@@ -174,6 +174,11 @@ CC:                               are out of the assumed range from 1 to 30.
 CC:                           (5) The vertex seed z-position lies outside the
 CC:                               detector fiducial as specified by parameter
 CC:                               'zrange' (=200 cm).
+CC:                           (6) The number of tracks associated with the
+CC:                               Z-DCA sequence, 'ntracks_seq', is .lt.
+CC:                               ntrkratiocut*(globtrk_h.nok - 50).  This
+CC:                               eliminates bad events which have mostly
+CC:                               garbage tracks.
 CC:                           
 CC: ERROR CONDITIONS	: None-Yet
 CC: STATUS		: Tested
@@ -272,12 +277,18 @@ CC:
 CC: (20)  Changed most Real variables to Real*8 and used explicit double
 CC:       precision functions, e.g. dsin(), etc. - Nov. 2000, G. van Buren.
 CC:
-CC:  Changes in Feb. 2001 - R. L. Ray
+CC:  Changes in Feb.-April 2001 - R. L. Ray
 CC:
 CC: (21)  Include Year 2000 run's beam line coordinates in vertex fit with
 CC:       small error in order to constrain the transverse vertex position
 CC:       for low multiplicity events.  Numbers are hardwired into code and
 CC:       should only be used for production of real Y2K data.
+CC:       Use the beamline coordinates from Jamie Dunlop's analysis, Mar. 21,
+CC:       2001; see http://www.star.bnl.gov/protected/spectra/dunlop/
+CC:       vertex_Mar202001/.  Activate this constraint by setting parameter
+CC:       evrpar(1).fitoption = 2; otherwise the error associated with the
+CC:       beam line is set to 100. cm which effectively removes it from the
+CC:       fitting.  The latter should be done for simulations.
 CC:
 CC: (22)  Extend vertex search region to include full beam pipe volume out 
 CC:       to +/- 6m, but only proceed with vertex fitting if seed is within
@@ -299,20 +310,23 @@ CC:        a) For the initial seed finding use all DCA points to the x=y=0
 CC:           z-axis that lie within the beampipe volume and |z| <= 6m.
 CC:        b) Select and proceed with fitting for seeds with <z> within
 CC:           TPC as specified from -zrange to +zrange (zrange = 200 cm).
-CC:        c) Fill x,y DCA histograms for sqrt(x*x+y*y) within beampipe and
+CC:        c) Check #tracks associated with seed Z-DCA sequence and if
+CC:           .lt. ntrkratiocut*(globtrk_h.nok - 50) then STOP vertex find/fit
+CC:           and return to calling program with STAFCV_BAD.
+CC:        d) Fill x,y DCA histograms for sqrt(x*x+y*y) within beampipe and
 CC:           for z within z-DCA sequence range, the latter is nominally
 CC:           <z> of seed +/- 'def_seq_range_z' (=2cm).
-CC:        d) For First fit iteration:
+CC:        e) For First fit iteration:
 CC:              select tracks with z-DCA within seed sequence range along
 CC:              z-axis and transverse x,y DCAs within the larger of
 CC:                 evrpar(1).cutxy OR 3*sqrt(2)*sigmaz,
 CC:              but not larger than the beampipe radius, in transverse
 CC:              distance from the vertex seed.
-CC:        e) For Second fit iteration:
+CC:        f) For Second fit iteration:
 CC:              select tracks with DCA point within 3D distance of the
 CC:              larger of 2*sqrt(3)*sigmaz or evrpar(1).cut2, but not
 CC:              larger than 2*sqrt(3)*sigdef, where sigdef = 1.0 cm.
-CC:        f) For Third (final) fit iteration:                 
+CC:        g) For Third (final) fit iteration:                 
 CC:              select tracks with DCA point within 3D distance of the   
 CC:              larger of sqrt(3)*sigmaz or evrpar(1).cut3, but not
 CC:              larger than sqrt(3)*sigdef, where sigdef = 1.0 cm.
@@ -321,7 +335,7 @@ CC:           where  sigmaz = rms of z-DCA sequence
 CC:                  sqrt(2)*sigmaz = two-dimensional Gaussian rms
 CC:                  sqrt(3)*sigmaz = three-dimensional Gaussian rms
 CC:
-CC:        g) For primary track candidate marker, use 3D DCA from final
+CC:        h) For primary track candidate marker, use 3D DCA from final
 CC:           vertex with evrpar(1).vcut as before.
 CC:
 CC: (25)  Track fit covariance matrix automatically used if globtrk.method
@@ -330,7 +344,7 @@ CC:
 CC: (26)  Changed minimum track number and track ratio requirements to:
 CC:        a) minimum number of tracks at each step must be .ge. ntrkcut (=3)
 CC:        b) initial number of selected tracks from DO 20 loop must be
-CC:           .ge. ntrkratiocut (0.1)*(globtrk_h.nok)
+CC:           .ge. ntrkratiocut (=0.1)*(globtrk_h.nok)
 CC:        c) for all subsequent iterations the ratio of the number of
 CC:           accepted tracks after each cut to the total number in the seed
 CC:           z-DCA sequence volume must be .ge. the ratio of the 3D dca_cut3
@@ -341,6 +355,9 @@ CC:           For problematic cases the default 'ntrkratiocut' = 0.1 is used.
 CC:
 CC: (27)  Reduced the array sizes for local track arrays from 20000 to 5000
 CC:       to better match the actual size of RHIC AuAu events.
+CC:
+CC: (28)  Increased the required number of hits on selected tracks from 10
+CC:       to .ge. 25.
 CC:
 CC:  METHOD:
 CC:  Minimization of the perpendicular distances from the vectors to a point.
@@ -522,18 +539,17 @@ CC
       REAL*8 Beamlinephi0, Beamlinetanl
       REAL*8 Beamline_xzslope, Beamline_yzslope
       REAL*8 Beamline_sigma
-      Parameter(BeamlineX1   = 0.58)
-      Parameter(BeamlineY1   = 0.34)
+      Parameter(BeamlineX1   = 0.561)
+      Parameter(BeamlineY1   = 0.352)
       Parameter(BeamlineZ1   = 0.00)
-      Parameter(BeamlineX2   = 0.626)
-      Parameter(BeamlineY2   = 0.400)
+      Parameter(BeamlineX2   = 0.5854)
+      Parameter(BeamlineY2   = 0.3762)
       Parameter(BeamlineZ2   = -100.0)
-      Parameter(Beamlinephi0 = 52.8)    ! deg
-      Parameter(Beamlinetanl = -1319.)
-      Parameter(Beamline_xzslope = -0.00046)
-      Parameter(Beamline_yzslope = -0.00060)
+      Parameter(Beamlinephi0 = 44.76)    ! deg
+      Parameter(Beamlinetanl = -2910.)
+      Parameter(Beamline_xzslope = -0.000244)
+      Parameter(Beamline_yzslope = -0.000242)
 CCC      Parameter(Beamline_sigma   = 0.10)
-      Parameter(Beamline_sigma   = 100.0)  !  Take this constraint out temp.
 
 CC  Vertex_pass(i,j) contains the vertex position from the initial
 CC  estimate and the first and second passes, where i = pass#, j=x,y,z.
@@ -544,6 +560,13 @@ C      covariance = 0   !  Turn off when evrpar(1).covariance available
 CSM    covariance = -1  !  TPC-tracks are used to fit pre-vertex. Simplify!!!
       fitoption  = evrpar(1).fitoption ! Activate when evrpar(1).fitoption ok
       covariance = evrpar(1).covariance ! Activate when evrpar(1).covariance ok
+
+CCC Set Beamline fitting constraint control switch:
+      if(fitoption .eq. 2) then
+         Beamline_sigma   = 0.10
+      else
+         Beamline_sigma   = 100.0
+      end if
 
 CC  B-field obtained via gufld call
       xlocal(1) = 0.
@@ -695,7 +718,7 @@ CCC   Select and load global tracks; compute relevant quantities, e.g. DCAs.
            if (ppt.ge.evrpar(1).ptmin .and. ppt.ne. 99999. .and.
      1     detIdOK.eq.1 .and. globtrk(i).iflag.gt.0 .and.
      2     icharge.ne.0 .and. (globtrk(i).n_fit_point.eq.0
-     3     .or. globtrk(i).n_fit_point.ge.10)) then
+     3     .or. globtrk(i).n_fit_point.ge.25)) then
               k = k + 1
               if(k .le. maxtr) then
 
@@ -898,15 +921,17 @@ CCC   Check for adequate number of tracks:
            ntrkratio = 0.0
         end if
         if (ntrk.lt.ntrkcut) then
-           write(6,*) 'EVR: Not enough global tracks after ptmin,z '
-           write(6,*) 'EVR:    and beampipe cuts to find the vertex:'
+           write(6,*) 'EVR: Not enough global tracks after DO-20'
+           write(6,*) 'EVR:    track selection loop (e.g. ptmin,DetID,'
+           write(6,*) 'EVR:    iflag,etc.) to find the vertex:' 
            write(6,*) 'EVR:    ntrk,ntrkratio = ',ntrk,ntrkratio
            evr_am = STAFCV_BAD
            return
         endif
         if (ntrkratio .lt. ntrkratiocut) then
            write(6,*) 'EVR: Ratio of accepted to total global tracks'
-           write(6,*) 'EVR:    too low after ptmin,z and beampipe cuts'
+           write(6,*) 'EVR:    too low after DO-20 track selection'
+           write(6,*) 'EVR:    loop (e.g. ptmin,DetID,iflag,etc.)'
            write(6,*) 'EVR:    to find the vertex:'
            write(6,*) 'EVR:    ntrk,ntrkratio = ',ntrk,ntrkratio
            evr_am = STAFCV_BAD
@@ -988,6 +1013,18 @@ CCC   Set z-range for vertex seed, or sequence of bins:
 CCC   Save the total number of tracks with DCAs within the vertex seed
 CCC   sequence z-range; used for later track ratio cuts:
            ntracks_seq = int(sumbin)
+
+CCC   Bad event rejection:
+           if(ntracks_seq .lt. ntrkratiocut*(globtrk_h.nok - 50)
+     1        .OR. ntracks_seq .le. 0) then
+              write(6,*) 'EVR: Ratio of number of tracks associated'
+              write(6,*) 'EVR:   with seq to globtrk_h.nok too small'
+              write(6,*) 'EVR:   ntracks_seq,globtrk_h.nok=',
+     1                    ntracks_seq,globtrk_h.nok
+              evr_am = STAFCV_BAD
+              Return
+           end if
+
            if(ntracks_seq .le. 0) ntracks_seq = globtrk_h.nok
 
 CCC   Compute the rms of the z-DCA sequence:

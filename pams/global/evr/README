@@ -6,6 +6,7 @@
                             July 27, 1999
 
              Maintained by R. L. Ray, ray@physics.utexas.edu
+             Last Update: April 6, 2001
 
 General Package Description:
 ---------------------------
@@ -31,7 +32,7 @@ tracks or may include tracks which have SVT and/or SSD hits.  FTPC tracks
 are not used in this module.  The event vertex results are loaded into the
 DST table type, dst_vertex (local table name `privert'). 
      
-     In general at least 5 global tracks must be selected and available for
+     In general at least 3 global tracks must be selected and available for
 use in finding the event vertex at each iteration in the processing.  This
 therefore requires events with significant multiplicity.  Also the module
 can accommodate any magnetic field value, including the no magnetic field case.
@@ -47,7 +48,8 @@ Method of Calculation in evr_am.F:
 
      Global tracks are initially selected for use based on a minimum pT cut
 defined by evr_evrpar.ptmin, the track/detector component (TPC, SVT, SSD),
-and the value of globtrk.iflag (iflag > 0).  The trajectories are extrapolated
+the value of globtrk.iflag (iflag > 0), charge non-zero, and number of fit
+points on track .ge. 25.  The trajectories are extrapolated
 to the distance of closest approach (DCA) to the beam axis (assumed to be at
 x=y=0).  The z-coordinates of these DCA points (which are located inside the
 beam pipe) are binned in 0.5 cm bins and the bin with maximum occupancy is
@@ -80,8 +82,11 @@ whose final DCA are less than evrpar.vcut, globtrk.id_start_vertex is also
 marked.  The 3D DCA is loaded into globtrk.impact for all global tracks
 (with TPC and/or SVTand/or SSD space points and with iflag > 0).
 
-     In general, at least 5 global tracks must be used at each iteration.
-If less than 5 tracks are encountered at any iteration a message is 
+NOTE: now thge DCA cuts are based on the sigmas of the Z-DCA sequences.
+The evrpar cuts are used to limit the computed sigmaz-s. See listing.
+
+     In general, at least 3 global tracks must be used at each iteration.
+If less than 3 tracks are encountered at any iteration a message is 
 printed and a STAFCV error code is returned to the calling program.
 See the following description of the evr_am return values using the STAFCV
 code.  The results from each iteration are loaded into the dst_vertex
@@ -106,6 +111,8 @@ below.  These parameters are:
      fitoption   - equal 1 (0) to update (not update) global track straight
                    line approximations near event vertex after 1st and 2nd
                    iterations.
+                 - equal 2 causes the Beamline to constrain the fit with a
+                   sigma error in (x,y) of 0.1 cm.
 
      Default values saved in evrpars.xdf:
 
@@ -114,7 +121,7 @@ below.  These parameters are:
      cutz        = 10
      cut2        = 2
      cut3        = 0.5
-     vcut        = 1.0
+     vcut        = 3.0  << NEW
      covariance  = 0
      fitoption   = 0
 
@@ -123,123 +130,36 @@ briefly listed below.  The complete listing is given later.
 
      Output variables in table privert:
      ----------------------------------
-     privert().id        = Primary key; value of privert_h.nok when
-                           row is filled
-               iflag     = 1 for normal, successfully found primary vertex
-                             during the 3rd iteration
-                         = -3,-2,-1 for seed, 1st, 2nd values, respectively.
-               det_id    = Detectors contributing to all tracks used
-               vtx_id    = kEventVtxId
-             n_daughters = number of tracks used at each iteration
-             x,y,z       = Primary vertex coords in STAR global c.s. (cm)
-          covar(1,2...6) = Covariance error matrix for vrtx position (cm^2)
-                           defined in DST document for table dst_vertex.
-                chisq(2) = Chi-Square of fit per d.o.f.; probability of 
-                           chi-square
-            id_aux_ent   = 0; not used by evr.
-
-***************************************************************************
-**           USER NOTE   USER NOTE   USER NOTE   USER NOTE               **
-**           ---------   ---------   ---------   ---------               **
-**    The final, best value for the event vertex for use in other        **
-**    modules MUST be identified by finding the row in dst_vertex        **
-**    for which BOTH of the following values occur:                      **
-**                                                                       **
-**             privert().iflag  = 1                                      **
-**             privert().vtx_id = kEventVtxId                            **
-**                                                                       **
-**    This will not necessarily be on the first row, nor any other       **
-**    particular row.  The above is the ONLY way to insure that you      **
-**    get the correct event vertex.                                      **
-***************************************************************************
-
-
-Hard-Wired Parameters:
----------------------
-
-     Several control parameters and some geometry and material estimates
-are hard-coded for convenience.  The user should not ordinarily care about
-these.  The geometry and material quantities are only for rough estimates
-of MCS effects; detailed data base values are not necessary.  The parameters
-include:
-
-     maxtr    = 20000      -  maximum number of global tracks that can be
-                              used in the vertex fit.  The rest, if any, are
-                              skipped.  This is pending the implementation
-                              of dynamic memory allocation.
-     LIFC = 0.0055         -  TPC IFC radiation length fraction
-     LSVT1 = 0.017         -  assumed effective SVT 1st layer radiation
-                              length fraction (one-third of total SVT)
-     beampipecut = 4.0 cm  -  beam pipe radius used for initial track DCA
-                              transverse position cut
-     ntrkcut = 50          -  minimum number of tracks for event abort check
-                              (see following for detailed explanation of
-                              evr_am STAFCV return codes).
-     ptdefault = 0.4 GeV/c -  default pt value for all used tracks for No B
-                              field case for use in estimating the DCA position
-                              uncertainty due to MCS.
-     bfield_min = 0.001 kGauss - Upper cutoff for no B field case.
-
-     The following parameters are used for the extrapolated track position
-uncertainty (sigma) at the DCA point to the primary vertex due to the
-errors in the track helix parameters.
-
-    sigdef = 1.0    ! Default track position sigma (cm) at DCA point
-    sigmin = 0.01   ! Minimum track position sigma (cm) at DCA point
-    sigmax = 10.0   ! Maximum track position sigma (cm) at DCA point
-    sigbig = 100.0  ! Upper cutoff track position sigma (cm), DCA point
-
-If the computed track position uncertainty ('error') using the helix
-parameter covariance matrix is:
-
-  (1)  crazy (i.e. 'error'**2 .le. 0.0 OR 'error' .gt. sigbig)
-       then the track position sigma is set to the default, sigdef.
-  (2)  less than sigmin, then 'error' is set to sigmin
-  (3)  between sigmax and sigbig, then 'error' is set to sigmax
-  (4)  between sigmin and sigmax, then 'error' is set to the computed value.  
-
-Unabridged Description of Code Input, Output and Return STAFCV values:
----------------------------------------------------------------------
-
-     The following are taken directly from the comments in evr_am.F:
-
-CC: ARGUMENTS:
-CC:          IN:
-CC:             evrpar   = Parameters controlling vertex finding
-CC:             globtrk  = Track information from egr package; uses the
-CC:                        first instance of the global track table
-CC:                        corresponding to the fit or refit of only the
-CC:                        space points from the tracking detectors.
-CC:         OUT:
-CC:             privert  = Primary Vertex Information
-CC:      UPDATE:
-CC:             globtrk.id_start_vertex -- used to indicate primary
-CC:                        track candidates based on 3D DCA cut from
-CC:                        the found primary vertex; also used to indicate
-CC:                        which tracks were used in the final primary
-CC:                        vertex fit (see following explanation of
-CC:                        packing algorithm).
-CC:             globtrk.impact -- Three dimensional distance of closest
-CC:                               approach (3D DCA) to the final primary
-CC:                               vertex for all good global tracks (i.e.
-CC:                               those with iflag > 0) which have
-CC:                               TPC and/or SVT and/or SSD space points
-CC:                               (not FTPC tracks).
-CC:
-CC:     Output variables in table privert:
-CC:     ----------------------------------
 CC:     privert().id        = Primary key; value of privert_h.nok when
 CC:                           row is filled
-CC:               iflag     = 1 for normal, successfully found primary vertex
-CC:                             during the 3rd iteration
-CC:                         = -3 for initial seed value
-CC:                         = -2 for first iteration value
-CC:                         = -1 for second iteration value
-CC:                         = -4 for failed fit with Determinant of G = 0.0,
-CC:                              occuring during any iteration.
-CC:                         = -5 for failed error covariance matrix evaluation
-CC:                              during fit with Determinant of E = 0.0,
-CC:                              occuring during any iteration.
+CC:               iflag     = +yx1 for normal, successfully found primary vertex
+CC:                                during the 3rd iteration
+CC:                         = -yx3 for initial seed value
+CC:                         = -yx2 for first iteration value
+CC:                         = -yx1 for second iteration value
+CC:                         = -yx4 for failed fit with Determinant of G = 0.0,
+CC:                                occuring during any iteration.
+CC:                         = -yx5 for failed error covariance matrix evaluation
+CC:                                during fit with Determinant of E = 0.0,
+CC:                                occuring during any iteration.
+CC:                         = -yx6 for failed vertex finding due to too few
+CC:                                tracks occuring anytime after the initial
+CC:                                vertex seed has been found.
+CC:                         = -yx7 for failed vertex finding due to too low
+CC:                                a fraction of selected tracks relative
+CC:                                to the total number of global tracks in seed
+CC:                                occuring anytime after the initial vertex
+CC:                                seed has been found.
+CC:                         = -yx8 for failed vertex finding due to both of
+CC:                                the previous two conditions occuring anytime
+CC:                                after the initial vertex seed has been
+CC:                                found.
+CC:                            x is the event vertex id (for pileups). Zero
+CC:                              means one vertex, x=1 is the next one etc.
+cc:                            y is the det_id for prevertex finding only. 
+cc:                            y=0 is not prevertex, y=1 TPC prevertex, 
+cc:                            y=2 SVT, y=3 FTPC etc. det_id compliments this in
+fo.
 CC:               det_id    = Detectors contributing to all tracks used for
 CC:                           primary vertex finding/fitting:
 CC:                           This quantity, based on the definitions in
@@ -285,6 +205,152 @@ CC:                           probability of chi-square calculated using the
 CC:                           CERNLIB function PROB(X,N).
 CC:            id_aux_ent   = 0; used by ev0 for auxiliary vertex table
 CC:                              reference, not used by evr.
+
+***************************************************************************
+**           USER NOTE   USER NOTE   USER NOTE   USER NOTE               **
+**           ---------   ---------   ---------   ---------               **
+**    The final, best value for the event vertex for use in other        **
+**    modules MUST be identified by finding the row in dst_vertex        **
+**    for which BOTH of the following values occur:                      **
+**                                                                       **
+**             privert().iflag  = 1                                      **
+**             privert().vtx_id = kEventVtxId                            **
+**                                                                       **
+**    This will not necessarily be on the first row, nor any other       **
+**    particular row.  The above is the ONLY way to insure that you      **
+**    get the correct event vertex.                                      **
+***************************************************************************
+
+
+Hard-Wired Parameters:
+---------------------
+
+     Several control parameters and some geometry and material estimates
+are hard-coded for convenience.  The user should not ordinarily care about
+these.  The geometry and material quantities are only for rough estimates
+of MCS effects; detailed data base values are not necessary.  The parameters
+include:
+
+     maxtr    = 5000       -  maximum number of global tracks that can be
+                              used in the vertex fit.  The rest, if any, are
+                              skipped.  This is pending the implementation
+                              of dynamic memory allocation.
+     LIFC = 0.0055         -  TPC IFC radiation length fraction
+     LSVT1 = 0.017         -  assumed effective SVT 1st layer radiation
+                              length fraction (one-third of total SVT)
+      Parameter(nbins         = 2400)
+      Parameter(nxybins       = 81)
+      Parameter(zlimit1       = 385.0)
+      Parameter(zlimit2       = 600.0)
+      Parameter(beampipecut1  = 4.0)
+      Parameter(beampipecut2  = 6.5)
+      Parameter(dz_default    = 0.5)
+      Parameter(dxy           = 0.1)
+      Parameter(zmin          = -600.0)
+      Parameter(zrange        = 200.0)
+      Parameter(def_seq_range_z = 2.0)
+      Parameter(def_seq_range_xy = 1.5)
+      DATA ntrkcut  /3/     ! Min. trk # at each step in the finding/fitting
+      DATA ntrkratiocut /0.1/! Default min. acceptable track ratio (see above)
+
+     ptdefault = 0.4 GeV/c -  default pt value for all used tracks for No B
+                              field case for use in estimating the DCA position
+                              uncertainty due to MCS.
+      DATA bfield_min /0.1/ ! Lower cutoff on abs(B_field, z component) in
+CC                          ! kGauss, below which this case is taken to be
+CC                          ! a zero magnetic field run; b is set to 0.000 .
+CC                          ! Same value used in TPC tracking code, tpt.
+
+
+     The following parameters are used for the extrapolated track position
+uncertainty (sigma) at the DCA point to the primary vertex due to the
+errors in the track helix parameters.
+
+      DATA sigdef  /1.0/    ! Default track position sigma (cm) at DCA point
+      DATA sigmin  /0.1/    ! Minimum track position sigma (cm) at DCA point
+CC                          ! Changed from 0.01 to 0.1 on Feb. 12, 2001 by
+CC                          ! RLR to be compatible with the minimum error
+CC                          ! assigned in Subr: EVR_VERTEX_FIT
+      DATA sigmax  /10.0/   ! Maximum track position sigma (cm) at DCA point
+      DATA sigbig  /100.0/  ! Upper cutoff track position sigma (cm), DCA point
+
+If the computed track position uncertainty ('error') using the helix
+parameter covariance matrix is:
+
+  (1)  crazy (i.e. 'error'**2 .le. 0.0 OR 'error' .gt. sigbig)
+       then the track position sigma is set to the default, sigdef.
+  (2)  less than sigmin, then 'error' is set to sigmin
+  (3)  between sigmax and sigbig, then 'error' is set to sigmax
+  (4)  between sigmin and sigmax, then 'error' is set to the computed value.  
+
+CC  Load beam line coordinates in STAR Global coordinate system as obtained
+CC  from the summer 2000 run.  These values will change every time STAR is
+CC  installed in the WAH.  Eventually these values should be determined by
+CC  analysis of central events, then loaded into the STAR run conditions DB,
+CC  and later retrieved and used in subsequent reconstruction runs.  For now,
+CC  these are hardwired into the code in order to improve the transverse
+CC  position determination of the primary vertex for low multiplicity events.
+CC  The slopes, azimuthal angle, and tanl are based on the full, measured
+CC  distributions from -120 to +120 cm provided by Akio Ogawa.
+CC
+CC  The parameters are:
+CC    - (x,y,z)1 (cm) where the actual beam line intersects the z=0 plane
+CC    - (x,y,z)2 (cm) where the actual beam line intersects the z= -100 cm plane
+CC    - slope of beam line as seen in projection onto x-z and y-z planes
+CC    - azimuthal angle (deg) of beam line as seen in projection onto x-y plane
+CC    - beam line's tanl parameter
+CC    - the assumed value of sigma (cm) to weight the beam line relative to the
+CC        extrapolated tracks in the vertex chi-sq fit; suggested values range
+CC        from 0.1 to 0.2 cm such that the beam line has negligible effects
+CC        on central events but dominant effect in the transverse fit for
+CC        low multiplicity events.
+CC
+
+      Parameter(BeamlineX1   = 0.561)
+      Parameter(BeamlineY1   = 0.352)
+      Parameter(BeamlineZ1   = 0.00)
+      Parameter(BeamlineX2   = 0.5854)
+      Parameter(BeamlineY2   = 0.3762)
+      Parameter(BeamlineZ2   = -100.0)
+      Parameter(Beamlinephi0 = 44.76)    ! deg
+      Parameter(Beamlinetanl = -2910.)
+      Parameter(Beamline_xzslope = -0.000244)
+      Parameter(Beamline_yzslope = -0.000242)
+CCC Set Beamline fitting constraint control switch:
+      if(fitoption .eq. 2) then
+         Beamline_sigma   = 0.10
+      else
+         Beamline_sigma   = 100.0
+      end if
+
+Unabridged Description of Code Input, Output and Return STAFCV values:
+---------------------------------------------------------------------
+
+     The following are taken directly from the comments in evr_am.F:
+
+CC: ARGUMENTS:
+CC:          IN:
+CC:             evrpar   = Parameters controlling vertex finding
+CC:             globtrk  = Track information from egr package; uses the
+CC:                        first instance of the global track table
+CC:                        corresponding to the fit or refit of only the
+CC:                        space points from the tracking detectors.
+CC:         OUT:
+CC:             privert  = Primary Vertex Information
+CC:      UPDATE:
+CC:             globtrk.id_start_vertex -- used to indicate primary
+CC:                        track candidates based on 3D DCA cut from
+CC:                        the found primary vertex; also used to indicate
+CC:                        which tracks were used in the final primary
+CC:                        vertex fit (see following explanation of
+CC:                        packing algorithm).
+CC:             globtrk.impact -- Three dimensional distance of closest
+CC:                               approach (3D DCA) to the final primary
+CC:                               vertex for all good global tracks (i.e.
+CC:                               those with iflag > 0) which have
+CC:                               TPC and/or SVT and/or SSD space points
+CC:                               (not FTPC tracks).
+CC:
 CC:
 CC:     Update variables in table globtrk:
 CC:     ---------------------------------
@@ -313,33 +379,36 @@ CC:                           vertex finding all the way to the final, third
 CC:                           fit iteration; indicates to the calling
 CC:                           program that event processing should continue.
 CC:                           
-CC:          STAFCV_BAD     - occurs if number of global tracks < 5, or if
-CC:                           number of global tracks < ntrkcut (=50) and
-CC:                           number of selected tracks at any step in the
-CC:                           processing is < 5.  This indicates to the
-CC:                           calling program that the event multiplicity
-CC:                           is too small for this module to work.  An
-CC:                           alternate, small event primary vertex finder
-CC:                           should be called instead of evr_am.  For example,
-CC:                           the peripheral collision group's primary vertex
-CC:                           module.  This return value may also indicate 
-CC:                           that the vertex table (privert) had an
-CC:                           insufficient number of rows such that the
-CC:                           primary vertex could not be written into it.
-CC:                           The calling program should increase the
-CC:                           number of assigned rows to table privert and
-CC:                           call evr_am again.
-CC:                           
-CC:          STAFCV_ERR     - occurs if the number of global tracks => ntrkcut
-CC:                           (equal to 50) and the number of selected tracks
-CC:                           at any step in the processing is < 5.  This
-CC:                           indicates to the calling program that a serious
-CC:                           failure in evr processing has occured, no
-CC:                           primary vertex could be found even though the
-CC:                           event multiplicity was large; event 
-CC:                           processing should be terminated.
-CC:                           
-
+CC:          STAFCV_BAD     - The following error conditions will result
+CC:                           in evr_am returning this STAF condition value:
+CC:                           (1) The number of selected tracks for vertex 
+CC:                               finding is less than ntrkcut (=3) during
+CC:                               any iteration.
+CC:                           (2) The ratio of the number of selected global
+CC:                               tracks to total number of global tracks
+CC:                               with DCA points within the Z-DCA sequence
+CC:                               and beam pipe volume is less than the
+CC:                               volumetric ratio of a sphere of radius
+CC:                               sqrt(3)*sigma(Z_DCA seq.) [corresponding to
+CC:                               to the final track cut, dca_cut3] to the
+CC:                               sequence-beam pipe volume or, if these have
+CC:                               problematic values, less than the default
+CC:                               value 'ntrkratiocut' (set to 0.1) during
+CC:                               any iteration.
+CC:                           (3) The primary vertex table, 'privert', is
+CC:                               already filled to its maximum length and
+CC:                               cannot have new vertex information added.
+CC:                           (4) The detector ID code numbers from 
+CC:                               $STAR/pams/global/inc/StDetectorDefinitions.h
+CC:                               are out of the assumed range from 1 to 30.
+CC:                           (5) The vertex seed z-position lies outside the
+CC:                               detector fiducial as specified by parameter
+CC:                               'zrange' (=200 cm).
+CC:                           (6) The number of tracks associated with the
+CC:                               Z-DCA sequence, 'ntracks_seq', is .lt.
+CC:                               ntrkratiocut*(globtrk_h.nok - 50).  This
+CC:                               eliminates bad events which have mostly
+CC:                               garbage tracks.
 
 History of Modifications:
 ------------------------
@@ -417,7 +486,110 @@ CC:
 CC: (13)  Calculate 3D DCA to final primary vertex for all good global tracks
 CC:       and load into globtrk().impact.
 CC:
-
+CC: (14)  Modified for new global track parameters r0,phi0 - 9/29/99 (L.Ray)
+CC:
+CC: (15)  Corrected handling of anomalously small values of extrapolated
+CC:       track position errors; hard coded pion mass (0.14) in multiple
+CC:       Coulomb scattering estimate - R. L. Ray, March, 2000.
+CC:
+CC: (16)  Revised the event abort criteria and diagnostic output - R. L. Ray,
+CC:       April, 2000.
+CC:
+CC: (17)  Use weighted means for initial seed values for vertex z-position
+CC:       and for x,y-positions for the case when the beam-beam axis is not
+CC:       coincident with the x = y = 0 axis - R. L. Ray, April, 2000.
+CC:
+CC: (18)  Replaced math library functions sind and cosd with locally
+CC:       defined functions - R. L. Ray, April, 2000.
+CC:
+CC: (19)  Added extra track selection criteria based on a minimum number of
+CC:       space points used in the global track fit - R. L. Ray, April, 2000.
+CC:
+CC: (20)  Changed most Real variables to Real*8 and used explicit double
+CC:       precision functions, e.g. dsin(), etc. - Nov. 2000, G. van Buren.
+CC:
+CC:  Changes in Feb.-April 2001 - R. L. Ray
+CC:
+CC: (21)  Include Year 2000 run's beam line coordinates in vertex fit with
+CC:       small error in order to constrain the transverse vertex position
+CC:       for low multiplicity events.  Numbers are hardwired into code and
+CC:       should only be used for production of real Y2K data.
+CC:       Use the beamline coordinates from Jamie Dunlop's analysis, Mar. 21,
+CC:       2001; see http://www.star.bnl.gov/protected/spectra/dunlop/
+CC:       vertex_Mar202001/.  Activate this constraint by setting parameter
+CC:       evrpar(1).fitoption = 2; otherwise the error associated with the
+CC:       beam line is set to 100. cm which effectively removes it from the
+CC:       fitting.  The latter should be done for simulations.
+CC:
+CC: (22)  Extend vertex search region to include full beam pipe volume out 
+CC:       to +/- 6m, but only proceed with vertex fitting if seed is within
+CC:       TPC, or if |z_seed| <= 2m.  Also, only tracks with DCA points
+CC:       within the sequence of z-bins near the seed are used to determine
+CC:       the <x>, <y> of the vertex seed.
+CC:
+CC: (23)  Use variable DCA binning as determined using parameter values
+CC:       in code; but use 2x larger z-DCA bins for low multiplicity events
+CC:       where globtrk_h.nok <= 50.
+CC:
+CC: (24)  Track DCA acceptance for each iteration of the vertex
+CC:       fit is based on distance cuts computed from the rms of the
+CC:       z distribution in the z-DCA sequence.  Preset DCA cuts are
+CC:       no longer used directly but are used to limit the computed cuts.
+CC:
+CC:       New track acceptance criteria:
+CC:        a) For the initial seed finding use all DCA points to the x=y=0
+CC:           z-axis that lie within the beampipe volume and |z| <= 6m.
+CC:        b) Select and proceed with fitting for seeds with <z> within
+CC:           TPC as specified from -zrange to +zrange (zrange = 200 cm).
+CC:        c) Check #tracks associated with seed Z-DCA sequence and if
+CC:           .lt. ntrkratiocut*(globtrk_h.nok - 50) then STOP vertex find/fit
+CC:           and return to calling program with STAFCV_BAD.
+CC:        d) Fill x,y DCA histograms for sqrt(x*x+y*y) within beampipe and
+CC:           for z within z-DCA sequence range, the latter is nominally
+CC:           <z> of seed +/- 'def_seq_range_z' (=2cm).
+CC:        e) For First fit iteration:
+CC:              select tracks with z-DCA within seed sequence range along
+CC:              z-axis and transverse x,y DCAs within the larger of
+CC:                 evrpar(1).cutxy OR 3*sqrt(2)*sigmaz,
+CC:              but not larger than the beampipe radius, in transverse
+CC:              distance from the vertex seed.
+CC:        f) For Second fit iteration:
+CC:              select tracks with DCA point within 3D distance of the
+CC:              larger of 2*sqrt(3)*sigmaz or evrpar(1).cut2, but not
+CC:              larger than 2*sqrt(3)*sigdef, where sigdef = 1.0 cm.
+CC:        g) For Third (final) fit iteration:                 
+CC:              select tracks with DCA point within 3D distance of the   
+CC:              larger of sqrt(3)*sigmaz or evrpar(1).cut3, but not
+CC:              larger than sqrt(3)*sigdef, where sigdef = 1.0 cm.
+CC:
+CC:           where  sigmaz = rms of z-DCA sequence
+CC:                  sqrt(2)*sigmaz = two-dimensional Gaussian rms
+CC:                  sqrt(3)*sigmaz = three-dimensional Gaussian rms
+CC:
+CC:        h) For primary track candidate marker, use 3D DCA from final
+CC:           vertex with evrpar(1).vcut as before.
+CC:
+CC: (25)  Track fit covariance matrix automatically used if globtrk.method
+CC:       is 2**kKalmanFitId (i.e., if the Kalman track fitter was used).
+CC:
+CC: (26)  Changed minimum track number and track ratio requirements to:
+CC:        a) minimum number of tracks at each step must be .ge. ntrkcut (=3)
+CC:        b) initial number of selected tracks from DO 20 loop must be
+CC:           .ge. ntrkratiocut (=0.1)*(globtrk_h.nok)
+CC:        c) for all subsequent iterations the ratio of the number of
+CC:           accepted tracks after each cut to the total number in the seed
+CC:           z-DCA sequence volume must be .ge. the ratio of the 3D dca_cut3
+CC:           volume to the z-DCA sequence volume, where these are given by:
+CC:                3D dca_cut3 Vol. = (4*pi/3)*(dca_cut3**3)
+CC:                z-DCA seq. Vol.  = pi*(beampipe radius**2)*(length of seq)
+CC:           For problematic cases the default 'ntrkratiocut' = 0.1 is used.
+CC:
+CC: (27)  Reduced the array sizes for local track arrays from 20000 to 5000
+CC:       to better match the actual size of RHIC AuAu events.
+CC:
+CC: (28)  Increased the required number of hits on selected tracks from 10
+CC:       to .ge. 25.
+CC:
 
 Method of Vertex Fitting:
 ------------------------

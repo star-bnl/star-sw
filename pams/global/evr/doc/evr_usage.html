@@ -21,16 +21,20 @@ with them:</P>
 
 <LI><FONT COLOR="#FF0000">cutxy</FONT>: First pass cut in x-y plane for
 outlier removal. Track should point back to the vertex at most this distance
-(in cm).</LI>
+(in cm).  Now we use the Z-DCA rms or sigma for this but use cutxy
+to limit the cut.</LI>
 
 <LI><FONT COLOR="#FF0000">cutz</FONT>: The same as cutxy but for the beam
-axis. This is usually more relaxed.</LI>
+axis. This is usually more relaxed. No longer used.  The Z-dca sequence
+range determines the z-dca acceptance.</LI>
 
 <LI><FONT COLOR="#FF0000">cut2</FONT>: Second pass cut for outlier removal.
-Common value for x-y and z.</LI>
+Common value for x-y and z.  Now only used to limit the computed cut 
+distance based on Z-DCA sequence rms.</LI>
 
 <LI><FONT COLOR="#FF0000">cut3</FONT>: Last pass cut value. This is usually
-a fraction of a cm.</LI>
+a fraction of a cm.  Now only used to limit the computed cut 
+distance based on Z-DCA sequence rms.</LI>
 
 <LI><FONT COLOR="#FF0000">ptmin</FONT>: Minimum pt track need in order
 to be used in the fit.</LI>
@@ -41,7 +45,8 @@ position uncertainty.</LI>
 
 <LI><FONT COLOR="#FF0000">fitoption</FONT>: Equal 1 (0) to update
 (not update) global track straight line approximations near event
-vertex after 1st and 2nd iterations.</LI>
+vertex after 1st and 2nd iterations.  Now also, if =2, is used to
+let the beam line constrain the vertex fit.</LI>
 
 </UL>
 
