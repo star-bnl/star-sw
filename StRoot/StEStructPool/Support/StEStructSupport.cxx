@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructSupport.cxx,v 1.2 2005/03/03 01:33:05 porter Exp $
+ * $Id: StEStructSupport.cxx,v 1.3 2005/03/08 20:16:34 msd Exp $
  *
  * Author: Jeff Porter 
  *
@@ -14,6 +14,7 @@
 #include "StEStructSupport.h"
 #include "StEStructPool/Correlations/StEStructMaxB.h"
 #include "Stiostream.h"
+#include <sstream>
 #include "Stsstream.h"
 #include "TFile.h"
 #include "TH1.h"
@@ -574,6 +575,9 @@ char* StEStructSupport::swapIn(const char* name, const char* s1, const char* s2)
 /***********************************************************************
  *
  * $Log: StEStructSupport.cxx,v $
+ * Revision 1.3  2005/03/08 20:16:34  msd
+ * included <sstream> library
+ *
  * Revision 1.2  2005/03/03 01:33:05  porter
  * Added pt-correlations method to support and included
  * these histograms to the HAdd routine
