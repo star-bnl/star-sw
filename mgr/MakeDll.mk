@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.49 1999/01/27 23:46:27 fisyak Exp $
+# $Id: MakeDll.mk,v 1.50 1999/01/27 23:59:50 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.50  1999/01/27 23:59:50  fisyak
+# More templates
+#
 # Revision 1.49  1999/01/27 23:46:27  fisyak
 # Add Templates
 #
@@ -500,7 +503,7 @@ ifndef NT
 
 $(MY_SO) : $(FILES_O) $(wildcard $(OBJ_DIR)/Templates.DB/*.o)
 	cd $(OBJ_DIR); \
-        $(SO) $(SOFLAGS) $(SoOUT)$(SL_NEW) $(notdir $(FILES_O)) $(STAR_FILES_O) $(LIBRARY); \
+        $(SO) $(SOFLAGS) $(SoOUT)$(SL_NEW) $(ALL_DEPS) $(LIBRARY); \
         $(RM) $(MY_SO); $(LN) $(SL_NEW) $(MY_SO)
 else # NT
 ifdef MY_SO
