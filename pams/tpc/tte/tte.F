@@ -1,5 +1,8 @@
-* $Id: tte.F,v 1.29 1999/07/21 04:03:35 sakrejda Exp $
+* $Id: tte.F,v 1.30 1999/07/21 14:01:50 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.30  1999/07/21 14:01:50  sakrejda
+* typo in the error message fixed, an s was accidentally cut off in  big_id_of_rec_hits
+*
 * Revision 1.29  1999/07/21 04:03:35  sakrejda
 * possible maximum id of a reconstructed hit was not identified correctly, an attempt to fix it
 *
@@ -675,7 +678,7 @@ c     translation table, clean up and zero the list_index_rec first
           call Message(m132, 1, idI12)
         else
           write(m132,*)'TTEI12-E1 Strange reconstructed hit in the index table',
-     >    tindex(i).key2 , big_id_of_rec_hit                   
+     >    tindex(i).key2 , big_id_of_rec_hits
           call Message(m132, 1, idI12)
           tte=STAFCV_BAD
           go to 996
