@@ -1,10 +1,15 @@
 /******************************************************
- * $Id: StRichPIDMaker.cxx,v 2.27 2000/12/08 14:59:41 horsley Exp $
+ * $Id: StRichPIDMaker.cxx,v 2.28 2000/12/08 20:09:31 horsley Exp $
  * 
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRichPIDMaker.cxx,v $
+ * Revision 2.28  2000/12/08 20:09:31  horsley
+ * updated monte carlo ntuples, member functions in StRichMCTrack, StRichPIDMaker
+ * changed monte carlo double xCorrection = 0 in StRichTrack to xCorrection = 0
+ * with no declaration of the double
+ *
  * Revision 2.27  2000/12/08 14:59:41  horsley
  * thepids is now passed by reference
  * fillCorrectedNtuple now uses the particledefinition->pdgEncoding()
@@ -149,7 +154,6 @@ using std::max;
 #include "TH1.h"
 #include "TH3.h"
 #include "TNtuple.h"
-
 #include <fstream.h>
 #include <math.h>
 #ifdef SUN
@@ -221,7 +225,7 @@ using std::max;
 //#define gufld  F77_NAME(gufld,GUFLD)
 //extern "C" {void gufld(Float_t *, Float_t *);}
 
-static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.27 2000/12/08 14:59:41 horsley Exp $";
+static const char rcsid[] = "$Id: StRichPIDMaker.cxx,v 2.28 2000/12/08 20:09:31 horsley Exp $";
 
 StRichPIDMaker::StRichPIDMaker(const Char_t *name, bool writeNtuple) : StMaker(name) {
   drawinit = kFALSE;
@@ -861,11 +865,16 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
     StThreeVectorF pointOnRing;
 
     StRichTrack* currentTrack = ringCalculator->getRing(eInnerRing)->getTrack();
+    
     if(!currentTrack) {
 	cout << "StRichPIDMaker::hitFilter()\n";
 	cout << "\tERROR no track" << endl;
 	return;
     }
+
+    
+
+
 
     StThreeVectorF trackMomentum = currentTrack->getMomentum();
 //      os << "Track Momentum: " << ( abs(trackMomentum) ) << endl;
@@ -917,7 +926,13 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 //      os << "LOOP OVER HITS start" << endl;
 
 #ifdef myRICH_WITH_NTUPLE
+
+#ifdef myRICH_WITH_MC
+    float distHits[33];
+#else
     float distHits[32];
+#endif
+
 #endif
 
     //
@@ -1363,6 +1378,13 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 
 
 #ifdef myRICH_WITH_NTUPLE
+	
+#ifdef myRICH_WITH_MC
+	StRichMCTrack* mcTrack = dynamic_cast<StRichMCTrack*>(currentTrack);
+	int geantID = -999;
+	if (mcTrack) geantID = mcTrack->getStMcTrack()->particleDefinition()->pdgEncoding(); 
+#endif
+
 	distHits[0] = innerRingPoint.x();
 	distHits[1] = innerRingPoint.y();
 	distHits[2] = outerRingPoint.x();
@@ -1411,6 +1433,10 @@ void StRichPIDMaker::hitFilter(const StSPtrVecRichHit* richHits,
 	distHits[29] = refit;
 	distHits[30] = ringCalculator->getConstantAreaAngle()/degree;
 	distHits[31] = currentTrack->getEnergyLoss();
+#ifdef myRICH_WITH_MC
+	distHits[32] = geantID;
+#endif
+
 
 	if ( (normalizedD>-4 && normalizedD<6) || photonNumber==1) {
 	    distup->Fill(distHits);
@@ -1729,7 +1755,14 @@ bool StRichPIDMaker::checkTrack(StTrack* track) {
     cout << "\tbitmask = " << bitmask << endl;
 
 #ifdef myRICH_WITH_NTUPLE
+
+
+#ifdef myRICH_WITH_MC
+  float distHits[33];
+#else
   float distHits[32];
+#endif
+
   distHits[0] = 0;
   distHits[1] = 0;
   distHits[2] = 0;
@@ -1777,6 +1810,10 @@ bool StRichPIDMaker::checkTrack(StTrack* track) {
   distHits[30] = 0;
   distHits[31] = 0;
   
+#ifdef myRICH_WITH_MC
+  distHits[32] = 0;
+#endif  
+
   distup->Fill(distHits);
 #endif
   
@@ -1844,7 +1881,13 @@ bool StRichPIDMaker::checkTrack(StRichTrack* track) {
     cout << "\tbitmask = " << bitmask << endl;
 
 #ifdef myRICH_WITH_NTUPLE
+
+#ifdef myRICH_WITH_MC
+  float distHits[33];
+#else
   float distHits[32];
+#endif
+
   distHits[0] = 0;
   distHits[1] = 0;
   distHits[2] = 0;
@@ -1891,7 +1934,12 @@ bool StRichPIDMaker::checkTrack(StRichTrack* track) {
   distHits[29] = 0;
   distHits[30] = 0;
   distHits[31] = 0;
-  
+ 
+#ifdef myRICH_WITH_MC
+  distHits[32] = 0;
+#endif
+
+
   distup->Fill(distHits);
 #endif
 
@@ -2831,6 +2879,7 @@ void StRichPIDMaker::fillMcPixelNtuple(const StSPtrVecRichPixel* pixels) {
 
 
 
+
 #ifdef myRICH_WITH_MC
 void StRichPIDMaker::fillGeantHitNtuple() {
   
@@ -2851,13 +2900,15 @@ void StRichPIDMaker::fillGeantHitNtuple() {
       float wave1save,wave2save;
       float psi1save,psi2save;
       float z1save,z2save;
+      float gtheta1,gtheta2;
+      float thetap1,thetap2;
       float x1,y1,x2,y2;
 
       for (int i=0;i<tempHits.size();i++) {
 	for (int j=i+1;j<tempHits.size();j++) {
 
-	  getGeantPhotonInfo(richMcTrack,tempHits[i]->parentTrack(),wave1,psi1,z1);
-	  getGeantPhotonInfo(richMcTrack,tempHits[j]->parentTrack(),wave2,psi2,z2);
+	  getGeantPhotonInfo(richMcTrack,tempHits[i]->parentTrack(),wave1,psi1,z1,gtheta1,thetap1);
+	  getGeantPhotonInfo(richMcTrack,tempHits[j]->parentTrack(),wave2,psi2,z2,gtheta2,thetap2);
 
 	  if (fabs(psi1)>constAngle && fabs(psi2)>constAngle)  {
 	
@@ -2898,6 +2949,10 @@ void StRichPIDMaker::fillGeantHitNtuple() {
   }  
 }
 #endif
+
+
+
+
 
 
 #ifdef myRICH_WITH_MC
@@ -2948,7 +3003,7 @@ void StRichPIDMaker::fillMcPhotonNtuple(StMcEvent* mcevent,
       richMcTrack->useTPCInfo();  
       
       float defaultValue = -999.0;
-      float mcWave,mcPsi,mcZ;
+      float mcWave,mcPsi,mcZ,mcTheta,mcPhotTheta;
       int   signalPhoton;
 
       // loop over hits
@@ -2971,11 +3026,13 @@ void StRichPIDMaker::fillMcPhotonNtuple(StMcEvent* mcevent,
 	    signalPhoton=1;    
 	  }
 	  
-	  mcWave = defaultValue; mcPsi = defaultValue; mcZ = defaultValue;
-	  getGeantPhotonInfo(richMcTrack,theHitsStMcTrack,mcWave,mcPsi,mcZ);
+	  mcWave = defaultValue; mcPsi = defaultValue; 
+	  mcZ = defaultValue; mcTheta = defaultValue;
+	  mcPhotTheta = defaultValue;
+	  getGeantPhotonInfo(richMcTrack,theHitsStMcTrack,mcWave,mcPsi,mcZ,mcTheta,mcPhotTheta);
 	  StThreeVectorF geantRichHit = getTheGeantHitOnPadPlane(theHitsStMcTrack,monteCarloRichHit->local()); 
 	  
-	  Float_t photonArray[52];
+	  Float_t photonArray[54];
 	  
 	  photonArray[0] = richMcTrack->getStTrack()->geometry()->charge();
 	  photonArray[1] = richMcTrack->getMomentum().x();
@@ -3069,8 +3126,11 @@ void StRichPIDMaker::fillMcPhotonNtuple(StMcEvent* mcevent,
 	    photonArray[51]=defaultValue;
 	  }
 	  
+	  photonArray[52]=mcTheta/degree;
+	  photonArray[53]=mcPhotTheta/degree;
+	   
 	  richMcTrack->useTPCInfo();
-	  if (kWriteTheNtuple) geantPhotonNtuple->Fill(photonArray);
+	  geantPhotonNtuple->Fill(photonArray);
 	}
       }
       delete TPC_RingCalc;
@@ -3083,9 +3143,15 @@ void StRichPIDMaker::fillMcPhotonNtuple(StMcEvent* mcevent,
 #endif
 
 
+
+
+
+
 #ifdef myRICH_WITH_MC
 void StRichPIDMaker::fillMcTrackNtuple(const StSPtrVecRichCluster* clusters) {
 
+
+ 
   for (size_t trackIndex=0;trackIndex<mListOfStRichTracks.size();trackIndex++) {    
     StRichMCTrack* track = dynamic_cast<StRichMCTrack*>(mListOfStRichTracks[trackIndex]);
     if (!track) {
@@ -3093,8 +3159,10 @@ void StRichPIDMaker::fillMcTrackNtuple(const StSPtrVecRichCluster* clusters) {
       abort();
     }    
     
-    StRichPidTraits* pidTrait = track->getPidTrait();
-    if (!pidTrait) {
+ 
+    cout << "geant track ntuple" << endl;
+   StRichPidTraits* pidTrait = track->getPidTrait();
+    if (pidTrait) {
       
       StRichPid* pionPid   = pidTrait->getPid(pion);
       StRichPid* kaonPid   = pidTrait->getPid(kaon);
@@ -3222,8 +3290,19 @@ void StRichPIDMaker::fillMcTrackNtuple(const StSPtrVecRichCluster* clusters) {
 
     trackArray[counter++] = track->getImpactPoint().x(); // ----> 10 + 20 == 30  
     trackArray[counter++] = track->getImpactPoint().y();
-    trackArray[counter++] = track->getUnCorrectedImpactPoint().x();  
-    trackArray[counter++] = track->getUnCorrectedImpactPoint().y();
+    
+    //trackArray[counter++] = track->getUnCorrectedImpactPoint().x();  
+    //trackArray[counter++] = track->getUnCorrectedImpactPoint().y();
+
+
+    //
+    // changed this dec 3, 2000
+    //
+    trackArray[counter++] = track->getGeantMomentumAtPadPlane().perp();
+    trackArray[counter++] = track->getGeantMomentumAtPadPlane().z();
+    
+    
+
     trackArray[counter++] = track->getUnCorrectedMomentum().x();        
 
     trackArray[counter++] = track->getUnCorrectedMomentum().y();
@@ -3242,8 +3321,8 @@ void StRichPIDMaker::fillMcTrackNtuple(const StSPtrVecRichCluster* clusters) {
 
     trackArray[counter++] = track->getStTrack()->detectorInfo()->numberOfPoints(kTpcId);
     trackArray[counter++] = track->getStTrack()->fitTraits().numberOfFitPoints(kTpcId);
-    trackArray[counter++] = mMaterialDb->innerWavelength()/nanometer;
-    trackArray[counter++] = mMaterialDb->outerWavelength()/nanometer;
+    trackArray[counter++] = mMaterialDb->indexOfRefractionOfC6F14At(mMaterialDb->innerWavelength());
+    trackArray[counter++] = mMaterialDb->indexOfRefractionOfC6F14At(mMaterialDb->outerWavelength());
     trackArray[counter++] = track->getGeantMomentumAtRadiator().x();     
 
     trackArray[counter++] = track->getGeantMomentumAtRadiator().y(); // 30 + 20 = 50
@@ -3315,11 +3394,15 @@ void StRichPIDMaker::fillMcTrackNtuple(const StSPtrVecRichCluster* clusters) {
     trackArray[counter++] = ProtonConstantHits; // 18 + 70 = 88
     
     if (counter != entries) {cout << "StRichPIDMaker::fillMcPidNtuple  wrong counter. abort." << endl; abort();}
+    
+    cout << "writing out the ntuple" << endl;
     geantTrackNtuple->Fill(trackArray);
     }
   } 
 }
 #endif
+
+
 
 void 
 StRichPIDMaker::fillPIDNtuple() {
@@ -3572,20 +3655,33 @@ void StRichPIDMaker::initNtuples() {
   
   //file = new TFile("/star/rcf/scratch/lasiuk/ex","RECREATE");
     file->SetFormat(1);
-
+#ifdef myRICH_WITH_MC
+    distup = new TNtuple("dist","b","xi:yi:xo:yo:si:ld:d:oldd:oldsig:oldsi:phx:phy:x:y:px:py:pz:theta:evt:numb:resx:resy:res:ring:cos:d2siline:p:q:vtx:refit:constang:energyloss:gid");
+#else
     distup = new TNtuple("dist","b","xi:yi:xo:yo:si:ld:d:oldd:oldsig:oldsi:phx:phy:x:y:px:py:pz:theta:evt:numb:resx:resy:res:ring:cos:d2siline:p:q:vtx:refit:constang:energyloss");
-
+#endif
 
     trackNtuple = new TNtuple("trackNtuple","trackwise tuple","evtn:nprimaries:nnegprimaries:posz:negz:vz:nrichtracks:globalp:globalpt:globalpx:globalpy:globalpz:localpx:localpy:localpz:eta:q:amipq:amipx:amipy:pmipx:pmipy:radx:rady:oradx:orady:otheta:ophi:ctbx:ctby:ctbz:firstrow:lastrow:lasthitx:lasthity:lasthitz:lasthitdca:pathlength:maxchain:maxgap:theta:phi:tpchits:tpcfitpoints:pionfactor:piontotalarea:pionconstarea:piontotalangle:pionconstangle:piontotalhits:pionconsthits:kaonfactor:kaontotalarea:kaonconstarea:kaontotalangle:kaonconstangle:kaontotalhits:kaonconsthits:protonfactor:protontotalarea:protonconstarea:protontotalangle:protonconstangle:protontotalhits:protonconsthits:innerwave:outerwave");
 
 
+
+#ifdef myRICH_WITH_MC
+    
     trackCorrectedNtuple = new TNtuple("trackCorrectedNtuple","","vertz:prims:gpx:gpy:gpz:lpx:lpy:lpz:clpx:clpy:clpz:eta:q:amipq:amipx:amipy:cpmipx:cpmipy:cradx:crady:radx:rady:pmipx:pmipy:lastx:lasty:lastz:nhits:nfits:pifact:pitotarea:piconstarea:pitotang:piconstang:pitothits:piconsthits:kafact:katotarea:kaconstarea:katotang:kaconstang:katothits:kaconsthits:prfact:prtotarea:prconstarea:prtotang:prconstang:prtothits:prconsthits:pichits:picthits:kachits:kacthits:prchits:prcthits:inwave:outwave:gradx:grady:mass");
 
-#ifdef myRICH_WITH_MC    
-    geantTrackNtuple = new TNtuple("geantTrackNtuple","geant trackwise tuple",
-				 "evtn:nprimaries:nnegprimaries:vz:nrichtracks:globalpx:globalpy:globalpz:localpx:localpy:localpz:eta:q:amipid:amipproc:amipq:amipx:amipy:amipnpads:pmipx:pmipy:gmipid:gmipproc:gmipq:gmipx:gmipy:gmipnpads:radx:rady:oradx:orady:olocalpx:olocalpy:olocalpz:firstrow:lastrow:lasthitx:lasthity:lasthitz:lasthitdca:pathlength:maxchain:maxgap:tpchits:tpcfitpoints:innerwave:outerwave:glocalpx:glocalpy:glocalpz:gradx:grady:geantmipx:geantmipy:gstopvertx:gstopverty:gstopvertz:gphots:grecophots:gradhits:gtpccommonhits:gglobalpx:gglobalpy:gglobalpz:gid:gstopproc:gnpartners:pionfactor:piontotalarea:pionconstarea:piontotalangle:pionconstangle:piontotalhits:pionconsthits:kaonfactor:kaontotalarea:kaonconstarea:kaontotalangle:kaonconstangle:kaontotalhits:kaonconsthits:protonfactor:protontotalarea:protonconstarea:protontotalangle:protonconstangle:protontotalhits:protonconsthits");
+#else 
 
-    geantPhotonNtuple = new TNtuple("geantPhotonNtuple","geant photon wise tnuple","q:localpx:localpy:localpz:radx:rady:gradx:grady:pmipx:pmipy:amipid:amipproc:amipq:amipx:amipy:amipnpads:gamipid:gamipproc:gamipq:gamipx:gamipy:gamipnpads:gmipx:gmipy:glocalpx:glocalpy:glocalpz:theta:gtheta:phi:gphi:gid:signal:gwave:gpsi:gz:gproc:x:y:gx:gy:gmass:constangle:trdist:trang:tgdist:tgang:gconstangle:grdist:grang:ggdist:ggang");
+ trackCorrectedNtuple = new TNtuple("trackCorrectedNtuple","","vertz:prims:gpx:gpy:gpz:lpx:lpy:lpz:clpx:clpy:clpz:eta:q:amipq:amipx:amipy:cpmipx:cpmipy:cradx:crady:radx:rady:pmipx:pmipy:lastx:lasty:lastz:nhits:nfits:pifact:pitotarea:piconstarea:pitotang:piconstang:pitothits:piconsthits:kafact:katotarea:kaconstarea:katotang:kaconstang:katothits:kaconsthits:prfact:prtotarea:prconstarea:prtotang:prconstang:prtothits:prconsthits:pichits:picthits:kachits:kacthits:prchits:prcthits:inwave:outwave");
+
+#endif
+
+
+
+#ifdef myRICH_WITH_MC   
+    geantTrackNtuple = new TNtuple("geantTrackNtuple","geant trackwise tuple",
+				 "evtn:nprimaries:nnegprimaries:vz:nrichtracks:globalpx:globalpy:globalpz:localpx:localpy:localpz:eta:q:amipid:amipproc:amipq:amipx:amipy:amipnpads:pmipx:pmipy:gmipid:gmipproc:gmipq:gmipx:gmipy:gmipnpads:radx:rady:gPtp:gPz:olocalpx:olocalpy:olocalpz:firstrow:lastrow:lasthitx:lasthity:lasthitz:lasthitdca:pathlength:maxchain:maxgap:tpchits:tpcfitpoints:innerwave:outerwave:glocalpx:glocalpy:glocalpz:gradx:grady:geantmipx:geantmipy:gstopvertx:gstopverty:gstopvertz:gphots:grecophots:gradhits:gtpccommonhits:gglobalpx:gglobalpy:gglobalpz:gid:gstopproc:gnpartners:pionfactor:piontotalarea:pionconstarea:piontotalangle:pionconstangle:piontotalhits:pionconsthits:kaonfactor:kaontotalarea:kaonconstarea:kaontotalangle:kaonconstangle:kaontotalhits:kaonconsthits:protonfactor:protontotalarea:protonconstarea:protontotalangle:protonconstangle:protontotalhits:protonconsthits");
+
+    geantPhotonNtuple = new TNtuple("geantPhotonNtuple","geant photon wise tnuple","q:localpx:localpy:localpz:radx:rady:gradx:grady:pmipx:pmipy:amipid:amipproc:amipq:amipx:amipy:amipnpads:gamipid:gamipproc:gamipq:gamipx:gamipy:gamipnpads:gmipx:gmipy:glocalpx:glocalpy:glocalpz:theta:gtheta:phi:gphi:gid:signal:gwave:gpsi:gz:gproc:x:y:gx:gy:gmass:constangle:trdist:trang:tgdist:tgang:gconstangle:grdist:grang:ggdist:ggang:gcher:gphottheta");
   
     geantPixelNtuple = new TNtuple("geantPixelNtuple","pixels","adc:n:gid0:gid1:gid2:gid3:q0:q1:q2:q3:proc0:proc1:proc2:proc3");
     geantCloseHitNtuple = new TNtuple("geantHitNtuple","pixels","p:theta:w1:w2:psi1:psi2:z1:z2:x1:y1:x2:y2:constAngle");
@@ -3652,7 +3748,10 @@ void StRichPIDMaker::initNtuples() {
 #ifdef myRICH_WITH_MC
 bool StRichPIDMaker::makeTrackAssociations(StMcEvent* temp_mEvent, const StSPtrVecRichHit* hits ) {
 
+  cout << "StRichPIDMaker:makeTrackAssociations()\n";
+  
   if (!temp_mEvent || !hits) {
+    cout << "StRichPIDMaker:makeTrackAssociations()\n";
     cout << "No StMcEvent/rich hits!" << endl;
     return false;}
   
@@ -3660,13 +3759,15 @@ bool StRichPIDMaker::makeTrackAssociations(StMcEvent* temp_mEvent, const StSPtrV
   StAssociationMaker* assoc = 0;
   assoc = (StAssociationMaker*) GetMaker("StAssociationMaker");
   if (!assoc) {
+    cout << "StRichPIDMaker:makeTrackAssociation() \n";
     cout << "No association maker!" << endl;
     return false;} 
   
   rcTrackMapType*  theTrackMap = 0;
   theTrackMap = assoc->rcTrackMap();
   if (!theTrackMap) {
-    cout << "no track map!" << endl;
+    cout << "StRichPIDMaker:makeTrackAssociation() \n";
+    cout << "No track map!" << endl;
     return false;} 
 
   for (size_t trackIndex=0; trackIndex<mListOfStRichTracks.size(); trackIndex++) { // track    
@@ -3760,13 +3861,17 @@ StMcTrack* StRichPIDMaker::getStMcTrack(StRichMCHit* hit, StMcEvent* mcevt, St_g
 }
 #endif
 
+
+
 #ifdef  myRICH_WITH_MC
 void StRichPIDMaker::getGeantPhotonInfo(StRichMCTrack* richTrack, StMcTrack* photon, 
-				     float& wave, float& gpsi, float& z) { 
+				     float& wave, float& gpsi, float& z, float& gtheta, float& gphottheta) { 
 
   wave = -999;
   gpsi = -999;
   z = -999;
+  gtheta = -999;
+  gphottheta = -999;
   if (!richTrack || !photon || photon->geantId()!=50) { return;}
    
   StRichLocalCoordinate localStartVert(-999,-999,-999);
@@ -3790,6 +3895,8 @@ void StRichPIDMaker::getGeantPhotonInfo(StRichMCTrack* richTrack, StMcTrack* pho
   globalMomentum.setMag(1.0);
   StThreeVector<double> localMomentum;
   mMomentumTransformation->localMomentum(globalMomentum,localMomentum);
+
+  gphottheta = acos(-localMomentum.z()/localMomentum.mag());
 
   StThreeVectorF trackLocalMomentum = richTrack->getGeantMomentumAtRadiator();  
   if (trackLocalMomentum.mag() == 0) {return;}
@@ -3827,6 +3934,11 @@ void StRichPIDMaker::getGeantPhotonInfo(StRichMCTrack* richTrack, StMcTrack* pho
   gpsi = atan2( rotatedTrackMomentum.x() - photonRotatedMomentum.x(),
 		rotatedTrackMomentum.y() - photonRotatedMomentum.y());
   
+  gtheta = acos(rotatedTrackMomentum.dot(photonRotatedMomentum));
+ 
+  //  cout << "chernekov angle of emission = " << gtheta/degree << endl;
+  // cout << "angle against normal = " << gphottheta/degree << endl;
+
   double constantPhaseDifference = M_PI/2.0;
   gpsi = gpsi - constantPhaseDifference;
   if (gpsi < -M_PI) {gpsi = gpsi + 2.0*M_PI;}

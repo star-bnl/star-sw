@@ -1,10 +1,15 @@
 /**********************************************************
- * $Id: StRichMCTrack.cxx,v 2.2 2000/11/01 17:39:27 lasiuk Exp $
+ * $Id: StRichMCTrack.cxx,v 2.3 2000/12/08 20:09:31 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMCTrack.cxx,v $
+ *  Revision 2.3  2000/12/08 20:09:31  horsley
+ *  updated monte carlo ntuples, member functions in StRichMCTrack, StRichPIDMaker
+ *  changed monte carlo double xCorrection = 0 in StRichTrack to xCorrection = 0
+ *  with no declaration of the double
+ *
  *  Revision 2.2  2000/11/01 17:39:27  lasiuk
  *  clean up:
  *  CVSn: ----------------------------------------------------------------------
@@ -56,9 +61,9 @@ StRichMCTrack::StRichMCTrack(StTrack* t, double b) : StRichTrack(t,b) {
   mGeantPhotons.resize(0);
   
   // keep original tpc values
-  mImpactPoint_TPC = getImpactPoint();
-  mMomentum_TPC    = getMomentum();
-  mMIP_TPC         = getProjectedMIP();
+  mImpactPoint_TPC = this->getImpactPoint();
+  mMomentum_TPC    = this->getMomentum();
+  mMIP_TPC         = this->getProjectedMIP();
 
   mMCMomentum.setX(0.0);
   mMCMomentum.setY(0.0);
@@ -68,6 +73,10 @@ StRichMCTrack::StRichMCTrack(StTrack* t, double b) : StRichTrack(t,b) {
   mMCImpactPoint.setY(-999.0);
   mMCImpactPoint.setZ(-999.0);
 
+  mcMomentumAtPadPlane.setX(0);
+  mcMomentumAtPadPlane.setY(0);
+  mcMomentumAtPadPlane.setZ(0);
+
   mMCMIP.setX(-999.0);
   mMCMIP.setY(-999.0);
   mMCMIP.setZ(-999.0);
@@ -76,12 +85,13 @@ StRichMCTrack::StRichMCTrack(StTrack* t, double b) : StRichTrack(t,b) {
 
 
 void StRichMCTrack::setGeantPhotons(StMcEvent* mEvent) {
+  
+  
+  cout << "StRichMCTrack:setgeantPhotons() \n";
+  cout << "This tracks mc partner pointer = " <<  this->getStMcTrack() << endl;
+  
   mGeantPhotons.resize(0);
-
-  cout << "about to fill tracks geant phots" << endl;
-  cout << "this event has " << mEvent->tracks().size() << "  tracks" << endl;
-  cout << "this tracks mc partner pointer = " <<  getStMcTrack() << endl;
-  if (getStMcTrack()) cout << "this tracks p = " <<  getStMcTrack()->momentum() << endl;
+  if (getStMcTrack()) cout << "This tracks p = " <<  getStMcTrack()->momentum() << endl;
   
   for (unsigned int i=0;i<mEvent->tracks().size();i++) {
     if (mEvent->tracks()[i]->geantId() == 50) {   
@@ -131,6 +141,8 @@ void StRichMCTrack::setStMcTrack(StMcTrack* tempStMcTrack) {
     double radiatorLowerBoundary_z = myGeometryDb->proximityGap() + myGeometryDb->quartzDimension().z();
     double radiatorUpperBoundary_z = radiatorLowerBoundary_z      + myGeometryDb->radiatorDimension().z(); 
     double oldZPos=0;
+    
+    //cout << "radiator pos = " << radiatorLowerBoundary_z << "     " << radiatorUpperBoundary_z << endl;
 
     for (size_t i=0;i<mStMcTrack->richHits().size();i++) {
       
@@ -145,10 +157,22 @@ void StRichMCTrack::setStMcTrack(StMcTrack* tempStMcTrack) {
 				    tempRichLocalPoint.position().y(),
 				    tempRichLocalPoint.position().z());
 
+      // cout << "local pos = " << richLocalPoint << endl;
+
       // geant mip at anode wire position      
       if ( fabs(richLocalPoint.z()) > 0.0 && fabs(richLocalPoint.z()) < 2.0*anodeDistanceToPadPlane ) {
 	if (fabs(richLocalPoint.z()-anodeDistanceToPadPlane) <  fabs(mMCMIP.z()-anodeDistanceToPadPlane)) {
 	  mMCMIP = richLocalPoint;
+	  
+	  StThreeVector<double> tempRichLocalMomentum(0,0,0);
+	  StThreeVector<double> richGlobalMomentum(mStMcTrack->richHits()[i]->localMomentum().x(),
+						   mStMcTrack->richHits()[i]->localMomentum().y(),
+						   mStMcTrack->richHits()[i]->localMomentum().z());
+	  momentumTransformation->localMomentum(richGlobalMomentum,tempRichLocalMomentum);
+	  mcMomentumAtPadPlane.setX(tempRichLocalMomentum.x());
+	  mcMomentumAtPadPlane.setY(tempRichLocalMomentum.y());
+	  mcMomentumAtPadPlane.setZ(tempRichLocalMomentum.z());
+	  
 	}
 	mGapHits++;
       } 
@@ -192,7 +216,7 @@ void StRichMCTrack::setStMcTrack(StMcTrack* tempStMcTrack) {
 	  //cout << "x = x0 + A*parameter     y = y0 + B*parameter      z = z0 + C*parameter" << endl;
  	  //cout << "parameter = " << parameter << endl;
  	  //cout << "A B C = " << A << "   " << B << "   " << C << endl;
- 	  //cout << "setting geant impact point = " <<  richLocalPoint.position() << endl << endl;
+ 	  //cout << "setting geant impact point = " <<  richLocalPoint << endl << endl;
 	  setGeantMomentumAtRadiator(richLocalMomentum);  
 	  setGeantImpactPointAtRadiator(richLocalPoint);
 	}
@@ -207,6 +231,9 @@ StRichMCHit* StRichMCTrack::getGeantRecoMIP() { return mMCRecoMIP;}
 StMcTrack*   StRichMCTrack::getStMcTrack()    { return mStMcTrack;}
 
 StThreeVectorF& StRichMCTrack::getGeantMomentumAtRadiator()    { return mMCMomentum;}
+StThreeVectorF& StRichMCTrack::getGeantMomentumAtPadPlane()    { return mcMomentumAtPadPlane;}
+
+
 StThreeVectorF& StRichMCTrack::getGeantImpactPointAtRadiator() { return mMCImpactPoint;}
 StThreeVectorF& StRichMCTrack::getGeantMIP() { return mMCMIP;}
 
