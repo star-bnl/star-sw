@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.cc,v 1.6 2001/07/16 13:16:41 laue Exp $
+ * $Id: StHbtTrack.cc,v 1.7 2001/07/17 20:40:17 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -10,6 +10,9 @@
  *
  ***************************************************************************
  * $Log: StHbtTrack.cc,v $
+ * Revision 1.7  2001/07/17 20:40:17  laue
+ * mNHitsDedx fixed
+ *
  * Revision 1.6  2001/07/16 13:16:41  laue
  * new constructor added [ StHbtTrack(const StEvent*, cons StTrack*) ]
  *
@@ -100,14 +103,15 @@ StHbtTrack::StHbtTrack(const StTrack* ST, StHbtThreeVector PrimaryVertex)
   StKaonPlus* Kaon = StKaonPlus::instance();
   StProton* Proton = StProton::instance();
 
- 
-
   // OK let's go...
   mHiddenInfo = 0;
   mTrackType = ST->type();
   mCharge = ST->geometry()->charge();
   mNHits = ST->detectorInfo()->numberOfPoints(kTpcId);
   mNHitsPoss = ST->numberOfPossiblePoints(kTpcId);
+  mNHits = ST->numberOfPossiblePoints(kTpcId);
+  mNHitsDedx = ST->fitTraits().numberOfFitPoints(kTpcId);
+
   mNSigmaElectron = PidAlgorithm->numberOfSigma(Electron);
   mNSigmaPion = PidAlgorithm->numberOfSigma(Pion);
   mNSigmaKaon = PidAlgorithm->numberOfSigma(Kaon);
@@ -158,6 +162,8 @@ StHbtTrack::StHbtTrack(const StEvent* EV, const StTrack* ST) {
   mCharge = ST->geometry()->charge();
   mNHits = ST->detectorInfo()->numberOfPoints(kTpcId);
   mNHitsPoss = ST->numberOfPossiblePoints(kTpcId);
+  mNHitsDedx = ST->fitTraits().numberOfFitPoints(kTpcId);
+
   mNSigmaElectron = PidAlgorithm.numberOfSigma(Electron);
   mNSigmaPion = PidAlgorithm.numberOfSigma(Pion);
   mNSigmaKaon = PidAlgorithm.numberOfSigma(Kaon);
