@@ -96,7 +96,7 @@ void TpcTrackFrame::Init()
 }
 
 // Initialize the frame via an parameter struct
-void TpcTrackFrame::Initialize(L3T_TPC_PARA_ST* params)
+void TpcTrackFrame::Initialize(SL3TPCPARA_ST* params)
 {
   // set default values for static members in THit, TTrack and TTrackerFTF
   // THit:
