@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.20 2001/09/10 15:42:42 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.21 2001/09/23 18:24:54 fisyak Exp $
 #include <iostream.h>
 #include "StdEdxMaker.h"
 // ROOT
@@ -547,10 +547,10 @@ Int_t StdEdxMaker::Make(){
   Double_t RowTime[NTimeBins];
   UInt_t idPT = 0;
   Int_t padOrdered[NPads];
-  Int_t timeList[NTimeBins], timeOrdered[NTimeBins];
+  Int_t timeOrdered[NTimeBins];
   Int_t nTimeBinT, nTimeBins;
   Int_t nPadBins;
-  Int_t index[NTimeBins];
+  Int_t timeList[5*NTimeBins], index[5*NTimeBins];
   for (int k=0; k < NPoints;k++) {
     if (fdEdxP[k]->sortId/1000000 !=idPT) {// get integral of charge
       idPT = fdEdxP[k]->sortId/1000000;
