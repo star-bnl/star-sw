@@ -5,6 +5,9 @@
       call hbook1(12,'primary particle PID',       60, 0.5, 60.5, 0) 
       call hbook1(13,'all particles with Nhit>10', 60, 0.5, 60.5, 0) 
       call hbook1(14,'secondary processes       ', 50, 0.5, 50.5, 0) 
+      call hbook1(15,'particle theta  ',           50,   0, 3.14, 0) 
+      call hbook1(16,'particle rapidity  ',        50, -10,  10, 0) 
+      call hbook1(21,'particle vertex (LOG) ',     50, -15,  5, 0) 
       IQUEST(100)=JVOLUM
       end
 
@@ -13,8 +16,9 @@
 +CDE,gcbank,gcnum,gcflag,quest.
       integer IEV/0/,Itrac,Ipart,Ivert,Nu,NtpcHit,Iad,
      >        Iw,Ihit,Ltra,Ntbeam,Nttarg,Nhit,N10,
-     >        Nvs(15)/15*0/,NBV(15)
-      real    Tofg,vert(4),pvert(4),ubuf(100),Digi(15)
+     >        Nvs(15)/15*0/,NBV(15),IP,ISTAT,IDPDG,MOTH(2),IDAU(2)
+      real    VMOD,Tofg,vert(4),pvert(4),ubuf(100),Digi(15),
+              P(5),V(5),theta,y,R,AMASS,TIME
 *
    
 * do not allow run without geometry
@@ -42,10 +46,22 @@
 * all particles:
          call hfill (11,float(Ipart),1.,1.)
 * separate histogram for primary and secondary
-         if (Nttarg<=0) call hfill(12,float(Ipart),1.,1.)
+         if (Nttarg<=0) then
+            call hfill(12,float(Ipart),1.,1.)
+            theta=atan2(sqrt(pvert(1)**2+pvert(2)**2),pvert(3))
+            call hfill(15,theta,1.,1.)
+            y=-alog(tan(theta/2))
+            call hfill(16,y,1.,1.)
+         endif
          if (Nttarg>0)  call hfill(14,float(mod(Ntbeam,50)),1.,1.)
       enddo
 
+      do IP=1,100000
+         call AgNZGETP(1,1,IP,ISTAT,IDPDG,P,AMASS,MOTH,TIME,IDAU,V)
+         if (ISTAT<=0) break;  check ISTAT==1
+         R=VMOD(V,3); if (R>0) call HFILL(21,Alog(R)/2.3,1.,1.)
+      enddo
+      call xntup ('NtrEG',IP-1)
 
 * count hits:
 
@@ -84,4 +100,32 @@
       IEOTRI = 1
       iquest(100)=Iev 
       end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+   call AgNZGETE(ILK,IDE,NPART,IRUN,IEVT,CGNAM,VERT,IWTFL,WEIGH)
+
+* Input : ILK   - Link number  : 1 = primary, 2 = secondary (obsolete)    *
+*         IDE   - ID of event in gate ( ZEBRA IDN)                        *
+* Output: NPART - Number of particles in event record                     *
+*         IRUN  - run number as recorded by generator                     *
+*         IEVT  - event number as recorded by generator                   *
+*         CGNAM - generator name                                          *
+*         VERT(4)- x,y,z,t of event (metres,seconds or mm,mm/c)           *
+*         IWTFL - weight flag                                             *
+*         WEIGH - event weight                                            *
+
+   call AgNZGETP(1,1,IP,ISTAT,IDPDG,P,AMASS,MOTH,TIME,IDAU1,V)
+
+* Input : IL    - Link number : 1 = primary, 2 = secondary (obsolete)      *
+*         IDE   - ID of event in gate                                      *
+*         IP    - Number of particle in event record                       *
+* Output: ISTAT - HEPEVT status flag. Returns 0 if record not found.       *
+*         IDPDG - PDG code for particle                                    *
+*         P     - 4-momentum (px,py,pz,E)                                  *
+*         AMASS - particle (quark) mass                                    *
+*         MOTH  - mothers. If MOTH(2)<0 the range is MOTH(1)-ABS(MOTH(2))  *
+*         TIME  - Start time of particle relative to interaction (sec)     *
+*         IDAU1 - a daughter pointer                                       *
+*         V     - vertex coordinates (in meter)                            *
 
