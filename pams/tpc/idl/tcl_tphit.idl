@@ -11,12 +11,12 @@
        long      track;      /* id of a track to which the pnt was assgn */
        float     alpha;      /* reconstructed crossing angle in xy */
        float     dalpha;     /* error on the crossing angle */
-       float     dlambda;    /* error on the dip angle (radians) */
+       float     dlambda;    /* error on the dip angle (degree) */
        float     dq;         /* error on the charge */
        float     dx;         /* error on the x coordinate */
        float     dy;         /* error on the y coordinate */
        float     dz;         /* error on the z coordinate */
-       float     lambda;     /* dip angle (radians) */
+       float     lambda;     /* dip angle (degree) */
        float     phi;        /* orientation of the hit w.r.t padplane */
        float     prf;        /* value of the pad response (cm) */
        float     q;          /* total charge assigned to this point */
@@ -25,6 +25,6 @@
        float     z;          /* reconstructed z coordinate */
        float     zrf;        /* value of the drift response (cm) */
    };
-/*  Last mod. for tphit: $Date: 1998/01/06 23:57:34 $ */
+/*  Last mod. for tphit: $Date: 1999/02/22 21:26:23 $ */
 
 
