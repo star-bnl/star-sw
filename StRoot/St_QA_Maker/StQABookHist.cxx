@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.17 1999/12/15 20:32:17 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.18 1999/12/16 19:52:36 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.18  1999/12/16 19:52:36  kathy
+// fix hist titles in QABookHist; unpack n_point,n_fit_point,n_max_point correctly for globtrk table - must still fix for primtrk table - in St_QA_Maker
+//
 // Revision 1.17  1999/12/15 20:32:17  kathy
 // separated the tpc and tpc+svt histograms for globtrk table; had to book and fill new histograms, add histograms to default logy list AND had to change what values of iflag I cut on for filling each different type of track in makehistglob method
 //
@@ -406,7 +409,7 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
 //_____________________________________________________________________________
 Int_t StQABookHist::Init(){
  
-  cout << "NOW BOOK HISTS! " << endl;
+  cout << " In StQABookHist::Init  " << endl;
 
 //book histograms --------------
   BookHistEvSum();
@@ -680,76 +683,76 @@ void StQABookHist::BookHistGlob(){
 
 // 2D - tpc + sillicon (svt + ssd)
 
-  m_pT_eta_recTS = QAH2F("QaGtrkPtVsEtaTS","globtrk: log pT versus eta, tpc", 20,-2.,2.,40,1.,4.);
+  m_pT_eta_recTS = QAH2F("QaGtrkPtVsEtaTS","globtrk: log pT versus eta, tpc+svt", 20,-2.,2.,40,1.,4.);
     m_pT_eta_recTS->SetXTitle("eta");
     m_pT_eta_recTS->SetYTitle(" log pT (MeV)");
 
-  m_globtrk_xf_yfTS = QAH2F("QaGtrkXfYfTS",  "globtrk: Y vs X of first hit on trk, tpc", 40,-200.,200.,40,-200.,200.);
+  m_globtrk_xf_yfTS = QAH2F("QaGtrkXfYfTS",  "globtrk: Y vs X of first hit on trk, tpc+svt", 40,-200.,200.,40,-200.,200.);
     m_globtrk_xf_yfTS->SetXTitle("x first");
     m_globtrk_xf_yfTS->SetYTitle("y first");
 
 
-  m_tanl_zfTS = QAH2F("QaGtrkTanlzfTS","globtrk: tanl(dip) versus zfirst, tpc",50,-250.,250.,60,-3.,3.);
+  m_tanl_zfTS = QAH2F("QaGtrkTanlzfTS","globtrk: tanl(dip) versus zfirst, tpc+svt",50,-250.,250.,60,-3.,3.);
     m_tanl_zfTS->SetXTitle("zfirst");
     m_tanl_zfTS->SetYTitle("tanl");
 
-  m_mom_trklengthTS = QAH2F("QaGtrkPVsTrkLTS","globtrk: log mom vs trk length, tpc",
+  m_mom_trklengthTS = QAH2F("QaGtrkPVsTrkLTS","globtrk: log mom vs trk length, tpc+svt",
 			     50,0.,250.,40,1.,4.);
     m_mom_trklengthTS->SetXTitle("trk length");  
     m_mom_trklengthTS->SetYTitle("log P (MeV)");
 
-  m_eta_trklengthTS = QAH2F("QaGtrkLVEtaTS","globtrk: trk length vs eta, tpc",
+  m_eta_trklengthTS = QAH2F("QaGtrkLVEtaTS","globtrk: trk length vs eta, tpc+svt",
 			     20,-2.,2.,50,0.,250.);
     m_eta_trklengthTS->SetXTitle("eta");
     m_eta_trklengthTS->SetYTitle("length");
 
-  m_npoint_lengthTS = QAH2F("QaGtrkNPntLTS","globtrk: N pnts vs length, tpc",
+  m_npoint_lengthTS = QAH2F("QaGtrkNPntLTS","globtrk: N pnts vs length, tpc+svt",
 			     25,0.,250.,25,0.,50.);
     m_npoint_lengthTS->SetXTitle("trk length");
     m_npoint_lengthTS->SetYTitle("Npoints on trk");
 
-  m_fpoint_lengthTS = QAH2F("QaGtrkFitPntLTS","globtrk: N fit pnts vs length, tpc",
+  m_fpoint_lengthTS = QAH2F("QaGtrkFitPntLTS","globtrk: N fit pnts vs length, tpc+svt",
 			     25,0.,250.,25,0.,50.);
     m_fpoint_lengthTS->SetXTitle("trk length");
     m_fpoint_lengthTS->SetYTitle("Npoints on trk");
 
-  m_chisq0_momTS = QAH2F("QaGtrkChi0MomTS","globtrk: Chisq0 vs log mom, tpc",40,1.,4.,50,0.,10.);
+  m_chisq0_momTS = QAH2F("QaGtrkChi0MomTS","globtrk: Chisq0 vs log mom, tpc+svt",40,1.,4.,50,0.,10.);
     m_chisq0_momTS->SetXTitle("log P (MeV)");
     m_chisq0_momTS->SetYTitle("chisq0") ;
 
-  m_chisq1_momTS = QAH2F("QaGtrkChi1MomTS","globtrk: Chisq1 vs log mom, tpc",40,1.,4.,50,0.,10.);
+  m_chisq1_momTS = QAH2F("QaGtrkChi1MomTS","globtrk: Chisq1 vs log mom, tpc+svt",40,1.,4.,50,0.,10.);
     m_chisq1_momTS->SetXTitle("log P (MeV)");
     m_chisq1_momTS->SetYTitle("chisq1");
 
-  m_chisq0_etaTS = QAH2F("QaGtrkChi0EtaTS","globtrk: Chisq0 vs eta, tpc",20,-2.,2.,20,0.,10.);
+  m_chisq0_etaTS = QAH2F("QaGtrkChi0EtaTS","globtrk: Chisq0 vs eta, tpc+svt",20,-2.,2.,20,0.,10.);
     m_chisq0_etaTS->SetXTitle("eta");
     m_chisq0_etaTS->SetYTitle("chisq0");
 
-  m_chisq1_etaTS = QAH2F("QaGtrkChi1EtaTS","globtrk: Chisq1 vs eta, tpc",20,-2.,2.,20,0.,10.);
+  m_chisq1_etaTS = QAH2F("QaGtrkChi1EtaTS","globtrk: Chisq1 vs eta, tpc+svt",20,-2.,2.,20,0.,10.);
     m_chisq1_etaTS->SetXTitle("eta");
     m_chisq1_etaTS->SetYTitle("chisq1");
 
-  m_chisq0_dipTS = QAH2F("QaGtrkChi0TanlTS","globtrk: Chisq0 vs tanl(dip), tpc",20,-5.,5.,20,0.,10.);
+  m_chisq0_dipTS = QAH2F("QaGtrkChi0TanlTS","globtrk: Chisq0 vs tanl(dip), tpc+svt",20,-5.,5.,20,0.,10.);
     m_chisq0_dipTS->SetXTitle("dip angle");
     m_chisq0_dipTS->SetYTitle("chisq0");
 
-  m_chisq1_dipTS = QAH2F("QaGtrkChi1TanlTS","globtrk: Chisq1 vs tanl(dip), tpc",20,-5.,5.,20,0.,10.);
+  m_chisq1_dipTS = QAH2F("QaGtrkChi1TanlTS","globtrk: Chisq1 vs tanl(dip), tpc+svt",20,-5.,5.,20,0.,10.);
     m_chisq1_dipTS->SetXTitle("dip angle");
     m_chisq1_dipTS->SetYTitle("chisq1");
 
-  m_chisq0_zfTS = QAH2F("QaGtrkChi0zfTS","globtrk: Chisq0 vs zfirst, tpc",20,-250.,250.,20,0.,10.);
+  m_chisq0_zfTS = QAH2F("QaGtrkChi0zfTS","globtrk: Chisq0 vs zfirst, tpc+svt",20,-250.,250.,20,0.,10.);
     m_chisq0_zfTS->SetXTitle("zfirst");
     m_chisq0_zfTS->SetYTitle("chisq0");
 
-  m_chisq1_zfTS = QAH2F("QaGtrkChi1zfT","globtrk: Chisq1 vs zfirst, tpc",20,-250.,250.,20,0.,10.);
+  m_chisq1_zfTS = QAH2F("QaGtrkChi1zfTS","globtrk: Chisq1 vs zfirst, tpc+svt",20,-250.,250.,20,0.,10.);
     m_chisq1_zfTS->SetXTitle("zfirst");
     m_chisq1_zfTS->SetYTitle("chisq1");
 
-  m_nfptonpt_momTS = QAH2F("QaGtrkRPntMomTS","globtrk: ratio Nfitpnt,Npnt vs log mom., tpc",40,1.,4.,50,0.,1.2005); 
+  m_nfptonpt_momTS = QAH2F("QaGtrkRPntMomTS","globtrk: ratio Nfitpnt,Npnt vs log mom., tpc+svt",40,1.,4.,50,0.,1.2005); 
      m_nfptonpt_momTS->SetXTitle("log P (MeV)");
      m_nfptonpt_momTS->SetYTitle("Ratio Nfitpnt/Npnt");
 
-  m_nfptonpt_etaTS = QAH2F("QaGtrkRPntEtaTS","globtrk: ratio Nfitpnt,Npnt vs Eta, tpc",40,-2.,2.,50,0.,1.2005); 
+  m_nfptonpt_etaTS = QAH2F("QaGtrkRPntEtaTS","globtrk: ratio Nfitpnt,Npnt vs Eta, tpc+svt",40,-2.,2.,50,0.,1.2005); 
      m_nfptonpt_etaTS->SetXTitle("eta");
      m_nfptonpt_etaTS->SetYTitle("Ratio Nfitpnt/Npnt");
 
