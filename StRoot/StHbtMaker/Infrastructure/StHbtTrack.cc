@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.cc,v 1.8 2001/09/05 20:41:43 laue Exp $
+ * $Id: StHbtTrack.cc,v 1.9 2001/09/13 15:03:49 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -10,8 +10,8 @@
  *
  ***************************************************************************
  * $Log: StHbtTrack.cc,v $
- * Revision 1.8  2001/09/05 20:41:43  laue
- * Updates of the hbtMuDstTree microDSTs
+ * Revision 1.9  2001/09/13 15:03:49  laue
+ * bug fix in copy constructor (didn't decode pid probability)
  *
  * Revision 1.7  2001/07/17 20:40:17  laue
  * mNHitsDedx fixed
@@ -61,10 +61,10 @@ StHbtTrack::StHbtTrack(const StHbtTrack& t) { // copy constructor
   mNSigmaPion = t.mNSigmaPion;
   mNSigmaKaon = t.mNSigmaKaon;
   mNSigmaProton = t.mNSigmaProton;
-  mPidProbElectron = t.mPidProbElectron/1000.;
-  mPidProbPion = t.mPidProbPion/1000.;
-  mPidProbKaon = t.mPidProbKaon/1000.;
-  mPidProbProton = t.mPidProbProton/1000.;
+  mPidProbElectron = t.mPidProbElectron;
+  mPidProbPion = t.mPidProbPion;
+  mPidProbKaon = t.mPidProbKaon;
+  mPidProbProton = t.mPidProbProton;
   mdEdx = t.mdEdx;
   mDCAxy = t.mDCAxy;
   mDCAz = t.mDCAz; 
@@ -231,10 +231,10 @@ StHbtTrack::StHbtTrack(const StHbtTTreeEvent* ev, const StHbtTTreeTrack* t) { //
   mNSigmaPion = t->mNSigmaPion;
   mNSigmaKaon = t->mNSigmaKaon;
   mNSigmaProton = t->mNSigmaProton;
-  mPidProbElectron = t->mPidProbElectron;
-  mPidProbPion = t->mPidProbPion;
-  mPidProbKaon = t->mPidProbKaon;
-  mPidProbProton = t->mPidProbProton;
+  mPidProbElectron = t->mPidProbElectron/1000.;
+  mPidProbPion = t->mPidProbPion/1000.;
+  mPidProbKaon = t->mPidProbKaon/1000.;
+  mPidProbProton = t->mPidProbProton/1000.;
 
   mdEdx = t->mdEdx;
   mChiSqXY = t->mChiSqXY;
