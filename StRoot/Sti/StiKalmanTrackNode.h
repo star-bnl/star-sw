@@ -151,10 +151,10 @@ public:
   /// the track at that point.
   StThreeVector<double> getPointAt(double xk) const;
   
-  void nudge();
+  int nudge();
   double evaluateChi2(const StiHit *hit); 
-  void updateNode(); 
-  void rotate(double alpha); 
+  int updateNode(); 
+  int rotate(double alpha); 
   void add(StiKalmanTrackNode * newChild);
   double getField()  const;
   int    getHelicity()  const;

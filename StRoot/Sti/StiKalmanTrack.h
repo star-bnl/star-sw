@@ -226,6 +226,7 @@ class StiKalmanTrack : public StiTrack
    StiKalmanTrackNode * getLastNode()   const { return lastNode; };
 
    void  setLastNode(StiKalmanTrackNode *n) { lastNode = n; };
+   void  setFirstNode(StiKalmanTrackNode *n) { firstNode = n; };
    
    /// Returns the direction (kInsideOut, kOutsideIn) used in the reconstruction of this track.
    StiDirection getTrackingDirection() const { return  trackingDirection;};
@@ -599,12 +600,16 @@ inline StiKalmanTrackNode * StiKalmanTrack::add(StiKalmanTrackNode * node)
 {
   if (node->getHit())
     {
-      TRACKMESSENGER <<"StiKalmanTrack::add() - I - node HAS a hit"<<endl;
-      node->nudge();
-      node->updateNode();
+      //TRACKMESSENGER <<"StiKalmanTrack::add() - I - node HAS a hit"<<endl;
+      if (node->nudge()) return 0;
+      int status = node->updateNode();
+      if (status<0) 
+	return 0;
+      else if (status>0) // remove the hit (CP Oct 21, 04 ) if the track direction has changed from update..
+      node->setHit(0);
     }
-  else
-    TRACKMESSENGER <<"StiKalmanTrack::add() - I - node WITHOUT a hit"<<endl;
+  //else
+  //  TRACKMESSENGER <<"StiKalmanTrack::add() - I - node WITHOUT a hit"<<endl;
   lastNode->add(node);
   lastNode = node;
   return lastNode;
