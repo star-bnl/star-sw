@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.11 2001/06/13 16:24:23 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.12 2001/06/13 16:36:43 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,8 +11,8 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
- * Revision 1.11  2001/06/13 16:24:23  jhthomas
- * Speed up the PadRow13 Corrections
+ * Revision 1.12  2001/06/13 16:36:43  jhthomas
+ * *** empty log message ***
  *
  * Revision 1.3  2000/12/15 16:10:45  jhthomas
  * Add PadRow13, Clock, and Twist corrections to UndoDistortion
@@ -650,7 +650,7 @@ void StMagUtilities::ReadField( )
   fclose(b3Dfile) ;
 
   filename = "membrane_efield.dat" ;
-  MapLocation = filename ;
+  //MapLocation = filename ;
   MapLocation = BaseLocation + filename ;
   gSystem->ExpandPathName(MapLocation) ;
   efile = fopen(MapLocation.Data(),"r") ;
@@ -701,7 +701,6 @@ void StMagUtilities::ReadField( )
 
   filename = "endcap_efield.dat" ;
   MapLocation = BaseLocation + filename ;
-  MapLocation = filename ;  // Read from local directory
   gSystem->ExpandPathName(MapLocation) ;
   eefile = fopen(MapLocation.Data(),"r") ;
   printf("Reading Endcap Electric Field Distortion File: %s \n",filename.Data());
