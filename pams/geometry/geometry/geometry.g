@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.40 2001/03/13 20:56:31 nevski Exp $
+* $Id: geometry.g,v 1.41 2001/03/15 01:14:20 nevski Exp $
 * $Log: geometry.g,v $
+* Revision 1.41  2001/03/15 01:14:20  nevski
+* first approach to forward pion detector
+*
 * Revision 1.40  2001/03/13 20:56:31  nevski
 * variable rich position taken from DB
 *
@@ -32,7 +35,8 @@
               zcal,mfld,mwc,pse,tof,t25,t1,four,ems,alpipe,
               on/.true./,off/.false./
    real       Par(1000),field,dcay(5),shift(2),wdm
-   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),Nleft,Mleft,Rv,Wfr,Itof,y/-1/
+   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),nsup(2),
+              Nleft,Mleft,Rv,Wfr,Itof,y/-1/
    character  Commands*4000
 * - - - - - - - - - - - - - - - - -
 +CDE,GCBANK,GCUNIT,GCPHYS,GCCUTS,GCFLAG,AGCKINE,QUEST.
@@ -112,10 +116,19 @@ If LL>1
                         {vpdd,ecal,ftpc}=off; {rich,ems,t1}=on; nmod={12,0}; 
                   y=1;  shift={87,0}; Itof=1; Rv=2; Wfr=7; Wdm=6.0;    Nsi=-3;}
 
+  on YEAR2000   { actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder(4); 
+*                 corrected: MWC readout, RICH reconstructed position, no TOF 
+                  Field=2.5; {vpdd,ecal,ftpc}=off; {rich,ems}=on; nmod={12,0};
+                  y=2;  shift={87,0}; Itof=1; Rv=2; Wfr=7; Wdm=6.305;  Nsi=-3;}
+
   on YEAR_2A    { asymptotic STAR;                                            }
 
   on YEAR_2B    { 2001 geometry first guess - TPC+CTB+FTPC+RICH+CaloPatch+SVT;
-                        ecal=off;  {rich,ems,t1}=on;  nmod={24,0};
+                        {rich,ems,t1}=on;  nmod={24,0};  nsup={0,1};
+                  y=2;  shift={21,0};  Itof=2;  Rv=2;  Wdm=6.305;      Nsi=6; }
+
+  on YEAR2001   { 2001 geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT;
+                         {rich,ems,t1}=on;  nmod={24,0}; nsup={0,1};
                   y=2;  shift={21,0};  Itof=2;  Rv=2;  Wdm=6.305;      Nsi=6; }
 
   on HADR_ON    { all Geant Physics On;                                       }
@@ -203,6 +216,10 @@ If LL>1
    if (ems)  call AgDETP add ('calg.shift=',shift,2)
    if (calb) Call calbgeo
    if (rich) Call richgeo
+
+*  - endcap calorimeter may be controled here
+   If (LL>1) call AgDETP new ('ECAL')
+   if (2>1)  call AgDETP add ('emcg.nsupsec=',Nsup,2)
    if (ecal) Call ecalgeo
    if (zcal) Call zcalgeo
    if (magp) Call magpgeo
