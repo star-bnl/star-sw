@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichTrackFilter.cxx,v 2.1 2000/09/29 01:35:38 horsley Exp $
+ * $Id: StRichTrackFilter.cxx,v 2.2 2002/02/01 16:15:30 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrackFilter.cxx,v $
+ *  Revision 2.2  2002/02/01 16:15:30  lasiuk
+ *  use fabs instead of abs for floating point numbers (gcc 7.2)
+ *
  *  Revision 2.1  2000/09/29 01:35:38  horsley
  *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
  *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
@@ -62,8 +65,8 @@ void StRichTrackFilter::setVertex(StThreeVectorF& Vertex){
 
 bool StRichTrackFilter::trackAcceptable() {
 
-    if (abs(mMIP.x()) > myGeometryDb->radiatorDimension().x() ||
-	abs(mMIP.y()) > myGeometryDb->radiatorDimension().y())
+    if (fabs(mMIP.x()) > myGeometryDb->radiatorDimension().x() ||
+	fabs(mMIP.y()) > myGeometryDb->radiatorDimension().y())
 	{
 	    return false;
 	}
