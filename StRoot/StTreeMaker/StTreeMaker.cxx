@@ -120,19 +120,37 @@ Int_t StTreeMaker::MakeWrite()
 
 //		Fill branches
 
+  FillBranch(0);
+
+//		Write StTree
+  ULong_t ukey = GetNumber();
+  fTree->WriteEvent(ukey);	
+  fTree->Clear(); 
+  return 0;
+}
+//_____________________________________________________________________________
+void StTreeMaker::FillBranch(StBranch *brOnly)
+{
+//		Fill branches
+
   StBranch *br;St_DataSet *dat,*ds,*inBr,*intoBrs;
   const char* logs;int nlog;
   TString tlog;
   
   
   intoBrs = Find(".branches");
-  if (!intoBrs) return kStWarn;
+  if (!intoBrs) return;
   St_DataSetIter intoNext(intoBrs);
   
   while ((inBr=intoNext())) {//loop intoBR
-    br = (StBranch*)fTree->Find(inBr->GetName());
-    if (!br) 	continue;
-
+    if (brOnly) { // Only one branch
+      br = brOnly;
+      if (strcmp(br->GetName(),inBr->GetName())) continue;
+    } else {
+      if (!strncmp("hist",inBr->GetName(),4)) continue;
+      br = (StBranch*)fTree->Find(inBr->GetName());
+      if (!br) 	continue;
+    }
     logs = inBr->GetTitle();nlog=0;
     while(1999) //loop over log names
     {
@@ -151,15 +169,22 @@ Int_t StTreeMaker::MakeWrite()
     }//end of log names
   }//end of intoBR
 
-//		Write StTree
-  ULong_t ukey = GetNumber();
-  fTree->WriteEvent(ukey);	
-  fTree->Clear(); 
-  return 0;
 }
+
+
 //_____________________________________________________________________________
 Int_t StTreeMaker::Finish()
 { 
+  St_DataSetIter  nextBr(fTree);
+  StBranch *br;
+  fTree->Clear(); 
+  while ((br = (StBranch*)nextBr())) {
+    if (strncmp("hist",br->GetName(),4)) continue;
+    FillHistBranch(br);
+  }
+  fTree->WriteEvent((ULong_t)(-2));	
+  fTree->Clear(); 
+ 
   Close(); return 0;
 }
 //_____________________________________________________________________________
@@ -217,11 +242,32 @@ void StTreeMaker::UpdateTree()
   }//end updates  
   
 }
+//_____________________________________________________________________________
+void StTreeMaker::FillHistBranch(StBranch *histBr)
+{
+  StMaker *top,*upp;
+  St_DataSet *ds,*par,*dothist;  
+
+  top = this;
+  while((upp=GetMaker(top))) top = upp;
+  
+  St_DataSetIter nextDs(top,999);
+  while ((ds= nextDs())) { //loop over all stru
+    par = ds->GetParent();
+    if (!par)				continue;
+    if (strcmp(".make",par->GetName()))	continue;
+    dothist = ds->Find(".hist");
+    if (!dothist)			continue;
+    TList *tl = (TList*)ds->GetObject();
+    if (!tl || !tl->First())		continue;
+    TString ts(ds->GetName()); ts +="Hist";
+    St_ObjectSet *os = new St_ObjectSet(ts);
+    os->SetObject(tl);
+    histBr->Add(os);
+  }
+  FillBranch(histBr);
+}
 
 
 
-
-
-
-
-
+  
