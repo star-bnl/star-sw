@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimField.cc,v 1.8 2001/04/25 17:52:04 perev Exp $
+// $Id: StFtpcSlowSimField.cc,v 1.9 2001/04/27 13:19:00 jcs Exp $
 // $Log: StFtpcSlowSimField.cc,v $
+// Revision 1.9  2001/04/27 13:19:00  jcs
+// cleanup comments
+//
 // Revision 1.8  2001/04/25 17:52:04  perev
 // HPcorrs
 //
@@ -45,7 +48,7 @@ StFtpcSlowSimField::StFtpcSlowSimField(StFtpcParamReader *paramReader,
 {
   mParam=paramReader;
   mDb = dbReader;
-  // inplementation of drift information from fcl_padtrahns, which is
+  // inplementation of drift information from fcl_padtrans, which is
   // more precise than that in ftpcSlowSimGas (includes calculated magfield)
   // there's a job to do: fuse both tables into one!
   innerRadius = mDb->sensitiveVolumeInnerRadius();
