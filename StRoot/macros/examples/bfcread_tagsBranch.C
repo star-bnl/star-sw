@@ -1,5 +1,8 @@
-// $Id: bfcread_tagsBranch.C,v 1.14 2000/06/07 18:21:21 kathy Exp $
+// $Id: bfcread_tagsBranch.C,v 1.15 2000/06/15 21:32:56 kathy Exp $
 // $Log: bfcread_tagsBranch.C,v $
+// Revision 1.15  2000/06/15 21:32:56  kathy
+// copied all integers to floats before writing out to file using fout --- otherwise CINT doesn't like it on Solaris
+//
 // Revision 1.14  2000/06/07 18:21:21  kathy
 // finalized printouts
 //
@@ -128,6 +131,8 @@ void bfcread_tagsBranch(
       //cout << " nowbranch, setBranch = " << 
       //  nowBranch << ", "<< setBranch << endl;
 
+      Float_t RtableIndex=tableIndex[l];
+
       if (nowBranch !=  setBranch){ 
           setBranch=nowBranch;
           cout << " QAInfo: branch ";
@@ -138,7 +143,7 @@ void bfcread_tagsBranch(
             cout << endl;
           fout << " QAInfo: branch ";
             fout.width(2);
-            fout << tableIndex[l] << " = ";
+            fout << RtableIndex << " = ";
             fout.width(10);
             fout << ((TNamed*)tagTable->UncheckedAt(tableIndex[l]))->GetName();
             fout << endl;
@@ -148,6 +153,8 @@ void bfcread_tagsBranch(
       countLeavesTable[tableIndex[l]]++;
       countTagsLeaf[l]+=ndim;
 
+      Float_t Rl=l;
+      Float_t Rndim=ndim;
       cout << " QAInfo:     leaf ";
         cout.width(3);
         cout << l << " has ";
@@ -156,9 +163,9 @@ void bfcread_tagsBranch(
         cout << endl;
       fout << " QAInfo:     leaf ";
         fout.width(3);
-        fout << l << " has ";
+        fout << Rl << " has ";
         fout.width(1);
-        fout << ndim << " tags:";
+        fout << Rndim << " tags:";
         fout << endl;
 
 //  loop over all events in each leaf
@@ -213,19 +220,23 @@ void bfcread_tagsBranch(
         cout.width(1);
         cout << ndim;
         cout << endl;
+
+	Float_t RtableIndex=tableIndex[m];
+        Float_t Rm=m;
+        Float_t Rndim=ndim;
       fout << " QAInfo: branch ";
         fout.width(2);
-        fout << tableIndex[m] << " = ";
+        fout << RtableIndex << " = ";
         fout.width(10);
         fout << ((TNamed*)tagTable->UncheckedAt(tableIndex[m]))->GetName();
         fout << ", leaf ";
         fout.width(3);
-        fout << m << " = ";
+        fout << Rm << " = ";
         fout.width(24);
         fout << leaf->GetName();
         fout << ", #tags = ";     
         fout.width(1);
-        fout << ndim;
+        fout << Rndim;
         fout << endl;
 
      }
@@ -254,9 +265,10 @@ void bfcread_tagsBranch(
         cout << sumTagsLeaf[m];
         cout << endl;
 
+	Float_t Rm=m;
       fout << " QAInfo: avg leaf #";
         fout.width(2);
-        fout << m << ", ";
+        fout << Rm << ", ";
         fout.width(23);
         fout << leaf->GetName() << " = ";
         fout.width(12);
@@ -279,31 +291,38 @@ void bfcread_tagsBranch(
 	  cout << countLeavesTable[m] << " leaves,";
 	  cout.width(4);
 	  cout << countTagsTable[m] << " tags" << endl;
+
+	  Float_t RcountLeavesTable=countLeavesTable[m];
+          Float_t RcountTagsTable=countTagsTable[m];
         fout << " QAInfo: branch(table) ";
 	  fout.width(10);
 	  fout << ((TNamed*)tagTable->UncheckedAt(m))->GetName() << " has ";
 	  fout.width(4);
-	  fout << countLeavesTable[m] << " leaves,";
+	  fout << RcountLeavesTable << " leaves,";
 	  fout.width(4);
-	  fout << countTagsTable[m] << " tags" << endl;
+	  fout << RcountTagsTable << " tags" << endl;
 
      }
      cout << endl  << endl;
      fout << endl  << endl;
 
 
+     Float_t RnEntries=nEntries;
+     Float_t RtableCount=tableCount; 
+     Float_t RnLeaves=nLeaves; 
+     Float_t RtagCount=tagCount; 
 
      cout << " QAInfo:  tot num events = " << nEntries << endl;
-     fout << " QAInfo:  tot num events = " << nEntries << endl;
+     fout << " QAInfo:  tot num events = " << RnEntries << endl;
 
      cout << " QAInfo:   tot num branches = " << tableCount << endl;
-     fout << " QAInfo:   tot num branches = " << tableCount << endl;
+     fout << " QAInfo:   tot num branches = " << RtableCount << endl;
 
      cout << " QAInfo:   tot num leaves = " << nLeaves << endl;
-     fout << " QAInfo:   tot num leaves = " << nLeaves << endl;
+     fout << " QAInfo:   tot num leaves = " << RnLeaves << endl;
 
      cout << " QAInfo:   tot num tags = " << tagCount << endl;
-     fout << " QAInfo:   tot num tags = " << tagCount << endl;
+     fout << " QAInfo:   tot num tags = " << RtagCount << endl;
 
 
   // stop timer and print results
