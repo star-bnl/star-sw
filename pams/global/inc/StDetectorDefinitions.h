@@ -25,7 +25,9 @@
 ** TPC+SSD         = 21 
 ** TPC+SVT         = 22
 ** TPC+SSD+SVT     = 23
-** SSD+SVT         = 24    */
+** SSD+SVT         = 24
+** CPV(PMD)        = 25
+** PMD             = 26    */
  
 
 
@@ -55,4 +57,13 @@
 #define kTpcSvtIdentifier             22
 #define kTpcSsdSvtIdentifier          23
 #define kSsdSvtIdentifier             24
+#define kPhmdCpvIdentifier            25
+#define kPhmdIdentifier               26
 #endif /*STDETECTORDEFINITIONS*/
+
+// $Id: StDetectorDefinitions.h,v 1.9 2002/12/18 02:28:37 lbarnby Exp $
+//
+// $Log: StDetectorDefinitions.h,v $
+// Revision 1.9  2002/12/18 02:28:37  lbarnby
+// PMD identifiers added
+//

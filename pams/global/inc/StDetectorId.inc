@@ -4,7 +4,7 @@
       INTEGER kEndcapEmcTowerId,kEndcapEmcPreShowerId
       INTEGER kBarrelSmdPhiStripId,kZdcWestId,kZdcEastId
       INTEGER kEndcapSmdUStripId,kEndcapSmdVStripId,kMwpcWestId,kMwpcEastId
-      INTEGER kTpcSvtId,kTpcSsdId,kTpcSsdsvtId,kSsdSvtId,kL3TpcId 
+      INTEGER kTpcSvtId,kTpcSsdId,kTpcSsdsvtId,kSsdSvtId,kPhmdCpvId,kPhmdId
 
 #include "StDetectorDefinitions.h"
       PARAMETER (kUnknownId = kUnknownIdentifier)
@@ -32,9 +32,15 @@
       PARAMETER (kTpcSvtId    = kTpcSvtIdentifier)
       PARAMETER (kTpcSsdSvtId = kTpcSsdSvtIdentifier)
       PARAMETER (kSsdSvtId    = kSsdSvtIdentifier)
+      PARAMETER (kPhmdCpvId = kPhmdCpvIdentifier)
+      PARAMETER (kPhmdId = kPhmdIdentifier)
 
-
-
+C     $Id: StDetectorId.inc,v 1.9 2002/12/18 02:28:52 lbarnby Exp $
+C
+C     $Log: StDetectorId.inc,v $
+C     Revision 1.9  2002/12/18 02:28:52  lbarnby
+C     PMD identifiers added
+C
 
 
 
