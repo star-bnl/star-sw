@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.100 1999/06/30 15:29:15 fisyak Exp $
+# $Id: MakePam.mk,v 1.101 1999/07/07 14:08:37 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.101  1999/07/07 14:08:37  fisyak
+# Extract dependencies from standard make path, add pathes to StarClassLibrary and MySql
+#
 # Revision 1.100  1999/06/30 15:29:15  fisyak
 # Add StarClassLibrary for pams
 #
@@ -594,7 +597,7 @@ endif
 	$(RM) *.h *.inc *.template *.cxx;
 $(FILES_MOD) : $(GEN_DIR)/St_%_Module.cxx : %.idl
 	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP);
-	cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS); 
+	cd $(GEN_TMP); $(STIC) -r -q $(STICFLAGS) $(1ST_DEPS);
 	cd $(GEN_TMP); $(MV) $(STEM)_i.cc  $(STEM).h $(STEM).inc $(GEN_DIR)/; 
 ifndef NOROOT
 	cd $(GEN_TMP); $(MV) St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR)/;
@@ -613,12 +616,10 @@ $(GEN_DIR)/%.didl $(GEN_DIR)/%_i.cc $(GEN_DIR)/%.h $(GEN_DIR)/%.inc: %.idl
 #	cd $(GEN_TMP); $(MV) *.h *.inc $(GEN_TAB)/;         
 	$(RM) *.h *.inc *.template;
 endif #IDM
-ifndef NODEPEND
+endif
+endif
+endif
 include $(STAR_MAKE_HOME)/MakeDep.mk
-endif
-endif
-endif
-endif
 #-----cleaning------------------------------
 clean: clean_obj clean_lib clean_dep
 clean_share:

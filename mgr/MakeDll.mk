@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.95 1999/06/29 01:59:44 fisyak Exp $
+# $Id: MakeDll.mk,v 1.96 1999/07/07 14:08:36 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.96  1999/07/07 14:08:36  fisyak
+# Extract dependencies from standard make path, add pathes to StarClassLibrary and MySql
+#
 # Revision 1.95  1999/06/29 01:59:44  fisyak
 # Fix typo
 #
@@ -239,6 +242,16 @@ FFLAGS   += -DCERNLIB_TYPE
 INC_DIRS  += $(INCINT) $(STAF_UTILS_INCS) 
 
 INC_DIRS += $(CERN_ROOT)/include
+
+#	Special includes & .a libraries
+#		MySQL
+ifeq ($(PKG),StDbLib)
+#  INC_DIRS += $(STAR_ROOT)/mysql/include
+#  SL_EXTRA_LIB += $(STAR_ROOT)/mysql/lib/libmysqlclient.a
+  INC_DIRS += /opt/star/include/
+  SL_EXTRA_LIB += -L/opt/star/lib/mysql/ -lmysqlclient
+endif
+
 INCLUDES := $(addprefix -I,$(INC_DIRS))
 INCINT   := $(addprefix -I,$(INCINT))
 
@@ -512,6 +525,7 @@ $(OBJ_DIR)/%.$(O) : %.c
 $(OBJ_DIR)/%.$(O) : %.cc
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) $(CXXINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS)
 $(OBJ_DIR)/%.$(O) : %.cxx 
+	echo BOT OHO $(PKGNAME)
 	$(CXX) -c $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) $(CXXINP)$(1ST_DEPS) $(COUT)$(ALL_TAGS)
 $(FILES_OG): $(OBJ_DIR)/%.$(O):%.g $(OBJ_DIR)/geant3.def
 	$(CP)$(1ST_DEPS) $(OBJ_DIR); cd $(OBJ_DIR); $(GEANT3) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).F
@@ -531,7 +545,6 @@ ifdef $(LIB_PKG)
 endif
 $(OBJ_DIR)/%.$(O): %.cdf
 	$(KUIPC) $(KUIPC_FLAGS) $(1ST_DEPS) $(GEN_DIR)/$(STEM).c
-include $(STAR_MAKE_HOME)/MakeDep.mk
 endif
 DeleteDirs :
 #	rm -rf  $(TMP_DIR)
@@ -543,11 +556,13 @@ ifneq (, $(strip $(FILES_D)))
 include $(FILES_D)
 endif
 endif
+include $(STAR_MAKE_HOME)/MakeDep.mk
 
 else
-.PHONY : all
+.PHONY : all depend
 all: 
 	@echo "Nothing to be done for Dll: $(SRC_DIR)"
+#depend: @echo "Nothing to be done for depend: $(SRC_DIR)"
 endif # end of DoIt
 test: 
 	@echo MAKE        := $(MAKE)

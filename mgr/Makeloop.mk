@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.81  1999/07/07 14:08:37  fisyak
+#  Extract dependencies from standard make path, add pathes to StarClassLibrary and MySql
+#
 #  Revision 1.80  1999/06/27 22:44:03  fisyak
 #  Merge StRootEvent and StEvent
 #
@@ -319,7 +322,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/06/27 22:44:03 $ 
+#           Last modification $Date: 1999/07/07 14:08:37 $ 
 #  default setings
 # Current Working Directory
 #
@@ -341,7 +344,7 @@ endif
 ifndef SUBDIRS
   DIRS    := $(subst /.,,$(strip $(wildcard */.)))
   SUBDIRS := $(DIRS)
-  SUBDIRS := $(filter-out inc idl doc CVS wrk src exa kumac html test macros, $(DIRS))
+  SUBDIRS := $(filter-out inc idl doc CVS wrk src exa kumac html test macros tmp, $(DIRS))
   SUBDIRS := $(strip    $(sort $(SUBDIRS)))
   SUBDIRS := $(filter StChain, $(SUBDIRS)) $(filter-out StChain, $(SUBDIRS)) 
   SUBDIRS := $(filter-out ctf, $(SUBDIRS)) $(filter ctf, $(SUBDIRS)) 
@@ -371,7 +374,8 @@ ifndef SUBDIRS
 #  SUBDIRS := $(filter-out StRootEvent, $(SUBDIRS))
   SUBDIRS := $(filter-out St_emc_Maker, $(SUBDIRS))
 #                         St_evg_Maker St_ebye_Maker St_fpt_Maker, $(SUBDIRS))
-  SUBDIRS := $(filter-out vpd par crs egz fri g2x mev, $(SUBDIRS))
+  SUBDIRS := $(filter-out vpd par crs egz fri g2x mev  St_geom_Maker StHbtMaker StAssociationMaker StPadDisplayMaker, $(SUBDIRS))
+  SUBDIRS := $(filter-out StDisplayMaker, $(SUBDIRS))
 ifndef OBJY_HOME
   SUBDIRS := $(filter-out StObjectivity StOdbEvent StObjyLoaderMaker objy, $(SUBDIRS)) 
 endif
@@ -380,7 +384,7 @@ ifneq (wenuas,$(USER))
 endif
  ifneq (,$(findstring $(STAR_SYS),sun4x_56 hp_ux102))
     SUBDIRS := $(filter-out StDaqLib StNoiseMaker StPadDisplayMaker StDisplayMaker, $(SUBDIRS))
-    SUBDIRS := $(filter-out StPeCMaker St_hbt_Maker, $(SUBDIRS))
+    SUBDIRS := $(filter-out StPeCMaker St_hbt_Maker StHbtMaker ftpc St_fpt_Maker, $(SUBDIRS))
  endif
   ifdef PKG
     SUBDIRS:=
@@ -388,21 +392,22 @@ endif
 endif
 #          I have subdrs
 .PHONY               :  all $(BASE)  $(St_Tables) test clean clean_lib clean_share clean_obj
-all:    $(BASE) $(addsuffix _loop, $(SUBDIRS)) $(addsuffix _$(branch),$(PKG)) $(St_Tables)
-$(BASE):
-	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/StRoot/$(BASE)
+all:    $(BASE) $(addsuffix _loop, $(SUBDIRS))  $(addsuffix _$(branch),$(PKG)) $(St_Tables)
+$(BASE): St_base_StRoot
 St_TablesDoc: 
 	root.exe -b -q MakeHtmlTables.cxx
 %_loop:
 	$(MAKE)  -f $(Makeloop) -C $(STEM)
 %_pams:
+	$(MAKE)  -f $(MakePam) depend
 	$(MAKE)  -f $(MakePam)
+	$(MAKE)  -f $(MakeDll) -C  $(GEN_DIR) depend
 	$(MAKE)  -f $(MakeDll) -C  $(GEN_DIR)
 %_StRoot:
-	$(MAKE)  -f $(MakeDll)
-StEvent_StEvent:
+	$(MAKE)  -f $(MakeDll) depend
 	$(MAKE)  -f $(MakeDll)
 St_Tables: $(BASE)
+	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables depend
 	$(MAKE)  -f $(MakeDll) -C $(ROOT_DIR)/.share/tables \
          SO_LIB=$(ROOT_DIR)/.$(STAR_HOST_SYS)/$(SO_SUBDIR)/St_Tables.$(So) NODEBUG=1999
 test:   $(addsuffix _test, $(SUBDIRS))
@@ -457,4 +462,3 @@ test_level:
 	@echo "SRC_DIR   = |"$(SRC_DIR)"|"
 	@echo "PKG       = |"$(PKG)"|"
 	@echo "NAME      = |"$(NAME)"|"
-	@echo "branch    = |"$(branch)"|"
