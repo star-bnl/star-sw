@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.46 1999/10/20 19:18:17 nevski Exp $
+// $Id: St_geant_Maker.cxx,v 1.47 1999/11/06 23:05:01 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.47  1999/11/06 23:05:01  fisyak
+// fix chars
+//
 // Revision 1.46  1999/10/20 19:18:17  nevski
 // g2t_event table filled
 //
@@ -914,10 +917,17 @@ TRotMatrix *St_geant_Maker::GetMatrix(float thet1, float phii1,
    return pattern;
 }
 //------------------------------------------------------------------------
-void type_of_call rootmaptable_(Char_t *Cdest,Char_t *Table, Char_t* Spec, 
-                                                      Int_t *k, Char_t *iq)
+void type_of_call rootmaptable_(const Char_t* cdest,const Char_t* table , const Char_t* spec, 
+                                                      Int_t *k, Char_t *iq, 
+				const int lCdest,const int lTable, const int lSpec)
 { 
-   St_geant_Maker::RootMapTable(Cdest,Table, Spec, k, iq); 
+  Char_t *Cdest = new char[(lCdest+1)]; strncpy(Cdest,cdest,lCdest); Cdest[lCdest] = 0;
+  Char_t *Table = new char[(lTable+1)]; strncpy(Table,table,lTable); Table[lTable] = 0;
+  Char_t *Spec  = new char[(lSpec+1)];  strncpy(Spec,spec,lSpec);    Spec[lSpec]   = 0;
+  St_geant_Maker::RootMapTable(Cdest,Table, Spec, k, iq); 
+  delete [] Cdest;
+  delete [] Table;
+  delete [] Spec;
 }
 //------------------------------------------------------------------------
 void St_geant_Maker::RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec, 
