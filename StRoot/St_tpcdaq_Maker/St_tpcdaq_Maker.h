@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.15 1999/11/23 20:32:48 ward Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.16 1999/11/23 22:26:45 ward Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.16  1999/11/23 22:26:45  ward
+// forward declaration for daq ZeroSuppressedReader
+//
 // Revision 1.15  1999/11/23 20:32:48  ward
 // forward declaration for StTrsDetectorReader & StTrsZeroSuppressedReader
 //
@@ -73,7 +76,7 @@ class TH1F;
 #define GAIN_CORRECTION
 #define MAXROWPADPERSECTOR 400
 #define BINRANGE 3
-#include "StDaqLib/GENERIC/EventReader.hh"
+class ZeroSuppressedReader;
 class StTrsDetectorReader;
 class StTrsZeroSuppressedReader;
 #ifdef NOISE_ELIM
@@ -149,7 +152,7 @@ class St_tpcdaq_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.15 1999/11/23 20:32:48 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpcdaq_Maker.h,v 1.16 1999/11/23 22:26:45 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_tpcdaq_Maker, 1)   //StAF chain virtual base class for Makers
 };
