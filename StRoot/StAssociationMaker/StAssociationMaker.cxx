@@ -1,11 +1,14 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.17 2000/01/14 21:53:58 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.18 2000/01/18 20:53:37 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
- * Revision 1.17  2000/01/14 21:53:58  calderon
- * Make sure the common hits for each detector are initialized to zero.
- * (Thanks, Lee).
+ * Revision 1.18  2000/01/18 20:53:37  calderon
+ * Changes to work with CC5
  *
+ * Revision 1.18  2000/01/18 20:53:37  calderon
+ * Changes to work with CC5
+ *
+ * Revision 1.17  2000/01/14 21:53:58  calderon
  * Make sure the common hits for each detector are initialized to zero.
  * (Thanks, Lee).
  *
@@ -86,6 +89,10 @@
 
 #include <iostream.h>
 #include <stdlib.h>
+#include <string>
+#include <vector>
+#include <math.h>
+#if !defined(ST_NO_NAMESPACES)
 using std::string;
 using std::vector;
 #endif
@@ -222,13 +229,22 @@ ostream& operator<<(ostream& out,
     return out;
 }
 
+// Print out the Track multimaps
 ostream& operator<<(ostream& out, const rcTrackMapType& tm)
+{
+#if __SUNPRO_CC != 0x500
+    copy(tm.begin(),tm.end(), ostream_iterator<rcTrackMapValType>(out,"\n"));
+    
 #else
     out << "Sorry, can't use ostream_iterator with this version of iostream.h !" << endl ;
 #endif
     return out;
 }
+
 ostream& operator<<(ostream& out, const mcTrackMapType& tm)
+{
+#if __SUNPRO_CC != 0x500
+    copy(tm.begin(),tm.end(), ostream_iterator<mcTrackMapValType>(out,"\n"));
 #else
     out << "Sorry, can't use ostream_iterator with this version of iostream.h !" << endl ;
 #endif

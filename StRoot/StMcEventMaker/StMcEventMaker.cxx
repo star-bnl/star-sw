@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.11 2000/01/11 23:18:56 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.12 2000/01/18 20:53:08 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.12  2000/01/18 20:53:08  calderon
+ * Changes to work with CC5
+ *
  * Revision 1.11  2000/01/11 23:18:56  calderon
  * Check if there are hits before writing info to screen.
  *
@@ -43,7 +46,11 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
-#include <algorithm>
+#ifndef ST_NO_NAMESPACES
+using std::vector;
+using std::string;
+#endif
+
 #include "TStyle.h"
 #include "TCanvas.h"
 #include "StMcEventMaker.h"
@@ -70,16 +77,13 @@
 
 #include "StMcEventTypes.hh"
 
-#ifndef ST_NO_NAMESPACES
-using namespace std;
-#endif
 
 static double vertexCut = .0000025; // 25 nm (lifetime of the pi0)
 struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.11 2000/01/11 23:18:56 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.12 2000/01/18 20:53:08 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
