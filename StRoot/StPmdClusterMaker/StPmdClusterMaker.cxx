@@ -1,6 +1,6 @@
 /*************************************************
  *
- * $Id: StPmdClusterMaker.cxx,v 1.9 2004/07/09 09:15:54 subhasis Exp $
+ * $Id: StPmdClusterMaker.cxx,v 1.10 2004/07/26 12:01:18 subhasis Exp $
  * Author: Subhasis Chattopadhyay
  *************************************************
  *
@@ -9,6 +9,9 @@
  *************************************************
  *
  * $Log: StPmdClusterMaker.cxx,v $
+ * Revision 1.10  2004/07/26 12:01:18  subhasis
+ * sigmaL, sigmaS stored in one place till StPhmdCluster.h modified
+ *
  * Revision 1.9  2004/07/09 09:15:54  subhasis
  * numbering convention starts from 0 everywhere for filling StEvent
  *
@@ -290,7 +293,11 @@ void StPmdClusterMaker::FillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_d
 	      Float_t phi=spmcl1->CluPhi();
 	      Float_t edep=spmcl1->CluEdep();
 	      Float_t sigmaL=spmcl1->CluSigmaL();
-	      // Float_t sigmaS=spmcl1->CluSigmaS();
+	      Float_t sigmaS=spmcl1->CluSigmaS();
+	      Int_t tempL=Int_t(sigmaL*1000);
+	      Int_t tempS=Int_t(sigmaS*1000);
+	      Int_t SigInt=tempL*10000+tempS;
+
 	      Int_t mod=spmcl1->Module();
 	      Float_t ncell=spmcl1->NumofMems();
 	      // Filling PmdCluster info in StEvent
@@ -304,12 +311,9 @@ void StPmdClusterMaker::FillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_d
 	      pcls->setEta(eta);              //! Cluster Eta
 	      pcls->setPhi(phi);              //! Cluster Phi
 	      pcls->setEnergy(edep);          //! Cluster Edep
-	      pcls->setSigma(sigmaL);           //! Filling Sigma Large
-		// Presently we are filling SigmaL only into StEvent
-		// Later on we will fill both the parameter( L & S)
-		//Following two lines are temporarily commented
-	      // pcls->setSigmaL(sigmaL);        //! Cluster Sigma Large
-	      // pcls->setSigmaS(sigmaS);        //! Cluster Sigma Small 
+	      pcls->setSigma((Float_t)SigInt);       //! Filling Sigma Large
+	      // SigmaL and sigmaS are put together are stored due tolack of 
+	      // spce for two of them
 	      cluscollpmd->addCluster(pcls);  // Adding to ClusterCollection in StEvent
 	    }       
 	} 
@@ -326,7 +330,10 @@ void StPmdClusterMaker::FillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_d
 	      Float_t phi=spmcl2->CluPhi();
 	      Float_t edep=spmcl2->CluEdep();
 	      Float_t sigmaL=spmcl2->CluSigmaL();
-	      //  Float_t sigmaS=spmcl2->CluSigmaS();
+	      Float_t sigmaS=spmcl2->CluSigmaS();
+	      Int_t tempL=Int_t(sigmaL*1000);
+	      Int_t tempS=Int_t(sigmaS*1000);
+	      Int_t SigInt=tempL*10000+tempS;
 	      Int_t mod=spmcl2->Module();
 	      Float_t ncell=spmcl2->NumofMems();
 	      // Filling PmdCluster for StEvent
@@ -338,13 +345,7 @@ void StPmdClusterMaker::FillStEvent(StPmdDetector* pmd_det, StPmdDetector* cpv_d
 	      pcls->setEta(eta);               //! Cluster Eta
 	      pcls->setPhi(phi);               //! Cluster Phi
 	      pcls->setEnergy(edep);           //! Cluster Edep
-	      pcls->setSigma(sigmaL);           //! Filling Sigma Large
-		
-		// Presently we are filling SigmaL only into StEvent
-		// Later on we will fill both the parameter( L & S)
-		//Following two lines are temporarily commented
-		// pcls->setSigmaL(sigmaL);        //! Cluster Sigma Large
-		//  pcls->setSigmaS(sigmaS);         //! Cluster Sigma Small
+	      pcls->setSigma(Float_t(SigInt));           //! Filling Sigma Large
 	      cluscollcpv->addCluster(pcls);   // Adding to ClusterCollection in StEvent
 	    }       
 	}
