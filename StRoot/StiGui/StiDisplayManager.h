@@ -21,10 +21,10 @@ class StiDrawable;
 class StiDisplayManager
 {
 public:
+    friend class nobody;
+    
     typedef multimap<string, StiDrawable*> stidrawablemap;
     typedef stidrawablemap::value_type stiDrawableMapValType;
-    
-    virtual ~StiDisplayManager();
     
     //Singleton access
     static StiDisplayManager* instance();
@@ -64,6 +64,8 @@ private:
     enum StiMainVolumeSize {kdx=200, kdy=200, kdz=240};
     
     StiDisplayManager();
+    virtual ~StiDisplayManager();
+    
     void setup();
 
     stidrawablemap mmap;
