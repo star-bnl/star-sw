@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.8 1999/07/21 21:33:09 levine Exp $
+ * $Id: EventReader.cxx,v 1.9 1999/07/28 16:08:23 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -19,7 +19,12 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.9  1999/07/28 16:08:23  levine
+ * modify EventReader so that ENDR does not cause error exit
+ *
  * Revision 1.8  1999/07/21 21:33:09  levine
+ *
+ *
  * changes to include error logging to file.
  *
  * There are now 2 constructors for EventReader:
@@ -204,12 +209,12 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
     strncpy(lcopy,lr.RecordType,8);
     lcopy[8] = 0;
     if (verbose) printf("lr.RecordType: %s\n",lcopy);
-    if (strncmp(lr.RecordType, "ENDR", 4)==0) { // check for ENDR record
-      if (verbose) 
-	printf("ENDR encountered. Processing terminated\n"); fflush(stdout);
-      next_event_offset = -1;
-      ERROR(ERR_ENDR_ENCOUNTERED);
-    }
+//     if (strncmp(lr.RecordType, "ENDR", 4)==0) { // check for ENDR record
+//       if (verbose) 
+// 	printf("ENDR encountered. Processing terminated\n"); fflush(stdout);
+//       next_event_offset = -1;
+//       ERROR(ERR_ENDR_ENCOUNTERED);
+//     }
     if(strncmp(lr.RecordType, "DATA", 4) != 0) { //not DATA
       //skip over this record 
       offset = 4*lr.RecordLength-sizeof(lr);
