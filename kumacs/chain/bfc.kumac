@@ -1,5 +1,8 @@
-* * $Id: bfc.kumac,v 1.70 1998/09/30 13:30:51 kathy Exp $
+* * $Id: bfc.kumac,v 1.71 1998/09/30 15:58:23 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.71  1998/09/30 15:58:23  kathy
+* implement dchkt correctly
+*
 * Revision 1.70  1998/09/30 13:30:51  kathy
 * make log a global variable
 *
@@ -305,7 +308,6 @@ MACRO bfc _
   output_fzd_file = [output_file].fzd
   output_dst_file = [output_file]_dst.xdf  
   
-  log_file = [log] 
   
 ***********************************************************
 * PRINT OUT INPUT VALUES
@@ -337,26 +339,25 @@ MACRO bfc _
 * GLOBAL VARIABLES - created from macro inputs 
 ***********************************************************
  
- macro/global/create input_file       [input_file]   'Input file name'
- macro/global/create output_file      [output_file]  'Output file name'
- macro/global/create tpc_sector_first [tpc_sector_first] 'first sector in TPC'
+ macro/global/create TOP              [TOP] 
+ macro/global/create calib_dir        [calib_dir]
+ macro/global/create tpc_sector_first [tpc_sector_first]  'first sector in TPC'
  macro/global/create tpc_sector_last  [tpc_sector_last]   'last sector in TPC'
- macro/global/create TOP              [TOP]
+ macro/global/create ebye_prior_switch    [ebye_prior_switch]
+ macro/global/create ebye_ensemble_switch [ebye_ensemble_switch]
+ macro/global/create ebye_analysis_switch [ebye_analysis_switch]
+ macro/global/create input_file       [input_file]        'Input file name'
+ macro/global/create output_file      [output_file]       'Output file name'
  macro/global/create gstar_settings   [gstar_settings]
  macro/global/create output_xdf_file  [output_xdf_file] 
  macro/global/create output_fzd_file  [output_fzd_file]
  macro/global/create output_dst_file  [output_dst_file]
- macro/global/create log              [log]
-     
+ macro/global/create log_file         [log]
  macro/global/create nunit            [nunit]
  macro/global/create nfile            [nfile]
  macro/global/create nid              [nid]
  macro/global/create ntable           [ntable]
 	   
- macro/global/create calib_dir            [calib_dir]
- macro/global/create ebye_prior_switch    [ebye_prior_switch]
- macro/global/create ebye_ensemble_switch [ebye_ensemble_switch]
- macro/global/create ebye_analysis_switch [ebye_analysis_switch]
 
 ***********************************************************
 * BEGINNING STUFF 
@@ -365,12 +366,14 @@ MACRO bfc _
  exec $STAR/kumacs/util/setup_defaults 
    
  exec setup#setup
-
+ 
+ macro/global/import *
+   
  exec bfc_util#bfc_start _
    domain=[domain] chain=[chain] gstar_settings=[gstar_settings]
  if (STAF_STATUS(1).ne. stafcv_ok) goto ABEND
  
- macro/global/import *
+* macro/global/import *
    
  string =   '---<bfc>-- i:'//[input_file]//' o:'//[output_file]
    fmessage $quote([string])  [log_file]

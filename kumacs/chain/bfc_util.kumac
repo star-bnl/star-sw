@@ -367,7 +367,9 @@ macro bfc_init _
     (ev0j)  exec init_ev0join
    (smdst)  exec create_tables_strange#smdst
             exec init_smdst#init
-    (dchkt) exec dst_chk_tabl#run_header
+    (dchkt)
+	    exec dst_chk_tabl#init
+	    exec dst_chk_tabl#run_header
     (dwntp) exec dst_wr_ntup#init
     (user)  exec init_user
     (ntup)  exec write_table_to_ntuple#init_disk [nunit] [nfile]
@@ -644,8 +646,9 @@ return
                endif
     (ev0j)     exec run_ev0join
    (smdst)     exec run_smdst#run
-    (dchkt)    exec dst_chk_tabl#dst_tables
+   (dchkt)    
                exec dst_chk_tabl#event_header
+               exec dst_chk_tabl#dst_tables
                exec dst_chk_tabl#event_summary    
     (dwntp)    exec dst_wr_ntup#run
      (user)     exec run_user
