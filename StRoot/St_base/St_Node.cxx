@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.29 1999/07/09 01:56:37 fine Exp $
+// $Id: St_Node.cxx,v 1.30 1999/10/28 16:24:30 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.30  1999/10/28 16:24:30  fine
+// St_DataSet major correction: it may be built with TList (default) or with TObjArray
+//
 // Revision 1.29  1999/07/09 01:56:37  fine
 // New method to contrsuct sub views and manage visibilities
 //
@@ -435,8 +438,8 @@ void St_Node::Browse(TBrowser *b)
        }
 //       GetListOfPositions()->Browse(b);
    }
-//    if( GetList() ) {
-//       GetList()->Browse( b );
+//    if( GetCollection() ) {
+//       GetCollection()->Browse( b );
 //    }
    else {
 #ifndef WIN32
@@ -640,9 +643,9 @@ void St_Node::ImportShapeAttributes()
      SetFillStyle(fShape->GetFillStyle());
    }
  
-   if (!GetList()) return;
+   if (!GetCollection()) return;
    St_Node *node;
-   TIter  next(GetList());
+   TIter  next(GetCollection());
    while ( (node = (St_Node *)next()) )
      node->ImportShapeAttributes();
 }
@@ -743,7 +746,6 @@ void St_Node::PaintNodePosition(Option_t *option,St_NodePosition *pos)
   position->UpdatePosition(option);      
 
   if (!(GetVisibility() & kThisUnvisible))  PaintShape(option);  
-  St_Node *n =  position->GetNode();
 
   if (GetVisibility() & kSonUnvisible) return;
  

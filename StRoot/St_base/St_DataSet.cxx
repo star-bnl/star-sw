@@ -2,8 +2,11 @@
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
-// $Id: St_DataSet.cxx,v 1.54 1999/09/24 23:31:37 perev Exp $
+// $Id: St_DataSet.cxx,v 1.55 1999/10/28 16:24:29 fine Exp $
 // $Log: St_DataSet.cxx,v $
+// Revision 1.55  1999/10/28 16:24:29  fine
+// St_DataSet major correction: it may be built with TList (default) or with TObjArray
+//
 // Revision 1.54  1999/09/24 23:31:37  perev
 // Add title update in St_DataSet::Update
 //
@@ -154,7 +157,8 @@ St_DataSet *St_DataSet::fgMainSet = &mainSet;
 ClassImp(St_DataSet)
  
 //______________________________________________________________________________
-St_DataSet::St_DataSet(const Char_t *name, St_DataSet *parent) : TNamed(name,"St_DataSet")
+St_DataSet::St_DataSet(const Char_t *name, St_DataSet *parent, Bool_t arrayFlag)
+           : TNamed(name,"St_DataSet")
 {
   //  cout << "ctor for " << GetName() << " - " << GetTitle() << endl;
    if (strchr(name,'/')) {
@@ -162,6 +166,7 @@ St_DataSet::St_DataSet(const Char_t *name, St_DataSet *parent) : TNamed(name,"St
       return;
    }
    fList =0; fParent=0;
+   if (arrayFlag) SetBit(kArray);
    if (parent) parent->Add(this);
 //   else AddMain(this);
 }
@@ -206,7 +211,7 @@ St_DataSet::St_DataSet(const St_DataSet &pattern,EDataSetPass iopt)
 }
 //______________________________________________________________________________
 St_DataSet::St_DataSet(TNode &src){
-
+  assert(0);
 }
 //______________________________________________________________________________
 St_DataSet::~St_DataSet()
@@ -215,12 +220,52 @@ St_DataSet::~St_DataSet()
    Shunt(0); Delete();
 } 
 //______________________________________________________________________________
+void  St_DataSet::MakeCollection()
+{
+  if (!fList) 
+    fList = TestBit(kArray) ? new TObjArray : new TList; 
+}
+//______________________________________________________________________________
+void St_DataSet::AddAt(St_DataSet *dataset,Int_t idx)
+{
+//
+// Add St_DataSet object at the "idx" position in ds 
+// or at the end of the dataset 
+// The final result is defined by either TList::AddAt or TObjArray::AddAt
+// methods
+//
+  if (!dataset) return;
+ 
+  MakeCollection();
+ 
+  // Check whether this new child has got any parent yet
+  if (!dataset->GetRealParent()) dataset->SetParent(this);
+  fList->AddAt(dataset,idx);
+}
+//______________________________________________________________________________
+void St_DataSet::AddAtAndExpand(St_DataSet *dataset, Int_t idx=0)
+{
+//   !!!! Under construction !!!!!
+// Add St_DataSet object at the "idx" position in ds 
+// or at the end of the dataset 
+// The final result is defined by either TList::AddAt or TObjArray::AddAt
+// methods
+//
+  if (!dataset) return;
+ 
+  MakeCollection();
+ 
+  // Check whether this new child has got any parent yet
+  if (!dataset->GetRealParent()) dataset->SetParent(this);
+  fList->AddAt(dataset,idx);
+}
+//______________________________________________________________________________
 void St_DataSet::AddLast(St_DataSet *dataset)
 {
 // Add St_DataSet object at the end of the dataset list of this dataset
   if (!dataset) return;
  
-  if (!fList) fList = new TList;
+  MakeCollection();
  
   // Check whether this new child has got any parent yet
   if (!dataset->GetRealParent()) dataset->SetParent(this);
@@ -233,8 +278,7 @@ void St_DataSet::AddFirst(St_DataSet *dataset)
  // Add St_DataSet object at the beginning of the dataset list of this dataset
   if (!dataset) return;
  
-  if (!fList) 
-       fList = new TList;
+  MakeCollection();
  
   // Check whether this new child has got any partent yet
   if (!dataset->GetRealParent()) dataset->SetParent(this);
@@ -442,6 +486,12 @@ void St_DataSet::InvertAllMarks()
 }
 
 //______________________________________________________________________________
+Bool_t St_DataSet::IsEmpty() const 
+{ 
+   // return kTRUE if the "internal" collection has no member
+   return First() ? kFALSE : kTRUE ;
+}
+//______________________________________________________________________________
 TString St_DataSet::Path() const
 {
  // return the full path of this data set 
@@ -460,6 +510,20 @@ void St_DataSet::Remove(St_DataSet *set)
   if (fList && set) fList->Remove(set);
 }
  
+//______________________________________________________________________________
+St_DataSet  *St_DataSet::RemoveAt(Int_t idx)
+{
+  //
+  // Remove object from the "idx" cell of this set and return
+  // the pointer to the removed object if any
+  //
+  St_DataSet *set = 0;
+  if (fList) {
+      set = (St_DataSet *)fList->At(idx);
+      fList->RemoveAt(idx);
+  }
+  return set;
+}
 //______________________________________________________________________________
 EDataSetPass St_DataSet::Pass(EDataSetPass ( *callback)(St_DataSet *),Int_t depth)
 {
@@ -670,3 +734,4 @@ void St_DataSet::Sort()
 }
 //______________________________________________________________________________
 Int_t St_DataSet::Streamer(StBufferAbc &R__b){return 0;}
+

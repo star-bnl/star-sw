@@ -1,8 +1,11 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved 
-// $Id: St_DataSetIter.cxx,v 1.29 1999/08/28 01:25:17 fine Exp $
+// $Id: St_DataSetIter.cxx,v 1.30 1999/10/28 16:24:30 fine Exp $
 // $Log: St_DataSetIter.cxx,v $
+// Revision 1.30  1999/10/28 16:24:30  fine
+// St_DataSet major correction: it may be built with TList (default) or with TObjArray
+//
 // Revision 1.29  1999/08/28 01:25:17  fine
 // St_DataSetIter::Find now can find itself
 //
@@ -64,7 +67,7 @@ ClassImp(St_DataSetIter)
   fWorkingDataSet= fRootDataSet   =link;
   fMaxDepth      = fDepth         =1;
   fDataSet=0;
-  fNext = link ? new TIter(link->GetList() ,dir):0;
+  fNext = link ? new TIter(link->GetCollection() ,dir):0;
  }
  
 //______________________________________________________________________________
@@ -74,7 +77,7 @@ ClassImp(St_DataSetIter)
   fMaxDepth    = depth;
   fDepth       = 1;
   fDataSet     = 0; 
-  fNext        = (link)? new TIter(link->GetList() ,dir):0;
+  fNext        = (link)? new TIter(link->GetCollection() ,dir):0;
 
   // Create a DataSet iterator to pass all nodes of the 
   //     "depth"  levels
@@ -138,7 +141,7 @@ St_DataSet *St_DataSetIter::Add(St_DataSet *set, St_DataSet *dataset)
        delete fNext; 
        fNext = 0;
      }
-     fNext = new TIter(s->GetList() );
+     fNext = new TIter(s->GetCollection() );
   }
   return s;
 }
@@ -409,7 +412,7 @@ St_DataSet *St_DataSetIter::Next( EDataSetPass mode)
     if (fDataSet && (fDepth < fMaxDepth || fMaxDepth ==0) && mode == kContinue ) 
     {
       // create the next level iterator, go deeper
-      TList *list  = fDataSet->GetList();
+      TSeqCollection *list  = fDataSet->GetCollection();
       // Look for the next level
       if (list && list->GetSize() ) {
          fDepth++;
@@ -487,7 +490,7 @@ St_DataSet *St_DataSetIter::Find(const Char_t *path, St_DataSet *rootset,
    St_DataSet *dataset=0,*dsnext=0,*ds=0;
    Int_t len=0,nextlen=0,yes=0,anywhere=0,rootdir=0;
    const Char_t *name=0,*nextname=0;
-   TList *tl=0;
+   TSeqCollection *tl=0;
    
    name = path;
    if (!name) return rootset;
@@ -514,7 +517,7 @@ St_DataSet *St_DataSetIter::Find(const Char_t *path, St_DataSet *rootset,
         return Find(name+len,dataset,mkdirflag);
    }
 
-   tl = dataset->GetList();
+   tl = dataset->GetCollection();
    if (tl) {
      TIter next(tl);
      while ( (dsnext = NextDataSet(next)) ) 
@@ -594,15 +597,15 @@ void St_DataSetIter::Reset(St_DataSet *l, int depth)
     fRootDataSet    = l;
     fWorkingDataSet = l;
     SafeDelete(fNext);
-    if (fRootDataSet->GetList() )
-             fNext = new TIter(fRootDataSet->GetList() );
+    if (fRootDataSet->GetCollection() )
+             fNext = new TIter(fRootDataSet->GetCollection() );
   }
   else {
     fWorkingDataSet = fRootDataSet;
     if (fNext)
         fNext->Reset();
-    else if (fRootDataSet && fRootDataSet->GetList() )
-        fNext = new TIter(fRootDataSet->GetList() );
+    else if (fRootDataSet && fRootDataSet->GetCollection() )
+        fNext = new TIter(fRootDataSet->GetCollection() );
   }
   // set the new value of the maximum depth to bypass
   if (depth) fMaxDepth = depth;
@@ -643,7 +646,7 @@ St_DataSet *St_DataSetIter::Shunt(St_DataSet *set, St_DataSet *dataset)
        delete fNext; 
        fNext = 0;
      }
-     fNext = new TIter(s->GetList() );
+     fNext = new TIter(s->GetCollection() );
   }
   return s;
 }
