@@ -114,6 +114,10 @@ ClassDef(StTObjArray,1)
 class StObjArray : public StTObjArray
 {
 friend class StObjArrayIter;
+protected:
+            virtual const TIterator *Begin() const;
+            virtual const TIterator *End() const;
+
 public:
             StObjArray(Int_t s = TCollection::kInitCapacity):StTObjArray(s,0){fOrBrowser=this;};
             StObjArray(const StObjArray& from):StTObjArray(from){fOrBrowser=this;};
@@ -138,8 +142,6 @@ virtual TObject* Back() const ;
 virtual TObject* Front() const;
 virtual void 	clear();
 virtual Bool_t 	empty() const ;
-virtual const TIterator *Begin() const;
-virtual const TIterator *End() const;
 virtual TIterator* MakeIterator(Bool_t dir = kIterForward) const;
 virtual TObject** GetCell(Int_t idx) const;
 virtual void    random_shuffle(int start=0,int end = 0x7fffffff);
