@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.59 2003/08/21 20:29:27 potekhin Exp $
+* $Id: geometry.g,v 1.60 2003/09/17 23:10:42 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.60  2003/09/17 23:10:42  potekhin
+* Small improvements to the Correction Level
+* logic.
+*
 * Revision 1.59  2003/08/21 20:29:27  potekhin
 * As per discussion with Jerome, I'm introducing
 * a cleaner versioning of the 2003 geometries:
@@ -384,7 +388,7 @@ If LL>1
                   "field version "
                      Mf=4;      "tabulated field, with correction "
                   "geometry correction "
-                     CorrNum = 1;
+                     CorrNum = 2;
                   "Photon Multiplicity Detector Version "
                      PhmdVersion = 1;
                 }
@@ -492,8 +496,10 @@ If LL>1
            if (svtt) then
               if(CorrNum==0) then
                  call svttgeo
-              else 
+              elseif(CorrNum==1) then 
                  call svttgeo1
+              elseif(CorrNum==2) then
+                 call svttgeo2
               endif
            endif
  
