@@ -1,5 +1,8 @@
-// $Id: readV0MiniDst.C,v 1.8 2000/01/05 22:18:07 genevb Exp $
+// $Id: readV0MiniDst.C,v 1.9 2000/04/12 16:16:55 genevb Exp $
 // $Log: readV0MiniDst.C,v $
+// Revision 1.9  2000/04/12 16:16:55  genevb
+// Remove unnecessary library loads
+//
 // Revision 1.8  2000/01/05 22:18:07  genevb
 // Put comments in order that QA wants
 //
@@ -37,7 +40,10 @@ TStopwatch clock;
 
 void load() {
   gSystem->Load("St_base");
-  gSystem->Load("St_Tables");
+  gSystem->Load("libgen_Tables");
+  gSystem->Load("libsim_Tables");
+  gSystem->Load("libglobal_Tables");
+  gSystem->Load("libtpc_Tables");
   gSystem->Load("StChain");
   gSystem->Load("StUtilities");
   gSystem->Load("StAnalysisUtilities");

@@ -1,5 +1,8 @@
-// $Id: makeStrangeMuDst.C,v 1.2 2000/04/12 15:06:53 kathy Exp $
+// $Id: makeStrangeMuDst.C,v 1.3 2000/04/12 16:16:55 genevb Exp $
 // $Log: makeStrangeMuDst.C,v $
+// Revision 1.3  2000/04/12 16:16:55  genevb
+// Remove unnecessary library loads
+//
 // Revision 1.2  2000/04/12 15:06:53  kathy
 // changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables because of a mismatch with tpt_track table
 //
@@ -18,7 +21,6 @@
 void load() {
   gSystem->Load("St_base");
   gSystem->Load("StUtilities");
-  gSystem->Load("StAnalysisUtilities");
 
   gSystem->Load("libgen_Tables");
   gSystem->Load("libsim_Tables");
