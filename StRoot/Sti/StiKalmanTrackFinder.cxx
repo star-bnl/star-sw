@@ -469,42 +469,45 @@ void StiKalmanTrackFinder::doNextDetector()
 	  while (hasMore) 
 	    {
 	      StiHit * h = hitContainer->getHit();
+	      //if (h->timesUsed()==0) { //MLM (9/27/02) //why does this break code?!
 	      tNode->setHit(h);
 	      // set the node error according to the ad hoc parametrization...
 	      // use the crossing angle and the dip angle.
-	      tNode->setError(toolkit->getHitErrorCalculator()->getHitError(h,tNode->crossAngle(),tNode->pitchAngle()));
+	      tNode->setError(toolkit->getHitErrorCalculator()->getHitError(h,tNode->crossAngle(),
+									    tNode->pitchAngle()));
 	      chi2 = tNode->evaluateChi2();
 	      trackMes << "SKTF::followTrackAt()\t chi2:" << chi2  << endl;
 	      if (chi2<pars->maxChi2ForSelection && chi2 < bestChi2)
-		{
-		  trackMes << "SKTF::followTrackAt()\t selected hit - chi2:" << chi2 << endl;
-		  hasHit = true;
-		  bestChi2 = chi2;
-		  bestNode = tNode;
-		}
+		  {
+		      trackMes << "SKTF::followTrackAt()\t selected hit - chi2:" << chi2 << endl;
+		      hasHit = true;
+		      bestChi2 = chi2;
+		      bestNode = tNode;
+		  }
 	      hasMore = hitContainer->hasMore();
 	      if (hasMore) // prepare new node
-		{
-		  StiKalmanTrackNode * newNode = trackNodeFactory->getObject();
-		  if (newNode==0) 
-		    throw logic_error("SKTF::followTrackAt()\t- ERROR - newNode==null");
-		  newNode->reset();   
-		  newNode->setState(tNode); // get everything from tNode
-		  newNode->setDetector(tDet); // set the local pointer to tDet
-		  tNode = newNode;  // not a memory leak because the factory handles the objects.... ;-)
-		}
+		  {
+		      StiKalmanTrackNode * newNode = trackNodeFactory->getObject();
+		      if (newNode==0) 
+			  throw logic_error("SKTF::followTrackAt()\t- ERROR - newNode==null");
+		      newNode->reset();   
+		      newNode->setState(tNode); // get everything from tNode
+		      newNode->setDetector(tDet); // set the local pointer to tDet
+		      tNode = newNode;  // not a memory leak because the factory handles the objects.... ;-)
+		  }
+	      //} //if (hit->timesUsed()==0)
 	    } // searching best hit
 	}
       else // projection in inactive volume, scanning is done
-	scanningDone = true;
+	  scanningDone = true;
     }
   else if (position==kFailed) 
-    {
-      trackMes << "SKTF::doNextDetector()\t - position==kFailed" << endl;
-      scanningDone = true;
-      trackDone = true;
-      return;
-    }
+      {
+	  trackMes << "SKTF::doNextDetector()\t - position==kFailed" << endl;
+	  scanningDone = true;
+	  trackDone = true;
+	  return;
+      }
 
 
   if (!scanningDone)
@@ -748,26 +751,42 @@ void StiKalmanTrackFinder::findNextTrack()
 	  if (!track)
 	    throw runtime_error("TrackSeedFinder->next() returned 0");
 	  track->find();
+	  if (pars->useTrackFilter && trackFilter->filter(track)) {
+	      trackContainer->push_back(track);
+	      //this next bit is bad design.  casting doesn't count as polymorphism.  downcast == bad!
+	      StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
+	      if (t) {
+		  t->update();
+	      }
+	  }
+	  else {
+	      trackContainer->push_back(track);
+	      StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
+	      if (t) {
+		  t->update();
+	      }
+	  }
 	} 
-      else 
-	trackMes <<"StiKalmanTrackFinder::findNextTrack() - INFO - trackSeedFinder->hasMore()==false"<<endl;
+      else {
+	  trackMes <<"StiKalmanTrackFinder::findNextTrack() - INFO - trackSeedFinder->hasMore()==false"<<endl;
+      }
     }
   catch (runtime_error & rte) 
-    {
-      trackMes << "StiKalmanTrackFinder::findNextTrack() - Run Time Error :\n" << rte.what() << endl;
-    }
+      {
+	  trackMes << "StiKalmanTrackFinder::findNextTrack() - Run Time Error :\n" << rte.what() << endl;
+      }
   catch (logic_error & le) 
-    {
-      cout << "StiKalmanTrackFinder::findNextTrack() - Logic Error :\n" << le.what() << endl;
+      {
+	  cout << "StiKalmanTrackFinder::findNextTrack() - Logic Error :\n" << le.what() << endl;
     }
   catch (exception & e) 
-    {
-      cout << "StiKalmanTrackFinder::findNextTrack() - Internal Error :\n" << e.what() << endl;
-    }	
+      {
+	  cout << "StiKalmanTrackFinder::findNextTrack() - Internal Error :\n" << e.what() << endl;
+      }	
   catch (...) 
-    {
-      cout << "StiKalmanTrackFinder::findNextTrack() - Caught unknwon exception."<<endl;
-    }
+      {
+	  cout << "StiKalmanTrackFinder::findNextTrack() - Caught unknwon exception."<<endl;
+      }
 }
 
 void StiKalmanTrackFinder::fitNextTrack()
@@ -865,7 +884,7 @@ void StiKalmanTrackFinder::setEvent(StEvent * event, StMcEvent * mcEvent)
   toolkit->getHitFiller()->setEvent(event);
   toolkit->getHitFiller()->fillHits(toolkit->getHitContainer(), toolkit->getHitFactory());
   toolkit->getHitContainer()->sortHits();
-  //xxxxx//  toolkit->getHitContainer()->update();
+  toolkit->getHitContainer()->update(); //uncommented, MLM, 9/27
   trackSeedFinder->reset();
 
   if (mcEvent)
