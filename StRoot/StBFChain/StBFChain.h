@@ -5,8 +5,8 @@
 /*!
                                                                       
  \class  StBFChain                                                            
- \author Yuri Fisyak
- \date   1999/07/29
+ \author Yuri Fisyak, Jerome LAURET
+ \date   1999/07/29 , 2001-2002
                                                                       
  Class to control "BFC" chain                                         
                                                                       
@@ -81,7 +81,7 @@ class StBFChain : public StChain {
    virtual Bool_t      GetOption(const Char_t  *Opt) const {return GetOption(kOpt(Opt));}
    virtual Char_t     *GetOptionString(const Char_t  *);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.24 2002/03/19 21:13:45 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.25 2002/03/29 01:07:17 jeromel Exp $ built "__DATE__" "__TIME__ ; 
        return cvs;
    }
    /// StBFChain control class
