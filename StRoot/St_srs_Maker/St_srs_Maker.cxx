@@ -1,12 +1,15 @@
-//$Id: St_srs_Maker.cxx,v 1.28 2001/11/12 22:56:38 caines Exp $
+//$Id: St_srs_Maker.cxx,v 1.29 2002/02/15 20:21:54 caines Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_srs_Maker class for Makers                                        //
 // Author : Anon                                                       //
 //////////////////////////////////////////////////////////////////////////
 //$Log: St_srs_Maker.cxx,v $
+//Revision 1.29  2002/02/15 20:21:54  caines
+//Work with database
+//
 //Revision 1.28  2001/11/12 22:56:38  caines
-//Simulation hits now go into our SvtHit collection like real data
+// Simulation hits now go into our SvtHit collection like real data
 //
 //Revision 1.27  2001/04/26 23:56:19  caines
 //Check that Geant svt hits,tracks and vertex exist before do get table
@@ -49,6 +52,7 @@
 #include "StSvtClassLibrary/StSvtConfig.hh"
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
+#include "StSvtClassLibrary/StSvtGeometry.hh"
 #include "svt/St_svg_am_Module.h"
 #include "svt/St_srs_am_Module.h"
 #include "tables/St_g2t_vertex_Table.h"
@@ -178,7 +182,8 @@ Int_t St_srs_Maker::Make()
   if(g2t_track)GeantTrack = g2t_track->GetTable(); 
   if (g2t_svt_hit ) {
     
-    res =  srs_am (srs_result,  g2t_svt_hit, scs_spt,
+ 
+   res =  srs_am (srs_result,  g2t_svt_hit, scs_spt,
                    m_geom,      m_config,    m_shape,
                    m_srs_srspar,m_srs_direct,m_srs_activea);
     if(res!=kSTAFCV_OK) return kStWarn;
@@ -186,14 +191,20 @@ Int_t St_srs_Maker::Make()
   }
 
 
-  srs_srspar_st* mSvtSrsPar = m_srs_srspar->GetTable();
-  svg_shape_st* mSvtShape  = m_shape->GetTable();
-  svg_geom_st* mSvtGeom   = m_geom->GetTable();
-
-  mCoordTransform->setParamPointers(mSvtSrsPar, mSvtGeom, mSvtShape, mConfig);
-
-  // cope with pile up events and fill hit collection
+  St_DataSet* dataSet;
+  dataSet = GetDataSet("StSvtGeometry");
+  if(!dataSet) {
+    gMessMgr->Error("Failure to get SVT geometry - THINGS HAVE GONE SERIOUSLY WRONG!!!!! \n");
+    
+    return kStOK;
+  }
   
+  StSvtGeometry *GeomDataBase = (StSvtGeometry*)dataSet->GetObject();
+  if(GeomDataBase)   mCoordTransform->setParamPointers(GeomDataBase, mConfig);
+  
+  // cope with pile up events and fill hit collection
+   srs_srspar_st* mSvtSrsPar = m_srs_srspar->GetTable();
+
   int MaxTimeBucket = (int)(3.*mSvtSrsPar[0].fsca/mSvtSrsPar[0].vd);
   StSvtWaferCoordinate WaferCoord;
   StGlobalCoordinate GlobalCoord;

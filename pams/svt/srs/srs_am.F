@@ -119,7 +119,7 @@ c------------------------------------------------------------------------------c
            wafer  = svt_hit(ihit).volume_id
            iwafer = get_geom_row(geom_h,geom,wafer)
            if (iwafer.gt.0) then
-           iret= svtgtol(gcoord,lcoord,geom(1),iwafer-1)
+           iret= svtgtol(gcoord,lcoord,geom(iwafer).id)
               layer=geom(iwafer).layer
               id_shape=config(1).layer_shape(layer)
               drift_length=shape(id_shape).shape(1)
@@ -497,7 +497,7 @@ c------------------------------------------------------------------------------c
            wafer  = svt_hit(ihit).volume_id
            iwafer = get_geom_row(geom_h,geom,wafer)
            if (iwafer.gt.0) then
-              iret=svtgtol(gcoord,lcoord,geom(1),iwafer-1)
+              iret=svtgtol(gcoord,lcoord,geom(iwafer).id)
               layer=geom(iwafer).layer
               id_shape=config(1).layer_shape(layer)
               drift_length=shape(id_shape).shape(1)
@@ -947,7 +947,7 @@ c------------------------------------------------------------------------------c
 	sigma_diff=sqrt(2.0*d*time)
 	sigma_angle=srspar(1).thickness*tand(angle)/sqrt(12.0)
 	width1=sqrt(sigma_diff**2.0+sigma_angle**2.0)
-	width1=width1*(a+time*b) ! coulomb repulsion correction
+ 22     width1=width1*(a+time*b) ! coulomb repulsion correction
 c------------------------------------------------------------------------------c
 c------------------------------------------------------------------------------c
 
@@ -2536,7 +2536,7 @@ c     map to wafer local frame coordinate, smear and map back to global frame
             spt(ispt).x(1)   = svt_hit(ihit).x(1) ! position of space point
             spt(ispt).x(2)   = svt_hit(ihit).x(2)
             spt(ispt).x(3)   = svt_hit(ihit).x(3)
-            iret=svtgtol(spt(ispt).x,xp,geom(1),iwafer-1)
+            iret=svtgtol(spt(ispt).x,xp,geom(iwafer).id)
             if (wafer.lt.7000.or.direct_h.nok.eq.1) then
                xp(1) = xp(1)+ direct(1).sd *rg32(dummy)
                xp(2) = xp(2)+ direct(1).st *rg32(dummy)
@@ -2547,7 +2547,7 @@ c     map to wafer local frame coordinate, smear and map back to global frame
             spt(ispt).xl(1) = xp(1)
             spt(ispt).xl(2) = xp(2)
             spt(ispt).xl(3) = 0
-            iret= svtltog(xp,spt(ispt).x,geom(1),iwafer-1)
+            iret= svtltog(xp,spt(ispt).x,iwafer-1)
             
             if (wafer.lt.7000.or.direct_h.nok.eq.1) then
                dxp(1) = direct(1).sd
@@ -2560,7 +2560,7 @@ c     map to wafer local frame coordinate, smear and map back to global frame
             zero(1) = 0.
             zero(2) = 0.
             zero(3) = 0.
-            iret= svtltog(dxp,dx,geom(1),iwafer-1)
+            iret= svtltog(dxp,dx,iwafer-1)
             spt(ispt).de(1)      = svt_hit(ihit).de ! energy loss
             spt(ispt).de(2)      = 0. ! error on energy loss)
             spt(ispt).cov(1)     = abs(dx(1))
