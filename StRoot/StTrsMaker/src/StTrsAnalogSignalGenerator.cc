@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsAnalogSignalGenerator.cc,v 1.4 1999/04/23 19:19:49 lasiuk Exp $
+ * $Id: StTrsAnalogSignalGenerator.cc,v 1.5 1999/04/27 15:05:40 lasiuk Exp $
  *
  * Author: brian Nov 3, 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsAnalogSignalGenerator.cc,v $
+ * Revision 1.5  1999/04/27 15:05:40  lasiuk
+ * itime shift in ns
+ *
  * Revision 1.4  1999/04/23 19:19:49  lasiuk
  * add delay to centroid of signal:
  * Calculated in constructor (mTimeShiftOfSignalCentroid)
@@ -66,8 +69,8 @@ StTrsAnalogSignalGenerator::StTrsAnalogSignalGenerator(StTpcGeometry* geo, StTpc
     mNoiseRMS = 0.;
     //
     // Time  Shift
-    mTimeShiftOfSignalCentroid = 3.*mSCDb->driftVelocity()*mTau;
-    PR(mTimeShiftOfSignalCentroid);
+    mTimeShiftOfSignalCentroid = 3.*mTau;
+    PR(mTimeShiftOfSignalCentroid/nanosecond);
 }
 
 void StTrsAnalogSignalGenerator::fractionSampled()
