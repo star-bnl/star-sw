@@ -49,6 +49,7 @@ my %dst_date = ();
 my %Objy_size = ();          # dst in Objy   
 my %Objy_date = (); 
 my %files = (); 
+my %files_job = ();
 my %comment = (); 
 my %jobfile = (); 
 my %archive = (); 
@@ -171,7 +172,7 @@ foreach $line (@lines){
        $file =~ s/b0_2y2a_off_|b0_2y2a_on_|b0_2y2y_on_|b0_3y1a_off_|b0_3y1a_on_//g;
        $file =~ s/b0_3y2a_on_|b0_3y2x_on_|b0_3y_1b_off_|//g;
        $job_status{$file} = $job_status;
-       $files{$file} = $file;
+       $files_job{$file} = $file;
     }
    }
 }
@@ -200,7 +201,7 @@ foreach $line (@lines){
      }
    }
 }
-#foreach  $file (sort keys %files){printf ("%s %s %s \n",$file,$job_status{$file},$node{$file});}
+#foreach  $file (sort keys %files_job){printf ("%s %s %s \n",$file,$job_status{$file},$node{$file});}
 foreach $set (sort @SETS){   
 #   
   printf ("set = %s \n", $set); 
@@ -529,7 +530,7 @@ my $no_ev;
     foreach  $file (sort keys %files){   
       my $input_file = $TOPHPSS_SINK . "/" . $set . "/gstardata/" . $file . ".fzd"; 
 # No dst on HPSS, No dst on disk1 and job is not running   
-      if (! $reco_size{$file} && ! $dst_size{$file}){   
+      if ($geant_size{$file} && ! $reco_size{$file} && ! $dst_size{$file}){   
         if (! $running{$file}){   
           print   JOB_SCRIPT "lsf_sub.csh $input_file \n"; 
 #_______Tom  
