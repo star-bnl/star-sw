@@ -1,0 +1,149 @@
+<HTML>
+<PRE>
+<H2>file: dio/inc/dioClasses.hh</H2>
+
+
+/*:Copyright 1995, Lawrence Berkeley National Laboratory
+**:&gt;--------------------------------------------------------------------
+**:FILE:        dioClasses.hh
+**:DESCRIPTION: <A HREF="dio_macros.h.html#DIO">DIO</A> Classes
+**:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
+**:BUGS:        -- STILL IN DEVELOPMENT --
+**:HISTORY:     12dec95-v000a-cet- creation
+**:&lt;--------------------------------------------------------------------
+*/
+
+#ifdef __cplusplus
+#ifndef <A HREF="#DIOCLASSES_HH">DIOCLASSES_HH</A>
+<B>#define <A NAME="DIOCLASSES_HH">DIOCLASSES_HH</A></B>
+
+//:----------------------------------------------- INCLUDES           --
+#include &lt;stream.h&gt;
+#include "dstype.h"
+#include "dsxdr.h"
+#include "asuLib.h"
+#include "socLib.h"
+#include "dui_types.h"
+#include "dui_globals.h"
+#include "<A HREF="dio_types.h.html">dio_types.h</A>"
+
+//:=============================================== CLASS              ==
+class dioFileStream: public virtual socObject {
+
+public:
+//:----------------------------------------------- CTORS & DTOR       --
+   <U>dioFileStream(</U>const char * name);        //OVERLOAD CALL: dioFileStream: <A HREF="dioClasses.cc.html#dioFileStream">dioClasses.cc(?)</A>, <A HREF="dioClasses.cc.html#dioFileStream">dioClasses.cc(?)</A>
+   virtual ~<U>dioFileStream(</U>);        //OVERLOAD CALL: dioFileStream: <A HREF="dioClasses.cc.html#dioFileStream">dioClasses.cc(?)</A>, <A HREF="dioClasses.cc.html#dioFileStream">dioClasses.cc(?)</A>
+
+//:----------------------------------------------- ATTRIBUTES         --
+   virtual <A HREF="dio_types.h.html#DIO_MODE_T">DIO_MODE_T</A> <A HREF="dioClasses.cc.html#mode">mode</A> ();
+   virtual <A HREF="dio_types.h.html#DIO_STATE_T">DIO_STATE_T</A> <A HREF="dioClasses.cc.html#state">state</A> ();
+
+//:----------------------------------------------- PUB FUNCTIONS      --
+   virtual STAFCV_T <A HREF="dioClasses.cc.html#close">close</A> ();
+   virtual STAFCV_T <A HREF="dioClasses.cc.html#getEvent">getEvent</A> (const char * path);
+   virtual STAFCV_T <A HREF="dioClasses.cc.html#open">open</A> (const char * fileName, <A HREF="dio_types.h.html#DIO_MODE_T">DIO_MODE_T</A> <A HREF="dioClasses.cc.html#mode">mode</A>);
+   virtual STAFCV_T <A HREF="dioClasses.cc.html#putEvent">putEvent</A> (const char * path);
+
+protected:
+//:----------------------------------------------- PRIV VARIABLES     --
+   <A HREF="dio_types.h.html#DIO_MODE_T">DIO_MODE_T</A> myMode;
+   <A HREF="dio_types.h.html#DIO_STATE_T">DIO_STATE_T</A> myState;
+
+   FILE* myFile;
+   XDR myXDR;
+
+//:----------------------------------------------- PRIV FUNCTIONS     --
+
+};
+
+//:=============================================== CLASS              ==
+class dioFactory: public virtual socFactory {
+
+public:
+//:----------------------------------------------- CTORS & DTOR       --
+   <U>dioFactory(</U>const char * name);        //OVERLOAD CALL: dioFactory: <A HREF="dioClasses.cc.html#dioFactory">dioClasses.cc(?)</A>, <A HREF="dioClasses.cc.html#dioFactory">dioClasses.cc(?)</A>
+   virtual ~<U>dioFactory(</U>);        //OVERLOAD CALL: dioFactory: <A HREF="dioClasses.cc.html#dioFactory">dioClasses.cc(?)</A>, <A HREF="dioClasses.cc.html#dioFactory">dioClasses.cc(?)</A>
+
+//:----------------------------------------------- ATTRIBUTES         --
+//:**NONE**
+
+//:----------------------------------------------- PUB FUNCTIONS      --
+   virtual STAFCV_T <A HREF="dioClasses.cc.html#deleteFileStream">deleteFileStream</A> (const char * name);
+   virtual STAFCV_T <A HREF="dioClasses.cc.html#findFileStream">findFileStream</A> (const char * name
+                , dioFileStream*& fileStream);
+   virtual STAFCV_T <A HREF="dioClasses.cc.html#getFileStream">getFileStream</A> (IDREF_T id
+                , dioFileStream*& fileStream);
+   virtual STAFCV_T <A HREF="dioClasses.cc.html#list">list</A> ();
+   virtual STAFCV_T <A HREF="dioClasses.cc.html#newFileStream">newFileStream</A> (const char * name
+                , const char * fileName, <A HREF="dio_types.h.html#DIO_MODE_T">DIO_MODE_T</A> <A HREF="dioClasses.cc.html#mode">mode</A>);
+
+protected:
+//:----------------------------------------------- PRIV VARIABLES     --
+//:----------------------------------------------- PRIV FUNCTIONS     --
+
+};
+
+//----------------------------------------------------------------------
+<B><A NAME="CORBA_TIE">CORBA_TIE(</A>dioFileStream)</B>
+<A HREF="#CORBA_TIE">CORBA_TIE(</A>dioFactory)
+
+#endif /*<A HREF="#DIOCLASSES_HH">DIOCLASSES_HH</A>*/
+#endif /*__cplusplus*/
+
+<P>
+<P>
+<HR>
+<H2>Back to <A HREF="files.html">Source File Index</A></H2><P>
+<P><HR>
+<H5>C++ to HTML Conversion by <I><A HREF="http://www.usc.edu/dept/robotics/personal/af0a/tools/ctoohtml/ctoohtml.html">ctoohtml</A></I></H5>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</PRE>
+</HTML>
