@@ -14,6 +14,7 @@
 #include "StiHitContainer.h"
 
 using std::sort;
+using std::find;
 
 StiHitContainer* StiHitContainer::sinstance = 0;
 
@@ -53,6 +54,8 @@ void StiHitContainer::clear()
     for (it=mmap.begin(); it!=mmap.end(); it++) {
 	(*it).second.clear();
     }
+    removeAllVertices();
+    resetVertexIterator();
     return;
 }
 
@@ -184,4 +187,61 @@ void StiHitContainer::print() const
 	}
     }
     return;
+}
+
+// ------------------------ vertex implementation
+
+void StiHitContainer::addVertex(StiHit* val)
+{
+    mvertexvec.push_back(val);
+}
+
+void StiHitContainer::removeVertex(StiHit* val)
+{
+    hitvector::iterator where = find(mvertexvec.begin(), mvertexvec.end(), val);
+    if (where!=mvertexvec.end()) {
+	mvertexvec.erase(where);
+    }
+}
+
+void StiHitContainer::removeAllVertices()
+{
+    mvertexvec.clear();
+}
+
+unsigned int StiHitContainer::numberOfVertices() const
+{
+    return mvertexvec.size();
+}
+
+void StiHitContainer::resetVertexIterator()
+{
+    mvertexiterator = mvertexvec.begin();
+}
+
+StiHit* StiHitContainer::vertex(unsigned int i) const
+{
+    return ( i>=0 && i<mvertexvec.size() ) ? mvertexvec[i] : 0;
+}
+
+StiHit* StiHitContainer::firstVertex() const
+{
+    return (mvertexvec.size()!=0) ? mvertexvec[0] : 0;
+}
+
+StiHit* StiHitContainer::lastVertex() const
+{
+    return (mvertexvec.size()!=0) ? mvertexvec[ mvertexvec.size()-1 ] : 0;
+}
+
+StiHit* StiHitContainer::nextVertex()
+{
+    return ( (++mvertexiterator<mvertexvec.end()) && (mvertexiterator>=mvertexvec.begin() ) )
+	? (*mvertexiterator) : 0;
+}
+
+StiHit* StiHitContainer::previousVertex()
+{
+    return (--mvertexiterator>=mvertexvec.begin()) && (mvertexiterator<mvertexvec.end())
+	? (*mvertexiterator) : 0;
 }
