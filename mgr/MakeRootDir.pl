@@ -9,6 +9,11 @@
 # change and it would be difficult to provide
 # a transparent support.
 #
+# If an argument is specified, only one version
+# of the tree will be created. Usually, this is
+# the case on non-linux system only (usefull for
+# cross Linux platform)
+#
 
 chomp($PWD = `pwd`);
 $SYS  = $ENV{STAR_HOST_SYS};
@@ -116,7 +121,7 @@ for ( my $iter=0; $iter < 2; $iter++ ) {
    }
 
    # Change name between 0 and 1 ($iter)
-   if( $^O ne "linux"){ last;}
+   if( $^O ne "linux" || defined($ARGV[0]) ){ last;}
    $root = "root"; 
    $lib  = "LIB";
    $bin  = "BIN";
