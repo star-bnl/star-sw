@@ -9,6 +9,7 @@
  * 02-Jul-99 MJL add navigation code to get to RICHP bank
  * 08-Jul-99 MJL completely change definition - RICH_Reader is independent 
  *               class which is handed a pointer at the constructor invocation
+ * 22-Nov-99 MJL fixed bug in array size  unsigned short RichMatrix[][]
  ***************************************************************************
  *  Opens Event From File, Fills Struct 
  *
@@ -81,7 +82,7 @@ struct RichDATA{
   char * BankType; // Will be filled with a 9 char array (8 letters + NULL)
   unsigned int ByteSwapped ; // Should be 0x04030302
   unsigned int EventNumber;
-  unsigned short RichMatrix[ MAX_CHANNEL_NUM / 6] [ TIC_NUM_CRAMS * 6] ; // Matrix of ADC's in Physical Positions
+  unsigned short RichMatrix[ MAX_CHANNEL_NUM / 6 + 1] [ TIC_NUM_CRAMS * 6] ; // Matrix of ADC's in Physical Positions
 } jon;                                                                        // in tic, each row is 96 channels
                                                                               // and it takes 6 rows to fit each cramBank
 
