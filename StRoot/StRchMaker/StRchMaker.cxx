@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 2.4 2000/11/01 16:50:32 lasiuk Exp $
+ * $Id: StRchMaker.cxx,v 2.5 2000/11/30 23:27:03 lasiuk Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -220,10 +220,10 @@ Int_t StRchMaker::Make() {
     //
     // Pause for Event Display Inspection
     //
-//        cout << "Next Event? <ret>: " << endl;
-//        do {
-//          if(getchar()) break;
-//        } while (true);
+//         cout << "Next Event? <ret>: " << endl;
+//         do {
+//           if(getchar()) break;
+//         } while (true);
 
     //
     // Try get StEvent Structure
@@ -785,7 +785,7 @@ void StRchMaker::fillStEvent()
 							    StThreeVectorF(mTheHits[ii]->localError().x(),
 									   mTheHits[ii]->localError().y(),
 									   mTheHits[ii]->localError().z()),
-							    1,
+							    kRichId,
 							    mTheHits[ii]->charge(),
 							    mTheHits[ii]->maxAmplitude(),
 							    static_cast<unsigned char>(0));
@@ -843,7 +843,7 @@ void StRchMaker::fillStEvent()
 void StRchMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRchMaker.cxx,v 2.4 2000/11/01 16:50:32 lasiuk Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 2.5 2000/11/30 23:27:03 lasiuk Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
@@ -888,8 +888,8 @@ void StRchMaker::clearPadMonitor(){
 /****************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
- * Revision 2.4  2000/11/01 16:50:32  lasiuk
- * set the number of pads used in constructing a hit
+ * Revision 2.5  2000/11/30 23:27:03  lasiuk
+ * change the hardware position of the hit to kRichId
  *
  * Revision 2.4  2000/11/01 16:50:32  lasiuk
  * set the number of pads used in constructing a hit
