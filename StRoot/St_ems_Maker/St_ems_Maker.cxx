@@ -1,5 +1,8 @@
-// $Id: St_ems_Maker.cxx,v 1.14 1999/07/19 13:23:03 fisyak Exp $
+// $Id: St_ems_Maker.cxx,v 1.15 1999/11/13 02:32:57 fisyak Exp $
 // $Log: St_ems_Maker.cxx,v $
+// Revision 1.15  1999/11/13 02:32:57  fisyak
+// Take calb_calg directly from geant w/o Cint macros
+//
 // Revision 1.14  1999/07/19 13:23:03  fisyak
 // New Maker scheme
 //
@@ -85,10 +88,9 @@ Int_t St_ems_Maker::Init(){
   m_org_slp_bemc_h  = (St_emc_calib_header *) local("cal/org_slp_bemc_h");
   m_org_slp_bemc    = (St_emc_adcslope *)     local("cal/org_slp_bemc");
 
-  St_DataSet *geo = GetInputDB("params/geant");
+  St_DataSet *geo = GetDataSet("geom");
   assert(geo);
-  St_DataSetIter  geom(geo);
-  m_calb_calg   = (St_calb_calg   *) geom("calb_calg"); 
+  m_calb_calg   = (St_calb_calg   *) geo->Find("calb_calg"); 
   assert(m_calb_calg);
 
   if(mHistControl){
