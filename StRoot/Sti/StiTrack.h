@@ -24,7 +24,7 @@ public:
     int     getCharge()         const;   // charge of the particle
     double  getChi2()           const;   // chi2 of fit
 
-    virtual void    getMomentum(double p[3], double e[6]) const =0;
+    virtual double  getMomentum(double p[3], double e[6]) const =0;
     virtual double  getPt()             const                   =0;   // transverse momentum
     virtual double  getRapidity()       const                   =0;   // rapidity
     virtual double  getPseudoRapidity() const                   =0;   // pseudo rapidity
