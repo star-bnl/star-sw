@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtParticleCut.h,v 1.4 2000/02/13 17:13:15 laue Exp $
+ * $Id: StHbtParticleCut.h,v 1.5 2000/03/16 01:54:37 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -15,6 +15,10 @@
  ***************************************************************************
  *
  * $Log: StHbtParticleCut.h,v $
+ * Revision 1.5  2000/03/16 01:54:37  laue
+ * Copy constructor added to all the cut base classes and to the
+ * corrfctn base class
+ *
  * Revision 1.4  2000/02/13 17:13:15  laue
  * EventBegin() and EventEnd() functions implemented
  *
@@ -65,6 +69,7 @@ class StHbtParticleCut : public StHbtCutMonitorHandler {
 public:
 
   StHbtParticleCut(){/* no-op */};   // default constructor. - Users should write their own
+  StHbtParticleCut(const StHbtParticleCut&); // copy constructor
   virtual ~StHbtParticleCut(){/* no-op */};  // destructor
 
   virtual StHbtString Report() =0;    // user-written method to return string describing cuts
@@ -76,8 +81,6 @@ public:
   virtual void EventEnd(const StHbtEvent*) { /* no-op */ }
 
   virtual StHbtParticleType Type()=0;
-
-
 
   // the following allows "back-pointing" from the CorrFctn to the "parent" Analysis
   friend class StHbtAnalysis;
@@ -93,5 +96,12 @@ protected:
   ClassDef(StHbtParticleCut, 0)
 #endif
 };
+
+inline StHbtParticleCut::StHbtParticleCut(const StHbtParticleCut& c) : StHbtCutMonitorHandler() { 
+  mMass = c.mMass; myAnalysis = 0; 
+#ifdef STHBTDEBUG
+  cout << " StHbtParticleCut::StHbtParticleCut(const StHbtParticleCut& c) - mMass: " << mMass << endl;
+#endif
+}
 
 #endif

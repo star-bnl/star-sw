@@ -28,6 +28,7 @@ class StHbtV0Cut : public StHbtParticleCut {
 public:
 
   StHbtV0Cut(){/* no-op */};                       // default constructor. - Users should write their own
+  StHbtV0Cut(const StHbtV0Cut&);                         // copy constructor
   virtual ~StHbtV0Cut(){/* no-op */};              // destructor
 
   virtual bool Pass(const StHbtV0* )=0;               // true if passes, false if not
@@ -38,5 +39,7 @@ public:
   ClassDef(StHbtV0Cut, 0)
 #endif
 };
+
+inline StHbtV0Cut::StHbtV0Cut(const StHbtV0Cut& c) : StHbtParticleCut(c) { /* no-op */ } 
 
 #endif

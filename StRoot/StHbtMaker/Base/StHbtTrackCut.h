@@ -28,6 +28,7 @@ class StHbtTrackCut : public StHbtParticleCut {
 public:
 
   StHbtTrackCut(){/* no-op */};                       // default constructor. - Users should write their own
+  StHbtTrackCut(const StHbtTrackCut&);                // copy constructor
   virtual ~StHbtTrackCut(){/* no-op */};              // destructor
 
   virtual bool Pass(const StHbtTrack* track)=0;       // true if passes, false if not
@@ -38,4 +39,9 @@ public:
 #endif
 };
 
+inline StHbtTrackCut::StHbtTrackCut(const StHbtTrackCut& c) : StHbtParticleCut(c) {
+#ifdef STHBTDEBUG
+  cout << " StHbtTrackCut::StHbtTrackCut(const StHbtTrackCut& c) : StHbtParticleCut(c) " << endl;
+#endif
+}
 #endif

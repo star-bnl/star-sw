@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtCorrFctn.hh,v 1.4 2000/02/13 17:13:09 laue Exp $
+ * $Id: StHbtCorrFctn.hh,v 1.5 2000/03/16 01:54:36 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,10 @@
  ***************************************************************************
  *
  * $Log: StHbtCorrFctn.hh,v $
+ * Revision 1.5  2000/03/16 01:54:36  laue
+ * Copy constructor added to all the cut base classes and to the
+ * corrfctn base class
+ *
  * Revision 1.4  2000/02/13 17:13:09  laue
  * EventBegin() and EventEnd() functions implemented
  *
@@ -38,6 +42,7 @@ class StHbtCorrFctn{
 
 public:
   StHbtCorrFctn(){/* no-op */};
+  StHbtCorrFctn(const StHbtCorrFctn& );
   virtual ~StHbtCorrFctn(){/* no-op */};
 
   virtual StHbtString Report() = 0;
@@ -59,5 +64,7 @@ protected:
 private:
 
 };
+
+inline StHbtCorrFctn::StHbtCorrFctn(const StHbtCorrFctn& c) { myAnalysis =0; }
 
 #endif

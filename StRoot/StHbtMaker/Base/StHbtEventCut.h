@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEventCut.h,v 1.3 2000/01/07 23:21:16 laue Exp $
+ * $Id: StHbtEventCut.h,v 1.4 2000/03/16 01:54:36 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,10 @@
  ***************************************************************************
  *
  * $Log: StHbtEventCut.h,v $
+ * Revision 1.4  2000/03/16 01:54:36  laue
+ * Copy constructor added to all the cut base classes and to the
+ * corrfctn base class
+ *
  * Revision 1.3  2000/01/07 23:21:16  laue
  * 0.) all 'ClassDef(...)' put inside #ifdef __ROOT__  #endif
  * 1.) unnecessary includes of 'StMaker.h' deleted
@@ -55,8 +59,9 @@ class StHbtEventCut : public StHbtCutMonitorHandler {
 
 public:
 
-  StHbtEventCut(){/* no-op */};   // default constructor. - Users should write their own
-  virtual ~StHbtEventCut(){/* no-op */};  // destructor
+  StHbtEventCut(){/* no-op */};                // default constructor. - Users should write their own
+  StHbtEventCut(const StHbtEventCut& c); // copy constructor
+  virtual ~StHbtEventCut(){/* no-op */};       // destructor
 
   virtual bool Pass(const StHbtEvent* event) =0;  // true if passes, false if not
 
@@ -74,5 +79,7 @@ protected:
   StHbtAnalysis* myAnalysis;
 
 };
+
+inline StHbtEventCut::StHbtEventCut(const StHbtEventCut& c) : StHbtCutMonitorHandler() { myAnalysis=0;}
 
 #endif
