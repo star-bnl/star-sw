@@ -85,6 +85,8 @@ enum ETestCommandIdentifiers {
     M_Message_Node,
     M_Message_SeedFinder,
     M_Message_Detector,
+
+    M_DisplayOptions,
     
     M_TrackingSwitch_NextDetector,
     M_TrackingSwitch_ScanLayer,
@@ -382,28 +384,34 @@ public:
     virtual Bool_t ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2);
 };
 
+#ifndef __CINT__
+typedef vector<TGHorizontalFrame*> HorizontalFrameVec;
+typedef pair<string, TGNumberEntry*> NamedNumberEntry;
+typedef vector<NamedNumberEntry> NumberEntryVec;
+//typedef vector<TGNumberEntry*> NumberEntryVec;
+typedef vector<TGLabel*> LabelVec;
+#else
+class HorizontalFrameVec;
+class NamedNumberEntry;
+class NumberEntryVec;
+class LabelVec;
+#endif
 
-class EntryTestDlg : public TGTransientFrame {
-    
+class EntryTestDlg : public TGTransientFrame
+{    
 private:
     TGVerticalFrame      *fF1;
     TGVerticalFrame      *fF2;
-    TGHorizontalFrame    *fF[13];
+    HorizontalFrameVec fF;
     TGLayoutHints        *fL1;
     TGLayoutHints        *fL2;
     TGLayoutHints        *fL3;
-    TGLabel              *fLabel[13];
-    TGNumberEntry        *fNumericEntries[13];
-    TGCheckButton        *fLowerLimit;
-    TGCheckButton        *fUpperLimit;
-    TGNumberEntry        *fLimits[2];
-    TGCheckButton        *fPositive;
-    TGCheckButton        *fNonNegative;
+    LabelVec fLabel;
+    NumberEntryVec fNumericEntries;
     TGButton             *fSetButton;
     TGButton             *fExitButton;
     
-    static const char *const numlabel[13];
-    static const Double_t numinit[13];
+    void makeNumberEntries();
     
 public:
     EntryTestDlg(const TGWindow *p, const TGWindow *main);

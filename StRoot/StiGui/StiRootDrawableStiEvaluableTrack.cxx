@@ -40,7 +40,7 @@ StiRootDrawableStiEvaluableTrack::StiRootDrawableStiEvaluableTrack()
     mLine = new StiRootDrawableLine();
     
     mHits = new StiRootDrawableHits();
-    //these are temp, need to be changed
+
     mHits->setColor( broker->markedHitColor() );
     mHits->setMarkerSize( broker->markedHitSize() );
     mHits->setMarkerStyle( broker->markedHitStyle() );
@@ -71,6 +71,12 @@ void StiRootDrawableStiEvaluableTrack::reset()
 void StiRootDrawableStiEvaluableTrack::update()
 {
     //cout <<"void StiRootDrawableStiEvaluableTrack::update()"<<endl;
+    StiGuiIOBroker* broker = StiGuiIOBroker::instance();
+
+    mHits->setColor( broker->markedHitColor() );
+    mHits->setMarkerSize( broker->markedHitSize() );
+    mHits->setMarkerStyle( broker->markedHitStyle() );    
+
     fillHitsForDrawing();
 }
 
