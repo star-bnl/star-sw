@@ -1,0 +1,13 @@
+/*    rdo_vs_fee.idl
+*
+*  Table: rdo_vs_fee
+*
+*       description:
+*/ 
+
+
+struct rdo_vs_fee { 
+
+   short  rdo[32];   /*  rdo per pin */
+
+ };  
