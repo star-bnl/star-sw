@@ -1,5 +1,8 @@
-// $Id: StMultiH1F.cxx,v 1.4 2000/08/28 18:47:50 genevb Exp $
+// $Id: StMultiH1F.cxx,v 1.5 2000/08/28 19:21:05 genevb Exp $
 // $Log: StMultiH1F.cxx,v $
+// Revision 1.5  2000/08/28 19:21:05  genevb
+// Improved projection code
+//
 // Revision 1.4  2000/08/28 18:47:50  genevb
 // Better handling of 1 y-bin case
 //
@@ -35,7 +38,7 @@ void StMultiH1F::Draw(Option_t *option) {
 
   Int_t ybins = GetNbinsY();
   if (ybins == 1) {
-    TH1F* temp0 = (TH1F*) ProjectionX(GetName());
+    TH1F* temp0 = XProjection(GetName());
     temp0->SetStats((!TestBit(kNoStats)));
     temp0->Draw();
     return;
@@ -62,9 +65,8 @@ void StMultiH1F::Draw(Option_t *option) {
     if ((ybin >= 10) || (names[ybin].IsNull())) n0 = GetName();
     else n0 = names[ybin];
     Int_t slice = ybin+1;
-    temp[ybin] = (TH1F*)ProjectionX(n0.Data(),slice,slice);
+    temp[ybin] = XProjection(n0.Data(),slice);
     temp[ybin]->SetLineStyle(slice);
-    temp[ybin]->SetLineWidth(5);
     temp[ybin]->SetStats(kFALSE);
     Double_t binmax = temp[ybin]->GetMaximum();
     if (binmax > maxval) {
@@ -83,7 +85,7 @@ void StMultiH1F::Draw(Option_t *option) {
 
   // Draw statistics for full set if stats are turned on
   if (!TestBit(kNoStats)) {
-    temp[0] = (TH1F*) ProjectionX(GetName());
+    temp[0] = XProjection(GetName());
     temp[0]->SetEntries(GetEntries());
     temp[0]->SetStats(kTRUE);
     temp[0]->Draw("boxsames");
@@ -92,4 +94,14 @@ void StMultiH1F::Draw(Option_t *option) {
   }
 
   legend->Draw();
+}
+
+TH1F* StMultiH1F::XProjection(const char* name, Int_t ybin) {
+  TH1F* temp=0;
+  if (ybin<0) temp = (TH1F*) ProjectionX(name);
+  else temp = (TH1F*) ProjectionX(name,ybin,ybin);
+  TAttLine::Copy(*temp);
+  TAttFill::Copy(*temp);
+  TAttMarker::Copy(*temp);
+  return temp;
 }
