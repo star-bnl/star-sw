@@ -30,26 +30,18 @@ C_______________________________________________________________________
       REAL    xnew,ynew,xold,yold,cf,theta
       REAL    vlocal(3),vglobal(3)
       real    atand
-      integer tgc_global_to_local_p,isect,iret
+      integer tpc_global_to_local_p,isect,iret
 C______________________________________________________________________
  
       if(cf.lt.0) then
          cf=1.0
       else
          isect = idet/100
-*         alpha = real(2*isect-1)*C_PI/12.0
-*         xv = xnew-xold
-*         yv = ynew-yold
-*         cf = (-sin(alpha)*xv+cos(alpha)*yv)/sqrt(xv**2+yv**2)
-*         if(abs(cf).gt.0.99) cf = sign(.99,cf)
-*         theta = acos(cf)
-*         theta = abs(cpi2-theta)
-*         cf = 1.0 -cf**2
 
          vglobal(1) = xnew-xold
          vglobal(2) = ynew-yold
          vglobal(3) = 0.0
-         iret= tgc_global_to_local_p(isect,vglobal,vlocal)
+         iret= tpc_global_to_local_p(isect,vglobal,vlocal)
 
          cf = (vlocal(2))**2/(vlocal(2)**2+vlocal(1)**2)
          theta=atand(vlocal(1)/vlocal(2))

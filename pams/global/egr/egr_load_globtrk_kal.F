@@ -29,6 +29,7 @@ C<--------------------------------------------------------------------
 #include "math_constants.inc"
 #include "phys_constants.inc"
 #include "StDetectorId.inc"
+#include "StTrackMethod.inc"
 C______________________________________________________________________
  
       RECORD /table_head_st/     globtrk_h
@@ -253,7 +254,7 @@ C---  <<<<<<<
       endif
       globtrk(iglob).impact = 0.
 CSM      globtrk(iglob).id_start_vertex = 0
-      globtrk(iglob).method = 0
+      globtrk(iglob).method = 2**kKalmanFitId
       globtrk(iglob).map(1) = 0
       globtrk(iglob).map(2) = 0
       globtrk(iglob).curvature = abs(C_D_CURVATURE*bfield*
