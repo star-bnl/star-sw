@@ -40,7 +40,7 @@ void RunStiGeometryGenerator()
     StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
   
     //StiGeometryGenerator (MLM)
-    StiGeometryGenerator* anaMk = new StiGeometryGenerator;
+    StiGeometryGenerator* anaMk = new StiGeometryGenerator();
     
     // now execute the chain member functions    
     chain->PrintInfo();
