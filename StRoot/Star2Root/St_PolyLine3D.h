@@ -2,7 +2,7 @@
 #define ROOT_Stt_PolyLine3D
 
 // ***********************************************************************
-// $Id: St_PolyLine3D.h,v 1.2 2003/08/02 02:51:59 perev Exp $ 
+// $Id: St_PolyLine3D.h,v 1.1 2000/02/25 00:48:08 fine Exp $ 
 // ***********************************************************************
 // * Defines 3D polyline base class to construct STAR "event" geometry
 // * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
@@ -47,7 +47,7 @@ public:
         virtual ~St_PolyLine3D();
 
         static  void      Axis(TVirtualPad *p=0, Float_t width=0.5, Float_t axisFactor=0.25);
-        virtual void      Copy(TObject &polyline) const;
+        virtual void      Copy(TObject &polyline);
         virtual Int_t     DistancetoPrimitive(Int_t px, Int_t py);
         virtual void      DrawPolyLine(Int_t n, Float_t *p, Option_t *option="");
         virtual void      SavePrimitive(ofstream &out, Option_t *option);
@@ -77,16 +77,11 @@ public:
         virtual Int_t     SetPoint(Int_t point, Float_t x, Float_t y, Float_t z){return fPoints ? fPoints->SetPoint(point,x,y,z): 0;}
         virtual Int_t     SetPoints(Int_t n, Float_t *p=0, Option_t *option="") {return fPoints ? fPoints->SetPoints(n,p,option): 0;}
 
-                void      SetPoints(Float_t* buffer){TShape::SetPoints(buffer);}
-         
 
         ClassDef(St_PolyLine3D,1)  //Defines 3D polyline base class to construct STAR "event" geometry
 };
 //__________________________________________________________________________
 // $Log: St_PolyLine3D.h,v $
-// Revision 1.2  2003/08/02 02:51:59  perev
-// warnOff
-//
 // Revision 1.1  2000/02/25 00:48:08  fine
 // temporary interface for ROOT 2.23/12 with STAR classes inside
 //

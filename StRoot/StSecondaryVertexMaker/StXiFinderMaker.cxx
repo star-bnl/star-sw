@@ -15,21 +15,9 @@
 #include "phys_constants.h"
 
 
-
-
-
-
 StSPtrVecXiVertex* vecXi=0;
 
 ClassImp(StXiFinderMaker)
-
-
-
-
-
-
-
-
 
 
 //_____________________________________________________________________________
@@ -294,8 +282,6 @@ Bool_t StXiFinderMaker::UseV0() {
   double rv;
   StThreeVectorF xPvx;
   xPvx=mainv;
-  double tesla=0.1; ///To replace...
-  double kiloGauss=1.e14; ///To replace...
   
   charge=0;
 
@@ -521,7 +507,8 @@ Bool_t StXiFinderMaker::UseV0() {
               xOrig.setX(xOut[i]);
               if (xOut[i] == 0.) xOrig.setX(0.01);
               xOrig.setY(yOut[i]);
-              xOrig.setZ(bachGeom->origin().z()-(bachGeom->charge()*Bfield*kiloGauss/fabs(bachGeom->charge()*Bfield*kiloGauss))*dz);
+	      // Here I want the field in tesla
+              xOrig.setZ(bachGeom->origin().z()-(bachGeom->charge()*(Bfield/tesla)/fabs(bachGeom->charge()*(Bfield/tesla)))*dz);
               bachGeom2->setOrigin(xOrig);
               bachGeom2->setPsi(bachGeom->psi()+TMath::ASin(arg));
               //End of update_track_param
@@ -596,7 +583,8 @@ Bool_t StXiFinderMaker::UseV0() {
                   xOrig.setX(xOut[i]);
                   if (xOut[i] == 0.) xOrig.setX(0.01);
                   xOrig.setY(yOut[i]);
-                  xOrig.setZ(bachGeom->origin().z()-(bachGeom->charge()*Bfield*kiloGauss/fabs(bachGeom->charge()*Bfield*kiloGauss))*dz);
+		  // Here I want the field in tesla
+                  xOrig.setZ(bachGeom->origin().z()-(bachGeom->charge()*(Bfield/tesla)/fabs(bachGeom->charge()*(Bfield/tesla)))*dz);
                   bachGeom2->setOrigin(xOrig);
                   bachGeom2->setPsi(bachGeom->psi()+TMath::ASin(arg));
                   //End of update_track_param                  
@@ -659,7 +647,8 @@ Bool_t StXiFinderMaker::UseV0() {
                              {//helixDCA(charge,xpp,pXi,bxi);
                               //helixDCA is defined in exi_c_utils.cc (pams/global/exi/).
                               pt_tmp = sqrt(pXi.x()*pXi.x()+pXi.y()*pXi.y());
-                              bcharge_tmp = charge*Bfield*kiloGauss/tesla;
+			      //Here I want the field on kGauss
+                              bcharge_tmp = charge*(Bfield/kilogauss);
                               curvature_tmp = TMath::Abs(bcharge_tmp)*C_D_CURVATURE/pt_tmp;
                               dip_tmp = atan(pXi.z()/pt_tmp);
                               h_tmp = ((bcharge_tmp > 0) ? -1 : 1);
@@ -747,8 +736,11 @@ Bool_t StXiFinderMaker::UseV0() {
   return usedV0;
 }
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.cxx,v 1.10 2003/07/15 17:39:16 faivre Exp $
+// $Id: StXiFinderMaker.cxx,v 1.11 2003/08/22 17:47:14 caines Exp $
 // $Log: StXiFinderMaker.cxx,v $
+// Revision 1.11  2003/08/22 17:47:14  caines
+// Get sign AND magnitude of mag field correctly for Xi and V0 finder
+//
 // Revision 1.10  2003/07/15 17:39:16  faivre
 // Doesn't take Bfield from gufld anymore (takes Bfield calculated in V0Finder).
 //

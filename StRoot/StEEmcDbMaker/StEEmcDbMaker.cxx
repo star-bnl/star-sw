@@ -1,10 +1,7 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.12 2003/08/02 01:02:17 perev Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.11 2003/07/18 18:31:46 perev Exp $
 // $Log: StEEmcDbMaker.cxx,v $
-// Revision 1.12  2003/08/02 01:02:17  perev
-// change %d to %p int printf
-//
 // Revision 1.11  2003/07/18 18:31:46  perev
 // test for nonexistance of XXXReader added
 //
@@ -237,7 +234,7 @@ Int_t  StEEmcDbMaker::InitRun  (int runumber){
 
 void  StEEmcDbMaker::mReloadDb  (){
   int i;
-  printf("%s::reloadDb using TimeStamp from 'StarDb'=%p or 'db'=%p \n",GetName(),GetMaker("StarDb"),GetMaker("db"));
+  printf("%s::reloadDb using TimeStamp from 'StarDb'=%d or 'db'=%p \n",GetName(),GetMaker("StarDb"),GetMaker("db"));
   
   // clear old DB tables  ...................
   nFound=0;

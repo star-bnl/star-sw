@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofCell.h,v 2.2 2003/08/05 17:12:32 ullrich Exp $
+ * $Id: StTofCell.h,v 2.1 2003/05/21 18:24:20 ullrich Exp $
  *
  * Author: F. Geurts, May 2003
  ***************************************************************************
@@ -14,9 +14,6 @@
  ***************************************************************************
  *
  * $Log: StTofCell.h,v $
- * Revision 2.2  2003/08/05 17:12:32  ullrich
- * Added position() methods and member.
- *
  * Revision 2.1  2003/05/21 18:24:20  ullrich
  * Initial Revision.
  *
@@ -25,28 +22,26 @@
 #define StTofCell_hh
 
 #include "StObject.h"
-#include "StThreeVectorD.hh"
 
 class StTrack;
 
 class StTofCell : public StObject {
 public:
     StTofCell();
-    StTofCell(int, int, int, int, int, StTrack*, int, StThreeVectorD&);
+    StTofCell(int, int, int, int, int, StTrack*);
     ~StTofCell();
     
     int operator==(const StTofCell&) const;
     int operator!=(const StTofCell&) const;
     
-    int                   trayIndex() const;
-    int                   moduleIndex() const;
-    int                   cellIndex() const;
-    int                   adc() const;
-    int                   tdc() const;
-    StTrack*              associatedTrack();
-    const StTrack*        associatedTrack() const;
-    int                   matchFlag() const;
-    const StThreeVectorD& position() const;
+    int trayIndex() const;
+    int moduleIndex() const;
+    int cellIndex() const;
+    int adc() const;
+    int tdc() const;
+
+    StTrack* associatedTrack();
+    const StTrack* associatedTrack() const;
     
     void      setTrayIndex(int);
     void      setModuleIndex(int);
@@ -54,8 +49,6 @@ public:
     void      setAdc(int);
     void      setTdc(int);
     void      setAssociatedTrack(StTrack*);
-    void      setMatchFlag(int);
-    void      setPosition(const StThreeVectorD&);
 
 protected:
     Int_t    mTrayIndex;
@@ -64,10 +57,8 @@ protected:
     Int_t    mAdc;
     Int_t    mTdc;
     StTrack* mAssociatedTrack;   //$LINK
-    Int_t    mMatchFlag;
-    StThreeVectorD mPosition;
 
-    ClassDef(StTofCell,2)
+    ClassDef(StTofCell,1)
 };
 
 
@@ -101,12 +92,6 @@ StTofCell::setTdc(int rawTdc)
     mTdc = rawTdc;
 }
 
-inline void
-StTofCell::setMatchFlag(int flag)
-{
-  mMatchFlag = flag;
-}
-
 inline int
 StTofCell::trayIndex() const
 {
@@ -135,12 +120,6 @@ inline int
 StTofCell::tdc()  const
 {
     return mTdc;
-}
-
-inline int
-StTofCell::matchFlag() const
-{
-  return mMatchFlag;
 }
 
 #endif

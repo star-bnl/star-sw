@@ -96,12 +96,7 @@ Int_t StDetectorDbMaker::Make(){
     StDetectorDbBeamInfo* beam = StDetectorDbBeamInfo::instance();
     StDetectorDbTriggerID* trigger = StDetectorDbTriggerID::instance();
     StDetectorDbIntegratedTriggerID* inTrigger = StDetectorDbIntegratedTriggerID::instance();
-    if (masks||magnet||clock||beam||trigger||inTrigger){/*warnOff*/}
-    
-    
-    
-    
-    
+
     // Jamie Asked for SpaceCharge to be couted every event
     cout << "Space Charge Correction = " << spaceCharge->getSpaceChargeCoulombs()
 	 << " Coulombs" << endl;

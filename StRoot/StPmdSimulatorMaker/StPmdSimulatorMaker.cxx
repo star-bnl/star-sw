@@ -1,6 +1,6 @@
 /***************************************************************
  *
- * $Id: StPmdSimulatorMaker.cxx,v 1.5 2003/08/04 19:04:54 perev Exp $
+ * $Id: StPmdSimulatorMaker.cxx,v 1.4 2003/05/12 11:37:35 subhasis Exp $
  * Author: Subhasis Chattopadhyay
  *         Premomoy Ghosh
  ***************************************************************
@@ -9,9 +9,6 @@
  *
  ****************************************************************
  * $Log: StPmdSimulatorMaker.cxx,v $
- * Revision 1.5  2003/08/04 19:04:54  perev
- * warnOff
- *
  * Revision 1.4  2003/05/12 11:37:35  subhasis
  * Stevent added
  *
@@ -378,7 +375,7 @@ Int_t StPmdSimulatorMaker::fillStEvent(StPmdDetector* pmd_det, StPmdDetector* cp
 	  Int_t col=spmcl2->Column();
 	  Int_t row=spmcl2->Row();
 	  Float_t edep=spmcl2->Edep();         
-//VP	  Int_t adc=spmcl2->Adc();
+	  Int_t adc=spmcl2->Adc();
 	  //! Filling PmdHit  for CPV in StEvent 
          StPhmdHit *phit = new StPhmdHit();
           phit->setSuperModule(Int_t(gsuper-1));     // filling supermodule no (0-11)

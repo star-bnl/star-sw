@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: PIDFitter.cxx,v 1.8 2003/08/04 18:46:26 perev Exp $
+// $Id: PIDFitter.cxx,v 1.7 2003/07/25 15:04:17 aihong Exp $
 //
 // Authors: Aihong Tang
 //
@@ -137,7 +137,7 @@ void PIDFitter::GetSigmaOfSingleTrail(Char_t* fileName4SigmaOfSingleTrail,Char_t
     cout<<"sigNSamplePion1Graph fit parameter: "<<f1->GetParameter(0);
     double theSigmaOfSingleTrail= f1->GetParameter(0);    
     double theErrorOfSigmaOfSingleTrail = f1->GetParError(0);
-    if(theErrorOfSigmaOfSingleTrail) {/*warnOff*/}
+
     if (mWriteSigmaNSampleGraph) {
         fitResoFile->cd();
         sigmaNSampleGraph->SetMarkerColor(2);
@@ -1204,9 +1204,6 @@ Double_t sigmaNSampleFitFcn(Double_t* x, Double_t *par){
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: PIDFitter.cxx,v $
-// Revision 1.8  2003/08/04 18:46:26  perev
-// warnOff
-//
 // Revision 1.7  2003/07/25 15:04:17  aihong
 // change fit range etc.
 //

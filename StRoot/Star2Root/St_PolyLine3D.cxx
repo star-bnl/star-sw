@@ -1,6 +1,6 @@
 //*CMZ :          29/04/99  16.26.07  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine     17/08/95
-// $Id: St_PolyLine3D.cxx,v 1.2 2003/08/02 02:51:59 perev Exp $ 
+// $Id: St_PolyLine3D.cxx,v 1.1 2000/02/25 00:48:07 fine Exp $ 
 // ***********************************************************************
 // * Defines 3D polyline base class to construct STAR "event" geometry
 // * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
@@ -125,7 +125,7 @@ St_PolyLine3D::St_PolyLine3D(const St_PolyLine3D &polyline)
    ((St_PolyLine3D&)polyline).Copy(*this);
 } 
 //______________________________________________________________________________
-void St_PolyLine3D::Copy(TObject &obj) const
+void St_PolyLine3D::Copy(TObject &obj)
 {
 //*-*-*-*-*-*-*-*-*-*-*-*-*Copy this polyline to polyline*-*-*-*-*-*-*-*-*-*-*-*
 //*-*                      ==============================
@@ -181,7 +181,7 @@ Int_t St_PolyLine3D::DistancetoPrimitive(Int_t px, Int_t py)
                                   gPad->XtoAbsPixel(y1),
                                   gPad->XtoAbsPixel(x2),
                                   gPad->XtoAbsPixel(y2),
-                                  (int)GetSizeAttribute()
+                                  GetSizeAttribute()
                                  );
       if (dsegment < dist) dist = dsegment;
    }
@@ -431,9 +431,6 @@ void St_PolyLine3D::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
 }   
 //__________________________________________________________________________
 // $Log: St_PolyLine3D.cxx,v $
-// Revision 1.2  2003/08/02 02:51:59  perev
-// warnOff
-//
 // Revision 1.1  2000/02/25 00:48:07  fine
 // temporary interface for ROOT 2.23/12 with STAR classes inside
 //

@@ -1,6 +1,6 @@
 /***************************************************************
  *
- * $Id: StPmdDiscriminatorMaker.cxx,v 1.3 2003/08/04 18:53:44 perev Exp $
+ * $Id: StPmdDiscriminatorMaker.cxx,v 1.2 2003/05/29 13:12:51 subhasis Exp $
  * Author: Subhasis Chattopadhyay
  ***************************************************************
  *
@@ -9,9 +9,6 @@
  *
  ****************************************************************
  * $Log: StPmdDiscriminatorMaker.cxx,v $
- * Revision 1.3  2003/08/04 18:53:44  perev
- * warnOff
- *
  * Revision 1.2  2003/05/29 13:12:51  subhasis
  * several changes to include NN
  *
@@ -193,6 +190,7 @@ Int_t StPmdDiscriminatorMaker::PrepareInputforNN(StPmdDetector* pmd_det,StPmdDet
   Double_t etapmd,phipmd,edeppmd;
   Double_t etacpv,phicpv,edepcpv;
 
+  Float_t cutcluster=0;
   Bool_t mcpvdone;
   
   for(Int_t ibineta=0;ibineta<400;ibineta++){

@@ -1,6 +1,6 @@
 /****************************************************
  *
- * $Id: StPmdDiscriminatorNN.cxx,v 1.2 2003/08/04 18:53:44 perev Exp $
+ * $Id: StPmdDiscriminatorNN.cxx,v 1.1 2003/05/29 13:21:05 subhasis Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -12,9 +12,6 @@
  ******************************************************
  *
  * $Log: StPmdDiscriminatorNN.cxx,v $
- * Revision 1.2  2003/08/04 18:53:44  perev
- * warnOff
- *
  * Revision 1.1  2003/05/29 13:21:05  subhasis
  * NN discriminator
  *
@@ -177,7 +174,7 @@ void StPmdDiscriminatorNN::Input(StPmdNeuNet* sneu)
       if(cl1->mcPid()==8)target=0.;
       sneu->fillArrayOut(target,i,0);
       
-//VP      Int_t sm=cl1->module();
+      Int_t sm=cl1->module();
       Float_t energy=cl1->energy();
       InputRange(energy,aveEnergy,outEnergy);
       sneu->FillArray(i,0,outEnergy);

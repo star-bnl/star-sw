@@ -1,9 +1,6 @@
 //*-- Author :    Valery Fine   21/05/99  (E-mail: fine@bnl.gov)
-// $Id: StHelix3DPoints.h,v 1.3 2003/08/02 02:51:28 perev Exp $
+// $Id: StHelix3DPoints.h,v 1.2 1999/11/16 14:41:03 fine Exp $
 // $Log: StHelix3DPoints.h,v $
-// Revision 1.3  2003/08/02 02:51:28  perev
-// warnOff
-//
 // Revision 1.2  1999/11/16 14:41:03  fine
 // TObject::Distancetoprimitive implementation, GetXYZ has been removed
 //
@@ -49,8 +46,6 @@ public:
         virtual Float_t   GetY(Int_t idx)  const { return GetAnyPoint(idx,1);}
         virtual Float_t   GetZ(Int_t idx)  const { return GetAnyPoint(idx,2);}
         virtual const Float_t  *GetXYZ(Int_t) {return 0;}
-        virtual Float_t*  GetXYZ(Float_t* xyz, Int_t idx, Int_t num = 1) const
-                          {return TPoints3DABC::GetXYZ(xyz,idx,num);}
         virtual Float_t   GetStep() const { return m_Step; }
         virtual Option_t *GetOption()      const ;
         virtual void      PaintPoints(Int_t n, Float_t *p,Option_t *option="");
