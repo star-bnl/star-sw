@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.cc,v 1.9 2004/10/13 22:26:46 oldi Exp $
+ * $Id: StFtpcTrackToStEvent.cc,v 1.10 2005/02/05 01:03:00 perev Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -321,7 +321,7 @@ void StFtpcTrackToStEvent::FillGeometry(StTrack* gTrack, StFtpcTrack* track, boo
   StTrackGeometry* geometry = new StHelixModel(short(track->GetCharge()),
 					       psi,
 					       track->curvature(),
-					       TMath::ATan(track->GetPz()/track->GetPt()), // dip angle
+					       TMath::ATan2(track->GetPz(),(track->GetPt()+1.e-5)), // dip angle
 					       origin, 
 					       P, 
 					       track->h());
@@ -431,7 +431,7 @@ void StFtpcTrackToStEvent::FillTrack(StTrack* gTrack, StFtpcTrack* track) {
       flag = -flag+20;
     }
     
-    if (TMath::Abs(1./track->GetPt()) > 999999.) {
+    if (TMath::Abs(track->GetPt()) < 1.e-3) {
       flag = -799;
     }
     
