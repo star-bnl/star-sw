@@ -1,8 +1,11 @@
 //*-- Author : Valeri Fine (Faine); E-mail: fine@bnl.gov, fine@mail.cern.ch
 //*CMZ : 23/03/98
 // Copyright (C) FineSoft, Valery Fine at Brookhaven National Laboratory (fine@bnl.gov)
-// $Id: St_Module.h,v 1.9 2000/03/26 01:59:23 fine Exp $
+// $Id: St_Module.h,v 1.10 2001/07/16 23:58:35 fine Exp $
 // $Log: St_Module.h,v $
+// Revision 1.10  2001/07/16 23:58:35  fine
+// suppressing the compilation warning
+//
 // Revision 1.9  2000/03/26 01:59:23  fine
 // new version of St_Module. Works for STAF module only
 //
@@ -132,7 +135,7 @@ public:
   void *GetStruct(Int_t i) const {return ((TTable *)fParams->At(i))->GetArray();}
 
   virtual Int_t  operator()() { return ExecuteModule(); }
-  virtual Int_t  ExecuteModule(TTable *f1,    TTable *f2=0,  TTable *f3=0,  TTable *f4=0
+          Int_t  InvokeModule(TTable *f1,    TTable *f2=0,  TTable *f3=0,  TTable *f4=0
                               ,TTable *f5=0,  TTable *f6=0,  TTable *f7=0,  TTable *f8=0
                               ,TTable *f9=0,  TTable *f10=0, TTable *f11=0, TTable *f12=0
                               ,TTable *f13=0, TTable *f14=0, TTable *f15=0, TTable *f16=0
@@ -143,24 +146,6 @@ public:
                               ,TTable *f33=0, TTable *f34=0, TTable *f35=0, TTable *f36=0
                               ,TTable *f37=0, TTable *f38=0
                               );
-
-  virtual Int_t  operator()   (TTable *f1,   TTable *f2=0, TTable *f3=0, TTable *f4=0
-                              ,TTable *f5=0, TTable *f6=0, TTable *f7=0, TTable *f8=0
-                              ,TTable *f9=0, TTable *f10=0, TTable *f11=0, TTable *f12=0
-                              ,TTable *f13=0, TTable *f14=0, TTable *f15=0, TTable *f16=0
-                              ,TTable *f17=0, TTable *f18=0, TTable *f19=0, TTable *f20=0
-                              ,TTable *f21=0, TTable *f22=0, TTable *f23=0, TTable *f24=0
-                              ,TTable *f25=0, TTable *f26=0, TTable *f27=0, TTable *f28=0
-                              ,TTable *f29=0, TTable *f30=0, TTable *f31=0, TTable *f32=0
-                              ,TTable *f33=0, TTable *f34=0, TTable *f35=0, TTable *f36=0
-                              ,TTable *f37=0, TTable *f38=0
-                              )
-                           { return ExecuteModule(f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13,f14
-                                                 ,f15,f16,f17,f18,f19,f20,f21,f22,f23,f24
-                                                 ,f25,f26,f27,f28,f29,f30,f31,f32,f33,f34
-                                                 ,f35,f36,f37,f38
-                                                 );
-                           }
 
          virtual const Char_t *GetTitle(){ return "title";}
          virtual const Char_t *GetName() { return "virtual St_Module";}

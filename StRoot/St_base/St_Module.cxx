@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Module.cxx,v 1.16 2000/09/15 15:12:37 perev Exp $
+// $Id: St_Module.cxx,v 1.17 2001/07/16 23:58:35 fine Exp $
 
 #include <assert.h>
 #include <string.h>
@@ -298,7 +298,7 @@ void St_Module::SetEntryName()
 }
 #endif
 //______________________________________________________________________________
-Int_t  St_Module::ExecuteModule(TTable *f1,TTable *f2,TTable *f3,TTable *f4,
+Int_t  St_Module::InvokeModule(TTable *f1,TTable *f2,TTable *f3,TTable *f4,
                               TTable *f5,TTable *f6,TTable *f7,TTable *f8,
                               TTable *f9,TTable *f10,TTable *f11,TTable *f12,
                               TTable *f13,TTable *f14,TTable *f15,TTable *f16,
@@ -323,6 +323,9 @@ void St_Module::Streamer(TBuffer &)
 
 //________________________________________________________________________
 // $Log: St_Module.cxx,v $
+// Revision 1.17  2001/07/16 23:58:35  fine
+// suppressing the compilation warning
+//
 // Revision 1.16  2000/09/15 15:12:37  perev
 // NaN check added
 //
