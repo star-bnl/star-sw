@@ -9,9 +9,12 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 //
-//  $Id: Stl3RawReaderMaker.cxx,v 1.6 2001/08/29 20:24:49 struck Exp $
+//  $Id: Stl3RawReaderMaker.cxx,v 1.7 2001/08/29 20:30:40 struck Exp $
 //
 //  $Log: Stl3RawReaderMaker.cxx,v $
+//  Revision 1.7  2001/08/29 20:30:40  struck
+//  and don't forget to delete your array ;-)
+//
 //  Revision 1.6  2001/08/29 20:24:49  struck
 //  makes Solaris compiler happy
 //
@@ -433,6 +436,8 @@ Int_t Stl3RawReaderMaker::fillStEvent()
 	myEventSummary->addAlgorithm(myL3AlgorithmInfo);
   }
 
+  // delete counter array
+  delete [] totalAlgCounter;
 
   // call filling routines
   // global tracks
