@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.42 2004/01/16 23:48:12 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.43 2004/01/20 02:52:18 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.43  2004/01/20 02:52:18  jhthomas
+ * Add code for extra resistor outside TPC to help remedy short.  !!This code currently commented out!!
+ *
  * Revision 1.42  2004/01/16 23:48:12  jhthomas
  * Fix integer math as suggested by Gene Van Buren
  *
@@ -331,7 +334,7 @@ void StMagUtilities::CommonStart ( Int_t mode )
       XTWIST      =   -0.165 ;      // X Displacement of West end of TPC wrt magnet (mRad)
       YTWIST      =    0.219 ;      // Y Displacement of West end of TPC wrt magnet (mRad)
       IFCShift    =   0.0080 ;      // Shift of the IFC towards the West Endcap (cm) (2/1/2002)
-      EASTCLOCKERROR =   0.0 ;      // Phi rotation of East end of TPC in milli-radians
+      EASTCLOCKERROR =   0.0 ;      // Phi rotation of East end of TPC in milli-radians 
       WESTCLOCKERROR = -0.43 ;      // Phi rotation of West end of TPC in milli-radians
       cout << "StMagUtilities::CommonSta  WARNING -- Using hard-wired TPC parameters. " << endl ; 
     }
@@ -339,20 +342,20 @@ void StMagUtilities::CommonStart ( Int_t mode )
   
   if ( fTpcVolts == 0 ) 
     {
-      CathodeV    = -31000.0 ;      // Cathode Voltage (volts)
-      GG          =   -127.5 ;      // Gating Grid voltage (volts)
+      CathodeV    = -27950.0 ;      // Cathode Voltage (volts)
+      GG          =   -115.0 ;      // Gating Grid voltage (volts)
       cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected TpcVoltages setting. " << endl ; 
     }
   else  cout << "StMagUtilities::CommonSta  Using TPC voltages from the DB."   << endl ; 
 
-  if ( fSpaceCharge != 0 )          
+  if ( fSpaceCharge == 0 )          
     {
       SpaceCharge =      0.0 ;      // Space Charge parameter (uniform in the TPC, Coulombs/Epsilon-nought)
       cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected SpaceCharge settings. " << endl ; 
     }
   else  cout << "StMagUtilities::CommonSta  Using SpaceCharge values from the DB." << endl ; 
 
-  if ( fSpaceChargeR2 != 0 )
+  if ( fSpaceChargeR2 == 0 )
     {
       SpaceChargeR2 =    0.0 ;      // Space Charge parameter (space charge from event ~1/R**2, Coulombs/Epsilon-nought)
       cout << "StMagUtilities::CommonSta  WARNING -- Using manually selected SpaceChargeR2 settings. " << endl ; 
@@ -1317,7 +1320,7 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
   
   const Int_t     ROWS        =  150 ;        // Rmax - Rmin (cm) [high accuracy not required]
   const Int_t     COLUMNS     =  182 ;        // Number of rings  [high accuracy not required]
-  const Int_t     ITERATIONS  =  2500 ;
+  const Int_t     ITERATIONS  =  3000 ;
   const Double_t  GRIDSIZER   =  (OFCRadius-IFCRadius) / (ROWS-1) ;
   const Double_t  GRIDSIZEZ   =  TPC_Z0 / (COLUMNS-1) ;
   const Double_t  Ratio       =  GRIDSIZER*GRIDSIZER / (GRIDSIZEZ*GRIDSIZEZ) ;
@@ -1346,17 +1349,17 @@ void StMagUtilities::UndoShortedRingDistortion( const Float_t x[], Float_t Xprim
   	      Double_t zed = j*GRIDSIZEZ ;
 	      Zedlist[j] = zed ;
               if ( (float)j/(float)(COLUMNS-1) < RingRatio )
-                ArrayV(i,j) = SHRINK * StarMagE*Pitch * GridRatio*(double)j/(double)(COLUMNS-1) ;          // One shorted Ring
+                ArrayV(i,j) = SHRINK * StarMagE*Pitch*GridRatio * (double)j/(double)(COLUMNS-1) ;          // One shorted Ring
 	      //ArrayV(i,j) = 0.0 ;   // Add one external resistor
 	      else
-                ArrayV(i,j) = SHRINK * StarMagE*Pitch * ( GridRatio*(double)j/(double)(COLUMNS-1) - 1 ) ;  // One shorted Ring
+                ArrayV(i,j) = SHRINK * StarMagE*Pitch*GridRatio * ( (double)j/(double)(COLUMNS-1) - 1 ) ;  // One shorted Ring
 	      //ArrayV(i,j) = SHRINK * StarMagE*Pitch * -1 ; // Add one  external resistor
 	      if ( j == 0 || j == (COLUMNS-1) ) ArrayV(i,j) = 0.0 ;  // Force zero error potential on endcap and CM
 	      if ( i == (ROWS-1) )              ArrayV(i,j) = 0.0 ;  // Force zero error potential on OFC
             }
 	}      
       
-      //Solve Poisson's equation in cylindrical coordinates by relaxation technique
+      //Solve Laplace's equation in cylindrical coordinates by relaxation technique
       //Allow for different size grid spacing in R and Z directions
 
       for ( Int_t k = 1 ; k <= ITERATIONS; k++ )
