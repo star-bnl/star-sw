@@ -1,0 +1,10 @@
+/* sci_clus.idl                                 */
+/* SVT raw data - geographic info associated with  */
+/*                table sci_raw                    */
+
+struct sci_clus{
+  long   anode;    /* anode index                                                */
+  long   time;     /* time bin of first adc value in line cluster; range [0-127] */
+  long   n;        /* number of ADC values in line cluster                       */
+  long   adc_ndx;  /* index to the sci_raw table                                 */
+};

@@ -1,0 +1,33 @@
+/* sgr_am.idl
+*      Module: sgr_am
+*      description: PURPOSE OF FUNCTION: Make SVT groups that are 
+*                      topologically consistent with tracks.                   *                      Requires svt control to get Vertex position.
+*                      Requires SVT hits.
+*                      Create Groups table.
+**/
+#include "PAM.idl"
+#include "sgr_groups.idl"
+#include "sgr_pixmap.idl"
+#include "stk_vtx.idl"
+#include "svg_geom.idl"
+#include "scs_spt.idl"
+#include "stk_track.idl"
+
+     
+interface sgr_am : amiModule {
+		STAFCV_T call (
+		       in    stk_vtx        v,
+                       in    svg_geom       svt_geom,
+		       in    scs_spt        svt_hits,
+                       out   sgr_groups     groups,
+                       out   sgr_pixmap pix_info,
+                       out   sgr_groups candidate_groups,
+		       inout stk_track stk_track
+                     );
+
+};
+
+/* Last mod. for sgr_am: $Date: 1997/12/31 14:33:33 $ */
+
+
+

@@ -1,0 +1,17 @@
+/*************************************************************************
+                     sal_find_vertex.idl
+*************************************************************************/
+#include "PAM.idl"
+#include "svg_config.idl"
+#include "sal_spt.idl"
+#include "sal_vrtx.idl"
+#include "sal_geom.idl"
+
+interface sal_make_align: amiModule 
+{
+ STAFCV_T call(in  svg_config config,
+               in  sal_spt sal_spt, 
+               in  sal_vrtx sal_vrtx
+               out sal_vrtx sal_vrtx_find, 
+               out sal_geom sal_geom);
+};

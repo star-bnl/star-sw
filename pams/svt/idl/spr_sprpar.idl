@@ -1,0 +1,5 @@
+struct spr_sprpar{
+  short     method;     /* flag to define the output of spr    */
+  float     p;          /* momentum cut off for dE/dx in GeV/c */
+};
+

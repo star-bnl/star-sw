@@ -1,0 +1,12 @@
+/* ssf_10to8_init.idl
+ * 
+ * Initialization of Conversion/Compression Routine 
+ * for 10 bits ADC to 8 bit ADC values
+ * 
+ */
+#include "PAM.idl"
+#include "ssf_map.idl"
+
+interface ssf_10to8_init : amiModule  {
+   STAFCV_T call(out ssf_map map);
+};

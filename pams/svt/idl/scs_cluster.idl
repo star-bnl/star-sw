@@ -1,0 +1,22 @@
+/*   scs_cluster.idl
+ *
+ *   SDD Charge Cluster
+ */
+  struct scs_cluster {
+       long   id;        /* cluster index                           */
+       long   anode;     /* anode index                             */
+       float  x[3];      /* hit position in local wafer coordinates */
+       float  dx[3];     /* error estimates on position             */
+       float  de[2];     /* energy deposition                       */
+       float  mom0;      /* 0th moment of the charge distribution   */
+       float  mom1[2];   /* 1st moments of the charge in x and y    */
+       float  mom2[2];   /* 2nd moments of the charge in x and y    */
+       long   n_seq;     /* number of sequences in the cluster  */
+       long   key_first; /* key to first sequence               */
+       long   key_mchit; /* key to mc hit                       */
+       long   N_anode;      /* number of anodes                            */
+       long   merge_flag;   /* 1=cluster is a merged cluster               */
+   };
+
+/*  Last modified  $Date: 1997/12/31 14:33:39 $*/
+

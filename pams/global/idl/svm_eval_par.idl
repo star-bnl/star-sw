@@ -1,0 +1,25 @@
+/*   svm_eval_par.idl
+*   Table: svm_eval_par
+*/
+   struct svm_eval_par { 
+       long      nstrk_bad;  /* # svt trks that do not -> mc track */
+       long      nstrk_badm; /* # bad svt trks that were matched */
+       long      nstrk_good; /* # svt trks, good mc and do match to tpc */
+       long      nstrk_good_cor;/* # svt trks, good mc, svm matched correct */
+       long      nstrk_good_inc;/* # svt trks, good mc, svm matched incorr. */
+       long      nstrk_good_un;/* # svt trks, good mc, svm unmatched */
+       long      nstrk_sgl;  /* # svt trks, good mc, do not match to tpc */
+       long      nstrk_sglm; /* # svt trks, good mc,don't match,svm mat. */
+       long      nttrk_bad;  /* # tpc trks that do not -> mc track */
+       long      nttrk_badm; /* # tpc trks, bad mc, svm matched to svt */
+       long      nttrk_good; /* # tpc trks, good mc, match to svt */
+       long      nttrk_good_cor;/* # tpc trks, good mc, svm matched correct */
+       long      nttrk_good_inc;/* # tpc trks, good mc, svm matched incorr. */
+       long      nttrk_good_un;/* # tpc trks, good mc, svm unmatched */
+       long      nttrk_sgl;  /* # tpc trks, good mc, don't match to svt */
+       long      nttrk_sglm; /* # tpc trks, good mc,don't mat,svm match */
+       float     qmin;       /* min frac of tpc trk->mc trk to accept */
+   } ;
+
+/*  Last mod. for svm_eval_par:   $Date: 1997/12/31 14:33:28 $     */
+

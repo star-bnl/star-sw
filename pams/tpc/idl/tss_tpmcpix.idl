@@ -1,0 +1,11 @@
+/*   tss_tpmcpix
+ * Table holding the MC track ids for the tpc.  Used in conjunction
+ * with the tppad and tppixel table
+ */
+   struct tss_tpmcpix {
+       long       mcid;       /* MC ID pixels. Same offset as tppixel. */
+   };
+
+/*  Last mod. for tpmcpix: $Date: 1997/12/31 14:34:11 $ */
+
+

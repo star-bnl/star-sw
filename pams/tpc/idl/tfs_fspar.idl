@@ -1,0 +1,41 @@
+/*   tfs_fspar.idl
+*
+*   Table: tfs_fspar
+*   
+*        description: TFS parameter table                     
+*/
+
+   struct tfs_fspar {
+       long      irmax;        /* number of inner sector rows */
+       long      nrow;         /* total number of TPC rows */
+       long      nsect;        /* total number of TPC sectors */
+       long      sys_test;     /* sys_test=1 for system tests o/w = 0 */
+       float     alpha_hi;     /* max angle for scaling (deg) */
+       float     alpha_lo;     /* min angle for scaling (deg) */
+       float     dbase[2];     /* radius of first row */
+       float     drivel;       /* drift velocity (cm/microsecond) */
+       float     drmin;        /* merging criterion radial (pads) */
+       float     dzmin;        /* merging criterion drift (time bins) */
+       float     merge_r;      /* max merged size radial (pads) */
+       float     merge_z;      /* max merged size drift (bins) */
+       float     padlen[2];    /* pad length (cm) */
+       float     padsep[2];    /* pad pitch (cm) */
+       float     padwid[2];    /* pad width (cm) */
+       float     reslim;       /* maximum cluster size (cm) */
+       float     sigma0[4];    /* resolution intrinsic term */
+       float     sigmat[4];    /* resolution tan-alpha term (OBSOLETE)*/
+       float     ang_wireF[4]; /* resolution angular wire term */
+       float     ang_padF[4];  /* resolution angular pad term */
+       float     sigmal;       /* resolution longitud.  diffusion (OBSOLETE)*/
+       float     sldiff;       /* longitudinal diffusion */
+       float     sprf_0[2];    /* prf intrinsic term */
+       float     sprf_dr0[4];  /* zero B-field prf drift term */
+       float     sprf_ta[2];   /* prf tan-alpha term */
+       float     tpclen;       /* total drift length (cm) */
+       float     tshape;       /* shaping time (ns) */
+       float     zbmax;        /* total time bins */
+       float     bmag;         /* B-field magnitude*/
+       float     n0_pcm;       /* # electrons liberated per cm (OBSOLETE)*/
+   };
+/*  Last mod. for fspar:  $Date: 1997/12/31 14:34:12 $ */
+

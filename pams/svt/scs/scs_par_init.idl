@@ -1,0 +1,10 @@
+/* scs_par_init.idl */
+
+#include "PAM.idl"
+#include "scs_par.idl"
+
+interface scs_par_init : amiModule {
+	STAFCV_T call (
+		inout scs_par  par);
+};
+

@@ -1,0 +1,23 @@
+/* stk_am_init.idl
+*  Module: stk_am_init
+*  	description: initialize svt tracking 
+*/
+
+#include "PAM.idl"
+#include "stk_stkpar.idl"
+#include "stk_track.idl"
+#include "stk_kine.idl"
+#include "sgr_groups.idl"
+
+interface stk_am_init : amiModule {
+	STAFCV_T call
+		( inout stk_stkpar      stkpar
+                , inout sgr_groups      groups
+		, inout stk_track       track
+		, inout stk_kine        kine
+	        , inout sgr_groups      mcgroups
+		, inout stk_track     	mctrack
+		, inout stk_kine      	mckine
+		);
+	};
+/* Last mod. for  stk_am_init: $Date: 1997/12/31 14:33:38 $ */
