@@ -38,33 +38,32 @@ St_DataSet::St_DataSet(const Char_t *name, St_DataSet *parent) : TNamed(), fList
    SetTitle("St_DataSet");
 }
 //______________________________________________________________________________
-St_DataSet::St_DataSet(const St_DataSet &src,EDataSetPass iopt)
+St_DataSet::St_DataSet(const St_DataSet &pattern,EDataSetPass iopt)
 {
   //
-  // Creates St_DataSet with topology similar with St_DataSet *src)  
+  // Creates St_DataSet (clone) with a topology similar with St_DataSet *pattern
   //
   //  Parameters:
   //  -----------
-  //  src      - the name of the "native file system" directory
-  //             to convert into St_FileSet
-  //  iopt = kStruct - clone only my strutural links
+  //  pattern        - the pattern dataset
+  //  iopt = kStruct - clone only my structural links
   //         kAll    - clone all links
   //         kRefs   - clone only refs
   //         kMarked - clone marked (not implemented yet) only
   //
-  //   All new-created sets become the structural anyway.
+  //   All new-created sets become the structural ones anyway.
   //
 
-  SetName(src.GetName());
-  SetTitle(src.GetTitle());
+  SetName(pattern.GetName());
+  SetTitle(pattern.GetTitle());
 
   St_DataSet *set = 0;
-  St_DataSetIter next((St_DataSet *)&src);
+  St_DataSetIter next((St_DataSet *)&pattern);
   Bool_t optsel = (iopt == kStruct);
   Bool_t optall = (iopt == kAll);
   while (set = next()) {
     // define the parent of the next set
-     St_DataSet *parent = set->GetParent();
+     St_DataSet *parent = set->GetParent(); 
      if ( optall || (optsel && parent == this) )
                                   Add((St_DataSet *)(set->Clone()));
   }
@@ -74,12 +73,12 @@ St_DataSet::St_DataSet(const St_DataSet &src,EDataSetPass iopt)
 St_DataSet::St_DataSet(TNode &src)
 {
   //
-  // Creates St_DataSet with topology similar with TNode *src
+  // Creates St_DataSet with a topology similar with TNode *src
   //
-  //   All new-created sets become the structural anyway.
+  //   All new-created sets become a structural ones anyway.
   //
-  // Note:  We need this ctor temporary unless Tnode is derived from
-  //        St_Dataset
+  // Note:  We need this ctor temporary unless TNode is derived from
+  // ====   St_DataSet
   //
 
   SetName(src.GetName());
