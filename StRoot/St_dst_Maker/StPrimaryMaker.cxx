@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.59 2001/05/31 16:11:01 fisyak Exp $
+// $Id: StPrimaryMaker.cxx,v 1.60 2001/06/12 23:15:58 balewski Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.60  2001/06/12 23:15:58  balewski
+// reject pileup in ppLMV
+//
 // Revision 1.59  2001/05/31 16:11:01  fisyak
 // Make m_Mode in StPreVertexMaker bitwise
 //
@@ -202,6 +205,7 @@
 #include "global/St_egr_fitter_Module.h"
 #include "global/St_egr_primfit_Module.h"
 #include "St_db_Maker/St_db_Maker.h"
+#include "TH2.h"
 
 #define gufld   gufld_
 extern "C" {void gufld(Float_t *, Float_t *);}
@@ -335,6 +339,28 @@ Int_t StPrimaryMaker::Init(){
      hppLMV2[6] = new TH1F("dely","Yvert Geant-Rec",100,-5.,5.);
    }//pp LMV end
 
+   // few histos for monitoring of ppLMV2
+   {
+     hPiFi[0] = new TH1F("FiN","counts(1,...6)",11,-0.5,10.5);
+     hPiFi[1] = (TH1F *) new TH2F("Fi-g","Gen Tr @ CTB  phi/deg vs. eta",15,-1.5,1.5,18,0.,360.);
+     hPiFi[2] = (TH1F *) new TH2F("Fi-m","Match Tr @ CTB  phi/deg vs. eta",15,-1.5,1.5,18,0.,360.);
+     hPiFi[3] = new TH1F("Fi4","Match #Delta #eta",50,-1.,1.);
+     hPiFi[4] = new TH1F("Fi5","Match #Delta #phi/deg",50,-10.,10.);
+     hPiFi[5] = new TH1F("Fin5","No. of potential match tracks/eve",21,-0.5,20.5);
+     hPiFi[6] = new TH1F("Fin6","No. of match tracks/eve",21,-0.5,20.5);
+
+     hPiFi[7] = new TH1F("Fin7","Zdca/cm of match/eve",100,-25,25);
+     hPiFi[8] = new TH1F("Fin8","Zdca-Geant/cm of match/eve",100,-5,5);
+     hPiFi[9] = new TH1F("Fin9","Vertex Z/cm found",50,-25,25);
+     hPiFi[10] = new TH1F("Fin10","Vertex Z/cm Geant-found/cm ",100,-5,5);
+     hPiFi[11] = new TH1F("Fin11","Vertex X/cm Geant-found/cm ",100,-5,5);
+     hPiFi[12] = new TH1F("Fin12","Vertex Y/cm Geant-found/cm ",100,-5,5);
+     hPiFi[13] = NULL;
+     hPiFi[14] = new TH1F("Fin14","starggling (a.u.) of tracks",100,.0,10.);
+     hPiFi[15] = new TH1F("Fin15","Spath (cm) of tracks",100,.0,200.);
+
+   }
+
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -444,7 +470,7 @@ Int_t StPrimaryMaker::Make(){
       iRes = evr_am(m_evr_evrpar,globtrk,vertex);
     }
   } else {  // Primary vertex is not fixed, find it
-    // Switch to Low Multiplicity Primary Vertex Finder for multiplicities < 15
+    // Switch to Low Multiplicity Primary Vertex Finder for multiplicities < 15 or pp-event
     if(zCutppLMV>0) printf("%s-maker will use ppLMV with zCutppLMV=%.1f/cm\n",GetName(),zCutppLMV);
     if( NGlbTrk < 15 || zCutppLMV>0 ){
 
@@ -455,7 +481,7 @@ Int_t StPrimaryMaker::Make(){
       if(Debug()) gMessMgr->Debug() << "run_lmv: calling lmv" << endm;
 
       if(zCutppLMV>0)  
-	iRes = ppLMV(globtrk,vertex,mdate);
+	iRes = ppLMV3(globtrk,vertex,mdate);
       else
 	iRes = lmv(globtrk,vertex,mdate);
       
