@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVecPtrGlobalTrack.hh,v 1.4 1999/03/04 18:17:38 ullrich Exp $
+ * $Id: StVecPtrGlobalTrack.hh,v 1.5 1999/03/10 12:12:15 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVecPtrGlobalTrack.hh,v $
- * Revision 1.4  1999/03/04 18:17:38  ullrich
- * Namespace std not used if ST_NO_NAMESPACES defined
+ * Revision 1.5  1999/03/10 12:12:15  ullrich
+ * Added iterators
  *
  * Revision 1.5  1999/03/10 12:12:15  ullrich
  * Added iterators
@@ -35,6 +35,7 @@ using namespace std;
 class StGlobalTrack;
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
+typedef vector<StGlobalTrack*, allocator<StGlobalTrack*> > StVecPtrGlobalTrack;
 #else
 typedef vector<StGlobalTrack*> StVecPtrGlobalTrack;
 typedef vector<StGlobalTrack*>::iterator StVecPtrGlobalTrackIterator;

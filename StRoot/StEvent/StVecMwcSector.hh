@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVecMwcSector.hh,v 1.4 1999/03/04 18:17:34 ullrich Exp $
+ * $Id: StVecMwcSector.hh,v 1.5 1999/03/10 12:12:13 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVecMwcSector.hh,v $
- * Revision 1.4  1999/03/04 18:17:34  ullrich
- * Namespace std not used if ST_NO_NAMESPACES defined
+ * Revision 1.5  1999/03/10 12:12:13  ullrich
+ * Added iterators
  *
  * Revision 1.4  1999/03/04 18:17:34  ullrich
  * Namespace std not used if ST_NO_NAMESPACES defined
@@ -32,8 +32,10 @@ using namespace std;
 class StMwcSector;
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 typedef vector<StMwcSector, allocator<StMwcSector> > StVecMwcSector;
+typedef vector<StMwcSector, allocator<StMwcSector> >::iterator StVecMwcSectorIterator;
 #else
 typedef vector<StMwcSector> StVecMwcSector;
+typedef vector<StMwcSector>::iterator StVecMwcSectorIterator;
 #endif
 
 #endif

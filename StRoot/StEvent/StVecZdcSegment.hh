@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVecZdcSegment.hh,v 1.4 1999/03/04 18:17:47 ullrich Exp $
+ * $Id: StVecZdcSegment.hh,v 1.5 1999/03/10 12:12:20 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVecZdcSegment.hh,v $
- * Revision 1.4  1999/03/04 18:17:47  ullrich
- * Namespace std not used if ST_NO_NAMESPACES defined
+ * Revision 1.5  1999/03/10 12:12:20  ullrich
+ * Added iterators
  *
  * Revision 1.4  1999/03/04 18:17:47  ullrich
  * Namespace std not used if ST_NO_NAMESPACES defined
@@ -32,8 +32,10 @@ using namespace std;
 class StZdcSegment;
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
 typedef vector<StZdcSegment, allocator<StZdcSegment> > StVecZdcSegment;
+typedef vector<StZdcSegment, allocator<StZdcSegment> >::iterator StVecZdcSegmentIterator;
 #else
 typedef vector<StZdcSegment> StVecZdcSegment;
+typedef vector<StZdcSegment>::iterator StVecZdcSegmentIterator;
 #endif
 
 #endif
