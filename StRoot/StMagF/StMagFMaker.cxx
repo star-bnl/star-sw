@@ -1,5 +1,8 @@
-// $Id: StMagFMaker.cxx,v 1.10 2001/07/14 21:18:18 fisyak Exp $
+// $Id: StMagFMaker.cxx,v 1.11 2001/08/08 23:28:39 fisyak Exp $
 // $Log: StMagFMaker.cxx,v $
+// Revision 1.11  2001/08/08 23:28:39  fisyak
+// Fit Reverse Field option
+//
 // Revision 1.10  2001/07/14 21:18:18  fisyak
 // Set scale=2.e-5 for FieldOff
 //
@@ -70,19 +73,17 @@ StMagFMaker::~StMagFMaker(){}
 Int_t StMagFMaker::InitRun(Int_t RunNo){
   StBFChain *chain = (StBFChain *) GetChain();
   if (chain) {
-    if (chain->GetOption("FieldON"))      fScale = 1.0;
+    if (chain->GetOption("FieldON"))            fScale = 1;
     else {if (chain->GetOption("FieldOff"))     fScale = 2.e-5;
     else {if (chain->GetOption("HalfField"))    fScale = 0.5;     
-    else {if (chain->GetOption("ReverseField")) fScale = - fScale;
     else {
       if (!fMagFactor) {
 	TDataSet *RunLog = GetDataBase("RunLog");
 	fMagFactor = (St_MagFactor *) RunLog->Find("MagFactor"); assert(fMagFactor);
       }
-      Float_t Scale = (*fMagFactor)[0].ScaleFactor;
-      if (Scale == fScale && fMagF) return kStOK;
-      fScale = Scale;
-    }}}}
+      fScale = (*fMagFactor)[0].ScaleFactor;
+    }}}
+    if (chain->GetOption("ReverseField")) fScale = - fScale;
   }
   if (fMagF) cout << "Reset STAR magnetic field with scale factor " << fScale << endl;
   else       cout << "Initialize STAR magnetic field with scale factor " << fScale << endl;
