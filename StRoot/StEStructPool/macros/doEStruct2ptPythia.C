@@ -1,5 +1,5 @@
 /************************************************************************
- * $Id: doEStruct2pt.C,v 1.2 2003/11/21 06:26:40 porter Exp $
+ * $Id: doEStruct2ptPythia.C,v 1.1 2003/11/21 06:26:40 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -12,10 +12,10 @@
  *               This example (from PP) contains 3 selections on event mult
  *
  *************************************************************************/
-void doEStruct2pt(const char* fileListFile, const char* outputDir, const char* jobName=0, int nset=3, int maxNumEvents=0){
+void doEStruct2ptPythia(const char* fileListFile, const char* outputDir, const char* jobName=0, int nset=3, int maxNumEvents=0){
 
   // input cut files presumed to be in cwd or use full path 
-  char* evtCutFile[]={"PPCuts01.txt","PPCuts02.txt","PPCuts03.txt"};
+  char* evtCutFile[]={"PythiaCuts01.txt","PythiaCuts02.txt","PythiaCuts03.txt"};
 
   // data and cut directories sub to outputDir/jobName 
   char* datadirs[]  ={"data/01","data/02","data/03"};
@@ -28,7 +28,27 @@ void doEStruct2pt(const char* fileListFile, const char* outputDir, const char* j
   // libraries required and helper macros in $STAR/StRoot/StEStructPool/macros
   gROOT->LoadMacro("load2ptLibs.C");
   load2ptLibs();
+
   gROOT->LoadMacro("getOutFileName.C");
+  gSystem->Load("libEG");
+  gSystem->Load("libEGPythia6");
+  gSystem->Load("libPythia6");    
+  gSystem->Load("StEStructPoolEventGenerators.so");
+  gROOT->LoadMacro("getPythia.C");
+
+  char* jobid=gSystem->Getenv("JOBID");
+  int jobId=1;
+  if(!jobid){
+    jobId=2;
+  } else {
+    char* ptr=strstr(jobid,"_");
+    if(ptr){
+       ptr++;
+       jobId=atoi(ptr);
+    }  
+  }
+  TPythia6* pythia=getPythia(jobId);
+
   
   // simple (global) centrality definition ...not persistant to event file.. 
   // and not used in this particular example
@@ -37,17 +57,18 @@ void doEStruct2pt(const char* fileListFile, const char* outputDir, const char* j
   cent->setCentralities(temp,4);
 
   // create the low-level reader (here for MuDst)
-  StMuDstMaker* mk = new StMuDstMaker(0,0,"",fileListFile,".",500); 
+  //  StMuDstMaker* mk = new StMuDstMaker(0,0,"",fileListFile,".",500); 
   
   // create the generic EStructAnalysisMaker
-  StEStructAnalysisMaker *estructMaker = new StEStructAnalysisMaker("EStruct2pt");
+  StEStructAnalysisMaker *estructMaker = new StEStructAnalysisMaker("EStruct2Pythia");
 
   // Set up the EStruct data Readers and Writer codes
   char* outputFile[3];
   StEStructEventCuts* ecuts[3];
   StEStructTrackCuts* tcuts[3];
   StEStruct2ptCorrelations*  analysis[3];
-  StEStructMuDstReader* readers[3];
+  StEStructPythia* readers[3];
+
 
   // only 1 reader actually reads the event, the others just pull from mem.
   // this 'skipMake' ensures this to be the case
@@ -70,7 +91,7 @@ void doEStruct2pt(const char* fileListFile, const char* outputDir, const char* j
 
      ecuts[i]=new StEStructEventCuts(evtCutFile[i]);
      tcuts[i]=new StEStructTrackCuts(trackCutFile);
-     readers[i]=new StEStructMuDstReader(mk,ecuts[i],tcuts[i],skipMake[i]);
+     readers[i]=new StEStructPythia(maxNumEvents,pythia,ecuts[i],tcuts[i]);
      estructMaker->SetReaderAnalysisPair(readers[i],analysis[i]);
   }
  
@@ -128,8 +149,8 @@ void doEStruct2pt(const char* fileListFile, const char* outputDir, const char* j
 
 /**********************************************************************
  *
- * $Log: doEStruct2pt.C,v $
- * Revision 1.2  2003/11/21 06:26:40  porter
+ * $Log: doEStruct2ptPythia.C,v $
+ * Revision 1.1  2003/11/21 06:26:40  porter
  * macros for running pythia
  *
  * Revision 1.1  2003/10/15 18:20:57  porter
