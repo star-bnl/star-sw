@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.8 2004/08/03 17:22:16 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.9 2004/10/20 18:56:22 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.9  2004/10/20 18:56:22  ullrich
+ * Add method getRawSize().
+ *
  * Revision 2.8  2004/08/03 17:22:16  ullrich
  * Major update by Akio and Marco.
  *
@@ -147,7 +150,8 @@ public:
     
     // Experts only!
     virtual char* getTriggerStructure() = 0;
-  
+    virtual int getRawSize() const = 0;
+
 protected:
     int   mYear;
     float mZdcVertexZ;
