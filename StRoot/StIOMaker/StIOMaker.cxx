@@ -192,7 +192,7 @@ StIOInterFace *StIOMaker::Load()
   Mk->SetTreeName(fTreeName);
   Mk->SetFile(fNextFile);
   if (GetDebug()) Mk->SetDebug();
-  St_DataSet *brs = Find(".branches");
+  TDataSet *brs = Find(".branches");
   if (brs) brs->Shunt(Mk);
   int iret = Mk->Init();
   return (iret) ? 0 : Mk;
