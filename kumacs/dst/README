@@ -1,0 +1,41 @@
+* This file contains BFC information on:
+*  -  call_bfc kumacs for use with post-dst packages
+*  -  analysis kumacs to run after bfc for post-dst packages
+*
+* for further info, look at 
+*   $STAR/kumacs/chain/README
+* **********************************************************************
+*
+* -- EXAMPLES OF BFC  --
+* Use the kumacs listed below as examples - they are in $STAR/kumacs/dst
+* 
+* 1. call_bfc_read_dst.kumac 
+*    - read in dst 
+*
+* 2. call_bfc_read_dst_user.kumac
+*    - read in dst 
+*    - execute dummy user package
+*    - write out ntuple
+*    - write out full event tables 
+*
+* 3. call_bfc_read_dst_ebye.kumac
+*    - read in dst
+*    - execute ebye1 (sca) package
+*    - write out ntuple
+*    - write out full event tables 
+*
+* 4. call_bfc_read_dst_ev0join.kumac & analyse_ev0join.kumac            
+*     - read in dst 
+*     - execute ev0join package
+*     - write out ntuple
+*   then use analyse_ev0join.kumac to
+*     - read in ntuple
+*     - make plots and save to postscript file
+*
+* 5. call_bfc_read_dst_smdst.kumac
+*    - read in dst
+*    - execute smdst package
+*    - write out ntuple
+*    - write out full event tables 
+* 
+************************************************************************
