@@ -86,7 +86,8 @@ long  type_of_call fill_dst_event_summary_ (
   
   /*  ==================  Local Variables  ======================== */
   int     irange, i;
-  int     glb_trk_good, glb_trk_prim, glb_trk_plus, glb_trk_minus;
+  int     glb_trk_good, glb_trk_plus, glb_trk_minus;
+  int     prim_trk_good;
   int     itrk, nphirange;
   int     ivtx, vtx_id, iflag;
   double  pi, piov2;
@@ -162,15 +163,17 @@ long  type_of_call fill_dst_event_summary_ (
   piov2 = pi/2;
   
   /* Initialize global track counters & sum variables  */
-  glb_trk_good=glb_trk_prim=glb_trk_plus=glb_trk_minus=0;
+  glb_trk_good=glb_trk_plus=glb_trk_minus=0;
   mean_pt=mean_pt2=mean_eta=rms_eta=0;
-  
+  prim_trk_good=0;
+
   /* Fill pt, eta & phi histograms  */
   for (itrk=0; itrk < dstTrack_h->nok; itrk++) {/* begin global track loop */
     /* Calculate track multiplicities  */
     if ( dstTrack[itrk].iflag <= 0 )
       continue;
     glb_trk_good++;       /*  good global tracks            */
+    if(dstTrack[itrk].id_start_vertex > 10) prim_trk_good++;
     if ( dstTrack[itrk].icharge > 0 )
       glb_trk_plus++;     /*  charge = 1                    */
     if ( dstTrack[itrk].icharge < 0 )
@@ -225,7 +228,7 @@ long  type_of_call fill_dst_event_summary_ (
       dstEventSummary->prim_vrtx[0]    = dstVertex[ivtx].x;
       dstEventSummary->prim_vrtx[1]    = dstVertex[ivtx].y;
       dstEventSummary->prim_vrtx[2]    = dstVertex[ivtx].z;
-      dstEventSummary->glb_trk_prim    = dstVertex[ivtx].n_daughters;
+      dstEventSummary->glb_trk_prim    = prim_trk_good;
     }
     if (vtx_id != kUndefinedVertexIdentifier && 
 	vtx_id != kEventVertexIdentifier     &&
