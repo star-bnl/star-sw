@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.100 1999/08/06 15:06:28 fisyak Exp $
+# $Id: MakeDll.mk,v 1.101 1999/08/16 16:31:32 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.101  1999/08/16 16:31:32  fisyak
+# Simplify Makefiles
+#
 # Revision 1.100  1999/08/06 15:06:28  fisyak
 # Clean up for new release
 #
@@ -218,9 +221,9 @@ ifndef SO_LIB
       SO_LIB := $(LIB_DIR)/St_$(PKG).$(SOEXT)
       LIBRARY := $(wildcard $(LIB_DIR)/lib$(PKG).a $(STAR_LIB)/lib$(PKG).a)
       LIBRARY := $(filter-out %~ ~%,$(subst ~,~ ~,$(LIBRARY)))
-      ifneq (,$(findstring $(PKG),global))
-        LIBRARY += $(wildcard $(LIB_DIR)/libsvt.a $(STAR_LIB)/libsvt.a)
-      endif
+#      ifneq (,$(findstring $(PKG),global))
+#        LIBRARY += $(wildcard $(LIB_DIR)/libsvt.a $(STAR_LIB)/libsvt.a)
+#      endif
     endif
 endif
 
@@ -418,9 +421,11 @@ FILES_CINTH:= $(subst .cxx,.h,$(FILES_CINT))
 FILES_CINT += $(FILES_CINT_ORD) $(FILES_CINT_DEF) $(FILES_CINT_MOD)  
 FILES_O := $(addprefix $(OBJ_DIR)/,$(addsuffix .$(O), $(notdir $(basename $(FILES_SRC) $(FILES_ORD) $(FILES_CINT)))))
 FILES_O := $(sort $(FILES_O))
-STAR_FILES_O := $(wildcard $(STAR_OBJ_DIR)/St_*Module*.$(O) $(STAR_OBJ_DIR)/St_*Table*.$(O) $(STAR_OBJ_DIR)/*Cint.$(O))
+ifneq (tables,$(PKGNAME))
+STAR_FILES_O := $(wildcard $(STAR_OBJ_DIR)/St_*Table*.$(O))
 FILTER  := $(addprefix  $(STAR_OBJ_DIR)/,$(notdir $(FILES_O)))
 STAR_FILES_O := $(filter-out $(FILTER),$(STAR_FILES_O))
+endif
 FILES_D := $(addsuffix .d, $(addprefix $(DEP_DIR)/,$(basename $(notdir $(FILES_O)))))
 
 ifeq (,$(FILES_O))
@@ -649,3 +654,17 @@ test_mk:
 	@echo STIC      = $(STIC)
 	@echo KUIPC     = $(KUIPC)
 	@echo KUIPC_FLAGS= $(KUIPC_FLAGS)
+	@echo ROOT_DIR  = $(ROOT_DIR)
+	@echo SYS_DIR   = $(SYS_DIR)
+	@echo "DIR_GEN   = |"$(DIR_GEN)"|"
+	@echo "GEN_TMP   = |"$(GEN_TMP)"|"
+	@echo "GEN_TAB   = |"$(GEN_TAB)"|"
+	@echo "LIB_DIR   = |"$(LIB_DIR)"|"
+	@echo "OBJ_DIR   = |"$(OBJ_DIR)"|"
+	@echo "DEP_DIR   = |"$(DEP_DIR)"|"
+	@echo "SYS_DIR   = |"$(SYS_DIR)"|"
+	@echo "SRC_DIR   = |"$(SRC_DIR)"|"
+	@echo "PKG       = |"$(PKG)"|"
+	@echo "NAME      = |"$(NAME)"|"
+	@echo "branch    = |"$(branch)"|"
+	@echo "PAMS      = |"$(PAMS)"|"
