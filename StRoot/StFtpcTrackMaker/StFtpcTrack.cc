@@ -1,5 +1,8 @@
-// $Id: StFtpcTrack.cc,v 1.4 2000/06/07 11:48:56 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.5 2000/07/03 12:42:57 jcs Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.5  2000/07/03 12:42:57  jcs
+// save (pre)Vertex id and unconstrained fit results
+//
 // Revision 1.4  2000/06/07 11:48:56  oldi
 // Added function GetEta().
 // In SetProperties(Bool_t usage, Int_t tracknumber): calculation of
@@ -61,10 +64,6 @@ StFtpcTrack::StFtpcTrack()
   mP.setY(0.);
   mP.setZ(0.);
 
-  mV.setX(0.);
-  mV.setY(0.);
-  mV.setZ(0.);
-
   mQ = 0;
   mChiSq[0] = 0.;
   mChiSq[1] = 0.;
@@ -98,10 +97,6 @@ StFtpcTrack::StFtpcTrack(fpt_fptrack_st *track_st, TClonesArray *hits)
   mP.setX(track_st->p[0]);
   mP.setY(track_st->p[1]);
   mP.setZ(track_st->p[2]);
-
-  mV.setX(track_st->v[0]);
-  mV.setY(track_st->v[1]);
-  mV.setZ(track_st->v[2]);
 
   mQ = track_st->q;
   mChiSq[0] = track_st->chisq[0];
@@ -309,7 +304,7 @@ Double_t StFtpcTrack::CalcDca(StFtpcVertex *vertex)
 }
 
 
-void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca)
+void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_vertex)
 {
   // Fitting.
 
@@ -334,31 +329,43 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca)
 
   StFtpcMomentumFit *Fit = new StFtpcMomentumFit(&vertexPos, Hit, numHits);
 
-  if (mDca > max_Dca) {
+  if (id_start_vertex < 0 ) {
     mP = looseFit->momentum();
-    mFromMainVertex = (Bool_t)false;
-    mV.setX(Hit[0].x());
-    mV.setY(Hit[0].y());
-    mV.setZ(Hit[0].z());
     mChiSq[0] = looseFit->chi2Rad();
     mChiSq[1] = looseFit->chi2Lin();
     mQ = looseFit->usedCharge();
     mRadius = 1./looseFit->curvature();
+    mTheta = mP.theta();
+    if (mDca > max_Dca) {
+       mFromMainVertex = (Bool_t)false;
+    }
+    else {
+       mFromMainVertex = (Bool_t)true;
+    }
   }
-
   else {
-    mP = Fit->momentum();
-    mFromMainVertex = (Bool_t)true;
-    mV.setX(vertexPos.x());
-    mV.setY(vertexPos.y());
-    mV.setZ(vertexPos.z());
-    mChiSq[0] = Fit->chi2Rad();
-    mChiSq[1] = Fit->chi2Lin();
-    mQ = Fit->usedCharge();
-    mRadius = 1./Fit->curvature();
-  }
+     if (mDca > max_Dca) {
+       mP = looseFit->momentum();
+       mFromMainVertex = (Bool_t)false;
+       mChiSq[0] = looseFit->chi2Rad();
+       mChiSq[1] = looseFit->chi2Lin();
+       mQ = looseFit->usedCharge();
+       mRadius = 1./looseFit->curvature();
+       mTheta = mP.theta();
+     }
+
+     else {
+       mP = Fit->momentum();
+       mFromMainVertex = (Bool_t)true;
+       mChiSq[0] = Fit->chi2Rad();
+       mChiSq[1] = Fit->chi2Lin();
+       mQ = Fit->usedCharge();
+       mRadius = 1./Fit->curvature();
+       mTheta = mP.theta();
+     }
+   }
   
-  mTheta = mP.theta();
+//mTheta = mP.theta();
 
   delete looseFit;
   delete Fit;
@@ -366,18 +373,22 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca)
 }
 
 
-Int_t StFtpcTrack::Write(fpt_fptrack_st *trackTableEntry)
+Int_t StFtpcTrack::Write(fpt_fptrack_st *trackTableEntry, Int_t id_start_vertex)
 {
   // Writes track to StAF table
-
-  trackTableEntry->flag = 0;
-  
-  if(mFromMainVertex) {
-    trackTableEntry->flag = 1;
-  }
   
   trackTableEntry->nrec = mPoints->GetEntriesFast();
   trackTableEntry->nfit = trackTableEntry->nrec;
+
+  if(mFromMainVertex) {
+    trackTableEntry->flag = 1;
+    trackTableEntry->id_start_vertex = id_start_vertex;
+  }
+
+  else {
+    trackTableEntry->flag = 0;
+    trackTableEntry->id_start_vertex = 0;
+  }
   
   for(Int_t k=0; k<10; k++) {
     trackTableEntry->hitid[k] = -1;
@@ -399,9 +410,7 @@ Int_t StFtpcTrack::Write(fpt_fptrack_st *trackTableEntry)
   trackTableEntry->p[0] = mP.x();
   trackTableEntry->p[1] = mP.y();
   trackTableEntry->p[2] = mP.z();
-  trackTableEntry->v[0] = mV.x();
-  trackTableEntry->v[1] = mV.y();
-  trackTableEntry->v[2] = mV.z();
+
   trackTableEntry->theta = mTheta;
   trackTableEntry->curvature = 1/mRadius;
   trackTableEntry->impact = mDca;
