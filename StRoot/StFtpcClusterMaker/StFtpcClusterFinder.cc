@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.39 2002/11/06 13:43:59 oldi Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.40 2002/11/07 13:27:30 oldi Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.40  2002/11/07 13:27:30  oldi
+// Eliminated a very dumb mistake.
+//
 // Revision 1.39  2002/11/06 13:43:59  oldi
 // Flag for clusters not to be used for tracking introduced.
 //
@@ -1276,7 +1279,7 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 			       + sqr(mParam->timeCutoffClusterError()));
 	    }
 	  
-	  if (Peak->Rad > mDb->sensitiveVolumeOuterRadius() &&
+	  if (Peak->Rad > mDb->sensitiveVolumeOuterRadius() ||
 	      Peak->Rad < mDb->sensitiveVolumeInnerRadius()
 	      /* please add additional criteria here*/) {
 	    // don't use this point for tracking
@@ -1746,7 +1749,7 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 				   + sqr(mParam->timeCutoffClusterError()));
 		}
 
-	      if (Peak[iPeakIndex].Rad > mDb->sensitiveVolumeOuterRadius() && 
+	      if (Peak[iPeakIndex].Rad > mDb->sensitiveVolumeOuterRadius() || 
 		  Peak[iPeakIndex].Rad < mDb->sensitiveVolumeInnerRadius()
 		  /* please add additional criteria here*/) {
 		// don't use this point for tracking
