@@ -1,5 +1,8 @@
-// $Id: Example_read_xdf_makehist.C,v 1.6 2000/04/13 21:46:21 kathy Exp $
+// $Id: Example_read_xdf_makehist.C,v 1.7 2000/04/18 20:37:25 kathy Exp $
 // $Log: Example_read_xdf_makehist.C,v $
+// Revision 1.7  2000/04/18 20:37:25  kathy
+// St_DataSet,St_DataSetIter,St_Table classes are nowchanged to TDataSet,TDataSetIter,TTable
+//
 // Revision 1.6  2000/04/13 21:46:21  kathy
 // remove loading of libtpc_Tables since l3Track table is now dst_track type from global
 //
@@ -44,8 +47,8 @@ void Example_read_xdf_makehist(
  // use method OpenXDF of St_XDFFile with instance f1 to open input file
  St_XDFFile f1;
  f1.OpenXDF(InputXdfFile);
- // create a pointer to an St_DataSet called record
- St_DataSet *record;
+ // create a pointer to an TDataSet called record
+ TDataSet *record;
  // point record to an event from the XDFFile previously opened to f1
  // using method NextEventGet from St_XDFFile - get first record (run header)
  record = f1.NextEventGet();
@@ -74,8 +77,8 @@ void Example_read_xdf_makehist(
 
 
 // now passed header - want to loop over events
- // create a pointer to an St_DataSet called recorde
- St_DataSet *recorde=0;
+ // create a pointer to an TDataSet called recorde
+ TDataSet *recorde=0;
  Int_t ijk=0;
 
  while (recorde=f1.NextEventGet())
@@ -86,9 +89,9 @@ void Example_read_xdf_makehist(
   ijk++;
   cout << " ==> event # " << ijk << endl;
  //   create instance of DataSetIter - uses the event record defined previously
-  St_DataSetIter roote(recorde);
+  TDataSetIter roote(recorde);
  // now want to go down to a table so create another dataset
-  St_DataSet *sete=0;
+  TDataSet *sete=0;
  // now cd to table globtrk 
   sete = roote.Cd("/dst/vertex");
   cout << "   find vertex table pointer = " << sete << endl;
@@ -100,10 +103,10 @@ void Example_read_xdf_makehist(
   St_dst_vertex *pdt=0;
  // Set the pointer pdt = to sete which is already a pointer to vertex
  // Must "cast" sete as a type St_dst_vertex for this to work !
- // since sete is a pointer to an St_DataSet and St_dst_vertex inherits
- // from St_DataSet, you can do this - then can use St_dst_vertex functions
+ // since sete is a pointer to an TDataSet and St_dst_vertex inherits
+ // from TDataSet, you can do this - then can use St_dst_vertex functions
   pdt = (St_dst_vertex *)sete;
- // create pointer of type table_head_st and use function GetHeader in St_Table
+ // create pointer of type table_head_st and use function GetHeader in TTable
  // from which St_dst_vertex inherits 
   table_head_st *tdt_h =  pdt->GetHeader();
  // print out results 

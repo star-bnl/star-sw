@@ -1,5 +1,8 @@
-// $Id: bfcread_runcoBranch.C,v 1.8 2000/04/12 16:20:12 kathy Exp $
+// $Id: bfcread_runcoBranch.C,v 1.9 2000/04/18 20:37:26 kathy Exp $
 // $Log: bfcread_runcoBranch.C,v $
+// Revision 1.9  2000/04/18 20:37:26  kathy
+// St_DataSet,St_DataSetIter,St_Table classes are nowchanged to TDataSet,TDataSetIter,TTable
+//
 // Revision 1.8  2000/04/12 16:20:12  kathy
 // fixing library loads to only do minimum
 //
@@ -82,9 +85,9 @@ void bfcread_runcoBranch(
 // --- now execute chain member functions
   chain->Init();
 
-  St_DataSet *ds=0;
-  St_Table   *tabl=0;
-  St_DataSet *obj=0;
+  TDataSet *ds=0;
+  TTable   *tabl=0;
+  TDataSet *obj=0;
 
 // Event loop
   int istat=0,i=0;
@@ -107,7 +110,7 @@ EventLoop: if (i < nevents && !istat) {
     cout << " start event # " << i << endl;
 
       ds=chain->GetDataSet("runco");
-      St_DataSetIter tabiter(ds);
+      TDataSetIter tabiter(ds);
       if (ds) {
 //        ds->ls(2);  
         while (obj = tabiter.Next()) {
@@ -117,15 +120,15 @@ EventLoop: if (i < nevents && !istat) {
 
 //.. now loop over each subdirectory and look at objects in it
 
-  St_DataSet *objindir=0;
-  St_DataSetIter objindiriter(obj);
+  TDataSet *objindir=0;
+  TDataSetIter objindiriter(obj);
         while(objindir = objindiriter.Next()) {
          cout << "     has sub-object = " << objindir->GetName() << endl;
          countObjInDir++;
 
 	 // if it's a table, print more info:
-         if (objindir->InheritsFrom("St_Table")) {           
-            tabl = (St_Table *)objindiriter.Find(objindir->GetName());
+         if (objindir->InheritsFrom("TTable")) {           
+            tabl = (TTable *)objindiriter.Find(objindir->GetName());
             if (tabl) {
               countTable++;
               cout << "  QAInfo: found table, #rows = " << 

@@ -1,5 +1,8 @@
-// $Id: Example_read_dst_write_table_ntup.C,v 1.3 2000/04/13 21:46:21 kathy Exp $
+// $Id: Example_read_dst_write_table_ntup.C,v 1.4 2000/04/18 20:37:25 kathy Exp $
 // $Log: Example_read_dst_write_table_ntup.C,v $
+// Revision 1.4  2000/04/18 20:37:25  kathy
+// St_DataSet,St_DataSetIter,St_Table classes are nowchanged to TDataSet,TDataSetIter,TTable
+//
 // Revision 1.3  2000/04/13 21:46:21  kathy
 // remove loading of libtpc_Tables since l3Track table is now dst_track type from global
 //
@@ -77,8 +80,8 @@ void Example_read_dst_write_table_ntup(
 
     cout << " !!!!! Now read  event # " << iev << endl;
 
-    St_DataSet *ds=chain->GetDataSet("dst/globtrk");
-    St_DataSetIter dsiter(ds);
+    TDataSet *ds=chain->GetDataSet("dst/globtrk");
+    TDataSetIter dsiter(ds);
     St_dst_track *glob = (St_dst_track *) dsiter.Find("globtrk");
 
     //    cout << "    globtrk table pointer = " << glob << endl;
@@ -107,7 +110,7 @@ void Example_read_dst_write_table_ntup(
 
    
 // fill ntuple
-    myNtuple->Fill((St_Table&)*glob);
+    myNtuple->Fill((TTable&)*glob);
 }
 
  cout << " ==> finished loop, now write ntuple to output file" << endl;

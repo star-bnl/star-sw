@@ -1,5 +1,8 @@
-// $Id: bfcread.C,v 1.24 2000/04/13 21:46:22 kathy Exp $
+// $Id: bfcread.C,v 1.25 2000/04/18 20:37:25 kathy Exp $
 // $Log: bfcread.C,v $
+// Revision 1.25  2000/04/18 20:37:25  kathy
+// St_DataSet,St_DataSetIter,St_Table classes are nowchanged to TDataSet,TDataSetIter,TTable
+//
 // Revision 1.24  2000/04/13 21:46:22  kathy
 // remove loading of libtpc_Tables since l3Track table is now dst_track type from global
 //
@@ -69,9 +72,9 @@
 //======================================================================
 
 class StChain;
-class St_DataSet;
+class TDataSet;
 
-St_DataSet *Event;
+TDataSet *Event;
 StChain *chain;
 TBrowser *brow=0;
 
