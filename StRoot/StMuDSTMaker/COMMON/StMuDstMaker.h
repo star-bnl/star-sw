@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.11 2002/05/04 23:56:30 laue Exp $
+ * $Id: StMuDstMaker.h,v 1.12 2002/05/20 17:23:31 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -43,6 +43,7 @@ class StXiMc;
 class StKinkMuDst;
 class StKinkMc;
 class StStrangeAssoc;
+class StStrangeCuts;
 
 ///
 class StMuCut;
@@ -77,7 +78,7 @@ class StMuDstMaker : public StMaker {
   void setCompression(int comp=9);
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.11 2002/05/04 23:56:30 laue Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.12 2002/05/20 17:23:31 laue Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -221,6 +222,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.12  2002/05/20 17:23:31  laue
+ * StStrangeCuts added
+ *
  * Revision 1.11  2002/05/04 23:56:30  laue
  * some documentation added
  *
