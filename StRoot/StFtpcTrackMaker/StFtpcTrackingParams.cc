@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.25 2004/01/28 01:41:32 jeromel Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.26 2004/04/05 06:38:46 oldi Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.26  2004/04/05 06:38:46  oldi
+// Reported problem fixed (delete -> delete[]).
+//
 // Revision 1.25  2004/01/28 01:41:32  jeromel
 // *** empty log message ***
 //
@@ -647,7 +650,7 @@ StFtpcTrackingParams::~StFtpcTrackingParams() {
     delete mFtpcRotationYInverse[i];
   }
 
-  delete mPadRowPosZ;
+  delete[] mPadRowPosZ;
   delete mMagField;
   
   mInstance = 0;
