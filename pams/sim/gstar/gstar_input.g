@@ -1,6 +1,9 @@
-* $Id: gstar_input.g,v 1.33 2000/02/25 16:23:19 nevski Exp $
+* $Id: gstar_input.g,v 1.34 2000/06/10 18:56:23 nevski Exp $
 *
 * $Log: gstar_input.g,v $
+* Revision 1.34  2000/06/10 18:56:23  nevski
+* rqmd cwntuple read added
+*
 * Revision 1.33  2000/02/25 16:23:19  nevski
 * no header printed on skipped events
 *
@@ -37,14 +40,14 @@
    end
 *************************************************************************
   subroutine agusevent(n)
-   Integer          n,InEvent,NnEvent
-   Character        Table*120
-   common /agcuser/ Irec(10),InEvent,NnEvent,Table
-   NnEvent=n
-   print *,' NT READ will start with event ',n
+    Integer          n,InEvent,NnEvent
+    Character        Table*120
+    common /agcuser/ Irec(10),InEvent,NnEvent,Table
+    NnEvent=n     
+    if (n>0) print *,' NT READ will start with event ',n
   end
 *************************************************************************
-   subroutine agusopen(ifile)
+  subroutine agusopen(ifile)
 *
 * Description: open a TXT, EGZ(FZ) or XDF event generator data file.    *
 *              Data type should corresponds to the filename extension   *
@@ -99,9 +102,16 @@
        if (ier!=0)  goto :e:
     } 
     else if C=='N'                       " HEP Ntuple "
-    {  Lrec=4096;     CDIR='HEPEVNT'//CHAR(48+N);    Irec(N)=0;
+    {  Lrec=0;     CDIR='HEPEVNT'//CHAR(48+N);    Irec(N)=0;
        Call HREND (CDIR)
        Call HROPEN(21-N,CDIR,file(:L),'X',Lrec,ier);  if (ier!=0) goto :e:; 
+       call HBSET ('BSIZE', Lrec, ier)
+    } 
+    else if C=='C'                       " RQMD Ntuple "
+    {  Lrec=0;     CDIR='RQMD'//CHAR(48+N);    Irec(N)=0;
+       Call HREND (CDIR)
+       Call HROPEN(21-N,CDIR,file(:L),'Q',Lrec,ier);  if (ier!=0) goto :e:; 
+       call HBSET ('BSIZE', Lrec, ier)
     } 
     else if C=='S'                       " STAF table "
     {  Table=File(1:idot-1)
@@ -142,6 +152,7 @@
                      J=CsADDR('XDF_READ'); If (J!=0) call CsJCAL(J,1,Igate)}
      elseif C=='T' { J=1;                    call gstar_ReadTXT(Igate)     }
      elseif C=='N' { J=1;                    call gstar_ReadNT (Igate)     }
+     elseif C=='C' { J=1;                    call gstar_ReadCNT(Igate)     }
      elseif C=='M' { J=CsADDR ('MICKINE'); IF (J!=0) Call CsJCAL(J,1,Igate)}
      elseif C=='S' { J=AMI_CALL ('gstar_readtab'//o,1,%L(Table)//o)-1;     }
      If Igate<=0   { Ier=1; return }
@@ -155,6 +166,137 @@
 *
    End
  
+*************************************************************************
+   Subroutine    gstar_ReadCNT(Igate)
+   implicit      none
++CDE,GCUNIT,GCFLAG,GCONST.
+*
+   Integer           Igate,Irec,InEvent,NnEvent,NpHEP
+   Real              CT/3.e11/,Comp(4)/4*0/,Hpar(4)/4*0/
+   Character         Table*120,CDIR*10
+   common /agcuser/  Irec(10),InEvent,NnEvent,Table
+*
+   Integer           Ip,Istat,Ipdg,Moth,Idau
+   Real              Pxyz,Ener,mass,Vxyz,Vtime
+   Common /hep_part/ Ip,Istat,Ipdg,Moth(2),Idau(2),Pxyz(3),Ener,mass,
+                                                   Vxyz(3),Vtime
+*
+   Integer           Iprin,Id/1/,StartVx/0/,Ubuf/0/,num(4),
+                     Ge_pid,nin,nv,nt,ier,L,Ia,i             
+   Character         CWD*20, Cform*8/'/6I 9F'/
+   Logical           First/.true./
+*
+c ---- Column-Wise-Ntuples ----
+   integer           mnt
+   parameter        (mnt = 4500)
+   integer           idate,itime,ievn,imult,isub,lundata,
+                     ipdgtype(mnt),ilastcoll(mnt),nrcoll(mnt)
+   real              RNDM,fi,b,xspace(mnt),yspace(mnt),zspace(mnt)
+   real              time(mnt),emass(mnt),Y(mnt),pt(mnt),phi(mnt)
+   COMMON/RQMD_EVENT/ievn,  b
+   COMMON/RQMD_PART/ imult, ipdgtype, emass, nrcoll, ilastcoll,
+                     time, xspace, yspace, zspace, Y, pt, phi, isub
+*  translate fermi to mm (? )
+   real              scfermi
+   parameter        (scfermi = 1.e-12)
+*
+   Iprin = Idebug;   prin2 igate; (' In ReadCNT igate=',i3)
+
+   CDIR='//RQMD'//CHAR(48+Igate)
+   Call RZCDIR(CWD, 'R')
+   Call RZCDIR(CDIR,' ')
+   Call  HCDIR(CDIR,' ')
+   if (Iprin>1) Call RZCDIR(' ', 'P')
+*                                               new file
+   if (Irec(Igate)=<0) then
+       lundata = id+Igate*1000
+       Call HRIN  (Id, 99999, Igate*1000) 
+*      call HGNT  (lundata,0,istat)
+       call HBNAME(lundata,' ',       0,    '$CLEAR') 
+       call HBNAME(lundata,'EVENT',   ievn, '$SET')
+       call HBNAME(lundata,'PARTICLE',imult,'$SET')
+*      call HNOENT(lundata, nloop)
+       InEvent=0
+   endif
+* 
+   Nin=0; Nphep=0; 
+   Loop
+   {  Irec(Igate)+=1; 
+      Call HGNT(Id+Igate*1000,Irec(Igate),ier); if (ier!=0) goto :err:;
+
+*                                                first record
+      if (isub.eq.0 .or. isub.eq.1) then
+         call datime(idate,itime) 
+         InEvent  += 1 
+         if Nphep>0 
+         {  Prin0 InEvent; (' READ CNT: bad subevent sequence in event ',i8)
+            Irec(Igate)-=1; Break; 
+         }
+*
+         fi        = rndm(1.)*TwoPi
+         nin       = 1
+         istat     = 100
+         ipdg      = 9999999
+         Moth(1)   = idRun
+         Moth(2)   = ievn
+         Idau(1)   = Idate
+         Idau(2)   = Itime
+         Pxyz(1)   = b         ! impact parameter
+         Pxyz(2)   = fi        ! angle reaction plane
+         Pxyz(3)   = 0         ! ev.gen parameter
+         Ener      = 2.*100.   ! energy of N-N CMS
+         mass      = 3         ! RQMD ev.gen id
+         Vxyz(1)   = 197 
+         Vxyz(2)   = 79  
+         Vxyz(3)   = 197
+         vtime     = 79
+      endif
+*                                skipping
+      if (InEvent<NnEvent) Next
+* 
+*     GENT bank was already created by HEPEVNT - no formatting is needed
+      Nphep += Imult;   Num = {1,Igate,1,NpHep+1 }
+      Call REBANK ('/EVNT/GENE/GENT.GENT',num,15,L,ia)
+      Prin2 L,ia;      ('  Rebank done with L, ia  = ',2i8)
+      Num= {1,Igate,1,0};  
+      Call RbSTORE('/EVNT/GENE/GENT*',num,Cform,15,istat)
+      prin3 nin,istat; ('  RBSTORE first nin,istat = ',2i8)
+*
+      Call VZERO(Moth,4)
+      do i = 1, Imult
+         istat   = 1
+         ipdg    = ipdgtype(i)
+         mass    = emass(i)
+         Pxyz(1) = pt(i)*cos(phi(i)+fi)
+         Pxyz(2) = pt(i)*sin(phi(i)+fi)
+         Pxyz(3) = sqrt(pt(i)**2+emass(i)**2)*sinh(Y(i))
+         Ener    = sqrt(pt(i)**2+emass(i)**2)*cosh(Y(i)) 
+         Vxyz(1) = (xspace(i)*cos(fi)-yspace(i)*sin(fi))*scfermi
+         Vxyz(2) = (xspace(i)*sin(fi)+yspace(i)*cos(fi))*scfermi
+         Vxyz(3) = zspace(i)*scfermi
+         Vtime   = time(i)  *scfermi
+*
+         Nin+=1; num(3)=Nin;  
+         Call RbSTORE ('/EVNT/GENE/GENT*',num,Cform,15,istat)
+* 
+         Call apdg2gea (Ipdg, ge_pid); If ge_pid<=0    
+         {  Prin1 Ipdg; (' gstar_read HEPTUP unknown particle',i6)
+            ge_pid = 1000000+Ipdg
+         }
+         Call Vscale   (Vxyz,0.1,Vxyz,3);  Vtime=Vtime/ct
+         Call AgSVERT  (Vxyz,0, -Igate,Ubuf,     0,nv)  
+         call AgSKINE  (Pxyz,ge_pid,nv,num(3)+0.,0,nt)
+*
+      enddo
+      prin2 nin,istat; ('  RBSTORE last nin, istat = ',2i8)
+*                                               last record
+      if (isub.le.0) goto :ok:
+   }
+*
+:err: Igate=-1
+:ok:  Call RZCDIR(CWD,' ')
+   end
+
 *************************************************************************
    Subroutine    gstar_ReadNT(Igate)
    implicit      none
@@ -203,6 +345,7 @@
            NpHEP=ip;  Num = {1,Igate,1,NpHep+1 }
            do i=1,5   { IdEvHep(i) = Pxyz(i);  }
            Call REBANK('/EVNT/GENE/GENT.GENT',num,15,L,ia)
+           print *,' Rebank done with L,ia = ',L,ia
         }
         elseif ipdg=999998 { call Ucopy(Pxyz,Hpar,4) }
         elseif ipdg=999997 { call Ucopy(Pxyz,Comp,4) }
@@ -216,6 +359,7 @@
       if (InEvent<NnEvent) Next;  
       Nin+=1; num(3)=Nin;  
       Call RbSTORE ('/EVNT/GENE/GENT*',num,Cform,15,istat)
+      print *,' RBSTORE nin,istat=',nin,istat
     
       Check Istat==1
 
@@ -234,6 +378,7 @@
 :err: Igate=-1
 :ok:  Call RZCDIR(CWD,' ')
    end
+
 *************************************************************************
    Subroutine    gstar_ReadTXT(Igate)
 *                                                                       *
