@@ -22,13 +22,14 @@ class  TTree;
 class St_io_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_io_Maker.h,v 1.5 1999/02/24 16:06:39 fisyak Exp $";
+   Bool_t fSplit;    // flag of the "split" mode
+// static Char_t  m_VersionCVS = "$Id: St_io_Maker.h,v 1.6 1999/02/25 17:14:14 fine Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
    TObjArray     *m_ListOfBranches; //!
 
  
  public: 
-            St_io_Maker(const char *name="output", const char *title="io_something",TTree *tree=0);
+            St_io_Maker(const char *name="output", const char *title="io_something",Bool_t split=kTRUE,TTree *tree=0);
    virtual  ~St_io_Maker();
    virtual TObjArray *GetListOfBranches(){return m_ListOfBranches;}
    virtual void       Add(const Char_t *dataName,const Char_t *fileName=0);
