@@ -642,7 +642,7 @@ Bool_t StEmcCalibrationMaker::CheckTracks()
     {
       if(calibGeo->getBin(phi,eta,mtr,etr,str)==0) if(str!=-1) calibGeo->getId(mtr,etr,str,idtr);
 
-      if(ProjectTrack(track,(double)(calibGeo->Radius()+calibGeo->YWidth()),&eta1,&phi1))
+      if(ProjectTrack(track,(double)(calibGeo->Radius()+2*calibGeo->YWidth()),&eta1,&phi1))
         if(calibGeo->getBin(phi1,eta1,mtr1,etr1,str1)==0) if(str1!=-1) calibGeo->getId(mtr1,etr1,str1,idtr1);
       
       if(idtr!=0 && idtr==idtr1) // good track candidate

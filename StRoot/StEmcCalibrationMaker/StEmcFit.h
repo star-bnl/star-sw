@@ -1,5 +1,8 @@
-// $Id: StEmcFit.h,v 1.4 2001/12/04 18:23:55 suaide Exp $
+// $Id: StEmcFit.h,v 1.5 2001/12/28 21:31:09 suaide Exp $
 // $Log: StEmcFit.h,v $
+// Revision 1.5  2001/12/28 21:31:09  suaide
+// Added documentation
+//
 // Revision 1.4  2001/12/04 18:23:55  suaide
 // small fix
 //
@@ -12,6 +15,13 @@
 // Revision 1.12  1999/09/24 22:03:09  perev
 // Add InitRun & FinishRun to template maker
 //
+
+/*!\class StEmcFit
+\author Alexandre A. P. Suaide
+
+This class hols some fit method that are used during EMC calibration.
+It is an adaption of non-linear method of fit from Numerical Recipes on C
+*/
 #ifndef STAR_StEmcFit
 #define STAR_StEmcFit
 #include "TObject.h"
@@ -50,23 +60,23 @@ class StEmcFit : public TObject
   public: 
  
     
-                      StEmcFit();
-   virtual            ~StEmcFit();
+                      StEmcFit();//!< Default constructor
+   virtual            ~StEmcFit();//!< Default destructor
    
-            void      SetFuncType(Int_t t)                         { functype=t; }
-            void      SetNParms(Int_t n)                           { ma=n; }
-            void      SetParm(Int_t i,Float_t xx,Int_t st)         { a[i]=xx; ia[i]=st;}
-            void      ClearAll();
-            void      AddPoint(Float_t xx,Float_t yy,Float_t sy)   { ndata++; x[ndata]=xx; y[ndata]=yy; sig[ndata]=sy;}
-            void      Fit();
-            void      Fit(Int_t);
-            Float_t   GetParameter(Int_t i)                        { return a[i]; }
-            Float_t   GetParameterError(Int_t i)                   { return sqrt(covar[i][i]); }
-            Float_t   GetCovariance(Int_t i,Int_t j)               { return covar[i][j]; }
-            Float_t   GetChiSquare()                               { return chisq; }
-            Int_t     GetNPoints()                                 { return ndata; }
-            Int_t     GetNParam()                                  { return ma; }
-            Float_t   Y(Float_t);       
+            void      SetFuncType(Int_t t)                         { functype=t; } //!< Set function type for fit
+            void      SetNParms(Int_t n)                           { ma=n; } //!< Set number of parameters
+            void      SetParm(Int_t i,Float_t xx,Int_t st)         { a[i]=xx; ia[i]=st;} //!< Set parameter initial guess
+            void      ClearAll(); //!< Clear all
+            void      AddPoint(Float_t xx,Float_t yy,Float_t sy)   { ndata++; x[ndata]=xx; y[ndata]=yy; sig[ndata]=sy;} //!< Add fit point
+            void      Fit(); //!< Fit
+            void      Fit(Int_t); //!< Fit using a fixed number of iterations
+            Float_t   GetParameter(Int_t i)                        { return a[i]; } //!< Get parameter value
+            Float_t   GetParameterError(Int_t i)                   { return sqrt(covar[i][i]); } //!< Get parameter error
+            Float_t   GetCovariance(Int_t i,Int_t j)               { return covar[i][j]; } //!< Get covariance matrix element
+            Float_t   GetChiSquare()                               { return chisq; } //!< Get chi square / sqrt (Npoints - Nparam)
+            Int_t     GetNPoints()                                 { return ndata; } //!< Get number of points
+            Int_t     GetNParam()                                  { return ma; } //!< Get number of parameters
+            Float_t   Y(Float_t); //!< Calculates fitted function for a given X
 
    ClassDef(StEmcFit, 1)  
 };

@@ -4,6 +4,11 @@
 *
 * This is responsible for emc equalization
 ***********************************************************************/
+/*!\class StEmcEffPedSpectra
+\author Alexandre A. P. Suaide
+
+This class makes EMC effective pedestal calculation. It is derived from StEmcSpectra.
+*/
 
 #ifndef STAR_StEmcEffPedSpectra
 #define STAR_StEmcEffPedSpectra
@@ -19,9 +24,9 @@ class StEmcEffPedSpectra : public StEmcSpectra
   protected:   
   public: 
            
-                   StEmcEffPedSpectra(const char*);  
-  virtual          ~StEmcEffPedSpectra();
-  Bool_t           CalcPedestal(Int_t);
+                   StEmcEffPedSpectra(const char*); //!< Default constructor
+  virtual          ~StEmcEffPedSpectra();//!< Default destructor
+  Bool_t           CalcPedestal(Int_t);//!< Calculates effective pedestal
            
 
   ClassDef(StEmcEffPedSpectra,1)

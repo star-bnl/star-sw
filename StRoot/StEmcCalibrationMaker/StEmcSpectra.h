@@ -5,6 +5,13 @@
 * This is a general EMCSpectra class
 ***********************************************************************/
 
+/*!\class StEmcSpectra
+\author Alexandre A. P. Suaide
+
+This class is the base class for EMC spectra. This class provides
+standard functions to manipulate spectra, such as mean, rms, rebins, etc.
+*/
+
 #ifndef STAR_StEmcSpectra
 #define STAR_StEmcSpectra
 #include "St_DataSet.h"
@@ -37,49 +44,49 @@ class StEmcSpectra : public St_DataSet
            Int_t    nEtaBins;
            Float_t  etaBinWidth;
 
-           St_emcCalSettings*     SettingsTable;
-           St_emcEqualization*    EqualTable;  
-           St_emcMipCalib*        MipTable; 
-           St_emcCalibration*     CalibTable; 
+           St_emcCalSettings*     SettingsTable; //!< Calibration settings table (should be set from StEmcCalibrationMaker)
+           St_emcEqualization*    EqualTable;  //!< Equalization table (should be set from StEmcCalibrationMaker)
+           St_emcMipCalib*        MipTable; //!< MIP table (should be set from StEmcCalibrationMaker)
+           St_emcCalibration*     CalibTable; //!< Calibration table (should be set from StEmcCalibrationMaker)
 
-                   StEmcSpectra(const char*);  
-  virtual          ~StEmcSpectra();
-  virtual  void    Init();
-           Bool_t  Zero(Int_t);
-           Bool_t  ZeroAll();
-           Int_t   GetID(Int_t,Int_t,Int_t);
-           Bool_t  FillSpectra(Int_t,Int_t);
-           Float_t GetAdcValue(Int_t,Int_t);
-           Int_t   GetStatus(Int_t);
-           Float_t GetSum(Int_t);
-           Bool_t  GetMeanAndRms(Int_t,Float_t*,Float_t*);
-           Bool_t  GetMeanAndRms(Int_t,Int_t,Int_t,Float_t*,Float_t*);
-           Bool_t  GetLogMeanAndRms(Int_t,Int_t,Int_t,Float_t*,Float_t*);
-           Bool_t  GetOccupancy(Int_t,Float_t*,Float_t*,Float_t*);
-           Bool_t  GetOccupancyEtaBin(Int_t,Float_t*,Float_t*,Float_t*);
+                   StEmcSpectra(const char*);  //!< StEmcSpectra default constructor
+  virtual          ~StEmcSpectra(); //!< StEmcSpectra default destructor
+  virtual  void    Init(); //!< Initialization method
+           Bool_t  Zero(Int_t); //!< Zero the spectrum of one bin
+           Bool_t  ZeroAll(); //!< Zero all spectra
+           Int_t   GetID(Int_t,Int_t,Int_t); //!< Return bin id
+           Bool_t  FillSpectra(Int_t,Int_t); //!< fill bin spectrum
+           Float_t GetAdcValue(Int_t,Int_t); //!< Return number of entries for a given ADC value
+           Int_t   GetStatus(Int_t); //!< Return the status of the bin
+           Float_t GetSum(Int_t); //!< Return the sum (integral) of the bin spectrum
+           Bool_t  GetMeanAndRms(Int_t,Float_t*,Float_t*); //!< Get mean and RMS for a given bin
+           Bool_t  GetMeanAndRms(Int_t,Int_t,Int_t,Float_t*,Float_t*); //!< Get mean and RMS for a given bin and a given ADC range
+           Bool_t  GetLogMeanAndRms(Int_t,Int_t,Int_t,Float_t*,Float_t*);//!< Get logaritmic mean and RMS for a given bin and a given ADC range
+           Bool_t  GetOccupancy(Int_t,Float_t*,Float_t*,Float_t*); //!< Get detector occupancy
+           Bool_t  GetOccupancyEtaBin(Int_t,Float_t*,Float_t*,Float_t*); //!< Get eta bin occupancy
  
-           void    Draw(Int_t);
-           void    DrawOccupancy();
-  virtual  void    DrawEtaBin(Int_t);         
-           Int_t   GetNBin();
-           Int_t   GetNEtaBin();
-           Int_t   GetNAdcMax();
-           Int_t   GetNModules();
-           Int_t   GetNEta();
-           Int_t   GetNSub();
-     const char*   GetDetName();
-           TArrayF GetSpectra(Int_t);
-           TArrayF GetSpectra(Int_t,Float_t,Float_t);
-           TArrayF ReBin(Int_t,Float_t,Float_t);
-  virtual  void    CalcEtaBin(Int_t,Float_t,Int_t*,Int_t*,Int_t*,Int_t*);
-           TArrayF GetEtaBinSpectra(Int_t);
-           Float_t GetSumEtaBin(Int_t); 
-           Int_t   GetEtaBinId(Int_t,Int_t);
+           void    Draw(Int_t); //!< Draw bin spectrum
+           void    DrawOccupancy(); //!< Draw occupancy
+  virtual  void    DrawEtaBin(Int_t); //!< Draw eta bin spectrum        
+           Int_t   GetNBin(); //!< Return number of bins
+           Int_t   GetNEtaBin(); //!< Return number of eta bins
+           Int_t   GetNAdcMax(); //!< Return max ADC possible
+           Int_t   GetNModules(); //!< Return number of modules
+           Int_t   GetNEta(); //!< Return number of etas
+           Int_t   GetNSub(); //!< Return number of subs
+     const char*   GetDetName(); //!< Return detector name
+           TArrayF GetSpectra(Int_t); //!< Return spectrum for one bin
+           TArrayF GetSpectra(Int_t,Float_t,Float_t); //!< Return spectrum for one bin after apply equalization
+           TArrayF ReBin(Int_t,Float_t,Float_t); //!< Rebin spectrum
+  virtual  void    CalcEtaBin(Int_t,Float_t,Int_t*,Int_t*,Int_t*,Int_t*); //!< Calculates eta bin
+           TArrayF GetEtaBinSpectra(Int_t); //!< Return eta bin spectrum
+           Float_t GetSumEtaBin(Int_t);  //!< Return eta bin spectrum integral
+           Int_t   GetEtaBinId(Int_t,Int_t); //!< Return eta bin Id
            
-           StEmcGeom* GetGeo();
+           StEmcGeom* GetGeo(); //!< Return detector geometry
            
-           void    SaveAll(char*);
-           void    LoadAll(char*);
+           void    SaveAll(char*); //!< Save all spectra on file
+           void    LoadAll(char*); //!< Load all spectra from file
 
   ClassDef(StEmcSpectra,1)
 };

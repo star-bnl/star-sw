@@ -5,6 +5,12 @@
 * This is responsible for emc equalization
 ***********************************************************************/
 
+/*!\class StEmcEqualSpectra
+\author Alexandre A. P. Suaide
+
+This class makes EMC equalization. It is derived from StEmcSpectra.
+*/
+
 #ifndef STAR_StEmcEqualSpectra
 #define STAR_StEmcEqualSpectra
 #include "StEmcSpectra.h"
@@ -19,10 +25,10 @@ class StEmcEqualSpectra : public StEmcSpectra
   protected:   
   public: 
            
-                   StEmcEqualSpectra(const char*);  
-  virtual          ~StEmcEqualSpectra();
-           void    DrawEqualConst();
-           Bool_t  Equalize(Int_t,Int_t,Int_t);
+                   StEmcEqualSpectra(const char*); //!< Default constructor 
+  virtual          ~StEmcEqualSpectra(); //!< Default destructor
+           void    DrawEqualConst(); //!< Draw Equalization constants
+           Bool_t  Equalize(Int_t,Int_t,Int_t); //!< Equalize two bins
            
 
   ClassDef(StEmcEqualSpectra,1)
