@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.291 2002/03/22 23:45:45 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.292 2002/03/28 00:14:48 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -113,7 +113,7 @@ Bfc_st BFC1[] = {
                                                                   ,"Base chain for 2001 (tpc+rhic)",kFALSE},
   {"P2001"       ,""  ,"","B2001,l3onl,tofDat,Corr2,OSpaceZ","",""
                                                ,"Production chain for summer 2001 data (+ l3, tof)",kFALSE},
-  {"P2001a"      ,""  ,"","B2001,svt_daq,SvtD,ftpc,l3onl,tofDat,emcDY2,Corr2,OSpaceZ","",""                       
+  {"P2001a"      ,""  ,"","B2001,svt_daq,SvtD,ftpc,l3onl,tofDat,emcDY2,Corr2,OSpaceZ","","" 
                                ,"Production chain for summer 2001 data (+ ftpc, svt, l3, tof, emc)",kFALSE},
 
   // pp Chains 
@@ -399,10 +399,12 @@ Bfc_st BFC1[] = {
 
 
   {"MuDSTChain","MuDSTChain","MuDSTDeps,EMCmDST",""                         ,"StMaker","StChain","",kFALSE},
-  {"MuDSTDeps","","MuDSTChain","", "",                                        "StEvent,StStrangeMuDstMaker",
-                                                                 "MuDST miscellaneous dependencies",kFALSE},
-  {"EMCmDST","","MuDSTChain","MuDSTDeps,EmcUtil",                       "StEmcMicroDstMaker","StMuDSTMaker",
+  {"MuDSTDeps","","MuDSTChain","","",      "StEvent,StStrangeMuDstMaker","MuDST misc. dependencies",kFALSE},
+
+  {"EMCmDST"  ,"","MuDSTChain","MuDSTDeps,EmcUtil",                     "StEmcMicroDstMaker","StMuDSTMaker",
                                                                                  "Writes EMC MuDST",kFALSE},
+  {"CMuDST"   ,"","MuDSTChain","MuDSTDeps",                                   "StMuDstMaker","StMuDSTMaker",
+                                                                              "Writes Common MuDST",kFALSE},
 
 
 
