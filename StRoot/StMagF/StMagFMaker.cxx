@@ -1,5 +1,8 @@
-// $Id: StMagFMaker.cxx,v 1.9 2001/05/29 21:59:41 fisyak Exp $
+// $Id: StMagFMaker.cxx,v 1.10 2001/07/14 21:18:18 fisyak Exp $
 // $Log: StMagFMaker.cxx,v $
+// Revision 1.10  2001/07/14 21:18:18  fisyak
+// Set scale=2.e-5 for FieldOff
+//
 // Revision 1.9  2001/05/29 21:59:41  fisyak
 // Add StMagF class for back compartibility
 //
@@ -68,7 +71,7 @@ Int_t StMagFMaker::InitRun(Int_t RunNo){
   StBFChain *chain = (StBFChain *) GetChain();
   if (chain) {
     if (chain->GetOption("FieldON"))      fScale = 1.0;
-    else {if (chain->GetOption("FieldOff"))     fScale = 0.0;
+    else {if (chain->GetOption("FieldOff"))     fScale = 2.e-5;
     else {if (chain->GetOption("HalfField"))    fScale = 0.5;     
     else {if (chain->GetOption("ReverseField")) fScale = - fScale;
     else {
