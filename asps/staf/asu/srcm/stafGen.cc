@@ -120,6 +120,7 @@ int main(int argc, char **argv)
 "%s"						/* ami_load_proto() */
 "void unknown(); \n"
 "void usage(char* prog); \n"
+"extern CC_P void staf_banner(FILE* stream); \n"
 " \n"
 "/*================== MAIN ========*/ \n"
 "int main(int argc, char** argv) \n"
@@ -130,6 +131,7 @@ int main(int argc, char **argv)
 "%s"						/* asp_starts() */
 " \n"
 "/*------------------ INPUT -------*/ \n"
+"   staf_banner(stdout); \n"
 "   printf(\"STAF - ready for user input.\\n\"); \n"
 "   ku_what(unknown); \n"
 "   printf(\"STAF - done with user input.\\n\"); \n"

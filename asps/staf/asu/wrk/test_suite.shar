@@ -36,7 +36,7 @@
 #	staf500tst.kumac
 #	staf501tst.kumac
 #	staf701getvalue.kumac
-# This archive created: Tue May 28 18:04:44 1996
+# This archive created: Mon Jun  3 16:21:16 1996
 export PATH; PATH=/bin:$PATH
 if test -f 'staf100asu.kumac'
 then
@@ -1163,7 +1163,7 @@ then
 	echo shar: will not over-write existing file "'staf305pam.kumac'"
 else
 cat << \SHAR_EOF > 'staf305pam.kumac'
-MACRO staf305pam [1]=10
+MACRO staf305pam [1]=10 [2]=10
 ************************************************************************
 **** staf305pam - Test PAM analysis module
 
@@ -1172,13 +1172,14 @@ MESS _         STAF Test #305 - PAM
 MESS _       0 Handle Macro Arguments & Initialize
 
 AMI/CALL pamc tab1 tab2
-MAXROWCOUNT tab1 100
-MAXROWCOUNT tab2 20
+MAXROWCOUNT tab1 [1]
+MAXROWCOUNT tab2 [2]
 ROWCOUNT tab1 [1]
-ROWCOUNT tab2 [1]
+ROWCOUNT tab2 [2]
 CALL pamc tab1 tab2
 CALL pamf tab1 tab2
-TABLE/PRINT tab1 [1]
+TABLE/PRINT tab1 10
+TABLE/PRINT tab2 10
 
 RETURN
 
@@ -1337,27 +1338,26 @@ then
 	echo shar: will not over-write existing file "'staf701getvalue.kumac'"
 else
 cat << \SHAR_EOF > 'staf701getvalue.kumac'
-exec staf152dio
-table/show tclpar
-table/print tclpar
-getval 'tclpar[0].mc'
-vect/print staf_result
-getval 'tclpar[0].dz_fact'
-vect/print staf_result
-getval 'tclpar[0].mf_min'
-getval 'tclpar[0].mf_ctim'
-vect/print staf_result
-vect/print staf_status
-exec staf152dio
-table/show tclpar
-table/print tclpar
-getval 'tclpar[0].mc'
-vect/print staf_result
-getval 'tclpar[0].dz_fact'
-vect/print staf_result
-getval 'tclpar[0].mf_min'
-getval 'tclpar[0].mf_ctim'
-vect/print staf_result
+
+exec staf305pam 10000 10000
+ls
+table/show tab1
+getvalue 'tab1[0].aLong'
+getvalue 'tab1[88].aLong'
+pwd
+ls
+putvalue 'tab1[86].aShort' 123
+putvalue 'tab1[87].aUshort' 321
+putvalue 'tab1[88].aLong' 123
+putvalue 'tab1[89].aUlong' 321
+putvalue 'tab1[90].aChar' %
+putvalue 'tab1[91].aOctet' 123
+putvalue 'tab1[92].aFloat' 321.123
+putvalue 'tab1[93].aDouble' 123.321
+
+getvalue 'tab1[88].aLong'
+table/print tab1 20 80
+
 SHAR_EOF
 fi # end of overwriting check
 #	End of shell archive
