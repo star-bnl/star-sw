@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.21 2000/04/20 20:38:50 caines Exp $
+// $Id: StMatchMaker.cxx,v 1.22 2000/04/29 19:57:22 caines Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.22  2000/04/29 19:57:22  caines
+// Protection for zero global tracks and tpc hits not on tpc tracks
+//
 // Revision 1.21  2000/04/20 20:38:50  caines
 // More fixing for the -1 problem
 //
@@ -572,8 +575,13 @@ Int_t StMatchMaker::Make(){
        if( spc->flag !=0) {
 	 tgroup->ident = -1;
        }
-       else if( ttrack[((int)tgroup->id1/1000)-1].flag < 0){
+       else if( tgroup->id1 !=0){
+	 if( ttrack[((int)tgroup->id1/1000)-1].flag < 0){
 	 tgroup->ident = -1;
+	 }
+	 else{
+	   tgroup->ident = 0;
+	 }
        }
        else{
 	 tgroup->ident = 0;
@@ -581,7 +589,7 @@ Int_t StMatchMaker::Make(){
        count++;
        tgroup++;
    }
-
+   
    tpc_groups->SetNRows(count);
 
   
