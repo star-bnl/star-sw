@@ -1,5 +1,8 @@
-// $Id: OnlineQaTpcRaw.C,v 1.4 2000/06/12 15:20:51 kathy Exp $
+// $Id: OnlineQaTpcRaw.C,v 1.5 2000/06/14 14:35:42 kathy Exp $
 // $Log: OnlineQaTpcRaw.C,v $
+// Revision 1.5  2000/06/14 14:35:42  kathy
+// comment out setdebug so zillions of daq messages aren't printed out
+//
 // Revision 1.4  2000/06/12 15:20:51  kathy
 // put in Sergei's code to set output hist file name correctly
 //
@@ -78,11 +81,11 @@ void OnlineQaTpcRaw(
 
 //  Setup top part of chain
     chain = new StChain("OnlineQaTpcRawChain");
-    chain->SetDebug();
+    //    chain->SetDebug(0);
    
 // now any Maker that gets constructed will be added to the chain
   StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,topTree);
-    IOMk->SetDebug();
+  //IOMk->SetDebug();
     IOMk->SetIOMode("r");
 
 // histogram utility class (this is not a Maker so not used in chain)
