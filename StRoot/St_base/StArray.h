@@ -46,7 +46,7 @@ class StObjLink : public TObject
 {
 public:
    	StObjLink(const StObject *p=0)	{fLink=(StObject*)p;}
-   	StObjLink(const StObjLink &from){fLink=(StObject*)from.fLink;}
+   	StObjLink(const StObjLink &from):TObject() {fLink=(StObject*)from.fLink;}
        ~StObjLink()             	{fLink=0;}
 
    	StObjLink &operator=(StObjLink &from){fLink=from.fLink;return *this;}
