@@ -1,7 +1,12 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.25 2000/04/19 16:30:18 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.26 2000/04/20 16:56:12 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.26  2000/04/20 16:56:12  calderon
+ * Speed up the tpc matching algorithm by using a seed to tell the iterator
+ * where to start looping, instead of looping over every hit all the time.
+ * Change the name from "Associations" to "StAssociationMaker"
+ *
  * Revision 1.25  2000/04/19 16:30:18  calderon
  * return kStWarn when no StEvent or StMcEvent is found, instead of
  * exit.
@@ -210,6 +215,17 @@ using std::find_if;
     
 // }
     
+class compFuncMcTpcHit{
+public:
+    bool operator()(const StMcTpcHit*) const;
+    void setReferenceZ(float z) { mRefZ = z; }
+    float mRefZ;
+};
+bool compFuncMcTpcHit::operator()(const StMcTpcHit* h) const {
+    // comparison is btw hits in the same padrow
+	return  (h->position().z()) > mRefZ;
+}
+
 class compFuncMcFtpcHit{
 public:
     bool operator()(const StMcFtpcHit*) const;
@@ -562,7 +578,7 @@ Int_t StAssociationMaker::Make()
     // Get StMcEvent
     //
     StMcEvent* mEvent = 0;
-    mEvent = ((StMcEventMaker*) gStChain->Maker("MCEvent"))->currentMcEvent();
+    mEvent = ((StMcEventMaker*) GetMaker("StMcEvent"))->currentMcEvent();
     if (!mEvent) {
 	cerr << "No StMcEvent!!! " << endl;
 	cerr << "Bailing out ..." << endl;
@@ -615,29 +631,46 @@ Int_t StAssociationMaker::Make()
 	     iPadrow++) {
 	    StTpcPadrowHitCollection* tpcPadRowHitColl = tpcSectHitColl->padrow(iPadrow);
 	    //PR(iPadrow);
+	    
+	    compFuncMcTpcHit tpcComp;
 	    for (unsigned int iHit=0;
 		 iHit<tpcPadRowHitColl->hits().size();
 		 iHit++){
 		//PR(iHit); 
 
 		rcTpcHit = tpcPadRowHitColl->hits()[iHit];
+
+		// Set the reference z for the comparison function
+		// The comparison will be used to find the first Mc Hit
+		// with a z greater than this reference, so that we don't loop
+		// over the hits that we don't need to.
 		
+		tpcComp.setReferenceZ(rcTpcHit->position().z() - parDB->zCutTpc());
 		StMcTpcHit* closestTpcHit = 0;
+
+		// Find the first Mc Tpc Hit that might have a meaningful association.
+		StMcTpcHitIterator tpcHitSeed = find_if (mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().begin(),
+							 mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().end(),
+							 tpcComp);
 		
-		for (unsigned int jHit=0;
-		     jHit<mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().size();
+		bool isFirst = true;
+		float xDiff, yDiff, zDiff;
+		xDiff = yDiff = zDiff = -999;
+		for (StMcTpcHitIterator jHit = tpcHitSeed;
+		     jHit<mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits().end();
 		     jHit++){
 		    //PR(jHit); 
-		    mcTpcHit = mcTpcHitColl->sector(iSector)->padrow(iPadrow)->hits()[jHit];
-		    float xDiff = mcTpcHit->position().x()-rcTpcHit->position().x();
-		    float yDiff = mcTpcHit->position().y()-rcTpcHit->position().y();
-		    float zDiff = mcTpcHit->position().z()-rcTpcHit->position().z();
+		    mcTpcHit = *jHit;
+		    xDiff = mcTpcHit->position().x()-rcTpcHit->position().x();
+		    yDiff = mcTpcHit->position().y()-rcTpcHit->position().y();
+		    zDiff = mcTpcHit->position().z()-rcTpcHit->position().z();
 		    
 		    if ( zDiff > parDB->zCutTpc() ) break; //mc hits are sorted, save time!
 		    
-		    if (jHit==0) {
+		    if (isFirst) {
 			tpcHitDistance=xDiff*xDiff+zDiff*zDiff;
 			closestTpcHit = mcTpcHit;
+			isFirst = false;
 		    }
 		    if (xDiff*xDiff+zDiff*zDiff<tpcHitDistance) {
 			tpcHitDistance = xDiff*xDiff+zDiff*zDiff;
@@ -668,6 +701,7 @@ Int_t StAssociationMaker::Make()
     // Loop over SVT hits and make Associations
     //
     cout << "Making SVT Hit Associations..." << endl;
+    cout << "Number of Entries in TPC Hit Maps: " << mRcTpcHitMap->size() << endl;
     
     StSvtHit*   rcSvtHit;
     StMcSvtHit* mcSvtHit;
@@ -740,6 +774,7 @@ Int_t StAssociationMaker::Make()
     } // End of Barrel Loop for Rec. Hits
 
     cout << "Finished Making SVT Hit Associations *********" << endl;
+    cout << "Number of Entries in SVT Hit Maps: " << mRcSvtHitMap->size() << endl;
 
     //
     // Loop over FTPC hits and make Associations
@@ -1170,6 +1205,7 @@ Int_t StAssociationMaker::Make()
     candidates.clear();
 	 
     cout << "Finished Making Track Associations *********" << endl;
+    cout << "Number of Entries in Track Maps: " << mRcTrackMap->size() << endl;
 
     //
     // Start doing Vertex Associations ----------------------

@@ -1,7 +1,12 @@
 /**********************************************
  *
- * $Id: StAssociationMaker.h,v 1.12 2000/03/06 18:08:56 calderon Exp $
+ * $Id: StAssociationMaker.h,v 1.13 2000/04/20 16:56:12 calderon Exp $
  * $Log: StAssociationMaker.h,v $
+ * Revision 1.13  2000/04/20 16:56:12  calderon
+ * Speed up the tpc matching algorithm by using a seed to tell the iterator
+ * where to start looping, instead of looping over every hit all the time.
+ * Change the name from "Associations" to "StAssociationMaker"
+ *
  * Revision 1.12  2000/03/06 18:08:56  calderon
  * Hit comparisons are used for both sorting the hits in the
  * StMcEvent containers and for ordering the hits in the multimaps,
@@ -378,8 +383,8 @@ class StAssociationMaker : public StMaker {
  public:
 
     StMaker* currentChain;
-    StAssociationMaker(const char* name = "Associations",
-		       const char* title = "event/Associations");
+    StAssociationMaker(const char* name = "StAssociationMaker",
+		       const char* title = "event/StAssociationMaker");
     virtual ~StAssociationMaker();
     virtual void  Clear(const char* opt="");
     virtual Int_t Init();
@@ -429,7 +434,7 @@ private:
     Bool_t drawinit;
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.12 2000/03/06 18:08:56 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.13 2000/04/20 16:56:12 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StAssociationMaker, 1)
 
