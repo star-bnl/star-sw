@@ -1,9 +1,12 @@
-// $Id: bfc_tss.C,v 1.18 1999/04/19 13:43:20 fisyak Exp $
+// $Id: bfc_tss.C,v 1.19 1999/04/20 12:56:00 fisyak Exp $
 // $Log: bfc_tss.C,v $
-// Revision 1.18  1999/04/19 13:43:20  fisyak
+// Revision 1.19  1999/04/20 12:56:00  fisyak
+// Add ctf/mwc
+//
+// Revision 1.12  1999/04/19 13:43:19  fisyak
 // Take out L3
 //
-// Revision 1.17  1999/04/18 23:45:06  fisyak
+// Revision 1.11  1999/04/18 23:45:05  fisyak
 // New schema
 //
 // macro to read fz files, xdf files and minidaq data 
@@ -361,6 +364,14 @@ void bfc_tss (const Int_t Nevents=1000,Char_t *infile=0, Char_t *outfile=0)
   St_fpt_Maker *fptMk 	= new St_fpt_Maker("ftpc_tracks");
   fptMk->SetDebug();
 #endif /* FTPC */
+#ifdef CTF
+  St_ctf_Maker         *ctf      = new St_ctf_Maker("ctf");
+  St_mwc_Maker         *mwc      = new St_mwc_Maker("mwc");
+  St_trg_Maker         *trg      = new St_trg_Maker("trg");
+#endif
+#ifdef L3
+  St_l3t_Maker         *l3Tracks   = new St_l3t_Maker("l3Tracks");
+#endif
   St_dst_Maker *dstMk = 0;
 #ifdef GLOBAL
 //		global
