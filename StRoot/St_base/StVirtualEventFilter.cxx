@@ -32,3 +32,7 @@ Int_t StVirtualEventFilter::Filter(const St_TableSorter *,Int_t index,Width_t &,
 Int_t StVirtualEventFilter::Filter(const StVertex *,Width_t &,Style_t &)
 { return GetFlag()? kBlue : 0 ; }
 
+//_____________________________________________________________________________
+Int_t StVirtualEventFilter::Filter(const St_Table *,Int_t rowNumber,Width_t &,Style_t &)
+{ return GetFlag()? (kGreen+rowNumber)%20 : 0 ;}
+
