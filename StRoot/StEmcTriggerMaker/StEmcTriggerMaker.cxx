@@ -209,12 +209,20 @@ void StEmcTriggerMaker::FillHistograms(StTriggerDetectorCollection* theTriggers)
       if(table[0].HighTowerBits[i]==1 && table[0].PatchBits[j]==1) 
         HTxPatch->Fill(table[0].HighTowerThresholds[i],table[0].PatchThresholds[j]);
 
+
+  cout << endl << endl << "**** trigger data follow ***" << endl;
+
   for (Int_t j=0;j<300;j++) {
     Float_t PADAQ=pa[j].PatchAdcSum6bits;
     Float_t HTDAQ=pa[j].HighTowerAdc6bits;
 
     Float_t PATRG=theEmcTrg.patch(j);
     Float_t HTTRG=theEmcTrg.highTower(j);
+
+    cout << "j=" << j 
+	 << ", PADAQ=" << PADAQ << ", HTDAQ=" << HTDAQ
+	 << ", PATRG=" << PATRG << ", HTTRG=" << HTTRG
+	 << endl;
 
     DAQHTower->Fill((Float_t)j,HTDAQ);
     DAQPatch->Fill((Float_t)j,PADAQ);
@@ -223,6 +231,8 @@ void StEmcTriggerMaker::FillHistograms(StTriggerDetectorCollection* theTriggers)
     TRGHTxDAQHT->Fill(HTDAQ,HTTRG);
     TRGPAxDAQPA->Fill(PADAQ,PATRG);
   }
+
+  cout << endl << "**** end of trigger data ***" << endl << endl;
 
 }
 
