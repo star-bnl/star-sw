@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiMicroMaker.cxx,v 1.2 2002/04/02 23:35:14 jklay Exp $                                      
+ * $Id: StHiMicroMaker.cxx,v 1.3 2002/04/03 00:37:41 jklay Exp $                                      
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHiMicroMaker.cxx,v $
+ * Revision 1.3  2002/04/03 00:37:41  jklay
+ * Fixed some bugs, added new version of dcaz
+ *
  * Revision 1.2  2002/04/02 23:35:14  jklay
  * Added L3RichTrigger information
  *
@@ -25,7 +28,7 @@
 #include "TMath.h"
 #include "TRandom.h"
 
-#include "StHiMicroEvent/StHiMicroEvent.h"
+#include "StHighptPool/StHiMicroEvent/StHiMicroEvent.h"
 //#include "StHiMicroEvent/StHiMicroTrack.h"
 
 #include "StIOMaker/StIOMaker.h"
@@ -277,7 +280,7 @@ StHiMicroMaker::fillEvent(StEvent* stEvent,Int_t nGoodEta)
 
     //Now check for L3 Rich Trigger
     const StPtrVecL3AlgorithmInfo& algoInfo = pL3Trigger->l3EventSummary()->algorithmsAcceptingEvent();
-    for (Int_t i = 0; i < algoInfo.size(); i++) {
+    for (UInt_t i = 0; i < algoInfo.size(); i++) {
        if(algoInfo[i]->id() == 4) mHiMicroEvent->SetL3RichTrigger(true);
     }
   }
@@ -470,7 +473,7 @@ StHiMicroMaker::fillTracks(StEvent* stEvent)
     hiMicroTrack->SetDcaXYPr(dcaXYPr);
 
     hiMicroTrack->SetDcaZGl(dcaz(glHelix,
-				 stEvent->primaryVertex()->position()));
+				 stEvent->primaryVertex()->position(),glTrack));
     
     hiMicroTrack->SetChi2(prTrack->fitTraits().chi2());
     
@@ -700,6 +703,49 @@ StHiMicroMaker::computeXY(const StThreeVectorF& pos, const StTrack* track)
   return (Float_t) radius - dPosCenter;
 }
 
+
+// 
+// i like this one better. dip angle in s-z plane
+// should be exact assuming a circle in x-y
+// (redundant StTrack* for debugging)
+double StHiMicroMaker::dcaz(const StPhysicalHelixD& helix, const StThreeVectorF& point,
+            const StTrack* track)  
+{  
+  double z0       = helix.origin().z();
+  double phi      = atan2(point.y()-helix.ycenter(),
+                          point.x()-helix.xcenter());
+  int    h        = helix.h(); // -sign(q*B) (+ := ccw looking down from +z)
+  double dphi     = h*(phi-helix.phase());
+
+  // half circle assumption
+  dphi           = (fabs(dphi) < M_PI ) ? dphi :
+                    ((dphi<0) ? 2*M_PI + dphi : 2*M_PI - dphi);
+   
+  double arclength= (1./helix.curvature()) * dphi;
+  
+  double dcaZ =  (point.z() - (z0 + arclength*tan(helix.dipAngle())));
+  /*
+  if(gRandom->Rndm(1)<0.1){
+    cout << "--------" << endl;
+    cout << "zpoint=" << point.z() << endl;
+    if(track)
+      cout << "pt=" << track->geometry()->momentum().perp()
+           << ",fit pts=" << track->fitTraits().numberOfFitPoints(kTpcId)
+           << endl;
+  
+    cout << ">>>zdca=" << dcaZ
+         << ", dphi=" << dphi*180./M_PI
+         << ", z0=" << z0 << ",arclength=" << arclength << endl
+         << ", dip=" << helix.dipAngle()*180./M_PI
+         << ", arc/tan(dip)="<< arclength/tan(helix.dipAngle()) << endl
+         << ">>>dca.z= " << point.z()-helix.at(helix.pathLength(point)).z()
+         << endl;
+    cout << "--------" << endl;
+  }
+  */
+  return dcaZ;
+         
+}
 
 double 
 StHiMicroMaker::dcaz(const StPhysicalHelixD& helix, const StThreeVectorF& point)
