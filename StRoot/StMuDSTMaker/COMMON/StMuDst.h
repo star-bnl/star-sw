@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.16 2004/04/09 22:04:52 subhasis Exp $
+ * $Id: StMuDst.h,v 1.17 2004/04/20 18:41:11 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -84,15 +84,15 @@ public:
 
  private:
   /// array of TClonesArrays
-  static TClonesArray* arrays[__NARRAYS__];
+  static TClonesArray** arrays;
   /// array of TClonesArrays for the stuff inherited from the StStrangeMuDst
-  static TClonesArray* strangeArrays[__NSTRANGEARRAYS__];
+  static TClonesArray** strangeArrays;
   /// array of TClonesArrays for the stuff inherited from the Emc
-  static TClonesArray* emcArrays[__NEMCARRAYS__];
+  static TClonesArray** emcArrays;
   /// array of TClonesArrays for the stuff inherited from the Pmd 
-  static TClonesArray* pmdArrays[__NPMDARRAYS__];
+  static TClonesArray** pmdArrays;
   /// array of TClonesArrays for the stuff inherited from the TOF
-  static TClonesArray* tofArrays[__NTOFARRAYS__];
+  static TClonesArray** tofArrays;
 
 public:
   /// returns pointer to the n-th TClonesArray 
@@ -212,6 +212,9 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.17  2004/04/20 18:41:11  perev
+ * Change arrays to pointer to StMuDstMaker::arrays StMuDst.h
+ *
  * Revision 1.16  2004/04/09 22:04:52  subhasis
  * after tof createevent fix by Xin
  *

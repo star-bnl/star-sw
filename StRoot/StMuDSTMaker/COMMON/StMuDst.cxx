@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.26 2004/04/14 17:15:56 subhasis Exp $
+ * $Id: StMuDst.cxx,v 1.27 2004/04/20 18:41:20 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -24,11 +24,11 @@
 #include "StStrangeMuDstMaker/StXiMuDst.hh"
 #include "StStrangeMuDstMaker/StKinkMuDst.hh"
 
-TClonesArray* StMuDst::arrays[__NARRAYS__] = {0,0,0,0,0,0,0,0,0};
-TClonesArray* StMuDst::strangeArrays[__NSTRANGEARRAYS__] = {0,0,0,0,0,0,0,0,0,0,0,0};
-TClonesArray* StMuDst::emcArrays[__NEMCARRAYS__] = {0};
-TClonesArray* StMuDst::pmdArrays[__NPMDARRAYS__] = {0};
-TClonesArray* StMuDst::tofArrays[__NTOFARRAYS__] = {0, 0};
+TClonesArray** StMuDst::arrays       = 0;
+TClonesArray** StMuDst::strangeArrays= 0;
+TClonesArray** StMuDst::emcArrays    = 0;
+TClonesArray** StMuDst::pmdArrays    = 0;
+TClonesArray** StMuDst::tofArrays    = 0;
 
 StMuDst::StMuDst() {
   DEBUGMESSAGE("");
@@ -39,22 +39,11 @@ StMuDst::StMuDst() {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDst::unset() {
-  for ( int i=0; i<__NARRAYS__; i++) {
-    arrays[i] = 0;
-  }
-  for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
-    strangeArrays[i] = 0;
-  }
-
-  for ( int i=0; i<__NEMCARRAYS__; i++) {
-    emcArrays[i] = 0;
-  }
-  for ( int i=0; i<__NPMDARRAYS__; i++) {
-    pmdArrays[i] = 0;
-  }
-  for ( int i=0; i<__NTOFARRAYS__; i++) {
-    tofArrays[i] = 0;
-  }
+    arrays        = 0;
+    strangeArrays = 0;
+    emcArrays     = 0;
+    pmdArrays     = 0;
+    tofArrays     = 0;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -62,21 +51,11 @@ void StMuDst::unset() {
 void StMuDst::set(StMuDstMaker* maker) {
   DEBUGMESSAGE2("");
   if (!maker) { DEBUGVALUE(maker); return;}
-  for ( int i=0; i<__NARRAYS__; i++) {
-    arrays[i] = maker->mArrays[i];
-  }
-  for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
-    strangeArrays[i] = maker->mStrangeArrays[i];
-  }
-  for ( int i=0; i<__NEMCARRAYS__; i++) {
-    emcArrays[i] = maker->mEmcArrays[i];
-  }
-  for ( int i=0; i<__NPMDARRAYS__; i++) {
-    pmdArrays[i] = maker->mPmdArrays[i];
-  }
-  for ( int i=0; i<__NTOFARRAYS__; i++) {
-    tofArrays[i] = maker->mTofArrays[i];
-  }
+  arrays        = maker->mArrays;
+  strangeArrays = maker->mStrangeArrays;
+  emcArrays     = maker->mEmcArrays;
+  pmdArrays     = maker->mPmdArrays;
+  tofArrays     = maker->mTofArrays;
 
   StStrangeEvMuDst* ev = strangeEvent();
   int nV0s = v0s()->GetEntries(); for (int i=0;i<nV0s; i++) v0s(i)->SetEvent(ev); // set the pointer to the StStrangeEvMuDst which is not read from disk
@@ -94,27 +73,11 @@ void StMuDst::set(TClonesArray** theArrays,
                   TClonesArray** theTofArrays) 
 {
   DEBUGMESSAGE2("");
-  for ( int i=0; i<__NARRAYS__; i++) {
-    arrays[i] = theArrays[i];
-  }
-  for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
-    strangeArrays[i] = theStrangeArrays[i];
-  }
-  if (theEmcArrays) {
-    for ( int i=0; i<__NEMCARRAYS__; i++) {
-      emcArrays[i] = theEmcArrays[i];
-    }
-  }
-  if (thePmdArrays) {
-    for ( int i=0; i<__NPMDARRAYS__; i++) {
-      pmdArrays[i] = thePmdArrays[i];
-    }
-  }
-  if (theTofArrays) {
-    for ( int i=0; i<__NTOFARRAYS__; i++) {
-      tofArrays[i] = theTofArrays[i];
-    }
-  }
+  arrays        = theArrays;
+  strangeArrays = theStrangeArrays;
+  emcArrays     = theEmcArrays;
+  pmdArrays     = thePmdArrays;
+  tofArrays     = theTofArrays;
 }
 
 //-----------------------------------------------------------------------
@@ -354,6 +317,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.27  2004/04/20 18:41:20  perev
+ * Change arrays to pointer to StMuDstMaker::arrays StMuDst.h
+ *
  * Revision 1.26  2004/04/14 17:15:56  subhasis
  * Xin's TOF reinclusion
  *
