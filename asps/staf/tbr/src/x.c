@@ -39,12 +39,12 @@
 #define BUF 1000
 /******************************************************  GLOBALS  **/
 extern int gNDs;
-extern char gStr[100]; /* there may be some need to match size of memory
-    ** for gStr with gStr in dsu, but probably not. */
+extern char dsu_gStr[100]; /* there may be some need to match size of memory
+    ** for dsu_gStr with dsu_gStr in dsu, but probably not. */
 int gCallBackData,gOutType,gTruncateStrings=7;
 FILE *gDump;
 int gLastWhWin=-10,gDone2;
-extern int gDone;
+extern int dsu_gDone;
 int gBlurb2,gBlurb1;
 char *gColor;
 char *gBlurb7="Click on the 2-letter abbre\n\
@@ -418,7 +418,7 @@ void FinishThisMenu(Widget mbar,Widget mpane,char *menuName) {
   XtManageChild(cas);
 }
 void QuitCB(Widget w,caddr_t cld,caddr_t cad) {
-  gDone=7;
+  dsu_gDone=7;
 }
 void Complain5(void) {
  Sss("\
@@ -504,7 +504,7 @@ int UserMod(char *tableName,char *xx) {
   gDone2=0;
   for(;;) { /* un-main loop */
     XtAppNextEvent(gAppCon,&event); XtDispatchEvent(&event);
-    if(gDone||gDone2) break;
+    if(dsu_gDone||gDone2) break;
   }
   XtPopdown(gCutsPopup);
   if(gDone2>10) return FALSE; /* User cancelled. */
@@ -728,7 +728,7 @@ void RunHistFill(size_t row) {
   if(hist>=HIST||hist<0) {
     PP"Table browser fatal error 711p.\n");
     PP"hist=%d, HIST=%d, gMax=%e, gMin=%e\n",hist,HIST,gMax,gMin);
-    gDone=7; return;
+    dsu_gDone=7; return;
   }
   gHist[hist]++;
 }
@@ -759,7 +759,7 @@ void RunValue(size_t row) {
     sprintf(buf,"%s%6d",gSumCol,row+1);
     if(strlen(buf)!=EXT) {
       PP"Table browser fatal error 611p.\n");
-      PP"buf=%s, len should be %d.\n",buf,EXT); gDone=7; return;
+      PP"buf=%s, len should be %d.\n",buf,EXT); dsu_gDone=7; return;
     }
   }
   if(!gTruncateStrings) strcat(buf," ");
@@ -776,14 +776,16 @@ void RunValue(size_t row) {
     sprintf(format,"%%%ds",WIDE);
     if(gVWType==VWSTRING) {
       if(gTruncateStrings) {
-        gStr[WIDE-1]='\0';
-        for(tt=WIDE-2;tt>=0;tt--) { if(gStr[tt]!=' ') break; gStr[tt]='\0'; }
+        dsu_gStr[WIDE-1]='\0';
+        for(tt=WIDE-2;tt>=0;tt--) {
+          if(dsu_gStr[tt]!=' ') break; dsu_gStr[tt]='\0';
+        }
       } else {
-        for(tt=strlen(gStr)-1;tt>=0;tt--) 
-              { if(gStr[tt]!=' ') break; gStr[tt]='\0'; }
-        strcat(gStr," ");
+        for(tt=strlen(dsu_gStr)-1;tt>=0;tt--) 
+              { if(dsu_gStr[tt]!=' ') break; dsu_gStr[tt]='\0'; }
+        strcat(dsu_gStr," ");
       }
-      sprintf(tt2,format,gStr);
+      sprintf(tt2,format,dsu_gStr);
     } else if(gVWType==VWNUMBER) {
       if(gOutType==15) {
         sprintf(tmp," %g",val);
@@ -1251,7 +1253,7 @@ void SetHilite(int control,int whWin,int lineNum) {
       if(strlen(tmp)+strlen(buf)>WIDE*MCOL+EXT) {
         PP"Table browser fatal error 712p.\n");
         PP"This is error 91P. %d + %d > %d, MCOL = %d.\n",
-        strlen(tmp),strlen(buf),WIDE*MCOL+EXT,MCOL); gDone=7; return;
+        strlen(tmp),strlen(buf),WIDE*MCOL+EXT,MCOL); dsu_gDone=7; return;
       } strcat(buf,tmp);
     } /* loop over hlLstIx */
     if(doReturn) return; gWin[whWin]->textOutput[0]='\0';
@@ -1596,7 +1598,7 @@ void DoXStuff(void) {
   if(!gDisplay) {
     PP"STAR Table Browser is an X-windows program.\n");
     PP"I can't open a display.\n");
-    PP"Have you set your DISPLAY env var?\n"); gDone=7; return;
+    PP"Have you set your DISPLAY env var?\n"); dsu_gDone=7; return;
   }
   nn=0;
   PP"XtAppCreateShell()\n");
@@ -1622,6 +1624,6 @@ void DoXStuff(void) {
       }
     }
     XtDispatchEvent(&event);    /* Vol1 p509 */
-    if(gDone) break;
+    if(dsu_gDone) break;
   }
 }

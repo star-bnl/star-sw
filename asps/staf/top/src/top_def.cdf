@@ -144,7 +144,7 @@ CUTFUNC 'Cut specification.' C
 >GUIDANCE
 Create and register a new topCut agent.
 
-This is the first step in making dynamic table cuts and/or filters.
+This is the first step in making table cuts and/or filters.
 
 Example: 
           TOP/NEWCUT slowPions pid.eq.5.and.invpt.gt.1.12e3
@@ -152,7 +152,7 @@ In this case 'slowPions' is the name of the agent; you will need this
 name in the second step.
 The identifiers 'pid' and 'invpt' are column names.
 
-To apply this cut use either TOP/CUTAGENT/FILTER or TOP/CUTAGENT/CUT.
+For the second step, use either TOP/CUTAGENT/FILTER or TOP/CUTAGENT/CUT.
 .
 >ACTION KAM_TOP_NEWCUT
 

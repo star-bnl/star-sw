@@ -470,7 +470,7 @@ STAFCV_T topJoin:: reset() {
 topFactory:: topFactory()
 		: socFactory()
 		, socObject() {
-   EML_MESSAGE(topFactory -- NULL Creator);
+   EML_MESSAGE("topFactory -- NULL Creator\n");
 }
 
 //:---------------------------------
