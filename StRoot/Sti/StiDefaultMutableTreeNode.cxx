@@ -133,7 +133,7 @@ void StiDefaultMutableTreeNode::remove(int childIndex)
 //--------------------------------------------------------------
 void StiDefaultMutableTreeNode::setParent(StiTreeNode *  newParent) 
 {
-  parent = newParent;
+    parent = newParent;
 }
 
 //--------------------------------------------------------------
@@ -1018,3 +1018,6 @@ StiDefaultMutableTreeNode::appendChildrenToVector(
 	//else
 	//cout << "appendChildrenToVector : node has no children " << endl;
 }
+
+//Global Utility function:
+

@@ -126,7 +126,8 @@ void StiCompositeSeedFinder::build()
 	for (vector<unsigned int>::const_iterator sector=theSectors.begin(); sector!=theSectors.end();
 	     ++sector) {
 	    char szBuf[100];
-	    sprintf(szBuf, "Tpc/Padrow_%d/Sector_%d", *padrow, *sector);
+	    sprintf(szBuf, "Tpc/Padrow_%d/Sector_%d",
+		    static_cast<int>(*padrow), static_cast<int>(*sector));
 	    StiDetector* layer = StiDetectorFinder::instance()->findDetector(szBuf);
 	    if (!layer) {
 		cout <<"gTrackSeedFinderBuilder(). ERROR:\t";
@@ -138,7 +139,7 @@ void StiCompositeSeedFinder::build()
 	}
     }
     
-    //sf->print();        
+    //sf->print();
     mSeedVec.push_back(sf);
     
     return;
