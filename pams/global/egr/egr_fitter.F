@@ -82,6 +82,7 @@ C ---------------------------------------------------------------------
       INTEGER malloc
       INTEGER imsg,imsgw
       INTEGER imsg1,imsg2,imsg3,imsg4,imsg5,imsg6,imsg7,imsg8
+      INTEGER nqwe,locf,ifull
       CHARACTER*132 errmsg,msg
       REAL covar(3,3),rfirst,rlast,r
       DATA imsg,imsgw,imsg1,imsg2,imsg3 /5*0/
@@ -117,26 +118,11 @@ CCC  L. Ray, 9/16/98
       endif
       i = abs(loc(gtrk(2))-loc(gtrk(1)))
       gtrk_p = malloc(mxtrack*i)
+      call vzero(gtrk(1),(mxtrack*i)/4)
       tpcmc_p = malloc(mxtrack*4)
       svt_p = malloc(mxtrack*4)
       tpc_p = malloc(mxtrack*4)
 
-
-
-      do i = 1,mxtrack
-         gtrk(i).nhit         = 0
-         gtrk(i).nfit         = 0
-         gtrk(i).flag         = 0
-         gtrk(i).ntpc         = 0
-         do j = 1,mxpnt
-            gtrk(i).ipnt(j)   = 0
-            gtrk(i).pos(j)    = 0
-            gtrk(i).det(j)    = 0
-         end do
-         do j = 1,9
-            gtrk(i).p(j)      = 0.0
-         end do
-      end do
 
 C  Use the egrpar(1).scenario variable to set the running schem
 
@@ -279,10 +265,11 @@ C  Abort if the TPC is needed but there are no TPC tracks
          do ithit=1,tphit_h.nok        ! Loop over number of hits
             tphit(ithit).id_globtrk = 0     !  Zero out F.key - L. Ray 9/16/98
             itrk = tphit(ithit).track/1000
-            if (itrk.ge.1.and.itrk.le.mxtrack) then
+*VP*        if (itrk.ge.1.and.itrk.le.mxtrack) then
+            if (itrk.ge.1.and.itrk.le.tptrack_h.nok) then !!!*VP*
                ient = tphit(ithit).track - itrk*1000
                if (ient.ge.1.and.ient.le.mxpnt_tpc) then
-                  if ( gtrk(itrk).nhit .le. mxpnt_tpc) then
+                  if ( gtrk(itrk).nhit .lt. mxpnt_tpc) then  !!*VP*
                      gtrk(itrk).ipnt(ient) = ithit
                      gtrk(itrk).pos(ient) = ient
                      gtrk(itrk).det(ient) = 1
@@ -297,7 +284,8 @@ C  Abort if the TPC is needed but there are no TPC tracks
                   endif
                endif
             else
-               if (itrk.gt.mxtrack) then
+*VP*           if (itrk.gt.mxtrack) then
+               if (itrk.gt.tptrack_h.nok) then		!!*VP*
                   write (errmsg,'(A45,I8)')
      +                 ' EGR_REFITTER-W: track id out of range',
      +                 tphit(ithit).track
@@ -307,7 +295,6 @@ C  Abort if the TPC is needed but there are no TPC tracks
          enddo                  ! Loop over ithit
       endif                     ! usetpc.gt.0
  
-
       if (egrpar(1).usevert.eq.1.or.egrpar(1).usevert.eq.-2) then
          ipriv=1
       else
@@ -326,8 +313,8 @@ C  Abort if the TPC is needed but there are no TPC tracks
             jj=0
             do while (j.le.tpeval_h.nok.and.jj.eq.0)
                if (tpeval(j).rtrk.eq.tptrack(itpct).id) then
-                  tpcmc(itpct) = tpeval(j).mtrk
-                  jj=1
+                 tpcmc(itpct) = tpeval(j).mtrk
+                 jj=1
                endif
                j = j+1
             enddo
@@ -347,7 +334,11 @@ c     Fill tracks
 
                if( egrpar(1).usesvt .eq. 0 .and. 
      +              egrpar(1).usetpc .eq. 0) then
+		  ifull = 1
+		  if (globtrk_h.nok .ge. globtrk_h.maxlen) go to 1313
                   globtrk_h.nok = globtrk_h.nok + 1
+		  ifull = 2
+		  if (globtrk_aux_h.nok .ge. globtrk_aux_h.maxlen) go to 1313
                   globtrk_aux_h.nok = globtrk_aux_h.nok + 1
                   igtrk = globtrk_h.nok
                   globtrk(igtrk).id= igtrk
@@ -387,6 +378,7 @@ c     Fill tracks
                   globtrk(igtrk).chisq(2)=svt_track(svt(isvtt)).chisq(2)
 C     Now find first point on track
                   rfirst = 99999.
+
                   do ishit = 1,svt_group_h.nok
                      if( svt_group(ishit).id1 .eq.
      +                    svt_track(svt(isvtt)).id) then
@@ -506,7 +498,6 @@ c     mark spts as used
      +              svt_spt,covar,itpct,isvtt,ipriv)
                
 c     mark spts as used
-               
                do ient = 1, gtrk(itpct).nfit
                   if( gtrk(itpct).det(ient) .eq. 1) then
                      ithit = gtrk(itpct).ipnt(ient)
@@ -519,7 +510,11 @@ c     mark spts as used
                
             else                ! egrpar(1).useglobal=3
                
+	       ifull = 1
+	       if (globtrk_h.nok .ge. globtrk_h.maxlen) go to 1313
                globtrk_h.nok = globtrk_h.nok + 1
+	       ifull = 2
+	       if (globtrk_aux_h.nok .ge. globtrk_aux_h.maxlen) go to 1313
                globtrk_aux_h.nok = globtrk_aux_h.nok + 1
                igtrk = globtrk_h.nok
                globtrk(igtrk).id=igtrk              
@@ -654,10 +649,12 @@ C     Loop through unmatched TPC tracks here.  Straight copy of tptrack.
       if( egrpar(1).usetpc .gt. 0) then
          isvtt = 0
          do itrk = 1,tptrack_h.nok
+
             if( tptrack(itrk).id_globtrk.eq.0 .and.
      +           tptrack(itrk).invp .ne. 0.0   .and.
      +           tptrack(itrk).flag .gt. 0) then
 C     +           tptrack(itrk).nrec .gt. 10 )    then
+
                
                if( egrpar(1).usetpc .gt. 1) then
                   
@@ -674,7 +671,11 @@ C     +           tptrack(itrk).nrec .gt. 10 )    then
 
 
                   gtrk(itrk).nfit = tptrack(itrk).nfit
+		  ifull = 1
+		  if (globtrk_h.nok .ge. globtrk_h.maxlen) go to 1313
                   globtrk_h.nok = globtrk_h.nok + 1
+		  ifull = 2
+		  if (globtrk_aux_h.nok .ge. globtrk_aux_h.maxlen) go to 1313
                   globtrk_aux_h.nok = globtrk_aux_h.nok + 1
 
                   iglob = globtrk_h.nok
@@ -752,10 +753,10 @@ C     Now find last point on track and calculate track length.
                   globtrk(iglob).id_smd = 0 
 
                endif            ! End of egrpar(1).perfect .ne. 1
-               do ient = 1, gtrk(itrk).nfit
+               do ient = 1, gtrk(itrk).ntpc
                   if( ient .le .mxpnt_tpc) then
                      ithit = gtrk(itrk).ipnt(ient)
-                     tphit(ithit).id_globtrk = globtrk_h.nok
+		     if (ithit.ne.-999) tphit(ithit).id_globtrk = globtrk_h.nok
                   endif
                enddo
                tptrack(itrk).id_globtrk = globtrk_h.nok
@@ -775,7 +776,11 @@ C     Now loop over unmatched SVT tracks.  Straight svt_track copy.
      +              egrpar(1).svtchicut) then ! only copy good SVT tracks
                   if( egrpar(1).usesvt .eq. 1) then
 
+		     ifull = 1
+		     if (globtrk_h.nok .ge. globtrk_h.maxlen) go to 1313
                      globtrk_h.nok = globtrk_h.nok + 1
+		     ifull = 2
+		     if (globtrk_aux_h.nok .ge. globtrk_aux_h.maxlen) go to 1313
                      globtrk_aux_h.nok = globtrk_aux_h.nok + 1
                      iglob = globtrk_h.nok
                      rlast = 0.
@@ -925,13 +930,16 @@ CCC  L.Ray - 9/16/98
              
       egr_fitter = STAFCV_OK
 
-      call free(gtrk_p)
+ 999  call free(gtrk_p)
       call free(tpcmc_p)
       call free(svt_p)
       call free(tpc_p)
 
       
       return
+1313  write(*,*) '***Error*** GLOBTRK(',globtrk_h.maxlen,') OVERFULL'
+      egr_fitter = STAFCV_BAD
+      goto 999
       end
       
 
