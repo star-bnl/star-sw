@@ -9,5 +9,10 @@
 *-------------------------------------------------------------------------
 * This section creates the teff table
 *-------------------------------------------------------------------------
-message 'making the ste teff table...'
-newtable ste_teff ste_teff 1
+ macro init
+   macro/global/import *
+     
+  message 'init_ste'
+  newtable ste_teff ste_teff 1
+  
+  return

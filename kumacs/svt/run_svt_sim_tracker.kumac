@@ -15,6 +15,7 @@
 * 7/14/98 - K. Turner - change to use bfc_defaults instead of bfc_star
 * 7/30/98 - K. Turner - change to use new utility kumacs
 * 8/10/98 - K. Turner - added nid to call to write_table_to_ntuple#close_disk
+* 8/10/98 - K. Turner - fixed up init calls
 * *************************************************
  
  MACRO run _
@@ -117,8 +118,8 @@
  if [svt_tracker].eq.stk .or. [svt_tracker].eq.sgr then
    exec create_tables_svt#sgr
    exec create_tables_svt#stk
-   exec init_stk
    exec init_sgr
+   exec init_stk
  endif
  
  
@@ -136,20 +137,24 @@
    message 'cpu time is ' $cptime
 * SVT detector response simulation
     if [svt_simul]= sss then
-      exec svt_slow_sim#process_event
+      exec run_sss
+      exec run_ssf
       if (staf_status(1) .ne. 1) goto NEXT_EVENT
     elseif [svt_simul]= srs then
-      exec svt_fast_sim#process_event
-      if (staf_status(1) .ne. 1) goto NEXT_EVENT
+       exec run_srs  
+       if (staf_status(1) .ne. 1) goto NEXT_EVENT
     else
       message ' SVT simulator not valid!!'
     endif
 * SVT track finding and momentum reconstruction -----------------------
     if [svt_tracker]= stk then
-      exec svt_tracker#process_event_stk 
+      exec run_stk#vtx
+      exec run_stk#run
         if (staf_status(1) .ne. 1) goto NEXT_EVENT
     elseif [svt_tracker]=sgr then
-      exec svt_tracker#process_event_sgr
+      exec run_stk#vtx
+      exec run_sgr#run
+      exec run_stk#run
         if (staf_status(1) .ne. 1) goto NEXT_EVENT
     else
       message ' svt_tracker not valid! '
