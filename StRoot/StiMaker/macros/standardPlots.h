@@ -1,9 +1,13 @@
 /*
- * $Id: standardPlots.h,v 1.5 2002/08/19 19:33:20 pruneau Exp $
+ * $Id: standardPlots.h,v 1.6 2002/08/26 22:17:16 andrewar Exp $
  * A. Rose, WSU
  *
  *
  * $Log: standardPlots.h,v $
+ * Revision 1.6  2002/08/26 22:17:16  andrewar
+ * Added multi-file input functionality (see doRun() for examples of use). Added
+ * cut string to provided easy equivalence of cut function in on-the-fly hists.
+ *
  * Revision 1.5  2002/08/19 19:33:20  pruneau
  * eliminated cout when unnecessary, made helix member of the EventFiller
  *
@@ -37,9 +41,11 @@
    const Int_t kMaxmGhostPairs = 1;
    const Int_t kMaxmContamPairs = 1;
 
+class TSystem;
+
 class standardPlots {
    public :
-   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
+   TChain          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
 //Declaration of leaves types
    Int_t           mEventId;
@@ -631,8 +637,10 @@ class standardPlots {
    TBranch        *b_fUniqueID;   //!
    TBranch        *b_fBits;   //!
 
-   standardPlots(TTree *tree,char* infile="/star/data22/ITTF/EvalData/MCNtuple/auau200.rcf0183_12.190.root");
-   standardPlots(char* infile="/star/data22/ITTF/EvalData/MCNtuple/auau200.rcf0183_12.190.root");
+   standardPlots(TSystem* mSystem,
+		 char* path="/star/data22/ITTF/EvalData/MCNtuple/",
+		 char* file="*evts.minimc.root");
+
    ~standardPlots();
 
    //cut arrays
@@ -641,9 +649,13 @@ class standardPlots {
    float  ptCut[2];
    float  etaCut[2];
    float  nHitCut[2];
+   float  nHitACut[2];
    float  dca[2];
+   float  geantId;
    float  primary;
    float  global;
+   char   rcTrackCutString[300];
+   char   mcTrackCutString[300];
 
    Int_t iEntry;
    Int_t nentries;
@@ -652,58 +664,148 @@ class standardPlots {
 
    Int_t  GetEntry(Int_t entry);
    Int_t  LoadTree(Int_t entry);
-   void   Init(TTree *tree);
+   void   Init(TChain *tree);
+   void   InitHists();
    void   Loop();
    Bool_t Notify();
    void   Show(Int_t entry = -1);
 
-   void    SetEventCutMult(float low, float high){multCut[0]=low;multCut[1]=high;};
-   void    SetEventCutZ(float low, float high){zCut[0]=low;zCut[1]=high;};
-   Int_t  Cut(Int_t entry);
+   void    SetEventCutMult(float low, float high)
+          {multCut[0]=low;multCut[1]=high;
+	  makeRcTrackCutString();makeMcTrackCutString();};
+   void    SetEventCutZ(float low, float high)
+          {zCut[0]=low;zCut[1]=high;
+	  makeRcTrackCutString();makeMcTrackCutString();};
+    Int_t  Cut(Int_t entry);
 
-   void    SetTrackCutPt(float low, float high){ptCut[0]=low;ptCut[1]=high;};
-   void    SetTrackCutEta(float low, float high){etaCut[0]=low;etaCut[1]=high;};
-   void    SetTrackCutNHit(float low, float high){nHitCut[0]=low;nHitCut[1]=high;};   
-   void    SetTrackCutDca(float low, float high){dca[0]=low;dca[1]=high;};
+   void    SetTrackCutPt(float low, float high)
+           {ptCut[0]=low;ptCut[1]=high;
+	    makeRcTrackCutString();makeMcTrackCutString();};
+   void    SetTrackCutEta(float low, float high)
+           {etaCut[0]=low;etaCut[1]=high;
+	    makeRcTrackCutString();makeMcTrackCutString();};
+   void    SetTrackCutNHit(float low, float high)
+           {nHitCut[0]=low;nHitCut[1]=high;
+	    makeRcTrackCutString();makeMcTrackCutString();};
+   void    SetTrackCutNAHit(float low, float high)
+           {nHitACut[0]=low;nHitACut[1]=high;
+	    makeRcTrackCutString();makeMcTrackCutString();};
+   void    SetTrackCutDca(float low, float high)
+           {dca[0]=low;dca[1]=high;
+	    makeRcTrackCutString();makeMcTrackCutString();};
+   void    SetTrackCutId(int Id)
+           {geantId=Id;
+	    makeRcTrackCutString();makeMcTrackCutString();};
+   
    int    trackCut(int entry, int track);
    int    mcTrackCut(int entry, int track);
    void   showCuts();
+   void   makeMcTrackCutString();
+   void   makeRcTrackCutString();
+
 
    //functions to make plots
-   void   makeTrackEffPlots();
+   void   makeTrackEffPlots(int nEvents);
    void   makeMomentumPlots();
    void   makeHitEffPlots();
    void   makeFitPointsPlots();
+   void   makeGeantIdPlots();
+
+   //hist pointers
+
+   TProfile* primaryTrackEff;
+   TH1D* primaryTrackEffEta;
+   TH1D* primaryTrackEffPt;
+   TProfile* primaryTrackEffMult;
+
+   TH1D* primaryTrackPt;
+   TH1D* primaryTrackEta;
+   TH1D* mcTrackEffPt;
+   TH1D* mcTrackEffEta;
+
+   TProfile *hitEffMult;
+   TProfile *hitEffPt;
+   TProfile *hitEffEta;
+   TH1D  *hitN;
+   TH1D  *lastHit;
+   TH1D  *firstHit;
+   TProfile *lastHitPt;
+   TProfile *firstHitPt;
+   TProfile *lastHitEta;
+   TProfile *firstHitEta;
+
+   TH1D* fitPointsPlot;
+   TH1D* fitPointsUsed;
+   TH1D* fitPointsPossible;
+   TProfile *fitPointsPt;
+   TProfile *fitPointsEta;
+
+   TH1D* mGeantIdPlot;
+
 };
 
 #endif
 
 #ifdef standardPlots_cxx
-standardPlots::standardPlots(char* infile)
+standardPlots::standardPlots(TSystem *mSystem,char* path, char* file)
 {
-  TTree *dummy=0;
-  standardPlots(dummy, infile);
-}
-standardPlots::standardPlots(TTree *tree, char* infile)
-{
-// if parameter tree is not specified (or zero), connect the file
-// used to generate this class and read the Tree.
-   if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(infile);
-      if (!f) {
-         f = new TFile(infile);
+  //TTree *dummy=0;
+  //standardPlots(dummy, infile);
+
+  //TSystem *mSystem = new TSystem("mSystem","Current Sys");
+
+  //make file list from provided path
+  const char *fileListQQ[]={0,0};
+    if (strncmp(path,"GC",2)==0) {
+      //fileListQQ=0;
+    } else if (path[0]=='-') {
+	fileListQQ[0]=file;
+    } else if (!file[0]) {
+	fileListQQ[0]=path;
+    } else {
+	fileListQQ[0] = mSystem->ConcatFileName(path,file);
+    }
+
+    //open files and add to chain
+    int iList=0;
+    TChain *tree = new TChain("StMiniMcTree");
+    while(fileListQQ[iList])
+      {
+	cout <<"Adding file " <<fileListQQ[iList]<<endl;
+        tree->Add(fileListQQ[iList]);
+	iList++;
       }
-      tree = (TTree*)gDirectory->Get("StMiniMcTree");
 
-   }
-   Init(tree);
+    Init(tree);
+    InitHists();
+    cout<<"Total Files: "<<iList<<endl;
+    cout <<"Total Entries: "<<tree->GetEntries()<<endl;
 
-   SetTrackCutPt(0.,20.);
-   SetTrackCutEta(-1.5,1.5);
-   SetTrackCutNHit(25.,55.);
+
+// standardPlots::standardPlots(TTree *tree, char* infile) */
+// { */
+// // if parameter tree is not specified (or zero), connect the file */
+// // used to generate this class and read the Tree. */
+//    if (tree == 0) { */
+//       TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(infile); */
+//       if (!f) { */
+//          f = new TFile(infile); */
+//       } */
+//       tree = (TTree*)gDirectory->Get("StMiniMcTree"); */
+
+//    } */
+//    Init(tree); */
+
+
+   //set inital cuts 
+   SetTrackCutPt(0.,20.); 
+   SetTrackCutEta(-1.5,1.5); 
+   SetTrackCutNHit(25.,55.); 
+   SetTrackCutNAHit(10.,55.); 
    SetTrackCutDca(0.,20.);
-   SetEventCutMult(0.,10000.);
-   SetEventCutZ(-30.,30.);
+   SetTrackCutId(8);
+   SetEventCutMult(0.,10000.); 
+   SetEventCutZ(-30.,30.); 
 }
 
 standardPlots::~standardPlots()
@@ -734,7 +836,7 @@ Int_t standardPlots::LoadTree(Int_t entry)
    return centry;
 }
 
-void standardPlots::Init(TTree *tree)
+void standardPlots::Init(TChain *tree)
 {
 //   Set branch addresses
    if (tree == 0) return;
@@ -1038,6 +1140,42 @@ void standardPlots::Init(TTree *tree)
    Notify();
 }
 
+void standardPlots::InitHists()
+{
+
+  cout <<"InitHists(): Initializing hists"<<endl;
+   primaryTrackEff=new TProfile("primaryTrackEff","Sti PrimaryTracks vs. Mc PrimaryTracks",100,0,MAX_TRACKS);
+   primaryTrackEffEta=new TProfile("primaryTrackEffEta","Sti PrimaryTracks vs. Mc PrimaryTracks",100,0,MAX_TRACKS);
+   primaryTrackEffPt=new TProfile("primaryTrackEffPt","Sti PrimaryTracks vs. Mc PrimaryTracks",100,0,MAX_TRACKS);
+   primaryTrackEffMult=new TProfile("primaryTrackEffMult","PrimaryTrack Finding Efficiency vs. McMult",100,0,MAX_TRACKS);
+
+   primaryTrackPt=new TH1D("primaryTrackPt","PrimaryTrack Pt",100,0,5);
+   primaryTrackEta=new TH1D("primaryTrackEta","PrimaryTrack Eta",100,-1,1);
+   mcTrackEffPt=new TH1D("mcTrackEffPt","McTrack Pt",100,0,5);
+   mcTrackEffEta=new TH1D("mcTrackEffEta","McTrack Eta",100,-1,1);
+
+  
+   hitEffMult=new TProfile("hitEffMult","Hit Shared / N Hits Possible", 50, 0, MAX_TRACKS);
+   hitEffPt=new TProfile("hitEffPt","Hit Shared / N Hits Possible", 50, 0, 5);
+   hitEffEta=new TProfile("hitEffEta","Hits Shared with MC Track / N Hits Possible", 50, -1.5,1.5);
+   hitN = new TH1D("hitN","Number of Hits on Track", 56,0,55);
+   lastHit = new TH1D("lastHit","Max hit Padrow",56,0,55);
+   firstHit= new TH1D("firstHit","Min hit Padrow",56,0,55);
+   lastHitPt=new TProfile("lastHitPt","Max padrow vs. Pt",100,0,5);;
+   firstHitPt=new TProfile("firstHitPt","Min padrow vs. Pt",100,0,5);;
+   lastHitEta=new TProfile("lastHitEta","Max padrow vs. Eta",100,0,5);;
+   firstHitEta=new TProfile("firstHitEta","Min padrow vs. Eta",100,0,5);;
+
+  //fit point plots
+  fitPointsPlot     = new TH1D("fitPointsPlot","Number of Fit Points / Number Possible", 50, 0,1);
+  fitPointsUsed     = new TH1D("fitPointsUsed","Number of Fit Points Used", 50, 0, 50);
+  fitPointsPossible = new TH1D("fitPointsPossible","Number of Fit Points Possible", 50, 0,50);
+  fitPointsPt  = new TProfile("fitPointsPt","Number of Fit Points vs. Pt",100,0,5);
+  fitPointsEta = new TProfile("fitPointsEta","Number of Fit Points vs. Eta",100,0,5);
+
+  mGeantIdPlot = new TH1D("mGeantIdPlot","GeantId",40,0,39);
+
+}
 Bool_t standardPlots::Notify()
 {
    // Called when loading a new file.
@@ -1369,9 +1507,25 @@ int standardPlots::trackCut(int entry, int track)
      && mMatchedPairs_mNCommonHit[track] > nHitCut[0] 
      && mMatchedPairs_mNCommonHit[track] < nHitCut[1]
      && mMatchedPairs_mDcaGl[track]      > dca[0] 
-     && mMatchedPairs_mDcaGl[track]      < dca[1]) return 1;
+     && mMatchedPairs_mDcaGl[track]      < dca[1]
+     && (mMatchedPairs_mGeantId[track]   == (short int)geantId
+	 ||mMatchedPairs_mGeantId[track] == 0)
+     ) return 1;
+
 
    return 0;
+}
+void standardPlots::makeRcTrackCutString()
+{
+  cout<<" Making reconstructed track cut string."<<endl;
+  //char* tmpString = "mMatchedPairs.mPtPr > %d && mMatchedPairs.mPtPr < %d  && mMatchedPairs.mEtaPr > %d && mMatchedPairs.mEtaPr < %f && mMatchedPairs.mNCommonHit > %f && mMatchedPairs.mNCommontHit < %f mMatchedPairs.mDcaGl > %f && mMatchedPairs.mDcaGl < %f";
+
+  (void)sprintf(rcTrackCutString, 
+		"mMatchedPairs.mPtPr > %f && mMatchedPairs.mPtPr < %f  && mMatchedPairs.mEtaPr > %f && mMatchedPairs.mEtaPr < %f && mMatchedPairs.mNCommonHit > %f && mMatchedPairs.mNCommontHit < %f mMatchedPairs.mDcaGl > %f && mMatchedPairs.mDcaGl < %f",
+		ptCut[0], ptCut[1], 
+	        etaCut[0], etaCut[1],
+	        nHitCut[0], nHitCut[1],
+	        dca[0],dca[1]);
 }
 
 int standardPlots::mcTrackCut(int entry, int track)
@@ -1385,11 +1539,25 @@ int standardPlots::mcTrackCut(int entry, int track)
      &&mMcTracks_mEtaMc[track]       < etaCut[1]) 
      &&mMcTracks_mNHitMc[track]      > nHitCut[0] 
      && mMcTracks_mNHitMc[track]     < nHitCut[1] 
-     &&mMcTracks_mChargeMc[track]!=0)
+     &&mMcTracks_mChargeMc[track]    !=0
+     &&(mMcTracks_mGeantId[track]    ==geantId
+	|| mMcTracks_mGeantId[track] ==0))
      return 1;
 
    return 0;
 }
+
+void standardPlots::makeMcTrackCutString()
+{
+  cout<<" Making Monte Carlo track cut string."<<endl;
+  // char* tempString = "mMcTracks.mPtMc > %f && mMcTracks.mPtPc < %f && mMcTracks.mEtaMc > %f && mMcTracks.mEtaMc < %f && mMcTracks.mNHitMc > %f && mMcTracks.mNHitMc < %f && mMcTracks.mChargeMc != 0";
+  (void)sprintf(mcTrackCutString, 
+		"mMcTracks.mPtMc > %f && mMcTracks.mPtPc < %f && mMcTracks.mEtaMc > %f && mMcTracks.mEtaMc < %f && mMcTracks.mNHitMc > %f && mMcTracks.mNHitMc < %f && mMcTracks.mChargeMc != 0",
+		ptCut[0], ptCut[1], 
+	        etaCut[0], etaCut[1],
+	        nHitCut[0], nHitCut[1]);
+}
+
 
 void standardPlots::showCuts()
 {
@@ -1404,7 +1572,12 @@ void standardPlots::showCuts()
        <<"\tEta :\t"
        <<"\t\t\t\t"<<etaCut[0]<<"\t"<<etaCut[1]<<endl
        <<"\tTpc Hits :\t"
-       <<"\t\t\t"<<nHitCut[0]<<"\t"<<nHitCut[1]<<endl;
+       <<"\t\t\t"<<nHitCut[0]<<"\t"<<nHitCut[1]<<endl
+       <<"\tAssociated Hits :\t"
+       <<"\t\t"<<nHitACut[0]<<"\t"<<nHitACut[1]<<endl
+       <<"\tGeant Id:\t"
+       <<"\t\t\t"<<geantId
+       <<endl;
 }
 #endif // #ifdef standardPlots_cxx
 
