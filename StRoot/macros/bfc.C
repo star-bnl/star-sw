@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.59 1999/05/21 23:25:40 didenko Exp $
+// $Id: bfc.C,v 1.60 1999/05/29 20:42:41 fine Exp $
 // $Log: bfc.C,v $
+// Revision 1.60  1999/05/29 20:42:41  fine
+// type fixed
+//
 // Revision 1.59  1999/05/21 23:25:40  didenko
 // Remove capital letters from Branch name because of HPSS
 //
@@ -456,7 +459,7 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar",Char_t *infile=0, C
   }
   if (ChainFlags[kMINIDAQ]) {// defined for ChainFlags[kMINIDAQ]
     chain->SetInput("BEGIN_RUN",".make/xdfin/.const/BEGIN_RUN");
-    chain->SetInput("ChainFlags[kTPC]_DATA",".make/xdfin/.data/ChainFlags[kTPC]_DATA");
+    chain->SetInput("TPC_DATA",".make/xdfin/.data/TPC_DATA");
   }
   if (ChainFlags[kGEANT]) {
     geant = new St_geant_Maker("geant");
