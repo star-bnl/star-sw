@@ -1,10 +1,7 @@
-// $Id: StAssociator.C,v 1.23 2001/04/09 18:04:50 calderon Exp $
+// $Id: StAssociator.C,v 1.24 2001/04/09 18:29:10 didenko Exp $
 // $Log: StAssociator.C,v $
-// Revision 1.23  2001/04/09 18:04:50  calderon
-// remove old DB comments
-//
-// Revision 1.22  2001/04/09 17:47:13  calderon
-// load StEmcUtil instead of St_emc_Maker
+// Revision 1.24  2001/04/09 18:29:10  didenko
+// add StEmcUtil
 //
 // Revision 1.21  2000/06/08 20:09:22  calderon
 // load St_emc_Maker to work with new Emc Hit classes
@@ -109,16 +106,23 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
     // Dynamically link needed shared libs
     gSystem->Load("St_base");
     gSystem->Load("StChain");
+//     gSystem->Load("St_Tables");
     gSystem->Load("libglobal_Tables");
     gSystem->Load("libsim_Tables");
     gSystem->Load("libgen_Tables");
     gSystem->Load("StUtilities");
+//     gSystem->Load("StDbLib");
+//     gSystem->Load("StDbBroker");
+//     gSystem->Load("St_db_Maker");
+//     gSystem->Load("StTpcDb");
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
+//     gSystem->Load("StDbUtilities");
     
     gSystem->Load("StEvent");
     gSystem->Load("StEventMaker"); 
     gSystem->Load("StEmcUtil");
+    gSystem->Load("St_emc_Maker");
     gSystem->Load("StMcEvent");
     gSystem->Load("StMcEventMaker");
     gSystem->Load("StAssociationMaker");
@@ -137,20 +141,28 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
     ioMaker->SetBranch("dstBranch",0,"r"); //activate Event Branch
     ioMaker->SetBranch("runcoBranch",0,"r"); //activate runco Branch
 
+//     const char *mainDB = "MySQL:Geometry_tpc";
+//     St_db_Maker *dbMk = new St_db_Maker("Geometry",mainDB);
+//     dbMk->SetDebug();
+    
+//     const char *calibDB = "MySQL:Calibrations_tpc";
+//     St_db_Maker *calibMk = new St_db_Maker("Calibrations",calibDB);
+//     calibMk->SetDebug();
+    
+//     StTpcDbMaker *tpcDbMk = new StTpcDbMaker("tpcDb");
+    
     // Note, the title "events" is used in the Association Maker, so don't change it.
     StEventMaker*       eventReader   = new StEventMaker("events","title");
     eventReader->doPrintMemoryInfo = kFALSE;
-    eventReader->doLoadTpcHits     = kFALSE;
     StMcEventMaker*     mcEventReader = new StMcEventMaker; // Make an instance...
 //     mcEventReader->doPrintMemoryInfo = kFALSE;
-     mcEventReader->doUseTpc = kFALSE;
+//     mcEventReader->doUseTpc = kTRUE;
 //     mcEventReader->doUseSvt = kTRUE;
 //     mcEventReader->doUseFtpc = kTRUE;
 //     mcEventReader->doUseRich = kTRUE;
     StAssociationMaker* associator    = new StAssociationMaker;
-    //associator->SetDebug();
     //associator->doPrintMemoryInfo = kTRUE;
-    //StMcAnalysisMaker*  examples      = new StMcAnalysisMaker;
+    StMcAnalysisMaker*  examples      = new StMcAnalysisMaker;
 
     // Define the cuts for the Associations
 
@@ -186,42 +198,42 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
      if (istat == 3) { cout << "Error Event Processed. Status = " << istat << endl; }
      iev++; goto EventLoop;
     } // Event Loop
-//     examples->mAssociationCanvas = new TCanvas("mAssociationCanvas", "Histograms",200,10,600,600);
-//     TCanvas* myCanvas = examples->mAssociationCanvas;
-//     myCanvas->Divide(2,2);
+    examples->mAssociationCanvas = new TCanvas("mAssociationCanvas", "Histograms",200,10,600,600);
+    TCanvas* myCanvas = examples->mAssociationCanvas;
+    myCanvas->Divide(2,2);
 
-//     myCanvas->cd(1);
-//     gPad->SetLogy(0);
-//     examples->mTrackNtuple->Draw("(p-prec)/p:commTpcHits","prec!=0");
+    myCanvas->cd(1);
+    gPad->SetLogy(0);
+    examples->mTrackNtuple->Draw("(p-prec)/p:commTpcHits","prec!=0");
 
-//     TList* dList = chain->GetMaker("StMcAnalysisMaker")->Histograms();
-//     TH2F* hitRes = dList->At(0);
-//     TH1F* momRes = dList->At(1);
-//     TH2F* coordRc = dList->At(2);
-//     TH2F* coordMc = dList->At(3);
-// //     TH2F* hitRes  = examples->mHitResolution;
-// //     TH1F* momRes  = examples->mMomResolution;
-// //     TH2F* coordRc = examples->coordRec;
-// //     TH2F* coordMc = examples->coordMcPartner;
+    TList* dList = chain->GetMaker("StMcAnalysisMaker")->Histograms();
+    TH2F* hitRes = dList->At(0);
+    TH1F* momRes = dList->At(1);
+    TH2F* coordRc = dList->At(2);
+    TH2F* coordMc = dList->At(3);
+//     TH2F* hitRes  = examples->mHitResolution;
+//     TH1F* momRes  = examples->mMomResolution;
+//     TH2F* coordRc = examples->coordRec;
+//     TH2F* coordMc = examples->coordMcPartner;
     
-//     myCanvas->cd(2);
-//     gPad->SetLogy(0);
-//     hitRes->Draw("box");
+    myCanvas->cd(2);
+    gPad->SetLogy(0);
+    hitRes->Draw("box");
 
-//     myCanvas->cd(3);
-//     gPad->SetLogy(0);
-//     momRes->Draw();
+    myCanvas->cd(3);
+    gPad->SetLogy(0);
+    momRes->Draw();
     
-//     myCanvas->cd(4);
-//     gPad->SetLogy(0);
-//     coordRc->SetMarkerStyle(20);
-//     coordRc->Draw();
+    myCanvas->cd(4);
+    gPad->SetLogy(0);
+    coordRc->SetMarkerStyle(20);
+    coordRc->Draw();
     
-//     myCanvas->cd(4);
-//     gPad->SetLogy(0);
-//     coordMc->SetMarkerColor(2);
-//     coordMc->SetMarkerStyle(20);
-//     coordMc->Draw("same");
+    myCanvas->cd(4);
+    gPad->SetLogy(0);
+    coordMc->SetMarkerColor(2);
+    coordMc->SetMarkerStyle(20);
+    coordMc->Draw("same");
     
     if(iev>200) chain->Finish(); // This should call the Finish() method in ALL makers,
                      // comment it out if you want to keep the objects
