@@ -288,7 +288,8 @@ C     +                +(trk1(3)-trk2(3))**2
                  xpp(1)=(xn1(1)+xn2(1))/2.
                  xpp(2)=(xn1(2)+xn2(2))/2.            
                  xpp(3)=(trk1(3)+trk2(3))/2.
-                 rv=sqrt(xpp(1)**2+xpp(2)**2+xpp(3)**2)
+                 rv=sqrt((xpp(1)-mainv(1))**2+
+     +                (xpp(2)-mainv(2))**2+(xpp(3)-mainv(3))**2)
 *     
 *---  decide here if it is a good candidate
 *  
