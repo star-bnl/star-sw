@@ -1,6 +1,9 @@
-//$Id: StLaserEvent.h,v 1.4 2000/04/24 14:28:03 love Exp $
+//$Id: StLaserEvent.h,v 1.5 2001/03/23 15:27:59 love Exp $
 // Header file for TPC Laser event - Bill Love
 //$Log: StLaserEvent.h,v $
+//Revision 1.5  2001/03/23 15:27:59  love
+//Updated README text
+//
 //Revision 1.4  2000/04/24 14:28:03  love
 //Added clock, drivel and tZero to event Header
 //
@@ -21,8 +24,10 @@
 //                                                                      //
 // StLaserEvent                                                         //
 //                                                                      //
-// Description of the event TTree                                       //
-// Track parameters are the tpt_track version                           //
+// Description of a TTree file for Laser Event analysis                 //
+// Works also for Cosmic Ray data                                       //
+// Each event has a header and TClonesArrays of tracks, hits and pixels //
+// hits that are on tracks carry the track Id and some track properties //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
@@ -45,6 +50,7 @@ private:
    Float_t ftZero;
    Float_t fDriVel;
    Float_t fClock;
+   Float_t fTrigger;
 
 
 public:
@@ -52,7 +58,9 @@ public:
    virtual ~EventHeader() { }
    void   Set(Int_t i, Int_t r, Int_t d) { fEvtNum = i; fRun = r; fDate = d; }
    void   SetE(Float_t tz, Float_t dv, Float_t ck) {
-        ftZero = tz; fDriVel = dv; fClock = ck; }
+          ftZero = tz; fDriVel = dv; fClock = ck; }
+   void   SetE(Float_t tz, Float_t dv, Float_t ck, Float_t tg) {
+          ftZero = tz; fDriVel = dv; fClock = ck; fTrigger = tg; }
    Int_t  GetEvtNum() const { return fEvtNum; }
    Int_t  GetRun() const { return fRun; }
    Int_t  GetDate() const { return fDate; }
@@ -92,7 +100,9 @@ public:
    void          SetFlag(UInt_t f) { fFlag = f; }
    void          SetHeader(Int_t i, Int_t run, Int_t date);
    void          SetHeader(Int_t i, Int_t run, Int_t date,
-                 Float_t tzero, Float_t drivel, Float_t clock);
+                 Float_t tzero, Float_t drivel, Float_t clock); 
+   void          SetHeader(Int_t i, Int_t run, Int_t date,
+              Float_t tzero, Float_t drivel, Float_t clock, Float_t trigger);
    void          AddTrack(Int_t flag,Int_t hitid,Int_t tid,Int_t id_globtrk,
          Int_t ndedx, Int_t nfit, Int_t nrec, Int_t npos,
          Int_t q, Float_t Chixy, Float_t Chiyz, Float_t dedx,
@@ -112,6 +122,12 @@ public:
                         Float_t zl, Float_t psi, Float_t invp, Int_t nfit,
                         Float_t dx, Float_t dz,Float_t alpha,
                         Float_t lambda, Float_t prf, Float_t zrf);
+   void          AddHit(Float_t q,Float_t x,Float_t y,Float_t z, 
+                        Int_t row, Int_t track, Int_t flag, Int_t sector,
+                        Float_t zl, Float_t psi, Float_t invp, Int_t nfit,
+                        Float_t dx, Float_t dz,Float_t alpha,
+                        Float_t lambda, Float_t prf, Float_t zrf, 
+                        Float_t exbdx, Float_t exbdy);
    void          AddPixel(Int_t row,Int_t pad,Int_t time,Int_t adc,
                          Float_t x,Float_t y,Float_t z);
 
@@ -138,6 +154,7 @@ class Hit : public TObject {
       Float_t fq;      Float_t falpha;  Float_t flambda;
       Float_t fprf;    Float_t fzrf;
       Float_t ftkzl;    Float_t ftkpsi; Float_t ftkinvp;
+      Float_t fexbdx; Float_t fexbdy;
 
       Int_t   ftrack;  Int_t   frow;    Int_t   fflag;
       Int_t ftksector; Int_t ftknfit;
@@ -150,10 +167,16 @@ public:
   Int_t flag, Int_t tksector, Float_t tkzl, Float_t tkpsi, Float_t dx,
   Float_t dz,Float_t alpha, Float_t lambda, Float_t prf,Float_t zrf);
   
+    Hit(Float_t q,Float_t x,Float_t y,Float_t z, Int_t row, Int_t track,
+   Int_t flag, Int_t tksector, Float_t tkzl, Float_t tkpsi, Float_t ftkinvp,
+   Int_t tknfit, Float_t dx, Float_t dz,Float_t alpha, Float_t lambda,
+   Float_t prf,Float_t zrf);
+
   Hit(Float_t q,Float_t x,Float_t y,Float_t z, Int_t row, Int_t track,
   Int_t flag, Int_t tksector, Float_t tkzl, Float_t tkpsi, Float_t ftkinvp,
   Int_t tknfit, Float_t dx, Float_t dz,Float_t alpha, Float_t lambda,
-  Float_t prf,Float_t zrf);
+  Float_t prf,Float_t zrf, Float_t exbdx, Float_t exbdy);
+
    virtual ~Hit() { }      
    ClassDef(Hit,1)  //A TPC TPhit object
 };
@@ -204,10 +227,7 @@ private:
        Float_t     fyl;         // y of point of closest approach
        Float_t     fzl;         // z of point of closest approach
        Int_t       fsector;     // sector of laser source point.
-       virtual void  DOCA(Float_t r0,Float_t phi0,Float_t z0, Float_t psi,
-                   Float_t tanl, Float_t curvature , Int_t q,
-                   Int_t * sector, Float_t * xl, Float_t * yl, Float_t * zl);
-  
+ 
 public:
    Track() { }
    Track(Int_t flag,Int_t hitid,Int_t tid,Int_t id_globtrk,
@@ -227,7 +247,10 @@ public:
    Int_t         GetNrec() const { return fnrec; }
    Int_t         GetNfit() const { return fnfit; }
    Int_t         GetNposs() const { return fnpos; }
-
+   Float_t       GetInvp() const { return finvp; }
+   Float_t       GetTanl() const { return ftanl; }
+   Float_t       GetPsi() const { return fpsi; }
+   Int_t         GetQ() const { return fq; }
 
    ClassDef(Track,1)  //A tpt_track rep of a laser track. 
 };
