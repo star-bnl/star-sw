@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StBadDcaAnalysis.cxx,v 1.2 2002/04/03 00:23:27 jklay Exp $
+ * $Id: StBadDcaAnalysis.cxx,v 1.3 2002/05/31 21:58:29 jklay Exp $
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StBadDcaAnalysis.cxx,v $
+ * Revision 1.3  2002/05/31 21:58:29  jklay
+ * Updated analysis code to use new cut class
+ *
  * Revision 1.2  2002/04/03 00:23:27  jklay
  * Fixed private member access bugs in analysis code
  *
@@ -165,7 +168,7 @@ StBadDcaAnalysis::trackLoop()
 
     //***************** spectra  ***********************************
     
-    if(!CutRc::AcceptTrackHalf(track,vertexZ)) continue;
+    if(!CutRc::AcceptTrackVtxZHalf(track,vertexZ)) continue;
     
     //**************************************************************
     Float_t ptPr = track->PtPr();

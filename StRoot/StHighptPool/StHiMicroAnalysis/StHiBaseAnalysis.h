@@ -1,26 +1,3 @@
-/***************************************************************************
- *
- * $Id: StHiBaseAnalysis.h,v 1.2 2002/04/03 00:23:27 jklay Exp $                                    
- *
- * Author: Bum Choi, UT Austin, Apr 2002
- *
- ***************************************************************************
- *
- * Description:  Class to perform basic I/O and functions for doing
- *		 highpt Analysis on highpt uDSTs
- *
- *
- ***************************************************************************
- * 
- * $Log: StHiBaseAnalysis.h,v $
- * Revision 1.2  2002/04/03 00:23:27  jklay
- * Fixed private member access bugs in analysis code
- *
- * Revision 1.1  2002/04/02 20:05:18  jklay
- * Bums analysis tools for highpt uDSTs
- *
- *
- **************************************************************************/
 #ifndef StHiBaseAnalysis_H
 #define StHiBaseAnalysis_H
 
@@ -29,11 +6,12 @@
 #include <cstdlib>
 
 #include "StHighptPool/StHiMicroEvent/StHiMicroEvent.h"
-#include "Centrality.h"
-#include "Name.h"
-#include "CutRc.h"
-#include "IO.h"
-#include "Bin.h"
+#include "StHighptPool/Common/Centrality.h"
+#include "StHighptPool/Common/Name.h"
+#include "StHighptPool/Common/CutRc.h"
+#include "StHighptPool/Common/Cut.h"
+#include "StHighptPool/Common/IO.h"
+#include "StHighptPool/Common/Bin.h"
 #include "TObject.h"
 #include "TString.h"
 #include "TArrayD.h"
@@ -53,8 +31,6 @@
 #include "TRandom.h"
 #include "TGraphAsymmErrors.h"
 
-
-
 #include <utility>
 #include <fstream.h>
 #include <cstdlib>
@@ -62,8 +38,7 @@
 
 class StHiBaseAnalysis : public TObject{
  public:
-  StHiBaseAnalysis(const char* inputDir="./", 
-	       const char* outRootName="hianalysis.hist.root");
+  StHiBaseAnalysis(const char* inDir, const char* outRootName);
   virtual ~StHiBaseAnalysis();
 
   virtual Int_t Init();
@@ -78,7 +53,6 @@ class StHiBaseAnalysis : public TObject{
 
   virtual Int_t initMore();
   virtual void initChain();
-  //  virtual void initHalf();
   virtual void initHistograms() = 0; // must override
   virtual void fillEventHistograms();
   virtual void finishHistograms();
@@ -97,14 +71,11 @@ class StHiBaseAnalysis : public TObject{
 
   Int_t              mNEvent; //!
   Int_t              mNFile;  //!
-  
+
   Int_t              mDebug; //!
   Int_t              mNEventAccepted; //!
   Int_t              mNHiPtTrack; //!
     
-  
-  
-
   ClassDef(StHiBaseAnalysis,1)
 };
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiStuff.h,v 1.1 2002/04/02 20:05:19 jklay Exp $                                    
+ * $Id: StHiStuff.h,v 1.2 2002/05/31 21:58:30 jklay Exp $                                    
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  * 
  * $Log: StHiStuff.h,v $
+ * Revision 1.2  2002/05/31 21:58:30  jklay
+ * Updated analysis code to use new cut class
+ *
  * Revision 1.1  2002/04/02 20:05:19  jklay
  * Bums analysis tools for highpt uDSTs
  *
@@ -40,7 +43,7 @@ class StHiStuff : public StHiBaseAnalysis{
   
   void trackLoop();
 
-  Int_t findSector(Float_t phi, Char_t ew);
+  Int_t findSector(Float_t phi, Int_t firstSector);
 
   static const Float_t mMinPt = 2.5;
 
@@ -105,8 +108,11 @@ class StHiStuff : public StHiBaseAnalysis{
     
   };
 
-  PlusMinus pm[2]; //! 0 is positive
-  
+  struct EastWest {
+    PlusMinus pm[3]; //! 0 is positive, 1 is negative, 2 is all charged
+  };
+
+  EastWest ew[3];  //0 is East, 1 is West, 2 is FullTPC
 
   ClassDef(StHiStuff,1)
 };

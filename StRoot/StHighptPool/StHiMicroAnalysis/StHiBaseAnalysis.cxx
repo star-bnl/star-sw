@@ -1,33 +1,9 @@
-/***************************************************************************
- *
- * $Id: StHiBaseAnalysis.cxx,v 1.2 2002/04/03 00:23:27 jklay Exp $                                    
- *
- * Author: Bum Choi, UT Austin, Apr 2002
- *
- ***************************************************************************
- *
- * Description:  Class to perform basic I/O and functions for doing   
- *               highpt Analysis on highpt uDSTs
- *
- *
- ***************************************************************************
- * 
- * $Log: StHiBaseAnalysis.cxx,v $
- * Revision 1.2  2002/04/03 00:23:27  jklay
- * Fixed private member access bugs in analysis code
- *
- * Revision 1.1  2002/04/02 20:05:18  jklay
- * Bums analysis tools for highpt uDSTs
- *
- *
- **************************************************************************/
 #include "StHiBaseAnalysis.h"
 
 //__________________
 
-StHiBaseAnalysis::StHiBaseAnalysis(const char* inputDir,
-			   const char* outRootName)
-  :  mInputDir(inputDir),mOutRootName(outRootName),
+StHiBaseAnalysis::StHiBaseAnalysis(const char* inDir, const char* outRootName)
+  :  mInputDir(inDir),mOutRootName(outRootName),
      mNEvent(0), mNFile(0),
      mDebug(0), mNEventAccepted(0),
      mNHiPtTrack(0)
@@ -64,10 +40,6 @@ StHiBaseAnalysis::Init()
   cout << "init more" << endl;
   stat += initMore();
 
-  //initHalf();
-  if(Cut::Half()) cout << "HALF IS ON! " << Cut::Half() << endl;
-
-
   cout << "debug     : " << mDebug << endl << endl;
   
   initChain();
@@ -88,49 +60,15 @@ StHiBaseAnalysis::Init()
   return stat;
 }
 
-/*
-void
-StHiBaseAnalysis::initHalf()
-{
-  if(!Cut::Half()) return;
-
-  cout << "StHiBaseAnalysis::initHalf()" << endl;
-
-  TString side;
-
-  switch(Cut::Half()){
-  case 'e' : side = "east_"; break;
-  case 'w' : side = "west_"; break;
-  default  :  cerr << "same side but vertex cut is weird" << endl; exit(1);
-  }
-
-  Ssiz_t last = mOutRootName.Last('/');
-  TString filename;
-  TString dir;
-
-  if(last) { // directory in name
-    filename = mOutRootName;
-    dir  = mOutRootName;
-    filename.Remove(0,last+1);
-    dir.Remove(last+1,mOutRootName.Length());
-    filename.Prepend(side);
-    mOutRootName = dir + filename;
-  }
-  else{
-    mOutRootName.Prepend(side);
-  }
-
-}
-*/
-
 //_________________
 
-Int_t
-StHiBaseAnalysis::initMore()
+Int_t StHiBaseAnalysis::initMore()
 {
   return 0;
 
 }
+//_________________
+
 
 void 
 StHiBaseAnalysis::initChain()
@@ -149,7 +87,7 @@ StHiBaseAnalysis::initChain()
   //
   mHiMicroChain->SetBranchAddress("StHiMicroEvent",&mHiMicroEvent);
 
-  IO io(mInputDir.Data(),"himicro.root");
+  IO io(mInputDir.Data(),"hipico.root");
   io.setNFile(mNFile);
   io.chain(mHiMicroChain);
 
@@ -177,7 +115,8 @@ StHiBaseAnalysis::Run()
   //
   if(nEvent>10000) mDebug = 0;
 
-  Int_t display = 10000;
+  Int_t display = 1000;
+//  Int_t display = 10000;
 
   for(Int_t iEvent=0; iEvent<nEvent; iEvent++){
     
@@ -192,8 +131,15 @@ StHiBaseAnalysis::Run()
 	     << "--------------------- " << endl;
 	cout << "\tprimary vertex z : " << mHiMicroEvent->VertexZ() << endl;
 	cout << "\tflow centrality  : " << mHiMicroEvent->Centrality() << endl;
+        cout << "\tL0TriggerWord : " << mHiMicroEvent->L0TriggerWord() << endl;
+        if(mHiMicroEvent->L3UnbiasedTrigger())
+        cout << "\tL3UnbiasedTrigger Event " << endl;
+        if (mHiMicroEvent->L3RichTrigger())
+        cout << "\tL3RichTrigger Event " << endl;
+
       }
 
+      //This comes before we make event cuts
       fillEventHistograms();
 
       // 
@@ -204,6 +150,7 @@ StHiBaseAnalysis::Run()
 
 	if(iEvent%display==0) cout << "\tAccepted event" << endl;
 
+	//Standard event cut on vertexZ, centrality and triggerword are already done
 	trackLoop();
       }
       else{
@@ -241,6 +188,14 @@ StHiBaseAnalysis::trackLoop()
 
 void
 StHiBaseAnalysis::fillEventHistograms()
+{
+
+}
+
+//_______________________
+
+void
+StHiBaseAnalysis::initHistograms()
 {
 
 }
