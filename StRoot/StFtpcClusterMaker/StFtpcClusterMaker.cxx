@@ -1,5 +1,10 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.11 2000/08/03 14:39:00 hummler Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.12 2000/09/18 14:26:46 hummler Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.12  2000/09/18 14:26:46  hummler
+// expand StFtpcParamReader to supply data for slow simulator as well
+// introduce StFtpcGeantReader to separate g2t tables from simulator code
+// implement StFtpcGeantReader in StFtpcFastSimu
+//
 // Revision 1.11  2000/08/03 14:39:00  hummler
 // Create param reader to keep parameter tables away from cluster finder and
 // fast simulator. StFtpcClusterFinder now knows nothing about tables anymore!
@@ -42,6 +47,7 @@
 
 #include "StFtpcClusterMaker.h"
 #include "StFtpcParamReader.hh"
+#include "StFtpcGeantReader.hh"
 #include "StFtpcClusterFinder.hh"
 #include "StFtpcTrackMaker/StFtpcPoint.hh"
 #include "StFtpcFastSimu.hh"
@@ -207,7 +213,11 @@ Int_t StFtpcClusterMaker::Make()
     St_g2t_vertex  *g2t_vertex  = (St_g2t_vertex *) geant("g2t_vertex");
     St_g2t_track   *g2t_track   = (St_g2t_track *)   geant("g2t_track");
     St_g2t_ftp_hit *g2t_ftp_hit = (St_g2t_ftp_hit *) geant("g2t_ftp_hit");
-    if (g2t_track && g2t_ftp_hit){
+    if (g2t_vertex && g2t_track && g2t_ftp_hit){
+      StFtpcGeantReader *geantReader = new StFtpcGeantReader(g2t_vertex,
+							     g2t_track,
+							     g2t_ftp_hit);
+
       St_ffs_gepoint *ffs_gepoint = new St_ffs_gepoint("ffs_gepoint",150000);
       m_DataSet->Add(ffs_gepoint);
       St_fcl_fppoint *fcl_fppoint = new St_fcl_fppoint("fcl_fppoint",150000);
@@ -215,26 +225,21 @@ Int_t StFtpcClusterMaker::Make()
       
       if(Debug()) cout<<"NO RAW DATA AVAILABLE - start running StFtpcFastSimu"<<endl;
       
-      Int_t numHit=g2t_ftp_hit->GetNRows();
-      Int_t numTrack=g2t_track->GetNRows();
       Int_t numGepoint=ffs_gepoint->GetNRows();
       Int_t maxGepoint=ffs_gepoint->GetTableSize();
       Int_t numFppoint=fcl_fppoint->GetNRows();
       Int_t maxFppoint=fcl_fppoint->GetTableSize();
-      StFtpcFastSimu *ffs = new StFtpcFastSimu(g2t_ftp_hit->GetTable(), 
-					       &numHit,
-					       g2t_track->GetTable(), 
-					       &numTrack,
-					       g2t_vertex->GetTable(),
-					       ffs_gepoint->GetTable(),
+      StFtpcFastSimu *ffs = new StFtpcFastSimu(ffs_gepoint->GetTable(),
 					       &numGepoint, maxGepoint,
 					       fcl_fppoint->GetTable(),
 					       &numFppoint, maxFppoint,
+					       geantReader,
 					       paramReader);
       ffs_gepoint->SetNRows(numGepoint);				      
       fcl_fppoint->SetNRows(numFppoint);				      
       if(Debug())cout<<"finished running StFtpcFastSimu"<<endl;
       delete ffs;
+      delete geantReader;
     }
   }
   
