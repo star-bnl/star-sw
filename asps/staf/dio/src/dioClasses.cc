@@ -531,10 +531,7 @@ STAFCV_T dioSockStream:: open (DIO_MODE_T mode) {
 
 //- Create XDR pointer. -**
    memset((char*)&myXDR, 0, sizeof(myXDR));
-//-21aug96- xdrrec_create(&myXDR, 0, 0, &mySocket, tcpRead, tcpWrite);
-   // xdrrec_create was here, I moved it down about 17 lines hjw 02oct97
-   xdrrec_create(&myXDR, 0, 0, (char*)&mySocket, tcpRead, tcpWrite);
-//-? if( myXDR == NULL ) EML_ERROR(BAD_XDR); -??
+   xdrrec_create(&myXDR, 0, 0, (char*)&mySocket, (TCPREAD)tcpRead, (TCPWRITE)tcpWrite);
 
 //- Set XDR mode -**
    switch (mode){
@@ -554,7 +551,7 @@ STAFCV_T dioSockStream:: open (DIO_MODE_T mode) {
 
    // Moved the create to after setting myXDR.x_op, in analogy with
    // dioFileStream::open.   hjw 02oct97
-   xdrrec_create(&myXDR, 0, 0, (char*)&mySocket, tcpRead, tcpWrite);
+   xdrrec_create(&myXDR, 0, 0, (char*)&mySocket, (TCPREAD)tcpRead, (TCPWRITE)tcpWrite);
 
    myMode = mode;
    myState = DIO_OPEN_STATE;

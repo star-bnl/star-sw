@@ -143,11 +143,11 @@ ifndef SYSTEM_DOMAIN
 #  FILES_SRG := $(SRC_GEN_DIR)/$(PKGNAME)_init.cc
 endif
 FILES_SRC := $(wildcard $(addprefix $(SRC_DIR)/, *.c *.cc *.f *.F *.l *.y ))
-FILES_SRC := $(filter-out %-lex.c %-yacc.c, $(FILES_SRC))
+FILES_SRC := $(filter-out %-lex.c %-yacc.c $(SRC_DIR)/~%, $(FILES_SRC))
 
 FILES_CDF := $(wildcard $(CDF_DIR)/*.cdf)
 FILES_SRM := $(wildcard $(addprefix $(SRM_DIR)/,*.c  *.cc))
-FILES_SRM := $(filter-out %-lex.c %-yacc.c, $(FILES_SRM))
+FILES_SRM := $(filter-out %-lex.c %-yacc.c $(SRM_DIR)/~%, $(FILES_SRM))
 
 
 ifdef FILES_SRM
@@ -459,8 +459,6 @@ show:
 	@echo FC        	:= $(FC)
 	@echo CC        	:= $(CC)
 	@echo CXX        	:= $(CXX)
-	echo QWE1        	:= $(QWE1)
-	@echo QWE2        	:= $(QWE2)
 	@echo INCLUDES        	:= $(INCLUDES)
 	@echo STIC        	:= $(STIC)
 	@echo L_DIR_THIS       	:= $(L_DIR_THIS)

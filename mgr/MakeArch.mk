@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.35  1998/10/24 22:32:33  perev
+#  Corr for RedHat5.1
+#
 #  Revision 1.34  1998/10/20 01:41:59  fisyak
 #  debug only for db
 #
@@ -83,7 +86,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/10/20 01:41:59 $ 
+#             Last modification $Date: 1998/10/24 22:32:33 $ 
 #. default setings
 
 RM := rm -f
@@ -234,6 +237,34 @@ ifneq (,$(findstring $(STAF_ARCH),i386_linux2 i386_redhat50))
   SOFLAGS  := $(DEBUG) -shared  
 ##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lg++ -lpgc -lm -ldl -rdynamic
   CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib -L/usr/lib -lXt -lXpm -lX11 -lcrypt -lg++ -lpgc -lm -ldl  -rdynamic
+##FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
+  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A 
+  FFLAGS   := -DPGI  $(DEBUG)
+  FEXTEND  := -Mextend
+  YACC     := bison -y
+  YACCLIB  := 
+  LEX      := flex
+  LEXLIB   := -lfl
+endif
+ifneq (,$(findstring $(STAF_ARCH),i386_redhat51))
+#    case linux but gcc is EGCS
+#  ====================
+  LINUX :=YESS
+  MOTIF :=
+  CERN_LEVEL :=pgf98
+  OSFID    := lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON
+  STRID    := lnx
+  FC       := /usr/pgi/linux86/bin/pgf77
+  LD       := $(CXX)
+  SO	   := $(CXX)
+  CXXFLAGS := $(DEBUG) -fPIC
+  CFLAGS   := $(DEBUG) -fPIC
+  CPPFLAGS += f2cFortran
+  LDFLAGS  := $(DEBUG) -Wl,-Bstatic
+  EXEFLAGS := $(DEBUG) -Wl,-Bdynamic -Wl,-noinhibit-exec   
+  SOFLAGS  := $(DEBUG) -shared  
+##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lpgc -lm -ldl -rdynamic
+  CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib -L/usr/lib -lXt -lXpm -lX11 -lcrypt -lpgc -lm -ldl  -rdynamic
 ##FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
   FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A 
   FFLAGS   := -DPGI  $(DEBUG)
