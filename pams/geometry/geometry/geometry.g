@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.82 2004/03/04 02:38:38 potekhin Exp $
+* $Id: geometry.g,v 1.83 2004/03/10 20:11:34 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.83  2004/03/10 20:11:34  potekhin
+* In Y2004, set the TOF config to 7 as requested by B.Llope,
+* to reflect the current configuration.
+*
 * Revision 1.82  2004/03/04 02:38:38  potekhin
 * Added modifications COMPLETE, to exclude SISD
 * as per Kai request -- won't affect anybody else
@@ -726,33 +730,46 @@ If LL>1
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
                      wdm=0  " width is in the code      ";
+
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
                      pse=on " inner sector has pseudo padrows ";
+
                   "ctb: central trigger barrer             ";
                      Itof=2 " call btofgeo2 ";
-                     btofconfig=5;
+* note the upgrade with respect to previous years:
+                     btofconfig=7;
+
                   "calb" 
                      ems=on
                      CalbConfig = 1
-* remember that with this config, the following vars assume a different meaning
-* because we have to (unfortunately) switch from divisions to copies and
-* introduce a map
+* remember that with this config, the following parameters have
+* a different meaning because we have to (unfortunately) switch
+* from divisions to copies and introduce a map, which DOES
+* control the configuration
                      nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
+
+
                   "ecal"
                      ecal_config=1   " one ecal patch, west "
                      ecal_fill=3     " all sectors filled "
+
                   "beam-beam counter "
                      bbcm=on
+
                   "forward pion detector "
                      fpdm=on
+
                   "field version "
                      Mf=4;      "tabulated field, with correction "
+
                   "geometry correction "
                      CorrNum = 3;
+
                   "Photon Multiplicity Detector Version "
                      phmd=on;
                      PhmdVersion = 1;
+
                   "Silicon Strip Detector Version "
                      sisd=on;
                      SisdConfig = 2;
