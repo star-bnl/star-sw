@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.22 1999/02/12 19:23:46 didenko Exp $
+// $Id: St_glb_Maker.cxx,v 1.23 1999/02/12 22:27:35 ogilvie Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.23  1999/02/12 22:27:35  ogilvie
+// added in spectra/pid QA histograms
+//
 // Revision 1.22  1999/02/12 19:23:46  didenko
 // updated v0 finding code from Helen
 //
@@ -259,6 +262,17 @@ Int_t St_glb_Maker::Init(){
   m_chi2xd  = new TH1F("chi2xd","x chisq/degf",100,0.,10.);
   m_chi2yd  = new TH1F("chi2yd","y chisq/degf",100,0.,10.);
   m_lameffm  = new TH1F("lameffm","Lambda effective mass",100,0.8,1.20);
+  // Spectra/pid histograms. C.Ogilvie
+  Int_t np = 100;
+  Int_t ndedx = 100;
+  Float_t minp = 0.0;
+  Float_t maxp = 2.0;
+  Float_t mindedx = 0.0;
+  Float_t maxdedx =  0.1e-04;
+  m_p_dedx_rec = new TH2F("p_dedx_rec","p versus dedx (reconstructed)",
+                           np,minp,maxp,ndedx,mindedx,maxdedx);
+  m_p_dedx_rec->SetYTitle("dedx");
+  m_p_dedx_rec->SetXTitle("p (GeV)");
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -440,7 +454,7 @@ Int_t St_glb_Maker::Make(){
     St_ev0_track2 *ev0track2 = new St_ev0_track2("ev0_track2",100000);
     dst.Add(ev0track2);
     if (vertex->GetNRows() != 1) {vertex->SetNRows(1);} 
-     Int_t Res_ev0 = ev0_am2(m_ev0par2,globtrk,vertex,dst_v0_vertex,ev0track2);
+    Int_t Res_ev0 = ev0_am2(m_ev0par2,globtrk,vertex,dst_v0_vertex,ev0track2);
     //ev0d No longer needed
     //Int_t Res_ev0d = ev0_dst(ev0out,dst_v0_vertex);
     //if (Res_ev0d != kSTAFCV_OK) {cout << " Problem on return from EV0_DST " << endl;}
@@ -631,12 +645,41 @@ Int_t St_glb_Maker::Make(){
       m_lameffm->Fill(inv_mass_la);
     }
   }
+  // spectra-PID diagnostic histograms
+  if (dst_dedx && primtrk) {
+     	dst_dedx_st  *de   = dst_dedx->GetTable();
+        dst_track_st  *trk   = primtrk->GetTable();
+	// loop over dedx entries
+        for (Int_t l = 0; l < dst_dedx->GetNRows(); l++){
+	       dst_dedx_st *d = de + l;
+               Float_t dedx_m = d->dedx[0];
+               Int_t igl = d->id_track;
+               Int_t igl_use = igl - 1;
+    // this is bad style, since it assumes the global track has not been sorted
+    // it works for now
+               dst_track_st  *t = trk + igl_use ;
+               Float_t invpt = t->invpt;
+	       Float_t pT = 9999.;
+	       if (invpt) pT = 1./TMath::Abs(invpt);
+               Float_t pz = pT*t->tanl;
+               Float_t  p = sqrt(pT*pT+pz*pz);
+               Float_t z0 = abs(t->x_first[2]);
+               Float_t x0 = t->x_first[0];
+               Float_t y0 = t->x_first[1];
+               Float_t r0 = sqrt(x0*x0+y0*y0);
+
+	       if (d->det_id==1 && d->ndedx >15 ) {
+		 m_p_dedx_rec->Fill(p,dedx_m);
+	       }
+	}
+      cout << " run_dst: finished filling dedx histograms" << endl;
+  }
   return kStOK;
 }
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.22 1999/02/12 19:23:46 didenko Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.23 1999/02/12 22:27:35 ogilvie Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

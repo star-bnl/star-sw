@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.h,v 1.11 1999/02/12 19:23:46 didenko Exp $
+// $Id: St_glb_Maker.h,v 1.12 1999/02/12 22:27:39 ogilvie Exp $
 // $Log: St_glb_Maker.h,v $
+// Revision 1.12  1999/02/12 22:27:39  ogilvie
+// added in spectra/pid QA histograms
+//
 // Revision 1.11  1999/02/12 19:23:46  didenko
 // updated v0 finding code from Helen
 //
@@ -71,7 +74,7 @@ class St_glb_Maker : public StMaker {
 
  private:
   Bool_t drawinit;
-  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.11 1999/02/12 19:23:46 didenko Exp $";
+  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.12 1999/02/12 22:27:39 ogilvie Exp $";
   // egr
   Int_t         m_scenario;   
   //#1: Real TPC Stand-Alone Tracking: Use this when running the TPC only.  
@@ -146,6 +149,7 @@ class St_glb_Maker : public StMaker {
   TH1F     *m_chi2xd;      //! x chisq/degf
   TH1F     *m_chi2yd;      //! y chisq/degf
   TH1F     *m_lameffm;     //! Lambda effective mass
+  TH2F     *m_p_dedx_rec;   //! dedx vs p
  public: 
   St_glb_Maker(const char *name="global", const char *title="event/data/global");
   virtual       ~St_glb_Maker();
