@@ -1,4 +1,5 @@
 #include "EEmcSmdMap.h"
+#include "EEmcSmd2SmdMapItem.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -21,7 +22,23 @@ EEmcSmdMap::EEmcSmdMap() {
 
 /////////////////////////////////////////////////////////////////////////////
 
+void EEmcSmdMap::getRangeSmd2Smd( Int_t isector, Int_t iuv, Int_t istrip,
+			Int_t &juv, Int_t &jMin, Int_t &jMax ) {
+  
+  // printf(" asking for isec=%d , plane=%c, istrip=%d\n",isector, 'U'+iuv,istrip);
+  //printf("p=%p\n",eemcStrip2StripMapItem[iuv]);
+
+  assert(isector>=0 && isector<kEEmcNumSectors);
+  assert(iuv>=0 && iuv<kEEmcNumSmdUVs);
+  assert(istrip>=0 && istrip<kEEmcNumStrips);
+  jMin = mSmd2SmdMap[isector][iuv][istrip].iMin;
+  jMax = mSmd2SmdMap[isector][iuv][istrip].iMax;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 void EEmcSmdMap::Init() {
+  InitStrip2Strip();
 
   EEmcStripMapItem stripData[720] = {
   
