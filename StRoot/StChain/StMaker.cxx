@@ -1,8 +1,19 @@
-// $Id: StMaker.cxx,v 1.124 2002/04/14 21:51:12 perev Exp $
+// $Id: StMaker.cxx,v 1.125 2002/04/28 00:53:42 jeromel Exp $
 //
 /*!
- *                                                                      
- * StChain virtual base class for StMaker                              
+ * Base class for user maker class. Provide common functionality for all
+ * makers(modules). Allows to arrange modules in a tree, consisting of modules
+ * and produced datasets.
+ *
+ * User must provide at least its own methods
+ * - Init()                     mandatory
+ * - Make()                     mandatory
+ * - InitRun(newRunNumber)      if needed
+ * - FinishRun(oldRunNumber)    if needed
+ * - Clear()                    if standard StMaker::Clear()  is not appropriate 
+ * - Finish()                   if standard StMaker::Finish() is not appropriate 
+ *
+ * The method will be described.
  *                                                                     
  */
 #include <iostream.h>
@@ -617,13 +628,15 @@ StMaker *StMaker::GetMaker(const TDataSet *ds)
   while (par && (par = par->GetParent()) && strncmp(".maker",par->GetTitle(),6)) {}
   return (StMaker*)par;
 }
+
 //_____________________________________________________________________________
+/*!
+  Reduce the size of the table to the used rows + 1
+  and filll the last empty row awith a special pattern
+  Check the table for NaN floating cells if any
+*/
 EDataSetPass StMaker::ClearDS (TDataSet* ds,void * )
 {
-  // Reduce the size of the table to the used rows + 1
-  // and filll the last empty row awith a special pattern
-  // Check the table for NaN floating cells if any
-
   if (ds->InheritsFrom(TTable::Class())){
      TTable *table = (TTable *)ds;
      Int_t setSize =  table->GetTableSize();
@@ -651,13 +664,16 @@ void StMaker::PrintInfo()
       maker->PrintInfo();
    }
 }
+
 //_____________________________________________________________________________
+/// Returns the current event number
 Int_t        StMaker::GetIventNumber() const 
 {
    StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
    if (!hd) return -1;
    return hd->GetIventNumber();
 }
+
 //_____________________________________________________________________________
 void         StMaker::SetIventNumber(Int_t iv)  
 {
@@ -672,7 +688,9 @@ Int_t        StMaker::GetEventNumber() const
    if (!hd) return -1;
    return hd->GetEventNumber();
 }
+
 //_____________________________________________________________________________
+/// Returns the current RunNumber
 Int_t        StMaker::GetRunNumber() const 
 {
    StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
@@ -707,12 +725,13 @@ const Char_t *StMaker::GetEventType() const
 }
 
 //_____________________________________________________________________________
+/*!
+  Print timer information of this maker.
+  Entries counts how many times the methods: Init(), Make() and Finish ()
+  were called.
+ */
 void StMaker::PrintTimer(Option_t *option) 
 {
-  // Print timer information of this maker
-  // Entries counts how many times the methods:
-  //    Init(), Make() and Finish () 
-  // were called
    if(option){};
    Printf("QAInfo:%-20s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds, Entries = %d",GetName()
            ,m_Timer.RealTime(),m_Timer.CpuTime(),m_Timer.Counter());
@@ -1122,6 +1141,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.125  2002/04/28 00:53:42  jeromel
+// More doc added ...
+//
 // Revision 1.124  2002/04/14 21:51:12  perev
 // Obsolete StBroadcast
 //
