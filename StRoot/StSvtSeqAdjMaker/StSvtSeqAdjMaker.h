@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.3 2000/08/21 12:57:31 caines Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.4 2000/08/24 04:23:50 caines Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.4  2000/08/24 04:23:50  caines
+// Improved histograms
+//
 // Revision 1.3  2000/08/21 12:57:31  caines
 // Now opens and reads in ped using CalibMaker
 //
@@ -55,7 +58,8 @@ class StSvtSeqAdjMaker : public StMaker
   Int_t GetPedOffset(){return mPedOffSet;};
   Int_t SetInputFiles(char* table, char* PedFile,int PedOffset);
   Int_t CreateHist(Int_t tNuOfHyb);
-  void  MakeHistograms(int index,int Anode);
+  void  MakeHistogramsProb(int index,int Anode);
+  void  MakeHistogramsAdc(int index,int Anode, int Count);
   Int_t SetMinAdcLevels( int MinAdc1,  int MinAbove1, int MinAdc2, int MinAbove2 ); // Set the 2 thresholds for a sequence
   Int_t SetLowInvProd(int LowInvProd);// Set the low threshold based on the frequency distribution
   Int_t AdjustSequences1( int Anode); // Find sequences  based on ASICS
@@ -76,6 +80,8 @@ class StSvtSeqAdjMaker : public StMaker
   char* mProbFile;
 
   TH1D** mInvProdSeqAdj;  //!
+  TH1F** mRawAdc;  //!
+  TH1F** mAdcAfter;  //!
 
   int mNumOfSeq;
   int m_n_seq_lo;
