@@ -1,6 +1,6 @@
 -*- mode:outline -*-
 This file is best viewed with x(emacs).
-Time-stamp: <99/10/28 22:01:46 ullrich>
+Time-stamp: <99/11/09 19:11:57 ullrich>
 
 * Disclaimer
 ============
@@ -15,6 +15,10 @@ documentation available.
 
 * Latest News
 =============
+** Added StMemoryPool. All hits get memory from it.
+   This speeds up the setup by almost 1 sec.
+** Removed unlink() from StTrackNode and StPrimaryVertex.
+   Doesn't work, too dangerous.
 ** StEvent compiles on Linux and SUN.
    - adapted new StArray 
    - some modifications for CC4.2 (sun) where needed
@@ -23,7 +27,6 @@ documentation available.
 ** First try to compile after submitting it to cvs
    failed. Interface to StPtrVec containers not ready?
    Send mail to Victor to get info on status of StArray.
-
 ** Victor: mark pure references (pointers) with //$LINK
 
 
