@@ -217,7 +217,7 @@ end
       structure BDOT { int N, Zi, Ri(20), Bzi(20), Bri(20) }
       complex   BBEXTER, zero/0/
       real      z,r,wz,br,bz,wr1,wr2,br1,br2,bz1,bz2
-      integer   JBBB,ier,ir1,ir2,nz/0/,iprin,Lout/6/
+      integer   JBBB,ier,ir1,ir2,nz/0/,iprin
       common /brcontr/ iprin      
 *
       Unless bdot_Zi <= z&z <= bdat_Zi 
