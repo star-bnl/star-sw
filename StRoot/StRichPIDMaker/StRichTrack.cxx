@@ -1,10 +1,15 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.12 2000/12/08 04:56:30 lasiuk Exp $
+ * $Id: StRichTrack.cxx,v 2.13 2000/12/08 06:32:02 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
+ *  Revision 2.13  2000/12/08 06:32:02  lasiuk
+ *  correctedMomentum()
+ *  xcorrection
+ *  comment setMomentum()
+ *
  *  Revision 2.12  2000/12/08 04:56:30  lasiuk
  *  MC define switch for xCorrection
  *  energyLoss() members
@@ -461,7 +466,7 @@ void StRichTrack::init()
 
 bool StRichTrack::setEnergyLoss() {
   
-    bool energyLossCorrection = true;
+  //bool energyLossCorrection = true;
 
     //
     // Approximation
@@ -718,6 +723,13 @@ bool StRichTrack::correctTrajectory() {
   this->setUnCorrectedImpactPoint( this->getImpactPoint() );
   this->setUnCorrectedMomentum( this->getMomentum() );
 
+  double xCorrection = 0.4*(mMomentumAtPadPlane.x()/mMomentumAtPadPlane.z());
+
+#ifdef myRICH_WITH_MC    
+  xCorrection = 0.0;
+  cout << "StRichTrack::correctTrajectory()\n";
+  cout << "\t monte carlo.  Dip Angle correction turned OFF" << endl;
+#endif
 
   // get momentum, x at assumed interaction point in CTB
   StPhysicalHelixD mHelix     = mStTrack->geometry()->helix();
@@ -729,7 +741,7 @@ bool StRichTrack::correctTrajectory() {
   //
   if ( (mPathLengthToCTB>10000)  || (mPathLengthToCTB<0) ) return false;
   
-  StThreeVectorF CTBPoint(mHelix.x(mPathLengthToCTB),
+  StThreeVectorF CTBPoint(mHelix.x(mPathLengthToCTB)-xCorrection,
 			  mHelix.y(mPathLengthToCTB),
 			  mHelix.z(mPathLengthToCTB));
 
@@ -832,12 +844,13 @@ bool StRichTrack::correctTrajectory() {
 					       tempRichLocalMom.z());  
 	  //StThreeVectorF normalVector(0,0,-1);
       
-	  setProjectedMIP(correctedProjectedMIP);
-	  setImpactPoint(impact);
-	  setMomentum(tempRichLocalMomentum);
+	  this->setProjectedMIP(correctedProjectedMIP);
+	  this->setImpactPoint(impact);
+	  //this->setMomentum(tempRichLocalMomentum);
       }
   }
   
+  //this->setCorrectedMomentum(correctedMomentum);
   return true;
 }
 
@@ -965,7 +978,7 @@ int StRichTrack::fastEnough(StParticleDefinition* particle) {
     
     double indexOfRefraction1 = myMaterialsDb->indexOfRefractionOfC6F14At(219.999*nanometer);
     double indexOfRefraction2 = myMaterialsDb->indexOfRefractionOfC6F14At(169.0*nanometer);
-        
+           
     if ( p/sqrt(p*p + m*m) > (1./indexOfRefraction1) && 
 	 p/sqrt(p*p + m*m) > (1./indexOfRefraction2)) { 
 	return 1;
@@ -973,6 +986,9 @@ int StRichTrack::fastEnough(StParticleDefinition* particle) {
     
     return 0;
 }
+
+StThreeVectorF& StRichTrack::getCorrectedMomentum() { return mCorrectedMomentum;}
+void StRichTrack::setCorrectedMomentum(StThreeVectorF input) { mCorrectedMomentum = input;}
 
 StThreeVectorF& StRichTrack::getUnCorrectedMomentum() { return mUnCorrectedMomentum;}
 StThreeVectorF& StRichTrack::getUnCorrectedProjectedMIP() { return mUnCorrectedProjectedMIP;}
