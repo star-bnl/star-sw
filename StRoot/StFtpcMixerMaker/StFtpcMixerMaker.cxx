@@ -37,7 +37,7 @@
 #include "StFtpcClusterMaker/StFtpcDbReader.hh"
 
 // outPut Data--decoder
-#include "StDaqLib/GENERIC/EventReader.hh"
+//VP#include "StDaqLib/GENERIC/EventReader.hh"
 #include "StSequence.hh"
 
 #include "StDAQMaker/StDAQReader.h"
@@ -411,9 +411,12 @@ Int_t StFtpcMixerMaker::Finish()
 
  /***************************************************************************
  *
- * $Id: StFtpcMixerMaker.cxx,v 1.2 2003/06/13 12:12:44 jcs Exp $
+ * $Id: StFtpcMixerMaker.cxx,v 1.3 2003/07/18 18:31:47 perev Exp $
  *
  * $Log: StFtpcMixerMaker.cxx,v $
+ * Revision 1.3  2003/07/18 18:31:47  perev
+ * test for nonexistance of XXXReader added
+ *
  * Revision 1.2  2003/06/13 12:12:44  jcs
  * use the same StFtpcDbReader constructor as used by Sti/StFtpcDetectorBuilder
  *

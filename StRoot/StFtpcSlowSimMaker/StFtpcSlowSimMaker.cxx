@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.19 2003/07/04 14:04:51 fsimon Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.20 2003/07/18 18:31:47 perev Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.20  2003/07/18 18:31:47  perev
+// test for nonexistance of XXXReader added
+//
 // Revision 1.19  2003/07/04 14:04:51  fsimon
 // Add rotation of hits from global GEANT coordinates into local FTPC coordinates.
 // This needs an instance of StFtpcTrackingParams
@@ -79,7 +82,7 @@
 #include "StFtpcSlowSimulator.hh"
 #include "StFtpcRawWriter.hh"
 
-#include "StDaqLib/GENERIC/EventReader.hh"
+//VP#include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDAQMaker/StFTPCReader.h"
 #include "PhysicalConstants.h"
 
@@ -359,9 +362,8 @@ Int_t StFtpcSlowSimMaker::Make(){
       daqReader=(StDAQReader *)(daqDataset->GetObject());
       assert(daqReader);
       ftpcReader=daqReader->getFTPCReader();
-      assert(ftpcReader);
 
-      if (!ftpcReader->checkForData()) {
+      if (!ftpcReader || !ftpcReader->checkForData()) {
 	gMessMgr->Message("", "W", "OST") << "No FTPC data available!" << endm;
         delete paramReader;
         delete dbReader;

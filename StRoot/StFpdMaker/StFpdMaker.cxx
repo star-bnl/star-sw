@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFpdMaker.cxx,v 1.2 2002/10/17 02:03:10 akio Exp $
+ * $Id: StFpdMaker.cxx,v 1.3 2003/07/18 18:31:47 perev Exp $
  *
  * Author: AKIO OGAWA
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StFpdMaker.cxx,v $
+ * Revision 1.3  2003/07/18 18:31:47  perev
+ * test for nonexistance of XXXReader added
+ *
  * Revision 1.2  2002/10/17 02:03:10  akio
  * modification along with StEvent modification for 2003
  *
@@ -23,7 +26,7 @@
 #include "StFpdMaker.h"
 #include <stdlib.h>
 #include "StEventTypes.h"
-#include "StDaqLib/GENERIC/EventReader.hh"
+//VP#include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/FPD/FPD_Reader.hh"
 #include "StDAQMaker/StDAQReader.h"
 #include "TFile.h"

@@ -1,5 +1,8 @@
-// $Id: StTpcBadChanMaker.cxx,v 1.6 2000/08/04 21:03:53 perev Exp $
+// $Id: StTpcBadChanMaker.cxx,v 1.7 2003/07/18 18:31:49 perev Exp $
 // $Log: StTpcBadChanMaker.cxx,v $
+// Revision 1.7  2003/07/18 18:31:49  perev
+// test for nonexistance of XXXReader added
+//
 // Revision 1.6  2000/08/04 21:03:53  perev
 // Leaks + Clear() cleanup
 //
@@ -98,7 +101,10 @@ Int_t StTpcBadChanMaker::Make(){
   //cout << "Got the daq reader " << tDAQReader<< endl;
   StTPCReader *tRMSReader=tDAQReader->getTPCReader(); 
   //cout << "Got the RMS reader " << tRMSReader<< endl;
-  if(!tRMSReader) {cout << "Coudln't get the reader " << endl;}
+  if(!tRMSReader) {
+    cout << "Coudln't get the TPC reader " << endl;
+    return kStWarn;
+  }
   for(int tiSect=0;
       tiSect< tNumberOfSector;
       tiSect++){
@@ -113,7 +119,7 @@ Int_t StTpcBadChanMaker::Make(){
 //_____________________________________________________________________________
 void StTpcBadChanMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTpcBadChanMaker.cxx,v 1.6 2000/08/04 21:03:53 perev Exp $\n");
+  printf("* $Id: StTpcBadChanMaker.cxx,v 1.7 2003/07/18 18:31:49 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

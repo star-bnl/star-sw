@@ -1,7 +1,10 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.10 2003/04/27 23:08:13 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.11 2003/07/18 18:31:46 perev Exp $
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.11  2003/07/18 18:31:46  perev
+// test for nonexistance of XXXReader added
+//
 // Revision 1.10  2003/04/27 23:08:13  balewski
 // clean up of daq-reader
 //
@@ -53,7 +56,6 @@
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
-#include "StDAQMaker/StDAQReader.h"
 
 #include "St_db_Maker/St_db_Maker.h" // tmp to ovveride time stamp
 

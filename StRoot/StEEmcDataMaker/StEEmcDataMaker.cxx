@@ -1,5 +1,8 @@
-// $Id: StEEmcDataMaker.cxx,v 1.4 2003/05/01 02:19:19 balewski Exp $
+// $Id: StEEmcDataMaker.cxx,v 1.5 2003/07/18 18:31:45 perev Exp $
 // $Log: StEEmcDataMaker.cxx,v $
+// Revision 1.5  2003/07/18 18:31:45  perev
+// test for nonexistance of XXXReader added
+//
 // Revision 1.4  2003/05/01 02:19:19  balewski
 // fixed empry event problem
 //
@@ -102,7 +105,8 @@ Int_t StEEmcDataMaker::Make(){
   
   St_DataSet *daq = GetDataSet("StDAQReader");                 assert(daq);
   StDAQReader *fromVictor = (StDAQReader*) (daq->GetObject()); assert(fromVictor);
-  StEEMCReader *steemcreader  = fromVictor->getEEMCReader();   assert(steemcreader);
+  StEEMCReader *steemcreader  = fromVictor->getEEMCReader();  
+  if(!steemcreader) return kStOK;
   
   
   
@@ -135,6 +139,7 @@ Int_t StEEmcDataMaker::Make(){
       int isub=x->sub-'A'; //range 0-4
       int ieta=x->eta-1;   //range 0-11
       
+      if(!steemcreader) continue; // there was no data 
       int rawAdc=steemcreader->getTowerAdc(crate,chan);
       if(rawAdc<0) continue; // there was no data for this channel
 

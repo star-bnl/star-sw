@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.76  2003/07/18 18:31:50  perev
+// test for nonexistance of XXXReader added
+//
 // Revision 1.75  2003/07/10 19:41:00  ward
 // Fix bug for running under TRS.
 //
@@ -212,7 +215,7 @@
 #include <sys/stat.h>   // For binary file input (the DAQ data file).
 #include <fcntl.h>      // For binary file input (the DAQ data file).
 ///////////////////////////////////////////////////////////////////////////
-#include "StDaqLib/GENERIC/EventReader.hh"
+//VP#include "StDaqLib/GENERIC/EventReader.hh"
 #include "StTrsMaker/include/StTrsDetectorReader.hh"
 #include "StTrsMaker/include/StTrsZeroSuppressedReader.hh"
 #include "St_tpcdaq_Maker.h"

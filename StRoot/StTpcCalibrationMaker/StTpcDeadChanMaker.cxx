@@ -1,5 +1,8 @@
-// $Id: StTpcDeadChanMaker.cxx,v 1.5 2000/08/04 21:03:53 perev Exp $
+// $Id: StTpcDeadChanMaker.cxx,v 1.6 2003/07/18 18:31:49 perev Exp $
 // $Log: StTpcDeadChanMaker.cxx,v $
+// Revision 1.6  2003/07/18 18:31:49  perev
+// test for nonexistance of XXXReader added
+//
 // Revision 1.5  2000/08/04 21:03:53  perev
 // Leaks + Clear() cleanup
 //
@@ -109,7 +112,11 @@ Int_t StTpcDeadChanMaker::Make(){
   //cout << "Got the daq reader " << tDAQReader<< endl;
   static StTPCReader *tZSupReader=tDAQReader->getTPCReader(); 
   //cout << "Got the zero suppressed reader " << tZSupReader<< endl;
-  if(!tZSupReader) {cout << "Coudln't get the reader " << endl;}
+  if(!tZSupReader) {
+    cout << "Coudln't get the reader " << endl;
+    return kStWarn;
+}
+
   for(int tiSect=0;
       tiSect< tNumberOfSector;
       tiSect++){
@@ -124,7 +131,7 @@ Int_t StTpcDeadChanMaker::Make(){
 //_____________________________________________________________________________
 void StTpcDeadChanMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTpcDeadChanMaker.cxx,v 1.5 2000/08/04 21:03:53 perev Exp $\n");
+  printf("* $Id: StTpcDeadChanMaker.cxx,v 1.6 2003/07/18 18:31:49 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

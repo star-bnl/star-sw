@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtPedMaker.cxx,v 1.4 2001/10/24 16:47:52 munhoz Exp $
+ * $Id: StSvtPedMaker.cxx,v 1.5 2003/07/18 18:31:49 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtPedMaker.cxx,v $
+ * Revision 1.5  2003/07/18 18:31:49  perev
+ * test for nonexistance of XXXReader added
+ *
  * Revision 1.4  2001/10/24 16:47:52  munhoz
  * adding RMS methods
  *
@@ -33,7 +36,6 @@
 #include "St_DataSetIter.h"
 #include "TObjectSet.h"
 #include "StMessMgr.h"
-#include "StDAQMaker/StDAQReader.h"
 #include "StarClassLibrary/StSequence.hh"
 #include "StSvtClassLibrary/StSvtHybridData.hh"
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
@@ -653,7 +655,7 @@ Int_t StSvtPedMaker::Finish()
 void StSvtPedMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtPedMaker.cxx,v 1.4 2001/10/24 16:47:52 munhoz Exp $\n");
+  printf("* $Id: StSvtPedMaker.cxx,v 1.5 2003/07/18 18:31:49 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
