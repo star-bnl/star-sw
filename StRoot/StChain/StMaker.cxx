@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.110 2001/04/12 22:23:22 perev Exp $
+// $Id: StMaker.cxx,v 1.111 2001/04/14 01:55:39 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -353,7 +353,7 @@ void StMaker::Clear(Option_t *option)
   if (m_DataSet) m_DataSet->Delete();
 //    Reset lists of event objects
    
-   TIter next(GetMakeList());
+   TIter next(GetMakeList(),kIterBackward);
    StMaker *maker;
    while ((maker = (StMaker*)next())) {
       if (maker->GetDebug()>1) {
@@ -457,7 +457,7 @@ Int_t StMaker::Finish()
    int run = GetRunNumber();
    if (run>-1) FinishRun(run);   
 
-   TIter next(GetMakeList());
+   TIter next(GetMakeList(),kIterBackward);
    StMaker *maker;
    Double_t totalCpuTime = 0;
    Double_t totalRealTime = 0;   
@@ -1049,6 +1049,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.111  2001/04/14 01:55:39  perev
+// Reverse iter for Clear() and Finish()
+//
 // Revision 1.110  2001/04/12 22:23:22  perev
 // Small bug fixed (fine found)
 //
