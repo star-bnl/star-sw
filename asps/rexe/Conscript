@@ -8,8 +8,8 @@ my $ObjDir = "#" . $obj_dir;
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 my $pkg;
 if ($env->{ENV}->{STAR}) {
-  if ($env->{ROOTLIBS} =~ /-lNew/) {$pkg  = "root4star";}
-  else                             {$pkg  = "root4starN";}
+  if ($env->{ROOTLIBS} =~ /-lNew/) {$pkg  = "root4starN";}
+  else                             {$pkg  = "root4star";}
 }
 else                     {$pkg  = "Root.exe";}
 my @GDIRS = qw(.

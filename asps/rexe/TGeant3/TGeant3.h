@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGeant3.h,v 1.8 2000/06/21 18:17:25 fisyak Exp $ */
+/* $Id: TGeant3.h,v 1.9 2003/09/10 19:36:56 perev Exp $ */
 
 //////////////////////////////////////////////// 
 //  C++ interface to Geant3 basic routines    // 
@@ -872,7 +872,7 @@ public:
    virtual void FinishGeometry();
    virtual void BuildPhysics();
 
-   ClassDef(TGeant3,1)  //C++ interface to Geant basic routines 
+   ClassDef(TGeant3,0)  //C++ interface to Geant basic routines 
 }; 
 
 #endif 

@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.132 2003/08/29 20:51:22 jeromel Exp $
+# $Id: Construct,v 1.133 2003/09/10 19:38:08 perev Exp $
 use Env;
 use lib $ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -74,7 +74,7 @@ if ( defined( $ARG{ROOTLIBS} ) ) {
     print "set ROOTLIBS = $ROOTLIBS\n" unless ($param::quiet);
 
 } else {
-  if ( !defined( $ARG{NoNew} ) ) { $ROOTLIBS = " -lNew "; }
+  if ( defined( $ARG{YesNew} ) ) { $ROOTLIBS = " -lNew "; }
   if( $ENV{ROOT_LEVEL} gt "3.02.00"){
       # New root scheme
       $ROOTLIBS .=
