@@ -1,5 +1,11 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.5 2000/02/02 15:20:33 hummler Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.6 2000/02/04 13:49:36 hummler Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.6  2000/02/04 13:49:36  hummler
+// upgrade ffs:
+// -remove unused fspar table
+// -make hit smearing gaussian with decent parameters and static rand engine
+// -separate hit smearing from cluster width calculation
+//
 // Revision 1.5  2000/02/02 15:20:33  hummler
 // correct acceptance at sector boundaries,
 // take values from fcl_det
@@ -48,7 +54,6 @@
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_ftp_hit_Table.h"
 #include "tables/St_ffs_gaspar_Table.h"
-#include "tables/St_ffs_fspar_Table.h"
 #include "tables/St_ffs_gepoint_Table.h"
 
 ClassImp(StFtpcClusterMaker)
@@ -83,18 +88,7 @@ Int_t StFtpcClusterMaker::Init(){
   m_padtrans   = (St_fcl_padtrans *)local("fclpars/padtrans");
   m_det        = (St_fcl_det      *)local("fclpars/det"     );
   m_zrow       = (St_fcl_zrow     *)local("fclpars/zrow"    );
-  m_fspar      = (St_ffs_fspar    *)local("ffspars/fspar"   );
   m_gaspar     = (St_ffs_gaspar   *)local("ffspars/gaspar"  );
-
-  ffs_gaspar_st *ffs_gaspar = m_gaspar->GetTable();
-  ffs_gaspar->sig_rad[0] = 800.00;
-  ffs_gaspar->sig_rad[1] = 0.00;
-  ffs_gaspar->sig_rad[2] = 0.00;
-  ffs_gaspar->sig_rad[3] = 0.00;
-  ffs_gaspar->sig_azi[0] = 2000.00;
-  ffs_gaspar->sig_azi[1] = 0.00;
-  ffs_gaspar->sig_azi[2] = 0.00;
-  ffs_gaspar->sig_azi[3] = 0.00;
 
 // 		Create Histograms
   m_flags      = new TH1F("fcl_flags"	,"FTPC cluster finder flags"	,7,0.,8.);
@@ -201,7 +195,6 @@ Int_t StFtpcClusterMaker::Make()
 					       g2t_track->GetTable(), 
 					       &numTrack,
 					       g2t_vertex->GetTable(),
-					       m_fspar->GetTable(),
 					       m_gaspar->GetTable(),
 					       ffs_gepoint->GetTable(),
 					       &numGepoint, maxGepoint,
