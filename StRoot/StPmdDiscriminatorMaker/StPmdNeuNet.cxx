@@ -8,13 +8,14 @@
 //////////////////////////////////////////////////////////////////
 ClassImp(StPmdNeuNet)
 
-	Float_t Teach[200000]={0.};
-	Float_t Value[200000]={0.};
+Float_t Teach[200000]={0.};
+Float_t Value[200000]={0.};
 
 
+/// Constructor 
 StPmdNeuNet::StPmdNeuNet(Text_t *name, Int_t nInput, Text_t *hidden, Int_t nOutput):TNamed(name,"Neural Network")
 {
-// constructor
+  ZeroAll();
   AllocateVW(nInput,hidden,nOutput);
     
   fUseBiases=1.;
@@ -30,15 +31,16 @@ StPmdNeuNet::StPmdNeuNet(Text_t *name, Int_t nInput, Text_t *hidden, Int_t nOutp
 
   TDatime temps;
   fRandom.SetSeed(temps.Convert());
-  printf("First Random Seed = %i\n",fRandom.GetSeed());
-  printf("Neural Network is created : \n");
-//  PrintS();
+  printf("StPmdNeuNet::StPmdNeuNet: First Random Seed = %i\n",fRandom.GetSeed());
+  printf("StPmdNeuNet::StPmdNeuNet: Neural Network is created : \n");
 
 }
 
+
+/// Constructor with no parameter . Purpose ??
 StPmdNeuNet::StPmdNeuNet()
 {
-// constructor witn no parameter 
+  ZeroAll();
   fUseBiases=1.;
   fLearnParam=0.2;
   fFlatSE=0.;
@@ -52,18 +54,40 @@ StPmdNeuNet::StPmdNeuNet()
 
   TDatime temps;
   fRandom.SetSeed(temps.Convert());
-  printf("First Random Seed = %i\n",fRandom.GetSeed());
+  printf("StPmdNeuNet::StPmdNeuNet: First Random Seed = %i\n",fRandom.GetSeed());
 }
 
 
+
+// Destructor
 StPmdNeuNet::~StPmdNeuNet() 
 {
-// destructor  
-  
-  DeleteArray();
+  // destructor  
+  printf("StPmdNeuNet::~StPmdNeuNet : we are done\n");
+  DeleteArray(); 
   FreeVW();
   if(fEventsList) delete [] fEventsList;
 }  
+
+
+/// Zero all arrays later used. Common for both constructors
+void StPmdNeuNet::ZeroAll()
+{
+  fValues     = 0;
+  fErrors     = 0;
+  fBiases     = 0;
+  fNUnits     = 0;
+  fW          = 0;
+
+  fArrayIn    = 0;
+  fArrayOut   = 0;
+  fTeach      = 0;
+  fEventsList = 0;
+
+  fDW         = 0;
+  fDB         = 0;
+
+}
 
 
 void StPmdNeuNet::SetHidden(Text_t *ttext)
@@ -135,7 +159,10 @@ void StPmdNeuNet::AllocateVW(Int_t nInput, Text_t *hidden, Int_t nOutput)
 {
   Int_t i,l;
   
-  if(fW){printf("free memory first !\n");return;}
+  if(fW){
+    printf("StPmdNeuNet::AllocateVW: free memory first !\n");
+    return;
+  }
 
   SetHidden(hidden);
   fNUnits[0]=nInput;
@@ -184,26 +211,30 @@ void StPmdNeuNet::SetKernel(Int_t nInput, Text_t *hidden, Int_t nOutput)
    AllocateVW(nInput,hidden,nOutput);
 }
 
+
+/*! 
+ * Sets the learning parameters :
+ * the main learning parameter is around 0.2 (in ]0,1])
+ * fse is for flat spot elimination, with values in [0,0.25], often 0.1
+ * mu is for backprop momentum, values in [0,1]
+ */
 void StPmdNeuNet::SetLearnParam(Double_t learnParam,Double_t fse,Double_t mu)
 {
-// Sets the learning parameters :
-// the main learning parameter is around 0.2 (in ]0,1])
-// fse is for flat spot elimination, with values in [0,0.25], often 0.1
-// mu is for backprop momentum, values in [0,1]
   fLearnParam=fabs(learnParam);
   fFlatSE=fabs(fse);
   fMu=fabs(mu);
 
-  if (fLearnParam>1.0) printf("Warning : %6.2f is not an usual value\n",fLearnParam);
-  if (fLearnParam==0.0) printf("Warning : 0 is a stupid value\n");
-  printf("Learning Parameter set to : %6.2f\n",fLearnParam);
-  printf("Flat Spot elimination value  set to : %6.2f\n",fFlatSE);
-  printf("Momentum set to : %6.2f\n",fMu);
+  if (fLearnParam>1.0)  printf("StPmdNeuNet::SetLearnParam: Warning : %6.2f is not an usual value\n",fLearnParam);
+  if (fLearnParam==0.0) printf("StPmdNeuNet::SetLearnParam: Warning : 0 is a stupid value\n");
+  printf("StPmdNeuNet::SetLearnParam: Learning Parameter set to : %6.2f\n",fLearnParam);
+  printf("StPmdNeuNet::SetLearnParam: Flat Spot elimination value  set to : %6.2f\n",fFlatSE);
+  printf("StPmdNeuNet::SetLearnParam: Momentum set to : %6.2f\n",fMu);
 }
- 
+
+
+/// Sets the initialisation parameters : max and min weights  
 void StPmdNeuNet::SetInitParam(Float_t lowerInitWeight, Float_t upperInitWeight)
 {
-// Sets the initialisation parameters : max and min weights 
   Float_t temp;
 
   fLowerInitWeight=lowerInitWeight;
@@ -214,10 +245,11 @@ void StPmdNeuNet::SetInitParam(Float_t lowerInitWeight, Float_t upperInitWeight)
     fUpperInitWeight=fLowerInitWeight;
     fLowerInitWeight=temp;
   } 
-  if (fLowerInitWeight==fUpperInitWeight)printf("Warning : the weights initialisation bounds are equal !\n");
-  printf("Init Parameters set to :\n");
-  printf(" --> Lower bound = %6.2f\n",fLowerInitWeight);
-  printf(" --> Upper bound = %6.2f\n",fUpperInitWeight);
+  if (fLowerInitWeight==fUpperInitWeight)
+    printf("StPmdNeuNet::SetInitParam: Warning : the weights initialisation bounds are equal !\n");
+  printf("StPmdNeuNet::SetInitParam: Init Parameters set to :\n");
+  printf("StPmdNeuNet::SetInitParam: --> Lower bound = %6.2f\n",fLowerInitWeight);
+  printf("StPmdNeuNet::SetInitParam: --> Upper bound = %6.2f\n",fUpperInitWeight);
 
 }
 
@@ -227,16 +259,18 @@ Float_t StPmdNeuNet::Alea()
   return fLowerInitWeight+fRandom.Rndm()*(fUpperInitWeight-fLowerInitWeight);
 }
 
+
+
+/*! initialisation of  biases and weights.  
+ * the init parameters can be changed by :
+ * SetInitParam(Float_t lowerInitWeight, Float_t upperInitWeight)
+ * The default is -1 and 1
+ */
 void StPmdNeuNet::Init()
-{
-// initialisation of  biases and weights.  
-// the init parameters can be changed by :
-// SetInitParam(Float_t lowerInitWeight, Float_t upperInitWeight)
-// The default is -1 and 1
-  
+{  
   Int_t i,l,c;
   
-  if(!fW){printf("allocate memory first !\n");return;}
+  if(!fW){printf("StPmdNeuNet::Init: allocate memory first !\n");return;}
   
   // init of weights
   
@@ -256,22 +290,24 @@ void StPmdNeuNet::Init()
 
 
   fNTrainCycles=0;
-  printf("Initialisation done\n");
+  printf("StPmdNeuNet::Init: Initialisation done\n");
 }
 
+
+/// prints structure of network on screen
 void StPmdNeuNet::PrintS()
 {
-// prints structure of network on screen
   Int_t i,l,c;
   
-  if(!fW){printf("no unit !\n");return;} 
+  if(!fW){printf("StPmdNeuNet::PrintS: no unit !\n");return;} 
   
-  printf("+++++++++ Neural Network %s ++++++++++++\n",GetName());
-  for(i=0;i<fNHiddL+2;i++)printf("Layer %1i contains %2i units\n",i,fNUnits[i]);
+  printf("StPmdNeuNet::PrintS: +++++++++ Neural Network %s ++++++++++++\n",GetName());
+  for(i=0;i<fNHiddL+2;i++)printf("StPmdNeuNet::PrintS: Layer %1i contains %2i units\n",i,fNUnits[i]);
 
-  if(fUseBiases)printf(">>>>>>> Biases USED");else printf(">>>>>>>Biases DUMMY");
+  if(fUseBiases)printf("StPmdNeuNet::PrintS: >>>>>>> Biases USED\n");
+  else          printf("StPmdNeuNet::PrintS: >>>>>>>Biases DUMMY\n");
 
-  printf("\n ----------   Biases   ---------- \n");
+  printf("StPmdNeuNet::PrintS: ----------   Biases   ---------- \n");
   Int_t maxl=0;
   for(i=0;i<fNHiddL+2;i++)if(fNUnits[i]>=maxl)maxl=fNUnits[i];
   for(i=0;i<fNHiddL+2;i++)printf("    %1i   | ",i);printf("\n");
@@ -279,21 +315,21 @@ void StPmdNeuNet::PrintS()
   for(l=0;l<maxl;l++)
   {
     for(i=0;i<fNHiddL+2;i++)
-      if(l<fNUnits[i])printf("%6.2f  | ",fBiases[i][l]);else printf("        | ");
-    printf("\n");
+      if(l<fNUnits[i])printf("StPmdNeuNet::PrintS: %6.2f  | ",fBiases[i][l]);
+      else printf("        | "); printf("\n");
   }
 
 
-  printf("\n    ----------   Weights ----------- \n");
+  printf("\nStPmdNeuNet::PrintS:    ----------   Weights ----------- \n");
   for(i=0;i<fNHiddL+1;i++)
   {
-    printf(" From  %1i  to  %1i  : \n",i,i+1);
-    printf("%2i |",i);for(l=0;l<fNUnits[i];l++)printf("  %3i |",l);printf("\n");
-    printf("===|");for(l=0;l<fNUnits[i];l++)printf("-------");printf("\n");
-    printf("%2i |",i+1);for(l=0;l<fNUnits[i];l++)printf("-------");printf("\n");
+    printf("StPmdNeuNet::PrintS:  From  %1i  to  %1i  : \n",i,i+1);
+    printf("StPmdNeuNet::PrintS: %2i |",i);for(l=0;l<fNUnits[i];l++)printf("  %3i |",l);printf("\n");
+    printf("StPmdNeuNet::PrintS: ===|");for(l=0;l<fNUnits[i];l++)printf("-------");printf("\n");
+    printf("StPmdNeuNet::PrintS: %2i |",i+1);for(l=0;l<fNUnits[i];l++)printf("-------");printf("\n");
     for(c=0;c<fNUnits[i+1];c++)
     { 
-       printf("%2i |",c);
+       printf("StPmdNeuNet::PrintS: %2i |",c);
        for(l=0;l<fNUnits[i];l++)printf("%6.2f|",fW[i][l][c]);
        printf("\n");
     }     
@@ -301,47 +337,53 @@ void StPmdNeuNet::PrintS()
   }  
 
   printf("\n");
-  printf("Learning parameter = %6.2f\n",fLearnParam);
-  printf("Flat Spot elimination value = %6.2f\n",fFlatSE);
-  printf("Momentum = %6.2f\n",fMu);
-  printf("Lower initialisation weight = %6.2f\n",fLowerInitWeight);
-  printf("Upper initialisation weight = %6.2f\n",fUpperInitWeight);
-  printf("Number of events for training   = %5i\n",fNTrainEvents);
-  printf("Number of events for validation = %5i\n",fNValidEvents);
-  printf("Number of cycles done = %3i\n",fNTrainCycles);
-  printf("+++++++++++++++++++++++++++++++++++++++++++++++\n");
+  printf("StPmdNeuNet::PrintS: Learning parameter = %6.2f\n",fLearnParam);
+  printf("StPmdNeuNet::PrintS: Flat Spot elimination value = %6.2f\n",fFlatSE);
+  printf("StPmdNeuNet::PrintS: Momentum = %6.2f\n",fMu);
+  printf("StPmdNeuNet::PrintS: Lower initialisation weight = %6.2f\n",fLowerInitWeight);
+  printf("StPmdNeuNet::PrintS: Upper initialisation weight = %6.2f\n",fUpperInitWeight);
+  printf("StPmdNeuNet::PrintS: Number of events for training   = %5i\n",fNTrainEvents);
+  printf("StPmdNeuNet::PrintS: Number of events for validation = %5i\n",fNValidEvents);
+  printf("StPmdNeuNet::PrintS: Number of cycles done = %3i\n",fNTrainCycles);
+  printf("StPmdNeuNet::PrintS: +++++++++++++++++++++++++++++++++++++++++++++++\n");
 
 }
 
+/*! 
+ * general function to propagate the input activation 
+ * The input activation array must be filled  
+ */
 void StPmdNeuNet::Forward()
 {
-// general function to propagate the input activation 
-//  The input activation array must be filled  
   Int_t i,l,c;
   Double_t sum;
   //  cout<<"Valid forward called "<<endl;
-  if(!fW){printf("no unit !\n");return;}  
+  if(!fW){ 
+    printf("StPmdNeuNet::Forward no unit !\n");
+    return;
+  }  
   
-for (i=0;i<fNHiddL+1;i++)  
+  for (i=0;i<fNHiddL+1;i++)  
     for (c=0;c<fNUnits[i+1];c++)
-    {
-      sum=0.; 
-      for(l=0;l<fNUnits[i];l++)sum+=fW[i][l][c]*(Double_t)fValues[i][l];
-      fValues[i+1][c]=(Float_t)Sigmoide(sum+fBiases[i+1][c]*fUseBiases);
-    }
+      {
+	sum=0.; 
+	for(l=0;l<fNUnits[i];l++)sum+=fW[i][l][c]*(Double_t)fValues[i][l];
+	fValues[i+1][c]=(Float_t)Sigmoide(sum+fBiases[i+1][c]*fUseBiases);
+      }
 }
 
+
+
+/// gradient retropropagation (updates of biases and weights)  
 void StPmdNeuNet::LearnBackward()
 {
-// gradient retropropagation (updates of biases and weights)  
-
-  if(fNTrainEvents<1){printf("No event to train !!!\n");return;}
-  if(!fW){printf("no unit !\n");return;}
+  if(fNTrainEvents<1){printf("StPmdNeuNet::LearnBackward: No event to train !!!\n");return;}
+  if(!fW){printf("StPmdNeuNet::LearnBackward: no unit !\n");return;}
 
   Int_t i,l,c;
   Double_t delta;
   
-// weights
+  // weights
     
   for (i=0;i<fNHiddL+1;i++)  
     for (l=0;l<fNUnits[i];l++)
@@ -351,7 +393,7 @@ void StPmdNeuNet::LearnBackward()
         fW[i][l][c]+=delta;
         fDW[i][l][c]=delta;
       }
-// biases
+  // biases
   if(((Bool_t)fUseBiases))
   {
     for (i=1;i<fNHiddL+2;i++)  
@@ -364,27 +406,31 @@ void StPmdNeuNet::LearnBackward()
   }
 }
 
+
+/*!
+ * function to compute the errors between forward propagation and teaching.  
+ * this error is = |teaching-computed| summed on NN outputs and divided by their number.  
+ */
 Double_t StPmdNeuNet::Error()
 {
-// function to compute the errors between forward propagation and teaching.  
-// this error is = |teaching-computed| summed on NN outputs and divided by their number.  
+
   Int_t i,l,c;
   Double_t sum,error=0,errorOneUnit;
-  if(!fW){printf("no unit !\n");return 0;}    
+  if(!fW){printf("StPmdNeuNet::Error: no unit !\n");return 0;}    
   
-//  Error on Output Units
+  //  Error on Output Units
 
   for(l=0;l<fNUnits[fNHiddL+1];l++)
   {
     errorOneUnit=(Double_t)(fTeach[l]-fValues[fNHiddL+1][l]);
-//    cout<<"teach "<<fTeach[l]<<"Value "<<fValues[fNHiddL+1][l]<<endl;
+    //    cout<<"teach "<<fTeach[l]<<"Value "<<fValues[fNHiddL+1][l]<<endl;
 
     error+=fabs(errorOneUnit);
     fErrors[fNHiddL+1][l]=errorOneUnit*(SigPrim(fValues[fNHiddL+1][l])+fFlatSE);
   }
   error=error/(Double_t)fNUnits[fNHiddL+1];
 
-//  Error on Hidden Units
+  //  Error on Hidden Units
 
   for(i=fNHiddL;i==1;i--)
   {  
@@ -399,16 +445,20 @@ Double_t StPmdNeuNet::Error()
   return error;
 }
 
+
+/*!
+ * function to compute the errors between forward propagation and teaching.  
+ * this error is = |teaching-computed| summed on NN outputs and divided by their number.  
+ *  Error on Output Units
+ */
 Double_t StPmdNeuNet::ErrorO()
 {
-// function to compute the errors between forward propagation and teaching.  
-// this error is = |teaching-computed| summed on NN outputs and divided by their number.  
-//  Error on Output Units
+
   
 //  cout<<"Error0 called "<<endl;
   Int_t l;
   Double_t error=0;
-  if(!fW){printf("no unit !\n");return 0;}    
+  if(!fW){printf("StPmdNeuNet::ErrorO: no unit !\n");return 0;}    
   for(l=0;l<fNUnits[fNHiddL+1];l++)
     error+=fabs((Double_t)(fTeach[l]-fValues[fNHiddL+1][l]));
   error=error/(Double_t)fNUnits[fNHiddL+1];  
@@ -416,17 +466,19 @@ Double_t StPmdNeuNet::ErrorO()
   
 }  
 
+
+/*!
+ * one loop on internal events = one cycle.  
+ * takes each event from internal array in an order fixed by an array ( fEventsList ).
+ * It is necessary to call the method Mix() before each call to this function
+ * in order to change the presentation order.
+ * The learning is done by this function.
+ * The private variable  fNTrainCycles is incremented.
+ */
 Double_t StPmdNeuNet::TrainOneCycle()
 {
-// one loop on internal events = one cycle.  
-// takes each event from internal array in an order fixed by an array ( fEventsList ).
-// It is necessary to call the method Mix() before each call to this function
-// in order to change the presentation order.
-// The learning is done by this function.
-// The private variable  fNTrainCycles is incremented.
-
-  if(fNTrainEvents<1){printf("No event to train !!!\n");return 0.;}
-  if(!fW){printf("no unit !\n");return 0.;}
+  if(fNTrainEvents<1){printf("StPmdNeuNet::TrainOneCycle: No event to train !!!\n");return 0.;}
+  if(!fW){printf("StPmdNeuNet::TrainOneCycle: no unit !\n");return 0.;}
 
 
   Int_t i;
@@ -436,13 +488,13 @@ Double_t StPmdNeuNet::TrainOneCycle()
   {  
     GetArrayEvt(fEventsList[i]); 
     Forward();
-	  for(Int_t l=0;l<fNUnits[fNHiddL+1];l++)
-  {
-	  Teach[i]=fTeach[l];
-	  Value[i]=fValues[fNHiddL+1][l];
-
-//  cout<<"evt  "<<i<<"teach **"<<fTeach[l]<<"favle "<<fValues[fNHiddL+1][l]<<endl;
-  }
+    for(Int_t l=0;l<fNUnits[fNHiddL+1];l++)
+      {
+	Teach[i]=fTeach[l];
+	Value[i]=fValues[fNHiddL+1][l];
+	
+	//  cout<<"evt  "<<i<<"teach **"<<fTeach[l]<<"favle "<<fValues[fNHiddL+1][l]<<endl;
+      }
 
     error+=Error();
     LearnBackward();
@@ -452,24 +504,25 @@ Double_t StPmdNeuNet::TrainOneCycle()
  
   fNTrainCycles++;
   error=error/(Double_t)fNTrainEvents;
-  printf("cycle %i : E_t = %6.4f ",fNTrainCycles,error);
+  printf("StPmdNeuNet::TrainOneCycle: cycle %i : E_t = %6.4f ",fNTrainCycles,error);
 
   return error;
 }
 
+
+/*!
+ * one loop on valid events.  
+ * takes each event from validation tree.
+ * the events are passed trough the kernel, and a mean output
+ * error is computed.
+ */
 Double_t StPmdNeuNet::Valid()
 {
-// one loop on valid events.  
-// takes each event from validation tree.
-// the events are passed trough the kernel, and a mean output
-// error is computed.
-
-
   if(fNValidEvents<1) return 0.;
  
 
-// we will now pass all the validation events through the kernel, and
-// compute the mean error on output 
+  // we will now pass all the validation events through the kernel, and
+  // compute the mean error on output 
   Double_t error=0.;
 
   for (Int_t j=0;j<fNValidEvents;j++)
@@ -481,46 +534,55 @@ Double_t StPmdNeuNet::Valid()
 }
 
 
+/*!
+ * method to train on N cycles, with mixing and plot of errors
+ * on the controller conte.
+ */
 void StPmdNeuNet::TrainNCycles(Int_t nCycles)
 {
-// method to train on N cycles, with mixing and plot of errors
-// on the controller conte.
-
-//sub  if(!conte){printf("no controller !\n");return;}
+  //sub  if(!conte){printf("no controller !\n");return;}
   Float_t errt,errv;
   for(Int_t i=0;i<nCycles;i++)
   {
     Mix();
     errt=(Float_t)TrainOneCycle();
     errv=(Float_t)Valid();
-    printf("cycle %3i > train : %7.3f",fNTrainCycles,errt);
-    if(fNValidEvents)printf(" and valid : %7.3f \n",errv);else printf("\n");
+    printf("StPmdNeuNet::TrainNCycles: cycle %3i > train : %7.3f",fNTrainCycles,errt);
+    if(fNValidEvents)printf("StPmdNeuNet::TrainNCycles: and valid : %7.3f \n",errv);
+    else printf("\n");
 
   }
   
 }
 
+
+/*! 
+ * Put the structure in a file
+ * WARNING : the weights and biases are stored with 4 digits
+ * in decimal part.      
+ * Learning parameters are not stored
+ */
 void StPmdNeuNet::Export(Text_t *fileName)
 {
-// Put the structure in a file
-// WARNING : the weights and biases are stored with 4 digits
-// in decimal part.    
-// Learning parameters are not stored
   Int_t i,l,c;
   
-  if(!fW){printf("no unit !\n");return;} 
+  if(!fW){printf("StPmdNeuNet::Export: no unit !\n");return;} 
   
-  FILE *file;
-  file=fopen(fileName,"w");
+  FILE  *file=0;
+  file = fopen(fileName,"w");
+  if ( ! file){
+    printf("StPmdNeuNet::Export: ERROR Cannot open %s for write\n",fileName);
+    return;
+  }
 
-    fprintf(file,"%8i\n",fNTrainEvents);
-    for(l=0;l<fNTrainEvents;l++)fprintf(file,"%8.4f %8.4f\n",Teach[l],Value[l]);
+  fprintf(file,"%8i\n",fNTrainEvents);
+  for(l=0;l<fNTrainEvents;l++)fprintf(file,"%8.4f %8.4f\n",Teach[l],Value[l]);
 
-    //////////////////////
-    cout<<"discMaker  "<<m_DiscMaker<<endl;
-    m_DiscMaker->mNNoutput->Fill(Value[l]);
+  //////////////////////
+  cout<<"StPmdNeuNet::Export: discMaker  "<<m_DiscMaker<<endl;
+  m_DiscMaker->mNNoutput->Fill(Value[l]);
 
-    fprintf(file,"%3i\n",fNHiddL);
+  fprintf(file,"%3i\n",fNHiddL);
   for(i=0;i<fNHiddL+2;i++)fprintf(file,"%3i\n",fNUnits[i]);
 
   for(i=0;i<fNHiddL+2;i++)
@@ -536,17 +598,25 @@ void StPmdNeuNet::Export(Text_t *fileName)
   fclose(file);   
 }
 
+
+/*!
+ * Get the structure from a file
+ * WARNING : the weights and biases are stored with 4 digits
+ * in decimal part.
+ * Learning parameteres are not stored.  
+ */
 void StPmdNeuNet::Import(Text_t *fileName)
 {
-// Get the structure from a file
-// WARNING : the weights and biases are stored with 4 digits
-// in decimal part.
-// Learning parameteres are not stored.  
   Int_t i,l,c,newI,newHL,newO;
   Text_t hidden[100],piece[5];
-  FILE *file;
-  file=fopen(fileName,"r");
+  FILE *file=0;
+  file = fopen(fileName,"r");
   
+  if ( ! file){
+    printf("StPmdNeuNet::Import: ERROR Cannot open %s for read\n",fileName);
+    return;
+  }
+
   fscanf(file,"%3i",&newHL);
   fscanf(file,"%3i",&newI); 
   strcpy(hidden,"");
@@ -555,9 +625,13 @@ void StPmdNeuNet::Import(Text_t *fileName)
   fscanf(file,"%s",piece);strcat(hidden,piece);
   fscanf(file,"%3i",&newO); 
   
-  printf("New NN set to : %3i  %s  %3i \n",newI,hidden,newO);
+  printf("StPmdNeuNet::Import: New NN set to : %3i  %s  %3i \n",newI,hidden,newO);
   FreeVW();			  
+
+  printf("StPmdNeuNet::Import: Allocating\n");
   AllocateVW(newI,hidden,newO);
+
+  printf("StPmdNeuNet::Import: Filling fDB+fscanf()\n");
   Float_t tmpfl;
   for(i=0;i<fNHiddL+2;i++)
     for(l=0;l<fNUnits[i];l++){fDB[i][l]=0.;fscanf(file,"%f",&tmpfl);*(fBiases[i]+l)=(Double_t)tmpfl;}
@@ -565,23 +639,24 @@ void StPmdNeuNet::Import(Text_t *fileName)
   for(i=0;i<fNHiddL+1;i++)
     for(l=0;l<fNUnits[i];l++)
       for(c=0;c<fNUnits[i+1];c++){
-      fDW[i][l][c]=0.;fscanf(file,"%f",&tmpfl);*(fW[i][l]+c)=(Double_t)tmpfl;
-      //      cout<<"Nhidd "<<i<<"Nunit "<<l<<"unit_next "<<c<<"wei "<<fW[i][l][c]<<endl;     
-}
-      
+	fDW[i][l][c]=0.;fscanf(file,"%f",&tmpfl);*(fW[i][l]+c)=(Double_t)tmpfl;
+	//      cout<<"Nhidd "<<i<<"Nunit "<<l<<"unit_next "<<c<<"wei "<<fW[i][l][c]<<endl;     
+      }
+  
 
   fscanf(file,"%5i",&fNTrainCycles);  
   fscanf(file,"%f",&tmpfl);fUseBiases=(Double_t)tmpfl;  
-    
   fclose(file);   
+  printf("StPmdNeuNet::Import: Done\n");
 }
 
+
+/*! mix the events before learning. VERY IMPORTANT.
+ * is has to be used before  TrainOneCycle() , 
+ * IT IS NOT used by TrainOneCycle() , you have to do the call yourself
+ */
 void StPmdNeuNet::Mix()
 {
-// mix the events before learning. VERY IMPORTANT.
-// is has to be used before  TrainOneCycle() , 
-// IT IS NOT used by TrainOneCycle() , you have to do the call yourself
-  
   Int_t i,i1,i2;
   Int_t temp;
   for (i=0;i<3*fNTrainEvents;i++)
@@ -593,9 +668,10 @@ void StPmdNeuNet::Mix()
      fEventsList[i2]=temp;
   }
 
-//  for (i=0;i<fNTrainEvents;i++)printf("%i \n",fEventsList[i]);  
-//  printf("Mixed ... ");
+  //  for (i=0;i<fNTrainEvents;i++)printf("%i \n",fEventsList[i]);  
+  //  printf("Mixed ... ");
 }
+
 
 void StPmdNeuNet::SetArraySize(Int_t size)
 {
@@ -607,7 +683,7 @@ void StPmdNeuNet::SetArraySize(Int_t size)
   fArrayIn  = new Float_t*[fNTrainEvents];
   for (i=0;i<fNTrainEvents;i++) fArrayIn[i] = new Float_t[fNUnits[0]];
 
-  cout<<"array size "<<fNUnits[0]<<endl;
+  cout<<"StPmdNeuNet::SetArraySize: array size "<<fNUnits[0]<<endl;
 
   fArrayOut = new Float_t*[fNTrainEvents];  
   for (i=0;i<fNTrainEvents;i++) fArrayOut[i] = new Float_t[fNUnits[fNHiddL+1]];
@@ -682,21 +758,23 @@ void StPmdNeuNet::FillArray(Int_t iev,Int_t iunit,Float_t value)
 {
   //cout<<"inside fillarray**"<<iev<<" "<<iunit<<" "<<value<<endl;
 
-	fArrayIn[iev][iunit]=value;
+  fArrayIn[iev][iunit]=value;
 }
 
 
+
+/*!
+ * one loop on internal events = one cycle.  
+ * takes each event from internal array in an order fixed by an array ( fEventsList ).
+ * It is necessary to call the method Mix() before each call to this function
+ * in order to change the presentation order.
+ * The learning is done by this function.
+ * The private variable  fNTrainCycles is incremented.
+ */
 Double_t StPmdNeuNet::ApplyWeights(Float_t *Teach,Float_t *Value)
 {
-// one loop on internal events = one cycle.  
-// takes each event from internal array in an order fixed by an array ( fEventsList ).
-// It is necessary to call the method Mix() before each call to this function
-// in order to change the presentation order.
-// The learning is done by this function.
-// The private variable  fNTrainCycles is incremented.
-
-  if(fNTrainEvents<1){printf("No event to train !!!\n");return 0.;}
-  if(!fW){printf("no unit !\n");return 0.;}
+  if(fNTrainEvents<1){printf("StPmdNeuNet::ApplyWeights: No event to train !!!\n");return 0.;}
+  if(!fW){printf("StPmdNeuNet::ApplyWeights: no unit !\n");return 0.;}
   FILE *file1;
   file1=fopen("testout","w");
 
@@ -707,26 +785,25 @@ Double_t StPmdNeuNet::ApplyWeights(Float_t *Teach,Float_t *Value)
   {  
     GetArrayEvt(fEventsList[i]); 
     Forward();
-//	  cout<<"fNUnits "<<fNUnits[fNHiddL+1]<<endl;
-	  for(Int_t l=0;l<fNUnits[fNHiddL+1];l++)
-  {
-	  Teach[i]=fTeach[l];
-	  Value[i]=fValues[fNHiddL+1][l];
-
-
-	  //	  cout<<"evt  "<<i<<"teach **"<<fTeach[l]<<"favle "<<fValues[fNHiddL+1][l]<<endl;
-  }
-      fprintf(file1,"%d %8.4f %8.4f\n",i,Teach[i],Value[i]);
+    for(Int_t l=0;l<fNUnits[fNHiddL+1];l++)
+      {
+	Teach[i]=fTeach[l];
+	Value[i]=fValues[fNHiddL+1][l];
+	
+	
+	//	  cout<<"evt  "<<i<<"teach **"<<fTeach[l]<<"favle "<<fValues[fNHiddL+1][l]<<endl;
+      }
+    fprintf(file1,"%d %8.4f %8.4f\n",i,Teach[i],Value[i]);
 
     error+=Error();
     //    LearnBackward();
   
-
+    
   }
  
-    fNTrainCycles++;
+  fNTrainCycles++;
   error=error/(Double_t)fNTrainEvents;
- // printf("cycle %i : E_t = %6.4f ",fNTrainCycles,error);
+  // printf("cycle %i : E_t = %6.4f ",fNTrainCycles,error);
 
   return error;
 }
