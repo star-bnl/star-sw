@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.80 2004/04/08 00:13:09 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.81 2004/04/08 00:28:53 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.81  2004/04/08 00:28:53  perev
+// AliasDate & AliasTime now static methods
+//
 // Revision 1.80  2004/04/08 00:13:09  perev
 // Again move from .data to .const
 //
@@ -97,11 +100,7 @@
 #include "TTableDescriptor.h"
 #include "TTable.h"
 #include "TUnixTime.h"
-
 #include "StDbBroker/StDbBroker.h"
-
-static Int_t AliasDate(const char *alias);
-static Int_t AliasTime(const char *alias);
 
 static const char *aliases[]={
    "sd97",     "sd98", "year_1a", "year_1b",  "year_1c",
@@ -280,8 +279,8 @@ TDatime St_db_Maker::Time(const char *filename)
   lfilename = strlen(filename);
   lname = strcspn(filename,".");
   if (lname+2>lfilename) return time;
-  idate = ::AliasDate(filename+lname+1);
-  itime = ::AliasTime(filename+lname+1);
+  idate = AliasDate(filename+lname+1);
+  itime = AliasTime(filename+lname+1);
 
   if (idate) { time.Set(idate,itime);return time;}
 
@@ -785,7 +784,7 @@ void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
        fDBBroker->SetTableFlavor(flaType,tabID, parID);
        fl->SetUniqueID(fl->GetUniqueID()+1);
 
-       if (!Debug())				continue;
+       if (Debug()<2)				continue;
        if (strcmp("ofl",flaType)==0) 		continue;
          printf("<St_db_Maker::SetFlavor> Set flavor %s to %s\n",flaType,tabName);
 
@@ -868,7 +867,7 @@ void St_db_Maker::SetMaxEntryTime(Int_t idate,Int_t itime)
   fMaxEntryTime = ut.GetUTime();
 }
 //_____________________________________________________________________________
-static Int_t AliasDate(const char *alias)
+Int_t St_db_Maker::AliasDate(const char *alias)
 
 {
 
@@ -878,7 +877,7 @@ static Int_t AliasDate(const char *alias)
   return dates[i];
 }
 //_____________________________________________________________________________
-static Int_t AliasTime(const char *alias)
+Int_t St_db_Maker::AliasTime(const char *alias)
 
 {
 
