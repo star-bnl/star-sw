@@ -22,7 +22,7 @@
 *
       volume_id = 0
 *
-      If    (Csys.eq.'svt') then
+      If    (Csys=='svt') then
 *1*                                          Ken Wilson
         If  (Cd=='SVTD') then
            lnumber    = numbv(1)
@@ -43,7 +43,7 @@
            volume_id =  7000+100*numbv(2)+numbv(1)
         endif
 
-      else If (Csys.eq.'tpc') then
+      else If (Csys=='tpc') then
 *2*                                        Peter M. Jacobs
         tpgv  = numbv(1)
         tpss  = numbv(2)
@@ -51,12 +51,13 @@
         sector= tpss+12*(tpgv-1) 
 
         isdet = 0
-        If (cd.eq.'TPAI')  isdet=1
-        If (cd.eq.'TPAO')  isdet=2
-
+        If (cd=='TPAI')  isdet=1
+        If (cd=='TPAO')  isdet=2
+*PN: outermost pseudopadrow:
+        If (cd=='TPAO' .and. tpad==14) tpad=45
         volume_id=100000*isdet+100*sector+tpad
 
-      else If (Csys.eq.'mwc') then
+      else If (Csys=='mwc') then
 *3*
         rileft    = numbv(1)
         sector    = numbv(2) 
@@ -64,7 +65,7 @@
         innour    = numbv(4)
         volume_id = 1000*rileft+100*innout+10*innour+sector
 
-      else If (Csys.eq.'tof') then
+      else If (Csys=='tof') then
 *4*
         rileft     = numbv(1)
         sector     = numbv(2)
@@ -73,7 +74,7 @@
         volume_id  = 100000*rileft+1000*innout+10*sector+
      +                                         sub_sector   
 
-      else If (Csys.eq.'ctb') then
+      else If (Csys=='ctb') then
 *5*
         rileft    = numbv(1)
         sector    = numbv(2)
@@ -82,15 +83,15 @@
 
 *   ------------------  calorimetry  ---------------------
 
-      else If (Csys.eq.'emc') then
+      else If (Csys=='emc') then
 *6*                                barrel calorimeter - K.Shester
         if (numbv(3)>0) then
           rileft=numbv(1)
           eta=idigi(1)+1
-          If (rileft.eq.1) then
+          If (rileft==1) then
             phi=60-numbv(2)+1
             phi_sub=idigi(2)
-            If (phi_sub.eq.0) phi_sub=2 
+            If (phi_sub==0) phi_sub=2 
           else
             phi=60+numbv(2)
             phi_sub=idigi(2)+1
@@ -106,12 +107,12 @@
         volume_id=10000000*rileft+100000*eta+100*phi+
      +                            10*phi_sub+superl
 
-      else If (Csys.eq.'smd') then
+      else If (Csys=='smd') then
 *7*
          if (numbv(3)>0) then
 	  rileft=numbv(1) 
           eta=idigi(2)+1
-          If (rileft.eq.1) then
+          If (rileft==1) then
             phi=60-numbv(2)+1
           else
             phi=60+numbv(2)
@@ -125,11 +126,11 @@
           forw_back=numbv(2)
           strip=idigi(2)+1
 	endif
-        If (forw_back.eq.4) forw_back=3
+        If (forw_back==4) forw_back=3
         volume_id=100000000*rileft+1000000*eta+1000*phi+
      +                             100*forw_back+strip
 
-      else If (Csys.eq.'esm') then
+      else If (Csys=='esm') then
 *8*                                 end-cap calorimeter - Rashid
         rileft    = numbv(1)
         phi       = numbv(2)
@@ -137,7 +138,7 @@
         eta       = numbv(2) 
         volume_id = 10000000*rileft+100000*phi+100*phi_sub+eta
 
-      else If (Csys.eq.'eem') then
+      else If (Csys=='eem') then
 *9*
         rileft    = numbv(1)
         phi_30d   = numbv(2)-1
@@ -149,22 +150,22 @@
  
 *   ------------------ forward region ---------------------
 
-      else If (Csys.eq.'ftp') then
+      else If (Csys=='ftp') then
 *10*
         endcap    = numbv(1)
         zslice    = numbv(2)
         volume_id = 100*endcap+zslice
 
-      else If (Csys.eq.'vpd') then
+      else If (Csys=='vpd') then
 *11*
         rileft    = numbv(1)
         innout    = numbv(2)
         sector    = numbv(3)
         volume_id = 1000*rileft+100*innout+sector
 
-      else If (Csys.eq.'pgc') then
+      else If (Csys=='pgc') then
 *12*
-      else If (Csys.eq.'psc') then
+      else If (Csys=='psc') then
 *13*
       else
         print *,' G2T warning: volume  ',Csys,'  not found '  
