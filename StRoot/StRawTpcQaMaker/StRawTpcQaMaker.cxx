@@ -59,7 +59,9 @@ Int_t StRawTpcQaMaker::Init(){
 
   victorPrelim=(StDAQReader*)(herb->GetObject());
   assert(victorPrelim);
-   
+
+  // count # times make called (ntmc defined in header file)
+  ntmc=0;   
 
    myH1 = new TH2F("RawTpcMxPad","Tpc - max pads vs row",
           50,0.,50.,50,0.,5000.); 
@@ -79,6 +81,10 @@ Int_t StRawTpcQaMaker::Make(){
 
   victor=victorPrelim->getTPCReader();
   assert(victor);
+
+  // count # times make called (ntmc defined in header file)
+  ntmc++;
+  cout << " StRawTpcQaMaker: event # " << ntmc << endl;
 
   // Now you have a pointer named "victor".  It is a pointer to class
   // StTPCReader, which is defined in $STAR/StDAQMaker/StDAQReader.h.
@@ -108,8 +114,10 @@ Int_t StRawTpcQaMaker::Make(){
 // loop over sectors
   for (Int_t sectorIndex=0; sectorIndex < N__SECTORS; sectorIndex++) 
   {
-    cout << "working on sector# ";
-    cout << " " << sectorIndex << "===>"<< endl;
+    if (ntmc<=1){
+      cout << "   working on sector# ";
+      cout << " " << sectorIndex << "===>"<< endl;
+    }
 
     myH2->Fill(sectorIndex);
 
@@ -127,7 +135,7 @@ Int_t StRawTpcQaMaker::Make(){
 //_____________________________________________________________________________
 void StRawTpcQaMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StRawTpcQaMaker.cxx,v 1.1 2000/06/09 18:21:50 kathy Exp $\n");
+  printf("* $Id: StRawTpcQaMaker.cxx,v 1.2 2000/06/14 15:01:53 kathy Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
