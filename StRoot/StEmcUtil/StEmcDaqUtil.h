@@ -43,16 +43,15 @@ StEmcCollection* GetEmcCollectionFromDaq(TDataSet* daq)
         for(UInt_t s=1;s<=sub[det];s++)
         {
           unsigned short ADC=0;
-          if(det==0)
-            if(TheEmcReader->getTowerADC((int)m,(int)e,(int)s,ADC));
-            {
-              //cout <<"ADC = "<<ADC<<endl;
-              if(ADC>0)
-              {
-                StEmcRawHit* hit=new StEmcRawHit(id,m,e,s,(UInt_t)ADC);
-                detector->addHit(hit);
-              }
-            }
+          if(det==0) if(!TheEmcReader->getTowerADC((int)m,(int)e,(int)s,ADC)) goto next;
+          if(det==3) if(!TheEmcReader->getSMDE_ADC((int)m,(int)e,ADC)) goto next; 
+          if(det==4) if(!TheEmcReader->getSMDP_ADC((int)m,(int)e,(int)s,ADC)) goto next;
+          if(ADC>0)
+          {
+            StEmcRawHit* hit=new StEmcRawHit(id,m,e,s,(UInt_t)ADC);
+            detector->addHit(hit);
+          }
+          next: continue;
         }
     
     emcDaqUtil->setDetector(detector);
