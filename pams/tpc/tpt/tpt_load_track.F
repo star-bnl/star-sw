@@ -1,5 +1,8 @@
-* $Id: tpt_load_track.F,v 1.17 2000/03/10 06:23:02 sakrejda Exp $
+* $Id: tpt_load_track.F,v 1.18 2000/03/10 06:29:57 sakrejda Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.18  2000/03/10 06:29:57  sakrejda
+* Debug write removed
+*
 * Revision 1.17  2000/03/10 06:23:02  sakrejda
 * Track length calculation fixed.
 *
@@ -209,10 +212,8 @@ C
      >          (( hit( trk(ipt).ipnt(1)).x-trk(ipt).p(3))**2+
      >           ( hit( trk(ipt).ipnt(1)).y-trk(ipt).p(4))**2))
            ds=acos(ds)
-           if(ds.lt.0)write(16,*) "negative ds"
-
+C
            track(ipt).length =abs(trk(ipt).p(2))*ds*sqrt(1.0+track(ipt).tanl**2)
-           write(16,*)ipt,track(ipt).length
       else
            track(ipt).length = trk(ipt).p(3)
       endif
