@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.26 1999/02/20 18:48:56 fisyak Exp $
+// $Id: StChain.cxx,v 1.27 1999/02/22 02:21:49 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.27  1999/02/22 02:21:49  fisyak
+// Add GetGeometry
+//
 // Revision 1.26  1999/02/20 18:48:56  fisyak
 // Add event/run information to Chain
 //
@@ -244,6 +247,7 @@
 #include "TTree.h"
 #include "TBrowser.h"
 #include "TClonesArray.h"
+#include "TGeometry.h"
 #include "TSystem.h"
 #include "St_XDFFile.h"
 #include "St_DataSetIter.h"
@@ -272,9 +276,8 @@ StChain::StChain()
 
 //_____________________________________________________________________________
 StChain::StChain(const char *name, const char *title):
-m_VersionCVS("$Id: StChain.cxx,v 1.26 1999/02/20 18:48:56 fisyak Exp $"),
+m_VersionCVS("$Id: StChain.cxx,v 1.27 1999/02/22 02:21:49 fisyak Exp $"),
 m_VersionTag("$Name:  $"),
-m_EvenType("Collision"),
 m_DateTime(),
 mProcessTime()
 {
@@ -296,6 +299,7 @@ mProcessTime()
    mCenterOfMassEnergy = 0;
    mBunchCrossingNumber = 0;
    mTriggerMask  = 0;
+   m_EvenType    = TString("Unknown");
 //   m_Display     = 0;
    m_DataSet       = 0;
    m_DebugLevel    = kNormal;
@@ -488,7 +492,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.26 1999/02/20 18:48:56 fisyak Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.27 1999/02/22 02:21:49 fisyak Exp $    \n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");
@@ -800,4 +804,9 @@ void StChain::ResetHits()
 //_____________________________________________________________________________
 void StChain::CleanDetectors()
 {
+}
+//_____________________________________________________________________________
+TGeometry *StChain::GetGeometry()
+{
+  return 0;
 }

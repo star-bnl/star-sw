@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.21 1999/02/20 18:48:56 fisyak Exp $
+// $Id: StChain.h,v 1.22 1999/02/22 02:21:49 fisyak Exp $
 // $Log: StChain.h,v $
+// Revision 1.22  1999/02/22 02:21:49  fisyak
+// Add GetGeometry
+//
 // Revision 1.21  1999/02/20 18:48:56  fisyak
 // Add event/run information to Chain
 //
@@ -111,19 +114,12 @@ private:
    Int_t               m_Run;               //Run number 
    Int_t               m_Event;             //Event event number
    Int_t               m_Mode;              //Run mode -- Event generator accoringly Ron numenclature 
-   Char_t             *m_EvenType;          //Event type: Au+Au, p+p, laser..
+   TString             m_EvenType;          //Event type: Au+Au, p+p, laser..
    Float_t             m_BImpact;           //Impact parameter
    Float_t             m_PhImpact;          //Phi angle of impact
    TDatime             m_DateTime;          //Run date
    ULong_t             mAwest;
    ULong_t             mAeast;
-/*  isthep = 10
-    idhep  = 9999999
-    jmohep = (103073, 56) 
-    jdahep = (990122, 1)    ? Date
-    phep   = (2.732848, 5.861712, 31.0, 200.0, 165.162)
-    vhep   = (412.0, 1.0, 103129.3, 0.0)*/
-
    Float_t             mCenterOfMassEnergy; //
    ULong_t             mBunchCrossingNumber;//
    ULong_t             mTriggerMask;        //
@@ -190,7 +186,7 @@ public:
 
    Int_t             Run()   {return m_Run;}
    Int_t             Event() {return m_Event;}
-   Char_t           *EvenType() {return m_EvenType;}
+   TString          *EvenType() {return &m_EvenType;}
    Float_t           BImpact(){return m_BImpact;}
    Float_t           PhImpact(){return m_PhImpact;}
    Int_t             Mode()  {return m_Mode;}
@@ -206,7 +202,7 @@ public:
    virtual void   SetBranches();
    virtual void   SetRun(Int_t run=1)     {m_Run=run;} // *MENU*
    virtual void   SetEvent(Int_t event=1) {m_Event=event;} // *MENU*
-   virtual void   SetEvenType(Char_t const *type=""){m_EvenType=type;} // *MENU*
+   virtual void   SetEvenType(Char_t const *type="Unknown") {m_EvenType = type;} // *MENU*
    virtual void   SetBImpact(Float_t b=0) {m_BImpact=b;} // *MENU*
    virtual void   SetPhImpact(Float_t Phi=0) {m_PhImpact=Phi;} // *MENU*
    virtual void   SetMode(Int_t mode=0)   {m_Mode=mode;} // *MENU*
