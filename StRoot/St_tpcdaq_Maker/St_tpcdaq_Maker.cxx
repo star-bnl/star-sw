@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.70  2002/10/15 19:24:31  ward
+// Stuff for pre-.daq file testing, and better handling of daq_flag.
+//
 // Revision 1.69  2002/10/13 20:43:38  ward
 // Support for decoding DAQ100 data and writing it into a table.
 //
@@ -229,13 +232,13 @@ ClassImp(St_tpcdaq_Maker)
 StDAQReader *victorPrelim;
 StTPCReader *victor;
 int gSector;
+#define DEVELOPMENT
 //________________________________________________________________________________
 St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqOrTrs):StMaker(name),gConfig(daqOrTrs)
 {
   printf("This is St_tpcdaq_Maker, name = \"%s\".\n",name);
   alreadySet=0; // FALSE
-  daq_flag  =1; // deafult value for DAQ Reading is to use pad_raw table filling
-  // daq100cl debug daq_flag = 3;
+  daq_flag = 1; // default value for DAQ Reading is to use pad_raw table filling
 }
 //________________________________________________________________________________
 St_tpcdaq_Maker::~St_tpcdaq_Maker() {
@@ -492,7 +495,9 @@ int St_tpcdaq_Maker::getSequences(float gain,int row,int pad,int *nseq,StSequenc
 /// Method to set the DAQ Reading mode.
 void St_tpcdaq_Maker::SetDAQFlag(Int_t mode)
 {
-  // daq100cl debug if(7) return;
+#ifdef DEVELOPMENT
+  if(7) return;
+#endif
   daq_flag = mode;
   cout << "St_tpcdaq_Maker::SetDAQFlag : Setting mandatory DAQ flag to ";
   if (daq_flag == 0){
@@ -660,11 +665,9 @@ int St_tpcdaq_Maker::Output() {
   StSequence *listOfSequences;
   St_raw_sec_m  *raw_sec_m;
 
-  if(daq_flag & 0x01) { // Herb Oct 2002 for DAQ100.
-    raw_sec_m = (St_raw_sec_m *) raw_data_tpc("raw_sec_m");
-    if(!raw_sec_m) {
-      raw_sec_m=new St_raw_sec_m("raw_sec_m",NSECT); raw_data_tpc.Add(raw_sec_m);
-    }
+  raw_sec_m = (St_raw_sec_m *) raw_data_tpc("raw_sec_m");
+  if(!raw_sec_m) {
+    raw_sec_m=new St_raw_sec_m("raw_sec_m",NSECT); raw_data_tpc.Add(raw_sec_m);
   }
 
   // See "DAQ to Offline", section "Better example - access by padrow,pad",
@@ -675,16 +678,13 @@ int St_tpcdaq_Maker::Output() {
 #endif
     dataOuter[isect-1]=0; dataInner[isect-1]=0;
 
-    if(daq_flag & 0x01) { // Herb Oct 2002 for DAQ100.  This is the switch which cuts 
-                           // off the old data in favor of the new online clusters.
+    sector=raw_data_tpc(NameOfSector(isect));
+    if(!sector) {
+      raw_data_tpc.Mkdir(NameOfSector(isect));
       sector=raw_data_tpc(NameOfSector(isect));
-      if(!sector) {
-        raw_data_tpc.Mkdir(NameOfSector(isect));
-        sector=raw_data_tpc(NameOfSector(isect));
-      }
-      MkTables(isect,sector,&raw_row_in,&raw_row_out,&raw_pad_in,&raw_pad_out, 
-          &raw_seq_in,&raw_seq_out,&pixel_data_in,&pixel_data_out);
     }
+    MkTables(isect,sector,&raw_row_in,&raw_row_out,&raw_pad_in,&raw_pad_out, 
+        &raw_seq_in,&raw_seq_out,&pixel_data_in,&pixel_data_out);
     sectorStatus=getSector(isect);
     if(sectorStatus) continue;
     raw_row_gen=raw_row_out; raw_pad_gen=raw_pad_out; rowR=0; padR=0;
@@ -875,8 +875,7 @@ void St_tpcdaq_Maker::DAQ100clTableOut(unsigned int sectorCntsFrom1,char swap,
   for(ipadrow=1;ipadrow<npadrow;ipadrow++) {
     padrow=     Swap4(swap,*(data+wordNumber[ipadrow]  ));
     numClusters=Swap4(swap,*(data+wordNumber[ipadrow]+1));
-    assert(numClusters>  0); // bbb Check this with Jeff.
-    assert(numClusters<200); // bbb Check this with Jeff.
+    assert(numClusters<=6000); // Sanity check.  Number is from discusssion with Landgraf Oct 14.
     for(icluster=0;icluster<numClusters;icluster++) {
       pad=(unsigned short int*)(data+wordNumber[ipadrow]+2*icluster+2);
       time=pad+1; flag=pad+2; charge=pad+3;
@@ -894,16 +893,32 @@ void St_tpcdaq_Maker::DAQ100clTableOut(unsigned int sectorCntsFrom1,char swap,
   }
 }
 //________________________________________________________________________________
+void St_tpcdaq_Maker::PrepareSimulatedData(unsigned int sector,unsigned int *out) {
+  static unsigned int cnt=0;
+  unsigned short int *r;
+  int ipadrow;
+
+  out[0]=3; // 3 pad rows
+
+  for(ipadrow=0;ipadrow<3;ipadrow++) {
+    out[1+ipadrow*8]=sector+1; // row number
+    out[2+ipadrow*8]=3;        // number of clusters this row
+    r=(unsigned short*)&(out[3+ipadrow*8]); r[0]=(cnt++)%30; r[1]=sector+2; r[2]=123; r[3]=321;
+    r=(unsigned short*)&(out[5+ipadrow*8]); r[0]=(cnt++)%30; r[1]=sector+2; r[2]=123; r[3]=321;
+    r=(unsigned short*)&(out[7+ipadrow*8]); r[0]=(cnt++)%30; r[1]=sector+2; r[2]=123; r[3]=321;
+  }
+}
+//________________________________________________________________________________
 void St_tpcdaq_Maker::DAQ100clOutput(const unsigned int *pTPCP) {
   char swapTPCRBCLP,swapTPCSECLP,swapTPCSECP,swapTPCP,swapTPCMZCLD;
   const unsigned int *pTPCSECP,*pTPCSECLP,*pTPCRBCLP,*pTPCMZCLD;
-  unsigned int imz,irb,format,offset,length,isec,numberOfPresentSectors=0;
+  unsigned int sector,map,imz,irb,format,offset,length,isec,numberOfPresentSectors=0;
   assert(sizeof(unsigned int)==4); // Casting the pointer as uint* lets us avoid many *4's.
   assert(sizeof(unsigned short int)==2);
   swapTPCP=WhetherToSwap(*(pTPCP+5));
 
-  // Loop over the sectors.  For some reason, in a standard DAQ file 12 sectors are
-  // missing, with each of the 12 present sectors having two physical sectors.
+  // Loop over the sectors.  For some reason, in a standard DAQ file, 12 sectors are
+  // missing, with each of the 12 present sectors representing two physical sectors.
   for(isec=0;isec<24;isec++) {
 
     // Navigate from the TPCP bank to the TPCSECP bank for this sector.
@@ -914,13 +929,21 @@ void St_tpcdaq_Maker::DAQ100clOutput(const unsigned int *pTPCP) {
     swapTPCSECP=WhetherToSwap(*(pTPCSECP+5));
 
     // Navigate from TPCSECP to TPCSECLP, the first bank dedicated to online clusters.
+#ifdef DEVELOPMENT
+    unsigned int simulated[100];
+    PrepareSimulatedData(isec+1,simulated);
+    DAQ100clTableOut(isec+1,0,simulated); // Decodes data words of TPCMZCLD.
+    continue;
+#endif
     offset=Swap4(swapTPCSECP,*(pTPCSECP+8)); if(offset==0) continue;
     format=Swap4(swapTPCSECP,*(pTPCSECP+6)); if(format <2) continue;
     pTPCSECLP=pTPCSECP+offset; assert(!strncmp((char*)pTPCSECLP,"TPCSECLP",8));
     swapTPCSECLP=WhetherToSwap(*(pTPCSECLP+5));
+    sector=Swap4(swapTPCSECLP,*(pTPCSECLP+3));
 
     // Loop over the 12 receiver boards, navigating from TPCSECLP to TPCRBCLP.
     for(irb=0;irb<12;irb++) {
+      if(irb<6) map=0; else map=1;
       offset=Swap4(swapTPCSECLP,*(pTPCSECLP+10+2*irb  ));
       length=Swap4(swapTPCSECLP,*(pTPCSECLP+10+2*irb+1));
       if(length==0) continue;
@@ -933,19 +956,25 @@ void St_tpcdaq_Maker::DAQ100clOutput(const unsigned int *pTPCP) {
         if(length==0) continue;
         pTPCMZCLD=pTPCSECLP+offset; assert(!strncmp((char*)pTPCMZCLD,"TPCMZCLD",8));
         swapTPCMZCLD=WhetherToSwap(*(pTPCMZCLD+5));
-        DAQ100clTableOut(isec+1,swapTPCMZCLD,pTPCMZCLD+10); // Decodes data words of TPCMZCLD.
+        DAQ100clTableOut(sector+map,swapTPCMZCLD,pTPCMZCLD+10); // Decodes data words of TPCMZCLD.
       }
     }
 
     numberOfPresentSectors++;
 
   }
-  assert(numberOfPresentSectors==12||numberOfPresentSectors==0);
+  assert(numberOfPresentSectors==12||numberOfPresentSectors==0); // We expect 12 sectors
+    // as described in the section on TPCSECLP on page 17 of the DAQ Format doc.
 }
 //________________________________________________________________________________
 Int_t St_tpcdaq_Maker::Make() {
   int errorCode; const char *pTPCP;
   printf("I am Perry Mason. (Oct 12 2002).  St_tpcdaq_Maker::Make().\n"); 
+#ifdef DEVELOPMENT
+  char junk[10];
+  PP("\007St_tpcdaq_Maker::Make: Please input a value for daq_flag: ");
+  gets(junk); daq_flag=atoi(junk); PP("daq_flag = %d.  Press return.\n",daq_flag);
+#endif
   mErr=0;
   errorCode=GetEventAndDecoder();
   if(m_Mode != 1) { victor=victorPrelim->getTPCReader(); assert(victor); }
@@ -955,9 +984,11 @@ Int_t St_tpcdaq_Maker::Make() {
     return kStErr;
   }
   assert(!m_DataSet->GetList());
-  if(Output()) {
-    PP("St_tpcdaq_Maker has detected .daq file corruption.  Skip this event.\n");
-    return kStErr; // See comment 66f.
+  if(daq_flag & 0x01) { //Sometimes this causes us to skip the corruption check, but it's not im-
+    if(Output()) { //portant because the data that would've gotten checked probably won't be used.
+      PP("St_tpcdaq_Maker has detected .daq file corruption.  Skip this event.\n");
+      return kStErr; // See comment 66f.
+    }
   }
   if(daq_flag & 0x02) { // Herb Oct 2002 for DAQ100.
     if(m_Mode != 1) {
