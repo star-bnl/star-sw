@@ -2,6 +2,8 @@
 #
 # runs gstar with fixed number of pi- per event
 #
+# pmj 30/5/98
+#
 ####################################################
 
 # set number of events, pion multiplicity per event
