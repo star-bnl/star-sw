@@ -2,7 +2,7 @@
 %
 % StMcEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StMcEvent.tex,v 2.5 2000/06/06 02:59:11 calderon Exp $
+% $Id: StMcEvent.tex,v 2.6 2003/04/16 18:12:35 calderon Exp $
 %
 % Authors:Michael A. Lisa
 %         Thomas S. Ullrich
@@ -23,6 +23,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StMcEvent.tex,v $
+% Revision 2.6  2003/04/16 18:12:35  calderon
+% Documentation on subprocess id.
+%
 % Revision 2.5  2000/06/06 02:59:11  calderon
 % Introduction of Calorimeter classes.  Update documentation.
 %
@@ -1284,6 +1287,13 @@ PositionOfHits(StMcTrack *track)
     either a start or a stop vertex, and they are NOT kept as daughters
     of the primary vertex either.
     \index{primary tracks}
+
+    \verb+unsigned long subProcessId() const;+\\
+    This is used for simulated Pythia pp events, where the
+    one can study a given reaction, e.g. gg->QQbar = 82, and
+    gg->J/Psi+g = 86. Refer to the Pythia manual for the
+    subprocess ids.  Read from g2t\_event.
+    \index{impact parameter}
 
     \verb+float impactParameter() const;+\\
     Impact parameter of collision, read from g2t\_event.
