@@ -234,6 +234,7 @@ void TTreeHelper::Init()
 #ifndef __OLDROOT__
   fTree->SetMakeClass(1);
 #endif
+  SetBranchObject(fTree->GetListOfBranches());
   fTree->SetBranchStatus("*",0);
   if (fTree->IsA()==TChain::Class()) 
     ((TChain*)fTree)->SetNotify(this);
@@ -268,20 +269,24 @@ void TTreeHelper::GetInfo(const TBranch *tbp, const char *&tyName
    } }
 
    int max = 0;
+   int kase = 0;
+   if (strcmp(tb->ClassName(),"TBranchElement")==0) kase = 1;
+   if (strcmp(tb->ClassName(),"TBranchClones" )==0) kase = 2;
+   switch (kase) {
 #ifndef __OLDROOT__
-   if (tb->IsA()==TBranchElement::Class()) {
-     TBranchElement *te = (TBranchElement*)tb;
-     max = te->GetMaximum();
-     brType  = te->GetType();
-   } 
-     else 
+     case 1: {TBranchElement *te = (TBranchElement*)tb;
+              max = te->GetMaximum();
+              brType  = te->GetType();}
+              break;
 #endif
-   {
+     case 2: max = 0; tyName = "Int_t"; return;
 
+     case 0:
      TLeaf *lf = (TLeaf*)tb->GetListOfLeaves()->First();
      TLeaf *lc = 0;
      if (lf) lc = lf->GetLeafCount();
      if (lc) max = lc->GetMaximum();
+
    }
    if (max) {if (!units) units = 1; units *= max;}
    if (brType==3) units=0;
@@ -357,10 +362,15 @@ TTreeHelperCast &TTreeHelper::operator() (const char *varname)
    fCast.Set(0,0,varname);
 //   TBranch *br = GetBranch(varname);
    TBranch *br = fTree->GetBranch(varname);
+   if (br && strcmp(br->ClassName(),"TBranchClones")==0) {//wrong object
+     TString ts(varname); ts+="_";
+     br = fTree->GetBranch(ts.Data());
+   }
    if (!br) {
      Warning("operator()","Branch %s NOT FOUND",varname);
      return fCast;
    }
+
    void *addr,**pddr;
    const char *tyName;
    Int_t brType;
@@ -481,9 +491,23 @@ void TTreeHelper::ls(const TObjArray *brList,Int_t lvl,Option_t* option)
    for (int iBr=0;iBr<nb;iBr++) {
       branch = (TBranch*)brList->UncheckedAt(iBr);
       if (!branch)	continue;
-      Print(branch,lvl);
-
+      Print(branch,lvl,option);
       ls(branch->GetListOfBranches(),lvl+1,option);
+   }
+}
+//______________________________________________________________________________
+void TTreeHelper::SetBranchObject(const TObjArray *brList)
+{
+   TBranch *branch;
+   if (!brList) return;
+   
+   Int_t nb = brList->GetEntriesFast();
+   for (int iBr=0;iBr<nb;iBr++) {
+      branch = (TBranch*)brList->UncheckedAt(iBr);
+      if (!branch)	continue;
+      if (strcmp(branch->ClassName(),"TBranchObject")==0) 
+          fTree->SetBranchAddress(branch->GetName(),(void*)(-1));
+      SetBranchObject(branch->GetListOfBranches());
    }
 }
 //______________________________________________________________________________

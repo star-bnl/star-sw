@@ -96,6 +96,7 @@ static void GetInfo(const TBranch *tb, const char *&tyName,Int_t &units,void  *&
 
 private:
 void Init();
+void SetBranchObject(const TObjArray *brList);
 void WhichTree(const char *fileName);
 static TBranch *GetBranch(const char* brName,TTree *tree);     
 static TBranch *GetBranch(const char* brName,TSeqCollection *brList,Int_t flag); 
