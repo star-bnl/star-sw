@@ -51,7 +51,7 @@
 
 
 // some defines
-inline double sqr(double val) {return(val*val);};
+//inline double sqr(double val) {return(val*val);};
 // some includes
 
 #include "TTrack.hpp"			// include TTrack

@@ -134,12 +134,12 @@ public:
 //
 // get phi index
 //
-   inline WORD THit::GetPhiIndex() {
+   inline WORD GetPhiIndex() {
    return (WORD) ((FPhi - FSPhiMin) * FSPhiSliceMultiplier + 1.0); };
 //
 // get eta index
 //
-   inline WORD THit::GetEtaIndex() {
+   inline WORD GetEtaIndex() {
    return (WORD) ((FEta - FSEtaMin) * FSEtaSliceMultiplier + 1.0); };
 //
 // getters
