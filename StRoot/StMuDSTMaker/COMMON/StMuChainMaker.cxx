@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.11 2002/12/19 19:44:25 laue Exp $
+ * $Id: StMuChainMaker.cxx,v 1.12 2002/12/31 19:52:11 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -146,10 +146,16 @@ void StMuChainMaker::subFilter(string filter) {
   string tmp(filter);
   int n=0;
   size_t pos=0;
-  while (tmp.find_first_of(":")!=string::npos ) {
+  while ( tmp.length() ) {
+    DEBUGMESSAGE3("");
+    DEBUGVALUE3(tmp);
+    DEBUGVALUE3(string::npos);
     pos = tmp.find_first_of(":");
+    if ( pos==string::npos ) pos = tmp.length();
     mSubFilters[n] = string( tmp.substr(0,pos) );
+    DEBUGVALUE3(mSubFilters[n]);
     tmp.erase(0,pos+1);
+    DEBUGVALUE3(tmp);
     n++;
   }				
   mSubFilters[n] = string("endOfFilters");
@@ -315,14 +321,20 @@ bool StMuChainMaker::pass(string file, string* filters) {
   bool good = true;
   int n=0;
   while (filters[n].find("endOfFilters")==string::npos  && good) {
-    if ( file.find(filters[n])==string::npos ) good=false;
+    if ( StMuDebug::level()==3 ) printf("%s %s %d ",file.c_str(),filters[n].c_str(), file.find(filters[n])==string::npos);
+    if ( (file.find(filters[n])==string::npos) ) good=false;
+    if ( StMuDebug::level()==3 ) printf("good= %d \n",good);
     n++;
   }
+  DEBUGVALUE3(good);
   return good;
 }
 /***************************************************************************
  *
  * $Log: StMuChainMaker.cxx,v $
+ * Revision 1.12  2002/12/31 19:52:11  laue
+ * bug fix in built of filters
+ *
  * Revision 1.11  2002/12/19 19:44:25  laue
  * update to read number of events from database, for files ending with .list
  *
