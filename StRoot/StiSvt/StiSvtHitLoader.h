@@ -33,7 +33,9 @@ public:
 	virtual void loadMcHits(StMcEvent* source,
 				bool useMcAsRec,
 				Filter<StiTrack> * trackFilter, 
-				Filter<StiHit> * hitFilter);
+				Filter<StiHit> * hitFilter,
+				StMcTrack & stMcTrack,
+				StiMcTrack & stiMcTrack);
 	int getLayer(int svtLayer) const;
 	int getLadder(int svtLayer, int svtLadder) const;
 	
