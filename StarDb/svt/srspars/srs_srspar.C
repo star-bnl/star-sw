@@ -18,7 +18,7 @@ memset(&row,0,tableSet->GetRowSize());
     row.id_active[6]	 =          4;
     row.id_active[7]	 =          0;
     row.id_active[8]	 =          0;
-    row.id_active[9]	 =          0;
+    row.id_active[9]	 =          -4; //Use for t0 storage
     row.init_ran	 =     111111; // if not 0 init seed with this each event ;
     row.merge	 =          0; // merge=1 when merging enabled ;
     row.method	 =          3; // how to copy hits to spt table ;
@@ -29,7 +29,7 @@ memset(&row,0,tableSet->GetRowSize());
     row.pitch	 =          0.025; // distance between anodes (cm) ;
     row.shaper	 =          0; // gaussian responce of electronics (s) ;
     row.thickness	 =          0; // SVT wafer thickness ;
-    row.vd	 =          675000; // drift velocity ;
+    row.vd	 =          700000; // drift velocity ;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
  return (St_DataSet *)tableSet;
