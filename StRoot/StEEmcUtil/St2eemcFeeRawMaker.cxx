@@ -1,7 +1,10 @@
 // *-- Author : J.Balewski, R.Fatemi
 // 
-// $Id: St2eemcFeeRawMaker.cxx,v 1.4 2003/02/18 22:01:47 balewski Exp $
+// $Id: St2eemcFeeRawMaker.cxx,v 1.5 2003/02/21 22:21:39 balewski Exp $
 // $Log: St2eemcFeeRawMaker.cxx,v $
+// Revision 1.5  2003/02/21 22:21:39  balewski
+// time stamp added
+//
 // Revision 1.4  2003/02/18 22:01:47  balewski
 // fixes
 //
@@ -104,7 +107,7 @@ Int_t St2eemcFeeRawMaker::InitRun  (int runumber){
   char text[200];
   sprintf(text," M-C event file, run=%d , created by %s",mEvent->runId(),GetName());
   mrunTT->setComment(text);
-  //  runTT->print();  
+  mrunTT->print();  
   
     return kStOK;
 }
@@ -200,7 +203,7 @@ Int_t St2eemcFeeRawMaker::Make(){
     meveTT->addFeeDataBlock(mcrateData+icr);
     n1++;
   }
-  //  runTT->print();  
+  //  mrunTT->print();  
   // eveTT->print();
 
   moutTTree->Fill();

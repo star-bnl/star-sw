@@ -5,9 +5,11 @@ class EEfeeRunDescr;
 TFile *f;
 
 void rdFeeTTree() {
-  
-  gSystem->Load("EEfeeRaw.so");
-  TFile   *f  = new TFile("myFeeMC-minb200-100.root");
+  gSystem->Load("St_base");
+    gSystem->Load("StEEmcUtil");
+    
+  //TFile   *f  = new TFile("myFeeMC-minb200-100.root");
+  TFile   *f  = new TFile("run00006.root");
   TTree   *t  = (TTree *)f->Get("fee");
   TBranch *bd = t->GetBranch("desc");
   TBranch *be = t->GetBranch("evt");
@@ -27,6 +29,7 @@ void rdFeeTTree() {
     nbd += bd->GetEntry(i);
     des->print();
     eve->print();
+    if(i>=max) break;
   }
 
 }

@@ -1,5 +1,8 @@
-// $Id: EEeventDst.cxx,v 1.1 2003/02/20 05:15:14 balewski Exp $
+// $Id: EEeventDst.cxx,v 1.2 2003/02/21 22:21:47 balewski Exp $
 // $Log: EEeventDst.cxx,v $
+// Revision 1.2  2003/02/21 22:21:47  balewski
+// time stamp added
+//
 // Revision 1.1  2003/02/20 05:15:14  balewski
 // reorganization
 //
@@ -76,6 +79,7 @@ void EEeventDst::clear(){ // only content of sectors, leave sectors
   ID=-999;
   type=kUnknown;
   token=-2;
+  timeStamp=0;
   int is;
   for(is=0;is<Sec->GetEntries();is++) {
     EEsectorDst *sec=(EEsectorDst*)Sec->At(is);
@@ -89,7 +93,7 @@ void EEeventDst::clear(){ // only content of sectors, leave sectors
 //-------------------------------------------------
 //-------------------------------------------------
 void EEeventDst::print(){
-  printf("Event ID=%d, type=%d  token=%d nSec= %d\n",ID,type,token,Sec->GetEntries());
+  printf("Event ID=%d, type=%d  token=%d nSect=%d time stamp= %d\n",ID,type,token,Sec->GetEntries(),timeStamp);
   int is;
   for(is=0;is<Sec->GetEntries();is++) {
     EEsectorDst *sec=(EEsectorDst*)Sec->At(is);

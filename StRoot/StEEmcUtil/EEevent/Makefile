@@ -23,7 +23,7 @@ CXXFLAGS = $(CFLAGS)
 LDFLAGS  = -shared 
 
 all:	$(LIBNAME)
-
+	-rm  $(LINK) $(DICT).*	
 
 $(LIBNAME): $(OBJS)
 	$(CXX) $(LDFLAGS) $^ -o lib$(LIBNAME).so
