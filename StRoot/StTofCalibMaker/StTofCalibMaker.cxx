@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.1 2004/07/01 17:23:48 dongx Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.2 2004/07/08 18:26:09 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.2  2004/07/08 18:26:09  dongx
+ * filling StTofPidTraits added (not completed, null nsigmaXXX now)
+ *
  * Revision 1.1  2004/07/01 17:23:48  dongx
  * first release
  *
@@ -31,6 +34,7 @@
 #include "StTofCell.h"
 #include "StTofSlat.h"
 #include "StTofData.h"
+#include "StTofPidTraits.h"
 #include "StEventTypes.h"
 #include "Stypes.h"
 #include "StMessMgr.h"
@@ -459,7 +463,23 @@ Int_t StTofCalibMaker::Make()
 			      << tofHit->getHit(j)->moduleIndex() << "  cell:"
 			      << tofHit->getHit(j)->cellIndex() << endm;
   }
-  
+
+  // add the tof pidtraits
+  StSPtrVecTofHit& tofHitVec = theTof->tofHits();
+  StSPtrVecTrackNode& nodes = mEvent->trackNodes();
+  for (unsigned int iNode=0; iNode<nodes.size(); iNode++){
+    StTrack *theTrack = nodes[iNode]->track(primary);
+    if(!theTrack) continue;
+    unsigned short trkId = theTrack->key();
+    for (size_t j=0;j<tofHitVec.size();j++){
+      StTrack *aTrack = tofHitVec[j]->associatedTrack();
+      if(!aTrack) continue;
+      if(aTrack->key()!=trkId) continue;
+      StTofPidTraits* pidTof = new StTofPidTraits(tofHitVec[j]->trayIndex(), tofHitVec[j]->moduleIndex(), tofHitVec[j]->cellIndex(), tofHitVec[j]->timeOfFlight(), tofHitVec[j]->pathLength(), tofHitVec[j]->beta());
+      theTrack->addPidTraits(pidTof);
+    }
+  }
+
   delete tofHit;
   
   return kStOK;
