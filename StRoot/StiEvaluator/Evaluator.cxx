@@ -4,8 +4,10 @@
 #include "TCanvas.h"
 #include "TStyle.h"
 #include "TROOT.h"
-#include "Sti/Html/HistoDocument.h"
+//#include "Sti/Html/HistoDocument.h"
 #include "StiEvaluator/StiEvaluatorHistograms.h"
+#include <iostream>
+using namespace std;
 
 ClassImp(Evaluator)
 
@@ -63,6 +65,7 @@ void Evaluator::save(const string &targetDirectory)
      }
 }
 
+/*
 void Evaluator::saveHtml(const char * targetDirectory)
 {
   string td = targetDirectory;
@@ -139,7 +142,7 @@ void Evaluator::saveHtml(const string &targetDirectory,
    delete canvas;
 }
 
-
+*/
 
 StiEvaluatorHistograms * Evaluator::add(StiEvaluatorHistograms *h)
 {
