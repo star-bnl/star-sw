@@ -3,7 +3,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.hh,v 1.1 1999/11/11 23:16:46 posk Exp $
+// $Id: StFlowAnalysisMaker.hh,v 1.2 1999/11/24 18:14:07 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 // Description:  Maker to analyze Flow using the FlowTags
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.hh,v $
+// Revision 1.2  1999/11/24 18:14:07  posk
+// Now reads event quantities with StFlowEvent methods
+//
 // Revision 1.1  1999/11/11 23:16:46  posk
 // Rearrangement of files.
 //
@@ -26,19 +29,17 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include "../StFlowMaker/StFlowMaker.hh"
-//#include "StMaker.h"
-//#include "FlowTag.h"
+//#include "../StFlowTagMaker/StFlowTagMaker.hh"
+#include "TVector2.h"
 class TH1F;
 class TH1D;
 class TH2F;
 class TH2D;
 class TH3F;
 class TProfile;
-//#include "TVector2.h"
-
 class StEvent;
 
-class StFlowAnalysisMaker : public StFlowMaker {
+class StFlowAnalysisMaker : public StMaker {
 
 public:
 
@@ -48,13 +49,31 @@ public:
   Int_t    Make();
   void     PrintInfo();
   Int_t    Finish();
-  Float_t  getRes(Int_t eventN, Int_t harN) const;
-  Float_t  getResErr(Int_t eventN, Int_t harN) const;
+  Float_t  Res(Int_t eventN, Int_t harN) const;
+  Float_t  ResErr(Int_t eventN, Int_t harN) const;
 
 private:
 
+  StFlowEvent*    pFlowEvent;
+  //StFlowTagMaker* pFlowTag;
+
   // C++ way to define constants in the header
-  enum {nHars = 4, nSubs = 4};
+  enum {nHars = 4, nSels = 2, nSubs = 2};
+  enum {nPhiBins = 60};
+
+  //Double_t mPhiWgt[nSels][nHars][nPhiBins]; // To make event plane isotropic
+
+  TVector2 mQ[nSels][nHars];              // flow vector
+  Float_t  mPsiSub[nSels+nSubs][nHars];   // event plane angle subevents
+  Float_t  mPsi[nSels][nHars];            // event plane angle
+  Float_t  mMult[nSels][nHars];           // multiplicity
+  Float_t  mMeanPt[nSels][nHars];         // mean Pt
+  Float_t  m_q[nSels][nHars];             // Q/sqroot(Mul)
+  TVector2 mQSub[nSels+nSubs][nHars];     // flow vector sub-events
+  Float_t  mMultSub[nSels+nSubs][nHars];  // multiplicity sub-events
+  Float_t  mSumPtSub[nSels+nSubs][nHars]; // Pt sum sub-events
+  //Float_t  mSumPt[nSels][nHars];       // sum Pt
+  //Float_t  mQMod[nSels][nHars];           // flow vector magnitude
  
   // structures for histograms
   // for each harminic and each sub-event
@@ -62,7 +81,7 @@ private:
     TH1F*     mHistPsiSubs;
   };
 
-  // for each harminic and each event
+  // for each harminic and each selection
   struct histFullHars {
     TH1D*     mHistPhi;
     TH1D*     mHistPhiWgt;
@@ -87,9 +106,9 @@ private:
   struct histSubs {
     struct histSubHars histSubHar[nHars];
   };
-  struct histSubs histSub[nSubs]; //!
+  struct histSubs histSub[nSels+nSubs]; //!
 
-  // for each event
+  // for each selection
   struct histFulls;	
   friend struct histFulls;
   struct histFulls {
@@ -98,22 +117,24 @@ private:
     TH3F*     mHistEtaPtPhi3D;
     struct histFullHars histFullHar[nHars];
   };
-  struct histFulls histFull[nSubs/2]; //!
+  struct histFulls histFull[nSels]; //!
 
   //private:
 
-  void fillTagHistograms();
-  void fillFlowHistograms();
+  Int_t fillFromTags();
+  Int_t fillFromFlowEvent();
+  void  fillEventHistograms();
+  void  fillParticleHistograms();
 
-  Float_t  mRes[nSubs/2][nHars];    // event plane resolution
-  Float_t  mResErr[nSubs/2][nHars]; // event plane resolution error
+  Float_t  mRes[nSels][nHars];    // event plane resolution
+  Float_t  mResErr[nSels][nHars]; // event plane resolution error
 
   ClassDef(StFlowAnalysisMaker, 1)  // macro for rootcint
 };
 
-inline Float_t StFlowAnalysisMaker::getRes(Int_t eventN, Int_t harN) const 
+inline Float_t StFlowAnalysisMaker::Res(Int_t eventN, Int_t harN) const 
   {return mRes[eventN][harN];}
-inline Float_t StFlowAnalysisMaker::getResErr(Int_t eventN, Int_t harN) const 
+inline Float_t StFlowAnalysisMaker::ResErr(Int_t eventN, Int_t harN) const 
   {return mResErr[eventN][harN];}
 
 #endif
