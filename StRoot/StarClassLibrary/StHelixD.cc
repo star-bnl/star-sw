@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixD.cc,v 1.16 2003/12/18 17:27:02 perev Exp $
+ * $Id: StHelixD.cc,v 1.17 2003/12/22 18:59:37 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StHelixD.cc,v $
+ * Revision 1.17  2003/12/22 18:59:37  perev
+ * remove test for only +ve pathLeng added before
+ *
  * Revision 1.16  2003/12/18 17:27:02  perev
  * Small bug fix in number of iters. i++ ==> i--
  *
@@ -440,7 +443,6 @@ double StHelixD::pathLength(const StThreeVectorD& r,
                s -= sgn*deltas;
             } else {
                s -= f/fp;
-               if (s < 0.) s = sOld+deltas;
             }
 	    if (fabs(sOld-s) < MaxPrecisionNeeded) break;
 	    sOld = s;
@@ -612,3 +614,4 @@ ostream& operator<<(ostream& os, const StHelixD& h)
 	      << "h = "          << h.h()         << ", "    
 	      << "origin = "     << h.origin()    << ')';
 }
+
