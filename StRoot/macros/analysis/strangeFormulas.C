@@ -1,5 +1,8 @@
-// $Id: strangeFormulas.C,v 1.2 2000/04/07 16:22:48 genevb Exp $
+// $Id: strangeFormulas.C,v 1.3 2000/04/11 17:55:39 genevb Exp $
 // $Log: strangeFormulas.C,v $
+// Revision 1.3  2000/04/11 17:55:39  genevb
+// Removed first parameter
+//
 // Revision 1.2  2000/04/07 16:22:48  genevb
 // Remove ambiguity on supplying just one parameter
 //
@@ -10,26 +13,22 @@
 //======================================================
 // owner:  Gene Van Buren, UCLA
 // what it does:  creates formulas for use with strangeness micro DST
-// usage: First parameter (char string 'doing') should include
-//          one or more of the strings "v0", "xi", and/or "kink"
-//          to indicate which formulas should be loaded in.
-//          Capitalization and delimeters don't matter - it's simply
-//          a search to match the substring.
-//        Second parameter is either a pointer to a strangeness
+// usage: The parameter is either a pointer to a strangeness
 //          micro DST tree, a pointer to a TFile containing such
 //          a tree (tree name assumed to be "StrangeMuDst"), or
 //          the name of such a file. In the latter two cases, a
 //          pointer to the strangeness TTree is returned.
 // examples:
-//        .x strangeFormulas.C("V0,xi","myfile.root");
-//          Opens a file named "myfile.root", loads the formulas needed
-//          for V0's and Xi's, and returns a pointer to the TTree.
-//        .x strangeFormulas.C("Xi",myTreePtr);
-//          Loads only the formulas needed for Xi's, and returns the
-//          number of new formulas loaded into Root.
-//        .x strangeFormulas.C("kinkV0",myFilePtr);
-//          Loads only the formulas needed for V0's and Kinks, and
-//          returns a pointer to the tree named "StrangeMuDst" in the
+//        .x strangeFormulas.C("myfile.root");
+//          Opens a file named "myfile.root", loads the formulas needed,
+//          and returns a pointer to the TTree.
+//        .x strangeFormulas.C;
+//          Opens a file named "evMuDst.root", loads the formulas needed,
+//          and returns a pointer to the TTree (this is the default file).
+//        .x strangeFormulas.C(myTreePtr);
+//          Returns the number of new formulas loaded into Root.
+//        .x strangeFormulas.C(myFilePtr);
+//          Returns a pointer to the tree named "StrangeMuDst" in the
 //          file pointed to by myFilePtr.
 //======================================================
 //
@@ -44,39 +43,33 @@
 // something like "3*a()".
 //
 
-TTree* strangeFormulas(const char* doing="", const char* fname=0);
-TTree* strangeFormulas(const char* doing="", TFile* fptr);
-Int_t strangeFormulas(const char* doing="", TTree* tree);
+TTree* strangeFormulas(const char* fname=0);
+TTree* strangeFormulas(TFile* fptr);
+Int_t strangeFormulas(TTree* tree);
 
-TTree* strangeFormulas(const char* doing, const char* fname) {
+TTree* strangeFormulas(const char* fname) {
   TFile *a1;
   if (!fname) {
-    a1 = new TFile("evMuDst.root");
+    a1 = new TFile("evMuDst.root");    // Default filename for root of TTree
   } else {
     a1 = new TFile(fname);
   }
-  TTree* m1 = strangeFormulas(doing,a1);
+  TTree* m1 = strangeFormulas(a1);
   return m1;
 }
 
-TTree* strangeFormulas(const char* doing, TFile* fptr) {
+TTree* strangeFormulas(TFile* fptr) {
   if (!fptr) return 0;
   TTree* m1 = (TTree*) fptr->Get("StrangeMuDst");
-  strangeFormulas(doing,m1);
+  strangeFormulas(m1);
   return m1;
 }
 
-Int_t strangeFormulas(const char* doing, TTree* tree) {
+Int_t strangeFormulas(TTree* tree) {
+  if (!tree) return 0;
   if (!(gROOT->GetClass("TTreeFormula"))) {
     gSystem->Load("libProof");
     gSystem->Load("libTreePlayer");
-  }
-  if (((!tree) || (!doing)) || (!(*doing))) return;
-  size_t len = strlen(doing);
-  char* str = new char[len+1];
-  str[len] = 0;
-  for (size_t i=0; i<len; i++) {
-    str[i] = tolower(doing[i]);
   }
 
   TFormula *f0=0;
@@ -111,7 +104,7 @@ Int_t strangeFormulas(const char* doing, TTree* tree) {
   gROOT->GetListOfFunctions()->Add(f1);
   
   // V0
-  if (strstr(str,"v0")) {
+  if (tree->GetBranch("V0")) {
   
     f1 = new TTreeFormula("V0.decayLengthV0()",
       "sqrt(sq(V0.mDecayVertexV0X-Event.mPrimaryVertexX)+sq(V0.mDecayVertexV0Y-Event.mPrimaryVertexY)+sq(V0.mDecayVertexV0Z-Event.mPrimaryVertexZ))",tree);
@@ -273,7 +266,7 @@ Int_t strangeFormulas(const char* doing, TTree* tree) {
   }
   
   // Xi
-  if (strstr(str,"xi")) {
+  if (tree->GetBranch("Xi")) {
   
     f0 = new TFormula("mXiMinus","1.32133");
     f0 = new TFormula("mOmegaMinus","1.67243");
@@ -569,10 +562,9 @@ Int_t strangeFormulas(const char* doing, TTree* tree) {
   }
 
   // Kink
-  if (strstr(str,"kink")) {
+  if (tree->GetBranch("Kink")) {
   }
   
-  delete str;
   Int_t finalFormulas = gROOT->GetListOfFunctions()->GetSize();
   return (finalFormulas-initialFormulas);
 }
