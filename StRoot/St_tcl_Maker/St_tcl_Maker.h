@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.h,v 1.14 1999/10/01 22:22:25 snelling Exp $
+// $Id: St_tcl_Maker.h,v 1.15 1999/10/05 00:46:07 snelling Exp $
 // $Log: St_tcl_Maker.h,v $
+// Revision 1.15  1999/10/05 00:46:07  snelling
+// added some histogram protections
+//
 // Revision 1.14  1999/10/01 22:22:25  snelling
 // updated histograms
 //
@@ -85,22 +88,22 @@ class St_tcl_Maker : public StMaker {
 
  private:
 
-  Bool_t                m_tclPixTransOn;        // switch for pixel translation evaluation
-  Bool_t                m_tclEvalOn;            // switch for the cluster finder evaluation
-  Bool_t                m_tclMorphOn;           // switch for the cluster morphology study
-  St_tpg_detector       *m_tpg_detector;  	//! TPC geometry parameters 
-  St_tpg_pad            *m_tpg_pad;       	//! characteristics unique to a given pad
+  Bool_t                 m_tclPixTransOn;       // switch for pixel translation evaluation
+  Bool_t                 m_tclEvalOn;           // switch for the cluster finder evaluation
+  Bool_t                 m_tclMorphOn;          // switch for the cluster morphology study
+  St_tpg_detector*       m_tpg_detector;  	//! TPC geometry parameters 
+  St_tpg_pad*            m_tpg_pad;       	//! characteristics unique to a given pad
 	                                  	// (not used)
-  St_tpg_pad_plane      *m_tpg_pad_plane; 	//! Constants that describe TPC pad plane
-  St_tss_tsspar         *m_tsspar;        	//! parameters for slow simulator running.
-  St_tcl_sector_index   *m_tcl_sector_index; 	//! Current sector
+  St_tpg_pad_plane*      m_tpg_pad_plane; 	//! Constants that describe TPC pad plane
+  St_tss_tsspar*         m_tsspar;        	//! parameters for slow simulator running.
+  St_tcl_sector_index*   m_tcl_sector_index; 	//! Current sector
 	                                     	//  for processing
-  St_tcl_tclpar         *m_tclpar; 		//! Table of parameters controlling
+  St_tcl_tclpar*         m_tclpar; 		//! Table of parameters controlling
 	                           		// how tcl works
-  St_tcl_tpc_index_type *m_type;   		//!  Table of many-to-many index 
+  St_tcl_tpc_index_type* m_type;   		//!  Table of many-to-many index 
 	                           		// correlations for tpc evaluations
-  St_tfs_fspar          *m_tfs_fspar;   	//! TFS parameter table 
-  St_tfs_fsctrl         *m_tfs_fsctrl;  	//! TFS control switches
+  St_tfs_fspar*          m_tfs_fspar;   	//! TFS parameter table 
+  St_tfs_fsctrl*         m_tfs_fsctrl;  	//! TFS control switches
 
   Int_t cluster_morphology( 
 			   Int_t 		   sectorNumber,
@@ -191,7 +194,7 @@ class St_tcl_Maker : public StMaker {
   virtual Int_t  Init();
   virtual Int_t  Make();
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.14 1999/10/01 22:22:25 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.15 1999/10/05 00:46:07 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(St_tcl_Maker, 1)       //StAF chain virtual base class for Makers
 };
