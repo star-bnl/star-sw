@@ -86,7 +86,7 @@ my $jobIn_no = 0;
  $hpssRawDirs[0] = $topHpssSink . "/" . "daq";
  $checkedRawDirs[0] = 0; 
 
-my $ftpRaw = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>100)
+my $ftpRaw = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>200)
   or die "HPSS access failed";
 $ftpRaw->login("starsink","MockData") or die "HPSS access failed";
 
@@ -309,7 +309,7 @@ sub walkDHpss {
  my $ppath;
 
   for ($ii=0; $ii<$nRawDirs; $ii++) {
-    print "Dir ".$dirs->[$ii]." check: ".$checked->[$ii]."\n" ;
+#    print "Dir ".$dirs->[$ii]." check: ".$checked->[$ii]."\n" ;
      if ( ! $checked->[$ii] ) {
     my @dird = $ftp->dir($dirs->[$ii]);
        $checked->[$ii] = 1;
