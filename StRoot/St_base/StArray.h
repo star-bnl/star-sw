@@ -192,7 +192,7 @@ const_St ## QWERTY ## Iterator end()   const {return (const_St ## QWERTY ## Iter
       St ## QWERTY * const &operator[](Int_t i) const {return at(i);}\
 void  push_back(const St ## QWERTY * const to){fV.push_back((TObject*const)to);}\
 \
-ClassDef(StPtrVec ## QWERTY ##,1) \
+ClassDef(StPtrVec ## QWERTY ,1) \
 };\
 \
 \
