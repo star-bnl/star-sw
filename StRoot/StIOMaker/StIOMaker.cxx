@@ -90,6 +90,7 @@ Int_t StIOMaker::Open()
 
   fNextFile = fFileSet->GetFileName(0);
   if (!fNextFile) return kStEOF;
+  if(GetDebug()) printf("<StIOMaker::Open() file %s\n",(const char*)fNextFile);
   TString fmt = fFileSet->GetFormat(0);
   TString bra = fFileSet->GetCompName(0);
 
@@ -127,7 +128,6 @@ AGAIN:
 }
 //_____________________________________________________________________________
 Int_t StIOMaker::MakeRead(){
-  UInt_t uRunEvent[8];
 
   if (!fCurrMk) Open();
   if (!fCurrMk) return kStEOF;
