@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.14 2000/09/25 14:21:30 ullrich Exp $
+ * $Id: StEvent.h,v 2.15 2000/12/08 03:53:41 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.15  2000/12/08 03:53:41  ullrich
+ * Prepared hooks for ToF.
+ *
  * Revision 2.14  2000/09/25 14:21:30  ullrich
  * Removed enums for content vector. Replaced by lookup function.
  *
@@ -78,6 +81,7 @@ class StSvtHitCollection;
 class StSsdHitCollection;
 class StEmcCollection;
 class StRichCollection;
+class StTofCollection;
 class StTriggerDetectorCollection;
 class StL0Trigger;
 class StL3Trigger;
@@ -126,6 +130,8 @@ public:
     const StEmcCollection*              emcCollection() const;
     StRichCollection*                   richCollection();
     const StRichCollection*             richCollection() const;
+    StTofCollection*                    tofCollection();
+    const StTofCollection*              tofCollection() const;
     
     StL0Trigger*                        l0Trigger();
     const StL0Trigger*                  l0Trigger() const;
@@ -168,6 +174,7 @@ public:
     void setSsdHitCollection(StSsdHitCollection*);
     void setEmcCollection(StEmcCollection*);
     void setRichCollection(StRichCollection*);
+    void setTofCollection(StTofCollection*);
     void setTriggerDetectorCollection(StTriggerDetectorCollection*);
     void setL0Trigger(StL0Trigger*);
     void setL3Trigger(StL3Trigger*);

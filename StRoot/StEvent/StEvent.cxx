@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.17 2000/09/25 14:47:25 ullrich Exp $
+ * $Id: StEvent.cxx,v 2.18 2000/12/08 03:53:40 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.18  2000/12/08 03:53:40  ullrich
+ * Prepared hooks for ToF.
+ *
  * Revision 2.17  2000/09/25 14:47:25  ullrich
  * Fixed problem in _lookup() and _lookupOrCreate().
  *
@@ -82,6 +85,7 @@
 #include "StFtpcHitCollection.h"
 #include "StEmcCollection.h"
 #include "StRichCollection.h"
+#include "StTofCollection.h"
 #include "StTrackDetectorInfo.h"
 #include "StTriggerDetectorCollection.h"
 #include "StPrimaryVertex.h"
@@ -95,8 +99,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.17 2000/09/25 14:47:25 ullrich Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.17 2000/09/25 14:47:25 ullrich Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.18 2000/12/08 03:53:40 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.18 2000/12/08 03:53:40 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -364,6 +368,22 @@ StEvent::richCollection() const
     return rich;
 }
 
+StTofCollection*
+StEvent::tofCollection()
+{
+    StTofCollection *tof = 0;
+    _lookup(tof, mContent);
+    return tof;
+}
+
+const StTofCollection*
+StEvent::tofCollection() const
+{
+    StTofCollection *tof = 0;
+    _lookup(tof, mContent);
+    return tof;
+}
+
 StTriggerDetectorCollection*
 StEvent::triggerDetectorCollection()
 {
@@ -625,6 +645,12 @@ StEvent::setEmcCollection(StEmcCollection* val)
 
 void
 StEvent::setRichCollection(StRichCollection* val)
+{
+    _lookupAndSet(val, mContent);
+}
+
+void
+StEvent::setTofCollection(StTofCollection* val)
 {
     _lookupAndSet(val, mContent);
 }

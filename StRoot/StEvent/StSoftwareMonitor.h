@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSoftwareMonitor.h,v 2.2 1999/11/05 11:36:04 ullrich Exp $
+ * $Id: StSoftwareMonitor.h,v 2.3 2000/12/08 03:53:41 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSoftwareMonitor.h,v $
+ * Revision 2.3  2000/12/08 03:53:41  ullrich
+ * Prepared hooks for ToF.
+ *
  * Revision 2.2  1999/11/05 11:36:04  ullrich
  * Added non-const version of methods
  *
@@ -30,6 +33,7 @@ class StRichSoftwareMonitor;
 class StCtbSoftwareMonitor;
 class StGlobalSoftwareMonitor;
 class StL3SoftwareMonitor;
+class StTofSoftwareMonitor;
 class dst_mon_soft_tpc_st;
 class dst_mon_soft_svt_st;
 class dst_mon_soft_ftpc_st;
@@ -70,6 +74,8 @@ public:
     const StGlobalSoftwareMonitor* global() const;
     StL3SoftwareMonitor*           l3();
     const StL3SoftwareMonitor*     l3() const;
+    StTofSoftwareMonitor*          tof();
+    const StTofSoftwareMonitor*    tof() const;
 
     void setTpcSoftwareMonitor(StTpcSoftwareMonitor*);
     void setSvtSoftwareMonitor(StSvtSoftwareMonitor*);
@@ -79,6 +85,7 @@ public:
     void setCtbSoftwareMonitor(StCtbSoftwareMonitor*);
     void setGlobalSoftwareMonitor(StGlobalSoftwareMonitor*);
     void setL3SoftwareMonitor(StL3SoftwareMonitor*);
+    void setTofSoftwareMonitor(StTofSoftwareMonitor*);
     
 protected:
     StTpcSoftwareMonitor    *mTpcMonitor;
@@ -89,6 +96,7 @@ protected:
     StCtbSoftwareMonitor    *mCtbMonitor;
     StGlobalSoftwareMonitor *mGlobalMonitor;
     StL3SoftwareMonitor     *mL3Monitor;
+    StTofSoftwareMonitor    *mTofMonitor;
     
     ClassDef(StSoftwareMonitor,1)
 };
