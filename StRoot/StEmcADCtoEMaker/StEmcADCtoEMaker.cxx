@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.39 2003/02/06 16:34:58 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.40 2003/02/10 16:29:20 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.40  2003/02/10 16:29:20  suaide
+// small modifications
+//
 // Revision 1.39  2003/02/06 16:34:58  suaide
 // changes on data validation
 //
@@ -561,7 +564,8 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
 		}
     if(status==STATUS_OK)
 		{
-			Float_t ADCSUB=ADC-PED;
+			PED =(Float_t)((Int_t)(PED)); // calibration is done this way because of histograms
+      Float_t ADCSUB=ADC-PED;
 			Float_t EN=0;
 			Float_t ADCPOWER=1;
 			//calibrating ..............
@@ -570,7 +574,7 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
         Float_t c = 0;
 				if(det<2) c = emccalibst[0].AdcToE[id-1][i];
 				else      c = smdcalibst[0].AdcToE[id-1][i];
-				//if(i==0) c=0;
+				//if(i==0 && det==0) c=emccalibst[0].AdcToE[id-1][0]-2.2e-4;
 				EN+=c*ADCPOWER; 
         ADCPOWER*=ADCSUB;
       }
