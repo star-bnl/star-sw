@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.125 2000/01/28 21:06:57 fisyak Exp $
+// $Id: bfc.C,v 1.126 2000/01/31 15:17:20 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StBFChain;        
@@ -28,7 +28,7 @@ void Load(){
 //_____________________________________________________________________
 void bfc(const Int_t First,
 	 const Int_t Last,
-	 const Char_t *Chain="gstar Cy2a tfs",Char_t *infile=0, Char_t *outfile=0)
+	 const Char_t *Chain="gstar Cy2a tfs",Char_t *infile=0, Char_t *outfile=0, Char_t *TreeFile=0)
 { // Chain variable define the chain configuration 
   // All symbols are significant (regardless of case)
   // "-" sign before requiest means that this option is disallowed
@@ -39,6 +39,8 @@ void bfc(const Int_t First,
   if (gClassTable->GetID("StBFChain") < 0) Load();
   
   chain->SetFlags(Chain);
+  if (TreeFile) chain->SetTFile(new TFile(TreeFile,"RECREATE"));
+  if (chain->GetOption("LAna") && !chain->GetTFile()) chain->SetTFile(new TFile("Laser.root","RECREATE"));
   printf ("QAInfo:Process [First=%6i/Last=%6i/Total=%6i] Events\n",First,Last,Last-First+1);
   chain->Set_IO_Files(infile,outfile);
   chain->Load();
@@ -97,8 +99,6 @@ void bfc(const Int_t First,
     parameterDB->setYCutSvt(.1); // 1 mm
     parameterDB->setZCutSvt(.1); // 1 mm
     parameterDB->setReqCommonHitsSvt(1); // Require 1 hits in common for tracks to be associated
-    
-    
   }
   if (chain->GetOption("V0") && chain->GetOption("Eval")) {
     StV0Maker    *v0Mk = (StV0Maker *) chain->GetMaker("v0");
@@ -140,7 +140,7 @@ EventLoop: if (i <= Last && iMake < kStEOF) {
   }
   //    gSystem->Exec("ps ux");
   evnt->Stop("QAInfo:");
-  evnt->Show("QAInfo:");
+  //  evnt->Show("QAInfo:");
   printf ("QAInfo: Done with Event [no. %d/run %d/evt. %d/Date.Time %d.%d/sta %d] Real Time = %10.2f seconds Cpu Time =  %10.2f seconds \n",
 	  i,chain->GetRunNumber(),chain->GetEventNumber(),chain->GetDate(), chain->GetTime(),
 	  iMake,evnt->GetRealTime("QAInfo:"),evnt->GetCpuTime("QAInfo:"));
@@ -157,12 +157,12 @@ if (evMk) Event = (StEvent *) chain->GetInputDS("StEvent");
 }
 //_____________________________________________________________________
 void bfc (const Int_t Last, 
-	  const Char_t *Chain="gstar Cy2a tfs",Char_t *infile=0, Char_t *outfile=0)
+	  const Char_t *Chain="gstar Cy2a tfs",Char_t *infile=0, Char_t *outfile=0, Char_t *TreeFile=0)
 {
-  bfc(1,Last,Chain,infile,outfile);
+  bfc(1,Last,Chain,infile,outfile,TreeFile);
 }
 //_____________________________________________________________________
-void bfc (const Char_t *Chain="",Char_t *infile=0, Char_t *outfile=0)
+void bfc (const Char_t *Chain="",Char_t *infile=0, Char_t *outfile=0, Char_t *TreeFile=0)
 {
   if (!Chain || !strlen(Chain)) {
     Usage();
@@ -179,8 +179,8 @@ void Usage() {
   chain = new StBFChain;
   chain->SetFlags("");
   printf ("============= \t U S A G E =============\n");
-  printf ("bfc(Int_t First, Int_t Last, Char_t *Chain, Char_t *infile, Char_t *outfile)\n");
-  printf ("bfc(Int_t Last, Char_t *Chain, Char_t *infile, Char_t *outfile)\n");
+  printf ("bfc(Int_t First, Int_t Last, Char_t *Chain, Char_t *infile, Char_t *outfile,, Char_t *TreeFile)\n");
+  printf ("bfc(Int_t Last, Char_t *Chain, Char_t *infile, Char_t *outfile, Char_t *TreeFile)\n");
   printf ("bfc(Char_t *Chain, Char_t *infile, Char_t *outfile)\n");
   printf ("where\n");
   printf (" First   \t- First event to process \t(Default = 1)\n");
