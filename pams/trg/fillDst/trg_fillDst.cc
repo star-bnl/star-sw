@@ -43,7 +43,7 @@ extern "C" long type_of_call trg_fillDst_(
       }
    }
 //
-   dst_h->nok = 1 ;
+//   dst_h->nok = 1 ;
 //
    return STAFCV_OK ;
    
