@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.42 2003/02/19 23:15:10 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.43 2003/04/03 13:17:49 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.43  2003/04/03 13:17:49  suaide
+// option to turn off message log was included
+//
 // Revision 1.42  2003/02/19 23:15:10  suaide
 // small modifications
 //
@@ -127,6 +130,7 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
     mControlADCtoE->OnlyCalibrated[i]=onlyCal[i];
   } 
   mEmbedd=kFALSE;
+  mPrint = kTRUE;
 }
 //_____________________________________________________________________________
 /* 
@@ -216,7 +220,7 @@ Int_t StEmcADCtoEMaker::Make()
 {  
   TStopwatch clock;
   clock.Start();
-  cout <<"\n\nStEmcADCtoEMaker::Make()******************************************************************\n";
+  if(mPrint) cout <<"\n\nStEmcADCtoEMaker::Make()******************************************************************\n";
   zeroAll(); 
 	
 	mData = new StBemcData(); 
@@ -247,8 +251,8 @@ Int_t StEmcADCtoEMaker::Make()
 	fillStEvent();
   
   clock.Stop();
-  cout <<"Time to run StEmcADCtoEMaker::Make() real = "<<clock.RealTime()<<"  cpu = "<<clock.CpuTime()<<" \n";
-  cout <<"*******************************************************************************************\n\n\n";
+  if(mPrint) cout <<"Time to run StEmcADCtoEMaker::Make() real = "<<clock.RealTime()<<"  cpu = "<<clock.CpuTime()<<" \n";
+  if(mPrint) cout <<"*******************************************************************************************\n\n\n";
 
   return kStOK;
 }
@@ -262,9 +266,13 @@ Bool_t StEmcADCtoEMaker::getStatus(Int_t det)
 	mDb=NULL;
 	TString DbName = "Calibrations/emc/y3"+detname[det];
   mDb=GetDataBase(DbName.Data());
-  if(!mDb) {cout <<"StEmcADCtoEMaker::Make() - Can not get new status tables.... \n"; return kFALSE;}
+  if(!mDb) 
+  { 
+    if(mPrint) cout <<"StEmcADCtoEMaker::Make() - Can not get new status tables.... \n"; 
+    return kFALSE;
+  }
   
-	cout <<"Getting status table for detector "<<detname[det].Data()<<endl;
+	if(mPrint) cout <<"Getting status table for detector "<<detname[det].Data()<<endl;
   TString TableName=detname[det]+"Status";
 	
 	Int_t NGOOD = 0; 
@@ -299,7 +307,7 @@ Bool_t StEmcADCtoEMaker::getStatus(Int_t det)
       }
     }
   }
-	cout <<"Detector: "<<detname[det].Data()<<"  STATUS_OK = "<<NGOOD<<"  channels\n";
+	if(mPrint) cout <<"Detector: "<<detname[det].Data()<<"  STATUS_OK = "<<NGOOD<<"  channels\n";
   return kTRUE;
 
 }
@@ -310,7 +318,7 @@ for SMD and saves it in the calibrationType member of StEmcRawHit.
 */
 Bool_t StEmcADCtoEMaker::getEmcFromDaq(TDataSet* daq)
 {
-  cout <<"***** Getting EMC event from daq file\n";
+  if(mPrint) cout <<"***** Getting EMC event from daq file\n";
 
 	StDAQReader* TheDataReader=(StDAQReader*)(daq->GetObject());
   if(!TheDataReader->EMCPresent()) return kFALSE;
@@ -457,7 +465,11 @@ Bool_t StEmcADCtoEMaker::getEmc()
   else 
   {
     StMaker *m = GetMaker("embedIO");
-    if(!m) { cout<<"No embedIO maker"<<endl; return kFALSE; }
+    if(!m) 
+    { 
+      if(mPrint) cout<<"No embedIO maker"<<endl; 
+      return kFALSE; 
+    }
     event = (StEvent*)m->GetInputDS("StEvent");  
   }
   if(event)
@@ -480,7 +492,7 @@ It also checks if the calibration is done for that bin
 */
 Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
 {
-  cout <<"Calibrating detector "<<detname[det].Data()<<endl;
+  if(mPrint) cout <<"Calibrating detector "<<detname[det].Data()<<endl;
 	
 	Bool_t Valid = kTRUE;
 	if(det==0) Valid = mData->ValidTowerEvent;
@@ -609,7 +621,7 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
 			if(det==3) mData->SmdpEnergy[id-1] = 0;        
     }
 	}
-	cout <<"detector: "<<detname[det].Data()<<"  NHITS = "<<NHITS<<"  TOTALE = "<<TOTALE<<endl;
+	if(mPrint) cout <<"detector: "<<detname[det].Data()<<"  NHITS = "<<NHITS<<"  TOTALE = "<<TOTALE<<endl;
   return kTRUE;
 }
 //_____________________________________________________________________________
@@ -674,7 +686,11 @@ Bool_t StEmcADCtoEMaker::fillStEvent()
   else
   {
     StMaker *m = GetMaker("embedIO");
-    if(!m) { cout<<"No embedIO maker"<<endl; return kFALSE; }
+    if(!m) 
+    { 
+      if(mPrint) cout<<"No embedIO maker"<<endl; 
+      return kFALSE; 
+    }
     event = (StEvent*)m->GetInputDS("StEvent");  
   }
   
@@ -741,7 +757,7 @@ Bool_t StEmcADCtoEMaker::fillStEvent()
       		}
     		}
 			}
-			cout <<"NHITS Saved on StEvent for detector "<<detname[det].Data()<<" = "<<NHITS<<"  GOOD = "<<NGOOD<<endl;
+			if(mPrint) cout <<"NHITS Saved on StEvent for detector "<<detname[det].Data()<<" = "<<NHITS<<"  GOOD = "<<NGOOD<<endl;
   	} 
 	} 
   // finished clean up
