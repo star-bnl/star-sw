@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.7 2004/10/12 18:17:37 mmiller Exp $
+ * $Id: StJetMaker.cxx,v 1.8 2004/11/30 19:01:37 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -162,6 +162,7 @@ Int_t StJetMaker::Make()
 	
 	StJets *muDstJets = thisAna->getmuDstJets();
 	muDstJets->Clear();
+	muDstJets->setBemcCorrupt(fourPMaker->bemcCorrupt() );
 
 	muDstJets->setMuDst(mudst);
 	
