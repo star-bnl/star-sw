@@ -96,7 +96,8 @@ float sft_process_event ( long Nspt,  scs_spt_st    *staf_spt,
  
    for (jspt = 0; jspt < Nspt; jspt++)
    {
-     if (staf_spt[jspt].id_wafer < 7000 && staf_spt[jspt].flag<2) 
+     if (staf_spt[jspt].id_wafer < 7000 && staf_spt[jspt].flag<2
+	 && staf_spt[jspt].de[1] > 15) 
        {
 	 spt[ispt].x[0]  = (double)staf_spt[jspt].x[0];
 	 spt[ispt].x[1]  = (double)staf_spt[jspt].x[1];
@@ -106,7 +107,7 @@ float sft_process_event ( long Nspt,  scs_spt_st    *staf_spt,
    }
    
    spt_n = ispt;
-
+   cout << spt_n << endl;
    if( spt_n < 4) return -1;
 
    zsvt= sft_find_vertex ();
