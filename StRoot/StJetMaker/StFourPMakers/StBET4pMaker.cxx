@@ -320,8 +320,18 @@ void StBET4pMaker::fillBarrelHits()
 
     //Now loop on emc data
     StEmcCollection *emc = uDst->emcCollection();
+    if (!emc) {
+	StEvent* event = dynamic_cast<StEvent*>( GetInputDS("StEvent") );
+	if (event) {
+	    cout <<"StBET4pMaker::Make()\tRetrieve StEmcCollection from StEvent"<<endl;
+	    emc = event->emcCollection();
+	}
+	else {
+	    cout <<"StBET4pMaker::Make().  Could not find StEvent in memory"<<endl;
+	}
+    }
     assert(emc);
-
+    
     // now it is like StEvent, getting energies for towers
     StEmcDetector* detector = emc->detector(kBarrelEmcTowerId);
 
