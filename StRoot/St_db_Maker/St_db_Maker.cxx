@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.36 2000/06/29 15:58:04 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.37 2000/07/14 02:39:21 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.37  2000/07/14 02:39:21  perev
+// SetMaxEntryTime method added
+//
 // Revision 1.36  2000/06/29 15:58:04  perev
 // bug in Init fixed, wrong {}
 //
@@ -44,6 +47,7 @@
 #include <iostream.h>
 #include <fstream.h>
 #include <stdlib.h>
+#include <time.h>
 #include "TBrowser.h"
 #include "TDatime.h"
 #include "TRegexp.h"
@@ -62,6 +66,8 @@
 
 static Int_t AliasDate(const char *alias);
 static Int_t AliasTime(const char *alias);
+static time_t mkgmtime(struct tm *gt);
+static time_t mkgmt(int date,int time);
 
 static const char *aliases[]={
 "sd97",   "sd98",   "year_1a","year_1b","year_1c",
@@ -141,6 +147,7 @@ St_db_Maker::St_db_Maker(const char *name
      
    fDataBase = 0;
    fUpdateMode = 0;
+   fMaxEntryTime = 0;
 }
 //_____________________________________________________________________________
 St_db_Maker::~St_db_Maker(){
@@ -241,6 +248,7 @@ TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
    TDataSet *top,*node,*ds;
    
    fDBBroker  = new StDbBroker();
+   if (fMaxEntryTime) fDBBroker->SetProdTime(fMaxEntryTime);
 
 //   if (fDBBroker->IsZombie()) {
 //     Warning("OpenDB","***Can not open MySQL DB %s ***");
@@ -690,6 +698,11 @@ void St_db_Maker::OnOff()
   }// end loop onoffs
 }
 //_____________________________________________________________________________
+void St_db_Maker::SetMaxEntryTime(Int_t idate,Int_t itime)
+{
+  fMaxEntryTime = mkgmt(idate,itime);
+}
+//_____________________________________________________________________________
 static Int_t AliasDate(const char *alias)
 
 {
@@ -708,4 +721,31 @@ static Int_t AliasTime(const char *alias)
   int i;
   for (i=0;aliases[i] && strncmp(alias,aliases[i],n);i++) {} 
   return times[i];
+}
+//_____________________________________________________________________________
+static time_t mkgmtime(struct tm *gt)
+{
+  time_t ut,ug;
+  struct tm *gtt;
+  gt->tm_isdst=-1;
+  ut =mktime(gt);
+  gtt = gmtime(&ut);
+  gtt->tm_isdst=-1;
+  ug = mktime(gtt);
+  ug = ut + (ut-ug);
+  return ug;
+}  
+//_____________________________________________________________________________
+static time_t mkgmt(int date,int time)
+{
+  struct tm gt;
+  if (date < 19000000) date +=19000000;
+  if (date < 19500000) date += 1000000;
+  gt.tm_year= ((date/10000)-1900);        
+  gt.tm_mon = ((date/100)%100) - 1; 
+  gt.tm_mday= ((date    )%100);
+  gt.tm_hour=  time/10000;
+  gt.tm_min = (time/100 )%100;
+  gt.tm_sec = (time     )%100;
+  return mkgmtime(&gt);
 }
