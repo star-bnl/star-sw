@@ -5,9 +5,8 @@
 class StChain;
 StChain *chain=0;
 
-void RunStiMaker(Int_t nevents=1,
+void RunStiMaker(Int_t nevents=4,
 		 bool simulated = true,
-		 bool run=true,
 		 //const char* MainFile="/star/data13/reco/dev/2001/08/*2235009*.event.root")
 		 //const char* MainFile="/afs/rhic/star/users/mmiller/code/ITF/geant/pion_10_neg.event.root")
 		 const char *MainFile="/direct/star+data02/scratch/haibin/geantTest/muon_10.dst.root")
@@ -131,17 +130,15 @@ void RunStiMaker(Int_t nevents=1,
     
     cout <<"Starting Event Loop"<<endl;
 
-    if (run) {
-	int istat=0,iev=1;
-    EventLoop: if (iev<=nevents && !istat) {
-	chain->Clear();
-	cout << "---------------------- Processing Event : " << iev << endl;
-	istat = chain->Make(iev);
-	if (istat) {
-	    cout << "Last Event Processed. Status = " << istat << endl;
-	}
-	iev++; goto EventLoop;
-    }
+    int istat=0,iev=1;
+ EventLoop: if (iev<=nevents && !istat) {
+     chain->Clear();
+     cout << "---------------------- Processing Event : " << iev << endl;
+     istat = chain->Make(iev);
+     if (istat) {
+	 cout << "Last Event Processed. Status = " << istat << endl;
+     }
+     iev++; goto EventLoop;
     }
     
     return;
