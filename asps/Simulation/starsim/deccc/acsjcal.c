@@ -1,10 +1,15 @@
-/* $Id: acsjcal.c,v 1.1.1.1 2004/01/12 23:49:39 potekhin Exp $ */
+/* $Id: acsjcal.c,v 1.2 2004/04/01 18:56:19 jeromel Exp $ */
 /* $Log: acsjcal.c,v $
- * Revision 1.1.1.1  2004/01/12 23:49:39  potekhin
+ * Revision 1.2  2004/04/01 18:56:19  jeromel
+ * Missing include header
  *
+/* Revision 1.1.1.1  2004/01/12 23:49:39  potekhin
+/*
+/*
 /* Revision 1.2  2003/10/03 17:18:09  nevski
 /* better dynamic call
 /* */
+#include <stdio.h>
 
 #define MDPOOL mdpool_;
 extern struct  {int ia0, names[99];} mdpool_;
