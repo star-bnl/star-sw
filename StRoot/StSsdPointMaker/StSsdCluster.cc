@@ -11,8 +11,8 @@ StSsdCluster::StSsdCluster(int rNCluster)
   mTotNoise    = 0;
   mStripMean   = 0;
   mFlag        = 0;
-  mIdMcHit     = new int[MAXIDMCHIT];
-  for(int e=0;e<MAXIDMCHIT;e++)  mIdMcHit[e] = 0;
+  mIdMcHit     = new int[SSD_MAXIDMCHIT];
+  for(int e=0;e<SSD_MAXIDMCHIT;e++)  mIdMcHit[e] = 0;
   mPrevCluster = 0;
   mNextCluster = 0;
 }
@@ -28,8 +28,8 @@ StSsdCluster::StSsdCluster(int rNCluster, int rFirstStrip, int rClusterSize, int
   mTotNoise    = rTotNoise;
   mStripMean   = rStripMean;
   mFlag        = rFlag;
-  mIdMcHit     = new int[MAXIDMCHIT];
-  for(int e=0;e<MAXIDMCHIT;e++)  mIdMcHit[e] = rIdMcHit[e];
+  mIdMcHit     = new int[SSD_MAXIDMCHIT];
+  for(int e=0;e<SSD_MAXIDMCHIT;e++)  mIdMcHit[e] = rIdMcHit[e];
   mPrevCluster = 0;
   mNextCluster = 0;
 }
@@ -45,8 +45,8 @@ StSsdCluster::StSsdCluster(const StSsdCluster & originalCluster)
   mTotNoise    = originalCluster.mTotNoise;
   mStripMean   = originalCluster.mStripMean;
   mFlag        = originalCluster.mFlag;
-  mIdMcHit     = new int[MAXIDMCHIT];
-  for(int e=0;e<MAXIDMCHIT;e++)  mIdMcHit[e] = originalCluster.mIdMcHit[e];
+  mIdMcHit     = new int[SSD_MAXIDMCHIT];
+  for(int e=0;e<SSD_MAXIDMCHIT;e++)  mIdMcHit[e] = originalCluster.mIdMcHit[e];
   mPrevCluster = originalCluster.mPrevCluster;
   mNextCluster = originalCluster.mNextCluster;
 }
@@ -65,7 +65,7 @@ StSsdCluster& StSsdCluster::operator=(const StSsdCluster originalCluster)
   mTotNoise    = originalCluster.mTotNoise;
   mStripMean   = originalCluster.mStripMean;
   mFlag        = originalCluster.mFlag;
-  for(int e=0;e<MAXIDMCHIT;e++)  mIdMcHit[e] = originalCluster.mIdMcHit[e];
+  for(int e=0;e<SSD_MAXIDMCHIT;e++)  mIdMcHit[e] = originalCluster.mIdMcHit[e];
   mPrevCluster = originalCluster.mPrevCluster;
   mNextCluster = originalCluster.mNextCluster;
   return *this;
@@ -155,7 +155,7 @@ StSsdCluster* StSsdCluster::giveCopy()
   ptrClone->mTotNoise    = this->mTotNoise;
   ptrClone->mStripMean   = this->mStripMean;
   ptrClone->mFlag        = this->mFlag;
-  for(int e=0;e<MAXIDMCHIT;e++)  ptrClone->mIdMcHit[e] = this->mIdMcHit[e];
+  for(int e=0;e<SSD_MAXIDMCHIT;e++)  ptrClone->mIdMcHit[e] = this->mIdMcHit[e];
   return ptrClone;
 }
 
@@ -169,7 +169,7 @@ void StSsdCluster::copyTo(StSsdCluster *ptrClone)
   ptrClone->mLastAdc     = this->mLastAdc;
   ptrClone->mTotNoise    = this->mTotNoise;
   ptrClone->mStripMean   = this->mStripMean;
-  for(int e=0;e<MAXIDMCHIT;e++)  ptrClone->mIdMcHit[e] = this->mIdMcHit[e];
+  for(int e=0;e<SSD_MAXIDMCHIT;e++)  ptrClone->mIdMcHit[e] = this->mIdMcHit[e];
 }
 
 
@@ -195,11 +195,11 @@ void StSsdCluster::update(StSsdStrip *ptr,float rWeight)
   int b = 0;
   int c = 0;
   int flag = 1;
-  while((a<MAXIDMCHIT)&&(this->getIdMcHit(a)!=0)) a++; 
-  while((b<MAXIDMCHIT)&&(a<MAXIDMCHIT)&&(ptr->getIdMcHit(b)!=0))
+  while((a<SSD_MAXIDMCHIT)&&(this->getIdMcHit(a)!=0)) a++; 
+  while((b<SSD_MAXIDMCHIT)&&(a<SSD_MAXIDMCHIT)&&(ptr->getIdMcHit(b)!=0))
     {
       flag = 1;
-      for(c=0;c<MAXIDMCHIT-a;c++)
+      for(c=0;c<SSD_MAXIDMCHIT-a;c++)
 	{if(this->getIdMcHit(c)==ptr->getIdMcHit(b)) flag=0;}
       if(flag)
 	{     
