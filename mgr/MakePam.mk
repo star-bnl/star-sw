@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.65 1998/11/16 01:26:45 fisyak Exp $
+# $Id: MakePam.mk,v 1.66 1998/11/17 02:27:04 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.66  1998/11/17 02:27:04  fisyak
+# Add log
+#
 # Revision 1.65  1998/11/16 01:26:45  fisyak
 # New merging with NT
 #
@@ -236,11 +239,12 @@ ifneq (,$(strip $(FILES_IDM) $(FILES_G) $(FILES_CDF)))
   SL_PKG  := $(LIB_DIR)/$(PKG).sl
   QWE  := $(wildcard $(SL_PKG).*)
   SL_NEW := $(SL_PKG).1000
-ifdef QWE
+ifneq (,$(QWE))
   NQWE := $(words $(QWE))
   QWE  := $(word $(NQWE),$(QWE))
   QWE  := $(subst $(SL_PKG).,,$(QWE))
   QWE  := $(shell expr $(QWE) + 1)
+  SL_NEW := $(SL_PKG).$(QWE)
 endif
 endif                          
 ifneq (,$(strip $(FILES_O)))

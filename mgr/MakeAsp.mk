@@ -1,3 +1,8 @@
+# $Id: MakeAsp.mk,v 1.16 1998/11/17 02:27:04 fisyak Exp $
+# $Log: MakeAsp.mk,v $
+# Revision 1.16  1998/11/17 02:27:04  fisyak
+# Add log
+#
 #
 #	Make file to make one ASP or PAM.  Victor.Perev Apr 1998
 #
