@@ -25,7 +25,7 @@ StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active)
 {
   _innerCalc = new StiDefaultHitErrorCalculator();
   _innerCalc->set(.066, 1.2e-04, 0.0004,
-		  .03, 2.2e-4, 2.8-02);
+		  .06, 2.2e-4, 2.8-02);
   //_innerCalc->set(3.12735e-03,1.51055e-04,2.43806e-02,
   //3.28243e-03,5.23272e-05,5.75341e-02);
   //		  3.68243e-03,5.23272e-05,5.75341e-02); //original C.P.5/1/03
@@ -36,7 +36,7 @@ StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active)
   //8.02775e-03,3.55219e-05,6.45610e-02);
   //2.02775e-04,3.55219e-05,6.45610e-02);  //original C.P. 5/1/03 
   StiTrackingParameters * trackingPars = getTrackingParameters();
-  trackingPars->setMaxChi2ForSelection(10.);
+  trackingPars->setMaxChi2ForSelection(25.);
   trackingPars->setMinSearchWindow(2.);
   trackingPars->setMaxSearchWindow(8.);
   trackingPars->setSearchWindowScaling(12.);
