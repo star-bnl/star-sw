@@ -1,5 +1,8 @@
-* $Id: tde_new.F,v 1.8 1998/12/13 21:34:26 sakrejda Exp $
+* $Id: tde_new.F,v 1.9 1999/01/11 22:35:37 sakrejda Exp $
 * $Log: tde_new.F,v $
+* Revision 1.9  1999/01/11 22:35:37  sakrejda
+* increased local arrays to accomodate a Vini event
+*
 * Revision 1.8  1998/12/13 21:34:26  sakrejda
 * tpt_const.inc replaced by math_constants.inc
 *
@@ -78,8 +81,8 @@ c
 
 c
       PARAMETER (ndemax=1000)
-      PARAMETER (nlocmax=400000)
-      PARAMETER  (nloctrc=20000)
+      PARAMETER (nlocmax=500000)
+      PARAMETER  (nloctrc=30000)
 c
       INTEGER loc_hit(nlocmax),loc_track(nloctrc)
 
