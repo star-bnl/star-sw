@@ -1,5 +1,8 @@
-* $Id: tpt_load_track.F,v 1.6 1999/08/23 01:05:10 sakrejda Exp $
+* $Id: tpt_load_track.F,v 1.7 1999/08/25 21:06:26 sakrejda Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.7  1999/08/25 21:06:26  sakrejda
+* calcualtion of possible number of points deactivated
+*
 * Revision 1.6  1999/08/23 01:05:10  sakrejda
 * curvature and npos filled
 *
@@ -60,7 +63,7 @@ C     REAL     xlocal(3), bfield(3)                  !ALREADY EXISTS
       data nmax /0/
 
       LOGICAL nposOn
-      DATA nposOn /.TRUE./
+      DATA nposOn /.FALSE./
 
 
 C___________________________________________________________________
