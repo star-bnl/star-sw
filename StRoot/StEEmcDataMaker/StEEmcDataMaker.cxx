@@ -1,4 +1,4 @@
-// $Id: StEEmcDataMaker.cxx,v 1.13 2004/04/02 06:38:43 balewski Exp $
+// $Id: StEEmcDataMaker.cxx,v 1.14 2004/04/03 06:32:45 balewski Exp $
 
 #include <Stiostream.h>
 #include <math.h>
@@ -47,8 +47,10 @@ Int_t StEEmcDataMaker::Init(){
     printf("\n\nWARN %s::Init() did not found \"eeDb-maker\", all EEMC data will be ignored\n\n", GetName());
   } 
 
-  hs[0]= new TH1F("nV-TwCr","No of valid Tw crates/eve",9,-1.5,7.5);
-  hs[1]= new TH1F("nV-MaCr","No of valid MAPMT crates/eve",19,-1.5,17.5);
+  hs[0]= new TH1F("health","raw data health; X: 0=nEve, 1=raw, 2=OKhead , 3=tower(No ghost/n256)",9,-1.5,7.5);
+
+  hs[1]= new TH1F("n256","No. of n256/eve, all header OK",100, -1.5,98.5);
+  hs[2]= new TH1F("nGhost","No. of tower nGhost/eve, all header OK, chan>119",100,-1.5,98.5);
   
   return StMaker::Init();
 }
@@ -85,14 +87,22 @@ Int_t StEEmcDataMaker::Make(){
   assert(mEvent);// fix your chain or open the right event file
   // printf("\n%s  accesing StEvent ID=%d\n",GetName(),mEvent->id());
 
+  hs[0]->Fill(0);
  //::::::::::::::::: copy raw data to StEvent ::::::::::::: 
- copyRawData(mEvent);
+  if(!copyRawData(mEvent)) return kStOK;
+  hs[0]->Fill(1);
 
  //::::::::::::::: assure raw data are sane  :::::::::::::::: 
- if(!headersAreSane(mEvent))   return kStOK;
+
+ if(headersAreSick(mEvent))   return kStOK;
+ hs[0]->Fill(2);
+
+ if(towerDataAreSick(mEvent))   return kStOK;
+ hs[0]->Fill(3);
+
 
  //:::::::::::::: store tower/pre/post/smd hits in StEvent
- //raw2calibrated(mEvent);
+ raw2pixels(mEvent);
    
  return kStOK;
   }
@@ -100,12 +110,12 @@ Int_t StEEmcDataMaker::Make(){
 //____________________________________________________
 //____________________________________________________
 //____________________________________________________
-void  StEEmcDataMaker::copyRawData(StEvent* mEvent) {
+int   StEEmcDataMaker::copyRawData(StEvent* mEvent) {
   
   St_DataSet *daq = GetDataSet("StDAQReader");                 assert(daq);
   StDAQReader *fromVictor = (StDAQReader*) (daq->GetObject()); assert(fromVictor);
   StEEMCReader *eeReader  = fromVictor->getEEMCReader();  
-  if(!eeReader) return ;
+  if(!eeReader) return false ;
 
   int icr; 
 
@@ -114,13 +124,12 @@ void  StEEmcDataMaker::copyRawData(StEvent* mEvent) {
   if(emcC==0) { // create this collection if not existing
     emcC=new StEmcCollection();
     mEvent->setEmcCollection(emcC);
-    printf(" %s::Make() has added a non existing StEmcCollection()\n", GetName());
+    printf("%s::Make() has added a non existing StEmcCollection()\n", GetName());
   }
   
-
   StEmcRawData *raw=new  StEmcRawData;  
   emcC->setEemcRawData(raw);
-  printf("%s:: copy %d EEMC raw data blocks\n",GetName(),mDb->getNCrate());
+  printf("%s::copy %d EEMC raw data blocks eveID=%d\n",GetName(),mDb->getNCrate(),mEvent->id());
 
   for(icr=0;icr<mDb->getNCrate();icr++) {
     const EEmcDbCrate *crate=mDb-> getCrate(icr);
@@ -131,19 +140,19 @@ void  StEEmcDataMaker::copyRawData(StEvent* mEvent) {
     raw->setHeader(icr,eeReader->getEemcHeadBlock(crate->fiber,crate->type));
     raw->setData(icr,eeReader->getEemcDataBlock(crate->fiber,crate->type));
   }
+  return true;
 }
 
 //____________________________________________________
 //____________________________________________________
 //____________________________________________________
-int  StEEmcDataMaker::headersAreSane(StEvent* mEvent) {
-  int good=true; // yes as default
-
+int  StEEmcDataMaker::headersAreSick(StEvent* mEvent) {
+  
   StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection();
 
   if(emcC==0) {
-    printf("%s::raw2calibrated() no emc collection, skip\n",GetName());
-    return good;
+    printf("%s::headersAreSick() no emc collection, skip\n",GetName());
+    return true;
   }
 
   StEmcRawData* raw=emcC->eemcRawData();
@@ -152,14 +161,13 @@ int  StEEmcDataMaker::headersAreSane(StEvent* mEvent) {
   StL0Trigger* trg=mEvent->l0Trigger(); assert(trg);
   int token=trg->triggerToken();
 
-  EEmcHealth *health=new  EEmcHealth;
-  health->setValidBlockSize(mDb->getNCrate());
-
   EEfeeDataBlock block; // use utility class as the work horse
 
+  int sick=false;
   int icr;
   for(icr=0;icr<mDb->getNCrate();icr++) {
     const EEmcDbCrate *crate=mDb-> getCrate(icr);
+    if(!crate->useIt) continue; // drop masked out crates
     //printf(" EEMC raw-->pix crID=%d type=%c \n",crate->crID,crate->type);
     const  UShort_t* head=raw->header(icr);
     assert(head);
@@ -176,23 +184,158 @@ int  StEEmcDataMaker::headersAreSane(StEvent* mEvent) {
 
     int trigCommand=4; // physics, 9=laser/LED, 8=??
     int valid=block.isHeadValid(token,crate->crIDswitch,lenCount,trigCommand,errFlag);
-    health->setValidBlock(valid,icr);
-    // printf("valid=%d good=%d ",valid,good); crate->print();
+ 
+    printf("valid=%d ",valid); crate->print();
 
-    if(valid==0) { good=false; continue; }
+    if(valid) continue;
+    sick=true;
+  }
 
-    switch(crate->type) {
-    case 'T':  health->addValidTwCr(); break;
-    case 'S':  health->addValidMaCr(); break;
-    default:;
+  printf("%s::headersAreSick()==%d\n",GetName(),sick);
+  return sick;
+}
+
+
+
+//____________________________________________________
+//____________________________________________________
+//____________________________________________________
+int  StEEmcDataMaker::towerDataAreSick(StEvent* mEvent) {
+
+
+  StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection();
+
+  assert(emcC);
+  
+  StEmcRawData* raw=emcC->eemcRawData();
+  assert(raw);
+
+  int nGhost=0, n256=0;
+  int icr;
+  for(icr=0;icr<mDb->getNCrate();icr++) {
+    const EEmcDbCrate *crate=mDb-> getCrate(icr);
+    if(!crate->useIt) continue; // drop masked out crates
+    if(crate->type!='T') continue;
+    const  UShort_t* data=raw->data(icr);
+    assert(data);
+    int i;
+    for(i=0;i<raw->sizeData(icr);i++) {
+      if((data[i] &0xff)==0 ) n256++;
+      if(i>=121 && data[i]>40) nGhost++;
     }
   }
-  //  printf("eeHealth:\n");  health->print();
-  hs[0]->Fill(health->getNValidTwCr());
-  hs[1]->Fill(health->getNValidMaCr());
 
-  printf("%s::rawDataSane() , good=%d\n",GetName(),good);
-  return good;
+  hs[1]->Fill(n256);
+  hs[2]->Fill(nGhost);
+
+  printf("%s::towerDataAreSick() , n256=%d, nGhost=%d\n",GetName(),n256, nGhost);
+  if(nGhost>0) return true;
+  if(n256>20) return true;
+  return false;
+}
+
+
+
+//____________________________________________________
+//____________________________________________________
+//____________________________________________________
+void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
+
+  StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection();
+
+  assert(emcC);
+  
+  StEmcRawData* raw=emcC->eemcRawData();
+  assert(raw);
+  printf("%s::raw2pixels()\n",GetName());
+
+  int mxSector = 12;
+
+  // initialize tower/prePost /U/V in StEvent
+  
+  StEmcDetector* emcDet[kEndcapSmdVStripId+1]; // what a crap,JB
+  StDetectorId emcId[kEndcapSmdVStripId+1];    // more crap
+  memset(emcDet,0,sizeof(emcDet));
+
+  int det;
+  for(det = kEndcapEmcTowerId; det<= kEndcapSmdVStripId; det++){
+    emcId[det] = StDetectorId(det);
+    emcDet[det] = new StEmcDetector(emcId[det],mxSector);
+    emcC->setDetector(emcDet[det]);
+  }
+
+  // store data from raw blocks to StEvent
+  int nDrop=0;
+  int nMap=0;
+  int nTow=0;
+  int icr;
+  for(icr=0;icr<mDb->getNCrate();icr++) {
+    const EEmcDbCrate *crate=mDb-> getCrate(icr);
+    if(!crate->useIt) continue; // drop masked out crates
+    
+    const  UShort_t* data=raw->data(icr);
+    assert(data);
+
+    for(int chan=0;chan<raw->sizeData(icr);chan++) {
+      const  StEEmcDbIndexItem1  *x=mDb->get(crate->crID,chan);
+      if(x==0) {
+	//printf("No EEMC mapping for crate=%3d chan=%3d\n",crate,chan);
+	nDrop++;
+	continue;
+      }
+
+      int isec=x->sec-1;   //range 0-11 ???
+      int rawAdc=data[chan];
+      float energy=123.456; // dumm value
+      int det = 0;
+      int ieta=0, isub=0;
+      char type=x->name[2];
+
+      switch(type) { // tw/pre/post/SMD
+      case 'T': // towers
+	isub=x->sub-'A'; //range 0-4
+	ieta=x->eta-1;   //range 0-11
+	det = kEndcapEmcTowerId;
+	nTow++;
+	break;
+      case 'P': // pres1
+      case 'Q': // pres2
+      case 'R': // post
+	isub=x->sub-'A'; //range 0-4
+	ieta=x->eta-1;   //range 0-11
+	isub+=5* (type-'P'); // this is even more sily
+	det = kEndcapEmcPreShowerId;
+	break;
+      case 'U': //SMD
+      case 'V': 
+	isub=0; // not used for SMD
+	ieta=x->strip-1;   //range 0-287
+	det = kEndcapSmdUStripId;
+	if(type=='V') det = kEndcapSmdVStripId;
+	break;
+      default:
+	continue;
+      }
+
+      if(det==0) continue; // tmp
+      //printf("EEMC crate=%3d chan=%3d  ADC: raw=%4d pedSub=%+.1f energy=%+10g  -->   %2.2dT%c%2.2d\n",crate,chan,rawAdc,adc,energy,x->sec,x->sub,x->eta);
+      
+      StEmcRawHit* h = new StEmcRawHit(emcId[det],isec,ieta,isub,rawAdc,energy);
+      emcDet[det]->addHit(h);
+      nMap++;
+
+    } // end of loop over channels
+  }// end of loop over crates 
+  
+    
+  printf("%s event finished nDrop=%d nMap=%d nTow=%d\n",GetName(), nDrop,nMap,nTow);
+
+
+  for(det = kEndcapEmcTowerId; det<= kEndcapSmdVStripId; det++){
+   StEmcDetector* emcDetX= emcC->detector( StDetectorId(det));
+   assert(emcDetX);
+   printf("det=%d ID=%d nHits=%d\n",det,StDetectorId(det),emcDetX->numberOfHits());
+  }  
 }
 
 
@@ -200,6 +343,12 @@ int  StEEmcDataMaker::headersAreSane(StEvent* mEvent) {
  
 
 // $Log: StEEmcDataMaker.cxx,v $
+// Revision 1.14  2004/04/03 06:32:45  balewski
+// firts attempt to store EEMC hits in StEvent & muDst,
+// Implemented useIt for fibers in Db
+// problems: - tower sector 12 is missing
+// - no pres & msd in smd
+//
 // Revision 1.13  2004/04/02 06:38:43  balewski
 // abort on any error in any header
 //
@@ -252,66 +401,6 @@ int  StEEmcDataMaker::headersAreSane(StEvent* mEvent) {
 
   //old .......................
 
-#if 0 // recording decoded data in StEvent, abandon in 2004
-
-  int det = kEndcapEmcTowerId; 
-  StDetectorId id = StDetectorId(det);
-  StEmcDetector* d = new StEmcDetector(id,12);
-  emcC->setDetector(d); 
-
-  int nDrop=0;
-  int nMap=0;
-  int nOver=0;
-  
-  for(icr=0;icr<mDb->getNCrate();icr++) {
-    const EEmcDbCrate *crate=mDb-> getCrate(icr);
-    if(crate->crID<1 || crate->crID>6) continue; // only tower data
-    
-    //tmp, no header check
-    
-    for(int chan=0;chan<crate->nch;chan++) {
-      const  StEEmcDbIndexItem1  *x=mDb->get(crate->crID,chan);
-      if(x==0) {
-	//printf("No EEMC mapping for crate=%3d chan=%3d\n",crate,chan);
-	nDrop++;
-	continue;
-      }
-      nMap++;
-      
-      int isec=x->sec-1;   //range 0-11
-      int isub=x->sub-'A'; //range 0-4
-      int ieta=x->eta-1;   //range 0-11
-      
-      if(!steemcreader) continue; // there was no data 
-      int rawAdc=steemcreader->getEemcData(crate->fiber,chan,'T'); 
-      
-      if(rawAdc<=0) continue; // there was no data for this channel
-      
-      float adc=rawAdc - x->ped;
-      float energy=-1.;
-      
-      if(rawAdc>x->thr){ // changed 8-18-03, JB
-	if(x->gain>0) 
-	  energy=adc/x->gain; // note: it corrects only relative gains, SF not 
-	else
-	  energy=-2.;
-	nOver++;
-      }
-      
-      //printf("EEMC crate=%3d chan=%3d  ADC: raw=%4d pedSub=%+.1f energy=%+10g  -->   %2.2dT%c%2.2d\n",crate,chan,rawAdc,adc,energy,x->sec,x->sub,x->eta);
-      
-      assert(strchr(x->name,'T')); // works only for towers
-      
-      StEmcRawHit* h = new StEmcRawHit(id,isec,ieta,isub,rawAdc,energy);
-      d->addHit(h);
-    } // end of loop over channels
-  }// end of loop over crates 
-    
-    
-    printf("%s event finished nDrop=%d nMap=%d--> nOver=%d \n",GetName(), nDrop,nMap,nOver);
-    
-#endif // decoding of data 
-
 
 
 #if 0 // test of new access method  
@@ -338,75 +427,3 @@ int  StEEmcDataMaker::headersAreSane(StEvent* mEvent) {
 #endif
 
 
-//========================= TMP
-//========================= TMP
-//========================= TMP
-
-
-#include <cassert>
-
-#include <TArrayS.h>
-
-//#include "EEmcHealth.h"
-
-ClassImp(EEmcHealth)
-
-
-//--------------------------------------------------
-//--------------------------------------------------
-//--------------------------------------------------
-
-EEmcHealth ::  EEmcHealth() {
-  validBlock= new TArrayS(0);
-  nValidTwCr= nValidMaCr=0;
-}
-
-
-
-//--------------------------------------------------
-//--------------------------------------------------
-//--------------------------------------------------
-EEmcHealth ::  ~EEmcHealth() {
-  delete validBlock;
-}
-
-
-//--------------------------------------------------
-//--------------------------------------------------
-//--------------------------------------------------
-void EEmcHealth ::setValidBlockSize(int size){
-  validBlock->Set(size);
-  validBlock->Reset(); // set unvalid by default
-}
-
-
-//--------------------------------------------------
-//--------------------------------------------------
-//--------------------------------------------------
-void EEmcHealth ::setValidBlock(Short_t valid, Int_t icr){
-  validBlock->AddAt(valid,icr);
-
-}
-
-
-
-//--------------------------------------------------
-//--------------------------------------------------
-//--------------------------------------------------
-void EEmcHealth :: print(int flag){
-  printf("EEmcHealth::print(), nBlocks=%d  Valid TwCr=%d Mapmt=%d\n",validBlock->GetSize(),nValidTwCr, nValidMaCr);
-  if(flag<0) return;
-
-  int i;
-  Short_t *valid=validBlock->GetArray();
-  for(i=0;i<validBlock->GetSize();i++){
-    printf("i=%2d valid=%d\n",i,valid[i]);
-  }
-}
-
-/*
- * $Log: StEEmcDataMaker.cxx,v $
- * Revision 1.13  2004/04/02 06:38:43  balewski
- * abort on any error in any header
- *
- */
