@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list_all.C,v 1.4 1999/11/03 19:02:54 kathy Exp $ 
+// $Id: bfcread_hist_list_all.C,v 1.5 1999/11/03 21:35:35 kathy Exp $ 
 // $Log: bfcread_hist_list_all.C,v $
+// Revision 1.5  1999/11/03 21:35:35  kathy
+// small fixes for use of StIOMaker - had it wrong before
+//
 // Revision 1.4  1999/11/03 19:02:54  kathy
 // changes to default input files and output file names - needed by perl script for testing
 //
@@ -47,7 +50,7 @@ void bfcread_hist_list_all(const char
   IOMk->SetBranch("*",0,"0");                 //deactivate all branches
 //  IOMk->SetBranch("tpc_tracks",0,"r"); //activate tpc_tracks Branch
 //  IOMk->SetBranch("geantBranch",0,"r"); //activate geant Branch
-  IOMk->SetBranch("dstBranch",0,"r"); //activate dst Branch
+  IOMk->SetBranch("histBranch",0,"r"); //activate dst Branch
 
 
 // --- now execute chain member functions
