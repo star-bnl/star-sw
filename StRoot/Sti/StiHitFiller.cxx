@@ -7,30 +7,25 @@
 // StEvent
 #include "StEventTypes.h"
 
-// StDb
-#include "StDbUtilities/StTpcCoordinateTransform.hh"
-#include "StDbUtilities/StTpcLocalSectorCoordinate.hh"
-#include "StDbUtilities/StGlobalCoordinate.hh"
-#include "StTpcDb/StTpcDb.h"
-
 //Sti
 #include "StiHit.h"
 #include "StiHitContainer.h"
 #include "StiHitFactory.h"
+#include "StiHitTranslator.h"
 
 #include "StiHitFiller.h"
 
 StiHitFiller::StiHitFiller()
 {
     cout <<"\nStiHitFiller::StiHitFiller()\n"<<endl;
-    //mtransformer = new StTpcCoordinateTransform(gStTpcDb);
+    mtranslator = new StiHitTranslator();
 }
 
 StiHitFiller::~StiHitFiller()
 {
     cout <<"\nStiHitFiller::~StiHitFiller()\n"<<endl;
-    //delete mtransformer;
-    //mtransformer = 0;
+    delete mtranslator;
+    mtranslator=0;
 }
 
 void StiHitFiller::addDetector(StDetectorId det)
@@ -49,6 +44,33 @@ void StiHitFiller::fillHits(StiHitContainer* store, StiHitFactory* factory) cons
 }
 
 void StiHitFiller::fillTpcHits(StiHitContainer* store, StiHitFactory* factory) const
+{
+    const StTpcHitCollection* tpcHits = mevent->tpcHitCollection();    
+    //Loop over sectors
+    for (int sector=1; sector<=24; sector++) {
+	const StTpcSectorHitCollection* secHits = tpcHits->sector(sector-1);
+	//Loop over padrows
+	for (int prow=1; prow<=45; prow++) {
+	    const StTpcPadrowHitCollection* padrowHits = secHits->padrow(prow-1);
+	    const StSPtrVecTpcHit& hitvec = padrowHits->hits();
+	    //Loop over hits
+	    for (StSPtrVecTpcHitIterator iter = hitvec.begin(); iter != hitvec.end(); iter++) {
+		const StTpcHit* hit = dynamic_cast<const StTpcHit*>(*iter);
+		if (hit) {
+		    //Now we have the hit
+		    StiHit* stihit = new StiHit();
+		    mtranslator->operator()(hit, stihit);
+		    //cout <<"TpcHit: "<<hit->sector()<<" "<<hit->padrow()<<" "<<hit->position()<<"\tStiHit: "<<*stihit<<endl;
+		    delete stihit;
+		}
+	    }
+	}	    
+    }
+    
+    return;
+}
+
+void StiHitFiller::fillSvtHits(StiHitContainer* store, StiHitFactory* factory) const
 {
     return;
 }

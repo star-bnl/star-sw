@@ -21,14 +21,10 @@ struct MapKeyLessThan{
 //Structure for detector map key
 struct DetectorMapKey {
   bool operator==(const DetectorMapKey&) const;
-  double position;
-  double refangle;
+  bool operator<(const DetectorMapKey&) const;
+  int padrow;
+  int sector;
   double z;
-};
- 
-//Functor for ordering detector map key
-struct DetectorMapKeyLessThan {
-  bool operator() (const DetectorMapKey&, const DetectorMapKey&) const;
 };
 
 //Non member functions

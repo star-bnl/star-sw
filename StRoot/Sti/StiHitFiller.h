@@ -13,7 +13,8 @@
 class ostream;
 class StiHitContainer;
 class StiHitFactory;
-class StTpcCoordinateTransform;
+class StiHitTranslator;
+class StEvent;
 
 class StiHitFiller
 {
@@ -24,6 +25,7 @@ public:
     virtual ~StiHitFiller();
 
     void addDetector(StDetectorId det);
+    void setEvent(StEvent* val) {mevent=val;}
     void fillHits(StiHitContainer*, StiHitFactory*) const;
 
     friend ostream& operator<<(ostream&, const StiHitFiller&);
@@ -33,7 +35,8 @@ private:
     void fillSvtHits(StiHitContainer*, StiHitFactory*) const;
     
 private:
-    StTpcCoordinateTransform* mtransformer;
+    StiHitTranslator* mtranslator;
+    StEvent* mevent;
     det_id_vector mvec;
     
 };
