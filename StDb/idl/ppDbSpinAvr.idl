@@ -11,6 +11,7 @@ struct ppDbSpinAvr {
    long  nSpinID;   /*   number of spin configurations  */
    char  author[128];   /*   name of user  */
    char  comment[1024];   /*   comment entered by user  */
+   long  timeInterval;   /*  for future use  */
    float  lum[20];   /*   integrated luminosity (a.u.) per spinID  */
    long  nBunch[20];   /*   no. of bunches per spinID  */
    float  yellPx[20];   /*   yellow beam average X-polarization per spinID  */

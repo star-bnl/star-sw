@@ -1,8 +1,11 @@
 //  modified by JB 2/2/01: trigOnCtb() isolated and upgraded
 // 
 //*-- Author : George , Jan Balewski 
-// $Id: StppTrigMaker.cxx,v 1.3 2001/04/12 15:19:09 balewski Exp $
+// $Id: StppTrigMaker.cxx,v 1.4 2001/04/13 18:04:35 balewski Exp $
 // $Log: StppTrigMaker.cxx,v $
+// Revision 1.4  2001/04/13 18:04:35  balewski
+// *** empty log message ***
+//
 // Revision 1.3  2001/04/12 15:19:09  balewski
 // *** empty log message ***
 //
@@ -167,11 +170,10 @@ Int_t StppTrigMaker::Make(){
   // start processing the C T B  information
 
   int nSlat=-1, nDiPatch=-2, n1Patch=-3;
-  //temp_OFF  trigOnCtb(nSlat, nDiPatch, n1Patch);
+  trigOnCtb(nSlat, nDiPatch, n1Patch);
 
   if(nSlat>=set.CtbnSlatMin)   decision+=2;
-  if(nDiPatch<=set.CtbnDiPatchMin)   decision+=4;
-
+  if(nDiPatch>=set.CtbnDiPatchMin)   decision+=4;
 
   //     H I S T O G R A M M I N G
 
@@ -252,10 +254,10 @@ void StppTrigMaker::trigOnCtb(  int &nSlat, int &nDiPatch, int &n1Patch )
   St_g2t_ctf_hit *g2t_ctb_hit = (St_g2t_ctf_hit *) geant("g2t_ctb_hit");
   g2t_ctf_hit_st *t = NULL;
 
-  if (g2t_ctb_hit == NULL) { Print("No geant/ctb data set \n"); return ; }
+  if (g2t_ctb_hit == NULL) { printf("No geant/ctb data set \n"); return ; }
   t = g2t_ctb_hit->GetTable();  assert(t); 
   if (g2t_ctb_hit->GetNRows() == 0) 
-    { Print("Empty geant/ctb data set \n"); return ; }
+    { printf("Empty geant/ctb data set \n"); return ; }
 
   // accumulate energy per slat , within time gate
   for (i = 0; i < g2t_ctb_hit->GetNRows(); i++,t++){
@@ -329,29 +331,29 @@ void StppTrigMaker::trigOnMwc(  int &iforw , int &iback)
   St_DataSet *ds=NULL; 
   St_mwc_raw  *tmwr=NULL;
   mwc_raw_st *tr=NULL;
- 
+
   ds=GetDataSet(".make/mwc");
-  if(ds == 0) {  Print("No .make/mwc data set \n"); return; }
+  if(ds == NULL) {  printf("No .make/mwc data set \n"); return; }
 
   tmwr= (St_mwc_raw   *) ds->Find(".data/raw");
-  if(tmwr ==NULL) { Print("No mwc/raw table \n"); return; } 
+  if(tmwr ==NULL) { printf("No mwc/raw table \n"); return; } 
     
   tr= tmwr->GetTable();
   assert(tr); 
   ntrr=tmwr->GetNRows(); 
-  if(ntrr ==0) { Print("Empty mwc/raw table \n"); return; } 
+  if(ntrr ==0) { printf("Empty mwc/raw table \n"); return; } 
 
   iforw=0;
   iback=0;
-
+  printf("MWC n hit=%d\n",ntrr);
   for (i = 0; i < ntrr ; i++,tr++){
     h5->Fill(float(tr->count));  
     if (tr->sector < 49) {
-      //printf(" back sec=%d, count=%d\n",tr->sector,tr->count);
+      //printf("MWC back sec=%d, count=%d\n",tr->sector,tr->count);
       if(tr->count>0)iback+=tr->count;
     } 
     else  {
-      //printf(" forw sec=%d, count=%d\n",tr->sector,tr->count);
+      //printf("MWC forw sec=%d, count=%d\n",tr->sector,tr->count);
       if(tr->count>0) iforw+=tr->count;
     } 
   }
@@ -360,7 +362,6 @@ void StppTrigMaker::trigOnMwc(  int &iforw , int &iback)
   h6->Fill(float(iback));
   h7->Fill(float(iforw));
   h25->Fill(float(iforw),float(iback),1.) ;
-  
   return;
 }
 
