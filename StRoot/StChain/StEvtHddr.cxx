@@ -28,10 +28,10 @@ StEvtHddr::StEvtHddr(St_DataSet *parent):St_DataSet("EvtHddr",parent)
   void StEvtHddr::Print()
 {
   printf("\n *********** Event Info **********************\n");  
-  printf("\tRun: \t%5d  Event %5d  TimeStamp %8d.%6d  Bunch %d\n"
+  printf("\tRun: \t%5d  Event %5d  TimeStamp %8d.%6d  Bunch %lu\n"
          ,mRunNumber,mEventNumber,mEventTime.GetDate(),mEventTime.GetTime()
          ,mBunchCrossingNumber);  
-  printf("\tInpTrig: %4x OutTrig: %4x  \n"
+  printf("\tInpTrig: %4lx OutTrig: %4lx  \n"
          ,mInputTriggerMask,mTriggerMask);
   printf("\n *********************************************\n\n");  
 }  
