@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.cc,v 1.21 2002/02/28 14:18:36 rcwells Exp $
+ * $Id: StHbtPair.cc,v 1.22 2002/04/22 22:48:11 laue Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.cc,v $
+ * Revision 1.22  2002/04/22 22:48:11  laue
+ * corrected calculation of opening angle
+ *
  * Revision 1.21  2002/02/28 14:18:36  rcwells
  * Added emissionAngle function to StHbtPair
  *
@@ -485,11 +488,7 @@ double StHbtPair::NominalTpcAverageSeparation() const {
 }
 
 double StHbtPair::OpeningAngle() const {
-  StHbtThreeVector p1 = mTrack1->FourMomentum().vect();
-  StHbtThreeVector p2 = mTrack2->FourMomentum().vect();
-  return 57.296*(p1.phi()-p2.phi());
-  //double dAngInv = 57.296*acos((p1.dot(p2))/(p1.mag()*p2.mag()));
-  //return (dAngInv);
+  return 57.296* mTrack1->FourMomentum().vect().angle( mTrack2->FourMomentum().vect() );
 }
 //_________________
 
