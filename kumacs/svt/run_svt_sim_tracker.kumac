@@ -121,6 +121,7 @@
    exec create_tables_svt#stk
    exec init_sgr
    exec init_stk
+   exec init_stk#vtx
  endif
  
  
@@ -149,11 +150,9 @@
     endif
 * SVT track finding and momentum reconstruction -----------------------
     if [svt_tracker]= stk then
-      exec run_stk#vtx
       exec run_stk#run
         if (staf_status(1) .ne. 1) goto NEXT_EVENT
     elseif [svt_tracker]=sgr then
-      exec run_stk#vtx
       exec run_sgr#run
       exec run_stk#run
         if (staf_status(1) .ne. 1) goto NEXT_EVENT
