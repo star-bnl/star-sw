@@ -1,5 +1,12 @@
-* $Id: g2t_volume_id.g,v 1.45 2003/10/02 23:17:24 potekhin Exp $
+* $Id: g2t_volume_id.g,v 1.46 2003/10/09 16:33:02 potekhin Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.46  2003/10/09 16:33:02  potekhin
+* Introduced a small hash table for the GEANT-> reco mapping
+* of the FTPC sector numbers, in accordance with
+* http://wwwstar.mppmu.mpg.de/ftpc_calibration_page/calibration/calibration.html
+* This is clean and flexible, and should be easy to correct very quickly
+* if necessary
+*
 * Revision 1.45  2003/10/02 23:17:24  potekhin
 * Added a missing dollar mark which so far prevented
 * the inclusion of CVS log into the source
@@ -66,6 +73,8 @@
       Integer          i,iWheel,zsubsect,zsublayer,eemc_depth
       Integer          sector_hash(6,2) / 4, 5, 6, 7, 8, 9, 
                                          10,11,12, 1, 2, 3/
+      Integer          ftpc_hash(6,2)   / 1, 6, 5, 4, 3, 2, 
+                                          6, 1, 2, 3, 4, 5/
 
       Integer          innout,sector,sub_sector,volume_id
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
@@ -490,10 +499,15 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *10*
 * ftpv=1 for west, 2 for east part of the FTPC
 * ftpc_sector is the phi division of the gas layer
-* the numbering scheme below designed by Janet Seyboth --max--
+* the numbering scheme below designed by Janet Seyboth,
+* but I'm adding the correct mapping between GEANT id's
+* and the ones found on:
+* http://wwwstar.mppmu.mpg.de/ftpc_calibration_page/calibration/calibration.html
+* I use a hash table for a unique and clean way to number sectors
+* --max--
         ftpv       = numbv(1)
         padrow     = numbv(2)
-	ftpc_sector= numbv(3)
+	ftpc_sector= ftpc_hash(numbv(3),ftpv)
         volume_id  = (100*ftpv+padrow)*10 + ftpc_sector
 *   ---------------------
       else If (Csys=='vpd') then
