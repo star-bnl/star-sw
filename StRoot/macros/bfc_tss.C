@@ -1,4 +1,4 @@
-// $Id: bfc_tss.C,v 1.14 1999/03/04 19:45:23 fisyak Exp $
+// $Id: bfc_tss.C,v 1.15 1999/03/07 22:33:19 fisyak Exp $
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
@@ -44,7 +44,7 @@ void Load(){
     gSystem->Load("St_global");
     gSystem->Load("St_dst_Maker");
     //    gSystem->Load("St_run_summary_Maker");
-    //    gSystem->Load("St_QA_Maker");
+    gSystem->Load("St_QA_Maker");
     gSystem->Load("St_io_Maker");
 }
 
@@ -59,7 +59,7 @@ bfc_tss (const Int_t Nevents=1000000,
   Int_t NoEvents = atoi(strrchr(InFile.Data(),'_')+1);
   if (NoEvents <=0) {NoEvents = Nevents;}  
   if (NoEvents > Nevents) {NoEvents = Nevents;}  
-  cout << "Input file name = "<< InFile.Data() <<"  with No.Events to process = " << NoEvents << endl;
+  printf("Input file name = %s with No.Events to process = %i \n",InFile.Data(),NoEvents);
   // Dynamically link some shared libs
   if (gClassTable->GetID("StChain") < 0) Load();
   if (!FileOut){
@@ -68,14 +68,13 @@ bfc_tss (const Int_t Nevents=1000000,
     FileOut->ReplaceAll(".fz",".root");
     FileOut->Strip();
   }
-  cout << "File for chain " << FileOut.Data() << endl;
+  printf("File for chain %s\n",FileOut.Data());
   TFile       *root_out  =  new TFile(FileOut->Data(),"RECREATE");
   St_XDFFile  *xdf_out = 0;
   TString *XdfFile = new TString(FileOut->Data());
   XdfFile->ReplaceAll(".root","_dst.xdf");
   xdf_out = new St_XDFFile(XdfFile->Data(),"wb"); 
-  cout << "Open xdf file  = " << XdfFile->Data() << endl;
-  cout << "+++++++++++++++++++++++++++++++++++++++++++++++" << endl;
+  printf ("Open xdf file  = %s \n +++++++++++++++++++++++++++++++++++++++++++++++\n",XdfFile->Data());
   // Create the main chain object
   if (chain) delete chain;
   chain = new StChain("bfc");
@@ -114,7 +113,7 @@ bfc_tss (const Int_t Nevents=1000000,
   //  St_run_summary_Maker *summary = new St_run_summary_Maker("run_summary","run/dst");
   St_dst_Maker         *dst     = new St_dst_Maker("dst","dst");
   //  dst_Maker->Save();
-  //  St_QA_Maker          *qa         = new St_QA_Maker;  
+  St_QA_Maker          *qa         = new St_QA_Maker;  
   St_io_Maker          *out  = new St_io_Maker("Output","all");
   // Create HTML docs of all Maker's involved
   //   chain->MakeDoc();
@@ -131,7 +130,7 @@ bfc_tss (const Int_t Nevents=1000000,
   // Prepare TCanvas to show some histograms created by makers
   if (out && dst) {
     FileOut->ReplaceAll(".root","_dst.root");
-    cout << "File for dst " << FileOut.Data() << endl;
+    printf ("File for dst %s\n",FileOut.Data());
     out->Add(dst->GetName(),FileOut.Data());
     if (root_out) {chain->Write();}
   }
@@ -161,6 +160,6 @@ bfc_tss (const Int_t Nevents=1000000,
     gBenchmark->Print("bfc");
   }
   else {if (!b)   b = new TBrowser;}
-  cout << "Run completed ";
+  printf ("Run completed ");
   gSystem->Exec("date");
 }
