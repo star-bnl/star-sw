@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.12 2000/02/15 21:21:15 jgreid Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.13 2000/02/17 19:44:59 jgreid Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
+ * Revision 1.13  2000/02/17 19:44:59  jgreid
+ * added separate global variable calculations for different charge species
+ *
  * Revision 1.12  2000/02/15 21:21:15  jgreid
  * added multiple primary vertex handling
  *
@@ -144,11 +147,17 @@ void StEbyeScaTagsMaker::fillTag(StEvent& event) {
 
   int imtbin;
 
-  float trackCount = 0.0;
-  float meanPt = 0.0;
-  float meanPtSquared = 0.0;
-  float meanEta = 0.0;
-  float meanEtaSquared = 0.0;
+  float trackCountPlus = 0.0;
+  float meanPtPlus = 0.0;
+  float meanPtSquaredPlus = 0.0;
+  float meanEtaPlus = 0.0;
+  float meanEtaSquaredPlus = 0.0;
+
+  float trackCountMinus = 0.0;
+  float meanPtMinus = 0.0;
+  float meanPtSquaredMinus = 0.0;
+  float meanEtaMinus = 0.0;
+  float meanEtaSquaredMinus = 0.0;
 
   double s;
   StThreeVectorD dca, p;
@@ -227,13 +236,27 @@ void StEbyeScaTagsMaker::fillTag(StEvent& event) {
             /* dN/mt*dy*dmt histogram */
             if (0<=imtbin && imtbin<NBINS) mt_histo[imtbin] += mtweight1/mt; 
 
-            // calculate number of particles that make the cuts, and the first two pt moments
-            trackCount++;
-            meanPtSquared += pt*pt;
-            meanPt += pt;
+	    if (charge > 0) {
+  
+              // calculate number of + particles that make the cuts, and the first two pt moments
+              trackCountPlus++;
+              meanPtSquaredPlus += pt*pt;
+              meanPtPlus += pt;
 
-	    meanEtaSquared += eta*eta;
-	    meanEta += eta;
+  	      meanEtaSquaredPlus += eta*eta;
+	      meanEtaPlus += eta;
+
+	    } else if (charge < 0) {
+  
+              // calculate number of - particles that make the cuts, and the first two pt moments
+              trackCountMinus++;
+              meanPtSquaredMinus += pt*pt;
+              meanPtMinus += pt;
+
+  	      meanEtaSquaredMinus += eta*eta;
+	      meanEtaMinus += eta;
+
+	    }
 
 	  } // [cut #1]
 
@@ -243,32 +266,48 @@ void StEbyeScaTagsMaker::fillTag(StEvent& event) {
 
     } // ** end of track loop **
 
-    meanPtSquared /= trackCount;
-    meanPt /= trackCount;
-    meanEtaSquared /= trackCount;
-    meanEta /= trackCount;
+    meanPtSquaredPlus /= trackCountPlus;
+    meanPtPlus /= trackCountPlus;
+    meanEtaSquaredPlus /= trackCountPlus;
+    meanEtaPlus /= trackCountPlus;
+
+    meanPtSquaredMinus /= trackCountMinus;
+    meanPtMinus /= trackCountMinus;
+    meanEtaSquaredMinus /= trackCountMinus;
+    meanEtaMinus /= trackCountMinus;
 
     // fill the chargedParicles_Means array in the sca Tag
 
-    // 0 - event multiplicity
-    mTag->chargedParticles_Means[0] = trackCount;
-    // 1 - eventwise mean transverse momentum
-    mTag->chargedParticles_Means[1] = meanPt;
-    // 2 - eventwise mean transverse momentum squared
-    mTag->chargedParticles_Means[2] = meanPtSquared;
-    // 3 - eventwise mean rapidity
-    mTag->chargedParticles_Means[3] = meanEta;
-    // 4 - eventwise mean rapidity squared
-    mTag->chargedParticles_Means[4] = meanEtaSquared;
-    // 5 - estimated temperature of the event
+    // 0,1 - event multiplicities
+    mTag->chargedParticles_Means[0] = trackCountPlus;
+    mTag->chargedParticles_Means[1] = trackCountMinus;
+    // 2,3 - eventwise mean transverse momenta
+    mTag->chargedParticles_Means[2] = meanPtPlus;
+    mTag->chargedParticles_Means[3] = meanPtMinus;
+    // 4,5 - eventwise mean transverse momenta squared
+    mTag->chargedParticles_Means[4] = meanPtSquaredPlus;
+    mTag->chargedParticles_Means[5] = meanPtSquaredMinus;
+    // 6,7 - eventwise mean rapidities
+    mTag->chargedParticles_Means[6] = meanEtaPlus;
+    mTag->chargedParticles_Means[7] = meanEtaMinus;
+    // 8,9 - eventwise mean rapidities squared
+    mTag->chargedParticles_Means[8] = meanEtaSquaredPlus;
+    mTag->chargedParticles_Means[9] = meanEtaSquaredMinus;
+    // 10 - estimated temperature of the event
     //     (based on slope fit to 1/mt dN/dmt)
-    mTag->chargedParticles_Means[5] = mtInverseSlope(mt_histo, 0, NBINS);
+    mTag->chargedParticles_Means[10] = mtInverseSlope(mt_histo, 0, NBINS);
 
     //uncomment the next line to send the analysis results to cout
-    //cout << trackCount << " " << meanPt/GeV << " " << meanPtSquared/(GeV*GeV) << endl;
+    //    for charge > 0 ...
+    cout << trackCountPlus << " " << meanPtPlus/GeV << " " << meanPtSquaredPlus/(GeV*GeV) << endl;
+    //    for charge < 0 ...
+    cout << trackCountMinus << " " << meanPtMinus/GeV << " " << meanPtSquaredMinus/(GeV*GeV) << endl;
 
     //uncomment the next line (and declaration of outFile above) to append results to a file
-    //outFile << trackCount << " " << meanPt/GeV << " " << meanPtSquared/(GeV*GeV) << endl;
+    //     for charge > 0 ...
+    //outFile << trackCountPlus << " " << meanPtPlus/GeV << " " << meanPtSquaredPlus/(GeV*GeV) << endl;
+    //     for charge < 0 ... 
+    //outFile << trackCountMinus << " " << meanPtMinus/GeV << " " << meanPtSquaredMinus/(GeV*GeV) << endl;
   }
 
 }
@@ -310,12 +349,17 @@ void StEbyeScaTagsMaker::printTag(ostream& os) {
     os << "--- Event-by-Event SCA Tag Table ---" << endl; 
     if (!mTag) os << "(tag is empty)" << endl;
     else {
-      os <<  "N = " << mTag->chargedParticles_Means[0] << endl;
-      os <<  "<pt> = " << mTag->chargedParticles_Means[1] << endl;
-      os <<  "<pt^2> = " << mTag->chargedParticles_Means[2] << endl;
-      os <<  "<y> = " << mTag->chargedParticles_Means[3] << endl;
-      os <<  "<y^2> = " << mTag->chargedParticles_Means[4] << endl;
-      os <<  "T = " << mTag->chargedParticles_Means[5] << endl;
+      os <<  "N_Plus = " << mTag->chargedParticles_Means[0] << endl;
+      os <<  "N_Minus = " << mTag->chargedParticles_Means[1] << endl;
+      os <<  "<pt_Plus> = " << mTag->chargedParticles_Means[2] << endl;
+      os <<  "<pt>_Minus = " << mTag->chargedParticles_Means[3] << endl;
+      os <<  "<pt^2>_Plus = " << mTag->chargedParticles_Means[4] << endl;
+      os <<  "<pt^2>_Minus = " << mTag->chargedParticles_Means[5] << endl;
+      os <<  "<y>_Plus = " << mTag->chargedParticles_Means[6] << endl;
+      os <<  "<y>_Minus = " << mTag->chargedParticles_Means[7] << endl;
+      os <<  "<y^2>_Plus = " << mTag->chargedParticles_Means[8] << endl;
+      os <<  "<y^2>_Minus = " << mTag->chargedParticles_Means[9] << endl;
+      os <<  "T = " << mTag->chargedParticles_Means[10] << endl;
       os <<  "...and more to be filled later" << endl;
     }
 }
