@@ -22,11 +22,8 @@ class StPrimaryVertex;
 class StiHitFiller
 {
 public:
-    typedef vector<StDetectorId> det_id_vector;
 
-    //Temproary
-    typedef map<unsigned int, double> padrow_radius_map;
-    typedef padrow_radius_map::value_type padrow_radius_map_ValType;
+    typedef vector<StDetectorId> det_id_vector;
     
     StiHitFiller();
     virtual ~StiHitFiller();
@@ -42,20 +39,13 @@ private:
     void fillTpcHits(StiHitContainer*, StiHitFactory*);
     void fillSvtHits(StiHitContainer*, StiHitFactory*);
     void fillPrimaryVertices(StiHitContainer*, StiHitFactory*);
-
-    //Temporary patch, should be in GeometryTransform
-    void operator() (const StTpcHit*, StiHit*);
-    void operator() (const StPrimaryVertex*, StiHit*);
     
 private:
     StiGeometryTransform* mtranslator;
-    StTpcCoordinateTransform* mtpctransformer;
+    //StTpcCoordinateTransform* mtpctransformer;
     
     StEvent* mevent;
     det_id_vector mvec;
-
-    //Temp (MLM)
-    padrow_radius_map mpadrowradiusmap;
 };
 
 ostream& operator<<(ostream&, const StiHitFiller&);
