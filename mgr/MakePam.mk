@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.123 1999/09/30 20:07:37 fisyak Exp $
+# $Id: MakePam.mk,v 1.124 1999/10/04 14:35:35 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.124  1999/10/04 14:35:35  fisyak
+# Add StRoot in include path
+#
 # Revision 1.123  1999/09/30 20:07:37  fisyak
 # Synchronize cons and makel Path
 #
@@ -271,7 +274,7 @@ ifeq (,$(sources))
 	@echo Nothing to do for package $(PKG), no source files
 else
 SRC_DIRS:= $(subst /TAIL, ,$(addsuffix TAIL, $(sources)))
-INC_NAMES  := include
+INC_NAMES  := include StRoot
 INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES))))
 ifneq ($(ROOT_DIR),$(STAR))
   INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES))))
