@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.17 2004/01/15 00:02:25 fisyak Exp $
+ * $Id: StDbManagerImpl.cc,v 1.18 2004/02/02 00:41:24 deph Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.18  2004/02/02 00:41:24  deph
+ * Added bbc and tracker domains
+ *
  * Revision 1.17  2004/01/15 00:02:25  fisyak
  * Replace ostringstream => StString, add option for alpha
  *
@@ -275,6 +278,8 @@ addDbDomain(dbTof,"tof");
 addDbDomain(dbFpd,"fpd"); 
 addDbDomain(dbEemc,"eemc"); 
 addDbDomain(dbPmd,"pmd"); 
+addDbDomain(dbBbc,"bbc"); 
+addDbDomain(dbTracker,"tracker"); 
 
 }
 
