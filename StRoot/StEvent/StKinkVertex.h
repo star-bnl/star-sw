@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StKinkVertex.h,v 2.2 1999/10/28 22:25:56 ullrich Exp $
+ * $Id: StKinkVertex.h,v 2.3 1999/11/04 16:33:26 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StKinkVertex.h,v $
- * Revision 2.2  1999/10/28 22:25:56  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.3  1999/11/04 16:33:26  ullrich
+ * Fixed wrong option to ClassDef macro.
  *
  * Revision 2.2  1999/10/28 22:25:56  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -89,6 +89,6 @@ protected:
     StThreeVectorF mDaughterMomentum;
 
     StObject* clone();
-    ClassDef(StVertex,1)
+    ClassDef(StKinkVertex,1)
 };
 #endif
