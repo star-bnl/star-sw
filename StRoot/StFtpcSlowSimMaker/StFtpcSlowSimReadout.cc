@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimReadout.cc,v 1.14 2003/01/14 12:58:25 jcs Exp $
+// $Id: StFtpcSlowSimReadout.cc,v 1.15 2003/01/29 12:12:37 fsimon Exp $
 // $Log: StFtpcSlowSimReadout.cc,v $
+// Revision 1.15  2003/01/29 12:12:37  fsimon
+// Additional comments to illustrate ASIC mapping
+//
 // Revision 1.14  2003/01/14 12:58:25  jcs
 // use Geometry_ftpc/ftpcAsicMap to control corrections for error in Y2001-2002
 // FTPC asic mapping
@@ -439,12 +442,15 @@ float StFtpcSlowSimReadout::TimeOfSlice(const int sslice)
 
 int StFtpcSlowSimReadout::GetHardPad(const int daqsec, const int daqpad, const int irow)
 {
+  // ATTENTION: This function is only used for correct db access (gain table, time offset...)
+  // The asic mapping for the output is done in StFtpcRawWriter
+
   int pad = daqpad;
   if (pad <0) pad =0;
   if (pad > (mDb->numberOfPads() -1)) pad = mDb->numberOfPads() -1;
   if (irow>=10)
-    if (mDb->Asic2EastNotInverted() && (pad>63)&&(pad<96)) // no turning for center FEE card in each sector
-      return pad;
+    if (mDb->Asic2EastNotInverted() && (pad>63)&&(pad<96)) // no turning for center FEE card in each sector in East
+      return pad;                                          // for old data (prior to 2003)
     else
       return (mDb->numberOfPads()-pad-1);
   else
