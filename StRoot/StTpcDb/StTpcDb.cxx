@@ -27,11 +27,10 @@ int type_of_call numberOfPadsAtRow_(int *row) {
 ClassImp(StTpcDb)
 #endif
 //_____________________________________________________________________________
-StTpcDb::StTpcDb(StMaker* input) {
+StTpcDb::StTpcDb(StDbDataSet* input) {
 St_DataSet* temp=0;
 St_DataSet* temp1=0;
-mk = input;
-temp = (StDbDataSet*)mk->GetData("StarDb");
+temp = input;
  if (temp){
    temp1 = temp->Find("Calibrations");
    if(temp1){tpc_calibrations = temp1->Find("tpc");}
