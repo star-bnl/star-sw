@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.8 1999/11/05 00:02:02 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.9 1999/11/11 23:16:43 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 // Description:  Maker to analyze Flow using the FlowTags
@@ -8,6 +8,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.9  1999/11/11 23:16:43  posk
+// Rearrangement of files.
+//
 // Revision 1.8  1999/11/05 00:02:02  posk
 // Changed the flow vector, Q, to a TVector2.
 //
@@ -37,39 +40,36 @@
 //
 //  
 ////////////////////////////////////////////////////////////////////////////
+
 #include <iostream.h>
 #include <stdlib.h>
 #include <math.h>
-#include "StFlowTagMaker/StFlowTagMaker.h"
-#include "StFlowAnalysisMaker.h"
-#include "StFlowCutEvent.hh"
-#include "StFlowCutTrack.hh"
+#include "StFlowAnalysisMaker.hh"
+#include "../StFlowMaker/StFlowMaker.hh"
+#include "../StFlowMaker/StFlowEvent.hh"
+//#include "../StFlowMaker/StFlowTrackCollection.hh"
+#include "../StFlowMaker/StFlowCutTrack.hh"
+//#include "StFlowCutEvent.hh"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
+//#include "StThreeVector.hh"
 #include "TVector2.h"
-#include "StThreeVector.hh"
-#include "StLorentzVector.hh"
-#include "StMaker.h"
-#include "StEvent.h"
-#include "StGlobalTrack.h"
-#include "StChain.h"
-//#include "TMath.h"
-#include "TString.h"
+//#include "StEvent.h"
+//#include "StGlobalTrack.h"
+//#include "StChain.h"
 #include "TFile.h"
+#include "TString.h"
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
 #include "TProfile.h"
 #include "TOrdCollection.h"
-
 #define PR(x) cout << (#x) << " = " << (x) << endl;
 extern "C" float besi0_(const float&);
+
 ClassImp(StFlowAnalysisMaker)
 
-const Double_t    bField             = 0.5*tesla;
-const Double_t    trackquality[3][2] = {{10, 0}, 
-				       {  0, 0},
-				       {  0, 0}}; 
+const Double_t bField = 0.5*tesla;
 
 const Float_t phiMin    =    0.;
 const Float_t phiMax    = twopi; 
@@ -94,65 +94,54 @@ const Int_t nMeanPtBins =    50;
 const Int_t nMultBins   =    50;
 const Int_t n_qBins     =    50;
 
-StFlowAnalysisMaker::StFlowAnalysisMaker(const Char_t* name="FlowAnalysis"): StMaker(name){
+//-----------------------------------------------------------------------
+
+StFlowAnalysisMaker::StFlowAnalysisMaker(const Char_t* name): StFlowMaker(name){
   // Make Flow histograms.
-  mFlowTag = 0;
-  mEvent   = 0;
 }
+
+//-----------------------------------------------------------------------
 
 StFlowAnalysisMaker::~StFlowAnalysisMaker() {
 }
 
+//-----------------------------------------------------------------------
+
 Int_t StFlowAnalysisMaker::Make() {
-  // Get the flow tags and make histograms
+  // Make histograms
 
-  // Get a pointer to the DST
-  mEvent = (StEvent*)GetInputDS("StEvent");
-  if (!mEvent) return kStOK; // If no event, we're done
-
-  // Check the event cuts
-  if (!StFlowCutEvent::CheckEvent(mEvent)) return kStOK; // next event
-  
-  if (kStOK == getTags()) {  // get Tags and calculated quantities
-    
-    // fill histograms from Flow Tags
-    fillTagHistograms();
-    
-    // fill flow histograms from particles
-    fillFlowHistograms();
+  StFlowMaker* flowMaker = (StFlowMaker*)GetMaker("Flow");
+  mFlowTag = flowMaker->TagPointer();
+  mFlowEvent = flowMaker->FlowEventPointer();
+  if (mFlowEvent && mFlowTag) {
+    if (kStOK == Tags()) {    // get Tags and calculated quantities
+      fillTagHistograms();    // fill histograms from Flow Tags
+      fillFlowHistograms();   // fill flow histograms from particles
+    }  
+  } else {
+    return kStOK;             // no StFlowEvent or no Tag pointer
   }
-
+  
   PrintInfo();
 
   return kStOK;
 }
 
+//-----------------------------------------------------------------------
+
 void StFlowAnalysisMaker::PrintInfo() {
   cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.8 1999/11/05 00:02:02 posk Exp $"
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.9 1999/11/11 23:16:43 posk Exp $"
        << endl;
   cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
+//-----------------------------------------------------------------------
+
 Int_t StFlowAnalysisMaker::Init() {
   // Book the histograms
 
-  // Set the event cuts
-//   StFlowCutEvent::SetMult(20, 2000);
-//   StFlowCutEvent::SetVertexX(0., 0.);
-//   StFlowCutEvent::SetVertexY(0., 0.);
-//   StFlowCutEvent::SetVertexZ(-50., 50.);
-
-  // Open PhiWgt file
-  TDirectory* dirSave = gDirectory;
-  TFile* phiWgtFile = new TFile("flowPhiWgt.hist.root", "READ");
-  if (!phiWgtFile->IsOpen()) {
-    cout << "### Can't open PhiWgt file" << endl;
-  }
-  gDirectory = dirSave;
-
-  // Book the histograms
   TString* histTitle;
   for (int i = 0; i < nSubs; i++) {
     char countSubs[2];
@@ -243,21 +232,21 @@ Int_t StFlowAnalysisMaker::Init() {
       delete histTitle;
       
       // PhiWgt
-      histTitle = new TString("Flow_Phi_Weight_Event");
-      histTitle->Append(*countSubs);
-      histTitle->Append("_Har");
-      histTitle->Append(*countHars);
-      if (phiWgtFile->IsOpen()) {
-	TH1* phiWgtHist = (TH1*)phiWgtFile->Get(histTitle->Data());
-	for (int n = 0; n < nPhiBins; n++) {
-	  mPhiWgt[k][j][n] = (phiWgtHist) ? phiWgtHist->GetBinContent(n+1) : 1.;
-	}
-      } else {
-	for (int n = 0; n < nPhiBins; n++) {
-	  mPhiWgt[k][j][n] = 1.;
-	}
-      }
-      delete histTitle;
+//       histTitle = new TString("Flow_Phi_Weight_Event");
+//       histTitle->Append(*countSubs);
+//       histTitle->Append("_Har");
+//       histTitle->Append(*countHars);
+//       if (phiWgtFile->IsOpen()) {
+// 	TH1* phiWgtHist = (TH1*)phiWgtFile->Get(histTitle->Data());
+// 	for (int n = 0; n < nPhiBins; n++) {
+// 	  mPhiWgt[k][j][n] = (phiWgtHist) ? phiWgtHist->GetBinContent(n+1) : 1.;
+// 	}
+//       } else {
+// 	for (int n = 0; n < nPhiBins; n++) {
+// 	  mPhiWgt[k][j][n] = 1.;
+// 	}
+//       }
+//       delete histTitle;
 
       // PhiWgt new
       histTitle = new TString("Flow_Phi_Weight_Event");
@@ -430,60 +419,10 @@ Int_t StFlowAnalysisMaker::Init() {
       delete histTitle;
     }
   }
-  if (phiWgtFile->IsOpen()) phiWgtFile->Close();
-
   return StMaker::Init();
 }
 
-Int_t StFlowAnalysisMaker::getTags() {
-  // Get the flow tags and calculate some quantities
-  
-  // Get a pointer to the flow tags
-  StFlowTagMaker* flowTagMaker = (StFlowTagMaker*)GetMaker("FlowTag");
-  mFlowTag = flowTagMaker->tag();
-  if (!mFlowTag) {
-    cout << "$$$$$ zero FlowTag pointer" << endl;
-    return kStErr;
-  }
-
-  for (int j = 0; j < nHars; j++) {
-    float harN  = (float)(j+1);
-    // sub-event quantities
-    mQSub[0][j].Set( mFlowTag->qxa[j], mFlowTag->qya[j] );
-    mQSub[1][j].Set( mFlowTag->qxb[j], mFlowTag->qyb[j] );
-    mQSub[2][j].Set( mFlowTag->qxc[j], mFlowTag->qyc[j] );
-    mQSub[3][j].Set( mFlowTag->qxd[j], mFlowTag->qyd[j] );
-    mMulSub[0][j]   = mFlowTag->na[j];
-    mMulSub[1][j]   = mFlowTag->nb[j];
-    mMulSub[2][j]   = mFlowTag->nc[j];
-    mMulSub[3][j]   = mFlowTag->nd[j];
-    mSumPtSub[0][j] = mFlowTag->spta[j];
-    mSumPtSub[1][j] = mFlowTag->sptb[j];
-    mSumPtSub[2][j] = mFlowTag->sptc[j];
-    mSumPtSub[3][j] = mFlowTag->sptd[j];
-
-    // calculate Psi
-    for (int i = 0; i < nSubs; i++) {
-      mPsiSub[i][j] = mQSub[i][j].Phi() / harN;
-    }
-
-    // full event quantities
-    for (int k = 0; k < nSubs/2; k++) {
-      mQ[k][j]    = mQSub[2*k][j] + mQSub[2*k+1][j];
-      mPsi[k][j]  = mQ[k][j].Phi() / harN;
-      mQMod[k][j] = mQ[k][j].Mod();
-      m_q[k][j]   = (mMul[k][j] > 0.) ? mQMod[k][j]/sqrt(mMul[k][j]) : 0.;
-      mMul[k][j]  = mMulSub[2*k][j] + mMulSub[2*k+1][j];
-      mSumPt[k][j]= mSumPtSub[2*k][j] + mSumPtSub[2*k+1][j];
-    }
-  }
-  return kStOK;
-}
-
-Double_t StFlowAnalysisMaker::getPhiWeight(Float_t mPhi, Int_t eventN, Int_t harN) const {
-  int n = (mPhi/twopi)*nPhiBins;
-  return mPhiWgt[eventN][harN][n];
-}
+//-----------------------------------------------------------------------
 
 void StFlowAnalysisMaker::fillTagHistograms() {
   // Fill histograms from the tags
@@ -534,68 +473,63 @@ void StFlowAnalysisMaker::fillTagHistograms() {
   }
 }
 
+//-----------------------------------------------------------------------
+
 void StFlowAnalysisMaker::fillFlowHistograms() {
   // Fill histograms from the particles
 
   // Initialize Iterator, loop variables, and arrays
-  StTrackCollection* tracks = mEvent->trackCollection();
-  StTrackIterator itr;
-  long initialMultiplicity = tracks->size();
+  StFlowTrackCollection* tracks = mFlowEvent->TrackCollection();
+  StFlowTrackIterator itr;
   
   // Track loop
-  long TrackCount = 0;
-  int i;
-  for (itr = tracks->begin(), i=0; itr != tracks->end(); itr++) {
-    StGlobalTrack* mTrack = *itr;
-    StThreeVectorD p = mTrack->helix().momentum(bField); 
-    Float_t mPhi =  p.phi();
+  for (itr = tracks->begin(); itr != tracks->end(); itr++) {
+    StFlowTrack* mTrack = *itr;
+    Float_t mPhi =  mTrack->Phi();
     if (mPhi < 0.) mPhi += twopi;
-    Float_t mEta =  p.pseudoRapidity();
-    Float_t mPt  =  p.perp();
+    Float_t mEta =  mTrack->Eta();
+    Float_t mPt  =  mTrack->Pt();
     for (int k = 0; k < nSubs/2; k++) {
-      histFull[k].mHistEtaPtPhi3D->Fill(mEta, mPt, mPhi); // no track cuts
+      histFull[k].mHistEtaPtPhi3D->Fill(mEta, mPt, mPhi);
       for (int j = 0; j < nHars; j++) {
 	float harN  = (float)(j+1);
-	// Track cuts
-	if (StFlowCutTrack::CheckTrack(mTrack, k, j)) {
-	  histFull[k].histFullHar[j].mHistPhi->Fill(mPhi);
-	  // Remove autocorrelations
-	  Double_t weight = getPhiWeight(mPhi, k, j);
-	  histFull[k].histFullHar[j].mHistPhiFlat->Fill(mPhi, weight);
-	  if (mEta < 0 && (j+1) % 2 == 1) weight *= -1.;
+	Float_t psi_i = mQ[k][j].Phi()/harN;
+	Double_t phiWgt = PhiWeight(mPhi, k, j);
+	if (mEta < 0 && (j+1) % 2 == 1) phiWgt *= -1.;
+	// Remove autocorrelations
+	if (StFlowCutTrack::SelectTrack(mTrack, k, j)) {
 	  TVector2 Q_i;
-	  Q_i.Set(weight * cos(mPhi * harN), weight * sin(mPhi * harN));
+	  Q_i.Set(phiWgt * cos(mPhi * harN), phiWgt * sin(mPhi * harN));
 	  TVector2 mQ_i = mQ[k][j] - Q_i;
-	  Float_t psi_i = mQ_i.Phi() / harN;
+	  psi_i = mQ_i.Phi() / harN;
 // 	  cout << "k= " << k << " j= " << j << " Psi= " <<
 // 	    mQ[k][j].Phi() / harN << "\t Psi_i= " << psi_i << endl;
-
-	  // 2D hists
-	  histFull[k].histFullHar[j].mHistYield2D->Fill(mEta, mPt);
-	  Float_t v = cos(harN*(mPhi - psi_i))/perCent;
-	  histFull[k].histFullHar[j].mHistSum_v2D->Fill(mEta, mPt, v);
-	  histFull[k].histFullHar[j].mHistBinEta->Fill(mEta, mEta);
-	  histFull[k].histFullHar[j].mHistBinPt->Fill(mPt, mPt);
-
-	  // Correlation of Phi with Psi
-	  if (mEta < 0 && (j+1) % 2 == 1) {
-	    mPhi += pi; // backward particle and odd harmonic
-	    if (mPhi > twopi) mPhi -= twopi;
-	  }
-	  float dPhi = mPhi - psi_i;
-	  if (dPhi < 0.) dPhi += twopi;
-	  histFull[k].histFullHar[j].mHistPhiCorr->
-	    Fill(fmod(dPhi, twopi/harN));
 	}
+	histFull[k].histFullHar[j].mHistPhi->Fill(mPhi);
+	histFull[k].histFullHar[j].mHistPhiFlat->Fill(mPhi, phiWgt);
+	// 2D hists
+	histFull[k].histFullHar[j].mHistYield2D->Fill(mEta, mPt);
+	Float_t v = cos(harN*(mPhi - psi_i))/perCent;
+	histFull[k].histFullHar[j].mHistSum_v2D->Fill(mEta, mPt, v);
+	histFull[k].histFullHar[j].mHistBinEta->Fill(mEta, mEta);
+	histFull[k].histFullHar[j].mHistBinPt->Fill(mPt, mPt);
+
+	// Correlation of Phi with Psi
+	if (mEta < 0 && (j+1) % 2 == 1) {
+	  mPhi += pi; // backward particle and odd harmonic
+	  if (mPhi > twopi) mPhi -= twopi;
+	}
+	float dPhi = mPhi - psi_i;
+	if (dPhi < 0.) dPhi += twopi;
+	histFull[k].histFullHar[j].mHistPhiCorr->
+	  Fill(fmod(dPhi, twopi/harN));
       }
     }  
     // Finish loop
-    TrackCount++;
-    i++;
   }
-  StFlowCutTrack::PrintCutSurvival();
-  StFlowCutTrack::CheckEvent(); // if kFALSE undo this event
 }
+
+//-----------------------------------------------------------------------
 
 static Double_t qDist(double* q, double* par) {
   // Calculates the q distribution given the parameters v, mult, area
@@ -607,9 +541,11 @@ static Double_t qDist(double* q, double* par) {
   return dNdq;
 }
 
+//-----------------------------------------------------------------------
+
 Int_t StFlowAnalysisMaker::Finish() {
   // Calculates resolution and mean flow values
-  // Fits q distribution and outputs phiWeight values
+  // Fits q distribution and outputs phiWgt values
 
   // PhiWgt histogram collection
   TOrdCollection* phiWgtHistNames = new TOrdCollection(nSubs*nHars/2);
@@ -689,10 +625,5 @@ Int_t StFlowAnalysisMaker::Finish() {
   phiWgtNewFile.Close();
   delete phiWgtHistNames;
   
-  // Print the event cuts
-  StFlowCutTrack::PrintCutList();
-  StFlowCutEvent::PrintCutList();
-
   return StMaker::Finish();
 }
-
