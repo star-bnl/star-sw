@@ -1,5 +1,8 @@
-// $Id: makeStrangeMuDst.C,v 1.4 2000/04/13 21:46:35 kathy Exp $
+// $Id: makeStrangeMuDst.C,v 1.5 2000/05/18 19:50:48 genevb Exp $
 // $Log: makeStrangeMuDst.C,v $
+// Revision 1.5  2000/05/18 19:50:48  genevb
+// Better handling of status returned by chain.Make()
+//
 // Revision 1.4  2000/04/13 21:46:35  kathy
 // remove loading of libtpc_Tables since l3Track table is now dst_track type from global
 //
@@ -28,7 +31,6 @@ void load() {
   gSystem->Load("libgen_Tables");
   gSystem->Load("libsim_Tables");
   gSystem->Load("libglobal_Tables");
-
 
   gSystem->Load("StChain");
   gSystem->Load("StIOMaker");
@@ -62,14 +64,22 @@ void run() {
   strangeDst.SetWrite(); // Sets "write" mode (using default filenames)
 
   // Do init
-  Int_t ierr = chain.Init();
-  if( ierr ) { chain.Fatal(ierr,"on init"); return; }
+  Int_t istatus = chain.Init();
+  if( istatus ) { chain.Fatal(istatus,"on init"); return; }
 
   // Loop over events
-  for( Int_t i=0; i<Nevents; i++ ) {
-    if( chain.Make(i) ) break;
+  for( Int_t i=0; (i<Nevents) && (istatus!=2); i++ ) {
+    switch (istatus = chain.Make(i)) {
+      case 0: break;
+      case 2: { gMessMgr->Info("Last event from input."); break; }
+      case 3: { gMessMgr->Error() << "Event " << i << " had error " <<
+        istatus << ". Now skipping event."; gMessMgr->Print(); break; }
+      default: { gMessMgr->Warning() << "Event " << i << " returned status " <<
+        istatus << ". Continuing."; gMessMgr->Print(); }
+    }
     if( i != Nevents) chain.Clear();
-    printf("*** Finished processing event %d\n",i);
+    gMessMgr->Info() << "*** Finished processing event " << i;
+    gMessMgr->Print();
   }
 
   // Finish
