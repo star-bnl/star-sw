@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.65 1999/09/12 15:02:53 fine Exp $
+// $Id: StMaker.cxx,v 1.66 1999/09/12 16:54:50 fine Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.66  1999/09/12 16:54:50  fine
+// StMaker::MakeDoc() adjusted to multi-level makers. Some bug fix also
+//
 // Revision 1.65  1999/09/12 15:02:53  fine
 // Multi-level maker source dirs introduced for MakeDoc method
 //
@@ -758,7 +761,7 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   else 
      STAR.ReplaceAll("$(afs)","/afs");
 
-  TString classname = ClassName();
+  TString classname = IsA()->GetName();
 
   if (!gHtml) gHtml = new THtml;
 
@@ -784,7 +787,8 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   lookup += delim;
 
   lookup += STAR;
-  lookup += gSystem->DirName(ImplFileName());
+  lookup += "/";
+  lookup += gSystem->DirName(IsA()->GetImplFileName());
   lookup += delim;
 
   lookup += STAR;
@@ -811,10 +815,12 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   
 //  const Char_t *c = ClassName();  // This trick has to be done since a bug within ROOT
 
+#if 0
   lookup += delim;
   lookup += STAR;
   lookup += "/StRoot/";
   lookup += classname;
+#endif
 
   gSystem->ExpandPathName(lookup);
   lookup.ReplaceAll("//StRoot/","/StRoot/");
