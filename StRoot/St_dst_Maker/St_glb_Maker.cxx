@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.20 1999/02/05 17:58:18 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.21 1999/02/11 02:53:37 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.21  1999/02/11 02:53:37  fisyak
+// Janet update to FTPC dst table
+//
 // Revision 1.20  1999/02/05 17:58:18  fisyak
 // Spiros correction to evr
 //
@@ -96,6 +99,7 @@
 #include "global/St_ev0_dst_Module.h"
 #include "global/St_ev0_eval2_Module.h"
 #include "global/St_dst_dedx_filler_Module.h"
+#include "global/St_fill_ftpc_dst_Module.h"
 #include "global/St_dst_monitor_soft_filler_Module.h"
 
 #include "strange/St_smdst2_am_Module.h"
@@ -387,7 +391,7 @@ Int_t St_glb_Maker::Make(){
       tp_param->iflag =   m_flag;
       if (m_flag == 1 || m_flag == 2) {
 	dst_vertex_st *vrtx = vertex->GetTable();
-	memset(tp_param->x,vrtx->x,3*sizeof(Float_t));  
+	memcpy(&tp_param->x,&vrtx->x,3*sizeof(Float_t));  
       }
     }
     Int_t Res_tp = track_propagator(globtrk2,m_tp_param,globtrk);
@@ -498,6 +502,15 @@ Int_t St_glb_Maker::Make(){
     if (ftpc_tracks) {
       St_DataSetIter tracks(ftpc_tracks);
       fpt_fptrack = (St_fpt_fptrack *) tracks["fpt_fptrack"];
+    }
+    if (fcl_fppoint && fpt_fptrack) {
+      cout<<" run_dst: Calling fill_ftpc_dst"<<endl;
+      Int_t Res_fill_ftpc_dst= fill_ftpc_dst(fpt_fptrack,fcl_fppoint,globtrk,
+                              globtrk_aux,point,vertex,dst_dedx);
+      if ( Res_fill_ftpc_dst != kSTAFCV_OK) {
+        cout << "Problem on return from FILL_FTPC_DST" << endl;
+      }
+      cout << " run_dst: finished calling fill_ftpc_dst" << endl;
     }
     if (tphit && scs_spt && tptrack && stk_track && evt_match && ctf && fcl_fppoint && fpt_fptrack) {
       if (! monitor_soft) {
@@ -610,7 +623,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.20 1999/02/05 17:58:18 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.21 1999/02/11 02:53:37 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
