@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.23 2004/07/23 17:06:58 perev Exp $
+// $Id: St_db_Maker.h,v 1.24 2004/08/18 20:33:56 perev Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.24  2004/08/18 20:33:56  perev
+// Timers added for MySQL and maker itself
+//
 // Revision 1.23  2004/07/23 17:06:58  perev
 // AliasDate & AliasTime moved fro db maker to StMaker
 //
@@ -83,7 +86,7 @@ private:
   Int_t       fUpdateMode;	//! 
   UInt_t      fMaxEntryTime;    //! MaxEntryTime accepted from DB
   TStopwatch  fTimer[4];        //!Timer object 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.23 2004/07/23 17:06:58 perev Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.24 2004/08/18 20:33:56 perev Exp $";
  protected:
  public: 
                    St_db_Maker(const char *name
@@ -107,6 +110,7 @@ private:
    virtual void    SetFlavor(const char *flav,const char *tabname=".all");
    virtual void    OnOff();
    virtual void    Clear(Option_t *opt=""){if(opt){/*unused*/}};
+   virtual Int_t   Finish();
            void    SetMaxEntryTime(Int_t idate,Int_t itime);
 protected:
    virtual TDataSet* UpdateDB (TDataSet* ds);
@@ -122,7 +126,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.23 2004/07/23 17:06:58 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.24 2004/08/18 20:33:56 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)   //StAF chain virtual base class for Makers
 };
