@@ -456,7 +456,7 @@ c               write(6,1000) ' a,da:', a,da,zchi2
                
 c     direction of the particle in the transverse plane
                
-               if (ch .gt. 0.) then
+               if (ch*bfield .gt. 0.) then
                   psi  = phi - 90.
                   dpsi = dphi
                else
@@ -470,7 +470,9 @@ c     field of 0.5 tesla = 5 kgauss
 c     calculate an inverse momentum
 
                
-               invpt  = 1./(rh*C_D_CURVATURE*ch*bfield)
+C  invpt  actually store q/pt, pt has to be positive so take abs(bfield) in
+c  case field is flipped 
+               invpt  = ch/(rh*C_D_CURVATURE*abs(bfield))
                dinvpt = (dcosl*rh**2 + drh*cosl**2)/
      &              (rh**4*(C_D_CURVATURE*bfield)**2)
                
@@ -531,7 +533,7 @@ c              wkw: store residuals
 c commented out today next 2 lines
 C               track(itrack).dedx(1)  = 0.    ! energy loss
 C               track(itrack).dedx(2)  = 0.    ! error on above
-               track(itrack).invpt    = invpt ! inverse radius of 
+               track(itrack).invpt    = invpt ! q*inverse radius of 
                                                     ! curvature
                track(itrack).psi      = psi   ! azimuthal angle of 
                                                     !momentum at first point
@@ -698,7 +700,7 @@ c     (xh,yh) : coordinates of the circle center
 c     rh      : radius of the circle
 c     phi     : angle between vector pointing from (xh,yh) to (x(2),y(2)) 
 c               and  the x-axis
-c     psi     : phi+90 : direction of the particle in transverse plane
+c     psi     : phi+h*90 : direction of the particle in transverse plane
 c     tanl    : slope of the particle direction in the z,s plane
 c     bfield  : magnetic filed strenght, bfield assume positive-z direction
 c      C_D_CURVATURE  : conversion factor to get the momentum from the
@@ -769,7 +771,7 @@ c     z-motion fit from phase
                
 c     direction of the particle in the transverse plane
                
-                  if (ch .gt. 0.) then
+                  if (ch*bfield .gt. 0.) then
                      psi  = phi - 90.
                      dpsi = dphi
                   else
@@ -782,8 +784,9 @@ c     direction of the particle in the transverse plane
 c     field of 0.5 tesla = 5 kgauss
 c     calculate an inverse momentum
                
-               
-                  invpt  = 1./(rh*C_D_CURVATURE*ch*bfield)
+C  invpt  actually store q/pt, pt has to be positive so take abs(bfield) in
+c  case field is flipped                
+                  invpt  = ch/(rh*C_D_CURVATURE*abs(bfield))
 
                   dinvpt = (dcosl*rh**2 + drh*cosl**2)/
      &                 (rh**4*(C_D_CURVATURE*bfield)**2)
@@ -843,7 +846,7 @@ c                 wkw: store residuals
 c commented out today next 2 lines            
 C                  track(itrack).dedx(1)  = 0. ! energy loss
 C                  track(itrack).dedx(2)  = 0. ! error on above
-                  track(itrack).invpt    = invpt ! inverse radius of 
+                  track(itrack).invpt    = invpt ! q*inverse radius of 
                                                        ! curvat ure
                   track(itrack).psi      = psi ! azimuthal angle of 
                                                      !momentum at first point
