@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.10 2004/08/07 02:44:06 mvl Exp $
+ * $Id: StMuTrack.h,v 1.11 2004/08/14 00:53:42 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -150,7 +150,6 @@ inline short StMuTrack::flag() const {return mFlag;}
 inline int StMuTrack::index2Global() const {return mIndex2Global;}
 inline int StMuTrack::index2RichSpectra() const {return mIndex2RichSpectra;}
 inline unsigned short StMuTrack::nHits() const {return mNHits;}
-inline unsigned short  StMuTrack::nHitsPoss() const {return mNHitsPoss;}
 inline unsigned short  StMuTrack::nHitsDedx() const {return mNHitsDedx;}
 inline unsigned short  StMuTrack::nHitsFit() const {return mNHitsFit;}
 inline double StMuTrack::pidProbElectron() const {return unPack(mPidProbElectron,__PROB_SCALE__);}
@@ -192,6 +191,9 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.11  2004/08/14 00:53:42  mvl
+ * Added 1 to possibel points for primary tracks, like in StEvent
+ *
  * Revision 1.10  2004/08/07 02:44:06  mvl
  * Added support for fitted and possible points in different detectors, for ITTF
  *
