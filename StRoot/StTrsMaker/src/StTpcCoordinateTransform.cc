@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.10 1999/03/02 17:52:10 lasiuk Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.11 1999/03/15 13:48:20 lasiuk Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,9 +16,14 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
- * Revision 1.10  1999/03/02 17:52:10  lasiuk
- * rotation for sectors>12
+ * Revision 1.11  1999/03/15 13:48:20  lasiuk
+ * xyFromRaw is changed to take into account the inversion.
+ * The local coordinate system should be rechecked to make
+ * sure it is defined as the STAR Coordinate system!
  *
+ * Revision 1.11  1999/03/15 13:48:20  lasiuk
+ * xyFromRaw is changed to take into account the inversion.
+ * The local coordinate system should be rechecked to make
  * sure it is defined as the STAR Coordinate system!
  *
  * Revision 1.10  1999/03/02 17:52:10  lasiuk
@@ -351,7 +356,13 @@ int StTpcCoordinateTransform::padFromLocal(const StThreeVector<double>& b, const
 
 
 //
-    double localX = xFromPad(a.row(),a.pad());
+// Coordinate from Raw
+//
+StThreeVector<double> StTpcCoordinateTransform::xyFromRaw(const StTpcPadCoordinate& a)
+{
+    double localY = yFromRow(a.row());
+    // Just a test?
+    //double localX = xFromPad(a.row(),a.pad());
 
     
     double localX = (a.sector()>12) ?
