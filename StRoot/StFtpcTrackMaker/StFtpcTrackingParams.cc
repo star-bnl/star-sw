@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.26 2004/04/05 06:38:46 oldi Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.27 2004/04/06 19:03:02 oldi Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.27  2004/04/06 19:03:02  oldi
+// Code cleanup.
+//
 // Revision 1.26  2004/04/05 06:38:46  oldi
 // Reported problem fixed (delete -> delete[]).
 //
@@ -559,10 +562,10 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
     
     if (ierr!=0) { 
       gMessMgr->Message("", "E", "OS") << "Can't invert FTPC ";
-      if (i == 0) *gMessMgr << " east rotation matrix Y !" << endm;
-      else *gMessMgr << " west rotation matrix Y !" << endm;
-      gMessMgr->Message("", "I", "OS") << "FTPC rotation matrix Y :" << (*mFtpcRotationY[i]) << endm;
-      gMessMgr->Message("", "I", "OS") << "Inverse FTPC rotation matrix Y :" << (*mFtpcRotationYInverse[i]) << endm;
+      if (i == 0) *gMessMgr << " east rotation matrix Y!" << endm;
+      else *gMessMgr << " west rotation matrix Y!" << endm;
+      gMessMgr->Message("", "I", "OS") << "FTPC rotation matrix Y:" << (*mFtpcRotationY[i]) << endm;
+      gMessMgr->Message("", "I", "OS") << "Inverse FTPC rotation matrix Y:" << (*mFtpcRotationYInverse[i]) << endm;
     }
 
     // define rotation axis
@@ -618,8 +621,8 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
       gMessMgr->Message("", "E", "OS") << "Can't invert FTPC ";
       if (i == 0) *gMessMgr << " east rotation matrix X !" << endm;
       else *gMessMgr << " west rotation matrix X !" << endm;
-      gMessMgr->Message("", "I", "OS") << "FTPC rotation matrix X :" << (*mFtpcRotationX[i]) << endm;
-      gMessMgr->Message("", "I", "OS") << "Inverse FTPC rotation matrix X :" << (*mFtpcRotationXInverse[i]) << endm;
+      gMessMgr->Message("", "I", "OS") << "FTPC rotation matrix X:" << (*mFtpcRotationX[i]) << endm;
+      gMessMgr->Message("", "I", "OS") << "Inverse FTPC rotation matrix X:" << (*mFtpcRotationXInverse[i]) << endm;
     }
 
     // combine Y and X rotation to rotation matrix
@@ -954,10 +957,10 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
     
     if (ierr!=0) { 
       gMessMgr->Message("", "E", "OS") << "Can't invert FTPC ";
-      if (i == 0) *gMessMgr << " east rotation matrix! Y " << endm;
-      else *gMessMgr << " west rotation matrix! Y " << endm;
-      gMessMgr->Message("", "I", "OS") << "FTPC rotation matrix Y :" << (*mFtpcRotationY[i]) << endm;
-      gMessMgr->Message("", "I", "OS") << "Inverse FTPC rotation matrix Y :" << (*mFtpcRotationYInverse[i]) << endm;
+      if (i == 0) *gMessMgr << " east rotation matrix! Y" << endm;
+      else *gMessMgr << " west rotation matrix! Y" << endm;
+      gMessMgr->Message("", "I", "OS") << "FTPC rotation matrix Y:" << (*mFtpcRotationY[i]) << endm;
+      gMessMgr->Message("", "I", "OS") << "Inverse FTPC rotation matrix Y:" << (*mFtpcRotationYInverse[i]) << endm;
     }
 
     // define rotation axis
@@ -1010,8 +1013,8 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
       gMessMgr->Message("", "E", "OS") << "Can't invert FTPC ";
       if (i == 0) *gMessMgr << " east rotation matrix X !" << endm;
       else *gMessMgr << " west rotation matrix X !" << endm;
-      gMessMgr->Message("", "I", "OS") << "FTPC rotation matrix X :" << (*mFtpcRotationX[i]) << endm;
-      gMessMgr->Message("", "I", "OS") << "Inverse FTPC rotation matrix X :" << (*mFtpcRotationXInverse[i]) << endm;
+      gMessMgr->Message("", "I", "OS") << "FTPC rotation matrix X:" << (*mFtpcRotationX[i]) << endm;
+      gMessMgr->Message("", "I", "OS") << "Inverse FTPC rotation matrix X:" << (*mFtpcRotationXInverse[i]) << endm;
     }
 
     // combine Y and X rotation to rotation matrix
@@ -1193,18 +1196,18 @@ void StFtpcTrackingParams::PrintParams() {
   gMessMgr->Message("", "I", "OS") << "Observed vertex offset y (west, cm): " << ObservedVertexOffsetY(1) << endm;
   gMessMgr->Message("", "I", "OS") << "Observed vertex offset x (east, cm): " << ObservedVertexOffsetX(0) << endm;
   gMessMgr->Message("", "I", "OS") << "Observed vertex offset x (west, cm): " << ObservedVertexOffsetX(1) << endm;
-  gMessMgr->Message("", "I", "OS") << "FTPC east to global rotation Y : " << FtpcRotationY(0) << endm;
-  gMessMgr->Message("", "I", "OS") << "Global to FTPC east rotation Y : " << FtpcRotationYInverse(0) << endm;
+  gMessMgr->Message("", "I", "OS") << "FTPC east to global rotation Y: " << FtpcRotationY(0) << endm;
+  gMessMgr->Message("", "I", "OS") << "Global to FTPC east rotation Y: " << FtpcRotationYInverse(0) << endm;
   gMessMgr->Message("", "I", "OS") << "FTPC west to global rotation Y: " << FtpcRotationY(1) << endm;
-  gMessMgr->Message("", "I", "OS") << "Global to FTPC west rotation Y : " << FtpcRotationYInverse(1) << endm;
-  gMessMgr->Message("", "I", "OS") << "FTPC east to global rotation X : " << FtpcRotationX(0) << endm;
-  gMessMgr->Message("", "I", "OS") << "Global to FTPC east rotation X : " << FtpcRotationXInverse(0) << endm;
+  gMessMgr->Message("", "I", "OS") << "Global to FTPC west rotation Y: " << FtpcRotationYInverse(1) << endm;
+  gMessMgr->Message("", "I", "OS") << "FTPC east to global rotation X: " << FtpcRotationX(0) << endm;
+  gMessMgr->Message("", "I", "OS") << "Global to FTPC east rotation X: " << FtpcRotationXInverse(0) << endm;
   gMessMgr->Message("", "I", "OS") << "FTPC west to global rotation X: " << FtpcRotationX(1) << endm;
-  gMessMgr->Message("", "I", "OS") << "Global to FTPC west rotation X : " << FtpcRotationXInverse(1) << endm;
-  gMessMgr->Message("", "I", "OS") << "FTPC east to global rotation : " << FtpcRotation(0) << endm;
-  gMessMgr->Message("", "I", "OS") << "Global to FTPC east rotation : " << FtpcRotationInverse(0) << endm;
-  gMessMgr->Message("", "I", "OS") << "FTPC west to global rotation : " << FtpcRotation(1) << endm;
-  gMessMgr->Message("", "I", "OS") << "Global to FTPC west rotation : " << FtpcRotationInverse(1) << endm;
+  gMessMgr->Message("", "I", "OS") << "Global to FTPC west rotation X: " << FtpcRotationXInverse(1) << endm;
+  gMessMgr->Message("", "I", "OS") << "FTPC east to global rotation: " << FtpcRotation(0) << endm;
+  gMessMgr->Message("", "I", "OS") << "Global to FTPC east rotation: " << FtpcRotationInverse(0) << endm;
+  gMessMgr->Message("", "I", "OS") << "FTPC west to global rotation: " << FtpcRotation(1) << endm;
+  gMessMgr->Message("", "I", "OS") << "Global to FTPC west rotation: " << FtpcRotationInverse(1) << endm;
     
   gMessMgr->Message("", "I", "OS") << "TPC to global transformation" << endm;
   gMessMgr->Message("", "I", "OS") << "Position of TPC (cm)..: " << TpcPositionInGlobal() <<endm;

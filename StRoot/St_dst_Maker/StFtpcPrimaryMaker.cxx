@@ -1,5 +1,8 @@
-// $Id: StFtpcPrimaryMaker.cxx,v 1.18 2004/02/13 21:13:13 oldi Exp $
+// $Id: StFtpcPrimaryMaker.cxx,v 1.19 2004/04/06 19:01:35 oldi Exp $
 // $Log: StFtpcPrimaryMaker.cxx,v $
+// Revision 1.19  2004/04/06 19:01:35  oldi
+// Code cleanup.
+//
 // Revision 1.18  2004/02/13 21:13:13  oldi
 // Protection against missing FTPC DAQ data added.
 //
@@ -218,7 +221,6 @@ Int_t StFtpcPrimaryMaker::Make(){
       ptrk->invpt = 1./track->GetPt();
       ptrk->tanl  = track->GetPz() * ptrk->invpt;
       ptrk->curvature = track->curvature();
-
 
       Int_t i = 0;
       for (i=0; i<15; i++) { ptrk->covar[i] = 0; }
