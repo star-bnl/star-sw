@@ -5,8 +5,11 @@
 //                                                                      //
 // StMatchMaker virtual base class for Maker                            //
 //                                                                      //
-// $Id: StMatchMaker.h,v 1.7 2000/02/25 02:38:27 caines Exp $
+// $Id: StMatchMaker.h,v 1.8 2000/03/01 14:48:09 caines Exp $
 // $Log: StMatchMaker.h,v $
+// Revision 1.8  2000/03/01 14:48:09  caines
+// Removed references to scs_cluster
+//
 // Revision 1.7  2000/02/25 02:38:27  caines
 // Stuff to fill bit map, cov correctly
 //
@@ -41,7 +44,7 @@ class StMatchMaker : public StMaker {
   
  private:
   Bool_t drawinit;
-  // static Char_t m_VersionCVS = "$Id: StMatchMaker.h,v 1.7 2000/02/25 02:38:27 caines Exp $";
+  // static Char_t m_VersionCVS = "$Id: StMatchMaker.h,v 1.8 2000/03/01 14:48:09 caines Exp $";
   // egr
 
   Int_t         m_svtchicut;  // = 0 all unmatched svt tracks copied
@@ -75,7 +78,6 @@ class StMatchMaker : public StMaker {
   virtual       ~StMatchMaker();
   virtual Int_t  Init();
   virtual Int_t  Make();
-  char* StMatchMaker::PrintMap(unsigned long x);
   virtual void   Set_svtchicut(Int_t m = 0){m_svtchicut = m;} // *MENU*
   virtual void   Set_useglobal(Int_t m = 2){m_useglobal = m;} // *MENU*
   virtual void   Set_usesvt   (Int_t m = 1){m_usesvt    = m;} // *MENU*
@@ -83,7 +85,7 @@ class StMatchMaker : public StMaker {
   virtual void   Set_usevert  (Int_t m = 0){m_usevert   = m;} // *MENU*
   virtual void   Set_flag     (Int_t m = 0){m_flag = m;}      // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMatchMaker.h,v 1.7 2000/02/25 02:38:27 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMatchMaker.h,v 1.8 2000/03/01 14:48:09 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StMatchMaker, 1)   //StAF chain virtual base class for Makers
 };

@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.44 2000/02/05 19:06:33 lbarnby Exp $
+// $Id: St_dst_Maker.cxx,v 1.45 2000/03/01 14:48:09 caines Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.45  2000/03/01 14:48:09  caines
+// Removed references to scs_cluster
+//
 // Revision 1.44  2000/02/05 19:06:33  lbarnby
 // Added L2_Trigger and L2_Trigger to DST
 //
@@ -135,7 +138,7 @@
 #include "tables/St_dst_mon_soft_l3_Table.h"
 #include "tables/St_dst_mon_soft_rich_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.44 2000/02/05 19:06:33 lbarnby Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.45 2000/03/01 14:48:09 caines Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -312,14 +315,11 @@ Int_t  St_dst_Maker::Filler(){
   if (! tpcluster)    {tpcluster = new St_tcl_tpcluster("tpcluster",1); AddGarb(tpcluster);}
 
   St_scs_spt     *scs_spt     = 0;
-  St_scs_cluster *scs_cluster = 0;
   
   St_DataSet     *svthits  = GetInputDS("svt_hits");
   if (svthits) {
     scs_spt     = (St_scs_spt    *)  svthits->Find("scs_spt");
-    scs_cluster = (St_scs_cluster *) svthits->Find("scs_cluster");
   }
-  if (! scs_cluster) {scs_cluster = new St_scs_cluster("scs_cluster",1); AddGarb(scs_cluster);}
   if (!scs_spt)      {scs_spt     = new St_scs_spt("scs_spt",1);         AddGarb(scs_spt);}
   
   if(Debug()) gMessMgr->Debug() << " run_dst: Calling dst_point_filler" << endm;
@@ -447,7 +447,7 @@ Int_t  St_dst_Maker::Filler(){
   mon_soft_rich->SetNRows(1);
   //dst_mon_soft_rich_st *mon_rich = mon_soft_rich->GetTable();
 
-  iRes = dst_monitor_soft_filler(tpcluster, scs_cluster,
+  iRes = dst_monitor_soft_filler(tpcluster, 
 				 tphit, scs_spt, fcl_fppoint,
 				 tptrack,stk_track,fpt_fptrack,
 				 evt_match, ctb_cor, vertex, event_summary, 
