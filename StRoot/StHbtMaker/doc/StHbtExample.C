@@ -1,4 +1,3 @@
-
 class StChain;
 StChain *chain=0;    
 
@@ -16,35 +15,33 @@ void StHbtExample(Int_t nevents=1,
 {
 
     // Dynamically link needed shared libs
-    gSystem->Load("St_base");
-    gSystem->Load("StChain");
-    gSystem->Load("St_Tables");
-    gSystem->Load("StUtilities");  // new addition 22jul99
-    gSystem->Load("StAnalysisUtilities");  // needed by V0dstMaker
-    gSystem->Load("StMagF");
-    gSystem->Load("StIOMaker");
-    gSystem->Load("StarClassLibrary");
-    gSystem->Load("StEvent");
-    gSystem->Load("StEventMaker");
-    gSystem->Load("StHbtMaker");
-    gSystem->Load("StV0MiniDstMaker");
-
+  gSystem->Load("StarRoot");
+  gSystem->Load("St_base");
+  gSystem->Load("St_base");
+  gSystem->Load("StChain");
+  gSystem->Load("St_Tables");
+  gSystem->Load("StMagF");
+  gSystem->Load("StUtilities");  // new addition 22jul99
+  gSystem->Load("StTreeMaker");
+  gSystem->Load("StIOMaker");
+  gSystem->Load("StarClassLibrary");
+  gSystem->Load("xdf2root");
+  gSystem->Load("St_xdfin_Maker");
+  gSystem->Load("StEvent");
+  gSystem->Load("StEventMaker");
+  gSystem->Load("StMcEvent"); 
+  gSystem->Load("StMcEventMaker"); 
+  gSystem->Load("StAssociationMaker");
+  gSystem->Load("StMcAnalysisMaker");
+  gSystem->Load("StHbtMaker");   
+  gSystem->Load("StStrangeMuDstMaker");
+  
+  
     cout << "Dynamic loading done" << endl;
 
     chain = new StChain("StChain"); 
     chain->SetDebug();
    
-
-    // Now we add Makers to the chain...
-
-    StIOMaker* ioMaker = new StIOMaker("IO","r",MainFile,"bfcTree");
-    ioMaker->SetDebug();
-
-    ioMaker->SetIOMode("r");
-    ioMaker->SetDebug();
-    ioMaker->SetBranch("*",0,"0");                 //deactivate all branches
-    ioMaker->SetBranch("dstBranch",0,"r"); //activate EventBranch
-
 
     StEventMaker* eventMaker = new StEventMaker("events","title");
     cout << "Just instantiated StEventMaker... lets go StHbtMaker!" << endl;
@@ -69,8 +66,7 @@ void StHbtExample(Int_t nevents=1,
 
     // here, we instantiate the appropriate StHbtEventReader
     // for STAR analyses in root4star, we instantiate StStandardHbtEventReader
-    StStandardHbtEventReader* Reader = new StStandardHbtEventReader;
-    Reader->SetTheEventMaker(eventMaker);     // gotta tell the reader where it should read from
+    StHbtTTreeReader* Reader = new StHbtTTreeReader(0);
 
     // UNCOMMENT THIS NEXT LINE OUT IF YOU WANT V0's
     //    Reader->SetTheV0Maker(v0dst); //Gotta tell the reader where to read the v0 stuff from
