@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.16 2000/02/25 03:28:58 caines Exp $
+// $Id: StMatchMaker.cxx,v 1.17 2000/03/01 14:48:09 caines Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.17  2000/03/01 14:48:09  caines
+// Removed references to scs_cluster
+//
 // Revision 1.16  2000/02/25 03:28:58  caines
 // Stuff to fill bit map, cov correctly
 //
@@ -65,7 +68,6 @@ using namespace units;
 #include "StMessMgr.h"
 
 #include "tables/St_tcl_tpcluster_Table.h"
-#include "tables/St_scs_cluster_Table.h"
 #include "tables/St_ctu_cor_Table.h"
 
 #include "global/St_svm_am_Module.h"
@@ -82,7 +84,6 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 
 
 class St_tcl_tpcluster;
-class St_scs_cluster;
 class St_ctu_cor;
 
 ClassImp(StMatchMaker)
@@ -445,7 +446,6 @@ Int_t StMatchMaker::Make(){
   St_stk_track   *stk_track   = 0;
   St_sgr_groups  *svt_groups  = 0;
   St_scs_spt     *scs_spt     = 0;
-  St_scs_cluster *scs_cluster = 0;
   
   // Case svt tracking performed
   if (svtracks) {
@@ -454,7 +454,6 @@ Int_t StMatchMaker::Make(){
   }
   if (svthits) {
     scs_spt     = (St_scs_spt    *)  svthits->Find("scs_spt");
-    scs_cluster = (St_scs_cluster *) svthits->Find("scs_cluster");
   }
   
   St_est_match   *est_match    = 0;
@@ -471,7 +470,7 @@ Int_t StMatchMaker::Make(){
     est_match    = (St_est_match *) m_GarbSet->Find("est_match");
     if ( !est_match){ est_match = new St_est_match("est_match",10000); AddGarb(est_match); }
   } 
-  if (! scs_cluster) {scs_cluster = new St_scs_cluster("scs_cluster",1); AddGarb(scs_cluster);}
+
   St_DataSet *ctf = GetInputDS("ctf");
   St_ctu_cor *ctb_cor = 0;
   if (!ctf) {
@@ -570,7 +569,8 @@ Int_t StMatchMaker::Make(){
   
   int spt_id = 0;
   int track_id = 0;
-  int row = 0,y;
+  int row = 0;
+  float y,two=2.,thirty=30.;
   
   for( i=0; i<tpc_groups->GetNRows(); i++, tgroup++){
 
@@ -579,12 +579,12 @@ Int_t StMatchMaker::Make(){
       row = spc[spt_id].row/100;
       row = spc[spt_id].row - row*100;
       if( row < 25){
-	y=track[spc[spt_id].id_globtrk-1].map[0]/(pow(2,(row+7)));
-	if( !fmod(y,2)){
+	y=track[spc[spt_id].id_globtrk-1].map[0]/(pow(two,(float)(row+7)));
+	if( !fmod(y,two)){
 	  track[spc[spt_id].id_globtrk-1].map[0] += (1UL<<(row+7));
 	}
 	else{
-	  y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(2,30));
+	  y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(two,thirty));
 	  if( !fmod(y,2)){
 	    track[spc[spt_id].id_globtrk-1].map[1]+= (1UL<<30);
 	  }
@@ -592,15 +592,14 @@ Int_t StMatchMaker::Make(){
 	
       }
       else{
-	y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(2,(row-25)));
-	if( !fmod(y,2)){
+	y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(two,(float)(row-25)));
+	if( !fmod(y,two)){
 	  track[spc[spt_id].id_globtrk-1].map[1] += (1UL<<(row-25));
 	}
 	else{
-	  y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(2,30));
-	  if( !fmod(y,2)){
+	  y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(two,thirty));
+	  if( !fmod(y,two)){
 	    track[spc[spt_id].id_globtrk-1].map[1]+= (1UL<<30);
-	    // cout << "Got here " << endl;
 	  }
 	}
 	
@@ -608,12 +607,9 @@ Int_t StMatchMaker::Make(){
     }
   }
 
-  //  cout << "Map[0] "<< PrintMap(track[0].map[0]) << " " << track[0].map[0] <<"\n" << endl;
 
-  //   cout << "Map[1] "<< PrintMap(track[0].map[1]) << "\n" << endl;
-
-  scs_spt_st *s_spc = scs_spt->GetTable();
-  sgr_groups_st *sgroup = svt_groups->GetTable();
+  // scs_spt_st *s_spc = scs_spt->GetTable();
+  //  sgr_groups_st *sgroup = svt_groups->GetTable();
     
   //for( i=0; i<svt_groups->GetNRows(); i++, sgroup++){
 
@@ -633,20 +629,3 @@ Int_t StMatchMaker::Make(){
 
 //_____________________________________________________________________________
 
-char* StMatchMaker::PrintMap( unsigned long x){
-
- 
-  char b[31];
-
-  for( int i=30; i>=0; i--){
-    if( x >= pow(2,i)){
-      b[30-i] = 'x';
-      x -= pow(2,i);
-    }
-    else{
-      b[30-i]='-';
-    }
-  }
-  // cout << b << endl;
-  return &b[0];
-}

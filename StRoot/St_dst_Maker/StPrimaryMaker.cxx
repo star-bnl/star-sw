@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.35 2000/02/25 02:38:28 caines Exp $
+// $Id: StPrimaryMaker.cxx,v 1.36 2000/03/01 14:48:09 caines Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.36  2000/03/01 14:48:09  caines
+// Removed references to scs_cluster
+//
 // Revision 1.35  2000/02/25 02:38:28  caines
 // Stuff to fill bit map, cov correctly
 //
@@ -132,7 +135,6 @@
 long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate);
 
 //class St_tcl_tpcluster;
-//class St_scs_cluster;
 //class St_ctu_cor;
 
 ClassImp(StPrimaryMaker)
@@ -439,7 +441,8 @@ Int_t StPrimaryMaker::Make(){
       dst_track_st * track  = primtrk->GetTable();
       
       int spt_id = 0;
-      int row = 0,i,y;
+      int row = 0,i;
+      float y,two=2.,thirty=30.;
       
       for( i=0; i<tpc_groups->GetNRows(); i++, tgroup++){
 	if( tgroup->id1 > 0){
@@ -447,26 +450,26 @@ Int_t StPrimaryMaker::Make(){
 	  row = spc[spt_id].row/100;
 	  row = spc[spt_id].row - row*100;
 	  if( row < 25){
-	    y=track[spc[spt_id].id_globtrk-1].map[0]/(pow(2,(row+7)));
-	    if( !fmod(y,2)){
+	    y=track[spc[spt_id].id_globtrk-1].map[0]/(pow(two,(float)(row+7)));
+	    if( !fmod(y,two)){
 	      track[spc[spt_id].id_globtrk-1].map[0] += (1UL<<(row+7));
 	    }
 	    else{
-	      y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(2,30));
-	      if( !fmod(y,2)){
+	      y=track[spc[spt_id].id_globtrk-1].map[1]/pow(two,thirty);
+	      if( !fmod(y,two)){
 		track[spc[spt_id].id_globtrk-1].map[1]+= (1UL<<30);
 	      }
 	    }  
 	    
 	  }
 	  else{
-	    y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(2,(row-25)));
-	    if( !fmod(y,2)){
+	    y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(two,(float)(row-25)));
+	    if( !fmod(y,two)){
 	      track[spc[spt_id].id_globtrk-1].map[1] += (1UL<<(row-25));
 	    }
 	    else{
-	      y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(2,30));
-	      if( !fmod(y,2)){
+	      y=track[spc[spt_id].id_globtrk-1].map[1]/(pow(two,thirty));
+	      if( !fmod(y,two)){
 		track[spc[spt_id].id_globtrk-1].map[1]+= (1UL<<30);
 	      }
 	    }
