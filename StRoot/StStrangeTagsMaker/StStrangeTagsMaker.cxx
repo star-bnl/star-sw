@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.cxx,v 1.7 1999/03/20 22:07:43 perev Exp $
+ * $Id: StStrangeTagsMaker.cxx,v 1.8 1999/04/14 22:05:11 genevb Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.cxx,v $
+ * Revision 1.8  1999/04/14 22:05:11  genevb
+ * Comply with momentumOfV0 call
+ *
  * Revision 1.7  1999/03/20 22:07:43  perev
  * new maker schema
  *
@@ -81,7 +84,7 @@ Int_t StStrangeTagsMaker::Make()
 
 void StStrangeTagsMaker::PrintInfo()
 {
-    cout << "$Id: StStrangeTagsMaker.cxx,v 1.7 1999/03/20 22:07:43 perev Exp $" << endl;
+    cout << "$Id: StStrangeTagsMaker.cxx,v 1.8 1999/04/14 22:05:11 genevb Exp $" << endl;
     if (Debug()) StMaker::PrintInfo();
 }
 
@@ -147,7 +150,7 @@ void StStrangeTagsMaker::fillTag()
 
         StXiVertex *vertex = (StXiVertex *) *vertices;
         const StThreeVector<float>& pMom = vertex->momentumOfBachelor();
-        StThreeVector<float>& lMom = vertex->momentumOfV0();
+        StThreeVector<float> lMom = vertex->momentumOfV0();
         StThreeVector<float> xMom = lMom + pMom;
         Float_t pP2 = pMom.mag2();
         Float_t pL2 = lMom.mag2();

@@ -1,5 +1,8 @@
-// $Id: StSmdstMaker.cxx,v 1.2 1999/04/14 15:23:30 genevb Exp $
+// $Id: StSmdstMaker.cxx,v 1.3 1999/04/14 22:05:06 genevb Exp $
 // $Log: StSmdstMaker.cxx,v $
+// Revision 1.3  1999/04/14 22:05:06  genevb
+// Comply with momentumOfV0 call
+//
 // Revision 1.2  1999/04/14 15:23:30  genevb
 // Fixed file includes
 //
@@ -431,7 +434,7 @@ void StSmdstMaker::FillXiHistograms() {
      StGlobalTrack* bTrack = vertex->bachelor();
 
      const StThreeVector<float>& bMom = vertex->momentumOfBachelor();
-     const StThreeVector<float>& vMom = vertex->momentumOfV0();
+     const StThreeVector<float> vMom = vertex->momentumOfV0();
       
      ptotb2 = bMom.mag2();
      ptotv2 = vMom.mag2();
@@ -478,7 +481,7 @@ void StSmdstMaker::PrintInfo() {
 // PrintInfo() prints information about the class to standard output.
 //
   printf("**************************************************************\n");
-  printf("* $Id: StSmdstMaker.cxx,v 1.2 1999/04/14 15:23:30 genevb Exp $\n");
+  printf("* $Id: StSmdstMaker.cxx,v 1.3 1999/04/14 22:05:06 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   if (draw_histos) printf("* Strangeness Histograms are active\n");
   printf("**************************************************************\n");
