@@ -1,5 +1,8 @@
-// $Id: doEvents.C,v 1.16 1999/05/23 03:20:20 perev Exp $
+// $Id: doEvents.C,v 1.17 1999/05/23 21:54:07 perev Exp $
 // $Log: doEvents.C,v $
+// Revision 1.17  1999/05/23 21:54:07  perev
+// restore old default in doEvent
+//
 // Revision 1.16  1999/05/23 03:20:20  perev
 // SetMaxEvent(2) removed
 //
@@ -108,8 +111,24 @@ const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 // example ROOT file invocation:
 // .x doEvents.C(9999,"/disk00001/star/auau200/hijing/b0_3/jet05/year_1b/hadronic_on/tfs/","*.root")
 
+void doEventsQQ(const Int_t nevents, const Char_t **fileList);
+
 
 void doEvents(const Int_t nevents=999,
+              const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
+              const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf")
+{
+  const char *fileListQQ[]={0,0};
+  if (path[0]=='-') {
+    fileListQQ[0]=file;
+  } else {
+    fileListQQ[0] = gSystem->ConcatFileName(path,file);
+  }
+  doEventsQQ(nevents,fileListQQ);
+}
+
+              const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
+void doEventsQQ(const Int_t nevents,
               const Char_t **fileList)
     cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
     cout << "       doEvents.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
@@ -170,18 +189,6 @@ EventLoop: if (i <= nevents && !istat) {
   if (nevents > 1) {
     if (!b) b = new TBrowser;
       //       gROOT->LoadMacro("PadControlPanel.C");
-}
-void doEvents(const Int_t nevents=999,
-              const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
-              const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf")
-{
-  const char *fileListQQ[]={0,0};
-  if (path[0]=='-') {
-    fileListQQ[0]=file;
-  } else {
-    fileListQQ[0] = gSystem->ConcatFileName(path,file);
-  }
-  doEvents(nevents,fileListQQ);
     fileListQQ[0] = gSystem->ConcatFileName(path,file);
 }
 
