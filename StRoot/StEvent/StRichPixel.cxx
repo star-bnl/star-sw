@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPixel.cxx,v 2.1 1999/10/13 19:45:05 ullrich Exp $
+ * $Id: StRichPixel.cxx,v 2.2 1999/10/28 22:26:22 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,17 +10,17 @@
  ***************************************************************************
  *
  * $Log: StRichPixel.cxx,v $
- * Revision 2.1  1999/10/13 19:45:05  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:26:22  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.1  1999/10/13 19:45:05  ullrich
  * Initial Revision
  *
  **************************************************************************/
 #include "StRichPixel.h"
-#include "tables/dst_rch_pixel.h"
+#include "tables/St_dst_rch_pixel_Table.h"
 
-static const char rcsid[] = "$Id: StRichPixel.cxx,v 2.1 1999/10/13 19:45:05 ullrich Exp $";
+static const char rcsid[] = "$Id: StRichPixel.cxx,v 2.2 1999/10/28 22:26:22 ullrich Exp $";
 
 ClassImp(StRichPixel)
 

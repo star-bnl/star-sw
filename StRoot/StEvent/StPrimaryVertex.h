@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.h,v 2.1 1999/10/13 19:43:33 ullrich Exp $
+ * $Id: StPrimaryVertex.h,v 2.2 1999/10/28 22:26:19 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.h,v $
- * Revision 2.1  1999/10/13 19:43:33  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:26:19  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.2  1999/10/28 22:26:19  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -45,6 +45,7 @@ public:
     friend class StPrimaryTrack;
     
 protected:
+    StSPtrVecPrimaryTrack mDaughters;
     void unlink(StTrack*);
 
     StObject* clone();

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.0 1999/10/12 18:42:21 ullrich Exp $
+ * $Id: StHit.h,v 2.1 1999/10/28 22:25:50 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
- * Revision 2.0  1999/10/12 18:42:21  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:25:50  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.2  2000/06/01 21:38:56  ullrich
  * Added member mFlag and access member flag() and setFlag().
@@ -22,7 +22,7 @@
  * Revision 2.0  1999/10/12 18:42:21  ullrich
  * Completely Revised for New Version
  *
-#include "StArray.h"
+ **************************************************************************/
 #ifndef StHit_hh
 #define StHit_hh
 
@@ -60,6 +60,7 @@ public:
     virtual StPtrVecTrack relatedTracks(const StSPtrVecTrackNode&, StTrackType);
     
 protected:
+    ULong_t bits(UInt_t, UInt_t) const;
     
     ULong_t        mHardwarePosition;
     UChar_t        mTrackRefCount;

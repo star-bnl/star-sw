@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 2.0 1999/10/12 18:43:02 ullrich Exp $
+ * $Id: StTrackFitTraits.h,v 2.1 1999/10/28 22:27:35 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
- * Revision 2.0  1999/10/12 18:43:02  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:27:35  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.1  1999/10/28 22:27:35  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -29,7 +29,7 @@
 class dst_track_st;
 class StParticleDefinition;
 
-    StTrackFitTraits(Char_t, UShort_t, Float_t[2], Float_t[15]);
+class StTrackFitTraits : public StObject {
 public:
     StTrackFitTraits();
     StTrackFitTraits(UShort_t, UShort_t, Float_t[2], Float_t[15]);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMwcTriggerDetector.cxx,v 2.1 1999/10/13 19:44:58 ullrich Exp $
+ * $Id: StMwcTriggerDetector.cxx,v 2.2 1999/10/28 22:26:07 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StMwcTriggerDetector.cxx,v $
- * Revision 2.1  1999/10/13 19:44:58  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:26:07  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.3  1999/12/21 15:09:04  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
@@ -19,7 +19,7 @@
  * Revision 2.2  1999/10/28 22:26:07  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
-#include "tables/dst_TrgDet.h"
+ * Revision 2.1  1999/10/13 19:44:58  ullrich
  * Initial Revision
  *
  **************************************************************************/
@@ -27,7 +27,7 @@ using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StMwcTriggerDetector.cxx,v 2.1 1999/10/13 19:44:58 ullrich Exp $";
+static const char rcsid[] = "$Id: StMwcTriggerDetector.cxx,v 2.2 1999/10/28 22:26:07 ullrich Exp $";
 
 ClassImp(StMwcTriggerDetector)
 

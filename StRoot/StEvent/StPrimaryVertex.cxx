@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.cxx,v 2.1 1999/10/13 19:45:02 ullrich Exp $
+ * $Id: StPrimaryVertex.cxx,v 2.2 1999/10/28 22:26:16 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.cxx,v $
- * Revision 2.1  1999/10/13 19:45:02  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:26:16  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.3  1999/11/04 20:36:17  ullrich
  * New method to obtain daughter container directly
@@ -22,19 +22,22 @@
  * Revision 2.1  1999/10/13 19:45:02  ullrich
  * Initial Revision
  *
-#include "tables/dst_vertex.h"
+ **************************************************************************/
 #include <iostream.h>
 #include "StPrimaryVertex.h"
 #include "StPrimaryTrack.h"
-static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.1 1999/10/13 19:45:02 ullrich Exp $";
+static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.2 1999/10/28 22:26:16 ullrich Exp $";
 #include "StFunctional.h"
 #include "tables/St_dst_vertex_Table.h"
 
 ClassImp(StPrimaryVertex)
 
-static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.1 1999/10/13 19:45:02 ullrich Exp $";
+static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.2 1999/10/28 22:26:16 ullrich Exp $";
 
 StPrimaryVertex::StPrimaryVertex()
+{ mType = kEventVtxId; }
+
+StPrimaryVertex::StPrimaryVertex(const dst_vertex_st& v) : StVertex(v)
 { mType = kEventVtxId; }
 
 StPrimaryVertex::~StPrimaryVertex() {/* noop */};
@@ -61,7 +64,7 @@ const StTrack*
 StPrimaryVertex::daughter(UInt_t i) const
 {
     return i < mDaughters.size() ? mDaughters[i] : 0;
-    for (int i=0; i<mDaughters.size(); i++)
+}
 
 StPtrVecTrack
 StPrimaryVertex::daughters(StTrackFilter& filter)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSoftwareMonitor.cxx,v 2.1 1999/10/13 19:45:09 ullrich Exp $
+ * $Id: StSoftwareMonitor.cxx,v 2.2 1999/10/28 22:26:33 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSoftwareMonitor.cxx,v $
- * Revision 2.1  1999/10/13 19:45:09  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:26:33  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.2  1999/10/28 22:26:33  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -26,19 +26,19 @@
 #include "StFtpcSoftwareMonitor.h"
 #include "StEmcSoftwareMonitor.h"
 #include "StRichSoftwareMonitor.h"
-#include "tables/dst_mon_soft_tpc.h"
-#include "tables/dst_mon_soft_svt.h"
-#include "tables/dst_mon_soft_ftpc.h"
-#include "tables/dst_mon_soft_emc.h"
-#include "tables/dst_mon_soft_ctb.h"
-#include "tables/dst_mon_soft_rich.h"
-#include "tables/dst_mon_soft_glob.h"
-#include "tables/dst_mon_soft_l3.h"
+#include "StCtbSoftwareMonitor.h"
+#include "StGlobalSoftwareMonitor.h"
+#include "StL3SoftwareMonitor.h"
+#include "tables/St_dst_mon_soft_tpc_Table.h"
+#include "tables/St_dst_mon_soft_svt_Table.h"
+#include "tables/St_dst_mon_soft_ftpc_Table.h"
+#include "tables/St_dst_mon_soft_emc_Table.h"
+#include "tables/St_dst_mon_soft_ctb_Table.h"
 #include "tables/St_dst_mon_soft_rich_Table.h"
 #include "tables/St_dst_mon_soft_glob_Table.h"
 #include "tables/St_dst_mon_soft_l3_Table.h"
 
-static const char rcsid[] = "$Id: StSoftwareMonitor.cxx,v 2.1 1999/10/13 19:45:09 ullrich Exp $";
+static const char rcsid[] = "$Id: StSoftwareMonitor.cxx,v 2.2 1999/10/28 22:26:33 ullrich Exp $";
 
 ClassImp(StSoftwareMonitor)
 

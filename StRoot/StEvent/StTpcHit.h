@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.0 1999/10/12 18:42:51 ullrich Exp $
+ * $Id: StTpcHit.h,v 2.1 1999/10/28 22:27:10 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
- * Revision 2.0  1999/10/12 18:42:51  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:27:10  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.4  1999/12/01 15:56:31  ullrich
  * Renamed xxxInCluster() methods to xxxInHit()
@@ -39,6 +39,8 @@ class StTpcHit : public StHit {
 public:
              ULong_t, Float_t, UChar_t = 0);
     StTpcHit(const dst_point_st&);
+    // StTpcHit(const StTpcHit&);            use default
+    // StTpcHit& operator=(const StTpcHit&); use default
     ~StTpcHit();
 
     void  operator delete(void* p) { mPool.free(p); }

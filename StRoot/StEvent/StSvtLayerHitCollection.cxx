@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtLayerHitCollection.cxx,v 2.1 1999/10/13 19:45:18 ullrich Exp $
+ * $Id: StSvtLayerHitCollection.cxx,v 2.2 1999/10/28 22:26:53 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtLayerHitCollection.cxx,v $
- * Revision 2.1  1999/10/13 19:45:18  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:26:53  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.2  1999/10/28 22:26:53  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -21,8 +21,8 @@
  *
  **************************************************************************/
 #include "StSvtLayerHitCollection.h"
-ClassImp(StSvtWaferHitCollection)
-static const char rcsid[] = "$Id: StSvtLayerHitCollection.cxx,v 2.1 1999/10/13 19:45:18 ullrich Exp $";
+
+static const char rcsid[] = "$Id: StSvtLayerHitCollection.cxx,v 2.2 1999/10/28 22:26:53 ullrich Exp $";
 
 ClassImp(StSvtLayerHitCollection)
 
@@ -61,8 +61,8 @@ StSvtLayerHitCollection::numberOfLadders() const
 }
 
 ULong_t
-    for (int j=0; j<numberOfLadders(); j++) {
-        for (int k=0; k<mLadders[j].numberOfWafers(); k++) {
+StSvtLayerHitCollection::numberOfHits() const
+{
     ULong_t sum = 0;
     for (unsigned int j=0; j<numberOfLadders(); j++) {
         for (unsigned int k=0; k<mLadders[j].numberOfWafers(); k++) {

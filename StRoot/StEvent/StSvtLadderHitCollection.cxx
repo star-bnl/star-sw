@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtLadderHitCollection.cxx,v 2.1 1999/10/13 19:45:16 ullrich Exp $
+ * $Id: StSvtLadderHitCollection.cxx,v 2.2 1999/10/28 22:26:50 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtLadderHitCollection.cxx,v $
- * Revision 2.1  1999/10/13 19:45:16  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:26:50  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.2  1999/10/28 22:26:50  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -21,8 +21,8 @@
  *
  **************************************************************************/
 #include "StSvtLadderHitCollection.h"
-ClassImp(StSvtWaferHitCollection)
-static const char rcsid[] = "$Id: StSvtLadderHitCollection.cxx,v 2.1 1999/10/13 19:45:16 ullrich Exp $";
+
+static const char rcsid[] = "$Id: StSvtLadderHitCollection.cxx,v 2.2 1999/10/28 22:26:50 ullrich Exp $";
 
 ClassImp(StSvtLadderHitCollection)
 
@@ -61,7 +61,7 @@ StSvtLadderHitCollection::numberOfWafers() const
 }
 
 ULong_t
-    for (int j=0; j<numberOfWafers(); j++) {
+StSvtLadderHitCollection::numberOfHits() const
 {
     ULong_t sum = 0;
     for (unsigned int j=0; j<numberOfWafers(); j++) {

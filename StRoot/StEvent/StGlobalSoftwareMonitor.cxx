@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalSoftwareMonitor.cxx,v 2.1 1999/10/13 19:44:47 ullrich Exp $
+ * $Id: StGlobalSoftwareMonitor.cxx,v 2.2 1999/10/28 22:25:33 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StGlobalSoftwareMonitor.cxx,v $
- * Revision 2.1  1999/10/13 19:44:47  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:25:33  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.2  1999/10/28 22:25:33  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -19,12 +19,12 @@
  * Revision 2.1  1999/10/13 19:44:47  ullrich
  * Initial Revision
  *
-#include "tables/dst_mon_soft_glob.h"
+ **************************************************************************/
 #include <algorithm>
 #include "StGlobalSoftwareMonitor.h"
 #include "tables/St_dst_mon_soft_glob_Table.h"
 
-static const char rcsid[] = "$Id: StGlobalSoftwareMonitor.cxx,v 2.1 1999/10/13 19:44:47 ullrich Exp $";
+static const char rcsid[] = "$Id: StGlobalSoftwareMonitor.cxx,v 2.2 1999/10/28 22:25:33 ullrich Exp $";
 
 ClassImp(StGlobalSoftwareMonitor)
 

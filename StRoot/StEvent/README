@@ -1,6 +1,6 @@
 -*- mode:outline -*-
 This file is best viewed with x(emacs).
-Time-stamp: <99/10/11 17:03:10 ullrich>
+Time-stamp: <99/10/28 22:01:46 ullrich>
 
 * Disclaimer
 ============
@@ -15,6 +15,15 @@ documentation available.
 
 * Latest News
 =============
+** StEvent compiles on Linux and SUN.
+   - adapted new StArray 
+   - some modifications for CC4.2 (sun) where needed
+   - all classes to be stored in containers (StArray)
+     now have a clone() member as requested by Victor.
+** First try to compile after submitting it to cvs
+   failed. Interface to StPtrVec containers not ready?
+   Send mail to Victor to get info on status of StArray.
+
 ** Victor: mark pure references (pointers) with //$LINK
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSsdHit.cxx,v 2.1 1999/10/13 19:45:11 ullrich Exp $
+ * $Id: StSsdHit.cxx,v 2.2 1999/10/28 22:26:36 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.cxx,v $
- * Revision 2.1  1999/10/13 19:45:11  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:26:36  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.5  2000/01/05 16:05:37  ullrich
  * Updated for actual use in StEvent. Unpacking changed.
@@ -19,7 +19,7 @@
  * Revision 2.4  1999/11/09 19:35:15  ullrich
  * Memory now allocated using StMemoryPool via overloaded new/delete
  *
-#include "tables/dst_point.h"
+ * Revision 2.3  1999/11/04 21:40:52  ullrich
  * Added missing default constructor
  *
  * Revision 2.2  1999/10/28 22:26:36  ullrich
@@ -29,7 +29,7 @@
  * Initial Revision
  *
 
-static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.1 1999/10/13 19:45:11 ullrich Exp $";
+static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.2 1999/10/28 22:26:36 ullrich Exp $";
 
 StMemoryPool StSsdHit::mPool(sizeof(StSsdHit));
 
@@ -76,6 +76,9 @@ StSsdHit::StSsdHit(const dst_point_st& pt)
     ssdz   = pt.pos_err[1]/(1L<<10);
     ssdx   = pt.pos_err[0] - (1L<<20)*ssdy11;
     ssdy10 = pt.pos_err[1] - (1L<<10)*ssdz;
+    ssdy   = ssdy11 + (1L<<10)*ssdy10;
+    mPositionError.setX(Float_t(ssdx)/(1L<<26));
+    mPositionError.setY(Float_t(ssdy)/(1L<<26));
     mPositionError.setZ(Float_t(ssdz)/(1L<<26));
 
     //

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcPadrowHitCollection.h,v 2.1 1999/10/13 19:44:02 ullrich Exp $
+ * $Id: StTpcPadrowHitCollection.h,v 2.2 1999/10/28 22:27:15 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcPadrowHitCollection.h,v $
- * Revision 2.1  1999/10/13 19:44:02  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:27:15  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.1  1999/10/13 19:44:02  ullrich
  * Initial Revision
@@ -21,7 +21,7 @@
 #define StTpcPadrowHitCollection_hh
 
 #include "StObject.h"
-#include "StArray.h"
+#include "StContainers.h"
 
 class StTpcHit;
 

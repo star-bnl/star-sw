@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StKinkVertex.h,v 2.1 1999/10/13 19:43:22 ullrich Exp $
+ * $Id: StKinkVertex.h,v 2.2 1999/10/28 22:25:56 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StKinkVertex.h,v $
- * Revision 2.1  1999/10/13 19:43:22  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:25:56  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.2  1999/10/28 22:25:56  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -84,7 +84,8 @@ protected:
     Float_t        mHitDistanceParentVertex;
     Float_t        mDeltaEnergy[3];
     Float_t        mDecayAngle;
-    
+    Float_t        mDecayAngleCM;
+    StThreeVectorF mParentMomentum;
     StThreeVectorF mDaughterMomentum;
 
     StObject* clone();

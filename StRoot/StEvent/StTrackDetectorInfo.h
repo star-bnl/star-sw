@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.h,v 2.1 1999/10/13 19:44:11 ullrich Exp $
+ * $Id: StTrackDetectorInfo.h,v 2.2 1999/10/28 22:27:30 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.h,v $
- * Revision 2.1  1999/10/13 19:44:11  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:27:30  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.3  1999/11/01 12:45:12  ullrich
  * Modified unpacking of point counter
@@ -19,7 +19,7 @@
  * Revision 2.2  1999/10/28 22:27:30  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
-#include "StArray.h"
+ * Revision 2.1  1999/10/13 19:44:11  ullrich
  * Initial Revision
  *
  **************************************************************************/
@@ -51,6 +51,9 @@ public:
     StPtrVecHit&          hits();
     const StPtrVecHit&    hits() const;
 
+    void setFirstPoint(const StThreeVectorF&);
+    void setLastPoint(const StThreeVectorF&);
+    void setNumberOfPoints(UShort_t);
     void addHit(StHit*);
     void removeHit(StHit*&);
 

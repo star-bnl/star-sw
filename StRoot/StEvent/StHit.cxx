@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.0 1999/10/12 18:42:17 ullrich Exp $
+ * $Id: StHit.cxx,v 2.1 1999/10/28 22:25:47 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
- * Revision 2.0  1999/10/12 18:42:17  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:25:47  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.3  2000/06/01 21:38:53  ullrich
  * Added member mFlag and access member flag() and setFlag().
@@ -31,17 +31,20 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.0 1999/10/12 18:42:17 ullrich Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.1 1999/10/28 22:25:47 ullrich Exp $";
 
 ClassImp(StHit)
 StHit::StHit()
 {
-    : StMeasuredPoint(p), mPositionError(e), mHardwarePosition(hp),
-      mCharge(q), mTrackRefCount(c)
+    mFlag = 0;
+    mCharge = 0;
     mHardwarePosition = 0;
     mTrackRefCount = 0;
 }
-    
+
+StHit::StHit(const StThreeVectorF& p,
+             const StThreeVectorF& e,
+{ /* noop */ }
 {
     mFlag = 0;
 }
@@ -151,15 +154,16 @@ StHit::covariantMatrix() const
 {
     StMatrixF m(3,3);
     m(1,1) = mPositionError.x()*mPositionError.x();
+    m(2,2) = mPositionError.y()*mPositionError.y();
     m(3,3) = mPositionError.z()*mPositionError.z();
     return m;
-    for (int i=0; i<nodes.size(); i++) {
+}
 
-        int ntracks = node->entries(type);
-        for (int k=0; k<ntracks; k++) {
+StPtrVecTrack
+StHit::relatedTracks(const StSPtrVecTrackNode& nodes, StTrackType type)
         StTrackNode *node = nodes[i];
-            StPtrVecHit hvec = track->detectorInfo()->hits(id);
-            for (int j=0; j<hvec.size(); j++)
+    StPtrVecTrack vec;
+    StPtrVecHit hvec; 
     StDetectorId id = this->detector();
 
     for (unsigned int i=0; i<nodes.size(); i++) {

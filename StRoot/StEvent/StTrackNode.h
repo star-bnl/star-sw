@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackNode.h,v 2.1 1999/10/13 19:44:15 ullrich Exp $
+ * $Id: StTrackNode.h,v 2.2 1999/10/28 22:27:47 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackNode.h,v $
- * Revision 2.1  1999/10/13 19:44:15  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:27:47  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.3  1999/11/05 15:27:12  ullrich
  * Added non-const versions of several methods
@@ -21,7 +21,7 @@
  *
  * Revision 2.1  1999/10/13 19:44:15  ullrich
  * Initial Revision
-#include "StArray.h"
+ *
  **************************************************************************/
 #ifndef StTrackNode_hh
 #define StTrackNode_hh
@@ -48,7 +48,7 @@ public:
     friend class StTrack;
     
 private:
-    
+    StTrackNode(const StTrackNode&);
     StTrackNode& operator=(const StTrackNode&);
     void unlink(StTrack*);
     

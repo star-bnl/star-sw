@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHitCollection.cxx,v 2.1 1999/10/13 19:44:38 ullrich Exp $
+ * $Id: StFtpcHitCollection.cxx,v 2.2 1999/10/28 22:25:22 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StFtpcHitCollection.cxx,v $
- * Revision 2.1  1999/10/13 19:44:38  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:25:22  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.2  1999/10/28 22:25:22  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -24,7 +24,7 @@
 #include "StFtpcSectorHitCollection.h"
 #include "StFtpcHit.h"
 
-static const char rcsid[] = "$Id: StFtpcHitCollection.cxx,v 2.1 1999/10/13 19:44:38 ullrich Exp $";
+static const char rcsid[] = "$Id: StFtpcHitCollection.cxx,v 2.2 1999/10/28 22:25:22 ullrich Exp $";
 
 ClassImp(StFtpcHitCollection)
 
@@ -50,8 +50,8 @@ UInt_t
 StFtpcHitCollection::numberOfPlanes() const { return mNumberOfPlanes; }
 
 ULong_t
-    for (int i=0; i<mNumberOfPlanes; i++) {
-        for (int j=0; j<mPlanes[i].numberOfSectors(); j++) {
+StFtpcHitCollection::numberOfHits() const
+{
     ULong_t sum = 0;
     for (unsigned int i=0; i<mNumberOfPlanes; i++) {
         for (unsigned int j=0; j<mPlanes[i].numberOfSectors(); j++) {

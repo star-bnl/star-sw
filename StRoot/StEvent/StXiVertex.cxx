@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.cxx,v 2.0 1999/10/12 18:43:34 ullrich Exp $
+ * $Id: StXiVertex.cxx,v 2.1 1999/10/28 22:28:15 ullrich Exp $
  *
  * Author: Gene Van Buren, Feb 1999, revised Thomas Ullrich Sep 99
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.cxx,v $
- * Revision 2.0  1999/10/12 18:43:34  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:28:15  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.1  1999/10/28 22:28:15  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -22,13 +22,13 @@
  **************************************************************************/
 #include <iostream.h>
 #include "StXiVertex.h"
-#include "tables/dst_vertex.h"
-#include "tables/dst_xi_vertex.h"
+#include "StV0Vertex.h"
+#include "StTrack.h"
 #include "StTrackGeometry.h"
 #include "tables/St_dst_vertex_Table.h"
 #include "tables/St_dst_xi_vertex_Table.h"
 
-static const char rcsid[] = "$Id: StXiVertex.cxx,v 2.0 1999/10/12 18:43:34 ullrich Exp $";
+static const char rcsid[] = "$Id: StXiVertex.cxx,v 2.1 1999/10/28 22:28:15 ullrich Exp $";
 
 ClassImp(StXiVertex)
 
@@ -55,6 +55,9 @@ StXiVertex::StXiVertex(const dst_xi_vertex_st& xivtx,
     mDcaParentToPrimaryVertex = xivtx.b_xi;
     mV0Vertex = 0;
     mDaughter = 0;
+}
+
+StXiVertex::~StXiVertex() { /* noop */ }
 
 StObject*
 StXiVertex::clone() { return new StXiVertex(*this); }

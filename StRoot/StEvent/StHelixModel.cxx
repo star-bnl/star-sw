@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixModel.cxx,v 2.1 1999/10/13 19:44:49 ullrich Exp $
+ * $Id: StHelixModel.cxx,v 2.2 1999/10/28 22:25:42 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StHelixModel.cxx,v $
- * Revision 2.1  1999/10/13 19:44:49  ullrich
- * Initial Revision
+ * Revision 2.2  1999/10/28 22:25:42  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.2  1999/10/28 22:25:42  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -19,7 +19,7 @@
  * Revision 2.1  1999/10/13 19:44:49  ullrich
  * Initial Revision
  *
-#include "tables/dst_track.h"
+ **************************************************************************/
 #include "StHelixModel.h"
 #include "StThreeVectorF.hh"
 #include "tables/St_dst_track_Table.h"
@@ -28,7 +28,7 @@
 
 ClassImp(StHelixModel)
 
-static const char rcsid[] = "$Id: StHelixModel.cxx,v 2.1 1999/10/13 19:44:49 ullrich Exp $";
+static const char rcsid[] = "$Id: StHelixModel.cxx,v 2.2 1999/10/28 22:25:42 ullrich Exp $";
 
 StHelixModel::StHelixModel() : mModel(helixModel)
 {
@@ -64,8 +64,11 @@ StHelixModel::StHelixModel(const dst_track_st& t) :  mModel(helixModel)
     mMomentum.setY(pt*sin(mPsi));
     mMomentum.setZ(pz);
 }
-StHelixModel*
-StHelixModel::clone() const { return new StHelixModel(*this); }
+
+StHelixModel::~StHelixModel() { /* noop */ }
+
+StTrackGeometry*
+StHelixModel::copy() const { return new StHelixModel(*this); }
 
 StObject*
 StHelixModel::clone() { return new StHelixModel(*this); }

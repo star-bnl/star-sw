@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackPidTraits.cxx,v 2.0 1999/10/12 18:43:05 ullrich Exp $
+ * $Id: StTrackPidTraits.cxx,v 2.1 1999/10/28 22:27:49 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,14 +10,14 @@
  ***************************************************************************
  *
  * $Log: StTrackPidTraits.cxx,v $
- * Revision 2.0  1999/10/12 18:43:05  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:27:49  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.3  1999/11/29 16:53:24  ullrich
  * ADopted new encoding scheme for method().
  *
  * Revision 2.2  1999/11/15 18:48:25  ullrich
-#include "tables/dst_dedx.h"
+ * Adapted new enums for dedx and track reco methods.
  *
  * Revision 2.1  1999/10/28 22:27:49  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -31,7 +31,7 @@
 
 ClassImp(StTrackPidTraits)
 
-static const char rcsid[] = "$Id: StTrackPidTraits.cxx,v 2.0 1999/10/12 18:43:05 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackPidTraits.cxx,v 2.1 1999/10/28 22:27:49 ullrich Exp $";
 
 StTrackPidTraits::StTrackPidTraits() :
     mDetectorId(0), mMethod(0) { /* noop */ }

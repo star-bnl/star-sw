@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.cxx,v 2.0 1999/10/12 18:42:48 ullrich Exp $
+ * $Id: StTpcHit.cxx,v 2.1 1999/10/28 22:27:07 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.cxx,v $
- * Revision 2.0  1999/10/12 18:42:48  ullrich
- * Completely Revised for New Version
+ * Revision 2.1  1999/10/28 22:27:07  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.5  1999/12/01 15:56:28  ullrich
  * Renamed xxxInCluster() methods to xxxInHit()
@@ -19,7 +19,7 @@
  * Revision 2.4  1999/11/11 10:19:52  ullrich
  * Inlined sector() and padrow().
  *
-#include "tables/dst_point.h"
+ * Revision 2.3  1999/11/09 19:35:25  ullrich
  * Memory now allocated using StMemoryPool via overloaded new/delete
  *
  * Revision 2.2  1999/11/04 21:41:00  ullrich
@@ -32,7 +32,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.0 1999/10/12 18:42:48 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.1 1999/10/28 22:27:07 ullrich Exp $";
 
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
 
@@ -76,6 +76,9 @@ StTpcHit::StTpcHit(const dst_point_st& pt)
     // Unpack error on position in xyz
     //
     tpcy11 = pt.pos_err[0]/(1L<<20);
+    tpcz   = pt.pos_err[1]/(1L<<10);
+    tpcx   = pt.pos_err[0] - (1L<<20)*tpcy11;
+    tpcy10 = pt.pos_err[1] - (1L<<10)*tpcz;
     tpcy   = tpcy11 + (1L<<10)*tpcy10;
     mPositionError.setX(Float_t(tpcx)/(1L<<17));
     mPositionError.setY(Float_t(tpcy)/(1L<<17));
