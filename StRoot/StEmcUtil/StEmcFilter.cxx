@@ -106,13 +106,13 @@ StEmcFilter::StEmcFilter(Int_t mode):TObject()
   
   if(mode!=0)
   {
-    mBemcRunning = new St_emcRunning("bemcRunning",1);
-    emcRunning_st *table=mBemcRunning->GetTable();
+    mBemcRunning = new St_emcStatus("bemcStatus",1);
+    emcStatus_st *table=mBemcRunning->GetTable();
     for(Int_t i=0;i<4800;i++)
     {
-      table[0].IsRunning[i]=0;
-      if(mode==1 && i<2400) table[0].IsRunning[i]=1;
-      if(mode==2) table[0].IsRunning[i]=1;
+      table[0].Status[i]=0;
+      if(mode==1 && i<2400) table[0].Status[i]=1;
+      if(mode==2) table[0].Status[i]=1;
     }
     mBemcRunningOrig=mBemcRunning;
   }
@@ -666,13 +666,12 @@ EmcStatus StEmcFilter::getEmcStatus(Int_t det, Int_t id)
     case 1: // bemc
       if(mBemcRunning)
       {
-        emcRunning_st *st=mBemcRunning->GetTable();
+        emcStatus_st *st=mBemcRunning->GetTable();
         if(id<1 || id >4800) return kBAD;
         else 
         {
-          Int_t status = (Int_t) st[0].IsRunning[id-1];
-          if(status == 1) return kGOOD;
-          if(status == 0) return kBAD;
+          Int_t status = (Int_t) st[0].Status[id-1];
+          if(status == 1) return kGOOD; else return kBAD;
           return kOTHER;
         }
       }
@@ -685,13 +684,12 @@ EmcStatus StEmcFilter::getEmcStatus(Int_t det, Int_t id)
     case 2: // bprs
       if(mBprsRunning)
       {
-        emcRunning_st *st=mBprsRunning->GetTable();
+        emcStatus_st *st=mBprsRunning->GetTable();
         if(id<1 || id >4800) return kBAD;
         else 
         {
-          Int_t status = (Int_t) st[0].IsRunning[id-1];
-          if(status == 1) return kGOOD;
-          if(status == 0) return kBAD;
+          Int_t status = (Int_t) st[0].Status[id-1];
+          if(status == 1) return kGOOD;else return kBAD;
           return kOTHER;
         }
       }
@@ -700,13 +698,12 @@ EmcStatus StEmcFilter::getEmcStatus(Int_t det, Int_t id)
     case 3: // bsmde
       if(mBsmdeRunning)
       {
-        smdRunning_st *st=mBsmdeRunning->GetTable();
+        smdStatus_st *st=mBsmdeRunning->GetTable();
         if(id<1 || id >18000) return kBAD;
         else 
         {
-          Int_t status = (Int_t) st[0].IsRunning[id-1];
-          if(status == 1) return kGOOD;
-          if(status == 0) return kBAD;
+          Int_t status = (Int_t) st[0].Status[id-1];
+          if(status == 1) return kGOOD;else return kBAD;
           return kOTHER;
         }
       }
@@ -715,13 +712,12 @@ EmcStatus StEmcFilter::getEmcStatus(Int_t det, Int_t id)
     case 4: // bsmdp
       if(mBsmdpRunning)
       {
-        smdRunning_st *st=mBsmdpRunning->GetTable();
+        smdStatus_st *st=mBsmdpRunning->GetTable();
         if(id<1 || id >18000) return kBAD;
         else 
         {
-          Int_t status = (Int_t) st[0].IsRunning[id-1];
-          if(status == 1) return kGOOD;
-          if(status == 0) return kBAD;
+          Int_t status = (Int_t) st[0].Status[id-1];
+          if(status == 1) return kGOOD;else return kBAD;
           return kOTHER;
         }
       }

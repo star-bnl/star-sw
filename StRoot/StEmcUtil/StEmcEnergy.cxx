@@ -40,6 +40,7 @@ StEmcEnergy::StEmcEnergy():TObject()
   mBemcGeom = StEmcGeom::getEmcGeom("bemc");    
   setEval(evalOff);
   mRealData = kTRUE;
+  mEffError = 1;
 }
 //------------------------------------------------------------------------------
 StEmcEnergy::~StEmcEnergy()
@@ -573,6 +574,9 @@ Float_t StEmcEnergy::trackEff( StTrack* track, UInt_t NCharged)
     parm1 = 0.0635;
     parm2 = 0.07507 + 3.867E-5*(NCharged/2.);
   }
+  parm0*=mEffError;
+	parm1*=mEffError;
+	parm2*=mEffError;
   trackEff = parm0*(1-exp(-(trackMomentum-parm1)/parm2));
   return trackEff;
   

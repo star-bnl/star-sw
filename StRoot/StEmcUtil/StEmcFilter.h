@@ -28,8 +28,8 @@ The geant_id is obtained based on the dE/dX cuts set in the filter.
 #ifndef StEmcFilter_HH
 #define StEmcFilter_HH
 #include "BetheBloch.h"
-#include "tables/St_emcRunning_Table.h"
-#include "tables/St_smdRunning_Table.h"
+#include "tables/St_emcStatus_Table.h"
+#include "tables/St_smdStatus_Table.h"
 #include <iostream.h>
 
 #define NTOWER 4800
@@ -72,11 +72,11 @@ class StEmcFilter: public TObject
 
 
     // status tables
-    St_emcRunning*  mBemcRunning;
-    St_emcRunning*  mBemcRunningOrig;
-    St_emcRunning*  mBprsRunning;
-    St_smdRunning*  mBsmdeRunning;
-    St_smdRunning*  mBsmdpRunning;
+    St_emcStatus*  mBemcRunning;
+    St_emcStatus*  mBemcRunningOrig;
+    St_emcStatus*  mBprsRunning;
+    St_smdStatus*  mBsmdeRunning;
+    St_smdStatus*  mBsmdpRunning;
     
     // event cuts (only ZVertex is applied to McEvent for a while)
     Bool_t          mPrintLog;       
@@ -166,10 +166,10 @@ class StEmcFilter: public TObject
     Float_t     		getEastFraction(Int_t=1);             ///< Return fraction of EMC live on east side of STAR
     Float_t     		getTotalFraction(Int_t=1);            ///< Return fraction of EMC live on STAR
 
-    St_emcRunning*  getBemcStatus()  { return mBemcRunning; }   ///< get tower status (need to get the table from database)
-    St_emcRunning*  getBprsStatus()  { return mBprsRunning; }   ///< get pre-shower status (need to get the table from database)
-    St_smdRunning*  getBsmdeStatus() { return mBsmdeRunning; }  ///< get SMD-eta status (need to get the table from database)
-    St_smdRunning*  getBsmdpStatus() { return mBsmdpRunning; }  ///< get SMD-phi status (need to get the table from database)
+    St_emcStatus*  getBemcStatus()  { return mBemcRunning; }   ///< get tower status (need to get the table from database)
+    St_emcStatus*  getBprsStatus()  { return mBprsRunning; }   ///< get pre-shower status (need to get the table from database)
+    St_smdStatus*  getBsmdeStatus() { return mBsmdeRunning; }  ///< get SMD-eta status (need to get the table from database)
+    St_smdStatus*  getBsmdpStatus() { return mBsmdpRunning; }  ///< get SMD-phi status (need to get the table from database)
     
     // get event cuts 
     Bool_t        	getEmcPresent()          { return mEmcPresent; }     ///< requires EMC data on event (kTRUE, kFALSE). Default value is kTRUE.
@@ -222,10 +222,10 @@ class StEmcFilter: public TObject
     
     void        		printCuts();                          ///< Print filter parameters
     
-    void        		setBemcStatus(St_emcRunning* st)  { mBemcRunning = st; }   ///< Set tower status (need to get the table from database)
-    void        		setBprsStatus(St_emcRunning* st)  { mBprsRunning = st; }   ///< Set pre-shower status (need to get the table from database)
-    void        		setBsmdeStatus(St_smdRunning* st) { mBsmdeRunning = st; }  ///< Set SMD-eta status (need to get the table from database)
-    void        		setBsmdpStatus(St_smdRunning* st) { mBsmdpRunning = st; }  ///< Set SMD-phi status (need to get the table from database)
+    void        		setBemcStatus(St_emcStatus* st)  { mBemcRunning = st; }   ///< Set tower status (need to get the table from database)
+    void        		setBprsStatus(St_emcStatus* st)  { mBprsRunning = st; }   ///< Set pre-shower status (need to get the table from database)
+    void        		setBsmdeStatus(St_smdStatus* st) { mBsmdeRunning = st; }  ///< Set SMD-eta status (need to get the table from database)
+    void        		setBsmdpStatus(St_smdStatus* st) { mBsmdpRunning = st; }  ///< Set SMD-phi status (need to get the table from database)
     
     // set event cuts (only ZVertex is applied to McEvent for a while)
     void        		setPrintLog(Bool_t a)             { mPrintLog = a; }       ///< Print log if event is rejected.
