@@ -1,5 +1,8 @@
-// $Id: StTpcFEEGainCalibMaker.h,v 1.3 2000/08/04 21:03:53 perev Exp $
+// $Id: StTpcFEEGainCalibMaker.h,v 1.4 2003/09/10 19:47:39 perev Exp $
 // $Log: StTpcFEEGainCalibMaker.h,v $
+// Revision 1.4  2003/09/10 19:47:39  perev
+// ansi corrs
+//
 // Revision 1.3  2000/08/04 21:03:53  perev
 // Leaks + Clear() cleanup
 //
@@ -35,7 +38,7 @@ public:
   virtual Int_t  Make();
   virtual Int_t  Finish();
   virtual void   PrintInfo();
- ClassDef(StTpcFEEGainCalibMaker, 1)   //StAF chain virtual base class for Makers
+ ClassDef(StTpcFEEGainCalibMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

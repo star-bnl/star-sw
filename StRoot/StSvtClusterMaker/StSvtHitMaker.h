@@ -1,5 +1,8 @@
-// $Id: StSvtHitMaker.h,v 1.13 2003/04/14 18:33:54 munhoz Exp $
+// $Id: StSvtHitMaker.h,v 1.14 2003/09/10 19:47:35 perev Exp $
 // $Log: StSvtHitMaker.h,v $
+// Revision 1.14  2003/09/10 19:47:35  perev
+// ansi corrs
+//
 // Revision 1.13  2003/04/14 18:33:54  munhoz
 // reading t0 from DB
 //
@@ -88,7 +91,7 @@ class StSvtHitMaker : public StMaker
   void SetFileNames(char* name1="/dev/null", char* name2="/dev/null");
   Int_t Eval();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.13 2003/04/14 18:33:54 munhoz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.14 2003/09/10 19:47:35 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  protected:
@@ -123,7 +126,7 @@ class StSvtHitMaker : public StMaker
   char* filenameN;
   char* filenameC;
 
-  ClassDef(StSvtHitMaker,1)   //virtual base class for Makers
+  ClassDef(StSvtHitMaker,0)   //virtual base class for Makers
 
 };
 

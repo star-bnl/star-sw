@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StFourPMaker.h,v 1.4 2003/08/27 23:19:49 thenry Exp $
+ * $Id: StFourPMaker.h,v 1.5 2003/09/10 19:47:20 perev Exp $
  * $Log: StFourPMaker.h,v $
+ * Revision 1.5  2003/09/10 19:47:20  perev
+ * ansi corrs
+ *
  * Revision 1.4  2003/08/27 23:19:49  thenry
  * Added track level eta cutting.
  *
@@ -76,7 +79,7 @@ public:
     Float_t          eta_high_lim;
     Float_t          eta_low_lim;
 
-    ClassDef(StFourPMaker,1)
+    ClassDef(StFourPMaker,0)
 };
 #endif
 

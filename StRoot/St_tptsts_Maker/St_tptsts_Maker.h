@@ -1,5 +1,8 @@
-// $Id: St_tptsts_Maker.h,v 1.3 1999/09/14 13:51:46 love Exp $
+// $Id: St_tptsts_Maker.h,v 1.4 2003/09/10 19:47:52 perev Exp $
 // $Log: St_tptsts_Maker.h,v $
+// Revision 1.4  2003/09/10 19:47:52  perev
+// ansi corrs
+//
 // Revision 1.3  1999/09/14 13:51:46  love
 // Add README file
 //
@@ -51,9 +54,9 @@ public:
   virtual Int_t  Make();
   virtual void   Set_stks(Bool_t m=kTRUE){m_mkstks = m;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tptsts_Maker.h,v 1.3 1999/09/14 13:51:46 love Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tptsts_Maker.h,v 1.4 2003/09/10 19:47:52 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-ClassDef(St_tptsts_Maker, 1)   //StAF chain virtual base class for Makers
+ClassDef(St_tptsts_Maker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

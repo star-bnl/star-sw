@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: tableAcceptor.hh,v 1.5 2003/09/02 17:57:50 perev Exp $
+ * $Id: tableAcceptor.hh,v 1.6 2003/09/10 19:47:06 perev Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: tableAcceptor.hh,v $
+ * Revision 1.6  2003/09/10 19:47:06  perev
+ * ansi corrs
+ *
  * Revision 1.5  2003/09/02 17:57:50  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -33,7 +36,6 @@
 
 
 #include "typeAcceptor.hh"
-//#include <Stiostream.h>
 
 class StDbTable;
 

@@ -1,5 +1,8 @@
-// $Id: StPreVertexMaker.h,v 1.2 2000/06/30 18:00:55 wdeng Exp $
+// $Id: StPreVertexMaker.h,v 1.3 2003/09/10 19:47:45 perev Exp $
 // $Log: StPreVertexMaker.h,v $
+// Revision 1.3  2003/09/10 19:47:45  perev
+// ansi corrs
+//
 // Revision 1.2  2000/06/30 18:00:55  wdeng
 // Add in GetCVS function.
 //
@@ -35,9 +38,9 @@ class StPreVertexMaker : public StMaker {
   virtual Int_t  Init();
   virtual Int_t  Make();
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StPreVertexMaker.h,v 1.2 2000/06/30 18:00:55 wdeng Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StPreVertexMaker.h,v 1.3 2003/09/10 19:47:45 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
-  ClassDef(StPreVertexMaker, 1)
+  ClassDef(StPreVertexMaker,0)
 };
     
 #endif

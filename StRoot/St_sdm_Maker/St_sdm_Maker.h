@@ -58,7 +58,7 @@ class St_sdm_Maker : public StMaker
   virtual void   PrintInfo();
   void           SetParamPath(Char_t *ParPath);
   void           SetDBPath(Char_t *DBPath);
-  ClassDef(St_sdm_Maker, 1)   //StAF chain virtual base class for Makers
+  ClassDef(St_sdm_Maker,0)   //StAF chain virtual base class for Makers
 };
 #endif
     

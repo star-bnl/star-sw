@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMiniDstMaker.h,v 1.2 2000/10/16 19:35:44 ullrich Exp $
+ * $Id: StMiniDstMaker.h,v 1.3 2003/09/10 19:47:23 perev Exp $
  *
  * Author: Thomas Ullrich, Oct 2000
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StMiniDstMaker.h,v $
+ * Revision 1.3  2003/09/10 19:47:23  perev
+ * ansi corrs
+ *
  * Revision 1.2  2000/10/16 19:35:44  ullrich
  * Updated to run on Sun/CC5.
  *
@@ -39,7 +42,7 @@ protected:
     bool accept(StTrack*);
     
 private:
-    ClassDef(StMiniDstMaker,1)
+    ClassDef(StMiniDstMaker,0)
 };
 
 #endif

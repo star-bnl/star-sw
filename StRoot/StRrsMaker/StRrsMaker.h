@@ -1,5 +1,5 @@
 /**********************************************************
- * $Id: StRrsMaker.h,v 2.1 2000/08/09 17:59:56 gans Exp $
+ * $Id: StRrsMaker.h,v 2.2 2003/09/10 19:47:31 perev Exp $
  *
  * Description:
  *  StRrsMaker is the main module
@@ -15,6 +15,9 @@
  *  memory.
  ***********************************************************
  *  $Log: StRrsMaker.h,v $
+ *  Revision 2.2  2003/09/10 19:47:31  perev
+ *  ansi corrs
+ *
  *  Revision 2.1  2000/08/09 17:59:56  gans
  *  Removed Int_t Clear() which was stomped in ver from 1.12->2.0
  *
@@ -191,9 +194,9 @@ private:
     int       mAddElectricNoise;
     
     virtual const char *GetCVS() const
-    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 2.1 2000/08/09 17:59:56 gans Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 2.2 2003/09/10 19:47:31 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-    ClassDef(StRrsMaker, 1)            // StAF chain
+    ClassDef(StRrsMaker,0)            // StAF chain
 };
 #endif
 #endif // __ROOT__

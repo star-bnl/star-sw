@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDriftVelocityMaker.h,v 1.5 2003/09/07 03:49:05 perev Exp $
+ * $Id: StSvtDriftVelocityMaker.h,v 1.6 2003/09/10 19:47:34 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDriftVelocityMaker.h,v $
+ * Revision 1.6  2003/09/10 19:47:34  perev
+ * ansi corrs
+ *
  * Revision 1.5  2003/09/07 03:49:05  perev
  * gcc 3.2 + WarnOff
  *
@@ -139,7 +142,7 @@ class StSvtDriftVelocityMaker : public StMaker {
   void SetFraction(const double x) {mFraction = x;}; //!
   void SetT0Guess(const double x) {mT0Guess = x;}; //!
 
-  ClassDef(StSvtDriftVelocityMaker, 1)   //StAF chain virtual base class for Makers
+  ClassDef(StSvtDriftVelocityMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

@@ -1,11 +1,14 @@
 /**********************************************************
- * $Id: StRichPIDMaker.h,v 2.19 2003/04/30 20:38:07 perev Exp $
+ * $Id: StRichPIDMaker.h,v 2.20 2003/09/10 19:47:30 perev Exp $
  *
  * Description:
  *  StRrsMaker is the main module
  *  StRichRawData. It has the standard Maker functions:
  *
  *  $Log: StRichPIDMaker.h,v $
+ *  Revision 2.20  2003/09/10 19:47:30  perev
+ *  ansi corrs
+ *
  *  Revision 2.19  2003/04/30 20:38:07  perev
  *  Warnings cleanup. Modified lines marked VP
  *
@@ -391,9 +394,9 @@ public:
   double findL3ZVertex(globalTrack *,int);
 #endif    
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StRichPIDMaker.h,v 2.19 2003/04/30 20:38:07 perev Exp $ built "__DATE__" "__TIME__
+    {static const char cvs[]="Tag $Name:  $ $Id: StRichPIDMaker.h,v 2.20 2003/09/10 19:47:30 perev Exp $ built "__DATE__" "__TIME__
 	 ; return cvs;}  
-  ClassDef(StRichPIDMaker,1)
+  ClassDef(StRichPIDMaker,0)
     };
 
 inline void StRichPIDMaker::setProductionVersion(int no) {mProductionVersion = no;}

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.h,v 1.7 2003/02/06 05:02:05 geurts Exp $ 
+ * $Id: StTofMaker.h,v 1.8 2003/09/10 19:47:37 perev Exp $ 
  * 
  * Author: Wei-Ming Zhang / Frank Geurts
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTofMaker.h,v $
+ * Revision 1.8  2003/09/10 19:47:37  perev
+ * ansi corrs
+ *
  * Revision 1.7  2003/02/06 05:02:05  geurts
  * Added TOFr and extra pVPD-ADC channels to the datastream:
  * StTofMaker is now aware of year2 (TOFp+pVPD) and year3 (TOFp+pVPD+TOFr) raw data.
@@ -89,9 +92,9 @@ public:
   virtual Int_t Finish();
     
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofMaker.h,v 1.7 2003/02/06 05:02:05 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofMaker.h,v 1.8 2003/09/10 19:47:37 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-  ClassDef(StTofMaker, 1)
+  ClassDef(StTofMaker,0)
 
 };
 #endif

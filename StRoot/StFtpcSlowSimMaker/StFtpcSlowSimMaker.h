@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.h,v 1.11 2003/07/03 13:25:50 fsimon Exp $
+// $Id: StFtpcSlowSimMaker.h,v 1.12 2003/09/10 19:47:17 perev Exp $
 // $Log: StFtpcSlowSimMaker.h,v $
+// Revision 1.12  2003/09/10 19:47:17  perev
+// ansi corrs
+//
 // Revision 1.11  2003/07/03 13:25:50  fsimon
 // Added database access for cathode offset information.
 //
@@ -80,7 +83,7 @@ class TH2F;
 
 class StFtpcSlowSimMaker : public StMaker {
  private:
-  // static Char_t m_VersionCVS = "$Id: StFtpcSlowSimMaker.h,v 1.11 2003/07/03 13:25:50 fsimon Exp $";
+  // static Char_t m_VersionCVS = "$Id: StFtpcSlowSimMaker.h,v 1.12 2003/09/10 19:47:17 perev Exp $";
   // Int_t         m_mode;        // mode 1 = primaries;
    St_db_Maker *mDbMaker;                         //!
    St_ftpcClusterPars   *m_clusterpars;           //!
@@ -117,9 +120,9 @@ class StFtpcSlowSimMaker : public StMaker {
   virtual Int_t  Make();
   // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcSlowSimMaker.h,v 1.11 2003/07/03 13:25:50 fsimon Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcSlowSimMaker.h,v 1.12 2003/09/10 19:47:17 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
-  ClassDef(StFtpcSlowSimMaker, 1)   //StAF chain virtual base class for Makers
+  ClassDef(StFtpcSlowSimMaker,0)   //StAF chain virtual base class for Makers
 };
     
 #endif

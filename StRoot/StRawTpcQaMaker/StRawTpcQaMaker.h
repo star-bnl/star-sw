@@ -1,5 +1,8 @@
-//! $Id: StRawTpcQaMaker.h,v 1.5 2000/08/04 21:03:47 perev Exp $
+//! $Id: StRawTpcQaMaker.h,v 1.6 2003/09/10 19:47:28 perev Exp $
 //! $Log: StRawTpcQaMaker.h,v $
+//! Revision 1.6  2003/09/10 19:47:28  perev
+//! ansi corrs
+//!
 //! Revision 1.5  2000/08/04 21:03:47  perev
 //! Leaks + Clear() cleanup
 //!
@@ -29,7 +32,7 @@
 class StRawTpcQaMaker : public StMaker {
 private:
 
-//! static Char_t m_VersionCVS = "$Id: StRawTpcQaMaker.h,v 1.5 2000/08/04 21:03:47 perev Exp $";
+//! static Char_t m_VersionCVS = "$Id: StRawTpcQaMaker.h,v 1.6 2003/09/10 19:47:28 perev Exp $";
 
 protected:
 
@@ -46,9 +49,9 @@ public:
   virtual void   PrintInfo();
 
   virtual const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StRawTpcQaMaker.h,v 1.5 2000/08/04 21:03:47 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    "Tag $Name:  $ $Id: StRawTpcQaMaker.h,v 1.6 2003/09/10 19:47:28 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
- ClassDef(StRawTpcQaMaker, 1)   //StAF chain virtual base class for Makers
+ ClassDef(StRawTpcQaMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

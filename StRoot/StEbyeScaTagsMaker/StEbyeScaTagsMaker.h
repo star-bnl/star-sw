@@ -3,7 +3,7 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StEbyeScaTagsMaker.h,v 1.9 2003/09/02 17:57:58 perev Exp $
+// $Id: StEbyeScaTagsMaker.h,v 1.10 2003/09/10 19:47:10 perev Exp $
 //
 // StEbyeScaTagsMaker
 //
@@ -19,6 +19,9 @@
 // History:
 //
 // $Log: StEbyeScaTagsMaker.h,v $
+// Revision 1.10  2003/09/10 19:47:10  perev
+// ansi corrs
+//
 // Revision 1.9  2003/09/02 17:57:58  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -70,9 +73,9 @@ public:
   void printTag(ostream& = cout);
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeScaTagsMaker.h,v 1.9 2003/09/02 17:57:58 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeScaTagsMaker.h,v 1.10 2003/09/10 19:47:10 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-  ClassDef(StEbyeScaTagsMaker, 1)
+  ClassDef(StEbyeScaTagsMaker,0)
 };
 
 #endif

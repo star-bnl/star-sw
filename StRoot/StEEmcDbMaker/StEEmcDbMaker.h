@@ -1,4 +1,4 @@
-// $Id: StEEmcDbMaker.h,v 1.11 2003/09/02 19:02:49 balewski Exp $
+// $Id: StEEmcDbMaker.h,v 1.12 2003/09/10 19:47:08 perev Exp $
 
 /*! \class StEEmcDbMaker 
 \author Jan Balewski
@@ -56,7 +56,7 @@ class DbFlavor {
 
 class StEEmcDbMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.11 2003/09/02 19:02:49 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StEEmcDbMaker.h,v 1.12 2003/09/10 19:47:08 perev Exp $";
 
   int mfirstSecID, mlastSecID;
   int mNSector;
@@ -118,17 +118,20 @@ class StEEmcDbMaker : public StMaker {
   virtual Int_t InitRun  (int runumber); ///< to access STAR-DB
   
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.11 2003/09/02 19:02:49 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEEmcDbMaker.h,v 1.12 2003/09/10 19:47:08 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
-  ClassDef(StEEmcDbMaker, 1)   
+  ClassDef(StEEmcDbMaker,0)   
 
  };
 
 #endif
 
 // $Log: StEEmcDbMaker.h,v $
+// Revision 1.12  2003/09/10 19:47:08  perev
+// ansi corrs
+//
 // Revision 1.11  2003/09/02 19:02:49  balewski
 // fix for TMemeStat
 //

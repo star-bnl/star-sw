@@ -1,5 +1,8 @@
-// $Id: St_ebye_Maker.h,v 1.9 1999/11/09 20:38:29 fisyak Exp $
+// $Id: St_ebye_Maker.h,v 1.10 2003/09/10 19:47:46 perev Exp $
 // $Log: St_ebye_Maker.h,v $
+// Revision 1.10  2003/09/10 19:47:46  perev
+// ansi corrs
+//
 // Revision 1.9  1999/11/09 20:38:29  fisyak
 // Change tables names
 //
@@ -76,9 +79,9 @@ class St_ebye_Maker : public StMaker {
    Int_t PutPrior();                                // *MENU*
    Int_t PutEnsembleAve();                          // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_ebye_Maker.h,v 1.9 1999/11/09 20:38:29 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_ebye_Maker.h,v 1.10 2003/09/10 19:47:46 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(St_ebye_Maker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(St_ebye_Maker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

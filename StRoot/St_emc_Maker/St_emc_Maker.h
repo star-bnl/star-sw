@@ -1,5 +1,8 @@
-// $Id: St_emc_Maker.h,v 1.9 2001/04/17 23:25:53 akio Exp $
+// $Id: St_emc_Maker.h,v 1.10 2003/09/10 19:47:46 perev Exp $
 // $Log: St_emc_Maker.h,v $
+// Revision 1.10  2003/09/10 19:47:46  perev
+// ansi corrs
+//
 // Revision 1.9  2001/04/17 23:25:53  akio
 // cvs test
 //
@@ -63,9 +66,9 @@ public:
   virtual void Set_mode (Int_t m = 0){m_mode = m;}; // *MENU*  
   St_DataSet     *getEmcCalib()   {return mEmcCalib;};
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_emc_Maker.h,v 1.9 2001/04/17 23:25:53 akio Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_emc_Maker.h,v 1.10 2003/09/10 19:47:46 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-  ClassDef(St_emc_Maker, 1)   //Macro
+  ClassDef(St_emc_Maker,0)   //Macro
 };
 
 #endif

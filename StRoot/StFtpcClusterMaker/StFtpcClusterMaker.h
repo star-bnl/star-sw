@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.h,v 1.23 2003/08/21 14:27:23 jcs Exp $
+// $Id: StFtpcClusterMaker.h,v 1.24 2003/09/10 19:47:16 perev Exp $
 // $Log: StFtpcClusterMaker.h,v $
+// Revision 1.24  2003/09/10 19:47:16  perev
+// ansi corrs
+//
 // Revision 1.23  2003/08/21 14:27:23  jcs
 // remove temporary fix to prevent segmentation violation which occurred when  more than one run per job
 //
@@ -118,7 +121,7 @@ class St_ftpcClusterGeom;
 class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.23 2003/08/21 14:27:23 jcs Exp $";
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.24 2003/09/10 19:47:16 perev Exp $";
    St_db_Maker *mDbMaker;                         //!
    St_ftpcClusterPars   *m_clusterpars;           //!
    St_ftpcFastSimGas    *m_fastsimgas;            //!
@@ -171,8 +174,8 @@ class StFtpcClusterMaker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.23 2003/08/21 14:27:23 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.24 2003/09/10 19:47:16 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(StFtpcClusterMaker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(StFtpcClusterMaker,0)   //StAF chain virtual base class for Makers
 };
 #endif

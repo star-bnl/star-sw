@@ -1,13 +1,16 @@
 /*!
  * \class StTpcT0Maker 
  * \author David Hardtke
- * \version $Id: StTpcT0Maker.h,v 1.2 2002/02/05 22:20:54 hardtke Exp $
+ * \version $Id: StTpcT0Maker.h,v 1.3 2003/09/10 19:47:25 perev Exp $
  *
  * StTpcT0Maker virtual base class for Maker  
  *
  */
 
 // $Log: StTpcT0Maker.h,v $
+// Revision 1.3  2003/09/10 19:47:25  perev
+// ansi corrs
+//
 // Revision 1.2  2002/02/05 22:20:54  hardtke
 // Move Init code to InitRun
 //
@@ -76,7 +79,7 @@ class StTpcT0Maker : public StMaker {
    void SetCorrectionFactors(float constant, float linear, float quadratic); //del z correction factors from trs
    float GetCorrection(float z);  // Get Correction Factor for this Z
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcT0Maker.h,v 1.2 2002/02/05 22:20:54 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcT0Maker.h,v 1.3 2003/09/10 19:47:25 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
 
@@ -114,7 +117,7 @@ class StTpcT0Maker : public StMaker {
   float    maxRMS;
   Bool_t   mHistOut;
 
-   ClassDef(StTpcT0Maker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(StTpcT0Maker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

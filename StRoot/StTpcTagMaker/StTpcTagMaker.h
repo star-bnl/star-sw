@@ -1,5 +1,8 @@
-// $Id: StTpcTagMaker.h,v 1.3 2000/05/24 00:25:50 sakrejda Exp $
+// $Id: StTpcTagMaker.h,v 1.4 2003/09/10 19:47:41 perev Exp $
 // $Log: StTpcTagMaker.h,v $
+// Revision 1.4  2003/09/10 19:47:41  perev
+// ansi corrs
+//
 // Revision 1.3  2000/05/24 00:25:50  sakrejda
 // Body of the Maker and the header cleaned up, comments added.
 //
@@ -26,7 +29,7 @@
 //class St_stk_stkpar;
 class StTpcTagMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StTpcTagMaker.h,v 1.3 2000/05/24 00:25:50 sakrejda Exp $";
+// static Char_t  m_VersionCVS = "$Id: StTpcTagMaker.h,v 1.4 2003/09/10 19:47:41 perev Exp $";
  
  protected:
  public: 
@@ -38,9 +41,9 @@ class StTpcTagMaker : public StMaker {
 // virtual Int_t FinishRun(int runumber){return 0;}; // Overload empty StMaker::FinishRun 
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcTagMaker.h,v 1.3 2000/05/24 00:25:50 sakrejda Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcTagMaker.h,v 1.4 2003/09/10 19:47:41 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(StTpcTagMaker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(StTpcTagMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

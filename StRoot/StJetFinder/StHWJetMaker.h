@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StHWJetMaker.h,v 1.1 2003/04/24 14:15:16 thenry Exp $
+ * $Id: StHWJetMaker.h,v 1.2 2003/09/10 19:47:20 perev Exp $
  * $Log: StHWJetMaker.h,v $
+ * Revision 1.2  2003/09/10 19:47:20  perev
+ * ansi corrs
+ *
  * Revision 1.1  2003/04/24 14:15:16  thenry
  * These changes are really the first working version of the StFourPMakers
  * and teh StJetMakers.  This is all c++ stl implementation, and by virtue of
@@ -33,7 +36,7 @@ public:
     virtual Int_t Make();
     virtual Int_t Finish();     
 
-    ClassDef(StHWJetMaker,1)
+    ClassDef(StHWJetMaker,0)
 };
 #endif
 

@@ -35,7 +35,7 @@ class StSvtdEdxMaker : public StMaker
   StSvtGeometry* mGeom; //!
   TH2F* mSvtdEdx; //!
 
-  ClassDef(StSvtdEdxMaker,1)   //virtual base class for Makers
+  ClassDef(StSvtdEdxMaker,0)   //virtual base class for Makers
 
 };
 

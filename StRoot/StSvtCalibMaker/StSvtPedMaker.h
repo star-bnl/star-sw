@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtPedMaker.h,v 1.3 2001/10/24 16:47:52 munhoz Exp $
+ * $Id: StSvtPedMaker.h,v 1.4 2003/09/10 19:47:34 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtPedMaker.h,v $
+ * Revision 1.4  2003/09/10 19:47:34  perev
+ * ansi corrs
+ *
  * Revision 1.3  2001/10/24 16:47:52  munhoz
  * adding RMS methods
  *
@@ -88,7 +91,7 @@ class StSvtPedMaker : public StMaker {
   virtual Int_t  ResetPed();
   virtual Int_t  Finish();
   virtual void   PrintInfo();
-  ClassDef(StSvtPedMaker, 1)   //StAF chain virtual base class for Makers
+  ClassDef(StSvtPedMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

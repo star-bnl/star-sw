@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.h,v 1.12 2000/09/09 18:09:21 fisyak Exp $
+// $Id: St_dst_Maker.h,v 1.13 2003/09/10 19:47:45 perev Exp $
 // $Log: St_dst_Maker.h,v $
+// Revision 1.13  2003/09/10 19:47:45  perev
+// ansi corrs
+//
 // Revision 1.12  2000/09/09 18:09:21  fisyak
 // Janet Seyboth corrections
 //
@@ -85,10 +88,10 @@ class St_dst_Maker : public StMaker {
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_dst_Maker.h,v 1.12 2000/09/09 18:09:21 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_dst_Maker.h,v 1.13 2003/09/10 19:47:45 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
-   ClassDef(St_dst_Maker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(St_dst_Maker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

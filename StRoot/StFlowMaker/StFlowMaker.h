@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.36 2003/09/02 17:58:12 perev Exp $
+//  $Id: StFlowMaker.h,v 1.37 2003/09/10 19:47:15 perev Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -66,7 +66,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.36 2003/09/02 17:58:12 perev Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.37 2003/09/10 19:47:15 perev Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -135,7 +135,7 @@ private:
   Float_t          CalcDcaSigned(const StThreeVectorF vertex, 
 				 const StPhysicalHelixD helix); 
 
-  ClassDef(StFlowMaker, 1)                    // macro for rootcint
+  ClassDef(StFlowMaker,0)                    // macro for rootcint
 };
 
 inline StFlowEvent* StFlowMaker::FlowEventPointer() const { return pFlowEvent; }
@@ -171,6 +171,9 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.37  2003/09/10 19:47:15  perev
+//  ansi corrs
+//
 //  Revision 1.36  2003/09/02 17:58:12  perev
 //  gcc 3.2 updates + WarnOff
 //

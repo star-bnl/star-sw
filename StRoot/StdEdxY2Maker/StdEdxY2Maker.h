@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.h,v 1.3 2002/11/11 17:08:59 fisyak Exp $
+// $Id: StdEdxY2Maker.h,v 1.4 2003/09/10 19:47:53 perev Exp $
 #ifndef STAR_StdEdxY2Maker
 #define STAR_StdEdxY2Maker
 
@@ -65,11 +65,11 @@ class StdEdxY2Maker : public StMaker {
   void    PrintdEdx(Int_t iop = 0);
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.3 2002/11/11 17:08:59 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.4 2003/09/10 19:47:53 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
-  ClassDef(StdEdxY2Maker, 1)   //StAF chain virtual base class for Makers
+  ClassDef(StdEdxY2Maker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

@@ -2,13 +2,16 @@
 #define StQACosmicMaker_HH
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.h,v 1.14 2000/08/18 20:34:47 snelling Exp $
+ * $Id: StQACosmicMaker.h,v 1.15 2003/09/10 19:47:28 perev Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to QA the Cosmic data (hitfinding, tracking, 
  *               geometry etc.)
  *
  * $Log: StQACosmicMaker.h,v $
+ * Revision 1.15  2003/09/10 19:47:28  perev
+ * ansi corrs
+ *
  * Revision 1.14  2000/08/18 20:34:47  snelling
  * Added hit errors to ntuple
  *
@@ -64,7 +67,7 @@ class StQACosmicMaker : public StMaker {
   virtual void   WriteHistogramsOff(){WriteHistograms();}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQACosmicMaker.h,v 1.14 2000/08/18 20:34:47 snelling Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQACosmicMaker.h,v 1.15 2003/09/10 19:47:28 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  private:
 
@@ -317,7 +320,7 @@ class StQACosmicMaker : public StMaker {
   // histograms for q versus x,y,z
   struct ChargeHist ChargeHists[nChargeHist]; //! 
 
-  ClassDef(StQACosmicMaker, 1) //macro for rootcint
+  ClassDef(StQACosmicMaker,0) //macro for rootcint
 };
 
 #endif

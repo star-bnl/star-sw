@@ -1,7 +1,10 @@
 
-// $Id: StSpectraMaker.h,v 1.9 2000/03/12 19:28:29 ogilvie Exp $
+// $Id: StSpectraMaker.h,v 1.10 2003/09/10 19:47:31 perev Exp $
 //
 // $Log: StSpectraMaker.h,v $
+// Revision 1.10  2003/09/10 19:47:31  perev
+// ansi corrs
+//
 // Revision 1.9  2000/03/12 19:28:29  ogilvie
 // added new analysis class, StNoPidSpectraAnalysis, for inclusive spectra
 //
@@ -84,9 +87,9 @@ public:
   virtual Int_t  Finish();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSpectraMaker.h,v 1.9 2000/03/12 19:28:29 ogilvie Exp $ built "__DATE__" "__TIME__ ; return cvs;};
+  {static const char cvs[]="Tag $Name:  $ $Id: StSpectraMaker.h,v 1.10 2003/09/10 19:47:31 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;};
 
-  ClassDef(StSpectraMaker,1)
+  ClassDef(StSpectraMaker,0)
 
 };
 

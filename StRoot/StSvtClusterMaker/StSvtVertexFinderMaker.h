@@ -31,7 +31,7 @@ class StSvtVertexFinderMaker : public StMaker
   void MakeHistograms( St_dst_vertex* vtx, long event);
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtVertexFinderMaker.h,v 1.6 2003/04/30 20:38:46 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtVertexFinderMaker.h,v 1.7 2003/09/10 19:47:35 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
  
  protected:
 
@@ -47,7 +47,7 @@ class StSvtVertexFinderMaker : public StMaker
   TNtuple* ntuple3;
   TFile *hfile2;
 
-  ClassDef(StSvtVertexFinderMaker,1)   //virtual base class for Makers
+  ClassDef(StSvtVertexFinderMaker,0)   //virtual base class for Makers
 
 };
 

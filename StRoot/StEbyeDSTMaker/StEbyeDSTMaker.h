@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeDSTMaker.h,v 1.4 2003/09/02 17:57:57 perev Exp $
+ * $Id: StEbyeDSTMaker.h,v 1.5 2003/09/10 19:47:10 perev Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *         incorporates elements of code by
@@ -19,6 +19,9 @@
  **********************************************************************
  *
  * $Log: StEbyeDSTMaker.h,v $
+ * Revision 1.5  2003/09/10 19:47:10  perev
+ * ansi corrs
+ *
  * Revision 1.4  2003/09/02 17:57:57  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -73,9 +76,9 @@ public:
   Int_t Finish();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeDSTMaker.h,v 1.4 2003/09/02 17:57:57 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeDSTMaker.h,v 1.5 2003/09/10 19:47:10 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-  ClassDef(StEbyeDSTMaker, 1)
+  ClassDef(StEbyeDSTMaker,0)
 };
 
 

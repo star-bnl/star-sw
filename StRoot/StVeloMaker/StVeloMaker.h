@@ -1,4 +1,4 @@
-// $Id: StVeloMaker.h,v 1.2 2001/05/30 18:07:07 perev Exp $
+// $Id: StVeloMaker.h,v 1.3 2003/09/10 19:47:42 perev Exp $
 //
 #ifndef StVeloMaker_H
 #define StVeloMaker_H
@@ -38,7 +38,7 @@ class StVeloMaker : public StMaker {
   virtual void   Clear(const char *opt="");
   virtual void   PrintInfo();
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StVeloMaker.h,v 1.2 2001/05/30 18:07:07 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StVeloMaker.h,v 1.3 2003/09/10 19:47:42 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
  private:
 
@@ -66,7 +66,7 @@ class StVeloMaker : public StMaker {
   double         fZLim[2][2];	//!
   double         fV[4][3];	//!
   double         fG[4][9];	//!
-  ClassDef(StVeloMaker, 0)       
+  ClassDef(StVeloMaker,0)       
 };
 
 #endif

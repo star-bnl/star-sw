@@ -93,18 +93,21 @@ class St_trg_Maker : public StMaker {
    virtual Int_t Make();
 
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.20 2003/07/16 19:58:35 perev Exp $ built "__DATE__" "__TIME__ ; 
+     static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.21 2003/09/10 19:47:52 perev Exp $ built "__DATE__" "__TIME__ ; 
      return cvs;
    }
 
-   ClassDef(St_trg_Maker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(St_trg_Maker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif
 
 
-// $Id: St_trg_Maker.h,v 1.20 2003/07/16 19:58:35 perev Exp $
+// $Id: St_trg_Maker.h,v 1.21 2003/09/10 19:47:52 perev Exp $
 // $Log: St_trg_Maker.h,v $
+// Revision 1.21  2003/09/10 19:47:52  perev
+// ansi corrs
+//
 // Revision 1.20  2003/07/16 19:58:35  perev
 // Cleanup of StTriggerData2003 at all
 //

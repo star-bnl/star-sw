@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.h,v 1.9 2002/02/23 17:42:27 fisyak Exp $
+// $Id: StdEdxMaker.h,v 1.10 2003/09/10 19:47:53 perev Exp $
 #ifndef STAR_StdEdxMaker
 #define STAR_StdEdxMaker
 
@@ -46,11 +46,11 @@ class StdEdxMaker : public StMaker {
   void Histogramming(StTrackChair     *globtrkC, Int_t iglob);
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxMaker.h,v 1.9 2002/02/23 17:42:27 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: StdEdxMaker.h,v 1.10 2003/09/10 19:47:53 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
-  ClassDef(StdEdxMaker, 1)   //StAF chain virtual base class for Makers
+  ClassDef(StdEdxMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

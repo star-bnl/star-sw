@@ -1,5 +1,8 @@
-// $Id: St_l3t_Maker.h,v 1.9 2000/07/21 22:26:12 flierl Exp $
+// $Id: St_l3t_Maker.h,v 1.10 2003/09/10 19:47:48 perev Exp $
 // $Log: St_l3t_Maker.h,v $
+// Revision 1.10  2003/09/10 19:47:48  perev
+// ansi corrs
+//
 // Revision 1.9  2000/07/21 22:26:12  flierl
 // add fillstevent routine
 //
@@ -79,9 +82,9 @@ class St_l3t_Maker : public StMaker {
    virtual Int_t  MakeOffLine();
    virtual Int_t  fillStEvent(St_dst_track* trackS, St_dst_dedx* dedxS, St_tcl_tphit* pointS);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_l3t_Maker.h,v 1.9 2000/07/21 22:26:12 flierl Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_l3t_Maker.h,v 1.10 2003/09/10 19:47:48 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(St_l3t_Maker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(St_l3t_Maker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

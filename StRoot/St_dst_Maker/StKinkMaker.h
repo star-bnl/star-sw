@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.h,v 1.15 2000/03/14 23:42:46 wdeng Exp $
+// $Id: StKinkMaker.h,v 1.16 2003/09/10 19:47:45 perev Exp $
 // $Log: StKinkMaker.h,v $
+// Revision 1.16  2003/09/10 19:47:45  perev
+// ansi corrs
+//
 // Revision 1.15  2000/03/14 23:42:46  wdeng
 // Avoid memory leak. Some cleaning up.
 //
@@ -109,8 +112,8 @@ class StKinkMaker : public StMaker {
   virtual  void   kinkEvalOn() {kinkEval();} 
   virtual  void   kinkEvalOff(){kinkEval(kFALSE);}      
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.15 2000/03/14 23:42:46 wdeng Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-  ClassDef(StKinkMaker, 1)  
+  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.16 2003/09/10 19:47:45 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  ClassDef(StKinkMaker,0)  
 };
     
 #endif

@@ -54,15 +54,18 @@ class St_scm_Maker : public StMaker {
    virtual void   PrintInfo();
 
    virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: St_scm_Maker.h,v 1.4 2003/04/30 20:38:40 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+     {static const char cvs[]="Tag $Name:  $ $Id: St_scm_Maker.h,v 1.5 2003/09/10 19:47:32 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(St_scm_Maker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(St_scm_Maker,0)   //StAF chain virtual base class for Makers
 };
 #endif
 
 /***************************************************************************
  *
  * $Log: St_scm_Maker.h,v $
+ * Revision 1.5  2003/09/10 19:47:32  perev
+ * ansi corrs
+ *
  * Revision 1.4  2003/04/30 20:38:40  perev
  * Warnings cleanup. Modified lines marked VP
  *

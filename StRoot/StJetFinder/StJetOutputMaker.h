@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetOutputMaker.h,v 1.6 2003/09/07 03:49:03 perev Exp $
+ * $Id: StJetOutputMaker.h,v 1.7 2003/09/10 19:47:20 perev Exp $
  * $Log: StJetOutputMaker.h,v $
+ * Revision 1.7  2003/09/10 19:47:20  perev
+ * ansi corrs
+ *
  * Revision 1.6  2003/09/07 03:49:03  perev
  * gcc 3.2 + WarnOff
  *
@@ -401,7 +404,7 @@ protected:
     StProjectedTrack tempTrack;
     int eventsProcessed;
 
-    ClassDef(StJetOutputMaker,1)
+    ClassDef(StJetOutputMaker,0)
 };
 #endif // __ROOT__
 #endif // StJetOutputMaker_h

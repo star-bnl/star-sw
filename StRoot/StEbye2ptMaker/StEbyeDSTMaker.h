@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeDSTMaker.h,v 1.3 2003/09/02 17:57:56 perev Exp $
+ * $Id: StEbyeDSTMaker.h,v 1.4 2003/09/10 19:47:09 perev Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  *         incorporates elements of code by
@@ -19,6 +19,9 @@
  **********************************************************************
  *
  * $Log: StEbyeDSTMaker.h,v $
+ * Revision 1.4  2003/09/10 19:47:09  perev
+ * ansi corrs
+ *
  * Revision 1.3  2003/09/02 17:57:56  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -69,9 +72,9 @@ public:
   void SetFilename(const Char_t* name="EbyeDST.root");
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeDSTMaker.h,v 1.3 2003/09/02 17:57:56 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEbyeDSTMaker.h,v 1.4 2003/09/10 19:47:09 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-  ClassDef(StEbyeDSTMaker, 1)
+  ClassDef(StEbyeDSTMaker,0)
 };
 
 inline void StEbyeDSTMaker::SetFilename(const Char_t* name) {

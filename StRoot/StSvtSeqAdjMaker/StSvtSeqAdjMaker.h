@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.22 2003/09/02 17:59:08 perev Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.23 2003/09/10 19:47:36 perev Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.23  2003/09/10 19:47:36  perev
+// ansi corrs
+//
 // Revision 1.22  2003/09/02 17:59:08  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -131,7 +134,7 @@ class StSvtSeqAdjMaker : public StMaker
   Int_t SetLowInvProd(int LowInvProd);// Set the low threshold based on the frequency distribution
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StSvtSeqAdjMaker.h,v 1.22 2003/09/02 17:59:08 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StSvtSeqAdjMaker.h,v 1.23 2003/09/10 19:47:36 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
     
@@ -179,7 +182,7 @@ class StSvtSeqAdjMaker : public StMaker
  private:
   string buildFileName(string dir, string fileName, string extention);
   string baseName(string s);
-  ClassDef(StSvtSeqAdjMaker,1)   //virtual base class for Makers
+  ClassDef(StSvtSeqAdjMaker,0)   //virtual base class for Makers
 
 };
 

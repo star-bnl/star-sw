@@ -85,9 +85,9 @@ class StEmcMixerMaker : public StMaker
     void          setFakeTrack(Bool_t a)    { mFakeTrackEmbed = a; } ///< Set kTRUE to merge tracks
     void          setDoPrint(Bool_t a)      { mDoPrint = a; } ///< Set kTRUE to print debug information
     
-    virtual const char *GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcMixerMaker.h,v 1.1 2003/01/21 21:00:51 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    virtual const char *GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcMixerMaker.h,v 1.2 2003/09/10 19:47:12 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-  ClassDef(StEmcMixerMaker, 1) 
+  ClassDef(StEmcMixerMaker,0) 
 };
 #endif
 

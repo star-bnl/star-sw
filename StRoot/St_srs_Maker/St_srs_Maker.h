@@ -58,9 +58,9 @@ class St_srs_Maker : public StMaker {
    Int_t          GetBadAnodes();
    Int_t          FillHist(St_scs_spt* scs_spt);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_srs_Maker.h,v 1.10 2002/12/05 23:37:43 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_srs_Maker.h,v 1.11 2003/09/10 19:47:50 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(St_srs_Maker, 1)   // chain virtual base class for Makers
+   ClassDef(St_srs_Maker,0)   // chain virtual base class for Makers
 };
 
 #endif

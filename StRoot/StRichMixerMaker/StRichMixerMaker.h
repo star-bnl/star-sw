@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichMixerMaker.h,v 1.1 2001/08/27 16:43:43 lasiuk Exp $
+ * $Id: StRichMixerMaker.h,v 1.2 2003/09/10 19:47:29 perev Exp $
  *
  * Author: bl 
  ***************************************************************************
@@ -12,6 +12,9 @@
  *
  ***************************************************************************
  * $Log: StRichMixerMaker.h,v $
+ * Revision 1.2  2003/09/10 19:47:29  perev
+ * ansi corrs
+ *
  * Revision 1.1  2001/08/27 16:43:43  lasiuk
  * Initial Revision
  *
@@ -103,7 +106,7 @@ private:
 #endif
 virtual const char *GetCVS() const	{
     static const char cvs[]=
-	"Tag $Name:  $ $Id: StRichMixerMaker.h,v 1.1 2001/08/27 16:43:43 lasiuk Exp $ built "__DATE__" "__TIME__ ;
+	"Tag $Name:  $ $Id: StRichMixerMaker.h,v 1.2 2003/09/10 19:47:29 perev Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
 }
 public:
@@ -112,7 +115,7 @@ public:
     }
 private:
     // the following is a ROOT macro  that is needed in all ROOT code
-    ClassDef(StRichMixerMaker, 1)   //StAF chain virtual base class for Makers
+    ClassDef(StRichMixerMaker,0)   //StAF chain virtual base class for Makers
 	};
 
 #endif 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtMaker.h,v 1.6 2003/09/07 03:49:02 perev Exp $
+ * $Id: StHbtMaker.h,v 1.7 2003/09/10 19:47:19 perev Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StHbtMaker.h,v $
+ * Revision 1.7  2003/09/10 19:47:19  perev
+ * ansi corrs
+ *
  * Revision 1.6  2003/09/07 03:49:02  perev
  * gcc 3.2 + WarnOff
  *
@@ -84,9 +87,9 @@ class StHbtMaker
 
   
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHbtMaker.h,v 1.6 2003/09/07 03:49:02 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHbtMaker.h,v 1.7 2003/09/10 19:47:19 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 #ifdef __ROOT__
-  ClassDef(StHbtMaker, 1)
+  ClassDef(StHbtMaker,0)
 #endif
 };
 

@@ -1,5 +1,8 @@
-// $Id: StEmcExampleMaker.h,v 1.1 2003/02/14 16:30:54 suaide Exp $
+// $Id: StEmcExampleMaker.h,v 1.2 2003/09/10 19:47:11 perev Exp $
 // $Log: StEmcExampleMaker.h,v $
+// Revision 1.2  2003/09/10 19:47:11  perev
+// ansi corrs
+//
 // Revision 1.1  2003/02/14 16:30:54  suaide
 // added example maker
 //
@@ -28,7 +31,7 @@ class StEmcExampleMaker : public StMaker
    virtual Int_t   Make();
    virtual Int_t   Finish();
 
-   ClassDef(StEmcExampleMaker, 1)  
+   ClassDef(StEmcExampleMaker,0)  
 };
 
 #endif

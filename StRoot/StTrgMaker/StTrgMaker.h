@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrgMaker.h,v 1.4 2001/12/25 20:01:29 ward Exp $
+ * $Id: StTrgMaker.h,v 1.5 2003/09/10 19:47:41 perev Exp $
  *
  * Author: Herbert Ward
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrgMaker.h,v $
+ * Revision 1.5  2003/09/10 19:47:41  perev
+ * ansi corrs
+ *
  * Revision 1.4  2001/12/25 20:01:29  ward
  * Outputs error (closeness to edge) of track extension subsector selection.
  *
@@ -136,6 +139,6 @@ private:
     //  It must be always the last statement in the class.
     //  Note that this is a macro, that's why the ';' is missing.
     //
-    ClassDef(StTrgMaker,1)
+    ClassDef(StTrgMaker,0)
 };
 #endif

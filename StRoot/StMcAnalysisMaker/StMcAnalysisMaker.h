@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StMcAnalysisMaker.h,v 1.6 2000/04/20 16:59:47 calderon Exp $
+ * $Id: StMcAnalysisMaker.h,v 1.7 2003/09/10 19:47:22 perev Exp $
  * $Log: StMcAnalysisMaker.h,v $
+ * Revision 1.7  2003/09/10 19:47:22  perev
+ * ansi corrs
+ *
  * Revision 1.6  2000/04/20 16:59:47  calderon
  * Pick up the makers with the new names
  * Change the name from "McAnalysis" to "StMcAnalysisMaker"
@@ -91,10 +94,10 @@ private:
     static const Float_t mMaxDeltaZ;
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcAnalysisMaker.h,v 1.6 2000/04/20 16:59:47 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcAnalysisMaker.h,v 1.7 2003/09/10 19:47:22 perev Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
     // the following is a ROOT macro  that is needed in all ROOT accessible code
-    ClassDef(StMcAnalysisMaker, 1)
+    ClassDef(StMcAnalysisMaker,0)
 
 };
 

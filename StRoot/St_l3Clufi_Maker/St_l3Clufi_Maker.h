@@ -1,5 +1,8 @@
-// $Id: St_l3Clufi_Maker.h,v 1.7 2001/05/14 19:39:18 flierl Exp $
+// $Id: St_l3Clufi_Maker.h,v 1.8 2003/09/10 19:47:48 perev Exp $
 // $Log: St_l3Clufi_Maker.h,v $
+// Revision 1.8  2003/09/10 19:47:48  perev
+// ansi corrs
+//
 // Revision 1.7  2001/05/14 19:39:18  flierl
 // fix severe bug : wrong adc values were extracted from rawdata
 //
@@ -73,7 +76,7 @@
 
 class St_l3Clufi_Maker : public StMaker {
  private:
-    // static Char_t  m_VersionCVS = "$Id: St_l3Clufi_Maker.h,v 1.7 2001/05/14 19:39:18 flierl Exp $";
+    // static Char_t  m_VersionCVS = "$Id: St_l3Clufi_Maker.h,v 1.8 2003/09/10 19:47:48 perev Exp $";
      
     //
     // l3 clusterfinding variables
@@ -121,9 +124,9 @@ class St_l3Clufi_Maker : public StMaker {
    
     // cvs
     virtual const char *GetCVS() const
-	{static const char cvs[]="Tag $Name:  $ $Id: St_l3Clufi_Maker.h,v 1.7 2001/05/14 19:39:18 flierl Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	{static const char cvs[]="Tag $Name:  $ $Id: St_l3Clufi_Maker.h,v 1.8 2003/09/10 19:47:48 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
-    ClassDef(St_l3Clufi_Maker, 1)   //StAF chain virtual base class for Makers
+    ClassDef(St_l3Clufi_Maker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

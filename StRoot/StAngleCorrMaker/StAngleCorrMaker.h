@@ -54,11 +54,11 @@ public:
  
   
       virtual const char *GetCVS() const	{
-	static const char cvs[]="Tag $Name:  $ $Id: StAngleCorrMaker.h,v 1.11 2000/02/20 16:53:28 horsley Exp $ built "__DATE__" "__TIME__ ;
+	static const char cvs[]="Tag $Name:  $ $Id: StAngleCorrMaker.h,v 1.12 2003/09/10 19:47:02 perev Exp $ built "__DATE__" "__TIME__ ;
 	return cvs;
       }
 
- ClassDef(StAngleCorrMaker,1)
+ ClassDef(StAngleCorrMaker,0)
 };
 
 #endif

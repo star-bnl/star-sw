@@ -169,7 +169,7 @@ class StEmcCalibrationMaker : public StMaker
            void    SetNEtaBins(Int_t a)           {   mNEtaBins = a; }
            void    SetEtaBinSize(Int_t a)         {   mEtaBinSize = a; }
 
-   ClassDef(StEmcCalibrationMaker, 1)  
+   ClassDef(StEmcCalibrationMaker,0)  
 };
 
 #endif

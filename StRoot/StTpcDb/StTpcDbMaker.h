@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.h,v 1.15 2002/04/02 00:16:31 hardtke Exp $
+ * $Id: StTpcDbMaker.h,v 1.16 2003/09/10 19:47:39 perev Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.h,v $
+ * Revision 1.16  2003/09/10 19:47:39  perev
+ * ansi corrs
+ *
  * Revision 1.15  2002/04/02 00:16:31  hardtke
  * New class that gets hit errors from database
  *
@@ -179,9 +182,9 @@ class StTpcDbMaker : public StMaker {
    virtual StTpcDb* tpcDbInterface() const;    //! return m_TpcDb
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.15 2002/04/02 00:16:31 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcDbMaker.h,v 1.16 2003/09/10 19:47:39 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(StTpcDbMaker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(StTpcDbMaker,0)   //StAF chain virtual base class for Makers
 };
 
 inline StTpcDb* StTpcDbMaker::tpcDbInterface() const {return m_TpcDb;}

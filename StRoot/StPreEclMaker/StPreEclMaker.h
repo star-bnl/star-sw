@@ -1,8 +1,11 @@
 //
-// $Id: StPreEclMaker.h,v 1.15 2003/05/26 13:44:19 suaide Exp $
+// $Id: StPreEclMaker.h,v 1.16 2003/09/10 19:47:27 perev Exp $
 //
 //
 // $Log: StPreEclMaker.h,v $
+// Revision 1.16  2003/09/10 19:47:27  perev
+// ansi corrs
+//
 // Revision 1.15  2003/05/26 13:44:19  suaide
 // added setPrint() method
 //
@@ -123,12 +126,12 @@ public:
   Bool_t doClearEmc;
 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StPreEclMaker.h,v 1.15 2003/05/26 13:44:19 suaide Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StPreEclMaker.h,v 1.16 2003/09/10 19:47:27 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
         
-  ClassDef(StPreEclMaker, 1)// Electromagnetic PreClusters maker
+  ClassDef(StPreEclMaker,0)// Electromagnetic PreClusters maker
 };
 
 #endif

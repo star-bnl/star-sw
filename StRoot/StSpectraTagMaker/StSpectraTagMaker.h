@@ -18,9 +18,9 @@ class StSpectraTagMaker : public StMaker {
    virtual Int_t  Make();
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSpectraTagMaker.h,v 1.1 2000/11/22 22:05:11 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSpectraTagMaker.h,v 1.2 2003/09/10 19:47:32 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(StSpectraTagMaker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(StSpectraTagMaker,0)   //StAF chain virtual base class for Makers
 };
 
 #endif

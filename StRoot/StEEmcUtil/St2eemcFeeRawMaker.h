@@ -1,5 +1,8 @@
-// $Id: St2eemcFeeRawMaker.h,v 1.1 2003/01/28 23:15:25 balewski Exp $
+// $Id: St2eemcFeeRawMaker.h,v 1.2 2003/09/10 19:47:09 perev Exp $
 // $Log: St2eemcFeeRawMaker.h,v $
+// Revision 1.2  2003/09/10 19:47:09  perev
+// ansi corrs
+//
 // Revision 1.1  2003/01/28 23:15:25  balewski
 // start
 //
@@ -32,7 +35,7 @@ class EEfeeRunDescr;
 
 class St2eemcFeeRawMaker : public StMaker {
  private:
-  // static Char_t  m_VersionCVS = "$Id: St2eemcFeeRawMaker.h,v 1.1 2003/01/28 23:15:25 balewski Exp $";
+  // static Char_t  m_VersionCVS = "$Id: St2eemcFeeRawMaker.h,v 1.2 2003/09/10 19:47:09 perev Exp $";
   TTree *moutTTree; ///< output TTree
   StEEmcDbMaker * meeDb; ///< to assess DB
   EEfeeRawEvent *meveTT; ///< output event
@@ -50,11 +53,11 @@ class St2eemcFeeRawMaker : public StMaker {
   virtual Int_t InitRun  (int runumber);///< to change time stamp in TTree
   virtual Int_t  Make();
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: St2eemcFeeRawMaker.h,v 1.1 2003/01/28 23:15:25 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: St2eemcFeeRawMaker.h,v 1.2 2003/09/10 19:47:09 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
-  ClassDef(St2eemcFeeRawMaker, 1) 
+  ClassDef(St2eemcFeeRawMaker,0) 
 };
 
 #endif

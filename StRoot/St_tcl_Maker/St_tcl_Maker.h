@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.h,v 1.22 2002/02/05 22:21:56 hardtke Exp $
+// $Id: St_tcl_Maker.h,v 1.23 2003/09/10 19:47:51 perev Exp $
 // $Log: St_tcl_Maker.h,v $
+// Revision 1.23  2003/09/10 19:47:51  perev
+// ansi corrs
+//
 // Revision 1.22  2002/02/05 22:21:56  hardtke
 // Move Init code to InitRun
 //
@@ -139,7 +142,7 @@ class St_tcl_Maker : public StMaker {
   virtual Int_t  Finish();
   virtual void   PrintInfo();
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.22 2002/02/05 22:21:56 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: St_tcl_Maker.h,v 1.23 2003/09/10 19:47:51 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
  private:
 
@@ -251,6 +254,6 @@ class St_tcl_Maker : public StMaker {
 
   TNtuple *mNtupleTcl; //!
   
-  ClassDef(St_tcl_Maker, 1)       //Cint definition
+  ClassDef(St_tcl_Maker,0)       //Cint definition
 };
 #endif

@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.h,v 1.8 2001/10/23 07:27:48 jcs Exp $
+// $Id: StFtpcDriftMapMaker.h,v 1.9 2003/09/10 19:47:16 perev Exp $
 // $Log: StFtpcDriftMapMaker.h,v $
+// Revision 1.9  2003/09/10 19:47:16  perev
+// ansi corrs
+//
 // Revision 1.8  2001/10/23 07:27:48  jcs
 // implement new StFtpcDbReader constructor
 //
@@ -57,7 +60,7 @@ class StFtpcDriftMapMaker : public StMaker {
  private:
    char*   fTableName;      // c-structure name that is same as table in database
    char*   fOutputFileName; // file name for output
-  // static Char_t m_VersionCVS = "$Id: StFtpcDriftMapMaker.h,v 1.8 2001/10/23 07:27:48 jcs Exp $";
+  // static Char_t m_VersionCVS = "$Id: StFtpcDriftMapMaker.h,v 1.9 2003/09/10 19:47:16 perev Exp $";
   // Int_t         m_mode;        // mode 1 = primaries;
    St_ftpcDimensions    *m_dimensions;    //!
    St_ftpcPadrowZ       *m_padrow_z;      //!
@@ -78,9 +81,9 @@ class StFtpcDriftMapMaker : public StMaker {
 
   // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcDriftMapMaker.h,v 1.8 2001/10/23 07:27:48 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcDriftMapMaker.h,v 1.9 2003/09/10 19:47:16 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
-  ClassDef(StFtpcDriftMapMaker, 1)  
+  ClassDef(StFtpcDriftMapMaker,0)  
 };
     
 #endif

@@ -99,7 +99,7 @@ struct testADC {
 
 #endif
 
-#ifdef unix
+#ifdef __unix__
 
 
 
@@ -205,7 +205,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 //		UINT32 mark = mzFastTimerMark() ;
 
 
-#ifdef unix
+#ifdef __unix__
 		static UINT32 cppStore[32] ;
 		UINT32 *ptrs = cppStore ;
 #else
@@ -230,7 +230,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 			register unsigned int fourth FCF_960_R11 ;
 
 			preburst4(cpp_r) ;	// this guy puts the results in r8 and r9!!!
-#ifdef unix
+#ifdef __unix__
 			first = *cpp_r ;
 			second = *(cpp_r+1) ;
 			third = *(cpp_r+2) ;
@@ -675,7 +675,7 @@ fcfClass::fcfClass(int det, u_short *table)
 {
 	detector = det ;
 
-#ifdef unix
+#ifdef __unix__
 	a8to10 = adc8to10_storage ;
 
 #else	// I960
@@ -731,7 +731,7 @@ fcfClass::fcfClass(int det, u_short *table)
 	}
 
 	static struct fcfResx res_slow[2][512] ;
-#ifdef unix
+#ifdef __unix__
 	static struct fcfResx res_fast_ux[2][FCF_MAX_RES_COU_FAST] ;
 	struct fcfResx *res_fast[2] = { res_fast_ux[0], res_fast_ux[1] } ;
 #else
@@ -830,7 +830,7 @@ inline int fcfClass::saveRes(struct fcfResx *res_p[], int cou, u_int *output)
 		cha >>= 6 ;	// it was multiplied by 64
 #endif
 
-#ifdef unix	// watchout for the ordering!
+#ifdef __unix__	// watchout for the ordering!
 		unsigned short *sh = (unsigned short *)output ;
 
 		*sh++ = pad_c ;

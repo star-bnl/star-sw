@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.h,v 1.15 2001/06/28 14:06:17 caines Exp $
+// $Id: St_stk_Maker.h,v 1.16 2003/09/10 19:47:50 perev Exp $
 // $Log: St_stk_Maker.h,v $
+// Revision 1.16  2003/09/10 19:47:50  perev
+// ansi corrs
+//
 // Revision 1.15  2001/06/28 14:06:17  caines
 // Remove references to dedx module spr now its own maker
 //
@@ -74,7 +77,7 @@ class TH2F;
 
 class St_stk_Maker : public StMaker {
 protected:
-// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.15 2001/06/28 14:06:17 caines Exp $";
+// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.16 2003/09/10 19:47:50 perev Exp $";
    Int_t  m_mode;      // mode 1 = primaries;
 	               // mode 2 = secondaries;
 	               // mode 3 = primaries to secondaries 
@@ -138,8 +141,8 @@ public:
    virtual Int_t  Make();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_stk_Maker.h,v 1.15 2001/06/28 14:06:17 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-   ClassDef(St_stk_Maker, 1)   //STAR chain virtual base class for Makers
+  {static const char cvs[]="Tag $Name:  $ $Id: St_stk_Maker.h,v 1.16 2003/09/10 19:47:50 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+   ClassDef(St_stk_Maker,0)   //STAR chain virtual base class for Makers
 };
 
 #endif

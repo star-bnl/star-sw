@@ -1,5 +1,8 @@
-// $Id: St_ems_Maker.h,v 1.13 2003/01/23 03:50:08 jeromel Exp $ 
+// $Id: St_ems_Maker.h,v 1.14 2003/09/10 19:47:46 perev Exp $ 
 // $Log: St_ems_Maker.h,v $
+// Revision 1.14  2003/09/10 19:47:46  perev
+// ansi corrs
+//
 // Revision 1.13  2003/01/23 03:50:08  jeromel
 // Include changed
 //
@@ -102,7 +105,7 @@ public:
   void   setEEMC(Short_t key){mEEMC = key; if (Debug()) printmEEMC();}
   void   setHistControl(Short_t key) {mHistControl = key;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_ems_Maker.h,v 1.13 2003/01/23 03:50:08 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_ems_Maker.h,v 1.14 2003/09/10 19:47:46 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   StEmcCollection*      getEmcCollection() {return  mEmcCollection;} //! 02-feb-2001 for backward capability
 
 protected:
@@ -129,7 +132,7 @@ private:
   Short_t mBEMC;            // Switch for BEMC; 0 => off; 1=> on
   Short_t mEEMC;            // Switch for EEMC; 0 => off; 1=> on
 
-  ClassDef(St_ems_Maker, 1)  
+  ClassDef(St_ems_Maker,0)  
 };
 
 #endif

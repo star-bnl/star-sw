@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.h,v 1.13 2002/05/21 22:52:56 lasiuk Exp $
+ * $Id: StRichSpectraMaker.h,v 1.14 2003/09/10 19:47:30 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRichSpectraMaker.h,v $
+ * Revision 1.14  2003/09/10 19:47:30  perev
+ * ansi corrs
+ *
  * Revision 1.13  2002/05/21 22:52:56  lasiuk
  * attempt 2
  *
@@ -246,7 +249,7 @@ protected:
     
 virtual const char *GetCVS() const	{
     static const char cvs[]=
-	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.13 2002/05/21 22:52:56 lasiuk Exp $ built "__DATE__" "__TIME__ ;
+	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.14 2003/09/10 19:47:30 perev Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
 }
 public:
@@ -255,7 +258,7 @@ public:
     }
 private:
     // the following is a ROOT macro  that is needed in all ROOT code
-    ClassDef(StRichSpectraMaker, 1)   //StAF chain virtual base class for Makers
+    ClassDef(StRichSpectraMaker,0)   //StAF chain virtual base class for Makers
 	};
 
 #endif
