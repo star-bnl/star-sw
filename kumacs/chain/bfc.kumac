@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.42 1998/09/10 18:33:01 kathy Exp $
+* $Id: bfc.kumac,v 1.43 1998/09/11 14:39:04 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.43  1998/09/11 14:39:04  kathy
+* take care of errors when reading input file using evin; take care of case when next record on file is run directory in bfc_process -- skip out and go to bfc_finish
+*
 * Revision 1.42  1998/09/10 18:33:01  kathy
 * add new chain variable - dout - and make new output file output_dst_file; changed steering kumac for ftpc from call_bfc_reco_ftpc to call_bfc_reco_trk_ftpc; cleaned up call_bfc_tpc_svt_sim_global_dst.kumac
 *
@@ -155,8 +158,13 @@
 *                                   dpnt  - dst point filler
 *                                   desum - dst event summary - now works
 * 
+* editted 9/10/98 K. Turner - check on vector havedstrunsum and 
+*                             skip out - was set in bfc_util
 * editted 9/10/98 K. Turner - add new calculation to bfc: output_dst_file
 *                             for use with new chain variable dout
+* editted 9/11/98 K. Turner - check if problem during read from 
+*                             read_table_from_file and skip out
+*                             
 * ******************************************************************************
 * -- DICTIONARY OF INPUTS TO BFC.KUMAC --
 * TOP        - top level directory to search for kumacs 
@@ -441,7 +449,11 @@ MACRO bfc _
    exec bfc_util#bfc_process [chain]
    if (STAF_STATUS(1).ne. 1) goto ABEND
    if ($vexist(havedstrunsum).ne.0) then
-     message ' in bfc, skip to bfc_finish because run_summary exists'
+     message ' BFC: skip to bfc_finish because got to run_summary'
+     goto FINISH
+   endif
+   if ($vexist(readprob).ne.0) then
+     message ' BFC: skip to bfc_finish because problem reading input file'
      goto FINISH
    endif
    nevents = [nevents] + 1
