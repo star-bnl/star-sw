@@ -77,14 +77,14 @@ c
 #include "tpg_pad_plane_pars.inc"
 #include "tpg_pad_plane_st.inc"
 
-#include "tcl_tppad_pars.inc"
-#include "tcl_tppad_st.inc"
+#include "tss_tppad_pars.inc"
+#include "tss_tppad_st.inc"
 
-#include "tcl_tppixel_pars.inc"
-#include "tcl_tppixel_st.inc"
+#include "tss_tppixel_pars.inc"
+#include "tss_tppixel_st.inc"
 
-#include "tcl_tpmcpix_pars.inc"
-#include "tcl_tpmcpix_st.inc"
+#include "tss_tpmcpix_pars.inc"
+#include "tss_tpmcpix_st.inc"
 
 #include "tcl_tpcluster_pars.inc"
 #include "tcl_tpcluster_st.inc"
@@ -278,14 +278,14 @@ c
 #include "tpg_pad_plane_pars.inc"
 #include "tpg_pad_plane_st.inc"
 
-#include "tcl_tppad_pars.inc"
-#include "tcl_tppad_st.inc"
+#include "tss_tppad_pars.inc"
+#include "tss_tppad_st.inc"
 
-#include "tcl_tppixel_pars.inc"
-#include "tcl_tppixel_st.inc"
+#include "tss_tppixel_pars.inc"
+#include "tss_tppixel_st.inc"
 
-#include "tcl_tpmcpix_pars.inc"
-#include "tcl_tpmcpix_st.inc"
+#include "tss_tpmcpix_pars.inc"
+#include "tss_tpmcpix_st.inc"
 
 #include "tcl_tpcluster_pars.inc"
 #include "tcl_tpcluster_st.inc"
@@ -621,14 +621,14 @@ c				  result in failure now (was row AND sector)
 #include "tpg_pad_plane_pars.inc"
 #include "tpg_pad_plane_st.inc"
 
-#include "tcl_tppad_pars.inc"
-#include "tcl_tppad_st.inc"
+#include "tss_tppad_pars.inc"
+#include "tss_tppad_st.inc"
 
-#include "tcl_tppixel_pars.inc"
-#include "tcl_tppixel_st.inc"
+#include "tss_tppixel_pars.inc"
+#include "tss_tppixel_st.inc"
 
-#include "tcl_tpmcpix_pars.inc"
-#include "tcl_tpmcpix_st.inc"
+#include "tss_tpmcpix_pars.inc"
+#include "tss_tpmcpix_st.inc"
 
 *  Inputs:
 	INTEGER                      Sector      !Sector no. of current data set.
@@ -828,14 +828,14 @@ C----------------------------------------------------------------------
 #include "tpg_pad_plane_pars.inc"
 #include "tpg_pad_plane_st.inc"
 
-#include "tcl_tppad_pars.inc"
-#include "tcl_tppad_st.inc"
+#include "tss_tppad_pars.inc"
+#include "tss_tppad_st.inc"
 
-#include "tcl_tppixel_pars.inc"
-#include "tcl_tppixel_st.inc"
+#include "tss_tppixel_pars.inc"
+#include "tss_tppixel_st.inc"
 
-#include "tcl_tpmcpix_pars.inc"
-#include "tcl_tpmcpix_st.inc"
+#include "tss_tpmcpix_pars.inc"
+#include "tss_tpmcpix_st.inc"
 
 *  Inputs:
 	INTEGER                      Sector      !Sector no. of current data set.
@@ -1065,14 +1065,14 @@ c	    Jsector =      tppad( Jtppad ).tpc_row / 100 + 1
 #include "tpg_pad_plane_pars.inc"
 #include "tpg_pad_plane_st.inc"
 
-#include "tcl_tppad_pars.inc"
-#include "tcl_tppad_st.inc"
+#include "tss_tppad_pars.inc"
+#include "tss_tppad_st.inc"
 
-#include "tcl_tppixel_pars.inc"
-#include "tcl_tppixel_st.inc"
+#include "tss_tppixel_pars.inc"
+#include "tss_tppixel_st.inc"
 
-#include "tcl_tpmcpix_pars.inc"
-#include "tcl_tpmcpix_st.inc"
+#include "tss_tpmcpix_pars.inc"
+#include "tss_tpmcpix_st.inc"
 
 #include "tcl_tpcluster_pars.inc"
 #include "tcl_tpcluster_st.inc"

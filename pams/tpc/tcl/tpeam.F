@@ -57,11 +57,11 @@ C-----------------------------------------------------------------------
 #include "tcl_tphit_pars.inc"
 #include "tcl_tphit_st.inc"
 
-#include "tcl_tppixel_pars.inc"
-#include "tcl_tppixel_st.inc"
+#include "tss_tppixel_pars.inc"
+#include "tss_tppixel_st.inc"
 
-#include "tcl_tpmcpix_pars.inc"
-#include "tcl_tpmcpix_st.inc"
+#include "tss_tpmcpix_pars.inc"
+#include "tss_tpmcpix_st.inc"
 
 #include "tcl_tpcluster_pars.inc"
 #include "tcl_tpcluster_st.inc"
