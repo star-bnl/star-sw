@@ -1,6 +1,9 @@
-* $Id: richgeo.g,v 1.10 2001/03/13 20:56:33 nevski Exp $
+* $Id: richgeo.g,v 1.11 2001/03/13 23:33:42 nevski Exp $
 *
 * $Log: richgeo.g,v $
+* Revision 1.11  2001/03/13 23:33:42  nevski
+* quartz absco corrected back
+*
 * Revision 1.10  2001/03/13 20:56:33  nevski
 * variable rich position taken from DB
 *
@@ -99,8 +102,8 @@ created June 1, 1998 supposely
         Rindex = { 1.528309, 1.533333, 1.538243, 1.544223,1.550568, 1.557770, 
                    1.565463, 1.574765, 1.584831, 1.597027, 1.611858, 1.62366, 
                    1.63815}                    ! Refraction index
-        Absco  = { 1, 1, 1, 1, 1, 29.85, 7.34, 4.134, 1.273, .722, .365, 
-                   .10051, 0.001}              ! Absorbtion lenghts (in cm)
+        Absco  = { 1.e6, 1.e6, 1.e6, 1.e6, 1.e6, 29.85, 7.34, 4.134, 1.273,
+                    .722, .365, .10051, 0.001} ! Absorbtion lenghts (in cm)
 
     fill RMAT  ! Material property for Cerenkov light
         MATE   = 'FREO'             ! material
