@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.76 2004/08/07 03:01:24 perev Exp $
+// $Id: St_tpt_Maker.cxx,v 1.77 2005/01/13 21:43:15 jeromel Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.77  2005/01/13 21:43:15  jeromel
+// Why 3 ?? Extend mask to sizeof()=4
+//
 // Revision 1.76  2004/08/07 03:01:24  perev
 // TF1 cleanup
 //
@@ -467,7 +470,7 @@ Int_t St_tpt_Maker::Make(){
     if(m_Mode & 0x01)
       {
 	Float_t x[3], xprime[3] ;
-	Int_t   option = (m_Mode & 0x3FFE) >> 1;
+	Int_t   option = (m_Mode & 0x7FFFFFFE) >> 1;
 	// request from Jim Thomas to have 2 (or more)
 	// method in StMagUtilities. We then use the
 	// option as a mask. J.Lauret July 2001. 
