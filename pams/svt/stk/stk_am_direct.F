@@ -3,8 +3,8 @@
      2               spt_h,               spt ,
      3          mcgroups_h,          mcgroups ,
      4           mctrack_h,           mctrack ,
-     5              geom_h,              geom ,
-     6            stkpar_h,            stkpar) 
+     5              geom_h,              geom , 
+     6            stkpar_h,            stkpar )
       IMPLICIT NONE
 C     SYNOPSIS:
 C     fill ctrack table with all space points belonging to MC tracks
@@ -14,7 +14,7 @@ c     This module fills the table track with svt space points
 C     belonging to MC tracks.
 c     It has to be followed by a call to
 c     stk_am_fit to perform
-c     a layer to layer helix fit assumin a 3 layer design with the
+c     a layer to layer helix fit assuming a 3 layer design with the
 c     appropriate MCS.
 C     
 C     A search is performed in 2 nested loops. It assumed that all tracks
@@ -39,6 +39,9 @@ C
 C     CREATION DATE:
 C     22-jul-1993,cap written
 C     Copyright 1993 WSU
+C
+C     07-sep-1998, lilian MARTIN. modified to ignore the ssd hits if the trackers
+C                  run with 3 layers only.
 C     
 C<-----------------------------------------------------------------------------
       
@@ -150,14 +153,13 @@ c     loop on all space points to find current track
 
       do while (ispt.lt.spt_h.nok)
          ispt = ispt + 1
-      
-         
-         if( spt(ispt).id_wafer/1000 .lt. (stkpar(1).nlayers*2+1))then
-            if (spt(ispt).id_mctrack.lt.1) then
-               write(msg,1028) ispt
-               call message(msg,1,msg_id(8))
-            else 
-               
+            
+         if (spt(ispt).id_mctrack.lt.1) then
+            write(msg,1028) ispt
+            call message(msg,1,msg_id(8))
+         else 
+c the tracking is done with 3 layers, the ssd hits have to be ignored 
+            if (spt(ispt).id_wafer.lt.7000.or.stkpar(1).nlayers.eq.4) then
                mctrk = spt(ispt).id_mctrack ! monte carlo track index
                if (mctrackkey(mctrk).le.0) then
                   if (idtrack.ge.mctrack_h.maxlen) then
@@ -190,6 +192,7 @@ c     loop on all space points to find current track
                            sec = g2t_track(imctrk).start_vertex_p
                            pid = g2t_track(imctrk).ge_pid
                         end if
+                        
                      end if
                      mctrack(jdtrack).sec  = sec   
 C     sec=1 primary, sec=2 secondary, sec=0 unknown
@@ -206,37 +209,32 @@ C     sec=1 primary, sec=2 secondary, sec=0 unknown
                   end if
                end if
                mctrack(jdtrack).nspt  = mctrack(jdtrack).nspt + 1
-               
-c     Temporarily fill ident with layer of space point
+
+c           Temporarily fill ident with layer of space point
                mcgroups(n_groups).ident = spt(ispt).id_wafer/1000
                mcgroups(n_groups).id1 = jdtrack ! id of track
                mcgroups(n_groups).id2 = spt(ispt).id ! id of spt on track
                n_groups = n_groups + 1
-               if( n_groups .gt. mcgroups_h.maxlen) then
-                  write(6,*) 'Not enough mcgroups'
-                  stk_am_direct = STAFCV_BAD
-                  return
-               endif
-            endif
-         endif
+            end if
+         end if
       end do
-      
+
 c     update the mctrack table header
-      
+
       mctrack_h.nok       = idtrack
       mcgroups_h.nok      = n_groups - 1
 c     sort groups table by track id
-      
+
       ok = tls_quick_sort_i(mcgroups_h.nok, mcgroups(1).id1,
-     >     mcgroups(2).id1, mcgroups)
-      
+     >         mcgroups(2).id1, mcgroups)
+
 c     put spt table back to sorted by id
       
       ok = tls_quick_sort_i(spt_h.nok, spt(1).id, spt(2).id, spt)
-      
+
 c     now sort groups table by hit position within track
       
-      
+
       i = 1
       do while ( i .le. mcgroups_h.nok)
          jdtrack = mcgroups(i).id1

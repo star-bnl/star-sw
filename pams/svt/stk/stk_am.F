@@ -28,6 +28,8 @@ C     DATE:
 c     27-july-1994 c.a.p. written
 c     Wed Aug 20 11:21:43 EDT 1997 H.Caines adapted to SL97a and removed
 c                                  ctrack table
+c     07-sep-1998 L.Martin call to stk_am_direct modified to include the 
+c                          stkpar table as argument.
 c
 C     argument declarations
 C     =====================
@@ -69,6 +71,12 @@ C     =======
 C     EXECUTABLE CODE:
 C     ================
       WRITE(*,*) 'STK_AM: Starting ##################################'
+      write(6,*)' Tracking conditions'
+      write(6,777)'mode (1=primary/2=secondary) :',stkpar(1).mode
+      write(6,777)'method (1=vtx in fit/2=no)   :',stkpar(1).method
+      write(6,777)'number of superlayers        :',stkpar(1).nlayers
+ 777  format(a30,i2)
+
       stk_am = stafcv_ok
 
       write(mess,1000) 
@@ -86,11 +94,6 @@ c     initialization phase
      7            mckine_h,            mckine )
       endif
 
-      if( spt_h.nok .lt. 3) then
-         write(6,*) 'Not enough spts quitting'
-         return
-      endif
-
       if (stkpar(1).vertex.eq.1) then
          status = STK_AM_VERTEX_DIRECT(
      1         g2t_event_h,         g2t_event ,
@@ -106,13 +109,14 @@ c            stk_am = status
       end if
             
       if (stkpar(1).direct.eq.1) then
+c modified to add the stkpar table as argument.
          status = STK_AM_DIRECT(
      1         g2t_track_h,         g2t_track ,
      2               spt_h,               spt ,
      3          mcgroups_h,           mcgroups,
      4           mctrack_h,            mctrack,
-     5              geom_h,               geom,
-     6           stkpar_h,             stkpar )
+     5              geom_h,              geom ,
+     6            stkpar_h,            stkpar )
          if (status.ne.stafcv_ok) then
 c            stk_am = status
             write(mess,1001) 'std','stk_am_direct'
@@ -171,8 +175,6 @@ c     normal reconstruction loop. (wkw)
                   call message(mess,1,mess_id(8))
                end if
 
-               if( (spt_h.nok - groups_h.nok) .lt. 3) goto 100
-               
          endif
 
             
@@ -306,7 +308,8 @@ c               filler(1).th87  =    th
      4             track_h,             track ,
      5            filler_h,            filler ,
      6            config_h,            config ,
-     7             geom_h,              geom )
+     7              geom_h,              geom ,
+     8            stkpar_h,            stkpar )
                   if (status.ne.stafcv_ok) then
                      write(mess,1001) 'stf','stk_am_fill3'
                      call message(mess,1,mess_id(6))
@@ -325,34 +328,29 @@ c               filler(1).th87  =    th
                      call message(mess,1,mess_id(6))
                   end if
                end if
-               if(track_h.nok-oldcandidate .gt. 0) then
-                  status = STK_AM_FIT(
-     1                 stkpar_h,            stkpar ,
-     2                 spt_h,               spt ,
-     3                 vtx_h,               vtx ,
-     4                 groups_h,            groups ,    
-     5                 track_h,             track )
-                  if (status.ne.stafcv_ok) then
-                     write(mess,1001) 'stfit','stk_am_fit'
-                     call message(mess,1,mess_id(7))
-                  end if
-                  
-                  status = STK_AM_SELECT(
-     1                 stkpar_h,            stkpar ,
-     2                 spt_h,               spt ,
-     3                 groups_h,            groups ,
-     4                 track_h,             track )
-                  if (status.ne.stafcv_ok) then
-                     write(mess,1001) 'sts','stk_am_select'
-                     call message(mess,1,mess_id(8))
-                  end if
-               endif
+            
+               status = STK_AM_FIT(
+     1            stkpar_h,            stkpar ,
+     2               spt_h,               spt ,
+     3               vtx_h,               vtx ,
+     4            groups_h,            groups ,    
+     5             track_h,             track )
+               if (status.ne.stafcv_ok) then
+                  write(mess,1001) 'stfit','stk_am_fit'
+                  call message(mess,1,mess_id(7))
+               end if
+            
+               status = STK_AM_SELECT(
+     1            stkpar_h,            stkpar ,
+     2               spt_h,               spt ,
+     3            groups_h,            groups ,
+     4             track_h,             track )
+               if (status.ne.stafcv_ok) then
+                  write(mess,1001) 'sts','stk_am_select'
+                  call message(mess,1,mess_id(8))
+               end if
                print*,'Found ',track_h.nok-oldcandidate
-               if (iteration.eq.stkpar(1).nitermax) then
-                  done = .true.
-               elseif( (spt_h.nok - groups_h.nok) .lt. 3) then
-                  done = .true.
-               endif
+               if (iteration.eq.stkpar(1).nitermax) done = .true.
                if (oldcandidate.eq.track_h.nok) then
                   iternull = iternull + 1
                   if (iternull.eq.stkpar(1).niternull) then
@@ -458,31 +456,28 @@ c     filler(1).th65  =    th
                         end if
                      end if
                      
-                     if( track_h.nok-oldcandidate .gt. 0) then
-                        status = STK_AM_FIT(
-     1                       stkpar_h,            stkpar ,
-     2                       spt_h,               spt ,
-     3                       vtx_h,               vtx ,
-     4                       groups_h,            groups ,
-     5                       track_h,             track )
-                        if (status.ne.stafcv_ok) then
-                           write(mess,1001) 'stfit','stk_am_fit'
-                           call message(mess,1,mess_id(7))
-                        end if
-                        
-                        status = STK_AM_SELECT(
-     1                       stkpar_h,            stkpar ,
-     2                       spt_h,               spt ,
-     3                       groups_h,            groups ,
-     4                       track_h,             track )
-                        if (status.ne.stafcv_ok) then
-                           write(mess,1001) 'sts','stk_am_select'
-                           call message(mess,1,mess_id(8))
-                        end if
-                     endif
+                     status = STK_AM_FIT(
+     1            stkpar_h,            stkpar ,
+     2               spt_h,               spt ,
+     3               vtx_h,               vtx ,
+     4            groups_h,            groups ,
+     5             track_h,             track )
+                     if (status.ne.stafcv_ok) then
+                        write(mess,1001) 'stfit','stk_am_fit'
+                        call message(mess,1,mess_id(7))
+                     end if
+                     
+                     status = STK_AM_SELECT(
+     1            stkpar_h,            stkpar ,
+     2               spt_h,               spt ,
+     3            groups_h,            groups ,
+     4             track_h,             track )
+                     if (status.ne.stafcv_ok) then
+                        write(mess,1001) 'sts','stk_am_select'
+                        call message(mess,1,mess_id(8))
+                     end if
                      print*,'Found ',track_h.nok-oldcandidate
                      if (iteration.eq.stkpar(1).nitermax) done=.true.
-                     if( (spt_h.nok - groups_h.nok) .lt. 3) done = .true.
                      if (oldcandidate.eq.track_h.nok) then
                         iternull = iternull + 1
                         if (iternull.eq.stkpar(1).niternull) then
@@ -502,8 +497,6 @@ c     filler(1).th65  =    th
             
          end if
 
-
- 100     continue
 c     Note: need to call kine even if not filling since
 c     sgr may have been called
       if (track_h.nok.gt.0) then

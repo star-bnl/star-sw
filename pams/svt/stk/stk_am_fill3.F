@@ -5,7 +5,8 @@
      4             track_h,             track ,
      5            filler_h,            filler ,
      6            config_h,            config ,
-     7              geom_h,              geom ) 
+     7              geom_h,              geom ,
+     8            stkpar_h,            stkpar ) 
       IMPLICIT NONE
 C     SYNOPSIS:
 C     fill track table with all relevant spacepoints combinations
@@ -34,6 +35,15 @@ C                       default values for filler
 C     21-oct-1993,c.p.  Written, Integration into tas
 C     Aug 20 1997 hlc   Adapted to SL97a removed ctrack table
 C     Aug 25 1997 hlc   Added in groups table linking spt->groups.    
+C     07-sep-1998 l.m.  Adapted to ignore the SSD hits when present and 
+C                       preserve a 3 layer tracking when 4 layers are loaded
+C                       (config(1).nlayer=7)
+C     05-feb-1998 l.m.  Modified to have stk_stkpar as an argument. 
+C                       Remove all references to 'first' which does not work.
+C                       Its aim was to avoid the make up of the wafer lookup 
+C                       table at each iteration. This part is now control by 
+C                       stk_stkpar[0].fast_search which is initialized to 1 
+C                       and set to 0 after the 1st iteration. 
 C     ARGUMENTS:
 C     spt_h    header to table spt     svt space points
 C     spt      rows of table   spt
@@ -52,23 +62,26 @@ C     =====================
       
 C     Local Declarations:
 C     ===================
-      real       x(3,0:6), v(3,6,0:6), vm(6,0:6), cth, cthij(6,0:6)
-      integer    extra(6), ispts(0:6), ispt, jspt(0:6), iwafer(0:6)
-      integer    jwafer(0:6),n_groups
+      real       x(3,0:7), v(3,6,0:7), vm(7,0:7), cth, cthij(7,0:7)
+      integer    extra(7), ispts(0:7), ispt, jspt(0:7), iwafer(0:7)
+      integer    jwafer(0:7),n_groups
       integer    iwafer1, iwafer2, n, kwafer
       integer    iladder, iladder1, iladder2
       integer    layer, layerp, layerpp, k
-      logical    layers(6), loop(6), done(6), first
+      logical    layers(7), loop(7), done(7), first
 
-      integer    waferkey(300,6,0:300), waferkeyn(6,0:300)
-      integer    sptkey(200,300), sptkeyn(300)
-      integer    waferi(0:6),wafern(0:6), waferntot
+      integer    waferkey(570,7,0:570), waferkeyn(7,0:570)
+      integer    sptkey(200,570), sptkeyn(570)
+      real       list(2,570)
+
+      integer    waferi(0:7),wafern(0:7), waferntot
       integer    itrack
       integer    ilayer0, ilayer1, ilayer2, ilayer
       integer    flag, id
       integer    ilist
-      real       list(2,300)
       save       first
+
+ 
 
 
 C     RETURN:
@@ -91,17 +104,8 @@ C     ================
 
       stk_am_fill3 = stafcv_ok
 
-c     wkw: don't do setup on subsequent loops:
-c      if (track_h.nok.eq.0) then
-         first = .true.
-c      else
-c         first = .false.
-c      endif
-c     Note: had to comment out the preceeding because pretreatment
-c     with sgr fills track
-
-      if (first) then
-      
+      if (stkpar(1).fast_search.eq.1) then
+         stkpar(1).fast_search=0      
          do ilayer1 = 1, 6
             do ilayer2 = 1, 6
                cthij(ilayer2,ilayer1) = 0.
@@ -127,7 +131,8 @@ c     wkw: make cthij parameters
          waferntot     = 0
          waferi(0)     = 0
          wafern(0)     = 0
-c         do ilayer = 1, config(1).n_layer
+clm         do ilayer = 1, config(1).n_layer
+clm the number of layers is hardwired because of the SSD
          do ilayer = 1, 6
             wafern(ilayer) = 
      &           config(1).n_ladder(ilayer)*
@@ -224,15 +229,7 @@ c         do ilayer = 1, config(1).n_layer
             end do
          end do
 
-c         do iwafer1 = 0, waferntot
-c            do ilayer1 = 1, 6
-c               write(884,*) 'iwafer, ilayer, n:',iwafer1,ilayer1,
-c     &              waferkeyn(ilayer1,iwafer1) 
-c            end do
-c         end do
-         
-
-      end if  ! first call
+      end if  ! end of fast search
       
       n_groups = groups_h.nok + 1
       if (spt_h.nok.eq.0) then
@@ -289,14 +286,14 @@ c     sort the space points by wafer and count them
       do ispt = 1, spt_h.nok   ! count
          kwafer       = spt(ispt).id_wafer
          ilayer       = kwafer/1000
+         if (ilayer.eq.8) ilayer=7
          iwafer1      = (kwafer-ilayer*1000)/100
          iladder      =  kwafer-ilayer*1000-iwafer1*100
          iwafer2  = waferi(ilayer) + 
      &        (iladder-1)*config(1).n_wafer(ilayer) + iwafer1
-
-
          if (kwafer.ne.geom(iwafer2).id) then
-            if (kwafer.gt.7000.and.kwafer.lt.9000.and.config(1).n_layer.eq.7) then
+            if (kwafer.gt.7000.and.kwafer.lt.9000
+     &           .and.config(1).n_layer.eq.7) then
 * it is ok : the SSD is in but we do not want to use the hits
             else
                write(6,*) ' fatal mis-match'
@@ -311,10 +308,6 @@ c     sort the space points by wafer and count them
          endif
 
       end do ! spt = 1, spt_h.nok
-
-c      do iwafer1 = 1, waferntot
-c         write(886,*) 'wafer, nspt:',iwafer1,sptkeyn(iwafer1)
-c      end do
 
 c     wkw: start where we left off on the last loop
       itrack = track_h.nok
@@ -333,8 +326,6 @@ c     -------------------------------------------------
       jspt(1)   = 0
       jwafer(1) = 1
       iwafer(1) = waferkey(jwafer(1),1,0)
-c      write(889,*) '1:jwafer,iwafer,nspt:',jwafer(1),iwafer(1),
-c     &     sptkeyn(iwafer(1))
       done(1)   = .false.
       extra(1)  = 0
 
@@ -344,9 +335,6 @@ c     &     sptkeyn(iwafer(1))
          if (extra(1).lt.1) then
 
             jspt(1) = jspt(1) + 1
-
-c            write(889,*) 'jspt(1),jwafer(1),iwafer(1),n:',
-c     &           jspt(1),jwafer(1),iwafer(1),sptkeyn(iwafer(1))
 
             if (jspt(1).gt.sptkeyn(iwafer(1))) then
 
@@ -362,7 +350,6 @@ c     &           jspt(1),jwafer(1),iwafer(1),sptkeyn(iwafer(1))
                
             else 
                ispts(1) = sptkey(jspt(1),iwafer(1))
-c               write(889,*) 'spt(1):',ispts(1)
                if (spt(ispts(1)).flag.eq.0) then
                   layer   = 1
                   layerp  = 0
@@ -390,7 +377,6 @@ c               write(889,*) 'spt(1):',ispts(1)
                end if
             end if
          else if (extra(1).eq.1) then
-c            write(889,*) 'extra(1).eq.1'
             done(1)   = .false.
             extra(1)  = 2
             loop(1)   = .true.
@@ -429,9 +415,6 @@ c     -------------------------------------------------
             
             jspt(2) = jspt(2) + 1
             iwafer(2) = waferkey(jwafer(2),2,iwafer(layerp))
-
-c      write(889,*) '2:jwafer,iwafer,nspt:',jwafer(2),iwafer(2),
-c     &     sptkeyn(iwafer(2))
 
             if (jspt(2).gt.sptkeyn(iwafer(2))) then
                
@@ -531,15 +514,10 @@ c     -------------------------------------------------
             layerpp =  -1
          end if
          
-c         write(889,*) 'layer, p, pp:',3,layerp, layerpp
-
         if (extra(3).lt.1) then
             
             jspt(3)   = jspt(3) + 1
             iwafer(3) = waferkey(jwafer(3),3,iwafer(layerp))
-
-c            write(889,*) '3:jwafer,iwafer,nspt:',jwafer(3),iwafer(3),
-c     &           sptkeyn(iwafer(3))
 
             if (jspt(3).gt.sptkeyn(iwafer(3))) then
                
@@ -655,15 +633,10 @@ c     -------------------------------------------------
             layerpp =  -1
          end if               
          
-c         write(889,*) 'layer, p, pp:',4,layerp, layerpp
-
          if (extra(4).lt.1) then
             
             jspt(4) = jspt(4) + 1
             iwafer(4) = waferkey(jwafer(4),4,iwafer(layerp))
-
-c            write(889,*) '4:jwafer,iwafer,nspt:',jwafer(4),iwafer(4),
-c     &     sptkeyn(iwafer(4))
 
             if (jspt(4).gt.sptkeyn(iwafer(4))) then
                
@@ -800,16 +773,11 @@ c     -------------------------------------------------
             layerpp =  -1
          end if
          
-c         write(889,*) 'layer, p, pp:',5,layerp, layerpp
-
          if (extra(5).lt.1) then
             
             jspt(5) = jspt(5) + 1
             iwafer(5) = waferkey(jwafer(5),5,iwafer(layerp))
 
-c            write(889,*) '5:jwafer,iwafer,nspt:',jwafer(5),iwafer(5),
-c     &           sptkeyn(iwafer(5))
-      
             if (jspt(5).gt.sptkeyn(iwafer(5))) then
                
                if (jwafer(5).lt.waferkeyn(5,iwafer(layerp))) then
@@ -970,15 +938,10 @@ c     -------------------------------------------------
             layerpp =  -1
          end if
       
-c         write(889,*) 'layer, p, pp:',6,layerp, layerpp
-
          if (extra(6).lt.1) then
 
             jspt(6) = jspt(6) + 1
             iwafer(6) = waferkey(jwafer(6),6,iwafer(layerp))
-
-c            write(889,*) 'jspt(6),jwafer(6),iwafer(6),n:',
-c     &           jspt(6),jwafer(6),iwafer(6),sptkeyn(iwafer(6))
 
             if (jspt(6).gt.sptkeyn(iwafer(6))) then
                
@@ -1081,8 +1044,6 @@ c     &           jspt(6),jwafer(6),iwafer(6),sptkeyn(iwafer(6))
             end if
          else if (extra(6).eq.1) then
 
-c            write(889,*) 'extra(1).eq.6'
-            
             done(6)   = .false.
             extra(6)  = 2
             loop(6)   = .true.
@@ -1099,8 +1060,6 @@ c            write(889,*) 'extra(1).eq.6'
 c     -----------------------------------------
 c     consider track candidate for storage
                               
-c            write(889,*) ' considering track for storage:',itrack+1
-
          if (itrack.ge.track_h.maxlen) then 
             write(6,1007) itrack
             done(1)   = .true.

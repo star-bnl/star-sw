@@ -18,8 +18,8 @@ interface stk_am_direct : amiModule {
                 , inout sgr_groups      mcgroups
                 , inout stk_track       mctrack
 		, in    svg_geom        geom
-                , in    stk_stkpar      stkpar
+		, in    stk_stkpar      stkpar
 		);
 	};
-/* Last mod. for  stk_am_direct: $Date: 1998/12/11 18:14:21 $ */
+/* Last mod. for  stk_am_direct: $Date: 1999/02/14 21:44:17 $ */
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: spr_svt.cc,v 1.5 1998/12/03 21:05:31 fisyak Exp $
+ * $Id: spr_svt.cc,v 1.6 1999/02/14 21:44:14 caines Exp $
  *
  * Author: blasiuk and nyfeiman 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: spr_svt.cc,v $
+ * Revision 1.6  1999/02/14 21:44:14  caines
+ * Code altered to include SSD
+ *
  * Revision 1.5  1998/12/03 21:05:31  fisyak
  * Add type_of_call for NT
  *
@@ -23,12 +26,12 @@
 #include "spr_svt.h"
 
 #define   MAXROWS         10000
-#define   MAXPOINTS       10
+#define   MAXPOINTS       50
 #include <iostream.h>
 #include <math.h>
 //#include <vector>
 
-#define MYDEBUG 0
+#define MYDEBUG 1
 #define idb if(MYDEBUG) cout
 // SCL
 
@@ -51,6 +54,10 @@
     int jj=0;
     int kk=0;
     
+    float u_ab_x, u_ab_y, u_ab_z;
+    float norm, cos_theta;
+    int wafer_no;
+    
     idb << "*****************************************************" << endl;
     idb << "*            dE/dx and pid for the SVT              *" << endl;
     idb << "*---------------------------------------------------*" << endl;
@@ -60,6 +67,7 @@
     idb << "*  dE/dx - pid            : spr module              *" << endl;
     idb << "*  Hypothetical Pid is set to zero                  *" << endl; 
     idb << "*****************************************************" << endl;
+    cout << "Helens version" << endl;
     
     // used to check global tracks here!
     
@@ -114,93 +122,137 @@
     idb << "(svtTrack[ii].nspt) " << (svtTrack[ii].nspt) << endl;
     
     for (ii = 0; ii<numberOfTracks; ii++) {
-      idb << ii << " # of points on track " << (svtTrack[ii].nspt) << endl;
-      int numberOfPointsOnTrack = svtTrack[ii].nspt;
-      int trackId=(svtTrack[ii].id);  // needed as an index
+      svtTrack[ii].dedx[0] = 0.;
+      svtTrack[ii].dedx[1] = 0.;
+      if ( svtTrack[ii].flag > 0 ){
+	idb << ii << " # of points on track " << (svtTrack[ii].nspt) << endl;
+	int numberOfPointsOnTrack = svtTrack[ii].nspt;
+	int trackId=(svtTrack[ii].id);  // needed as an index
 	
-      // zero arrays (not necessary with STL--use clear() )
-      for(kk=0; kk<MAXPOINTS; kk++) {
-	spacePoints[kk]       = 0;
-	spacePointsCharge[kk] = 0;
-	pathLength[kk]        = 0;
-	ionization[kk]        = 0;
-      }
-	
-      //
-      // get id's of points for the iith track
-      // To gain access, must loop over "groups" of space points
-      //
-
-      //
-      // Match the group and track ID numbers!
-      //
-	
-      int index = 0;
-      idb << "(svtGroupsH->nok) " << (svtGroupsH->nok) << endl;
-      for (jj=0; jj<(svtGroupsH->nok); jj++) {
-
-	if (trackId == svtGroups[jj].id1) {
-	  spacePoints[index] = svtGroups[jj].id2;
-	  index++;    // can incorporate this into the spacePoints[index]?
+	// zero arrays (not necessary with STL--use clear() )
+	for(kk=0; kk<MAXPOINTS; kk++) {
+	  spacePoints[kk]       = 0;
+	  spacePointsCharge[kk] = 0;
+	  pathLength[kk]        = 0;
+	  ionization[kk]        = 0;
 	}
-	if (index == numberOfPointsOnTrack)
-	  break;      // get out if I found all the points!
-      }
-      
-      //
-      // reset and get the ionization from the clusters
-      // using the indices above
-      //
-      index = 0;
-      idb << "numberOfPointsOnTrack " << numberOfPointsOnTrack << endl;
-      for (jj=0; jj<numberOfPointsOnTrack; jj++) {
 	
-	ionization[index]        = svtCluster[spacePoints[jj]].de[0];
 	//
-	// A pathLength correction will be necessary
-	// in the future, for now let us allow the machinery
-	// for it
+	// get id's of points for the iith track
+	// To gain access, must loop over "groups" of space points
 	//
-	pathLength[index]        = 1.0;
-	spacePointsCharge[index] = (ionization[index]/pathLength[index]);
-	index++;
-      }
-      
-      //
-      // The dE/dx calculation
-      // For now, only use the logmean
-      // a truncated mean will require a sort!
-      //
-      float dEdx=0;
-      float dEdxError=0;
-      for (jj=0; jj<numberOfPointsOnTrack; jj++) {
-	idb << "spacePointsCharge " << (spacePointsCharge[jj]) << endl;
-	dEdx      += log(spacePointsCharge[jj]);
-	//dEdxError += 2*log(spacePointsCharge[jj]);
-	dEdxError += log(spacePointsCharge[jj]);
-      }
-      
-      //
-      // Normalize to the number of Points
-      //
-      dEdx      /= numberOfPointsOnTrack;
-      dEdxError /= numberOfPointsOnTrack;      
-      
-      dEdx = exp(dEdx);
-      dEdxError = sqrt(exp(dEdxError));
-      //dEdxError = exp(dEdxError) - dEdx*dEdx;
-      //cout << "dEdx " << dEdx << " +/- " << dEdxError << endl;
-      
-      //
-      // Assign to tables
-      //
-      
-      dEdxError = exp(dEdxError) - (dEdx * dEdx);
-      svtTrack[ii].dedx[0] = dEdx;
-      svtTrack[ii].dedx[1] = dEdxError;
-    }
+	
+	//
+	// Match the group and track ID numbers!
+	//
+	
+	int index = 0;
     
-    idb << "End of spr_svt" << endl;
-    return STAFCV_OK;
+	for (jj=0; jj<(svtGroupsH->nok); jj++) {
+	  
+	  if (trackId == svtGroups[jj].id1) {
+	    spacePoints[index] = svtGroups[jj].id2;
+	    index++;    // can incorporate this into the spacePoints[index]?
+	  }
+	  if (index == numberOfPointsOnTrack)
+	    break;      // get out if I found all the points!
+	}
+	
+	// Calc unit vector for first point
+  	u_ab_x = (svtCluster[spacePoints[1]].x[0] - 
+		  svtCluster[spacePoints[0]].x[0]);
+	u_ab_y = (svtCluster[spacePoints[1]].x[1] - 
+		  svtCluster[spacePoints[0]].x[1]); 
+	u_ab_z = (svtCluster[spacePoints[1]].x[2] - 
+		  svtCluster[spacePoints[0]].x[2]); 
+	norm = sqrt((u_ab_x*u_ab_x)+(u_ab_y*u_ab_y)+(u_ab_z*u_ab_z));
+	
+	u_ab_x /= norm;
+	u_ab_y /= norm;
+	u_ab_z /= norm; 
+	
+	//
+	// reset and get the ionization from the clusters
+	// using the indices above
+	//
+	index = 0;
+	idb << "numberOfPointsOnTrack " << numberOfPointsOnTrack << endl;
+	for (jj=0; jj<numberOfPointsOnTrack; jj++) {
+	  
+	  ionization[index]        = svtCluster[spacePoints[jj]].de[0];
+	  
+	  // Path length correction
+	  
+	  
+	  for ( wafer_no=0; wafer_no<svtGeometryH->nok; wafer_no++){
+	    if( svtCluster[spacePoints[jj]].id_wafer == 
+		svtGeometry[wafer_no].id) break;
+	  }
+	  cos_theta = u_ab_x*svtGeometry[wafer_no].n[0] +
+	    u_ab_y*svtGeometry[wafer_no].n[1] +
+	    u_ab_z*svtGeometry[wafer_no].n[2] ;
+	  
+	  
+	  pathLength[index]        = fabs(0.03/cos_theta);
+	  
+	  spacePointsCharge[index] = (ionization[index]/pathLength[index]);
+	  
+	  idb << "PathLength= " << pathLength[index] << endl;
+	  idb << "Real PathLength= " << svtCluster[spacePoints[jj]].de[1] <<  endl;
+	  index++;
+	  
+	  // unit vector for next point
+	  
+	  u_ab_x = (svtCluster[spacePoints[jj+1]].x[0] - 
+		    svtCluster[spacePoints[jj]].x[0]);
+	  u_ab_y = (svtCluster[spacePoints[jj+1]].x[1] - 
+		    svtCluster[spacePoints[jj]].x[1]); 
+	  u_ab_z = (svtCluster[spacePoints[jj+1]].x[2] - 
+		    svtCluster[spacePoints[jj]].x[2]); 
+	  norm = sqrt((u_ab_x*u_ab_x)+(u_ab_y*u_ab_y)+(u_ab_z*u_ab_z));
+	  
+	  u_ab_x /= norm;
+	  u_ab_y /= norm;
+	  u_ab_z /= norm;
+	}
+	
+	//
+	// The dE/dx calculation
+	// For now, only use the logmean
+	// a truncated mean will require a sort!
+	//
+	float dEdx=0;
+	float dEdxError=0;
+	for (jj=0; jj<numberOfPointsOnTrack; jj++) {
+	  idb << "spacePointsCharge " << (spacePointsCharge[jj]) << endl;
+	  //dEdx      += log(spacePointsCharge[jj]);
+	  dEdx  += spacePointsCharge[jj];
+	  dEdxError += log(spacePointsCharge[jj]);
+	}
+	
+	//
+	// Normalize to the number of Points
+	//
+	dEdx      /= numberOfPointsOnTrack;
+	dEdxError /= numberOfPointsOnTrack;      
+	
+	//dEdx = exp(dEdx);
+	dEdxError = sqrt(exp(dEdxError));
+	//dEdxError = exp(dEdxError) - dEdx*dEdx;
+	//cout << "dEdx " << dEdx << " +/- " << dEdxError << endl;
+	
+	//
+	// Assign to tables
+	//
+	
+	dEdxError = exp(dEdxError) - (dEdx * dEdx);
+	svtTrack[ii].dedx[0] = dEdx;
+	svtTrack[ii].dedx[1] = dEdxError;
+	
+      }
+    }
+      
+      idb << "End of spr_svt" << endl;
+      return STAFCV_OK;
 }
 

@@ -5,7 +5,8 @@
      4             track_h,             track ,
      5            filler_h,            filler ,
      6            config_h,            config ,
-     7              geom_h,              geom ) 
+     7              geom_h,              geom , 
+     8            stkpar_h,            stkpar )
       IMPLICIT NONE
 C     SYNOPSIS:
 C     fill track table with all relevant spacepoints combinations
@@ -36,7 +37,17 @@ C     26-nov-1993,c.p.  Debugging, added table config as input, added
 c                       default values for filler
 C     21-oct-1993,c.p.  Written, Integration into tas
 C     Aug 20 1997 hlc   Adapted to SL97a, removed ctrack table
-c     
+C     05-feb-1999 lm    Modified to take 7 layers (3 super+1 SSD)
+C                       the 8th loop is removed and the arrays reduced accor.
+C     08-feb-1999 l.m.  Modified to have stk_stkpar as an argument. 
+C                       Remove all references to 'first' which does not work.
+C                       Its aim was to avoid the make up of the wafer lookup 
+C                       table at each iteration. This part is now control by 
+C                       stk_stkpar[0].fast_search which is initialized to 1 
+C                       and set to 0 after the 1st iteration.   
+C     WARNING : fill4 does not work for the SSD yet. It should run without 
+C               crashing but the results should be really bad.  
+C
 C     ARGUMENTS:
 C     spt_h    header to table spt     svt space points
 C     spt      rows of table   spt
@@ -55,19 +66,19 @@ C     =====================
 
 C     Local Declarations:
 C     ===================
-      real       x(3,0:8), v(3,8,0:8), vm(8,0:8), cth, cthij(8,0:8)
-      integer    extra(8), ispts(0:8), ispt, jspt(0:8), iwafer(0:8)
-      integer    jwafer(0:8), islayer_hits
+      real       x(3,0:7), v(3,7,0:7), vm(7,0:7), cth, cthij(7,0:7)
+      integer    extra(7), ispts(0:7), ispt, jspt(0:7), iwafer(0:7)
+      integer    jwafer(0:7), islayer_hits
       integer    iwafer1, iwafer2, n, kwafer
       integer    iladder, iladder1, iladder2
       integer    layer, layerp, layerpp, k, n_groups
-      logical    layers(8), loop(8), done(8), first
+      logical    layers(7), loop(7), done(7), first
 
-      integer    waferkey(400,8,0:400), waferkeyn(8,0:400)
-      integer    sptkey(200,400), sptkeyn(400)
-      real       list(2,400)
+      integer    waferkey(570,7,0:570), waferkeyn(7,0:570)
+      integer    sptkey(200,570), sptkeyn(570)
+      real       list(2,570)
 
-      integer    waferi(0:8),wafern(0:8), waferntot
+      integer    waferi(0:7),wafern(0:7), waferntot
       integer    itrack
       integer    ilayer0, ilayer1, ilayer2, ilayer
       integer    flag, id
@@ -105,10 +116,10 @@ c      endif
 c     Note: had to comment out the preceeding because pretreatment
 c     with sgr fills track
 
-      if (first) then
-
-         do ilayer1 = 1, 8
-            do ilayer2 = 1, 8
+      if (stkpar(1).fast_search.eq.1) then
+         stkpar(1).fast_search=0
+         do ilayer1 = 1, 7
+            do ilayer2 = 1, 7
                cthij(ilayer2,ilayer1) = 0.
             end do
          end do
@@ -120,28 +131,21 @@ c     wkw: make cthij parameters
          cthij(5,1) = cosd(filler(1).wth51)
          cthij(6,1) = cosd(filler(1).wth61)
          cthij(7,1) = cosd(filler(1).wth71)
-         cthij(8,1) = cosd(filler(1).wth81)
          cthij(3,2) = cosd(filler(1).wth32)
          cthij(4,2) = cosd(filler(1).wth42)
          cthij(5,2) = cosd(filler(1).wth52)
          cthij(6,2) = cosd(filler(1).wth62)
          cthij(7,2) = cosd(filler(1).wth72)
-         cthij(8,2) = cosd(filler(1).wth82)
          cthij(4,3) = cosd(filler(1).wth43)
          cthij(5,3) = cosd(filler(1).wth53)
          cthij(6,3) = cosd(filler(1).wth63)
          cthij(7,3) = cosd(filler(1).wth73)
-         cthij(8,3) = cosd(filler(1).wth83)
          cthij(5,4) = cosd(filler(1).wth54)
          cthij(6,4) = cosd(filler(1).wth64)
          cthij(7,4) = cosd(filler(1).wth74)
-         cthij(8,4) = cosd(filler(1).wth84)
          cthij(6,5) = cosd(filler(1).wth65)
          cthij(7,5) = cosd(filler(1).wth75)
-         cthij(8,5) = cosd(filler(1).wth85)
          cthij(7,6) = cosd(filler(1).wth76)
-         cthij(8,6) = cosd(filler(1).wth86)
-         cthij(8,7) = cosd(filler(1).wth87)
          waferntot     = 0
          waferi(0)     = 0
          wafern(0)     = 0
@@ -155,14 +159,14 @@ c     wkw: make cthij parameters
          end do
 
          do iwafer1 = 0, waferntot
-            do ilayer2 = 1, 8
+            do ilayer2 = 1, 7
                waferkeyn(ilayer2,iwafer1) = 0
             end do
          end do
 
          do iwafer2 = 1, waferntot
             ilayer2 = geom(iwafer2).layer
-            if (ilayer2.lt.1.or.ilayer2.gt.8) then
+            if (ilayer2.lt.1.or.ilayer2.gt.7) then
                write(6,*) 'ilayer2 error:',ilayer2
                stop
             end if
@@ -195,7 +199,7 @@ c     wkw: make cthij parameters
             v(3,ilayer1,ilayer0) = v(3,ilayer1,ilayer0)/
      &           vm(ilayer1,ilayer0)
             
-            do ilayer2 = ilayer1+1, 8
+            do ilayer2 = ilayer1+1, 7
                ilist = 0
                do iwafer2 = waferi(ilayer2-1)+1, waferi(ilayer2)
                   if (ilayer2.ne.geom(iwafer2).layer) then
@@ -240,15 +244,8 @@ c     wkw: make cthij parameters
                end do
             end do
          end do
-
-c         do iwafer1 = 0, waferntot
-c            do ilayer1 = 1, 8
-c               write(884,*) 'iwafer, ilayer, n:',iwafer1,ilayer1,
-c     &              waferkeyn(ilayer1,iwafer1) 
-c            end do
-c         end do
-
-      end if  ! first call
+         write(6,*)'stk_am_fill3 : end of initialisation'
+      end if  ! end of fast_search
          
       if (spt_h.nok.eq.0) then
          write(6,1000)
@@ -272,28 +269,21 @@ c      write(6,*) 'nspt:',spt_h.nok
       cthij(5,1) = cosd(filler(1).th51)
       cthij(6,1) = cosd(filler(1).th61)
       cthij(7,1) = cosd(filler(1).th71)
-      cthij(8,1) = cosd(filler(1).th81)
       cthij(3,2) = cosd(filler(1).th32)
       cthij(4,2) = cosd(filler(1).th42)
       cthij(5,2) = cosd(filler(1).th52)
       cthij(6,2) = cosd(filler(1).th62)
       cthij(7,2) = cosd(filler(1).th72)
-      cthij(8,2) = cosd(filler(1).th82)
       cthij(4,3) = cosd(filler(1).th43)
       cthij(5,3) = cosd(filler(1).th53)
       cthij(6,3) = cosd(filler(1).th63)
       cthij(7,3) = cosd(filler(1).th73)
-      cthij(8,3) = cosd(filler(1).th83)
       cthij(5,4) = cosd(filler(1).th54)
       cthij(6,4) = cosd(filler(1).th64)
       cthij(7,4) = cosd(filler(1).th74)
-      cthij(8,4) = cosd(filler(1).th84)
       cthij(6,5) = cosd(filler(1).th65)
       cthij(7,5) = cosd(filler(1).th75)
-      cthij(8,5) = cosd(filler(1).th85)
       cthij(7,6) = cosd(filler(1).th76)
-      cthij(8,6) = cosd(filler(1).th86)
-      cthij(8,7) = cosd(filler(1).th87)
 
 c     reset counters
 c     sort the space points by wafer and count them
@@ -310,10 +300,9 @@ c     sort the space points by wafer and count them
      &     config(1).n_wafer(5)
       waferi(7)  = waferi(6) + config(1).n_ladder(6)*
      &     config(1).n_wafer(6)
-      waferi(8)  = waferi(7) + config(1).n_ladder(7)*
-     &     config(1).n_wafer(7)
 
-      do iwafer1 = 1, 400       ! zero counters
+C      do iwafer1 = 1, 400       ! zero counters
+      do iwafer1 = 1, 570       ! zero counters
         sptkeyn(iwafer1) = 0
       end do
 
@@ -321,6 +310,7 @@ c     sort the space points by wafer and count them
       do ispt = 1, spt_h.nok   ! count
          kwafer       = spt(ispt).id_wafer
          ilayer       = kwafer/1000
+         if (ilayer.eq.8) ilayer=7
          iwafer1      = (kwafer-ilayer*1000)/100
          iladder      =  kwafer-ilayer*1000-iwafer1*100
          iwafer2  = waferi(ilayer) + 
@@ -337,10 +327,6 @@ c     sort the space points by wafer and count them
          sptkey(sptkeyn(iwafer2),iwafer2) = ispt
 
       end do ! spt = 1, spt_h.nok
-
-c      do iwafer1 = 1, waferntot
-c         write(886,*) 'wafer, nspt:',iwafer1,sptkeyn(iwafer1)
-c      end do
 
 c     wkw: start where we left off on the last loop
       itrack = track_h.nok
@@ -360,8 +346,6 @@ c     -------------------------------------------------
       jspt(1)   = 0
       jwafer(1) = 1
       iwafer(1) = waferkey(jwafer(1),1,0)
-c      write(889,*) '1:jwafer,iwafer,nspt:',jwafer(1),iwafer(1),
-c     &     sptkeyn(iwafer(1))
       done(1)   = .false.
       extra(1)  = 0
 
@@ -371,9 +355,6 @@ c     &     sptkeyn(iwafer(1))
          if (extra(1).lt.1) then
 
             jspt(1) = jspt(1) + 1
-
-c            write(889,*) 'jspt(1),jwafer(1),iwafer(1),n:',
-c     &           jspt(1),jwafer(1),iwafer(1),sptkeyn(iwafer(1))
 
             if (jspt(1).gt.sptkeyn(iwafer(1))) then
 
@@ -389,7 +370,6 @@ c     &           jspt(1),jwafer(1),iwafer(1),sptkeyn(iwafer(1))
                
             else 
                ispts(1) = sptkey(jspt(1),iwafer(1))
-c               write(889,*) 'spt(1):',ispts(1)
                if (spt(ispts(1)).flag.eq.0) then
                   layer   = 1
                   layerp  = 0
@@ -414,7 +394,6 @@ c               write(889,*) 'spt(1):',ispts(1)
                end if
             end if
          else if (extra(1).eq.1) then
-c            write(889,*) 'extra(1).eq.1'
             done(1)   = .false.
             extra(1)  = 2
             loop(1)   = .true.
@@ -453,9 +432,6 @@ c     -------------------------------------------------
             
             jspt(2) = jspt(2) + 1
             iwafer(2) = waferkey(jwafer(2),2,iwafer(layerp))
-
-c      write(889,*) '2:jwafer,iwafer,nspt:',jwafer(2),iwafer(2),
-c     &     sptkeyn(iwafer(2))
 
             if (jspt(2).gt.sptkeyn(iwafer(2))) then
                
@@ -555,15 +531,10 @@ c     -------------------------------------------------
             layerpp =  -1
          end if
          
-c         write(889,*) 'layer, p, pp:',3,layerp, layerpp
-
         if (extra(3).lt.1) then
             
             jspt(3)   = jspt(3) + 1
             iwafer(3) = waferkey(jwafer(3),3,iwafer(layerp))
-
-c            write(889,*) '3:jwafer,iwafer,nspt:',jwafer(3),iwafer(3),
-c     &           sptkeyn(iwafer(3))
 
             if (jspt(3).gt.sptkeyn(iwafer(3))) then
                
@@ -678,15 +649,10 @@ c     -------------------------------------------------
             layerpp =  -1
          end if               
          
-c         write(889,*) 'layer, p, pp:',4,layerp, layerpp
-
          if (extra(4).lt.1) then
             
             jspt(4) = jspt(4) + 1
             iwafer(4) = waferkey(jwafer(4),4,iwafer(layerp))
-
-c            write(889,*) '4:jwafer,iwafer,nspt:',jwafer(4),iwafer(4),
-c     &     sptkeyn(iwafer(4))
 
             if (jspt(4).gt.sptkeyn(iwafer(4))) then
                
@@ -823,16 +789,11 @@ c     -------------------------------------------------
             layerpp =  -1
          end if
          
-c         write(889,*) 'layer, p, pp:',5,layerp, layerpp
-
          if (extra(5).lt.1) then
             
             jspt(5) = jspt(5) + 1
             iwafer(5) = waferkey(jwafer(5),5,iwafer(layerp))
 
-c            write(889,*) '5:jwafer,iwafer,nspt:',jwafer(5),iwafer(5),
-c     &           sptkeyn(iwafer(5))
-      
             if (jspt(5).gt.sptkeyn(iwafer(5))) then
                
                if (jwafer(5).lt.waferkeyn(5,iwafer(layerp))) then
@@ -992,15 +953,10 @@ c     -------------------------------------------------
             layerpp =  -1
          end if
       
-c         write(889,*) 'layer, p, pp:',6,layerp, layerpp
-
          if (extra(6).lt.1) then
 
             jspt(6) = jspt(6) + 1
             iwafer(6) = waferkey(jwafer(6),6,iwafer(layerp))
-
-c            write(889,*) 'jspt(6),jwafer(6),iwafer(6),n:',
-c     &           jspt(6),jwafer(6),iwafer(6),sptkeyn(iwafer(6))
 
             if (jspt(6).gt.sptkeyn(iwafer(6))) then
                
@@ -1103,8 +1059,6 @@ c     &           jspt(6),jwafer(6),iwafer(6),sptkeyn(iwafer(6))
             end if
          else if (extra(6).eq.1) then
 
-c            write(889,*) 'extra(1).eq.6'
-            
             done(6)   = .false.
             extra(6)  = 2
             loop(6)   = .true.
@@ -1193,17 +1147,11 @@ c     -------------------------------------------------
             layerpp =  -1
          end if
       
-         
-c         write(889,*) 'layer, p, pp:',7,layerp, layerpp
-
          if (extra(7).lt.1) then
             
             jspt(7) = jspt(7) + 1
             iwafer(7) = waferkey(jwafer(7),7,iwafer(layerp))
 
-c            write(889,*) '7:jwafer,iwafer,nspt:',jwafer(7),iwafer(7),
-c     &           sptkeyn(iwafer(7))
-      
             if (jspt(7).gt.sptkeyn(iwafer(7))) then
                
                if (jwafer(7).lt.waferkeyn(7,iwafer(layerp))) then
@@ -1330,253 +1278,6 @@ c     &           sptkeyn(iwafer(7))
          end if
 
          if (loop(7)) then
-c     -------------------------------------------------
-c     layer 8
-c     -------------------------------------------------
-      jspt(8)   = 0
-      jwafer(8) = 1
-      done(8)   = .false.
-      extra(8)  = 0
- 
-
-      do while (.not.done(8))
- 8     continue
-         layer   =  8
-         if (layers(7)) then
-            layerp = 7
-            if (layers(6)) then
-               layerpp = 6
-            else if (layers(5)) then
-               layerpp = 5
-            else if (layers(4)) then
-               layerpp = 4
-            else if (layers(3)) then
-               layerpp = 3
-            else if (layers(2)) then
-               layerpp = 2
-            else if (layers(1)) then
-               layerpp = 1
-            else
-               layerpp = 0
-            end if
-         else if (layers(6)) then
-            layerp = 6
-            if (layers(5)) then
-               layerpp = 5
-            else if (layers(4)) then
-               layerpp = 4
-            else if (layers(3)) then
-               layerpp = 3
-            else if (layers(2)) then
-               layerpp = 2
-            else if (layers(1)) then
-               layerpp = 1
-            else
-               layerpp = 0
-            end if
-         else if (layers(5)) then
-            layerp = 5
-            if (layers(4)) then
-               layerpp = 4
-            else if (layers(3)) then
-               layerpp = 3
-            else if (layers(2)) then
-               layerpp = 2
-            else if (layers(1)) then
-               layerpp = 1
-            else
-               layerpp = 0
-            end if
-         else if (layers(4)) then
-            layerp = 4
-            if (layers(3)) then
-               layerpp = 3
-            else if (layers(2)) then
-               layerpp = 2
-            else if (layers(1)) then
-               layerpp = 1
-            else
-               layerpp = 0
-            end if
-         else if (layers(3)) then
-            layerp = 3
-            if (layers(2)) then
-               layerpp = 2
-            else if (layers(1)) then
-               layerpp = 1
-            else
-               layerpp = 0
-            end if
-         else if (layers(2)) then
-            layerp = 2
-            if (layers(1)) then
-               layerpp = 1
-            else
-               layerpp = 0
-            end if
-         else if (layers(1)) then
-            layerp  = 1
-            layerpp = 0
-         else 
-            layerp  =  0
-            layerpp =  -1
-         end if
-      
-         
-c         write(889,*) 'layer, p, pp:',8,layerp, layerpp
-
-         if (extra(8).lt.1) then
-            
-            jspt(8) = jspt(8) + 1
-            iwafer(8) = waferkey(jwafer(8),8,iwafer(layerp))
-
-c            write(889,*) '8:jwafer,iwafer,nspt:',jwafer(8),iwafer(8),
-c     &           sptkeyn(iwafer(8))
-      
-            if (jspt(8).gt.sptkeyn(iwafer(8))) then
-               
-               if (jwafer(8).lt.waferkeyn(8,iwafer(layerp))) then
-                  jwafer(8) = jwafer(8) + 1
-                  iwafer(8) = waferkey(jwafer(8),8,iwafer(layerp))
-                  jspt(8)   = 0
-                  goto 8
-               else
-                  extra(8) = extra(8) + 1
-                  goto 8
-               end if
-               
-            else 
-               ispts(8) = sptkey(jspt(8),iwafer(8))
-               if (spt(ispts(8)).flag.eq.0) then
-                  layer   =  8
-                  if (layers(7)) then
-                     layerp = 7
-                     if (layers(6)) then
-                        layerpp=6
-                     else if (layers(5)) then
-                        layerpp=5
-                     else if (layers(4)) then
-                        layerpp=4
-                     else if (layers(3)) then
-                        layerpp=3
-                     else if (layers(2)) then
-                        layerpp=2
-                     else if (layers(1)) then
-                        layerpp=1
-                     else 
-                        layerpp=0
-                     end if
-                  else if (layers(6)) then
-                     layerp = 6
-                     if (layers(5)) then
-                        layerpp=5
-                     else if (layers(4)) then
-                        layerpp=4
-                     else if (layers(3)) then
-                        layerpp=3
-                     else if (layers(2)) then
-                        layerpp=2
-                     else if (layers(1)) then
-                        layerpp=1
-                     else 
-                        layerpp=0
-                     end if
-                  else if (layers(5)) then
-                     layerp = 5
-                     if (layers(4)) then
-                        layerpp = 4
-                     else if (layers(3)) then
-                        layerpp = 3
-                     else if (layers(2)) then
-                        layerpp = 2
-                     else if (layers(1)) then
-                        layerpp = 1
-                     else
-                        layerpp = 0
-                     end if
-                  else if (layers(4)) then
-                     layerp = 4
-                     if (layers(3)) then
-                        layerpp = 3
-                     else if (layers(2)) then
-                        layerpp = 2
-                     else if (layers(1)) then
-                        layerpp = 1
-                     else
-                        layerpp = 0
-                     end if
-                  else if (layers(3)) then
-                     layerp = 3
-                     if (layers(2)) then
-                        layerpp = 2
-                     else if (layers(1)) then
-                        layerpp = 1
-                     else
-                        layerpp = 0
-                     end if
-                  else if (layers(2)) then
-                     layerp = 2
-                     if (layers(1)) then
-                        layerpp = 1
-                     else
-                        layerpp = 0
-                     end if
-                  else if (layers(1)) then
-                     layerp  = 1
-                     layerpp = 0
-                  else 
-                     layerp  =  0
-                     layerpp =  -1
-                  end if
-                  
-                  x(1,layer)   =  spt(ispts(layer)).x(1)
-                  x(2,layer)   =  spt(ispts(layer)).x(2)
-                  x(3,layer)   =  spt(ispts(layer)).x(3)
-                  v(1,layer,layerp) = x(1,layer) - x(1,layerp)
-                  v(2,layer,layerp) = x(2,layer) - x(2,layerp)
-                  v(3,layer,layerp) = x(3,layer) - x(3,layerp)
-                  vm(layer,layerp)   = sqrt(v(1,layer,layerp)**2+
-     &                 v(2,layer,layerp)**2+
-     &                 v(3,layer,layerp)**2)
-                  v(1,layer,layerp) = v(1,layer,layerp)/vm(layer,layerp)
-                  v(2,layer,layerp) = v(2,layer,layerp)/vm(layer,layerp)
-                  v(3,layer,layerp) = v(3,layer,layerp)/vm(layer,layerp)
-                  if (layerpp.lt.0) then
-                     layers(8) = .true.
-                     loop(8)   = .true.
-                  else
-                     cth= v(1,layer,layerp)*v(1,layerp,layerpp) +
-     &                    v(2,layer,layerp)*v(2,layerp,layerpp) +
-     &                    v(3,layer,layerp)*v(3,layerp,layerpp) 
-                     if (cth .gt. cthij(layer,layerp).and.
-     &                    spt(ispts(layer)).flag.eq.0) then 
-                        layers(8) = .true.
-                        loop(8)  = .true.
-                     else
-                        layers(8) = .false.
-                        loop(8)  = .false.
-                     end if
-                  end if
-               else 
-                  layers(8) = .false.
-                  loop(8)  = .false.
-               end if
-            end if
-         else if (extra(8).eq.1) then
-            done(8)  = .false.
-            extra(8) = 2
-            loop(8)  = .true.
-            layers(8) = .false.
-            ispts(8)  = 0
-         else
-            done(8)  = .true.
-            loop(8)  = .false.
-            layers(8) = .false.
-            ispts(8)  = 0
-         end if
-         
-         
-         if (loop(8)) then
 c     -----------------------------------------
 c     consider track candidate for storage
 c            write(889,*) ' considering track for storage:',itrack+1
@@ -1594,7 +1295,7 @@ c            write(889,*) ' considering track for storage:',itrack+1
             itrack   = track_h.maxlen
          else                   ! (itrack.le.track_h.maxlen)
             ispt = 0
-            do k = 1, 8
+            do k = 1, 7
                if (ispts(k).gt.0) ispt = ispt + 1
             end do
 
@@ -1608,7 +1309,7 @@ c            write(889,*) ' considering track for storage:',itrack+1
             if (ispts(5).gt.0.or.ispts(6).gt.0) then ! hit in slayer 3
                islayer_hits=islayer_hits+1
             endif
-            if (ispts(7).gt.0.or.ispts(8).gt.0) then ! hit in slayer 4
+            if (ispts(7).gt.0) then ! hit in slayer 4
                islayer_hits=islayer_hits+1
             endif
 
@@ -1635,9 +1336,6 @@ C     &                       spt(ispts(k)).id_mctrack
             end if
          end if 
          
-      end if                    ! 8
-      end do
-
       end if                    ! 7
       end do
 
