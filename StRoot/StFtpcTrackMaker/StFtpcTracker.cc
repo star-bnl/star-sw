@@ -1,5 +1,9 @@
-// $Id: StFtpcTracker.cc,v 1.15 2001/05/04 09:21:01 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.16 2002/01/29 11:08:20 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.16  2002/01/29 11:08:20  oldi
+// Write() renamed to WriteCluster() resp. WriteTrack() to avoid compiler warnings.
+// As a result the functions TObject::Write() are available again (directly).
+//
 // Revision 1.15  2001/05/04 09:21:01  oldi
 // Changed TMath::TMath:: to TMath::
 //
@@ -651,7 +655,7 @@ Int_t StFtpcTracker::FitAndWrite(St_fpt_fptrack *trackTableWrapper, Int_t id_sta
     for (Int_t i=0; i<num_tracks; i++) {
       track = (StFtpcTrack *)mTrack->At(i);
       track->Fit(mVertex, mMaxDca, id_start_vertex);
-      track->Write(&(trackTable[i]), id_start_vertex);
+      track->WriteTrack(&(trackTable[i]), id_start_vertex);
     }
    
     trackTableWrapper->SetNRows(num_tracks);
@@ -841,7 +845,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
       if (fdepar->id_method != 1) { 
 	// calculations done, write track
 	// if id_method == 1 the calculaations go on and the track is writtem later
-	track->Write(&(trackTable[itrk]), id_start_vertex);
+	track->WriteTrack(&(trackTable[itrk]), id_start_vertex);
       }
     
       itrk_ok++;
@@ -993,7 +997,7 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
 	track->SetNumdEdxHits(acc_hit);
 
 	// write track
-	track->Write(&(trackTable[itrk]), id_start_vertex);
+	track->WriteTrack(&(trackTable[itrk]), id_start_vertex);
       }
     
       delete[] weighted;

@@ -1,5 +1,9 @@
-// $Id: StFtpcTracker.hh,v 1.11 2001/07/12 08:35:54 oldi Exp $
+// $Id: StFtpcTracker.hh,v 1.12 2002/01/29 11:08:29 oldi Exp $
 // $Log: StFtpcTracker.hh,v $
+// Revision 1.12  2002/01/29 11:08:29  oldi
+// Write() renamed to WriteCluster() resp. WriteTrack() to avoid compiler warnings.
+// As a result the functions TObject::Write() are available again (directly).
+//
 // Revision 1.11  2001/07/12 08:35:54  oldi
 // New function GetTime(char name[10]) introduced.
 //
@@ -120,7 +124,7 @@ public:
 			     FDE_FDEPAR_ST *fdepar, 
 			     Int_t id_start_vertex);                        // does momentum fit, the dEdx calculation and writes tracks to STAF table
   Int_t   FitAndWrite(St_fpt_fptrack *trackTable, Int_t id_start_vertex);   // does momentum fit and writes tracks to STAF table
-  Int_t   Write();                                                          // writes tracks and clusters in ROOT file
+  Int_t   WriteTracksAndClusters();                                         // writes tracks and clusters in ROOT file
 
   // getter
        Float_t   GetTime()              { return mTime;                    }  // returns time consumption
@@ -139,7 +143,7 @@ public:
 };
 
 
-inline Int_t StFtpcTracker::Write()
+inline Int_t StFtpcTracker::WriteTracksAndClusters()
 {
   // Writes tracks and clusters in ROOT file.
   // In the moment this makes no sense because the important information

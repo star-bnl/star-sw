@@ -1,5 +1,9 @@
-// $Id: StFtpcTrack.cc,v 1.12 2001/05/04 09:19:58 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.13 2002/01/29 11:08:10 oldi Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.13  2002/01/29 11:08:10  oldi
+// Write() renamed to WriteCluster() resp. WriteTrack() to avoid compiler warnings.
+// As a result the functions TObject::Write() are available again (directly).
+//
 // Revision 1.12  2001/05/04 09:19:58  oldi
 // For non main vertex tracks the momentum of the fit with vertex constraint was
 // stored. To fix this  Fit-> was changed to looseFit-> at the appropriate
@@ -570,7 +574,7 @@ void StFtpcTrack::Fit(StFtpcVertex *vertex, Double_t max_Dca, Int_t id_start_ver
 }
 
 
-Int_t StFtpcTrack::Write(fpt_fptrack_st *trackTableEntry, Int_t id_start_vertex)
+Int_t StFtpcTrack::WriteTrack(fpt_fptrack_st *trackTableEntry, Int_t id_start_vertex)
 {
   // Writes track to StAF table
   
