@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.71 2002/04/17 23:56:43 jeromel Exp $
+// $Id: St_dst_Maker.cxx,v 1.72 2002/05/09 22:49:19 caines Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.72  2002/05/09 22:49:19  caines
+// Dont save svt hit info on events when SVT not there
+//
 // Revision 1.71  2002/04/17 23:56:43  jeromel
 // Changes by Helen for the SVT in egr implementation.
 //
@@ -220,7 +223,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.71 2002/04/17 23:56:43 jeromel Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.72 2002/05/09 22:49:19 caines Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -460,6 +463,8 @@ Int_t  St_dst_Maker::Filler(){
     StSvtAnalysedHybridClusters *mSvtBigHit;
     StSvtHybridCollection *mSvtCluColl=0;
     St_DataSet *dataSetSvt =0;
+    dataSetSvt = GetDataSet("StSvtData");
+    if( dataSetSvt)
     dataSetSvt = GetDataSet("StSvtAnalResults");
 
     // If dataSetSvt not there then fast sim ran and need to use scs_spt else
