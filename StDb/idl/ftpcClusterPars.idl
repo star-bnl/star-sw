@@ -33,6 +33,15 @@
      float threePadGaussError;      /* additional error 3-pad-cluster, gaussfit */
      float zDirectionError;         /* parameter for error in z-direction */
 
+     long maxNumSequences;           /* max number of used sequences (not used yet) */
+     long maxNumSeqPeaks;            /* max number of peaks per sequence */
+     long maxNumPeaks;               /* max number of unfolded peaks per cluster */
+     long maxNumCUC;                 /* max number of cluster under construction (not used yet) */
+     long maxLoops;                  /* max loopnumber in unfolding */
+     long maxFastLoops;              /* max loopnumber in fast unfolding */ 
+     float unfoldLimit;              /* accuracy of unfolding */
+     float unfoldFailedLimit;        /* limit for failed unfolding */
+
        // run parameters
      float normalizedNowPressure;   /* normalized air pressure (in hPa) */
      float adjustedAirPressureWest;  /* temperature adjusted air pressure for FTPC West */
