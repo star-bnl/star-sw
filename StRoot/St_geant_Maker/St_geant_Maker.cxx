@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.42 1999/07/09 01:15:48 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.43 1999/07/09 02:18:03 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.43  1999/07/09 02:18:03  fisyak
+// Add Skip
+//
 // Revision 1.42  1999/07/09 01:15:48  fisyak
 // Remove non printing character from generator type
 //
@@ -481,7 +484,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.42 1999/07/09 01:15:48 fisyak Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.43 1999/07/09 02:18:03 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -884,7 +887,7 @@ static Bool_t CompareMatrix(TRotMatrix &a,TRotMatrix &b)
    for (int i=0; i<9; i++)  if (pa[i]!=pb[i]) return kFALSE;
    return kTRUE;
 }
-
+//------------------------------------------------------------------------
 TRotMatrix *St_geant_Maker::GetMatrix(float thet1, float phii1,
                                       float thet2, float phii2,
                                       float thet3, float phii3)
@@ -936,6 +939,19 @@ Int_t St_geant_Maker::SetInputFile(const char *file)
   TString kuip("gfile p "); kuip += fInputFile;
   Do((const char*)kuip); 
   if (cquest->iquest[0]) {return kStEOF;}
+  return kStOK;
+}
+//------------------------------------------------------------------------
+Int_t St_geant_Maker::Skip(Int_t Nskip)
+{
+  if (Nskip >= 0) {
+    Char_t kuip[20];
+    sprintf (kuip,"skip %i",Nskip);
+     if (GetDebug()) printf("St_geant_Maker skip %i\n record(s)",Nskip); 
+    Do((const char*)kuip);
+    
+    if (cquest->iquest[0]) {return kStEOF;}
+  }
   return kStOK;
 }
 //------------------------------------------------------------------------
