@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.24 2002/02/10 21:04:49 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.25 2002/02/20 16:11:15 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.25  2002/02/20 16:11:15  jcs
+// change loop over vertex table to test if first row is primary vertex
+//
 // Revision 1.24  2002/02/10 21:04:49  jcs
 // Use primary vertex for tracking if it is available. Otherwise use preVertex.
 //
@@ -215,7 +218,6 @@ Int_t StFtpcTrackMaker::Make()
    St_dst_vertex *vertex = (St_dst_vertex *) primary->Find("vertex");
    if (vertex) {
      dst_vertex_st *primvtx = vertex->GetTable();
-     if( primvtx->vtx_id != kEventVtxId || primvtx->iflag != 1){
        for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,primvtx++){
           if( primvtx->vtx_id == kEventVtxId && primvtx->iflag == 1 ) {
              primary_vertex_x = primvtx->x;
@@ -225,7 +227,6 @@ Int_t StFtpcTrackMaker::Make()
              break;
           }       
         }
-      }
      }  // end of if (vertex)
    }  // end of if (primary) 
    
@@ -245,7 +246,6 @@ Int_t StFtpcTrackMaker::Make()
 
      dst_vertex_st *preVtxPtr = preVtx->GetTable();
      for (Int_t i = 0; i < preVtx->GetNRows(); i++, preVtxPtr++) {
-
        if (preVtxPtr->iflag == 101) {
          primary_vertex_x =  preVtxPtr->x;
          primary_vertex_y =  preVtxPtr->y;
@@ -399,7 +399,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.24 2002/02/10 21:04:49 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.25 2002/02/20 16:11:15 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
