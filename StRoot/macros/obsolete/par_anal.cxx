@@ -1,7 +1,7 @@
-// $Id: par_anal.cxx,v 1.8 1999/06/03 16:12:22 kathy Exp $
+// $Id: par_anal.cxx,v 1.9 1999/06/03 16:40:37 kathy Exp $
 // $Log: par_anal.cxx,v $
-// Revision 1.8  1999/06/03 16:12:22  kathy
-// putting in new default files for some macros, remove unneeded macro dedx.C and put in new read_bfc_hist_list.C macro
+// Revision 1.9  1999/06/03 16:40:37  kathy
+// put back old dedx.C and restore original macros that use non-existent input file
 //
 // Revision 1.7  1999/05/21 15:34:00  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
@@ -11,7 +11,7 @@
 // what it does: 
 //=======================================================================
 
-void par_anal(Char_t *xdffilename="/disk00000/star/test/new/tfs_Solaris/year_1b/psc0069_01_40evts_dst.xdf")
+void par_anal(Char_t *xdffilename="/afs/rhic/star/packages/dev/StRoot/macros/data/test.xdf") 
 {
   //  gROOT->Reset();
 
