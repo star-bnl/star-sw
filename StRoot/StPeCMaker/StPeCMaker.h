@@ -1,6 +1,9 @@
-// $Id: StPeCMaker.h,v 1.5 2000/01/20 23:03:15 nystrand Exp $
+// $Id: StPeCMaker.h,v 1.6 2000/03/24 22:36:16 nystrand Exp $
 //
 // $Log: StPeCMaker.h,v $
+// Revision 1.6  2000/03/24 22:36:16  nystrand
+// First version with StPeCEvent
+//
 // Revision 1.5  2000/01/20 23:03:15  nystrand
 // First Version of StPeCMaker with new StEvent
 //
@@ -16,10 +19,6 @@
 // Revision 1.0  1999/03/05 11:00:00  Nystrand
 // First Version
 //
-
-#ifndef StPeCMaker_HH
-#define StPeCMaker_HH
-
 ///////////////////////////////////////////////////////////////////////////////
 //
 // StPeCMaker
@@ -36,47 +35,52 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
+#ifndef StPeCMaker_HH
+#define StPeCMaker_HH
 #include "StMaker.h"
+#include "StPeCEvent.h"
 #include "TH1.h"
+#include "TFile.h"
 
 class StEvent;
+class StPeCEvent;
 class StRun;
 class TH1F;
 
 class StPeCMaker : public StMaker {
 
-private:
-
-  // Maker generates a tag
-  void  GetMwcHits(StEvent& event);// MWC Hits
-  void  GetCtbHits(StEvent& event);// CTB Hits
-
 protected:
+  TFile *m_outfile;
   TH1F *m_hstat;
   TH1F *m_hntrk; 
-  TH1F *m_hntrk5;
-  TH1F *m_hntrk10;
+  TH1F *m_hnvtxtrk;
   TH1F *m_hnmwchts;
   TH1F *m_hnctbhts;
-  TH1F *m_hnvtx;
-  TH1F *m_hnvtxtrk;
   TH1F *m_hsumq;
   TH1F *m_hsumpt;
   TH1F *m_hzvert;
   TH1F *m_hminvpi;
   TH1F *m_hminvk;
+  TH1F *m_hrappi;
+  TH1F *m_hrapka;
 
 public:
 
-  StPeCMaker(const Char_t *name="analysis", const Char_t *title="analysis");
+  StPeCMaker(const Char_t *name="analysis");
   virtual ~StPeCMaker();
-  virtual Int_t Init();
+  virtual void Clear(Option_t *option="");
+  virtual Int_t  Init();
   virtual Int_t  Make();
   virtual Int_t  Finish();
 
+private:
+
+  Int_t FillStPeCEvent(StEvent *event, StPeCEvent *pevent);
+  Int_t FillHistograms(StPeCEvent *pevent);
+  Int_t ExampleAnalysis(StPeCEvent *pevent);
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.5 2000/01/20 23:03:15 nystrand Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.6 2000/03/24 22:36:16 nystrand Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StPeCMaker, 1)
 };
