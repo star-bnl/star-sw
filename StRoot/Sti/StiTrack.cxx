@@ -13,6 +13,13 @@
 StiTrackFinder * StiTrack::trackFinder = 0;
 StiTrackFitter * StiTrack::trackFitter = 0;
 
+StiTrack::StiTrack()
+{
+  static int mIdCount=0;
+  if (++mIdCount > 32000) mIdCount=1;
+  mId = mIdCount+10000;		
+}
+
 ostream& operator<<(ostream& os, const StiTrack& track)
 {
   try 
