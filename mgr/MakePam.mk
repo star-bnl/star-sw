@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.129 1999/11/27 23:26:19 fisyak Exp $
+# $Id: MakePam.mk,v 1.130 1999/12/04 22:46:24 fine Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.130  1999/12/04 22:46:24  fine
+# St_Table::GetTable method became const
+#
 # Revision 1.129  1999/11/27 23:26:19  fisyak
 # Valery's table wrapper
 #
@@ -338,9 +341,9 @@ echo "  St_$(STEM)() : St_Table(\"$(STEM)\",sizeof($(STEM)_st)) {SetType(\"$(STE
 echo "  St_$(STEM)(Text_t *name) : St_Table(name,sizeof($(STEM)_st)) {SetType(\"$(STEM)\");}          ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
 echo "  St_$(STEM)(Int_t n): St_Table(\"$(STEM)\",n,sizeof($(STEM)_st)) {SetType(\"$(STEM)\");}   ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
 echo "  St_$(STEM)(Text_t *name,Int_t n): St_Table(name,n,sizeof($(STEM)_st)) {SetType(\"$(STEM)\");} ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "  $(STEM)_st *GetTable(Int_t i=0){ return ($(STEM)_st *)s_Table+i;}                           ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
+echo "  $(STEM)_st *GetTable(Int_t i=0) const { return ($(STEM)_st *)s_Table+i;}                           ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
 echo "        $(STEM)_st &operator[](Int_t i)       { assert(i>=0 && i<GetNRows()); return *GetTable(i); }     ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
-echo "  const $(STEM)_st &operator[](Int_t i) const { assert(i>=0 && i<GetNRows()); return *((const $(STEM)_st *)(((St_$(STEM) *)this)->GetTable(i))); }">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
+echo "  const $(STEM)_st &operator[](Int_t i) const { assert(i>=0 && i<GetNRows()); return *((const $(STEM)_st *)(GetTable(i))); }">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
 echo "                                           ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
 echo "  ClassDef(St_$(STEM),0) // class particle STAF tables  ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
 echo "};                                                            ">>$(GEN_TAB_INC)/St_$(STEM)_Table.h;\
