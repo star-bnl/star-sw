@@ -5,6 +5,9 @@
 #ifndef StiGeometryGenerator_HH
 #define StiGeometryGenerator_HH
 
+#include <vector>
+#include "StiPolygon.h"
+
 class StiGeometryTransform;
 class St_svg_geom;
 class St_svg_config;
@@ -40,12 +43,13 @@ class StiGeometryGenerator : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiGeometryGenerator.h,v 1.1 2001/05/18 20:47:00 bnorman Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiGeometryGenerator.h,v 1.2 2001/06/06 13:52:43 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 private:
     void buildTpc();
     void buildSvg(); // SVT + SSD
-
+    void buildPolygons();
+    vector<StiPolygon> mpoly_vec; //!
     StiGeometryTransform *mGeometryTransform; //! 
     St_svg_geom   *m_svg_geom;    //!
     St_svg_config *m_svg_config;  //!
@@ -53,10 +57,11 @@ private:
 
     
 private:
-    ClassDef(StiGeometryGenerator, 1)
 
-        // root of directory all detectors
-        char* m_szGeomDirectory; //!
+    // root of directory all detectors
+    char* m_szGeomDirectory; //!
+    char* m_polydirectory; //!
+    ClassDef(StiGeometryGenerator, 1)
 
 };
 #endif

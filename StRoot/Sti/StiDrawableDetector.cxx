@@ -60,7 +60,7 @@ void StiDrawableDetector::makeShape()
     sprintf(nodename, "node_%f_%f",getCenterRadius(), getCenterRefAngle());
     double xcenter = getCenterRadius()*cos(getCenterRefAngle());
     double ycenter = getCenterRadius()*sin(getCenterRefAngle());
-    mnode = new TNode("nodename","", mshape, xcenter, ycenter, getZCenter());
+    mnode = new TNode(nodename,"", mshape, xcenter, ycenter, getZCenter());
     
     //Account for rotation of object w.r.t. origin
     //cout <<"\tRotate node"<<endl;

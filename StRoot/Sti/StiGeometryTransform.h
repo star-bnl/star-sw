@@ -72,8 +72,17 @@ public:
     double phiForWestSector(int iSector, int nSectors);
     double phiForEastSector(int iSector, int nSectors);
     double phiForSector(int iSector, int nSectors){
-      if(iSector>nSectors){ return phiForEastSector(iSector, nSectors); }
-      else{                 return phiForWestSector(iSector, nSectors); }
+	double phi;
+      if(iSector>nSectors){
+	  phi = phiForEastSector(iSector, nSectors);
+      }
+      else {
+	  phi = phiForWestSector(iSector, nSectors);
+      }
+      if (phi<0) {
+      	  phi+=2.*M_PI;
+      }
+      return phi;
     }
 
     int westSectorForPhi(double phi, int nSectors);

@@ -1,3 +1,15 @@
+//StiTrackFinder.cxx
+//C.Prunea (Wayne State U)
+//05/01
+
+#include <iostream.h>
+#include <stdlib.h>
+#include "StiSeedFinder.h"
+#include "StiTrackFilter.h"
+#include "StiDetectorContainer.h"
+#include "StiHitContainer.h"
+#include "StiTrackContainer.h"
+
 #include "StiTrackFinder.h"
 
 
@@ -57,7 +69,7 @@ void StiTrackFinder::setTrackFilter(StiTrackFilter * filter)
   trackFilter = filter;  
 }
 
-void StiTrackFinder::setGeometryContainer(StiDetectorLayerContainer* newGeometry)
+void StiTrackFinder::setGeometryContainer(StiDetectorContainer* newGeometry)
 {
   //----------------------------------------------------------------- 
   // Set the detector geometry to be used by this track finder to the given

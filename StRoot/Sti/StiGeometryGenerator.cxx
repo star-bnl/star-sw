@@ -34,7 +34,9 @@ ClassImp(StiGeometryGenerator)
 StiGeometryGenerator::StiGeometryGenerator(const Char_t *name) : StMaker(name)
 {
 //  m_szGeomDirectory = "/star/u/bnorman/Detectors";
-  m_szGeomDirectory = "/scr20/ittf/StiGeometryParameters/Detectors";
+    //m_szGeomDirectory = "/scr20/ittf/StiGeometryParameters/Detectors";
+  m_szGeomDirectory = "/scr20/TempIttf/StiGeometryParameters/Detectors";
+  m_polydirectory = "/scr20/TempIttf/StiGeometryParameters/Polygons";
 }
 
 StiGeometryGenerator::~StiGeometryGenerator() 
@@ -60,11 +62,11 @@ Int_t StiGeometryGenerator::Make()
 {
   cout <<"\n\n ---------------------- StiGeometryGenerator::Make() ---------------- \n\n"<<endl;
 
+  mpoly_vec.clear();
+  
   // load Sti geometry routines
   mGeometryTransform = new StiGeometryTransform();
 
-  cout << "  building TPC." << endl;
-  buildTpc();
 
   // load svt & ssd geometry
   St_DataSetIter local(GetInputDB("svt"));
@@ -75,12 +77,28 @@ Int_t StiGeometryGenerator::Make()
   cout << "  building SVT && SSD." << endl;
   buildSvg();
 
+  cout << "  building TPC." << endl;
+  buildTpc();
+
+  buildPolygons();
+  
   cout << "  done." << endl;
 
   return kStOK;
 
 }
 
+void StiGeometryGenerator::buildPolygons()
+{
+    char outfile[500];
+    for (unsigned int i=0; i<mpoly_vec.size(); ++i) {
+	sprintf(outfile, "%s/Layer_%i.txt", m_polydirectory, i);
+	mpoly_vec[i].write(outfile);
+	cout <<"Writing File:\t"<<outfile<<endl;
+		
+    }
+    return;
+}
 // warning:  the ladder numbers used here are NOT the same as those shown in
 // CSN 229A
 void StiGeometryGenerator::buildSvg(){
@@ -131,6 +149,9 @@ void StiGeometryGenerator::buildSvg(){
     // width of gap between the edges of 2 adjacent ladders:
     //   first, the angle subtended by 1/2 of the ladder
     Double_t dLadderRadius = svgConfig.layer_radius[nLayer];
+
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    
 /*
     Double_t dHalfLadderPhi = asin(dWaferHalfWidth/dLadderRadius);
     Double_t dHalfGapPhi = dDeltaPhi/2. - dHalfLadderPhi;
@@ -139,6 +160,9 @@ void StiGeometryGenerator::buildSvg(){
     //   finally half the gap distance
     Double_t dHalfGap = dGapRadius*tan(dHalfGapPhi);
 */
+    //MLM (6/5/01)
+    double phi0forpoly=999.;
+    
     for(Int_t iLadder = 0; iLadder < nLadders; iLadder++){
 
       StiDetector detector;
@@ -161,11 +185,15 @@ void StiGeometryGenerator::buildSvg(){
 
       int nLadder = 2*(iLadder + 1) - nLayer%2; // formal ladder number in svt
       if(nLayer == nLayers - 1){ nLadder = iLadder + 1; } // ssd
-      detector.setCenterRep(
-          dLadderRadius, 
-          mGeometryTransform->phiForSector(nLadder, 
-                                           (2 - nLayer/(nLayers-1))*nLadders),
-          dOrientationAngle, dWaferHalfWidth);
+
+      
+      double thephi0 =  mGeometryTransform->phiForSector(nLadder, 
+							 (2 - nLayer/(nLayers-1))*nLadders);
+      if (thephi0<phi0forpoly && thephi0>=0.) { //first ladder in given layer
+	  phi0forpoly = thephi0;
+      }
+      
+      detector.setCenterRep(dLadderRadius, thephi0, dOrientationAngle, dWaferHalfWidth);
 
       detector.setActivePosition(0.);
       detector.setHalfDepth(dWaferHalfDepth*svgConfig.n_wafer[nLayer]);
@@ -222,6 +250,13 @@ void StiGeometryGenerator::buildSvg(){
       WriteGeomFile(params, szOutfile);
 */
     } // for iLadder
+
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    //MLM (6/5/01)
+    
+    StiPolygon poly(nLadders, phi0forpoly, dLadderRadius);
+    mpoly_vec.push_back(poly);
+
   } // for nLayer
 
 } // buildSvg()
@@ -232,10 +267,18 @@ void StiGeometryGenerator::buildTpc()
 
   int numSectors = gStTpcDb->Dimensions()->numberOfSectors();
   int numPadrows = gStTpcDb->PadPlaneGeometry()->numberOfRows();
-  for (int sector=1; sector<=numSectors; ++sector) {
-		
-    for (int padrow=1; padrow<=numPadrows; ++padrow) {
-	    
+
+  for (int padrow=1; padrow<=numPadrows; ++padrow) {
+      
+      double center = gStTpcDb->PadPlaneGeometry()->radialDistanceAtRow(padrow);
+      double phi0forpoly;
+      
+      for (int sector=1; sector<=12; ++sector) {
+
+	  //MLM (6/6/01) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Forget about sectors 13-24.  Treat TPC as 12 sectors of -200<z<200
+	  // for (int sector=1; sector<=numSectors; ++sector) {
+	  
+      
       StiDetector detector;
       StiMaterial gas; // dummy for holding gas name
       gas.setName("P10");
@@ -251,8 +294,7 @@ void StiGeometryGenerator::buildTpc()
         detector.setThickness(
             gStTpcDb->PadPlaneGeometry()->outerSectorPadLength() );
       }    
-      double center = 
-          gStTpcDb->PadPlaneGeometry()->radialDistanceAtRow(padrow);
+
       double rowWidth = gStTpcDb->PadPlaneGeometry()->PadPitchAtRow(padrow) *
           static_cast<double>(numberOfPads);
 	    
@@ -262,13 +304,23 @@ void StiGeometryGenerator::buildTpc()
       detector.setIsContinuousMedium(true);
       detector.setIsDiscreteScatterer(false);
 
+      double thephi0 = mGeometryTransform->phiForSector(sector, numSectors/2);
+      
+      if (sector==3) { //on x-axis
+	  phi0forpoly = thephi0;
+      }
+      
       detector.setCenterRep(
-          center, mGeometryTransform->phiForSector(sector, numSectors/2),
+          center, thephi0,
           0., rowWidth/2.);
 
       detector.setActivePosition(0.);
-      detector.setZCenter( sector>12 ? -100. : 100. );
-      detector.setHalfDepth(100.);
+      //detector.setZCenter( sector>12 ? -100. : 100. );
+      //detector.setHalfDepth(100.);
+
+      //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Temp Kludge to get a reasonable z-extent (MLM 6/6/01)
+      detector.setZCenter(0.);
+      detector.setHalfDepth(208.);
 
       detector.setSector(sector);
       detector.setPadrow(padrow);
@@ -281,15 +333,13 @@ void StiGeometryGenerator::buildTpc()
       detector.write(outfile);
 
       cout << "wrote file '"<< outfile << "'." << endl;
-    }
+
+      }
+      //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      //M.L.M. (6/5/01)
+      StiPolygon poly(12, phi0forpoly, center);
+      mpoly_vec.push_back(poly);
   }
     
   return;
 }
-
-
-
-
-
-
-
