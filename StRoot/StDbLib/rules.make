@@ -22,36 +22,45 @@ ifndef OPTSTAR
 OPTSTAR := /opt/star
 endif
 
+ifndef NODEBUG
+ DBG = -g 
+else
+ DBG = -O4
+endif
+
+
 # --> assume egcs
 CC       := /usr/local/bin/gcc
 CXX      := /usr/local/bin/g++
-AR       := ar -rvu
 
 ifeq (SunOS,$(SYSTYPE))
 
+AR       := /usr/ccs/bin/ar -rvu
   OSDEFS   := sun SUN SOLARIS Solaris ST_NO_NUMERIC_LIMITS 
   OSDEFS   += ST_NO_EXCEPTIONS 
-  CXXFLAGS := -g -fPIC -Wall
-  CFLAGS   := -g -fPIC -Wall
-  EXEFLAGS := -g -Wl,-Bdynamic   
-  SOFLAGS  := -g -shared  
+  CXXFLAGS := $(DBG) -fPIC -Wall
+  CFLAGS   := $(DBG) -fPIC -Wall
+  EXEFLAGS := $(DBG) -Wl,-Bdynamic   
+  SOFLAGS  := $(DBG) -shared  
   LIBS     := -lnsl -lsocket -lgen
 
 ifndef GNU_GCC
 #--> then were using native Sun
 
   OSDEFS   += ST_NO_MEMBER_TEMPLATES 
-  LDFLAGS  :=  -g  -xar -o
-  SOFLAGS  :=  -g  -G
+  LDFLAGS  :=  $(DBG)  -xar -o
+  SOFLAGS  :=  $(DBG)  -G
 
 ifndef ONL_solaris
 #-->then we're using CC5
 
   CC        :=  /opt/WS5.0/bin/cc
   CXX       := /opt/WS5.0/bin/CC
-  CXXFLAGS  := -g  -KPIC +w -features=no%anachronisms -features=rtti 
-  CXXFLAGS  += -library=iostream,no%Cstd 
-  CLIBS     := -L/opt/WS5.0/lib -L/opt/WS5.0/SC5.0/lib -liostream 
+  CXXFLAGS  := $(DBG)  -KPIC 
+# +w -features=no%anachronisms -features=rtti 
+#  CXXFLAGS  += -library=iostream,no%Cstd 
+  CLIBS     := -L/opt/WS5.0/lib -L/opt/WS5.0/SC5.0/lib 
+#-liostream 
   CLIBS     += -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
 
 else
@@ -61,7 +70,7 @@ else
  STLHOME  := /online/production/packages/rogue/workspaces/SOLARIS25/SUNPRO42/15d
  CC       := /opt/WS4.0/bin/cc
  CXX      := /opt/WS4.0/bin/CC
- CXXFLAGS := -g  -KPIC +w -features=no%anachronisms -features=rtti 
+ CXXFLAGS := $(DBG)  -KPIC +w -features=no%anachronisms -features=rtti 
  CXXFLAGS += -I/$(STLHOME)/include  
  CLIBS    := -L/opt/WS4.0/lib -L/opt/WS4.0/SC4.2/lib -L$(STLHOME)/lib -lstd15d 
  CLIBS    += -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
@@ -77,13 +86,15 @@ endif
 ifeq (Linux,$(SYSTYPE))
 #  CXX = insure
 
+AR       := /usr/bin/ar -rvu
+
   OSDEFS     := GNU_GCC ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES
   LD       := $(CXX)
   SO       := $(CXX)
-  CXXFLAGS := -g -fPIC -Wall -I/usr/include/g++
-  CFLAGS   := -g -fPIC -Wall
-#  LDFLAGS  := -g -Wl,-Bstatic
-  SOFLAGS  := -g -shared  
+  CXXFLAGS := $(DBG) -fPIC -Wall -I/usr/include/g++
+  CFLAGS   := $(DBG) -fPIC -Wall
+#  LDFLAGS  := $(DBG) -Wl,-Bstatic
+  SOFLAGS  := $(DBG) -shared  
   CLIBS    := -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lm -ldl  -rdynamic 
 
 endif
