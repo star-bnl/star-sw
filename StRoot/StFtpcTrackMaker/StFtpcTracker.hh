@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.hh,v 1.10 2001/04/02 14:20:23 oldi Exp $
+// $Id: StFtpcTracker.hh,v 1.11 2001/07/12 08:35:54 oldi Exp $
 // $Log: StFtpcTracker.hh,v $
+// Revision 1.11  2001/07/12 08:35:54  oldi
+// New function GetTime(char name[10]) introduced.
+//
 // Revision 1.10  2001/04/02 14:20:23  oldi
 // Some minor changes due to Insure++ was reporting problems.
 // These changes do not affect the physical output of StFtpcTrackMaker!
@@ -120,7 +123,8 @@ public:
   Int_t   Write();                                                          // writes tracks and clusters in ROOT file
 
   // getter
-       Float_t   GetTime()              { return mTime;                    }  // returns time consumption      
+       Float_t   GetTime()              { return mTime;                    }  // returns time consumption
+       Float_t   GetTime(char name[10]) { return mBench->GetCpuTime(name); }  // returns time consumption for different tracking parts
   StFtpcVertex  *GetVertex()            { return mVertex;                  }  // returns the vertex
          Int_t   GetNumberOfClusters()  { return mHit->GetEntriesFast();   }  // returns the number of clusters
          Int_t   GetNumberOfTracks()    { return mTrack->GetEntriesFast(); }  // returns the number of tracks
