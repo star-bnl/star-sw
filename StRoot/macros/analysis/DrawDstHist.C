@@ -1,11 +1,15 @@
-//create chain to read in root dst file(s), run QA_Maker & 
+// this macro works for reading in a MDC2 DST!!
+//
+//  create chain to read in root dst file(s), run QA_Maker & 
 //  send all histograms to a postscript file
+
 TCanvas *QACanvas = 0;
 TBrowser *QABrowser = 0;
 class StChain;
 class St_DataSet;
 StChain  *chain=0;
 
+// Load macro --------------------------------------------------------
 void Load()
 {
     gSystem->Load("St_base");
@@ -15,13 +19,21 @@ void Load()
     gSystem->Load("St_QA_Maker");
 };
 
+
+// DrawDstHist macro ---------------------------------------------------
+// enter firstHistName,lastHistName,input fileName,output psFile name
+
+// this is an MDC2 dst:
+//fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0064_07_40evts.root
+
 void DrawDstHist(
      const Char_t *firstHistName="*",const Char_t *lastHistName="*",
-//     const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/./psc0055_07_40evts.root",
-//     const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0064_07_40evts.root",
-     const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss",
+//     const Char_t *fileName="/disk1/star/test/hijing135/jetq_on/b0_3/year_1b/tfs_dst/set0016_01_51evts.dst.root",
+     const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0064_07_40evts.root",
      const Char_t *psFile="QA_hist.ps")
 { 
+
+// print out stuff:
     cout << endl   
          << " Usage:  QA_Hist_Draw( " << endl
          << "                        const Char_t *firstHistName=\"" << firstHistName << "\","   << endl
@@ -34,8 +46,11 @@ void DrawDstHist(
          << "       fileName      - may define either file or entire directory tree." << endl
          << "                       For the directory all files from that will be used." << endl
          << endl ;
+
+// execute Load macro
   if (gClassTable->GetID("StChain") < 0) Load();
-  //  check file first
+
+//  check input file first
   Long_t id;
   Long_t size;
   Long_t flags; 
@@ -48,18 +63,21 @@ void DrawDstHist(
    exFileName=0;
    return;
   }
+
+// check output file
   Char_t *exPsFile =  gSystem->ExpandPathName(psFile);
   const Char_t *excludedFiles[] = {"psc0055_07_40","psc0055_08_40","psc0059_07_40"};
   Int_t nExcluded =  sizeof(excludedFiles)/4;
   cout << nExcluded << " files will be excluded" << endl ;
+
+// Now setup the actual chain
   if (!chain) {
     chain = new StChain("bfc");
     St_io_Maker *input    = new St_io_Maker("Input","all");
     Int_t  nFile = 0;
-    if ((flags & 2)) {
 
 //*-*  Add a files or files to the list of dst ones 
-
+    if ((flags & 2)) {
       St_FileSet dstDirs(exFileName,".");
       St_DataSetIter nextDataSet(&dstDirs,0);
       St_DataSet *set = 0;      
@@ -86,7 +104,8 @@ void DrawDstHist(
     }
     cout << "Total: " << nFile << " files will be analysed" << endl ;
 
-    input->SetMaxEvent(3);
+// now setup the rest of the Makers in the chain 
+    input->SetMaxEvent(1);
     input->SetDebug();
     St_QA_Maker *QA   = new St_QA_Maker("QA","event/geant/Event");
     QA->SetHistsNames(firstHistName,lastHistName);
@@ -95,6 +114,7 @@ void DrawDstHist(
 //    input->MakeDoc(); 
   }
 
+// Now actually execute the init & make methods in the Makers 
   chain->Init();
   chain->PrintInfo();
   int i;
@@ -102,9 +122,14 @@ void DrawDstHist(
     if (!chain->Make(i))  chain->Clear();
     else break;
   }
+  cout <<  " !!! passed chain->Make" << endl ;
   chain->Finish();
+  cout <<  " !!! passed chain->Finish" << endl ;
+
   if (QABrowser) delete QABrowser;
 //  QABrowser = new TBrowser;
+
   delete [] exFileName;
   delete [] exPsFile;
+  cout <<  " !!! This is last line of macro" << endl ;
 }
