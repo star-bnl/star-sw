@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.16 1999/10/29 23:23:26 caines Exp $
+// $Id: StPrimaryMaker.cxx,v 1.17 1999/11/10 01:56:35 lbarnby Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.17  1999/11/10 01:56:35  lbarnby
+// fix to allow 'intermediate' primary vertices to be saved plus final one - was previously only saving initial guess
+//
 // Revision 1.16  1999/10/29 23:23:26  caines
 // Removed scenario methods
 //
@@ -162,7 +165,7 @@ Int_t StPrimaryMaker::Make(){
   St_dst_track     *globtrk  = (St_dst_track *) matchI("globtrk");
   St_svm_evt_match *evt_match = (St_svm_evt_match *) matchI("evt_match");
   St_dst_track     *primtrk     = 0;   
-  St_dst_vertex *vertex = new St_dst_vertex("vertex",1); 
+  St_dst_vertex *vertex = new St_dst_vertex("vertex",4); 
   AddData(vertex);   
   
   
@@ -209,7 +212,6 @@ Int_t StPrimaryMaker::Make(){
     stk_track    = (St_stk_track *) m_GarbSet->Find("stk_tracks");
     if( !stk_track){ stk_track = new St_stk_track("stk_tracks",5000); AddGarb(stk_track);}
   } 
-  
 
   // Switch to Low Multiplicity Primary Vertex Finder for multiplicities < 15
   long NGlbTrk = tptrack->GetNRows();
