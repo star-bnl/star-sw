@@ -7,8 +7,6 @@
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// $Id: St_DataSetIter.h,v 1.20 1999/12/29 02:37:00 fine Exp $                             
-//
 // St_DataSetIter                                                       //
 //                                                                      //
 // Iterator of St_DataSet lists.                                        //
@@ -40,8 +38,6 @@ protected:
    St_DataSet       *fWorkingDataSet; // Pointer to the working St_DataSet
    St_DataSet       *NextDataSet(TIter &next);
    St_DataSet       *NextDataSet(Int_t nDataSet);
-   static const St_DataSet *fNullDataSet;
-   const St_DataSet *GetNullSet();    // return a fake pointer == -1 casted to (St_DataSet *)
 public:
   St_DataSetIter(St_DataSet *l=0, Int_t depth=1, Bool_t dir=kIterForward);
   St_DataSetIter(St_DataSet *l, Bool_t dir);
@@ -52,7 +48,6 @@ public:
   virtual St_DataSet    *Add(St_DataSet *set, St_DataSet *dataset);
  
   virtual St_DataSet    *Cd(const Char_t *dirname);
-  virtual St_DataSet    *Cd(St_DataSet *ds);
   virtual St_DataSet    *operator()( EDataSetPass mode=kContinue ) {return  Next(mode);}
   virtual St_DataSet    *operator()(const Char_t *path) { return Find(path); }
   virtual St_DataSet    *operator[](const Char_t *path);
@@ -93,23 +88,8 @@ public:
   virtual void           Notify(St_DataSet *dataset);
   const Option_t *GetOption() const                                      { return fNext ? fNext->GetOption():0; }
   virtual void           Reset(St_DataSet *l=0,Int_t depth=0);
-  virtual const St_DataSet *operator *() const ;
-  ClassDef(St_DataSetIter,0) // class-iterator to navigate St_DataSet structure
+  ClassDef(St_DataSetIter,0)
 };
 
-inline const St_DataSet *St_DataSetIter::operator *() const { return fDataSet == fNullDataSet ? fWorkingDataSet : fDataSet; }
-inline const St_DataSet *St_DataSetIter::GetNullSet() { return fNullDataSet; } // return a fake pointer == -1 casted to (St_DataSet *)
-
-//__________________________________________________
-// $Log: St_DataSetIter.h,v $
-// Revision 1.20  1999/12/29 02:37:00  fine
-// remove warning to make Linux happy
-//
-// Revision 1.19  1999/12/28 23:32:01  fine
-// St_DataSetIter  operator++ removed to avoid a future problem
-//
-// Revision 1.18  1999/12/28 21:24:07  fine
-// St_DataSetIter opeartor * and operator ++ have been implemented
-//__________________________________________________
 #endif
 

@@ -70,7 +70,7 @@ my $Salt = undef;
 $_ = $STAR_HOST_SYS;
 print "System: ", $_,"\n" unless ($param::quiet);
 if (/^i386_/) {
-#    case linux
+#    case linux but gcc is EGCS
 #  ====================
   $OSFID    = "f2cFortran";
   $OSFID   .= " lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC";
@@ -81,18 +81,15 @@ if (/^i386_/) {
   $LDFLAGS  = "-Wl,-Bstatic";
   $EXEFLAGS = $CXXFLAGS . " -Wl,-Bdynamic";
   $SOFLAGS  = "-shared";  
-  if (/egcs$/) {
+  if (/^i386_redhat51egcs$/ || /^i386_redhat60egcs$/) {
     $CLIBS    = "-L/usr/X11R6/lib  -lXt -lXpm -lX11 -lm -ldl  -rdynamic";
     $FC       = "g77";
     $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
     $FFLAGS   = "-w %DEBUG -fno-second-underscore -fno-automatic";
-    $FCCOM    = "test -f %>.g && rm %>.g ; test -f %>.f && rm %>.f;";
-    $FCCOM   .= "%FC -E -P %CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %< %Fout%>.g &&"; 
-    $FCCOM   .= "%GEANT3 -v 1 -i %>.g %Fout%>.f;"; 
-    $FCCOM   .= "test -f %>.f && %FC %FFLAGS -c %>.f %Fout%> ||";
-    $FCCOM   .= "%FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>";
+    $FCCOM    = "%FC -E -P %CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %< %Fout%>.g &&"; 
+    $FCCOM   .= "%GEANT3 -v 1 -i %>.g %Fout%>.f &&"; 
+    $FCCOM   .= "%FC %FFLAGS -c %>.f %Fout%>";
     my $GEANT3COM= $FCCOM;
-    $FEXTEND  = "-ffixed-line-length-132"; #"-fextended-source";
   }
   else {
     $CLIBS    = "-L/usr/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic";
@@ -132,8 +129,7 @@ elsif (/^hp_ux102/) {
 elsif (/^sun4x_56_CC5$/) {
   $ROOTCINTD = "-DSOLARIS";
   $OSFID     = "__CC5__";
-  $OSFID    .= " CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS";
-  $OSFID    .= " ST_NO_MEMBER_TEMPLATES";
+  $OSFID    .= " CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS ";
   $OSFID    .= " SUN Solaris sun sun4os5 sun4x_56";
   $CC        = "/opt/WS5.0/bin/cc";
   $CXX       = "/opt/WS5.0/bin/CC";
@@ -228,8 +224,7 @@ elsif (/^intel_wnt/) {
 }
 
 $MAIN    = cwd();
-$include = "include";
-$INCLUDE = "#" . $include;
+$INCLUDE = "#include";
 $EXPORT = "#.share";
 $FFLAGS .= " -DCERNLIB_TYPE";
 $OSFID .= " " . $STAR_SYS;
@@ -412,8 +407,6 @@ $env = new cons(
 				     'STAR_SYS' => $STAR_HOST_SYS
 				   },
 	       );
-&File::Find::find (\&wanted_dead,$include) if -d $include;
-&File::Find::find (\&wanted_dead,$build)   if -d $build;
 my @subdirs = ();
 # make Targets and install includes
 foreach my $dir ("StRoot","pams"){#,"StDb") {
@@ -484,17 +477,27 @@ foreach my $dir ("StRoot","pams"){#,"StDb") {
 	  if ($subsub_dir =~  /\./     || $subsub_dir =~ /\.\./  || 
 	      $subsub_dir =~ /CVS/     || $subsub_dir =~ /^doc/  ||
 	      $subsub_dir =~ /^local/  || $subsub_dir =~ /^run/  ||
-	      $subsub_dir =~ /^wrk$/   ||
 	      $subsub_dir =~ /^example/|| $subsub_dir =~ /^kumac/) {next;}
-	  if ($subsub_dir =~ /^inc$/ || $subsub_dir =~ /^idl$/ ) {
+	  if ($subsub_dir =~ /^idl$/) {   
+	    opendir (DIR, $subsub_DIR) or die "Can't open $sub_DIR\n";   
+	    my @idls = readdir DIR;   
+	    closedir DIR; #print "idls = @idls\n";   
+	    my @idlT;
+	    foreach my $idl (@idls) {   
+	      if ($idl =~ /\.idl$/ ) {   
+		push @idlT, $subsub_DIR ."/" . $idl; #print "+++ add $idl\n";   
+	      }   
+	      if ($#idlT > -1 && ! $param::rflag) {Install $env $INCLUDE, @idlT;} 
+	    }   
+	    next;   
+	  }   
+	  if ($subsub_dir =~ /^inc/) {
 	    opendir (DIR, $subsub_DIR) or die "Can't open $sub_DIR\n";
 	    my @incs = readdir DIR; 
 	    closedir DIR; #print "subsub_DIR = $subsub_DIR\n";
 	    my @incT = ();
 	    foreach my $inc (@incs) {
-	      if ($inc =~ /\.h$/ || $inc =~ /\.hh$/ || 
-		  $inc =~ /\.hpp$/ || $inc =~ /\.inc$/ ||
-		  $inc =~ /\.idl$/) {
+	      if ($inc =~ /\.h$/ || $inc =~ /\.hh$/ || $inc =~ /\.hpp$/ || $inc =~ /\.inc$/ ) {
 		push @incT, $subsub_DIR ."/" . $inc; #print "+++ add $inc\n";
 	      }
 	    }
@@ -531,8 +534,5 @@ print "BUILD  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ\n" unless ($param::quiet); #
 Export qw( env INCLUDE LIB BIN EXPORT BUILD OBJ MAIN);
 Default qw (   .  );
 Build  @Targets;
-sub wanted_dead {
-  -l and not -e and print "bigus link: $File::Find::name \t--- remove it\n" and `rm $_`;
-}
 #________________________________________________________________________________
 __END__;
