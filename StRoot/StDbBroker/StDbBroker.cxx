@@ -124,6 +124,9 @@ void *pDbData = ::DbUse(&nRows, datetime, (const char*)m_tableName,(const char*)
   return pDbData;
 }
 //______________________________________________________________________________
+int StDbBroker::DbInit(const char * dbName)
+{  return ::DbInit(dbName) ;}
+
 
 
 

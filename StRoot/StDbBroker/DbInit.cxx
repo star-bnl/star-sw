@@ -18,7 +18,7 @@ mysql_init(&mysql);
 
 // Try to establish a connection to the MySQL database engine 
 
-char *database="params";
+char *database=dbName;
 //only db1 is visible from rcas0202 machine
 char *dbHost="db1.star.bnl.gov";
 //char *dbHost="duvall.star.bnl.gov";
