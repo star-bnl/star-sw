@@ -1,6 +1,9 @@
-// $Id: StSsdPoint.hh,v 1.2 2005/03/18 14:19:44 lmartin Exp $
+// $Id: StSsdPoint.hh,v 1.3 2005/03/18 16:29:08 lmartin Exp $
 //
 // $Log: StSsdPoint.hh,v $
+// Revision 1.3  2005/03/18 16:29:08  lmartin
+// new members mIdClusterP and mIdClusterN and associated methods
+//
 // Revision 1.2  2005/03/18 14:19:44  lmartin
 // missing CVS header added
 //
@@ -28,6 +31,8 @@ class StSsdPoint
   void        setPositionU(float rPositionU, int iR);
   void        setXg(float rXg, int iR);
   void        setXl(float rXl, int iR);
+  void        setIdClusterP(int iIdClusterP);
+  void        setIdClusterN(int iIdClusterN);
 
   void        setPrevPoint(StSsdPoint *rPrevPoint);
   void        setNextPoint(StSsdPoint *rNextPoint);
@@ -42,6 +47,8 @@ class StSsdPoint
   float       getPositionU(int iR);
   float       getXg(int iR);
   float       getXl(int iR);
+  int         getIdClusterP();
+  int         getIdClusterN();
 
   StSsdPoint* getPrevPoint();
   StSsdPoint* getNextPoint();  
@@ -54,6 +61,8 @@ class StSsdPoint
   int         mNPoint;
   int         mNCluster;
   int         mNMatched;
+  int         mIdClusterP;
+  int         mIdClusterN;
   int        *mNMchit;
   int         mNWafer;
   float      *mDe;
