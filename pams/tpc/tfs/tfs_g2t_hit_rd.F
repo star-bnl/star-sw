@@ -1,5 +1,9 @@
-* $Id: tfs_g2t_hit_rd.F,v 1.10 1999/10/15 00:54:01 nevski Exp $
+* $Id: tfs_g2t_hit_rd.F,v 1.11 1999/11/19 21:38:31 sakrejda Exp $
 * $Log: tfs_g2t_hit_rd.F,v $
+* Revision 1.11  1999/11/19 21:38:31  sakrejda
+* Hits with length below 100 microns are not processed by tfs.
+* This temporarily solves "double hit" problem of gstar.
+*
 * Revision 1.10  1999/10/15 00:54:01  nevski
 * pgf->g77 cleanup
 *
@@ -131,6 +135,7 @@ C     Fast Simulator, reject GEANT hits with voulme_id > 2445.
 C     ---  Dhammika W.  April 18, 1996 ---
 
          if(g2t_hit(ih).volume_id.gt.2445)goto 100
+         if(g2t_hit(ih).ds.lt.0.01)goto 100
 
          if( nok .lt. tphit_h.maxlen ) then
 
