@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.7  1998/05/01 12:21:27  fisyak
+#  Test automail
+#
 #  Revision 1.6  1998/05/01 12:16:32  fisyak
 #  Test automail
 #
@@ -35,7 +38,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/05/01 12:16:32 $ 
+#          Last modification $Date: 1998/05/01 12:21:27 $ 
 #. default setings
 #include $(STAF_HOME)/MakeEnv.mk
 #
