@@ -1,18 +1,27 @@
 #!/usr/bin/env perl
-Import qw ( env INCLUDE LIB BIN  EXPORT BUILD OBJ);
+
+Import qw ( env INCLUDE LIB BIN EXPORT BUILD OBJ);
+
 ( my $build = $OBJ ) =~ s/\#//g;
-$build =~ s/\\/\//g;    # print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
-my $DirPath = DirPath '.';    # print "DirPath = $DirPath\n";
-( my $obj_dir = $DirPath ) =~ s/\\/\//g;    # print "obj_dir = $obj_dir\n";
-( my $Dir = $obj_dir ) =~ s/$build\///g;    # print "Dir = $Dir\n";
-my $ObjDir   = "#" . $obj_dir;              #print "ObjDir = $ObjDir\n";
+$build =~ s/\\/\//g;                                    # print "OBJ = $OBJ build = $build\n";
+                                                        # print "MAIN = $MAIN\n";
+my $DirPath = DirPath '.';                              # print "DirPath = $DirPath\n";
+( my $obj_dir = $DirPath ) =~ s/\\/\//g;                # print "obj_dir = $obj_dir\n";
+( my $Dir = $obj_dir ) =~ s/$build\///g;                # print "Dir = $Dir\n";
+my $ObjDir   = "#" . $obj_dir;                          # print "ObjDir = $ObjDir\n";
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
-@Repo = Repository_List
-  unless $param::noRepository;    #print "Repositories = |@Repo|\n";nv
-my $pkg = File::Basename::basename($Dir); # print "Run cons in $Dir for $PKG\n";
+
+@Repo   = Repository_List unless $param::noRepository;  # print "Repositories = |@Repo|\n";nv
+my $pkg = File::Basename::basename($Dir);               # print "Run cons in $Dir for $PKG\n";
 my $PKG = $pkg;
+
 my $SO_PKG  = "";
 my $SO_PKGT = "";
+my $SHARE   = $EXPORT;   # *** Will remove later. For now, old version have
+                         # sub-dirs with Conscript scripts expecting EXPORT
+                         # variable
+
+
 my @idlL    = script::find_idl($Dir);
 print "In Dir = $Dir idlL = @idlL\n" if $param::debug;
 foreach my $Rep(@Repo) {
@@ -92,13 +101,12 @@ my $QTDIR = $ENV{QTDIR};
 
 
 
-
 #+
 # Extraneous flag treatment for specific makers
 # Search path depth for Makers.
 #-
 
-if ( $pkg =~ /^StEventDisplay/){
+if ( $pkg =~ m/^StEventDisplay/){
     # This make requires both ROOT Qt and QT libraries
     if ( defined($QTDIR) && -r $ENV{ROOTSYS} . "/include/TQt.h"){
 	#print "-=-=-=-=-=-=-=- QT is defined -=-=-=-=-=-=-=-=-=-=\n";
@@ -109,11 +117,16 @@ if ( $pkg =~ /^StEventDisplay/){
 	#$LIBS ... should come loaded from ROOT
 	$CXXFLAGS.= " -DR__QT";
     }
-}
-if ( $pkg =~ /^St.*Db/ ) {
+
+
+} elsif ( $pkg =~ m/^St.*Db/ ) {
   $CPPPATH .= $main::PATH_SEPARATOR . $MYSQLINC;
-}
-if ( $pkg =~ /^StDbLib$/ || $pkg =~ /^StDbBroker$/) {
+
+
+# This block is used for libraries requiering mysql
+# include
+} elsif ( $pkg =~ m/^StDbLib$/ || 
+	  $pkg =~ m/^StDbBroker$/) {
     if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }
 
     $LIBPATH .= $main::PATH_SEPARATOR . $MYSQLLIB;
@@ -122,9 +135,8 @@ if ( $pkg =~ /^StDbLib$/ || $pkg =~ /^StDbBroker$/) {
     print "LIBS    = $LIBS\n" if $param::debug;
     $CPPPATH .=  $main::PATH_SEPARATOR . $MYSQLINC;
     print "CPPPATH = $CPPPATH\n" if $param::debug;
-}
 
-if ( $pkg =~ /^pyth$/ ) {
+} elsif ( $pkg =~ m/^pyth$/ ) {
   my $CERN_ROOT = $env->{ENV}->{CERN_ROOT};
   print "CERN_ROOT = $CERN_ROOT\n" if $param::debug;
   if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }
@@ -133,20 +145,14 @@ if ( $pkg =~ /^pyth$/ ) {
     my $file = $CERN_ROOT . "/lib/lib" . $py . ".a";
     if (-f $file) {$LIBS .= " -l" . $py; last;}
   }
-}
-( my $share = $EXPORT . "/" . $Dir ) =~ s/\/pams//g;
-print "new share $share\n" if $param::debug;
-$share =~ s/\/StRoot//g;
-$share =~ s/\/(sim|gen)//g;
 
-if ( $pkg =~ /^StTrsMaker$/ ) {
+} elsif ( $pkg =~ m/^StTrsMaker$/ ) {
     $CPPPATH =
       "#" . $Dir . $main::PATH_SEPARATOR . "#" . $Dir . "/include"
       . $main::PATH_SEPARATOR . $env->{CPPPATH};
     print "CPPPATH = $CPPPATH\n" if $param::debug;
-}
 
-if ( $pkg =~ /^StHbtMaker$/ ) {
+} elsif ( $pkg =~ m/^StHbtMaker$/ ) {
     $CPPPATH = "#" . $Dir;
     foreach
       my $subdir( "Base", "Infrastructure", "Reader", "Cut", 
@@ -156,14 +162,15 @@ if ( $pkg =~ /^StHbtMaker$/ ) {
     }
     $CPPPATH .= $main::PATH_SEPARATOR . $env->{CPPPATH};
     print "CPPPATH = $CPPPATH\n" if $param::debug;
-}
 
 # This block can be used for ANY maker having a 2 level
 # directory structure using auto-globbing
-if ( $pkg =~ /^StMuDSTMaker$/ ||
-     $pkg =~ /^StRichPool$/   ||
-     $pkg =~ /^Sti/           ) {
+} elsif ( $pkg =~ m/^StMuDSTMaker$/ ||
+	  $pkg =~ m/^StRichPool$/   ||
+	  $pkg =~ m/^Sti/           ) {
     $CPPPATH = "#" . $Dir;
+
+    print "WARNING Package $pkg requires a glob() to be called\n" if $param::debug;
 
     foreach my $subdir ( glob("$Dir/*") ){
 	if( -d $subdir && $subdir ne "$Dir/CVS"
@@ -175,24 +182,34 @@ if ( $pkg =~ /^StMuDSTMaker$/ ||
     }
     $CPPPATH .= $main::PATH_SEPARATOR . $env->{CPPPATH};
     print "CPPPATH = $CPPPATH\n" if $param::debug;
-}
 
 
-if ( $pkg =~ /^StDaqLib$/ ) {
+} elsif ( $pkg =~ m/^StDaqLib$/ ) {
     $CPPPATH = "#" . $Dir . $main::PATH_SEPARATOR . $env->{CPPPATH};
     print "CPPPATH = $CPPPATH\n" if $param::debug;
 }
 
+
+# Prepare a local share variable
+( my $share = $SHARE . "/" . $Dir ) =~ s/\/pams//g;
+print "new share $share\n" if $param::debug;
+$share =~ s/\/StRoot//g;
+$share =~ s/\/(sim|gen)//g;
+
+my $LIBPKG = "";
+my @srco   = @src;
+
+
+
 if ( $#idlM > -1 ) {
     $CPPPATH = $INCLUDE . "/" . $pkg . $main::PATH_SEPARATOR . $CPPPATH;
     print "CPPPATH = $CPPPATH\n" if $param::debug;
-}
-elsif ( $#idlL > -1 ) {
+
+} elsif ( $#idlL > -1 ) {
     $CPPPATH .= $main::PATH_SEPARATOR . $INCLUDE . "/tables";
     print "CPPPATH = $CPPPATH\n" if $param::debug;
 }
-my $LIBPKG = "";
-my @srco   = @src;
+
 
 if ( $LIBPKG && $Dir =~ /pams\// || $STAR_SYS =~ /^intel_wnt$/ ) {
     $LIBS .= " -l" . $pkg;    #"lib" . $pkg . "." . $env->{SUFLIB};
@@ -378,7 +395,7 @@ if ( $#idlL > -1 ) {
     my $objT = $OBJ . "/pams/tables";
     ( my $objT_dir = $objT ) =~ s/^\#//g;
     print "objT_dir = $objT_dir\n" if $param::debug;
-    my $shareT = "#.share/tables";
+    my $shareT = "$SHARE/tables";
     print "shareT = $shareT\n" if $param::debug;
     my $includeT = $INCLUDE . "/tables";
     print "includeT = $includeT\n" if $param::debug;
