@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.11 2001/09/22 00:28:58 pavlinov Exp $
+ * $Id: StEmcGeom.h,v 1.12 2001/09/24 17:34:51 akio Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.12  2001/09/24 17:34:51  akio
+ * Dirty bug fix.
+ *
  * Revision 1.11  2001/09/22 00:28:58  pavlinov
  * No public constructor for StEmcGeom
  *
@@ -114,9 +117,7 @@ private:
   //  static Int_t   getIndex(const Float_t x, TArrayF &arr);
   Int_t   getIndex(const Float_t x, TArrayF &arr);
 
-  StEmcGeom(const Int_t );
-  StEmcGeom(const Char_t*);
-  StEmcGeom(const Int_t ,const Char_t*);
+
 protected:
   TString mMode;     // Empty, "geant" or "db"
   Int_t   mDetector; // Detectors number => see emc/inc/emc_def.h
@@ -145,6 +146,10 @@ protected:
   Int_t   mMaxAdc;    // Range of ADC for each detector
 
 public: 
+  StEmcGeom(const Int_t );
+  StEmcGeom(const Char_t*);
+  StEmcGeom(const Int_t ,const Char_t*);
+
   static StEmcGeom *instance(const Int_t det);
   static StEmcGeom *getEmcGeom(const Int_t det);
   static StEmcGeom *instance(const Char_t* cdet);
