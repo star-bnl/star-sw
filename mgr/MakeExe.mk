@@ -51,7 +51,7 @@ ifdef ifAFS_OUT
   AFS_EXE_DIR := $(OUT_DIR)/bin
 endif
 
-SRC_DIRS := $(addprefix $(GST_DIR)/,main dummy ntuple comis agsim deccc dzdoc geant zebra)  
+SRC_DIRS := $(addprefix $(GST_DIR)/,main dummy ntuple comis kuip agsim deccc dzdoc geant zebra)  
 
 VPATH := $(SRC_DIRS) $(OUT_DIR) $(OBJ_DIR) $(SRG_DIR) $(EXE_DIR) 
 

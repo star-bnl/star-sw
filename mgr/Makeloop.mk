@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.17  1998/09/18 00:32:14  fisyak
+#  Add kuip break off for Linux
+#
 #  Revision 1.16  1998/09/16 21:52:14  fisyak
 #  Add dependencies for StRoot
 #
@@ -130,7 +133,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/09/16 21:52:14 $ 
+#           Last modification $Date: 1998/09/18 00:32:14 $ 
 #  default setings
 # Current Working Directory
 #
@@ -281,6 +284,7 @@ StChain:
 St_Tables:
 	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/.share/tables  SO_LIB=$(ROOT_DIR)/.$(STAR_SYS)/lib/St_Tables.so NODEBUG=YES
 ifneq ($(EMPTY),$(findstring $(STAR_LEVEL),dev))
+St_TablesDoc: 
 	root.exe -b -q MakeHtmlTables.cxx
 endif
 St_%_Maker: 
