@@ -30,6 +30,7 @@ using std::find_if;
 #include "Sti/StiDetectorContainer.h"
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiKalmanTrackFinder.h"
+#include "Sti/StiTrackSeedFinder.h"
 
 #include "StiMaker/DetectorActivator.h"
 #include "StiMaker/Navigator.h"
@@ -114,8 +115,7 @@ void MainFrame::createOptionMenu(TGMenuBar *menuBar, TGLayoutHints *itemLayout)
   menu->AddEntry("Messenger Options", M_Messenger);
   menu->AddEntry("Display Options", M_DisplayOptions);
   menu->AddEntry("MC Track Colors", M_ShowRootColors);
-  menu->AddEntry("Evaluable Seed Finder Options", M_SeedFinderOptions);
-  menu->AddEntry("Local Seed Finder Options", M_LocalSeedFinderOptions);
+  menu->AddEntry("Seed Finder Options", M_SeedFinderOptions);
   menu->AddEntry("Kalman Track Finder Options", M_TrackFinderOptions);
   menu->AddEntry("MC Track Filter Options", M_McTrackFilterOptions);
   menu->AddEntry("Rec Track Filter Options", M_TrackFilterOptions); 
@@ -267,113 +267,112 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
     {
     case kC_COMMAND:
       switch (GET_SUBMSG(msg)) 
-	{
-	case kCM_BUTTON:
-	  if (parm1 == M_Tracking_DoTrackStep) doNextTrackStep();
-	  else if (parm1 == M_Tracking_FinishTrack) finishTrack();
-	  else if (parm1 == M_Tracking_FinishEvent) finishEvent();
-	  else if (parm1 == M_Tracking_ResetEvent) 
-	    {
-	      setCurrentDetectorToDefault();
-	      _toolkit->getTrackFinder()->reloadEvent();
-	      _toolkit->getDisplayManager()->reset();
-	      _toolkit->getDisplayManager()->draw();
-	      _toolkit->getDisplayManager()->update();
-	      showCurrentDetector();
-	    }
-	  else if (parm1 == M_Tracking_EventStep) stepToNextEvent();
-	  break;
-	case kCM_MENUSELECT:
-	  break;
-	case kCM_MENU:
-	    switch (parm1) 
-	      {
-	      case M_FILE_OPEN:
-		{
-		  static TString dir("/star/data22/ITTF/");
-		  TGFileInfo fi;
-		  fi.fFileTypes = filetypes;
-		  fi.fIniDir    = StrDup(dir);
-		  new TGFileDialog(fClient->GetRoot(), this, kFDOpen, &fi);
-		  printf("Open file: %s (dir: %s)\n", fi.fFilename,
-			 fi.fIniDir);
-		  dir = fi.fIniDir;
-		  mIoMaker->Close();
-		  mIoMaker->SetFile(fi.fFilename);
-		  stepToNextEvent();
-		}
-		break;
-	      case M_Messenger:	new MessengerOptionsDialog(fClient->GetRoot(), this, 400, 200);break;
-	      case M_DisplayOptions: break;//new EntryTestDlg(fClient->GetRoot(), this); break;
-	      case M_SeedFinderOptions:
-		{
-		  /*
-		    StiLocalTrackSeedFinder * seedFinder = _toolkit->getTrackSeedFinder();
-		    if (seedFinder)
-		    new StiOptionFrame(fClient->GetRoot(), this, seedFinder);
-		    else
-		    cout << "case M_TrackFinderOptions - null StiLocalTrackSeedFinder * seedFinder "<<endl;*/
-		  break;
-		}
-	      case M_TrackFinderOptions:
-		{
-		  EditableParameters * pars = dynamic_cast<EditableParameters *>(_toolkit->getTrackFinder()->getParameters());
-		  if (pars)
-		    new StiOptionFrame(fClient->GetRoot(), this, pars);
-		  else
-		    cout << "case M_TrackFinderOptions - null StiKalmanTrackFinderParameters * pars"<<endl;
-		  break;
-		}
-	      case M_McTrackFilterOptions: 
-		{
-		  StiDefaultTrackFilter * mcFilter;
-		  Filter<StiTrack> * filter = _toolkit->getTrackFinder()->getGuiMcTrackFilter();
-		  mcFilter = dynamic_cast<StiDefaultTrackFilter*>(filter);
-		  if (mcFilter)
-		      new StiOptionFrame(fClient->GetRoot(), this, mcFilter);
-		  else
-		    cout << "case M_McTrackFilterOptions: Null mcFilter." << endl;
-		  break;
-		}
-	      case M_TrackFilterOptions: 
-		{
-		  StiDefaultTrackFilter * filter;
-		  filter = static_cast<StiDefaultTrackFilter *>(_toolkit->getTrackFinder()->getGuiTrackFilter());
-		  new StiOptionFrame(fClient->GetRoot(), this, filter);
-		  break;
-		}
-	      case M_DetView_AllVisible: 	 setAllVisible();  break;
-	      case M_DetView_AllInvisible: setAllInvisible();break;
-	      case M_DetView_TpcVisible:   setTpcVisible();    break;
-	      case M_DetView_TpcInvisible: setTpcInvisible();  break;
-	      case M_DetView_SvtVisible:   setSvtVisible();    break;
-	      case M_DetView_SvtInvisible: setSvtInvisible();  break;
-	      case M_DetView_IfcVisible:   setIfcVisible();    break;
-	      case M_DetView_IfcInvisible: setIfcInvisible();  break;
-	      case M_DetView_ManualView:   setManualView();    break;
-	      case M_DetView_SkeletonView: setSkeletonView();  break;
-	      case M_DetView_ZoomSkeletonView: setZoomSkeletonView(); break;
-	      case M_DetOnOff:	 new DetectorActivator(fClient->GetRoot(), this, 800, 200); break;
-	      case M_Det_Navigate: 
-		new Navigator(fClient->GetRoot(), this, 400, 200); break;
-	      case M_DetNavigate_MoveIn:      moveIn();  break;
-	      case M_DetNavigate_MoveOut:	    moveOut(); break;
-	      case M_DetNavigate_MovePlusPhi: movePlusPhi();break;
-	      case M_DetNavigate_MoveMinusPhi:moveMinusPhi();break;
-	      case M_DetNavigate_SetLayer:    setLayer();	break;
-	      case M_DetNavigate_SetLayerAndAngle:setLayerAndAngle();break;
-	      case M_Tracking_ToggleFitFind:toggleFitFind();break;
-	      case M_Tracking_DoTrackStep:doNextTrackStep();break;
-	      case M_Tracking_FinishTrack:finishTrack();	break;
-	      case M_Tracking_FinishEvent:finishEvent();	break;
-	      case M_Tracking_EventStep:	stepToNextEvent();break;
-	      case M_Tracking_NEventStep:	stepThroughNEvents();break;
-	      case M_FILE_SAVE:	printf("M_FILE_SAVE\n");break;
-	      case M_FILE_EXIT:	CloseWindow();  break;		
-	      default:      break;
-	    }
-	default:  break;
-	}
+				{
+				case kCM_BUTTON:
+					if (parm1 == M_Tracking_DoTrackStep) doNextTrackStep();
+					else if (parm1 == M_Tracking_FinishTrack) finishTrack();
+					else if (parm1 == M_Tracking_FinishEvent) finishEvent();
+					else if (parm1 == M_Tracking_ResetEvent) 
+						{
+							setCurrentDetectorToDefault();
+							_toolkit->getTrackFinder()->reloadEvent();
+							_toolkit->getDisplayManager()->reset();
+							_toolkit->getDisplayManager()->draw();
+							_toolkit->getDisplayManager()->update();
+							showCurrentDetector();
+						}
+					else if (parm1 == M_Tracking_EventStep) stepToNextEvent();
+					break;
+				case kCM_MENUSELECT:
+					break;
+				case kCM_MENU:
+					switch (parm1) 
+						{
+						case M_FILE_OPEN:
+							{
+								static TString dir("/star/data22/ITTF/");
+								TGFileInfo fi;
+								fi.fFileTypes = filetypes;
+								fi.fIniDir    = StrDup(dir);
+								new TGFileDialog(fClient->GetRoot(), this, kFDOpen, &fi);
+								printf("Open file: %s (dir: %s)\n", fi.fFilename,
+											 fi.fIniDir);
+								dir = fi.fIniDir;
+								mIoMaker->Close();
+								mIoMaker->SetFile(fi.fFilename);
+								stepToNextEvent();
+							}
+							break;
+						case M_Messenger:	new MessengerOptionsDialog(fClient->GetRoot(), this, 400, 200);break;
+						case M_DisplayOptions: break;//new EntryTestDlg(fClient->GetRoot(), this); break;
+						case M_SeedFinderOptions:
+							{	
+								EditableParameters * pars = dynamic_cast<EditableParameters *>(_toolkit->getTrackSeedFinder()->getParameters() );
+								if (pars)
+									new StiOptionFrame(fClient->GetRoot(), this, pars);
+								else
+									cout << "case M_TrackFinderOptions - null StiKalmanTrackFinderParameters * pars"<<endl;
+								break;
+							}
+						case M_TrackFinderOptions:
+							{
+								EditableParameters * pars = dynamic_cast<EditableParameters *>(_toolkit->getTrackFinder()->getParameters());
+								if (pars)
+									new StiOptionFrame(fClient->GetRoot(), this, pars);
+								else
+									cout << "case M_TrackFinderOptions - null StiKalmanTrackFinderParameters * pars"<<endl;
+								break;
+							}
+						case M_McTrackFilterOptions: 
+							{
+								StiDefaultTrackFilter * mcFilter;
+								Filter<StiTrack> * filter = _toolkit->getTrackFinder()->getGuiMcTrackFilter();
+								mcFilter = dynamic_cast<StiDefaultTrackFilter*>(filter);
+								if (mcFilter)
+									new StiOptionFrame(fClient->GetRoot(), this, mcFilter);
+								else
+									cout << "case M_McTrackFilterOptions: Null mcFilter." << endl;
+								break;
+							}
+						case M_TrackFilterOptions: 
+							{
+								StiDefaultTrackFilter * filter;
+								filter = static_cast<StiDefaultTrackFilter *>(_toolkit->getTrackFinder()->getGuiTrackFilter());
+								new StiOptionFrame(fClient->GetRoot(), this, filter);
+								break;
+							}
+						case M_DetView_AllVisible: 	 setAllVisible();  break;
+						case M_DetView_AllInvisible: setAllInvisible();break;
+						case M_DetView_TpcVisible:   setTpcVisible();    break;
+						case M_DetView_TpcInvisible: setTpcInvisible();  break;
+						case M_DetView_SvtVisible:   setSvtVisible();    break;
+						case M_DetView_SvtInvisible: setSvtInvisible();  break;
+						case M_DetView_IfcVisible:   setIfcVisible();    break;
+						case M_DetView_IfcInvisible: setIfcInvisible();  break;
+						case M_DetView_ManualView:   setManualView();    break;
+						case M_DetView_SkeletonView: setSkeletonView();  break;
+						case M_DetView_ZoomSkeletonView: setZoomSkeletonView(); break;
+						case M_DetOnOff:	 new DetectorActivator(fClient->GetRoot(), this, 800, 200); break;
+						case M_Det_Navigate: 
+							new Navigator(fClient->GetRoot(), this, 400, 200); break;
+						case M_DetNavigate_MoveIn:      moveIn();  break;
+						case M_DetNavigate_MoveOut:	    moveOut(); break;
+						case M_DetNavigate_MovePlusPhi: movePlusPhi();break;
+						case M_DetNavigate_MoveMinusPhi:moveMinusPhi();break;
+						case M_DetNavigate_SetLayer:    setLayer();	break;
+						case M_DetNavigate_SetLayerAndAngle:setLayerAndAngle();break;
+						case M_Tracking_ToggleFitFind:toggleFitFind();break;
+						case M_Tracking_DoTrackStep:doNextTrackStep();break;
+						case M_Tracking_FinishTrack:finishTrack();	break;
+						case M_Tracking_FinishEvent:finishEvent();	break;
+						case M_Tracking_EventStep:	stepToNextEvent();break;
+						case M_Tracking_NEventStep:	stepThroughNEvents();break;
+						case M_FILE_SAVE:	printf("M_FILE_SAVE\n");break;
+						case M_FILE_EXIT:	CloseWindow();  break;		
+						default:      break;
+						}
+				default:  break;
+				}
     default:    break;
     }
   return kTRUE;
@@ -457,54 +456,54 @@ void MainFrame::setAllInvisible()
 
 void MainFrame::setSkeletonView()
 {
-    StiRootDisplayManager::instance()->setView(0);
-    setView(new StiSkeletonView());
-    StiRootDisplayManager::instance()->draw();
-    StiRootDisplayManager::instance()->update();
+	StiRootDisplayManager::instance()->setView(0);
+	setView(new StiSkeletonView());
+	StiRootDisplayManager::instance()->draw();
+	StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setManualView()
 {
-    StiRootDisplayManager::instance()->setVisible(true);
-    setView(new StiManualView());
-    StiRootDisplayManager::instance()->draw();
-    StiRootDisplayManager::instance()->update();
+	StiRootDisplayManager::instance()->setVisible(true);
+	setView(new StiManualView());
+	StiRootDisplayManager::instance()->draw();
+	StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setZoomSkeletonView()
 {
-    StiRootDisplayManager::instance()->setView(1);
-    setView(new StiZoomSkeletonView());
-    StiRootDisplayManager::instance()->draw();
-    StiRootDisplayManager::instance()->update();
+	StiRootDisplayManager::instance()->setView(1);
+	setView(new StiZoomSkeletonView());
+	StiRootDisplayManager::instance()->draw();
+	StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setSvtVisible()
 {
-    StiRootDisplayManager::instance()->setVisible("Svg",true);
-    StiRootDisplayManager::instance()->draw();
-    StiRootDisplayManager::instance()->update();
+	StiRootDisplayManager::instance()->setVisible("Svg",true);
+	StiRootDisplayManager::instance()->draw();
+	StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setSvtInvisible()
 {
-    StiRootDisplayManager::instance()->setVisible("Svg",false);
-    StiRootDisplayManager::instance()->draw();
-    StiRootDisplayManager::instance()->update();
+	StiRootDisplayManager::instance()->setVisible("Svg",false);
+	StiRootDisplayManager::instance()->draw();
+	StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setTpcVisible()
 {
-    StiRootDisplayManager::instance()->setVisible("Tpc",true);
-    StiRootDisplayManager::instance()->draw();
-    StiRootDisplayManager::instance()->update();
+	StiRootDisplayManager::instance()->setVisible("Tpc",true);
+	StiRootDisplayManager::instance()->draw();
+	StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setTpcInvisible()
 {
-    StiRootDisplayManager::instance()->setVisible("Tpc",false);
-    StiRootDisplayManager::instance()->draw();
-    StiRootDisplayManager::instance()->update();
+	StiRootDisplayManager::instance()->setVisible("Tpc",false);
+	StiRootDisplayManager::instance()->draw();
+	StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::setIfcVisible()
@@ -523,7 +522,7 @@ void MainFrame::setIfcInvisible()
 
 void MainFrame::printDisplayManager()
 {
-    StiRootDisplayManager::instance()->print();
+	StiRootDisplayManager::instance()->print();
 }
 
 //This is a memory leak, so don't push it too far!
@@ -535,150 +534,150 @@ void MainFrame::ShowRootColors()
   double xstart = .1;
   double ystart = .9;
   double dx = .8;
-    double dy = .1;
-    double deltay = .15;
+	double dy = .1;
+	double deltay = .15;
     
-    TPaveLabel* pion = new TPaveLabel(xstart, ystart, xstart+dx, ystart-dy, "Pion");
-    pion->SetTextColor(2);
-    pion->Draw();
+	TPaveLabel* pion = new TPaveLabel(xstart, ystart, xstart+dx, ystart-dy, "Pion");
+	pion->SetTextColor(2);
+	pion->Draw();
 
-    ystart-=deltay;
-    TPaveLabel* kaon = new TPaveLabel(xstart, ystart, xstart+dx, ystart-dy, "Kaon");
-    kaon->SetTextColor(3);
-    kaon->Draw();
+	ystart-=deltay;
+	TPaveLabel* kaon = new TPaveLabel(xstart, ystart, xstart+dx, ystart-dy, "Kaon");
+	kaon->SetTextColor(3);
+	kaon->Draw();
 
-    ystart-=deltay;
-    TPaveLabel* proton = new TPaveLabel(xstart, ystart, xstart+dx, ystart-dy, "Proton");
-    proton->SetTextColor(4);
-    proton->Draw();
+	ystart-=deltay;
+	TPaveLabel* proton = new TPaveLabel(xstart, ystart, xstart+dx, ystart-dy, "Proton");
+	proton->SetTextColor(4);
+	proton->Draw();
 
-    ystart-=deltay;
-    TPaveLabel* muon = new TPaveLabel(xstart, ystart, xstart+dx, ystart-dy, "Muon");
-    muon->SetTextColor(6);
-    muon->Draw();
+	ystart-=deltay;
+	TPaveLabel* muon = new TPaveLabel(xstart, ystart, xstart+dx, ystart-dy, "Muon");
+	muon->SetTextColor(6);
+	muon->Draw();
 
-    ystart-=deltay;
-    TPaveLabel* electron = new TPaveLabel(xstart, ystart, xstart+dx, ystart-dy, "Electron");
-    electron->SetTextColor(1);
-    electron->Draw();
+	ystart-=deltay;
+	TPaveLabel* electron = new TPaveLabel(xstart, ystart, xstart+dx, ystart-dy, "Electron");
+	electron->SetTextColor(1);
+	electron->Draw();
 
-    ystart-=deltay;
-    TPaveLabel* other = new TPaveLabel(xstart, ystart, xstart+dx, ystart-dy, "Other");
-    other->SetTextColor(5);
-    other->Draw();
+	ystart-=deltay;
+	TPaveLabel* other = new TPaveLabel(xstart, ystart, xstart+dx, ystart-dy, "Other");
+	other->SetTextColor(5);
+	other->Draw();
 
-    StiRootDisplayManager::instance()->cd();
+	StiRootDisplayManager::instance()->cd();
 }
 
 void MainFrame::setLayer()
 {
-    //cout <<"Function Not Currently Implemented"<<endl;
-    setCurrentDetectorToDefault();
-    cout <<"\nEnter position: (double)"<<endl;
-    double position;
-    cin >>position;
-    cout <<"Setting to  position:\t"<<position<<endl;
-    StiDetectorContainer*rdet = _toolkit->getDetectorContainer();
-    rdet->setToDetector(position);
-    StiDetector* layer = **rdet;
-    if (!layer) {
-	cout <<"Error in setSectorAndPadrow"<<endl;
-	return;
-    }
-    cout <<"Detector Set To: "<<layer->getName()<<endl;
-    showCurrentDetector();
+	//cout <<"Function Not Currently Implemented"<<endl;
+	setCurrentDetectorToDefault();
+	cout <<"\nEnter position: (double)"<<endl;
+	double position;
+	cin >>position;
+	cout <<"Setting to  position:\t"<<position<<endl;
+	StiDetectorContainer*rdet = _toolkit->getDetectorContainer();
+	rdet->setToDetector(position);
+	StiDetector* layer = **rdet;
+	if (!layer) {
+		cout <<"Error in setSectorAndPadrow"<<endl;
+		return;
+	}
+	cout <<"Detector Set To: "<<layer->getName()<<endl;
+	showCurrentDetector();
 }
 
 void MainFrame::setLayerAndAngle()
 {
-    //cout <<"Function Not Currently Implemented"<<endl;
-    setCurrentDetectorToDefault();
-    cout <<"\nEnter position: (double)"<<endl;
-    double position;
-    cin >>position;
+	//cout <<"Function Not Currently Implemented"<<endl;
+	setCurrentDetectorToDefault();
+	cout <<"\nEnter position: (double)"<<endl;
+	double position;
+	cin >>position;
 
-    cout <<"\nEnter angle: (double)"<<endl;
-    double angle;
-    cin >> angle;
-    cout <<"Setting to  position:\t"<<position<<"\tangle:\t"<<angle<<endl;
-    StiDetectorContainer*rdet = _toolkit->getDetectorContainer();
-    rdet->setToDetector(position, angle);
-    StiDetector* layer = **rdet;
-    if (!layer) {
-	cout <<"Error in setSectorAndPadrow"<<endl;
-	return;
-    }
-    cout <<"Detector Set To: "<<layer->getName()<<endl;
-    showCurrentDetector();
+	cout <<"\nEnter angle: (double)"<<endl;
+	double angle;
+	cin >> angle;
+	cout <<"Setting to  position:\t"<<position<<"\tangle:\t"<<angle<<endl;
+	StiDetectorContainer*rdet = _toolkit->getDetectorContainer();
+	rdet->setToDetector(position, angle);
+	StiDetector* layer = **rdet;
+	if (!layer) {
+		cout <<"Error in setSectorAndPadrow"<<endl;
+		return;
+	}
+	cout <<"Detector Set To: "<<layer->getName()<<endl;
+	showCurrentDetector();
 }
 
 void MainFrame::moveOut()
 {
-    //cout <<"Function Not Currently Implemented"<<endl;
-    //cout <<"MainFrame::moveOut()"<<endl;
-    setCurrentDetectorToDefault();
-    StiDetectorContainer*rdet = _toolkit->getDetectorContainer();
-    cout <<"\t DetectorContainer returned: "<<rdet->moveOut()<<endl;
-    showCurrentDetector();
-    //cout <<"\t Leaving MainFrame::moveOut()"<<endl;
+	//cout <<"Function Not Currently Implemented"<<endl;
+	//cout <<"MainFrame::moveOut()"<<endl;
+	setCurrentDetectorToDefault();
+	StiDetectorContainer*rdet = _toolkit->getDetectorContainer();
+	cout <<"\t DetectorContainer returned: "<<rdet->moveOut()<<endl;
+	showCurrentDetector();
+	//cout <<"\t Leaving MainFrame::moveOut()"<<endl;
 }
 
 void MainFrame::moveIn()
 {
-    //cout <<"Function Not Currently Implemented"<<endl;
-    //cout <<"MainFrame::moveIn()"<<endl;
-    setCurrentDetectorToDefault();
-    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+	//cout <<"Function Not Currently Implemented"<<endl;
+	//cout <<"MainFrame::moveIn()"<<endl;
+	setCurrentDetectorToDefault();
+	StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
 
-    cout <<"\t DetectorContainer returned: "<<rdet.moveIn()<<endl;
-    //rdet.moveIn();
+	cout <<"\t DetectorContainer returned: "<<rdet.moveIn()<<endl;
+	//rdet.moveIn();
     
-    showCurrentDetector();
-    //cout <<"\t Leaving MainFrame::moveIn()"<<endl;
+	showCurrentDetector();
+	//cout <<"\t Leaving MainFrame::moveIn()"<<endl;
 }
 
 void MainFrame::movePlusPhi()
 {
-    //cout <<"Function Not Currently Implemented"<<endl;
-    setCurrentDetectorToDefault();
-    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
-    rdet.movePlusPhi();
-    showCurrentDetector();
+	//cout <<"Function Not Currently Implemented"<<endl;
+	setCurrentDetectorToDefault();
+	StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+	rdet.movePlusPhi();
+	showCurrentDetector();
 }
 
 void MainFrame::moveMinusPhi()
 {
-    //cout <<"Function Not Currently Implemented"<<endl;
-    setCurrentDetectorToDefault();
-    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
-    rdet.moveMinusPhi();
-    showCurrentDetector();
+	//cout <<"Function Not Currently Implemented"<<endl;
+	setCurrentDetectorToDefault();
+	StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+	rdet.moveMinusPhi();
+	showCurrentDetector();
 }
 
 void MainFrame::printHitContainerForDetector()
 {
-    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
-    StiDetector* layer = *rdet;
-    if (!layer)
-      throw runtime_error("MainFrame::printHitContainerForDetector() - FATAL - Failed to get detector");
-    cout << _toolkit->getHitContainer()->hits( layer->getPlacement()->getCenterRefAngle(),
-							     layer->getPlacement()->getCenterRadius() )
-	 <<endl;
+	StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+	StiDetector* layer = *rdet;
+	if (!layer)
+		throw runtime_error("MainFrame::printHitContainerForDetector() - FATAL - Failed to get detector");
+	cout << _toolkit->getHitContainer()->hits( layer->getPlacement()->getCenterRefAngle(),
+																						 layer->getPlacement()->getCenterRadius() )
+			 <<endl;
 }
 
 void MainFrame::showCurrentDetector()
 {
-    //cout <<"Function Not Currently Implemented"<<endl;
-    StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
-    StiRootDrawableDetector* layer = dynamic_cast<StiRootDrawableDetector*>(*rdet);
+	//cout <<"Function Not Currently Implemented"<<endl;
+	StiDetectorContainer& rdet = *(StiDetectorContainer::instance());
+	StiRootDrawableDetector* layer = dynamic_cast<StiRootDrawableDetector*>(*rdet);
     
-    if (!layer) 
-      throw runtime_error("MainFrame::showCurrentDetector() - FATAL - Failed to get drawable detector");
-    layer->setVisibility(true);
-    layer->setColor(2);
-    cout<<"MainFrame::showCurrentDetector() - Layer:"<<*layer<<endl;
-    StiRootDisplayManager::instance()->draw();
-    StiRootDisplayManager::instance()->update();
+	if (!layer) 
+		throw runtime_error("MainFrame::showCurrentDetector() - FATAL - Failed to get drawable detector");
+	layer->setVisibility(true);
+	layer->setColor(2);
+	cout<<"MainFrame::showCurrentDetector() - Layer:"<<*layer<<endl;
+	StiRootDisplayManager::instance()->draw();
+	StiRootDisplayManager::instance()->update();
 }
 
 void MainFrame::memoryInfo()
