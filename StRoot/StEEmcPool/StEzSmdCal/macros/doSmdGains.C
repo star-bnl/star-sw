@@ -1,12 +1,14 @@
 class  SmdGains;
 SmdGains *task=0;
 TObjArray  *HList;
+TFile *fd;
 
-doSmdGains( int iU=1){
-  int sec=5;
+doSmdGains( int iU=0){
+  int sectID=6;
 
-  TString iPath="./";
- char *libL[]={
+  TString iPath="/star/data05/scratch/balewski/outD1/";
+  
+  char *libL[]={
    "../StRoot/StEEmcUtil/EEmcGeom/libEEmcGeom.so", // some hidden dependence
    "../StRoot/StEEmcPool/StEzSmdCal/libEzSmdCal.so",
  };
@@ -24,30 +26,36 @@ doSmdGains( int iU=1){
 
   // task->open("5UV.hist.root"); // Murad's file
   //task->open("../outC3/mip.hist.root"); // Iter-3
-  task->open("../outC5/mipA.hist.root"); // Iter-4
+  fd=task->open(iPath+"mip06A.hist.root"); 
+  //fd=task->open(iPath+"R5112018.hist.root"); 
+  //  return;
 
-
-  task->set(HList,5,'U'+iU);
+  task->set(HList,sectID,'U'+iU);
   task->init();
-  int str1=1,str2=280;
- 
+  int str1=1,str2=288;
+
+  // return;
+  //task->fitSlopes(30,38); return;
+  //  task->fitSlopes(str1,str2);  task-> doSlopesOnly(760.); 
+
+#if 1
   task->doOneStripEne(str1,str2);
   task->doGainCorr(str1,str2);
   task->saveHisto();
-  //  return;
 
-  task->plFGC();
-  task->plTGraph("pol0",0);
-  task->plTGraph("pol0",1);
-  
+  if(0) {
+    task->plFGC();
+    task->plTGraph("pol0",0); // individual gain corrections
+    task->plTGraph("pol0",1); // avearge MIP energy
+  }
 
-
-  return;
-  sprintf(tt,"smd%02d%c.dat",sec,'U'+iU);
+#endif
+  char tt[100];
+  sprintf(tt,"smd%02d%c.dat",sectID,'U'+iU);
   FILE *fd=fopen(tt,"w"); assert(fd);
   task->saveGains(fd);
   fclose(fd);
-
+  return;
   // ....... slopes only:  
   task->fitSlopes(251,259); return;
    
@@ -55,51 +63,13 @@ doSmdGains( int iU=1){
   return;
   
 
-  // task-> doSlopesOnly(760.);
+  //
 
   //.... absolute average MIP position
-
+  
   task->finish(0);
 
   return;
  
-
-	  
-  // .........   input  event file   .........
-  
-  TChain *chain = new TChain("ezstar");
-  TString fullName=iPath+run+".ez.root";  
-  chain->Add(fullName);
-  int nEntries = (Int_t)chain->GetEntries();
-  printf("Sort %d  of total Events %d\n",mxEve, nEntries);
-  int nEve=0;
-  
-  Int_t nEntries = (Int_t)chain->GetEntries();
-  if(nEntries<=0) {
-    printf("\n\nSth is wrong, chain is empty nEntries=%d\n\n",nEntries);
-    assert(nEntries>0);
-  }
-  
-  EEfeeRawEvent  *eFee=0;
-  chain->SetBranchAddress("eemc",&eFee);
-  sorter->init();
-  
-  int nEve=0;
-  int t1=time(0);  
-  for(nEve=0; nEve<nEntries && nEve<mxEve; nEve++) {
-    chain->GetEntry(nEve);
-    if(nEve%2000==0)printf("in %d\n",nEve);
-    sorter->make();
-  }
-
-  int t2=time(0);
-  if(t2==t1) t2=t1+1;
-  float tMnt=(t2-t1)/60.;
-  float rate=1.*nEve/(t2-t1);
-  printf("sorting done, nEve=%d CPU event rate=%.1f Hz, total time %.1f minute(s) \n",nEve,rate,tMnt);
-
-  
-
-  return;
 } 
 
