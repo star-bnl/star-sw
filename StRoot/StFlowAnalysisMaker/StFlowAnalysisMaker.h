@@ -3,18 +3,18 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// StFlowAnalysisMaker
+// $Id: StFlowAnalysisMaker.h,v 1.6 1999/10/05 16:54:11 posk Exp $
 //
-// Description: 
-//  Maker to analyze Tags for flow
+// Author: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
+// Description:  Maker to analyze Flow using the FlowTags
 //
-// Environment:
-//  Software developed for the STAR Detector at LBNL
+///////////////////////////////////////////////////////////////////////////////
 //
-// Author List: 
-//  Raimond Snellings and Art Poskanzer, LBNL, 8/99
+// $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.6  1999/10/05 16:54:11  posk
+// Added getPhiWeight method for making the event plane isotropic.
 //
-// History:
+//
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include "StFlowTagMaker/StFlowTagMaker.h"
@@ -38,6 +38,7 @@ public:
   Int_t Init();
   Int_t Make();
   Int_t getTags();
+  Float_t getPhiWeight(Float_t fPhi, Int_t eventN, Int_t harN);
   void PrintInfo();
   Int_t Finish();
 
@@ -55,6 +56,7 @@ protected:
   // for each harminic and each event
   struct histFullHars {
     TH1F *mHistPhi;
+    TH1F *mHistPhiWgt;
     TH1F *mHistPhiFlat;
     TH1F *mHistPhiCorr;
     TH1F *mHistPsiSubCorr;
@@ -91,27 +93,29 @@ protected:
 
 private:
 
-  // Histograms
   void makeTagHistograms();
   void makeFlowHistograms();
-  Int_t writeHistFile();
 
   FlowTag_st*   mFlowTag;          //! pointer to the tag table
   StEvent*      mEvent;            //! pointer to DST data
-  Float_t mQxSub[nSubs][nHars];    // flow vector x sub-events
-  Float_t mQySub[nSubs][nHars];    // flow vector y sub-events
-  Float_t mMulSub[nSubs][nHars];   // multiplicity sub-events
-  Float_t mSumPtSub[nSubs][nHars]; // Pt sum sub-events
-  Float_t mPsiSub[nSubs][nHars];   // event plane angle subevents
-  Float_t mQx[nSubs/2][nHars];     // flow vector x
-  Float_t mQy[nSubs/2][nHars];     // flow vector y
-  Float_t mMul[nSubs/2][nHars];    // multiplicity
-  Float_t mSumPt[nSubs/2][nHars];  // Pt sum
-  Float_t mQ[nSubs/2][nHars];      // flow vector magnitude
-  Float_t m_q[nSubs/2][nHars];     // Q/sqroot(Mul)
-  Float_t mPsi[nSubs/2][nHars];    // event plane angle
-  Float_t mRes[nSubs/2][nHars];    // event plane resolution
-  Float_t mResErr[nSubs/2][nHars]; // event plane resolution error
+
+  Float_t fQxSub[nSubs][nHars];    // flow vector x sub-events
+  Float_t fQySub[nSubs][nHars];    // flow vector y sub-events
+  Float_t fMulSub[nSubs][nHars];   // multiplicity sub-events
+  Float_t fSumPtSub[nSubs][nHars]; // Pt sum sub-events
+  Float_t fPsiSub[nSubs][nHars];   // event plane angle subevents
+  Float_t fQx[nSubs/2][nHars];     // flow vector x
+  Float_t fQy[nSubs/2][nHars];     // flow vector y
+  Float_t fMul[nSubs/2][nHars];    // multiplicity
+  Float_t fSumPt[nSubs/2][nHars];  // Pt sum
+  Float_t fQ[nSubs/2][nHars];      // flow vector magnitude
+  Float_t f_q[nSubs/2][nHars];     // Q/sqroot(Mul)
+  Float_t fPsi[nSubs/2][nHars];    // event plane angle
+  Float_t fRes[nSubs/2][nHars];    // event plane resolution
+  Float_t fResErr[nSubs/2][nHars]; // event plane resolution error
+
+  enum {nPhiBins = 60};
+  Float_t fPhiWgt[nSubs/2][nHars][nPhiBins]; // PhiWgt
 
   ClassDef(StFlowAnalysisMaker, 1) // macro for rootcint
 };
