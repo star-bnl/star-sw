@@ -1,0 +1,28 @@
+#!/usr/local/bin/perl
+use File::Basename;
+Import qw ( env INCLUDE LIB BIN  EXPORT BUILD OBJ);
+#my @sources = find_sources($Dir); #my $i=0; for my $s (@sources) {print "i=",$i++," sources = ",$s,"\n";}
+my @DirList = ( "ctf","db","ebye","emc","ftpc","geometry","global","l3","mwc",
+		"strange","svt","tpc","trg","vpd",
+#		"gen/crs","gen/fri","gen/g2x","gen/hij","gen/mev","gen/par","gen/pyth","gen/ven",
+		"sim/control","sim/dig","sim/g2r","sim/gstar");
+
+my @dirs = ();
+my $Dir = cwd(); $Dir .= "/pams"; print "Dir = $Dir\n";
+my @incs = find_inc ($Dir);
+Install $env $INCLUDE, @incs;
+for my $dir  (@DirList) {
+  my $Dir = "pams/" . $dir; #print "Dir = $Dir\n";
+  if (!-d $Dir) {print "Directory does not exist"; next;} 
+#    if (!grep (/vpd/,$dir))  {next;}
+    push @dirs, $dir; #print "dirs = @dirs\n";
+} 
+#print "dirs = @dirs\n";
+my @Targets = ();
+for my $dir (@dirs) {
+  my $Cons = $dir . "/Conscript"; #print "Cons = $Cons\n";
+  push @Targets, $Cons;
+} 
+#print "pams Targets = @Targets\n";
+Build @Targets;
+
