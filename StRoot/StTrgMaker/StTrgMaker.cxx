@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrgMaker.cxx,v 1.6 2001/12/25 20:01:19 ward Exp $
+ * $Id: StTrgMaker.cxx,v 1.7 2002/03/06 18:16:49 ward Exp $
  *
  * Author: Herbert Ward April 2001
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StTrgMaker.cxx,v $
+ * Revision 1.7  2002/03/06 18:16:49  ward
+ * Filter out tracks which begin beyone the MWC.  Remove dead weight from trigCtb.C.
+ *
  * Revision 1.6  2001/12/25 20:01:19  ward
  * Outputs error (closeness to edge) of track extension subsector selection.
  *
@@ -284,9 +287,17 @@ void StTrgMaker::DoOneTrackMwc(FILE *oo,long q,double curvatureCircle2,double ph
   double xstart,ystart,xCenterCircle2,ycenterCircle2,dist,radiusCircle2,radiansInFlightCircle2;
   double xAtMwc,yAtMwc,radiansAtStartCircle2,radiansAtMwcCircle2,errDistPhi,errDistRad;
   assert(curvatureCircle2>=0); // Not physical, just a convention for the code below.
-  if(tanl>0) dist=MWC_LOCATION-z0; else dist=-MWC_LOCATION-z0;
+  if(tanl>0) {
+    dist=MWC_LOCATION-z0;
+    if(dist<0) { fprintf(oo,"M-1:-1\nR999\nN999\n"); return; } // ignore trk which begins beyond the MWC
+  } else {
+    dist=-MWC_LOCATION-z0;
+    if(dist>0) { fprintf(oo,"M-1:-1\nR999\nN999\n"); return; } // ignore trk which begins beyond the MWC
+  }
   radiusCircle2=1/curvatureCircle2;
   radiansInFlightCircle2=dist/(radiusCircle2*tanl);
+  // printf("BBB z0=%7.1f dist=%7.1f radiusCircle2=%5.1f tanl=%5.2f q=%2d, radiansInFlightCircle2 = %6.2f\n",
+  //    z0,dist,radiusCircle2,tanl,q,radiansInFlightCircle2);
   assert(radiansInFlightCircle2>=0); // May become neg below.
   if(radiansInFlightCircle2>PI) { fprintf(oo,"M-1:-1\nR999\nN999\n"); return; } // don't extend so shallow a trk
   if(q<0) radiansInFlightCircle2*=-1;
