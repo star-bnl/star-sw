@@ -5,9 +5,9 @@ class  StChain;
 StChain *chain;
 int total=0;
 
-void RunJetFinder2(int nevents=300,
+void RunJetFinder2(int nevents=99,
 		   const char* dir = "",
-		   const char* file = "/star/data16/reco/ppLong-1/FullField/P03ih/2003/150/st_physics_4150010_raw_0010005.MuDst.root",
+		   const char* file = "/star/data35/reco/productionPP/ReversedFullField/P04ij/2004/117/st_physics_5117052_raw_2010002.MuDst.root",
 		   const char *filter = "",
 		   const char *outfile="4150010_raw_0010005")
 {
@@ -28,7 +28,6 @@ void RunJetFinder2(int nevents=300,
     gSystem->Load("St_db_Maker");
     gSystem->Load("StJetFinder");
     gSystem->Load("StJetMaker");
-    gSystem->Load("StSpinPoolThomasUtilities");
 
     double pi = atan(1.0)*4.0;
     cout << " loading done " << endl;
@@ -48,7 +47,6 @@ void RunJetFinder2(int nevents=300,
 
     //Database
     St_db_Maker *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");
-    dbMk->SetDateTime(20030101,10000); 
 
     //EmcAdc2EMaker
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
@@ -79,7 +77,7 @@ void RunJetFinder2(int nevents=300,
     anapars->setFlagMin(0); //track->flag() > 0
     anapars->setNhits(15); //track->nHitsFit()>15    anapars->setCutPtMin(0.2); //track->pt() > 0.2
     anapars->setAbsEtaMax(1.6); //abs(track->eta())<1.6
-    anapars->setJetPtMin(5.0);
+    anapars->setJetPtMin(5.0); //MLM, remember to change this back to 5!
     anapars->setJetEtaMax(100.0);
     anapars->setJetEtaMin(0);
     anapars->setJetNmin(0);
@@ -155,8 +153,8 @@ void RunJetFinder2(int nevents=300,
 	    }
 	}
     }
-
-    for (Int_t iev=0;iev<nevents; iev++) {
+    
+    for (Int_t iev=0; iev<nevents; iev++) {
 	cout << "****************************************** " << endl;
 	cout << "Working on eventNumber " << iev << endl;
 	cout << "*************************1***************** " << endl;
