@@ -29,10 +29,10 @@ long track_propagator_(
 **:>------------------------------------------------------------------*/
   
   
-  long  i, iflag;
+  long  i, iflag, iiflag=1;
   float bfld=5., GRADDEG=57.2958;
-  float psi, pt, tanl, x0, y0, z0, xp[2], xout[4];
-  float trk[6], r1, r2, xc1[2], xc2[2], x[2], y[2], cut;
+  float psi, pt, tanl, x0, y0, z0, xp[2], xout[4], p[3], xv[3], xx0[3];
+  float trk[6], r1, r2, xc1[2], xc2[2], x[2], y[2], cut, x1[3];
   long  q;
 
   for(i=0; i<gtrack_h->nok; i++) 
@@ -50,7 +50,7 @@ long track_propagator_(
 	  pt = 0.01;
 	}
       x0   = gtrack[i].x0 ;
-      y0  = gtrack[i].y0 ;
+      y0   = gtrack[i].y0 ;
       z0   = gtrack[i].z0;
       trk[0] = gtrack[i].x0;
       trk[1] = gtrack[i].y0;
@@ -59,8 +59,9 @@ long track_propagator_(
       trk[4] = gtrack[i].tanl;
       trk[5] = gtrack[i].icharge;
       r1     = ((float) gtrack[i].icharge)*(1/gtrack[i].invpt)/(0.0003*bfld);
-
-      if(target->iflag == 1)
+     
+      
+      if(target->iflag == 1 || target->iflag == 2)
 	{
 	  xp[0]= target->x[0]; 
 	  xp[1]= target->x[1];
@@ -74,14 +75,28 @@ long track_propagator_(
 
 	  if (target->iflag == 2)
 	    {
-	      /* do nothing now */
+	      xv[0] = target->x[0];
+	      xv[1] = target->x[1];
+	      xv[2] = target->x[2];
+	      x1[0] = xout[0];
+	      x1[1] = xout[1];
+	      x1[2] = xout[2];
+	      trk[0] = gtrack[i].x0;
+	      trk[1] = gtrack[i].y0;
+	      trk[2] = gtrack[i].z0;
+	      trk[3] = gtrack[i].psi;
+	      prop_track_mom_(trk, &r1, &iiflag, p, &bfld);  
+	      prop_fine_approach_(xv, x1, p, &xx0); 
+	      gtrack[i].x0 = xx0[0];
+	      gtrack[i].y0 = xx0[1];
+	      gtrack[i].z0 = xx0[2];
 	    }
 	  return STAFCV_OK;
 	}
       
-      if (target->iflag == 3)
+      if(target->iflag == 3)
 	{
-	  prop_circle_param_(trk, xc1, &r1, &bfld);
+	  prop_circle_param_(trk, xc1, &r1, &bfld); 
 	  xc2[0] = xc2[1] = 0.;
 	  r2 = target->r;
 	  cut = 0.4;
@@ -121,3 +136,16 @@ long track_propagator_(
     }
 }
   
+
+
+
+
+
+
+
+
+
+
+
+
+
