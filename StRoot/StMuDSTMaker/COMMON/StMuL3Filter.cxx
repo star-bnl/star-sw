@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuL3Filter.cxx,v 1.4 2003/01/23 21:59:50 laue Exp $
+ * $Id: StMuL3Filter.cxx,v 1.5 2003/10/20 19:50:13 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -36,7 +36,7 @@ StMuL3Filter::StMuL3Filter()  {
 }
 
 StMuL3Filter::~StMuL3Filter()  {
-  delete mBB;
+  delete mBB; mBB = 0;
 }
 
 bool StMuL3Filter::accept(const StTrack* track) {
@@ -111,6 +111,9 @@ bool StMuL3Filter::accept(const StTrack* track) {
 /***************************************************************************
  *
  * $Log: StMuL3Filter.cxx,v $
+ * Revision 1.5  2003/10/20 19:50:13  perev
+ * workaround added for TClonesArray::Delete + some cleanup of MuEmc
+ *
  * Revision 1.4  2003/01/23 21:59:50  laue
  * Modification to compile on Solaris.
  *

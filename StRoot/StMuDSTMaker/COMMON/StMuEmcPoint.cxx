@@ -11,7 +11,8 @@ ClassImp(StMuEmcPoint)
 
 StMuEmcPoint::StMuEmcPoint()
 {
-  for(Int_t i=0;i<8;i++) mEmc[i] = NULL;
+mEta=mPhi=mRadius=mDeltaEta=mDeltaPhi=mEnergy=mChiSquare=0;    
+memset(mEmc,0,sizeof(mEmc));
 }
 StMuEmcPoint::StMuEmcPoint(StMuEmcPoint *point)
 {
@@ -30,4 +31,8 @@ StMuEmcPoint::StMuEmcPoint(StMuEmcPoint *point)
 }
 StMuEmcPoint::~StMuEmcPoint()
 {
+  for (int i=0;i<8;i++) {
+//VP    delete mEmc[i];   //VP Unclear who is the owner   
+    mEmc[i] = 0;
+  }  
 }

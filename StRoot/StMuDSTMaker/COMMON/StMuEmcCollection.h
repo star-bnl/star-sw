@@ -67,6 +67,7 @@ class StMuEmcCollection: public TObject
     void              addEndcapPoint();
         
   private:
+    void              init();
     void              packbits(unsigned char*, unsigned int, unsigned int, unsigned int);
     unsigned int      unpackbits(unsigned char*, unsigned int, unsigned int);
     
