@@ -803,8 +803,9 @@ sub sortu {
   my $old = "";
   my @sorted_and_uniq = ();
   foreach my $name (sort @_) {
-    next if "$old" eq "$name";
-    push @sorted_and_uniq, $name; $old = $name;
+    (my $base_name = $name) =~ s/\.[^\.]*$//g;
+    next if "$old" eq "$base_name";
+    push @sorted_and_uniq, $name; $old = $base_name;
   }
   return @sorted_and_uniq;
 }
