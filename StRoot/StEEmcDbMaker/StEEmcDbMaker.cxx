@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.20 2003/11/20 16:01:25 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.21 2004/01/06 21:19:34 jwebb Exp $
  
 #include <TDatime.h>
 #include <time.h>
@@ -184,6 +184,53 @@ StEEmcDbMaker::getT(int sec, char sub, int eta){
   int key=EEname2Index(name);
   return mDbItem1+key;  
 }
+
+const StEEmcDbIndexItem1*  
+StEEmcDbMaker::getP(int sec, char sub, int eta){
+  char name[20];
+  sprintf(name,"%2.2dP%c%2.2d",sec,sub,eta);
+  int key=EEname2Index(name);
+  return mDbItem1+key;  
+}
+
+const StEEmcDbIndexItem1*  
+StEEmcDbMaker::getQ(int sec, char sub, int eta){
+  char name[20];
+  sprintf(name,"%2.2dQ%c%2.2d",sec,sub,eta);
+  int key=EEname2Index(name);
+  return mDbItem1+key;  
+}
+
+const StEEmcDbIndexItem1*  
+StEEmcDbMaker::getR(int sec, char sub, int eta){
+  char name[20];
+  sprintf(name,"%2.2dR%c%2.2d",sec,sub,eta);
+  int key=EEname2Index(name);
+  return mDbItem1+key;  
+}
+
+const StEEmcDbIndexItem1*  
+StEEmcDbMaker::getU(int sec, int strip ) {
+  char name[20];
+  sprintf(name,"%2.2dU%3.3d",sec,strip);
+  int key=EEname2Index(name);
+  return mDbItem1+key;
+}
+
+const StEEmcDbIndexItem1*  
+StEEmcDbMaker::getV(int sec, int strip ) {
+  char name[20];
+  sprintf(name,"%2.2dV%3.3d",sec,strip);
+  int key=EEname2Index(name);
+  return mDbItem1+key;
+}
+
+
+
+
+
+
+
 //__________________________________________________
 //__________________________________________________
 //__________________________________________________
@@ -585,6 +632,9 @@ template <class St_T, class T_st>  void StEEmcDbMaker
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.21  2004/01/06 21:19:34  jwebb
+// Added methods for accessing preshower, postshower and SMD info.
+//
 // Revision 1.20  2003/11/20 16:01:25  balewski
 // towards run4
 //
