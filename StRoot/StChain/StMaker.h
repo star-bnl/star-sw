@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.47 2000/06/21 21:12:40 perev Exp $
+// $Id: StMaker.h,v 1.48 2000/07/04 02:36:01 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.48  2000/07/04 02:36:01  perev
+// AddMaker method added & gStChain removed
+//
 // Revision 1.47  2000/06/21 21:12:40  perev
 // StMakerIter class added
 //
@@ -165,7 +168,6 @@ protected:
    Int_t           m_MakeReturn;    	//Make() return flag
    TStopwatch      m_Timer;             //Timer object
   
-   StMaker        *gStChain;  		//???? Temporary ?????
    Bool_t          fActive;             // true if active
 public:
 
@@ -188,6 +190,7 @@ public:
    virtual Int_t  	FinishRun(int oldrunumber);
    virtual void	       	Fatal(int Ierr, const char *Com);  
    virtual void   	PrintInfo() const;
+   virtual void         AddMaker (StMaker *mk);
 
    virtual void   MakeDoc(const TString &stardir="$(STAR)",const TString &outdir="$(STAR)/StRoot/html",Bool_t baseClasses=kTRUE); 
 
@@ -284,7 +287,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.47 2000/06/21 21:12:40 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.48 2000/07/04 02:36:01 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   // base class to define  one step of the recontsruction chain
 };
