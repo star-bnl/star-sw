@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.5 1999/07/12 01:49:39 fine Exp $
+// $Id: StPrimaryMaker.cxx,v 1.6 1999/07/15 13:57:53 perev Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.6  1999/07/15 13:57:53  perev
+// cleanup
+//
 // Revision 1.5  1999/07/12 01:49:39  fine
 // Clean up
 //
@@ -237,12 +240,4 @@ Int_t StPrimaryMaker::Make(){
   return iMake;
 }
 //_____________________________________________________________________________
-void StPrimaryMaker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: StPrimaryMaker.cxx,v 1.5 1999/07/12 01:49:39 fine Exp $\n");
-  //  printf("* %s    *\n",m_VersionCVS);
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-  
-}
 

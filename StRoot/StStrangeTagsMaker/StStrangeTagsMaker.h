@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStrangeTagsMaker.h,v 1.2 1999/02/24 02:03:39 genevb Exp $
+ * $Id: StStrangeTagsMaker.h,v 1.3 1999/07/15 13:57:29 perev Exp $
  *
  * Author: Gene Van Buren, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StStrangeTagsMaker.h,v $
+ * Revision 1.3  1999/07/15 13:57:29  perev
+ * cleanup
+ *
  * Revision 1.2  1999/02/24 02:03:39  genevb
  * Add Xi vertices
  *
@@ -33,7 +36,6 @@ public:
     
     Int_t  Init();                    // create and fills the tags
     Int_t  Make();                    // create and fills the tags
-    void   PrintInfo();               // prints version
     
     StrangeTag_st* tag();             // returns pointer to the tag table
     void          printTag(ostream& = cout);
@@ -51,6 +53,9 @@ private:
     Float_t         mMasspr2;
     Float_t         mMassla2;
     
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StStrangeTagsMaker.h,v 1.3 1999/07/15 13:57:29 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
     ClassDef(StStrangeTagsMaker, 1)   // macro for rootcint
 };
 

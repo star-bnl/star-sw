@@ -1,5 +1,8 @@
-// $Id: St_ebye_Maker.h,v 1.7 1999/03/12 14:39:41 perev Exp $
+// $Id: St_ebye_Maker.h,v 1.8 1999/07/15 13:58:00 perev Exp $
 // $Log: St_ebye_Maker.h,v $
+// Revision 1.8  1999/07/15 13:58:00  perev
+// cleanup
+//
 // Revision 1.7  1999/03/12 14:39:41  perev
 // New maker schema
 //
@@ -63,13 +66,15 @@ class St_ebye_Maker : public StMaker {
    virtual       ~St_ebye_Maker();
    virtual Int_t  Init();
    virtual Int_t  Make();
-   virtual void   PrintInfo();
    Int_t SetmakePrior(Bool_t flag=kFALSE);          // *MENU*
    Int_t SetmakeEnsembleAve(Bool_t flag=kFALSE);    // *MENU*
    Int_t SetdoAnalysis(Bool_t flag=kFALSE);         // *MENU*
    Int_t SetnEvents(Int_t     nEvents=0);           // *MENU*
    Int_t PutPrior();                                // *MENU*
    Int_t PutEnsembleAve();                          // *MENU*
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: St_ebye_Maker.h,v 1.8 1999/07/15 13:58:00 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
    ClassDef(St_ebye_Maker, 1)   //StAF chain virtual base class for Makers
 };
 

@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 1.6 1999/03/20 22:00:19 perev Exp $
+ * $Id: StRchMaker.cxx,v 1.7 1999/07/15 13:57:22 perev Exp $
  *
  * Author: Dan Lyons
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
+ * Revision 1.7  1999/07/15 13:57:22  perev
+ * cleanup
+ *
  * Revision 1.6  1999/03/20 22:00:19  perev
  * new maker schema
  *
@@ -98,13 +101,6 @@ StRchMaker::StRchMaker(const char *name) : StMaker(name) {
 // 	PR(mSingleHitCollection->mTheHits[zz]);
 
 
-void StRchMaker::PrintInfo() 
-{
-  printf("**************************************************************\n");
-  printf("* $Id: StRchMaker.cxx,v 1.6 1999/03/20 22:00:19 perev Exp $\n");
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}
     mClusterFinder = 0;
 	
 #ifdef RCH_HISTOGRAM

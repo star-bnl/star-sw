@@ -1,7 +1,10 @@
-// $Id: St_LSEvent_Maker.h,v 1.2 1999/05/10 13:41:31 love Exp $
+// $Id: St_LSEvent_Maker.h,v 1.3 1999/07/15 13:57:35 perev Exp $
 // $Log: St_LSEvent_Maker.h,v $
+// Revision 1.3  1999/07/15 13:57:35  perev
+// cleanup
+//
 // Revision 1.2  1999/05/10 13:41:31  love
-// Two passes to try to get event number from IT tables, Clean up code
+//   Two passes to try to get event number from IT tables, Clean up code
 //  to erase previous event data.
 //
 // Revision 1.1.1.1  1999/04/27 14:29:31  love
@@ -56,8 +59,10 @@ public:
   virtual void   SetRun(Int_t run) {m_runno = run;} 
   virtual void   SetDate(Int_t date) {m_date = date;} 
   virtual void   SetRows(Int_t min, Int_t max) {m_rowmin=min; m_rowmax=max;}
-  virtual void   PrintInfo();
   virtual void   Set_stks(Bool_t m=kTRUE){m_mkstks = m;}
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: St_LSEvent_Maker.h,v 1.3 1999/07/15 13:57:35 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
 ClassDef(St_LSEvent_Maker, 1)   //StAF chain virtual base class for Makers
 };
 

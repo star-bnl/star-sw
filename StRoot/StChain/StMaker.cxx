@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.54 1999/07/13 02:19:34 perev Exp $
+// $Id: StMaker.cxx,v 1.55 1999/07/15 13:56:47 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.55  1999/07/15 13:56:47  perev
+// cleanup
+//
 // Revision 1.54  1999/07/13 02:19:34  perev
 // GetCVS,StEvtHddr,etc...
 //
@@ -607,9 +610,7 @@ void StMaker::PrintInfo() const
 {
    const char *cvs = GetCVS();
    const char *built = strstr(cvs,"built");
-   printf("\n%.*s\n",built-cvs,cvs);
-   printf("%s\n\n",built);
-
+   printf(" \t%-20s %s from %.*s\n",ClassName(),built,built-cvs,cvs);
 //     Print info for all defined Makers
    TIter next(GetMakeList());
    StMaker *maker;

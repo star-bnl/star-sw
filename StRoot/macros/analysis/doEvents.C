@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.23 1999/07/14 01:41:51 fisyak Exp $
+// $Id: doEvents.C,v 1.24 1999/07/15 13:58:39 perev Exp $
 // $Log: doEvents.C,v $
-// Revision 1.23  1999/07/14 01:41:51  fisyak
-// Add 0.5 Tesla magnetic field as default
+// Revision 1.24  1999/07/15 13:58:39  perev
+// cleanup
+//
+// Revision 1.24  1999/07/15 13:58:39  perev
+// cleanup
 //
 // Revision 1.23  1999/07/14 01:41:51  fisyak
 // Add 0.5 Tesla magnetic field as default
@@ -140,6 +143,9 @@ void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StEvent");
 //  gSystem->Load("StEventReaderMaker");
+  gSystem->Load("St_geom_Maker");
+  gSystem->Load("StEventDisplayMaker");
+  gSystem->Load("StAnalysisMaker");
 //  gSystem->Load("St_geom_Maker");
 //  gSystem->Load("StEventDisplayMaker");
 
@@ -149,18 +155,22 @@ void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
   chain  = new StChain("StChain");
 
   StFile *setFiles= new StFile();
-  
+
+  for (int ifil=0; fileList[ifil]; ifil++)
+  St_geom_Maker *geom = new St_geom_Maker; // this maker open its own TFile !!!
   // St_geom)Maker is to supply the GEANT/GEOM dataset, that will be provided by
   IOMk->SetDebug();
   //  St_geom_Maker *geom = new St_geom_Maker; // this maker open its own TFile !!!
 // 		Maker to read events from file or database into StEvent
 
-  StEventMaker readerMaker("events","title");
+
 // 		Sample analysis maker
-  StAnalysisMaker analysisMaker("analysis");
+  StAnalysisMaker *analysisMaker = new StAnalysisMaker ("analysis");
+  StEventDisplayMaker *disp  = new StEventDisplayMaker;
+
 //  Event Display Maker
   //  StEventDisplayMaker *disp  = new StEventDisplayMaker;
-Int_t iInit = chain->Init();
+
 
   // Initialize chain
   Int_t iInit = chain->Init();
@@ -185,7 +195,10 @@ EventLoop: if (i <= nevents && !istat) {
      chain->Clear();
     cout << "============================ Event " << i << " finish" << endl;
   if (nevents > 1) {
-    if (!b) b = new TBrowser;
+    chain->Clear();
+       gROOT->LoadMacro("PadControlPanel.C");
+       b = new TBrowser;
+    if (!b) {
       //       gROOT->LoadMacro("PadControlPanel.C");
     b = new TBrowser;
 void doEvents(const Int_t nevents=999,

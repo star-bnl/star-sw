@@ -1,5 +1,8 @@
-// $Id: St_ems_Maker.cxx,v 1.12 1999/07/01 15:59:12 pavlinov Exp $
+// $Id: St_ems_Maker.cxx,v 1.13 1999/07/15 13:58:03 perev Exp $
 // $Log: St_ems_Maker.cxx,v $
+// Revision 1.13  1999/07/15 13:58:03  perev
+// cleanup
+//
 // Revision 1.12  1999/07/01 15:59:12  pavlinov
 // added QA histograms and new switches for control of maker
 //
@@ -266,12 +269,6 @@ Int_t St_ems_Maker::Make(){
   return kStOK;
 }
 //_____________________________________________________________________________
-void St_ems_Maker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: St_ems_Maker.cxx,v 1.12 1999/07/01 15:59:12 pavlinov Exp $\n");
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}
 //_____________________________________________________________________________
 void St_ems_Maker::printNameOfTables(){
   Char_t *path="/bfc/.make/.data/params/emc/";

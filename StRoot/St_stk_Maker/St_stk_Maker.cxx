@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.cxx,v 1.15 1999/07/15 00:19:59 caines Exp $
+// $Id: St_stk_Maker.cxx,v 1.16 1999/07/15 13:58:21 perev Exp $
 // $Log: St_stk_Maker.cxx,v $
+// Revision 1.16  1999/07/15 13:58:21  perev
+// cleanup
+//
 // Revision 1.15  1999/07/15 00:19:59  caines
 // Switch to turn tracking on/off
 //
@@ -296,11 +299,3 @@ void St_stk_Maker::MakeHistograms() {
     }
   }
 }
-//_____________________________________________________________________________
-void St_stk_Maker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: St_stk_Maker.cxx,v 1.15 1999/07/15 00:19:59 caines Exp $\n");
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}
-

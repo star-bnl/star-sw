@@ -1,5 +1,8 @@
-// $Id: St_ebye_Maker.cxx,v 1.10 1999/03/12 14:39:40 perev Exp $
+// $Id: St_ebye_Maker.cxx,v 1.11 1999/07/15 13:57:59 perev Exp $
 // $Log: St_ebye_Maker.cxx,v $
+// Revision 1.11  1999/07/15 13:57:59  perev
+// cleanup
+//
 // Revision 1.10  1999/03/12 14:39:40  perev
 // New maker schema
 //
@@ -376,10 +379,3 @@ Int_t St_ebye_Maker::PutEnsembleAve(){
   return kStOK;
 }
 //_____________________________________________________________________________
-void St_ebye_Maker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: St_ebye_Maker.cxx,v 1.10 1999/03/12 14:39:40 perev Exp $\n");
-  //  printf("* %s    *\n",m_VersionCVS);
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}

@@ -106,12 +106,6 @@ StAngleCorrMaker::~StAngleCorrMaker() {
 }
 
 
-void StAngleCorrMaker::PrintInfo() {
-  printf("**************************************************************\n");
-  printf("* $Id: StAngleCorrMaker.cxx,v 1.5 1999/06/27 22:45:24 fisyak Exp $\n");
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}
 
 void StAngleCorrMaker::Clear(Option_t *opt) {
 

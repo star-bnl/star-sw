@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.27 1999/07/14 23:23:00 kathy Exp $
+//! $Id: St_QA_Maker.h,v 1.28 1999/07/15 13:57:41 perev Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.28  1999/07/15 13:57:41  perev
+//! cleanup
+//!
 //! Revision 1.27  1999/07/14 23:23:00  kathy
 //! a lot of changes to hist limits and fixes to titles and added a few new hist
 //!
@@ -136,7 +139,7 @@ class TCanvas;
 class St_QA_Maker : public StMaker {
  private:
   Bool_t drawinit;
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.27 1999/07/14 23:23:00 kathy Exp $";
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.28 1999/07/15 13:57:41 perev Exp $";
   //! Histograms booking constants
   static const Int_t nxpT;
   static const Int_t nyeta;
@@ -399,7 +402,6 @@ class St_QA_Maker : public StMaker {
   virtual void   BookHistVertex();
   virtual void   BookHistXi();
   virtual void   MakeHistXi(St_DataSet *dst);
-  virtual void   PrintInfo();
   virtual void   SetDraw(Bool_t drawFlag=kTRUE);
   virtual void   SetHistsNamesDraw(const Char_t *firstName="*", const Char_t *lastName="*");
 // SetZones --> divide canvas into 2 x 3 zones
@@ -415,6 +417,9 @@ class St_QA_Maker : public StMaker {
   
 
 // the following is a ROOT macro  that is needed in all ROOT code
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.28 1999/07/15 13:57:41 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
   ClassDef(St_QA_Maker, 1)   //StAF chain virtual base class for Makers
     };
     

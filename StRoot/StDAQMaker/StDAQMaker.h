@@ -28,14 +28,14 @@ class StDAQMaker : public StIOInterFace {
   virtual Int_t  Open(const char *file=0);
   virtual void   Close(Option_t *opt=0);
   virtual Int_t  Make();
-  virtual void   Skip(Int_t Nskip=1);
+  virtual Int_t  Skip(Int_t Nskip=1);
 //	for compatability with StIOInterFace
-  void SetBranch(const Char_t *brName,const Char_t *file=0,const Char_t *iomode="r"){};
+  void SetBranch(const Char_t *,const Char_t *,const Char_t *){};
 
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StDAQMaker.h,v 1.1 1999/07/13 01:54:12 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StDAQMaker.h,v 1.2 1999/07/15 13:56:50 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StDAQMaker, 0)   //
 };

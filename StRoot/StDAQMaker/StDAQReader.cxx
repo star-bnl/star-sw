@@ -2,6 +2,11 @@
 #include "StDaqLib/GENERIC/EventReader.hh"
 
 //	non standard open,close,read
+#include <string.h>
+#include <stdio.h>
+#include <errno.h>
+#include <unistd.h>
+#include <assert.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -70,6 +75,17 @@ int StDAQReader::readEvent()
 
   return 0;
 }
+//_____________________________________________________________________________
+int StDAQReader::skipEvent(int nskip)
+{
+  for (int isk=0; isk<nskip; isk++) {if (readEvent()) return 1;} 
+  return 0;
+}
+
+
+//_____________________________________________________________________________
+void StDAQReader::setTPCVersion(const char* vers)
+{strcpy(fTPCVersion,vers);} 
 
 //_____________________________________________________________________________
   int StDAQReader::getRunNumber()   const { return fEventReader->runno();}

@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtMaker.cxx,v 1.2 1999/07/06 22:33:18 lisa Exp $
+ * $Id: StHbtMaker.cxx,v 1.3 1999/07/15 13:57:10 perev Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtMaker.cxx,v $
+ * Revision 1.3  1999/07/15 13:57:10  perev
+ * cleanup
+ *
  * Revision 1.2  1999/07/06 22:33:18  lisa
  * Adjusted all to work in pro and new - dev itself is broken
  *
@@ -53,13 +56,6 @@ void StHbtMaker::Clear(const char*)
   StMaker::Clear();
 }
 //_____________________________________________________________________________
-void StHbtMaker::PrintInfo()
-{
-  cout << "********************" << endl;
-  cout << "*  StHbtMaker.cxx  *" << endl;
-  cout << "********************" << endl;
-  StMaker::PrintInfo();
-}
 //_____________________________________________________________________________
 Int_t StHbtMaker::Init()
 {

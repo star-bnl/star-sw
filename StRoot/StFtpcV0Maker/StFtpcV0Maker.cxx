@@ -193,10 +193,4 @@ Int_t StFtpcV0Maker::Make(){
   return kStOK;
 }
 //_____________________________________________________________________________
-void StFtpcV0Maker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: StFtpcV0Maker.cxx,v 1.3 1999/04/13 15:20:36 mheffner Exp $\n");
-  printf("**************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
-}
 

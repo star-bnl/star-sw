@@ -25,7 +25,7 @@ class  TFile;
 class St_io_Maker : public StIOInterFace {
  private:
    Bool_t fSplit;    // flag of the "split" mode
-// static Char_t  m_VersionCVS = "$Id: St_io_Maker.h,v 1.13 1999/07/13 02:19:38 perev Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_io_Maker.h,v 1.14 1999/07/15 13:58:12 perev Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
    TFile         *m_TreeRootFile;   //! ROOT file to keep TTRee object in their.
    TObjArray     *m_ListOfBranches; //!
@@ -81,9 +81,8 @@ class St_io_Maker : public StIOInterFace {
    { AddFile(file);};
 
 
-
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_io_Maker.h,v 1.13 1999/07/13 02:19:38 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_io_Maker.h,v 1.14 1999/07/15 13:58:12 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_io_Maker, 1)   //StAF chain virtual base class for Makers
 };

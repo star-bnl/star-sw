@@ -1,6 +1,9 @@
-// $Id: StPeCMaker.h,v 1.2 1999/04/08 16:37:27 nystrand Exp $
+// $Id: StPeCMaker.h,v 1.3 1999/07/15 13:57:21 perev Exp $
 //
 // $Log: StPeCMaker.h,v $
+// Revision 1.3  1999/07/15 13:57:21  perev
+// cleanup
+//
 // Revision 1.2  1999/04/08 16:37:27  nystrand
 // MakeBranch,SetBranch removed
 //
@@ -72,11 +75,13 @@ public:
   virtual void Clear(Option_t *option="");
   virtual Int_t Init();
   virtual Int_t  Make();
-  virtual void   PrintInfo();
   virtual Int_t  Finish();
 
   // Tag accessor
   HighPtTag_st* tag() {return theTag;};
+
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.3 1999/07/15 13:57:21 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StPeCMaker, 1)
 };

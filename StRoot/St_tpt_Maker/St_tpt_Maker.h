@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.h,v 1.11 1999/06/02 01:29:14 sakrejda Exp $
+// $Id: St_tpt_Maker.h,v 1.12 1999/07/15 13:58:28 perev Exp $
 // $Log: St_tpt_Maker.h,v $
+// Revision 1.12  1999/07/15 13:58:28  perev
+// cleanup
+//
 // Revision 1.11  1999/06/02 01:29:14  sakrejda
 // functions to switch on/off tte_track added
 //
@@ -64,7 +67,7 @@ private:
   Bool_t m_mkfinal;   	//control flag for final ntuple production
   Bool_t m_tteEvalOn; 	//switch for the evaluation
   Bool_t m_tptResOn;  	//switch for the residuals calculation
-//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.11 1999/06/02 01:29:14 sakrejda Exp $";
+//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.12 1999/07/15 13:58:28 perev Exp $";
   St_tpg_pad_plane      *m_tpg_pad_plane;	//! Constants that describe TPC pad plane
   St_tcl_tpc_index_type *m_type;   		//! Table of many-to-many index 
 	                                        //! correlations for tpc evaluations
@@ -168,8 +171,10 @@ public:
   virtual Int_t  Init();
   virtual Int_t  Make();
   virtual Int_t  Finish();
-  virtual void   PrintInfo();
   virtual void   Set_final(Bool_t m=kFALSE){m_mkfinal = m;}
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpt_Maker.h,v 1.12 1999/07/15 13:58:28 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
  ClassDef(St_tpt_Maker, 1)   //StAF chain virtual base class for Makers
 };
 

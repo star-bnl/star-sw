@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.8 1999/07/14 15:48:19 caines Exp $
+// $Id: StV0Maker.cxx,v 1.9 1999/07/15 13:57:54 perev Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.9  1999/07/15 13:57:54  perev
+// cleanup
+//
 // Revision 1.8  1999/07/14 15:48:19  caines
 // Correct check on stk_track when eval turned on
 //
@@ -191,15 +194,5 @@ Int_t StV0Maker::Make(){
     }     // If ev0 evaluation switched on 
   }  
   return iMake;
-}
-
-//_____________________________________________________________________________
-void StV0Maker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: StV0Maker.cxx,v 1.8 1999/07/14 15:48:19 caines Exp $\n");
-  //  printf("* %s    *\n",m_VersionCVS);
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-  
 }
 

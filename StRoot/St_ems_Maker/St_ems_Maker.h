@@ -1,5 +1,8 @@
-// $Id: St_ems_Maker.h,v 1.7 1999/07/01 15:59:12 pavlinov Exp $ 
+// $Id: St_ems_Maker.h,v 1.8 1999/07/15 13:58:03 perev Exp $ 
 // $Log: St_ems_Maker.h,v $
+// Revision 1.8  1999/07/15 13:58:03  perev
+// cleanup
+//
 // Revision 1.7  1999/07/01 15:59:12  pavlinov
 // added QA histograms and new switches for control of maker
 //
@@ -93,7 +96,6 @@ public:
   ~St_ems_Maker();
   virtual Int_t Init();
   virtual Int_t Make();
-  virtual void  PrintInfo();
   virtual void  printNameOfTables();
   virtual void  bookHistograms(const Int_t);
   virtual void  makeHistograms(const Int_t, St_emc_hits*);
@@ -106,6 +108,9 @@ public:
   void   setBEMC(Short_t key){mBEMC = key; if (Debug()) printmBEMC();}
   void   setEEMC(Short_t key){mEEMC = key; if (Debug()) printmEEMC();}
   void   setHistControl(Short_t key) {mHistControl = key;}
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: St_ems_Maker.h,v 1.8 1999/07/15 13:58:03 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
   ClassDef(St_ems_Maker, 1)  
 };
 

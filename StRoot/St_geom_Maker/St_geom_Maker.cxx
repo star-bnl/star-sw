@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   29/06/99  (E-mail: fine@bnl.gov)
-// $Id: St_geom_Maker.cxx,v 1.6 1999/07/13 00:52:52 fine Exp $
+// $Id: St_geom_Maker.cxx,v 1.7 1999/07/15 13:58:10 perev Exp $
 // $Log: St_geom_Maker.cxx,v $
+// Revision 1.7  1999/07/15 13:58:10  perev
+// cleanup
+//
 // Revision 1.6  1999/07/13 00:52:52  fine
 // Some corrections
 //
@@ -133,11 +136,4 @@ Int_t St_geom_Maker::Make(){
  return kStOK;
 }
 //_____________________________________________________________________________
-void St_geom_Maker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: St_geom_Maker.cxx,v 1.6 1999/07/13 00:52:52 fine Exp $\n");
-//  printf("* %s    *\n",m_VersionCVS);
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}
 

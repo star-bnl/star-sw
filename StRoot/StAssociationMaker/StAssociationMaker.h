@@ -110,6 +110,9 @@ private:
 
 
     // the following is a ROOT macro  that is needed in all ROOT accessible code
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.3 1999/07/15 13:56:44 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
     ClassDef(StAssociationMaker, 1)
 
 };

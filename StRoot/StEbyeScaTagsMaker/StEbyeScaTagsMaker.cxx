@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEbyeScaTagsMaker.cxx,v 1.6 1999/06/27 22:45:27 fisyak Exp $
+ * $Id: StEbyeScaTagsMaker.cxx,v 1.7 1999/07/15 13:57:00 perev Exp $
  *
  * Author: Jeff Reid, UW, Feb 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEbyeScaTagsMaker.cxx,v $
+ * Revision 1.7  1999/07/15 13:57:00  perev
+ * cleanup
+ *
  * Revision 1.6  1999/06/27 22:45:27  fisyak
  * Merge StRootEvent and StEvent
  *
@@ -72,10 +75,6 @@ Int_t StEbyeScaTagsMaker::Make() {
   return kStOK;
 }
 
-void StEbyeScaTagsMaker::PrintInfo() {
-  cout << "$Id: StEbyeScaTagsMaker.cxx,v 1.6 1999/06/27 22:45:27 fisyak Exp $" << endl;
-  if (Debug()) StMaker::PrintInfo();
-}
 
 
 ScaTag_st* StEbyeScaTagsMaker::tag() {

@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.19 1999/07/14 15:48:42 caines Exp $
+// $Id: St_dst_Maker.cxx,v 1.20 1999/07/15 13:57:55 perev Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.20  1999/07/15 13:57:55  perev
+// cleanup
+//
 // Revision 1.19  1999/07/14 15:48:42  caines
 // Added ev0_eval to tables wrtten out
 //
@@ -56,7 +59,7 @@
 #include "St_dst_summary_param_Table.h"
 #include "St_dst_run_summary_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.19 1999/07/14 15:48:42 caines Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.20 1999/07/15 13:57:55 perev Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -76,7 +79,7 @@ Int_t St_dst_Maker::Init(){
     "xi:",     "dst_xi_vertex",
     "kink:",   "kinkVertex",
     "geant:",  "particle", "g2t_rch_hit",
-    "trg:",    "dst_TriggerDetectors",
+    "trg:",    "TrgDet",
     0};
   
   if (!fSelect) fSelect = todst;   
@@ -342,11 +345,4 @@ Int_t  St_dst_Maker::Filler(){
     if(Debug()) cout << " run_dst: finished calling fill_dst_event_summary" << endl;
   }
   return kStOK;
-}
-//_____________________________________________________________________________
-void St_dst_Maker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: St_dst_Maker.cxx,v 1.19 1999/07/14 15:48:42 caines Exp $\n");
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
 }

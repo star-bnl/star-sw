@@ -21,7 +21,7 @@ class St_ctg_geo;
 
 class St_rl0_Maker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: St_rl0_Maker.h,v 1.2 1999/03/12 21:53:27 perev Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_rl0_Maker.h,v 1.3 1999/07/15 13:58:19 perev Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
 
@@ -37,8 +37,10 @@ class St_rl0_Maker : public StMaker {
    virtual      ~St_rl0_Maker();
    virtual Int_t Init();
    virtual Int_t Make();
-   virtual void  PrintInfo();
 // virtual void  Set_mode     (Int_t   m =      2){m_mode       = m;} // *MENU*
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: St_rl0_Maker.h,v 1.3 1999/07/15 13:58:19 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
    ClassDef(St_rl0_Maker, 1)   //StAF chain virtual base class for Makers
 };
 

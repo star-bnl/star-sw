@@ -1,5 +1,8 @@
-// $Id: St_ctf_Maker.h,v 1.6 1999/03/11 03:55:07 perev Exp $
+// $Id: St_ctf_Maker.h,v 1.7 1999/07/15 13:57:49 perev Exp $
 // $Log: St_ctf_Maker.h,v $
+// Revision 1.7  1999/07/15 13:57:49  perev
+// cleanup
+//
 // Revision 1.6  1999/03/11 03:55:07  perev
 // new schema
 //
@@ -77,7 +80,9 @@ class St_ctf_Maker : public StMaker {
    virtual       ~St_ctf_Maker();
    virtual Int_t Init();
    virtual Int_t  Make();
-   virtual void   PrintInfo();
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: St_ctf_Maker.h,v 1.7 1999/07/15 13:57:49 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
    ClassDef(St_ctf_Maker, 1)   //StAF chain virtual base class for Makers
 };
 

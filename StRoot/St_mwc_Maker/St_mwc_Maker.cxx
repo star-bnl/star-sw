@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.cxx,v 1.13 1999/06/09 19:56:31 druss Exp $
+// $Id: St_mwc_Maker.cxx,v 1.14 1999/07/15 13:58:17 perev Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.14  1999/07/15 13:58:17  perev
+// cleanup
+//
 // Revision 1.13  1999/06/09 19:56:31  druss
 // Added histograms : # of wire hits, # of sectors hit, # wires hit as a function of eta and phi
 //
@@ -191,11 +194,4 @@ Int_t St_mwc_Maker::Make(){
    return kStOK;
 }
 //_____________________________________________________________________________
-void St_mwc_Maker::PrintInfo(){
-  printf("**************************************************************\n");
-  printf("* $Id: St_mwc_Maker.cxx,v 1.13 1999/06/09 19:56:31 druss Exp $\n");
-//  printf("* %s    *\n",m_VersionCVS);
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}
      
