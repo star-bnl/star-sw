@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.23 2000/06/30 02:00:42 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.24 2000/08/15 22:53:14 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,12 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.24  2000/08/15 22:53:14  porter
+ * Added 2 write methods.
+ *  - 1 works once "list" is requested from database
+ *  - 1 works just by specifying the full path from which
+ *    the code extracts the database name.
+ *
  * Revision 1.23  2000/06/30 02:00:42  porter
  * fixed memory leak introduced when making sure top level returned to
  * offline is always a database type name
@@ -320,7 +326,6 @@ StDbBroker::SetDateTime(UInt_t date, UInt_t time)
 
    //   cout << "ReQuested Time = " << mgr->getDateCheckTime() << endl;
 
-
 }
 
 //____________________________________________________________________________
@@ -339,8 +344,6 @@ void StDbBroker::SetFlavor(const char* flavor){
 
 }
 
-
-
 //____________________________________________________________________________
 void * StDbBroker::Use(int tabID, int parID)
 {
@@ -357,10 +360,8 @@ void * StDbBroker::Use(int tabID, int parID)
   StDbNode* anode = m_Nodes->getNode(tabID);
   StDbTable* node=0;
   if(anode && !anode->IsNode())node=(StDbTable*)anode;
-  // 0 endtime means no requests yet  
-  if(node && !(node->getEndTime()))node->setDescriptor(GetTableDescriptor());
+  if(node && !(node->hasDescriptor()))node->setDescriptor(GetTableDescriptor());
   
-
   if(node && mgr->fetchDbTable(node)){
     m_nRows= node->GetNRows();
     pData  = node->GetTableCpy(); // gives the "malloc'd version"
@@ -406,6 +407,123 @@ void * StDbBroker::Use(int tabID, int parID)
 return pData;
 }
 
+//______________________________________________________________________________
+Int_t StDbBroker::WriteToDb(void* pArray, int tabID){
+
+  if(!pArray || tabID==0) {
+    cerr<<"WRITE FAILED  StDbBroker::WriteToDb : insufficient input data"<<endl;
+    return 0;
+  }
+  if(!m_Nodes){
+    cerr<<"WRITE FAILED StDbBroker::WriteToDb : must 1st call InitConfig()"<<endl;
+    return 0;
+  }
+
+  StDbNode* anode= m_Nodes->getNode(tabID);
+  if(!anode || anode->IsNode()){
+    cerr<<"WRITE FAILED StDbBroker::WriteToDb :tabID="<<tabID<<" does not reference a TABLE"<<endl;
+    return 0;
+  }
+
+  StDbTable* table=(StDbTable*)anode;
+  if(!table->hasDescriptor())table->setDescriptor(GetTableDescriptor());
+  
+  table->SetTable((char*)pArray,m_nRows);
+
+  // WARNING :: A Cludge -> StDbManager has separate 'store' & 'request' times
+  // StDbBroker does not
+
+  mgr->setStoreTime(mgr->getUnixCheckTime());
+  if(!mgr->storeDbTable(table))return 0;
+
+  return 1;
+}
+
+//______________________________________________________________________________
+Int_t StDbBroker::WriteToDb(void* pArray, const char* fullPath, int* idList){
+
+  if(!pArray || !fullPath) {
+    cerr<<"WRITE FAILED  StDbBroker::WriteToDb : insufficient input data"<<endl;
+    return 0;
+  }
+
+  char* path=new char[strlen(fullPath)+1]; 
+  strcpy(path,fullPath);
+
+  // chop off a trailing "/" if found
+  char* tmp=path;
+  tmp+=strlen(path)-1;
+  if(*tmp=='/')*tmp='\0';
+
+  // Algorithm is if path = "A/B/C/D", we try to connect to 
+  // databases "D", "C_D" (& "C") , "B_C" ( & "B"), "A_B" (& "A") 
+  // quiting when table is found.  Note, by design if database
+  // "C_D" does not exist, the DB-API tries to find database "C".
+
+  char* a1=path;
+  char* a2;
+  char** aword = new char*[20];
+  
+  int icount=0;
+  aword[icount]=a1;
+  while((a2=strstr(a1,"/"))){
+   *a2='\0'; a2++;
+   icount++;
+   aword[icount]=a2;
+   a1=a2;
+  }
+
+   char tmpName[128];
+   char* dbName;
+   StDbTable* table;
+   for(int i=icount;i>0;i--){
+     if(i==icount){
+       dbName=aword[i];
+     } else {
+       tmpName[0]='\0';
+       ostrstream dbn(tmpName,128);
+       dbn<<aword[i-1]<<"_"<<aword[i]<<ends;
+       dbName=(char*)tmpName;
+     }
+     table=findTable(dbName);
+     if(table)break;
+   }
+
+   if(!table){
+     cerr<<"WRITE FAILED  StDbBroker::WriteToDb : table"<<m_tableName;
+     cerr<<" not found in database of Name="<<dbName<<endl;
+     delete [] path;
+     return 0;
+   }
+
+   table->setDescriptor(GetTableDescriptor());
+   if(idList)table->setElementID(idList,m_nRows);
+   
+   table->SetTable((char*)pArray,m_nRows);
+   
+   mgr->setStoreTime(mgr->getUnixCheckTime());
+   bool iswritten=mgr->storeDbTable(table);
+   delete table;
+
+   if(iswritten) return 1;
+
+return 0;
+}
+
+
+//_____________________________________________________________________________
+StDbTable*
+StDbBroker::findTable(const char* databaseName){
+
+  StDbTable* table=0;
+  StDbConfigNode* node= mgr->initConfig(databaseName);
+  StDbTable* tmp=node->addDbTable(m_tableName);  
+  if(tmp)table=new StDbTable(*tmp);
+  delete node;
+
+  return table;
+}
+  
 //______________________________________________________________________________
 void * StDbBroker::Use()
 {
