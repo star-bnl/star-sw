@@ -50,30 +50,24 @@ void StiDrawableDetector::makeShape()
     //Make sure that our shape get's hung on the main node
     StiDisplayManager::instance()->cd();
 
-    //cout <<"\tMake shape"<<endl;
     char* shapename = new char[200];
     sprintf(shapename,"Shape_%s",getName());
-    //cout <<"\tshapename: "<<shapename<<endl;
-    Double_t dWidth = yMax - yMin;
-    Double_t dYshift = (yMax + yMin)/2.; // how much yCenter differs from 0.
-    mshape = new TBRIK(shapename,"BRIK","void", thickness/2., dWidth/2., 
-                       halfDepth);
+    mshape = new TBRIK(shapename,"BRIK","void", getThickness()/2., getHalfWidth(), getHalfDepth());
     mshape->SetLineColor(1);
     
     //Hang shape on a drawable node
-    //cout <<"Make node"<<endl;
     char* nodename = new char[200];
-    sprintf(nodename, "node_%f_%f",position, refAngle);
-    double xcenter = position*cos(refAngle) - dYshift*sin(refAngle); 
-    double ycenter = position*sin(refAngle) + dYshift*cos(refAngle);
-    mnode = new TNode("nodename","", mshape, xcenter, ycenter, zCenter);
+    sprintf(nodename, "node_%f_%f",getCenterRadius(), getCenterRefAngle());
+    double xcenter = getCenterRadius()*cos(getCenterRefAngle());
+    double ycenter = getCenterRadius()*sin(getCenterRefAngle());
+    mnode = new TNode("nodename","", mshape, xcenter, ycenter, getZCenter());
     
     //Account for rotation of object w.r.t. origin
     //cout <<"\tRotate node"<<endl;
     char* matrixname = new char[200];
-    sprintf(matrixname, "matrix_%f_%f",position, refAngle);
+    sprintf(matrixname, "matrix_%f_%f",getCenterRadius(), getCenterRefAngle());
     double x[9];    
-    gStiEulerMatrixForRoot(refAngle, x); //Make our euler-rotatin matrix
+    gStiEulerMatrixForRoot(getCenterRefAngle(), x); //Make our euler-rotatin matrix
     mrotation = new TRotMatrix(matrixname, "void", x);
     mnode->SetMatrix(mrotation);
     //cout <<"\tFinished making shape"<<endl;

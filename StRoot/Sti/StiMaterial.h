@@ -48,7 +48,7 @@ class StiMaterial : public TObject{
 
 //Non-members--------------------------
 
-ostream& operator<<(ostream& os, const StiMaterial& m){
+inline ostream& operator<<(ostream& os, const StiMaterial& m){
   return os << m.getDensity() << " " 
             << m.getRadLength() << " "
             << m.getName();

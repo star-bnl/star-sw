@@ -30,7 +30,7 @@ void StiDetector::build(const char* buildfile)
 
     int code;
     StGetConfigValue(buildfile, "shapeCode", code);
-    shapeCode = code;
+    shapeCode = static_cast<StiShapeCode>(code);
 
     // we only store & read one representation of the geometry
     StGetConfigValue(buildfile, "centerRadius", centerRadius);
