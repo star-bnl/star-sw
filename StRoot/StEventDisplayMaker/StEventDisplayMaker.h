@@ -13,10 +13,8 @@
 //  Submit any problem with this code via begin_html <A HREF="http://www.star.bnl.gov/STARAFS/comp/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#ifndef StMaker_H
 #include "StMaker.h"
-#endif
-
+#include "TSeqCollection.h"
 
 class    St_Node;
 class    St_NodeView;
@@ -31,10 +29,11 @@ class StGlobalTrack;
 class StVertex;
 class StVirtualEventFilter;
 class StTrackChair;
+class TVirtualPad;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.16 2000/03/09 22:00:34 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.17 2000/03/15 17:22:19 fine Exp $";
  private: 
     TList         *m_HitCollector;     //!
     TList         *m_TrackCollector;   //!
@@ -75,7 +74,8 @@ class StEventDisplayMaker : public StMaker {
    virtual void   Clear(Option_t *option="");
    virtual void   ClearCanvas(); // *MENU*
    virtual void   ClearEvents();
-   virtual Int_t  CreateCanvas();
+   virtual TVirtualPad *CreateCanvas();
+           TVirtualPad *GetEventPad();
    virtual Int_t  CreateTrackNodes();
    virtual St_Node *GetHall()          { return m_Hall; }
    virtual St_NodeView *GetFullView()  { return m_FullView;  }
@@ -164,11 +164,22 @@ class StEventDisplayMaker : public StMaker {
   // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.16 2000/03/09 22:00:34 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.17 2000/03/15 17:22:19 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:
    static StVirtualEventFilter m_DefaultFilters[kEndOfEventList];
 };
 
+//______________________________________________________________________________
+inline TVirtualPad *StEventDisplayMaker::GetEventPad()
+{
+  // Protect this class from the crash if user deleted canvas accidently
+  if (m_PadBrowserCanvas) {
+    TSeqCollection   *cList = gROOT->GetListOfCanvases();
+    if ( !cList || !cList->FindObject((TObject *)m_PadBrowserCanvas)) 
+      m_PadBrowserCanvas = 0;
+  }
+  return (TVirtualPad *)m_PadBrowserCanvas;
+};
 #endif

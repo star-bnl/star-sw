@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.53 2000/03/09 22:00:33 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.54 2000/03/15 17:22:19 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -249,8 +249,9 @@ void StEventDisplayMaker::ClearEvents()
   if (m_Mode == 2) return;
   // Clear picture
   if (m_EventsNode) {
-    if (m_PadBrowserCanvas) 
-        m_PadBrowserCanvas->Clear();
+    if (!GetEventPad()) CreateCanvas();
+    else                m_PadBrowserCanvas->Clear();
+
     delete m_EventsView;
     m_EventsView = 0;
     St_Node *node = 0;
@@ -294,9 +295,9 @@ void StEventDisplayMaker::Clear(Option_t *)
 }
 
 //_____________________________________________________________________________
-Int_t StEventDisplayMaker::CreateCanvas()
+TVirtualPad *StEventDisplayMaker::CreateCanvas()
 {
-  if (!m_PadBrowserCanvas) {
+  if (!GetEventPad()) {
    // Attention !!! The name of TCanvas MUST unique across all ROOT
    // objects otherwise those will be destroyed by TCanvas ctor !!!
      m_PadBrowserCanvas = new TCanvas("STARMonitor","Event Display",10,600,400,400);
@@ -304,7 +305,7 @@ Int_t StEventDisplayMaker::CreateCanvas()
   if (m_ShortView) m_ShortView->Draw();
   m_PadBrowserCanvas->Modified();
   m_PadBrowserCanvas->Update();
-  return 0;
+  return m_PadBrowserCanvas;
 }
 
 //_____________________________________________________________________________
@@ -708,7 +709,7 @@ Int_t StEventDisplayMaker::MakeTracks( StGlobalTrack *globTrack,StVirtualEventFi
     Style_t trackStyle = 1;
     Size_t trackSize  = 2;
     // --------------------- tracks filter ---------------------------------- //
-    if (filter) trackColor =  filter->Channel(globTrack,trackSize,trackStyle); //
+    if (filter) trackColor =  filter->Channel(globTrack,trackSize,trackStyle);//
     // ---------------------------------------------------------------------- //
     if (trackColor > 0) {
        StHelix3DPoints *tracksPoints  = new StHelix3DPoints(globTrack);
@@ -966,6 +967,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.54  2000/03/15 17:22:19  fine
+// some extra protection against of dead canvas
+//
 // Revision 1.53  2000/03/09 22:00:33  fine
 // StTrackChair class to draw any track-like table: tpt_track, dst_track has been introduced
 //

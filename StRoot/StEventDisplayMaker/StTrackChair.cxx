@@ -36,13 +36,16 @@ StHelixD *StTrackChair::MakeHelix(Int_t i) const
   const float pi2 = 3.1415926/2.;
   const float rad = pi2/90.;
   const void *point =  At(i);
-  Float_t angle = (*(Float_t*)GetOffset(point,mPhi0)) * rad;
+  Float_t angle   = (*(Float_t*)GetOffset(point,mPhi0)) * rad;
   int h = (*(Int_t *)GetOffset(point,mCharge)) > 0 ? -1 : 1;  
   Float_t ro = *(Float_t *)GetOffset(point,mR0);
+
   StThreeVectorD vector(ro*cos(angle),ro*sin(angle),*(Float_t *)GetOffset(point,mZ0));
+
   Float_t curv = *(Float_t *)GetOffset(point,mCurvature);
   Float_t tanl = *(Float_t *)GetOffset(point,mTanl);
   Float_t psi  = *(Float_t *)GetOffset(point,mPsi);
+
   StHelixD *helix = new  StHelixD(curv, tanl, psi*rad-h*pi2, vector, h);
   return helix;
 }
