@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.27 2004/10/20 18:55:13 ullrich Exp $
+ * $Id: StTrack.cxx,v 2.28 2004/11/08 22:25:38 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.28  2004/11/08 22:25:38  perev
+ * Remove StTrack test for wrong length. TPT only
+ *
  * Revision 2.27  2004/10/20 18:55:13  ullrich
  * Name of enum changed: StStarMaxR(Z) now StStarMaxTrackRangeR(Z).
  *
@@ -110,7 +113,7 @@
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.27 2004/10/20 18:55:13 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.28 2004/11/08 22:25:38 perev Exp $";
 
 StTrack::StTrack()
 {
@@ -490,7 +493,11 @@ int StTrack::bad() const
     StPhysicalHelixD hlx1 = mGeometry->helix();
     StThreeVectorD   ori2 = mOuterGeometry->origin();
     double len12 = hlx1.pathLength(ori2);
-    if (fabs(mLength-len12)>0.9)                  return   43;
+    double per = hlx1.period();
+    while (len12<  0) len12+=per;
+    while (len12>per) len12-=per;
+    double tol = (len12)*0.2; if (tol<1) tol =1;
+//VP ignor for TPT    if (fabs(mLength-len12)>tol)                 return   43;
      
     if (fabs(hlx1.z(mLength))>kStarMaxTrackRangeZ) return   53;
     double qwe = pow(hlx1.x(mLength),2)+pow(hlx1.y(mLength),2);
