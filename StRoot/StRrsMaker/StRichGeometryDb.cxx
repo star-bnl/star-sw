@@ -1,10 +1,18 @@
 /*******************************************************************
- * $Id: StRichGeometryDb.cxx,v 2.3 2001/08/22 16:42:59 lasiuk Exp $
+ * $Id: StRichGeometryDb.cxx,v 2.5 2001/10/04 22:16:48 dunlop Exp $
  *
  * Description:
  *
  *******************************************************************
  * $Log: StRichGeometryDb.cxx,v $
+ * Revision 2.5  2001/10/04 22:16:48  dunlop
+ * Fixing small mistake in new euler angles
+ *
+ * Revision 2.4  2001/10/04 19:37:43  dunlop
+ * Modification to fill in year 2001 information.
+ * Has TPC in global coordinates + small shift + mod to gap in x and y to match
+ * machine drawings
+ *
  * Revision 2.3  2001/08/22 16:42:59  lasiuk
  * data base functionality to check library environment variable
  *
@@ -78,8 +86,9 @@ void StRichGeometryDb::my_fill()
 {
     mVersion = 1.0;
     
-    quad_gap_x        =  30.8 * millimeter;          // verified          
-    quad_gap_y        =  30.0 * millimeter;          
+// JCD Changed 10/4/2001 to match machine drawings
+    quad_gap_x        =  30.0 * millimeter;          // verified          
+    quad_gap_y        =  29.8 * millimeter;          
 	
     wire_spacing      = 4.2   * millimeter;          // verified
     number_of_wires   = 192;                         // verified
@@ -209,12 +218,12 @@ void StRichGeometryDb::my_fill()
 	cout << "Year 2000 Geometry 2nd production: " << endl;
 	this->fill2001he();	 
      }
-     else if(strstr(starVersion, "01")) {
+     else if(strstr(starVersion, "01")||strstr(starVersion, "DEV")) {
 	cout << "Year 2001 Geometry: " << endl;
 	this->fill2001();	 
      }
      else {
-	 cout << "ERROR\n";
+	 cout << "Warning:\n";
 	 cout << "\tStRichGeometry::my_fill()\n";
 	 cout << "\tUnknown starVersion: " << starVersion << endl;
 	 cout << "\tUse Year 2000 Geometry" << endl;
@@ -287,24 +296,25 @@ void StRichGeometryDb::fill2001he() {
 }
 void StRichGeometryDb::fill2001() {
 
-    cout << "*******************WARNING ************************\a\a" << endl;
     cout << "\tStRichGeometryDb::fill2001()\n";
-    cout << "\tNo Geometry defined for year 2001 just yet\n";
-    cout << "\tUsing Year 2000" << endl;
-    this->fill2000();
-    
+    // production
     //
-    // 2001 Survey Geometry
-    // Euler-like rotations
+    // Euler-like angles
     //
-    
-    //mLocalAngleX = 
-    //mLocalAngleY = 
-    //mLocalAngleZ = 
+    // Use exact from survey
+    mLocalAngleX = -0.0200353082209942 * degree ;
+    mLocalAngleY = 0.037884454328129 * degree ;
+    mLocalAngleZ = 29.8171493344754 * degree ;
+    //
+    // P00hm + tpc local->global + (0.03,-0.025,0) local
+    mLocalOriginAngle = -60.0233755889891 * degree ; 
+    mLocalOriginR = 240.160406174684 * centimeter ;
+    mLocalOriginZ = -0.470960678181733 * centimeter ; 
+    cout << "mLocalOriginAngle = " << mLocalOriginAngle/degree << endl;
+    cout << "mLocalOriginR = " << mLocalOriginR/centimeter << endl;
+    cout << "mLocalOriginZ = " << mLocalOriginZ/centimeter << endl;
+	
 
-    //mLocalOriginAngle =
-    //mLocalOriginR     =
-    //mLocalOriginZ     =
 }
 
 

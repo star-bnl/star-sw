@@ -1,5 +1,17 @@
-// $Id: StQABookHist.cxx,v 2.20 2001/08/07 07:51:27 lansdell Exp $
+// $Id: StQABookHist.cxx,v 2.24 2001/11/02 20:50:03 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.24  2001/11/02 20:50:03  genevb
+// Changed histogram ranges for momenta
+//
+// Revision 2.23  2001/10/25 20:45:12  lansdell
+// changed ftpc # hits range to 25k
+//
+// Revision 2.22  2001/10/25 20:43:43  lansdell
+// changed 2d ftpc globtrk histo ranges
+//
+// Revision 2.21  2001/10/10 05:00:19  genevb
+// Changed ftpc point/track ranges
+//
 // Revision 2.20  2001/08/07 07:51:27  lansdell
 // primvtx check for different multiplicities crashed for MC data, now fixed
 //
@@ -628,7 +640,7 @@ void StQABookHist::BookHistGlob(){
   m_globtrk_good_tot->Rebin(1,"TPC/total");
   m_globtrk_good_tot->SetStats(kFALSE);
   m_globtrk_goodTTS  = QAH::H1F("QaGtrkGoodTTS","globtrk: tot good tracks - tpc,tpc+svt",40,0.,10000.);
-  m_globtrk_goodF    = QAH::H2F("QaGtrkGoodF","globtrk: tot good tracks - ftpc",40,0.,1000.,40,0.,1000.);
+  m_globtrk_goodF    = QAH::H2F("QaGtrkGoodF","globtrk: tot good tracks - ftpc",40,0.,4000.,40,0.,4000.);
   m_globtrk_goodF->SetXTitle("FTPC East");
   m_globtrk_goodF->SetYTitle("FTPC West");
   m_globtrk_fit_prob = QAH::H1F("QaGtrkFitProb","globtrk: prob. fit is correct",100,0,1.2);
@@ -669,10 +681,11 @@ void StQABookHist::BookHistGlob(){
   m_etaTTS->Rebin(0,"TPC+SVT");
   m_etaTTS->Rebin(1,"TPC");
   m_etaTTS->SetStats(kFALSE);
-  m_pTTTS            = QAH::MH1F("QaGtrkPtTTS",  "globtrk: pT, tpc,svt",50,0.,5.,2);
+  m_pTTTS            = QAH::MH1F("QaGtrkPtTTS",  "globtrk: log pT, tpc,svt",50,-1.,4.,2);
   m_pTTTS->Rebin(0,"TPC+SVT");
   m_pTTTS->Rebin(1,"TPC");
   m_pTTTS->SetStats(kFALSE);
+  m_pTTTS->SetXTitle("log pT (MeV)");
   m_chisq0TTS        = QAH::MH1F("QaGtrkChisq0TTS", "globtrk: chisq0, tpc,svt", 50, 0.,5.,2);
   m_chisq0TTS->Rebin(0,"TPC+SVT");
   m_chisq0TTS->Rebin(1,"TPC");
@@ -748,8 +761,8 @@ void StQABookHist::BookHistGlob(){
   m_tanlT       = QAH::H1F("QaGtrkTanlT",   "globtrk: tanl, tpc",32,-4.,4.);
   m_glb_thetaT  = QAH::H1F("QaGtrkThetaT",  "globtrk: theta (degrees), tpc",36,0.,180.);
   m_etaT        = QAH::H1F("QaGtrkEtaT",    "globtrk: eta, tpc",40,-2.,2.);
-  m_pTT         = QAH::H1F("QaGtrkPtT",     "globtrk: pT, tpc",50,0.,5.);
-  m_momT        = QAH::H1F("QaGtrkPT",      "globtrk: momentum, tpc",50,0.,5.);
+  m_pTT         = QAH::H1F("QaGtrkPtT",     "globtrk: pT, tpc",50,0.,10.);
+  m_momT        = QAH::H1F("QaGtrkPT",      "globtrk: momentum, tpc",50,0.,10.);
   m_chisq0T     = QAH::H1F("QaGtrkChisq0T", "globtrk: chisq0, tpc", 50, 0.,5.);
   m_chisq1T     = QAH::H1F("QaGtrkChisq1T", "globtrk: chisq1, tpc", 50, 0.,1.2);
   m_glb_impactT = QAH::H1F("QaGtrkImpactT", "globtrk: log10 impact param from prim vtx, tpc",120,-3.0,3.0);
@@ -886,8 +899,8 @@ void StQABookHist::BookHistGlob(){
   m_tanlTS       = QAH::H1F("QaGtrkTanlTS",   "globtrk: tanl, tpc+svt",32,-4.,4.);
   m_glb_thetaTS  = QAH::H1F("QaGtrkThetaTS",  "globtrk: theta (degrees), tpc+svt",36,0.,180.);
   m_etaTS        = QAH::H1F("QaGtrkEtaTS",    "globtrk: eta, tpc+svt",40,-2.,2.);
-  m_pTTS         = QAH::H1F("QaGtrkPtTS",     "globtrk: pT, tpc+svt",50,0.,5.);
-  m_momTS        = QAH::H1F("QaGtrkPTS",      "globtrk: momentum, tpc+svt",50,0.,5.);
+  m_pTTS         = QAH::H1F("QaGtrkPtTS",     "globtrk: pT, tpc+svt",50,0.,10.);
+  m_momTS        = QAH::H1F("QaGtrkPTS",      "globtrk: momentum, tpc+svt",50,0.,10.);
   m_chisq0TS     = QAH::H1F("QaGtrkChisq0TS", "globtrk: chisq0, tpc+svt", 50, 0.,5.);
   m_chisq1TS     = QAH::H1F("QaGtrkChisq1TS", "globtrk: chisq1, tpc+svt", 50, 0.,1.2);
   m_glb_impactTS = QAH::H1F("QaGtrkImpactTS", "globtrk: log10 impact param from prim vtx, tpc+svt",
@@ -1026,11 +1039,11 @@ void StQABookHist::BookHistGlob(){
   m_etaF->Rebin(0,"East");
   m_etaF->Rebin(1,"West");
   m_etaF->SetStats(kFALSE);
-  m_pTF         = QAH::MH1F("QaGtrkPtF",      "globtrk: pT, ftpc",50,0.,5.,2);
+  m_pTF         = QAH::MH1F("QaGtrkPtF",      "globtrk: pT, ftpc",50,0.,10.,2);
   m_pTF->Rebin(0,"East");
   m_pTF->Rebin(1,"West");
   m_pTF->SetStats(kFALSE);
-  m_momF        = QAH::MH1F("QaGtrkPF",       "globtrk: momentum, ftpc",50,0.,5.,2);
+  m_momF        = QAH::MH1F("QaGtrkPF",       "globtrk: momentum, ftpc",50,0.,10.,2);
   m_momF->Rebin(0,"East");
   m_momF->Rebin(1,"West");
   m_momF->SetStats(kFALSE);
@@ -1069,8 +1082,8 @@ void StQABookHist::BookHistGlob(){
   m_psiFW        = QAH::H1F("QaGtrkPsiFW",     "globtrk: psi, ftpc west", 36, 0.,360.);
   m_etaFE        = QAH::H1F("QaGtrkEtaFE",     "globtrk: eta, ftpc east",80,-4.5,-2.);
   m_etaFW        = QAH::H1F("QaGtrkEtaFW",     "globtrk: eta, ftpc west",80,2.,4.5);
-  m_pTFE         = QAH::H1F("QaGtrkPtFE",      "globtrk: pT, ftpc east",50,0.,5.);
-  m_pTFW         = QAH::H1F("QaGtrkPtFW",      "globtrk: pT, ftpc west",50,0.,5.);
+  m_pTFE         = QAH::H1F("QaGtrkPtFE",      "globtrk: pT, ftpc east",50,0.,10.);
+  m_pTFW         = QAH::H1F("QaGtrkPtFW",      "globtrk: pT, ftpc west",50,0.,10.);
   m_momFE        = QAH::H1F("QaGtrkPFE",       "globtrk: momentum, ftpc east ",50,0.,5.);
   m_momFW        = QAH::H1F("QaGtrkPFW",       "globtrk: momentum, ftpc west ",50,0.,5.);
   m_chisq0FE     = QAH::H1F("QaGtrkChisq0FE",  "globtrk: chisq0, ftpc east", 50, 0.,5.);
@@ -1115,7 +1128,7 @@ void StQABookHist::BookHistPrim(){
   m_primtrk_good    = QAH::H1F("QaPtrkGood",  "primtrk: tot num tracks iflag>0",50,0.,5000.);
   m_primtrk_good_sm = QAH::H1F("QaPtrkGoodsm","primtrk: tot num tracks iflag>0",50,0.,500.);
   m_primtrk_goodTTS = QAH::H1F("QaPtrkGoodTTS","primtrk: tot num tracks iflag>0, tpc,svt",50,0.,5000.);
-  m_primtrk_goodF   = QAH::H2F("QaPtrkGoodF",  "primtrk: tot num tracks iflag>0, ftpc",50,0.,1000.,50,0.,1000.);
+  m_primtrk_goodF   = QAH::H2F("QaPtrkGoodF",  "primtrk: tot num tracks iflag>0, ftpc",50,0.,3000.,50,0.,3000.);
   m_primtrk_goodF->SetXTitle("East");
   m_primtrk_goodF->SetYTitle("West");
   m_primglob_good   = QAH::H1F("QaPtrkGlob","primtrk: ratio primary/global tracks w/ iflag>0",50,0,1);
@@ -1584,13 +1597,13 @@ void StQABookHist::BookHistPoint(){
   m_pnt_svt     = QAH::H1F("QaPointSvt",  "point: # hits svt ",100, 0.,15000.);
   m_pnt_ssd     = QAH::H1F("QaPointSsd",  "point: # hits ssd ",100, 0.,5000.);
   // east and west on same plot
-  m_pnt_ftpc   = QAH::MH1F("QaPointFtpc", "point: # hits ftpc",100,0.,10000.,2);
+  m_pnt_ftpc   = QAH::MH1F("QaPointFtpc", "point: # hits ftpc",100,0.,25000.,2);
   m_pnt_ftpc->Rebin(0,"East");
   m_pnt_ftpc->Rebin(1,"West");
   m_pnt_ftpc->SetStats(kFALSE);
   // east and west on separate plots
-  m_pnt_ftpcE   = QAH::H1F("QaPointFtpcE","point: # hits ftpcE ",100, 0.,10000.);
-  m_pnt_ftpcW   = QAH::H1F("QaPointFtpcW","point: # hits ftpcW ",100, 0.,10000.);
+  m_pnt_ftpcE   = QAH::H1F("QaPointFtpcE","point: # hits ftpcE ",100, 0.,25000.);
+  m_pnt_ftpcW   = QAH::H1F("QaPointFtpcW","point: # hits ftpcW ",100, 0.,25000.);
 
   m_z_hits      = QAH::H1F("QaPointZhits","point: z distribution of hits, tpc",100,-210,210);
   m_pnt_phiT    = QAH::MH1F("QaPointPhiT","point: #phi distribution of hits, tpc",36,0,360,2);

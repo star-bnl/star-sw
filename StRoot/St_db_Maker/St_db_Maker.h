@@ -1,5 +1,11 @@
-// $Id: St_db_Maker.h,v 1.17 2001/09/26 23:24:05 perev Exp $
+// $Id: St_db_Maker.h,v 1.19 2001/10/27 21:48:32 perev Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.19  2001/10/27 21:48:32  perev
+// SetRunNumber added
+//
+// Revision 1.18  2001/10/13 20:23:25  perev
+// SetFlavor  working before and after Init()
+//
 // Revision 1.17  2001/09/26 23:24:05  perev
 // SetFlavor for table added
 //
@@ -64,7 +70,7 @@ private:
   TDatime     fDBTime;		//! Own DB time stamp
   Int_t       fUpdateMode;	//! 
   UInt_t      fMaxEntryTime;    //! MaxEntryTime accepted from DB
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.17 2001/09/26 23:24:05 perev Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.19 2001/10/27 21:48:32 perev Exp $";
  protected:
  public: 
                    St_db_Maker(const char *name
@@ -74,10 +80,12 @@ private:
 			      ,const char *dir3 = ""
                    );
    virtual        ~St_db_Maker();
+   virtual TDataSet *GetDataBase(const char* logInput);
    virtual TDatime GetDateTime() const;
    virtual Int_t   GetValidity(const TTable *tb, TDatime *val) const;
    virtual void    SetDateTime(int idat,int itim);
    virtual void    SetDateTime(const char *datalias);
+   virtual Int_t   InitRun(int runumber);
    virtual Int_t   Init();
    virtual Int_t   Make();
    virtual Int_t   Save(const char *path);
@@ -101,7 +109,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.17 2001/09/26 23:24:05 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.19 2001/10/27 21:48:32 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)   //StAF chain virtual base class for Makers
 };
@@ -111,7 +119,7 @@ class St_dbConfig : public TTable
 protected:                                 
   static TTableDescriptor *fgColDescriptors;    
   virtual TTableDescriptor *GetDescriptorPointer() const { return fgColDescriptors;}       
-  virtual void  SetDescriptorPointer(TTableDescriptor *list) const { fgColDescriptors = list;}  
+  virtual void  SetDescriptorPointer(TTableDescriptor *list) { fgColDescriptors = list;}  
 public:                                    
 
   St_dbConfig() : TTable("dbConfig",sizeof(dbConfig_st)) {SetType("dbConfig");}           

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.20 2001/09/13 16:54:54 porter Exp $
+ * $Id: StDbBroker.h,v 1.24 2001/10/30 20:43:29 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,18 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.24  2001/10/30 20:43:29  porter
+ * timestamp set for failure on query by runNumber
+ *
+ * Revision 1.23  2001/10/26 16:36:17  porter
+ * more runNumber implementation
+ *
+ * Revision 1.22  2001/10/26 15:44:02  porter
+ * add query by runNumber
+ *
+ * Revision 1.21  2001/10/24 04:05:56  porter
+ * added zombie designation per Victor's suggestion
+ *
  * Revision 1.20  2001/09/13 16:54:54  porter
  * propogate falvor by table through the brokery
  *
@@ -137,6 +149,8 @@ struct oldDescriptor {
     UInt_t       m_endTimeStamp; // unix endTime
     UInt_t       m_requestTimeStamp; // unix requestTime
 
+    UInt_t       m_runNumber;  // run number of queries of runlog
+
     char*        m_tableVersion; // name of the version of the table
     char*        m_database;     // name of the database for this table
     char*        m_ParentType;   // named dbType when "top" db is domain-level
@@ -150,6 +164,9 @@ struct oldDescriptor {
     dbConfig_st*  buildConfig(int& numRows);
     int           buildNodes(StDbConfigNode* node, int pID);
 
+    Bool_t         m_isZombie;
+   
+
   public:
 
     StDbBroker();
@@ -160,6 +177,7 @@ struct oldDescriptor {
     void * Use();
     void   SetTableFlavor(const char* flavor, int tabID, int parID);
     void * Use(int tabID, int parID);
+    bool   UseRunLog(StDbTable* table);
 
     char  **GetComments(St_Table *parentTable);
     void   Fill(void * pArray, const char **ElementComment);
@@ -186,6 +204,7 @@ struct oldDescriptor {
     UInt_t GetBeginTimeStamp()       {return m_beginTimeStamp; }
     UInt_t GetEndTimeStamp()         {return m_endTimeStamp; }
     UInt_t GetProdTime()             {return m_prodTime;}
+    Bool_t   IsZombie()              {return m_isZombie; }
 
     StTableDescriptorI* GetTableDescriptor();
 
@@ -211,6 +230,7 @@ struct oldDescriptor {
     };
 
     void   SetDateTime(UInt_t date,UInt_t time);
+    void   SetRunNumber(UInt_t runNumber)  {m_runNumber=runNumber;};
     void   SetDictionary(UInt_t nElements, Descriptor *D)
                                      {m_nElements=nElements; mdescriptor = D;}
     void   SetDictionary(Descriptor *D)
@@ -243,6 +263,8 @@ struct oldDescriptor {
     void   SetEndTimeStamp(UInt_t utime)     {m_endTimeStamp     = utime; }
     void   SetProdTime(UInt_t ptime);
     void   SetFlavor(const char* flavor);
+    void   SetZombie(Bool_t zombie)          { m_isZombie=true; }
+    
 
     static int DbInit(const char *);  		//Sasha's dbInit 
     void   setVerbose(int isVerbose) { m_isVerbose = isVerbose; } 

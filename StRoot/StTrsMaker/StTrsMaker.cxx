@@ -1,6 +1,10 @@
-// $Id: StTrsMaker.cxx,v 1.66 2001/03/20 01:44:24 perev Exp $
+// $Id: StTrsMaker.cxx,v 1.67 2001/11/14 22:24:32 jeromel Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.67  2001/11/14 22:24:32  jeromel
+// mAllTheData deleted in maker. Was in maker AND in Event (destroyed
+// twice) causing a crash.
+//
 // Revision 1.66  2001/03/20 01:44:24  perev
 // drift velocity print added
 //
@@ -358,7 +362,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.66 2001/03/20 01:44:24 perev Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.67 2001/11/14 22:24:32 jeromel Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -645,7 +649,7 @@ Int_t StTrsMaker::Init()
    //
    // Construct constant data sets.  This is what is passed downstream
    mAllTheData = new StTrsRawDataEvent(mGeometryDb->numberOfSectors());
-   AddConst(new St_ObjectSet("Event"  , mAllTheData));
+   AddConst(new St_ObjectSet("Event"  , mAllTheData, 0));
 
 #ifdef HISTOGRAM
    mTrsNtupleFile          = new TFile("TrsOutput.root","RECREATE","Trs Ntuples");

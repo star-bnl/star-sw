@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 2.7 2001/09/27 00:53:54 perev Exp $
+ * $Id: StRchMaker.cxx,v 2.8 2001/10/21 21:52:51 dunlop Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -850,25 +850,33 @@ void StRchMaker::fillStEvent()
     // This should be removed at a later date
     //
     AddData(new St_ObjectSet("StRichEvent", richCollection,0));
-
-    StRichSoftwareMonitor* theMonitor = mEvent->softwareMonitor()->rich();
-    if(theMonitor) {
-	theMonitor->setNumberOfPixels(static_cast<Long_t>(thePixels.size()));
-	theMonitor->setNumberOfClusters(theClusters.size());
-	theMonitor->setNumberOfHits(mTheHits.size());
-	theMonitor->setTotalCharge(totalCharge);
+    if (mEvent->softwareMonitor()) {
+	
+	StRichSoftwareMonitor* theMonitor = mEvent->softwareMonitor()->rich();
+	if(theMonitor) {
+	    theMonitor->setNumberOfPixels(static_cast<Long_t>(thePixels.size()));
+	    theMonitor->setNumberOfClusters(theClusters.size());
+	    theMonitor->setNumberOfHits(mTheHits.size());
+	    theMonitor->setTotalCharge(totalCharge);
+	}
+	else {
+	    cout << "StRchMaker::fillStEvent()\n";
+	    cout << "\tERROR\n";
+	    cout << "\tStRichSoftwareMonitor Does not Exist" << endl;
+	}
     }
     else {
 	cout << "StRchMaker::fillStEvent()\n";
 	cout << "\tERROR\n";
-	cout << "\tStRichSoftwareMonitor Does not Exist" << endl;
+	cout << "\tStSoftwareMonitor Does not Exist" << endl;
     }
+    
 }
 //-----------------------------------------------------------------
 void StRchMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRchMaker.cxx,v 2.7 2001/09/27 00:53:54 perev Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 2.8 2001/10/21 21:52:51 dunlop Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
@@ -913,6 +921,9 @@ void StRchMaker::clearPadMonitor(){
 /****************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
+ * Revision 2.8  2001/10/21 21:52:51  dunlop
+ * Protection against null event->softwareMonitor()
+ *
  * Revision 2.7  2001/09/27 00:53:54  perev
  * TObjectSet is not an owner
  *

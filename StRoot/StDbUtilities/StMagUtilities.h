@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.13 2001/08/01 18:34:40 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.17 2001/10/25 23:00:24 hardtke Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,19 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.17  2001/10/25 23:00:24  hardtke
+ * Use database to get a few parameters in StMagUtilities (including twist)
+ *
+ * Revision 1.16  2001/10/05 21:27:35  jeromel
+ * Small comment addition for historical purposes.
+ *
+ * Revision 1.15  2001/10/05 20:18:02  dunlop
+ * Tweaked enumeration of distortion selection to respect first three bits for
+ * year flag
+ *
+ * Revision 1.14  2001/10/05 03:44:25  jeromel
+ * Modifications by Jamie so we can turn on/off every corrections.
+ *
  * Revision 1.13  2001/08/01 18:34:40  jhthomas
  * Add temporary mode flag for year 2 running (different cathode potentials)
  *
@@ -45,12 +58,27 @@
 #include "TROOT.h"
 #include "TFile.h"
 
-enum   EBField  { kUndefined=0, kConstant=1, kMapped=2, kChain=3 } ;
 
+enum   EBField  { kUndefined=0, kConstant=1, kMapped=2, kChain=3 } ;
+// DO NOT change the numbering of those constants. StBFChain depends
+// on those values to build an option mask. In StBFChain, the options
+// are set as those values x2 since the mask is right shifted first.
+enum   DistortSelect { kElectricField2001 = 1, 
+		       kBMap = 0x08,
+		       kPadrow13 = 0x10,
+		       kTwist = 0x20,
+		       kClock = 0x40,
+		       kMembrane = 0x80,
+		       kEndcap = 0x100 
+};
+
+class StTpcDb;
+		       
 class StMagUtilities {
 
 
  private:
+    Int_t mDistortionMode;
 
   virtual void    Init ( Int_t mode ) ;
   virtual void    ReadField ( ) ;
@@ -65,13 +93,25 @@ class StMagUtilities {
                                            Float_t &Er_value, Float_t &Ephi_value ) ;
   virtual void    InterpolateEEdistortion ( const Float_t r, const Float_t phi, const Float_t z, 
 					    Float_t &Er_value, Float_t &Ephi_value ) ;
+  StTpcDb* thedb;  
+  float  StarDriftV;               // STAR Drift Velocity (cm/microSec) Magnitude
+  float  StarMagE;                 // STAR Electric Field (V/cm) Magnitude
+  float  GG;                       // Gating Grid voltage (volts)
 
+  float  TPC_Z0;                   // Z location of STAR TPC Ground Plane (cm)
+  float  XTWIST;                   // X Displacement of West end of TPC wrt magnet (mRad)
+  float  YTWIST;                   // Y Displacement of West end of TPC wrt magnet (mRad)
+  float  EASTCLOCKERROR;           // Phi rotation of East end of TPC in milli-radians
+  float  WESTCLOCKERROR;           // Phi rotation of West end of TPC in milli-radians
+  
  public:
 
   StMagUtilities () ;
   StMagUtilities ( Int_t mode ) ;
-  StMagUtilities ( const EBField map, const Float_t factor ) ;
+  StMagUtilities ( Int_t mode, StTpcDb* dbin ) ;
+  StMagUtilities ( const EBField map, const Float_t factor=1.0, Int_t mode = 0) ;
   virtual ~StMagUtilities() {}
+  virtual void SetDb(StTpcDb* dbin);
 
   virtual void    BField ( const Float_t x[], Float_t B[] ) ;
   virtual void    BrBzField( const Float_t r, const Float_t z, Float_t &Br_value, Float_t &Bz_value ) ;

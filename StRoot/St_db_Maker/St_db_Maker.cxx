@@ -1,6 +1,15 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.49 2001/09/26 23:24:04 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.52 2001/11/07 18:02:28 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.52  2001/11/07 18:02:28  perev
+// reurn into InitRun added
+//
+// Revision 1.51  2001/10/27 21:48:32  perev
+// SetRunNumber added
+//
+// Revision 1.50  2001/10/13 20:23:16  perev
+// SetFlavor  working before and after Init()
+//
 // Revision 1.49  2001/09/26 23:24:04  perev
 // SetFlavor for table added
 //
@@ -83,6 +92,7 @@
 #include <iostream.h>
 #include <fstream.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include "TError.h"
 #include "TBrowser.h"
@@ -136,6 +146,7 @@ public:
    TDatime fTimeMin;
    TDatime fTimeMax;
    TDataSet *fDat;
+   TString fFla;
    Int_t  fMod;
    St_ValiSet(const char *name,TDataSet *parent);
    virtual ~St_ValiSet(){};
@@ -149,6 +160,7 @@ public:
 St_ValiSet::St_ValiSet(const char *name,TDataSet *parent): TDataSet(name,parent)
 {
   SetTitle(".Val");
+  fFla = "ofl";
   fTimeMin.Set(kMaxTime,0);
   fTimeMax.Set(kMinTime,0);
   fDat =0;
@@ -195,11 +207,19 @@ St_db_Maker::St_db_Maker(const char *name
 St_db_Maker::~St_db_Maker(){
 }
 //_____________________________________________________________________________
+Int_t St_db_Maker::InitRun(int runumber)
+{
+  if (!fDBBroker) return 0;
+  fDBBroker->SetRunNumber((UInt_t) runumber);
+  return 0;
+}
+//_____________________________________________________________________________
 Int_t St_db_Maker::Init()
 {
    TDataSet *fileset;
    TString dir;
 
+   SetBit(kInitBeg);
    fDataBase=0;
    for (int idir=0; !fDirs[idir].IsNull(); idir++) {//loop over dirs
 
@@ -232,6 +252,8 @@ Int_t St_db_Maker::Init()
      if (Debug()>1) fDataBase->ls("*");
    }
    OnOff();
+   SetFlavor(0,0);	// Apply all collected before flavors
+   ResetBit(kInitBeg); SetBit(kInitEnd);
    return 0;
 }
 //_____________________________________________________________________________
@@ -351,24 +373,6 @@ TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
      Error("OpenMySQL","WRONG parent %s/%s\n",ihy->parname,ihy->tabname);
    }/*end i for*/
 
-   TDataSet *wild = GetData(".all",".flavor");
-   TDataSet *flav,*flv;
-   for (irow=0,ihy=thy; irow <nrows ; irow++,ihy++)
-   {  
-     if (GetDebug()>1) 
-       printf("%4d - parID/TabId=%d/%d \t%s/%s \n"
-             ,irow,ihy->parID,ihy->tabID,ihy->parname,ihy->tabname);
-     if (strcmp(".node",ihy->tabtype)==0)	continue;
-     if (ihy->parID == 0)			continue;
-     if (ihy->tabID == 0)			continue;
-     flav = wild;
-     flv = GetData(ihy->tabname,".flavor");
-     if (flv) flav = flv;
-     if (!flav)					continue;
-     printf("<St_db_Maker::OpenMySQL> set flavor %s to %s\n"
-           ,flav->GetTitle(),flav->GetName());
-     fDBBroker->SetTableFlavor(flav->GetTitle(),ihy->tabID, ihy->parID);
-   }
 
    delete [] dss;
 //   top->ls(99);
@@ -380,11 +384,7 @@ TDataSet *St_db_Maker::OpenMySQL(const char *dbname)
 TDataSet *St_db_Maker::UpdateDB(TDataSet* ds)
 { 
   if(!ds) return 0;
-#ifdef __CC5__
   ds->Pass(&UpdateDB,this);
-#else
-  ds->Pass(UpdateDB,this);
-#endif
   return ds;
 }
 //_____________________________________________________________________________
@@ -394,18 +394,7 @@ int St_db_Maker::UpdateTable(UInt_t parId, TTable* dat, TDatime val[2] )
   assert(fDBBroker);assert(dat);
   fDBBroker->SetDateTime(GetDateTime().GetDate(),GetDateTime().GetTime());
   TTableDescriptor *rowTL = ((TTable*)dat)->GetRowDescriptors();
-#if 0
-  int nElements = rowTL->GetNRows();
-
-  tableDescriptor_st *elem= rowTL->GetTable();
-
-  assert(sizeof(StDbBroker::Descriptor)==sizeof(tableDescriptor_st));
-
-  StDbBroker::Descriptor *descriptor = (StDbBroker::Descriptor *)elem;
-  fDBBroker->SetDictionary(nElements,descriptor);
-#else
   fDBBroker->SetDictionary(rowTL);
-#endif
   fDBBroker->SetTableName (dat->GetName());
   fDBBroker->SetStructName(dat->GetTitle());
   fDBBroker->SetStructSize(dat->GetRowSize());
@@ -642,6 +631,31 @@ EDataSetPass St_db_Maker::PrepareDB(TDataSet* ds, void *user)
   }
   return kContinue;
 }
+//______________________________________________________________________________
+TDataSet *St_db_Maker::GetDataBase(const char* logInput)
+{
+  TString ts;
+  TDataSet *ds;
+  int idir = 1;
+  ds = GetDataSet(logInput);
+  if (!ds || strncmp(ds->GetTitle(),"directory",9)!=0) 
+  {		// We did not find it or it is not a directory.
+   		// May be concrete object name is here
+     idir = 0;
+     int lst=-1; 
+     for (int i=0;logInput[i];i++) if (logInput[i]=='/') lst=i;
+     if (lst<0) 		return 0;
+//		path/obj  ==> path/.obj
+     ts = logInput;
+     ts.Insert(lst+1,".");
+     ds =  GetDataSet(ts.Data());
+     if (!ds) 		return 0;
+  }
+
+  UpdateDB(ds);
+  if (idir) return ds;
+  return GetDataSet(logInput);
+}
 //_____________________________________________________________________________
 TDatime St_db_Maker::GetDateTime() const
 { 
@@ -704,9 +718,61 @@ Int_t  St_db_Maker::Save(const char *path)
 //_____________________________________________________________________________
 void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
 {
-   TDataSet *fl = new TDataSet(tabname);
-   fl->SetTitle(flav);
-   AddData(fl,".flavor");
+   TDataSet *fl;
+   if (flav) {
+     fl = new TDataSet(tabname);
+     fl->SetTitle(flav);
+     AddData(fl,".flavor");
+   }
+   if (!TestBit(kInitBeg|kInitEnd)) 	return;
+
+   TDataSet *flaDir = Find(".flavor");
+   if (!flaDir)				return;
+   St_ValiSet *val;
+   TDataSetIter  valNext(m_DataSet,999);
+   while ((val = (St_ValiSet*)valNext())) {	//DB objects loop
+     const char *tabName = val->GetName();
+     if (tabName[0] != '.')			continue;
+     if (strcmp(val->GetTitle(),".Val")!=0)	continue;
+     tabName++;
+     if (val->fDat==0)				continue;
+     if (val->fDat->GetUniqueID() >= kUNIXOBJ) 	continue;
+
+     TDataSetIter  flaNext(flaDir);
+     while((fl = flaNext())) {			// Flavor loop
+       const char *flaName = fl->GetName();
+       if (strcmp(flaName,".all" )!=0 
+       &&  strcmp(flaName,tabName)!=0) 		continue;
+       const char *flaType = fl->GetTitle();
+       if (val->fFla == flaType)		continue;
+
+       TDataSet *par = val->GetParent();
+       val->fFla = flaType;
+       val->fTimeMin.Set(kMaxTime,0);
+       val->fTimeMax.Set(kMinTime,0);
+       int tabID = (int)val->fDat->GetUniqueID();
+       int parID = (int)par->GetUniqueID();
+          
+       fDBBroker->SetTableFlavor(flaType,tabID, parID);
+       fl->SetUniqueID(fl->GetUniqueID()+1);
+
+       if (strcmp("ofl",flaType)!=0) 
+         printf("<St_db_Maker::SetFlavor> Set flavor %s to %s\n",flaType,tabName);
+
+     }// End Flavor loop
+
+   }//End DB objects loop
+
+   TDataSetIter  flaNext(flaDir);
+   while((fl = flaNext())) {			// 2nd Flavor loop
+     if (fl->GetUniqueID()) continue;
+     Warning("SetFlavor","Flavor %s for table %s was NOT USED",
+              fl->GetTitle(),fl->GetName());
+   }
+
+   delete flaDir;
+
+
 }
 //_____________________________________________________________________________
 Int_t  St_db_Maker::GetValidity(const TTable *tb, TDatime *val) const

@@ -1,9 +1,12 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 2.2 2001/08/22 16:42:07 lasiuk Exp $
+ * $Id: StRrsMaker.cxx,v 2.3 2001/11/16 19:40:46 jeromel Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
+ * Revision 2.3  2001/11/16 19:40:46  jeromel
+ * Another one ...
+ *
  * Revision 2.2  2001/08/22 16:42:07  lasiuk
  * flags turned off for production
  *
@@ -254,7 +257,7 @@ Int_t StRrsMaker::Init()
 	new StRichPadPlane(mGeometryDb->numberOfRowsInAColumn(),
 			   mGeometryDb->numberOfPadsInARow());
 
-    AddConst(new St_ObjectSet("richPixels", mPadPlane));
+    AddConst(new St_ObjectSet("richPixels", mPadPlane, 0));
 
     // Data Writer is here
     mWriter = StRichWriter::getInstance(mPadPlane);

@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.118 2001/08/14 16:42:48 perev Exp $
+// $Id: StMaker.cxx,v 1.119 2001/10/13 20:23:45 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -12,6 +12,7 @@
 #include <TSystem.h>
 #include <TClass.h>
 #include <TROOT.h>
+#include <TError.h>
 #include <THtml.h>
 #include <TH1.h>
 
@@ -38,8 +39,9 @@ ClassImp(StMaker)
 static void doPs(const char *who,const char *where);
 
 //_____________________________________________________________________________
-StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker"),fActive(kTRUE)
+StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker")
 {
+   SetActive();
    SetMode();
    m_DebugLevel=0;
    m_MakeReturn=0;
@@ -341,15 +343,25 @@ FOUND: if (uppMk || dowMk) 	return dataset;
 TDataSet *StMaker::GetDataBase(const char* logInput)
 {
   TDataSet *ds;
+  StMaker  *mk;
+  StMakerIter mkiter(this);
+  while ((mk = mkiter.NextMaker())) {//loop over makers
+    if (!mk->InheritsFrom("St_db_Maker")) 	continue;
+    ds = mk->GetDataBase(logInput);
+    if (ds) 					return ds;
+  }
+  return 0;
+}
+//______________________________________________________________________________
+void StMaker::SetFlavor(const char *flav,const char *tabname)
+{
   StMaker *mk;
   StMakerIter mkiter(this);
   while ((mk = mkiter.NextMaker())) {//loop over makers
     if (!mk->InheritsFrom("St_db_Maker")) 	continue;
-    ds = mk->GetInputDS(logInput);
-    if (!ds) 					continue;
-    return mk->UpdateDB(ds);
+    mk->SetFlavor(flav,tabname);
+    return;
   }
-  return 0;
 }
 //______________________________________________________________________________
 Int_t   StMaker::GetValidity(const TTable *tb, TDatime *val) const
@@ -370,11 +382,14 @@ void StMaker::Clear(Option_t *option)
    TIter next(GetMakeList(),kIterBackward);
    StMaker *maker;
    while ((maker = (StMaker*)next())) {
+      Assert(maker->TestBit(kCleaBeg)==0);
+      maker->SetBit(kCleaBeg);
       maker->StartTimer();
       if (maker->fMemStatClear) maker->fMemStatClear->Start();
       maker->Clear(option);
       if (maker->fMemStatClear) maker->fMemStatClear->Stop();
       maker->StopTimer();
+      maker->ResetBit(kCleaBeg);
    }
    return;
 
@@ -391,12 +406,14 @@ Int_t StMaker::Init()
 
    while ((maker = (StMaker*)nextMaker())) {
 
-     // save last created histogram in current Root directory
+// 		save last created histogram in current Root directory
       gROOT->cd();
       objLast = gDirectory->GetList()->Last();
 
 // 		Initialise maker
 
+      Assert(maker->TestBit(kInitBeg|kInitEnd)==0);
+      maker->SetBit(kInitBeg);
       maker->StartTimer();
       if (GetDebug()) printf("\n*** Call %s::Init() ***\n\n",maker->ClassName());
       TString ts1(maker->ClassName()); ts1+="("; ts1+=maker->GetName(); ts1+=")::";
@@ -427,7 +444,9 @@ Int_t StMaker::Init()
         ((TH1*)objHist)->SetDirectory(0);
         maker->AddHist((TH1*)objHist);
       }
-    ::doPs(maker->GetName(),"Init");
+      ::doPs(maker->GetName(),"Init");
+      maker->ResetBit(kInitBeg);
+      maker->SetBit  (kInitEnd);
     }
   return kStOK; 
 }
@@ -468,10 +487,18 @@ Int_t StMaker::Finish()
    Double_t totalRealTime = 0;   
    while ((maker = (StMaker*)next())) 
    {
+      Assert(maker->TestBit(kFiniBeg)==0);
+      if (maker->TestBit(kFiniEnd)) 
+         Warning("Finish","maker %s.%s Finished twice"
+                 ,maker->GetName(),maker->ClassName());
+      maker->SetBit(kFiniBeg);
       if ( maker->Finish() ) nerr++;
       maker->PrintTimer();
       totalCpuTime  += maker->CpuTime();
       totalRealTime += maker->RealTime();
+      maker->ResetBit(kFiniBeg);
+      maker->SetBit  (kFiniEnd);
+      
    }
 
    // Print relative time
@@ -506,7 +533,7 @@ Int_t StMaker::Finish()
 Int_t StMaker::Make()
 {
 //   Loop on all makers
-   Int_t ret,Ret=kStOK,run=-1,oldrun;
+   Int_t ret,run=-1,oldrun;
    TList *tl = GetMakeList();
    if (!tl) return kStOK;
    StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");   
@@ -515,6 +542,8 @@ Int_t StMaker::Make()
    fgFailedMaker = 0;
    while ((maker = (StMaker*)nextMaker())) {
      if (!maker->IsActive()) continue;
+     Assert(maker->TestBit(kMakeBeg)==0);
+     maker->SetBit(kMakeBeg);
      oldrun = maker->m_LastRun;
      if (hd && hd->GetRunNumber()!=oldrun) {
        if (oldrun>-1) maker->FinishRun(oldrun);
@@ -531,6 +560,7 @@ Int_t StMaker::Make()
      
      if (Debug() || ret) printf("*** %s::Make() == %d ***\n",maker->ClassName(),ret);
 
+     maker->ResetBit(kMakeBeg);
      if (ret>kStWarn) { 
        fgFailedMaker = maker;
        return ret;}
@@ -1057,6 +1087,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.119  2001/10/13 20:23:45  perev
+// SetFlavor  working before and after Init()
+//
 // Revision 1.118  2001/08/14 16:42:48  perev
 // InitRun call improved
 //

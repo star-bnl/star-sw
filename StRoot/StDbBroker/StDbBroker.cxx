@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.28 2001/09/13 16:54:54 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.33 2001/10/30 21:59:32 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,21 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.33  2001/10/30 21:59:32  porter
+ * same timestamp fix for runlevel query... but works..
+ *
+ * Revision 1.32  2001/10/30 20:43:29  porter
+ * timestamp set for failure on query by runNumber
+ *
+ * Revision 1.31  2001/10/26 21:40:03  porter
+ * added protection for query by runNumber until Victor can implement his side
+ *
+ * Revision 1.30  2001/10/26 15:44:02  porter
+ * add query by runNumber
+ *
+ * Revision 1.29  2001/10/24 04:05:56  porter
+ * added zombie designation per Victor's suggestion
+ *
  * Revision 1.28  2001/09/13 16:54:54  porter
  * propogate falvor by table through the brokery
  *
@@ -166,6 +181,7 @@ char **StDbBroker::GetComments(St_Table *parentTable)
 //_____________________________________________________________________________
 StDbBroker::StDbBroker(): m_structName(0), m_tableName(0), m_requestTimeStamp(0), m_tableVersion(0), m_database(0), m_ParentType(0), m_isVerbose(0), m_Nodes(0), m_Tree(0), m_flavor(0), m_prodTime(0) {
 
+  m_runNumber=0;
   mgr=StDbManager::Instance();
   StDbMessService* ms=new StDbWrappedMessenger();
   mgr->setMessenger(ms);
@@ -399,6 +415,7 @@ void * StDbBroker::Use(int tabID, int parID)
   SetEndDate(20380101);
   SetEndTimeStamp(2145916799);
   SetEndTime(0);
+  SetZombie(false);
 
   StDbNode* anode = m_Nodes->getNode(tabID);
   StDbTable* node=dynamic_cast<StDbTable*>(anode);
@@ -406,10 +423,23 @@ void * StDbBroker::Use(int tabID, int parID)
   if(!node) return pData;
   if(!node->hasDescriptor())node->setDescriptor(GetTableDescriptor());
 
-  if(mgr->fetchDbTable(node)){
+  // I would do this in a separate function but this would require
+  // redoing it all with
+
+  bool fetchStatus;
+  if(node->getDbType()==dbRunLog && 
+     node->getDbDomain() != dbStar && 
+     m_runNumber !=0 ){
+     fetchStatus=UseRunLog(node);   
+  } else {
+    fetchStatus=mgr->fetchDbTable(node);
+  }
+
+  if(fetchStatus){ 
 
     m_nRows= node->GetNRows();
     pData  = node->GetTableCpy(); // gives the "malloc'd version"
+
 
     // reformat timestamp for StRoot
     char* thisTime;
@@ -434,8 +464,23 @@ void * StDbBroker::Use(int tabID, int parID)
     m_EndDate = (UInt_t)atoi(tmp1);
     m_EndTime = (UInt_t)atoi(tmp2);
     delete [] tmp1; tmp2-=8; delete [] tmp2;
-   }
+  } else {
+    SetZombie(true);
+  }
+
+
 return pData;
+}
+
+//_____________________________________________________________________________
+bool StDbBroker::UseRunLog(StDbTable* table){
+
+    ostrstream rq;
+    rq<<" where runNumber="<<m_runNumber<<ends;
+    bool fetchStatus=mgr->fetchDbTable(table,rq.str());
+    rq.freeze(0);
+
+return fetchStatus;
 }
 
 //_____________________________________________________________________________

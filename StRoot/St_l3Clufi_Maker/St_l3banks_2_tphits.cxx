@@ -7,8 +7,8 @@
 #include "St_l3banks_2_tphits.h"
 #include "tables/St_tcl_tphit_Table.h"
 #include "tables/St_hitarray_Table.h"
-#include "Stl3Util/base/St_l3_Coordinate_Transformer.h"
-#include "Stl3Util/base/St_l3_Coordinates.h"
+#include "St_l3_Coordinate_Transformer.h"
+#include "St_l3_Coordinates.h"
 #include "TStopwatch.h"
 
 ClassImp(St_l3banks_2_tphits);
@@ -30,8 +30,6 @@ Int_t St_l3banks_2_tphits::Filltclpoints()
 {
   // Prepare transformation
   St_l3_Coordinate_Transformer transformer;
-  transformer.LoadTPCLookupTable("map.bin");
-
   St_l3_xyz_Coordinate XYZ(0,0,0) ;
   St_l3_ptrs_Coordinate PTRS(0,0,0,0) ;
 
