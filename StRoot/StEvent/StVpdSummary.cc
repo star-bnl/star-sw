@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVpdSummary.cc,v 1.3 1999/03/17 22:22:51 ullrich Exp $
+ * $Id: StVpdSummary.cc,v 1.4 1999/03/19 21:30:51 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StVpdSummary.cc,v $
+ * Revision 1.4  1999/03/19 21:30:51  fisyak
+ * Fix typo
+ *
  * Revision 1.3  1999/03/17 22:22:51  ullrich
  * Some cosmetics
  *
@@ -19,7 +22,7 @@
  **************************************************************************/
 #include "StEvent/StVpdSummary.hh"
 
-static const char rcsid[] = "$Id: StVpdSummary.cc,v 1.3 1999/03/17 22:22:51 ullrich Exp $";
+static const char rcsid[] = "$Id: StVpdSummary.cc,v 1.4 1999/03/19 21:30:51 fisyak Exp $";
 
 StVpdSummary::StVpdSummary()
 {
@@ -30,9 +33,9 @@ StVpdSummary::StVpdSummary()
 
 StVpdSummary::StVpdSummary(float te, float tw, float z)
 {
-    mMinimumTimeEast = ae;  
-    mMinimumTimeWest = aw;  
-    mVertexZ = s;          
+    mMinimumTimeEast = te;  
+    mMinimumTimeWest = tw;  
+    mVertexZ = z;          
 }
 
 StVpdSummary::~StVpdSummary() { /* noop */ }
