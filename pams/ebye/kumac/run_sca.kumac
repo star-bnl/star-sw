@@ -9,7 +9,8 @@
 * 09/01/1998  DSW            -- fixed DSL directory aliases.
 * 09/11/1998  DSW            -- added call to sca_makeprior & sca_makeref
 *                               in run_sca#close macro.
-
+* 09/15/98 - LDC added analysis_switch options for xdf file output
+*
 *********************************************************
  MACRO filter
    macro/global/import *
@@ -66,6 +67,10 @@ MACRO close calib_dir=$STAR_CALIB _
     exec write_table_to_file#init  SCAENSEMBLE2  sca_ensemble_dir.xdf
     exec write_table_to_file#write SCAENSEMBLE2  [calib]/ebye/sca_ensemble_dir
     exec write_table_to_file#close SCAENSEMBLE2 
+  endif
+
+  if [analysis_switch]=1 then
+    exec write_table_to_file#close SCAANALYSIS  
   endif
 
 RETURN

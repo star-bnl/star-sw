@@ -19,6 +19,7 @@
 *                            these lines to use standard STAR DST tables.
 * 09/01/1998 - DSW        -- Brought into STAR kumac framework.
 * 09/11/1998 - DSW        -- Updated to normalize prior and  ensemble average.
+* 09/14/1998 - LDC  Added output xdf file in event loop and as argument
 *
 ************************************************************************
 ************************************************************************
@@ -28,11 +29,12 @@
           domain='geometry tpc svt global ebye' _
           input_data_prefix=/scr20/dhammika/data/ _
           input_data_file=standardDST1.xdf _
+          output_file=sca_out.xdf _
           num_events=1 _
-	  calib_dir=./. _
-	  prior_switch=1 _
-	  ensemble_switch=0 _
-	  analysis_switch=0 _
+          calib_dir=$STAR_CALIB/ebye_
+          prior_switch=0 _
+          ensemble_switch=0 _
+          analysis_switch=1 _
           funit=21 _
           nfile=ebye.ntup _
           nid=111 _
@@ -60,6 +62,7 @@
   message ' *** domains to load  -->                   ' [domain]
   message ' *** Data Sample directory -->              ' [input_data_dir]
   message ' *** Input data file -->                    ' [input_data_file]
+  message ' *** Output data file -->	        ' [output_file]
   message ' *** Num Events to process -->              ' [num_events]
   message ' *** Calibration Directory -->              ' [calib_dir]
   message ' *** Prior Switch -->                       ' [prior_switch]
@@ -105,10 +108,7 @@
   exec create_tables_ebye#sca_prior
   exec create_tables_ebye#sca_ensemble_ave
 
-  exec init_sca#init [calib_dir] _
-                     [prior_switch] _
-                     [ensemble_switch] _ 
-                     [analysis_switch]
+  exec init_sca#init [calib_dir] [output_file] [prior_switch] [ensemble_switch]  [analysis_switch]
   
 
 ***************************************************************
@@ -139,6 +139,10 @@
    nevebyetot=[nevebyetot]+1
 * write table to ntuple
     *exec write_table_to_ntuple#write_event_disk [nid] [data]/[table]
+* write event to file
+    if [analysis_switch]=1 then
+        exec write_table_to_file#write SCAANALYSIS [data]/ebye/
+    endif
   enddo
 * -------------------- end stuff -----------------------------*
   
@@ -152,10 +156,7 @@
   tdm/table/cell/putvalue 'sca_switch[0].nEvents'  [nevebyetot]
   cd /dui    
 * write out sca reference information if switches set accordingly
-  exec run_sca#close [calib_dir] _
-                     [prior_switch] _
-                     [ensemble_switch] _
-                     [analysis_switch]
+  exec run_sca#close [calib_dir] [prior_switch] [ensemble_switch] [analysis_switch]
 
 * close ntuple
   message ' close ntuple'
