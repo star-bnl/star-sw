@@ -1,5 +1,9 @@
-// $Id: StLaserEventMaker.h,v 1.12 2001/12/23 20:08:04 pfachini Exp $
+// $Id: StLaserEventMaker.h,v 1.13 2002/01/03 22:41:14 jeromel Exp $
 // $Log: StLaserEventMaker.h,v $
+// Revision 1.13  2002/01/03 22:41:14  jeromel
+// Forgot to change the calibration file name. Also added doxygen-like comments
+// and documentation. Trimmed traling spaces + ident in some places.
+//
 // Revision 1.12  2001/12/23 20:08:04  pfachini
 // *** empty log message ***
 //
@@ -37,11 +41,7 @@
 #ifndef STAR_StLaserEventMaker
 #define STAR_StLaserEventMaker
 
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// StLaserEventMaker virtual base class for Maker                       //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
+
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
@@ -54,7 +54,7 @@ class St_tpcDriftVelocity;
 class TTree;
 class StLaserEvent;
 
-enum { maxNofTracks = 8000}; 
+enum { maxNofTracks = 8000};
 
 class StLaserEventMaker : public StMaker {
 private:
@@ -80,7 +80,7 @@ private:
   Bool_t m_lasers;       // control flag so DOCA knows how many track sources.
   St_tpg_pad_plane      *m_tpg_pad_plane;  //! Constants that describe TPC
                                           //! pad plane geometry
-  St_tcl_tpc_index_type *m_type;   	  //! Table of many-to-many index 
+  St_tcl_tpc_index_type *m_type;   	  //! Table of many-to-many index
 	                                  //! correlations for tpc evaluations
   St_tpt_pars           *m_tpt_pars;  	  //! Parameters for the track finding
   StMagUtilities            *m_mag;                 //!JT's ExB code
@@ -90,8 +90,8 @@ private:
   void         MakeHistograms();// Histograms for tracking
 protected:
  TTree                *m_laser; //! Laser track-hit event Tree
- StLaserEvent              *event;  //! Laser Event object 
-public: 
+ StLaserEvent              *event;  //! Laser Event object
+public:
   StLaserEventMaker(const char *name="tpc_stracks");
   virtual       ~StLaserEventMaker();
 
@@ -100,13 +100,13 @@ public:
   virtual void   Clear(Option_t *option="");
   virtual void  DOCA(Float_t r0,Float_t phi0,Float_t z0,
                       Float_t psi, Float_t tanl, Float_t curvature, Int_t q,
-                      Int_t *sector, Float_t *xl, Float_t *yl, Float_t *zl); 
+                      Int_t *sector, Float_t *xl, Float_t *yl, Float_t *zl);
   virtual void  POCA(Float_t r0,Float_t phi0,Float_t z0,
                       Float_t psi, Float_t tanl, Float_t curvature, Int_t q,
-                      Float_t *xl, Float_t *yl, Float_t *zl, Float_t *phi); 
-  virtual void   SetRun(Int_t run) {m_runno = run;} 
-  virtual void   SetDate(Int_t date) {m_date = date;} 
-  virtual void   SetTime(Int_t time) {m_time = time;} 
+                      Float_t *xl, Float_t *yl, Float_t *zl, Float_t *phi);
+  virtual void   SetRun(Int_t run) {m_runno = run;}
+  virtual void   SetDate(Int_t date) {m_date = date;}
+  virtual void   SetTime(Int_t time) {m_time = time;}
   virtual void   SetRows(Int_t min, Int_t max) {m_rowmin=min; m_rowmax=max;}
   virtual void   Set_laser(Bool_t m=kTRUE){m_mklaser = m;}
   virtual void   Set_lasers(Bool_t m=kTRUE){m_lasers = m;}
@@ -128,7 +128,7 @@ public:
   double driftVelocityReco;
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.12 2001/12/23 20:08:04 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.13 2002/01/03 22:41:14 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 ClassDef(StLaserEventMaker, 1)   //StAF chain virtual base class for Makers
 };
