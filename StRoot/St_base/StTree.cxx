@@ -826,8 +826,12 @@ Int_t StFile::AddFile(const char *file,const char *opt)
   if (!dsfam) fDS->Add((dsfam = new TObjectSet(famy,0)));
 
   TDataSet *twice = dsfam->Find(base);
+  tit = tfile; tit.Replace(0,0," file=");
   if (twice) {
-    if (!remove) {Warning("AddFile","File %s added twice \n",(const char *)tfile);
+    if (!remove) {
+       // compare the full path
+       if (tit == twice->GetTitle() )
+          Warning("AddFile","File %s added twice \n",(const char *)tfile);
     } else       { delete twice; return 0;}
   }
   //  TDataSet *dss = dsfam->First();
@@ -835,7 +839,6 @@ Int_t StFile::AddFile(const char *file,const char *opt)
   //  Warning("AddFile","Files %s and %s are from the same family \n",
   //  (const char *)tfile,dss->GetName());
 
-  tit = tfile; tit.Replace(0,0," file=");
 
   TDataSet *ds = new TDataSet(base,dsfam);
   ds->SetTitle(tit);
