@@ -40,11 +40,7 @@ Replace[LIST #;] with [ #1 _
 *
   END
  
-  function JATTF(jj)
-  Integer JATTF
-+CDE,GCBANK.
-  JATTF = Jj+int(Q(Jj+5))+6
-  end
+
 
  
 
