@@ -1,4 +1,4 @@
-// $Id: St_l3t_Maker.cxx,v 1.39 2001/06/12 12:09:03 flierl Exp $
+// $Id: St_l3t_Maker.cxx,v 1.40 2001/07/18 23:26:57 struck Exp $
 //
 // Revision 1.22  2000/03/28 20:22:15  fine
 // Adjusted to ROOT 2.24
@@ -91,6 +91,9 @@
 #include "tables/St_hitarray_Table.h"
 #include "St_l3_Coordinate_Transformer.h"
 #include "StEventTypes.h"
+
+#define gufld   gufld_
+extern "C" {void gufld(Float_t *, Float_t *);}
 
 ClassImp(St_l3t_Maker)
   
@@ -606,8 +609,12 @@ Int_t St_l3t_Maker::fillStEvent(St_dst_track* trackS, St_dst_dedx* dedxS, St_tcl
 	return 0 ;
       }
     StGlobalTrack* Store_Track_ids[MaxNTracks] ;
-    
 
+    // get magnetic field
+    Float_t xval[3] = {0.,0.,0.};
+    Float_t bval[3];
+    gufld(xval,bval);
+    
     // Loop over dst tracks and fill them into StEvent
     dst_track_st* dstTracks = trackS->GetTable();
     for(Int_t trackindex = 0 ; trackindex<trackS->GetNRows() ;  trackindex++)
@@ -631,13 +638,22 @@ Int_t St_l3t_Maker::fillStEvent(St_dst_track* trackS, St_dst_dedx* dedxS, St_tcl
 	StThreeVectorF momentum( Pt * cos(convert*dstTracks[trackindex].psi),
 				 Pt * sin(convert*dstTracks[trackindex].psi),
 				 Pt * dstTracks[trackindex].tanl ) ;
+
+	// CS HACK: l3 tracking assumes pos. Bz
+	// ==>> correct charge
+	short q = bval[2] > 0 ? dstTracks[trackindex].icharge : -1 * dstTracks[trackindex].icharge;
+
+	// calculate helicity:
+	short h = ((bval[2] * q) > 0 ? -1 : 1);
+
 	StHelixModel* helixModel = new StHelixModel( 
-						    dstTracks[trackindex].icharge,
+						    q,
 						    dstTracks[trackindex].psi,
 						    0.0,
-						    dstTracks[trackindex].tanl, 
+						    atan(dstTracks[trackindex].tanl), 
 						    origin, 
-						    momentum ) ;		
+						    momentum,
+						    h) ;
 	// global track
 	StGlobalTrack* globalTrack = new StGlobalTrack(dstTracks[trackindex]) ;
 	globalTrack->setDetectorInfo(info) ;
