@@ -109,7 +109,10 @@ private:
     //Counter:
     unsigned int mHitCounter;
     TClonesArray* mArray;
-    
+
+    //flag
+    unsigned int stiTrackFlag;
+
     //temp kinematic info : MC
     unsigned int mcNTimesFound; //Number of times found by ITTF
     unsigned int bestMatch; //1=yes, 0=no
