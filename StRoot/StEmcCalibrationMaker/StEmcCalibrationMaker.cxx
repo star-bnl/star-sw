@@ -32,16 +32,6 @@ TRandom*             ran=new TRandom();
 StEmcGeom*           Geo;
 StEmcCollection*     emc;
 StEvent*             event;
-/*Float_t              miptemp,equaltemp;
-Float_t              evnumber;
-Float_t              avg,sigma;
-Int_t                firstEventTime,lastEventTime,firstEventRun,lastEventRun;
-Int_t                firstEventDate,lastEventDate;*/
-//emcCalSummary_st*    Summary_st;
-//emcCalSettings_st*   Settings_st;
-//emcCalibration_st*   Calib_st;
-//emcEqualization_st*  Equal_st;
-//emcMipCalib_st*      Mip_st;
 
 //_____________________________________________________________________________
 StEmcCalibrationMaker::StEmcCalibrationMaker(const char *name):StMaker(name)
@@ -86,7 +76,7 @@ StEmcCalibrationMaker::StEmcCalibrationMaker(const char *name):StMaker(name)
   Settings_st[0].UseMipEtaBin=1;
   Settings_st[0].EOverMipCte=0.290;  // e/MIP for geant
   Settings_st[0].MipPeakFitFuntion=0;
-  Settings_st[0].MipEventsPerBin=1200; //600
+  Settings_st[0].MipEventsPerBin=950; //600
   Settings_st[0].MipMaxNumberOfTracks=1000;
   Settings_st[0].MipMinOccupancy=0.99;
   Settings_st[0].MipMinimumMomentum=1.5;
@@ -344,7 +334,7 @@ Int_t StEmcCalibrationMaker::Make()
     SaveTables();
     gMessMgr->Info("StEmcCalibrationMaker::Make() - starting again");
     Init();
-//    return kStERR;
+    //return kStERR;
   }
     
   clock.Stop();
@@ -939,13 +929,10 @@ Bool_t StEmcCalibrationMaker::MakeCalibration()
       // calculate E/MIP for this tower...
       y[0]=0; ey[0]=0;
       y[1]=Settings_st[0].EOverMipCte; ey[1]=0;
-      if(Settings_st[0].DataType==1)
-      {         
-        Float_t eta=0,phi=0;
-        Geo->getEtaPhi(bin,eta,phi);
-        Float_t theta=2.*atan(exp(-eta));
-        y[1]*=(1.+0.056)/sin(theta); // from V.Rykov
-      }
+      Float_t eta=0,phi=0;
+      Geo->getEtaPhi(bin,eta,phi);
+      Float_t theta=2.*atan(exp(-eta));
+      y[1]*=(1.+0.056)/sin(theta); // from V.Rykov
     }
     
     // Pi0
@@ -1182,11 +1169,11 @@ void StEmcCalibrationMaker::SetCalibStatus()
 {
   emcCalibration_st* Calib_st=CalibTable->GetTable();  
 
-  for(Int_t i=1;i<=nbins;i++) 
-    if (i>=1861 && i<=2340) Calib_st[i-1].Status=1; // initial 2001 configuration
-    else Calib_st[i-1].Status=0;
+  //for(Int_t i=1;i<=nbins;i++) 
+  //  if (i>=1861 && i<=2340) Calib_st[i-1].Status=1; // initial 2001 configuration
+  //  else Calib_st[i-1].Status=0;
     
-  //for(Int_t i=1;i<=nbins;i++) Calib_st[i-1].Status=1; // FULL EMC
+  for(Int_t i=1;i<=nbins;i++) Calib_st[i-1].Status=1; // FULL EMC
 }
 //_____________________________________________________________________________
 void StEmcCalibrationMaker::ClearEqualTable()
