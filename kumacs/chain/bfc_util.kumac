@@ -168,6 +168,8 @@
 *                    - create "ntup2" chain so can write a 2nd ntuple to
 *                      the ntuple file
 * 
+* 11/6/98 K.Turner - implement  tfc_r chain for Iwona & Li Qun
+* 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -249,8 +251,8 @@ macro bfc_init _
            if ($vexist(readprob).ne.0) then 
             message ' BFC_UTIL,init: ERROR - cannot read input file - quit '
             goto EOF
-	  endif
-    (dstin) 
+	  endif  
+   (dstin) 
 	  exec read_table_from_file#init ind [input_file]
 	  if ($vexist(readprob).ne.0) then 
             message ' BFC_UTIL,init: ERROR - cannot open dstin file - quit '
@@ -311,7 +313,9 @@ macro bfc_init _
 	 exec create_tables_tpc#tss [tpc_sector_first] [tpc_sector_last]
          exec tss_init#init [tpc_sector_first] [tpc_sector_last]
       (tfc) 
-	 exec create_tables_tpc#tfc
+        exec create_tables_tpc#tfc
+      (tfc_r)
+         exec tfc_init#init
       (tcl)
          exec create_tables_tpc#tcl_slow
 	 exec tcl_init#init
@@ -614,6 +618,7 @@ return
 		 goto NEXT_EVENT
                endif
       (tfc)    exec tfc_run#run_newtab [tpc_sector_first] [tpc_sector_last]
+      (tfc_r)  exec tfc_run#run_reformat_newtab
       (tcl)    
 	       exec tcl_run#run_tcl [tpc_sector_first] [tpc_sector_last] 
                exec tcl_run#run_tph [tpc_sector_first] [tpc_sector_last]
