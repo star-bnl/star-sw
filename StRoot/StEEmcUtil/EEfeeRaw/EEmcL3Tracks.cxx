@@ -1,5 +1,8 @@
-// $Id: EEmcL3Tracks.cxx,v 1.9 2003/09/05 15:04:21 zolnie Exp $ 
+// $Id: EEmcL3Tracks.cxx,v 1.10 2003/09/11 19:41:02 zolnie Exp $ 
 // $Log: EEmcL3Tracks.cxx,v $
+// Revision 1.10  2003/09/11 19:41:02  zolnie
+// updates for gcc3.2
+//
 // Revision 1.9  2003/09/05 15:04:21  zolnie
 // remove Stiostream/iostream from the source code
 //
@@ -27,7 +30,7 @@
 //
 
 //#include <Stiostream.h>
-#include <math.h>
+#include <cmath>
 #include "EEmcL3Tracks.h"
 
 ClassImp(EEmcHelix)

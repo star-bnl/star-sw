@@ -1,9 +1,12 @@
 #ifndef EEmcEventHeader_h
 #define EEmcEventHeader_h
 /*********************************************************************
- * $Id: EEmcEventHeader.h,v 1.4 2003/06/16 16:03:54 zolnie Exp $
+ * $Id: EEmcEventHeader.h,v 1.5 2003/09/11 19:41:01 zolnie Exp $
  *********************************************************************
  * $Log: EEmcEventHeader.h,v $
+ * Revision 1.5  2003/09/11 19:41:01  zolnie
+ * updates for gcc3.2
+ *
  * Revision 1.4  2003/06/16 16:03:54  zolnie
  * updated root version number
  *
@@ -17,8 +20,8 @@
  * new additions for ..... :)
  *
  *********************************************************************/
-#include <stdio.h>
-#include <time.h>
+#include <cstdio>
+#include <ctime>
 #include "TObject.h"
 
 

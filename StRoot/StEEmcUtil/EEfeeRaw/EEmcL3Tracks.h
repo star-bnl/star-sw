@@ -2,9 +2,12 @@
 #ifndef EEmcL3Tracks_h
 #define EEmcL3Tracks_h
 /*********************************************************************
- * $Id: EEmcL3Tracks.h,v 1.10 2003/09/02 17:57:55 perev Exp $
+ * $Id: EEmcL3Tracks.h,v 1.11 2003/09/11 19:41:02 zolnie Exp $
  *********************************************************************
  * $Log: EEmcL3Tracks.h,v $
+ * Revision 1.11  2003/09/11 19:41:02  zolnie
+ * updates for gcc3.2
+ *
  * Revision 1.10  2003/09/02 17:57:55  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -34,8 +37,8 @@
  * new additions for ..... :)
  *
  *********************************************************************/
-#include <math.h>
-#include <time.h>
+#include <cmath>
+#include <ctime>
 
 #ifndef MAXFLOAT
 #define MAXFLOAT 3E38

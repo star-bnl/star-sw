@@ -1,9 +1,12 @@
 #ifndef EEfeeRunDescr_h
 #define EEfeeRunDescr_h
 /*********************************************************************
- * $Id: EEfeeRunDescr.h,v 1.2 2003/02/21 22:21:56 balewski Exp $
+ * $Id: EEfeeRunDescr.h,v 1.3 2003/09/11 19:41:01 zolnie Exp $
  *********************************************************************
  * $Log: EEfeeRunDescr.h,v $
+ * Revision 1.3  2003/09/11 19:41:01  zolnie
+ * updates for gcc3.2
+ *
  * Revision 1.2  2003/02/21 22:21:56  balewski
  * time stamp added
  *
@@ -29,7 +32,7 @@
  * Initial revision
  *
  *********************************************************************/
-#include <time.h>
+#include <ctime>
 
 
 #include <TObject.h>
