@@ -1,6 +1,9 @@
 #!/usr/local/bin/perl
-# $Id: bfc,v 1.11 2000/07/19 21:26:51 didenko Exp $
+# $Id: bfc,v 1.12 2000/10/02 00:23:49 fisyak Exp $
 # $Log: bfc,v $
+# Revision 1.12  2000/10/02 00:23:49  fisyak
+# Adjustment for P00hi
+#
 # Revision 1.11  2000/07/19 21:26:51  didenko
 # fix shell
 #
@@ -123,7 +126,7 @@ exit 0;
 #______________________________________________________
 sub convert($) {
   my $new_name = @_[0];
-  $new_name =~ s'/home/starreco/reco'/star/rcf/data09/reco'g;
+  $new_name =~ s'/home/starreco/reco'/star/rcf/data03/reco'g;
   return $new_name;
 }
 #END
