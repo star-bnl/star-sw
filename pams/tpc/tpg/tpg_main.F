@@ -18,12 +18,15 @@ c     tpg_pad_h
 c     tpg_pad - contains t0_offset (and other info) for each pad
 c
 c 
+C  210.0 replaced by drift_length initialised from the tpg_detector table.
+C  I. Sakrejda 19/12/97
 
 
-      real    dummy1, dummy2, dummy3, dummy4
+      real    dummy1, dummy2, dummy3, dummy4, dummy5
       integer tgc_pad_to_x, tgc_row_to_y, tgc_x_to_pad
       integer tgc_y_to_row
       integer tgc_time_to_z,tgc_z_to_time ! added 05feb97 - mal
+      integer tgc_drift_volume_length
       integer iret
       integer init_flag, idebug
 
@@ -38,6 +41,7 @@ CCCCCCCCCCCC
       data init_flag/0/, idebug/0/
 *
       if(init_flag.eq.0) then
+         iret=tgc_drift_volume_length(dummy5,tpg_detector_h,tpg_detector)
          iret=tgc_pad_to_x(1.0,1.0,dummy3,pad_plane_h,pad_plane)
          iret=tgc_row_to_y(1.0,dummy2,pad_plane_h,pad_plane)
          iret=tgc_x_to_pad(1.0,1.0,dummy3,pad_plane_h,pad_plane)
@@ -96,16 +100,17 @@ C     xlocal - coordinates of a point in the local coordinate system
 C     Returns:
 C     xglobal- coordinates of a point in the global coordinate system
 C
-
-      real b_rot, pi_six
+      integer iret, tgc_drift_volume_length
+      real b_rot, pi_six, drift_vol_length, dummy1
 *
       pi_six=2.0*atan(1.0)/3.0
+      iret=tgc_drift_volume_length(drift_vol_length, dummy1, dummy1)
       if(isect.le.12) then    
         b_rot=real(isect)*pi_six
-        xglobal(3)=210.0-xlocal(3)
+        xglobal(3)=drift_vol_length-xlocal(3)
       else
         b_rot=real(24-isect)*pi_six
-        xglobal(3)=-210.0+xlocal(3)
+        xglobal(3)=-drift_vol_length+xlocal(3)
       endif
       xglobal(1)=xlocal(1)*cos(b_rot)+xlocal(2)*sin(b_rot)
       xglobal(2)=xlocal(2)*cos(b_rot)-xlocal(1)*sin(b_rot)
@@ -125,9 +130,10 @@ C     returns:
 C     isect - sector number
 C     xlocal - coordinates of a point in a local coordinate system
 C
+      integer iret, tgc_drift_volume_length
       integer first
-      real b_rot, angle
-      real twopi, pi_twelve, pi_six
+      real b_rot, angle, dummy1
+      real twopi, pi_twelve, pi_six, drift_vol_length
       save
 
       data first/1/
@@ -137,6 +143,7 @@ C
        pi_twelve=atan(1.0)/3.0
        pi_six=pi_twelve*2.0
        first=0
+       iret=tgc_drift_volume_length(drift_vol_length,dummy1, dummy1)
       endif
 C
       angle = atan2(xglobal(2),xglobal(1))
@@ -144,14 +151,14 @@ C
       isect=int((angle+pi_twelve)/pi_six)
       if(isect.eq.12)isect=0
       if(xglobal(3).gt.0) then
-         xlocal(3)=210.0-xglobal(3)
+         xlocal(3)=drift_vol_length-xglobal(3)
          isect=15-isect
          if(isect.gt.12) isect=isect-12
          b_rot=real(isect)*pi_six
       else
          isect=isect+9
          if(isect.le.12) isect=isect+12
-         xlocal(3)=xglobal(3)+210.0
+         xlocal(3)=xglobal(3)+drift_vol_length
          b_rot=real(24-isect)*pi_six
       endif
       xlocal(1)=xglobal(1)*cos(b_rot)-xglobal(2)*sin(b_rot)
@@ -663,11 +670,33 @@ c     dip        - dip angle
         tgc_cross_and_dip = STAFCV_OK
       endif
       end
+      integer function tgc_drift_volume_length(xlength,
+     >                   tpg_detector_h, tpg_detector)
+      implicit none
+c     tpg_detector_h
+c     tpg_detector - contains drift distance length
 
+#include "PAM.inc"
+#include "tpg_detector.inc"
 
+      RECORD / table_head_st /tpg_detector_h
+      RECORD / tpg_detector_st /tpg_detector(*)
 
+      real    length , xlength
+      integer flag
 
+      save
 
+      data flag /1/
+C
+      if(flag.eq.1) then
+          length=tpg_detector(1).drift_length
+          flag=0
+      endif
+      xlength=length
+      tgc_drift_volume_length=STAFCV_OK
+      end
+           
 
 
 
