@@ -6,15 +6,19 @@ StChain *chain;
 int total=0;
 
 void RunJetReader(int nevents=10,
+		  const char* file,
+		  const char* jetInFile,
 		  const char* dir = "",
-		  const char* file = "/star/data44/reco/productionPP/ReversedFullField/P04ij/2004/135/st_physics_adc_5135068_raw_2050001.MuDst.root",
-		  const char *filter = "",
-		  const char* jetInFile = "./jets_out.root")
+		  const char *filter = "")
 {
+    cout <<"MuDst chain file:\t"<<file<<endl;
+    cout <<"Jet tree file:\t"<<jetInFile<<endl;
+    //abort();
+    
     if (gClassTable->GetID("TTable") < 0) {
 	gSystem->Load("libStar");
 	gSystem->Load("libPhysics");
-    } 
+    }
     gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
     loadSharedLibraries();
     gSystem->Load("StMagF");
@@ -24,7 +28,7 @@ void RunJetReader(int nevents=10,
     gSystem->Load("StEmcADCtoEMaker");
     gSystem->Load("StEpcMaker");
     gSystem->Load("StDbLib");
-    gSystem->Load("StDbBroker");  
+    gSystem->Load("StDbBroker");
     gSystem->Load("St_db_Maker");
     gSystem->Load("StJetFinder");
     gSystem->Load("StJetMaker");
