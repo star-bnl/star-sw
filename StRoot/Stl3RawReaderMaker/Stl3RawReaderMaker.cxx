@@ -9,9 +9,12 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 //
-//  $Id
+//  $Id: Stl3RawReaderMaker.cxx,v 1.5 2001/08/20 22:32:00 struck Exp $
 //
-//  $Log
+//  $Log: Stl3RawReaderMaker.cxx,v $
+//  Revision 1.5  2001/08/20 22:32:00  struck
+//  first version filling L3 counters and algorithm info into StEvent
+//
 //
 
 #include "Stl3RawReaderMaker.h"
