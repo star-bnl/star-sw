@@ -24,7 +24,7 @@ C :>--------------------------------------------------------------------
       Integer    AgFHIT0, AgFHIT1, IH, ITRA, JTRA, NUMBV(15)
       integer    tpgv,tpss,tpad,sector,isdet/1/,nh,i,k, LenH
       Real       Hits(15),fhmin(15),fhmax(15),fhbin(15),x(3)
-      Character  chit*4(15)
+      Character*4  chit(15)
 
 #include       "g2t_get_hits.inc"
 #include       "geant321/gcnum.inc"
