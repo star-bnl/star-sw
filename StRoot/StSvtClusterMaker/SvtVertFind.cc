@@ -414,7 +414,7 @@ int bracket2 ( float (*func)(double),
   float   fX, fVal, fMaxVal = 0.0, fMaxPos;
   POINT   pPoints[1000];
   int     iMaxPoints = 1000;
-#ifdef DEBUG
+#if DEBUG
   FILE    *fout;
 #endif
   /* start in the middle, and work our way outwards */
@@ -475,7 +475,7 @@ int bracket2 ( float (*func)(double),
   *cx = pPoints[iRightPos].x;
   *fc = pPoints[iRightPos].y;
   
-#ifdef DEBUG
+#if DEBUG
   
   fout = fopen ("groups.dat", "w");
   
