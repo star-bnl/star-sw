@@ -15,6 +15,7 @@
 use CGI;
 
 require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
+require "/afs/rhic/star/packages/DEV00/mgr/dbDescriptorSetup.pl";
 
 use File::Find;
 use Class::Struct;
@@ -51,8 +52,6 @@ my @prodSer = ("P00hd_1","P00hd") ;
 
 &beginHtml();
 
-##### connect to the DB
-&StDbProdConnect();
 
 ##### Find sets in DataSet table
 
@@ -79,6 +78,71 @@ my @prodSer = ("P00hd_1","P00hd") ;
                     "2000/09" => "SEPTEMBER-2000"                    
  ); 
 
+my %daqHash = ();
+
+struct DaqAttr => {
+        drun   => '$',
+        iname  => '$',
+        jname  => '$',
+        iMomnt => '$',
+        jMomnt => '$'
+}; 
+
+
+my @runDescr;
+my $nrunDescr = 0;
+
+##### connect to the DB RunLog
+
+&StDbDescriptorConnect();
+
+ $sql="SELECT runNumber, cwName, ccwName, cwMomentum, ccwMomentum FROM $runDescriptorT WHERE category = 'physics'";
+ $cursor =$dbh->prepare($sql)
+   || die "Cannot prepare statement: $DBI::errstr\n";
+ $cursor->execute;
+
+ while(@fields = $cursor->fetchrow) {
+   my $cols=$cursor->{NUM_OF_FIELDS};
+   $fObjAdr = \(DaqAttr->new());
+
+   for($i=0;$i<$cols;$i++) {
+     my $fvalue=$fields[$i];
+     my $fname=$cursor->{NAME}->[$i];
+     print "$fname = $fvalue\n" if $debugOn;
+
+    ($$fObjAdr)->drun($fvalue)      if( $fname eq 'runNumber');
+    ($$fObjAdr)->iname($fvalue)     if( $fname eq 'cwName');   
+    ($$fObjAdr)->jname($fvalue)     if( $fname eq 'ccwName');
+    ($$fObjAdr)->iMomnt($fvalue)    if( $fname eq 'cwMomentum');
+    ($$fObjAdr)->jMomnt($fvalue)    if( $fname eq 'ccwMomentum');
+
+   }
+     $runDescr[$nrunDescr] = $fObjAdr;
+     $nrunDescr++;
+} 
+&StDbDescriptorDisconnect();
+
+my $Numrun;
+my $cWname;
+my $cEname;
+my $cWMnt;
+my $cEMnt; 
+
+foreach my $runDsc (@runDescr) {
+
+       $Numrun = ($$runDsc)->drun;
+       $cWname = ($$runDsc)->iname;
+       $cEname = ($$runDsc)->jname;   
+       $cWMnt  = ($$runDsc)->iMomnt;
+       $cEMnt  = ($$runDsc)->jMomnt;
+
+       $daqHash{$Numrun} = $cWname ."-".$cEname." ". $cWMnt ."GeV"."+". $cEMnt."GeV"; 
+     }
+ 
+
+##### connect to the DB operation
+
+&StDbProdConnect();
 ##### select Geant files from FileCatalog
 my  $nmfile;
 my  @hpssInFiles;
@@ -371,19 +435,21 @@ my $TdaqHEvt  = 0;
         if (! defined $dstHpEvts{$runD}) {$dstHpEvts{$runD} = 0 };
         if (! defined $dstDEvts{$runD}) {$dstDEvts{$runD} = 0 };
         if (! defined $daqHpEvts{$runD}) {$daqHpEvts{$runD} = 0 };
+        if (! defined $daqHash{$runD}) {$daqHash{$runD} = 'n/a'};
         $TdstHEvt    +=  $dstHpEvts{$runD}; 
         $TdstDEvt    +=  $dstDEvts{$runD}; 
         $TdaqHEvt    +=  $daqHpEvts{$runD}; 
 
+
    print HTML "<TR ALIGN=CENTER VALIGN=CENTER>\n";
    print HTML "<TD><a href=\"http://duvall.star.bnl.gov/devcgi/dbFileDAQRetrv.pl?run=$runD\">$runD</TD>\n"; 
-   print HTML "<td>$periodRun{$runD}</td><td>$prodRun{$runD}</td><td> n/a </td><td>$daqHpEvts{$runD}</td><td>$dstHpEvts{$runD}</td><td>$dstDEvts{$runD}</td></tr>\n"; 
+   print HTML "<td>$periodRun{$runD}</td><td>$prodRun{$runD}</td><td> $daqHash{$runD} </td><td>$daqHpEvts{$runD}</td><td>$dstHpEvts{$runD}</td><td>$dstDEvts{$runD}</td></tr>\n"; 
 
 }
 
 #  print total amount
    print HTML "<TR ALIGN=CENTER VALIGN=CENTER>\n"; 
-   print HTML "<td>Total</td><td>June-July</td><td>All</td><td> n/a</td><td> $TdaqHEvt</td><td>$TdstHEvt</td><td>$TdstDEvt </td></tr>\n"; 
+   print HTML "<td>Total</td><td>June-July</td><td>All</td><td> All</td><td> $TdaqHEvt</td><td>$TdstHEvt</td><td>$TdstDEvt </td></tr>\n"; 
 
 #####
 
