@@ -1,6 +1,9 @@
-* $Id: svttgeo.g,v 1.14 2000/12/19 22:42:49 nevski Exp $
+* $Id: svttgeo.g,v 1.15 2001/03/16 00:32:06 nevski Exp $
 *
 * $Log: svttgeo.g,v $
+* Revision 1.15  2001/03/16 00:32:06  nevski
+* switch on/off cooling water
+*
 * Revision 1.14  2000/12/19 22:42:49  nevski
 * make water manifold optional
 *
@@ -61,6 +64,7 @@ Module  SVTTGEO  is the SVT geometry for STAR
 *             error fixed in the SFCP cooling pipe                            *
 * 08/26/99, E.Cains: if Nlayer is negaitive, generate one svt ladder there    *
 * 09/14/99, H.Huemmler: include beampipe support and svt shields              *
+* 03/16/01, PN: if water manifold is not installed, water is replaced by gas  *
 *******************************************************************************
 
 +cde,AGECOM,GCONST,GCUNIT.
@@ -343,6 +347,16 @@ Module  SVTTGEO  is the SVT geometry for STAR
         Component O2  A=16    Z=8  W=2
         Component Al  A=27    Z=13 W=3
       Mixture  ALKAP  Dens=1.65
+*
+*     put real water only when manifold is installed
+      Component H2     A=1   Z=1   W=2
+      Component O      A=16  Z=8   W=1
+      if (swam_Len>0) then
+         Mixture   Water  Dens=1.0
+      else
+*        i don't care about the composition as soon as this is as light as air
+         Mixture   Water  Dens=0.0009
+      endif
 *
       Create and Position SVTT in Cave
 *
@@ -732,9 +746,7 @@ EndBlock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Block SWCW is the water channel water (probably Evian?) 
 *
-      Component H2     A=1   Z=1   W=2
-      Component O      A=16  Z=8   W=1
-      Mixture   Water  Dens=1.0
+      Material  Water
       Attribute SWCW   seen=1  colo=6
       Shape     BOX    dx=(selc_ElcaWid-2.0*selc_BeThk)/2,
                        dy=swca_Length/2,
@@ -1091,10 +1103,8 @@ EndBlock
 Block SHWA is the water in the hose 
 * note: fix hose length a la Pavel's example
       Attribute  SHWA   Seen=1    Colo=6
-      Component H2     A=1   Z=1   W=2
-      Component O      A=16  Z=8   W=1
-      Mixture   Water  Dens=1.0
-      Shape     TUBE   rmax=ssup_HosRmn
+      Material   Water
+      Shape      TUBE   rmax=ssup_HosRmn
 
 EndBlock
 *
@@ -1210,10 +1220,8 @@ Endblock
 *------------------------------------------------------------------------------
 *
 Block SWMW is the water in the water manifold
-      Component H2     A=1   Z=1   W=2
-      Component O      A=16  Z=8   W=1
-      Mixture   Water  Dens=1.0
       Attribute SWMW   seen=1  colo=6
+      Material  Water 
       Shape     PGON  Phi1=0   Dphi=360  Nz=2,
                       NpDiv=18,
                       zi ={-swam_Len/2+swam_WallThk,
@@ -1442,9 +1450,9 @@ Endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 * 
 Block SFCW is the water cylinder in the cooling pipe
-      Material Water
       Attribute SFCW Seen=1 Colo=6
-      Shape TUBE     rmax=sfpa_cpral
+      Material  Water
+      Shape     TUBE rmax=sfpa_cpral
                 
 Endblock
 *
