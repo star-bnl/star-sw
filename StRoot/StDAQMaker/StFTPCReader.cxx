@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFTPCReader.cxx,v 1.4 2001/06/25 22:55:35 jcs Exp $
+ * $Id: StFTPCReader.cxx,v 1.5 2001/07/26 13:52:33 oldi Exp $
  *
  * Author: Holm Huemmler
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFTPCReader.cxx,v $
+ * Revision 1.5  2001/07/26 13:52:33  oldi
+ * Bug fix to circumvent crashes due to missing FTPC data.
+ *
  * Revision 1.4  2001/06/25 22:55:35  jcs
  * cleanup code
  *
@@ -91,6 +94,17 @@ StFTPCReader::~StFTPCReader()
     }
 }
 //_____________________________________________________________________________
+bool StFTPCReader::checkForData()
+{
+  if (fFTPCImpReader) {
+    return TRUE;
+  }
+
+  else {
+    return FALSE;
+  }
+}
+//_____________________________________________________________________________
 int StFTPCReader::close()
 {
       delete fZeroSuppressedReader; fZeroSuppressedReader   = 0;
@@ -140,7 +154,7 @@ int StFTPCReader::setSector(int sector)
   	fFTPCImpReader = ::getDetectorReader(fDAQReader->getEventReader(),"FTPC");
 	fSector = -1999;
         if(!fFTPCImpReader) return 1;
-        return 0;
+	return 0;
       }
 
       fSector = sector;
