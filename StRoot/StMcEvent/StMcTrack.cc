@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.12 2000/06/06 02:58:42 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.13 2000/06/22 23:52:27 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.13  2000/06/22 23:52:27  calderon
+ * Alexei fixed typo in ostream<< for Bsdme
+ *
  * Revision 2.12  2000/06/06 02:58:42  calderon
  * Introduction of Calorimeter classes.  Modified several classes
  * accordingly.
@@ -71,7 +74,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.12 2000/06/06 02:58:42 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.13 2000/06/22 23:52:27 calderon Exp $";
 
 StMcTrack::StMcTrack() 
 {
@@ -163,7 +166,7 @@ ostream&  operator<<(ostream& os, const StMcTrack& t)
     os << "No. Rich  Hits: " << t.richHits().size()  << endl;
     os << "No. Bemc  Hits: " << t.bemcHits().size()  << endl;
     os << "No. Bprs  Hits: " << t.bprsHits().size()  << endl;
-    os << "No. Bsmdp Hits: " << t.bsmdeHits().size() << endl;
+    os << "No. Bsmde Hits: " << t.bsmdeHits().size() << endl;
     os << "No. Bsmdp Hits: " << t.bsmdpHits().size() << endl;
     os << "Is Shower     : " << t.isShower() << endl;
     os << "Geant Id      : " << t.geantId()  << endl;
