@@ -107,6 +107,30 @@ StEmcFilter::~StEmcFilter()
   delete mEmcPosition;
 }
 //------------------------------------------------------------------------------
+void StEmcFilter::calcCentrality(StEvent* event)
+{
+  // works only for AuAu at 200 GeV
+  
+  if(fabs(mBField)>0.4) //full field
+  {
+    Int_t cent[]  = {14,33,59,98,150,221,311,428,500,1000};
+    mCentrality = cent;
+  }
+  else // half field
+  {
+    Int_t cent[]  = {14,32,59,98,149,216,302,409,474,1000};
+    mCentrality = cent;
+  }
+  
+  Int_t primaries=uncorrectedNumberOfPrimaries(*event);
+
+  mCentralityBin=9;
+  
+  for(Int_t i=0;i<9;i++)
+    if(primaries < mCentrality[i]) { mCentralityBin=i; return; }
+  return;
+}
+//------------------------------------------------------------------------------
 Bool_t StEmcFilter::accept(StEvent* event)
 {
   if(!event) 
@@ -155,6 +179,8 @@ Bool_t StEmcFilter::accept(StEvent* event)
       }
     }
   }
+  
+  calcCentrality(event);
   
   Float_t EventMultiplicity = uncorrectedNumberOfNegativePrimaries(*event);
   if(EventMultiplicity<mMinMult || EventMultiplicity>mMaxMult) 
