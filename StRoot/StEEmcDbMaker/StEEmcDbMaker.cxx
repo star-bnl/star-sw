@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.32 2004/05/14 20:55:34 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.33 2004/05/20 16:40:14 balewski Exp $
  
 
 #include <time.h>
@@ -581,7 +581,10 @@ void  StEEmcDbMaker::mOptimizeFibers  (){
 
   static char blobBuffer[KRETmxBlobSlen+1];
   char  *blob = blobBuffer;
-  int   len = strnlen(mDbFiberConfBlob->dataS,KRETmxBlobSlen ); 
+  const char *aaa;
+
+  int   len = strlen(mDbFiberConfBlob->dataS); 
+  assert(len<KRETmxBlobSlen ); // strnlen() is better but aborts under redhat72,JB
   strncpy(blob,mDbFiberConfBlob->dataS,len);
  
   blob=strtok(blob,";"); // init iterator
@@ -864,6 +867,9 @@ void StEEmcDbMaker::setAsciiDatabase( const Char_t *ascii )
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.33  2004/05/20 16:40:14  balewski
+// fix of strnlen --> strlen
+//
 // Revision 1.32  2004/05/14 20:55:34  balewski
 // fix to process many runs, by Piotr
 //

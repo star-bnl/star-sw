@@ -13,8 +13,6 @@
 #include "StiPlacement.h"
 #include "StiDetector.h"
 #include "StiHitContainer.h"
-#include <float.h>
-
 using std::sort;
 using std::find;
 using std::lower_bound;
