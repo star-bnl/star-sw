@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.43 2001/02/18 20:09:58 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.44 2001/03/07 20:43:46 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.44  2001/03/07 20:43:46  perev
+// assert for wrong time added
+//
 // Revision 1.43  2001/02/18 20:09:58  perev
 // Distinction between UNIX FS objects and MySql added
 //
@@ -66,6 +69,7 @@
 #include <fstream.h>
 #include <stdlib.h>
 #include <time.h>
+#include "TError.h"
 #include "TBrowser.h"
 #include "TDatime.h"
 #include "TRegexp.h"
@@ -210,7 +214,7 @@ Int_t St_db_Maker::Init()
      AddData(fDataBase);
      SetOutputAll(fDataBase,2); //  
      
-     if (Debug()) fDataBase->ls("*");
+     if (Debug()>1) fDataBase->ls("*");
    }
    OnOff();
    return 0;
@@ -218,6 +222,9 @@ Int_t St_db_Maker::Init()
 //_____________________________________________________________________________
 Int_t St_db_Maker::Make()
 {
+
+  TDatime td = GetDateTime();
+  assert(td.GetDate() < 20330101);
   fUpdateMode = 1;
   UpdateDB(fDataBase);  
   fUpdateMode = 0;
