@@ -8,8 +8,6 @@
 	integer     MSG_Journal_LUN_P
 	parameter ( MSG_Journal_LUN_P = 11 )
 
-	character*132 M132
-
 	integer TL, JL
 	integer I
 
