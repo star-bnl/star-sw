@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichInduceSignal.h,v 1.2 2000/01/25 22:02:20 lasiuk Exp $
+ * $Id: StRichInduceSignal.h,v 1.3 2000/02/08 16:26:52 lasiuk Exp $
  *
  * Description:
  *   InduceSigna1 is the module containing the sequence of
@@ -8,8 +8,8 @@
  *
  *****************************************************************
  * $Log: StRichInduceSignal.h,v $
- * Revision 1.2  2000/01/25 22:02:20  lasiuk
- * Second Revision
+ * Revision 1.3  2000/02/08 16:26:52  lasiuk
+ * rm viewer dependence
  *
  * Revision 1.3  2000/02/08 16:26:52  lasiuk
  * rm viewer dependence
@@ -29,7 +29,7 @@
  *                                                  C & A
  ********************************************************************/
 #ifndef ST_RICH_INDUCE_SIGNAL_H
-#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+#define ST_RICH_INDUCE_SIGNAL_H
 
 #include <functional>
 #ifndef ST_NO_NAMESPACES
@@ -39,9 +39,9 @@ using std::unary_function;
 #ifndef ST_NO_NAMESPACES
 //namespace StRichRawData {
 #endif
-    struct StRichInduceSignal : public unary_function<StRichGHit,void> {
-	void operator()(StRichGHit& );
-    };
+#include "StRichRrsMacros.h"
+#include "StRichGHit.h"
+
 struct StRichInduceSignal : public unary_function<StRichGHit,void> {
     void operator()(StRichGHit& );
 };
