@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer.C,v 1.18 2004/04/01 02:42:50 jeromel Exp $
+// $Id: bfcMixer.C,v 1.19 2004/09/01 14:35:00 jeromel Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -46,7 +46,8 @@ void bfcMixer(const Int_t Nevents=10,
 	      const Float_t zvertex_high=175.0,
 	      const Char_t *mode="strange",
 	      const Char_t *acc_mode="off",
-	      const Int_t  doFCF=1)
+	      const Int_t  doFCF=1,
+	      const Int_t  doITTF=1)
 {
   // Dynamically link some shared libs
   if (gClassTable->GetID("StBFChain") < 0) Load();
@@ -57,9 +58,18 @@ void bfcMixer(const Int_t Nevents=10,
   StMaker *saveMk = 0;
 
   // Create chain1 object
-  chain1 = new StBFChain("One");
+  chain1 = new StBFChain(doITTF?2:1,"One");
   saveMk = chain1->cd();
-  chain1->SetFlags("in Physics DbV20030408 NoDefault");
+
+  // WARNING !!
+  //   (1) Timestamp is hardcoded making option tracking hard to impossible
+  //   (2) Timestamp MUST match between chain 1 and chain 2 / changed logic to avoid mess
+  //
+  TString TheChain1("in Physics NoDefault");
+  TString DBTimeStamp(" DbV20030408");       // beware of needed leading space
+  TheChain1 += DBTimeStamp;
+
+  chain1->SetFlags(TheChain1);
   chain1->Set_IO_Files(file1);
   chain1->Load();
   chain1->Instantiate();
@@ -67,9 +77,19 @@ void bfcMixer(const Int_t Nevents=10,
   saveMk->cd();
   
   // Create chain2 object
-  chain2 = new StBFChain("Two");
+  chain2 = new StBFChain(doITTF?2:1,"Two");
   saveMk = chain2->cd();
-  chain2->SetFlags("fzin DbV20030408 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq fss ftpcT");   // 
+
+  // WARNING !!
+  //   As provided, the timestamp is hardcoded. Option tracking becomes
+  //   hard if not impossible.
+  //
+  TString TheChain2("fzin gen_T geomT sim_T trs -tcl -tpt -PreVtx -tpc_daq fss ftpcT");
+  if (doITTF) TheChain2 += " tpcI";
+  else        TheChain2 += " tpc";
+  TheChain2 += DBTimeStamp;
+
+  chain2->SetFlags(TheChain2);  
   chain2->Set_IO_Files(file2);
   chain2->Load();
   chain2->Instantiate();
@@ -125,12 +145,29 @@ void bfcMixer(const Int_t Nevents=10,
   StFtpcMixerMaker  *ftpcmixer = new StFtpcMixerMaker("FtpcMixer","daq","trs");
 
   // Create chain3 object
-  chain3 = new StBFChain("Three");
+  chain3 = new StBFChain(doITTF?2:1,"Three");
   saveMk = chain3->cd();
-  if (doFCF)
-    chain3->SetFlags("Simu ppOpt beamline NoDefault NoInput db tpc_daq tpc -tcl fcf ftpc emcDY2 global dst Kalman event evout QA Tree GeantOut ctf tofDat -Prevtx"); 
-  else
-    chain3->SetFlags("Simu ppOpt beamline NoDefault NoInput db tpc_daq tpc tcl ftpc emcDY2 global dst Kalman event evout QA Tree GeantOut ctf tofDat -Prevtx"); 
+
+
+  // WARNING   !!
+  //  (1) This macro was left as-is and as-provided. However, ppOpt appears valid
+  //      ONLY for pp and d+Au samples.
+  //  (2) In ITTF mode, there are a few other caveats
+  //      a- VertexFinder is a generic one  VFMinuit is the default (good for simulation, 
+  //         Au+Au). Others may be used depending on sample.
+  //      b- SvtI option is not turn ON by default as it stands below. Tracking
+  //         with SVT will NOT happen until then.
+  //  (3) Option QA is obsolete. If used, global would be back in the chain and would
+  //      class with ITTF
+  //
+  TString TheChain3("Simu ppOpt beamline NoDefault NoInput db tpc_daq ftpc emcDY2 event evout EventQA Tree GeantOut ctf tofDat -Prevtx");
+  if (doFCF)  TheChain3 += " -tcl fcf";
+  else        TheChain3 += " tcl";
+  if (doITTF) TheChain3 += " Idst tpcI ITTF";
+  else        TheChain3 += " dst tpc global Kalman";
+
+  chain3->SetFlags(TheChain3.Data());
+
 
   TString OutputFileName(gSystem->BaseName(file1));
   OutputFileName.ReplaceAll("*","");
@@ -139,6 +176,8 @@ void bfcMixer(const Int_t Nevents=10,
   chain3->Set_IO_Files(0,OutputFileName.Data());
   chain3->Load();
   chain3->Instantiate();
+  //chain3->PrintInfo();
+
   St_geant_Maker *geantMk = (St_geant_Maker *) chain->GetMaker("geant");
   geantMk->SetActive(kTRUE);
   StMaker *tpcdaqMk = chain3->GetMaker("tpc_raw");
