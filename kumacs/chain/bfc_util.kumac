@@ -58,18 +58,22 @@
 * SETUP LOCAL VARIABLES 
  alias/create STAFCV_OK  1
  alias/create STAFCV_BAD 0
- 
+ vec/input STAF_STATUS(1)  1
+
 * import global macros
- macro/global/import *
+   macro/global/import *
    
 *  THESE NEXT 4 MUST BE DONE IN THIS ORDER!!!!
    message ' *** SET GEOMETRY in gstar:  -->   ' [gstar_settings]
    message '        !!! split_off is hardwired into this kumac !!! '
    detp geometry [gstar_settings] split_off
    exec bfc_util#bfc_g2t_b4_load    [chain]
+   if (STAF_STATUS(1).ne. STAFCV_OK) goto ABEND
    exec load_libraries#run          [domain]
+   if (STAF_STATUS(1).ne. STAFCV_OK) goto ABEND
    exec bfc_util#bfc_g2t_after_load [chain]
- 
+   if (STAF_STATUS(1).ne. STAFCV_OK) goto ABEND
+ABEND: 
 return
  
 *********************************************************************
@@ -223,9 +227,11 @@ macro bfc_init _
             endif
       (*)   message " !!! bfc_util: No initialization for package " [mod]
     ENDCASE
+    if (STAF_STATUS(1).ne. STAFCV_OK) goto ABEND
     
   enddo
 EOF:
+ABEND:
  
  return
  
@@ -351,6 +357,7 @@ EOF:
         (*)    message " !!! bfc_util: No process stage for package " [mod]
       if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
    ENDCASE
+   if (STAF_STATUS(1).ne. STAFCV_OK) goto ABEND
 	     
    sigma v[mod] = v[mod] + abs($cptime)
    sigma t[mod] = t[mod] + v[mod]
@@ -361,6 +368,7 @@ EOF:
    
   enddo
  
+ ABEND:
  NEXT_EVENT:
  EOF:
  
@@ -385,7 +393,9 @@ macro bfc_finish _
      (evout,esout) exec write_table_to_file#close outfile;
       (*) message " !!! bfc_util#bfc_finish No final stage for package " [mod]
     ENDCASE
+   if (STAF_STATUS(1).ne. STAFCV_OK) goto ABEND
   enddo
+ABEND:
 return
  
 **********************************************************************
