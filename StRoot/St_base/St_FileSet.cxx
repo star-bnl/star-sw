@@ -1,7 +1,10 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
-// $Id: St_FileSet.cxx,v 1.6 1999/03/11 00:34:43 perev Exp $
+// $Id: St_FileSet.cxx,v 1.7 1999/06/16 14:28:35 fisyak Exp $
 // $Log: St_FileSet.cxx,v $
+// Revision 1.7  1999/06/16 14:28:35  fisyak
+// Add protection against empty directory entry
+//
 // Revision 1.6  1999/03/11 00:34:43  perev
 // St_base in new maker schema
 //
@@ -81,7 +84,7 @@ St_FileSet::St_FileSet(const TString &dirname,const Char_t *setname,Bool_t expan
       SetTitle("directory");
       while (name = gSystem->GetDirEntry(dir)) {
          // skip some "special" names
-         if (strcmp(name,"..")==0 || strcmp(name,".")==0) continue;
+         if (!name[0] || strcmp(name,"..")==0 || strcmp(name,".")==0) continue;
          Char_t *file = gSystem->ConcatFileName(dirbuf,name);
          TString nextdir = file;
          delete [] file;
