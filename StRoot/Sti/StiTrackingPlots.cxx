@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.cxx,v 2.13 2003/11/24 18:37:20 andrewar Exp $
+ * $Id: StiTrackingPlots.cxx,v 2.14 2004/01/03 19:52:20 andrewar Exp $
  *
  *
  * $Log: StiTrackingPlots.cxx,v $
+ * Revision 2.14  2004/01/03 19:52:20  andrewar
+ * Added check for valid kalman track cast.
+ *
  * Revision 2.13  2003/11/24 18:37:20  andrewar
  * Reduced number of bins in 3D hists. There were memory problems.
  *
@@ -216,7 +219,7 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
     {
       const StiTrack* track = (*trackIt).second;
       const StiKalmanTrack * kTrack = dynamic_cast<const StiKalmanTrack *>(track);
-      if(!track) continue;
+      if( !track || !kTrack ) continue;
       if(!kTrack->isPrimary()) continue;
       double nPts = track->getPointCount();
       if(nPts<5) continue;
