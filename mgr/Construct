@@ -308,8 +308,19 @@ foreach my $dir ("StRoot","pams") {
 	    if ($subsub_dir =~  /\./     || $subsub_dir =~ /\.\./  || 
 		$subsub_dir =~ /CVS/     || $subsub_dir =~ /^doc/  ||
 		$subsub_dir =~ /^local/  || $subsub_dir =~ /^run/  ||
-		$subsub_dir =~ /^example/|| $subsub_dir =~ /^kumac/||
-		$subsub_dir =~ /^idl/)        {next;}
+		$subsub_dir =~ /^example/|| $subsub_dir =~ /^kumac/) {next;}
+	    if ($subsub_dir =~ /^idl$/) {   
+               opendir (DIR, $subsub_DIR) or die "Can't open $sub_DIR\n";   
+               my @idls = readdir DIR;   
+               closedir DIR; #print "idls = @idls\n";   
+               foreach my $idl (@idls) {   
+                 if ($idl =~ /\.idl$/ ) {   
+                   push @idlT, $subsub_DIR ."/" . $idl; #print "+++ add $idl\n";   
+                 }   
+               }   
+               next;   
+             }   
+
 #	    print "subsub :  $subsub_dir /  $subsub_DIR\n";
 	    if ($subsub_dir =~ /^inc$/ || $subsub_dir =~ /^include$/) {
 	      opendir (DIR, $subsub_DIR) or die "Can't open $sub_DIR\n";
@@ -428,9 +439,11 @@ print "BUILD  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ\n";# Targets = @Targets\n";
 Export qw( env INCLUDE LIB BIN EXPORT BUILD OBJ MAIN);
 Default qw (   .  );
 Build  @Targets;
-if ($#incT > -1) {
-  Install $env $INCLUDE, @incT;
-}
+if ($#incT > -1) {Install $env $INCLUDE, @incT;}
+if ($#idlT > -1) {   
+   my $tables = $INCLUDE . "/tables";   
+   Install $env $tables, @idlT;   
+ } 
 #________________________________________________________________________________
 # Builder for a C++ module
 package build::command::cxx;
