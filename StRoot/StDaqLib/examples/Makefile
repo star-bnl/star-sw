@@ -13,11 +13,14 @@ FTPC_DIR = ../FTPC
 RICH_DIR = ../RICH
 TRG_DIR  = ../TRG
 L3_DIR = ../L3
+TOF_DIR = ../TOF
+FPD_DIR = ../FPD
+PMD_DIR = ../PMD
 
-OBJECTS = client.o EventReader.o DetectorReader.o TPCV1P0.o TPCV1P0_ZS_SR.o TPCV1P0_ADCR_SR.o TPCV1P0_CPP_SR.o TPCV2P0.o TPCV2P0_ZS_SR.o TPCV2P0_ADCR_SR.o TPCV2P0_CPP_SR.o CRC.o RecHeaderFormats.o TPCV1P0.Banks.o TPCV2P0.Banks.o  swaps.o RICH_Reader.o TRG_Reader.o FTPV1P0.o FTPV1P0.Banks.o FTPV1P0_ADCR_SR.o FTPV1P0_CPP_SR.o FTPV1P0_ZS_SR.o SVTV1P0.o SVTV1P0.Banks.o SVTV1P0_ADCR_SR.o SVTV1P0_CPP_SR.o SVTV1P0_ZS_SR.o L3_Reader.o
+OBJECTS =  EventReader.o DetectorReader.o TPCV1P0.o TPCV1P0_ZS_SR.o TPCV1P0_ADCR_SR.o TPCV1P0_CPP_SR.o TPCV2P0.o TPCV2P0_ZS_SR.o TPCV2P0_ADCR_SR.o TPCV2P0_CPP_SR.o CRC.o RecHeaderFormats.o TPCV1P0.Banks.o TPCV2P0.Banks.o  swaps.o RICH_Reader.o TRG_Reader.o FTPV1P0.o FTPV1P0.Banks.o FTPV1P0_ADCR_SR.o FTPV1P0_CPP_SR.o FTPV1P0_ZS_SR.o SVTV1P0.o SVTV1P0.Banks.o SVTV1P0_ADCR_SR.o SVTV1P0_CPP_SR.o SVTV1P0_ZS_SR.o L3_Reader.o L3_Banks.o TOF_Reader.o PMD_Reader.o FPD_Reader.o EMC_Reader.o EMC_SmdReader.o StEmcDecoder.o EMC_BarrelReader.o code2003.o
 
-client: $(OBJECTS)	
-	g++ $(CFLAGS) $(OBJECTS) -o client
+client: client.o $(OBJECTS)	
+	g++ $(CFLAGS) client.o $(OBJECTS) -o client
 
 client.o:	client.cxx $(EMC_DIR)/EMC_Reader.hh $(RICH_DIR)/RICH_Reader.hh $(TRG_DIR)/TRG_Reader.hh $(L3_DIR)/L3_Reader.hh
 	g++ $(CFLAGS) -c client.cxx
@@ -110,8 +113,35 @@ RICH_Reader.o:	$(RICH_DIR)/RICH_Reader.hh $(RICH_DIR)/RICH_Reader.cxx
 TRG_Reader.o:	$(IFACE_DIR)/EventReader.hh $(TRG_DIR)/TRG_Reader.hh $(TRG_DIR)/TRG_Reader.cxx $(TRG_DIR)/trgStructures.h
 	g++ $(CFLAGS) -c $(TRG_DIR)/TRG_Reader.cxx
 
-L3_Reader.o:	$(IFACE_DIR)/EventReader.hh $(L3_DIR)/L3_Reader.hh $(L3_DIR)/L3_Reader.cxx 
+code2003.o:	$(TRG_DIR)/TRG_Reader.hh $(TRG_DIR)/trgStructures2003.h
+	g++ $(CFLAGS) -c $(TRG_DIR)/code2003.cxx
+
+L3_Reader.o:	$(IFACE_DIR)/EventReader.hh $(L3_DIR)/L3_Reader.hh $(L3_DIR)/L3_Banks.hh $(L3_DIR)/L3_Reader.cxx 
 	g++ $(CFLAGS) -c $(L3_DIR)/L3_Reader.cxx
+
+L3_Banks.o:	 $(L3_DIR)/L3_Reader.hh $(L3_DIR)/L3_Banks.cxx 
+	g++ $(CFLAGS) -c $(L3_DIR)/L3_Banks.cxx
+
+TOF_Reader.o:	$(IFACE_DIR)/EventReader.hh $(TOF_DIR)/TOF_Reader.hh $(TOF_DIR)/TOF_Reader.cxx 
+	g++ $(CFLAGS) -c $(TOF_DIR)/TOF_Reader.cxx
+
+PMD_Reader.o:	$(IFACE_DIR)/EventReader.hh $(PMD_DIR)/PMD_Reader.hh $(PMD_DIR)/PMD_Reader.cxx 
+	g++ $(CFLAGS) -c $(PMD_DIR)/PMD_Reader.cxx
+
+FPD_Reader.o:	$(IFACE_DIR)/EventReader.hh $(FPD_DIR)/FPD_Reader.hh $(FPD_DIR)/FPD_Reader.cxx 
+	g++ $(CFLAGS) -c $(FPD_DIR)/FPD_Reader.cxx
+
+EMC_Reader.o:	$(IFACE_DIR)/EventReader.hh $(EMC_DIR)/EMC_Reader.hh $(EMC_DIR)/EMC_BarrelReader.hh $(EMC_DIR)/EMC_SmdReader.hh $(EMC_DIR)/EMC_Reader.cxx 
+	g++ $(CFLAGS) -c $(EMC_DIR)/EMC_Reader.cxx
+
+EMC_SmdReader.o:	$(IFACE_DIR)/EventReader.hh $(EMC_DIR)/EMC_Reader.hh  $(EMC_DIR)/StEmcDecoder.h $(EMC_DIR)/EMC_SmdReader.cxx 
+	g++ $(CFLAGS) -c $(EMC_DIR)/EMC_SmdReader.cxx
+
+EMC_BarrelReader.o:	$(IFACE_DIR)/EventReader.hh $(EMC_DIR)/EMC_Reader.hh $(EMC_DIR)/StEmcDecoder.h  $(EMC_DIR)/EMC_BarrelReader.cxx 
+	g++ $(CFLAGS) -c $(EMC_DIR)/EMC_BarrelReader.cxx
+
+StEmcDecoder.o:	$(IFACE_DIR)/EventReader.hh $(EMC_DIR)/StEmcDecoder.h $(EMC_DIR)/StEmcDecoder.cxx 
+	g++ $(CFLAGS) -c $(EMC_DIR)/StEmcDecoder.cxx
 
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
