@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowPicoTrack.cxx,v 1.10 2001/12/18 19:22:35 posk Exp $
+// $Id: StFlowPicoTrack.cxx,v 1.11 2003/01/08 19:26:51 posk Exp $
 //
 // Author: Raimond Snellings, March 2000
 //
@@ -22,25 +22,27 @@ StFlowPicoTrack::StFlowPicoTrack(StFlowPicoTrack *track) : TObject() {
   Float_t maxInt = 32.;
   Float_t pid;
 
-  mPt        = track->Pt();
-  mPtGlobal  = track->PtGlobal();
-  mEta       = track->Eta();
-  mEtaGlobal = track->EtaGlobal();
-  mDedx      = track->Dedx();
-  mPhi       = track->Phi();
-  mPhiGlobal = track->PhiGlobal();
-  mCharge    = track->Charge();
-  mDca       = track->Dca();
-  mDcaSigned = track->DcaSigned();
-  mDcaGlobal = track->DcaGlobal();
-  mChi2      = track->Chi2();
-  mFitPts    = track->FitPts();
-  mMaxPts    = track->MaxPts();
-  mNhits     = track->Nhits();
-  mNdedxPts  = track->NdedxPts();
-  mDcaGlobalX = (Float_t)track->DcaGlobalX();
-  mDcaGlobalY = (Float_t)track->DcaGlobalY();
-  mDcaGlobalZ = (Float_t)track->DcaGlobalZ();
+  mPt          = track->Pt();
+  mPtGlobal    = track->PtGlobal();
+  mEta         = track->Eta();
+  mEtaGlobal   = track->EtaGlobal();
+  mDedx        = track->Dedx();
+  mPhi         = track->Phi();
+  mPhiGlobal   = track->PhiGlobal();
+  mCharge      = track->Charge();
+  mDca         = track->Dca();
+  mDcaSigned   = track->DcaSigned();
+  mDcaGlobal   = track->DcaGlobal();
+  mZFirstPoint = track->ZFirstPoint();
+  mZLastPoint  = track->ZLastPoint();
+  mChi2        = track->Chi2();
+  mFitPts      = track->FitPts();
+  mMaxPts      = track->MaxPts();
+  mNhits       = track->Nhits();
+  mNdedxPts    = track->NdedxPts();
+  mDcaGlobalX  = (Float_t)track->DcaGlobalX();
+  mDcaGlobalY  = (Float_t)track->DcaGlobalY();
+  mDcaGlobalZ  = (Float_t)track->DcaGlobalZ();
   mTrackLength = track->TrackLength();
   mMostLikelihoodPID  = track->MostLikelihoodPID();
   mMostLikelihoodProb = track->MostLikelihoodProb();
@@ -68,6 +70,10 @@ StFlowPicoTrack::StFlowPicoTrack(StFlowPicoTrack *track) : TObject() {
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowPicoTrack.cxx,v $
+// Revision 1.11  2003/01/08 19:26:51  posk
+// PhiWgt hists sorted on sign of z of first and last points.
+// Version 6 of pico file.
+//
 // Revision 1.10  2001/12/18 19:22:35  posk
 // "proton" and "antiproton" changed to "pr+" and "pr-".
 // Compiles on Solaris.

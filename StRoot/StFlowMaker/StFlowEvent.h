@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.40 2002/05/23 18:54:11 posk Exp $
+// $Id: StFlowEvent.h,v 1.41 2003/01/08 19:26:48 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -61,6 +61,8 @@ public:
   Float_t        ZDCw() const;
   Bool_t         PtWgt() const;
   Bool_t         EtaWgt() const;
+  Bool_t         FirstLastPhiWgt() const;
+  Bool_t         FirstLastPoints() const;
   Bool_t         ProbPid() const;
   Char_t*        Pid();
   Bool_t         EtaSubs() const;
@@ -118,6 +120,8 @@ public:
   static void SetPtWgt(Bool_t);
   static void SetEtaWgt(Bool_t);
   static void SetOnePhiWgt();
+  static void SetFirstLastPhiWgt();
+  static void SetFirstLastPoints();
 
 private:
 
@@ -151,11 +155,13 @@ private:
   Flow::PhiWgtFtpc_t  mPhiWgtFtpcWest;                           //!flattening weights Ftpc west
   static Float_t      mPiPlusCuts[2];                            // PID cuts
   static Bool_t       mPtWgt;                                    // flag for pt weighting
-  static Bool_t       mEtaWgt;                                     // flag for y weighting for odd harmonics
+  static Bool_t       mEtaWgt;                                   // flag for y weighting for odd harmonics
   static Char_t       mPid[10];                                  // h+, h-, pi-, pi+, pi, k+, k-, k, pr+, pr-, pr, e+, e-, e
   static Bool_t       mProbPid;                                  // flag for probability pid
   static Bool_t       mEtaSubs;                                  // flag for eta subevents
   static Bool_t       mOnePhiWgt;                                // flag for old phi weights
+  static Bool_t       mFirstLastPhiWgt;                          // flag for using z of first and last points for reading phi weights
+  static Bool_t       mFirstLastPoints;                          // flag for using z of first and last points for generating phi weights
   static Float_t      mPiMinusCuts[2];
   static Float_t      mProtonCuts[2];
   static Float_t      mKMinusCuts[2];
@@ -213,6 +219,10 @@ inline Float_t  StFlowEvent::ZDCw() const { return mZDCw; }
 inline Bool_t   StFlowEvent::PtWgt() const { return mPtWgt; }
 
 inline Bool_t   StFlowEvent::EtaWgt() const { return mEtaWgt; }
+
+inline Bool_t   StFlowEvent::FirstLastPhiWgt() const { return mFirstLastPhiWgt; }
+
+inline Bool_t   StFlowEvent::FirstLastPoints() const { return mFirstLastPoints; }
 
 inline Char_t*  StFlowEvent::Pid() { return mPid; }
 
@@ -333,6 +343,10 @@ inline void StFlowEvent::SetEtaSubs() { mEtaSubs = kTRUE; }
 
 inline void StFlowEvent::SetOnePhiWgt() { mOnePhiWgt = kTRUE; }
 
+inline void StFlowEvent::SetFirstLastPhiWgt() { mFirstLastPhiWgt = kTRUE; }
+
+inline void StFlowEvent::SetFirstLastPoints() { mFirstLastPoints = kTRUE; }
+
 inline void StFlowEvent::SetPtWgt(Bool_t PtWgt) { mPtWgt = PtWgt; }
 
 inline void StFlowEvent::SetEtaWgt(Bool_t EtaWgt) { mEtaWgt = EtaWgt; }
@@ -342,6 +356,10 @@ inline void StFlowEvent::SetEtaWgt(Bool_t EtaWgt) { mEtaWgt = EtaWgt; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.41  2003/01/08 19:26:48  posk
+// PhiWgt hists sorted on sign of z of first and last points.
+// Version 6 of pico file.
+//
 // Revision 1.40  2002/05/23 18:54:11  posk
 // Moved centrality cuts into StFlowConstants
 //

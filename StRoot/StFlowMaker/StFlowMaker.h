@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.32 2002/06/10 22:51:02 posk Exp $
+//  $Id: StFlowMaker.h,v 1.33 2003/01/08 19:26:50 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -66,13 +66,13 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.32 2002/06/10 22:51:02 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.33 2003/01/08 19:26:50 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
 
   Flow::PhiWgt_t       mPhiWgt;                   //! To make event plane isotropic
-  Flow::PhiWgt_t       mPhiWgtFarEast;             //! To make event plane isotropic
+  Flow::PhiWgt_t       mPhiWgtFarEast;            //! To make event plane isotropic
   Flow::PhiWgt_t       mPhiWgtEast;               //! To make event plane isotropic
   Flow::PhiWgt_t       mPhiWgtWest;               //! To make event plane isotropic
   Flow::PhiWgt_t       mPhiWgtFarWest;            //! To make event plane isotropic
@@ -91,6 +91,7 @@ private:
   Bool_t           mMuEventRead;              // switch for common Mu-DST
   UInt_t           mPicoEventCounter;         // number of Bytes in pico event
   Bool_t           mOnePhiWgt;                // use old phi weights
+  Bool_t           mFirstLastPhiWgt;          // use z of first-last for phi weights
   Int_t            mRunID;                    // last run ID
   Int_t            ReadPhiWgtFile();          // get the weight file
   Int_t            InitPicoEventWrite();      // open pico-DST
@@ -106,6 +107,7 @@ private:
   Bool_t           FillFromPicoVersion3DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromPicoVersion5DST(StFlowPicoEvent* pPicoEvent);
+  Bool_t           FillFromPicoVersion6DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromMuDST();
   Bool_t           FillFromMuVersion0DST();
   void             CloseEventRead();          // close StEvent
@@ -167,6 +169,10 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.33  2003/01/08 19:26:50  posk
+//  PhiWgt hists sorted on sign of z of first and last points.
+//  Version 6 of pico file.
+//
 //  Revision 1.32  2002/06/10 22:51:02  posk
 //  pt and eta weighting now default.
 //  DcaGlobalPart default now 0 to 1 cm.
