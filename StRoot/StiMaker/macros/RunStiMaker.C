@@ -33,7 +33,9 @@ void RunStiMaker(Int_t nevents=1,
     //This file points to a nightly low density hadronic cocktail reconstruction.
     //const char* MainFile="/star/rcf/test/dev/trs_redhat61/Tue/year_2001/hc_lowdensity/*.event.root")
 		 
-{    
+{
+    bool optimized = false;
+    
     // Dynamically link needed shared libs
     cout <<"Loading St_base"<<endl;
     gSystem->Load("St_base");
@@ -77,21 +79,33 @@ void RunStiMaker(Int_t nevents=1,
 
     cout <<"Loading AssociationMaker"<<endl;
     gSystem->Load("StAssociationMaker");
-    
-    cout <<"Loading Sti"<<endl;
-    gSystem->Load("Sti");
-    //gSystem->Load(".i386_redhat61/LIB/Sti.so"); //For optimized
 
-    cout <<"Loading StiGui"<<endl;
-    gSystem->Load("StiGui");
-    //gSystem->Load(".i386_redhat61/LIB/StiGui"); //For optimized
-
-    cout <<"Loading StiEvaluator"<<endl;
-    gSystem->Load("StiEvaluator");
-    
-    cout <<"Loading StiMaker"<<endl;
-    gSystem->Load("StiMaker");
-    //gSystem->Load(".i386_redhat61/LIB/StiMaker"); //For optimized
+    if (optimized) {
+	cout <<"Loading Sti"<<endl;
+	gSystem->Load(".i386_redhat61/LIB/Sti.so"); //For optimized
+	
+	cout <<"Loading StiGui"<<endl;
+	gSystem->Load(".i386_redhat61/LIB/StiGui"); //For optimized
+	
+	cout <<"Loading StiEvaluator"<<endl;
+	gSystem->Load(".i386_redhat61/LIB/StiEvaluator");
+	
+	cout <<"Loading StiMaker"<<endl;
+	gSystem->Load(".i386_redhat61/LIB/StiMaker"); //For optimized
+    }
+    else {
+	cout <<"Loading Sti"<<endl;
+	gSystem->Load("Sti");
+	
+	cout <<"Loading StiGui"<<endl;
+	gSystem->Load("StiGui");
+		
+	cout <<"Loading StiEvaluator"<<endl;
+	gSystem->Load("StiEvaluator");
+	
+	cout <<"Loading StiMaker"<<endl;
+	gSystem->Load("StiMaker");
+    }
     
     // create a new instance of the chain
     chain = new StChain("StChain"); 
@@ -156,7 +170,7 @@ void RunStiMaker(Int_t nevents=1,
     }
     //Add padrows;
     //for (unsigned int padrow=1; padrow<=45; ++padrow) {
-    for (unsigned int padrow=15; padrow<=45; padrow+=5) {
+    for (unsigned int padrow=15; padrow<=45; padrow+=2) {
 	stiIO->addLTSFPadrow(padrow);
     }
     
