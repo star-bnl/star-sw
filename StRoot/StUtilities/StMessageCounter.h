@@ -1,5 +1,8 @@
-// $Id: StMessageCounter.h,v 1.6 1999/06/29 17:37:31 genevb Exp $
+// $Id: StMessageCounter.h,v 1.7 1999/06/30 17:24:50 genevb Exp $
 // $Log: StMessageCounter.h,v $
+// Revision 1.7  1999/06/30 17:24:50  genevb
+// Better limit management, remove Bool_t
+//
 // Revision 1.6  1999/06/29 17:37:31  genevb
 // Lots of fixes...
 //
@@ -39,7 +42,6 @@
 
 typedef StVector(char*) messCharVec;
 typedef StVector(char*)::iterator messCharVecIter;
-typedef StVector(int*) messIntVec;
 
 
 class StMessageCounter : public ostrstream {
@@ -52,11 +54,11 @@ class StMessageCounter : public ostrstream {
  protected:
    StMessageCounter();
    StMessageCounter(const StMessageCounter&);
-   messIntVec limitTList;
-   messIntVec limitTCountList;
+   intVector limitTList;
+   intVector limitTCountList;
    messCharVec limitList;
-   messIntVec limitNList;
-   messIntVec limitNCountList;
+   intVector limitNList;
+   intVector limitNCountList;
  
  public:
    ~StMessageCounter();
