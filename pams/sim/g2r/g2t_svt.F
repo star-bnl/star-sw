@@ -24,7 +24,7 @@
 
       do isys=1,2
        if (isys.eq.1) call G2R_GET_SYS ('SVTT','SVTD',Iprin,Idigi)
-       if (isys.eq.1) call G2R_GET_SYS ('SVTT','SFSD',Iprin,Idigi)
+       if (isys.eq.2) call G2R_GET_SYS ('SVTT','SFSD',Iprin,Idigi)
        if (Iprin.lt.0) go to 99
        Local  = Idigi.ge.2
 *
