@@ -10,4 +10,4 @@ EOF
 more ${batch}
 set PWD = `pwd`
 echo /usr/local/bin/qsub -M ${USER} ${PWD}/${batch}
-/usr/local/bin/qsub -ltwo_hour -M ${USER} ${PWD}/${batch}   
+/usr/local/bin/qsub -M ${USER} ${PWD}/${batch}   
