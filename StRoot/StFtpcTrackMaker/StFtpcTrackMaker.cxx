@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.51 2004/01/28 01:41:32 jeromel Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.52 2004/02/05 00:24:54 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.52  2004/02/05 00:24:54  oldi
+// Eliminating a bug concerning a test of the wrong pointer to a vertex.
+//
 // Revision 1.51  2004/01/28 01:41:32  jeromel
 // *** empty log message ***
 //
@@ -425,7 +428,7 @@ Int_t StFtpcTrackMaker::Make()
   if (primary) {
     St_dst_vertex *vtx = (St_dst_vertex *)primary->Find("vertex");
     
-    if (vertex) {
+    if (vtx) {
       dst_vertex_st *primvtx = vtx->GetTable();
       
       for (Int_t no_rows = 0; no_rows < vtx->GetNRows(); no_rows++, primvtx++) {
@@ -676,7 +679,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.51 2004/01/28 01:41:32 jeromel Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.52 2004/02/05 00:24:54 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
