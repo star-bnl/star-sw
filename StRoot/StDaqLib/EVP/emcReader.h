@@ -45,5 +45,6 @@ extern struct emc emc ;
 
 extern int emcReader(char *mem) ;
 extern int getEemcTower(int r) ; // Added by Herbert Ward.
+extern int getEemcMapmt(int r) ; // Added by Herbert Ward.
 
 #endif
