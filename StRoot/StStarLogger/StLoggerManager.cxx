@@ -145,7 +145,11 @@ StMessMgr* StLoggerManager::Instance() {
     String propertyFile = "log4j.xml";
     const char *proEnv = gSystem->Getenv("STAR_LOGGER_PROPERTY");
     if (proEnv && proEnv[0] ) propertyFile=proEnv;
-    PropertyConfigurator::configure(propertyFile);
+    if (!gSystem->AccessPathName(propertyFile.c_str())) {
+       PropertyConfigurator::configure(propertyFile);
+    } else {       
+     	 BasicConfigurator::configure();
+    }
     Logger::getRootLogger();
     fgQALogger = Logger::getLogger("QA");
     NDC::push(_T(":"));
@@ -344,7 +348,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.1 2004/05/11 20:58:48 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.2 2004/05/11 22:42:27 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -650,8 +654,11 @@ static StMessMgr* temp=StLoggerManager::Instance();
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.1 2004/05/11 20:58:48 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.2 2004/05/11 22:42:27 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.2  2004/05/11 22:42:27  fine
+// Add the default configurator
+//
 // Revision 1.1  2004/05/11 20:58:48  fine
 // first implemantation of the abstarct STAR messeger via log4cxx package
 //
