@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2004/07/12 20:36:58 potekhin Exp $
+# $Id: Makefile,v 1.2 2004/07/16 22:53:20 potekhin Exp $
 
 ############################### vmc Makefile ###########################
 
@@ -63,8 +63,8 @@ OBJS	:= $(CXXOBJ) $(GDICTO)
 INCDIR  := -Iinclude
 
 # C++ compilation flags
-#
-CXXFLAGS := $(CXXOPTS) -I. $(INCDIR) -I$(ROOTSYS)/include 
+# Note I added no deprecated --max--
+CXXFLAGS := $(CXXOPTS) -Wno-deprecated -I. $(INCDIR) -I$(ROOTSYS)/include 
 
 DEPINC 		+= -I. -I$(ROOTSYS)/include $(INCDIR)
 
