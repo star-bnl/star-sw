@@ -1,8 +1,11 @@
 
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.5 1999/12/16 21:01:31 flierl Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.6 2000/01/20 14:36:23 flierl Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.6  2000/01/20 14:36:23  flierl
+// change return value from kStErr to kStWarn to avoid stalling of the whole chain
+//
 // Revision 1.5  1999/12/16 21:01:31  flierl
 // feed tracker with banks instead of tcl_tphit structs
 //
@@ -110,7 +113,7 @@ Int_t St_l3Clufi_Maker::Make(){
     
 
     // here we start
-    cout << endl << "Now we start l3Clufi Maker." << endl << endl;
+    cout << "Now we start l3Clufi Maker." << endl;
   
     // set max values for pixel array
     // these values must be equal to those in the module (in croat.h)
@@ -126,8 +129,8 @@ Int_t St_l3Clufi_Maker::Make(){
     // do we have something ? 
     if (!raw_data_tpc)
 	{ 
-	    cerr << " No raw data found, l3 clusterfinding skipped ! " << endl;
-	    return kStErr;
+	    cerr << "No raw data found, l3 clusterfinding skipped ! " << endl;
+	    return kStWarn;
 	} 
     else if (raw_data_tpc) 
 	{ 
@@ -162,7 +165,7 @@ Int_t St_l3Clufi_Maker::Make(){
 				{
 				    cerr << " Bad raw data in sector " << sectorindex+1 << endl;
 				    // stop this maker and go back to bfc
-				    return kStErr;
+				    return kStWarn;
 				}
 			
 			    ///////
@@ -223,14 +226,14 @@ Int_t St_l3Clufi_Maker::Make(){
 				{
 				    cerr << "Unable to fill pixels of inner rows";
 				    cerr << " in sector " << sectorindex <<endl;
-				    return kStErr;
+				    return kStWarn;
 				}
 			    // fill pixel array outer rows
 			    if ( Fill_pixel_of_outer_rows() != 1 )
 				{
 				    cerr << "Unable to fill pixels of outer rows";
 				    cerr << " in sector " << sectorindex <<endl;
-				    return kStErr;
+				    return kStWarn;
 				}
 			
 			    // just checking
@@ -251,7 +254,7 @@ Int_t St_l3Clufi_Maker::Make(){
 				{
 				    cerr << "problems in clusterfinding module in sector: "<< sectorindex <<endl;
 				    // stop this maker and go back to bfc
-				    return kStErr;
+				    return kStWarn;
 				}
 			    // write out tables in online format just for the supersector
 			    if ( sectorindex%2 == 0 )
