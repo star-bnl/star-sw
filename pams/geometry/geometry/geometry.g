@@ -1,5 +1,10 @@
-* $Id: geometry.g,v 1.88 2004/04/28 00:35:40 potekhin Exp $
+* $Id: geometry.g,v 1.89 2004/04/28 23:30:37 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.89  2004/04/28 23:30:37  potekhin
+* Deleted an unnecessary line setting the
+* PHMD version. It will be done throught the
+* structure PMVR anyway.
+*
 * Revision 1.88  2004/04/28 00:35:40  potekhin
 * Extra detail in steering the PHMD geo, see the PHMD code
 *
@@ -354,13 +359,13 @@
    Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,kgeom,nmod(2),nonf(3),
               ecal_config, ecal_fill,
               Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf,
-              CorrNum, PhmdVersion,
+              CorrNum, PhmdConfig,
               BtofConfig, VpddConfig, FpdmConfig,
               SisdConfig, PipeConfig, CalbConfig
 
 * configuration variables for tuning the geometry:
 *            BtofConfig  -- tof trays
-*            PhmdVersion -- photon multiplicity detector
+*            PhmdConfig  -- photon multiplicity detector
 *            SisdConfig  -- silicon strip
 *            PipeConfig  -- beam pipe
 *            CalbConfig  -- barrel calorimeter
@@ -400,7 +405,7 @@ replace[;ON#{#;] with [
    CorrNum = 0
 
 * No Photon multiplicity detector or Silicon strip by default, hence init the version:
-   PhmdVersion = 0
+   PhmdConfig  = 0
    SisdConfig  = 0
    PipeConfig  = 2 ! Default, Be pipe used in most of the runs =<2003
    BtofConfig  = 1 ! ctb only
@@ -550,7 +555,7 @@ If LL>1
                      CorrNum = 4;
                   "Photon Multiplicity Detector Version "
                      phmd=on;
-                     PhmdVersion = 1;
+                     PhmdConfig = 1;
                   "Silicon Strip Detector Version "
                      sisd=off;
                      SisdConfig = 1;
@@ -754,7 +759,7 @@ If LL>1
                      CorrNum = 2;
                   "Photon Multiplicity Detector Version "
                      phmd=on;
-                     PhmdVersion = 1;
+                     PhmdConfig = 1;
                 }
 
 ****************************************************************************************
@@ -806,7 +811,7 @@ If LL>1
 
                   "Photon Multiplicity Detector Version "
                      phmd=on;
-                     PhmdVersion = 2;
+                     PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
                      sisd=on;
@@ -862,7 +867,7 @@ If LL>1
 
                   "Photon Multiplicity Detector Version "
                      phmd=on;
-                     PhmdVersion = 2;
+                     PhmdConfig = 2;
 
                   "Silicon Strip Detector Version "
                      sisd=on;
@@ -927,7 +932,7 @@ If LL>1
 
                   "Photon Multiplicity Detector Version "
                      phmd=on;
-                     PhmdVersion = 1;
+                     PhmdConfig = 1;
 
                   "Silicon Strip Detector Version "
                      sisd=on;
@@ -1172,10 +1177,9 @@ If LL>1
 * is defined, pass the version number to its constructor
 * and create it:
 
-   if  (phmd.and.PhmdVersion>0) then
+   if  (phmd.and.PhmdConfig>0) then
       call AgDETP new ('PHMD')
-      call AgDETP add ('PMDG.version=',PhmdVersion,1)
-      call AgDETP add ('PMVR.Config=', PhmdVersion,1)
+      call AgDETP add ('PMVR.Config=', PhmdConfig,1)
       call phmdgeo
    endif
 
