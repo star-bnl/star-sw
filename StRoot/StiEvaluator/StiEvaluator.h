@@ -21,6 +21,7 @@ class StiKalmanTrack;
 class StiHit;
 class StiKalmanTrackNode;
 class trackPing;
+class StiTrackPairInfo;
 
 //Temp class to be stored in TTree, eventually move to it's own .h, .cxx files
 #include "TObject.h"
@@ -82,11 +83,11 @@ public:
     TrackEntry();
     virtual ~TrackEntry() {};
     
-    void setMcTrack(StMcTrack*);
-    void setGlobalTrack(StTrack*);
-    void setStiTrack(StiTrack*);
+    void setMcTrack(const StMcTrack*, unsigned int nTimesFound);
+    void setGlobalTrack(const StTrack*);
+    void setStiTrack(const StiTrack*);
     void setGlobalAssoc(const StTrackPairInfo*);
-    void setAssociation(const trackPing&);
+    void setAssociation(const StiTrackPairInfo&);
 
     
     void addStiHitEntry(const StiHitEntry&);
@@ -110,6 +111,7 @@ private:
     TClonesArray* mArray;
     
     //temp kinematic info : MC
+    unsigned int mcNTimesFound; //Number of times found by ITTF
     double mcTrackId;
     double mcTrackPsi;
     double mcTrackRapidity;
