@@ -1,7 +1,4 @@
-*****************************************************************
-
 MACRO run_stk i=1 
-
 i = [1]
 
 if [i] = 1 then
@@ -63,7 +60,7 @@ MACRO eval_stk
 		/dui/geant/Event/g2t_vertex _
 		/dui/data/svt/hits/scs_spt _
 		/dui/data/global/vertices/stk_vtx _
-	        /dui/data/srvt/tracks/groups _
+	        /dui/data/svt/tracks/groups _
 		/dui/data/svt/tracks/stk_track _
 		/dui/data/svt/tracks/stk_kine _
 	 	/dui/data/svt/tracks/mcgroups _
