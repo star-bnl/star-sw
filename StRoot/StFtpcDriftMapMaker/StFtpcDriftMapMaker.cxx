@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.2 2001/01/09 22:52:22 jcs Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.3 2001/03/07 15:12:32 jcs Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.3  2001/03/07 15:12:32  jcs
+// use MySQL database instead of params
+//
 // Revision 1.2  2001/01/09 22:52:22  jcs
 // remove include St_fmg_Module.h - now obsolete
 //
@@ -19,17 +22,13 @@
 #include "StFtpcMagboltz1.hh"
 #include "StFtpcMagboltz2.hh"
 #include "StFtpcClusterMaker/StFtpcParamReader.hh"
+#include "StFtpcClusterMaker/StFtpcDbReader.hh"
 
+#include "StMessMgr.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "TH1.h"
 #include "TH2.h"
-
-#include "tables/St_fss_param_Table.h"
-#include "tables/St_fss_gas_Table.h"
-#include "tables/St_fcl_padtrans_Table.h"
-#include "tables/St_fcl_det_Table.h"
-#include "tables/St_fcl_zrow_Table.h"
 
 #ifndef gufld
 #define gufld gufld_
@@ -43,9 +42,13 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const char *name):
 StMaker(name),
 m_fss_gas(0),
 m_fss_param(0),
-m_padtrans(0),
 m_det(0),
-m_zrow(0)
+    m_padrow_z(0),
+    m_efield(0),
+    m_vdrift(0),
+    m_deflection(0),
+    m_dvdriftdp(0),
+    m_ddeflectiondp(0)
 {
 }
 //_____________________________________________________________________________
@@ -60,10 +63,27 @@ Int_t StFtpcDriftMapMaker::Init(){
 
   m_fss_gas  = (St_fss_gas      *) local("fsspars/fss_gas");
   m_fss_param= (St_fss_param    *) local("fsspars/fss_param");
-  m_padtrans = (St_fcl_padtrans *) local("fclpars/padtrans");
   m_det      = (St_fcl_det      *) local("fclpars/det");
-  m_zrow     = (St_fcl_zrow     *) local("fclpars/zrow");
 
+  St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
+  if ( !ftpc_geometry_db ){
+     return kStErr;
+  }
+  St_DataSetIter       dblocal_geometry(ftpc_geometry_db);
+
+  m_padrow_z   = (St_ftpcPadrowZ  *)dblocal_geometry("ftpcPadrowZ" );
+
+  St_DataSet *ftpc_calibrations_db = GetDataBase("Calibrations/ftpc");
+  if ( !ftpc_calibrations_db ){
+     return kStErr;
+  }
+  St_DataSetIter       dblocal_calibrations(ftpc_calibrations_db);
+
+  m_efield     = (St_ftpcEField *)dblocal_calibrations("ftpcEField" );
+  m_vdrift     = (St_ftpcVDrift *)dblocal_calibrations("ftpcVDrift" );
+  m_deflection = (St_ftpcDeflection *)dblocal_calibrations("ftpcDeflection" );
+  m_dvdriftdp     = (St_ftpcdVDriftdP *)dblocal_calibrations("ftpcdVDriftdP" );
+  m_ddeflectiondp = (St_ftpcdDeflectiondP *)dblocal_calibrations("ftpcdDeflectiondP" );
   
   // Create Histograms    
 
@@ -75,9 +95,16 @@ Int_t StFtpcDriftMapMaker::Make(){
   // create parameter reader
   StFtpcParamReader *paramReader = new StFtpcParamReader(m_fss_gas,
 							 m_fss_param,
-							 m_padtrans,
-							 m_det,
-							 m_zrow);
+							 m_det);
+
+  // create FTPC data base reader
+  StFtpcDbReader *dbReader = new StFtpcDbReader(paramReader,
+                                                m_padrow_z,
+                                                m_efield,
+                                                m_vdrift,
+                                                m_deflection,
+                                                m_dvdriftdp,
+                                                m_ddeflectiondp);
   
   // create magboltz
   StFtpcMagboltz1 *magboltz = new StFtpcMagboltz1();
@@ -97,7 +124,7 @@ Int_t StFtpcDriftMapMaker::Make(){
 
   posVector[0]=0;
 
-  for(i=0; i < paramReader->numberOfPadtransBins(); i++) 
+  for(i=0; i < paramReader->numberOfMagboltzBins(); i++) 
     { 
       
       thisField = paramReader->minimumDriftField() 
@@ -107,7 +134,7 @@ Int_t StFtpcDriftMapMaker::Make(){
       posVector[1]=thisRadius; 
       for(j=0; j < paramReader->numberOfPadrowsPerSide(); j++) 
  	{ 
- 	  posVector[2]=paramReader->padrowZPosition(j); 
+ 	  posVector[2]=dbReader->padrowZPosition(j); 
  	  /* sets posVector to (0, radius, z) */ 
 	  
  	  gufld(posVector, bVector); 
@@ -124,7 +151,7 @@ Int_t StFtpcDriftMapMaker::Make(){
 	  psiAngle=0;
 	  upDrift=0;
 	  upAngle=0;
- 	  printf("loop %d of %d\n", i, paramReader->numberOfPadtransBins()); 
+ 	  printf("loop %d of %d\n", i, paramReader->numberOfMagboltzBins()); 
 //     	  printf("calling magboltz with field %f bMag %f bTheta %f pressure %f vDrift %f psiAngle %f\n", thisField, bMag, bTheta, pressure, vDrift, psiAngle);
 	  float gas1=paramReader->percentAr();
 	  float gas2=paramReader->percentCO2();
@@ -134,17 +161,19 @@ Int_t StFtpcDriftMapMaker::Make(){
  	  magboltz->magboltz_(&thisField, &bMag, &bTheta, &pressure, &gas1, &gas2, &gas3, &gas4, &temperature, &vDrift, &psiAngle, &eFinal); 
 //   	  printf("called magboltz got field %f bMag %f bTheta %f pressure %f vDrift %f psiAngle %f\n", thisField, bMag, bTheta, pressure, vDrift, psiAngle);  
  	  magboltz->magboltz_(&thisField, &bMag, &bTheta, &upPressure, &gas1, &gas2, &gas3, &gas4, &temperature, &upDrift, &upAngle, &eFinal); 
-	  printf("changing padtrans values from %f %f %f %f\n",paramReader->padtransVDrift(i,j), paramReader->padtransDeflection(i,j),paramReader->padtransdVDriftdP(i,j),paramReader->padtransdDeflectiondP(i,j));
-	  paramReader->setPadtransEField(i,thisField);
-	  paramReader->setPadtransVDrift(i,j,vDrift);
-	  paramReader->setPadtransDeflection(i,j,psiAngle);
-	  paramReader->setPadtransdVDriftdP(i,j,(upDrift-vDrift)/pOff);
-	  paramReader->setPadtransdDeflectiondP(i,j,(upAngle-psiAngle)/pOff);
-	  printf("                           to %f %f %f %f\n",paramReader->padtransVDrift(i,j), paramReader->padtransDeflection(i,j),paramReader->padtransdVDriftdP(i,j),paramReader->padtransdDeflectiondP(i,j));
+	  printf("changing magboltz values from %f %f %f %f\n",dbReader->magboltzVDrift(i,j), dbReader->magboltzDeflection(i,j),dbReader->magboltzdVDriftdP(i,j),dbReader->magboltzdDeflectiondP(i,j));
+	  dbReader->setMagboltzEField(i,thisField);
+	  dbReader->setMagboltzVDrift(i,j,vDrift);
+	  dbReader->setMagboltzDeflection(i,j,psiAngle);
+	  dbReader->setMagboltzdVDriftdP(i,j,(upDrift-vDrift)/pOff);
+	  dbReader->setMagboltzdDeflectiondP(i,j,(upAngle-psiAngle)/pOff);
+	  printf("                           to %f %f %f %f\n",dbReader->magboltzVDrift(i,j), dbReader->magboltzDeflection(i,j),dbReader->magboltzdVDriftdP(i,j),dbReader->magboltzdDeflectiondP(i,j));
 
  	} 
      } 
  
+  delete paramReader;
+  delete dbReader;
   delete magboltz;
 
   cout <<"finished fmg" << endl;
