@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.58 2000/01/31 15:18:23 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.59 2000/02/02 14:50:26 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.59  2000/02/02 14:50:26  fisyak
+// Put PreVtx into chain if tpc has been selected
+//
 // Revision 1.58  2000/01/31 15:18:23  fisyak
 // Add Laser Analysis
 //
@@ -299,7 +302,7 @@ BfcItem BFC[] = {
   {"calib"       ,""  ,"","tables,xdf2root"      ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"magF"        ,"","","NoFieldSet,tables,db","StMagFMaker","StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
-  {"tpc"         ,"tpc","","tables,tls,db,tcl,tpt"                     ,"StChainMaker","StChain","",kFALSE},
+  {"tpc"         ,"tpc","","tables,tls,db,tcl,tpt,PreVtx"              ,"StChainMaker","StChain","",kFALSE},
   {"tpcDB"       ,"tpcDB","tpc",""                                     ,"StTpcDbMaker","StTpcDb","",kFALSE},
   {"Trs"         ,"","tpc","scl,tpc_daq"                              ,"StTrsMaker","StTrsMaker","",kFALSE},
   {"tpc_daq"     ,"tpc_raw","tpc",""                        ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
@@ -308,6 +311,7 @@ BfcItem BFC[] = {
   {"tpt"         ,"tpc_tracks","tpc","tables,tls"          ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
   {"laser"       ,"tpc_tracks","tpc","tdaq,tpc,-tpt"
                                            ,"StLaserEventMaker","StLaserEvent,StLaserEventMaker","",kFALSE},  
+  {"PreVtx"      ,"","","tpt"         ,"StPreVertexMaker","St_tpc,St_svt,St_global,St_dst_Maker","",kFALSE},
   {"svt"         ,"svt","","tables,srs,stk"                            ,"StChainMaker","StChain","",kFALSE},
   {"srs"         ,"svt_hits","svt","tls"            ,"St_srs_Maker","St_tpc,St_svt,St_srs_Maker","",kFALSE},
   {"stk"         ,"svt_tracks","svt","tls"          ,"St_stk_Maker","St_tpc,St_svt,St_stk_Maker","",kFALSE},
@@ -337,16 +341,16 @@ BfcItem BFC[] = {
   {"Xi"          ,"xi","global","SCL,tables,tls"    ,"StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Kink"        ,"kink","global","SCL,tables,tls","StKinkMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"dst"         ,"dst","global","SCL,tables,tls","St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"Event"       ,"StEventMaker","","tables,SCL"          ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
-  {"HighPtTag"   ,"","","analysis"                                       ,"","","Alias to analysis",kFALSE},
+  {"Event"       ,"","","tables,SCL"                      ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
+  {"analysis"    ,"","","Event"           ,"StAnalysisMaker","StAnalysisMaker","Exampe of Analysis",kFALSE},
+  //  {"HighPtTag"   ,"","","analysis"                                       ,"","","Alias to analysis",kFALSE},
   {"TagsChain"   ,"TagsChain","",""                                    ,"StChainMaker","StChain","",kFALSE},
-  {"analysis"    ,"","TagsChain","Event"           ,"StAnalysisMaker","StAnalysisMaker","HighPtTag",kFALSE},
-  {"EbyeScaTags" ,"","TagsChain","Event"   ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","EbyeScaTags",kFALSE},
+  //  {"EbyeScaTags" ,"","TagsChain","Event"   ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","EbyeScaTags",kFALSE},
   {"Flow"        ,"","TagsChain","Event"                            ,"StFlowMaker","StFlowMaker","",kFALSE},
   {"FlowTag"     ,"","TagsChain","Event,Flow"                 ,"StFlowTagMaker","StFlowTagMaker","",kFALSE},
   {"FlowAnalysis","","TagsChain","Event,Flow"       ,"StFlowAnalysisMaker","StFlowAnalysisMaker","",kFALSE},
   {"StrangeTags" ,"","TagsChain","Event"              ,"StStrangeTagsMaker","StStrangeTagsMaker","",kFALSE},
-  {"tags"        ,"","TagsChain","Event,HighPtTag,EbyeScaTags,FlowTag,StrangeTags"    
+  {"tags"        ,"","TagsChain","Event,FlowTag,StrangeTags"    
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
   {"QA"          ,"QA","","tables,SCL,global"             ,"St_QA_Maker","St_Tables,St_QA_Maker","",kFALSE},
   {"QAC"         ,"CosmicsQA","tables",""         ,"StQACosmicMaker","St_Tables,StQACosmicMaker","",kFALSE},
