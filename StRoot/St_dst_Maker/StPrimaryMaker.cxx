@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.9 1999/09/13 15:07:05 caines Exp $
+// $Id: StPrimaryMaker.cxx,v 1.10 1999/09/13 15:17:58 caines Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.10  1999/09/13 15:17:58  caines
+// Changed memset(&row,0,m_evr_evrpar->GetRowSize());  to memset(&row,0,m_egr_egrpar->GetRowSize()); for the egr2 allocation
+//
 // Revision 1.9  1999/09/13 15:07:05  caines
 // Added creation of garb(tphit) and garb(tptrack) so it is possible
 // to run with TPC turned off
@@ -105,7 +108,7 @@ Int_t StPrimaryMaker::Init(){
   m_egr2_egrpar = new St_egr_egrpar("egr2_egrpar",1);
   {  
     egr_egrpar_st row;
-    memset(&row,0,m_evr_egrpar->GetRowSize());
+    memset(&row,0,m_egr_egrpar->GetRowSize());
     row.scenario =  0;
     row.mxtry =    10;
     row.minfit =    5;
