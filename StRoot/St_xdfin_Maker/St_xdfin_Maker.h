@@ -28,7 +28,7 @@ class St_xdfin_Maker : public StIOInterFace {
   virtual void   Init_Done (Bool_t k=kFALSE){m_InitDone = k;} // *MENU*
   virtual Int_t  Make();
   virtual void   PrintInfo();
-  virtual void   Skip(Int_t Nskip=1);
+  virtual void   Skip(Int_t Nskip=1); // *MENU*
 //	for compatability with StIOInterFace
   void SetBranch(const Char_t *brName,const Char_t *file=0,const Char_t *iomode="r"){};
 
