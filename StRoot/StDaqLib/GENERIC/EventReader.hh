@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.hh,v 1.14 2002/01/17 17:29:26 jeromel Exp $
+ * $Id: EventReader.hh,v 1.15 2002/01/17 18:29:55 jeromel Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: common definitions for all detectors
@@ -21,7 +21,11 @@
  *
  ***************************************************************************
  * $Log: EventReader.hh,v $
+ * Revision 1.15  2002/01/17 18:29:55  jeromel
+ * After I looked at the code, corrections from Akio (pass2).
+ *
  * Revision 1.14  2002/01/17 17:29:26  jeromel
+ *
  * Files:  CVS: DetectorReader.cxx EventReader.cxx EventReader.hh CVS: RecHeaderFormats.hh CVS: ----------------------------------------------------------------------
  * Modifications for FPD support
  *
@@ -126,12 +130,13 @@ struct EventInfo // return from EventReader::getEventInfo()
   unsigned char SVTPresent;
   unsigned char TOFPresent;
   unsigned char EMCPresent;
-  unsigned char SMDPresent;
-  unsigned char FTPCPresent;
   unsigned char FPDPresent;
+  unsigned char FTPCPresent;
+  unsigned char PMDPresent;
   unsigned char RICHPresent;
   unsigned char TRGDetectorsPresent;
   unsigned char L3Present;
+  unsigned char SMDPresent;
 };
 
 // Each sequence contains one hit (zero suppressed data)

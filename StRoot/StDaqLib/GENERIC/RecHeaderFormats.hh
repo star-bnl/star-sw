@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: RecHeaderFormats.hh,v 1.6 2002/01/17 17:29:26 jeromel Exp $
+ * $Id: RecHeaderFormats.hh,v 1.7 2002/01/17 18:29:55 jeromel Exp $
  * Author: M.W. Schulz, Jeff Landgraf, M.J. LeVine
  ***************************************************************************
  * Description: Bank header formats common to all detectors in STAR:
@@ -11,7 +11,11 @@
  *
  ***************************************************************************
  * $Log: RecHeaderFormats.hh,v $
+ * Revision 1.7  2002/01/17 18:29:55  jeromel
+ * After I looked at the code, corrections from Akio (pass2).
+ *
  * Revision 1.6  2002/01/17 17:29:26  jeromel
+ *
  * Files:  CVS: DetectorReader.cxx EventReader.cxx EventReader.hh CVS: RecHeaderFormats.hh CVS: ----------------------------------------------------------------------
  * Modifications for FPD support
  *
@@ -139,7 +143,6 @@ struct Bank_DATAP : public Bank
   Pointer SVT;
   Pointer TOF;
   Pointer EMC;
-  //  Pointer ShowerMax;
   Pointer FPD;
   Pointer FTPC;
   Pointer PMD;

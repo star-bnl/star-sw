@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.35 2002/01/17 17:29:26 jeromel Exp $
+ * $Id: EventReader.cxx,v 1.36 2002/01/17 18:29:54 jeromel Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,7 +23,11 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.36  2002/01/17 18:29:54  jeromel
+ * After I looked at the code, corrections from Akio (pass2).
+ *
  * Revision 1.35  2002/01/17 17:29:26  jeromel
+ *
  * Files:  CVS: DetectorReader.cxx EventReader.cxx EventReader.hh CVS: RecHeaderFormats.hh CVS: ----------------------------------------------------------------------
  * Modifications for FPD support
  *
@@ -628,6 +632,7 @@ EventInfo EventReader::getEventInfo()
   ei.EMCPresent = (dp->DetectorPresence & 0x8);
   ei.FPDPresent  = (dp->DetectorPresence & 0x10);
   ei.FTPCPresent = (dp->DetectorPresence & 0x20);
+  ei.PMDPresent  = (dp->DetectorPresence & 0x40);
   ei.RICHPresent = (dp->DetectorPresence & 0x80);
   ei.TRGDetectorsPresent = (dp->DetectorPresence & 0x100);
   ei.L3Present = (dp->DetectorPresence & 0x200);
@@ -651,9 +656,9 @@ void EventReader::printEventInfo()
   if (ei.SVTPresent) printf("SVT ");
   if (ei.TOFPresent) printf("TOF ");
   if (ei.EMCPresent) printf("EMC ");
-  if (ei.SMDPresent) printf("SMD ");
-  if (ei.FTPCPresent) printf("FTPC ");
   if (ei.FPDPresent) printf("FPD ");
+  if (ei.FTPCPresent) printf("FTPC ");
+  if (ei.PMDPresent) printf("PMD ");
   if (ei.RICHPresent) printf("RICH ");
   if (ei.TRGDetectorsPresent) printf("TRG ");
   if (ei.L3Present) printf("L3 ");
@@ -678,9 +683,9 @@ void EventReader::printEventInfo(FILE * fd)
   if (ei.SVTPresent) fprintf(fd,"SVT ");
   if (ei.TOFPresent) fprintf(fd,"TOF ");
   if (ei.EMCPresent) fprintf(fd,"EMC ");
-  if (ei.SMDPresent) fprintf(fd,"SMD ");
-  if (ei.FTPCPresent) fprintf(fd,"FTPC ");
   if (ei.FPDPresent) fprintf(fd,"FPD ");
+  if (ei.FTPCPresent) fprintf(fd,"FTPC ");
+  if (ei.PMDPresent)  fprintf(fd,"PMD ");
   if (ei.RICHPresent) fprintf(fd,"RICH ");
   if (ei.TRGDetectorsPresent) fprintf(fd,"TRG ");
   if (ei.L3Present) fprintf(fd,"L3 ");
