@@ -1,0 +1,79 @@
+#!/usr/bin/csh
+#  $Id: hijing_sim.batch,v 1.1 1998/04/04 15:00:03 fisyak Exp $
+#  $Log: hijing_sim.batch,v $
+#  Revision 1.1  1998/04/04 15:00:03  fisyak
+#  add hijing_sim.batch
+#
+#  Revision 1.1  1998/03/23 02:34:29  fisyak
+#  Add pyhtia batch job
+#
+# This script is to submit an example job to execute  NQS queues.
+# You can submit it with the command: 
+#	qsub -q express star_nqs.batch
+# You can modify your copy of this script to suit your needs.
+#
+# When this script starts executing, assumes as default directory
+# the directory from where you submitted it. First compiles any
+# fortran files and after that creates the executable at the NQS
+# workspace. Several files are linked to the current directory to
+# create the default running environment.
+# 
+# During the execution output files are written at the directory you
+# submitted the script. Check if your quota space is enough.
+#
+#
+# NQS embedded directives  follow
+#@$-lt 1000      # time limit in seconds
+#@$-r  hijin     # request name
+#@$-lf 90mb      # output file size limit
+#$-eo            # merge std error and out
+#$-me            # send mail upon termination
+#$-m bes         # Mail at beginning/end/on suspension
+#$-M $USER       # Send mail to these users
+#$-s /usr/local/bin/tcsh # under what shell to execute
+#
+# Go to the directory from where job was submitted.
+#
+#printenv
+echo Starting job execution at `date`
+#
+cd $SCRATCH
+if (  -d hijin_sim2 == 0) mkdir hijin_sim2
+cd hijin_sim2
+source $STAR/mgr/setup_gstar
+staf -w 0 << EOF
+Root  Geant
+* sets standard geant geometry and  parameters for "physics on" running
+def $STAR/kumacs/sim
+exec  set_hadr_phys_on
+exec  load_star_geom
+*make geometry
+*
+* make geant to save secondaries which produced TPC hits:
+Mode TRAC  SIMU 1
+detp TRAC  DCAY 210 210 0.1 0.01
+mode tpce  simu 2
+debug off
+
+* keep track of memory/cpu consumption
+ghist star.his  STAR
+gstat time size mult stak
+
+user/input  U /star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/auau_ce_b0-2_801_1000.xdf
+user/output O auau_gstar.fzd
+trig  1
+
+* show histograms
+ge/rz/cd //PAWC
+hi/list
+
+exit
+EOF
+#
+# Clean files/links not needed anymore...
+echo
+echo   Job finished at `date`
+#
+#END
+
+
