@@ -6,9 +6,10 @@ class StChain;
 StChain *chain=0;
 
 void RunStiMaker(Int_t nevents=1,
-		 //const char *MainFile="/star/data04/reco/reco/minbias/P00hm/2000/08/*.dst.root")
-		 const char *MainFile="/direct/star+data02/scratch/haibin/geantTest/muon_10.dst.root")
-		 //const char * MainFile = "/afs/rhic/star/users/mmiller/code/ITF/geant/pion_50_neg.dst.root")
+		 bool run=false,
+		 const char* MainFile="/star/data13/reco/dev/2001/08/*2235009*.event.root")
+		 //const char* MainFile="/afs/rhic/star/users/mmiller/code/ITF/geant/pion_10_neg.event.root")
+    //const char *MainFile="/direct/star+data02/scratch/haibin/geantTest/muon_10.dst.root")
 {    
     // Dynamically link needed shared libs
     
@@ -84,12 +85,13 @@ void RunStiMaker(Int_t nevents=1,
     
     //StiMaker
     StiMaker* anaMk = StiMaker::instance();
-//    anaMk->setMaterialBuildPath("/scr20/TempIttf/StiGeometryParameters/Materials");
-//    anaMk->setDetectorBuildPath("/scr20/TempIttf/StiGeometryParameters/Detectors");
-//    anaMk->setPolygonBuildPath("/scr20/TempIttf/StiGeometryParameters/Polygons");
+    
     anaMk->setMaterialBuildPath("/scr20/ittf/StiGeometryParameters/Materials");
     anaMk->setDetectorBuildPath("/scr20/ittf/StiGeometryParameters/Detectors");
-    
+    enum StTrackType {global, primary, tpt, secondary};
+    //anaMk->setDrawableStTrackType(primary);
+    anaMk->setDrawableStTrackType(global);
+
     // now execute the chain member functions    
     chain->PrintInfo();
     
@@ -102,7 +104,7 @@ void RunStiMaker(Int_t nevents=1,
     
     cout <<"Starting Event Loop"<<endl;
 
-    if (0) {
+    if (run) {
 	int istat=0,iev=1;
     EventLoop: if (iev<=nevents && !istat) {
 	chain->Clear();
