@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.50 1999/11/13 17:30:05 fine Exp $
+// $Id: St_geant_Maker.cxx,v 1.51 1999/12/07 15:44:25 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.51  1999/12/07 15:44:25  fisyak
+// Add geane, new TGeant3 from Alice
+//
 // Revision 1.50  1999/11/13 17:30:05  fine
 // scope for i within for loop fixed
 //
@@ -223,27 +226,8 @@ extern "C" int isprint (int);
 #include "g2r/St_g2t_esm_Module.h"
 #include "g2r/St_g2t_zdc_Module.h"
 #include "g2r/St_g2t_vpd_Module.h"
-
-common_gcbank *cbank;
-common_quest  *cquest; 
-common_gclink *clink; 
-common_gccuts *ccuts; 
-common_gcflag *cflag; 
-common_gckine *ckine; 
-common_gcking *cking; 
-common_gcmate *cmate; 
-common_gctmed *ctmed; 
-common_gctrak *ctrak; 
-common_gctpol *ctpol; 
-common_gcvolu *cvolu; 
-common_gcnum  *cnum; 
-common_gcsets *csets; 
-
-Int_t *z_iq, *z_lq; 
-Float_t *z_q; 
-Int_t   nlev;
+#include "StarCallf77.h" 
 #ifdef F77_NAME
-#define gfnhit_ F77_NAME(gfnhit,GFNHIT)
 #define csjcal_ F77_NAME(csjcal,CSJCAL)
 #define csaddr_ F77_NAME(csaddr,CSADDR)
 #endif
@@ -256,6 +240,15 @@ extern "C" long int type_of_call csjcal_(
                             int  *narg,   /* number   of arguments      */
                             ...);         /* other narg arguments       */
 
+Quest_t  *cquest; 
+Gclink_t *clink; 
+Gcflag_t *cflag; 
+Gcvolu_t *cvolu; 
+Gcnum_t  *cnum; 
+Int_t *z_iq, *z_lq; 
+Float_t *z_q; 
+
+Int_t   nlev;
 static Int_t irot = 0;
 static St_Node *topnode=0;
 typedef struct {
@@ -264,29 +257,13 @@ typedef struct {
 typedef struct {
   Float_t lseen, lstyle, lwidth, lcolor, lfill;
 } attributes;
-
-#define gfnhit gfnhit_
-#define csaddr csaddr_
-#define csjcal csjcal_
-
-extern "C" void     type_of_call  gfnhit_(char*,char*,int*,int,int);
-extern "C" void     type_of_call  agnzgete_(int* ILK,int* IDE,
-             int* NPART,int* IRUN,int* IEVT,char* CGNAM,
-             float* VERT,int* IWTFL,float* WEIGH);
-/*
-* Input : ILK   - Link number  : 1 = primary, 2 = secondary (obsolete)    *
-*         IDE   - ID of event in gate ( ZEBRA IDN)                        *
-* Output: NPART - Number of particles in event record                     *
-*         IRUN  - run number as recorded by generator                     *
-*         IEVT  - event number as recorded by generator                   *
-*         CGNAM - generator name                                          *
-*         VERT(4)- x,y,z,t of event (metres,seconds or mm,mm/c)           *
-*         IWTFL - weight flag                                             *
-*         WEIGH - event weight                                            *
-*/
+extern "C" 
+{
+  }
 ClassImp(St_geant_Maker)
 
 St_DataSet *St_geant_Maker::fgGeom = 0;
+TGeant3  *St_geant_Maker::geant3 = 0;
 //_____________________________________________________________________________
 St_geant_Maker::St_geant_Maker(const Char_t *name):
 StMaker(name){
@@ -336,9 +313,18 @@ St_DataSet  *St_geant_Maker::GetDataSet (const char* logInput,const StMaker *upp
 Int_t St_geant_Maker::Init(){
 // Initialize GEANT
   
-  if (! TGeant3::fgGeant) {
+  if (! geant3) {
     PrintInfo();
-    new TGeant3("Geant","C++ Interface to Geant3",nwgeant,nwpaw,iwtype); 
+    const char* title = "C++ Interface to Geant3";
+    geant3 = new TGeant3(title,nwgeant,nwpaw,iwtype); 
+    cquest = (Quest_t  *) geant3->Quest();
+    clink  = (Gclink_t *) geant3->Gclink();
+    cflag  = (Gcflag_t *) geant3->Gcflag();
+    cvolu  = (Gcvolu_t *) geant3->Gcvolu();
+    cnum   = (Gcnum_t  *) geant3->Gcnum();
+    z_iq   = (Int_t    *) geant3->Iq();
+    z_lq   = (Int_t    *) geant3->Lq();
+    z_q    = (Float_t  *) geant3->Q();
   }
 // Create Histograms    
   return StMaker::Init();
@@ -360,7 +346,7 @@ Int_t St_geant_Maker::Make()
     // empty g2t_event
     St_g2t_event *g2t_event = new St_g2t_event("g2t_event",1);  
     m_DataSet->Add(g2t_event);
-    agnzgete_(&link,&ide,&npart,&irun,&ievt,cgnam,vert,&iwtfl,&weigh);
+    geant3->Agnzgete(link,ide,npart,irun,ievt,cgnam,vert,iwtfl,weigh);
 
     fEvtHddr->SetRunNumber(irun);
     fEvtHddr->SetEventNumber(ievt);
@@ -406,8 +392,8 @@ Int_t St_geant_Maker::Make()
 
     //---------------------- inner part -------------------------//
 
-    gfnhit_ ("SVTH","SVTD", &nhit1, 4,4);
-    gfnhit_ ("SVTH","SFSD", &nhit2, 4,4);
+    geant3->Gfnhit("SVTH","SVTD", nhit1);
+    geant3->Gfnhit("SVTH","SFSD", nhit2);
     nhits=nhit1+nhit2;
     if (nhits>0) { 
       St_g2t_svt_hit *g2t_svt_hit = new St_g2t_svt_hit("g2t_svt_hit",nhits);
@@ -417,7 +403,7 @@ Int_t St_geant_Maker::Make()
 //	     ===============================
     }
 
-    gfnhit_ ("TPCH","TPAD", &nhits, 4,4);
+    geant3->Gfnhit("TPCH","TPAD", nhits);
     if (nhits>0){ 
       St_g2t_tpc_hit *g2t_tpc_hit = new St_g2t_tpc_hit("g2t_tpc_hit",nhits);
       m_DataSet->Add(g2t_tpc_hit);
@@ -426,7 +412,7 @@ Int_t St_geant_Maker::Make()
 //	     ==============================
     }
 
-    gfnhit_ ("TPCH","TMSE", &nhits, 4,4);
+    geant3->Gfnhit("TPCH","TMSE", nhits);
     if (nhits>0) { 
       St_g2t_mwc_hit *g2t_mwc_hit = new St_g2t_mwc_hit("g2t_mwc_hit",nhits);
       m_DataSet->Add(g2t_mwc_hit);
@@ -434,7 +420,7 @@ Int_t St_geant_Maker::Make()
 //	     ==============================
     }
 
-    gfnhit_ ("FTPH","FSEC", &nhits, 4,4);
+    geant3->Gfnhit("FTPH","FSEC", nhits);
     if (nhits>0){
       St_g2t_ftp_hit *g2t_ftp_hit = new St_g2t_ftp_hit("g2t_ftp_hit",nhits);
       m_DataSet->Add(g2t_ftp_hit);
@@ -442,7 +428,7 @@ Int_t St_geant_Maker::Make()
 //           ===============================
     }
 
-    gfnhit_ ("BTOH","BXSA", &nhits, 4,4);
+    geant3->Gfnhit("BTOH","BXSA", nhits);
     if (nhits>0) { 
       St_g2t_ctf_hit *g2t_ctb_hit = new St_g2t_ctf_hit("g2t_ctb_hit",nhits);
       m_DataSet->Add(g2t_ctb_hit);
@@ -450,7 +436,7 @@ Int_t St_geant_Maker::Make()
 //           ==============================
     }
 
-    gfnhit_ ("BTOH","BCSB", &nhits, 4,4);
+    geant3->Gfnhit("BTOH","BCSB", nhits);
     if (nhits>0) {
       St_g2t_ctf_hit *g2t_tof_hit = new St_g2t_ctf_hit("g2t_tof_hit",nhits);
       m_DataSet->Add(g2t_tof_hit);
@@ -458,8 +444,8 @@ Int_t St_geant_Maker::Make()
 //           ==============================
     }
 
-    gfnhit_ ("RICH","RGAP", &nhit1, 4,4);
-    gfnhit_ ("RICH","RCSI", &nhit2, 4,4);
+    geant3->Gfnhit("RICH","RGAP", nhit1);
+    geant3->Gfnhit("RICH","RCSI", nhit2);
     nhits=nhit1+nhit2;
     if (nhits>0) {
       St_g2t_rch_hit *g2t_rch_hit = new St_g2t_rch_hit("g2t_rch_hit",nhits);
@@ -469,7 +455,7 @@ Int_t St_geant_Maker::Make()
     }
     
     //---------------------- calorimeters -------------------------//
-    gfnhit_ ("CALH","CSUP", &nhits, 4,4);
+    geant3->Gfnhit("CALH","CSUP", nhits);
     if (nhits>0) {
       St_g2t_emc_hit *g2t_emc_hit = new St_g2t_emc_hit("g2t_emc_hit",nhits);
       m_DataSet->Add(g2t_emc_hit);
@@ -477,7 +463,7 @@ Int_t St_geant_Maker::Make()
 //           ==============================
     }
 
-    gfnhit_ ("CALH","CSDA", &nhits, 4,4);
+    geant3->Gfnhit("CALH","CSDA", nhits);
     if (nhits>0) {
       St_g2t_emc_hit *g2t_smd_hit = new St_g2t_emc_hit("g2t_smd_hit",nhits);
       m_DataSet->Add(g2t_smd_hit);
@@ -485,7 +471,7 @@ Int_t St_geant_Maker::Make()
 //           ==============================
     }
 
-    gfnhit_ ("ECAH","ESCI", &nhits, 4,4);
+    geant3->Gfnhit("ECAH","ESCI", nhits);
     if (nhits>0) {
       St_g2t_emc_hit *g2t_eem_hit = new St_g2t_emc_hit("g2t_eem_hit",nhits);
       m_DataSet->Add(g2t_eem_hit);
@@ -493,7 +479,7 @@ Int_t St_geant_Maker::Make()
 //           ==============================
     }
 
-    gfnhit_ ("ECAH","EXSE", &nhits, 4,4);
+    geant3->Gfnhit("ECAH","EXSE", nhits);
     if (nhits>0) {
       St_g2t_emc_hit *g2t_esm_hit = new St_g2t_emc_hit("g2t_esm_hit",nhits);
       m_DataSet->Add(g2t_esm_hit);
@@ -501,7 +487,7 @@ Int_t St_geant_Maker::Make()
 //           ==============================
     }
 
-    gfnhit_ ("VPDH","VRAD", &nhits, 4,4);
+    geant3->Gfnhit("VPDH","VRAD", nhits);
     if (nhits>0) {
       St_g2t_vpd_hit *g2t_vpd_hit = new St_g2t_vpd_hit("g2t_vpd_hit",nhits);
       m_DataSet->Add(g2t_vpd_hit);
@@ -509,7 +495,7 @@ Int_t St_geant_Maker::Make()
 //           ==============================
     }
 
-    gfnhit_ ("ZCAH","QSCI", &nhits, 4,4);
+    geant3->Gfnhit("ZCAH","QSCI", nhits);
     if (nhits>0) {
       St_g2t_emc_hit *g2t_zdc_hit = new St_g2t_emc_hit("g2t_zdc_hit",nhits);
       m_DataSet->Add(g2t_zdc_hit);
@@ -520,7 +506,7 @@ Int_t St_geant_Maker::Make()
 #if 0
     Char_t *g2t = "g2t_";
     Int_t  narg = 0;
-    addrfun address  = (addrfun ) csaddr(g2t,strlen(g2t));
+    addrfun address  = (addrfun ) geant3->Csaddr(g2t);
     if (address) csjcal(&address,&narg);
 #endif
 
@@ -531,24 +517,26 @@ Int_t St_geant_Maker::Make()
 void St_geant_Maker::LoadGeometry(Char_t *option){
   Init(); 
   if (strlen(option)) Do (option); 
-  geometry_();
+  geant3->Geometry();
   Do("gclose all");
-  agstroot_();
+  geant3->Agstroot();
 }
-//_____________________________________________________________________________
 //_____________________________________________________________________________
 void St_geant_Maker::Draw()
 { 
-  int    idiv=2,Ldummy,one=1,zero=0,iw=1;
-  Char_t   *path=" ",*opt="IN";
-  dzddiv_ (&idiv,&Ldummy,path,opt,&one,&zero,&one,&iw,1,2);
+  Int_t two = 2;
+  Int_t zero = 0;
+  Int_t one = 1;
+  Char_t *path = " ";
+  Char_t *opt = "IN";
+  geant3->Dzddiv (two,zero,path,opt,one,zero,one,one);
 }
 //_____________________________________________________________________________
 void St_geant_Maker::Do(const Char_t *job)
 {  
   Init();
   int l=strlen(job);
-  if (l) kuexel_(job,l);
+  if (l) geant3->Kuexel(job);
 }
 //_____________________________________________________________________________
 void St_geant_Maker::G2root()
@@ -670,10 +658,10 @@ St_Node *St_geant_Maker::MakeNode(TString *name, Int_t ivo, Int_t Nlevel, Int_t 
 	Int_t   Ierr;
 	Float_t xx[3], theta1,phi1, theta2,phi2, theta3,phi3, type;
 
-	glvolu (&nlevv, &Names[0], &Numbers[0], &Ierr);
+	Ierr = geant3->Glvolu(nlevv, Names, Numbers);
 
-	gfxzrm_ (&Nlevel, &xx[0],&xx[1],&xx[2], 
-                          &theta1,&phi1, &theta2,&phi2, &theta3,&phi3, &type);
+	geant3->Gfxzrm(Nlevel, xx[0],xx[1],xx[2], 
+		       theta1,phi1, theta2,phi2, theta3,phi3, type);
         St_Node *newnode = (St_Node *) topnode->FindObject(namem.Data());
 
 	if (!newnode) 
@@ -799,8 +787,8 @@ TShape *St_geant_Maker::MakeShape(TString *name, Int_t ivo){
 void St_geant_Maker::Call(const Char_t *name)
 {  
   Int_t  narg = 0;
-  addrfun address  = (addrfun ) csaddr((char*)name,strlen(name));
-  if (address) csjcal(&address,&narg);
+  addrfun *address  = (addrfun *) csaddr_((Char_t *)name, strlen(name));
+  if (address) csjcal_(address, &narg);
 }
 //_____________________________________________________________________________
 St_Node *St_geant_Maker::Work()
@@ -822,7 +810,7 @@ St_Node *St_geant_Maker::Work()
  
   printf(" looping on agvolume \n");
   //   ===============================================================
-  while (agvolume_(&node,&volu,&position,&mother,&who,&copy,&p,&npar)) 
+  while (geant3->Agvolume(node,volu,position,mother,who,copy,p,npar)) 
   { // ===============================================================
   
     typedef enum {BOX=1,TRD1,TRD2,TRAP,TUBE,TUBS,CONE,CONS,SPHE,PARA,
@@ -916,8 +904,8 @@ St_Node *St_geant_Maker::Work()
     }
 
     if (node)
-    {  gfxzrm_ (&nlev, &xx[0],&xx[1],&xx[2], &theta1,&phi1, 
-                       &theta2,&phi2, &theta3,&phi3, &type);
+    {  geant3->Gfxzrm(nlev, xx[0],xx[1],xx[2], theta1,phi1, 
+                       theta2,phi2, theta3,phi3, type);
        TRotMatrix *matrix=GetMatrix(theta1,phi1,theta2,phi2,theta3,phi3);
        node->Add(newNode,xx[0],xx[1],xx[2],matrix,UInt_t(copy));
     }
@@ -929,13 +917,13 @@ St_Node *St_geant_Maker::Work()
   return GetNode();
 }
 
-//------------------------------------------------------------------------
+//_____________________________________________________________________________
 static Bool_t CompareMatrix(TRotMatrix &a,TRotMatrix &b)
 {  double *pa=a.GetMatrix(); double *pb=b.GetMatrix();
    for (int i=0; i<9; i++)  if (pa[i]!=pb[i]) return kFALSE;
    return kTRUE;
 }
-//------------------------------------------------------------------------
+//_____________________________________________________________________________
 TRotMatrix *St_geant_Maker::GetMatrix(float thet1, float phii1,
                                       float thet2, float phii2,
                                       float thet3, float phii3)
@@ -953,7 +941,37 @@ TRotMatrix *St_geant_Maker::GetMatrix(float thet1, float phii1,
    } }
    return pattern;
 }
-//------------------------------------------------------------------------
+//_____________________________________________________________________________
+void  St_geant_Maker::SetDebug(EDebugLevel dbl)
+{
+  StMaker::SetDebug(dbl);
+  if (GetDebug()) { Do("debug on;"); } else {Do("debug off;"); }
+}
+//_____________________________________________________________________________
+Int_t St_geant_Maker::SetInputFile(const char *file)
+{
+  fInputFile = file;
+  TString kuip("gfile p "); kuip += fInputFile;
+  Do((const char*)kuip); 
+  if (cquest->iquest[0]) {return kStEOF;}
+  Do("gclose all");
+  geant3->Agstroot();
+  return kStOK;
+}
+//_____________________________________________________________________________
+Int_t St_geant_Maker::Skip(Int_t Nskip)
+{
+  if (Nskip >= 0) {
+    Char_t kuip[20];
+    sprintf (kuip,"skip %i",Nskip);
+     if (GetDebug()) printf("St_geant_Maker skip %i\n record(s)",Nskip); 
+    Do((const char*)kuip);
+    
+    if (cquest->iquest[0]) {return kStEOF;}
+  }
+  return kStOK;
+}
+//_____________________________________________________________________________
 void type_of_call rootmaptable_(const Char_t* cdest,const Char_t* table , const Char_t* spec, 
                                                       Int_t *k, Char_t *iq, 
 				const int lCdest,const int lTable, const int lSpec)
@@ -966,7 +984,7 @@ void type_of_call rootmaptable_(const Char_t* cdest,const Char_t* table , const 
   delete [] Table;
   delete [] Spec;
 }
-//------------------------------------------------------------------------
+//_____________________________________________________________________________
 void St_geant_Maker::RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec, 
                                                       Int_t *k, Char_t *iq)
 {
@@ -981,35 +999,4 @@ void St_geant_Maker::RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec,
                   << " has not been defined yet. Skip it" 
                   << endl;
 }
-//------------------------------------------------------------------------
-void  St_geant_Maker::SetDebug(EDebugLevel dbl)
-{
-  StMaker::SetDebug(dbl);
-  if (GetDebug()) { Do("debug on;"); } else {Do("debug off;"); }
-}
-//------------------------------------------------------------------------
-Int_t St_geant_Maker::SetInputFile(const char *file)
-{
-  fInputFile = file;
-  TString kuip("gfile p "); kuip += fInputFile;
-  Do((const char*)kuip); 
-  if (cquest->iquest[0]) {return kStEOF;}
-  Do("gclose all");
-  agstroot_();
-  return kStOK;
-}
-//------------------------------------------------------------------------
-Int_t St_geant_Maker::Skip(Int_t Nskip)
-{
-  if (Nskip >= 0) {
-    Char_t kuip[20];
-    sprintf (kuip,"skip %i",Nskip);
-     if (GetDebug()) printf("St_geant_Maker skip %i\n record(s)",Nskip); 
-    Do((const char*)kuip);
-    
-    if (cquest->iquest[0]) {return kStEOF;}
-  }
-  return kStOK;
-}
-//------------------------------------------------------------------------
 

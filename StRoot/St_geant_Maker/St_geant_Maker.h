@@ -1,4 +1,4 @@
-// $Id: St_geant_Maker.h,v 1.18 1999/11/11 05:16:30 fine Exp $
+// $Id: St_geant_Maker.h,v 1.19 1999/12/07 15:44:25 fisyak Exp $
 
 #ifndef STAR_St_geant_Maker
 #define STAR_St_geant_Maker
@@ -8,12 +8,10 @@
 // St_geant_Maker virtual base class for Maker                          //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#ifndef StMaker_H
 #include "StMaker.h"
- class St_Node;
-
+class St_Node;
 #ifndef __CINT__
-#include "fortranc.h"
+#include "StarCallf77.h" 
 #define rootmaptable_ F77_NAME(rootmaptable,ROOTMAPTABLE)
 #define agvolume_     F77_NAME(agvolume,AGVOLUME)
 extern "C" {
@@ -22,8 +20,7 @@ R__EXTERN Int_t type_of_call agvolume_(St_Node**,Float_t**,Float_t**,Float_t**,
                                        Int_t*,Int_t*,Float_t**,Int_t*);
 }
 #endif
-
-#endif
+class TGeant3;
 class TRotMatrix;
 class St_geant_Maker : public StMaker {
 protected:
@@ -63,14 +60,14 @@ public:
            Int_t SetInputFile(const char* file);
 
    St_Node* GetNode() { return fNode; }
-   //----------------------------------------------------------------------
-static void RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec, Int_t *k, Char_t *iq);
-
-protected:
-   static St_DataSet *fgGeom;
-  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.18 1999/11/11 05:16:30 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
-
+   static void RootMapTable(Char_t *Cdest,Char_t *Table, Char_t* Spec, 
+			    Int_t *k, Char_t *iq);
+   
+ protected:
+   static St_DataSet *fgGeom; //!
+   static TGeant3    *geant3; //!
+   virtual const char *GetCVS() const
+   {static const char cvs[]="Tag $Name:  $ $Id: St_geant_Maker.h,v 1.19 1999/12/07 15:44:25 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 ClassDef(St_geant_Maker, 1)   //StAF chain virtual base class for Makers
 };
 
