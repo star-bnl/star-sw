@@ -162,7 +162,7 @@ BfcItem BFC[] = {
   {"FlowAnalysis","","TagsChain","Event,Flow"       ,"StFlowAnalysisMaker","StFlowAnalysisMaker","",kFALSE},
   {"StrangeTags" ,"","TagsChain","Event"              ,"StStrangeTagsMaker","StStrangeTagsMaker","",kFALSE},
   {"EbyeScaTags" ,"","TagsChain","Event"              ,"StEbyeScaTagsMaker","StEbyeScaTagsMaker","",kFALSE},
-  {"tags"        ,"","TagsChain","globT,Event,FlowTag,StrangeTags,EbyeScaTags"    
+  {"tags"        ,"","TagsChain","TagsChain,globT,Event,FlowTag,StrangeTags,EbyeScaTags"    
                                            ,"StTagsMaker","StTagsMaker","Collect all tags to TTree",kFALSE},
   {"QA"          ,"QA","","globT,SCL,global"                        ,"St_QA_Maker","St_QA_Maker","",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
@@ -663,8 +663,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("GeantOut") && geantMk) treeMk->IntoBranch("geantBranch","geant");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.77 2000/03/09 16:18:34 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.78 2000/03/09 20:08:51 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.78  2000/03/09 20:08:51  fisyak
+// ReInstall TagsChain
+//
 // Revision 1.77  2000/03/09 16:18:34  fisyak
 // Make chain table local to the chain
 //
