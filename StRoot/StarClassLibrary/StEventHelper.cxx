@@ -15,7 +15,6 @@
 #include "TRandom.h"
 #include "TError.h"
 #include "TPoints3DABC.h"
-#include "TInterpreter.h"
 #include "TSystem.h"
 
 #include "StEvent.h"
@@ -478,7 +477,7 @@ StFilterABC::StFilterABC(const char *name):TNamed(name,"")
 {
    char cbuf[200];
    sprintf(cbuf,"__StEventControlPanel__.AddFilter((TObject*)%p);",this);
-   gInterpreter->ProcessLine(cbuf);
+   gROOT->ProcessLine(cbuf);
 }
 //______________________________________________________________________________
 void StFilterABC::SetDefs()
@@ -495,17 +494,17 @@ void   StFilterABC::Update()
    const float *defs    = GetDefs();
    const char **namval  = GetNams();
    int flagg = 2001;
-   if (!fgDial++) gInterpreter->LoadMacro("FilterDialog.C");
+   if (!fgDial++) gROOT->LoadMacro("FilterDialog.C");
    sprintf(cbuf
   ,"new FilterDialog((char*)%p,(char**)%p,(float*)%p,(float*)%p,(int*)%p);"
                     ,GetName(),    namval,      defs,      pars,  &flagg);
    printf("%s\n",cbuf);
-   void *dial = (void*)gInterpreter->Calc(cbuf);
+   void *dial = (void*)gROOT->ProcessLineFast(cbuf);
    printf("StFilterABC::Update() Waiting for update\n");
    while(flagg) {gSystem->DispatchOneEvent(1);}
    sprintf(cbuf,"delete ((FilterDialog*)%p);",dial);
    printf("StFilterABC::Update: %s\n",cbuf);
-   gInterpreter->ProcessLine(cbuf);
+   gROOT->ProcessLine(cbuf);
    printf("StFilterABC::Update() update finished\n");
 }
    
