@@ -1,7 +1,10 @@
-// $Id: StEmcADCtoEMaker.h,v 1.28 2003/09/10 19:47:10 perev Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.29 2003/09/11 20:40:08 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
-// Revision 1.28  2003/09/10 19:47:10  perev
-// ansi corrs
+// Revision 1.29  2003/09/11 20:40:08  suaide
+// Removed SMD capacitors 124 and 125 from data for dAu and pp Y2003 runs only.
+// It is timestamp flagged so it will work only for this data.
+// The point is the fact the the ped subtracted SMD data looks strange for these
+// two capacitors values
 //
 // Revision 1.27  2003/09/08 20:56:52  suaide
 // Patch to fix problem with SMD-phi pedestals saved on database
@@ -115,7 +118,7 @@ class StEmcADCtoEMaker : public StMaker
            TH2F              *mHits[MAXDET];   //!
            TH2F              *mAdc[MAXDET];    //!
            TH2F              *mEnergyHist[MAXDET]; //!
-           TH2F              *mEnergySpec[MAXDET]; //!
+           TH2F              *mEnergySpec[MAXDET][3]; //!
            TH1F              *mAdc1d[MAXDET];  //!           
            TH1F              *mEn1d[MAXDET];  //!           
            TH2F              *mTower;          //!           
@@ -162,11 +165,11 @@ class StEmcADCtoEMaker : public StMaker
            void              setEmbeddingMode(Bool_t a) {mEmbedd = a; } ///< Set embedding mode (default is kFALSE)
            void              setPrint(Bool_t a) {mPrint = a; } /// Set it to kFALSE if you do not want to print messages
    virtual const char *GetCVS() const {
-     static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.28 2003/09/10 19:47:10 perev Exp $ built "__DATE__" "__TIME__ ; 
+     static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.29 2003/09/11 20:40:08 suaide Exp $ built "__DATE__" "__TIME__ ; 
      return cvs;
    }
 
-   ClassDef(StEmcADCtoEMaker,0)  
+   ClassDef(StEmcADCtoEMaker, 1)  
 };
 
 #endif
