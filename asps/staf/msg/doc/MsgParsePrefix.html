@@ -1,0 +1,22 @@
+<pre><h3>	void	MsgParsePrefix</h3></pre>
+<pre>
+(
+/*  Input:  */
+	  const char *Prefix      /* Messsage prefix.  */
+/*  Outputs: */
+	, char *PrefixStripped  /*  Prefix stripped of trailing digits. */
+	, int  *PrefixNumber )  /*  Prefix trailing digits, decoded as integer.
+	                            If there are no trailing digits, set to zero. */
+{
+/*  Description:  Parse a prefix into a string and a number.
+	Parse the specified message prefix "Prefix" into two
+	components:
+	1)	The prefix without trailing digits,
+	2)	The trailing digits, converted to an integer.
+	The principal use of this is for sorting, to preserve the sequence
+	1,2,3...8,9,10,11, etc., instead of the straight ASCII sequence,
+	which would go as 1,10,11,...,2,20,21,... etc.
+
+	Note that classes are irrelevant to this purpose, and are ignored.
+*/
+</pre>

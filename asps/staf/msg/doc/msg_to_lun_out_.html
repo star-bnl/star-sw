@@ -1,0 +1,20 @@
+<pre><h3>	void	msg_to_lun_out_</h3></pre>
+<pre>
+( const char *msg, int *Lines, int *LUN, int msglen )
+/*  Fortran callable interface to msg;  Fortran equivalent to:
+	SUBROUTINE			MSG_to_LUN_Out( msg, Lines, LUN )
+
+*  Inputs:
+	CHARACTER*(*) msg(*) !1 or more line character-string message submitted for display.
+	INTEGER       Lines  !Number of lines in msg.
+	INTEGER       LUN    !Fortran logical unit number for msg to be written to.
+
+*  Description:  Write a message to a Fortran LUN;  bypass accounting.
+	Display a message, containing one or more lines of no particular
+	length (or length-limit), on Fortran logical unit LUN.
+
+	This routine ends by flushing the output buffer.
+	Without this, a crash leaves the last several lines of the output to
+	LUN not in the listing file -- a terrible thing indeed for debugging.
+*/
+</pre>

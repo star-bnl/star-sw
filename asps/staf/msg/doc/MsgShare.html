@@ -1,0 +1,16 @@
+<pre><h3>	int	MsgShare</h3></pre>
+<pre>
+(
+/*  Input:                                                                          */
+	const pid_t  ProcessID )   /* The ID of the process to share msg memory with. */
+{
+/* Description:  Set Msg up to share its memory.
+	         When this routine returns >0, the memory is being shared.
+	         This should be the very first Msg call.
+	         If a journal file was open at the time of this call, it is closed.
+	         The journal will need to be reopened if it had been open.
+
+   Returns:
+	shmid if successful,
+	-1 for failure.                                                          */
+</pre>
