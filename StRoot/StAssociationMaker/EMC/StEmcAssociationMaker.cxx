@@ -40,6 +40,26 @@ StEmcPointAssociation::~StEmcPointAssociation()
 //------------------------------------------------------------------------------
 StEmcAssociationMaker::StEmcAssociationMaker()
 {
+  for(Int_t i=0;i<NDETECTORS;i++)
+  {
+    mTrackCluster[i] = NULL;
+    mClusterTrack[i] = NULL;
+  }
+  mTrackPoint = NULL;
+  mPointTrack = NULL;
+  
+  for (Int_t detnum=0; detnum<NDETECTORS; detnum++) // For detnum<4, only barrel EMC
+  {
+    mAssocMatrix[detnum].ResizeTo(1,1);
+    mAssocMatrix[detnum].Zero();
+    mTrackHitEnergyRtMatrix[detnum].ResizeTo(1,1);
+    mTrackHitEnergyRtMatrix[detnum].Zero();
+    mClHitEnergyRtMatrix[detnum].ResizeTo(1,1);
+    mClHitEnergyRtMatrix[detnum].Zero();
+  }
+  mAssocPointMatrix.ResizeTo(1,1);
+  mAssocPointMatrix.Zero();
+  mPrint = kTRUE;
 }
 //------------------------------------------------------------------------------
 StEmcAssociationMaker::~StEmcAssociationMaker()
@@ -47,8 +67,10 @@ StEmcAssociationMaker::~StEmcAssociationMaker()
 }
 void StEmcAssociationMaker::Clear(const char* a)
 {
+  if(mPrint) cout <<"Cleaning old stuff from EMC association\n";
   for(Int_t i=0;i<NDETECTORS;i++)
   {
+    if(mPrint) cout <<"Cleaning for detector "<<i<<endl;
     if(mTrackCluster[i]) 
     { 
       for(multiEmcTrackClusterIter j=mTrackCluster[i]->begin(); j!=mTrackCluster[i]->end(); j++) 
@@ -70,6 +92,7 @@ void StEmcAssociationMaker::Clear(const char* a)
       mClusterTrack[i]=NULL;
     }
   }
+  if (mPrint) cout <<"Cleaning points Association\n";
   if(mTrackPoint) 
   { 
     for(multiEmcTrackPointIter j=mTrackPoint->begin(); j!=mTrackPoint->end(); j++) 
@@ -80,7 +103,7 @@ void StEmcAssociationMaker::Clear(const char* a)
     SafeDelete(mTrackPoint); 
     mTrackPoint=NULL;
   }
-  if(mTrackPoint) 
+  if(mPointTrack) 
   { 
     for(multiEmcPointTrackIter j=mPointTrack->begin(); j!=mPointTrack->end(); j++) 
     {
@@ -90,6 +113,13 @@ void StEmcAssociationMaker::Clear(const char* a)
     SafeDelete(mPointTrack); 
     mPointTrack=NULL;
   }
+  for (Int_t detnum=0; detnum<NDETECTORS; detnum++) // For detnum<4, only barrel EMC
+  {
+    mAssocMatrix[detnum].Zero();
+    mTrackHitEnergyRtMatrix[detnum].Zero();
+    mClHitEnergyRtMatrix[detnum].Zero();
+  }
+  mAssocPointMatrix.Zero();
   return;
 }
 //------------------------------------------------------------------------------
@@ -107,6 +137,7 @@ Int_t StEmcAssociationMaker::Make()
   StMcEvent* mcEvent=((StMcEventMaker*) GetMaker("StMcEvent"))->currentMcEvent();
   if (!mcEvent) return kStWarn;
   StSPtrVecMcTrack& tracks=mcEvent->tracks();
+  if(tracks.size()==0) return kStWarn;
 
   // Getting Event object
   StEvent* event=(StEvent*) GetDataSet("StEvent");
@@ -118,6 +149,7 @@ Int_t StEmcAssociationMaker::Make()
   // Starting doing cluster association for each detector
   for (Int_t detnum=0; detnum<NDETECTORS; detnum++) // For detnum<4, only barrel EMC
   {
+    if(mPrint) cout <<"Doing association for detector "<<detnum<<endl;
     StDetectorId detId=static_cast<StDetectorId>(detnum+kBarrelEmcTowerId);
     StEmcDetector* detector=emcCollection->detector(detId);
     StEmcClusterCollection* clusterColl;
@@ -127,6 +159,7 @@ Int_t StEmcAssociationMaker::Make()
       StSPtrVecEmcCluster& clusters=clusterColl->clusters();
 
       // Dimensioning Association Matrices
+      if(mPrint) cout<<"Track size = "<<tracks.size()<<"  cluster size = "<<clusters.size()<<endl;
       mAssocMatrix[detnum].ResizeTo(tracks.size(),clusters.size());
       mAssocMatrix[detnum].Zero();
       mTrackHitEnergyRtMatrix[detnum].ResizeTo(tracks.size(),clusters.size());
@@ -198,8 +231,8 @@ Int_t StEmcAssociationMaker::Make()
   
   // Starting doing point association 
   StSPtrVecEmcPoint& barrelPoints=emcCollection->barrelPoints();
-  
   mAssocPointMatrix.Zero();
+  if(mPrint) cout <<"Doing point association\n";
   if(barrelPoints.size()!=0)
   {
     // Dimensioning Association Matrix
@@ -225,16 +258,16 @@ Int_t StEmcAssociationMaker::Make()
           }
           StDetectorId detId=static_cast<StDetectorId>(detnum+kBarrelEmcTowerId);
           StPtrVecEmcCluster& cluster=barrelPoints[j]->cluster(detId);
-          for (UInt_t k=0; k<hits.size(); k++)
+          for (UInt_t k=0; k<hits.size(); k++) if(hits[k])
           {
             UInt_t module=hits[k]->module();
             UInt_t eta=hits[k]->eta();
             Int_t sub=hits[k]->sub();
 
-            for (UInt_t j2=0; j2<cluster.size(); j2++)
+            for (UInt_t j2=0; j2<cluster.size(); j2++) if(cluster[j2])
             {
               StPtrVecEmcRawHit& clHit=cluster[j2]->hit();
-              for (UInt_t l=0; l<clHit.size(); l++)
+              for (UInt_t l=0; l<clHit.size(); l++) if(clHit[l])
               {
                 UInt_t clModule=clHit[l]->module();
                 UInt_t clEta=clHit[l]->eta();
@@ -250,6 +283,7 @@ Int_t StEmcAssociationMaker::Make()
       }
     }   
   }  
+  fillMaps();
   // Finishing doing point association 
   return kStOK;
 }
@@ -312,16 +346,16 @@ multiEmcClusterTrack* StEmcAssociationMaker::getClusterTrackMap(const char* detn
 //---------------------------------------------------------------------
 void StEmcAssociationMaker::fillMaps()
 {
-  StMcEvent* mcEvent=((StMcEventMaker*) GetMaker("StMcEvent")) ->currentMcEvent();
+  StMcEvent* mcEvent=((StMcEventMaker*) GetMaker("StMcEvent"))->currentMcEvent();
   StSPtrVecMcTrack& tracks=mcEvent->tracks();
   // Getting Event object
-  StEvent* event=(StEvent*) GetDataSet("StEvent");
+  StEvent* event=(StEvent*)GetDataSet("StEvent");
   StEmcCollection* emcCollection=event->emcCollection();
   for(Int_t detnum=0;detnum<NDETECTORS;detnum++)
   {
     StDetectorId detId=static_cast<StDetectorId>(detnum+kBarrelEmcTowerId);
     StEmcDetector* detector=emcCollection->detector(detId);
-    StEmcClusterCollection* clusterColl;
+    StEmcClusterCollection* clusterColl=NULL;
     if (detector) clusterColl=detector->cluster();
     if (clusterColl)
     { 
@@ -331,12 +365,14 @@ void StEmcAssociationMaker::fillMaps()
         {
           if(mAssocMatrix[detnum](i,j)==1) // association made
           {
-            StEmcClusterAssociation *c=new StEmcClusterAssociation(tracks[i],clusters[i],
-                                           mTrackHitEnergyRtMatrix[4](i,j),mClHitEnergyRtMatrix[4](i,j));
+            StEmcClusterAssociation *c=new StEmcClusterAssociation(tracks[i],clusters[j],
+                                           mTrackHitEnergyRtMatrix[detnum](i,j),mClHitEnergyRtMatrix[detnum](i,j));
+            StEmcClusterAssociation *c1=new StEmcClusterAssociation(tracks[i],clusters[j],
+                                           mTrackHitEnergyRtMatrix[detnum](i,j),mClHitEnergyRtMatrix[detnum](i,j));
             if(!mTrackCluster[detnum]) mTrackCluster[detnum]=new multiEmcTrackCluster;
-            if(!mTrackCluster[detnum]) mClusterTrack[detnum]=new multiEmcClusterTrack;
+            if(!mClusterTrack[detnum]) mClusterTrack[detnum]=new multiEmcClusterTrack;
             mTrackCluster[detnum]->insert(multiEmcTrackClusterValue(tracks[i],c));
-            mClusterTrack[detnum]->insert(multiEmcClusterTrackValue(clusters[i],c));
+            mClusterTrack[detnum]->insert(multiEmcClusterTrackValue(clusters[j],c1));
           }
         }
     }
@@ -348,11 +384,12 @@ void StEmcAssociationMaker::fillMaps()
     {
       if(mAssocPointMatrix(i,j)>0)
       {
-        StEmcPointAssociation *p= new StEmcPointAssociation(tracks[i],points[i],(int)mAssocPointMatrix(i,j));
+        StEmcPointAssociation *p= new StEmcPointAssociation(tracks[i],points[j],(int)mAssocPointMatrix(i,j));
+        StEmcPointAssociation *p1= new StEmcPointAssociation(tracks[i],points[j],(int)mAssocPointMatrix(i,j));
         if(!mTrackPoint) mTrackPoint = new multiEmcTrackPoint;
         if(!mPointTrack) mPointTrack = new multiEmcPointTrack;
         mTrackPoint->insert(multiEmcTrackPointValue(tracks[i],p));
-        mPointTrack->insert(multiEmcPointTrackValue(points[i],p));
+        mPointTrack->insert(multiEmcPointTrackValue(points[j],p1));
       }
     }
   return;
@@ -366,3 +403,99 @@ Int_t StEmcAssociationMaker::getDetNum(const char* detname)
     if (!strcmp(detname,det[i])) detnum = i+1;
   return detnum;
 }     
+//---------------------------------------------------------------------
+void StEmcAssociationMaker::printMaps()
+{
+  const TString det[] = {"bemc","bprs","bsmde","bsmdp"};
+  for(int i=0;i<NDETECTORS;i++)
+  {
+    cout <<"-----------------------------------------------------------\n";
+    cout <<"ASSOCIATION FOR DETECTOR "<<det[i].Data()<<endl;
+    multiEmcTrackCluster* map = getTrackClusterMap(i+1);
+    if(map) 
+    { 
+      cout <<"Track->Cluster Association Map\n";
+      for(multiEmcTrackClusterIter j=map->begin(); j!=map->end(); j++) 
+      {
+        StMcTrack* track = (StMcTrack*)(*j).first;
+        StEmcClusterAssociation* value = (StEmcClusterAssociation*)(*j).second;
+        if(track && value)
+        {
+          StEmcCluster *c = value->getCluster();
+          
+          if(c) 
+          {
+            cout <<" McTrack = "<<track<<" GeantId = "<<track->geantId()<<" pt = "<<track->pt()<<" TReta = "<<track->pseudoRapidity()
+                 <<" Cl = "<<c<<" E = "<<c->energy()<<" eta = "<<c->eta()<<" phi = "<<c->phi()
+                 <<" FrTr = "<<value->getFractionTrack()<<" FrCl = "<<value->getFractionCluster()<<endl;
+          }
+        }
+      }      
+    }
+    cout <<endl;
+    multiEmcClusterTrack* map1 = getClusterTrackMap(i+1);
+    if(map1) 
+    { 
+      cout <<"Cluster->Track Association Map\n";
+      for(multiEmcClusterTrackIter j=map1->begin(); j!=map1->end(); j++) 
+      {
+        StEmcCluster *c = (StEmcCluster*)(*j).first;
+        StEmcClusterAssociation* value = (StEmcClusterAssociation*)(*j).second;
+        if(c && value)
+        {               
+          StMcTrack* track = value->getTrack();
+          if(track) 
+          {
+            cout <<" Cl = "<<c<<" E = "<<c->energy()<<" eta = "<<c->eta()<<" phi = "<<c->phi()
+                 <<" McTrack = "<<track<<" GeantId = "<<track->geantId()<<" pt = "<<track->pt()<<" TReta = "<<track->pseudoRapidity()
+                 <<" FrTr = "<<value->getFractionTrack()<<" FrCl = "<<value->getFractionCluster()<<endl;
+          }
+        }
+      }      
+    }
+  }
+  multiEmcTrackPoint *mapPoint = getTrackPointMap();
+  if(mapPoint)
+  {
+    cout <<"Track->Point Association Map\n";
+    for(multiEmcTrackPointIter j = mapPoint->begin(); j!=mapPoint->end(); j++)
+    {
+      StMcTrack *track = (StMcTrack*)(*j).first;
+      StEmcPointAssociation *value = (StEmcPointAssociation*)(*j).second;
+      if(value)
+      {
+        StEmcPoint *point = value->getPoint(); 
+        if(track && point)
+        {
+          cout <<" McTrack = "<<track<<" GeantId = "<<track->geantId()<<" pt = "<<track->pt()<<" TReta = "<<track->pseudoRapidity()
+               <<" Point = "<<point<<" E = "<<point->energy()
+               <<" Assoc. = "<<value->getAssociation();
+          for(int i=1;i<=4;i++) cout <<" det "<<i<<" A = "<< value->getAssociation(i);
+          cout <<endl;
+        }
+      }
+    }
+  }
+  multiEmcPointTrack *mapPoint1 = getPointTrackMap();
+  if(mapPoint1)
+  {
+    cout <<"Point->Track Association Map\n";
+    for(multiEmcPointTrackIter j = mapPoint1->begin(); j!=mapPoint1->end(); j++)
+    {
+      StEmcPoint *point = (StEmcPoint*)(*j).first;
+      StEmcPointAssociation *value = (StEmcPointAssociation*)(*j).second;
+      if(value)
+      {
+        StMcTrack *track = value->getTrack();
+        if(track && point)
+        {
+          cout <<" McTrack = "<<track<<" GeantId = "<<track->geantId()<<" pt = "<<track->pt()<<" TReta = "<<track->pseudoRapidity()
+               <<" Point = "<<point<<" E = "<<point->energy()
+               <<" Assoc. = "<<value->getAssociation();
+          for(int i=1;i<=4;i++) cout <<" det "<<i<<" A = "<< value->getAssociation(i);
+          cout <<endl;
+        }
+      }
+    }
+  }
+}

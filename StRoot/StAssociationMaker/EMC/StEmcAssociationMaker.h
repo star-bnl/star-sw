@@ -136,7 +136,7 @@ class StEmcAssociation
     ClassDef(StEmcAssociation, 1)
 };
 
-class StEmcClusterAssociation:StEmcAssociation
+class StEmcClusterAssociation:public StEmcAssociation
 {
   private:
     StEmcCluster     *mCluster;
@@ -150,7 +150,7 @@ class StEmcClusterAssociation:StEmcAssociation
     float            getFractionCluster()       { return mFEmc; }     ///< returns the fraction of the energy of the cluster that was deposited by the MC track
     ClassDef(StEmcClusterAssociation, 1)
 };
-class StEmcPointAssociation:StEmcAssociation
+class StEmcPointAssociation:public StEmcAssociation
 {
   private:
     StEmcPoint       *mPoint;
@@ -210,6 +210,8 @@ class StEmcAssociationMaker : public StMaker
                  Int_t          Make();
                  Int_t          Finish();
                  void           Clear(const char*);
+                 
+                 void           printMaps();
          
                  TMatrix        getMatrix(const char*,const char*); ///< Returns clusters association matrixes (old style association)
                  TMatrix        getMatrix() { return mAssocPointMatrix; } ///< Returns points association matrix (old style association)
@@ -221,11 +223,14 @@ class StEmcAssociationMaker : public StMaker
          multiEmcTrackPoint*    getTrackPointMap()               { return mTrackPoint;} ///< returns multimap for association betwwen MC tracks and points 
          multiEmcPointTrack*    getPointTrackMap()               { return mPointTrack;} ///< returns multimap for association betwwen points and MC tracks 
                  Int_t          getDetNum(const char*);          ///< returns detector number for each EMC sub detector
+                 
+                 void           setPrint(Bool_t a)               {mPrint = a;} ///< Set print log
          
          
   protected: 
          virtual Float_t        dEToEnergy(StMcCalorimeterHit*,Int_t);
-                 void           fillMaps();
+                 void           fillMaps(); 
+                 Bool_t         mPrint;
                  
                  TMatrix        mAssocMatrix[NDETECTORS];
                  TMatrix        mTrackHitEnergyRtMatrix[NDETECTORS];
