@@ -81,7 +81,7 @@ TABLE_HEAD_ST           *extra_h ;
 CTE_EXTRA_ST            *extra   ;
 
 
-extern "C" long cte_(
+extern "C" long type_of_call cte_(
   TABLE_HEAD_ST            *ge_h,        CTG_GEO_ST             *ge,
   TABLE_HEAD_ST           *slt_h,       CTG_SLAT_ST             *slt ,
   TABLE_HEAD_ST       *slt_eta_h,   CTG_SLAT_ETA_ST         *slt_eta ,
