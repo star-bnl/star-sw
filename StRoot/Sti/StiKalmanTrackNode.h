@@ -45,7 +45,7 @@ class StiKalmanTrackNode : public StiTrackNode
 {
 public:
   StiKalmanTrackNode(){reset();}
-  //~StiKalmanTrackNode();
+  virtual ~StiKalmanTrackNode(){};
   const StiKalmanTrackNode& operator=(const StiKalmanTrackNode&node);  
   
   double mcs2(double relRadThickness, double beta2, double p2);
@@ -126,6 +126,7 @@ public:
   StThreeVector<double>getGlobalPoint() const;
   /// Calculates and returns the momentum and error of the track at this node in global coordinates.
   void getGlobalMomentum(double p[3], double e[6]=0) const;
+  int  isEnded() const;	
   
   /// Propagates a track encapsulated by the given node "p" to the given detector "tDet".
   int  propagate(StiKalmanTrackNode *p, const StiDetector * tDet, int dir);	//throw (Exception);
@@ -160,8 +161,6 @@ public:
   double evaluateChi2(const StiHit *hit); 
   int updateNode(); 
   int rotate(double alpha); 
-  void add(StiKalmanTrackNode * newChild);
-  void cutTail();
   double getField()   const;
   int    getHelicity()const;
   double getPhase()   const;
@@ -199,6 +198,8 @@ public:
   void static saveStatics(double *sav);
   void static backStatics(double *sav);
 
+ private:   
+  void getHitErrors(const StiHit *hit,double ss[3]) const;
 
  protected:   
 

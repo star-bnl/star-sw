@@ -23,14 +23,14 @@ typedef StiKTNIterator StiKTNBidirectionalIterator;
 
 //This is a temp hack to get around old gcc ansi-non-compliant STL implementation
 class StiKTNIterator
-
 {
 public:
     
-public:
     ///ctr-dstr
     StiKTNIterator(KTN_t* leaf=0,int dir=0) : mDir(dir),mNode( leaf) {};
     StiKTNIterator(KTN_t& leaf  ,int dir=0) : mDir(dir),mNode(&leaf) {};
+    StiKTNIterator   begin();
+    StiKTNIterator  rbegin();
 
     ///equality:
     bool operator==(const StiKTNIterator& rhs) const;
@@ -76,6 +76,7 @@ public:
     StiKTNForwardIterator(KTN_t& leaf  ) : StiKTNIterator(leaf,1){};
 static const StiKTNForwardIterator& end(){return (StiKTNForwardIterator&)mgEnd;}
 };
+
 //inlines --
 
 inline bool StiKTNIterator::operator==(const StiKTNIterator& rhs) const
@@ -129,13 +130,12 @@ inline StiKTNIterator& StiKTNIterator::operator++ ()
 {
   assert(mNode);
   if(!mDir) { //forward direction  
-    if (mNode->isLeaf()) {mNode=0;}
-    else                 {mNode = static_cast<KTN_t*>(mNode->getFirstChild());}
+
+    mNode = static_cast<KTN_t*>(mNode->getNextNode());
 
   } else { //backward direction
 
-    if (mNode->isRoot()) {mNode=0;}
-    else                 {mNode = static_cast<KTN_t*>(mNode->getParent()    );}
+    mNode = static_cast<KTN_t*>(mNode->getPrevNode());
   }
 
   return *this;
@@ -168,6 +168,19 @@ inline StiKTNIterator  StiKTNIterator::begin(KTN_t* fist)
 
 inline StiKTNIterator StiKTNIterator::rbegin(KTN_t* last)
 {
+  return StiKTNIterator(last,1);
+}  
+inline StiKTNIterator  StiKTNIterator::begin()
+{
+  assert(mNode);
+  KTN_t*  fist = (KTN_t*)mNode->getFirstNode();
+  return StiKTNIterator(fist,0);
+}  
+
+inline StiKTNIterator StiKTNIterator::rbegin()
+{
+  assert(mNode);
+  KTN_t* last = (KTN_t*)mNode->getLastNode();
   return StiKTNIterator(last,1);
 }  
 
