@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/opt/star/bin/perl
 Import qw ( env INCLUDE LIB BIN EXPORT BUILD OBJ);
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 my $DirPath = DirPath '.';# print "DirPath = $DirPath\n"; 
