@@ -1,8 +1,8 @@
-# $Id: Makefile,v 1.1 2004/07/12 20:37:15 potekhin Exp $
+# $Id: Makefile,v 1.2 2004/07/13 19:15:44 potekhin Exp $
 
-############################### vmc Makefile ###########################
+############################### module Makefile ###########################
 
-PACKAGE   = tpc
+PACKAGE   = $(shell pwd | sed -e 's/.*\///')
 
 ifndef PLATFORM
   PLATFORM = $(shell uname)
@@ -13,6 +13,7 @@ BINDIR     = $(TOPDIR)/tmp/.$(STAR_HOST_SYS)/$(PACKAGE)
 LIBDIR     = $(TOPDIR)/lib/.$(STAR_HOST_SYS)
 
 include $(TOPDIR)/config/Makefile.$(PLATFORM)
+include ./Makefile.inc
 
 ############################### Sources #######################################
 include $(TOPDIR)/config/MakeRules
@@ -41,6 +42,7 @@ OBJS	:= $(CXXOBJ) $(GDICTO)
 # Make include list
 INCDIR  := -Iinclude
 INCDIR  += -I../vmcApp/include
+INCDIR  += $(INCAUX)
 
 # C++ compilation flags
 CXXFLAGS := $(CXXOPTS) -I. $(INCDIR) -I$(ROOTSYS)/include 
@@ -62,6 +64,8 @@ depend:		$(SRCS)
 
 show:
 
+	@echo Package:  $(PACKAGE)
+	@echo ' '
 	@echo Platform: $(PLATFORM)
 	@echo ' '
 	@echo System:   $(STAR_HOST_SYS)
@@ -72,11 +76,13 @@ show:
 	@echo ' '
 	@echo Options:  $(CXXOPTS)
 	@echo ' '
-	@echo CXXOBJ:  $(CXXOBJ)
+	@echo CXXOBJ:   $(CXXOBJ)
 	@echo ' '
-	@echo GDICTO:  $(GDICTO)
+	@echo GDICTO:   $(GDICTO)
 	@echo ' '
 	@echo OBJS:    $(OBJS)
+	@echo ' '
+	@echo INCDIR:    $(INCDIR)
 
 TOCLEAN		= $(BINDIR)
 TOCLEANALL	= $(BINDIR) $(LIBDIR)
