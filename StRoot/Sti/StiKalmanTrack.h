@@ -18,7 +18,7 @@
  */
 #ifndef StiKalmanTrack_H
 #define StiKalmanTrack_H 1
-//SCL
+//Sti
 #include "StThreeVector.hh"
 #include "StThreeVectorF.hh"
 //STD
@@ -225,7 +225,7 @@ public:
   bool isPrimary() const;
 
 	double calculateTrackLength() const;
-	double calculateTrackSegmentLength(StiKalmanTrackNode *p1, StiKalmanTrackNode *p2) const;
+	double calculateTrackSegmentLength(const StiKalmanTrackNode &p1, const StiKalmanTrackNode &p2) const;
 	int calculatePointCount() const;
 	int calculateMaxPointCount() const;
 
