@@ -46,6 +46,7 @@ foreach my $d (@GDIRS){
   foreach my $s (@sources) {
     my $ss = $d . "/" . $s;
     next if $ss =~ /\/gst\/agsim\/agdummy\.g/ or $ss =~ /traceqc/ or $ss =~ /ighcxy/;
+    next if $ss =~ /\gst\/geant\/grndm\.F/ or  $ss =~ /\gst\/geant\/grndmq\.F/; 
     push @src, $ss; 
   }
 }
