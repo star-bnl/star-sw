@@ -90,11 +90,6 @@ Int_t StiMaker::Init()
     mtrackstore = StiTrackContainer::instance();
     mhitstore = StiHitContainer::instance();
     mhitfactory = new StiHitFactory("HitFactory");
-    mhitfiller = new StiHitFiller();
-
-    mhitfiller->addDetector(kTpcId);
-    //mhitfiller->addDetector(kSvtId);
-    //cout <<"Hits used from detectors:\t"<<*mhitfiller<<endl;
 
     mdisplay->cd();
     mdisplay->draw();
@@ -112,25 +107,26 @@ Int_t StiMaker::Init()
     mdisplay->draw();
     mdisplay->update();
     
+    //mhitfiller = new StiHitFiller();
+    //mhitfiller->addDetector(kTpcId);
+    //mhitfiller->addDetector(kSvtId);
+    //cout <<"Hits used from detectors:\t"<<*mhitfiller<<endl;
+    
     return StMaker::Init();
 }
 
 Int_t StiMaker::Make()
 {
-    /*
-      StEvent* rEvent = 0;
-      rEvent = (StEvent*) GetInputDS("StEvent");
-      if (rEvent) {
-      mevent = rEvent;
-      
-      cout <<"\n---------- StiMaker::Make() ------------\n"<<endl;
-      cout <<"Number of Primary Vertices:\t"<<mevent->numberOfPrimaryVertices()<<endl;
-      mhitfiller->setEvent(mevent);
-      mhitfiller->fillHits(mhitstore, mhitfactory);
-      }
-    */
-
-    
+    StEvent* rEvent = 0;
+    rEvent = (StEvent*) GetInputDS("StEvent");
+    if (rEvent) {
+	mevent = rEvent;
+	
+	cout <<"\n---------- StiMaker::Make() ------------\n"<<endl;
+	cout <<"Number of Primary Vertices:\t"<<mevent->numberOfPrimaryVertices()<<endl;
+	//mhitfiller->setEvent(mevent);
+	//mhitfiller->fillHits(mhitstore, mhitfactory);
+    }
     return kStOK;
 }
 
