@@ -3,14 +3,13 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.108 1999/09/08 22:41:59 fisyak Exp $
+// $Id: bfc.C,v 1.109 1999/09/09 01:34:12 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StBFChain;        
 StBFChain  *chain=0;
 class StEvent;
 StEvent *Event;
-Int_t NoEvents = 0;
 class St_geant_Maker;
 class StIOMaker;
 class St_XDFFile;
@@ -22,7 +21,7 @@ void Load(){
   gSystem->Load("StBFChain");}
 //_____________________________________________________________________
 void bfc(const Int_t First,
-	 const Int_t Nevents=1,
+	 const Int_t Last=1,
 	 const Char_t *Chain="gstar tfs",Char_t *infile=0, Char_t *outfile=0)
 { // Chain variable define the chain configuration 
   // All symbols are significant (regardless of case)
@@ -30,7 +29,6 @@ void bfc(const Int_t First,
   // Chain = "gstar" run GEANT on flight with 10 muons in range |eta| < 1 amd pT = 1GeV/c (default)
   // Chain = "" || "xdf" run STANDARD chain using xd-files as an input
   // Chain = "minidaq" read miniDAQ xdf file and process 
-  NoEvents = Nevents;
   // Dynamically link some shared libs
   if (gClassTable->GetID("StBFChain") < 0) Load();
   // Create the main chain object
@@ -40,7 +38,7 @@ void bfc(const Int_t First,
   if (!Chain || !strlen(Chain)) {
     Usage();
   }
-  printf ("QAInfo:No. of Events to process = %i\n",NoEvents);
+  printf ("QAInfo:Process [First=%6i/Last=%6i/Total=%6i] Events\n",First,Last,Last-First+1);
   chain->Set_IO_Files(infile,outfile);
 
   chain->Load();
@@ -83,7 +81,7 @@ void bfc(const Int_t First,
   if (inpMk && First > 1) {printf ("Skip %i Events\n",First-1);inpMk->Skip(First-1);}
   TBenchmark evnt;
   Int_t iMake = 0, i = First;
- EventLoop: if (i <= NoEvents && iMake < kStEOF) {
+ EventLoop: if (i <= Last && iMake < kStEOF) {
    evnt->Reset();
    evnt->Start("QAInfo:");
    chain->Clear();
@@ -99,7 +97,7 @@ void bfc(const Int_t First,
 	   i,iMake,evnt->GetRealTime("QAInfo:"),evnt->GetCpuTime("QAInfo:"));
    i++; goto EventLoop;
  }
-  if (NoEvents > First || gROOT->IsBatch()) {
+  if (Last > First || gROOT->IsBatch()) {
     chain->Finish();
     if (xdf_out) delete xdf_out;
     fflush(stdout);
@@ -117,10 +115,10 @@ void bfc(const Int_t First,
 
 }
 //_____________________________________________________________________
-void bfc (const Int_t Nevents, 
+void bfc (const Int_t Last, 
 	  const Char_t *Chain="gstar tfs",Char_t *infile=0, Char_t *outfile=0)
 {
-  bfc(1,Nevents,Chain,infile,outfile);
+  bfc(1,Last,Chain,infile,outfile);
 }
 //_____________________________________________________________________
 void bfc (const Char_t *Chain="",Char_t *infile=0, Char_t *outfile=0)
@@ -135,14 +133,14 @@ void Usage() {
 	  "              \tAll Chain options set in supplyed order\n"); 
 #endif
   printf ("============= \t U S A G E =============\n");
-  printf ("bfc(Int_t First, Int_t Nevents, Char_t *Chain, Char_t *infile, Char_t *outfile)\n");
-  printf ("bfc(Int_t Nevents, Char_t *Chain, Char_t *infile, Char_t *outfile)\n");
+  printf ("bfc(Int_t First, Int_t Last, Char_t *Chain, Char_t *infile, Char_t *outfile)\n");
+  printf ("bfc(Int_t Last, Char_t *Chain, Char_t *infile, Char_t *outfile)\n");
   printf ("bfc(Char_t *Chain, Char_t *infile, Char_t *outfile)\n");
   printf ("where\n");
   printf (" First   \t- First event to process \t(Default = 1)\n");
-  printf (" Nevents \t- Total No. of events (including skipped ones)\t(Default = 1)\n");
-  printf (" Chain   \t- Chain specification    \t(without First &  Nevents: Default is \"\" which gives this message)\n");
-  printf ("         \t                         \t with    First || Nevents: Default is \"gstar tfs\")\n");
+  printf (" Last    \t- Last  event to process \t(Default = 1)\n");
+  printf (" Chain   \t- Chain specification    \t(without First &  Last: Default is \"\" which gives this message)\n");
+  printf ("         \t                         \t with    First || Last: Default is \"gstar tfs\")\n");
   printf (" infile  \t- Name of Input file     \t(Default = 0, i.e. use preset file names depending on Chain)\n"); 
   printf (" outfile \t- Name of Output file    \t(Default = 0, i.e. define Output file name from Input one)\n");
   printf ("Examples:\n"); 
