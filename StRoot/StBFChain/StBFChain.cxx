@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.301 2002/10/01 20:46:48 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.302 2002/10/11 18:12:58 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -21,6 +21,7 @@
 #include "St_tpt_Maker/St_tpt_Maker.h"
 #include "St_dst_Maker/StPrimaryMaker.h"
 #include "St_dst_Maker/StVertexMaker.h"
+#include "St_tpcdaq_Maker/St_tpcdaq_Maker.h"
 #include "StStrangeMuDstMaker/StStrangeMuDstMaker.h"
 #include "StDbUtilities/StMagUtilities.h"
 #include "StMessMgr.h"
@@ -202,6 +203,8 @@ Bfc_st BFC1[] = {
   {"VtxOffSet"   ,""  ,"","",""                 ,"","Account Primary Vertex offset from y2000 data",kFALSE},
   {"Calibration" ,""  ,"","",""                                              ,"","Calibration mode",kFALSE},
   {"beamLine"    ,""  ,"","",""                                       ,"","LMV Beam line constrain",kFALSE},
+  {"onlcl"  ,""  ,"","",""                                       ,"","Read/use TPC DAQ100 clusters",kFALSE},
+  {"onlraw" ,""  ,"","",""                                              ,"","Read/use TPC raw hits",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -281,7 +284,7 @@ Bfc_st BFC1[] = {
   {"Trs"         ,"","tpcChain","scl,tpcDB,tpc_daq,Simu"              ,"StTrsMaker","StTrsMaker","",kFALSE},
 
   {"Mixer"       ,"tpc_raw","","","StMixerMaker"  ,"StDaqLib,StDAQMaker,StTrsMaker,StMixerMaker","",kFALSE},
-  {"tpc_daq"     ,"tpc_raw","tpcChain","detDb,tpc_T"        ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
+  {"tpc_daq"     ,"tpc_raw","tpcChain","detDb,tpc_T,onlraw" ,"St_tpcdaq_Maker","St_tpcdaq_Maker","",kFALSE},
   {"tfs"         ,"","tpcChain","Simu"                             ,"","","use tfs (no StTrsMaker)",kFALSE},
   {"ZDCVtx"      ,"","tpcChain","db"                      ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls"        ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
@@ -1149,9 +1152,17 @@ Int_t StBFChain::Instantiate()
 	    if (GetOption("AllOn"))   tclMk->AllOn();
 	  }
 	  if (maker == "St_tpcdaq_Maker") {
+	    Int_t DMode=0;
+	    St_tpcdaq_Maker *tcpdaqMk = (St_tpcdaq_Maker *) mk;
+
 	    if (GetOption("Trs")) mk->SetMode(1); // trs
 	    else                  mk->SetMode(0); // daq
+
+	    if ( GetOption("onlcl") )   DMode = DMode | 0x2;  // use the online TPC clusters info if any
+	    if ( GetOption("onlraw") )  DMode = DMode | 0x1;  // use the TPC raw hit information
+	    tcpdaqMk->SetDAQFlag(DMode);                      // set flag
 	  }
+
 	  if (maker == "StRchMaker") {
 	    if (GetOption("Rrs")) mk->SetMode(1); // rrs
 	    else                  mk->SetMode(0); // daq
