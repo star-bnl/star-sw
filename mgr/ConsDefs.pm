@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.79 2005/02/02 23:13:50 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.80 2005/02/03 02:58:47 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -448,12 +448,13 @@
 	die "Can't find mysql.h in $OPTSTAR/include  $OPTSTAR/mysql/include ";
     }
 
-    my $mysqllibdir;
+    my ($mysqllibdir)=$MYSQLINCDIR;
     if ( $IS_64BITS ){
-	($mysqllibdir = $MYSQLINCDIR) =~ s/include$/lib64/;
+	$mysqllibdir =~ s/include/lib64/;
     } else {
-	($mysqllibdir = $MYSQLINCDIR) =~ s/include$/lib/;
+	$mysqllibdir =~ s/include/lib/;
     }
+    #print "DEBUG :: $mysqllibdir\n";
     my ($MYSQLLIBDIR,$MYSQLLIB) =
 	script::find_lib($mysqllibdir . " /usr/lib/mysql ".
 			 $OPTSTAR . "/lib " .  $OPTSTAR . "/lib/mysql ",
