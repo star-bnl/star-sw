@@ -461,7 +461,7 @@ Int_t StTree::SetFile(const Char_t *file,const Char_t *mode,int insist)
 void StTree::Clear(Option_t*)
 {
  St_DataSetIter next(this);StBranch *br;
- while ((br=(StBranch*)next())) { br->Clear();}
+ while ((br=(StBranch*)next())) {if(!br->IsOption("const")) br->Clear();}
 } 
 
 //_______________________________________________________________________________
