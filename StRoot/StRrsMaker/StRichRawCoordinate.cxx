@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StRichRawCoordinate.cxx,v 1.1 2000/02/08 16:34:11 lasiuk Exp $
+ * $Id: StRichRawCoordinate.cxx,v 1.2 2000/04/05 16:03:54 lasiuk Exp $
  *
  * Author: brian Jan 27, 2000
  *
@@ -11,8 +11,8 @@
  ************************************************************************
  *
  * $Log: StRichRawCoordinate.cxx,v $
- * Revision 1.1  2000/02/08 16:34:11  lasiuk
- * Initial Revision:  eventually for StUtilities
+ * Revision 1.2  2000/04/05 16:03:54  lasiuk
+ * fractional pad/column to give 1-1 correspondence
  *
  * Revision 1.1  2000/02/08 16:34:11  lasiuk
  * Initial Revision:  eventually for StUtilities
@@ -23,7 +23,7 @@
 
 StRichRawCoordinate::StRichRawCoordinate() {/**/}
 
-StRichRawCoordinate::StRichRawCoordinate(const int pad, const int row)
+StRichRawCoordinate::StRichRawCoordinate(const double pad, const double row)
     : mRow(row), mPad(pad) {/**/}
 
 StRichRawCoordinate::~StRichRawCoordinate() {/**/}
