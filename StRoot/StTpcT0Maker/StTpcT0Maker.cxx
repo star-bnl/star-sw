@@ -1,7 +1,10 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.1 2000/08/24 23:51:27 hardtke Exp $
+// $Id: StTpcT0Maker.cxx,v 1.2 2000/08/26 23:50:04 fisyak Exp $
 // $Log: StTpcT0Maker.cxx,v $
+// Revision 1.2  2000/08/26 23:50:04  fisyak
+// Make it chain
+//
 // Revision 1.1  2000/08/24 23:51:27  hardtke
 // New package for drift velocity calibrations
 //
@@ -34,6 +37,13 @@ StTpcT0Maker::StTpcT0Maker(const char *name):StMaker(name){
   desiredEntries = 99999; // must set limit by hand. 
   maxRMS     = 0.05; //t0 should be good to 50 ns
   mHistOut   = kFALSE;
+  StMaker *saveMk = cd();
+  New("St_tcl_Maker","tpc_hits");
+  New("St_tpt_Maker","tpc_tracks");
+  New("StMatchMaker","match");
+  New("StPrimaryMaker","primary");
+  New("St_dst_Maker","dst");
+  saveMk->cd();
 }
 //_____________________________________________________________________________
 StTpcT0Maker::~StTpcT0Maker(){
@@ -166,7 +176,7 @@ Int_t StTpcT0Maker::Finish() {
 
 void StTpcT0Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StTpcT0Maker.cxx,v 1.1 2000/08/24 23:51:27 hardtke Exp $\n");
+  printf("* $Id: StTpcT0Maker.cxx,v 1.2 2000/08/26 23:50:04 fisyak Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
