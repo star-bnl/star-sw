@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.115 1999/11/04 22:21:48 fisyak Exp $
+// $Id: bfc.C,v 1.116 1999/11/05 16:19:18 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StBFChain;        
@@ -23,7 +23,7 @@ void Load(){
 //_____________________________________________________________________
 void bfc(const Int_t First,
 	 const Int_t Last,
-	 const Char_t *Chain="gstar tfs",Char_t *infile=0, Char_t *outfile=0)
+	 const Char_t *Chain="gstar y2a tfs",Char_t *infile=0, Char_t *outfile=0)
 { // Chain variable define the chain configuration 
   // All symbols are significant (regardless of case)
   // "-" sign before requiest means that this option is disallowed
@@ -127,7 +127,7 @@ void bfc(const Int_t First,
 }
 //_____________________________________________________________________
 void bfc (const Int_t Last, 
-	  const Char_t *Chain="gstar tfs",Char_t *infile=0, Char_t *outfile=0)
+	  const Char_t *Chain="gstar y2a tfs",Char_t *infile=0, Char_t *outfile=0)
 {
   bfc(1,Last,Chain,infile,outfile);
 }
