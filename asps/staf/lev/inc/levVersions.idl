@@ -1,0 +1,6 @@
+/* levVersions.idl - Versions table for LEV */
+struct levVersions {
+  char name[32];
+  char type[32];
+  char version[256];
+};

@@ -1,0 +1,5 @@
+/* levEnv.idl - environment table for LEV */
+struct levEnv {
+  char name[32];
+  char value[128];
+};
