@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.42 2004/10/27 17:02:46 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.43 2005/01/24 05:08:26 balewski Exp $
  
 
 #include <time.h>
@@ -679,6 +679,19 @@ Int_t StEEmcDbMaker::Make(){
 
 }
 
+//--------------------------------------------------
+//--------------------------------------------------
+const  EEmcDbItem*  
+StEEmcDbMaker::getByIndex(int i){
+  // Gets database entry by absolute index
+
+  assert(i>=0);
+  assert(i<EEindexMax);
+  const  EEmcDbItem *x=byIndex+i;
+  if(x->isEmpty()) return 0;
+  return x;
+}
+
 
 //--------------------------------------------------
 //--------------------------------------------------
@@ -1016,6 +1029,9 @@ void  StEEmcDbMaker::changeMaskAction(const char *fname) {
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.43  2005/01/24 05:08:26  balewski
+// more get-methods
+//
 // Revision 1.42  2004/10/27 17:02:46  balewski
 // move setKsig from Init() to constructor where it belongs
 //
