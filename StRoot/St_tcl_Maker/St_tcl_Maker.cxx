@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.72 2004/05/03 23:34:32 perev Exp $
+// $Id: St_tcl_Maker.cxx,v 1.73 2004/06/05 23:39:44 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.73  2004/06/05 23:39:44  fisyak
+// Add (sector,row) for TpcCoordinate transformations
+//
 // Revision 1.72  2004/05/03 23:34:32  perev
 // Possible non init WarnOff
 //
@@ -455,16 +458,11 @@ Int_t St_tcl_Maker::Make() {
   if (m_GlobalHits) {
     gMessMgr->Info() << "Translating hits to Global Coordinates" << endm;
     StTpcCoordinateTransform transform(gStTpcDb);
-    StTpcLocalCoordinate local(0,0,0);
-    StGlobalCoordinate   global(0,0,0);
-    StThreeVector<double>       vector(0,0,0);
+    StGlobalCoordinate   global;
     tcl_tphit_st *spc = tphit -> GetTable() ;
     for ( Int_t i = 0 ; i < tphit->GetNRows() ; i++ , spc++ )
 	  {
-	    vector.setX(spc -> x);    
-	    vector.setY(spc -> y);    
-	    vector.setZ(spc -> z);
-            local.setPosition(vector);
+	    StTpcLocalCoordinate local(spc->x,spc->y,spc ->z,(int)spc->row/100,(int)spc->row%100);
 	    transform(local,global);
 	    spc -> x = global.position().x();
 	    spc -> y = global.position().y();
@@ -486,7 +484,7 @@ Int_t St_tcl_Maker::Make() {
 
 void St_tcl_Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.72 2004/05/03 23:34:32 perev Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.73 2004/06/05 23:39:44 fisyak Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();

@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.74 2004/01/27 03:47:35 jeromel Exp $
+// $Id: St_tpt_Maker.cxx,v 1.75 2004/06/05 23:40:05 fisyak Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.75  2004/06/05 23:40:05  fisyak
+// Add (sector,row) for TpcCoordinate transformations
+//
 // Revision 1.74  2004/01/27 03:47:35  jeromel
 // Indent and define TPT_CORRECTION
 //
@@ -494,7 +497,7 @@ Int_t St_tpt_Maker::Make(){
     for ( Int_t i = 0 ; i < tphit->GetNRows() ; i++ , spc++ ){
 
       x[0] = spc->x;      x[1] = spc->y;      x[2] = spc->z;
-      StTpcLocalCoordinate local(x[0],x[1],x[2]);
+      StTpcLocalCoordinate local(x[0],x[1],x[2],spc->row/100,spc->row%100);
       StGlobalCoordinate global;
       transform(local,global);
 
