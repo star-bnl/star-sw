@@ -629,6 +629,8 @@ const char  **StFilterDef::GetNams() const
    "  LenMax       ",
    "  PtMin        ",
    "  PtMax        ",
+   "  PseudoMin    ",
+   "  PseudoMax    ",
    "  QMin         ",
    "  QMax         ", 
    "  EncodedMethod",
@@ -650,6 +652,8 @@ const float  *StFilterDef::GetDefs() const
    /*  LenMax      =*/ +999.00,
    /*  PtMin       =*/    0.00,
    /*  PtMax       =*/  999.00,
+   /*  PseudoMin   =*/ -999.00,
+   /*  PseudoMax   =*/  999.00,
    /*  QMin        =*/   -1   ,
    /*  QMax        =*/   +1   ,
    /* Encoded method*/   -1   ,     // The default value -1 menas all
@@ -661,7 +665,7 @@ const float  *StFilterDef::GetDefs() const
 Int_t StFilterDef::Accept(StPoints3DABC *pnt) 
 {
    static TRandom rrr;
-   float x,y,z,r2xy,phid,len,pt,q;
+   float x,y,z,r2xy,phid,len,pt,ps,q;
    TObject *to;
    StTrack *trk;
    
@@ -691,6 +695,9 @@ Int_t StFilterDef::Accept(StPoints3DABC *pnt)
    pt = trk->geometry()->momentum().perp();
    cut++;
    if (fPtMin >pt || pt > fPtMax)			goto SKIP;	
+   ps = trk->geometry()->momentum().pseudoRapidity();
+   cut++;
+   if (fPsMin >ps || ps > fPsMax)			goto SKIP;	
    q = trk->geometry()->charge();
    cut++;
    if (fQMin >q || q > fQMax)				goto SKIP;	
