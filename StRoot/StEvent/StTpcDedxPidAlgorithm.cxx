@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.8 2000/05/19 18:33:45 ullrich Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.9 2000/07/28 16:55:35 calderon Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
+ * Revision 2.9  2000/07/28 16:55:35  calderon
+ * Mike's version of StTpcDedxPidAlgorithm using BetheBloch
+ * class lookup table from
+ * StarClassLibrary and parameterization of resolution obtained
+ * from the first two weeks of July 2000 Data.
+ *
  * Revision 2.8  2000/05/19 18:33:45  ullrich
  * Minor changes (add const) to cope with modified StArray.
  *
@@ -45,8 +51,9 @@
 #include "StEnumerations.h"
 #include "StDedxPidTraits.h"
 #include "StTrackGeometry.h"
+#include "BetheBloch.h"
 
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.8 2000/05/19 18:33:45 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.9 2000/07/28 16:55:35 calderon Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
@@ -108,8 +115,9 @@ StTpcDedxPidAlgorithm::numberOfSigma(const StParticleDefinition* particle) const
             
     double dedx_expected   = meanPidFunction(particle) ;
     double dedx_resolution = sigmaPidFunction(particle) ;
-    
-    return (mTraits->mean() - dedx_expected)/dedx_resolution ;
+    double z = log(mTraits->mean()/dedx_expected);
+//     return (mTraits->mean() - dedx_expected)/dedx_resolution ;
+    return z/dedx_resolution ;
 }
 
 double
@@ -122,13 +130,17 @@ StTpcDedxPidAlgorithm::meanPidFunction(const StParticleDefinition* particle) con
     // placeholder constants for charcaterizeing bethe-bloch curve
     // use some data-base solution
     
-    double bpar[3] = {0.1221537e-06,-4.608514, 5613.} ;
+    //double bpar[3] = {0.1221537e-06,-4.608514, 5613.} ;
     
-    double gamma =sqrt(pow(momentum/particle->mass(),2)+1.);
-    double beta = sqrt(1. - 1./pow(gamma,2));
-    double rise = bpar[2]*pow(beta*gamma,2);
+    //double gamma =sqrt(pow(momentum/particle->mass(),2)+1.);
+    //double beta = sqrt(1. - 1./pow(gamma,2));
+    //double rise = bpar[2]*pow(beta*gamma,2);
+    //return beta > 0 ? bpar[0]/pow(beta,2)*(0.5*log(rise)-pow(beta,2)-bpar[1]) : 1000;
 
-    return beta > 0 ? bpar[0]/pow(beta,2)*(0.5*log(rise)-pow(beta,2)-bpar[1]) : 1000;
+    //MLM (7/27/00)
+    BetheBloch bb;
+    return bb(momentum/particle->mass());
+
 }
 
 double
@@ -137,11 +149,11 @@ StTpcDedxPidAlgorithm::sigmaPidFunction(const StParticleDefinition* particle) co
     if (!mTraits) return 0;
     
     // calcuates average resolution of tpc dedx
-    double dedx_expected = meanPidFunction(particle);
+//     double dedx_expected = meanPidFunction(particle);
     
     // resolution depends on the number of points used in truncated mean
     
-    double nhit = mTraits->numberOfPoints() ;
+    double nDedxPoints = mTraits->numberOfPoints() ;
     
-    return nhit > 0 ? 0.4 * dedx_expected/sqrt(nhit) : 1000.;
+    return nDedxPoints > 0 ? 0.45  /sqrt(nDedxPoints) : 1000.;
 }
