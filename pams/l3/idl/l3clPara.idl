@@ -1,8 +1,8 @@
-//   l3clPara    
-// Controls L3 cluster finder
-//
+/*   l3clPara    
+   Controls L3 cluster finder
+*/
 struct l3clPara {
-   short      StartRow  ;     // First Padrow to be processed
-   short      EndRow    ;     // Last  Padrow to be processed
+   short      StartRow  ;     /* First Padrow to be processed */
+   short      EndRow    ;     /* Last  Padrow to be processed */
    short      sector    ;
 };
