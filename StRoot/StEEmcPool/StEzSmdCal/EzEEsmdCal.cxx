@@ -1,4 +1,4 @@
-// $Id: EzEEsmdCal.cxx,v 1.3 2004/06/22 23:31:11 balewski Exp $
+// $Id: EzEEsmdCal.cxx,v 1.4 2004/06/29 16:37:41 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -38,7 +38,7 @@ EzEEsmdCal::EzEEsmdCal(int sect){
   eEve=0;
   eTrig=0;
   setSector(sect);
-  //geoTw=new EEmcGeomSimple;
+  printf("dfsadfgdsjfs  %d jkfdhshjfdsh d\n",sectID);
 }
 
 //--------------------------------------------------
@@ -100,26 +100,25 @@ void EzEEsmdCal:: unpackEzTail(){
      
       if(x->fail ) continue; // drop broken channels
       
-      float rawAdc=data[chan];  
-
       // accept this hit
       int iphi=(x->sec-1)*MaxSubSec+(x->sub-'A');
       int ieta=x->eta-1;
       assert(iphi>=0 && iphi<MaxPhiBins);
       assert(ieta>=0 && ieta<MaxEtaBins);
 
-      float adc=rawAdc-x->ped;
       int iT=-1;// store T,P,Q,R depending on 'iT'
       if(x->name[2]=='T'){
 	iT=0;
       } else{
 	iT=x->name[2]-'P'+1;
       }
-      assert(iT>=0 && iT<kTile);
+      assert(iT>=0 && iT<mxTile);
 
+      float rawAdc=data[chan];  
+      float adc=rawAdc-x->ped;
       tileAdc[iT][ieta][iphi]=adc; 
       tileThr[iT][ieta][iphi]=rawAdc>x->thr;
-      
+
       if(x->gain<=0) continue;
       // ........ only elements with valid gains are processed below
       tileEne[iT][ieta][iphi]=adc/x->gain; 
@@ -155,18 +154,15 @@ void EzEEsmdCal:: unpackEzSmd(){
       // (assuming pre/post is not mixed in hrdware with SMD pixels) 
 
       if(x->fail ) continue; // drop broken channels
-      if(x->gain<=0)continue; // drop channels w/o gains
+      if(x->sec!=sectID ) continue; // drop data from other sectors
 
-      // tmp mask
-      if(strstr(x->name,"05U035")) continue;
-      if(strstr(x->name,"05V057")) continue;
-      
-      float rawAdc=data[chan];  
+      float rawAdc=data[chan];
       float adc=rawAdc-x->ped;
-      //     printf(" e=%f ",adc/x->gain); x->print();
 
-      // accept this hit for sector 5
-      smdEne[x->sec-1][x->plane-'U'][x->strip-1]=adc/x->gain;
+      smdAdc[x->plane-'U'][x->strip-1]=adc;
+      
+      if(x->gain<=0)continue; // drop channels w/o gains
+      smdEne[x->plane-'U'][x->strip-1]=adc/x->gain;
     }
   }
   
