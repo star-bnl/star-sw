@@ -5,6 +5,12 @@
 //
 //  A. Rose, M. Calderon
 // $Log: WriteStiEvents.C,v $
+// Revision 1.2  2002/09/15 15:54:35  andrewar
+// Added bool simulated to argument list; true = simulated data,
+// false= real data. This fixes the timestamp issue where we explicitly
+// try to set a timestamp, even if one exists - which it does for real
+// data.
+//
 // Revision 1.1  2002/06/07 19:26:57  andrewar
 // First commit. Set to do nothing but track and write out.
 // Data file defaults to public event file in ITTF area.
@@ -13,7 +19,8 @@
 
 void WriteStiEvents(Int_t nevents=1,
 	            const Char_t *Mainfile = "/star/data22/ITTF/EvalData/MCFiles/auau200/rcf0183_12_300evts.geant.root",
-		    const Char_t *outfile= "test.event.root")
+		    const Char_t *outfile= "test.event.root",
+		    bool simulated = true)
 {
 
     gSystem->Load("St_base");
@@ -54,7 +61,7 @@ void WriteStiEvents(Int_t nevents=1,
     IOMk->SetBranch("geantBranch",0,"r");
 
     dbaseMk = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb");
-    dbaseMk-> SetDateTime(20010801,000000);  
+    if (simulated) dbaseMk-> SetDateTime(20010801,000000);  
     tpcDbMk  = new StTpcDbMaker("tpcDb");
     svtDbMk  = new StSvtDbMaker("svtDb");
     detDbMk = new StDetectorDbMaker("detDb");
@@ -142,22 +149,23 @@ void WriteStiEvents(Int_t nevents=1,
     stiIO->addFilterType(kPrimaryDcaFilter);
     stiIO->setFilterPrimaryDcaMax(100.);
         
-    stiIO->setSimulated(false);
-    
-    StMcEventMaker* mcEventReader = mcEventReader = new StMcEventMaker();
-    mcEventReader->doUseFtpc = kFALSE;
-    mcEventReader->doUseRich = kFALSE;
-    mcEventReader->doUseBemc = kFALSE;
-    mcEventReader->doUseBsmd = kFALSE;
+    if (!simulated) stiIO->setSimulated(false);
 
+    if (simulated){
+       StMcEventMaker* mcEventReader = mcEventReader = new StMcEventMaker();
+       mcEventReader->doUseFtpc = kFALSE;
+       mcEventReader->doUseRich = kFALSE;
+       mcEventReader->doUseBemc = kFALSE;
+       mcEventReader->doUseBsmd = kFALSE;
+    }
     cout << "!!!! doEvents: will write out .event.root file !!" << endl << endl;
     StTreeMaker *outMk = new StTreeMaker("EvOut","","bfcTree");
     outMk->SetIOMode("w");
     outMk->SetBranch("eventBranch",outfile,"w");
     outMk->IntoBranch("eventBranch","StEvent");
 
-    StAssociationMaker*	assocMakerIt = new StAssociationMaker();
-    assocMakerIt->useInTracker();
+    if (simulated) StAssociationMaker*	assocMakerIt = new StAssociationMaker();
+    if (simulated) assocMakerIt->useInTracker();
     //assocMakerIt->SetDebug();
 
     chain->PrintInfo();
