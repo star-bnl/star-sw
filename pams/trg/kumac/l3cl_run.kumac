@@ -1,0 +1,9 @@
+macro l3cl_run
+macro/global/import *
+
+
+ami/mod/call l3cl [params]/l3/l3cl_para _
+                  [raw_data]/tpc/pixels/tppad _
+                  [raw_data]/tpc/pixels/tppixel _
+                  [data]/l3/hit 
+*
