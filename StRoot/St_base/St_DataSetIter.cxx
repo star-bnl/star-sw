@@ -132,7 +132,7 @@ St_DataSet *St_DataSetIter::Add(St_DataSet *dataset, const Char_t *path)
  ///////////////////////////////////////////////////////////////////////////////
  if (!dataset) return 0;
  St_DataSet *set = 0;
- if (path && strlen(path)) set = Next(path);
+ if (path && strlen(path)) set = Find(path);
  return Add(dataset,set);
 }
  
@@ -154,7 +154,7 @@ St_DataSet *St_DataSetIter::Cd(const Char_t *dirname){
 /////////////////////////////////////////////////////////////////////
   St_DataSet *set = 0;
   if (strcmp(dirname,"..")) 
-    set =  Next(dirname);
+    set =  Find(dirname);
   else
     set = fWorkingDataSet->GetParent();
   if (set) fWorkingDataSet = set;
@@ -169,7 +169,7 @@ St_DataSet *St_DataSetIter::Dir(Char_t *dirname)
 // apart of St_DataSet::Ls()  this method prints one level only
 //
   St_DataSet *set = (St_DataSet *)fWorkingDataSet;
-  if (dirname) set = Next(dirname);
+  if (dirname) set = Find(dirname);
   if (set) set->ls();
   return set;
 }
@@ -215,7 +215,7 @@ St_DataSet *St_DataSetIter::FindObject(const Char_t *name,const Char_t *path,Opt
   Bool_t opti = opt ? strcasecmp(opt,"-i") == 0 : kFALSE;
 
   St_DataSet *startset = 0;
-  if (path && strlen(path)) startset = Next(path);
+  if (path && strlen(path)) startset = Find(path);
   else                      startset = fWorkingDataSet;
   if (!startset) return 0;
 
@@ -245,7 +245,7 @@ St_DataSet *St_DataSetIter::FindObject(St_DataSet *set,const Char_t *path,Option
   Bool_t opts = opt ? stricmp(opt,"-s") == 0 : kFALSE;
 
   St_DataSet *startset = 0;
-  if (path) startset = Next(path);
+  if (path) startset = Find(path);
   else      startset = fWorkingDataSet;
   if (!startset) return 0;
 
@@ -260,7 +260,7 @@ St_DataSet *St_DataSetIter::FindObject(St_DataSet *set,const Char_t *path,Option
 //______________________________________________________________________________
 Int_t St_DataSetIter::Flag(const Char_t *path,UInt_t flag,EBitOpt reset)
 {
-  St_DataSet *set = Next(path);
+  St_DataSet *set = Find(path);
   if (set) set->SetBit(flag,reset);
   return 0;
 }
@@ -284,7 +284,7 @@ St_DataSet *St_DataSetIter::Ls(const Char_t *dirname,Option_t *opt) {
 //
  
   St_DataSet *set= fWorkingDataSet;
-  if (dirname && strlen(dirname)) set= Next(dirname);
+  if (dirname && strlen(dirname)) set= Find(dirname);
   if (set) set->ls(opt);
   return set;
 }
@@ -304,7 +304,7 @@ St_DataSet *St_DataSetIter::Ls(const Char_t *dirname,Int_t depth) {
 //               > 0   - print depth levels at most of the dirname St_DataSet
 //
   St_DataSet *set= fWorkingDataSet;
-  if (dirname && strlen(dirname)) set= Next(dirname);
+  if (dirname && strlen(dirname)) set= Find(dirname);
   if (set) set->ls(depth);
   return set;
 }
@@ -313,7 +313,7 @@ St_DataSet *St_DataSetIter::Ls(const Char_t *dirname,Int_t depth) {
 St_DataSet *St_DataSetIter::Mkdir(const Char_t *dirname)
 {
  St_DataSet *set = 0;
- set = Next(dirname,0,kTRUE);
+ set = Find(dirname,0,kTRUE);
  if (!fNext)  Reset();  // Create a new iterator
  return set;
 }
@@ -386,7 +386,7 @@ St_DataSet *St_DataSetIter::Next()
 }
 
 //______________________________________________________________________________
-St_DataSet *St_DataSetIter::Next(const Char_t *path, St_DataSet *rootset,
+St_DataSet *St_DataSetIter::Find(const Char_t *path, St_DataSet *rootset,
                                  Bool_t mkdirflag)
 {
  ////////////////////////////////////////////////////////////////////////////////
@@ -490,7 +490,7 @@ St_DataSet *St_DataSetIter::Next(const Char_t *path, St_DataSet *rootset,
       }
       // Go to the next recursive level
       if (found)
-        dataset = Next(seppos,dataset,mkdirflag);
+        dataset = Find(seppos,dataset,mkdirflag);
  
       delete [] dirname;
    }
@@ -592,7 +592,7 @@ St_DataSet *St_DataSetIter::Shunt(St_DataSet *dataset, const Char_t *path)
  ///////////////////////////////////////////////////////////////////////////////
  if (!dataset) return 0;
  St_DataSet *set = 0;
- if (path && strlen(path)) set = Next(path);
+ if (path && strlen(path)) set = Find(path);
  return Shunt(dataset,set);
 }
 
