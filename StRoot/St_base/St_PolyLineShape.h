@@ -17,7 +17,7 @@ class TVirtualPad;
 enum EShapeTypes { kNULL=0, kSphere, kBrik};
 
 class St_PolyLineShape : public TShape  {
- private:
+ protected:
    EShapeTypes   m_ShapeType;   // shape of the segment connections
    TShape       *m_Shape;       // shape for draw each segment of the polylins
    TShape       *m_Connection;  // shep to represent the each "end" of the polyline
