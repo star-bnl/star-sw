@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.1 2002/02/14 21:25:55 aihong Exp $
+// $Id: doFlowEvents.C,v 1.2 2002/09/30 20:29:39 aihong Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -100,6 +100,9 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
 
   gSystem->Load("StFlowMaker");
   gSystem->Load("PIDFitter");
+
+  gSystem->Load("StStrangeMuDstMaker");
+  gSystem->Load("StMuDSTMaker");
   
   // Make a chain with a file list
   chain  = new StChain("StChain");
@@ -183,6 +186,18 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
     }
      flowMaker->PicoEventRead(kTRUE);
      flowMaker->SetPicoEventFileName(setFiles);
+
+  } else if (strstr(fileList[0], "MuDst.root")) {
+    //Read mu-DST
+    //cout << "##### doFlowEvents: MuDST file" << endl;
+    if (makerName[0]=='\0') {
+      StFlowMaker* flowMaker = new StFlowMaker();
+    } else {
+      StFlowMaker* flowMaker = new StFlowMaker(makerName, flowSelect);
+    }
+    flowMaker->MuEventRead(kTRUE);
+    flowMaker->SetMuEventFileName(setFiles);
+    
  
   } else if (strstr(fileList[0], ".event.root")) {
     // Read StEvent files
@@ -435,6 +450,9 @@ void doFlowEvents(const Int_t nevents)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.2  2002/09/30 20:29:39  aihong
+// to make it read in MuDst
+//
 // Revision 1.1  2002/02/14 21:25:55  aihong
 // re-install the new version
 //
