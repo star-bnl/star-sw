@@ -14,6 +14,7 @@ class StMuTrackFourVec : public AbstractFourVec
 {
 public:
     
+    StMuTrackFourVec(StMuTrack* track, StLorentzVectorF P, Int_t i);
     StMuTrackFourVec(StMuTrack*);
     StMuTrackFourVec(StMuTrack*, Int_t i);
     virtual ~StMuTrackFourVec() {};
