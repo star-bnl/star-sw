@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.hh,v 1.2 1999/11/24 18:17:16 posk Exp $
+// $Id: StFlowTrack.hh,v 1.3 1999/11/30 18:52:55 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.hh,v $
+// Revision 1.3  1999/11/30 18:52:55  snelling
+// First modification for the new StEvent
+//
 // Revision 1.2  1999/11/24 18:17:16  posk
 // Put the methods which act on the data in with the data in StFlowEvent.
 //
@@ -24,7 +27,6 @@
 #ifndef StFlowTrack_hh
 #define StFlowTrack_hh
 #include "Rtypes.h"
-#define PR(x) cout << "##### FlowTrack: " << (#x) << " = " << (x) << endl;
 
 class StFlowTrack{
 
@@ -93,3 +95,4 @@ inline Int_t   StFlowTrack::Select(Int_t harmonic, Int_t selection,
 }
 
 #endif
+

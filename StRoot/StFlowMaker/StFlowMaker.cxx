@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// $Id: StFlowMaker.cxx,v 1.3 1999/11/24 18:17:15 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.4 1999/11/30 18:52:52 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 // Description:  Maker to fill StFlowEvent from StEvent and
@@ -8,6 +8,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.4  1999/11/30 18:52:52  snelling
+// First modification for the new StEvent
+//
 // Revision 1.3  1999/11/24 18:17:15  posk
 // Put the methods which act on the data in with the data in StFlowEvent.
 //
@@ -22,17 +25,17 @@
 
 #include "StFlowMaker.hh"
 #include "StFlowEvent.hh"
-#include "TFile.h"
+#include "StEvent.h"
+#include "StEventTypes.h"
 #include "StFlowCutEvent.hh"
 #include "StFlowCutTrack.hh"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #include "StThreeVector.hh"
+#include "TFile.h"
 #define PR(x) cout << "##### FlowMaker: " << (#x) << " = " << (x) << endl;
 
 ClassImp(StFlowMaker)
-
-const Double_t bField = 0.5*tesla;
 
 //-----------------------------------------------------------------------
 
@@ -50,7 +53,7 @@ StFlowMaker::~StFlowMaker() {
 Int_t StFlowMaker::Make() {
 
   // Get a pointer to the DST
-  pEvent = (StEvent*)GetInputDS("StEvent");
+  pEvent = (StEvent*) GetInputDS("StEvent");
   if (!pEvent) return kStOK; // If no event, we're done
     
   // Check the event cuts
@@ -65,7 +68,7 @@ Int_t StFlowMaker::Make() {
 //-----------------------------------------------------------------------
 
 void StFlowMaker::PrintInfo() {
-  cout << "$Id: StFlowMaker.cxx,v 1.3 1999/11/24 18:17:15 posk Exp $" << endl;
+  cout << "$Id: StFlowMaker.cxx,v 1.4 1999/11/30 18:52:52 snelling Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
@@ -141,29 +144,31 @@ Int_t StFlowMaker::readPhiWgtFile() {
 
 //-----------------------------------------------------------------------
 
-StFlowEvent* StFlowMaker::fillFlowEvent() {
-  // Make StFlowEvent from StEvent
-  
+StFlowEvent* StFlowMaker::fillFlowEvent() {// Make StFlowEvent from StEvent
+  const Double_t bField = 0.5*tesla;  
+
   // Instantiate a new StFlowEvent
-  StFlowEvent* pFlowEvent = new StFlowEvent;
+  pFlowEvent = new StFlowEvent;
 
   // Fill PhiWgt array
   Double_t* pPhiWgt = &mPhiWgt[0][0][0];
   pFlowEvent->SetPhiWeight(pPhiWgt);
-  
-  // Initialize Iterator, loop over tracks in StEvent
-  StTrackCollection* pTracks = pEvent->trackCollection();
-  StTrackIterator    itr;
-  UInt_t origTracks = pTracks->size();
+
+  // Get Initial multiplicity before TrackCuts 
+  UInt_t origTracks = pEvent->primaryVertex(0)->numberOfDaughters(); 
   pFlowEvent->SetOrigTrackN(origTracks);
-  // track loop
+
+  // loop over tracks in StEvent
   Int_t goodTracks = 0;
-  for (itr = pTracks->begin(); itr != pTracks->end(); itr++) {
-    StGlobalTrack* pTrack = *itr;
+  const StSPtrVecPrimaryTrack& tracks = pEvent->primaryVertex(0)->daughters();
+  StSPtrVecPrimaryTrackIterator itr = 0;
+
+  for (itr = tracks.begin(); itr != tracks.end(); itr++) {
+    StPrimaryTrack* pTrack = *itr;
     if (StFlowCutTrack::CheckTrack(pTrack)) {
       // Instantiate new StFlowTrack
       StFlowTrack* pFlowTrack = new StFlowTrack;
-      StThreeVectorD p = pTrack->helix().momentum(bField); 
+      StThreeVectorD p = pTrack->geometry()->helix().momentum(bField);
       pFlowTrack->SetPhi(p.phi());
       pFlowTrack->SetEta(p.pseudoRapidity());
       pFlowTrack->SetPt(p.perp());

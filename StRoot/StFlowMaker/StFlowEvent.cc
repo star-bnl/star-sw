@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cc,v 1.2 1999/11/24 18:17:13 posk Exp $
+// $Id: StFlowEvent.cc,v 1.3 1999/11/30 18:52:51 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cc,v $
+// Revision 1.3  1999/11/30 18:52:51  snelling
+// First modification for the new StEvent
+//
 // Revision 1.2  1999/11/24 18:17:13  posk
 // Put the methods which act on the data in with the data in StFlowEvent.
 //
@@ -25,7 +28,7 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include <math.h>
-//#include "StChain.h"
+#include <algorithm>
 #include "StFlowEvent.hh"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
@@ -181,4 +184,49 @@ Float_t StFlowEvent::q(Int_t harN, Int_t selN, Int_t subN) {
   return (mMult) ? mQ.Mod() / sqrt(mMult) : 0.;
 }
 
+//-------------------------------------------------------------
+void StFlowEvent::MakeSubEvents() {
+
+  StFlowTrackIterator itr;
+  int* counter = new int[nHars * nSels];
+  int* counter2 = new int[nHars * nSels];
+  //initialize all elements in array with 0 
+  memset(counter, 0 , (nHars * nSels) * sizeof(int));
+  memset(counter2, 0 , (nHars * nSels) * sizeof(int));
+  Int_t iSelect, iHar, iSub = 0;
+
+  random_shuffle(TrackCollection()->begin(), TrackCollection()->end());
+
+
+  // loop to count the total number of tracks for each selection
+  for (itr = TrackCollection()->begin(); itr != TrackCollection()->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
+    for (iSelect = 0; iSelect < nSels; iSelect++) {
+      for (iHar = 0; iHar < nHars; iHar++) {
+	if (pFlowTrack->Select(iHar, iSelect)) {
+	    counter[iHar + nHars * iSelect]++;
+	}
+      }
+    }
+  }
+
+  // loop to set the SubEvent member variable
+  for (itr = TrackCollection()->begin(); itr != TrackCollection()->end(); itr++) {
+    StFlowTrack* pFlowTrack = *itr;
+    for (iSelect = 0; iSelect < nSels; iSelect++) {
+      for (iHar = 0; iHar < nHars; iHar++) {
+	if (pFlowTrack->Select(iHar, iSelect)) {
+	  counter2[iHar + nHars * iSelect]++;
+	  iSub = (Int_t)(counter2[iHar + nHars * iSelect] / 
+			 floor(counter[iHar + nHars * iSelect] / nSubs)) + 1;
+	  if (iSub > nSubs) {
+	    iSub = 0;
+	  }
+	  pFlowTrack->SetSubevent(iHar, iSelect, iSub);
+	}
+      }
+    }
+  }
+  
+}
 //-------------------------------------------------------------
