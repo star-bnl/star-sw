@@ -11,7 +11,8 @@ class MinvCorrFctn;
 MinvCorrFctn* MinvCF;
 
 void StHbtExample(Int_t nevents=1,
-		  const char *MainFile="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfs_4/set0353_01_35evts.dst.root")
+		  const char *MainFile="/star/rcf/test/dev/tfs_Linux/Wed/year_1b/set0352_01_35evts.dst.xdf")
+  // this is an OLD xdf file   const char *MainFile="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfs_4/set0353_01_35evts.dst.root")
 {
 
     // Dynamically link needed shared libs

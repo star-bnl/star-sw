@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.h,v 1.4 1999/10/15 01:57:23 lisa Exp $
+ * $Id: StHbtAnalysis.h,v 1.5 1999/12/03 22:24:36 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.h,v $
+ * Revision 1.5  1999/12/03 22:24:36  lisa
+ * (1) make Cuts and CorrFctns point back to parent Analysis (as well as other way). (2) Accommodate new PidTraits mechanism
+ *
  * Revision 1.4  1999/10/15 01:57:23  lisa
  * Important enhancement of StHbtMaker - implement Franks CutMonitors
  * ----------------------------------------------------------
@@ -50,7 +53,6 @@
 
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 //#include <string>
-//#include "base/StHbtControlSwitch.hh"        // base class
 #include "StHbtMaker/Base/StHbtEventCut.h"             // base class 
 #include "StHbtMaker/Base/StHbtParticleCut.h"          // base class
 #include "StHbtMaker/Base/StHbtPairCut.h"              // base class
@@ -68,13 +70,11 @@ public:
   ~StHbtAnalysis();
 
   // Gets and Sets
-  //  StHbtControlSwitch* ControlSwitch();
   StHbtEventCut*      EventCut();
   StHbtParticleCut*   FirstParticleCut();
   StHbtParticleCut*   SecondParticleCut();
   StHbtPairCut*       PairCut();
 
-  //void SetControlSwitch(StHbtControlSwitch*);
   void SetEventCut(StHbtEventCut*);
   void SetFirstParticleCut(StHbtParticleCut*);
   void SetSecondParticleCut(StHbtParticleCut*);
@@ -97,7 +97,6 @@ public:
 
 
 private:
-  //StHbtControlSwitch* mControlSwitch;
   StHbtEventCut*      mEventCut;
   StHbtParticleCut*   mFirstParticleCut;
   StHbtParticleCut*   mSecondParticleCut;
@@ -115,7 +114,6 @@ private:
 };
 
 // Get's
-//inline StHbtControlSwitch* StHbtAnalysis::ControlSwitch() {return mControlSwitch;}
 inline StHbtEventCut*      StHbtAnalysis::EventCut() {return mEventCut;}
 inline StHbtParticleCut*   StHbtAnalysis::FirstParticleCut() {return mFirstParticleCut;}
 inline StHbtParticleCut*   StHbtAnalysis::SecondParticleCut() {return mSecondParticleCut;}
@@ -126,12 +124,11 @@ inline StHbtCorrFctnCollection* StHbtAnalysis::CorrFctnCollection() {return mCor
 inline StHbtPicoEventCollection*  StHbtAnalysis::MixingBuffer() {return mMixingBuffer;}
 
 // Set's
-//inline void StHbtAnalysis::SetControlSwitch(StHbtControlSwitch* x) { mControlSwitch = x;}
-inline void StHbtAnalysis::AddCorrFctn(StHbtCorrFctn* cf) {mCorrFctnCollection->push_back(cf);}
-inline void StHbtAnalysis::SetEventCut(StHbtEventCut* x) { mEventCut = x;}
-inline void StHbtAnalysis::SetFirstParticleCut(StHbtParticleCut* x) { mFirstParticleCut = x;}
-inline void StHbtAnalysis::SetSecondParticleCut(StHbtParticleCut* x) { mSecondParticleCut = x;}
-inline void StHbtAnalysis::SetPairCut(StHbtPairCut* x) { mPairCut = x;}
+inline void StHbtAnalysis::AddCorrFctn(StHbtCorrFctn* cf) {mCorrFctnCollection->push_back(cf); cf->myAnalysis=this;}
+inline void StHbtAnalysis::SetEventCut(StHbtEventCut* x) { mEventCut = x; x->myAnalysis=this;}
+inline void StHbtAnalysis::SetFirstParticleCut(StHbtParticleCut* x) { mFirstParticleCut = x; x->myAnalysis=this;}
+inline void StHbtAnalysis::SetSecondParticleCut(StHbtParticleCut* x) { mSecondParticleCut = x; x->myAnalysis=this;}
+inline void StHbtAnalysis::SetPairCut(StHbtPairCut* x) { mPairCut = x; x->myAnalysis=this;}
 
 inline void StHbtAnalysis::SetNumEventsToMix(const unsigned int& nmix){ mNumEventsToMix = nmix;}
 

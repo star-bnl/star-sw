@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPairCut.h,v 1.1 1999/10/15 01:56:48 lisa Exp $
+ * $Id: StHbtPairCut.h,v 1.2 1999/12/03 22:24:34 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPairCut.h,v $
+ * Revision 1.2  1999/12/03 22:24:34  lisa
+ * (1) make Cuts and CorrFctns point back to parent Analysis (as well as other way). (2) Accommodate new PidTraits mechanism
+ *
  * Revision 1.1  1999/10/15 01:56:48  lisa
  * Important enhancement of StHbtMaker - implement Franks CutMonitors
  * ----------------------------------------------------------
@@ -59,6 +62,15 @@ public:
   virtual StHbtString Report() =0;    // user-written method to return string describing cuts
 
   ClassDef(StHbtPairCut, 0)
+
+  // the following allows "back-pointing" from the CorrFctn to the "parent" Analysis
+  friend class StHbtAnalysis;
+  StHbtAnalysis* HbtAnalysis(){return myAnalysis;};
+
+protected:
+  StHbtAnalysis* myAnalysis;
+
+
 };
 
 #endif
