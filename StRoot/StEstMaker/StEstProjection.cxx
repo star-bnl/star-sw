@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstProjection.cxx,v 1.10 2003/09/02 17:58:04 perev Exp $
+ * $Id: StEstProjection.cxx,v 1.11 2004/01/15 00:25:30 fisyak Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstProjection.cxx,v $
+ * Revision 1.11  2004/01/15 00:25:30  fisyak
+ * unsigned int => size_t
+ *
  * Revision 1.10  2003/09/02 17:58:04  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -76,7 +79,7 @@ void StEstTracker::AlignmentInfo() {
   mGlobalToSvtRotation(3,2) = cos(psi)*sin(theta)*sin(phi)-sin(psi)*cos(phi);
   mGlobalToSvtRotation(3,3) = cos(theta)*cos(psi);
 
-  unsigned int ierr;
+  size_t ierr;
   mSvtToGlobalRotation = mGlobalToSvtRotation.inverse(ierr);
   if (ierr!=0){ 
     cerr << "StSvtCoordinateTransform::Cant invert rotation matrix" << endl;
