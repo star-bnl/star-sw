@@ -94,8 +94,8 @@ void St_trg_Maker::SecondDstSim(St_dst_L0_Trigger *dst2)
 int St_trg_Maker::YearOfData(St_DataSet *herb) 
 {
   StDAQReader *fromVictor = (StDAQReader*) (herb->GetObject()); assert(fromVictor);
-  StTRGReader *trgReader  = fromVictor->getTRGReader(); assert(trgReader);
-  assert(trgReader->thereIsTriggerData());
+  StTRGReader *trgReader  = fromVictor->getTRGReader();if(!trgReader) return 0;
+  if(!trgReader->thereIsTriggerData()) return 0;
   int y = trgReader->getYear();
   assert(y);
   return y;
@@ -228,7 +228,7 @@ Int_t St_trg_Maker::Make(){
 	}
         return Daq2003(DAQdset,dst1,dst2,dst3,dst4);  /* use same scheme as 2003 */
         break;
-
+      case 0: return kStWarn;
 
       default: assert(0);
     }
@@ -1055,8 +1055,11 @@ void St_trg_Maker::InitMwcArrays(void) {
 
 
 
-// $Id: St_trg_Maker.cxx,v 1.50 2004/03/09 18:38:43 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.51 2004/08/07 03:02:20 perev Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.51  2004/08/07 03:02:20  perev
+// corruption test added
+//
 // Revision 1.50  2004/03/09 18:38:43  ward
 // Take care of Insure warning.
 //
