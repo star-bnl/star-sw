@@ -44,9 +44,7 @@ public:
   virtual void Clear(Option_t *option="");
   virtual Int_t Init();
   virtual Int_t  Make();
-  virtual void   MakeBranch();
   virtual void   PrintInfo();
-  virtual void   SetBranch();
   virtual Int_t  Finish();
 
   // Tag accessor
