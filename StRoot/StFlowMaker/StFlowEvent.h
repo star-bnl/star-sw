@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.11 2000/08/05 21:21:33 fisyak Exp $
+// $Id: StFlowEvent.h,v 1.12 2000/08/05 22:07:18 fisyak Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.12  2000/08/05 22:07:18  fisyak
+// less restrictive selection for ROOTCINT
+//
 // Revision 1.11  2000/08/05 21:21:33  fisyak
 // hide from CINT inline functions
 //
@@ -146,7 +149,6 @@ private:
 
   ClassDef(StFlowEvent,1)                    // macro for rootcint
 };
-#ifndef __CINT__
 inline StFlowTrackCollection* StFlowEvent::TrackCollection() const {
   return pTrackCollection; }
 
@@ -160,8 +162,10 @@ inline UInt_t StFlowEvent::Centrality() const { return mCentrality; }
 
 inline StThreeVectorF StFlowEvent::VertexPos() const { return mVertexPos; }
 
+#ifndef __CINT__
 inline void StFlowEvent::SetPhiWeight(const Flow::PhiWgt_t& pPhiWgt) {
   memcpy (mPhiWgt, pPhiWgt, sizeof(Flow::PhiWgt_t)); }
+#endif
 
 inline void StFlowEvent::SetEtaCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN)
 { mEtaCuts[0][harN][selN] = lo; mEtaCuts[1][harN][selN] = hi; }
@@ -190,6 +194,5 @@ inline void StFlowEvent::SetPiMinusCut(Float_t lo, Float_t hi) {
 inline void StFlowEvent::SetProtonCut(Float_t lo, Float_t hi) { 
   mProtonCuts[0] = lo; mProtonCuts[1] = hi; }
 
-#endif
 #endif
 
