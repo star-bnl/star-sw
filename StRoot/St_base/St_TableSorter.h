@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   26/01/99  (E-mail: fine@bnl.gov)
-// $Id: St_TableSorter.h,v 1.18 1999/08/09 01:38:55 fine Exp $
+// $Id: St_TableSorter.h,v 1.19 1999/12/01 01:40:04 fine Exp $
 // $Log: St_TableSorter.h,v $
+// Revision 1.19  1999/12/01 01:40:04  fine
+// new access method with the Long_t parameter has been introduced to avoid the wrong cast from (long) to (double) in CINT
+//
 // Revision 1.18  1999/08/09 01:38:55  fine
 // New method GetKeyAddress has been introduced
 //
@@ -92,11 +95,12 @@ class St_TableSorter : public TNamed {
 
     Int_t  BSearch(const void *value);
 
-    Int_t BSearch(Float_t value);
-    Int_t BSearch(Int_t value);
-    Int_t BSearch(Double_t value);
-    Int_t BSearch(const Char_t *value);
-    Int_t BSearch(TString &value);
+    Int_t BSearch(Float_t value)      { return BSearch(&value);}
+    Int_t BSearch(Int_t value)        { return BSearch(&value);}
+    Int_t BSearch(Long_t value)       { return BSearch(&value);}
+    Int_t BSearch(Double_t value)     { return BSearch(&value);}
+    Int_t BSearch(const Char_t *value){ return BSearch(value); }
+    Int_t BSearch(TString &value)     { return BSearch(value.Data()); }
 
     void   FillIndexArray();
     void   SortArray();
@@ -163,12 +167,14 @@ class St_TableSorter : public TNamed {
     virtual       Int_t     GetFirstRow()   const { return m_firstRow;}
 
     Int_t operator[](Int_t value)    { return BSearch(value); }
+    Int_t operator[](Long_t value)   { return BSearch(value); }
     Int_t operator[](Double_t value) { return BSearch(value); } 
     Int_t operator[](const Char_t *value) { return BSearch(value); }
 //    Int_t operator[](TString &value) { return BSearch(value); }  // to be implemented
 
     Int_t operator()(Float_t value)  { return BinarySearch(value); }
     Int_t operator()(Int_t value)    { return BinarySearch(value); }
+    Int_t operator()(Long_t value)   { return BinarySearch(value); }
     Int_t operator()(Double_t value) { return BinarySearch(value); }
 //    Int_t operator()(const Char_t *value) { return BinarySearch(*value); } // to be implemented
 //    Int_t operator()(TString &value)    { return *this(value.Data());  }   // to be implemented
