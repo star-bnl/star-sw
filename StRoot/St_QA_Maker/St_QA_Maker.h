@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.28 1999/07/15 13:57:41 perev Exp $
+//! $Id: St_QA_Maker.h,v 1.29 1999/07/17 01:51:21 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.29  1999/07/17 01:51:21  kathy
+//! changed limits and titles of some histograms
+//!
 //! Revision 1.28  1999/07/15 13:57:41  perev
 //! cleanup
 //!
@@ -139,7 +142,7 @@ class TCanvas;
 class St_QA_Maker : public StMaker {
  private:
   Bool_t drawinit;
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.28 1999/07/15 13:57:41 perev Exp $";
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.29 1999/07/17 01:51:21 kathy Exp $";
   //! Histograms booking constants
   static const Int_t nxpT;
   static const Int_t nyeta;
@@ -243,12 +246,12 @@ class St_QA_Maker : public StMaker {
   TH1F     *m_max_point;     //! number of max possible track points
   TH1F     *m_fit_point;     //! number of track points used for fitting
   TH1F     *m_glb_charge;    //! particle charge in units of |e|
-  TH1F     *m_glb_xf0;       //! x-coord. of first tpc hit - at start of helix
-  TH1F     *m_glb_yf0;       //! y-coord. of first tpc hit - at start of helix
-  TH1F     *m_glb_zf0;       //! z-coord. of first tpc hit - at start of helix
-  TH1F     *m_glb_xf;        //! x-coord. of first tpc hit
-  TH1F     *m_glb_yf;        //! y-coord. of first tpc hit
-  TH1F     *m_glb_zf;        //! z-coord. of first tpc hit
+  TH1F     *m_glb_xf0;       //! x-coord. of first hit - at start of helix
+  TH1F     *m_glb_yf0;       //! y-coord. of first hit - at start of helix
+  TH1F     *m_glb_zf0;       //! z-coord. of first hit - at start of helix
+  TH1F     *m_glb_xf;        //! x-coord. of first hit on trk
+  TH1F     *m_glb_yf;        //! y-coord. of first hit on trk
+  TH1F     *m_glb_zf;        //! z-coord. of first hit on trk
   TH1F     *m_glb_radf;      //! radial (xy) coordinate of first tpc hit
   TH1F     *m_glb_ratio;     //! ratio of n fit pnts over n pnts
   TH1F     *m_psi;           //! psi reconstructed
@@ -297,12 +300,12 @@ class St_QA_Maker : public StMaker {
   TH1F     *m_pmax_point;    //! number of max possible track points
   TH1F     *m_pfit_point;    //! number of track points used for fitting
   TH1F     *m_prim_charge;   //! particle charge in units of |e|
-  TH1F     *m_prim_xf0;      //! x-coord. of first tpc hit - at start of helix
-  TH1F     *m_prim_yf0;      //! y-coord. of first tpc hit - at start of helix
-  TH1F     *m_prim_zf0;      //! z-coord. of first tpc hit - at start of helix
-  TH1F     *m_prim_xf;        //! x-coord. of first tpc hit
-  TH1F     *m_prim_yf;        //! y-coord. of first tpc hit
-  TH1F     *m_prim_zf;        //! z-coord. of first tpc hit
+  TH1F     *m_prim_xf0;      //! x-coord. of first hit - at start of helix
+  TH1F     *m_prim_yf0;      //! y-coord. of first hit - at start of helix
+  TH1F     *m_prim_zf0;      //! z-coord. of first hit - at start of helix
+  TH1F     *m_prim_xf;        //! x-coord. of first hit on trk
+  TH1F     *m_prim_yf;        //! y-coord. of first hit on trk
+  TH1F     *m_prim_zf;        //! z-coord. of first hit on trk
   TH1F     *m_prim_radf;      //! radial (xy) coordinate of first tpc hit
   TH1F     *m_prim_ratio;     //! ratio of n fit pnts over n pnts
   TH1F     *m_ppsi;           //! psi reconstructed
@@ -418,7 +421,7 @@ class St_QA_Maker : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.28 1999/07/15 13:57:41 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_QA_Maker.h,v 1.29 1999/07/17 01:51:21 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(St_QA_Maker, 1)   //StAF chain virtual base class for Makers
     };

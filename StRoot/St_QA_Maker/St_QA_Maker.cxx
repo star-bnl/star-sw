@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.45 1999/07/15 13:57:37 perev Exp $
+// $Id: St_QA_Maker.cxx,v 1.46 1999/07/17 01:51:19 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.46  1999/07/17 01:51:19  kathy
+// changed limits and titles of some histograms
+//
 // Revision 1.45  1999/07/15 13:57:37  perev
 // cleanup
 //
@@ -884,14 +887,14 @@ void St_QA_Maker::BookHistGlob(){
   m_max_point  = new TH1F("QaGlobtrkNPntMax", "globtrk: N max points on track", 50, 0.,50.);
   m_fit_point  = new TH1F("QaGlobtrkNPntFit", "globtrk: N fit points on track", 50, 0.,50.);
   m_glb_charge = new TH1F("QaGlobtrkChrg",    "globtrk: charge ", 20,-2.,2.);
-  m_glb_xf     = new TH1F("QaGlobtrkXf",      "globtrk: x of first tpc hit ", 50,-200.,200.);
-  m_glb_xf0    = new TH1F("QaGlobtrkXf0",     "globtrk: x of first tpc hit - on helix at start",50,-20.,20.);
-  m_glb_yf     = new TH1F("QaGlobtrkYf",      "globtrk: y of first tpc hit ", 50,-200.,200.);
-  m_glb_yf0    = new TH1F("QaGlobtrkYf0",     "globtrk: y of first tpc hit - on helix at start",50,-20.,20.);
-  m_glb_zf     = new TH1F("QaGlobtrkZf",      "globtrk: z of first tpc hit ", 50,-250.,250.);
-  m_glb_zf0    = new TH1F("QaGlobtrkZf0",     "globtrk: z of first tpc hit - on helix at start",50,-20.,20.);
+  m_glb_xf     = new TH1F("QaGlobtrkXf",      "globtrk: x of first hit on trk", 50,-200.,200.);
+  m_glb_xf0    = new TH1F("QaGlobtrkXf0",     "globtrk: x of first hit - on helix at start",50,-20.,20.);
+  m_glb_yf     = new TH1F("QaGlobtrkYf",      "globtrk: y of first hit on trk", 50,-200.,200.);
+  m_glb_yf0    = new TH1F("QaGlobtrkYf0",     "globtrk: y of first hit - on helix at start",50,-20.,20.);
+  m_glb_zf     = new TH1F("QaGlobtrkZf",      "globtrk: z of first hit on trk", 50,-250.,250.);
+  m_glb_zf0    = new TH1F("QaGlobtrkZf0",     "globtrk: z of first hit - on helix at start",50,-20.,20.);
   m_glb_radf   = new TH1F("QaGlobtrkR",   "globtrk: radial position of first tpc hit", 50,0.,250.);
-  m_glb_ratio  = new TH1F("QaGlobtrkRnf",     "globtrk: ratio Nfitpnt over Npnt", 48, 0., 1.2);
+  m_glb_ratio  = new TH1F("QaGlobtrkRnf",     "globtrk: ratio Nfitpnt over Npnt", 50, 0., 1.2005);
   m_psi        = new TH1F("QaGlobtrkPsi",     "globtrk: psi distribution", 36, 0.,360.);
   m_tanl       = new TH1F("QaGlobtrkTanl",    "globtrk: tanl distribution",32,-4.,4.);
   m_glb_theta  = new TH1F("QaGlobtrkTheta",   "globtrk: theta distribution",20,0.,4.);
@@ -974,11 +977,11 @@ void St_QA_Maker::BookHistGlob(){
     m_chisq1_zf->SetXTitle("zfirst");
     m_chisq1_zf->SetYTitle("chisq1");
 
-  m_nfptonpt_mom = new TH2F("QaGlobtrkRPntMom","globtrk: ratio Nfitpnt,Npnt vs log mom.",40,1.,4.,40,0.,1.2); 
+  m_nfptonpt_mom = new TH2F("QaGlobtrkRPntMom","globtrk: ratio Nfitpnt,Npnt vs log mom.",40,1.,4.,50,0.,1.2005); 
      m_nfptonpt_mom->SetXTitle("log P (MeV)");
      m_nfptonpt_mom->SetYTitle("Ratio Nfitpnt/Npnt");
 
-  m_nfptonpt_eta = new TH2F("QaGlobtrkRPntEta","globtrk: ratio Nfitpnt,Npnt vs Eta",40,-2.,2.,40,0.,1.2); 
+  m_nfptonpt_eta = new TH2F("QaGlobtrkRPntEta","globtrk: ratio Nfitpnt,Npnt vs Eta",40,-2.,2.,50,0.,1.2005); 
      m_nfptonpt_eta->SetXTitle("eta");
      m_nfptonpt_eta->SetYTitle("Ratio Nfitpnt/Npnt");
 
@@ -1001,14 +1004,14 @@ void St_QA_Maker::BookHistPrim(){
   m_pmax_point  = new TH1F("QaPrimtrkNPntMax", "primtrk: N max points on track", 50, 0.,50.);
   m_pfit_point  = new TH1F("QaPrimtrkNPntFit", "primtrk: N fit points on track", 50, 0.,50.);
   m_prim_charge = new TH1F("QaPrimtrkChrg",    "primtrk: charge ", 20,-2.,2.);
-  m_prim_xf     = new TH1F("QaPrimtrkXf",      "primtrk: x of first tpc hit ", 50,-200.,200.);
-  m_prim_xf0    = new TH1F("QaPrimtrkXf0",     "primtrk: x of first tpc hit - on helix at start",50,-200.,200.);
-  m_prim_yf     = new TH1F("QaPrimtrkYf",      "primtrk: y of first tpc hit ", 50,-200.,200.);
-  m_prim_yf0    = new TH1F("QaPrimtrkYf0",     "primtrk: y of first tpc hit - on helix at start",50,-200.,200.);
-  m_prim_zf     = new TH1F("QaPrimtrkZf",      "primtrk: z of first tpc hit ", 50,-200.,200.);
-  m_prim_zf0    = new TH1F("QaPrimtrkZf0",     "primtrk: z of first tpc hit - on helix at start",50,-200.,200.);
+  m_prim_xf     = new TH1F("QaPrimtrkXf",      "primtrk: x of first hit on trk ", 50,-200.,200.);
+  m_prim_xf0    = new TH1F("QaPrimtrkXf0",     "primtrk: x of first hit - on helix at start",50,-200.,200.);
+  m_prim_yf     = new TH1F("QaPrimtrkYf",      "primtrk: y of first hit on trk", 50,-200.,200.);
+  m_prim_yf0    = new TH1F("QaPrimtrkYf0",     "primtrk: y of first hit - on helix at start",50,-200.,200.);
+  m_prim_zf     = new TH1F("QaPrimtrkZf",      "primtrk: z of first hit on trk", 50,-200.,200.);
+  m_prim_zf0    = new TH1F("QaPrimtrkZf0",     "primtrk: z of first hit - on helix at start",50,-200.,200.);
   m_prim_radf   = new TH1F("QaPrimtrkR",   "primtrk: radial position of first tpc hit",50,0.,250.);
-  m_prim_ratio  = new TH1F("QaPrimtrkRnf",     "primtrk: ratio Nfitpnt over Npnt", 48, 0., 1.2);
+  m_prim_ratio  = new TH1F("QaPrimtrkRnf",     "primtrk: ratio Nfitpnt over Npnt", 50, 0., 1.2005);
   m_ppsi        = new TH1F("QaPrimtrkPsi",     "primtrk: psi distribution", 36, 0.,360.);
   m_ptanl       = new TH1F("QaPrimtrkTanl",    "primtrk: tanl distribution",32,-4.,4.);
   m_prim_theta  = new TH1F("QaPrimtrkTheta",   "primtrk: theta distribution",20,0.,4.);
@@ -1091,11 +1094,11 @@ void St_QA_Maker::BookHistPrim(){
     m_pchisq1_zf->SetXTitle("zfirst");
     m_pchisq1_zf->SetYTitle("chisq1");
 
-  m_pnfptonpt_mom = new TH2F("QaPrimtrkRPntMom","primtrk: ratio Nfitpnt,Npnt vs log mom.",40,1.,4.,40,0.,1.2); 
+  m_pnfptonpt_mom = new TH2F("QaPrimtrkRPntMom","primtrk: ratio Nfitpnt,Npnt vs log mom.",40,1.,4.,50,0.,1.2005); 
      m_pnfptonpt_mom->SetXTitle("log P (MeV)");
      m_pnfptonpt_mom->SetYTitle("Ratio Nfitpnt/Npnt");
 
-  m_pnfptonpt_eta = new TH2F("QaPrimtrkRPntEta","primtrk: ratio Nfitpnt,Npnt vs Eta",40,-2.,2.,40,0.,1.2); 
+  m_pnfptonpt_eta = new TH2F("QaPrimtrkRPntEta","primtrk: ratio Nfitpnt,Npnt vs Eta",40,-2.,2.,50,0.,1.2005); 
      m_pnfptonpt_eta->SetXTitle("eta");
      m_pnfptonpt_eta->SetYTitle("Ratio Nfitpnt/Npnt");
 
