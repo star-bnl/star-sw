@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.20 2003/12/29 18:15:05 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.21 2004/02/02 19:55:16 fisyak Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -631,38 +631,47 @@ Int_t StdEdxY2Maker::InitRun(Int_t RunNumber){
       cout << "=== tpcPressure is missing ===" << endl;
     }
     assert (m_tpcPressure && m_tpcGas);
+    assert(m_tpcGas->GetNRows());
+    assert(m_tpcPressure->GetNRows());
     
 #ifdef DriftDistanceCorrection
     if (! m_drift) {
       m_drift = (St_tpcCorrection *) tpc_calib->Find("TpcDriftDistOxygen"); 
       assert(m_drift); 
+      assert(m_drift->GetNRows());
     }
 #endif // DriftDistanceCorrection
 #ifdef AdcCorrection 
     if (! m_AdcCorrection) {
       m_AdcCorrection = (St_tpcCorrection *) tpc_calib->Find("TpcAdcCorrection"); 
       assert(m_AdcCorrection); 
+      assert(m_AdcCorrection->GetNRows());
     }
 #endif // AdcCorrection
     if (! m_zCorrection) {
       m_zCorrection = (St_tpcCorrection *) tpc_calib->Find("TpcZCorrection"); 
       if (! m_zCorrection) cout << "=== TpcZCorrection is missing ===" << endl;
+      else assert(m_zCorrection->GetNRows());
     }
     if (! m_dXCorrection) {
       m_dXCorrection = (St_tpcCorrection *) tpc_calib->Find("TpcdXCorrection"); 
       if (! m_dXCorrection) cout << "=== TpcdXCorrection is missing ===" << endl;
+      else assert(m_dXCorrection->GetNRows());
     }
     if (! m_TpcdEdxCor) {
       m_TpcdEdxCor = (St_tpcCorrection *) tpc_calib->Find("TpcdEdxCor"); 
       if (! m_TpcdEdxCor) cout << "=== TpcdEdxCor is missing ===" << endl;
+      else assert(m_TpcdEdxCor->GetNRows());
     }
     if (! m_TpcLengthCorrection) {
       m_TpcLengthCorrection = (St_tpcCorrection *) tpc_calib->Find("TpcLengthCorrection"); 
       if (! m_TpcLengthCorrection) cout << "=== TpcLengthCorrection is missing ===" << endl;
+      else assert(m_TpcLengthCorrection->GetNRows());
     }
     m_TpcSecRow  = (St_TpcSecRowCor *) tpc_calib->Find("TpcSecRowB"); assert(m_TpcSecRow); 
     if (! m_trigDetSums) 
       m_trigDetSums = (St_trigDetSums *) GetDataBase("Calibrations/rich/trigDetSums");
+    else assert(m_trigDetSums->GetNRows());
     if (m_trigDetSums) {
       trigDetSums_st *m_trig = m_trigDetSums->GetTable();
       UInt_t date = GetDateTime().Convert();
