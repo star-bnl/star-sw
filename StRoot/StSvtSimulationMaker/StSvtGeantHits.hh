@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtGeantHits.hh,v 1.6 2003/07/31 19:18:09 caines Exp $
+ * $Id: StSvtGeantHits.hh,v 1.7 2004/02/24 15:53:22 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtGeantHits.hh,v $
+ * Revision 1.7  2004/02/24 15:53:22  caines
+ * Read all params from database
+ *
  * Revision 1.6  2003/07/31 19:18:09  caines
  * Petrs improved simulation code
  *
@@ -55,9 +58,9 @@ public:
   void setNumOfHits(int nhits);
   void setPeak(int index, float peak);
   void setGeantHit(int index ,int* svtAtt, float* AnTime);
-  void setGeantHit(int index , StSvtWaferCoordinate& waferCoord);
-  void setLocalCoord( int index, StThreeVector<double>& x );
-  void setGlobalCoord(int index, StThreeVector<double>& x);
+  void setGeantHit(int index , StSvtWaferCoordinate* waferCoord);
+  void setLocalCoord( int index, StThreeVector<double>* x );
+  void setGlobalCoord(int index, StThreeVector<double>* x);
 
   int numberOfHits();
   float peak(int index);

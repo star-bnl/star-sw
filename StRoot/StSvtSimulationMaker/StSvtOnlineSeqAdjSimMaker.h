@@ -11,6 +11,7 @@ class StSvtHybridPixelsD;
 //class StSvtHybridData;
 class StSvtHybridCollection;
 class StSvtData;
+class StSvtDaq;
 
 //used bad anode list is the same as in StSvtSeqAdjMaker => no difference between online and offline
 
@@ -21,6 +22,7 @@ public:
   StSvtOnlineSeqAdjSimMaker(const char* name = "SvtOnlineSeqAdj");
   ~StSvtOnlineSeqAdjSimMaker();
 
+  
   void SetKillBadAnodes(bool doit){mKillBadAnodes=doit;}
   bool GetKillBadAnodes(){return mKillBadAnodes;}
   void SetSaveAnode2Raw(bool doit){mSaveAnode2Raw=doit;}
@@ -56,37 +58,40 @@ public:
   virtual Int_t InitRun(int runumber); //caled when run number changes
 
 private:
-  StSvtData                         *mPixelColl;    //! the simulated data - created for each run InitRun{in beginAnalyses} 
-  StSvtData                         *m8bitPixelColl;   //! simulated final result written to 8 bits
-  StSvtData                         *mRawData;
-  StSvtHybridCollection             *mSvtBadAnodes;
-  StSvtConfig                       *mConfig;
-  bool  mKillBadAnodes;
-  int   mNumberTBinsToClear;   //number of first time bins which are set to 0 by DAQ - default 2
-  bool  mSaveAnode2Raw;
-  bool  mSaveAnode239Raw;
+  StSvtData                  *mPixelColl;       //! the simulated data - created for each run InitRun{in beginAnalyses} 
+  StSvtData                  *m8bitPixelColl;   //! simulated final result written to 8 bits
+  StSvtData                  *mRawData;         //!
+  StSvtHybridCollection      *mSvtBadAnodes;    //!
+  StSvtConfig                *mConfig;          //!
+  StSvtDaq                   *mDaq;             //!
+
+  bool                       mKillBadAnodes;    //!
+  int                        mNumberTBinsToClear;//!number of first time bins which are set to 0 by DAQ - default 2
+  bool                       mSaveAnode2Raw;     //!
+  bool                       mSaveAnode239Raw;   //!
 
   //number of extra pixels around the sequence to save
-  int   mExtraBefore;
-  int   mExtraAfter;
+  int   mExtraBefore;//!
+  int   mExtraAfter;//!
 
   //parameters for seq adjusting
-  int m_n_seq_lo;
-  int m_n_seq_hi;
-  int m_thresh_lo;
-  int m_thresh_hi;
-  int mPedOffset;
-  Bool_t mMask[128*240];
+  int m_n_seq_lo;//!
+  int m_n_seq_hi;//!
+  int m_thresh_lo;//!
+  int m_thresh_hi;//!
+  int mPedOffset;//!
+  Bool_t mMask[128*240];//!
 
   //global variables for temporary store in the loop
-  StSvtHybridPixelsD  *mCurrentPixelData;
-  StSvtHybridPixelsC  *mCurrent8bitPixelData;
+  StSvtHybridPixelsD  *mCurrentPixelData;//!
+  StSvtHybridPixelsC  *mCurrent8bitPixelData;//!
   int mCurrentIndex;
 
   Int_t GetConfig();
-  void GetBadAnodes();
-  void GetPixelData();
-  void SetRawData();
+  Int_t GetDaqParams();
+  void  GetBadAnodes();
+  void  GetPixelData();
+  void  SetRawData();
 
   void  Conversion10to8bit();
   void  KillBadAnodes();
