@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.26 2003/09/02 17:57:49 perev Exp $
+ * $Id: MysqlDb.cc,v 1.27 2003/09/16 22:44:17 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.27  2003/09/16 22:44:17  porter
+ * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * modified rules.make and added file stdb_streams.h for standalone compilation
+ *
  * Revision 1.26  2003/09/02 17:57:49  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -142,7 +146,7 @@
  **************************************************************************/
 #include "MysqlDb.h"
 #include "StDbManager.hh" // for now & only for getting the message service
-#include <Stsstream.h>
+#include "stdb_streams.h"
 
 //#include "errmsg.h"
 
@@ -219,12 +223,12 @@ bool MysqlDb::reConnect(){
     connected=true;
     if(!connected){
       timeOutConnect*=2;
-      ostrstream wm;
+      ostringstream wm;
       wm<<" Connection Failed with MySQL on "<<mdbhost<<":"<<mdbPort<<endl;
       wm<<" Returned error =";
       wm<<mysql_error(&mData)<<".  Will re-try with timeout set at \n==> ";
-      wm<<timeOutConnect<<" seconds <=="<<ends;
-      StDbManager::Instance()->printInfo(wm.str(),dbMConnect,__LINE__,__CLASS__,__METHOD__); wm.freeze(0);
+      wm<<timeOutConnect<<" seconds <==";
+      StDbManager::Instance()->printInfo((wm.str()).c_str(),dbMConnect,__LINE__,__CLASS__,__METHOD__); 
     }
   }      
 
@@ -271,7 +275,7 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
     return (bool) StDbManager::Instance()->printInfo("Mysql Init Error=",mysql_error(&mData),dbMErr,__LINE__,__CLASS__,__METHOD__);
 
   // char *connString; 
-  ostrstream cs;
+  ostringstream cs;
   if(reConnect()){
     //  if(mysql_real_connect(&mData,aHost,aUser,aPasswd,bDb,aPort,NULL,0)){ 
        t0=mqueryLog.wallTime()-t0;
@@ -279,20 +283,15 @@ bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,
        cs<< "  Host=" << aHost <<":"<<aPort<<endl;
        cs<< " --> Connection Time="<<t0<<" sec   ";
        if(mdbServerVersion)cs<<" MysqlVersion="<<mdbServerVersion;
-       cs<<ends;
-       //       connString = cs.str();
-        StDbManager::Instance()->printInfo(cs.str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
-	//	delete [] connString;
+      
+        StDbManager::Instance()->printInfo((cs.str()).c_str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
       tRetVal=true;
   } else {
       cs << "Making Connection to DataBase = " << aDb;
       cs << " On Host = " << aHost <<":"<<aPort;
-      cs << " MySQL returned error " << mysql_error(&mData) << ends;
-      //      connString=cs.str();
-      StDbManager::Instance()->printInfo(cs.str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
-      //      delete [] connString;
+      cs << " MySQL returned error " << mysql_error(&mData);
+      StDbManager::Instance()->printInfo((cs.str()).c_str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
   }
-  cs.freeze(0);
 
   if(mlogTime)mconnectLog.end();
   mhasConnected = tRetVal;
@@ -639,11 +638,9 @@ bool  MysqlDb::Output(StDbBuffer *aBuff){
            // to the buffer. 
 
            //char commentName[1024];
-           ostrstream cn;
-           cn<<mRes->mRes->fields[i].name<<".text"<<ends;
-	       aBuff->WriteScalar((char*)tRow[i],cn.str());
-               cn.freeze(0);
-	       //       delete [] cn.str();
+           ostringstream cn;
+           cn<<mRes->mRes->fields[i].name<<".text";
+	       aBuff->WriteScalar((char*)tRow[i],(cn.str()).c_str());
 	    };
       } else {
 	       aBuff->WriteScalar((char*)tRow[i],mRes->mRes->fields[i].name);
@@ -653,11 +650,10 @@ bool  MysqlDb::Output(StDbBuffer *aBuff){
     /*
        else {
 
-      ostrstream nd;
+      ostringstream nd;
       nd<<"null data returned from table = ";
-      nd<<mRes->mRes->fields[i].table<<" column="<<mRes->mRes->fields[i].name<<ends;
-      StDbManager::Instance()->printInfo(nd.str(),dbMWarn,__LINE__,"MysqlDb","Output(StDbBuffer* b)");
-      nd.freeze(0);
+      nd<<mRes->mRes->fields[i].table<<" column="<<mRes->mRes->fields[i].name;
+      StDbManager::Instance()->printInfo((nd.str()).c_str(),dbMWarn,__LINE__,"MysqlDb","Output(StDbBuffer* b)");
     }
     */
 

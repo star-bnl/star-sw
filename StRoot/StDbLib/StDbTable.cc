@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.35 2003/09/02 17:57:49 perev Exp $
+ * $Id: StDbTable.cc,v 1.36 2003/09/16 22:44:17 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.36  2003/09/16 22:44:17  porter
+ * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * modified rules.make and added file stdb_streams.h for standalone compilation
+ *
  * Revision 1.35  2003/09/02 17:57:49  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -158,6 +162,10 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.36  2003/09/16 22:44:17  porter
+ * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * modified rules.make and added file stdb_streams.h for standalone compilation
+ *
  * Revision 1.35  2003/09/02 17:57:49  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -314,8 +322,7 @@
 #include "StDbDefaults.hh"
 #include "StDbManager.hh"
 #include <string.h>
-#include <Stiostream.h>
-#include <Stsstream.h>
+#include "stdb_streams.h"
 #include <malloc.h>
 #ifdef __ROOT__
 ClassImp(StDbTable)
@@ -921,8 +928,8 @@ float* mfloat; double* mdouble;
   switch (type) {
   case Stchar:
     {
-        ostrstream cn;
-        cn<<name<<".text"<<ends; const char* commentName = cn.str();
+        ostringstream cn;
+        cn<<name<<".text"; const char* commentName = (cn.str()).c_str();
         mchar = 0;
         if(!buff->ReadScalar(mchar,commentName))buff->ReadScalar(mchar,name);
         if(mchar){
@@ -934,7 +941,6 @@ float* mfloat; double* mdouble;
              *ptr='\0';
              printNoDataReturned(name);
         }
-        cn.freeze(0);
     break;
     }
   case Stuchar:
@@ -1335,14 +1341,21 @@ unsigned int size = mdescriptor->getTotalSizeInBytes();
 
 void StDbTable::printNoDataReturned(const char* elementName){
 
-  ostrstream emess;
-  emess<<" No data return from table="<<printName()<<" column="<<elementName<<ends;
-  StDbManager::Instance()->printInfo(emess.str(),dbMWarn,__LINE__,__CLASS__,"ReadElement(ptr,name,len,type,buffer)");
-
-  emess.freeze(0);
+  ostringstream emess;
+  emess<<" No data return from table="<<printName()<<" column="<<elementName;
+  StDbManager::Instance()->printInfo((emess.str()).c_str(),dbMWarn,__LINE__,__CLASS__,"ReadElement(ptr,name,len,type,buffer)");
 }
 
 #undef __CLASS__
+
+
+
+
+
+
+
+
+
 
 
 

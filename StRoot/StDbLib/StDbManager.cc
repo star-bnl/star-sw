@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManager.cc,v 1.29 2003/09/02 17:57:49 perev Exp $
+ * $Id: StDbManager.cc,v 1.30 2003/09/16 22:44:17 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.30  2003/09/16 22:44:17  porter
+ * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * modified rules.make and added file stdb_streams.h for standalone compilation
+ *
  * Revision 1.29  2003/09/02 17:57:49  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -135,8 +139,7 @@
 #include "StDbManager.hh"
 #include "StDbManagerImpl.hh" // for new method only
 #include "StDbMessenger.hh"
-#include <Stsstream.h>
-#include <string.h>
+#include "stdb_streams.h"
 #ifdef __ROOT__
 ClassImp(StDbManager)
 #endif
@@ -186,18 +189,13 @@ StDbManager::printInfo(const char* m1, StDbMessLevel ml, int lineNumber, const c
 int
 StDbManager::printInfo(const char* m1, const char* m2, StDbMessLevel ml, int lineNumber, const char* className, const char* methodName){
 
-   ostrstream ms;
-   ms<<m1<<" "<<m2<<ends;
-   printInfo(ms.str(),ml,lineNumber,className,methodName);
-   ms.freeze(0);
+   ostringstream ms;
+   ms<<m1<<" "<<m2;
+   printInfo((ms.str()).c_str(),ml,lineNumber,className,methodName);
    return 0;
 }
 
-///////////////////////////////////////////////////////////////
-void 
-StDbManager::setMessageStream(ostream& os) { 
-   setMessenger(new StDbMessenger(os));
-}
+
 
 //////////////////////////////////////////////////////////////////
 void

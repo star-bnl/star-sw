@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.hh,v 1.7 2003/04/11 22:47:36 porter Exp $
+ * $Id: StDbSql.hh,v 1.8 2003/09/16 22:44:17 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbSql.hh,v $
+ * Revision 1.8  2003/09/16 22:44:17  porter
+ * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * modified rules.make and added file stdb_streams.h for standalone compilation
+ *
  * Revision 1.7  2003/04/11 22:47:36  porter
  * Added a fast multi-row write model specifically needed by the daqEventTag
  * writer. Speed increased from about 100Hz to ~3000Hz.  It is only invoked if
@@ -123,7 +127,7 @@ protected:
   void  deleteRows(const char* tableName, int* rowID, int nrows);
   void  initEndTime();
 
-  char* mRetString(ostrstream& rs);
+  char* mRetString(ostringstream& rs);
   int   sendMess(const char* a, const char* b, StDbMessLevel m, 
                  int lineNum=0, const char* className=" ",
                  const char* methName=" ");
@@ -187,11 +191,11 @@ StDbBuffer& buff;
 
 };
 
-inline char* StDbSql::mRetString(ostrstream& rs){
+inline char* StDbSql::mRetString(ostringstream& rs){
    if(mretString)delete [] mretString;
-   mretString = new char[strlen(rs.str())+1];
-   strcpy(mretString,rs.str());
-   rs.freeze(0);
+   string srs=rs.str();
+   mretString = new char[srs.length()+1];
+   strcpy(mretString,srs.c_str());
    return mretString;
 }
 

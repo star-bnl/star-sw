@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.15 2003/09/02 17:57:49 perev Exp $
+ * $Id: StDbManagerImpl.cc,v 1.16 2003/09/16 22:44:17 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.16  2003/09/16 22:44:17  porter
+ * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * modified rules.make and added file stdb_streams.h for standalone compilation
+ *
  * Revision 1.15  2003/09/02 17:57:49  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -185,8 +189,7 @@
 #include "StDbTableIter.hh"
 #include "dbCollection.h"
 #include "StDbMessenger.hh"
-#include <Stiostream.h>
-#include <Stsstream.h>
+#include "stdb_streams.h"
 #include <string.h>
 
 #ifdef HPUX
@@ -420,7 +423,7 @@ void StDbManagerImpl::lookUpServers(){
  char* xmlFile[3]={NULL,NULL,NULL};
  dbFindServerMode mode[3]={userHome,serverEnvVar,starDefault};
 
- ostrstream cos;
+ ostringstream cos;
  cos<<endl<<"******** Order of Files searched for dbServers ********* "<<endl;
 
  for(int i=0;i<3; i++){
@@ -437,10 +440,9 @@ void StDbManagerImpl::lookUpServers(){
    }
  }
 
- cos <<"********************************************************" << endl<<ends;
+ cos <<"********************************************************" << endl;
 
- printInfo(cos.str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
- cos.freeze(0);
+ printInfo((cos.str()).c_str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
 
  mhasServerList = true;
 
@@ -515,7 +517,7 @@ bool started = false;
 char* id;
 
  char* line=NULL;
- ostrstream os;
+ ostringstream os;
 
 while(!done){
 
@@ -536,18 +538,16 @@ while(!done){
      } else {
         os<<tmpline;
         id=strstr(tmpline,"</StDbServer>");
-        if(id){
-          os<<ends;
-          done=true;
-        }
+        if(id)done=true;
+        
      } // started check          
    } // eof check 
  } // while loop
 
- const char* tmpString=os.str();
- line= new char[strlen(tmpString)+1];
- strcpy(line,tmpString);
- os.freeze(0);
+ string osstr=os.str();
+ line= new char[osstr.length()+1];
+ strcpy(line,osstr.c_str());
+
 return line;
 }
 
@@ -1299,7 +1299,7 @@ for(ServerList::iterator itr = mservers.begin();
  // double dbTF=100.0*((socketTimes+queryTimes)/dbTotalTimes);
  double dbCF=100.0*(dbTotalConnect/dbTotalTimes);
 
- ostrstream cos;
+ ostringstream cos;
  cos<<endl<<"*************************** DataBase ClockTime Stats *************************** "<<endl;
 
  cos<<"Total Time in DB-API       = "<<dbTotalTimes<<"\t sec"<<endl;
@@ -1316,10 +1316,10 @@ for(ServerList::iterator itr = mservers.begin();
  cos<<" - SQL Query Times         = "<<queryTimes<<"\t sec --> "<<dbQF<<"% of total"<<endl;
  cos<<" - socket transfer Times   = "<<socketTimes<<"\t sec --> "<<dbSF<<"% of total"<<endl;
 
- cos<<"********************************************************************************"<<endl<<ends;
+ cos<<"********************************************************************************"<<endl;
 
- printInfo(cos.str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
- cos.freeze(0);
+ printInfo((cos.str()).c_str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
+
 #undef __METHOD__
 }
 
@@ -1340,12 +1340,11 @@ char* id;
     id--; *id='_';
     delete [] tmpName;
  }
- ostrstream ni;
+ ostringstream ni;
  ni<<" Found dbType="<<type<<" & dbDomain="<<domain;
- ni<<" from DataBase Name="<<dbName<<ends;
+ ni<<" from DataBase Name="<<dbName;
 
- printInfo(ni.str(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
- ni.freeze(0);
+ printInfo((ni.str()).c_str(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
 
 return true;
 #undef __METHOD__
@@ -1366,12 +1365,10 @@ return true;
 char* 
 StDbManagerImpl::getDbName(const char* typeName, const char* domainName){
  
-  ostrstream dbname;
+  ostringstream dbname;
   dbname<<typeName;
   if(strcmp(domainName,"Star")!=0)dbname<<"_"<<domainName;
-  dbname<<ends;
-  char* retName = mstringDup(dbname.str());
-  dbname.freeze(0);
+  char* retName = mstringDup((dbname.str()).c_str());
   
   return retName;
 }

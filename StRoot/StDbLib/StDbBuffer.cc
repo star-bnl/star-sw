@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.19 2003/09/02 17:57:49 perev Exp $
+ * $Id: StDbBuffer.cc,v 1.20 2003/09/16 22:44:17 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.20  2003/09/16 22:44:17  porter
+ * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * modified rules.make and added file stdb_streams.h for standalone compilation
+ *
  * Revision 1.19  2003/09/02 17:57:49  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -103,8 +107,7 @@
 #include "StDbBuffer.h"
 #include <stdlib.h>
 #include <string.h>
-#include <Stiostream.h>
-#include <Stsstream.h>
+#include "stdb_streams.h"
 
 
 #ifdef HPUX
@@ -329,7 +332,7 @@ genwritemem(long long);
 genwritemem(float);
 genwritemem(double);
 
-#define castcasest(typelist,casttype) case typelist: {casttype tVal; MemSwapCpy((char*)&tVal,(char*)aVal,mycsize[typelist],mycswapl[typelist],Client);ostrstream sStream;sStream.precision(10); sStream << tVal<<ends;char *tStr=new char[strlen(sStream.str())+1];strcpy(tStr,sStream.str());s[0]=tStr; sStream.freeze(0); };break
+#define castcasest(typelist,casttype) case typelist: {casttype tVal; MemSwapCpy((char*)&tVal,(char*)aVal,mycsize[typelist],mycswapl[typelist],Client);ostringstream sStream;sStream.precision(10); sStream << tVal; string s2=sStream.str();char *tStr=new char[s2.length()+1];strcpy(tStr,s2.c_str());s[0]=tStr; };break
 
 bool StDbBuffer::WriteMem( char **s,void* aVal, myctype type) {
   bool tRetVal=true;

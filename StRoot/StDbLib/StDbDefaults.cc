@@ -1,6 +1,5 @@
 #include "StDbDefaults.hh"
-#include <Stsstream.h>
-#include <Stiostream.h>
+#include "stdb_streams.h"
 #include <dirent.h>
 #include <stdlib.h>
 
@@ -34,27 +33,28 @@ char* StDbDefaults::getFileName(const char* fileName){
   char* nullReturn=0;
   if(!fileName) return nullReturn;
  
-  ostrstream fn;
+  ostringstream fn;
 
   if(strcmp(fileName,"HOME")==0){
-    fn<<getenv("HOME")<<"/"<<mdbServerFile<<ends;
+    fn<<getenv("HOME")<<"/"<<mdbServerFile;
   } else if(strcmp(fileName,"STAR")==0){
-    fn<<getenv("STAR")<<"/"<<"StDb/servers/"<<mdbServerFile<<ends;
+    fn<<getenv("STAR")<<"/"<<"StDb/servers/"<<mdbServerFile;
   } else {
     char* fname=getenv(fileName);
     if(!fname)return nullReturn;
     fn<<fname;
     if(opendir(fname))fn<<"/"<<mdbServerFile;  
-    fn<<ends;
   }
 
-  const char* tmpString = fn.str();
-  char* retVal= new char[strlen(tmpString)+1];
-  strcpy(retVal,tmpString);
-  fn.freeze(0);
+  string fns=fn.str();
+  char* retVal= new char[fns.length()+1];
+  strcpy(retVal,fns.c_str());
 
   return retVal;
 }
+
+
+
 
 
 
