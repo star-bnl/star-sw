@@ -1,5 +1,4 @@
 macro filter 
-   
  debug    on
  filecase keep
  name=$shell('basename `pwd`')
@@ -8,37 +7,61 @@ macro filter
  nn=id(1)
  n1=id(2)
  n2=id(3)
- message first file = [n1], last file = [n2], ouput [name]
-*
- ghist [name].his
- make  sim/control
- make  sim/gstar
-*
  mm=0
  len=999999
+ message first file = [n1], last file = [n2], ouput [name]
+ ghist [name].his
+ make  sim/control
+*
  do ni=[n1],[n2]
     file=gsrun.[ni].fz
-    if ($fexist([file]).eq.0) goto nextl      
-    gfile pz [file]
+    if ($fexist([file]).eq.0) goto nextl
+    gfile pz [file] gekh
+    if [mm].eq.0 then
+*      here is the only place where tables can be corrected:
+       make  sim/gstar
+       fort/file 72 [name].ps;   meta  72 -111
+       dcut cave x .1 10 10 .03 .03
+       meta   0;   close 72
+    endif      
+
     if ([len].gt.800)  then
        mm=[mm]+1
-       call hepevnt
-       gfile o [name].[n1]_[mm].fzd
-       if [mm].eq.1 then
-          fort/file 72 [name].[n1].ps
-          meta      72 -111
-          dcut cave x .1 10 10 .03 .03
-          close     72
-       endif      
+       gfile o [name].[n1]_[mm].fzd 
     endif 
-    trig 30
+
+    call rzcdir('//SLUGRZ',' ')
+    trig 100
+
   * get the output file length in MB:
     cmd=ls -s [name].[n1]_[mm].fzd 
     len=$word($shell([cmd]))
     len=[len]/2000
+  * control histogram
+    if ($hexist(1).gt.0) then
+       cdir //pawc
+       tit=file [ni] in set [name] done
+       title_global $quote([tit])
+       if (mod([ni],2).eq.0) then
+          fort/file 72 [name].aps;   meta  72 -111
+          zone 1 3
+          hi/pl 11
+          hi/pl 12
+          hi/pl 13
+          meta 0; close 72
+       else
+          fort/file 72 [name].bps;   meta  72 -111
+          zone 2 2
+          n/pl 1.ntrack
+          n/pl 1.Nvertx
+          n/pl 1.NtpcHit
+          n/pl 1.Ntr10
+          meta 0; close 72
+       endif
+    endif
     nextl:
  enddo
- gclose all
+ physi
  exit  
 return
          
