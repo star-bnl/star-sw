@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.4 1999/02/10 18:02:24 lasiuk Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.5 1999/02/12 01:26:37 lasiuk Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
- * Revision 1.4  1999/02/10 18:02:24  lasiuk
- * verbose output and ostream
+ * Revision 1.5  1999/02/12 01:26:37  lasiuk
+ * Limit debug output
+ *
+ * Revision 1.7  1999/02/18 21:18:33  lasiuk
+ * rotate() mods to StTpcCoordinateTranform
  *
  * Revision 1.6  1999/02/16 18:15:41  fisyak
  * Check in the latest updates to fix them
@@ -117,8 +120,8 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
     // what is the subsegment length?
 //     PR(gasDb->W());
     double deltaS = mDs/static_cast<double>(subSegments);
-    PR(deltaS);
-    PR(deltaS/millimeter);
+    //
+    if(subSegments > 1) {
 
 	// what is the subsegment length?
     gasDb->setPadLength(deltaS*centimeter);
@@ -165,7 +168,7 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
     
     double betaGamma = abs(mMomentum)/particleMass;
     //PR(mMomentum);
-    PR(betaGamma);
+	    particleMass = .1395*GeV;
 	    break;
     // number of segments to split given by command line argument (default 1):
     //  should be related to mNumberOfElectrons
@@ -218,7 +221,7 @@ void StTrsChargeSegment::split(StTrsDeDx*       gasDb,
 	listOfMiniSegments->push_back(aMiniSegment);
 // 	PR(track.at(newPosition));
 	ionizationLeft -= numberOfElectronsOnMiniSegment;
-	PR(ionizationLeft);
+ 	    //PR(newPosition);
 						numberOfElectronsOnMiniSegment,
 	if(!ionizationLeft) break;
 		newPosition += deltaS;

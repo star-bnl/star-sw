@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.7 1999/02/10 18:03:42 lasiuk Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.8 1999/02/12 01:26:38 lasiuk Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,9 +11,12 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
- * Revision 1.7  1999/02/10 18:03:42  lasiuk
- * gas gain manual setting
- * debug output
+ * Revision 1.8  1999/02/12 01:26:38  lasiuk
+ * Limit debug output
+ *
+ *
+ * Revision 1.10  1999/02/16 23:40:32  lasiuk
+ * check clear/add entry
  *
  * Revision 1.9  1999/02/14 20:44:32  lasiuk
  * gas gain settable via member function
@@ -158,7 +161,7 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
     //
     // Check Wire Index before doing any further calculations:
 // 	    PR(avalancheFactor);
-	PR(bin.numberOfElectrons());
+    if (wireIndex >= 0 &&
 	if(mDoGasGain) {
 	    double avalancheFactor = avalanche(wireIndex);
 // 	PR(bin.numberOfElectrons());
@@ -186,7 +189,7 @@ void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
 #endif
 		double increase = 250*micrometer/millimeter*distanceToWire;
 		//PR(increase);
-        cout << "add at wire # " << wireIndex <<endl;
+		double oldDriftLength = bin.position().z();
 		bin.position().setZ((oldDriftLength+increase));
 	    }
 //         cout << "add at wire # " << wireIndex <<endl;

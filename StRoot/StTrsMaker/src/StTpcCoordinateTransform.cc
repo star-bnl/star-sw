@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.4 1999/02/10 04:23:24 lasiuk Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.5 1999/02/12 01:26:36 lasiuk Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,9 +16,12 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
- * Revision 1.4  1999/02/10 04:23:24  lasiuk
- * HP namespace
+ * Revision 1.5  1999/02/12 01:26:36  lasiuk
+ * Limit debug output
  *
+ * positive pushes time bins into the chamber
+ *
+ * Revision 1.8  1999/02/18 21:17:27  lasiuk
  * instantiate with electronics db
  *
  * Revision 1.7  1999/02/16 23:28:59  lasiuk
@@ -105,10 +108,10 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate&  a, StTpcP
 	tmp.setZ((zFromTB(a.timeBucket())));
 
     b = StTpcLocalCoordinate(tmp);
-    cout << "tBFromZ z=" << a.pos().z() << endl;
+}
 
 void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate&  a, StTpcPadCoordinate& b)
-    PR(tb);
+{
     int sector = sectorFromCoordinate(a);
     if(a.pos().z() < 0)
 	sector += 12;
@@ -116,7 +119,7 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate&  a, StTpcP
     
     // rotate to local sector frame (12)
 void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, StTpcPadCoordinate& b) const
-    PR(decodedVolumeId);
+    //PR(tmp);
     int row = rowFromLocal(tmp);
     //PR(row);
     int pad = padFromLocal(tmp,row);
@@ -133,9 +136,9 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
      // LocalSector is a kind of sector (12) frame
     int decodedVolumeId = a.volumeId();
     //PR(decodedVolumeId);
-    cout << "Number of Pads (shift): " << numberOfPads << endl;
+    int isdet = (decodedVolumeId/100000);
     decodedVolumeId -= isdet*100000;
-    PR(probablePad);
+    int sector = decodedVolumeId/100;
     decodedVolumeId -= sector*100;
 
     int row = decodedVolumeId;
@@ -149,12 +152,12 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
     double shift =  (a.pos().x())/thePitch + .5;
     // shift in number of pads from centerline
     int numberOfPads = nearestInteger(shift);
-    PR(decodedVolumeId);
+    //cout << "Number of Pads (shift): " << numberOfPads << endl;
     probablePad += numberOfPads;
     //PR(probablePad);
     /////////////--------------////////
     
-    PR(row);
+    int tb = tBFromZ(a.pos().z());
     b = StTpcPadCoordinate(sector, row, probablePad, tb);
 }
 //      LocalSector Coordnate    -->  Tpc Local Coordinate

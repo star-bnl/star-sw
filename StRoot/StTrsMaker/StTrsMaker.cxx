@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.11 1999/02/10 18:01:31 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.12 1999/02/12 01:26:51 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.12  1999/02/12 01:26:51  lasiuk
+// Limit debug output
+//
 // Revision 1.11  1999/02/10 18:01:31  lasiuk
 // remove debug/sleep
 // ROOT passing
@@ -100,7 +103,7 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.11 1999/02/10 18:01:31 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.12 1999/02/12 01:26:51 lasiuk Exp $";
 
 ClassImp(StTrsMaker)
 
@@ -181,8 +184,8 @@ Int_t StTrsMaker::Init()
        StTrsWireHistogram::instance(mGeometryDb, mSlowControlDb);
    mWireHistogram->setDoGasGain(true);  // True by default
    mWireHistogram->setDoGasGainFluctuations(false);
-   mWireHistogram->setGasGainInnerSector(8000);  // True by default
-   mWireHistogram->setGasGainOuterSector(2000);
+   mWireHistogram->setGasGainInnerSector(4000);  // True by default
+   mWireHistogram->setGasGainOuterSector(1000);
    mWireHistogram->setDoTimeDelay(false);
    
     // create a Sector:
@@ -279,18 +282,17 @@ Int_t StTrsMaker::Make(){
     int bisdet, bsectorOfHit, bpadrow;
 
     // Where is the first hit in the TPC
-    PR(tpc_hit->id);
     whichSector(tpc_hit->volume_id, &bisdet, &bsectorOfHit, &bpadrow);
-    PR(bisdet);
-    PR(bsectorOfHit);
-    PR(bpadrow);
+//     PR(bisdet);
+//     PR(bsectorOfHit);
+//     PR(bpadrow);
     currentSectorProcessed = bsectorOfHit;
-    PR(currentSectorProcessed);
+//     PR(currentSectorProcessed);
 
     // Limit the  processing to a fixed number of segments
     //no_tpc_hits = 20;
     for (int i=1; i<=no_tpc_hits; i++){
-	cout << "********************tpc_hit number:  " << i << "  ************" << endl;
+	cout << "--> tpc_hit:  " << i << endl;
 // 	cout << tpc_hit->id                << ' '
 // 	     << (tpc_hit->de/eV)           << ' '
 // 	     << (tpc_hit->ds/centimeter)   << ' '
@@ -367,8 +369,8 @@ Int_t StTrsMaker::Make(){
 	    
 // 	    PR(hitMomentum.mag());
 	    
-	    PR(aSegment);
-	    //sleep(2);
+// 	    PR(aSegment);
+	    //sleep(5);
 // 	    cout << "^^^^Segment Definition^^^^" << '\n' << endl;
 	    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
@@ -385,15 +387,15 @@ Int_t StTrsMaker::Make(){
 	    list<StTrsMiniChargeSegment,allocator<StTrsMiniChargeSegment> >::iterator iter;
 #endif
 	    int breakNumber = 1;
-	    cout << "call StTrsSegment::split() into " << breakNumber << " segments." << endl;
+// 	    cout << "call StTrsSegment::split() into " << breakNumber << " segments." << endl;
 	    aSegment.split(mGasDb, mMagneticFieldDb, breakNumber, &comp);
 	    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
 	    copy(comp.begin(), comp.end(), ostream_iterator<StTrsMiniChargeSegment>(cout,"\n"));
 #endif
-	    cout << endl;
+// 	    cout << endl;
 	    
-	    cout << "Number of \"miniSegments\": " << (comp.size()) << endl;
+// 	    cout << "Number of \"miniSegments\": " << (comp.size()) << endl;
 	    
 	    // Loop over the miniSegments
 	    for(iter = comp.begin();
@@ -402,12 +404,12 @@ Int_t StTrsMaker::Make(){
 		
 // 		cout << endl;
 // 		cout << " *iter " << (*iter) << endl;
- 		PR(*iter);
+//  		PR(*iter);
 		//
 	        // TRANSPORT HERE
 	        //
 		mChargeTransporter->transportToWire(*iter);
-		PR(*iter);
+// 		PR(*iter);
 		
 		//
 		// CHARGE COLLECTION AND AMPLIFICATION
@@ -415,7 +417,7 @@ Int_t StTrsMaker::Make(){
 		
 #ifndef __sun   // Bug in the sun iterators.  Must Explicitly dereference!
 		StTrsWireBinEntry anEntry(iter->position(), iter->charge());
-		PR(anEntry);
+// 		PR(anEntry);
 #else
 		StTrsWireBinEntry anEntry((*iter).position(), (*iter).charge());
 #endif
@@ -441,10 +443,12 @@ Int_t StTrsMaker::Make(){
 	//
 	// Generate the ANALOG Signals on pads
 	//
+	cout << "--->inducedChargeOnPad()..." << endl;
 	mAnalogSignalGenerator->inducedChargeOnPad(mWireHistogram);
-	
+
+	cout << "--->sampleAnalogSignal()..." << endl;
 	mAnalogSignalGenerator->sampleAnalogSignal();
-	
+	sleep(3);
 	//
 	// Digitize the Signals
 	//
@@ -458,6 +462,7 @@ Int_t StTrsMaker::Make(){
 
 	//
 	// ...and digitize it
+	cout << "--->digitizeSignal()..." << endl;
 	mDigitalSignalGenerator->digitizeSignal();
 
 	//
@@ -483,14 +488,14 @@ Int_t StTrsMaker::Make(){
 // 	  break;
 
 	//
-	// Go to the nexe sector
+	// Go to the next sector
 	currentSectorProcessed = bsectorOfHit;
-	
+	break;  // Finish here
     } // loop over all segments: for(int i...
   } // mDataSet
   
   // The access stuff:
-
+  //#ifdef UNPACK_ALL
   //
   // Access it!
   // with:
@@ -536,14 +541,14 @@ Int_t StTrsMaker::Make(){
 			   << '\t' << static_cast<int>(*(listOfSequences[kk].firstAdc)) << endl;
 		      listOfSequences[kk].firstAdc++;
 		  } // zz
-		  cout << endl;
+// 		  cout << endl;
 	      } // Loop kk
 	  } // loop over pads
 	  // Do the data manipulation here!
 	  mUnPacker->clear();
       } // Loop over rows!
   } // Loop over sectors
-
+  //#endif
   
   cout << "Got to the end of the maker" << endl;
   
@@ -582,7 +587,7 @@ Int_t StTrsMaker::Make(){
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.11 1999/02/10 18:01:31 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.12 1999/02/12 01:26:51 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
