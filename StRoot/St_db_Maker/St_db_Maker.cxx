@@ -29,7 +29,7 @@
 #include "St_tableDescriptor.h"
 #include "St_Table.h"
 
-#include "StDbBroker.h"
+#include "StDbBroker/StDbBroker.h"
 
 static Int_t AliasDate(const char *alias);
 static Int_t AliasTime(const char *alias);
