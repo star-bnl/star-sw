@@ -199,6 +199,8 @@ C :>--------------------------------------------------------------------
       endif
 
       call VZERO(numbv,Nmh)
+      it0 = 0
+      ip0 = 0
 * - - -     
       DO WHILE (agfhit1(ih,jtra,numbv,hits).eq.0)
 *

@@ -13,7 +13,7 @@
      >                Slen,Step,Etot,Lgam,Lpto,Elos,User,Unkn(3)
       Equivalence     (QQ(1),IQQ(1),id)
 *    - - - - - - - - -
-      INTEGER   G2T_RCH,G2R_GET_HIT,ISLFLAG,Iprin/0/,Idigi,Isys,i
+      INTEGER   G2T_RCH,G2R_GET_HIT,ISLFLAG,Iprin/0/,Idigi,Isys/0/,i,j
       logical   Local/.true./
 *
       G2T_RCH=STAFCV_OK
@@ -23,6 +23,7 @@
       g2t_rch_hit_h.nok = 0
 
       do Isys=1,2
+
        if (isys.eq.1) call G2R_GET_SYS ('RICH','RGAP',Iprin,Idigi)
        if (isys.eq.2) call G2R_GET_SYS ('RICH','RCSI',Iprin,Idigi)
        if (Iprin.lt.0) goto 99
@@ -30,8 +31,10 @@
 *
        Do While (G2R_GET_HIT('rch') .eq. 0)
          i=i+1
+         if (i.gt.g2t_rch_hit_h.maxlen) return
          g2t_rch_hit_h.nok            = i
          g2t_rch_hit(i).id            = i
+
          If (local) then
            g2t_rch_hit(i).x(1)        = x(1)
            g2t_rch_hit(i).x(2)        = x(2)
