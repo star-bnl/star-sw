@@ -146,11 +146,6 @@ int main ( ) {
   printf ( "\n **************************************************** " ) ;
   printf ( "\n " ) ;
 //
-  printf ( "before nPhi %d \n", tracker.para.nPhi ) ;
-  tracker.para.read ( "parameters.txt" ) ; 
-  printf ( "nPhi %d \n", tracker.para.nPhi ) ;
-  tracker.para.write( "parameter2.txt" ) ; 
-//
 //
    return 1;
 }
