@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.86  1999/09/02 20:14:15  fisyak
+#  Cleanup for redhat60
+#
 #  Revision 1.85  1999/09/02 20:11:45  fisyak
 #  Completed Construct with shared dirs
 #
@@ -233,7 +236,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/09/02 20:11:45 $ 
+#             Last modification $Date: 1999/09/02 20:14:15 $ 
 #. default setings
 
 MAKE  := gmake
@@ -461,15 +464,9 @@ endif
   LDFLAGS  := $(DEBUG) -Wl,-Bstatic
   EXEFLAGS := $(DEBUG) -Wl,-Bdynamic   
   SOFLAGS  := $(DEBUG) -shared  
-##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lpgc -lm -ldl -rdynamic
-  CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic
-##FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
-#  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -lg2c -lI77
-#  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib -lg2c -lI77 -lF77
-#            -lcrypt
-  FLIBS   := -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c
-# -L/usr/local/lib -L/usr/local/egcs-1.1.1 -L/usr/local/egcs-1.1.1/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.60 -lg2c 
-#  SL_EXTRA_LIB := -L/usr/pgi/linux86/lib -lpgc
+  CLIBS    := -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lm -ldl  -rdynamic 
+  FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl -lpgc -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c -lc
+#  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c
 ifneq (,$(findstring $(STAR_SYS),i386_linux2))
   FLIBS   += -lI77 -lF77
 endif

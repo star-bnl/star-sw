@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.107 1999/08/26 16:23:36 fisyak Exp $
+# $Id: MakeDll.mk,v 1.108 1999/09/02 20:14:15 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.108  1999/09/02 20:14:15  fisyak
+# Cleanup for redhat60
+#
 # Revision 1.107  1999/08/26 16:23:36  fisyak
 # Allow partitial modules build
 #
@@ -265,8 +268,9 @@ SRC_DIRS  += $(ALL_DIRS)
 endif
 
 # 	Define internal and external includes dirs
-INC_NAMES := $(addprefix StRoot/,St_base StChain StUtilities xdf2root StarClassLibrary StEvent StDbLib) \
-              StRoot .share .share/tables .share/$(PKG) pams inc StDb/include
+INC_NAMES := $(addprefix StRoot/,St_base StChain StUtilities StAnalysisUtilities \
+	xdf2root StarClassLibrary StEven  StDbLib) \
+        StRoot .share .share/tables .share/$(PKG) pams inc StDb/include
 #                            StarClassLibrary/include
 INC_DIRS  := $(wildcard $(GEN_DIR) $(SRC_DIRS) $(SRC_DIR)/include)
 INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES)))) 
