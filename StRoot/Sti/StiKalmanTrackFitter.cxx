@@ -68,10 +68,10 @@ StiKalmanTrackNode::Break(nCall);
       double oldChi2 = targetNode->getChi2(); if(oldChi2){/*debugonly*/};
 static int myKount=0;myKount++;
       if (!pNode && ((!targetHit)||!targetNode->isValid())) continue;
-      targetNode->setChi2(1e51);
       //begin refit at first hit
       status = 0;
       if (pNode) {
+        targetNode->setChi2(1e51);
 	if (targetDet)
 	  status = targetNode->propagate(pNode,targetDet,fitDirection);	// hit
 	else if (targetHit)
@@ -82,6 +82,7 @@ static int myKount=0;myKount++;
 	if (debug()) {
 	  targetNode->ResetComment(::Form("%30s start refit",targetDet->getName().c_str()));
 	  targetNode->PrintpT("S");}
+        pNode = targetNode;		continue;
       }
 // target node has parameters now but not fitted
 // if targetNode has hit, get chi2 and update track parameters accordingly
