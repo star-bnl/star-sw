@@ -9,7 +9,7 @@
  */
 
 int tls_loc_( object )
-int    *object;
+int    object;
 {
-       return ( object) ;
+       return ( object ) ;
 }
