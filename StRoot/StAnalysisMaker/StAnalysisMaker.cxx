@@ -1,5 +1,11 @@
-// $Id: StAnalysisMaker.cxx,v 1.7 1999/05/01 00:54:59 perev Exp $
+// $Id: StAnalysisMaker.cxx,v 1.8 1999/06/25 19:20:40 fisyak Exp $
 // $Log: StAnalysisMaker.cxx,v $
+// Revision 1.8  1999/06/25 19:20:40  fisyak
+// Merge StRootEvent and StEvent
+//
+// Revision 1.4  1999/06/24 21:56:46  wenaus
+// Version minimally changed from standard StAnalysisMaker
+//
 // Revision 1.7  1999/05/01 00:54:59  perev
 // Clear removed delet m_DataSet
 //
@@ -39,22 +45,21 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
  * Revision for new StEvent
-#include "StRoot/StEventReaderMaker/StEventReaderMaker.h"
 #include "StChain/StChain.h"
-#include "StEvent/StRun.hh"
-#include "StEvent/StEvent.hh"
+#include "StRun.h"
+#include "StEvent.h"
 
-static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.7 1999/05/01 00:54:59 perev Exp $";
+static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.8 1999/06/25 19:20:40 fisyak Exp $";
 #include "StMessMgr.h"
 void summarizeEvent(StEvent& event);
 //  specific analysis tasks.
 //
 void summarizeEvent(StEvent& event, Int_t &nevents);
 Int_t StAnalysisMaker::Make() {
-  StEventReaderMaker* evMaker = (StEventReaderMaker*) gStChain->Maker("events");
-  if (! evMaker->event()) return kStOK; // If no event, we're done
-  StEvent& ev = *(evMaker->event());
-  StRun& run = *(evMaker->run());
+  StEvent* mEvent;
+  mEvent = (StEvent *) GetInputDS("StEvent");
+  if (! mEvent) return kStOK; // If no event, we're done
+  StEvent& ev = *mEvent;
 
   // OK, we've got the event. Pass it and process it.
   summarizeEvent(ev);
@@ -70,7 +75,7 @@ void tagFiller(StEvent& event, HighPtTag_st& hptTag);
     drawinit = kFALSE;
     theTag = 0;
 
-StAnalysisMaker::StAnalysisMaker(const Char_t *name, const Char_t *title) : StMaker(name, title) {
+StAnalysisMaker::StAnalysisMaker(const Char_t *name) : StMaker(name) {
   drawinit = kFALSE;
   theTag = 0;
 }
@@ -84,7 +89,7 @@ StAnalysisMaker::Init()
 {
 void StAnalysisMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StAnalysisMaker.cxx,v 1.7 1999/05/01 00:54:59 perev Exp $\n");
+  printf("* $Id: StAnalysisMaker.cxx,v 1.8 1999/06/25 19:20:40 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

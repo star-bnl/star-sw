@@ -1,6 +1,12 @@
-// $Id: StAnalysisMaker.h,v 1.3 1999/03/30 15:33:43 wenaus Exp $
+// $Id: StAnalysisMaker.h,v 1.4 1999/06/25 19:20:40 fisyak Exp $
 //
 // $Log: StAnalysisMaker.h,v $
+// Revision 1.4  1999/06/25 19:20:40  fisyak
+// Merge StRootEvent and StEvent
+//
+// Revision 1.3  1999/06/24 21:56:47  wenaus
+// Version minimally changed from standard StAnalysisMaker
+//
 // Revision 1.3  1999/03/30 15:33:43  wenaus
 // eliminate obsolete branch methods
 //
@@ -49,7 +55,7 @@ protected:
 
 public:
 
-  StAnalysisMaker(const Char_t *name="analysis", const Char_t *title="analysis");
+  StAnalysisMaker(const Char_t *name="analysis");
   virtual ~StAnalysisMaker();
   virtual void Clear(Option_t *option="");
   virtual Int_t Init();

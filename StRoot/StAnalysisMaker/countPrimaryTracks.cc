@@ -1,5 +1,11 @@
-// $Id: countPrimaryTracks.cc,v 1.5 1999/03/30 20:37:49 wenaus Exp $
+// $Id: countPrimaryTracks.cc,v 1.6 1999/06/25 19:20:40 fisyak Exp $
 // $Log: countPrimaryTracks.cc,v $
+// Revision 1.6  1999/06/25 19:20:40  fisyak
+// Merge StRootEvent and StEvent
+//
+// Revision 1.3  1999/06/24 21:56:47  wenaus
+// Version minimally changed from standard StAnalysisMaker
+//
 // Revision 1.5  1999/03/30 20:37:49  wenaus
 // Explicit StGlobalTrack include
 //
@@ -29,13 +35,13 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-#include "StEvent/StEvent.hh"
-#include "StEvent/StGlobalTrack.hh"
+#include "StEvent.h"
+#include "StGlobalTrack.h"
  *
-static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.5 1999/03/30 20:37:49 wenaus Exp $";
+static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.6 1999/06/25 19:20:40 fisyak Exp $";
 #include "StEventTypes.h"
 
-static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.5 1999/03/30 20:37:49 wenaus Exp $";
+static const char rcsid[] = "$Id: countPrimaryTracks.cc,v 1.6 1999/06/25 19:20:40 fisyak Exp $";
   long counter = 0;
   // First, we have to establish a primary vertex.
     //  in many different ways. Here we demonstrate

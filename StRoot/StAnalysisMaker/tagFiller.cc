@@ -1,5 +1,11 @@
-// $Id: tagFiller.cc,v 1.3 1999/03/30 20:37:49 wenaus Exp $
+// $Id: tagFiller.cc,v 1.4 1999/06/25 19:20:41 fisyak Exp $
 // $Log: tagFiller.cc,v $
+// Revision 1.4  1999/06/25 19:20:41  fisyak
+// Merge StRootEvent and StEvent
+//
+// Revision 1.3  1999/06/24 21:56:49  wenaus
+// Version minimally changed from standard StAnalysisMaker
+//
 // Revision 1.3  1999/03/30 20:37:49  wenaus
 // Explicit StGlobalTrack include
 //
@@ -30,11 +36,11 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
  * Revision for new StEvent
-#include "StEvent/StEvent.hh"
-#include "StEvent/StGlobalTrack.hh"
+#include "StEvent.h"
+#include "StGlobalTrack.h"
 #include "tables/HighPtTag.h"
 #include "SystemOfUnits.h"
-static const char rcsid[] = "$Id: tagFiller.cc,v 1.3 1999/03/30 20:37:49 wenaus Exp $";
+static const char rcsid[] = "$Id: tagFiller.cc,v 1.4 1999/06/25 19:20:41 fisyak Exp $";
 #include "HighPtTag.h"
 void tagFiller(StEvent& event, HighPtTag_st& hptTag)
 
