@@ -1,5 +1,8 @@
-// $Id: tpcdraw.C,v 1.5 1999/06/10 22:45:15 snelling Exp $
+// $Id: tpcdraw.C,v 1.6 1999/08/10 18:38:19 snelling Exp $
 // $Log: tpcdraw.C,v $
+// Revision 1.6  1999/08/10 18:38:19  snelling
+// made it compatible with the new bfc.C
+//
 // Revision 1.5  1999/06/10 22:45:15  snelling
 // disabled nr of track limit
 //
@@ -284,7 +287,7 @@ void tpcdraw() {
    * -----------------------------------------------------------------*/
 
 
-  if (ChainFlags[kMINIDAQ]) {// defined for ChainFlags[kMINIDAQ]
+  if (chain->GetOption(kMINIDAQ)) {
     chain->SetInput("BEGIN_RUN",".make/xdfin/.const/BEGIN_RUN");
     chain->SetInput("ChainFlags[kTPC]_DATA",".make/xdfin/.data/ChainFlags[kTPC]_DATA");
   }
@@ -294,7 +297,7 @@ void tpcdraw() {
   gStyle->SetFrameFillColor(10);           // white
   gStyle->SetOptFit(1);
 
-  TCanvas *c1 = new TCanvas("c1","x y z info",100,100,700,700);
+  TCanvas *c1 = new TCanvas("tpcDraw","x y z info",100,100,700,700);
   c1->SetFillColor(0);
   c1->SetBorderMode(0);
   c1->SetBorderSize(0);
@@ -330,22 +333,24 @@ void tpcdraw() {
   pad4->Draw();
 
   pad1->cd();
-  if (ChainFlags[kTSS] || ChainFlags[kTRS] || ChainFlags[kMINIDAQ]) {
+  if (chain->GetOption(kTSS) || chain->GetOption(kTRS) || chain->GetOption(kMINIDAQ) ||
+      chain->GetOption(kTDAQ)) {
     DrawPixels("y:x","(adc>2)*adc","box");
   }
   if (DrawPixels == 0) { DrawHits("y:x","","same,scat"); }
   else { DrawHits("y:x","","scat"); }
-  if (!ChainFlags[kMINIDAQ]) {
+  if (!chain->GetOption(kMINIDAQ) && !chain->GetOption(kTDAQ)) {
     DrawGeantHits("x1:x0","","same,scat");
   }  
 
   pad2->cd();
-  if (ChainFlags[kTSS] || ChainFlags[kTRS] || ChainFlags[kMINIDAQ]) {
+  if (chain->GetOption(kTSS) || chain->GetOption(kTRS) || chain->GetOption(kMINIDAQ) ||
+      chain->GetOption(kTDAQ)) {
     DrawPixels("z:x","(adc>2)*adc","box");
   }
   if (DrawPixels == 0) { DrawHits("z:x","","same,scat"); }
   else { DrawHits("z:x","","scat"); }
-  if (!ChainFlags[kMINIDAQ]) {
+  if (!chain->GetOption(kMINIDAQ) && !chain->GetOption(kTDAQ)) {
     DrawGeantHits("x2:x0","","same,scat");
   }
   
