@@ -1,0 +1,13 @@
+/*    smdRunning.idl
+*
+*  Table: smdRunning
+*
+*       description: //   which smds are up and running
+*/ 
+
+
+struct smdRunning { 
+
+   octet  IsRunning[18000];   /*   */
+
+ };  
