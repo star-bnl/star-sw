@@ -42,9 +42,8 @@ class StRefArray;
 class StRegistry : public TObject
 {
  protected: 
-    static TObjArray *fReg;				// pointer to container of containers
-    static TList     *fNon;				// pointer to container of non init containers
-    static Int_t      fFree;
+    static TObjArray *fgReg;				// pointer to container of containers
+    static Int_t      fgFree;
  public:
  StRegistry(){};
  static void Clear();
@@ -54,10 +53,9 @@ class StRegistry : public TObject
  static const char    *GetCollName (Int_t idx );	// get name of cont by index
  static StStrArray    *GetColl (Int_t idx );		// get name of cont by index
  static void  List() ;					// print list of registered conts    
- static UInt_t Ident(UInt_t colidx,UInt_t objidx);
- static void    Ident(UInt_t ident,UInt_t &colidx,UInt_t &objidx);
+ static UInt_t Ident(Int_t colidx,Int_t objidx);
+ static void    Ident(UInt_t ident,Int_t &colidx,Int_t &objidx);
  static Int_t GetNColl();				// Number of collections
- static void  AddNon(StRefArray *coll);
  static void  Init();
 ClassDef(StRegistry,0)
 };
@@ -107,6 +105,8 @@ class StTObjArray : public TSeqCollection {
             virtual void Sort(Int_t upto = kMaxInt){fArr->Sort(upto);}
                 TObject* UncheckedAt(Int_t i) const {return fArr->UncheckedAt(i);}
             virtual TObjArray* GetTObjArray() const {return fArr;}
+            virtual void SetTitle(const char *title);
+            virtual const char *GetTitle() const;
 
 ClassDef(StTObjArray,1)
 };
@@ -179,11 +179,8 @@ ClassDef(StObjArrayIter,1)
 
 class StStrArray : public StObjArray {
 protected:
- TString fName;
- TString fIDName;
- UInt_t fIdx;
 
- void Book(TObject* obj,int idx);
+//NONMONO void Book(TObject* obj,int idx);
 
 public:
  StStrArray(const Char_t *name=0, Int_t s=0);
@@ -191,8 +188,6 @@ public:
  virtual ~StStrArray();
  virtual void operator =(const StStrArray &a); 
 
- virtual const Char_t *GetName() const ;
- virtual void          SetName(const char* name) ; 
  virtual const Char_t *GetIDName() const ;
  virtual void          SetIDName(const char* name);
 
@@ -211,10 +206,9 @@ ClassDef(StStrArray,1)
 class StRefArray : public StObjArray
 {
 public:
-StRefArray(Int_t s = TCollection::kInitCapacity):StObjArray(s){};
-StRefArray(const StRefArray &from):StObjArray(from){};
-virtual void Decode();
-virtual ~StRefArray(){};
+  StRefArray(Int_t s = TCollection::kInitCapacity):StObjArray(s){};
+  StRefArray(const StRefArray &from):StObjArray(from){};
+  virtual ~StRefArray(){};
 ClassDef(StRefArray,1)
 };
 
