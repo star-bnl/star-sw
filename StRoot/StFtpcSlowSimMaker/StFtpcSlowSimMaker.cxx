@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.9 2001/10/29 12:56:55 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.10 2002/06/04 13:54:21 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.10  2002/06/04 13:54:21  jcs
+// move GetDataBase from Make to InitRun
+//
 // Revision 1.9  2001/10/29 12:56:55  jcs
 // select FTPC drift maps according to flavor of magnetic field
 //
@@ -122,18 +125,6 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
      SetFlavor("ffn10kv","ftpcDeflection");
      SetFlavor("ffn10kv","ftpcdDeflectiondP");
   }    
-  return 0;
-}
-//_____________________________________________________________________________
-Int_t StFtpcSlowSimMaker::Init(){
-// Create tables
-  St_DataSet *ftpc = GetDataBase("ftpc");
-  assert(ftpc);
-  St_DataSetIter       local(ftpc);
-
-  m_clusterpars  = (St_ftpcClusterPars *) local("ftpcClusterPars");
-  m_slowsimgas   = (St_ftpcSlowSimGas  *) local("ftpcSlowSimGas");
-  m_slowsimpars  = (St_ftpcSlowSimPars *)local("ftpcSlowSimPars");
 
   St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
   if ( !ftpc_geometry_db ){
@@ -159,7 +150,19 @@ Int_t StFtpcSlowSimMaker::Init(){
   m_gas        = (St_ftpcGas *)dblocal_calibrations("ftpcGas");
   m_driftfield = (St_ftpcDriftField *)dblocal_calibrations("ftpcDriftField");
   m_electronics = (St_ftpcElectronics *)dblocal_calibrations("ftpcElectronics");
+  return 0;
+}
+//_____________________________________________________________________________
+Int_t StFtpcSlowSimMaker::Init(){
 
+// get parameters used in code
+  St_DataSet *ftpc = GetDataBase("ftpc");
+  assert(ftpc);
+  St_DataSetIter       local(ftpc);
+
+  m_clusterpars  = (St_ftpcClusterPars *) local("ftpcClusterPars");
+  m_slowsimgas   = (St_ftpcSlowSimGas  *) local("ftpcSlowSimGas");
+  m_slowsimpars  = (St_ftpcSlowSimPars *)local("ftpcSlowSimPars");
   
   // Create Histograms    
   m_nadc    = new TH1F("fss_total_adc","Total number of adcs in both FTPCs",1000,0.,2000000.);
