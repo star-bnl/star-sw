@@ -1,31 +1,12 @@
 //*-- Author :    Valery Fine   26/01/99  (E-mail: fine@bnl.gov)
-// $Id: St_TableSorter.h,v 1.19 1999/12/01 01:40:04 fine Exp $
-// $Log: St_TableSorter.h,v $
-// Revision 1.19  1999/12/01 01:40:04  fine
-// new access method with the Long_t parameter has been introduced to avoid the wrong cast from (long) to (double) in CINT
-//
-// Revision 1.18  1999/08/09 01:38:55  fine
-// New method GetKeyAddress has been introduced
-//
-// Revision 1.17  1999/05/18 17:59:22  fine
-// Clean up and some comments
-//
-// Revision 1.16  1999/05/18 14:41:29  fine
-// New methods: CountKey(), CountKeys(), FindFirstKey() have beent introduced
-//
-// Revision 1.15  1999/05/14 22:20:56  fine
-// CountKey and CountKeys methods have been introduced
-//
-// Revision 1.14  1999/05/14 00:30:38  fine
-// GetLastFound method has been introduced
-//  
-
 #ifndef STAR_St_TableSorter
 #define STAR_St_TableSorter
 
 #include "TNamed.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////
+//
+//  $Id: St_TableSorter.h,v 1.20 1999/12/01 14:03:35 fine Exp $
 //
 //  St_TableSorter  - Is an "observer" class to sort the St_Table objects
 //                    The class provides an interface to the standard "C/C++"
@@ -95,12 +76,19 @@ class St_TableSorter : public TNamed {
 
     Int_t  BSearch(const void *value);
 
-    Int_t BSearch(Float_t value)      { return BSearch(&value);}
-    Int_t BSearch(Int_t value)        { return BSearch(&value);}
-    Int_t BSearch(Long_t value)       { return BSearch(&value);}
-    Int_t BSearch(Double_t value)     { return BSearch(&value);}
-    Int_t BSearch(const Char_t *value){ return BSearch(value); }
-    Int_t BSearch(TString &value)     { return BSearch(value.Data()); }
+    Int_t BSearch(Float_t  value );
+    Int_t BSearch(Int_t    value );
+    Int_t BSearch(ULong_t  value );
+    Int_t BSearch(Long_t   value );
+    Int_t BSearch(UInt_t   value );
+    Int_t BSearch(Short_t  value );
+    Int_t BSearch(Double_t value );
+    Int_t BSearch(UShort_t value );
+    Int_t BSearch(UChar_t  value );
+    Int_t BSearch(Char_t   value );
+
+  //  Int_t BSearch(const Char_t *value);
+  //  Int_t BSearch(TString &value)     ;
 
     void   FillIndexArray();
     void   SortArray();
@@ -169,7 +157,7 @@ class St_TableSorter : public TNamed {
     Int_t operator[](Int_t value)    { return BSearch(value); }
     Int_t operator[](Long_t value)   { return BSearch(value); }
     Int_t operator[](Double_t value) { return BSearch(value); } 
-    Int_t operator[](const Char_t *value) { return BSearch(value); }
+//    Int_t operator[](const Char_t *value) { return BSearch(value); }
 //    Int_t operator[](TString &value) { return BSearch(value); }  // to be implemented
 
     Int_t operator()(Float_t value)  { return BinarySearch(value); }
@@ -181,4 +169,29 @@ class St_TableSorter : public TNamed {
 
     ClassDef(St_TableSorter,0)
 };
+//______________________________________________________________________
+// $Log: St_TableSorter.h,v $
+// Revision 1.20  1999/12/01 14:03:35  fine
+// operator[] fixed for mixed types
+//
+// Revision 1.19  1999/12/01 01:40:04  fine
+// new access method with the Long_t parameter has been introduced to avoid the wrong cast from (long) to (double) in CINT
+//
+// Revision 1.18  1999/08/09 01:38:55  fine
+// New method GetKeyAddress has been introduced
+//
+// Revision 1.17  1999/05/18 17:59:22  fine
+// Clean up and some comments
+//
+// Revision 1.16  1999/05/18 14:41:29  fine
+// New methods: CountKey(), CountKeys(), FindFirstKey() have beent introduced
+//
+// Revision 1.15  1999/05/14 22:20:56  fine
+// CountKey and CountKeys methods have been introduced
+//
+// Revision 1.14  1999/05/14 00:30:38  fine
+// GetLastFound method has been introduced
+//  
+//______________________________________________________________________
+
 #endif
