@@ -133,6 +133,7 @@ class StEmcAssociation
                      StEmcAssociation(StMcTrack *t);
     virtual          ~StEmcAssociation();
     StMcTrack*       getTrack()                 { return mTrack; }   ///< returns pointer to the MC track
+    const StMcTrack* getTrack() const           { return mTrack; }   ///< returns pointer to the MC track
     ClassDef(StEmcAssociation, 1)
 };
 
@@ -146,6 +147,7 @@ class StEmcClusterAssociation:public StEmcAssociation
                      StEmcClusterAssociation(StMcTrack*, StEmcCluster*, float,float);
     virtual          ~StEmcClusterAssociation();
     StEmcCluster*    getCluster()               { return mCluster; }  ///< returns pointer to the EMC cluster
+    const StEmcCluster* getCluster() const      { return mCluster; }  ///< returns pointer to the EMC cluster
     float            getFractionTrack()         { return mFTrack; }   ///< returns the fraction of the energy deposited by the track on the EMC that ended in the reconstructed cluster
     float            getFractionCluster()       { return mFEmc; }     ///< returns the fraction of the energy of the cluster that was deposited by the MC track
     ClassDef(StEmcClusterAssociation, 1)
@@ -159,6 +161,7 @@ class StEmcPointAssociation:public StEmcAssociation
                      StEmcPointAssociation(StMcTrack*, StEmcPoint*, int);
     virtual          ~StEmcPointAssociation();
     StEmcPoint*      getPoint()                 { return mPoint; }      ///< returns pointer to the EMC point
+    const StEmcPoint*getPoint() const           { return mPoint; }      ///< returns pointer to the EMC point
     int              getAssociation()           { return mAssocType; }  ///< returns Association information between MC track and EMC point
     int              getAssociation(int det)    { return (det>0 && det<=NDETECTORS) ? ((mAssocType&(1<<(det-1)))!=0): 0; } ///<returns bit information (0,1) for each EMC subdetector
     ClassDef(StEmcPointAssociation, 1)
