@@ -15,6 +15,7 @@ set output_dir=.
 set output_filename=mickey_mouse.fzd
 
 # setup gstar
+setenv GSTAR_UTIL_DIR $STAR/kumacs/sim/utilities
 source $GSTAR_UTIL_DIR/../user/setup_gstar.hadronic_off.year2a.csh
 
 #-----------------------------------------------------------

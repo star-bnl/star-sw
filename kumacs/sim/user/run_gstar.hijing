@@ -16,6 +16,7 @@ set output_dir=.
 set output_filename=hijing.fzd
 
 # setup gstar
+setenv GSTAR_UTIL_DIR $STAR/kumacs/sim/utilities
 source $GSTAR_UTIL_DIR/../user/setup_gstar.decay_only.year1a.csh
 
 # run gstar
