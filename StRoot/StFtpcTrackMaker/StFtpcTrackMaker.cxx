@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.28 2002/03/25 09:52:55 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.29 2002/03/25 12:50:56 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.29  2002/03/25 12:50:56  oldi
+// Customization of Warnings.
+//
 // Revision 1.28  2002/03/25 09:52:55  jcs
 // exit with warning if primary vertex calculation returns nan
 //
@@ -285,7 +288,7 @@ Int_t StFtpcTrackMaker::Make()
   }
   if (iflag == 0) {
     //  No vertex found, no FTPC tracking is possible
-    gMessMgr->Warning() << "StFtpcTrackMaker::Make() - no vertex found - no tracking" << endm;
+    gMessMgr->Message("", "W", "OST") << "StFtpcTrackMaker::Make() - no vertex found - no tracking" << endm;
 
     // ----------------------------------------------------
     // debug
@@ -297,10 +300,9 @@ Int_t StFtpcTrackMaker::Make()
   }
 
   // check for the position of the main vertex
-
   if (isnan(primary_vertex_x) || isnan(primary_vertex_y) || isnan(primary_vertex_z)) {
       // No tracking!
-      gMessMgr->Warning() << "StFtpcTrackMaker::Make() - error in vertex calculation - no tracking" << endm;
+      gMessMgr->Message("", "W", "OST") << "StFtpcTrackMaker::Make() - error in vertex calculation - no tracking" << endm;
       return kStWarn;
   } 
 
@@ -478,7 +480,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.28 2002/03/25 09:52:55 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.29 2002/03/25 12:50:56 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
