@@ -1,9 +1,7 @@
 /* This program reads an xdf data file and produces C++ and C code.
 ** It then compiles, links (to the root library), and runs this code,
-** resulting in the final product, the root data file, corresponding
-** to the xdf file input to this program.  Besides this C++ and C code,
-** this program also produces some root macro files, and an on-screen
-** recipe for using them to read the root data file from within root.
+** resulting in a root data file, and shared object library, some
+** example macros, and a few other goodies.
 */
 /**************************************************  INCLUDES  ************/
 #include <stdio.h>
@@ -48,6 +46,7 @@ char         *gTypesList[NTYPE]; /* non-redundant copy of gTableType */
 char         *gTableSpec[NTYPE];
 DS_DATASET_T *gPtrCurrentEvent;
 /*****************************************************  PROTOTYPES  ******/
+void EnvValNotDefined(char *evname);
 int FileExists(char *fn);
 void WriteRecipe(void);
 int IndexOfSomeTableWhichHasThisType(int i);
@@ -58,17 +57,30 @@ char *Slash2X(char *fn);
 void ConvertStructToMyRoot(int maxlen,char *in,char *out);
 void Ose(void); void FatalError(int isDslError,int ln);
 /*****************************************************  FUNCTIONS  ******/
-DS_DATASET_T *DsPointer(char *tableName) {
+void Exit(int ln) {
+  if(ln>0) PP"Abnormal exit from line %d of %s.\n",ln,__FILE__);
+  PP"ABORTED.   ABORTED.   ABORTED.   ABORTED.   ABORTED.   ABORTED.\n");
+  exit(2);
+}
+DS_DATASET_T *DsPointer(int callingLineNum,char *tableName) {
   int i;
   for(i=gNtable-1;i>=0;i--) {
     if(!strcmp(tableName,gTableName[i])) return gTablePtr[i];
   }
-  ERR;
+  Ose();
+  PP"callingLineNum = %d\n",callingLineNum);
+  PP"Fatal error 88u in %s.\n",__FILE__);
+  PP"I can't find table name '%s' in my list:\n",tableName);
+  for(i=0;i<gNtable;i++) {
+    if(i>30) { PP"List truncated.\n"); break; }
+    PP"%2d '%s'\n",gTableName[i]);
+  }
+  if(7) Exit(__LINE__);
   return 0;
 }
-int NumberOfRows(char *tableName) {
+int NumberOfRows(int callingLineNumber,char *tableName) {
   size_t nrow;
-  if(!dsTableRowCount(&nrow,DsPointer(tableName)))  ERR;
+  if(!dsTableRowCount(&nrow,DsPointer(callingLineNumber,tableName))) ERR;
   return (int)nrow;
 }
 FILE *Fopen(char *fn,char *mode) {
@@ -76,18 +88,18 @@ FILE *Fopen(char *fn,char *mode) {
   if(strcmp(mode,"w")) ERR;
   sprintf(buf,"%s/%s",gDir[1],fn);
   ff=fopen(buf,mode);
-  if(!ff) { Ose(); PP">> Can't write %s.\n",buf); exit(2); }
+  if(!ff) { Ose(); PP">> Can't write %s.\n",buf); Exit(__LINE__); }
   return ff;
 }
 void FatalError(int isDslError,int ln) {
   Ose();
   if(isDslError) { PP">> The last dsl error was:\n"); dsPerror(""); }
   PP">> Error in file %s on line :%d\n",__FILE__,ln);
-  exit(2);
+  exit(-10);
 }
 void OpenTheXdfFile(char *filename) {
   if((gXdfIn=fopen(filename,"rb"))==NULL) {
-    PP">> can't read file '%s'.\n",filename); exit(2);
+    PP">> can't read file '%s'.\n",filename); Exit(__LINE__);
   }
   xdrstdio_create(&gXdrPtr,gXdfIn,XDR_DECODE);
 }
@@ -95,7 +107,7 @@ char *Path(int addDotC,char *oldPath,char *newEnd) {
   char *rv; int extra;
   if(addDotC) extra=2; else extra=0;  /* two extra bytes for the .C */
   rv=(char*)malloc((size_t)(strlen(oldPath)+strlen(newEnd)+2+extra));
-  if(!rv) { PP">> Fatal error malloc() failed.\n"); exit(2); }
+  if(!rv) { PP">> Fatal error malloc() failed.\n"); Exit(__LINE__); }
   strcpy(rv,oldPath);
   if(strlen(rv)>0) strcat(rv,"/"); strcat(rv,newEnd);
   if(addDotC) strcat(rv,".C");
@@ -162,7 +174,7 @@ void AllEventsNotSame(void) {
   PP">> Fatal error:  all events must have the same tables.\n");
   PP">> You can work around this limitation by using the -e option.\n");
   PP">> Type 'xdf2root -h' for help.\n");
-  exit(2);
+  Exit(__LINE__);
 }
 void CheckAllEventsHaveSameTables(void) {
   int ii,cnt=0,foundTheEvent=0;
@@ -189,7 +201,7 @@ void CheckAllEventsHaveSameTables(void) {
   if(gOptionE&&!foundTheEvent) {
     Ose();
     PP"I did not find event number %d.  Count from 1, like FORTRAN.\n",
-      gOptionEIndex); exit(2);
+      gOptionEIndex); Exit(__LINE__);
   }
 }
 void PrintListOfTablesToScreen(void) {
@@ -355,8 +367,7 @@ void WriteMakefile_sun4os5pc() {
   FF"\t@echo \"Generating dictionary, ignore the two \\\"Note:\\\"s:\"\n");
   FF"\t@$(ROOTSYS)/bin/rootcint EventCint.$(SrcSuf) -c Event.h LinkDef.h\n");
   FF"\t@echo ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo\n");
-  FF"\t@echo Compile of EventCint.C takes around 3 minutes per megabyte\n");
-  FF"\t@echo on rcrs12.rhic.bnl.gov.\n");
+  FF"\t@echo Compile of EventCint.C takes around 3 minutes per megabyte.\n");
   FF"\t@ls -l EventCint.C\n");
   FF" \n");
   FF".$(SrcSuf).$(ObjSuf):\n");
@@ -367,7 +378,7 @@ void WriteMakefile() {
   char ok=0;
 #ifdef aix
   PP"Note to programmer:  use Root/Aix/Makefile as a template\n");
-  PP"when writing WriteMakefile_aix(); exit(2);
+  PP"when writing WriteMakefile_aix(); Exit(__LINE__);
 #endif
 #ifdef sun4os5pc
   WriteMakefile_sun4os5pc(); ok=7;
@@ -377,7 +388,7 @@ void WriteMakefile() {
     PP"Fatal error, the code for xdf2root does not support\n");
     PP"this architecture.  You need to add another ifdef to function\n");
     PP"WriteMakefile().\n");
-    exit(2);
+    Exit(__LINE__);
   }
 }
 #define STRUCTSIZE 3000
@@ -455,7 +466,7 @@ void WriteDataset_access() {
   FF"  }\n");
   FF"  xdrstdio_create(&gXdrPtr,gXdfIn,XDR_DECODE);\n");
   FF"  gEventNumber=0;\n");
-  FF"  PP\"OpenTheXdfFile() was successful.\\n\");\n");
+  /* FF"  PP\"OpenTheXdfFile() was successful.\\n\");\n"); */
   FF"}\n");
   FF"float TableValue(char *table,int row,int col,int ss) {");
   FF"/*ss=vec.subscript*/\n");
@@ -532,8 +543,8 @@ void WriteDataset_access() {
   FF"  if(doTheFree) { for(ii=0;ii<gNfree;ii++) free(gFree[ii]); }\n");
   FF"  gNfree=0;\n");
   FF"  FillListOfTables();\n");
-  FF"  PP\"This event has %%d tables:\\n\",gNtable);\n");
-  FF"  for(ii=0;ii<gNtable;ii++) PP\"%%s\\n\",gTableName[ii]);\n");
+  /* FF"  PP\"This event has %%d tables:\\n\",gNtable);\n"); */
+  /* FF"  for(ii=0;ii<gNtable;ii++) PP\"%%s\\n\",gTableName[ii]);\n"); */
   FF"  return 7;\n");
   FF"}\n");
   fclose(ff);
@@ -647,22 +658,29 @@ void WriteEventC() {
     FF"  rows_%s->Clear();\n",cc);
   }
   FF"}\n");
-  FF"void Event::PrintColumnNames(char *table) {\n");
+  FF"void Event::GetCol(char *tbl,char **col,char **dtype,int wc) {\n");
+  FF"  char *v=\"vector\",*s=\"scalar\";\n");
   for(i=0;i<gNtable;i++) {
-    FF"  if(!strcmp(table,\"%s\")) {\n",gTableName[i]);
+    FF"  if(!strcmp(tbl,\"%s\")) {\n",gTableName[i]);
     ncol=NumberColumns(i);
+    FF"    switch(wc) {\n");
     for(icol=0;icol<ncol;icol++) {
-      if(Dimensions(i,icol)>1) scalVec="vector"; else scalVec="scalar";
+      if(Dimensions(i,icol)>1) scalVec="v"; else scalVec="s";
       cn=ColName(i,icol);
-      FF"    printf(\"%s %s\\n\");\n",scalVec,cn);
+      FF"    case %2d: *col=\"%s\"; *dtype=%s; break;\n",icol,cn,scalVec);
     }
-    FF"  }\n");
+    FF"      default: *col=0; *dtype=0; break;\n");
+    FF"    } // end switch\n");
+    FF"  } // end if\n");
   }
   FF"}\n");
-  FF"void Event::PrintTables() {\n");
+  FF"void Event::GetTableName(char **tableName,int whichTable) {\n");
+  FF"  switch(whichTable) {\n");
   for(i=0;i<gNtable;i++) {
-    FF"  printf(\"%s\\n\");\n",gTableName[i]);
+    FF"    case %d: *tableName=\"%s\"; break;\n",i,gTableName[i]);
   }
+  FF"    default: *tableName=0; break;\n");
+  FF"  }\n");
   FF"}\n");
   FF"Float_t Event::GetVal(char *table,char *col,Int_t irow) {\n");
   FF"  // Returns non-zero for error.\n");
@@ -837,8 +855,8 @@ void WriteEventH() {
   FF"   void    Clear();\n");
   FF"   void    Finish();\n");
   FF"   void    AddRow(int row,char *table);\n");
-  FF"   void    PrintColumnNames(char *table);\n");
-  FF"   void    PrintTables();\n");
+  FF"   void    GetCol(char *table,char **col,char **dtype,int icol);\n");
+  FF"   void    GetTableName(char **tableName,int whichTable);\n");
   FF"   Float_t   GetVal(char *table,char *col,Int_t irow,Int_t vecIndex);\n");
   FF"   Float_t   GetVal(char *table,char *col,Int_t irow);\n");
   FF"   Int_t   Nrow(char *table);\n");
@@ -883,12 +901,13 @@ void WriteMainEventC() {
   FF"// autosave when 1 Gbyte written\n");
   FF"   bufs=256000; if (splt) bufs /= 4;\n");
   FF"\n");
-  FF"   for(ev=0;;ev++) {\n");
+  FF"   for(ev=0;ev<9999;ev++) {\n");
   FF"      if(!GetNextEvent((int)ev)) break; nevent++;\n");
+  FF"      printf(\">> Reading event %%d from xdf file.\\n\",ev+1);\n");
   if(gOptionE) {
     FF"      if(ev!=%d) continue;\n",gOptionEIndex-1);
   }
-  FF"      cout<<\"event=\"<<ev<<endl;\n");
+  /* FF"      cout<<\"event=\"<<ev<<endl;\n"); */
   FF"      event=new Event();\n");
   FF"      if(b) b->SetAddress(event); ");
   FF"else b=tree->Branch(\"event\",event,bufs,splt);\n");
@@ -896,6 +915,8 @@ void WriteMainEventC() {
   for(itbl=0;itbl<gNtable;itbl++) {
     FF"      table=\"%s\"; nrow=NumberOfRows(table);\n",gTableName[itbl]);
     FF"      for(t=0;t<nrow;t++) event->AddRow(t,table);\n");
+    FF"      printf(\">> %3d percent done,  event %%d.\\n\",1+ev);\n",
+          (100*(1+itbl))/gNtable);
     FF"\n");
   }
   FF"      nb += tree->Fill();\n");
@@ -909,6 +930,7 @@ void WriteMainEventC() {
   FF"   Double_t rtime=timer.RealTime();\n");
   FF"   Double_t ctime=timer.CpuTime();\n");
   FF" \n");
+  /*
   FF"   printf(\"\\n%%d events and %%d bytes ");
   FF"processed.\\n\",nevent,nb);\n");
   FF"   printf(\"RealTime=%%f seconds, ");
@@ -920,7 +942,9 @@ void WriteMainEventC() {
   FF"Mbytes/Cputime seconds\\n\",mbytes/ctime);\n");
   FF"   //printf(\"file compression factor ");
   FF"= %%f\\n\",hfile.GetCompressionFactor());\n");
-  FF"   printf(\"Normal end of automatically generated code..\\n\");\n");
+  */
+  FF"   fprintf(stderr,\"Normal end of ");
+  FF"automatically generated code..\\n\");\n");
   FF" \n");
   FF"   return 0;\n");
   FF"}\n");
@@ -948,8 +972,9 @@ void WriteTestGetVal(int macroNumber) {
   }
   FF"// Note that GetVal() has an extra argument for vector columns.\n");
   FF"//\n");
-  FF"   gROOT->Reset(); TFile f(\"Event.root\"); ");
-  FF"TTree *T = (TTree*)f.Get(\"T\");\n");
+  FF"   gROOT->Reset();\n");
+  FF"   TFile f(\"Event.root\");\n");
+  FF"   TTree *T = (TTree*)f.Get(\"T\");\n");
   FF"   TStopwatch timer; timer.Start();\n");
   FF"   Event *event = new Event();   ");
   FF"//create the event object outside the loop\n");
@@ -963,14 +988,17 @@ void WriteTestGetVal(int macroNumber) {
   }
   FF"      Int_t nrows;\n");
   FF"      nb += T.GetEvent(i);\n");
+  FF"      event = (Event*)branch->GetAddress();\n");
   FF"      printf(\"Event:%%d\\n\",i);\n");
   for(itbl=0;itbl<gNtable;itbl++) {
+    tn=gTableName[itbl];
     if( macroNumber==1 && itbl<gNtable-1 ) {  /* do at least one */
       if(itbl<gNtable/4) continue;
-      if(NumberOfRows(gTableName[itbl])<3) continue;
+      if(NumberOfRows(__LINE__,tn)<3) continue;
     }
     if(didOne&&macroNumber==1) continue; didOne=7;
-    tn=gTableName[itbl];
+    if(macroNumber==1) PP">> Using %s for small.C.  It has %d rows.\n",tn,
+          NumberOfRows(__LINE__,tn));
     FF"      /////////////////////////// table %s\n",tn);
     FF"      nrows=event->Nrow(\"%s\");\n",tn);
     FF"      printf(\"Table %s ",tn);
@@ -1109,33 +1137,53 @@ void WriteTestStruct() {
 void WriteHist() {
   FILE *ff=Fopen("hist.C","w");
   FF"{\n");
-  FF"  gROOT->Reset();\n");
-  FF"  Int_t nbin; Float_t val;\n");
-  FF"  char ans[10],table[100],column[100];\n");
+  FF"  gROOT->Reset();\n  Int_t isScalar,vecIdx,nbin; Float_t val;\n");
+  FF"  char title[150];\n");
+  FF"  char ans[10],*tableName,*colName,*scalvec;\n");
   FF"  Axis_t xmax,xmin;\n");
   FF"  TFile f(\"Event.root\"); TTree *T = (TTree*)f.Get(\"T\");\n");
-  FF"  Event *event = new Event();\n");
-  FF"  Int_t ii,ncol,nrow;\n");
+  FF"  Event *event = new Event();\n  Int_t ii,nrow;\n");
   FF"  TBranch *branch  = T.GetBranch(\"event\");\n");
-  FF"  branch->SetAddress(event);\n");
-  FF"  Int_t nevent = T.GetEntries();\n");
-  FF"  Int_t whichEvent=nevent/2;\n");
-  FF"  T.GetEvent(whichEvent);\n");
-  FF"  printf(\"Using event number %%d ");
-  FF"(count from one, like FORTRAN).\\n\",\n");
-  FF"      1+whichEvent);\n");
-  FF"  event->PrintTables();\n");
-  FF"  printf(\"Please type a table from the ");
-  FF"above list:\\n\"); gets(table);\n");
-  FF"  event->PrintColumnNames(table);\n");
-  FF"  printf(\"Type a column ");
-  FF"(do not include the 'scalar' or 'vector')");
-  FF":\\n\"); gets(column);\n");
-  FF"  nrow=event->Nrow(\"small_dir/smallTable\");\n");
+  FF"  branch->SetAddress(event);\n  Int_t nevent = T.GetEntries();\n");
+  FF"  Int_t whichEvent=nevent/2;\n  T.GetEvent(whichEvent);\n");
+  FF"  event = (Event*)branch->GetAddress();\n  printf(\"Event number %%d ");
+  FF"(count from one, like FORTRAN).\\n\",\n      1+whichEvent);\n");
+  FF"  printf(\"oooooooooooooooooooooooooooooooooooooooooooooooooo\\n\");\n");
+  FF"  for(Int_t cnt=0;cnt<9999;cnt++) {\n");
+  FF"    Int_t nr;\n");
+  FF"    event->GetTableName(&tableName,cnt);\n");
+  FF"    if(!tableName) break; nr=event->Nrow(tableName);\n");
+  FF"    printf(\"%%2d %%33s  %%7d rows\\n\",cnt+1,tableName,nr);\n");
+  FF"  }\n");
+  FF"  printf(\"Type a NUMBER from the above list:\\n\"); gets(ans);\n");
+  FF"  event->GetTableName(&tableName,(int)(atoi(ans)-1));\n");
+  FF"  printf(\"oooooooooooooooooooooooooooooooooooooooooooooooooo\\n\");\n");
+  FF"  for(Int_t cnt=0;cnt<9999;cnt++) {\n");
+  FF"    event->GetCol(tableName,&colName,&scalvec,cnt);\n");
+  FF"    if(!colName) break;  printf(\"%%2d %%s\\n\",cnt+1,colName);\n");
+  FF"  }\n");
+  FF"  printf(\"Type a number from the above list:\\n\");\n");
+  FF"  gets(ans);\n");
+  FF"  event->GetCol(tableName,&colName,&scalvec,(int)(atoi(ans)-1));\n");
+  FF"  printf(\"Column %%s is of data type %%s.\\n\",colName,scalvec);\n");
+  FF"  if(!strcmp(scalvec,\"scalar\")) isScalar=7; else isScalar=0;\n");
+  FF"  if(!isScalar) {\n");
+  FF"    printf(\"Type index of vector ");
+  FF"element (start from 0, like C)\\n\");\n");
+  FF"    gets(ans); vecIdx=atoi(ans); if(vecIdx<0) vecIdx=0;\n");
+  FF"    printf(\"Vector index = %%d\\n\",vecIdx);\n");
+  FF"  }\n");
+  FF"  nrow=event->Nrow(tableName);\n");
   FF"  printf(\"There are %%d rows.\\n\",nrow);\n");
   FF"  printf(\"How many bins do you want?\\n\"); ");
   FF"gets(ans); nbin=atoi(ans);\n");
+  FF"  printf(\"If drawing window over net, have patience.\\n\");\n");
   FF"\n");
+  FF"  if(isScalar) {\n");
+  FF"    sprintf(title,\"%%s,  %%s\",tableName,colName);\n");
+  FF"  } else {\n");
+  FF"    sprintf(title,\"%%s,  %%s(%%d)\",tableName,colName,vecIdx);\n");
+  FF"  }\n");
   FF"  c1 = new TCanvas(\"c1\",\"xdf2root\",200,10,700,500);\n");
   FF"  c1->SetFillColor(42);\n");
   FF"  c1->GetFrame()->SetFillColor(21);\n");
@@ -1143,21 +1191,22 @@ void WriteHist() {
   FF"  c1->GetFrame()->SetBorderMode(-1);\n");
   FF"  xmax=-1e20; xmin=1e20;\n");
   FF"  for(ii=0;ii<nrow;ii++) {\n");
-  FF"    val=event->GetVal(table,column,ii);\n");
+  FF"    if(isScalar) val=event->GetVal(tableName,colName,ii);\n");
+  FF"    else         val=event->GetVal(tableName,colName,ii,vecIdx);\n");
   FF"    if(xmax<val) xmax=val; if(xmin>val) xmin=val;\n");
   FF"  }\n");
   FF"  printf(\"The minimum value is %%g, ");
   FF"and the max is %%g.\\n\",xmin,xmax);\n");
   FF"  xmax+=(xmax-xmin)*0.05;\n");
   FF"  xmin-=(xmax-xmin)*0.05;\n");
-  FF"  hpxpy  = new TH1F(\"xdf2root\",\"xdf2root\",nbin,xmin,xmax);\n");
+  FF"  hpxpy  = new TH1F(title,title,nbin,xmin,xmax);\n");
   FF"  hpxpy->SetFillColor(48);\n");
   FF"  gRandom->SetSeed();\n");
   FF"  Float_t px;\n");
   FF"  const Int_t kUPDATE = 1000;\n");
-  FF"  printf(\"There will be %%d entries on the 2D histogram.\\n\",nrow);\n");
   FF"  for ( Int_t i=0; i<nrow; i++) {\n");
-  FF"     px=event->GetVal(table,column,i);\n");
+  FF"     if(isScalar) px=event->GetVal(tableName,colName,i);\n");
+  FF"     else         px=event->GetVal(tableName,colName,i,vecIdx);\n");
   FF"     // printf(\"Adding %%g to the histogram.\\n\",px);\n");
   FF"     hpxpy->Fill(px);\n");
   FF"  }\n");
@@ -1193,7 +1242,7 @@ void MakeTwoSubdirectories() {
   for(ii=0;ii<2;ii++) {
     sprintf(com,"rm -rf %s",gDir[ii]); system(com);
     if(mkdir(gDir[ii],S_IRWXU|S_IRWXG|S_IRWXO)) {
-      PP">> Cannot create directory '%s'.\n",gDir[ii]); exit(2);
+      PP">> Cannot create directory '%s'.\n",gDir[ii]); Exit(__LINE__);
     } else {
       PP">> Made directory %s.\n",gDir[ii]);
     }
@@ -1211,12 +1260,12 @@ void CheckStderr() {
     PP">> There is an error during ROOT's file compression.\n");
     PP">> Please re-run xdf2root with the -c option, which\n");
     PP">> turns off compression.\n");
-    exit(2);
+    Exit(__LINE__);
   }
 }
-void CheckOutput() {
+void CheckForNormalEnd() {
   FILE *ff; int ok=0; char line[103];
-  ff=fopen("Event.stdout","r"); if(!ff) ERR;
+  ff=fopen("Event.stderr","r"); if(!ff) ERR;
   while(fgets(line,100,ff)) {
     if(strstr(line,"Normal end of automatically generated code")) ok=7;
   } fclose(ff);
@@ -1224,8 +1273,8 @@ void CheckOutput() {
     Ose(); 
     PP">> Fatal error.\n");
     PP">> The automatically generated code did not run correctly.\n");
-    PP">> See the file %s/Event.stdout for details.\n",gDir[1]);
-    exit(2);
+    PP">> See files %s/Event.std* for details.\n",gDir[1]);
+    Exit(__LINE__);
   }
 }
 void CompileAndRunTheOutputFiles(char *absolutePathForInputFile) {
@@ -1246,13 +1295,13 @@ void CompileAndRunTheOutputFiles(char *absolutePathForInputFile) {
     PP"If these are ok, then either call the programmer, or apply the \n");
     PP"above make messages to the code in subdirectory %s.\n",
             gDir[1]);
-    exit(2);
+    Exit(__LINE__);
   }
   PP">> Running the new executable.\n");
-  sprintf(com,"./Event %s > Event.stdout 2> Event.stderr",
+  sprintf(com,"./Event %s 2> Event.stderr",
   absolutePathForInputFile);
   system(com);
-  CheckOutput();
+  CheckForNormalEnd();
   CheckStderr();
   PP">> The new executable finished normally.\n");
   if(chdir(gBaseDir)) ERR;
@@ -1285,7 +1334,8 @@ void MoveFilesFromScratchToOutputDir() {
     sprintf(com,"mv %s/%s %s",gDir[1],cc,gDir[0]); system(com);
     sprintf(com,"%s/%s",gDir[0],cc);
     if(!FileExists(com)) {
-      Ose(); PP">> Fatal error: failed to make %s/%s.\n",gDir[1],cc); exit(2);
+      Ose(); PP">> Fatal error: failed to make %s/%s.\n",gDir[1],cc);
+      Exit(__LINE__);
     } else {
       PP">> Final output file:   %s\n",com);
     }
@@ -1346,9 +1396,7 @@ void EndingBlurb() {
   PP">>\n");
   PP">> Here are a few commands for mouse capture:\n");
   PP">>    For the UNIX prompt:\n");
-  PP"         cd %s/%s # go to output dir\n", gBaseDir,gDir[0]);
-  PP"         ls -l  # check that the files are there\n");
-  PP"         root   # Start root.\n");
+  PP"         cd %s/%s ; ls -l ; root\n", gBaseDir,gDir[0]);
   PP">>    For the root prompt.\n");
   PP"         gSystem.Load(\"libEvent.so\");\n");
   PP"         .x small.C\n");
@@ -1356,6 +1404,11 @@ void EndingBlurb() {
   PP"         .q\n");
   PP">>\n");
 }
+/* 
+root
+gSystem.Load("libEvent.so"); 
+.x hist.C
+*/
 char *ReadOptions(int nnn, char *aaa[]) {
   int ifc=0,ii; char *cc,*dd,*retVal=0;
   gOptionG=0; gOptionC=0; gOptionE=0;
@@ -1391,13 +1444,22 @@ void CheckLoadPath(char *fn,char *loadPath) {
     if(FileExists(fn)) { ok=7; break; }
     cc=strtok(NULL,":");
   }
-  if(!ok) ERR; /* This should have been taken care of in SetLoadPath(). */
+  
+  if(!ok) {
+    Ose();
+    PP"Your LD_LIBRARY_PATH is bad.  It does not have libCint.\n");
+    PP"This should have been taken care of in SetEnvironmentalVariables().\n");
+    PP"LD_LIBRARY_PATH=\n%s\n",loadPath);
+    Exit(__LINE__);
+  }
 }
 void SetEnvironmentalVariables() {
   char ok=0;
+  char *ldl;
 #ifdef sun4os5pc
-  putenv("LD_LIBRARY_PATH=\
-/usr/lib:/usr/openwin/lib:/usr/dt/lib:/opt/SUNWsprob/lib:/u0b/brun/root/lib");
+  ldl="LD_LIBRARY_PATH=/usr/lib:/usr/openwin/lib:/usr/dt/lib:/opt/SUNWsprob\
+/lib:/usr/local/src/root/lib";
+  if(putenv(ldl)) ERR;
   ok=7;
 #endif
   if(!ok) ERR;
@@ -1408,8 +1470,18 @@ void CheckForDslHeaders() {
     Ose();
     PP"I can't read %s.\nPlease check your afs token, and the\n",fn);
     PP"values of the env vars STAR_LIB and STAR_SYS_LEVEL.\n");
-    exit(2);
+    Exit(__LINE__);
   }
+}
+void EnvValNotDefined(char *evname) {
+  Ose(); 
+  PP"Fatal error:  environmental variable %s is not defined\n",evname);
+  PP"for me.  Did you export it?\n");
+  if(!strcmp(evname,"LD_LIBRARY_PATH")) {
+    PP"In ksh, you would type\n");
+    PP"export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH\n");
+  }
+  Exit(__LINE__);
 }
 void CheckEnvironmentalVariables() {
   char fn[183],*evvalue,*evname,ok;  int ii; FILE *ff;
@@ -1418,16 +1490,7 @@ void CheckEnvironmentalVariables() {
   for(ii=0;;ii++) {
     evname=evlist[ii]; if(!evname) break;
     evvalue=getenv(evname);
-    if(!evvalue) {
-      Ose(); 
-      PP"Fatal error:  environmental variable %s is not defined\n",evname);
-      PP"for me.  Did you export it?\n");
-      if(!strcmp(evname,"LD_LIBRARY_PATH")) {
-        PP"In ksh, you would type\n");
-        PP"export LD_LIBRARY_PATH=$ROOTSYS/lib:$LD_LIBRARY_PATH\n");
-      }
-      exit(2);
-    }
+    if(!evvalue) EnvValNotDefined(evname);
     if(!strcmp(evname,"LD_LIBRARY_PATH")) CheckLoadPath(fn,evvalue);
     if(!strcmp(evname,"ROOTSYS")) {
       sprintf(fn,"%s/include/TROOT.h",evvalue);
@@ -1438,8 +1501,8 @@ void CheckEnvironmentalVariables() {
         Ose();
         PP"Fatal error:  I can't read %s.\n",fn);
         PP"Check value of your enenvironmental variable %s.\n",evname);
-        PP"Also check that ROOT is installed on this machine\n");
-        exit(2);
+        PP"Also check that ROOT is installed on this machine.\n");
+        Exit(__LINE__);
       }
     }
   }
@@ -1452,7 +1515,7 @@ void Set_gDir(char *fullpath) {
   if(strlen(fullpath+i+1)>FN) ERR;
   strcpy(fn,fullpath+i+1);
   for(i=strlen(fn)-1;i>=0;i--) if(fn[i]=='.') break;
-  if(i<2) ERR;
+  if(i<0) ERR;
   fn[i]=0;
   if(strlen(prefix1)+1+strlen(fn)>DIR) ERR;
   if(strlen(prefix2)+1+strlen(fn)>DIR) ERR;
@@ -1485,7 +1548,7 @@ void main(int nnnn,char *aaaa[]) {
   PP">> Writing some code.\n");
   WriteTheOutputFiles();
   if(gOptionG) {
-    PP"Your -g files are in %s.\n",gDir[1]);
+    PP"Your -g files are in\n     cd %s/%s\n",gBaseDir,gDir[1]);
     exit(2);
   }
   CompileAndRunTheOutputFiles(absolutePathForInputFile);
