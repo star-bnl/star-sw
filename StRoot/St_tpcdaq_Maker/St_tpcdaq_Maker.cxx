@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.34  1999/08/13 16:28:19  fisyak
+// add full path to trans_table.hh
+//
 // Revision 1.33  1999/08/12 15:23:37  ward
 // 8 to 10 bit conversion has been implemented
 //
@@ -104,7 +107,7 @@
 #include "St_ObjectSet.h"
 #include "TH1.h"
 #include "StTpcRawDataEvent.hh"
-#include "trans_table.hh"
+#include "StDaqLib/TPC/trans_table.hh"
 // #include "StTrsMaker/include/StTrsRawDataEvent.hh"
 // #include "StTrsMaker/include/StDacRawDataEvent.hh"
 #ifdef TRS_SIMPLE
