@@ -5,8 +5,11 @@
 //                                                                      //
 // StPrimaryMaker virtual base class for Maker                          //
 //                                                                      //
-// $Id: StPrimaryMaker.h,v 1.15 2001/11/29 00:43:10 balewski Exp $
+// $Id: StPrimaryMaker.h,v 1.16 2002/01/21 01:35:07 balewski Exp $
 // $Log: StPrimaryMaker.h,v $
+// Revision 1.16  2002/01/21 01:35:07  balewski
+// Optional beam line constrain was added to ppLMV
+//
 // Revision 1.15  2001/11/29 00:43:10  balewski
 // *** empty log message ***
 //
@@ -86,13 +89,15 @@ class StPrimaryMaker : public StMaker {
   TArrayF m_fixedArrayY;
   TArrayF m_fixedArrayZ;
   TArrayI m_fixedArrayR;
-  TArrayI m_fixedArrayE;
+  TArrayI m_fixedArrayE; 
   Bool_t embedVerts;
+
+  struct {int equivNtr; float x0,y0,nx,ny;} beam4ppLMV;
   float zCutppLMV;
   float ppLMVparF[10];
   int ppLMVparI[10];
-  long ppLMV4(MatchedTrk &, St_dst_track *trackAll,St_dst_vertex *vertex, Int_t mdate);
-  TH1F *hPiFi[16];
+   
+  TH1F *hPiFi[32];
  protected:
   virtual Int_t FixVertexFileRead(char* fname, Bool_t idMatch);
   TH1F *hctb[16];
@@ -113,8 +118,17 @@ class StPrimaryMaker : public StMaker {
   Int_t GetFixedSize() { return m_fixedArrayX.GetSize(); }
   Int_t GetMatchedSize() { return m_fixedArrayE.GetSize(); }
   void ppLMVuse(int *parI, float *parF);
+  long ppLMV4(MatchedTrk &, St_dst_track *trackAll,St_dst_vertex *vertex, Int_t mdate);
+  void SetBeam4ppLMV(int ntr, double x, double y, double ux, double uy){
+    beam4ppLMV.equivNtr=ntr;
+    beam4ppLMV.x0=x;    beam4ppLMV.nx=ux;
+    beam4ppLMV.y0=y;    beam4ppLMV.ny=uy;
+    printf(" Executed  SetBeam4ppLMV AAAAAAAAAA\n");
+  } 
+  void UnSetBeam4ppLMV(){beam4ppLMV.equivNtr=0;}
+
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.15 2001/11/29 00:43:10 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPrimaryMaker.h,v 1.16 2002/01/21 01:35:07 balewski Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StPrimaryMaker, 0)   //StAF chain virtual base class for Makers
     };
