@@ -1932,7 +1932,7 @@ TrackerUsage gives the possibility of choosing to use {\sc tpt} and/or {\sc ittf
 \end{maliste}
 When the value of the tracker usage is set to {\tt kTrackerUseBOTH}, all the tracks are used but they are never mixed together, i.e. a V0 will have either 2 {\sc tpt} daughters, or 2 {\sc ittf} daughters, never one daughter of each type. This allows to define {\sc tpt} and {\sc ittf} V0's and Xi's. They can be differentiated afterwards by the fact that the {\sc tpt} V0's and Xi's have a positive distance of closest approach between the V0 daughters, while this value is negative for the {\sc ittf} V0's and Xi's (so be careful in your analysis code...).
 
-Knowing if a track is a {\sc tpt} track or an {\sc ittf} track is done by quering {\tt StTrack->fitting\-Me\-thod()}, and checking if it's equal to or different than a specific value that signs the {\sc ittf} tracks. This value is stored in the member-variable {\tt ITTFflag}.
+Knowing if a track is a {\sc tpt} track or an {\sc ittf} track is done by quering {\tt StTrack->fitting\-Me\-thod()}, and checking if it's equal to a specific value that signs the {\sc ittf} and {\sc tpt} tracks. These values are stored in the member-variables {\tt ITTFflag} and {\tt TPTflag}, and are defined in {\tt pams/global/inc/}, in files {\tt StTrackMethod.h} and {\tt StTrackDefinitions.h}.
 
 \subsubsection{SVTUsage}
 
@@ -2315,7 +2315,6 @@ Tests of the V0Finder show that some distributions are significantly different, 
 
 There is no particular order and not everything is relevant/worth doing ;-)
 \begin{maliste}
-\item Bfield is assigned 0 in the constructor : no need because it's being assigned $1.10^{-10}$ afterwards.
 \item fabs vs TMath::Abs.
 \item TThreeVector vs double[3].
 \item Write more about tests in the documentation.
@@ -2323,7 +2322,6 @@ There is no particular order and not everything is relevant/worth doing ;-)
 \item Fortran code doesn't treat correctly the cascade candidate when its V0 mass falls both in the $\Lambda$ and in the $\overline{\Lambda}$ mass hypothesis (it does only one of the 2 hypothesis). Influence on the tests ? (Concerns only a very small percentage of the candidates).
 \item Bfield value is calculated from the momentum of the 1st track of the container, whatever its $p_\perp$~: could be useful to calculate Bfield only with a track that has a curvature reasonably high (i.e. not too high $p_\perp$).
 \item Remove usage of {\tt xAns} and {\tt yAns} in {\tt StXiFinderMaker.cxx} : use directly {\tt xOut} and {\tt yOut}.
-\item Comment ``Secondary cut" in the V0Finder should be replaced with ``{\em Primary and} secondary", for those cuts are used (as written in the DB files themselves) for both primary and secondary V0's.
 \item Flag $\chi^2_{Xi}$ negative even when the V0 is a Fortran one.
 \item Change XiFinder algo : allow at most 1 stored Xi candidate per pair (V0,track). To choose~: take the intersection point that gives the smaller dca.
 \item Etc...
