@@ -4,7 +4,7 @@
 #define tls_qsort_herb_i_ F77_NAME(tls_qsort_herb_i,TLS_QSORT_HERB_I)
 
 #define TLS_SORT_NORMAL_CV      3585
-void tls_swap_two_rows(int row1,int row2,int rowsize,int *table) {
+void type_of_call tls_swap_two_rows(int row1,int row2,int rowsize,int *table) {
   register int ii,offset1,offset2,swap;
   if(row1==row2) return;
   offset1=row1*rowsize; offset2=row2*rowsize;
