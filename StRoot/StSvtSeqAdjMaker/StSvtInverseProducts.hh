@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtInverseProducts.hh,v 1.2 2000/10/02 13:48:10 caines Exp $
+ * $Id: StSvtInverseProducts.hh,v 1.3 2000/11/30 20:45:56 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtInverseProducts.hh,v $
- * Revision 1.2  2000/10/02 13:48:10  caines
- * Adjusting donw hybrid by hybrid
+ * Revision 1.3  2000/11/30 20:45:56  caines
+ * Dynamically calc prob values, use database
  *
  * Revision 1.1  2000/06/15 20:04:54  caines
  * Initial versions of sequence adjusting codes
@@ -21,6 +21,7 @@
 #define STSVTINVERSEPRODUCTS_HH
 
 #include <fstream.h>
+#include "StSvtProbValues.hh"
 
 class StSvtHybridData;
 
@@ -30,18 +31,17 @@ public:
    StSvtInverseProducts();
    ~StSvtInverseProducts();
 
-   void SetHybridPointer(StSvtHybridData* hybData);
-   void FillProbTable(ifstream & iFile, int TotalNumberOfHybrids);
-   void FindInvProducts(int HybIndex, int PedOffSet, int Anode);
+   void SetProbTable(StSvtProbValues* probValue);
+   void FindInvProducts(StSvtHybridData* hybridData, int anode, int pedOffSet);
 
-   double GetBuffer(int timBin);
+   double GetBuffer(int timeBin);
    void ResetBuffer();
 
   private:
 
-  StSvtHybridData* mHybridData;    //!      
   double mBuffer[128];      
-  double **mProbTable; 
+  double mProbTable[MAX_ADC_COUNTS]; 
+  int mMaxCount;
 };
 
 #endif

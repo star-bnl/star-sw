@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.4 2000/08/24 04:23:50 caines Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.5 2000/11/30 20:45:56 caines Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.5  2000/11/30 20:45:56  caines
+// Dynamically calc prob values, use database
+//
 // Revision 1.4  2000/08/24 04:23:50  caines
 // Improved histograms
 //
@@ -37,7 +40,7 @@ class StSvtPedSub;
 class TObjectSet;
 class StSvtHybridCollection;
 class StSvtBadAnode;
-
+class StSvtProbValues;
 
 class StSvtSeqAdjMaker : public StMaker
 {
@@ -50,34 +53,39 @@ class StSvtSeqAdjMaker : public StMaker
   virtual Int_t Make();
   virtual Int_t Finish();
 
-
-  Int_t SetSvtRawEvent();
-  Int_t GetSvtToBeAdjEvent();
+  Int_t SetSvtData();
+  Int_t GetSvtRawData();
   Int_t GetSvtPedestals();
   Int_t GetBadAnodes();
   Int_t GetPedOffset(){return mPedOffSet;};
-  Int_t SetInputFiles(char* table, char* PedFile,int PedOffset);
-  Int_t CreateHist(Int_t tNuOfHyb);
-  void  MakeHistogramsProb(int index,int Anode);
-  void  MakeHistogramsAdc(int index,int Anode, int Count);
-  Int_t SetMinAdcLevels( int MinAdc1,  int MinAbove1, int MinAdc2, int MinAbove2 ); // Set the 2 thresholds for a sequence
-  Int_t SetLowInvProd(int LowInvProd);// Set the low threshold based on the frequency distribution
   Int_t AdjustSequences1( int Anode); // Find sequences  based on ASICS
   Int_t AdjustSequences2(int Anode); //adjust sequences base on LowInvProd
+
+  Int_t CreateHist(Int_t tNuOfHyb);
+  void  MakeHistogramsProb(int index,int Anode);
+  void  MakeHistogramsAdc(StSvtHybridData* hybridData, int index,int Anode, int Count);
+
+  Int_t SetMinAdcLevels( int MinAdc1,  int MinAbove1, int MinAdc2, int MinAbove2, int PedOffset); // Set the 2 thresholds for a sequence
+  Int_t SetPedestalFile(const char* PedFile);
+  Int_t SetLowInvProd(int LowInvProd);// Set the low threshold based on the frequency distribution
     
  protected:
-  St_ObjectSet* mRawEventSet;             //!
-  St_ObjectSet* mSvtBadAnodeSet;             //!
-  StSvtData* mSvtToBeAdjEvent;            //!
-  StSvtHybridCollection* mSvtRawEvent;    //!
-  StSvtHybridCollection* mSvtBadAnodes;    //!
+  St_ObjectSet* mSvtDataSet;             //!
+  St_ObjectSet* mSvtBadAnodeSet;          //!
+  StSvtData* mSvtRawData;            //!
+  StSvtData* mSvtAdjData;    //!
   StSvtHybridData* mHybridRawData ;       //!
-  StSvtHybridData* mHybridToBeAdjData ;   //!
+  StSvtHybridData* mHybridAdjData ;   //!
+
+  StSvtHybridCollection* mSvtBadAnodes;   //!
+  StSvtHybridCollection* mSvtPedColl;     //!
+
   StSvtInverseProducts* mInvProd;         //!
   StSvtPedSub* mSvtPedSub;                //!
+  StSvtProbValues* mProbValue;            //!
   StSequence* tempSeq1;                   //!
-  char* mPedFile;
-  char* mProbFile;
+
+  const char* mPedFile;   //!
 
   TH1D** mInvProdSeqAdj;  //!
   TH1F** mRawAdc;  //!
