@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.8 1998/08/18 14:05:02 fisyak Exp $
+// $Id: StChain.h,v 1.9 1998/09/08 13:42:00 love Exp $
 // $Log: StChain.h,v $
+// Revision 1.9  1998/09/08 13:42:00  love
+// new St_tpctest_Maker module
+//
 // Revision 1.8  1998/08/18 14:05:02  fisyak
 // Add to bfc dst
 //
@@ -41,7 +44,7 @@
 class TBrowser;
 class TChain;
 class St_XDFFile; 
-//static Char_t      *m_VersionCVS="$Id: StChain.h,v 1.8 1998/08/18 14:05:02 fisyak Exp $";//StChain header CVS version
+//static Char_t      *m_VersionCVS="$Id: StChain.h,v 1.9 1998/09/08 13:42:00 love Exp $";//StChain header CVS version
 
 class StChain : public StMaker {
 
@@ -83,6 +86,8 @@ public:
    St_DataSet        *GetParams();
    St_DataSet        *GetData();
    St_DataSet        *GetRawData();
+   St_XDFFile        *GetXDF_in(){return m_File;} 
+   St_XDFFile        *GetXDF_out(){ return m_FileOut;} 
    virtual void       Init();
    Bool_t             IsFolder() {return kTRUE;}
    virtual Int_t      Make() {return 0;}
