@@ -1,6 +1,13 @@
-* $Id: svttgeo2.g,v 1.4 2003/10/10 23:17:53 potekhin Exp $
+* $Id: svttgeo2.g,v 1.5 2003/11/13 00:23:05 potekhin Exp $
 *
 * $Log: svttgeo2.g,v $
+* Revision 1.5  2003/11/13 00:23:05  potekhin
+* We need to accomodate the pixel detector
+* hence the beampipe support AND the inner
+* radius of the SVT mother both need to
+* be shrunk. We use the SupportVer variable to
+* steer this process.
+*
 * Revision 1.4  2003/10/10 23:17:53  potekhin
 * Introduced the ShieldVer steering variable as well
 * as a version of the data structure, to modify (when necessary)
@@ -75,7 +82,7 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
                        SCBM,SCBL,SFED,SPLS,SOUM,SOUR
 *
       structure SVTG { Version,   Nlayer,    RsizeMin,  RsizeMax,
-		       ZsizeMax,  Angoff, ShieldVer}
+		       ZsizeMax,  Angoff, SupportVer}
 *     
       structure SWCA { Version,   Length,
                        WaferWid,  WaferLen,  WaferThk,  RohaThk,
@@ -159,7 +166,7 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
       RsizeMax  = 46.107     ! STV outermost radius
       ZsizeMax  = 270        ! SVT+FTPC length
       Angoff    = 0          ! angular offset x1 for slayer 2 x2 for slayer 3
-      ShieldVer = 1          ! versioning of the shield
+      SupportVer= 1          ! versioning of the shield
 *
    Fill SWCA ! Wafer Carrier
       Version   = 1          ! geometry version
@@ -453,10 +460,14 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
       USE SWAM
       USE SELC
       USE SFPA
-      USE SSLD version=SVTG_Shieldver
+      USE SSLD version=SVTG_SupportVer
       USE SCBP
       USE SWCX
       USE SOUP
+
+      if(SVTG_SupportVer==2) then ! shrink the inner radius
+         SVTG_RsizeMin = 1.4
+      endif
 
 * introduce common materials here
 *
