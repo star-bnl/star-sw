@@ -13,16 +13,15 @@
 #include "StDbUtilities/StGlobalCoordinate.hh"
 #include "StTpcDb/StTpcDb.h"
 #include "StTpcDb/StTpcPadPlaneI.h"
+#include "tables/St_svg_geom_Table.h"
+#include "tables/St_svg_config_Table.h"
+#include "tables/St_svg_shape_Table.h"
 
 // StRoot
 #include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 #include "StMessMgr.h"
-
-#include "tables/St_svg_geom_Table.h"
-#include "tables/St_svg_config_Table.h"
-#include "tables/St_svg_shape_Table.h"
 
 //Sti
 #include "Sti/StiDetector.h"
@@ -34,12 +33,19 @@
 
 ClassImp(StiGeometryGenerator)
  
-StiGeometryGenerator::StiGeometryGenerator(const Char_t *name) : StMaker(name)
+StiGeometryGenerator::StiGeometryGenerator(
+    const Char_t *name, const Char_t *szGeomDirectory) : StMaker(name)
 {
-//  m_szGeomDirectory = "/star/u/bnorman/Detectors";
-    //m_szGeomDirectory = "/scr20/ittf/StiGeometryParameters/Detectors";
-    m_szGeomDirectory = "/scr20/TempIttf/StiGeometryParameters/Detectors";
-    m_polydirectory = "/scr20/TempIttf/StiGeometryParameters/Polygons";
+  string geomDirectory(szGeomDirectory);
+  geomDirectory += "/Detectors";
+  m_szGeomDirectory = const_cast<char*>(geomDirectory.c_str());
+
+  string polyDirectory(szGeomDirectory);
+  polyDirectory += "/Polygons";
+  m_polydirectory = const_cast<char*>(polyDirectory.c_str());
+
+  cout << "Geometry directory = " << m_szGeomDirectory << endl;
+  cout << "Polygon directory = " << m_polydirectory << endl;
 }
 
 StiGeometryGenerator::~StiGeometryGenerator() 
@@ -71,13 +77,6 @@ Int_t StiGeometryGenerator::Make()
   // load Sti geometry routines
   mGeometryTransform = StiGeometryTransform::instance();
 
-
-  // load svt & ssd geometry
-  St_DataSetIter local(GetInputDB("svt"));
-  m_svg_config = (St_svg_config *)local("svgpars/config");
-  m_svg_geom = (St_svg_geom *)local("svgpars/geom");
-  m_svg_shape = (St_svg_shape *)local("svgpars/shape");
-
   cout << "  building SVT && SSD." << endl;
   buildSvg();
 
@@ -108,17 +107,15 @@ void StiGeometryGenerator::buildPolygons()
 void StiGeometryGenerator::buildSvg(){
 
   // get the configuration & geometry tables
-  svg_config_st svgConfig = m_svg_config->GetTable()[0];
-  svg_geom_st *pSvgGeom = m_svg_geom->GetTable();
-  svg_shape_st *pSvgShape = m_svg_shape->GetTable();
+  svg_config_st svgConfig = mGeometryTransform->getSvgConfig();
+  svg_shape_st *pSvgShape = mGeometryTransform->getSvgShape();
 
   char szOutfile[500];
 
   // extract the wafer shape parameters by looking up the shape code used by
   // the first wafer (assume SVT) and last wafer (assume SSD).
-  svg_shape_st svtWaferShape = pSvgShape[ pSvgGeom[0].id_shape - 1 ];
-  svg_shape_st ssdWaferShape = pSvgShape[ 
-      pSvgGeom[m_svg_geom->GetTableSize() - 1].id_shape - 1 ];
+  svg_shape_st svtWaferShape = pSvgShape[ 0 ];
+  svg_shape_st ssdWaferShape = pSvgShape[ 1 ];
 
   // the smallest item we will write out is a ladder, since that will be our
   // r-phi element, just as we stop at the padrow level, not writing individual
@@ -149,21 +146,20 @@ void StiGeometryGenerator::buildSvg(){
       dOrientationAngle = 0.09; // or so...
     }
   
-
     // width of gap between the edges of 2 adjacent ladders:
     //   first, the angle subtended by 1/2 of the ladder
     Double_t dLadderRadius = svgConfig.layer_radius[nLayer];
-
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    
-/*
-    Double_t dHalfLadderPhi = asin(dWaferHalfWidth/dLadderRadius);
+    Double_t dHalfLadderPhi = atan(dWaferHalfWidth/dLadderRadius);
     Double_t dHalfGapPhi = dDeltaPhi/2. - dHalfLadderPhi;
-    //   then the distance from the origin to the gap center
+
+    //   then the distance from the origin to the gap center 
+    //     != the layer radius bc the layer width differs from the gap width, 
+    //     i.e. not a regular polygon.
     Double_t dGapRadius = dLadderRadius/cos(dHalfLadderPhi)*cos(dHalfGapPhi);
     //   finally half the gap distance
     Double_t dHalfGap = dGapRadius*tan(dHalfGapPhi);
-*/
+    cout << "dHalfGap = " << dHalfGap << endl;
+
     //MLM (6/5/01)
     double phi0forpoly=999.;
     
@@ -190,14 +186,14 @@ void StiGeometryGenerator::buildSvg(){
       int nLadder = 2*(iLadder + 1) - nLayer%2; // formal ladder number in svt
       if(nLayer == nLayers - 1){ nLadder = iLadder + 1; } // ssd
 
-      
-      double thephi0 =  mGeometryTransform->phiForSector(nLadder, 
-							 (2 - nLayer/(nLayers-1))*nLadders);
+      double thephi0 =  mGeometryTransform->phiForSector(
+          nLadder, (2 - nLayer/(nLayers-1))*nLadders);
       if (thephi0<phi0forpoly && thephi0>=0.) { //first ladder in given layer
 	  phi0forpoly = thephi0;
       }
       
-      detector.setCenterRep(dLadderRadius, thephi0, dOrientationAngle, dWaferHalfWidth);
+      detector.setCenterRep(dLadderRadius, thephi0, dOrientationAngle, 
+                            dWaferHalfWidth);
 
       detector.setActivePosition(0.);
       detector.setHalfDepth(dWaferHalfDepth*svgConfig.n_wafer[nLayer]);
@@ -216,47 +212,55 @@ void StiGeometryGenerator::buildSvg(){
 
       cout << "wrote file '"<< szOutfile << "'." << endl;
 
+      // if this is the ssd, we're done
+      if(nLayer == nLayers - 1){ continue; }
+
       // now we need to write out a file for the hybrids on each side of the
-      // ladder:
+      // ladder (looking from west to east):
       //                     ladder
       //                   ---------
-      //      hybrid A   /           \  hybrid B
+      //      hybrid 1   /           \  hybrid 2
       //               /               \                    
           
       // need dimensions, rad length & density estimate of hybrid
 
       // We assume the hybrid is on a plane perpendicular to a vector from
       // the origin which bisects the angle between the two adjacent ladders
+      
+      // this is the hybrid counterclockwise of the ladder (dubbed '1')
+      detector.setNormalRep(dGapRadius, thephi0 + dDeltaPhi/2, 
+                            dHalfGap - STI_HYBRID_WIDTH, dHalfGap);
 
-      // this is the hybrid clockwise of the ladder (I dub this 'B' for now)
-/*
-      params.refAngle -= dDeltaPhi/2.;
-      params.active = false;
-      params.halfDepth = STI_HYBRID_DEPTH/2.;
-      params.thickness = STI_HYBRID_THICKNESS;
-      params.density = STI_HYBRID_DENSITY;
-      params.radLength = STI_HYBRID_RADLENGTH;
-      params.yMin = dHalfGap - STI_HYBRID_WIDTH;
-      params.yMax = dHalfGap;
-      params.position = dGapRadius;
+      detector.setHalfDepth(dWaferHalfDepth*svgConfig.n_wafer[nLayer]);
+      detector.setZCenter(0.);
+      detector.setThickness(STI_HYBRID_THICKNESS);
 
-      sprintf(szOutfile, "Svt/Layer_%i/Ladder_%i_hybridB", 
-              nLayer + 1, iLadder + 1);
-      WriteGeomFile(params, szOutfile);
+      StiMaterial material2; // dummy for holding material name
+      material2.setName("Hybrid");
+      detector.setMaterial(&material2);
 
-      // this is the hybrid counterclockwise of the ladder (dubbed 'A')
-      params.refAngle += dDeltaPhi;
-      params.yMin = -dHalfGap + STI_HYBRID_WIDTH;
-      params.yMax = -dHalfGap;
+      detector.setSector(nLadder);
+      detector.setPadrow(nLayer + 1);
 
-      sprintf(szOutfile, "Svt/Layer_%i/Ladder_%i_hybridA", 
-              nLayer + 1, iLadder + 1);
-      WriteGeomFile(params, szOutfile);
-*/
+      sprintf(szOutfile, "Svg/Layer_%i/Ladder_%ihybrid1", 
+              nLayer + 1, nLadder);
+      detector.setName(szOutfile);
+      sprintf(szOutfile, "%s/%s.txt", m_szGeomDirectory, detector.getName());
+      detector.write(szOutfile);
+      cout << "wrote file '"<< szOutfile << "'." << endl;
+
+      // this is the hybrid clockwise of the ladder (dubbed '2')
+      detector.setNormalRep(dGapRadius, thephi0 - dDeltaPhi/2, 
+                            - dHalfGap, STI_HYBRID_WIDTH - dHalfGap);
+
+      sprintf(szOutfile, "Svg/Layer_%i/Ladder_%ihybrid2", 
+              nLayer + 1, nLadder);
+      detector.setName(szOutfile);
+      sprintf(szOutfile, "%s/%s.txt", m_szGeomDirectory, detector.getName());
+      detector.write(szOutfile);
+      cout << "wrote file '"<< szOutfile << "'." << endl;
+
     } // for iLadder
-
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    //MLM (6/5/01)
     
     StiPolygon poly(nLadders, phi0forpoly, dLadderRadius);
     mpoly_vec.push_back(poly);

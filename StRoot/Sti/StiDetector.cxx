@@ -60,9 +60,9 @@ void StiDetector::updateCenterRep()
 {
     if(shapeCode == kPlanar){
         halfWidth = (yMax - yMin)/2.;
-        orientationAngle = - atan( (yMin + yMax)/2./normalRadius );
-        centerRefAngle = normalRefAngle + orientationAngle;
-        centerRadius = normalRadius/sin(orientationAngle);
+        orientationAngle = atan( (yMin + yMax)/2./normalRadius );
+        centerRefAngle = normalRefAngle - orientationAngle;
+        centerRadius = normalRadius/cos(orientationAngle);
     }
     else if(shapeCode == kCylindrical){
         halfWidth = yMax;
@@ -70,6 +70,15 @@ void StiDetector::updateCenterRep()
         centerRefAngle = normalRefAngle;
         centerRadius = normalRadius;
     }
+
+    cout << "yMax = " << yMax << endl
+         << "yMin = " << yMin << endl
+         << "normalRefAngle = " << normalRefAngle << endl
+         << "normalRadius = " << normalRadius << endl
+         << "halfWidth = " << halfWidth << endl
+         << "orientationAngle = " << orientationAngle << endl
+         << "centerRefAngle = " << centerRefAngle << endl
+         << "centerRadius = " << centerRadius << endl;
 }
 
 void StiDetector::build(const char* buildfile)

@@ -11,9 +11,6 @@
 #include "Sti/StiPolygon.h"
 
 class StiGeometryTransform;
-class St_svg_geom;
-class St_svg_config;
-class St_svg_shape;
 
 #include "StMaker.h"
 
@@ -26,17 +23,19 @@ class St_svg_shape;
 // on the SVT site, a density close to most of the hybrid volume, and an
 // overall thickness close to that of the hybrid.  In other words, these
 // numbers do not correspond to real material.
-#define STI_HYBRID_RADLENGTH   8.3  // chosen to match realistic thickness
-#define STI_HYBRID_DENSITY     2.5  // Mostly BeO (2.86), some dielectric (1.5)
+//#define STI_HYBRID_RADLENGTH   8.3  // chosen to match realistic thickness
+//#define STI_HYBRID_DENSITY     2.5  // Mostly BeO (2.86), some dielectric (1.5)
 #define STI_HYBRID_THICKNESS   0.1  // real thickness is O(1mm)
 // this doesn't appear in the database:
 #define STI_HYBRID_WIDTH        2.  // extent in local y
-#define STI_HYBRID_DEPTH       54.  // extend in z
+//#define STI_HYBRID_DEPTH       54.  // extend in z
 
 class StiGeometryGenerator : public StMaker {
  public:
     
-    StiGeometryGenerator(const char* name = "StiGeometryGenerator");
+    StiGeometryGenerator(const char* name = "StiGeometryGenerator",
+                         const char *szGeomDirectory = 
+                         "/scr20/ittf/StiGeometryParameters" );
     virtual ~StiGeometryGenerator();
 
     virtual void  Clear(const char* opt="");
@@ -45,7 +44,7 @@ class StiGeometryGenerator : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiGeometryGenerator.h,v 1.1 2001/06/13 18:55:57 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiGeometryGenerator.h,v 1.2 2001/07/03 21:39:22 bnorman Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 private:
     void buildTpc();
@@ -53,10 +52,6 @@ private:
     void buildPolygons();
     vector<StiPolygon> mpoly_vec; //!
     StiGeometryTransform *mGeometryTransform; //! 
-    St_svg_geom   *m_svg_geom;    //!
-    St_svg_config *m_svg_config;  //!
-    St_svg_shape  *m_svg_shape;   //!
-
     
 private:
 
