@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.50 2000/12/12 20:22:05 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.51 2000/12/29 19:40:39 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -168,7 +168,7 @@ Int_t StFlowMaker::Init() {
     }
     // Init pid probability algorithm
     //    if (pFlowEvent->ProbPid()) {
-      TString parameterfile = "nhitsBin_0_10_20_45_ptBin_0_Inf_dcaBin_0_2_50000_Amp.root";
+      TString parameterfile = "PIDTable.root";
       StuProbabilityPidAlgorithm::readParametersFromFile(parameterfile.Data());
       //    }
   }
@@ -177,7 +177,7 @@ Int_t StFlowMaker::Init() {
   if (mPicoEventRead)  kRETURN += InitPicoEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.50 2000/12/12 20:22:05 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.51 2000/12/29 19:40:39 snelling Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -937,6 +937,9 @@ Int_t StFlowMaker::InitPicoEventRead() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.51  2000/12/29 19:40:39  snelling
+// Used the new calibration file for PID
+//
 // Revision 1.50  2000/12/12 20:22:05  posk
 // Put log comments at end of files.
 // Deleted persistent StFlowEvent (old micro DST).
