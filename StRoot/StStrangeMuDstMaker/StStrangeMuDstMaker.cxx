@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 1.3 2000/04/05 20:23:53 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 1.4 2000/04/06 14:51:11 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 1.4  2000/04/06 14:51:11  genevb
+// Fixed bug with storing event info when making subDST
+//
 // Revision 1.3  2000/04/05 20:23:53  genevb
 // Introduce creating sub-Micro DSTs, dynamic expansion of clones arrays as needed, SetNoKeep() function
 //
@@ -62,11 +65,19 @@ StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
 }
 //_____________________________________________________________________________
 StStrangeMuDstMaker::~StStrangeMuDstMaker() {
+  if (!dstMaker) delete evClonesArray;  // Don't delete other maker's array!
+  delete v0ClonesArray;
+  delete xiClonesArray;
+  delete kinkClonesArray;
+  delete v0Selections;
+  delete xiSelections;
+  delete kinkSelections;
 }
 //_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::Init() {
 
-  gMessMgr->Debug("In StStrangeMuDstMaker::Init() ...");
+  if (Debug()) gMessMgr->Debug() << "In StStrangeMuDstMaker::Init() ... "
+                               << GetName() << endm; 
   
   if (OpenFile() == kStErr) return kStErr;
   if (!dstMaker) evClonesArray = new TClonesArray("StStrangeEvMuDst",1);
@@ -116,36 +127,55 @@ void StStrangeMuDstMaker::InitCreateDst() {
   Int_t bsize=64000;
   tree = new TTree("StrangeMuDst","Strangeness Micro-DST");
   tree->SetDirectory(muDst);
-  if (dstMaker) evClonesArray = dstMaker->GetEvClonesArray();
-  TBranch* branch = tree->Branch("Event",&evClonesArray,bsize,split);
+  TBranch* branch;
   if (doV0) {
     branch = tree->Branch("V0",&v0ClonesArray,bsize,split);
     if (rw == StrangeWrite) branch->SetFile(v0File);
-    if (dstMaker) v0Selections = new TArrayI(MXENT);
   }
   if (doXi) {
     branch = tree->Branch("Xi",&xiClonesArray,bsize,split);
     if (rw == StrangeWrite) branch->SetFile(xiFile);
-    if (dstMaker) xiSelections = new TArrayI(MXENT);
   }
   if (doKink) {
     branch = tree->Branch("Kink",&kinkClonesArray,bsize,split);
     if (rw == StrangeWrite) branch->SetFile(kinkFile);
-    if (dstMaker) kinkSelections = new TArrayI(MXKINK);
   }
+  if (!dstMaker) {
+    branch = tree->Branch("Event",&evClonesArray,bsize,split);
+    branch->SetFile(evFile);
+  }
+}
+//_____________________________________________________________________________
+void StStrangeMuDstMaker::InitCreateSubDst() {
+
+  Int_t split=1;
+  Int_t bsize=64000;
+  evClonesArray = dstMaker->GetEvClonesArray();
+  TBranch* branch = tree->Branch("Event",&evClonesArray,bsize,split);
+  branch->SetFile(evFile);
+  if (doV0) v0Selections = new TArrayI(MXENT);
+  if (doXi) xiSelections = new TArrayI(MXENT);
+  if (doKink) kinkSelections = new TArrayI(MXKINK);
 }
 //_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::Make() {
 
-  gMessMgr->Debug("In StStrangeMuDstMaker::Make() ...");
+  if (Debug()) gMessMgr->Debug() << "In StStrangeMuDstMaker::Make() ... "
+                               << GetName() << endm; 
 
   if (rw == StrangeRead) {            // READING  the Micro Dst
     return MakeReadDst();
   } else if (!dstMaker) {             // CREATING a new Micro Dst
     return MakeCreateDst();
+    
+  // Else creating a sub-Micro Dst, done in the Clear() stage.
+  // However, since the old Micro Dst's Init() is called AFTER the new
+  // one's, special initialization for the subDST must be done on the
+  // first time through Make().
+  } else if (!evClonesArray) {
+    InitCreateSubDst();
   }
   return kStOK;
-  // else creating a sub-Micro Dst, done in the Clear() stage.
 }
 //_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::MakeReadDst() {
@@ -265,10 +295,10 @@ Int_t StStrangeMuDstMaker::MakeCreateDst() {
   return kStOK;
 }
 //_____________________________________________________________________________
-void StStrangeMuDstMaker::CreateSubDst() {
+Int_t StStrangeMuDstMaker::MakeCreateSubDst() {
 
   // If no entries to copy, skip event
-  if (!((v0Entries) || (xiEntries) || (kinkEntries))) return;
+  if (!((v0Entries) || (xiEntries) || (kinkEntries))) return kStOK;
 
   Int_t k;
   TClonesArray* dstV0ClonesArray = 0;
@@ -330,55 +360,49 @@ void StStrangeMuDstMaker::CreateSubDst() {
   if (dstV0ClonesArray) tree->SetBranchAddress("V0",&v0ClonesArray);
   if (dstXiClonesArray) tree->SetBranchAddress("Xi",&xiClonesArray);
   if (dstKinkClonesArray) tree->SetBranchAddress("Kink",&kinkClonesArray);
+  
+  return kStOK;
 }
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::Clear(Option_t *option) {
 
-  if (dstMaker) CreateSubDst();
-  if (evClonesArray) evClonesArray->Clear();
+  if (Debug()) gMessMgr->Debug() << "In StStrangeMuDstMaker::Clear() ... "
+                               << GetName() << endm; 
+
+  if (dstMaker) {                                    // Making a subDST
+    MakeCreateSubDst();
+    if (doV0) v0Selections->Reset();
+    if (doXi) xiSelections->Reset();
+    if (doKink) kinkSelections->Reset();
+  } else if (evClonesArray) evClonesArray->Clear();  // Not if making a subDST
+
   if (doV0 && v0ClonesArray) v0ClonesArray->Clear();
   if (doXi && xiClonesArray) xiClonesArray->Clear();
   if (doKink && kinkClonesArray) kinkClonesArray->Clear();
   if (rw == StrangeNoKeep) tree->Reset();
-  if (dstMaker) {
-    if (doV0) v0Selections->Reset();
-    if (doXi) xiSelections->Reset();
-    if (doKink) kinkSelections->Reset();
-  }
+
   v0Entries = 0;
   xiEntries = 0;
   kinkEntries = 0;
+
   StMaker::Clear(option);
 }
 //_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::Finish() {
 
-  gMessMgr->Debug("In StStrangeMuDstMaker::Finish() ..."); 
-  if (dstMaker) CreateSubDst();
-
+  if (Debug()) gMessMgr->Debug() << "In StStrangeMuDstMaker::Finish() ... "
+                               << GetName() << endm; 
+  
 //  tree->Print();
   if (rw == StrangeWrite) muDst->Write();
   if (muDst) muDst->Close();
-   if (doV0) {
-    gMessMgr->Info() << "StStrangeMuDstMaker: "
-                     << nV0Entries << " V0 Entries" << endm;
-    delete v0ClonesArray;
-    v0ClonesArray = 0;
-  }
-  if (doXi) {
-    gMessMgr->Info() << "StStrangeMuDstMaker: "
-	             << nXiEntries << " Xi Entries" << endm;
-    delete xiClonesArray;
-    xiClonesArray = 0;
-  }
-  if (doKink) {
-    gMessMgr->Info() << "StStrangeMuDstMaker: "
-	             << nKinkEntries << " Kink Entries" << endm;
-    delete kinkClonesArray;
-    kinkClonesArray = 0;
-  }
-  delete evClonesArray;
-  evClonesArray = 0;
+  if (doV0) gMessMgr->Info() << "StStrangeMuDstMaker: "
+                             << nV0Entries << " V0 Entries" << endm;
+  if (doXi) gMessMgr->Info() << "StStrangeMuDstMaker: "
+	                     << nXiEntries << " Xi Entries" << endm;
+  if (doKink) gMessMgr->Info() << "StStrangeMuDstMaker: "
+	                       << nKinkEntries << " Kink Entries" << endm;
+
   return kStOK;
 }
 //_____________________________________________________________________________
