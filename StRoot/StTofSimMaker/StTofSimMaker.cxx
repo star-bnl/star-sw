@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofSimMaker.cxx,v 1.5 2003/09/02 17:59:10 perev Exp $
+ * $Id: StTofSimMaker.cxx,v 1.6 2003/09/17 19:49:10 geurts Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofSimMaker.cxx,v $
+ * Revision 1.6  2003/09/17 19:49:10  geurts
+ * zeroed pointers in constructor
+ *
  * Revision 1.5  2003/09/02 17:59:10  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -71,8 +74,12 @@ static RanluxEngine engine;
 
 ClassImp(StTofSimMaker)
 
-/// default empty constructor
-StTofSimMaker::StTofSimMaker(const char *name):StMaker(name){/* nope */}
+/// default constructor
+StTofSimMaker::StTofSimMaker(const char *name):StMaker(name){
+  mGeomDb  = 0;
+  mCalibDb = 0;
+  mSimDb   = 0;
+}
 
 /// default empty destructor
 StTofSimMaker::~StTofSimMaker(){/* nope */}
