@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.8 1999/12/03 00:55:21 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.9 1999/12/03 19:40:42 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.9  1999/12/03 19:40:42  calderon
+ * volume_id for SVT hits can be up to ~8700.
+ *
  * Revision 1.8  1999/12/03 00:55:21  calderon
  * Completely revised for StMcEvent 2.0
  * Using StDbUtilities for coordinate transformations.
@@ -62,12 +65,7 @@
 #include "StTpcDb/StTpcDb.h"
 #include "StDbUtilities/StCoordinates.hh"
 
-#include "StMcEvent.hh"
-#include "StMcTrack.hh"
-#include "StMcTpcHit.hh"
-#include "StMcFtpcHit.hh"
-#include "StMcSvtHit.hh"
-#include "StMcVertex.hh"
+#include "StMcEventTypes.hh"
 
 #ifndef ST_NO_NAMESPACES
 using namespace std;
@@ -78,7 +76,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.8 1999/12/03 00:55:21 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.9 1999/12/03 19:40:42 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -216,7 +214,7 @@ Int_t StMcEventMaker::Make()
 	g2t_ftp_hit_st *ftpHitTable;
 	if (g2t_ftp_hitTablePointer)
 	    ftpHitTable = g2t_ftp_hitTablePointer->GetTable();
-	else
+	else 
 	    cerr << "Table g2t_ftp_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 
 	//
@@ -524,7 +522,7 @@ Int_t StMcEventMaker::Make()
 	    iTrkId = 0;
 	    nBadVolId = 0;
 	    for(ihit=0; ihit<NHits; ihit++) {
-		if (svtHitTable[ihit].volume_id < 1101 || svtHitTable[ihit].volume_id > 5000) {
+		if (svtHitTable[ihit].volume_id < 1101 || svtHitTable[ihit].volume_id > 9000) {
 		    nBadVolId++;
 		    continue;
 		}
