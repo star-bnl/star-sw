@@ -22,7 +22,7 @@
 #include "StMaker.h"
 #endif
 
-#include "StHbtMaker/Base/StHbtV0Cut.hh"
+#include "StHbtMaker/Base/StHbtV0Cut.h"
 
 class dummyV0Cut : public StHbtV0Cut{
 public:
@@ -33,8 +33,6 @@ public:
   virtual bool Pass(const StHbtV0*);
 
   virtual StHbtString Report();
-
-  virtual void SetMass(const double& mass);
 
 
   ClassDef(dummyV0Cut, 1)

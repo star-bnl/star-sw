@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorD.cc,v 1.2 1999/06/04 18:00:08 ullrich Exp $
+ * $Id: StThreeVectorD.cc,v 1.3 1999/10/15 15:46:49 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,10 +10,8 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorD.cc,v $
- * Revision 1.2  1999/06/04 18:00:08  ullrich
- * Added new constructor which takes C-style array as argument.
- * New operators operator() and operator[] which can be used
- * as lvalues.
+ * Revision 1.3  1999/10/15 15:46:49  ullrich
+ * Changed output format in operator<<
  *
  * Revision 1.3  1999/10/15 15:46:49  ullrich
  * Changed output format in operator<<
@@ -93,7 +91,7 @@ double StThreeVectorD::angle(const StThreeVectorF& v) const
 {
     return acos(this->dot(v)/this->mag()/v.mag());
 }
-    return os << '(' << v.x() << ", " << v.y() << ", " << v.z() << ')';
+
 ostream&  operator<<(ostream& os, const StThreeVectorD& v)
 {
     return os << v.x() << '\t' << v.y() << '\t' << v.z();

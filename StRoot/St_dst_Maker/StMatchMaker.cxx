@@ -2,11 +2,8 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.10 1999/10/01 21:16:03 wdeng Exp $
+// $Id: StMatchMaker.cxx,v 1.9 1999/09/13 15:06:23 caines Exp $
 // $Log: StMatchMaker.cxx,v $
-// Revision 1.10  1999/10/01 21:16:03  wdeng
-// Take out dst auxiliary table.
-//
 // Revision 1.9  1999/09/13 15:06:23  caines
 // Added creation of garb(tphit) and garb(tptrack) so it is possible
 // to run with TPC turned off
@@ -388,7 +385,10 @@ Int_t StMatchMaker::Make(){
   
   St_dst_track     *globtrk     = new St_dst_track("globtrk",20000);  
   AddData(globtrk);
-    
+  
+  St_dst_track_aux *globtrk_aux = new St_dst_track_aux("globtrk_aux",20000);
+  AddData(globtrk_aux);
+  
   St_dst_vertex *vertex = new St_dst_vertex("vertex",1); 
   AddGarb(vertex);   
   
@@ -506,7 +506,7 @@ Int_t StMatchMaker::Make(){
   
   iRes = egr_fitter (tphit,    vertex,      tptrack,   evaltrk,
 		     scs_spt,m_egr_egrpar,stk_track,groups,
-		     evt_match,globtrk);
+		     evt_match,globtrk,globtrk_aux);
   //	 ======================================================
   
   if (iRes !=kSTAFCV_OK) iMake = kStWarn;

@@ -17,18 +17,18 @@ CC:>-----+---------+---------+---------+---------+---------+---------+---------+
       INTEGER*4 G2T_GET_KINE
 
       INTEGER   It, Iv, Ityp, Npar, Istop, LenT, LenV, LBUF,
-     >          Nd, Id, NBytPW, LabelV, LabelT, Label1, IHEAD(1000)
+     >          Nd, Id, NBytPW, LabelV, LabelT, IHEAD(1000)
       Parameter (Lbuf=200,NBytPW=4)
       INTEGER   NBUF, NtBeam, NtTarg, Ipart, eg_label, Parent, NwHead,
      >          Iv0, Ip0, Mecat, Meca, Ivol, N_parent, numed, Jv, Kv 
       REAL      VMOD, VDIST, Pvert(4), Vert(3), Ubuf(Lbuf), Par(50),
      >          Amass, Tlife, Charge, Tofg, Pt, tet, Eta, rap, 
-     >          d,P(4),V(3),am,time,Vcut/0.0010/
+     >          D,P(4),V(3),am,time,Vcut/0.0010/
       CHARACTER NAPART*24,Cvol*4,Cshap*4
       Integer   NUM(100000),ISTAT,IDPDG,MOTH(2),IDAU(2)
 
-#include       "g2t_get_kine.inc"
-#include       "geant321/gcnum.inc"
+#include "g2t_get_kine.inc"
+#include "geant321/gcnum.inc"
 
 CC:>-----+---------+---------+---------+---------+---------+---------+---------+
       G2T_GET_KINE = STAFCV_BAD
@@ -152,20 +152,14 @@ c       p_vert(iv).daughter_p - filled by tracks ! first daughter in linked list
         p_track(it).pt             = -999.
         p_track(it).eta            = -999.
 *
-        if (NtBeam .le. 0) then ! this is an event generator particle 
+        if (NtBeam .le. 0) then ! this is an event generator particle        
 *                                 stable arithmetics requires Pt>0 only
  61       LabelT  = LabelT + 1 
           call AgNZGETP(1,1,LabelT,ISTAT,IDPDG,P,AM,MOTH,TIME,IDAU,V)
           if (ISTAT.gt.1) go to 61
-          Label1  = 99999
-          if (ISTAT.eq.1) then
-             Label1  = LabelT
-             D       = VDIST(Pvert,P,3)
-             if (D.gt.0) then
-                print *,' g2t_warning - particle and kine differ'
-                print *,'   Ikine=',It,',   Eg=',LabelT
-             endif
-          endif
+          D       = VDIST(Pvert,P,3)
+          if (D.gt.0) print *,' g2t_warning - particle and kine differ'
+          if (D.gt.0) print *,'   Ikine=',It,',   Eg=',LabelT
 *          
           Pt      = VMOD (Pvert,2)
           Eta     = Pvert(3)
@@ -176,13 +170,13 @@ c       p_vert(iv).daughter_p - filled by tracks ! first daughter in linked list
             Rap   =  LOG ( (Pvert(4)+Pvert(3))/(Pvert(4)-Pvert(3)) )/2
           endif
 *
-          p_track(it).eg_label   = Label1      ! event generator label
+          p_track(it).eg_label   = LabelT      ! event generator label
           p_track(it).eg_pid     = Ipart       ! event generator particle ID
           p_track(it).pt         = Pt
           p_track(it).eta        = eta
           p_track(it).rapidity   = rap
 *>
-          p_vert(iv).eg_label    = Label1      ! generator label (0 if GEANT)
+          p_vert(iv).eg_label    = LabelT      ! generator label (0 if GEANT)
 *
         else                ! Ntbeam positive - this is a secondary particle
 *                           ! NtTarg coding explained above

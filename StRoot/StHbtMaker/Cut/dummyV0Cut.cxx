@@ -34,8 +34,4 @@ StHbtString dummyV0Cut::Report()
   return "dummyV0Cut\n";
 }
 //________________________
-void dummyV0Cut::SetMass(const double& mass)
-{
-  mMass = mass;
-}
 

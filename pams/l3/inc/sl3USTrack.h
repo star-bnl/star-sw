@@ -1,10 +1,6 @@
-#ifndef SL3USTRACK
-#define SL3USTRACK
-class sl3USTrack { 
-public:
+struct sl3USTrack { 
     short     id;        /* track id */
-    short     q ;
-    short     nHits;      /* Number of points assigned to that track */
+    short     nrec;      /* Number of points assigned to that track */
     float     chisq;     /* xy and sz chi2 squared packed in 16 bits each */
     float     dedx;      /* dE/dx information */
     float     pt  ;      /* pt time charge */
@@ -14,10 +10,4 @@ public:
     float     r0;        /* r   coordinate of the first point */
     float     phi0;      /* phi coordinate of the first point */
     float     Errors ;   /* dpt, dpsi, dtanl errors (10bits*3)  */
-
-    void print ( ) {
-        printf ( " id %d nHits %d pt %e tanl %e psi %e \n",
-                 id, nHits, pt, tanl, psi ) ;
-    }
 };
-#endif

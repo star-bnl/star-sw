@@ -99,22 +99,22 @@ C convert to Tesla
              nok=nok+1
              trak(nok).id  = globtrk(i).id
              trak(nok).det_id = globtrk(i).det_id
-             trak(nok).r0   = globtrk(i).r0
-             trak(nok).phi  = globtrk(i).phi0*C_RAD_PER_DEG
+             trak(nok).r0   = sqrt(globtrk(i).x0**2+globtrk(i).y0**2)
+             trak(nok).phi  = atan2(globtrk(i).y0,globtrk(i).x0)
              trak(nok).z0   = globtrk(i).z0
              trak(nok).psi   = globtrk(i).psi*C_RAD_PER_DEG !degrees to radians
-             trak(nok).tanl= globtrk(i).tanl
-             trak(nok).rc = 1./(C_D_CURVATURE*bfield(3)*10.
-     +            *globtrk(i).invpt)
-             trak(nok).q  = float(globtrk(i).icharge)
-             call ev0_circle_param(trak(nok).r0,xc,
-     +            trak(nok).rc,bfield(3))
-             trak(nok).xc(1) = xc(1)
-             trak(nok).xc(2) = xc(2)
-             trak(nok).pid = globtrk(i).pid
-             trak(nok).sagitta = globtrk(i).length**2/(8*trak(nok).rc)
-             trak(nok).dca = globtrk(i).impact
-          endif
+              trak(nok).tanl= globtrk(i).tanl
+              trak(nok).rc = 1./(C_D_CURVATURE*bfield(3)*10.
+     +             *globtrk(i).invpt)
+              trak(nok).q  = float(globtrk(i).icharge)
+              call ev0_circle_param(trak(nok).r0,xc,
+     +             trak(nok).rc,bfield(3))
+              trak(nok).xc(1) = xc(1)
+              trak(nok).xc(2) = xc(2)
+              trak(nok).pid = globtrk(i).id_global_pid
+              trak(nok).sagitta = globtrk(i).length**2/(8*trak(nok).rc)
+              trak(nok).dca = globtrk(i).impact
+           endif
         ENDDO
  35     CONTINUE
                 

@@ -8,7 +8,8 @@
      7         svt_track_h,         svt_track ,
      8         svt_group_h,         svt_group ,
      9         evt_match_h,         evt_match , 
-     9           globtrk_h,           globtrk) 
+     9           globtrk_h,           globtrk,
+     9       globtrk_aux_h,       globtrk_aux) 
 C>--------------------------------------------------------------------
 C *********************************************************************
 C ***                                                                **
@@ -62,6 +63,8 @@ C     evt_match =       rows of the evt_match table
 C Output Arguments:
 C     globtrk_h =       header for the dst_track table
 C     globtrk   =       rows of the globtrk table
+C     globtrk_aux_h =      header for the dst_track_aux tables
+C     globtrk_aux =     rows of teh dst_track table
 C<----------------------------------------------------------------------
       IMPLICIT NONE
 #include "egr_fitter.inc"
@@ -107,6 +110,7 @@ C ---------------------------------------------------------------------
 C  Initialize number of refit tracks
 
       globtrk_h.nok = 0
+      globtrk_aux_h.nok = 0
 c      write(6,*) 'EGR: ',tphit_h.nok,tptrack_h.nok,tpeval_h.nok,globtrk_h.nok
 
 CCC  Initialize the local track-pointer array structure to zero:
@@ -348,6 +352,8 @@ c     Fill tracks
 		  if (globtrk_h.nok .ge. globtrk_h.maxlen) go to 1313
                   globtrk_h.nok = globtrk_h.nok + 1
 		  ifull = 2
+		  if (globtrk_aux_h.nok .ge. globtrk_aux_h.maxlen) go to 1313
+                  globtrk_aux_h.nok = globtrk_aux_h.nok + 1
                   igtrk = globtrk_h.nok
                   globtrk(igtrk).id= igtrk
                  globtrk(igtrk).iflag = svt_track(svt(isvtt)).flag*10
@@ -364,45 +370,28 @@ c     Fill tracks
                      globtrk(igtrk).iflag = -1.0*
      +                    abs(globtrk(igtrk).iflag+20)
                   endif
-                  globtrk(igtrk).r0=svt_track(svt(isvtt)).r0
-                  globtrk(igtrk).phi0=svt_track(svt(isvtt)).phi0
+                  globtrk(igtrk).x0=svt_track(svt(isvtt)).r0*
+     +                 cos(svt_track(svt(isvtt)).phi0*C_RAD_PER_DEG)
+                  globtrk(igtrk).y0=svt_track(svt(isvtt)).r0*
+     +                 sin(svt_track(svt(isvtt)).phi0*C_RAD_PER_DEG)
                   globtrk(igtrk).z0=svt_track(svt(isvtt)).z0
                   globtrk(igtrk).psi=svt_track(svt(isvtt)).psi
                   globtrk(igtrk).tanl=svt_track(svt(isvtt)).tanl
                   globtrk(igtrk).invpt=abs(tptrack(itpct).invp) ! tpc pt
-                  globtrk(igtrk).covar(1)
+                  globtrk(igtrk).covar_diag(1)
      +                 =svt_track(svt(isvtt)).cov(1)
-                  globtrk(igtrk).covar(2)
-     +                 =svt_track(svt(isvtt)).cov(2)
-                  globtrk(igtrk).covar(3)
+                  globtrk(igtrk).covar_diag(2)
      +                 =svt_track(svt(isvtt)).cov(3)
-                  globtrk(igtrk).covar(4)
-     +                 =svt_track(svt(isvtt)).cov(4)
-                  globtrk(igtrk).covar(5)
-     +                 =svt_track(svt(isvtt)).cov(5) 
-                 globtrk(igtrk).covar(6)
+                  globtrk(igtrk).covar_diag(3)
      +                 =svt_track(svt(isvtt)).cov(6)
-                  globtrk(igtrk).covar(7)
-     +                 =svt_track(svt(isvtt)).cov(7)
-                  globtrk(igtrk).covar(8)
-     +                 =svt_track(svt(isvtt)).cov(8)
-                  globtrk(igtrk).covar(9)
-     +                 =svt_track(svt(isvtt)).cov(9)
-                  globtrk(igtrk).covar(10)
-     +                 =svt_track(svt(isvtt)).cov(10) 
-                 globtrk(igtrk).covar(11)
-     +                 =svt_track(svt(isvtt)).cov(11)
-                  globtrk(igtrk).covar(12)
-     +                 =svt_track(svt(isvtt)).cov(12)
-                  globtrk(igtrk).covar(13)
-     +                 =svt_track(svt(isvtt)).cov(13)
-                  globtrk(igtrk).covar(14)
-     +                 =svt_track(svt(isvtt)).cov(14)
-                  globtrk(igtrk).covar(15)
-     +                 =svt_track(svt(isvtt)).cov(15) 
-                
+                  globtrk(igtrk).covar_diag(4)
+     +                 =svt_track(svt(isvtt)).cov(10)
+                  globtrk(igtrk).covar_diag(5)
+     +                 =svt_track(svt(isvtt)).cov(15)                 
                   globtrk(igtrk).chisq(1)=svt_track(svt(isvtt)).chisq(1)
+     +                 / real(globtrk(igtrk).n_fit_point-3)
                   globtrk(igtrk).chisq(2)=svt_track(svt(isvtt)).chisq(2)
+     +                 /real(globtrk(igtrk).n_fit_point-2)
 C     Now find first point on track
                   rfirst = 99999.
 
@@ -448,14 +437,40 @@ C----->>>>  new calculation of .length   S.Margetis
                   globtrk(igtrk).length=glength
 C---<<<<<<<
                   globtrk(igtrk).impact = 0.                  
+                  globtrk(igtrk).ndegf = 2*(svt_track(svt(isvtt)).nspt +
+     +                 tptrack(itpct).nfit)-5
+                  globtrk(igtrk).id_global_pid = 0
+                  globtrk(igtrk).id_hypo_pid = 0
                   globtrk(igtrk).id_start_vertex = 0
-                  globtrk(igtrk).curvature = 0
-                  globtrk(igtrk).method = 0
-                  globtrk(igtrk).map(1) = 0
-                  globtrk(igtrk).map(2) = 0
-                  globtrk(igtrk).pid = 0
+                  globtrk(igtrk).id_stop_vertex = 0
+                  globtrk(igtrk).id_emc = 0
+                  globtrk(igtrk).id_smd = 0
 
- 
+
+                  globtrk_aux(globtrk_aux_h.nok).id_track = 
+     +                 globtrk(globtrk_aux_h.nok).id
+                  globtrk_aux(globtrk_aux_h.nok).covar_off_diag(1)
+     +                 =svt_track(svt(isvtt)).cov(2)
+                  globtrk_aux(globtrk_aux_h.nok).covar_off_diag(2)
+     +                 =svt_track(svt(isvtt)).cov(4)
+                  globtrk_aux(globtrk_aux_h.nok).covar_off_diag(3)
+     +                 =svt_track(svt(isvtt)).cov(5)
+                  globtrk_aux(globtrk_aux_h.nok).covar_off_diag(4)
+     +                 =svt_track(svt(isvtt)).cov(7)
+                  globtrk_aux(globtrk_aux_h.nok).covar_off_diag(5)
+     +                 =svt_track(svt(isvtt)).cov(8)
+                  globtrk_aux(globtrk_aux_h.nok).covar_off_diag(6)
+     +                 =svt_track(svt(isvtt)).cov(9)
+                  globtrk_aux(globtrk_aux_h.nok).covar_off_diag(7)
+     +                 =svt_track(svt(isvtt)).cov(11)
+                  globtrk_aux(globtrk_aux_h.nok).covar_off_diag(8)
+     +                 =svt_track(svt(isvtt)).cov(12)
+                  globtrk_aux(globtrk_aux_h.nok).covar_off_diag(9)
+     +                 =svt_track(svt(isvtt)).cov(13)
+                  globtrk_aux(globtrk_aux_h.nok).covar_off_diag(10)
+     +                 =svt_track(svt(isvtt)).cov(14)
+                  globtrk_aux(globtrk_aux_h.nok).residuals(1) = 0.
+                  globtrk_aux(globtrk_aux_h.nok).residuals(2) = 0.
                   if (globtrk(igtrk).length.gt.99999.9) then
                      globtrk(igtrk).length=99999.9
                   endif
@@ -467,10 +482,10 @@ C---<<<<<<<
      +                 svt_group_h,svt_group,egrpar_h,egrpar,
      +                 evt_match_h,evt_match,cov)
                   
-              iret = egr_load_globtrk(globtrk_h,globtrk,
-     +                 tptrack(itpct).id,gtrk,
-     +                 tphit_h,tphit,svt_spt_h,svt_spt,cov,itpct,
-     +                 isvtt,ipriv,bfield(3))
+              iret = egr_load_globtrk(globtrk_h,globtrk,globtrk_aux_h
+     +                 ,globtrk_aux,tptrack(itpct).id,gtrk,
+     +                 tphit_h,tphit,svt_spt_h,svt_spt,cov,itpct
+     +                 ,isvtt,ipriv,bfield(3))
                endif
                tptrack(itpct).id_globtrk = globtrk_h.nok
                svt_track(svt(isvtt)).id_globtrk = globtrk_h.nok  
@@ -501,8 +516,8 @@ c     mark spts as used
      +              svt_track_h,svt_track,svt_group_h,svt_group,
      +              egrpar_h,egrpar,evt_match_h,evt_match,cov)
                
-               iret = egr_load_globtrk(globtrk_h,globtrk,
-     +              igtrk,gtrk,tphit_h,tphit,svt_spt_h,
+               iret = egr_load_globtrk(globtrk_h,globtrk,globtrk_aux_h
+     +              ,globtrk_aux,igtrk,gtrk,tphit_h,tphit,svt_spt_h,
      +              svt_spt,cov,itpct,isvtt,ipriv,bfield(3))
                
 c     mark spts as used
@@ -532,7 +547,7 @@ c     mark spts as used
      +              egrpar_h,egrpar,evt_match_h,evt_match,covar)
                
                iret = egr_load_globtrk_kal(globtrk_h,globtrk
-     +              ,igtrk,gtrk,tphit_h,
+     +              ,globtrk_aux_h,globtrk_aux,igtrk,gtrk,tphit_h,
      +              tphit,svt_spt_h,svt_spt,covar,itpct,isvtt,
      +              ipriv,bfield(3))
                
@@ -554,6 +569,8 @@ c     mark spts as used
 	       if (globtrk_h.nok .ge. globtrk_h.maxlen) go to 1313
                globtrk_h.nok = globtrk_h.nok + 1
 	       ifull = 2
+	     if (globtrk_aux_h.nok .ge. globtrk_aux_h.maxlen) go to 1313
+               globtrk_aux_h.nok = globtrk_aux_h.nok + 1
                igtrk = globtrk_h.nok
                globtrk(igtrk).id=igtrk              
                globtrk(igtrk).iflag = svt_track(svt(isvtt)).flag*10
@@ -566,30 +583,23 @@ c     mark spts as used
                globtrk(igtrk).n_fit_point = svt_track(svt(isvtt)).nspt +
      +              tptrack(tpc(itpct)).nfit 
                globtrk(igtrk).icharge=tptrack(tpc(itpct)).q ! tpc q
-               globtrk(igtrk).r0=svt_track(svt(isvtt)).r0           
-               globtrk(igtrk).phi0=svt_track(svt(isvtt)).r0
+               globtrk(igtrk).x0=svt_track(svt(isvtt)).r0*
+     +              cos(svt_track(svt(isvtt)).phi0*C_RAD_PER_DEG)            
+               globtrk(igtrk).y0=svt_track(svt(isvtt)).r0*
+     +              sin(svt_track(svt(isvtt)).phi0*C_RAD_PER_DEG)
                globtrk(igtrk).z0=svt_track(svt(isvtt)).z0
                globtrk(igtrk).psi=svt_track(svt(isvtt)).psi               
                globtrk(igtrk).tanl=svt_track(svt(isvtt)).tanl
                globtrk(igtrk).invpt=abs(tptrack(tpc(itpct)).invp) ! tpc pt
-               globtrk(igtrk).covar(1)=svt_track(svt(isvtt)).cov(1)
-               globtrk(igtrk).covar(2)=svt_track(svt(isvtt)).cov(2)
-               globtrk(igtrk).covar(3)=svt_track(svt(isvtt)).cov(3)
-               globtrk(igtrk).covar(4)=svt_track(svt(isvtt)).cov(4)
-               globtrk(igtrk).covar(5)=svt_track(svt(isvtt)).cov(5)
-               globtrk(igtrk).covar(6)=svt_track(svt(isvtt)).cov(6)
-               globtrk(igtrk).covar(7)=svt_track(svt(isvtt)).cov(7)
-               globtrk(igtrk).covar(8)=svt_track(svt(isvtt)).cov(8)
-               globtrk(igtrk).covar(9)=svt_track(svt(isvtt)).cov(9)
-               globtrk(igtrk).covar(10)=svt_track(svt(isvtt)).cov(10)
-               globtrk(igtrk).covar(11)=svt_track(svt(isvtt)).cov(11)
-               globtrk(igtrk).covar(12)=svt_track(svt(isvtt)).cov(12)
-               globtrk(igtrk).covar(13)=svt_track(svt(isvtt)).cov(13)
-               globtrk(igtrk).covar(14)=svt_track(svt(isvtt)).cov(14)
-               globtrk(igtrk).covar(15)=svt_track(svt(isvtt)).cov(15)
-
-               globtrk(igtrk).chisq(1)=svt_track(svt(isvtt)).chisq(1)
-               globtrk(igtrk).chisq(2)=svt_track(svt(isvtt)).chisq(2)
+               globtrk(igtrk).covar_diag(1)=svt_track(svt(isvtt)).cov(1)
+               globtrk(igtrk).covar_diag(2)=svt_track(svt(isvtt)).cov(3)
+               globtrk(igtrk).covar_diag(3)=svt_track(svt(isvtt)).cov(6)
+              globtrk(igtrk).covar_diag(4)=svt_track(svt(isvtt)).cov(10)
+              globtrk(igtrk).covar_diag(5)=svt_track(svt(isvtt)).cov(15)
+               globtrk(igtrk).chisq(1)=svt_track(svt(isvtt)).chisq(1)/
+     +             real(globtrk(igtrk).n_fit_point -3)
+               globtrk(igtrk).chisq(2)=svt_track(svt(isvtt)).chisq(2)/
+     +             real(globtrk(igtrk).n_fit_point -2)
 C     Now find first point on track
                rfirst = 99999.
                do ishit = 1,svt_group_h.nok
@@ -639,15 +649,38 @@ C---<<<<<<<
                endif
            
                globtrk(igtrk).impact = 0
+               globtrk(igtrk).ndegf = 2*(svt_track(svt(isvtt)).nspt +
+     +              tptrack(tpc(itpct)).nfit) - 5
+               globtrk(igtrk).id_global_pid = 0
+               globtrk(igtrk).id_hypo_pid = 0
                globtrk(igtrk).id_start_vertex = 0
-               globtrk(igtrk).curvature = 0
-               globtrk(igtrk).method = 0
-               globtrk(igtrk).map(1) = 0
-               globtrk(igtrk).map(2) = 0
-               globtrk(igtrk).pid = 0
-
+               globtrk(igtrk).id_stop_vertex = 0
+               globtrk(igtrk).id_emc = 0
+               globtrk(igtrk).id_smd = 0
                
- 
+               globtrk_aux(globtrk_aux_h.nok).id_track = igtrk
+               globtrk_aux(globtrk_aux_h.nok).residuals(1) = 0
+               globtrk_aux(globtrk_aux_h.nok).residuals(2) = 0
+               globtrk_aux(globtrk_aux_h.nok).covar_off_diag(1) = 
+     +              svt_track(svt(isvtt)).cov(2)
+               globtrk_aux(globtrk_aux_h.nok).covar_off_diag(2) = 
+     +              svt_track(svt(isvtt)).cov(4)
+               globtrk_aux(globtrk_aux_h.nok).covar_off_diag(3) = 
+     +              svt_track(svt(isvtt)).cov(5)
+               globtrk_aux(globtrk_aux_h.nok).covar_off_diag(4) = 
+     +              svt_track(svt(isvtt)).cov(7)
+               globtrk_aux(globtrk_aux_h.nok).covar_off_diag(5) = 
+     +              svt_track(svt(isvtt)).cov(8)
+               globtrk_aux(globtrk_aux_h.nok).covar_off_diag(6) = 
+     +              svt_track(svt(isvtt)).cov(9)
+               globtrk_aux(globtrk_aux_h.nok).covar_off_diag(7) = 
+     +              svt_track(svt(isvtt)).cov(11)
+               globtrk_aux(globtrk_aux_h.nok).covar_off_diag(8) = 
+     +              svt_track(svt(isvtt)).cov(12)
+               globtrk_aux(globtrk_aux_h.nok).covar_off_diag(9) = 
+     +              svt_track(svt(isvtt)).cov(13)
+               globtrk_aux(globtrk_aux_h.nok).covar_off_diag(10) = 
+     +              svt_track(svt(isvtt)).cov(14)
 c     mark spts as used
                
                do ient = 1, gtrk(itpct).ntpc
@@ -694,8 +727,8 @@ C     +           tptrack(itrk).nrec .gt. 10 )    then
      +                 tphit,privert_h,privert,svt_spt_h,svt_spt,
      +                 svt_track_h,svt_track,svt_group_h,svt_group,
      +                 egrpar_h,egrpar,evt_match_h,evt_match,cov)
-                  iret = egr_load_globtrk(globtrk_h,globtrk
-     +                 ,tptrack(itrk).id,gtrk
+                  iret = egr_load_globtrk(globtrk_h,globtrk,globtrk_aux_h
+     +                 ,globtrk_aux,tptrack(itrk).id,gtrk
      +                 ,tphit_h,tphit,svt_spt_h,svt_spt,cov,itrk
      +                 ,isvtt,ipriv,bfield(3))
 
@@ -713,7 +746,7 @@ C     +           tptrack(itrk).nrec .gt. 10 )    then
      +                 svt_track_h,svt_track,svt_group_h,svt_group,
      +                 egrpar_h,egrpar,evt_match_h,evt_match,covar)
                   iret = egr_load_globtrk_kal(globtrk_h,globtrk,
-     +                 tptrack(itrk).id,gtrk
+     +                 globtrk_aux_h,globtrk_aux,tptrack(itrk).id,gtrk
      +                 ,tphit_h,tphit,svt_spt_h,svt_spt,covar,itrk,isvtt,
      +                 ipriv,bfield(3))
                else
@@ -724,7 +757,8 @@ C     +           tptrack(itrk).nrec .gt. 10 )    then
 		  if (globtrk_h.nok .ge. globtrk_h.maxlen) go to 1313
                   globtrk_h.nok = globtrk_h.nok + 1
 		  ifull = 2
-
+		  if (globtrk_aux_h.nok .ge. globtrk_aux_h.maxlen) go to 1313
+                  globtrk_aux_h.nok = globtrk_aux_h.nok + 1
 
                   iglob = globtrk_h.nok
                   globtrk(iglob).id = iglob
@@ -741,28 +775,19 @@ C     +           tptrack(itrk).nrec .gt. 10 )    then
                      globtrk(iglob).iflag = 
      +                    -1.0*abs(globtrk(iglob).iflag+20)
                   endif
-                  globtrk(iglob).r0 = tptrack(itrk).r0
-                  globtrk(iglob).phi0 = tptrack(itrk).phi0
+                  globtrk(iglob).x0 = tptrack(itrk).r0*
+     +                 cos(tptrack(itrk).phi0*C_RAD_PER_DEG)
+                  globtrk(iglob).y0 = tptrack(itrk).r0*
+     +                 sin(tptrack(itrk).phi0*C_RAD_PER_DEG)
                   globtrk(iglob).z0 = tptrack(itrk).z0
                   globtrk(iglob).psi = tptrack(itrk).psi
                   globtrk(iglob).tanl = tptrack(itrk).tanl
                   globtrk(iglob).invpt = tptrack(itrk).invp
-                  globtrk(iglob).covar(1) = tptrack(itrk).cov(1)
-                  globtrk(iglob).covar(2) = tptrack(itrk).cov(2)
-                  globtrk(iglob).covar(3) = tptrack(itrk).cov(3)
-                  globtrk(iglob).covar(4) = tptrack(itrk).cov(4)
-                  globtrk(iglob).covar(5) = tptrack(itrk).cov(5)
-                  globtrk(iglob).covar(6) = tptrack(itrk).cov(6)
-                  globtrk(iglob).covar(7) = tptrack(itrk).cov(7)
-                  globtrk(iglob).covar(8) = tptrack(itrk).cov(8)
-                  globtrk(iglob).covar(9) = tptrack(itrk).cov(9)
-                  globtrk(iglob).covar(10) = tptrack(itrk).cov(10)
-                  globtrk(iglob).covar(11) = tptrack(itrk).cov(11)
-                  globtrk(iglob).covar(12) = tptrack(itrk).cov(12)
-                  globtrk(iglob).covar(13) = tptrack(itrk).cov(13)
-                  globtrk(iglob).covar(14) = tptrack(itrk).cov(14)
-                  globtrk(iglob).covar(15) = tptrack(itrk).cov(15)
-
+                  globtrk(iglob).covar_diag(1) = tptrack(itrk).cov(1)
+                  globtrk(iglob).covar_diag(2) = tptrack(itrk).cov(3)
+                  globtrk(iglob).covar_diag(3) = tptrack(itrk).cov(6)
+                  globtrk(iglob).covar_diag(4) = tptrack(itrk).cov(10)
+                  globtrk(iglob).covar_diag(5) = tptrack(itrk).cov(15)
                   globtrk(iglob).chisq(1) = tptrack(itrk).chisq(1)/
      +            real(globtrk(iglob).n_fit_point-3)
                   globtrk(iglob).chisq(2) = tptrack(itrk).chisq(2)/
@@ -813,13 +838,14 @@ C---<<<<<<<
                      globtrk(iglob).length=99999.9
                   endif
 
-                  globtrk(iglob).id_start_vertex= 0
-                  globtrk(iglob).curvature = 0
-                  globtrk(iglob).method = 0
-                  globtrk(iglob).map(1) = 0
-                  globtrk(iglob).map(2) = 0
-                  globtrk(iglob).pid = 0
 
+                  globtrk(iglob).ndegf = (2*tptrack(itrk).nfit) -5
+                  globtrk(iglob).id_global_pid = 0
+                  globtrk(iglob).id_hypo_pid = 0
+                  globtrk(iglob).id_start_vertex= 0
+                  globtrk(iglob).id_stop_vertex = 0
+                  globtrk(iglob).id_emc = 0
+                  globtrk(iglob).id_smd = 0 
 
                endif            ! End of egrpar(1).perfect .ne. 1
                do ient = 1, gtrk(itrk).ntpc
@@ -849,6 +875,8 @@ C     Now loop over unmatched SVT tracks.  Straight svt_track copy.
 		     if (globtrk_h.nok .ge. globtrk_h.maxlen) go to 1313
                      globtrk_h.nok = globtrk_h.nok + 1
 		     ifull = 2
+		     if (globtrk_aux_h.nok .ge. globtrk_aux_h.maxlen) go to 1313
+                     globtrk_aux_h.nok = globtrk_aux_h.nok + 1
                      iglob = globtrk_h.nok
                      rlast = 0.
                      rfirst= 10000.
@@ -880,45 +908,28 @@ C     Now loop over unmatched SVT tracks.  Straight svt_track copy.
                      globtrk(iglob).n_fit_point =  svt_track(itrk).nspt
                      globtrk(iglob).icharge = 
      +                    sign(1.0,svt_track(itrk).invpt)
-                     globtrk(iglob).r0 = svt_track(itrk).r0
-                     globtrk(iglob).phi0 = svt_track(itrk).phi0
+                     globtrk(iglob).x0 = svt_track(itrk).r0*
+     +                    cos(svt_track(itrk).phi0*C_RAD_PER_DEG)
+                     globtrk(iglob).y0 = svt_track(itrk).r0*
+     +                    sin(svt_track(itrk).phi0*C_RAD_PER_DEG)
                      globtrk(iglob).z0 = svt_track(itrk).z0
                      globtrk(iglob).psi = svt_track(itrk).psi
                      globtrk(iglob).tanl = svt_track(itrk).tanl
                      globtrk(iglob).invpt = abs(svt_track(itrk).invpt)
-                     globtrk(iglob).covar(1) = 
+                     globtrk(iglob).covar_diag(1) = 
      +                       svt_track(itrk).cov(1)
-                    globtrk(iglob).covar(2) = 
-     +                       svt_track(itrk).cov(2)
-                    globtrk(iglob).covar(3) = 
+                    globtrk(iglob).covar_diag(2) = 
      +                       svt_track(itrk).cov(3)
-                    globtrk(iglob).covar(4) = 
-     +                       svt_track(itrk).cov(4)
-                    globtrk(iglob).covar(5) = 
-     +                       svt_track(itrk).cov(5)
-                    globtrk(iglob).covar(6) = 
+                    globtrk(iglob).covar_diag(3) = 
      +                       svt_track(itrk).cov(6)
-                    globtrk(iglob).covar(7) = 
-     +                       svt_track(itrk).cov(7)
-                    globtrk(iglob).covar(8) = 
-     +                       svt_track(itrk).cov(8)
-                    globtrk(iglob).covar(9) = 
-     +                       svt_track(itrk).cov(9)
-                    globtrk(iglob).covar(10) = 
+                    globtrk(iglob).covar_diag(4) = 
      +                       svt_track(itrk).cov(10)
-                    globtrk(iglob).covar(11) = 
-     +                       svt_track(itrk).cov(11)
-                    globtrk(iglob).covar(12) = 
-     +                       svt_track(itrk).cov(12)
-                    globtrk(iglob).covar(13) = 
-     +                       svt_track(itrk).cov(13)
-                    globtrk(iglob).covar(14) = 
-     +                       svt_track(itrk).cov(14)
-                    globtrk(iglob).covar(15) = 
+                    globtrk(iglob).covar_diag(5) = 
      +                       svt_track(itrk).cov(15)
-
-                    globtrk(iglob).chisq(1) = svt_track(itrk).chisq(1)
-                    globtrk(iglob).chisq(2) = svt_track(itrk).chisq(2)
+                    globtrk(iglob).chisq(1) = svt_track(itrk).chisq(1)/
+     +                   real(globtrk(iglob).n_fit_point-3)
+                    globtrk(iglob).chisq(2) = svt_track(itrk).chisq(2)/
+     +                   real(globtrk(iglob).n_fit_point-2)
                     globtrk(iglob).x_first(1) = svt_spt(ifirst).x(1)
                     globtrk(iglob).x_first(2) = svt_spt(ifirst).x(2)
                     globtrk(iglob).x_first(3) = svt_spt(ifirst).x(3)
@@ -940,14 +951,37 @@ C---<<<<<<<
                      globtrk(iglob).length=99999.9
                   endif
                     globtrk(iglob).impact = 0
+                    globtrk(iglob).ndegf = (2*globtrk(iglob).n_point)-5 
+                    globtrk(iglob).id_global_pid = 0
+                    globtrk(iglob).id_hypo_pid = 0
                     globtrk(iglob).id_start_vertex = 0
-                    globtrk(iglob).curvature = 0
-                    globtrk(iglob).method = 0
-                    globtrk(iglob).map(1) = 0
-                    globtrk(iglob).map(2) = 0
-                    globtrk(iglob).pid = 0
-
+                    globtrk(iglob).id_stop_vertex = 0
+                    globtrk(iglob).id_emc = 0
+                    globtrk(iglob).id_smd = 0
                     
+                    globtrk_aux(globtrk_aux_h.nok).id_track = iglob
+                    globtrk_aux(globtrk_aux_h.nok).residuals(1) = 0
+                    globtrk_aux(globtrk_aux_h.nok).residuals(2) = 0
+                    globtrk_aux(globtrk_aux_h.nok).covar_off_diag(1) = 
+     +                   svt_track(itrk).cov(2)
+                    globtrk_aux(globtrk_aux_h.nok).covar_off_diag(2) = 
+     +                   svt_track(itrk).cov(4)
+                    globtrk_aux(globtrk_aux_h.nok).covar_off_diag(3) = 
+     +                   svt_track(itrk).cov(5)
+                    globtrk_aux(globtrk_aux_h.nok).covar_off_diag(4) = 
+     +                   svt_track(itrk).cov(7)
+                    globtrk_aux(globtrk_aux_h.nok).covar_off_diag(5) = 
+     +                   svt_track(itrk).cov(8)
+                    globtrk_aux(globtrk_aux_h.nok).covar_off_diag(6) = 
+     +                   svt_track(itrk).cov(9)
+                    globtrk_aux(globtrk_aux_h.nok).covar_off_diag(7) = 
+     +                   svt_track(itrk).cov(11)
+                    globtrk_aux(globtrk_aux_h.nok).covar_off_diag(8) = 
+     +                    svt_track(itrk).cov(12)
+                    globtrk_aux(globtrk_aux_h.nok).covar_off_diag(9) = 
+     +                   svt_track(itrk).cov(13)
+                    globtrk_aux(globtrk_aux_h.nok).covar_off_diag(10) = 
+     +                   svt_track(itrk).cov(14)
                  elseif( egrpar(1).usesvt .eq.2)then
                     igtrk = igtrk + 1
                     iret = egr_refit_track(igtrk,itpct,itrk,ipriv,
@@ -957,7 +991,7 @@ C---<<<<<<<
      +                   evt_match_h,evt_match,cov)
                     
                     iret = egr_load_globtrk(globtrk_h,globtrk,
-     +                   igtrk,gtrk,tphit_h,
+     +                   globtrk_aux_h,globtrk_aux,igtrk,gtrk,tphit_h,
      +                   tphit,svt_spt_h,svt_spt,cov,itpct,isvtt
      +                   ,ipriv,bfield(3))
                     
@@ -981,7 +1015,7 @@ C---<<<<<<<
      +                   evt_match_h,evt_match,covar)
                     
                     iret = egr_load_globtrk_kal(globtrk_h,globtrk,
-     +                   igtrk,gtrk,tphit_h,
+     +                   globtrk_aux_h,globtrk_aux,igtrk,gtrk,tphit_h,
      +                   tphit,svt_spt_h,svt_spt,covar,itpct,isvtt,ipriv,
      +                   bfield(3))
                     

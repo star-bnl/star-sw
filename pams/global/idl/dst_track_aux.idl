@@ -1,0 +1,13 @@
+/*  dst_track_aux.idl           */
+/*  Table: dst_track_aux        */
+
+/*
+ *   Auxiliary dst track information.
+ */
+
+ struct dst_track_aux  {
+  long      id_track;           /* F.key to dst_track                      */
+  float     residuals[2];       /* Track fit residuals in x-y & path-z     */
+  float     covar_off_diag[10]; /* Off-diagonal covariance matrix elements */
+ } ;
+/*  Last mod. for dst_track_aux:   $Date: 1998/06/03 13:52:02 $ */

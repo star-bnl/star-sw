@@ -1,13 +1,9 @@
-//:>------------------------------------------------------------------
-//: FILE:       FtfFinder.h
-//: HISTORY:
-//:             28oct1996 version 1.00
-//:             23aug1999 ppy printVols and printRows deleted
-//:<------------------------------------------------------------------
-
 #ifndef FTFFINDER
 #define FTFFINDER
+#include <stdio.h>
+#include <stdlib.h>
 #include <memory.h>
+//#include <iostream.h>
 
 #include "FtfGeneral.h"
 #include "FtfPara.h"
@@ -15,12 +11,6 @@
 #include "FtfTrack.h"
 #include "FtfMcTrack.h"
 #include "FtfVolume.h"
-
-#ifdef SL3ROOT
-#include "Rtypes.h"
-#else
-#define ClassDef(a,b)
-#endif
 
 
 class FtfFinder {
@@ -39,6 +29,8 @@ public:
    double  CpuTime                 ( ) ;
    double  RealTime                ( ) ;
 //
+   void		printVols ( ) ;
+   void		printRows ( ) ;
 //
    int           nHits      ;  
    int           maxHits    ;  
@@ -57,9 +49,6 @@ public:
 private: 
 
    FtfTrack      *currentTrack ;
-
-   ClassDef(FtfFinder,1)
-
     
 } ;
 #endif

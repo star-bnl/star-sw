@@ -1,6 +1,12 @@
-// $Id: StTrsMaker.cxx,v 1.43 1999/10/11 23:54:31 calderon Exp $
+// $Id: StTrsMaker.cxx,v 1.45 1999/10/13 17:36:53 calderon Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.45  1999/10/13 17:36:53  calderon
+// Fixed path to find SimpleDb files.
+//
+// Revision 1.44  1999/10/12 22:51:17  long
+// fix a bug in switching from sector to sector
+//
 // Revision 1.43  1999/10/11 23:54:31  calderon
 // Version with Database Access and persistent file.
 // Not fully tested due to problems with cons, it
@@ -237,7 +243,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.43 1999/10/11 23:54:31 calderon Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.45 1999/10/13 17:36:53 calderon Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -340,28 +346,28 @@ Int_t StTrsMaker::Init()
     // Check File access
     //
     cout << "StTrsMaker::Init()" << endl;
-    string geoFile("../run/TPCgeo.conf");
+    string geoFile("StRoot/StTrsMaker/run/TPCgeo.conf");
     if (access(geoFile.c_str(),R_OK)) {
 	cerr << "ERROR:\n" << geoFile.c_str() << " cannot be opened" << endl;
 	cerr << "Exitting..." << endl;
 	exit(1);
     }
 
-    string scFile = "../run/sc.conf";
+    string scFile = "StRoot/StTrsMaker/run/sc.conf";
     if (access(scFile.c_str(),R_OK)) {
      cerr << "ERROR:\n" << scFile.c_str() << " cannot be opened" << endl;
      cerr << "Exitting..." << endl;
      exit(1);
     }
 
-    string electronicsFile = "../run/electronics.conf";
+    string electronicsFile = "StRoot/StTrsMaker/run/electronics.conf";
     if (access(electronicsFile.c_str(),R_OK)) {
 	cerr << "ERROR:\n" << electronicsFile.c_str() << " cannot be opened" << endl;
 	cerr << "Exitting..." << endl;
 	exit(1);
     }
 
-    string magFile = "../run/example.conf";         // contains B field
+    string magFile = "StRoot/StTrsMaker/run/example.conf";         // contains B field
     if (access(magFile.c_str(),R_OK)) {
 	cerr << "ERROR:\n" << magFile.c_str() << " cannot be opened" << endl;
 	cerr << "Exitting..." << endl;
@@ -556,7 +562,7 @@ Int_t StTrsMaker::Make(){
     
     if (mReadFromFile) { // Read mAllTheData from file
 	mInputStream->fillTrsEvent(mAllTheData);
-	cout << "Filled mAllTheData" << endl;
+	cout << "Done Filling mAllTheData" << endl;
     }
     else { // Normal processing of TRS through GEANT   
     //cout << "Make ofstream" << endl;
@@ -632,12 +638,12 @@ Int_t StTrsMaker::Make(){
 	if((inRange)  &&                                 //HL
 	   (bsectorOfHit != currentSectorProcessed&&start==false) &&//HL
 	   (i            <= no_tpc_hits           )) {//HL
-	  currentSectorProcessed=bsectorOfHit;//HL
+      
           
           tpc_hit--;
           i--;
 	}  //HL    ,continue to another sector....
-		if((inRange)  &&
+	   else	if((inRange)  &&
 	 (bsectorOfHit == currentSectorProcessed||start==true) &&
 	(i            <= no_tpc_hits           )) {
                   currentSectorProcessed=bsectorOfHit;//HL
@@ -835,7 +841,7 @@ Int_t StTrsMaker::Make(){
 	
 	//
 	// Go to the next sector --> should be identical to a simple increment
-	//	currentSectorProcessed = bsectorOfHit;
+	currentSectorProcessed = bsectorOfHit;
         numberOfProcessedPointsInCurrentSector = 0;
 // you can skip out here if you only want to process a single sector...
 // 	if(currentSectorProcessed>3)

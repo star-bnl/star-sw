@@ -31,7 +31,7 @@ public:
    FtfMcSpacePoint* hit ;
 
    FtfMcTrack  ( ) ;
-   ~FtfMcTrack  ( ) ;
+   ~FtfMcTrack ( ) ;
    inline virtual   void nextHit (){ currentHit = currentHit->nextMcTrackHit ; } ;
 
 } ;

@@ -44,11 +44,7 @@ MODULE  CALBGEO is the geometry of the Barrel EM Calorimeter in (aG)STAR     *
 *               - modified by K.Shestermanov 99.10.08
 *               - remove unused constant in structure CALG
 *               - put new cuts for SMD detector
-*
-*      Version 3.0
-*               - modified by A. OGAWA   99.5.13
-*	        - Clean up and addition of variables
-*
+*         
 ******************************************************************************
 +CDE,AGECOM,GCONST,GCUNIT.
 *
@@ -63,24 +59,19 @@ external etsphit
                        SmAffWdh, SmAfbWdh, SmetaWdh, Seta1Wdh, Netfirst, 
                        Seta2Wdh, Netsecon, Set12Wdh, SphiWdh,  SphidWdh, 
                        NPhistr,  NSmdAlw,  Nsuper  , Nsmd,     NsubLay(2),
-                       Nmodule(2), Shift(2), MaxModule, NetaT, Nsub,
-                       NetaSMDp}
-      Structure CALR { Rmin, Rprs, Rsmd1, Rsmd2, Rmax } 
-
+                       Nmodule(2), Shift(2) }
       Real      RKB2sc/0.013/, RKB3sc/9.6E-6/
 *---- local definitions...
       real      current_depth, current, layer_width, smd_width, tan_theta,
                 cut_length, cut_radius, future_depth,c_dep,c_lead_dep, 
                 eta_lenght, current_csda, h_eta1, h_eta2, h_phi1, h_phi2,
-                sh_eta1,sh_eta2,sh_phi1,sh_phi2,Rmax,Hleng, Deta,
-                DphiTot, DphiMod, DphiT, R1, R2, R3, R4, RR(2)
+                sh_eta1,sh_eta2,sh_phi1,sh_phi2,Rmax,Hleng,Dphi
       integer   layer,super,sub,i,j,ii,nn
 *
-* ---------------------------------------------------------------------------
-*                          primary geometrical constant
+* ----------------------------------------------------------------------------
 *
    fill CALG                 ! Barrel Calorimeter data
-      Version  = 3.0         ! geometry version
+      Version  = 2.7         ! geometry version
       Rmin     = 223.5       ! inner radius 
       EtaCut   = 1.0         ! calorimeter rapidity cut
       CrackWd  = 0.655       ! half width of the crack between modules
@@ -103,61 +94,41 @@ external etsphit
       SmAfbWdh = 0.1664      ! SMD Al back first (last) rib half width
       SmetaWdh = 0.9806      ! Eta=0 strip notch half width
       Seta1Wdh = 0.7277      ! strip#1-75 half witdh
+      Netfirst = 75.         ! Number of strip in first part eta=0-0.5
       Seta2Wdh = 0.9398      ! strip#76-150 half witdh
+      Netsecon = 75.         ! Number of strip in second part eta=0.5-1.0
       Set12Wdh = 0.04064     ! half distance between strips in eta
       SphiWdh  = 0.6680      ! strip#(1-NPhistr) in phi direction half witdh
       SphidWdh = 0.07874     ! half distance between strips in phi
+      NPhistr  = 15          ! Number of the strip in phi direction
       NSmdAlw  = 30          ! Number SMD gaseus interval in tile
       Nsuper   = 2           ! number of readout superlayer
       Nsmd     = 5           ! SMD positioned after sandvich type layers EMC
       NsubLay  = {1,20}      ! number of layers in a superlayer
-      MaxModule= 60          ! max number of moudle
-      NetaT    = 20          ! Number of eta division for tower/preshower
-      Nsub     = 2           ! Number of sub division in phi for tower/preshower
-      NetaSMDp = 10          ! Number of eta division in for SMD phi plane
-      NPhistr  = 15          ! Number of the strip in phi direction
-      Netfirst = 75.         ! Number of strip in first part eta=0-0.5
-      Netsecon = 75.         ! Number of strip in second part eta=0.5-1.0
       Nmodule  = {60,60}     ! number of modules
       Shift    = {75,105}    ! starting azimuth of the first module   
    Endfill
-   USE    CALG
+*
+      USE    CALG
 *
 * ---------------------------------------------------------------------------
-*                          primary geometrical constant
+*                          geometrical constant
 *
       layer_width = calg_ScintThk + calg_AbsorThk+2.*calg_AbPapThk
       smd_width=2.*calg_g10SbThk+2.*calg_SmAlfThk+2.*calg_AbPapThk
-      smd_width1=2.*calg_g10SbThk+2.*calg_AbPapThk
-      smd_width2=smd_width1+calg_SmGasThk+calg_SmGasRad
-      smd_width3=smd_width1+2.*calg_SmAlfThk-calg_SmGasThk-calg_SmGasRad
-      R1=calg_Rmin+2.*calg_FrontThk
-      R2=0.0
+      Rmax=0.
       do i=1,nint(calg_Nsuper)
-        R2+=(calg_NsubLay(i)-i+1)*layer_width*2.0
-	RR(i)=R2 
+        Rmax+=(calg_NsubLay(i)-i+1)*layer_width*2+
+               (smd_width+calg_scintThk+2.*calg_AbPapThk)*2.*(i-1)
       enddo
-      R3=calg_nsmd*layer_width*2.0
-      R4=(smd_width+calg_scintThk+2.*calg_AbPapThk)*2.0
-      cut_radius=R1+R2+R4
-      Rmax=cut_radius+2.*(Calg_BackThk+calg_SpaceThk+Calg_CompThk+calg_AirThk)
+      Rmax+=calg_Rmin+2.*calg_FrontThk
+      cut_radius=Rmax
+      Rmax+=2.*(Calg_BackThk+calg_SpaceThk+Calg_CompThk+calg_AirThk)
       tan_theta  = tan(2*atan(exp(-calg_EtaCut)))
       cut_length = calg_Rmin/tan_theta
-      Hleng   = cut_radius/tan_theta  
-      nn      = max(calg_Nmodule(1),calg_Nmodule(2))
-      Deta    = 1.0/calg_NetaT
-      DphiMod = 360/calg_MaxModule
-      DphiT   = DphiMod/calg_Nsub
-      DphiTot = DphiMod*nn
-		
-      fill CALR                 ! barrel EMC radiuses
-	RMIN = R1               ! inner raduis of sensitive area
-	RPRS = R1+RR(1)/2.0     ! mean raduis of PRS
-	RSMD1= R1+R3+smd_width2 ! mean raduis of SMD
-	RSMD2= R1+R3+smd_width3 ! mean raduis of SMD
-	RMAX = cut_radius       ! outer raduis of sensitive area
-      Endfill
-      USE CALR
+      Hleng = cut_radius/tan_theta  
+      nn    = max(calg_Nmodule(1),calg_Nmodule(2))
+      dphi  = 6*nn
 *
       create and position CALB in CAVE
       prin1  calg_Version;            (' CALB geo. version    =',F7.1)
@@ -182,7 +153,7 @@ EndBlock
 * -----------------------------------------------------------------------------
 Block CHLV corresponds to double modules...
 *
-      shape     PCON  Phi1=calg_shift(ii) Dphi=DphiMod*calg_Nmodule(ii)  Nz=3,
+      shape     PCON  Phi1=calg_shift(ii) Dphi=6*calg_Nmodule(ii)  Nz=3,
                       zi  = { 0,          cut_length,  Hleng},
                       rmn = { Calg_rmin,  Calg_Rmin,   cut_radius},
                       rmx = { Rmax,       Rmax,        Rmax };
@@ -235,7 +206,7 @@ Block CSUP  is a super layer with few layers inside
       Component O  A=16.     Z=8.    W=5./21.
       Mixture   Cellulose Dens=0.35 Isvol=1       
       attribute CSUP  seen=0   colo=1
-      shape     PCON  Phi1=-3  Dphi=DphiMod  Nz=3,
+      shape     PCON  Phi1=-3  Dphi=6  Nz=3,
                       zi ={0, current_depth/tan_theta, future_depth/tan_theta},
                       rmn={ current_depth,    current_depth,    future_depth },
                       rmx={ future_depth,     future_depth,     future_depth };
@@ -273,7 +244,7 @@ Block CPBP
       Medium    Lead_emc
       Attribute CPBP seen=1  colo=1
       SHAPE  BOX  dx = calg_AbsorThk,
-                  dy = current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd,
+                  dy = current_depth*tan(TwoPi/120.)-calg_CrackWd,
                   dz = current_depth/tan_theta/2
       Call CALBPAR(ag_imed,'ABSORBER')
 
@@ -285,7 +256,7 @@ Block CSCI a scintillator layer.
       Medium    sens_sci
       attribute CSCI  seen=1  colo=4
       Shape     BOX   dx=calg_ScintThk,  
-                      dy = current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd,
+                      dy = current_depth*tan(TwoPi/120.)-calg_CrackWd,
                       dz = current_depth/tan_theta/2
       Call CALBPAR(ag_imed,'ABSORBER')
 
@@ -294,7 +265,7 @@ Block CSCI a scintillator layer.
       Call GSTPAR (ag_imed,'BIRK2',RKB2sc)
       Call GSTPAR (ag_imed,'BIRK3',RKB3sc)
 *
-      HITS   CSUP  eta:Deta:(0,1)        y:1:(-13,13)       Birk:0:(0,10)
+      HITS   CSUP  eta:0.05:(0,1)        y:1:(-13,13)       Birk:0:(0,10)
 *                  xx:16:H(-300,300)     yy:16:(-300,300)   zz:16:(-350,350),
 *                  px:16:(-100,100)      py:16:(-100,100)   pz:16:(-100,100),
 *                  Slen:16:(0,1.e4)      Tof:16:(0,1.e-6)   Step:16:(0,100),
@@ -307,7 +278,7 @@ Block CBTW  is the  Module Front Back Plate
       Material  EAluminium Isvol=1
       Medium Al_emc 
       attribute CBTW  seen=1  colo=6
-      Shape     BOX   dy = current_depth*tan(TwoPi/360*DphiT)-calg_CrackWd,
+      Shape     BOX   dy = current_depth*tan(TwoPi/120.)-calg_CrackWd,
                       dz = current_depth/tan_theta/2
       Call CALBPAR(ag_imed,'ABSORBER')
 

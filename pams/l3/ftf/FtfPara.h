@@ -6,20 +6,13 @@
 //:             28oct1996 version 1.00
 //:              7dec1998 ppy variable names changed to C++ style
 //:              3jun1999 ppy add fillTracks flag
-//:             11aug1999 ppy add vertexConstrainedFit variable
-//:             23aug1999 ppy add ROOT option
+//:             11aug1999 ppy add vertexContrainedFit variable
 //:
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
 //: CLASS:       FtfPara
 //: AUTHOR:      ppy - Pablo Yepes, yepes@physics.rice.edu
 //:>------------------------------------------------------------------
-#ifdef SL3ROOT
-#include "Rtypes.h"
-#else
-#define ClassDef(a,b)
-#endif
-
 //
 //           fft control parameters                          
 //
@@ -100,7 +93,6 @@
        int       hitDebug ;
        int       debugLevel ;
 #endif
-   ClassDef(FtfPara,1)
    } ;
 #endif
 

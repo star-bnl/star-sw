@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.cxx,v 1.11 1999/10/04 15:38:57 lisa Exp $
+ * $Id: StHbtManager.cxx,v 1.12 1999/10/15 01:57:29 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,23 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.cxx,v $
+ * Revision 1.12  1999/10/15 01:57:29  lisa
+ * Important enhancement of StHbtMaker - implement Franks CutMonitors
+ * ----------------------------------------------------------
+ * This means 3 new files in Infrastructure area (CutMonitor),
+ * several specific CutMonitor classes in the Cut area
+ * and a new base class in the Base area (StHbtCutMonitor).
+ * This means also changing all Cut Base class header files from .hh to .h
+ * so we have access to CutMonitor methods from Cint command line.
+ * This last means
+ * 1) files which include these header files are slightly modified
+ * 2) a side benefit: the TrackCuts and V0Cuts no longer need
+ * a SetMass() implementation in each Cut class, which was stupid.
+ * Also:
+ * -----
+ * Include Franks StHbtAssociationReader
+ * ** None of these changes should affect any user **
+ *
  * Revision 1.11  1999/10/04 15:38:57  lisa
  * include Franks new accessor methods StHbtAnalysis::CorrFctn and StHbtManager::Analysis as well as McEvent example macro
  *
@@ -50,8 +67,8 @@
 
 #include "StHbtMaker/Infrastructure/StHbtManager.h"
 #include "StHbtMaker/Infrastructure/StHbtParticleCollection.hh"
-#include "StHbtMaker/Base/StHbtTrackCut.hh"
-#include "StHbtMaker/Base/StHbtV0Cut.hh"
+#include "StHbtMaker/Base/StHbtTrackCut.h"
+#include "StHbtMaker/Base/StHbtV0Cut.h"
 #include <cstdio>
 
 ClassImp(StHbtManager)
@@ -72,8 +89,10 @@ void FillHbtParticleCollection(StHbtParticleCut*         partCut,
       StHbtTrackIterator startLoop = hbtEvent->TrackCollection()->begin();
       StHbtTrackIterator endLoop   = hbtEvent->TrackCollection()->end();
       for (pIter=startLoop;pIter!=endLoop;pIter++){
-	pParticle = *pIter;    
-	if (pCut->Pass(pParticle)){
+	pParticle = *pIter;
+	bool tmpPassParticle = pCut->Pass(pParticle);
+	pCut->FillCutMonitor(pParticle, tmpPassParticle);
+	if (tmpPassParticle){
 	  StHbtParticle* particle = new StHbtParticle(pParticle,pCut->Mass());
 	  partCollection->push_back(particle);
 	}
@@ -89,8 +108,10 @@ void FillHbtParticleCollection(StHbtParticleCut*         partCut,
       StHbtV0Iterator endLoop   = hbtEvent->V0Collection()->end();
       // this following "for" loop is identical to the one above, but because of scoping, I can's see how to avoid repitition...
       for (pIter=startLoop;pIter!=endLoop;pIter++){
-	pParticle = *pIter;    
-	if (pCut->Pass(pParticle)){
+	pParticle = *pIter; 
+	bool tmpPassV0 = pCut->Pass(pParticle);
+	pCut->FillCutMonitor(pParticle,tmpPassV0);
+	if (tmpPassV0){
 	  StHbtParticle* particle = new StHbtParticle(pParticle,partCut->Mass());
 	  partCollection->push_back(particle);
 	}
@@ -182,13 +203,13 @@ StHbtAnalysis* StHbtManager::Analysis( int n ){  // return pointer to n-th analy
 }
  //____________________________
 int StHbtManager::ProcessEvent(){
-
+  
   cout << "StHbtManager::ProcessEvent" << endl;
   // NOTE - this ReturnHbtEvent makes a *new* StHbtEvent - delete it when done!
   StHbtEvent* currentHbtEvent = mEventReader->ReturnHbtEvent();
-
+  
   cout << "Event reader has returned control to manager" << endl;
-
+  
   // if no HbtEvent is returned, then we abort processing.
   // the question is now: do we try again next time (i.e. there may be an HbtEvent next time)
   // or are we at EOF or something?  If Reader says Status=0, then that means try again later.
@@ -197,15 +218,17 @@ int StHbtManager::ProcessEvent(){
     cout << "StHbtManager::ProcessEvent() - Reader::ReturnHbtEvent() has returned null pointer\n";
     return mEventReader->Status();
   }
-
+  
   // shall we write a microDST? - added 3sep99
   if (mEventWriter) mEventWriter->WriteHbtEvent(currentHbtEvent);
-
+  
   StHbtAnalysisIterator AnalysisIter;
   StHbtAnalysis* currentAnalysis;
   for (AnalysisIter=mAnalysisCollection->begin();AnalysisIter!=mAnalysisCollection->end();AnalysisIter++){
     currentAnalysis = *AnalysisIter;
-    if (currentAnalysis->EventCut()->Pass(currentHbtEvent)){
+    bool tmpPassEvent = currentAnalysis->EventCut()->Pass(currentHbtEvent);
+    currentAnalysis->EventCut()->FillCutMonitor(currentHbtEvent, tmpPassEvent);
+    if (tmpPassEvent) {
       cout << "StHbtManager::ProcessEvent() - Event has passed cut - build picoEvent from " <<
 	currentHbtEvent->TrackCollection()->size() << " tracks in TrackCollection" << endl;
       // OK, analysis likes the event-- build a pico event from it, using tracks the analysis likes...
@@ -216,15 +239,15 @@ int StHbtManager::ProcessEvent(){
       cout <<"StHbtManager::ProcessEvent - #particles in First, Second Collections: " <<
 	picoEvent->FirstParticleCollection()->size() << " " <<
 	picoEvent->SecondParticleCollection()->size() << endl;
-
+      
       // OK, pico event is built
       // make real pairs...
-
+      
       // Fabrice points out that we do not need to keep creating/deleting pairs all the time
       // We only ever need ONE pair, and we can just keep changing internal pointers
       // this should help speed things up
       StHbtPair* ThePair = new StHbtPair;
-
+      
       StHbtParticleIterator PartIter1;
       StHbtParticleIterator PartIter2;
       StHbtCorrFctnIterator CorrFctnIter;
@@ -248,6 +271,11 @@ int StHbtManager::ProcessEvent(){
 	ThePair->SetTrack1(*PartIter1);
 	for (PartIter2 = StartInnerLoop; PartIter2!=EndInnerLoop;PartIter2++){
 	  ThePair->SetTrack2(*PartIter2);
+	  // The following lines have to be uncommented if you want pairCutMonitors
+	  // they are not in for speed reasons
+	  // bool tmpPassPair = currentAnalysis->PairCut()->Pass(ThePair);
+          // currentAnalysis->PairCut()->FillCutMonitor(ThePair, tmpPassPair);
+	  // if ( tmpPassPair ) {
 	  if (currentAnalysis->PairCut()->Pass(ThePair)){
 	    for (CorrFctnIter=currentAnalysis->CorrFctnCollection()->begin();
 		 CorrFctnIter!=currentAnalysis->CorrFctnCollection()->end();CorrFctnIter++){
@@ -259,7 +287,7 @@ int StHbtManager::ProcessEvent(){
       }      // loop over first particle
       
       // ok, now make mixed pairs, if the Mixing buffer is full
-
+      
       cout << "StHbtManager::ProcessEvent() - reals done" << endl;
       if (currentAnalysis->MixingBufferFull()){
 	cout << "Mixing Buffer is full - lets rock and roll" << endl;

@@ -2,11 +2,8 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.13 1999/09/29 20:29:09 wdeng Exp $
+// $Id: StV0Maker.cxx,v 1.12 1999/09/16 13:53:08 fisyak Exp $
 // $Log: StV0Maker.cxx,v $
-// Revision 1.13  1999/09/29 20:29:09  wdeng
-// Accommodate dst_track and dst_vertex change
-//
 // Revision 1.12  1999/09/16 13:53:08  fisyak
 // Fix typo in ev0par2 (thanks Matt)
 //
@@ -42,8 +39,6 @@
 
 #include "TMath.h"
 #include "StV0Maker.h"
-
-#include "StVertexId.h"
 
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
@@ -160,12 +155,12 @@ Int_t StV0Maker::Make(){
   
   
   dst_vertex_st *vrtx = vertex->GetTable();
-  if( vrtx->vtx_id != kEventVtxId || vrtx->iflag != 1){
+  if( vrtx->vtx_id != 1 || vrtx->iflag != 1){
     for( Int_t no_rows=0; no_rows<vertex->GetNRows(); no_rows++,vrtx++){
-      if( vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1 ) break;
+      if( vrtx->vtx_id == 1 && vrtx->iflag == 1 ) break;
     }
   }
-  if (vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1) {
+  if (vrtx->vtx_id == 1 && vrtx->iflag == 1) {
     // ev0
     if(Debug()) gMessMgr->Info() << "Calling ev0..." << endm;
     Int_t v0_limit = globtrk->GetNRows();

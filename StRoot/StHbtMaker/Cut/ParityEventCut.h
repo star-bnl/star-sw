@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: ParityEventCut.h,v 1.1 1999/09/01 19:04:52 lisa Exp $
+ * $Id: ParityEventCut.h,v 1.2 1999/10/15 01:56:55 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -19,7 +19,7 @@
 #include "StMaker.h"
 #endif
 
-#include "StHbtMaker/Base/StHbtEventCut.hh"
+#include "StHbtMaker/Base/StHbtEventCut.h"
 
 class ParityEventCut : public StHbtEventCut {
 

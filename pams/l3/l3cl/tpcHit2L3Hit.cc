@@ -5,6 +5,7 @@
 **:             7/07/99  Replace SL3HIT with SL3BUFFER 
 **:--------------------------------------------------------------------*/
 
+#include "t2lConstants.h"
 #include "t2l.h"
 #include "l3Point.h"
 #include "tpcHit2L3Hit.h"

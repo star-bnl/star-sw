@@ -221,7 +221,7 @@ void StBranch::Close(const char *)
 { 
   if (!fIOMode) return;
   if (!fTFile) 	return;
-  if (strcmp(".none",GetFile())) return;
+  if (strcmp(".none",GetFile())==0) return;
   TFile *tf = fTFile;
   fTFile = 0;
   TString ts(tf->GetTitle());

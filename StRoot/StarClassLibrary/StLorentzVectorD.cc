@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StLorentzVectorD.cc,v 1.1 1999/01/30 03:59:02 fisyak Exp $
+ * $Id: StLorentzVectorD.cc,v 1.3 1999/10/15 21:55:09 didenko Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StLorentzVectorD.cc,v $
- * Revision 1.1  1999/01/30 03:59:02  fisyak
- * Root Version of StarClassLibrary
+ * Revision 1.3  1999/10/15 21:55:09  didenko
+ * fixed type of x,y,z,t T-> double
+ *
+ * Revision 1.3  1999/10/15 21:55:09  didenko
+ * fixed type of x,y,z,t T-> double
  *
  * Revision 1.2  1999/10/15 15:56:30  ullrich
  * Changed output format in operator<<, added operator>>
@@ -105,7 +108,18 @@ operator* (const StLorentzVectorD& v1, const StLorentzVectorF& v2)
 {
     return v1.t()*v2.t() - v1.vect()*v2.vect();
 }
-  return os << '(' << v.vect() << ',' << v.t() << ')';
+
+ostream& operator<< (ostream& os, const StLorentzVectorD& v)
+{
+    return os << v.vect() << "\t\t" << v.t();
+}
+
+istream&  operator>>(istream& is, StLorentzVectorD& v)
+{
+    double  x, y, z, t;
+    is >> x >> y >> z >> t;
+    v.setX(x);
+    v.setY(y);
       R__b << mX4;
    }
 

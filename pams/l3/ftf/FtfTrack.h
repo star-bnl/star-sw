@@ -5,12 +5,6 @@
 #include "FtfHit.h"
 #include "FtfPara.h"
 #include "FtfVolume.h"
-#ifdef SL3ROOT
-#include "Rtypes.h"
-#else
-#define ClassDef(a,b)
-#endif
-
 
 int const USE_SEGMENT= 1 ;
 int const USE_FOLLOW = 2 ;
@@ -43,15 +37,15 @@ public:
    FtfTrack *nxatrk  ;      
         
 #ifdef DEBUG
-   void debugAsk                 ( ) ;
-   void debugDeleteCandidate     ( ) ;
-   void debugFill                ( ) ;
-   void debugFollowCandidate     ( FtfHit *candidate_hit ) ;
-   void debugFollowSuccess       ( double dxy, double dsz, double lchi2_xy,
-                                   double lchi2_sz, double chi2_min,
-                                   FtfHit *candidate_hit ) ;
-   void debugInVolume            ( FtfHit *base_hit, FtfHit *current_hit ) ;
-   void debugNew                 ( ) ;
+   void Debug_Ask                  ( ) ;
+   void Debug_Delete_Candidate     ( ) ;
+   void Debug_Fill                 ( ) ;
+   void Debug_Follow_Candidate     ( FtfHit *candidate_hit ) ;
+   void Debug_Follow_Success       ( float dxy, float dsz, float lchi2_xy,
+                                     float lchi2_sz, float chi2_min,
+                                     FtfHit *candidate_hit ) ;
+   void Debug_in_Volume            ( FtfHit *base_hit, FtfHit *current_hit ) ;
+   void Debug_New                  ( ) ;
 #endif
 		
    float   lastXyAngle ;    // Angle in the xy plane of line connecting to last hits        
@@ -73,10 +67,9 @@ public:
    vfit    ddXy, a1Xy, a2Xy ;    /*fit par in xy */
    vfit    ddSz, a1Sz, a2Sz ;    /*fit par in sz */
    float   trackLength ;
-//private:
+private:
    inline virtual   void nextHit (){ currentHit = currentHit->nextTrackHit ; } ;
 	   
-   ClassDef(FtfTrack,1)
    } ;
 #endif
 

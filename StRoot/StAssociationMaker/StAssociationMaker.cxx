@@ -1,15 +1,27 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.10 1999/10/01 14:08:54 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.12 1999/10/18 16:11:50 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.12  1999/10/18 16:11:50  calderon
+ * Frank found 2 leaks that these changes will correct:
+ * -Delete the TrackPairInfos in the Clear() method
+ * -Correct the sub detector destructors to delete all
+ *  instances to StLocalHit.
+ *
+ * -Correct the sub detector destructors to delete all
+ *  instances to StLocalHit.
+ *
+ * Revision 1.11  1999/10/14 01:18:44  calderon
+ * -Delete StTrackPairInfo objects owned by trackMap in
+ *  StAssociationMaker destructor.
+ * -Make sure there is a closestHit for filling the
+ *  mLocalHitResolution histogram.
+ *
  * Revision 1.10  1999/10/01 14:08:54  calderon
  * Added Local Hit resolution Histogram. It is made by default
  * without any requirement of association, to serve
  * as a diagnostic.
  * Before building track multimap, check the size of the
- * tpc hit map.  If it is too small, print out a warning
- * and exit.
- *
  * tpc hit map.  If it is too small, print out a warning
  * and exit.
  *
@@ -170,8 +182,19 @@ StAssociationMaker::StAssociationMaker(const char *name, const char *title):StMa
 
 //_________________________________________________
 StAssociationMaker::~StAssociationMaker()
+
+    // Delete TpcHitMap 
+    mTpcHitMap->clear();
     SafeDelete(mTpcHitMap);
+    cout << "Deleted Hit Map" << endl;
+    // Delete the TrackPairInfos
+    for (trackMapIter i=mTrackMap->begin(); i!=mTrackMap->end(); i++){
+	delete (*i).second;
+    }
+    // Delete the TrackMap
+    mTrackMap->clear();
     SafeDelete(mTrackMap);
+    cout << "Deleted Track Map" << endl;
     //SafeDelete(mLocalHitResolution);
 	SafeDelete(mMcXiMap);
 	cout << "Deleted M.C. Xi Map" << endl;
@@ -181,11 +204,23 @@ StAssociationMaker::~StAssociationMaker()
 //_____________________________________________________________________________
 
     cout << "StAssociationMaker::Clear *** " << endl;
+void StAssociationMaker::Clear(const char*)
+{
+    mTpcHitMap->clear();
+    //    SafeDelete(mTpcHitMap);
     delete mTpcHitMap;
     mTpcHitMap = 0;
+    cout << "Deleted Hit Map" << endl;
+
+    // Delete the TrackPairInfos
+    for (trackMapIter i=mTrackMap->begin(); i!=mTrackMap->end(); i++){
+	delete (*i).second;
+    }
+    // Delete the TrackMap
+    mTrackMap->clear();
     delete mTrackMap;
     mTrackMap = 0;
-    
+    cout << "Deleted Track Map" << endl;
 	SafeDelete(mMcXiMap);
 	cout << "Deleted M.C. Xi Map" << endl;
     }
@@ -292,17 +327,21 @@ Int_t StAssociationMaker::Finish()
 	
 	for (unsigned int iPadrow=0; iPadrow<rTpcLocal->device(iSector)->numOfRows(); iPadrow++) {
 	    
-	    
+	     iPadrow<tpcSectHitColl->numberOfPadrows();
 	    for (unsigned int iHit=0; iHit<rTpcLocal->device(iSector)->row(iPadrow)->nHits(); iHit++){
-		
+	    for (unsigned int iHit=0;
 		recHit = (StTpcLocalHit_recon*) rTpcLocal->device(iSector)->row(iPadrow)->hit(iHit);
-		float distance=200;
+		float distance;
 		StTpcLocalHit_mc* closestHit = 0;
 		for (unsigned int jHit=0; jHit<mTpcLocal->device(iSector)->row(iPadrow)->nHits(); jHit++){
-		    
+		for (unsigned int jHit=0;
 		    mcHit = (StTpcLocalHit_mc*) mTpcLocal->device(iSector)->row(iPadrow)->hit(jHit);
 		    float xDiff = mcHit->localX()-recHit->localX();
 		    float zDiff = mcHit->globalZ()-recHit->globalZ();
+		    float xDiff = mcTpcHit->position().x()-rcTpcHit->position().x();
+			distance=xDiff*xDiff+zDiff*zDiff;
+			closestHit = mcHit;
+		    if (jHit==0) {
 		    if (xDiff*xDiff+zDiff*zDiff<distance) {
 			distance = xDiff*xDiff+zDiff*zDiff;
 			closestHit = mcHit;
@@ -310,12 +349,11 @@ Int_t StAssociationMaker::Finish()
 			tpcHitDistance = xDiff*xDiff+zDiff*zDiff;
 		    if ( (StLocalHit) *recHit == (StLocalHit) *mcHit) {
 			// Make Associations  Use map,
-			
 			mTpcHitMap->insert(tpcHitMapValType (recHit->globalHitPtr(), mcHit->globalHitPtr()) );
 			// Make Associations  Use maps,
 			mRcTpcHitMap->insert(rcTpcHitMapValType (rcTpcHit, mcTpcHit) );
 			mMcTpcHitMap->insert(mcTpcHitMapValType (mcTpcHit, rcTpcHit) );
-		mLocalHitResolution->Fill(closestHit->localX()-recHit->localX(), closestHit->globalZ()-recHit->globalZ());
+		if (closestHit) mLocalHitResolution->Fill(closestHit->localX()-recHit->localX(), closestHit->globalZ()-recHit->globalZ());
 						 rcTpcHit->position().x(),
 						 closestTpcHit->position().z()-
 						 rcTpcHit->position().z() );
@@ -437,8 +475,10 @@ Int_t StAssociationMaker::Finish()
     // Clear the candidate vector
     
     candidates.clear();
+    // Delete SubDetectors
     delete rTpcLocal;
     delete mTpcLocal;
+    cout << "Deleted Auxiliary SubDetectors" << endl;
     
 	}
     }

@@ -1,21 +1,20 @@
 /* evr_am.idl
 * Module: evr_am
 * Description: Event vertex reconstruction
-* Modified in July 1999 for updated evr_am module which does not
-* use the egr_egrpar table.
 */
 
 #include "PAM.idl"
 #include "evr_evrpar.idl"
+#include "egr_egrpar.idl"
 #include "dst_track.idl"
 #include "dst_vertex.idl"
 
 interface evr_am : amiModule {
         STAFCV_T call
                 ( in       evr_evrpar      evrpar
+                , in       egr_egrpar      egrpar
                 , inout    dst_track       globtrk 
                 , inout    dst_vertex      privert
         );
 };
-/* Last mod. for evr_am: $Date: 1999/09/29 16:11:25 $  */
-
+/* Last mod. for evr_am: $Date: 1998/12/10 17:09:20 $  */

@@ -161,16 +161,15 @@ C*- get tracks from DST_TRACK table
       do ihit = 1, dst_track_h.nok       ! Loop over input tracks
          trk_qual=(dst_track(ihit).chisq(1)+
      +             dst_track(ihit).chisq(2))/2.0
+     +            /float(dst_track(ihit).ndegf)
          if(trk_qual.le.trk_qual_cut)then
             trkchar = float(dst_track(ihit).icharge)
             pt      = 1.0/dst_track(ihit).invpt
             pz      = pt*dst_track(ihit).tanl
             p_tot   = sqrt(pt**2 + pz**2)
             crad    = pt/abs(trkchar*C_D_CURVATURE*b_field)
-            x_strt  = dst_track(ihit).r0
-     +           *cos(dst_track(ihit).phi0*C_RAD_PER_DEG)
-            y_strt  = dst_track(ihit).r0
-     +           *sin(dst_track(ihit).phi0*C_RAD_PER_DEG)
+            x_strt  = dst_track(ihit).x0
+            y_strt  = dst_track(ihit).y0
             cap_phi0= dst_track(ihit).psi*C_RAD_PER_DEG+trkchar*C_PI_2
             xc      = x_strt - crad*cos(cap_phi0)
             yc      = y_strt - crad*sin(cap_phi0)
@@ -260,9 +259,11 @@ c*-Subtract expected energy deposit from charged track
 
 C*-Project Tracks back to the primary Vertex. Calculate Energy
 C*-of charged tracks and load energy into eta-phi grid at Vertex
-            trak(1)  = dst_track(ihit).r0
-            trak(2)  = trak(1)*dst_track(ihit).phi0   
-     +           *C_RAD_PER_DEG !r0*phi0
+            trak(1)  = sqrt(dst_track(ihit).x0**2
+     +                     +dst_track(ihit).y0**2)    !r0
+            trak(2)  = trak(1)
+     +               *ATAN2(dst_track(ihit).x0,dst_track(ihit).y0)
+     +               *C_RAD_PER_DEG                      !r0*phi0
             trak(3)  = dst_track(ihit).z0 !z0
             trak(4)  = dst_track(ihit).psi*C_RAD_PER_DEG !psi
             trak(5)  = dst_track(ihit).tanl !tanl

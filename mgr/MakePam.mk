@@ -1,5 +1,11 @@
-# $Id: MakePam.mk,v 1.125 1999/10/12 14:05:44 fine Exp $
+# $Id: MakePam.mk,v 1.127 1999/10/18 19:16:49 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.127  1999/10/18 19:16:49  fisyak
+# Remove run examples doc local hold CVS from list of source directories
+#
+# Revision 1.126  1999/10/12 21:56:07  fisyak
+# option -H in stic does work anymore, but it is not needed
+#
 # Revision 1.125  1999/10/12 14:05:44  fine
 # assert for St_Table::operator[] fixed
 #
@@ -270,13 +276,14 @@ FILES_G  := $(wildcard $(SRC_DIR)/*.g $(SRC_DIR)/*/*.g)
 #_________________________________________________________________________
 SUFFIXES := .c .cc .C .cxx .f .F .g .h .hh .hpp .inc .idl
 sources :=$(strip $(sort $(dir $(foreach s, $(SUFFIXES), $(wildcard $(SRC_DIR)/*$(s) $(SRC_DIR)/*/*$(s) $(SRC_DIR)/*/*/*$(s))))))
-ifeq (,$(sources))
+SRC_DIRS:= $(subst /TAIL, ,$(addsuffix TAIL, $(sources)))
+SRC_DIRS :=$(strip $(filter-out $(addprefix $(SRC_DIR)/,run examples doc local hold CVS), $(SRC_DIRS)))
+ifeq (,$(SRC_DIRS))
   all:
 	@echo Nothing to do for package $(PKG), no source files
   depend:
 	@echo Nothing to do for package $(PKG), no source files
 else
-SRC_DIRS:= $(subst /TAIL, ,$(addsuffix TAIL, $(sources)))
 INC_NAMES  := include StRoot
 INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES))))
 ifneq ($(ROOT_DIR),$(STAR))
@@ -503,10 +510,10 @@ include $(FILES_D)
 #--------  idm, idl --------
   ifneq (,$(FILES_ALL_TAB))
 $(FILES_TAH) : $(GEN_INC)/%.h : %.idl
-	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -H -q $(STEM).idl; \
+	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -q $(STEM).idl; \
         $(CP) $(STEM).h $(GEN_INC)/$(STEM).h
 $(FILES_TAI) : $(GEN_INC)/%.inc : %.idl
-	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -H -q $(STEM).idl; \
+	$(CP) $(1ST_DEPS) $(GEN_TMP)/ ; cd $(GEN_TMP); $(STIC) -q $(STEM).idl; \
         $(CP) $(STEM).inc $(GEN_INC)/$(STEM).inc
     ifndef NOROOT
 #------------------------------------------- ---------------------------------

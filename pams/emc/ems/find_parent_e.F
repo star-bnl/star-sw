@@ -23,17 +23,16 @@
       iparvtx=g2t_track(itrk).start_vertex_p
  100  Continue
       k  = k + 1
-C ! parent has geant ID or ! parent has generator ID
       parent_vert_rho = MAX(
-     >     abs(g2t_vertex(iparvtx).ge_x(3)), 
-     >     abs(g2t_vertex(iparvtx).eg_x(3))) 
+     1     abs(g2t_vertex(iparvtx).ge_x(3)), ! parent has geant ID
+     1     abs(g2t_vertex(iparvtx).eg_x(3))) ! parent has generator ID
       if(parent_vert_rho.gt.ems_control(1).eemc_inner_z)then
          if(g2t_vertex(iparvtx).n_parent.gt.0)then
             ipartrk  = g2t_vertex(iparvtx).parent_p
             iparvtx  = g2t_track(ipartrk).start_vertex_p 
             if(k.gt.50)then
                write(*,*)
-     >           '***find_parent_e: too many parent vertices!! ',k,itrk
+     1           '***find_parent_e: too many parent vertices!! ',k,itrk
             end if
             goto 100
          else

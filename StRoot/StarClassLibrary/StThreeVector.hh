@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVector.hh,v 1.4 1999/06/04 18:00:05 ullrich Exp $
+ * $Id: StThreeVector.hh,v 1.5 1999/10/15 15:46:54 ullrich Exp $
  *
  * Author: Brian Lasiuk, Thomas Ullrich, April 1998
  ***************************************************************************
@@ -15,10 +15,8 @@
  ***************************************************************************
  *
  * $Log: StThreeVector.hh,v $
- * Revision 1.4  1999/06/04 18:00:05  ullrich
- * Added new constructor which takes C-style array as argument.
- * New operators operator() and operator[] which can be used
- * as lvalues.
+ * Revision 1.5  1999/10/15 15:46:54  ullrich
+ * Changed output format in operator<<
  *
  * Revision 1.5  1999/10/15 15:46:54  ullrich
  * Changed output format in operator<<
@@ -728,7 +726,7 @@ inline StThreeVector<T> operator/ (const StThreeVector<T>& v, X c)
     return StThreeVector<T>(v) /= c;
 }
 
-    return os << '(' << v.x() << ", " << v.y() << ", " << v.z() << ')';
+template<class T>
 ostream&  operator<<(ostream& os, const StThreeVector<T>& v)
 {
     return os << v.x() << '\t' << v.y() << '\t' << v.z();

@@ -4,13 +4,12 @@
 **:             7/07/99  Install in the library
 **:                      For the moment only 6 bytes per cluster even though
 **:                      DAQ documentation calls for 8
-**:            10/7/99   replace t2lConstants with sl3GeoConstants
 **:--------------------------------------------------------------------*/
 #ifndef L3POINT
 #define L3POINT
 #include <math.h>
 #include <stdio.h>
-#include "sl3GeoConstants.h"
+#include "t2lConstants.h"
 
 typedef float mword ;
 
@@ -79,8 +78,8 @@ public:
 //
       int is = sector - 1 ;
       
-      float xx = SectorSin[is] * x - SectorCos[is] * y;
-      float yy = SectorSin[is] * y + SectorCos[is] * x;
+      float xx = SectorSinus[is] * x - SectorCosinus[is] * y;
+      float yy = SectorSinus[is] * y + SectorCosinus[is] * x;
       float zz = (float)fabs(z);
 
       l3Point p(row,xx,yy,zz);
@@ -112,8 +111,8 @@ public:
       int is = sector - 1 ;
       short sgn = 1 ;
 
-      float xx = SectorSin[is] * x + SectorCos[is] * y;
-      float yy = SectorSin[is] * y - SectorCos[is] * x;
+      float xx = SectorSinus[is] * x + SectorCosinus[is] * y;
+      float yy = SectorSinus[is] * y - SectorCosinus[is] * x;
       if ( sector > 12 ) sgn = 1 ;
       float zz = sgn*z;
 
