@@ -3,12 +3,12 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) MSG(*) !Character string to be output.
 	INTEGER LINES !Number of lines in MSG to output.
 	INTEGER LUN !Logical unit on which to output (terminal).
 
-*  Functional desctiption:
+*  Description:
 *	Output a one-or-more-line message on a terminal with
 *	machine-independent carriage-control on a terminal.
 
@@ -26,11 +26,11 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) MSG !Character string to be output.
 	INTEGER LUN !Logical unit on which to output (terminal).
 
-*  Functional desctiption:
+*  Description:
 *	Output a one-line message without a following carriage return
 *	on a terminal.
 
@@ -44,11 +44,11 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) MSG !Character string to be output.
 	INTEGER LUN !Logical unit on which to output (terminal).
 
-*  Functional desctiption:
+*  Description:
 *	Output a one-line message without a preceding line feed
 *	on a terminal.
 
@@ -68,11 +68,11 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) MSG !Character string to be output.
 	INTEGER LUN !Logical unit on which to output (terminal).
 
-*  Functional desctiption:
+*  Description:
 *	Output a one-line message without a preceding line feed
 *	or a following carriage-return on a terminal.
 

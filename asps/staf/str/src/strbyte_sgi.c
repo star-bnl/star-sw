@@ -49,20 +49,21 @@ FILE *fpr, *fpw;
 
 
 /*	Define procedures ("c-callable-only functions"):     */
-strfc(
-/*
-  Inputs:
-*/
+void strfc(
+/*  Inputs:   */
 
 	 char *ftext        /*  Text-string, from a FORTRAN routine.          */
 	,int ftext_length   /*  Text-string-length -- from a FORTRAN routine. */
+    
+/*  Outputs:  */
+
 	,char *ctext        /*  Text-string, to a C routine.                  */
 	,int ctext_length   /*  Text-string-length -- to a C routine.         */
 	,int *ctext_lnb     /*  Last non-blank in resulting ctext.            */
 
 	        )
 
-/*  Functional Description:
+/*  Description:
 
 	Take a text-string, defined in a FORTRAN routine and passed into
 a C routine, and copy it into a text-string defined in that C routine.
@@ -72,13 +73,27 @@ A null is appended to the string.
 {
 	static int length;
 
+/*	Check for nonsense:    */
+	if ( ftext_length < 1 )
+	{
+	  printf("strfc-E1 FORTRAN text length: [%d] is nonsense.\n", ftext_length );
+	  *ctext_lnb=0;
+	  return;
+	}
+
+	if ( ctext_length < 1 )
+	{
+	  printf("strfc-E2 C text length: [%d] is nonsense.\n", ctext_length );
+	  *ctext_lnb=0;
+	  return;
+	}
 
 /*	Find the end of the specified text (this is a FORTRAN routine!!): */
 	strend_( ftext, &length, ftext_length );
 
 	if (length>(ctext_length-1))   /*  Make sure the given FORTRAN text isn't too long:  */
 	{
-	  printf("strfc-E0 FORTRAN text: [%s] is too long.\n", ftext);
+	  printf("strfc-E3 FORTRAN text: [%s] is too long.\n", ftext);
 	  *ctext_lnb=0;
 	  return;
 	}
@@ -148,7 +163,7 @@ int strbyte_openr_(
 
 	        )
 
-/*  Functional Description:
+/*  Description:
 
 	Open the old file for reading, named in <filename>, in byte-stream mode.    */
 
@@ -208,7 +223,7 @@ int strbyte_openw_(
 
 	       )
 
-/*  Functional Description:
+/*  Description:
 
 	Open the new file for writing, named in <filename>, in byte-stream mode.    */
 {

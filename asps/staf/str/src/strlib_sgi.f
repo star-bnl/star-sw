@@ -13,6 +13,10 @@
 	
 	RETURN
 	END
+
+
+
+
 
 	SUBROUTINE STRCPUQ(TCPU) !Quad (64-bit) version.
 	INTEGER TCPU(2)
@@ -27,6 +31,10 @@
 	
 	RETURN
 	END
+
+
+
+
 
 	SUBROUTINE STRCPU0
 *  Brief Description: "Initialize" CPU elapsed time counter.
@@ -37,6 +45,10 @@
 	NATCPU_T0=MCLOCK()
 	RETURN
 	END
+
+
+
+
 
 	INTEGER FUNCTION STRCPUTPS()
 
@@ -50,6 +62,10 @@
 
 	RETURN
 	END
+
+
+
+
 
 	SUBROUTINE STRDATE(YEAR,MONTH,DAY)
 
@@ -112,6 +128,10 @@
 
 	RETURN
 	END
+
+
+
+
 
 	SUBROUTINE STRDEC_ENDIAN(I32)
 
@@ -127,6 +147,10 @@
 
 	RETURN
 	END
+
+
+
+
 
 	SUBROUTINE STRDEC_ENDIAN_BYTE(I32)
 
@@ -160,6 +184,10 @@
 
 	RETURN
 	END
+
+
+
+
 
 	SUBROUTINE STRDEC_ENDIAN_BYTES(Nwords,Block)
 
@@ -202,6 +230,10 @@
 
 	RETURN
 	END
+
+
+
+
 
 	SUBROUTINE STRDEC_ENDIAN_HALF(I32)
 
@@ -227,6 +259,10 @@
 
 	RETURN
 	END
+
+
+
+
 
 	INTEGER FUNCTION STRDEC_IBITS(DATA,BIT0,BITS)
 
@@ -241,6 +277,10 @@
 
 	RETURN
 	END
+
+
+
+
 
 	SUBROUTINE STRFLUSH( LUN )
 
@@ -256,15 +296,15 @@
 *	Intended for use on ASCII-type text files, as written by FORTRAN
 *	formatted-writes.
 
-	CHARACTER*132 Blank_line
-	DATA Blank_line/' '/	
-
-	WRITE(LUN,'(A)') Blank_line
-	BACKSPACE(UNIT=LUN)
+	CALL FLUSH( LUN )  !It's easy on SGI.
 
 	RETURN
 
 	END
+
+
+
+
 
 	SUBROUTINE STRMOVE(COUNT,SOURCE,DEST)
 
@@ -285,7 +325,11 @@
 
 	RETURN
 	END
-*
+
+
+
+
+
 	SUBROUTINE STRMSEC(MSECS)
 *  Description:
 *	Standard interface routine to return milliseconds since midnight.
@@ -297,6 +341,10 @@
 	MSECS=1000*SEC !Milliseconds since midnight (only whole secs.).
 	RETURN
 	END
+
+
+
+
 
 	LOGICAL FUNCTION STRMSEC_DELAY(MSECS)
 
@@ -347,6 +395,70 @@
 
 	RETURN
 	END
+
+
+
+
+
+	SUBROUTINE STRNET_ENDIAN_BYTE(I32)
+
+*  Description:
+*	Swap the 4 8-bit bytes in the 32-bit (long) word I32,
+*	if needed, to make the big/little endian business come out
+*	Network-style.  On SGI (here), nothing is done.
+
+	IMPLICIT NONE
+
+	INTEGER I32
+
+	RETURN
+	END
+
+
+
+
+
+	SUBROUTINE STRNET_ENDIAN_BYTES(Nwords,Block)
+
+*  Description:
+*	Swap the 4 8-bit bytes in the 32-bit (long) word I32,
+*	if needed, to make the big/little endian business come out
+*	Network-style.  On SGI (here), nothing is done.
+
+	IMPLICIT NONE
+
+*  Input:
+	INTEGER Nwords   !Number of 32-bit words in Block to reorder.
+
+*  Input/Output:
+	INTEGER Block(*) !Block of 32-bit words in to be reordered.
+
+*	No-op, on SGI!  (Bye-bye.)
+
+	RETURN
+	END
+
+
+
+
+
+	SUBROUTINE STRNET_ENDIAN_HALF(I32)
+
+*  Description:
+*	Swap the two 16-bit half-words in the 32-bit (long) word I32,
+*	if needed, to make the big/little endian business come out
+*	Network-style.  On SGI (here), nothing is done.
+
+	IMPLICIT NONE
+
+	INTEGER I32
+
+	RETURN
+	END
+
+
+
+
 
 	LOGICAL FUNCTION STROPEN_NAT(LUN,FILENAME
      1	 ,STATUS_CARG,ACCESS_CARG,FORM_CARG
@@ -605,6 +717,10 @@
 
 	RETURN
 	END
+
+
+
+
 
 	SUBROUTINE STRTIME(HOUR,MIN,SEC)
 	IMPLICIT NONE
@@ -626,6 +742,10 @@
 	END IF
 	RETURN
 	END
+
+
+
+
 
 	SUBROUTINE STR_FLOAT_IEEE_TO_HOST( Ireal )
 
@@ -643,6 +763,10 @@
 
 	RETURN !No-op under SGI.
 	END
+
+
+
+
 
 	SUBROUTINE STR_FLOAT_HOST_TO_IEEE( Ireal )
 
@@ -682,6 +806,10 @@
 
 	RETURN !No-op under SGI.
 	END
+
+
+
+
 
 	SUBROUTINE STR_FLOAT_HOST_TO_VAX( Ireal )
 
@@ -757,6 +885,10 @@
 
 	RETURN
 	END
+
+
+
+
 
 	SUBROUTINE STR_FLOAT_VAX_TO_HOST( Ireal )
 
@@ -860,6 +992,43 @@
 	END IF
 
 	Ireal = Ieee !Return the IEEE conversion.
+
+	RETURN
+	END
+
+
+
+
+
+	SUBROUTINE STR_Sleep( Seconds )
+
+	IMPLICIT NONE
+
+*  Input:
+	REAL Seconds !Seconds to go to sleep, then wake up.
+
+*  Description:
+*	Platform-independent call to interface platform-dependent
+*	system call to wait for the specified interval in seconds
+*	and then wake up and continue, exiting this rouine
+*	normally.  Note that on some systems (SGI, not VMS) the
+*	time-interval has one-second granuality (ie, seconds is
+*	taken as an integer), and the minimum time to wait on
+*	such systems is requested to be 1 for "Seconds" > 0.
+*	Furthermore, on those systems which take integer-valued
+*	"Seconds", because of the granularity, the actual
+*	interval of sleep may be less than one second, right
+*	down to essentially zero.
+
+	INTEGER Local_Seconds !On SGI, this needs to be an integer.
+
+	IF ( Seconds .LE. 0 ) THEN !Just return quickly.
+	  RETURN
+	ELSE     !Ensure one sec. if Seconds > 0 is requested.
+	  Local_Seconds = NINT( Seconds + 0.5 )
+	END IF
+
+	CALL sleep( Local_Seconds )
 
 	RETURN
 	END

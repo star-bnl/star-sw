@@ -52,20 +52,22 @@ FILE *fpr, *fpw, *fopen();
 
 void strfc(
 
-/*
-  Input:
-*/
+/*  Inputs:   */
+
 	struct dsc$descriptor_s *ftext_descriptor   /*  ASCII ftext descriptor;  Fortran CHARACTER*(n).  */
 
-/*	This consists of:               */
-/*	unsigned short	dsc$w_length;	*/ /* length of data item in bytes,
+/*	  This consists of:             */
+/*	  unsigned short	dsc$w_length;	*/ /* length of data item in bytes,
 					     or if dsc$b_dtype is DSC$K_DTYPE_V, bits,
 					     or if dsc$b_dtype is DSC$K_DTYPE_P, digits (4 bits each) */
-/*	unsigned char	dsc$b_dtype;	*/ /* data type code */
-/*	unsigned char	dsc$b_class;	*/ /* descriptor class code = DSC$K_CLASS_D */
-/*	char		*dsc$a_pointer;	*/ /* address of first byte of data storage */
+/*	  unsigned char	dsc$b_dtype;	*/ /* data type code */
+/*	  unsigned char	dsc$b_class;	*/ /* descriptor class code = DSC$K_CLASS_D */
+/*	  char		*dsc$a_pointer;	*/ /* address of first byte of data storage */
 
 	,int dummy                         /* This is the length on Unix -- unused on VMS */
+
+/*  Outputs:  */
+
 	,char *ctext                       /* Text string (destination) -- defined in a C routine */
 	,int ctext_length                  /* Text string (destination) length.  */
 	,int *ctext_lnb                    /* Index to last non-blank in ctext.  */
@@ -73,7 +75,7 @@ void strfc(
 	       )
 
 
-/*  Functional Description:
+/*  Description:
 
 	Copy the FORTRAN-defined text-string, ftext, into the C-defined text-string, ctext.
 */
@@ -81,13 +83,20 @@ void strfc(
 {
 	static int length;
 
-
 /*	printf("strfc-i1  length:%d  class:%d  dtype:%d\n  ftext[%s]\n"
 	       , ftext_descriptor->dsc$w_length
 	       , ftext_descriptor->dsc$b_dtype
 	       , ftext_descriptor->dsc$b_class
 	       , ftext_descriptor->dsc$a_pointer );
 */
+
+/*	Check for nonsense:  */
+	if ( ctext_length < 1 )
+	{
+	  printf("strfc-E2 C text length: [%d] is nonsense.\n", ctext_length );
+	  *ctext_lnb=0;
+	  return;
+	}
 
 /*	Find the end of the specified FORTRAN text.
 	This is another Fortran routine, so just pass the descriptor given to this routine:
@@ -98,7 +107,7 @@ void strfc(
 */
 	if (length>(ctext_length-1))   /*  Make sure the given FORTRAN text isn't too long:  */
 	{
-	  printf("strfc-E0 FORTRAN text: [%s] is too long.\n", ftext_descriptor->dsc$a_pointer);
+	  printf("strfc-E3 FORTRAN text: [%s] is too long.\n", ftext_descriptor->dsc$a_pointer);
 	  *ctext_lnb=0;
 	  return;
 	}
@@ -173,7 +182,7 @@ int strbyte_openr(
 	       )
 
 
-/*  Functional Description:
+/*  Description:
 
 	Open the old file for reading, named in <filename>, in byte-stream mode.    */
 {
@@ -228,7 +237,7 @@ int strbyte_openw(
 	       )
 
 
-/*  Functional Description:
+/*  Description:
 
 	Open the new file for writing, named in <filename>, in byte-stream mode.    */
 {

@@ -35,10 +35,11 @@ if ( "$STAR_ARCH" == "sun4" ) then
 else if ( "$STAR_ARCH" == "hpux" ) then
    setenv ARCH_TAG    "_hpu"
    setenv ARFLAGS     " lqv "
-   setenv FFLAGS      " +e +es -c +ppu "
-   setenv FFLAGS_DBG  " +e +es -c -g +ppu "
-   setenv CCFLAGS     " -c -DHPUX "
-   setenv CCFLAGS_DBG " -c -g -DHPUX "
+   setenv FFLAGS      " -w +e +es -c +ppu "
+   setenv FFLAGS_DBG  " -w +e +es -c -g +ppu "
+   setenv CCFLAGS     " -c -Aa -DHPUX "
+   setenv CCFLAGS_DBG " -c -Aa -g -DHPUX "
+   setenv _HPUX_SOURCE "/usr/include"
 else if ( "$STAR_ARCH" == "irix" ) then
    setenv ARCH_TAG    "_sgi"
    setenv ARFLAGS     " slqv "
@@ -46,11 +47,18 @@ else if ( "$STAR_ARCH" == "irix" ) then
    setenv FFLAGS_DBG  " -extend_source -c -g -w "
    setenv CCFLAGS     " -c -O -ansi -fullwarn -v -prototypes -DIRIX "
    setenv CCFLAGS_DBG " -c -g -ansi -fullwarn -v -prototypes -DIRIX "
-
 #
 #  INCLUDES under irix require this step...
 #
    cd ../src
+else if ( "$STAR_ARCH" == "aix" ) then
+   setenv ARCH_TAG    "_aix"
+   setenv ARFLAGS     " slqv "
+   setenv FFLAGS      " -c -w -Pk -Wp,-tr=NV,-INTL,-SV=A,-CTYPLSS -qextname -qsave -qfixed=132 -qctyplss -qintlog "
+   setenv FFLAGS_DBG  " -g -c -w -Pk -Wp,-tr=NV,-INTL,-SV=A,-CTYPLSS -qextname -qsave -qfixed=132 -qctyplss -qintlog "
+   setenv CCFLAGS     " -c -O -qlanglvl=ansi -v -DAIX "
+   setenv CCFLAGS_DBG " -c -g -qlanglvl=ansi -v -DAIX "
+   alias f77 xlf
 endif
 if( -e make_flags.csh ) then
 	source ../lib/make_flags.csh
@@ -77,13 +85,13 @@ if ( -e $OBJLIB_DBG ) then
 	rm -f $OBJLIB_DBG
 endif
 #
-#set OBJFILES = ( $STAR_ARCH/*.o )
-#if( $OBJFILES == "" ) then
-#	echo "No objects to remove"
-#else
+set OBJFILES = ( `(ls ../lib/$STAR_ARCH/*.o |& grep -v "No match")` )
+if( $OBJFILES[$#OBJFILES] == "" ) then
+	echo "No objects to remove"
+else
 	echo "Removing all object files"
 	rm -f ../lib/$STAR_ARCH/*.o
-#endif
+endif
 #
 echo "Setting up include file links."
 #D.O. 8-Mar-93rmlink *
@@ -106,8 +114,15 @@ cd ../src
 make -e all
 echo "Moving all .a files to ../lib/$STAR_ARCH"
 mv *.a ../lib/$STAR_ARCH
-echo "Removing all .o files"
-rm -f *.o
+#
+set OBJFILES = ( `(ls *.o |& grep -v "No match")` )
+if( $OBJFILES[$#OBJFILES] == "" ) then
+	echo "No objects to remove"
+else
+	echo "Removing all object files"
+	rm -f *.o
+endif
+#
 #
 echo "cleaning up include file links.."
 rmlink *
