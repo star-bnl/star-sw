@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_Node.h,v 1.2 1998/12/26 21:40:40 fisyak Exp $
+// $Id: St_Node.h,v 1.3 1998/12/27 02:33:16 fine Exp $
 // $Log: St_Node.h,v $
+// Revision 1.3  1998/12/27 02:33:16  fine
+// St_Node, St_NodePosition - first working versions have been introduced *see macros/STAR_shapes.C for an example)
+//
 // Revision 1.2  1998/12/26 21:40:40  fisyak
 // Add Id and Log
 //
@@ -46,17 +49,18 @@ class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill {
    TString         fOption;        //List of options if any
    Int_t           fVisibility;    //Visibility flag
 
-   virtual void    Add(St_NodePosition *position);
-   virtual void    Add(St_Node *node, St_NodePosition *nodePosition);
-   void SetPositionsList(TList *list=0){AddObject((TObject *)list);}
+   virtual void             Add(St_NodePosition *position);
+   virtual St_NodePosition *Add(St_Node *node, St_NodePosition *nodePosition);
+           void             SetPositionsList(TList *list=0){AddObject((TObject *)list);}
 
  public:
         St_Node();
         St_Node(const Text_t *name, const Text_t *title, const Text_t *shapename, Option_t *option="");
         St_Node(const Text_t *name, const Text_t *title, TShape *shape, Option_t *option="");
         virtual ~St_Node();
-        virtual void        Add(St_Node *node, Double_t x, Double_t y=0, Double_t z=0, TRotMatrix *matrix=0, Option_t *option="");
-        virtual void        Add(St_Node *node, Double_t x, Double_t y, Double_t z,  const Text_t *matrixname, Option_t *option="");
+        virtual St_NodePosition *Add(St_Node *node, Double_t x=0, Double_t y=0, Double_t z=0, TRotMatrix *matrix=0, Option_t *option="");
+        virtual St_NodePosition *Add(St_Node *node, Double_t x, Double_t y, Double_t z,  const Text_t *matrixname, Option_t *option="");
+        virtual void        Browse(TBrowser *b);
         virtual void        DeletePosition(St_NodePosition *position);
         virtual Int_t       DistancetoPrimitive(Int_t px, Int_t py);
         virtual void        Draw(Option_t *option=""); // *MENU*
@@ -71,7 +75,6 @@ class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill {
         virtual Bool_t      Is3D()  {return kTRUE;}
         virtual TList      *Nodes() const { return GetList(); }
         virtual void        Paint(Option_t *option="");
-        virtual void        RecursiveRemove(TObject *obj);
         virtual void        SetVisibility(Int_t vis=1); // *MENU*
         virtual void        Sizeof3D() const;
  

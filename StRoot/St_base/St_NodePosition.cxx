@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_NodePosition.cxx,v 1.2 1998/12/26 21:40:40 fisyak Exp $
+// $Id: St_NodePosition.cxx,v 1.3 1998/12/27 02:33:16 fine Exp $
 // $Log: St_NodePosition.cxx,v $
+// Revision 1.3  1998/12/27 02:33:16  fine
+// St_Node, St_NodePosition - first working versions have been introduced *see macros/STAR_shapes.C for an example)
+//
 // Revision 1.2  1998/12/26 21:40:40  fisyak
 // Add Id and Log
 // 
@@ -9,14 +12,6 @@
 /*************************************************************************
  * Copyright(c) 1998, FineSoft, All rights reserved.                     *
  * Authors: Valery Fine                                                  *
- *                                                                       *
- * Permission to use, copy, modify and distribute this software and its  *
- * documentation for non-commercial purposes is hereby granted without   *
- * fee, provided that the above copyright notice appears in all copies   *
- * and that both the copyright notice and this permission notice appear  *
- * in the supporting documentation. The authors make no claims about the *
- * suitability of this software for any purpose.                         *
- * It is provided "as is" without express or implied warranty.           *
  *************************************************************************/
 //*KEND.
  
@@ -83,8 +78,8 @@ ClassImp(St_NodePosition)
  
  
 //______________________________________________________________________________
-St_NodePosition::St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t z, const Text_t *matrixname, Option_t *option)
-: fNode(node),fX(x),fY(y),fZ(z)
+St_NodePosition::St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t z, const Text_t *matrixname)
+: fNode(node),fX(x),fY(y),fZ(z),fMatrix(0)
 {
 //*-*-*-*-*-*-*-*-*-*-*Node normal constructor*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 //*-*                  ======================
@@ -96,10 +91,10 @@ St_NodePosition::St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t 
 //*-*
 //*-*    This new node is added into the list of sons of the current node
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
- 
+   if (!node) return;
    static Int_t counter = 0;
    counter++;
-   if(!(counter%1000))cout<<"St_NodePosition count="<<counter<<" name="<<name<<endl;
+   if(!(counter%1000))cout<<"St_NodePosition count="<<counter<<" name="<<node->GetName()<<endl;
  
    if (strlen(matrixname)) fMatrix = gGeometry->GetRotMatrix(matrixname);
    else {
@@ -113,8 +108,8 @@ St_NodePosition::St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t 
  
  
 //______________________________________________________________________________
-St_NodePosition::St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t z, TRotMatrix *matrix, Option_t *option)
-               : fNode(node),fX(x),fY(y),fZ(z)
+St_NodePosition::St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t z, TRotMatrix *matrix)
+               : fNode(node),fX(x),fY(y),fZ(z),fMatrix(matrix)
 {
 //*-*-*-*-*-*-*-*-*-*-*Node normal constructor*-*-*-*-*-*-*-*-*-*-*
 //*-*                  ================================
@@ -127,7 +122,6 @@ St_NodePosition::St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t 
 //*-*    This new node is added into the list of sons of the current node
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
  
-   fMatrix = matrix;
    if(!fMatrix) {
      fMatrix =gGeometry->GetRotMatrix("Identity");
      if (!fMatrix) {
@@ -138,6 +132,21 @@ St_NodePosition::St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t 
 }
   
 //______________________________________________________________________________
+void St_NodePosition::Browse(TBrowser *b)
+{
+   if (GetNode()) {
+        TShape *shape = GetNode()->GetShape();
+        b->Add(GetNode(),shape?shape->GetName():GetNode()->GetName());
+   }
+//    if( GetList() ) {
+//       GetList()->Browse( b );
+//    }
+   else {
+       Draw();
+       gPad->Update();
+    }
+} 
+//______________________________________________________________________________
 Int_t St_NodePosition::DistancetoPrimitive(Int_t px, Int_t py)
 {
 //*-*-*-*-*-*-*-*-*-*-*Compute distance from point px,py to a Node*-*-*-*-*-*
@@ -147,7 +156,7 @@ Int_t St_NodePosition::DistancetoPrimitive(Int_t px, Int_t py)
 //*-*
 //*-*
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
- 
+#if 0 
    const Int_t big = 9999;
    const Int_t inaxis = 7;
    const Int_t maxdist = 5;
@@ -218,6 +227,10 @@ Int_t St_NodePosition::DistancetoPrimitive(Int_t px, Int_t py)
       return 0;
    } else
       return dnode;
+#else
+  return 999;
+#endif  
+      
 }
  
 //______________________________________________________________________________
@@ -226,6 +239,7 @@ void St_NodePosition::Draw(Option_t *option)
 //*-*-*-*-*-*-*-*-*-*-*-*Draw Referenced node with current parameters*-*-*-*
 //*-*                   =============================================
  
+ #if 0
    Int_t i;
    TString opt = option;
    opt.ToLower();
@@ -253,18 +267,9 @@ void St_NodePosition::Draw(Option_t *option)
       Paint();
       view->SetAutoRange(kFALSE);
    }
+#endif   
 }
- 
-//______________________________________________________________________________
-void St_NodePosition::DrawOnly(Option_t *option)
-{
-//*-*-*-*-*-*-*-*-*-*Draw only Sons of this node*-*-*-*-*-*-*-*-*-*-*-*-*
-//*-*                ===========================
- 
-   SetVisibility(2);
-   Draw(option);
-}
- 
+  
  
 //______________________________________________________________________________
 void St_NodePosition::ExecuteEvent(Int_t, Int_t, Int_t)
@@ -291,16 +296,7 @@ Text_t *St_NodePosition::GetObjectInfo(Int_t, Int_t)
    sprintf(info,"%s/%s, shape=%s/%s",GetNode()->GetName(),GetNode()->GetTitle(),GetNode()->GetShape()->GetName(),GetNode()->GetShape()->ClassName());
    return info;
 }
- 
-//______________________________________________________________________________
-Bool_t St_NodePosition::IsFolder()
-{
-//*-*-*-*-*Return TRUE if node contains nodes, FALSE otherwise*-*
-//*-*      ======================================================
- 
-   if (fNodes) return kTRUE;
-   else        return kFALSE;
-}
+
  
 //______________________________________________________________________________
 void St_NodePosition::Local2Master(Double_t *local, Double_t *master)
@@ -313,9 +309,9 @@ void St_NodePosition::Local2Master(Double_t *local, Double_t *master)
 //  This is automatically done by the Paint functions.
 //  Otherwise St_NodePosition::UpdateMatrix should be called before.
  
+#if 0 
    Double_t x,y,z;
    Float_t bomb = gGeometry->GetBomb();
- 
    Double_t *matrix      = &gRotMatrix[gGeomLevel][0];
    Double_t *translation = &gTranslation[gGeomLevel][0];
  
@@ -335,6 +331,7 @@ void St_NodePosition::Local2Master(Double_t *local, Double_t *master)
      + local[2]*matrix[8];
  
    master[0] = x; master[1] = y; master[2] = z;
+#endif   
 }
  
 //______________________________________________________________________________
@@ -348,6 +345,7 @@ void St_NodePosition::Local2Master(Float_t *local, Float_t *master)
 //  This is automatically done by the Paint functions.
 //  Otherwise St_NodePosition::UpdateMatrix should be called before.
  
+#if 0 
    Float_t x,y,z;
    Float_t bomb = gGeometry->GetBomb();
  
@@ -370,7 +368,7 @@ void St_NodePosition::Local2Master(Float_t *local, Float_t *master)
      + local[2]*matrix[8];
  
    master[0] = x; master[1] = y; master[2] = z;
- 
+#endif 
 }
   
 //______________________________________________________________________________
@@ -444,79 +442,8 @@ void St_NodePosition::Paint(Option_t *option)
 #endif 
 }
    
-//______________________________________________________________________________
-void St_NodePosition::SetVisibility(Int_t vis)
-{
-//*-*-*-*-*-*-*Set visibility for this node and its sons*-*-*-*-*--*-*-*-*-*-*
-//*-*          =========================================
-//*-*  vis = 3  node is drawn and its sons are drawn
-//*-*  vis = 2  node is not drawn but its sons are drawn
-//*-*  vis = 1  (default) node is drawn
-//*-*  vis = 0  node is not drawn
-//*-*  vis = -1 node is not drawn. Its sons are not drawn
-//*-*  vis = -2 node is drawn. Its sons are not drawn
-//*-*  vis = -3 Only node leaves are drawn
-//*-*  vis = -4 Node is not drawn. Its immediate sons are drawn
-//*-*
-//*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
- 
-   ResetBit(kSonsInvisible);
-   TIter  next(fNodes);
-   St_NodePosition *node;
-   if (vis == -4 ) {         //Node is not drawn. Its immediate sons are drawn
-      fVisibility = 0;
-      if (!fNodes) { fVisibility = 1; return;}
-      while ((node = (St_NodePosition*)next())) { node->SetVisibility(-2); }
-   } else if (vis == -3 ) {  //Only node leaves are drawn
-      fVisibility = 0;
-      if (!fNodes) { fVisibility = 1; return;}
-      while ((node = (St_NodePosition*)next())) { node->SetVisibility(-3); }
- 
-   } else if (vis == -2) {  //node is drawn. Its sons are not drawn
-      fVisibility = 1; SetBit(kSonsInvisible); if (!fNodes) return;
-      while ((node = (St_NodePosition*)next())) { node->SetVisibility(-1); }
- 
-   } else if (vis == -1) {  //node is not drawn. Its sons are not drawn
-      fVisibility = 0; SetBit(kSonsInvisible); if (!fNodes) return;
-      while ((node = (St_NodePosition*)next())) { node->SetVisibility(-1); }
- 
-   } else if (vis ==  0) {  //node is not drawn
-      fVisibility = 0;
- 
-   } else if (vis ==  1) {  //node is drawn
-      fVisibility = 1;
- 
-   } else if (vis ==  2) {  //node is not drawn but its sons are drawn
-      fVisibility = 0; if (!fNodes) return;
-      while ((node = (St_NodePosition*)next())) { node->SetVisibility(3); }
- 
-   } else if (vis ==  3) {  //node is drawn and its sons are drawn
-      fVisibility = 1; if (!fNodes) return;
-      while ((node = (St_NodePosition*)next())) { node->SetVisibility(3); }
-   }
-}
- 
-//______________________________________________________________________________
-void St_NodePosition::Sizeof3D() const
-{
-//*-*-*-*-*-*-*Return total size of this 3-D Node with its attributes*-*-*
-//*-*          ==========================================================
- 
-   if (fVisibility && fShape->GetVisibility()) {
-      fShape->Sizeof3D();
-   }
-   if ( TestBit(kSonsInvisible) ) return;
- 
-   if (!fNodes) return;
-   St_NodePosition *node;
-   TObject *obj;
-   TIter  next(fNodes);
-   while ((obj = next())) {
-      node = (St_NodePosition*)obj;
-      node->Sizeof3D();
-   }
-}
- 
+  
+#if 0  
 //_______________________________________________________________________
 void St_NodePosition::Streamer(TBuffer &b)
 {
@@ -553,7 +480,6 @@ void St_NodePosition::Streamer(TBuffer &b)
       b << fVisibility;
    }
 }
- 
  
 //______________________________________________________________________________
 void St_NodePosition::UpdateMatrix()
@@ -617,3 +543,4 @@ void St_NodePosition::UpdateTempMatrix(Double_t *dx,Double_t *rmat
    rmatnew[7] = rmat[1]*matrix[6] + rmat[4]*matrix[7] + rmat[7]*matrix[8];
    rmatnew[8] = rmat[2]*matrix[6] + rmat[5]*matrix[7] + rmat[8]*matrix[8];
 }
+#endif
