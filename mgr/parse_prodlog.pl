@@ -1,34 +1,51 @@
 #! /usr/local/bin/perl -w 
 
-# parse production log file and create summary file
+# parse production log file
 
 #=========================================================
 use strict;
 use Sys::Hostname;
 my $hostname     = hostname();
 my $dir_log      = "/disk00001/star/prod4/log/tfs";
-my $dir_sum      = "../../sum/tfs";   
+my $dir_sum      = "/disk00001/star/prod4/sum/tfs";   
 my @set ;
-my @list;      
+my @list; 
+my @list_sum;     
 my $job_log;
 my $dummy;
 my $file_sum;
+#my $dir_lg       = "../log";
 my $name_log;
-
+my $f_flag = 0;
 #=========================================================
 #chdir $dir_log;
 @list = `ls *log`;
+chdir $dir_sum;
+@list_sum = `ls *.sum`;
+chdir $dir_log;
+
 foreach my $file (@list) {
-       my  $ltime = `mod_time $file`;
-           if( $ltime > 3600){ 
+        my $ltime = `mod_time $file`;
+           if( $ltime > 3600){
+                chop $file;
+              $file_sum = $file;
+              $file_sum =~ s/.log//g;
+              $file_sum = $file_sum . ".sum";
+      foreach my $filesm (@list_sum)  {
+               chop $filesm;              
+	if ($filesm = $file_sum) {
+              $f_flag = 1;
+     }
+}           
+              if($f_flag != 1) {  
              parse_log($file);
              timestamp($file);
-              chop $file;
             $name_log = $file; 
-         $dummy = `mv $file_sum $dir_sum`;   
+         $dummy = `mv $file_sum $dir_sum`;
+#         $dummy = `mv $name_log $dir_lg`;   
            }             
-    }
-
+        }
+     }
 exit(0);
 #==========================================================
  sub mod_time($) { 
@@ -62,13 +79,12 @@ sub parse_log($) {
 
   my $filename = $_[0];
   my $tag = ".sum";
-  my $file_sm;
-     chop $filename;
-  $file_sm = $filename;
-  $file_sm =~ s/.log//g;
-  $file_sum = $file_sm . $tag;
+#  my $file_sm;
+#     chop $filename;
+#  $file_sm = $filename;
+#  $file_sm =~ s/.log//g;
+#  $file_sum = $file_sm . $tag;
   my $input_fn;
-  my $command_option;
   my $lib_version;  
   my $record_run_options = 0;
   my $run_option_length = 0;
@@ -86,9 +102,10 @@ sub parse_log($) {
 
   #----------------------------------------------------------
   
-  open (LOGFILE, $filename) or die "cannot open $filename: $!\n";
-  open (STDOUT, ">$file_sum");
+  open (LOGFILE, $filename ) or die "cannot open $filename: $!\n";
   
+  open (STDOUT, ">$file_sum");
+
   #---------------------------------------------------------
   
   # dump contents of log file to array for parsing
@@ -100,6 +117,22 @@ sub parse_log($) {
   my @maker_name;
   my @msize_aver = 0; 
   my $mymaker; 
+  my $no_tracks; 
+  my $no_vertices;
+  my $no_tpc_hits;
+  my $no_svt_hits;
+  my $no_ftpc_hits;
+  my $tot_tracks = 0;
+  my $tot_vertices = 0;
+  my $tot_tpc_hits = 0;
+  my $tot_svt_hits = 0;
+  my $tot_ftpc_hits = 0;
+  my $avr_tracks;
+  my $avr_vertices;
+  my $avr_tpc_hits;
+  my $avr_svt_hits;
+  my $avr_ftpc_hits;
+  my @word_tr;
   my $i;
   my $last_maker;
   my @size_line;
@@ -118,13 +151,6 @@ sub parse_log($) {
   foreach $line (@logfile) {
      chop $line ;
       $num_line++;
-    
-
-    # get command option
-    if ( (! $command_option) && $line =~ /Processing (bfc\.C.*)/ ) {
-      $command_option = $1;
-      $command_option =~ s/\.{3}//;
-    }
     
     # get library version
     if ( (! $lib_version) && $line =~ /={3} You are in (\w+)/ ) {
@@ -174,9 +200,34 @@ sub parse_log($) {
     # get  number of events
     if ( $line =~ /QAInfo: Done with Event no. ([0-9]+)\W+([0-9]+)/ ) {
       $num_event = $1;
+  } 
+    # get number of tracks, vertices and hits
 
-    } 
-    
+     if ($line =~ /StInfo: QAInfo: StAnalysisMaker/ ) {
+
+           my  $string = $logfile[$num_line];
+             @word_tr = split /:/,$string;
+             $no_tracks = $word_tr[3];
+             $tot_tracks += $no_tracks; 
+#              print $word_tr[2], $no_tracks, "\n";
+              $string = $logfile[$num_line + 1];
+             @word_tr = split /:/,$string;
+             $no_vertices = $word_tr[3]; 
+             $tot_vertices += $no_vertices;
+             $string = $logfile[$num_line + 2];
+             @word_tr = split /:/,$string;
+             $no_tpc_hits = $word_tr[3];
+             $tot_tpc_hits += $no_tpc_hits;
+             $string = $logfile[$num_line + 3];
+             @word_tr = split /:/,$string;
+             $no_svt_hits = $word_tr[3]; 
+             $tot_svt_hits += $no_svt_hits;
+             $string = $logfile[$num_line + 4];
+             @word_tr = split /:/,$string;
+             $no_ftpc_hits = $word_tr[3];
+             $tot_ftpc_hits += $no_ftpc_hits; 
+           
+ }   
     # check if job crashed due to break_buss_error
      if($line =~ /buss error/) {
          $break_buss = "Break buss error";
@@ -209,11 +260,7 @@ sub parse_log($) {
   ! defined($lib_version) and $lib_version = $not_found_string;
   print ("Library version:", $lib_version, "\n");
 
-
-  ! defined($command_option) and $command_option = $not_found_string;
-  print ("Command string:", $command_option, "\n");
-
-
+  
    ! defined($input_fn) and $input_fn = $not_found_string;
    print ("Input file:", $input_fn, "\n");
    print '=' x 80, "\n";
@@ -252,9 +299,23 @@ sub parse_log($) {
  }
 
    print '=' x 80, "\n";
+   print(">>> Average number of tracks, vertices and hits foung <<<\n");
+   print '=' x 80, "\n";
+ 
+   $avr_tracks    = $tot_tracks/$num_event;
+   $avr_vertices  = $tot_vertices/$num_event;
+   $avr_tpc_hits  = $tot_tpc_hits/$num_event;
+   $avr_svt_hits  = $tot_svt_hits/$num_event;
+   $avr_ftpc_hits = $tot_ftpc_hits/$num_event;
+    printf ("QAinfo: number of tracks:    %10i \n",  $avr_tracks); 
+    printf ("QAinfo: number of vertices:  %10i \n",  $avr_vertices ); 
+    printf ("QAinfo: number of TPC hits:  %10i \n",  $avr_tpc_hits ); 
+    printf ("QAinfo: number of SVT hits:  %10i \n",  $avr_svt_hits ); 
+    printf ("QAinfo: number of FTPC hits: %10i \n",  $avr_ftpc_hits ); 
+
+   print '=' x 80, "\n";
    print(">>> Average memory usage for each package at the time of execution <<<\n");
    print '=' x 80, "\n";
-   
 
    for ($i = 0; $i < $last_maker; $i++){
 
@@ -282,7 +343,7 @@ sub parse_log($) {
    printf("Package   %s        Memory size =  %10.3f  MB; \n", $maker_name[19], $msize_aver[19]);
    printf("Package   %s              Memory size =  %10.3f  MB; \n", $maker_name[20], $msize_aver[20]);
    printf("Package   %s            Memory size =  %10.3f  MB; \n", $maker_name[21], $msize_aver[21]);  
-}
+  }
  #--------------------------------------------------------------------------
   
  # parse end of file
@@ -319,7 +380,7 @@ sub parse_log($) {
      @words = split(" ",$myword[2]);
      $real_time = $words[3] / $no_event;
      $cpu_time = $words[8] / $no_event;
-
+ 
 #    print ($Maker, ": Real Time = ", $real_time," seconds;   Cpu Time = ", $cpu_time, " seconds; \n");
    printf ("%s : Real Time =  %10.3f seconds;   Cpu Time = %10.3f seconds;\n", $Maker, $real_time, $cpu_time);
      if ($end_line =~ /bfc/){
