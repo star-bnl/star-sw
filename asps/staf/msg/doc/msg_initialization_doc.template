@@ -1,4 +1,4 @@
-
+<pre>
 *	msg_initialization.template -- the msg package-initialization-calls template.
 
 *	This is an msg template -- replace items enclosed in <brackets> with application-
@@ -106,3 +106,4 @@
 	IF (.NOT.MSG_Journal_Close()) THEN !Failure:
 	  CALL MESSAGE('<Subroutine name>-E2 Failed to close journal file', 1, -1 )
 	END IF
+</pre>
