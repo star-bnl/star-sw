@@ -16,6 +16,8 @@ my @parts;
 my $nodeID = "n/a";
 my $job_line; 
 my @wrd;
+my $date_line;
+
 
 $now = localtime;
 ($sec,$min,$hour,$mday,$mon) = localtime;
@@ -30,6 +32,11 @@ $outfile = "mail" . "_" .$thisday . "_" . "out";
 
 while (<>) {
   $mail_line = $_;
+
+   if ($mail_line =~ /Date/) {
+
+     $date_line = $mail_line;
+  } 
 
    if ($mail_line =~ /job_/) {
       $status_line = $mail_line;
@@ -77,7 +84,8 @@ while (<>) {
 
 }
  open (OUT,">> $outfile") or die "Can't open $outfile";
-  print OUT "JobInfo: ","  %  " $jbStat,"  %  ",$nodeID,"  %  ",$job_file,  "\n"; 
+  print OUT $date_line, "\n";
+  print OUT "JobInfo: ","  %  ", $jbStat,"  %  ",$nodeID,"  %  ",$job_file,  "\n"; 
 
   close (OUT);
 
