@@ -2,6 +2,9 @@
 #include <stdexcept>
 #include <math.h>
 
+#include "StDetectorId.h"
+#include "StHit.h"
+
 //Sti
 #include "StiKTNIterator.h"
 #include "StiHit.h"
@@ -939,8 +942,37 @@ void StiKalmanTrack::swap()
     trackingDirection = kOutsideIn;
 }
 
+
+///return vector of nodes with hits
+vector<StiKalmanTrackNode*> StiKalmanTrack::getNodes(StDetectorId detectorId) const
+{
+  StiKalmanTrackNode* leaf = getLastNode();
+  StiKTNForwardIterator it(leaf);
+  StiKTNForwardIterator end = it.end();
+  //vector<StHit*> hits;
+  vector<StiKalmanTrackNode*> nodeVec;
+  while (it!=end) {
+    const StiKalmanTrackNode& node = *it;
+    //make sure node has a hit
+    StiHit* hit = node.getHit();
+    if((&node)->getHit()!=hit) cout <<"Danger, Will Robinson! Danger!"<<endl;
+    if (hit) {
+      if(detectorId==kTpcId && strstr(hit->detector()->getName().c_str(), "Tpc")!=NULL)
+	{//Tpc Hit requested and found
+	nodeVec.push_back(const_cast<StiKalmanTrackNode*>(&node));
+	}
+      else if (detectorId==kSvtId && strstr(hit->detector()->getName().c_str(), "Svt")!=NULL)
+	{//Svt hit requested and found
+	nodeVec.push_back(const_cast<StiKalmanTrackNode*>(&node));
+	}
+    }
+    ++it;
+  }
+  
+  return nodeVec;
+}
+
 ///return hits;
-//vector<StHit*> StiKalmanTrack::stHits() const
 vector<StMeasuredPoint*> StiKalmanTrack::stHits() const
 {
   StiKalmanTrackNode* leaf = getLastNode();
