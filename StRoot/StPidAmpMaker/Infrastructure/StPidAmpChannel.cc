@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannel.cc,v 1.1.1.1 2000/03/09 17:48:34 aihong Exp $
+ * $Id: StPidAmpChannel.cc,v 1.2 2000/04/09 16:16:33 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannel.cc,v $
+ * Revision 1.2  2000/04/09 16:16:33  aihong
+ * change for adapting NHitsDcaNet added
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:34  aihong
  * Installation of package
  *
@@ -40,6 +43,7 @@ StPidAmpChannel::StPidAmpChannel(){
   //the actual content will be auto.
   // casted to base, and we resulted 
   //in a base version fit() calling.
+
 }
 
 //----------------------------------
@@ -51,6 +55,7 @@ StPidAmpChannel::~StPidAmpChannel(){
 //----------------------------------
 StPidAmpChannel::StPidAmpChannel(StPidAmpChannelInfo& channelInfo,StPidAmpNetType netType){
 
+
     mNetCollect=new StPidAmpNetVector();
 
     mDrawBandFits=true;
@@ -58,6 +63,7 @@ StPidAmpChannel::StPidAmpChannel(StPidAmpChannelInfo& channelInfo,StPidAmpNetTyp
     mChannelInfo =channelInfo;
 
     setUp(netType); //setup nets.
+
 }
 
 
@@ -260,6 +266,36 @@ void StPidAmpChannel::setUp(StPidAmpNetType netType){ //set up nets.
   mNetCollect->push_back(kaonPlusNet);
   mNetCollect->push_back(protonNet); 
   mNetCollect->push_back(deuteronNet);
+  }else if (netType==nhitsDcaDependent){
+
+  StPidAmpNHitsDcaNet*      electronNet=new StPidAmpNHitsDcaNet(StPidAmpParticle::mElectron,   mChannelInfo);
+  StPidAmpNHitsDcaNet*       piMinusNet=new StPidAmpNHitsDcaNet(StPidAmpParticle::mPiMinus,    mChannelInfo);
+  StPidAmpNHitsDcaNet*     kaonMinusNet=new StPidAmpNHitsDcaNet(StPidAmpParticle::mKaonMinus,  mChannelInfo);
+  StPidAmpNHitsDcaNet*    antiProtonNet=new StPidAmpNHitsDcaNet(StPidAmpParticle::mAntiProton, mChannelInfo);
+  StPidAmpNHitsDcaNet*      positronNet=new StPidAmpNHitsDcaNet(StPidAmpParticle::mPositron,   mChannelInfo);
+  StPidAmpNHitsDcaNet*        piPlusNet=new StPidAmpNHitsDcaNet(StPidAmpParticle::mPiPlus,     mChannelInfo);
+  StPidAmpNHitsDcaNet*      kaonPlusNet=new StPidAmpNHitsDcaNet(StPidAmpParticle::mKaonPlus,   mChannelInfo);
+  StPidAmpNHitsDcaNet*        protonNet=new StPidAmpNHitsDcaNet(StPidAmpParticle::mProton,     mChannelInfo);
+  StPidAmpNHitsDcaNet*      deuteronNet=new StPidAmpNHitsDcaNet(StPidAmpParticle::mDeuteron,   mChannelInfo);
+
+  //negative particles first
+
+ 
+  
+
+
+  mNetCollect->clear();
+  mNetCollect->reserve(NParticleTypes);
+
+  mNetCollect->push_back(electronNet);
+  mNetCollect->push_back(piMinusNet);
+  mNetCollect->push_back(kaonMinusNet);
+  mNetCollect->push_back(antiProtonNet);
+  mNetCollect->push_back(positronNet);
+  mNetCollect->push_back(piPlusNet);
+  mNetCollect->push_back(kaonPlusNet);
+  mNetCollect->push_back(protonNet); 
+  mNetCollect->push_back(deuteronNet);
   }
 
 
@@ -274,6 +310,7 @@ void StPidAmpChannel::fillChannelInfoOut(){
 
      mChannelInfoOut.SetNHitsRange(((mChannelInfo.cutVector())[0]).lowEdge(), ((mChannelInfo.cutVector())[0]).highEdge());
      mChannelInfoOut.SetPtRange(((mChannelInfo.cutVector())[1]).lowEdge(),((mChannelInfo.cutVector())[1]).highEdge());
+     mChannelInfoOut.SetDcaRange(((mChannelInfo.cutVector())[2]).lowEdge(),((mChannelInfo.cutVector())[2]).highEdge());
 
 }
 

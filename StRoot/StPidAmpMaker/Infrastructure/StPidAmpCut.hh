@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpCut.hh,v 1.1.1.1 2000/03/09 17:48:34 aihong Exp $
+ * $Id: StPidAmpCut.hh,v 1.2 2000/04/09 16:16:34 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpCut.hh,v $
+ * Revision 1.2  2000/04/09 16:16:34  aihong
+ * change for adapting NHitsDcaNet added
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:34  aihong
  * Installation of package
  *
@@ -44,6 +47,7 @@ public:
 
          double  lowEdge() const;
          double highEdge() const;
+         double midPoint() const;
          string     name() const;
         
           
@@ -64,11 +68,14 @@ private:
 
 inline double StPidAmpCut::lowEdge() const { return mLowEdge;}
 inline double StPidAmpCut::highEdge() const {return mHighEdge;}
+inline double StPidAmpCut::midPoint() const {return (mHighEdge-mLowEdge)*0.5+mLowEdge ;}
+
 inline string StPidAmpCut::name() const {return mName; }
 
 #endif
 //in mName, "N" means Nhits cut.
 //"P" means Pt cut
 //"R" means rigidity cut.
+//"D" means dca cut. (distance of closest approach)
 //the compiler can not recognize "bool" without "include <iostream>"
 //see "/afs/rhic/star/packages/ObjectSpace/2.0m/ospace/type/prim.h"  for more about bool
