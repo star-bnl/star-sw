@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.201 2001/05/01 21:54:20 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.202 2001/05/04 20:48:04 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -75,6 +75,7 @@ Bfc_st BFC[] = {
   {"C2000"       ,""  ,"","y2000,C1default"                            ,"","","Turn on chain Y2001",kFALSE},
   {"C2001"       ,""  ,"","y2001,C2default"                            ,"","","Turn on chain Y2001",kFALSE},
   {"MDC4"        ,""  ,"","C2001,trs,srs,fss,rrs,big,GeantOut"      ,"","","Turn on chain for MDC4",kFALSE},
+  {"PostMDC4"    ,""  ,"","C2001,trs,sss,fss,rrs,big,GeantOut"      ,"","","Turn on Post MDC4 chain",kFALSE},
   {"ppMDC4"      ,""  ,"","pp,C2001,-PreVtx,ppMCTrig,mwc,ppLPeval1,trs,srs,rrs,big,GeantOut",
                                                                     "","","Turn on chain for ppMDC",kFALSE},
   {"CComplete"   ,""  ,"","Complete,C2default"             ,"","","Turn on chain for Complete STAR",kFALSE},
