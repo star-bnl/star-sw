@@ -1,5 +1,9 @@
-* $Id: tpt_extend_segments.F,v 1.9 2000/03/19 04:20:32 sakrejda Exp $
+* $Id: tpt_extend_segments.F,v 1.10 2000/03/29 03:38:23 sakrejda Exp $
 * $Log: tpt_extend_segments.F,v $
+* Revision 1.10  2000/03/29 03:38:23  sakrejda
+* Marking hits that belong to a track moved from here to the "load track"
+* routine.
+*
 * Revision 1.9  2000/03/19 04:20:32  sakrejda
 * An option to use straigth line to fit lasers even if the field is on.
 *
@@ -132,6 +136,7 @@ C              mark points as used , don't do anything
                end do
 C              mark track as extended
                tmp(ipos) = -1.0
+               iret = tpt_load_track(ipos,track_h,track,trk,hit_h,hit,tpar_h,tpar,ipass)
          else if(int(tmp(ipos)).lt.tpar(ipass).minfit) then
 C              too many hits were removed from this track......
                tmp(ipos)=-1.0
@@ -200,8 +205,6 @@ C                      check which hit it was on the track
                        endif
                        trk(itrack).ipnt(lc) = 0
                      endif
-C                    mark it as used
-                     hit(ld).track = ipos*1000+j
                   end do
 C                 loop through all the affected chains and update 
 C	          track and hit information
@@ -223,6 +226,7 @@ c                    mark that the track needs to be re-fit
                      end do
                      tmp(laf(k))=real(ng)
                   end do
+                  iret = tpt_load_track(ipos,track_h,track,trk,hit_h,hit,tpar_h,tpar,ipass)
                endif
          endif
 
