@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.11 1999/12/08 22:58:16 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.12 1999/12/10 17:38:24 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.12  1999/12/10 17:38:24  kathy
+// now reprint canvas on each page of postscript output file; also changed some histogram limits
+//
 // Revision 1.11  1999/12/08 22:58:16  kathy
 // changed histogram limits and made names smaller
 //
@@ -111,7 +114,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
   SafeDelete(m_HistCanvas);
 
 // TCanvas wants width & height in pixels (712 x 950 corresponds to A4 paper)
-//                                        (600 x 720                US      )
+//                                        (600 x 780                US      )
   //  TCanvas *HistCanvas = new TCanvas("CanvasName","Canvas Title",30*m_PaperWidth,30*m_PaperHeight);
     TCanvas *HistCanvas = new TCanvas("CanvasName"," STAR Maker Histogram Canvas",600,780);
 
@@ -139,7 +142,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
   TDatime HistTime;
   const Char_t *myTime = HistTime.AsString();
   TPaveLabel *Ldatetime = new TPaveLabel(0.7,0.01,0.95,0.03,myTime,"br");
-  Ldatetime->SetTextSize(0.5);
+  Ldatetime->SetTextSize(0.6);
   Ldatetime->Draw();
 
 // Make 1 big pad on the canvas - make it a little bit inside the  canvas 
@@ -156,7 +159,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
   const Char_t *firstHistName = m_FirstHistName.Data();
   const Char_t *lastHistName  = m_LastHistName.Data();
 
-  cout << " **** Now finding hist **** " << endl;
+  //  cout << " **** Now finding hist **** " << endl;
 
 // Now find the histograms
 // get the TList pointer to the histograms:
@@ -176,8 +179,8 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
 
   TObject *obj = 0;
   Int_t chkdim=0;
-  while (obj = nextHist()) {
-   cout << " **** Now in StHistUtil::DrawHists - in loop: " << endl;
+  while ((obj = nextHist())) {
+//   cout << " **** Now in StHistUtil::DrawHists - in loop: " << endl;
    cout << "               name = " << obj->GetName() << endl;
 
 
@@ -192,6 +195,10 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
 	printf("  -   %d. Drawing ... %s::%s; Title=\"%s\"\n",histCounter,obj->ClassName(),obj->GetName(), obj->GetTitle());
 	if (padCount == numPads) {
 	  if (psf) psf->NewPage();
+// must redraw the histcanvas for each new page of postscript file!
+	  //    HistCanvas->cd();
+        HistCanvas->Modified();
+        HistCanvas->Update();
 	  padCount=0;
 	}
 	graphPad->cd(++padCount);
@@ -332,7 +339,7 @@ Int_t StHistUtil::ListHists(Char_t *dirName)
   TObject *obj = 0;
 
 // use = here instead of ==, because we are setting obj equal to nextObj and then seeing if it's T or F
-  while (obj = nextObj()) {
+  while ((obj = nextObj())) {
 
 // now check if obj is a histogram
     if (obj->InheritsFrom("TH1")) {
@@ -367,7 +374,7 @@ Int_t StHistUtil::ExamineLogYList()
   Int_t LogYCount = 0;
 
 // use = here instead of ==, because we are setting obj equal to nextObj and then seeing if it's T or F
-  while (obj = nextObj()) {
+  while ((obj = nextObj())) {
 
     cout << " StHistUtil::ExamineLogYList has hist " <<  obj->GetName() << endl;
     LogYCount++;

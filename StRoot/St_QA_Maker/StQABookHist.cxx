@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.8 1999/12/08 22:58:17 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.9 1999/12/10 17:38:24 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.9  1999/12/10 17:38:24  kathy
+// now reprint canvas on each page of postscript output file; also changed some histogram limits
+//
 // Revision 1.8  1999/12/08 22:58:17  kathy
 // changed histogram limits and made names smaller
 //
@@ -520,8 +523,8 @@ void StQABookHist::BookHistGlob(){
   m_lengthFW     = QAH1F("QaGtrkLengthFW",  "globtrk: track length, ftpc west", 30,0.,120.);
   m_psiFE        = QAH1F("QaGtrkPsiFE",     "globtrk: psi, ftpc east", 36, 0.,360.);
   m_psiFW        = QAH1F("QaGtrkPsiFW",     "globtrk: psi, ftpc west", 36, 0.,360.);
-  m_tanlFE       = QAH1F("QaGtrkTanlFE",    "globtrk: tanl, ftpc east",32,-4.,4.);
-  m_tanlFW       = QAH1F("QaGtrkTanlFW",    "globtrk: tanl, ftpc west",32,-4.,4.);
+  m_tanlFE       = QAH1F("QaGtrkTanlFE",    "globtrk: tanl, ftpc east",30,-30.,30.);
+  m_tanlFW       = QAH1F("QaGtrkTanlFW",    "globtrk: tanl, ftpc west",30,-30.,30.);
   m_glb_thetaFE  = QAH1F("QaGtrkThetaFE",   "globtrk: theta, ftpc east",20,0.,4.);
   m_glb_thetaFW  = QAH1F("QaGtrkThetaFW",   "globtrk: theta, ftpc west",20,0.,4.);
   m_etaFE        = QAH1F("QaGtrkEtaFE",     "globtrk: eta, ftpc east",60,-6.,6.);
