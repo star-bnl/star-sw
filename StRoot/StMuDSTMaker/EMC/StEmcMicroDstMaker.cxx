@@ -120,7 +120,7 @@ Int_t StEmcMicroDstMaker::Make()
     StIOMaker* IO=(StIOMaker*)GetMaker("IOMaker");
     if(IO)
       {
-	char* chp = strrchr(IO->GetFile(),'/');
+	const char* chp = strrchr(IO->GetFile(),'/');
 	if(chp) mEventFile = strrchr(IO->GetFile(),'/')+1;
 	else mEventFile = IO->GetFile();
       }
