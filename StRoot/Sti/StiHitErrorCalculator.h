@@ -35,8 +35,8 @@ class StiDefaultHitErrorCalculator: public StiHitErrorCalculator
 	 const StiDefaultHitErrorCalculator & operator=(const StiDefaultHitErrorCalculator & calc);
 	 const StiDefaultHitErrorCalculator & operator=(const HitError_st & error);
    ~StiDefaultHitErrorCalculator();
-   inline void calculateError(StiKalmanTrackNode *node) const;
-   inline void set(double intrinsicZ, double driftZ,
+   void calculateError(StiKalmanTrackNode *node) const;
+   void set(double intrinsicZ, double driftZ,
 									 double crossZ, double intrinsicX,
 									 double driftX, double crossX);
 	 virtual void loadDS(TDataSet&ds);
