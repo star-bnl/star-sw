@@ -14,6 +14,7 @@ use File::Find;
 use Net::FTP;
 
 require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
+require "dbOnLineSetup.pl";
 
 my $debugOn=0;
 
@@ -58,12 +59,13 @@ struct JFileAttr => {
     fowner    => '$',
 };
 
-
- struct DbFileAttr => {
-         dbpath  => '$',
-         dbFname => '$',
-         dbEvType=> '$',
-		      };
+ struct DaqAttr =>   {
+          dName  => '$',
+          bgEvt   => '$',
+          endEvt  => '$',
+          numEvt  => '$',
+          evType  => '$',
+               };  
 
 
  my %monthHash = (
@@ -96,9 +98,42 @@ my @hpssDstDirs;
 my @hpssDstFiles;
 my @dbDaqFiles;
 my $ndbDaqFiles = 0;
+my @dbOnFiles;
+my $ndbOnFiles = 0;
+
 
  $nDHpssFiles = 0;
 
+&StDbOnLineConnect();
+
+ $sql="SELECT file, eventType,beginEvent, endEvent, numberOfEvents FROM $daqTagFilesT WHERE eventType = '3' ";
+
+  $cursor =$dbh->prepare($sql)
+   || die "Cannot prepare statement: $DBI::errstr\n";
+  $cursor->execute;
+ 
+   while(@fields = $cursor->fetchrow) {
+    my $cols=$cursor->{NUM_OF_FIELDS};
+       $fObjAdr = \(DaqAttr->new());
+
+       for($i=0;$i<$cols;$i++) {
+         my $fvalue=$fields[$i];
+         my $fname=$cursor->{NAME}->[$i];
+#       print "$fname = $fvalue\n" ;
+
+       ($$fObjAdr)->dName($fvalue)    if( $fname eq 'file');
+       ($$fObjAdr)->evType($fvalue)    if( $fname eq 'eventType'); 
+       ($$fObjAdr)->bgEvt($fvalue)     if( $fname eq 'beginEvent');
+       ($$fObjAdr)->endEvt($fvalue)    if( $fname eq 'endEvent'); 
+       ($$fObjAdr)->numEvt($fvalue)    if( $fname eq 'numberOfEvents'); 
+  }
+
+      $dbOnFiles[$ndbOnFiles] = $fObjAdr;
+      $ndbOnFiles++; 
+}
+  print "Total Number of files = ", $ndbOnFiles, "\n";
+
+&StDbOnLineDisconnect();
 
 
 for( $ll = 0; $ll<scalar(@SetD); $ll++) {
@@ -182,9 +217,67 @@ print "Total daq reco files: $nDiskFiles\n";
 
 &StDbProdConnect();
 
+ $sql="SELECT fName, Nevents FROM $FileCatalogT WHERE path like '%2000/06%' AND fName like '%daq' AND Nevents = 0";
+
+  $cursor =$dbh->prepare($sql)
+   || die "Cannot prepare statement: $DBI::errstr\n";
+  $cursor->execute;
+ 
+   while(@fields = $cursor->fetchrow) {
+    my $cols=$cursor->{NUM_OF_FIELDS};
+       $fObjAdr = \(DaqAttr->new());
+
+       for($i=0;$i<$cols;$i++) {
+         my $fvalue=$fields[$i];
+         my $fname=$cursor->{NAME}->[$i];
+#       print "$fname = $fvalue\n" ;
+
+       ($$fObjAdr)->dName($fvalue)     if( $fname eq 'fName');
+       ($$fObjAdr)->numEvt($fvalue)    if( $fname eq 'Nevents');  
+  }
+
+      $dbDaqFiles[$ndbDaqFiles] = $fObjAdr;
+      $ndbDaqFiles++; 
+}
+
+##### update daq files in FileCatalog with number of events from Online DB
+######## declare variables needed to update daq files in FileCatalog
+
+my $mNevts = 0;
+my $mNevtLo = 0;
+my $mNevtHi = 0;
+my $mFile;
+my $mEvType = 0;
+   foreach $eachDaqFile (@dbDaqFiles) {
+          
+ $mNevts = 0;
+ $mNevtLo = 0;
+ $mNevtHi = 0;
+ $mEvType = 0;          
+        $mFile = ($$eachDaqFile)->dName;
+    
+       foreach $eachOnFile (@dbOnFiles) {   
+
+         $dbFile = ($$eachOnFile)->dName;
+         $mNevts = ($$eachOnFile)->numEvt;
+         $mNevtLo = ($$eachOnFile)->bgEvt;
+         $mNevtHi = ($$eachOnFile)->endEvt;    
+         $mEvType = ($$eachOnFile)->evType; 
+	 if (($mFile eq $dbFile) and ($mNevts > 0)) {
+
+#   print "File, EvtType, Nevent, FirstEv, LastEv: ", $mFile," % ",$mEvType," % ",$mNevts," % ", $mNevtLo," % ", $mNevtHi, "\n";
+
+  &updateDAQTable();
+     last;
+    }else{
+    next;
+   }
+  }
+ }
+
 ### select from JobStatus table files which should be updated
 
- $sql="SELECT prodSeries, JobID,sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobStatus = 'n/a'";
+ $sql="SELECT prodSeries, JobID, sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobStatus = 'n/a'";
 
   $cursor =$dbh->prepare($sql)
    || die "Cannot prepare statement: $DBI::errstr\n";
@@ -213,32 +306,6 @@ print "Total daq reco files: $nDiskFiles\n";
 
 }
 
- for ($ll = 0;$ll<scalar(@SetD); $ll++) {
- $sql="SELECT path, fName, eventType FROM $FileCatalogT WHERE path like '%$SetD[$ll]' AND fName like '%daq' ";
-
-  $cursor =$dbh->prepare($sql)
-   || die "Cannot prepare statement: $DBI::errstr\n";
-  $cursor->execute;
- 
-   while(@fields = $cursor->fetchrow) {
-    my $cols=$cursor->{NUM_OF_FIELDS};
-       $fObjAdr = \(DbFileAttr->new());
- 
-
-   for($i=0;$i<$cols;$i++) {
-    my $fvalue=$fields[$i];
-      my $fname=$cursor->{NAME}->[$i];
-#       print "$fname = $fvalue\n" ;
-
-       ($$fObjAdr)->dbpath($fvalue)   if( $fname eq 'path');
-       ($$fObjAdr)->dbFname($fvalue)   if( $fname eq 'fName');
-       ($$fObjAdr)->dbEvType($fvalue)  if( $fname eq 'eventType'); 
-  }
-
-      $dbDaqFiles[$ndbDaqFiles] = $fObjAdr;
-      $$ndbDaqFiles++; 
-}
-}
  
 my $mchainOp;
 my $pr_chain;
@@ -319,10 +386,8 @@ foreach my $jobnm (@jobSum_set){
 
           &sumInfo("$jb_sumFile",1);
 
-#     print "File name: ",$filename, " % ", "Sum dir: ", $msumDir, "\n";
-     print "JobFile=", $mjobFname," % ", "Job Status: ", $mjobSt,"\n";
-     print "Event first, last, Done, Skip :", $first_evts," % ",$last_evts," % ",$mNev," % ", $mEvtSk, "\n";
-     print "Node :", $mnodeId, "\n";
+#     print "JobFile=", $mjobFname," % ", "Job Status: ", $mjobSt,"\n";
+#     print "Event first, last, Done, Skip :", $first_evts," % ",$last_evts," % ",$mNev," % ", $mEvtSk, "\n";
 
 ### update JobStatus table with info for jobs completed
 
@@ -365,9 +430,6 @@ my $mpath  = "n\/a";
 my $mdataSet = "n\/a";
 my $msize = 0;
 my $mcTime = 00-00-00;
-my $mNevts = 0;
-my $mNevtLo = 0;
-my $mNevtHi = 0;
 my $mowner = "n\/a";
 my $mprotc = "-rw-r-----";
 my $mtype = "n\/a";
@@ -446,20 +508,16 @@ my $daqType = 0;
    $mhpss = "N";
  }
    $mtype = "daq_reco";
-# print  "Path:  ", $mpath," % ","Name :",$mfName," % ","Nrun = ", $mrunId," % ", "FileSeq = ", $mfileSeq," % ", "component =", $mcomp, "\n";
 
  $daqType = 0; 
 
- foreach my $daqFile (@dbDaqFiles){
-        $daqName =  ($$daqFile)->dbFname;
-        $daqType =  ($$daqFile)->dbEvType;  
+ foreach my $daqFile (@dbOnFiles){
+        $daqName =  ($$daqFile)->dName;
+        $daqType =  ($$daqFile)->evType;
+        $daqName =~ s/.daq//g; 
 	if ($mfName =~ /$daqName/) {
           $mevtType = $daqType;
-    last;
-   }else{
-   next;
- } 
-      }
+
 foreach my $jobnm (@jobFSum_set){
       $mproSr   = ($$jobnm)->prSer;
       $msumFile = ($$jobnm)->smFile;
@@ -472,7 +530,7 @@ foreach my $jobnm (@jobFSum_set){
         
      if ( $mfName =~ /$dfile/) {
 
-#  print "Num Events: first, last, done :", $mNevtLo," % ", $mNevtHi," % ",$mNevts, "\n";  
+#  print "Num Events, EvType: first, last, done :", $mNevtLo," % ", $mNevtHi," % ",$mNevts," % ",$mevtType, "\n";  
    
       print "updating FileCatalogT table\n";
  
@@ -483,6 +541,12 @@ foreach my $jobnm (@jobFSum_set){
          next;
        }
      }   
+    last;
+   }else{
+   next;
+ } 
+      }
+
 }else{
  next;
 }
@@ -543,6 +607,22 @@ sub fillDbTable {
     $rv = $dbh->do($sql) || die $dbh->errstr;
 
   }
+##############################################################################
+
+  sub updateDAQTable {
+  
+   $sql="update $FileCatalogT set ";   
+   $sql.="Nevents='$mNevts',";
+   $sql.="NevLo='$mNevtLo',";
+   $sql.="NevHi='$mNevtHi',";
+   $sql.="eventType='$mEvType'";  
+   $sql.=" WHERE fName = '$mFile'"; 
+   print "$sql\n" if $debugOn;
+   $rv = $dbh->do($sql) || die $dbh->errstr;
+  
+  }
+
+
 
 ##############################################################################
 
