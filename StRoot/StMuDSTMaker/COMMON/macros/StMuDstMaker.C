@@ -30,7 +30,7 @@ void StMuDstMaker(const Int_t nevents=10,
 //==========================================================================================
 void StHbtExampleQQ(const Int_t nevents, const Char_t **fileList, const Char_t* dirName, const Char_t* fileName)
 {
-  gROOT->LoadMacro("StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
+  gROOT->LoadMacro("/star/u/laue/afsWork/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
 
   //  gSystem->Setenv("JPROF_FLAGS", "JP_START JP_PERIOD=0.001"); 
