@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofSlat.cxx,v 2.3 2003/05/21 18:23:18 ullrich Exp $
+ * $Id: StTofSlat.cxx,v 2.4 2003/07/09 20:13:23 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, Dec 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofSlat.cxx,v $
+ * Revision 2.4  2003/07/09 20:13:23  ullrich
+ * Inherits now from StHit. Methods added.
+ *
  * Revision 2.3  2003/05/21 18:23:18  ullrich
  * Major Revision of ToF classes (F. Geurts)
  *
@@ -23,7 +26,7 @@
 #include "StTofSlat.h"
 #include "StTrack.h"
 
-static const char rcsid[] = "$Id: StTofSlat.cxx,v 2.3 2003/05/21 18:23:18 ullrich Exp $";
+static const char rcsid[] = "$Id: StTofSlat.cxx,v 2.4 2003/07/09 20:13:23 ullrich Exp $";
 
 ClassImp(StTofSlat)
 
@@ -32,11 +35,15 @@ StTofSlat::StTofSlat()
 { /* noop */ }
 
 StTofSlat::StTofSlat(unsigned short slatId, unsigned short rawAdc,
-                     unsigned short rawTdc, StTrack *track)
-  : mSlatIndex(slatId), mAdc(rawAdc), mTdc(rawTdc), mAssociatedTrack(track)
+                     unsigned short rawTdc, StTrack *track,
+  		     float zhit, unsigned short hitprof, unsigned short matchflag)
+  : mSlatIndex(slatId), mAdc(rawAdc), mTdc(rawTdc), mAssociatedTrack(track),
+    mZhit(zhit), mHitProf(hitprof), mMatchFlag(matchflag)
 { /* noop */ }
 
 StTofSlat::~StTofSlat() { /* noop */ }
+
+StObject* StTofSlat::clone() const { return new StTofSlat(*this); }
 
 void
 StTofSlat::setAssociatedTrack(StTrack* val)
@@ -61,7 +68,10 @@ StTofSlat::operator==(const StTofSlat& p) const
 {
     return (p.mSlatIndex == mSlatIndex &&
             p.mAdc  == mAdc && p.mTdc  == mTdc &&
-	    p.mAssociatedTrack == mAssociatedTrack);
+	    p.mAssociatedTrack == mAssociatedTrack &&
+	    p.mZhit == mZhit &&
+	    p.mHitProf == mHitProf &&
+	    p.mMatchFlag == mMatchFlag );
 }
 
 int
