@@ -1,7 +1,13 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.h,v 1.3 2003/04/25 22:52:29 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.h,v 1.4 2003/05/15 17:54:19 thenry Exp $
  * $Log: StEmcTpcFourPMaker.h,v $
+ * Revision 1.4  2003/05/15 17:54:19  thenry
+ * Constructor modified to accept the StEmcADCToEMaker* (default is NULL), so
+ * that if StEmcADCToEMaker* is not NULL, the StEmcCollection from the
+ * StEmcADCToEMaker will be used, instead of the default StEmcMuCollection
+ * obtained directly from the muDst.
+ *
  * Revision 1.3  2003/04/25 22:52:29  thenry
  * Better speed-- before took 5 seconds PER EVENT, now takes 1/7 the time
  * that reading from the MuDst does.  Fast enough.  Promiscuity with respect
@@ -41,8 +47,11 @@ using namespace std;
 #include "StFourPMaker.h"
 #include "StLorentzVectorD.hh"
 #include "StMuDSTMaker/COMMON/StMuEmcPoint.h"
+#include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
 
+#ifndef M_PI
 #define M_PI 3.14159265358979323846
+#endif
 
 class BadPathLengthException : public string
 {
@@ -433,10 +442,16 @@ public:
     
 public:
     StEmcTpcFourPMaker(const char* name, StMuDstMaker *pevent, 
-      long pBins, long thBins, double pRad, double thRad, double rsqr);
+      long pBins, long thBins, double pRad, double thRad, double rsqr, 
+      StEmcADCtoEMaker* adcToEMaker = NULL);
     virtual Int_t Make();
+    
+    StMuEmcCollection* getMuEmcCollection(void) { return muEmc; };
 
     StEmcTpcBinMap binmap;   
+protected:
+    StEmcADCtoEMaker* adc2E;
+    StMuEmcCollection* muEmc;
 
     ClassDef(StEmcTpcFourPMaker,1)
 };

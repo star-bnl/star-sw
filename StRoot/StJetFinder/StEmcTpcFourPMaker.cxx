@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.5 2003/05/09 20:48:16 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.6 2003/05/15 17:54:19 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -33,14 +33,18 @@
 #include "StMuDSTMaker/COMMON/StMuEmcCollection.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StEmcPoint.h"
+#include "StMuDSTMaker/COMMON/StMuEmcUtil.h"
 #include "StEmcTpcFourPMaker.h"
 
 ClassImp(StEmcTpcFourPMaker)
   
-StEmcTpcFourPMaker::StEmcTpcFourPMaker(const char* name, StMuDstMaker* uDstMaker,
-  long pBins, long thBins, double pRad, double thRad, double rsqr) 
-  : StFourPMaker(name, uDstMaker), radiussqr(rsqr), binmap(pBins, thBins, pRad, thRad){
+StEmcTpcFourPMaker::StEmcTpcFourPMaker(const char* name, 
+  StMuDstMaker* uDstMaker, 
+  long pBins, long thBins, double pRad, double thRad, double rsqr,
+  StEmcADCtoEMaker* adcToEMaker) 
+  : StFourPMaker(name, uDstMaker), radiussqr(rsqr), binmap(pBins, thBins, pRad, thRad), adc2E(adcToEMaker) {
   seconds = 0;
+  muEmc = NULL;
 }
 
 Int_t StEmcTpcFourPMaker::Make() {
@@ -76,8 +80,17 @@ Int_t StEmcTpcFourPMaker::Make() {
   }
 
   // Retreive the points
-  StMuEmcCollection* emc = uDst->emcCollection();
-  int numPoints = emc->getNPoints();
+  if(adc2E == NULL)
+    muEmc = uDst->emcCollection();
+  else
+    {
+      if(muEmc != NULL)
+	delete muEmc;
+      StMuEmcUtil converter;
+      StEmcCollection *emc = adc2E->getEmcCollection();
+      muEmc = converter.getMuEmc(emc);
+    }
+  int numPoints = muEmc->getNPoints();
 
   // Add the points
   cout << "NumPoints: " << numPoints << endl;
@@ -85,7 +98,7 @@ Int_t StEmcTpcFourPMaker::Make() {
   double twoPi = M_PI*2.0;
   for(int i = 0; i < numPoints; i++)
   {
-    StMuEmcPoint* point = emc->getPoint(i);
+    StMuEmcPoint* point = muEmc->getPoint(i);
     cout << "Point[" << i << "] eta: " << point->getEta() - etaShift;
     double phi = point->getPhi(); 
     while(phi < 0) phi += twoPi;
@@ -95,7 +108,7 @@ Int_t StEmcTpcFourPMaker::Make() {
   }
   for(int i = 0; i < numPoints; i++)
   {
-    StMuEmcPoint* point = emc->getPoint(i);
+    StMuEmcPoint* point = muEmc->getPoint(i);
     binmap.insertPoint(point);
   }
 
@@ -176,6 +189,12 @@ Int_t StEmcTpcFourPMaker::Make() {
   ///static_cast<double>(CLOCKS_PER_SEC);
   //cout << "Time to add points for jet finding: " << timeLengths[timeindex++] << endl;
 
+  if(adc2E == NULL)
+    delete muEmc;
+
   return kStOk;
 }
+
+
+
 
