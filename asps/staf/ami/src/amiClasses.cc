@@ -176,10 +176,16 @@ STAFCV_T amiBroker:: callInvoker (const char * name
 	 }
 	 else {
 	    if( !tdm->newTable(tnames._buffer[i], invoker->tableSpec(i)
-			, 0)
+			, 1) // TEMPORARY HACK !!!
 	    ||  !tdm->findTable(tnames._buffer[i], tables._buffer[i])
 	    ){
-	       EML_MESSAGE(TABLE_CREATED_IGNORE_ERRORS);
+	    if( !tdm->findTable(tnames._buffer[i], tables._buffer[i])
+	    ){ // HACK - should not be called twice... but it works
+	       EML_ERROR(CANT_CREATE_OBJECT);
+	    }
+	    else {
+	       EML_MESSAGE(WARNING: Table created with 1 row.);
+	    }
 	    }
 	 }
       }
