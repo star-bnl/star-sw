@@ -8,7 +8,7 @@ class StEvtHddr : public St_DataSet
 public:
   StEvtHddr(St_DataSet *parent=0);
  ~StEvtHddr(){};
- 
+  StEvtHddr &operator=(const StEvtHddr &hddr);
 //		Get methods
 
   Int_t 	GetRunNumber()    const {return mRunNumber;};
