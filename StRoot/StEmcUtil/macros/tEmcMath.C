@@ -1,7 +1,8 @@
 //
-// 9-mar-2001 for testing StEmcMath 
+//  9-mar-2001 for testing StEmcMath 
+// 24-may - added testing for StEmcOnlineUtil
 //
-//.include "$STAR/StRoot "
+//.include "$STAR/StRoot"
 //gDebug=5 
 #if !defined(__CINT__)
 #include <TROOT.h>
@@ -10,6 +11,7 @@
 #include "StEvent/StMeasuredPoint.h"
 #include "StEvent/StHit.h"
 #include "StEmcUtil/StEmcMath.h"
+#include "StEmcUtil/StSmdDaqUtil.h"
 #endif
 #include "StEmcUtil/emcInternalDef.h"
 #include "StDetectorId.h"
@@ -65,4 +67,23 @@ void tEmcId()
     if(id) cout<<" Star Id "<<UInt_t(stId)<<" => Local Emc Id "<<id<<endl;
     else cout<<" Wrong Star Id "<<UInt_t(stId)<<endl;
   }
+}
+
+// =======================================================
+
+void tDaqUtil()
+{
+  Int_t e, s;
+  tEmcLoad();
+  for(Int_t con=1; con<=3; con++){
+    for(Int_t pin=1; pin<=50; pin++){
+      if(StSmdDaqUtil::getBsmdeCell(con,pin,e)){
+        printf(" Bsmde con %1i pin %2i => e %3i ",con,pin,e);
+        if(StSmdDaqUtil::getBsmdpCell(con,pin,e,s))
+        printf(" Bsmdp => e %2i s %2i\n",e,s);
+        else printf("\n");
+      }
+    }
+    printf("==\n");
+  } 
 }
