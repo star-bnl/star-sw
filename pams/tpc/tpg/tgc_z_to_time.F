@@ -1,5 +1,8 @@
-* $Id: tgc_z_to_time.F,v 1.4 1998/09/01 21:36:36 sakrejda Exp $
+* $Id: tgc_z_to_time.F,v 1.5 1999/07/26 21:17:25 sakrejda Exp $
 * $Log: tgc_z_to_time.F,v $
+* Revision 1.5  1999/07/26 21:17:25  sakrejda
+* z<->time changedto follow Tom's formula
+*
 * Revision 1.4  1998/09/01 21:36:36  sakrejda
 * trigger offset added
 *
@@ -52,7 +55,8 @@ C     time - time bucket number
 
       zoff=0
       if(padrow.lt.14)zoff=z_offset
-      time=((z+zoff)/vdrift + t0_offset)*clock_local+1.0
+c      time=((z+zoff)/vdrift + t0_offset)*clock_local+1.0
+       time=int(z*clock_local/vdrift)+int(t0_offset*clock_local-1.0)+1 ! HL,IS 7/25/99
 
       tgc_z_to_time = STAFCV_OK      
 
