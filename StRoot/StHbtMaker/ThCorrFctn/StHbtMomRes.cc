@@ -77,9 +77,9 @@ void StHbtMomRes::setPDGPid(const int pdgPid) {
     mPShiftb = -0.000793;
     mPShiftalfa = -2.74;
     break;
-    // Caution! These are not real parameters for protons -
-    //   just copied from kaons for convenience, do not rely
-    //   on them for any physics results! 
+    /* Caution! These are not real parameters for protons -
+       just copied from kaons for convenience, do not rely
+       on them for any physics results! 
     case 2212:
     case -2212:
     mPta = 0.0208;

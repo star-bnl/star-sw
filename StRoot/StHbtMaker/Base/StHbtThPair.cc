@@ -201,6 +201,7 @@ void StHbtThPair::calcMomParameters() const{ // fortran like function! faster?
   tMt = sqrt(tMt);
   mPt = sqrt(mPt);
   mBetat = mPt/tMt;
+  mUt = mPt/tMt;
 
   // Boost to LCMS
   double tBeta = tPz/tE;
@@ -236,7 +237,6 @@ void StHbtThPair::calcPosParameters() const{ // fortran like function! faster?
   double tM =   sqrt(tMt - tPt);
   tMt = sqrt(tMt);
   tPt = sqrt(tPt);
-   mUt = tPt/tMt;
    
   double tDX = mEmPoint1->x()-mEmPoint2->x();
   double tDY = mEmPoint1->y()-mEmPoint2->y();

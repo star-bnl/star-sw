@@ -78,6 +78,13 @@ class ThNonId3DCF :  public virtual StHbtThCorrFctn  {
   TProfile*     mProfLongP;
   TProfile*     mProfLongN;
   
+  TProfile*     mProfDenOutP;
+  TProfile*     mProfDenOutN;
+  TProfile*     mProfDenSideP;
+  TProfile*     mProfDenSideN;
+  TProfile*     mProfDenLongP;
+  TProfile*     mProfDenLongN;
+  
 
   StHbt2DHisto* mHOutKSame;
   StHbt2DHisto* mHOutKDiff;

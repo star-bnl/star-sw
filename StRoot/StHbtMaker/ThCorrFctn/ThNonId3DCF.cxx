@@ -141,6 +141,25 @@ ThNonId3DCF::ThNonId3DCF(char* title, const int& nbins, const float& QinvLo, con
   strcat(tLN,title);
   mProfLongN = new TProfile(tLN, tLN, nbins, QinvLo, QinvHi);
 
+  char tDOP[100] = "ProfDenOutP";
+  strcat(tDOP,title);
+  mProfDenOutP = new TProfile(tDOP, tDOP, nbins, QinvLo, QinvHi);
+  char tDON[100] = "ProfDenOutN";
+  strcat(tDON,title);
+  mProfDenOutN = new TProfile(tDON, tDON, nbins, QinvLo, QinvHi);
+  char tDSP[100] = "ProfDenSideP";
+  strcat(tDSP,title);
+  mProfDenSideP = new TProfile(tDSP, tDSP, nbins, QinvLo, QinvHi);
+  char tDSN[100] = "ProfDenSideN";
+  strcat(tDSN,title);
+  mProfDenSideN = new TProfile(tDSN, tDSN, nbins, QinvLo, QinvHi);
+  char tDLP[100] = "ProfDenLongP";
+  strcat(tDLP,title);
+  mProfDenLongP = new TProfile(tDLP, tDLP, nbins, QinvLo, QinvHi);
+  char tDLN[100] = "ProfDenLongN";
+  strcat(tDLN,title);
+  mProfDenLongN = new TProfile(tDLN, tDLN, nbins, QinvLo, QinvHi);
+
   // to enable error bar calculation...
   mNumOutP->Sumw2();
   mDenOutP->Sumw2();  
@@ -227,6 +246,13 @@ ThNonId3DCF::ThNonId3DCF(const ThNonId3DCF& ThCf) : StHbtThCorrFctn(ThCf)
   mProfSideN = new TProfile(*ThCf.mProfSideN);
   mProfLongP = new TProfile(*ThCf.mProfLongP);
   mProfLongN = new TProfile(*ThCf.mProfLongN);
+
+  mProfDenOutP = new TProfile(*ThCf.mProfDenOutP);
+  mProfDenOutN = new TProfile(*ThCf.mProfDenOutN);
+  mProfDenSideP = new TProfile(*ThCf.mProfDenSideP);
+  mProfDenSideN = new TProfile(*ThCf.mProfDenSideN);
+  mProfDenLongP = new TProfile(*ThCf.mProfDenLongP);
+  mProfDenLongN = new TProfile(*ThCf.mProfDenLongN);
 }
 
 ThNonId3DCF::~ThNonId3DCF(){
@@ -271,7 +297,15 @@ ThNonId3DCF::~ThNonId3DCF(){
   delete mProfLongP;
   delete mProfLongN;
 
+  delete mProfDenOutP;
+  delete mProfDenOutN;
+  delete mProfDenSideP;
+  delete mProfDenSideN;
+  delete mProfDenLongP;
+  delete mProfDenLongN;
+
 }
+
 
 //____________________________
 void ThNonId3DCF::AddNum(StHbtThPair* aThPair){
@@ -327,21 +361,27 @@ void ThNonId3DCF::AddDen(StHbtThPair* aThPair){
     {
       if(tKOut>0.){
 	mDenOutP->Fill(tKStar, weight);
+	mProfDenOutP->Fill(tKStar, weight);
       }
       else{
 	mDenOutN->Fill(tKStar, weight);    
+	mProfDenOutN->Fill(tKStar, weight);
       }
       if(tKSide>0.){
 	mDenSideP->Fill(tKStar, weight);
+	mProfDenSideP->Fill(tKStar, weight);
       }
       else{
 	mDenSideN->Fill(tKStar, weight);    
+	mProfDenSideN->Fill(tKStar, weight);
       }
       if(tKLong>0.){
 	mDenLongP->Fill(tKStar, weight);
+	mProfDenLongP->Fill(tKStar, weight);
       }
       else{
 	mDenLongN->Fill(tKStar, weight);    
+	mProfDenLongN->Fill(tKStar, weight);
       }
 
       mHOutKDiff->Fill(tKOut, tKStar, weight);
@@ -468,6 +508,13 @@ inline void ThNonId3DCF::Write()  {
   mProfSideN->Write();
   mProfLongP->Write();
   mProfLongN->Write();
+
+  mProfDenOutP->Write();
+  mProfDenOutN->Write();
+  mProfDenSideP->Write();
+  mProfDenSideN->Write();
+  mProfDenLongP->Write();
+  mProfDenLongN->Write();
 
 };
 

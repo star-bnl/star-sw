@@ -48,7 +48,7 @@ StHbtEvtGenPair::~StHbtEvtGenPair(){
 
 void StHbtEvtGenPair::setVariables(const StHbtPair* aPair){
   double tTimeShift = 3.75;
-  // double SpaceShift = -4.21;
+  double SpaceShift = -4.21;
  
   StHbtEvtGenHiddenInfo* tEvtGenHiddenInfoV[2];
   tEvtGenHiddenInfoV[0] =
@@ -118,6 +118,64 @@ void StHbtEvtGenPair::setVariables(const StHbtPair* aPair){
 				   mMomentum2->mt());
 	  break;
 	}      
+      case 5: // Generate a static gaussian in rOut
+	{
+	  static TRandom tRand;
+	  static double sigma=9.0;
+	  static double mu=3.0;
+	  double mRandVar[3];
+	  if (ti==0)
+	    {
+	      tEmPoint->setX(0.0);
+	      tEmPoint->setY(0.0);
+	      tEmPoint->setZ(0.0);
+	      tEmPoint->setT(0.0);
+	    }
+	  else
+	    {
+	      mRandVar[0] = tRand.Gaus(0.,1.);
+	      mRandVar[1] = tRand.Gaus(0.,1.);
+	      mRandVar[2] = tRand.Gaus(0.,1.);
+	  
+
+	      double tPx = mMomentum1->x()+mMomentum2->x();
+	      double tPy = mMomentum1->y()+mMomentum2->y();
+	      double tPz = mMomentum1->z()+mMomentum2->z();
+	      double tE  = mMomentum1->e()+mMomentum2->e();
+	      double tPt = tPx*tPx + tPy*tPy;
+	      //mCVK = tPz*tPz;
+	      double tMt = tE*tE - tPz*tPz;//mCVK;
+	      //mCVK += tPt;
+	      //mCVK = sqrt(mCVK);
+	      double tM =   sqrt(tMt - tPt);
+	      tMt = sqrt(tMt);
+	      tPt = sqrt(tPt);
+	  
+	      double tROut = mRandVar[0]*sigma+mu;
+	      double tRSide = mRandVar[1]*sigma;
+	      double ttz = mRandVar[2]*sigma;
+	      double ttt = tROut;
+	      //	      mX2[2] = mRandVar[2]*sigma;
+	      //	      mX2[3] = tROut; // =0 | Just a computing trick for the boost
+	  
+	      tROut  *= (tMt/tM); // Rout*gammaT
+	      ttt    *= (tPt/tM); // Rout*betaT*gammaT
+	      double ttDTime = ttt; 
+	      ttt += (tPz/tE*ttz);
+	      ttt *= (tE/tMt);
+	      ttz += (tPz/tE*ttDTime); 
+	      ttz *= (tE/tMt);
+	  
+	      tPx /= tPt;
+	      tPy /= tPt;
+	  
+	      tEmPoint->setX(tROut*tPx-tRSide*tPy);
+	      tEmPoint->setY(tROut*tPy+tRSide*tPx);
+	      tEmPoint->setZ(ttz);
+	      tEmPoint->setT(ttt);
+	    }
+	  break;
+	}      
 	//      case 4:
       	//{
 	  //	  if(ti==1) {
@@ -134,5 +192,11 @@ void StHbtEvtGenPair::setVariables(const StHbtPair* aPair){
   mEmPoint2 = tEvtGenHiddenInfoV[1]->getEmPoint();
   mPid1=tEvtGenHiddenInfoV[0]->getPdgPid();
   mPid2=tEvtGenHiddenInfoV[1]->getPdgPid();
+
+  mMomParCalculated=0;
+  mPosParCalculated=0;
+
+  mMeasPair=aPair;
+  mWeightOk=false;
 }
 
