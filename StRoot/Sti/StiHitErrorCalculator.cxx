@@ -1,5 +1,5 @@
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.0 2002/12/10 21:59:13 pruneau Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.1 2003/01/08 21:17:33 pruneau Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -11,6 +11,11 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.1  2003/01/08 21:17:33  pruneau
+ * Addind class StiSortedHitIterator to work in the seed finder
+ * and StiDummyVertex finder to provide an StEvent based vertex
+ * retrieval mechanism.
+ *
  * Revision 2.0  2002/12/10 21:59:13  pruneau
  * Introducing version 2.0
  *
@@ -42,18 +47,17 @@ void StiDefaultHitErrorCalculator::set(double intrinsicZ, double driftZ,
   coeff[5]= crossX;
 }
 
-void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode & node) const
+void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode * node) const
 {  
-  StiHit * hit = node.getHit();
-  double dz = (fabs(hit->z())-200.)/100.;
-  double cosCA = node._cosCA;
-  double sinCA = node._sinCA;
+  double dz = (fabs(node->getZ())-200.)/100.;
+  double cosCA = node->_cosCA;
+  double sinCA = node->_sinCA;
   double tanCA = sinCA/cosCA;
   double ecross=coeff[0]-coeff[1]*dz/cosCA +coeff[2]*tanCA*tanCA;
-  double tanDip=node.getTanL();
+  double tanDip=node->getTanL();
   double cosDipInv=sqrt(1+tanDip*tanDip);
   double edip=coeff[3]-coeff[4]*dz*cosDipInv+coeff[5]*tanDip*tanDip;
-  node.eyy = 10000.*ecross*ecross;
-  node.ezz = 10000.*edip*edip;
+  node->eyy = 10000.*ecross*ecross;
+  node->ezz = 10000.*edip*edip;
 }
 

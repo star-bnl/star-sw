@@ -42,6 +42,7 @@ public:
   void setFactory(Factory<StiKalmanTrack>* val);
   ///Set hit container
   void setHitContainer(StiHitContainer*);
+  StiHitContainer* getHitContainer();
   
  protected:
   Factory<StiKalmanTrack>* _trackFactory;
@@ -63,6 +64,11 @@ inline void StiSeedFinder::setFactory(Factory<StiKalmanTrack>* val)
 inline void StiSeedFinder::setHitContainer(StiHitContainer* val)
 {
   _hitContainer=val;
+}
+
+inline StiHitContainer* StiSeedFinder::getHitContainer()
+{
+  return _hitContainer;
 }
 
 #endif

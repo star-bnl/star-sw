@@ -15,6 +15,7 @@
 #include "StiHit.h"
 class StiDetector;
 class StiMaterial;
+class Messenger;
   
 typedef enum {
   kFailed = -1,         // could not find intersection
@@ -28,205 +29,201 @@ typedef enum {
   Work class used to handle Kalman filter information while
   constructing track nodes.  A node may or may not own a hit
   depending whether it lies on a measurement layer where a hit
-  was found. A node can have 0, 1, or many children. The canonical
-  ordering of the nodes is outside-in. Children node should be
-  at smaller radii.
-
-  <p>  
+  was found. A node can have 0, 1, or many children. 
+  Nodes are nominally sequenced outside-in i.e. with decreasing 
+  radius (or independent variable). The order can however be reversed.
+  In anycase, the order should always be monotonically increasing 
+  or decreasing.
   \author Claude A Pruneau
 */
 class StiKalmanTrackNode : public StiTrackNode 
 {
 public:
+  //StiKalmanTrackNode();
+  //~StiKalmanTrackNode();
+  const StiKalmanTrackNode& operator=(const StiKalmanTrackNode&node);  
+  
   double mcs2(double d, double radThickness, double beta2, double p2);
   /// Resets the node to a "null" un-used state
   void reset();
   /// Initialize this node with the given hit information
-  void initialize(StiHit*h,double alpha, double eta, double curvature, double tanl)
+  void initialize(StiHit*h,double alpha, double eta, double curvature, double tanl);
+  
+  // Sets the various attributes of this node based on the argument list.
+  //void set(StiHit * hit, const double alpha,const double xRef,const double xx[5], const double cc[15], const double dEdx, const double chi2);
+  /// Sets the Kalman state of this node equal to that of the given node. 
+  void setState(const StiKalmanTrackNode * node);
+  // Extract state information from this node.
+  void get(double& alpha, double& xRef, double x[5], double cc[15], double& chi2);
+  /// Get the charge (sign) of the track at this node
+  double getCharge() const;
+  /// Convenience Method that returns the track momentum at this node
+  StThreeVectorF getMomentumF() const;
+  /// Convenience Method that returns the track momentum at this node
+  /// in global coordinates.
+  StThreeVectorF getGlobalMomentumF() const;
+  StThreeVector<double> getMomentum() const;
+  StThreeVector<double> getGlobalMomentum() const;
+  void setDetector(const StiDetector * detector);
+  const StiDetector * getDetector() const;
+  /// Calculates and returns the momentum and error of the track at this node. The momentum is 
+  /// in the local reference frame of this node.
+  void getMomentum(double p[3], double e[6]=0) const;
+  /// Calculates and returns the tangent of the track pitch angle at this node.
+  double getCurvature() const;
+  void setCurvature(double curvature);
+  double getDipAngle() const;
+  double getTanL() const;
+  /// Calculates and returns the momentum of the track at this node.
+  double getP() const;
+  /// Calculates and returns the transverse momentum of the track at this node.
+  double getPt() const;
+  
+  double getRefPosition() const 
     {
-      reset();
-      _hit      = h;
-      _refX    = h->detector()->getPlacement()->getNormalRadius();
-      _x       = h->x();
-      _alpha   = alpha;
-      _cosAlpha = cos(alpha);
-      _sinAlpha = sin(alpha);
-      _p0      = h->y();
-      _p1      = h->z();
-      _p2      = eta;
-      _p3      = curvature;
-      _p4      = tanl;
-      _sinCA   = _p3*_x-_p2;
-      if (fabs(_sinCA)>1.) throw runtime_error("SKTN::initialize() - ERROR - fabs(_sinCA)>1.");
-      _cosCA   = sqrt(1.-_sinCA*_sinCA);
-    };
-    // Sets the various attributes of this node based on the argument list.
-    //void set(StiHit * hit, const double alpha,const double xRef,const double xx[5], const double cc[15], const double dEdx, const double chi2);
-    /// Sets the Kalman state of this node equal to that of the given node. 
-    void setState(const StiKalmanTrackNode * node);
-    // Extract state information from this node.
-    void get(double& alpha, double& xRef, double x[5], double cc[15], double& chi2);
-    /// Get the charge (sign) of the track at this node
-    double getCharge() const;
-    /// Convenience Method that returns the track momentum at this node
-    StThreeVectorF getMomentumF() const;
-    /// Convenience Method that returns the track momentum at this node
-    /// in global coordinates.
-    StThreeVectorF getGlobalMomentumF() const;
-    StThreeVector<double> getMomentum() const;
-    StThreeVector<double> getGlobalMomentum() const;
-    void setDetector(const StiDetector * detector);
-    const StiDetector * getDetector() const;
-    /// Calculates and returns the momentum and error of the track at this node. The momentum is 
-    /// in the local reference frame of this node.
-    void getMomentum(double p[3], double e[6]=0) const;
-    /// Calculates and returns the tangent of the track pitch angle at this node.
-    double getCurvature() const;
-    void setCurvature(double curvature);
-    double getDipAngle() const;
-    double getTanL() const;
-    /// Calculates and returns the momentum of the track at this node.
-    double getP() const;
-    /// Calculates and returns the transverse momentum of the track at this node.
-    double getPt() const;
-
-    double getRefPosition() const 
-      {
-	return _refX;
-      }
-
-    double getRefAngle() const 
-      {
-	return _alpha;
-      }
-
-    double getX() const
-      {
-	return _x;
-      }
-    double getY() const
-      {
-	return _p0;
-      }
-
-    double getZ() const
-      {
-	return _p1;
-      }
-    
-    double getEta() const
-      {
-	return _p2;
-      }
-
-    StThreeVector<double>getPoint() const;
-    StThreeVector<double>getGlobalPoint() const;
-    /// Calculates and returns the momentum and error of the track at this node in global coordinates.
-    void getGlobalMomentum(double p[3], double e[6]=0) const;
-    /// Set the attributes of this node as a copy of the given node.
-    void setAsCopyOf(const StiKalmanTrackNode * node);
-
-    /// Propagates a track encapsulated by the given node "p" to the given detector "tDet".
-    int  propagate(StiKalmanTrackNode *p, const StiDetector * tDet);	//throw (Exception);
-
-    /// Propagates a track encapsulated by the given node "p" to the given vertex
-    void  propagate(const StiKalmanTrackNode *p, StiHit * vertex);
-
-    /// Evaluates, stores and returns the dedx associated with this node.
-    /// Possible returned values are:
-    /// > 0 : value of dedx
-    /// -1  : pathlength was invalid or less than "0"
-    /// -2  : no hit is associated with the node.
-    /// -3  : invalid eloss data for this node.
-    double  evaluateDedx();
-
-    int  locate(StiPlacement*place,StiShape*sh);
-    int  propagate(double x,int option);
-    void propagateError();
-    void propagateMCS(double pathLength, 
-		      double radThickness, 
-		      double zOverA,
-		      double ionization,
-		      double massHypo,
-		      double elossSign);
-
-    /// Extrapolate the track parameters to radial position "x"  and return a point global coordinates along
-    /// the track at that point.
-    StThreeVector<double> getPointAt(double xk) const;
-
-    double evaluateChi2(); 
-    void updateNode(); 
-    void rotate(double alpha); 
-    void add(StiKalmanTrackNode * newChild);
-    double getField()  const;
-    double getHelicity()  const;
-    double getPhase()   const;
-    double getWindowY() const;
-    double getWindowZ() const;
-    double pitchAngle() const;
-    double crossAngle() const;
-    double sinCrossAngle() const;
-    double getDedx() const;
-    double nice(double angle) const;
-    /// Return center of helix circle in global coordinates
-    StThreeVector<double> getHelixCenter() const;
-    void setError(pair<double, double> p);
-    static void   setParameters(StiKalmanTrackFinderParameters *parameters);
-    friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
-    /// rotation angle of local coordinates wrt global coordinates
-
-    double _alpha;
-    double _cosAlpha;
-    double _sinAlpha;
-    /// sine and cosine of cross angle
-    double _sinCA;
-    double _cosCA;
-    /// local X-coordinate of this track (reference plane)
-    double _refX;
-    double _x;   
-    /// local Y-coordinate of this track (reference plane)           
-    double _p0; 
-    /// local Z-coordinate of this track (reference plane)
-    double _p1;
-    /// (signed curvature)*(local X-coordinate of helix axis)
-    double _p2;
-    /// signed curvature [sign = sign(-qB)]
-    double _p3;  
-    /// tangent of the track momentum dip angle
-    double _p4;
-    /// covariance matrix of the track parameters
-    double _c00;                       
-    double _c10, _c11;                 
-    double _c20, _c21, _c22;           
-    double _c30, _c31, _c32, _c33;     
-    double _c40, _c41, _c42, _c43, _c44;
-    double _chi2;
-    float  eyy,ezz;
-    int hitCount;
-    int nullCount;
-    int contiguousHitCount;
-    int contiguousNullCount;
-
+      return _refX;
+    }
+  
+  double getRefAngle() const 
+    {
+      return _alpha;
+    }
+  
+  double getX() const
+    {
+      return _x;
+    }
+  double getY() const
+    {
+      return _p0;
+    }
+  
+  double getZ() const
+    {
+      return _p1;
+    }
+  
+  double getEta() const
+    {
+      return _p2;
+    }
+  double getChi2() const
+    {
+      return _chi2;
+    }
+  void setChi2(double chi2)
+    {
+      _chi2 = chi2;
+    }
+  StThreeVector<double>getPoint() const;
+  StThreeVector<double>getGlobalPoint() const;
+  /// Calculates and returns the momentum and error of the track at this node in global coordinates.
+  void getGlobalMomentum(double p[3], double e[6]=0) const;
+  /// Set the attributes of this node as a copy of the given node.
+  void setAsCopyOf(const StiKalmanTrackNode * node);
+  
+  /// Propagates a track encapsulated by the given node "p" to the given detector "tDet".
+  int  propagate(StiKalmanTrackNode *p, const StiDetector * tDet);	//throw (Exception);
+  
+  /// Propagates a track encapsulated by the given node "p" to the given vertex
+  void  propagate(const StiKalmanTrackNode *p, StiHit * vertex);
+  
+  /// Evaluates, stores and returns the dedx associated with this node.
+  /// Possible returned values are:
+  /// > 0 : value of dedx
+  /// -1  : pathlength was invalid or less than "0"
+  /// -2  : no hit is associated with the node.
+  /// -3  : invalid eloss data for this node.
+  double  evaluateDedx();
+  
+  int  locate(StiPlacement*place,StiShape*sh);
+  int  propagate(double x,int option);
+  void propagateError();
+  void propagateMCS(double pathLength, 
+		    double radThickness, 
+		    double zOverA,
+		    double ionization,
+		    double massHypo,
+		    double elossSign);
+  
+  /// Extrapolate the track parameters to radial position "x"  and return a point global coordinates along
+  /// the track at that point.
+  StThreeVector<double> getPointAt(double xk) const;
+  
+  double evaluateChi2(const StiHit *hit); 
+  void updateNode(); 
+  void rotate(double alpha); 
+  void add(StiKalmanTrackNode * newChild);
+  double getField()  const;
+  double getHelicity()  const;
+  double getPhase()   const;
+  double getWindowY() const;
+  double getWindowZ() const;
+  double pitchAngle() const;
+  double crossAngle() const;
+  double sinCrossAngle() const;
+  double getDedx() const;
+  double nice(double angle) const;
+  /// Return center of helix circle in global coordinates
+  StThreeVector<double> getHelixCenter() const;
+  void setError(pair<double, double> p);
+  static void   setParameters(StiKalmanTrackFinderParameters *parameters);
+  friend ostream& operator<<(ostream& os, const StiKalmanTrackNode& n);
+  /// rotation angle of local coordinates wrt global coordinates
+  
+  double _alpha;
+  double _cosAlpha;
+  double _sinAlpha;
+  /// sine and cosine of cross angle
+  double _sinCA;
+  double _cosCA;
+  /// local X-coordinate of this track (reference plane)
+  double _refX;
+  double _x;   
+  /// local Y-coordinate of this track (reference plane)           
+  double _p0; 
+  /// local Z-coordinate of this track (reference plane)
+  double _p1;
+  /// (signed curvature)*(local X-coordinate of helix axis)
+  double _p2;
+  /// signed curvature [sign = sign(-qB)]
+  double _p3;  
+  /// tangent of the track momentum dip angle
+  double _p4;
+  /// covariance matrix of the track parameters
+  double _c00;                       
+  double _c10, _c11;                 
+  double _c20, _c21, _c22;           
+  double _c30, _c31, _c32, _c33;     
+  double _c40, _c41, _c42, _c43, _c44;
+  double _chi2;
+  float  eyy,ezz;
+  int hitCount;
+  int nullCount;
+  int contiguousHitCount;
+  int contiguousNullCount;
+  
  protected:   
-    const StiDetector * _detector;
+  const StiDetector * _detector;
+  static Messenger &  _messenger;
 
-    static bool  recurse;
-    static StiKalmanTrackFinderParameters * pars;
-    static int   shapeCode;
-    static const StiDetector * det;
-    static const StiPlanarShape * planarShape;
-    static const StiCylindricalShape * cylinderShape;
-    static StiMaterial * gas;
-    static StiMaterial * prevGas;
-    static StiMaterial * mat;
-    static StiMaterial * prevMat;
-    static double x0,y0, dx;
-    static double x1,y1,z1,cosCA1,sinCA1;
-    static double x2,y2,z2,cosCA2,sinCA2;
-    static double sumSin, sinCA1plusCA2, sumCos;
-    static double radThickness, density;
-    static double gasDensity,matDensity,gasRL,matRL;
-    static bool   useCalculatedHitError;
+  static bool  recurse;
+  static StiKalmanTrackFinderParameters * pars;
+  static int   shapeCode;
+  static const StiDetector * det;
+  static const StiPlanarShape * planarShape;
+  static const StiCylindricalShape * cylinderShape;
+  static StiMaterial * gas;
+  static StiMaterial * prevGas;
+  static StiMaterial * mat;
+  static StiMaterial * prevMat;
+  static double x0,y0, dx;
+  static double x1,y1,z1,cosCA1,sinCA1;
+  static double x2,y2,z2,cosCA2,sinCA2;
+  static double sumSin, sinCA1plusCA2, sumCos;
+  static double radThickness, density;
+  static double gasDensity,matDensity,gasRL,matRL;
+  static bool   useCalculatedHitError;
 };
 
 inline void StiKalmanTrackNode::reset()
@@ -453,6 +450,77 @@ inline void StiKalmanTrackNode::setDetector(const StiDetector * detector)
 inline void StiKalmanTrackNode::setCurvature(double curvature)
 {
   _p3=curvature;
+}
+
+inline  void StiKalmanTrackNode::initialize(StiHit*h,double alpha, double eta, double curvature, double tanl)
+{
+  cout << "StiKalmanTrackNode::initialize(...) -I- Started"<<endl;
+  reset();
+  _hit     = h;
+  _refX    = h->detector()->getPlacement()->getNormalRadius();
+  _x       = h->x();
+  _alpha   = alpha;
+  _cosAlpha = cos(alpha);
+  _sinAlpha = sin(alpha);
+  _p0      = h->y();
+  _p1      = h->z();
+  _p2      = eta;
+  _p3      = curvature;
+  _p4      = tanl;
+  _sinCA   = _p3*_x-_p2;
+  cout << "StiKalmanTrackNode::initialize(...) -I- What?"<<endl;
+  if (fabs(_sinCA)>1.) 
+    {
+      cout << "SKTN::initialize() -E- fabs(_sinCA)>1."<<endl;
+      throw runtime_error("SKTN::initialize() - ERROR - fabs(_sinCA)>1.");
+    }
+  _cosCA   = sqrt(1.-_sinCA*_sinCA);
+  cout << "StiKalmanTrackNode::initialize(...) -I- Done"<<endl;
+};
+
+
+inline const StiKalmanTrackNode& StiKalmanTrackNode::operator=(const StiKalmanTrackNode & n)
+{
+  //children is NOT copid.
+  parent     = n.parent;
+  _detector  = n._detector;
+  _hit       = n._hit;
+  _alpha     = n._alpha;
+  _cosAlpha = n._cosAlpha;
+  _sinAlpha = n._sinAlpha;
+  _sinCA = n._sinCA;
+  _cosCA = n._cosCA;
+  _refX = n._refX;
+  _x    = n._x;   
+  _p0   = n._p0; 
+  _p1   = n._p1;
+  _p2   = n._p2;
+  _p3   = n._p3;  
+  _p4   = n._p4;
+  _c00  = n._c00;                       
+  _c10  = n._c10;
+  _c11  = n._c11;                 
+  _c20  = n._c20;
+  _c21  = n._c21;
+  _c22  = n._c22;           
+  _c30  = n._c30;
+  _c31  = n._c31;
+  _c32  = n._c32;
+  _c33  = n._c33; 
+  _c40  = n._c40;
+  _c41  = n._c41;
+  _c42  = n._c42;
+  _c43  = n._c43;
+  _c44  = n._c44;
+  _chi2 = n._chi2;
+  eyy   = n.eyy;
+  ezz   = n.ezz;
+  hitCount = n.hitCount;
+  nullCount = n.nullCount;
+  contiguousHitCount = n.contiguousHitCount;
+  contiguousNullCount = n.contiguousNullCount;
+  _detector = n._detector;  
+  return *this;
 }
 
 #endif

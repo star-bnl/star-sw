@@ -56,6 +56,8 @@ StiMaterial * StiKalmanTrackNode::prevGas = 0;
 StiMaterial * StiKalmanTrackNode::mat = 0;
 StiMaterial * StiKalmanTrackNode::prevMat = 0;
 bool StiKalmanTrackNode::useCalculatedHitError = true;
+//Messenger & StiKalmanTrackNode::MESSENGER = *(Messenger::instance(MessageType::kNodeMessage));
+#define MESSENGER *(Messenger::instance(MessageType::kNodeMessage))
 
 //_____________________________________________________________
 /// Set the Kalman state of this node to be identical 
@@ -344,7 +346,8 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   cylinderShape = 0;
   _refX = place->getNormalRadius();
   position = propagate(_refX,sh->getShapeCode()); 
-  if (position<0) return position;
+  if (position<0) 
+    return position;
   position = locate(place,sh);
   *(Messenger::instance(MessageType::kNodeMessage)) 
     << "StiKalmanTrackNode::propagate(pNode,tDet) -INFO- (2) position:"<<position<<endl;
@@ -365,7 +368,7 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 	  gasRL      = gas->getRadLength();
 	  matRL      = mat->getRadLength();
 	}
-      double detHT, gapT, cosLinv,s;
+      double detHT, gapT,s;
       switch (sh->getShapeCode())
 	{
 	case kPlanar:
@@ -431,13 +434,16 @@ void StiKalmanTrackNode::propagate(const StiKalmanTrackNode *parentNode, StiHit 
  */
 int  StiKalmanTrackNode::propagate(double xk, int option)
 {
+  MESSENGER << "SKTN::PROPAGATE(D)-I- CA:"<<180.*crossAngle()/3.1415927<<" x1:"<<x1<<" x2:"<<x2<<" p3:"<<_p3<<" _p2:"<<_p2;
   x1=_x;  y1=_p0;  z1=_p1; cosCA1 =_cosCA; sinCA1 =_sinCA;
   switch (option)
     {
-    case 0: 
+    case kPlanar: 
+      MESSENGER<<" CASE 0";
       x2=xk;  // target position
       break;
-    case 1: // cylinder
+    case kCylindrical: // cylinder
+      MESSENGER<<" CASE 1";
       if (_p3==0) throw runtime_error("SKTN::propagateCylinder() - _p3==0");
       double L = xk;
       double y0 = _p0+cosCA1/_p3;
@@ -464,7 +470,9 @@ int  StiKalmanTrackNode::propagate(double xk, int option)
 	}
     }
   dx=x2-x1;
+  
   sinCA2=_p3*x2 - _p2; 
+  MESSENGER << " sin(CA2):"<<sinCA2<<endl;
   if (fabs(sinCA2)>1.) return -1;
   cosCA2   = sqrt(1.-sinCA2*sinCA2);
   sumSin   = sinCA1+sinCA2;
@@ -591,9 +599,9 @@ StThreeVector<double> StiKalmanTrackNode::getPointAt(double xk) const
 
 /*! Calculate the increment of chi2 caused by the addition of this node to the track.
   <p>
-  Uses the track extrapolation to "_x", and hit position to evaluate an update to the track chi2.
-  The new chi2 is stored internally in this node. The increment is returned as a convenience
-  for the caller method. 
+  Uses the track extrapolation to "_x", and hit position to evaluate and return the 
+  increment to the track chi2.
+  The chi2 is not stored internally in this node. 
   <p>
   <h3>Notes</h3>
   <ol>
@@ -602,31 +610,43 @@ StThreeVector<double> StiKalmanTrackNode::getPointAt(double xk) const
   <li>Throws an exception if numerical problems arise.</li>
   </ol>
 */
-double StiKalmanTrackNode::evaluateChi2() 
+double StiKalmanTrackNode::evaluateChi2(const StiHit * hit) 
 {
   double r00, r01,r11;
-  if (useCalculatedHitError)
+  MESSENGER <<"evaluateChi2()-INFO-Started"<<endl;
+  //If required, recalculate the errors of the detector hits.
+  //Do not attempt this calculation for the main vertex.
+  if (useCalculatedHitError && !(fabs(hit->x())<2.0 && fabs(hit->y())<2.0) )
     {
-      _hit->detector()->getHitErrorCalculator()->calculateError(*this);
+      if (!hit)
+	throw runtime_error("SKTN::evaluateChi2(const StiHit &) - hit==0");
+      MESSENGER <<"evaluateChi2()-INFO- Hit OK"<<endl;
+      const StiDetector * det = hit->detector();
+      if (!det)
+	throw runtime_error("SKTN::evaluateChi2(const StiHit &) - det==0");
+      MESSENGER <<"evaluateChi2()-INFO- det OK"<<endl;
+      const StiHitErrorCalculator * calc = det->getHitErrorCalculator();
+      if (!calc)
+	throw runtime_error("SKTN::evaluateChi2(const StiHit &) - calc==0");
+      calc->calculateError(this);
       r00=_c00+eyy;
       r01=_c10; r11=_c11+ezz;
     }
   else
-    {
-      r00=_hit->syy()+_c00;
-      r01=_hit->syz()+_c10;  r11=_hit->szz()+_c11;
+    { 
+      if (!hit)
+	throw runtime_error("SKTN::evaluateChi2(const StiHit &) - hit==0");
+      r00=hit->syy()+_c00;
+      r01=hit->syz()+_c10;  
+      r11=hit->szz()+_c11;
     }
-  //*(Messenger::instance(MessageType::kNodeMessage)) << " r00:"<<r00<<" r01:"<<r01<<" r11:"<<r11<<endl;
   double det=r00*r11 - r01*r01;
   if (fabs(det)==0.) throw runtime_error("SKTN::evaluateChi2() Singular matrix !\n");
-  // invert error matrix
   double tmp=r00; r00=r11; r11=tmp; r01=-r01;  
-  double dy=_hit->y()-_p0;
-  double dz=_hit->z()-_p1;
-  double chi2inc = (dy*r00*dy + 2*r01*dy*dz + dz*r11*dz)/det;
-  _chi2 += chi2inc;
-  *(Messenger::instance(MessageType::kNodeMessage)) << "chi2inc:"<<chi2inc<<endl;
-  return chi2inc;
+  double dy=hit->y()-_p0;
+  double dz=hit->z()-_p1;
+  MESSENGER <<"evaluateChi2()-INFO-Done"<<endl;
+  return (dy*r00*dy + 2*r01*dy*dz + dz*r11*dz)/det;
 }
 
 /*! Update the track parameters using this node.
@@ -717,15 +737,20 @@ void StiKalmanTrackNode::updateNode()
 */
 void StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
 {
+  MESSENGER << "rotate by alpha:"<< 180.*alpha/3.1415927<<endl;
+  MESSENGER << "         _alpha:"<< 180.*_alpha/3.1415927<<endl;
   _alpha += alpha;
   _alpha = nice(_alpha);
-  x1=_x; y1=_p0; 
-  _cosAlpha=cos(alpha); 
-  _sinAlpha=sin(alpha); 
-  _x = x1*_cosAlpha + y1*_sinAlpha;
-  _p0=-x1*_sinAlpha + y1*_cosAlpha;
-  _p2=_p2*_cosAlpha + (_p3*y1 + _cosCA*_sinAlpha);
+  MESSENGER << "    new  _alpha:"<< 180.*_alpha/3.1415927<<endl;
+  double x1=_x; 
+  double y1=_p0; 
+  double ca = cos(alpha);
+  double sa = sin(alpha);
+  _x = x1*ca + y1*sa;
+  _p0=-x1*sa + y1*ca;
+  _p2=_p2*ca + (_p3*y1 + _cosCA)*sa;
   _sinCA = _p3*_x - _p2;
+  MESSENGER << " _sinCA:"<<_sinCA<<endl;
   if (_sinCA>1)
     {
       _sinCA = 1.; _cosCA = 0.;
@@ -740,10 +765,10 @@ void StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
   double y0=_p0 + _cosCA/_p3;
   if ((_p0-y0)*_p3 >= 0.) throw runtime_error("SKTN::rotate() - Error - Rotation failed!\n");
   //f = F - 1
-  double f00=_cosAlpha-1;
-  double f23=(y1 - _sinCA*x1/_cosCA)*_sinAlpha;
-  double f20=_p3*_sinAlpha;
-  double f22=(_cosAlpha + _sinAlpha*_sinCA/_cosCA)-1;
+  double f00=ca-1;
+  double f23=(y1 - _sinCA*x1/_cosCA)*sa;
+  double f20=_p3*sa;
+  double f22=(ca + sa*_sinCA/_cosCA)-1;
   //b = C*ft
   double b00=_c00*f00, b02=_c00*f20+_c30*f23+_c20*f22;
   double b10=_c10*f00, b12=_c10*f20+_c31*f23+_c21*f22;
@@ -762,17 +787,17 @@ void StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
   _c32 += b32;
   _c22 += a22 + 2*b22;
   _c42 += b42; 
-  
   _cosAlpha=cos(_alpha); 
-  _sinAlpha=sin(_alpha);
+  _sinAlpha=sin(_alpha); 
 }
 
 //_____________________________________________________________________________
 void StiKalmanTrackNode::add(StiKalmanTrackNode * newChild)
 {
   // set counters of the newChild node
-  if (newChild->_hit!=0)
+  if (newChild->_hit)
     {
+      *(Messenger::instance(MessageType::kNodeMessage))<<"SKTN::add(SKTN*) -I- Adding node with hit   :";
       newChild->hitCount = hitCount+1;
       newChild->contiguousHitCount = contiguousHitCount+1; 
       if (contiguousHitCount>pars->minContiguousHitCountForNullReset)
@@ -783,29 +808,28 @@ void StiKalmanTrackNode::add(StiKalmanTrackNode * newChild)
     }
   else
     {
-      newChild->nullCount            = nullCount+1;
-      newChild->contiguousNullCount  = contiguousNullCount+1;
-      newChild->hitCount             = hitCount;
-      newChild->contiguousHitCount   = 0;//contiguousHitCount; 
+      *(Messenger::instance(MessageType::kNodeMessage))<<"SKTN::add(SKTN*) -I- Adding node WIHTOUT hit:";
+      newChild->nullCount           = nullCount+1;
+      newChild->contiguousNullCount = contiguousNullCount+1;
+      newChild->hitCount            = hitCount;
+      newChild->contiguousHitCount  = 0;
     } 
   children.push_back(newChild);
   newChild->setParent(this);
-  *(Messenger::instance(MessageType::kNodeMessage))
-    << "SKTN::add(child) -I- "<<*this<<endl;
+  *(Messenger::instance(MessageType::kNodeMessage)) << *this<<endl;
 }
 
 /// print to the ostream "os" the parameters of this node 
 /// and all its children recursively
 ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
 {
-  os << "\ta:" << 180*n._alpha/M_PI<<"\tdegs"
-     << "\tx:" << n._x
-     << "\ty:" << n._p0 << "\tz:" << n._p1 <<"\teta:"<< n._p2 <<"\tc:"<< n._p3 <<"\ttanl:"<< n._p4
-     << "\tc00:" <<n._c00<< "\tc11:"<<n._c11<<"\tc22:"<<n._c22
-     << "\tchi2:" << n._chi2 
-     << "\tHITS:"<<n.hitCount
-     << "\tcHITS:"<<n.contiguousHitCount
-     << "\tnull:"<<n.nullCount<<endl;
+  os << " a:" << 180*n._alpha/M_PI<<" degs"
+     << " x:" << n._x
+     << " y:" << n._p0 << " z:" << n._p1 <<" eta:"<< n._p2 <<" c:"<< n._p3 <<" tanl:"<< n._p4
+     << " c00:" <<n._c00<< " c11:"<<n._c11
+     << " chi2:" << n._chi2 
+     << " n:"<<n.hitCount
+     << " null:"<<n.nullCount<<endl;
   return os;
 }
 

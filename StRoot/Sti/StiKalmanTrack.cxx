@@ -71,13 +71,22 @@ void StiKalmanTrack::setKalmanTrackNodeFactory(Factory<StiKalmanTrackNode>* val)
 */
 StiKalmanTrackNode * StiKalmanTrack::add(StiHit *h,double alpha, double eta, double curvature, double tanl)
 {
+  TRACKMESSENGER << "StiKalmanTrack::add(...) -I- Started"<<endl;
   StiKalmanTrackNode * n = trackNodeFactory->getInstance();
+  TRACKMESSENGER << "StiKalmanTrack::add(...) -I- have n"<<endl;
+  if (!n)
+    {
+      TRACKMESSENGER << "StiKalmanTrack::add(...) -E- n==0"<<endl;
+      throw runtime_error("StiKalmanTrack::add(...) -F- n==0");
+    }
+  TRACKMESSENGER << "StiKalmanTrack::add(...) -I- have valid n"<<endl;
   n->initialize(h,alpha,eta,curvature,tanl);
   if (lastNode!=0)
     lastNode->add(n);
   else 
     firstNode = n;
   lastNode = n;
+  TRACKMESSENGER << "StiKalmanTrack::add(...) -I- Done"<<endl;
   return lastNode;
 }
 
@@ -179,7 +188,7 @@ void StiKalmanTrack::initialize(double curvature,
 				const StThreeVectorD& origin,
 				const hitvector & hits)
 {
-  cout << "StiKalmanTrack::initialize() - INFO - Started -----------------------------"<<endl;
+  TRACKMESSENGER << "StiKalmanTrack::initialize() -I- Started -----------------------------"<<endl;
   reset();
   hitvector::const_iterator it;
   StiKalmanTrackNode * node  = 0;
@@ -188,22 +197,34 @@ void StiKalmanTrack::initialize(double curvature,
   double alpha;
   StThreeVectorD temp;
   const StiDetector* detector;
+  TRACKMESSENGER << "StiKalmanTrack::initialize() -I-  -1----------------------------"<<endl;
   for (it=hits.begin(); it!=hits.end(); ++it)
     {
+      TRACKMESSENGER << "StiKalmanTrack::initialize() -I-  -2----------------------------"<<endl;
       detector = (*it)->detector();
-      if (!detector) throw logic_error("StiKalmanTrack::initialize() - FATAL - Hit has null detector.");
+      TRACKMESSENGER << "StiKalmanTrack::initialize() -I-  -3----------------------------"<<endl;
+
+      if (!detector) 
+	{
+	  cout <<"StiKalmanTrack::initialize() -F- detector==0"<<endl;
+	  throw logic_error("StiKalmanTrack::initialize() - FATAL - Hit has null detector.");
+	}
       // if alpha is same, avoid recalculating eta
+      TRACKMESSENGER << "StiKalmanTrack::initialize() -I-  -4----------------------------"<<endl;
       alpha = detector->getPlacement()->getNormalRefAngle();
       if (alphaP!=alpha)
 	{
+	  TRACKMESSENGER << "StiKalmanTrack::initialize() -I-  -4a----------------------------"<<endl;
+
 	  temp = origin;
 	  temp.rotateZ(-alpha);
 	  eta = curvature*temp.x();
 	  alphaP=alpha;
 	}
-      cout << *add((*it),alpha,eta,curvature,tanl);
+      TRACKMESSENGER << "StiKalmanTrack::initialize() -I-  -5----------------------------"<<endl;
+      TRACKMESSENGER << *add((*it),alpha,eta,curvature,tanl);
     }
-  cout << "StiKalmanTrack::initialize() - INFO - Done -----------------------------"<<endl;
+  TRACKMESSENGER << "StiKalmanTrack::initialize() -I- Done -----------------------------"<<endl;
 }
 
 StiKalmanTrackNode * StiKalmanTrack::getNodeNear(double x) const
@@ -219,7 +240,7 @@ StiKalmanTrackNode * StiKalmanTrack::getNodeNear(double x) const
       StiKalmanTrackNode * node = static_cast<StiKalmanTrackNode *>(*it);
       xx = node->_x;
       diff = xx-x; if (diff<0) diff = -diff;
-      //cout << "===> x/diff:" << xx << "\t" << diff << endl;
+      //TRACKMESSENGER << "===> x/diff:" << xx << "\t" << diff << endl;
       if (diff<minDist) 
 	{
 	  minDist = diff;
@@ -636,7 +657,7 @@ vector<StiKalmanTrackNode*> StiKalmanTrack::getNodes(StDetectorId detectorId) co
     */
     const StiKalmanTrackNode& node = *it;
     StiHit* hit = node.getHit();
-    if((&node)->getHit()!=hit) cout <<"Danger, Will Robinson! Danger!"<<endl;
+    if((&node)->getHit()!=hit) TRACKMESSENGER <<"Danger, Will Robinson! Danger!"<<endl;
     if (hit && hit->detector() != NULL && hit->getEloss()>0.) {
       if(detectorId==kTpcId && strstr(hit->detector()->getName().c_str(), "Tpc")!=NULL)
 	{//Tpc Hit requested and found
@@ -731,25 +752,24 @@ void StiKalmanTrack::reserveHits()
 */
 bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 {
-  if (trackingDirection==kInsideOut) throw logic_error("SKT::extendToVertex(const StiHit*) - LOGIC ERROR - Extension to vtx only allowed for OutsideIn");
+  if (trackingDirection==kInsideOut) 
+    throw logic_error("SKT::extendToVertex(const StiHit*) - ERROR - Extension to vtx only allowed for OutsideIn");
   double chi2;
   StiKalmanTrackNode * sNode=0;
   StiKalmanTrackNode * tNode=0;
   bool trackExtended = false;
   sNode = lastNode;
   tNode = trackNodeFactory->getInstance();
-  if (tNode==0) throw logic_error("SKTF::extendTrackToVertex()\t- ERROR - tNode==null");
+  if (tNode==0) throw logic_error("SKTF::extendTrackToVertex() - ERROR - tNode==null");
   tNode->reset();
   tNode->propagate(sNode, vertex);
-  chi2 = tNode->evaluateChi2(); 
+  chi2 = tNode->evaluateChi2(vertex); 
   if (chi2<pars->maxChi2ForSelection)
     {
-      tNode->updateNode();
-      sNode->add(tNode);	
-      lastNode = tNode;
+      tNode->setChi2(chi2);
+      add(tNode);
       trackExtended = true;
     }
-  //cout << "SKT::extendToVertex(StiHit* vertex) - done"<<endl;
   return trackExtended;
 }
 
@@ -757,52 +777,31 @@ bool StiKalmanTrack::find(int direction)
 {
   bool trackExtended=false;
   setFlag(0);
-  //cout << "StiKalmanTrack::find(int direction) called with direction:"<<direction<<endl;
-  if (++debugCount<5) 
-    {
-      cout << "::In-x:" << getInnerMostHitNode()->_x;
-      cout << "/Out-x:" << getOuterMostHitNode()->_x;
-      cout << "/find(OutIn)";
-    }
   // invoke tracker to find or extend this track
+  TRACKMESSENGER<<"StiKalmanTrack::find(int) -I- Outside-in"<<endl;
   if (trackFinder->find(this,kOutsideIn))
     {
-      // prune the undesirable nodes
-      //prune();
-			
-      if (debugCount<5) cout<<"/fit(InOut);";
+      if (debugCount<5) TRACKMESSENGER<<"/fit(InOut);";
       fit(kInsideOut);
       trackExtended = true;
-    }			
-			
+    }		
+  /*
   // decide if an outward pass is needed.
   const StiKalmanTrackNode * outerMostNode = getOuterMostHitNode();
-  if (debugCount<5) 
-    {
-      cout << "//In-x:" << getInnerMostHitNode()->_x;
-      cout << "//Out-x:" << getOuterMostHitNode()->_x;
-    }
   if (outerMostNode->_x<190. )
     {
       // swap the track inside-out in preparation for the outward search/extension
-      if (debugCount<5) cout << "/swap";
+      TRACKMESSENGER<<"StiKalmanTrack::find(int) -I- Swap track"<<endl;
       swap();      
-      setTrackingDirection(kInsideOut); 			if (debugCount<20) cout << "/find(inOut)";
       if (trackFinder->find(this,kInsideOut))
 	{
-	  if (debugCount<20) cout << "fit(OutIn)";
-	  fit(kOutsideIn);                  			if (debugCount<20) cout << "/swap()";
+	  if (debugCount<20) TRACKMESSENGER << "fit(OutIn)";
+	  fit(kOutsideIn);             
 	  trackExtended = true;
 	}
       swap();
       setTrackingDirection(kOutsideIn);
-    }
-  double pp[3];
-  if (debugCount<5) 
-    {
-      getInnerMostHitNode()->getGlobalMomentum(pp);
-      getOuterMostHitNode()->getGlobalMomentum(pp);
-    }
+      }*/
   reserveHits();
   setFlag(1);
   return trackExtended;

@@ -1,7 +1,7 @@
 //StiResidualMaker.cxx
 /***************************************************************************
  *
- * $Id: StiResidualMaker.cxx,v 2.0 2002/12/10 21:59:58 pruneau Exp $
+ * $Id: StiResidualMaker.cxx,v 2.1 2003/01/08 21:17:57 pruneau Exp $
  *
  * \class  StiResidualMaker provides a utility for determining the
  *         track residuals.
@@ -9,6 +9,11 @@
  * \date   October 2002
  ***************************************************************************
  * $Log: StiResidualMaker.cxx,v $
+ * Revision 2.1  2003/01/08 21:17:57  pruneau
+ * Addind class StiSortedHitIterator to work in the seed finder
+ * and StiDummyVertex finder to provide an StEvent based vertex
+ * retrieval mechanism.
+ *
  * Revision 2.0  2002/12/10 21:59:58  pruneau
  * Introducing version 2.0
  *
@@ -103,8 +108,8 @@ int StiResidualMaker::Init()
 
 
   int numLayers;
-  float zLow, zHigh;
-  float yLow, yHigh;
+  //float zLow, zHigh;
+  //float yLow, yHigh;
   string angleYBaseName = "yResidualCrossDip";
   string coordYBaseName = "yResidualZYRow";
   string angleZBaseName = "zResidualCrossDip";
@@ -297,8 +302,8 @@ void StiResidualMaker::FillHist(StiKalmanTrackNode* node)
   //get node values
   double cross = node->crossAngle();
   double dip   = node->pitchAngle();
-  double nodeZ = node->fP1;
-  double nodeY = node->fP0;
+  double nodeZ = node->getZ();
+  double nodeY = node->getY();
   double diff;
   double row = 10;
 

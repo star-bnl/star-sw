@@ -31,6 +31,8 @@ using namespace std;
 #include "StDetectorId.h"
 
 //Sti
+#include "Sti/Base/Messenger.h"
+#include "Sti/Base/MessageType.h"
 #include "Sti/Base/Factory.h"
 #include "StiKalmanTrackNode.h"
 #include "StiHitContainer.h"
@@ -38,6 +40,7 @@ using namespace std;
 #include "StiHit.h"
 #include "StiTrack.h"
 #include "StiKalmanTrackFinderParameters.h"
+#define TRACKMESSENGER *(Messenger::instance(MessageType::kTrackMessage))
 
 /*! 
   \class StiKalmanTrack
@@ -239,6 +242,10 @@ class StiKalmanTrack : public StiTrack
    /// Method used to add a hit to this track
    StiKalmanTrackNode * add(StiHit *h,double alpha, double eta, double curvature, double tanl);
    
+   /// Add a kalman track node to this track as a child to the last node of the track
+   /// Return the added node 
+   StiKalmanTrackNode * add(StiKalmanTrackNode * node);
+
   /// Remove given hit from this track
   void removeHit(StiHit *h);
   
@@ -572,6 +579,20 @@ inline StiKalmanTrackNode * StiKalmanTrack::getInnerMostNode()   const
   return (trackingDirection==kInsideOut)?firstNode:lastNode;
 }
 
+
+inline StiKalmanTrackNode * StiKalmanTrack::add(StiKalmanTrackNode * node)
+{
+  if (node->getHit())
+    {
+      TRACKMESSENGER <<"StiKalmanTrack::add() - I - node HAS a hit"<<endl;
+      node->updateNode();
+    }
+  else
+    TRACKMESSENGER <<"StiKalmanTrack::add() - I - node WITHOUT a hit"<<endl;
+  lastNode->add(node);
+  lastNode = node;
+  return lastNode;
+}
 
 #endif
 

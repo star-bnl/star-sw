@@ -123,6 +123,7 @@
 using std::map;
 using std::vector;
 
+class StiKalmanTrackNode;
 class StiHit;
 class StiDetector;
 class Messenger;
@@ -216,6 +217,9 @@ public:
     
     ///Set the reference point to define sub-volume of hits to be accessed.
     void setRefPoint(double position, double refAngle, double y, double z);
+
+    ///Set reference point to be the location of the given node
+    void setRefPoint(const StiKalmanTrackNode &);
 
     //Iterator interface:
 

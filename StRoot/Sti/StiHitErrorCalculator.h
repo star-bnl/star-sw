@@ -21,7 +21,7 @@ class StiHitErrorCalculator
  public:
   StiHitErrorCalculator(){/*noop*/};
   virtual ~StiHitErrorCalculator(){/*noop*/};
-  virtual void calculateError(StiKalmanTrackNode &) const= 0; 
+  virtual void calculateError(StiKalmanTrackNode *)const = 0; 
 };
 
 class StiDefaultHitErrorCalculator: public StiHitErrorCalculator
@@ -29,7 +29,7 @@ class StiDefaultHitErrorCalculator: public StiHitErrorCalculator
  public:
    StiDefaultHitErrorCalculator();
    ~StiDefaultHitErrorCalculator();
-   inline void calculateError(StiKalmanTrackNode &node) const;   //input StiKalmanTrackNode
+   inline void calculateError(StiKalmanTrackNode *node) const;
    inline void set(double intrinsicZ, double driftZ,
 		   double crossZ, double intrinsicX,
 		   double driftX, double crossX);

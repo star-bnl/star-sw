@@ -30,6 +30,7 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
   StiKTNBidirectionalIterator last;
   StiKTNBidirectionalIterator source;
   bool direction = (trackingDirection==fitDirection);
+  double chi2;
   if (direction)
     { 
       //cout << "set =="<<endl;
@@ -48,7 +49,8 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	  // if targetNode has hit, get chi2 and update track parameters accordingly
 	  if (targetHit)
 	    {
-	      targetNode->evaluateChi2();
+	      chi2 = targetNode->evaluateChi2(targetHit);
+	      targetNode->setChi2(chi2);
 	      targetNode->updateNode();
 	    }
 	  source++;//cout<<"=="<<endl;
@@ -56,7 +58,6 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
     }
   else
     {
-      //cout << "set !="<<endl;
       last  = track->begin();
       first = track->end();
       for (source=first;source!=last;)
@@ -72,7 +73,8 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	  // if targetNode has hit, get chi2 and update track parameters accordingly
 	  if (targetHit)
 	    {
-	      targetNode->evaluateChi2();
+	      chi2 = targetNode->evaluateChi2(targetHit);
+	      targetNode->setChi2(chi2);
 	      targetNode->updateNode();
 	    }
 	  source--;//cout<<"!="<<endl;
