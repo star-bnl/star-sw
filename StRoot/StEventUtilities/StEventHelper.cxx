@@ -262,6 +262,7 @@ THelixTrack *StEventHelper::MyHelix(THelixTrack *myHlx,const StHelixD *evHlx)
   myX[2]= evHlx->z(0.);
   
   myHlx->Set(myX,myDir,curv*h);
+#if 0
   double s = 10;
   double myXX[3];
   myHlx->Step(s,myXX);
@@ -277,6 +278,7 @@ THelixTrack *StEventHelper::MyHelix(THelixTrack *myHlx,const StHelixD *evHlx)
     printf(" Z %g %g\n",myXX[2]-myX[2],evHlx->z(s)-myX[2]);
     assert(diff<1.e-5);
   }
+#endif
   return myHlx;		
 }		
 //______________________________________________________________________________
@@ -498,7 +500,8 @@ static const int     nlitra  = sizeof(plitra)/sizeof(Color_t);
 
     p = 0;
     if      (kind&kHIT) p = new StHitPoints   ((StHit      *)to);
-    else if (kind&kHRR) p = new StHitPoints   ((StPtrVecHit*)to);
+    else if (kind&kHRR && ((StPtrVecHit*)to)->size()) 
+	                p = new StHitPoints   ((StPtrVecHit*)to);
     else if (kind&kTRK) p = new StTrackPoints ((StTrack    *)to);
     else if (kind&kVTX) p = new StVertexPoints((StVertex   *)to);
     if (!p) continue;
@@ -536,16 +539,19 @@ StTrackPoints::StTrackPoints(const StTrack *st,const char *name,const char *titl
 //______________________________________________________________________________
 void StTrackPoints::Init() 
 {  
+static const char *beginTrack = gSystem->Getenv("STAR_DISPLAY_BEGIN_TRACK");
+
   if (fXYZ) return;
-  float len = ((StTrack*)fObj)->length();   
+  StTrack *trk = ((StTrack*)fObj); 
+  float len = trk->length();   
   if (len <= 0.0001) {
     Warning("Init","Zero length %s(%p), IGNORED",fObj->ClassName(),(void*)fObj);
     MakeZombie();
     return;
   }
   
-//  StTrackGeometry *geo = ((StTrack*)fObj)->geometry(); 
-  StTrackGeometry *geo = ((StTrack*)fObj)->outerGeometry(); 
+  
+  StTrackGeometry *geo = (beginTrack)? trk->geometry():trk->outerGeometry(); 
   Assert(geo);
   double curva = fabs(geo->curvature());
   double dip   = geo->dipAngle();
@@ -555,9 +561,8 @@ void StTrackPoints::Init()
   StPhysicalHelixD hel = geo->helix();
   Double_t step = len/(fSize-1);
   Double_t ss = 0;
-  
-//  for (int i =0;i<fSize;i++,ss+=step)
-  for (int i =0;i<fSize;i++,ss-=step)
+  if (!beginTrack) step = -step;
+  for (int i =0;i<fSize;i++,ss+=step)
   {
      fXYZ[i*3+0] = hel.x(ss); 
      fXYZ[i*3+1] = hel.y(ss); 

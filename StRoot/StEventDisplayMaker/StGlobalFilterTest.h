@@ -1,5 +1,5 @@
 //*-- Author :    Victor Perev(perev@bnl.gov)   11/09/04  
-// $Id: StGlobalFilterTest.h,v 1.1 2004/09/28 03:55:23 perev Exp $ 
+// $Id: StGlobalFilterTest.h,v 1.2 2004/10/07 19:41:23 perev Exp $ 
 #ifndef STAR_StGlobalFilterTest
 #define STAR_StGlobalFilterTest
 
@@ -13,6 +13,7 @@
 //////////////////////////////////////////////////////////////////////////
 #include "StGlobalFilterABC.h"
 class TH1F;
+class TH2F;
 class TCanvas;
 class StGlobalFilterTest : public StGlobalFilterABC {
  public:
@@ -20,8 +21,9 @@ class StGlobalFilterTest : public StGlobalFilterABC {
     virtual void Filter(TObjArray *eArr,int flag);
     virtual void NewEvent(int nrun,int nev);
 private:
-TCanvas *fCanvas;
-TH1F    *fHRes[2];
+TCanvas *fCanvas[2];
+TH1F    *fHRes[5];
+TH2F    *fPlot[1];
     ClassDef(StGlobalFilterTest,0)
 };
 #endif
