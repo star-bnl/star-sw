@@ -4,10 +4,6 @@
 
 macro init
 
-cd /dui
-cd ProducedData/Pixels
-tdm/newtable adcxyz  tfc_adcxyz   900000
-cd /dui
 
 return
 
