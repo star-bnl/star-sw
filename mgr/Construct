@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.115 2001/06/01 03:08:37 perev Exp $
+# $Id: Construct,v 1.116 2001/08/01 14:17:20 jeromel Exp $
 use Env;
 use lib $STAR . "/mgr";    # Modify perl include path
 use ConsDefs;
@@ -270,7 +270,7 @@ foreach my $dir( "pams", "StRoot" ) {
         if ( $sub_dir =~ /Pool$/ ) { next; }
         push @subdirs, $sub_DIR;
         print "================== add $sub_DIR\n" if ($param::debug);
-        }
+    }
 }
 
 print "subdirs = @subdirs\n" if $param::debug;
@@ -289,11 +289,11 @@ Default qw (   .  );
 #print "Debug ".join(" ",@Targets)."\n";
 Build @Targets;
 
-#________________________________________________________________________________
+#___________________________________________________________________________
 sub script::wanted_dead {
-    -l and not -e and print "bigus link: $File::Find::name \t--- remove it\n"
+    -l and not -e and print "bogus link: $File::Find::name \t--- remove it\n"
       and `rm $_`;
 }
 
-#________________________________________________________________________________
+#___________________________________________________________________________
 __END__;
