@@ -1,32 +1,3 @@
-// $Id: StMessTypeList.cxx,v 1.9 2003/09/02 17:59:20 perev Exp $
-// $Log: StMessTypeList.cxx,v $
-// Revision 1.9  2003/09/02 17:59:20  perev
-// gcc 3.2 updates + WarnOff
-//
-// Revision 1.8  1999/09/14 15:42:02  genevb
-// Some bug fixes, workaround for nulls in strings
-//
-// Revision 1.7  1999/09/10 21:05:55  genevb
-// Some workarounds for RedHat6.0
-//
-// Revision 1.6  1999/07/01 01:24:45  genevb
-// Fixed FORTRAN character string bug on linux, removed a memory leak from Summary()
-//
-// Revision 1.4  1999/06/29 17:37:30  genevb
-// Lots of fixes...
-//
-// Revision 1.3  1999/06/26 00:24:51  genevb
-// Fixed const type mismatches
-//
-// Revision 1.2  1999/06/24 16:30:41  genevb
-// Fixed some memory leaks
-//
-// Revision 1.1  1999/06/23 15:17:44  genevb
-// Introduction of StMessageManager
-//
-//
-// Revision 1.1 1999/01/27 10:28:29 genevb
-//
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // StMessTypeList                                                       //
@@ -36,7 +7,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "StMessTypeList.h"
-#include <Stiostream.h>
+#include "StMessageStream.h"
 #include <ctype.h>
 
 StMessTypePair::StMessTypePair(const char* ty, const char* te) :
@@ -105,12 +76,45 @@ const char* StMessTypeList::FindNumText(size_t typeNum) {
 //_____________________________________________________________________________
 int StMessTypeList::ListTypes() {
   StMessTypeVecIter iter;
-  cout << "List of StMessage types:" << endl;
-  cout << "--------------------------------------------------------" << endl;
+  myout << "List of StMessage types:\n"
+        << "--------------------------------------------------------"
+        << endl;
   for (iter=messList.begin(); iter!=messList.end(); iter++) {
     StMessTypePair* current = (*iter);
-    cout << "  " << current->Type() << " : " << current->Text() << endl;
+    myout << "  " << current->Type() << " : " << current->Text() << endl;
   }
   return messList.size();
 }
 
+//_____________________________________________________________________________
+// $Id: StMessTypeList.cxx,v 1.10 2003/09/25 21:19:22 genevb Exp $
+// $Log: StMessTypeList.cxx,v $
+// Revision 1.10  2003/09/25 21:19:22  genevb
+// Some new cout-like functions and friend functions, some doxygen-ization
+//
+// Revision 1.9  2003/09/02 17:59:20  perev
+// gcc 3.2 updates + WarnOff
+//
+// Revision 1.8  1999/09/14 15:42:02  genevb
+// Some bug fixes, workaround for nulls in strings
+//
+// Revision 1.7  1999/09/10 21:05:55  genevb
+// Some workarounds for RedHat6.0
+//
+// Revision 1.6  1999/07/01 01:24:45  genevb
+// Fixed FORTRAN character string bug on linux, removed a memory leak from Summary()
+//
+// Revision 1.4  1999/06/29 17:37:30  genevb
+// Lots of fixes...
+//
+// Revision 1.3  1999/06/26 00:24:51  genevb
+// Fixed const type mismatches
+//
+// Revision 1.2  1999/06/24 16:30:41  genevb
+// Fixed some memory leaks
+//
+// Revision 1.1  1999/06/23 15:17:44  genevb
+// Introduction of StMessageManager
+//
+// Revision 1.0  1999/01/27 10:28:29  genevb
+//
