@@ -312,7 +312,7 @@ inline double StiKalmanTrackNode::getTanL() const
 
 inline int StiKalmanTrackNode::getHelicity()  const
 {
-  return (_p3 < 0) ? 1 : -1;
+  return (_p3 < 0) ? -1 : 1;
 }
 
 
