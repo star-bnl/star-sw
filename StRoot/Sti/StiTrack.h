@@ -2,6 +2,8 @@
 #define StiTrack_H 1
 
 #include <math.h>
+#include "StiObjectFactory.h"
+#include "StiTrackNode.h"
 
 class StiHit;
 
@@ -46,6 +48,8 @@ public:
     void  setPointCount(int v)    ;  // number of points currently assigned to the track;
     void  setStatus(int v)      ;  // status of track
     void  setVertex(StiHit *v);
+  
+    static StiTrackNodeFactory * trackNodeFactory;
 
 protected:
     int    q;          // charge of the track 

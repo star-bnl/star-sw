@@ -136,12 +136,16 @@ void StiEvaluableTrackSeedFinder::operator() (const StTrack* st, StiKalmanTrack*
     //cout <<"y: "<<y<<endl;
     double z = originD.z() - tanLambda/curvature*asin(curvature*x-eta);
     //cout <<"z: "<<z<<endl;
-    double state[5];
-    state[0] = y;
-    state[1] = z;
-    state[2] = eta;
-    state[3] = curvature;
-    state[4] = tanLambda;
+    //double state[5];
+    double origin[3];
+    origin[0] = originD.x();
+    origin[1] = originD.y();
+    origin[2] = originD.z();
+    //state[0] = y;
+    //state[1] = z;
+    //state[2] = eta;
+    //state[3] = curvature;
+    //state[4] = tanLambda;
 
     //cout <<"Set State"<<endl;
     double dstate[15];
@@ -181,7 +185,11 @@ void StiEvaluableTrackSeedFinder::operator() (const StTrack* st, StiKalmanTrack*
     //}
     
     //That's it, seed the track and go home
-    sti->initialize(refAngle, state, dstate, hitvec);
+    sti->initialize(refAngle, 
+		    eta,
+		    curvature, 
+		    tanLambda,
+		    hitvec);
     //cout <<"Initialized StiKalmanTrack"<<endl;
     
 }

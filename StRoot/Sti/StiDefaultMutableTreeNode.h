@@ -39,6 +39,8 @@ typedef vector<StiDefaultMutableTreeNode *> StiDefaultMutableTreeNodeVector;
 typedef StiDefaultMutableTreeNodeVector::iterator StiDefaultMutableTreeNodeIterator;
 
 
+
+
 class StiDefaultMutableTreeNode : public StiTreeNode
 {
  public:
@@ -46,6 +48,11 @@ class StiDefaultMutableTreeNode : public StiTreeNode
   virtual ~StiDefaultMutableTreeNode(){};
   StiDefaultMutableTreeNode();
   StiDefaultMutableTreeNode(bool allowsChildren);
+
+  void reset();
+  void set(int depth);
+  void setAsCopyOf(const StiDefaultMutableTreeNode * node);
+
   void initialize(bool allowsChildren);
   void insert(StiTreeNode * newChild, int childIndex);
   void remove(int childIndex) ;
@@ -65,7 +72,6 @@ class StiDefaultMutableTreeNode : public StiTreeNode
   bool isNodeDescendant(StiDefaultMutableTreeNode *  anotherNode) ;
   StiTreeNode *  getSharedAncestor(StiDefaultMutableTreeNode *  aNode);
   bool isNodeRelated(StiDefaultMutableTreeNode *  aNode) ;
-  int getDepth() ;
   int getLevel() ;
   StiTreeNode *  getRoot() ;
   bool isRoot();
@@ -85,12 +91,14 @@ class StiDefaultMutableTreeNode : public StiTreeNode
   StiDefaultMutableTreeNode *  getLastLeaf(); 
   StiDefaultMutableTreeNode *  getNextLeaf();
   StiDefaultMutableTreeNode *  getPreviousLeaf() ;
+  void           setDepth(int depth);
+  int            getDepth() const;
 
   StiDefaultMutableTreeNodeVector * breadthFirstEnumeration();
   void appendChildrenToVector(StiDefaultMutableTreeNode *node, 
 			      StiDefaultMutableTreeNodeVector *v);
  protected:
-
+  int           mDepth;
   bool          allowsChildren;
   StiTreeNode * parent;
   StiDefaultMutableTreeNodeVector children;

@@ -4,7 +4,8 @@
 #include "StiPlanarShape.h"
 #include "StiCylindricalShape.h"
 #include "StiPlacement.h" 
-#include "StiTrackNode.h"
+#include "StiKalmanTrackNode.h"
+#include "StiHit.h"
 #include "StiMaterialInteraction.h"
 #include "StiGeometryTransform.h" 
 
@@ -30,8 +31,8 @@
 //
 // 3) Does not test intersection point to ensure that it is within the 
 //    physical extent of the detector
-float StiMaterialInteraction::getEquivalentThickness(StiTrackNode *nodeBegin,
-                                                     StiTrackNode *nodeEnd){
+float StiMaterialInteraction::getEquivalentThickness(StiKalmanTrackNode *nodeBegin,
+                                                     StiKalmanTrackNode *nodeEnd){
 
   // make StHelix from local helix params
   StHelix helix(1., 1., 1., StThreeVector<double>(0., 0., 0.), 1);
@@ -39,11 +40,11 @@ float StiMaterialInteraction::getEquivalentThickness(StiTrackNode *nodeBegin,
   (*pGeometryTransform)(nodeBegin, &helix);
 
   // get (hopefully) 2 intersection points with the detector
-  StiShapeCode iCode = nodeEnd->getDetector()->getShape()->getShapeCode();
-  StiPlacement *pPlacement = nodeEnd->getDetector()->getPlacement();
+  StiShapeCode iCode = nodeEnd->getHit()->detector()->getShape()->getShapeCode();
+  StiPlacement *pPlacement = nodeEnd->getHit()->detector()->getPlacement();
   if(iCode==kPlanar){
     StiPlanarShape *pShape = dynamic_cast<StiPlanarShape *>(
-        nodeEnd->getDetector()->getShape());
+        nodeEnd->getHit()->detector()->getShape());
     
     // find intersections with both inner & outer boundaries
     double dRadius = pPlacement->getNormalRadius() + pShape->getThickness()/2.;
@@ -62,11 +63,11 @@ float StiMaterialInteraction::getEquivalentThickness(StiTrackNode *nodeBegin,
     
     // otherwise, return the equivalent thickness
     return(fabs(dPathLength1 - dPathLength2) /
-           nodeEnd->getDetector()->getMaterial()->getRadLength());
+           nodeEnd->getHit()->detector()->getMaterial()->getRadLength());
 
   }else if(iCode==kCylindrical){
     StiCylindricalShape *pShape = dynamic_cast<StiCylindricalShape *>(
-        nodeEnd->getDetector()->getShape());
+        nodeEnd->getHit()->detector()->getShape());
 
     // find intersections with both inner and outer boundaries
     double dRadius = pShape->getOuterRadius();
@@ -79,7 +80,7 @@ float StiMaterialInteraction::getEquivalentThickness(StiTrackNode *nodeBegin,
     
     // otherwise, return the equivalent thickness
     return(fabs(dPathLength1 - dPathLength2) /
-           nodeEnd->getDetector()->getMaterial()->getRadLength());
+           nodeEnd->getHit()->detector()->getMaterial()->getRadLength());
 
   }else if(iCode==kConical){
     return -1;  // to be implemented

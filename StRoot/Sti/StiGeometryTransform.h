@@ -10,7 +10,8 @@
 #include "tables/St_svg_config_Table.h"
 
 class StiTrack;
-class StiTrackNode;
+class StiKalmanTrack;
+class StiKalmanTrackNode;
 class StTrack;
 class StTpcHit;
 class StSvtHit;
@@ -73,7 +74,7 @@ public:
     
     void operator() (const StPrimaryVertex*, StiHit*); //From StPrimaryVertex -> StiHit
 
-    void operator() (const StiTrackNode*, StHelix*);  // from StiTrackNode helix params -> StHelix
+    void operator() (const StiKalmanTrackNode*, StHelix*);  // from StiTrackNode helix params -> StHelix
 
     //Point Transform Functors
     

@@ -8,7 +8,7 @@
 #ifndef STI_MATERIAL_INTERACTION_H
 #define STI_MATERIAL_INTERACTION_H
 
-class StiTrackNode;
+class StiKalmanTrackNode;
 
 class StiMaterialInteraction{
 
@@ -19,8 +19,8 @@ public:
     // returns the thickness in radiation lengths between the detector 
     // of the beginning node and the detector of the ending node.
     // Includes thickness of any intermediate gas, plus the thickness
-    static float getEquivalentThickness(StiTrackNode *nodeBegin,
-                                        StiTrackNode *nodeEnd);
+    static float getEquivalentThickness(StiKalmanTrackNode *nodeBegin,
+                                        StiKalmanTrackNode *nodeEnd);
 
 protected:
 

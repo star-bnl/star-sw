@@ -1,23 +1,21 @@
 #ifndef StiKalmanTrack_H
 #define StiKalmanTrack_H 1
-
 //SCL
 #include "StThreeVector.hh"
-
 //STD
 #include <math.h>
-
 //Sti
+//#include "StiFactoryTypedefs.h"
 #include "StiTrack.h"
 #include "StiObjectFactory.h"
-#include "StiTrackNode.h"
+#include "StiKalmanTrackNode.h"
 #include "StiHitContainer.h"
 
 class StiKalmanTrack : public StiTrack 
 {
  public:
-    typedef StiObjectFactory<StiTrackNode> StiTrackNodeFactory;
-
+  //  typedef StiObjectFactory<StiKalmanKalmanTrackNode> StiKalmanKalmanTrackNodeFactory;
+  
   // constructor/destructor/copy/etc
   
   StiKalmanTrack() 
@@ -44,39 +42,45 @@ class StiKalmanTrack : public StiTrack
   
   
   // Methods of this class
-  StiTrackNode * getFirstNode()  const { return firstNode; };
-  StiTrackNode * getLastNode()   const { return lastNode;  };
-  void setFirstNode(StiTrackNode * n) {firstNode = n;};
-  void setLastNode(StiTrackNode * n)  {lastNode  = n;};
+  StiKalmanTrackNode * getFirstNode()  const { return firstNode; };
+  StiKalmanTrackNode * getLastNode()   const { return lastNode;  };
+  void setFirstNode(StiKalmanTrackNode * n) {firstNode = n;};
+  void setLastNode(StiKalmanTrackNode * n)  {lastNode  = n;};
   
   double  getSvtDedx()         const { return svtDedx;};
   double  getTpcDedx()         const { return tpcDedx;};
   void   setSvtDedx(double dedx) { svtDedx = dedx; };
   void   setTpcDedx(double dedx) { tpcDedx = dedx; };
-
+  
   // convenience methods for adding/retrieving points
-  StiTrackNode * addHit(StiHit *h);
-  StiTrackNode * insertHit(StiHit *hInserted, StiHit * targetParent);
+  StiKalmanTrackNode * addHit(StiHit *h);
+  StiKalmanTrackNode * insertHit(StiHit *hInserted, StiHit * targetParent);
   void removeHit(StiHit *h);
   void removeAllHits();
   int  getHitCount();
   StiHit * getHit(int index);
-  StiTrackNode * findHit(StiHit * h);
-
-  void initialize(double alpha, double x[5], double e[15], const hitvector &);
-  void getStateNear(double x, double &xx, double x[5], double e[15]);
-  StThreeVector<double> getPointNear(double x);
+  StiKalmanTrackNode * findHit(StiHit * h);
   
-  static StiTrackNodeFactory * trackNodeFactory;
-
+  void initialize(double alpha, 
+		  double eta,
+		  double curvature,
+		  double tanl,
+		  const hitvector &);
+  StiKalmanTrackNode * getNodeNear(double x) const;
+  StThreeVector<double> getPointNear(double x) const;
+  StThreeVector<double> getGlobalPointNear(double x) const;
+  
+  // static StiTrackNodeFactory * trackNodeFactory; // moved to base class...
+  
  protected:
   
-  StiTrackNode * firstNode;
-  StiTrackNode * lastNode;
+  StiKalmanTrackNode * firstNode;
+  StiKalmanTrackNode * lastNode;
   double svtDedx;
   double tpcDedx;
 };
 
+typedef StiObjectFactory<StiKalmanTrack> StiKalmanTrackFactory; 
 
 
 #endif

@@ -15,6 +15,7 @@ class StiKalmanTrackFinder : public StiTrackFinder
   StiKalmanTrackFinder();
   ~StiKalmanTrackFinder();
 
+
     //action methods_______________________________________________
 
     //inherited
@@ -29,27 +30,27 @@ private:
     //Local
     int  findTrack(StiTrack * t);
     
-    bool followTrackAtNode(StiTrack * t, StiTrackNode * node);
-    bool propagateTrackAtNodeTo(StiTrack * t, 
-				StiTrackNode * node, 
+    bool followTrackAtNode(StiKalmanTrack * t, StiKalmanTrackNode * node);
+    bool propagateTrackAtNodeTo(StiKalmanTrack * t, 
+				StiKalmanTrackNode * node, 
 				StiDetector  * sDet,
 				StiDetector  * tDet);
-    bool exploreTrackAtNode(StiTrack * t, StiTrackNode * parentNode, StiTrackNode * workNode);
-    bool followBestTrackAtNode(StiTrack * t, StiTrackNode * node, StiTrackNode * wNode);
+    bool exploreTrackAtNode(StiKalmanTrack * t, StiKalmanTrackNode * parentNode, StiKalmanTrackNode * workNode);
+    bool followBestTrackAtNode(StiKalmanTrack * t, StiKalmanTrackNode * node, StiKalmanTrackNode * wNode);
     
-    double getPredictedChi2(const StiTrackNode * node, const StiHit *hit) const ;
+    double getPredictedChi2(const StiKalmanTrackNode * node, const StiHit *hit) const ;
     
-    StiTrackNode * updateTrackAtNode(StiTrackNode * node, StiTrackNode * wNode, StiHit * hit, double chisq);
-    int rotate(StiTrackNode * node, double alpha);
-    void removeNodeFromTrack(StiTrackNode * node, StiTrack* track);
-    void pruneNodes(StiTrackNode * node);
-    StiTrackNode * findBestBranch(StiTrackNode * node);
-    bool extendToMainVertex(StiTrackNode * node);
+    StiKalmanTrackNode * updateTrackAtNode(StiKalmanTrackNode * node, StiKalmanTrackNode * wNode, StiHit * hit, double chisq);
+    int rotate(StiKalmanTrackNode * node, double alpha);
+    void removeNodeFromTrack(StiKalmanTrackNode * node, StiKalmanTrack* track);
+    void pruneNodes(StiKalmanTrackNode * node);
+    StiKalmanTrackNode * findBestBranch(StiKalmanTrackNode * node);
+    bool extendToMainVertex(StiKalmanTrackNode * node);
     void   setMassHypothesis(double m) { massHypothesis=m;};
     double getMassHypothesis()         { return massHypothesis;};
     
-    double getYWindow(StiTrackNode * n, StiHit * h) const;
-    double getZWindow(StiTrackNode * n, StiHit * h) const;
+    double getYWindow(StiKalmanTrackNode * n, StiHit * h) const;
+    double getZWindow(StiKalmanTrackNode * n, StiHit * h) const;
     
 private:
     
