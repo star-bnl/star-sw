@@ -12,17 +12,17 @@ void RunStiMaker(Int_t nevents=1,
 		 bool draw=true, /*! use gui, click your way around */
 		 //bool draw=false, /*! console version, run through nevents */
 		 
-		 bool doFit=true, /*! true->fit track only */
-		 //bool doFit=false, /*! false->find track only */
+		 //bool doFit=true, /*! true->fit track only */
+		 bool doFit=false, /*! false->find track only */
 
-                 //This file points to 10 events of 10 neg muons w/ pt=.9 
-                 //const char *MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_04_01/*.event.root")
+//This file points to 10 events of 10 neg muons w/ pt=.9 
+//const char *MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_04_01/*.event.root")
 
-                 //This file points to 30 events of 10 neg muons w/ pt=.9
-                 //const char* MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_8_01/*.event.root")
+//This file points to 30 events of 10 neg muons w/ pt=.9
+const char* MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_8_01/*.event.root")
 
-                 //This file points to 110 events from mevsim (homebrew had. cocktail)
-                 const char* MainFile="/star/data17/ITTF/data/mevsim/10_9_01/*.event.root")
+//This file points to 110 events from mevsim (homebrew had. cocktail)
+//const char* MainFile="/star/data17/ITTF/data/mevsim/10_9_01/*.event.root")
 
 //This file points to a nightly low density hadronic cocktail reconstruction.
 //const char* MainFile="/star/rcf/test/dev/trs_redhat61/Tue/year_2001/hc_lowdensity/*.event.root")
