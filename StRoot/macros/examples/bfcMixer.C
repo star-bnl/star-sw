@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer.C,v 1.16 2003/09/19 20:45:44 hjort Exp $
+// $Id: bfcMixer.C,v 1.17 2004/03/19 16:22:08 didenko Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -39,9 +39,9 @@ void Load(){
 }
 //_____________________________________________________________________
 void bfcMixer(const Int_t Nevents=10,
-             const Char_t *file1="/auto/pdsfdv09/starprod/daq/2001/minbias/st_physics_2270008_raw_0030.daq",
-	     const Char_t *file2="/auto/u/starofl/embedding/GSTAR/gtest.fz",
-             const Char_t *file3="/auto/u/starofl/embedding/GSTAR/st_physics_2270008_raw_0030.vertices.dat",
+             const Char_t *file1="/star/rcf/test/embedding/st_physics_2270008_raw_0030.daq",
+	     const Char_t *file2="/star/rcf/test/embedding/gtest.fz",
+             const Char_t *file3="/star/rcf/test/embedding/st_physics_2270008_raw_0030.vertices.dat",
              const Float_t zvertex_low=-175.0,
              const Float_t zvertex_high=175.0,
 	     const Char_t *mode="strange",
