@@ -33,11 +33,11 @@ TGeoNode *findNode     (TObjArray *nodeList,const char *name);
 void
 show
 (
- char* inpDir  = "/star/2004/mudst/",     // MuDST directory
- char* inpFile = "st_physics_5086037_raw_4040001.MuDst.root", // MuDST file(s);                      
- char* outFile = "x.root",      // output tree file
- Int_t nFiles  = 1,                    // # of MuDST file(s)
- Int_t nEvents = -1                    // # of ebents
+ char* inpDir  = "",          // MuDST directory
+ char* inpFile = "show.lis",  // MuDST file(s);                      
+ char* outFile = "show.root", // output tree file
+ Int_t nFiles  = 100,         // # of MuDST file(s)
+ Int_t nEvents = -1           // # of ebents
  )
   // remeber to adjust dbase timestamp below !!!! 
   // what a ... design
