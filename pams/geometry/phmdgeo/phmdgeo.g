@@ -30,7 +30,7 @@
               PFEA,PCBA,BASA,ASTR,PSTR,PDCU,PDGS
               
               
-    structure PMDG {version,m_max,m_min,zdist,DPMDx,DPMDy,DPMDz, 
+    structure PMDG {version,m_max,m_min,zdist(2),DPMDx,DPMDy,DPMDz, 
                     PARGCz,PARSCz,PARFEz,PARPBz,
                     cell_radius,cell_depth,cell_wall,boundary,
                     th_base,th_air,th_pcb,th_lead,th_steel,
@@ -45,11 +45,11 @@
     SizeN (N) = ((N + 1./3.)*pmdg_CELL_RADIUS)*2 + pmdg_boundary*2.*2./sqrt(3.)
 
 *
-    Fill PMDG   ! PMD geometry
-      version = 1      ! geometry version
-      m_max   = 135.   ! Mother volume max radius
-      m_min   = 22.    ! Mother volume min radius
-      ZDIST   = -550.   ! PMD placed at 5.5 metre from the interaction point
+    Fill PMDG                   ! PMD geometry
+      version = 1               ! geometry version
+      m_max   = 135.0           ! Mother volume max radius
+      m_min   = 22.0            ! Mother volume min radius
+      zdist   = {-535.0,-550.0} ! PMD placed at 5.5 metre from the interaction point
       DPMDx   = 270    !  (X-halfwidth of the PMD box,was 190 earlier)
       DPMDy   = 270    ! Y-halfwidth of the  PMD box.
       DPMDz   = 10.    ! total z half-width of the box.
@@ -75,18 +75,21 @@
       th_steel    = 0.5    ! Thickness of the steel support
     endfill
     
-      Use  PMDG  version=1
-      root32=sqrt(3.)/2.
-      root34=root32/2.
-      xlen3=(SizeN(72)+SizeN(48))/4.
+      Use  PMDG
+      root32=sqrt(3.0)/2.0
+      root34=root32/2.0
+
+      xlen3=(SizeN(72)+SizeN(48))/4.0
       ylen3=-(SizeN(72)+SizeN(48))*root34      
       zlen2=(SizeN(72)+SizeN(48)+4.5*pmdg_th_air)/4.
-      zlen1=-(SizeN(72)+SizeN(48)+(2.*pmdg_boundary+3.75*pmdg_th_air)/root32)*root34      
-      sm_thick=2.*(pmdg_th_base + 4.*pmdg_th_air + 3.*pmdg_th_pcb _
-                   + pmdg_CELL_depth) +pmdg_th_lead + pmdg_th_steel
-      sm_thick_a =  (pmdg_th_base + 4.*pmdg_th_air + 3.*pmdg_th_pcb _
-                     + pmdg_CELL_depth)
-      Create and Position PHMD in CAVE z=pmdg_ZDIST
+      zlen1=-(SizeN(72)+SizeN(48)+(2.0*pmdg_boundary+3.75*pmdg_th_air)/root32)*root34 
+
+      sm_thick_a = (pmdg_th_base + 4.0*pmdg_th_air + 3.0*pmdg_th_pcb  + pmdg_CELL_depth)
+
+      sm_thick   = 2.0*sm_thick_a  + pmdg_th_lead + pmdg_th_steel
+
+* Postion according to the current version
+      Create and Position PHMD in CAVE z=pmdg_ZDIST(PMDG_version)
 *
 * -----------------------------------------------------------------------
 * Position the sectors inside PHMD
