@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.18 1998/09/23 20:22:24 fisyak Exp $ 
+// $Id: St_Table.cxx,v 1.19 1998/09/28 01:47:48 fisyak Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.19  1998/09/28 01:47:48  fisyak
+// Use system includes for ROOT
+//
 // Revision 1.18  1998/09/23 20:22:24  fisyak
 // Set kIsNotOwn=23
 //
@@ -45,11 +48,11 @@
 // #include <sstream>
 #include <string.h> 
 
-#include "TROOT.h"
-#include "TBuffer.h"
-#include "TMath.h"
-#include "TClass.h"
-#include "TString.h"
+#include <TROOT.h>
+#include <TBuffer.h>
+#include <TMath.h>
+#include <TClass.h>
+#include <TString.h>
 #include "Api.h"
 
 #include "St_Table.h"
