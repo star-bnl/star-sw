@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.14 2001/12/13 03:08:17 caines Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.15 2002/01/11 22:49:22 caines Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.15  2002/01/11 22:49:22  caines
+// Fix sequence merging bugs-hopefully
+//
 // Revision 1.14  2001/12/13 03:08:17  caines
 // Can now subtract common mode noise via black anodes 239 and 2
 //
@@ -92,7 +95,7 @@ class StSvtSeqAdjMaker : public StMaker
   Int_t FindBlackAnodes(); // Find Black anodes on each hybrid
   Int_t AdjustSequences1( int iAnode, int Anode); // Find sequences  based on ASICS
   Int_t AdjustSequences2(int iAnode, int Anode); //adjust sequences base on LowInvProd
-
+  Int_t MergeSequences(StSequence* Seq, int nSeq); // Merge overlapping sequences
   Int_t CreateHist(Int_t tNuOfHyb);
   void  MakeHistogramsProb(int index,int Anode);
   void  MakeHistogramsAdc(StSvtHybridData* hybridData, int index,int Anode, int Count);
