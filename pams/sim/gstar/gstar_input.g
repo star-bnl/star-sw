@@ -102,7 +102,7 @@ Replace [READ[DIGIT](#)#;] with _
 *  character*8   tit, eg_name, frame 
    Character*120 line
    Integer       LENOCC,Index,li,Ieven,Ntrac,Nvert,itr,ivt,nv,nt,Igate,
-                 LabelTr,LabelVx,ge_pid,StartVx,StopVx,i,k,ier,eg_proc
+                 LabelTr,LabelVx,ge_pid,StartVx,StopVx,i,k,eg_proc
    Real          version,east_z,east_a,west_z,west_a,sqrts,b_max,phi,
                  PP(3),vert(4),UBUF(10)/10*0/
    Integer       istat,eg_pid,moth,daut,num(5)
