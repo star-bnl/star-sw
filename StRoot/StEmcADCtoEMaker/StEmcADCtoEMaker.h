@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.32 2003/09/19 14:34:39 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.33 2003/10/03 14:02:23 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.33  2003/10/03 14:02:23  suaide
+// NULL points initialization fixed
+//
 // Revision 1.32  2003/09/19 14:34:39  suaide
 // Removed muDST option from StEmcADCtoEMaker. Will find another solution for that
 //
@@ -138,7 +141,7 @@ class StEmcADCtoEMaker : public StMaker
   TH2F              *mEnergySpec[MAXDETBARREL][3]; //!
   TH1F              *mAdc1d[MAXDETBARREL];  //!           
   TH1F              *mEn1d[MAXDETBARREL];  //!           
-  TH2F              *mTower;          //!           
+  TH2F              *mADCSpec[MAXDETBARREL];          //!           
   TH2F              *mSmdTimeBinHist; //!
   TH2F              *mValidEvents;    //!
            
@@ -148,6 +151,7 @@ class StEmcADCtoEMaker : public StMaker
   Bool_t            mHasCalib[MAXDETBARREL];
   Bool_t            mHasGain[MAXDETBARREL];
   Float_t           mPed[MAXDETBARREL][18000][3];
+  Float_t           mPedRMS[MAXDETBARREL][18000][3];
   Float_t           mGain[MAXDETBARREL][18000];
   Float_t           mCalib[MAXDETBARREL][18000][5];
 					 
@@ -196,7 +200,7 @@ class StEmcADCtoEMaker : public StMaker
   void                      setEmbeddingMode(Bool_t a) {mEmbedd = a; } ///< Set embedding mode (default is kFALSE)
   void                      setPrint(Bool_t a) {mPrint = a; } ///< Set it to kFALSE if you do not want to print messages
   void                      setFillHisto(Bool_t a) {mFillHisto = a;} ///< Turns on/off histogram filling
-  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.32 2003/09/19 14:34:39 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.33 2003/10/03 14:02:23 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcADCtoEMaker, 1)  
 };

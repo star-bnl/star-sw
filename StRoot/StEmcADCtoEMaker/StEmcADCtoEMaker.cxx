@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.55 2003/10/02 15:51:13 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.56 2003/10/03 14:02:23 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.56  2003/10/03 14:02:23  suaide
+// NULL points initialization fixed
+//
 // Revision 1.55  2003/10/02 15:51:13  suaide
 // possible memory leak removed
 //
@@ -155,7 +158,7 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
 
   Int_t   calib[]      = {1, 0, 1, 1, 0, 0, 0, 0};
   Int_t   pedSub[]     = {1, 0, 1, 1, 0, 0, 0, 0};
-  Float_t energyCut[]  = {-1, -1, 0.07, 0.07, -1, -1, -1, -1};
+  Float_t energyCut[]  = {-1, -1, -1, -1, -1, -1, -1, -1};
   Int_t   onlyCal[]    = {0, 0, 0, 0, 0, 0, 0, 0};
   
   for(Int_t i=0; i<MAXDETBARREL; i++)
@@ -164,7 +167,22 @@ StEmcADCtoEMaker::StEmcADCtoEMaker(const char *name):StMaker(name)
     mControlADCtoE->Calibration[i]=calib[i];
     mControlADCtoE->EnergyCutOff[i]=energyCut[i];
     mControlADCtoE->OnlyCalibrated[i]=onlyCal[i];
+    mHits[i] = NULL;   //!
+    mAdc[i] = NULL;    //!
+    mEnergyHist[i] = NULL; //!
+    mEnergySpec[i][0] = NULL; //!
+    mEnergySpec[i][1] = NULL; //!
+    mEnergySpec[i][2] = NULL; //!
+    mAdc1d[i] = NULL;  //!           
+    mEn1d[i] = NULL;  //!           
+    mADCSpec[i] = NULL;          //!           
+    mGeo[i] = NULL; 
   } 
+  mNhit = NULL;           //! 
+  mEtot = NULL;           //!
+  mSmdTimeBinHist = NULL; //!
+  mValidEvents = NULL;    //!
+           
   mEmbedd=kFALSE;
   mPrint = kTRUE;  
   mDb = NULL;
@@ -190,21 +208,6 @@ program
 Int_t StEmcADCtoEMaker::Init()
 {     
   mData = new StBemcData(); 
-
-  //Making QA histgrams
-	
-	int nbins[] = {4800,4800,18000,18000};
-  mValidEvents = new TH2F("ValidEvents","Valid events for each detector (1=good, 2= bad)",4,-0.5,3.5,8,0.5,8.5);
- 
-  mNhit = new TH2F("EmcNHitsVsDet" ,"Number of hit with energy > 0 .vs. Detector #",1000,0.0,18000,8,0.5,8.5);
-  mEtot = new TH2F("EmcEtotVsDet" ,"Total energy(log10) .vs. Detector #",500,-4.0,15.0,8,0.5,8.5);
- 
-  //tower spectra for gain monitoring  
-  mTower=new TH2F("TowerSpectra","Tower Spectra up to ADC = 500",4800,0.5,4800.5,500,0,500);
-       
-  // SMD time bin
-  mSmdTimeBinHist = new TH2F("SmdTimeBin","SMD Time bin",8,-0.5,7.5,128,0.5,128.5);
-
   for (Int_t i=0; i<MAXDETBARREL; i++) 
 	{
 		mGeo[i]=StEmcGeom::getEmcGeom(detname[i].Data());
@@ -214,6 +217,27 @@ Int_t StEmcADCtoEMaker::Init()
          <<"  EnergyCutOff = "<<mControlADCtoE->EnergyCutOff[i]
          <<"  OnlyCalibrated = "<<mControlADCtoE->OnlyCalibrated[i]<<endl;
   }
+  
+  if(!mFillHisto) return StMaker::Init();
+  //Making QA histgrams
+	
+	int nbins[] = {4800,4800,18000,18000};
+  mValidEvents = new TH2F("ValidEvents","Valid events for each detector (1=good, 2= bad)",4,-0.5,3.5,8,0.5,8.5);
+ 
+  mNhit = new TH2F("EmcNHitsVsDet" ,"Number of hit with energy > 0 .vs. Detector #",1000,0.0,18000,8,0.5,8.5);
+  mEtot = new TH2F("EmcEtotVsDet" ,"Total energy(log10) .vs. Detector #",500,-4.0,15.0,8,0.5,8.5);
+ 
+  //tower spectra for gain monitoring  
+  int a[]={4800,4800,18000,18000};
+  float b[]={4096,1024,1024,1024};
+  for (Int_t i=0; i<MAXDETBARREL; i++) 
+	{
+    char name[40];
+    sprintf(name,"ADCSpec-%s",detname[i].Data());
+    mADCSpec[i]=new TH2F(name,name,a[i],0.5,a[i]+0.5,1024,-64,b[i]);
+  }     
+  // SMD time bin
+  mSmdTimeBinHist = new TH2F("SmdTimeBin","SMD Time bin",8,-0.5,7.5,128,0.5,128.5);
   
   for (Int_t i=0; i<MAXDETBARREL; i++) if(mControlADCtoE->Calibration[i]==1)
   {
@@ -419,7 +443,11 @@ Bool_t StEmcADCtoEMaker::getTables()
             if(emcpedst)
             {
               mHasPed[det] = kTRUE;
-              for(int i=0;i<4800;i++) mPed[det][i][0] = ((Float_t)emcpedst[0].AdcPedestal[i])/100.;
+              for(int i=0;i<4800;i++) 
+              {
+                mPed[det][i][0] = ((Float_t)emcpedst[0].AdcPedestal[i])/100.;
+                mPedRMS[det][i][0] = ((Float_t)emcpedst[0].AdcPedestalRMS[i])/100.;
+              }
             }
           }
 		    }
@@ -460,7 +488,11 @@ Bool_t StEmcADCtoEMaker::getTables()
             if(smdpedst)
             {
               mHasPed[det] = kTRUE;
-              for(int i=0;i<18000;i++) for(int j=0;j<3;j++) mPed[det][i][j] = ((Float_t)smdpedst[0].AdcPedestal[i][j])/100.;
+              for(int i=0;i<18000;i++) for(int j=0;j<3;j++) 
+              {
+                mPed[det][i][j] = ((Float_t)smdpedst[0].AdcPedestal[i][j])/100.;
+                mPedRMS[det][i][j] = ((Float_t)smdpedst[0].AdcPedestalRMS[i][j])/100.;
+              }
             }
           }
         }
@@ -860,10 +892,11 @@ Bool_t StEmcADCtoEMaker::fillHistograms()
 			{
 				Float_t ADC = 0;
 				Float_t E = 0;
-				if(det==0) { ADC = (Float_t)mData->TowerADC[i]; E = mData->TowerEnergy[i]; mTower->Fill(i+1,ADC);}
+				if(det==0) { ADC = (Float_t)mData->TowerADC[i]; E = mData->TowerEnergy[i]; }
 				if(det==2) { ADC = (Float_t)mData->SmdeADC[i]; E = mData->SmdeEnergy[i]; }
 				if(det==3) { ADC = (Float_t)mData->SmdpADC[i]; E = mData->SmdpEnergy[i]; }
-			  //if(det==2) cout <<"id = "<<i+1<<"  ADC = "<<ADC<<"  E = "<<E<<endl;
+			  if(ADC!=0) mADCSpec[det]->Fill(i+1,ADC-mPed[det][i][0]);
+        //if(det==2) cout <<"id = "<<i+1<<"  ADC = "<<ADC<<"  E = "<<E<<endl;
 				totalE+=E;
 				totalADC+=ADC;
 				nHits++;
