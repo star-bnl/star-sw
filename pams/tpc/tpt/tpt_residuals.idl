@@ -14,4 +14,4 @@ interface tpt_residuals : amiModule{
                        out   tpt_res   res	
              );
      };
-/*  Last mod. for tpt_residuals:  1998/10/21 */@
+     /*  Last mod. for tde_new.idl  */
