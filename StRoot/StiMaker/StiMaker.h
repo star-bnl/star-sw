@@ -42,7 +42,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.43 2002/03/15 22:43:39 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.44 2002/03/15 22:57:39 pruneau Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -76,20 +76,20 @@ protected:
 private:
 
     static StiMaker* sinstance; //!
-
-		bool initialized;
+    
+    bool initialized;
     string mEvalFileName; //!
-
-		StiIOBroker * ioBroker;
-		StiToolkit  * toolkit;
-		StiKalmanTrackFinder * tracker;
-
+    
+    StiIOBroker * ioBroker;
+    StiToolkit  * toolkit;
+    StiKalmanTrackFinder * tracker;
+    
     //Tracker
-    StiKalmanTrackFinder* mtracker; //!
-
+    //StiKalmanTrackFinder* mtracker; //!
+    
     //TrackFilter
     StiDynamicTrackFilter* mFilter; //!
-
+    
     //EventFiller
     StiStEventFiller* mStEventFiller; //!
 

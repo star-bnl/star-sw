@@ -79,10 +79,10 @@ StiMaker::StiMaker(const Char_t *name) :
 	ioBroker(0),
 	toolkit(0),
 	tracker(0),
+	mStEventFiller(0),
 	mevent(0), 
 	mMcEvent(0), 
 	mMcEventMaker(0),
-	mStEventFiller(0),
 	mAssociationMaker(0)
 {
     cout <<"StiMaker::StiMaker()"<<endl;
@@ -140,56 +140,55 @@ Int_t StiMaker::Init()
 
 Int_t StiMaker::InitRun(int run)
 {
-<<<<<<< StiMaker.cxx
-	if (!initialized)
-		{
-			cout <<"\n --- StiMaker::InitRun(): Building --- \n"<<endl;
-			initialized=true;
-			
-			Messenger::init();
-			Messenger::setRoutingMask(0);
-			//Messenger::instance()->setRoutingMask(0); //turn off all streams
-			//Messenger::instance()->setRoutingBits(MessageType::kHitMessage);
-			
-
-			ioBroker = toolkit->getIOBroker();
-			cout <<"\n\n ------------------- StiIOBroker ----------------------- \n\n"<<*ioBroker<<endl;
-			if (ioBroker->useGui()) 
-				{
-					cout <<"--- Display Manager will be set" << endl;
-					toolkit->getDisplayManager()->cd();
-					cout <<"--- Display Manager Ready" << endl;
-				}
-			else
-				cout <<"--- Display Manager will not be used" << endl;
-			if (ioBroker->simulated()==true)
-				{
-					if (mAssociationMaker)
-						cout << "AssociationMaker Defined" << endl;
-					else
-						cout << "---- AssociationMaker NOT Defined" << endl;
-							
-					toolkit->setAssociationMaker(mAssociationMaker);
-					toolkit->getEvaluator(mEvalFileName);
-					cout <<"--- Evaluator Ready" << endl;
-				}
-			else
-				cout <<"--- Evaluator will not be used" << endl;
-			tracker = dynamic_cast<StiKalmanTrackFinder *>(toolkit->getTrackFinder());
-			//StiStEventFiller
-			mStEventFiller = new StiStEventFiller();
-
-			cout <<"--- Tracker Ready" << endl;
-			if (ioBroker->useGui()) 
-				{
-					toolkit->getDisplayManager()->setSkeletonView();
-					toolkit->getDisplayManager()->draw();
-					toolkit->getDisplayManager()->update();
-					//toolkit->getDisplayManager()->print();
-				}
-			cout <<"\n --- StiMaker::InitRun(): Done building --- \n"<<endl;
+  if (!initialized)
+    {
+      cout <<"\n --- StiMaker::InitRun(): Building --- \n"<<endl;
+      initialized=true;
+      
+      Messenger::init();
+      Messenger::setRoutingMask(0);
+      //Messenger::instance()->setRoutingMask(0); //turn off all streams
+      //Messenger::instance()->setRoutingBits(MessageType::kHitMessage);
+      
+      
+      ioBroker = toolkit->getIOBroker();
+      cout <<"\n\n ------------------- StiIOBroker ----------------------- \n\n"<<*ioBroker<<endl;
+      if (ioBroker->useGui()) 
+	{
+	  cout <<"--- Display Manager will be set" << endl;
+	  toolkit->getDisplayManager()->cd();
+	  cout <<"--- Display Manager Ready" << endl;
+	}
+      else
+	cout <<"--- Display Manager will not be used" << endl;
+      if (ioBroker->simulated()==true)
+	{
+	  if (mAssociationMaker)
+	    cout << "AssociationMaker Defined" << endl;
+	  else
+	    cout << "---- AssociationMaker NOT Defined" << endl;
+	  
+	  toolkit->setAssociationMaker(mAssociationMaker);
+	  toolkit->getEvaluator(mEvalFileName);
+	  cout <<"--- Evaluator Ready" << endl;
+	}
+      else
+	cout <<"--- Evaluator will not be used" << endl;
+      tracker = dynamic_cast<StiKalmanTrackFinder *>(toolkit->getTrackFinder());
+      //StiStEventFiller
+      mStEventFiller = new StiStEventFiller();
+      
+      cout <<"--- Tracker Ready" << endl;
+      if (ioBroker->useGui()) 
+	{
+	  toolkit->getDisplayManager()->setSkeletonView();
+	  toolkit->getDisplayManager()->draw();
+	  toolkit->getDisplayManager()->update();
+	  //toolkit->getDisplayManager()->print();
+	}
+      cout <<"\n --- StiMaker::InitRun(): Done building --- \n"<<endl;
     }
-	return StMaker::Init();
+  return StMaker::Init();
 }
 
 Int_t StiMaker::Make()
@@ -280,7 +279,7 @@ void StiMaker::finishEvent()
 		//cout <<"Time to merge tracks: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
 
 		clock.start();
-		mevent = mStEventFiller->fillEvent(mevent, mtrackstore);
+		mevent = mStEventFiller->fillEvent(mevent, toolkit->getTrackContainer());
 		clock.stop();
 		cout <<"Time to fill StEvent: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
 		if (ioBroker->simulated())
