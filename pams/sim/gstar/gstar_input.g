@@ -118,8 +118,7 @@ Replace [READ[DIGIT](#)#;] with _
 *
  WHILE itr<Ntrac | ivt<Nvert
  { 
-   line='end-of-file';  read5 (li,'(a)') Line; (1x,a)
-
+   line='end-of-file';  read5 (li,'(a)') Line; (1x,a);  Check Line(1:1)!='*'
    If Line(1:5)=='GENER'
    {  
      read1 (line(11:),*) version,east_z,east_a,west_z,west_a,sqrts,b_max
@@ -147,9 +146,9 @@ Replace [READ[DIGIT](#)#;] with _
    else If Line(1:6)=='HEPEVT' & itr+ivt==0  
    { *             HEPEVT text format
      read1 (line(8:),*) Ntrac,Ieven; (' gstar_Read HEPEVT:',i8,' event#',i6)
-
      do Itr=1,Ntrac
-     {  read5 (li,*) istat,eg_pid,moth,daut,phep,vhep; (6i5,5F8.2,4F9.3)
+     {  :r: read5 (li,'(a)') Line; (1x,a);  If (Line(1:1)=='*') go to :r:
+        read6 (line, * ) istat,eg_pid,moth,daut,phep,vhep; (6i5,5F8.2,4F9.3)
         num(3)=0;    If (itr==1) num(3)=1
         Call RbSTORE ('/EVNT/GENE/GENT*',num,Cform,15,istat)
         check Istat==1;       Call apdg2gea (eg_pid, ge_pid)
@@ -167,7 +166,8 @@ Replace [READ[DIGIT](#)#;] with _
      read1 (line,*) Ntrac,Ieven; (' gstar_ReadOld: ',i8,' event# ',i6)
      call VZERO(vert,4); call AgSVERT(vert,-1,-Igate,Ubuf,0,nv)
      do itr=1,Ntrac
-     {  read5 (li,*) ge_pid,PP; (16x,i6,3F8.3)
+     {  :q: read5 (li,'(a)') Line; (1x,a);  If (Line(1:1)=='*') go to :q:
+        read6     (line, * ) ge_pid,PP;     (16x,i6,3F8.3)
         Call AgSKINE(PP,ge_pid,nv,Ubuf,0,nt)
      }  Break
    }
@@ -182,7 +182,8 @@ Replace [READ[DIGIT](#)#;] with _
      call VZERO(Vert,4); call AgSVERT(Vert,-1,-Igate,Ubuf,0,nv)
 
      do itr=1,Ntrac
-     {  read2(li,*) ge_pid,moth,daut,Phep; (i8,4i6,5f10.5) 
+     {  :p: read5 (li,'(a)') Line; (1x,a);  If (Line(1:1)=='*') go to :p:
+            read2 (line, * ) ge_pid,moth,daut,Phep; (i8,4i6,5f10.5) 
         call aGEA2PDG(ge_pid,eg_pid)
         if (eg_pid==0) { print *,' ? ge_pid =',ge_pid; next; }
         Call AgSKINE(PP,ge_pid,nv,Ubuf,0,nt)
@@ -449,7 +450,7 @@ Replace [READ[DIGIT](#)#;] with _
    call GsHEAD (len_egrn-2, Bank_egrn(3), iadr)
    call GsHEAD (len_egev-2, Bank_egev(3), iadr)
    call GsHEAD (len_uevn-2, Bank_uevn(3), iadr)
-   print *,' Header: geant header set with length =',iadr
+   prin1 iadr; (' Header: geant header set with length =',i6)
 *
    end
 
