@@ -29,7 +29,9 @@ dioFactory *dio;
 //:<--------------------------------------------------------------------
 int dio_init()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("DIO:Initializing. ");
+#endif
 
 /*- Load other PKGs. -*/
 // soc->bind("tdm");
@@ -55,7 +57,9 @@ int dio_init()
 //:<--------------------------------------------------------------------
 int dio_start()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("DIO:Starting. ");
+#endif
 
 /*- Create the DIO Factory. -*/
    dio = new dioFactory("dio");
@@ -71,7 +75,9 @@ int dio_start()
 //:<--------------------------------------------------------------------
 int dio_stop()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("DIO:Stopping. ");
+#endif
 
 /*- Delete the DIO Factory.
    delete dio;

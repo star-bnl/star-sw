@@ -1,310 +1,217 @@
 #include <stdio.h>
 #include <string.h>
 #include "asuAlloc.h"
+static asuAllocMgr_t gAsuMgr;
+static asuAlloc_t gAsuMain;
+void asuWau();
 
-static ASU_MALLOCLEVEL_T asu_mallocLevel=ASU_MALLOC_INIT;
-
-static size_t asu_mallocCalls = 0;
-static size_t asu_freeCalls = 0;
-static size_t asu_mallocSize = 0;
-static size_t asu_freeSize = 0;
-
-static size_t asu_nTrace = 0;
-static size_t asu_maxTrace = 1;
-static ASU_MALLOCTRACE_T asu_mallocTrace0;
-static ASU_MALLOCTRACE_T *asu_mallocTrace=&asu_mallocTrace0;
+void asuPrintBlok(asuAlloc_t *p);
 
 
 /*--------------------------------------------------------------------*/
 void asuMallocInit()
 {
     
-     if( !(ASU_MALLOC_INIT == asu_mallocLevel) ){
-      fprintf(stderr,"ASU_MALLOC: use Reset \n");fflush(0);
-      return;
-   }
-#ifndef QUIET_ASP
-   fprintf(stderr,"ASU_MALLOC: Initializing ");fflush(0);
-#endif
-   asuMallocLevel(ASU_MALLOC_LEVEL);
-
-   switch(asu_mallocLevel) {
-   case ASU_MALLOC_VERBOSE:	/* ...and print every time */
-      fprintf(stderr,",VERBOSE ");
-   case ASU_MALLOC_FILL:	/* ...and fill w/ pattern */
-      fprintf(stderr,",FILL ");
-   case ASU_MALLOC_TRACE:	/* ...and keep trace of m&f */
-      fprintf(stderr,",TRACE ");
-      asuMallocInitTrace();
-   case ASU_MALLOC_COUNT:	/* ...and count calls to m&f */
-      fprintf(stderr,",COUNT ");
-   case ASU_MALLOC_FAST:	/* only call m&f */
-   default:
-      fprintf(stderr,"\n");
-      break;
-   }
+    memset(&gAsuMgr,0,sizeof(asuAllocMgr_t));
+    memset(&gAsuMain,0,sizeof(asuAlloc_t));
 }
 
 /*--------------------------------------------------------------------*/
 void asuMallocInitTrace()
 {
-   asu_nTrace = 0;
-   asuMallocGrowTrace(1024);	/* reserve space for 1024 calls */
+}
+
+void asuMallocLevel(int level)
+{
+if (level == -1){ printf("ASU/MALLOC/LEVEL=%d\n",gAsuMgr.fLogLevel);
+} else 		{ gAsuMgr.fLogLevel=level;}
 }
 
 /*--------------------------------------------------------------------*/
-void asuMallocGrowTrace(size_t m)
+void asuMallocStats(level)
 {
-   ASU_MALLOCTRACE_T* oldTrace = asu_mallocTrace;
-   size_t oldMaxTrace = asu_maxTrace;
+asuAlloc_t *pa; char* pc;
+float Mega;
+int numb,accu,corr,size;
+  if (level >=0) gAsuMgr.fLogLevel = level;
+  printf("\nASU_MALLOC: Memory allocation for Event:%d \n",gAsuMgr.fEvent);
 
-   asu_maxTrace = m;
-   asu_mallocTrace = (ASU_MALLOCTRACE_T*)MALLOC(asu_maxTrace*sizeof(
-		ASU_MALLOCTRACE_T));
-   memcpy(asu_mallocTrace, (void*)oldTrace
-		, oldMaxTrace*sizeof(ASU_MALLOCTRACE_T));
-   if(&asu_mallocTrace0 != oldTrace){ /* avoid free global -akio */
-     FREE(oldTrace);                  /* fix memory leak -akio */
-   }
+  Mega = gAsuMgr.fSize; Mega = Mega/1000000;
+  printf(" Size %10.3fM  Blocks%8d  Allocs%8d  Free   %8d  Errors %d Warnings %d\n"
+         ,Mega
+         ,gAsuMgr.fNumBlok 
+         ,gAsuMgr.fNumAlloc 
+         ,gAsuMgr.fNumFree 
+         ,gAsuMgr.fNumErr
+         ,gAsuMgr.fNumWar);
+  
+  numb = 0; accu = 0;
+  for (pa = gAsuMain.next; pa; pa = pa->next) {/*loop over all*/ 
+    pc = (char*)pa; size = pa->size;
+    corr = (pa->magic!=kAsuMagic || pc[size + sizeof(asuAlloc_t)]!=kAsuLast);
+    corr = corr & (pa->begin != kAsuBegin);
+    if ( !corr && !gAsuMgr.fLogLevel) continue;
+    numb++; accu += size;
+
+    printf("%4d - %10d  ",numb,accu); asuPrintBlok(pa);
+  } 
+
+  gAsuMgr.fEvent++;
+
 }
 
 /*--------------------------------------------------------------------*/
-void asuMallocStats()
+void asuMallocPrintTrace(void *p, size_t size, const char* file, int line)
 {
-   int i;
-
-   fprintf(stderr,"\nASU_MALLOC: Memory allocation statistics: ");
-
-   switch(asu_mallocLevel) {
-   case ASU_MALLOC_VERBOSE:	/* ...and print every time */
-   case ASU_MALLOC_FILL:	/* ...and fill w/ pattern */
-   case ASU_MALLOC_TRACE:	/* ...and keep trace of m&f */
-      for( i=0;i<asu_nTrace;i++ ){
-	 if( asu_mallocTrace[i].p ){
-	    fprintf(stderr,"\n");
-            asuMallocPrintTrace(
-			  asu_mallocTrace[i].p
-			, asu_mallocTrace[i].size
-			, asu_mallocTrace[i].file
-			, asu_mallocTrace[i].line
-	    );
-	 }
-      }
-   case ASU_MALLOC_COUNT:	/* ...and count calls to m&f */
-      fprintf(stderr,"\n\tmallocCalls %d, freeCalls %d, diff %d"
-      		, asu_mallocCalls, asu_freeCalls
-		, asu_mallocCalls - asu_freeCalls);
-      fprintf(stderr,"\n\tmallocSize %d, freeSize %d, diff %d"
-      		, asu_mallocSize, asu_freeSize
-		, asu_mallocSize - asu_freeSize);
-      fprintf(stderr,"\n\tasuMallocSize %d"
-		, (1==asu_maxTrace? 0:
-		asu_maxTrace*sizeof(ASU_MALLOCTRACE_T)));
-   case ASU_MALLOC_FAST:	/* only call m&f */
-   default:
-      fprintf(stderr,"\n");
-      break;
-   }
 }
 
 /*--------------------------------------------------------------------*/
-void asuMallocPrintTrace(void *p, size_t size, char* file, int line)
-{
-   /* ===========================================================
-   This crashes if p = NULL, so I'm replacing it with something
-   ** simple and foolproof.  Herb June 11 1998 
-   long v; char c[5], *s=c; memcpy(&v,p,4); memcpy(s,p,4); c[4]=0;
-   fprintf(stderr,"(%p:%d) %s.%d [%lx:%4s]", p, size, file, line, v, s);
-   ===========================================================*/
-   if(!file) { fprintf(stderr,"file==NULL !!!!\n"); return; }
-   fprintf(stderr,
-      "asuMallocPrintTrace(p=%p, size=%d, file=%s, line=%d).\n",
-      p,size,file,line);
-}
-
-/*--------------------------------------------------------------------*/
-ASU_MALLOCLEVEL_T asuMallocLevel(ASU_MALLOCLEVEL_T level)
-{
-   ASU_MALLOCLEVEL_T oldLevel = asu_mallocLevel;
-
-   switch(level) {
-   case ASU_MALLOC_VERBOSE:	/* ...and print every time */
-   case ASU_MALLOC_FILL:	/* ...and fill w/ pattern */
-   case ASU_MALLOC_TRACE:	/* ...and keep trace of m&f */
-      switch(asu_mallocLevel) {
-      case ASU_MALLOC_INIT:	/* UNINITIALIZED */
-      case ASU_MALLOC_FAST:	/* only call m&f */
-      case ASU_MALLOC_COUNT:	/* ...and count calls to m&f */
-	 asuMallocInitTrace();
-      case ASU_MALLOC_TRACE:	/* ...and keep trace of m&f */
-      case ASU_MALLOC_FILL:	/* ...and fill w/ pattern */
-      case ASU_MALLOC_VERBOSE:	/* ...and print every time */
-      default:
-      break;
-      }
-   case ASU_MALLOC_COUNT:	/* ...and count calls to m&f */
-   case ASU_MALLOC_FAST:	/* only call m&f */
-   case ASU_MALLOC_INIT:	/* UNINITIALIZED */
-   default:
-   break;
-   }
-
-   asu_mallocLevel = level;
-   return oldLevel;
-}
 
 /*--------------------------------------------------------------------*/
 void asuMallocReset()
 {
-   ASU_MALLOCLEVEL_T tmpLevel;;
-
-   asu_mallocCalls = 0;
-   asu_freeCalls = 0;
-   asu_mallocSize = 0;
-   asu_freeSize = 0;
-   FREE(asu_mallocTrace);
-   tmpLevel = asu_mallocLevel;
-   asuMallocLevel(ASU_MALLOC_INIT);
-   asuMallocInit();
-   asuMallocLevel(tmpLevel);
 }
 
 /*--------------------------------------------------------------------*/
-void asuMallocAdd(void *p, size_t size, char* file, int line)
+void asuMallocAdd(void *pp, size_t size, const char* file, int line)
 {
-   int patt=ASU_MALLOC_FILLPATTERN;
-   int *c = &patt;
+asuAlloc_t *p,*pold;
+int i;
+   p = (asuAlloc_t*)pp;
 
-   if (!p) {/* Not enough space*/
-      fprintf(stderr,"ASU_ALLOC: ***Error***: No more memory available\n");
-      asuMallocPrintTrace(p,size,file,line);
-      fprintf(stderr,"\n");}
-   
-   switch(asu_mallocLevel) {
-   case ASU_MALLOC_VERBOSE:	/* ...and print every time */
-      fprintf(stderr,"ASU_MALLOC: alloc ");
-      asuMallocPrintTrace(p,size,file,line);
-      fprintf(stderr,"\n");
-   case ASU_MALLOC_FILL:	/* ...and fill w/ pattern */
-      memset(p,'*',size);	/* HACK ? should be many memcpy's */
-      if(size >= 4) memcpy(p,c,4);
-   case ASU_MALLOC_TRACE:	/* ...and keep trace of m&f */
-      if( asu_nTrace >= asu_maxTrace ){
-	 asuMallocGrowTrace((int)(1.5*asu_maxTrace));
-      }
-      asu_mallocTrace[asu_nTrace].p = p;
-      asu_mallocTrace[asu_nTrace].size = size;
-      strncpy(asu_mallocTrace[asu_nTrace].file,file,127);  
-      asu_mallocTrace[asu_nTrace].file[127]=0; /* hjw 19Feb98 */
-      asu_mallocTrace[asu_nTrace].line = line;
-      asu_nTrace++;
-   case ASU_MALLOC_COUNT:	/* ...and count calls to m&f */
-      asu_mallocCalls++;
-      asu_mallocSize += size;
-   case ASU_MALLOC_FAST:	/* only call m&f */
-   case ASU_MALLOC_INIT:	/* UNINITIALIZED */
-   default:
-   break;
-   }
+   if (!p) {/* No Memory */
+     gAsuMgr.fNumErr++;
+     printf("asuMalloc. ***Error***: Can not allocate %d bytes\n",size);
+     printf("asuMalloc. ***Error***: in File: %s Line %d \n",file,line);
+     return;}
 
-
+   pold = gAsuMain.next; gAsuMain.next = p;
+   p->next = pold; p->back = &gAsuMain;  
+   if (pold) pold->back = p;
+/* 	Fill new block 	*/
+   i=strlen(file)-15; if (i<0) i=0; strcpy(p->file,file+i);
+   p->size = size; p->line=line; p->event = gAsuMgr.fEvent;
+   p->status=0; p->magic = kAsuMagic; p->summ = 0;
+   p->begin = kAsuBegin;
+   *((char*)pp + sizeof(asuAlloc_t)+size)=kAsuLast;
+/*	Update Mgr	*/
+   gAsuMgr.fNumBlok++;
+   gAsuMgr.fNumAlloc++;
+   gAsuMgr.fSize +=size;
 }
 
 /*--------------------------------------------------------------------*/
-void asuMallocRemove(void *p, char* file, int line)
+int asuMallocRemove(void *pv, const char* file, int line){
+
+static int NumGiveUp=50;
+asuAlloc_t *pa,*pnex,*pbak;
+char *pc; int size,idel,inew,i;
+
+  pc = (char*)pv; 
+  pa = (asuAlloc_t*)(pc - sizeof(asuAlloc_t)); 
+
+  if (pa->magic != kAsuMagic) {/* block was not created by asuMalloc*/
+    if ( gAsuMgr.fLogLevel || NumGiveUp) {
+      printf("asuFree. ***Warning***: block %p was not made by asuAlloc\n",pa); 
+      printf("asuFree. ***-------***: File: %s Line %d \n",file,line);
+      if (NumGiveUp) NumGiveUp--;}
+    gAsuMgr.fNumWar++; return 1;}
+
+  if (pa->status == kAsuDead) {/* block is dead */
+      printf("asuFree. ***Error***: attempt delete dead block \n"); 
+      asuPrintBlok(pa);
+      printf("asuFree. ***Error***: File: %s Line %d \n",file,line);
+      gAsuMgr.fNumErr++; return 2;}
+  size = pa->size;
+
+  if(*(pc+size)!=kAsuLast){ ;
+      gAsuMgr.fNumErr++;
+      printf("asuFree. ***Error***: Block corrupted \n"); 
+      asuPrintBlok(pa);
+      printf("asuFree. ***Error***: File: %s Line %d \n",file,line);}
+
+  inew = (pa->line <0 );
+  idel = (line < 0 );
+  if (idel != inew) {/* new/new mess */
+      gAsuMgr.fNumErr++;
+      printf("asuFree. ***Error***: New/Delete mess \n"); 
+      printf("         block made by "); 
+      if (inew) {printf("new");} else {printf("malloc");}
+      printf(" but deleted by ");
+      if (idel) {printf("delete");} else {printf("free");}
+      printf("\n");
+      asuPrintBlok(pa);
+      printf("asuFree. ***Error***: File: %s Line %d \n",file,line);}
+ 
+  pnex = pa->next; pbak = pa->back;
+  pbak->next = pnex; if (pnex) pnex->back = pbak;
+  pa->next = NULL; pa->back = NULL; pa->status = kAsuDead;
+  
+  gAsuMgr.fNumBlok--;
+  gAsuMgr.fNumFree++;
+  gAsuMgr.fSize-=pa->size;
+
+  return 0;      
+}
+
+/*--------------------------------------------------------------------*/
+void *asuCalloc(size_t nobj, size_t size, const char* file, int line)
 {
+   asuAlloc_t *p,*pold;
+
+   size = size*nobj;
+   p = (asuAlloc_t*)malloc(size+sizeof(asuAlloc_t)+1);
+   if (p) memset(p,0,size+sizeof(asuAlloc_t));
+   asuMallocAdd(p,size,file,line);
+   if (!p) return NULL;
+   return (void*)((char*)p+sizeof(asuAlloc_t));
+}
+
+/*--------------------------------------------------------------------*/
+void *asuMalloc(size_t size, const char* file, int line)
+{
+   void *p;
    int i;
-   int patt=ASU_MALLOC_FREEPATTERN;
-   int *c = &patt;
-   size_t size;
-   int istk;
+
+   p = malloc(size+sizeof(asuAlloc_t)+1);
    
-   istk = asuStack(p);
-   if (istk) {
-     fprintf(stderr,"ASU_MALLOC: free Error %d",istk);
-     asuMallocPrintTrace(p,size,file,line);
-     fprintf(stderr,"\n");}
-     
-   switch(istk) {
-     case  1: fprintf(stderr,"          : It is stack area      \n"); 	break;
-     case -1: fprintf(stderr,"          : It is LOST stack area \n");	break;
-     case -2: fprintf(stderr,"          : It is UNDEFINED area  \n");	break;
-   }  
-
-   switch(asu_mallocLevel) {
-   case ASU_MALLOC_VERBOSE:	/* ...and print every time */
-   case ASU_MALLOC_FILL:	/* ...and fill w/ pattern */
-   case ASU_MALLOC_TRACE:	/* ...and keep trace of m&f */
-      for( i=0;i<asu_nTrace;i++ ){
-	 if( p == asu_mallocTrace[i].p ){
-	    asu_mallocTrace[i].p = NULL;
-	    asu_freeSize += asu_mallocTrace[i].size;
-
-	    size = asu_mallocTrace[i].size;
-	    switch(asu_mallocLevel) {
-	    case ASU_MALLOC_VERBOSE:	/* ...and print every time */
-	       fprintf(stderr,"ASU_MALLOC: free ");
-	       asuMallocPrintTrace(p,size,file,line);
-	       fprintf(stderr,"\n");
-	    case ASU_MALLOC_FILL:	/* ...and fill w/ pattern */
-	       memset(p,'-',size); /* HACK ? should be many memcpy's */
-	       if(size >= 4) memcpy(p,c,4);
-	    case ASU_MALLOC_TRACE:	/* ...and keep trace of m&f */
-	    case ASU_MALLOC_COUNT:	/* ...and count calls to m&f */
-	    case ASU_MALLOC_FAST:	/* only call m&f */
-	    case ASU_MALLOC_INIT:	/* UNINITIALIZED */
-	    default:
-	       break;
-	    }
-
-	    break;
-	 }
-      }
-   case ASU_MALLOC_COUNT:	/* ...and count calls to m&f */
-      asu_freeCalls++;
-   case ASU_MALLOC_FAST:	/* only call m&f */
-   case ASU_MALLOC_INIT:	/* UNINITIALIZED */
-   default:
-      break;
-   }
-
-}
-
-/*--------------------------------------------------------------------*/
-void *asuCalloc(size_t nobj, size_t size, char* file, int line)
-{
-   void *p=NULL;
-   p = calloc(nobj,size);
    asuMallocAdd(p,size,file,line);
-   if (!p) p=(void*)(-1);
+   if (!p) return NULL;
+   p = (void*)((char*)p+sizeof(asuAlloc_t));
+   if ((long)p&3) asuWau();
    return p;
 }
 
 /*--------------------------------------------------------------------*/
-void *asuMalloc(size_t size, char* file, int line)
+void *asuRealloc(void *p, size_t size, const char* file, int line)
 {
-   void *p=NULL;
-   p = malloc(size);
-   asuMallocAdd(p,size,file,line);
-   if (!p) p=(void*)(-1);
-   return p;
+char *pc = (char*)p;
+
+int ierr  = asuMallocRemove(p,file,line);
+  switch (ierr) {
+  
+  case 0:
+    p = realloc(pc-sizeof(asuAlloc_t),size+sizeof(asuAlloc_t)+1);
+    pc = (char*)p;
+    asuMallocAdd(p,size,file,line);
+    if (!p) return NULL;
+    return (void*)(pc+sizeof(asuAlloc_t));
+    break;
+  case 1:
+    return realloc(p,size);
+  default:
+    return NULL;
+  }
 }
 
 /*--------------------------------------------------------------------*/
-void *asuRealloc(void *p, size_t size, char* file, int line)
+void asuFree(void *p, const char* file, int line)
 {
-   asuMallocRemove(p,file,line);
-   p = realloc(p,size);
-   asuMallocAdd(p,size,file,line);
-   if (!p) p=(void*)(-1);
-   return p;
-}
-
-/*--------------------------------------------------------------------*/
-void asuFree(void *p, char* file, int line)
-{
-   asuMallocRemove(p,file,line);
-   if(p) free(p); /* This has more probrems... fix only free null -akio */
+int ierr;
+  if(!p) return;
+  ierr = asuMallocRemove(p,file,line);
+  if (ierr==2) return;
+  free(p); 
 }
 
 /*--------------------------------------------------------------------*/
@@ -336,3 +243,24 @@ int asuStack(void *p)
   return 0;    
 }
 
+void asuPrintBlok(asuAlloc_t *p){
+  int corr;
+  int size = p->size;
+  corr =(*((char*)p + sizeof(asuAlloc_t)+size)!=kAsuLast) ;
+  corr = corr & (p->begin != kAsuBegin);
+  gAsuMgr.fNumErr +=corr;
+  printf("%p(%6d) \tEvt=%d \tFile=%s:%d "
+    ,p,size,p->event,p->file,p->line);
+
+  if (corr) printf(" CORRUPTED"); printf("\n");
+
+}
+unsigned short int asuSumm(void *blok,int size) {
+ unsigned long int *data = (unsigned long int *)blok;
+ int n = size/sizeof(long);
+ unsigned long int sum = 0;
+ int i;
+ for (i=0;i<n;i++) { sum = sum ^ data[i];}
+ return (sum & 0xFFFF ) ^ (sum >> 16);
+} 
+void asuWau() {return;};

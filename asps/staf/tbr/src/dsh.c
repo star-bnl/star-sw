@@ -10,7 +10,6 @@
 #include <stdlib.h>
 #include "dstype.h"
 #include "dsuType.h"
-#include "asuAlloc.h"
 #include "emlLib.h"
 #include "tbr_types.h"
 #include "dsxdr.h"
@@ -21,6 +20,7 @@
 #define EXTERN
 #include "brow.h"
 #include "dscuts.h"
+#include "asuAlloc.h"
 extern char dsu_gStr[DSU_SIZE_OF_GSTR];
 void Sss(char *mess);
 int gAlreadyErr;

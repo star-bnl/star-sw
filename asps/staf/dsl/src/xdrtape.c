@@ -97,7 +97,7 @@ int xdrtape_create(XDR *xdrs, enum xdr_op op, int fd, unsigned size,
 	if (size <= 0) {
 		size = XDRTAPE_DEFAULT_BLOCK_SIZE;
 	}
-	if (!(pTape = (TAPEBUF_T *)calloc(1, sizeof(TAPEBUF_T) + size))) {
+	if (!(pTape = (TAPEBUF_T *)CALLOC(1, sizeof(TAPEBUF_T) + size))) {
 		XDRTAPE_ERROR(XDRTAPE_INSUFFICIENT_MEMORY);
 	}
 	xdrs->x_private = (caddr_t)pTape; 	
