@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.h,v 1.9 2004/06/05 23:40:49 fisyak Exp $
+// $Id: StdEdxY2Maker.h,v 1.10 2004/06/22 16:50:07 fisyak Exp $
 #ifndef STAR_StdEdxY2Maker
 #define STAR_StdEdxY2Maker
 
@@ -20,6 +20,9 @@ class StGlobalTrack;
 class TMinuit; 
 class StEvent;
 class StGlobalCoordinate;
+class TH2D;
+class St_trigDetSums;
+class trigDetSums;
 class StdEdxY2Maker : public StMaker {
  public: 
   enum  EMode {kOldClusterFinder       ,
@@ -34,6 +37,7 @@ class StdEdxY2Maker : public StMaker {
 	       kProbabilityPlot        ,
 	       kMakeTree               ,
 	       kCORRELATION            ,
+	       kAlignment              , 
 	       kZBGX };
   StdEdxY2Maker(const char *name="dEdxY2");
   virtual       ~StdEdxY2Maker() {}
@@ -57,7 +61,7 @@ class StdEdxY2Maker : public StMaker {
   static  void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag);
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.9 2004/06/05 23:40:49 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: StdEdxY2Maker.h,v 1.10 2004/06/22 16:50:07 fisyak Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
  private:
@@ -65,13 +69,16 @@ class StdEdxY2Maker : public StMaker {
   TMinuit             *m_Minuit;        //!
   StTpcdEdxCorrection *m_TpcdEdxCorrection; // !
   Int_t                m_Mask; //!
-  Bool_t               mAlignSector; // !
   static Int_t  NdEdx;
   static dEdx_t *CdEdx; // corrected
   static dEdx_t *FdEdx; // fit
   static dEdx_t *dEdxS; // dEdx sorted
   StThreeVectorD      *mNormal[24][45];     //!
   StThreeVectorD      *mRowPosition[24][45][3]; //!
+  St_trigDetSums      *m_trigDetSums;//!
+  trigDetSums_st      *m_trig;//!
+  TH2D                *mHitsUsage;//!
+  
   ClassDef(StdEdxY2Maker,0)   //StAF chain virtual base class for Makers
 };
 
