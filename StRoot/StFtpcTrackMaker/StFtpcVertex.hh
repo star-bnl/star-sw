@@ -1,5 +1,9 @@
-// $Id: StFtpcVertex.hh,v 1.7 2001/07/12 13:05:03 oldi Exp $
+// $Id: StFtpcVertex.hh,v 1.8 2002/03/15 10:04:41 oldi Exp $
 // $Log: StFtpcVertex.hh,v $
+// Revision 1.8  2002/03/15 10:04:41  oldi
+// Adjust eta segments not only to z-position of vertex but to x,y as well.
+// Avoid tracking if vertex position is outside of the inner radius of the Ftpc.
+//
 // Revision 1.7  2001/07/12 13:05:03  oldi
 // QA histogram of FTPC vertex estimation is generated.
 // FTPC vertex estimation is stored as pre vertex (id = 301) in any case, now.
@@ -54,6 +58,7 @@
 #include "TObject.h"
 #include "TObjArray.h"
 #include "TH1.h"
+#include "TMath.h"
 #include "TVector3.h"
 #include "St_DataSet.h"
 
@@ -77,14 +82,16 @@ public:
   virtual  ~StFtpcVertex();                                                          // destructor
 
   // getter
-  Double_t GetX()     const { return mCoord.X(); }
-  Double_t GetY()     const { return mCoord.Y(); }
-  Double_t GetZ()     const { return mCoord.Z(); }
-  Double_t GetXerr()  const { return mError.X(); }
-  Double_t GetYerr()  const { return mError.Y(); }
-  Double_t GetZerr()  const { return mError.Z(); }
-  TVector3 GetCoord() const { return mCoord;}
-  TVector3 GetError() const { return mError;}
+  Double_t GetX()       const { return mCoord.X(); }
+  Double_t GetY()       const { return mCoord.Y(); }
+  Double_t GetZ()       const { return mCoord.Z(); }
+  Double_t GetXerr()    const { return mError.X(); }
+  Double_t GetYerr()    const { return mError.Y(); }
+  Double_t GetZerr()    const { return mError.Z(); }
+  Double_t GetRadius2() const { return TMath::Sqrt(GetX()*GetX() + GetY()*GetY()); }
+  Double_t GetRadius3() const { return mCoord.Mag(); }
+  TVector3 GetCoord()   const { return mCoord;}
+  TVector3 GetError()   const { return mError;}
 
   // setter
   void SetX(Double_t f)    { mCoord.SetX(f); }

@@ -1,5 +1,9 @@
-// $Id: StFtpcConfMapper.hh,v 1.10 2001/11/21 12:31:15 jcs Exp $
+// $Id: StFtpcConfMapper.hh,v 1.11 2002/03/15 10:04:41 oldi Exp $
 // $Log: StFtpcConfMapper.hh,v $
+// Revision 1.11  2002/03/15 10:04:41  oldi
+// Adjust eta segments not only to z-position of vertex but to x,y as well.
+// Avoid tracking if vertex position is outside of the inner radius of the Ftpc.
+//
 // Revision 1.10  2001/11/21 12:31:15  jcs
 // adjust mEtaMax for extended drift maps
 //
@@ -326,9 +330,13 @@ inline void StFtpcConfMapper::CalcEtaMinMax()
   // under an angle between 1.79 and 10.62 degrees which translates directly into max. eta and min. eta. 
   // Due to the fact that the main vertex is shifted, the values of min./max. eta is calculated for each 
   // event. To be save, 0.01 is substracted/added.
+
+  Double_t vertex_rad_squared = TMath::Power(mVertex->GetRadius2(), 2);
+  Double_t ftpc_inner_rad_squared = TMath::Power(7.73, 2);
+  Double_t ftpc_outer_rad_squared = TMath::Power(30.05, 2);
   
-  mEtaMin = -TMath::Log(TMath::Tan( TMath::ASin(30./ (162.75 - TMath::Abs(mVertex->GetZ()) ) ) /2.) ) - 0.01;
-  mEtaMax = -TMath::Log(TMath::Tan( TMath::ASin( 5./ (256.45 + TMath::Abs(mVertex->GetZ()) ) ) /2.) ) + 0.01;
+  mEtaMin = -TMath::Log(TMath::Tan( TMath::ASin(TMath::Sqrt(ftpc_outer_rad_squared + vertex_rad_squared)/ (162.75 - TMath::Abs(mVertex->GetZ()) ) ) /2.) ) - 0.01;
+  mEtaMax = -TMath::Log(TMath::Tan( TMath::ASin(TMath::Sqrt(ftpc_inner_rad_squared - vertex_rad_squared)/ (256.45 + TMath::Abs(mVertex->GetZ()) ) ) /2.) ) + 0.01;
 
   return;
 }
@@ -413,7 +421,6 @@ inline Int_t StFtpcConfMapper::GetSegm(Int_t row_segm, Int_t phi_segm, Int_t eta
   Int_t segm = row_segm * (mNumPhiSegment * mNumEtaSegment) + phi_segm * (mNumEtaSegment) + eta_segm;
 
   if (segm >= mBounds) {
-    cout << row_segm << " " << GetRow(row_segm) << endl;
     gMessMgr->Message("", "W", "OST") << "Segment calculation out of bounds (row = " << GetRow(row_segm) << ", phi = " << GetPhi(phi_segm) << ", eta = " << GetEta(eta_segm) << ")!" << endm;
     return mBounds-1;
   }
