@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.9 2000/09/05 16:11:39 snelling Exp $
+// $Id: StFlowTrack.h,v 1.10 2000/09/05 17:57:13 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.10  2000/09/05 17:57:13  snelling
+// Solaris needs math.h for fabs
+//
 // Revision 1.9  2000/09/05 16:11:39  snelling
 // Added global DCA, electron and positron
 //
@@ -69,6 +72,7 @@
 #ifndef StFlowTrack_h
 #define StFlowTrack_h
 #include <string.h>
+#include <math.h>
 #include "Rtypes.h"
 #include "StObject.h"
 #include "StFlowConstants.h"
