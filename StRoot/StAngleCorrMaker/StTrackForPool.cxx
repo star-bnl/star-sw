@@ -19,7 +19,6 @@ StTrackForPool::StTrackForPool(Double_t px, Double_t py, Double_t pz)
   mPy=py;
   mPz=pz;
   Double_t p=sqrt(px*px+py*py+pz*pz);
-  //mid = track->GetIDNumber();
   mPsuedoRap=0.5*log((p+pz)/(p-pz));
   mId=0;
 }
