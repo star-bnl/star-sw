@@ -1,7 +1,15 @@
+// macro to read fz files, xdf files and minidaq data 
+// (can use all detectors not just tpc)
+//
+//////////////////////////////////////////////////////////////////////////
+//                                                                      //
+// Macro for running chain with different inputs                        //
+//                                                                      //
+//////////////////////////////////////////////////////////////////////////
 #define GTRACK
 //#define FZIN
-#define TPC
 //#define MINIDAQ
+#define TPC
 //#define TRS
 #define TSS
 //#define FTPC
@@ -13,6 +21,7 @@
 //#define StMagF
 #endif
 //#define XDFOUT
+//#define GLOBAL
 
 TBrowser *b = 0;
 class StChain;
@@ -82,22 +91,36 @@ void Load(){
 #ifdef MINIDAQ
     gSystem->Load("StMinidaqMaker");
 #endif
+#ifdef GLOBAL
     gSystem->Load("St_global");
     gSystem->Load("St_dst_Maker");
     //    gSystem->Load("St_run_summary_Maker");
     gSystem->Load("St_QA_Maker");
     gSystem->Load("StTreeMaker");
+#endif
 }
 
 void tpc (const Int_t Nevents=1,
-	  //const Char_t *infile ="/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf", 
-	  //minidaq file
-	  const Char_t *infile ="/afs/rhic/star/data/samples/hijet-g2t.xdf", 
+	  const Char_t *infile ="/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf", 
+	  TString* FileOut=0)
+
+{
+  // redefine input file
+#ifndef MINIDAQ
+#ifndef FZIN
 	  // xdf file
-	  //const Char_t *infile ="/afs/rhic/star/tpc/data/trs_muon_10cmdrift_good.fzd", 
+	  infile ="/afs/rhic/star/data/samples/hijet-g2t.xdf";
+#endif
+#endif
+#ifdef MINIDAQ
+	  //minidaq file
+	  infile ="/afs/rhic/star/tpc/data/tpc_s18e_981105_03h_cos_t22_f1.xdf";
+#endif
+#ifdef FZIN
 	  // zebra file
-     TString* FileOut=0)
-{        
+	  infile ="/afs/rhic/star/tpc/data/trs_muon_10cmdrift_good.fzd";
+#endif
+
   // Dynamically link some shared libs
   if (gClassTable->GetID("StChain") < 0) Load();
 #ifndef GTRACK
@@ -246,7 +269,7 @@ void tpc (const Int_t Nevents=1,
 //		tcl
   St_tcl_Maker *tclMk = new St_tcl_Maker("tpc_hits");
   tclMk->SetDebug();
-  //  tclMk->tclPixTransOn();  
+  tclMk->tclPixTransOn();  
 #endif
 
 #ifdef SVT
@@ -286,7 +309,7 @@ void tpc (const Int_t Nevents=1,
   fptMk->SetDebug();
 #endif
 
-GLOBAL:
+#ifdef GLOBAL
 //		global
   St_glb_Maker *glbMk = new St_glb_Maker("global");
   glbMk->SetDebug();
@@ -295,7 +318,6 @@ GLOBAL:
   dstMk->SetDebug();
   St_QA_Maker          *qa         = new St_QA_Maker;  
 
-//  goto CHAIN;
 //		Tree
   StTreeMaker *treeMk = new StTreeMaker("tree",FileOut.Data());
   treeMk->SetIOMode("w");
@@ -303,9 +325,9 @@ GLOBAL:
   treeMk->SetInput("dst","dst");
   //  treeMk->SetInput("global","global");
   //treeMk->SetInput(".default","Others");
+#endif  
   
-  
-CHAIN:
+  // START the chain (may the force be with you)
   // Create HTML docs of all Maker's involved
   //   chain->MakeDoc();
 
