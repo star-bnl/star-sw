@@ -153,20 +153,26 @@ void StEmcMicroUtil::processStEventTracks()
     // first primary track
     if (pTrack && mDoSavePrimaries)// && pTrack->flag() > 0) 
     {
+      cout << "++++++++++++++++++ 1" << endl;
       totalp++;      
       if(mPFilter->accept(pTrack))
       {
+      cout << "++++++++++++++++++ 2" << endl;
         // Instantiate new StEmcMicroTrack
         StEmcMicroTrack* MicroPTrack = new StEmcMicroTrack();
+      cout << "++++++++++++++++++ 2.1" << endl;
         createTrack(pTrack,MicroPTrack);
+      cout << "++++++++++++++++++ 2.2" << endl;
         if(MicroPTrack) 
         {
+      cout << "++++++++++++++++++ 3" << endl;
           MicroPTrack->setTrackNodeNumber(j);
           mMicroEvent->addPrimaryTrack(MicroPTrack); 
           goodp++;
         }
       }
     }
+      cout << "++++++++++++++++++ 4" << endl;
 
     if (gTrack && mDoSaveGlobals)
     {
@@ -194,12 +200,12 @@ void StEmcMicroUtil::createTrack(StTrack* track,StEmcMicroTrack* MicroTrack)
   if(p.mag()==0) return;
 
   StThreeVectorF o = track->geometry()->origin();
-   
+
   MicroTrack->setP(p.mag());
   MicroTrack->setEta(p.pseudoRapidity());
   MicroTrack->setPhi(p.phi());
   MicroTrack->setCurvature(track->geometry()->curvature());
-  
+
   MicroTrack->setFlag(track->flag());
   
   MicroTrack->setOrigin(o.x(),o.y(),o.z());
@@ -215,7 +221,8 @@ void StEmcMicroUtil::createTrack(StTrack* track,StEmcMicroTrack* MicroTrack)
   MicroTrack->setFitPts(track->fitTraits().numberOfFitPoints());
   MicroTrack->setMaxPts(track->numberOfPossiblePoints());
 
-  MicroTrack->setNhits(track->detectorInfo()->numberOfPoints(kTpcId));
+  if(track->detectorInfo())
+    MicroTrack->setNhits(track->detectorInfo()->numberOfPoints(kTpcId));
   
   // dE/dx
   StPtrVecTrackPidTraits traits = track->pidTraits(kTpcId);
@@ -240,7 +247,7 @@ void StEmcMicroUtil::createTrack(StTrack* track,StEmcMicroTrack* MicroTrack)
   }
 
   MicroTrack->setTrackLength(track->length());
-  
+
   return;
 }
 Float_t StEmcMicroUtil::calcDcaSigned(StTrack* track) 
