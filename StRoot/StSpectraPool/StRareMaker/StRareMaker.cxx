@@ -1,5 +1,8 @@
-// $Id: StRareMaker.cxx,v 1.7 2001/12/04 18:26:10 struck Exp $
+// $Id: StRareMaker.cxx,v 1.8 2002/01/18 19:14:10 struck Exp $
 // $Log: StRareMaker.cxx,v $
+// Revision 1.8  2002/01/18 19:14:10  struck
+// compress track classes, filter only hadronic unbiased/Z=-2 events
+//
 // Revision 1.7  2001/12/04 18:26:10  struck
 // update for gcc2.95-3
 //
@@ -50,7 +53,7 @@ ClassImp(StRareEventCut)
 ClassImp(StRareTrackCut)
 ClassImp(StL3RareTrackCut)
 
-static const char rcsid[] = "$Id: StRareMaker.cxx,v 1.7 2001/12/04 18:26:10 struck Exp $";
+static const char rcsid[] = "$Id: StRareMaker.cxx,v 1.8 2002/01/18 19:14:10 struck Exp $";
 
 double dEdx_formula(double momentum, double mass);
 
@@ -73,6 +76,7 @@ StRareMaker::StRareMaker(const Char_t *name, Char_t* fileName) : StMaker(name) {
 StRareMaker::StRareMaker(const Char_t *name, Char_t* fileName,
 			 StRareEventCut* cut, StRareTrackCut* track) : StMaker(name) {
   out = new TFile(fileName, "RECREATE");
+  out->SetCompressionLevel(2);
   m_Tree = new TTree("RareTree", "RareTree", 1000000);
   m_Tree->AutoSave();
   m_Tree->SetAutoSave(10000000);
@@ -89,6 +93,7 @@ StRareMaker::StRareMaker(const Char_t *name, Char_t* fileName,
 			 StL3RareTrackCut* l3trackCut) : StMaker(name) {
   //out = new TFile("/direct/star+data01/pwg/spectra/struck/2001/RareEvent.root","RECREATE");
   out = new TFile(fileName, "RECREATE");
+  out->SetCompressionLevel(2);
   m_Tree = new TTree("RareTree", "RareTree", 1000000);
   m_Tree->AutoSave();
   m_Tree->SetAutoSave(10000000);
@@ -116,6 +121,36 @@ Int_t StRareMaker::Make() {
 
     mRareEvent->clear();
 
+    // take only hadronic events 
+    StL0Trigger* l0Trigger = mEvent->l0Trigger();
+    if (!l0Trigger) {
+          cout << "No l0 trigger found.\n";
+	  cout << "Skip this event!\n";
+	  return 0;
+    }
+    else if (l0Trigger->triggerWord()<0x1000 ||
+	     l0Trigger->triggerWord()>0x1fff) {
+          return 0;
+    }
+
+    // take only unbiased events and events triggered by Z=-2 trigger
+    StL3Trigger* l3Event;
+    l3Event = (StL3Trigger*) mEvent->l3Trigger();
+    if (l3Event) {
+          const StL3EventSummary* l3EventSummary = l3Event->l3EventSummary();
+	  if (!l3EventSummary) {
+	        cout << "No l3 event summary found." << endl;
+		return 0;
+	  }
+	  bool take = l3EventSummary->unbiasedTrigger();
+	  
+	  const StPtrVecL3AlgorithmInfo& algInfo = l3EventSummary->algorithmsAcceptingEvent();
+	  for (unsigned int i=0; i<algInfo.size(); i++) {
+	        if (algInfo[i]->id() == 6) take = kTRUE;
+	  }
+	  if (!take) return 0;
+    }
+
     if (mEventCut->Accept(mEvent)) {
           mRareEvent->fillRareEvent(mEvent);
 	  StPrimaryTrackIterator itr;
@@ -129,8 +164,6 @@ Int_t StRareMaker::Make() {
 	  }
 
 	  // now look for L3
-	  StL3Trigger* l3Event;
-	  l3Event = (StL3Trigger*) mEvent->l3Trigger();
 	  float l3zVertex = -999;
 	  if (mL3TrackCut && l3Event) {
 	        mRareEvent->fillL3Info(l3Event);
@@ -142,7 +175,7 @@ Int_t StRareMaker::Make() {
 		for (unsigned int i=0; i<mtracknodes.size(); i++) {
 		      l3trk = (StGlobalTrack* )mtracknodes[i]->track(0);
 		      // correct my bug in StEvent filling
-		      StGlobalTrack* newL3Track = new StGlobalTrack(*l3trk);
+		      //StGlobalTrack* newL3Track = new StGlobalTrack(*l3trk);
 		      StHelixModel* oldHelix = (StHelixModel*) l3trk->geometry();
 		      int charge = oldHelix->charge();
 		      short int h = oldHelix->helicity();
@@ -150,25 +183,32 @@ Int_t StRareMaker::Make() {
 		      if (runNumber==2291023) {
 			    charge *= -1;
 			    h *= -1;
+			    float kapa = /*0.001 * */oldHelix->curvature();
+			    float lambda = /*atan(*/oldHelix->dipAngle();
+			    StHelixModel* newHelix = new StHelixModel(charge, (float) oldHelix->psi(),
+								      kapa, lambda, oldHelix->origin(),
+								      oldHelix->momentum(), h);
+			    l3trk->setGeometry(newHelix);
 		      }
-		      float kapa = 0.001 * oldHelix->curvature();
-		      float lambda = atan(oldHelix->dipAngle());
-		      StHelixModel* newHelix = new StHelixModel(charge, (float) oldHelix->psi(),
-								kapa, lambda, oldHelix->origin(),
-								oldHelix->momentum(), h);
-		      newL3Track->setGeometry(newHelix);
+		      //float kapa = 0.001 * oldHelix->curvature();
+		      //float lambda = atan(oldHelix->dipAngle());
+		      //StHelixModel* newHelix = new StHelixModel(charge, (float) oldHelix->psi(),
+		      //					kapa, lambda, oldHelix->origin(),
+		      //					oldHelix->momentum(), h);
+		      //newL3Track->setGeometry(newHelix);
 		      // get dca2d to l3zVertex
 		      if (l3zVertex!=-999) {
 			    StThreeVectorD vertex(0, 0, l3zVertex);
-			    float dca2d = newHelix->helix().distance(vertex);
+			    float dca2d = oldHelix->helix().distance(vertex);
 			    //cout << l3zVertex << " ==> dca = " << dca2d << endl;
-			    newL3Track->setImpactParameter(dca2d);
+			    //newL3Track->setImpactParameter(dca2d);
+			    l3trk->setImpactParameter(dca2d);
 		      }
 
-		      if (mL3TrackCut->Accept(newL3Track)) mRareEvent->addL3Track(newL3Track);
+		      if (mL3TrackCut->Accept(l3trk)) mRareEvent->addL3Track(l3trk);
 
 		      // clean up this mess
-		      delete newL3Track;
+		      //delete newL3Track;
 		}
 	  }
 
@@ -193,7 +233,7 @@ void StRareMaker::Report(){
 
 void StRareMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StRareMaker.cxx,v 1.7 2001/12/04 18:26:10 struck Exp $\n");
+  printf("* $Id: StRareMaker.cxx,v 1.8 2002/01/18 19:14:10 struck Exp $\n");
   printf("**************************************************************\n");
 }
 

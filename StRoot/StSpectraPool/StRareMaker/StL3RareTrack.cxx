@@ -25,12 +25,6 @@ StL3RareTrack::StL3RareTrack()
   mPx = 0;
   mPy = 0;
   mPz = 0;
-  mDedxPion = 0;
-  mDedxProton = 0;
-  mDedxDeuteron = 0;
-  mDedxTriton = 0;
-  mDedxHe3 = 0;
-  mDedxHe4 = 0;
   mChargesign = 0;
   mTrigType = 0;
   mDedx = 0.0;
@@ -49,12 +43,6 @@ StL3RareTrack::StL3RareTrack(StGlobalTrack* track)
   mPx = track->geometry()->momentum().x();
   mPy = track->geometry()->momentum().y();
   mPz = track->geometry()->momentum().z();
-  mDedxPion = dedxPi();
-  mDedxProton = dedxProton();
-  mDedxDeuteron = dedxDeuteron();
-  mDedxTriton = dedxTriton();
-  mDedxHe3 = dedxHe3();
-  mDedxHe4 = dedxHe4();
   mChargesign = track->geometry()->charge();
   mTrigType = 0;
   mDedx = 0.0;

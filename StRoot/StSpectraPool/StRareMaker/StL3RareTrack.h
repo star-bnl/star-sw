@@ -25,16 +25,16 @@ class StL3RareTrack : public TObject
       float py() const;
       float pz() const;
       float p() const;
-      int   chargesign() const;
+      short chargesign() const;
       float rapidity(float mass) const;
       float pt() const;
       float dca2d() const;
       float dedx() const;
-      int   ndedx() const;
+      short ndedx() const;
       float chisqxy() const;
       float chisqz() const;
-      int   npntpossible() const;
-      int   npntfit() const;
+      short npntpossible() const;
+      short npntfit() const;
       float dedxExpected(float mass, float charge = 1) const;
       float dedxPi() const;
       float dedxProton() const;
@@ -51,23 +51,17 @@ class StL3RareTrack : public TObject
       float mPx;
       float mPy;
       float mPz;
-      int   mChargesign;
+      short mChargesign;
       float mDca2d;
       float mDedx;
-      int   mNDedx;
+      short mNDedx;
       float mChisqXY;
       float mChisqSZ;
-      int   mNPntfit;
-      int   mNPntpossible;
-      float mDedxPion;
-      float mDedxProton;
-      float mDedxDeuteron;
-      float mDedxTriton;
-      float mDedxHe3;
-      float mDedxHe4;
+      short mNPntfit;
+      short mNPntpossible;
       int   mTrigType;
 
-  ClassDef(StL3RareTrack,1)
+  ClassDef(StL3RareTrack,2)
 };
  
 inline int   StL3RareTrack::tracknumber() const {return mTracknumber;}
@@ -77,14 +71,14 @@ inline float StL3RareTrack::py() const {return mPy;}
 inline float StL3RareTrack::pz() const {return mPz;}
 inline float StL3RareTrack::p() const {return sqrt(mPx*mPx+mPy*mPy+mPz*mPz);}
 inline float StL3RareTrack::pt() const {return sqrt(mPx*mPx+mPy*mPy);}
-inline int   StL3RareTrack::chargesign() const {return mChargesign;}
+inline short StL3RareTrack::chargesign() const {return mChargesign;}
 inline float StL3RareTrack::dca2d() const {return mDca2d;} 
 inline float StL3RareTrack::dedx() const {return mDedx;}
-inline int   StL3RareTrack::ndedx() const {return mNDedx;}
+inline short StL3RareTrack::ndedx() const {return mNDedx;}
 inline float StL3RareTrack::chisqxy() const {return mChisqXY;} 
 inline float StL3RareTrack::chisqz() const {return mChisqSZ;} 
-inline int   StL3RareTrack::npntfit() const {return mNPntfit;}
-inline int   StL3RareTrack::npntpossible() const {return mNPntpossible;}
+inline short StL3RareTrack::npntfit() const {return mNPntfit;}
+inline short StL3RareTrack::npntpossible() const {return mNPntpossible;}
 inline float StL3RareTrack::dedxPi() const {return dedxExpected(0.139,1);} 
 inline float StL3RareTrack::dedxProton() const {return dedxExpected(0.939,1);} 
 inline float StL3RareTrack::dedxDeuteron() const {return dedxExpected(1.88,1);} 

@@ -21,6 +21,7 @@ class StRareEvent : public TObject {
 
   int   eventNumber() const;
   int   runNumber() const;
+  int   triggerWord() const;
   float vertexZ() const;
   int   numberOfTracks() const;
   int   numberOfGoodPrimaryTracks() const;
@@ -28,7 +29,8 @@ class StRareEvent : public TObject {
   void  addTrack(StPrimaryTrack* track);
   void  addL3Track(StGlobalTrack* l3track);
   float l3vertexZ() const;
-  int   numberOfL3Tracks() const; 
+  int   numberOfL3Tracks() const;
+  short l3Unbiased() const;
   int   numberOfProccesedEvents() const;
   int   numberOfAcceptedEvents() const;
   int   numberOfBuildEvents() const;
@@ -43,6 +45,7 @@ class StRareEvent : public TObject {
   int   fNRareTrack;
   int   fEventNumber;
   int   fRunNumber;
+  int   fTriggerWord;
   float fVertexZ;
   int   fnumberOfGoodPrimaryTracks;
   float fmagneticField;
@@ -52,18 +55,20 @@ class StRareEvent : public TObject {
   static TClonesArray* fgL3RareTracks;
   int   fNL3RareTrack;
   float fL3VertexZ;
+  short fL3Unbiased;
   int   fNProcessed;
   int   fNAccept;
   int   fNBuild;
   float fTriggerData[10];
   int   fL3Flag;
 
-  ClassDef(StRareEvent,2)
+  ClassDef(StRareEvent,3)
 };
 
  
 inline int StRareEvent::eventNumber() const {return fEventNumber;}
 inline int StRareEvent::runNumber() const {return fRunNumber;}
+inline int StRareEvent::triggerWord() const {return fTriggerWord;}
 inline int StRareEvent::numberOfGoodPrimaryTracks() const {return fnumberOfGoodPrimaryTracks;}
 inline int StRareEvent::numberOfTracks() const {return fNRareTrack;}
 inline float StRareEvent::vertexZ() const {return fVertexZ;}
@@ -73,6 +78,7 @@ inline TClonesArray* StRareEvent::getTracks() const {return fRareTracks;}
 
 // L3 stuff
 inline int StRareEvent::numberOfL3Tracks() const {return fNL3RareTrack;}
+inline short StRareEvent::l3Unbiased() const {return fL3Unbiased;}
 inline int StRareEvent::numberOfProccesedEvents() const {return fNProcessed;}
 inline int StRareEvent::numberOfAcceptedEvents() const {return fNAccept;}
 inline int StRareEvent::numberOfBuildEvents() const {return fNBuild;}

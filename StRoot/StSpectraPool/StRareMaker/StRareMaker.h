@@ -1,6 +1,9 @@
-// $Id: StRareMaker.h,v 1.5 2001/10/16 01:26:14 struck Exp $
+// $Id: StRareMaker.h,v 1.6 2002/01/18 19:14:10 struck Exp $
 //
 // $Log: StRareMaker.h,v $
+// Revision 1.6  2002/01/18 19:14:10  struck
+// compress track classes, filter only hadronic unbiased/Z=-2 events
+//
 // Revision 1.5  2001/10/16 01:26:14  struck
 // added filename parameter for tree file to constructors
 //
@@ -18,22 +21,7 @@
 #ifndef StRareMaker_HH
 #define StRareMaker_HH
 
-///////////////////////////////////////////////////////////////////////////////
-//
-// StRareMaker
-//
-// Description: 
-//  Sample maker to access and analyze StEvent
-//
-// Environment:
-//  Software developed for the STAR Detector at Brookhaven National Laboratory
-//
-// Author List: 
-//  Torre Wenaus, BNL
-//
-// History:
-//
-///////////////////////////////////////////////////////////////////////////////
+
 #include "StMaker.h"
 #include "SystemOfUnits.h"
 #ifndef ROOT_TH1
@@ -72,18 +60,18 @@ public:
 	      StRareTrackCut* trackCut,
 	      StL3RareTrackCut* l3trackCut);
   virtual ~StRareMaker(){};
-  virtual void Clear(Option_t *option="");
-  virtual Int_t Init();
+  virtual void  Clear(Option_t *option="");
+  virtual Int_t  Init();
   virtual Int_t  Make();
   virtual void   PrintInfo();
   virtual Int_t  Finish();
   virtual void   Report();
 
 private:
-  StRareTrackCut* mTrackCut;  //!
-  StRareEventCut* mEventCut;  //!
+  StRareTrackCut*   mTrackCut;  //!
+  StRareEventCut*   mEventCut;  //!
   StL3RareTrackCut* mL3TrackCut; //!
-  StRareEvent* mRareEvent;
+  StRareEvent*      mRareEvent;
 
   ClassDef(StRareMaker, 1)
 };

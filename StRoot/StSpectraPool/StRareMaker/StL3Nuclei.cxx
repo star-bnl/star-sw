@@ -47,7 +47,7 @@ int StL3Nuclei::Accept(StGlobalTrack* trk)
   // now select random tracks
   float random_number = (float)rand()/(float)RAND_MAX;
   //  cout << "random number = " << random_number << endl;
-  if (random_number<0.0005)
+  if (random_number<0.005)
         dedxOK = 1;
 
   if (track.p()>pcut[0] && track.p()<pcut[1] && track.npntfit()>20) pOK = 1;
