@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: minBias.C,v 1.10 2003/08/26 21:10:12 posk Exp $
+// $Id: minBias.C,v 1.11 2004/03/01 22:43:42 posk Exp $
 //
 // Author:       Art Poskanzer and Alexander Wetzler, Mar 2001
 //                 Kirill Filimonov treated the one count case
@@ -24,9 +24,9 @@
 
 void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 
-  const  int nCens = 3;
+  const  int nCens = 9;
   int    nSels = 2;
-  const  int nHars = 6;
+  const  int nHars = 4;
   char   fileName[80];
   TFile* histFile[nCens+1];
   TH1*   hist[nCens+1];
@@ -301,6 +301,9 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: minBias.C,v $
+// Revision 1.11  2004/03/01 22:43:42  posk
+// Changed some "->" to ".".
+//
 // Revision 1.10  2003/08/26 21:10:12  posk
 // Calculates v8 if nHars=8.
 //

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.17 2003/06/27 21:25:45 posk Exp $
+// $Id: plotCen.C,v 1.18 2004/03/01 22:43:44 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -252,7 +252,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2){
   TPaveLabel* run = new TPaveLabel(0.1,0.01,0.2,0.03,runName);  
   run->Draw();
   TDatime now;
-  TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now->AsString());
+  TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now.AsString());
   date->Draw();
   TPad* graphPad = new TPad("Graphs","Graphs",0.01,0.05,0.97,0.95);
   graphPad->Draw();
@@ -658,6 +658,9 @@ static Double_t StruveL0(Double_t x)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.18  2004/03/01 22:43:44  posk
+// Changed some "->" to ".".
+//
 // Revision 1.17  2003/06/27 21:25:45  posk
 // v4 and v6 are with repect to the 2nd harmonic event plane.
 //

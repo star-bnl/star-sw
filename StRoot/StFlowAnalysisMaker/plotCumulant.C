@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCumulant.C,v 1.7 2003/08/26 21:10:14 posk Exp $
+// $Id: plotCumulant.C,v 1.8 2004/03/01 22:43:45 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Nov 2001
 // Description:  Macro to plot histograms made by StFlowCumulantMaker.
@@ -131,7 +131,7 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t selN=2, Int_t orderN=0, Int_t ha
   TPaveLabel* run = new TPaveLabel(0.1,0.01,0.2,0.03,runName);  
   run->Draw();
   TDatime now;
-  TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now->AsString());
+  TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now.AsString());
   date->Draw();
   TPad* graphPad = new TPad("Graphs","Graphs",0.01,0.05,0.97,0.95);
   graphPad->Draw();
@@ -257,6 +257,9 @@ void plotCumulantAll(Int_t nNames, Int_t orderN, Int_t selN, Int_t harN, Int_t f
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCumulant.C,v $
+// Revision 1.8  2004/03/01 22:43:45  posk
+// Changed some "->" to ".".
+//
 // Revision 1.7  2003/08/26 21:10:14  posk
 // Calculates v8 if nHars=8.
 //
