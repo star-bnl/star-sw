@@ -8,7 +8,6 @@ using std::string;
 #include "Sti/Base/Named.h"
 #include "Sti/StiPlacement.h"
 #include "StiIsActiveFunctor.h"
-#include "StiTrackingParameters.h"
 
 class StiMaterial;
 class StiShape;
@@ -77,12 +76,7 @@ public:
     void setGroupId(int id);
     int  getGroupId() const;
 
-    void setTrackingParameters(const StiTrackingParameters * pars);
-    const StiTrackingParameters * getTrackingParameters() const;
-
     friend ostream& operator<<(ostream&os, const StiDetector & det);
-
-
  protected:
     
     /// Toggle switch determining whether this detector is to be added to the detector tree.
@@ -122,7 +116,7 @@ public:
     double _sin;
     /// Detector group identifier.
     int _groupId;
-    const StiTrackingParameters * _pars;
+
 };
 
 inline void StiDetector::setHitErrorCalculator(const StiHitErrorCalculator * calculator)
@@ -156,16 +150,6 @@ inline bool StiDetector::isActive() const
   return isActive(placement->getNormalYoffset(), placement->getZcenter());
 } // isActive
 
-
-inline void StiDetector::setTrackingParameters(const StiTrackingParameters * pars)
-{
-  _pars = pars;
-}
-
-inline const StiTrackingParameters * StiDetector::getTrackingParameters() const
-{
-  return _pars;
-}
 
 
 #endif
