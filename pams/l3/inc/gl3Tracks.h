@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <math.h>
 #include "daqFormats.h"
+#include "FtfTrack.h"
 
 #ifndef GL3TRACKS
 #define GL3TRACKS
@@ -32,16 +33,25 @@ public:
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //
 //############################################################################
-   void print ( ) {
-      float gl3ToDeg = 180./acos(-1.);
-      printf ( "pt %f tanl %f psi %f r0 %f z0 %f phi0 %f nHits %d\n", 
-                pt, tanl, psi*gl3ToDeg, r0, z0, phi0*gl3ToDeg, nHits ) ;
+   float eta ( ) {
+      float theta = atan2(1.,(double)tanl);
+      float eta  = -1. * log (tan(theta/2.)) ;
+      return eta ;
    }
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //
 //############################################################################
-   void set ( short sector, type1_track* trk, float bField, float xVert, float yVert,
-                                              float rVert, float phiVert ) {
+   void print ( ) {
+      float gl3ToDeg = 180./acos(-1.);
+      printf ( "pt %f tanl %f psi %f r0 %f z0 %f phi0 %f nHits %d\n", 
+                pt, tanl, psi, r0, z0, phi0*gl3ToDeg, nHits ) ;
+   }
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//
+//############################################################################
+   void set ( short sector, type1_track* trk, 
+              float bField, float xVert, float yVert,
+              float rVert, float phiVert ) {
    //
    //   Line parameters in xy
    //
@@ -82,7 +92,7 @@ public:
       if ( d_angle < -M_PI ) d_angle =   d_angle + 2.*M_PI  ;
       short  q = ( ( d_angle < 0 ) ? 1 : -1 ) ;
 //
-      id    = trk->id  + sector * 10000 ;
+      id    = sector * 10000 + trk->id ;
       nHits = trk->nHits ; 
       pt    = (double)(2.9979e-3 * bField * rc ) * double(q) ;
       r0    = rVert ;
@@ -102,8 +112,8 @@ public:
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 //
 //############################################################################
-   void set ( short sector,  type2_track* trk, float rVert, float phiVert ) {
-      id          = trk->id + sector * 10000 ;
+   void set ( short sector, type2_track* trk, float rVert, float phiVert ) {
+      id          = sector * 10000 + trk->id ;
       nHits       = trk->nrec ;
       chisq[0]    = float(trk->xy_chisq)/10. ;
       chisq[1]    = float(trk->sz_chisq)/10. ;
@@ -121,7 +131,7 @@ public:
 //
 //############################################################################
    void set ( short sector, type3_track* trk ) {
-      id          = trk->id + sector * 10000 ;
+      id          = sector * 10000 + trk->id ;
       nHits       = trk->nrec ;
       chisq[0]    = float(trk->xy_chisq)/10. ;
       chisq[1]    = float(trk->sz_chisq)/10. ;
@@ -133,6 +143,24 @@ public:
       trackLength = trk->trackLength ;
       r0          = trk->r0 ;
       phi0          = trk->phi0 ;
+      dtanl = dpsi = dpt = 0. ;
+   }
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//
+//############################################################################
+   void set ( FtfTrack* trk ) {
+      id          = trk->id ;
+      nHits       = trk->nHits;
+      chisq[0]    = trk->chi2[0] ;
+      chisq[1]    = trk->chi2[1] ; 
+      dedx        = trk->dedx ; 
+      pt          = trk->pt ;
+      psi         = trk->psi ;
+      tanl        = trk->tanl ;
+      z0          = trk->z0 ;
+      trackLength = trk->trackLength ;
+      r0          = trk->r0 ;
+      phi0        = trk->phi0 ;
       dtanl = dpsi = dpt = 0. ;
    }
 };

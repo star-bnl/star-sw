@@ -1,10 +1,16 @@
+//:>----------------------------------------------------------------------
+//: FILE:      FtfTrack.h
+//: HISTORY:
+//:           27jan2000  start writting changes 
+//:                      refHit replaced by xRefHit and yRefHit
+//:           27jan2000  VOLUME, ROW and AREA classes replaced by FtfContainer
+//:>----------------------------------------------------------------------
 #ifndef FTFTRACK
 #define FTFTRACK
 #include "FtfGeneral.h"
 #include "FtfBaseTrack.h"
 #include "FtfHit.h"
 #include "FtfPara.h"
-#include "FtfVolume.h"
 #ifdef SL3ROOT
 #include "Rtypes.h"
 #else
@@ -24,21 +30,21 @@ public:
 
    void    add                   ( FtfHit   *thisHit, int way ) ;
    void    add                   ( FtfTrack *thisTrack ) ;
-   int     buildTrack            ( FtfHit *firstHit, VOLUME *volume ) ;
+   int     buildTrack            ( FtfHit *firstHit, FtfContainer *volume ) ;
    void    dEdx                  ( ) ;
    void    deleteCandidate       ( ) ;
    void    fill                  ( ) ;
    void    fillPrimary           ( double &xc, double &yc, double &rc ) ;
    void    fillSecondary         ( double &xc, double &yc ) ;
-   int     follow                ( VOLUME *volume, int way, int rowToStop ) ;
+   int     follow                ( FtfContainer *volume, int way, int rowToStop ) ;
    int     followHitSelection    ( FtfHit *baseHit, FtfHit *candidateHit ) ;
-   int     mergePrimary          ( AREA   *trackArea ) ;
+   int     mergePrimary          ( FtfContainer   *trackArea ) ;
    void    reset                 ( ) ;
-   FtfHit  *seekNextHit          ( VOLUME  *volume, 
+   FtfHit  *seekNextHit          ( FtfContainer  *volume, 
                                    FtfHit *baseHit,
 			           int     nradiusSteps,
                                    int     whichFunction ) ;
-   int     segment               ( VOLUME *volume, int way ) ;
+   int     segment               ( FtfContainer *volume, int way ) ;
    int     segmentHitSelection ( FtfHit *baseHit, FtfHit *candidateHit ) ;
    FtfTrack *nxatrk  ;      
         
@@ -55,9 +61,12 @@ public:
 #endif
 		
    float   lastXyAngle ;    // Angle in the xy plane of line connecting to last hits        
-   FtfHit* refHit ; // Hit use as reference for secondary tracks
-		
    typedef double vfit ;
+		
+   vfit    xRefHit ;
+   vfit    yRefHit ;
+   vfit    xLastHit ;
+   vfit    yLastHit ;
 
    vfit    s11Xy  ;       // Fit Parameters
    vfit    s12Xy  ;
