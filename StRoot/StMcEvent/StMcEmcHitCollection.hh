@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcEmcHitCollection.hh,v 2.2 2000/08/30 14:52:03 calderon Exp $
+ * $Id: StMcEmcHitCollection.hh,v 2.3 2001/05/13 21:12:10 calderon Exp $
  * $Log: StMcEmcHitCollection.hh,v $
+ * Revision 2.3  2001/05/13 21:12:10  calderon
+ * Modifications by Aleksei to the Emc Hit Collections on indexing of
+ * module numbers
+ *
  * Revision 2.2  2000/08/30 14:52:03  calderon
  * New changes made by Aleksei.
  *
@@ -28,8 +32,8 @@ public:
     unsigned int numberOfModules() const;
     float    sum() const;
     
-    StMcEmcModuleHitCollection*       module(unsigned int);
-    const StMcEmcModuleHitCollection* module(unsigned int) const;
+    StMcEmcModuleHitCollection*       module(unsigned int m);
+    const StMcEmcModuleHitCollection* module(unsigned int m) const;
 
     virtual Bool_t IsFolder() {return kTRUE;} // It is a directory for modules 
     virtual void Browse(TBrowser *b);
