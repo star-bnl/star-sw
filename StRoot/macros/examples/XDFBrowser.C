@@ -22,8 +22,20 @@ Load(){
  gSystem->Load("xdf2root");
  gSystem->Load("St_Tables");
 }
-XDFBrowser(const Char_t *filename) {
-   if (gClassTable->GetID("St_DataSet") < 0) Load(); 
+XDFBrowser(const Char_t *fileName="\0") {
+   if (gClassTable->GetID("St_DataSet") < 0) {
+      Load(); 
+      cout << "Usage: XDFBrowser(\"XDF file name here\")" << endl;
+   }
+   Char_t filename[512]="\0";
+   if (fileName && strlen(fileName)) strcpy(filename,fileName);
+   while (!(filename && strlen(filename)) ) {
+    // Prompt user:
+    cout << "Input XDF file name, please: ";
+    cin >> filename ;
+//    gets( filename );
+//    cout << endl;
+   }
    if (xdf) delete xdf;
    xdf = new St_XDFFile();
    if (!xdf->OpenXDF(filename)) {
