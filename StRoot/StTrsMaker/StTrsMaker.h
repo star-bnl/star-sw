@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.h,v 1.7 1999/03/20 03:23:58 lasiuk Exp $
+// $Id: StTrsMaker.h,v 1.8 1999/03/20 20:07:57 fisyak Exp $
 //
 // $Log: StTrsMaker.h,v $
+// Revision 1.8  1999/03/20 20:07:57  fisyak
+// Add access to DataSet with parameters
+//
 // Revision 1.7  1999/03/20 03:23:58  lasiuk
 // setMiniSegmentLength()
 // setFirstSectorToProcess()
@@ -42,7 +45,9 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
-
+#ifndef HEP_SYSTEM_OF_UNITS_H
+#include "SystemOfUnits.h"
+#endif
 // Dbs
 class StTpcGeometry;
 class StTpcSlowControl;
@@ -66,7 +71,7 @@ class StTrsUnpacker;
 
 class StTrsMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.7 1999/03/20 03:23:58 lasiuk Exp $";
+// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.8 1999/03/20 20:07:57 fisyak Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
 
@@ -109,9 +114,9 @@ public:
     Int_t  Finish();
     void   PrintInfo();
 
-    void   setMiniSegmentLength(double);
-    void   setFirstSectorToProcess(int);
-    void   setLastSectorToProcess(int);
+    void   setMiniSegmentLength(double len=4.) {mMiniSegmentLength = len*millimeter;} // *MENU*
+    void   setFirstSectorToProcess(int first=1){mFirstSectorToProcess = first;}       // *MENU*
+    void   setLastSectorToProcess(int last=24) {mLastSectorToProcess = last;}         // *MENU*
     
     ClassDef(StTrsMaker, 1)   //StAF chain virtual base class for Makers
 
