@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.8 2004/07/12 17:21:19 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.9 2004/07/13 16:12:32 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.9  2004/07/13 16:12:32  dongx
+ * continuing update for the DAQ array in Run IV
+ *
  * Revision 1.8  2004/07/12 17:21:19  dongx
  * fix the crashing when running events before day 030 (TofDaq not updated to 184 yet)
  *
@@ -989,8 +992,14 @@ Int_t StTofrMatchMaker::getTofData(StTofCollection* tofCollection){
   gMessMgr->Info("","OS") << "TOF raw data consistency test ...";
 
   Int_t tofsize = tofData.size();
-  if(tofsize!=mNTOFR) gMessMgr->Warning("The size of tofData is NOT mNTOFR!","OS");
-  for (Int_t i=0;i<tofsize;i++){
+  Int_t nTOFr = 0;
+  if(tofsize<184) {
+    gMessMgr->Warning("The size of tofData is NOT 184!","OS");
+    nTOFr = 72; // DAQ not updated
+  } else {
+    nTOFr = mNTOFR;
+  }
+  for (Int_t i=0;i<nTOFr;i++){
     Int_t iAdc = mDaqMap->DaqChan2ADCChan(i);
     mTofrAdc[i] = tofData[iAdc]->adc();
     Int_t iTdc = mDaqMap->DaqChan2TDCChan(i);
