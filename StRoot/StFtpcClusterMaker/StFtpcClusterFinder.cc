@@ -1,6 +1,11 @@
-// $Id: StFtpcClusterFinder.cc,v 1.20 2001/07/05 13:47:03 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.21 2001/07/12 10:42:05 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.21  2001/07/12 10:42:05  jcs
+// reject clusters outside FTPC sensitive volume
+// change to linear interpolation method in padtrans
+// create and fill new histogram (currently inactive)
+//
 // Revision 1.20  2001/07/05 13:47:03  jcs
 // move debug statement to correct location
 //
@@ -66,8 +71,11 @@
 #include "StFtpcTrackMaker/StFtpcPoint.hh"
 #include "math_constants.h"
 #include <math.h>
+#include "TH1.h"
 
 #include "PhysicalConstants.h"
+
+//TH1F *clfradius;
 
 StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,  
 					 StFtpcParamReader *paramReader,
@@ -79,6 +87,7 @@ mReader = reader;
 mParam = paramReader; 
 mDb    = dbReader;
 mPoint = pointarray;
+//clfradius=new TH1F("clfradius","radius",140,0,35);
 }
 
 StFtpcClusterFinder::~StFtpcClusterFinder()
@@ -192,6 +201,7 @@ int StFtpcClusterFinder::search()
 	  // calculate hardware (daq) sectors from software position
 	  iHardSec = mDb->numberOfSectors()*(int)(iRow/2) + iSec + 1;
 	  iHardRow = iRow%2 + 1;
+
 #ifdef DEBUG
 	  printf("Now on Sector %d, Row %d (iHardSec %d, iHardRow %d)\n",iSec,iRow,iHardSec,iHardRow);
 #endif
@@ -635,7 +645,9 @@ int StFtpcClusterFinder::search()
 		      xwrite= ((float) xNow-1000)*31/1000;
 		      ywrite= ((float) yNow-1000)*31/1000;
 
+
 		      fprintf(fpoints, "%f %f %d\n", xwrite, ywrite, maparray[xNow+2000*yNow]);
+
 		    }
 		}
 	    }
@@ -654,6 +666,7 @@ int StFtpcClusterFinder::search()
 #ifdef DEBUG 
   cout<<"finished running cluster search"<<endl;
 #endif
+  //clfradius->DrawCopy();
   int dummy=1;
   return dummy;
 }
@@ -1160,14 +1173,10 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	}
 
       /* transform from pad/time to x/y/z */
-      if(!padtrans(Peak, iRow, iSec, 
+      if(padtrans(Peak, iRow, iSec, 
 		   pRadius, pDeflection))
-	{
-#ifdef DEBUG
-	  printf("Peak position can't be transformed!\n");
-#endif
-	}
-
+      {
+	//clfradius->Fill(Peak->Rad);
       if (Peak->x == 0. && Peak->y == 0.) {
 	// This if-statement can be deleted as soon as the slow simulator is fixed. This also occurs for FTPC DAQ data.
 	gMessMgr->Message("Hit rejected because of an error in the FTPC data. (x, y, z) = (0. ,0., z)", "W", "OST");
@@ -1175,9 +1184,8 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 
       if(!isnan(Peak->x) && !isnan(Peak->y) && !isnan(Peak->PadSigma) &&
 !isnan(Peak->TimeSigma) // && Peak->PeakHeight>=mParam->minimumClusterMaxADC())
-	 && Peak->x != 0. && Peak->y != 0.) // This line was added to avoid a problem of the slow simulator.
-	                                    // It can be removed as soon as the slow simulator does not produce
-                                            // hits lying on the beam axis anymore.
+	 && Peak->Rad <= mDb->sensitiveVolumeOuterRadius() && Peak->Rad >= mDb->sensitiveVolumeInnerRadius() )
+
 	{
 	  // create new point
 	  Int_t numPoint = mPoint->GetEntriesFast();
@@ -1259,6 +1267,12 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	{
 #ifdef DEBUG
 	  printf("Cluster fitting error. Point not stored.\n");
+#endif
+	}
+     }
+	else{
+#ifdef DEBUG
+	  printf("Peak position can't be transformed!\n");
 #endif
 	}
     } /* end of: if(iNumPeaks == 1) */
@@ -1595,14 +1609,10 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
       for(iPeakIndex=0; iPeakIndex < iNumPeaks; iPeakIndex++)
 	{
 	  /* transform from pad/time to x/y/z */
-	  if(!padtrans(&(Peak[iPeakIndex]), iRow, iSec, 
+	  if(padtrans(&(Peak[iPeakIndex]), iRow, iSec, 
 		       pRadius, pDeflection))
-	    {
-#ifdef DEBUG
-	      printf("Peak position can't be transformed!\n");
-#endif
-	    }
-	  
+          {
+	    //clfradius->Fill(Peak[iPeakIndex].Rad);
 	  if (Peak[iPeakIndex].x == 0. && Peak[iPeakIndex].y == 0.) {
 	    // This if-statement can be deleted as soon as the slow simulator is fixed. This also occurs for FTPC DAQ data.
 	    gMessMgr->Message("Hit rejected because of an error in the FTPC data. (x, y, z) = (0. ,0., z)", "W", "OST");
@@ -1613,9 +1623,10 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	     these hits into array: */
 	  if(!isnan(Peak[iPeakIndex].x) && !isnan(Peak[iPeakIndex].y) &&
 !isnan(Peak[iPeakIndex].PadSigma) && !isnan(Peak[iPeakIndex].TimeSigma) // && Peak[iPeakIndex].PeakHeight>=mParam->minimumClusterMaxADC())
-	     && Peak[iPeakIndex].x != 0. && Peak[iPeakIndex].y != 0.) // This line was added to avoid a problem of the slow simulator.
-	                                                              // It can be removed as soon as the slow simulator does not produce
-	                                                              // hits lying on the beam axis anymore.
+	     && Peak[iPeakIndex].Rad <= mDb->sensitiveVolumeOuterRadius() 
+             && Peak[iPeakIndex].Rad >= mDb->sensitiveVolumeInnerRadius() )
+	                                                             
+	                                                            
 	    {
 	      // create new point
 	      Int_t numPoint = mPoint->GetEntriesFast();
@@ -1705,6 +1716,13 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 				      *fPhiError*cos(Peak[iPeakIndex].Phi)));
 	      thispoint->SetZerr(mParam->zDirectionError());
 	    }
+         }
+            else
+	    {
+#ifdef DEBUG
+	      printf("Peak position can't be transformed!\n");
+#endif
+	    }
 	} /* end of: for(iPeakIndex=0;... */
     } /*end of: if(iNumPeaks==1) ... else { */
   return TRUE;
@@ -1724,29 +1742,50 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
   TimeCoordinate = Peak->TimePosition + 0.5; /*time start at beginning of bin 0*/
   // include tZero = time from collision to beginning of bin 0
   TimeCoordinate += mDb->tZero()/mDb->microsecondsPerTimebin();
-  PadtransPerTimebin = (int) mParam->numberOfDriftSteps() 
-    / mDb->numberOfTimebins();
+  PadtransPerTimebin = (int) mParam->numberOfDriftSteps() / mDb->numberOfTimebins();
   PadtransLower= (int) (TimeCoordinate*PadtransPerTimebin);
 
+  if ( TimeCoordinate > mDb->numberOfTimebins() || TimeCoordinate <= 0 ) 
+  {
+         // exceeds table dimensions
+         return FALSE;
+  }
+
   /* linear interpolation in radius table */
-  Peak->Rad = ((pRadius[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower] * 
-		((float) (PadtransLower+1) / (float) PadtransPerTimebin - 
-		 TimeCoordinate) + pRadius[iRow + mDb->numberOfPadrowsPerSide()
-					   * (PadtransLower+1)] * 
-		(TimeCoordinate - (float) PadtransLower 
-		 / (float) PadtransPerTimebin)) / 
-	       (((float) (PadtransLower + 1) / (float) PadtransPerTimebin - 
-		 (float) PadtransLower / (float) PadtransPerTimebin)));
-  
+//  Peak->Rad = pRadius[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower];
+
+    Peak->Rad=pRadius[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower]
+             -(pRadius[iRow + mDb->numberOfPadrowsPerSide()*(PadtransLower)]
+             -pRadius[iRow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)])/2;
+
+    if ( pRadius[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower] == 0 )
+    {
+        // outside FTPC sensitive region
+        return FALSE;
+    }
+//  Peak->Rad = ((pRadius[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower] * 
+//		((float) (PadtransLower+1) / (float) PadtransPerTimebin - 
+//		 TimeCoordinate) + pRadius[iRow + mDb->numberOfPadrowsPerSide()
+//					   * (PadtransLower+1)] * 
+//		(TimeCoordinate - (float) PadtransLower 
+//		 / (float) PadtransPerTimebin)) / 
+//	       (((float) (PadtransLower + 1) / (float) PadtransPerTimebin - 
+//		 (float) PadtransLower / (float) PadtransPerTimebin)));
   /* linear interpolation in deflection table */
-  PhiDeflect = mParam->directionOfMagnetField() 
-    * ((pDeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower]
-	* ((float) (PadtransLower + 1.0) 
-	 / (float) PadtransPerTimebin - TimeCoordinate) 
-	+ pDeflection[iRow + mDb->numberOfPadrowsPerSide() * (PadtransLower + 1)] 
-	* (TimeCoordinate - (float) PadtransLower / (float) PadtransPerTimebin))
-       / (((float) (PadtransLower + 1.0) / (float) PadtransPerTimebin 
-	   - (float) PadtransLower / (float) PadtransPerTimebin)));
+
+    PhiDeflect=pDeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower]
+               +(pDeflection[iRow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)]
+               -pDeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower])/2;
+
+//  PhiDeflect = pDeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower];
+//  PhiDeflect = 
+//      ((pDeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower]
+//	* ((float) (PadtransLower + 1.0) 
+//	 / (float) PadtransPerTimebin - TimeCoordinate) 
+//	+ pDeflection[iRow + mDb->numberOfPadrowsPerSide() * (PadtransLower + 1)] 
+//	* (TimeCoordinate - (float) PadtransLower / (float) PadtransPerTimebin))
+//       / (((float) (PadtransLower + 1.0) / (float) PadtransPerTimebin 
+//	   - (float) PadtransLower / (float) PadtransPerTimebin)));
 			      
   /* calculate phi angle from pad position */
   Peak->Phi = mDb->radiansPerBoundary() / 2 
