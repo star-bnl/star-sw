@@ -26,7 +26,7 @@ class StiDetectorContainer
 {
 public:
 
-    virtual ~StiDetectorContainer();
+    friend class nobody;
 
     //Singleton Access
     static StiDetectorContainer* instance();
@@ -63,10 +63,10 @@ public:
     //Set iterators to the position nearest this guy
     void setToDetector(double position, double angle);
 
-    //Starting points for outside-in tracking
-    void nextStartPoint(); //++    
+    //Starting points for outside-in tracking  
+    void nextStartPoint(); //++  
     //void previousStartPoint(); //---   
-    bool hasMoreStartPoints() const; //Done yet?
+    bool hasMoreStartPoints() const; //Done yet?  
     
     //Utilities
     void print() const;
@@ -90,6 +90,7 @@ private:
 private:
     
     //Singleton Management
+    virtual ~StiDetectorContainer();
     StiDetectorContainer();
     static StiDetectorContainer* sinstance;
     
