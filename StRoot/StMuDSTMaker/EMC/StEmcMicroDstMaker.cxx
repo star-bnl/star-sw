@@ -123,7 +123,7 @@ Int_t StEmcMicroDstMaker::Make()
       StTreeMaker *tree=(StTreeMaker*)GetMaker("outputStream");
       if(tree)
       {
-        StTree *t = tree->fTree;
+        StTree *t = tree->GetTree();;
         mEventFile=t->GetBaseName();
       }
       else
