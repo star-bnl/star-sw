@@ -41,7 +41,7 @@ private:
   ServerList mservers;  // servers handle the Query 
   StDbConfigNode* m_configNode;  // handles the StDbTables & Named Configurations
 
-  StDbManager(){ initTypes(); initDomains(); initServers();};
+  StDbManager(): m_configNode(0) { initTypes(); initDomains(); initServers();};
   static StDbManager* mInstance;
   
 protected:
@@ -67,6 +67,7 @@ public:
 
   virtual StDbConfigNode* getConfig() { return m_configNode; };
   virtual StDbConfigNode* initConfig(const char* configName);
+  virtual StDbConfigNode* initConfig(StDbType type, StDbDomain domain, const char* configName);
   //  virtual StDbConfigNode* initConfig();
   virtual StDbConfigNode* resetConfig(StDbType type, StDbDomain domain, const char* configName);
 

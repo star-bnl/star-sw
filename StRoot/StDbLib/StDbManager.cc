@@ -11,7 +11,8 @@ StDbManager* StDbManager::mInstance=0;
 
 StDbManager::~StDbManager(){
 
-  m_configNode->deleteTree();
+
+  if(m_configNode)m_configNode->deleteTree();
   deleteServers();
   deleteDomains();
   deleteTypes();
@@ -193,7 +194,12 @@ StDbManager::findServer(StDbType type, StDbDomain domain){
    }
  }
 
-if(!server->isconnected())server->init();
+if(server && !server->isconnected())server->init();
+ if(!server) {
+   cout << "No Such Server " << endl;
+   cout << "Type = " << type << " & name= " << getDbTypeName(type) << endl;
+   cout << "Domain = "<< domain << " & name = " << getDbDomainName(domain) << endl;
+}
 return server;
 }
 
@@ -206,6 +212,29 @@ m_configNode = new StDbConfigNode(StarDb,Star,"StarDb",configName);
 m_configNode->buildTree();
 
 return getConfig();
+}
+
+////////////////////////////////////////////////////////////////
+StDbConfigNode*
+StDbManager::initConfig(StDbType type, StDbDomain domain, const char* configName){
+
+StDbConfigNode * node = 0;
+  if(m_configNode){
+    cout << "Error: already configured, use [resetConfig] function" << endl; 
+    return node;
+  }
+
+char* name;
+ if(domain == Star){
+  name = getDbTypeName(type);
+ } else {
+  name = getDbDomainName(domain);
+ }
+
+ m_configNode = new StDbConfigNode(type,domain,name,configName);
+ m_configNode->buildTree();
+ return getConfig();
+
 }
 
 ////////////////////////////////////////////////////////////////

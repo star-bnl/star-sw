@@ -46,13 +46,13 @@ StDbConfigNode::StDbConfigNode(StDbType type, StDbDomain domain, const char* nod
   // while the domain may still be StarDb
   // Else if StarDb domain, then name holds map to real domain type
   // Else both type & domain are that of parent
-
+  /*
   if(mdbType==StarDb){
     mdbType=StDbManager::Instance()->getDbType(mnodeName);
   } else if(mdbDomain==Star){
     mdbDomain=StDbManager::Instance()->getDbDomain(mnodeName);
   }
-
+  */
 }
 
 ////////////////////////////////////////////////////////////////
@@ -165,7 +165,7 @@ StDbConfigNode::findConfigNode(StDbType type, StDbDomain domain){
 StDbConfigNode* node = 0;
 
   if(type == mdbType && domain == mdbDomain){
-    if(mparentNode->isNode(type,domain))return mparentNode->findConfigNode(type,domain);
+    if(mparentNode && mparentNode->isNode(type,domain))return mparentNode->findConfigNode(type,domain);
     return this;
     }
    if(hasChildren())node=mfirstChildNode->findConfigNode(type,domain);
