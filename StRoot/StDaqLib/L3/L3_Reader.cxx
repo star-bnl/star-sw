@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3_Reader.cxx,v 1.6 2000/08/09 15:27:03 struck Exp $
+ * $Id: L3_Reader.cxx,v 1.7 2000/09/11 16:31:12 struck Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -12,11 +12,15 @@
  * change log:
  *   06 Jun 00 CS initial version
  *   25 Jul 00 CS added i960 cluster reader
- *   09 Aug 00 CS removed 'cout' statement in i960 reader 
+ *   09 Aug 00 CS removed 'cout' statement in i960 reader
+ *   11 Sep 00 CS removed memory leak in L3_Reader
  *
  ***************************************************************************
  *
  * $Log: L3_Reader.cxx,v $
+ * Revision 1.7  2000/09/11 16:31:12  struck
+ * removed memory leak in L3_Reader
+ *
  * Revision 1.6  2000/08/09 15:27:03  struck
  * removed 'cout' statement in i960ClusterReader
  *
@@ -42,6 +46,18 @@ L3_Reader::L3_Reader(EventReader *er, Bank_L3_P *pL3P)
   pBankL3SECP = NULL;
   pBankL3SECCD = NULL;
   pBankL3SECTP = NULL;
+  gtr = NULL;
+  scr = NULL;
+  str = NULL;
+  icr = NULL;
+}
+
+L3_Reader::~L3_Reader()
+{
+  delete gtr;
+  delete scr;
+  delete str;
+  delete icr;
 }
 
 
@@ -182,7 +198,7 @@ Bank_TPCRBCLP * L3_Reader::getTPCRBCLP (int sec, int rb)
 	return pBankTPCRBCLP;
   }
 
-  // now check on TPCSECLP
+  // now check on TPCRBCLP
   if (pBankTPCSECLP->receiverBoard[rb-1].length==0) {
         L3secERROR(INFO_MISSING_BANK, "no TPCRBCLP bank", sec);
         pBankTPCRBCLP = NULL;
@@ -234,47 +250,45 @@ Bank_TPCMZCLD * L3_Reader::getTPCMZCLD (int sec, int rb, int mz)
 
 GlobalTrackReader * L3_Reader::getGlobalTrackReader ()
 {
-  GlobalTrackReader *gtr = new GlobalTrackReader (this);
-  if (!gtr->initialize()) {
-        //cout << "ERROR: getGlobalTrackReader FAILED" << endl;
-	delete gtr;
-	return NULL;
+  // only one reader per event
+  if (!gtr) {
+        gtr = new GlobalTrackReader (this);
+	if (!gtr->initialize()) {
+	      //cout << "ERROR: getGlobalTrackReader FAILED" << endl;
+	      return NULL;
+	}
   }
-
   return gtr;
 }
 
 
 Sl3ClusterReader * L3_Reader::getSl3ClusterReader (int sec)
 {
-  Sl3ClusterReader *cr = new Sl3ClusterReader (sec, this);
-  if (!cr->initialize()) {
+  if (!scr) scr = new Sl3ClusterReader (this);
+  if (!scr->initialize(sec)) {
         //cout << "ERROR: getSl3ClusterReader FAILED" << endl;
-	delete cr;
-	return NULL;
+        return NULL;
   }
-  return cr;
+  return scr;
 }
 
 
 Sl3TrackReader * L3_Reader::getSl3TrackReader (int sec)
 {
-  Sl3TrackReader *tr = new Sl3TrackReader (sec, this);
-  if (!tr->initialize()) {
+  if (!str) str = new Sl3TrackReader (this);
+  if (!str->initialize(sec)) {
         //cout << "ERROR: getSl3TrackReader FAILED" << endl;
-	delete tr;
-	return NULL;
+        return NULL;
   }
-  return tr;
+  return str;
 }
 
 
 I960ClusterReader * L3_Reader::getI960ClusterReader (int sec)
 {
-  I960ClusterReader *icr = new I960ClusterReader (sec, this);
-  if (!icr->initialize()) {
+  if (!icr) icr = new I960ClusterReader (this);
+  if (!icr->initialize(sec)) {
         //cout << "ERROR: getI960ClusterReader FAILED" << endl;
-	delete icr;
 	return NULL;
   }
   return icr;
@@ -318,38 +332,41 @@ int GlobalTrackReader::initialize ()
 
 // ---------- Sl3ClusterReader -----------------------
 
-Sl3ClusterReader::Sl3ClusterReader (int sec, L3_Reader *l3r)
+Sl3ClusterReader::Sl3ClusterReader (L3_Reader *l3r)
 {
   l3 = l3r;
-  sector = sec;
+  sector = -1;
   pL3SECCD = NULL;
   cluster  = NULL;
   nCluster = 0;
 }
 
 
-int Sl3ClusterReader::initialize ()
+int Sl3ClusterReader::initialize (int sec)
 {
-  pL3SECCD = l3->getL3_SECCD(sector);
-  if (pL3SECCD == NULL) {
-        //cout << "no L3_SECCD found" << endl;
-	return FALSE;
+  // is this sector already initialized?
+  if (sector!=sec) {
+        // set sector number
+        sector = sec;
+	pL3SECCD = l3->getL3_SECCD(sector);
+	if (pL3SECCD == NULL) {
+	      //cout << "no L3_SECCD found" << endl;
+	      return FALSE;
+	}
+	cluster  = pL3SECCD->cluster;
+	nCluster = pL3SECCD->nrClusters_in_sector;
   }
-  
-  cluster  = pL3SECCD->cluster;
-  nCluster = pL3SECCD->nrClusters_in_sector;
-
   return TRUE;
 }
 
 
 // ---------- I960ClusterReader --------------------
 
-I960ClusterReader::I960ClusterReader (int sec, L3_Reader *l3r)
+I960ClusterReader::I960ClusterReader (L3_Reader *l3r)
 {
   l3 = l3r;
-  sector = sec;
-  cluster = NULL;
+  sector = -1;
+  cluster = new l3_cluster[maxClusterPerSector];
   nCluster = 0;
   for (int rb=0; rb<12; rb++) {
         for (int mz=0; mz<3; mz++) {
@@ -365,7 +382,7 @@ I960ClusterReader::~I960ClusterReader ()
 }
 
 
-int I960ClusterReader::initialize ()
+int I960ClusterReader::initialize (int sec)
 {
   Bank_TPCMZCLD *cld;
 
@@ -380,67 +397,78 @@ int I960ClusterReader::initialize ()
     unsigned short q;
   };
 
-  for (int rb=1; rb<=12; rb++) {
-        for (int mz=1; mz<=3; mz++) {
-	      //pointer to TPCMZCLD bank
-	      pBankTPCMZCLD[rb-1][mz-1] = l3->getTPCMZCLD(sector, rb, mz); 
-	      cld = pBankTPCMZCLD[rb-1][mz-1];
-	      if (!cld) continue;
-	      int *ptr = (int *)&cld->stuff;
-	      // count total number of clusters for memory allocation
-	      for (int ir=0; ir<cld->numberOfRows; ir++) {
-		    int row = *ptr++;
-		    int nHitsThisRow = *ptr++;  // bump pointer to beginning of space points
-		    nCluster += nHitsThisRow;   // add num space pts to running total
-		    ptr += 2 * nHitsThisRow;
+  // is this sector already initialized?
+  if (sector!=sec) {
+        // set sector number
+        sector = sec;
+	nCluster = 0;
+	// get number of clusters
+	for (int rb=1; rb<=12; rb++) {
+	      for (int mz=1; mz<=3; mz++) {
+		    //pointer to TPCMZCLD bank
+		    pBankTPCMZCLD[rb-1][mz-1] = l3->getTPCMZCLD(sector, rb, mz); 
+		    cld = pBankTPCMZCLD[rb-1][mz-1];
+		    if (!cld) continue;
+		    int *ptr = (int *)&cld->stuff;
+		    // count total number of clusters for memory allocation
+		    for (int ir=0; ir<cld->numberOfRows; ir++) {
+		          int row = *ptr++;
+			  int nHitsThisRow = *ptr++;  // bump pointer to beginning of space points
+			  nCluster += nHitsThisRow;   // add num space pts to running total
+			  ptr += 2 * nHitsThisRow;
+		    }
 	      }
 	}
-  }
-  //cout << "sector "<<sector<<": found " 
-  //     <<nCluster<<" space pts" <<endl;
-  
-  cluster = new l3_cluster[nCluster];
-  if (cluster==NULL) {
-        cout << "failed to allocate cluster structures " << endl;
+	//cout << "sector "<<sector<<": found " 
+	//     <<nCluster<<" space pts" <<endl;
+
+	if (nCluster>maxClusterPerSector) {
+	      cout << "ERROR: L3_Reader: reached maxClusterPerSector limit!" << endl;
 	      return FALSE;
-  }
+	}
+	if (cluster==NULL) {
+	      cout << "failed to allocate cluster structures " << endl;
+	      return FALSE;
+	}
 
-  l3_cluster *pcluster;
-  pcluster = cluster;
 
-  for ( int rb=1; rb<=12; rb++) {
-        for (int mz=1; mz<=3; mz++) {
-	      cld = pBankTPCMZCLD[rb-1][mz-1];  // pointer to TPCMZCLD bank
-	      if (!cld) continue;
-	      int *ptr = &cld->stuff[0];
-	      for (int ir=0; ir<cld->numberOfRows; ir++){
-		    int row = *ptr++;
-		    int nsp = *ptr++;           // bump pointer to beginning of space points
-		    for (int isp=0; isp<nsp; isp++, ptr+=2) {
-		          SpacePt *hit = (SpacePt *)ptr;
-		          pcluster->pad     = hit->centroids.x;
-			  pcluster->time    = hit->centroids.t;
-			  pcluster->charge  = hit->q;
-			  pcluster->flags   = hit->flags;
-			  pcluster->padrow  = row;
-			  pcluster->RB_MZ   = 16 * rb + mz;
-			  pcluster->trackId = 0; // no track ass. for i960 cluster
-			  pcluster++;
+	// copy i960 cluster into l3 cluster struct
+	l3_cluster *pcluster;
+	pcluster = cluster;
+
+	for ( int rb=1; rb<=12; rb++) {
+	      for (int mz=1; mz<=3; mz++) {
+		    cld = pBankTPCMZCLD[rb-1][mz-1];  // pointer to TPCMZCLD bank
+		    if (!cld) continue;
+		    int *ptr = &cld->stuff[0];
+		    for (int ir=0; ir<cld->numberOfRows; ir++){
+		          int row = *ptr++;
+			  int nsp = *ptr++;           // bump pointer to beginning of space points
+			  for (int isp=0; isp<nsp; isp++, ptr+=2) {
+			        SpacePt *hit = (SpacePt *)ptr;
+				pcluster->pad     = hit->centroids.x;
+				pcluster->time    = hit->centroids.t;
+				pcluster->charge  = hit->q;
+				pcluster->flags   = hit->flags;
+				pcluster->padrow  = row;
+				pcluster->RB_MZ   = 16 * rb + mz;
+				pcluster->trackId = 0; // no track ass. for i960 cluster
+				pcluster++;
+			  }
 		    }
 	      }
 	}
   }
-
   return TRUE;
 }
 
 
 // ---------- Sl3TrackReader -----------------------
 
-Sl3TrackReader::Sl3TrackReader (int sec, L3_Reader *l3r)
+Sl3TrackReader::Sl3TrackReader (L3_Reader *l3r)
 {
   l3 = l3r;
-  sector = sec;
+  sector = -1;
   pL3LTD = NULL;
   tracks  = NULL;
   nTracks = 0;
@@ -454,42 +482,46 @@ Sl3TrackReader::Sl3TrackReader (int sec, L3_Reader *l3r)
 }
 
 
-int Sl3TrackReader::initialize ()
+int Sl3TrackReader::initialize (int sec)
 {
-  pL3SECTP = l3->getL3_SECTP(sector);
-  if (pL3SECTP == NULL) {
-        //cout << "no L3_SECTP found" << endl;
-	return FALSE;
+  // is this sector already initialized?
+  if (sector!=sec) {
+        // set sector number
+        sector = sec;
+	pL3SECTP = l3->getL3_SECTP(sector);
+	if (pL3SECTP == NULL) {
+	      //cout << "no L3_SECTP found" << endl;
+	      return FALSE;
+	}
+
+	// check existence of local track bank
+	if (pL3SECTP->banks[0].length == 0) {
+	      pL3secERROR(INFO_MISSING_BANK, "no L3_LTD bank", sector);
+	      return FALSE;
+	}
+
+	pL3LTD = (Bank_L3_LTD *) ((INT32 *)pL3SECTP + pL3SECTP->banks[0].offset);
+	if (strncmp(pL3LTD->header.BankType, CHAR_L3_LTD, 8) != 0) {
+	      pL3secERROR(ERR_BAD_HEADER, "bad L3_LTD header", sector);
+	      return FALSE;
+	}
+
+	if (pL3LTD->swap() < 0) pL3secERROR(ERR_SWAP, "swap L3_LTD", sector);
+
+
+	//pL3LTD->header.print();
+	//printf("+++++>> L3_LTD: nTracks %i\n",
+	//       (int) (pL3LTD->header.BankLength * 4 - sizeof(Bank_Header)) / sizeof(localTrack));
+
+	tracks  = pL3LTD->track;
+	nTracks = pL3SECTP->nTracks;
+	nHits   = pL3SECTP->nHits;
+	cpuTime = pL3SECTP->cpuTime;
+	realTime = pL3SECTP->realTime;
+	paraSet = pL3SECTP->para;
+	locVertex.x = pL3SECTP->xVert;
+	locVertex.y = pL3SECTP->yVert;
+	locVertex.z = pL3SECTP->zVert;
   }
-
-  // check existence of local track bank
-  if (pL3SECTP->banks[0].length == 0) {
-        pL3secERROR(INFO_MISSING_BANK, "no L3_LTD bank", sector);
-	return FALSE;
-  }
-
-  pL3LTD = (Bank_L3_LTD *) ((INT32 *)pL3SECTP + pL3SECTP->banks[0].offset);
-  if (strncmp(pL3LTD->header.BankType, CHAR_L3_LTD, 8) != 0) {
-        pL3secERROR(ERR_BAD_HEADER, "bad L3_LTD header", sector);
-	return FALSE;
-  }
-
-  if (pL3LTD->swap() < 0) pL3secERROR(ERR_SWAP, "swap L3_LTD", sector);
-
-
-  //pL3LTD->header.print();
-  //printf("+++++>> L3_LTD: nTracks %i\n",
-  //       (int) (pL3LTD->header.BankLength * 4 - sizeof(Bank_Header)) / sizeof(localTrack));
-
-  tracks  = pL3LTD->track;
-  nTracks = pL3SECTP->nTracks;
-  nHits   = pL3SECTP->nHits;
-  cpuTime = pL3SECTP->cpuTime;
-  realTime = pL3SECTP->realTime;
-  paraSet = pL3SECTP->para;
-  locVertex.x = pL3SECTP->xVert;
-  locVertex.y = pL3SECTP->yVert;
-  locVertex.z = pL3SECTP->zVert;
-
   return TRUE;
 }
