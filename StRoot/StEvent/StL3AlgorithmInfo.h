@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL3AlgorithmInfo.h,v 2.1 2001/08/02 01:26:31 ullrich Exp $
+ * $Id: StL3AlgorithmInfo.h,v 2.2 2001/08/20 21:29:00 ullrich Exp $
  *
  * Author: Christof Struck, July 2001
  ***************************************************************************
@@ -10,9 +10,11 @@
  ***************************************************************************
  *
  * $Log: StL3AlgorithmInfo.h,v $
+ * Revision 2.2  2001/08/20 21:29:00  ullrich
+ * Changed counter type from UInt_t to Int_t.
+ *
  * Revision 2.1  2001/08/02 01:26:31  ullrich
  * Initial Revision.
- *
  *
  **************************************************************************/
 #ifndef StL3AlgorithmInfo_hh
@@ -28,16 +30,16 @@ class StL3AlgorithmInfo : public StObject
 {
 public:
       StL3AlgorithmInfo();
-      StL3AlgorithmInfo(algorithm_data *algData);
+      StL3AlgorithmInfo(Algorithm_Data*);
       ~StL3AlgorithmInfo();
 
       int          id() const;
       bool         on() const;
       bool         accept() const;
       bool         build() const;
-      unsigned int numberOfProcessedEvents() const;
-      unsigned int numberOfAcceptedEvents() const;
-      unsigned int numberOfBuildEvents() const;
+      int          numberOfProcessedEvents() const;
+      int          numberOfAcceptedEvents() const;
+      int          numberOfBuildEvents() const;
       int          dataSize() const;
       float        data(int index) const;
       int          preScale() const;
@@ -59,9 +61,9 @@ private:
       Bool_t   mOn;
       Bool_t   mAccept;
       Bool_t   mBuild;
-      UInt_t   mNumberOfProcessedEvents;
-      UInt_t   mNumberOfAcceptedEvents;
-      UInt_t   mNumberOfBuildEvents;
+      Int_t    mNumberOfProcessedEvents;
+      Int_t    mNumberOfAcceptedEvents;
+      Int_t    mNumberOfBuildEvents;
       UShort_t mDataSize;
       TArrayF  mDataArray;
       Int_t    mPreScale;
@@ -86,13 +88,13 @@ StL3AlgorithmInfo::accept() const { return mAccept; }
 inline bool
 StL3AlgorithmInfo::build() const { return mBuild; }
 
-inline unsigned int
+inline int
 StL3AlgorithmInfo::numberOfProcessedEvents() const { return mNumberOfProcessedEvents; }
 
-inline unsigned int
+inline int
 StL3AlgorithmInfo::numberOfAcceptedEvents() const { return mNumberOfAcceptedEvents; }
 
-inline unsigned int
+inline int
 StL3AlgorithmInfo::numberOfBuildEvents() const { return mNumberOfBuildEvents; }
 
 inline int
