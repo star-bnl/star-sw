@@ -19,7 +19,7 @@ public:
     StiShape(const string &name,float halfDepth, float thickness);
 
     // accessors
-    float getHalfDepth() const { return _halfDepth; }
+    float getHalfDepth() const { return _halfDepth; } 
     virtual float getHalfWidth() const=0;
     float getThickness() const { return _thickness; }
     virtual StiShapeCode getShapeCode() const = 0;

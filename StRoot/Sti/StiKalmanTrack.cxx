@@ -1,12 +1,12 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.26 2003/07/22 17:15:48 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.27 2003/07/30 19:18:25 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
- * Revision 2.26  2003/07/22 17:15:48  pruneau
- * various
+ * Revision 2.27  2003/07/30 19:18:25  pruneau
+ * sigh
  *
  * Revision 2.25  2003/05/14 21:37:59  pruneau
  * Fixed "chi2" problem. 5 first nodes on a track did not have
@@ -905,7 +905,7 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
   bool trackExtended = false;
   StiHit localVertex = *vertex;
   sNode = lastNode;
-  localVertex.rotate(-sNode->getRefAngle());
+  localVertex.rotate(sNode->getRefAngle());
   tNode = trackNodeFactory->getInstance();
   if (tNode==0) throw logic_error("SKTF::extendTrackToVertex() - ERROR - tNode==null");
   tNode->reset();
@@ -958,7 +958,7 @@ bool StiKalmanTrack::find(int direction)
       if (trackFinder->find(this,kOutsideIn))
 	{
 	  //cout<<"/fit(InOut)";
-	  fit(kInsideOut);
+	  fit(kInsideOut);  
 	  fit(kOutsideIn);
 	  trackExtended = true;
 	}	

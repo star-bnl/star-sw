@@ -14,10 +14,22 @@
 #ifndef STI_IS_ACTIVE_FUNCTOR
 #define STI_IS_ACTIVE_FUNCTOR
 
-struct StiIsActiveFunctor{
-    StiIsActiveFunctor();
-    virtual ~StiIsActiveFunctor();
-    virtual bool operator()(double dYlocal, double dZlocal) = 0;
+class StiIsActiveFunctor
+{
+ public:
+  
+  StiIsActiveFunctor(bool active=true,bool editable=true);
+  virtual ~StiIsActiveFunctor();
+  virtual bool isActive() const;
+  virtual void setIsActive(bool value);
+  virtual bool isEditable() const;
+  virtual void setIsEditable(bool value);
+  virtual bool operator()(double dYlocal, double dZlocal) const;
+
+ protected: 
+  bool _active;
+  bool _editable;
 };
 
 #endif // ifndef STI_IS_ACTIVE_FUNCTOR
+

@@ -1,10 +1,10 @@
 /*
- * $Id: StiTrackingPlots.h,v 2.8 2003/07/22 17:16:31 pruneau Exp $
+ * $Id: StiTrackingPlots.h,v 2.9 2003/07/30 19:19:24 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.h,v $
- * Revision 2.8  2003/07/22 17:16:31  pruneau
- * various
+ * Revision 2.9  2003/07/30 19:19:24  pruneau
+ * sigh
  *
  * Revision 2.7  2003/05/01 20:46:52  pruneau
  * changed error parametrization
@@ -35,9 +35,6 @@ class TH1D;
 class TH2D;
 class TH3D;
 class TFile;
-class TProfile;
-class TProfile2D;
-
 #include "Sti/Base/HistogramGroup.h"
 
 class StiTrackingPlots : public HistogramGroup
@@ -88,10 +85,9 @@ class StiTrackingPlots : public HistogramGroup
   TH2D *_nptsVsPhiMinus;
 
   //rad length maps
-  TH2D * _radLengthVsPhi;
-  TH2D * _radLengthVsEta;
-  TProfile * _radLengthVsPhiProf;
-  TProfile * _radLengthVsEtaProf;
+  TH2D * radLengthZ;
+  TH2D * radLengthPhi;
+  TH2D * radLengthEta;
 
   TH2D *_xLastHitVsXLastNode;
   TH2D *_xLastHitVsXLastNode1;
@@ -111,8 +107,6 @@ class StiTrackingPlots : public HistogramGroup
   TH3D * mMomZ;
   TH3D * mPhase;
 
-  TH2D * _yVsXPosEta;
-  TH2D * _yVsXNegEta;
 };
 
 

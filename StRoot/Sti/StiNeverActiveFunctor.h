@@ -12,10 +12,12 @@
 
 #include "StiIsActiveFunctor.h"
 
-struct StiNeverActiveFunctor : public StiIsActiveFunctor{
-    StiNeverActiveFunctor();
-    virtual ~StiNeverActiveFunctor();
-    virtual bool operator()(double dYlocal, double dZlocal);
+///Class implements an  object which is never active.
+class StiNeverActiveFunctor : public StiIsActiveFunctor
+{
+public:
+  StiNeverActiveFunctor();
+  virtual ~StiNeverActiveFunctor();
 };
 
 #endif // defined STI_NEVER_ACTIVE_FUNCTOR

@@ -13,7 +13,7 @@ class StiDefaultHitAssociationFilter : public EditableAssociationFilter<StiHit>
   StiDefaultHitAssociationFilter();
   StiDefaultHitAssociationFilter(const string & name, const string & description);
   virtual ~StiDefaultHitAssociationFilter();  
-  bool accept(const StiHit * h1,const StiHit * h2) const;
+  bool accept(const StiHit * h1,const StiHit * h2);
   virtual void initialize();
 
  protected:

@@ -34,7 +34,6 @@ using namespace std;
 #include "StiEvaluableTrackSeedFinder.h"
 #include "StiCompositeSeedFinder.h"
 #include "StiTrack.h"
-#include "StiTrackingParameters.h"
 #include "StiMcTrack.h"
 #include "StiGui/StiRootDrawableMcTrack.h"
 #include "StiKalmanTrackFinder.h"
@@ -77,7 +76,7 @@ void StiKalmanTrackFinder::initialize()
   StiDefaultTrackFilter * trackFilter = new StiDefaultTrackFilter("FinderTrackFilter","Reconstructed Track Filter");
   trackFilter->add( new EditableParameter("nPtsUsed","Use nPts", 1., 1., 0., 1., 1.,
 					  Parameter::Boolean, StiTrack::kPointCount) );
-  trackFilter->add( new EditableParameter("nPtsMin", "Minimum nPts", 10., 10., 0., 100.,1., 
+  trackFilter->add( new EditableParameter("nPtsMin", "Minimum nPts", 6., 10., 0., 100.,1., 
 					  Parameter::Integer,StiTrack::kPointCount) );
   trackFilter->add( new EditableParameter("nPtsMax", "Maximum nPts", 60., 60., 0., 100.,1., 
 					  Parameter::Integer,StiTrack::kPointCount) );
@@ -176,8 +175,6 @@ void StiKalmanTrackFinder::findTracks()
   _trackSeedFinder->reset();
   _trackContainer->clear();
   if (_trackFilter) _trackFilter->reset();
-  int plus = 0;
-  int minus= 0;
   try
     {
       while (_trackSeedFinder->hasMore())
@@ -190,10 +187,6 @@ void StiKalmanTrackFinder::findTracks()
 	      track->find();
 	      if (!_trackFilter || _trackFilter->filter(track)) 
 		{
-		  if (track->getCharge()>0)
-		    plus++;
-		  else
-		    minus++;
 		  _trackContainer->push_back(track);
 		  track->reserveHits();
 		}
@@ -208,10 +201,6 @@ void StiKalmanTrackFinder::findTracks()
     {
       cout << "StiKalmanTrackFinder::findTracks() - Run Time Error (2) :" << rte.what() << endl;
     }  
-  cout << "SKTF::findTracks() -I- Track Count:"<<endl
-       << "            total:"<<plus+minus<<endl
-       << "             plus:"<<plus<<endl
-       << "            minus:"<<minus<<endl;
   if (_trackFilter)
     cout << "  tracks Analyzed:"<< _trackFilter->getAnalyzedCount() << endl
 	 << "  tracks Accepted:"<< _trackFilter->getAcceptedCount() << endl;
@@ -237,26 +226,13 @@ void StiKalmanTrackFinder::fitTracks()
 	  if (!track) 
 	    throw runtime_error("StiKalmanTrackFinder::fitTracks() - trackSeedFinder returned track==0");
 	  track->fit(kOutsideIn); track->setFlag(0);
-	  // apply filter if one is defined 
-	  // always add track if not
-	  if (_trackFilter)
-	    {
-	      if (_trackFilter->filter(track))
-		_trackContainer->push_back(track);
-	    }
-	  else
+	  if (!_trackFilter || _trackFilter->filter(track))
 	    _trackContainer->push_back(track);
-	  StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
-	  t->update();
-	  _messenger << "track parameters:";
-	  _messenger << *track<<endl;
 	}
-      else 
-	_messenger <<"\ttrackSeedFinder->hasMore()==false"<<endl;
     }
   catch (runtime_error & rte) 
     {
-      _messenger << "StiKalmanTrackFinder::fitTracks() - Run Time Error :" << rte.what() << endl;
+      cout << "StiKalmanTrackFinder::fitTracks() - Run Time Error :" << rte.what() << endl;
     }
 }
 
@@ -308,7 +284,7 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
       catch (runtime_error & rte) 
 	{
 	  cout << "SKTF::extendTracksToVertex()"
-	       << "- WARNING - Run Time Error while extending a track to main vertex."<<endl
+	       << "-W- Run Time Error while extending a track to main vertex."<<endl
 	       << "Error Message:" << endl
 	       << rte.what() << endl;
 	}
@@ -318,7 +294,7 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
        << "                                                   plus:"<<plus<<endl
        << "                                                  minus:"<<minus<<endl
        << "                                                helPlus:"<<helPlus<<endl
-       << "                                               helMinus:"<<helMinus<<endl;
+       << "                                               helMinus:"<<helMinus<<endl<<endl<<endl<<endl<<endl<<endl<<endl;
 }
 
 /// Find extension (track) to the given track seed
@@ -362,11 +338,7 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
       else
 	_detectorContainer->moveOut();
       tDet = **_detectorContainer;
-
-      if (!tDet->isActive()&&false)
-	{
-	  cout << "Non active detector: " <<  tDet->getName()<< endl;
-	}
+      //_messenger << tDet->getName()<<" ACTIVE:" << tDet->isActive() << endl;
 	  
       leadDet = tDet;
       // tDet==0 implies a severe detector container error - exit
@@ -381,80 +353,59 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 	  testNode.reset();
 	  testNode.setChi2(1e50);
 	  position = testNode.propagate(sNode,tDet);
+	  if(debug)cout << "tDet:" << *tDet << "  POSITION:"<<position<<endl;
 	  if (position<0)
 	    { // not reaching this detector layer - stop track
+	      if(debug)cout << "TRACK DOES NOT REACH CURRENT LAYER"<<endl;
 	      trackDone = true; break;
 	    }
 	  else if (position<=kEdgeZplus) 
 	    { 
 	      testNode.setDetector(tDet);
-	      if (tDet->isActive() && (testNode.nullCount  <  _pars->maxNullCount &&
-		   testNode.contiguousNullCount  <  _pars->maxContiguousNullCount)) 
+	      bool active = tDet->isActive();
+	      if (active&&(testNode.nullCount<_pars->maxNullCount&&testNode.contiguousNullCount<_pars->maxContiguousNullCount)) 
 		{ // active detector may have a hit
 		  _hitContainer->setRefPoint(testNode);
 		  while (_hitContainer->hasMore()) 
 		    {  
-		      stiHit = _hitContainer->getHit();
-		      if (!stiHit) throw logic_error("StiKalmanTrackFinder::doNextDetector() - FATAL - StiHit*hit==0");
+		      stiHit = _hitContainer->getHit();if (!stiHit) throw logic_error("StiKalmanTrackFinder::doNextDetector() - FATAL - StiHit*hit==0");
 		      chi2 = testNode.evaluateChi2(stiHit);
-		      if (chi2<tDet->getTrackingParameters()->getMaxChi2ForSelection() && 
-			  chi2<testNode.getChi2())
+		      if (chi2<_pars->maxChi2ForSelection && chi2<testNode.getChi2())
 			{
-			  testNode.setHit(stiHit);
-			  testNode.setChi2(chi2);
+			  testNode.setHit(stiHit); testNode.setChi2(chi2);
 			}
 		    } 
 		}
-	      // add best node to track if it has a hit or
-	      // if the maximum of node with null hit has NOT been exceeded
-	      /*	      if (testNode.getHit() ||
-			      (testNode.nullCount  <  _pars->maxNullCount &&
-			      testNode.contiguousNullCount  <  _pars->maxContiguousNullCount) )
-			      {*/
-		  StiKalmanTrackNode * node = _trackNodeFactory->getInstance();
-		  if (node==0) throw logic_error("SKTF::find() - ERROR - node==null");
-		  node->reset();
-		  *node = testNode;
-		  sNode = track->add(node);
-		  if (node->getHit())
-		    {
-		      _messenger<<"SKTN::add(SKTN*) -I- Add node with hit:"<<endl;
-		      nAdded++;
-		      node->hitCount = sNode->hitCount+1;
-		      node->contiguousHitCount = sNode->contiguousHitCount+1; 
-		      if (node->contiguousHitCount>_pars->minContiguousHitCountForNullReset)
-			node->contiguousNullCount = 0;
-		      else
-			node->contiguousNullCount = sNode->contiguousNullCount;
-		      node->nullCount = sNode->nullCount;
-		    }
-		  // detectors edge - don't really expect a hit here
-		  else if (position>0) 
-		    {
-		      _messenger<<"SKTN::add(SKTN*) -I- Add node WIHTOUT hit:"<<endl;
-		      node->nullCount           = sNode->nullCount;
-		      node->contiguousNullCount = sNode->contiguousNullCount;
-		      node->hitCount            = sNode->hitCount;
-		      node->contiguousHitCount  = 0;
-		    } 
-		  else // there should have been a hit but we found none
-		    {
-		      //cout<<"SKTN::add(SKTN*) -I- Add node WIHTOUT hit:"<<endl
-		      //<< node->getDetector()->getName();
-		      node->nullCount           = sNode->nullCount+1;
-		      node->contiguousNullCount = sNode->contiguousNullCount+1;
-		      node->hitCount            = sNode->hitCount;
-		      node->contiguousHitCount  = 0;
-		    } 
-		  leadDet = sNode->getDetector();
-		  if(debug)cout << " hit added"<<endl;
-		  break;
-		  /*	}
-			else
-			{
-			//cout <<"TRACK IS DONE"<<endl;
-			trackDone = true;  break;
-			}*/
+	      StiKalmanTrackNode * node = _trackNodeFactory->getInstance();if (node==0) throw logic_error("SKTF::find() - ERROR - node==null");
+	      node->reset();
+	      *node = testNode;
+	      sNode = track->add(node);
+	      if (node->getHit())
+		{
+		  nAdded++;
+		  node->hitCount = sNode->hitCount+1;
+		  node->contiguousHitCount = sNode->contiguousHitCount+1; 
+		  if (node->contiguousHitCount>_pars->minContiguousHitCountForNullReset)
+		    node->contiguousNullCount = 0;
+		  else
+		    node->contiguousNullCount = sNode->contiguousNullCount;
+		  node->nullCount = sNode->nullCount;
+		}
+	      else if (position>0 || !active) // detectors edge - don't really expect a hit here
+		{
+		  node->nullCount           = sNode->nullCount;
+		  node->contiguousNullCount = sNode->contiguousNullCount;
+		  node->hitCount            = sNode->hitCount;
+		  node->contiguousHitCount  = 0;
+		} 
+	      else // there should have been a hit but we found none
+		{
+		  node->nullCount           = sNode->nullCount+1;
+		  node->contiguousNullCount = sNode->contiguousNullCount+1;
+		  node->hitCount            = sNode->hitCount;
+		  node->contiguousHitCount  = 0;
+		} 
+	      leadDet = sNode->getDetector(); break;
 	    }
 	  else if ( (position==kEdgePhiPlus || position==kMissPhiPlus)  && lastMove>=0 )
 	    {
@@ -466,17 +417,16 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 	      //cout << " MOVE MINUUS PHI"<<endl;
 	      _detectorContainer->moveMinusPhi(); lastMove--;
 	    }
-	  if (abs(lastMove)>2) break; 
+	  if (abs(lastMove)>2) break;
 	  nextDet = **_detectorContainer;
 	  if (nextDet==0 || tDet==nextDet) 
-	    {
-	      //cout <<" SCANNING DONE"<<endl;
+	    { //cout <<" SCANNING DONE"<<endl;
 	      scanningDone = true;
 	    }
 	  else
 	    tDet = nextDet;
-	}
-    }
+	} // scanningDone
+    } // trackDone
   return nAdded>0;
 }
 
