@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.cxx,v 1.1 2001/02/23 00:50:20 posk Exp $
+// $Id: StFlowConstants.cxx,v 1.2 2001/05/14 23:04:11 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //

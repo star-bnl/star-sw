@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.1 2001/02/23 00:50:26 posk Exp $
+// $Id: StFlowConstants.h,v 1.2 2001/05/14 23:04:15 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -11,8 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
-// Revision 1.1  2001/02/23 00:50:26  posk
-// NA49 version of STAR software.
+// Revision 1.2  2001/05/14 23:04:15  posk
+// Can select PID for event plane particles. Protons not used for 1st har.
+// event plane.
 //
 // Revision 1.3  2000/05/11 20:00:30  posk
 //

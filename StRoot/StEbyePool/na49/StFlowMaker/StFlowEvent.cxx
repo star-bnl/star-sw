@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.2 2001/03/16 22:39:23 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.3 2001/05/14 23:04:29 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -11,6 +11,10 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.3  2001/05/14 23:04:29  posk
+// Can select PID for event plane particles. Protons not used for 1st har.
+// event plane.
+//
 // Revision 1.2  2001/03/16 22:39:23  posk
 // Removed pt weighting for odd harmonics.
 //
@@ -64,6 +68,7 @@ Bool_t  StFlowEvent::mPtWgt     = kFALSE;
 Bool_t  StFlowEvent::mYWgt      = kFALSE;
 Int_t   StFlowEvent::mStripes   = 0;
 Bool_t  StFlowEvent::mProbPid   = kFALSE;
+Char_t  StFlowEvent::mPid[10]   = {'\0'};
 
 //-----------------------------------------------------------
 
@@ -213,9 +218,12 @@ void StFlowEvent::SetSelections() {
       for (int harN = 0; harN < Flow::nHars; harN++) {
 
 	// No protons for odd harmonics
-// 	bool oddHar  = (harN + 1) % 2;
-// 	if (oddHar && strcmp(pid, "proton") == 0) continue;
-
+ 	bool oddHar  = (harN + 1) % 2;
+ 	if (oddHar && strcmp(pid, "proton") == 0) continue;
+	
+	// PID
+	if (mPid[0] != '\0' && strstr(pid, mPid)==0) continue;
+    
 	// Pt
 	if (mPtCuts[1][harN][selN] > mPtCuts[0][harN][selN] && 
 	    (pt < mPtCuts[0][harN][selN] ||
@@ -426,6 +434,7 @@ void StFlowEvent::PrintSelectionList() {
   cout << "#    Stripes= " << mStripes << endl;
   cout << "#######################################################" << endl;
   cout << "# Track Selections List:" << endl; 
+  cout << "#    Particles used for the event plane: " << mPid << endl;
   cout << "#    MeanSinCos cuts= " << mMeanSinCosCuts[0] << ", " 
 	   << mMeanSinCosCuts[1] << endl;
   for (int k = 0; k < Flow::nSels; k++) {

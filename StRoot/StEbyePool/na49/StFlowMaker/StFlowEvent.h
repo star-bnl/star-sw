@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.1 2001/02/23 00:51:09 posk Exp $
+// $Id: StFlowEvent.h,v 1.2 2001/05/14 23:04:33 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -11,8 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
-// Revision 1.1  2001/02/23 00:51:09  posk
-// NA49 version of STAR software.
+// Revision 1.2  2001/05/14 23:04:33  posk
+// Can select PID for event plane particles. Protons not used for 1st har.
+// event plane.
 //
 // Revision 1.18  2000/10/12 22:46:36  snelling
 //
@@ -51,6 +52,7 @@ public:
   Bool_t         PtWgt() const;
   Bool_t         YWgt() const;
   Int_t          Stripes() const;
+  Char_t*        Pid();
   Bool_t         ProbPid() const;
   StFlowTrackCollection* TrackCollection() const;
  
@@ -66,6 +68,7 @@ public:
   void SetEVeto(const Float_t&);
   void SetCent(const Float_t);
   void SetVertexPos(const StThreeVectorF&);
+  void SetPid(const Char_t*);
 #ifndef __CINT__		
   void SetPhiWeight(const Flow::PhiWgt_t &pPhiWgt);
   void SetMeanCos(const Flow::MeanCos_t &pMeanCos);
@@ -96,6 +99,7 @@ private:
   static Bool_t   mPtWgt;                               // flag for pt weighting
   static Bool_t   mYWgt;                                // flag for y weighting
   static Int_t    mStripes;                             // flag for striped subevents
+  static Char_t   mPid[10];                             // pi-, pi+, pi, pbar, proton, e+, e-
   static Bool_t   mProbPid;                             // flag for probability pid
 
   StFlowEvent*           pFlowEvent;         //!
@@ -124,7 +128,9 @@ inline Bool_t   StFlowEvent::PtWgt() const { return mPtWgt; }
 
 inline Bool_t   StFlowEvent::YWgt() const { return mYWgt; }
 
-inline Int_t   StFlowEvent::Stripes() const { return mStripes; }
+inline Int_t    StFlowEvent::Stripes() const { return mStripes; }
+
+inline Char_t*  StFlowEvent::Pid() { return mPid; }
 
 inline Bool_t   StFlowEvent::ProbPid() const { return mProbPid; }
 
@@ -169,6 +175,9 @@ inline void  StFlowEvent::SetPtWgt() { mPtWgt = kTRUE; }
 inline void  StFlowEvent::SetYWgt() { mYWgt = kTRUE; }
 
 inline void  StFlowEvent::SetStripes(const Int_t stripe) { mStripes = stripe; }
+
+inline void  StFlowEvent::SetPid(const Char_t* pid)  { 
+  strncpy(mPid, pid, 9); mPid[9] = '\0'; }
 
 inline void  StFlowEvent::SetProbPid() { mProbPid = kTRUE; }
 

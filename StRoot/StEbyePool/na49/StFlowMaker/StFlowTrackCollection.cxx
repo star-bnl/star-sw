@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrackCollection.cxx,v 1.1 2001/02/23 00:51:59 posk Exp $
+// $Id: StFlowTrackCollection.cxx,v 1.2 2001/05/14 23:04:51 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //
@@ -12,8 +12,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrackCollection.cxx,v $
-// Revision 1.1  2001/02/23 00:51:59  posk
-// NA49 version of STAR software.
+// Revision 1.2  2001/05/14 23:04:51  posk
+// Can select PID for event plane particles. Protons not used for 1st har.
+// event plane.
 //
 // Revision 1.1  2000/05/12 22:42:05  snelling
 // Additions for persistency and minor fix

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.cxx,v 1.1 2001/02/23 00:51:32 posk Exp $
+// $Id: StFlowSelection.cxx,v 1.2 2001/05/14 23:04:39 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -9,8 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.cxx,v $
-// Revision 1.1  2001/02/23 00:51:32  posk
-// NA49 version of STAR software.
+// Revision 1.2  2001/05/14 23:04:39  posk
+// Can select PID for event plane particles. Protons not used for 1st har.
+// event plane.
 //
 // Revision 1.11  2000/09/22 22:03:00  posk
 //
@@ -30,7 +31,6 @@ ClassImp(StFlowSelection)
 
 StFlowSelection::StFlowSelection() : mSubevent(-1) {
   // To make selections
-  mPid[0]     = '\0';
   mPidPart[0] = '\0';
   mPtPart[0]            = 0.;
   mPtPart[1]            = 0.;
@@ -72,12 +72,6 @@ Bool_t StFlowSelection::Select(StFlowTrack* pFlowTrack) {
   if (!pFlowTrack->Select(mHarmonic, mSelection, mSubevent)) return kFALSE;
   if (pFlowTrack->Select(mHarmonic, mSelection, Flow::nSubs)) return kFALSE;
 
-  // PID
-  if (mPid[0] != '\0') {
-    const Char_t* pid = pFlowTrack->Pid();
-    if (strstr(pid, mPid)==0) return kFALSE;
-  }
-    
   return kTRUE;
 }
 
@@ -148,7 +142,6 @@ void StFlowSelection::PrintList() const {
   cout << "#################################################################"
        << endl;
   cout << "# Selection List:" << endl;
-  cout << "# Particles used for the event plane: " << mPid << endl;
   cout << "# Particles correlated with the event plane: " << mPidPart << endl;
   cout << "# Pt for particles correlated with the event plane: " << 
     mPtPart[0] << " to " << mPtPart[1] << " GeV/c" << endl;

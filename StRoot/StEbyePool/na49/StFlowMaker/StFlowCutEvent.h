@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.h,v 1.1 2001/02/23 00:50:38 posk Exp $
+// $Id: StFlowCutEvent.h,v 1.2 2001/05/14 23:04:21 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -13,8 +13,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.h,v $
-// Revision 1.1  2001/02/23 00:50:38  posk
-// NA49 version of STAR software.
+// Revision 1.2  2001/05/14 23:04:21  posk
+// Can select PID for event plane particles. Protons not used for 1st har.
+// event plane.
 //
 // Revision 1.5  2000/08/31 18:58:19  posk
 //

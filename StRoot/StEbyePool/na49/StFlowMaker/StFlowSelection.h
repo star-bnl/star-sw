@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.h,v 1.1 2001/02/23 00:51:39 posk Exp $
+// $Id: StFlowSelection.h,v 1.2 2001/05/14 23:04:41 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -9,8 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.h,v $
-// Revision 1.1  2001/02/23 00:51:39  posk
-// NA49 version of STAR software.
+// Revision 1.2  2001/05/14 23:04:41  posk
+// Can select PID for event plane particles. Protons not used for 1st har.
+// event plane.
 //
 // Revision 1.11  2000/09/22 22:03:01  posk
 //
@@ -34,7 +35,6 @@ class StFlowSelection : public StObject {
           StFlowSelection();
   virtual ~StFlowSelection();
 
-  Char_t* Pid();
   Char_t* PidPart();
   Int_t   Sel() const;
   Int_t   Har() const;
@@ -44,7 +44,6 @@ class StFlowSelection : public StObject {
   Bool_t  SelectPart(StFlowTrack*);
   Float_t PtMaxPart() const;
   void    PrintList() const;
-  void    SetPid(const Char_t*);
   void    SetPidPart(const Char_t*);
   void    SetPtPart(const Float_t, const Float_t);
   void    SetPPart(const Float_t, const Float_t);
@@ -60,7 +59,6 @@ class StFlowSelection : public StObject {
   
  private:
 
-  Char_t  mPid[10];                          // pi-, pi+, pi, pbar, proton, e+, e-
   Char_t  mPidPart[10];                      // PID for particles wrt plane
   Float_t mPtPart[2];                        // for parts. wrt plane
   Float_t mPPart[2];                         // for parts. wrt plane
@@ -78,8 +76,6 @@ class StFlowSelection : public StObject {
   ClassDef(StFlowSelection,1)               // macro for rootcint
 }; 
 
-inline Char_t* StFlowSelection::Pid() { return mPid; }
-
 inline Char_t* StFlowSelection::PidPart() { return mPidPart; }
 
 inline Float_t StFlowSelection::PtMaxPart() const { return mPtPart[1]; }
@@ -89,9 +85,6 @@ inline Int_t StFlowSelection::Sel() const { return mSelection; }
 inline Int_t StFlowSelection::Har() const { return mHarmonic; }
 
 inline Int_t StFlowSelection::Sub() const { return mSubevent; }
-
-inline void StFlowSelection::SetPid(const Char_t* pid)  { 
-  strncpy(mPid, pid, 9); mPid[9] = '\0'; }
 
 inline void StFlowSelection::SetPidPart(const Char_t* pid)  { 
   strncpy(mPidPart, pid, 9); mPidPart[9] = '\0'; }
