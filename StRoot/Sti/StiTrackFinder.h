@@ -1,8 +1,11 @@
 #ifndef StiTrackFinder_H
 #define StiTrackFinder_H 1
 
-#include "StiFactoryTypedefs.h"
+//#include "StiFactoryTypedefs.h"
 #include "StiConstants.h"
+
+#include "StiTrackNode.h"
+#include "StiObjectFactory.h"
 
 class StiSeedFinder;
 class StiTrackFilter;
@@ -15,6 +18,8 @@ class StiTrackFinder
 {
  public:
 
+    typedef StiObjectFactory<StiTrackNode> StiTrackNodeFactory;
+    
   //_c-tor/d-tor__________________________________________________
   StiTrackFinder();
   virtual ~StiTrackFinder();
@@ -104,7 +109,7 @@ inline  void StiTrackFinder::setMCSCalculated(bool option)
   mcsCalculated   = option; 
 }
 
-inline StiTrackNodeFactory * StiTrackFinder::getTrackNodeFactory() const
+inline StiTrackFinder::StiTrackNodeFactory * StiTrackFinder::getTrackNodeFactory() const
 {
   return  trackNodeFactory;
 }

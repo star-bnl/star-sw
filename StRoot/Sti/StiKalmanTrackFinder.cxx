@@ -32,6 +32,7 @@
  *                                                                        *
  **************************************************************************/
 
+#include "StiHit.h"
 #include "StiDetector.h"
 #include "StiDetectorContainer.h"
 #include "StiTrackContainer.h"
