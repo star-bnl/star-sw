@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.1.1.1 2000/01/27 18:54:00 fisyak Exp $
+// $Id: StTagsMaker.cxx,v 1.2 2000/02/02 21:20:55 fisyak Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.2  2000/02/02 21:20:55  fisyak
+// Remove user parametes from GetTags
+//
 // Revision 1.1.1.1  2000/01/27 18:54:00  fisyak
 // Initial revision of Tags Maker
 //
@@ -64,7 +67,7 @@ Int_t StTagsMaker::Make(){
   return kStOK;
 }
 //_____________________________________________________________________________
-EDataSetPass StTagsMaker::GetTags (St_DataSet* ds,void * )
+EDataSetPass StTagsMaker::GetTags (St_DataSet* ds)
 {
   Int_t bufsize= 64000;
   St_DataSet *newds = 0;
@@ -114,7 +117,7 @@ Int_t StTagsMaker::InitRun(int runumber) {
     if (f) {
       f->cd();
       fTree = new TTree("Tag","BFC chain Tags");
-      GetChain()->Pass(GetTags,0);
+      GetChain()->Pass(GetTags);
     }
   }
   return 0;
