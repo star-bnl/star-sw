@@ -28,6 +28,23 @@ if (level == -1){ printf("ASU/MALLOC/LEVEL=%d\n",gAsuMgr.fLogLevel);
 }
 
 /*--------------------------------------------------------------------*/
+int asuMallocCorrupt(asuAlloc_t *pa)
+{
+  asuAlloc_t *panext;
+  int ierr = 0;
+  char *pc = (char*)pa; 
+  int size = pa->size;
+  panext = pa->next;
+  if ( panext && panext->magic!=kAsuMagic ) ierr = 1;
+
+  if (pa->magic!=kAsuMagic) 			ierr +=2;
+  if ( pa->begin != kAsuBegin)                  ierr +=4;
+  if (ierr > 1 ) return ierr;
+  if ( pc[size + sizeof(asuAlloc_t)]!=kAsuLast) ierr +=8;
+  return ierr;
+}
+    
+/*--------------------------------------------------------------------*/
 void asuMallocStats(level)
 {
 asuAlloc_t *pa; char* pc;
@@ -48,12 +65,13 @@ int numb,accu,corr,size;
   numb = 0; accu = 0;
   for (pa = gAsuMain.next; pa; pa = pa->next) {/*loop over all*/ 
     pc = (char*)pa; size = pa->size;
-    corr = (pa->magic!=kAsuMagic || pc[size + sizeof(asuAlloc_t)]!=kAsuLast);
-    corr = corr & (pa->begin != kAsuBegin);
+    corr = asuMallocCorrupt(pa);
+
     if ( !corr && !gAsuMgr.fLogLevel) continue;
     numb++; accu += size;
 
     printf("%4d - %10d  ",numb,accu); asuPrintBlok(pa);
+    if (corr&1) break; /* next block is not a asuMalloc*/
   } 
 
   gAsuMgr.fEvent++;
@@ -244,15 +262,19 @@ int asuStack(void *p)
 }
 
 void asuPrintBlok(asuAlloc_t *p){
-  int corr;
   int size = p->size;
-  corr =(*((char*)p + sizeof(asuAlloc_t)+size)!=kAsuLast) ;
-  corr = corr & (p->begin != kAsuBegin);
-  gAsuMgr.fNumErr +=corr;
+  int corr = asuAlloc(p);
   printf("%p(%6d) \tEvt=%d \tFile=%s:%d "
     ,p,size,p->event,p->file,p->line);
 
-  if (corr) printf(" CORRUPTED"); printf("\n");
+  if (corr) {/*Corrupted*/
+    printf(" CORRUPTED=%d\n");
+    if (corr&1) printf(" Probably wrong pointer to next \n");
+    if (corr&2) printf(" Begining (magic) corrupted \n");
+    if (corr&4) printf(" Begining         corrupted \n");
+    if (corr&8) printf(" End              corrupted \n");}
+
+    printf("\n");
 
 }
 unsigned short int asuSumm(void *blok,int size) {
