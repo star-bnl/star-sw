@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNHitsDcaNet.cc,v 1.1 2000/04/09 16:24:51 aihong Exp $
+ * $Id: StPidAmpNHitsDcaNet.cc,v 1.2 2000/04/11 15:34:23 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNHitsDcaNet.cc,v $
+ * Revision 1.2  2000/04/11 15:34:23  aihong
+ * change to adapt dividing trks by channel for faster filling
+ *
  * Revision 1.1  2000/04/09 16:24:51  aihong
  * adding into package
  *
@@ -212,9 +215,18 @@ void StPidAmpNHitsDcaNet::fitAmp(StPidAmpTrkVector* trks,TH3D* histo){
 
      double midNhits=(mChannelInfo.cutVector())[0].midPoint();
 
-     double widthExpected =0.23*midNhits+5.99; 
+     double widthExpected;
+     if ((mChannelInfo.cutVector())[2].lowEdge()>0.1)
+       widthExpected =0.186*midNhits+6.77; //higher dca, wider the width.
+     else   widthExpected =0.23*midNhits+5.99; 
     //the less nhits, the wider. here I use a linear func
      //to describe the width change with nhits.
+
+
+     if (mParticleType.id()==2||mParticleType.id()==3)
+     widthExpected =mParticleType.maxllWidth();
+
+
 
      if ((mChannelInfo.cutVector())[2].lowEdge()>0.1 && (mParticleType.id() == 14 || mParticleType.id()==15) ) 
        centerExpected=maxPoint(ampGraph(),false);

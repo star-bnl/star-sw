@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannel.cc,v 1.2 2000/04/09 16:16:33 aihong Exp $
+ * $Id: StPidAmpChannel.cc,v 1.3 2000/04/11 15:34:23 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannel.cc,v $
+ * Revision 1.3  2000/04/11 15:34:23  aihong
+ * change to adapt dividing trks by channel for faster filling
+ *
  * Revision 1.2  2000/04/09 16:16:33  aihong
  * change for adapting NHitsDcaNet added
  *
@@ -63,13 +66,16 @@ StPidAmpChannel::StPidAmpChannel(StPidAmpChannelInfo& channelInfo,StPidAmpNetTyp
     mChannelInfo =channelInfo;
 
     setUp(netType); //setup nets.
+     mTrks= new StPidAmpTrkVector();
+
 
 }
 
 
 
+/*
 //----------------------------------
-void StPidAmpChannel::fillChannel(StPidAmpTrkVector* trks){
+void StPidAmpChannel::fillChannel(){
 
 
      StPidAmpNetIter iter;
@@ -77,12 +83,12 @@ void StPidAmpChannel::fillChannel(StPidAmpTrkVector* trks){
 
      for (iter=mNetCollect->begin(); iter!=mNetCollect->end(); iter++){
           theNet=*iter;
-          theNet->fillNet(trks);
+          theNet->fillNet(mTrks);
      }
   
 
 }
-
+*/
 
 //----------------------------------
 void StPidAmpChannel::drawFittings(){
@@ -105,7 +111,6 @@ void StPidAmpChannel::drawFittings(){
      ((*mNetCollect)[j])->bandGraph()->Draw("A*");
   }//note that idex of pads of canvas begin with 1.
    //but our mNetCollect begin with 0.
-
   theBandFitCanvas->cd();
   if (saveCanvas) theBandFitCanvas->SaveAs("");
 
@@ -147,7 +152,7 @@ void StPidAmpChannel::drawFittings(){
 
 
 //----------------------------------
-void StPidAmpChannel::fillBGNet(StPidAmpTrkVector* trks, StPidAmpChannelCollection* set){
+void StPidAmpChannel::fillBGNet(StPidAmpChannelCollection* set){
 
 
      StPidAmpNetIter iter;
@@ -155,7 +160,7 @@ void StPidAmpChannel::fillBGNet(StPidAmpTrkVector* trks, StPidAmpChannelCollecti
  
      for (iter=mNetCollect->begin(); iter!=mNetCollect->end(); iter++){
           theNet=*iter;
-          theNet->fillBetaGammaNet(trks,set);
+          theNet->fillBetaGammaNet(mTrks,set);
      }
      
 }
@@ -180,7 +185,7 @@ void StPidAmpChannel::setBandParams4Nets(StPidParamVector& pars){
 
 }
 //----------------------------------
-void StPidAmpChannel::processChannel(StPidAmpTrkVector* trks,TH3D* histo,bool fitBd, bool fitPth, bool fitAp, bool fitLr){
+void StPidAmpChannel::processChannel(TH3D* histo,bool fitBd, bool fitPth, bool fitAp, bool fitLr){
   //assume getagamma fittings has finished.
 
      StPidAmpNetIter iter;
@@ -192,7 +197,7 @@ void StPidAmpChannel::processChannel(StPidAmpTrkVector* trks,TH3D* histo,bool fi
           theNet->setFitAmp(fitAp);
           theNet->setFitReso(fitLr);
 
-          theNet->processNet(trks,histo);
+          theNet->processNet(mTrks,histo);
      }
 
       drawFittings();
@@ -313,7 +318,19 @@ void StPidAmpChannel::fillChannelInfoOut(){
      mChannelInfoOut.SetDcaRange(((mChannelInfo.cutVector())[2]).lowEdge(),((mChannelInfo.cutVector())[2]).highEdge());
 
 }
+//---------------------------------
+void StPidAmpChannel::filterAndFillTrks(StPidAmpTrkVector* trks){
+    StPidAmpTrkIter iter;
+    StPidAmpTrk* thisTrack;
 
+ for (iter=trks->begin(); iter!=trks->end(); iter++){
+   thisTrack=*iter;
+   if  (mChannelInfo.isInChannel(thisTrack))
+       mTrks->push_back(thisTrack);
+ }
+
+
+}
 
 //----------------------------------
 ostream& operator<<(ostream& s, StPidAmpChannel& channel){

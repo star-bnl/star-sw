@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNHitsNet.cc,v 1.1.1.1 2000/03/09 17:48:34 aihong Exp $
+ * $Id: StPidAmpNHitsNet.cc,v 1.2 2000/04/11 15:34:23 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNHitsNet.cc,v $
+ * Revision 1.2  2000/04/11 15:34:23  aihong
+ * change to adapt dividing trks by channel for faster filling
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:34  aihong
  * Installation of package
  *
@@ -207,12 +210,20 @@ void StPidAmpNHitsNet::fitAmp(StPidAmpTrkVector* trks,TH3D* histo){
 
      
      double centerExpected=fabs(mParticleType.maxllPeakPos());
-     double widthExpected =mParticleType.maxllWidth();
+     //     double widthExpected =mParticleType.maxllWidth();
+     double widthExpected=0.23*((mChannelInfo.cutVector())[0].midPoint())+4.99;
+
+     if (mParticleType.id()==2||mParticleType.id()==3)
+     widthExpected =mParticleType.maxllWidth();
 
 
-     if (mParticleType.id()==2||mParticleType.id()==3) 
-     centerExpected=maxPoint(ampGraph(),false);//electron's amp center has strong dependence of NHits.
-
+     if (mParticleType.id()==2 || 
+         mParticleType.id()==3 ||
+         mParticleType.id()==14 ||
+         mParticleType.id()==15 ) 
+     centerExpected=maxPoint(ampGraph(),false);
+   //electron's amp center has strong dependence of NHits.
+     //so does proton and antiproton.
 
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNet.cc,v 1.3 2000/04/09 16:17:29 aihong Exp $
+ * $Id: StPidAmpNet.cc,v 1.4 2000/04/11 15:34:23 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNet.cc,v $
+ * Revision 1.4  2000/04/11 15:34:23  aihong
+ * change to adapt dividing trks by channel for faster filling
+ *
  * Revision 1.3  2000/04/09 16:17:29  aihong
  * screen out bad pion region for band fitting
  *
@@ -630,7 +633,7 @@ void StPidAmpNet::pushATrk(StPidAmpTrk* theTrack,StPidAmpChannelCollection* set)
     double dedx;
                    
 
- if ( (mChannelInfo.isInChannel(theTrack)) && (fabs(theTrack->rig())>fabs(mParticleType.start())) && (fabs(theTrack->rig())<fabs(mParticleType.end())) ){
+ if ( (fabs(theTrack->rig())>fabs(mParticleType.start())) && (fabs(theTrack->rig())<fabs(mParticleType.end())) ){
    //channel bound checking and band bound checking
 
     if (!set){

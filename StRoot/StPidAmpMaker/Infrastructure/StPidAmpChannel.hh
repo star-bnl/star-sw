@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannel.hh,v 1.2 2000/04/09 16:46:05 aihong Exp $
+ * $Id: StPidAmpChannel.hh,v 1.3 2000/04/11 15:34:23 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannel.hh,v $
+ * Revision 1.3  2000/04/11 15:34:23  aihong
+ * change to adapt dividing trks by channel for faster filling
+ *
  * Revision 1.2  2000/04/09 16:46:05  aihong
  * change for adapting NHitsDcaNet added
  *
@@ -53,15 +56,17 @@ public:
 
       ~StPidAmpChannel();
 
-  void fillChannel(StPidAmpTrkVector* trks); //fill trks into mNetCollect.
+
+
   void drawFittings(); //draw bandFits and ampFits.
-  void fillBGNet(StPidAmpTrkVector* trks,StPidAmpChannelCollection* set);
+  void filterAndFillTrks(StPidAmpTrkVector* trks); //pick up trks in this channel
+  void fillBGNet(StPidAmpChannelCollection* set);
   void setBandParams4Nets(StPidParamVector& pars);
 
   void setBandFitsDraw(bool br);
   void setAmpFitsDraw(bool br);
   void setResoFitsDraw(bool br);
-  void processChannel(StPidAmpTrkVector* trks,TH3D* histo,bool fitBd, bool fitPth, bool fitAp, bool fitLr);
+  void processChannel(TH3D* histo,bool fitBd, bool fitPth, bool fitAp, bool fitLr);
 
   StPidAmpNetVector* netVector();
   StPidAmpChannelInfoOut channelInfoOut() const;
@@ -74,7 +79,10 @@ private:
       void setUp(StPidAmpNetType netType); //set nets. called by constructor
       void fillChannelInfoOut(); //fill mChannelInfoOut for out put to disk.
 
+  // void fillChannel();//fill  mTrks into mNetCollect.
+
       StPidAmpNetVector* mNetCollect;
+      StPidAmpTrkVector* mTrks;
 
       StPidAmpChannelInfo    mChannelInfo;
       StPidAmpChannelInfoOut mChannelInfoOut;
