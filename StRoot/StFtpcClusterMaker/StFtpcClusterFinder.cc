@@ -1,6 +1,11 @@
-// $Id: StFtpcClusterFinder.cc,v 1.15 2001/04/02 12:10:11 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.16 2001/04/19 11:32:39 oldi Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.16  2001/04/19 11:32:39  oldi
+// Reject clusters with x = 0. and y = 0.
+// This is just to avoid a crash in StFtpcTrackMaker but the origin of the problem
+// is in the FTPC slow simulator.
+//
 // Revision 1.15  2001/04/02 12:10:11  jcs
 // get FTPC calibrations,geometry from MySQL database and code parameters
 // from StarDb/ftpc
@@ -44,6 +49,7 @@
 
 #include <iostream.h>
 #include <stdlib.h>
+#include "StMessMgr.h"
 #include "StFtpcClusterFinder.hh"
 #include "StFtpcTrackMaker/StFtpcPoint.hh"
 #include "math_constants.h"
@@ -1150,9 +1156,16 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 #endif
 	}
 
+      if (Peak->x == 0. && Peak->y == 0.) {
+	// This if-statement can be deleted as soon as the slow simulator is fixed.
+	gMessMgr->Message("Hit rejected because of an error in the FTPC slow simulator. (x, y, z) = (0. ,0., z)", "W", "OST");
+      }
 
       if(!isnan(Peak->x) && !isnan(Peak->y) && !isnan(Peak->PadSigma) &&
-!isnan(Peak->TimeSigma))// && Peak->PeakHeight>=mParam->minimumClusterMaxADC())
+!isnan(Peak->TimeSigma) // && Peak->PeakHeight>=mParam->minimumClusterMaxADC())
+	 && Peak->x != 0. && Peak->y != 0.) // This line was added to avoid a problem of the slow simulator.
+	                                    // It can be removed as soon as the slow simulator does not produce
+                                            // hits lying on the beam axis anymore.
 	{
 	  // create new point
 	  Int_t numPoint = mPoint->GetEntriesFast();
@@ -1578,11 +1591,19 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 #endif
 	    }
 	  
+	  if (Peak[iPeakIndex].x == 0. && Peak[iPeakIndex].y == 0.) {
+	    // This if-statement can be deleted as soon as the slow simulator is fixed.
+	    gMessMgr->Message("Hit rejected because of an error in the FTPC slow simulator. (x, y, z) = (0. ,0., z)", "W", "OST");
+	  }
+	  
 	  /* in very complicated clusters some hits may have been unfolded
 	     with errors while the rest of the cluster is okay, don't fill 
 	     these hits into array: */
 	  if(!isnan(Peak[iPeakIndex].x) && !isnan(Peak[iPeakIndex].y) &&
-!isnan(Peak[iPeakIndex].PadSigma) && !isnan(Peak[iPeakIndex].TimeSigma))// && Peak[iPeakIndex].PeakHeight>=mParam->minimumClusterMaxADC())
+!isnan(Peak[iPeakIndex].PadSigma) && !isnan(Peak[iPeakIndex].TimeSigma) // && Peak[iPeakIndex].PeakHeight>=mParam->minimumClusterMaxADC())
+	     && Peak[iPeakIndex].x != 0. && Peak[iPeakIndex].y != 0.) // This line was added to avoid a problem of the slow simulator.
+	                                                              // It can be removed as soon as the slow simulator does not produce
+	                                                              // hits lying on the beam axis anymore.
 	    {
 	      // create new point
 	      Int_t numPoint = mPoint->GetEntriesFast();
