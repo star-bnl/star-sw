@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.21 2002/12/02 21:20:14 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.22 2003/01/17 23:02:25 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.22  2003/01/17 23:02:25  suaide
+// small modification
+//
 // Revision 1.21  2002/12/02 21:20:14  suaide
 // modifications for new DB scheme
 //
@@ -105,6 +108,8 @@ class StEmcADCtoEMaker : public StMaker
            StEmcDecoder      *mDecoder;          
 					 StBemcData        *mData;                      
            StEmcGeom         *mGeo[MAXDET]; 
+           
+           Bool_t            mEmbedd;
 					 
 					 
            void              zeroAll(); ///< Zero all temporary vectors
@@ -131,7 +136,7 @@ class StEmcADCtoEMaker : public StMaker
            StEmcCollection*  getEmcCollection() {return mEmc;} ///< Return emcCollection
            StBemcData*       getBemcData()      {return mData;} ///< Return BemcData pointer
 					 void              clearStEventStaf() {mEmc = NULL;} ///< Clear emcCollection (does not delete from memory)
-         
+           void              setEmbeddingMode(Bool_t a) {mEmbedd = a; } ///< Set embedding mode (default is kFALSE)
    ClassDef(StEmcADCtoEMaker, 1)  
 };
 
