@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.3 2003/09/17 19:57:48 tonko Exp $
+ * $Id: FCFMaker.cxx,v 1.4 2003/09/19 15:48:13 tonko Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.4  2003/09/19 15:48:13  tonko
+ * Skip row 13. Charge cut is default.
+ *
  * Revision 1.3  2003/09/17 19:57:48  tonko
  * Changed name of the class from DaqClf to RTSClientFCF
  *
@@ -339,6 +342,9 @@ Int_t StRTSClientFCFMaker::Make()
     memset(fcf_resptr,0,sizeof(fcf_resptr)) ;
 
     for(int r=44;r>=0;r--) {
+      // skip row 13!
+      if(r==12) continue ;
+
       // does both Gain & T0 corrections (depending on flags)
       getGainCorrections(sectorIdx, r);     // places corrections into fcf->gainCorr[1...lastpad]
 
@@ -436,7 +442,6 @@ Int_t StRTSClientFCFMaker::Make()
 	  }
 	}
 
-	fcf->chargeMin = 1 ;
 	u_int words = fcf->finder((u_char *)croat_adc, 
 				  (u_short *)croat_cpp, 
 				  (u_int *)res_ptr);
