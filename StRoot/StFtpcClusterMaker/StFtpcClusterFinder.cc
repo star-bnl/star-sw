@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.55 2004/01/28 01:41:13 jeromel Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.56 2004/01/28 02:04:43 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.56  2004/01/28 02:04:43  jcs
+// replace all instances of StFtpcReducedPoint and StFtpcPoint with StFtpcConfMapPoint
+//
 // Revision 1.55  2004/01/28 01:41:13  jeromel
 // Change OST to OS everywhere since defaultoption is now not to print
 // the date.
@@ -177,7 +180,7 @@
 #include <stdlib.h>
 #include "StMessMgr.h"
 #include "StFtpcClusterFinder.hh"
-#include "StFtpcTrackMaker/StFtpcPoint.hh"
+#include "StFtpcTrackMaker/StFtpcConfMapPoint.hh"
 #include "math_constants.h"
 #include <math.h>
 #include "TH1.h"
@@ -1295,8 +1298,8 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	  Int_t numPoint = mPoint->GetEntriesFast();
 	  if (numPoint >= mPoint->GetSize()) mPoint->Expand(mPoint->GetSize()+5000);
 
-	  mPoint->AddAt(new StFtpcPoint(), numPoint);
-	  StFtpcPoint *thispoint = (StFtpcPoint *) mPoint->At(numPoint);
+	  mPoint->AddAt(new StFtpcConfMapPoint(), numPoint);
+	  StFtpcConfMapPoint *thispoint = (StFtpcConfMapPoint *) mPoint->At(numPoint);
 
 	  thispoint->SetPadRow(iRow+1);           
 	  thispoint->SetSector(iSec+1);
@@ -1753,8 +1756,8 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	      Int_t numPoint = mPoint->GetEntriesFast();
 	      if (numPoint >= mPoint->GetSize()) mPoint->Expand(mPoint->GetSize()+5000);
 	      
-	      mPoint->AddAt(new StFtpcPoint(), numPoint);
-	      StFtpcPoint *thispoint = (StFtpcPoint *) mPoint->At(numPoint);
+	      mPoint->AddAt(new StFtpcConfMapPoint(), numPoint);
+	      StFtpcConfMapPoint *thispoint = (StFtpcConfMapPoint *) mPoint->At(numPoint);
 	      
 	      thispoint->SetPadRow(iRow+1);           
 	      thispoint->SetSector(iSec+1);

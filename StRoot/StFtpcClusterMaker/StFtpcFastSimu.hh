@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.hh,v 1.15 2003/10/10 12:36:15 jcs Exp $
+// $Id: StFtpcFastSimu.hh,v 1.16 2004/01/28 02:04:43 jcs Exp $
 //
 // $Log: StFtpcFastSimu.hh,v $
+// Revision 1.16  2004/01/28 02:04:43  jcs
+// replace all instances of StFtpcReducedPoint and StFtpcPoint with StFtpcConfMapPoint
+//
 // Revision 1.15  2003/10/10 12:36:15  jcs
 // implement new FTPC geant volume id method
 // initialize counters and arrays to zero
@@ -58,7 +61,7 @@
 #include "fcl_fppoint.h"
 #include "TObjArray.h"
 #include "StFtpcGeantPoint.hh"
-#include "StFtpcReducedPoint.hh"
+#include "StFtpcTrackMaker/StFtpcConfMapPoint.hh"
 
 #define TRUE 1
 #define FALSE 0
@@ -74,7 +77,7 @@ class StFtpcFastSimu
   StFtpcParamReader *mParam;
   StFtpcDbReader    *mDb;
   StFtpcGeantReader *mGeant;
-  StFtpcReducedPoint *mPoint;
+  StFtpcConfMapPoint *mPoint;
   StFtpcGeantPoint *mGeantPoint;
 
   Char_t mStart;  //  start of simple variables
