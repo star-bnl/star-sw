@@ -1,5 +1,8 @@
-// $Id: St_TableNtuple.h,v 1.4 1999/02/18 15:26:10 genevb Exp $
+// $Id: St_TableNtuple.h,v 1.5 1999/02/19 21:13:30 genevb Exp $
 // $Log: St_TableNtuple.h,v $
+// Revision 1.5  1999/02/19 21:13:30  genevb
+// Fixed const problems for pickier compilers
+//
 // Revision 1.4  1999/02/18 15:26:10  genevb
 // Updated help, table name defaults to dataset name
 //
@@ -72,7 +75,7 @@ class St_TableNtuple : public TTree {
    virtual    void Browse(TBrowser *b);
    virtual   Int_t Fill(const St_Table &table, Int_t firstRow=0, Int_t nRows=-1);
    virtual   Int_t GetNvar() const { return mNvar; }
-   virtual Char_t* GetStTableClassName() const { return mTableClass.Data(); }
+   virtual   const Char_t* GetStTableClassName() const { return mTableClass.Data(); }
    virtual TClass* GetTableClass() const { return mClassPtr; }
    virtual    void PrintInfo();
    ClassDef(St_TableNtuple,1)

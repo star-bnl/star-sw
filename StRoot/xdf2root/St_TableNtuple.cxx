@@ -1,5 +1,8 @@
-// $Id: St_TableNtuple.cxx,v 1.4 1999/02/18 15:26:09 genevb Exp $
+// $Id: St_TableNtuple.cxx,v 1.5 1999/02/19 21:13:29 genevb Exp $
 // $Log: St_TableNtuple.cxx,v $
+// Revision 1.5  1999/02/19 21:13:29  genevb
+// Fixed const problems for pickier compilers
+//
 // Revision 1.4  1999/02/18 15:26:09  genevb
 // Updated help, table name defaults to dataset name
 //
@@ -271,7 +274,7 @@ Int_t St_TableNtuple::Fill(const St_Table &table, Int_t firstRow, Int_t nRows) {
 //
   Int_t j;
   Int_t i;
-  void *pointer;
+  Int_t pointer;
   Int_t thisRow;
   Int_t rowSize = (Int_t) table.GetRowSize();
   Int_t tRows = table.GetNRows();
@@ -351,7 +354,7 @@ void St_TableNtuple::LearnTable(const St_Table &table, Bool_t buildTree, Int_t b
   mOffset = new Int_t[rowSize];
   Int_t *pvars = new Int_t[(rowSize+1)];
   Char_t **ty = new Char_t*[rowSize];
-  Char_t *types;
+  const Char_t *types;
   Char_t *varname;
   Char_t varlist[1000];
   Char_t vartemp[80];
@@ -447,7 +450,7 @@ void St_TableNtuple::LearnTable(const St_Table &table, Bool_t buildTree, Int_t b
 //_____________________________________________________________________________
 void St_TableNtuple::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_TableNtuple.cxx,v 1.4 1999/02/18 15:26:09 genevb Exp $\n");
+  printf("* $Id: St_TableNtuple.cxx,v 1.5 1999/02/19 21:13:29 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("* Using %d columns from table with:\n",mNvar);
   printf("*   Name: %s\n",GetName());
