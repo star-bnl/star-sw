@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.90 2004/05/31 20:09:37 oldi Exp $
+// $Id: StFlowMaker.cxx,v 1.91 2004/08/18 00:19:19 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -221,7 +221,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.90 2004/05/31 20:09:37 oldi Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.91 2004/08/18 00:19:19 oldi Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -607,17 +607,58 @@ void StFlowMaker::FillFlowEvent() {
 	pFlowTrack->SetDca(pTrack->impactParameter());
 	pFlowTrack->SetDcaGlobal(gTrack->impactParameter());
 	pFlowTrack->SetChi2((Float_t)(pTrack->fitTraits().chi2()));
-	pFlowTrack->SetFitPts(pTrack->fitTraits().numberOfFitPoints());
-	pFlowTrack->SetMaxPts(pTrack->numberOfPossiblePoints());
+	pFlowTrack->SetTopologyMap(pTrack->topologyMap());
 
+	pFlowTrack->SetNhits(pTrack->detectorInfo()->numberOfPoints());
+	pFlowTrack->SetFitPts(pTrack->fitTraits().numberOfFitPoints() -
+			      pTrack->fitTraits().numberOfFitPoints(kSvtId) -
+			      pTrack->fitTraits().numberOfFitPoints(kSsdId) - 1); // remove additional vertex point
+	pFlowTrack->SetMaxPts(pTrack->numberOfPossiblePoints() -
+			      pTrack->numberOfPossiblePoints(kSvtId) -
+			      pTrack->numberOfPossiblePoints(kSsdId) - 1); // remove additional vertex point
+	
 	Double_t pathLength = gTrack->geometry()->helix().pathLength(vertex);
 	StThreeVectorD distance = gTrack->geometry()->helix().at(pathLength);
 	pFlowTrack->SetDcaGlobal3(distance - vertex);
 
 	pFlowTrack->SetTrackLength(pTrack->length());
-	pFlowTrack->SetNhits(pTrack->detectorInfo()->numberOfPoints(kTpcId));
-	pFlowTrack->SetZFirstPoint(pTrack->detectorInfo()->firstPoint().z());
-	pFlowTrack->SetZLastPoint(pTrack->detectorInfo()->lastPoint().z());
+
+	if (pTrack->topologyMap().hasHitInDetector(kFtpcEastId) || pTrack->topologyMap().hasHitInDetector(kFtpcWestId)) { // FTPC track: first and last point are within these detectors
+	  pFlowTrack->SetZFirstPoint(pTrack->detectorInfo()->firstPoint().z());
+	  pFlowTrack->SetZLastPoint(pTrack->detectorInfo()->lastPoint().z());
+	}
+	
+	else if (pTrack->topologyMap().hasHitInDetector(kTpcId)) { // TPC track
+	  Double_t innerFieldCageRadius = 46.107;
+	  Double_t innerPadrowRadius = 60.0;
+	  Double_t x, y;
+	  
+	  pFlowTrack->SetZLastPoint(pTrack->detectorInfo()->lastPoint().z()); 
+
+	  x = pTrack->detectorInfo()->firstPoint().x();
+	  y = pTrack->detectorInfo()->firstPoint().y();
+	  if (TMath::Sqrt(x*x+y*y) >= innerFieldCageRadius) { // track starts in TPC
+	    pFlowTrack->SetZFirstPoint(pTrack->detectorInfo()->firstPoint().z()); 
+	  } else { // track starts before TPC: calculate first TPC point
+	    pairD pathL = pTrack->geometry()->helix().pathLength(innerPadrowRadius);
+	    
+	    Double_t s = 0.;
+	    Double_t s1 = pathL.first;
+	    Double_t s2 = pathL.second;
+	    
+	    // Selects positive path length to project track forward along its helix relative to
+	    // first point of track. The smaller solution is taken when both are positive.
+	    
+	    if (finite(s1) != 0 || finite(s2) != 0) { // track could be projected
+	      if (s1 >= 0 && s2 >= 0) s = s1;
+	      else if (s1 >= 0 && s2 < 0) s = s1;
+	      else if (s1 < 0 && s2 >= 0) s = s2;
+	      pFlowTrack->SetZFirstPoint(pTrack->geometry()->helix().z(s));
+	    } else { // no projection possible
+	      pFlowTrack->SetZFirstPoint(0.);
+	    }
+	  }
+	}
 	
 	pTrack->pidTraits(tpcDedxAlgo);       // initialize
 	nSigma = (float)tpcDedxAlgo.numberOfSigma(StPionPlus::instance());
@@ -641,8 +682,6 @@ void StFlowMaker::FillFlowEvent() {
 	pFlowTrack->SetPidElectron(nSigma);
 	nSigma = (float)tpcDedxAlgo.numberOfSigma(StPositron::instance());
 	pFlowTrack->SetPidPositron(nSigma);
-
-	pFlowTrack->SetTopologyMap(pTrack->topologyMap());
 	
 	// dE/dx
 	StPtrVecTrackPidTraits traits = pTrack->pidTraits(kTpcId);
@@ -787,6 +826,9 @@ void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
     pFlowTrack->SetChi2( pParticle->ChiSquaredXY() );
     pFlowTrack->SetFitPts( pParticle->NHits() );
     pFlowTrack->SetMaxPts( pParticle->NHitsPossible() );
+    cout << "pParticle->NHits(), pParticle->NHitsPossible() in StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) might be wrong!" << endl;
+    cout << "(MuDst, StEvent were changed and nFitPts might be different from nHits.)" << endl;
+    cout << "Whoever uses them, check it, please!" << endl;
     // PID
     pFlowTrack->SetPidPiPlus( pParticle->NSigmaPion() );
     pFlowTrack->SetPidPiMinus( pParticle->NSigmaPion() );
@@ -901,7 +943,7 @@ void StFlowMaker::FillPicoEvent() {
     pFlowPicoTrack->SetZFirstPoint(pFlowTrack->ZFirstPoint());
     pFlowPicoTrack->SetZLastPoint(pFlowTrack->ZLastPoint());
     pFlowPicoTrack->SetChi2(pFlowTrack->Chi2());
-    pFlowPicoTrack->SetFitPts(pFlowTrack->FitPts());
+    pFlowPicoTrack->SetFitPts(pFlowTrack->FitPts() + 1); // add additional vertex point
     pFlowPicoTrack->SetMaxPts(pFlowTrack->MaxPts());
     pFlowPicoTrack->SetNhits(pFlowTrack->Nhits());
     pFlowPicoTrack->SetNdedxPts(pFlowTrack->NdedxPts());
@@ -1082,7 +1124,7 @@ Bool_t StFlowMaker::FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetDca(pPicoTrack->Dca());
       pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
       pFlowTrack->SetChi2(pPicoTrack->Chi2());
-      pFlowTrack->SetFitPts(pPicoTrack->FitPts());
+      pFlowTrack->SetFitPts(pPicoTrack->FitPts() - 1); // remove additional vertex point
       pFlowTrack->SetMaxPts(pPicoTrack->MaxPts());
       pFlowTrack->SetNhits(pPicoTrack->Nhits());
       pFlowTrack->SetNdedxPts(pPicoTrack->NdedxPts());
@@ -1214,7 +1256,7 @@ Bool_t StFlowMaker::FillFromPicoVersion5DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetDca(pPicoTrack->Dca());
       pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
       pFlowTrack->SetChi2(pPicoTrack->Chi2());
-      pFlowTrack->SetFitPts(pPicoTrack->FitPts());
+      pFlowTrack->SetFitPts(pPicoTrack->FitPts() - 1); // remove additional vertex point
       pFlowTrack->SetMaxPts(pPicoTrack->MaxPts());
       pFlowTrack->SetNhits(pPicoTrack->Nhits());
       pFlowTrack->SetNdedxPts(pPicoTrack->NdedxPts());
@@ -1349,7 +1391,7 @@ Bool_t StFlowMaker::FillFromPicoVersion6DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetDca(pPicoTrack->Dca());
       pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
       pFlowTrack->SetChi2(pPicoTrack->Chi2());
-      pFlowTrack->SetFitPts(pPicoTrack->FitPts());
+      pFlowTrack->SetFitPts(pPicoTrack->FitPts() - 1); // remove additional vertex point
       pFlowTrack->SetMaxPts(pPicoTrack->MaxPts());
       pFlowTrack->SetNhits(pPicoTrack->Nhits());
       pFlowTrack->SetNdedxPts(pPicoTrack->NdedxPts());
@@ -1490,7 +1532,7 @@ Bool_t StFlowMaker::FillFromPicoVersion7DST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetDca(pPicoTrack->Dca());
       pFlowTrack->SetDcaGlobal(pPicoTrack->DcaGlobal());
       pFlowTrack->SetChi2(pPicoTrack->Chi2());
-      pFlowTrack->SetFitPts(pPicoTrack->FitPts());
+      pFlowTrack->SetFitPts(pPicoTrack->FitPts() - 1); // remove additional vertex point
       pFlowTrack->SetMaxPts(pPicoTrack->MaxPts());
       pFlowTrack->SetNhits(pPicoTrack->Nhits());
       pFlowTrack->SetNdedxPts(pPicoTrack->NdedxPts());
@@ -1712,23 +1754,65 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
       pFlowTrack->SetPhiGlobal(pMuGlobalTrack->phi());
       pFlowTrack->SetEta(pMuTrack->eta());
       pFlowTrack->SetEtaGlobal(pMuGlobalTrack->eta());
-      pFlowTrack->SetZFirstPoint(pMuTrack->firstPoint().z());
-      pFlowTrack->SetZLastPoint(pMuTrack->lastPoint().z());
       pFlowTrack->SetDedx(pMuTrack->dEdx());
       pFlowTrack->SetCharge(pMuTrack->charge());
       pFlowTrack->SetDcaSigned(CalcDcaSigned(pMuEvent->primaryVertexPosition(),pMuTrack->helix()));
       pFlowTrack->SetDca(pMuTrack->dca().mag());
       pFlowTrack->SetDcaGlobal(pMuTrack->dcaGlobal().mag());
       pFlowTrack->SetChi2(pMuTrack->chi2xy()); 
-      pFlowTrack->SetFitPts(pMuTrack->nHitsFit());
-      pFlowTrack->SetMaxPts(pMuTrack->nHitsPoss()); 
+      pFlowTrack->SetTopologyMap(pMuTrack->topologyMap());
+      
       pFlowTrack->SetNhits(pMuTrack->nHits());
+      pFlowTrack->SetFitPts(pMuTrack->nHitsFit() - 
+			    pMuTrack->nHitsFit(kSvtId) -
+			    pMuTrack->nHitsFit(kSsdId) - 1); // remove additional vertex point
+      pFlowTrack->SetMaxPts(pMuTrack->nHitsPoss() -
+			    pMuTrack->nHitsPoss(kSvtId) -
+			    pMuTrack->nHitsPoss(kSsdId) - 1); // remove additional vertex point 
+
       pFlowTrack->SetNdedxPts(pMuTrack->nHitsDedx());
       pFlowTrack->SetDcaGlobal3(pMuTrack->dcaGlobal());
       pFlowTrack->SetTrackLength(pMuTrack->helix().pathLength(pMuEvent->primaryVertexPosition())); //???
 
+      if (pFlowTrack->TopologyMap().hasHitInDetector(kFtpcEastId) || pFlowTrack->TopologyMap().hasHitInDetector(kFtpcWestId)) { // FTPC track: first and last point are within these detectors
+	pFlowTrack->SetZFirstPoint(pMuTrack->firstPoint().z());
+	pFlowTrack->SetZLastPoint(pMuTrack->lastPoint().z());
+      }
+      
+      else if (pFlowTrack->TopologyMap().hasHitInDetector(kTpcId)) { // TPC track
+	Double_t innerFieldCageRadius = 46.107;
+	Double_t innerPadrowRadius = 60.0;
+	Double_t x, y;
+	
+	pFlowTrack->SetZLastPoint(pMuTrack->lastPoint().z()); 
+	
+	x = pMuTrack->firstPoint().x();
+	y = pMuTrack->firstPoint().y();
+	if (TMath::Sqrt(x*x+y*y) >= innerPadrowRadius) { // track starts in TPC
+	  pFlowTrack->SetZFirstPoint(pMuTrack->firstPoint().z()); 
+	} else { // track starts before TPC: calculate first TPC point
+	  pairD pathL = pMuTrack->helix().pathLength(innerPadrowRadius);
+	  
+	  Double_t s = 0.;
+	  Double_t s1 = pathL.first;
+	  Double_t s2 = pathL.second;
+	  
+	  // Selects positive path length to project track forward along its helix relative to
+	  // first point of track. The smaller solution is taken when both are positive.
+	  
+	  if (finite(s1) != 0 || finite(s2) != 0) { // track could be projected
+	    if (s1 >= 0 && s2 >= 0) s = s1;
+	    else if (s1 >= 0 && s2 < 0) s = s1;
+	    else if (s1 < 0 && s2 >= 0) s = s2;
+	    pFlowTrack->SetZFirstPoint(pMuTrack->helix().z(s));
+	  } else { // no projection possible
+	    pFlowTrack->SetZFirstPoint(0.);
+	  }
+	}
+      }
+      
       if (StuProbabilityPidAlgorithm::isPIDTableRead()) {
-
+	
   uPid.processPIDAsFunction(uPid.getCentrality(pMuEvent->refMultNeg()),
 		    pMuTrack->dcaGlobal().mag(),
 		    pMuTrack->charge(),
@@ -1819,12 +1903,6 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
         pFlowTrack->SetPidPositron(pMuTrack->nSigmaElectron());
       }
 
-
-
-
-
-      pFlowTrack->SetTopologyMap(pMuTrack->topologyMap());
-    
       pFlowEvent->TrackCollection()->push_back(pFlowTrack);
       goodTracks++;
       
@@ -2035,6 +2113,31 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.91  2004/08/18 00:19:19  oldi
+// Several changes were necessary to comply with latest changes of MuDsts and StEvent:
+//
+// nHits, nFitPoints, nMaxPoints
+// -----------------------------
+// From now on
+//  - the fit points used in StFlowMaker are the fit points within the TPC xor FTPC (vertex excluded).
+//  - the max. possible points used in StFlowMAker are the max. possible points within the TPC xor FTPC (vertex excluded).
+//  - the number of points (nHits; not used for analyses so far) are the total number of points on a track, i. e.
+//    TPC + SVT + SSD + FTPCeast + FTPCwest [reading from HBT event gives a warning, but it seems like nobody uses it anyhow].
+// - The fit/max plot (used to be (fit-1)/max) was updated accordingly.
+// - The default cuts for fit points were changed (only for the FTPC, since TPC doesn't set default cuts).
+// - All these changes are backward compatible, as long as you change your cuts for the fit points by 1 (the vertex used to
+//   be included and is not included anymore). In other words, your results won't depend on old or new MuDst, StEvent,
+//   PicoDsts as long as you use the new flow software (together with the latest MuDst and StEvent software version).
+// - For backward compatibility reasons the number of fit points which is written out to the flowpicoevent.root file
+//   includes the vertex. It is subtracted internally while reading back the pico files. This is completely hidden from the
+//   user.
+//
+// zFirstPoint
+// -----------
+// The positions of the first point of tracks which have points in the TPC can lie outside of the TPC (the tracks can start in
+// the SVT or SSD now). In this case, the first point of the track is obtained by extrapolating the track helix to the inner
+// radius of the TPC.
+//
 // Revision 1.90  2004/05/31 20:09:37  oldi
 // PicoDst format changed (Version 7) to hold ZDC SMD information.
 // Trigger cut modified to comply with TriggerCollections.
