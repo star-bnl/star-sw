@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofSlat.h,v 2.8 2003/07/28 21:00:22 ullrich Exp $
+ * $Id: StTofSlat.h,v 2.9 2004/02/05 17:58:51 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, Dec 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofSlat.h,v $
+ * Revision 2.9  2004/02/05 17:58:51  ullrich
+ * Changed $LINK to StLink mechanism.
+ *
  * Revision 2.8  2003/07/28 21:00:22  ullrich
  * Revised version: new but not inheriting from StHit as before.
  *
@@ -39,6 +42,7 @@
 
 #include "StObject.h"
 #include "StThreeVectorF.hh"
+#include "StContainers.h"
 class StTrack;
 
 class StTofSlat : public StObject {
@@ -74,13 +78,18 @@ protected:
     UShort_t  mSlatIndex;
     UShort_t  mAdc;
     UShort_t  mTdc;
-    StTrack  *mAssociatedTrack; //$LINK
+    // StTrack  *mAssociatedTrack; //$LINK
+#ifdef __CINT__
+    StObjLink        mAssociatedTrack;		
+#else
+    StLink<StTrack>  mAssociatedTrack;		
+#endif //__CINT__
     Float_t   mZhit;
     UShort_t  mHitProf;
     UShort_t  mMatchFlag;
     StThreeVectorF mPosition;
 
-    ClassDef(StTofSlat,3)
+    ClassDef(StTofSlat,4)
 };
 
 inline void
