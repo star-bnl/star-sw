@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.44 1999/02/17 22:38:23 fisyak Exp $ 
+// $Id: St_Table.cxx,v 1.45 1999/02/22 23:54:37 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.45  1999/02/22 23:54:37  fine
+// St_Table::New() - method has been prepared but not activated yet
+//
 // Revision 1.44  1999/02/17 22:38:23  fisyak
 // Victor fix for short print out
 //
@@ -495,6 +498,41 @@ void St_Table::ls(Option_t *option)
    DecreaseDirLevel();
 }
 
+#if 0
+
+//______________________________________________________________________________
+static St_Table *St_Table::New(const Char_t *name, const Char_t *type, void *array, UInt_t size)
+{
+  // This static method creates a new St_Table object if provided 
+
+  St_Table *table = 0;
+  if (array && size && type && name) 
+  {
+    TString TableType(type); 
+    TString t = TableType.Strip();
+    t.ToLower();
+
+    const Char_t *classprefix="St_";
+    const Int_t extralen = strlen(classprefix) + 1;
+    Char_t *classname = new Char_t[strlen(t.Data())+extralen];
+    strcpy(classname,classprefix);
+    strcat(classname,t.Data());
+    TClass *cl = gROOT->GetClass(classname);
+    if (cl) {
+      table = (St_Table *)cl->New();
+      if (table) {
+         table->SetTablePointer(array);
+         table->SetName(name);
+         table->SetfN(size);
+         table->SetUsedRows(size);
+      }
+    } 
+    delete [] classname;
+  }
+  return table; 
+}
+
+#endif
 //______________________________________________________________________________
 Char_t *St_Table::Print(Char_t *strbuf,Int_t lenbuf) const 
 {
