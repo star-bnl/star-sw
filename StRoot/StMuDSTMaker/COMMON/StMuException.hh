@@ -1,22 +1,28 @@
-#include <iostream>
-#include <string>
-#include <typeinfo>
-
 #ifndef StMuException_hh
 #define StMuException_hh
 
+#include <string>
+#include <iostream>
+#include <typeinfo>
+
+#ifndef ST_NO_NAMESPACES
+using namespace std;
+#endif
+
+#ifndef __PRETTY_FUNCTION__ 
+#define __PRETTY_FUNCTION__ "NoScopeIdentifierAvailable"
+#endif
+
 #define PF __PRETTY_FUNCTION__
 
-#define THROW(key,text) StMuException##key(text,__PRETTY_FUNCTION__)
-#define EXE(x) class StMuException##x : public StMuException { public: StMuException##x (const char* m="", const char* in="???") : StMuException(k##x, m, in) { /* no-op */ } };
-		       
 
 enum StMuExceptionTypes {kUnknown=0, kNullPointer, kBadFlag, kBadValue, kEOF};
 /** 
     @class StMuException
     Just a small helper class (and a few macros) to easily create a set of exceptions.
-    Using the "THROW(...)" macro the exceptions datamember mIn will hold the name of the scope that was throwing the exception.
+    Using the "THROW(...)" macro the exception's datamember mIn will hold the name of the scope that was throwing the exception.
 */
+
 class StMuException {
 protected:
   StMuExceptionTypes mException;
@@ -29,6 +35,11 @@ public:
   virtual void print() { cout << "*** StMuException #" <<  (unsigned long)mException << " *** " << mIn << " *** " << message() << " ***" << endl; }
   virtual StMuExceptionTypes type() { return mException; }
 };
+
+
+#define THROW(key,text) StMuException##key(text,__PRETTY_FUNCTION__)
+#define EXE(x) class StMuException##x : public StMuException { public: StMuException##x (const char* m="", const char* in="???") : StMuException(k##x, m, in) { /* no-op */ } };
+		       
 
 EXE(Unknown);
 EXE(NullPointer);

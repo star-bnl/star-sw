@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.h,v 1.8 2002/12/19 19:44:25 laue Exp $
+ * $Id: StMuChainMaker.h,v 1.9 2003/01/23 21:59:50 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** @class StMuChainMaker
@@ -11,6 +11,11 @@
 #define StMuChainMaker_hh
 
 #include <string>
+#if !defined(ST_NO_NAMESPACES)
+using namespace std;
+#endif
+
+
 class TChain;
 class StMuDbReader;
 
@@ -48,6 +53,9 @@ ClassDef(StMuChainMaker,0)
 /***************************************************************************
  *
  * $Log: StMuChainMaker.h,v $
+ * Revision 1.9  2003/01/23 21:59:50  laue
+ * Modification to compile on Solaris.
+ *
  * Revision 1.8  2002/12/19 19:44:25  laue
  * update to read number of events from database, for files ending with .list
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuHelix.h,v 1.2 2002/03/20 16:04:11 laue Exp $
+ * $Id: StMuHelix.h,v 1.3 2003/01/23 21:59:50 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -14,6 +14,11 @@
 #include "StarClassLibrary/StThreeVectorF.hh"
 
 #include "TObject.h"
+
+#ifndef ST_NO_NAMESPACES
+using namespace units;
+#endif
+
 
 class StMuHelix : public TObject {
  public:
@@ -42,6 +47,9 @@ inline float StMuHelix::b() const { return mB; }
 /***************************************************************************
  *
  * $Log: StMuHelix.h,v $
+ * Revision 1.3  2003/01/23 21:59:50  laue
+ * Modification to compile on Solaris.
+ *
  * Revision 1.2  2002/03/20 16:04:11  laue
  * minor changes, mostly added access functions
  *
