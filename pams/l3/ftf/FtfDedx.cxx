@@ -17,9 +17,9 @@ FtfDedx::FtfDedx(FtfTrack *track) {
   // for each sector
   for (int sector=0; sector<24; sector++) {
     // caution: sector>12 needs x->-x and y->y (east side!)
-    fUnitVec[sector].x = SectorSin[sector]; //east sector is included in lookup table
-    int eastsector = (sector+1>12) ? sector-12 : sector;
-    fUnitVec[sector].y = SectorCos[eastsector];
+    fUnitVec[sector].x = SectorSin[sector];
+    if (sector+1>12) fUnitVec[sector].x = -1 * fUnitVec[sector].x;
+    fUnitVec[sector].y = SectorCos[sector];
   } 
 }
 
@@ -34,9 +34,9 @@ FtfDedx::FtfDedx (FtfTrack *track, float cutLow, float cutHigh) {
   // for each sector
   for (int sector=0; sector<24; sector++) {
     // caution: sector>12 needs x->-x and y->y (east side!)
-    fUnitVec[sector].x = SectorSin[sector]; //east sector is included in lookup table
-    int eastsector = (sector+1>12) ? sector-12 : sector;
-    fUnitVec[sector].y = SectorCos[eastsector];
+    fUnitVec[sector].x = SectorSin[sector];
+    if (sector+1>12) fUnitVec[sector].x = -1 * fUnitVec[sector].x;
+    fUnitVec[sector].y = SectorCos[sector];
   } 
 }
 
@@ -51,9 +51,9 @@ FtfDedx::FtfDedx (FtfTrack *track, float cutLow, float cutHigh, float driftLoss)
   // for each sector
   for (int sector=0; sector<24; sector++) {
     // caution: sector>12 needs x->-x and y->y (east side!)
-    fUnitVec[sector].x = SectorSin[sector]; //east sector is included in lookup table
-    int eastsector = (sector+1>12) ? sector-12 : sector;
-    fUnitVec[sector].y = SectorCos[eastsector];
+    fUnitVec[sector].x = SectorSin[sector];
+    if (sector+1>12) fUnitVec[sector].x = -1 * fUnitVec[sector].x;
+    fUnitVec[sector].y = SectorCos[sector];
   } 
 }
 
