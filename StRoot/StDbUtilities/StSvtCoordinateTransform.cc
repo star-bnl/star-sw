@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.28 2004/08/02 19:42:43 caines Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.29 2004/08/07 02:44:25 perev Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -46,12 +46,14 @@ StSvtCoordinateTransform::StSvtCoordinateTransform() {
 //_____________________________________________________________________________
 
 StSvtCoordinateTransform::StSvtCoordinateTransform(StTpcDb* gStTpcDb) {
-
+mPoly9=0;
 }
 //_____________________________________________________________________________
 
-StSvtCoordinateTransform::~StSvtCoordinateTransform() {
- }
+StSvtCoordinateTransform::~StSvtCoordinateTransform()
+{
+ delete mPoly9; mPoly9=0;
+}
 
 //_____________________________________________________________________________
 void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
