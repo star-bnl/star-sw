@@ -1,5 +1,8 @@
-// $Id: StFtpcDisplay.hh,v 1.4 2000/07/18 21:22:16 oldi Exp $
+// $Id: StFtpcDisplay.hh,v 1.5 2000/07/28 09:45:42 hummler Exp $
 // $Log: StFtpcDisplay.hh,v $
+// Revision 1.5  2000/07/28 09:45:42  hummler
+// change "iostream.h" to <iostream.h> for correct path
+//
 // Revision 1.4  2000/07/18 21:22:16  oldi
 // Changes due to be able to find laser tracks.
 // Cleanup: - new functions in StFtpcConfMapper, StFtpcTrack, and StFtpcPoint
@@ -33,7 +36,7 @@
 #ifndef STAR_StFtpcDisplay
 #define STAR_StFtpcDisplay
 
-#include "iostream.h"
+#include <iostream.h>
 
 #include "TObjArray.h"
 #include "TObject.h"
