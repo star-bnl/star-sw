@@ -1,66 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.30 1999/11/09 22:47:39 fine Exp $
-// $Log: StEventDisplayMaker.cxx,v $
-// Revision 1.30  1999/11/09 22:47:39  fine
-// psi angle was forgotten to be converted from degrees to rad.
-//
-// Revision 1.29  1999/11/08 17:47:54  fine
-// The bug for tpt_track filtering was fixed
-//
-// Revision 1.28  1999/11/07 05:27:12  fine
-// Take in account new data-member of tpt_track table: length
-//
-// Revision 1.27  1999/11/05 23:18:40  fine
-// convertor degree to rad was introduced
-//
-// Revision 1.26  1999/11/05 02:29:25  fine
-// helix drawing for tpt_track table improved
-//
-// Revision 1.25  1999/11/04 17:59:59  fine
-//  several bugs fixed to draw table-objects
-//
-// Revision 1.24  1999/11/04 01:49:47  fine
-// tpt_track drawing is turned On
-//
-// Revision 1.23  1999/11/02 01:49:26  fine
-// A special case for tpt_track table has been introduced
-//
-// Revision 1.22  1999/10/14 13:42:14  fine
-// Some big to draw tables have been fixed
-//
-// Revision 1.21  1999/10/09 18:17:10  fine
-// Some correction to draw tptrack table
-//
-// Revision 1.20  1999/08/16 16:28:09  fine
-// StVirtualEventFilter has been moved to St_base
-//
-// Revision 1.19  1999/08/09 01:36:47  fine
-// MakeTable methods have been activated
-//
-// Revision 1.18  1999/08/07 20:31:22  fine
-// MakeVertex method has been introduced
-//
-// Revision 1.17  1999/08/05 02:41:12  fine
-//  fix problem with the hits attributes
-//
-// Revision 1.16  1999/08/05 02:14:09  fine
-//  style attribute for hits has been fixed
-//
-// Revision 1.15  1999/08/04 03:52:01  fine
-// Helix drawing improvements
-//
-// Revision 1.14  1999/08/03 19:18:37  fine
-// Vertices collections have been introduced
-//
-// Revision 1.13  1999/08/03 14:50:02  fine
-// Clean up
-//
-// Revision 1.12  1999/08/02 14:43:25  fine
-// Vertices collection has been introduced, more simple geometry
-//
-// Revision 1.11  1999/08/02 02:21:51  fine
-// new method ParseName has been introduced,but not activated yet
-//
+// $Id: StEventDisplayMaker.cxx,v 1.31 1999/11/10 02:24:36 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -431,6 +370,15 @@ Int_t StEventDisplayMaker::Make()
   if (m_Mode == 1)   return  kStOK;
   CreateCanvas();
   if (Debug()) PrintInfo();
+  //_______________________________________
+  //
+  // Reset all filters
+  //_______________________________________
+ 
+  TIter nextFilter(m_FilterArray);
+  StVirtualEventFilter *f = 0;
+  while ( (f = (StVirtualEventFilter *)nextFiler()) ) f->Reset(); 
+
  //---  Temporary ---
  //   ClearCanvas();
  //_______________________________________
@@ -1000,4 +948,69 @@ DISPLAY_FILTER_DEFINITION(Table)
 DISPLAY_FILTER_DEFINITION(TptTrack)
 
 // --  end of filter list --
+
+// $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.31  1999/11/10 02:24:36  fine
+// StVirtualFilter::Reset method has been introduced
+//
+// Revision 1.30  1999/11/09 22:47:39  fine
+// psi angle was forgotten to be converted from degrees to rad.
+//
+// Revision 1.29  1999/11/08 17:47:54  fine
+// The bug for tpt_track filtering was fixed
+//
+// Revision 1.28  1999/11/07 05:27:12  fine
+// Take in account new data-member of tpt_track table: length
+//
+// Revision 1.27  1999/11/05 23:18:40  fine
+// convertor degree to rad was introduced
+//
+// Revision 1.26  1999/11/05 02:29:25  fine
+// helix drawing for tpt_track table improved
+//
+// Revision 1.25  1999/11/04 17:59:59  fine
+//  several bugs fixed to draw table-objects
+//
+// Revision 1.24  1999/11/04 01:49:47  fine
+// tpt_track drawing is turned On
+//
+// Revision 1.23  1999/11/02 01:49:26  fine
+// A special case for tpt_track table has been introduced
+//
+// Revision 1.22  1999/10/14 13:42:14  fine
+// Some big to draw tables have been fixed
+//
+// Revision 1.21  1999/10/09 18:17:10  fine
+// Some correction to draw tptrack table
+//
+// Revision 1.20  1999/08/16 16:28:09  fine
+// StVirtualEventFilter has been moved to St_base
+//
+// Revision 1.19  1999/08/09 01:36:47  fine
+// MakeTable methods have been activated
+//
+// Revision 1.18  1999/08/07 20:31:22  fine
+// MakeVertex method has been introduced
+//
+// Revision 1.17  1999/08/05 02:41:12  fine
+//  fix problem with the hits attributes
+//
+// Revision 1.16  1999/08/05 02:14:09  fine
+//  style attribute for hits has been fixed
+//
+// Revision 1.15  1999/08/04 03:52:01  fine
+// Helix drawing improvements
+//
+// Revision 1.14  1999/08/03 19:18:37  fine
+// Vertices collections have been introduced
+//
+// Revision 1.13  1999/08/03 14:50:02  fine
+// Clean up
+//
+// Revision 1.12  1999/08/02 14:43:25  fine
+// Vertices collection has been introduced, more simple geometry
+//
+// Revision 1.11  1999/08/02 02:21:51  fine
+// new method ParseName has been introduced,but not activated yet
+//
 
