@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotMultiGraphFits.C,v 1.1 2002/11/15 22:38:17 posk Exp $
+// $Id: plotMultiGraphFits.C,v 1.2 2003/01/24 23:10:25 posk Exp $
 //
 // Author:       Art Poskanzer and Alexander Wetzler, April 2002
 // Description:
@@ -695,11 +695,11 @@ void plotMultiGraphFits(Int_t eBeam = 158) {
       }
     } else {
       if (pion) {
-	l.DrawLatex(0.7,0.25,"v_{1}"); 
+	l.DrawLatex(0.7,0.28,"v_{1}"); 
 	l.SetTextColor(kGreen); 
 	l.DrawLatex(0.7,0.77,"v_{2}"); 
       } else {
-	l.DrawLatex(0.7,0.72,"v_{1}"); 
+	l.DrawLatex(0.73,0.72,"v_{1}"); 
 	l.SetTextColor(kGreen); 
 	l.DrawLatex(0.75,0.47,"v_{2}"); 
       }
@@ -830,7 +830,7 @@ void plotMultiGraphFits(Int_t eBeam = 158) {
       if (pion) {
 	l.DrawLatex(0.75,0.45,"v_{1}"); 
 	l.SetTextColor(kGreen); 
-	l.DrawLatex(0.75,0.75,"v_{2}");
+	l.DrawLatex(0.75,0.73,"v_{2}");
       } else {
 	l.DrawLatex(0.6,0.62,"v_{1}"); 
 	l.SetTextColor(kGreen); 
@@ -963,7 +963,7 @@ void plotMultiGraphFits(Int_t eBeam = 158) {
 	max = 15.;
 	min = -7.;
       } else {
-	max = 18.;
+	max = 15.;
 	min = -2.;
       }
     }    
@@ -988,7 +988,7 @@ void plotMultiGraphFits(Int_t eBeam = 158) {
       if (pion) {
 	cout << endl << "##### " << part << " v1(pt) cent " << i-6 << endl << endl;
 	fprintf(fpar, "%s v1 cent %.0f \n", part, i-6);
-	if (i==9 && eBeam==158) {
+	if ((i==9 && eBeam==158) || (i==7 && eBeam==40)) {
 	  flowPtPi1Cen[i-7] = 
 	    (TGraphErrors*)flowPt[i][0][0][fileN]->DrawClone("PC");
 	} else {
@@ -1086,7 +1086,7 @@ void plotMultiGraphFits(Int_t eBeam = 158) {
 	min = -5.;
       } else {
 	max = 15.;
-	min = -10.;
+	min = -15.;
       }
     }    
     hist->SetMaximum(max/noPercent);
@@ -1147,11 +1147,11 @@ void plotMultiGraphFits(Int_t eBeam = 158) {
       }
     } else {
       if (pion) {
-	max = 20.;
+	max = 30.;
 	min = -5.;
       } else {
 	max = 15.;
-	min = -5.;
+	min = -7.;
       }
     }
     hist->SetMaximum(max/noPercent);
@@ -1200,9 +1200,9 @@ void plotMultiGraphFits(Int_t eBeam = 158) {
     Int_t padN = gPad->GetNumber();
     if (padN == 4) {
       legend->Clear();
-      legend->SetX1NDC(0.2);
+      legend->SetX1NDC(0.25);
       legend->SetY1NDC(0.6);    
-      legend->SetX2NDC(0.47);
+      legend->SetX2NDC(0.52);
       legend->SetY2NDC(0.8);
       for (Int_t i = 7; i <= 9; i++){
 	legend->AddEntry(flowPt[i][1][0][fileN], centrality[i-7], "P");
@@ -1346,7 +1346,7 @@ void plotMultiGraphFits(Int_t eBeam = 158) {
       if (pion) {
 	l.DrawLatex(0.6,0.27,"v_{1}"); 
 	l.SetTextColor(kGreen); 
-	l.DrawLatex(0.6,0.61,"v_{2}"); 
+	l.DrawLatex(0.6,0.63,"v_{2}"); 
       } else {
 	l.DrawLatex(0.67,0.73,"v_{1}"); 
 	l.SetTextColor(kGreen); 
@@ -1531,6 +1531,9 @@ TF1* func_v = new TF1("func_v", vi, 0.01, 2., nPars);
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotMultiGraphFits.C,v $
+// Revision 1.2  2003/01/24 23:10:25  posk
+// For version 37 of the paper.
+//
 // Revision 1.1  2002/11/15 22:38:17  posk
 // updates.
 //
