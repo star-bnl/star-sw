@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.17 2000/04/10 18:49:10 posk Exp $
+// $Id: plot.C,v 1.18 2000/04/13 22:34:16 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -17,6 +17,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.18  2000/04/13 22:34:16  posk
+// Resolution correction is now made.
+//
 // Revision 1.17  2000/04/10 18:49:10  posk
 // Asks for the histogram file number.
 //
@@ -266,22 +269,18 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	TH1D* projX = hist->ProjectionX(histName->Data(), 0, 9999, "E");
 	projX->SetName(histProjName->Data());
 	projX->SetXTitle("pseudorapidity");
-	if (strcmp(shortName[pageNumber],"Flow_Yield.Eta")==0) {
-	  projX->SetYTitle("Counts");
-	  gStyle->SetOptStat(10);
-	  if (projX) projX->Draw("H");
-	}
+	projX->SetYTitle("Counts");
+	gStyle->SetOptStat(10);
+	if (projX) projX->Draw("H");
   	lineZeroEta->Draw();
       } else if (strstr(shortName[pageNumber],".Pt")!=0) {  // 2D Y projection
-	TH1D* projY = hist->ProjectionY(histName->Data(), 0, 9999, "E"); 
+	TH1D* projY = hist->ProjectionY(histName->Data(), 0, 9999, "E");
 	projY->SetName(histProjName->Data());
 	projY->SetXTitle("Pt (GeV)");
-	if (strcmp(shortName[pageNumber],"Flow_Yield.Pt")==0) {
-	  projY->SetYTitle("Counts");
-	  gPad->SetLogy();
-	  gStyle->SetOptStat(100110);
-	  if (projY) projY->Draw("H");
-	}
+	projY->SetYTitle("Counts");
+	gPad->SetLogy();
+	gStyle->SetOptStat(100110);
+	if (projY) projY->Draw("H");
   	lineZeroPt->Draw();
       } else if (strstr(shortName[pageNumber],"Corr")!=0) { // azimuthal corr.
 	float norm = (float)(hist->GetNbinsX()) / hist->Integral(); 

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.11 2000/03/21 00:24:45 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.12 2000/04/13 22:34:15 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.12  2000/04/13 22:34:15  posk
+// Resolution correction is now made.
+//
 // Revision 1.11  2000/03/21 00:24:45  posk
 // Added GetCVS and changed some plot names.
 //
@@ -29,17 +32,8 @@
 // Revision 1.9  2000/02/04 16:26:42  posk
 // Added correct calculation of event plane resolution for large flow.
 //
-// Revision 1.8  2000/01/24 23:02:13  posk
-// Merged updates
-//
 // Revision 1.7  2000/01/14 01:35:52  snelling
 // changed include path ../FlowMaker/ to FlowMaker/
-//
-// Revision 1.6  2000/01/13 21:50:24  posk
-// Updates and corrections.
-//
-// Revision 1.5  1999/12/21 21:29:47  posk
-// Updated the README file.
 //
 // Revision 1.4  1999/12/21 01:19:28  posk
 // Added more histograms.
@@ -95,7 +89,7 @@ public:
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.11 2000/03/21 00:24:45 posk Exp $ built "__DATE__" "__TIME__ ;
+    {static const char cvs[]="Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.12 2000/04/13 22:34:15 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -175,8 +169,8 @@ private:
     TProfile* mHist_vObsEta;
     TProfile* mHist_vObsPt;
     TH2F*     mHist_v2D;
-    TProfile* mHist_vEta;
-    TProfile* mHist_vPt;
+    TH1F*     mHist_vEta;
+    TH1F*     mHist_vPt;
   };
 
   // for each selection
