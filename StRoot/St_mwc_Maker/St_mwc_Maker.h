@@ -1,5 +1,8 @@
-// $Id: St_mwc_Maker.h,v 1.1 1999/01/14 19:11:01 druss Exp $
+// $Id: St_mwc_Maker.h,v 1.2 1999/02/08 16:51:58 fisyak Exp $
 // $Log: St_mwc_Maker.h,v $
+// Revision 1.2  1999/02/08 16:51:58  fisyak
+// Fix to parameters
+//
 // Revision 1.1  1999/01/14 19:11:01  druss
 // root Maker definitions/header for mwc
 //
@@ -33,16 +36,19 @@
 #include "StMaker.h"
 #endif
 
-class St_mwc_geo  *m_geom;
-class St_mwc_cal  *m_cal;
-class St_mwc_mpar *m_mpar;
+class St_mwc_geo;
+class St_mwc_cal;
+class St_mwc_mpar;
 
 class St_mwc_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_mwc_Maker.h,v 1.1 1999/01/14 19:11:01 druss Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_mwc_Maker.h,v 1.2 1999/02/08 16:51:58 fisyak Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
+   St_mwc_geo  *m_geom; //!
+   St_mwc_cal  *m_cal;  //!
+   St_mwc_mpar *m_mpar; //!
  
  protected:
  public: 
