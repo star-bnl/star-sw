@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.cxx,v 1.10 2004/01/30 07:22:06 munhoz Exp $
+ * $Id: StSvtDbMaker.cxx,v 1.11 2004/03/24 03:36:10 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.cxx,v $
+ * Revision 1.11  2004/03/24 03:36:10  caines
+ * Fix to allow to call INitRun twice as happens in MC data sometimes. Before we were deleting our own data by mistake
+ *
  * Revision 1.10  2004/01/30 07:22:06  munhoz
  * adding rms and daq parameters reading
  *
@@ -179,7 +182,6 @@ Int_t StSvtDbMaker::InitRun(int runumber)
   readSvtDriftVelocity();
   readSvtBadAnodes();
   readSvtT0();
-
   return kStOk;
 }
 
@@ -253,9 +255,9 @@ void StSvtDbMaker::setSvtConfig()
 void StSvtDbMaker::readSvtConfig()
 {    
   if (mReader)
-    svtSetConfig->SetObject((TObject*)mReader->getConfiguration());
+    svtSetConfig->SetObject((TObject*)mReader->getConfiguration(),kFALSE);
   else if (m_Reader)
-    svtSetConfig->SetObject((TObject*)m_Reader->getConfiguration());
+    svtSetConfig->SetObject((TObject*)m_Reader->getConfiguration(),kFALSE);
 }
 
 //_____________________________________________________________________________
@@ -269,9 +271,9 @@ void StSvtDbMaker::setSvtDriftVelocity()
 void StSvtDbMaker::readSvtDriftVelocity()
 {
   if (mReader)
-    svtSetDrift->SetObject((TObject*)mReader->getDriftVelocity());
+    svtSetDrift->SetObject((TObject*)mReader->getDriftVelocity(),kFALSE);
   else if (m_Reader)
-    svtSetDrift->SetObject((TObject*)m_Reader->getDriftVelocity());  
+    svtSetDrift->SetObject((TObject*)m_Reader->getDriftVelocity(),kFALSE);  
 }
 
 //_____________________________________________________________________________
@@ -285,9 +287,9 @@ void StSvtDbMaker::setSvtPedestals()
 void StSvtDbMaker::readSvtPedestals()
 {
   if (mReader)
-    svtSetPed->SetObject((TObject*)mReader->getPedestals());
+    svtSetPed->SetObject((TObject*)mReader->getPedestals(),kFALSE);
   else if (m_Reader)
-    svtSetPed->SetObject((TObject*)m_Reader->getPedestals());
+    svtSetPed->SetObject((TObject*)m_Reader->getPedestals(),kFALSE);
 }
 
 //_____________________________________________________________________________
@@ -301,9 +303,9 @@ void StSvtDbMaker::setSvtRms()
 void StSvtDbMaker::readSvtRms()
 {
   if (mReader)
-    svtSetRms->SetObject((TObject*)mReader->getRms());
+    svtSetRms->SetObject((TObject*)mReader->getRms(),kFALSE);
   else if (m_Reader)
-    svtSetRms->SetObject((TObject*)m_Reader->getRms());
+    svtSetRms->SetObject((TObject*)m_Reader->getRms(),kFALSE);
 }
 
 //_____________________________________________________________________________
@@ -317,9 +319,9 @@ void StSvtDbMaker::setSvtGeometry()
 void StSvtDbMaker::readSvtGeometry()
 {
   if (mReader)
-    svtSetGeom->SetObject((TObject*)mReader->getGeometry());
+    svtSetGeom->SetObject((TObject*)mReader->getGeometry(),kFALSE);
   else if (m_Reader)
-    svtSetGeom->SetObject((TObject*)m_Reader->getGeometry());
+    svtSetGeom->SetObject((TObject*)m_Reader->getGeometry(),kFALSE);
 }
 
 //_____________________________________________________________________________
@@ -333,9 +335,9 @@ void StSvtDbMaker::setSvtBadAnodes()
 void StSvtDbMaker::readSvtBadAnodes()
 {
   if (mReader)
-    svtSetBad->SetObject((TObject*)mReader->getBadAnodes());
+    svtSetBad->SetObject((TObject*)mReader->getBadAnodes(),kFALSE);
   else if (m_Reader)
-    svtSetBad->SetObject((TObject*)m_Reader->getBadAnodes());
+    svtSetBad->SetObject((TObject*)m_Reader->getBadAnodes(),kFALSE);
 }
 
 //_____________________________________________________________________________
