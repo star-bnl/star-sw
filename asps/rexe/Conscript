@@ -7,7 +7,10 @@ $build =~ s/\\/\//g;
 my $ObjDir = "#" . $obj_dir; 
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 my $pkg;
-if ($env->{ENV}->{STAR}) {$pkg  = "root4star";}
+if ($env->{ENV}->{STAR}) {
+  if ($env->{ROOTLIBS} =~ /-lNew/) {$pkg  = "root4star";}
+  else                             {$pkg  = "root4starN";}
+}
 else                     {$pkg  = "Root.exe";}
 my @GDIRS = qw(.
 	       ../agi/gst/agsim
@@ -40,7 +43,13 @@ if ($STAR_SYS =~ /^i386/) {
   $FFLAGS   = "-w %DEBUG -fno-second-underscore -fno-automatic";
   $FEXTEND  = "-ffixed-line-length-132"; 
 }
-if ($STAR_SYS =~ /^sun4x_5.$/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
+if ($STAR_SYS =~ /^sun4x_5.$/) {
+#  $CXXFLAGS .= " -ptr" . $obj_dir;
+    if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }
+    $LIBPATH .= $env->{ENV}->{OPTSTAR} . "/lib";
+    $LIBS .= " -lCstd";
+  
+}
 $env2 = $env->clone('CPPPATH'      => $CPPPATH,
 		    'CPPFLAGS'     => $CPPFLAGS,
 		    'CXXFLAGS'     => $CXXFLAGS,

@@ -38,13 +38,6 @@ char **xargv=NULL;              // g77
 
 int f77argc = 0;                // For mips Fortran
 char **f77argv=NULL;            //
- 
-extern void InitGui();
-VoidFuncPtr_t initfuncs[] = { InitGui, 0 };
- 
- 
-TROOT root("Rint","The ROOT Interactive Interface", initfuncs);
- 
 //______________________________________________________________________________
 int main(int argc, char **argv)
 {
@@ -52,7 +45,7 @@ int main(int argc, char **argv)
    char appname[] = "Rint";
 #else
    char appname[] = "Root_Rint";
-#endif
+#endif 
  __argc_save=argc;  __argv_save=argv; 
        xargc=argc;      xargv = argv;
    f77argc = argc;    f77argv = argv;
