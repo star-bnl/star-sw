@@ -1,5 +1,8 @@
-//! $Id: St_QA_Maker.h,v 1.26 1999/07/12 16:39:35 kathy Exp $
+//! $Id: St_QA_Maker.h,v 1.27 1999/07/14 23:23:00 kathy Exp $
 //! $Log: St_QA_Maker.h,v $
+//! Revision 1.27  1999/07/14 23:23:00  kathy
+//! a lot of changes to hist limits and fixes to titles and added a few new hist
+//!
 //! Revision 1.26  1999/07/12 16:39:35  kathy
 //! hopefully last change for globtrk,event_summary and primtrk histograms
 //!
@@ -133,7 +136,7 @@ class TCanvas;
 class St_QA_Maker : public StMaker {
  private:
   Bool_t drawinit;
-  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.26 1999/07/12 16:39:35 kathy Exp $";
+  //! static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.27 1999/07/14 23:23:00 kathy Exp $";
   //! Histograms booking constants
   static const Int_t nxpT;
   static const Int_t nyeta;
@@ -243,6 +246,8 @@ class St_QA_Maker : public StMaker {
   TH1F     *m_glb_xf;        //! x-coord. of first tpc hit
   TH1F     *m_glb_yf;        //! y-coord. of first tpc hit
   TH1F     *m_glb_zf;        //! z-coord. of first tpc hit
+  TH1F     *m_glb_radf;      //! radial (xy) coordinate of first tpc hit
+  TH1F     *m_glb_ratio;     //! ratio of n fit pnts over n pnts
   TH1F     *m_psi;           //! psi reconstructed
   TH1F     *m_tanl;          //! tan(dip) =pz/pt at start
   TH1F     *m_glb_theta;     //! theta - calculated
@@ -295,6 +300,8 @@ class St_QA_Maker : public StMaker {
   TH1F     *m_prim_xf;        //! x-coord. of first tpc hit
   TH1F     *m_prim_yf;        //! y-coord. of first tpc hit
   TH1F     *m_prim_zf;        //! z-coord. of first tpc hit
+  TH1F     *m_prim_radf;      //! radial (xy) coordinate of first tpc hit
+  TH1F     *m_prim_ratio;     //! ratio of n fit pnts over n pnts
   TH1F     *m_ppsi;           //! psi reconstructed
   TH1F     *m_ptanl;          //! tan(dip) =pz/pt at start
   TH1F     *m_prim_theta;     //! theta - calculated
