@@ -93,7 +93,7 @@ long type_of_call l3Clufi_(
   adc = (UChar_t*) calloc (MAX_T*MAX_P*ABS_ROWS,sizeof(*adc));
   for ( i = 0; i < MAX_T*MAX_P*ABS_ROWS; i++)
     {
-      adc[i]= log8to10_table[adclong[i]];
+      adc[i]= log10to8_table[adclong[i]];
     }
 
   // get pointer for outgoing bank, calculate pointer to first rc bank
