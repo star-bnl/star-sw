@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-
+#include "asuAlloc.h"
 /* ------- STAF/ROOT generated includes ------- */
 #include "fill_dst_event_summary.h"
 
@@ -86,8 +86,8 @@ long  type_of_call fill_dst_event_summary_ (
   int     minbin, maxbin, binrange;
   int     ivtx, vtx_id;
   double  pi, piov2;
-  double  *mt_histo, *pt_histo, *eta_histo, *phi_histo;
-  double  *eta1_mt_histo,*eta2_mt_histo,*eta3_mt_histo;
+  double  mt_histo[NBINS], pt_histo[NBINS], eta_histo[NBINS], phi_histo[NBINS];
+  double  eta1_mt_histo[NBINS],eta2_mt_histo[NBINS],eta3_mt_histo[NBINS];
   float   mt_min, mt_max;
   float   pt_binsize, mt_binsize, eta_binsize, phi_binsize; 
   float   dmt, deta1, deta2, mtweight1, mtweight2;
@@ -148,43 +148,14 @@ long  type_of_call fill_dst_event_summary_ (
     return STAFCV_BAD;
   }
 
-  /* Allocate dynamic memory for histograms  */
-  if( !(pt_histo  = (double *)malloc(sizeof(double) * NBINS)) )  {
-    fprintf(stderr, "Unable to allocate pt_histo...exiting.\n");
-    return STAFCV_BAD;
-  }
-  if( !(mt_histo       = (double *)malloc(sizeof(double) * NBINS)) )  {
-    fprintf(stderr, "Unable to allocate mt_histo...exiting.\n");
-    return STAFCV_BAD;
-  }
-  if( !(eta_histo      = (double *)malloc(sizeof(double) * NBINS)) )  {
-    fprintf(stderr, "Unable to allocate eta_histo...exiting.\n");
-    return STAFCV_BAD;
-  }
-  if( !(phi_histo      = (double *)malloc(sizeof(double) * NBINS)) )  {
-    fprintf(stderr, "Unable to allocate phi_histo...exiting.\n");
-    return STAFCV_BAD;
-  }
-  if( !(eta1_mt_histo  = (double *)malloc(sizeof(double) * NBINS)) )  {
-    fprintf(stderr, "Unable to allocate eta1_mt_histo...exiting.\n");
-    return STAFCV_BAD;
-  }
-  if( !(eta2_mt_histo  = (double *)malloc(sizeof(double) * NBINS)) )  {
-    fprintf(stderr, "Unable to allocate eta2_mt_histo...exiting.\n");
-    return STAFCV_BAD;
-  }
-  if( !(eta3_mt_histo  = (double *)malloc(sizeof(double) * NBINS)) )  {
-    fprintf(stderr, "Unable to allocate eta3_mt_histo...exiting.\n");
-    return STAFCV_BAD;
-  }
   /* Reset pt, mt, eta & phi  histograms  */
-  memset (pt_histo,      0, sizeof(double)*NBINS);
-  memset (mt_histo,      0, sizeof(double)*NBINS);
-  memset (eta_histo,     0, sizeof(double)*NBINS);
-  memset (phi_histo,     0, sizeof(double)*NBINS);
-  memset (eta1_mt_histo, 0, sizeof(double)*NBINS);
-  memset (eta2_mt_histo, 0, sizeof(double)*NBINS);
-  memset (eta3_mt_histo, 0, sizeof(double)*NBINS);
+  memset (&pt_histo,      0, sizeof(double)*NBINS);
+  memset (&mt_histo,      0, sizeof(double)*NBINS);
+  memset (&eta_histo,     0, sizeof(double)*NBINS);
+  memset (&phi_histo,     0, sizeof(double)*NBINS);
+  memset (&eta1_mt_histo, 0, sizeof(double)*NBINS);
+  memset (&eta2_mt_histo, 0, sizeof(double)*NBINS);
+  memset (&eta3_mt_histo, 0, sizeof(double)*NBINS);
   
   /* Claculate  histogram bin size */
   pt_binsize  = (PT_MAX  - PT_MIN )/NBINS;
@@ -231,7 +202,7 @@ long  type_of_call fill_dst_event_summary_ (
     /*  Fill histograms.  Protect against going out of range. */
     if (iptbin<NBINS)
       pt_histo[iptbin]++;    /* pt histogram    */
-    if (ietabin<NBINS)
+    if (0 <= ietabin && ietabin<NBINS)
       eta_histo[ietabin]++;  /* eta histogram   */
     if (iphibin<NBINS)  
       phi_histo[iphibin]++;  /* phi histogram   */
@@ -348,14 +319,6 @@ long  type_of_call fill_dst_event_summary_ (
   /* Fill DST production run ID */
   dst_eventsummary->prod_run = dst_runheader->run_id;
   
-  free (pt_histo);
-  free (mt_histo);
-  free (eta_histo);
-  free (phi_histo);
-  free (eta1_mt_histo);
-  free (eta2_mt_histo);
-  free (eta3_mt_histo);
-
   dst_event_summary_h->nok = 1;
   return STAFCV_OK;
 }  /*  End of fill_dst_event_summary  */
