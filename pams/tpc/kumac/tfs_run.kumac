@@ -1,20 +1,18 @@
 ***************************************************************
 
 macro run 
+  
 macro/global/import *
 
 message 'start tfs_run'
 
-  cd /dui
-  tdm/table/rowcount [data]/tpc/hits/tphit 0
-  tdm/table/rowcount [data]/tpc/hits/index 0
 
   alias/create STAFCV_OK 1
   alias/create STAFCV_BAD 0
 
   ami/module/call tfs_g2t _
-	 [geant]/Event/g2t_tpc_hit _
-	 [geant]/Event/g2t_track _
+	 [geant_Event]/g2t_tpc_hit _
+	 [geant_Event]/g2t_track _
 		[params]/tpc/tfspars/tfs_fspar _ 
   		[params]/tpc/tfspars/tfs_bmpar _
 		[params]/tpc/tfspars/tfs_fsctrl _
