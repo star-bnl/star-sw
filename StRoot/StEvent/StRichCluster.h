@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichCluster.h,v 2.2 2000/08/08 14:42:14 ullrich Exp $
+ * $Id: StRichCluster.h,v 2.3 2000/08/09 14:11:51 perev Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichCluster.h,v $
+ * Revision 2.3  2000/08/09 14:11:51  perev
+ * ClassDef must be without ;, (???)
+ *
  * Revision 2.2  2000/08/08 14:42:14  ullrich
  * Added missing ClassDef and ClassImp macros.
  *
@@ -55,7 +58,7 @@ private:
     Float_t  mAmplitudeSum;     // sum of all pad amplitudes
     Float_t  mAmplitude2Sum;    // sum of squares of all pad amplitudes
     Float_t  mRms2;             // square rms of pad amplitudes
-    ClassDef(StRichCluster,1);
+    ClassDef(StRichCluster,1)
 };
 
 inline Int_t StRichCluster::numberOfPads() const { return mNumberOfPads; } 
