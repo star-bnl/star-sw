@@ -6,7 +6,7 @@ macro test file
  make  sim/control
 *
    gfile pz [file]
-   if ($iquest(1)<>0) exitm
+   if ($iquest(1)<>0) goto exitm
 * check physics
    gclose all
 * check geometry
@@ -16,7 +16,7 @@ macro test file
    close     72
 * fill histigrams
    trig 1000000
-
+exitm:
  exit  
 return
          
