@@ -138,10 +138,12 @@ void StiStarDetectorBuilder::useVMCGeometry() {
 	p->setNormalRep(sector*dPhi, radius, 0.);
 	p->setRegion(StiPlacement::kMidRapidity);
 	StiDetector *pipeVolume = _detectorFactory->getInstance();
-	name= pathT.Data();
-	name += "_";
-	name += sector;
-	pipeVolume->setName(name);
+	TString nameP = pathT.Data();
+	nameP += "_";
+	nameP += sector;
+	nameP.ReplaceAll("HALL_1/CAVE_1/","");
+	nameP.Resize(30); nameP.Strip();
+	pipeVolume->setName(nameP.Data());
 	pipeVolume->setIsOn(true);
 	pipeVolume->setIsActive(new StiNeverActiveFunctor);
 	pipeVolume->setIsContinuousMedium(false);
