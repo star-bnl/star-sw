@@ -1,7 +1,11 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.4 2002/02/11 20:30:48 akio Exp $
+// $Id: StppEvent.cxx,v 1.5 2002/02/13 17:15:10 jeromel Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.5  2002/02/13 17:15:10  jeromel
+// Commented out recent addition from Akio to prevent compilation collapse.
+// Need StEvent addition.
+//
 // Revision 1.4  2002/02/11 20:30:48  akio
 // Many updates, including very first version of jet finder.
 //
@@ -360,6 +364,8 @@ Int_t StppEvent::fill(StEvent *event){
     fpdSouthVeto    = fpd->southVeto();
   }
   
+  StL0Trigger* l0;
+  /*
   StL0Trigger* l0=event->l0Trigger();
   if(l0){
     token = l0->triggerToken();
@@ -381,7 +387,8 @@ Int_t StppEvent::fill(StEvent *event){
 	   <<diff<<" != "<<BunchIdDifference<<endl;
     }
   }
-  
+  */  
+
   cout << "AKIO-Run#/Token/Unix-Time/BunchID/7Bit/SpinBits:" 
        << runN << " " << token << " " << time << " " 
        << bunchId << " " << bunchId7bit << " " << doubleSpinIndex  << endl;
