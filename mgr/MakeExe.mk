@@ -120,10 +120,11 @@ $(OBJ_DIR)/%.o :%.cdf
 	$(FOR) -c $(SRG_DIR)/$(STEM).f -o  $(OBJ_DIR)/$(STEM).o
 	$(RM)    $(SRG_DIR)/$(STEM).f
 
-.PRECIOUS : $(SRG_DIR)/%.f
-$(SRG_DIR)/%.f : %.g 
+.PRECIOUS : $(SRG_DIR)/%.F
+$(OBJ_DIR)/%.o : %.g 
 	cd $(GST_DIR); \
-	$(EXE_DIR)/geant3    $(1ST_DEPS) -o $(SRG_DIR)/$(STEM).f
+	$(EXE_DIR)/geant3    $(1ST_DEPS) -o $(SRG_DIR)/$(STEM).F
+	$(FOR) -c $(INCL)  $(SRG_DIR)/$(STEM).F -o  $(OBJ_DIR)/$(STEM).o
 
 $(OBJ_DIR)/%.o : %.F
 	$(FOR) -c $(INCL) $(1ST_DEPS) -o  $(OBJ_DIR)/$(STEM).o

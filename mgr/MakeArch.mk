@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.49  1998/12/10 22:47:47  fine
+#  Correction for fit Window NT branch
+#
 #  Revision 1.48  1998/12/04 01:17:29  fisyak
 #  fix for fortran source in StRoot
 #
@@ -125,7 +128,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/12/04 01:17:29 $ 
+#             Last modification $Date: 1998/12/10 22:47:47 $ 
 #. default setings
 
 MAKE  := gmake
@@ -348,9 +351,9 @@ ifndef EGCS_ON
 else 
 #   	EGCS compiler
 
-  EGCS := /afs/rhic/asis/i386_linux2/usr.local/egcs
-  CC  :=$(EGCS)/bin/gcc 
-  CXX :=$(EGCS)/bin/g++ 
+#  EGCS := /afs/rhic/asis/i386_linux2/usr.local/egcs
+#  CC  :=$(EGCS)/bin/gcc 
+#  CXX :=$(EGCS)/bin/g++ 
 
   MOTIF :=
   LINUX :=YESS
@@ -368,7 +371,7 @@ else
   EXEFLAGS := $(DEBUG) -Wl,-Bdynamic -Wl,-noinhibit-exec   
   SOFLAGS  := $(DEBUG) -shared  
 ##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lg++ -lpgc -lm -ldl -rdynamic
-  CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib -L/usr/lib -lXt -lXpm -lX11 -lcrypt -lg++ -lpgc -lm -ldl  -rdynamic
+  CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib -lXt -lXpm -lX11 -lcrypt -lg++ -lpgc -lm -ldl  -rdynamic
 ##FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
   FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A 
   FFLAGS   := -DPGI  $(DEBUG)
@@ -385,7 +388,6 @@ ifneq (,$(findstring $(STAR_SYS),i386_redhat51))
 #  ====================
   LINUX :=YESS
   MOTIF :=
-  CERN_LEVEL :=pgf98
   OSFID    := lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON GNU_GCC ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS ST_NO_NAMESPACES
   STRID    := lnx
   FC       := /usr/pgi/linux86/bin/pgf77
@@ -396,12 +398,12 @@ ifneq (,$(findstring $(STAR_SYS),i386_redhat51))
   CFLAGS   := $(DEBUG) -fPIC
   CPPFLAGS += f2cFortran
   LDFLAGS  := $(DEBUG) -Wl,-Bstatic
-  EXEFLAGS := $(DEBUG) -Wl,-Bdynamic -Wl,-noinhibit-exec   
+  EXEFLAGS := $(DEBUG) -Wl,-Bdynamic    
   SOFLAGS  := $(DEBUG) -shared  
 ##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lpgc -lm -ldl -rdynamic
-  CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib -L/usr/lib -lXt -lXpm -lX11 -lcrypt -lpgc -lm -ldl  -rdynamic
+  CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic
 ##FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
-  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A 
+  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -lg2c
   FFLAGS   := -DPGI  $(DEBUG)
   FEXTEND  := -Mextend
   YACC     := bison -y
