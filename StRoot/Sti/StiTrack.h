@@ -1,7 +1,7 @@
 #ifndef StiTrack_H
-#define StiTrack_H 1
+#define StiTrack_H
 
-#include <cmath>
+#include <math.h>
 #include "TObject.h"
 
 class StMeasuredPoint;
@@ -9,86 +9,83 @@ class StVertex;
 
 class StiTrack : public TObject
 {
- public:
+public:
 
-  // constructor/destructor/copy/etc
+    // constructor/destructor/copy/etc
+    
+    StiTrack();
+    virtual ~StiTrack();
+    
+    // action methods
+    
+    virtual void reset();
+    
+    // accessor methods
+    
+    float  getE()              const;   // energy
+    float  getP()              const;   // 3-momentum
+    float  getPt()             const;   // transverse momentum
+    float  getPx()             const;   // px
+    float  getPy()             const;   // py
+    float  getPz()             const;   // longitudinal momentum
+    float  getRapidity()       const;   // rapidity
+    float  getPseudoRapidity() const;   // pseudo rapidity
+    float  getPhi()            const;   // azimuthal angle
+    float  getTanPhi()         const;   // tan(phi)
+    float  getTanL()           const;   // tan(lambda)
+    float  getLambda()         const;   // lambda (pitch angle)
+    float  getMass()           const;   // mass when pid known
+    int    getCharge()         const;   // charge of the particle
+    float  getDca()            const;   // distance of closest approach to track vertex
+    float  getDca(StMeasuredPoint *h)       const;   // distance of closest approach to given point/hit
+    float  getDca2(StiTrack *t)   const;   // distance of closest approach to given track - 2D calc
+    float  getDca3(StiTrack *t)   const;   // distance of closest approach to given track - 3D calc
+    float  getChi2()            const;  // chi2 of fit
+    float  getSvtDedx()         const;
+    float  getTpcDedx()         const;
+    
+    int    getTpcPointCount()   const;  // number of points used in TPC
+    int    getSvtPointCount()   const;  // number of points used in SVT/SSD
+    int    getFitPointCount()   const;  // number of points used in fit
+    int    getPointCount()      const;  // number of total number of points currently assigned to the track
+    int    getStatus()          const;  // status of track
+    
+    StVertex * getVertex() const;  // return pointer to vertex associated with this track if any. 
+    
+    void  setPt(float v)     ;   // transverse momentum
+    void  setTanL(float v)   ;   // tan(lambda)
+    void  setTanPhi(float v) ;   // tan(phi)
+    void  setSvtDedx(float v);   // "average" dEdx of the track from TPC
+    void  setTpcDedx(float v);   // "average" dEdx of the track from SVT
+    void  setCharge(int v)   ;   // charge of the particle
+    void  setDca(float v)    ;   // distance of closest approach to track vertex
+    
+    void  setChi2(float v)        ;  // chi2 of fit
+    void  setFitPointCount(int v) ;  // number of points used in fit
+    void  setPointCount(int v)    ;  // number of points currently assigned to the track;
+    void  setStatus(int v)      ;  // status of track
+    void  setVertex(StVertex *v);
 
-  StiTrack();
-  //StiTrack(const StiTrack & tf); // use compiler default
-  virtual ~StiTrack();
-  
-  // action methods
-
-  virtual void reset();
-
-  // accessor methods
-
-  float  getE()              const;   // energy
-  float  getP()              const;   // 3-momentum
-  float  getPt()             const;   // transverse momentum
-  float  getPx()             const;   // px
-  float  getPy()             const;   // py
-  float  getPz()             const;   // longitudinal momentum
-  float  getRapidity()       const;   // rapidity
-  float  getPseudoRapidity() const;   // pseudo rapidity
-  float  getPhi()            const;   // azimuthal angle
-  float  getTanPhi()         const;   // tan(phi)
-  float  getTanL()           const;   // tan(lambda)
-  float  getLambda()         const;   // lambda (pitch angle)
-  float  getMass()           const;   // mass when pid known
-  int    getCharge()         const;   // charge of the particle
-  float  getDca()            const;   // distance of closest approach to track vertex
-  float  getDca(StMeasuredPoint *h)       const;   // distance of closest approach to given point/hit
-  float  getDca2(StiTrack *t)   const;   // distance of closest approach to given track - 2D calc
-  float  getDca3(StiTrack *t)   const;   // distance of closest approach to given track - 3D calc
-  float  getChi2()            const;  // chi2 of fit
-  float  getSvtDedx()         const;
-  float  getTpcDedx()         const;
-
-  int    getTpcPointCount()   const;  // number of points used in TPC
-  int    getSvtPointCount()   const;  // number of points used in SVT/SSD
-  int    getFitPointCount()   const;  // number of points used in fit
-  int    getPointCount()      const;  // number of total number of points currently assigned to the track;
-  int    getStatus()          const;  // status of track
-  
-  StVertex * getVertex() const;  // return pointer to vertex associated with this track if any. 
-
-  void  setPt(float v)     ;   // transverse momentum
-  void  setTanL(float v)   ;   // tan(lambda)
-  void  setTanPhi(float v) ;   // tan(phi)
-  void  setSvtDedx(float v);   // "average" dEdx of the track from TPC
-  void  setTpcDedx(float v);   // "average" dEdx of the track from SVT
-  void  setCharge(int v)   ;   // charge of the particle
-  void  setDca(float v)    ;   // distance of closest approach to track vertex
-
-  void  setChi2(float v)        ;  // chi2 of fit
-  void  setFitPointCount(int v) ;  // number of points used in fit
-  void  setPointCount(int v)    ;  // number of points currently assigned to the track;
-  void  setStatus(int v)      ;  // status of track
-  void  setVertex(StVertex *v);
-
-  virtual float getSigmaPx2()                     const=0;
-  virtual float getSigmaPy2()                     const=0;
-  virtual float getSigmaPz2()                     const=0;
-  virtual float getSigmaPt2()                     const=0;
-  virtual float getSigmaP2()                      const=0;
-  virtual float getSigmaE2()                      const=0;
-  virtual float getSigmaRapidity2()               const=0;
-  virtual float getSigmaPseudoRapidity2()         const=0;
-  virtual float getSigmaTanL2()                   const=0;
-  virtual float getSigmaTanPhi2()                 const=0;
-  virtual void  getErrorMatrix(double c[15])      const=0;
-  
- protected:
-
-  int    q;
-  float  pt, tanL, tanPhi, svtDedx, tpcDedx, dca, m, chi2;
-  int    nPts, nFitPts;
-  StVertex * vertex; //!
-  int    status;
-
-  ClassDef(StiTrack, 1)
-
+    virtual float getSigmaPx2()                     const=0;
+    virtual float getSigmaPy2()                     const=0;
+    virtual float getSigmaPz2()                     const=0;
+    virtual float getSigmaPt2()                     const=0;
+    virtual float getSigmaP2()                      const=0;
+    virtual float getSigmaE2()                      const=0;
+    virtual float getSigmaRapidity2()               const=0;
+    virtual float getSigmaPseudoRapidity2()         const=0;
+    virtual float getSigmaTanL2()                   const=0;
+    virtual float getSigmaTanPhi2()                 const=0;
+    virtual void  getErrorMatrix(double c[15])      const=0;
+    
+protected:
+    int    q;
+    float  pt, tanL, tanPhi, svtDedx, tpcDedx, dca, m, chi2;
+    int    nPts, nFitPts;
+    StVertex * vertex; //!
+    int    status;
+    ClassDef(StiTrack, 1)
+	
 };
 
 inline  float  StiTrack::getE()              const
@@ -294,5 +291,6 @@ inline void  StiTrack::setVertex(StVertex *v)
 {
   vertex = v;
 }
+
 
 #endif
