@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.74  1999/06/10 18:27:08  fisyak
+#  add ST_NO_EXCEPTIONS for HP
+#
 #  Revision 1.73  1999/06/08 11:30:12  fisyak
 #  take out NT stuff for the moment
 #
@@ -197,7 +200,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/06/08 11:30:12 $ 
+#             Last modification $Date: 1999/06/10 18:27:08 $ 
 #. default setings
 
 MAKE  := gmake
@@ -248,7 +251,8 @@ ifdef INSURE
   CXX      :=  insure -g -Zoi "compiler_cpp g++"
 endif
 ifdef CODEWIZ
-  GCC      :=  codewizard -g -Zoi "compiler_c gcc"
+# No GCC; don't use codewizard during .d file generation
+#  GCC      :=  codewizard -g -Zoi "compiler_c gcc"
   CXX      :=  codewizard -g -Zoi "compiler_cpp g++"
 endif
 CC       :=  $(GCC)
@@ -475,7 +479,7 @@ ifneq (,$(findstring $(STAR_SYS),hp_ux102 hp700_ux90))
 #    case "hp":
 #  ====================
   HPUX := Yess
-  OSFID := HPUX CERNLIB_HPUX CERNLIB_UNIX ST_NO_NAMESPACES
+  OSFID := HPUX CERNLIB_HPUX CERNLIB_UNIX ST_NO_NAMESPACES ST_NO_EXCEPTIONS
   STRID := hpu
   ifdef GCC
     CXXFLAGS  := $(DEBUG) -fPIC +p -I/usr/include/X11R5 -Dextname -D_HPUX_SOURCE 
