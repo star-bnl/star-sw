@@ -3,6 +3,7 @@
 #include "StDetectorDbRichScalers.h"
 #include "StDetectorDbTpcRDOMasks.h"
 #include "StDetectorDbMagnet.h"
+#include "StDetectorDbClock.h"
 
 ClassImp(StDetectorDbMaker)
 
@@ -24,8 +25,13 @@ Int_t StDetectorDbMaker::InitRun(int runNumber){
     StDetectorDbTpcRDOMasks* masks = StDetectorDbTpcRDOMasks::instance();
     masks->update(this);
 
+    // Update Magnet Current
     StDetectorDbMagnet* magnet = StDetectorDbMagnet::instance();
     magnet->update(this);
+
+    // Update Clock Frequency
+    StDetectorDbClock* clock = StDetectorDbClock::instance();
+    clock->update(this);
     
     return StMaker::InitRun(runNumber);
 }
