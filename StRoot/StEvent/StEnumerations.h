@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.8 2000/11/01 16:42:19 lasiuk Exp $
+ * $Id: StEnumerations.h,v 2.9 2000/11/25 11:48:40 lasiuk Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
- * Revision 2.8  2000/11/01 16:42:19  lasiuk
- * add StRichHitFlag for PID info
+ * Revision 2.9  2000/11/25 11:48:40  lasiuk
+ * Modify the StRichHitFlags to account for ambiguities
  *
  * Revision 2.9  2000/11/25 11:48:40  lasiuk
  * Modify the StRichHitFlags to account for ambiguities
@@ -74,23 +74,31 @@ enum StRichPidFlag {eNoMip = 1,
 		    eLightOnPadPlane = 4};
 
 enum StRichHitFlag {eDeconvoluted=1,
-		    eMultiplyAssignedToRing=16,
-		    eAssociatedMip=32,
-		    e1SigmaPi=64,
-		    e2SigmaPi=128,
-		    eInConstantAreaPi=256,
-		    eInAreaPi=512,
-		    eAssignedToRingPi=1024,
-		    e1SigmaK=2048,
-		    e2SigmaK=4096,
+		    eMip=2,
+		    eSaturatedPad=4 ,
+		    ePhotoElectron=8,
+		    eAssociatedMip=16,
+		    eInAreaPi=64,
+		    eInAreaK=128,
+		    eInAreap=256,
+		    eInConstantAnglePi=512,
 		    eInConstantAngleK=1024,
-		    eInAreaK=16384,
-		    eAssignedToRingK=32768,
-		    e1Sigmap=65536,
-		    e2Sigmap=131072,
-		    eInConstantAreap=262144,
-		    eInAreap=524288,
-		    eAssignedToRingp=1048576};
+		    eInConstantAnglep=2048,
+		    eInConstantAreaPi=4096,
+		    eInConstantAreaK=8192,
+		    eInConstantAreap=16384,
+		    eInMultipleAreaPi=32768,
+                    eInMultipleAreaK=65536,
+                    eInMultipleAreap=131072,
+                    eInMultipleCAnglePi=262144,
+                    eInMultipleCAngleK=524288,
+                    eInMultipleCAnglep=1048576,
+                    eInMultipleCAreaPi=2097152,
+                    eInMultipleCAreaK=4194304,
+                    eInMultipleCAreap=8388608,
+                    e1SigmaPi=16777216,
+                    e1SigmaK=33554432,
+                    e1Sigmap=67108864,
                     e2SigmaPi=134217728,
                     e2SigmaK=268435456,
                     e2Sigmap=536870912};
