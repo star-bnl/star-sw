@@ -454,7 +454,7 @@ TTree *St_io_Maker::MakeTree(const char* name, const char*title)
 //_____________________________________________________________________________
 void St_io_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_io_Maker.cxx,v 1.12 1999/03/06 02:31:13 fine Exp $\n");
+  printf("* $Id: St_io_Maker.cxx,v 1.13 1999/03/07 02:15:32 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
@@ -523,12 +523,12 @@ TTree *St_io_Maker::SetNextTree()
          // Calclulate next and current offset
          m_OffSet += TMath::Min(m_Entries,GetMaxEvent());
 //         m_Entries = m_Tree->GetEntries();
-         m_Entries = -1;
-         g_Chain->SetTree(m_Tree);
+         m_Entries = -1;         
        }
        else 
-            cout << "there is no tree in tthis file " << endl;
+            cout << "there is no tree in this file " << endl;
      }
+     g_Chain->SetTree(m_Tree);
   }  
   return GetTree();
 }
