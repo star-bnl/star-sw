@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcPixelHit.cc,v 2.1 2003/08/20 18:50:21 calderon Exp $
+ * $Id: StMcPixelHit.cc,v 2.2 2003/12/02 21:22:03 calderon Exp $
  * $Log: StMcPixelHit.cc,v $
+ * Revision 2.2  2003/12/02 21:22:03  calderon
+ * remove unnecessary #include "StMcTrack.hh"
+ *
  * Revision 2.1  2003/08/20 18:50:21  calderon
  * Addition of Tof classes and Pixel classes.  Modified track, event, and
  * container code to reflect this.
@@ -12,10 +15,9 @@
 #include "StThreeVectorF.hh"
 
 #include "StMcPixelHit.hh"
-#include "StMcTrack.hh"
 #include "tables/St_g2t_pix_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcPixelHit.cc,v 2.1 2003/08/20 18:50:21 calderon Exp $";
+static const char rcsid[] = "$Id: StMcPixelHit.cc,v 2.2 2003/12/02 21:22:03 calderon Exp $";
 
 StMemoryPool StMcPixelHit::mPool(sizeof(StMcPixelHit));
 

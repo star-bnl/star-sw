@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcRichHit.cc,v 2.4 2000/06/06 02:58:41 calderon Exp $
+ * $Id: StMcRichHit.cc,v 2.5 2003/12/02 21:22:03 calderon Exp $
  * $Log: StMcRichHit.cc,v $
+ * Revision 2.5  2003/12/02 21:22:03  calderon
+ * remove unnecessary #include "StMcTrack.hh"
+ *
  * Revision 2.4  2000/06/06 02:58:41  calderon
  * Introduction of Calorimeter classes.  Modified several classes
  * accordingly.
@@ -21,10 +24,9 @@
  *
  **************************************************************************/
 #include "StMcRichHit.hh"
-#include "StMcTrack.hh"
 #include "tables/St_g2t_rch_hit_Table.h"
 
-static const char rcsid[] = "$Id: StMcRichHit.cc,v 2.4 2000/06/06 02:58:41 calderon Exp $";
+static const char rcsid[] = "$Id: StMcRichHit.cc,v 2.5 2003/12/02 21:22:03 calderon Exp $";
 
 StMemoryPool StMcRichHit::mPool(sizeof(StMcRichHit));
 
