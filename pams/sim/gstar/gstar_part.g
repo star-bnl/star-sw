@@ -54,17 +54,17 @@
 *
 * --------------------------------------------------------------------------
 *
- Subroutine aGuTRACK
-* check here for IPART: if>200, this particle is unknown to GEANT  
-* and needs correct tracking parameters (TrkTyp,mass,charge,tlife) 
-* to be set here.
- end
+* Subroutine aGuTRACK
+*  check here for IPART: if>200, this particle is unknown to GEANT  
+*  and needs correct tracking parameters (TrkTyp,mass,charge,tlife) 
+*  to be set here.
+* end
 *
 * --------------------------------------------------------------------------
 *
- Subroutine aGuDCAY
-* If decay modes are not set, this routine will be called to decay the particle 
- end
+* Subroutine aGuDCAY
+*  If decay modes are not set, this routine will be called to decay the particle 
+* end
 *
 * --------------------------------------------------------------------------
 *

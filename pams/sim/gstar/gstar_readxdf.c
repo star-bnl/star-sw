@@ -51,7 +51,7 @@ int  *igate;
    /* if (particle) free(particle); */
 
    if ( GET(p,"particle",particle,pok) )
-      { if (gcflag_) printf(" xdf_read: HEPEVNT table Npart=%d \n",pok);
+      { if (gcflag_) printf("  xdf_read: HEPEVNT table Npart=%d \n",pok);
         if (pok) 
         { int num[3]={1,1,1};  int L=15*pok;  int Link;
           rebank_("/EVNT/GENE/GENT*",num,&L,&Link,z,16);
