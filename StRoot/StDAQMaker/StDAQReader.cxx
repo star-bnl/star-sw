@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.40 2004/02/03 03:25:06 jeromel Exp $
+ * $Id: StDAQReader.cxx,v 1.41 2004/02/04 01:39:43 jeromel Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.41  2004/02/04 01:39:43  jeromel
+ * Minor change (forgot a \n)
+ *
  * Revision 1.40  2004/02/03 03:25:06  jeromel
  * Added counter for ZeroToken events
  *
@@ -223,7 +226,7 @@ int StDAQReader::close()
 StDAQReader::~StDAQReader()
 {
   if (m_ZeroTokens > 1){
-    (void) printf("<Warning: StDAQReader::~StDAQReader()> %d events with token==0",
+    (void) printf("<Warning: StDAQReader::~StDAQReader()> %d events with token==0\n",
 		  m_ZeroTokens);
   }
   close();
@@ -247,6 +250,7 @@ int StDAQReader::readEvent()
   if(fEventReader->errorNo()) return kStErr;  
   *fEventInfo = fEventReader->getEventInfo();
   if(fEventInfo->Token==0){
+    (void) printf("<Warning: StDAQReader::readEvent()> found event with token==0\n");
     m_ZeroTokens++;
     // return kStErr;  // Herb, July 5 2000
   }
