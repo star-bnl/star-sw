@@ -1,4 +1,4 @@
-// $Id: rootlogon.C,v 1.29 2000/10/27 11:53:10 fisyak Exp $
+// $Id: rootlogon.C,v 1.30 2001/04/13 21:07:16 fine Exp $
 //
 //=======================================================================
 // owner:  Yuri Fisyak
@@ -6,6 +6,7 @@
 //=======================================================================
 
 {
+
 #pragma optimize 0
   //    gInterpreter->ProcessLine(".O0");
     gROOT->ProcessLine(".O0"); 
@@ -129,5 +130,16 @@
      }
    }
 #endif
-   if (gSystem->Getenv("OPENGL")) gROOT->Macro("GL.C");
+  
+   int nargStar  = gApplication->Argc();
+   Bool_t starGraph = kTRUE;
+   if (nargStar > 1 ) {
+     int iii_jjj;
+     for (iii_jjj = 1; iii_jjj < nargStar;iii_jjj++) {
+       if (strcmp(gApplication->Argv(iii_jjj),"-b") == 0) {
+          starGraph = kFALSE; 
+       }
+     }
+   }
+   if (starGraph && gSystem->Getenv("OPENGL")) gROOT->Macro("GL.C");
 }
