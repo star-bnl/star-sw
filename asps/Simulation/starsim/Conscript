@@ -18,8 +18,9 @@ my $pkg  = "starsim";
 my $PKG = $pkg;     print "Run cons in $Dir for $PKG\n";
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB};# print "SO_PKG = $SO_PKG\n";
 my $LIBPKG = "lib" . $PKG . "." . $env->{SUFLIB};
-$FCPATH  .= $main::PATH_SEPARATOR . "#asps/Simulation/starsim/include";
-$FCPATH  .= $main::PATH_SEPARATOR . "#asps/Simulation/gcalor/include";
+$FCPATH  = "#asps/Simulation/starsim/include";
+$FCPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/gcalor/include";
+$FCPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/include";
 my $CPP_DATE = "031201";
 my $CPP_TIME = "1937";
 $FPPFLAGS .= " -D__ROOT_ -DCERNLIB_TYPE -DCERNLIB_UNIX " .
@@ -31,7 +32,7 @@ $FPPFLAGS .= " -DCPP_VERS=\"'v*'\"";
 $FPPFLAGS .= " -DCPP_DATE=\"`date +%%y%%m%%d`\"";
 $FPPFLAGS .= " -DCPP_TIME=\"`date +%%H%%M`\"";
 $CPPFLAGS .= " -Df2cFortran";
-$CPPPATH .= $main::PATH_SEPARATOR . "#asps/Simulation/starsim/include";
+$CPPPATH  = "#asps/Simulation/starsim/include";
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{INCDIR}; 
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/include";
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/src/pawlib/paw/ntuple";
@@ -95,20 +96,20 @@ my @starsim = qw(acmain.cxx);
 my $pgm = "starsim";
 my $PGI = $env->{ENV}->{PGI};
 my $PGILIBS = "";
-if ($PGI) {
-  $PGILIBS .= " -L$PGI/linux86/lib";
-  $PGILIBS .= " -Wl,--whole-archive -Wl,-Bstatic";
-  if ( -e "$PGI/linux86/lib/libpgftnrtl.a"){
-    $PGILIBS .= " -lpgftnrtl";
-  }
-  if ( -e "$PGI/linux86/lib/libpgc.a"){
-    $PGILIBS .= " -lpgc";
-  }
-  if ( -e "$PGI/linux86/lib/libpgnod_prof.a"){
-    $PGILIBS .= " -lpgnod_prof";
-  }
-  $PGILIBS .= " -Wl,--no-whole-archive -Wl,-Bdynamic";
-}
+#if ($PGI) {
+#  $PGILIBS .= " -L$PGI/linux86/lib";
+#  $PGILIBS .= " -Wl,--whole-archive -Wl,-Bstatic";
+#  if ( -e "$PGI/linux86/lib/libpgftnrtl.a"){
+#    $PGILIBS .= " -lpgftnrtl";
+#  }
+#  if ( -e "$PGI/linux86/lib/libpgc.a"){
+#    $PGILIBS .= " -lpgc";
+#  }
+#  if ( -e "$PGI/linux86/lib/libpgnod_prof.a"){
+#    $PGILIBS .= " -lpgnod_prof";
+#  }
+#  $PGILIBS .= " -Wl,--no-whole-archive -Wl,-Bdynamic";
+#}
 script::Keep $pgm;
 my $LDFLAGS = $env->{LDFLAGS};
 $LDFLAGS .= " -export-dynamic -rdynamic -Wl,-noinhibit-exec,-Bdynamic";
@@ -119,8 +120,8 @@ if ($LIBPATH) {$LIBPATH .= $main::PATH_SEPARATOR;}
 $LIBPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{LIBDIR};
 my $LIBS    = $env->{LIBS};
 if ($PGILIBS) {$LIBS .= " " . $PGILIBS;}
-$LIBS .= " -Wl,--whole-archive -Wl,-Bstatic -lstarsim -lstdc++ -Wl,--no-whole-archive -Wl,-Bdynamic";# -lg2c";
-		 $LIBS .= " -lgeant321";
+$LIBS .= " -Wl,--whole-archive -Wl,-Bstatic -lstarsim -lg2c -lstdc++ -Wl,--no-whole-archive -Wl,-Bdynamic";# -lg2c";
+$LIBS .= " -lgeant321";
 $LIBS .= " -lgcalor";
 my $Libraries = $env->{Libraries};
 		 my $LD = $env->{CC};
@@ -142,8 +143,8 @@ my @Deps = ($pgm . ".new","#" . $d . "atlsim.makefile","#" . $d . "atlsim.bank",
 foreach my $l (@list) {
   my $f = File::Basename::basename($l); 
   my $s = $f; $s =~ s/atlsim/starsim/; #  print "$l => $s\n";
-  InstallAs $envP $BIN . $s, "#" . $d . $f;
-  push @Deps, $BIN . $s;
+  InstallAs $envP $BIN ."/". $s, "#" . $d ."/". $f;
+  push @Deps, $BIN . "/" . $s;
 }		 
 Command      $env  $pgm, @Deps, 
 		 q(
