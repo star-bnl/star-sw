@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.58 1998/10/18 21:50:29 fisyak Exp $
+# $Id: MakePam.mk,v 1.59 1998/10/19 01:03:12 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.59  1998/10/19 01:03:12  fisyak
+# Add also separate OBJ directory for NODEBUG version
+#
 # Revision 1.58  1998/10/18 21:50:29  fisyak
 # separate dependencies for debug and Nodebug libraries
 #
@@ -100,11 +103,12 @@ ifeq (,$(findstring $(LEVEL),0 1))
     ifndef NODEBUG
       LIB_DIR := $(SYS_DIR)/lib
       DEP_DIR := $(SYS_DIR)/dep/$(DOMAIN)
+      OBJ_DIR := $(SYS_DIR)/obj/$(DOMAIN)
     else
       LIB_DIR := $(SYS_DIR)/LIB
       DEP_DIR := $(SYS_DIR)/DEP/$(DOMAIN)
+      OBJ_DIR := $(SYS_DIR)/OBJ/$(DOMAIN)
     endif
-    OBJ_DIR := $(SYS_DIR)/obj/$(DOMAIN)
     DIR_GEN := $(OUT_DIR)/.share
     GEN_TMP := $(DIR_GEN)/tmp
     GEN_TAB := $(DIR_GEN)/tables
