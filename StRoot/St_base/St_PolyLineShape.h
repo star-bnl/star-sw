@@ -32,7 +32,6 @@ public:
    St_PolyLineShape();
    St_PolyLineShape(TPoints3DABC *points,Option_t* option="P");
    virtual ~St_PolyLineShape();
-   static  void Axis(TVirtualPad *p=0, Float_t width=0.5, Float_t axisFactor=0.2);
    virtual Int_t        DistancetoPrimitive(Int_t px, Int_t py);
    virtual void         Draw(Option_t *opt="");
    virtual void         ExecuteEvent(Int_t event, Int_t px, Int_t py);

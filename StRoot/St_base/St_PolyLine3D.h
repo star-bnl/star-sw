@@ -30,6 +30,7 @@ public:
         St_PolyLine3D(const St_PolyLine3D &polylin);
         virtual ~St_PolyLine3D();
 
+        static  void      Axis(TVirtualPad *p=0, Float_t width=0.5, Float_t axisFactor=0.2);
         virtual void      Copy(TObject &polyline);
         virtual Int_t     DistancetoPrimitive(Int_t px, Int_t py);
         virtual void      DrawPolyLine(Int_t n, Float_t *p, Option_t *option="");

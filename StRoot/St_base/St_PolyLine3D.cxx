@@ -283,3 +283,126 @@ Int_t   St_PolyLine3D::GetNumberOfAttributes() const
 Int_t   St_PolyLine3D::SetNumberOfAttributes(Int_t n)
 { return 0;}
 
+//______________________________________________________________________________
+void St_PolyLine3D::Axis(TVirtualPad *p, Float_t width, Float_t axisFactor)
+{
+#if 1
+   TVirtualPad *pad = p;
+   TVirtualPad *savpad = 0;
+   if (pad && pad != gPad) {
+      savpad = gPad;
+      pad->cd();      
+   }
+   else 
+     pad = gPad;
+
+   // 3 options for the origin positions
+   //  -  at (0,0,0}
+   //  -  left front angle of the view port
+   //  -  the center of the view port  
+   //       Axis / Cube
+   
+   const Float_t arrowLegthFactor = 0.1;
+   const Float_t arrowWidthFactor = 0.5;
+
+   TView *view = pad->GetView();
+   if (view) {
+      Float_t origin[3] = {0,0,0};
+      Float_t min[3];
+      Float_t max[3];
+      Float_t x = 0;
+      Float_t y = 0;
+      Float_t z = 0;
+      Int_t i =0;
+      Int_t indx = 0;
+      view->GetRange(min,max);
+      const Float_t arrowLegth = arrowLegthFactor*axisFactor*(max[0]-min[0]);
+      const Float_t arrWidth   = arrowWidthFactor*arrowLegth;
+      for (i=0;i<3;i++) {
+//       origin[i] = TMath::Min(TMath::Max(0.0f,min[i]),max[i]);
+       origin[i] = 0.5*(max[i]+min[i]);
+//       printf(" %f %f min=%f max=%f \n", arrowLegth, origin[i],min[i],max[i]);
+      }
+      //___________  X axis ____________
+      indx = 0;
+      St_PolyLine3D *lx = new St_PolyLine3D(5,"L");
+        x = origin[0];
+        y = origin[1];
+        z = origin[2];
+      lx->SetNextPoint(x,y,z);               // initial point
+        x += axisFactor*(max[indx]-min[indx]);
+      lx->SetNextPoint(x,y,z);               //     --------
+      //____________ x_head ____________
+        x -= arrowLegth;
+        y += arrWidth;                        //            
+      lx->SetNextPoint(x,y,z);                //     --------
+        x = origin[indx] + axisFactor*(max[indx]-min[indx]);
+        y = origin[1];
+      lx->SetNextPoint(x,y,z);                // go back
+        x -= arrowLegth;
+        y -= arrWidth;                        //            
+      lx->SetNextPoint(x,y,z);                //     --------> finish it
+                                              //            
+      lx->SetBit(kCanDelete);
+      lx->SetColorAttribute(6);
+      lx->SetSizeAttribute(2);
+      lx->SetWidthFactor(width);
+//      lx->Draw();
+
+      //___________  Y axis ____________
+      indx++;
+      St_PolyLine3D *ly = new St_PolyLine3D(5,"L");
+        x = origin[0];
+        y = origin[1];
+        z = origin[2];
+      lx->SetNextPoint(x,y,z);               // initial point
+        y = origin[indx] + axisFactor*(max[indx]-min[indx]);
+      lx->SetNextPoint(x,y,z);               //     --------
+      //____________ y_head ____________
+        y -= arrowLegth;
+        x += arrWidth;                       //            
+      lx->SetNextPoint(x,y,z);               //     --------
+        x = origin[0];
+        y = origin[indx] + axisFactor*(max[indx]-min[indx]);
+      lx->SetNextPoint(x,y,z);               // go back
+        y -= arrowLegth;
+        x -= arrWidth;                       //            
+      lx->SetNextPoint(x,y,z);               //     --------> finish it
+                                             //            
+      ly->SetColorAttribute(4);
+      ly->SetSizeAttribute(2);
+      ly->SetBit(kCanDelete);
+      ly->SetWidthFactor(width);
+//      ly->Draw();
+
+      //___________  Z axis ____________
+      indx++;
+      St_PolyLine3D *lz = new St_PolyLine3D(5,"L");
+        x = origin[0];
+        y = origin[1];
+        z = origin[2];
+      lx->SetNextPoint(x,y,z);               // initial point
+        z = origin[indx] + axisFactor*(max[indx]-min[indx]);
+      lx->SetNextPoint(x,y,z);               //     --------
+      //____________ z_head ____________
+        z -= arrowLegth;
+        x += arrWidth;                       //            
+      lx->SetNextPoint(x,y,z);               //     --------
+        x = origin[0];
+        z = origin[indx] + axisFactor*(max[indx]-min[indx]);
+      lx->SetNextPoint(x,y,z);               // go back
+        z -= arrowLegth;
+        x -= arrWidth;                       //            
+      lx->SetNextPoint(x,y,z);               //     --------> finish it
+
+
+      lz->SetBit(kCanDelete);
+      lz->SetColorAttribute(2);
+      lz->SetSizeAttribute(2);
+      lz->SetWidthFactor(width);
+      lz->Draw();
+   }
+   if (savpad) savpad->cd();
+#endif
+ }   
+
