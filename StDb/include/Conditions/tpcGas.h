@@ -1,4 +1,6 @@
-//:Description: 
+#ifndef TPC_GAS_H
+#define TPC_GAS_H
+//:Description: Gas measures
 //:Synonyms::::
 //:Source:
 //:Update:
@@ -6,7 +8,7 @@
 //:Reminder:
 //:Recall frequency:
 //:Size of Data:
-//:Pointer to data:  TPCGas.time:
+//:Pointer to data:  Conditions_tpc/tpcGas:
 struct tpcGas {
 
   //  type varnam;    //Units : Comments
@@ -33,3 +35,4 @@ struct tpcGas {
   float flowRateRecirculation;     // liters/min : TPC-F17
 
 };
+#endif

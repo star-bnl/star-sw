@@ -1,4 +1,6 @@
-//:Description: 
+#ifndef TPC_WIREPLANES_H
+#define TPC_WIREPLANES_H
+//:Description: location & dimension of Wire-planes
 //:Synonyms::::
 //:Source:
 //:Update:
@@ -6,7 +8,7 @@
 //:Reminder:
 //:Recall frequency:
 //:Size of Data:
-//:Pointer to data:  TPCWires.time:
+//:Pointer to data:  Geometry_tpc/tpcWirePlanes
 struct tpcWirePlanes {
 
   //  type varnam;    //Units : Comments
@@ -44,3 +46,4 @@ struct tpcWirePlanes {
 
 
 };
+#endif

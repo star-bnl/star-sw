@@ -1,4 +1,6 @@
-//:Description: 
+#ifndef TPC_SECTORPOSITION_H
+#define TPC_SECTORPOSITION_H
+//:Description: position measures of a tpc-sector 
 //:Synonyms::::
 //:Source:
 //:Update:
@@ -6,12 +8,11 @@
 //:Reminder:
 //:Recall frequency:
 //:Size of Data:
-//:Pointer to data:  sectorPosition.time:
+//:Pointer to data: Geometry_tpc/Sector_##/tpcSectorPosition
 struct tpcSectorPosition {
 
   //  type varnam;    //Units : Comments
 
-  int   sectorID;
   float innerSectorLocalxShift;     // cm : shift in local x coord.
   float innerSectorLocalyShift;     // cm : shift in local y coord.
   float innerSectorRotationAngle;   // degrees : rotation
@@ -25,3 +26,4 @@ struct tpcSectorPosition {
 
 
 };
+#endif

@@ -1,4 +1,6 @@
-//:Description: 
+#ifndef TPC_ELECTRONICS_H
+#define TPC_ELECTRONICS_H
+//:Description: electronic signal characteristics 
 //:Synonyms::::
 //:Source:  B. Lasiuk (trs)
 //:Update:
@@ -6,7 +8,7 @@
 //:Reminder:
 //:Recall frequency:
 //:Size of Data:
-//:Pointer to data:  TPCElectronics.time:
+//:Pointer to data:  Geometry_tpc/tpcElectronics
 struct tpcElectronics {
 
   //  type varnam;    //Units : Comments
@@ -23,3 +25,4 @@ struct tpcElectronics {
    
 };
 
+#endif
