@@ -81,7 +81,7 @@ inline StiKalmanTrackNode& StiKTNVertIterator::operator*()
 /*! In the case where the prefix operator increments beyond the root of the tree,
   the pointer to mNode is set to 0.   This demarcates the end of the traversal.
  */
-StiKTNVertIterator& StiKTNVertIterator::operator++ ()
+inline StiKTNVertIterator& StiKTNVertIterator::operator++ ()
 {
     if (mNode->isRoot() ) {
 	mNode=0;
@@ -97,14 +97,14 @@ StiKTNVertIterator& StiKTNVertIterator::operator++ ()
 /*! In the case where the prefix operator increments beyond the root of the tree,
   the pointer to mNode is set to 0.   This demarcates the end of the traversal.
 */
-StiKTNVertIterator StiKTNVertIterator::operator++(int)
+inline StiKTNVertIterator StiKTNVertIterator::operator++(int)
 {
     StiKTNVertIterator temp = *this;
     ++(*this);
     return temp;
 }
 
-StiKTNVertIterator StiKTNVertIterator::end()
+inline StiKTNVertIterator StiKTNVertIterator::end()
 {
     return StiKTNVertIterator(0);
 }

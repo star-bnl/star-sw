@@ -103,8 +103,9 @@ protected:
     unsigned int mSkipped;
     //Define the max number we can skip
     unsigned int mMaxSkipped;
-    //define the number of points to extrapolate
-    unsigned int mExtrapLength;
+    //define the Min/Max number of points to extrapolate
+    unsigned int mExtrapMinLength;
+    unsigned int mExtrapMaxLength;
 
     //Use the origin to calculate helix?
     bool mUseOrigin;

@@ -19,6 +19,7 @@
 #include "StiCompositeTreeNode.h"
 #include "StiPlacement.h"
 #include "StiDetector.h"
+#include "StiTrackNode.h"
 #include "StiFactoryTypes.h" //For typedef
 
 //------------------------------ Hit Map Utilities ----------------------------
@@ -135,6 +136,15 @@ bool StTpcPadrowHitFilter::operator()(const StTpcHit& hit) const
 {
     return ( (hit.padrow()>=mMinPadrow) && (hit.padrow()<=mMaxPadrow) );
 }
+
+void SetHitUsed::operator()(StiTrackNode& node)
+{
+    StiHit* hit = node.getHit();
+    if (hit) {
+	hit->setUsed(true);
+    }
+}
+
 
 
 //----------------------- Streamers -------------------------------------------------

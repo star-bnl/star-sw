@@ -79,8 +79,11 @@ public:
     virtual void setLTSFExtrapMaxSkipped(unsigned int);
     virtual unsigned int ltsfExtrapMaxSkipped() const;
 
-    virtual void setLTSFExtrapLength(unsigned int);
-    virtual unsigned int ltsfExtrapLength() const;
+    virtual void setLTSFExtrapMinLength(unsigned int);
+    virtual unsigned int ltsfExtrapMinLength() const;
+    
+    virtual void setLTSFExtrapMaxLength(unsigned int);
+    virtual unsigned int ltsfExtrapMaxLength() const;
     
     virtual void setLTSFUseVertex(bool);
     virtual bool ltsfUseVertex() const;
@@ -160,7 +163,8 @@ protected:
     double mLTSFExtrapZWindow;
     double mLTSFExtrapYWindow;
     unsigned int mLTSFExtrapMaxSkipped;
-    unsigned int mLTSFExtrapLength;
+    unsigned int mLTSFExtrapMinLength;
+    unsigned int mLTSFExtrapMaxLength;
     bool mLTSFUseVertex;
     bool mLTSFDoHelixFit;
 
@@ -364,15 +368,26 @@ inline unsigned int StiRootIOBroker::ltsfExtrapMaxSkipped() const
     return mLTSFExtrapMaxSkipped;
 }
 
-inline void StiRootIOBroker::setLTSFExtrapLength(unsigned int val)
+inline void StiRootIOBroker::setLTSFExtrapMinLength(unsigned int val)
 {
-    mLTSFExtrapLength=val;
+    mLTSFExtrapMinLength=val;
     notify();
 }
 
-inline unsigned int StiRootIOBroker::ltsfExtrapLength() const
+inline unsigned int StiRootIOBroker::ltsfExtrapMinLength() const
 {
-    return mLTSFExtrapLength;
+    return mLTSFExtrapMinLength;
+}
+
+inline void StiRootIOBroker::setLTSFExtrapMaxLength(unsigned int val)
+{
+    mLTSFExtrapMaxLength=val;
+    notify();
+}
+
+inline unsigned int StiRootIOBroker::ltsfExtrapMaxLength() const
+{
+    return mLTSFExtrapMaxLength;
 }
 
 inline void StiRootIOBroker::setLTSFUseVertex(bool val)

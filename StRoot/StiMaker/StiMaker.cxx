@@ -220,8 +220,9 @@ Int_t StiMaker::Init()
     //The Track node factory
     mktracknodefactory =
 	new StiKalmanTrackNodeFactory("StiKalmanTrackNodeFactory");
-    mktracknodefactory->setIncrementalSize(1000);
-    mktracknodefactory->setMaxIncrementCount(100);
+    mktracknodefactory->setIncrementalSize(10000);
+    mktracknodefactory->setMaxIncrementCount(200);
+    //So, we can have 100 allocations at 10000 a pop ->1M nodes max
     
     StiKalmanTrack::setKalmanTrackNodeFactory( mktracknodefactory );    
 
@@ -390,14 +391,19 @@ void StiMaker::printStatistics() const
 void StiMaker::finishEvent()
 {
     cout <<"StiMaker::finishEvent()"<<endl;
+    StTimer clock;
+    clock.start();
     double n=0.;
     while (mtracker->hasMore()) {
 	++n;
 	finishTrack();
-	if (fmod(n, 25.)==0.) {
+	if (fmod(n, 100.)==0.) {
 	    cout <<"Chugging on track: "<<n<<endl;
 	}
     }
+    clock.stop();
+    cout <<"Time to find/fit "<<n<<" tracks: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
+
     StiEvaluator::instance()->evaluateForEvent(mtrackstore);
     cout <<"\tStiMaker::finishEvent(). done"<<endl;
 }

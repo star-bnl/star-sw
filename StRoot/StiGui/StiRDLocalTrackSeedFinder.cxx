@@ -35,7 +35,7 @@ StiRDLocalTrackSeedFinder::StiRDLocalTrackSeedFinder(StiDetectorContainer* det,
 						     StiHitContainer* hits)    
     : StiLocalTrackSeedFinder(det, hits), mdrawablehits(new StiRootDrawableHits())
 {
-    mMessenger <<"StiRDLocalTrackSeedFinder::StiRDLocalTrackSeedFinder()"<<endl;
+    cout <<"StiRDLocalTrackSeedFinder::StiRDLocalTrackSeedFinder()"<<endl;
 
     mdrawablehits->clear();
     mdrawablehits->setColor(3);
@@ -50,34 +50,33 @@ StiRDLocalTrackSeedFinder::StiRDLocalTrackSeedFinder(StiDetectorContainer* det,
 
 StiRDLocalTrackSeedFinder::~StiRDLocalTrackSeedFinder()
 {
-    mMessenger <<"StiRDLocalTrackSeedFinder::~StiRDLocalTrackSeedFinder()"<<endl;
+    cout <<"StiRDLocalTrackSeedFinder::~StiRDLocalTrackSeedFinder()"<<endl;
     //Note, do not call delete on drawable hits, they're owned by root
 }
 
 void StiRDLocalTrackSeedFinder::reset()
 {
-    mMessenger <<"StiRDLocalTrackSeedFinder::reset()"<<endl;
-
     mdrawablehits->clear();
-
     //Cleanup the base-class
     StiLocalTrackSeedFinder::reset();
-
-    mMessenger <<"\t leaving StiRDLocalTrackSeedFinder::reset()"<<endl;
 }
 
 
 StiKalmanTrack* StiRDLocalTrackSeedFinder::makeTrack(StiHit* hit)
 {
+#ifdef DEBUG
     mMessenger <<"StiRDLocalTrackSeedFinder::makeTrack()"<<endl;
+#endif
 
     mdrawablehits->clear();
     StiKalmanTrack* track = StiLocalTrackSeedFinder::makeTrack(hit);
     if (!track) {
 	return track;
     }
-    
+
+#ifdef DEBUG
     mMessenger<<"\tGet Global positions:\t";
+#endif
 
     for (HitVec::const_iterator it=mSeedHitVec.begin(); it!=mSeedHitVec.end(); ++it) {
 	const StThreeVectorF& pos = (*it)->globalPosition();
@@ -85,21 +84,27 @@ StiKalmanTrack* StiRDLocalTrackSeedFinder::makeTrack(StiHit* hit)
 	mdrawablehits->push_back( pos.y() );
 	mdrawablehits->push_back( pos.z() );
     }
-    
+
+#ifdef DEBUG
     mMessenger <<"done."<<endl;
+#endif
     
     mdrawablehits->fillHitsForDrawing();    
     StiDisplayManager::instance()->draw();
     StiDisplayManager::instance()->update();
-    
+
+#ifdef DEBUG
     mMessenger <<"\t leaving StiRDLocalTrackSeedFinder::makeTrack()"<<endl;
+#endif
     
     return track;
 }
 
 void StiRDLocalTrackSeedFinder::getNewState()
 {
+#ifdef DEBUG
     mMessenger <<"StiRDLocalTrackSeedFinder::getNewState()"<<endl;
+#endif
     //const StiIOBroker* broker = StiIOBroker::instance();
     StiLocalTrackSeedFinder::getNewState();
 }

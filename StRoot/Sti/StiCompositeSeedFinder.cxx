@@ -28,14 +28,14 @@ using std::copy;
 
 StiCompositeSeedFinder::StiCompositeSeedFinder(StiObjectFactoryInterface<StiKalmanTrack>* fact)
 {
-    mMessenger <<"StiCompositeSeedFinder::StiCompositeSeedFinder()"<<endl;
+    cout <<"StiCompositeSeedFinder::StiCompositeSeedFinder()"<<endl;
     mFactory = fact;
     build();
 }
 
 StiCompositeSeedFinder::~StiCompositeSeedFinder()
 {
-    mMessenger <<"StiCompositeSeedFinder::~StiCompositeSeedFinder()"<<endl;
+    cout <<"StiCompositeSeedFinder::~StiCompositeSeedFinder()"<<endl;
 
     //Destroy seed finders
     for (SeedFinderVec::iterator it=mSeedVec.begin(); it!=mSeedVec.end(); ++it) {
@@ -45,16 +45,26 @@ StiCompositeSeedFinder::~StiCompositeSeedFinder()
 
 bool StiCompositeSeedFinder::hasMore()
 {
+#ifdef DEBUG
     mMessenger <<"StiCompositeSeedFinder::hasMore()"<<endl;
+#endif
+    
     bool val =  mCurrent>=mSeedVec.begin() && mCurrent<mSeedVec.end()
 	&& (*mCurrent)->hasMore();
+    
+#ifdef DEBUG
     mMessenger <<"\t  returning "<<val<<endl;
+#endif
+    
     return val;
 }
 
 StiKalmanTrack* StiCompositeSeedFinder::next()
 {
+#ifdef DEBUG
     mMessenger <<"StiCompositeSeedFinder::next()"<<endl;
+#endif
+    
     StiKalmanTrack* track=0;
     //while ((*mCurrent)->hasMore() && track==0) {
     track = (*mCurrent)->next();
@@ -64,27 +74,37 @@ StiKalmanTrack* StiCompositeSeedFinder::next()
     if ( (*mCurrent)->hasMore()==false ) {
 	++mCurrent;
     }
-     
+    
+#ifdef DEBUG 
     mMessenger <<"\t leaving StiCompositeSeedFinder::next()"<<endl;
+#endif
+    
     return track;
 }
 
 void StiCompositeSeedFinder::reset()
 {
+    
+#ifdef DEBUG
     mMessenger <<"StiCompositeSeedFinder::reset()"<<endl;
+#endif
+    
     //reset all!
     for (SeedFinderVec::iterator it=mSeedVec.begin(); it!=mSeedVec.end(); ++it) {
 	(*it)->reset();
     }
     mCurrent=mSeedVec.begin();
+    
+#ifdef DEBUG
     mMessenger <<"\t leaving StiCompositeSeedFinder::reset()"<<endl;
+#endif
     
     return;
 }
 
 void StiCompositeSeedFinder::build()
 {
-    mMessenger <<"\nStiCompositeSeedFinder::build()"<<endl;
+    cout <<"\nStiCompositeSeedFinder::build()"<<endl;
 
     //Build each SeedFinder
     
@@ -121,8 +141,8 @@ void StiCompositeSeedFinder::build()
 	    sprintf(szBuf, "Tpc/Padrow_%d/Sector_%d", *padrow, *sector);
 	    StiDetector* layer = StiDetectorFinder::instance()->findDetector(szBuf);
 	    if (!layer) {
-		mMessenger <<"gTrackSeedFinderBuilder(). ERROR:\t";
-		mMessenger <<"No layer: "<<szBuf<<endl;
+		cout <<"gTrackSeedFinderBuilder(). ERROR:\t";
+		cout <<"No layer: "<<szBuf<<endl;
 	    }
 	    else {
 		sf->addLayer(layer);
