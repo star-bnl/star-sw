@@ -1,8 +1,8 @@
 .rn '' }`
-''' $RCSfile: cons.1,v $$Revision: 1.1.1.7 $$Date: 2000/11/19 19:33:41 $
+''' $RCSfile: cons.1,v $$Revision: 1.1.1.8 $$Date: 2000/11/27 23:12:33 $
 '''
 ''' $Log: cons.1,v $
-''' Revision 1.1.1.7  2000/11/19 19:33:41  fisyak
+''' Revision 1.1.1.8  2000/11/27 23:12:33  fisyak
 ''' *** empty log message ***
 '''
 '''
@@ -96,7 +96,7 @@
 .nr % 0
 .rr F
 .\}
-.TH CONS 1 "2.3.0" "19/Nov/2000" "Cons - Software Construction System"
+.TH CONS 1 "2.3.0" "27/Nov/100" "Cons - Software Construction System"
 .UC
 .if n .hy 0
 .if n .na
@@ -1189,6 +1189,13 @@ Would yield a compilation command of:
 .Vb 1
 \&  cc -Ia -I/u1/a -I/u2/a -Ib -I/u1/b -I/u2/b -Ic -I/u1/c -I/u2/c -c hello.c -o hello.o
 .Ve
+In order to shorten the command lines as much as possible, Cons will
+remove \f(CW-I\fR flags for any directories, locally or in the repositories,
+which do not actually exist.  (Note that the \f(CW-I\fR flags are not included
+in the \s-1MD5\s0 signature calculation for the target file, so the target will
+not be recompiled if the compilation command changes due to a directory
+coming into existence.)
+.PP
 Because Cons relies on the compiler's \f(CW-I\fR flags to communicate the order
 in which repository directories must be searched, Cons\*(R' handling of
 repository directories is fundamentally incompatible with using
@@ -1690,6 +1697,18 @@ list of files before building them again.  It is invoked as:
 This is especially useful for allowing incremental updates to libraries
 or debug information files which are updated rather than rebuilt anew each
 time.  Cons will still delete the files when the \f(CW-r\fR flag is specified.
+.Sh "The \f(CWAfterBuild\fR method"
+The \f(CWAfterBuild\fR method evaluates the specified perl string after
+building the given file or files (or finding that they are up to date).
+The eval will happen once per specified file.  \f(CWAfterBuild\fR is called
+as follows:
+.PP
+.Vb 1
+\&  AfterBuild $env 'foo.o', qq(print "foo.o is up to date!\en");
+.Ve
+The perl string is evaluated in the \f(CWscript\fR package, and has access
+to all variables and subroutines defined in the \fIConscript\fR file in
+which the \f(CWAfterBuild\fR method is called.
 .Sh "The \f(CWCommand\fR method"
 The \f(CWCommand\fR method is a catchall method which can be used to arrange for
 any external command to be called to update the target. For this command, a
@@ -1754,7 +1773,7 @@ the following suffixes to select a portion of the expanded path name:
 \&  :s    the file name suffix
 \&  :F    the file name stripped of any suffix
 .Ve
-Continuing with the above example, \f(CW%<:f\fR would expand to \f(CWfoo bar baz\fR,
+Continuing with the above example, C<%<:f> would expand to \f(CWfoo bar baz\fR,
 and \f(CW%\fR:d> would expand to \f(CWtest\fR.
 .PP
 It is possible to programmatically rewrite part of the command by
@@ -2556,6 +2575,8 @@ a part of the program itself.
 .IX Subsection "The \f(CWInstallAs\fR method"
 
 .IX Subsection "The \f(CWPrecious\fR method"
+
+.IX Subsection "The \f(CWAfterBuild\fR method"
 
 .IX Subsection "The \f(CWCommand\fR method"
 

@@ -13,14 +13,14 @@
 # Regression tests keep the code honest by checking for warnings
 # and "use strict" failures.
 
-# $Id: cons,v 1.1.1.20 2000/11/19 19:33:40 fisyak Exp $
+# $Id: cons,v 1.1.1.21 2000/11/27 23:12:34 fisyak Exp $
 
 use vars qw( $ver_num $ver_rev $version );
 
 $ver_num = "2.3";
 $ver_rev = ".0";
 $version = sprintf "This is Cons %s%s " .
-	    '($Id: cons,v 1.1.1.20 2000/11/19 19:33:40 fisyak Exp $)'. "\n",
+	    '($Id: cons,v 1.1.1.21 2000/11/27 23:12:34 fisyak Exp $)'. "\n",
 	    $ver_num, $ver_rev;
 
 # Cons: A Software Construction Tool.
@@ -1043,6 +1043,15 @@ sub _subst {
     }
 }
 
+sub AfterBuild {
+    my($env) = shift;
+    my($perl_eval_str) = pop(@_);
+    my $file;
+    for $file (map($dir::cwd->lookup($_), @_)) {
+	$file->{after_build_func} = $perl_eval_str;
+    }
+}
+
 sub Install {
     my($env) = shift;
     my($tgtdir) = $dir::cwd->lookupdir($env->_subst(shift));
@@ -1550,10 +1559,15 @@ sub find {
 	} elsif (ref($pdirs) ne 'ARRAY') {
 	    $pdirs = [ split(/$main::PATH_SEPARATOR/o, $pdirs) ];
 	}
-	my $dir;
+	my($dir, $dpath);
 	for $dir (map($wd->lookupdir($env->_subst($_)), @$pdirs)) {
-	    my($dpath) = $dir->path;
-	    $ldirs .= " ".$env->{LIBDIRPREFIX}.$dpath;
+	    $dpath = $dir->path;
+	    # Add the (presumably local) directory to the -L flags
+	    # if we're not using repositories, the directory exists,
+	    # or it's Linked to a source directory (that is, it *will*
+	    # exist by the time the link occurs).
+	    $ldirs .= " ".$env->{LIBDIRPREFIX}.$dpath
+			if ! @param::rpath || -d $dpath || $dir->is_linked;
 	    next if File::Spec->file_name_is_absolute($dpath);
 	    if (@param::rpath) {
 		my $d;
@@ -1562,8 +1576,10 @@ sub find {
 			$ldirs .= " ".$env->{LIBDIRPREFIX}.$d;
 		    }
 		} else {
+		    my($rpath);
 		    foreach $d (map($_->path, @param::rpath)) {
-			$ldirs .= " ".$env->{LIBDIRPREFIX}.File::Spec->catfile($d, $dpath);
+			$rpath = File::Spec->catfile($d, $dpath);
+			$ldirs .= " ".$env->{LIBDIRPREFIX}.$rpath if -d $rpath;
 		    }
 		}
 	    }
@@ -2063,9 +2079,15 @@ sub scan {
 sub iflags {
     my($self, $env) = @_;
     my($iflags) = '';
-    my($dpath);
-    for $dpath (map($_->path, @{$self->{path}})) {
-	$iflags .= " ".$env->{INCDIRPREFIX}.$dpath;
+    my($dir, $dpath);
+    for $dir (@{$self->{path}}) {
+	$dpath = $dir->path;
+	# Add the (presumably local) directory to the -I flags
+	# if we're not using repositories, the directory exists,
+	# or it's Linked to a source directory (that is, it *will*
+	# exist by the time the compilation occurs).
+	$iflags .= " ".$env->{INCDIRPREFIX}.$dpath
+		if ! @param::rpath || -d $dpath || $dir->is_linked;
 	next if File::Spec->file_name_is_absolute($dpath);
 	if (@param::rpath) {
 	    my $d;
@@ -2074,8 +2096,10 @@ sub iflags {
 		    $iflags .= " ".$env->{INCDIRPREFIX}.$d;
 		}
 	    } else {
+		my($rpath);
 		foreach $d (map($_->path, @param::rpath)) {
-		    $iflags .= " ".$env->{INCDIRPREFIX}.File::Spec->catfile($d, $dpath);
+		    $rpath = File::Spec->catfile($d, $dpath);
+		    $iflags .= " ".$env->{INCDIRPREFIX}.$rpath if -d $rpath;
 		}
 	    }
 	}
@@ -2808,7 +2832,16 @@ sub ignore {
 
 # Build the file, if necessary.
 sub build {
-    $_[0]->{status} || &file::_build;
+    return $_[0]->{status} if $_[0]->{status};
+    my($status) = &file::_build;
+    if ($_[0]->{after_build_func}) {
+	my($pkgvars) = $_[0]->{conscript}->{pkgvars};
+	NameSpace::restore('script', $pkgvars) if $pkgvars;
+	eval("package script; " . $_[0]->{after_build_func});
+	print "Error running AfterBuild for ${\$_[0]->path}: $@\n" if ($@);
+	NameSpace::remove('script', keys %$pkgvars) if $pkgvars;
+    }
+    return $status;
 }
 
 sub _build {
@@ -4373,6 +4406,13 @@ Would yield a compilation command of:
 
   cc -Ia -I/u1/a -I/u2/a -Ib -I/u1/b -I/u2/b -Ic -I/u1/c -I/u2/c -c hello.c -o hello.o
 
+In order to shorten the command lines as much as possible, Cons will
+remove C<-I> flags for any directories, locally or in the repositories,
+which do not actually exist.  (Note that the C<-I> flags are not included
+in the MD5 signature calculation for the target file, so the target will
+not be recompiled if the compilation command changes due to a directory
+coming into existence.)
+
 Because Cons relies on the compiler's C<-I> flags to communicate the order
 in which repository directories must be searched, Cons' handling of
 repository directories is fundamentally incompatible with using
@@ -4892,6 +4932,19 @@ list of files before building them again.  It is invoked as:
 This is especially useful for allowing incremental updates to libraries
 or debug information files which are updated rather than rebuilt anew each
 time.  Cons will still delete the files when the C<-r> flag is specified.
+
+=head2 The C<AfterBuild> method
+
+The C<AfterBuild> method evaluates the specified perl string after
+building the given file or files (or finding that they are up to date).
+The eval will happen once per specified file.  C<AfterBuild> is called
+as follows:
+
+  AfterBuild $env 'foo.o', qq(print "foo.o is up to date!\n");
+
+The perl string is evaluated in the C<script> package, and has access
+to all variables and subroutines defined in the F<Conscript> file in
+which the C<AfterBuild> method is called.
 
 =head2 The C<Command> method
 
