@@ -19,9 +19,12 @@
 #include "StiHitContainer.h"
 #include "StiObjectFactory.h"
 #include "StiGeometryTransform.h"
+#include "StiDetectorFinder.h"
+#include "StiDetector.h"
 
 #include "StiHitFiller.h"
 
+ostream& operator<<(ostream&, const StiDetector&);
 
 //StiHitFiller::StiHitFiller() : mtranslator(0), mtpctransformer( new StTpcCoordinateTransform(gStTpcDb) )
 StiHitFiller::StiHitFiller() : mtranslator(StiGeometryTransform::instance())
@@ -56,8 +59,11 @@ void StiHitFiller::fillHits(StiHitContainer* store, StiHitFactory* factory)
 void StiHitFiller::fillTpcHits(StiHitContainer* store, StiHitFactory* factory)
 {
     cout <<"StiHitFiller::fillTpcHits()"<<endl;
+    mtimer.reset();
+    mtimer.start();
+    
     double nhit=0;
-    double nprint = 1000.;
+    double nprint = 10000.;
     const StTpcHitCollection* tpcHits = mevent->tpcHitCollection();    
     //Loop over sectors
     for (int sector=1; sector<=24; sector++) {
@@ -66,7 +72,24 @@ void StiHitFiller::fillTpcHits(StiHitContainer* store, StiHitFactory* factory)
 	for (int prow=1; prow<=45; prow++) {
 	    const StTpcPadrowHitCollection* padrowHits = secHits->padrow(prow-1);
 	    const StSPtrVecTpcHit& hitvec = padrowHits->hits();
-	    //Loop over hits
+
+	    //Find the detector for this set of hits:
+	    char szBuf[100];
+	    int iIttfSector=sector;
+	    if (sector>12) {
+		iIttfSector = 12 - (sector-12)%12;
+	    }	    
+	    sprintf(szBuf, "Tpc/Padrow_%d/Sector_%d", static_cast<int>(prow), static_cast<int>(iIttfSector));
+	    StiDetector* layer = StiDetectorFinder::instance()->findDetector(szBuf);
+	    if (!layer) {
+		cout <<"StiHitFiller::fillTpcHits(). ERROR:\t Detector for (sector,padrow): ("<<sector<<","<<prow<<") not found.  Abort"<<endl;
+		mtimer.stop();
+		return;
+	    }
+	    //else
+		//cout <<"Sector: "<<sector<<" padrow: "<<prow<<" layer: "<<*layer<<endl;
+	    
+	    //Loop over hits	    
 	    for (StSPtrVecTpcHitIterator iter = hitvec.begin(); iter != hitvec.end(); iter++) {
 		StTpcHit* hit = dynamic_cast<StTpcHit*>(*iter);
 		if (hit) {
@@ -76,6 +99,7 @@ void StiHitFiller::fillTpcHits(StiHitContainer* store, StiHitFactory* factory)
 		    stihit->reset();
 		    
 		    mtranslator->operator()(hit, stihit);
+		    stihit->setDetector( layer );
 
 		    //Now Fill the Hit Container!
 		    store->push_back( stihit );
@@ -87,26 +111,30 @@ void StiHitFiller::fillTpcHits(StiHitContainer* store, StiHitFactory* factory)
 	    }
 	}	    
     }
-    
+
+    mtimer.stop();
+    cout <<"Time to fill TPC Hits: "<<mtimer.elapsedTime()<<endl;
     return;
 }
 
 void StiHitFiller::fillSvtHits(StiHitContainer* store, StiHitFactory* factory)
 {
     cout <<"StiHitFiller::fillSvtHits()"<<endl;
+    mtimer.reset();
+    mtimer.start();
     double nhit=0;
     double nprint = 1000.;
     StSvtHitCollection* svthits = mevent->svtHitCollection();
     //loop on barrels
-    for (unsigned int barrel=0; barrel<svthits->numberOfBarrels(); ++barrel) {
-	StSvtBarrelHitCollection* barrelhits = svthits->barrel(barrel);
+    for (unsigned int barrel=1; barrel<=svthits->numberOfBarrels(); ++barrel) {
+	StSvtBarrelHitCollection* barrelhits = svthits->barrel(barrel-1);
 	//Loop on ladders
-	for (unsigned int ladder=0; ladder<barrelhits->numberOfLadders(); ++ladder) {
-	    StSvtLadderHitCollection* ladderhits = barrelhits->ladder(ladder);
+	for (unsigned int ladder=1; ladder<=barrelhits->numberOfLadders(); ++ladder) {
+	    StSvtLadderHitCollection* ladderhits = barrelhits->ladder(ladder-1);
 	    //Loop on wafers
-	    for (unsigned int wafer=0; wafer<ladderhits->numberOfWafers(); ++wafer) {
+	    for (unsigned int wafer=1; wafer<=ladderhits->numberOfWafers(); ++wafer) {
 		//cout <<"Barrel "<<barrel<<"\tladder "<<ladder<<"\twafer "<<wafer<<endl;
-		StSvtWaferHitCollection* waferhits = ladderhits->wafer(wafer);
+		StSvtWaferHitCollection* waferhits = ladderhits->wafer(wafer-1);
 		const StSPtrVecSvtHit& hits = waferhits->hits();  //Finally!
 		for (vector<StSvtHit*>::const_iterator it=hits.begin(); it!=hits.end(); ++it) {
 		    StSvtHit* hit = dynamic_cast<StSvtHit*>(*it);
@@ -129,7 +157,8 @@ void StiHitFiller::fillSvtHits(StiHitContainer* store, StiHitFactory* factory)
 		}
 	    }
 	}
-    }
+    } 
+    cout <<"Time to fill SVT Hits: "<<mtimer.elapsedTime()<<endl;
     return;
 }
 

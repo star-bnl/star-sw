@@ -41,6 +41,7 @@ StiTrackSeedFinder::StiTrackSeedFinder(StiHitContainer* h)
 
 StiTrackSeedFinder::~StiTrackSeedFinder()
 {
+    cout <<"StiTrackSeedFinder::~StiTrackSeedFinder()"<<endl;
     delete miterator;
     miterator = 0;
 }
