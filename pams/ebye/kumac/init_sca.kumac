@@ -1,5 +1,5 @@
 * init_sca.kumac
-* written by L.D. Carr -- lcarr@u.washington.edu
+* 07/25/98  written by L.D. Carr -- lcarr@u.washington.edu
 * ----------------------------------------------------------------
 * this is the initialization kumac for the sca event by event package
 * ----------------------------------------------------------------
@@ -13,8 +13,9 @@
 * 08/13/1998 - Dhammika W. -- Put reading in prior and ensemble average xdf
 *                             files on switches.
 *
-* 09/15/98 - LDC added analysis_switch options for xdf file output
-*  9/21/98 - K. Turner - broke up into more distinct macros
+* 09/15/1998 - LDC         -- added analysis_switch options for xdf file output
+* 09/21/1998 - K. Turner   -- broke up into more distinct macros
+* 12/10/1998 - Dhammika W. -- Added a little bit of documentation.
 *
 * ***************************************************************
 * ***************************************************************
@@ -39,7 +40,7 @@ macro init_params _
 	analysis_switch=0
 
   macro/global/import *
-
+  *** currently this is a dummy macro ***  DSW  Dec 10, 1998 
   message ' init_sca#init_params '
 
 return
@@ -62,8 +63,7 @@ macro init_analysis _
    goto SETSWITCH
   endif
 
-  exec read_table_from_file#init  SCAPRIOR   [calib_dir]/sca_prior_dir.xdf
-* exec read_table_from_file#init  SCAPRIOR   $STAR_CALIB/ebye/sca_prior_dir.xdf
+  exec read_table_from_file#init  SCAPRIOR    [calib_dir]/sca_prior_dir.xdf
   exec read_table_from_file#read  SCAPRIOR    [calib]/ebye
   exec read_table_from_file#close SCAPRIOR 
 
@@ -73,7 +73,6 @@ macro init_analysis _
   endif
   
   exec read_table_from_file#init  SCAENSEMBLE [calib_dir]/sca_ensemble_dir.xdf
-* exec read_table_from_file#init  SCAENSEMBLE $STAR_CALIB/ebye/sca_ensemble_dir.xdf
   exec read_table_from_file#read  SCAENSEMBLE [calib]/ebye
   exec read_table_from_file#close SCAENSEMBLE 
 
@@ -101,8 +100,8 @@ SETSWITCH:
 
 *** Added by Dhammika W.  Aug 12, 1998
   if [setswitch]=0 then
-   message " <<<<<  ERROR  >>>>> in init_sca.kumac "
-   message "      Invalid switch value: Switch option not set"
+   message " <<<<<  ERROR  >>>>> in init_sca#init_analysis "
+   message "      Invalid switch value: sca_switch option not set"
   endif
   cd /dui
   

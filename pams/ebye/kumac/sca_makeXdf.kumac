@@ -50,7 +50,7 @@ macro params TOP=./.
 * write from staf tables to xdf
   cd /dui
   exec write_table_to_file#init  SCACONST  ./params/ebye/sca_params.xdf 
-  exec write_table_to_file#write SCACONST   [params]/ebye/sca
+  exec write_table_to_file#write SCACONST   [params]/ebye/sca/
   exec write_table_to_file#close SCACONST
 
 return
