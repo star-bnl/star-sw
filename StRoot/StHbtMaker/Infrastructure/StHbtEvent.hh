@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.hh,v 1.16 2001/09/05 20:41:42 laue Exp $
+ * $Id: StHbtEvent.hh,v 1.17 2001/12/06 16:47:13 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.hh,v $
- * Revision 1.16  2001/09/05 20:41:42  laue
- * Updates of the hbtMuDstTree microDSTs
+ * Revision 1.17  2001/12/06 16:47:13  laue
+ * l3 trigger algorithm added
  *
  * Revision 1.14  2001/06/21 19:15:45  laue
  * Modified fiels:
@@ -124,6 +124,9 @@ public:
   StHbtKinkCollection* KinkCollection() const;
   StHbtTrackCollection* TrackCollection() const;
   double MagneticField() const;
+  unsigned int TriggerWord() const;
+  unsigned int TriggerActionWord() const;
+  unsigned int L3TriggerAlgorithm(const unsigned int& l=0) const;
 
   void SetEventNumber(const unsigned short&);
   void SetRunNumber(const int&);
@@ -140,6 +143,9 @@ public:
   void SetReactionPlaneSubEventDifference(const float&, const int& wgt=0);
   void SetPrimVertPos(const StHbtThreeVector&);
   void SetMagneticField(const double&);
+  void SetTriggerWord(const unsigned int&);
+  void SetTriggerActionWord(const unsigned int&);
+  void SetL3TriggerAlgorithm(const unsigned int&, const unsigned int&);
 
   // For I/O of this object -- functions defined in StHbtIO.cc
   friend ostream& operator<<(ostream& out, StHbtEvent& ev);
@@ -159,6 +165,10 @@ private:
   float mReactionPlane[2]; //reaction plane/error  //   
   float mReactionPlanePtWgt[2]; //reaction plane/error with pT weight //     
   double mMagneticField; // magnetic field in Z direction
+  unsigned int mTriggerWord;
+  unsigned int mTriggerActionWord;
+  unsigned int mL3TriggerAlgorithm[4];
+
   StHbtThreeVector mPrimVertPos;
   StHbtTrackCollection* mTrackCollection;
   StHbtV0Collection* mV0Collection;

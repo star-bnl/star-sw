@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.cc,v 1.15 2001/11/14 21:07:21 lisa Exp $
+ * $Id: StHbtEvent.cc,v 1.16 2001/12/06 16:47:13 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.cc,v $
+ * Revision 1.16  2001/12/06 16:47:13  laue
+ * l3 trigger algorithm added
+ *
  * Revision 1.15  2001/11/14 21:07:21  lisa
  * Fixed several small things (mostly discarded const) that caused fatal errors with gcc2.95.3
  *
@@ -131,6 +134,11 @@ StHbtEvent::StHbtEvent(const StHbtTTreeEvent* ev) {
     //    ev->SetMagneticField(mMagneticField);   commented-out by malisa 14nov01 - unneeded and caused compiler problems
     cout << "StHbtEvent::StHbtEvent(const StHbtTTreeEvent* ev) - B=0 in TTree! WARNING!! PROBABLY SCREWED-UP!!" << endl;
   }
+  mTriggerWord = ev->mTriggerWord;
+  mTriggerActionWord = ev->mTriggerActionWord;
+  //  for (int i=0;i<4; i++) mL3TriggerAlgorithm[i] = ev->mL3TriggerAlgorithm[i];
+  mL3TriggerAlgorithm[0] = ev->mL3TriggerAlgorithm;
+
 
   // create collections
   mV0Collection = new StHbtV0Collection();
@@ -197,6 +205,9 @@ StHbtEvent::StHbtEvent(const StHbtEvent& ev, StHbtTrackCut* tCut, StHbtV0Cut* vC
   mReactionPlanePtWgt[1] = ev.mReactionPlanePtWgt[1];
   mPrimVertPos = ev.mPrimVertPos;
   mMagneticField= ev.mMagneticField;
+  mTriggerWord = ev.mTriggerWord;
+  mTriggerActionWord = ev.mTriggerActionWord;
+  for ( int i=0; i<4; i++) mL3TriggerAlgorithm[i] = ev.mL3TriggerAlgorithm[i];
 
   // create collections
   mTrackCollection = new StHbtTrackCollection;
@@ -314,6 +325,9 @@ void StHbtEvent::SetReactionPlaneSubEventDifference(const float& rp, const int& 
 }
 void StHbtEvent::SetPrimVertPos(const StHbtThreeVector& vp){mPrimVertPos = vp;}
 void StHbtEvent::SetMagneticField(const double& magF){mMagneticField = magF;}
+void StHbtEvent::SetTriggerWord(const unsigned int& t){mTriggerWord = t;}
+void StHbtEvent::SetTriggerActionWord(const unsigned int& t){mTriggerActionWord = t;}
+void StHbtEvent::SetL3TriggerAlgorithm(const unsigned int& i, const unsigned int& t){mL3TriggerAlgorithm[i] = t;}
 
 unsigned short StHbtEvent::EventNumber() const {return mEventNumber;}
 int            StHbtEvent::RunNumber() const {return mRunNumber;}
@@ -338,3 +352,6 @@ StHbtKinkCollection* StHbtEvent::KinkCollection() const {return mKinkCollection;
 StHbtTrackCollection* StHbtEvent::TrackCollection() const {return mTrackCollection;}
 StHbtThreeVector StHbtEvent::PrimVertPos() const {return mPrimVertPos;}
 double StHbtEvent::MagneticField() const {return mMagneticField;}
+unsigned int StHbtEvent::TriggerWord() const {return mTriggerWord;}
+unsigned int StHbtEvent::TriggerActionWord() const {return mTriggerActionWord;}
+unsigned int StHbtEvent::L3TriggerAlgorithm(const unsigned int& i) const {return mL3TriggerAlgorithm[i];}
