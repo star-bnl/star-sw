@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrNtupleMaker.h,v 1.1 2004/03/11 22:39:54 dongx Exp $
+ * $Id: StTofrNtupleMaker.h,v 1.2 2004/04/12 16:17:03 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTofrNtupleMaker.h,v $
+ * Revision 1.2  2004/04/12 16:17:03  dongx
+ * add AdcLoRes in the ntuple
+ *
  * Revision 1.1  2004/03/11 22:39:54  dongx
  * first release
  *
@@ -38,7 +41,7 @@ class TTree;
 
 class StTofrNtupleMaker : public StMaker {
  public:
-  StTofrNtupleMaker(const Char_t *name="tofrNtuple");
+  StTofrNtupleMaker(const Char_t *name, const Char_t *outname);
   ~StTofrNtupleMaker();
 
   Int_t  Init();
@@ -84,6 +87,7 @@ private:
   float	mMaxValidAdc; //! upper cut on ADC value
   Float_t mPvpdAdc[mNPVPD];
   Float_t mPvpdTdc[mNPVPD];
+  Float_t mPvpdAdcLoRes[mNPVPD];
 
   // ntuple related data members
   Int_t mAcceptedEvents; //! number of accepted events
@@ -106,7 +110,7 @@ private:
   TNtuple *mHitPosTuple; //! Hit position data
 
   virtual const char *GetCVS() const 
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofrNtupleMaker.h,v 1.1 2004/03/11 22:39:54 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofrNtupleMaker.h,v 1.2 2004/04/12 16:17:03 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StTofrNtupleMaker,1)
 };

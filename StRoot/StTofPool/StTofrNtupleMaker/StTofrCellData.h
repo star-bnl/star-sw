@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrCellData.h,v 1.1 2004/03/11 22:39:54 dongx Exp $
+ * $Id: StTofrCellData.h,v 1.2 2004/04/12 16:17:03 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofrCellData.h,v $
+ * Revision 1.2  2004/04/12 16:17:03  dongx
+ * add AdcLoRes in the ntuple
+ *
  * Revision 1.1  2004/03/11 22:39:54  dongx
  * first release
  *
@@ -28,6 +31,7 @@
     Float_t TdcSumEast, TdcSumWest, TdcSum;
     Int_t te1, te2, te3, tw1, tw2, tw3;
     Int_t ae1, ae2, ae3, aw1, aw2, aw3;
+    Int_t ale1, ale2, ale3, alw1, alw2, alw3;
     Int_t tray, module, cell, daq, tdc, adc, hitprof, matchflag;
     Float_t xlocal, ylocal, zlocal, deltay;
     Int_t trackId, charge;
