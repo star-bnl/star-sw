@@ -97,22 +97,22 @@ class StDbBroker  {
     ClassDef(StDbBroker,0)
 };
 
-extern "C" void DbFill(uint *,         //datetime[4]
+extern "C" void DbFill(unsigned int *,         //datetime[4]
 		       const char *,  //tableName
 		       const char *,  //StructName
-		       uint,           //nVar
+		       unsigned int,           //nVar
 		       StDbBroker::Descriptor *d,
 		       const char **,       //Comments
-		       uint,           //nRows
-		       uint,           //sizeOfStruct
+		       unsigned int,           //nRows
+		       unsigned int,           //sizeOfStruct
 		       void *);       //pData
 		       
-extern "C" void *DbUse(uint*,           //&nRows,
-		       uint *,         //datetime[4]
+extern "C" void *DbUse(unsigned int*,           //&nRows,
+		       unsigned int *,         //datetime[4]
 		       const char *,  //tableName
 		       const char *,  //StructName
-		       uint,           //nVar
-		       uint,           //sizeOfStruct
+		       unsigned int,           //nVar
+		       unsigned int,           //sizeOfStruct
 		       StDbBroker::Descriptor *d);
 
 extern "C" int DbInit(const char *);  		//dbInit
