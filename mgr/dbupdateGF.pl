@@ -103,7 +103,7 @@ print "Total files: ".@hpssGeantFiles."\n";
 ###### Find GEANT files in Files Catalog
  &StDbProdConnect();
 
- $sql="SELECT dataset, fName, size, createTime FROM $FileCatalogT  WHERE fName LIKE '%fzd' OR fName LIKE '%fz' AND hpss = 'Y' ";
+ $sql="SELECT dataset, fName, size, createTime FROM $FileCatalogT WHERE fName LIKE '%fzd' OR fName LIKE '%fz' AND hpss = 'Y' ";
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
           $cursor->execute;
@@ -384,6 +384,7 @@ sub walkHpss {
          $fname = $dirs->[$ii]."/".$name;
           $ppath = $dirs->[$ii];
          next if ($ppath =~ /special/) ;
+         next if ($ppath =~ /ckin/) ;
           @dirF = split(/\//, $dirs->[$ii]);
          if( $ppath =~ /gstardata/) {         
 	  if($dirF[9] eq 'gstardata') {
