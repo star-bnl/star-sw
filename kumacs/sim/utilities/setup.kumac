@@ -132,8 +132,9 @@ endif
 * 
 
 if [PLATFORM] = T3E then
-   subevent       200  | split each event into subevents of 200 tracks
-   mess T3E: Split each event into subevents of 200 tracks
+*   subevent       200  | split each event into subevents of 200 tracks
+*   mess T3E: Split each event into subevents of 200 tracks
+   mess Subevent splitting not active
 else
    mess Subevent splitting not active
 endif
