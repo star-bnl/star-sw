@@ -3,6 +3,7 @@
 #include <assert.h>
 #include "TROOT.h"
 #include "TClass.h"
+#include "TCL.h"
 #include "TBaseClass.h"
 #include "TDataMember.h"
 #include "TMethod.h"
@@ -488,7 +489,7 @@ static const int     nlitra  = sizeof(plitra)/sizeof(Color_t);
   int nbjs = inp->GetLast()+1;   
   if (!nbjs)	return 0;
   TObjArray *out = new TObjArray;out->SetOwner();
-  StPoints3DABC  *p = 0;
+  StPoints3DABC  *p[3] ; int np=0;
   for (int i=0;i<nbjs;i++) {
     TObject *to = inp->At(i);
     int kind = Kind(to);
@@ -498,21 +499,27 @@ static const int     nlitra  = sizeof(plitra)/sizeof(Color_t);
     if (take&kHIT) take -=kHIT;
     if (!take) 	continue;
 
-    p = 0;
-    if      (kind&kHIT) p = new StHitPoints   ((StHit      *)to);
+    np = 0;
+    if      (kind&kHIT) {np=1;p[0] = new StHitPoints   ((StHit      *)to  );}
     else if (kind&kHRR && ((StPtrVecHit*)to)->size()) 
-	                p = new StHitPoints   ((StPtrVecHit*)to);
-    else if (kind&kTRK) p = new StTrackPoints ((StTrack    *)to);
-    else if (kind&kVTX) p = new StVertexPoints((StVertex   *)to);
-    if (!p) continue;
-    p->SetUniqueID(plitra[ilitra]);
-    out->Add(p);
+	                {np=1;p[0] = new StHitPoints   ((StPtrVecHit*)to  );}
+
+    else if (kind&kTRK) {np=3;p[0] = new StTrackPoints ((StTrack    *)to  );
+                              p[1] = new StInnOutPoints((StTrack    *)to,0);
+                              p[2] = new StInnOutPoints((StTrack    *)to,1);}
+
+    else if (kind&kVTX) {np=1;p[0] = new StVertexPoints((StVertex   *)to  );}
+
+    for (int j=0;j<np;j++){p[j]->SetUniqueID(plitra[ilitra]); out->Add(p[j]);}
   }// 
 
   return out;
 }	
-
-
+//______________________________________________________________________________
+void StEventHelper::Break(int kase)
+{
+  fprintf(stderr,"Break(%d)\n",kase);
+}
 
 //______________________________________________________________________________
 ClassImp(StPoints3DABC)
@@ -539,35 +546,12 @@ StTrackPoints::StTrackPoints(const StTrack *st,const char *name,const char *titl
 //______________________________________________________________________________
 void StTrackPoints::Init() 
 {  
-static const char *beginTrack = gSystem->Getenv("STAR_DISPLAY_BEGIN_TRACK");
-
   if (fXYZ) return;
   StTrack *trk = ((StTrack*)fObj); 
-  float len = trk->length();   
-  if (len <= 0.0001) {
-    Warning("Init","Zero length %s(%p), IGNORED",fObj->ClassName(),(void*)fObj);
-    MakeZombie();
-    return;
-  }
-  
-  
-  StTrackGeometry *geo = (beginTrack)? trk->geometry():trk->outerGeometry(); 
-  Assert(geo);
-  double curva = fabs(geo->curvature());
-  double dip   = geo->dipAngle();
-  fSize = abs(int(len*cos(dip)*curva*20))+2;   
+  StTrackHelper th(trk);
+  fXYZ = th.GetPoints(fSize);
   fN = fSize;
-  fXYZ = new Float_t[fN*3];
-  StPhysicalHelixD hel = geo->helix();
-  Double_t step = len/(fSize-1);
-  Double_t ss = 0;
-  if (!beginTrack) step = -step;
-  for (int i =0;i<fSize;i++,ss+=step)
-  {
-     fXYZ[i*3+0] = hel.x(ss); 
-     fXYZ[i*3+1] = hel.y(ss); 
-     fXYZ[i*3+2] = hel.z(ss); 
-  }
+  if (!fSize) { MakeZombie(); return;}
 }
 //______________________________________________________________________________
  Int_t StTrackPoints::DistancetoPrimitive(Int_t px, Int_t py)
@@ -657,6 +641,19 @@ StVertexPoints::StVertexPoints(const StVertex *sv,const char *name,const char *t
   fXYZ[1] = ((StVertex*)fObj)->position().y(); 
   fXYZ[2] = ((StVertex*)fObj)->position().z(); 
 }
+//______________________________________________________________________________
+ClassImp(StVertexPoints)
+//______________________________________________________________________________
+StInnOutPoints::StInnOutPoints(const StTrack *st,int innout,const char *name,const char *title)
+:StPoints3DABC(name,title,st)
+{
+  fSize = 1; fN =1; fInnOut=innout;
+  const StTrackGeometry *geo = (fInnOut==0) ? st->geometry():st->outerGeometry();
+  fXYZ = new Float_t[3];
+  fXYZ[0] = geo->origin().x(); 
+  fXYZ[1] = geo->origin().y(); 
+  fXYZ[2] = geo->origin().z(); 
+}
    
    
 ClassImp(StHitPoints)
@@ -683,14 +680,19 @@ void StHitPoints::Init()
   if (fXYZ) return;
   fXYZ = new Float_t[fN*3];
   
+  int n=0;
   for (int i =0;i<fSize;i++)
   {
      StHit *hit= (fSize==1) ? (StHit*)fObj: (StHit*)((StRefArray*)fObj)->at(i);
+     if (fSize>1 && !hit->trackReferenceCount()) continue;
+     if (fSize>1 && !hit->usedInFit()) 		 continue;
      StThreeVectorF v3 = hit->position();
-     fXYZ[i*3+0] = v3.x(); 
-     fXYZ[i*3+1] = v3.y(); 
-     fXYZ[i*3+2] = v3.z(); 
+     fXYZ[n*3+0] = v3.x(); 
+     fXYZ[n*3+1] = v3.y(); 
+     fXYZ[n*3+2] = v3.z(); 
+     n++;
   }
+  fN=n; fSize=n;
 }
    
 //______________________________________________________________________________
@@ -1075,6 +1077,7 @@ Int_t StColorFilterHelper::Accept(StPoints3DABC *pnt, Color_t&color, Size_t&size
 //______________________________________________________________________________
 //______________________________________________________________________________
 //______________________________________________________________________________
+ClassImp(StVertexHelper)
 StVertexHelper::StVertexHelper(const StVertex *vtx)
 { SetVertex(vtx);} 
 //______________________________________________________________________________
@@ -1097,10 +1100,19 @@ const StTrack *StVertexHelper::GetTrack(int idx)  	// -1=parent track
 //______________________________________________________________________________
 //______________________________________________________________________________
 //______________________________________________________________________________
+ClassImp(StTrackHelper)
 StTrackHelper::StTrackHelper(const StTrack *trk)
-{ fHelx[0]=0; fHelx[1]=0; SetTrack(trk); }
+{ 
+  fHelx[0]=0; fHelx[1]=0; 
+  fTHlx[0]=0; fTHlx[1]=0; 
+  SetTrack(trk);
+}
 
-StTrackHelper::~StTrackHelper(){  delete fHelx[0];delete fHelx[1]; }
+StTrackHelper::~StTrackHelper()
+{  
+  delete fHelx[0];delete fHelx[1];
+  delete fTHlx[0];delete fTHlx[1];
+}
 void StTrackHelper::SetTrack(const StTrack *trk){fTrk=trk;fHits=0;GetNHits();}    
 int  StTrackHelper::GetType()                 	{return fTrk->type();}
         int     StTrackHelper::GetFlag()      	{return fTrk->flag();}
@@ -1144,8 +1156,94 @@ const StHit *StTrackHelper::GetHit(int idx)
   return fHits->at(idx);
 }
 //______________________________________________________________________________
+Float_t  *StTrackHelper::GetPoints(int &npoints)
+{
+  static int ndebug=0; ndebug++;
+  npoints=0;
+  double len,len0,len1;
+  len = fTrk->length();   
+  if (len <= 0.0001) {
+    Warning("GetPoints","Zero length %s(%p), IGNORED",fTrk->ClassName(),(void*)fTrk);
+    return 0;
+  }
+  
+  GetHelix(0); GetHelix(1);
+  for (int i=0;i<2;i++) {fTHlx[i] = StEventHelper::MyHelix(fTHlx[i],fHelx[i]);}
+  fTHlx[1]->Backward();
+  len0 = fTHlx[0]->Step(fTHlx[1]->GetXYZ());
+  if (fabs(len0-len) > 1.1) 
+    Warning("GetPoints","Track length %g contradicts Out/Inn distance %g",len,len0);
+  if (len0 +0.1 < len) fTHlx[1]->Move(-(len-len0));
+
+  len0 = fTHlx[0]->Step(fTHlx[1]->GetXYZ());
+  len1 = fTHlx[1]->Step(fTHlx[0]->GetXYZ());
+  
+
+
+  double curva = fabs(fTHlx[0]->GetRho());
+  double cdip  = fTHlx[0]->GetCos();
+  npoints  = abs(int(len*cdip*curva*90))+2;   
+  Float_t *arr = new Float_t[npoints*3];
+  Double_t step = 1./(npoints-1);
+  Double_t ss[4];ss[0]=0;
+  double xyz[3][3];
+#if 0
+  for (int i =0;i<npoints;i++,ss[0]+=step)
+  {
+     ss[1] = 1.-ss[0];
+     fTHlx[0]->Step(ss[0]*len0,xyz[0]);
+     fTHlx[1]->Step(ss[1]*len1,xyz[1]);
+     ss[0+2] = pow(ss[0],3);
+     ss[1+2] = pow(ss[1],3);
+     double nor = ss[2]+ss[3];
+     TCL::vlinco(xyz[0],ss[1+2]/nor,xyz[1],ss[0+2]/nor,xyz[2],3);
+     TCL::ucopy(xyz[2],arr+i*3,3);
+  }
+#endif //0
+#if 1
+  double *arr0 = new double[npoints*3*2];
+  double *arr1 = arr0+npoints*3;
+  THelixTrack hlx0 = *fTHlx[0];
+  THelixTrack hlx1 = *fTHlx[1];
+  ss[0]=0; ss[1]=0;
+  double rho0 = fTHlx[0]->GetRho();
+  double rho1 = fTHlx[1]->GetRho();
+  int j = npoints-1;
+  for (int i =0;i<npoints;i++,ss[0]+=step)
+  {
+     ss[1] = 1.-ss[0];
+     hlx0.Step(0.,xyz[0]);
+     hlx1.Step(0.,xyz[1]);
+     TCL::ucopy(xyz[0],arr0+i*3,3);
+     TCL::ucopy(xyz[1],arr1+j*3,3); j--;
+     ss[2]=ss[0]+0.5*step;
+     ss[3] = 1.-ss[2];
+     hlx0.Set(rho0*ss[3]-rho1*ss[2]);
+     hlx1.Set(rho1*ss[3]-rho0*ss[2]);
+     hlx0.Move(len0*step);
+     hlx1.Move(len1*step);
+  }
+  ss[0]=0;
+  for (int i =0;i<npoints;i++,ss[0]+=step)
+  {
+     ss[1] = 1.-ss[0];
+     ss[0+2] = pow(ss[0],3);
+     ss[1+2] = pow(ss[1],3);
+     double nor = ss[2]+ss[3];
+     TCL::vlinco(arr0+i*3,ss[1+2]/nor,arr1+i*3,ss[0+2]/nor,xyz[2],3);
+     TCL::ucopy(xyz[2],arr+i*3,3);
+  }
+
+  delete [] arr0;
+#endif //1
+  return arr;
+}
+
+
 //______________________________________________________________________________
 //______________________________________________________________________________
+//______________________________________________________________________________
+ClassImp(StHitHelper)
       StHitHelper::StHitHelper(const StHit *hit){fHit = hit;}
 void  StHitHelper::SetHit(const StHit *hit)	{fHit = hit;}    
 int   StHitHelper::GetDetId()			{return fHit->detector();}
@@ -1154,6 +1252,150 @@ float StHitHelper::GetCharge()			{return fHit->charge();}
 int   StHitHelper::IsUsed()			{return fHit->trackReferenceCount();}
 int   StHitHelper::IsFit()			{return fHit->usedInFit();}
 const StThreeVectorF &StHitHelper::GetPoint()	{return fHit->position();}
+//______________________________________________________________________________
+//______________________________________________________________________________
+//______________________________________________________________________________
+
+ClassImp(StErrorHelper)
+//_____________________________________________________________________________
+StErrorHelper::StErrorHelper()
+{
+  fNErr=0; fNTot=0; fKErr=0;
+  fMap = new TExMap;
+  fArr = new TArrayI;
+}
+//_____________________________________________________________________________
+StErrorHelper::~StErrorHelper()
+{
+  delete fMap;
+  delete fArr;
+}
+//_____________________________________________________________________________
+void StErrorHelper::Add(int errn)   
+{
+  fNTot++;
+  if(!errn) return;
+  fNErr++;
+  (*fMap)(errn)++;
+}
+//_____________________________________________________________________________
+void StErrorHelper::MakeArray()   
+{
+  if (!fNErr) return;
+  fKErr = fMap->GetSize();
+  fArr->Set(fKErr*3);
+  TExMapIter it(fMap);
+  long lerr,lnum;
+  int idx=0;
+  while(it.Next(lerr,lnum)) {
+    (*fArr)[idx+    0] = lnum;
+    (*fArr)[idx+fKErr] = lerr;
+    idx++;
+  }
+  
+  TMath::Sort(fKErr, fArr->GetArray(), fArr->GetArray()+2*fKErr);
+}
+//_____________________________________________________________________________
+void StErrorHelper::Print(const char* txt) const
+{
+  StErrorHelper *This = (StErrorHelper *)this;
+  This->MakeArray();
+  if (!txt) txt="";
+  printf("StEvent Error Summary:%s\n",txt);
+  
+  printf("%4d -%8d(%4d)\n",0,0,fNTot-fNErr);
+  int *nrr=fArr->GetArray();
+  int *krr=nrr+fKErr;
+  int *idx=krr+fKErr;
+  for (int i=0;i<fKErr;i++) {
+    int j = idx[i];
+    printf("%4d -%8d(%4d) //%s\n",i+1,krr[j],nrr[j],Say(krr[j]).Data());
+  }
+}
+//_____________________________________________________________________________
+
+TString StErrorHelper::Say(int ierr,const char *klass)
+{
+  static const char *TabErr[] = 
+  {
+ "StTrack"		,"mFlag"		,"1","2","is Negative",
+ "StTrack"		,"mFlag"		,"1","3","is Zero",
+
+ "StTrack"		,"mImpactParameter"	,"2","1","is NaN",
+ "StTrack"		,"mImpactParameter"	,"2","2","is huge",
+
+ "StTrack"		,"mLength"		,"3","1","is NaN",
+ "StTrack"		,"mLength"		,"3","2","is huge",
+ "StTrack"		,"mLength"		,"3","3","is too small",
+ "StTrack"		,"mLength"		,"3","4","contradicts to In/Out distance",
+ "StTrack"		,"mLength"		,"3","5","helix out of Zmax",
+ "StTrack"		,"mLength"		,"3","6","helix out of Rmax",
+
+ "StTrack"		,"mGeometry"		,"4","2","iz zero",
+ "StTrack"		,"mGeometry"		,"4","0","StTrackGeometry",
+
+ "StTrack"		,"mOuterGeometry"	,"5","2","iz zero",
+ "StTrack"		,"mOuterGeometry"	,"5","0","StTrackGeometry",
+
+ "StTrack"		,"mDetectorInfo"	,"6","2","iz zero",
+ "StTrack"		,"mDetectorInfo"	,"6","0","StTrackDetectorInfo",
+
+ "StTrackGeometry"	,"Helix"	        ,"1","0","StPhysicalHelixD",
+ "StTrackGeometry"	,"Helix"	        ,"1","2","out of zMax",
+ "StTrackGeometry"	,"Helix"	        ,"1","3","out of rMax",
+
+ "StTrackDetectorInfo"	,"mFirstPoint"	        ,"1","0","StThreeVectorF",
+ "StTrackDetectorInfo"	,"mFirstPoint"	        ,"1","2","out of zMax",
+ "StTrackDetectorInfo"	,"mFirstPoint"	        ,"1","3","out of rMax",
+
+ "StTrackDetectorInfo"	,"mLastPoint"	        ,"2","0","StThreeVectorF",
+ "StTrackDetectorInfo"	,"mLastPoint"	        ,"2","2","out of zMax",
+ "StTrackDetectorInfo"	,"mFLastPoint"	        ,"2","3","out of rMax",
+
+
+ "StPhysicalHelixD"	,"mDipAngle"	        ,"1","1","is NaN",
+ "StPhysicalHelixD"	,"mDipAngle"	        ,"1","2",">  Py/2",
+ "StPhysicalHelixD"	,"mDipAngle"	        ,"1","3","== Py/2",
+
+ "StPhysicalHelixD"	,"mCurvature"	        ,"2","1","is NaN",
+ "StPhysicalHelixD"	,"mCurvature"	        ,"2","2","too big",
+ "StPhysicalHelixD"	,"mCurvature"	        ,"2","3","is Negaive",
+
+ "StPhysicalHelixD"	,"mOrigin"	        ,"3","0","StThreeVectorD",
+ "StPhysicalHelixD"	,"mH"	        	,"4","2","!= 1 or -1",
+
+ "StThreeVectorD"	,"mX1"	        	,"1","1","is NaN",
+ "StThreeVectorD"	,"mX1"	        	,"1","2","too big",
+ "StThreeVectorD"	,"mX2"	        	,"2","1","is NaN",
+ "StThreeVectorD"	,"mX2"	        	,"2","2","too big",
+ "StThreeVectorD"	,"mX3"	        	,"3","1","is NaN",
+ "StThreeVectorD"	,"mX3"	        	,"3","2","too big",
+
+
+ "StThreeVectorF"	,"mX1"	        	,"1","1","is NaN",
+ "StThreeVectorF"	,"mX1"	        	,"1","2","too big",
+ "StThreeVectorF"	,"mX2"	        	,"2","1","is NaN",
+ "StThreeVectorF"	,"mX2"	        	,"2","2","too big",
+ "StThreeVectorF"	,"mX3"	        	,"3","1","is NaN",
+ "StThreeVectorF"	,"mX3"	        	,"3","2","too big",
+ 0};
+TString ts;
+
+  int jmm = ierr%10;
+  int jrr = (ierr/10)%10;
+  for (const char **jt=TabErr;*jt;jt+=5) {
+    if (strcmp(klass,*jt) ) 	continue;
+    if (atoi(jt[2]) != jmm) 	continue;
+    if (atoi(jt[3]) != jrr) 	continue;
+    ts+=jt[1]; 
+    if (jrr) { ts+=": "; ts+=jt[4];}
+    else     { ts+=".";  ts+=Say(ierr/100,jt[4]);}
+    return ts;
+  }
+  ts="***Unknown***";
+  return ts;
+}
+
 
 
 

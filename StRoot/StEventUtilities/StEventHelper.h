@@ -31,7 +31,7 @@ class THelixTrack;
 class StHelixD;
 
 
-class StVertexHelper
+class StVertexHelper: public TObject
 {
 public:
   StVertexHelper(const StVertex *vtx=0);
@@ -45,9 +45,10 @@ const StTrack *GetTrack(int idx);       // -1=parent track
 const StTrack *GetParent() {return GetTrack(-1);}        
 private:  
 const StVertex *fVtx;
+ClassDef(StVertexHelper,0)
 };
 
-class StTrackHelper
+class StTrackHelper: public TObject
 {
 public:
       StTrackHelper(const StTrack *trk=0);
@@ -68,13 +69,16 @@ const StThreeVectorF &GetMom();
 const StHit    *GetHit(int idx);
 const StPtrVecHit *GetHits();
       StPhysicalHelixD *GetHelix(int idx=0);
+      Float_t  *GetPoints(int &npoints);
 private:
 const StTrack *fTrk;
 const StPtrVecHit *fHits;
 StPhysicalHelixD  *fHelx[2];
+THelixTrack       *fTHlx[2];
+ClassDef(StTrackHelper,0)
 };
 
-class StHitHelper
+class StHitHelper: public TObject
 {
 public:
       StHitHelper(const StHit *hit=0);
@@ -88,7 +92,37 @@ const StThreeVectorF &GetPoint();
 
 private:
 const StHit *fHit;
+ClassDef(StHitHelper,0)
 };
+
+class TExMap;
+class TArrayI;
+class StErrorHelper: public TObject
+{
+public:
+  StErrorHelper();
+ ~StErrorHelper();
+       void Add(int errn);    
+       void Print(const char* option) const;
+       int  GetNTot() {return fNTot;}
+       int  GetNErr() {return fNErr ;}
+static TString Say(int errn,const char *klas="StTrack");
+
+private:  
+       void MakeArray();
+private:  
+		
+int fNTot;
+int fNErr;
+int fKErr;
+TExMap  *fMap;
+TArrayI *fArr;
+ClassDef(StErrorHelper,0)
+};
+
+
+
+
 
 enum EHKind {kUDF = 0 
     ,kVTX = BIT( 1),kTRK = BIT( 2),kHIT = BIT( 3),kHRR = BIT( 4)//StEvent types
@@ -140,6 +174,7 @@ public:
     void Reset(const TObject *evt=0,const char *opt="");
 static int Kind(const TObject *to);
 static THelixTrack *MyHelix(THelixTrack *myHlx,const StHelixD *evHlx);
+static void Break(int kase);
 private:
 
 ClassDef(StEventHelper,0)    
@@ -227,6 +262,21 @@ private:
 // data members                  
 private:  
  ClassDef(StVertexPoints,0)    
+};
+//______________________________________________________________________________
+class StInnOutPoints : public StPoints3DABC 
+{
+public:
+   StInnOutPoints(const StTrack *sv,int inout,const char *name="",const char *title="");
+  ~StInnOutPoints(){};
+virtual Int_t   Kind() const          {return 4+fInnOut;}
+private:
+   StInnOutPoints(const StInnOutPoints&);
+   void operator=(const StInnOutPoints&);
+// data members                  
+private:  
+ int fInnOut;
+ ClassDef(StInnOutPoints,0)    
 };
 
 
