@@ -1,5 +1,8 @@
-// $Id: StMessageCounter.h,v 1.5 1999/06/28 02:40:56 genevb Exp $
+// $Id: StMessageCounter.h,v 1.6 1999/06/29 17:37:31 genevb Exp $
 // $Log: StMessageCounter.h,v $
+// Revision 1.6  1999/06/29 17:37:31  genevb
+// Lots of fixes...
+//
 // Revision 1.5  1999/06/28 02:40:56  genevb
 // Additional backward compatibilit with MSG (msg_enable, msg_enabled, msg_disable
 //
@@ -32,19 +35,19 @@
 #define ClassStMessageCounter
 
 #include "StMessTypeList.h"
+#include <strstream.h>
 
-typedef StVector(Char_t*) messCharVec;
-typedef StVector(Char_t*)::iterator messCharVecIter;
-typedef StVector(Int_t*) messIntVec;
+typedef StVector(char*) messCharVec;
+typedef StVector(char*)::iterator messCharVecIter;
+typedef StVector(int*) messIntVec;
 
 
-class StMessageCounter {
+class StMessageCounter : public ostrstream {
  private:
    static StMessageCounter* mInstance;
    StMessTypeList* messTypeList;
-   const Char_t* limitMessage;
-   Char_t* outMessage;
-   Int_t yesLimits;
+   const char* limitMessage;
+   int yesLimits;
 
  protected:
    StMessageCounter();
@@ -58,13 +61,11 @@ class StMessageCounter {
  public:
    ~StMessageCounter();
     static StMessageCounter* Instance();
-      void SetLimit(Char_t* str, Int_t n=0);
-       int GetLimit(Char_t* str);
+      void SetLimit(char* str, int n=0);
+       int GetLimit(char* str);
       void ListLimits();
       void AddType();
-       int CheckLimit(Char_t* mess, const Char_t* type);
-   Char_t* GetOutMessage() const {return outMessage;}
-   ClassDef(StMessageCounter,0)
+       int CheckLimit(char* mess, const char* type);
 };
 
 #endif

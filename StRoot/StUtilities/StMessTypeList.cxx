@@ -1,5 +1,8 @@
-// $Id: StMessTypeList.cxx,v 1.3 1999/06/26 00:24:51 genevb Exp $
+// $Id: StMessTypeList.cxx,v 1.4 1999/06/29 17:37:30 genevb Exp $
 // $Log: StMessTypeList.cxx,v $
+// Revision 1.4  1999/06/29 17:37:30  genevb
+// Lots of fixes...
+//
 // Revision 1.3  1999/06/26 00:24:51  genevb
 // Fixed const type mismatches
 //
@@ -20,19 +23,16 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
-#include "TROOT.h"
 #include "StMessTypeList.h"
 #include <iostream.h>
 #include <ctype.h>
 
-ClassImp(StMessTypePair)
-StMessTypePair::StMessTypePair(const Char_t* ty, const Char_t* te) :
+StMessTypePair::StMessTypePair(const char* ty, const char* te) :
 type(ty),
 text(te) {}
 StMessTypePair::~StMessTypePair() {}
 
 StMessTypeList* StMessTypeList::mInstance = 0;
-ClassImp(StMessTypeList)
 
 //________________________________________
 StMessTypeList::StMessTypeList() {
@@ -50,7 +50,7 @@ StMessTypeList* StMessTypeList::Instance() {
   return mInstance;
 }
 //_____________________________________________________________________________
-Int_t StMessTypeList::AddType(const Char_t* type, const Char_t* text) {
+int StMessTypeList::AddType(const char* type, const char* text) {
   StMessTypePair* temp = FindType(type);
   if (temp) return 0;
   temp = new StMessTypePair(type,text);
@@ -58,10 +58,10 @@ Int_t StMessTypeList::AddType(const Char_t* type, const Char_t* text) {
   return messList.size();
 }
 //_____________________________________________________________________________
-Int_t StMessTypeList::FindTypeNum(const Char_t* type) {
+int StMessTypeList::FindTypeNum(const char* type) {
   StMessTypeVecIter iter;
-  Char_t ty=toupper(*type);
-  Int_t j=0;
+  char ty=toupper(*type);
+  int j=0;
   for (iter=messList.begin(); iter!=messList.end(); iter++) {
     j++;
     if (*((*iter)->Type())==ty) return j;
@@ -69,17 +69,17 @@ Int_t StMessTypeList::FindTypeNum(const Char_t* type) {
   return 0;
 }
 //_____________________________________________________________________________
-StMessTypePair* StMessTypeList::FindType(const Char_t* type) {
-  Int_t j = FindTypeNum(type);
+StMessTypePair* StMessTypeList::FindType(const char* type) {
+  int j = FindTypeNum(type);
   return ( (j) ? messList[(j-1)] : 0 );
 }
 //_____________________________________________________________________________
-const Char_t* StMessTypeList::Text(const Char_t* type) {
+const char* StMessTypeList::Text(const char* type) {
   StMessTypePair* temp = FindType(type);
   return ( (temp) ? temp->Text() : 0 );
 }
 //_____________________________________________________________________________
-Int_t StMessTypeList::ListTypes() {
+int StMessTypeList::ListTypes() {
   StMessTypeVecIter iter;
   cout << "List of StMessage types:" << endl;
   cout << "--------------------------------------------------------" << endl;
