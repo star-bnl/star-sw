@@ -1,7 +1,12 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.35 2000/08/11 20:57:00 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.36 2000/09/07 21:04:51 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.36  2000/09/07 21:04:51  calderon
+ * Remove requirement on having g2t_tpc_hit table to create StMcEvent.
+ * Print diagnostics accordingly.
+ * Add doUseBsmd(kTRUE) to StMcEventMaker constructor.
+ *
  * Revision 1.35  2000/08/11 20:57:00  calderon
  * bug fix to PrintInfo(), Thanks Maria
  *
@@ -173,7 +178,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.35 2000/08/11 20:57:00 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.36 2000/09/07 21:04:51 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -190,6 +195,7 @@ StMcEventMaker::StMcEventMaker(const char*name, const char * title) :
     doUseFtpc	     (kTRUE),
     doUseRich        (kTRUE),
     doUseBemc        (kTRUE),
+    doUseBsmd        (kTRUE),
     ttemp(),
     ttempParticle(),
     mCurrentMcEvent(0)
@@ -305,8 +311,7 @@ Int_t StMcEventMaker::Make()
 
     // Now we check if we have the pointer, if we do, then we can access the tables!
   
-    if (g2t_vertexTablePointer && g2t_trackTablePointer
-	&& g2t_tpc_hitTablePointer){
+    if (g2t_vertexTablePointer && g2t_trackTablePointer){
 	
 	//
 	// g2t_event Table
@@ -326,12 +331,19 @@ Int_t StMcEventMaker::Make()
 	    PR(eventTable)
 	}
 	//
-	// Vertex, Track and Tpc Hit table don't have problems normally.
+	// Vertex, Track and table don't have problems normally.
 	//
 	g2t_vertex_st  *vertexTable = g2t_vertexTablePointer->GetTable();
 	g2t_track_st   *trackTable  = g2t_trackTablePointer->GetTable();
-	g2t_tpc_hit_st *tpcHitTable = g2t_tpc_hitTablePointer->GetTable();
 
+	//
+	// Tpc Hit Table (might not be there for photon events
+	//
+	g2t_tpc_hit_st *tpcHitTable;
+	if (g2t_tpc_hitTablePointer)
+	    tpcHitTable = g2t_tpc_hitTablePointer->GetTable();
+	else
+	    cerr << "Table g2t_tpc_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 	//
 	// Ftpc Hit Table
 	//
@@ -698,6 +710,7 @@ Int_t StMcEventMaker::Make()
 	// TPC Hits
 	//
 	if (doUseTpc) {
+	if (g2t_tpc_hitTablePointer) {
 	StMcTpcHit* th = 0;
 	long NHits = g2t_tpc_hitTablePointer->GetNRows();
 	long iTrkId = 0;
@@ -744,6 +757,11 @@ Int_t StMcEventMaker::Make()
 	        
 	    }
 	}
+	else {
+	    cout << "No TPC Hits in this event" << endl;
+	}
+	}
+    
 	//
 	// SVT Hits
 	//
@@ -897,7 +915,7 @@ Int_t StMcEventMaker::Make()
     if (!g2t_trackTablePointer)
 	gMessMgr->Warning() << "StMcEventMaker:   g2t_track   Table Not found " << endm;
     if (!g2t_tpc_hitTablePointer)
-	gMessMgr->Warning() << "StMcEventMaker:   g2t_tpc_hit Table Not found " << endm;
+	gMessMgr->Info()    << "StMcEventMaker:   g2t_tpc_hit Table Not found " << endm;
     if (!particleTablePointer)
 	gMessMgr->Info()    << "StMcEventMaker:   particle    Table Not found " << endm;
     
