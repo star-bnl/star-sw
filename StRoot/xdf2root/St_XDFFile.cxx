@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.33 2000/03/22 23:52:06 fine Exp $ 
+// $Id: St_XDFFile.cxx,v 1.34 2000/03/23 03:27:10 fine Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.34  2000/03/23 03:27:10  fine
+// clean up: header_table ref has been removed
+//
 // Revision 1.33  2000/03/22 23:52:06  fine
 // Adjusted to libSTAR for ROOT 2.24
 //
@@ -92,7 +95,6 @@
 #include <stdlib.h>
 #include <errno.h>
 
-#include "table_header.h"
 #include "dsxdr.h"
 #include "TROOT.h"
 #include "TSystem.h"
