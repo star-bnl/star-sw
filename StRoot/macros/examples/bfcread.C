@@ -1,3 +1,10 @@
+//  bfcread.C
+//  bfcread.C
+//
+// 4/28/99 K.T. ---> you must copy this to the directory where the
+//                   file actually is, or it won't work
+//
+//======================================================================
 class StChain;
 class St_DataSet;
 St_DataSet *dst;
