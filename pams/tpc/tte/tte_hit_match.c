@@ -39,9 +39,6 @@ extern void type_of_call tls_qsort_herb_i_(long *, long *,long *,long *);
 #define tls_quick_sort_r_ F77_NAME(tls_quick_sort_r,TLS_QUICK_SORT_R)
 extern void type_of_call tls_quick_sort_r_(long *, float *,float *,long *);
 
-#define vzero_ F77_NAME (vzero,VZERO)
-extern void type_of_call vzero_(long *,long *);
-
 #define MAX_ROW    45          /* Number of TPC rows*/
 #define MAX_SECTOR 24          /* Number of TPC sectors*/
 #define LIMIT      4.0         /* Maximum alowable difference in z position*/
@@ -51,6 +48,8 @@ long total_len=MAX_ROW*MAX_SECTOR;
 long count_hit_rec[MAX_ROW][MAX_SECTOR]; /*count of reconstructed hits per row/sector*/
 long count_hit_g2t[MAX_ROW][MAX_SECTOR]; /*count of generated hits per row/sector*/
 long current_sector_row;                 /* 100*sector+row currently being processed*/
+int  newmaxlen;
+
 
 /*loop iterators*/
 long k;
@@ -88,8 +87,8 @@ float dist_current; /* current sqared smallest distance between the geant and re
 		      &g2t_hit[1].volume_id,&g2t_hit[0].id);
 
 /* Clear counter table */
-    vzero_(&count_hit_rec[0][0],&total_len);
-    vzero_(&count_hit_g2t[0][0],&total_len);
+    memset(count_hit_rec,0,total_len*sizeof(long));
+    memset(count_hit_g2t,0,total_len*sizeof(long));
 
 /* Setup pointers to rows and sectors and count number of hits
    for generated */
@@ -178,6 +177,11 @@ float dist_current; /* current sqared smallest distance between the geant and re
 	    }
 	  } /* end of loop over reconstructed hits, if i_current>-1, there was 
 a match for id_current, now we fill the index table*/
+
+    	  if (g2t_ent >= tpc_index_h->maxlen) { /* Increase table */
+             newmaxlen = tpc_index_h->maxlen*1.3;
+             ds2ReallocTable(&tpc_index_h,&tpc_index,newmaxlen);}
+	  
 	  tpc_index[g2t_ent].type=tpc_index_type[0].tphit_mhitstpc;
           tpc_index[g2t_ent].key1=g2t_hit[start_p_g2t+i].id;
 	  tpc_index[g2t_ent].key2=id_current;
