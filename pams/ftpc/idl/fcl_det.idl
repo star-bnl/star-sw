@@ -36,8 +36,15 @@
        float p_normalized;    /* normalized air pressure (in hPa) */
        float padtrans_e_min;  /* lowest e-field in padtrans database */
        float padtrans_e_max;  /* highest e-field in padtrans database */
+       char ampslopepath[200];/* path and name of ampslope database */
+       char ampoffpath[200];  /* path and name of ampoff database */
+       char timeoffpath[200]; /* path and name of timeoff database */
        char padtranspath[200];/* path and name of padtrans database */
    };
 
-/*  Last mod. for fcl_det: $Date: 1998/06/24 13:30:41 $ */
+/*  Last mod. for fcl_det: $Date: 1998/07/15 15:05:29 $ */
+
+
+
+
 
