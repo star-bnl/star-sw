@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichRayTracer.cxx,v $
+ * Revision 1.6  2002/02/09 19:03:47  lasiuk
+ * float.h header included for 7.2
+ *
  * Revision 1.5  2002/02/01 17:45:56  lasiuk
  * Mods for gcc(7.2)
  * outer helix usage
@@ -34,6 +37,7 @@
  **************************************************************************/
 
 #include "StRichRayTracer.h"
+#include <float.h>
 #include "StGlobals.hh"
 
 #include "StRrsMaker/StRichGeometryDb.h"
