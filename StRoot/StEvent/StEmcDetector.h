@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcDetector.h,v 2.7 2004/10/14 20:00:18 ullrich Exp $
+ * $Id: StEmcDetector.h,v 2.8 2004/10/15 18:17:58 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2000`
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEmcDetector.h,v $
+ * Revision 2.8  2004/10/15 18:17:58  ullrich
+ * Increased mMaxNumberOfCrates to 36.
+ *
  * Revision 2.7  2004/10/14 20:00:18  ullrich
  * Added member and methods to deal with crate status flags.
  *
@@ -80,7 +83,7 @@ protected:
     void clear();
     
 private:
-    enum { mMaxNumberOfCrates = 30 };
+    enum { mMaxNumberOfCrates = 36 };
     StDetectorId            mDetectorId;
     UInt_t                  mNumberOfModules;    
     StEmcModule             *mModules[120];
