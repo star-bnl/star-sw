@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.82  2004/01/05 16:51:29  ward
+// Fix bug in ipadrow limits.
+//
 // Revision 1.81  2004/01/02 18:11:29  ward
 // Change encoding of rb_mz.
 //
@@ -923,7 +926,7 @@ void St_tpcdaq_Maker::DAQ100clTableOut(unsigned int receiverBoard,unsigned int m
   // See the discussion of TPCMZCLD in the DAQ format doc, at about page 17.
   wordNumber[0]=1;
   assert(npadrow<=MAXPADROWSPERBANK); // Protect against overfilling the array.
-  for(ipadrow=0;ipadrow<npadrow;ipadrow++) {
+  for(ipadrow=1;ipadrow<npadrow;ipadrow++) {
     numberOfClustersInPreviousChunk = Swap4(swap,*(data+wordNumber[ipadrow-1]+1));
     numberOfWordsInPreviousChunk = 2 * numberOfClustersInPreviousChunk + 2;
     wordNumber[ipadrow] = wordNumber[ipadrow-1] + numberOfWordsInPreviousChunk;
