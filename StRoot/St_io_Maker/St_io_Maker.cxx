@@ -7,10 +7,12 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
+#include <iostream.h>
 #include "St_io_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
 #include "TTree.h"
+#include "TClass.h"
 
 class StIOHeader : public TObject 
 {
@@ -28,7 +30,8 @@ class StIOHeader : public TObject
                                                                     m_DataSet(obj){SetAddress();}    
   StIOHeader(TString &name, TTree *tree)                          : m_BranchName(name),m_DataSet(0)
   {
-    if (tree) m_Branch = tree->Branch(m_BranchName.Data(),"St_DataSet", &m_DataSet, 4000,0); 
+    if (!m_DataSet) m_DataSet = new St_DataSet;
+    if (tree) m_Branch = tree->Branch(m_BranchName.Data(),m_DataSet->IsA()->GetName(),&m_DataSet, 4000,0); 
   }
   StIOHeader(TBranch *branch)                                     : m_BranchName(branch?branch->GetName():""),
                                                                     m_DataSet(0),m_Branch(branch){SetAddress();}
@@ -42,7 +45,7 @@ class StIOHeader : public TObject
         Int_t    GetEvent(Int_t nevent=0) { return m_Branch ? m_Branch->GetEvent(nevent):0;}
         Int_t    Fill(TObject *obj) {
 #ifndef tree
-            if (m_Branch) { m_DataSet = obj; SetAddress(); return m_Branch->Fill();}
+            if (m_Branch) { m_DataSet = obj; return m_Branch->Fill();}
 #else
             if (m_Branch) { m_DataSet = obj; SetAddress(); }
 #endif
@@ -119,6 +122,25 @@ void St_io_Maker::Add(TString &dataName){
   Add(dataName.Data());
 }
 //_____________________________________________________________________________
+St_DataSet *St_io_Maker::DataSet(const Char_t *set) 
+{
+   if (!m_ListOfBranches) return 0;
+   TIter next(m_ListOfBranches);
+   StIOHeader *obj = 0;
+   while(obj = (StIOHeader *)next())  
+   {
+      // Find St_DataSet pointer 
+      TString name = obj->GetName();
+      name.ReplaceAll("_Branch","");
+      if (strcmp(name.Data(),set)==0) break;
+   }
+
+   if (obj && obj->GetEvent(g_Chain->Event())) 
+         return (St_DataSet *)(obj->ShuntData());
+   return  0;
+}
+
+//_____________________________________________________________________________
 Int_t St_io_Maker::GetEvent(Int_t nevent)
 {
   Int_t i = NextEventGet(nevent);
@@ -149,7 +171,8 @@ Int_t St_io_Maker::Finish()
  return 0;
 }
 //_____________________________________________________________________________
-Int_t St_io_Maker::Make(){
+Int_t St_io_Maker::Make()
+{
   // Write out all datasets for all StMaker's
   if (strcmp(GetName(),"Output")==0)  {
      NextEventPut();
@@ -172,12 +195,16 @@ Int_t St_io_Maker::NextEventGet(Int_t nevent)
     TTree *tree = GetTree();
     if (!tree)   return 0;
 #endif
-    // Let' s create it from the TTree if any
+    // Let's create it from the TTree if any
     TBranch *nextb = 0;
     TObjArray *branches = tree->GetListOfBranches();
     if (!branches)       return 0;
     TIter next(branches);
-    while (nextb = (TBranch *)next())  { printf(" St_io_Maker::NextEventGet ----> %s \n", nextb->GetName()); Add(nextb);}
+    while (nextb = (TBranch *)next())  
+    {
+         printf(" St_io_Maker::NextEventGet ----> %s \n", nextb->GetName());
+         Add(nextb);
+    }
   }
   Int_t counter = 0;
 #ifdef tree
@@ -254,7 +281,7 @@ TTree *St_io_Maker::MakeTree(const char* name, const char*title)
 //_____________________________________________________________________________
 void St_io_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_io_Maker.cxx,v 1.2 1999/01/19 04:58:49 fine Exp $\n");
+  printf("* $Id: St_io_Maker.cxx,v 1.3 1999/01/20 23:45:57 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
@@ -263,7 +290,9 @@ void St_io_Maker::PrintInfo(){
 //_____________________________________________________________________________
 Int_t St_io_Maker::SetActive()
 {
-  // Disactivate all branches of the currebt tree then 
+  //  SetActive()
+  //
+  // Disactivate all branches of the current tree then 
   // Mark all branches of this maker as active ones
   //
   // Return: number of active branches if any
