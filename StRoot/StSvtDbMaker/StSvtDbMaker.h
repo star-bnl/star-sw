@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.h,v 1.4 2003/01/28 20:20:10 munhoz Exp $
+ * $Id: StSvtDbMaker.h,v 1.5 2003/02/19 11:03:59 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.h,v $
+ * Revision 1.5  2003/02/19 11:03:59  munhoz
+ * adding getCVS line
+ *
  * Revision 1.4  2003/01/28 20:20:10  munhoz
  * including InitRun()
  *
@@ -97,6 +100,8 @@ class StSvtDbMaker : public StMaker {
   StSvtDbReader* getSvtDbReader(){return mReader;}
   StSvtDbWriter* getSvtDbWriter(){return mWriter;}  
 
+  virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtDbMaker.h,v 1.5 2003/02/19 11:03:59 munhoz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StSvtDbMaker, 1)   //StAF chain virtual base class for Makers
 };
 
