@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructTrack.h,v 1.2 2004/06/28 23:23:14 chunhuih Exp $
+ * $Id: StEStructTrack.h,v 1.3 2005/03/03 01:32:03 porter Exp $
  *
  * Author: Jeff Porter merge of work from Aya Ishihara and Jeff Reid
  *
@@ -68,6 +68,7 @@ private:
   Float_t           mPt; //!
   Float_t           mYt; //!
   Float_t           mXt; //!
+  Float_t           mAssignedMass; //!
   StLorentzVectorF  mFourMomentum; //!
   StThreeVectorF    mStartPos; //!
   StThreeVectorF    mNominalTpcExitPoint; //!
@@ -77,7 +78,7 @@ private:
 
 public:
 
-  StEStructTrack() : mIsComplete(false) {};
+  StEStructTrack() : mIsComplete(false), mAssignedMass(0.1396) {};
   StEStructTrack(StEStructTrack* track);
   virtual ~StEStructTrack() {};
 
@@ -117,6 +118,7 @@ public:
 
   Float_t Dedx() const { return mDedx; }
   Float_t Chi2() const { return mChi2; }
+  Float_t AssignedMass() { return mAssignedMass; };
 
   Int_t NFitPoints() const { return mNFitPoints; }
   Int_t NFoundPoints() const { return mNFoundPoints; }
@@ -129,6 +131,7 @@ public:
 
   ULong_t TopologyMapData(const Int_t word) const { return mMap[word];} 
   UInt_t  TopologyMapTPCNHits() const {return mTPCNHits;}
+  int      getYtBin() const;
 
   // functions which do some simple calculations
   //  using information contained in data members
@@ -136,6 +139,7 @@ public:
   Float_t	Mt(Float_t mass) const;
   Float_t	E(Float_t mass) const;
   Float_t	Rapidity(Float_t mass) const;
+
 
   Float_t       Dca() const;
   Float_t       DcaPrimary() const;
@@ -153,8 +157,6 @@ public:
   const StHelixD& Helix()                              const;
   Float_t  Xt() const;
   Float_t  Yt() const;
-  int      getYtBin() const;
-
 
   // functions used to set data members
   void SetPx(Float_t px) { mPx = px; }
@@ -184,7 +186,7 @@ public:
 
   void SetDedx(Float_t dedx) { mDedx = dedx; }
   void SetChi2(Float_t chi2) { mChi2 = chi2; }
-
+  void SetMassAssignment(float mass){ mAssignedMass=mass; };
   void SetNFitPoints(Int_t nfit) { mNFitPoints = nfit; }
   void SetNFoundPoints(Int_t nfound) { mNFoundPoints = nfound; }
   void SetNMaxPoints(Int_t nmax) { mNMaxPoints = nmax; }
@@ -219,7 +221,12 @@ inline int      StEStructTrack::getYtBin() const { return mytbin; };
 /***********************************************************************
  *
  * $Log: StEStructTrack.h,v $
+ * Revision 1.3  2005/03/03 01:32:03  porter
+ * fixed a bug setting 4-momentum and added data (+accessors)
+ * to the track class
+ *
  * Revision 1.2  2004/06/28 23:23:14  chunhuih
+ *
  * add 'const' specification to a set of member functions, including some of
  * the return types, so that they can be used by a const StEStructTrack object.
  *
