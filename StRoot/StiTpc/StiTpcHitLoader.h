@@ -31,7 +31,9 @@ class StiTpcHitLoader : public StiHitLoader<StEvent,StMcEvent,StiDetectorBuilder
 			Filter<StiHit> * hitFilter);
   virtual void loadMcHits(StMcEvent* source,bool useMcAsRec,
 			  Filter<StiTrack> * trackFilter, 
-			  Filter<StiHit> * hitFilter);
+			  Filter<StiHit> * hitFilter,
+			  StMcTrack & stMcTrack,
+			  StiMcTrack & stiMcTrack);
 };
 
 #endif
