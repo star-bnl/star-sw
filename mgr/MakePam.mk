@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.113 1999/09/03 20:44:58 fisyak Exp $
+# $Id: MakePam.mk,v 1.114 1999/09/07 19:31:04 fine Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.114  1999/09/07 19:31:04  fine
+# table descriptor access has been changed. All tables are affected and must be re-compiled
+#
 # Revision 1.113  1999/09/03 20:44:58  fisyak
 # Fix typo
 #
@@ -296,8 +299,8 @@ echo "class St_$(STEM) : public St_Table   ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
 echo "{                                          ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
 echo "protected:                                 ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
 echo "  static St_tableDescriptor *fgColDescriptors;">>$(GEN_TAB)/St_$(STEM)_Table.h;\
-echo "  virtual St_tableDescriptor *GetRowDescriptors() const { return fgColDescriptors?fgColDescriptors:(fgColDescriptors=GetTableDescriptors());}">>$(GEN_TAB)/St_$(STEM)_Table.h;\
-echo "  virtual void  SetRowDescriptors(St_tableDescriptor *list) { fgColDescriptors = list;}">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  virtual St_tableDescriptor *GetDescriptorPointer() const { return fgColDescriptors;}">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  virtual void SetDescriptorPointer(St_tableDescriptor *list) const { fgColDescriptors = list;}">>$(GEN_TAB)/St_$(STEM)_Table.h;\
 echo "public:                                    ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
 echo "  St_$(STEM)() : St_Table(\"$(STEM)\",sizeof($(STEM)_st)) {SetType(\"$(STEM)\");}           ">>$(GEN_TAB)/St_$(STEM)_Table.h ;\
 echo "  St_$(STEM)(Text_t *name) : St_Table(name,sizeof($(STEM)_st)) {SetType(\"$(STEM)\");}          ">>$(GEN_TAB)/St_$(STEM)_Table.h;\

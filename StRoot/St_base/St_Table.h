@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.36 1999/09/04 00:28:02 fine Exp $
+// $Id: St_Table.h,v 1.37 1999/09/07 19:30:29 fine Exp $
 // $Log: St_Table.h,v $
+// Revision 1.37  1999/09/07 19:30:29  fine
+// table descriptor access has been changed. All tables are affected and must be re-compiled
+//
 // Revision 1.36  1999/09/04 00:28:02  fine
 // St_Table::NaN from VP and gloabl dataset have been introduced
 //
@@ -143,7 +146,8 @@ protected:
    void       SetTableType(const Char_t *type);
    void       StreamerTable(TBuffer &b);
    Int_t      StreamerTable(StBufferAbc &b);
-//   TList     *GetTableDescriptors();
+   virtual St_tableDescriptor *GetDescriptorPointer() const;
+   virtual void  SetDescriptorPointer(St_tableDescriptor *list) const ;
 
    Long_t    *s_MaxIndex;   // The used capacity of this array
 
@@ -223,6 +227,7 @@ public:
    virtual     void      *operator[](Int_t i);
 
  //  ----   Table descriptor service   ------
+
    virtual  const Char_t *GetColumnName(Int_t columnIndex)      const;
    virtual   UInt_t      *GetIndexArray(Int_t columnIndex)      const;
    virtual   UInt_t       GetNumberOfColumns()                  const;
