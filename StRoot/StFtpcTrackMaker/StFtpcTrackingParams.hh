@@ -1,3 +1,9 @@
+// $Id: StFtpcTrackingParams.hh,v 1.3 2002/06/07 06:00:40 oldi Exp $
+// $Log: StFtpcTrackingParams.hh,v $
+// Revision 1.3  2002/06/07 06:00:40  oldi
+// New value for rotation angle of FTPC east after temperature offset was corrected.
+//
+
 #ifndef STAR_StFtpcTrackingParams
 #define STAR_StFtpcTrackingParams
 

@@ -1,3 +1,9 @@
+// $Id: StFtpcTrackingParams.cc,v 1.4 2002/06/07 06:00:39 oldi Exp $
+// $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.4  2002/06/07 06:00:39  oldi
+// New value for rotation angle of FTPC east after temperature offset was corrected.
+//
+
 //----------Author:        Markus D. Oldenburg
 //----------Last Modified: 25.04.2002
 //----------Copyright:     &copy MDO Production 2002
@@ -251,7 +257,7 @@ Int_t StFtpcTrackingParams::InitFromFile() {
   
    // internal FTPC rotation (East only) [has do be done before local -> global]
    mInstallationPointZ    = -235.8855 * centimeter;
-   mObservedVertexOffsetY =    0.258  * centimeter;
+   mObservedVertexOffsetY =    0.2694 * centimeter;
  
    // define rotation angle alpha=atan(y_vertex_offset cm/z_installation cm)
    Double_t alpha = TMath::ATan(mObservedVertexOffsetY / TMath::Abs(mInstallationPointZ)); // radians and > 0
