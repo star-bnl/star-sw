@@ -26,5 +26,5 @@
        float rad_per_gap;     /* phi angle of sector gap, def 0.05047541 */
    };
 
-/*  Last mod. for fcl_det: $Date: 1998/02/23 14:32:56 $ */
+/*  Last mod. for fcl_det: $Date: 1998/03/25 10:43:21 $ */
 
