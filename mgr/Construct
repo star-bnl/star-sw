@@ -47,7 +47,8 @@ my $CLIBS    = "";
 my $FLIBS    = "";
 my $OSFID    = "";
 my $ROOTCINTD= "";
-my $LINKMODULECOM = "%SO %DEBUG %SOFLAGS %SoOUT%> %<";
+my $SoLibs   = "";
+my $LINKMODULECOM = "%SO %DEBUG %SOFLAGS %SoOUT%> %< %SoLibs";
 my $INCLUDE_PATH  = $INCLUDE;
 my $LIBPATH  = ""; #$STAR/.$STAR_SYS/lib:$STAF/.$STAF_SYS/lib";#:;#:$CERN_ROOT/lib"; 
 $_ = $STAR_SYS;
@@ -109,7 +110,9 @@ elsif (/^sun4x_55/ ||  /^sun4x_56/) {
   $CXX       = "/opt/SUNWspro/bin/CC";
   $FC        = "/opt/SUNWspro/bin/f77";
   $CXXFLAGS  = "-KPIC +w -features=no_castop -features=no_anachronisms";
-  $CLIBS     = "-L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc";
+#  $CLIBS     = "-L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc";
+#  $CLIBS     = "-L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc";
+  $CLIBS     = "-lw -lgen -lsocket -lnsl -lintl";
   $FLIBS     = "-lM77 -lF77 -lsunmath";
   $FFLAGS    = "-KPIC -w";
   $FEXTEND   = "-e";
@@ -122,7 +125,7 @@ elsif (/^sun4x_55/ ||  /^sun4x_56/) {
   my $STDHOME= "/afs/rhic/star/packages/ObjectSpace/2.0m";
   $CXXFLAGS .= " -I" . $STDHOME . " -I" . $STDHOME ."/ospace/std -I" . $STDHOME . "/ospace";
   $LINKMODULECOM = 
-    "test -d %>:d/Templates.DB && %SO %DEBUG %SOFLAGS %SoOUT%> %<  %>:d/Templates.DB/*.o || %SO %DEBUG %SOFLAGS %SoOUT%> %< ";
+    "test -d %>:d/Templates.DB && %SO %DEBUG %SOFLAGS %SoOUT%> %<  %>:d/Templates.DB/*.o || %SO %DEBUG %SOFLAGS %SoOUT%> %< %SoLibs";
 }
 elsif (/^intel_wnt/) {
 #  $DEBUG    = "-Zi";
@@ -250,7 +253,10 @@ $env = new cons(
 		'CXX'          => $CXX,
 		'CXXFLAGS'     => $CXXFLAGS,
 		'CXXCOM'       => '%CXX %CXXFLAGS %DEBUG %CPPFLAGS %_IFLAGS -c %CXXinp%< %Cout%>',
+		'CLIBS'        => $CLIBS,
+		'FLIBS'        => $FLIBS,
 		'LIBS'         => $LIBS,
+		'SoLibs'       => $SoLibs,
 		'LINK'	       => $LD,
 		'LDFLAGS'      => $LDFLAGS,
 		'EXEFLAGS'     => $EXEFLAGS,
@@ -322,10 +328,12 @@ foreach my $dir ("StRoot","pams") {
     foreach my $sub_dir (@subdirS) {
       # skip unwanted directories
       if ($sub_dir =~ /^macros$/     ||
+#	  $sub_dir =~ /^StPadDisplayMaker$/    ||
 	  $sub_dir =~ /^StTpcDb$/    ||
+	  $sub_dir =~ /^StDbMaker$/    ||
           $sub_dir =~ /^test$/)  {next;}
       if ($STAR_SYS =~ /^hp_ux102/ && 
-	  ($sub_dir =~ /^StDb/ ||
+	  ($sub_dir =~ /^StDbLib$/ ||
 	   $sub_dir =~ /StHbt/)	  ) {next;}
       if ($STAR_SYS =~ /sun4x/ && $sub_dir =~ /^StAssociationMaker$/) {next;}
       my $sub_DIR = $dir . "/" . $sub_dir; #print "sub_DIR = $sub_DIR\n";
@@ -404,6 +412,7 @@ foreach my $dir ("StRoot","pams") {
 	    $sub_dir =~ /^StAnalysisUtilities$/ ||
 	    $sub_dir =~ /^St_geant_Maker$/ ||
 	    $sub_dir =~ /^St_db_Maker$/ ||
+	    $sub_dir =~ /^StDbBroker$/ ||
 	    $sub_dir =~ /^StTreeMaker$/ ||
 	    $sub_dir =~ /^StIOMaker$/ ||
 	    $sub_dir =~ /^StDbLib$/) {
@@ -463,7 +472,7 @@ if (-d $db_dir) {
 #print "subdirs = @subdirs\n";
 #print "incT = @incT\n";
 my @Targets = ();
-foreach $dir ("asps/rexe",@subdirs,"cern/geant321","cern/minicern") {
+foreach $dir ("asps/Rexe","asps/rexe",@subdirs,"cern/geant321","cern/minicern") {
   next if !-d $dir;
   push @Targets, $OBJ . "/" . $dir . "/Conscript";
 }
