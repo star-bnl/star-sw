@@ -5,6 +5,7 @@
 modification history
 --------------------
 15mar95,whg  written.
+11jun96,whg  added indirection to dataset structure
 */
 
 /*
@@ -101,8 +102,10 @@ void dsPrintData(FILE *stream, DS_TYPE_T *type, unsigned count, void *data)
 int dsPrintDatasetSpecifier(FILE *stream, DS_DATASET_T *pDataset)
 {
 	char buf[DS_MAX_SPEC_LEN+1];
+	DS_BUF_T bp;
 
-	if (!dsDatasetSpecifier(buf, sizeof(buf), pDataset)) {
+	DS_PUT_INIT(&bp, buf, sizeof(buf));
+	if (!dsDatasetSpecifier(&bp, pDataset)) {
 		return FALSE;
 	}
 	fprintf(stream, "%s\n", buf);
@@ -133,41 +136,46 @@ fail:
 }
 /******************************************************************************
 */
-int dsPrintTypes(FILE *stream, DS_DATASET_T *pDataset, size_t *tList)
+int dsPrintTypes(FILE *stream, DS_DATASET_T *dataset, size_t *tList)
 {
 	char *str;
-	size_t h, i;
+	size_t h, i, len;
+	DS_DATASET_T *item;
+	DS_LIST_T list;
 	DS_TYPE_T *pType;
 
-	if (DS_IS_TABLE(pDataset)) {
-		if (!dsTypePtr(&pType, pDataset->tid)) {
-			return FALSE;
+	if (!dsListInit(&list)) {
+		return FALSE;
+	}
+	if (!dsVisitList(&list, dataset)) {
+		goto fail;
+	}
+	for (i = 0; i < list.count; i++) {
+		item = list.pItem[i];
+		if (!DS_IS_TABLE(item)) {
+			continue;
 		}
-		if (!dsTypeListFind(&h, tList, pType->name)) {
-			return FALSE;
+		if (!dsTypePtr(&pType, item->tid) ||
+			!dsTypeListFind(&h, tList, pType->name)) {
+			goto fail;
 		}
-		if (tList[h] == pDataset->tid) {
-			return TRUE;
+		if (tList[h] == item->tid) {
+			continue;
 		}
 		if (tList[h]) {
-			DS_ERROR(DS_E_DUPLICATE_TYPE_NAME);
+			DS_LOG_ERROR(DS_E_DUPLICATE_TYPE_NAME);
+			goto fail;
 		}
-		if (!dsTypeSpecifier(&str, &i, pDataset->tid)) {
-			return FALSE;
+		tList[h] = item->tid;
+		if (!dsTypeSpecifier(&str, &len, item->tid)) {
+			goto fail;
 		}
-		fprintf(stream, "%s\n", str);
-		tList[h] = pDataset->tid;
-		return TRUE;
+		fprintf(stream, "type %s\n", str);
 	}
-	if (DS_IS_DATASET(pDataset)) {
-		for (i = 0; i < pDataset->elcount; i++) {
-			if (!dsPrintTypes(stream, &pDataset->p.child[i], tList)) {
-				return FALSE;
-			}
-		}
-		return TRUE;
-	}
-	DS_ERROR(DS_E_SYSTEM_ERROR);
+	return dsListFree(&list);
+fail:
+	dsListFree(&list);
+	return FALSE;
 }
 /****************************************************************************
 *

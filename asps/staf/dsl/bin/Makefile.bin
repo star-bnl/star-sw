@@ -6,12 +6,8 @@
 CC=gcc
 CPPFLAGS= $(patsubst %, -I%, $(HPATH))
 CFLAGS= -Wall
-ARCH := $(shell uname -sr)
-SUN5 := "SunOS 5.4 "
-ifeq ($(ARCH),$(SUN5))
-CPPFLAGS += -Usun
-else
-CPPFLAGS += -Usun
+ifeq "$(STAR_ARCH)" "sun4os5"
+LDFLAGS= -lnsl
 endif
 vpath %.c $(SPATH)
 vpath %.h $(HPATH)
@@ -40,6 +36,9 @@ test:
 	@echo $(SPATH)
 	@echo $(HPATH)
 	@echo $(LPATH)
+	@echo x$(ARCH)x
+	@echo x$(SUN5)x
+	@echo x$(LDFLAGS)x
 
 vwtest:		$(VWTEST)
 

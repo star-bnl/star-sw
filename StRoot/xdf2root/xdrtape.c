@@ -23,6 +23,11 @@ error has occured.
 #include <assert.h>
 #include <string.h>
 #include <rpc/rpc.h>
+#if defined(sparc) && !defined(ntohl)
+/* big-endian sun */
+#define ntohl(x)    (x)
+#define htonl(x)    (x)
+#endif
 #include "xdrtape.h"
 /*****************************************************************************
 *

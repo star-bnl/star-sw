@@ -33,14 +33,14 @@ typedef struct staff_t {
 	"short supNum;}"
 	
 STAFF_T staff[] = {
-	{"Charles",  1, 90000,  0},
-	{"Bob",     19, 50000, 11},
-	{"Mary",    10, 80000,  1},
-	{"John",    17, 85000, 10},
-	{"James",   11, 95000,  1},
-	{"Ted",     15, 40000, 10},
-	{"Jane",    22, 60000, 11},
-	{"Fred",    13, 70000, 10}};
+	{"Charles",	 1, 90000,  0},
+	{"Bob",		19, 50000, 11},
+	{"Mary",	10, 80000,  1},
+	{"John",	17, 85000, 10},
+	{"James",	11, 95000,  1},
+	{"Ted",		15, 40000, 10},
+	{"Jane",	22, 60000, 11},
+	{"Fred",	13, 70000, 10}};
 
 size_t staffRowCount = sizeof(staff)/sizeof(staff[0]);
 
@@ -60,13 +60,13 @@ char *removeName = "{selfJoin.empName myName, empSalary mySalary, supSalary}";
 */
 int testEquijoin()
 {
-	DS_DATASET_T projectTable, *pProject = &projectTable, *pSelfJoin = NULL;
+	DS_DATASET_T *pProject, *pSelfJoin;
 	DS_DATASET_T staffTable, *pStaffTable = &staffTable;
 	
 	/*
 	 * create staff table
 	 */
-	if (!dsNewTable(&pStaffTable, "staff", STAFF_S, staffRowCount, staff)) {
+	if (!dsInitTable(pStaffTable, "staff", STAFF_S, staffRowCount, staff)) {
 		dsPerror("dsNewTable failed for staff");
 		return FALSE;
 	}                                     
@@ -146,7 +146,7 @@ int testNatural()
 	TYPE_ONE_T varOne[DIM_ONE];
 	TYPE_TWO_T varTwo[DIM_TWO];
 	JOIN_TYPE_T *joinVar;
-	unsigned joinRowCount;
+	size_t joinRowCount;
 		/* table structs and pointers */
 		/* allocate space for tableOne and tableTwo */
 	DS_DATASET_T tableOne, *pTableOne = &tableOne;
@@ -158,12 +158,12 @@ int testNatural()
 	fillVarOne(varOne, DIM_ONE);
 	fillVarTwo(varTwo, DIM_TWO);
 	/* fill in descriptor for table one */
-	if (!dsNewTable(&pTableOne, "table_one", TYPE_ONE_S, DIM_ONE, varOne)) {
+	if (!dsInitTable(pTableOne, "table_one", TYPE_ONE_S, DIM_ONE, varOne)) {
 		dsPerror("dsNewTable failed for table_one");
 		return FALSE;
 	}
 	/* fill in descriptor for table two */
-	if (!dsNewTable(&pTableTwo, "table_two", TYPE_TWO_S, DIM_TWO, varTwo)) {
+	if (!dsInitTable(pTableTwo, "table_two", TYPE_TWO_S, DIM_TWO, varTwo)) {
 		dsPerror("dsNewTable failed for table_two");
 		return FALSE;
 	}

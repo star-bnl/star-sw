@@ -7,11 +7,11 @@ modification history
 --------------------
 24apr93,whg  written.
 15feb95,whg	 added functions for CORBA IDL
+11jun96,whg  added indirection to dataset structure
 */
-
 /*
 DESCRIPTION
-general routines for parsing and memory allocation
+general utility routines
 */
 #include <ctype.h>
 #include <limits.h>
@@ -19,37 +19,6 @@ general routines for parsing and memory allocation
 #include <string.h>
 #define DS_PRIVATE
 #include "dstype.h"
-
-static int dsAllocCalls = 0;
-static int dsFreeCalls = 0;
-static int dsTidSize = 0;
-/******************************************************************************
-*
-* dsCheckDuplicate - verify dataset or type names are unique 
-*
-* RETURNS: TRUE if unique names, FALSE if duplicate or names collide
-*/
-int dsCheckDuplicate(char *name, size_t count, size_t stride)
-{
-	char *n1, *n2;
-	int c;
-	size_t i;
-	
-	for (i = 1, n2 = name; i < count; i++) {
-		n2 += stride;
-		for (n1 = name; n1 < n2; n1 += stride) {
-			if ((c = dsCmpName(n1, n2)) <= 0) {
-				if (c < 0) {
-					DS_ERROR(DS_E_NAMES_COLLIDE);
-				}
-				else {
-					DS_ERROR(DS_E_DUPLICATE_NAME);
-				}
-			}
-		}
-	}
-	return TRUE;
-}
 /*****************************************************************************
 *
 * dsCmpName - CORBA style compare of names
@@ -94,64 +63,6 @@ int dsCopyName(char *dst, char *str, char **ptr)
 	}
 	return c < 0 ? FALSE : TRUE;
 }
-/******************************************************************************
-*
-* dsDatasetAllocStats - print dataset allocation stats
-*
-* RETURNS: N/A
-*/
-void dsDatasetAllocStats(void)
-{
-	printf("AllocStats:tidSize: %d, allocCalls %d, freeCalls %d, diff %d\n",
-		dsTidSize, dsAllocCalls, dsFreeCalls, dsAllocCalls - dsFreeCalls);
-}
-/******************************************************************************
-*
-* dsDsetAlloc - allocate memory for dataset or table
-*
-* RETURNS: pointer to memory or NULL if size is zero or not enough memory
-*/
-void *dsDsetAlloc(size_t size)
-{
-	return dsDsetRealloc(NULL, size); 
-}
-/******************************************************************************
-*
-* dsDsetFree - free memory for dataset or table
-*
-* RETURNS: N/A
-*/
-void dsDsetFree(void *ptr)
-{
-	if (ptr != NULL) {
-		free((char *)ptr);
-		dsFreeCalls++;
-	}
-}
-/******************************************************************************
-*
-* dsDsetRealloc - allocate memory for dataset or table
-*
-* RETURNS: pointer to memory or NULL if size is zero or not enough memory
-*/
-void *dsDsetRealloc(char *old, size_t size)
-{
-	char *ptr;
-	
-	if (size == 0){
-		DS_LOG_ERROR(DS_E_ZERO_LENGTH_ALLOC);
-	}
-	if ((ptr = (old == NULL ? malloc(size) : realloc(old, size))) != NULL) {
-		if (old == NULL) {
-			dsAllocCalls++;
-		}
-		return ptr;
-	}
-	else {
-		DS_LOG_ERROR(DS_E_NOT_ENOUGH_MEMORY);
-	}
-	return NULL;	
-}
 /*****************************************************************************
 *
 * dsGetChar - get a character from the buffer defined by bp
@@ -164,7 +75,7 @@ int dsGetc(DS_BUF_T *bp)
 }
 /*****************************************************************************
 *
-* dsGetColumnSpecifier
+* dsGetColumnSpecifier - return col specifier (colName or tableName.tableName)
 *
 * RETURNS:
 */ 
@@ -230,10 +141,10 @@ int dsGetNonSpace(DS_BUF_T *bp)
 *
 * RETURNS: zero for success or EOF 
 */
-int dsGetNumber(unsigned *pNumber, DS_BUF_T *bp)
+int dsGetNumber(size_t *pNumber, DS_BUF_T *bp)
 {
 	int c;
-	unsigned number = 0;
+	size_t number = 0;
 
 	if (!isdigit(c = dsGetNonSpace(bp))) {
 		dsUngetc(c, bp);
@@ -252,66 +163,26 @@ int dsGetNumber(unsigned *pNumber, DS_BUF_T *bp)
 	*pNumber = number;
 	return 0;
 }
-/******************************************************************************
+/*****************************************************************************
 *
-* dsFirstPass - first pass for parse of dataset and type specifiers
+* dsMark - mark node as visited
 *
-* RETURNS: TRUE for success or FALSE for error
+* RETURN TRUE if success else FALSE
 */
-int dsFirstPass(int *pSepCount, int *map,
-	int *pMapCount, int maxMapCount, char *str)
+int dsMark(DS_LIST_T *list, DS_DATASET_T *node)
 {
-	int mapCount = 0, nest = -1, sepCount = 0, stack[DS_MAX_NEST];
-
-	for (; isalnum(*str) || isspace(*str) || *str == '_'; str++);
-
-	if (*str != '{') {
-		*pMapCount = mapCount;
-		*pSepCount = 0;
-		return TRUE;
+	if (!DS_IS_VALID(node)) {
+		DS_ERROR(DS_E_INVALID_DATASET_OR_TABLE);
 	}
-	for (;;) {
-		for (; isalnum(*str) || isspace(*str) || *str == '_'; str++);
-		switch (*str++) {
-
-			case ';':
-			case ',':
-				map[stack[nest]]++;
-				sepCount++;
-				break;
-
-			case '{':
-				if (++nest >= DS_MAX_NEST) {
-					DS_ERROR(DS_E_NESTED_TOO_DEEP);
-				}
-				stack[nest] = mapCount++;
-				if (mapCount > maxMapCount) {
-					DS_ERROR(DS_E_TOO_MANY_MEMBERS);
-				}
-				map[stack[nest]] = 0;
-				break;
-
-			case '}':
-				if (nest == 0) {
-					*pMapCount = mapCount;
-					*pSepCount = sepCount;
-					return TRUE;
-				}
-				nest--;
-				break;
-
-			case '(':
-				while(*str != '\0' && *str++ != ')');
-				break;
-
-			case '[':
-				while(*str != '\0' && *str++ != ']');
-				break;
-
-			default: 
-				DS_ERROR(DS_E_SYNTAX_ERROR);
-		}
+	if ((node->visit - 1) < list->count &&
+		list->pItem[node->visit - 1] == node) {
+		DS_ERROR(DS_E_MARK_ERROR);
 	}
+	if (!dsListAppend(list, node)) {
+		return FALSE;
+	}
+	node->visit = list->count;
+	return TRUE;
 }
 /*****************************************************************************
 *
@@ -321,7 +192,15 @@ int dsFirstPass(int *pSepCount, int *map,
 */
 int dsPutc(int c, DS_BUF_T *bp)
 {
-	return DS_PUTC(c, bp);
+	size_t size;
+
+	if (bp->in >= bp->limit) {
+		size = bp->limit - bp->first + DS_BUF_ALLOC;
+		if (!dsBufRealloc(bp, size)) {
+			return EOF;
+		}
+	}
+	return  0XFF & (*bp->in++ = (char)c);
 }
 /*****************************************************************************
 *
@@ -370,41 +249,6 @@ int dsPutTabs(int n, DS_BUF_T *bp)
 }
 /******************************************************************************
 *
-* dsTypeCalloc - allocate zeroed memory for type structure
-*
-* RETURNS: pointer to memory or NULL if size is zero or not enough memory
-*/
-void *dsTypeCalloc(size_t size)
-{
-	char *ptr;
-
-	if (size == 0){
-		DS_LOG_ERROR(DS_E_ZERO_LENGTH_ALLOC);
-	}
-	else if ((ptr = calloc(1, size)) != NULL) {
-		dsTidSize += size;
-		return ptr;
-	}	
-	else {
-		DS_LOG_ERROR(DS_E_NOT_ENOUGH_MEMORY);
-	}
-	return NULL;
-}
-/******************************************************************************
-*
-* dsTypeFree - free memory for type structure
-*
-* RETURNS: N/A
-*/
-void dsTypeFree(void *ptr, size_t size)
-{
-	if (ptr != NULL) {
-		free((char *)ptr);
-		dsTidSize -= size;
-	}
-}
-/******************************************************************************
-*
 * dsUngetc - push character back
 *
 * RETURNS: character if success else EOF
@@ -417,3 +261,86 @@ int dsUngetc(int c, DS_BUF_T *bp)
 	}
 	return EOF;
 } 
+/******************************************************************************
+*
+* dsVisitClear - clear visit during depth first traversal of dataset
+*
+* RETURN TRUE if success else FALSE
+*/
+int dsVisitClear(DS_DATASET_T *dataset)
+{
+	size_t i;
+
+	if (!DS_IS_VALID(dataset)) {
+		DS_ERROR(DS_E_INVALID_DATASET_OR_TABLE);
+	}
+	if (dataset->visit != 0) {
+		dataset->visit = 0;
+		if (DS_IS_DATASET(dataset)) {
+			for (i = 0; i < dataset->elcount; i++) {
+				if (!dsVisitClear(dataset->p.link[i])) {
+					return FALSE;
+				}
+			}
+		}
+	}
+	return TRUE;
+}
+/******************************************************************************
+*
+* dsVisitCount - count visits during depth first traversal of dataset
+*
+* RETURN TRUE if success else FALSE
+*/
+int dsVisitCount(DS_DATASET_T *dataset)
+{
+	size_t i;
+
+	if (!DS_IS_VALID(dataset)) {
+		DS_ERROR(DS_E_INVALID_DATASET_OR_TABLE);
+	}
+	if (dataset->visit++ == 0) {
+		if (DS_IS_DATASET(dataset)) {
+			for (i = 0; i < dataset->elcount; i++) {
+				if (!dsVisitCount(dataset->p.link[i])) {
+					return FALSE;
+				}
+			}
+		}
+	}
+	return TRUE;
+}
+/*****************************************************************************
+*
+* dsVisited - check for node of dataset visited
+*
+* RETURN TRUE if visited else FALSE
+*/
+int dsVisited(DS_LIST_T *list, DS_DATASET_T *node)
+{
+	return node != NULL && (node->visit - 1) < list->count &&
+		node == list->pItem[node->visit - 1];
+}
+/******************************************************************************
+*
+* dsVisitList - form a list of nodes accessable from dataset
+*
+* RETURN TRUE if success else FALSE
+*/
+int dsVisitList(DS_LIST_T *list, DS_DATASET_T *dataset)
+{
+	size_t i;
+
+	if (!dsMark(list, dataset)) {
+		return FALSE;
+	}
+	if (DS_IS_DATASET(dataset)) {
+		for (i = 0; i < dataset->elcount; i++) {
+			if (!dsVisited(list, dataset->p.link[i]) &&
+				!dsVisitList(list, dataset->p.link[i])) {
+				return FALSE;
+			}
+		}
+	}
+	return TRUE;
+}

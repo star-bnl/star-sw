@@ -149,7 +149,7 @@ int readVars(void)
 	TYPE_D_T table4[NROW_TABLE4], *pTable4 = table4;
 	size_t nRow1 = NROW_TABLE1, nRow2 = NROW_TABLE2;
 	size_t nRow3 = NROW_TABLE3, nRow4 = NROW_TABLE4;
-	DS_DATASET_T dataset[DSET_DIM], *pDataset = dataset;
+	DS_DATASET_T *pDataset;
 	FILE *stream;
 	XDR xdr;
 	int rtn;
@@ -163,7 +163,7 @@ int readVars(void)
 
 	/* read dataset into program vars */
 	if (
-		!xdr_dataset_type(&xdr, &pDataset, DSET_DIM) ||
+		!xdr_dataset_type(&xdr, &pDataset) ||
 		!dsMapTable(pDataset, "table1", TYPE_A_S, &nRow1, (char **)&pTable1) ||
 		!dsMapTable(pDataset, "table2", TYPE_B_S, &nRow2, (char **)&pTable2) ||
 		!dsMapTable(pDataset, "table3", TYPE_C_S, &nRow3, (char **)&pTable3) ||
@@ -272,7 +272,7 @@ done:
 */
 int writeDynamic(void)
 {
-	DS_DATASET_T *pDataset = NULL;
+	DS_DATASET_T *pDataset;
 	FILE *stream;
 	XDR xdr;
 	int rtn;
@@ -284,7 +284,7 @@ int writeDynamic(void)
 	}
 	xdrstdio_create(&xdr, stream, XDR_ENCODE);
 	if (
-		!dsNewDataset(&pDataset, "example", DSET_DIM) ||
+		!dsNewDataset(&pDataset, "example") ||
 		!dsAddTable(pDataset, "table1", TYPE_A_S, NROW_TABLE1, NULL) ||
 		!dsAddTable(pDataset, "table2", TYPE_B_S, NROW_TABLE2, NULL) ||
 		!dsAddTable(pDataset, "table3", TYPE_C_S, NROW_TABLE3, NULL) ||
@@ -332,7 +332,7 @@ int writeVars(void)
 	size_t nRow1 = NROW_TABLE1, nRow2 = NROW_TABLE2;
 	size_t nRow3 = NROW_TABLE3, nRow4 = NROW_TABLE4;
 	size_t nRow5 = NROW_TABLE5;
-	DS_DATASET_T dataset[DSET_DIM], *pDataset = dataset;
+	DS_DATASET_T *pDataset;
 	FILE *stream;
 	XDR xdr;
 	int rtn;
@@ -346,7 +346,7 @@ int writeVars(void)
 
 	/* build and write dataset */
 	if (
-		!dsNewDataset(&pDataset, "example", DSET_DIM) ||
+		!dsNewDataset(&pDataset, "example") ||
 		!dsAddTable(pDataset, "table1", TYPE_A_S, nRow1, &pTable1) ||
 		!dsAddTable(pDataset, "table2", TYPE_B_S, nRow2, &pTable2) ||
 		!dsAddTable(pDataset, "table3", TYPE_C_S, nRow3, &pTable3) ||
@@ -367,5 +367,6 @@ fail:
 done:
 	xdr_destroy(&xdr);
 	fclose(stream);
+	dsFreeDataset(pDataset);
 	return rtn;
 }

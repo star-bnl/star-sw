@@ -6,6 +6,7 @@
 modification history
 --------------------
 23jul93,whg  written.
+11jun96,whg  added indirection to dataset structure
 */
 
 /*
@@ -65,19 +66,27 @@ int dsCheckDataset(DS_DATASET_T *pDataset)
 {
 	size_t i;
 	DS_TYPE_T *type;
+	DS_LIST_T list;
 
-	if (DS_IS_TABLE(pDataset)) {
-		if (!dsTypePtr(&type, pDataset->tid)) {
-			return FALSE;
-		}
-		return dsCheckTableR(pDataset->p.data, pDataset->elcount, type);
+	if(!dsListInit(&list)) {
+		return FALSE;
 	}
-	for (i = 0 ; i < pDataset->elcount; i++) {
-		if (!dsCheckDataset(&pDataset->p.child[i])) {
-			return FALSE;
+	if (!dsVisitList(&list, pDataset)) {
+		goto fail;
+	}
+	for (i = 0; i < list.count; i++) {
+		pDataset = list.pItem[i];
+		if (DS_IS_TABLE(pDataset)) {
+			if (!dsTypePtr(&type, pDataset->tid) ||
+				!dsCheckTableR(pDataset->p.data, pDataset->elcount, type)) {
+				goto fail;
+			}
 		}
 	}
-	return TRUE;
+	return dsListFree(&list);
+fail:
+	dsListFree(&list);
+	return FALSE;
 }
 /******************************************************************************
 *
@@ -243,7 +252,7 @@ fail:
 */
 int dsReadTest(XDR *xdrs, size_t count)
 {
-	DS_DATASET_T *pDataset = NULL, *pTable;
+	DS_DATASET_T *pDataset, *pTable;
 	size_t i;
 
 	for (i = 0; i < count; i++) {
@@ -264,8 +273,7 @@ int dsReadTest(XDR *xdrs, size_t count)
 		dsFreeDataset(pDataset);
 	}
 	return TRUE;
-}
-/******************************************************************************
+}/******************************************************************************
 *
 * dsSetDataset - set all tables to have basic type code in each element
 *
@@ -273,28 +281,31 @@ int dsReadTest(XDR *xdrs, size_t count)
 */
 int dsSetDataset(DS_DATASET_T *pDataset)
 {
+
 	size_t i;
 	DS_TYPE_T *type;
+	DS_LIST_T list;
 
-	if (DS_IS_TABLE(pDataset)) {
-		if (!dsTypePtr(&type, pDataset->tid)) {
-			return FALSE;
-		}
-		if (!dsSetTableR(pDataset->p.data, pDataset->maxcount, type)) {
-			return FALSE;
-		}
-		pDataset->elcount = pDataset->maxcount;
-		return TRUE;
+	if(!dsListInit(&list)) {
+		return FALSE;
 	}
-	if (!DS_IS_DATASET(pDataset)) {
-		DS_ERROR(DS_E_SYSTEM_ERROR);
+	if (!dsVisitList(&list, pDataset)) {
+		goto fail;
 	}
-	for (i = 0 ; i < pDataset->elcount; i++) {
-		if (!dsSetDataset(&pDataset->p.child[i])) {
-			return FALSE;
+	for (i = 0; i < list.count; i++) {
+		pDataset = list.pItem[i];
+		if (DS_IS_TABLE(pDataset)) {
+			if (!dsTypePtr(&type, pDataset->tid) ||
+				!dsSetTableR(pDataset->p.data, pDataset->maxcount, type)) {
+				goto fail;
+			}
+			pDataset->elcount = pDataset->maxcount;
 		}
 	}
-	return TRUE;
+	return dsListFree(&list);
+fail:
+	dsListFree(&list);
+	return FALSE;
 }
 /******************************************************************************
 *
@@ -370,12 +381,15 @@ static int dsSetTableR(void *pData, size_t count, DS_TYPE_T *type)
 */
 int dsWriteTest(XDR *xdrs, size_t count)
 {
-	DS_DATASET_T *pDataset = NULL, *pTable = NULL;
+	DS_DATASET_T *cycle, *pDataset, *pTable = NULL;
 	TEST_TYPE_T *pData = NULL;
 	size_t i;
 
 	if (
-		!dsNewDataset(&pDataset, "test", 3) ||
+		!dsNewDataset(&pDataset, "test") ||
+		!dsNewDataset(&cycle, "cycle") ||
+		!dsLink(pDataset, cycle) ||
+		!dsLink(cycle, pDataset) ||
 		!dsAddTable(pDataset, "empty", emptySpecifier, 0, NULL) ||
 		!dsAddTable(pDataset, "table", testSpecifier, count, (char **)&pData) ||
 		!dsFindTable(&pTable, pDataset, "table", testSpecifier) || 
