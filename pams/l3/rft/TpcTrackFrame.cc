@@ -1,5 +1,5 @@
 //
-// TTrackFrame
+// TpcTrackFrame
 //
 //   This class supports a general tracker development environment.
 //   The purpose of this class is to free the tracking developer from
@@ -13,7 +13,7 @@
 //
 //   Example:
 //	...
-//	TTrackFrame 	theFrame;
+//	TpcTrackFrame 	theFrame;
 //	TMyTracker	theTracker("setup_1.ini");
 //
 //	theFrame.Init();
@@ -28,13 +28,13 @@
 //	theFrame.Done();
 
 // some includes
-#include "TrackFrame.hpp"
+#include "TpcTrackFrame.hpp"
 #include "TTracker.hpp"
 #include "Common.h"
 #include "types.h"
 
 // stupid constructor
-TTrackFrame::TTrackFrame() 
+TpcTrackFrame::TpcTrackFrame() 
 {
   // create the free point list (with default parameters, should be adapted)
   fFreePoints = new THitList();
@@ -50,7 +50,7 @@ TTrackFrame::TTrackFrame()
 }
 
 // stupid destructor
-TTrackFrame::~TTrackFrame()
+TpcTrackFrame::~TpcTrackFrame()
 {
   // delete the freepoint list
   Done();
@@ -58,7 +58,7 @@ TTrackFrame::~TTrackFrame()
 
 
 // Initialize the frame
-void TTrackFrame::Init()
+void TpcTrackFrame::Init()
 {
   // set default values for static members in THit, TTrack and TTrackerFFT
   // THit:
@@ -96,7 +96,7 @@ void TTrackFrame::Init()
 }
 
 // Initialize the frame via an parameter struct
-void TTrackFrame::Initialize(L3T_TPC_PARA_ST* params)
+void TpcTrackFrame::Initialize(L3T_TPC_PARA_ST* params)
 {
   // set default values for static members in THit, TTrack and TTrackerFFT
   // THit:
@@ -150,14 +150,14 @@ void TTrackFrame::Initialize(L3T_TPC_PARA_ST* params)
 }
 
 // Set the tracking algorithm
-void TTrackFrame::SetTracker(VTracker* thetracker)
+void TpcTrackFrame::SetTracker(VTracker* thetracker)
 {
   fTracker = thetracker;
 }
 //************************************************************************************
 // (re)process current event and build all tracks
 //************************************************************************************
-void TTrackFrame::ProcessEvent()
+void TpcTrackFrame::ProcessEvent()
 {
   int nSectors = 24 ;
   int count;
@@ -218,7 +218,7 @@ void TTrackFrame::ProcessEvent()
 
 
 // free event memory and clean up
-void TTrackFrame::Done()
+void TpcTrackFrame::Done()
 {
 //  Error << ">> Cleaning environment" << endl;
 // kill all the memory at once, but leave the first memory block allocated for further use
@@ -235,7 +235,7 @@ void TTrackFrame::Done()
   fTracks = 0;
 }
 
-BOOL TTrackFrame::FillEvent( TABLE_HEAD_ST     *tphit_h,      
+BOOL TpcTrackFrame::FillEvent( TABLE_HEAD_ST     *tphit_h,      
 			                 TCL_TPHIT_ST      *table,
 			                 int FirstSector,
 			                 int LastSector )
@@ -292,7 +292,7 @@ BOOL TTrackFrame::FillEvent( TABLE_HEAD_ST     *tphit_h,
 //****************************************************************
 //
 //****************************************************************
-int TTrackFrame::FillResultTable
+int TpcTrackFrame::FillResultTable
        ( TABLE_HEAD_ST *hit_h,   TCL_TPHIT_ST *hit, 
          TABLE_HEAD_ST *track_h, TPT_TRACK_ST *tracks)
 {
@@ -326,7 +326,7 @@ int TTrackFrame::FillResultTable
      forall(tHit, *(track->GetHits())) {
         id = tHit->GetId() ;
         if ( id < 0 || id > hit_h->nok - 1 ) {
-           printf ( "TTrackFrame: \n Error assigning hits to tracks " ) ; 
+           printf ( "TpcTrackFrame: \n Error assigning hits to tracks " ) ; 
            continue ;
         }
         hit[id].track = counter + 1 ;

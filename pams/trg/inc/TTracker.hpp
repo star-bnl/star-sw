@@ -58,7 +58,6 @@ inline double sqr(double val) {return(val*val);};
 #include "TrackBase.hpp"		// include VTracker
 #include "TVolume.hpp"			// include TVolume
 #include "THit.hpp"			// include THit
-#include "TrackFrame.hpp"		// include TTrackList
 #include "Common.h"			// include common definitions
 #include "TMerger.hpp"          	// include TMerger
 // class declaration
