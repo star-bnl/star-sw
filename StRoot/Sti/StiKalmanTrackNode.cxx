@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.44 2004/12/01 14:04:57 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.45 2004/12/05 00:39:07 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.45  2004/12/05 00:39:07  fisyak
+ * Add test suit for matrix manipulation debugging under overall CPPFLAGS=-DSti_DEBUG
+ *
  * Revision 2.44  2004/12/01 14:04:57  pruneau
  * z propagation fix
  *
@@ -142,7 +145,12 @@ using namespace std;
 #include "StiKalmanTrackFinderParameters.h"
 #include "StiHitErrorCalculator.h"
 #include "Sti/StiElossCalculator.h"
-
+#ifdef Sti_DEBUG
+#include "TRMatrix.h"
+#include "TRVector.h"
+#define PrP(A)    cout << "\t" << (#A) << " = \t" << ( A )
+#define PrPP(A,B) cout << "=== StiKalmanTrackNode::" << (#A); PrP((B)); cout << endl;
+#endif
 // Local Track Model
 //
 // x[0] = y  coordinate
@@ -153,7 +161,6 @@ using namespace std;
 
 StiKalmanTrackFinderParameters * StiKalmanTrackNode::pars = 0;
 bool StiKalmanTrackNode::recurse = false;
-
 const StiElossCalculator * StiKalmanTrackNode::_elossCalculator = new StiElossCalculator();
 
 int    StiKalmanTrackNode::shapeCode = 0;
@@ -327,6 +334,17 @@ void StiKalmanTrackNode::getMomentum(double p[3], double e[6]) const
   double a20=0;
   double a21=-kField*_p4/c;
   double a22=kField/c;
+#ifdef  Sti_DEBUG
+  TRMatrix A(3,5,
+	     0.               ,                                0.,  0.,
+	     0.               ,                                0.,  0.,
+	     (_x-_p2/c)/_cosCA, -(_p2*_p2-_x*_p2*c-1)/(cc*_cosCA),  0.,
+	     -1/c             ,                            _p2/cc,  0.,
+	     0.               ,                           -_p4/c,1./c); 
+  A *= kField;
+  TRSymMatrix C(5,&_c00);
+  TRSymMatrix E(A,TRArray::kAxSxAT,C);
+#endif
   // original error matrix
   double b00=_c22, b01=_c32, b02=_c42;
   double b10=_c32, b11=_c33, b12=_c43;
@@ -364,6 +382,10 @@ void StiKalmanTrackNode::getMomentum(double p[3], double e[6]) const
   e[3] = d11;  // py-py
   e[4] = d12;  // py-pz
   e[5] = d22;  // pz-pz
+#ifdef Sti_DEBUG
+  TRSymMatrix E1(3,e);
+  E1.Verify(E);//,1e-7,2);
+#endif
 }
 
 double StiKalmanTrackNode::getField()  const
@@ -404,6 +426,15 @@ void StiKalmanTrackNode::getGlobalMomentum(double p[3], double e[6]) const
   // for the time being, assume an azimuthal rotation 
   // by alpha is sufficient.
   // transformation matrix - needs to be set
+#ifdef Sti_DEBUG
+  TRMatrix A(3,3,
+	     _cosAlpha, -_sinAlpha, 0.,
+	     _sinAlpha,  _cosAlpha, 0.,
+	     0.       ,         0.,  ((pars->field<0)? -1.:1.));      
+  PrPP(getGlobalMomentum,A);
+  TRVector P(3,p); PrPP(getGlobalMomentum,P);
+  P = TRVector(A,TRArray::kAxB,P); PrPP(getGlobalMomentum,P);
+#endif
   double a00=_cosAlpha, a01=-_sinAlpha, a02=0;
   double a10=_sinAlpha, a11= _cosAlpha, a12=0;
   double a20= 0, a21=  0, a22=(pars->field<0)? -1:1;
@@ -413,7 +444,15 @@ void StiKalmanTrackNode::getGlobalMomentum(double p[3], double e[6]) const
   p[0] = a00*px + a01*py + a02*pz;
   p[1] = a10*px + a11*py + a12*pz;
   p[2] = a20*px + a21*py + a22*pz;
+#ifdef Sti_DEBUG
+  TRVector P1(3,p);
+  P1.Verify(P);//,1e-7,2);
+#endif
   if (e==0) return;
+#ifdef Sti_DEBUG
+  TRSymMatrix E(3,e);
+  E = TRSymMatrix(A,TRArray::kAxSxAT,E);
+#endif
   // original error matrix
   double b00=e[0], b01=e[1], b02=e[2];
   double b10=e[1], b11=e[3], b12=e[4];
@@ -452,6 +491,10 @@ void StiKalmanTrackNode::getGlobalMomentum(double p[3], double e[6]) const
   e[3] = d11;  // py-py
   e[4] = d12;  // py-pz
   e[5] = d22;  // pz-pz
+#ifdef Sti_DEBUG
+  TRSymMatrix E1(3,e);
+  E1.Verify(E);//,1e-7,2);
+#endif
 }
 
 
@@ -691,6 +734,15 @@ void StiKalmanTrackNode::propagateError()
 		     -sumSin*(x1*(cosCA2-sinCA2*tanCA1) 
 			      +x2*(cosCA1-sinCA1*tanCA2))/sinCA1plusCA2/sinCA1plusCA2);
   double f14= dx*sumSin/sinCA1plusCA2; 
+#ifdef Sti_DEBUG
+  TRMatrix F(5,5,
+	     1., 0., f02, f03,  0.,
+	     0., 1., f12, f13, f14,
+	     0., 0.,  1.,  0.,  0.,
+	     0., 0.,  0.,  1.,  0.,
+	     0., 0.,  0.,  0.,  1.);
+  TRSymMatrix C(5,&_c00);
+#endif
   //b = C*ft
   double b00=f02*_c20 + f03*_c30;
   double b01=f12*_c20 + f13*_c30 + f14*_c40;
@@ -728,6 +780,12 @@ void StiKalmanTrackNode::propagateError()
   _c21 += b21; 
   _c31 += b31; 
   _c41 += b41;
+#ifdef Sti_DEBUG
+  // C^k-1_k = F_k * C_k-1 * F_kT + Q_k
+  C = TRSymMatrix(F,TRArray::kAxSxAT,C);
+  TRSymMatrix C1(5,&_c00);
+  C1.Verify(C);//,1e-7,2);
+#endif
   if (debug) 
     {
       cout << "Post Error:"
@@ -868,17 +926,32 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
   //cout << " m2:"<<m2<<" p2:"<<p2<<" beta2:"<<beta2;
   double theta2=mcs2(relRadThickness,beta2,p2);
   //cout << " theta2:"<<theta2;
-  double ey  = _p3*_x-_p2;
-  double ez  = _p4;
-  double xz  = _p3*ez;
-  double zz1 = ez*ez+1;
-  double xy  = _p2+ey;
+  double ey  = _p3*_x-_p2; //C*x -eta = sin(Phi)
+  double ez  = _p4;        //tan(Lambda)
+  double xz  = _p3*ez;     //C*tan(Lambda)
+  double zz1 = ez*ez+1;    //1+tan**2(Lambda) = 1/cons**2(Lambda)
+  double xy  = _p2+ey;     //eta + C*x - eta = C*x 
+#ifdef Sti_DEBUG
+  TRSymMatrix C(5,&_c00);
+  TRSymMatrix Q(5,                           
+		0.,                                                                  //0
+		0., 0.,                                                              //1
+		0., 0.,2*ey*ez*ez*_p2+1-ey*ey+ez*ez+_p2*_p2*ez*ez,                   //2
+		0., 0.,                                  xz*ez*xy, xz*xz,            //3
+		0., 0.,                                 ez*zz1*xy, xz*zz1, zz1*zz1); //4
+  Q *= theta2;
+  C += Q;
+#endif
   _c33 += xz*xz*theta2;
   _c32 += xz*ez*xy*theta2;
   _c43 += xz*zz1*theta2;
   _c22 += (2*ey*ez*ez*_p2+1-ey*ey+ez*ez+_p2*_p2*ez*ez)*theta2;
   _c42 += ez*zz1*xy*theta2;
   _c44 += zz1*zz1*theta2;
+#ifdef Sti_DEBUG
+  TRSymMatrix CP(5,&_c00);
+  CP.Verify(C);//,1e-7,2);
+#endif
   double dE=0;
   double sign;
   if (dx>0)
@@ -986,6 +1059,12 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
       r01=hit->syz()+_c10;  
       r11=hit->szz()+_c11;
     }
+#ifdef Sti_DEBUG
+  TRSymMatrix R(2,
+		r00,
+		r01, r11);
+  TRSymMatrix G(R,TRArray::kInverted);
+#endif
   double det=r00*r11 - r01*r01;
   //if (_c00<=0 || _c11<=0 || det<=0)
   //  cout << endl << "evalChi2 c00:"<<_c00<< " c10:"<<_c10<<" c11:"<<_c11<<" det:"<<det<< " eyy:"<<eyy<<" ezz:"<<ezz<<endl;
@@ -994,6 +1073,15 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   double dy=hit->y()-_p0;
   double dz=hit->z()-_p1;
   double cc= (dy*r00*dy + 2*r01*dy*dz + dz*r11*dz)/det;
+#ifdef Sti_DEBUG
+  TRVector r(2,hit->y()-_p0,hit->z()-_p1);
+  Double_t chisq = G.Product(r,TRArray::kATxSxA);
+  Double_t diff = chisq - cc;
+  Double_t sum  = chisq + cc;
+  if (diff > 1e-7 || (sum > 2. && (2 * diff ) / sum > 1e-7)) {
+    cout << "Failed:\t" << chisq << "\t" << cc << "\tdiff\t" << diff << endl;
+  }
+#endif
   return cc;
 }
 
@@ -1030,6 +1118,29 @@ int StiKalmanTrackNode::updateNode()
       r00=_hit->syy()+_c00;
       r01=_hit->syz()+_c10;  r11=_hit->szz()+_c11;
     }  
+#ifdef Sti_DEBUG
+  TRSymMatrix R1(2,
+		 r00,
+		 r01, r11); PrPP(updateNode,R1);
+  static const TRMatrix H(2,5,
+			  1., 0., 0., 0., 0.,
+			  0., 1., 0., 0., 0.);
+  double eYY = eyy;
+  double eYZ =  0.;
+  double eZZ = ezz;
+  if (! (useCalculatedHitError && detector))
+    {
+      eYY=_hit->syy();
+      eYZ=_hit->syz();  eZZ=_hit->szz();
+    }  
+  TRSymMatrix V(2,
+		eYY,
+		eYZ, eZZ);
+  TRSymMatrix C(5,&_c00);  PrPP(updateNode,C);
+  TRSymMatrix R(H,TRArray::kAxSxAT,C); PrPP(updateNode,R);
+  R += V;                              PrPP(updateNode,R);
+  TRSymMatrix G(R,TRArray::kInverted); PrPP(updateNode,G);
+#endif
   double det=r00*r11 - r01*r01;
   if (fabs(det)==0) throw runtime_error("SKTN::updateNode() -W- Singular matrix; fabs(det)==0");
   // inverse matrix
@@ -1045,7 +1156,24 @@ int StiKalmanTrackNode::updateNode()
   double dp3  = k30*dy + k31*dz;
   double dp2  = k20*dy + k21*dz;
   double dp4  = k40*dy + k41*dz;
-
+#ifdef Sti_DEBUG
+  double dp0  = k00*dy + k01*dz;
+  double dp1  = k10*dy + k11*dz;
+  // K = C * HT * G
+  TRMatrix T(C,TRArray::kSxAT,H); PrPP(updateNode,T);
+  TRMatrix K(T,TRArray::kAxS,G);  PrPP(updateNode,K);
+  TRMatrix K1(5,2,
+	      k00, k01,
+	      k10, k11,
+	      k20, k21,
+	      k30, k31,
+	      k40, k41);   PrPP(updateNode,K1);
+  K1.Verify(K);
+  TRVector dR(2,dy, dz);
+  TRVector dP1(5, dp0, dp1, dp2, dp3, dp4);
+  TRVector dP(K,TRArray::kAxB,dR);
+  dP1.Verify(dP);//,1e-7,2);
+#endif
   if (_x>2.)
     {
       if ( (dp4*dp4/16.>_c44) || (dp3*dp3/16. > _c33) || (dp2*dp2/16.>_c22) ) return 1;
@@ -1112,8 +1240,14 @@ int StiKalmanTrackNode::updateNode()
   _c42-=k20*c04+k21*c14; 
   _c33-=k30*c03+k31*c13;
   _c43-=k30*c04+k31*c14; 
-  _c44-=k40*c04+k41*c14; 
-	return 0;
+  _c44-=k40*c04+k41*c14;
+#ifdef Sti_DEBUG
+  TRSymMatrix W(H,TRArray::kATxSxA,G); 
+  C -= TRSymMatrix(C,TRArray::kRxSxR,W);
+  TRSymMatrix C1(5,&_c00);
+  C1.Verify(C);//,1e-7,2);
+#endif 
+  return 0;
 }
 
 /*! Rotate this node track representation azymuthally by given angle.
@@ -1144,8 +1278,18 @@ int StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
   _sinCA = _p3*_x - _p2;
   //cout << " _sinCA:"<<_sinCA<<endl;
   if (fabs(_sinCA)>0.9999) return -15;
-	_cosCA = ::sqrt(1.- _sinCA*_sinCA);
-  //double y0=_p0 + _cosCA/_p3;
+  _cosCA = ::sqrt(1.- _sinCA*_sinCA);
+#ifdef Sti_DEBUG
+  TRSymMatrix C(5,&_c00); PrPP(rotate,C);
+  TRMatrix F(5,5,
+	     ca    , 0., 0.,                                              0., 0.,
+	     0.    , 1., 0.,                                              0., 0.,
+	     _p3*sa, 0., (ca + sa*_sinCA/_cosCA), (y1 - _sinCA*x1/_cosCA)*sa, 0.,
+	     0.    , 0., 0.,                                              1., 0.,
+             0.    , 0., 0.,                                              0., 1.);  PrPP(rotate,F);
+  C = TRSymMatrix(F,TRArray::kAxSxAT,C);    PrPP(rotate,C);
+#endif
+   //double y0=_p0 + _cosCA/_p3;
   ////if ((_p0-y0)*_p3 >= 0.) throw runtime_error("SKTN::rotate() - Error - Rotation failed!\n");
   //f = F - 1
   double f00=ca-1;
@@ -1170,6 +1314,10 @@ int StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
   _c32 += b32;
   _c22 += a22 + 2*b22;
   _c42 += b42; 
+#ifdef Sti_DEBUG
+  TRSymMatrix C1(5,&_c00);  PrPP(rotate,C1);
+  C1.Verify(C);//,1e-7,2);
+#endif  
   _cosAlpha=cos(_alpha); 
   _sinAlpha=sin(_alpha); 
 	return 0;
