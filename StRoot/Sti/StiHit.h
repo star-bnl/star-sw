@@ -212,4 +212,45 @@ inline const StMeasuredPoint* StiHit::stHit() const {return msthit;}
 inline const StiDetector* StiHit::detector() const {return mdetector;}
 inline unsigned int StiHit::timesUsed() const { return mTimesUsed;}
 
+
+//Functors for ordering hits
+struct StiHitRadiusLessThan
+{
+  bool operator() (const StiHit*h1, const StiHit*h2) const
+  {
+    double x1 = h1->x_g();
+    double y1 = h1->y_g();
+    double r1 = sqrt(x1*x1+y1*y1);
+    double x2 = h2->x_g();
+    double y2 = h2->y_g();
+    double r2 = sqrt(x2*x2+y2*y2);
+    return r1<r2;
+  }
+};
+
+struct StidHitLessThan
+{
+  bool operator() (const StiHit*lhs, const StiHit*rhs) const
+    {
+      return (lhs->y() < rhs->y()) ? true : false;
+    }
+};
+
+struct StizHitLessThan
+{
+  bool operator() (const StiHit*lhs, const StiHit*rhs) const
+  {
+    return (lhs->z() < rhs->z()) ? true : false;
+  }
+};
+
+struct StiHitIsUsed
+{
+  bool operator() (const StiHit*hit) const
+  {
+    return (hit->timesUsed()==0);
+  }
+};
+
+
 #endif

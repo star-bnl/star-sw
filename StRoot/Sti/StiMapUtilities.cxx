@@ -51,45 +51,6 @@ bool MapKeyLessThan::operator() (const HitMapKey& key1, const HitMapKey& key2) c
     return val;
 }
 
-/*
-//Order StHits (NOT Sti!) by radius
-bool StHitRadiusLessThan::operator() (const StHit* hit1, const StHit* hit2) const
-{
-    const StThreeVectorD& pos1 = hit1->position();
-    const StThreeVectorD& pos2 = hit2->position();
-    return (::sqrt( pos1.x()*pos1.x() + pos1.y()*pos1.y() + pos1.z()*pos1.z() ) <
-	    ::sqrt( pos2.x()*pos2.x() + pos2.y()*pos2.y() + pos2.z()*pos2.z() ) );
-}
-*/
-
-bool StiHitIsUsed::operator() (const StiHit* hit) const
-{
-    //return !hit->isUsed();
-    return (hit->timesUsed()==0);
-}
-
-/*
-//Order StHits (NOT Sti!) by radius
-bool StHitRadiusGreaterThan::operator() (const StHit* hit1, const StHit* hit2) const
-{
-    const StThreeVectorD& pos1 = hit1->position();
-    const StThreeVectorD& pos2 = hit2->position();
-    return (::sqrt( pos1.x()*pos1.x() + pos1.y()*pos1.y() + pos1.z()*pos1.z() ) >
-	    ::sqrt( pos2.x()*pos2.x() + pos2.y()*pos2.y() + pos2.z()*pos2.z() ) );
-}
-*/
-	
-//Order by distance along position
-bool StidHitLessThan::operator() (const StiHit* lhs, const StiHit* rhs) const
-{
-    return (lhs->y() < rhs->y()) ? true : false;
-}
-
-//Order by distance in z
-bool StizHitLessThan::operator() (const StiHit* lhs, const StiHit* rhs) const
-{
-    return (lhs->z() < rhs->z()) ? true : false;
-}
 
 bool StiDetectorNodePositionLessThan::operator() (const StiCompositeTreeNode<StiDetector> * lhs,
 						  const StiCompositeTreeNode<StiDetector> * rhs) const
@@ -104,13 +65,6 @@ bool StiDetectorNodePositionLessThan::operator() (const StiCompositeTreeNode<Sti
     return lhsp->getNormalRadius()<rhsp->getNormalRadius();
 }
 
-/*
-bool SameStHit::operator()(const StiHit* rhs) const
-{
-    return (stHit == rhs->stHit() );
-};
-*/
-
 //----------------------- Detector Map Utilities ------------------------------------
 
 bool NameMapKey::operator==(const NameMapKey& key2) const{
@@ -123,15 +77,6 @@ bool NameMapKey::operator<(const NameMapKey& key2) const{
   return( name < key2.name );
 }
 
-StTpcPadrowHitFilter::StTpcPadrowHitFilter()
-    : mMinPadrow(1), mMaxPadrow(45)
-{}
-
-bool StTpcPadrowHitFilter::operator()(const StTpcHit& hit) const
-{
-    return ( (hit.padrow()>=mMinPadrow) && (hit.padrow()<=mMaxPadrow) );
-}
-
 void SetHitUsed::operator()(StiTrackNode& node)
 {
     StiHit* hit = node.getHit();
@@ -140,6 +85,7 @@ void SetHitUsed::operator()(StiTrackNode& node)
 	hit->setTimesUsed(hit->timesUsed()+1);
     }
 }
+
 
 //----------------------- Streamers -------------------------------------------------
 ostream& operator<<(ostream& os, const HitMapKey& a)
@@ -150,3 +96,5 @@ ostream& operator<<(ostream& os, const HitMapKey& a)
 ostream& operator<<(ostream& os, const NameMapKey& a){
   return os << a.name;
 }
+
+
