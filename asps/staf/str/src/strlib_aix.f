@@ -245,7 +245,7 @@
 *  Input/Output:
 	INTEGER Block(*) !Block of 32-bit words in to be reordered.
 
-*  Functional description:
+*  Description:
 *	Swap the 4 8-bit bytes in the 32-bit (long) word I32,
 *	if needed, to make the big/little endian business come out
 *	DEC-style.  On AIX (here), the swapping is done.
@@ -284,7 +284,7 @@
 *  Input/Output:
 	INTEGER I32
 
-*  Functional description:
+*  Description:
 *	Swap the two 16-bit half-words in the 32-bit (long) word I32,
 *	if needed, to make the big/little endian business come out
 *	DEC-style.  On AIX (here), the swapping is done.
@@ -319,10 +319,10 @@
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	INTEGER LUN !FORTRAN Logical Unit of device (file) to be "flushed".
 
-*  Functional Description:
+*  Description:
 *	Do whatever platform-dependent operations are necessary to cause all
 *	pending output for the specified LUN to be sent to the actual device
 *	or file represented by the LUN, "flushing" out that device's buffer.
@@ -426,11 +426,12 @@
      5	 ,INITIALSIZE_FLAG,INITIALSIZE_IARG
      6	 ,BLOCKSIZE_FLAG,BLOCKSIZE_IARG
      7	 ,MAXREC_FLAG,MAXREC_IARG
+     1	 ,READONLY_FLAG
      8   )
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	INTEGER LUN !Logical unit on which to open file.
 	CHARACTER*(*) FILENAME !Name of file.
 	CHARACTER*(*) STATUS_CARG !"STATUS=" character argument
@@ -448,8 +449,9 @@
 	INTEGER BLOCKSIZE_IARG !"BLOCKSIZE=" integer argument -- not used.
 	LOGICAL MAXREC_FLAG !MAXREC specified/not flag.
 	INTEGER MAXREC_IARG !"MAXREC=" integer argument.
+	LOGICAL READONLY_FLAG !Whether the file is readonly
 
-*  Functional Description:
+*  Description:
 *	Provides a machine-dependent (native) OPEN routine, intended
 *	to be called only from STROPEN (qv).
 
@@ -466,26 +468,41 @@
 
 	IF ( RECL_FLAG ) THEN
 
-	  OPEN(UNIT=LUN,FILE=FILENAME,STATUS=STATUS_CARG
-     1	      ,ACCESS=ACCESS_CARG,FORM=FORM_CARG
-     2	      ,RECL=RECL_JARG
-     8	      ,ERR=1)
+	  IF ( READONLY_FLAG ) THEN
+	    OPEN(UNIT=LUN,FILE=FILENAME,STATUS=STATUS_CARG
+     1	        ,ACCESS=ACCESS_CARG,FORM=FORM_CARG
+     1	        ,RECL=RECL_JARG
+     1	        ,ACTION=READ
+     1	        ,ERR=1)
+	  ELSE
+	    OPEN(UNIT=LUN,FILE=FILENAME,STATUS=STATUS_CARG
+     1	        ,ACCESS=ACCESS_CARG,FORM=FORM_CARG
+     1	        ,RECL=RECL_JARG
+     1	        ,ERR=1)
+	  END IF
 
 	ELSE !None of the "extras" are specified:
 
-	  OPEN(UNIT=LUN,FILE=FILENAME,STATUS=STATUS_CARG
-     1	      ,ACCESS=ACCESS_CARG,FORM=FORM_CARG
-     8	      ,ERR=1)
+	  IF ( READONLY_FLAG ) THEN
+	    OPEN(UNIT=LUN,FILE=FILENAME,STATUS=STATUS_CARG
+     1	        ,ACCESS=ACCESS_CARG,FORM=FORM_CARG
+     1	        ,ACTION=READ
+     1	        ,ERR=1)
+	  ELSE
+	    OPEN(UNIT=LUN,FILE=FILENAME,STATUS=STATUS_CARG
+     1	        ,ACCESS=ACCESS_CARG,FORM=FORM_CARG
+     1	        ,ERR=1)
+	  END IF
 
 	END IF
 
 	Open_success=.TRUE.
 1	CONTINUE
 
-	write(6,301) Open_success,filename
-     1	  ,status_carg,access_carg,form_carg,recl_jarg
-301	format(' STROPEN_NAT(AIX)-D1  Native OPEN, success:'L1' file:'/
-     1	       ' 'A/' status:'A/' access:'A/' form:'A/' recl:'I11)
+*	write(6,301) Open_success,filename
+*     1	  ,status_carg,access_carg,form_carg,recl_jarg
+*301	format(' STROPEN_NAT(AIX)-D1  Native OPEN, success:'L1' file:'/
+*     1	       ' 'A/' status:'A/' access:'A/' form:'A/' recl:'I11)
 
 	STROPEN_NAT=Open_success
 
@@ -584,7 +601,7 @@
 
 	INTEGER Ireal !Integer-cast of a Host-style floating number.
 
-*  Functional description:
+*  Description:
 
 *	This is the IEEE version, which works for any host using the
 *	IEEE floating-representation.
@@ -659,7 +676,7 @@
 
 	INTEGER Ireal !Integer-cast of a DEC-style floating number.
 
-*  Functional description:
+*  Description:
 
 *	This is the generic version, which works anywhere on 32-bit
 *	floating numbers.
