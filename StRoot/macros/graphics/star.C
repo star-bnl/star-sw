@@ -8,7 +8,7 @@ float fStep = d2rad*360./10;
 float f0    = 90.*d2rad - 2*fStep;
 D[1] = D[0]*cos(2*fStep)/cos(fStep);
 
-TCanvas cc("STAR","STAR",0,0,400,400);
+TCanvas cc("STARC","STARC",0,0,400,400);
 TPad pad("STAR","STAR",0,0,1,1);
 pad.Draw();
 pad.cd();
