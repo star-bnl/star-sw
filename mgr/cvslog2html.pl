@@ -69,7 +69,7 @@ while (<COMMITLOG>) {
       # Now get the log message
       if (exists($commitUsers{"$uname"})) {
           $commitUsers{"$uname"}++;
-          open (USERFILE, ">> $userFile") or die "Can't create $userFile: $!";
+          open (USERFILE, ">> $userFile") or die "Can't append $userFile: $!";
       } else {
           $commitUsers{"$uname"} = 1;
           if ( ! -d $userDir ) {
@@ -84,11 +84,13 @@ while (<COMMITLOG>) {
           </head>
         <body bgcolor=cornsilk text=black link=navy vlink=maroon alink=tomato>
         <basefont face="verdana,arial,helvetica,sans-serif">
+        <a name="top"></a>
         <table border=0   cellpadding=5 cellspacing=0 width="100%">
         <tr bgcolor=lightgrey>
           <td align=left>CVS commits by <b>$uname</b></td>
           <td align=right> <font size="-1">Last updated $currentTime
         </tr></table>
+        <font size="-1"><a href="#bottom">Go to bottom</a></font><br>
 END_BLOCK
         print USERFILE $content;
     };
@@ -118,19 +120,39 @@ END_BLOCK
   }
 }
 
+$firstTime = $timeA[1];
 foreach $cuser (sort keys %commitUsers) {
 #    print "$cuser $commitUsers{$cuser}\n";
     $content = <<END_BLOCK;
     <tr bgcolor=whitesmoke>
-        <td>&nbsp; <a href="user/$cuser/">$cuser</a> &nbsp;</td>
+        <td>&nbsp; <a href="user/$cuser/index.html#bottom">$cuser</a> &nbsp;</td>
         <td align=center>$commitUsers{$cuser}</td>
         <td>&nbsp; $latestCommit{$cuser} &nbsp;</td>
         <td>&nbsp; <a href="$cvsUrl/$latestModule{$cuser}">$latestModule{$cuser}</a> &nbsp;</td>
     </tr>
 END_BLOCK
     print USERCOMMITS $content;
+    $userDir = "$cvsHtml/user/$cuser";
+    $userFile = "$userDir/index.html";
+    open (USERFILE, ">> $userFile") or die "Can't append $userFile: $!";
+    $content = <<END_BLOCK;
+        <p>
+        <font size="-1"><a href="#top">Go to top</a></font><br>
+        <table border=0   cellpadding=5 cellspacing=0 width="100%">
+        <tr bgcolor=lightgrey>
+          <td align=left>CVS commits by <b>$cuser</b></td>
+          <td align=right> <font size="-1">Last updated $currentTime
+        </tr></table>
+        <a name="bottom"></a>
+        <font size=-1>
+        Commits since $firstTime
+        </font>
+        </body>
+        </html>
+END_BLOCK
+    print USERFILE $content;
+    close USERFILE; 
 }
-$firstTime = $timeA[1];
 $content =<<END_BLOCK;
 </table>
 <font size=-1>
@@ -183,7 +205,7 @@ if ($iFirstIndex < 1) { $iFirstIndex = 1; }
 for ( $i=$iCommit; $i>=$iFirstIndex; $i--) {
     $content = <<END_BLOCK;
     <tr bgcolor=whitesmoke>
-        <td>&nbsp; <a href="user/$userA[$i]/">$userA[$i]</a> &nbsp;</td>
+        <td>&nbsp; <a href="user/$userA[$i]/index.html#bottom">$userA[$i]</a> &nbsp;</td>
         <td>&nbsp; <a href="$cvsUrl/$modA[$i]">$modA[$i]</a> &nbsp;</td>
         <td align=center>$timeA[$i]</td>
     </tr>
