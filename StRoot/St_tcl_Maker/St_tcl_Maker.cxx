@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.40 1999/07/15 13:58:24 perev Exp $
+// $Id: St_tcl_Maker.cxx,v 1.41 1999/08/25 21:50:20 snelling Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.41  1999/08/25 21:50:20  snelling
+// Li Qun added a table for tracking
+//
 // Revision 1.40  1999/07/15 13:58:24  perev
 // cleanup
 //
@@ -504,6 +507,9 @@ Int_t St_tcl_Maker::Make(){
   if (Debug()) printf("Start of TCL Maker");
 
   St_tcl_tphit     *tphit     = new St_tcl_tphit("tphit",max_hit);         local.Add(tphit);
+  tcl_tclpar_st *sttclpar=m_tclpar->GetTable();
+  St_tcl_hitclus *tphitclus=0;
+  if(sttclpar[0].mc>1){tphitclus=new St_tcl_hitclus("tphitclus",max_hit);local.Add(tphitclus);}
   St_tcl_tpcluster *tpcluster = new St_tcl_tpcluster("tpcluster",max_hit); local.Add(tpcluster);
   St_tcc_morphology *morph    = 0;
   if(m_tclMorphOn) {
@@ -633,7 +639,7 @@ Int_t St_tcl_Maker::Make(){
 	Int_t tph_res =  tph(m_tcl_sector_index,m_tclpar,m_tsspar,
 			     m_tpg_pad_plane,
 			     pixel_data_in,pixel_data_out,
-			     tpseq,tpcluster,tphit);
+			     tpseq,tpcluster,tphit,tphitclus);
 //			  ==============================================
         if (tph_res!=kSTAFCV_OK) Warning("Make","tph == %d",tph_res);
       }
