@@ -160,14 +160,14 @@ c
 
          
          integer nquota,nvar,icycle,nvar2,nvar3,nvar4,nvar5,nvar6
-         parameter (nvar=9,nvar2=25,nvar3=5,nvar4=5,nvar5=5,nvar6=4)
+         parameter (nvar=9,nvar2=26,nvar3=5,nvar4=5,nvar5=5,nvar6=4)
          character*4 chtags(nvar),chtags2(nvar2)
          character*4 chtags3(nvar3),chtags4(nvar4),chtags5(nvar5)
          character*4 chtags6(nvar6)
 C-----------------------------------------------------------------------
          logical lstat,first
 
-         real vec(25)
+         real vec(26)
          real vec2(4)
 
          integer istat
@@ -265,7 +265,7 @@ C-----------------------------------------------------------------------
          data chtags2/'itrk','mcx ','mcy ','mcz ','tpx ','tpy ','tpz '
      +,              'delx','dely','delz','nrow', 'clus','nseq',
      +                'dx','dy','dz','mhit','nmc',
-     +                'phi','lamd','malf','ralf','rhit','flag','q'/
+     +                'phi','lamd','malf','ralf','rhit','flag','q','prf'/
          data chtags3/'prec','mce','tpe','rde','pre2'/
 *	 data chtags4/'hit ','clus','sect','row ','pad ',
 *     +		      'tdc ','adc ','mcid','xpix','ypix','zpix',
@@ -700,6 +700,7 @@ c-------------------------------------------
                            vec(24) = real(
      +                          tphit(dtptr(idummy,jdummy)).flag)
                            vec(25) = tphit(dtptr(idummy,jdummy)).q
+                           vec(26) = tphit(dtptr(idummy,jdummy)).prf
 c ok we have found a reconstructed hit... how many mc tracks contributed
 c  to its cluster???
                            nmc_found=0
@@ -953,6 +954,7 @@ c-------------------------------------------
                      vec(23) = real(tphit(ptr_ghost).id)
                      vec(24) = real(tphit(ptr_ghost).flag)
                      vec(25) = tphit(ptr_ghost).q
+                     vec(26) = tphit(ptr_ghost).prf
 c find out how many mc tracks contributed to this hit's cluster...
                      nmc_found=0
                      iclstr=tphit(ptr_ghost).cluster
@@ -1006,6 +1008,7 @@ c-------------------------------------------
                      vec(23)=0.0
                      vec(24)=0.0
                      vec(25)=0.0
+                     vec(26)=0.0
                   endif
                   call hfn(300+ihisto,vec)
                enddo            ! i_maybe_lost
