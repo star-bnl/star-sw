@@ -10,7 +10,6 @@
 #include "tcl_tphit.h"
 #include "tpt_track.h"
 #include "FTFinder.h"
-#include "TrackerFrame.h"
 #include "FTF_Mc_Track.h"
 
 FTFinder      tracker ;
