@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.340 2003/05/21 00:26:23 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.341 2003/07/03 18:25:06 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -55,6 +55,7 @@ Bfc_st BFC1[] = {
   {"RY2000a","","","db,calib,detDb"      ,"","","alternate 2000: Real data with Year2000 geometry ",kFALSE},
   {"RY2001","","","db,calib,detDb"          ,"","","actual 2001: Real data with Year2001 geometry ",kFALSE},
   {"RY2003","","","db,calib,detDb"             ,"","","actual 2003: Real data with Year3 geometry ",kFALSE},
+  {"RY2003X","","","db,calib,detDb"      ,"","","actual 2003: Real data with Year4 study geometry ",kFALSE},
   {"Y2a"   ,"","","db,calib,detDb"                            ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"   ,"","","db,calib,detDb" ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
   {"Y2001" ,"","","db,calib,detDb","","","year2001: geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
@@ -62,6 +63,8 @@ Bfc_st BFC1[] = {
                                      "year2001: new geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
   {"Y2003" ,"","","db,calib,detDb","","",
                                "year2003: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL",kFALSE},
+  {"Y2003X" ,"","","db,calib,detDb","","",
+                  "y2003X: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL - Full B/E EMC",kFALSE},
   {"Complete","","","db,calib,detDb"      ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
   {"NoDb"  ,""  ,"","HalfField"                                     ,"","","Take out Db from Chain",kFALSE},
 
@@ -96,6 +99,7 @@ Bfc_st BFC1[] = {
   {"C2000"       ,""  ,"","y2000,C1default"                            ,"","","Turn on chain Y2000",kFALSE},
   {"C2001"       ,""  ,"","y2001,C2default"                            ,"","","Turn on chain Y2001",kFALSE},
   {"C2003"       ,""  ,"","y2003,C3default"                            ,"","","Turn on chain Y2003",kFALSE},
+  {"C2003X"      ,""  ,"","y2003X,C3default"           ,"","","Turn on chain Y2003X (full B/E EMC)",kFALSE},
 
   // MDC / Sim chain agregates
   {"mdc3"        ,""  ,"","cy1h,GeantOut"                               ,"","","MDC3 default chain",kFALSE},
@@ -540,6 +544,7 @@ Bfc_st BFC2[] = {
   {"RY2000a","","","db,calib,detDb"      ,"","","alternate 2000: Real data with Year2000 geometry ",kFALSE},
   {"RY2001","","","db,calib,detDb"          ,"","","actual 2001: Real data with Year2001 geometry ",kFALSE},
   {"RY2003","","","db,calib,detDb"             ,"","","actual 2003: Real data with Year3 geometry ",kFALSE},
+  {"RY2003X","","","db,calib,detDb"      ,"","","actual 2003: Real data with Year4 study geometry ",kFALSE},
   {"Y2a"   ,"","","db,calib,detDb"                            ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"   ,"","","db,calib,detDb" ,"","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
   {"Y2001" ,"","","db,calib,detDb","","","year2001: geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
@@ -547,6 +552,8 @@ Bfc_st BFC2[] = {
                                      "year2001: new geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
   {"Y2003" ,"","","db,calib,detDb","","",
                                "year2003: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL",kFALSE},
+  {"Y2003X" ,"","","db,calib,detDb","","",
+                  "y2003X: new geometry - TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL - Full B/E EMC",kFALSE},
   {"Complete","","","db,calib,detDb"      ,"","","complete: new (currently foreseen) complete STAR",kFALSE},
   {"NoDb"  ,""  ,"","HalfField"                                     ,"","","Take out Db from Chain",kFALSE},
 
@@ -581,6 +588,7 @@ Bfc_st BFC2[] = {
   {"C2000"       ,""  ,"","y2000,C1default"                            ,"","","Turn on chain Y2000",kFALSE},
   {"C2001"       ,""  ,"","y2001,C2default"                            ,"","","Turn on chain Y2001",kFALSE},
   {"C2003"       ,""  ,"","y2003,C3default"                            ,"","","Turn on chain Y2003",kFALSE},
+  {"C2003X"      ,""  ,"","y2003X,C3default"                          ,"","","Turn on chain Y2003X",kFALSE},
 
   // MDC / Sim chain agregates
   {"mdc3"        ,""  ,"","cy1h,GeantOut"                               ,"","","MDC3 default chain",kFALSE},
@@ -1327,7 +1335,8 @@ Int_t StBFChain::Instantiate()
 	      // depend on RY option i.e. take default for that RealYear data
 	      // expectations.
 	      if( GetOption("RY2001") ||
-		  GetOption("RY2003")) mask = mask | 2 ;  // Jim Thomas request
+		  GetOption("RY2003") ||
+		  GetOption("RY2003X")) mask = mask | 2 ;  // Jim Thomas request
 	    }
 	    // Other options introduced in October 2001 for distortion corrections
 	    // studies and year1 re-production. Those are OR additive to the mask.
@@ -1889,6 +1898,9 @@ void StBFChain::SetGeantOptions(){
 	       GetOption("RY2001"))   geantMk->LoadGeometry("detp geometry year2001");
       else if (GetOption("Y2003")  ||
 	       GetOption("RY2003"))   geantMk->LoadGeometry("detp geometry year2003");
+      else if (GetOption("Y2003X") ||
+	       GetOption("RY2003X"))  geantMk->LoadGeometry("detp geometry y2003x");
+
       else if (GetOption("Y2b"))      geantMk->LoadGeometry("detp geometry YEAR_2b");
       else if (GetOption("Complete")) geantMk->LoadGeometry("detp geometry complete");
       else                            geantMk->LoadGeometry("detp geometry year2001");
@@ -1992,6 +2004,7 @@ void StBFChain::SetDbOptions(){
 	// svt shift. Small hack to make it work.
 	else if (GetOption("Y2001n"))db->SetDateTime("year2001");
 	else if (GetOption("Y2003")) db->SetDateTime("year2003");
+	else if (GetOption("Y2003X"))db->SetDateTime("y2003x");
 	else (void) printf("QAInfo: StBFChain::SetDbOptions() Chain has not set a time-stamp\n");
       }
 
