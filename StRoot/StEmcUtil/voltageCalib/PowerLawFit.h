@@ -61,7 +61,7 @@ const PowerLawFit<Number> & PowerLawFit<Number>::operator=(const PowerLawFit<Num
 template<typename Number>
 void PowerLawFit<Number>::fit()
 {
-  Points::const_iterator i;
+  typename Points::const_iterator i;
   _logData.clear();
   double x,y;
   for (i=_data->begin();i!=_data->end();i++)
