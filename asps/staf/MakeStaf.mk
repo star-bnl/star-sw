@@ -29,8 +29,9 @@ endif
 #  override OUT_DIR := $(CWD)/$(OUT_DIR)
 #endif
 #	Generic .inc dir  , copy of all includes
-INC_GEN_DIR := $(OUT_DIR)/inc
-#INC_GEN_DIR :=  ./inc
+#INC_GEN_DIR := $(OUT_DIR)/inc
+INC_GEN_DIR :=  ./inc
+check_out   := $(shell test -d $(INC_GEN_DIR) || mkdir $(INC_GEN_DIR)) 
 #	list of all /inc dirs
 ALL_INC_DIRS := $(wildcard $(INP_DIR)/???/inc)
 ALL_INC_DIRS := $(filter-out $(INC_GEN_DIR), $(ALL_INC_DIRS))
@@ -43,6 +44,8 @@ VPATH := $(ALL_INC_DIRS)
 
 ASPS  := $(notdir $(subst / , ,$(dir $(wildcard $(INP_DIR)/???/src)) ))
 ASPSLIB := $(filter-out sdd pam tbr c4t tst,$(ASPS))
+ASPSLIB := $(filter tls,$(ASPSLIB))  $(filter-out tls, $(ASPSLIB))
+ASPSLIB := $(filter msg,$(ASPSLIB))  $(filter-out msg, $(ASPSLIB))
 ifdef PGI
 ASPSLIB := $(filter-out str,$(ASPSLIB))
 endif 
@@ -83,6 +86,6 @@ show:
 	@echo ALL_INC_DIRS       := $(ALL_INC_DIRS)
 	@echo ALL_INC_INST       := $(ALL_INC_INST)
 	@echo INC_GEN_DIR       := $(INC_GEN_DIR)
-
-
+	@echo ASPSLIB     := $(ASPSLIB)
+	@echo INC_GEN_DIR := $(INC_GEN_DIR)
 

@@ -15,8 +15,6 @@ STEM     = $*
 #
 # Determine STAF main env variables.
 #
-
-
 ifndef STAF_HOME
   STAF_HOME := $(CWD)
 endif
