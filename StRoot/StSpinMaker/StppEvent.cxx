@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.3 2002/01/24 17:38:33 akio Exp $
+// $Id: StppEvent.cxx,v 1.4 2002/02/11 20:30:48 akio Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.4  2002/02/11 20:30:48  akio
+// Many updates, including very first version of jet finder.
+//
 // Revision 1.3  2002/01/24 17:38:33  akio
 // add L3 info, zdc info & fix phi/psi confusion
 //
@@ -16,6 +19,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 #include <iostream.h>
+
 //#include "Rtypes.h"
 #include "StEventTypes.h"
 #include "StEvent.h"
@@ -23,6 +27,8 @@
 #include "StCtbTriggerDetector.h"
 #include "StppTrack.h"
 #include "StppEvent.h"
+#include "StEtGridFlat.h"
+#include "StJet.h"
 
 ClassImp(StppEvent);
 
@@ -33,17 +39,30 @@ StppEvent::StppEvent(){
 #ifdef _L3_tracks_
   pTracksL3 = new TClonesArray ("StppTrack",200);  //warning hardcoded # of track limits!
 #endif 
+#ifdef _Jet_
+  jets = new TClonesArray ("StJet",20);  //warning hardcoded # of jets limits!
+  jetR    = 0.7;
+  jetSeed = 1.5;
+  jetCut  = 0.2;
+#endif 
   infoLevel = 0;
+  BunchIdDifference=-999;
   clear();
 }
 
 StppEvent::~StppEvent() {
   clear() ;
 #ifdef _Offline_tracks_
+  pTracks->Delete();
   delete pTracks ;
 #endif
 #ifdef _L3_tracks_
+  pTracksL3->Delete();
   delete pTracksL3;
+#endif 
+#ifdef _Jet_
+  jets->Delete();
+  delete jets;
 #endif 
 } 
 
@@ -85,13 +104,38 @@ void StppEvent::clear(){
   weightedPhiL3=0.0;
 #endif
 
+  bbcAdcSumEast = 0;
+  bbcAdcSumWest = 0;
+  bbcNHitEast=0;
+  bbcNHitWest=0;
+  zVertexBbc=0.0;
+
+  fpdAdcSumNorth  = 0;
+  fpdAdcSumSouth  = 0;
+  fpdAdcSumTop    = 0;
+  fpdAdcSumBottom = 0;
+  fpdAdcSumPres1  = 0;
+  fpdAdcSumPres2  = 0;
+  fpdAdcSumSmdX   = 0;
+  fpdAdcSumSmdY   = 0;
+  fpdSouthVeto    = 0;
+
   ctbAdcSum = 0.0;
   ctbNHit=0;
   zdcEast = 0;
   zdcWest=0;
+  zdcTdcEast = 0;
+  zdcTdcWest = 0;
+  zdcRatioEast = 0.0;
+  zdcRatioWest = 0.0;
 
   svtNHit=0;
   emcHighTower = 0.0;  
+  
+#ifdef _Jet_
+  nJets = 0;
+  jets->Clear();
+#endif
 }
 
 #ifndef __CINT__
@@ -284,8 +328,36 @@ Int_t StppEvent::fill(StEvent *event){
     }
 
     StZdcTriggerDetector& zdc = trg->zdc();
-    zdcEast = zdc.adcSum(east);
-    zdcWest = zdc.adcSum(west);
+    //cout << "ZDC "; for(int i=0; i<16; i++){cout << zdc.adc(i) << " ";}; cout << endl;
+    zdcEast = (Int_t)zdc.adc(4);
+    zdcWest = (Int_t)zdc.adc(0);
+    zdcTdcEast = (Int_t)zdc.adc(8);
+    zdcTdcWest = (Int_t)zdc.adc(9);
+    if(zdcEast>0) {zdcRatioEast = zdc.adc(7)/zdcEast;} else {zdcRatioEast=0.0;}
+    if(zdcWest>0) {zdcRatioWest = zdc.adc(3)/zdcWest;} else {zdcRatioWest=0.0;}
+
+    StBbcTriggerDetector* bbc = &(trg->bbc());
+    if(bbc){
+      bbcAdcSumEast = bbc->adcSumEast();
+      bbcAdcSumWest = bbc->adcSumWest();
+      bbcNHitEast = bbc->nHitEast();
+      bbcNHitWest = bbc->nHitWest();
+      zVertexBbc = bbc->zVertex();
+    }
+  }
+
+  StFpdCollection* fpd = event->fpdCollection();
+  if(fpd){
+    token = fpd->token();
+    fpdAdcSumNorth  = fpd->sumAdcNorth();
+    fpdAdcSumSouth  = fpd->sumAdcSouth();
+    fpdAdcSumTop    = fpd->sumAdcTop();
+    fpdAdcSumBottom = fpd->sumAdcBottom();
+    fpdAdcSumPres1  = fpd->sumAdcPreShower1();
+    fpdAdcSumPres2  = fpd->sumAdcPreShower2();
+    fpdAdcSumSmdX   = fpd->sumAdcSmdX();
+    fpdAdcSumSmdY   = fpd->sumAdcSmdY();
+    fpdSouthVeto    = fpd->southVeto();
   }
   
   StL0Trigger* l0=event->l0Trigger();
@@ -293,16 +365,51 @@ Int_t StppEvent::fill(StEvent *event){
     token = l0->triggerToken();
     triggerWord = l0->triggerWord();
     bunchId = l0->bunchCrossingId();
-    bunchId7bit = l0->bunchCrossingId7bit();
+    bunchId7bit = l0->bunchCrossingId7bit(runN);
     doubleSpinIndex = l0->spinBits();
-    if(bunchId != bunchId7bit){
-      cout << "2 bunch Id did not agree " << bunchId <<" "<< bunchId7bit<<endl;
+    // unpol bunch xing now will get spin index==15
+    if(runN >= 3020032 && doubleSpinIndex==0 && bunchId%2==0){doubleSpinIndex=15;}
+    // checking bunch ids
+    if(BunchIdDifference==-999){
+      BunchIdDifference = bunchId - bunchId7bit;
+      if(BunchIdDifference<0)  BunchIdDifference+=120;
+    }
+    int diff = bunchId - bunchId7bit;
+    if(diff<0) diff+=120;
+    else if (BunchIdDifference != diff){
+      cout << "2 bunch Id did not agree "<< bunchId<<" - "<<bunchId7bit<<" = "
+	   <<diff<<" != "<<BunchIdDifference<<endl;
     }
   }
   
   cout << "AKIO-Run#/Token/Unix-Time/BunchID/7Bit/SpinBits:" 
        << runN << " " << token << " " << time << " " 
        << bunchId << " " << bunchId7bit << " " << doubleSpinIndex  << endl;
+
+#ifdef _Jet_
+#ifdef _Offline_tracks_
+  //simple jet finder
+  nJets = 0;
+  StEtGridFlat *g = new StEtGridFlat;
+  g->createKeys();
+  for(int i=0; i<=pTracks->GetLast(); i++){
+    StppTrack *t = (StppTrack*)(*pTracks)[i];
+    if(t->flag>0 && t->nHits>20 && t->pt>0.2 && fabs(t->eta)<1.4) g->add(t);
+  }
+  //g->sort();
+  //g->print();
+  StJet* jet;
+  while( (jet = g->findJet(jetR,jetSeed,jetCut)) != 0){
+    StJet* jj = new((*jets)[nJets]) StJet(jet);
+    delete jet;
+    jj->print();
+    nJets++;
+  }
+  //g->sort();
+  //g->print();
+  delete g;
+#endif
+#endif
 
   return 0;
 }

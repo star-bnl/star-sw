@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StppuDstMaker.h,v 1.1 2002/01/16 20:22:54 akio Exp $
+ * $Id: StppuDstMaker.h,v 1.2 2002/02/11 20:30:48 akio Exp $
  * $Log: StppuDstMaker.h,v $
+ * Revision 1.2  2002/02/11 20:30:48  akio
+ * Many updates, including very first version of jet finder.
+ *
  * Revision 1.1  2002/01/16 20:22:54  akio
  * First version
  *
@@ -16,8 +19,11 @@
 #define StppuDst_h
 #include "StMaker.h"
 
+#define _GEANT_
 #define _BBC_data_
 #define _FPD_data_
+//#define _EMC_CLUSTERS_
+//#define _EMC_POINTS_
 
 class TFile;
 class TTree;
@@ -25,31 +31,41 @@ class StppEvent;
 class StppGeant;
 class StBbcTriggerDetector;
 class StFpdCollection;
+class StEmcClusterCollection;
+class StEmcPoint;
 
 class StppuDstMaker : public StMaker {
 public:
-    StppuDstMaker(const Char_t *name="StppuDst");
-    Int_t Init();
-    Int_t Make();
-    Int_t Finish();
-	
+  StppuDstMaker(const Char_t *name="StppuDst");
+  Int_t Init();
+  Int_t Make();
+  Int_t Finish();
+  
 protected:
     
 private:
-    size_t          mGoodCounter; //!
-    size_t          mBadCounter;  //!
-    TFile           *m_outfile;   //!
-    TTree           *ppuDst;      //!
-    StppEvent       *ppEvent;     //!
-    StppGeant       *ppGeant;     //!
+  size_t          mGoodCounter; //!
+  size_t          mBadCounter;  //!
+  TFile           *m_outfile;   //!
+  TTree           *ppuDst;      //!
+  StppEvent       *ppEvent;     //!
+#ifdef _GEANT_
+  StppGeant       *ppGeant;     //!
+#endif
 #ifdef _BBC_data_
-    StBbcTriggerDetector *bbc;    //!
+  StBbcTriggerDetector *bbc;    //!
 #endif
 #ifdef _FPD_data_
-    StFpdCollection *fpd;         //!
+  StFpdCollection *fpd;         //!
 #endif
-    Int_t           infoLevel;
-
-    ClassDef(StppuDstMaker,0)
+#ifdef _EMC_CLUSTERS_
+  StEmcClusterCollection* emcClusters[3];//!
+#endif
+#ifdef _EMC_POINTS_
+  TClonesArray     *emcPoints;  //!
+#endif
+  Int_t            infoLevel;
+  
+  ClassDef(StppuDstMaker,0)
 };
 #endif
