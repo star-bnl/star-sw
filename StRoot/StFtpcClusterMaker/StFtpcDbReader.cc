@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.10 2001/10/29 12:54:43 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.11 2001/11/21 12:36:27 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.11  2001/11/21 12:36:27  jcs
+// make ftpcGas database table available to FTPC cluster maker
+//
 // Revision 1.10  2001/10/29 12:54:43  jcs
 // add new constructor for StFtpcDriftMapMaker
 //
@@ -49,6 +52,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
                                St_ftpcAmpOffset     *ampoffset,
                                St_ftpcTimeOffset    *timeoffset,
                                St_ftpcDriftField    *driftfield,
+                               St_ftpcGas           *gas,
                                St_ftpcElectronics  *electronics)
 {
 
@@ -155,6 +159,14 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
     gMessMgr->Message( " No data in table class St_ftpcDriftField","E");
   }
 
+  //  just copy gas table start to pointer
+  ftpcGas_st* gasTable = (ftpcGas_st*)gas->GetTable();
+  if(gasTable){
+   mBaseTemperature        = gasTable->baseTemperature;
+  } else {
+    gMessMgr->Message( " No data in table class St_ftpcGas","E");
+  }
+
   //  just copy electronics table start to pointer
   ftpcElectronics_st* electronicsTable = (ftpcElectronics_st*)electronics->GetTable();
   if(electronicsTable){
@@ -256,7 +268,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
    mGasIonizationPotential = gasTable->gasIonizationPotential;
    mBaseTemperature        = gasTable->baseTemperature;
    mBasePressure           = gasTable->basePressure;
-   mPressureOffset         =gasTable->pressureOffset;
+   mPressureOffset         = gasTable->pressureOffset;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcGas","E");
   }

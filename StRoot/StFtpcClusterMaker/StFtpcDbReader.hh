@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.hh,v 1.8 2001/10/29 12:54:43 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.9 2001/11/21 12:36:27 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.9  2001/11/21 12:36:27  jcs
+// make ftpcGas database table available to FTPC cluster maker
+//
 // Revision 1.8  2001/10/29 12:54:43  jcs
 // add new constructor for StFtpcDriftMapMaker
 //
@@ -121,6 +124,7 @@ public:
                  St_ftpcAmpOffset     *ampoffset,
                  St_ftpcTimeOffset    *timeoffset,
                  St_ftpcDriftField    *driftfield,
+                 St_ftpcGas           *gas,
                  St_ftpcElectronics   *electronics);
   // constructor used by StFtpcSlowSimMaker
   StFtpcDbReader(St_ftpcDimensions    *dimensions,
