@@ -70,7 +70,7 @@ show
   TPaveLabel *tlab = new TPaveLabel(-0.99,+0.99,+0.99,+0.90,
 				    "EEMC TOWERS & TPC TRACKS     Piotr A Zolnierczuk (IU)");
 
-  eventInfo = new TPaveText (-0.99,-0.99,+0.0 ,-0.80);
+  eventInfo = new TPaveText (-0.99,-0.99,+0.0 ,-0.75);
   dateInfo  = new TPaveLabel(+0.60,-0.99,+0.99,-0.95,now->AsString());
 
   TGeoManager  *gm    = new TGeoManager("eemc", "eemc tower display");

@@ -49,8 +49,8 @@ ttm
   gSystem->Load("StEEmcPoolTTM");
   
   // turn on profiling
-  gSystem->Setenv("JPROF_FLAGS", "JP_START JP_PERIOD=0.001"); 
-  gSystem->Load("libJprof"); 
+  //gSystem->Setenv("JPROF_FLAGS", "JP_START JP_PERIOD=0.001"); 
+  //gSystem->Load("libJprof"); 
   // % jprof `which root4star` jprof-log >jprof.html 
 
   // create the chain    
@@ -67,8 +67,7 @@ ttm
 
   // finally after so many lines we arrive at the good stuff
   ttmMk = new  EEmcTTMMaker ("TTM",muDstMk,eemcDbMk);
-  ttmMk->SetFileName(outFile);
-  //ttm->WriteTree(false);
+  ttmMk->SetFileName(outFile); // output nanoDst file
   // have cuts your way (optional)
   ttmMk->SetMaxCTBSum(1000); 
   ttmMk->SetMinTrackLength(20.0);

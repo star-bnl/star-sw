@@ -40,7 +40,7 @@ void Test_EEmcTower()
 
 
 void
-testm()
+ttmtest()
 { 
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
