@@ -368,6 +368,7 @@ if(mod==60)cout<<daq_smd<<"  "<<wire+1<<"   "<<mod<<"   "<<A_value<<"   "<<det<<
 //  else{cout<<"dummy fiber**"<<wire<<endl;}
 }
 
+ return 0; // 28-aug-2001 by PAI ??
 }
 
 /*
