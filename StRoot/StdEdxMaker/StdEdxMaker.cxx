@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.27 2002/03/20 14:17:57 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.28 2002/04/26 18:47:13 fisyak Exp $
 #include <iostream.h>
 #include <time.h>
 #include "StdEdxMaker.h"
@@ -750,10 +750,11 @@ Int_t StdEdxMaker::Make(){
       Double_t dY = 
 	normal.x()*(helix->y(s_in) - helix->y(s_out))  - 
 	normal.y()*(helix->x(s_in) - helix->x(s_out));
-      dEU = dEdxP[ipoint].dE*Scale2keV;
+      dEU = dEdxP[ipoint].dE;
       // Corrections
       Double_t RMS = 1;
       if (!m_Simulation) {
+	dEU *= Scale2keV;
 	dE = dEU*TimeScale;
 	dET = dE;
 	Double_t gc = 1;
