@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDaqClfMaker.cxx,v 1.5 2002/08/22 21:31:33 jml Exp $
+ * $Id: StDaqClfMaker.cxx,v 1.6 2002/09/05 15:48:07 jml Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StDaqClfMaker.cxx,v $
+ * Revision 1.6  2002/09/05 15:48:07  jml
+ * Now fill the deconvolution flag to help dedx
+ *
  * Revision 1.5  2002/08/22 21:31:33  jml
  * Installed new version of fcfClass
  * This version is frozen for the 2002-2003 run and will be running on the i960s
@@ -133,6 +136,7 @@ Int_t StDaqClfMaker::Init()
   doT0Corrections = 1;  // do the t0 corrections
   doGainCorrections = 0; // done by St_tpcdaq_Maker
   doZeroTruncation = 1; // 
+  fillDeconFlag = 1;
 
   mCreate_stevent = 0;  // Use  StEvent for ittf
   mFill_stevent = 0;
@@ -648,7 +652,16 @@ void StDaqClfMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, int r, i
 
   // Filling in the flag causes very bad tracking performance
   // for some events.  I don't know why.
-  hit.flag = 0;      // hit.flag = cl_f;
+  if(fillDeconFlag == 0)
+    hit.flag = 0;     
+  else
+  {
+    if( (cl_f & FCF_DOUBLE_PAD) ||
+	(cl_f & FCF_DOUBLE_T))
+    {
+      hit.flag = 1;
+    }
+  }
 
   hit.id = clustercount;
   hit.row = (r+1) + sector * 100;
