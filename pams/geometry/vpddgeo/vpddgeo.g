@@ -1,5 +1,11 @@
-* $Id: vpddgeo.g,v 1.7 2001/09/13 15:59:47 geurts Exp $
+* $Id: vpddgeo.g,v 1.8 2002/11/26 17:32:00 geurts Exp $
 * $Log: vpddgeo.g,v $
+* Revision 1.8  2002/11/26 17:32:00  geurts
+* The pVPD mothervolumes have been moved to the best estimate for the
+* 2000/2001 run. The two mothervolumes are now asymetrically
+* placed. Positioning of the I-Beams had to be changed accordingly so
+* the absolute position of the two I-Beams remained the same.
+*
 * Revision 1.7  2001/09/13 15:59:47  geurts
 * pVPD mothervolumes moved by 36inch
 *
@@ -39,7 +45,7 @@ Created 21 June 2000
                VPCV, VPCH, VDTI,
                IBEM,IBEH,IBEV,IBEW
 *
-     Structure VPDG { version,  zpos,     rmin,    rmax,
+     Structure VPDG { version,  zposEast, zposWest, rmin,    rmax,
                       BPwidth,  BPlength, BPthick,
                       BXheight, BXlength, BXwidth,  BXthick, BXzposC,
                       FPwidth,  FPheight, FPthick,
@@ -56,14 +62,16 @@ Created 21 June 2000
                       IBwlen,   IBwhghtF, IBwhghtB}
 *
      real ybase, ytop, convlength, detangle, strutheight, ydispl
-     real ElecThck, ElecWid, ElecLen, xloc, yloc,zloc
+     real ElecThck, ElecWid, ElecLen, xloc, yloc,zloc, zpos
      integer isec
 *
 * ----------------------------------------------------------------------
 *
      FILL VPDG  ! pVPD basic dimensions
         version   =    3.     ! geometry version
-        zpos      =  591.44   ! Z position of pVPD-volume along beam axis
+CCCC    zpos      =  591.44   ! Z position of pVPD-volume (used for I-Beam)
+        zposEast  =  561.2638 ! Z position of the East pVPD volume
+        zposWest  =  563.1688 ! Z position of the West pVPD volume
         rmin      =    6.35   ! mothervolume rmin		(2.5inch)
         rmax      =   31.27375! mothervolume rmin		(12.3125inch)
         BPwidth   =   30.48   ! baseplate width 		(12inch)
@@ -122,8 +130,11 @@ Created 21 June 2000
      USE  VPDG  
 *
      Create VPDD
-     Position VPDD in Cave   z=+vpdg_zpos               Konly='Many'
-     Position VPDD in Cave   z=-vpdg_zpos   ThetaZ=180  Konly='Many'
+* need zpos passed on inside the vpdd definition for the I-beam
+     zpos = vpdg_zposWest
+     Position VPDD in Cave   z=+zpos            Konly='Many'
+     zpos = vpdg_zposEast
+     Position VPDD in Cave   z=-zpos ThetaZ=180 Konly='Many'
 
      if (vpdg_IBchoice != 0) then
        Position IBEM in Cave z=+vpdg_IBPosZc y=vpdg_IBposYc
@@ -134,7 +145,7 @@ Created 21 June 2000
 Block VPDD  is the whole VPPD assembly
      Material  Air
      Medium    Standard
-     Attribute VPDD seen=0
+     Attribute VPDD seen=0 serial=zpos
      Shape TUBE rmin=vpdg_rmin rmax=vpdg_rmax dz=vpdg_BPlength/2
 *
 * Mount the baseplate under the Ibeam
@@ -210,7 +221,7 @@ Block VPDD  is the whole VPPD assembly
 *
      if (vpdg_IBchoice != 0) then
        print *,'vpddgeo: I-Beam support is activated'
-       Create and Position IBEM z=-vpdg_zpos+vpdg_IBPosZc y=vpdg_IBposYc
+       Create and Position IBEM z=-zpos+vpdg_IBPosZc y=vpdg_IBposYc
      endif
 *
 Endblock
