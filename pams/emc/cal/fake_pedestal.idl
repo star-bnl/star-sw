@@ -4,7 +4,6 @@
 #include "ems_control.idl"
 #include "ems_cal_control.idl"
 #include "emc_pedestal.idl"
-#include "eemc_pedestal.idl"
 
 interface fake_pedestal : amiModule {
 	STAFCV_T call
