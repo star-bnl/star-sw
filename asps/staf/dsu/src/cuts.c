@@ -3,7 +3,7 @@ typedef int myBool;
 /***********************************************************  INCLUDES  **/
 #include <stdio.h>
 #include <math.h>
-#include <strings.h>
+#include <string.h>
 #include <stdlib.h>
 #include "dstype.h"
 #include "dsxdr.h"
