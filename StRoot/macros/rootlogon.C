@@ -1,5 +1,8 @@
-// $Id: rootlogon.C,v 1.10 1999/07/17 23:28:09 fisyak Exp $
+// $Id: rootlogon.C,v 1.11 1999/07/22 15:31:41 fine Exp $
 // $Log: rootlogon.C,v $
+// Revision 1.11  1999/07/22 15:31:41  fine
+// US letter paper size has been set as default one
+//
 // Revision 1.10  1999/07/17 23:28:09  fisyak
 // Add QAInfo tag
 //
@@ -28,8 +31,8 @@
 
 {
     gInterpreter->ProcessLine(".O0");
-    G__loadfile("iostream.h");
-    TString gPrompt =  gROOT->GetApplication()->Argv(0);
+    //    G__loadfile("iostream.h");
+    TString gPrompt =  gSystem->BaseName(gROOT->GetApplication()->Argv(0));
     gPrompt += " [%d] ";
 
    ((TRint*)gROOT->GetApplication())->SetPrompt( gPrompt.Data()); // Redefine prompt
@@ -74,7 +77,10 @@
  // Settings for statistics information
  gStyle->SetOptFit(1);
  gStyle->SetOptStat(1);
-
+ 
+ // SetPaperSize wants width & height in cm: A4 is 20,26 & US is 20,24
+ gStyle->SetPaperSize(20,24); 
+  
  // Positioning of axes labels
  gStyle->SetTitleOffset(1.2);
 
