@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.25 2000/08/29 17:08:51 ward Exp $
+ * $Id: EventReader.cxx,v 1.26 2000/09/12 19:19:06 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.26  2000/09/12 19:19:06  ward
+ * Fixed bug in bank name extraction, added SVTSECP SVTRBP to bank list.
+ *
  * Revision 1.25  2000/08/29 17:08:51  ward
  * In corruption detector, temporarily remove L3_P (no doc), and add SVTP.
  *
@@ -737,7 +740,7 @@ char *EventReader::ConvertToString(unsigned long  *input) {
   cc=(char*)input;
   dd=rv;
   while(isupper(*cc)||isdigit(*cc)||*cc=='_') *(dd++)=*(cc++); *dd=0;
-  if(strlen(rv)>10) { PP"What?\n"); exit(2); }
+  if(strlen(rv)>8) rv[8]=0; // Max len of a bank name is 8 chars (2 words = 8 bytes)
   return rv;
 }
 void EventReader::WhereAreThePointers(int *beg,int *end,char *xx) {
@@ -754,6 +757,8 @@ void EventReader::WhereAreThePointers(int *beg,int *end,char *xx) {
   if(!strcmp(xx, "L3_SECP")) { *beg=6; *end=11; }
   if(!strcmp(xx,    "L3_P")) { *beg=0; *end= 0; return; } // bbb I don't have good doc for L3_P yet.
   if(!strcmp(xx,    "SVTP")) { *beg=1; *end= 8; }
+  if(!strcmp(xx, "SVTSECP")) { *beg=1; *end=24; }
+  if(!strcmp(xx,  "SVTRBP")) { *beg=1; *end= 6; }
   (*beg)--; (*end)--;
   if((*beg)<0||(*end)<0) {
     printf("Please add code to WhereAreThePointers for '%s'.\n",xx);
@@ -795,8 +800,10 @@ char EventReader::BankOrItsDescendentsIsBad(int herbFd,long currentOffset) { // 
   if(doTheByteSwap) for(i=0;i<10;i++) Swap4(header+i);
   assert(header[5]==0x04030201); /* We have enought corruption checks above that this shouldn't happen. */
 
-  numberOfDataWords=header[2]-10; assert(numberOfDataWords<=DATA);
-  if(!strcmp(bankname,"TPCMZP")) { beg=0; end=numberOfDataWords-1; }
+  numberOfDataWords=header[2]-10;
+  if(numberOfDataWords>DATA) { printf("%d %d, bankname=%s.\n",numberOfDataWords,DATA,bankname); }
+  assert(numberOfDataWords<=DATA);
+  if(!strcmp(bankname,"TPCMZP")||!strcmp(bankname,"SVTMZP")) { beg=0; end=numberOfDataWords-1; }
   else WhereAreThePointers(&beg,&end,bankname); 
   if(end>=numberOfDataWords) {
     PP"end=%d, numberOfDataWords=%d, bankname=%s.\n",end,numberOfDataWords,bankname);
