@@ -96,6 +96,8 @@ class EEmcPoint : public TObject {
   void addFlag(Int_t f){ mFlag |= f; }
   /// Get the user-defined analysis flag
   Int_t flag();
+  /// Returns the logical or with the arguement
+  Int_t flag( Int_t f );
 
  private:
  protected:
@@ -141,6 +143,7 @@ inline Bool_t EEmcPoint::match( EEezPatch *patch ) { return mSmdPoint.match(patc
 
 inline void EEmcPoint::setFlag(Int_t f){ mFlag = f; }
 inline Int_t EEmcPoint::flag(){ return mFlag; }
+inline Int_t EEmcPoint::flag( Int_t f ){ return mFlag&f; }
 
 
 #endif
