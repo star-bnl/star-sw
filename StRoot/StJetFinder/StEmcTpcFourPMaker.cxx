@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.7 2003/05/29 21:16:04 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.8 2003/06/25 23:03:22 thenry Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -76,7 +76,7 @@ Int_t StEmcTpcFourPMaker::Make() {
     double R = pt/(0.3*mField);
     if(R < HSMDR) // just forget the track if it doesn't get to EMC radius. 
       continue;
-    binmap.insertTrack(track);
+    binmap.insertTrack(track, i);
   }
 
   // Retreive the points
@@ -112,7 +112,7 @@ Int_t StEmcTpcFourPMaker::Make() {
   for(int i = 0; i < numPoints; i++)
   {
     StMuEmcPoint* point = muEmc->getPoint(i);
-    binmap.insertPoint(point);
+    binmap.insertPoint(point, i);
   }
 
   // Connect the points with the tracks when they are within radiussqr 
@@ -157,9 +157,9 @@ Int_t StEmcTpcFourPMaker::Make() {
       track != binmap.moddTracks.end(); ++track)
   {
     trackMap::value_type &track_val = *track;
-    StMuTrackFourVec& newTrack = tPile[index];
+    StMuTrackFourVec& newTrack = tPile[index++];
     StProjectedTrack &pTrack = track_val.second;
-    newTrack.Init(pTrack.getTrack(), pTrack.P(), index++);
+    newTrack.Init(pTrack.getTrack(), pTrack.P(), pTrack.getIndex());
     tracks.push_back(&newTrack);
   }  
 
@@ -182,10 +182,10 @@ Int_t StEmcTpcFourPMaker::Make() {
       point != binmap.moddPoints.end(); ++point)
   {
     pointMap::value_type &point_val = *point;
-    StMuTrackFourVec& newTrack = tPile[index];
+    StMuTrackFourVec& newTrack = tPile[index++];
     StCorrectedEmcPoint &cPoint = point_val.second;
-    newTrack.Init(NULL, cPoint.P(), index++);
-    tracks.push_back(&newTrack);  
+    newTrack.Init(NULL, cPoint.P(), cPoint.getIndex()+nTracks);
+    //tracks.push_back(&newTrack);  
   }  
   //stop = clock();
   //timeLengths[timeindex] += static_cast<double>(stop-start)
@@ -194,6 +194,7 @@ Int_t StEmcTpcFourPMaker::Make() {
 
   return kStOk;
 }
+
 
 
 

@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.h,v 1.5 2003/05/29 21:16:05 thenry Exp $
+ * $Id: StEmcTpcFourPMaker.h,v 1.6 2003/06/25 23:03:31 thenry Exp $
  * $Log: StEmcTpcFourPMaker.h,v $
+ * Revision 1.6  2003/06/25 23:03:31  thenry
+ * Fixed indexes
+ *
  * Revision 1.5  2003/05/29 21:16:05  thenry
  * Added initProbabilities to StProjectedTrack class
  *
@@ -69,14 +72,17 @@ public:
     static const double HSMDR = 1.13125;
     static const double twoPi = M_PI*2.0;
 
-    StCorrectedEmcPoint() : correctedE(0), mPoint(0), etaShift(0) {};
-    StCorrectedEmcPoint(StMuEmcPoint* p) : correctedE(0), mPoint(p), etaShift(0) {};
-    StCorrectedEmcPoint(StMuEmcPoint* p, StThreeVectorD vertex) : mPoint(p)
+    StCorrectedEmcPoint() : correctedE(0), mPoint(0), etaShift(0), index(0) {};
+    StCorrectedEmcPoint(StMuEmcPoint* p, int _index) : correctedE(0), 
+      mPoint(p), etaShift(0), index(_index) {};
+    StCorrectedEmcPoint(StMuEmcPoint* p, int _index, StThreeVectorD vertex) : 
+      mPoint(p), index(_index)
     {
       etaShift = atan2(vertex.z()/100.0, SMDR);
       correctedE = p->getEnergy();
     };
-    StCorrectedEmcPoint(StMuEmcPoint* p, double zv) : mPoint(p) 
+    StCorrectedEmcPoint(StMuEmcPoint* p, int _index, double zv) : 
+      mPoint(p), index(_index) 
     {
       etaShift = atan2(zv/100.0, SMDR);
       correctedE = p->getEnergy();
@@ -86,6 +92,7 @@ public:
       mPoint = p.getPoint();
       correctedE = p.E();
       etaShift = p.getEtaShift();
+      index = p.getIndex();
     };
 
     virtual ~StCorrectedEmcPoint() {};
@@ -126,11 +133,13 @@ public:
     };
     inline StMuEmcPoint* getPoint(void) const{ return mPoint; };
     inline double getEtaShift(void) const{ return etaShift; };
+    inline int getIndex(void) const{ return index; };
 
 protected:
     double correctedE;
     StMuEmcPoint* mPoint;
     double etaShift;
+    int index;
 };
 
 class StProjectedTrack
@@ -148,8 +157,8 @@ class StProjectedTrack
     static const double mpi = .1396;
     static const double mk = .4937;
 
-    StProjectedTrack() : mTrack(0) { };
-    StProjectedTrack(StMuTrack* t) : mTrack(t) 
+    StProjectedTrack() : mTrack(0), index(0) { };
+    StProjectedTrack(StMuTrack* t, int _index) : mTrack(t), index(_index) 
     {
       fourP = StLorentzVectorD(sqrt(masssqr() + mom().mag2()), mom());
       StPhysicalHelixD helix = mTrack->outerHelix();
@@ -159,7 +168,8 @@ class StProjectedTrack
       projection = helix.at(path);
       initProbabilities(t);
     };
-    StProjectedTrack(StMuTrack* t, StThreeVectorD vertex) : mTrack(t) 
+    StProjectedTrack(StMuTrack* t, int _index, StThreeVectorD vertex) : 
+      mTrack(t), index(_index) 
     {
       fourP = StLorentzVectorD(sqrt(masssqr() + mom().mag2()), mom());
       StPhysicalHelixD helix = mTrack->outerHelix();
@@ -177,6 +187,7 @@ class StProjectedTrack
       probElectron = t.getProbElectron();
       fourP = t.P();
       projection = t.proj();
+      index = t.getIndex();
     };
     virtual ~StProjectedTrack() {};
 
@@ -237,6 +248,7 @@ class StProjectedTrack
       probPion = probKaon = probProton = 0;
       probElectron = 1.0;
     };
+    inline int getIndex(void) const{ return index; };
 
 protected:
     StMuTrack* mTrack;
@@ -247,6 +259,7 @@ protected:
 
     StLorentzVectorD fourP;
     StThreeVectorD projection;
+    int index;
 };
 
 typedef map<StMuTrack*, StProjectedTrack, less<StMuTrack*> > trackMap;
@@ -361,16 +374,16 @@ public:
       mVertex = StThreeVectorD(vertex); 
     };
 
-  inline void insertTrack(StMuTrack* track)
+  inline void insertTrack(StMuTrack* track, int index)
   {
     try{
-      moddTracks[track] = StProjectedTrack(track, mVertex);
+      moddTracks[track] = StProjectedTrack(track, index, mVertex);
     } catch (BadPathLengthException &b) { }; 
     return;
   };
-  inline _binmap::iterator insertPoint(StMuEmcPoint* point)
+  inline _binmap::iterator insertPoint(StMuEmcPoint* point, int index)
   {
-    moddPoints[point] = StCorrectedEmcPoint(point, mVertex);
+    moddPoints[point] = StCorrectedEmcPoint(point, index, mVertex);
     return insert(point);
   };
   inline long bin(StMuEmcPoint* point) { return bin(moddPoints[point]); };
