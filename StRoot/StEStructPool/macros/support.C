@@ -1,5 +1,5 @@
 /************************************************************************
- * $Id: support.C,v 1.1 2004/06/25 03:14:56 porter Exp $
+ * $Id: support.C,v 1.2 2004/06/26 16:28:42 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -15,7 +15,7 @@ char** getDirNames(const char* type, int nset){
   char** retVal=new char*[nset];
 
   for(int i=0;i<nset;i++){
-    TString ndir("type");
+    TString ndir(type);
     ndir+="/0";
     ndir+=(i+1);
     retVal[i]=new char[strlen(ndir.Data())+1];
@@ -70,6 +70,9 @@ void doTheWork(StEStructAnalysisMaker* estructMaker, int maxNumEvents){
 /**********************************************************************
  *
  * $Log: support.C,v $
+ * Revision 1.2  2004/06/26 16:28:42  porter
+ * fixed typo in getDirNames.C
+ *
  * Revision 1.1  2004/06/25 03:14:56  porter
  * modified basic macro to take only 1 cutfile and moved some common
  * features into a new macro=support.C.....   this cleaned up the
