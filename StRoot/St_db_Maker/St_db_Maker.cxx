@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.78 2004/03/16 04:00:16 jeromel Exp $
+// $Id: St_db_Maker.cxx,v 1.79 2004/04/07 18:17:45 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.79  2004/04/07 18:17:45  perev
+// Cleanup, DB data now in .const as should be
+//
 // Revision 1.78  2004/03/16 04:00:16  jeromel
 // Improper number of elements times[] array fixed
 //
@@ -239,7 +242,7 @@ Int_t St_db_Maker::Init()
    }
 
    if (fDataBase) {
-     AddData(fDataBase);
+     AddConst(fDataBase);
      SetOutputAll(fDataBase,2); //  
      
      if (Debug()>1) fDataBase->ls("*");
@@ -752,7 +755,7 @@ void St_db_Maker::SetFlavor(const char *flav,const char *tabname)
    TDataSet *flaDir = Find(".flavor");
    if (!flaDir)				return;
    St_ValiSet *val;
-   TDataSetIter  valNext(m_DataSet,999);
+   TDataSetIter  valNext(m_ConstSet,999);
    while ((val = (St_ValiSet*)valNext())) {	//DB objects loop
      const char *tabName = val->GetName();
      if (tabName[0] != '.')			continue;
