@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.48 2004/02/17 04:56:36 jeromel Exp $
+ * $Id: StMuDstMaker.cxx,v 1.49 2004/02/17 05:05:35 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -570,9 +570,9 @@ void StMuDstMaker::openWrite(string fileName) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDstMaker::closeWrite(){
-  cout << __PRETTY_FUNCTION__ << endl;
+  cout << __PRETTYF__ << endl;
   if (mTTree && mCurrentFile) {
-    cout << " ##### " << __PRETTY_FUNCTION__ << endl;
+    cout << " ##### " << __PRETTYF__ << endl;
     cout << " ##### File=" << mCurrentFile->GetName() << " ";
     cout << " NumberOfEvents= " << mTTree->GetEntries() << " ";
     cout << " ##### " << endl;
@@ -953,6 +953,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.49  2004/02/17 05:05:35  jeromel
+ * One more hidden one found post-commit
+ *
  * Revision 1.48  2004/02/17 04:56:36  jeromel
  * Extended help, added crs support, restored __GNUC__ for PRETTY_FUNCTION(checked once
  * more and yes, it is ONLY defined in GCC and so is __FUCTION__),  use of a consistent
