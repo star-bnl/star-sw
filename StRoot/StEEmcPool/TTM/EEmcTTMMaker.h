@@ -1,5 +1,5 @@
 // Hey Emacs this is -*-c++-*-
-// $Id: EEmcTTMMaker.h,v 1.15 2004/05/06 16:02:49 zolnie Exp $
+// $Id: EEmcTTMMaker.h,v 1.16 2004/05/07 22:02:56 zolnie Exp $
 #ifndef STAR_EEmcTTMMaker
 #define STAR_EEmcTTMMaker
 
@@ -124,9 +124,10 @@ public:
   /// sets delta eta cut see \ref matchparams
   void     SetDeltaEtaCut(Double_t v=1.0) { mEtaFac=v;  }
 
-  /// set output file name OBSOLETE
-  void     SetFileName( const char *string) { mFileName=TString(string); }
-
+  /// set output file name
+  void     SetFileName( const char *string) { mFileName=TString(string); mTreeOut=true; }
+  /// decide whether write out matches to a tree
+  void     WriteTree( const bool f ) { mTreeOut = f ; }
 
   /// returns number of matched tracks
   ULong_t  GetNMatched() const { return mNMatched; };
@@ -193,12 +194,14 @@ private:
   TList          *mTowerList;
   TList          *mMatchList;
 
+  bool            mTreeOut;
+
  public:
   //  StMaker jumbo mumbo
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.15 2004/05/06 16:02:49 zolnie Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.16 2004/05/07 22:02:56 zolnie Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -210,6 +213,9 @@ ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm);
 #endif
 
 // $Log: EEmcTTMMaker.h,v $
+// Revision 1.16  2004/05/07 22:02:56  zolnie
+// fixed a nasty memory leak in EEmcTTMMaker
+//
 // Revision 1.15  2004/05/06 16:02:49  zolnie
 // more docs
 //

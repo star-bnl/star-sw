@@ -1,7 +1,7 @@
 // Hey Emacs this is -*-c++-*-
 #ifndef STAR_EEmcTower_h
 #define STAR_EEmcTower_h
-// $Id: EEmcTower.h,v 1.2 2004/05/06 16:02:50 zolnie Exp $
+// $Id: EEmcTower.h,v 1.3 2004/05/07 22:02:57 zolnie Exp $
 
 
 #include <ostream>
@@ -17,7 +17,7 @@ using std::ostream;
 class EEmcTower : public TObject  {
 public:
   /// the default constructor
-  EEmcTower()  { mSec=mSub=mEta=-1; mADC=mEdep=0.0; mLabel=NULL; };
+  EEmcTower()  { mSec=mSub=mEta=-1; mADC=mEdep=0.0; };
   
   /// the explicit constructor
   EEmcTower(int s, int ss, int e, float adc=0.0, float ene=0.0) { 
@@ -26,15 +26,13 @@ public:
     mEta  = (unsigned char)e;
     mADC  = adc;
     mEdep = ene;
-    mLabel= NULL;
-    WriteLabel();
   };
 
   /// an explicit constructor that uses labels rather intigers
   EEmcTower(const char *label, float adc=0.0, float ene=0.0);
 
   /// the destructor
-  ~EEmcTower() { if(mLabel) delete mLabel; }
+  ~EEmcTower() { };
 
   /// gets adc value associated with the tower (pedestal adjusted)
   float ADC() const    { return mADC; }
@@ -78,14 +76,12 @@ public:
   int  EtaLabel   (int e)  { mEta=(char)(e-1  ); return e; }
 
   /// returns tower label, e.g. "05TB09"
-  const char *TowerLabel() { return mLabel; }
-  
+  const char *TowerLabel() const; 
 
   /// print tower hit info in xml-like style
   ostream& Out ( ostream &out ) const ;  
   
 private:
-  bool  WriteLabel();
   bool  ParseLabel(const char* label);
   //
   char  mSec;   //
@@ -94,9 +90,8 @@ private:
   char  mDummy; // byte align
   float mADC;   //
   float mEdep;  //
-  char *mLabel; //! do not store this variable
 public:
-  ClassDef(EEmcTower, 2)   // 
+  ClassDef(EEmcTower, 3)   // 
 };
 
 
