@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.44 2004/12/22 15:15:18 aihong Exp $
+//  $Id: StFlowMaker.h,v 1.45 2005/02/10 17:39:42 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -57,6 +57,7 @@ public:
   void          PicoEventWrite(Bool_t flag=kFALSE);
   void          PicoEventRead(Bool_t flag=kFALSE);
   void          MuEventRead(Bool_t flag=kFALSE);
+  void          MuEventReadGC(Bool_t flag=kFALSE); // Grid Collector
   void          SetPicoEventDir(const Char_t* name="./");
   void          SetPicoEventFileName(StFileI* fileList);
   void          SetMuEventDir(const Char_t* name="./");
@@ -66,7 +67,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.44 2004/12/22 15:15:18 aihong Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.45 2005/02/10 17:39:42 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -96,7 +97,8 @@ private:
   StFileI*         pMuFileList;               //! Mu-DST File List
   Bool_t           mPicoEventWrite;           // switch for pico-DST
   Bool_t           mPicoEventRead;            // switch for pico-DST
-  Bool_t           mMuEventRead;              // switch for common Mu-DST
+  Bool_t           mMuEventRead;              // switch for Mu-DST non GC
+  Bool_t           mMuEventReadGC;            // switch for Mu-DST GC
   UInt_t           mEventCounter;             // number of Bytes in pico event
   Bool_t           mFirstLastPhiWgt;          // use z of first-last for phi weights
   Int_t            mRunID;                    // last run ID
@@ -154,6 +156,9 @@ inline void StFlowMaker::PicoEventRead(Bool_t flag) {
 inline void StFlowMaker::MuEventRead(Bool_t flag) {
   mMuEventRead=flag;}
 
+inline void StFlowMaker::MuEventReadGC(Bool_t flag) {
+  mMuEventReadGC=flag;}
+
 inline void StFlowMaker::SetPicoEventDir(const Char_t* name) {
   strncpy(mPicoEventDir, name, 63); mPicoEventDir[63] = '\0'; }
 
@@ -174,6 +179,9 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.45  2005/02/10 17:39:42  posk
+//  Now also works with the Grid Collector.
+//
 //  Revision 1.44  2004/12/22 15:15:18  aihong
 //  Read run-by-run beam shifts and SMD pedestal. Done by Gang
 //
