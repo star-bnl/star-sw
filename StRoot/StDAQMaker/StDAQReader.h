@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.15 2001/06/19 21:10:49 jeromel Exp $
+ * $Id: StDAQReader.h,v 1.16 2001/06/29 17:08:24 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.16  2001/06/29 17:08:24  perev
+ * Hide DaqLib includes from CINT
+ *
  * Revision 1.15  2001/06/19 21:10:49  jeromel
  * Changes for FTPCReader (Janet S.)
  *
@@ -143,7 +146,8 @@ char fTPCVersion[12];
 char fFTPCVersion[12];
 
 };
-
+#ifndef __CINT__
 #include "StTPCReader.h"
 #include "StFTPCReader.h"
-#endif
+#endif /*__CINT__*/
+#endif /*end*/
