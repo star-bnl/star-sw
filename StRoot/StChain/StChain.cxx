@@ -1,7 +1,10 @@
-// $Id: StChain.cxx,v 1.32 1999/03/02 03:20:52 fine Exp $
+// $Id: StChain.cxx,v 1.33 1999/03/04 02:26:04 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.33  1999/03/04 02:26:04  fisyak
+// Add read Chain
+//
 // Revision 1.32  1999/03/02 03:20:52  fine
-// Table counter has been  moved from StMaker to StChain
+//  Table counter has been  moved from StMaker to StChain
 //
 // Revision 1.31  1999/02/28 19:18:44  fisyak
 // Add tag information
@@ -293,11 +296,12 @@ StChain::StChain()
    m_Mode          = 0;
    m_DataSet       = 0;
    m_DebugLevel    = kNormal;
+   if (!gStChain) gStChain = this;
 }
 
 //_____________________________________________________________________________
 StChain::StChain(const char *name, const char *title):
-m_VersionCVS("$Id: StChain.cxx,v 1.32 1999/03/02 03:20:52 fine Exp $"),
+m_VersionCVS("$Id: StChain.cxx,v 1.33 1999/03/04 02:26:04 fisyak Exp $"),
 m_VersionTag("$Name:  $"),
 m_DateTime(),
 mProcessTime()
@@ -516,7 +520,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.32 1999/03/02 03:20:52 fine Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.33 1999/03/04 02:26:04 fisyak Exp $    \n");
    printf("* The chain was tagged with $Name:  $                \n");
    printf("**************************************************************\n");
 //     Print info for all defined Makers

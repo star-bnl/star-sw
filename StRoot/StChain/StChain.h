@@ -1,5 +1,8 @@
-// $Id: StChain.h,v 1.23 1999/03/04 00:01:14 fisyak Exp $
+// $Id: StChain.h,v 1.24 1999/03/04 02:26:10 fisyak Exp $
 // $Log: StChain.h,v $
+// Revision 1.24  1999/03/04 02:26:10  fisyak
+// Add read Chain
+//
 // Revision 1.23  1999/03/04 00:01:14  fisyak
 // Add access to Chain Version
 //
@@ -130,7 +133,7 @@ private:
    TDatime             mProcessTime;        //time of event processing
    EDebugLevel         m_DebugLevel;        //Debug level
    TTree              *m_Tree;              //!Pointer to the Root tree
-   TList              *m_Makers;            //List of Makers
+   TList              *m_Makers;            //!List of Makers
    St_XDFFile         *m_File;              //!Pointer to input file 
    St_XDFFile         *m_FileOut;           //!Pointer to output file 
    StHeader           *fHeader;             //!Header information
