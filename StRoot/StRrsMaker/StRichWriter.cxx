@@ -1,12 +1,12 @@
 /*****************************************************
- * $Id: StRichWriter.cxx,v 1.4 2000/02/08 16:36:47 lasiuk Exp $
+ * $Id: StRichWriter.cxx,v 1.5 2000/02/08 19:53:43 lasiuk Exp $
  *
  * Description:
  *  Implementation of the StRichWriter output object.
  ******************************************************
  * $Log: StRichWriter.cxx,v $
- * Revision 1.4  2000/02/08 16:36:47  lasiuk
- * Bring into line with HP
+ * Revision 1.5  2000/02/08 19:53:43  lasiuk
+ * add to the pads rather than reassign each time!
  *
  *
  * Revision 1.5  2000/02/08 19:53:43  lasiuk
@@ -76,7 +76,7 @@
 
     void StRichWriter::putSignal(int row, int col, double s, int id)
     {
-	(*mStorage)[row][col].signal = s;
+	(*mStorage)[row][col].signal += s;
 	(*mStorage)[row][col].IDs.push_back(id_type(id) );
     } 
 
