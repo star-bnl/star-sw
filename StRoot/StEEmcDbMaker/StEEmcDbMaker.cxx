@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.34 2004/05/26 21:30:36 jwebb Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.35 2004/06/04 13:30:24 balewski Exp $
  
 
 #include <time.h>
@@ -32,7 +32,22 @@
 #include "cstructs/eemcConstDB.hh"
 #include "cstructs/kretConstDB.hh"
 
-//#include <iostream>
+#include <StMessMgr.h>
+
+/*
+http://www.star.bnl.gov/STAR/comp/pkg/dev/StRoot/StUtilities/doc/StMessMgr.html
+gMessMgr->Message("This is an error message.","E");
+
+The message type is specified with a single letter:
+"E" = "Error"
+"I" = "Info"
+"W" = "Warning"
+"D" = "Debug"
+"Q" = "QAInfo"
+
+gMessMgr->Message("","W") << big_num << " seems too big." << endm;
+
+*/
 
 ClassImp(StEEmcDbMaker)
 
@@ -135,10 +150,7 @@ void StEEmcDbMaker::setThreshold(float x){
 void StEEmcDbMaker::setPreferredFlavor(const char *flavor, const char *nameMask){
   strncpy(dbFlavor.flavor,flavor,DbFlavor::mx);
   strncpy(dbFlavor.nameMask,nameMask,DbFlavor::mx);
-  printf("SET %s::preferFlavor(flav='%s', mask='%s')\n",GetName(),dbFlavor.flavor,dbFlavor.nameMask);
-}
-void StEEmcDbMaker::setPreferedFlavor(const char *flavor, const char *nameMask){
-    setPreferredFlavor( flavor, nameMask);
+  printf("SET %s::preferredFlavor(flav='%s', mask='%s')\n",GetName(),dbFlavor.flavor,dbFlavor.nameMask);
 }
 
 
@@ -371,14 +383,14 @@ void  StEEmcDbMaker::mRequestDataBase(){
 //--------------------------------------------------
 void StEEmcDbMaker::mOptimizeMapping(int is){
 
-  printf("\n  conf ADC for sector=%d\n",mDbsectorID[is]); //tmp
-  
+  gMessMgr->Message("","I") <<"\n  EEDB  conf ADC map for sector="<< mDbsectorID[is] <<endm;
+ 
   assert(mDbsectorID[is]>0);
   
   eemcDbADCconf_st *t= mDbADCconf[is];
   
   if(t==0) return;
-  printf("  comment=%s\n",t->comment); //tmp
+  gMessMgr->Message("","I") <<"      EEDB chanMap="<< t->comment <<endm;
   
   int j;
   for(j=0;j<EEMCDbMaxAdc; j++) { // loop over channels
@@ -423,30 +435,33 @@ void StEEmcDbMaker::mOptimizeMapping(int is){
 void StEEmcDbMaker::mOptimizeOthers(int is){
 
   int secID= mDbsectorID[is];
-  printf("\n  optimizeDB for sector=%d\n",secID); //tmp
+  //  printf("\n  optimizeDB for sector=%d\n",secID); //tmp
   int ix1,ix2;
   EEindexRange(secID,ix1,ix2);
-  // if(dbg)
-  printf("EEindexRange(%d,%d,%d)\n",secID,ix1,ix2);
+  
+  gMessMgr->Message("","D") <<"\n   EEDB EEindexRange("<<secID<<","<<ix1<<","<<ix2<<")"<<endm;
   
   //  if(dbg)printf(" Size: ped=%d cal=%d name=%d stat=%d \n",sizeof(ped->name)/EEMCDbMaxName,sizeof(cal->name)/EEMCDbMaxName,sizeof(tubeTw->name)/EEMCDbMaxName,sizeof(stat->name)/EEMCDbMaxName);
   
   assert(secID>0);
 
   eemcDbPMTcal_st  *calT=mDbPMTcal[is];  
-  if(calT) printf("  calTw-comment=%s\n",calT->comment);
-
+  if(calT)  gMessMgr->Message("","I") <<"      EEDB calTw="<<calT->comment<<endm;
   eemcDbPMTname_st *tubeTw=mDbPMTname[is];
-  if(tubeTw) printf("  tube-comment=%s\n",tubeTw->comment);
+  if(tubeTw) gMessMgr->Message("","I") <<"      EEDB tubeTw="<<tubeTw->comment<<endm;
+  //printf("  tube-comment=%s\n",tubeTw->comment);
 
   eemcDbPIXcal_st  *calM= mDbPIXcal[is];
-  if(calM) printf("  calMAPMT-comment=%s\n",calM->comment);
+  if(calM) gMessMgr->Message("","I") <<"      EEDB calMAPMT="<<calM->comment<<endm;
+  //printf("  calMAPMT-comment=%s\n",calM->comment);
 
   eemcDbPMTped_st  *ped=mDbPMTped[is];
-  if(ped) printf("  ped-comment=%s\n",ped->comment);
+  if(ped) gMessMgr->Message("","I") <<"      EEDB ped="<<ped->comment<<endm;
+  //printf("  ped-comment=%s\n",ped->comment);
 
   eemcDbPMTstat_st *stat=mDbPMTstat[is];
-  if(stat) printf("  stat-comment=%s\n",stat->comment);
+  if(stat) gMessMgr->Message("","I") <<"      EEDB stat="<<stat->comment<<endm;
+  //printf("  stat-comment=%s\n",stat->comment);
   
   int key; 
   for(key=ix1;key<ix2; key++) { // loop  in this sector
@@ -584,7 +599,7 @@ void  StEEmcDbMaker::mOptimizeFibers  (){
 
   static char blobBuffer[KRETmxBlobSlen+1];
   char  *blob = blobBuffer;
-  const char *aaa;
+
 
   int   len = strlen(mDbFiberConfBlob->dataS); 
   assert(len<KRETmxBlobSlen ); // strnlen() is better but aborts under redhat72,JB
@@ -607,13 +622,13 @@ void  StEEmcDbMaker::mOptimizeFibers  (){
     if(nFiber==0) {
       nFiber=atoi(blob);
       mDbFiber=new EEmcDbCrate[ nFiber];
-      printf("%s::mOptimizeFibers() map %d fibers to crates\n",GetName(),nFiber);
+      gMessMgr->Message("","I") <<"\n  EEDB mOptimizeFibers() map , nFiber="<<nFiber<<endm;
       icr=0;
       continue;
     }
     assert(icr<nFiber);
     mDbFiber[icr].setAll(blob);
-    mDbFiber[icr].print();
+    //  mDbFiber[icr].print();
     icr++;
   };
 
@@ -691,7 +706,10 @@ template <class St_T, class T_st> void StEEmcDbMaker
     sprintf(name,"misc/%s",tabName.Data());
 
 
-  printf("request=%s==>", name);
+  // gMessMgr->Info() << "Constructor :::::: " << GetName() << endm;
+  
+  gMessMgr->Message("","D") <<"EEDB request="<< name <<endm;
+
   St_T *ds= (St_T *)eedb->Find(name);
   if(ds==0) {
     printf(" not Found in DB, continue \n");
@@ -711,7 +729,7 @@ template <class St_T, class T_st> void StEEmcDbMaker
   }
 
   *outTab=tab;
-  printf("'%s'\n",(*outTab)->comment);
+  gMessMgr->Message("","D") <<"  EEDB map="<< (*outTab)->comment<<"'"<<endm;
 
   nFound++;
   return ; // copy the whole s-struct to allow flavor change;
@@ -870,9 +888,8 @@ void StEEmcDbMaker::setAsciiDatabase( const Char_t *ascii )
 
 
 // $Log: StEEmcDbMaker.cxx,v $
-// Revision 1.34  2004/05/26 21:30:36  jwebb
-// Fixed typo, added setPreferredFlavor method.  Kept setPreferedFlavor for
-// backwards compatibility.
+// Revision 1.35  2004/06/04 13:30:24  balewski
+// use gMessMgr for most of output
 //
 // Revision 1.33  2004/05/20 16:40:14  balewski
 // fix of strnlen --> strlen
