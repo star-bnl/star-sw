@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.7 2001/04/26 14:23:40 akio Exp $
+ * $Id: StEmcGeom.h,v 1.8 2001/07/13 18:35:20 pavlinov Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.8  2001/07/13 18:35:20  pavlinov
+ * New version of methods getBin and getId for BSMDE and BSMDP
+ *
  * Revision 1.7  2001/04/26 14:23:40  akio
  * Quick and dirty fix for crashing non-bfc chain
  *
@@ -102,8 +105,8 @@ protected:
   Int_t   mDetector; // Detectors number => see emc/inc/emc_def.h
   Int_t   mNModule;  // Number of modeles (120 is default)
   Int_t   mNEta;     // Number of eta bins
-  Int_t   mNSub;     // Subdivision in eta bin
-  Int_t   mNes;      // mNes  = mNEta * mNSubStEmcGeom.d
+  Int_t   mNSub;     // Subdivision in phi bin
+  Int_t   mNes;      // mNes  = mNEta * mNSub
   Int_t   mNRaw;     // mNraw = mNes * mNModule
   Float_t mRadius;   // Distance to beam axis
   Float_t mYWidth;   // Half Width of module for mRadius
@@ -389,23 +392,41 @@ StEmcGeom::getBin(const Int_t rid,Int_t &m,Int_t &e,Int_t &s)
   // usual EMC'c numbering. This is standard now !!!
   // It is work only for BEMC and BPRS (15-mar-2001)
   //
-  if(mDetector<1 || mDetector>3) {cout<<" Wrong number of detector "
-                                      <<mDetector<<endl; return 1;}
-  if(checkId(rid) == 1) return 1;
-
+  //  if(mDetector<1 || mDetector>3) {cout<<" Wrong number of detector "
+  //                                    <<mDetector<<endl; return 1;}
   Int_t idw;
-  m   = (rid - 1) / 40 + 1; // Module number 
-  idw = (rid - 1) % 40;     // change from 0 to 39
-  s   = idw/20 + 1;
-  e   = 20 - idw%20;
-  return 0;                   // zero is good
+  if(mDetector==1 || mDetector==2) { // BEMC and BPRS
+    if(checkId(rid) == 1) return 1;
+    m   = (rid - 1) / 40 + 1; // Module number 
+    idw = (rid - 1) % 40;     // change from 0 to 39
+    s   = idw/20 + 1;
+    e   = 20 - idw%20;
+    return 0;                   // zero is good
+  }
+  else if(mDetector==3 || mDetector==4) { // BSMDE and BSMDP
+    if(checkId(rid) == 1) return 1;
+    m   = (rid - 1) / mNes + 1; // Module number 
+    idw = (rid - 1) % mNes;     // change from 0 to mNes - 1
+    s   = idw/mNEta + 1;
+    e   = mNEta - idw%mNEta;
+    return 0;                   // zero is good
+  }
+  else {
+    cout<<" Wrong number of detector "<<mDetector<<endl; 
+    return 1;
+  }
 }
 
 inline Int_t 
 StEmcGeom::getId(const Int_t m, const Int_t e, const Int_t s,Int_t &rid)
 {
   if(!checkModule(m) && !checkEta(e) && !checkSub(s)){
-    rid = 40*(m-1) + 20*(s-1) + (21-e); // only for bemc and bprs
+    if(mDetector==1 || mDetector==2) { // only for bemc and bprs
+      rid = 40*(m-1) + 20*(s-1) + (21-e);
+    }
+    if(mDetector==3 || mDetector==4) { // for BSMDE and BSDDP
+      rid = mNes*(m-1) + mNEta*(s-1) + (mNEta - e) + 1;
+    }
     return 0;
   }
   else {
