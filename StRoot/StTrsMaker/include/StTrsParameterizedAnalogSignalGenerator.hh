@@ -17,9 +17,12 @@
 #ifndef ST_TRS_PARAMETERIZED_ANALOG_SIGNAL_GENERATOR_HH
 #define ST_TRS_PARAMETERIZED_ANALOG_SIGNAL_GENERATOR_HH
 
+
+
+#include "StTpcDb/StTpcDb.h"
+#include "TRandom.h"
 #include <iostream.h>
 #include "StTrsAnalogSignalGenerator.hh"
-
 class StTrsParameterizedAnalogSignalGenerator : public  StTrsAnalogSignalGenerator {
 public:
 
@@ -38,20 +41,23 @@ public:
     // sampling
     void   sampleAnalogSignal();
     double signalSampler(double, StTrsAnalogSignal&);
+    double addNoise(double );
 
 private:
     // sampling
     double realShaperResponse(double, StTrsAnalogSignal&);
   // error function table initialization
-    void    errorFunctionTableBuilder();
+    void    errorFunctionTableBuilder(); 
+    void    localArrayBuilder();
     double  erf_fast(double) const;
 
 protected:
     StTrsParameterizedAnalogSignalGenerator(StTpcGeometry*, StTpcSlowControl*, StTpcElectronics*, StTrsSector*);
 
 private:
-  static StTrsAnalogSignalGenerator* mInstance;
-
+  static StTrsAnalogSignalGenerator* mInstance; 
+  StTpcDb* gTpcDbPtr;
+  
   double         mDriftVelocity;
   double         mTimeBinWidth;
   double         mTau;
@@ -76,6 +82,7 @@ const double         mPadResponseFunctionSigmaInner;
 #endif
   double         mNumberOfEntriesInTable;
   double         mRangeOfTable ;
+  int            mPadsAtRow[200];
     //To avoid initialization, define the following data members.
     StTpcPadCoordinate    mTpcRaw;
     int            mCentralPad;
@@ -87,11 +94,12 @@ const double         mPadResponseFunctionSigmaInner;
     double rowNormalization;
     double padWidth, padLength;
     double zoffset, wire_to_plane_coupling;
-    double xCentroidOfPad, yCentroidOfPad;
-    double delx, gridMinusZ, sigma_x, localXDirectionCoupling;
+    double xCentroid[100][500], yCentroid[100],SignalInTimeBin[1000],gain[100][500];
+    double delx, gridMinusZ, sigma_x, localXDirectionCoupling[500];
     double dely, constant, localYDirectionCoupling;
     double timeOfSignal, chargeOfSignal;
-    double t, tzero, K, sigmaLoverTau, lambda;
+    double t, tzero, K, sigmaLoverTau, lambda,lambdasqr;
+    double mAdcConversion;
     
 };
 
@@ -109,3 +117,5 @@ inline double StTrsParameterizedAnalogSignalGenerator::signalSampler(double tt, 
 }
 
 #endif
+
+
