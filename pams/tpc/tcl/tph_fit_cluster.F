@@ -1,5 +1,8 @@
-* $Id: tph_fit_cluster.F,v 1.3 1999/07/17 00:32:06 genevb Exp $
+* $Id: tph_fit_cluster.F,v 1.4 1999/08/25 21:27:14 liq Exp $
 * $Log: tph_fit_cluster.F,v $
+* Revision 1.4  1999/08/25 21:27:14  liq
+* add new table tphitclus
+*
 * Revision 1.3  1999/07/17 00:32:06  genevb
 * Use StMessMgr
 *
@@ -14,7 +17,9 @@
      +     white_noise,  filtered_noise, nhits,
      +     max_hits_in_cluster,
      +     qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
-     +     irow, isec, npads, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
+     +     irow, isec, npads, ipad_lo, ipad_hi, itdc_lo, itdc_hi,
+     +     ipad_hit_lo, ipad_hit_hi, itdc_hit_lo, itdc_hit_hi)
+
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -98,6 +103,14 @@ c
         integer npads                 ! Number of pads in cluster's pad row
 	integer npix_seq(*)           ! Number of pixels in sequence on pad
         integer nseq                  ! Number of sequences in cluster
+c+liq
+        integer nmax_max              ! maximum number of hits in one cluster liq
+        parameter (nmax_max=100)      !limit it to 100 liq
+        integer ipad_hit_lo(nmax_max) ! Pad number extent for each hit in this cluster
+        integer ipad_hit_hi(nmax_max) ! Pad number extent for each hit in this cluster
+        integer itdc_hit_lo(nmax_max) ! Time bucket extent for cluster
+        integer itdc_hit_hi(nmax_max) ! Time bucket extent for cluster
+c-liq
 
         real dx(*)                    ! Uncertainty in x
         real dz(*)                    ! Uncertainty in z
@@ -147,7 +160,8 @@ c*** skip the neural net for now..... mal 21jun95
      +           ipad, itdc, iadc, itrk,
      +           white_noise, filtered_noise,nhits, qq, x, dx, prf,
      +           z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5, npads,
-     +           irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
+     +           irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi,
+     +           ipad_hit_lo, ipad_hit_hi, itdc_hit_lo, itdc_hit_hi)
 c ??? Direct write is forbidden
             if (nhits.gt.max_hits_in_cluster) 
      +           call StError('TPHAM - array overrun! - fix this!')
@@ -175,7 +189,7 @@ c  calls to tph_fit_isolated_cluster!! - fixed mal
      +        ipad, itdc, iadc, itrk,
      +        white_noise, filtered_noise,
      +        qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
-     +        npads, irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi, ierr)
+     +      npads, irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi, ierr)
          if (ierr.eq.0) nhits=1
       endif
       

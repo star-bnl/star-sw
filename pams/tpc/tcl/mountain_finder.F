@@ -1,5 +1,8 @@
-* $Id: mountain_finder.F,v 1.6 1999/07/19 16:27:59 genevb Exp $
+* $Id: mountain_finder.F,v 1.7 1999/08/25 21:27:10 liq Exp $
 * $Log: mountain_finder.F,v $
+* Revision 1.7  1999/08/25 21:27:10  liq
+* add new table tphitclus
+*
 * Revision 1.6  1999/07/19 16:27:59  genevb
 * Edited some messages
 *
@@ -23,7 +26,8 @@
      +     white_noise, filtered_noise,
      +     nhits,
      +     qq,x,dx,prf,z,dz,zrf,phi,track,mu1,mu2,mu3,mu4,mu5,
-     +     npads, irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
+     +     npads, irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi,
+     +     ipad_hit_lo, ipad_hit_hi, itdc_hit_lo, itdc_hit_hi)
 C-----------------------------------------------------------------------
 
       IMPLICIT NONE
@@ -129,6 +133,14 @@ c
         integer isec                  ! Sector number for cluster (1-24)
 	integer npix_seq(*)           ! Number of pixels in sequence on pad
         integer nseq                  ! Number of sequences in cluster
+c+liq
+        integer nmax_max              ! maximum number of hits in one cluster liq
+        parameter (nmax_max=100)      !limit it to 100 liq
+        integer ipad_hit_lo(nmax_max) ! Pad number extent for each hit in this cluster
+        integer ipad_hit_hi(nmax_max) ! Pad number extent for each hit in this cluster
+        integer itdc_hit_lo(nmax_max) ! Time bucket extent for cluster
+        integer itdc_hit_hi(nmax_max) ! Time bucket extent for cluster
+c-liq
 
         real dx(*)                    ! Uncertainty in x
         real dz(*)                    ! Uncertainty in z
@@ -153,14 +165,14 @@ c
         integer h_tol                 ! Tolerance on monotonic ADC decrease
         integer nbuck_max             ! Total number of time buckets
         integer nclpix_max            ! Max. pixels in cluster
-        integer nmax_max              ! maximum number of local maxima
+cliq        integer nmax_max              ! maximum number of local maxima
         integer npads_max             ! Largest number of pads in any row
         integer n_allow               ! Most possible pixels in a cluster
 c
         parameter (h_tol=3)
         parameter (nbuck_max=512)
         parameter (nclpix_max=10000)
-        parameter (nmax_max=100)
+cliq        parameter (nmax_max=100)
         parameter (npads_max=182)
         parameter (n_allow=npads_max*nbuck_max)
 c
@@ -702,6 +714,14 @@ c Fit the peak:
      +           npads, irow, isec,
      +           ipad_lo_temp, ipad_hi_temp, itdc_lo_temp, itdc_hi_temp,
      +           ierr)
+c+liq
+c    fill the ipad_hit_lo,ipad_hit_hi,itdc_hit_lo,itdc_hit_hi arrays
+            ipad_hit_lo(i)= ipad_lo_temp
+            ipad_hit_hi(i)= ipad_hi_temp
+            itdc_hit_lo(i)= itdc_lo_temp
+            itdc_hit_hi(i)= itdc_hi_temp
+ 
+c-liq                 
          else
 c
 c Should *not* be possible...

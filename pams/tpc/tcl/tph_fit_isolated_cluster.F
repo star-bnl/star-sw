@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.12 1999/08/07 16:42:08 sakrejda Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.13 1999/08/25 21:27:14 liq Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.13  1999/08/25 21:27:14  liq
+* add new table tphitclus
+*
 * Revision 1.12  1999/08/07 16:42:08  sakrejda
 * commented out a message that could write past an array boundary, cluster finder was crashing there
 *
@@ -240,7 +243,8 @@ c set up the identity vector for x (pad) calculation
            do indx=1,npads_max
               identity_vector(indx) = float(indx)
            enddo
-           lookat_mc = (tclpar(1).mc.eq.1)
+cliq           lookat_mc = (tclpar(1).mc.eq.1)
+           lookat_mc = (tclpar(1).mc.ge.1)
 c get difference in z-positions for two randomly selected pixels:
            iret=tgc_time_to_z(50,50,5,5,zdummy) 
            if(iret.eq.1)bucket_length_in = zdummy
