@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.12 2003/09/02 17:58:43 perev Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.13 2004/01/26 13:59:26 calderon Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -7,6 +7,9 @@
  * \author Bum Choi, Manuel Calderon de la Barca Sanchez
  * \date   March 2001
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.13  2004/01/26 13:59:26  calderon
+ * Added the code to fill the global track matches of StMiniMcEvent.
+ *
  * Revision 1.12  2003/09/02 17:58:43  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -64,6 +67,9 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.13  2004/01/26 13:59:26  calderon
+ * Added the code to fill the global track matches of StMiniMcEvent.
+ *
  * Revision 1.12  2003/09/02 17:58:43  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -117,7 +123,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.12 2003/09/02 17:58:43 perev Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.13 2004/01/26 13:59:26 calderon Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -227,7 +233,8 @@ StMiniMcMaker::Finish()
        << "\tmatched=" << mNMatched << endl
        << "\tsplit=" << mNSplit << endl
        << "\tcontam=" << mNContam << endl
-       << "\tghost=" << mNGhost << endl;
+       << "\tghost=" << mNGhost << endl
+       << "\tmat global=" << mNMatGlob << endl;
 
 
 
@@ -429,7 +436,7 @@ StMiniMcMaker::trackLoop()
   if(mDebug) cout << "##StMiniMcMaker::trackLoop()" << endl;
 
   Int_t nMatched(0), nAcceptedRaw(0),nAccepted(0), 
-      nMerged(0), nSplit(0), nContam(0), nGhost(0), nContamNew(0),
+      nMerged(0), nSplit(0), nContam(0), nGhost(0), nMatGlob(0), nContamNew(0),
       nRcGoodGlobal20(0), nRcGlobal(0), nMcGoodGlobal20(0), 
       nMcNch(0), nMcHminus(0), nMcFtpcWNch(0), nMcFtpcENch(0);
       
@@ -445,6 +452,56 @@ StMiniMcMaker::trackLoop()
   StContamPair* contamPair      = new StContamPair;
   StTinyMcTrack* tinyMcTrack    = new StTinyMcTrack;
 
+
+  //
+  // simple loop to associate global tracks
+  // Since the primary track loop has all the bells and
+  // whistles to do the proper accounting of split, merged, contamination
+  // backgrounds, etc.  We will do a much simplified version of the
+  // matching loop.
+  // Essentially, I will start only from the monte carlo track container as my seeds,
+  // -I'll apply some simple acceptance cut (10 tpc hits)
+  // -then I will query the association maker for the associated tracks
+  // -I will apply a simple 10 fit points cut to the global tracks
+  // -I will select the one track with the most common hits among those
+  // -enter the matched pair for this global track if there is one.
+  // Note that if there is no associated track, there will be no entry.
+  // The above is all that's needed in the absence of track merging.
+  // To deal with that, I will
+  // -Record which global tracks are already entered
+  // -if a track has been entered, skip the match.
+  // I won't do any more merging accounting, as that is already done for primaries.
+  vector<int> enteredGlobalTracks;
+  const StPtrVecMcTrack& allmcTracks = mMcEvent->tracks();
+  cout << "size of Mc tracks : " << allmcTracks.size() << endl;
+  
+  StMcTrackConstIterator allMcTrkIter = allmcTracks.begin();
+  for ( ; allMcTrkIter != allmcTracks.end(); ++allMcTrkIter) {
+      StMcTrack* mcGlobTrack = *allMcTrkIter;
+      if(!acceptRaw(mcGlobTrack)) continue; // loose eta cut (4 units, so should include ftpc).
+      if(accept(mcGlobTrack) || mcGlobTrack->ftpcHits().size()>=5) { // 10 tpc hits or 5 ftpc hits
+	  // Ok, track is accepted, query the map for its reco tracks.
+	  StTrackPairInfo* candTrackPair = findBestMatchedGlobal(mcGlobTrack);
+	  if (candTrackPair) {
+	      // ok, found a match! Enter into the array and store the glob id
+	      // to only enter a glob track once
+	      StGlobalTrack* glTrack = candTrackPair->partnerTrack();
+	      if (find(enteredGlobalTracks.begin(),enteredGlobalTracks.end(),glTrack->key())!=enteredGlobalTracks.end()) continue; //if it's already matched, skip it.
+	      fillTrackPairInfo(miniMcPair, mcGlobTrack,
+				0, glTrack, 
+				candTrackPair->commonTpcHits(), mRcTrackMap->count(glTrack),
+				mMcTrackMap->count(mcGlobTrack), 0,
+				kTRUE);
+	      mMiniMcEvent->addTrackPair(miniMcPair,MATGLOB);
+	      
+	      enteredGlobalTracks.push_back(glTrack->key()); // store the keys of the tracks we've matched.
+	      nMatGlob++;
+	      
+	  }
+      }// mc hits condition
+  }// end of global track match loop
+
+  // primary track begins here
   //
   // loop over mc tracks.
   //
@@ -482,7 +539,7 @@ StMiniMcMaker::trackLoop()
     //
     // minimum requirement to accept the mc track and search a rc match
     //
-    if(accept(mcTrack)){
+    if(accept(mcTrack)){ //10 tpc hits
 
       nAccepted++;
 
@@ -842,7 +899,8 @@ StMiniMcMaker::trackLoop()
   cout << "\tall mc tracks: " << mcTracks.size() << endl;
   cout << "\taccepted raw : " << nAcceptedRaw << endl;
   cout << "\taccepted mc  : " << nAccepted << endl;
-  cout << "\tmatched rc   : " << nMatched << endl;
+  cout << "\tmatched rc gl: " << nMatGlob << endl;
+  cout << "\tmatched rc pr: " << nMatched << endl;
   cout << "\tmerged rc    : " << nMerged << endl;
   cout << "\tsplit rc     : " << nSplit << endl;
   if(mGhost) {
@@ -854,7 +912,7 @@ StMiniMcMaker::trackLoop()
   // counters
   mNSplit += nSplit; mNGhost+= nGhost; mNContam += nContam; 
   mNMatched += nMatched;
-
+  mNMatGlob += nMatGlob;
 }
 
 /*
@@ -1020,7 +1078,7 @@ StMiniMcMaker::fillTrackPairInfo(StMiniMcPair* miniMcPair,
 
   if(mcTrack) fillMcTrackInfo(miniMcPair,mcTrack,nAssocGl,nAssocPr);
 
-  if(prTrack) fillRcTrackInfo(miniMcPair,prTrack,glTrack,nAssocMc);
+  if(prTrack || glTrack) fillRcTrackInfo(miniMcPair,prTrack,glTrack,nAssocMc);
   
   // common association info
   miniMcPair->setNCommonHit(commonHits);
@@ -1087,25 +1145,17 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
 			       Int_t nAssocMc)
 {
 
-  
-  const StThreeVectorF& prMom = prTrack->geometry()->momentum();
+  if (!glTrack) {
+      cout << "Error StMiniMcMaker::fillRcTrackInfo, glTrack pointer is zero " << glTrack << endl;
+      return;
+  }
   const StThreeVectorF& glMom = glTrack->geometry()->momentum();
   
   const StPhysicalHelixD& glHelix = glTrack->geometry()->helix();
-  const StPhysicalHelixD& prHelix = prTrack->geometry()->helix();
 
-  StMatrixF pCM = prTrack->fitTraits().covariantMatrix();
   StMatrixF gCM = glTrack->fitTraits().covariantMatrix();
-  Float_t errorPr[5] = {pCM(1,1),pCM(2,2),pCM(3,3),pCM(4,4),pCM(5,5)};
   Float_t errorGl[5] = {gCM(1,1),gCM(2,2),gCM(3,3),gCM(4,4),gCM(5,5)};
   
-  tinyRcTrack->setPtPr(prMom.perp());
-  tinyRcTrack->setPzPr(prMom.z()); 
-  tinyRcTrack->setEtaPr(prMom.pseudoRapidity());
-  tinyRcTrack->setPhiPr(prMom.phi());
-  tinyRcTrack->setCurvPr(prTrack->geometry()->curvature());
-  tinyRcTrack->setTanLPr(tan(prTrack->geometry()->dipAngle()));
-  tinyRcTrack->setErrPr(errorPr);
   
   tinyRcTrack->setPtGl(glMom.perp());
   tinyRcTrack->setPzGl(glMom.z());
@@ -1115,13 +1165,6 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
   tinyRcTrack->setTanLGl(tan(glTrack->geometry()->dipAngle()));
   tinyRcTrack->setErrGl(errorGl);
 
-  tinyRcTrack->setChi2Pr(prTrack->fitTraits().chi2());
-  tinyRcTrack->setFlag(prTrack->flag());
-
-  StDedxPidTraits* pid = findDedxPidTraits(prTrack);
-  float meanDedx = (pid) ? pid->mean() : -999;
-  tinyRcTrack->setDedx(meanDedx);
-  
   //
   // reality check
   //
@@ -1135,13 +1178,11 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
   //tinyRcTrack->setDcaZGl(computeZDca(mRcVertexPos,glTrack));
   tinyRcTrack->setDcaZGl(dcaz(glHelix,*mRcVertexPos,glTrack));
     
-  tinyRcTrack->setDcaPr(prTrack->impactParameter());
-  tinyRcTrack->setDcaXYPr(computeXY(mRcVertexPos,prTrack));
-  //tinyRcTrack->setDcaZPr(computeZDca(mRcVertexPos,prTrack));
-  tinyRcTrack->setDcaZPr(dcaz(prHelix,*mRcVertexPos));
-
-
-
+  StDedxPidTraits* pid = findDedxPidTraits(glTrack);
+  float meanDedx = (pid) ? pid->mean() : -999;
+  tinyRcTrack->setDedx(meanDedx);
+  short nDedxPts = (pid) ? pid->numberOfPoints() : 0;
+  tinyRcTrack->setDedxPts(nDedxPts);
  
   //
   // common rc info
@@ -1161,7 +1202,7 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
   }
   else{
     cout << "Error: no hits?" << endl;
-    cout << "tpc points : " << prTrack->detectorInfo()->numberOfPoints(kTpcId) << endl;
+    cout << "tpc points : " << glTrack->detectorInfo()->numberOfPoints(kTpcId) << endl;
   }
   if (fitHits.first) {
     tinyRcTrack->setFirstFitPadrow(fitHits.first->padrow());
@@ -1169,25 +1210,54 @@ StMiniMcMaker::fillRcTrackInfo(StTinyRcTrack* tinyRcTrack,
   }
   else {
     cout << "Error: no hit with usedInFit()>0" << endl;
-    cout << "fit pts :" << prTrack->fitTraits().numberOfFitPoints(kTpcId) << endl;
+    cout << "fit pts :" << glTrack->fitTraits().numberOfFitPoints(kTpcId) << endl;
   }
   
-  tinyRcTrack->setFitPts(prTrack->fitTraits().numberOfFitPoints(kTpcId));
-  tinyRcTrack->setFitSvt(prTrack->fitTraits().numberOfFitPoints(kSvtId));
+  tinyRcTrack->setFitPts(glTrack->fitTraits().numberOfFitPoints(kTpcId));
+  tinyRcTrack->setFitSvt(glTrack->fitTraits().numberOfFitPoints(kSvtId));
   size_t ftpcFitPts = 0;
   if (tinyRcTrack->etaGl()>1.8)
-      ftpcFitPts = prTrack->fitTraits().numberOfFitPoints(kFtpcWestId);
+      ftpcFitPts = glTrack->fitTraits().numberOfFitPoints(kFtpcWestId);
   if (tinyRcTrack->etaGl()<-1.8)
-      ftpcFitPts = prTrack->fitTraits().numberOfFitPoints(kFtpcEastId);
+      ftpcFitPts = glTrack->fitTraits().numberOfFitPoints(kFtpcEastId);
   tinyRcTrack->setFitFtpc(ftpcFitPts);
-  short nDedxPts = (pid) ? pid->numberOfPoints() : 0;
-  tinyRcTrack->setDedxPts(nDedxPts);
   tinyRcTrack->setAllPts(glTrack->detectorInfo()->numberOfPoints(kTpcId));
   tinyRcTrack->setCharge(glTrack->geometry()->charge());
 
   tinyRcTrack->setNAssocMc(nAssocMc);
   tinyRcTrack->setNPossible(glTrack->numberOfPossiblePoints(kTpcId));
-
+  
+  if (prTrack) {
+      // with the introduction of the global track branch,
+      // having the primary track pointer here is optional. 
+      const StThreeVectorF& prMom = prTrack->geometry()->momentum();
+      const StPhysicalHelixD& prHelix = prTrack->geometry()->helix();
+      StMatrixF pCM = prTrack->fitTraits().covariantMatrix();
+      Float_t errorPr[5] = {pCM(1,1),pCM(2,2),pCM(3,3),pCM(4,4),pCM(5,5)};
+      
+      tinyRcTrack->setPtPr(prMom.perp());
+      tinyRcTrack->setPzPr(prMom.z()); 
+      tinyRcTrack->setEtaPr(prMom.pseudoRapidity());
+      tinyRcTrack->setPhiPr(prMom.phi());
+      tinyRcTrack->setCurvPr(prTrack->geometry()->curvature());
+      tinyRcTrack->setTanLPr(tan(prTrack->geometry()->dipAngle()));
+      tinyRcTrack->setErrPr(errorPr);
+      tinyRcTrack->setChi2Pr(prTrack->fitTraits().chi2());
+      tinyRcTrack->setFlag(prTrack->flag());
+      tinyRcTrack->setDcaPr(prTrack->impactParameter());
+      tinyRcTrack->setDcaXYPr(computeXY(mRcVertexPos,prTrack));
+      //tinyRcTrack->setDcaZPr(computeZDca(mRcVertexPos,prTrack));
+      tinyRcTrack->setDcaZPr(dcaz(prHelix,*mRcVertexPos));
+      tinyRcTrack->setFitPts(prTrack->fitTraits().numberOfFitPoints(kTpcId));
+      tinyRcTrack->setFitSvt(prTrack->fitTraits().numberOfFitPoints(kSvtId));
+      size_t ftpcFitPts = 0;
+      if (tinyRcTrack->etaGl()>1.8)
+	  ftpcFitPts = prTrack->fitTraits().numberOfFitPoints(kFtpcWestId);
+      if (tinyRcTrack->etaGl()<-1.8)
+	  ftpcFitPts = prTrack->fitTraits().numberOfFitPoints(kFtpcEastId);
+	tinyRcTrack->setFitFtpc(ftpcFitPts);
+	
+  }
   return;
 }
 
@@ -1226,7 +1296,42 @@ StMiniMcMaker::fillMcTrackInfo(StTinyMcTrack* tinyMcTrack,
 /*
   given a mc track, returns a vector of matched associated pairs.
  */
-
+StTrackPairInfo*
+StMiniMcMaker::findBestMatchedGlobal(StMcTrack* mcTrack)
+{
+    pair<mcTrackMapIter,mcTrackMapIter> mcBounds 
+      = mMcTrackMap->equal_range(mcTrack);
+    StTrackPairInfo* candTrackPair = 0;  // used for finding the best matched track
+    StGlobalTrack* candTrack = 0;
+    mcTrackMapIter mcMapIter = mcBounds.first;
+    for ( ; mcMapIter != mcBounds.second; ++mcMapIter){
+	StTrackPairInfo* assocPair = (*mcMapIter).second;
+	StGlobalTrack* globTrack = assocPair->partnerTrack();
+	if (!globTrack || globTrack->flag()<=0) continue;
+	if (globTrack->fitTraits().numberOfFitPoints(kTpcId)>=10 ||
+	    globTrack->fitTraits().numberOfFitPoints(kFtpcEastId)>=5 ||
+	    globTrack->fitTraits().numberOfFitPoints(kFtpcWestId)>=5) {
+	    if (!candTrackPair) {
+		candTrackPair = assocPair;
+		candTrack = globTrack;
+	    }
+	    else if (globTrack->fitTraits().numberOfFitPoints(kTpcId) > candTrack->fitTraits().numberOfFitPoints(kTpcId)) {
+		candTrackPair = assocPair;
+		candTrack = globTrack;
+	    }
+	    else if (globTrack->fitTraits().numberOfFitPoints(kFtpcEastId) > candTrack->fitTraits().numberOfFitPoints(kFtpcEastId)) {
+		candTrackPair = assocPair;
+		candTrack = globTrack;
+	    }
+	    else if (globTrack->fitTraits().numberOfFitPoints(kFtpcWestId) > candTrack->fitTraits().numberOfFitPoints(kFtpcWestId)) {
+		candTrackPair = assocPair;
+		candTrack = globTrack;
+	    }
+	    
+	} // fit points requirement
+    }// bounds loop
+    return candTrackPair; // Note that candTrack might be zero, for example if only one track is matched and has 9 tpc fit pts.
+}
 PAIRVEC
 StMiniMcMaker::findMatchedRc(StMcTrack* mcTrack)
 {
