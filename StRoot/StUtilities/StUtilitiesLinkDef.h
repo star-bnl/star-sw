@@ -10,6 +10,7 @@
 #pragma link C++ global gMessMgr;
 #pragma link C++ global gMessage;
 #pragma link C++ global endm;
+#pragma link C++ function Message_;
 #pragma link C++ function StMessage_;
 #pragma link C++ function StInfo_;
 #pragma link C++ function StWarning_;

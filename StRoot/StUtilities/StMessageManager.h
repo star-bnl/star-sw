@@ -1,5 +1,8 @@
-// $Id: StMessageManager.h,v 1.2 1999/06/24 16:30:43 genevb Exp $
+// $Id: StMessageManager.h,v 1.3 1999/06/24 23:23:59 genevb Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.3  1999/06/24 23:23:59  genevb
+// Added message call for compatibility with old fortran code
+//
 // Revision 1.2  1999/06/24 16:30:43  genevb
 // Fixed some memory leaks
 //
@@ -26,12 +29,14 @@
 
 #ifndef __CINT__
 #include "fortranc.h"
+#define Message_ F77_NAME(message,MESSAGE)
 #define StMessage_ F77_NAME(stmessage,STMESSAGE)
 #define StInfo_ F77_NAME(stinfo,STINFO)
 #define StWarning_ F77_NAME(stwarning,STWARNING)
 #define StError_ F77_NAME(sterror,STERROR)
 #define StMessAddType_ F77_NAME(stmessaddtype,StMESSADDTYPE)
 extern "C" {
+R__EXTERN  void type_of_call Message_(Char_t* mess="", int lines=1, int id=-1);
 R__EXTERN  void type_of_call StMessage_(Char_t* mess="", Char_t* type="I", Char_t* opt="O");
 R__EXTERN  void type_of_call StInfo_(Char_t* mess="", Char_t* opt="O");
 R__EXTERN  void type_of_call StWarning_(Char_t* mess="", Char_t* opt="O");

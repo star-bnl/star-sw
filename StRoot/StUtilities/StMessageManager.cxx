@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.2 1999/06/24 16:30:42 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.3 1999/06/24 23:23:58 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.3  1999/06/24 23:23:58  genevb
+// Added message call for compatibility with old fortran code
+//
 // Revision 1.2  1999/06/24 16:30:42  genevb
 // Fixed some memory leaks
 //
@@ -276,6 +279,7 @@
 #include "TROOT.h"
 #include "StMessageManager.h"
 #include <ctype.h>
+#include <string.h>
 
 StMessageManager* gMessMgr=0;
 
@@ -283,6 +287,13 @@ StMessageManager* StMessageManager::mInstance = 0;
 
 //
 // C and Fortran routines:
+//________________________________________
+void type_of_call Message_(Char_t* mess, int lines, int id) {
+  char* cptr = strchr(mess,'-');
+  char* type = "I";
+  strncpy(type,cptr,1);
+  StMessageManager::Instance()->Message(mess,type);
+}
 //________________________________________
 void type_of_call StMessage_(Char_t* mess, Char_t* type, Char_t* opt) {
   StMessageManager::Instance()->Message(mess,type,opt);
@@ -536,7 +547,7 @@ int StMessageManager::AddType(const Char_t* type, const Char_t* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.2 1999/06/24 16:30:42 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.3 1999/06/24 23:23:58 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
