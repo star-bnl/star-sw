@@ -1,12 +1,12 @@
 #!/usr/local/bin/perl
 # Conscript file for directory
-Import qw ( CONS INCLUDE LIB BIN OBJ);
+Import qw ( env INCLUDE LIB BIN OBJ);
 # Install the products of this directory
-#Install $CONS $LIB, 'libworld.a';
-#Install $CONS $INCLUDE, 'world.h';
+#Install $env $LIB, 'libworld.a';
+#Install $env $INCLUDE, 'world.h';
 # Internal products
-#Library $CONS 'libworld.a', 'world.c';
-#Install $CONS $LIB, 'St_dst_Maker.so';
+#Library $env 'libworld.a', 'world.c';
+#Install $env $LIB, 'St_dst_Maker.so';
 print "OBJ == ",$OBJ,"\n";
 my $PWD = `pwd`;
 print "Build in $PWD\n";
