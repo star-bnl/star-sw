@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbReader.cc,v 1.2 2001/11/07 16:49:48 caines Exp $
+ * $Id: StSvtDbReader.cc,v 1.3 2003/04/25 19:46:19 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StSvtDbReader.cc,v $
+ * Revision 1.3  2003/04/25 19:46:19  caines
+ * Switch argument calls to correct order
+ *
  * Revision 1.2  2001/11/07 16:49:48  caines
- * Add _st s added by stic for our comfort and convenience
+ *  Add _st s added by stic for our comfort and convenience
  *
  * Revision 1.1  2001/10/29 18:53:13  munhoz
  * starting SVT Data base
@@ -214,9 +217,9 @@ StSvtHybridCollection* StSvtDbReader::getDriftVelocity()
 	  
 	  // loop over anodes
 	  for (int anode=1;anode<=mSvtConfig->getNumberOfAnodes();anode++) {
-	    hybridDriftVeloc->setV1(anode,driftVeloc[index].injectionDriftVelocityFocus[anode-1]);
-	    hybridDriftVeloc->setV2(anode,driftVeloc[index].injectionDriftVelocity[anode-1]);
-	    hybridDriftVeloc->setV3(anode,driftVeloc[index].averageDriftVelocity[anode-1]);
+	    hybridDriftVeloc->setV1(driftVeloc[index].injectionDriftVelocityFocus[anode-1],anode);
+	    hybridDriftVeloc->setV2(driftVeloc[index].injectionDriftVelocity[anode-1],anode);
+	    hybridDriftVeloc->setV3(driftVeloc[index].averageDriftVelocity[anode-1],anode);
 	  }
 
 	  svtDriftVeloc->put_at(hybridDriftVeloc,index);
