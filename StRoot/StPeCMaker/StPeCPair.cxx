@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.cxx,v 1.11 2003/03/18 21:20:41 yepes Exp $
+// $Id: StPeCPair.cxx,v 1.12 2003/03/19 15:35:47 yepes Exp $
 // $Log: StPeCPair.cxx,v $
+// Revision 1.12  2003/03/19 15:35:47  yepes
+// *** empty log message ***
+//
 // Revision 1.11  2003/03/18 21:20:41  yepes
 // correcting problem with bField
 //
@@ -143,10 +146,9 @@ Int_t StPeCPair::fill ( Bool_t primaryFlag, StEventSummary* summary,
    zV0   = xMean.z();
    
    StThreeVectorD pSum  = p1+p2 ;
-   StPhysicalHelixD v0Helix ( pSum, xMean, 0.1*bField, 100000./GeV ) ;
+   StPhysicalHelixD v0Helix ( pSum, xMean, 0.1*bField/tesla, 100000./GeV ) ;
    pV0Dca = v0Helix.distance ( primaryVertexPosition ) ;
-   
-
+   //
    StThreeVectorF p = p1 + p2 ;
    pPt              = p.perp() ;
    pPz              = p.z() ;
