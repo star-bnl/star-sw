@@ -475,8 +475,7 @@ bool RPhiLessThan::operator()(const StiDetector* lhs, const StiDetector* rhs)
 
 void StiLocalTrackSeedFinder::print() const
 {
-  cout <<"StiLocalTrackSeedFinder Detectors:\n";
-    
+  cout <<"StiLocalTrackSeedFinder::print() -I-  Detectors";
   for (vector<StiDetector*>::const_iterator it=mDetVec.begin(); it!=mDetVec.end(); ++it) {
     cout << **it <<endl;
   }
@@ -487,4 +486,62 @@ void StiLocalTrackSeedFinder::print() const
 void ScaleHitError::operator()(StiHit* hit) const
 {
   hit->scaleError(scale);
+}
+
+void StiLocalTrackSeedFinder::load(TDataSet*)
+{
+	cout << "StiLocalTrackSeedFinder::load(TDataSet*) -I- Started" << endl;
+	/*
+	if (!ds) throw runtime_error("::load(TDataSet * ds)");
+	St_KalmanTrackFitterParameters * a = dynamic_cast<St_KalmanTrackFitterParameters*>(ds->Find(getName().c_str() ));
+  if (!a) throw runtime_error("StiLocalTrackSeedFinder::load(TDataSet * ds) -E- a==0");
+	KalmanTrackFitterParameters_st * b = a->GetTable();
+	if (!b) throw runtime_error("StiLocalTrackSeedFinder::load(TDataSet * ds) -E- b==0");
+	mDeltaY = b-> deltaY;
+  mDeltaZ = b-> deltaZ;
+  mSeedLength = b->seed;Length;
+  mExtrapDeltaY = b->extraDeltaY; 
+  mExtrapDeltaZ = b->extraDeltaZ;
+  mSkipped      = b->skipped;
+  mMaxSkipped   = b->maxSkipped;
+  mExtrapMinLength = b->extraMinLength;
+  mExtrapMaxLength = b->extraMaxLength;
+  mUseOrigin       = b->useOrigin;
+	cout << *this;
+	*/
+	cout << "StiLocalTrackSeedFinder::load(TDataSet*) -I- Done" << endl;
+}
+
+void StiLocalTrackSeedFinder::load(ifstream& inFile)
+{
+
+	cout << "StiLocalTrackSeedFinder::load(ifstream& inFile) -I- Started" << endl;
+	inFile >> mDeltaY;
+  inFile >> mDeltaZ;
+  inFile >> mSeedLength;
+  inFile >> mExtrapDeltaY;
+  inFile >> mExtrapDeltaZ;
+  inFile >> mSkipped;
+  inFile >> mMaxSkipped;
+  inFile >> mExtrapMinLength;
+  inFile >> mExtrapMaxLength;
+  inFile >> mUseOrigin;
+	cout << *this;
+	cout << "StiLocalTrackSeedFinder::load(ifstream& inFile) -I- Done" << endl;
+}
+
+ostream& operator<<(ostream& os, const StiLocalTrackSeedFinder & f)
+{
+	return os << " StiLocalTrackSeedFinder " << endl
+						<< "          mDeltaY: " << f.mDeltaY
+						<< "          mDeltaZ: " << f.mDeltaZ
+						<< "      mSeedLength: " << f.mSeedLength
+						<< "    mExtrapDeltaY: " << f.mExtrapDeltaY
+						<< "    mExtrapDeltaZ: " << f.mExtrapDeltaZ
+						<< "         mSkipped: " << f.mSkipped
+						<< "      mMaxSkipped: " << f.mMaxSkipped
+						<< "  mExtraMinLength: " << f.mExtrapMinLength
+						<< " mExtrapMaxLength: " << f.mExtrapMaxLength
+						<< "       mUseOrigin: " << f.mUseOrigin
+						<< endl;
 }

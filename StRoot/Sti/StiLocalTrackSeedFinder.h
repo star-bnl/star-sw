@@ -37,6 +37,9 @@ public:
   virtual void initialize();
   virtual void addLayer(StiDetector*);
   virtual void print() const;
+	void load(TDataSet*);
+	void load(ifstream& inFile); 
+	friend ostream& operator<<(ostream& os, const StiLocalTrackSeedFinder &f);
   
 protected:
   StiSortedHitIterator begin();
