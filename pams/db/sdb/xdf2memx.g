@@ -55,26 +55,25 @@ C.....
   created 2.07.98
 
 +cde,gcunit.
-      integer maxlof,maxlff
-*      parameter (maxlof=80)    ! Maximum file name length
-*      parameter (maxlff=256)    ! Maximum full file name length
+      integer   maxlof,maxlff
       parameter (maxlof=40)    ! Maximum file name length
       parameter (maxlff=80)    ! Maximum full file name length
-      character path*(maxlff),dbfile*(maxlof)
-      character fulldir*(maxlff),caldir*(maxlff),vfile*(maxlof) 
+      character path*(maxlff)
+      character fulldir*(maxlff),vfile*(maxlof) 
       character fullname*(maxlff)
       character flist*16
-      integer lun,justnow,iret,lenocc,ncfile,ncpath
-   structure   myco { version, lun, char flist(4), int ncall, int nupdate,
+      integer   lun,justnow,iret,lenocc,ncfile,ncpath
+
+      structure   myco { version, lun, char flist(4), int ncall, int nupdate,
                       int npath, int nfile, char rtime(4), int stime,
                       int tmin, int tmax}
-   character   cfile*(maxlof),cpath*(maxlff),ctime*16,ct1*16,ct2*16
-*   structure   reco { char file(20), char mpath(64), char t1(4), char t2(4),
-*                      int it1, int it2 }
-   structure   reco { char file(10), char mpath(20), char t1(4), char t2(4),
+      structure   reco { char file(10), char mpath(20), char t1(4), char t2(4),
                       int it1, int it2 }
-   equivalence (cfile,reco_file), (cpath,reco_mpath), (ctime,myco_rtime)
-   equivalence (flist,myco_flist), (ct1,reco_t1), (ct2,reco_t2)
+
+      character   cfile*(maxlof),cpath*(maxlff),ctime*16,ct1*16,ct2*16
+      equivalence (cfile,reco_file), (cpath,reco_mpath), (ctime,myco_rtime)
+      equivalence (flist,myco_flist), (ct1,reco_t1), (ct2,reco_t2)
+
       integer ind,ind1,idir,ts0,ts1,i,tcmin,tcmax,update,ltroot,jscan,noerr
       integer iprin/0/,istat/-1/
       character troot*20,calenv*20

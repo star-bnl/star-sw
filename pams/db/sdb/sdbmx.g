@@ -1,3 +1,7 @@
+      subroutine sdb
+      entry sdb_start
+      print *,' V1 calibration and constant data base manager loaded '
+      end
 *-----------------------------------------------------------------------
       SUBROUTINE CAL2MEM(time)
 *
@@ -25,30 +29,29 @@ C: Call main routine of SDBM package
 
       END
 *-----------------------------------------------------------------------
-  module sdbm  Simple Data Base Manager
+  module sdbm is a Simple Data Base Manager
   author V.Tikhomirov
   created 25.06.98
 
 +cde,gcunit.
       integer maxlof,maxlff
-*      parameter (maxlof=80)    ! Maximum file name length
-*      parameter (maxlff=256)    ! Maximum full file name length
       parameter (maxlof=40)    ! Maximum file name length
       parameter (maxlff=80)    ! Maximum full file name length
-      character path*(maxlff),fulldir*(maxlff),caldir*(maxlff),vfile*(maxlof)
+      character path*(maxlff),fulldir*(maxlff),vfile*(maxlof)
       character troot*20,calenv*20,flist*16
       integer lun,iret,lenocc,ncfile,ncpath
-   structure   myco { version, lun, char flist(4), int ncall, int nupdate,
+
+      structure   myco { version, lun, char flist(4), int ncall, int nupdate,
                       int npath, int nfile, char rtime(4), int stime,
                       int tmin, int tmax}
-   character   cfile*(maxlof),cpath*(maxlff),ctime*16,ct1*16,ct2*16
-   structure   reco { char file(10), char mpath(20), char t1(4), char t2(4),
+      structure   reco { char file(10), char mpath(20), char t1(4), char t2(4),
                       int it1, int it2 }
-*   structure   reco { char file(20), char mpath(64), char t1(4), char t2(4),
-*                      int it1, int it2 }
-   equivalence (cfile,reco_file), (cpath,reco_mpath), (ctime,myco_rtime)
-   equivalence (flist,myco_flist), (ct1,reco_t1), (ct2,reco_t2)
-      integer ltroot,ind,ind1,idir,ts0,ts1,i,tcmin,tcmax,update
+
+      character   cfile*(maxlof),cpath*(maxlff),ctime*16,ct1*16,ct2*16
+      equivalence (cfile,reco_file), (cpath,reco_mpath), (ctime,myco_rtime)
+      equivalence (flist,myco_flist), (ct1,reco_t1), (ct2,reco_t2)
+
+      integer ltroot,ind,ind1,ts0,ts1,i,tcmin,tcmax,update
       save calenv,troot,ltroot
       integer iprin/0/,istat/-1/
       integer justnow
@@ -279,10 +282,10 @@ C: Map ZEBRA sructure to STAR table
 *                       calibration file
 *        iret (integer) - return code: =0 - OK; =-1 - cannot open dir
 *
-      implicit none
-      integer justnow,ts0,ts1,iopt,iret
+      implicit  none
+      integer   justnow,ts0,ts1,iopt,iret
       character path*(*),calenv*(*),troot*(*),fulldir*(*),vfile*(*)
-      integer lenocc,idir
+      integer   idir
       character dbfile*80
 C.....
       iret=-1
