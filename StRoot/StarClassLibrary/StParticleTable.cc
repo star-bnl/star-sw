@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StParticleTable.cc,v 1.3 1999/12/21 15:14:23 ullrich Exp $
+ * $Id: StParticleTable.cc,v 1.4 2000/04/06 22:25:38 ullrich Exp $
  *
  * Author: Thomas Ullrich, May 99 (based on Geant4 code, see below) 
  ***************************************************************************
@@ -14,8 +14,8 @@
  ***************************************************************************
  *
  * $Log: StParticleTable.cc,v $
- * Revision 1.3  1999/12/21 15:14:23  ullrich
- * Modified to cope with new compiler version on Sun (CC5.0).
+ * Revision 1.4  2000/04/06 22:25:38  ullrich
+ * Added phi and omega. More STAR specific Geant IDs.
  *
  * Revision 1.3  1999/12/21 15:14:23  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
@@ -90,6 +90,13 @@ StParticleTable::StParticleTable()
     mGeantPdgMap.insert(geantPdgPairType(42, 24));     // W+  (STAR def.)
     mGeantPdgMap.insert(geantPdgPairType(43, -24));    // W-  (STAR def.)
     mGeantPdgMap.insert(geantPdgPairType(44, 23));     // Z0  (STAR def.)
+    mGeantPdgMap.insert(geantPdgPairType(150, 223));   // omega meson (STAR def.)
+    mGeantPdgMap.insert(geantPdgPairType(151, 333));   // phi meson (STAR def.)
+    mGeantPdgMap.insert(geantPdgPairType(152, 113));   // rho meson (STAR def.)
+    mGeantPdgMap.insert(geantPdgPairType(153, 213));   // rho+ meson (STAR def.)
+    mGeantPdgMap.insert(geantPdgPairType(154, -213));  // rho- meson (STAR def.)
+    mGeantPdgMap.insert(geantPdgPairType(155, 311));   // K0 (STAR def.)
+    mGeantPdgMap.insert(geantPdgPairType(156, -311));  // anti_K0 (STAR def.)
 }
 
 StParticleTable::StParticleTable(const StParticleTable &) {/* private */}
