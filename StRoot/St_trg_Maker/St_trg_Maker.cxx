@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.32 2001/09/04 20:06:33 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.33 2001/09/11 21:49:46 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.33  2001/09/11 21:49:46  ward
+// Changes to StDaqLib/TRG for running year 2000 data.
+//
 // Revision 1.32  2001/09/04 20:06:33  ward
 // I had a typo in the previous correction.
 //
@@ -201,7 +204,7 @@ char St_trg_Maker::IsYear2000Data(St_DataSet *herb) {
   StDAQReader *fromVictor = (StDAQReader*) (herb->GetObject()); assert(fromVictor);
   StTRGReader *trgReader = fromVictor->getTRGReader(); assert(trgReader);
   assert(trgReader->thereIsTriggerData());
-  data=(char*)(trgReader->fTRGImpReader->pBankTRGD);
+  data=(unsigned char*)(trgReader->fTRGImpReader->pBankTRGD);
   data+=40; // Skip the 10 word DAQ bank header
   data+=sizeof(unsigned short)+sizeof(char); // Skip the first two data.
   if(*data==0x12) return 7; // TRUE

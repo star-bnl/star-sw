@@ -13,78 +13,46 @@
 */
 
 #include "TRG_Reader.hh"
-#include "trgStructures.h"
 #include <assert.h>
 #define PP printf(
+
+
 ////////////////////////////////////////////////////////////////////////////////
-// The structure MarilynMonroe_t is like the trigger group's TrgDataType, except that
-// it does not include TrgEvtHeader, which they don't pass to DAQ.
-// MarilynMonroe_t and GS are also in St_trg_Maker/St_trg_Maker.cxx.
+#define PREPOST 11
+#include "trgStructures.h"
 typedef struct {
   EvtDescData    EvtDesc;  /* L1 Event Descriptor Data */
   TrgSumData     TrgSum;   /* summary data */
-  RawTrgDet      RAW[1];      /* pre and post history determines actual dimension. */
-} MarilynMonroe_t;
-MarilynMonroe_t *GS;
+  RawTrgDet      RAW[PREPOST];      /* pre and post history determines actual dimension. */
+} MarilynMonroe;
+MarilynMonroe *gs;
+
+#include "trgStructures2000.h"
+typedef struct {
+  EvtDescData2000    EvtDesc;  /* L1 Event Descriptor Data */
+  TrgSumData2000     TrgSum;   /* summary data */
+  RawTrgDet2000      RAW[PREPOST];      /* For simplicity, I assume that you don't want pre and post history. */
+} MarilynMonroe2000;
+MarilynMonroe2000 *gs2000;
+////////////////////////////////////////////////////////////////////////////////
+// This section of code causes the functions in the file duplicated.code to appear twice
+// in this code file.  The second time is for trigger data in the year 2000 format.
+// The first time is for year 2001 format.
+#define SWITCH(x) x
+#include "duplicated.code"
+#undef SWITCH
+#define SWITCH(x) x ## 2000
+#include "duplicated.code"
+////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////  functions  /////////////////////
-int Bank_TRGD::HerbSwap() {
-  int numToSwap,returnValue,i;
 
-
-  assert(header.ByteOrder==0x01020304||header.ByteOrder==0x04030201);
-  if(header.ByteOrder==0x04030201) return 0;
-
-  swapHerb2bytes( &(GS->EvtDesc.TCU3.FIFO3.TriggerWd),   1);
-  swapHerb2bytes( &(GS->EvtDesc.TCU1.FIFO1.TrgActionWd), 1);
-  swapHerb2bytes( &(GS->EvtDesc.TCU1.FIFO1.TrgToken),    1);
-  swapHerb2bytes( &(GS->EvtDesc.TCU2.FIFO2.DSMAddress),  1);
-  swapHerb2bytes( &(GS->EvtDesc.TCU2.FIFO2.DSMInput),    1);
-  swapHerb2bytes( &(GS->EvtDesc.TCUdataBytes),           1);
-  swapHerb2bytes( &(GS->EvtDesc.npost),                  1);
-  swapHerb2bytes( &(GS->EvtDesc.npre),                   1);
-  swapHerb2bytes( &(GS->TrgSum.DSM.BCdata[0]),          16);
-  swapHerb2bytes( &(GS->TrgSum.DSM.CPA[0]),             32);
-  /* This is now one-byte data, so no swapping needed. swapHerb2bytes( &(GS->TrgSum.DSM.ZDCDSM[0]),8); */
-  swapHerb2bytes( &(GS->TrgSum.DSM.lastDSM[0]),          8);
-  swapHerb2bytes( &(GS->TrgSum.DSM.quadDSM[0]),          8);
-  swapHerb2bytes( &(GS->TrgSum.L0SumBytes),              1);
-  swapHerb2bytes( &(GS->TrgSum.L1SumBytes),              1);
-  swapHerb2bytes( &(GS->TrgSum.L2SumBytes),              1);
-  swapHerb2bytes( &(GS->TrgSum.TrgSumBytes),             1);
-  swapHerb4bytes( &(GS->EvtDesc.bunchXing_hi),           1);
-  swapHerb4bytes( &(GS->EvtDesc.bunchXing_lo),           1);
-  swapHerb4bytes( &(GS->TrgSum.L1Result[0]),            32);
-  swapHerb4bytes( &(GS->TrgSum.L1Sum[0]),                2);
-  swapHerb4bytes( &(GS->TrgSum.L2Result[0]),            32);
-  swapHerb4bytes( &(GS->TrgSum.L2Sum[0]),                2);
-  // fifo1 is in a union swapHerb4bytes( &(GS->EvtDesc.TCU1.fifo1),1);
-  // fifo2 is in a union swapHerb4bytes( &(GS->EvtDesc.TCU2.fifo2),1);
-  // fifo3 is in a union swapHerb4bytes( &(GS->EvtDesc.TCU3.fifo3),1);
-  numToSwap=1+GS->EvtDesc.npost+GS->EvtDesc.npre; assert(numToSwap<50&&numToSwap>0);
-  for(i=0;i<numToSwap;i++) { // loop over NPRE, NPOST as well
-    swapHerb2bytes( &(GS->RAW[i].CTBdataBytes),          1);
-    swapHerb2bytes( &(GS->RAW[i].EMCdataBytes),          1);
-    swapHerb2bytes( &(GS->RAW[i].MWCdataBytes),          1);
-    swapHerb2bytes( &(GS->RAW[i].RawDetBytes),           1);
-    swapHerb4bytes( &(GS->RAW[i].EMCfiller),             1);
-    swapHerb4bytes( &(GS->RAW[i].MWCfiller),             1);
-  }
-
-  returnValue=header.swap();
-  assert(header.ByteOrder==0x04030201);
-  return returnValue;
+char TRG_Reader::IsYear2000Data(char *data) {
+  data+=sizeof(unsigned short)+sizeof(char); // Skip the first two data.
+  if(*data==0x12) return 7; // TRUE
+  if(*data==0x13) return 0; // FALSE
+  assert(0);  // Should not be here.  Eto nehoroshoe mesto etogo fajla.
+  return 0;
 }
-void TRG_Reader::SanityCheck() {
-  assert( GS->RAW[0].RawDetHeader[0]=='R');  // If one of these asserts()s
-  assert( GS->RAW[0].RawDetHeader[1]=='D');  // fails, it probably means that the
-  assert(GS->RAW[0].CTBdataHeader[0]=='C');  // trigger group wrote the .daq bank
-  assert(GS->RAW[0].CTBdataHeader[1]=='T');  // with a new version of trgStructures.h.
-  assert(GS->RAW[0].MWCdataHeader[0]=='M');  // If so, then you will have to modify all
-  assert(GS->RAW[0].MWCdataHeader[1]=='W');  // the offline code to 
-  assert(GS->RAW[0].EMCdataHeader[0]=='E');  // switch
-  assert(GS->RAW[0].EMCdataHeader[1]=='M');  // between versions of trgStructures.h.
-}
-
 TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) {
   pBankTRGP=pTRGP; //copy into class data member for use by other methods
   ercpy=er; // squirrel away pointer eventreader for our friends
@@ -94,8 +62,16 @@ TRG_Reader::TRG_Reader(EventReader *er, Bank_TRGP *pTRGP) {
   pBankTRGD=(Bank_TRGD*) ((unsigned int)pBankTRGP + 4*pBankTRGP->theData.offset);
   assert(pBankTRGD);
   if(!pBankTRGD->test_CRC()) printf("CRC error: %s %d\n",__FILE__,__LINE__); 
-  char *ptr=(char*)pBankTRGD; ptr+=40; /* skip header */ GS=(MarilynMonroe_t*)ptr;
-  SanityCheck();
+  char *ptr=(char*)pBankTRGD; ptr+=40; /* skip header */ 
+  if(IsYear2000Data(ptr)) {
+    gs2000=(MarilynMonroe2000*)ptr;
+    SanityCheck2000();
+    if(pBankTRGD->HerbSwap2000()<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
+  } else {
+    gs=(MarilynMonroe*)ptr;
+    SanityCheck();
+    if(pBankTRGD->HerbSwap()<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
+  }
   if(pBankTRGD->HerbSwap()<0) { printf("Swap error %s %d.\n",__FILE__,__LINE__); }
   printf("Trigger reader instantiated, distance to data = %d bytes.\n",pBankTRGP->theData.offset);
 }
@@ -121,7 +97,7 @@ char *Bank_TRGD::PrintHelp(char *msg,int nn) {
 #define Funsigned_char  "%32s       0x%02x %15d\n"
 #define Funsigned_long  Funsigned_int
 #define FF fprintf(ff,
-#define DUMPFILE "TRGD.dump"
+/*--------------------- Commented Sep 7 2001.  St_trg_Maker has functions for printing the data.
 void Bank_TRGD::PrintAllTheData(FILE *ff) {
   int i;
   assert(ff);
@@ -323,7 +299,7 @@ void Bank_TRGD::PrintDataCompact(FILE *ff) {
   FF M1unsigned_long   ,"RAW.EMCfiller",GS->RAW[0].EMCfiller);
   FF "\n\n\n\n");
 }
-
+----------------------------------------------------------------------*/
 
 int Bank_TRGD::swapHerb4bytes(unsigned long *data,int number) {
   return swapHerb4bytes((unsigned int*)data,number);
