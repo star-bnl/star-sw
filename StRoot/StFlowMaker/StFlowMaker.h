@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.37 2003/09/10 19:47:15 perev Exp $
+//  $Id: StFlowMaker.h,v 1.38 2003/12/12 02:33:06 oldi Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -66,7 +66,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.37 2003/09/10 19:47:15 perev Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.38 2003/12/12 02:33:06 oldi Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -107,7 +107,7 @@ private:
 /*   Bool_t           FillFromPicoVersion1DST(StFlowPicoEvent* pPicoEvent); */
 /*   Bool_t           FillFromPicoVersion2DST(StFlowPicoEvent* pPicoEvent); */
 /*   Bool_t           FillFromPicoVersion3DST(StFlowPicoEvent* pPicoEvent); */
-/*   Bool_t           FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent); */
+  Bool_t           FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromPicoVersion5DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromPicoVersion6DST(StFlowPicoEvent* pPicoEvent);
   Bool_t           FillFromMuDST();
@@ -171,6 +171,9 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.38  2003/12/12 02:33:06  oldi
+//  Read from PicoDST version 4 enabled again (some simulations are in this format).
+//
 //  Revision 1.37  2003/09/10 19:47:15  perev
 //  ansi corrs
 //
