@@ -105,7 +105,7 @@ C     =======
 C     EXECUTABLE CODE:
 C     ================
 
-      call StInfo('STK_AM_FILL4: Starting ###########################')
+C      call StInfo('STK_AM_FILL4: Starting ###########################')
 
       stk_am_fill4 = stafcv_ok
 
@@ -1405,7 +1405,7 @@ c     wkw: itrack here is the sum of the previous loop and the old loops
       track_h.nok       = itrack
       groups_h.nok      = n_groups -1
       
-      call StInfo('STK_AM_FILL4: Stopping ############################')
+C      call StInfo('STK_AM_FILL4: Stopping ############################')
       
       RETURN
       END
