@@ -9,9 +9,9 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-extern "C" {
 #define G__ANSIHEADER
 #include "G__ci.h"
+extern "C" {
 extern void G__cpp_setup_tagtableFtfGraphicDict();
 extern void G__cpp_setup_inheritanceFtfGraphicDict();
 extern void G__cpp_setup_typetableFtfGraphicDict();
@@ -31,6 +31,7 @@ extern void G__set_cpp_environmentFtfGraphicDict();
 #endif
 
 extern G__linked_taginfo G__FtfGraphicDictLN_TClass;
+extern G__linked_taginfo G__FtfGraphicDictLN_TList;
 extern G__linked_taginfo G__FtfGraphicDictLN_TObject;
 extern G__linked_taginfo G__FtfGraphicDictLN_TView;
 extern G__linked_taginfo G__FtfGraphicDictLN_TCanvas;
