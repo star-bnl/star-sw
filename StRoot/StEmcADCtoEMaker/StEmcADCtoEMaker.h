@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.23 2003/01/23 03:09:05 jeromel Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.24 2003/01/23 03:24:54 jeromel Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.24  2003/01/23 03:24:54  jeromel
+// GetCVS() added
+//
 // Revision 1.23  2003/01/23 03:09:05  jeromel
 // Include modif
 //
@@ -140,6 +143,11 @@ class StEmcADCtoEMaker : public StMaker
            StBemcData*       getBemcData()      {return mData;} ///< Return BemcData pointer
 					 void              clearStEventStaf() {mEmc = NULL;} ///< Clear emcCollection (does not delete from memory)
            void              setEmbeddingMode(Bool_t a) {mEmbedd = a; } ///< Set embedding mode (default is kFALSE)
+   virtual const char *GetCVS() const {
+     static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.24 2003/01/23 03:24:54 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+     return cvs;
+   }
+
    ClassDef(StEmcADCtoEMaker, 1)  
 };
 
