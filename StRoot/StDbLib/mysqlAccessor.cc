@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.cc,v 1.21 2000/03/06 17:11:49 porter Exp $
+ * $Id: mysqlAccessor.cc,v 1.22 2000/03/09 20:11:30 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.cc,v $
+ * Revision 1.22  2000/03/09 20:11:30  porter
+ * modified datetime string format for endTime in QueryDb(table)
+ *
  * Revision 1.21  2000/03/06 17:11:49  porter
  * - WriteDb(table) returns true if no data is in table
  * - fixed memory leak introduced in 2/18/00 update.
@@ -333,8 +336,10 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
     buff.SetClientMode();
     buff.ReadScalar(eTime,"mendTime");
     Db.Release(); buff.Raz();
-    table->setEndTime(eTime);
+    //    table->setEndTime(eTime);
     table->setEndTime(getUnixTime(eTime));
+    char* tmpEtime=getDateTime(table->getEndTime());
+    table->setEndTime(tmpEtime); delete [] tmpEtime;    
   } else {
     table->setEndTime(getEndTime()); // simply use dec-31st 2037, 11:59:59
     eTime=getEndDateTime();
