@@ -1,5 +1,9 @@
-* $Id: tpt_load_track.F,v 1.8 1999/09/06 02:18:17 sakrejda Exp $
+* $Id: tpt_load_track.F,v 1.9 1999/09/08 19:39:43 sakrejda Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.9  1999/09/08 19:39:43  sakrejda
+* Calculation for possible number of points on track activated again
+* Spiros fixed problems for zero field.
+*
 * Revision 1.8  1999/09/06 02:18:17  sakrejda
 * Calculation of the inverse transverse momentum protected against
 * z component of the field being 0.
@@ -67,7 +71,7 @@ C     REAL     xlocal(3), bfield(3)                  !ALREADY EXISTS
       data nmax /0/
 
       LOGICAL nposOn
-      DATA nposOn /.FALSE./
+      DATA nposOn /.TRUE./
 
 
 C___________________________________________________________________
@@ -158,8 +162,8 @@ C*** Copy parameters to local table
               trakl(3)   = track(ipt).z0
               trakl(4)   = track(ipt).psi*C_RAD_PER_DEG !degrees to radians
               trakl(5)   = track(ipt).tanl
-              trakl(6)   = track(ipt).invp
-              IF(rr.lt.999999) THEN
+              trakl(6)   = track(ipt).q
+              IF((abs(bfield(3)).gt.0.001).AND.((track(ipt).invp).gt.0.001)) THEN
                  rr=1./(C_D_CURVATURE*bfield(3)*10.*track(ipt).invp)
               ELSE
                  rr=9999999.
