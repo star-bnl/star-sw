@@ -1,21 +1,9 @@
-* $Id: tfs_g2t.F,v 1.4 1998/04/07 20:56:30 hardtke Exp $
+* $Id: tfs_g2t.F,v 1.5 1998/04/09 22:59:40 hardtke Exp $
 * $Log: tfs_g2t.F,v $
+* Revision 1.5  1998/04/09 22:59:40  hardtke
+* change write statement to message call
+*
 * Revision 1.4  1998/04/07 20:56:30  hardtke
-* AZZZZ
-* A
-* B
-* C
-* B
-* B
-* B
-*
-* A
-* A
-* B
-* B
-*
-*
-* C
 * add error message if tphit table too small
 *
 * Revision 1.3  1998/04/02 20:53:39  sakrejda
@@ -250,9 +238,9 @@ C     read-in the Monte-Carlo hit data
      >        tpc_index_h, tpc_index, tpc_index_type_h,
      >        tpc_index_type,ierr)
          If (ierr.eq.1) then
-*          write(m132,*) 'TFS-G2T-I1: tphit table too small'
-*          call Message (m132, 1, idI1 )
-          write(6,*) 'TFS-G2T-I1 tphit table too small'
+          write(m132,*) 'TFS-G2T-I1 tphit table too small'
+          call Message (m132, 1, idI1 )
+C          write(6,*) 'TFS-G2T-I1 tphit table too small'
 *          tfs_g2t = STAFCV_BAD
          endif
          CALL TIMED(TIME_NOW)
