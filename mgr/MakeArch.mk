@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.25  1998/09/09 07:42:47  fisyak
+#  For HP optimization is -O
+#
 #  Revision 1.24  1998/09/08 06:46:07  fisyak
 #  Standard extension for HP StAF libraries
 #
@@ -53,7 +56,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/09/08 06:46:07 $ 
+#             Last modification $Date: 1998/09/09 07:42:47 $ 
 #. default setings
 
 RM := rm -f
@@ -258,6 +261,13 @@ ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
   endif
 
   ifndef noACC.
+ifdef NODEBUG
+  DEBUG := -O
+endif
+ifdef nodebug
+  DEBUG := -O
+endif
+
   OSFID += NEW_ARRAY_ON
     CXX     := aCC
     CC      := cc
