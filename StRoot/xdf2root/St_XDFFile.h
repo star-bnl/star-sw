@@ -1,8 +1,8 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.h,v 1.16 1998/12/12 02:40:24 fisyak Exp $
+// $Id: St_XDFFile.h,v 1.17 1998/12/19 02:54:05 fine Exp $
 // $Log: St_XDFFile.h,v $
-// Revision 1.16  1998/12/12 02:40:24  fisyak
-// New dsl
+// Revision 1.17  1998/12/19 02:54:05  fine
+// ST_XDFFile::NextEventList() - fast scan of the XDF files method has been introduced
 //
 // Revision 1.15  1998/10/31 00:21:57  fisyak
 // Add record counter
@@ -80,6 +80,7 @@ class St_XDFFile
     virtual Int_t       OpenXDF(const char *host, Int_t port,const Char_t *mode="r");      // Create object and open file
     virtual Int_t       OpenXDF(Int_t descriptor,const Char_t *mode="r");       // Create object and open file
     virtual St_DataSet *NextEventGet();                                         // create St_DataSet and read the next event in it.
+    virtual St_DataSet *NextEventList();
     virtual Int_t       NextEventPut(St_DataSet *dataset);                      // create DS_DATASET_T from St_DataSet and write it out in XDR format
     virtual Int_t       GetCount(){return fRecordCount;}
     static  void        GetXdFile(const Char_t *filename, St_DataSet *dataset); // open, read and close file file
