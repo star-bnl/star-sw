@@ -95,7 +95,7 @@ ClassDef(StEvtHddr,2)
 struct EvtHddr_st 
 {
     Int_t	mRunNumber;
-    Int_t	mOldRunNumber;
+    Int_t	mOldRunNumber;		//!
     Int_t       mId;
     UInt_t 	mInputTriggerMask;
     UInt_t 	mTriggerMask;
@@ -112,15 +112,15 @@ struct EvtHddr_st
     Int_t       mGenerType;		//Gener type see below
     UInt_t	mBunchCrossingNumber;
     Int_t       mIventNumber;    	//sequential number in DAQ/Geant file
+    Int_t       mEventSize;    		//size of event
     Int_t       mEventNumber;    
 //
 //    TDatime     mEventTime;		//DAQ Time
-    Int_t       mEventTime;
-    Int_t       mEventDate;
+    Double_t    mEventTime;
 //    TDatime     mProdTime;		//Production time
-    Int_t       mProdTime;
-    Int_t       mProdDate;
+    Double_t    mProdTime;
   //    TString     mEventType;
+    char        mEventType[16];
 };
 #endif
 
