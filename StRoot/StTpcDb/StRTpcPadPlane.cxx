@@ -7,101 +7,101 @@ ClassImp(StRTpcPadPlane)
   // mPadPlane = PadIn;
   // }
 
-int   StRTpcPadPlane::numberOfRows() const { return mPadPlane.padRows;}
+int   StRTpcPadPlane::numberOfRows() const { return mPadPlane->padRows;}
 
 int   StRTpcPadPlane::numberOfInnerRows() const {
-return mPadPlane.innerPadRows;
+return mPadPlane->innerPadRows;
 }
 
 int   StRTpcPadPlane::numberOfInnerRows48() const {
-return mPadPlane.innerPadRows48;
+return mPadPlane->innerPadRows48;
 }
 
 int   StRTpcPadPlane::numberOfInnerRows52() const {
-return mPadPlane.innerPadRows52;
+return mPadPlane->innerPadRows52;
 }
  
 int   StRTpcPadPlane::numberOfOuterRows() const {
-return mPadPlane.outerPadRows;
+return mPadPlane->outerPadRows;
 }
 
 float StRTpcPadPlane::innerSectorPadWidth() const {
-return mPadPlane.innerSectorPadWidth;
+return mPadPlane->innerSectorPadWidth;
 }
 
 float StRTpcPadPlane::innerSectorPadLength() const {
-return mPadPlane.innerSectorPadLength;
+return mPadPlane->innerSectorPadLength;
 }
 
 float StRTpcPadPlane::innerSectorPadPitch() const {
-return mPadPlane.innerSectorPadPitch;
+return mPadPlane->innerSectorPadPitch;
 }
 
 float StRTpcPadPlane::innerSectorRowPitch1() const {
-return mPadPlane.innerSectorRowPitch1;
+return mPadPlane->innerSectorRowPitch1;
 }
 float StRTpcPadPlane::innerSectorRowPitch2() const {
-return mPadPlane.innerSectorRowPitch2;
+return mPadPlane->innerSectorRowPitch2;
 }
 
 float StRTpcPadPlane::firstPadRow() const {
-return mPadPlane.firstPadRow;
+return mPadPlane->firstPadRow;
 }
 
 float StRTpcPadPlane::firstOuterSectorPadRow() const {
-return mPadPlane.firstOuterSectorPadRow;
+return mPadPlane->firstOuterSectorPadRow;
 }
 
 float StRTpcPadPlane::lastOuterSectorPadRow() const {
-return mPadPlane.lastOuterSectorPadRow;
+return mPadPlane->lastOuterSectorPadRow;
 }
 
 float StRTpcPadPlane::firstRowWidth() const {
-return mPadPlane.firstRowWidth;
+return mPadPlane->firstRowWidth;
 }
  
 float StRTpcPadPlane::lastRowWidth() const {
-return mPadPlane.lastRowWidth;
+return mPadPlane->lastRowWidth;
 }
 
 float StRTpcPadPlane::outerSectorPadWidth() const {
-return mPadPlane.outerSectorPadWidth;
+return mPadPlane->outerSectorPadWidth;
 }
 
 float StRTpcPadPlane::outerSectorPadLength() const {
-return mPadPlane.outerSectorPadLength;
+return mPadPlane->outerSectorPadLength;
 }
 
 float StRTpcPadPlane::outerSectorPadPitch() const {
-return mPadPlane.outerSectorPadPitch;
+return mPadPlane->outerSectorPadPitch;
 }
 
 float StRTpcPadPlane::outerSectorRowPitch() const {
-return mPadPlane.outerSectorRowPitch;
+return mPadPlane->outerSectorRowPitch;
 }
 
 float StRTpcPadPlane::outerSectorLength() const {
-return mPadPlane.outerSectorLength;
+return mPadPlane->outerSectorLength;
 }
 
 float StRTpcPadPlane::ioSectorSeparation() const {
-return mPadPlane.ioSectorSeparation;
+return mPadPlane->ioSectorSeparation;
 }
 
 float StRTpcPadPlane::innerSectorEdge() const {
-return mPadPlane.innerSectorEdge;
+return mPadPlane->innerSectorEdge;
 }
 
 float StRTpcPadPlane::outerSectorEdge() const {
-return mPadPlane.outerSectorEdge;
+return mPadPlane->outerSectorEdge;
 }
  
 int   StRTpcPadPlane::numberOfPadsAtRow(int row) const {
  int npad;
  if (row<1||row>numberOfRows()) {npad = 0;}
   else if (row>0&&row<=numberOfInnerRows()) 
-    {npad = mPadPlane.innerPadsPerRow[row-1];}
-  else {npad = mPadPlane.outerPadsPerRow[row-1-numberOfInnerRows()];}
+    {npad = mPadPlane->innerPadsPerRow[row-1];}
+  else {npad = mPadPlane->outerPadsPerRow[row-1-numberOfInnerRows()];}
  return npad;
 }
 
@@ -109,8 +109,8 @@ float   StRTpcPadPlane::radialDistanceAtRow(int row) const {
  int radius;
  if (row<1||row>numberOfRows()) {radius = 0;}
   else if (row>0&&row<=numberOfInnerRows()) {
-        radius = mPadPlane.innerRowRadii[row-1];}
-  else {radius = mPadPlane.outerRowRadii[row-1-numberOfInnerRows()];}
+        radius = mPadPlane->innerRowRadii[row-1];}
+  else {radius = mPadPlane->outerRowRadii[row-1-numberOfInnerRows()];}
  return radius;
 }
 

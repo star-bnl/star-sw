@@ -2,19 +2,19 @@
 #define __STRTPCPADPLANE__
 //#include <TObject.h>
 #include <StTpcPadPlaneI.h>
-#include <TPCPadPlanes.time.h>
+#include "StDbLib/Geometry/tpcPadPlanes.h"
 
 class StRTpcPadPlane : public StTpcPadPlaneI {
 
 private:
 
-  tpc_padplanes mPadPlane;
+  tpcPadPlanes* mPadPlane;
 
 public:
 
   StRTpcPadPlane(){}
   ~StRTpcPadPlane(){}
-  void AddData(tpc_padplanes PadIn) {
+  void AddData(tpcPadPlanes* PadIn) {
   mPadPlane = PadIn;
  }
 // void AddData(tpc_padplanes PadIn);

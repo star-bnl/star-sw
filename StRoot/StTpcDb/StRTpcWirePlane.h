@@ -1,18 +1,18 @@
 #ifndef __STRTPCWIREPLANE__
 #define __STRPCWIREPLANE__
 #include <StTpcWirePlaneI.h>
-#include <TPCWirePlanes.time.h>
+#include "StDbLib/Geometry/tpcWirePlanes.h"
 
 class StRTpcWirePlane : public StTpcWirePlaneI {
 
  private:
 
-   tpc_wireplanes mWirePlane;
+   tpcWirePlanes* mWirePlane;
 
 public:
   StRTpcWirePlane(){}
   ~StRTpcWirePlane(){}
-  void AddData(tpc_wireplanes WireIn){
+  void AddData(tpcWirePlanes* WireIn){
     mWirePlane = WireIn;
   }
 

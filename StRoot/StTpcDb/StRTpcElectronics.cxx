@@ -3,38 +3,38 @@
 ClassImp(StRTpcElectronics)
 
 int StRTpcElectronics::numberOfTimeBins() const {
-   return mElec.numberOfTimeBins;
+   return mElec->numberOfTimeBins;
 }
 
 double StRTpcElectronics::nominalGain() const {
-   return mElec.nominalGain;
+   return mElec->nominalGain;
 }
 
 double StRTpcElectronics::samplingFrequency() const {
-   return mElec.samplingFrequency;
+   return mElec->samplingFrequency;
 }
 
 double StRTpcElectronics::tZero() const {
-   return mElec.tZero;
+   return mElec->tZero;
 }
 
 double StRTpcElectronics::adcCharge() const {
-   return mElec.adcCharge;
+   return mElec->adcCharge;
 }
 
 double StRTpcElectronics::adcConversion() const {
-   return mElec.adcConversion;
+   return mElec->adcConversion;
 }
 
 double StRTpcElectronics::averagePedestal() const {
-   return mElec.averagePedestal;
+   return mElec->averagePedestal;
 }
 
 double StRTpcElectronics::shapingTime() const {
-   return mElec.shapingTime;
+   return mElec->shapingTime;
 }
 
 double StRTpcElectronics::tau() const {
-   return mElec.tau;
+   return mElec->tau;
 }
 

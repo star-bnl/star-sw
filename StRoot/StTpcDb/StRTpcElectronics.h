@@ -1,17 +1,17 @@
 #ifndef __STRTPCELECTRONICS__
 #define __STRTPCELECTRONICS__
 #include <StTpcElectronicsI.h>
-#include <TPCElectronics.time.h>
+#include "StDbLib/Geometry/tpcElectronics.h"
 
 class StRTpcElectronics : public StTpcElectronicsI {
 
 private:
-    tpcelectronics mElec;
+    tpcElectronics* mElec;
 
 public:
     StRTpcElectronics(){}
     ~StRTpcElectronics(){}
-    void AddData(tpcelectronics In){
+    void AddData(tpcElectronics* In){
      mElec = In;
     }
  

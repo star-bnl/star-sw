@@ -2,7 +2,7 @@
 #define __STRTPCGAIN__
 //#include <TObject.h>
 #include <StTpcGainI.h>
-#include <gainFactors.time.h>
+#include "StDbLib/Calibrations/tpcGainFactors.h"
 //#include <StTpcPadPlaneI.h>
 //#include <iostream.h>
 
@@ -10,7 +10,7 @@ class StRTpcGain : public StTpcGainI {
 
 private:
 
-  gain_factors mGain;
+  tpcGainFactors* mGain;
   int mSector;
   StTpcPadPlaneI* padplane;
 
@@ -18,7 +18,7 @@ public:
 
   StRTpcGain(){}
   ~StRTpcGain(){}
-  void AddData(gain_factors GainIn) {
+  void AddData(tpcGainFactors* GainIn) {
       mGain = GainIn;
    }
 

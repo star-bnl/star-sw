@@ -1,20 +1,20 @@
 #ifndef __STRTPCDIMENSIONS__
 #define __STRTPCDIMENTIONS__
 #include <StTpcDimensionsI.h>
-#include <TPCDimensions.time.h>
+#include "StDbLib/Geometry/tpcDimensions.h"
 
 class StRTpcDimensions : public StTpcDimensionsI {
 
  private:
 
-  tpc_dimensions mTpc;
+  tpcDimensions* mTpc;
 
 
 public:
 
   StRTpcDimensions(){}
  ~StRTpcDimensions(){}
-  void AddData(tpc_dimensions TpcIn){
+  void AddData(tpcDimensions* TpcIn){
   mTpc = TpcIn;
   }
 
