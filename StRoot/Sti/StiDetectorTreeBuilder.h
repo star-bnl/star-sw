@@ -108,7 +108,6 @@ protected:
     ///Convenience pointer to a detector finder
     StiDetectorFinder *_detectorFinder;
     
-    Messenger&  _messenger;
 };
 
 #endif

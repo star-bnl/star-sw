@@ -23,10 +23,9 @@ StiDetectorTreeBuilder::StiDetectorTreeBuilder()
     : mroot(0), 
       mnodefactory(StiToolkit::instance()->getDetectorNodeFactory()), 
     mregion(0),
-    _detectorFinder(StiDetectorFinder::instance() ),
-    _messenger( *Messenger::instance(MessageType::kDetectorMessage) )
+    _detectorFinder(StiDetectorFinder::instance() )
 {
-    _messenger <<"StiDetectorTreeBuilder::StiDetectorTreeBuilder() - INFO - Started/Done"<<endl;
+    cout <<"StiDetectorTreeBuilder::StiDetectorTreeBuilder() - INFO - Started/Done"<<endl;
 }
 
 StiDetectorTreeBuilder::~StiDetectorTreeBuilder()
@@ -34,36 +33,32 @@ StiDetectorTreeBuilder::~StiDetectorTreeBuilder()
 
 StiDetectorNode* StiDetectorTreeBuilder::build(StiDetectorBuilder * builder)
 {
-    _messenger <<"StiDetectorTreeBuilder::build() - Started"<<endl;
-    if (mroot) 	{
-	_messenger << "StiDetectorTreeBuilder::build()\tError!\troot tree already built"<<endl;
-	throw logic_error("StiDetectorTreeBuilder::build() - ERROR - Attempting to build on top of an existing detector");
-    }
+    cout <<"StiDetectorTreeBuilder::build() - Started"<<endl;
+    if (mroot) 	
+			{
+				cout << "StiDetectorTreeBuilder::build()\tError!\troot tree already built"<<endl;
+				throw logic_error("StiDetectorTreeBuilder::build() - ERROR - Attempting to build on top of an existing detector");
+			}
     if (!builder)
-	throw logic_error("StiDetectorTreeBuilder::build() - ERROR - no builder provided");
+			throw logic_error("StiDetectorTreeBuilder::build() - ERROR - no builder provided");
     if (!mnodefactory)
-	throw logic_error("StiDetectorTreeBuilder::build() - ERROR - no Factory<StiDetectorNode> provided");
+			throw logic_error("StiDetectorTreeBuilder::build() - ERROR - no Factory<StiDetectorNode> provided");
     mDetectorBuilder = builder;
-    _messenger <<"StiDetectorTreeBuilder::build() - INFO - Build root"<<endl;
-
+    cout <<"StiDetectorTreeBuilder::build() - INFO - Build root"<<endl;
+		
     buildRoot();
-
     loopOnDetectors();
-
-    _messenger <<"StiDetectorTreeBuilder::build() - INFO - Sort Tree"<<endl;
-
+    cout <<"StiDetectorTreeBuilder::build() - INFO - Sort Tree"<<endl;
     //Now sort the tree:
     SortDaughters<StiDetector> mysorter;
     //mysorter(mregion); (old)
     mysorter(mroot); //new (MLM)
-    
     //Now index the tree to give efficient sibling traversal
-    _messenger <<"StiDetectorTreeBuilder::build() - INFO - Index Tree"<<endl;
+    cout <<"StiDetectorTreeBuilder::build() - INFO - Index Tree"<<endl;
     IndexDaughters<StiDetector> myindexer;
-    
     myindexer(mroot);
     //myindexer(mregion);
-    _messenger <<"StiDetectorTreeBuilder::build() - INFO - Done"<<endl;
+    cout <<"StiDetectorTreeBuilder::build() - INFO - Done"<<endl;
     return mroot;
 }
 
@@ -174,7 +169,7 @@ StiDetectorNode* StiDetectorTreeBuilder::hangWhere(StiDetectorNode* parent, cons
     StiDetectorNodeVector::iterator where = find_if(parent->begin(), parent->end(), mySameOrderKey);
 
     if (where == parent->end()) {
-	//_messenger <<"hangWhere().  Start new node"<<endl;
+	//cout <<"hangWhere().  Start new node"<<endl;
 	StiDetectorNode* temp = mnodefactory->getInstance();
 	char* tempname = new char[100];
 	sprintf(tempname,"_%f", order.key);
@@ -195,19 +190,19 @@ StiDetectorNode* StiDetectorTreeBuilder::hangWhere(StiDetectorNode* parent, cons
 
 void StiDetectorTreeBuilder::loopOnDetectors()
 {
-  _messenger << "StiDetectorTreeBuilder::loopOnDetectors() - INFO - Started"<<endl;
+  cout << "StiDetectorTreeBuilder::loopOnDetectors() - INFO - Started"<<endl;
   while(mDetectorBuilder->hasMore())
     {
       //StiDetector* layer = mdetfactory->getInstance();
       //mDetectorBuilder->fillNext(layer);
       StiDetector* detector = mDetectorBuilder->next();
       if (!detector)
-	throw runtime_error("StiDetectorTreeBuilder::loopOnDetectors() - ERROR - detector==0");
+				throw runtime_error("StiDetectorTreeBuilder::loopOnDetectors() - ERROR - detector==0");
       detector->build();
       addToTree(detector);
       // add to by-name map
       _detectorFinder->addDetector(detector);
     }
-  _messenger << "StiDetectorTreeBuilder::loopOnDetectors() - INFO - Done"<<endl;
+  cout << "StiDetectorTreeBuilder::loopOnDetectors() - INFO - Done"<<endl;
   return;
 }
