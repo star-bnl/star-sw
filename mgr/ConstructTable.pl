@@ -119,8 +119,8 @@ my $c = '
 #include "Stypes.h"
 TableImpl(' . $stem . ')
 ';
-}
   print OUT $c;
+}
   close (OUT);
 }
 #________________________________________
