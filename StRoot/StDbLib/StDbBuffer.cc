@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.9 2000/06/02 13:37:36 porter Exp $
+ * $Id: StDbBuffer.cc,v 1.10 2000/06/02 15:58:26 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.10  2000/06/02 15:58:26  porter
+ * removed "\" character in a "//" comment - it gives a warning on linux
+ *
  * Revision 1.9  2000/06/02 13:37:36  porter
  * built up list of minor changes:
  *  - made buffer more robust for certain null inputs
@@ -378,7 +381,8 @@ bool  StDbBuffer::ReadArray(tpe* &s, int &len,const char *aName)\
       if (i==(int)mCol[mCur].length) tRetVal=true;};}\
  return tRetVal;\
 }
-// else { cerr << "WARNING:: field " << aName << " does not exist in this Buffer" << endl; }\
+
+//else {cerr<<"WARNING::field "<<aName<<" is not in this Buffer"<<endl;}
 
 //Rarray(char,_char);
 Rarray(unsigned char,_uchar);
