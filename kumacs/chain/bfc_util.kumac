@@ -442,7 +442,9 @@ ABEND:
               if (staf_status(1).ne.STAFCV_OK) goto EOF
             endfor
      (fzin) trig 1; if ($iquest(1) <>0) goto EOF	     
+            vec/input staf_status(1) STAFCV_OK
      (rgst) trig 1; if ($iquest(1) <>0) goto EOF	     
+            vec/input staf_status(1) STAFCV_OK
      (rg2t) cd [geantE]
           for/call g2t
 * try this
