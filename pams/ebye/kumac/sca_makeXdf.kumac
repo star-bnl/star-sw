@@ -1,0 +1,53 @@
+* sca_makeXdf.kumac
+* written by L.D. Carr -- lcarr@u.washington.edu
+* and D. Weerasundara -- dhammika@gibbs.npl.washington.edu
+* ----------------------------------------------------------------
+* This kumac makes .xdf files for the constant tables used in the
+* sca package: sca_const.idl, sca_filter_const.idl, sca_switch.idl
+* ----------------------------------------------------------------
+* 8/7/98 LDC -- modified to accomodate new switches
+
+
+ DEFAULT = _
+./pams/ebye/kumac,_
+$STAR/kumacs/util,_
+$STAR/kumacs/tpc,_
+$STAR/pams/global/kumac,_
+$STAR/pams/tpc/kumac,_
+
+def [DEFAULT] C
+message 'Define default kumac search path as' def
+
+* load idl tables
+  tdm/types/load ./pams/ebye/idl/sca_const.idl
+  tdm/types/load ./pams/ebye/idl/sca_filter_const.idl
+  tdm/types/load ./pams/ebye/idl/sca_switch.idl
+
+* make directory structure
+  cd /dui
+  exec $STAR/kumacs/util/setup_dir
+  mkdir /dui/run/params/ebye
+  mkdir /dui/run/params/ebye/sca
+
+* make tables
+  cd /dui/run/params/ebye/sca
+  tdm/newtable	sca_const		sca_const		1
+  tdm/newtable	sca_switch		sca_switch		1
+  tdm/newtable	sca_filter_const	sca_filter_const	1
+
+* set nok = 1 for the SCA pamameter tables.
+  tdm/table/rowcount	sca_const           1
+  tdm/table/rowcount	sca_filter_const    1
+  tdm/table/rowcount	sca_switch          1
+
+* load sca_filter_const & sca_const
+  exec sca_filter_const
+  exec sca_const
+  exec sca_switch
+
+* write from staf tables to xdf
+  cd /dui
+  dio/newfilestream SCACONST ./pams/ebye/params/ebye/sca/scaconst.xdf w
+  dio/stream/putevent    SCACONST   run/params/ebye/sca
+  dio/stream/close       SCACONST
+
