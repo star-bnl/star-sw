@@ -84,6 +84,11 @@ c	integer j,k,ii,jj,kk
         integer filtered
         integer id_shape,get_geom_row,dead
         real gcoord(3),lcoord(3),drift_length,trans_length
+        character*132 m132(5)  ! And some message-generating space.
+        integer idI1
+        data    idI1 /0/
+        save    idI1
+
 c------------------------------------------------------------------------------c
 c------------------------------------------------------------------------------c
 
@@ -150,9 +155,11 @@ c------------------------------------------------------------------------------c
                                 enddo
                         endif
                 else
-                        print*,'SVT Wafer Shape ID is not set!'
-	                srs_am=STAFCV_BAD
-                        return
+                        write(m132,*) 'SVT Wafer Shape ID is not set!'
+                        call Message( m132, 1, idI1)
+*yf                     print*,'SVT Wafer Shape ID is not set!'
+*yf	                srs_am=STAFCV_BAD
+*yf                     return
                 endif
         enddo
         dead=svt_hit_h.nok-filtered
