@@ -143,7 +143,7 @@ void StEmcEnergy::chHadEnergyInBtow()
     Float_t pm = p.mag();
     if((pm>0.1 && pm<0.23) || (pm>0.42 && pm<0.67) || (pm>0.9 && pm<1.2)) // mixed windows
     {
-      if(np>15 && fabs(dca)<3 && trId!=2 && trId!=3)
+      if(np>10 && fabs(dca)<3 && trId!=2 && trId!=3)
       {
 	      Float_t electron = 1;
 	      Float_t EDATA[]={1.55,1.30,1.13,1.08,1.05,1.02,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
@@ -156,7 +156,7 @@ void StEmcEnergy::chHadEnergyInBtow()
         correction = 1.0/electron;
       }
     }
-    else if(np>15 && fabs(dca)<3 && (trId==2 || trId==3)) correction = 0;
+    else if(np>10 && fabs(dca)<3 && (trId==2 || trId==3)) correction = 0;
     //////////////////////////////////////////////////////////////////////////
     
     if (mEmcFilter->accept(track))
