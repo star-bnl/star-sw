@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.24 1999/02/23 18:59:50 nevski Exp $
+// $Id: St_geant_Maker.cxx,v 1.25 1999/02/24 17:12:27 fine Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.25  1999/02/24 17:12:27  fine
+// St_Table::New has been activated
+//
 // Revision 1.24  1999/02/23 18:59:50  nevski
 // SVT 4th layer added to svt hit table
 //
@@ -380,7 +383,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.24 1999/02/23 18:59:50 nevski Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.25 1999/02/24 17:12:27 fine Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
@@ -793,7 +796,7 @@ void type_of_call rootmaptable_(Char_t *,Char_t *Table, Char_t*, Int_t *k, Char_
   TString t = TableName.Strip();
   t.ToLower();
   St_DataSet *geom = gStChain->DataSet("geom");
-#ifndef StTableNewMethod
+#if 0
   Char_t cmd[80];
   Int_t Nchar = sprintf(cmd,"St_%s",t.Data());
   if (gClassTable->GetID(cmd) < 0){
