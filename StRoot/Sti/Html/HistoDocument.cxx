@@ -262,7 +262,7 @@ const string HistoDocument::saveHistoAsTableFile(const string & dir, TH1*histo)
   doc->addTable();
   char indexS[20];
   char valueS[128];
-  char errorS[128];
+  char errorS[128];if(errorS[0]){/*nothing*/}
   for (int i=0;i<histo->GetNbinsX();++i)
     {
       doc->addTableRow();

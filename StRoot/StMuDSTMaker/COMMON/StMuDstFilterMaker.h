@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.h,v 1.2 2003/08/04 14:38:10 laue Exp $
+ * $Id: StMuDstFilterMaker.h,v 1.3 2003/09/07 03:49:03 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstFilterMaker_hh
@@ -32,11 +32,10 @@ class StMuDstFilterMaker : public StMaker {
     ~StMuDstFilterMaker();
     
     int Init();   ///< Create the output file and the TClonesArrays
-    void Clear(); ///< Clears all TClonesArrays 
     int Make();   ///< Filters the muDst and writes the filtered version
     int Finish(); ///< Writes and closes the output file
     virtual const char *GetCVS() const {
-	static const char cvs[]="Tag $Name:  $ $Id: StMuDstFilterMaker.h,v 1.2 2003/08/04 14:38:10 laue Exp $ built "__DATE__" "__TIME__ ; 
+	static const char cvs[]="Tag $Name:  $ $Id: StMuDstFilterMaker.h,v 1.3 2003/09/07 03:49:03 perev Exp $ built "__DATE__" "__TIME__ ; 
 	return cvs;
     }
   
@@ -84,6 +83,9 @@ class StMuDstFilterMaker : public StMaker {
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.h,v $
+ * Revision 1.3  2003/09/07 03:49:03  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 1.2  2003/08/04 14:38:10  laue
  * Alex Suaide's updated for the EMC. Now EEMC is included.
  *

@@ -1,6 +1,6 @@
 
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.14 2003/08/13 21:04:03 pruneau Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.15 2003/09/07 03:49:08 perev Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -12,6 +12,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.15  2003/09/07 03:49:08  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 2.14  2003/08/13 21:04:03  pruneau
  * transfered relevant tracking pars to detector builders
  *
@@ -97,7 +100,7 @@ void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode * node) con
   double edip=coeff[3]+coeff[4]*dz*cosDipInv2+coeff[5]*tanDip*tanDip;
   if (ecross>50) ecross = 50.; 
   if (edip>50) edip = 50.; 
-  double scaling;
+  double scaling=0; if(scaling){}
   /*
   if (node->_x>120)
     scaling = StiKalmanTrackNode::pars->getOuterScaling();

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsUnpacker.hh,v 1.4 1999/12/08 02:10:25 calderon Exp $
+ * $Id: StTrsUnpacker.hh,v 1.5 2003/09/07 03:49:06 perev Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsUnpacker.hh,v $
+ * Revision 1.5  2003/09/07 03:49:06  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 1.4  1999/12/08 02:10:25  calderon
  * Modified to eliminate warnings on Linux.
  *
@@ -45,7 +48,7 @@ public:
     //StTrsUnpacker& operator=(const StTrsUnpacker&);
 
     // access functions
-    int  getSector(unsigned int which, StTpcRawDataEvent* eventData);
+    int  getSector(int which, StTpcRawDataEvent* eventData);
     int  getSequences(int padRow, int npad, int *nSeq, StSequence** seq);
     int  getPadList(int padRow, unsigned char **padList);
     void clear();

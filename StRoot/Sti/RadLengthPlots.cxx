@@ -42,15 +42,15 @@ void RadLengthPlots::fill(StiTrackContainer *mTrackStore)
       double phi = track->getPhi();
       double eta = track->getPseudoRapidity();
       double thePt  = track->getPt();
-      double dca = track->getDca();
+      double dca = track->getDca(); if(dca){}
       if (kTrack)
 	{
 	  StiKalmanTrackNode * innerMostNode = static_cast<StiKalmanTrackNode *>(kTrack->getInnerMostNode());
-	  double x1 = innerMostNode->_x;
+	  double x1 = innerMostNode->_x; if(x1){}
 	  double z  = innerMostNode->_p1;
 	  double x2 = kTrack->getInnerMostHitNode()->_x;
 	  StiKalmanTrackNode * secNode =  static_cast<StiKalmanTrackNode *>(innerMostNode->getParent());
-	  double x3 = secNode->_x;
+	  double x3 = secNode->_x;if(x3){}
 	  if(nPts>40 && x2<2. && fabs(z)<50. && thePt>0.4)
 	    {
 	      double radLength = kTrack->getTrackRadLength();

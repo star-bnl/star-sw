@@ -320,7 +320,7 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
   sNode   = track->getLastNode(); 
   bool debug=false;
   if (!sNode) throw logic_error("SKTF::find()\t - ERROR - track last node ==0");
-  StiHit* hhh = sNode->getHit();
+  StiHit* hhh = sNode->getHit(); if (hhh){}
   sDet = sNode->getDetector();
   if (sDet==0) throw logic_error("SKTF::find(StiTrack*) - FATAL - sDet==0");
   tNode   = 0;
@@ -487,7 +487,7 @@ void StiKalmanTrackFinder::findNextTrack()
 	  //Redundant check, but it protectes against naive calls
 	  if (!track) throw runtime_error("TrackSeedFinder->next() returned 0");
 	  track->find();
-	  StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track);
+	  StiDrawableTrack * t = dynamic_cast<StiDrawableTrack *>(track); if(t){}
 	  if (_trackFilter)
 	    {
 	      if (_trackFilter->filter(track)) 

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsFastChargeTransporter.cc,v 1.16 2003/09/02 17:59:19 perev Exp $
+ * $Id: StTrsFastChargeTransporter.cc,v 1.17 2003/09/07 03:49:06 perev Exp $
  *
  * Author: brian June 1, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTrsFastChargeTransporter.cc,v $
+ * Revision 1.17  2003/09/07 03:49:06  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 1.16  2003/09/02 17:59:19  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -93,7 +96,7 @@ StTrsChargeTransporter* StTrsFastChargeTransporter::instance(StTpcGeometry* geo,
 
 StTrsFastChargeTransporter::StTrsFastChargeTransporter(StTpcGeometry* geodb, StTpcSlowControl* scdb, StTrsDeDx* gasdb, StMagneticField* magdb)
     : StTrsChargeTransporter(geodb, scdb, gasdb, magdb)
-{int i= fieldFactorTable(); /* nopt*/ }
+{int i= fieldFactorTable(); if(i){/* nopt*/ }}
 
 StTrsFastChargeTransporter::~StTrsFastChargeTransporter() {/* nopt */}
 
@@ -158,7 +161,7 @@ void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg,dou
     // while in transport.  Must be scaled by the number
     // of electrons in the charge cluster
     //
-    double ne = ::sqrt(seg.charge());
+    // double ne = ::sqrt(seg.charge());
     if (mTransverseDiffusion) {
       //	seg.position().setX(mGaussDistribution.shoot(seg.position().x(),
       // 					     SigmaT/ne));

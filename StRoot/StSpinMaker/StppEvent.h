@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.h,v 1.8 2003/03/07 23:46:44 thenry Exp $ 
+// $Id: StppEvent.h,v 1.9 2003/09/07 03:49:05 perev Exp $ 
 // $Log: StppEvent.h,v $
+// Revision 1.9  2003/09/07 03:49:05  perev
+// gcc 3.2 + WarnOff
+//
 // Revision 1.8  2003/03/07 23:46:44  thenry
 // Added fill calls with different parameters
 //
@@ -72,9 +75,10 @@ class StMuDst;
 class StJet;
 class StProtoJet;
 
-#define MAXANALYZERS 4
+//VP #define MAXANALYZERS 4 //enum instead
 
 class StppEvent : public TObject {
+enum {MAXANALYZERS=4};
 public:  
     StppEvent();
     virtual ~StppEvent();

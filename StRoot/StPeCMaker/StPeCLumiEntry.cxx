@@ -13,7 +13,7 @@ StPeCLumiEntry::StPeCLumiEntry() {
   StPeCLumiEntry::Clear();  
 }
 
-void StPeCLumiEntry::Clear() {
+void StPeCLumiEntry::Clear(const char*) {
   runNr=0;    
   eventNr=0 ; 
   uTime=0;    

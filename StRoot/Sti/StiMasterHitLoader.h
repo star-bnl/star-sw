@@ -49,8 +49,8 @@ public:
 protected:
     typedef StiHitLoader<Source1,Source2,Detector>* HitLoaderKey;
     typedef vector< HitLoaderKey >  HitLoaderVector;
-    typedef HitLoaderVector::iterator HitLoaderIter;
-    typedef HitLoaderVector::const_iterator HitLoaderConstIter;
+    typedef typename HitLoaderVector::iterator HitLoaderIter;
+    typedef typename HitLoaderVector::const_iterator HitLoaderConstIter;
     //HitLoaderVector _hitLoaders;
 };
 

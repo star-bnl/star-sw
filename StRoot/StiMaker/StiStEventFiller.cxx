@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.23 2003/09/02 17:59:59 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.24 2003/09/07 03:49:10 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.24  2003/09/07 03:49:10  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 2.23  2003/09/02 17:59:59  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -452,8 +455,8 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 	throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- itKtrack == mTrkNodeMap.end()");
       StTrackNode* currentTrackNode = (*itKtrack).second;
       //double globalDca = currentTrackNode->track(global)->impactParameter();
-      StiKalmanTrackNode * nnn1; 
-      StiKalmanTrackNode * nnnn;
+      StiKalmanTrackNode * nnn1=0; 	if(nnn1){}
+      StiKalmanTrackNode * nnnn=0;	if(nnnn){}
       if (kTrack->isPrimary())
 	{
 	  fillTrackCount1++;

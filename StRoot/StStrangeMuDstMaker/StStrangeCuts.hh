@@ -35,6 +35,7 @@ public:
   void Add(const char* name, const char* value);
   void Add(const TCut&);
   void Add(const TCut*);
+  void Add(TObject *to){TSeqCollection::Add(to);}
   //@}
 
   /// @name Functions for StStrangeMuDstMaker operations
@@ -86,8 +87,11 @@ inline Bool_t StStrangeCuts::NewCut(const TObject* obj)
 
 
 /***********************************************************************
- * $Id: StStrangeCuts.hh,v 3.4 2003/05/30 21:20:19 genevb Exp $
+ * $Id: StStrangeCuts.hh,v 3.5 2003/09/07 03:49:05 perev Exp $
  * $Log: StStrangeCuts.hh,v $
+ * Revision 3.5  2003/09/07 03:49:05  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 3.4  2003/05/30 21:20:19  genevb
  * doxygen savvy, encoding of FTPC mults, change virtual funcs
  *

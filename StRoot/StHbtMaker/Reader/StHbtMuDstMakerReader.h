@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtMuDstMakerReader.h,v 1.1 2002/08/27 18:21:26 laue Exp $
+ * $Id: StHbtMuDstMakerReader.h,v 1.2 2003/09/07 03:49:02 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StHbtMuDstMakerReader_hh
@@ -63,6 +63,8 @@ class StHbtMuDstMakerReader : public StHbtEventReader {
   
   StHbtEvent* ReturnHbtEvent();
   int Init();
+  int Init(const char* ReadWrite, StHbtString& Message)
+          { return StHbtEventReader::Init(ReadWrite,Message);}//WarnOff
   void Clear();
   void clear();
   void Finish();
@@ -141,6 +143,9 @@ inline void StHbtMuDstMakerReader::setReadKinks(bool b) { mReadKinks=b;}
 /***************************************************************************
  *
  * $Log: StHbtMuDstMakerReader.h,v $
+ * Revision 1.2  2003/09/07 03:49:02  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 1.1  2002/08/27 18:21:26  laue
  * New reader. Wrapper around the StMuDstMaker
  *

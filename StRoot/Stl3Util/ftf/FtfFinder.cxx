@@ -297,7 +297,7 @@ int FtfFinder::reset (void) {
 		para.nEtaTrackPlusOne*sizeof(AREA));
 #endif
 	int nTrackVolumes = para.nPhiTrackPlusOne*
-	    para.nEtaTrackPlusOne ;
+	    para.nEtaTrackPlusOne ;	if(nTrackVolumes){}
 	trackC = new FtfContainer[para.nPhiTrackPlusOne*para.nEtaTrackPlusOne];
     }
     /*---------------------------------------------------------------------

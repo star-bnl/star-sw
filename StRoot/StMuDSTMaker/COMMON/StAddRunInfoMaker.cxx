@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StAddRunInfoMaker.cxx,v 1.1 2003/03/06 01:34:18 laue Exp $
+ * $Id: StAddRunInfoMaker.cxx,v 1.2 2003/09/07 03:49:03 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StAddRunInfoMaker.h"
@@ -19,13 +19,6 @@ StAddRunInfoMaker::~StAddRunInfoMaker() {
   /* no=op */
 }
     
-int StAddRunInfoMaker::Init(){
-  return 0;
-}
- 
-void StAddRunInfoMaker::Clear() {
-  /* no-op */
-}
 
 
 int StAddRunInfoMaker::Make(){  ///< create a StEvent from the muDst and put it into the .data tree 
@@ -54,9 +47,6 @@ int StAddRunInfoMaker::Make(){  ///< create a StEvent from the muDst and put it 
   return 0;
 }
 
-int StAddRunInfoMaker::Finish() { 
-  return 0;
-}
     
 
 ClassImp(StAddRunInfoMaker)
@@ -64,6 +54,9 @@ ClassImp(StAddRunInfoMaker)
 /***************************************************************************
  *
  * $Log: StAddRunInfoMaker.cxx,v $
+ * Revision 1.2  2003/09/07 03:49:03  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 1.1  2003/03/06 01:34:18  laue
  * StAddRunInfoMaker is a make helper maker to add the StRunInfo for the
  * only year1 Au+Au 130GeV data

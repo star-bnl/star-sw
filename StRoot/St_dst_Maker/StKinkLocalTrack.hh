@@ -1,7 +1,10 @@
 #ifndef StKinkLocalTrack_hh
 #define StKinkLocalTrack_hh
-// $Id: StKinkLocalTrack.hh,v 1.8 2003/09/02 17:59:26 perev Exp $
+// $Id: StKinkLocalTrack.hh,v 1.9 2003/09/07 03:49:07 perev Exp $
 // $Log: StKinkLocalTrack.hh,v $
+// Revision 1.9  2003/09/07 03:49:07  perev
+// gcc 3.2 + WarnOff
+//
 // Revision 1.8  2003/09/02 17:59:26  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -40,7 +43,7 @@ public:
   
   Int_t  Compare(const TObject *obj) const;
   Bool_t IsSortable() const { return 1; }
-  Bool_t IsEqual(TObject *obj);
+  Bool_t IsEqual(const TObject *obj) const;
   
   StPhysicalHelixD& helix();
   Int_t   Id() const;

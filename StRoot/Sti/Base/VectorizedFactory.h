@@ -58,7 +58,7 @@ private:
     int _incrementCount;
 
     t_vector _container;
-    t_vector::iterator _current;    
+    typename t_vector::iterator _current;    
 };
 
 //Implementation
@@ -188,7 +188,7 @@ inline  void VectorizedFactory<Concrete,Abstract>::initialize()
 template <class Concrete, class Abstract> 
 void VectorizedFactory<Concrete,Abstract>::destroy()
 {
-    for (t_vector::iterator it=_container.begin(); it!=_container.end(); ++it) 
+    for (typename t_vector::iterator it=_container.begin(); it!=_container.end(); ++it) 
       delete *it;
     _container.clear();
 }

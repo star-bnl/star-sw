@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.h,v 1.6 2003/09/02 17:58:39 perev Exp $
+ * $Id: StJetMaker.h,v 1.7 2003/09/07 03:49:03 perev Exp $
  * $Log: StJetMaker.h,v $
+ * Revision 1.7  2003/09/07 03:49:03  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 1.6  2003/09/02 17:58:39  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -57,7 +60,7 @@ using namespace std;
 //#define _GEANT_
 #define _BBC_data_
 #define _FPD_data_
-#define MAXANALYZERS 12
+//VP #define MAXANALYZERS 12 // in enum now
 #define DMAXEVENTSPERFILE 1000
 
 class TFile;
@@ -72,6 +75,7 @@ class StMuDstMaker;
 class StFourPMaker;
 
 class StJetMaker : public StMaker {
+enum {MAXANALYZERS=12}; 
 public:
     typedef map<string, StppJetAnalyzer*, less<string> > jetBranchesMap;
 

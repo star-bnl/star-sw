@@ -31,7 +31,7 @@ public:
   
                                   StPeCLumiEntry();
   virtual                         ~StPeCLumiEntry();
-  void  Clear();
+  void  Clear(const char *opt="");
   
 
   Int_t runNr;    // run nr. 

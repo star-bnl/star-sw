@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StppuDstMaker.h,v 1.6 2003/05/14 18:00:25 akio Exp $
+ * $Id: StppuDstMaker.h,v 1.7 2003/09/07 03:49:05 perev Exp $
  * $Log: StppuDstMaker.h,v $
+ * Revision 1.7  2003/09/07 03:49:05  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 1.6  2003/05/14 18:00:25  akio
  * New addition for 2003 data ntuple prodction
  * Also fix a problem with MuTrack creating from StEvent tracks.
@@ -53,7 +56,7 @@
 //#define _EMC_CLUSTERS_
 //#define _EMC_POINTS_
 //#define _EMC_
-#define MAXANALYZERS 12
+//VP #define MAXANALYZERS 12 //enum instead
 
 class TFile;
 class TTree;
@@ -67,7 +70,8 @@ class StMuDst;
 class StEmcMicroEvent;
 
 class StppuDstMaker : public StMaker {
-public:
+  enum {MAXANALYZERS =12};
+  public:
   StppuDstMaker(const Char_t *name="StppuDst");
   ~StppuDstMaker();   
   void Clear(Option_t *option=""); 
@@ -76,7 +80,7 @@ public:
   Int_t Make();
   Int_t Finish(); 
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StppuDstMaker.h,v 1.6 2003/05/14 18:00:25 akio Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StppuDstMaker.h,v 1.7 2003/09/07 03:49:05 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   

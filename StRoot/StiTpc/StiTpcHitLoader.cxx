@@ -135,10 +135,10 @@ void StiTpcHitLoader::loadMcHits(StMcEvent* source,
     {
       //_messenger << "Loading StMcTrack into _mcTrackContainer" << endl;
       stMcTrack = *iter;
-      double eta = stMcTrack->pseudoRapidity();
-      double pt  = stMcTrack->pt();
-      const StPtrVecMcTpcHit& hits = stMcTrack->tpcHits();
-      int nPts = hits.size();
+      double eta = stMcTrack->pseudoRapidity();			if(  eta){}
+      double pt  = stMcTrack->pt();				if(   pt){}
+      const StPtrVecMcTpcHit& hits = stMcTrack->tpcHits();	if(&hits){}
+      int nPts = hits.size();					if( nPts){}
       mcTrack = _mcTrackFactory->getInstance();
       mcTrack->reset();
       mcTrack->setStMcTrack( (*iter) );

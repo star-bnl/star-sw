@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsUnpacker.cc,v 1.15 2000/06/07 02:03:12 lasiuk Exp $
+ * $Id: StTrsUnpacker.cc,v 1.16 2003/09/07 03:49:07 perev Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsUnpacker.cc,v $
+ * Revision 1.16  2003/09/07 03:49:07  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 1.15  2000/06/07 02:03:12  lasiuk
  * exit/abort ultimatum
  *
@@ -80,7 +83,7 @@ StTrsUnpacker::StTrsUnpacker()
 StTrsUnpacker::~StTrsUnpacker()
 { /* nopt*/ }
     
-int StTrsUnpacker::getSector(unsigned int which, StTpcRawDataEvent* eventData)
+int StTrsUnpacker::getSector(int which, StTpcRawDataEvent* eventData)
 {
     int status;
     StTrsRawDataEvent *theData = (StTrsRawDataEvent*)eventData;
@@ -90,7 +93,7 @@ int StTrsUnpacker::getSector(unsigned int which, StTpcRawDataEvent* eventData)
     //
     // Do bounds check
     //
-    if(theData->mSectors.size() >= which) {
+    if((int)theData->mSectors.size() >= which) {
 	if ( (theData->mSectors[(which-1)]) ) {  // check the pointer...
 	    cout << "Sector: " << which << " data exists." << endl;
 	    mSector = theData->mSectors[(which-1)];

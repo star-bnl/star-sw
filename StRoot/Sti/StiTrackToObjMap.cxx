@@ -77,7 +77,7 @@ void StiTrackToObjMap::analyze(Filter<StiTrack> * filter, StiHit * vertex)
       //cout << "StiTrackToObjMap::analyze() -I- loop "<<endl;          
       StiTrack * first = iter->first;
       if(!first) continue;
-      StiTrack * second; 
+      StiTrack * second=0; 	if(second){}
       ++analyzed;
       if (filter->filter(first))
 	{

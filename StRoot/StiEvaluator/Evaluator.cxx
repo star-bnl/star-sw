@@ -115,7 +115,7 @@ void Evaluator::saveHtml(const string &targetDirectory,
 			 StiEvaluatorHistograms* hg1,
 			 StiEvaluatorHistograms* hg2)
 {
-   vector<StiEvaluatorHistograms*>::iterator iter;
+//VP   vector<StiEvaluatorHistograms*>::iterator iter;
    TCanvas * canvas = new TCanvas();
    HistoDocument histoDocument(targetDirectory,fileName,description,canvas);
    histoDocument.generateWebPage(hg1,hg2);
@@ -129,7 +129,7 @@ void Evaluator::saveHtml(const string &targetDirectory,
 			 StiEvaluatorHistograms* hg2,
 			 StiEvaluatorHistograms* hg3)
 {
-   vector<StiEvaluatorHistograms*>::iterator iter;
+//VP   vector<StiEvaluatorHistograms*>::iterator iter;
    TCanvas * canvas = new TCanvas();
    HistoDocument histoDocument(targetDirectory,fileName,description,canvas);
    histoDocument.generateWebPage(hg1,hg2,hg3);

@@ -67,7 +67,7 @@ public:
     void operator++();
     
     ///Define !=
-    bool operator!=(const tnode_vec::const_iterator&) {
+    bool operator!=(const typename tnode_vec::const_iterator&) {
 	  return (mcurrentleaf != rhs);
     }
 
@@ -79,18 +79,18 @@ public:
     //Safe forward Access to leaves
 
     ///Return an iterator marking the beginning of the leaf vector
-    tnode_vec::iterator begin() { return mleaves.begin();}
+    typename tnode_vec::iterator begin() { return mleaves.begin();}
 
     
     ///Return an iterator marking the end of the leaf vector
-    tnode_vec::iterator end() { return mleaves.end(); }
+    typename tnode_vec::iterator end() { return mleaves.end(); }
 
     
     ///Return a const_iterator marking the beginning of the leaf vector.
-    tnode_vec::const_iterator const_begin() const {return mleaves.begin();}
+    typename tnode_vec::const_iterator const_begin() const {return mleaves.begin();}
 
     ///Return a const_iterator marking the end of the leaf vector.
-    tnode_vec::const_iterator const_end() const {return mleaves.end();}
+    typename tnode_vec::const_iterator const_end() const {return mleaves.end();}
     
 protected:
     ///This is not implemented.  One must pass a node to the constructor
@@ -104,7 +104,7 @@ protected:
     tnode_t* mcurrentnode;
 
     ///We have to store an interator into the leaf vector for traversal.
-    tnode_vec::const_iterator mcurrentleaf;
+    typename tnode_vec::const_iterator mcurrentleaf;
 
     ///The vector of leaves.
     tnode_vec mleaves;
@@ -161,7 +161,7 @@ inline void StiCompositeLeafIterator<T>::reset()
   </code>
 */
 template <class T>
-inline StiCompositeLeafIterator<T>::tnode_t*
+inline typename StiCompositeLeafIterator<T>::tnode_t*
 StiCompositeLeafIterator<T>::operator*() const
 {
     return (*mcurrentleaf);

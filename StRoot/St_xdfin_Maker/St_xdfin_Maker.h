@@ -29,10 +29,10 @@ class St_xdfin_Maker : public StIOInterFace {
   virtual Int_t  Make();
   virtual Int_t   Skip(Int_t Nskip=1); 		// 
 //	for compatability with StIOInterFace
-  void SetBranch(const Char_t *brName,const Char_t *file=0,const Char_t *iomode="r"){};
+  void SetBranch(const Char_t *brName,const Char_t *file,const Char_t *iomode,const Option_t* opt){};
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_xdfin_Maker.h,v 1.15 1999/07/15 13:58:36 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_xdfin_Maker.h,v 1.16 2003/09/07 03:49:08 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(St_xdfin_Maker, 0)   //StAF chain virtual base class for Makers
 };

@@ -210,6 +210,7 @@ Int_t StV0FinderMaker::InitRun( int RunNumber){
 	  float gufldB[3];
 	  gufld(gufldX,gufldB);
 	  Bfield = gufldB[2]*kilogauss;
+          return 0;
 }
 
 
@@ -732,8 +733,11 @@ void StV0FinderMaker::Trim() {
                       " V0 candidates" << endm;
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.11 2003/09/02 17:58:59 perev Exp $
+// $Id: StV0FinderMaker.cxx,v 1.12 2003/09/07 03:49:04 perev Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.12  2003/09/07 03:49:04  perev
+// gcc 3.2 + WarnOff
+//
 // Revision 1.11  2003/09/02 17:58:59  perev
 // gcc 3.2 updates + WarnOff
 //

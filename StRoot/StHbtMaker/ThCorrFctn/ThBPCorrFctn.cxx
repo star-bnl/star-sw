@@ -13,7 +13,7 @@
  *
  ***************************************************************************/
 
-#include <strstream>
+#include "Stsstream.h"
 #include "StHbtMaker/ThCorrFctn/ThBPCorrFctn.h"
 
 #ifdef __ROOT__

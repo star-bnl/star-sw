@@ -1,5 +1,8 @@
-// $Id: StKinkLocalTrack.cc,v 1.10 2003/09/02 17:59:26 perev Exp $
+// $Id: StKinkLocalTrack.cc,v 1.11 2003/09/07 03:49:07 perev Exp $
 // $Log: StKinkLocalTrack.cc,v $
+// Revision 1.11  2003/09/07 03:49:07  perev
+// gcc 3.2 + WarnOff
+//
 // Revision 1.10  2003/09/02 17:59:26  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -78,7 +81,7 @@ Int_t StKinkLocalTrack::Compare(const TObject *obj) const
   return 1;
 }
 
-Bool_t StKinkLocalTrack::IsEqual(TObject *obj)
+Bool_t StKinkLocalTrack::IsEqual(const TObject *obj) const
 {
   if (this == obj) return 1;
   if (StKinkLocalTrack::Class() != obj->IsA()) return 0;

@@ -19,7 +19,7 @@ class StiEmcIsActiveFunctor : public StiIsActiveFunctor
   public:
   StiEmcIsActiveFunctor(int iSector, int iLayer);
   virtual ~StiEmcIsActiveFunctor();
-  virtual bool operator()(double dYlocal, double dZlocal);
+  virtual bool operator()(double dYlocal, double dZlocal) const;
     
 protected:
     /// returns the RDO board number [1-6] for the tpc padrow [1-45]

@@ -51,7 +51,7 @@ void StMuEmcUtil::fillMuEmc(StMuEmcCollection *muEmc,StEmcCollection *emccol)
       Int_t maxMod = 121;
       if(d>3) maxMod = 14;
       //cout <<"Filling hits for detetor "<<EmcDet<<endl;
-      for(UInt_t j=1;j<maxMod;j++)
+      for(Int_t j=1;j<maxMod;j++)
       {
         StEmcModule* module = detector->module(j);
         if(module)

@@ -1,4 +1,4 @@
-// $Id: StClusterDisplayMaker.h,v 1.5 2003/09/02 17:55:30 perev Exp $
+// $Id: StClusterDisplayMaker.h,v 1.6 2003/09/07 03:48:58 perev Exp $
 #ifndef STAR_StClusterDisplayMaker
 #define STAR_StClusterDisplayMaker
 
@@ -19,7 +19,7 @@
 class StClusterDisplayMaker : public StMaker {
 
  private:
-    // static Char_t  m_VersionCVS = "$Id: StClusterDisplayMaker.h,v 1.5 2003/09/02 17:55:30 perev Exp $";
+    // static Char_t  m_VersionCVS = "$Id: StClusterDisplayMaker.h,v 1.6 2003/09/07 03:48:58 perev Exp $";
     TTree* mytree ;
     TH2S*  myhist ;
         
@@ -61,7 +61,8 @@ class StClusterDisplayMaker : public StMaker {
                   StClusterDisplayMaker(const char *name="ClusterDisplay");
    virtual       ~StClusterDisplayMaker();
    virtual Int_t  Init();
-   virtual Int_t  Make(Int_t sec = 1, Int_t row = 1, Char_t* opt =""  ,Int_t pad_min = 1, Int_t pad_max =184, Int_t time_min = 0, Int_t time_max = 511);
+   virtual Int_t  Make(Int_t sec, Int_t row = 1, Char_t* opt =""  ,Int_t pad_min = 1, Int_t pad_max =184, Int_t time_min = 0, Int_t time_max = 511);
+   virtual Int_t  Make(){return Make(1);}
    virtual Int_t Get_l3off_points();
    virtual Int_t getOffPoints(Float_t* padvec, Float_t* padvecerr, 
 				Float_t* timevec, Float_t* timevecerr, 
@@ -88,7 +89,7 @@ class StClusterDisplayMaker : public StMaker {
    //TGraphErrors* Get_graph_matched_points() { return matched_points;} ;
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StClusterDisplayMaker.h,v 1.5 2003/09/02 17:55:30 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StClusterDisplayMaker.h,v 1.6 2003/09/07 03:48:58 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StClusterDisplayMaker, 1)   //StAF chain virtual base class for Makers
 };

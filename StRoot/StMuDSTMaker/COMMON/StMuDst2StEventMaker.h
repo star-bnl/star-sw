@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst2StEventMaker.h,v 1.2 2003/08/04 14:38:10 laue Exp $
+ * $Id: StMuDst2StEventMaker.h,v 1.3 2003/09/07 03:49:03 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDst2StEventMaker_hh
@@ -23,13 +23,11 @@ class StMuDst2StEventMaker : public StMaker {
     StMuDst2StEventMaker(const char* self="muDst2StEventMaker", const char* muDstMakerName="muDstMaker");
     ~StMuDst2StEventMaker();
     
-    int Init();   ///< do nothing
-    void Clear(); ///< do nothing 
+    void Clear(const char*);  
     int Make();   ///< create a StEvent from the muDst and put it into the .data tree structure. Also time stamp gets written and set in StEvtHddr for database usage
-    int Finish(); ///< do nothing
     StEvent* event() { return  mStEvent; } ///< retunr pointer to StEvent, 0 if not created 
     virtual const char *GetCVS() const {
-	static const char cvs[]="Tag $Name:  $ $Id: StMuDst2StEventMaker.h,v 1.2 2003/08/04 14:38:10 laue Exp $ built "__DATE__" "__TIME__ ; 
+	static const char cvs[]="Tag $Name:  $ $Id: StMuDst2StEventMaker.h,v 1.3 2003/09/07 03:49:03 perev Exp $ built "__DATE__" "__TIME__ ; 
 	return cvs;
     }
   
@@ -50,6 +48,9 @@ class StMuDst2StEventMaker : public StMaker {
 /***************************************************************************
  *
  * $Log: StMuDst2StEventMaker.h,v $
+ * Revision 1.3  2003/09/07 03:49:03  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 1.2  2003/08/04 14:38:10  laue
  * Alex Suaide's updated for the EMC. Now EEMC is included.
  *

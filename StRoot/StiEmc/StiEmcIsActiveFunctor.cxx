@@ -17,7 +17,7 @@ StiEmcIsActiveFunctor::StiEmcIsActiveFunctor(int iSector, int iLayer)
 StiEmcIsActiveFunctor::~StiEmcIsActiveFunctor()
 {} // ~StiEmcIsActiveFunctor
 
-bool StiEmcIsActiveFunctor::operator()(double dYlocal, double dZlocal)
+bool StiEmcIsActiveFunctor::operator()(double dYlocal, double dZlocal) const
 {
   return (_westActive && dZlocal>-2.0 ||_eastActive && dZlocal< 2.0);
 } // operator()

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.cxx,v 1.2 2003/08/04 14:38:10 laue Exp $
+ * $Id: StMuDstFilterMaker.cxx,v 1.3 2003/09/07 03:49:03 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDstFilterMaker.h"
@@ -85,9 +85,6 @@ StMuDstFilterMaker::~StMuDstFilterMaker() {
 }
     
  
-void StMuDstFilterMaker::Clear() {
-  /* no-op */
-}
 
 int StMuDstFilterMaker::Make(){  ///< create a StEvent from the muDst and put it into the .data tree 
     DEBUGMESSAGE1("");
@@ -214,6 +211,9 @@ ClassImp(StMuDstFilterMaker)
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.cxx,v $
+ * Revision 1.3  2003/09/07 03:49:03  perev
+ * gcc 3.2 + WarnOff
+ *
  * Revision 1.2  2003/08/04 14:38:10  laue
  * Alex Suaide's updated for the EMC. Now EEMC is included.
  *
