@@ -186,22 +186,15 @@ Int_t StiMaker::Finish()
 Int_t StiMaker::Init()
 {
     //The Display
-    //cout <<"Display"<<endl;
     mdisplay = StiDisplayManager::instance(); //Must come before anything that you want to be drawn
     mdisplay->cd();
-    mdisplay->draw();
-    mdisplay->update();
-    //cout <<"\tdone"<<endl;
 
     //The track store
     mtrackstore = StiTrackContainer::instance();
 
     //The hit container
-    //cout <<"Make HitContainer"<<endl;
     mhitstore = StiHitContainer::instance();
-    //cout <<"\tdone"<<endl;
 
-    //cout <<"Make Factories"<<endl;
     //The Hit Factory
     mhitfactory = new StiHitFactory("HitFactory");
     mhitfactory->setIncrementalSize(50000); //Allocate in chunks of 50k hits
@@ -223,70 +216,53 @@ Int_t StiMaker::Init()
     mkalmantrackfactory->setIncrementalSize(1000);
     mkalmantrackfactory->setMaxIncrementCount(10);
 
-    //cout <<"\tdone"<<endl;
-    
     //EvaluableTrack SeedFinder
-    //cout <<"StiEvaluableSeedFinder"<<endl;
     mEvaluableSeedFinder = new StiEvaluableTrackSeedFinder(mAssociationMaker);
     mEvaluableSeedFinder->setFactory(mtrackfactory);
-    //cout <<"\tdone"<<endl;
 
-    //cout <<"StiDetectorFactory"<<endl;
     //The StiDetector factory
     mdetectorfactory = new detector_factory("DrawableDetectorFactory");
     mdetectorfactory->setIncrementalSize(1000);
     mdetectorfactory->setMaxIncrementCount(10);
     mdetectorfactory->reset();
-    //cout <<"\tdone"<<endl;
 
     //The DetectorNodeFactory
-    //cout <<"DetectorNodeFactory"<<endl;
     mdatanodefactory = new data_node_factory("DataNodeFactory");
     mdatanodefactory->setIncrementalSize(1000);
     mdatanodefactory->setMaxIncrementCount(10);
     mdatanodefactory->reset();
-    //cout <<"\tdone"<<endl;
-    
     
     //The Detector Tree
-    //cout <<"DetectorContainer"<<endl;
     mdetector = StiDetectorContainer::instance();
     mdetector->buildDetectors(mdatanodefactory, mdetectorfactory);
     mdetector->reset();
-    //mdetector->print();
-    //cout <<"\tdone"<<endl;
       
     mdisplay->draw();
     mdisplay->update();
 
-    //cout <<"HitFiller"<<endl;
     //The Hit Filler
     mhitfiller = new StiHitFiller();
     mhitfiller->addDetector(kTpcId);
     mhitfiller->addDetector(kSvtId);
     cout <<"Hits used from detectors:\t"<<*mhitfiller<<endl;
-    //cout <<"\tdone"<<endl;
 
     //    TrackNodeTest *pTest = new TrackNodeTest();
     //    pTest->doTest();
 
-    //cout <<"StiCompositeSeedFinder"<<endl;
     //StiCompositeSeedFinder
-    mKalmanSeedFinder = new StiTrackSeedFinder(mhitstore);
-    mKalmanSeedFinder->setFactory(mkalmantrackfactory);
-    mcompseedfinder =new StiCompositeSeedFinder();
-    mcompseedfinder->buildOuterSeedFinder(mKalmanSeedFinder);
-    mcompseedfinder->buildInnerSeedFinder(mKalmanSeedFinder);
-    //cout <<"\tdone"<<endl;
+    //mKalmanSeedFinder = new StiTrackSeedFinder(mhitstore);
+    //mKalmanSeedFinder->setFactory(mkalmantrackfactory);
+    mcompseedfinder = new StiCompositeSeedFinder();
+    mcompseedfinder->setFactory(mkalmantrackfactory);
+    mcompseedfinder->setBuildPath("StRoot/StiMaker/RunTimeParameters/CompositeSeedFinderBuild.txt");
+    mcompseedfinder->build();
 
-    //cout <<"StiKalmanTrackFinder"<<endl;
     //The Tracker
     mtracker = new StiKalmanTrackFinder();
     mtracker->setTrackNodeFactory(mktracknodefactory);
     mtracker->setTrackSeedFinder(mEvaluableSeedFinder);
     //mtracker->setTrackSeedFinder(mcompseedfinder);
     mtracker->isValid(true);
-    //cout <<"\tdone"<<endl;
     
     return StMaker::Init();
 }
