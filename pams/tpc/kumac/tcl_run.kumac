@@ -54,7 +54,7 @@ return
     
   * set current sector
   mess 'setting sector to '[j]
-  cd [params]/tpc/tccpars
+  cd [params]/tpc/tclpars
   tdm/table/cell/putvalue 'tcc_cluster_index[0].current_sector' [j]
   cd /dui
 
@@ -64,8 +64,8 @@ return
           [data]/tpc/hits/tpseq_
           [data]/tpc/hits/tpcluster_
           [data]/tpc/hits/tpmorphology_
-          [params]/tpc/tccpars/tcc_params_
-          [params]/tpc/tccpars/tcc_cluster_index
+          [params]/tpc/tclpars/tcc_params_
+          [params]/tpc/tclpars/tcc_cluster_index
   
   
    if ( staf_status(1) .ne. STAFCV_OK) then

@@ -30,26 +30,13 @@ return
  return
  
 * ********************************************************************
- macro read_tcc
-   macro/global/import *
-     
-   cd [params]/tpc
 
-  message 'reading tcc_params.xdf'
-  dio/newfilestream tccp [top]/tcc_params.xdf r
-  dio/stream/getevent    tccp
-  dio/stream/close       tccp
-  soc/object/oid tccp; oid = staf_result(1); soc/deleteoid [oid]
- cd /dui
-
-     
- return
-* 
-* ********************************************************************
  macro fill_tcc
    macro/global/import *
      
-  cd [params]/tpc/tccpars
+     cd [params/tpc/
+     mkdir tclpars
+     cd [params]/tpc/tclpars
      
   tdm/table/cell/putvalue 'tcc_params[0].numTimeBins'         512.0  
   tdm/table/cell/putvalue 'tcc_params[0].tpcLength'           2100.0  
