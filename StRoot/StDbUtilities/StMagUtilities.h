@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.25 2004/03/16 20:45:32 jhthomas Exp $
+ * $Id: StMagUtilities.h,v 1.26 2004/04/01 22:19:48 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.26  2004/04/01 22:19:48  jhthomas
+ * Add 3D SpaceCharge capabilities
+ *
  * Revision 1.25  2004/03/16 20:45:32  jhthomas
  * Add new (faster) BField shape distortion routine.  See comments for chain flags.
  *
@@ -118,6 +121,7 @@ class StTpcDb ;
 class TDataSet ;
 class StDetectorDbSpaceCharge ;
 class StDetectorDbTpcVoltages ;
+class TMatrix ;
 
 class StMagUtilities {
 
@@ -152,6 +156,12 @@ class StMagUtilities {
   virtual void    Interpolate3DEdistortion ( const Float_t r, const Float_t phi, const Float_t z, 
 					     const Float_t Er[neZ][nePhi][neR], const Float_t Ephi[neZ][nePhi][neR], 
 					     Float_t &Er_value, Float_t &Ephi_value ) ;
+  virtual void    PoissonRelaxation  ( TMatrix &ArrayV, const TMatrix &Charge, TMatrix &EroverEz, 
+                                       const Int_t ROWS, const Int_t COLUMNS, const Int_t ITERATIONS ) ;
+
+  virtual void    Poisson3DRelaxation( TMatrix **ArrayofArrayV, TMatrix **ArrayofCharge, TMatrix **ArrayofEroverEz, 
+				       TMatrix **ArrayofEPhioverEz,
+				       const Int_t ROWS, const Int_t COLUMNS, const Int_t PHISLICES, const Int_t ITERATIONS ) ;
 
   Int_t    mDistortionMode;             // Distortion mode - determines which corrections are run
 
@@ -182,7 +192,7 @@ class StMagUtilities {
   Float_t  spaceEr[neZ][neR] ;
   Float_t  spaceR2Er[neZ][neR] ;
   Float_t  shortEr[neZ][neR] ;
-  Float_t  tiltEr[neZ][neR] ;
+  Float_t  tiltEr[neZ][nePhi][neR], tiltEphi[neZ][nePhi][neR] ;
   Float_t  eRadius[neR], ePhiList[nePhi], eZList[neZ]  ;         
 
  public:
