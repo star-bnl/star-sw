@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: trans_table.hh,v 1.3 2000/05/02 15:59:04 jml Exp $
+ * $Id: trans_table.hh,v 1.4 2004/03/15 23:55:03 jeromel Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: 10-bit to 8-bit translation table
@@ -9,6 +9,9 @@
  *
  ***************************************************************************
  * $Log: trans_table.hh,v $
+ * Revision 1.4  2004/03/15 23:55:03  jeromel
+ * Unused method removed
+ *
  * Revision 1.3  2000/05/02 15:59:04  jml
  * Added an inline "dummy" function to prevent compiler warnings if the
  * file is included but the lookup tables are not used.
@@ -129,8 +132,8 @@ static unsigned short log8to10_table[256] = {
   833,  845,  857,  870,  882,  895,  907,  920,
   934,  947,  961,  975,  989, 1003, 1017, 1023 };
 
-inline void tpcwarningkillingdummyfunction()
-{
-  char x = log10to8_table[0];
-  x = log8to10_table[0];
-}	
+//inline void tpcwarningkillingdummyfunction()
+//{
+//  char x = log10to8_table[0];
+//  x = log8to10_table[0];
+//}	
