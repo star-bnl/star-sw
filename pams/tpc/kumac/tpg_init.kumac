@@ -4,26 +4,25 @@
 
 macro init
 
-  macro/global/import _
-         KUMACS_UTIL,PAMS_TPC_KUMAC,DATA_SAMPLES,KUMACS_TPC,PARAMS_TPC 
+  macro/global/import PARAMS_TPC
 
 
-cd /dui/constants/tpc/geometry
+  cd /dui/constants/tpc/geometry
 
-dio/newfilestream   geom [PARAMS_TPC]tpg_pars.xdf r
-dio/stream/getevent geom 
-dio/stream/close    geom
+  dio/newfilestream   geom [PARAMS_TPC]tpg_pars.xdf r
+  dio/stream/getevent geom 
+  dio/stream/close    geom
 
-cd tpgpar
-tdm/newtable tpg_pad tpg_pad 1
+  cd tpgpar
+  tdm/newtable tpg_pad tpg_pad 1
 
-cd /dui
+  cd /dui
 
-ami/module/call tpg_main /dui/constants/tpc/geometry/tpgpar/tpg_pad_plane _
+  ami/module/call tpg_main /dui/constants/tpc/geometry/tpgpar/tpg_pad_plane _
                          /dui/constants/tpc/geometry/tpgpar/tpg_detector _
                          /dui/constants/tpc/geometry/tpgpar/tpg_pad
 
-cd /dui
+  cd /dui
  
 return
 
