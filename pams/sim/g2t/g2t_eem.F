@@ -46,7 +46,7 @@
             g2t_track(trac).hit_eem_p    = i
             g2t_track(trac).n_eem_hit    = g2t_track(trac).n_eem_hit + 1
           endif
-        print *,' isys, i = ',isys,i
+*        print *,' isys, i = ',isys,i
         enddo    
  99   enddo
       RETURN
