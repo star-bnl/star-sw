@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.34 1998/11/16 01:26:45 fisyak Exp $
+# $Id: MakeDll.mk,v 1.35 1998/11/16 02:09:41 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.35  1998/11/16 02:09:41  fisyak
+# replace ROOTSYS/include to ROOTSYS/src
+#
 # Revision 1.34  1998/11/16 01:26:45  fisyak
 # New merging with NT
 #
@@ -111,7 +114,7 @@ INCINT := $(INC_DIRS)
 INC_DIRS += $(SRC_DIR) $(SRC_DIR)/include $(GEN_DIR) $(ROOT_DIR)/inc  $(STAR)/inc  $(STAF_UTILS_INCS)
 #
 INCINT := $(INC_DIRS)
-INC_DIRS += $(OUT_DIR)/.share $(ROOT_DIR)/StRoot $(STAR)/.share $(STAR)/StRoot $(ROOTSYS)/include
+INC_DIRS += $(OUT_DIR)/.share $(ROOT_DIR)/StRoot $(STAR)/.share $(STAR)/StRoot $(ROOTSYS)/src
 
 INCLUDES := $(addprefix -I,$(INC_DIRS))
 INCINT   := $(addprefix -I,$(INCINT))
