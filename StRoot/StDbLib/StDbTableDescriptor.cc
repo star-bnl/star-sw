@@ -187,7 +187,11 @@ int i = elementNum;
   }
 
   if(offsetToLast4Bytes<0)offsetToLast4Bytes=0;
+#ifdef LINUX
+  lastType=Stdouble;
+#else
   lastType=type;
+#endif
 }
 
 /////////////////////////////////////////////////////////////////////////
