@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.23 2000/01/07 20:35:00 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.24 2000/01/10 21:22:29 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.24  2000/01/10 21:22:29  kathy
+// now use Spiros' new code in pams/global/egr/prop_one_track to get primary track residuals - note must now load St_global library! - don't have magnetic field working from the dst yet...
+//
 // Revision 1.23  2000/01/07 20:35:00  kathy
 // make some corrections to filling hist; add point hist for each det separately
 //
@@ -875,11 +878,11 @@ void StQABookHist::BookHistPrim(){
   m_pfit_point  = QAH1F("QaPtrkNPntFit", "primtrk: N fit points on track", 60, 0.,60.);
   m_prim_charge = QAH1F("QaPtrkChrg",    "primtrk: charge ", 20,-2.,2.);
   m_prim_xf     = QAH1F("QaPtrkXf",      "primtrk: x of first hit on trk ", 50,-200.,200.);
-  m_prim_xf0    = QAH1F("QaPtrkXf0",     "primtrk: x of first hit - on helix at start",50,-200.,200.);
+  m_prim_xf0    = QAH1F("QaPtrkXf0",     "primtrk: x of first hit - on helix at start",50,-5.,5.);
   m_prim_yf     = QAH1F("QaPtrkYf",      "primtrk: y of first hit on trk", 50,-200.,200.);
-  m_prim_yf0    = QAH1F("QaPtrkYf0",     "primtrk: y of first hit - on helix at start",50,-200.,200.);
+  m_prim_yf0    = QAH1F("QaPtrkYf0",     "primtrk: y of first hit - on helix at start",50,-5.,5.);
   m_prim_zf     = QAH1F("QaPtrkZf",      "primtrk: z of first hit on trk", 50,-200.,200.);
-  m_prim_zf0    = QAH1F("QaPtrkZf0",     "primtrk: z of first hit - on helix at start",50,-200.,200.);
+  m_prim_zf0    = QAH1F("QaPtrkZf0",     "primtrk: z of first hit - on helix at start",50,-5.,5.);
   m_prim_radf   = QAH1F("QaPtrkR",       "primtrk: radial position of first hit",50,0.,200.);
   m_prim_ratio  = QAH1F("QaPtrkRnf",     "primtrk: ratio Nfitpnt over Npnt", 50, 0., 1.2005);
   m_ppsi        = QAH1F("QaPtrkPsi",     "primtrk: psi ", 36, 0.,360.);

@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.77 2000/01/08 03:27:34 lansdell Exp $
+// $Id: St_QA_Maker.cxx,v 1.78 2000/01/10 21:22:29 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.78  2000/01/10 21:22:29  kathy
+// now use Spiros' new code in pams/global/egr/prop_one_track to get primary track residuals - note must now load St_global library! - don't have magnetic field working from the dst yet...
+//
 // Revision 1.77  2000/01/08 03:27:34  lansdell
 // fixed nfit/nmax ratio in Tab version; separated hits by detector; changed vertex histograms to allow for events with 0 vertices
 //
@@ -269,6 +272,11 @@
 #include "tables/St_g2t_rch_hit_Table.h"       // g2t_rch_hit
 #include "tables/St_ev0_eval_Table.h"          // ev0_eval
 #include "tables/St_tpt_track_Table.h"         // l3Track
+
+// Spiros added following line on 10jan00
+// this routine is from pams/global/egr
+extern "C" {float prop_one_track( float * ,  float * , float * );}
+
 
 ClassImp(St_QA_Maker)
   
@@ -772,6 +780,9 @@ void St_QA_Maker::MakeHistDE() {
 
 void St_QA_Maker::MakeHistPrim(){
 
+// Spiros added the following line on 10jan00
+  float gtrack[7],target[2],ptrack[3];
+
   St_DataSetIter dstI(dst);           
 
   St_dst_track *primtrk = (St_dst_track *) dstI["primtrk"];
@@ -841,11 +852,28 @@ void St_QA_Maker::MakeHistPrim(){
 	Float_t chisq0 = t->chisq[0];
 	Float_t chisq1 = t->chisq[1]; 
         Float_t nfitntot = (Float_t(trkfpnt))/(Float_t(trkpnt));
-        Float_t x0s  =  t->r0 * TMath::Cos(t->phi0*degree);
-        Float_t y0s  =  t->r0 * TMath::Sin(t->phi0*degree);
+
+// Spiros' modifications start - 10jan00
+        target[0] = t->x_first[0];
+        target[1] = t->x_first[1];
+        gtrack[0] = t->r0 * TMath::Cos(t->phi0*degree);
+        gtrack[1] = t->r0 * TMath::Sin(t->phi0*degree);
+        gtrack[2] = t->z0;
+        gtrack[3] = t->psi;
+        gtrack[4] = t->tanl;
+        gtrack[5] = (float) t->icharge;
+        gtrack[6] = t->invpt;
+        Float_t mytst = prop_one_track( gtrack, target, ptrack);
+        cout << " ptrack 0,1,2 = " << ptrack[0] << "  " 
+                                   << ptrack[1] << "  " 
+                                   << ptrack[2] << "  " << endl;
+        Float_t x0s  =  ptrack[0];
+        Float_t y0s  =  ptrack[1];
         Float_t xdif =  (t->x_first[0])-x0s;
         Float_t ydif =  (t->x_first[1])-y0s;
-        Float_t zdif = (t->x_first[2]) - (t->z0);
+        Float_t zdif = (t->x_first[2]) - (ptrack[2]);
+// Spiros' modifications end
+
         Float_t radf = TMath::Power((t->x_first[0]),2) + 
                        TMath::Power((t->x_first[1]),2);
                 radf = TMath::Sqrt(radf); 
