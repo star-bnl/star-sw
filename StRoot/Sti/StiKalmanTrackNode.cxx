@@ -359,7 +359,6 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
     << "StiKalmanTrackNode::propagate(pNode,tDet) -INFO- (2) position:"<<position<<endl;
   if (position>kEdgeZplus || position<0) return position;
   propagateError();
-  double dx=0;
   // Multiple scattering
   if (pars->mcsCalculated)
     {
@@ -406,10 +405,10 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 	sign = -1.;
       else
 	sign =  1.;
-	  
-      double zOverA = 0.5;
-      double ionization = 5;
-      propagateMCS(pathLength,radThickness,zOverA,ionization,pars->massHypothesis,sign);
+      
+      //double zOverA = 0.5;
+      //double ionization = 5;
+      //propagateMCS(pathLength,radThickness,zOverA,ionization,pars->massHypothesis,sign);
     }
   return position;
 }
@@ -551,6 +550,11 @@ void StiKalmanTrackNode::propagateError()
   _c31 += b31; 
   _c41 += b41; 
 }
+
+/*
+void StiKalmanTrackNode::propagateMCS()
+{}
+*/
 
 /*! Calculate the effect of MCS on the track error matrix.
   <p>
