@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StRunInfo.h,v 2.5 2002/02/25 19:32:47 ullrich Exp $
+ * $Id: StRunInfo.h,v 2.6 2004/01/22 23:14:07 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2001
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StRunInfo.h,v $
+ * Revision 2.6  2004/01/22 23:14:07  ullrich
+ * Added Rhic scaler methods (BBC).
+ *
  * Revision 2.5  2002/02/25 19:32:47  ullrich
  * Added more RHIC related info.
  *
@@ -65,6 +68,11 @@ public:
     double   backgroundRate() const;
     double   l0RateToRich() const;
 
+    double   bbcEastRate() const;
+    double   bbcWestRate() const;
+    double   bbcBlueBackgroundRate() const;
+    double   bbcYellowBackgroundRate() const;
+
     void     setRunId(int);
     void     setProductionTime(time_t);                 
     void     setProductionVersion(const char*);   
@@ -82,7 +90,12 @@ public:
     void     setZdcCoincidenceRate(double);
     void     setBbcCoincidenceRate(double);
     void     setBackgroundRate(double);
-    void     setL0RateToRich(double); 
+    void     setL0RateToRich(double);
+
+    void     setBbcEastRate(double);	
+    void     setBbcWestRate(double);	
+    void     setBbcBlueBackgroundRate(double);
+    void     setBbcYellowBackgroundRate(double);
     
 protected:
     Int_t	mRunId;
@@ -107,6 +120,12 @@ protected:
     Float_t     mInitialBeamIntensity[2];
     Float_t     mBeamLifeTime[2];
     Float_t     mBeamFillNumber[2];
-    ClassDef(StRunInfo,4)
+
+    Double_t    mBbcEastRate;
+    Double_t    mBbcWestRate;
+    Double_t    mBbcBlueBackgroundRate;
+    Double_t    mBbcYellowBackgroundRate;
+    
+    ClassDef(StRunInfo,5)
 };
 #endif

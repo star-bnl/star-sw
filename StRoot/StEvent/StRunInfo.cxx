@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRunInfo.cxx,v 2.4 2002/02/25 19:32:47 ullrich Exp $
+ * $Id: StRunInfo.cxx,v 2.5 2004/01/22 23:14:07 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRunInfo.cxx,v $
+ * Revision 2.5  2004/01/22 23:14:07  ullrich
+ * Added Rhic scaler methods (BBC).
+ *
  * Revision 2.4  2002/02/25 19:32:47  ullrich
  * Added more RHIC related info.
  *
@@ -25,7 +28,7 @@
  **************************************************************************/
 #include "StRunInfo.h"
 
-static const char rcsid[] = "$Id: StRunInfo.cxx,v 2.4 2002/02/25 19:32:47 ullrich Exp $";
+static const char rcsid[] = "$Id: StRunInfo.cxx,v 2.5 2004/01/22 23:14:07 ullrich Exp $";
 
 ClassImp(StRunInfo)
 
@@ -51,6 +54,11 @@ StRunInfo::StRunInfo()
 	mBeamLifeTime[i] = 0;
 	mBeamFillNumber[i] = 0;
     }
+
+    mBbcEastRate = 0;		 
+    mBbcWestRate = 0;		 
+    mBbcBlueBackgroundRate = 0;	 
+    mBbcYellowBackgroundRate = 0;
 }
 
 StRunInfo::~StRunInfo() {/* noop */}
@@ -123,6 +131,22 @@ double
 StRunInfo::l0RateToRich() const
 {return mL0RateToRich;}
 
+double
+StRunInfo::bbcEastRate() const
+{return mBbcEastRate;}
+
+double
+StRunInfo::bbcWestRate() const
+{return mBbcWestRate;}
+
+double
+StRunInfo::bbcBlueBackgroundRate() const
+{return mBbcBlueBackgroundRate;}
+
+double
+StRunInfo::bbcYellowBackgroundRate() const
+{return mBbcYellowBackgroundRate;}
+
 void
 StRunInfo::setRunId(int val) {mRunId = val;}
 
@@ -189,3 +213,19 @@ StRunInfo::setBackgroundRate(double val)
 void
 StRunInfo::setL0RateToRich(double val)
 {mL0RateToRich = val;}
+
+void
+StRunInfo::setBbcEastRate(double val)
+{mBbcEastRate = val;}
+
+void
+StRunInfo::setBbcWestRate(double val)
+{mBbcWestRate = val;}
+
+void
+StRunInfo::setBbcBlueBackgroundRate(double val)
+{mBbcBlueBackgroundRate = val;}
+
+void
+StRunInfo::setBbcYellowBackgroundRate(double val)
+{mBbcYellowBackgroundRate = val;}
