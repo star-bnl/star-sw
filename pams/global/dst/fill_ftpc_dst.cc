@@ -1,8 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: fill_ftpc_dst.cc,v 1.3 2000/02/04 12:48:39 jcs Exp $
+// $Id: fill_ftpc_dst.cc,v 1.4 2000/02/09 08:44:37 jcs Exp $
 //
 // $Log: fill_ftpc_dst.cc,v $
+// Revision 1.4  2000/02/09 08:44:37  jcs
+// add cast to fabs
+//
 // Revision 1.3  2000/02/04 12:48:39  jcs
 // correct KCC compiler warning
 //
@@ -248,11 +251,11 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
 // bitmask quality information
     dst_track[dst_track_h->nok].iflag = 
       700 + fptrack[itrk].flag;
-    if (fabs(dst_track[dst_track_h->nok].icharge) != 1. ) {
+    if (fabs((float) dst_track[dst_track_h->nok].icharge) != 1. ) {
         dst_track[dst_track_h->nok].iflag   =  
              -dst_track[dst_track_h->nok].iflag + 20;
     }
-    if (fabs(dst_track[dst_track_h->nok].invpt) >= 999999.)  {
+    if (fabs((float) dst_track[dst_track_h->nok].invpt) >= 999999.)  {
         dst_track[dst_track_h->nok].iflag   = -799;
     }
 
