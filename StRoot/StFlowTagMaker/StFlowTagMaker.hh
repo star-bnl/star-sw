@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // StFlowTagMaker.hh
-// $Id: StFlowTagMaker.hh,v 1.6 2000/01/14 01:36:03 snelling Exp $
+// $Id: StFlowTagMaker.hh,v 1.7 2000/01/14 05:44:35 snelling Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -16,6 +16,9 @@
 //
 // History:
 // $Log: StFlowTagMaker.hh,v $
+// Revision 1.7  2000/01/14 05:44:35  snelling
+// Added St_FlowTag Table to .data
+//
 // Revision 1.6  2000/01/14 01:36:03  snelling
 // changed include path ../FlowMaker/ to FlowMaker/
 //
@@ -51,7 +54,7 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include "StMaker.h"
-#include "FlowTag.h"
+#include "tables/St_FlowTag_Table.h"
 #include "StFlowMaker/StFlowConstants.hh"
 class StFlowEvent;
 class TH1F;
@@ -78,7 +81,8 @@ private:
   Int_t        fillHistograms();
   void         printTag(ostream& = cout);  // output Tag info to screen
 
-  FlowTag_st*  pFlowTag;    //! the tag table to fill
+  St_FlowTag*  pSt_FlowTag; //! the StFlowTag table header
+  FlowTag_st*  pFlowTag;    //! the StFlowTag table structure to fill
   StFlowEvent* pFlowEvent;  //! the event to fill from
 
   struct histHarmonic {
