@@ -3,9 +3,12 @@
 // Macro for plotting hits and pixels in combination with bfc.C
 //            plotting both sides of tpc seperately
 //
-// $Id: TwoSideDraw.C,v 1.4 1999/11/10 00:15:36 snelling Exp $
+// $Id: TwoSideDraw.C,v 1.5 1999/11/16 19:28:25 snelling Exp $
 //
 // $Log: TwoSideDraw.C,v $
+// Revision 1.5  1999/11/16 19:28:25  snelling
+// Changed kOption to "Option" in chain->GetOption()
+//
 // Revision 1.4  1999/11/10 00:15:36  snelling
 // removed drawing of pseudo-padrow hits for geant points
 //
@@ -109,13 +112,6 @@ void TwoSideDraw() {
   static int DrawHits(Text_t*, Text_t*, Text_t*);
   static int DrawGeantHits(Text_t*, Text_t*, Text_t*);
 
-  /*
-  if (chain->GetOption(kMINIDAQ)) {
-    chain->SetInput("BEGIN_RUN",".make/xdfin/.const/BEGIN_RUN");
-    chain->SetInput("ChainFlags[kTPC]_DATA",".make/xdfin/.data/ChainFlags[kTPC]_DATA");
-  }
-  */
-
   gStyle->SetCanvasColor(10);              // white
   gStyle->SetPadColor(10);                 // white
   gStyle->SetFrameFillColor(10);           // white
@@ -159,8 +155,8 @@ void TwoSideDraw() {
   int ierror = 1;
 
   pad1->cd();
-  if (chain->GetOption(kTSS) || chain->GetOption(kTRS) || chain->GetOption(kMINIDAQ) ||
-      chain->GetOption(kTDAQ)) {
+  if (chain->GetOption("tss") || chain->GetOption("trs") || 
+      chain->GetOption("miniDAQ") || chain->GetOption("TDAQ")) {
     ierror = DrawPixels("y:x","(adc>2 && z>0)*adc","box");
   }
   if (ierror == 0) { 
@@ -169,13 +165,13 @@ void TwoSideDraw() {
   else { 
     DrawHits("y:x","z>0","scat"); 
   }
-  if (!chain->GetOption(kMINIDAQ) && !chain->GetOption(kTDAQ)) {
+  if (!chain->GetOption("miniDAQ") && !chain->GetOption("TDAQ")) {
       DrawGeantHits("x1:x0","x2>0 && volume_id<2446","same,scat");
   }  
 
   pad2->cd();
-  if (chain->GetOption(kTSS) || chain->GetOption(kTRS) || chain->GetOption(kMINIDAQ) ||
-      chain->GetOption(kTDAQ)) {
+  if (chain->GetOption("tss") || chain->GetOption("trs") || 
+      chain->GetOption("miniDAQ") || chain->GetOption("TDAQ")) {
     ierror = DrawPixels("z:x","(adc>2 && z>0)*adc","box");
   }
   if (ierror == 0) { 
@@ -184,13 +180,13 @@ void TwoSideDraw() {
   else { 
     DrawHits("z:x","z>0","scat"); 
   }
-  if (!chain->GetOption(kMINIDAQ) && !chain->GetOption(kTDAQ)) {
+  if (!chain->GetOption("miniDAQ") && !chain->GetOption("TDAQ")) {
     DrawGeantHits("x2:x0","x2>0 && volume_id<2446","same,scat");
   }
 
   pad3->cd();
-  if (chain->GetOption(kTSS) || chain->GetOption(kTRS) || chain->GetOption(kMINIDAQ) ||
-      chain->GetOption(kTDAQ)) {
+  if (chain->GetOption("tss") || chain->GetOption("trs") || 
+      chain->GetOption("miniDAQ") || chain->GetOption("TDAQ")) {
     ierror = DrawPixels("y:x","(adc>2 && z<0)*adc","box");
   }
   if (ierror == 0) { 
@@ -199,20 +195,20 @@ void TwoSideDraw() {
   else { 
     DrawHits("y:x","z<0","scat"); 
   }
-  if (!chain->GetOption(kMINIDAQ) && !chain->GetOption(kTDAQ)) {
+  if (!chain->GetOption("miniDAQ") && !chain->GetOption("TDAQ")) {
     DrawGeantHits("x1:x0","x2<0 && volume_id<2446","same,scat");
   }  
 
   pad4->cd();
-  if (chain->GetOption(kTSS) || chain->GetOption(kTRS) || chain->GetOption(kMINIDAQ) ||
-      chain->GetOption(kTDAQ)) {
+  if (chain->GetOption("tss") || chain->GetOption("trs") || 
+      chain->GetOption("miniDAQ") || chain->GetOption("TDAQ")) {
     ierror = DrawPixels("z:x","(adc>2 && z<0)*adc","box");
   }
   if (ierror == 0) { 
     DrawHits("z:x","z<0","same,scat"); 
   }
   else { DrawHits("z:x","z<0","scat"); }
-  if (!chain->GetOption(kMINIDAQ) && !chain->GetOption(kTDAQ)) {
+  if (!chain->GetOption("miniDAQ") && !chain->GetOption("TDAQ")) {
     DrawGeantHits("x2:x0","x2<0 && volume_id<2446","same,scat");
   }
 }
