@@ -14,52 +14,51 @@
  * provided "as is" without express or implied warranty.             
  */
 #include "StiDefaultToolkit.h"
-#include "../Sti/Filter.h"
-#include "../Sti/Factory.h"
-#include "../Sti/VectorizedFactory.h"
-#include "../Sti/StiMcTrack.h"
-#include "../Sti/StiHit.h"
-#include "../Sti/StiHitContainer.h"
-#include "../Sti/StiHitFiller.h"
-#include "../Sti/StiMasterHitLoader.h"
-#include "../Sti/StiTpcHitLoader.h"
-#include "../Sti/StiSvtHitLoader.h"
-#include "../Sti/StiDetector.h"
-#include "../Sti/StiDetectorContainer.h"
-#include "../Sti/StiDetectorFinder.h"
-#include "../Sti/StiTrackContainer.h"
-#include "../Sti/StiGeometryTransform.h"
-#include "../Sti/StiCoordinateTransform.h"
-#include "../Sti/StiTrackSeedFinder.h"
-#include "../Sti/StiTrackFinder.h"
-#include "../Sti/StiTrackFitter.h"
-#include "../Sti/StiDefaultTrackFilter.h"
-#include "../Sti/StiTrack.h"
-#include "../Sti/StiKalmanTrack.h"
-#include "../Sti/StiKalmanTrackNode.h"
-#include "../Sti/StiKalmanTrackFitter.h"
-#include "../Sti/StiKalmanTrackFinder.h"
-#include "../Sti/StiTrackMerger.h"
-#include "../Sti/StiCompositeSeedFinder.h"
-#include "../Sti/StiLocalTrackMerger.h"
-#include "../Sti/StiDisplayManager.h"
-#include "../Sti/StiDefaultTrackFilter.h"
-#include "../Sti/StiIOBroker.h"
-#include "../Sti/Parameter.h"
-#include "../StiMaker/RootEditableParameter.h"
-#include "../StiMaker/StiRootIOBroker.h"
-#include "../StiGui/StiRootDisplayManager.h"
-#include "../StiGui/StiRootDrawableDetector.h"
-#include "../StiGui/StiRootDrawableMcTrack.h"
-#include "../StiGui/StiRootDrawableHitContainer.h"
-#include "../StiGui/StiRootDrawableKalmanTrack.h"
-#include "../StiGui/StiRootDrawableStiEvaluableTrack.h"
+#include "Sti/Filter.h"
+#include "Sti/Factory.h"
+#include "Sti/VectorizedFactory.h"
+#include "Sti/StiMcTrack.h"
+#include "Sti/StiHit.h"
+#include "Sti/StiHitContainer.h"
+#include "Sti/StiHitFiller.h"
+#include "Sti/StiMasterHitLoader.h"
+#include "Sti/StiTpcHitLoader.h"
+#include "Sti/StiSvtHitLoader.h"
+#include "Sti/StiDetector.h"
+#include "Sti/StiDetectorContainer.h"
+#include "Sti/StiDetectorFinder.h"
+#include "Sti/StiTrackContainer.h"
+#include "Sti/StiGeometryTransform.h"
+#include "Sti/StiCoordinateTransform.h"
+#include "Sti/StiTrackSeedFinder.h"
+#include "Sti/StiTrackFinder.h"
+#include "Sti/StiTrackFitter.h"
+#include "Sti/StiDefaultTrackFilter.h"
+#include "Sti/StiTrack.h"
+#include "Sti/StiKalmanTrack.h"
+#include "Sti/StiKalmanTrackNode.h"
+#include "Sti/StiKalmanTrackFitter.h"
+#include "Sti/StiKalmanTrackFinder.h"
+#include "Sti/StiTrackMerger.h"
+#include "Sti/StiCompositeSeedFinder.h"
+#include "Sti/StiLocalTrackMerger.h"
+#include "Sti/StiDisplayManager.h"
+#include "Sti/StiDefaultTrackFilter.h"
+#include "Sti/StiIOBroker.h"
+#include "Sti/Parameter.h"
+#include "StiMaker/RootEditableParameter.h"
+#include "StiMaker/StiRootIOBroker.h"
+#include "StiGui/StiRootDisplayManager.h"
+#include "StiGui/StiRootDrawableDetector.h"
+#include "StiGui/StiRootDrawableMcTrack.h"
+#include "StiGui/StiRootDrawableHitContainer.h"
+#include "StiGui/StiRootDrawableKalmanTrack.h"
+#include "StiGui/StiRootDrawableStiEvaluableTrack.h"
 
-#include "../StiEvaluator/StiEvaluator.h"
-#include "../StiEvaluator/StiEventAssociator.h"
-#include "../Sti/StiEvaluableTrackSeedFinder.h"
+#include "StiEvaluator/StiEvaluator.h"
+#include "Sti/StiEvaluableTrackSeedFinder.h"
 #include "StAssociationMaker/StAssociationMaker.h"
-#include "../Sti/StiHitErrorCalculator.h"
+#include "Sti/StiHitErrorCalculator.h"
 
 StiDefaultToolkit::StiDefaultToolkit()
   :
@@ -355,25 +354,6 @@ StiHitFiller    * StiDefaultToolkit::getHitFiller()
   hitFiller->addDetector(kSvtId);
   return hitFiller;
 }
-
-/*
-  StiEvaluator         * StiDefaultToolkit::getEvaluator(const string& fname)
-  {
-  if (evaluator)
-  return evaluator;
-  StiEventAssociator::instance(getAssociationMaker());
-  evaluator = StiDefaultEvaluator::instance(fname);
-  return evaluator;
-  }
-  
-  StiEvaluator         * StiDefaultToolkit::getEvaluator()
-  {
-  if (evaluator)
-  return evaluator;
-  evaluator = StiDefaultEvaluator::instance("Evaluator.root");
-  return evaluator;
-  }
-*/
 
 StiIOBroker * StiDefaultToolkit::getIOBroker()
 {

@@ -7,6 +7,10 @@
 //
 //
 // $Log: StiMaker.cxx,v $
+// Revision 1.107  2002/12/02 20:37:20  calderon
+// Removed previous references to old version of StiEvaluator, which were not
+// used anyway, but caused compilation problems.
+//
 // Revision 1.106  2002/10/04 01:54:48  pruneau
 // DefaultToolkit now uses the StiHitLoader scheme rahter than the StiHitFiller.
 //
@@ -103,10 +107,6 @@
 //#include "StiGui/StiRootDrawableLine.h"
 //#include "StiGui/StiRootDrawableHitContainer.h"
 #include "StiGui/StiRootDisplayManager.h"
-
-//StiEvaluator
-#include "StiEvaluator/StiEvaluator.h"
-#include "StiEvaluator/StiEventAssociator.h"
 
 // StiMaker
 #include "StiDefaultToolkit.h"
@@ -209,9 +209,6 @@ Int_t StiMaker::InitRun(int run)
 	  else
 	    cout << "---- AssociationMaker NOT Defined" << endl;
 	  
-	  StiEventAssociator::instance(mAssociationMaker);
-	  StiEvaluator::instance(mEvalFileName);
-	  cout <<"---- Evaluator Ready" << endl;
 	}
       else
 	cout <<"--- Evaluator will not be used" << endl;
@@ -279,8 +276,6 @@ void StiMaker::finishEvent()
   StTimer clockGlobalFiller;
   StTimer clockPrimaryFiller;
   StTimer clockPrimaryFinder;
-  StTimer clockAssociator;
-  StTimer clockEvaluator;
   
   if (eventIsFinished)
     {
@@ -315,16 +310,6 @@ void StiMaker::finishEvent()
   else 
     cout <<"StiMaker::finishEvent() - INFO - Event has no vertex" << endl;
 
-  if (ioBroker->simulated())
-    {
-      clockAssociator.start();
-      //StiEventAssociator::instance()->associate(mMcEvent);
-      clockAssociator.stop();
-
-      //clockEvaluator.start();
-      //StiEvaluator::instance()->evaluate(toolkit->getTrackContainer());
-      //clockEvaluator.stop();
-    }
   if (ioBroker->useGui()==true) 
     {
       tracker->update();
@@ -376,9 +361,7 @@ void StiMaker::finishEvent()
        <<" Global  Finding :"<<clockGlobalFinder.elapsedTime()<<endl
        <<"         Filling :"<<clockGlobalFiller.elapsedTime()<<endl
        <<" Primary Finding :"<<clockPrimaryFinder.elapsedTime()<<endl
-       <<"         Filling :"<<clockPrimaryFiller.elapsedTime()<<endl
-       <<"     Association :"<<clockAssociator.elapsedTime()<<endl
-       <<"      Evaluation :"<<clockEvaluator.elapsedTime()<<endl;
+       <<"         Filling :"<<clockPrimaryFiller.elapsedTime()<<endl;
 
 
   cout <<"StiMaker::finishEvent() - INFO - Done"<<endl;
