@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.24 2000/05/17 00:11:31 caines Exp $
+// $Id: StMatchMaker.cxx,v 1.25 2000/06/22 16:57:41 wdeng Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.25  2000/06/22 16:57:41  wdeng
+// Move globtrk length calculation from StPrimaryMaker to StMatchMaker.
+//
 // Revision 1.24  2000/05/17 00:11:31  caines
 // Make sure ALL hits acknowledged as on track
 //
@@ -74,8 +77,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-//#include "PhysicalConstants.h"
+
+#include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
+#include "StThreeVectorD.hh"
+#include "StHelixD.hh"
+
 #if !defined(ST_NO_NAMESPACES)
 using namespace units;
 #endif
@@ -608,9 +615,28 @@ Int_t StMatchMaker::Make(){
   if (iRes !=kSTAFCV_OK) {
     gMessMgr->Warning() << "Problem on return from EGR_FITTER" << endm;}
   if(Debug()) gMessMgr->Debug() << " finished calling egr_fitter" << endm;
+
+  // globtrk length calaulation  
+  dst_track_st *globtrkPtr1  = globtrk->GetTable();
+  for( Int_t no_rows=0; no_rows<globtrk->GetNRows(); no_rows++, globtrkPtr1++)
+    {
+      if( globtrkPtr1->iflag<0 ) { globtrkPtr1->length = 0; continue; }
+      Float_t dip   = atan(globtrkPtr1->tanl);
+      Int_t    h    = (globtrkPtr1->icharge > 0 ? -1 : 1);
+      Float_t phase = globtrkPtr1->psi*degree-h*pi/2;
+      Float_t curvature = globtrkPtr1->curvature;
+      Float_t x0 = globtrkPtr1->r0 * cos(globtrkPtr1->phi0 * degree);
+      Float_t y0 = globtrkPtr1->r0 * sin(globtrkPtr1->phi0 * degree);
+      Float_t z0 = globtrkPtr1->z0;
+      StThreeVectorD origin(x0, y0, z0);  
+      StHelixD globHelix(curvature, dip, phase, origin, h);
+            
+      StThreeVectorD lastPoint(globtrkPtr1->x_last[0], 
+                               globtrkPtr1->x_last[1],globtrkPtr1->x_last[2]);
+      Float_t globLength = globHelix.pathLength(lastPoint); 
+      globtrkPtr1->length = (globLength>0) ? globLength : (-globLength);  
+    }
   
-
-
   // Fill bit map in glob trk
 
   spc   = tphit->GetTable();
