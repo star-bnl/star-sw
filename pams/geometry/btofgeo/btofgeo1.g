@@ -1,5 +1,8 @@
-* $Id: btofgeo1.g,v 1.1 2000/11/22 17:49:07 nevski Exp $
+* $Id: btofgeo1.g,v 1.2 2001/03/14 17:39:33 geurts Exp $
 * $Log: btofgeo1.g,v $
+* Revision 1.2  2001/03/14 17:39:33  geurts
+* fixed bug in outer CTB slab dimensioning
+*
 * Revision 1.1  2000/11/22 17:49:07  nevski
 * tof geometry versions 1 and 2 preserved in btofgeo1, version 3 goes in btofgeo2
 *
@@ -230,7 +233,10 @@ Block BMTC  is  the Main Tray Cavity filled with MANY details for CTB
 *---- inner slab + readout
       zpos  =  (tray_length-ctbb_Slab1Len)/2-tray_WallThk-ctbb_Wrap
       xpos  =  -tray_Height/2+ctbb_Slab1x
-      Create and Position BXSA  X=xpos  Z=zpos
+      Create and Position BXSA  dx=ctbb_SlabThck/2 ,
+                                dy=ctbb_SlabWid/2 ,
+                                dz=ctbb_Slab1Len/2,
+                                X=xpos  Z=zpos
       zpos = zpos - (ctbb_Slab1Len + ctbb_ConvLen)/2
       Create and Position BCCV  X=xpos  Z=zpos,
                      Dx1=ctbb_SlabThck/2  Dx2=ctbb_SlabThck/2,
@@ -250,8 +256,7 @@ Block BMTC  is  the Main Tray Cavity filled with MANY details for CTB
       Create and Position BXSA          dx=ctbb_SlabThck/2,
                                         dy=ctbb_SlabWid/2,
                                         dz=ctbb_Slab2Len/2,
-                                        X=xpos,
-                                        Z=-zpos
+                                        X=xpos Z=-zpos
       zpos = zpos - (ctbb_Slab2len + ctbb_ConvLen)/2
                  Position BCCV  X=xpos  Z=-zpos  alphax=180,
                      Dx1=ctbb_SlabThck/2  Dx2=ctbb_SlabThck/2,
@@ -347,7 +352,7 @@ Block BXSA  is  the active trigger scintillator SLAB for ctb
       Attribute BXSA      seen=1   colo=3
       Material polystyren
       Medium   sensitive    IsVol=1
-      Shape   BOX    dx=ctbb_SlabThck/2  dy=ctbb_SlabWid/2  dz=ctbb_Slab1Len/2
+      Shape   BOX    dx=0 dy=0 dz=0
 *
 *   hit options: H - put in GEANT hit field (instead of PseudoVolumes)
 *                S - Single step
