@@ -48,7 +48,11 @@ TROOT root("Rint","The ROOT Interactive Interface", initfuncs);
 //______________________________________________________________________________
 int main(int argc, char **argv)
 {
-   const char *appname = "Rint";
+#ifndef WIN32
+   char appname[] = "Rint";
+#else
+   char appname[] = "Root_Rint";
+#endif
  __argc_save=argc;  __argv_save=argv; 
        xargc=argc;      xargv = argv;
    f77argc = argc;    f77argv = argv;
