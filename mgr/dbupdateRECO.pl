@@ -51,6 +51,7 @@ my @Sets = (
              "pau200/hijing/b0_7/gam15/year_2a/hadronic_on",
              "pau200/hijing/b0_7/jet15/year_2a/hadronic_on", 
              "pp200/pythia/default/minibias/year_2a/hadronic_on",
+             "auau200/strongcp/broken/eb-400_90/year_1h/hadronic_on",
              "auau200/mevsim/vcascade/central/year_1h/hadronic_on",       
              "auau200/mevsim/vcascade/flow/year_1h/hadronic_on", 
              "auau200/mevsim/vcascade/fluct/year_1h/hadronic_on",
@@ -169,11 +170,11 @@ my @diskRecoDirs;
 
 my $inext =scalar(@Sets); 
 
-for( $ll = 0; $ll<34; $ll++) { 
+for( $ll = 0; $ll<35; $ll++) { 
   $diskRecoDirs[$ll] = $DISK2 . "/" . $Sets[$ll] . "/tfs_6";
   print "diskRecoDir: $diskRecoDirs[$ll]\n";
 }
-for( $ii = 34; $ii< 41; $ii++) { 
+for( $ii = 35; $ii< 42; $ii++) { 
 $diskRecoDirs[$ii] = $DISK1 . "/" . $Sets[$ii] . "/tfs_6";
   print "diskRecoDir: $diskRecoDirs[$ii]\n";
 }
