@@ -81,6 +81,7 @@
   tdm/table/cell/putvalue 'control_toadc[0].energy'         60.0     | GeV/c
   tdm/table/cell/putvalue 'control_toadc[0].dep_mip'        0.019    | GeV/c
   tdm/table/cell/putvalue 'control_toadc[0].nphe_mip'       42.0     | phe 
+  tdm/table/cell/putvalue 'control_toadc[0].rms_ped'        0.0     | RMS of pedestal
   tdm/table/cell/putvalue 'control_toadc[0].c1'             0.0     | to be calculated 
   tdm/table/cell/putvalue 'control_toadc[0].c2'             0.0     | to be calculated 
   tdm/table/cell/putvalue 'control_toadc[0].c3'             0.0     | to be calculated 
