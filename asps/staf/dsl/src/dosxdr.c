@@ -513,7 +513,7 @@ static void xdrstdio_destroy(XDR *xdrs)
 * xdrstdio_getbytes - read bytest from stream
 *
 */
-static bool_t xdrstdio_getbytes(XDR *xdrs, char *cp, unsigned len)
+bool_t xdrstdio_getbytes(XDR *xdrs, char *cp, unsigned len)
 {
  unsigned lenread; 
   if ( !len ) return TRUE;

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 int makearray_(int *base, int* srowpp, int *nrowpp) {
 

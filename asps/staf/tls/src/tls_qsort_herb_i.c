@@ -14,7 +14,7 @@ void tls_swap_two_rows(int row1,int row2,int rowsize,int *table) {
     table[ii+offset2]=swap;
   }
 }
-int tls_qsort(int *sortCol,int rsize,int *table,int left,int rite) {
+void tls_qsort(int *sortCol,int rsize,int *table,int left,int rite) {
   register int ileft,irite,rowsize,comparator;
 
   ileft=left; irite=rite; rowsize=rsize;
