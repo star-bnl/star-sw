@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.h,v 1.10 1998/08/28 21:55:11 fine Exp $
+// $Id: St_XDFFile.h,v 1.11 1998/09/20 22:50:38 fine Exp $
 // $Log: St_XDFFile.h,v $
+// Revision 1.11  1998/09/20 22:50:38  fine
+// New method to read XDF file has been introduced
+//
 // Revision 1.10  1998/08/28 21:55:11  fine
 // TSocket data-memebr and "socket" methods have been introduced to accept the XDF file
 // over TCP/IP
@@ -61,6 +64,7 @@ class St_XDFFile
     virtual Int_t       NextEventPut(St_DataSet *dataset);          // create DS_DATASET_T from St_DataSet and write it out in XDR format
     virtual Int_t       CloseXDF();                                 // close the XDF file (it is called from dtor)
     static  void        GetXdFile(const Char_t *filename, St_DataSet *dataset); // open, read and close file file
+    static  St_DataSet *GetXdFile(const Char_t *filename);          // open, read and close file file
     ClassDef(St_XDFFile,0)
 
 };
