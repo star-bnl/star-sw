@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.h,v 1.10 2000/05/18 21:57:19 lasiuk Exp $
+ * $Id: StRchMaker.h,v 1.11 2000/05/23 16:49:55 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,8 +9,8 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRchMaker.h,v $
- * Revision 1.10  2000/05/18 21:57:19  lasiuk
- * dev patch
+ * Revision 1.11  2000/05/23 16:49:55  lasiuk
+ * writing to StEvent/StRichCollection
  *
  * Revision 1.11  2000/05/23 16:49:55  lasiuk
  * writing to StEvent/StRichCollection
@@ -34,12 +34,17 @@
  *
  **************************************************************************/
 #ifdef __ROOT__
+#ifndef STAR_StRchMaker
+#define STAR_StRchMaker
+
+#ifndef StMaker_H
 #include "StMaker.h"
 #endif
 #define rCH_WITH_PAD_MONITOR 1
 
-#ifndef StMaker_H
-#include "StMaker.h"
+#include "StRichDisplayActivate.h"
+
+#ifndef __CINT__
 #include <vector>
 
 using std::vector;
@@ -48,13 +53,22 @@ using std::vector;
 #ifdef RCH_HISTOGRAM
 #include "TFile.h"
 
+#include "TNtuple.h"
+#endif
+
+#include "StRrsMaker/StRichSinglePixel.h"
+#include "StRrsMaker/StRichSingleMCPixel.h"
+#endif
 // forward StEvent declaration
 class StEvent;
 class StRichCollection;
 
 class StDAQReader;
 class StRichReaderInterface;
+class StRichGeometryDb;
 class StRichClusterAndHitFinder;
+class StRichHit;
+class StRichSimpleHit;
 class StRichSimpleHitCollection;
 class StRichSinglePixel;
 
@@ -64,7 +78,7 @@ class StRchMaker : public StMaker {
 private:
     Bool_t drawinit;
     
-    StRchMaker(const char *name="rch", int daq=0, int matrix=0, int stevent=0);
+protected:
     
 public: 
     StRchMaker(const char *name="rch", int daq=0, int matrix=0, int cf=0);
@@ -73,10 +87,14 @@ public:
     virtual Int_t  Make();
     virtual void   PrintInfo();
     virtual Int_t  Finish();
+    int  adcDecoder(unsigned long code, unsigned long* pad, unsigned long* row, unsigned long* adc);
+    void setPedestalSubtract(int v,const char *file);
+    void clearPadMonitor();
+
 protected:
     void fillStEvent();
     
-    St_DataSet*            mTheRichData;
+private:
     StDAQReader*           mTheDataReader;//!
     StRichReaderInterface* mTheRichReader;//!
     St_DataSet*            mTheRichData;//!
@@ -86,11 +104,25 @@ protected:
     int mDaq;  // looking for DAQ data or not?
     int mPads;  // number of pads
     int mRows;
-    int mWithDstPixels;
+    int mNumberOfPads;
+    int mEventNumber;
+    int mUseMatrix;
+
+    // flags
+    short mRichCollectionPresent ;
+    short mPixelCollectionPresent;
     
+    const char* mPedestalFile;
     
+#ifndef __CINT__    
+    vector<StRichSinglePixel*> mPixelStore;//!
     StRichClusterAndHitFinder*  mClusterFinder;//!
+    // this is used only to pass the hits via the DataSet
     
+    StRichSimpleHitCollection*  mSimpleHitCollection;//!
+    vector<StRichSimpleHit*>    mTheHits;//!
+#endif    
+    // From StEvent
     StEvent*                    mEvent;//!
     StRichCollection*           mTheRichCollection;//!
 
@@ -112,7 +144,7 @@ protected:
     // hits
     TH1F* mhc;//!
     TH1F* mhmc;//!
-	static const char cvs[]="Tag $Name:  $ $Id: StRchMaker.h,v 1.10 2000/05/18 21:57:19 lasiuk Exp $ built "__DATE__" "__TIME__ ;
+	static const char cvs[]="Tag $Name:  $ $Id: StRchMaker.h,v 1.11 2000/05/23 16:49:55 lasiuk Exp $ built "__DATE__" "__TIME__ ;
 #endif
     virtual const char *GetCVS() const	{
     
