@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichGasGain.cxx,v 1.5 2000/02/14 01:13:25 lasiuk Exp $
+ * $Id: StRichGasGain.cxx,v 1.6 2000/03/12 23:56:33 lasiuk Exp $
  *
  * Description:
  *  StRichGasGain computes an amplification factor of an
@@ -35,8 +35,12 @@
  *
  ****************************************************************
  * $Log: StRichGasGain.cxx,v $
- * Revision 1.5  2000/02/14 01:13:25  lasiuk
- * add track_p to the GHit c'tor
+ * Revision 1.6  2000/03/12 23:56:33  lasiuk
+ * new coordinate system
+ * exchange MyRound with inline templated funtion
+ *
+ * Revision 1.7  2000/03/17 14:54:34  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.6  2000/03/12 23:56:33  lasiuk
  * new coordinate system
@@ -54,6 +58,10 @@
  * Revision 1.2  2000/01/25 22:02:20  lasiuk
  * Second Revision
  *
+ * Revision 1.1  2000/01/18 21:32:01  lasiuk
+ * Initial Revision
+ *
+ ****************************************************************/
 #ifndef ST_NO_NAMESPACES
 //namespace StRichRawData {
 #endif
@@ -61,10 +69,6 @@
 
 #include "StRichInduceSignal.h"
 #include "StRichGHit.h"
-#ifndef ST_NO_NAMESPACES
-//namespace StRichRawData {
-#endif
-
 #include "StRichGeometryDb.h"
 #include "StRichPhysicsDb.h"
 #include "StRichOtherAlgorithms.h"
@@ -81,8 +85,11 @@
     mGasGainAmplification    = tmpPhysicsDb->gasGainAmplification();
     mPolia                   = tmpPhysicsDb->polia();
 }
-    hit.position().setX(wirePos);
-    hit.position().setY(0);
+
+double StRichGasGain::operator()(StRichGHit& hit, double wirePos )
+{/* nopt */}
+
+double StRichGasGain::avalanche(StRichMiniHit* hit, double wirePos, list<StRichMiniHit*>& aList)
 {
     hit.position().setY(wirePos);
     hit.position().setZ(mAnodePadPlaneSeparation);
@@ -119,9 +126,12 @@ void StRichGasGain::feedbackPhoton(StRichMiniHit* hit, double q, list<StRichMini
     if ( StRichViewer::histograms )
 	StRichViewer::getView()->mFeedback->Fill(P);
 #endif
-	x    = hit.position().x() + dist * sin(phi);
-	z    = hit.position().z() + dist * cos(phi);
-	y    = mAnodePadPlaneSeparation;
+    double dist, x, y, z, cost, phi;
+	
+    for (int i=1; i<=P; i++) {
+	cost = mRandom.Flat();
+	x    = hit.position().x() + dist * cos(phi);
+ 	y    = hit.position().y() + dist * sin(phi);
 	dist = mAnodePadPlaneSeparation * sqrt( 1 - cost*cost ) / cost;
 	x    = hit->position().x() + dist * cos(phi);
  	y    = hit->position().y() + dist * sin(phi);

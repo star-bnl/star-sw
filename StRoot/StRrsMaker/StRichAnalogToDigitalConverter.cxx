@@ -1,5 +1,5 @@
 /********************************************************
- * $Id: StRichAnalogToDigitalConverter.cxx,v 1.3 2000/02/08 16:22:19 lasiuk Exp $
+ * $Id: StRichAnalogToDigitalConverter.cxx,v 1.4 2000/03/12 23:56:33 lasiuk Exp $
  *
  * Description:
  *  StRichAnalogToDigitalConverter takes an analog signal
@@ -11,6 +11,10 @@
  *
  ******************************************************
  * $Log: StRichAnalogToDigitalConverter.cxx,v $
+ * Revision 1.4  2000/03/12 23:56:33  lasiuk
+ * new coordinate system
+ * exchange MyRound with inline templated funtion
+ *
  * Revision 1.3  2000/02/08 16:22:19  lasiuk
  * use dbs
  * systemOfUnits now used
@@ -37,9 +41,10 @@ using namespace units;
 //namespace StRichRawData {
 #endif  
 
+#include "StRichAnalogToDigitalConverter.h"
 #include "StRichPhysicsDb.h"
 #include "StRichGeometryDb.h"
-#include "StRichAnalogToDigitalConverter.h"
+#include "StRichOtherAlgorithms.h"
 
 StRichAnalogToDigitalConverter::StRichAnalogToDigitalConverter()
     : mAddPedestal(0)
@@ -60,7 +65,7 @@ int StRichAnalogToDigitalConverter::operator()(double signal) const
     //    
     // signal is in [electrons], e_charge in [fC] and adc_factor in [fC/channel]
 
-    int Q = mRound( signal  /  mAdcConversion );
+    int Q = floor( signal  /  mAdcConversion );
     if(mAddPedestal)
 	Q += mPedestal;
     

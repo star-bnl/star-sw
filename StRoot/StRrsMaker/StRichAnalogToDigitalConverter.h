@@ -1,5 +1,5 @@
 /********************************************************************
- * $Id: StRichAnalogToDigitalConverter.h,v 1.3 2000/02/08 16:22:20 lasiuk Exp $
+ * $Id: StRichAnalogToDigitalConverter.h,v 1.4 2000/03/12 23:56:33 lasiuk Exp $
  *
  * Description:
  *   StRichAnalogToDigitalConverter is the function object containing
@@ -15,6 +15,10 @@
  *
  ********************************************************************
  * $Log: StRichAnalogToDigitalConverter.h,v $
+ * Revision 1.4  2000/03/12 23:56:33  lasiuk
+ * new coordinate system
+ * exchange MyRound with inline templated funtion
+ *
  * Revision 1.3  2000/02/08 16:22:20  lasiuk
  * use dbs
  * systemOfUnits now used
@@ -43,7 +47,7 @@ using std::unary_function;
 //namespace StRichRawData {
 #endif
 #include "StRichRrsMacros.h"
-#include "StRichOtherAlgorithms.h"
+class StRichPhysicsDb;
 
 class StRichAnalogToDigitalConverter : public unary_function<double,double> {
 public:
@@ -59,7 +63,6 @@ public:
     
 private:
     StRichPhysicsDb*  mPhysicsDb;
-    MyRound           mRound;
     int               mMaxADC;
     int               mPedestal;
     double            mAdcConversion;

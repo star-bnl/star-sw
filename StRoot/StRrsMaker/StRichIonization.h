@@ -1,5 +1,5 @@
 /***********************************************************************
- *  $Id: StRichIonization.h,v 1.4 2000/02/12 00:38:29 lasiuk Exp $
+ *  $Id: StRichIonization.h,v 1.5 2000/03/12 23:56:34 lasiuk Exp $
  *
  * Description:
  *   StRichIonization function object contains ionization algorithm
@@ -14,8 +14,12 @@
  *
  ***************************************************************************
  * $Log: StRichIonization.h,v $
- * Revision 1.4  2000/02/12 00:38:29  lasiuk
- * rename probability (max)
+ * Revision 1.5  2000/03/12 23:56:34  lasiuk
+ * new coordinate system
+ * exchange MyRound with inline templated funtion
+ *
+ * Revision 1.6  2000/03/17 14:54:46  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.5  2000/03/12 23:56:34  lasiuk
  * new coordinate system
@@ -62,7 +66,6 @@ public:
     StRichIonization();
     ~StRichIonization();
 
-    MyRound          mRound;
     void operator()( const StRichGHit& );
 
     void splitSegment(const StRichGHit*, list<StRichMiniHit*>&) const;

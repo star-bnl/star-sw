@@ -1,5 +1,5 @@
 /*******************************************************************
- * $Id: StRichAnalogSignalGenerator.cxx,v 1.5 2000/02/14 01:09:46 lasiuk Exp $
+ * $Id: StRichAnalogSignalGenerator.cxx,v 1.6 2000/03/12 23:56:33 lasiuk Exp $
  *
  * Description:
  *  StRichAnalogSignalGenerator generates signals on pads
@@ -32,8 +32,12 @@
  * 
  *************************************************************************
  * $Log: StRichAnalogSignalGenerator.cxx,v $
- * Revision 1.5  2000/02/14 01:09:46  lasiuk
- * add track_p to GHit c'tor
+ * Revision 1.6  2000/03/12 23:56:33  lasiuk
+ * new coordinate system
+ * exchange MyRound with inline templated funtion
+ *
+ * Revision 1.7  2000/03/17 14:54:12  lasiuk
+ * Large scale revisions after ROOT dependent memory leak
  *
  * Revision 1.6  2000/03/12 23:56:33  lasiuk
  * new coordinate system
@@ -66,17 +70,18 @@ using std::min;
 //namespace StRichRawData { 
 #endif
 #include "StRichCoordinateTransform.h"
-#include "StRichCoordinateTransform.h"
+#include "StRichAnalogSignalGenerator.h"
 #include "StRichWriter.h"
 #include "StRichOtherAlgorithms.h"
 
-    mGeomDb  = StRichGeometryDb::getDb(); 
-    mOutput  = StRichWriter::getInstance();
+#include "StRichOtherAlgorithms.h"
+#ifdef RICH_WITH_VIEWER
+StRichAnalogSignalGenerator::StRichAnalogSignalGenerator()
+StRichAnalogSignalGenerator::StRichAnalogSignalGenerator() {/* never called*/}
 
-    mNumberOfPadsInRowQ    = mGeomDb->numberOfPadsInAQuadrantRow(); //n_pad_z
-    mNumberOfRowsInColumnQ = mGeomDb->numberOfRowsInAQuadrantColumn(); //n_pad_x;
-    mPadLength             = mGeomDb->padLength(); //pad_side_x;
-    mPadWidth              = mGeomDb->padWidth(); //pad_side_z;
+StRichAnalogSignalGenerator::StRichAnalogSignalGenerator(StRichWriter* theWriter)
+    mOutput    = StRichWriter::getInstance();
+    mGeomDb    = StRichGeometryDb::getDb();
     mTransform = StRichCoordinateTransform::getTransform(mGeomDb);
     mOutput    = theWriter;
     
@@ -87,17 +92,15 @@ using std::min;
 StRichAnalogSignalGenerator::~StRichAnalogSignalGenerator() { /* nopt */ }
 {
 void StRichAnalogSignalGenerator::operator()( const StRichGHit& hit, double q ) const
-    double x, z, q00, q10, q01, q11,s;
+}
 
 	cout << "StRichAnalogSignalGenerator::operator() --> q= " << q << endl;
 {
     if(RRS_DEBUG)
-    StRichCoordinateTransform transform(mGeomDb);
-    
 	cout << "StRichAnalogSignalGenerator::induceSignal() --> q= " << q << endl;
     double sum = 0;
     double x, y, q00, q10, q01, q11,s;
-    transform(local, raw);
+
     //
     StRichLocalCoordinate local(hit.position());
 
@@ -121,18 +124,18 @@ void StRichAnalogSignalGenerator::operator()( const StRichGHit& hit, double q ) 
 	     << padLimits.first << ", " << padLimits.second << ')' << endl;
     }
     int i, j;
-	    transform(tmpRaw,tmpLoc);
+    StRichRawCoordinate tmpRaw;
     StRichLocalCoordinate tmpLoc;
-	    z = tmpLoc.position().z();
+    for (i=rowLimits.first; i<=rowLimits.second; i++) {
 	tmpRaw.setRow(i);
-	    q00 = induceTension (( (hit.position().x()-x) - mPadLength/2)/mAnodePadPlaneSpacing,   
-				 ( (hit.position().z()-z) - mPadWidth/2 )/mAnodePadPlaneSpacing);    
-	    q10 = induceTension (( (hit.position().x()-x) + mPadLength/2)/mAnodePadPlaneSpacing,   
-				 ( (hit.position().z()-z) - mPadWidth/2 )/mAnodePadPlaneSpacing);    
-	    q01 = induceTension (( (hit.position().x()-x) - mPadLength/2)/mAnodePadPlaneSpacing,     
-				 ( (hit.position().z()-z) + mPadWidth/2 )/mAnodePadPlaneSpacing);     
-	    q11 = induceTension (( (hit.position().x()-x) + mPadLength/2)/mAnodePadPlaneSpacing,    
-				 ( (hit.position().z()-z) + mPadWidth/2 )/mAnodePadPlaneSpacing);   
+	for (j=padLimits.first; j<=padLimits.second; j++) {
+	    tmpRaw.setPad(j);
+
+	    (*mTransform)(tmpRaw,tmpLoc);
+	    q00 = induceTension (( (hit.position().y()-y) - mPadLength/2)/mAnodePadPlaneSpacing,   
+				 ( (hit.position().x()-x) - mPadWidth/2 )/mAnodePadPlaneSpacing);    
+	    q10 = induceTension (( (hit.position().y()-y) + mPadLength/2)/mAnodePadPlaneSpacing,   
+				 ( (hit.position().x()-x) - mPadWidth/2 )/mAnodePadPlaneSpacing);    
 	    q01 = induceTension (( (hit.position().y()-y) - mPadLength/2)/mAnodePadPlaneSpacing,     
 				 ( (hit.position().x()-x) + mPadWidth/2 )/mAnodePadPlaneSpacing);     
 	    q11 = induceTension (( (hit.position().y()-y) + mPadLength/2)/mAnodePadPlaneSpacing,    
@@ -143,7 +146,7 @@ void StRichAnalogSignalGenerator::operator()( const StRichGHit& hit, double q ) 
 
 	    s =  q * (q00-q10-q01+q11);
 	    sum += s;
-		StRichViewer::getView()->mAnalogSignals->Fill(z,x,s);
+	    if(RRS_DEBUG)
 	    mOutput->putSignal(i,j,s,hit.id(),hit.trackp());
 	    
 	    // save signal on pad
@@ -155,13 +158,13 @@ void StRichAnalogSignalGenerator::operator()( const StRichGHit& hit, double q ) 
 	    // histograms
 #endif
 	} 
-double StRichAnalogSignalGenerator::induceTension(double ratiox, double ratioz) const 
+    }
 #ifdef RICH_WITH_VIEWER
     if (StRichViewer::histograms )
 	StRichViewer::getView()->mTotalCharge->Fill(sum/q);
 #endif
-    c1 = ratiox*ratioz;
-    c2 = ratiox*ratiox + ratioz*ratioz;
+}
+
 double StRichAnalogSignalGenerator::induceTension(double ratioy, double ratiox) const 
 {
     static const double g = 0.9159655942;   // Catalan constant
@@ -178,28 +181,30 @@ double StRichAnalogSignalGenerator::induceTension(double ratioy, double ratiox) 
 	qsum += s*(arctan-c1/(i*i));
 	s = -s;
     }
+    return ((g*c1 + qsum)/(2*M_PI));
+}
 
-    if(raw.pad()<=deltaPad) {//0-deltaPad
+pair<int, int>
 StRichAnalogSignalGenerator::calculatePadLimits(const StRichRawCoordinate& raw) const
-	limits.second = raw.pad()+deltaPad;
+{
     int deltaPad = 1;
-    else if (raw.pad() >= ( (mNumberOfPadsInRowQ-1)-(deltaPad)) &&
-	     raw.pad() <= ( (mNumberOfPadsInRowQ-1) )         ) {//79-deltaPad
-	limits.first = raw.pad()-deltaPad;
+    int tmpPad = nearestInteger(raw.pad());
+
+    pair<int,int> limits;
     if(tmpPad<=deltaPad) {//0-deltaPad
 	limits.first  = 0;
-    else if (raw.pad() >= ( (mNumberOfPadsInRowQ         )) &&
-	     raw.pad() <= ( (mNumberOfPadsInRowQ+deltaPad)) ) {//80+deltaPad
+	limits.second = tmpPad+deltaPad;
+    }
     else if (tmpPad >= ( (mNumberOfPadsInRowQ-1)-(deltaPad)) &&
-	limits.second = raw.pad()+deltaPad;
+	     tmpPad <= ( (mNumberOfPadsInRowQ-1) )         ) {//79-deltaPad
 	limits.first = tmpPad-deltaPad;
-    else if (raw.pad() >= (2.*mNumberOfPadsInRowQ - 1)) {//159
-	limits.first  = (2.*mNumberOfPadsInRowQ - 1) - deltaPad;
-	limits.second = (2.*mNumberOfPadsInRowQ - 1);
+	limits.second = mNumberOfPadsInRowQ-1;
+    }
+    else if (tmpPad >= ( (mNumberOfPadsInRowQ         )) &&
 	     tmpPad <= ( (mNumberOfPadsInRowQ+deltaPad)) ) {//80+deltaPad
 	limits.first = mNumberOfPadsInRowQ;
-	limits.first  = raw.pad() - deltaPad;
-	limits.second = raw.pad() + deltaPad;
+	limits.second = tmpPad+deltaPad;
+    }
     else if (tmpPad >= (2*mNumberOfPadsInRowQ - 1)) {//159
 	limits.first  = (2*mNumberOfPadsInRowQ - 1) - deltaPad;
 	limits.second = (2*mNumberOfPadsInRowQ - 1);
@@ -209,28 +214,30 @@ StRichAnalogSignalGenerator::calculatePadLimits(const StRichRawCoordinate& raw) 
 	limits.second = tmpPad + deltaPad;
     }
     
+    return limits;
+}
 
-    if(raw.row() <= deltaRow) {//0-deltaRow
+pair<int, int>
 StRichAnalogSignalGenerator::calculateRowLimits(const StRichRawCoordinate& raw) const
-	limits.second = raw.row()+deltaRow;
+{ 
     int deltaRow = 1;
-    else if (raw.row() >= ( (mNumberOfRowsInColumnQ-1)-(deltaRow)) &&
-	     raw.row() <= ( ((mNumberOfRowsInColumnQ-1) )        )) {//47-deltaRow
-	limits.first = raw.row()-deltaRow;
+    int tmpRow = nearestInteger(raw.row());
+
+    pair<int,int> limits;
     if(tmpRow <= deltaRow) {//0-deltaRow
 	limits.first  = 0;
-    else if (raw.row() >= ( (mNumberOfRowsInColumnQ         ) ) &&
-	     raw.row() <= ( (mNumberOfRowsInColumnQ+deltaRow))) {//48+deltaRow
+	limits.second = tmpRow+deltaRow;
+    }
     else if (tmpRow >= ( (mNumberOfRowsInColumnQ-1)-(deltaRow)) &&
-	limits.second = raw.row()+deltaRow;
+	     tmpRow <= ( ((mNumberOfRowsInColumnQ-1) )        )) {//47-deltaRow
 	limits.first = tmpRow-deltaRow;
-    else if (raw.row() >= (2.*mNumberOfRowsInColumnQ - 1) ) {//95
-	limits.first  = (2.*mNumberOfRowsInColumnQ - 1) - deltaRow;
-	limits.second = (2.*mNumberOfRowsInColumnQ - 1);
+	limits.second = (mNumberOfRowsInColumnQ)-1;
+    }
+    else if (tmpRow >= ( (mNumberOfRowsInColumnQ         ) ) &&
 	     tmpRow <= ( (mNumberOfRowsInColumnQ+deltaRow))) {//48+deltaRow
 	limits.first  = mNumberOfRowsInColumnQ;
-	limits.first  = raw.row() - deltaRow;
-	limits.second = raw.row() + deltaRow;
+	limits.second = tmpRow+deltaRow;
+    }
     else if (tmpRow >= (2*mNumberOfRowsInColumnQ - 1) ) {//95
 	limits.first  = (2*mNumberOfRowsInColumnQ - 1) - deltaRow;
 	limits.second = (2*mNumberOfRowsInColumnQ - 1);
