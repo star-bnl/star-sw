@@ -1,13 +1,13 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.69 2003/01/16 16:02:27 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.70 2003/05/06 18:38:05 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
 //
 ////////////////////////////////////////////////////////////////////////////
 //
-// Description:  Maker to analyze Flow using the FlowTags and/or StFlowEvent
+// Description:  Maker to analyze Flow using StFlowEvent
 //
 ////////////////////////////////////////////////////////////////////////////
 
@@ -18,7 +18,6 @@
 #include "StFlowAnalysisMaker.h"
 #include "StFlowMaker/StFlowMaker.h"
 #include "StFlowMaker/StFlowEvent.h"
-#include "StFlowTagMaker/StFlowTagMaker.h"
 #include "StFlowMaker/StFlowConstants.h"
 #include "StFlowMaker/StFlowSelection.h"
 #include "StEnumerations.h"
@@ -65,12 +64,6 @@ StFlowAnalysisMaker::~StFlowAnalysisMaker() {
 Int_t StFlowAnalysisMaker::Make() {
   // Make histograms
 
-  // Get a pointer to the flow tags
-  StFlowTagMaker* pFlowTagMaker = NULL;
-  pFlowTag = NULL;
-  pFlowTagMaker = (StFlowTagMaker*)GetMaker("FlowTag");
-  if (pFlowTagMaker) pFlowTag = pFlowTagMaker->TagPointer();
-
   // Get a pointer to StFlowEvent
   StFlowMaker* pFlowMaker = NULL;
   pFlowMaker = (StFlowMaker*)GetMaker("Flow");
@@ -78,12 +71,7 @@ Int_t StFlowAnalysisMaker::Make() {
   if (pFlowEvent && pFlowSelect->Select(pFlowEvent)) {     // event selected
 
     // Event quantities
-    if (pFlowTag) {
-      FillFromTags();                        // get event quantities
-      FillEventHistograms();                 // fill from Flow Tags
-      if (pFlowEvent) FillParticleHistograms(); // fill particle histograms
-    } else if (pFlowEvent) {
-      gMessMgr->Info("##### FlowAnalysis: FlowTag pointer null");
+    if (pFlowEvent) {
       if (FillFromFlowEvent()) {               // get event quantities
 	FillEventHistograms();                 // fill from FlowEvent
 	FillParticleHistograms();              // fill particle histograms
@@ -91,7 +79,7 @@ Int_t StFlowAnalysisMaker::Make() {
 	gMessMgr->Info("##### FlowAnalysis: Event psi = 0");
       }
     } else {
-      gMessMgr->Info("##### FlowAnalysis: FlowEvent and FlowTag pointers null");
+      gMessMgr->Info("##### FlowAnalysis: FlowEvent pointer null");
       return kStOK;
     }
     
@@ -1203,46 +1191,9 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.69 2003/01/16 16:02:27 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.70 2003/05/06 18:38:05 posk Exp $");
 
   return StMaker::Init();
-}
-
-//-----------------------------------------------------------------------
-
-void StFlowAnalysisMaker::FillFromTags() {
-//   Get the flow tags and calculate the full event quantities
-
-  int nSels = 2, nHars = 6, nSubs = 2;
-
-  for (int j = 0; j < nHars; j++) {
-    float order  = (float)(j+1);
-
-    // sub-event quantities
-    mQSub[0][j].Set( pFlowTag->qxa[j], pFlowTag->qya[j] );
-    mQSub[1][j].Set( pFlowTag->qxb[j], pFlowTag->qyb[j] );
-    mQSub[2][j].Set( pFlowTag->qxc[j], pFlowTag->qyc[j] );
-    mQSub[3][j].Set( pFlowTag->qxd[j], pFlowTag->qyd[j] );
-    mMultSub[0][j] = pFlowTag->na[j];
-    mMultSub[1][j] = pFlowTag->nb[j];
-    mMultSub[2][j] = pFlowTag->nc[j];
-    mMultSub[3][j] = pFlowTag->nd[j];
-
-    // calculate Psi
-    for (int i = 0; i < nSels * nSubs; i++) {
-      mPsiSub[i][j] = mQSub[i][j].Phi() / order;
-    }
-
-    // full event quantities
-    for (int k = 0; k < nSels; k++) {
-      mQ[k][j]    = mQSub[nSels*k][j] + mQSub[nSels*k+1][j];
-      mPsi[k][j]  = mQ[k][j].Phi() / order;
-      mMult[k][j] = mMultSub[nSels*k][j] + mMultSub[nSels*k+1][j];
-      m_q[k][j]   = (mMult[k][j] > 0) ? mQ[k][j].Mod()/sqrt((double)mMult[k][j])
-	: 0.;
-    }
-  }
-
 }
 
 //-----------------------------------------------------------------------
@@ -2095,6 +2046,9 @@ void StFlowAnalysisMaker::SetHistoRanges(Bool_t ftpc_included) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.70  2003/05/06 18:38:05  posk
+// Removed StFlowTagMaker.
+//
 // Revision 1.69  2003/01/16 16:02:27  posk
 // Some plotting changes.
 //
