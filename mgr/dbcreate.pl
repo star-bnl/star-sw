@@ -1,6 +1,6 @@
-#!/opt/star/bin/perl -w
+#!/opt/star/bin/perl
 #
-# $Id: dbcreate.pl,v 1.3 1999/07/25 16:23:09 wenaus Exp $
+# $Id: dbcreate.pl,v 1.4 1999/09/21 12:24:00 wenaus Exp $
 #
 ######################################################################
 #
@@ -14,6 +14,9 @@
 # Usage:    create.pl <pwd>
 #
 # $Log: dbcreate.pl,v $
+# Revision 1.4  1999/09/21 12:24:00  wenaus
+# Update to run on Solaris, and run quieter
+#
 # Revision 1.3  1999/07/25 16:23:09  wenaus
 # Modify DB access to allow remote use
 #
@@ -30,6 +33,7 @@ use File::Find;
 use File::Basename;
 use Net::FTP;
 
+use lib "/star/u2d/wenaus/datadb";
 require "dbsetup.pl";
 
 my $debugOn=0;
@@ -137,10 +141,12 @@ $nHpssDirs = 1;
 $theRecoDirs[0] = $ftpRecoHome;
 $checkedRecoDirs[0] = 0;
 $nHpssFiles = 0;
-print "Finding HPSS reco files\n";
 &walkHpss( $ftpReco, $ftpRecoHome, \@theRecoDirs, \@checkedRecoDirs,
            \@theRecoFiles, \@theRecoFileSpecs );
-print "Total reco files in HPSS: ".@theRecoFiles."\n";
+if ( @theRecoFiles == 0 ) {
+  print "dbcreate error: Total reco files in HPSS: ".@theRecoFiles."\n";
+}
+print "Total reco files in HPSS: ".@theRecoFiles."\n" if $debugOn;
 
 $ftpReco->quit();
 
@@ -159,17 +165,19 @@ $nHpssDirs = 1;
 $theSimuDirs[0] = $ftpSimuHome;
 $checkedSimuDirs[0] = 0;
 $nHpssFiles = 0;
-print "Finding HPSS simu files\n";
 &walkHpss( $ftpSimu, $ftpSimuHome, \@theSimuDirs,\@checkedSimuDirs,
            \@theSimuFiles, \@theSimuFileSpecs );
-print "Total simu files in HPSS: ".@theSimuFiles."\n";
+if ( @theSimuFiles == 0 ) {
+  print "dbcreate.pl error: Total simu files in HPSS: ".@theSimuFiles."\n";
+}
+print "Total simu files in HPSS: ".@theSimuFiles."\n" if $debugOn;
 
 $ftpSimu->quit();
 
 #### Discover datasets in the production data areas
-print "Finding data on disk\n";
+print "Finding data on disk\n" if $debugOn;
 foreach $dataDir (@dataDisks) {
-    open(DIRS, "find $dataDir -mindepth 6 -maxdepth 10 -type d |");
+    open(DIRS, "gfind $dataDir -mindepth 6 -maxdepth 10 -type d |");
     while (<DIRS>) {
         chomp;
         s/$dataDir\///;
@@ -229,7 +237,7 @@ $bfcEnum = "'unknown'";
 foreach $bf (sort keys %bfcTypes) { $bfcEnum .= ",'$bf'"; }
 
 
-print "Create and fill tables\n";
+print "Create and fill tables\n" if $debugOn;
 # drop any existing tables
 &StDbDeleteTables();
 
@@ -245,7 +253,7 @@ print "Create and fill tables\n";
 $nstored=0;
 $oldDir="";
 foreach $dataArea (@dataDisks) {
-    open(FILES, "find $dataArea -mindepth 6 -maxdepth 10 -type f |");
+    open(FILES, "gfind $dataArea -mindepth 6 -maxdepth 10 -type f |");
     while (<FILES>) {
         chomp;
         &addFile($_,"");
@@ -561,27 +569,29 @@ sub addFile {
                 $rv = $dbh->do($sql) || die $dbh->errstr;
             }
             
-            if ($nstored%200 == 0) { print "$nstored\n"; }
+            if ( $debugOn ) {
+              if ($nstored%200 == 0) { print "$nstored\n"; }
+            }
         }
     }
 }
 
 ######################
 sub StDbDeleteTables {
-    open ( DELTABLES, "| /usr/local/mysql/bin/mysql --user=$dbuser --host=$dbhost --password=$dbpass") or die "Open failure: $!";
+    open ( DELTABLES, "| /opt/star/bin/mysql --user=$dbuser --host=$dbhost --password=$dbpass") or die "Open failure: $!";
     print DELTABLES <<END;
     use $dbname;
-    drop table $DataFileT;
-    drop table $FileLocationT;
-    drop table $DataSetT;
-    drop table $SubsetT;
-    drop table $DataDirT;
+    drop table if exists $DataFileT;
+    drop table if exists $FileLocationT;
+    drop table if exists $DataSetT;
+    drop table if exists $SubsetT;
+    drop table if exists $DataDirT;
 END
     if ( $dropRunTables ) {
     print DELTABLES <<END;
-    drop table $RunT;
-    drop table $RunFileT;
-    drop table $EventT;
+#    drop table if exists $RunT;
+#    drop table if exists $RunFileT;
+#    drop table if exists $EventT;
 END
     }
     close DELTABLES;
@@ -589,7 +599,7 @@ END
 
 ######################
 sub StDbCreateTables {
-    open ( MAKETABLES, "| /usr/local/mysql/bin/mysql --user=$dbuser --host=$dbhost --password=$dbpass ") or die "Open failure: $!";
+    open ( MAKETABLES, "| /opt/star/bin/mysql --user=$dbuser --host=$dbhost --password=$dbpass ") or die "Open failure: $!";
     $dbCmd =<<END_BLOCK;
 # --------- Table building -----------
     use $dbname;
@@ -760,6 +770,46 @@ sub StDbCreateTables {
 
 #    show columns from $DataDirT;
 #    show index from $DataDirT;
+END_BLOCK
+    print MAKETABLES $dbCmd;
+
+    if ( $dropRunTables ) {
+    $dbCmd =<<END_BLOCK;
+    use $dbname;
+    create table $RunFileT
+        (
+         id mediumint not null auto_increment primary key,
+         ctime datetime not null,
+         size bigint not null,
+         fileId1 int unsigned not null,
+         fileId2 int unsigned not null,
+         owner varchar(20) not null,
+         grp varchar(20) not null,
+         access mediumint,
+         readtime datetime not null,
+         inserttime timestamp(10) not null,
+         runname varchar(80) not null,
+         name varchar(255) not null,
+         type enum ( $runTypeList ) not null,
+         nrun int unsigned not null,
+         stage enum ( $procStages ) not null,
+         nseq int not null,
+         events mediumint unsigned,
+         format varchar(30) not null,
+         hpss enum('U','Y','N') not null,
+         location varchar(10) not null,
+         site varchar(10) not null,
+         volume varchar(30) not null,
+         status smallint,
+         comment blob,
+
+         index(type),
+         index(nrun),
+         index(stage),
+         unique(name)
+         );
+#    show columns from $RunFileT;
+#    show index from $RunFileT;
 
     create table $RunT
         (
@@ -792,7 +842,7 @@ sub StDbCreateTables {
          status smallint,
          banks set ( $bankTypeList ),
          sectors set ( $sectorList ),
-         nevents mediumint unsigned,
+         events mediumint unsigned,
          ngood mediumint unsigned,
          nfiles mediumint unsigned,
          stage set ( $procStages ) not null,
@@ -844,36 +894,12 @@ sub StDbCreateTables {
 #    show columns from $EventT;
 #    show index from $EventT;
 
-    create table $RunFileT
-        (
-         id mediumint not null auto_increment primary key,
-         fileId1 int unsigned not null,
-         fileId2 int unsigned not null,
-         runname varchar(80) not null,
-         name varchar(255) not null,
-         type enum ( $runTypeList ) not null,
-         nrun int unsigned not null,
-         stage enum ( $procStages ) not null,
-         nseq int not null,
-         format varchar(30) not null,
-         ctime datetime not null,
-         usetime datetime not null,
-         hpss enum('U','Y','N') not null,
-         size bigint not null,
-         comment blob,
-
-         index(type),
-         index(nrun),
-         index(stage)
-         );
-#    show columns from $RunFileT;
-#    show index from $RunFileT;
-
 # --------- End of table building ----------
 END_BLOCK
     print MAKETABLES $dbCmd;
+  }
     close MAKETABLES;
-    print "------------------- Tables built --------------------\n";
+    print "----------------- Tables built -----------------\n" if $debugOn;
 }
 
 ######################
