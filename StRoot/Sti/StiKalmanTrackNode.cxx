@@ -17,6 +17,7 @@
 // x[4] = tan(l) 
 
 // initialize static vairables
+bool StiKalmanTrackNode::recurse = false;
 bool StiKalmanTrackNode::elossCalculated = false;
 bool StiKalmanTrackNode::mcsCalculated   = false;
 double StiKalmanTrackNode::kField = 0.5;
@@ -388,6 +389,7 @@ int StiKalmanTrackNode::propagate(StiDetector * tDet)	throw (Exception)
     rotate(dAlpha);
   double x, x0, rho;
   position = StiMaterialInteraction::findIntersection(this,tDet,x,x0,rho);
+	cout << "propagate x/x0/rho:" << x << "\t" << x0 << "\t" << rho << endl;
   propagate(x,x0,rho);
   return position;
 }
@@ -511,12 +513,22 @@ void StiKalmanTrackNode::updateNode() throw (Exception)
   // of this node.
   //__________________________________________________________________
 	// Update Measurement Error Matrix, calculate its determinant
+	if (hit==0)
+		{
+			cout << "StiKalmanTrackNode::updateNode() - Null HIT" << endl;
+      //throw new Exception(" KalmanTrack warning: Singular matrix !\n");
+			return;
+		}
 	double r00=hit->syy()+fC00;
   double r01=hit->syz()+fC10;
   double r11=hit->szz()+fC11;
   double det=r00*r11 - r01*r01;
   if (det< 1.e-10 && det>-1.e-10) 
-      throw new Exception(" KalmanTrack warning: Singular matrix !\n");
+		{
+			cout << "StiKalmanTrackNode::updateNode() - Singular matrix" << endl;
+      //throw new Exception(" KalmanTrack warning: Singular matrix !\n");
+			return;
+		}
   // inverse matrix
   double tmp=r00; r00=r11/det; r11=tmp/det; r01=-r01/det;
   // update error matrix
@@ -531,8 +543,13 @@ void StiKalmanTrackNode::updateNode() throw (Exception)
   double cur = fP3 + k30*dy + k31*dz;
   double eta = fP2 + k20*dy + k21*dz;
   double ddd = cur*fX-eta;
-  if (ddd >= 0.99999 || ddd<0.99999) 
-      throw new Exception("StiKalmanTrackNode - Warning - Filtering failed !\n");
+  if (ddd >= 0.99999 || ddd<-0.99999) 
+		{
+      cout << "StiKalmanTrackNode::updateNode() - extrapolation failed ddd" 
+					 << endl;
+			//throw new Exception("StiKalmanTrackNode - Warning - Filtering failed !\n");
+			return;
+		}
 	// update state
   fP0 += k00*dy + k01*dz;
   fP1 += k10*dy + k11*dz;
@@ -675,37 +692,41 @@ ostream& operator<<(ostream& os, const StiKalmanTrackNode& n)
 {
 	// print to the ostream "os" the parameters of this node 
 	// and all its children recursively
-
-  os << "Node Level: " << n.mDepth << endl
-		 << "x:" << n.fX  <<"\t"
-		 << "a:" << n.fAlpha<<"\t"
+	int nChildren = n.getChildCount();
+  os << "Level: " << n.mDepth << "\t"
+		 << " x:" << n.fX  <<"\t"
+		 << "alpha:" << n.fAlpha<<"\t"
 		 << "dedx:" << n.fdEdx <<"\t"
 		 << "chi2:" << n.fChi2 << endl
 		 << "P0/1/2/3/4:" << n.fP0 << " " 
 		 << n.fP1 <<" "
 		 << n.fP2 <<" "
 		 << n.fP3 <<" "
-		 << n.fP4 << endl
-		 << "ERROR:" << n.fC00 << "\t"
-		 << n.fC10<<"\t"
-		 << n.fC11<<"\t"
-		 << n.fC20<<"\t"
-		 << n.fC21<<"\t"
-		 << n.fC22<<"\t"
-		 << n.fC30<<"\t"
-		 << n.fC31<<"\t"
-		 << n.fC32<<"\t"
-		 << n.fC33<<"\t"
-		 << n.fC40<<"\t"
-		 << n.fC41<<"\t"
-		 << n.fC42<<"\t"
-		 << n.fC43<<"\t"
-		 << n.fC44 << endl;
-	int nChildren = n.getChildCount();
-	for (int i=0;i<nChildren;i++)
+		 << n.fP4 <<" "
+		 << "CC:" << nChildren << endl;
+		/*		 << "cov:" << n.fC00 << "\t"
+					 << n.fC10<<"\t"
+					 << n.fC11<<"\t"
+					 << n.fC20<<"\t"
+					 << n.fC21<<"\t"
+					 << n.fC22<<"\t"
+					 << n.fC30<<"\t"
+					 << n.fC31<<"\t"
+					 << n.fC32<<"\t"
+					 << n.fC33<<"\t"
+					 << n.fC40<<"\t"
+					 << n.fC41<<"\t"
+					 << n.fC42<<"\t"
+					 << n.fC43<<"\t"
+					 << n.fC44 << endl
+    */
+	if (StiKalmanTrackNode::recurse)
 		{
-			const StiKalmanTrackNode * child = dynamic_cast<const StiKalmanTrackNode *>(n.getChildAt(i));
-			os << *child;
+			for (int i=0;i<nChildren;i++)
+				{
+					const StiKalmanTrackNode * child = dynamic_cast<const StiKalmanTrackNode *>(n.getChildAt(i));
+					os << *child;
+				}
 		}
 	return os;
 }
