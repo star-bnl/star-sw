@@ -3,36 +3,29 @@
 
 #include <iostream.h>
 #include "StMaker.h"
+#include "tables/St_tpcRDOMasks_Table.h"
 
 class StDetectorDbTpcRDOMasks{
 public:
-    StDetectorDbTpcRDOMasks(StMaker*);
-    ~StDetectorDbTpcRDOMasks();
-
-    void setRunNumber(unsigned int value);
-    void setNumEntries(unsigned int value);
-    void setSectors(unsigned int* value);
-    void setMasks(unsigned int* value);
-
-    unsigned int getRunNumber();
-    unsigned int getNumEntries();
+    static StDetectorDbTpcRDOMasks* instance();
+    
     bool isOn(unsigned int sector,unsigned int rdo);
     unsigned int getSectorMask(unsigned int sector);
 
+    void update(StMaker*);
+    friend class nobody; // for virtual ~
     friend ostream& operator<<(ostream& os, StDetectorDbTpcRDOMasks& v);
 
 protected:
-    unsigned int mRunNumber;
+    virtual ~StDetectorDbTpcRDOMasks();
     unsigned int mNumEntries;
-    unsigned int* mSectors;  // Goes 1-12, where 1 has TPC sector 1,2; 2 has sectors 3,4
-    unsigned int* mMasks;
-        
+    StDetectorDbTpcRDOMasks();
+    tpcRDOMasks_st* mMaskVector; // Vector To hold RDO Masks
+    TTable* mTable; // Holds the TTable
+private:
+    static StDetectorDbTpcRDOMasks* sInstance;
 };
 
-struct tpcRDOMasks_st {
-    unsigned int runNumber;
-    unsigned int sector;
-    unsigned int mask;
-};
+
 
 #endif
