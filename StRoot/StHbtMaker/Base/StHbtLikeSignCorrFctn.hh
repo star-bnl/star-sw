@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtLikeSignCorrFctn.hh,v 1.1 2000/09/01 18:40:53 laue Exp $
+ * $Id: StHbtLikeSignCorrFctn.hh,v 1.2 2001/06/21 19:06:49 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -16,9 +16,7 @@
 #ifndef StHbtLikeSignCorrFctn_hh
 #define StHbtLikeSignCorrFctn_hh
 
-#include "StHbtMaker/Infrastructure/StHbtTypes.hh"
-#include "StHbtMaker/Infrastructure/StHbtPair.hh"
-#include "StHbtMaker/Infrastructure/StHbtEvent.hh"
+class StHbtPair;
 #include "StHbtMaker/Base/StHbtCorrFctn.hh"
 
 class StHbtLikeSignCorrFctn : public StHbtCorrFctn {

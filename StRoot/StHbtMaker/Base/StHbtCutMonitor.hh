@@ -1,11 +1,12 @@
 #ifndef StHbtCutMonitor_hh
 #define StHbtCutMonitor_hh
 
-#include "StHbtMaker/Infrastructure/StHbtTypes.hh"
-#include "StHbtMaker/Infrastructure/StHbtEvent.hh"
-#include "StHbtMaker/Infrastructure/StHbtTrack.hh"
-#include "StHbtMaker/Infrastructure/StHbtV0.hh"
-#include "StHbtMaker/Infrastructure/StHbtKink.hh"
+class StHbtEvent;
+class StHbtTrack;
+class StHbtV0;
+class StHbtKink;
+
+#include "StHbtMaker/Infrastructure/StHbtString.hh"
 
 class StHbtCutMonitor{
   

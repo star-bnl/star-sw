@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEventCut.h,v 1.8 2000/06/15 18:51:32 willson Exp $
+ * $Id: StHbtEventCut.h,v 1.9 2001/06/21 19:06:48 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEventCut.h,v $
+ * Revision 1.9  2001/06/21 19:06:48  laue
+ * Some minor structural changes (forward declarations, etc)
+ *
  * Revision 1.8  2000/06/15 18:51:32  willson
  * Cuts and Correlation function information moved from StBaseAnalysis
  * to the derived analysis classes.  Global functions installed in
@@ -64,9 +67,12 @@
 
 #ifndef StHbtEventCut_hh
 #define StHbtEventCut_hh
-#include "StHbtMaker/Infrastructure/StHbtTypes.hh"
-#include "StHbtMaker/Infrastructure/StHbtEvent.hh"
+
+class StHbtEvent;
+class StHbtBaseAnalysis;
+
 #include "StHbtMaker/Infrastructure/StHbtCutMonitorHandler.h"
+#include "StHbtMaker/Infrastructure/StHbtString.hh"
 
 class StHbtEventCut : public StHbtCutMonitorHandler {
 
