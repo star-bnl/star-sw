@@ -83,6 +83,8 @@ public:
   virtual void useVMCGeometry() {}
   void    setGasMat(StiMaterial    *m) {_gasMat = m;}
   StiMaterial *getGasMat()   {return _gasMat;}
+  static void setDebug(int m = 0) {_debug = m;}
+  static int  debug() {return _debug;}
  protected:
  
   int                 _groupId;
@@ -97,6 +99,7 @@ public:
   string _inputFile;
   static StiDetectorBuilder* fCurrentDetectorBuilder;
   StiMaterial    * _gasMat;
+  static   int     _debug;
 };
 
 ///Returns the number of active rows in the detector

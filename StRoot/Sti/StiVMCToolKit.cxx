@@ -1,4 +1,3 @@
-//#define DEBUG
 #include "StiVMCToolKit.h"
 #ifdef __ROOT__
 #include "StMaker.h"
@@ -27,6 +26,7 @@ struct ElemV_t {
   Double_t     V; // by  volume 
   Double_t     W;
 };
+static Int_t m_Debug = 0;
 static const Int_t NoElemMax = 10000;
 #if 0
 static VolumeMap_t VolumesToBePut[] = {
@@ -168,6 +168,10 @@ static Int_t NP10 = 3;
 // {H_2", 0., 0, 0.5e-6}
 // {"CH_4",0., 0, 2e-6}
 // {N_2 O", 0., 0, 0.5-e6}
+//________________________________________________________________________________
+void StiVMCToolKit::SetDebug(Int_t m) {m_Debug = m;}
+//________________________________________________________________________________
+Int_t StiVMCToolKit::Debug() {return m_Debug;}
 //________________________________________________________________________________
 void StiVMCToolKit::PrintShape(TGeoShape *shape) {
   TGeoBBox *box = 0, *Box = 0;
@@ -371,20 +375,19 @@ Double_t StiVMCToolKit::GetShapeVolume(TGeoShape *shape) {
       case TGeoShape::kGeoEltu:    
       case TGeoShape::kGeoCtub:    
       default:
-#ifdef DEBUG
-	cout << bit << "\t has not yet implemented for " << shape->GetName() << endl;
-#endif
+	if (Debug()) 
+	  cout << bit << "\t has not yet implemented for " << shape->GetName() << endl;
 	volume = TMath::Min(volBB,volBC);
 	break;
       }
       break;
     }
   }
-#ifdef DEBUG
-  cout << " =============> Volume = " << volume << "\t" << shape->GetName() << "\tBB\t" << volBB << "\tBC\t" << volBC << endl;
-#endif
+  if (Debug())
+    cout << " =============> Volume = " << volume 
+	 << "\t" << shape->GetName() << "\tBB\t" << volBB << "\tBC\t" << volBC << endl;
   assert(volume >= 0);
-  if (! (volBB - volume > -1e-7 && volBC - volume > -1.e-7) ) {
+  if (Debug() && ! (volBB - volume > -1e-7 && volBC - volume > -1.e-7) ) {
     PrintShape(shape);
     cout << "volume\t" << volume << "\tvolBB\t" <<  volBB << "\tvolBC\t" << volBC << endl;
     cout << "\tBoundingBox dX\t" << Box->GetDX() << "\tdY\t" << Box->GetDY() << "\tdZ\t" << Box->GetDZ() << endl;
@@ -593,9 +596,8 @@ Double_t StiVMCToolKit::GetWeight(TGeoVolume *volT, Int_t *NElem, Elem_t *Elemen
   Double_t dens = mat->GetDensity();
   TGeoShape *shapeT = (TGeoShape *) volT->GetShape();
   if (! shapeT) return Weight;
-#ifdef DEBUG
-  cout << "volT \t" << volT->GetName() << "\t" << volT->GetTitle() << endl;
-#endif
+  if (Debug())
+    cout << "volT \t" << volT->GetName() << "\t" << volT->GetTitle() << endl;
   Double_t volume = GetShapeVolume(shapeT);
   WeightT = Weight = dens*volume;
   if (! ElementList ) {
@@ -650,14 +652,16 @@ void StiVMCToolKit::MakeAverageVolume(TGeoVolume *volT, TGeoShape *&newshape, TG
   //  cout << volT->GetName() << "\t" << volT->GetTitle() << "\t" << Form("%10.3f [g]",Weight) << endl;
   const TGeoMedium   *med = volT->GetMedium(); 
   const TGeoMaterial *mat = volT->GetMaterial();
-  if (med->GetParam(0)) cout << "===================" << endl; 
-  else                  cout << "+++++++++++++++++++" << endl;
-  cout << volT->GetName() << " === "   
-       << " Weight " << Weight << "[g]\t";
-  cout << "material\t" << mat->GetName() << "\tmedium\t" << med->GetName() << endl;
+  if (Debug()) {
+    if (med->GetParam(0)) cout << "===================" << endl; 
+    else                  cout << "+++++++++++++++++++" << endl;
+    cout << volT->GetName() << " === "   
+	 << " Weight " << Weight << "[g]\t";
+    cout << "material\t" << mat->GetName() << "\tmedium\t" << med->GetName() << endl;
+  }
   TGeoShape *shapeT = (TGeoShape *) volT->GetShape();
   Double_t volume = GetShapeVolume(shapeT);
-  PrintShape(shapeT);
+  if (Debug()) PrintShape(shapeT);
   shapeT->ComputeBBox();  
   TGeoBBox * Box = (TGeoBBox *) shapeT; 
   Double_t dx, dy, dz, rmin, rmax;
@@ -666,50 +670,54 @@ void StiVMCToolKit::MakeAverageVolume(TGeoVolume *volT, TGeoShape *&newshape, TG
   Double_t volBB = 8*Box->GetDX()*Box->GetDY()*Box->GetDZ();
   Double_t volBC = 2*TMath::Pi()*(paramsBC[1] - paramsBC[0])*Box->GetDZ();
   Double_t volB = 0;
-  cout << shapeT->GetName();
+  if (Debug()) cout << shapeT->GetName();
   enum ShapeId {kBox = 1, kTube, kKeep};
-  Int_t iShape = kKeep;
+  Int_t iShape = 3;
   TString name(volT->GetName());
   if (name == "SROD") {// replace oval road by box
-    iShape = kBox;
+    iShape = 1;
     Double_t S = TMath::Pi()*(paramsBC[1] - paramsBC[0]);
-    Double_t dy = TMath::Sqrt(paramsBC[1]) - TMath::Sqrt(paramsBC[0]);
-    Double_t dx = S/(4*dy);
-    Double_t dz = Box->GetDZ();
+    dy = TMath::Sqrt(paramsBC[1]) - TMath::Sqrt(paramsBC[0]);
+    dx = S/(4*dy);
+    dz = Box->GetDZ();
     Box->SetBoxDimensions(dx,dy,dz);
-    volBB = volBC;
-  }
-  if (shapeT->TestShapeBit(TGeoShape::kGeoTubeSeg) &&
-      xyzM && xyzM[0]*xyzM[0] + xyzM[1]*xyzM[1] < 1.e-3) {
-    iShape = kKeep;
-    volB  = volume;
-    cout << "\tKeep shape ===========\t";
-  }
-  else {
-    if (volBB <= volBC) {
-      iShape = kTube;
-      volB = volBB;
-      dx = Box->GetDX();
-      dy = Box->GetDY();
-      dz = Box->GetDZ();
-      cout << "\tBoundingBox dX\t" << dx << "\tdY\t" << dy << "\tdZ\t" << dz;
-    } else {
-      iShape = kTube;
-      volB = volBC;
-      rmin = TMath::Sqrt(paramsBC[0]);
-      rmax = TMath::Sqrt(paramsBC[1]);
-      dz = Box->GetDZ();
-      cout  << "\tBoundingCylinder\trMin\t" << rmin << "\trMax\t" << rmax << "\tdZ\t" << dz;
+    volB = volBB = volBC;
+  } else {
+    if ((shapeT->TestShapeBit(TGeoShape::kGeoTube) ||
+	 shapeT->TestShapeBit(TGeoShape::kGeoTubeSeg)) &&
+	xyzM && xyzM[0]*xyzM[0] + xyzM[1]*xyzM[1] < 1.e-3) {
+      iShape = 3;
+      volB  = volume;
+      if (Debug()) cout << "\tKeep shape ===========\t";
+    }
+    else {
+      if (volBB <= volBC || xyzM && xyzM[0]*xyzM[0] + xyzM[1]*xyzM[1] > 1.e-3) {
+	iShape = 1;
+	volB = volBB;
+	dx = Box->GetDX();
+	dy = Box->GetDY();
+	dz = Box->GetDZ();
+	if (Debug()) cout << "\tBoundingBox dX\t" << dx << "\tdY\t" << dy << "\tdZ\t" << dz;
+      } else {
+	iShape = 2;
+	volB = volBC;
+	rmin = TMath::Sqrt(paramsBC[0]);
+	rmax = TMath::Sqrt(paramsBC[1]);
+	dz = Box->GetDZ();
+	if (Debug()) cout  << "\tBoundingCylinder\trMin\t" << rmin << "\trMax\t" << rmax << "\tdZ\t" << dz;
+      }
     }
   }
   Double_t Dens = Weight/volB;
-  cout << "\tvolume\t" << volume << "\tvolB\t" << volB << "\tDens\t" << Dens << endl;
+  if (Debug()) cout << "\tvolume\t" << volume << "\tvolB\t" << volB << "\tDens\t" << Dens << endl;
   TString newmatname(mat->GetName());
   newmatname += "_";
   newmatname += name;
   TGeoMixture *newmat = new  TGeoMixture(newmatname.Data(),NElem, Dens);
   for (Int_t i = 0; i < NElem; i++) {
-    cout << Form("id%3i\tW%10.3g\tA%5.1f\t%5.1f\n",ElementList[i].index,ElementList[i].W,ElementList[i].A,ElementList[i].Z);
+    if (Debug()) 
+      cout << Form("id%3i\tW%10.3g\tA%5.1f\t%5.1f\n",
+		   ElementList[i].index,ElementList[i].W,ElementList[i].A,ElementList[i].Z);
     //    cout << "id\t" << ElementList[i].index << "\tW\t" << ElementList[i].W
     //	 << "\tA\t" <<  ElementList[i].A << "\tZ\t" << ElementList[i].Z << endl;
     newmat->DefineElement(i,ElementList[i].A,ElementList[i].Z,ElementList[i].W);
@@ -720,11 +728,12 @@ void StiVMCToolKit::MakeAverageVolume(TGeoVolume *volT, TGeoShape *&newshape, TG
   Double_t params[10];
   for (Int_t i = 0; i < 10; i++) params[i] = med->GetParam(i);
   newmed = new TGeoMedium(newmatname.Data(),matid,newmat,params);
-  if (xyzM) {
+  if (Debug() && xyzM) {
     cout << "\txyzM  x\t" << xyzM[0] << "\ty\t" << xyzM[1] << "\tz\t" << xyzM[2] << endl;
   }
-  if (iShape == kBox)  newshape = new TGeoBBox(dx, dy, dz);
-  else if (iShape == kTube) {
+  newshape = shapeT;
+  if (iShape == 1)  newshape = new TGeoBBox(dx, dy, dz);
+  else if (iShape == 2) {
 #if 0
     Double_t Phi1 = 0;
     Double_t Phi2 = 360.;
@@ -808,11 +817,13 @@ TGeoPhysicalNode *StiVMCToolKit::Alignment(const TGeoNode *nodeT, const Char_t *
   }
   Double_t local[3] = {0,0,0};
   TGeoShape *shapeT = volT->GetShape();
-  cout << "StiVMCToolKit::Alignment -I node\t" << nodeT->GetName() 
-       << "\tvolume\t" << volT->GetName() << "\t:" << volT->GetTitle() << endl;
-  cout << "\tshape\t" << shapeT->GetName() << "\tmaterial\t" <<  volT->GetMaterial()->GetName();
-  if (newshape) cout  << "\tnewshape\t" << newshape->GetName();
-  cout << endl;
+  if (Debug()) {
+    cout << "StiVMCToolKit::Alignment -I node\t" << nodeT->GetName() 
+	 << "\tvolume\t" << volT->GetName() << "\t:" << volT->GetTitle() << endl;
+    cout << "\tshape\t" << shapeT->GetName() << "\tmaterial\t" <<  volT->GetMaterial()->GetName();
+    if (newshape) cout  << "\tnewshape\t" << newshape->GetName();
+    cout << endl;
+  }
   if (shapeT->TestShapeBit(TGeoShape::kGeoPcon) || shapeT->TestShapeBit(TGeoShape::kGeoPgon)) {
     TGeoPcon *pcon = (TGeoPcon *) shapeT;
     Int_t Nz = pcon->GetNz();
@@ -820,7 +831,8 @@ TGeoPhysicalNode *StiVMCToolKit::Alignment(const TGeoNode *nodeT, const Char_t *
   }
   Double_t master[3]; 
   nodeT->LocalToMaster(local,master);
-  cout << "\tmaster  x\t" << master[0] << "\ty\t" << master[1] << "\tz\t" << master[2] << endl;
+  if (Debug()) 
+    cout << "\tmaster  x\t" << master[0] << "\ty\t" << master[1] << "\tz\t" << master[2] << endl;
   if (!nodeP) nodeP = gGeoManager->MakePhysicalNode(pathT);
   if (nodeP->IsAligned()) {
     trP = (TGeoTranslation*)nodeP->GetNode()->GetMatrix();
@@ -830,7 +842,8 @@ TGeoPhysicalNode *StiVMCToolKit::Alignment(const TGeoNode *nodeT, const Char_t *
   }   
   nodeP->Align(trP,newshape);//,kTRUE);
   TGeoVolume *newvol = nodeP->GetNode(-1)->GetVolume();
-  cout << "newvol\t" << newvol->GetName() << "\tmed\t" << newvol->GetMedium()->GetName() << endl;
+  if (Debug()) 
+    cout << "newvol\t" << newvol->GetName() << "\tmed\t" << newvol->GetMedium()->GetName() << endl;
   newvol->SetMedium(newmed);
   newvol->SetTitle("AVERAGED");
   newvol->SetLineColor(1);
@@ -878,7 +891,7 @@ TGeoPhysicalNode *StiVMCToolKit::LoopOverNodes(const TGeoNode *nodeT, const Char
     TString path = pathT;
     if (path != "") path += "/";
     path += node->GetName();
-    if (! name) {
+    if (! name && Debug()) {
       cout << path;
       TGeoVolume *vol = node->GetVolume(); 
       const TGeoMedium   *med = vol->GetMedium(); 
@@ -891,17 +904,19 @@ TGeoPhysicalNode *StiVMCToolKit::LoopOverNodes(const TGeoNode *nodeT, const Char
 }
 //________________________________________________________________________________
 void StiVMCToolKit::MakeVolume(TGeoPhysicalNode *nodeP) {
-  cout << "StiVMCToolKit::MakeVolume -I TGeoPhysicalNode\t" << nodeP->GetName() << endl;
-  TGeoVolume   *volP   = nodeP->GetVolume();
-  TGeoMaterial *matP   = volP->GetMaterial(); matP->Print("");
-  TGeoShape    *shapeP = nodeP->GetShape(); cout << "New Shape\t"; PrintShape(shapeP);
-  TGeoHMatrix  *hmat   = nodeP->GetMatrix(); hmat->Print("");
+  if (Debug()) {
+    cout << "StiVMCToolKit::MakeVolume -I TGeoPhysicalNode\t" << nodeP->GetName() << endl;
+    TGeoVolume   *volP   = nodeP->GetVolume();
+    TGeoMaterial *matP   = volP->GetMaterial(); matP->Print("");
+    TGeoShape    *shapeP = nodeP->GetShape(); cout << "New Shape\t"; PrintShape(shapeP);
+    TGeoHMatrix  *hmat   = nodeP->GetMatrix(); hmat->Print("");
 #if 0
-  TGeoNode     *node   = nodeP->GetNode();
-  TGeoVolume   *vol    = node->GetVolume();
-  TGeoShape    *shape  = vol->GetShape();   cout << "Old Shape\t"; PrintShape(shape);
-  TGeoMaterial *mat    = vol->GetMaterial(); mat->Print("");
+    TGeoNode     *node   = nodeP->GetNode();
+    TGeoVolume   *vol    = node->GetVolume();
+    TGeoShape    *shape  = vol->GetShape();   cout << "Old Shape\t"; PrintShape(shape);
+    TGeoMaterial *mat    = vol->GetMaterial(); mat->Print("");
 #endif
+  }
 }
 //________________________________________________________________________________
 Double_t StiVMCToolKit::GetPotI(const TGeoMaterial *mat) {

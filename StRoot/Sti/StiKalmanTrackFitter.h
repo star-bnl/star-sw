@@ -24,10 +24,12 @@ class StiKalmanTrackFitter : public StiTrackFitter, public Named, public Describ
   void loadDS(TDataSet &ds);
   void loadFS(ifstream& inFile);
   void setDefaults();
+  static void setDebug(int m = 0) {_debug = m;}
+  static int  debug() {return _debug;}
 
  protected:
   StiKalmanTrackFitterParameters  _pars;
-  
+  static int _debug;
 };
 
 #endif

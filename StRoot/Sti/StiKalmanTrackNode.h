@@ -191,6 +191,9 @@ public:
 
   Int_t  debug() const {return _debug;}
   void   setDebug(Int_t m) {_debug = m;}
+  void   PrintpT(Char_t *opt="");
+  static void   ResetComment(Char_t *m = "") {comment = m;}
+  static const Char_t *Comment() {return comment.Data();}
   /// rotation angle of local coordinates wrt global coordinates
 
 
@@ -256,11 +259,11 @@ public:
   static bool   useCalculatedHitError;
   void static saveStatics(double *sav);
   void static backStatics(double *sav);
-    
 //  debug variables
   static int    fDerivTestOn;   
   static double fDerivTest[5][5];   
   static int   _debug;
+  static TString comment;
 };
 
 

@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.60 2005/02/16 17:47:16 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.61 2005/02/17 19:58:06 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.61  2005/02/17 19:58:06  fisyak
+ * Add debug print out flags
+ *
  * Revision 2.60  2005/02/16 17:47:16  perev
  * assert in nudge 1==>5
  *
@@ -175,6 +178,7 @@
 #include <Stiostream.h>
 #include <stdexcept>
 #include <math.h>
+#include <stdio.h>
 using namespace std;
 
 #include "StiHit.h"
@@ -242,7 +246,7 @@ StiMaterial * StiKalmanTrackNode::mat = 0;
 StiMaterial * StiKalmanTrackNode::prevMat = 0;
 bool StiKalmanTrackNode::useCalculatedHitError = true;
 #define MESSENGER *(Messenger::instance(MessageType::kNodeMessage))
-
+TString StiKalmanTrackNode::comment(""); 
 int StiKalmanTrackNode::counter = 0;
 //debug vars
 //#define STI_ERROR_TEST
@@ -541,7 +545,7 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
   det = tDet;
   int position = 0;
   setState(pNode);
-
+  if (debug()) ResetComment(::Form("%30s ",tDet->getName().c_str()));
   if(_c00 >100.) return -52;   	//VP ?????????
   if(_c11 >100.) return -53;	//VP ?????????
 
@@ -562,9 +566,9 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 	if (rotate(dAlpha)) return -10;
     }
     							break;
-    
+  case kDisk:  							
   case kCylindrical: endVal = place->getNormalRadius(); break;
-  case kDisk:        endVal = place->getZcenter(); 	break;
+    //  case kDisk:        endVal = place->getZcenter(); 	break;
   default: assert(0);
   }
   //if (false&&_refX<20.) cout << "Node:refX<4.5 pNode:"<< *pNode;
@@ -589,15 +593,16 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 	  return -50;
 	}
     }
-  position = locate(place,sh);
+  position = locate(place,sh); 
   if (position>kEdgeZplus || position<0) return position;
   propagateError();
-  
+  if (debug() & 8) { PrintpT("E");}
   if(_c00 >100.) return -52;   	//VP ?????????
   if(_c11 >100.) return -53;	//VP ?????????
 
   // Multiple scattering
   if (pars->mcsCalculated && fabs(pars->field)>0 )  propagateMCS(pNode,tDet);
+  if (debug() & 8) { PrintpT("M");}
   return position;
 }
 
@@ -615,10 +620,12 @@ int StiKalmanTrackNode::propagate(StiKalmanTrackNode *pNode,
 bool StiKalmanTrackNode::propagate(const StiKalmanTrackNode *parentNode, StiHit * vertex,int dir)
 {
   setState(parentNode);
+  if (debug()) ResetComment(::Form("%30s ",parentNode->getDetector()->getName().c_str()));
   //double locVx = _cosAlpha*vertex->x() + _sinAlpha*vertex->y();
   if (propagate(vertex->x(),kPlanar,dir) < 0)
     return false; // track does not reach vertex "plane"
   propagateError();
+  if (debug() & 8) { PrintpT("V");}
   _hit = vertex;
   _detector = 0;
   return true;
@@ -630,8 +637,10 @@ bool StiKalmanTrackNode::propagate(const StiKalmanTrackNode *parentNode, StiHit 
 bool StiKalmanTrackNode::propagateToBeam(const StiKalmanTrackNode *parentNode,int dir)
 {
   setState(parentNode);
+  if (debug()) ResetComment(::Form("%30s ",parentNode->getDetector()->getName().c_str()));
   if (propagate(0., kPlanar,dir) < 0) return false; // track does not reach vertex "plane"
   propagateError();
+  if (debug() & 8) { PrintpT("B");}
   _hit = 0;
   _detector = 0;
   return true;
@@ -644,10 +653,12 @@ int StiKalmanTrackNode::propagateToRadius(StiKalmanTrackNode *pNode, double radi
 {
   int position = 0;
   setState(pNode);
+  if (debug()) ResetComment(::Form("%30s ",pNode->getDetector()->getName().c_str()));
   _refX = radius;
   position = propagate(radius,kCylindrical,dir);
   if (position<0) return position;
   propagateError();
+  if (debug() & 8) { PrintpT("R");}
   return position;
 }
 
@@ -678,6 +689,7 @@ int  StiKalmanTrackNode::propagate(double xk, int option,int dir)
     case kPlanar: 
       x2=xk;  // target position
       break;
+    case kDisk: 
     case kCylindrical: // cylinder
       if (_p3==0) throw runtime_error("SKTN::propagateCylinder() - _p3==0");
       L = xk;
@@ -696,24 +708,6 @@ int  StiKalmanTrackNode::propagate(double xk, int option,int dir)
       x_m = a*(x0-y0*sq)/r0sq;
       x2 = ( x_p>x_m) ? x_p : x_m;
       if (x2<=0) 				return -3;
-      break;
-
-    case kDisk: {
-      if (fabs(_p4)<1e-12) 			return -1;
-      L = (xk-_p1)/_p4;
-      double ang = L*_p3; 
-      double sangR,cang1R;
-      if ( fabs(ang)>0.02) {
-        double sang = sin(ang);
-        double cang = cos(ang);
-        if (_cosCA*cang - _sinCA*sang <=0) 	return -2;
-        sangR  = sang/_p3;
-        cang1R = (cang-1.)/_p3;
-      } else {
-        sangR  =  L*(1.-ang*ang/6);
-        cang1R = -L*ang/2*(1.-ang*ang/12);
-      }
-      x2 = _x +	_cosCA*sangR + _sinCA*cang1R;}
       break;
     default: assert(0);
     }
@@ -1043,6 +1037,7 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
       cout << "Failed:\t" << chisq << "\t" << cc << "\tdiff\t" << diff << endl;
     }
   }
+  if (debug() & 8) {comment += Form(" chi2 = %6.2f",cc);}
   return cc;
 }
 //______________________________________________________________________________
@@ -1402,7 +1397,13 @@ static int nCall=0; nCall++;
     C2.Verify(C1);
   }
 #endif
-  return 0;
+  if (debug() & 8) {
+    Double_t dpTOverpT = 100*TMath::Sqrt(_c33/(_p3*_p3));
+    if (dpTOverpT > 9999.999) dpTOverpT = 9999.999;
+    if (debug() & 8) PrintpT("U");
+    //    cout << "StiKalmanTrackNode::updateNode pT " << getPt() << "+-" << dpTOverpT << endl;
+  } 
+  return 0; 
 }
 
 //______________________________________________________________________________
@@ -1667,14 +1668,14 @@ int StiKalmanTrackNode::locate(StiPlacement*place,StiShape*sh)
     // positive or negative z edge
     position = zOff>0 ? kEdgeZplus : kEdgeZminus;
   if (debug() & 8) {
-    cout << "locate: " << position 
-	 <<" s = " << shapeCode<<  " R " << _x << " y/z " << _p0 << "/" << _p1
-	 << "\tyO/zO " <<  yOff << "/" << zOff << "\tdY/dZ " << detHW << "/" << detHD 
-	 << " shape " << sh->getName()
-	 << endl;
+    comment += ::Form("R %8.3f y/z %8.3f/%8.3f", 
+		      _x, _p0, _p1);
+    if (position>kEdgeZplus || position<0)  
+      comment += ::Form(" missed %2d y0/z0 %8.3f/%8.3f dY/dZ %8.3f/%8.3f",
+			position, yOff, zOff, detHW, detHD);
   }
   return position;
-}
+ }
 #ifdef STI_NODE_DEBUG
 //______________________________________________________________________________
 void StiKalmanTrackNode::setChi2(double chi2)
@@ -1839,3 +1840,9 @@ void StiKalmanTrackNode::backStatics(double *sav)
   dl0=            sav[15];
   dy=             sav[16];
 }
+//________________________________________________________________________________
+ void   StiKalmanTrackNode::PrintpT(Char_t *opt) {
+    Double_t dpTOverpT = 100*TMath::Sqrt(_c33/(_p3*_p3));
+    if (dpTOverpT > 9999.9) dpTOverpT = 9999.9;
+    comment += ::Form(" %s pT %8.3f+-%6.1f",opt,getPt(),dpTOverpT);
+ }
