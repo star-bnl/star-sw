@@ -1,4 +1,4 @@
-*CMZ :          03/09/98  14.12.13  by  Pavel Nevski
+*CMZ :          28/09/98  01.03.58  by  Pavel Nevski
 *CMZ :  1.40/05 24/08/98  22.02.41  by  Pavel Nevski
 *CMZ :  1.30/00 29/04/97  23.40.13  by  Pavel Nevski
 *-- Author :    Pavel Nevski   29/03/97
@@ -176,7 +176,7 @@ c***  Get command and number of parameters passed
             If (input .ge. 4) then
                 input = input - 4
                 write(6,*)'*** input: EGZ(FZ) file ',string1(1:length1)
-                Call AgZOPEN ('P',string1(1:length1),'E',0,0)
+                Call AgZOPEN ('P',string1(1:length1),'E',Ier)
                 Call AGZREAD ('P',ier)
                 IKINE = -3
                 If (Ier.ne.0) go to 490
@@ -223,12 +223,12 @@ c***  Get command and number of parameters passed
               call KUGETS ( string1, length1 )
               write(6,*) ' GXUSER: opening output file ',
      >                              string1(1:length1)
-              Call AgZOPEN  ('O',string1(1:length1),'GEKHD',0,0)
+              Call AgZOPEN  ('O',string1(1:length1),'GEKHD',Ier)
 *             PN,03.09.98 - spool output until the first trig
 *             Call AGZWRITE ('O',ier)
  
           else                                          !  close output
-              Call AgZOPEN('O',' ',' ',0,0)
+              Call AgZOPEN('O',' ',' ',Ier)
           endif
 *
       else if (command.eq.'PHASESPACE'.or.command.eq.'MOMENTUMBIN') then
@@ -396,12 +396,12 @@ c----------------------------------------------------------------------
 *KEEP,VIDQQ.
       CHARACTER*68 VIDQQ
       DATA VIDQQ/
-     +'@(#)* Advanced Geant Inteface   1.40/05   C: 27/09/98  14.43.38
+     +'@(#)* Advanced Geant Inteface   1.40/05   C: 29/09/98  16.54.49
      +'/
 *KEEP,DATEQQ.
-      IDATQQ =   980927
+      IDATQQ =   980929
 *KEEP,TIMEQQ.
-      ITIMQQ =   1443
+      ITIMQQ =   1654
 *KEEP,VERSQQ.
       VERSQQ = ' 1.40/05'
       IVERSQ =  14005
