@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstInit.cxx,v 1.10 2001/07/15 20:31:30 caines Exp $
+ * $Id: StEstInit.cxx,v 1.11 2001/07/16 18:38:24 jecc Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstInit.cxx,v $
+ * Revision 1.11  2001/07/16 18:38:24  jecc
+ * Remove mNSvtHit reset, now calculated at first loop
+ *
  * Revision 1.10  2001/07/15 20:31:30  caines
  * Fixes from Insure++ debugging
  *
@@ -141,16 +144,16 @@ int StEstTracker::BranchInit(){
 	  // assigned to the tpc track
 	  int fitstatus;
 	  fitstatus=0;
-	  cout << "primary vertex at : " << a << " dca of track : " << mTPCTrack[i]->GetHelix()->distance(a) << endl;
+// 	  cout << "primary vertex at : " << a << " dca of track : " << mTPCTrack[i]->GetHelix()->distance(a) << endl;
  	  if (mTPCTrack[i]->GetHelix()->distance(a)<3.){ 
 	    RefitBranch(branch,1,&fitstatus);
-	    cout << "refit track with primary vertex " << endl;
+// 	    cout << "refit track with primary vertex " << endl;
 	  }
 	  else {
 	    RefitBranch(branch,0,&fitstatus);
-	    cout << "refit track with-out primary vertex " << endl;
+// 	    cout << "refit track with-out primary vertex " << endl;
 	  }
-	  cout << " fitstatus " << fitstatus << endl; 
+// 	  cout << " fitstatus " << fitstatus << endl; 
 	if(mDebugLevel>3)
 	  gMessMgr->Info()<<" Branch refitted"<<endm;
 	  //	  branch->mTrack->mTPCTrack->mChiSq = branch->GetChiSq();
@@ -417,7 +420,7 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
       }
     }
   
-  mNSvtHit = ill-1;
+//   mNSvtHit = ill-1;
   if(mDebugLevel>0)
     gMessMgr->Info()<<"SVTInit **** Maximum number of hits per wafer=" << maxwaf << " ****" <<endm;
   
