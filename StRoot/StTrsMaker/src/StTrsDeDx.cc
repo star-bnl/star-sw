@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.cc,v 1.9 1999/06/16 14:26:52 fisyak Exp $
+ * $Id: StTrsDeDx.cc,v 1.10 1999/07/19 21:42:23 lasiuk Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,8 +13,9 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.cc,v $
- * Revision 1.9  1999/06/16 14:26:52  fisyak
- * Add flags for egcs on Solaris
+ * Revision 1.10  1999/07/19 21:42:23  lasiuk
+ * - add tss bethe-bloche parameterization for P10.  No saturation
+ *   effects are included.
  *
  * Revision 1.9  1999/06/16 14:26:52  fisyak
  * Add flags for egcs on Solaris
@@ -301,6 +302,57 @@ double StTrsDeDx::betheBloch(double bg) const
     double I = mAlfat*((sqr(bg)+1)/sqr(bg))*(log((electron_mass_c2/MeV*mAlfat)/(sqr(mIonize)))+te);
 
     return (I/Io);
+}
+
+double StTrsDeDx::betheBlochTSS(double p, double z, double m)
+{
+    //
+    // Modified Bethe-Bloch formula, accounting for restricted energy loss.
+    // Form taken from PDG.
+    // The density effect correction term "delta" is not accounted for here.
+    //  This should affect the relativistic rise.
+    // p =  momentum (GeV/c)
+    // z =  charge (e-)
+    // m =  mass (GeV/c^2) of particle
+    //float beta,gamma; //           ! relativistic velocity of particle
+
+    double K = 0.3071*MeV/(gram/centimeter2);
+    double me = 511.*keV;  // electron mass
+    double emax = 50.*keV; // cut-off energy (usually some 10s of keV)
+
+    //
+    // Gas characteristics----------
+    const int ncomp=2;
+    double rhoP10  = 1.547e-3*gram/centimeter3; // P10 density
+    double rhocomp[ncomp] = {1.66e-3*gram/centimeter3,
+			    6.70e-4*gram/centimeter3}; // Ar. CH4 density
+    double Acomp[ncomp]   = {39.95*gram/mole, 16.04*gram/mole};
+    double Zcomp[ncomp]   = {18.0, 10.0}; //  A,Z of the two components in P10
+    double I[ncomp]       = {188.0*eV, 41.7*eV}; //  Mean excitation energy for
+                                                // components of P10
+    double dedxComp[ncomp]; // dedx for this component
+
+    double percentage[ncomp] = {90.0, 10.0};
+
+    double energy = sqrt(p*p+m*m);
+    double beta   = p/energy;
+    double beta2  = beta*beta;
+    double gamma  = energy/m;
+    double z2     = z*z;
+
+    double weight, prefactor, arg;
+    for(int icomp=0; icomp<ncomp; icomp++) {
+	weight =
+	    (percentage[icomp]*Acomp[icomp]/(percentage[0]*Acomp[0]+percentage[1]*Acomp[1]));
+	prefactor =
+	    K*z2*Zcomp[icomp]/(Acomp[icomp]/(gram/mole)*beta2)*rhocomp[icomp]; 
+     
+	arg = beta*gamma*sqrt(2.*me*emax)/I[icomp];
+	dedxComp[icomp] =
+	    (weight/rhocomp[icomp])*prefactor*(log(arg)-beta2/2.);
+    }
+        
+    return (rhoP10*(dedxComp[0] + dedxComp[1]));    
 }
 
 void StTrsDeDx::print(ostream& os) const
