@@ -1,5 +1,8 @@
-* $Id: tpt_merge_segments.F,v 1.12 1999/12/17 16:30:53 sakrejda Exp $
+* $Id: tpt_merge_segments.F,v 1.13 2000/03/05 01:32:05 sakrejda Exp $
 * $Log: tpt_merge_segments.F,v $
+* Revision 1.13  2000/03/05 01:32:05  sakrejda
+* New version of spiral merging
+*
 * Revision 1.12  1999/12/17 16:30:53  sakrejda
 * Introduced additional integer to avit having mod(short,int).
 * It was not harmful, but confusing and debuggers complained about it.
@@ -59,12 +62,23 @@ C
 #include "tpt_mxdim.inc"
 #include "tcl_tphit.inc"
 #include "tpt_pars.inc"
+#include "math_constants.inc"
 C______________________________________________________________________
 c
 c Define local structure to sort radius
       STRUCTURE /track_merge/
                 integer lpnt           ! location of a track with given radius
                 real    rad            ! radius of a track
+                real    xclose(2)
+                real    yclose(2)
+      END STRUCTURE
+
+      STRUCTURE /local_hits/
+                integer lhit
+                integer ltrack
+                real    x
+                real    y
+                real    z
       END STRUCTURE
 
 C______________________________________________________________________
@@ -77,46 +91,70 @@ C______________________________________________________________________
       RECORD /tpt_pars_st/      tpar(*)
 
       RECORD /track_merge/      merge(mxtrack)
+      RECORD /local_hits/       rhits(1000)
 C_________________________________________________________________
       INTEGER ltot,tls_Quick_Sort_r,iret
-      INTEGER i,j,k,l,lxj,lxi,next,c,m,n,ipass
-      INTEGER longrow
-      REAL    radd,long
-      INTEGER tracks,hits,id
-      REAL    dis,min(5),cuta,cutb
-      INTEGER firsti,lasti,firstj,lastj
-      INTEGER hipnt,lowpnt,isort,ipoint,itrack,ips
-      INTEGER rfifj,rfilj,rlifj,rlilj,rowdiff
-      INTEGER rfi,rli,rfj,rlj,mpnt,ncount
-      REAL    xfi,yfi,zfi,xli,yli,zli
-      REAL    xfj,yfj,zfj,xlj,ylj,zlj
-      REAL    dfifj,dfilj,dlifj,dlilj,mindist,mindist2
+      INTEGER i,j,k,ipass
+
+      REAL    min(5),cuta,cutb
+      INTEGER integer tpt_fit_track, tpt_load_track
       REAL    radi,radj
-      REAL    varb,varc,meanrad,qij
+      REAL    varb,varc
+
+      REAL    temp
+      INTEGER event, dummy
+      data    event /0/
       CHARACTER*132 m132
+      logical enough
 C______________________________________________________________________
 
 c Order the good tracks according to their helix radius.
 c The array lpnt will point to each of these tracks in order.
-      mpnt = mxpnt
+C      write(17,*)"****************** event ",event," ***************"
+      event = event+1
+C      if(event.eq.4) return
+
       ltot = 0
       do i=1,track_h.nok
          if(trk(i).flag.ge.0) then
             ltot=ltot+1
             merge(ltot).rad=abs(trk(i).p(2))
             merge(ltot).lpnt=i
+            merge(ltot).xclose(1)=trk(i).p(3)*
+     >                            (1.0+merge(ltot).rad/sqrt(trk(i).p(3)**2+
+     >                            trk(i).p(4)**2))
+            merge(ltot).xclose(2)=trk(i).p(3)*
+     >                            (1.0-merge(ltot).rad/sqrt(trk(i).p(3)**2+
+     >                            trk(i).p(4)**2))
+            merge(ltot).yclose(1)=trk(i).p(4)*
+     >                            (1.0+merge(ltot).rad/sqrt(trk(i).p(3)**2+
+     >                            trk(i).p(4)**2))
+            merge(ltot).yclose(2)=trk(i).p(4)*
+     >                            (1.0-merge(ltot).rad/sqrt(trk(i).p(3)**2+
+     >                            trk(i).p(4)**2))
+            if((merge(ltot).xclose(1)**2+merge(ltot).yclose(1)**2).gt.
+     >      (merge(ltot).xclose(2)**2+merge(ltot).yclose(2)**2)) then
+               temp=merge(ltot).xclose(1)
+               merge(ltot).xclose(1)=merge(ltot).xclose(2)
+               merge(ltot).xclose(2)=temp
+               temp=merge(ltot).yclose(1)
+               merge(ltot).yclose(1)=merge(ltot).yclose(2)
+               merge(ltot).yclose(2)=temp
+            endif
+C            write(17,*)merge(ltot).rad,merge(ltot).xclose(1),merge(ltot).xclose(2),
+C     >                 merge(ltot).yclose(1),merge(ltot).yclose(2)
          endif
       enddo
-      if(ltot.eq.0) go to 999
+C      go to 999
       iret=tls_Quick_Sort_r(ltot, merge(1).rad, merge(2).rad, merge)
 
 
 c Minimum difference values for merging tracks 
 c (min(1)=rr,min(2)=average of acent & bcent, min(3)=ltan, min(4)=phi0):
 c Adjust these parameters to change the merging criteria.
-      min(1)=0.1   ! radius ratio
-      min(2)=0.02! center average
-      min(3)=0.02 ! tanl
+      min(1)=0.00003  ! radius ratio
+      min(2)=0.05  ! approach average
+      min(3)=0.02  ! tanl
       min(4)=0.5   ! phi0 (deactivated)
       min(5)=10.0  ! Cut for avoiding merging parallel tracks 
 
@@ -125,254 +163,63 @@ c radd is the larger of the radii being compared.
       do i=1,ltot-1
          j=i+1
          lxi=merge(i).lpnt
-         if(trk(lxi).flag.gt.0) then
+         if(trk(lxi).flag.gt.0) enough = .false.
+         do while (.not.enough)
          radi = merge(i).rad
          radj = merge(j).rad
-         do while ((abs(radj-radi)/radi.lt.min(1)).and.(j.le.ltot)) 
-          lxj=merge(j).lpnt
-          if(trk(lxj).flag.gt.0) then
-            radd=merge(i).rad
+         if(radi.gt.1500.0) then
+            enough = abs(radi-radj)/radj.gt.min(1)*radi
+         else
+            enough = abs(radi-radj)/radj.gt.0.05
+         endif
+         lxj=merge(j).lpnt
+         if(.not.enough.and.trk(lxj).flag.gt.0) then
 c           Now compare the average of the differences of the 
-c           centers of the helices
-            cuta = abs(trk(lxi).p(3)-trk(lxj).p(3))
-            cutb = abs(trk(lxi).p(4)-trk(lxj).p(4))
-C           >> USE Eq. 2.1.29 of Tracking Memo. Do not try to merge tracks
-C           >> with different curvature (charge). (JN 980406)
-            qij=trk(lxi).p(2)*trk(lxj).p(2)
-            meanrad=0.5*(radi+radj)
-            varb=0.5*(cuta + cutb)/meanrad
-C            if (cuta.lt.6.0.and.cutb.lt.6.0) then
-c           come back to it! sometimes merging tracks with different signs
-c           makes some sence
-c            if ( (varb.lt.min(2)) .and. (qij.gt.0.) ) then
-            if ( (varb.lt.min(2))) then
+c           x and y for the closest apptoach to the origin.
+            cuta = abs(merge(i).xclose(1)-merge(j).xclose(1))/merge(i).rad
+            cutb = abs(merge(i).xclose(1)-merge(j).xclose(1))/merge(i).rad
+            if (cuta.lt.min(2).and.cutb.lt.min(2)) then
 c               Now compare their dip angles.
                 varc=abs(abs(trk(lxi).p(7))-abs(trk(lxj).p(7)))
                 if (abs(varc).lt.min(3)) then
-c                 For the tracks that survive, these two cuts, find 
-c                 their endpoints.
-c                 This is to make sure that two parallel tracks 
-c                 are not merged.
-                  firsti=0
-                  lasti=0
-                  firstj=0
-                  lastj=0
-                  hipnt=0
-                  lowpnt=999
-                  do isort=1,trk(lxi).nhit
-                     ipoint = trk(lxi).ipnt(isort)
-                     if (ipoint.ne.0) then
-                           ips = mod(hit(ipoint).track,1000)
-                           if (ips.lt.lowpnt) then
-                              lowpnt = ips
-                              firsti = ipoint
-                           endif
-                           if (ips.gt.hipnt) then
-                              hipnt = ips
-                              lasti = ipoint
-                           endif
-                     else
-                           call StError('TPT_MERGE_SEGMENTS - This is a bug.')
-                     endif
-                  enddo
-                  lowpnt = 999
-                  hipnt = 0
-                  do isort=1,trk(lxj).nhit
-                     ipoint = trk(lxj).ipnt(isort)
-                     if (ipoint.ne.0) then
-                           ips = mod(hit(ipoint).track,1000)
-                           if (ips.lt.lowpnt) then
-                              lowpnt = ips
-                              firstj = ipoint
-                           endif
-                           if (ips.gt.hipnt) then
-                              hipnt = ips
-                              lastj = ipoint
-                           endif
-                     else
-                           call StError('TPT_MERGE_SEGMENTS - This is a bug.')
-                     endif
-                  enddo
-c                 Now that the endpoint hits have been identified, 
-c                 assign rows and coords.
-                  xfi = hit(firsti).x
-                  yfi = hit(firsti).y
-                  zfi = hit(firsti).z
-                  longrow = hit(firsti).row
-                  rfi = mod(longrow,100)
-                  xli = hit(lasti).x
-                  yli = hit(lasti).y
-                  zli = hit(lasti).z
-                  longrow =hit(lasti).row 
-                  rli = mod(longrow,100)
-                  xfj = hit(firstj).x
-                  yfj = hit(firstj).y
-                  zfj = hit(firstj).z
-                  longrow = hit(firstj).row
-                  rfj = mod(longrow,100)
-                  xlj = hit(lastj).x
-                  ylj = hit(lastj).y
-                  zlj = hit(lastj).z
-                  longrow =hit(lastj).row 
-                  rlj = mod(longrow,100)
-
-c                 Compute the distances and row differences
-c                 between endpoints.
-C                 Only consider firsti-firstj, firsti-lastj, 
-c                 lasti-firstj, lasti-lastj
-                  dfifj = sqrt((xfi-xfj)**2+(yfi-yfj)**2+
-     +                    (zfi-zfj)**2)
-                  dfilj = sqrt((xfi-xlj)**2+(yfi-ylj)**2+
-     +                    (zfi-zlj)**2)
-                  dlifj = sqrt((xli-xfj)**2+(yli-yfj)**2+
-     +                    (zli-zfj)**2)
-                  dlilj = sqrt((xli-xlj)**2+(yli-ylj)**2+
-     +                    (zli-zlj)**2)
-                  rfifj = abs(rfi-rfj)
-                  rfilj = abs(rfi-rlj)
-                  rlifj = abs(rli-rfj)
-                  rlilj = abs(rli-rlj)
-
-c                 Need to find the closest endpoints and 
-c                 corresponding row difference.
-                  mindist=99999.99
-                  mindist2=99999.99
-                  if (dfifj.ne.0.0.and.dfifj.lt.mindist) then
-                        mindist=dfifj
-                        rowdiff=rfifj
-                  endif
-                  if (dfilj.ne.0.0.and.dfilj.lt.mindist) then
-                        mindist=dfilj
-                        rowdiff=rfilj
-                  endif
-                  if (dlifj.ne.0.0.and.dlifj.lt.mindist) then
-                        mindist=dlifj
-                        rowdiff=rlifj
-                  endif
-                  if (dlilj.ne.0.0.and.dlilj.lt.mindist) then
-                        mindist=dlilj
-                        rowdiff=rlilj
-                  endif
-                  if (dfifj.ne.0.0.and.dfifj.ne.mindist) 
-     +                    mindist2=dfifj
-                  if (dfilj.ne.0.0.and.dfilj.ne.mindist.and.
-     +                    dfilj.lt.mindist2) mindist2=dfilj
-                  if (dlifj.ne.0.0.and.dlifj.ne.mindist.and.
-     +                    dlifj.lt.mindist2) mindist2=dlifj
-                  if (dlilj.ne.0.0.and.dlilj.ne.mindist.and.
-     +                    dlilj.lt.mindist2) mindist2=dlilj
-
-c                 Finally got it, now make sure the tracks are not parallel
-c                 >> USE PARAMETER min(5) (JN 980406)
-                  if (mindist.lt.min(5).and.mindist2.lt.min(5).and.
-     +                    tpar(ipass).debug(8).eq.1)
-     +                    call StInfo('TPT_MERGE_SEGMENTS - *****PARALLEL******')
-                  if (mindist.gt.min(5).or.mindist2.gt.min(5)) then 
-                        if (tpar(ipass).debug(8).eq.1) then
-                           write(m132,*) 'TPT_MERGE_SEGMENTS - **Merged ',
-     +                          'dist= ',mindist,'drow= ',rowdiff
-                           call StInfo(m132)
-                           write(m132,111) i,lxi,trk(lxi).nhit,merge(i).rad,
-     +                          trk(lxi).p(3),trk(lxi).p(4),trk(lxi).
-     +                          p(7),trk(lxi).p(5)
-                           call StInfo(m132)
-                           write(m132,111) j,lxj,trk(lxj).nhit,merge(j).rad,
-     +                          trk(lxj).p(3),trk(lxj).p(4),trk(lxj).
-     +                          p(7),trk(lxj).p(5)
-                           call StInfo(m132)
- 111                       format(3(1x,i5),5(1x,f10.5))
-                        endif
-
-*                       Merge the two tracks:
-                        m=trk(lxi).nhit+trk(lxj).nhit
-                        c=1  
-                        n=1
-                        if (m.gt.mxpnt) m=mxpnt
-                        do l=1,m
-                           long=-1.0
-*                          Find hit with the next largest radius:
-                           do n=1,trk(lxj).nhit
-                              id=trk(lxj).ipnt(n)
-                              if(id.gt.0) then
-                              dis=hit(trk(lxj).ipnt(n)).x**2+
-     +                             hit(trk(lxj).ipnt(n)).y**2+
-     +                             hit(trk(lxj).ipnt(n)).z**2
-                              if (id.gt.-1.and.(dis.ge.long)) then
-                                 long=dis
-                                 tracks=lxj
-                                 hits=n
-                                 next=id
-                              endif
-                              endif
-                           enddo 
-                  
-                           do n=1,trk(lxi).nhit
-                              id=trk(lxi).ipnt(n)
-                              if(id.gt.0) then
-                              dis=hit(trk(lxi).ipnt(n)).x**2+
-     +                             hit(trk(lxi).ipnt(n)).y**2+
-     +                             hit(trk(lxi).ipnt(n)).z**2
-                              if (id.gt.-1.and.(dis.ge.long)) then
-                                 long=dis
-                                 tracks=lxi
-                                 hits=n
-                                 next=id
-                              endif
-                              endif
-                           enddo                   
-*                          Write the hit to its new track:
-                           if (long.gt.-1.0) then
-                              hit(next).track=lxi*1000+c
-                              c=c+1
-                           endif
-*                          Mark hit as used:
-                           trk(tracks).ipnt(hits)=-abs(trk(tracks).
-     +                          ipnt(hits))
-                        enddo
-*                       Update and fix the trk array & update tptrack table:
-                        ncount = 0
-                        do n=1,trk(lxi).nhit
-                           if(trk(lxi).ipnt(n).gt.0) then
-                               next=trk(lxi).ipnt(n)
-                               hit(next).track=0
-                           else 
-                               ncount=ncount+1
-                               trk(lxi).ipnt(ncount)=
-     >                         abs(trk(lxi).ipnt(n))
-                           endif
-                        enddo
-                        do k=1,trk(lxj).nhit
-                           if(trk(lxj).ipnt(k).gt.0) then
-                               next=trk(lxj).ipnt(k)
-                               hit(next).track=0
-                           else
-                               ncount = ncount+1
-                               trk(lxj).ipnt(k)=abs(trk(lxj).ipnt(k))
-                               trk(lxi).ipnt(ncount)=
-     >                         abs(trk(lxj).ipnt(k))
-                           endif
-                        enddo
-                        trk(lxi).nhit = ncount
-                        if (tpar(ipass).debug(8).eq.1) then
-                           call StInfo('TPT-MERGE-SEGMENTS - New track:')
-                           write(m132,*) 'trk(lxi).nhit= ',trk(lxi).nhit
-                           call StInfo(m132)
-                        endif
-                        trk(lxj).p(1)=-100
-                        trk(lxj).flag=-100
-                        track(lxj).flag=-100 
-                        trk(lxi).p(1) = 100
-                        trk(lxi).flag = 100
-                        track(lxi).flag=100
-                        track(lxi).nrec=ncount
-                  endif   ! mindist
-                endif   ! p(7) or tanl
+C                   write(17,*)"merged",i,j
+C                  flag the j=th track as "admerged"
+                   trk(j).flag=-77
+                   track(j).flag=-77
+C                  store hits from both tracks in a local struct
+                   do k=1,trk(i).nhit
+                      rhits(k).lhit=trk(i).ipnt(k)
+                      rhits(k).ltrack=i
+                      rhits(k).x=hit(rhits(k).lhit).x
+                      rhits(k).y=hit(rhits(k).lhit).y
+                      rhits(k).z=hit(rhits(k).lhit).z
+c                      write(6,*)hit(rhits(k).lhit).x,hit(rhits(k).lhit).y,hit(rhits(k).lhit).z,hit(rhits(k).lhit).track
+                   end do
+                   do k=1,trk(j).nhit
+                      rhits(k+trk(i).nhit).lhit=trk(j).ipnt(k)
+                      rhits(k+trk(i).nhit).ltrack=j
+                      rhits(k+trk(i).nhit).x=hit(rhits(k+trk(i).nhit).lhit).x
+                      rhits(k+trk(i).nhit).y=hit(rhits(k+trk(i).nhit).lhit).y
+                      rhits(k+trk(i).nhit).z=hit(rhits(k+trk(i).nhit).lhit).z
+                   end do
+                   trk(i).nhit=trk(i).nhit+trk(j).nhit
+C                  sort hits in z
+                   iret=tls_Quick_Sort_r(trk(i).nhit, rhits(1).z, rhits(2).z, rhits)
+C                  re-load trk(i)
+                   do  k=1,trk(i).nhit
+                      trk(i).ipnt(k)=rhits(k).lhit
+                      hit(rhits(k).lhit).track=1000*i+k
+                   end do
+c                  refit track
+c                call the fitting and loading
+                 iret = tpt_fit_track(i,trk,hit_h,hit,tpar_h,tpar,dummy,ipass)
+                 iret = tpt_load_track(i,track_h,track,trk,hit_h,hit)
+              endif   ! p(7) or tanl
             endif   ! cuta,b
-          endif! track that passes the radius criterion already merged 
-          j=j+1
-          if(j.le.ltot) radj = merge(j).rad
+         endif! track that passes the radius criterion already merged 
+         j=j+1
+         if(j.gt.ltot)enough=.true.
          enddo   ! rad
-      endif ! .flag<0 (track already merged)
       enddo   ! i  
 c
  999  continue
