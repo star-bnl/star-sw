@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimulator.cc,v 1.4 2001/03/06 23:36:24 jcs Exp $
+// $Id: StFtpcSlowSimulator.cc,v 1.5 2001/03/19 15:53:10 jcs Exp $
 // $Log: StFtpcSlowSimulator.cc,v $
+// Revision 1.5  2001/03/19 15:53:10  jcs
+// use ftpcDimensions from database
+//
 // Revision 1.4  2001/03/06 23:36:24  jcs
 // use database instead of params
 //
@@ -55,10 +58,10 @@ int StFtpcSlowSimulator::simulate()
     if(DEBUG) field->Output();                  // write out field 
 
     // setup readout
-    float *ADC = new float[mParam->numberOfPadrows()
-			  *mParam->numberOfSectors()
-			  *mParam->numberOfPads()
-			  *mParam->numberOfTimebins()];      
+    float *ADC = new float[mDb->numberOfPadrows()
+			  *mDb->numberOfSectors()
+			  *mDb->numberOfPads()
+			  *mDb->numberOfTimebins()];      
     
     StFtpcSlowSimReadout *rdout = new StFtpcSlowSimReadout(mParam, mDb, ADC, field);
     // create readout
@@ -83,8 +86,8 @@ int StFtpcSlowSimulator::simulate()
     float rr;
     float de;
     float phi_tmp;
-    float r_min    = mParam->sensitiveVolumeInnerRadius();
-    float r_max    = mParam->sensitiveVolumeOuterRadius();
+    float r_min    = mDb->sensitiveVolumeInnerRadius();
+    float r_max    = mDb->sensitiveVolumeOuterRadius();
     float dip_ang, cross_ang;
 
     int number_hits = mGeant->numberOfHits();
@@ -268,10 +271,10 @@ int StFtpcSlowSimulator::simulate()
    rdout->OutputADC();
 
    mWriter->writeArray(ADC,
-		       mParam->numberOfPadrows(),
-		       mParam->numberOfSectors(),
-		       mParam->numberOfPads(),
-		       mParam->numberOfTimebins(),
+		       mDb->numberOfPadrows(),
+		       mDb->numberOfSectors(),
+		       mDb->numberOfPads(),
+		       mDb->numberOfTimebins(),
 		       mParam->zeroSuppressThreshold());
 
     delete rdout;

@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimCluster.cc,v 1.2 2001/03/06 23:35:55 jcs Exp $
+// $Id: StFtpcSlowSimCluster.cc,v 1.3 2001/03/19 15:53:10 jcs Exp $
 // $Log: StFtpcSlowSimCluster.cc,v $
+// Revision 1.3  2001/03/19 15:53:10  jcs
+// use ftpcDimensions from database
+//
 // Revision 1.2  2001/03/06 23:35:55  jcs
 // use database instead of params
 //
@@ -26,7 +29,7 @@ StFtpcSlowSimCluster::StFtpcSlowSimCluster(StFtpcParamReader *paramReader,
 					   const float ph, const float time, 
 					   const int call_padrow)
 {
-  outerRadius=paramReader->sensitiveVolumeOuterRadius();
+  outerRadius=dbReader->sensitiveVolumeOuterRadius();
   mIntDiffCoarseness=paramReader->diffusionCoarseness();
   mFlDiffCoarseness=(float) mIntDiffCoarseness;
   electron     = el;

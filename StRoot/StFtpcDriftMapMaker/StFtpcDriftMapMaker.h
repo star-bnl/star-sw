@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.h,v 1.3 2001/03/09 13:54:26 jcs Exp $
+// $Id: StFtpcDriftMapMaker.h,v 1.4 2001/03/19 15:53:05 jcs Exp $
 // $Log: StFtpcDriftMapMaker.h,v $
+// Revision 1.4  2001/03/19 15:53:05  jcs
+// use ftpcDimensions from database
+//
 // Revision 1.3  2001/03/09 13:54:26  jcs
 // write out cstructs with new values so that they can be added to database
 //
@@ -25,6 +28,7 @@
 class St_fss_gas;
 class St_fss_param;
 class St_fcl_det;
+class St_ftpcDimensions;
 class St_ftpcPadrowZ;
 class St_ftpcEField;
 class St_ftpcVDrift;
@@ -39,11 +43,12 @@ class StFtpcDriftMapMaker : public StMaker {
  private:
    char*   fTableName;      // c-structure name that is same as table in database
    char*   fOutputFileName; // file name for output
-  // static Char_t m_VersionCVS = "$Id: StFtpcDriftMapMaker.h,v 1.3 2001/03/09 13:54:26 jcs Exp $";
+  // static Char_t m_VersionCVS = "$Id: StFtpcDriftMapMaker.h,v 1.4 2001/03/19 15:53:05 jcs Exp $";
   // Int_t         m_mode;        // mode 1 = primaries;
   St_fss_gas      *m_fss_gas;  //!
   St_fss_param    *m_fss_param;//!
   St_fcl_det      *m_det;      //!
+   St_ftpcDimensions    *m_dimensions;    //!
    St_ftpcPadrowZ       *m_padrow_z;      //!
    St_ftpcEField        *m_efield;        //!
    St_ftpcVDrift        *m_vdrift;        //!
@@ -60,7 +65,7 @@ class StFtpcDriftMapMaker : public StMaker {
   virtual Int_t  Make();
   // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcDriftMapMaker.h,v 1.3 2001/03/09 13:54:26 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcDriftMapMaker.h,v 1.4 2001/03/19 15:53:05 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StFtpcDriftMapMaker, 1)  
 };

@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.hh,v 1.12 2001/01/25 15:25:49 oldi Exp $
+// $Id: StFtpcFastSimu.hh,v 1.13 2001/03/19 15:52:47 jcs Exp $
 //
 // $Log: StFtpcFastSimu.hh,v $
+// Revision 1.13  2001/03/19 15:52:47  jcs
+// use ftpcDimensions from database
+//
 // Revision 1.12  2001/01/25 15:25:49  oldi
 // Fix of several bugs which caused memory leaks:
 //  - Some arrays were not allocated and/or deleted properly.
@@ -56,12 +59,14 @@
 
 class RandGauss;
 class StFtpcParamReader;
+class StFtpcDbReader;
 class StFtpcGeantReader;
 
 class StFtpcFastSimu
 {
  private:
   StFtpcParamReader *mParam;
+  StFtpcDbReader    *mDb;
   StFtpcGeantReader *mGeant;
   StFtpcReducedPoint *mPoint;
   StFtpcGeantPoint *mGeantPoint;
@@ -92,6 +97,7 @@ class StFtpcFastSimu
  public:
   StFtpcFastSimu(StFtpcGeantReader *geantReader,
 		 StFtpcParamReader *paramReader,
+                 StFtpcDbReader    *dbReader,
 		 TObjArray *pointarray,
 		 TObjArray *geantarray);
   ~StFtpcFastSimu();
