@@ -3,12 +3,13 @@ use Env;
 if (defined($AFS)) {$File::Find::dont_use_nlink;}
 use File::Basename;
 use File::Find ();
+#use lib qw(/usr/local/lib/site_perl);
 #use strict;
 use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.12 1999/09/26 00:23:53 fisyak Exp $
+# $Id: cons,v 1.13 1999/09/26 21:48:33 fisyak Exp $
 $cons_history =
   q(
     Modification History:
@@ -43,7 +44,7 @@ $cons_history =
 $ver_num = 1.6;
 $ver_rev = "b1";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.12 1999/09/26 00:23:53 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.13 1999/09/26 21:48:33 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 

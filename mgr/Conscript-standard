@@ -89,7 +89,6 @@ foreach my $cpp (@cpps) {
 }
 $cscanner= find scan::cpp($env2->{_cwd}, $ROOTCINT_CPP);# print "ROOTCINT_CPP = $ROOTCINT_CPP\n";
 my $ROOTCINT_CPPPATH = $cscanner->iflags;# print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
-my @CintFiles = ($share . "/"  . $PKG . "_Cint.cxx", $share . "/"  . $PKG . "_Cint.h", $share . "/"  . "LinkDef.h"); 
 my $DIR = cwd(); #print "DIR = $DIR\n";
 my $line;
 my @Defs = ();
@@ -122,21 +121,23 @@ else {
     for $idl (@idlM) {
       my $stem = basename($idl,".idl"); #print "idl = $idl  stem = $stem\n";
       my $idm  = $stem . ".idl";
-      my $idM  = $DIR . "/" . $Dir . "/" . $idl; #print "idM = $idM\n";
+#      my $idM  = "#" . $DIR . "/" . $Dir . "/" . $idl; print "idM = $idM\n";
+      my $idM  = "#" . $Dir . "/" . $idl;# print "idM = $idM\n";
       my @idlS = ($idM);
       my $modh = $INCLUDE . "/"   . $stem . ".h";
       my $modi = $INCLUDE . "/"   . $stem . ".inc";
       my $modH = $include . "/"   . "St_" . $stem . "_Module.h"; 
       my $modC = $share . "/"   . "St_" . $stem . "_Module.cxx";# print "mod = $mod\n";
-      if (-r $idM) {
-	open (IN, "<$idM") or die  "Can't open $idM";
-	while ($line = <IN>) {
-	  if ($line !~ "include") {next;}
-	  if ($line =~ "PAM")     {next;}
-	  my @words = split '"', $line; my $idt = $INCLUDE . "/" . $words[1]; #print "idt = $idt\n";
-	  push @idlS, $idt; 
-	}
-	close (IN);
+#      if (-r $idM) {
+#	open (IN, "<$idM") or die  "Can't open $idM";
+#	while ($line = <IN>) {
+#	  if ($line !~ "include") {next;}
+#	  if ($line =~ "PAM")     {next;}
+#	  my @words = split '"', $line; my $idt = $INCLUDE . "/" . $words[1]; #print "idt = $idt\n";
+#	  push @idlS, $idt; 
+#	}
+#	close (IN);
+#      }
 	if ($STAR_SYS !~ /^intel_wnt$/) {
 	  Command $env2 [$modh], @idlS,  qq(stic.pl %> -r $STIC_CPPPATH -q %1);  
 	  Command $env2 [$modi], @idlS,  qq(stic.pl %> -r $STIC_CPPPATH -q %1);  
@@ -145,7 +146,6 @@ else {
 	}
 	my @objmod = ($modC);
 	Install $env2 $ObjDir, @objmod;#  print "Install @objmod in $ObjDir\n";
-      }
       (my $mod = $modC) =~  s/$share/$obj/g; 
       push @src, $mod;# print "src + $mod: @src\n";
       push @Defs, $modH;
@@ -153,8 +153,10 @@ else {
   }
 }
 if ($#Defs > -1) {
+  my @CintFiles = 
+  ($share . "/"  . $PKG . "_Cint.cxx", $share . "/"  . $PKG . "_Cint.h", $share . "/"  . "LinkDef.h"); 
   Command $env2 [@CintFiles], @Defs,  qq(RootCint.pl "%>" "%<" "$ROOTCINT_CPPPATH" );
-  my $linkdef = pop @CintFiles;# print "ObjDir and Cints: $ObjDir => @CintFiles\n";
+#  my $linkdef = pop @CintFiles;# print "ObjDir and Cints: $ObjDir => @CintFiles\n";
   Install $env2 $ObjDir, @CintFiles;
   (my $cint =  $CintFiles[0]) =~ s/$share/$obj/g;
   push @src, $cint;# print "+==========add $cint\n"; 
