@@ -1,32 +1,60 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.65 2000/08/15 23:15:45 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.66 2000/08/16 20:50:55 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // StEventDisplayMaker class for Makers                                 //
-//  To diplay the StEvent/StGlobalTrack object with the GEANT geometry  //
+//                                                                      //
+//  To mix and display the "detector" object defined by  GEANT geometry //
+//  and "event" object defined by TTable objects                        //
+//                                                                      //
+//  The "regular" ROOT viewers, namely TPad, X3D and OpenGL can be used //
+//                                                                      //
+//  Example provided by default filter (StVirtualEventFilter class):    //
+//  begin_html <P ALIGN=CENTER> <IMG SRC="gif/EventDisplay.gif" width=100%> </P> end_html   //
+//                                                                      //
+// - "doEvents" - defines the "bfc" should make NO reconstruction       //
+//                and get the information from the begin_html <a href="http://www.rhic.bnl.gov/STAR/html/comp_l/ofl/dst_table_model.html">DST</a> end_html file directly    //
+// - "y1h geant" - define the source of the detector geometry           //
+// - "noevent"   - defines no StEvent output is required                //
+//                                                                      //
+// - green dots represent the hits                                      //
+//   from begin_html <a href="dst_point_st.html">dst/point</a> end_html  table with no track associated                      //
+//                                                                      //
+// - "colored" dots represent the hits associated with begin_html <a href="dst_track_st.html">dst/globtrk</a> end_html //
+//   (The color is used to distinguish the hits of one track from others)//
+//                                                                      //
+// - "colored" lines represent the begin_html <a href="dst_track_st.html">dst/primtrk</a> end_html          //
+//                                                                      //
+// - "detector geometry" is defined by STAR geant definition (see: St_geant_Maker) //
+//                                                                      //
+// - the default 3D viewer is ROOT TPad object. That can be switched to either //
+//   X3D or OpenGL view TPad "view" menu (see picture attached)         //
+//                                                                      //
+// - The custom view can be provided by user code as well. The user should provide 
+//   his/her own selection with the selection class-filter.             //
 //                                                                      //
 //  Submit any problem with this code via begin_html <A HREF="http://www.star.bnl.gov/STARAFS/comp/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html   //
+//                                                                      //
 //                                                                      //
 //             How to create the custom filter                          //
 //                                                                      //
 // 1. Choose name for your filter                                       //
-// 2. Copy $STAR/StRoot/StEvent/St_TLA_EventFiler.cxx                   //
-//         $STAR/StRoot/StEvent/St_TLA_EventFiler.h                     //
-// 3. Replace all "_TLA_" with the name of the filter you've chosen     //
-// 4. Edit St<your_name>EventFiler.cxx to introduce your own version of //
-//    St<your_name>EventFiler::Channel methods                           //
+// 2. Pick the pattern:                                                 //
+//    cvs co StRoot/macros/graphics/StSectorHitFilter                   //
+// 3. Copy it to your filter directory:                                 //
+//    cp StRoot/macros/graphics/StSectorHitFilter/* StRoot/MyFilter     //
+//    where "MyFilter" is the name of the filter you choose             //
+// 3. Replace all "SectorHit" with the name of the filter you've chosen //
+// 4. Edit St<your_name>Filer.cxx to introduce your own version of      //
+//    St<your_name>EventFiler::Channel methods                          //
 // 5. Create the "regular" STAR share library for yor filter class      //
-// 6. Create/Edit "chain" macro  (see drawEvent.C )                     //
-//    6.1. Load in there your filter share library                      //
-//    6.2. Create in there your filter object('s)                       //
-//    6.2. Link your filter with the element of StEvent you want        //
-//         your filter affect:                                          //
+// 6. Call TurnDisplay.C("MyFiler") to include StEventDisplayMaker with //
+//    your custom filter in the "regular" chain: "bfc.C" or "doEvents"  //
+// 7. Call .x PadControlPanel.C                                         //
 //                                                                      //
-//         disp      = new StEventDisplayMaker;                         //
-//         St_TLA_EventFilter *trackFilter = new St_TLA_EventFilter();  //
-//         disp->SetFilter(trackFilter,StEventDisplayMaker::kTrack);    //
-//                                                                      //
+// 8. Push either "ReDraw" to redraw the current event                  //
+//                "NextEvent" to see next event                         //                                                                    //
 //////////////////////////////////////////////////////////////////////////
 
 #include "TROOT.h"
@@ -155,7 +183,8 @@ Int_t StEventDisplayMaker::BuildGeometry()
 // ---  Create "standard" TPC and SVT views ----
   TVolume *sector = 0;
 //  const Char_t *volueNames[] = {"TPSS","STSI"}; // STLI"};
-  const Char_t *volueNames[] = {"TPSS","STLI","ECAL","CALB"}; // STSI"};
+//  const Char_t *volueNames[] = {"TPSS","STLI","ECAL","CALB"}; // STSI"};
+  const Char_t *volueNames[] = {"TPSS","STLI","ECAL","CALB","BTOF"}; // STSI"};
   const Int_t lvolueNames = sizeof(volueNames)/sizeof(Char_t *);
   while ( (sector = ( TVolume *)volume()) ){
     Bool_t found = kFALSE;
@@ -944,6 +973,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.66  2000/08/16 20:50:55  fine
+// CTB object has been added to the list of the volumes to draw
+//
 // Revision 1.65  2000/08/15 23:15:45  fine
 // globtrk has been replaced with primtrk for default views
 //
