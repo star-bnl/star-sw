@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.44 2000/11/02 18:19:09 fine Exp $
+// $Id: StFlowMaker.cxx,v 1.45 2000/11/07 02:36:41 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.45  2000/11/07 02:36:41  snelling
+// Do not init prob pid when not used
+//
 // Revision 1.44  2000/11/02 18:19:09  fine
 // protection against of the crash with traits.size() == 0 and pid == 0. May be one has to change the logic of this code
 //
@@ -293,8 +296,10 @@ Int_t StFlowMaker::Init() {
 		       <<  mEventFileName << endm;
     }
     // Init pid probability algorithm
-    TString parameterfile = "nhitsBin_0_10_20_45_ptBin_0_Inf_dcaBin_0_2_50000_Amp.root";
-    StuProbabilityPidAlgorithm::readParametersFromFile(parameterfile.Data());
+    if (pFlowEvent->ProbPid()) {
+      TString parameterfile = "nhitsBin_0_10_20_45_ptBin_0_Inf_dcaBin_0_2_50000_Amp.root";
+      StuProbabilityPidAlgorithm::readParametersFromFile(parameterfile.Data());
+    }
   }
 
   if (mPicoEventWrite) kRETURN += InitPicoEventWrite();
@@ -303,7 +308,7 @@ Int_t StFlowMaker::Init() {
   if (mFlowEventRead)  kRETURN += InitFlowEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.44 2000/11/02 18:19:09 fine Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.45 2000/11/07 02:36:41 snelling Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -441,7 +446,7 @@ void StFlowMaker::FillFlowEvent() {
 
   // define functor for pid probability algorithm
   StuProbabilityPidAlgorithm uPid(*pEvent);
-  
+
   // loop over tracks in StEvent
   int goodTracks    = 0;
   int goodTracksEta = 0;
@@ -519,12 +524,14 @@ void StFlowMaker::FillFlowEvent() {
 	  assert(pid); pFlowTrack->SetDedx(pid->mean());
         }
 
-	// Probability pid
-	const StParticleDefinition* def = pTrack->pidTraits(uPid);
-	pFlowTrack->SetMostLikelihoodPID(uPid.mostLikelihoodParticleGeantID());
-	pFlowTrack->SetMostLikelihoodProb(uPid.mostLikelihoodProbability());
-	if (uPid.isExtrap()) pFlowTrack->SetExtrapTag(1); //mergin area. 
-	else pFlowTrack->SetExtrapTag(0); 
+	if (pFlowEvent->ProbPid()) {
+	  // Probability pid
+	  const StParticleDefinition* def = pTrack->pidTraits(uPid);
+	  pFlowTrack->SetMostLikelihoodPID(uPid.mostLikelihoodParticleGeantID());
+	  pFlowTrack->SetMostLikelihoodProb(uPid.mostLikelihoodProbability());
+	  if (uPid.isExtrap()) pFlowTrack->SetExtrapTag(1); //mergin area. 
+	  else pFlowTrack->SetExtrapTag(0); 
+	}
 
 	pFlowEvent->TrackCollection()->push_back(pFlowTrack);
 	goodTracks++;
