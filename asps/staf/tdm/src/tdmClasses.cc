@@ -408,7 +408,7 @@ long tdmTable:: columnRank (long ncol) {
 
 //----------------------------------
 long tdmTable:: columnShape (long ncol, long ndim) {
-   size_t *c;
+   size_t c[8];		/* HACK - limit to RANK <= 8 */
    if( !dsColumnDimensions(c,pDSthis,ncol)
    ||  !( ndim < columnRank(ncol) )
    ){
