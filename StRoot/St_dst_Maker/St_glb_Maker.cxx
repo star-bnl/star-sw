@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.43 1999/03/03 04:52:55 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.44 1999/03/03 17:13:43 caines Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.44  1999/03/03 17:13:43  caines
+// Reduced v0,xi table memory allocations
+//
 // Revision 1.43  1999/03/03 04:52:55  fisyak
 // Add protection for no vertex fit was made
 //
@@ -595,7 +598,10 @@ Int_t St_glb_Maker::Make(){
 #endif
       // ev0
       cout << "Calling ev0..." << endl;
-      if (! dst_v0_vertex) {dst_v0_vertex = new St_dst_v0_vertex("dst_v0_vertex",20000); dst.Add(dst_v0_vertex);}
+      Int_t v0_limit = globtrk->GetNRows();
+      v0_limit = (v0_limit*v0_limit)/6000;
+      if (v0_limit < 1000) v0_limit=1000;
+      if (! dst_v0_vertex) {dst_v0_vertex = new St_dst_v0_vertex("dst_v0_vertex",v0_limit); dst.Add(dst_v0_vertex);}
       St_ev0_track2 *ev0track2 = new St_ev0_track2("ev0_track2",globtrk->GetNRows());
       temp->Add(ev0track2);
       if (vertex->GetNRows() != 1) vertex->SetNRows(1); 
@@ -623,7 +629,9 @@ Int_t St_glb_Maker::Make(){
       // exi
       cout << "Calling exi..."<< endl;
       if (! dst_xi_vertex) {
-	dst_xi_vertex = new St_dst_xi_vertex("dst_xi_vertex",30*dst_v0_vertex->GetNRows());
+        Int_t xi_limit = 2*dst_v0_vertex->GetNRows();
+        if (xi_limit < 250) xi_limit=250;
+	dst_xi_vertex = new St_dst_xi_vertex("dst_xi_vertex",xi_limit);
 	dst.Add(dst_xi_vertex);
       }
       Int_t Res_exi = exiam(m_exipar,globtrk,vertex,dst_v0_vertex,dst_xi_vertex,m_exiaux);
@@ -739,7 +747,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.43 1999/03/03 04:52:55 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.44 1999/03/03 17:13:43 caines Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
