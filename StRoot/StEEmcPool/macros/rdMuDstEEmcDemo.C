@@ -3,13 +3,12 @@ class StChain;
   StChain *chain=0;
 
 
-int rdMuDstEEmcDemo(//char* file    ="rcf1200_2301_2000evts.MuDst.root",
-	  char* file    = "mc_el-pt10_0-eta1_3-a1.MuDst.root",
-	  //char* file    = "rcf1200_2377_2000evts.MuDst.root",
+int rdMuDstEEmcDemo(
+	  char* file    = "rcf1202_2178_1000evts.MuDst.root",
 	  Int_t nFiles  = 1, 
-	  char* inDir   = "./",
-	  int nEve=1)
-{
+	  char* inDir   = "/star/data29/reco/pp200/pythia6_203/default/pt5/year2003/gheisha_on/trs_if/",
+	  int nEve=500)
+{ 
   if (gClassTable->GetID("TTable") < 0)
   gSystem->Load("libStar");
   gSystem->Load("St_base");
@@ -42,9 +41,9 @@ int rdMuDstEEmcDemo(//char* file    ="rcf1200_2301_2000evts.MuDst.root",
   gSystem->Load("StMuDSTMaker");
 
 // Load my maker
-  gSystem->Load("StEEmcUtil");
-  gSystem->Load("StEEmcPool");
-  gSystem->Load("StEEmcDbMaker");
+  assert(gSystem->Load("StEEmcUtil")==0);
+  assert(gSystem->Load("StEEmcPoolmuDst")==0 );
+  assert(gSystem->Load("StEEmcDbMaker")==0);
 
 
 // create chain    
@@ -55,25 +54,33 @@ int rdMuDstEEmcDemo(//char* file    ="rcf1200_2301_2000evts.MuDst.root",
   StMuDbReader* db = StMuDbReader::instance();
 
   
-  // instantiate your test maker here 
-  StEEmcDbMaker  *myMk1=new StEEmcDbMaker("eemcDb");
+  // instantiate your maker here 
+  //#2
+  StEEmcDbMaker  *myMk=new StEEmcDbMaker("eemcDb");  
+  //#1
   St_db_Maker *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");
 
-  myMk1->setSectors(5,8);
-  myMk1->setTimeStampDay(20030814);  // format: yyyymmdd, change order !
-  // myMk1->setDBname("TestScheme/emc");
-  // myMk1->setPreferedFlavor("set-b","eemcPMTcal");
+  // request DB for sectors you need (dafault:1-12)
+  myMk->setSectors(5,8);
+
+  // overwritte the time stamp (if needed)
+  // reverse order of makers: first #2, then #1
+  // activate the line below
+  myMk->setTimeStampDay(20030514);  // format: yyyymmdd
+
+  // change DB-server name (if needed)
+  myMk->setDBname("TestScheme/emc");
+ 
+  // request alternative flavor of DB table (if needed)
+  myMk->setPreferedFlavor("set430","eemcPMTcal");
 
   StMuEEDemoMaker *m = new StMuEEDemoMaker("jasEE","MuDst");
   
   chain->Init();
   chain->ls(3);
-  
-
 
   int eventCounter=0;
   int stat=0;
-
 
   //---------------------------------------------------
   while ( stat==0 ) {// loop over events
