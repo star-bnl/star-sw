@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.h,v 1.8 1999/09/24 01:23:14 fisyak Exp $
+ * $Id: StStandardHbtEventReader.h,v 1.9 1999/10/15 01:57:37 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,23 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.h,v $
+ * Revision 1.9  1999/10/15 01:57:37  lisa
+ * Important enhancement of StHbtMaker - implement Franks CutMonitors
+ * ----------------------------------------------------------
+ * This means 3 new files in Infrastructure area (CutMonitor),
+ * several specific CutMonitor classes in the Cut area
+ * and a new base class in the Base area (StHbtCutMonitor).
+ * This means also changing all Cut Base class header files from .hh to .h
+ * so we have access to CutMonitor methods from Cint command line.
+ * This last means
+ * 1) files which include these header files are slightly modified
+ * 2) a side benefit: the TrackCuts and V0Cuts no longer need
+ * a SetMass() implementation in each Cut class, which was stupid.
+ * Also:
+ * -----
+ * Include Franks StHbtAssociationReader
+ * ** None of these changes should affect any user **
+ *
  * Revision 1.8  1999/09/24 01:23:14  fisyak
  * Reduced Include Path
  *
@@ -58,9 +75,9 @@
 //#include "StChain.h"
 #include "StMaker.h"
 #include "StV0MiniDstMaker/StV0MiniDstMaker.h"
-#include "StHbtMaker/Base/StHbtEventCut.hh"
-#include "StHbtMaker/Base/StHbtTrackCut.hh"
-#include "StHbtMaker/Base/StHbtV0Cut.hh"
+#include "StHbtMaker/Base/StHbtEventCut.h"
+#include "StHbtMaker/Base/StHbtTrackCut.h"
+#include "StHbtMaker/Base/StHbtV0Cut.h"
 
 class TOrdCollection;
 class StStandardHbtEventReader : public StHbtEventReader{

@@ -21,12 +21,9 @@
 #include "StMaker.h"
 #endif
 
-#include "StHbtMaker/Base/StHbtTrackCut.hh"
-//#include "StHbtMaker/Base/StHbtHistoStyle.hh"
-//#include "StHbtMaker/Infrastructure/StHbtParticleCutMoniHandler.h" 
+#include "StHbtMaker/Base/StHbtTrackCut.h"
 
 class franksTrackCut : public StHbtTrackCut
-//, public StHbtParticleCutMoniHandler 
 {
 
  public:
@@ -50,7 +47,6 @@ class franksTrackCut : public StHbtTrackCut
   void SetDCA(const float& lo, const float& hi);
   void SetCharge(const int&);
 
-  virtual void SetMass(const double& mass);  // need this in derived class so Cint can handle it
 
 private:   // here are the quantities I want to cut on...
 
@@ -71,7 +67,6 @@ private:   // here are the quantities I want to cut on...
 
 };
 
-inline void franksTrackCut::SetMass(const double& mass) {mMass = mass;}
 
 inline void franksTrackCut::SetNSigmaPion(const float& lo, const float& hi){mNSigmaPion[0]=lo; mNSigmaPion[1]=hi;}
 inline void franksTrackCut::SetNSigmaKaon(const float& lo, const float& hi){mNSigmaKaon[0]=lo; mNSigmaKaon[1]=hi;}

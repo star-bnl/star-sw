@@ -21,9 +21,9 @@
 
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
-#include "StHbtMaker/Base/StHbtParticleCut.hh"
+#include "StHbtMaker/Base/StHbtParticleCut.h"
 
-class StHbtTrackCut : public StHbtParticleCut{
+class StHbtTrackCut : public StHbtParticleCut {
 
 public:
 
@@ -32,6 +32,8 @@ public:
 
   virtual bool Pass(const StHbtTrack* track)=0;       // true if passes, false if not
   virtual StHbtParticleType Type(){return hbtTrack;}
+
+  ClassDef(StHbtTrackCut, 0)
 };
 
 #endif

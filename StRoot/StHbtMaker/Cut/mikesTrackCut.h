@@ -20,7 +20,7 @@
 #include "StMaker.h"
 #endif
 
-#include "StHbtMaker/Base/StHbtTrackCut.hh"
+#include "StHbtMaker/Base/StHbtTrackCut.h"
 
 class mikesTrackCut : public StHbtTrackCut {
 
@@ -44,7 +44,6 @@ public:
   void SetDCA(const float& lo, const float& hi);
   void SetCharge(const int&);
 
-  virtual void SetMass(const double& mass);  // need this in derived class so Cint can handle it
 
 private:   // here are the quantities I want to cut on...
 
@@ -64,7 +63,6 @@ private:   // here are the quantities I want to cut on...
 
 };
 
-inline void mikesTrackCut::SetMass(const double& mass) {mMass = mass;}
 
 inline void mikesTrackCut::SetNSigmaPion(const float& lo, const float& hi){mNSigmaPion[0]=lo; mNSigmaPion[1]=hi;}
 inline void mikesTrackCut::SetNSigmaKaon(const float& lo, const float& hi){mNSigmaKaon[0]=lo; mNSigmaKaon[1]=hi;}
