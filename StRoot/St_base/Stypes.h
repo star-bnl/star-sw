@@ -14,6 +14,9 @@
  * classes (by stic compiler)                                           
  *                                                                      
  */
+#ifndef ST_NO_NAMESPACES
+using namespace std;
+#endif
 
 #ifndef STAR_Stypes
 #define STAR_Stypes

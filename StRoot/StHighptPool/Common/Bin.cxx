@@ -1,6 +1,10 @@
 #include "Bin.h"
 #include <iostream>
+#ifndef ST_NO_NAMESPACES
+using namespace std;
+#endif
 using namespace Bin;
+
 
 void Bin::initPtAry(TArrayD* ary, int type)
 {
