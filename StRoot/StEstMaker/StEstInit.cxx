@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstInit.cxx,v 1.7 2001/02/23 13:46:13 lmartin Exp $
+ * $Id: StEstInit.cxx,v 1.8 2001/04/20 07:50:54 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstInit.cxx,v $
+ * Revision 1.8  2001/04/20 07:50:54  lmartin
+ * Corrected vertex coordinates for the branch initialization.
+ *
  * Revision 1.7  2001/02/23 13:46:13  lmartin
  * Two arguments (hittmp,exclhit) of the RefitBranch method removed.
  *
@@ -122,7 +125,7 @@ int StEstTracker::BranchInit(){
 	branch->SetDebugLevel(0);
 	if(mDebugLevel>3)
 	  gMessMgr->Info()<<" Branch added"<<endm;
-	StThreeVector<double> a(mVertex->mXG->z(),mVertex->mXG->y(),mVertex->mXG->z());
+	StThreeVector<double> a(mVertex->mXG->x(),mVertex->mXG->y(),mVertex->mXG->z());
   	if (mTPCTrack[i]->GetFlag()>=0) {
 	  // First the branch is refitted without the tpc hits only.
 	  // The fit results (chisq,chisql,chisqc,ndofl,ndofc) are
