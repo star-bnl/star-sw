@@ -1,5 +1,8 @@
-// $Id: StPreVertexMaker.cxx,v 1.12 2003/09/02 17:59:26 perev Exp $
+// $Id: StPreVertexMaker.cxx,v 1.13 2003/09/30 19:21:02 perev Exp $
 // $Log: StPreVertexMaker.cxx,v $
+// Revision 1.13  2003/09/30 19:21:02  perev
+// zeroing tpc_track before copy into it
+//
 // Revision 1.12  2003/09/02 17:59:26  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -119,7 +122,7 @@ Int_t StPreVertexMaker::Make(){
     St_dst_track globtpc("globtpc", numRowTptrack);
   
     tpt_track_st *tptrackT = tptrack->GetTable();
-    dst_track_st globtpcRow;
+    dst_track_st globtpcRow; memset(&globtpcRow,0,sizeof(globtpcRow));
 
     Int_t counter = 0;
     for( Int_t i=0; i<numRowTptrack; i++) {
