@@ -113,7 +113,7 @@ int FtfDedx::TruncatedMean() {
         //       matrix (  0   1 )
         //              ( -1   0 )
         //     - divide by length to get unity vector
-        struct vector tangent;
+        struct twoVectorL3 tangent;
 	tangent.x = (ihit->y - yc)/rr;
 	tangent.y = -(ihit->x - xc)/rr;
 	//printf("   tangent x %f y %f\n", tangent.x, tangent.y);
