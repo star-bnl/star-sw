@@ -19,7 +19,7 @@
       G2T_ESM=STAFCV_OK
       if (g2t_emc_hit_h.maxlen.le.0) return
 *
-      call G2R_GET_SYS ('CALB','CSDA',Iprin,Idigi)
+      call G2R_GET_SYS ('ECAL','EXSE',Iprin,Idigi)
       if (Iprin.lt.0) return
       Local  = Idigi.ge.2
 *

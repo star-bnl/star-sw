@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.25 1999/02/24 17:12:27 fine Exp $
+// $Id: St_geant_Maker.cxx,v 1.26 1999/03/04 19:32:16 nevski Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.26  1999/03/04 19:32:16  nevski
+// esm/eem corrected
+//
 // Revision 1.25  1999/02/24 17:12:27  fine
 // St_Table::New has been activated
 //
@@ -344,7 +347,7 @@ Int_t St_geant_Maker::Make(){
       m_DataSet->Add(g2t_eem_hit);
       Int_t Res_eem = g2t_eem(g2t_track,g2t_eem_hit);
       }
-    gfnhit_ ("ECAH","MSEC", &nhits, 4,4);
+    gfnhit_ ("ECAH","EXSE", &nhits, 4,4);
     if (nhits>0) 
       { St_g2t_emc_hit *g2t_esm_hit = new St_g2t_emc_hit("g2t_esm_hit",nhits);
       m_DataSet->Add(g2t_esm_hit);
@@ -383,7 +386,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.25 1999/02/24 17:12:27 fine Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.26 1999/03/04 19:32:16 nevski Exp $\n");
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
 }
