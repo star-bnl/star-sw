@@ -1,5 +1,5 @@
 // Hey Emacs this is -*-c++-*-
-// $Id: EEmcTTMMaker.h,v 1.16 2004/05/07 22:02:56 zolnie Exp $
+// $Id: EEmcTTMMaker.h,v 1.17 2004/05/10 23:02:53 zolnie Exp $
 #ifndef STAR_EEmcTTMMaker
 #define STAR_EEmcTTMMaker
 
@@ -27,12 +27,16 @@ class StChain;
 class StMuTrack;
 class EEmcGeomSimple;
 
+class StEventInfo; 
+class StEventSummary; 
+class StMuTriggerIdCollection; 
+
 class StMuDstMaker;
 class StEEmcDbMaker;
 
 class EEmcTower;
 
-
+/// class EEmcTTMMaker
 class EEmcTTMMaker : public StMaker {
 public: 
   /// default value for the maximum CTB sum allowed
@@ -193,6 +197,10 @@ private:
   TList          *mTrackList;
   TList          *mTowerList;
   TList          *mMatchList;
+  //
+  StEventInfo             *mEvInfo;
+  StEventSummary          *mEvSumm;
+  StMuTriggerIdCollection *mEvTrig;
 
   bool            mTreeOut;
 
@@ -201,7 +209,7 @@ private:
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
     static const char cvs[]=
-      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.16 2004/05/07 22:02:56 zolnie Exp $ built "__DATE__" "__TIME__ ; 
+      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.17 2004/05/10 23:02:53 zolnie Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
   
@@ -213,6 +221,9 @@ ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm);
 #endif
 
 // $Log: EEmcTTMMaker.h,v $
+// Revision 1.17  2004/05/10 23:02:53  zolnie
+// EEmcTTMMaker produces now  nanoDST
+//
 // Revision 1.16  2004/05/07 22:02:56  zolnie
 // fixed a nasty memory leak in EEmcTTMMaker
 //
