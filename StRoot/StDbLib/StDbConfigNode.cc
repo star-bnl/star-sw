@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.cc,v 1.23 2003/09/02 17:57:49 perev Exp $
+ * $Id: StDbConfigNode.cc,v 1.24 2003/09/16 22:44:17 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.cc,v $
+ * Revision 1.24  2003/09/16 22:44:17  porter
+ * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * modified rules.make and added file stdb_streams.h for standalone compilation
+ *
  * Revision 1.23  2003/09/02 17:57:49  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -107,8 +111,8 @@
  * each header and src file
  *
  **************************************************************************/
-#include <Stiostream.h>
-#include <Stsstream.h>
+
+#include "stdb_streams.h"
 #include <string.h>
 
 #include "StDbConfigNode.hh"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlWriter.h,v 1.7 2003/09/02 17:57:50 perev Exp $
+ * $Id: StDbXmlWriter.h,v 1.8 2003/09/16 22:44:18 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbXmlWriter.h,v $
+ * Revision 1.8  2003/09/16 22:44:18  porter
+ * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * modified rules.make and added file stdb_streams.h for standalone compilation
+ *
  * Revision 1.7  2003/09/02 17:57:50  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -39,8 +43,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <Stiostream.h>
-#include <Stsstream.h>
+#include "stdb_streams.h"
 #include "tableAcceptor.hh"
 
 class StDbTable;

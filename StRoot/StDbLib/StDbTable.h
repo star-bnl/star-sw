@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.h,v 1.23 2003/09/02 17:57:49 perev Exp $
+ * $Id: StDbTable.h,v 1.24 2003/09/16 22:44:18 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTable.h,v $
+ * Revision 1.24  2003/09/16 22:44:18  porter
+ * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * modified rules.make and added file stdb_streams.h for standalone compilation
+ *
  * Revision 1.23  2003/09/02 17:57:49  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -130,7 +134,6 @@
 //#include "StDbBufferI.h"
 #include "StDbStoreInfo.hh"
 #include <string.h>
-//#include <Stiostream.h>
 
 class StDbBufferI;
 class StDbBuffer;

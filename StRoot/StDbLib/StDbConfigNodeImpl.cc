@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNodeImpl.cc,v 1.5 2003/09/02 17:57:49 perev Exp $
+ * $Id: StDbConfigNodeImpl.cc,v 1.6 2003/09/16 22:44:17 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNodeImpl.cc,v $
+ * Revision 1.6  2003/09/16 22:44:17  porter
+ * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * modified rules.make and added file stdb_streams.h for standalone compilation
+ *
  * Revision 1.5  2003/09/02 17:57:49  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -44,8 +48,7 @@
  *
  *
  **************************************************************************/
-#include <Stiostream.h>
-#include <Stsstream.h>
+#include "stdb_streams.h"
 #include <string.h>
 #include "StDbConfigNodeImpl.hh"
 #include "StDbManagerImpl.hh" // could be StDbManager.hh but for dbEnvList def
@@ -115,13 +118,11 @@ StDbConfigNodeImpl::updateDbInfo(){
      setBranchID(0);
      char* version=StDbManager::Instance()->getExternalVersion(mdbType,mdbDomain);
      if(version && strcmp(version,mversion)){
-       const char *nMes; ostrstream nm;
+       ostringstream nm;
        nm<<" Overriding Key="<<mversion<<" with Environment Var Key="<<version;
        nm<<" for DataBase=";
-       nm<<StDbManager::Instance()->printDbName(mdbType,mdbDomain)<<ends;
-       nMes = nm.str();
-       StDbManager::Instance()->printInfo(nMes,dbMWarn,__LINE__,__CLASS__,__METHOD__);
-//VP       delete [] nMes;
+       nm<<StDbManager::Instance()->printDbName(mdbType,mdbDomain);
+       StDbManager::Instance()->printInfo((nm.str()).c_str(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
        setVersion(version);
      }
   }
@@ -386,11 +387,10 @@ StDbConfigNodeImpl::addChildren(dbEnvList* elist){
     if(id){
       id++;
       if(strcmp(id,mname) && !findChildConfigNode(id)){
-        const char* nMes; ostrstream nm;
+        ostringstream nm;
         nm<<" Adding DataBase="<<elist->envVar[i]<<" with KEY=";
-        nm<<elist->envDef[i]<<" from Environment variable definition"<<ends;
-        nMes = nm.str();
-	StDbManager::Instance()->printInfo(nMes,dbMWarn,__LINE__,__CLASS__,__METHOD__);    
+        nm<<elist->envDef[i]<<" from Environment variable definition";
+	StDbManager::Instance()->printInfo((nm.str()).c_str(),dbMWarn,__LINE__,__CLASS__,__METHOD__);    
 //VP        delete [] nMes;
             new StDbConfigNodeImpl(this,id,elist->envDef[i]);
       }
@@ -404,10 +404,10 @@ void
 StDbConfigNodeImpl::printTables(int depth){
 
   if(StDbManager::Instance()->IsVerbose()){
-    ostrstream os;
+    ostringstream os;
     for(int k=0;k<depth;k++)os<<" ";
-    os<<ends;
-    const char* pdepth=os.str();
+    
+    string pdepth=os.str();
    TableList::iterator itr;
    for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
      cout<<pdepth<<"Table="<<(*itr)->printName()<<", Version="<<(*itr)->printVersion();
@@ -429,15 +429,14 @@ unsigned int numNodes, numTables, numBytes;
  numNodes=numTables=numBytes=0;
  getNumberStats(numNodes,numTables, numBytes);
  double kbs = ((double)numBytes)/1000.0;
- ostrstream cos;
+ ostringstream cos;
  cos<<"******************** Number Stats ******************** "<<endl;
  cos<<"Total Number of Nodes        = "<<numNodes<<endl;
  cos<<"Total Number of Tables       = "<<numTables<<endl;
  cos<<"Total Size of Data in Tables = "<<kbs<<" kBytes"<<endl;
- cos<<"******************************************************"<<endl<<ends;
+ cos<<"******************************************************"<<endl;
 
- const char* nstats=cos.str();
- StDbManager::Instance()->printInfo(nstats,dbMConnect,__LINE__,__CLASS__,__METHOD__);
+ StDbManager::Instance()->printInfo((cos.str()).c_str(),dbMConnect,__LINE__,__CLASS__,__METHOD__);
 //VP delete [] nstats;
 
 #undef __METHOD__

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbNode.cc,v 1.7 2003/09/02 17:57:49 perev Exp $
+ * $Id: StDbNode.cc,v 1.8 2003/09/16 22:44:17 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbNode.cc,v $
+ * Revision 1.8  2003/09/16 22:44:17  porter
+ * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * modified rules.make and added file stdb_streams.h for standalone compilation
+ *
  * Revision 1.7  2003/09/02 17:57:49  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -61,8 +65,7 @@
 
 #include "StDbNode.hh"
 #include "StDbDefaults.hh"
-#include <Stiostream.h>
-#include <Stsstream.h>
+#include "stdb_streams.h"
 #include <stdlib.h>
 
 #ifdef __ROOT__
@@ -155,7 +158,7 @@ char* id1;
 char* id2;
 
 id2 = strstr(tmpName,"-");
-ostrstream sl;
+ostringstream sl;
 
 if(id2 && ( (id && id2<id) || !id)){
   id=id2;
@@ -182,8 +185,7 @@ while(id){
    }
    if(id)id++;
 }
- sl << ends;
- const char* islist = sl.str();
+ const char* islist = (sl.str()).c_str();
 
  // cout << "My string list = " << islist << endl;
 

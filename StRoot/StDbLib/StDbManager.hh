@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManager.hh,v 1.21 2003/09/02 17:57:49 perev Exp $
+ * $Id: StDbManager.hh,v 1.22 2003/09/16 22:44:17 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbManager.hh,v $
+ * Revision 1.22  2003/09/16 22:44:17  porter
+ * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * modified rules.make and added file stdb_streams.h for standalone compilation
+ *
  * Revision 1.21  2003/09/02 17:57:49  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -113,10 +117,10 @@
 #ifndef STDBMANAGER_HH
 #define STDBMANAGER_HH
 
-// language include files 
-#include <Stsstream.h>
-#include <Stiostream.h>
-#include <time.h>
+#include <string.h>
+#include <sstream>
+
+#include "stdb_streams.h"
 
 // real basic definitions
 #include "StDbDefs.hh"
@@ -257,7 +261,6 @@ public:
                          StDbMessLevel ml, int lineNumber=0,
                          const char* className=" ",
                          const char* methodName=" ");
-  virtual void setMessageStream(ostream& os);
 
   virtual char* userName();
   virtual char* pWord();

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbFastSqlWriter.h,v 1.2 2003/09/02 17:57:49 perev Exp $
+ * $Id: StDbFastSqlWriter.h,v 1.3 2003/09/16 22:44:17 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbFastSqlWriter.h,v $
+ * Revision 1.3  2003/09/16 22:44:17  porter
+ * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * modified rules.make and added file stdb_streams.h for standalone compilation
+ *
  * Revision 1.2  2003/09/02 17:57:49  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -47,8 +51,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "tableAcceptor.hh"
-#include <Stiostream.h>
-#include <Stsstream.h>
+#include "stdb_streams.h"
 
 class StDbTable;
 

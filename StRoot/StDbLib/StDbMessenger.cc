@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbMessenger.cc,v 1.2 2003/09/02 17:57:49 perev Exp $
+ * $Id: StDbMessenger.cc,v 1.3 2003/09/16 22:44:17 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbMessenger.cc,v $
+ * Revision 1.3  2003/09/16 22:44:17  porter
+ * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * modified rules.make and added file stdb_streams.h for standalone compilation
+ *
  * Revision 1.2  2003/09/02 17:57:49  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -33,7 +37,7 @@
  *
  **************************************************************************/
 #include <string.h>
-#include "Stiostream.h"
+#include "stdb_streams.h"
 #include "StDbMessenger.hh"
 
 ////////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.21 2003/09/02 17:57:50 perev Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.22 2003/09/16 22:44:18 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.22  2003/09/16 22:44:18  porter
+ * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * modified rules.make and added file stdb_streams.h for standalone compilation
+ *
  * Revision 1.21  2003/09/02 17:57:50  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -115,7 +119,7 @@
 #include "StDbTableDescriptor.h"
 #include <stdlib.h>
 #include <math.h>
-#include <Stiostream.h>
+#include "stdb_streams.h"
 
 
 /////////////////////////////////////////////////////////////////////////

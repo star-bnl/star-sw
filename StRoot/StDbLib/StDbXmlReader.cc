@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlReader.cc,v 1.10 2003/09/02 17:57:50 perev Exp $
+ * $Id: StDbXmlReader.cc,v 1.11 2003/09/16 22:44:18 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbXmlReader.cc,v $
+ * Revision 1.11  2003/09/16 22:44:18  porter
+ * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * modified rules.make and added file stdb_streams.h for standalone compilation
+ *
  * Revision 1.10  2003/09/02 17:57:50  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -54,9 +58,9 @@
  *
  **************************************************************************/
 #include "StDbXmlReader.h"
-#include <Stiostream.h>
+#include "stdb_streams.h"
 #include <string.h>
-#include <Stsstream.h>
+
 #include "dbStruct.hh"
 
 template<class T>
@@ -402,12 +406,12 @@ if(p1){
      ilist =e->iend - e->istart;
      iline =0;
      for(j=2;j<ilist;j++)iline += strlen(loca[e->istart+j]);
-     ostrstream fs;
+     ostringstream fs;
      for(j=2;j<ilist;j++) fs<<loca[e->istart+j]; //<<endl;
-     fs << ends;
-     e->val.data = new char[strlen(fs.str())+1];
+     string fs2=fs.str();
+     e->val.data = new char[fs2.length()+1];
      //cout << "TEST:: " << fullLine << " len = " << strlen(fullLine) << endl;
-     strcpy(e->val.data,fs.str());
+     strcpy(e->val.data,fs2.c_str());
 
    }
 

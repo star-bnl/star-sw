@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.21 2003/09/02 17:57:49 perev Exp $
+ * $Id: StDbSql.cc,v 1.22 2003/09/16 22:44:17 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.22  2003/09/16 22:44:17  porter
+ * got rid of all ostrstream objects; replaced with ostringstream+string.
+ * modified rules.make and added file stdb_streams.h for standalone compilation
+ *
  * Revision 1.21  2003/09/02 17:57:49  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -112,8 +116,7 @@
 #include "StDbTable.h"
 #include "StDbFastSqlWriter.h"
 
-#include <Stsstream.h>
-#include <Stiostream.h>
+#include "stdb_streams.h"
 
 #define __CLASS__ "StDbSql"
 
@@ -188,11 +191,11 @@ StDbSql::QueryDb(StDbConfigNode* node) {
     curNode.setConfigured(false);
     if(readNodeInfo(&curNode)){
 
-      ostrstream fs;
+      ostringstream fs;
       fs<<"Found "<<curNode.printNodeType()<<" Node "<<curNode.printName();
-      fs<<" of parent "<<node->printName()<<ends;
-      sendMess(DbQResult,fs.str(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
-      fs.freeze(0);
+      fs<<" of parent "<<node->printName();
+      sendMess(DbQResult,(fs.str()).c_str(),dbMDebug,__LINE__,__CLASS__,__METHOD__);
+      
 
       if(strcmp(curNode.printNodeType(),"table")!=0){ // it is a ConfigNode
 
@@ -257,17 +260,17 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
  // start preparing the queries
 
  // common where clause
-   ostrstream bs;
+   ostringstream bs;
    bs<<" Where nodeID="<<nodeID;
  // prepare "flavor" part of query 
    bs<<" AND "<<getFlavorQuery(table->printFlavor());
  // prepare for production time
    bs<<" AND "<<getProdTimeQuery(table->getProdTime()); 
  // terminate the baseString
-   bs<<" "<<ends;
+   bs<<" ";
 
-   const char* baseString = bs.str();
-   bs.freeze(0);
+   string baseString = bs.str();
+
 
  //--> add element ID list part of query
   int numRows;
@@ -383,11 +386,10 @@ StDbSql::QueryDb(StDbTable* table, unsigned int reqTime){
      setDefaultBeginTime(table,reqTime);
      retVal=0;
    } else if(rowsLeft>0){
-     ostrstream tp;
+     ostringstream tp;
      tp<<" Not all rows filled from DB, Requested="<<numRows;
-     tp<<" Returned="<<numRows-rowsLeft<<" for Table="<<ends;
-     mgr->printInfo(tp.str(),tName,dbMWarn,__LINE__,__CLASS__,__METHOD__);
-     tp.freeze(0);
+     tp<<" Returned="<<numRows-rowsLeft<<" for Table="<<tName;
+     mgr->printInfo((tp.str()).c_str(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
      //     numRows-=rowsLeft;
      //     table->resizeNumRows(numRows);
    }
@@ -620,7 +622,6 @@ StDbSql::QueryDbFunction(StDbTable* table, const char* whereClause, char* funcNa
    char* columnList=getColumnList(table,dataTables[i],funcName);
    if(!columnList)return 0;
 
-     ostrstream qs;
      Db<<" select "<<columnList<<" from "<<dataTables[i];
      Db<<" "<<whereClause<<endsql;
 
@@ -747,13 +748,13 @@ StDbSql::WriteDbNoIndex(StDbTable* table, unsigned int storeTime){
   if(!((dataTable)=getDataTable(table,storeTime)))
      return sendMess(table->printName()," has no storage table",dbMErr,__LINE__,__CLASS__,__METHOD__);
 
-  ostrstream cList;
-  cList<<"beginTime,"<<getColumnList(table)<<ends;
+  ostringstream cList;
+  cList<<"beginTime,"<<getColumnList(table);
 
   char* sTime=getDateTime(storeTime);
 
   int numRows=table->GetNRows();
-  const char* colList=cList.str();
+  const char* colList=(cList.str()).c_str();
   int i;
   bool hasBinary=false;
   if(Db.InputStart(dataTable,&buff,colList,numRows,hasBinary)){
@@ -772,12 +773,10 @@ StDbSql::WriteDbNoIndex(StDbTable* table, unsigned int storeTime){
     } else {
        
       table->setBeginTime(storeTime);
-      ostrstream fsql;
+      ostringstream fsql;
       StDbFastSqlWriter writer(fsql);
       writer.ioTable(table);
-      fsql<<ends;
-      const char* sql=fsql.str();
-      Db<<sql; fsql.freeze(0);
+      Db<<fsql.str();
       if(Db.InputEnd()){
 	retVal=1;
         table->commitData();
@@ -790,7 +789,7 @@ StDbSql::WriteDbNoIndex(StDbTable* table, unsigned int storeTime){
 
   table->setRowNumber();
   delete [] sTime;
-  cList.freeze(0);
+
   delete [] dataTable;
 
   if(!retVal)sendMess(" Write failed for Non-Indexed table=",table->printName(),dbMWarn,__LINE__,__CLASS__,__METHOD__);
@@ -1235,12 +1234,12 @@ return true;
 char*
 StDbSql::insertNodeString(StDbNode* node){
 
-  ostrstream dqs;
+  ostringstream dqs;
   dqs<<"insert into Nodes set name='"<<node->printName()<<"' ";
   if(!StDbDefaults::Instance()->IsDefaultVersion(node->printVersion()))
      dqs<<", versionKey='"<<node->printVersion()<<"' ";
 
-  dqs<<", nodeType='"<<node->printNodeType()<<"'"<<ends;
+  dqs<<", nodeType='"<<node->printNodeType()<<"'";
 
   return mRetString(dqs);
 }
@@ -1355,7 +1354,7 @@ StDbSql::getFlavorQuery(const char* flavor){
  strcpy(id1,flavor);
  id3=id1;
 
- ostrstream fs;
+ ostringstream fs;
  fs<<" flavor In(";
  while(( (id2)=strstr(id3,"+")) ){
     *id2='\0';
@@ -1364,7 +1363,7 @@ StDbSql::getFlavorQuery(const char* flavor){
     id2++;
     id3=id2;
  }
- fs<<"'"<<id3<<"')"<<ends;
+ fs<<"'"<<id3<<"')";
  delete [] id1;
 
  return mRetString(fs);
@@ -1375,12 +1374,12 @@ char*
 StDbSql::getProdTimeQuery(unsigned int prodTime){
 
 // prepares SQL of " entryTime<="
-ostrstream pt;
+ostringstream pt;
   if(prodTime==0){
-    pt<<" deactive=0 "<<ends;
+    pt<<" deactive=0 ";
   } else {
     pt<<" (deactive=0 OR deactive>="<<prodTime<<")";
-    pt<<" AND unix_timestamp(entryTime)<="<<prodTime<<ends;
+    pt<<" AND unix_timestamp(entryTime)<="<<prodTime;
   } 
   return mRetString(pt);
 }
@@ -1391,12 +1390,12 @@ StDbSql::getElementList(int* e, int num){
 
 // prepares comma separated list of integers
 
- ostrstream es;
+ ostringstream es;
  if(!e){ 
-   es<<0<<ends;
+   es<<0;
  } else {
    for(int i=0;i<num-1;i++)es<<e[i]<<",";
-   es<<e[num-1]<<ends;
+   es<<e[num-1];
  }
 
  return mRetString(es);
@@ -1409,7 +1408,7 @@ StDbSql::getColumnList(StDbTable* table,char* tableName,char* funcName){
   StTableDescriptorI* desc=table->getDescriptor();
   int numElements=desc->getNumElements();
 
-  ostrstream es; es<<" ";
+  ostringstream es; es<<" ";
 
   int icount=0;
   for(int i=0;i<numElements;i++){
@@ -1424,7 +1423,6 @@ StDbSql::getColumnList(StDbTable* table,char* tableName,char* funcName){
      icount++;
   }
 
- es<<ends;
  if(icount) return mRetString(es);
  return (char*) 0;
 }
@@ -1433,7 +1431,7 @@ StDbSql::getColumnList(StDbTable* table,char* tableName,char* funcName){
 char*
 StDbSql::getEmptyString(){
 
-  ostrstream es; es<<" "<<ends;
+  ostringstream es; es<<" ";
   return mRetString(es);
 
 };
