@@ -1,11 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.39 2004/10/27 03:25:49 perev Exp $
- * $Id: StiKalmanTrack.cxx,v 2.39 2004/10/27 03:25:49 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.40 2004/10/28 04:59:18 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.40 2004/10/28 04:59:18 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.40  2004/10/28 04:59:18  perev
+ * Fixed iterator for nodes. v3V2
+ *
  * Revision 2.39  2004/10/27 03:25:49  perev
  * Version V3V
  *
@@ -789,34 +792,19 @@ double StiKalmanTrack::getTrackRadLength() const
 StiKalmanTrackNode * StiKalmanTrack::getInnOutMostNode(int inot,int qua)  const
 {
   if (firstNode==0 || lastNode==0)
-		{
-		  //cout << "StiKalmanTrack::getInnOutMostHitNode() -E- firstNode||lastNode==0" << endl;
-		  throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0");
-		}
-  StiKTNBidirectionalIterator it;
+ {
+  //cout << "StiKalmanTrack::getInnOutMostHitNode() -E- firstNode||lastNode==0" << endl;
+  throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- firstNode||lastNode==0");
+ }
   
   StiKalmanTrackNode *node;
   if (trackingDirection!=kOutsideIn) inot = !inot;
-  if (inot)
-    {
-      for (it=begin();it!=end();it++)
-				{
-	  node = &*it;
-	  if (qua   && !node->getHit()) 	continue;
-          if (qua>1 && node->getChi2()>10000.) 	continue;
-	  return node;
-				}
-    }
-  else
-    {	
-      for (it=end();it!=begin();it--)
-      {
-	  node = &*it;
-	  if (qua   && !node->getHit()) 	continue;
-          if (qua>1 && node->getChi2()>10000.) 	continue;
-	  return node;
-      }
-    }
+  StiKTNBidirectionalIterator it =(inot) ? begin():rbegin();
+  for (;(node=it());it++){
+    if (qua   && !node->getHit()) 		continue;
+    if (qua>1 && node->getChi2()>10000.)	continue;
+    return node;
+  }
   //cout << "StiKalmanTrack::getInnOutMostHitNode() -E- Track has no hit" << endl;
   throw runtime_error("StiKalmanTrack::getInnOutMostNode() -E- Track has no hit");
 }

@@ -206,8 +206,10 @@ class StiKalmanTrack : public StiTrack
   double getTpcDedx() const;
   double getSvtDedx() const;
 
-	StiKTNBidirectionalIterator begin() const;
-	StiKTNBidirectionalIterator end() const;
+	StiKTNBidirectionalIterator  begin()  const;
+  const StiKTNBidirectionalIterator& end()    const;
+	StiKTNBidirectionalIterator  rbegin() const;
+  const StiKTNBidirectionalIterator& rend()   const;
 
    /// Accessor method returns the inner/outer most node associated with the track.
    /// inot: 0=inner, 1=outer; 
@@ -547,19 +549,29 @@ inline StiKTNBidirectionalIterator StiKalmanTrack::begin() const
 			cout << "StiKTNBidirectionalIterator StiKalmanTrack::begin() -F- firstNode==0"<<endl;
 			throw runtime_error("StiKalmanTrack::begin() - ERROR - firstNode==0");
 		}
-  return StiKTNBidirectionalIterator(firstNode);
+  return StiKTNBidirectionalIterator::begin(firstNode);
+}
+inline StiKTNBidirectionalIterator StiKalmanTrack::rbegin() const 
+{
+  if (!lastNode)
+		{
+			cout << "StiKTNBidirectionalIterator StiKalmanTrack::rbegin() -F- lastNode==0"<<endl;
+			throw runtime_error("StiKalmanTrack::rbegin() - ERROR - lastNode==0");
+		}
+  return StiKTNBidirectionalIterator::rbegin(lastNode);
 }
 
 /*! Convenience method used to return a track node iterator initialized to the track last node.
 	\return Bidirectional Itertator of KalmanTrackNodes 
 	\throws runtime_error 	
 */
-inline StiKTNBidirectionalIterator StiKalmanTrack::end() const 
+inline const StiKTNBidirectionalIterator &StiKalmanTrack::end() const 
 {
-  if (!firstNode)
-    throw runtime_error("StiKalmanTrack::end() - ERROR - firstNode==0");
-  return StiKTNBidirectionalIterator(lastNode);
-//VP  return StiKTNBidirectionalIterator(0);
+  return StiKTNBidirectionalIterator::end();
+}
+inline const StiKTNBidirectionalIterator &StiKalmanTrack::rend() const 
+{
+  return StiKTNBidirectionalIterator::rend();
 }
 
 /*! Accessor method to get the dca.
