@@ -2,11 +2,16 @@
    
  macro/global/import *
   
-  message 'init_stk'
+  message 'init_spr_svt'
   
  cd [params]/svt
  
-   
+* 
+* The table is not currently read in.
+* We can use the dummy table that is already created...just read
+* it in...Eventually we will want to create it in this kumac
+* 
+* 
   dio/newfilestream    spr_par $STAR/params/svt/spr_pars.xdf r
   dio/stream/getevent  spr_par
   dio/stream/close     spr_par
