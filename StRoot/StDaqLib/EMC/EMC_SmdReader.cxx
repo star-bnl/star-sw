@@ -348,6 +348,10 @@ int EMC_SmdReader::getSmdBin(const int RDO,const int daq_smd,int &mod,int &strip
 /*
 // conversion from FEE Tower number to m,e,s for Tower
 
+int EMC_SmdReader::GetModuleFromConnector(int S_value,int &mod)
+{
+	return 0;
+}
 int EMC_SmdReader::getSmdBin(const int RDO,const int rid,int &mod,int &strip,int&det)
 {
   //Transiion from environment Id to m,e,s to fill the arrays
