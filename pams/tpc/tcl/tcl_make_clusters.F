@@ -284,7 +284,7 @@ C----------------------------------------------------------------------
 	PARAMETER ( PAD_TDC_max = 1023 ) !Max. no. of TDC bins.
 
 	INTEGER     Nrowseqs_max
-	PARAMETER ( Nrowseqs_max = 40000 ) !Max. pixels in one row.
+	PARAMETER ( Nrowseqs_max = 40000 ) !Max. #sequences in one row.
 
 	INTEGER Nclusters
 	INTEGER Nrowseqs !No. of pixels in this row, unpacked by PADUNP.
@@ -324,6 +324,9 @@ C----------------------------------------------------------------------
 
         data    nway/0/,imode/-1/,nsort/0/
         save    nway,imode,nsort
+
+	integer n_admit,ithi_cls
+	integer seqptr_keep,jndx2
 C----------------------------------------------------------------------
 c
 c       Must initialise value of tcl_clsrow!
@@ -395,6 +398,11 @@ c       seed sequence in time space; store pointers; note that we
 c       implicitly use the fact that data are coming out in ascending 
 c       pad,tdc/seq order!
 c
+c	changed 8feb95 by mike lisa - now we want to truly find "islands" of
+c	occupied pixels.... first step: find all sequences which overlap in
+c	time (i.e. a sequence is added if it starts before the last stop in the
+c	current cluster list)
+
         loptr = 1
         indx = 1
 
@@ -404,6 +412,7 @@ c
            recseq(seqptr(loptr)) = .true.
            Jpad(indx)=ipad(seqptr(loptr))
            Jpix(indx)=ipix(seqptr(loptr))
+	   ithi_cls = ithi(seqptr(loptr))	! "high mark" of cluster
 
            done_time = .false.
            do while (.not. done_time)
@@ -413,12 +422,15 @@ c
 c                could add a "fudge-factor" as ithi()+Itfudge   !
 c                for future, need better defn of this overlap
 c
-                 if(itlo(seqptr(loptr+indx)).le.ithi(seqptr(loptr)))then
+c mal 8feb95                 if(itlo(seqptr(loptr+indx)).le.ithi(seqptr(loptr)))then
+                 if(itlo(seqptr(loptr+indx)).le.ithi_cls)then
                     hiptr = loptr+indx
                     indx = indx + 1
                     recseq(seqptr(hiptr)) = .true.
                     Jpad(indx)=ipad(seqptr(hiptr))
                     Jpix(indx)=ipix(seqptr(hiptr))
+		    if (ithi(seqptr(hiptr)).gt.ithi_cls) 
+     +			ithi_cls=ithi(seqptr(hiptr))		! new "high mark"
                  else
                     done_time = .true.
                  endif
@@ -466,6 +478,63 @@ c
               continue  ! flush this single-sequence "cluster" 
 c->RJM        could treat this differently later
            endif
+
+c ok, now we have a set of *candidates* to be in the cluster
+c  They had belonged to a group overlapping in time, but the last cut
+c  eliminated sequences on pads after the first non-sequential pad.
+c  The current group of candidates may not overlap, so we now make the
+c  final selection such that a sequence is admitted to the cluster if
+c  it overlaps in time with a cluster sequence on a neighboring pad
+c  (note this is a new, more stringent condition).  If you think about
+c  all the possible ways sequences could be admitted, I think you will see
+c  that the crazy loop below is the only way to do it. - mal 8feb95
+
+c the candidates are in the seqptr list between seqptr(loptr) and seqptr(hiptr)
+
+c the first candidate in the list is automatically admitted
+	   n_admit = 1
+	   jpix(n_admit) = ipix(seqptr(loptr+n_admit-1))	! in principle
+	   jpad(n_admit) = ipad(seqptr(loptr+n_admit-1))	! these lines not needed
+
+ 1	   continue
+	   do jndx=loptr+n_admit,hiptr		! loop over candidates to find recruits
+	     do indx=1,n_admit
+	       if (iabs(jpad(indx)-ipad(seqptr(jndx))).eq.1) then	! next-pad neighbors
+		 if (((itlo(seqptr(jndx)).gt.itlo(seqptr(loptr+indx-1))).and.
+     +		     (itlo(seqptr(jndx)).lt.ithi(seqptr(loptr+indx-1))))
+     +		   .or.
+     +		     ((ithi(seqptr(jndx)).gt.itlo(seqptr(loptr+indx-1))).and.
+     +		      (ithi(seqptr(jndx)).lt.ithi(seqptr(loptr+indx-1))))) then  ! time-overlap
+c we have a recruit
+c shuffle the seqptr list to make this recruit next after previous recruits
+c (so that recruits come first, candidates next)
+	   		seqptr_keep = seqptr(jndx)
+	   		do jndx2=jndx,loptr+n_admit+1,-1
+	   		  seqptr(jndx2) = seqptr(jndx2-1)
+	   		enddo
+	   		seqptr(loptr+n_admit)=seqptr_keep
+c then record him....
+	   		n_admit = n_admit+1
+	   		jpix(n_admit) = ipix(seqptr(loptr+n_admit-1))
+	   		jpad(n_admit) = ipad(seqptr(loptr+n_admit-1))
+c then restart the whole double-loop
+			goto 1
+		 endif
+	       endif
+	     enddo
+	   enddo
+c ok, now all candidates have been fully checked, and there are no more matches...
+c  put the rest of the candidates back in the deck....
+	   do jndx=loptr+n_admit,hiptr
+		recseq(seqptr(jndx))=.false.
+	   enddo
+	   hiptr=loptr+n_admit-1
+c so now, all recruits (=cluster members) are between loptr and hiptr in the secptr list
+	   nclseqs=hiptr-loptr+1
+
+c NOW, DO I HAVE TO RESORT SEQPTR ON ITLO AGAIN????????? *****
+
+
 
            if(nclseqs.ge.2)then
 c

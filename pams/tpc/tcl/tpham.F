@@ -170,9 +170,9 @@ C-----------------------------------------------------------------------
 
 C-----------------------------------------------------------------------
         integer nclpix_max
-        parameter (nclpix_max = 1000)
+        parameter (nclpix_max = 10000)
         real ipad(nclpix_max),itdc(nclpix_max),iadc(nclpix_max)
-	integer npix_pad(50)
+	integer npix_pad(100)
 
         integer isec,irow,itrk,krow
 
@@ -185,7 +185,6 @@ C-----------------------------------------------------------------------
         integer ntim, nseq, jseq
 
         real pad_width, time_bucket, time_bin, tval
-        real shaper_bin
         real rstat
 
 	integer min_hit_seq/2/	! this could go into switch table
@@ -196,6 +195,8 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
         data first/.true./
 C-----------------------------------------------------------------------
+	integer ichek	! mal -** temp
+
 c
 c       set status
 c
@@ -217,10 +218,15 @@ c
             time_bucket = detector(1).drift_length/tsspar(1).ntime
             time_bin = time_bucket/tsspar(1).v_drift
 
-            shaper_bin = tsspar(1).tau1/time_bin
+
+c	    write(6,*)'input icheck'
+c	    read(5,*)ichek			! mal -** temp
+
         endif
 
         do jtpcl = 1, tpclusterh.nok
+
+c	   if (mod(jtpcl,ichek).eq.1) write(13,*)'cluster #',jtpcl	! mal -** temp
 
            nseq = tpcluster(jtpcl).nseq
            jseq = tpcluster(jtpcl).jseq
@@ -239,8 +245,10 @@ c
      +,                             tppixel_h, tppixel
      +,                             tpmcpix_h, tpmcpix
      +,                             nclspix, ipad, itdc, iadc, itrk
+     +,				    nclpix_max
      +,				    npix_pad)
  
+
               tphith.nok = tphith.nok + 1
 	      tphit(tphith.nok).id = tphith.nok		! mal 17jan95
               tphit(tphith.nok).cluster = jtpcl
@@ -321,6 +329,7 @@ C-----------------------------------------------------------------------
      +,                            tppixel_h, tppixel
      +,                            tpmcpix_h, tpmcpix
      +,                            nclspix, ipad, itdc, iadc, itrk
+     +,				   nclpix_max
      +,				   npix_pad)
 C-----------------------------------------------------------------------
 
@@ -338,6 +347,7 @@ C     tpppixel_h
 C     tppixel:
 C     tpmcpix_h
 C     tpmcpix:
+C     nclpix_max  (added 1feb95 by mal) maximum #pixels in a cluster
 C
 C   Output arguments : 
 C
@@ -401,13 +411,14 @@ C-----------------------------------------------------------------------
         integer*2 seqmask,botmask
 
         integer maxtrk, ntrk, ktrk, imax
-        parameter (maxtrk=100)
-        integer ltrk(maxtrk)
-        real nocc(maxtrk)
+        parameter (maxtrk=2000)
+        integer ltrk(maxtrk)		! array of all MC tracks contrib to cluster
+        real nocc(maxtrk)		! array of occurrances of those tracks
 
         integer kseq,kpix,kseqpix
         integer jpix,iclspix,indx
         integer mtrk,jndx
+	integer nclpix_max
 
         integer id
 	integer iseq_num
@@ -426,6 +437,12 @@ C-----------------------------------------------------------------------
            jpix = tpseq(kseq).jpix
            iclspix = iclspix + 1
 
+	   if (nclspix.gt.nclpix_max) then
+	     id = 0
+	     call message('TPHAM-!-TMP too many pixels!',1,id)
+	     return
+	   endif
+
            ldatum = tppixel(jpix).datum
 c
 c          for MC data!
@@ -441,7 +458,7 @@ c
                  nocc(mtrk) = nocc(mtrk) + 1.
               else
                  id = 0
-                 call message('TPHAM-I-GCD, ntrk.gt.maxtrk',1,id)
+                 call message('TPHAM-I-GCD--A, ntrk.gt.maxtrk',1,id)
                  return
               endif
            elseif(ntrk.eq.0)then
@@ -450,7 +467,8 @@ c
               nocc(ntrk) = 1.
            else
               id = 0
-              call message('TPHAM-I-GCD, ntrk.gt.maxtrk',1,id)
+              call message('TPHAM-I-GCD--B, ntrk.gt.maxtrk',1,id)
+	      write(6,*)ntrk,maxtrk,ktrk
               return
            endif
 
@@ -468,6 +486,11 @@ c
 
            do indx = 2, kseqpix
               iclspix = iclspix + 1
+	      if (nclspix.gt.nclpix_max) then
+	        id = 0
+	        call message('TPHAM-!-TMP too many pixels!',1,id)
+	        return
+	      endif
               ldatum = tppixel(jpix+indx-1).datum
               iadc(iclspix) = real(idatum(1))
               itdc(iclspix) = real(itdc(iclspix-1)+1.)
@@ -485,7 +508,7 @@ c
                  nocc(mtrk) = nocc(mtrk) + 1.
               else
                  id = 0
-                 call message('TPHAM-I-GCD, ntrk.gt.maxtrk',1,id)
+                 call message('TPHAM-I-GCD--C, ntrk.gt.maxtrk',1,id)
                  return
               endif
 
@@ -495,6 +518,8 @@ c
         nclspix = iclspix
         imax = lvmax(nocc,ntrk)
         itrk = ltrk(imax)
+
+c	write(13,*)'ntrk,iclspix for this cluster.....',ntrk,iclspix	! mal -** temp
 
         return
         end
