@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.32 1999/11/16 16:29:56 fine Exp $
+// $Id: St_Node.cxx,v 1.33 1999/11/24 18:49:27 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.33  1999/11/24 18:49:27  fine
+// Some changed in St_Node dtor, GetListOfPositions removed
+//
 // Revision 1.32  1999/11/16 16:29:56  fine
 // TObject::GetObjectInfo() implemented
 //
@@ -363,7 +366,6 @@ St_Node::~St_Node()
 
    if (GetListOfPositions()) {
      GetListOfPositions()->Delete();
-     delete GetListOfPositions();
      SetPositionsList();
    }
    SafeDelete(fListOfShapes);
