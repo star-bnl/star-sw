@@ -1,5 +1,8 @@
-// $Id: StTpcT0Maker.h,v 1.7 2001/04/17 23:54:51 hardtke Exp $
+// $Id: StTpcT0Maker.h,v 1.8 2001/09/25 20:10:30 hardtke Exp $
 // $Log: StTpcT0Maker.h,v $
+// Revision 1.8  2001/09/25 20:10:30  hardtke
+// Add ad hoc correction factor to take care of bias suggested by TRS
+//
 // Revision 1.7  2001/04/17 23:54:51  hardtke
 // add z Vertex contraint -- default to +-40cm
 //
@@ -60,9 +63,10 @@ class StTpcT0Maker : public StMaker {
    void HistFileByDefault();   // Write out file on Finish
    void SetVertexZmax(float zmax);  //Set max z vertex for t0 calculation
    void SetVertexZmin(float zmin);  //Set min z vertex for t0 calculation
-
+   void SetCorrectionFactors(float constant, float linear, float quadratic); //del z correction factors from trs
+   float GetCorrection(float z);  // Get Correction Factor for this Z
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcT0Maker.h,v 1.7 2001/04/17 23:54:51 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcT0Maker.h,v 1.8 2001/09/25 20:10:30 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  protected:
 
@@ -91,6 +95,7 @@ class StTpcT0Maker : public StMaker {
   float T0HIST_MAX;
   float zVertexMax; //maximum allowed z vertex for t0 calculation
   float zVertexMin; //minimum allowed z vertex for t0 calculation
+  float CorrFac[3];
   StTpcDb* theDb; //!
   int    date;
   int    time;
@@ -103,3 +108,8 @@ class StTpcT0Maker : public StMaker {
 };
 
 #endif
+
+
+
+
+
