@@ -21,7 +21,11 @@
 #endif
 #include <TStopwatch.h>
 
+#ifndef __CINT__
+#if ROOT_VERSION_CODE >= ROOT_VERSION(3,05,04)
 typedef TDataSet::EDataSetPass EDataSetPass;
+#endif
+#endif
 
 class TList;
 class TBrowser;
@@ -181,7 +185,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.59 2003/04/30 20:36:24 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.60 2003/05/01 16:41:05 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -210,8 +214,11 @@ private:
 #endif
 
 
-// $Id: StMaker.h,v 1.59 2003/04/30 20:36:24 perev Exp $
+// $Id: StMaker.h,v 1.60 2003/05/01 16:41:05 jeromel Exp $
 // $Log: StMaker.h,v $
+// Revision 1.60  2003/05/01 16:41:05  jeromel
+// Declaration works in new root but not in old. Transition solution added
+//
 // Revision 1.59  2003/04/30 20:36:24  perev
 // Warnings cleanup. Modified lines marked VP
 //
