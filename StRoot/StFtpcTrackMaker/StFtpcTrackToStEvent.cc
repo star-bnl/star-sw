@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.cc,v 1.3 2004/08/05 23:46:31 oldi Exp $
+ * $Id: StFtpcTrackToStEvent.cc,v 1.4 2004/08/06 01:37:04 oldi Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -365,6 +365,7 @@ void StFtpcTrackToStEvent::FillFitTraits(StTrack* gTrack, StFtpcTrack* track){
   // which does a memberwise copy.  Therefore, constructing a local instance of 
   // StTrackFitTraits is fine, as it will get properly copied.
   StTrackFitTraits fitTraits(geantIdPidHyp, nFitPoints, chi2, covMFloat);
+  fitTraits.setNumberOfFitPoints(nFitPoints, track->GetDetectorId());
   gTrack->setFitTraits(fitTraits); 
   return;
 }
