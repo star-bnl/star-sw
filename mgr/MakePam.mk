@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.97 1999/06/27 22:44:02 fisyak Exp $
+# $Id: MakePam.mk,v 1.98 1999/06/29 17:53:27 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.98  1999/06/29 17:53:27  fisyak
+# Fix Table streamer
+#
 # Revision 1.97  1999/06/27 22:44:02  fisyak
 # Merge StRootEvent and StEvent
 #
@@ -272,8 +275,8 @@ echo "class St_$(STEM) : public St_Table   ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
 echo "{                                          ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
 echo "protected:                                 ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
 echo "  static TList *fgListOfColDescriptors;    ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
-echo "  virtual TList *GetRowDescritors() { return fgListOfColDescriptors?fgListOfColDescriptors:(fgListOfColDescriptors=GetTableDescriptors());}       ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
-echo "  virtual void  SetRowDescritors(TList *list) { fgListOfColDescriptors = list;}  ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  virtual TList *GetRowDescriptors() { return fgListOfColDescriptors?fgListOfColDescriptors:(fgListOfColDescriptors=GetTableDescriptors());}       ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
+echo "  virtual void  SetRowDescriptors(TList *list) { fgListOfColDescriptors = list;}  ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
 echo "public:                                    ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
 echo "  St_$(STEM)() : St_Table(\"$(STEM)\",sizeof($(STEM)_st)) {SetType(\"$(STEM)\");}           ">>$(GEN_TAB)/St_$(STEM)_Table.h ;\
 echo "  St_$(STEM)(Text_t *name) : St_Table(name,sizeof($(STEM)_st)) {SetType(\"$(STEM)\");}          ">>$(GEN_TAB)/St_$(STEM)_Table.h;\
