@@ -1,7 +1,43 @@
+// ------- System includes -------------- 
 #include <math.h>
 #include <string.h>
+// ------- Local includes -------  
 #include "Dataset.hh"
 #include "utility.hh"
+
+#ifdef    DEBUG
+#undef    DEBUG
+#endif
+#define   DEBUG 0
+
+//>--------------------------------------------------------------------
+// ROUTINE:     sca_Dataset.cc
+//
+// DESCRIPTION: Base class for the Scaled Correlation Analysis 
+//              (SCA) package.
+//
+// AUTHOR:      Dhammika Weerasundara -- University of Washington
+//              dhammika@gibbs.npl.washington.edu
+//
+// HISTORY:    
+//      06/19/1995       SJ Bailey  Orginal was written to run
+//                       JG Reid    in NA49/DSPACK environment.
+//
+//      06/26/1998       DSW        Adapted to run in STAF/ROOT.
+//
+//      08/10/1998       LDC        Worked on debugging.
+//
+//      08/13/1998       DSW        Put debug print statements on a 
+//                                   DEBUG switch. 
+//      09/01/1998       DSW        Commented out all the usage of 
+//                                  'debug' structure defined in
+//                                  sca_utility.cc
+//
+//      09/01/1998       DSW        Moved looping over Hist.AddDatum
+//                                  into  sca_Histogram.cc
+//
+//>--------------------------------------------------------------------
+
 Dataset::Dataset(
   TABLE_HEAD_ST   *sca_const_h,     SCA_CONST_ST     *sca_const,
   TABLE_HEAD_ST   *sca_prior_h,     SCA_PRIOR_ST     *sca_prior,  
@@ -53,29 +89,37 @@ Dataset::Dataset(
   num_ranks = constants->num_ranks;  // num_scales will get calculated later
   for(int i = 0; i < MAX_RANKS; i++)
     vol_x[i] = vol_y[i] = vol_xy[i] = 0.0;
-  cout << debug("Trace") << "dataSet successfully initialized.\n";
+  if (DEBUG){
+    //cout << debug("Trace") << "dataSet successfully initialized.\n";
+    cout << "dataSet successfully initialized." << endl;
+  }
 }  // end Dataset constructor
 Dataset::~Dataset()
 {
-  if(constants) delete constants;
-  if (prior_p) delete [] prior_p;
-  if(data) delete [] data;
-  if(xdata) delete [] xdata;
-  if(ydata) delete [] ydata;
-  if (sca) delete [] sca;
-  if (info) delete [] info;
+  if (constants) delete constants;
+  if (prior_p)   delete [] prior_p;
+  if (data)      delete [] data;
+  if (xdata)     delete [] xdata;
+  if (ydata)     delete [] ydata;
+  if (sca)       delete [] sca;
+  if (info)      delete [] info;
+  if (vol)       delete [] vol;
 }
 int Dataset::CalcEntropy()
 {
   static int callcount=0;
   double rank;			// for shorter notation
   sca_info_t *cur_info;
-  printf("Dataset::CalcEntropy, call count = %d\n",++callcount);
-  cout << debug("Trace") << "CalcEntropy() called.\n";
+
+  if (DEBUG){
+    cout << "Dataset::CalcEntropy, call count ="<< ++callcount << endl;
+    //cout << debug("Trace") << "CalcEntropy() called.\n";
+  }
   if( !data || !validnum )
     {
-      cerr << error(HIGH) <<
-	"There is no valid data in the server to analyze.\n";
+      //      cerr << error(HIGH) <<
+      cerr << "Dataset::CalcEntropy:" << endl;
+      cerr << "      There is no valid data in the memory to analyze." << endl;
       return 1;
     }
   alloc_info();
@@ -84,7 +128,7 @@ int Dataset::CalcEntropy()
   double binsize_x = constants->minbinsize_x;
   double binsize_y = constants->minbinsize_y;
   if (!prior_p) { 
-      cout << "Fail CalcEntropy: prior cantains no data!" << endl;
+      cerr << "Fail CalcEntropy: prior cantains no data!" << endl;
       return 1;
   }
   int is = 0;			// index to the scale value
@@ -126,9 +170,14 @@ int Dataset::CalcDimension(void)
   int L, R;
   double rise;
   sca_info_t *cur_info;
-  cout << debug("Trace") << "CalcDimension() called.\n";
+
+  if (DEBUG) {
+    // cout << debug("Trace") << "CalcDimension() called.\n";
+    cout << "CalcDimension() called." << endl;
+  }
   if (!sca) {
-      cerr << "Fail CalcDiminsion: sca contains no data!" << endl;
+    cerr << "Dataset::CalcDimension:"<< endl;
+    cerr << "      Fail CalcDiminsion: sca contains no data!" << endl;
       return 1;
   }
   for(int r = 0; r < num_ranks; r++)
@@ -166,7 +215,10 @@ void Dataset::findrange(void)
 }  // end findrange()
 int Dataset::alloc_info()
 {
-  cout << debug("Trace") << "alloc_info() called.\n";
+  if (DEBUG) {
+    //cout << debug("Trace") << "alloc_info() called.\n";
+    cout << "alloc_info() called. " << endl;
+  }
   num_scales = 0;
   double binsize_x    = constants->minbinsize_x;   // start at smallest value
   double binsize_y    = constants->minbinsize_y;   // start at smallest value
@@ -174,18 +226,18 @@ int Dataset::alloc_info()
   double maxbinsize_y = constants->maxbinsize_y;
   double binstep_x    = constants->step_binsize_x;
   double binstep_y    = constants->step_binsize_y;
-  while(binsize_x <= maxbinsize_x && binsize_y <= maxbinsize_y)
-    {
-      num_scales++;
-      binsize_x *= binstep_x;
-      binsize_y *= binstep_y;
-    }
+  while(binsize_x <= maxbinsize_x && binsize_y <= maxbinsize_y) {
+    num_scales++;
+    binsize_x *= binstep_x;
+    binsize_y *= binstep_y;
+  }
   num_ranks = constants->num_ranks;
   if (sca) delete [] sca;
   sca = new sca_t[num_ranks];
   memset (sca, 0, sizeof(sca_t) * num_ranks);
   if(!sca) {
-    cerr << error(HIGH) << "Failed to allocate " << sca_name << ".\n";
+    //cerr << error(HIGH) << "Failed to allocate " << sca_name << ".\n";
+    cerr << "Dataset::alloc_info: Failed to allocate " << sca_name  << endl;
     return 1;
   }
   int infonum = num_scales * num_ranks;
@@ -193,13 +245,20 @@ int Dataset::alloc_info()
   info = new sca_info_t[infonum];
   memset (info, 0, sizeof(sca_info_t) * infonum);
   if(!info) {
-    cerr << error(HIGH) << "Failed to allocate " << sca_info_name << ".\n";
+    // cerr << error(HIGH) << "Failed to allocate " << sca_info_name << ".\n";
+    cerr << "Dataset::alloc_info: Failed to allocate" << sca_info_name << endl;
     return 1;
   }
+  // Set up pointers from sca_t objects to the sca_info_t objects
   for(int i = 0; i < num_ranks; i++) {
     sca[i].info = info + i * num_scales;
     sca[i].num_scales = num_scales;
+    sca[i].rank        = constants->rank[i];
   }
+
+  // Allocate the array if necessary
+  vol = new double[num_ranks];
+
  return 0;
 }  // end alloc_info()
 int Dataset::getConstants(
@@ -286,30 +345,38 @@ int Dataset::fillScaOutTable(TABLE_HEAD_ST  *sca_out_h, SCA_OUT_ST *sca_out)
 } // end fillScaOutTable
 void Dataset::CalcVolume(int is, double binsize_x, double binsize_y)
 {
- double *tempvol;
-     tempvol = DithVolume(binsize_x, binsize_y);
+  // This is an inefficient way to pass the arguments. This leaves
+  // dynamic memory hanging after leaving DithVolume. DSW Sep 1, 1998
+  //double *tempvol;
+  //   tempvol = DithVolume(binsize_x, binsize_y);
+  //  Now 'vol' is globally defined in Dataset::alloc_info
+  DithVolume(binsize_x, binsize_y);
      for(int ir = 0; ir < num_ranks; ir++)
        {
-         sca[ir].info[is].volume = tempvol[ir];
+         //sca[ir].info[is].volume = tempvol[ir];
+         sca[ir].info[is].volume = vol[ir];
        }
-/*    }  // end calculation of dithered volume
-  else		// for scale > 0 we can do perfect fast dithering
-    {
-      tempvol = DithVolume(binsize_x, binsize_y);
-          for(int ir = 0; ir < num_ranks; ir++)
-            {
-              sca[ir].info[is].volume = tempvol[ir];
-            }
-    }  // end fast volume calculation
-*/
+     //    }  // end calculation of dithered volume
+     //else		// for scale > 0 we can do perfect fast dithering
+     //{
+     // tempvol = DithVolume(binsize_x, binsize_y);
+     //     for(int ir = 0; ir < num_ranks; ir++)
+     //       {
+     //         sca[ir].info[is].volume = tempvol[ir];
+     //       }
+    //}  // end fast volume calculation
+
 }  // end CalcVolume()
-double *Dataset::DithVolume(double binsize_x, double binsize_y)
+void Dataset::DithVolume(double binsize_x, double binsize_y)
 {
-  static double *vol = NULL;
+  // static double *vol = NULL;
   double xoff, yoff;
   int r;
-  if( !vol )
-    vol = new double[num_ranks];
+
+  //  if( !vol )
+  //  vol = new double[num_ranks];
+  // vol is globally defined in Dataset::alloc_info  DSW Sep 1, 1998
+  // Clear the volume array
   for(r = 0; r < num_ranks; r++)
     vol[r] = 0.0;
   Hist.SetRange(xmin, xmax, ymin, ymax);
@@ -318,23 +385,30 @@ double *Dataset::DithVolume(double binsize_x, double binsize_y)
 		       constants->dithscale * sqrt(binsize_x/(xmax-xmin)));
   int dither_y = (int)(constants->dithmin +
 		       constants->dithscale * sqrt(binsize_y/(ymax-ymin)));
+  // calculate bin_numbers for prior
   int nbinsx = (int) ((xmax-xmin)/binsize_x + 3);
+  // Have a 1/2 dither constant offset so bin edges won't meet data edges
   double edge_x = binsize_x/dither_x/2;
   double edge_y = binsize_y/dither_y/2;
+  // Check for 1D case
   if( constants->num_dim == 1 )
     {
       dither_y = 1;
       edge_y = 0.0;
     }
   for(int dx = 0; dx < dither_x; dx++)
-    {
+          {
       xoff = (double) dx / (double) dither_x * binsize_x + edge_x;
       for(int dy = 0; dy < dither_y; dy++)
 	{
 	  yoff = (double) dy / (double) dither_y * binsize_y + edge_y;
 	  Hist.ClearHisto();
-	  for(int i = 0; i < validnum; i++)
-	    Hist.AddDatum(xdata[i]->x + xoff, xdata[i]->y + yoff);
+	  // Move the looping over data points into sca_Histogram.cc
+	  // It improves the speed of the program by ~30% 
+	  // DSW  Sep 1, 1998.
+	  //for(int i = 0; i < validnum; i++)
+	  //  Hist.AddDatum(xdata[i]->x + xoff, xdata[i]->y + yoff);
+	  Hist.AddDatum(xdata, validnum, xoff, yoff);
 	  for(r = 0; r < num_ranks; r++)
 	    vol[r] += Hist.GetVolume(constants->rank[r],
 			             nbinsx,
@@ -344,5 +418,6 @@ double *Dataset::DithVolume(double binsize_x, double binsize_y)
     }  // end x dithering loop
   for(r = 0; r < num_ranks; r++)
     vol[r] /= (dither_x * dither_y);
-  return vol;
+  // return vol;  
+  // vol is globally defined.
 }  // end DithVolume()

@@ -31,8 +31,9 @@ private:
   int     getPrior(TABLE_HEAD_ST *sca_prior_h, SCA_PRIOR_ST *sca_prior);
   int     getinData(TABLE_HEAD_ST *sca_in_h, SCA_IN_ST  *sca_in);
   void    CalcVolume(int pass, double binsize_x, double binsize_y);
-  double *DithVolume(double binsize_x, double binsize_y);
+  void    DithVolume(double binsize_x, double binsize_y);
     
+  double *vol;                 // SCA   volume
   sca_t        *sca;           // the scaled correlation analysis info
   sca_info_t   *info;          // pointer to all info for all ranks and scales
   sca_data_t  *data;	      // input data to SCA
