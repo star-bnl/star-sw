@@ -1,7 +1,7 @@
-// $Id: StMaker.cxx,v 1.56 1999/07/16 15:09:36 fisyak Exp $
+// $Id: StMaker.cxx,v 1.57 1999/07/17 19:08:45 perev Exp $
 // $Log: StMaker.cxx,v $
-// Revision 1.56  1999/07/16 15:09:36  fisyak
-// reduce length of PrintInfo line
+// Revision 1.57  1999/07/17 19:08:45  perev
+// StMemoryInfo added
 //
 // Revision 1.55  1999/07/15 13:56:47  perev
 // cleanup
@@ -150,6 +150,8 @@
 #include "StChain.h"
 #include "St_Table.h"
 
+#include "StarClassLibrary/StMemoryInfo.hh"
+
 StMaker *StMaker::fgStChain = 0;
 Int_t MaxWarnings = 26;
 
@@ -187,7 +189,6 @@ StMaker::StMaker(const char *name,const char *):St_DataSet(name,".maker")
 //_____________________________________________________________________________
 StMaker::~StMaker()
 {
-  Finish();
 }
 //______________________________________________________________________________
 void StMaker::SetNumber(Int_t number)
@@ -504,8 +505,14 @@ void StMaker::StartMaker()
     m_DataSet = Find(".data");
     if (!m_DataSet) {m_DataSet = new St_ObjectSet(".data"); Add(m_DataSet);}
   }
-  if (GetDebug()) printf("\n*** Call %s::Make() ***\n\n", ClassName());
-//VP  gBenchmark->Start(GetName());
+  if (GetDebug()) {
+    printf("\n*** Call %s::Make() ***\n\n", ClassName());
+    if (GetDebug()>1) {
+      StMemoryInfo* info = StMemoryInfo::instance();
+      info->snapshot(); info->print();
+  } }
+
+
   StartTimer();}
 //_____________________________________________________________________________
 void StMaker::EndMaker(int ierr)
@@ -517,7 +524,12 @@ void StMaker::EndMaker(int ierr)
   if (gar) gar->Delete();
   ::doPs(GetName(),"EndMaker");
   
-//VP  gBenchmark->Stop(GetName());
+  if (GetDebug()) {
+    printf("\n*** End of %s::Make() ***\n\n", ClassName());
+    if (GetDebug()>1) {
+      StMemoryInfo* info = StMemoryInfo::instance();
+      info->snapshot(); info->print();
+  } }
   StopTimer();
 }
 
