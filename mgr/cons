@@ -9,7 +9,7 @@ use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.13 1999/09/26 21:48:33 fisyak Exp $
+# $Id: cons,v 1.14 1999/09/27 17:03:55 fisyak Exp $
 $cons_history =
   q(
     Modification History:
@@ -44,7 +44,7 @@ $cons_history =
 $ver_num = 1.6;
 $ver_rev = "b1";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.13 1999/09/26 21:48:33 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.14 1999/09/27 17:03:55 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -1792,6 +1792,7 @@ sub scan {
 	return () unless open(SCAN, $file->rpath);
 	while (<SCAN>) {
 	    next unless /^\s*#/;
+	  $_ =~ s/\/\/.*$//g;
 	    if (/^\s*#\s*include\s*([<"])(.*)[>"]/) {
 		if ($1 eq "<") {
 		    push(@anglenames, $2);
