@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.9 2001/03/14 02:29:16 ullrich Exp $
+ * $Id: StContainers.cxx,v 2.10 2001/04/16 20:29:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
+ * Revision 2.10  2001/04/16 20:29:45  ullrich
+ * Added Tof containers.
+ *
  * Revision 2.9  2001/03/14 02:29:16  ullrich
  * Added StPsd container.
  *
@@ -52,6 +55,8 @@
 #include "StEmcRawHit.h"
 #include "StEmcCluster.h"
 #include "StEmcPoint.h"
+#include "StTofHit.h"
+#include "StTofSlat.h"
 #include "StPrimaryTrack.h"
 #include "StPrimaryVertex.h"
 #include "StPsd.h"
@@ -80,6 +85,8 @@ StCollectionImp(RichMCInfo)
 StCollectionImp(EmcRawHit)
 StCollectionImp(EmcCluster)
 StCollectionImp(EmcPoint)
+StCollectionImp(TofHit)
+StCollectionImp(TofSlat)
 StCollectionImp(Track)
 StCollectionImp(TrackNode)
 StCollectionImp(TrackPidTraits)

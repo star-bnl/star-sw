@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.9 2001/03/14 02:29:17 ullrich Exp $
+ * $Id: StContainers.h,v 2.10 2001/04/16 20:29:46 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
+ * Revision 2.10  2001/04/16 20:29:46  ullrich
+ * Added Tof containers.
+ *
  * Revision 2.9  2001/03/14 02:29:17  ullrich
  * Added StPsd container.
  *
@@ -60,6 +63,8 @@ class StRichMCInfo;
 class StEmcRawHit;
 class StEmcCluster;
 class StEmcPoint;
+class StTofHit;
+class StTofSlat;
 class StTrack;
 class StTrackNode;
 class StTrackPidTraits;
@@ -86,6 +91,8 @@ StCollectionDef(RichMCInfo)
 StCollectionDef(EmcRawHit)
 StCollectionDef(EmcCluster)
 StCollectionDef(EmcPoint)
+StCollectionDef(TofHit)
+StCollectionDef(TofSlat)
 StCollectionDef(Track)
 StCollectionDef(TrackNode)
 StCollectionDef(TrackPidTraits)
