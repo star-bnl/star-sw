@@ -461,6 +461,7 @@ my $topDisk = "star/rcf";
    $mrunId = $mrun;
    $extn = "." . $mcomp;
    $mfileSeq = basename("$mfileS","$extn"); 
+   $mevtType = 3;
 
   if($mpath =~ /starreco/)  {
    $msite = "hpss_rcf";
@@ -487,7 +488,7 @@ my $topDisk = "star/rcf";
   
    if( $gflag != 0 ) {
 
-    foreach my $jobnm (@jobSum_set){
+    foreach my $jobnm (@jobFSum_set){
        $mproSr   = ($$jobnm)->prSer;
        $mJobId   = ($$jobnm)->job_id;
        $msumFile = ($$jobnm)->smFile;
@@ -500,11 +501,11 @@ my $topDisk = "star/rcf";
 
        if ($mfName =~ /$jfile/ and $mjobFname =~ /$jbFile/) {
 
-#  print "Set: ", $mdataSet, "File: ", $mfName, "Flag = ", $gflag, "\n";
 if ( $gflag eq 1) {
 
    print "Files to be inserted :", "\n"; 
    print "Job ID: ", $mJobId," % ", "Path: ", $mpath," % ", "File: ", $mfName, " % ","Date:", $mcTime,"\n"; 
+#  print "Number Event: Evts, EvtLo, EvtHi :", $mNevts," % ",$mNevtLo," % ",$mNevtHi, "\n",
      $NumMisFile++;
 
 ##### fill Files Catalog with missing files
@@ -516,6 +517,7 @@ elsif ( $gflag eq 2) {
     
  print "Files to be updated :", "\n";    
  print "Job ID: ", $mJobId, " % ","Path: ", $mpath," % ","File:", $mfName, " % ","Date:", $mcTime, "\n";
+#  print "Number Event: Evts, EvtLo, EvtHi :", $mNevts," % ",$mNevtLo," % ",$mNevtHi, "\n",
     $NumUpFile++; 
 
 ##### update RECO DAQ files in Files Catalog if rerun 
@@ -598,7 +600,7 @@ elsif ( $gflag eq 2) {
      $sql.="NevLo='$mNevtLo',";
      $sql.="NevHi='$mNevtHi',";
      $sql.="owner='$mowner'";
-     $sql.=" WHERE fName = '$mfName' AND dataset= '$mdataSet' AND path='$mpath'";
+     $sql.=" WHERE fName = '$mfName' AND path='$mpath'";
      print "$sql\n" if $debugOn;
      $rv = $dbh->do($sql) || die $dbh->errstr;
 

@@ -33,6 +33,10 @@ my @SetD = (
              "P00hd_1/2000/07",
 );
 
+my @SetS = (
+             "daq/2000/06",
+             "daq/2000/07",
+);
 
 my $recoDir = ("daq");
 
@@ -93,7 +97,7 @@ my $jbSt = "n\/a";
 ########## Find reco for daq files on HPSS
 
 my $nDHpssFiles = 0;
-my $nDHpssDirs = 1;
+my $nDHpssDirs = 2;
 my @hpssDstDirs;
 my @hpssDstFiles;
 my @dbDaqFiles;
@@ -217,7 +221,9 @@ print "Total daq reco files: $nDiskFiles\n";
 
 &StDbProdConnect();
 
- $sql="SELECT fName, Nevents FROM $FileCatalogT WHERE path like '%2000/06%' AND fName like '%daq' AND Nevents = 0";
+for ($ll = 0; $ll<scalar(@SetS); $ll++) {
+
+ $sql="SELECT fName, Nevents FROM $FileCatalogT WHERE path like '%SetS[$ll]%' AND fName like '%daq' AND Nevents = 0";
 
   $cursor =$dbh->prepare($sql)
    || die "Cannot prepare statement: $DBI::errstr\n";
@@ -238,6 +244,7 @@ print "Total daq reco files: $nDiskFiles\n";
 
       $dbDaqFiles[$ndbDaqFiles] = $fObjAdr;
       $ndbDaqFiles++; 
+}
 }
 
 ##### update daq files in FileCatalog with number of events from Online DB
@@ -265,7 +272,7 @@ my $mEvType = 0;
          $mEvType = ($$eachOnFile)->evType; 
 	 if (($mFile eq $dbFile) and ($mNevts > 0)) {
 
-#   print "File, EvtType, Nevent, FirstEv, LastEv: ", $mFile," % ",$mEvType," % ",$mNevts," % ", $mNevtLo," % ", $mNevtHi, "\n";
+   print "File, EvtType, Nevent, FirstEv, LastEv: ", $mFile," % ",$mEvType," % ",$mNevts," % ", $mNevtLo," % ", $mNevtHi, "\n";
 
   &updateDAQTable();
      last;
@@ -277,7 +284,7 @@ my $mEvType = 0;
 
 ### select from JobStatus table files which should be updated
 
- $sql="SELECT prodSeries, JobID, sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobStatus = 'n/a'";
+ $sql="SELECT prodSeries, JobID, sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobStatus = 'n/a' ";
 
   $cursor =$dbh->prepare($sql)
    || die "Cannot prepare statement: $DBI::errstr\n";
@@ -380,13 +387,12 @@ foreach my $jobnm (@jobSum_set){
         next if ( !($filename =~ /.sum$/) );
        if ( $filename =~ /$msumFile/ ) {
      $jb_sumFile = $msumDir . "/" . $msumFile;
-      print "Sum Dir = ", $jb_sumFile, "\n";
       $mjobDg = "none";
       $mjobSt = "n\/a"; 
 
           &sumInfo("$jb_sumFile",1);
 
-#     print "JobFile=", $mjobFname," % ", "Job Status: ", $mjobSt,"\n";
+     print "JobFile=", $mjobFname," % ", "Job Status: ", $mjobSt,"\n";
 #     print "Event first, last, Done, Skip :", $first_evts," % ",$last_evts," % ",$mNev," % ", $mEvtSk, "\n";
 
 ### update JobStatus table with info for jobs completed
@@ -530,7 +536,7 @@ foreach my $jobnm (@jobFSum_set){
         
      if ( $mfName =~ /$dfile/) {
 
-#  print "Num Events, EvType: first, last, done :", $mNevtLo," % ", $mNevtHi," % ",$mNevts," % ",$mevtType, "\n";  
+  print "File Name :", $mpath, " % ", $mfName, " % ", "Num Events, EvType: first, last, done :", $mNevtLo," % ", $mNevtHi," % ",$mNevts," % ",$mevtType, "\n";  
    
       print "updating FileCatalogT table\n";
  
