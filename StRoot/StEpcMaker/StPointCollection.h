@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StPointCollection.h,v $
+// Revision 1.5  2001/12/01 02:44:50  pavlinov
+// Cleanp for events with zero number of tracks
+//
 // Revision 1.4  2001/11/06 23:35:27  suaide
 // fixed bug in the way we get magnetic field
 //
@@ -51,12 +54,13 @@ typedef vector<int> intVector;
 #endif
 
 #include "TObjArray.h"
-#include "St_DataSet.h"
-#include "St_DataSetIter.h"
-#include "St_TableSorter.h"
+#include "TDataSet.h"
+#include "TDataSetIter.h"
+#include "TTableSorter.h"
 #include "StPi0Candidate.h"
 #include "StEpcMaker.h"
 
+class TBrowser;
 class StEmcClusterCollection;
 class StEmcCluster;
 
@@ -65,7 +69,7 @@ typedef StVector(StEmcCluster*)::iterator StMatchVecClusIter;
 
 #include "tables/St_dst_track_Table.h"
 
-class StPointCollection : public St_DataSet 
+class StPointCollection : public TDataSet 
 {
 
   private:
@@ -73,7 +77,7 @@ class StPointCollection : public St_DataSet
     TObjArray         mPointsReal;
     Int_t             mNPoints;
     Int_t             mNPointsReal;
-    double            BField;
+    double            mBField;
   protected:   
 
   public: 
@@ -81,8 +85,9 @@ class StPointCollection : public St_DataSet
                       StPointCollection();
                       StPointCollection(const Char_t *);
     virtual           ~StPointCollection();
+    virtual  void     Browse(TBrowser* b); // mPoints .. 
 
-    void              SetBField(double B) { BField=B; }
+    void              SetBField(double B) { mBField=B; }
     Int_t             NPoints() const;
     const TObjArray*  Points() const;
     Int_t             NPointsReal() const;

@@ -1,8 +1,10 @@
-
 //
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.13  2001/12/01 02:44:50  pavlinov
+// Cleanp for events with zero number of tracks
+//
 // Revision 1.12  2001/11/06 23:35:27  suaide
 // fixed bug in the way we get magnetic field
 //
@@ -51,7 +53,8 @@
 #include <iostream.h>
 #include <math.h>
 #include "StChain.h"
-#include "St_DataSetIter.h"
+#include <TDataSetIter.h>
+#include <TBrowser.h>
 #include "StEpcMaker.h"
 #include "StThreeVector.hh"
 #include "StHelix.hh"
@@ -68,6 +71,7 @@
 #include "StDetectorDefinitions.h"
 #include "Stypes.h"
 #include "math_constants.h"
+#include "StAutoBrowse.h"
 
 //For StEvent
 #include "StEvent/StEvent.h"
@@ -112,21 +116,30 @@ StTrackVec  HitTrackPointer;
 StMatchVecClus ClusterPointer[4];
 
 //_____________________________________________________________________________
-StPointCollection::StPointCollection():St_DataSet("Default")
+StPointCollection::StPointCollection():TDataSet("Default")
 {
   SetTitle("EmcPoints");
-  BField = 0.5;
+  mBField = 0.5;
 }
 //_____________________________________________________________________________
-StPointCollection::StPointCollection(const Char_t *Name):St_DataSet(Name)
+StPointCollection::StPointCollection(const Char_t *Name):TDataSet(Name)
 {
   SetTitle("EmcPoints");
-  BField = 0.5;
+  mBField = 0.5;
 }
 //_____________________________________________________________________________
 StPointCollection::~StPointCollection()
 {
 }
+
+void 
+StPointCollection::Browse(TBrowser* b)
+{
+  // if(mPoints.GetSize())     b->Add((TObject*)NPoints()); // for testing 30-nov-2001
+  //if(mPointsReal.GetSize()) b->Add((TObject*)NPointsReal());
+  TDataSet::Browse(b);
+}
+
 //*************** FIND EMC POINTS **********************************
 Int_t StPointCollection::findEmcPoints(StEmcClusterCollection* Bemccluster,
                                        StEmcClusterCollection *Bprscluster,
@@ -651,7 +664,7 @@ Int_t StPointCollection::MatchClusterAndTrack(const StMatchVecClus mvec,
 Int_t StPointCollection::TrackSort( const StTrackVec & TrackToFit) const
 {
   cout <<" Inside TrackSort*** size "<<TrackToFit.size()<<endl;
-  cout <<" Magnetic Field used = "<<BField<<endl;
+  cout <<" Magnetic Field used = "<<mBField<<endl;
   double spath;
   //  double x0,y0,z0;
   //  double ptinv,psi,tanl;
@@ -675,7 +688,7 @@ Int_t StPointCollection::TrackSort( const StTrackVec & TrackToFit) const
   //  double Rmincut      = 4.0;
   //  long   MinTrkPoints = 10;
 
-  double bfield = BField; //This is now Tesla.
+  double bfield = mBField; //This is now Tesla.
 
   #ifdef ST_NO_TEMPLATE_DEF_ARGS
     vector<StPhysicalHelixD,allocator<StPhysicalHelixD> > helices;
