@@ -1,18 +1,12 @@
-      integer function tgc_main(pad_planeh,pad_plane)
+      integer function tpg_main(pad_plane_h,pad_plane)
       implicit none
 
-#include "tas_structures.inc"
-#include "tas_user_codes.inc"
-#include "tpg_pad_plane_pars.inc"
-#include "tpg_pad_plane_st.inc"
-
-      RECORD / table_head_st /pad_planeh
-      RECORD / pad_plane_row_st /pad_plane 
+#include "tpg_main.inc"
 
 C     Description: Initialisation of the geometry package.
 C     Description: In the debug mode it verifies the transformations.
 C     Input arguments:
-C     pad_planeh - header of the pad plane table
+C     pad_plane_h - header of the pad plane table
 C     pad_plane  - pad plane table 
 
       real    dummy1, dummy2, dummy3, dummy4
@@ -29,14 +23,14 @@ CCCCCCCCCCCC
 
       save
 
-      data init_flag/0/, idebug/0/
+      data init_flag/0/, idebug/1/
 *
       if(init_flag.eq.0) then
-         iret=tgc_pad_to_x(1.0,1.0,dummy3,pad_planeh,pad_plane)
-         iret=tgc_row_to_y(1.0,dummy2,pad_planeh,pad_plane)
-         iret=tgc_x_to_pad(1.0,1.0,dummy3,pad_planeh,pad_plane)
-         iret=tgc_y_to_row(60.0,dummy2,pad_planeh,pad_plane)
-         iret=tgc_row_par(1,1.0,dummy3,dummy4,pad_planeh,pad_plane)
+         iret=tgc_pad_to_x(1.0,1.0,dummy3,pad_plane_h,pad_plane)
+         iret=tgc_row_to_y(1.0,dummy2,pad_plane_h,pad_plane)
+         iret=tgc_x_to_pad(1.0,1.0,dummy3,pad_plane_h,pad_plane)
+         iret=tgc_y_to_row(60.0,dummy2,pad_plane_h,pad_plane)
+         iret=tgc_row_par(1,1.0,dummy3,dummy4,pad_plane_h,pad_plane)
          init_flag=1
       endif
 CCCCC
@@ -52,11 +46,11 @@ CCCCC
         write(55,*)j,xglobal,xback
       end do
       do i=1,45
-        iret=tgc_pad_to_x(0.5*real(pad_plane.npads(i))+0.5,real(i),
+        iret=tgc_pad_to_x(0.5*real(pad_plane(1).npads(i))+0.5,real(i),
      >                   xlocal(1),dummy1,dummy2)
         iret=tgc_x_to_pad(real(i),xlocal(1),pad,dummy1,dummy2)
         iret=tgc_row_to_y(real(i),xlocal(2),dummy1,dummy2)
-        write(33,*)i,0.5*real(pad_plane.npads(i))+0.5,
+        write(33,*)i,0.5*real(pad_plane(1).npads(i))+0.5,
      >             pad,xlocal(1),xlocal(2)
         end do
       endif
@@ -68,7 +62,7 @@ CCCCC
       enddo
 
 CCCCCC
-      tgc_main=tucod_ok
+      tpg_main=STAFCV_OK
       end
 
 
@@ -172,17 +166,15 @@ C
       iret=tgc_time_to_z(time,xlocal(3))
       end
 
-      integer function tgc_pad_to_x(pad,row,x,pad_planeh,pad_plane)
+      integer function tgc_pad_to_x(pad,row,x,pad_plane_h,pad_plane)
 
       implicit none
 
-#include "tas_structures.inc"
-#include "tas_user_codes.inc"
-#include "tpg_pad_plane_pars.inc"
-#include "tpg_pad_plane_st.inc"
+#include "PAM.inc"
+#include "tpg_pad_plane.inc"
 
-      RECORD / table_head_st /pad_planeh
-      RECORD / pad_plane_row_st /pad_plane 
+      RECORD / table_head_st /pad_plane_h
+      RECORD / tpg_pad_plane_st /pad_plane(*) 
 
       real pad, row, x
 
@@ -199,10 +191,10 @@ C     x - x coordinate in the local coordinate system
 
       data flag /1/
       if(flag.eq.1) then
-         pitch_in=pad_plane.pad_sep_in
-         pitch_out=pad_plane.pad_sep_out
+         pitch_in=pad_plane(1).pad_sep_in
+         pitch_out=pad_plane(1).pad_sep_out
          do i=1,45
-           pad_num(i)=pad_plane.npads(i)
+           pad_num(i)=pad_plane(1).npads(i)
          enddo
          flag=0
       endif
@@ -217,17 +209,15 @@ C     x - x coordinate in the local coordinate system
       x=(pad_int-pad_half-0.5+pad_dif)*pitch
 
       end
-      integer function tgc_row_to_y(row,y,pad_planeh,pad_plane)
+      integer function tgc_row_to_y(row,y,pad_plane_h,pad_plane)
 
       implicit none
 
-#include "tas_structures.inc"
-#include "tas_user_codes.inc"
-#include "tpg_pad_plane_pars.inc"
-#include "tpg_pad_plane_st.inc"
+#include "PAM.inc"
+#include "tpg_pad_plane.inc"
 
-      RECORD / table_head_st /pad_planeh
-      RECORD / pad_plane_row_st /pad_plane
+      RECORD / table_head_st /pad_plane_h
+      RECORD / tpg_pad_plane_st /pad_plane(*)
 
 
       real row,y
@@ -248,10 +238,10 @@ C     y - y coordinate in the local coordinate system
 *
       if(flag.eq.1) then
         do i=1,45
-          row_cent(i)=pad_plane.rad(i)
+          row_cent(i)=pad_plane(1).rad(i)
         enddo
-        row_wid_in=pad_plane.pad_len_in
-        row_wid_out=pad_plane.pad_len_out
+        row_wid_in=pad_plane(1).pad_len_in
+        row_wid_out=pad_plane(1).pad_len_out
         flag=0
       endif
       int_row=int(row+0.5)
@@ -350,17 +340,15 @@ C
       
 
 
-      integer function tgc_x_to_pad(row,x,pad,pad_planeh,pad_plane)
+      integer function tgc_x_to_pad(row,x,pad,pad_plane_h,pad_plane)
 
       implicit none
 
-#include "tas_structures.inc"
-#include "tas_user_codes.inc"
-#include "tpg_pad_plane_pars.inc"
-#include "tpg_pad_plane_st.inc"
+#include "PAM.inc"
+#include "tpg_pad_plane.inc"
 
-      RECORD / table_head_st /pad_planeh
-      RECORD / pad_plane_row_st /pad_plane
+      RECORD / table_head_st /pad_plane_h
+      RECORD / tpg_pad_plane_st /pad_plane(*)
 
       real row, x, pad
 C     Description: Converts x coordinate in the local coordinate system
@@ -380,10 +368,10 @@ C     pad - pad number
       data flag /1/
 C
       if(flag.eq.1) then
-         pitch_in=pad_plane.pad_sep_in
-         pitch_out=pad_plane.pad_sep_out
+         pitch_in=pad_plane(1).pad_sep_in
+         pitch_out=pad_plane(1).pad_sep_out
          do i=1,45
-           pad_num(i)=pad_plane.npads(i)
+           pad_num(i)=pad_plane(1).npads(i)
          enddo
          flag=0
       endif
@@ -396,17 +384,15 @@ C
 
       end
 
-      integer function tgc_y_to_row(y,row,pad_planeh,pad_plane)
+      integer function tgc_y_to_row(y,row,pad_plane_h,pad_plane)
 
       implicit none
 
-#include "tas_structures.inc"
-#include "tas_user_codes.inc"
-#include "tpg_pad_plane_pars.inc"
-#include "tpg_pad_plane_st.inc"
+#include "PAM.inc"
+#include "tpg_pad_plane.inc"
 
-      RECORD / table_head_st /pad_planeh
-      RECORD / pad_plane_row_st /pad_plane
+      RECORD / table_head_st /pad_plane_h
+      RECORD / tpg_pad_plane_st /pad_plane(*)
 
       real y, row
 C     Description: Converts y to row number
@@ -425,10 +411,10 @@ C     row - row number
 *
       if(flag.eq.1) then
         do i=1,45
-          row_cent(i)=pad_plane.rad(i)
+          row_cent(i)=pad_plane(1).rad(i)
         enddo
-        row_wid_in=pad_plane.pad_len_in
-        row_wid_out=pad_plane.pad_len_out
+        row_wid_in=pad_plane(1).pad_len_in
+        row_wid_out=pad_plane(1).pad_len_out
         do i=1,13
            row_wid(i)=row_wid_in*0.5
         end do
@@ -459,16 +445,14 @@ C
       time=0
       end
       
-      integer function tgc_row_par(isect,row,a,b,pad_planeh,pad_plane)
+      integer function tgc_row_par(isect,row,a,b,pad_plane_h,pad_plane)
       implicit none
 
-#include "tas_structures.inc"
-#include "tas_user_codes.inc"
-#include "tpg_pad_plane_pars.inc"
-#include "tpg_pad_plane_st.inc"
+#include "PAM.inc"
+#include "tpg_pad_plane.inc"
 
-      RECORD / table_head_st /pad_planeh
-      RECORD / pad_plane_row_st /pad_plane
+      RECORD / table_head_st /pad_plane_h
+      RECORD / tpg_pad_plane_st /pad_plane(*)
 
       real    a, b, row, det
       integer isect
@@ -490,7 +474,7 @@ C     a,b - row parameterisation
 *
       if(flag.eq.1) then
         do i=1,45
-          row_cent(i)=pad_plane.rad(i)
+          row_cent(i)=pad_plane(1).rad(i)
         enddo
         plocal(1)=1.0
         plocal(2)=0.0
@@ -507,9 +491,9 @@ C     a,b - row parameterisation
       if(abs(det).gt.0.000001) then
           a=-pglobal(2)/det
           b= pglobal(1)/det
-          tgc_row_par = tucod_ok
+          tgc_row_par = STAFCV_OK
       else
-          tgc_row_par = tucod_fail
+          tgc_row_par = STAFCV_BAD
       endif
       end
 
