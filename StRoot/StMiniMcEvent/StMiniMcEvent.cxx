@@ -1,5 +1,8 @@
 
 #include "StMiniMcEvent.h"
+#include "StMiniMcPair.h"
+#include "StContamPair.h"
+
 #include <iostream>
 
 Int_t StMiniMcEvent::mSFirst=1; 

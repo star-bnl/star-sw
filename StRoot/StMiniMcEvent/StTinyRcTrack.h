@@ -17,6 +17,7 @@
 #define StTinyRcTrack_H
 
 #include "TObject.h"
+#include <cmath>
 
 class StTinyRcTrack {
  public:
@@ -58,6 +59,8 @@ class StTinyRcTrack {
   void setFirstSector(Short_t val) { mFirstSector=val; }
   void setLastSector(Short_t val) { mLastSector=val; }
   void setFitPts(Short_t val) { mFitPts=val; }
+  void setFitFtpc(Short_t val) { mFitFtpc=val; }
+  void setFitSvt(Short_t val) { mFitSvt=val; }
   void setDedxPts(Short_t val) { mDedxPts=val; }
   void setAllPts(Short_t val) { mAllPts=val; }
   void setCharge(Short_t val) { mCharge=val; }
@@ -65,7 +68,10 @@ class StTinyRcTrack {
   void setNPossible(Short_t val) { mNPossible=val; }
 
   float ptPr()const { return mPtPr; }
+  float pxPr()const { return mPtPr*cos(mPhiPr); }
+  float pyPr()const { return mPtPr*sin(mPhiPr); }
   float pzPr()const { return mPzPr; }
+  float pPr()const { return sqrt((mPtPr*mPtPr) + (mPzPr*mPzPr)); }
   float etaPr() const { return mEtaPr; }
   float phiPr() const { return mPhiPr; }
   float dcaPr() const { return mDcaPr; }
@@ -77,7 +83,10 @@ class StTinyRcTrack {
   float dedx() const { return mDedx; }
 	
   float ptGl()const { return mPtGl; }
+  float pxGl()const { return mPtGl*cos(mPhiGl); }
+  float pyGl()const { return mPtGl*sin(mPhiGl); }
   float pzGl()const { return mPzGl; }
+  float pGl()const { return sqrt((mPtGl*mPtGl) + (mPzGl*mPzGl)); }
   float etaGl() const { return mEtaGl; }
   float phiGl() const { return mPhiGl; }
   float dcaGl() const { return mDcaGl; }
@@ -98,7 +107,9 @@ class StTinyRcTrack {
 	
   short firstSector() const { return mFirstSector; }
   short lastSector() const { return mLastSector; }
-  short fitPts() const { return mFitPts; }
+  short fitPts()     const { return mFitPts; }
+  short fitPtsFtpc() const { return mFitFtpc; }
+  short fitPtsSvt()  const { return mFitSvt; }
   short dedxPts() const { return mDedxPts; }
   short allPts() const { return mAllPts; }
   short charge() const { return mCharge; }
@@ -152,21 +163,37 @@ private:
   Short_t    mLastSector;
 
   Short_t      mFitPts;
+  Short_t      mFitSvt;
+  Short_t      mFitFtpc;
   Short_t      mDedxPts;
   Short_t      mAllPts;
   Short_t      mCharge;
-
+    
   Short_t      mNAssocMc;
   Short_t      mNPossible;
 
-  ClassDef(StTinyRcTrack,2)
+  ClassDef(StTinyRcTrack,3)
 };
 
 #endif
 //
 // $Log: StTinyRcTrack.h,v $
+// Revision 1.3  2003/05/08 02:09:20  calderon
+// Added data members for svt and ftpc fit points for StTinyRcTrack.
+// Added data members for svt and ftpc hits for StTinyMcTrack.
+// Added methods to calculate px, py, and p from the available pt,  phi and pz, for
+// global and primary momenta and also for monte carlo momentum.
+// Cleaned up includes in StMiniMcEvent.
+//
 // Revision 1.2  2002/06/06 18:58:30  calderon
-// Added $Log$
+// Added $Log: StTinyRcTrack.h,v $
+// Added Revision 1.3  2003/05/08 02:09:20  calderon
+// Added Added data members for svt and ftpc fit points for StTinyRcTrack.
+// Added Added data members for svt and ftpc hits for StTinyMcTrack.
+// Added Added methods to calculate px, py, and p from the available pt,  phi and pz, for
+// Added global and primary momenta and also for monte carlo momentum.
+// Added Cleaned up includes in StMiniMcEvent.
+// Added
 // Added mDedxPts data member, get and set methods, and updated ClassDef(StTinyRcTrack,1)
 // to ClassDef(StTinyRcTrack,2) because of this change for schema evolution
 //
