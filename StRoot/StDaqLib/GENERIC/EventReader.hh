@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.hh,v 1.5 1999/07/21 21:33:08 levine Exp $
+ * $Id: EventReader.hh,v 1.6 1999/07/26 17:00:03 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: common definitions for all detectors
@@ -18,7 +18,12 @@
  *
  ***************************************************************************
  * $Log: EventReader.hh,v $
+ * Revision 1.6  1999/07/26 17:00:03  levine
+ * changes to RICH file organization
+ *
  * Revision 1.5  1999/07/21 21:33:08  levine
+ *
+ *
  * changes to include error logging to file.
  *
  * There are now 2 constructors for EventReader:
@@ -407,14 +412,15 @@ private:
   // later storage for detector buffers
 };
 
-#include "../RICH/RICH_Reader.hh"
+//#include "../RICH/RICH_Reader.hh"
 
 // Declaration for the factories
 DetectorReader *getDetectorReader(EventReader *, string);
 EventReader *getEventReader(int fd, long offset, int MMap=1);
 EventReader *getEventReader(int fd, long offset, const char *logfile, int MMap=1);
 EventReader *getEventReader(char *event);
-RICH_Reader *getRichReader(EventReader *er);
+// declared in RICH_Reader.hh
+// RICH_Reader *getRichReader(EventReader *er);
 
 
 
