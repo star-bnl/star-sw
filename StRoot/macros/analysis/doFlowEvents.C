@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.32 2001/06/07 20:12:12 posk Exp $
+// $Id: doFlowEvents.C,v 1.33 2001/11/09 21:44:34 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -47,7 +47,6 @@
 //              Art Poskanzer
 //  
 ///////////////////////////////////////////////////////////////////////////////
-gROOT->Reset();
 
 class    StChain;
 StChain  *chain = 0;
@@ -95,6 +94,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   gSystem->Load("StEvent");
   gSystem->Load("StEventUtilities");
   gSystem->Load("StMagF");
+  //gSystem->Load("StarRoot"); 
 
   gSystem->Load("StFlowMaker");
   gSystem->Load("StFlowTagMaker");
@@ -127,13 +127,12 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //StFlowSelection flowSelect;
   // particles:  pi+, pi-, pi, k+, k-, e-, e+, pbar, proton, d and dbar
   //flowSelect->SetPidPart("pi");               // for parts. wrt plane
-  //flowSelect->SetPtPart(0.1, 1.);             // for parts. wrt plane
+  //flowSelect->SetPtPart(0., 8.);             // for parts. wrt plane
   //flowSelect->SetPPart(0.15, 5.);             // for parts. wrt plane
   //flowSelect->SetEtaPart(0., 0.);             // for parts. wrt plane
   //flowSelect->SetFitPtsPart(20, 50);          // for parts. wrt plane
   //flowSelect->SetFitOverMaxPtsPart(0.52, 1.); // for parts. wrt plane
   //flowSelect->SetChiSqPart(0.1, 1.3);         // for parts. wrt plane
-  //flowSelect->SetDcaPart(0., 0.8);            // for parts. wrt plane
   //flowSelect->SetDcaGlobalPart(0., 0.8);      // for parts. wrt plane
   //flowSelect->SetYPart(-0.5, 0.5);            // for parts. wrt plane
 
@@ -205,20 +204,25 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   // Flow Makers
   //   Use of the TagMaker is optional.
   //   The AnalysisMaker may be used with a selection object.
+  //   When the CumulantMaker is run, also run the AnalysisMaker.
 
   //StFlowTagMaker* flowTagMaker = new StFlowTagMaker();
 
   if (makerName[0]=='\0') {
     StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker();
+    //StFlowCumulantMaker* flowCumulantMaker = new StFlowCumulantMaker();
   } else {
     sprintf(makerName, "FlowAnalysis");
     StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker(makerName, flowSelect);
+    //sprintf(makerName, "FlowCumulant");
+    //StFlowCumulantMaker* flowCumulantMaker = new StFlowCumulantMaker(makerName, flowSelect);
   }
 
   // Make docs
   //flowMaker->MakeDoc("./StRoot/StFlowMaker", "./html", kFALSE);
   //flowTagMaker->MakeDoc("./StRoot/StFlowTagMaker", "./html", kFALSE);
   //flowAnalysisMaker->MakeDoc("./StRoot/StFlowAnalysisMaker", "./html", kFALSE);
+  //flowCumulantMaker->MakeDoc("./StRoot/StFlowCumulantMaker", "./html", kFALSE);
   
   // Set write flages and file names
   //  flowMaker->PicoEventWrite(kTRUE);
@@ -228,6 +232,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //  flowMaker->SetDebug();
   //  flowTagMaker->SetDebug();
   //  flowAnalysisMaker->SetDebug();
+  //  flowCumulantMaker->SetDebug();
 
   //
   // Initialize chain
@@ -248,7 +253,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   }
 
   // Set the event cuts
-//   StFlowCutEvent::SetCent(1, 1);
+//   StFlowCutEvent::SetCent(3, 3);
 //   StFlowCutEvent::SetMult(0, 0);
 //   StFlowCutEvent::SetVertexX(0., 0.);
 //   StFlowCutEvent::SetVertexY(0., 0.);
@@ -261,7 +266,6 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
 //   StFlowCutTrack::SetFitOverMaxPts(0., 0.);
 //   StFlowCutTrack::SetChiSqTpc(0., 0.);
 //   StFlowCutTrack::SetChiSqFtpc(0., 0.);
-//   StFlowCutTrack::SetDcaTpc(0., 0.);
 //   StFlowCutTrack::SetDcaFtpc(0., 0.);
 //   StFlowCutTrack::SetPtTpc(0., 0.);
 //   StFlowCutTrack::SetPtFtpc(0., 0.);
@@ -291,6 +295,9 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
 
   // Use Aihong's probability PID method
   //  StFlowEvent::SetProbPid();
+
+  // Have the CumulantMaker use the old method
+//   StFlowCumulantMaker::SetOldMethod(kTRUE); 
 
   // Set the PID deviant windows
 //   StFlowEvent::SetPiPlusCut(-3., 3.);
@@ -416,6 +423,20 @@ void doFlowEvents(const Int_t nevents)
   //Char_t* fileExt="*.event.root";
   
   // LBNL
+//   Char_t* filePath="/auto/pdsfdv15/rhstar/kaneta/flow_pDST/reco/ProductionMinBias/DEV/2001/2266012/";
+//   if (nevents < 250) {
+//     Char_t* fileExt="st_physics_2266012_raw_0001.event.root.flowpicoevent.root";
+//    } else {
+//      Char_t* fileExt="*.flowpicoevent.root";
+//    }
+
+//   Char_t* filePath="/auto/pdsfdv15/starprod/reco/minbias/P01he/2000/08";
+//   if (nevents < 250) {
+//     Char_t* fileExt="st_physics_1229032_raw_0001.event.root";
+//    } else {
+//      Char_t* fileExt="*.event.root";
+//    }
+
 //   Char_t* filePath="/auto/pdsfdv08/starspec/pDST/P00hm/minbias/";
 //   if (nevents < 250) {
 //     Char_t* fileExt="st_physics_1244014_raw_0001.event.root.flowpicoevent.root";
@@ -429,6 +450,9 @@ void doFlowEvents(const Int_t nevents)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.33  2001/11/09 21:44:34  posk
+// Added StFlowCumulantMaker.
+//
 // Revision 1.32  2001/06/07 20:12:12  posk
 // Added global dca cut for event plane particles.
 // Changed SePtWgt() to SetPtWgt(Bool_t).
