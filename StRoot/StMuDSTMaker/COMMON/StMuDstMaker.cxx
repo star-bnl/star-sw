@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.59 2004/05/04 13:17:11 jeromel Exp $
+ * $Id: StMuDstMaker.cxx,v 1.60 2004/05/04 13:26:23 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -496,12 +496,8 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
   if (!chain) return;
   chain->SetBranchStatus("*",0);
   TString ts;
-<<<<<<< StMuDstMaker.cxx
-  for ( int i=0; i<__NARRAYS__; i++) {
-=======
   for ( int i=0; i<__NALLARRAYS__; i++) {
     if (mStatusArrays[i]==0) continue;
->>>>>>> 1.58
     const char *bname=StMuArrays::arrayNames[i];
     TBranch *tb = chain->GetBranch(bname);
     if(!tb) {Warning("setBranchAddresses","Branch name %s does not exist",bname);continue;}
@@ -1083,6 +1079,9 @@ void StMuDstMaker::fillHddr()
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.60  2004/05/04 13:26:23  jeromel
+ * Oops .. Conflict resolution fixed.
+ *
  * Revision 1.59  2004/05/04 13:17:11  jeromel
  * Changed to the documentation in doxygen format
  *
