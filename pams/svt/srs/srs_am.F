@@ -2514,8 +2514,10 @@ c     b)the number of data to be transfered is too big given the size of the tar
       else if (direct_h.nok.le.0) then
          write(myString,1002)
          call stError(myString)
-         direct(1).sd = 0.0020     ! 20 microns
-         direct(1).st = 0.0020     ! 20 microns
+c        direct(1).sd = 0.0020     ! 20 microns
+c        direct(1).st = 0.0020     ! 20 microns
+         direct(1).sd = 0.0150     ! 150 microns closer to reality 11 03
+         direct(1).st = 0.0150     ! 150 microns closer to reality 11 03
          direct_h.nok = 1
       else if (direct_h.nok.eq.1) then
          write(myString,1005)
