@@ -1,15 +1,12 @@
 /**********************************************************
- * $Id: StRichMinimization.cxx,v 2.3 2000/10/19 01:13:22 horsley Exp $
+ * $Id: StRichMinimization.cxx,v 2.4 2000/10/19 18:11:09 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMinimization.cxx,v $
- *  Revision 2.3  2000/10/19 01:13:22  horsley
- *  added member functions to StRichPIDMaker to make cuts on hits, tracks, events.
- *  added normal distance sigma cut on hits, quartz and radiator pathlengths
- *  for individual photons, modified minimization routine to correct boundary
- *  problems
+ *  Revision 2.4  2000/10/19 18:11:09  lasiuk
+ *  definition of degree
  *
  *  Revision 2.4  2000/10/19 18:11:09  lasiuk
  *  definition of degree
@@ -55,6 +52,9 @@
 
 StRichMinimization::StRichMinimization(StRichRingPoint* rp) {
   ringPoint  = rp;
+  mTolerance = 0.00000005;
+  mMeanPathInRadiator = 0.0;
+  mMeanPathInQuartz   = 0.0;
 
   // should use system of units
   degree = M_PI/180;

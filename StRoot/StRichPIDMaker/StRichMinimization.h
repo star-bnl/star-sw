@@ -1,13 +1,12 @@
 /**********************************************************
- * $Id: StRichMinimization.h,v 2.1 2000/09/29 01:35:37 horsley Exp $
+ * $Id: StRichMinimization.h,v 2.2 2000/10/19 18:11:12 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMinimization.h,v $
- *  Revision 2.1  2000/09/29 01:35:37  horsley
- *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
- *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
+ *  Revision 2.2  2000/10/19 18:11:12  lasiuk
+ *  definition of degree
  *
  *  Revision 2.2  2000/10/19 18:11:12  lasiuk
  *  definition of degree
@@ -49,6 +48,7 @@ private:
   double psi,returnPsi;
   double minDistance,mTolerance;
   double mMeanPathInRadiator;
+  double mMeanPathInQuartz;
   bool status;
   StThreeVectorF returnThisPoint;
     double degree;
