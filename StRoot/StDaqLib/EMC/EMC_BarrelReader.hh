@@ -1,5 +1,3 @@
-/////////////////////Barrel Reader/////////////////////////
-
 #ifndef EMC_BARRELREADER_HH
 #define EMC_BARRELREADER_HH
 #include "StDaqLib/GENERIC/EventReader.hh"
@@ -8,13 +6,17 @@
 #include "EMC_Reader.hh"
 #include "StEmcDecoder.h"
 
-//class EMC_BarrelReader:public EMC_Reader {
+/*!\class EMC_BarrelReader
+\author Subhasis, Herbert Ward and Alexandre A. P. Suaide
+
+EMC Barrel reader.
+*/ 
 class EMC_BarrelReader
 {
 
     public:
-                       EMC_BarrelReader(EventReader *er,Bank_EMCP *pEMCP);
-      void             Initialize();
+                       EMC_BarrelReader(EventReader *er,Bank_EMCP *pEMCP);//!<EMC_BarrelReader constructor
+      void             Initialize();//!<Initialization of arrays
       int              ProcessBarrelTower(const Bank_EMCP*);
       Bank_EMCSECP*    getBarrelSection(const Bank_EMCP*,int);
       Bank_EMCRBP*     getBarrelTowerFiber(Bank_EMCSECP*,int);
@@ -22,7 +24,8 @@ class EMC_BarrelReader
       int              FillBarrelTower(Bank_TOWERADCR*);
       void             PrintTowerArray();
       Bank_BTOWERADCR& getBTOWERADCR();
-                       ~EMC_BarrelReader(); 
+                       ~EMC_BarrelReader(); //!<EMC_BarrelReader destructor
+
 
     protected:
       Bank_EMCP*       pBankEMCP;

@@ -1,9 +1,3 @@
-/*!\class EMC_BarrelReader
-\author Subhasis, Herbert Ward and Alexandre A. P. Suaide
-
-EMC Barrel reader.
-*/ 
-
 #include "EMC_BarrelReader.hh"
 #include <assert.h>
 #define MAX_ADC 0xFFF
@@ -15,7 +9,6 @@ EMC Barrel reader.
 
 //ofstream fout("decode.out");
 
-///EMC_BarrelReader constructor
 EMC_BarrelReader::EMC_BarrelReader(EventReader *er,Bank_EMCP *pEMCP):pBankEMCP(pEMCP),ercpy(er)
 {
   EventInfo info=er->getEventInfo();
@@ -36,13 +29,11 @@ EMC_BarrelReader::EMC_BarrelReader(EventReader *er,Bank_EMCP *pEMCP):pBankEMCP(p
   cout<<"EMC_Barrelreader** Event time (Unix time) = "<<UnixTime<<endl;
   Initialize();
 }
-///EMC_BarrelReader destructor
 EMC_BarrelReader::~EMC_BarrelReader()
 {
   if(decoder) delete decoder;
 }
 ////////////////////////////////////////////////////////////
-///Initialization of arrays
 void EMC_BarrelReader::Initialize()
 {
   mTheTowerAdcR.NTowerHits=0;

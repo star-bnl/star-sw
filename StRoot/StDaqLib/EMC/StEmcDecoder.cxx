@@ -1,27 +1,3 @@
-/*!\class StEmcDecoder
-\author Alexandre A. P. Suaide
-
-This class makes the decodification from EMC daq
-and electronics scheme to software scheme. This class
-has methods to decode the numbers in both directions and
-it works for SMD and towers.<br><br>
-
-The current id's definitions are:<br>
-      - for Towers
-            - 0 <= RDO (daq_id)            <= 4799
-            - 1 <= Crate                   <= 30
-            - 0 <= Crate_sequency          <= 159
-            - 1 <= crate board             <= 5
-            - 0 <= position on board       <= 31
-            - 0 <= TDC                     <= 29
-            - 0 <= TDC channels            <= 29
-            - 0 <= tdc sequency on channel <= 159
-            - 1 <= Tower (jose) id         <= 4800       
-      - for SMD
-            - 0 <= RDO             <= 7
-            - 0 <= index           <= 4799
-            
-*/ 
 #include "StEmcDecoder.h"
 #include <time.h>
 #include <stdlib.h>
@@ -29,8 +5,10 @@ The current id's definitions are:<br>
 #include <stdio.h>
 
 //--------------------------------------------------------
-/// StEmcDecoder constructor - date and time should be in GMT
-/// to get the correct electronics configuration for towers and SMD
+/*! 
+Date and time should be in GMT
+to get the correct electronics configuration for towers and SMD
+*/
 StEmcDecoder::StEmcDecoder(unsigned int date,unsigned int time)
 {
   cout <<"TIME USED FOR DECODER = "<<date<<" "<<time<<endl;
@@ -66,13 +44,15 @@ StEmcDecoder::StEmcDecoder(unsigned int date,unsigned int time)
   
 }
 //--------------------------------------------------------
-/// StEmcDecoder destructor
 StEmcDecoder::~StEmcDecoder()
 {
 }
 //--------------------------------------------------------
-/// Init method - should be called from constructor
-/// this method initializes the variables used in decoder
+/*!
+Init method - should be called from constructor
+this method initializes the variables used in decoder in agreement with the
+time stamp.
+*/
 void StEmcDecoder::Init(unsigned int date,unsigned int time)
 {
   
@@ -187,25 +167,33 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
   return;
 }
 //--------------------------------------------------------
-///Transiion from environment rid to m,e,s for towers
-///Copy of StEmcGeom version
-int StEmcDecoder::GetTowerBin(const int rid,int &m,int &e,int &s)
+/*!
+Copy of StEmcGeom version
+\param TowerId is the software id for towers
+\param module is the module number
+\param eta is the eta division for towers
+\param sub is the sub division for towers
+*/
+int StEmcDecoder::GetTowerBin(const int TowerId,int &module,int &eta,int &sub)
 {
-  //Transiion from environment Id to m,e,s to fill the arrays
-  // Copy of StEmcGeom version
-
+  
+  int rid=TowerId;
+  
   if(rid<1 || rid>4800) return 0;
  
   int idw;
-  m   = (rid - 1) / 40 + 1; // Module number
+  module   = (rid - 1) / 40 + 1; // Module number
   idw = (rid - 1) % 40;     // change from 0 to 39
-  s   = idw/20 + 1;
-  e   = idw%20+1;
+  sub   = idw/20 + 1;
+  eta   = idw%20+1;
 //  e   = 20 - idw%20;
   return 1;                   // zero is bad
 }
 //--------------------------------------------------------
-///Get crate number from TDC channel for towers
+/*!
+\param TDC is the TDC channel number
+\param crate is the crate number
+*/
 int StEmcDecoder::GetTowerCrateFromTDC(int TDC, int& crate)
 {
   if(TDC>=0 && TDC<30) 
@@ -216,7 +204,10 @@ int StEmcDecoder::GetTowerCrateFromTDC(int TDC, int& crate)
   return 0;
 }
 //--------------------------------------------------------
-/// get TDC channel from crate number for towers
+/*!
+\param crate is the crate number
+\param TDC is the TDC channel number
+*/
 int StEmcDecoder::GetTowerTDCFromCrate(int crate, int& TDC)
 {
   if(crate>0 && crate<31) 
@@ -227,29 +218,33 @@ int StEmcDecoder::GetTowerTDCFromCrate(int crate, int& TDC)
   return 0;
 }
 //--------------------------------------------------------
-/// get TDC channel from Daq Id for towers
-int StEmcDecoder::GetTowerTDCFromDaqId(int daq_tower, int& TDC)
+/*!
+\param RDO is the DAQ id
+\param TDC is the TDC channel number
+*/
+int StEmcDecoder::GetTowerTDCFromDaqId(int RDO, int& TDC)
 {
-  if(daq_tower>=0 && daq_tower<=4799)
+  if(RDO>=0 && RDO<=4799)
   {
-    TDC=daq_tower%30;
+    TDC=RDO%30;
     return 1;
   }
   return 0;
 }
 //--------------------------------------------------------
-/// Get crate number from Daq Id for towers
-int StEmcDecoder::GetTowerCrateFromDaqId(int daq_tower,
-                                                int& crate,
-                                                int& crate_sequency)
+/*!
+\param RDO is the DAQ id
+\param crate is the crate number
+\param crate_sequency is the position of the tower inside the crate
+*/
+int StEmcDecoder::GetTowerCrateFromDaqId(int RDO, int& crate, int& crate_sequency)
 {
-  int tdc=daq_tower%30;
-  crate_sequency=daq_tower/30;
+  int tdc=RDO%30;
+  crate_sequency=RDO/30;
   if(GetTowerCrateFromTDC(tdc, crate)==1) return 1; // 1 is ok
   return 0; 
 }
 //--------------------------------------------------------
-///Get Software Id for West size for towers
 int StEmcDecoder::Getjose_towerWest(int start,int crate_seq)
 {
   int card=crate_seq/32;
@@ -261,7 +256,6 @@ int StEmcDecoder::Getjose_towerWest(int start,int crate_seq)
   return jose_tower;
 }
 //--------------------------------------------------------
-///Get Software Id for East side for towers
 int StEmcDecoder::Getjose_towerEast(int start,int crate_seq)
 {
   int card=crate_seq/32;
@@ -273,8 +267,11 @@ int StEmcDecoder::Getjose_towerEast(int start,int crate_seq)
   return jose_tower;
 }
 //--------------------------------------------------------
-///Get Sofwtare Id from Daq Id for towers
-int StEmcDecoder::GetTowerIdFromDaqId(int RDO,int& id)
+/*!
+\param RDO is the DAQ id
+\param TowerId is the software id for towers
+*/
+int StEmcDecoder::GetTowerIdFromDaqId(int RDO,int& TowerId)
 {
   //RDO from 0 to 4799
   if(RDO<0 || RDO>4799) return 0;  //0 is bad
@@ -287,49 +284,58 @@ int StEmcDecoder::GetTowerIdFromDaqId(int RDO,int& id)
   int start=Init_Crate[Crate-1];
   if(Crate>15 && Crate<31)
   {
-    id=Getjose_towerWest(start,crate_seq);
+    TowerId=Getjose_towerWest(start,crate_seq);
     return 1;
   }
   if(Crate>0 && Crate<16)
   {
-    id=Getjose_towerEast(start,crate_seq);
+    TowerId=Getjose_towerEast(start,crate_seq);
     return 1;
   }
   return 0;
 }
 //--------------------------------------------------------
-/// Get Daq Id from Software Id for towers
-int StEmcDecoder::GetDaqIdFromTowerId(int id,int& RDO)
+/*!
+\param TowerId is the software id for towers
+\param RDO is the DAQ id
+*/
+int StEmcDecoder::GetDaqIdFromTowerId(int TowerId,int& RDO)
 {
-  if(id<1 || id >4800) return 0; // 0 is bad
+  if(TowerId<1 || TowerId >4800) return 0; // 0 is bad
   
-  RDO = ReverseOrder[id-1];
+  RDO = ReverseOrder[TowerId-1];
   
   return 1;
 }
 //--------------------------------------------------------
-///Get Software Id from Crate number and position in crate for towers
-int StEmcDecoder::GetTowerIdFromCrate(int Crate,int crate_sequency,
-                                             int& id)
+/*!
+\param crate is the crate number
+\param crate_sequency is the position of the tower inside the crate
+\param TowerId is the software id for towers
+*/
+int StEmcDecoder::GetTowerIdFromCrate(int crate,int crate_sequency, int& TowerId)
 {
-  if(Crate>15 && Crate<31)
+  if(crate>15 && crate<31)
   {
-    int start=Init_Crate[Crate-1];
-    id=Getjose_towerWest(start,crate_sequency);
+    int start=Init_Crate[crate-1];
+    TowerId=Getjose_towerWest(start,crate_sequency);
     return 1;
   }
-  if(Crate>0 && Crate<16)
+  if(crate>0 && crate<16)
   {
-    int start=Init_Crate[Crate-1];
-    id=Getjose_towerEast(start,crate_sequency);
+    int start=Init_Crate[crate-1];
+    TowerId=Getjose_towerEast(start,crate_sequency);
     return 1;
   }
   return 0;
 }
 //--------------------------------------------------------
-///Get Software Id from TDC channel number and position in TDC for towers
-int StEmcDecoder::GetTowerIdFromTDC(int TDC,int tdc_sequency,
-                                             int& id)
+/*!
+\param TDC is the crate number
+\param tdc_sequency is the position of the tower inside the crate
+\param TowerId is the software id for towers
+*/
+int StEmcDecoder::GetTowerIdFromTDC(int TDC,int tdc_sequency, int& TowerId)
 {
   
   int Crate;
@@ -339,30 +345,37 @@ int StEmcDecoder::GetTowerIdFromTDC(int TDC,int tdc_sequency,
   if(Crate>15 && Crate<31)
   {
     int start=Init_Crate[Crate-1];
-    id=Getjose_towerWest(start,crate_sequency);
+    TowerId=Getjose_towerWest(start,crate_sequency);
     return 1;
   }
   if(Crate>0 && Crate<16)
   {
     int start=Init_Crate[Crate-1];
-    id=Getjose_towerEast(start,crate_sequency);
+    TowerId=Getjose_towerEast(start,crate_sequency);
     return 1;
   }
   return 0;
 }
 //--------------------------------------------------------
-///Get SMD fiber and position from detector number (3==SMDE, 4==SMDP), m, e, s
-int StEmcDecoder::GetSmdRDO(int det,int module, int eta, int sub, int& RDO, int& index)
+/*!
+\param detector is detector number (3 = SMDE, 4 = SMDP)
+\param module is the module number
+\param eta is the eta division for towers
+\param sub is the sub division for towers
+\param RDO is the SMD fiber number
+\param index is the position in the fiber
+*/
+int StEmcDecoder::GetSmdRDO(int detector,int module, int eta, int sub, int& RDO, int& index)
 {
   if(module<1 || module >120) return 0;
-  if(det==3)
+  if(detector==3)
   {
     if(eta<1 || eta>150) return 0;
     RDO=SmdeRDO[module-1][eta-1];
     index=SmdeIndex[module-1][eta-1];
     return 1;
   }
-  if(det==4)
+  if(detector==4)
   {
     if(eta<1 || eta>10) return 0;
     if(sub<1 || sub>15) return 0;
@@ -372,10 +385,15 @@ int StEmcDecoder::GetSmdRDO(int det,int module, int eta, int sub, int& RDO, int&
   return 0;
 }
 //--------------------------------------------------------
-///Get SMD detector (3==SMDE, 4==SMDP), m, e, s from RDO and position for SMD
-int StEmcDecoder::GetSmdCoord(int RDO,int index,
-                                     int& detector,
-                                     int& module,int& eta,int& sub)
+/*!
+\param RDO is the SMD fiber number
+\param index is the position in the fiber
+\param detector is detector number (3 = SMDE, 4 = SMDP)
+\param module is the module number
+\param eta is the eta division for towers
+\param sub is the sub division for towers
+*/
+int StEmcDecoder::GetSmdCoord(int RDO,int index, int& detector, int& module,int& eta,int& sub)
 {
   if(RDO<0 || RDO>7) return 0;
   if(index <0 || index >4799) return 0; 
@@ -477,15 +495,21 @@ int StEmcDecoder::GetSmdCoord(int RDO,int index,
   return 0;
 }
 //--------------------------------------------------
-///Get SMD module in a given position in RDO
-int StEmcDecoder::getSmdModule(int RDO, int S_value,int& mod)
+/*!
+\param RDO is the SMD fiber number
+\param S_value is the connector in the SMD crate
+\param module is the module number
+*/
+int StEmcDecoder::getSmdModule(int RDO, int S_value,int& module)
  
 {
-  mod=SmdModules[RDO][S_value-1];
+  module=SmdModules[RDO][S_value-1];
   return 1;
 } 
 //--------------------------------------------------
-///Check dummy positions on SMD crate
+/*!
+\param fiberno is the fiber number in each SMD crate connector
+*/
 int StEmcDecoder::checkDummy(int fiberno)
 {
   int dummy=0;
@@ -494,8 +518,13 @@ int StEmcDecoder::checkDummy(int fiberno)
   return dummy;
 }
 //--------------------------------------------------
-///Get SMD pin number
-int StEmcDecoder::getSmdPin(int det,int half,int fiberno,int& pin)
+/*!
+\param detector is detector number (3 = SMDE, 4 = SMDP)
+\param half is a internal variable
+\param fiberno is the fiber number in each SMD crate connector
+\param pin is the pin number
+*/
+int StEmcDecoder::getSmdPin(int detector,int half,int fiberno,int& pin)
  
 {
   int gap=(fiberno-1)/16;
@@ -510,15 +539,19 @@ int StEmcDecoder::getSmdPin(int det,int half,int fiberno,int& pin)
   return 1;
 }
 //--------------------------------------------------
-///Get SMDP strip
-int StEmcDecoder::getSmdpStrip(int pin,int& etabin,int& phibin)
+/*!
+Converts the pin number in eta and sub divisions for SMDP
+\param pin is the pin number
+\param eta is the eta division for towers
+\param sub is the sub division for towers
+*/
+int StEmcDecoder::getSmdpStrip(int pin,int& eta,int& sub)
 {
-  etabin=(pin-1)%10+1;
-  phibin=15-(pin-1)/10;
+  eta=(pin-1)%10+1;
+  sub=15-(pin-1)/10;
   return 1; // 0 is bad
 }       
 //--------------------------------------------------
-///Print Tower MAP
 void StEmcDecoder::PrintTowerMap(ofstream *out)
 {
   *out <<"TDC channels connections\n";
@@ -541,7 +574,6 @@ void StEmcDecoder::PrintTowerMap(ofstream *out)
   *out <<endl;
 }
 //--------------------------------------------------
-///Print SMD MAP
 void StEmcDecoder::PrintSmdMap(ofstream *out)
 {
   *out <<"Modules connected to SMD crate\n";

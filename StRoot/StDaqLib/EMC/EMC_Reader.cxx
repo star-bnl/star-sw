@@ -1,15 +1,9 @@
-/*!\class EMC_Reader
-\author Subhasis, Herbert Ward and Alexandre A. P. Suaide
-
-Main EMC reader for towers and SMD.
-*/ 
 #include "EMC_Reader.hh"
 #include <assert.h>
 #include "EMC_BarrelReader.hh"
 #include "EMC_SmdReader.hh"
 #define MAX_ADC 0xFFF
 
-///Process EMC (tower+SMD) event
 void EMC_Reader::ProcessEvent(const Bank_EMCP * EmcPTR) 
 {    
   // will process the event to fill the arrays for different detectors.
@@ -48,7 +42,6 @@ void EMC_Reader::ProcessEvent(const Bank_EMCP * EmcPTR)
 
 //EMC_Reader::~EMC_Reader(){}
 
-///EMC_Reader constructor
 EMC_Reader::EMC_Reader(EventReader *er, Bank_EMCP *pEMCP) 
 {
   pBankEMCP = pEMCP; //copy into class data member for use by other methods
@@ -69,8 +62,6 @@ EMC_Reader::EMC_Reader(EventReader *er, Bank_EMCP *pEMCP)
   
   ProcessEvent(pBankEMCP); 
 }
-
-///Return number of valid hits on towers
 int EMC_Reader::NTowerHits()
 {
   if(mTowerPresent) 
@@ -85,8 +76,6 @@ int EMC_Reader::NTowerHits()
   }
   else return 0;
 }
-
-///Return number of valid hits on SMD
 int EMC_Reader::NSmdHits()
 {
   if(mSmdPresent) 
@@ -102,7 +91,6 @@ int EMC_Reader::NSmdHits()
   else return 0;
 }
 
-///Get ADC value for one tower with given module, eta and sub
 int EMC_Reader::getTowerADC(int module,int eta, int sub,unsigned short& ADC )
 {
   //
@@ -125,7 +113,6 @@ int EMC_Reader::getTowerADC(int module,int eta, int sub,unsigned short& ADC )
   else return 0; // 0 is bad 
 }
 
-///Get ADC value for one tower with given Daq Id
 int EMC_Reader::getTowerADC(int index, unsigned short& ADC )
 {
   //
@@ -144,7 +131,6 @@ int EMC_Reader::getTowerADC(int index, unsigned short& ADC )
   else return 0;
 }
 
-///Get ADC for SMDE with given module and stip number
 int EMC_Reader::getSMDE_ADC(int modInd,int stripInd,unsigned short& ADC )
 {
   //
@@ -167,7 +153,6 @@ int EMC_Reader::getSMDE_ADC(int modInd,int stripInd,unsigned short& ADC )
   else return 0;
 }
 
-///Get ADC for SMDP with given module, eta and sub
 int EMC_Reader::getSMDP_ADC(int modInd,int binInd,int stripInd,unsigned short& ADC )
 {
   //
@@ -190,7 +175,6 @@ int EMC_Reader::getSMDP_ADC(int modInd,int binInd,int stripInd,unsigned short& A
   else return 0;
 }
   
-///Get SMD ADC for a given index and fiber (RDO) number
 int EMC_Reader::getSMD_ADC(int index, int fiber,unsigned short& ADC )
 {
   // index and fiber is index starting with 0
@@ -210,7 +194,6 @@ int EMC_Reader::getSMD_ADC(int index, int fiber,unsigned short& ADC )
   else return 0;
 }
 
-///Get SMD time bin (capacitor number) for a given fiber (RDO)
 int EMC_Reader::getSMD_TIMEBIN(int fiber, unsigned int& TimeBin)
 {
   if(mSmdPresent) 

@@ -1,21 +1,27 @@
-//*-- Author : Alexandre Suaide
-// 
-/*    
-      for Towers
-      0 <= RDO (daq_id)            <= 4799
-      1 <= Crate                   <= 30
-      0 <= Crate_sequency          <= 159
-      1 <= crate board             <= 5
-      0 <= position on board       <= 31
-      0 <= TDC                     <= 29
-      0 <= TDC channels            <= 29
-      0 <= tdc sequency on channel <= 159
-      1 <= Tower (jose) id         <= 4800 
-      
-      for SMD
-      0 <= RDO             <= 7
-      0 <= index           <= 4799
-*/
+/*!\class StEmcDecoder
+\author Alexandre A. P. Suaide
+
+This class makes the decodification from EMC daq
+and electronics scheme to software scheme. This class
+has methods to decode the numbers in both directions and
+it works for SMD and towers.<br><br>
+
+The current id's definitions are:<br>
+      - for Towers
+            - 0 <= RDO (daq_id)            <= 4799
+            - 1 <= Crate                   <= 30
+            - 0 <= Crate_sequency          <= 159
+            - 1 <= crate board             <= 5
+            - 0 <= position on board       <= 31
+            - 0 <= TDC                     <= 29
+            - 0 <= TDC channels            <= 29
+            - 0 <= tdc sequency on channel <= 159
+            - 1 <= Tower (jose) id         <= 4800       
+      - for SMD
+            - 0 <= RDO             <= 7
+            - 0 <= index           <= 4799
+            
+*/ 
 #include <iostream.h>
 #include <iostream.h>
 #include <fstream.h>
@@ -37,34 +43,34 @@ class StEmcDecoder
     int       SmdeRDO[120][150],SmdpRDO[120][10][15];
     int       SmdeIndex[120][150],SmdpIndex[120][10][15];
     
-    int       Getjose_towerWest(int,int);
-    int       Getjose_towerEast(int,int);
-    int       getSmdModule(int,int,int&);
-    int       checkDummy(int);
-    int       getSmdPin(int,int,int,int&);
-    int       getSmdpStrip(int,int&,int&);
+    int       Getjose_towerWest(int,int);//!<Get Software Id for West size for towers
+    int       Getjose_towerEast(int,int);//!<Get Software Id for East side for towers
+    int       getSmdModule(int,int,int&);//!<Get SMD module in a given position in RDO
+    int       checkDummy(int);//!<Check dummy positions on SMD crate
+    int       getSmdPin(int,int,int,int&);//!<Get SMD pin number
+    int       getSmdpStrip(int,int&,int&);//!<Get SMDP strip
     
-    void      Init(unsigned int,unsigned int);
+    void      Init(unsigned int,unsigned int);//!< Init method
         
   public:
-              StEmcDecoder(unsigned int date=20010101,unsigned int time=000000);
-    virtual   ~StEmcDecoder();
+              StEmcDecoder(unsigned int date=20010101,unsigned int time=000000);//!< StEmcDecoder constructor
+    virtual   ~StEmcDecoder();//!< StEmcDecoder destructor
 
-    int       GetTowerIdFromDaqId(int,int&);
-    int       GetDaqIdFromTowerId(int,int&);
-    int       GetTowerIdFromCrate(int,int,int&);
-    int       GetTowerIdFromTDC(int,int,int&);
-    int       GetTowerCrateFromDaqId(int,int&,int&);
-    int       GetTowerCrateFromTDC(int,int&);
-    int       GetTowerTDCFromCrate(int,int&);
-    int       GetTowerTDCFromDaqId(int,int&);
-    int       GetTowerBin(int,int&,int&,int&);
+    int       GetTowerIdFromDaqId(int,int&);//!<Get Sofwtare Id from Daq Id for towers
+    int       GetDaqIdFromTowerId(int,int&);//!< Get Daq Id from Software Id for towers
+    int       GetTowerIdFromCrate(int,int,int&);//!<Get Software Id from Crate number and position in crate for towers
+    int       GetTowerIdFromTDC(int,int,int&);//!<Get Software Id from TDC channel number and position in TDC for towers
+    int       GetTowerCrateFromDaqId(int,int&,int&);//!< Get crate number from Daq Id for towers
+    int       GetTowerCrateFromTDC(int,int&);//!<Get crate number from TDC channel for towers
+    int       GetTowerTDCFromCrate(int,int&);//!< Get TDC channel from crate number for towers
+    int       GetTowerTDCFromDaqId(int,int&);//!< Get TDC channel from Daq Id for towers
+    int       GetTowerBin(int,int&,int&,int&);//!<Transition from environment rid to m,e,s for towers
     
-    int       GetSmdCoord(int,int,int&,int&,int&,int&);
-    int       GetSmdRDO(int,int,int,int,int&,int&);
+    int       GetSmdCoord(int,int,int&,int&,int&,int&);//!<Get SMD detector (3==SMDE, 4==SMDP), m, e, s from RDO and position for SMD
+    int       GetSmdRDO(int,int,int,int,int&,int&);//!<Get SMD fiber and position from detector number (3==SMDE, 4==SMDP), m, e, s
     
-    void      PrintTowerMap(ofstream *);
-    void      PrintSmdMap(ofstream *);
+    void      PrintTowerMap(ofstream *);//!<Print Tower MAP
+    void      PrintSmdMap(ofstream *);//!<Print SMD MAP
     
 };
 #endif
