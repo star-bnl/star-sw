@@ -4,7 +4,7 @@
  */
 /*********************************************************
  *
- * $Id: StPmdGeom.h,v 1.6 2004/03/11 11:30:41 subhasis Exp $
+ * $Id: StPmdGeom.h,v 1.7 2004/03/23 08:49:15 subhasis Exp $
  *
  * Author: Dipak Mishra
  *
@@ -16,8 +16,8 @@
  *************************************************************
  *
  * $Log: StPmdGeom.h,v $
- * Revision 1.6  2004/03/11 11:30:41  subhasis
- * Board status based mapping added
+ * Revision 1.7  2004/03/23 08:49:15  subhasis
+ * biardDetail put by had
  *
  * Revision 1.6 
  * Mapping modified according to final mounting of FEE: Dipak
@@ -54,8 +54,8 @@ class StPmdGeom {
   static Int_t imirr[192];
   static Int_t jmirr[192] ;
   Int_t m_RunNo;  
-  FILE *infile;
-  FILE *fp1;
+//  FILE *infile;
+//  FILE *fp1;
   Float_t mconst1;             //! constant used for calculation
   Float_t mconst2;             //! constant used for calculation
   Float_t mcell_rad;           //! cell radius
@@ -76,7 +76,7 @@ class StPmdGeom {
   void readBoardDetail(Int_t runno1);      // function for defining constant values
 
 
-  Int_t ChainMapping(Int_t&,Int_t&,Int_t&,Int_t&,Int_t&);
+  Int_t ChainMapping(Int_t&,Int_t&,Int_t&,Int_t&,Int_t&,Int_t&);
 
   void chain1(int&,int&,int&,int&);
   void chain2(int&,int&,int&,int&);
