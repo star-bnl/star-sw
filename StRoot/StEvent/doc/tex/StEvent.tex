@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.11 1999/12/13 20:16:46 ullrich Exp $
+% $Id: StEvent.tex,v 2.12 2000/01/05 17:44:53 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -143,8 +143,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.11 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/13 20:16:46 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.12 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/05 17:44:53 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -168,8 +168,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.11 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/13 20:16:46 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.12 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/05 17:44:53 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -177,17 +177,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.11 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/13 20:16:46 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.12 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/05 17:44:53 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.11 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/13 20:16:46 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.12 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/05 17:44:53 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.11 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/13 20:16:46 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.12 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/05 17:44:53 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -202,8 +202,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.11 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/12/13 20:16:46 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.12 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/01/05 17:44:53 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
@@ -1447,8 +1447,8 @@ them by value or by pointer. There are:
     handled analytically. This makes it very useful to find the
     distance-of-closest approach to a given point, to extrapolate the
     path of the track and to easily get the 3-momentum at every point
-The class \texttt{StDedxPidTraits} gives you the mean and sigma dE/dx,
-the number of points used, and the method which was applied to
+    along the trajectory.
+    
     At the moment there is actually only one concrete class
     implemented and that is -- you guessed it -- the helix model
     (\texttt{StHelixModel}). This is where all the calculations (if
@@ -1722,7 +1722,7 @@ MyPID::operator() (const StTrack& track,
                    const StSPtrVecTrackPidTraits& traits)
 {
    StDedxPidTraits* tpcPid = 0;
-cout << tpcDedx.traits()->sigma() << endl;
+   StDedxPidTraits* svtPid = 0;
 
    for (int i=0; i<traits.size(); i++) {
         StDedxPidTraits *pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
@@ -1986,7 +1986,7 @@ const int irow = 24;
 \end{figure}
 
 The hits are stored in a tree-like structure organized
-has up to 7 wafers. Consequently the \texttt{StSvtHit} class provides method to
+according to their ``natural'' location, i.e. sector- and row-wise.
 The collection you obtain (by pointer) via
 \texttt{StEvent::tpcHitCollection()} holds a list of sectors
 (\texttt{StTpcSectorHitCollection}) which itself holds a list of padrows
@@ -2032,6 +2032,45 @@ const int iladder  = 2;
 \index{sectors}
 \index{planes}
 cout << "layer " << ilayer << " contains "
+     << event->svtHitCollection()->layer(ilayer)->numberOfHits()
+version.  However, because of the different detector geometry the hits
+are stored according to planes (20) and then sectors (6). This is
+depicted in Fig.~\ref{fig:ftpc}. Other than the TPC hit the FTPC hit
+event->svtHitCollection()->layer(ilayer)->ladder(iladder)->wafer(iwafer).hits();
+(\texttt{timebinsInHit()}) but no method to return the number of
+cout << "layer " << ilayer << ", ladder " << iladder
+should also read the warnings in section
+\ref{sec:conventionsNumbering} on the numbering schemes.
+
+\begin{figure}[htb]
+    \begin{center}
+        \includegraphics{ftpc.eps}
+    assert(theHits[i]->layer() == ilayer);
+        \label{fig:ftpc}
+    \end{center}
+\end{figure}
+The following is the equivalent example to the one above but for the FTPC:
+\begin{verbatim}
+const int iplane = 11;
+const int isec   = 3;
+\index{SSD hits} \index{StSsdHit} \index{ladder} \index{wafer} The SSD
+consist of one layer of 20 ladders with 16 wafers each.  The
+     << " hits" << endl;
+
+StSPtrVecFtpcHit& theHits =
+event->ftpcHitCollection()->plane(iplane)->sector(isec)->hits();
+member functions to return the strip number and the cluster size
+of the p and n side, respectively.  The SSD hits are stored in a tree
+     << theHits.size() << " hits" << endl;
+layer collection (there's only one).  The hits are stored per wafer.
+for (int i=0; i<theHits.size(); i++) {
+    cout << theHits[i]->position() << endl;
+    cout << theHits[i]->charge() << endl;
+    cout << theHits[i]->padsInHit() << endl << endl;
+    cout << theHits[i]->timebinsInHit() << endl << endl;
+    assert(theHits[i]->plane() == iplane);
+    assert(theHits[i]->sector() == isec);
+}
 \end{verbatim}
 
 \subsubsection{SVT hits}
@@ -2074,7 +2113,13 @@ const int iladder  = 10; // 11th ladder
 const int iwafer   = 3;  // 4th layer
 
 cout << "barrel " << ibarrel << " contains "
+     << event->svtHitCollection()->barrel(ibarrel)->numberOfHits()
+     << " hits" << endl;
 
+StSPtrVecSvtHit& theHits =
+event->svtHitCollection()->barrel(ibarrel)->ladder(iladder)->wafer(iwafer).hits();
+
+cout << "barrel " << ibarrel << ", ladder " << iladder
      << ", wafer " << iwafer << " contains "
      << theHits.size() << " hits" << endl;
 
@@ -2115,13 +2160,6 @@ StSPtrVecSsdHit& theHits =
 event->ssdHitCollection()->ladder(iladder)->wafer(iwafer).hits();
 
 cout << "ladder " << iladder
-\begin{figure}[htb]
-    \begin{center}
-        \includegraphics[width=0.9\textwidth]{cartoon7.eps}
-        \caption{Mechanisms are the means whereby objects collaborate
-            to provide some higher level behaviour.}
-    \end{center}
-\end{figure}
      << ", wafer " << iwafer << " contains "
      << theHits.size() << " hits" << endl;
 
@@ -2281,7 +2319,7 @@ referring class reference.
 
 Not every member function listed is explained in detail since many are
 trivial and their names are chosen such that one can easily figure out
-    \texttt{np}, dE/dx mean \texttt{dedx}, and sigma \texttt{sig}.
+what they are all about.  Macros and \texttt{Inline} declarations are
 omitted throughout the documentation and so is the \texttt{virtual}
 keyword.  The state-of-the-art reference is always the class
 definition in the header file.
@@ -2290,8 +2328,8 @@ definition in the header file.
 \item[Summary] Central Trigger Barrel (CTB) data.
             a common structure and a common behavior.}
     \end{center}
-    \verb+Float_t sigma() const;+\\
-    Returns the sigma of the dE/dx value.
+\end{figure}
+\clearpage
 
 \label{sec:StContainers}
 \begin{Entry}
@@ -2413,6 +2451,11 @@ definition in the header file.
     \verb+StEmcSoftwareMonitor();+\\
 \end{Entry}
 \clearpage
+
+
+\subsection{StEnumerations}
+\index{StEnumerations|textbf}
+\label{sec:StEnumerations}
 \begin{Entry}
 \item[Summary] Header file which contains all enumeration types used
     in \StEvent.
@@ -3283,26 +3326,81 @@ definition in the header file.
     \verb+StRunSummary();+\\
     \verb+StRunSummary(const dst_run_summary_st&);+\\
 \item[Public Member\\ Functions]
-    \verb+         const StThreeVectorF&,+\\
-    \verb+         ULong_t, Float_t, UChar_t = 0);+\\
+    \verb+ULong_t numberOfEvents() const;+\\
+    \verb+ULong_t numberOfProcessedEvents() const;+\\
     \verb+Long_t startTime() const;+\\
     \verb+Long_t stopTime() const;+\\
-    \verb+ULong_t centralStripNSide() const;+\\
-    Runs from 0--767.
+    \verb+Float_t cpuSeconds() const;+\\
+    \verb+Float_t averageBeamPolarization(StBeamDirection, StBeamPolarizationAxis) const;+\\
     \verb+Float_t averageLuminosity() const;+\\
+    \verb+Float_t meanEta() const;+\\
+    \verb+Float_t rmsEta() const;+\\
     \verb+Float_t meanPt() const;+\\
-
+    \verb+Float_t rmsPt() const;+\\
     \verb+Float_t meanNumberOfVertices() const;+\\
-    Runs from 0--767.
-    
-    
-
     \verb+Float_t rmsNumberOfVertices() const;+\\
     \verb+Float_t meanMultiplicity(StDetectorId) const;+\\
-    \verb+ULong_t matchingQualityFactor() const;+\\
     \verb+Float_t rmsMultiplicity(StDetectorId) const;+\\
     \verb+void setNumberOfEvents(ULong_t);+\\
     \verb+void setNumberOfProcessedEvents(ULong_t);+\\
+    \verb+void setStartTime(Long_t);+\\
+    \verb+void setStopTime(Long_t);+\\
+    \verb+void setCpuSeconds(Float_t);+\\
+    \verb+void setAverageBeamPolarization(StBeamDirection, StBeamPolarizationAxis, Float_t);+\\
+    \verb+void setAverageLuminosity(Float_t);+\\
+    \verb+void setMeanEta(Float_t);+\\
+    \verb+void setRmsEta(Float_t);+\\
+    \verb+void setMeanPt(Float_t);+\\
+    \verb+void setRmsPt(Float_t);+\\
+    \verb+void setMeanNumberOfVertices(Float_t);+\\
+    \verb+void setRmsNumberOfVertices(Float_t);+\\
+    \verb+void setMeanMultiplicity(StDetectorId, Float_t);+\\
+    \verb+void setRmsMultiplicity(StDetectorId, Float_t);+\\
+\end{Entry}
+\clearpage
+
+
+\subsection{StSoftwareMonitor}
+\index{StSoftwareMonitor|textbf}
+\label{sec:StSoftwareMonitor}
+\begin{Entry}
+\item[Summary]
+\item[Synopsis]
+    \verb+#include "StSoftwareMonitor.h"+\\
+    \verb+class StSoftwareMonitor;+\\
+\item[Description]
+\item[Related Classes]
+\item[Public\\ Constructors]
+    \verb+StSoftwareMonitor();+\\
+    \verb+StSoftwareMonitor(const dst_mon_soft_tpc_st*,+\\
+    \verb+                  const dst_mon_soft_svt_st*,+\\
+    \verb+                  const dst_mon_soft_ftpc_st*,+\\
+    \verb+                  const dst_mon_soft_emc_st*,+\\
+    \verb+                  const dst_mon_soft_ctb_st*,+\\
+    \verb+                  const dst_mon_soft_rich_st*,+\\
+    \verb+                  const dst_mon_soft_glob_st*,+\\
+    \verb+                  const dst_mon_soft_l3_st*);+\\
+    \verb+StSoftwareMonitor& operator=(const StSoftwareMonitor&);+\\
+    \verb+StSoftwareMonitor(const StSoftwareMonitor&);+\\
+\item[Public Member\\ Functions]
+    \verb+StTpcSoftwareMonitor* tpc();+\\
+    \verb+const StTpcSoftwareMonitor* tpc() const;+\\
+    \verb+StSvtSoftwareMonitor* svt();+\\
+    \verb+const StSvtSoftwareMonitor* svt() const;+\\
+    \verb+StFtpcSoftwareMonitor* ftpc();+\\
+    \verb+const StFtpcSoftwareMonitor* ftpc() const;+\\
+    \verb+StEmcSoftwareMonitor* emc();+\\
+    \verb+const StEmcSoftwareMonitor* emc() const;+\\
+    \verb+StRichSoftwareMonitor* rich();+\\
+    \verb+const StRichSoftwareMonitor* rich() const;+\\
+    \verb+StCtbSoftwareMonitor* ctb();+\\
+    \verb+const StCtbSoftwareMonitor* ctb() const;+\\
+    \verb+StGlobalSoftwareMonitor* global();+\\
+    \verb+const StGlobalSoftwareMonitor* global() const;+\\
+    \verb+StL3SoftwareMonitor* l3();+\\
+    \verb+const StL3SoftwareMonitor* l3() const;+\\
+    \verb+void setTpcSoftwareMonitor(StTpcSoftwareMonitor*);+\\
+    \verb+void setSvtSoftwareMonitor(StSvtSoftwareMonitor*);+\\
     \verb+void setFtpcSoftwareMonitor(StFtpcSoftwareMonitor*);+\\
     \verb+void setEmcSoftwareMonitor(StEmcSoftwareMonitor*);+\\
     \verb+void setRichSoftwareMonitor(StRichSoftwareMonitor*);+\\
