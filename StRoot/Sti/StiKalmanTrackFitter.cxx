@@ -41,7 +41,7 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
   StiKTNBidirectionalIterator source;
   bool direction = (trackingDirection==fitDirection);
   double chi2;
-  int status;
+  int status = 0;
   if (direction) {
     first = track->begin();
     last  = track->end();
@@ -83,7 +83,7 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
     pNode = targetNode;
     //cout<<"=="<<endl;
   ENDLB:
-    cout << Form("%5d ",status) << StiKalmanTrackNode::Comment() << endl;
+    if (debug()) cout << Form("%5d ",status) << StiKalmanTrackNode::Comment() << endl;
   }
 }
 
