@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.h,v 2.3 1999/11/01 12:45:12 ullrich Exp $
+ * $Id: StTrackDetectorInfo.h,v 2.4 2000/04/20 13:30:02 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.h,v $
- * Revision 2.3  1999/11/01 12:45:12  ullrich
- * Modified unpacking of point counter
+ * Revision 2.4  2000/04/20 13:30:02  ullrich
+ * Added new methods and removed inconsistencies in numberOfPoints().
  *
  * Revision 2.3  1999/11/01 12:45:12  ullrich
  * Modified unpacking of point counter
@@ -44,8 +44,12 @@ public:
 
     const StThreeVectorF& firstPoint() const;
     const StThreeVectorF& lastPoint() const;
+
     UShort_t              numberOfPoints() const;
     UShort_t              numberOfPoints(StDetectorId) const;
+    
+    UShort_t              numberOfReferencedPoints() const;
+    UShort_t              numberOfReferencedPoints(StDetectorId) const;
     
     StPtrVecHit           hits(StDetectorId) const;
     StPtrVecHit           hits(StHitFilter&) const;
