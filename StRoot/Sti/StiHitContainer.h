@@ -231,8 +231,8 @@ inline vector<StiHit*>& StiHitContainer::getHits(double refangle, double positio
 /// Get all hits from the specified detector component
 inline vector<StiHit*>& StiHitContainer::getHits(const StiDetector* layer)
 {
-    _key.refangle = layer->getPlacement()->getCenterRefAngle();
-    _key.position = layer->getPlacement()->getCenterRadius();
+    _key.refangle = layer->getPlacement()->getNormalRefAngle();
+    _key.position = layer->getPlacement()->getLayerRadius();
     return _map[_key].theHitVec;
 }
 
