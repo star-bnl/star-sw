@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StRichHit.h,v 2.6 2003/09/02 17:58:05 perev Exp $
+ * $Id: StRichHit.h,v 2.7 2004/07/15 16:36:25 ullrich Exp $
  *
  * Author: Brian Lasiuk, May 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StRichHit.h,v $
+ * Revision 2.7  2004/07/15 16:36:25  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.6  2003/09/02 17:58:05  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -83,8 +86,6 @@ public:
     unsigned int flags() const;
 
 protected:
-    StObject* clone() const;
-    
     StThreeVectorF mLocal;
     StThreeVectorF mLError;
     StThreeVectorF mInternal;

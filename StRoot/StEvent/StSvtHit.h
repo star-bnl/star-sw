@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSvtHit.h,v 2.10 2003/01/08 19:43:11 perev Exp $
+ * $Id: StSvtHit.h,v 2.11 2004/07/15 16:36:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.h,v $
+ * Revision 2.11  2004/07/15 16:36:25  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.10  2003/01/08 19:43:11  perev
  * CleanUp
  *
@@ -83,12 +86,11 @@ public:
 
 protected:
     static StMemoryPool mPool;  //!
-    StObject* clone() const;
-    float mPeak; 
- private:
+    float mPeak;
+    
+private:
     enum {mNBarrel=3};
     ClassDef(StSvtHit,1)
-
 };
 
 inline unsigned int

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.12 2004/03/30 15:59:08 calderon Exp $
+ * $Id: StHit.cxx,v 2.13 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.13  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.12  2004/03/30 15:59:08  calderon
  * Added method to set mFitFlag (new chain no longer uses tables, so must set
  * this by hand).
@@ -58,7 +61,7 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.12 2004/03/30 15:59:08 calderon Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.13 2004/07/15 16:36:24 ullrich Exp $";
 
 ClassImp(StHit)
 
@@ -83,9 +86,6 @@ StHit::StHit(const StThreeVectorF& p,
 
 StHit::~StHit() { /* noop */ }
 
-StObject*
-StHit::clone() const { return new StHit(*this); }
-   
 int
 StHit::operator==(const StHit& h) const
 {

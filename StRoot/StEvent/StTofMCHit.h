@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofMCHit.h,v 2.4 2003/09/02 17:58:06 perev Exp $
+ * $Id: StTofMCHit.h,v 2.5 2004/07/15 16:36:25 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, April 2001 
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofMCHit.h,v $
+ * Revision 2.5  2004/07/15 16:36:25  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.4  2003/09/02 17:58:06  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -46,7 +49,6 @@ public:
     void  setGId(Int_t);
 
 protected:
-    StObject* clone() const;
     Int_t     mTrkId;
     Int_t     mGId;
 

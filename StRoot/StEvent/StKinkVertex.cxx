@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StKinkVertex.cxx,v 2.8 2001/07/13 16:25:20 perev Exp $
+ * $Id: StKinkVertex.cxx,v 2.9 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StKinkVertex.cxx,v $
+ * Revision 2.9  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.8  2001/07/13 16:25:20  perev
  * last static array fixed
  *
@@ -49,7 +52,7 @@ using std::copy;
 
 ClassImp(StKinkVertex)
 
-static const char rcsid[] = "$Id: StKinkVertex.cxx,v 2.8 2001/07/13 16:25:20 perev Exp $";
+static const char rcsid[] = "$Id: StKinkVertex.cxx,v 2.9 2004/07/15 16:36:24 ullrich Exp $";
 
 StKinkVertex::StKinkVertex()
 {
@@ -85,9 +88,6 @@ StKinkVertex::StKinkVertex(const dst_vertex_st& vtx, const dst_tkf_vertex_st& kv
 }
 
 StKinkVertex::~StKinkVertex() {/* noop */}
-
-StObject*
-StKinkVertex::clone() const { return new StKinkVertex(*this); }
 
 StVertexId
 StKinkVertex::type() const { return kKinkVtxId; }

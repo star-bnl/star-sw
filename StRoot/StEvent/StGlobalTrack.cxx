@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.cxx,v 2.2 2001/03/24 03:34:47 perev Exp $
+ * $Id: StGlobalTrack.cxx,v 2.3 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.cxx,v $
+ * Revision 2.3  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.2  2001/03/24 03:34:47  perev
  * clone() -> clone() const
  *
@@ -26,7 +29,7 @@
 
 ClassImp(StGlobalTrack)
 
-static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 2.2 2001/03/24 03:34:47 perev Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cxx,v 2.3 2004/07/15 16:36:24 ullrich Exp $";
 
 StGlobalTrack::StGlobalTrack() {/* noop */}
 
@@ -43,9 +46,6 @@ StGlobalTrack::operator=(const StGlobalTrack& track)
 }
 
 StGlobalTrack::~StGlobalTrack() {/* noop */}
-
-StObject*
-StGlobalTrack::clone() const { return new StGlobalTrack(*this); }
 
 StTrackType
 StGlobalTrack::type() const { return global; }

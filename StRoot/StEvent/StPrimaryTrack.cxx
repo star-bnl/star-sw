@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryTrack.cxx,v 2.6 2001/05/30 17:45:54 perev Exp $
+ * $Id: StPrimaryTrack.cxx,v 2.7 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryTrack.cxx,v $
+ * Revision 2.7  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.6  2001/05/30 17:45:54  perev
  * StEvent branching
  *
@@ -37,7 +40,7 @@
 
 ClassImp(StPrimaryTrack)
 
-static const char rcsid[] = "$Id: StPrimaryTrack.cxx,v 2.6 2001/05/30 17:45:54 perev Exp $";
+static const char rcsid[] = "$Id: StPrimaryTrack.cxx,v 2.7 2004/07/15 16:36:24 ullrich Exp $";
 
 StPrimaryTrack::StPrimaryTrack() : mVertex(0) {/* noop */}
 
@@ -61,9 +64,6 @@ StPrimaryTrack::operator=(const StPrimaryTrack& track)
 }
 
 StPrimaryTrack::~StPrimaryTrack() {/* noop */}
-
-StObject*
-StPrimaryTrack::clone() const { return new StPrimaryTrack(*this); }
 
 StTrackType
 StPrimaryTrack::type() const { return primary; }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.cxx,v 2.10 2004/01/13 21:01:08 fisyak Exp $
+ * $Id: StTpcHit.cxx,v 2.11 2004/07/15 16:36:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.cxx,v $
+ * Revision 2.11  2004/07/15 16:36:25  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.10  2004/01/13 21:01:08  fisyak
  * Add Truth and Quality information from simulation
  *
@@ -49,7 +52,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.10 2004/01/13 21:01:08 fisyak Exp $";
+static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.11 2004/07/15 16:36:25 ullrich Exp $";
 
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
 
@@ -108,9 +111,6 @@ StTpcHit::StTpcHit(const dst_point_st& pt)
 }
 
 StTpcHit::~StTpcHit() {/* noop */}
-
-StObject*
-StTpcHit::clone() const { return new StTpcHit(*this); }
 
 unsigned int
 StTpcHit::padsInHit() const

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.17 2003/10/31 16:00:04 ullrich Exp $
+ * $Id: StTrack.h,v 2.18 2004/07/15 16:36:26 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
+ * Revision 2.18  2004/07/15 16:36:26  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.17  2003/10/31 16:00:04  ullrich
  * Added setKey() method.
  *
@@ -160,7 +163,6 @@ protected:
 
     StSPtrVecTrackPidTraits mPidTraitsVec;
 
-    virtual StObject*       clone() const = 0;
     ClassDef(StTrack,3)
 };
 #endif

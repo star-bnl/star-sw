@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcPoint.h,v 2.5 2002/02/22 22:56:47 jeromel Exp $
+ * $Id: StEmcPoint.h,v 2.6 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Akio Ogawa, Mar 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEmcPoint.h,v $
+ * Revision 2.6  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.5  2002/02/22 22:56:47  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -98,7 +101,6 @@ protected:
     StPtrVecTrack      mTracks;
     
     int getDetId(const StDetectorId) const;
-    StObject* clone() const;
     ClassDef(StEmcPoint,1)
 };
 #endif

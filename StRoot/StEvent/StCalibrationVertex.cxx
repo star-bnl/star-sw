@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StCalibrationVertex.cxx,v 2.1 2001/11/10 23:52:13 ullrich Exp $
+ * $Id: StCalibrationVertex.cxx,v 2.2 2004/07/15 16:36:23 ullrich Exp $
  *
  * Author: Thomas Ullrich, Nov 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StCalibrationVertex.cxx,v $
+ * Revision 2.2  2004/07/15 16:36:23  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.1  2001/11/10 23:52:13  ullrich
  * Initial Revision.
  *
@@ -23,7 +26,7 @@ using std::copy;
 
 ClassImp(StCalibrationVertex)
 
-static const char rcsid[] = "$Id: StCalibrationVertex.cxx,v 2.1 2001/11/10 23:52:13 ullrich Exp $";
+static const char rcsid[] = "$Id: StCalibrationVertex.cxx,v 2.2 2004/07/15 16:36:23 ullrich Exp $";
 
 StCalibrationVertex::StCalibrationVertex()
 {
@@ -59,7 +62,3 @@ StCalibrationVertex::addDaughter(StTrack*) { /* noop */ }
 
 void
 StCalibrationVertex::removeDaughter(StTrack*) { /* noop */ }
-
-StObject*
-StCalibrationVertex::clone() const { return new StCalibrationVertex(*this); }
-

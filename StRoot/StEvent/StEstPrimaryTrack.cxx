@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstPrimaryTrack.cxx,v 2.2 2003/10/30 20:07:32 perev Exp $
+ * $Id: StEstPrimaryTrack.cxx,v 2.3 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Mar 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstPrimaryTrack.cxx,v $
+ * Revision 2.3  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.2  2003/10/30 20:07:32  perev
  * Check of quality added
  *
@@ -24,7 +27,7 @@
 
 ClassImp(StEstPrimaryTrack)
 
-static const char rcsid[] = "$Id: StEstPrimaryTrack.cxx,v 2.2 2003/10/30 20:07:32 perev Exp $";
+static const char rcsid[] = "$Id: StEstPrimaryTrack.cxx,v 2.3 2004/07/15 16:36:24 ullrich Exp $";
 
 StEstPrimaryTrack::StEstPrimaryTrack() {/* noop */}
 
@@ -46,9 +49,6 @@ StEstPrimaryTrack::operator=(const StEstPrimaryTrack& track)
 }
 
 StEstPrimaryTrack::~StEstPrimaryTrack() {/* noop */}
-
-StObject*
-StEstPrimaryTrack::clone() const { return new StEstPrimaryTrack(*this); }
 
 StTrackType
 StEstPrimaryTrack::type() const { return estPrimary; }

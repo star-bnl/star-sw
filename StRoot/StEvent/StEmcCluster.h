@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcCluster.h,v 2.7 2003/09/02 17:58:05 perev Exp $
+ * $Id: StEmcCluster.h,v 2.8 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCluster.h,v $
+ * Revision 2.8  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.7  2003/09/02 17:58:05  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -87,7 +90,6 @@ private:
     StPtrVecEmcCluster mNeighbors;
     StPtrVecTrack      mTracks;
     
-    StObject* clone() const;
     ClassDef(StEmcCluster,1)
 };
 

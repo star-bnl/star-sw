@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPrimaryTrack.h,v 2.5 2002/02/22 22:56:49 jeromel Exp $
+ * $Id: StPrimaryTrack.h,v 2.6 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryTrack.h,v $
+ * Revision 2.6  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.5  2002/02/22 22:56:49  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -49,9 +52,6 @@ public:
     const StVertex*  vertex() const;
 
     void setVertex(StVertex*);
-
-protected:
-    StObject* clone() const;
     
 private:
 //  StPrimaryVertex*         	mVertex; 	//$LINK

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.cxx,v 2.8 2003/04/30 20:37:08 perev Exp $
+ * $Id: StV0Vertex.cxx,v 2.9 2004/07/15 16:36:26 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.cxx,v $
+ * Revision 2.9  2004/07/15 16:36:26  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.8  2003/04/30 20:37:08  perev
  * Warnings cleanup. Modified lines marked VP
  *
@@ -51,7 +54,7 @@ using std::copy;
 
 ClassImp(StV0Vertex)
 
-static const char rcsid[] = "$Id: StV0Vertex.cxx,v 2.8 2003/04/30 20:37:08 perev Exp $";
+static const char rcsid[] = "$Id: StV0Vertex.cxx,v 2.9 2004/07/15 16:36:26 ullrich Exp $";
 
 StV0Vertex::StV0Vertex()
 {
@@ -83,9 +86,6 @@ StV0Vertex::StV0Vertex(const dst_vertex_st& vtx, const dst_v0_vertex_st& v0vtx) 
 }
 
 StV0Vertex::~StV0Vertex() { /* noop */ }
-
-StObject*
-StV0Vertex::clone() const { return new StV0Vertex(*this); }
 
 StVertexId
 StV0Vertex::type() const { return kV0VtxId; }

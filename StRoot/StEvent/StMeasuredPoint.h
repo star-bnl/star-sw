@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StMeasuredPoint.h,v 2.6 2002/02/22 22:56:49 jeromel Exp $
+ * $Id: StMeasuredPoint.h,v 2.7 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StMeasuredPoint.h,v $
+ * Revision 2.7  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.6  2002/02/22 22:56:49  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -60,8 +63,6 @@ public:
     
 protected:
     StThreeVectorF mPosition;
-
-    virtual StObject* clone() const = 0;
     ClassDef(StMeasuredPoint,1)
 };
 #endif

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StKinkVertex.h,v 2.7 2002/02/22 22:56:48 jeromel Exp $
+ * $Id: StKinkVertex.h,v 2.8 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StKinkVertex.h,v $
+ * Revision 2.8  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.7  2002/02/22 22:56:48  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -110,7 +113,6 @@ protected:
     StThreeVectorF mParentMomentum;
     StThreeVectorF mDaughterMomentum;
 
-    StObject* clone() const;
     ClassDef(StKinkVertex,2)
 };
 #endif

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofHit.h,v 2.9 2004/02/05 17:59:44 ullrich Exp $
+ * $Id: StTofHit.h,v 2.10 2004/07/15 16:36:25 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, Dec 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofHit.h,v $
+ * Revision 2.10  2004/07/15 16:36:25  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.9  2004/02/05 17:59:44  ullrich
  * Changed $LINK to StLink mechanism and add new member.
  *
@@ -102,7 +105,6 @@ public:
     void setParticleHypothesis(StParticleDefinition*);
 
  protected:
-    StObject* clone() const;
     Int_t   mTrayIndex;
     Int_t   mModuleIndex;
     Int_t   mCellIndex;

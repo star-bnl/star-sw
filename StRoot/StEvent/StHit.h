@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.11 2004/03/30 15:59:08 calderon Exp $
+ * $Id: StHit.h,v 2.12 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.12  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.11  2004/03/30 15:59:08  calderon
  * Added method to set mFitFlag (new chain no longer uses tables, so must set
  * this by hand).
@@ -109,7 +112,6 @@ protected:
     UChar_t        mFitFlag;
     UShort_t       mIdTruth; // simulation track id 
     UShort_t       mQuality; // quality of this information (percentage of charge produced by mIdTruth)
-    StObject* clone() const;
     ClassDef(StHit,2)
 };
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSsdHit.cxx,v 2.8 2001/04/05 04:00:55 ullrich Exp $
+ * $Id: StSsdHit.cxx,v 2.9 2004/07/15 16:36:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *         Lilian Martin, Dec 1999
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.cxx,v $
+ * Revision 2.9  2004/07/15 16:36:25  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.8  2001/04/05 04:00:55  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -40,7 +43,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.8 2001/04/05 04:00:55 ullrich Exp $";
+static const char rcsid[] = "$Id: StSsdHit.cxx,v 2.9 2004/07/15 16:36:25 ullrich Exp $";
 
 StMemoryPool StSsdHit::mPool(sizeof(StSsdHit));
 
@@ -97,9 +100,6 @@ StSsdHit::StSsdHit(const dst_point_st& pt)
 }
 
 StSsdHit::~StSsdHit() {/* noop */}
-
-StObject*
-StSsdHit::clone() const { return new StSsdHit(*this); }
 
 unsigned int
 StSsdHit::ladder() const

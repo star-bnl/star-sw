@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackGeometry.h,v 2.8 2003/10/30 20:07:32 perev Exp $
+ * $Id: StTrackGeometry.h,v 2.9 2004/07/15 16:36:26 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTrackGeometry.h,v $
+ * Revision 2.9  2004/07/15 16:36:26  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.8  2003/10/30 20:07:32  perev
  * Check of quality added
  *
@@ -77,8 +80,7 @@ public:
     
     virtual StTrackGeometry*       copy() const = 0;     // virtual constructor
     int     bad() const;
-protected:
-    virtual StObject*  clone() const = 0;     // virtual constructor used in StArray
+
     ClassDef(StTrackGeometry,2)
 };
 

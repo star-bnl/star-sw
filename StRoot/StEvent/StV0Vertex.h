@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StV0Vertex.h,v 2.6 2002/11/26 02:19:11 perev Exp $
+ * $Id: StV0Vertex.h,v 2.7 2004/07/15 16:36:26 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.h,v $
+ * Revision 2.7  2004/07/15 16:36:26  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.6  2002/11/26 02:19:11  perev
  * StEventMaker ITTF modif
  *
@@ -81,7 +84,6 @@ private:
     Float_t          mDcaDaughters;
     Float_t          mDcaParentToPrimaryVertex;
 
-    StObject* clone() const;
     ClassDef(StV0Vertex,3)
 };
 #endif

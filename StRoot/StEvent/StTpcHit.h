@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.9 2003/01/08 19:43:11 perev Exp $
+ * $Id: StTpcHit.h,v 2.10 2004/07/15 16:36:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
+ * Revision 2.10  2004/07/15 16:36:25  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.9  2003/01/08 19:43:11  perev
  * CleanUp
  *
@@ -75,7 +78,6 @@ public:
 
 protected:
     static StMemoryPool mPool;  //!
-    StObject* clone() const;
     ClassDef(StTpcHit,1)
 };
 

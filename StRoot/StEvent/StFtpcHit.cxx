@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHit.cxx,v 2.10 2004/05/07 15:05:28 calderon Exp $
+ * $Id: StFtpcHit.cxx,v 2.11 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.cxx,v $
+ * Revision 2.11  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.10  2004/05/07 15:05:28  calderon
  * Adding constructor based on StFtpcPoint from Markus.
  *
@@ -50,7 +53,7 @@
 #include "StFtpcTrackMaker/StFtpcPoint.hh"
 #include "StTrack.h"
 
-static const char rcsid[] = "$Id: StFtpcHit.cxx,v 2.10 2004/05/07 15:05:28 calderon Exp $";
+static const char rcsid[] = "$Id: StFtpcHit.cxx,v 2.11 2004/07/15 16:36:24 ullrich Exp $";
 
 StMemoryPool StFtpcHit::mPool(sizeof(StFtpcHit));
 
@@ -163,9 +166,6 @@ void StFtpcHit::update(const StFtpcPoint& pt)
 }
 
 StFtpcHit::~StFtpcHit() {/* noop */}
-
-StObject*
-StFtpcHit::clone() const { return new StFtpcHit(*this); }
 
 unsigned int
 StFtpcHit::sector() const

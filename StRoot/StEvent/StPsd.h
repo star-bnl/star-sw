@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPsd.h,v 2.4 2002/02/22 22:56:49 jeromel Exp $
+ * $Id: StPsd.h,v 2.5 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Mar 2001
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StPsd.h,v $
+ * Revision 2.5  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.4  2002/02/22 22:56:49  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -47,9 +50,6 @@ public:
     void    setPwg(StPwg);
     void    setId(int);
     
-protected:
-    virtual StObject* clone() const = 0;
-
 private:
     StPwg   mPwg;
     Int_t   mId;

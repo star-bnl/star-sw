@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcRawHit.cxx,v 2.5 2001/04/05 04:00:49 ullrich Exp $
+ * $Id: StEmcRawHit.cxx,v 2.6 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcRawHit.cxx,v $
+ * Revision 2.6  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.5  2001/04/05 04:00:49  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -28,7 +31,7 @@
  **************************************************************************/
 #include "StEmcRawHit.h"
 
-static const char rcsid[] = "$Id: StEmcRawHit.cxx,v 2.5 2001/04/05 04:00:49 ullrich Exp $";
+static const char rcsid[] = "$Id: StEmcRawHit.cxx,v 2.6 2004/07/15 16:36:24 ullrich Exp $";
 
 ClassImp(StEmcRawHit)
 
@@ -123,11 +126,6 @@ StEmcRawHit::setAdc(const unsigned int adc) {mAdc=adc;}
 
 void
 StEmcRawHit::setEnergy(const float energy) {mEnergy=energy;}
-
-StObject*
-StEmcRawHit::clone() const { return new StEmcRawHit(*this); }
-
-
 
 
 
