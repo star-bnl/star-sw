@@ -66,7 +66,7 @@ StiKalmanTrackFinder::StiKalmanTrackFinder()
   //Turn off by default
   Messenger::instance()->clearRoutingBits(MessageType::kTrackMessage);
     
-  cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Begins"<<endl;
+  //cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Begins"<<endl;
   StiTrack::setTrackFitter(new StiKalmanTrackFitter());
   reset();
 
@@ -77,7 +77,7 @@ StiKalmanTrackFinder::StiKalmanTrackFinder()
   mSubject->attach(this);
   getNewState();
     
-  cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Done"<<endl;
+  //cout << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Done"<<endl;
 }
 
 StiKalmanTrackFinder::~StiKalmanTrackFinder()
@@ -274,7 +274,7 @@ void StiKalmanTrackFinder::doTrackFind()
       trackMes <<"StiKalmanTrackFinder::doTrackFind()\t Got Valid track"<<endl;
 
       findTrack(track);
-			cout << " StiKalmanTrackFinder::doTrackFind() - done" << endl;
+			//cout << " StiKalmanTrackFinder::doTrackFind() - done" << endl;
 
       trackMes << " SKTFinder::doTrackFind() - Track Parameters" << endl << *track;
 			if (pars->useTrackFilter)
@@ -357,11 +357,11 @@ void StiKalmanTrackFinder::findTrack(StiTrack * t)
       cout << "SKTF::findTrack() exception: " << e.what();
       track->setFlag(0);
     }
-	cout << " findTrack(StiTrack * t)  - track completed " << endl;
+	//cout << " findTrack(StiTrack * t)  - track completed " << endl;
   pruneNodes(lastNode);
-	cout << " findTrack(StiTrack * t)  - track pruned " << endl;
+	//cout << " findTrack(StiTrack * t)  - track pruned " << endl;
   reserveHits(lastNode);
-	cout << " findTrack(StiTrack * t)  - track has reserved hits " << endl;
+	//cout << " findTrack(StiTrack * t)  - track has reserved hits " << endl;
   track->setChi2(lastNode->fChi2);
   using namespace std;
   if (lastNode->fP3*StiKalmanTrackNode::getFieldConstant()>0)
@@ -369,7 +369,7 @@ void StiKalmanTrackFinder::findTrack(StiTrack * t)
   else
     track->setCharge(1);
   if (pars->xtrapolateToMainVertex) extendToMainVertex(lastNode);
-	cout << " findTrack(StiTrack * t)  - extend called " << endl;
+	//cout << " findTrack(StiTrack * t)  - extend called " << endl;
 
 }
 
@@ -417,7 +417,7 @@ void StiKalmanTrackFinder::doFinishTrackSearch()
 		{
 			trackContainer->push_back(track);
 		}
-	cout << " doFinishTrackSearch() - track done - now update display" << endl;
+	//cout << " doFinishTrackSearch() - track done - now update display" << endl;
   track->update();  //This updates the track on the display
 }
 
@@ -456,7 +456,7 @@ void StiKalmanTrackFinder::search()
       doScanLayer();
       doFinishLayer();
     }
-	cout << " StiKalmanTrackFinder::search() done" << endl;
+	//cout << " StiKalmanTrackFinder::search() done" << endl;
 }
 
 void StiKalmanTrackFinder::doInitLayer()
@@ -657,37 +657,39 @@ void StiKalmanTrackFinder::doFinishLayer()
   if (hasDet)
     {
       if (hasHit)
-	{ 
-	  bestNode->updateNode();
-	  //StiHit * myHit = bestNode->getHit();
-	  //cout << "HIT:" << myHit->x() << "\t" << myHit->y() << "\t" << myHit->z();
-	  //cout << "CENTER:"<<  bestNode->getHelixCenter() << endl;
-	  //cout << "EXTRA: "<<  bestNode->getPointAt(myHit->x()+1.) << endl;
-	  sNode->add(bestNode);
-	  sNode = bestNode;  
-	  leadDet = bestNode->getDetector();
-	  //trackMes << "SKTF::doFinishLayer() - Adding node with hit in det:" 
-	  //<< *leadDet << endl;
-	}
+				{ 
+					bestNode->updateNode();
+					//StiHit * myHit = bestNode->getHit();
+					//cout << "HIT:" << myHit->x() << "\t" << myHit->y() << "\t" << myHit->z();
+					//cout << "CENTER:"<<  bestNode->getHelixCenter() << endl;
+					//cout << "EXTRA: "<<  bestNode->getPointAt(myHit->x()+1.) << endl;
+					sNode->add(bestNode);
+					sNode = bestNode;
+					track->setLastNode(bestNode);
+					leadDet = bestNode->getDetector();
+					//trackMes << "SKTF::doFinishLayer() - Adding node with hit in det:" 
+					//<< *leadDet << endl;
+				}
       else // no hit found
-	{
-	  //trackMes << "===============================leadNode   is at:" 
-	  //<< leadNode << endl;
-	  leadDet = leadNode->getDetector();
-	  if (leadDet==0)
-	    trackMes << "SKTF::doFinishLayer() - Fatal Error - leadDet==0" << endl;
-	  //else
-	  //trackMes << "SKTF::doFinishLayer() - Adding node WITHOUT hit in det:"  
-	  //<< *leadDet << endl;
-	  sNode->add(leadNode);
-	  sNode = leadNode;
-	  trackMes << "SKTF::doFinishLayer() "
-		   << "               nullCount:" << leadNode->nullCount << endl
-		   << "    contiguousNullCount :" << leadNode->contiguousNullCount << endl;
-	  if (leadNode->nullCount>pars->maxNullCount ||
-	      leadNode->contiguousNullCount>pars->maxContiguousNullCount)
-	    trackDone = true;    
-	}
+				{
+					//trackMes << "===============================leadNode   is at:" 
+					//<< leadNode << endl;
+					leadDet = leadNode->getDetector();
+					if (leadDet==0)
+						trackMes << "SKTF::doFinishLayer() - Fatal Error - leadDet==0" << endl;
+					//else
+					//trackMes << "SKTF::doFinishLayer() - Adding node WITHOUT hit in det:"  
+					//<< *leadDet << endl;
+					sNode->add(leadNode);
+					sNode = leadNode;
+					track->setLastNode(leadNode);
+					trackMes << "SKTF::doFinishLayer() "
+									 << "               nullCount:" << leadNode->nullCount << endl
+									 << "    contiguousNullCount :" << leadNode->contiguousNullCount << endl;
+					if (leadNode->nullCount>pars->maxNullCount ||
+							leadNode->contiguousNullCount>pars->maxContiguousNullCount)
+						trackDone = true;    
+				}
     }
   else // no det crossing found
     {
