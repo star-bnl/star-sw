@@ -1,9 +1,18 @@
-{
+
 // gROOT->Reset();
-  myLoad("libbase.so");
-  myLoad("libtables.so");
-  myLoad("tpc.sl");   myLoad("libtpc.so");
-  myLoad("svt.sl");   myLoad("libsvt.so");
-  myLoad("emc.sl");   myLoad("libemc.so");
-  myLoad("global.sl");myLoad("libglobal.so");
+#include "iostream.h"
+void myLoad(Char_t  *file){
+  if (gSystem.Load(file)) cout << "Cannot load "<< file << endl;
+}
+Load(){
+  myLoad("/afs/rhic/star/packages/dev/lib/St_base.so");
+  myLoad("/afs/rhic/star/packages/dev/lib/St_Tables.so");
+  myLoad("/afs/rhic/star/packages/dev/lib/tpc.sl");
+  myLoad("/afs/rhic/star/packages/dev/lib/St_tpc.so");
+  myLoad("/afs/rhic/star/packages/dev/lib/svt.sl");   
+  myLoad("/afs/rhic/star/packages/dev/lib/St_svt.so");
+  myLoad("/afs/rhic/star/packages/dev/lib/emc.sl");
+  myLoad("/afs/rhic/star/packages/dev/lib/St_emc.so");
+  myLoad("/afs/rhic/star/packages/dev/lib/global.sl");
+  myLoad("/afs/rhic/star/packages/dev/lib/St_global.so");
 }
