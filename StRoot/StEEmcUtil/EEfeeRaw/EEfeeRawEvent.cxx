@@ -93,20 +93,39 @@ void EEfeeRawEvent::maskWrongCrates( long timeStamp) {
   else 
     { list=listB; dim=sizeof(listB)/sizeof(int); }
 
-
   int i;
   for(i=0;i<block->GetEntries();i++) {
     EEfeeDataBlock *b=(EEfeeDataBlock *)block->At(i);
     int crateID=b->getCrateID();
     if(i>=dim ||  crateID!=list[i]) b->maskCrate();
-    //printf("vvv %d %d \n",i,crateID);
+    //pr-intf("vvv %d %d \n",i,crateID);
   }
   
   
 }
+//--------------------------------------------------
+//--------------------------------------------------
+//--------------------------------------------------
+
+UShort_t  EEfeeRawEvent::getValue(int crateID, int channel) const {
+  int i;
+  for(i=0;i<block->GetEntries();i++) {
+    EEfeeDataBlock *b=(EEfeeDataBlock *)block->At(i);
+    if( crateID!=b->getCrateID()) continue;
+    int nd=b->getValidDataLen();
+    assert(channel>=0 );
+    assert(channel<nd );
+    UShort_t* data=b->getData();
+    return data[channel];
+  }
+  return 0xffff; 
+}
 
 /*
  * $Log: EEfeeRawEvent.cxx,v $
+ * Revision 1.5  2003/11/20 22:59:40  balewski
+ * *** empty log message ***
+ *
  * Revision 1.4  2003/11/20 16:01:46  balewski
  * towars run 4
  *
