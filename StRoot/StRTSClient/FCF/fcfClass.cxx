@@ -488,7 +488,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 #ifdef FCF_SIM_ON
 								max_sim = sim_id ;
 #endif
-								mean = start ;	// this is not the 
+								mean = start ;	// this is not the mean but the position of the max!
 
 							}
 
@@ -1140,7 +1140,7 @@ inline int fcfClass::saveRes(struct fcfResx *res_p[], int cou, u_int *output)
 		}
 
 #ifdef FCF_ANNOTATE_CLUSTERS
-#ifdef __ROOT_
+#ifdef __ROOT__
 		fcfPixA = 0;
                 if (fcfPixATop) {
                   fcfPixA = (St_fcfPixel *) fcfPixATop->Find(Form("fcfPixA%i_%i",sb,row));
