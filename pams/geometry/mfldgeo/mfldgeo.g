@@ -198,7 +198,7 @@ end
          if (R<=bmap.rr(ir)) break
       enddo
       zi=(z-bmap.zz(1))/dz
-      iz=min(zi+1,bmap_nz-1)
+      iz=min(zi+1,real(bmap_nz-1))
       wz1=iz-zi;  wz2=1-wz1;
 
       if (ir>1) then
