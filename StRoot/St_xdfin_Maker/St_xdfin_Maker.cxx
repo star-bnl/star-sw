@@ -18,8 +18,11 @@ ClassImp(St_xdfin_Maker)
     m_InitDone(0)
 {
   if (inputFile && inputFile[0]) SetFile(inputFile);
-  fEvtHddr = new StEvtHddr(m_ConstSet);
-  SetOutput(fEvtHddr);	//Declare this "EvtHddr" for output
+  fEvtHddr = GetDataSet("EvtHddr");
+  if (!fEvtHddr) {
+    fEvtHddr = new StEvtHddr(m_ConstSet);
+    SetOutput(fEvtHddr);	//Declare this "EvtHddr" for output
+  }
 }
 //_____________________________________________________________________________
 St_xdfin_Maker::~St_xdfin_Maker(){
