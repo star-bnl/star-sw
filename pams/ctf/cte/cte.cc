@@ -281,7 +281,6 @@ long cte_extra ( void )
 **: RETURNS:    void
 **:>------------------------------------------------------------------*/
 {
-   const float Local_pi = 3.141592654 ;
    long  itrack   ;
    long  islat, index, nctf_tracks ;
    float xc, yc, rr      ; /* center and radius track circle in x-y */
@@ -398,7 +397,7 @@ long cte_extra ( void )
 /*-------------------------------------------------------
        Get  phi and eta
 ---------------------------------------------------------*/
-      l_extra->phi       = atan2(yp-yc,xp-xc) - 0.5 * sgn(globtrk[itrack].icharge) * Local_pi ; 
+      l_extra->phi       = atan2(yp-yc,xp-xc) - 0.5 * sgn(globtrk[itrack].icharge) * M_PI ; 
       float theta = atan2 ( 1, globtrk[itrack].tanl ) ;
       l_extra->eta       = -log(tan(theta/2.));
 /*---------------------------------------------------------
@@ -521,7 +520,6 @@ void cte_slat_distance (  float phi ,  float z,
 **: RETURNS:    void
 **:>------------------------------------------------------------------*/
 {
-   const float Local_pi = 3.141592654 ;
    float dphi ;
    float local_drphi, local_dz ;
 //
@@ -532,8 +530,8 @@ void cte_slat_distance (  float phi ,  float z,
    else
       dphi = slat_phi[iphi-1].phi_min - phi ;
 
-   if ( fabs(dphi) > Local_pi )
-       dphi = dphi - sgn(dphi) * 2. * Local_pi ;
+   if ( fabs(dphi) > M_PI )
+       dphi = dphi - sgn(dphi) * 2. * M_PI ;
    drphi = geo->r * dphi  ;
 
    local_drphi = max(0,drphi) ;
