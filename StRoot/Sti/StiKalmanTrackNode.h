@@ -152,10 +152,10 @@ public:
     
     static bool  recurse;
     
+		static StiKalmanTrackFinderParameters * pars;
     
  protected:   
     
-		static StiKalmanTrackFinderParameters * pars;
 
     const StiDetector * targetDet; // not persistent
     

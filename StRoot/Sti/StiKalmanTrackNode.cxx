@@ -27,6 +27,8 @@ using namespace std;
 // x[4] = tan(l) 
 
 // initialize static vairables
+
+StiKalmanTrackFinderParameters * StiKalmanTrackNode::pars = 0;
 bool StiKalmanTrackNode::recurse = false;
 //bool StiKalmanTrackNode::elossCalculated = false;
 //bool StiKalmanTrackNode::mcsCalculated   = false;
