@@ -1,15 +1,13 @@
 /**********************************************************
- * $Id: StRichPIDMaker.h,v 2.7 2000/11/21 16:24:22 horsley Exp $
+ * $Id: StRichPIDMaker.h,v 2.8 2000/11/21 19:50:35 lasiuk Exp $
  *
  * Description:
  *  StRrsMaker is the main module
  *  StRichRawData. It has the standard Maker functions:
  *
  *  $Log: StRichPIDMaker.h,v $
- *  Revision 2.7  2000/11/21 16:24:22  horsley
- *  Major overhaul of StRichArea, introduced monte carlo integration cross check,
- *  all possible areas, angles calculated together. StRichRingCalculator, StRichPIDMaker modified to support new StRichArea. StRichPIDMaker's hit finder
- *  typo corrected.
+ *  Revision 2.8  2000/11/21 19:50:35  lasiuk
+ *  add stthreevectorf
  *
  *  Revision 2.8  2000/11/21 19:50:35  lasiuk
  *  add stthreevectorf
@@ -68,10 +66,11 @@
 using std::vector;
 #endif
 
+// SCL
 #include "StParticleTypes.hh"
 #include "StThreeVectorD.hh"
 #include "StThreeVectorF.hh"
-#include "StRichTrackFilter.h"
+#include "StThreeVector.hh"
 
 // StRichPid
 //#include "StRichTrackFilter.h"
