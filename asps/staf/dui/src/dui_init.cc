@@ -50,11 +50,18 @@ int dui_start()
 /*- Create the DUI Dispatcher. -*/
    dui = new duiDispatcher("dui");
 
+/*- Find the TDM Factory. -*/
+   socObject *obj=NULL;
+   if( NULL == (obj = soc->findObject("tdm","tdmFactory")) ){
+      return TRUE;
+   }
+   tdmFactory *t = (tdmFactory*)(obj->ptr());
 /*- Superceed the TDM Factory. -*/
-   if( tdm != NULL ){
+   if( t != NULL ){
       EML_MESSAGE(DUI: Superceeding TDM.);
-      tdm->lock(FALSE);
+      t->lock(FALSE);
       soc->deleteObject("tdm","tdmFactory");
+      t = dui;
       tdm = dui;
    }
 

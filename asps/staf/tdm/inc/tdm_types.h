@@ -114,7 +114,9 @@ extern CC_P void kam_tdmdataset_addtable_();
 extern CC_P void kam_tdmdataset_entrycount_();
 extern CC_P void kam_tdmdataset_entryname_();
 extern CC_P void kam_tdmdataset_findentry_();
+#ifdef OLD_DSL
 extern CC_P void kam_tdmdataset_maxentrycount_();
+#endif /*OLD_DSL*/
 extern CC_P void kam_tdmdataset_name_();
 extern CC_P void kam_tdmdataset_show_();
 extern CC_P void kam_tdmtable_cell_getvalue_();
@@ -153,7 +155,9 @@ extern CC_P STAFCV_T tdmdataset_addtable(char* dsname, char* name
 extern CC_P STAFCV_T tdmdataset_entrycount(char* name);
 extern CC_P STAFCV_T tdmdataset_entryname();
 extern CC_P STAFCV_T tdmdataset_findentry();
+#ifdef OLD_DSL
 extern CC_P STAFCV_T tdmdataset_maxentrycount(char* name);
+#endif /*OLD_DSL*/
 extern CC_P STAFCV_T tdmdataset_name(char* name);
 extern CC_P STAFCV_T tdmdataset_show();
 extern CC_P STAFCV_T tdmtable_cell_getvalue(char* cellSpec);

@@ -33,7 +33,7 @@ duiDispatcher:: duiDispatcher(const char * name)
 
 //- specific to DUI
    myCwd=NULL;
-   myCwd = (char*)ASUALLOC(strlen(name) +2);
+   myCwd = (char*)MALLOC(strlen(name) +2);
    strcpy(myCwd,"/");
    strcat(myCwd,name);
    pDSroot = NULL;
@@ -60,20 +60,20 @@ duiDispatcher:: duiDispatcher(const char * name)
 //----------------------------------
 duiDispatcher:: ~duiDispatcher() {
 // delete[] myRoot;
-   ASUFREE(myCwd);
+   FREE(myCwd);
 }
 
 //:----------------------------------------------- ATTRIBUTES         --
 void duiDispatcher::  cwd (const char * cwd) {
-   if(myCwd)ASUFREE(myCwd);
-   myCwd = (char*)ASUALLOC(strlen(cwd) +1);
+   if(myCwd)FREE(myCwd);
+   myCwd = (char*)MALLOC(strlen(cwd) +1);
    strcpy(myCwd,cwd);
    findNode_ds(myCwd,dui_pDScwd);
 }
 
 //----------------------------------
 char * duiDispatcher::  cwd () {
-   char *c = (char*)ASUALLOC(strlen(myCwd)+1);
+   char *c = (char*)MALLOC(strlen(myCwd)+1);
    strcpy(c,myCwd);
    return c;
 }
@@ -89,21 +89,6 @@ tdmDataset* duiDispatcher::  rootDO () {
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
-STAFCV_T duiDispatcher:: mkTable (const char * filePath
-		, const char * spec, long rows) {
-
-   DS_DATASET_T *pDSbase=NULL, *pDSnew=NULL;
-   char* pData=NULL;
-
-   if( !findNode_ds(dui_dirof(dui_pathof(myCwd,filePath)), pDSbase)
-   ||  !dsAddTable(pDSbase,dui_notdirof(filePath),(char*)spec,rows
-		,&pData)
-   ){
-      EML_ERROR(CANT_CREATE_OBJECT);
-   }
-   EML_SUCCESS(STAFCV_OK);
-}
-
 //----------------------------------
 STAFCV_T duiDispatcher:: cd (const char * dirPath) {
 
@@ -122,9 +107,9 @@ STAFCV_T duiDispatcher:: cd (const char * dirPath) {
    if( NULL == strstr(newPath,p=myRoot->name()) ){
       EML_ERROR(INVALID_DATASET);
    }
-   ASUFREE(p);
+   FREE(p);
    cwd(newPath);
-   ASUFREE(newPath);
+   FREE(newPath);
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -142,7 +127,7 @@ STAFCV_T duiDispatcher:: ls (const char * path, char *& result) {
    char* errormessage = "*** No such DUI table or directory ***";
 
    if( !findNode_ds(path,pDS) ){
-      result = (char*)ASUALLOC(strlen(errormessage) +1);
+      result = (char*)MALLOC(strlen(errormessage) +1);
       strcpy(result,errormessage);
       EML_ERROR(OBJECT_NOT_FOUND);
    }
@@ -166,7 +151,7 @@ STAFCV_T duiDispatcher:: mkdir (const char * dirPath) {
    char* c=cvtRelAbs(dirPath);
    char* bName=dui_dirof(c);
    char* nName=dui_notdirof(c);
-   ASUFREE(c);
+   FREE(c);
 
    if( !findNode_ds(bName, pDSbase)
 #ifndef OLD_DSL
@@ -179,10 +164,10 @@ STAFCV_T duiDispatcher:: mkdir (const char * dirPath) {
    ||  !dsIsDataset(&isDataset,pDSnew)
    ||  !isDataset
    ){
-      ASUFREE(bName); ASUFREE(nName);
+      FREE(bName); FREE(nName);
       EML_DSPERROR(DSL_ERROR);
    }
-   ASUFREE(bName); ASUFREE(nName);
+   FREE(bName); FREE(nName);
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -194,7 +179,7 @@ STAFCV_T duiDispatcher:: mv (const char * fromPath
 
 //----------------------------------
 STAFCV_T duiDispatcher:: pwd (char *& result) {
-   result = (char*)ASUALLOC(strlen(myCwd) +1);
+   result = (char*)MALLOC(strlen(myCwd) +1);
    strcpy(result,myCwd);
    EML_SUCCESS(STAFCV_OK);
 }
@@ -217,18 +202,15 @@ char * duiDispatcher:: cvtRelAbs (const char * relPath) {
    }
    char *c=cwd();
    absPath = (char*)dui_pathof(c,relPath);
-   if(c)ASUFREE(c);
+   if(c)FREE(c);
    return absPath;
 }
 
 //**********************************************************************
 // Over-ride tdmFactory methods
-//----------------------------------
-// Over-ride tdmFactory methods
 
 //----------------------------------
-STAFCV_T duiDispatcher:: findDataset (const char * dirPath
-		, tdmDataset*& dataset) {
+tdmDataset* duiDispatcher:: findDataset (const char * dirPath) {
 
    DS_DATASET_T* pDS=NULL;
    char *fullPath=NULL;
@@ -237,24 +219,23 @@ STAFCV_T duiDispatcher:: findDataset (const char * dirPath
 	 EML_ERROR(INVALID_AHS_SPEC);
    }
 
-/*-HACK- should be superfluous. -*/
-   dataset = NULL;
+   tdmDataset* dataset = NULL;
 
-   if( !tdmFactory::findDataset(fullPath,dataset) ){
+   if( NULL == (dataset = tdmFactory::findDataset(fullPath)) ){
       if( !findNode_ds(fullPath,pDS)
-      ||  !createDataset(fullPath,pDS,dataset)
+      ||  NULL == (dataset = createDataset(fullPath,pDS))
       ){
-	 dataset = NULL;
-	 EML_ERROR(OBJECT_NOT_FOUND);
+	 // EML_ERROR(OBJECT_NOT_FOUND);
+	 return NULL;
       }
    }
-   ASUFREE(fullPath);
-   EML_SUCCESS(STAFCV_OK);
+   FREE(fullPath);
+   // EML_SUCCESS(STAFCV_OK);
+   return dataset;
 }
 
 //----------------------------------
-STAFCV_T duiDispatcher:: findTable (const char * filePath
-		, tdmTable*& table) {
+tdmTable* duiDispatcher:: findTable (const char * filePath) {
 
    DS_DATASET_T* pDS=NULL;
    char *fullPath=NULL;
@@ -263,61 +244,66 @@ STAFCV_T duiDispatcher:: findTable (const char * filePath
 	 EML_ERROR(INVALID_AHS_SPEC);
    }
 
-   if( !tdmFactory::findTable(fullPath,table) ){
+   tdmTable* table=NULL;
+   if( NULL == (table = tdmFactory::findTable(fullPath)) ){
       if( !findNode_ds(fullPath,pDS)
-      ||  !createTable(fullPath,pDS,table)
+      ||  NULL == (table = createTable(fullPath,pDS))
       ){
-	 table = NULL;
-	 ASUFREE(fullPath);
-	 EML_ERROR(OBJECT_NOT_FOUND);
+	 FREE(fullPath);
+	 // EML_ERROR(OBJECT_NOT_FOUND);
+	 return NULL;
       }
    }
-   ASUFREE(fullPath);
-   EML_SUCCESS(STAFCV_OK);
+   FREE(fullPath);
+   // EML_SUCCESS(STAFCV_OK);
+   return table;
 }
 
 //----------------------------------
-STAFCV_T duiDispatcher:: newDataset (const char * name, long setDim){
+tdmDataset* duiDispatcher:: newDataset (const char * name, long setDim){
    IDREF_T id;
    if( soc->idObject(name,"tdmDataset",id) ){
-      EML_ERROR(DUPLICATE_OBJECT_NAME);
+      // EML_ERROR(DUPLICATE_OBJECT_NAME);
+      return NULL;
    }
    tdmDataset* p;
-   if( !findDataset(name,p) ){		//- create object from pointer
+   if( NULL == (p = findDataset(name)) ){//- create object from pointer
       if( !mkdir(name)			//- create pointer
-      ||  !findDataset(name,p)		//- create object from pointer
+      ||  NULL == (p = findDataset(name))//- create object from pointer
       ){
-	 EML_ERROR(CANT_CREATE_OBJECT);
+	 // EML_ERROR(CANT_CREATE_OBJECT);
+	 return NULL;
       }
    }
-   if( !soc->idObject(name,"tdmDataset",id) ){
-      EML_ERROR(OBJECT_NOT_FOUND);
-   }
    addEntry(id);
-   EML_SUCCESS(STAFCV_OK);
+   // EML_SUCCESS(STAFCV_OK);
+   return p;
 }
 
 //----------------------------------
-STAFCV_T duiDispatcher:: newTable (const char * name, const char * spec
-		, long rows){
+tdmTable* duiDispatcher:: newTable (const char * name
+		, const char * spec, long rows ){
    IDREF_T id;
    if( soc->idObject(name,"tdmTable",id) ){
-      EML_ERROR(DUPLICATE_OBJECT_NAME);
+      // EML_ERROR(DUPLICATE_OBJECT_NAME);
+      return NULL;
    }
    tdmTable* p=NULL;
-   if( !findTable(name,p) ){		//- create object from pointer
-      if( !mkTable(name,spec,rows)	//- create pointer
-      ||  !findTable(name,p)		//- create object from pointer
+   DS_DATASET_T *pDSbase=NULL, *pDSnew=NULL;
+   char* pData=NULL;
+   if( NULL == (p = findTable(name)) ){	//- create object from pointer
+      					//- ... or create pointer
+      if( !findNode_ds(dui_dirof(dui_pathof(myCwd,name)), pDSbase)
+      ||  !dsAddTable(pDSbase,dui_notdirof(name),(char*)spec,rows,&pData)
+      ||  NULL == (p = findTable(name))	//- create object from pointer
       ){
-	 EML_ERROR(CANT_CREATE_OBJECT);
+	 // EML_ERROR(CANT_CREATE_OBJECT);
+	 return NULL;
       }
    }
-   if( !soc->idObject(name,"tdmTable",id) ){
-      EML_ERROR(OBJECT_NOT_FOUND);
-   }
    addEntry(id);
-   EML_SUCCESS(STAFCV_OK);
-
+   // EML_SUCCESS(STAFCV_OK);
+   return p;
 }
 
 //:----------------------------------------------- PRIV FUNCTIONS     --
@@ -327,10 +313,10 @@ STAFCV_T duiDispatcher:: findNode_ds (const char * path
    if( !(fullPath = cvtRelAbs(path))
    ||  !duiFindDS(pNode,pDSroot,fullPath)
    ){
-      ASUFREE(fullPath);
+      FREE(fullPath);
       EML_ERROR(OBJECT_NOT_FOUND);
    }
-   ASUFREE(fullPath);
+   FREE(fullPath);
    EML_SUCCESS(STAFCV_OK);
 }
 

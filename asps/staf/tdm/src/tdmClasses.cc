@@ -74,7 +74,7 @@ char * tdmObject::  dslName () {
    else {
      return NULL;
    }
-   cc = (char*)ASUALLOC(strlen(c)+1);
+   cc = (char*)MALLOC(strlen(c)+1);
    strcpy(cc,c);
    return cc;
 }
@@ -187,7 +187,7 @@ char * tdmTable::  dslName () {
       dsPerror("DSL_ERROR");
       return NULL;
    }
-   cc = (char*)ASUALLOC(strlen(c) +1);
+   cc = (char*)MALLOC(strlen(c) +1);
    strcpy(cc,c);
    return cc;
 }
@@ -256,7 +256,7 @@ char * tdmTable::  typeSpecifier () {
       dsPerror("DSL_ERROR");
       return NULL;
    }
-   char *c=(char*)ASUALLOC(strlen(tspec) +1);
+   char *c=(char*)MALLOC(strlen(tspec) +1);
    strcpy(c,tspec);
    return c;
 }
@@ -266,11 +266,11 @@ char * tdmTable::  typeSpecifier () {
 char * tdmTable::  listing () {
    char* c = socObject::listing();
    char* cc = NULL;
-   cc = (char*)ASUALLOC(79);
+   cc = (char*)MALLOC(79);
    memset(cc,0,79);
-   sprintf(cc,"%s Used/Alloc = %d/%d; rowSize = %d",c,rowCount()
+   sprintf(cc,"%s %d/%d rows; %d bytes",c,rowCount()
 		,maxRowCount() ,rowSize());
-   ASUFREE(c);
+   FREE(c);
    return cc;
 }
 
@@ -291,6 +291,7 @@ STAFCV_T tdmTable:: printRows (long ifirst, long nrows) {
    size_t i,j;
    DS_TYPE_T *type;
    char *pCellData;
+   char *c=NULL;
 
    if( !dsTypePtr(&type,pDSthis->tid)) {
       EML_ERROR(BAD_TABLE_TYPE);
@@ -302,9 +303,11 @@ STAFCV_T tdmTable:: printRows (long ifirst, long nrows) {
 /*- Print Table Header Column Names -*/
    fprintf(stdout," ROW #");
    for( i=0;i<columnCount();i++ ){
-      fprintf(stdout,"\t%s",columnName(i));
+      fprintf(stdout,"\t%s",c=columnName(i));
+/*HACK:			FREE(c); 	UNKNOWN BUG*/
       for( long n=1;n<MIN(columnElcount(i),100); n++ ){
-         fprintf(stdout,"\t%s(%d)",columnName(i),n);
+         fprintf(stdout,"\t%s(%d)",c=columnName(i),n);
+         FREE(c);
       }
       if( columnElcount(i) > 100 ){
 	 fprintf(stdout,"\t***%d MORE HEADERS UNPRINTED***"
@@ -393,7 +396,7 @@ char * tdmTable:: columnName (long ncol) {
    if( !dsColumnName(&c,pDSthis,ncol) ){
       return NULL;
    }
-   char *cc = (char*)ASUALLOC(strlen(c) +1);
+   char *cc = (char*)MALLOC(strlen(c) +1);		/*HACK:LEAK*/
    strcpy(cc,c);
    return cc;
 }
@@ -415,7 +418,7 @@ char * tdmTable:: columnTypeName (long ncol) {
    if( !dsColumnTypeName(&c,pDSthis,ncol) ){
       return NULL;
    }
-   char *cc = (char*)ASUALLOC(strlen(c) +1);
+   char *cc = (char*)MALLOC(strlen(c) +1);		/*HACK:LEAK*/
    strcpy(cc,c);
    return cc;
 }
@@ -496,7 +499,7 @@ STAFCV_T tdmTable:: getData (TDM_DATABLOCK_T& data) {
    }
    data._maximum = mxrow*rsize;
    data._length = nrows*rsize;
-   data._buffer = (unsigned char*)ASUALLOC(data._maximum);
+   data._buffer = (unsigned char*)MALLOC(data._maximum);
    memcpy(data._buffer,pData,data._length);
    EML_SUCCESS(STAFCV_OK);
 }
@@ -638,7 +641,7 @@ char * tdmDataset::  dslName () {
       dsPerror("DSL_ERROR");
       return NULL;
    }
-   cc = (char*)ASUALLOC(strlen(c) +1);
+   cc = (char*)MALLOC(strlen(c) +1);
    strcpy(cc,c);
    return cc;
 }
@@ -654,6 +657,7 @@ long tdmDataset::  entryCount () {
 }
 
 //----------------------------------
+#ifdef OLD_DSL
 long tdmDataset::  maxEntryCount () {
    size_t count;
    if( !dsDatasetMaxEntryCount(&count, pDSthis) ){
@@ -662,16 +666,17 @@ long tdmDataset::  maxEntryCount () {
    }
    return count;
 }
+#endif /*OLD_DSL*/
 
 //----------------------------------
 // override socObject::listing()
 char * tdmDataset::  listing () {
    char* c = socObject::listing();
    char* cc = NULL;
-   cc = (char*)ASUALLOC(79);
+   cc = (char*)MALLOC(79);
    memset(cc,0,79);
-   sprintf(cc,"%s Entries = %d",c,entryCount());
-   ASUFREE(c);
+   sprintf(cc,"%s %d ent.s",c,entryCount());
+   FREE(c);
    return cc;
 }
 
@@ -832,7 +837,7 @@ char * tdmFactory:: list () {
 
    char *c = socFactory::list();
 
-   char *cc = (char*)ASUALLOC(strlen(c) +1 +162);
+   char *cc = (char*)MALLOC(strlen(c) +1 +162);
 
    sprintf(cc, 
                 "\n"
@@ -842,7 +847,7 @@ char * tdmFactory:: list () {
 		"TDM - Table & Dataset Memory listing"
 		" ********************\n"
                 "%s\n",c);
-   ASUFREE(c);
+   FREE(c);
    return cc;
 
 }
@@ -923,7 +928,7 @@ STAFCV_T tdmFactory:: getTypeName (long tid, char *& name) {
    while ( !isalnum(buff[0]) && !(buff[0] == '_') ) buff++;
    lbuff = 0;
    while ( isalnum(buff[lbuff]) || (buff[lbuff] == '_') ) lbuff++;
-   name = (char*)ASUALLOC(lbuff+1);
+   name = (char*)MALLOC(lbuff+1);
    strncpy(name,buff,lbuff);
    name[lbuff] = 0;
    EML_SUCCESS(STAFCV_OK);
@@ -938,7 +943,7 @@ STAFCV_T tdmFactory:: getTypeSpecification (long tid, char *& spec) {
       spec = NULL;
       EML_ERROR(INVALID_TYPE_ID);
    }
-   spec = (char*)ASUALLOC(l+1);
+   spec = (char*)MALLOC(l+1);
    strcpy(spec,c);
    EML_SUCCESS(STAFCV_OK);
 }
@@ -955,11 +960,11 @@ STAFCV_T tdmFactory:: findTypeSpecification (const char * name
          EML_SUCCESS(STAFCV_OK);
       }
       if( (0 == strcmp(name,nm)) ){
-         ASUFREE(nm);
+         FREE(nm);
          getTypeSpecification(i,spec);
          EML_SUCCESS(STAFCV_OK);
       }
-      ASUFREE(nm);
+      FREE(nm);
    }
 }
 

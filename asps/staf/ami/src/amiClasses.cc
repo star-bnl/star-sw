@@ -56,6 +56,18 @@ FNC_PTR_T amiInvoker::  pFunction () {
    return myPamFtn;
 }
 
+//----------------------------------
+// OVERRIDE socObject::listing()
+char * amiInvoker::  listing () {
+   char* c = socObject::listing();
+   char* cc = NULL;
+   cc = (char*)MALLOC(79);
+   memset(cc,0,79);
+   sprintf(cc,"%s %d arg.s",c,rank());
+   FREE(c);
+   return cc;
+}
+
 //:----------------------------------------------- PUB FUNCTIONS      --
 STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
 
@@ -164,7 +176,7 @@ STAFCV_T amiBroker:: callInvoker (const char * name
 
 //- Find the correct invoker.
    amiInvoker* invoker=NULL;
-   if( !findInvoker(name, invoker) ){
+   if( NULL == (invoker = findInvoker(name)) ){
       EML_ERROR(OBJECT_NOT_FOUND);
    }
 //- Check number of table names passed.
@@ -188,7 +200,7 @@ STAFCV_T amiBroker:: callInvoker (const char * name
       cc = strchr(tnames._buffer[i],'(');
       b = strlen(tnames._buffer[i]);
       if( cc )b = (int)(cc - c);
-      table_name = (char*)ASUALLOC(b +1); memset(table_name,0,b+1);
+      table_name = (char*)MALLOC(b +1); memset(table_name,0,b+1);
       strncpy(table_name,tnames._buffer[i],b);
       if( b < strlen(tnames._buffer[i]) ){
 	 table_size = atoi(tnames._buffer[i] + b + 1);
@@ -197,27 +209,22 @@ STAFCV_T amiBroker:: callInvoker (const char * name
 	 table_size = 1;
       }
 //- Find or create table.
-      if( !tdm->findTable(table_name, tables._buffer[i]) ){
+      if( NULL == (tables._buffer[i] = tdm->findTable(table_name)) ){
 	 if( AMI_INPUT_MODE == invoker->tableMode(i) ){
 	    EML_ERROR(OBJECT_NOT_FOUND);
 	 }
 	 else {
-	    if( !tdm->newTable(table_name, invoker->tableSpec(i)
-			, table_size) // TEMPORARY HACK !!!
-	    ||  !tdm->findTable(table_name, tables._buffer[i])
-	    ){
-	    if( !tdm->findTable(table_name, tables._buffer[i])
-	    ){ // HACK - should not be called twice... but it works
-	       if( table_name ){ASUFREE(table_name); table_name = NULL;}
+	    if( NULL == (tables._buffer[i] = tdm->newTable(table_name,
+			invoker->tableSpec(i), table_size)) ){
+	       if( table_name ){FREE(table_name); table_name = NULL;}
 	       EML_ERROR(CANT_CREATE_OBJECT);
 	    }
 	    else {
 	       EML_MESSAGE(WARNING: Table created with 1 row.);
 	    }
-	    }
 	 }
       }
-      if( table_name ){ASUFREE(table_name); table_name = NULL;}
+      if( table_name ){FREE(table_name); table_name = NULL;}
    }
 //- Call the actual invoker object.
    invoker->call(tables);
@@ -233,22 +240,23 @@ STAFCV_T amiBroker:: deleteInvoker (const char * name ) {
 }
 
 //----------------------------------
-STAFCV_T amiBroker:: findInvoker (const char * name
-		, amiInvoker*& invoker ) {
+amiInvoker * amiBroker:: findInvoker (const char * name) {
+   amiInvoker*& invoker=NULL;
    socObject* obj;
-   if( !soc->findObject(name,"amiInvoker",obj) ){
+   if( NULL == (obj = soc->findObject(name,"amiInvoker")) ){
       invoker = NULL;
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    invoker = AMIINVOKER(obj);
-   EML_SUCCESS(STAFCV_OK);
+   // EML_SUCCESS(STAFCV_OK);
+   return invoker;
 }
 
 //----------------------------------
-STAFCV_T amiBroker:: getInvoker (IDREF_T id
-		, amiInvoker*& invoker ) {
+amiInvoker * amiBroker:: getInvoker (IDREF_T id) {
+   amiInvoker* invoker=NULL;
    socObject* obj;
-   if( !soc->getObject(id,obj) ){
+   if( NULL == (obj = soc->getObject(id)) ){
       invoker = NULL;
       EML_ERROR(OBJECT_NOT_FOUND);
    }
@@ -257,46 +265,32 @@ STAFCV_T amiBroker:: getInvoker (IDREF_T id
       EML_ERROR(WRONG_OBJECT_TYPE);
    }
    invoker = AMIINVOKER(obj);
-   EML_SUCCESS(STAFCV_OK);
+   // EML_SUCCESS(STAFCV_OK);
+   return invoker;
 }
 
 //----------------------------------
 char * amiBroker:: list () {
-   socObject* obj;
 
-   printf("\n"
-"+---------------------------------------------------------------------"
-   "\n"
-"|************* AMI - Analysis Module Interface listing ***************"
-   "\n"
-"+-------+-----------------+-----------------+------+------------------"
-   "\n"
-"| IDREF | NAME            | TYPE            | RANK |                  "
-   "\n"
-"+-------+-----------------+-----------------+------+------------------"
-    "\n");
-   for( int i=0;i<count();i++ ){
-      if( soc->getObject(entry(i),obj) ){
-         if( 0 == strcmp("amiInvoker",obj->type()) ){
-            printf("| %5d | %-15s | %-15s | %4d | \n"
-                        ,obj->idRef(),obj->name(),obj->type()
-			,AMIINVOKER(obj)->rank()
-                        );
-         }
-      } else {
-         printf("* %5d | %-15s | %-15s | %4s | \n"
-                        ,entry(i),"**DELETED**","**DELETED**","***");
-      }
-   }
-   printf(
-"+-------+-----------------+-----------------+------+------------------"
-   "\n\n");
+   char *c = socFactory::list();
 
-   return ""; // TEMPORARY HACK
+   char *cc = (char*)MALLOC(strlen(c) +1 +162);
+
+   sprintf(cc, 
+                "\n"
+                "+-------------------------------------------"
+                "-----------------------------------\n"
+                "|****************** "
+                "AMI - Analysis Module Interface listing"
+                " *******************\n"
+                "%s\n",c);
+   FREE(c);
+   return cc;
+
 }
 
 //----------------------------------
-STAFCV_T amiBroker:: newInvoker (const char * name
+amiInvoker * amiBroker:: newInvoker (const char * name
 		, long rank
 		, FNC_PTR_T pam
 		, const STRING_SEQ_T& specs) {
@@ -304,13 +298,14 @@ STAFCV_T amiBroker:: newInvoker (const char * name
    if( soc->idObject(name,"amiInvoker",id) ){
       EML_ERROR(DUPLICATE_OBJECT_NAME);
    }
-   static amiInvoker* p;
+   amiInvoker* p;
    p = new amiInvoker(name,rank,pam,specs);
    if( !soc->idObject(name,"amiInvoker",id) ){
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    addEntry(id);
-   EML_SUCCESS(STAFCV_OK);
+   // EML_SUCCESS(STAFCV_OK);
+   return p;
 
 }
 

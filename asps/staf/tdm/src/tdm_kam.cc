@@ -96,7 +96,9 @@ void kam_tdm_list_()
 }
 STAFCV_T tdm_list()
 {
-   printf("%s",tdm->list() );
+   char *c=NULL;
+   printf("%s",c = tdm->list() );
+   FREE(c);
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -155,10 +157,10 @@ STAFCV_T tdm_newtable(char* name, char* spec, long rowcount)
       char *specs=NULL;
       if( !tdm->findTypeSpecification(spec,specs)
       ||  !tdm->newTable(name,specs,rowcount) ){
-	 ASUFREE(specs);
+	 FREE(specs);
 	 EML_ERROR(KAM_METHOD_FAILURE);
       }
-      ASUFREE(specs);
+      FREE(specs);
       EML_SUCCESS(STAFCV_OK);
    }
 }
@@ -189,7 +191,7 @@ STAFCV_T tdm_type_list(long tid)
             break;
          }
          printf("TDM:\tType name = (%s) \n",name);
-         ASUFREE(name);
+         FREE(name);
       }
    }
    else {
@@ -197,7 +199,7 @@ STAFCV_T tdm_type_list(long tid)
          EML_ERROR(KAM_METHOD_FAILURE);
       }
       printf("TDM:\tType name = (%s) \n",name);
-      ASUFREE(name);
+      FREE(name);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -231,6 +233,7 @@ STAFCV_T tdm_type_show(char* name)
       }
       if( sutMatchWild(name,tname) ){
 	 printf("TDM:\tType spec = ...\n%s\n.\n",tspec);
+	 FREE(tspec);
       }
    }
    EML_SUCCESS(STAFCV_OK);
@@ -363,6 +366,7 @@ EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
 *:* TDM/DATASET/MAXENTRYCOUNT NAME
 *:<---------------------------------------------------------------------
 */
+#ifdef OLD_DSL
 void kam_tdmdataset_maxentrycount_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
@@ -383,7 +387,7 @@ STAFCV_T tdmdataset_maxentrycount(char* name)
    set_staf_result((float)result);
    EML_SUCCESS(STAFCV_OK);
 }
-
+#endif /*OLD_DSL*/
 
 /*
 *:>---------------------------------------------------------------------
@@ -408,7 +412,9 @@ STAFCV_T tdmdataset_name(char* name)
    if( NULL == (dataset = tdm->findDataset(name)) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
-   printf("TDMDATASET:\tDSL name = (%s) \n",dataset->dslName());
+   char *c=NULL;
+   printf("TDMDATASET:\tDSL name = (%s) \n",c = dataset->dslName());
+   FREE(c);
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -441,7 +447,7 @@ STAFCV_T tdmtable_cell_getvalue(char* cellSpec)
    tdmTable* table;		/* tdmTable object */
 
    /*- HACK - preliminary AHS calls do not work!!! -*/
-   char *cs = (char*)ASUALLOC(strlen(cellSpec) +1);
+   char *cs = (char*)MALLOC(strlen(cellSpec) +1);
    strcpy(cs,cellSpec);
    char *tname = strtok(cs,"[].");
    char *c = strtok(NULL,"[].");
@@ -526,7 +532,7 @@ STAFCV_T tdmtable_cell_getvalue(char* cellSpec)
    }
    set_staf_result(result);
 
-   ASUFREE(cs);
+   FREE(cs);
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -555,7 +561,7 @@ STAFCV_T tdmtable_cell_putvalue(char* cellSpec, long nv, char **values)
    int iv,lv=0;
 
    /*- HACK - preliminary AHS calls do not work!!! -*/
-   char *cs = (char*)ASUALLOC(strlen(cellSpec) +1);
+   char *cs = (char*)MALLOC(strlen(cellSpec) +1);
    strcpy(cs,cellSpec);
    char *tname = strtok(cs,"[].");
    char *c = strtok(NULL,"[].");
@@ -577,7 +583,7 @@ STAFCV_T tdmtable_cell_putvalue(char* cellSpec, long nv, char **values)
 	
    TDM_CELLDATA_T cellData;
    cellData._d = tcode;
-   cellData.data.v = ASUALLOC(col.size);
+   cellData.data.v = MALLOC(col.size);
    TDM_CELLDATA_T buff;
    buff.data.v = cellData.data.v;
 
@@ -587,12 +593,12 @@ STAFCV_T tdmtable_cell_putvalue(char* cellSpec, long nv, char **values)
 	 case DS_TYPE_CHAR:
 	    lv = 0;
 	    for( iv=0;iv<nv;iv++ ){ lv += strlen(values[iv]); }
-	    value = (char*)ASUALLOC(lv +1);
+	    value = (char*)MALLOC(lv +1);
 	    strncpy(value,values[0],strlen(value));
 	    for( iv=1;iv<nv;iv++ ){ strcat(value,values[iv]); }
 	    value[strlen(value)] = 0;
 	    strncpy(cellData.data.c,value,col.size);
-	    ASUFREE(value);
+	    FREE(value);
 	    break;
 	 case DS_TYPE_OCTET:
 	    *(buff.data.o) = atol(values[np]);
@@ -616,13 +622,13 @@ STAFCV_T tdmtable_cell_putvalue(char* cellSpec, long nv, char **values)
 	    *(buff.data.d) = atof(values[np]);
 	    break;
 	 case DS_TYPE_STRUCT:
-	    ASUFREE(cellData.data.v);
-	    ASUFREE(cs);
+	    FREE(cellData.data.v);
+	    FREE(cs);
 	    EML_ERROR(KAM_NOT_YET_IMPLEMENTED);
 	    break;
 	 default:
-	    ASUFREE(cellData.data.v);
-	    ASUFREE(cs);
+	    FREE(cellData.data.v);
+	    FREE(cs);
 	    EML_ERROR(KAM_INVALID_TYPE);
 	    break;
       }
@@ -630,13 +636,13 @@ STAFCV_T tdmtable_cell_putvalue(char* cellSpec, long nv, char **values)
    }
 
    if( !table->putCell(cellData,nrow,ncol) ){
-      ASUFREE(cellData.data.v);
-      ASUFREE(cs);
+      FREE(cellData.data.v);
+      FREE(cs);
       EML_ERROR(KAM_METHOD_FAILURE);
    }
 
-   ASUFREE(cellData.data.v);
-   ASUFREE(cs);
+   FREE(cellData.data.v);
+   FREE(cs);
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -833,7 +839,9 @@ STAFCV_T tdmtable_name(char* name)
    if( NULL == (table = tdm->findTable(name)) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
-   printf("TDMTABLE:\tDSL Name = (%s) \n",table->dslName());
+   char *c=NULL;
+   printf("TDMTABLE:\tDSL Name = (%s) \n",c = table->dslName());
+   FREE(c);
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -978,12 +986,14 @@ void kam_tdmtable_specifier_()
 STAFCV_T tdmtable_specifier(char* name)
 {
    tdmTable* table;		/* tdmTable object */
+   char *c=NULL;
 
    if( NULL == (table = tdm->findTable(name)) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
    printf("TDMTABLE:\tType Specifier = ...\n%s\n.\n"
-		,table->typeSpecifier());
+		,c=table->typeSpecifier());
+   FREE(c);
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -1006,11 +1016,13 @@ void kam_tdmtable_typename_()
 STAFCV_T tdmtable_typename(char* name)
 {
    tdmTable* table=NULL;		/* tdmTable object */
+   char *c=NULL;
 
    if( NULL == (table = tdm->findTable(name)) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
-   printf("TDMTABLE:\tType Name = (%s) \n",table->typeName());
+   printf("TDMTABLE:\tType Name = (%s) \n",c=table->typeName());
+   FREE(c);
    EML_SUCCESS(STAFCV_OK);
 }
 

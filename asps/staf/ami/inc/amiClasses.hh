@@ -34,6 +34,9 @@ public:
    virtual long rank ();
    virtual FNC_PTR_T pFunction ();
 
+//- OVERRIDE VIRTUAL
+   virtual char * listing();
+
 //:----------------------------------------------- PUB FUNCTIONS      --
    virtual STAFCV_T call (TABLE_SEQ_T& tbl);
 
@@ -71,11 +74,9 @@ public:
 		, const STRING_SEQ_T& tables);
 
    virtual STAFCV_T deleteInvoker (const char * name);
-   virtual STAFCV_T findInvoker (const char * name
-                , amiInvoker*& invoker);
-   virtual STAFCV_T getInvoker (IDREF_T id
-                , amiInvoker*& invoker);
-   virtual STAFCV_T newInvoker (const char * name
+   virtual amiInvoker* findInvoker (const char * name);
+   virtual amiInvoker* getInvoker (IDREF_T id);
+   virtual amiInvoker* newInvoker (const char * name
 		, long rank
 		, FNC_PTR_T pam
 		, const STRING_SEQ_T& specs);

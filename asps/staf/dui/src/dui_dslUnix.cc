@@ -44,7 +44,7 @@ int dui_ls_l_Table(DS_DATASET_T *pDS, char*& listing)
       dsPerror("invalid DSL table");
       return FALSE;
    }
-   char* result = (char*)ASUALLOC(256);
+   char* result = (char*)MALLOC(256);
    sprintf(result,DUI_LST_FORMAT
    		,"T",name,tname,rowcount,maxrowcount,rowsize);
    strcat(listing,result);
@@ -69,14 +69,16 @@ int dui_ls_ld_Dataset(DS_DATASET_T *pDS,char*& listing)
    ||  !isDataset
    ||  !dsDatasetName(&name,pDS)
    ||  !dsDatasetEntryCount(&elcount,pDS)
+#ifdef OLD_DSL
    ||  !dsDatasetMaxEntryCount(&maxelcount,pDS)
+#endif /*OLD_DSL*/
    ){
       dsPerror("invalid DSL dataset");
       return FALSE;
    }
-   char* result = (char*)ASUALLOC(256);
+   char* result = (char*)MALLOC(256);
    sprintf(result,DUI_LSD_FORMAT
-   		,"D",name," ",elcount,maxelcount,-1);
+   		,"D",name," ",elcount,-1,-1);
    strcat(listing,result);
    return TRUE;
 }
@@ -128,7 +130,7 @@ int dui_ls_l_Dataset(DS_DATASET_T *pDS, char*& listing)
 */
 int dui_ls_l_Header(char*& listing)
 {
-   char* result = (char*)ASUALLOC(256);
+   char* result = (char*)MALLOC(256);
    sprintf(result,DUI_LSH_FORMAT
    		," "
 		,"Name            "

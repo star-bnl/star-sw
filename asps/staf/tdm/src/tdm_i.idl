@@ -73,7 +73,6 @@ interface tdmDataset_i : tdmObject_i {
 
 //:----------------------------------------------- ATTRIBUTES         --
 readonly attribute long entryCount;
-readonly attribute long maxEntryCount;
 
 //:----------------------------------------------- FUNCTIONS          --
 STAFCV_T addDataset(in string name, in long setDim);

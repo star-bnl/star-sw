@@ -51,7 +51,7 @@ int tdm_cvtDst2st(DS_DATASET_T *pT
       dsPerror("cannot convert DSL table to TAS table");
       return FALSE;
    }
-   tbl_h = (TABLE_HEAD_ST*)ASUALLOC(sizeof(header));
+   tbl_h = (TABLE_HEAD_ST*)MALLOC(sizeof(header));
 
 /*- WARNING - Following strncpy's write \000 into next struct word. -*/
    strncpy(tbl_h->name,name,20);		/*- WARNING -*/

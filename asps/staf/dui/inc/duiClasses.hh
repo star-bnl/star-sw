@@ -41,8 +41,6 @@ public:
    virtual STAFCV_T cp (const char * fromPath, const char * toPath);
    virtual STAFCV_T ls (const char * path, char *& result);
    virtual STAFCV_T mkdir (const char * dirPath);
-   virtual STAFCV_T mkTable (const char * filePath
-                , const char * spec, long rows);
    virtual STAFCV_T mv (const char * fromPath, const char * toPath);
    virtual STAFCV_T pwd (char *& result);
    virtual STAFCV_T rm (const char * filePath);
@@ -54,12 +52,10 @@ public:
 
 //----------------------------------
 // Over-ride tdmFactory methods
-   virtual STAFCV_T findDataset (const char * dirPath
-		, tdmDataset*& dataset);
-   virtual STAFCV_T findTable (const char * filePath
-		, tdmTable*& table);
-   virtual STAFCV_T newDataset (const char * name, long setDim);
-   virtual STAFCV_T newTable (const char * name, const char * spec
+   tdmDataset* findDataset (const char * dirPath);
+   tdmTable* findTable (const char * filePath);
+   tdmDataset* newDataset (const char * name, long setDim);
+   tdmTable* newTable (const char * name, const char * spec
    		, long rows);
 
 protected:

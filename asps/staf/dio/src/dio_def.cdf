@@ -42,13 +42,13 @@ List DIO Streams.
 >ACTION KAM_DIO_LIST
 
 ** ---------------------------------------------------------------------
-** DIO/NEWFILESTREAM ALIAS [ FILE MODE ]
+** DIO/NEWFILESTREAM ALIAS FILE [ MODE ]
 >COMMAND NEWFILESTREAM
 >PARAMETERS
 ALIAS 'dioFileStream alias.' C
-+
 FILE 'Name of data file.' C D='-b'
-MODE 'Read/write mode of stream.' C R=' ,R,W,U' D=' '
++
+MODE 'Read/write mode of stream.' C R='R,W,U' D='R'
 >GUIDANCE
 Create a new dioFileStream.
 .
@@ -57,17 +57,18 @@ FILE == "-b" will invoke the tcl/tk browser.
 MODE == "R" = Read Only
         "W" = Write Only
 	"U" = Update (Read/Write)
-	" " = Do not open file. Mode to be determined.
 .
 >ACTION KAM_DIO_NEWFILESTREAM
 
 ** ---------------------------------------------------------------------
-** DIO/NEWSOCKSTREAM ALIAS HOST PORT
+** DIO/NEWSOCKSTREAM ALIAS HOST PORT [ MODE ]
 >COMMAND NEWSOCKSTREAM
 >PARAMETERS
 ALIAS 'dioSockStream alias.' C
 HOST 'Name of remote host.' C
 PORT 'Socket port number.' I R='1024:9999'
++
+MODE 'Read/write mode of stream.' C R='R,W,U' D='R'
 >GUIDANCE
 Create a new dioSockStream.
 .
@@ -75,21 +76,23 @@ HOST is the TCP/IP address of the host to which to connect.
 .
 PORT is the service port number to which to connect.
 .
+MODE == "R" = Read Only
+        "W" = Write Only
+	"U" = Update (Read/Write)
+.
 >ACTION KAM_DIO_NEWSOCKSTREAM
 
 
 ************************************************************************
 ************************************************************************
-** DIO/FILESTREAM
->MENU FILESTREAM
+** DIO/STREAM
+>MENU STREAM
 >Guidance
-Data Input/Output fileStream commands.
+Data Input/Output stream commands.
 .
-************************************************************************
-************************************************************************
 
 ** ---------------------------------------------------------------------
-** DIO/FILESTREAM/OPEN ALIAS MODE
+** DIO/STREAM/OPEN ALIAS MODE
 >COMMAND OPEN
 >PARAMETERS
 ALIAS 'dioFileStream alias.' C
@@ -105,20 +108,20 @@ MODE == "R" = Read Only
  * Not Yet Implemented  *
  ************************
 .
->ACTION KAM_DIOFILESTREAM_OPEN
+>ACTION KAM_DIOSTREAM_OPEN
 
 ** ---------------------------------------------------------------------
-** DIO/FILESTREAM/CLOSE ALIAS
+** DIO/STREAM/CLOSE ALIAS
 >COMMAND CLOSE
 >PARAMETERS
 ALIAS 'dioFileStream alias.' C
 >GUIDANCE
 Close the stream's file.
 .
->ACTION KAM_DIOFILESTREAM_CLOSE
+>ACTION KAM_DIOSTREAM_CLOSE
 
 ** ---------------------------------------------------------------------
-** DIO/FILESTREAM/GETEVENT ALIAS [ DATASET ]
+** DIO/STREAM/GETEVENT ALIAS [ DATASET ]
 >COMMAND GETEVENT
 >PARAMETERS
 ALIAS 'dioFileStream alias.' C
@@ -131,10 +134,10 @@ Read from a DIO file stream ONTO a memory-resident dataset.
  * Still In Development *
  ************************
 .
->ACTION KAM_DIOFILESTREAM_GETEVENT
+>ACTION KAM_DIOSTREAM_GETEVENT
 
 ** ---------------------------------------------------------------------
-** DIO/FILESTREAM/PUTEVENT ALIAS [ DATASET ]
+** DIO/STREAM/PUTEVENT ALIAS [ DATASET ]
 >COMMAND PUTEVENT
 >PARAMETERS
 ALIAS 'dioFileStream alias.' C
@@ -147,27 +150,37 @@ Write a memory-resident dataset to a DIO file stream.
  * Still In Development *
  ************************
 .
->ACTION KAM_DIOFILESTREAM_PUTEVENT
+>ACTION KAM_DIOSTREAM_PUTEVENT
 
 ** ---------------------------------------------------------------------
-** DIO/FILESTREAM/MODE ALIAS
+** DIO/STREAM/MODE ALIAS
 >COMMAND MODE
 >PARAMETERS
 ALIAS 'dioFileStream alias.' C
 >GUIDANCE
 Show the I/O mode of DIO stream.
 .
->ACTION KAM_DIOFILESTREAM_MODE
+>ACTION KAM_DIOSTREAM_MODE
 
 ** ---------------------------------------------------------------------
-** DIO/FILESTREAM/STATE ALIAS
+** DIO/STREAM/STATE ALIAS
 >COMMAND STATE
 >PARAMETERS
 ALIAS 'dioFileStream alias.' C
 >GUIDANCE
 Show the state of DIO stream.
 .
->ACTION KAM_DIOFILESTREAM_STATE
+>ACTION KAM_DIOSTREAM_STATE
+
+************************************************************************
+************************************************************************
+** DIO/FILESTREAM
+>MENU \FILESTREAM
+>Guidance
+Data Input/Output fileStream commands.
+.
+************************************************************************
+************************************************************************
 
 ** ---------------------------------------------------------------------
 ** DIO/FILESTREAM/FILENAME ALIAS
@@ -202,87 +215,6 @@ Set or get the maximnum number of handshakes to try.
  N.B.- The server and client handshake protocols must match.
 .
 >ACTION KAM_DIOSOCKSTREAM_MAXHANDSHAKES
-
-** ---------------------------------------------------------------------
-** DIO/SOCKSTREAM/OPEN ALIAS MODE
->COMMAND OPEN
->PARAMETERS
-ALIAS 'dioSockStream alias.' C
-MODE 'Read/write mode of stream.' C R='R,W,U' D='R'
->GUIDANCE
-Open a socket for the stream.
-.
- MODE == "R" = Read Only
-         "W" = Write Only
-	 "U" = Update (Read/Write)
-.
- ************************
- * Not Yet Implemented  *
- ************************
-.
->ACTION KAM_DIOSOCKSTREAM_OPEN
-
-** ---------------------------------------------------------------------
-** DIO/SOCKSTREAM/CLOSE ALIAS
->COMMAND CLOSE
->PARAMETERS
-ALIAS 'dioSockStream alias.' C
->GUIDANCE
-Close the stream's socket.
-.
->ACTION KAM_DIOSOCKSTREAM_CLOSE
-
-** ---------------------------------------------------------------------
-** DIO/SOCKSTREAM/GETEVENT ALIAS [ DATASET ]
->COMMAND GETEVENT
->PARAMETERS
-ALIAS 'dioSockStream alias.' C
-+
-DATASET 'Dataset name.' C D='.'
->GUIDANCE
-Read from a DIO sockStream ONTO a memory-resident dataset.
-.
- ************************
- * Still In Development *
- ************************
-.
->ACTION KAM_DIOSOCKSTREAM_GETEVENT
-
-** ---------------------------------------------------------------------
-** DIO/SOCKSTREAM/PUTEVENT ALIAS [ DATASET ]
->COMMAND PUTEVENT
->PARAMETERS
-ALIAS 'dioSockStream alias.' C
-+
-DATASET 'Dataset name.' C D='.'
->GUIDANCE
-Write a memory-resident dataset to a DIO sockStream.
-.
- ************************
- * Still In Development *
- ************************
-.
->ACTION KAM_DIOSOCKSTREAM_PUTEVENT
-
-** ---------------------------------------------------------------------
-** DIO/SOCKSTREAM/MODE ALIAS
->COMMAND MODE
->PARAMETERS
-ALIAS 'dioSockStream alias.' C
->GUIDANCE
-Show the I/O mode of DIO stream.
-.
->ACTION KAM_DIOSOCKSTREAM_MODE
-
-** ---------------------------------------------------------------------
-** DIO/SOCKSTREAM/STATE ALIAS
->COMMAND STATE
->PARAMETERS
-ALIAS 'dioSockStream alias.' C
->GUIDANCE
-Show the state of DIO stream.
-.
->ACTION KAM_DIOSOCKSTREAM_STATE
 
 ** ---------------------------------------------------------------------
 ** DIO/SOCKSTREAM/HOST ALIAS

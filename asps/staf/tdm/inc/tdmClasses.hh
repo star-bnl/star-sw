@@ -134,7 +134,9 @@ public:
 //:----------------------------------------------- ATTRIBUTES         --
    virtual char * dslName ();
    virtual long entryCount ();
+#ifdef OLD_DSL
    virtual long maxEntryCount ();
+#endif /*OLD_DSL*/
 
 //- OVERRIDE VIRTUAL
    virtual char * listing();
