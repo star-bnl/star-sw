@@ -21,7 +21,7 @@ StSsdEvent::StSsdEvent()
 StSsdEvent::~StSsdEvent()
 {
   for(int i=0; i < mNumTracks; i++) delete mTracks[i];
-  delete[] mTracks;
+  delete[] mTracks; mTracks=0;
 };
 
 
@@ -30,16 +30,13 @@ int StSsdEvent::addTrack(track newOne)
   if (mNumTracks == maxNumTracks)
     {
       //track *newTr[3000];
+      maxNumTracks = int(maxNumTracks*1.2+10);
       track **newTr= new track*[maxNumTracks];
 
-      for (int i=0; i<maxNumTracks; i++)
+      for (int i=0; i<mNumTracks; i++)
 	newTr[i] = mTracks[i];
       delete[] mTracks;
-      mTracks = new track*[maxNumTracks+10];
-      for (int i=0; i<maxNumTracks; i++)
-	mTracks[i] = newTr[i];
-      maxNumTracks+=10;
-      delete[] newTr;
+      mTracks = newTr ;
     };
 
   int np = newOne.numberOfHits - 1;
