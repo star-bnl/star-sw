@@ -30,7 +30,7 @@
    size_t              pok;	  /* size of table (# of rows) */
 /*generic io*/
    static DS_DATASET_T *ptr;
-   uint                *pp;
+   unsigned int        *pp;
    size_t               nn;
 
 #define GET(P,T,O,F) (dsFindEntry(&P,d,T)                && \
