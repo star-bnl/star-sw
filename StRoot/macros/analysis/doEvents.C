@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.34 1999/08/06 20:23:22 kathy Exp $
+// $Id: doEvents.C,v 1.35 1999/09/22 19:45:05 perev Exp $
 // $Log: doEvents.C,v $
-// Revision 1.34  1999/08/06 20:23:22  kathy
-// back to old version that didn't call different types of StAnalysisMaker, with and without qaflag to write out QA file; However, I've still left qaflag as macro input (switched off) so that we can use it to turn off and on QA histogram package when we get it working
+// Revision 1.35  1999/09/22 19:45:05  perev
+// Fix last event print number
+//
+// Revision 1.35  1999/09/22 19:45:05  perev
+// Fix last event print number
 //
 // Revision 1.34  1999/08/06 20:23:22  kathy
 // back to old version that didn't call different types of StAnalysisMaker, with and without qaflag to write out QA file; However, I've still left qaflag as macro input (switched off) so that we can use it to turn off and on QA histogram package when we get it working
@@ -223,9 +226,11 @@ void doEvents(Int_t,const Char_t **,const char *qaflag = "");
   int istat=0,i=1;
 EventLoop: if (i <= nevents && !istat) {
     cout << "============================ Event " << i << " start" << endl;
-    i++; goto EventLoop;
+    chain->Clear();
+    istat = chain->Make(i);
     if (istat) {cout << "Last event processed. Status = " << istat << endl;}
     i++;
+    goto EventLoop;
 }
      chain->Clear();
      istat = chain->Make(i);
