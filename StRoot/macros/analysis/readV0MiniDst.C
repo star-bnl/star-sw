@@ -1,5 +1,8 @@
-// $Id: readV0MiniDst.C,v 1.9 2000/04/12 16:16:55 genevb Exp $
+// $Id: readV0MiniDst.C,v 1.10 2000/04/13 21:46:35 kathy Exp $
 // $Log: readV0MiniDst.C,v $
+// Revision 1.10  2000/04/13 21:46:35  kathy
+// remove loading of libtpc_Tables since l3Track table is now dst_track type from global
+//
 // Revision 1.9  2000/04/12 16:16:55  genevb
 // Remove unnecessary library loads
 //
@@ -43,7 +46,7 @@ void load() {
   gSystem->Load("libgen_Tables");
   gSystem->Load("libsim_Tables");
   gSystem->Load("libglobal_Tables");
-  gSystem->Load("libtpc_Tables");
+
   gSystem->Load("StChain");
   gSystem->Load("StUtilities");
   gSystem->Load("StAnalysisUtilities");

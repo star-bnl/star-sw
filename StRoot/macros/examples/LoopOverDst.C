@@ -1,6 +1,9 @@
 //*CMZ :          01/04/99  18.27.27  by  Valery Fine(fine@mail.cern.ch)
-// $Id: LoopOverDst.C,v 1.3 2000/04/12 16:13:40 kathy Exp $
+// $Id: LoopOverDst.C,v 1.4 2000/04/13 21:46:21 kathy Exp $
 // $Log: LoopOverDst.C,v $
+// Revision 1.4  2000/04/13 21:46:21  kathy
+// remove loading of libtpc_Tables since l3Track table is now dst_track type from global
+//
 // Revision 1.3  2000/04/12 16:13:40  kathy
 // have changed so that macro loads only table libraries needed instead of all table libraries
 //
@@ -32,7 +35,6 @@ void Load()
   gSystem->Load("libglobal_Tables");
   gSystem->Load("libgen_Tables");
   gSystem->Load("libsim_Tables");
-  gSystem->Load("libtpc_Tables");
 
     gSystem->Load("St_io_Maker");
 };

@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_tables.C,v 1.22 2000/04/13 20:25:46 kathy Exp $
+// $Id: QA_bfcread_dst_tables.C,v 1.23 2000/04/13 21:46:33 kathy Exp $
 // $Log: QA_bfcread_dst_tables.C,v $
+// Revision 1.23  2000/04/13 21:46:33  kathy
+// remove loading of libtpc_Tables since l3Track table is now dst_track type from global
+//
 // Revision 1.22  2000/04/13 20:25:46  kathy
 // make prettier output
 //
@@ -96,7 +99,7 @@ void QA_bfcread_dst_tables(
   gSystem->Load("libgen_Tables");
   gSystem->Load("libsim_Tables");
   gSystem->Load("libglobal_Tables");
-  gSystem->Load("libtpc_Tables");
+
 
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");

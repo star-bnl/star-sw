@@ -1,5 +1,8 @@
-// $Id: bfcread.C,v 1.23 2000/04/12 16:13:40 kathy Exp $
+// $Id: bfcread.C,v 1.24 2000/04/13 21:46:22 kathy Exp $
 // $Log: bfcread.C,v $
+// Revision 1.24  2000/04/13 21:46:22  kathy
+// remove loading of libtpc_Tables since l3Track table is now dst_track type from global
+//
 // Revision 1.23  2000/04/12 16:13:40  kathy
 // have changed so that macro loads only table libraries needed instead of all table libraries
 //
@@ -84,7 +87,6 @@ void bfcread(
   gSystem->Load("libglobal_Tables");
   gSystem->Load("libgen_Tables");
   gSystem->Load("libsim_Tables");
-  gSystem->Load("libtpc_Tables");
 
     gSystem->Load("StIOMaker");
 

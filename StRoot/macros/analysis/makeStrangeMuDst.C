@@ -1,5 +1,8 @@
-// $Id: makeStrangeMuDst.C,v 1.3 2000/04/12 16:16:55 genevb Exp $
+// $Id: makeStrangeMuDst.C,v 1.4 2000/04/13 21:46:35 kathy Exp $
 // $Log: makeStrangeMuDst.C,v $
+// Revision 1.4  2000/04/13 21:46:35  kathy
+// remove loading of libtpc_Tables since l3Track table is now dst_track type from global
+//
 // Revision 1.3  2000/04/12 16:16:55  genevb
 // Remove unnecessary library loads
 //
@@ -25,7 +28,7 @@ void load() {
   gSystem->Load("libgen_Tables");
   gSystem->Load("libsim_Tables");
   gSystem->Load("libglobal_Tables");
-  gSystem->Load("libtpc_Tables");
+
 
   gSystem->Load("StChain");
   gSystem->Load("StIOMaker");

@@ -1,5 +1,8 @@
-// $Id: Example_read_dst_write_table_ntup.C,v 1.2 2000/04/12 16:13:40 kathy Exp $
+// $Id: Example_read_dst_write_table_ntup.C,v 1.3 2000/04/13 21:46:21 kathy Exp $
 // $Log: Example_read_dst_write_table_ntup.C,v $
+// Revision 1.3  2000/04/13 21:46:21  kathy
+// remove loading of libtpc_Tables since l3Track table is now dst_track type from global
+//
 // Revision 1.2  2000/04/12 16:13:40  kathy
 // have changed so that macro loads only table libraries needed instead of all table libraries
 //
@@ -32,10 +35,9 @@ void Example_read_dst_write_table_ntup(
     gSystem->Load("St_base");
     gSystem->Load("StChain");
 
-gSystem->Load("libglobal_Tables");
-gSystem->Load("libgen_Tables");
-gSystem->Load("libsim_Tables");
-gSystem->Load("libtpc_Tables");
+    gSystem->Load("libglobal_Tables");
+    gSystem->Load("libgen_Tables");
+    gSystem->Load("libsim_Tables");
 
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
