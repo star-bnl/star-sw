@@ -409,9 +409,15 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
   		                                    TH1F* hHotTower,
                                           TH1F* hPedMean,
 			                                    TH1F* hPedWidth) {
-//create the pedestal file
+
+//create the pedestal directory, if it doesn't exist
+//create the pedestal file as well
   TString pfilename = directory;
   pfilename += "/pedestals/";
+  void *dir = NULL;
+  if ((dir = gSystem->OpenDirectory(directory)) == NULL)
+    gSystem->MakeDirectory(directory);
+
   pfilename += mDetectorFlavor;
   pfilename += "pedestals_for_run_";
   TString runnumber = hist->GetName();
@@ -580,6 +586,10 @@ CSMStatusUtils::analyseStatusHistogram(TH2F* hist,
 Int_t
 CSMStatusUtils::saveStatusTablesToASCII(const Char_t* directory,int index) {
   
+  void* dir;
+  if ((dir = gSystem->OpenDirectory(directory)) == NULL)
+    gSystem->MakeDirectory(directory);
+
   IntToPtrVecShortConstIter first = mRunStatusMapPtr->begin();
   IntToPtrVecShortConstIter last = mRunStatusMapPtr->end();
   if(index != 0) {
@@ -620,7 +630,7 @@ CSMStatusUtils::getNumberOfChangedTowers(Int_t runnumber) {
   }
 // run not found
   if (iter == mRunStatusMapPtr->end()) {
-    cout << "you killed my recturm " << runnumber << endl;
+    cout << "you killed my babyp " << runnumber << endl;
     return -1;
   }
 
