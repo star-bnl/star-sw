@@ -127,7 +127,7 @@ class TTTableSorter : public TTableSorter
   public:
   TTTableSorter(float *arr, int narr):TTableSorter(arr,narr){}
   Int_t BinarySearch(Float_t fkey)
-  {return TMath::BinarySearch(fNumberOfRows,(float**)fSortIndex,fkey);}
+  {return TMath::BinarySearch(fNumberOfRows,(const Float_t *)fSortIndex,fkey);}
   void Randomize(Int_t jl,Int_t jr); 
 };
 //_____________________________________________________________________________
@@ -526,9 +526,9 @@ double StVeloMaker::MakeTrack(int *tr)
      nacc++;
    }
 
-   double r1 = sqrt(pow(pnts[i1REG][0],2)+pow(pnts[i1REG][1],2));
-   double r2 = sqrt(pow(pnts[i2REG][0],2)+pow(pnts[i2REG][1],2));
-   double z0 = (pnts[i1REG][2]*r2- pnts[i2REG][2]*r1)/(r2-r1);
+   //double r1 = sqrt(pow(pnts[i1REG][0],2)+pow(pnts[i1REG][1],2));
+   //double r2 = sqrt(pow(pnts[i2REG][0],2)+pow(pnts[i2REG][1],2));
+   //double z0 = (pnts[i1REG][2]*r2- pnts[i2REG][2]*r1)/(r2-r1);
 
    THelixTrack hel(pnts[0],nacc);
    TCL::ucopy(hel.GetXYZ(),fTrks[fNTrks].x,3);
