@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSector.hh,v 1.3 1999/10/11 23:55:10 calderon Exp $
+ * $Id: StTrsDigitalSector.hh,v 1.4 1999/10/19 21:17:57 calderon Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -24,6 +24,12 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSector.hh,v $
+ * Revision 1.4  1999/10/19 21:17:57  calderon
+ * New format of data for the Digital Sector without mZeros.
+ * Member functions modified accordingly.  Not tested yet, but
+ * committed because cons still can't handle changes in the
+ * TRS header files.
+ *
  * Revision 1.3  1999/10/11 23:55:10  calderon
  * Version with Database Access and persistent file.
  * Not fully tested due to problems with cons, it
@@ -78,9 +84,9 @@ public:
     //StTrsDigitalSector& operator=(const StTrsDigitalSector&);
 
     // access functions
-    pair<digitalTimeBins*, digitalTimeBins*>   timeBinsOfRowAndPad(int, int);
-    pair<digitalPadRow*,   digitalPadRow*>     padsOfRow(int);
-    pair<digitalSector*,   digitalSector*>     rows();
+    digitalTimeBins*   timeBinsOfRowAndPad(int, int);
+    digitalPadRow*     padsOfRow(int);
+    digitalSector*     rows();
 
     int  numberOfRows()             const;
     int  numberOfPadsInRow(int)     const;
@@ -89,28 +95,25 @@ public:
     // Adding
     void clear();
 
-    void assignTimeBins(int, int, pair<digitalTimeBins*, digitalTimeBins*> );
-    void assignTimeBins(StTpcPadCoordinate&, pair<digitalTimeBins*, digitalTimeBins*>);
+    void assignTimeBins(int, int, digitalTimeBins*);
+    void assignTimeBins(StTpcPadCoordinate&, digitalTimeBins*);
     // When writing, make sure we don't carry unnecessary zeros:
     int cleanup();
 public:
     digitalSector mData;
-    digitalSector mZeros;
+//     digitalSector mZeros;
 };
-inline pair<digitalTimeBins*,digitalTimeBins*> StTrsDigitalSector::timeBinsOfRowAndPad(int rowN, int padN)
+inline digitalTimeBins* StTrsDigitalSector::timeBinsOfRowAndPad(int rowN, int padN)
 {
-    pair<digitalTimeBins*,digitalTimeBins*> a(&mData[(rowN-1)][(padN-1)],&mZeros[(rowN-1)][(padN-1)]);
-    return (a);
+    return (&mData[(rowN-1)][(padN-1)]);
 }
-inline pair<digitalPadRow*,digitalPadRow*> StTrsDigitalSector::padsOfRow(int rowN)
+inline digitalPadRow* StTrsDigitalSector::padsOfRow(int rowN)
 {
-    pair<digitalPadRow*,digitalPadRow*> a(&mData[(rowN-1)],&mZeros[(rowN-1)]);
-    return(a);
+    return(&mData[(rowN-1)]);
 }
-inline pair<digitalSector*,digitalSector*> StTrsDigitalSector::rows()
+inline digitalSector* StTrsDigitalSector::rows()
 {
-    pair<digitalSector*,digitalSector*> a(&mData,&mZeros);
-    return (a);
+    return (&mData);
 }
 inline int StTrsDigitalSector::numberOfRows() const { return mData.size();}
 inline int StTrsDigitalSector::numberOfPadsInRow(int rowN) const { return mData[(rowN-1)].size();}
