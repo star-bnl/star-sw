@@ -1,6 +1,10 @@
 // 
-// $Id: StBemcRaw.cxx,v 1.9 2004/12/14 11:32:11 suaide Exp $
+// $Id: StBemcRaw.cxx,v 1.10 2004/12/21 12:53:48 suaide Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.10  2004/12/21 12:53:48  suaide
+// moved StBemcTables to StEmcUtil
+// corrected for y2005 PSD data banks
+//
 // Revision 1.9  2004/12/14 11:32:11  suaide
 // added histograms for status tables creation
 //
@@ -227,6 +231,7 @@ Bool_t StBemcRaw::convertFromDaq(TDataSet* DAQ, StEmcRawData* RAW)
     // not have its own data format and it is being read as 
     // SMD
     if(mDate<20040701) NSMD = 4;
+  
     for(Int_t i = 0; i<NSMD; i++)
     {      
       if(smd.HasData[i]==1)
@@ -241,6 +246,8 @@ Bool_t StBemcRaw::convertFromDaq(TDataSet* DAQ, StEmcRawData* RAW)
     /////////////////////////////////////////////////////////////////////
     // read Pre Shower data for Y2004 AuAu data. This year, the PSD data
     // is read as SMD data for fibers 4 and 5.
+    //
+    // For y2005 data, PSD data is on SMD banks 8 to 12
     // 
     // This is a temporary solution while the PSD data format is not
     // decided by Tonko. He needs to have a decision on some
@@ -248,11 +255,11 @@ Bool_t StBemcRaw::convertFromDaq(TDataSet* DAQ, StEmcRawData* RAW)
     //
     // AAPSUAIDE 20040318
     //
-    if(mDate>20040101 && mDate<20040701)
+    if(mDate>20040101)
     {
-      for(Int_t RDO = 0; RDO<2; RDO++)
+      for(Int_t RDO = 0; RDO<4; RDO++)
       {
-        Int_t SMDRDO = RDO+4;
+        Int_t SMDRDO = RDO+NSMD;
         if(smd.HasData[SMDRDO]==1) 
         {
           Int_t bank = RDO+BPRSOFFSET;

@@ -1,5 +1,9 @@
-// $Id: StBemcRaw.h,v 1.6 2004/12/14 11:32:11 suaide Exp $
+// $Id: StBemcRaw.h,v 1.7 2004/12/21 12:53:49 suaide Exp $
 // $Log: StBemcRaw.h,v $
+// Revision 1.7  2004/12/21 12:53:49  suaide
+// moved StBemcTables to StEmcUtil
+// corrected for y2005 PSD data banks
+//
 // Revision 1.6  2004/12/14 11:32:11  suaide
 // added histograms for status tables creation
 //
@@ -37,7 +41,7 @@ bemcRawData is also filled in the StEmcCollection.
 
 #include "TObject.h"
 #include "TDataSet.h"
-#include "StBemcTables.h"
+#include "StEmcUtil/database/StBemcTables.h"
 #include "StDaqLib/EMC/StEmcDecoder.h"
 
 #include "tables/St_controlADCtoE_Table.h"
