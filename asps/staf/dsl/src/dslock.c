@@ -1,18 +1,17 @@
 /* Copyright 1993, Lawrence Berkeley Laboratory */
 
 /* dslock.c - lock and unlock routines for static type structures  */
- 
+
 /*
 modification history
 --------------------
-01a,27jul93,whg  written.
+27jul93,whg  written.
 */
 
 /*
 DESCRIPTION
-TBS ...
+routines for sharing structures in VxWorks or other multi-threaded OS
 */
-#include <stdio.h>
 #include <stdlib.h>
 #define DS_PRIVATE
 #include "dscodes.h"
@@ -27,15 +26,15 @@ static int semVal = 0, nLock = 0;
 *
 * dsTypeLock - lock type structures
 *
+* RETURNS: TRUE if success else FALSE
 */
 int dsTypeLock(void)
 {
 	nLock++;
 #ifdef VXWORKS
-	if (semTake (tidSemID, WAIT_FOREVER)) {
+	if (semTake(tidSemID, WAIT_FOREVER)) {
 #else
 	if (semVal++){
-		printf("DS_E_SEM_TAKE_ERROR\n");
 #endif
 		DS_ERROR(DS_E_SEM_TAKE_ERROR);
 	}
@@ -45,6 +44,7 @@ int dsTypeLock(void)
 *
 * dsTypeLockInit - intialize semaphore for vxWorks or dummy
 *
+* RETURNS: TRUE if success else FALSE
 */
 int dsTypeLockInit(void)
 {
@@ -60,6 +60,7 @@ int dsTypeLockInit(void)
 *
 * dsTypeLockStats - print lock statsistics
 *
+* RETURNS: TRUE
 */
 int dsTypeLockStats(void)
 {
@@ -70,6 +71,7 @@ int dsTypeLockStats(void)
 *
 * dsTypeUnock - unlock structures
 *
+* RETURNS: TRUE if success else FALSE
 */
 int dsTypeUnlock(void)
 {
@@ -77,7 +79,6 @@ int dsTypeUnlock(void)
 	if (semGive(tidSemID)) {
 #else
 	if (--semVal){
-		printf("DS_E_SEM_GIVE_ERROR\n");
 #endif
 		DS_ERROR(DS_E_SEM_GIVE_ERROR);
 	}

@@ -13,11 +13,7 @@ modification history
 DESCRIPTION
 TBS ...
 */
-#include <stddef.h>
 #include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <rpc/rpc.h>
 #include "dstype.h"
 #include "dsxdr.h"
 #ifdef sun
@@ -164,18 +160,17 @@ int readFile(char *fileName)
 	ORDER_TYPE order[TABLE_DIM], *pOrder = order;
 	DS_DATASET_T *pDataset = NULL;
 	XDR xdr;
-	int c, d;
 
-	if (!(c = xdrCreate(&xdr, fileName, XDR_DECODE)) ||
-		!(d = xdr_dataset(&xdr, &pDataset))){
-		printf("c %d, d %d\n", c, d);
+	if (!xdrCreate(&xdr, fileName, XDR_DECODE) ||
+		!xdr_dataset(&xdr, &pDataset)){
 		dsPerror("readFile: xdr failed\n");
 		goto fail;
 	}
 	count = TABLE_DIM;
 	memset(base, 127, sizeof(base));
 	if (!dsTasProject(pDataset, "base", BASE_DECL, &count, &pBase)
-		|| count != BASE_LEN || !checkBase(base, count)) {
+		|| count != BASE_LEN || !checkBase(base, count)) { 
+		printf("count %d\n", count);
 		dsPerror("UNEXPECTED failue for base\n");
 		goto fail;
 	}
@@ -192,7 +187,7 @@ int readFile(char *fileName)
 	if (!dsTasProject(pDataset, "base", FEWER_DECL, &count, &pFewer) ||
 		count != BASE_LEN || !checkFewer(fewer, count)) {
 		printf("count %d\n", count);
-		dsPerror("UNEXPECTED failure for fewer test\n");
+		dsPerror("UNEXPECTED failure for extra columns\n");
 		goto fail;
 	}
 	/* check project into more columns */
@@ -200,10 +195,10 @@ int readFile(char *fileName)
 	if (dsTasProject(pDataset, "base", MORE_DECL, &count, &pMore) ||
 		count != BASE_LEN || !checkMore(more, count)) {
 		printf("count %d\n", count);
-		dsPerror("UNEXPECTED failure for more test\n");
+		dsPerror("UNEXPECTED failure for missing columns test\n");
 		goto fail;
 	}
-	dsPerror("more columns test");
+	dsPerror("missing columns test");
 		
 	/* check truncation */
 	count = 3;
@@ -225,7 +220,17 @@ int readFile(char *fileName)
 		goto fail;
 	}
 	dsPerror("column types differ test");
-	
+
+	/* multiple error test */
+	count = 3;
+	memset(base, 127, sizeof(base));
+	if (dsTasProject(pDataset, "long", DIFFER_DECL, &count, &pDiffer) ||
+		count != 3 || !checkDiffer(differ, count)) {
+		printf("UNEXPECTED success for multiple failure test\n");
+		goto fail;
+	}
+	dsPerror("multiple failure test");
+
 	/* no matching columns */
 	count = TABLE_DIM;
 	if (dsTasProject(pDataset, "base", NONE_DECL, &count, &pBase) || 
@@ -306,7 +311,7 @@ int xdrCreate(XDR *xdrs, char *fileName, int op)
 	}
 	type = op == XDR_ENCODE ? "wb" : "rb";
 	if ((stream = fopen(fileName, type)) == NULL) {
-		fprintf(stderr, "fopen(%s, %s) failed\n", fileName, type);
+		dsErrorPrint("fopen(%s, %s) failed\n", fileName, type);
 		return FALSE;
 	}
 	xdrstdio_create(xdrs, stream, op);

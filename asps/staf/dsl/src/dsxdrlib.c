@@ -5,28 +5,24 @@
 /*
 modification history
 --------------------
-01a,24apr93,whg  written.
+24apr93,whg  written.
 */
 
 /*
 DESCRIPTION
-TBS ...
+xdr interface for tables and datasets
 */
-#include <stdio.h>
 #include <string.h>
-#include <rpc/rpc.h>
 #define DS_PRIVATE
 #include "dscodes.h"
 #include "dstype.h"
 #include "dsxdr.h"
 
-static int xdr_ctype(XDR *xdrs, char *base, size_t count, DS_TYPE_T *type);
-static int xdr_swap(XDR *xdrs, char *ptr, int elsize, int elcount);
-static bool_t xdr_table(XDR *xdrs, void *ptr, size_t typeID, size_t nrow);
-static bool_t xdr_types(XDR *xdrs, DS_DATASET_T *pDataset, size_t *typeList);
-
-#define XDR_CAST int (*)(XDR *, void *)
-
+/******************************************************************************
+*
+* macros and variables for padding and raw transfers
+*
+*/
 #define XDR_PAD(xdrs, n) ((n) == 0 ? TRUE : ((size_t)(n) > MAX_PAD ? FALSE :\
 	((xdrs)->x_op == XDR_DECODE ? XDR_GETBYTES(xdrs, padBuf, n) :\
 	((xdrs)->x_op == XDR_ENCODE ? XDR_PUTBYTES(xdrs, padZero, n) : FALSE))))
@@ -39,8 +35,18 @@ static bool_t xdr_types(XDR *xdrs, DS_DATASET_T *pDataset, size_t *typeList);
 static char padBuf[MAX_PAD], padZero[MAX_PAD] = {0, 0, 0, 0, 0, 0, 0};
 /******************************************************************************
 *
+* prototypes for static functions
+*
+*/
+static int xdr_ctype(XDR *xdrs, char *base, size_t count, DS_TYPE_T *type);
+static int xdr_swap(XDR *xdrs, char *ptr, int elsize, int elcount);
+static bool_t xdr_table(XDR *xdrs, void *ptr, size_t typeID, size_t nrow);
+static bool_t xdr_types(XDR *xdrs, DS_DATASET_T *pDataset, size_t *typeList);
+/******************************************************************************
+*
 * xdr_ctype - translate an array of c structs
 *
+* RETURNS: TRUE if success else FALSE
 */
 static int xdr_ctype(XDR *xdrs, char *base, size_t count, DS_TYPE_T *type)
 {
@@ -59,41 +65,34 @@ static int xdr_ctype(XDR *xdrs, char *base, size_t count, DS_TYPE_T *type)
 	}
 #endif
 	if (DS_BASIC_TYPE(type)) {
-		if ((size = type->size) == type->stdsize && DS_STD_REAL(type)) {
+		if ((size = type->size) == type->stdsize &&
+			(DS_IS_IEEE_FLOAT || !DS_IS_REAL(type))) {
 			if (DS_IS_BIG_ENDIAN || size == 1) {
 				if (!XDR_RAW(xdrs, base, count*size)) {
 					DS_ERROR(DS_E_XDR_IO_ERROR);
 				}
 			}
 			else if (!xdr_swap(xdrs, base, size, count)) {
-					DS_ERROR(DS_E_XDR_BYTE_SWAP_ERROR);
+				return FALSE;
 			}
 			return TRUE;
 		}
 		switch (type->code) {
 
-		 case DS_TYPE_INT:
-			xdr_fcn = (XDR_CAST)xdr_int;
-			break;
-
-		 case DS_TYPE_U_INT:
-			xdr_fcn = (XDR_CAST)xdr_u_int;
-			break;
-
 		 case DS_TYPE_LONG:
-			xdr_fcn = (XDR_CAST)xdr_long;
+			xdr_fcn = (int (*)(XDR *, void *))xdr_long;
 			break;
 
 		 case DS_TYPE_U_LONG:
-			xdr_fcn = (XDR_CAST)xdr_u_long;
+			xdr_fcn = (int (*)(XDR *, void *))xdr_u_long;
 			break;
 
 		case DS_TYPE_FLOAT:
-			xdr_fcn = (XDR_CAST)xdr_float;
+			xdr_fcn = (int (*)(XDR *, void *))xdr_float;
 			break;
 
 		case DS_TYPE_DOUBLE:
-			xdr_fcn = (XDR_CAST)xdr_double;
+			xdr_fcn = (int (*)(XDR *, void *))xdr_double;
 			break;
 
 		default:
@@ -135,6 +134,7 @@ static int xdr_ctype(XDR *xdrs, char *base, size_t count, DS_TYPE_T *type)
 *
 * xdr_dataset - encode or decode a dataset
 *
+* RETURNS: TRUE if success else FALSE
 */
 bool_t xdr_dataset(XDR *xdrs, DS_DATASET_T **ppDataset)
 {
@@ -167,29 +167,46 @@ fail:
 *
 * xdr_dataset_data - encode or decode dataset tables
 *
+* RETURNS: TRUE if success else FALSE
 */
 bool_t xdr_dataset_data(XDR *xdrs, DS_DATASET_T *pDataset)
 {
-	size_t i, n = pDataset->elcount, tid = pDataset->tid;
+	size_t i;
 
-	if (tid != 0) {
-		return xdr_table(xdrs, pDataset->p.data, tid, n);
-	}
-	for (i = 0; i < n; i++) {
-		if (!xdr_dataset_data(xdrs, &pDataset->p.child[i])) {
+	if (DS_IS_TABLE(pDataset)) {
+		if(xdrs->x_op == XDR_ENCODE) {
+			return xdr_table(xdrs, pDataset->p.data,
+				pDataset->tid, pDataset->elcount);
+		}
+		if (xdrs->x_op != XDR_DECODE) {
+			DS_ERROR(DS_E_INVALID_XDR_OP);
+		}
+		if (!xdr_table(xdrs, pDataset->p.data,
+			pDataset->tid, pDataset->maxcount)) {
 			return FALSE;
 		}
+		pDataset->elcount = pDataset->maxcount;
+		return TRUE;
 	}
-	return TRUE;
+	if (DS_IS_DATASET(pDataset)) {
+		for (i = 0; i < pDataset->elcount; i++) {
+			if (!xdr_dataset_data(xdrs, &pDataset->p.child[i])) {
+				return FALSE;
+			}
+		}
+		return TRUE;
+	}
+	DS_ERROR(DS_E_SYSTEM_ERROR);
 }
 /******************************************************************************
 *
 * xdr_dataset_type - encode or decode abstract types for dataset
 *
+* RETURNS: TRUE if success else FALSE
 */
 bool_t xdr_dataset_type(XDR *xdrs, DS_DATASET_T **ppDataset, size_t dim)
 {
-	char buf[DS_MAX_DECL_LEN], *str;
+	char buf[DS_MAX_SPEC_LEN+1], *str;
 	size_t *tList = NULL;
 	DS_DATASET_T *pDataset = *ppDataset;
 
@@ -201,7 +218,7 @@ bool_t xdr_dataset_type(XDR *xdrs, DS_DATASET_T **ppDataset, size_t dim)
 			goto fail;
 		}
 		str = buf;
-		if (!dsFmtDatasetDef(str, sizeof(buf), pDataset)) {
+		if (!dsDatasetSpecifier(str, sizeof(buf), pDataset)) {
 			goto fail;
 		}
 		if (!xdr_string(xdrs, &str, sizeof(buf))) {
@@ -249,23 +266,28 @@ bool_t xdr_dataset_type(XDR *xdrs, DS_DATASET_T **ppDataset, size_t dim)
 *
 * xdr_swap - translate little endian integer and ieee floating point types
 *
+* RETURNS: TRUE if success else FALSE
 */
 static int xdr_swap(XDR *xdrs, char *ptr, int elsize, int elcount)
 {
-	char buf[DS_SWAP_BUF_SIZE];
+	char buf[DS_SWAP_BUF_SIZE];	/* size must be a multiple of eight */
 	int i, n, nbytes = elcount*elsize;
+	
+	if (elsize == 0 || sizeof(buf)%elsize != 0) {
+		DS_ERROR(DS_E_SYSTEM_ERROR);
+	}
 
 	if (xdrs->x_op == XDR_DECODE) {
 		while (nbytes) {
 			n = nbytes > sizeof(buf) ? sizeof(buf) : nbytes;
 			if (!XDR_GETBYTES(xdrs, buf, n)) {
-				return FALSE;
+				DS_ERROR(DS_E_XDR_IO_ERROR);
 			}
 			switch (elsize) {
 			case 2:
 				for (i = 0; i < n; i += 2) {
 					*ptr++ = buf[i + 1];
-					*ptr++ = buf[i];
+					*ptr++ = buf[i + 0];
 				}
 				break;
 			case 4:
@@ -273,7 +295,7 @@ static int xdr_swap(XDR *xdrs, char *ptr, int elsize, int elcount)
 					*ptr++ = buf[i + 3];
 					*ptr++ = buf[i + 2];
 					*ptr++ = buf[i + 1];
-					*ptr++ = buf[i];
+					*ptr++ = buf[i + 0];
 				}
 				break;
 			case 8:
@@ -285,15 +307,14 @@ static int xdr_swap(XDR *xdrs, char *ptr, int elsize, int elcount)
 					*ptr++ = buf[i + 3];
 					*ptr++ = buf[i + 2];
 					*ptr++ = buf[i + 1];
-					*ptr++ = buf[i];
+					*ptr++ = buf[i + 0];
 				}
 				break;
 			default:
-				return FALSE;
+				DS_ERROR(DS_E_XDR_BYTE_SWAP_ERROR);
 			}
 			nbytes -= n;
 		}
-		return TRUE;
 	}
 	else if (xdrs->x_op == XDR_ENCODE) {
 		while (nbytes) {
@@ -302,7 +323,7 @@ static int xdr_swap(XDR *xdrs, char *ptr, int elsize, int elcount)
 			case 2:
 				for (i = 0; i < n; i += 2) {
 					buf[i + 1] = *ptr++;
-					buf[i] = *ptr++;
+					buf[i + 0] = *ptr++;
 				}
 				break;
 			case 4:
@@ -310,7 +331,7 @@ static int xdr_swap(XDR *xdrs, char *ptr, int elsize, int elcount)
 					buf[i + 3] = *ptr++;
 					buf[i + 2] = *ptr++;
 					buf[i + 1] = *ptr++;
-					buf[i] = *ptr++;
+					buf[i + 0] = *ptr++;
 				}
 				break;
 			case 8:
@@ -322,20 +343,20 @@ static int xdr_swap(XDR *xdrs, char *ptr, int elsize, int elcount)
 					buf[i + 3] = *ptr++;
 					buf[i + 2] = *ptr++;
 					buf[i + 1] = *ptr++;
-					buf[i] = *ptr++;
+					buf[i + 0] = *ptr++;
 				}
 				break;
 			default:
-				return FALSE;
+				DS_ERROR(DS_E_XDR_BYTE_SWAP_ERROR);
 			}
 			nbytes -= n;
 			if (!XDR_PUTBYTES(xdrs, buf, n)) {
-				return FALSE;
+				DS_ERROR(DS_E_XDR_IO_ERROR);
 			}
 		}
 	}
 	else {
-		return FALSE;
+		DS_ERROR(DS_E_XDR_IO_ERROR);
 	}
 	return TRUE;
 }
@@ -343,15 +364,16 @@ static int xdr_swap(XDR *xdrs, char *ptr, int elsize, int elcount)
 *
 * xdr_table - decode or encode table data
 *
+* RETURNS: TRUE if success else FALSE
 */
 static bool_t xdr_table(XDR *xdrs, void *ptr, size_t tid, size_t nrow)
 {
 	size_t npad, size;
 	DS_TYPE_T *type;
-    
-    if (nrow == 0) {
-    	return TRUE;
-    }
+
+	if (nrow == 0) {
+		return TRUE;
+	}
 	if (ptr == NULL) {
 		DS_ERROR(DS_E_NULL_POINTER_ERROR);
 	}
@@ -372,39 +394,49 @@ static bool_t xdr_table(XDR *xdrs, void *ptr, size_t tid, size_t nrow)
 *
 * xdr_types - encode type declarations for dataset tables
 *
+* RETURNS: TRUE if success else FALSE
 */
 static bool_t xdr_types(XDR *xdrs, DS_DATASET_T *pDataset, size_t *tList)
 {
-	char *str;
-	size_t h, i, tid = pDataset->tid;
+	char *str, *typeStr = "type ";
+	size_t h, i, npad;
+	long size;
 	DS_TYPE_T *pType;
 
-	if (tid != 0) {
-		if (!dsTypePtr(&pType, tid)) {
+	if (DS_IS_TABLE(pDataset)) {
+		if (!dsTypePtr(&pType, pDataset->tid)) {
 			return FALSE;
 		}
-		if (!dsTypeListFind(&h, tList, pType->name, NULL)) {
+		if (!dsTypeListFind(&h, tList, pType->name)) {
 			return FALSE;
 		}
-		if (tList[h] == tid) {
+		if (tList[h] == pDataset->tid) {
 			return TRUE;
 		}
 		if (tList[h]) {
 			DS_ERROR(DS_E_DUPLICATE_TYPE_NAME);
 		}
-		if (!dsTypeDef(&str, &i, tid)) {
+		if (!dsTypeSpecifier(&str, &i, pDataset->tid)) {
 			return FALSE;
 		}
-		if (!xdr_bytes(xdrs, &str, (int *)&i, i)) {
+		size = i + strlen(typeStr);
+		npad = DS_PAD((size_t)size, BYTES_PER_XDR_UNIT);
+		if (!xdr_long(xdrs, &size) ||
+			!XDR_PUTBYTES(xdrs, typeStr, strlen(typeStr)) ||
+			!XDR_PUTBYTES(xdrs, str, i) ||
+			!XDR_PAD(xdrs, npad)) {
 			DS_ERROR(DS_E_XDR_IO_ERROR);
 		}
-		tList[h] = tid;
+		tList[h] = pDataset->tid;
 		return TRUE;
 	}
-	for (i = 0; i < pDataset->elcount; i++) {
-		if (!xdr_types(xdrs, &pDataset->p.child[i], tList)) {
-			return FALSE;
+	if (DS_IS_DATASET(pDataset)) {
+		for (i = 0; i < pDataset->elcount; i++) {
+			if (!xdr_types(xdrs, &pDataset->p.child[i], tList)) {
+				return FALSE;
+			}
 		}
+		return TRUE;
 	}
-	return TRUE;
+	DS_ERROR(DS_E_SYSTEM_ERROR);
 }

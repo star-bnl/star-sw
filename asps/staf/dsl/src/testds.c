@@ -1,27 +1,31 @@
 /* Copyright 1993, Lawrence Berkeley Laboratory */
- 
+
 /* testds.c - test routines to support development of dslib */
 
 /*
 modification history
 --------------------
-01a,01aug93,whg  written.
+01aug93,whg  written.
 */
 
 /*
 DESCRIPTION
-TBS ...
+main program to run test code for dsl
 */
 #include <stdlib.h>
-#include <stdio.h>
 #define DS_PRIVATE
 #include "dstype.h"
-int dsTestAdt(void);
+#include "sample.h"
+
+int dsTestType(void);
+int dsTestCorba(void);
 int dsTestErr(void);
 int dsTestMisc(void);
 int dsTestDset(void);
 int dsTestTree(void);
+int dsTestJoin(void);
 int projectTest(void);
+int testSort();
 void testStats(void);
 void usage(char *name);
 int xdrMemTest(void);
@@ -33,36 +37,40 @@ int xdrWriteTest(void);
 * main program for development tests
 *
 */
-void main(argc, argv)
-int argc;
-char **argv;
+void main(int argc, char **argv)
 {
 	char buf[10], *ptr;
 	int errflag = 1, status = 0;
-    
-    if (argc != 2) {
+
+
+	if (argc != 2) {
+		dsToDo();
 		usage(argv[0]);
-    	printf("enter arg: ");
-    	gets(buf);
-    	ptr = buf;
-    }
-    else {
+		printf("enter arg: ");
+		gets(buf);
+		ptr = buf;
+	}
+	else {
 		ptr = argv[1];
 	}
 	if (ptr[1] == '\0') {
 		errflag = 0;
 		switch(*ptr) {
 			case 'a':
-				status = dsTestAdt();
+				printf("no a/n");
 				break;
 
 			case 'b':
-				status = TRUE;
-				printf("NO DEBUG\n");
+				status = dsDumpTypes();
 				break;
+				
+			case 'c':
+				status = dsTestCorba();
+	 		   	break;
 
 			case 'd':
-				status = dsTestMisc();
+				status = dsTestDset();
+				status = dsTestTree();
 				break;
 
 			case 'e':
@@ -72,24 +80,33 @@ char **argv;
 			case 'f':
 				status = xdrReadTest(1);
 				break;
+				
+			case 'j':
+				status = dsTestJoin();
+				break;
 
 			case 'm':
 				status = xdrMemTest();
 				break;
 				
-            case 'p':
-            	status = projectTest();
-            	break;
-            
+			case 'p':
+				status = projectTest();
+				break;
+	
+			case 'q':
+				status = testSort();
+				break;
+	
 			case 'r':
 				status = xdrReadTest(0);
 				break;
 
 			case 's':
-				status = dsTestDset();
+				status = sample();
 				break;
+				
 			case 't':
-				status = dsTestTree();
+				status = dsTestType();
 				break;
 
 			case 'w':
@@ -118,10 +135,11 @@ char **argv;
 */
 void usage(char *name)
 {
-	printf("usage: %s [a | b | d | f | m | p | r | s| t | w]\n", name);
-	printf("\ta - testAdt\n");
-	printf("\tb - dsBug\n\td - dumpBasic\n\te - dsTestErr\n");
-	printf("\tf - fast xdrReadTest\n");
-	printf("\tm - dsMemTest\n\tp - projectTest\tr - xdrReadTest\n");
-	printf("\ts - dsTestDset\n\tt - testTree\n\tw - xdrWriteTest\n");
+	printf("usage: %s [a | b | c | d | f | j | m | p | q | r | s| t | w]\n", name);
+	printf("\ta - reserved\n");
+	printf("\tb - dumpBasic\n\tc - testCorba\n\td - dsTestDset\n");
+	printf("\te - dsTestErr\n\tf - fast xdrReadTest\n\tj - joinTest\n");
+	printf("\tm - dsMemTest\n\tp - projectTest\n\tq - testQuickSort\n");
+	printf("\tr - xdrReadTest\n");
+	printf("\ts - sample\n\tt - testType\n\tw - xdrWriteTest\n");
 }

@@ -5,14 +5,14 @@
 /*
 modification history
 --------------------
-01a,10aug93,whg  written.
+10aug93,whg  written.
 */
 
 /*
 DESCRIPTION
-TBS ...
+error code routines...
 */
-#include <stdio.h>
+#include <stdarg.h>
 #include <stddef.h>
 #include "dscodes.h"
 #define DS_PRIVATE
@@ -22,6 +22,7 @@ TBS ...
 *
 * dsClearError - set error code to DS_E_OK
 *
+* RETURNS: TRUE
 */
 int dsClearError()
 {
@@ -30,8 +31,9 @@ int dsClearError()
 }
 /******************************************************************************
 *
-* dsErrorCode - return code for last error
+* dsErrorCode
 *
+* RETURNS: last error code
 */
 int dsErrorCode()
 {
@@ -41,6 +43,7 @@ int dsErrorCode()
 *
 * dsErrorLogger - log, print or return error code
 *
+* RETURNS: last error code
 */
 int dsErrorLogger(int code, char *msg, char *file, int line)
 {
@@ -68,20 +71,30 @@ int dsErrorLogger(int code, char *msg, char *file, int line)
 		err->line = line;
 	}
 	else if (msg != NULL) {
-#ifdef VXWORKS
-		printf(
-#else
-		fprintf(stderr,
-#endif
-			"%s%s%s - %s %d\n", msg, (*msg == '\0' ? "" : ": "),
+		dsErrorPrint("%s%s%s - %s %d\n", msg, (*msg == '\0' ? "" : ": "),
 			err->msg, err->file, err->line);
 	}
 	return err->code;
 }
 /******************************************************************************
 *
+*/
+ int dsErrorPrint(char *fmt, ...)
+ {
+ 	va_list args;
+	va_start(args, fmt);
+
+#ifdef VXWORKS
+	return vprintf(fmt, args);
+#else
+	return vfprintf(stderr, fmt, args);
+#endif
+}
+/******************************************************************************
+*
 * dsPerror - print info about last error
 *
+* RETURNS: last error code
 */
 int dsPerror(char *msg)
 {
