@@ -1,5 +1,10 @@
-// $Id: StLaserEventMaker.cxx,v 1.7 2000/07/26 22:49:40 didenko Exp $
+// $Id: StLaserEventMaker.cxx,v 1.8 2001/03/26 18:27:00 love Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.8  2001/03/26 18:27:00  love
+// Added many features.  Calculates DOCA for laser tracks to mirror positions.  POCA
+//  for non laser events to x,y = 0,0.
+//
+// 8 Jan 2001 Change curvature cut in DOCA from .0001 to .000001
 // Revision 1.7  2000/07/26 22:49:40  didenko
 // add one more parameter in tpt
 //
@@ -7,7 +12,8 @@
 // remove params
 //
 // Revision 1.5  2000/04/24 14:36:34  love
-// Write clock, drivel, tzero on Event Header.  truncate psi angles to 0-180 range
+// Write clock, drivel, tzero on Event Header. 
+// truncate psi angles to 0-180 range (a mistake)
 // Expand doca to do straight tracks and do 12 laser sectors, add z cut.
 // Expand to 2000 possible track numbers.
 //
@@ -23,7 +29,6 @@
 // Revision 1.1  1999/09/28 15:34:34  love
 // change LSEvent to LaserEvent
 //
-
 //
 // Revision 1.1.1.1  1999/09/28 14:29:31  love
 // First release of StLaserEventMaker
@@ -48,6 +53,7 @@
 #include "TTree.h"
 #include "StLaserEvent/StLaserEvent.h"
 #include "tables/St_type_index_Table.h"
+#include "tables/St_dst_vertex_Table.h"
 #include "StTpcDb/StTpcDb.h"
 #include "TMath.h"
 ClassImp(StLaserEventMaker)
@@ -99,9 +105,11 @@ Int_t StLaserEventMaker::Init(){
   assert(m_tpt_pars);
 
 //  Create a root tree. (let controlling Macro make the file?)
+  cout << "Making the laser TTree" << endl;
   event = new StLaserEvent();
   ((StBFChain* )GetChain())->GetTFile()->cd();
   m_laser = new TTree("laser","Tpc laser track tree");
+  m_laser->SetAutoSave(100000000); //Save every 100 MB
   Int_t bufsize= 64000;
   m_laser->Branch("event", "StLaserEvent",&event, bufsize, 1);
 
@@ -116,20 +124,49 @@ Int_t StLaserEventMaker::Make(){
 // 		Clusters exist -> do tracking
   TDataSetIter gime(tpc_data);
   St_tcl_tphit     *tphit = (St_tcl_tphit     *) gime("tphit");
-  //  St_tcl_tpc_index *index = (St_tcl_tpc_index *) gime("index");
-  //  if (!index) {index = new St_tcl_tpc_index("index",10*maxNofTracks);  m_DataSet->Add(index);}
+
+
+  // Move the hits according to the ExB corrections. We have a flag.
+
+     if(tphit && m_undoExB){
+       cout << " correct the hits for ExB effects" << endl;
+       tcl_tphit_st *h = tphit->GetTable();
+       for (int i = 0;i<tphit->GetNRows();i++,h++){
+	 UndoExB(&h->x,&h->y,&h->z);
+       }
+     }
+     // Move the hits by Jim Thomas' distortion removal.
+    if(m_undoDistort){
+    m_mag = new StMagUtilities() ;
+    Float_t x[3], xprime[3];
+    tcl_tphit_st  *spc   = tphit->GetTable();
+    for(Int_t i=0; i<tphit->GetNRows(); i++, spc++){
+     //ExB corections
+       x[0] = spc->x;    
+       x[1] = spc->y;    
+       x[2] = spc->z;
+       m_mag->UndoDistortion(x,xprime);   // input x[3], return xprime[3]
+       spc->x = xprime[0];
+       spc->y = xprime[1];
+       spc->z = xprime[2];
+    }
+    }
+
       
   St_tpt_track  *tptrack = new St_tpt_track("tptrack",maxNofTracks);
   m_DataSet->Add(tptrack);
+
   St_dst_vertex  *clusterVertex = new St_dst_vertex("clusterVertex",1); 
   Add(clusterVertex);
 
+
+
 //			call TPT tracker 
     if (Debug()) cout << " start tpt run " << endl;
-    
+
       Int_t Res_tpt = tpt(m_tpt_pars,tphit,tptrack,clusterVertex);
-//                      ==============================
-    
+
+
     if (Res_tpt != kSTAFCV_OK) {
       cout << "Problem with tpt... returns " <<Res_tpt<< endl;
       return kStErr;}
@@ -149,15 +186,18 @@ Int_t StLaserEventMaker::Make(){
     
       evno = GetEventNumber();
       m_runno = GetRunNumber();
-       m_drivel = gStTpcDb->DriftVelocity();
-       m_tzero = gStTpcDb->Electronics()->tZero();
-       m_clock = gStTpcDb->Electronics()->samplingFrequency();
+      Float_t m_drivel = gStTpcDb->DriftVelocity();
+      Float_t m_tzero = gStTpcDb->Electronics()->tZero();
+      Float_t m_clock = gStTpcDb->Electronics()->samplingFrequency();
+      Float_t m_trigger = gStTpcDb->triggerTimeOffset();
        //   m_tzero = 1.0; m_clock = 1.0;
 
      // Fill the event header.
-     event->SetHeader(evno, m_runno, m_date, m_tzero, m_drivel, m_clock);
+     event->SetHeader(evno, m_runno, m_date,
+                  m_tzero, m_drivel, m_clock, m_trigger);
      cout << "Event "<< evno << " Run " << m_runno << endl;
-     cout << " tZero "<< m_tzero << " drivel " << m_drivel << endl;
+     cout << " tZero "<< m_tzero << " trigger " << m_trigger << endl;
+     cout << " clock "<< m_clock << " drivel " << m_drivel << endl;
 
      //  Make the "laser"  TTree  Should be controllable.
      // Create an iterator for the track dataset
@@ -172,10 +212,13 @@ Int_t StLaserEventMaker::Make(){
           Float_t *zl = new Float_t[ntks];
           tpt_track_st *ta = n_track->GetTable();
 	  for(int itk=0;itk<ntks;itk++,ta++){
+	    if(m_lasers)
           DOCA(ta->r0, ta->phi0, ta->z0, ta->psi, ta->tanl, ta->curvature,
            ta->q, &sector[itk], &xl[itk], &yl[itk], &zl[itk]);
+	    else 
+          POCA(ta->r0, ta->phi0, ta->z0, ta->psi, ta->tanl, ta->curvature,
+           ta->q, &xl[itk], &yl[itk], &zl[itk]);
 	  }
-         
     //
      St_tfc_adcxyz  *n_adc = 0;
      St_tcl_tphit  *n_hit = 0;
@@ -190,6 +233,11 @@ Int_t StLaserEventMaker::Make(){
        tcl_tphit_st *h = n_hit->GetTable();
        for (int i = 0;i<n_hit->GetNRows();i++,h++){
 	 // got a hit - calculate some missing properties.
+	 // calculate the ExB shift.
+         Float_t xhold = h->x;Float_t yhold = h->y;
+ 	    UndoExB(&h->x,&h->y,&h->z);
+	    Float_t exbdx = h->x - xhold;Float_t exbdy = h->y - yhold;
+	    h->x = xhold;h->y = yhold;
          Int_t tof = h->track/1000; // get the track number
          if(tof){
          tpt_track_st *te = n_track->GetTable();
@@ -207,14 +255,14 @@ Int_t StLaserEventMaker::Make(){
             Float_t resz = h->z-z1-te->tanl*
                         sqrt((h->x-x1)*(h->x-x1) + (h->y-y1)*(h->y-y1));
             Float_t phi = te->psi;
-	    if(phi>180.0) phi-=180.0;
-          event->AddHit(h->q,h->x,h->y,h->z,h->row,h->track, h->flag,
-       sector[itrk],zl[itrk],phi,te->invp,te->nfit,
-       resy,resz,h->alpha,h->lambda,h->prf,h->zrf);
+	    //	    if(phi>180.0) phi-=180.0;  This was a mistake
+               event->AddHit(h->q,h->x,h->y,h->z,h->row,h->track, h->flag,
+       sector[itrk],zl[itrk],phi,te->invp*te->q,te->nfit,
+       resy,resz,h->alpha,h->lambda,h->prf,h->zrf,exbdx,exbdy);
 	 }       }}
      else
        event->AddHit(h->q,h->x,h->y,h->z,h->row,h->track, h->flag,
-       0,0,0,0,0,0,0,h->alpha,h->lambda,h->prf,h->zrf);
+       0,0,0,0,0,0,0,h->alpha,h->lambda,h->prf,h->zrf,exbdx,exbdy);
        }
      cout << n_hit->GetNRows() << " hits, " ; 
        }
@@ -225,7 +273,8 @@ Int_t StLaserEventMaker::Make(){
          ngtk++;
 	 Float_t phi = t->psi;
 	 Float_t tlam = t->tanl;
-	 if(phi>180.0){phi=phi-180.0; tlam=-tlam;}
+	 //	 if(phi>180.0){phi=phi-180.0; tlam=-tlam;} 
+         //the rest of the mistake
          event->AddTrack(t->flag,t->hitid,t->id,t->id_globtrk,
          t->ndedx, t->nfit, t->nrec, t->npos, t->q,
          t->chisq[0], t->chisq[1], t->dedx[0], t->invp, t->curvature,
@@ -238,14 +287,16 @@ Int_t StLaserEventMaker::Make(){
       delete [] xl;
       delete [] yl;
       delete [] zl;
+      Int_t npixwrit=0;
      // Find the adc table.
-     TDataSet *tpc_raw = GetDataSet("tpc_raw");
+     //???     St_DataSet *tpc_raw = GetDataSet("tpc_hits");
+     TDataSet *tpc_raw = GetDataSet("tpc_hits");
      if(tpc_raw){
         TDataSetIter tpcadc(tpc_raw);
         n_adc = (St_tfc_adcxyz *) tpcadc["adcxyz"];
      }
      if(n_adc){
-         Int_t npixwrit=0;
+
          tfc_adcxyz_st *p = n_adc->GetTable();
          cout << n_adc->GetNRows() << " pixels in adcxyz table, " ;
          for(int iadc=0;iadc<n_adc->GetNRows();iadc++,p++){
@@ -255,8 +306,9 @@ Int_t StLaserEventMaker::Make(){
 	     npixwrit++;
 	   }
 	 }
-	 cout << npixwrit <<" pixels written to event " << evno << endl;
      }
+	 cout << npixwrit <<" pixels written to event " << evno << endl;
+
      m_laser->Fill(); //Fill the Tree
    }  //end of if(m_mklaser)
 }  // end of MakeHistograms member.
@@ -266,7 +318,7 @@ Int_t StLaserEventMaker::Make(){
                       Int_t *sector, Float_t *xl, Float_t *yl, Float_t *zl) {
   // calculate distance of closest approach to the 12 laser sources
   // for the track and return the sector number for the smallest.
-    // this version for helices with finite curvature
+  //uses helices when  curvature is non zero - straight lines else.
   static const Float_t zcut[13]={-165,-140,-105,-75,-45,-15,
                 15,45,75,105,135,165,195};
   static const Float_t zpt[12] = {-179.2, -151.6, -120.5, -90.7, -59.6,
@@ -281,7 +333,7 @@ Int_t StLaserEventMaker::Make(){
                { 172.090,169.791,-2.264,-172.120,-169.841,2.256},
                { 172.312,169.576,-2.745,-172.316,-169.548,2.747},
                { 171.627,169.547,-2.013,-171.652,-169.570,2.062},
-               { 172.099,169.049,-2.943,-172.100,-169.161,2.977},
+               { 172.099,169.149,-2.943,-172.100,-169.161,2.977},
                { 171.411,169.102,-2.320,-171.410,-169.134,2.292},
                { 171.665,168.924,-2.760,-171.664,-168.913,2.745},
 
@@ -290,7 +342,7 @@ Int_t StLaserEventMaker::Make(){
                {95.937,-100.671,-196.611,-95.927,100.693,196.647},
                {96.312,-100.322,-196.623,-96.288,100.308,196.577},
                {95.959,-101.048,-197.049,-95.954,101.068,197.007},
-               {96.718,-100.277,-197.018,-96.708,100.282,197.027},
+               {96.718,-100.234,-197.018,-96.708,100.282,197.027},
                {96.341,-101.054,-197.440,-96.322,101.066,197.397},
                {96.729,-100.653,-197.399,-96.649,100.681,197.387},
                {96.744,-100.674,-197.391,-96.676,100.665,197.433},
@@ -316,18 +368,18 @@ Int_t StLaserEventMaker::Make(){
     ang = 0.017453292 * psi;
     Float_t px = cos(ang); Float_t py = sin(ang);
     Float_t test = 200.0; // cutoff the source match at 10 X 10 cm
-    if(curvature>0.0001)
+    if(curvature>0.000001)
       {
 	// helix track, calculate circle center position
 
-	Float_t xc = x0 + q*py/curvature;
-	Float_t yc = y0 - q*px/curvature;
+	Double_t xc = x0 + q*py/curvature;
+	Double_t yc = y0 - q*px/curvature;
 	for (int i=0;i<6;i++){
 	  Float_t xp = xpt[iz][i]; Float_t yp= ypt[iz][i];
-	  Float_t d = xc - xp; Float_t a = yc - yp;
-	  Float_t c = d/a;  
-	  Float_t dy = 1./sqrt(1. + c*c)/curvature;
-	  Float_t dx = c*dy;
+	  Double_t d = xc - xp; Double_t a = yc - yp;
+	  Double_t c = d/a;  
+	  Double_t dy = 1./sqrt(1. + c*c)/curvature;
+	  Double_t dx = c*dy;
 	  if(a<0) { x = xc + dx;  y = yc + dy;}
 	  else    { x = xc - dx;  y = yc - dy;}
 	  Float_t disq = (x-xp)*(x-xp) + (y-yp)*(y-yp);
@@ -367,6 +419,205 @@ Int_t StLaserEventMaker::Make(){
       }
   }
 //_____________________________________________________________________________
+  void StLaserEventMaker::POCA(Float_t r0,Float_t phi0,Float_t z0,
+                      Float_t psi, Float_t tanl, Float_t curvature, Int_t q,
+                      Float_t *xl, Float_t *yl, Float_t *zl) {
+  // calculate point of closest approach to the centerline of the beam.
+    Float_t x, y, z, disxy;
+    *xl = 100.0; *yl = 100.0; *zl = 0.0;
+  //
+    Float_t ang = 0.017453292 * phi0;
+    Float_t x0 = r0 * cos(ang);
+    Float_t y0 = r0 * sin(ang);
+    ang = 0.017453292 * psi;
+    Float_t px = cos(ang); Float_t py = sin(ang);
+    Float_t test = 200.0; // cutoff the source match at 10 X 10 cm
+    if(curvature>0.0001)
+      {
+	// helix track, calculate circle center position
+	Float_t xc = x0 + q*py/curvature;
+	Float_t yc = y0 - q*px/curvature;
+	Float_t xp = 0; Float_t yp=0;
+        Float_t d = xc - xp; Float_t a = yc - yp;
+        Float_t c = d/a;  
+        Float_t dy = 1./sqrt(1. + c*c)/curvature;
+        Float_t dx = c*dy;
+        if(a<0) { x = xc + dx;  y = yc + dy;}
+	else    { x = xc - dx;  y = yc - dy;}
+	Float_t disq = (x-xp)*(x-xp) + (y-yp)*(y-yp);
+	if (disq<test) { 
+            *xl=x; *yl=y;
+            disxy = sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0)); 
+            *zl = z0 - tanl*disxy;}
+	}
+    else
+      {
+      //Straight line tracks
+      Float_t slope = tan(psi*0.017453292);
+      Float_t ax = 1./(x0 - y0/slope);
+      Float_t ay = 1./(y0 - x0*slope);
+      Float_t xp = 0.5; Float_t yp= 0.5;
+      Float_t d = ax*ax +ay*ay;
+      x = (ax + ay*ay*xp - ax*ay*yp)/d;
+      y = (ay + ax*ax*yp - ax*ay*xp)/d;
+      //extrapolate back to x,y
+      disxy = sqrt((x-x0)*(x-x0)+ (y-y0)*(y-y0)); 
+      z = z0 + -tanl*disxy;
+      Float_t disq = (x-xp)*(x-xp) + (y-yp)*(y-yp);
+	 if (disq<test) {
+	 *xl=x; *yl=y; *zl=z; 
+	  }
+      }
+  }
+//_____________________________________________________________________________
+void StLaserEventMaker::UndoExB(Float_t *x, Float_t *y, Float_t *z){  
+  //  Compute the Integral of Br/Bz from the specified point to the pad plane.
+  //  Convert it to a displacement (ie distortion).  x, y,z is the reported 
+  //  location of the track-hit and the actual location as calculated
+  //  by this program and replaced in the x, y, z variables.
+  //  x, y, z in STAR TPC coord. system (cm units)
+  //  Fitted Function is in terms of z, r, phi - scaled to the range -1 to 1.
+  //  Separate functions fitted to the positive and negative z TPC ends.
+  //  Note that 2 dimensional arrays in C go across rows while Fortran goes
+  //  down columns
+
+  const float   TAU_1   = 0.35e-10   ;     // Tau Parameters valid for P9 gas 
+  const float   TAU_2   = 0.29e-10   ;     // from the Aleph Experiment 
+  const double  PI      = 3.14159265 ;
+  const double  ZSCALE  = 105.0      ; 
+  const double  ROFF    = 126.7      ;
+  const double  RSCALE  =  66.7      ; 
+  
+  //  This version for the half field in the positive z direction
+  //  Data below this point should really be in a database and read
+  //  in on user command.
+
+  const float Bmax = 2500. ;
+  const int NCOEFF =22;
+  const int PCOEFF =19;
+
+
+  double ncoef [22]     = { 0.86519044E-01, 0.53515316E-01, 0.76126441E-01,
+                           -0.25630806E-01, 0.39710304E-01,-0.23678712E-01,
+                            0.21143267E-01, 0.21130090E-01,-0.27967561E-01,
+                            0.14842647E-01, 0.18729207E-01, 0.91055100E-02,
+                            0.12635363E-01, 0.12567390E-01,-0.10256438E-01,
+                            0.71242234E-02, 0.49913415E-02,-0.40337429E-02,
+                            0.31642346E-02,-0.82095956E-02,-0.64247543E-02,
+                            0.36472205E-02   } ;
+  
+  int ibasng [22][3]    = { { 10,  0,  0},{ 20, 10,  0},{ 10, 10,  0},
+                            {  0, 20,  0},{ 20,  0,  0},{ 30,  0,  0},
+                            {  0, 30,  0},{  0,  0,  0},{ 30, 10,  0},
+                            { 10, 20,  0},{ 20, 20,  0},{  0, 40,  0},
+                            {  0, 10, 20},{ 10, 30,  0},{ 30, 20,  0},
+                            { 10,  0, 40},{  0,  0, 50},{ 40,  0,  0},
+                            {  0,  0, 40},{ 10, 10, 30},{  0, 10, 30},
+                            {  0,  0, 30} } ;
+  
+  double pcoef [19]     = {-0.56271269E-01, 0.56316758E-01, 0.32334931E-01,
+                           -0.40870593E-01,-0.26015326E-01, 0.30634023E-01,
+                           -0.19830788E-01, 0.51648488E-01, 0.81722594E-02,
+                           -0.21299166E-01,-0.21224224E-01, 0.11237955E-01,
+                           -0.91026999E-02,-0.76372695E-02, 0.12071229E-01,
+                            0.11819910E-01,-0.99196176E-02, 0.49532689E-02,
+                            0.58692146E-02   } ;
+  
+  int ibasps [19][3]   = {{ 20, 10,  0},{ 10,  0,  0},{  0, 10,  0},
+                          { 20,  0,  0},{ 30, 10,  0},{  0, 20,  0},
+			  {  0, 30,  0},{ 10, 10,  0},{  0,  0,  0},
+                          { 30,  0,  0},{ 20, 20,  0},{ 10, 20,  0},
+                          {  0, 40,  0},{  0,  0, 20},{ 10, 30,  0},
+                          { 10,  0, 20},{ 30, 20,  0},{ 40,  0,  0},
+                          { 10,  0, 30}  } ;
+   
+
+  double  Omega, Const_1, Const_2 ;
+  double  p, p0, p1, p2, phi ;
+  float   r, xv[3] ;
+  float   brobz, delxy[2], xp, yp, zp ;
+  int     num ;
+  
+
+  Omega     =  Bmax * 8.9875518e6 / 0.511 ;
+  Const_1   =  Omega*TAU_1 / ( 1. +  Omega*TAU_1*Omega*TAU_1 ) ;
+  Const_2   =  Omega*TAU_2*Omega*TAU_2 / ( 1. + Omega*TAU_2*Omega*TAU_2 ) ;
+  xp = *x;
+  yp = *y;
+  zp = *z;
+  r    = sqrt( xp*xp + yp*yp ) ;
+  xv[1] = ( r - ROFF ) / RSCALE ;
+  phi  = atan2( yp, xp ) ;
+  if ( phi < 0 ) phi = phi + 2*PI ;
+  xv[2] = ( phi - PI ) / PI ;
+  
+  brobz = 0.0 ;
+  
+  if ( zp < 0 ) 	      
+
+    {
+      xv[0] = ( zp + ZSCALE ) / ZSCALE ;
+      for ( int k = 0 ; k < NCOEFF ; k++ )
+        {
+	  p = 1 ;
+	  for ( int i = 0 ; i < 3 ; i++ ) 
+	    {
+	      num = ibasng[k][i] / 10 ;
+	      if ( num != 0 ) 
+		{
+		  p0 = 1.0 ;
+		  p1 = xv[i] ;
+		  for ( int j = 2 ; j <= num ; j++ )
+		    {
+		      p2 = 2 * xv[i] * p1 - p0 ;
+		      p0 = p1 ;
+		      p1 = p2 ;
+		    }
+		  p = p * p1 ;
+		}
+	    }
+	  brobz = brobz + ncoef[k] * p ;
+	}
+      delxy[0] = brobz * (Const_2*cos(phi) + Const_1*sin(phi)) ;
+      delxy[1] = brobz * (Const_2*sin(phi) - Const_1*cos(phi)) ;
+    }
+  
+  else
+    
+    {
+      xv[0] = ( zp - ZSCALE ) / ZSCALE ;
+      for ( int k = 0 ; k < PCOEFF ; k++ )
+	{
+	  p = 1 ;
+	  for ( int i = 0 ; i < 3 ; i++ ) 
+	    {
+	      num = ibasps[k][i] / 10 ;
+	      if ( num != 0 ) 
+		{
+		  p0 = 1.0 ;
+		  p1 = xv[i] ;
+		  for ( int j = 2 ; j <= num ; j++ )
+		    {
+		      p2 = 2 * xv[i] * p1 - p0 ;
+		      p0 = p1 ;
+		      p1 = p2 ;
+		    }
+		  p = p * p1 ;
+		}
+	    }
+	  brobz = brobz + pcoef[k] * p ;
+	}
+      delxy[0] = -brobz * (Const_2*cos(phi) + Const_1*sin(phi)) ;
+      delxy[1] = -brobz * (Const_2*sin(phi) - Const_1*cos(phi)) ;
+    }
+  xp = xp + delxy[0];
+  yp = yp + delxy[1];
+  // temporary printout for Al Saulys.
+  //  cout <<" x, dx " << *x << " "  << delxy[0] << " y, dy " << *y 
+  //     << " " << delxy[1] <<" z "<< *z<< endl;
+  *x = xp; *y = yp; *z = zp;  
+}
+
 
 //_____________________________________________________________________________
 
