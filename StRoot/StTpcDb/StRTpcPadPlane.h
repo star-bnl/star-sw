@@ -3,19 +3,19 @@
 //#include <TObject.h>
 #include "StMessMgr.h"
 #include "StTpcPadPlaneI.h"
-#include "tables/St_tpc_padplanes_Table.h"
+#include "tables/St_tpcPadPlanes_Table.h"
 
 class StRTpcPadPlane : public StTpcPadPlaneI {
 
 private:
 
-  St_tpc_padplanes* mPadPlane;
+  St_tpcPadPlanes* mPadPlane;
 
 public:
 
-  StRTpcPadPlane(St_tpc_padplanes* PadIn=0){AddData(PadIn);}
+  StRTpcPadPlane(St_tpcPadPlanes* PadIn=0){AddData(PadIn);}
   ~StRTpcPadPlane(){}
-  void AddData(St_tpc_padplanes* PadIn) {
+  void AddData(St_tpcPadPlanes* PadIn) {
    mPadPlane = PadIn;
  } 
 

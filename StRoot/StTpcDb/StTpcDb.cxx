@@ -60,9 +60,8 @@ void StTpcDb::GetDataBase(StMaker* maker) {
      TString dbPath = bases[i];
      dbPath += "tpc";
      dbFullPath += dbPath;
-     if ( ( tpc[i] = maker->GetDataBase(dbPath)) 
-       || ( tpc[i] = maker->GetDataBase(dbFullPath)) 
-     ) continue;
+     if ( ( tpc[i] = maker->GetDataBase(dbPath)) || 
+          ( tpc[i] = maker->GetDataBase(dbFullPath)) ) continue;
      gMessMgr->Message("StTpcDb::Error Getting TPC Calibrations database","E");
    }
  }
@@ -90,12 +89,12 @@ gStTpcDb = 0;
 StTpcPadPlaneI* StTpcDb::PadPlaneGeometry(){
   if (!PadPlane){            // get pad plane from data base
    const int dbIndex = kGeometry;
-   St_DataSet *tpd = tpc[dbIndex]->Find("tpcPadPlanes");
+   St_DataSet *tpd = tpc[dbIndex]->Find("TPCPadPlanes");
    if (!tpd) {
      gMessMgr->Message("StTpcDb::Error Finding Tpc Pad Planes","E");
      return 0;
    }
-   PadPlane = new StRTpcPadPlane((St_tpc_padplanes*)tpd);
+   PadPlane = new StRTpcPadPlane((St_tpcPadPlanes*)tpd);
   }
   return PadPlane;
 }
@@ -104,12 +103,12 @@ StTpcPadPlaneI* StTpcDb::PadPlaneGeometry(){
 StTpcWirePlaneI* StTpcDb::WirePlaneGeometry(){
   if (!WirePlane){            // get wire plane from data base
    const int dbIndex = kGeometry;
-   St_DataSet* tpd = tpc[dbIndex]->Find("tpcWirePlanes");
+   St_DataSet* tpd = tpc[dbIndex]->Find("TPCWirePlanes");
    if (!(tpd && tpd->HasData()) ){
     gMessMgr->Message("StTpcDb::Error Finding Tpc Wire Planes","E");
     return 0;
    }   
-   WirePlane = new StRTpcWirePlane((St_tpc_wireplanes*)tpd);
+   WirePlane = new StRTpcWirePlane((St_tpcWirePlanes*)tpd);
   }
  return WirePlane;
 }
@@ -118,12 +117,12 @@ StTpcWirePlaneI* StTpcDb::WirePlaneGeometry(){
 StTpcDimensionsI* StTpcDb::Dimensions(){
   if (!dimensions){            // get wire plane from data base
    const int dbIndex = kGeometry;
-   St_DataSet* tpd = tpc[dbIndex]->Find("tpcDimensions");
+   St_DataSet* tpd = tpc[dbIndex]->Find("TPCDimensions");
    if (!(tpd && tpd->HasData()) ){
     gMessMgr->Message("StTpcDb::Error Finding Tpc Dimensions","E");
     return 0;
    }
-   dimensions =  new StRTpcDimensions((St_tpc_dimensions*)tpd);
+   dimensions =  new StRTpcDimensions((St_tpcDimensions*)tpd);
   }
  return dimensions;
 }
@@ -131,11 +130,7 @@ StTpcDimensionsI* StTpcDb::Dimensions(){
 //_____________________________________________________________________________
 StTpcSlowControlSimI* StTpcDb::SlowControlSim(){
   if (!slowControlSim){            // get wire plane from data base
-   const int dbIndex = kConditions;
-   if (!tpc[dbIndex]){
-    gMessMgr->Message("StTpcDb::Error Not connected to conditions database","E");
-    return 0;
-   }
+   const int dbIndex = kCalibrarion;
    St_DataSet* tpd = tpc[dbIndex]->Find("tpcSlowControlSim");
    if (!(tpd && tpd->HasData()) ){
     gMessMgr->Message("StTpcDb::Error Finding Slow Control Simulations Parameters","E");
@@ -150,12 +145,12 @@ StTpcSlowControlSimI* StTpcDb::SlowControlSim(){
 StTpcElectronicsI* StTpcDb::Electronics(){
   if (!electronics){            // get electronics from data base
    const int dbIndex = kGeometry;
-   St_DataSet* tpd = tpc[dbIndex]->Find("tpcElectronics");
+   St_DataSet* tpd = tpc[dbIndex]->Find("TPCElectronics");
    if (!(tpd && tpd->HasData()) ){
     gMessMgr->Message("StTpcDb::Error Finding Tpc Electronics","E");
     return 0;
    }
-   electronics = new StRTpcElectronics((St_tpcelectronics*)tpd);
+   electronics = new StRTpcElectronics((St_tpcElectronics*)tpd);
   }
  return electronics;
 }
@@ -167,11 +162,7 @@ StTpcGainI* StTpcDb::Gain(int sector){
     return 0;
   }
   if(!gain[sector-1]){
-   const int dbIndex = kCalibration;
-   if (tpc[dbIndex]==0){
-    gMessMgr->Message("StTpcDb::Error Not connected to calibrations database","E");
-    return 0;
-   }
+   const int dbIndex = kCalibrarion;
    char dbname[25];
    sprintf(dbname,"Sector_%.2d/tpcGainFactors",sector);
    printf("Getting %s \n",dbname);
@@ -194,11 +185,7 @@ StTpcT0I* StTpcDb::T0(int sector){
     return 0;
   }
   if(!t0[sector-1]){
-   const int dbIndex = kCalibration;
-   if (tpc[dbIndex]==0){
-    gMessMgr->Message("StTpcDb::Error Not connected to calibrations database","E");
-    return 0;
-   }
+   const int dbIndex = kCalibrarion;
    char dbname[25];
    sprintf(dbname,"Sector_%.2d/tpcTimeOffsets",sector);
    printf("Getting %s \n",dbname);

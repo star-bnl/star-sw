@@ -1,21 +1,21 @@
 #ifndef __STRTPCDIMENSIONS__
 #define __STRTPCDIMENSIONS__
 #include "StTpcDimensionsI.h"
-#include "tables/St_tpc_dimensions_Table.h"
+#include "tables/St_tpcDimensions_Table.h"
 
 class StRTpcDimensions : public StTpcDimensionsI {
 
  private:
 
-  St_tpc_dimensions* mTpc; //!
+  St_tpcDimensions* mTpc; //!
 
 
 public:
 
   StRTpcDimensions() : mTpc(0){;}
   virtual ~StRTpcDimensions(){;}
-  void AddData( St_tpc_dimensions* TpcIn);
-  StRTpcDimensions(St_tpc_dimensions* TpcIn){ AddData(TpcIn); }
+  void AddData( St_tpcDimensions* TpcIn);
+  StRTpcDimensions(St_tpcDimensions* TpcIn){ AddData(TpcIn); }
 
   //accessors
 
@@ -44,7 +44,7 @@ public:
 };
 
 #ifndef __CINT__
-inline  void StRTpcDimensions::AddData( St_tpc_dimensions* TpcIn){ mTpc = TpcIn;}
+inline  void StRTpcDimensions::AddData( St_tpcDimensions* TpcIn){ mTpc = TpcIn;}
 
 inline int StRTpcDimensions::numberOfSectors() const {
 return (*mTpc)[0].numberOfSectors;
