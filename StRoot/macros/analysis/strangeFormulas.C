@@ -1,5 +1,8 @@
-// $Id: strangeFormulas.C,v 1.3 2000/04/11 17:55:39 genevb Exp $
+// $Id: strangeFormulas.C,v 1.4 2000/04/12 21:13:27 genevb Exp $
 // $Log: strangeFormulas.C,v $
+// Revision 1.4  2000/04/12 21:13:27  genevb
+// Added track topology map functions
+//
 // Revision 1.3  2000/04/11 17:55:39  genevb
 // Removed first parameter
 //
@@ -71,6 +74,13 @@ Int_t strangeFormulas(TTree* tree) {
     gSystem->Load("libProof");
     gSystem->Load("libTreePlayer");
   }
+
+  char name[256];
+  char expr[2048];
+  char track[32];
+  char temp[256];
+  char ftpc[256];
+  TString tstr;
 
   TFormula *f0=0;
   TTreeFormula *f1=0;
@@ -263,7 +273,136 @@ Int_t strangeFormulas(TTree* tree) {
     f1 = new TTreeFormula("V0.ptotV0()",
       "sqrt(V0.Ptot2V0())",tree);
     gROOT->GetListOfFunctions()->Add(f1);
-  }
+    
+    // Track topology maps, with function names like
+    // "V0.topologyMapNeg.*()" and "V0.topologyMapPos.*()"
+    if (!(tree->GetBranch("V0.mTopologyMapPos.mMap0"))) continue;
+    for (int k=0; k<2; k++) {
+      if (k) sprintf(track,"Neg\0");
+      else sprintf(track,"Pos\0");
+
+
+      // bit(i), i=0,63, uses only 1 value.
+      for (int l=0; l<2; l++) {
+        for (int j=0; j<32; j++) {
+          int m = l*32 + j;
+          sprintf(name,"V0.topologyMap%s.bit(%d)\0",track,m);
+          sprintf(expr,"(V0.mTopologyMap%s.mMap%d/(2^%d))&1\0",track,l,j);
+          f1 = new TTreeFormula(name,expr,tree);
+          gROOT->GetListOfFunctions()->Add(f1);
+        }
+
+        // data(i), i=0,1, uses only 1 value.
+        sprintf(name,"V0.topologyMap%s.data(%d)",track,l);
+	sprintf(expr,"V0.mTopologyMap%s.mMap%d",track,l);
+        f1 = new TTreeFormula(name,expr,tree);
+        gROOT->GetListOfFunctions()->Add(f1);
+      }
+
+      // ftpcFormat()
+      sprintf(ftpc,"V0.topologyMap%s.ftpcFormat()",track);
+      sprintf(expr,"V0.topologyMap%s.bit(63)",track);
+      f1 = new TTreeFormula(ftpc,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+
+      // primaryVertexUsed()
+      sprintf(name,"V0.topologyMap%s.primaryVertexUsed()",track);
+      sprintf(expr,"V0.topologyMap%s.bit(0)",track);
+      f1 = new TTreeFormula(name,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+
+      // turnAroundFlag()
+      sprintf(name,"V0.topologyMap%s.turnAroundFlag()",track);
+      sprintf(expr,"V0.topologyMap%s.bit(62)",track);
+      f1 = new TTreeFormula(name,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+
+      // hasHitInSvtLayer(i), i=1,6
+      for (int j=1; j<7; j++) {
+        sprintf(name,"V0.topologyMap%s.hasHitInSvtLayer(%d)",track,j);
+        sprintf(temp,"V0.topologyMap%s.bit(%d)\0",track,j);
+        sprintf(expr,"(!%s)&&(%s)\0",ftpc,temp);
+        f1 = new TTreeFormula(name,expr,tree);
+        gROOT->GetListOfFunctions()->Add(f1);
+	
+        tstr += temp;
+        if (j<6) tstr += "+";
+      }
+
+      // numOfSvtHits(), uses 6 values
+      sprintf(name,"V0.topologyMap%s.numOfSvtHits()\0",track);
+      sprintf(expr,"(!%s)*(%s)\0",ftpc,tstr.Data());
+      f1 = new TTreeFormula(name,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+      tstr = "";
+      
+      // hasHitInSsd()
+      sprintf(name,"V0.topologyMap%s.hasHitInSsd()",track);
+      sprintf(expr,"V0.topologyMap%s.bit(7)",track);
+      f1 = new TTreeFormula(name,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+
+      sprintf(temp,"(!%s)*(\0",ftpc);
+      tstr = temp;
+
+      // hasHitInTpcRow(i), i=1,45
+      for (int j=1; j<45; j++) {
+        sprintf(name,"V0.topologyMap%s.hasHitInTpcRow(%d)",track,j);
+	int m = j+8;
+        sprintf(temp,"V0.topologyMap%s.bit(%d)\0",track,m);
+        sprintf(expr,"(!%s)&&(%s)\0",ftpc,temp);
+        f1 = new TTreeFormula(name,expr,tree);
+        gROOT->GetListOfFunctions()->Add(f1);
+	
+        tstr += temp;
+        if (j<44) tstr += "+";
+      }
+
+      // numOfTpcHits(), uses 45 values.
+      sprintf(name,"V0.topologyMap%s.numOfTpcHits()\0",track);
+      tstr += ")";
+      f1 = new TTreeFormula(name,tstr.Data(),tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+      tstr = "";
+
+      // hasHitInMwpc()
+      sprintf(name,"V0.topologyMap%s.hasHitInMwpc()",track);
+      sprintf(expr,"V0.topologyMap%s.bit(53)",track);
+      f1 = new TTreeFormula(name,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+
+      // hasHitInCtb()
+      sprintf(name,"V0.topologyMap%s.hasHitInCtb()",track);
+      sprintf(expr,"V0.topologyMap%s.bit(54)",track);
+      f1 = new TTreeFormula(name,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+
+      // hasHitInTofPatch()
+      sprintf(name,"V0.topologyMap%s.hasHitInTofPatch()",track);
+      sprintf(expr,"V0.topologyMap%s.bit(55)",track);
+      f1 = new TTreeFormula(name,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+
+      // hasHitInRich()
+      sprintf(name,"V0.topologyMap%s.hasHitInRich()",track);
+      sprintf(expr,"V0.topologyMap%s.bit(56)",track);
+      f1 = new TTreeFormula(name,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+
+      // hasHitInBarrelEmc()
+      sprintf(name,"V0.topologyMap%s.hasHitInBarrelEmc()",track);
+      sprintf(expr,"V0.topologyMap%s.bit(57)",track);
+      f1 = new TTreeFormula(name,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+
+      // hasHitInEndcapEmc()
+      sprintf(name,"V0.topologyMap%s.hasHitInEndcapEmc()",track);
+      sprintf(expr,"V0.topologyMap%s.bit(58)",track);
+      f1 = new TTreeFormula(name,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+    }
+
+  }  // End of V0
   
   // Xi
   if (tree->GetBranch("Xi")) {
@@ -559,11 +698,142 @@ Int_t strangeFormulas(TTree* tree) {
     f1 = new TTreeFormula("Xi.ptotXi()",
       "sqrt(Xi.Ptot2Xi())",tree);
     gROOT->GetListOfFunctions()->Add(f1);
-  }
+
+    // Track topology maps, with function names like
+    // "Xi.topologyMapNeg.*()", Xi.topologyMapPos.*(),
+    // and "Xi.topologyMapBachelor.*()"
+    if (!(tree->GetBranch("Xi.mTopologyMapBachelor.mMap0"))) continue;
+    for (int k=0; k<3; k++) {
+      if (k==2) sprintf(track,"Bachelor\0");
+      else if (k==1) sprintf(track,"Neg\0");
+      else sprintf(track,"Pos\0");
+
+
+      // bit(i), i=0,63, uses only 1 value.
+      for (int l=0; l<2; l++) {
+        for (int j=0; j<32; j++) {
+          int m = l*32 + j;
+          sprintf(name,"Xi.topologyMap%s.bit(%d)\0",track,m);
+          sprintf(expr,"(Xi.mTopologyMap%s.mMap%d/(2^%d))&1\0",track,l,j);
+          f1 = new TTreeFormula(name,expr,tree);
+          gROOT->GetListOfFunctions()->Add(f1);
+        }
+
+        // data(i), i=0,1, uses only 1 value.
+        sprintf(name,"Xi.topologyMap%s.data(%d)",track,l);
+	sprintf(expr,"Xi.mTopologyMap%s.mMap%d",track,l);
+        f1 = new TTreeFormula(name,expr,tree);
+        gROOT->GetListOfFunctions()->Add(f1);
+      }
+
+      // ftpcFormat()
+      sprintf(ftpc,"Xi.topologyMap%s.ftpcFormat()",track);
+      sprintf(expr,"Xi.topologyMap%s.bit(63)",track);
+      f1 = new TTreeFormula(ftpc,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+
+      // primaryVertexUsed()
+      sprintf(name,"Xi.topologyMap%s.primaryVertexUsed()",track);
+      sprintf(expr,"Xi.topologyMap%s.bit(0)",track);
+      f1 = new TTreeFormula(name,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+
+      // turnAroundFlag()
+      sprintf(name,"Xi.topologyMap%s.turnAroundFlag()",track);
+      sprintf(expr,"Xi.topologyMap%s.bit(62)",track);
+      f1 = new TTreeFormula(name,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+
+      // hasHitInSvtLayer(i), i=1,6
+      for (int j=1; j<7; j++) {
+        sprintf(name,"Xi.topologyMap%s.hasHitInSvtLayer(%d)",track,j);
+        sprintf(temp,"Xi.topologyMap%s.bit(%d)\0",track,j);
+        sprintf(expr,"(!%s)&&(%s)\0",ftpc,temp);
+        f1 = new TTreeFormula(name,expr,tree);
+        gROOT->GetListOfFunctions()->Add(f1);
+	
+        tstr += temp;
+        if (j<6) tstr += "+";
+      }
+
+      // numOfSvtHits(), uses 6 values
+      sprintf(name,"Xi.topologyMap%s.numOfSvtHits()\0",track);
+      sprintf(expr,"(!%s)*(%s)\0",ftpc,tstr.Data());
+      f1 = new TTreeFormula(name,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+      tstr = "";
+      
+      // hasHitInSSD()
+      sprintf(name,"Xi.topologyMap%s.hasHitInSSD()",track);
+      sprintf(expr,"Xi.topologyMap%s.bit(7)",track);
+      f1 = new TTreeFormula(name,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+
+      sprintf(temp,"(!%s)*(\0",ftpc);
+      tstr = temp;
+
+      // hasHitInTpcRow(i), i=1,45
+      for (int j=1; j<45; j++) {
+        sprintf(name,"Xi.topologyMap%s.hasHitInTpcRow(%d)",track,j);
+	int m = j+8;
+        sprintf(temp,"Xi.topologyMap%s.bit(%d)\0",track,m);
+        sprintf(expr,"(!%s)&&(%s)\0",ftpc,temp);
+        f1 = new TTreeFormula(name,expr,tree);
+        gROOT->GetListOfFunctions()->Add(f1);
+	
+        tstr += temp;
+        if (j<44) tstr += "+";
+      }
+
+      // numOfTpcHits(), uses 45 values.
+      sprintf(name,"Xi.topologyMap%s.numOfTpcHits()\0",track);
+      tstr += ")";
+      f1 = new TTreeFormula(name,tstr.Data(),tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+      tstr = "";
+
+      // hasHitInMwpc()
+      sprintf(name,"Xi.topologyMap%s.hasHitInMwpc()",track);
+      sprintf(expr,"Xi.topologyMap%s.bit(53)",track);
+      f1 = new TTreeFormula(name,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+
+      // hasHitInCtb()
+      sprintf(name,"Xi.topologyMap%s.hasHitInCtb()",track);
+      sprintf(expr,"Xi.topologyMap%s.bit(54)",track);
+      f1 = new TTreeFormula(name,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+
+      // hasHitInTofPatch()
+      sprintf(name,"Xi.topologyMap%s.hasHitInTofPatch()",track);
+      sprintf(expr,"Xi.topologyMap%s.bit(55)",track);
+      f1 = new TTreeFormula(name,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+
+      // hasHitInRich()
+      sprintf(name,"Xi.topologyMap%s.hasHitInRich()",track);
+      sprintf(expr,"Xi.topologyMap%s.bit(56)",track);
+      f1 = new TTreeFormula(name,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+
+      // hasHitInBarrelEmc()
+      sprintf(name,"Xi.topologyMap%s.hasHitInBarrelEmc()",track);
+      sprintf(expr,"Xi.topologyMap%s.bit(57)",track);
+      f1 = new TTreeFormula(name,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+
+      // hasHitInEndcapEmc()
+      sprintf(name,"Xi.topologyMap%s.hasHitInEndcapEmc()",track);
+      sprintf(expr,"Xi.topologyMap%s.bit(58)",track);
+      f1 = new TTreeFormula(name,expr,tree);
+      gROOT->GetListOfFunctions()->Add(f1);
+    }
+
+  }  // End of Xi
 
   // Kink
   if (tree->GetBranch("Kink")) {
-  }
+  }  // End of Kink
   
   Int_t finalFormulas = gROOT->GetListOfFunctions()->GetSize();
   return (finalFormulas-initialFormulas);
