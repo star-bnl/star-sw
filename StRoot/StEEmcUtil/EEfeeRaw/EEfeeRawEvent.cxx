@@ -1,4 +1,5 @@
 #include <cassert>
+#include <ctime>
 
 #include "EEfeeDataBlock.h"
 #include "EEfeeRawEvent.h"
@@ -98,7 +99,6 @@ void EEfeeRawEvent::maskWrongCrates( long timeStamp, unsigned headToken) {
     { list=listB; dim=sizeof(listB)/sizeof(int); }
 
   int ic;
-  int token =-1;
   for(ic=0;ic<block->GetEntries();ic++) {
     EEfeeDataBlock *b=(EEfeeDataBlock *)block->At(ic);
     int crateID=b->getCrateID();
@@ -128,6 +128,9 @@ UShort_t  EEfeeRawEvent::getValue(int crateID, int channel) const {
 
 /*
  * $Log: EEfeeRawEvent.cxx,v $
+ * Revision 1.7  2003/11/24 18:26:47  balewski
+ * *** empty log message ***
+ *
  * Revision 1.6  2003/11/24 05:40:55  balewski
  * new stuff for miniDaq
  *
