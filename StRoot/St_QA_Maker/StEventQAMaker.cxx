@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.22 2001/09/01 14:24:40 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.23 2001/09/10 18:00:12 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.23  2001/09/10 18:00:12  genevb
+// Another trigger word
+//
 // Revision 2.22  2001/09/01 14:24:40  genevb
 // Allow trigger word=0 for MC data
 //
@@ -167,6 +170,9 @@ Int_t StEventQAMaker::Make() {
 	  doEvent = kTRUE;
         } else if ((tword >= 0x1100) && (tword < 0x1200)) {
           mTrigWord->Fill(2.); // "Central"
+	  doEvent = kTRUE;
+        } else if ((tword >= 0x1200) && (tword < 0x2000)) {
+          mTrigWord->Fill(3.); // "Other Physics"
 	  doEvent = kTRUE;
         } else if (tword == 0xF200) {
           mTrigWord->Fill(7.); // "Laser"
