@@ -44,7 +44,7 @@
 *  Return value:
 *	Native cpu clock ticks-per-second.
 
-	STRCPUTPS=100 !On SUN, it's 100 per second.
+	STRCPUTPS=60 !On SUN, it's 60 per second (for "times", via str's "mclock").
 
 	RETURN
 	END
@@ -849,6 +849,39 @@
 	END IF
 
 	Ireal = Ieee !Return the IEEE conversion.
+
+	RETURN
+	END
+
+	SUBROUTINE STR_Sleep( Seconds )
+
+	IMPLICIT NONE
+
+*  Input:
+	REAL Seconds !Seconds to go to sleep, then wake up.
+
+*  Description:
+*	Platform-independent call to interface platform-dependent
+*	system call to wait for the specified interval in seconds
+*	and then wake up and continue, exiting this rouine
+*	normally.  Note that on some systems (SGI, not VMS) the
+*	time-interval has one-second granuality (ie, seconds is
+*	taken as an integer), and the minimum time to wait on
+*	such systems is requested to be 1 for "Seconds" > 0.
+*	Furthermore, on those systems which take integer-valued
+*	"Seconds", because of the granularity, the actual
+*	interval of sleep may be less than one second, right
+*	down to essentially zero.
+
+	INTEGER Local_Seconds !On SGI, this needs to be an integer.
+
+	IF ( Seconds .LE. 0 ) THEN !Just return quickly.
+	  RETURN
+	ELSE     !Ensure one sec. if Seconds > 0 is requested.
+	  Local_Seconds = NINT( Seconds + 0.5 )
+	END IF
+
+	CALL sleep( Local_Seconds )
 
 	RETURN
 	END

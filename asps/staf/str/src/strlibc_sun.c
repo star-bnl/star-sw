@@ -25,7 +25,8 @@ long	mclock_()
 
   FORTRAN callable:
 
-	INTEGER CPU_ticks, CPU_seconds
+	INTEGER CPU_ticks
+	REAL    CPU_seconds
 	INTEGER mclock
 	INTEGER STRCPUTPS
 
@@ -38,5 +39,5 @@ long	mclock_()
 
 	times( &cpu );   /*  Fill the "cpu" structure (tms).  */
 
-	return( cpu.tms_utime + cpu.tms_stime );
+	return( cpu.tms_utime );   /* user CPU time. */
 }

@@ -3,12 +3,12 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) MSG(*) !Character string to be output.
 	INTEGER LINES !Number of lines in MSG to output.
 	INTEGER LUN !Logical unit on which to output (terminal).
 
-*  Functional desctiption:
+*  Description:
 *	Output a one-or-more-line message on a terminal with
 *	machine-independent carriage-control on a terminal.
 
@@ -26,11 +26,11 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) MSG !Character string to be output.
 	INTEGER LUN !Logical unit on which to output (terminal).
 
-*  Functional desctiption:
+*  Description:
 *	Output a one-line message without a following carriage return
 *	on a terminal.
 
@@ -44,11 +44,11 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) MSG !Character string to be output.
 	INTEGER LUN !Logical unit on which to output (terminal).
 
-*  Functional desctiption:
+*  Description:
 *	Output a one-line message without a preceding line feed
 *	on a terminal.
 
@@ -62,11 +62,11 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) MSG !Character string to be output.
 	INTEGER LUN !Logical unit on which to output (terminal).
 
-*  Functional desctiption:
+*  Description:
 *	Output a one-line message without a preceding line feed
 *	or a following carriage-return on a terminal.
 
@@ -80,13 +80,13 @@
 
 	IMPLICIT NONE
 
-*  Output argument:
+*  Output:
 	INTEGER Long  !Integer-ASCII-equivalent of transmitted character,
 	              !or zero, if nothing is ready.
 
 *  Return value:  none
 
-*  Functional description:
+*  Description:
 *	Get a single character from the terminal, w/o waiting, and without
 *	waiting for a complete line (ie, no EOT character needed to make
 *	characters available).
@@ -162,13 +162,13 @@
 
 	IMPLICIT NONE
 
-*  Output argument:
+*  Output:
 	INTEGER Long  !Integer-ASCII-equivalent of transmitted character,
 	              !or zero, if nothing is ready.
 
 *  Return value:  none
 
-*  Functional description:
+*  Description:
 
 *	VMS version is not operational -- just for compatability's sake,
 *	this issues a call to strterm_get_char, which isn't quite the same.
@@ -193,7 +193,7 @@
 
 *  Return value:  none
 
-*  Functional description:
+*  Description:
 *	Set the terminal into single-character ("punctual") I/O mode.
 *	ie, make characters available immediately, without waiting for
 *	an EOT (End Of Transmission, eg, a Return, Line Feed, etc.).
@@ -220,7 +220,7 @@
 
 *  Return value:  none
 
-*  Functional description:
+*  Description:
 *	Set the terminal into "line" I/O mode.  ie, characters are not
 *	available until an EOT (End Of Transmission, eg, a Return, Line Feed,
 *	etc.) is sent.
@@ -249,7 +249,7 @@
 
 *  Return value:  none
 
-*  Functional description:
+*  Description:
 *	Set the terminal into "normal" I/O mode.  ie, wait at a read for
 *	input to be typed, and do not make characters available until an
 *	EOT (End Of Transmission, eg, a Return, Line Feed, etc.) is sent.
@@ -270,7 +270,7 @@
 
 *  Return value:  none
 
-*  Functional description:
+*  Description:
 *	Set the terminal into "nowait", or asynchronous I/O mode.  ie, if
 *	no characters are available at a read, a null byte is returned
 *	and program flow continues, rather than waiting for something to be
@@ -297,7 +297,7 @@
 
 *  Return value:  none
 
-*  Functional description:
+*  Description:
 *	Set the terminal into "wait", or synchronous I/O mode.  ie, if
 *	no characters are available at a read,  program flow halts,
 *	waiting for something to be transmitted, rather than returning

@@ -1,5 +1,6 @@
 *	VMS versions.
-*
+
+
 	SUBROUTINE STRCPU(TCPU)
 	IMPLICIT NONE
 *  Output argument:
@@ -12,7 +13,11 @@
 	
 	RETURN
 	END
-*
+
+
+
+
+
 	SUBROUTINE STRCPUQ(TCPU) !Quad-version (64-bits).
 	IMPLICIT NONE
 *  Output argument:
@@ -24,7 +29,11 @@
 	
 	RETURN
 	END
-*
+
+
+
+
+
 	SUBROUTINE STRCPU0
 
 *	Initialize CPU elapsed time counter.
@@ -32,7 +41,11 @@
 	CALL LIB$INIT_TIMER
 	RETURN
 	END
-*
+
+
+
+
+
 	INTEGER FUNCTION STRCPUTPS()
 
 	IMPLICIT NONE
@@ -44,7 +57,11 @@
 
 	RETURN
 	END
-*
+
+
+
+
+
 	SUBROUTINE STRDATE(YEAR,MONTH,DAY)
 	IMPLICIT NONE
 *  Output arguments:
@@ -53,7 +70,11 @@
 	IF (YEAR.LT.1900) YEAR=YEAR+1900 !If it's missing, add the century.
 	RETURN
 	END
-*
+
+
+
+
+
 	SUBROUTINE STRDEC_ENDIAN(I32)
 
 *  Compatibility routine.  See STRDEC_ENDIAN_HALF.
@@ -66,7 +87,11 @@
 
 	RETURN
 	END
-*
+
+
+
+
+
 	SUBROUTINE STRDEC_ENDIAN_BYTE(I32)
 
 *	Swap the 4 8-bit bytes in the 32-bit (long) word I32,
@@ -79,7 +104,11 @@
 
 	RETURN
 	END
-*
+
+
+
+
+
 	SUBROUTINE STRDEC_ENDIAN_BYTES(Nwords,Block)
 
 *	Swap the 4 8-bit bytes in the 32-bit (long) word I32,
@@ -98,7 +127,11 @@
 
 	RETURN
 	END
-*
+
+
+
+
+
 	SUBROUTINE STRDEC_ENDIAN_HALF(I32)
 
 *	Swap the two 16-bit half-words in the 32-bit (long) word I32,
@@ -111,7 +144,11 @@
 
 	RETURN
 	END
-*
+
+
+
+
+
 	INTEGER FUNCTION STRDEC_IBITS(DATA,BIT0,BITS)
 
 *	Do an IBITS, but make it act like DEC.
@@ -124,7 +161,11 @@
 
 	RETURN
 	END
-*
+
+
+
+
+
 	SUBROUTINE STRFLUSH( LUN )
 
 	IMPLICIT NONE
@@ -140,7 +181,11 @@
 	RETURN !No-op under VMS.
 
 	END
-*
+
+
+
+
+
 	SUBROUTINE STRMOVE(COUNT,SOURCE,DEST)
 
 *	VAX interface routine to LIB$MOVC3.  COUNT is a 32-bit word-count,
@@ -165,7 +210,11 @@
 
 	RETURN
 	END
-*
+
+
+
+
+
 	SUBROUTINE STRMSEC(MSECS)
 *	Standard interface routine to return milliseconds since midnight.
 	IMPLICIT NONE
@@ -174,7 +223,11 @@
 	MSECS=INT(1000.*SECNDS(0.)) !Milliseconds since midnight
 	RETURN
 	END
-*
+
+
+
+
+
 	LOGICAL FUNCTION STRMSEC_DELAY(MSECS)
 
 *	Standard interface routine to delay the specified time in
@@ -234,7 +287,123 @@
 
 	RETURN
 	END
-*
+
+
+
+
+
+	SUBROUTINE STRNET_ENDIAN_BYTE(I32)
+
+	IMPLICIT NONE
+
+*  Input/Output:
+	INTEGER I32
+
+*  Description:
+*	Swap the 4 8-bit bytes in the 32-bit (long) word I32,
+*	if needed, to make the big/little endian business come out
+*	Network-style.  On SGI (here), the swapping is done.
+
+	INTEGER I4
+	INTEGER*1 I1(4),I1SAVE
+	EQUIVALENCE (I1,I4)
+
+	I4=I32
+
+*	Swap outter two:
+	I1SAVE=I1(1)
+	I1(1)=I1(4)
+	I1(4)=I1SAVE
+
+*	Swap inner two:
+	I1SAVE=I1(2)
+	I1(2)=I1(3)
+	I1(3)=I1SAVE
+
+	I32=I4
+
+	RETURN
+	END
+
+
+
+
+
+	SUBROUTINE STRNET_ENDIAN_BYTES(Nwords,Block)
+
+	IMPLICIT NONE
+
+*  Input:
+	INTEGER Nwords   !Number of 32-bit words in Block to reorder.
+
+*  Input/Output:
+	INTEGER Block(*) !Block of 32-bit words in to be reordered.
+
+*  Description:
+*	Swap the 4 8-bit bytes in the 32-bit (long) word I32,
+*	if needed, to make the big/little endian business come out
+*	Network-style.  On SGI (here), the swapping is done.
+
+	INTEGER Iword
+
+	INTEGER I4
+	INTEGER*1 I1(4),I1SAVE
+	EQUIVALENCE (I1,I4)
+
+	DO Iword=1,Nwords
+
+	  I4=Block(Iword)
+
+*	  Swap outter two:
+	  I1SAVE=I1(1)
+	  I1(1)=I1(4)
+	  I1(4)=I1SAVE
+
+*	  Swap inner two:
+	  I1SAVE=I1(2)
+	  I1(2)=I1(3)
+	  I1(3)=I1SAVE
+
+	  Block(Iword)=I4
+
+	END DO !Iword=1,Nwords
+
+	RETURN
+	END
+
+
+
+
+
+	SUBROUTINE STRNET_ENDIAN_HALF(I32)
+
+	IMPLICIT NONE
+
+*  Input/Output:
+	INTEGER I32
+
+*  Description:
+*	Swap the two 16-bit half-words in the 32-bit (long) word I32,
+*	if needed, to make the big/little endian business come out
+*	Network-style.  On SGI (here), the swapping is done.
+
+	INTEGER I4
+	INTEGER*2 I2(2),I2SAVE
+	EQUIVALENCE (I2,I4)
+
+	I4=I32
+	I2SAVE=I2(1)
+	I2(1)=I2(2)
+	I2(2)=I2SAVE
+	I32=I4
+
+	RETURN
+	END
+
+
+
+
+
 	LOGICAL FUNCTION STROPEN_NAT(LUN,FILENAME
      1	 ,STATUS_CARG,ACCESS_CARG,FORM_CARG
      2	 ,RECL_FLAG,RECL_IARG
@@ -1594,7 +1763,11 @@
 
 	RETURN
 	END
-*
+
+
+
+
+
 	SUBROUTINE STRTIME(HOURS,MINS,SECS)
 	IMPLICIT NONE
 	INTEGER HOURS,MINS,SECS
@@ -1622,8 +1795,13 @@
 	HOURS=H
 	MINS=M
 	SECS=S
-1	RETURN
+1	CONTINUE
+	RETURN
 	END
+
+
+
+
 
 	SUBROUTINE STR_FLOAT_IEEE_TO_HOST( Ireal )
 
@@ -1852,6 +2030,35 @@
 *	number (see STR_FLOAT_DEC_TO_HOST for more details).
 
 	RETURN !No-op under VMS.
+	END
+
+	SUBROUTINE STR_Sleep( Seconds )
+
+	IMPLICIT NONE
+
+*  Input:
+	REAL Seconds !Seconds to go to sleep, then wake up.
+
+*  Description:
+*	Platform-independent call to interface platform-dependent
+*	system call to wait for the specified interval in seconds
+*	and then wake up and continue, exiting this rouine
+*	normally.  Note that on some systems (not VMS) the time-
+*	interval has one-second granuality (ie, seconds is taken
+*	as an integer), and the minimum time to wait on such
+*	systems is requested to be 1 for "Seconds" > 0.
+*	Furthermore, on those systems which take integer-valued
+*	"Seconds", because of the granularity, the actual
+*	interval of sleep may be less than one second, right
+*	down to essentially zero.
+
+	REAL Local_Seconds
+
+	Local_Seconds = Seconds !Some meager protection.
+
+	CALL LIB$WAIT( Local_Seconds )
+
+	RETURN
 	END
 
 	SUBROUTINE STR_Time1970( Seconds_Since_1970 )
