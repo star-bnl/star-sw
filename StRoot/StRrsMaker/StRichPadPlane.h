@@ -1,11 +1,14 @@
 /*****************************************************************
- * $Id: StRichPadPlane.h,v 1.5 2000/02/14 01:11:47 lasiuk Exp $   
+ * $Id: StRichPadPlane.h,v 1.6 2000/02/14 20:54:03 lasiuk Exp $   
  *   StRichPadPlane is a special container specialized to store 
  *   RICH Raw Data. 
  *
  * $Log: StRichPadPlane.h,v $
- * Revision 1.5  2000/02/14 01:11:47  lasiuk
- * alter StRichID for MC storage
+ * Revision 1.6  2000/02/14 20:54:03  lasiuk
+ * : in class definition
+ *
+ * Revision 1.6  2000/02/14 20:54:03  lasiuk
+ * : in class definition
  *
  * Revision 1.5  2000/02/14 01:11:47  lasiuk
  * alter StRichID for MC storage
@@ -95,9 +98,9 @@ typedef impl_type::const_iterator const_row_iter;
 typedef row_type::iterator pad_iter;
 typedef row_type::const_iterator const_pad_iter;
 	
-class StRichPadPlane :
+	
 
-    public TObject
+
 class StRichPadPlane
 #ifdef __ROOT__
     : public TObject
