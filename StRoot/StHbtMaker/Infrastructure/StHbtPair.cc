@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.cc,v 1.7 2000/02/13 21:13:33 lisa Exp $
+ * $Id: StHbtPair.cc,v 1.8 2000/04/03 22:09:12 rcwells Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.cc,v $
+ * Revision 1.8  2000/04/03 22:09:12  rcwells
+ * Add member function ... quality().
+ *
  * Revision 1.7  2000/02/13 21:13:33  lisa
  * changed ambiguous StHbtPair::fourMomentum() to fourMomentumSum() and fourMomentumDiff() and fixed related bug in QvecCorrFctn
  *
@@ -210,4 +213,47 @@ double StHbtPair::qLongBf(double beta) const
 
     double temp = gamma*(dz - beta*dt);
     return (temp);
+}
+
+int StHbtPair::quality() const {
+  unsigned long mapMask0 = 0xFFFFFF00;
+  unsigned long mapMask1 = 0x1FFFFF;
+  unsigned long padRow1To24Track1 = mTrack1->TopologyMap(0) & mapMask0;
+  unsigned long padRow25To45Track1 = mTrack1->TopologyMap(1) & mapMask1;
+  unsigned long padRow1To24Track2 = mTrack2->TopologyMap(0) & mapMask0;
+  unsigned long padRow25To45Track2 = mTrack2->TopologyMap(1) & mapMask1;
+  // AND logic
+  unsigned long bothPads1To24 = padRow1To24Track1 & padRow1To24Track2;
+  unsigned long bothPads25To45 = padRow25To45Track1 & padRow25To45Track2;
+  // XOR logic
+  unsigned long onePad1To24 = padRow1To24Track1 ^ padRow1To24Track2;
+  unsigned long onePad25To45 = padRow25To45Track1 ^ padRow25To45Track2;
+  unsigned long bitI;
+  int ibits;
+  int Quality = 0;
+  for (ibits=8;ibits<=31;ibits++) {
+    bitI = 0;
+    bitI |= 1UL<<(ibits);
+    if ( onePad1To24 & bitI ) {
+      Quality++;
+      continue;
+    }
+    else{
+      if ( bothPads1To24 & bitI ) Quality--;
+    }
+  }
+  for (ibits=0;ibits<=20;ibits++) {
+    bitI = 0;
+    bitI |= 1UL<<(ibits);
+    if ( onePad25To45 & bitI ) {
+      Quality++;
+      continue;
+    }
+    else{
+      if ( bothPads25To45 & bitI ) Quality--;
+    }
+  }
+
+  return ( Quality );
+
 }
