@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSignalGenerator.cc,v 1.3 1999/02/04 18:34:01 lasiuk Exp $
+ * $Id: StTrsDigitalSignalGenerator.cc,v 1.4 1999/02/28 20:19:32 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,9 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSignalGenerator.cc,v $
- * Revision 1.3  1999/02/04 18:34:01  lasiuk
- * remove digSector from constructor;
- * add fillSector for designation
+ * Revision 1.4  1999/02/28 20:19:32  lasiuk
+ * take number of time bins from db
+ * not compatible with data compression from the analogSignalGenerator
  *
  * Revision 1.3  1999/02/04 18:34:01  lasiuk
  * remove digSector from constructor;
@@ -34,7 +34,10 @@
 
 StTrsDigitalSignalGenerator::StTrsDigitalSignalGenerator(StTpcElectronics* el, StTrsSector* sec)
     : mElectronicsDb(el), mSector(sec)
-{/* nopt */}
+{
+    mNumberOfTimeBins = mElectronicsDb->numberOfTimeBins();
+    PR(mNumberOfTimeBins);
+}
 
 StTrsDigitalSignalGenerator::~StTrsDigitalSignalGenerator() {/* nopt */}
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.13 1999/02/14 20:46:07 lasiuk Exp $
+ * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.14 1999/02/28 20:19:30 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
- * Revision 1.13  1999/02/14 20:46:07  lasiuk
- * debug info
+ * Revision 1.14  1999/02/28 20:19:30  lasiuk
+ * take number of time bins from db
+ * not compatible with data compression from the analogSignalGenerator
  *
  * Revision 1.13  1999/02/14 20:46:07  lasiuk
  * debug info
@@ -127,11 +128,15 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
 
 	    currentPad = mSector->timeBinsOfRowAndPad(irow,ipad);
 	    if(!currentPad.size()) continue;
-// 	    cout << "dig() r/p " << irow << '/' << ipad << endl;
+ //  	    cout << "dig() r/p " << irow << '/' << ipad << endl;
 	    // Make sure the digital Pad is clear!
 	    digitalPadData.clear();
 	    digitalPadZeros.clear();
 
+
+	    int currentTimeBin = digitalPadData.size();
+// 	    PR(currentTimeBin);
+	    
 	    for(mTimeSequenceIterator  = currentPad.begin();
 		mTimeSequenceIterator != currentPad.end();
 		mTimeSequenceIterator++) {
@@ -139,40 +144,75 @@ void StTrsFastDigitalSignalGenerator::digitizeSignal()
 		// Conversion
 		// Must take into account the 8 <--> 10 bit conversion
 		// TRS calculates on a linear scale and then must
-		// convert to 8 bit data
+		// convert to 8 bit data?
+
 		int digitalAmplitude =
 		    mTimeSequenceIterator->amplitude()/mSimpleConversion;
 		if(digitalAmplitude>255) digitalAmplitude = 255;
-		
+
 		if(digitalAmplitude != 0) {
 		    digitalPadData.push_back(static_cast<unsigned char>(digitalAmplitude));
 		    digitalPadZeros.push_back(static_cast<unsigned char>(0));
+		    currentTimeBin++;
 		}
 		// Otherwise there is no signals!
 		else if(digitalPadZeros.size() == 0) {
 		    digitalPadData.push_back(static_cast<unsigned char>(0));
 		    digitalPadZeros.push_back(static_cast<unsigned char>(1));
+		    currentTimeBin++;
 		}
 		else if(digitalPadData.back() == static_cast<unsigned char>(0) ) {
 		    
 		    if (digitalPadZeros.back() == static_cast<unsigned char>(255)) {
 			digitalPadData.push_back(static_cast<unsigned char>(0));
 			digitalPadZeros.push_back(static_cast<unsigned char>(1));
+			currentTimeBin++;
 		    }
 		    else {
 			digitalPadZeros.back()++;
+			currentTimeBin++;
 		    }
 		}
 		else {
 		    digitalPadData.push_back(static_cast<unsigned char>(0));
 		    digitalPadZeros.push_back(static_cast<unsigned char>(1));
+		    currentTimeBin++;
 		}
-	    } // the iterator
+	    } // the iterator (mTimeSequence)
+
+	    if(currentTimeBin<mNumberOfTimeBins) {
+		int remainingTimeBins = mNumberOfTimeBins - (currentTimeBin+1);
+ // 		PR(currentTimeBin);
+		do {
+		    if(digitalPadData.back() == 0) {
+			if(remainingTimeBins>255) {
+			    digitalPadZeros.back() += 254;
+			    remainingTimeBins -= 254;
+			}
+			else {
+			    digitalPadZeros.back() += remainingTimeBins;
+			    break;
+			}
+		    }
+		    if(remainingTimeBins>255) {
+			digitalPadData.push_back(static_cast<unsigned char>(0));
+			digitalPadZeros.push_back(static_cast<unsigned char>(255));
+			remainingTimeBins -= 255;
+		    }
+		    else {
+			digitalPadData.push_back(static_cast<unsigned char>(0));
+			digitalPadZeros.push_back(static_cast<unsigned char>(remainingTimeBins));
+			break;
+		    }
+		} while (remainingTimeBins > 0);
+	    }
+
+	    
 	    // print it out:
-// 	    PR(digitalPadData.size());
-// 	    for(int ii=0; ii<digitalPadData.size(); ii++) {
-// 		cout << (ii) << '\t' << dec << (int)(digitalPadData[ii]) << '\t' << dec << (int)(digitalPadZeros[ii]) << endl;
-// 	    }
+//   	    PR(digitalPadData.size());
+//   	    for(int ii=0; ii<digitalPadData.size(); ii++) {
+//   		cout << (ii) << '\t' << dec << (int)(digitalPadData[ii]) << '\t' << dec << (int)(digitalPadZeros[ii]) << endl;
+//   	    }
 	    
 	    currentPad.clear();
 	    pair<digitalTimeBins*, digitalTimeBins*> tmp(&digitalPadData, &digitalPadZeros);
