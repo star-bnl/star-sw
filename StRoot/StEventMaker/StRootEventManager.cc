@@ -1,5 +1,8 @@
-// $Id: StRootEventManager.cc,v 1.1 1999/05/22 18:23:42 perev Exp $
+// $Id: StRootEventManager.cc,v 1.2 1999/06/24 17:30:27 fisyak Exp $
 // $Log: StRootEventManager.cc,v $
+// Revision 1.2  1999/06/24 17:30:27  fisyak
+// Add more print out
+//
 // Revision 1.1  1999/05/22 18:23:42  perev
 // Add classes from StEventReaderMaker
 //
@@ -132,8 +135,11 @@ void StRootEventManager::closeEvent() { /* noop */ }
 
 void StRootEventManager::setup() { /* noop */ }
 
-  } else {\
-    cout << "StRootEventManager: " << nt << " not found" << endl;\
+void StRootEventManager::shutdown() { /* noop */ }
+
+    cout << "StRootEventManager: Table type  " << nt << \
+TABLE_TYPE ##_st* StRootEventManager::returnTable_ ## TABLE_TYPE(long& nentries) const\
+    Dst->Pwd()->ls(2);\
 {\
   TABLE_TYPE ## _st* table = NULL;\
   St_ ## TABLE_TYPE  *tableWrap;\
