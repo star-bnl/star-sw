@@ -1,5 +1,8 @@
-// $Id: tpcdraw.C,v 1.7 1999/09/23 21:52:35 snelling Exp $
+// $Id: tpcdraw.C,v 1.8 1999/11/10 00:16:16 snelling Exp $
 // $Log: tpcdraw.C,v $
+// Revision 1.8  1999/11/10 00:16:16  snelling
+// Removed drawing of pseudo-padrow hits for GEANT points
+//
 // Revision 1.7  1999/09/23 21:52:35  snelling
 // added gSystem->Load("StAnalysisUtilities") because that's not in bfc anymore
 //
@@ -343,7 +346,7 @@ void tpcdraw() {
   if (DrawPixels == 0) { DrawHits("y:x","","same,scat"); }
   else { DrawHits("y:x","","scat"); }
   if (!chain->GetOption(kMINIDAQ) && !chain->GetOption(kTDAQ)) {
-    DrawGeantHits("x1:x0","","same,scat");
+    DrawGeantHits("x1:x0","volume_id<2446","same,scat");
   }  
 
   pad2->cd();
@@ -354,7 +357,7 @@ void tpcdraw() {
   if (DrawPixels == 0) { DrawHits("z:x","","same,scat"); }
   else { DrawHits("z:x","","scat"); }
   if (!chain->GetOption(kMINIDAQ) && !chain->GetOption(kTDAQ)) {
-    DrawGeantHits("x2:x0","","same,scat");
+    DrawGeantHits("x2:x0","volume_id<2446","same,scat");
   }
   
   InitDraw();
