@@ -1,8 +1,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.26 2002/06/07 22:18:37 kirill Exp $
+// $Id: StFlowCutEvent.cxx,v 1.27 2002/06/10 22:50:56 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
+//          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
 //
 // Description:  Class for applying event cuts
 //
@@ -69,6 +70,14 @@ Bool_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
   StPrimaryVertex* pVertex = pEvent->primaryVertex(0);
   if (!pVertex) return kFALSE;
 
+  // Multiplicity
+  Long_t mult = pVertex->numberOfDaughters();
+  if (mMultCuts[1] > mMultCuts[0] && 
+     (mult < mMultCuts[0] || mult >= mMultCuts[1])) {
+    mMultCut++;
+    return kFALSE;
+  }
+  
   if (pEvent->l3Trigger() && pEvent->l3Trigger()->l3EventSummary() &&
       !(pEvent->l3Trigger()->l3EventSummary()->unbiasedTrigger())) {
     // cout << "FlowCutEvent: L3 biased trigger event " << endl;
@@ -78,14 +87,6 @@ Bool_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
   // update normal event counter
   mEventN++;
 
-  // Multiplicity
-  Long_t mult = pVertex->numberOfDaughters();
-  if (mMultCuts[1] > mMultCuts[0] && 
-     (mult < mMultCuts[0] || mult >= mMultCuts[1])) {
-    mMultCut++;
-    return kFALSE;
-  }
-  
   const StThreeVectorF& vertex = pVertex->position();
  
   // Vertex x
@@ -114,7 +115,7 @@ Bool_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
 
   // Trigger
   StL0Trigger* pTrigger = pEvent->l0Trigger();
-  Float_t trigger = 10.;
+  Float_t trigger;
 
   if (pTrigger) {
     UInt_t triggerWord = pTrigger->triggerWord();
@@ -143,16 +144,6 @@ Bool_t StFlowCutEvent::CheckEvent(StFlowPicoEvent* pPicoEvent) {
   
   if (!pPicoEvent) return kFALSE;
 
-  // Centrality
-  Int_t cent = pPicoEvent->CalcCentrality();
-  if (mCentCuts[0] && mCentCuts[1] >= mCentCuts[0] && 
-      (cent < mCentCuts[0] || cent > mCentCuts[1])) {
-    mCentCut++;
-    return kFALSE;
-  }
-  
-  mEventN++;
-
   // Multiplicity
   Int_t mult = pPicoEvent->OrigMult();
   if (mMultCuts[1] > mMultCuts[0] && 
@@ -161,6 +152,33 @@ Bool_t StFlowCutEvent::CheckEvent(StFlowPicoEvent* pPicoEvent) {
     return kFALSE;
   }
    
+  // Trigger
+  UInt_t triggerWord = pPicoEvent->L0TriggerWord();
+  Float_t trigger;
+
+  switch (triggerWord) {
+  case 4096:  trigger = 1.;  break; // minbias
+  case 4352:  trigger = 2.;  break; // central
+  case 61952: trigger = 3.;  break; // laser
+  default:    trigger = 10.; break; // no clue
+  }
+
+  if (mTriggerCut && trigger != mTriggerCut) {
+    mTriggerCutN++;
+    return kFALSE;
+  }
+
+  // Centrality
+  Int_t cent = pPicoEvent->CalcCentrality();
+  if (mCentCuts[0] && mCentCuts[1] >= mCentCuts[0] && 
+      (cent < mCentCuts[0] || cent > mCentCuts[1])) {
+    mCentCut++;
+    return kFALSE;
+  }
+  
+  // update normal event counter
+  mEventN++;
+
   // Vertex x
   Float_t vertexX = pPicoEvent->VertexX();
   if (mVertexXCuts[1] > mVertexXCuts[0] &&
@@ -185,22 +203,6 @@ Bool_t StFlowCutEvent::CheckEvent(StFlowPicoEvent* pPicoEvent) {
     return kFALSE;
   }
 
-  // Trigger
-  UInt_t triggerWord = pPicoEvent->L0TriggerWord();
-  Float_t trigger = 10.;
-
-  switch (triggerWord) {
-  case 4096:  trigger = 1.;  break; // minbias
-  case 4352:  trigger = 2.;  break; // central
-  case 61952: trigger = 3.;  break; // laser
-  default:    trigger = 10.; break; // no clue
-  }
-
-  if (mTriggerCut && trigger != mTriggerCut) {
-    mTriggerCutN++;
-    return kFALSE;
-  }
-
   mGoodEventN++;
   return kTRUE;
 }
@@ -217,8 +219,29 @@ Bool_t StFlowCutEvent::CheckEvent(StMuEvent* pMuEvent) {
     return kFALSE;
   }
 
-  // update normal event counter
-  mEventN++;
+  // Multiplicity 
+  Int_t mult = pMuEvent->eventSummary().numberOfGoodPrimaryTracks(); //???
+  if (mMultCuts[1] > mMultCuts[0] && 
+      (mult < mMultCuts[0] || mult >= mMultCuts[1])) {
+    mMultCut++;
+    return kFALSE;
+  }
+   
+  // Trigger
+  UInt_t triggerWord = pMuEvent->l0Trigger().triggerWord();
+  Float_t trigger;
+
+  switch (triggerWord) {
+  case 4096:  trigger = 1.;  break; // minbias
+  case 4352:  trigger = 2.;  break; // central
+  case 61952: trigger = 3.;  break; // laser
+  default:    trigger = 10.; break; // no clue
+  }
+
+  if (mTriggerCut && trigger != mTriggerCut) {
+    mTriggerCutN++;
+    return kFALSE;
+  }
 
   // Centrality
   Int_t* cent;
@@ -253,14 +276,9 @@ Bool_t StFlowCutEvent::CheckEvent(StMuEvent* pMuEvent) {
     return kFALSE;
   }
   
-  // Multiplicity 
-  Int_t mult = pMuEvent->eventSummary().numberOfGoodPrimaryTracks(); //???
-  if (mMultCuts[1] > mMultCuts[0] && 
-      (mult < mMultCuts[0] || mult >= mMultCuts[1])) {
-    mMultCut++;
-    return kFALSE;
-  }
-   
+  // update normal event counter
+  mEventN++;
+
   // Vertex x
   Float_t vertexX = pMuEvent->primaryVertexPosition().x();
   if (mVertexXCuts[1] > mVertexXCuts[0] &&
@@ -282,22 +300,6 @@ Bool_t StFlowCutEvent::CheckEvent(StMuEvent* pMuEvent) {
   if (mVertexZCuts[1] > mVertexZCuts[0] &&
      (vertexZ < mVertexZCuts[0] || vertexZ >= mVertexZCuts[1])) {
     mVertexZCut++;
-    return kFALSE;
-  }
-
-  // Trigger
-  UInt_t triggerWord = pMuEvent->l0Trigger().triggerWord();
-  Float_t trigger = 10.;
-
-  switch (triggerWord) {
-  case 4096:  trigger = 1.;  break; // minbias
-  case 4352:  trigger = 2.;  break; // central
-  case 61952: trigger = 3.;  break; // laser
-  default:    trigger = 10.; break; // no clue
-  }
-
-  if (mTriggerCut && trigger != mTriggerCut) {
-    mTriggerCutN++;
     return kFALSE;
   }
 
@@ -398,13 +400,14 @@ void StFlowCutEvent::PrintCutList() {
   // Prints the list of cuts
 
   cout << "#######################################################" << endl;
-  cout << "# Primary Vertex Events= " << mEventN << endl;
+  cout << "# Primary Vertex Triggered Events= " << mEventN << endl;
   cout << "# Event Cut List:" << endl;
+  cout << "#   Mult cuts= " << mMultCuts[0] << ", " << mMultCuts[1]
+       << " :\t Events Cut= " << mMultCut << endl;
+  cout << "#   Trigger cut= " << mTriggerCut
+       << " :\t\t Events Cut= " << mTriggerCutN << endl;
   cout << "#   Centrality cuts= " << mCentCuts[0] << ", " << mCentCuts[1]
        << " :\t Events Cut= " << mCentCut << endl;
-  cout << "#   Mult cuts= " << mMultCuts[0] << ", " << mMultCuts[1]
-       << " :\t Events Cut= " << mMultCut << "\t (" <<  setprecision(3) << 
-    (float)mMultCut/(float)mEventN/perCent << "% cut)" << endl;
   cout << "#   VertexX cuts= " << mVertexXCuts[0] << ", " << mVertexXCuts[1]
        << " :\t Events Cut= " << mVertexXCut << "\t (" <<  setprecision(3) << 
     (float)mVertexXCut/(float)mEventN/perCent << "% cut)" << endl;
@@ -429,6 +432,11 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.27  2002/06/10 22:50:56  posk
+// pt and eta weighting now default.
+// DcaGlobalPart default now 0 to 1 cm.
+// Event cut order changed.
+//
 // Revision 1.26  2002/06/07 22:18:37  kirill
 // Introduced MuDst reader
 //

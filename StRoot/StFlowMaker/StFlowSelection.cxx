@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.cxx,v 1.16 2002/01/31 01:04:52 posk Exp $
+// $Id: StFlowSelection.cxx,v 1.17 2002/06/10 22:51:02 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -37,7 +37,7 @@ StFlowSelection::StFlowSelection() : mSubevent(-1) {
   mChiSqPart[0]         = 0.;
   mChiSqPart[1]         = 0.;
   mDcaGlobalPart[0]     = 0.;
-  mDcaGlobalPart[1]     = 0.;
+  mDcaGlobalPart[1]     = 1.;
   mYPart[0]             = 0.;
   mYPart[1]             = 0.;
 }
@@ -163,6 +163,11 @@ void StFlowSelection::PrintList() const {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.cxx,v $
+// Revision 1.17  2002/06/10 22:51:02  posk
+// pt and eta weighting now default.
+// DcaGlobalPart default now 0 to 1 cm.
+// Event cut order changed.
+//
 // Revision 1.16  2002/01/31 01:04:52  posk
 // *** empty log message ***
 //

@@ -1,9 +1,10 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.h,v 1.8 2002/06/07 22:18:38 kirill Exp $
+// $Id: StFlowCutEvent.h,v 1.9 2002/06/10 22:50:57 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
+//          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
 //
 // Description:  Class for applying flow event cuts
 //               If lo >= hi no cut is applied
@@ -99,6 +100,11 @@ inline void StFlowCutEvent::SetTrigger(const Float_t value) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.h,v $
+// Revision 1.9  2002/06/10 22:50:57  posk
+// pt and eta weighting now default.
+// DcaGlobalPart default now 0 to 1 cm.
+// Event cut order changed.
+//
 // Revision 1.8  2002/06/07 22:18:38  kirill
 // Introduced MuDst reader
 //

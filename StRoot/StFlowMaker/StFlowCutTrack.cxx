@@ -1,9 +1,10 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutTrack.cxx,v 1.33 2002/06/07 22:18:39 kirill Exp $
+// $Id: StFlowCutTrack.cxx,v 1.34 2002/06/10 22:50:58 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
+//          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
 //
 // Description:  Class for applying track cuts
 //
@@ -387,7 +388,7 @@ Int_t StFlowCutTrack::CheckTrack(StFlowPicoTrack* pPicoTrack) {
 //-----------------------------------------------------------------------
 
 Int_t StFlowCutTrack::CheckTrack(StMuTrack* pMuTrack) {
-  // Returns kTRUE if the picotrack survives all the cuts
+  // Returns kTRUE if the micotrack survives all the cuts
 
   float charge =  (float) (pMuTrack->charge());
   float eta = pMuTrack->eta();
@@ -597,6 +598,11 @@ void StFlowCutTrack::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutTrack.cxx,v $
+// Revision 1.34  2002/06/10 22:50:58  posk
+// pt and eta weighting now default.
+// DcaGlobalPart default now 0 to 1 cm.
+// Event cut order changed.
+//
 // Revision 1.33  2002/06/07 22:18:39  kirill
 // Introduced MuDst reader
 //
