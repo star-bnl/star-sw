@@ -11,17 +11,23 @@
 //####################################################################
 void gl3Event::addTracks ( short sector, int nTrk, type1_track* track1 ) {
 //
-   gl3Track*    lTrack = &(track[nTracks]) ;
+   gl3MergingTrack* lTrack = &(mergingTrack[nMergingTracks]) ;
+   gl3MergingTrack* pTrack = lTrack ;
    type1_track *trk    = track1 ;
 //
    for ( int i = 0 ; i < nTrk ; i++ ) { 
-      lTrack->set ( sector, trk, bField,
-                      sectorInfo[sector].xVert, sectorInfo[sector].yVert, 
-		      sectorInfo[sector].rVert, sectorInfo[sector].phiVert ) ; 
-//    lTrack->print();
+      pTrack->para = &para ;
+      pTrack->addTrack ( sector, trk ) ;
       trk++ ;
-      lTrack++ ;
-      nTracks++ ;
+      if ( pTrack->mergePrimary ( trackContainer ) ) continue ;
+      pTrack++ ;
+      nMergingTracks++ ;
+      if ( nMergingTracks > maxMergingTracks ) {
+         fprintf ( stderr, 
+        "gl3Event::addTracks: max number of merging tracks %d reached\n", 
+         maxMergingTracks ) ;
+	 nMergingTracks-- ;
+      }
    }
 }
 //####################################################################
@@ -34,11 +40,16 @@ void gl3Event::addTracks ( short sector, int nTrk, type2_track* track2 ) {
 //
    for ( int i = 0 ; i < nTrk ; i++ ) { 
       lTrack->set ( sector, trk, 
-		      sectorInfo[sector].rVert, sectorInfo[sector].phiVert ) ; 
+		    sectorInfo[sector-1].rVert, sectorInfo[sector-1].phiVert ) ; 
 //    lTrack->print();
       trk++ ;
       lTrack++ ;
       nTracks++ ;
+      if ( nTracks > maxTracks ) {
+         fprintf ( stderr, 
+         "gl3Event::addTracks: max number of tracks %d reached\n", maxTracks ) ;
+	 nTracks-- ;
+      }
    }
 }
 //####################################################################
@@ -55,19 +66,56 @@ void gl3Event::addTracks ( short sector, int nTrk, type3_track* track3 ) {
       trk++ ;
       lTrack++ ;
       nTracks++ ;
+      if ( nTracks > maxTracks ) {
+         fprintf ( stderr, 
+        " gl3Event::addTracks: max number of tracks %d reached\n", 
+         maxTracks ) ;
+	 nTracks-- ;
+      }
    }
 }
+
 //####################################################################
 //
 //####################################################################
 int gl3Event::readEvent  ( int maxLength, char* buffer ){
    maxLength = 0 ;
+   L3_P* header = (L3_P *)buffer ;
+
+   int length, offset ;
+   char* pointer ;
+
+   nTracks = 0 ;
+   nMergingTracks = 0 ;
+   memset ( trackContainer, 0, para.nPhiTrackPlusOne*para.nEtaTrackPlusOne*sizeof(FtfContainer) ) ;
+
+   int i ;
+   for ( i = 0 ; i < NSECTORS ; i++ ) {
+      length = header->sector[i].len ;
+      if ( !length ) continue ;
+      offset = header->sector[i].off ;
+      pointer = &(buffer[offset]);
+      readSector ( pointer ) ;
+   }
+   //
+   //   Copy merging tracks to gl3Tracks
+   //
+   for ( i = 0 ; i < nMergingTracks ; i++ ) {
+      track[nTracks].set ( &(mergingTrack[i]) ) ;
+      nTracks++ ;
+      if ( nTracks > maxTracks ) {
+	 fprintf ( stderr, "gl3Event::readEvent: max number tracks %d reached \n",
+	       nTracks ) ;
+	 break ;
+      }
+   }
+   //
    return 0 ;
 }
 //####################################################################
 //
 //####################################################################
-int gl3Event::readSector ( int maxLength, char* buffer ){
+int gl3Event::readSector ( char* buffer ){
 
    struct L3_SECTP *head = (struct L3_SECTP *)buffer ;
    int sizeWord = 4; // 4 bytes per dword in raw formats
@@ -79,7 +127,7 @@ int gl3Event::readSector ( int maxLength, char* buffer ){
       return 1 ;
    }
 
-   gl3Sector* sectorP = &(sectorInfo[sector]) ;
+   gl3Sector* sectorP = &(sectorInfo[sector-1]) ;
    sectorP->filled = 1 ;
    sectorP->nHits     = head->nHits ;
    sectorP->nTracks   = head->nTracks ;
@@ -93,8 +141,15 @@ int gl3Event::readSector ( int maxLength, char* buffer ){
    if ( sectorP->phiVert < 0 ) sectorP->phiVert += 2. * M_PI ;
 
  //sectorP->print();
-
-
+//
+//   Set vertex parameters for track merging 
+//
+   para.xVertex   = sectorP->xVert ;
+   para.yVertex   = sectorP->yVert ;
+   para.zVertex   = sectorP->zVert ;
+   para.rVertex   = sectorP->rVert ;
+   para.phiVertex = sectorP->phiVert ;
+//
    char* pointer1 = head->banks[0].off * sizeWord + buffer ;
    int nTracks1, nTracks2, nTracks3 ;
    if ( head->banks[0].len > 0 ) {
@@ -119,6 +174,7 @@ int gl3Event::readSector ( int maxLength, char* buffer ){
    }
    else nTracks3 = 0 ;
 // printf ( "nTracks 1 2 3 %d %d %d\n",nTracks1, nTracks2, nTracks3 ) ;
+
 //
 //   Add different types of tracks
 //
@@ -139,13 +195,26 @@ int gl3Event::readSector ( int maxLength, char* buffer ){
       type3_track* track3 = headerType3->track ;
       addTracks ( sector, nTracks3, track3 ) ;
    }
+//
+//   declare event as busy
+//
+   busy = 1 ;
 // 
    return 0 ;
 }
 //####################################################################
 //
 //####################################################################
-int gl3Event::setup ( int mxTracks ){
+int gl3Event::resetEvent  (  ){
+   nTracks = 0 ;
+   busy    = 0 ;
+   return 0 ;
+}
+
+//####################################################################
+//
+//####################################################################
+int gl3Event::setup ( int mxTracks, int mxMergingTracks ){
 
    if ( mxTracks < 0 || mxTracks > 1000000 ) {
       fprintf ( stderr, " gl3Event::setup: maxTrack %d out of range \n",
@@ -154,6 +223,34 @@ int gl3Event::setup ( int mxTracks ){
    }
    maxTracks = mxTracks ;
    track = new gl3Track[maxTracks] ;
+//
+//   Merging variables
+//
+   maxMergingTracks = mxMergingTracks ;
+   nMergingTracks   = 0 ;
+   mergingTrack = new gl3MergingTrack[maxMergingTracks];
+
+
+   para.nPhiTrackPlusOne = para.nPhiTrack + 1 ;
+   para.nEtaTrackPlusOne = para.nEtaTrack + 1 ;
+//-------------------------------------------------------------------------
+//         If needed calculate track area dimensions
+//-------------------------------------------------------------------------
+   para.phiSliceTrack   = (para.phiMaxTrack - para.phiMinTrack)/para.nPhiTrack ;
+   para.etaSliceTrack   = (para.etaMaxTrack - para.etaMinTrack)/para.nEtaTrack ;
+
+   int nTrackVolumes = para.nPhiTrackPlusOne* para.nEtaTrackPlusOne ;
+   trackContainer = new FtfContainer[nTrackVolumes];
+   if(trackContainer == NULL) {
+      fprintf ( stderr, "Problem with memory allocation... exiting\n") ;
+      return 1 ;
+   }
+   para.primaries = 1 ;
+
    nTracks = 0 ;
+//
+//
+
    return 0 ;
 }
+ 
