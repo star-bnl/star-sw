@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.cxx,v 1.14 2002/05/21 22:07:13 lasiuk Exp $
+ * $Id: StRichSpectraMaker.cxx,v 1.15 2002/05/21 22:52:56 lasiuk Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -15,9 +15,8 @@
  ***************************************************************************
  *
  * $Log: StRichSpectraMaker.cxx,v $
- * Revision 1.14  2002/05/21 22:07:13  lasiuk
- * revision of index of refraction
- * and ray tracing
+ * Revision 1.15  2002/05/21 22:52:56  lasiuk
+ * attempt 2
  *
  * Revision 1.13  2002/02/22 18:20:31  dunlop
  * Actually, rationalize return values
@@ -733,26 +732,30 @@ Int_t StRichSpectraMaker::Make() {
 	// for production.  The integer could
 	// be used as a coded number
 	// dynamic_cast<StRichPidTraits*>(theSelectedTrait)->setProbability(mass2);
-// 	dynamic_cast<StRichPidTraits*>(theSelectedTrait)->setId(mHistogram->numberOfPhotons());
+	dynamic_cast<StRichPidTraits*>(theSelectedTrait)->setId(mHistogram->numberOfPhotons());
 
-// 	StRichSpectra *spectraInfo =
-// 	    new StRichSpectra(mAssociatedMip.x(), mAssociatedMip.y(),
-// 			      mMipResidual.x(), mMipResidual.y(),
-// 			      mCalculatedResidual.x(), mCalculatedResidual.y(), 
-// 			      cerenkovAngle,
-// 			      mHistogram->cerenkovSigma()/degree,
-// 			      mHistogram->numberOfPhotons(),
-// 			      peakAngle/degree, numberOfPhotons, mUniqueRingHits,
-// 			      mass2, lineIntegralRatio, totalPath,
-// 			      mTracer->trackAngle()/degree, iflag, dEdx,
-// 			      mD[0], mD[1], mD[2],
-// 			      int(mNpd[0]), int(mNpd[1]), int(mNpd[2]));
-// 	//
-// 	// default Production
-// 	//
-// 	spectraInfo->setVersion(-999);  
-// 	dynamic_cast<StRichPidTraits*>(theSelectedTrait)->setRichSpectra(spectraInfo);
-// 	//
+	StRichSpectra *oldSpectra =
+	    dynamic_cast<StRichPidTraits*>(theSelectedTrait)->getRichSpectra();
+	if(oldSpectra) oldSpectra->makeZombie();
+	
+	StRichSpectra *spectraInfo =
+	    new StRichSpectra(mAssociatedMip.x(), mAssociatedMip.y(),
+			      mMipResidual.x(), mMipResidual.y(),
+			      mCalculatedResidual.x(), mCalculatedResidual.y(), 
+			      cerenkovAngle,
+			      mHistogram->cerenkovSigma()/degree,
+			      mHistogram->numberOfPhotons(),
+			      peakAngle/degree, numberOfPhotons, mUniqueRingHits,
+			      mass2, lineIntegralRatio, totalPath,
+			      mTracer->trackAngle()/degree, iflag, dEdx,
+			      mD[0], mD[1], mD[2],
+			      int(mNpd[0]), int(mNpd[1]), int(mNpd[2]));
+	//
+	// default Production
+	//
+	spectraInfo->setVersion(20011);  
+	dynamic_cast<StRichPidTraits*>(theSelectedTrait)->setRichSpectra(spectraInfo);
+	//
 	//////////////////////////////////////////////////
 #endif	
     } // loop over the tracks
@@ -768,7 +771,7 @@ Int_t StRichSpectraMaker::Make() {
 void StRichSpectraMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRichSpectraMaker.cxx,v 1.14 2002/05/21 22:07:13 lasiuk Exp $\n");
+    printf("* $Id: StRichSpectraMaker.cxx,v 1.15 2002/05/21 22:52:56 lasiuk Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
@@ -1357,6 +1360,7 @@ void StRichSpectraMaker::doIdentification(StTrack* track) {
 // ----------------------------------------------------
 void StRichSpectraMaker::calculateResidual(StTrack* track)
 {
+    // never called
     cout << "StRichSpectraMaker::calculateResidual()" << endl;
     abort();
     StRichTrack mattTrack(track,mMagField);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.h,v 1.12 2002/05/21 22:07:13 lasiuk Exp $
+ * $Id: StRichSpectraMaker.h,v 1.13 2002/05/21 22:52:56 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,9 +9,8 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRichSpectraMaker.h,v $
- * Revision 1.12  2002/05/21 22:07:13  lasiuk
- * revision of index of refraction
- * and ray tracing
+ * Revision 1.13  2002/05/21 22:52:56  lasiuk
+ * attempt 2
  *
  * Revision 1.11  2002/02/22 15:38:40  dunlop
  * Tweaked the ifdef to remove writing out of histograms
@@ -67,7 +66,7 @@ using std::pair;
 #endif
 
 #define FOR_RECONSTRUCTION 1
-#define RICH_SPECTRA_HISTOGRAM 1
+//#define rICH_SPECTRA_HISTOGRAM 1
 //RICH_WITH_PAD_MONITOR 1
 
 #ifdef RICH_SPECTRA_HISTOGRAM
@@ -247,7 +246,7 @@ protected:
     
 virtual const char *GetCVS() const	{
     static const char cvs[]=
-	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.12 2002/05/21 22:07:13 lasiuk Exp $ built "__DATE__" "__TIME__ ;
+	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.13 2002/05/21 22:52:56 lasiuk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
 }
 public:

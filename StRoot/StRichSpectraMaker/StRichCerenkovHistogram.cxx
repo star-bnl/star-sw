@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichCerenkovHistogram.cxx,v 1.7 2002/05/21 22:07:13 lasiuk Exp $
+ * $Id: StRichCerenkovHistogram.cxx,v 1.8 2002/05/21 22:52:55 lasiuk Exp $
  *
  * Author:  bl Mar 2, 2001
  ***************************************************************************
@@ -11,9 +11,8 @@
  ***************************************************************************
  *
  * $Log: StRichCerenkovHistogram.cxx,v $
- * Revision 1.7  2002/05/21 22:07:13  lasiuk
- * revision of index of refraction
- * and ray tracing
+ * Revision 1.8  2002/05/21 22:52:55  lasiuk
+ * attempt 2
  *
  * Revision 1.6  2002/02/19 04:26:49  lasiuk
  * addition of filling StEvent for inclusion in chain
