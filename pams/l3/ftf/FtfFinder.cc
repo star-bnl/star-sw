@@ -51,13 +51,13 @@ float FtfFinder::process (  ) {
    short i ;
    para.primaries = 1 ;
    for ( i = 0 ; i < para.nPrimaryPasses ; i++ )
-        getTracks ( );
+        if ( getTracks ( ) ) break ;
 //
 //      Look for secondaries    
 //
    para.primaries = 0 ;
    for ( i = 0 ; i < para.nSecondaryPasses ; i++ )
-        getTracks ( );
+        if ( getTracks ( ) ) break ;
 
 //   if ( para.dEdx ) dEdx ( ) ;
 
@@ -78,7 +78,7 @@ void FtfFinder::dEdx ( ) {
 //********************************************************************** 
 //	Recontruct primary tracks 
 //**********************************************************************
-void FtfFinder::getTracks ( ) {
+int FtfFinder::getTracks ( ) {
    short   nhitsSegment ;
 //
 //     Set conformal coordinates if we are working with primaries
@@ -113,9 +113,9 @@ void FtfFinder::getTracks ( ) {
 //
 //
          if ( nTracks > maxTracks ){
-            printf("\n fft_track: Max nr tracks reached !") ;
+            printf("\n FtfFinder::getTracks: Max nr tracks reached !") ;
             nTracks = maxTracks  ;
-            return ;
+            return 1 ;
          }
 //
 //     Initialize variables before going into track hit loop
@@ -156,7 +156,7 @@ void FtfFinder::getTracks ( ) {
 //       End loop over rows                           
 //
    }
-   return;
+   return 0 ;
 }
 //********************************************************************
 //
