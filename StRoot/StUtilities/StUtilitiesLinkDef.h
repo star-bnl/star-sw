@@ -19,6 +19,8 @@
 #pragma link C++ function StInfo_;
 #pragma link C++ function StWarning_;
 #pragma link C++ function StError_;
+#pragma link C++ function StDebug_;
+#pragma link C++ function QAInfo_;
 #pragma link C++ function StMessAddType_;
 #pragma link C++ function MessageOut;
 #endif

@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.19 1999/07/25 05:27:45 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.20 1999/08/10 22:07:35 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.20  1999/08/10 22:07:35  genevb
+// Added QAInfo message types
+//
 // Revision 1.19  1999/07/25 05:27:45  genevb
 // Better protection against empty option strings in FORTRAN
 //
@@ -65,290 +68,10 @@
 // It inherits from StMessMgr, which provides the external interface.   //
 // Messages are stored in a vector, and come in several types           //
 // (i.e. info, error, debug ). The types "I" (info), "W" (warning),     //
-// "E" (error), and "D" (debug) are predefined. Message finding         //
-// and summary tools are also available.                                //
+// "E" (error), "D" (debug), and "Q" (QAInfo) are predefined. Message   //
+// finding and summary tools are also available.                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-//
-//
-//      ***************************************************************
-//      ***************************************************************
-//      ****      StMessMgr:  The STAR offline message manager     ****
-//      ***************************************************************
-//      ***************************************************************
-//
-//
-// Table of Contents:
-//
-// Section I. Basic usage: creating a message
-// I-1.   C++ and CINT usage
-// I-2.   Fortran usage
-// I-3.   C usage
-//
-// Section II. Advanced features
-// II-1.  Message summary
-// II-2.  Specifying output streams
-// II-3.  Non-accounted messages
-// II-4.  Turning off printing of the time-date stamp
-// II-5.  Access to the current message
-// II-6.  Finding a message
-// II-7.  Finding a list of messages
-// II-8.  Finding messages within a list
-// II-9.  Printing a list of messages
-// II-10. Formatting output
-// II-11. Limiting message counts
-//
-//______________________________________________________________________
-//
-//
-// Section I.
-// ***************************************************
-// ********* Basic usage: creating a message *********
-// ***************************************************
-//
-//
-// *** I-1.   C++ and CINT usage
-//
-// In C++ programs, one must include StMessMgr.h.
-// A global pointer (gMessMgr) points to the single message managing class.
-// A generic message is created as follows:
-//
-//   gMessMgr->Message("This is the text of the message.");
-//     or
-//   char* myText = "hello";
-//   gMessMgr->Message(myText);
-//
-// The default action here is to create an "Info" message.
-// "Info" is one of four predefined message types (the other three
-// are "Warning", "Error", and "Debug" - Debug messages are by default
-// switched off; see section II-11). The type of the message can
-// be specified as a second field in the message declaration:
-//
-//   gMessMgr->Message("This is an error message.","E");
-//
-// The message type is specified with a single letter:
-// "E" = "Error"
-// "I" = "Info"
-// "W" = "Warning"
-// "D" = "Debug"
-// Additional message types can be declared with AddType():
-//
-//   gMessMgr->AddType("F","Fatal");
-//   gMessMgr->Message("Crashing now...","F");
-//
-// The second field in the AddType() call specifies the text
-// string that will be printed out with each message of this
-// type. The available types can be listed with ListTypes();
-// AddType() returns an integer which indicates the total number
-// of types defined so far, or equals zero if the letter specified
-// to represent the new type is already taken.
-//
-// A shortcut has been provided for declaration of the three
-// pre-defined types which is not available for new types:
-//
-//   gMessMgr->Info("Hello world.");
-//     is the same as
-//   gMessMgr->Message("Hello world.","I");
-//
-// Similarly, Error(), Warning(), and Debug() also exist.
-//
-// If you would like to add variables to your message output,
-// you can use the stream version of the message declaration:
-//
-//   gMessMgr->Info() << "The number is: " << 3.42 << endm;
-//
-//   gMessMgr->Message("","W") << big_num << " seems too big." << endm;
-//
-//   gMessMgr->Error() << "Alarm #" << alarmNo << "!!!";
-//   gMessMgr->Print();
-//
-// In the first example above, nothing was specified by the call to Info().
-// The message is declared afterwards and is terminated by "endm" (similar
-// to "endl" for cout). The second example shows how to use the stream
-// version for non-predefined types where the type must be specified - to
-// do so, the message inside the Message() call must be empty (""). The
-// third example shows another way of ending the message and printing it
-// to the output: gMessMgr->Print(). This is the option which must be used
-// in CINT as "endm" is not recognized properly there.
-//
-//
-// *** I-2.   Fortran usage
-//
-// No special statements are needed in fortran to include message
-// functionality. Messages are declared with a call as follows:
-//
-//   call StMessage('message text')
-//
-// As with C++, a second string can denote a message type. New message types
-// can be declared with StMessAddType():
-//
-//   call StMessAddType('A','Abort')
-//
-// The four predefined types also have associated declaration calls:
-//
-//   call StInfo('info text')
-//   call StError('error message')
-//   call StWarning('better not')
-//   call StDebug('value above zero')
-//
-// Format statements can also be used with character strings:
-//
-//   character*60 myString
-//   ...
-//   write(myString,300) 5.6, 6
-//   300 format('This first number is ',F5.2,' and the second ',I3)
-//   call StInfo(myString)
-//
-// Notice that using a large number for the character string will cause
-// spaces to be printed which may cause the string to wrap around lines.
-//
-// For backwards compatibility with the MSG package, the following routines
-// have been supplied:
-//
-//   message(message,lines,id)    (the id parameter is unused)
-//   msg_enabled(message,id)      (the id parameter is unused)
-//   msg_enable(message)
-//   msg_disable(message)
-//
-//
-// *** I-3.   C usage
-//
-// For C, one must have "extern" statements stating that the routines to
-// use have been defined externally. This can be done simply by including
-// the StMessMgr.h file. All the C routines are identical to the FORTRAN
-// routines except that they have an underscore ("_") at the end of the
-// subroutine name. Otherwise they are identical.
-//
-// Also, for C, one more routine has been provided: MessageOut(message)
-// just to maintain some compatibility with the MSG package. This routine
-// does not have an extern statement in StMessMgr.h at the moment.
-//
-//
-//
-// Section II.
-// *************************************
-// ********* Advanced features *********
-// *************************************
-//
-//
-// *** II-1.  Message summary
-//
-// A message summary can be displayed with:
-//
-//   gMessMgr->Summary(n)
-//
-// This function compares messages by type and by the first n "tokens"
-// (text separated by spaces) of their message strings. By default, n=1.
-// Using n=0 would summarize messages by type.
-//
-//
-// *** II-2.  Specifying output streams
-//
-// Message declarations have a third field (second field for the predefined
-// declarations) for an options string. By default, this string contains only
-// the letter "O". This means that when the message is printed, it will go
-// to stdout (like cout). One can also specify the letter "E" so that the
-// message goes to stderr (like cerr). One can even use both: "OE".
-//
-//
-// *** II-3.  Non-accounted messages
-//
-// Using the additional option "-" means that a message will not be saved
-// by the message manager. This means it will not show up in subsequent
-// summaries or prints. The message will, however, be printed to the
-// stdout or stderr if (and only if) "O" and/or "E" is included in the option
-// string.
-//
-//
-// *** II-4.  Turning off printing of the time-date stamp
-//
-// Use the option "T". Remember, "O" or "E" must also be in the option
-// string for the printout.
-//
-//
-// *** II-5.  Access to the current message
-//
-// A global pointer, gMessage, exists as a pointer to the last StMessage.
-// StMessage allows access to the attributes of a message:
-//
-//   gMessage->GetType();        // message type
-//   gMessage->GetMessage();     // message text string
-//   gMessage->GetOptions();     // message options
-//   gMessage->GetTime();        // time-date stamp
-//   gMessage->Print();          // outputs a message
-//
-//
-// *** II-6.  Finding a message
-//
-// The message manager can find the first message whose text string contains
-// matches for up to four search strings:
-//
-//   StMessage* myMess = gMessMgr->FindMessage("dst","full");
-//
-//
-// *** II-7.  Finding a list of messages
-//
-// Message lists in the form of a vector of StMessage pointers are called
-// a messVec. A list of messages can be found which match up to four strings:
-//
-//   messVec* myList = gMessMgr->FindMessageList("sun","moon","planet")
-//
-//
-// *** II-8.  Finding messages within a list
-//
-// Both FindMessage() and FindMessageList() take a fifth argument which is
-// messVec pointer.
-//
-//
-// *** II-9.  Printing a list of messages
-//
-// Call PrintList() with a pointer to the messVec list of messages:
-//
-//   gMessMgr->PrintList(myList);
-//
-//
-// *** II-10. Formatting output
-//
-// StMessMgr is an ostream, like cout. It can therefore be used
-// to format, like cout:
-//
-//   gMessMgr->Info() << "Here, n=";
-//   gMessMgr->width(5)
-//   *gMessMgr << x << endm;
-//
-// Notice that once an StMessage gets printed (either by a Print() call
-// or the use of "endm"), a message is closed to further streamed input.
-//
-// One should not forget that character strings can also be formatted by
-// sprintf() before adding them to the message.
-//
-//
-// *** II-11. Limiting message counts
-//
-// The message manager provide message limiting in two ways:
-//
-//   gMessMgr->SetLimit("full disk",10);    // by message string
-//   gMessMgr->SetLimit("I",150);           // by message type
-//
-// Notice that the only thing that differentiates these calls is
-// that a single letter for the first argument means a message type
-// limit. The message string limit affects all messages which contain
-// the string. A "limit reached" message is output with the last printed
-// message.
-//
-// Limits can be changed again after being set once. The exact same string
-// or type must be specified. ListLimits() will list all the limits on
-// message strings.
-//
-// A negative limit removes limiting. There are also a couple shortcuts
-// to limiting message counts:
-// - RemoveLimit(string/type) sets the limit on a string/type to -1, thereby
-//   effectively removing the limit.
-// - SwitchOff(string/type) sets the limit to zero. This is the default case
-//   for type "D", debug messages - on can use SwitchOn("D") to enable them.
-// - SwitchOn(string/type) sets the limit to -1, removing any limit.
-//
-///////////////////////////////////////////////////////////////////////////
  
 #ifdef __ROOT__
 #include "TROOT.h"
@@ -371,6 +94,7 @@ ostream& operator<<(ostream& os, StMessage*) {
 static const char defaultMessType[] = "I";
 static char emptyString[] = "";
 static char oOpt[] = "O";
+static char otsOpt[] = "OTS";
 static char eOpt[] = "E";
 static const size_t oSize = 25;
 static const int oAddress = 132;
@@ -493,6 +217,16 @@ void type_of_call StDebug_(char* mess, char* opt, size_t len1, size_t len2) {
   gMessMgr->Message(mess,"D",opt);
 }
 //________________________________________
+void type_of_call QAInfo_(char* mess, char* opt, size_t len1, size_t len2) {
+#ifdef LINUX
+    sMessLength = len1;
+#endif
+  if ((len1>1) && (strlen(mess) > len1)) strcpy(&(mess[len1]),emptyString);
+  if ((((int) opt)==oAddress) || (len2<=0) || (len2>oSize)) opt=otsOpt;
+  else if (strlen(opt) > len2) strcpy(&(opt[len2]),emptyString);
+  gMessMgr->Message(mess,"Q",opt);
+}
+//________________________________________
 void type_of_call StMessAddType_(const char* type, const char* text,
                                                  size_t len1, size_t len2) {
   if (strlen(type) > len1) strcpy(&((const_cast<char*> (type))[len1]),emptyString);
@@ -527,6 +261,7 @@ StMessageManager::StMessageManager() : StMessMgr() {
   AddType("W","Warning");
   AddType("E","Error");
   AddType("D","Debug");
+  AddType("Q","QAInfo");
   SwitchOff("D");
 #ifdef LINUX
   memset(listOfMessPtrs,0,(maxLOMP * sizeof(char*)));
@@ -835,7 +570,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.19 1999/07/25 05:27:45 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.20 1999/08/10 22:07:35 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

@@ -1,5 +1,8 @@
-// $Id: StMessageManager.h,v 1.12 1999/07/23 16:56:40 genevb Exp $
+// $Id: StMessageManager.h,v 1.13 1999/08/10 22:07:35 genevb Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.13  1999/08/10 22:07:35  genevb
+// Added QAInfo message types
+//
 // Revision 1.12  1999/07/23 16:56:40  genevb
 // Fix extern C prototypes, default options for omitted types, Linux bug with multi-line messages
 //
@@ -44,8 +47,8 @@
 // It inherits from StMessMgr, which provides the external interface.   //
 // Messages are stored in a vector, and come in several types           //
 // (i.e. info, error, debug ). The types "I" (info), "W" (warning),     //
-// "E" (error), and "D" (debug) are predefined. Message finding         //
-// and summary tools are also available.                                //
+// "E" (error), "D" (debug), and "Q" (QAInfo) are predefined. Message   //
+// finding and summary tools are also available.                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
@@ -149,6 +152,16 @@ class StMessageManager : public StMessMgr {
          char* s4="") {return FindMessage(s1,s2,s3,s4,messCollection[4]);}
    virtual messVec* FindDebugList(const char* s1, char* s2="", char* s3="",
          char* s4="") {return FindMessageList(s1,s2,s3,s4,messCollection[4]);}
+
+// QAInfo Messages:
+   virtual StMessMgr& QAInfo(char* mess="", char* opt="OTS")
+         { return Message(mess, "Q", opt);}
+   virtual        int PrintQAInfo() {return PrintList(messCollection[5]); }
+   virtual const messVec* GetQAInfos() {return (messCollection[5]);}
+   virtual StMessage* FindQAInfo(const char* s1, char* s2="", char* s3="",
+         char* s4="") {return FindMessage(s1,s2,s3,s4,messCollection[5]);}
+   virtual messVec* FindQAInfoList(const char* s1, char* s2="", char* s3="",
+         char* s4="") {return FindMessageList(s1,s2,s3,s4,messCollection[5]);}
 
    virtual       void PrintInfo();
 #ifdef __ROOT__

@@ -21,13 +21,14 @@ II-1.  Message summary
 II-2.  Specifying output streams
 II-3.  Non-accounted messages
 II-4.  Turning off printing of the time-date stamp
-II-5.  Access to the current message
-II-6.  Finding a message
-II-7.  Finding a list of messages
-II-8.  Finding messages within a list
-II-9.  Printing a list of messages
-II-10. Formatting output
-II-11. Limiting message counts
+II-5.  Turning off printing of the leading "St"
+II-6.  Access to the current message
+II-7.  Finding a message
+II-8.  Finding a list of messages
+II-9.  Finding messages within a list
+II-10. Printing a list of messages
+II-11. Formatting output
+II-12. Limiting message counts
 
 </pre>
 <hr>
@@ -54,9 +55,9 @@ A generic message is created as follows:
   char* myText = "hello";
   gMessMgr->Message(myText);
 
-The default action here is to create an "Info" message.
-"Info" is one of four predefined message types (the other three
-are "Warning", "Error", and "Debug" - Debug messages are by default
+The default action here is to create an "Info" message. "Info" is
+one of five predefined message types (the other four are "Warning",
+"Error", "Debug", and "QAInfo" - Debug messages are by default
 switched off; see section II-11). The type of the message can
 be specified as a second field in the message declaration:
 
@@ -67,6 +68,7 @@ The message type is specified with a single letter:
 "I" = "Info"
 "W" = "Warning"
 "D" = "Debug"
+"Q" = "QAInfo"
 Additional message types can be declared with AddType():
 
   gMessMgr->AddType("F","Fatal");
@@ -86,7 +88,7 @@ pre-defined types which is not available for new types:
     is the same as
   gMessMgr->Message("Hello world.","I");
 
-Similarly, Error(), Warning(), and Debug() also exist.
+Similarly, Error(), Warning(), Debug(), and QAInfo() also exist.
 
 If you would like to add variables to your message output,
 you can use the stream version of the message declaration:
@@ -123,12 +125,13 @@ can be declared with StMessAddType():
 
   call StMessAddType('A','Abort')
 
-The four predefined types also have associated declaration calls:
+The five predefined types also have associated declaration calls:
 
   call StInfo('info text')
   call StError('error message')
   call StWarning('better not')
   call StDebug('value above zero')
+  call QAInfo('12 histograms filled')
 
 Format statements can also be used with character strings:
 
@@ -220,13 +223,22 @@ string.
 *** II-4.  Turning off printing of the time-date stamp
 
 Use the option "T". Remember, "O" or "E" must also be in the option
-string for the printout.
+string for the printout. QAInfo messages by default have this option.
 
 </pre>
 <hr>
 <pre>
 
-*** II-5.  Access to the current message
+*** II-5.  Turning off printing of the leading "St"
+
+Use the option "S". Remember, "O" or "E" must also be in the option
+string for the printout. QAInfo messages by default have this option.
+
+</pre>
+<hr>
+<pre>
+
+*** II-6.  Access to the current message
 
 A global pointer, gMessage, exists as a pointer to the last StMessage.
 StMessage allows access to the attributes of a message:
@@ -241,7 +253,7 @@ StMessage allows access to the attributes of a message:
 <hr>
 <pre>
 
-*** II-6.  Finding a message
+*** II-7.  Finding a message
 
 The message manager can find the first message whose text string contains
 matches for up to four search strings:
@@ -252,7 +264,7 @@ matches for up to four search strings:
 <hr>
 <pre>
 
-*** II-7.  Finding a list of messages
+*** II-8.  Finding a list of messages
 
 Message lists in the form of a vector of StMessage pointers are called
 a messVec. A list of messages can be found which match up to four strings:
@@ -263,7 +275,7 @@ a messVec. A list of messages can be found which match up to four strings:
 <hr>
 <pre>
 
-*** II-8.  Finding messages within a list
+*** II-9.  Finding messages within a list
 
 Both FindMessage() and FindMessageList() take a fifth argument which is
 messVec pointer.
@@ -272,7 +284,7 @@ messVec pointer.
 <hr>
 <pre>
 
-*** II-9.  Printing a list of messages
+*** II-10. Printing a list of messages
 
 Call PrintList() with a pointer to the messVec list of messages:
 
@@ -282,7 +294,7 @@ Call PrintList() with a pointer to the messVec list of messages:
 <hr>
 <pre>
 
-*** II-10. Formatting output
+*** II-11. Formatting output
 
 StMessMgr is an ostream, like cout. It can therefore be used
 to format, like cout:
@@ -301,7 +313,7 @@ sprintf() before adding them to the message.
 <hr>
 <pre>
 
-*** II-11. Limiting message counts
+*** II-12. Limiting message counts
 
 The message manager provide message limiting in two ways:
 
