@@ -1,31 +1,22 @@
-//StiLocalTrackSeedFinder.h
-//M.L. Miller (Yale Software)
-//10/01
-
-/*! \class StiLocalTrackSeedFinder
-  StiLocalTrackSEedFinder is a concrete implementation of StiTrackSeedFinder.
-  It is built from a collection of StiDetectorObjects, which it
-  stores in a vector and orders properly, then uses each detector
-  as a layer from which a one-point seed can be generated.  It then proceeds
-  to step inwards, iteratively making a local decision at each step.
-  
-  \author M.L. Miller
-  
-*/
-
+/// \class StiLocalTrackSeedFinder
+/// StiLocalTrackSEedFinder is a concrete implementation of StiTrackSeedFinder.
+/// It is built from a collection of StiDetectorObjects, which it
+/// stores in a vector and orders properly, then uses each detector
+/// as a layer from which a one-point seed can be generated.  It then proceeds
+/// to step inwards, iteratively making a local decision at each step.
+///  
+/// \author M.L. Miller (Yale Software) 10/01
 #ifndef StiLocalTrackSeedFinder_HH
 #define StiLocalTrackSeedFinder_HH
 
 #include <iostream>
 using std::ostream;
-
 #include <vector>
 using std::vector;
-
 #include "StiHelixCalculator.h"
 #include "StiHelixFitter.h"
 #include "StiTrackSeedFinder.h"
-
+#include "StiSortedHitIterator.h"
 class StiHitContainer;
 class Sti2HitComboFilter;
 class StiDetector;
@@ -50,79 +41,81 @@ public:
   virtual void addLayer(StiDetector*);
   virtual void print() const;
   
- private:
-  void increment();
-  void initHitVec();
-  
+protected:
+
+  StiSortedHitIterator begin();
+  StiSortedHitIterator end();
+
   ///Extend hit looking for closest neighbor in z
-  bool extendHit(StiHit* hit);
-  
+  bool extendHit(StiHit * hit);
   ///Extrapolate to next layer using straight line, add hit closest in z
   bool extrapolate();
-  
   StiKalmanTrack* initializeTrack(StiKalmanTrack*);
   void calculate(StiKalmanTrack*);
   void calculateWithOrigin(StiKalmanTrack*);
-  
   //Perform helix fit, Perform helix calculation (doesn't assume any vertex)
   bool fit(StiKalmanTrack*);
+  typedef vector<StiHit*> HitVec; 
+  typedef vector<StiDetector*> DetVec;
+ StiSortedHitIterator _hitIter;
+  virtual StiKalmanTrack* makeTrack(StiHit*);
+  DetVec mDetVec;
+
+  //define search window in the next layer when connecting two points
+  double mDeltaY;
+  double mDeltaZ;
+  //define the number of points to connect
+  unsigned int mSeedLength;
+  //define search window in the next layer when extending a coonection of points
+  double mExtrapDeltaY;
+  double mExtrapDeltaZ;
+  //Count how many hits we've skipped in extrapolation
+  unsigned int mSkipped;
+  //Define the max number we can skip
+  unsigned int mMaxSkipped;
+  //define the Min/Max number of points to extrapolate
+  unsigned int mExtrapMinLength;
+  unsigned int mExtrapMaxLength;
+  //Use the origin to calculate helix?
+  bool mUseOrigin;
+  vector<StiHit*> mSeedHitVec;
+  bool mDoHelixFit; //true-> fit, false-> calculate
+  StiHelixCalculator mHelixCalculator;
+  StiHelixFitter mHelixFitter;
   
-  //This is just for testing
-  void triggerPartition();
-  
-protected:
-    typedef vector<StiDetector*> DetVec;
-    typedef vector<StiHit*> HitVec;
-
-    virtual StiKalmanTrack* makeTrack(StiHit*);
-    
-    DetVec mDetVec;
-    DetVec::iterator mCurrentDet;
-
-    //Trigger hit-container partition on change in start radius
-    double mCurrentRadius;
-
-    //Store iterators to the hits for a given starting detector
-    HitVec::iterator mHitsBegin;
-    HitVec::iterator mHitsEnd;
-    HitVec::iterator mCurrentHit;
-
-    //define search window in the next layer when connecting two points
-    double mDeltaY;
-    double mDeltaZ;
-    //define the number of points to connect
-    unsigned int mSeedLength;
-
-    //define search window in the next layer when extending a coonection of points
-    double mExtrapDeltaY;
-    double mExtrapDeltaZ;
-    //Count how many hits we've skipped in extrapolation
-    unsigned int mSkipped;
-    //Define the max number we can skip
-    unsigned int mMaxSkipped;
-    //define the Min/Max number of points to extrapolate
-    unsigned int mExtrapMinLength;
-    unsigned int mExtrapMaxLength;
-
-    //Use the origin to calculate helix?
-    bool mUseOrigin;
-
-    HitVec mSeedHitVec;
-    bool mDoHelixFit; //true-> fit, false-> calculate
-    StiHelixCalculator mHelixCalculator;
-    StiHelixFitter mHelixFitter;
-    
-private:
-    //The following are not implemented, as they are non-trivial
-    //and the default compiler generated versions will be wrong.
-    StiLocalTrackSeedFinder();
-    StiLocalTrackSeedFinder(const StiLocalTrackSeedFinder&);
-    StiLocalTrackSeedFinder operator=(const StiLocalTrackSeedFinder&);
-
-    
+ private:
+  //The following are not implemented, as they are non-trivial
+  //and the default compiler generated versions will be wrong.
+  StiLocalTrackSeedFinder();
+  StiLocalTrackSeedFinder(const StiLocalTrackSeedFinder&);
+  StiLocalTrackSeedFinder operator=(const StiLocalTrackSeedFinder&);
 };
 
-//Non-members
+inline bool StiLocalTrackSeedFinder::hasMore()
+{
+  return _hitIter!=end();
+}
+
+///Return an iterator pointing to the first hit of the current event
+inline StiSortedHitIterator  StiLocalTrackSeedFinder::begin()
+{
+  return StiSortedHitIterator(getHitContainer(),mDetVec.begin(), mDetVec.end());
+}
+
+/// return an iterator pointing to no hit
+inline StiSortedHitIterator  StiLocalTrackSeedFinder::end()
+{
+  return StiSortedHitIterator();
+}
+
+inline void StiLocalTrackSeedFinder::reset()
+{
+  _messenger <<"StiLocalTrackSeedFinder::reset() -I- Started"<<endl;
+  _hitIter = begin();
+  //Cleanup the base-class
+  StiTrackSeedFinder::reset();
+  _messenger <<"StiLocalTrackSeedFinder::reset() -I- Done"<<endl;
+}
 
 struct RPhiLessThan
 {

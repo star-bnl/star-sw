@@ -15,6 +15,7 @@
 
 //Sti
 #include "Sti/Base/Messenger.h"
+#include "StiKalmanTrackNode.h"
 #include "StiHit.h"
 #include "StiPlacement.h"
 #include "StiDetector.h"
@@ -223,10 +224,21 @@ hitvector::iterator StiHitContainer::hitsEnd(const StiDetector* layer)
 void StiHitContainer::setRefPoint(double position, double refAngle,
 				  double y, double z)
 {
-  mMessenger <<"\nStiHitContainer::setRefPoint(double, double, double, double)"<<endl;
-  mMessenger <<"\tposition: "<<position<<"\trefAngle: "<<refAngle<<"\t";
-  mMessenger <<"y: "<<y<<"\tz: "<<z<<endl;
+  mMessenger <<"\nStiHitContainer::setRefPoint(double, double, double, double)"<<endl
+	     <<"\tposition: "<<position<<"\trefAngle: "<<refAngle<<"\t"
+	     <<"y: "<<y<<"\tz: "<<z<<endl;
   mUtilityHit.set(position,refAngle,y,z);
+  setRefPoint(&mUtilityHit);
+}
+
+void StiHitContainer::setRefPoint(const StiKalmanTrackNode & node)
+{
+  mdeltad = node.getWindowY();
+  mdeltaz = node.getWindowZ();
+  mUtilityHit.set(node.getRefPosition(),
+		  node.getRefAngle(),
+		  node.getY(),
+		  node.getZ());
   setRefPoint(&mUtilityHit);
 }
 
