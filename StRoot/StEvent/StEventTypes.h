@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.4 2000/02/17 18:13:09 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.5 2000/02/23 17:36:05 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,9 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
- * Revision 2.4  2000/02/17 18:13:09  ullrich
- * Changed the SVT hit storage model. Hits are now stored according
- * to barrel/ladder/wafer not by layer/ladder/wafer.
+ * Revision 2.5  2000/02/23 17:36:05  ullrich
+ * Changes due to the addition of the EMC to StEvent
  *
  * Revision 2.8  2000/05/22 21:43:06  ullrich
  * Add RICH related containers.
@@ -35,6 +34,12 @@
  *
  * Revision 2.2  2000/01/05 16:02:30  ullrich
  * SSD hits added to StEvent.
+ *
+ * Revision 2.1  1999/10/13 19:43:04  ullrich
+#include "StBrowsableEvent.h"
+ * Initial Revision
+ *
+ **************************************************************************/
 #ifndef StEventTypes_hh
 #define StEventTypes_hh
 #include "StCtbSoftwareMonitor.h"

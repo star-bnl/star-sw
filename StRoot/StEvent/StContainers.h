@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.h,v 2.2 2000/01/05 16:02:23 ullrich Exp $
+ * $Id: StContainers.h,v 2.3 2000/02/23 17:35:57 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StContainers.h,v $
- * Revision 2.2  2000/01/05 16:02:23  ullrich
- * SSD hits added to StEvent.
+ * Revision 2.3  2000/02/23 17:35:57  ullrich
+ * Changes due to the addition of the EMC to StEvent
  *
  * Revision 2.5  2000/05/22 21:42:44  ullrich
  * Add RICH related classes.
@@ -31,6 +31,8 @@
 #ifndef StContainers_hh
 #define StContainers_hh
 #include "StArray.h"
+
+class StObject;
 class StTpcHit;
 class StRichHit;
 class StRichPixel;
@@ -46,6 +48,8 @@ class StTrackDetectorInfo;
 class StV0Vertex;
 class StXiVertex;
 class StKinkVertex;
+
+StCollectionDef(Object)
 StCollectionDef(TpcHit)
 StCollectionDef(RichHit)
 StCollectionDef(RichPixel)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StContainers.cxx,v 2.2 2000/01/05 16:02:20 ullrich Exp $
+ * $Id: StContainers.cxx,v 2.3 2000/02/23 17:35:54 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StContainers.cxx,v $
- * Revision 2.2  2000/01/05 16:02:20  ullrich
- * SSD hits added to StEvent.
+ * Revision 2.3  2000/02/23 17:35:54  ullrich
+ * Changes due to the addition of the EMC to StEvent
  *
  * Revision 2.5  2000/05/22 21:42:41  ullrich
  * Add RICH related classes.
@@ -25,6 +25,8 @@
  * Revision 2.2  2000/01/05 16:02:20  ullrich
  * SSD hits added to StEvent.
  *
+ * Revision 2.1  1999/10/28 22:06:16  ullrich
+ * Initial Revision
 #include "StTpcHit.h"
 #include "StRichHit.h"
 #include "StRichPixel.h"
@@ -41,6 +43,8 @@
 #include "StV0Vertex.h"
 #include "StXiVertex.h"
 #include "StKinkVertex.h"
+
+StCollectionImp(Object)
 StCollectionImp(TpcHit)
 StCollectionImp(FtpcHit)
 StCollectionImp(RichCluster)
@@ -48,6 +52,9 @@ StCollectionImp(RichPixel)
 StCollectionImp(RichPid)
 StCollectionImp(RichMCInfo)
 StCollectionImp(EmcRawHit)
+StCollectionImp(EmcCluster)
+StCollectionImp(EmcPoint)
+StCollectionImp(Track)
 
 
 
