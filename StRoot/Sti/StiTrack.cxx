@@ -9,6 +9,7 @@
 #include "StiConstants.h"
 #include "StiTrack.h"
 #include "StiTrackFitter.h"
+StiTrackFitter * StiTrack::trackFitter = 0;
 
 StiTrack::StiTrack()
 {
@@ -45,4 +46,14 @@ ostream& operator<<(ostream& os, const StiTrack& track)
 	      <<" Chi2: "<<track.getChi2()
 	      <<" points: "<<track.getPointCount()
 	      <<" fitPoints: "<<track.getFitPointCount();
+}
+
+void StiTrack::setTrackFitter(StiTrackFitter * fitter)
+{
+	trackFitter = fitter;
+}
+
+StiTrackFitter * StiTrack::getTrackFitter()
+{
+	return trackFitter;
 }

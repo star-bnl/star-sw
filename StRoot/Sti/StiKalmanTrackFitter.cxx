@@ -1,6 +1,7 @@
 #include "StiKalmanTrackFitter.h"
 #include "StiKalmanTrack.h"
 
+
 StiKalmanTrackFitter::StiKalmanTrackFitter()
 {
   fitMethod = Inward;
@@ -28,10 +29,20 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack) throw (Exception)
       cout << "Inward" << endl;
       fitInward(first);
       track->setChi2(last->fChi2);
+			if (last->fP3>0)
+				track->setCharge(unitCharge);
+			else
+				track->setCharge(-unitCharge);
+			break;
     case Outward:
       cout << "Outward" << endl;
-      fitInward(last);
+      fitOutward(last);
       track->setChi2(first->fChi2);
+			if (last->fP3>0)
+				track->setCharge(unitCharge);
+			else
+				track->setCharge(-unitCharge);
+			break;
     }
 }
 
@@ -57,7 +68,7 @@ void StiKalmanTrackFitter::fitInward(StiKalmanTrackNode * node) throw (Exception
   
   pNode = node;
   pDet  = pNode->getDetector();
-  cout << "StiKalmanTrackFinder::fitInward()" << endl
+  cout << "StiKalmanTrackFitter::fitInward()" << endl
        << "FIRST NODE::" << endl
        << *pNode << endl;
   int pos;
