@@ -1,0 +1,19 @@
+<pre><h3>	void	MsgDisplayAndEchoOut</h3></pre>
+<pre>
+(
+
+/*   Inputs:                                                                               */
+	  const char *msg /* Character-string message, with prefix, submitted for display. */
+	, int       LUN ) /* FORTRAN logical unit number for msg to be echoed to;          */
+	                  /* The file refered to by LUN must be opened FORTRAN style.      */
+{
+/* Description:  Display a message on the terminal and echo on a FORTRAN LUN.
+	Display (always) a message msg on standard out and echo it to LUN.
+	The message may not be disabled.
+	The message is not counted.
+	Note that unlike the FORTRAN message call, there is no "Lines" argument;
+	lines are defined with "\n" (newline) characters, and the caller is
+	expected to specify a "\n" character at the end of a message, according
+	to standard C practice.  msg may have as many newlines as desired.
+*/
+</pre>
