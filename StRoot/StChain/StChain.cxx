@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.25 1999/01/20 23:44:46 fine Exp $
+// $Id: StChain.cxx,v 1.26 1999/02/20 18:48:56 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.26  1999/02/20 18:48:56  fisyak
+// Add event/run information to Chain
+//
 // Revision 1.25  1999/01/20 23:44:46  fine
 // The special Input/Output makers and the static variable StChain::g_Chain have been introduced
 //
@@ -269,17 +272,30 @@ StChain::StChain()
 
 //_____________________________________________________________________________
 StChain::StChain(const char *name, const char *title):
-m_VersionCVS("$Id: StChain.cxx,v 1.25 1999/01/20 23:44:46 fine Exp $"),
-m_VersionTag("$Name:  $")
+m_VersionCVS("$Id: StChain.cxx,v 1.26 1999/02/20 18:48:56 fisyak Exp $"),
+m_VersionTag("$Name:  $"),
+m_EvenType("Collision"),
+m_DateTime(),
+mProcessTime()
 {
    SetName(name);
    SetTitle(title);
    gStChain      = this;
    m_Version     = 100;       //StChain  version number and release date
    m_VersionDate = 180698;
-   
+   m_Run         = 0;
+   m_Event       = 0;
    m_Tree        = 0;
    m_Mode        = 0;
+   m_BImpact     = 0;
+   m_PhImpact    = 0;
+   m_Mode        = 0;
+   m_DateTime.Set(1995,0);
+   mAwest        = 0;
+   mAeast        = 0;
+   mCenterOfMassEnergy = 0;
+   mBunchCrossingNumber = 0;
+   mTriggerMask  = 0;
 //   m_Display     = 0;
    m_DataSet       = 0;
    m_DebugLevel    = kNormal;
@@ -472,7 +488,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.25 1999/01/20 23:44:46 fine Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.26 1999/02/20 18:48:56 fisyak Exp $    \n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");
@@ -592,7 +608,6 @@ void StChain::SetDefaultParameters()
 //_____________________________________________________________________________
 Int_t StChain::Make(Int_t i)
 {
-   m_Event = i;
 // Create event 
    //   St_DataSetIter nextDataSet(m_DataSet);
    //   nextDataSet.Cd(gStChain->GetName());
@@ -771,64 +786,6 @@ void StChain::Streamer(TBuffer &R__b)
       makeNames.Delete();
       
 //      m_HistBrowser.Streamer(R__b);
-   }
-}
-#else
-void StChain::Streamer(TBuffer &R__b)
-{
-   // Stream an object of class StChain.
-
-   if (R__b.IsReading()) {
-      Version_t R__v = R__b.ReadVersion(); if (R__v) { }
-      gStChain = this;
-      StMaker::Streamer(R__b);
-      //R__b.ReadArray(m_VersionCVS);
-      //R__b.ReadArray(m_VersionTag);
-      R__b >> m_Version;
-      R__b >> m_VersionDate;
-      R__b >> m_Run;
-      R__b >> m_Event;
-      R__b >> m_Mode;
-      R__b >> m_EvenType;
-      R__b >> mBunchCrossingNumber;
-      R__b >> mTriggerMask;
-      mTimeStapm.Streamer(R__b);
-      mProcessTime.Streamer(R__b);
-      R__b >> (Int_t&)m_DebugLevel;
-      R__b >> m_Makers;
-      // Uncheck all makers
-      TIter next(m_Makers);
-      StMaker *maker = 0;
-      while (maker = (StMaker *)next()) maker->Save(kFALSE);
-      R__b >> fNtrack;
-   } else {
-      R__b.WriteVersion(StChain::IsA());
-      StMaker::Streamer(R__b);
-      //R__b.WriteArray(m_VersionCVS, __COUNTER__);
-      //R__b.WriteArray(m_VersionTag, __COUNTER__);
-      R__b << m_Version;
-      R__b << m_VersionDate;
-      R__b << m_Run;
-      R__b << m_Event;
-      R__b << m_Mode;
-      R__b << m_EvenType;
-      R__b << mBunchCrossingNumber;
-      R__b << mTriggerMask;
-      mTimeStapm.Streamer(R__b);
-      mProcessTime.Streamer(R__b);
-      R__b << (Int_t)m_DebugLevel;
-      // Create temp list to save
-      if (m_Makers && m_Makers->GetSize())  {
-           TList tempListMakers;
-           TIter next(m_Makers);
-           StMaker *maker=0;
-           while(maker = (StMaker *)next()) 
-                if (maker->IsToSave()) tempListMakers.Add(maker);
-           R__b << &tempListMakers;
-      }
-      else 
-          R__b << m_Makers;
-      R__b << fNtrack;
    }
 }
 #endif
