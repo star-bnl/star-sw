@@ -1,150 +1,204 @@
-// $Id: strange.C,v 1.4 1999/05/21 15:34:01 kathy Exp $
+// $Id: strange.C,v 1.5 1999/06/25 19:34:39 genevb Exp $
 // $Log: strange.C,v $
-// Revision 1.4  1999/05/21 15:34:01  kathy
-// made sure Log & Id are in each file and also put in standard comment line with name of owner
+// Revision 1.5  1999/06/25 19:34:39  genevb
+// Update strange.C
 //
-// Revision 1.3  1999/01/21 00:53:24  fisyak
-// Cleanup
+// Revision 1.18  1999/05/24 19:02:03  kathy
+// put owner back into do*Events.C so it's standardized with all other macros
 //
-// Revision 1.2  1999/01/19 23:05:14  genevb
-// MakeDoc() removed
+// Revision 1.17  1999/05/23 21:54:07  perev
+// restore old default in doEvent
 //
-// Revision 1.1  1998/12/29 10:24:40 genevb
-// strangeness dst analysis
+// Revision 1.16  1999/05/23 03:20:20  perev
+// SetMaxEvent(2) removed
+//
+// Revision 1.15  1999/05/22 19:39:09  perev
+// Big changes for all fmts(xdf,mdc2,root)
+//
+// Revision 1.13  1999/04/15 18:03:14  wenaus
+// clean out duplicate/conflicting declarations
+//
+// Revision 1.12  1999/04/01 23:39:47  fisyak
+// Cleanup old macros
+//
+// Revision 1.11  1999/03/10 14:28:17  fisyak
+// Clean up for SL99c
+//
+// Revision 1.10  1999/03/02 03:34:43  fisyak
+// Set LD_LIBRARY_PATH to Root.DynamicPath
+//
+// Revision 1.9  1999/02/28 00:08:18  wenaus
+// add multi-file handling for .root files. But, using multiple files doesn't work for ROOT files yet.
+//
+// Revision 1.8  1999/02/25 23:10:41  wenaus
+// fix multi-file bug
+//
+// Revision 1.7  1999/02/25 02:51:42  wenaus
+// make sure default file is a working one
+//
+// Revision 1.6  1999/02/25 02:42:58  wenaus
+// input file options
+//
+// Revision 1.5  1999/02/24 23:21:19  wenaus
+// add ROOT file handling
+//
+// Revision 1.4  1999/02/20 05:39:24  wenaus
+// turn off TBrowser (gives bus errors) and don't count run header as an event
+//
+// Revision 1.3  1999/02/16 18:15:48  fisyak
+// Check in the latest updates to fix them
+//
+// Revision 1.2  1999/02/11 16:22:51  wenaus
+// load StEvent for Linux
+//
+// Revision 1.1  1999/02/11 15:44:28  wenaus
+// macro to read DSTs into StEvent and analyze
+//
 //
 //=======================================================================
-// owner: Gene Van Buren
+// owner: Torre Wenaus
 // what it does: 
 //=======================================================================
+///////////////////////////////////////////////////////////////////////////////
+//
+// strange.C
+//
+// Description: 
+// Chain to read events from files or database into StEvent and analyze
+//
+// Environment:
+//  Software developed for the STAR Detector at Brookhaven National Laboratory
+//
+// Author List: 
+//  Torre Wenaus, BNL  2/99
+//
+// History:
+//
+///////////////////////////////////////////////////////////////////////////////
 
+// Functions included below which retrieve a single file or all files
+// under a path
+
+
+// File-scope stuff needed by setFiles, nextFile. Someone ambitious
+// can clean this up by putting it all into a nice clean class.
+
+Int_t usePath = 0;
+Int_t nFile = 0;
+TString  thePath;
+TString  theFileName;
+TString  originalPath;
+class StChain;
+StChain *chain=0;
+
+TBrowser *b=0;
+const char *dstFile ="/disk00001/star/auau200/two_photon/starlight/twogam/year_1b/hadronic_on/tfs/ric0022_01_14552evts.dst.root";
+const char *xdfFile ="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf";
+const char *mdcFile ="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0081_07_40evts.root";
+const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
+
+  // const Char_t *file="/afs/rhic/star/data/samples/psc0016_05_35evts.root")
+  // const Char_t *file="/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/./set0022_01_56evts_dst.xdf")
+  // const Char_t *file="/afs/rhic/star/strange/genevb/year1a_90evts_dst.xdf")
+  // const Char_t *file="/disk00000/star/auau200/hijing135/default/b0_20/year2x/hadronic_on/tfs_dst/pet213_02_190evts_h_dst.xdf")
+  // const Char_t *path="-/disk00000/star/auau200/hijing135/",
+
+// If you specify a path, all DST files below that path will be
+// found, and 'nevents' events from each will be analyzed.
+// The type of DST files searched for is taken from the 'file' parameter.
+// If 'file ends in '.xdf', XDF DSTs are searched for.
+// If 'file ends in '.root', ROOT DSTs are searched for.
+//
+// If path begins with '-', 'file' will be taken to be a single file
+// to be processed.
+//
+// example invocation:
+// .x strange.C(10,"-","/afs/rhic/star/strange/genevb/year1a_90evts_dst.xdf")
+//
+// example ROOT file invocation:
+// .x strange.C(10,"-","/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/gstardata/psc0033_01_40evts.root")
+//
+// example multi-ROOT file invocation:
+// .x strange.C(9999,"/disk00001/star/auau200/hijing/b0_3/jet05/year_1b/hadronic_on/tfs/","*.root")
+
+void strangeQQ(const Int_t nevents, const Char_t **fileList);
+
+
+void strange(const Int_t nevents=999,
+              const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
+              const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf")
+{
+  const char *fileListQQ[]={0,0};
+  if (path[0]=='-') {
+    fileListQQ[0]=file;
+  } else {
+    fileListQQ[0] = gSystem->ConcatFileName(path,file);
+  }
+  strangeQQ(nevents,fileListQQ);
+}
+
+
+void strangeQQ(const Int_t nevents,
+              const Char_t **fileList)
 {
 
-/*------------------------------------- Begin_Html <font color="#800000" size="-1">
-The strange.C macro is intended for use by the strangeness group
-in analyzing a STAR dst to produce microdst tables.<br>
 
-The comments in this macro file follow the outline of the steps
-for writing a macro described in <a href="/STAR/html/comp_l/train/root/RootMacros.html">Understanding Root Macros</a>.
-You may want to first examine <a href="/STAR/html/comp_l/root/html/examples/bfc.C.html">bfc.C</a> when learning
-about macros.<br>
 
-<b>STEP 1:</b> Here in the macro are a series of system load calls.
-Only the relevant libraries need to be loaded. Often, for a given
-maker, one will need to load libraries for the definitions of the
-maker's tables (St_Tables), the associated PAM (strange), the Root
-wrapper for the PAM (St_strange), and the maker (St_smdst_Maker).
-</font> End_Html -------------------------------------*/
+  // Dynamically link needed shared libs
+  gSystem->Load("St_base");
+  gSystem->Load("StChain");
+  gSystem->Load("St_Tables");
+  gSystem->Load("StIOMaker");
+  gSystem->Load("StarClassLibrary");
+  gSystem->Load("StEvent");
+  gSystem->Load("StEventReaderMaker");
+  gSystem->Load("StMagF");
+  gSystem->Load("StSmdstMaker");
 
-  gSystem->Load("St_base.so");
-  gSystem->Load("StChain.so");
-  gSystem->Load("xdf2root.so");
-  gSystem->Load("St_Tables.so");
-  gSystem->Load("St_xdfin_Maker.so");
-  gSystem->Load("St_TLA_Maker.so");
-  gSystem->Load("St_ana_Maker.so");
-  gSystem->Load("libtls.so");
-  gSystem->Load("strange.sl");
-  gSystem->Load("St_strange.so");
-  gSystem->Load("St_smdst_Maker.so");
+  // Handling depends on whether file is a ROOT file or XDF file
 
-/*------------------------------------- Begin_Html <font color="#800000" size="-1">
-<b>STEP 2:</b> Next, we  specify the input file we want to process.
-In this case, a simple XDF file.
-</font> End_Html -------------------------------------*/
+  chain  = new StChain("StChain");
 
-  const Char_t *fileinp =
-  "/disk1/star/genevb/year1a_90evts_dst.xdf";
-//  "/disk1/star/genevb/year2a_46evts_dst.xdf";
-  const Int_t Nevents=90;
-  St_XDFFile   *xdf_in   = 0;
-  if (fileinp)  xdf_in   = new St_XDFFile(fileinp,"r");
+  StFile *setFiles= new StFile();
 
-// Root output
-//  TFile      *root_tree= new TFile("smdst.tree.root","RECREATE");
-//  Create the main chain object
+  for (int ifil=0; fileList[ifil]; ifil++)
+  { setFiles->AddFile(fileList[ifil]);}
+  
+  StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
+  IOMk->SetDebug();
 
-/*------------------------------------- Begin_Html <font color="#800000" size="-1">
-<b>STEP 3:</b> You may instantly recognize this next bit as the construction of a
-<i>chain</i>.  In this macro, the chain is actually of the class End_Html StChainSpy Begin_Html
-and is named "dstChain". This macro also differs from <a href="/STAR/html/comp_l/root/html/examples/bfc.C.html">bfc.C</a> in that <b>chain</b> 
-is the name of the structure itself, not a pointer to it.
-</font> End_Html -------------------------------------*/
+// 		Maker to read events from file or database into StEvent
+  StEventReaderMaker readerMaker("events","title");
+// 		Sample analysis maker
+ 		StSmdstMaker *analysis=new StSmdstMaker("analysis");
+		analysis->DoHistograms();
 
-  StChainSpy chain("dstChain");
+  // Initialize chain
+Int_t iInit = chain->Init();
+  if (iInit) chain->Fatal(iInit,"on init");
+  chain->PrintInfo();
 
-/*------------------------------------- Begin_Html <font color="#800000" size="-1">
-<b>STEP 4:</b> Now it's time to construct our <i>makers</i>. Only a few
-makers are required for this analysis. A call to the DoHistograms member
-function of the smdst maker causes its diagnostic histograms to be
-turned on.
-</font> End_Html -------------------------------------*/
-
-  if (xdf_in) {
-    St_xdfin_Maker xdfin("xdfin");
-    chain.SetInputXDFile(xdf_in);
+  // Event loop
+  int istat;
+  for (Int_t i=1; i<=nevents; i++) {
+    cout << "============================ Event " << i << " start" << endl;
+    chain->Clear();
+    istat = chain->Make(i);
+    if (istat) {
+      cout << "Last event processed. Status = " << istat << endl;
+      chain->Clear();
+      break;
+    }
+    St_DataSet *set = chain->DataSet("dst");
+    if (set)  {
+      St_DataSetIter dirt(set);
+      dirt.Du();
+    }
+    cout << "============================ Event " << i << " finish" << endl;
   }
-  St_ana_Maker        dst("dst","event/data/global/dst");
-  St_smdst_Maker      smdst("smdst","event/data/strange/smdst");
-  smdst.MakeDoc();
-  smdst.DoHistograms(5);  // Turn on smdst histograms and update every 5 events
-
-/*------------------------------------- Begin_Html <font color="#800000" size="-1">
-<b>STEP 5:</b> Next, we place calls to the PrintInfo() member
-function of chain, followed by the Init() member function to
-initialize all histograms and read in the run header of the file.
-</font> End_Html -------------------------------------*/
-
-  chain.PrintInfo();
-
-// Init the main chain and all its makers
-  int iInit = chain.Init();
-  if (iInit) chain.Fatal(iInit,"on init");
-
-/*------------------------------------- Begin_Html <font color="#800000" size="-1">
-<b>STEP 6a:</b> Here we prepare for our event loop. We could skip some
-events first if we want. The NextEventGet() member function of
-End_Html St_XDFFile Begin_Html allows an event to be read in outside of the chain.
-</font> End_Html -------------------------------------*/
-
-// Skip events?
-//  St_DataSet *set =chain->XDFFile()->NextEventGet();  
-//  delete set;
-
-  gBenchmark->Start("dst");
-  Int_t i=1;
-  for (Int_t i =1; i <= Nevents; i++){
-    if (chain.Make(i)) break;
-
-/*------------------------------------- Begin_Html <font color="#800000" size="-1">
-<b>STEP 6b:</b>We could at this point output or histogram the data. But the
-smdst maker already provides some histograms.<br>
-
-<b>STEP 6c:</b> The data for each event must be cleared from memory before the
-next event is read in, and that is performed with the call to chain.Clear(). 
-An <i>if</i> statement here prevents the chain from clearing on the final
-event in this particular example, permitting the data from the last event to
-persist in memory after the macro finishes.
-</font> End_Html -------------------------------------*/
-    
-    if (i != Nevents) chain.Clear();
-    printf ("===========================================\n");
-    printf ("=========================================== Done with Event no. %d\n",i);
-    printf ("===========================================\n");
+  if (nevents > 1) {
+    chain->Finish();
+  } else {
+    if (!b) b = new TBrowser;
   }
-
-/*------------------------------------- Begin_Html <font color="#800000" size="-1">
-<b>STEP 7:</b> Lastly, this macro makes a call to chain.Finish().
-The input file is essentially closed by deleting its reference
-pointer. In this macro, chain.Finish() is called only if
-more than one event is analyzed. Otherwise, a browser is called up
-to provide simplified access to the data structures, a useful tool
-when debugging/testing your code on a single event.
-</font> End_Html -------------------------------------*/
-
-  if (Nevents > 1) {
-    chain.Finish();
-    delete xdf_in;
-    gBenchmark->Print("dst");
-  }
-  else TBrowser b;
 }
