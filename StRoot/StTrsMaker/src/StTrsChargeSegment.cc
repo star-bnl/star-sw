@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.33 2002/04/25 21:37:03 long Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.34 2002/04/25 21:40:23 long Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -13,6 +13,9 @@
  *
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.34  2002/04/25 21:40:23  long
+ * add he3,he4,deuteron
+ *
  * Revision 1.33  2002/04/25 21:37:03  long
  * *** empty log message ***
  *
@@ -152,7 +155,7 @@ using std::random_shuffle;
 
 // Need a CERNLIB routine for tssSplit
 extern "C"  float dislan_(float *);
-
+ 
 HepJamesRandom  StTrsChargeSegment::mEngine;
 RandFlat        StTrsChargeSegment::mFlatDistribution(mEngine);
 
