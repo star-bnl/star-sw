@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTRGReader.h,v 1.3 2003/07/16 19:58:29 perev Exp $
+ * $Id: StTRGReader.h,v 1.4 2003/12/23 23:17:10 akio Exp $
  *
  * Author: Herbert Ward
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTRGReader.h,v $
+ * Revision 1.4  2003/12/23 23:17:10  akio
+ * Update for Fy04 run
+ *
  * Revision 1.3  2003/07/16 19:58:29  perev
  * Cleanup of StTriggerData2003 at all
  *
@@ -28,6 +31,7 @@
 #include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/TRG/trgStructures2000.h"
 #include "StDaqLib/TRG/trgStructures2003.h"
+#include "StDaqLib/TRG/trgStructures2004.h"
 #endif /*__CINT__*/
 
 #include "StDaqLib/TRG/TRG_Reader.hh"
@@ -45,8 +49,9 @@ class  StTRGReader {
   int   getYear() const;
 
   const char            *getData()         const;
-  const TrgDataType2003 *getDataType2003() const;
   const TrgDataType2000 *getDataType2000() const;
+  const TrgDataType2003 *getDataType2003() const;
+  const TrgDataType2004 *getDataType2004() const;
 
   virtual void Update();
 protected:
