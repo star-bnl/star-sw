@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRun.cxx,v 1.6 1999/05/04 20:59:25 fisyak Exp $
+ * $Id: StRun.cxx,v 1.7 1999/05/23 03:17:15 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StRun.cxx,v $
- * Revision 1.6  1999/05/04 20:59:25  fisyak
- * move CVS Tag to StRun
+ * Revision 1.7  1999/05/23 03:17:15  perev
+ * mRunSummary=0 added
+ *
+ * Revision 1.7  1999/05/23 03:17:15  perev
+ * mRunSummary=0 added
  *
  * Revision 1.6  1999/05/04 20:59:25  fisyak
  * move CVS Tag to StRun
@@ -37,13 +40,13 @@
  * Revision 1.2  1999/01/15 22:53:49  wenaus
  * version with constructors for table-based loading
  *
-static const Char_t rcsid[] = "$Id: StRun.cxx,v 1.6 1999/05/04 20:59:25 fisyak Exp $";
+ * Revision 2.0  1999/10/12 18:42:29  ullrich
  **************************************************************************/
 #include "tables/run_header.h"
-static const Char_t rcsid[] = "$Id: StRun.cxx,v 1.6 1999/05/04 20:59:25 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StRun.cxx,v 1.7 1999/05/23 03:17:15 perev Exp $";
 
-TString StRun::mCvsTag = "$Id: StRun.cxx,v 1.6 1999/05/04 20:59:25 fisyak Exp $";
-static const char rcsid[] = "$Id: StRun.cxx,v 1.6 1999/05/04 20:59:25 fisyak Exp $";
+TString StRun::mCvsTag = "$Id: StRun.cxx,v 1.7 1999/05/23 03:17:15 perev Exp $";
+static const char rcsid[] = "$Id: StRun.cxx,v 1.7 1999/05/23 03:17:15 perev Exp $";
   StRun::StRun():
 St_DataSet("Run"),
 mCVSTag("$Name:  $")
@@ -81,6 +84,7 @@ StRun::StRun(dst_run_header_st& runHdr)
     mTriggerMask = runHdr.trig_mask;
     mCenterOfMassEnergy = runHdr.sqrt_s;
     mEastA = runHdr.east_a;
+    mEastZ = runHdr.east_z;
     mWestA = runHdr.west_a;
     mWestZ = runHdr.west_z;
     mSummary = 0;
