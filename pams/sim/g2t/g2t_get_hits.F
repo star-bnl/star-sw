@@ -1,5 +1,8 @@
-* $Id: g2t_get_hits.F,v 1.25 2000/03/03 20:51:24 nevski Exp $
+* $Id: g2t_get_hits.F,v 1.26 2000/03/03 21:54:19 nevski Exp $
 * $Log: g2t_get_hits.F,v $
+* Revision 1.26  2000/03/03 21:54:19  nevski
+* protection against bad track number
+*
 * Revision 1.25  2000/03/03 20:51:24  nevski
 * add protection against corrupted Itrac
 *
@@ -152,7 +155,8 @@ C :>--------------------------------------------------------------------
 
       DO WHILE (AgHITGET(0,xxx).eq.0)
          if (abs(trac)>Ntrack) then
-            nb+=1; next
+            nb = nb + 1
+            go to 190
          endif
 *
          volume  =   g2t_volume_id (Csys,NUMBV)
