@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEstPrimaryTrack.h,v 2.2 2003/10/30 20:07:32 perev Exp $
+ * $Id: StEstPrimaryTrack.h,v 2.3 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Mar 2002
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEstPrimaryTrack.h,v $
+ * Revision 2.3  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.2  2003/10/30 20:07:32  perev
  * Check of quality added
  *
@@ -36,9 +39,6 @@ public:
     ~StEstPrimaryTrack();
 
     StTrackType type() const;
-
-protected:
-    StObject*   clone() const;
     
 private:
     ClassDef(StEstPrimaryTrack,2)

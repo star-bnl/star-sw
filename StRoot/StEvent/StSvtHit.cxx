@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.cxx,v 2.9 2001/08/07 20:50:57 caines Exp $
+ * $Id: StSvtHit.cxx,v 2.10 2004/07/15 16:36:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.cxx,v $
+ * Revision 2.10  2004/07/15 16:36:25  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.9  2001/08/07 20:50:57  caines
  * Implement better packing of hardware and charge values
  *
@@ -45,7 +48,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.9 2001/08/07 20:50:57 caines Exp $";
+static const char rcsid[] = "$Id: StSvtHit.cxx,v 2.10 2004/07/15 16:36:25 ullrich Exp $";
 
 ClassImp(StSvtHit)
     
@@ -105,9 +108,6 @@ StSvtHit::StSvtHit(const dst_point_st& pt)
 }
 
 StSvtHit::~StSvtHit() {/* noop */}
-
-StObject*
-StSvtHit::clone() const { return new StSvtHit(*this); }
 
 unsigned int
 StSvtHit::barrel() const { 

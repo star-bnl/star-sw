@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMCHit.cxx,v 2.2 2003/05/21 18:22:46 ullrich Exp $
+ * $Id: StTofMCHit.cxx,v 2.3 2004/07/15 16:36:25 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, April 2001 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofMCHit.cxx,v $
+ * Revision 2.3  2004/07/15 16:36:25  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.2  2003/05/21 18:22:46  ullrich
  * Major Revision of ToF classes (F. Geurts)
  *
@@ -19,16 +22,13 @@
  **************************************************************************/
 #include "StTofMCHit.h"
 
-static const char rcsid[] = "$Id: StTofMCHit.cxx,v 2.2 2003/05/21 18:22:46 ullrich Exp $";
+static const char rcsid[] = "$Id: StTofMCHit.cxx,v 2.3 2004/07/15 16:36:25 ullrich Exp $";
 
 ClassImp(StTofMCHit)
     
 StTofMCHit::StTofMCHit()  {/* noop */}
 
 StTofMCHit::~StTofMCHit() {/* noop */}
-
-StObject*
-StTofMCHit::clone() const { return new StTofMCHit(*this); }
 
 ostream&
 operator<<(ostream& os, const StTofMCHit& hit)

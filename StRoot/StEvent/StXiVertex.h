@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StXiVertex.h,v 2.8 2003/01/24 22:30:05 genevb Exp $
+ * $Id: StXiVertex.h,v 2.9 2004/07/15 16:36:26 ullrich Exp $
  *
  * Author: Gene Van Buren, Feb 1999, revised Thomas Ullrich Sep 99
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.h,v $
+ * Revision 2.9  2004/07/15 16:36:26  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.8  2003/01/24 22:30:05  genevb
  * Allow for signed DCA of Xi to PrimVertex
  *
@@ -103,8 +106,6 @@ protected:
 #else
     StLink<StV0Vertex>     mV0Vertex;                   
 #endif //__CINT__
-
-    StObject* clone() const;
     ClassDef(StXiVertex,2)
 };
 #endif

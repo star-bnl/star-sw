@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEstGlobalTrack.h,v 2.1 2002/04/19 13:29:28 jeromel Exp $
+ * $Id: StEstGlobalTrack.h,v 2.2 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Mar 2002
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEstGlobalTrack.h,v $
+ * Revision 2.2  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.1  2002/04/19 13:29:28  jeromel
  * New include for SVT 2 tables scheme support. Forgot about it yesterday ...
  *
@@ -34,7 +37,6 @@ public:
     StTrackType     type() const;
 
 protected:
-    StObject* clone() const;
     ClassDef(StEstGlobalTrack,1)
 };
 #endif

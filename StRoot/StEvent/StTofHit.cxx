@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofHit.cxx,v 2.5 2004/02/05 17:59:43 ullrich Exp $
+ * $Id: StTofHit.cxx,v 2.6 2004/07/15 16:36:25 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, Dec 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofHit.cxx,v $
+ * Revision 2.6  2004/07/15 16:36:25  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.5  2004/02/05 17:59:43  ullrich
  * Changed $LINK to StLink mechanism and add new member.
  *
@@ -56,9 +59,6 @@ StTofHit::StTofHit()
 }
 
 StTofHit::~StTofHit() {/* noop */}
-
-StObject*
-StTofHit::clone() const { return new StTofHit(*this); }
 
 int
 StTofHit::trayIndex() const { return mTrayIndex; }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcCluster.cxx,v 2.5 2001/04/05 04:00:48 ullrich Exp $
+ * $Id: StEmcCluster.cxx,v 2.6 2004/07/15 16:36:23 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcCluster.cxx,v $
+ * Revision 2.6  2004/07/15 16:36:23  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.5  2001/04/05 04:00:48  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -30,7 +33,7 @@
 
 ClassImp(StEmcCluster)
     
-static const char rcsid[] = "$Id: StEmcCluster.cxx,v 2.5 2001/04/05 04:00:48 ullrich Exp $";
+static const char rcsid[] = "$Id: StEmcCluster.cxx,v 2.6 2004/07/15 16:36:23 ullrich Exp $";
 
 StEmcCluster::StEmcCluster() {/* noop*/};
 
@@ -101,9 +104,6 @@ StEmcCluster::addNeighbor(StEmcCluster* cluster) {mNeighbors.push_back(cluster);
 
 void
 StEmcCluster::addTrack(StTrack* track) {mTracks.push_back(track);}
-
-StObject*
-StEmcCluster::clone() const {return new StEmcCluster(*this);}
 
 ostream&
 operator<<(ostream &os, const StEmcCluster& cl)

@@ -8,7 +8,7 @@
  */
 /***************************************************************************
  *
- * $Id: StCalibrationVertex.h,v 2.2 2002/02/22 22:56:46 jeromel Exp $
+ * $Id: StCalibrationVertex.h,v 2.3 2004/07/15 16:36:23 ullrich Exp $
  *
  * Author: Thomas Ullrich, Nov 2001
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StCalibrationVertex.h,v $
+ * Revision 2.3  2004/07/15 16:36:23  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.2  2002/02/22 22:56:46  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -51,7 +54,6 @@ public:
     void removeDaughter(StTrack*);
 
 protected:    
-    StObject* clone() const;
     ClassDef(StCalibrationVertex,1)
 };
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTptTrack.cxx,v 2.2 2001/03/24 03:34:59 perev Exp $
+ * $Id: StTptTrack.cxx,v 2.3 2004/07/15 16:36:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Aug 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTptTrack.cxx,v $
+ * Revision 2.3  2004/07/15 16:36:25  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.2  2001/03/24 03:34:59  perev
  * clone() -> clone() const
  *
@@ -23,7 +26,7 @@
 
 ClassImp(StTptTrack)
 
-static const char rcsid[] = "$Id: StTptTrack.cxx,v 2.2 2001/03/24 03:34:59 perev Exp $";
+static const char rcsid[] = "$Id: StTptTrack.cxx,v 2.3 2004/07/15 16:36:25 ullrich Exp $";
 
 StTptTrack::StTptTrack() {/* noop */}
 
@@ -40,9 +43,6 @@ StTptTrack::operator=(const StTptTrack& track)
 }
 
 StTptTrack::~StTptTrack() {/* noop */}
-
-StObject*
-StTptTrack::clone() const { return new StTptTrack(*this); }
 
 StTrackType
 StTptTrack::type() const { return tpt; }

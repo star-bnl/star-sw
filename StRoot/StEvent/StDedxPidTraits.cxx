@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.cxx,v 2.11 2004/03/01 17:44:37 fisyak Exp $
+ * $Id: StDedxPidTraits.cxx,v 2.12 2004/07/15 16:36:23 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.cxx,v $
+ * Revision 2.12  2004/07/15 16:36:23  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.11  2004/03/01 17:44:37  fisyak
  * Add Print method
  *
@@ -51,7 +54,7 @@
 #include "Stiostream.h"
 ClassImp(StDedxPidTraits)
 
-static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.11 2004/03/01 17:44:37 fisyak Exp $";
+static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.12 2004/07/15 16:36:23 ullrich Exp $";
 
 StDedxPidTraits::StDedxPidTraits() :
     mNumberOfPoints(0), mDedx(0), mSigma(0), mMethod(0) { /* noop */ }
@@ -121,9 +124,6 @@ StDedxPidTraits::errorOnMean() const {
   else return mSigma; 
 #endif
 }
-
-StObject*
-StDedxPidTraits::clone() const { return new StDedxPidTraits(*this); }
 
 short
 StDedxPidTraits::encodedMethod() const { return mMethod; }

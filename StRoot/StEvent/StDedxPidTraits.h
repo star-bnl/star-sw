@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.h,v 2.11 2004/03/01 17:44:38 fisyak Exp $
+ * $Id: StDedxPidTraits.h,v 2.12 2004/07/15 16:36:23 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.h,v $
+ * Revision 2.12  2004/07/15 16:36:23  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.11  2004/03/01 17:44:38  fisyak
  * Add Print method
  *
@@ -77,7 +80,6 @@ protected:
     Float_t  mSigma;
     Short_t  mMethod;
     
-    StObject* clone() const;
     ClassDef(StDedxPidTraits,2)
 };
 #endif

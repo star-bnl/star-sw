@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcRawHit.h,v 2.6 2002/02/22 22:56:47 jeromel Exp $
+ * $Id: StEmcRawHit.h,v 2.7 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEmcRawHit.h,v $
+ * Revision 2.7  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.6  2002/02/22 22:56:47  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -70,7 +73,6 @@ protected:
     UInt_t    mAdc;
     Float_t   mEnergy;
     
-    StObject* clone() const;
     ClassDef(StEmcRawHit,1)
 };
 #endif

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcRawData.h,v 2.1 2004/03/26 21:53:45 ullrich Exp $
+ * $Id: StEmcRawData.h,v 2.2 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Alex Suaide, Mar 2004
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcRawData.h,v $
+ * Revision 2.2  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.1  2004/03/26 21:53:45  ullrich
  * Initial Revision.
  *
@@ -57,8 +60,6 @@ public:
     void          setData(int, int, unsigned short);
 
 protected:
-    StObject*     clone() const;
-    
     TArrayS       mHeader[MAXEMCDATABANK];
     TArrayS       mData[MAXEMCDATABANK];
     

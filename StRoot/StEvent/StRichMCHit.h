@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StRichMCHit.h,v 2.4 2002/02/22 22:56:49 jeromel Exp $
+ * $Id: StRichMCHit.h,v 2.5 2004/07/15 16:36:25 ullrich Exp $
  *
  * Author: Brian Lasiuk, May 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StRichMCHit.h,v $
+ * Revision 2.5  2004/07/15 16:36:25  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.4  2002/02/22 22:56:49  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -53,8 +56,6 @@ public:
     const StRichMCInfo& getMCInfo() const;
 
 protected:
-    StObject* clone() const;
-    
     StRichMCInfo  mInfo;
     
     ClassDef(StRichMCHit,1)

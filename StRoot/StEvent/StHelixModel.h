@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHelixModel.h,v 2.8 2003/04/09 17:59:39 genevb Exp $
+ * $Id: StHelixModel.h,v 2.9 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHelixModel.h,v $
+ * Revision 2.9  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.8  2003/04/09 17:59:39  genevb
  * Add setMomentum function
  *
@@ -74,9 +77,6 @@ public:
     void setMomentum(const StThreeVectorF&);
      
     StTrackGeometry*       copy() const;     // virtual constructor
-
-protected:
-    StObject*      clone() const;
     
 private:
     StTrackModel   mModel;

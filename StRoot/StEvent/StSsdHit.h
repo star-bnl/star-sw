@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSsdHit.h,v 2.8 2003/01/08 19:43:11 perev Exp $
+ * $Id: StSsdHit.h,v 2.9 2004/07/15 16:36:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *         Lilian Martin, Dec 1999
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StSsdHit.h,v $
+ * Revision 2.9  2004/07/15 16:36:25  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.8  2003/01/08 19:43:11  perev
  * CleanUp
  *
@@ -72,7 +75,6 @@ public:
 
 protected:
     static StMemoryPool mPool;  //!
-    StObject* clone() const;
     
 private:
     enum {mWaferPerLadder=16};

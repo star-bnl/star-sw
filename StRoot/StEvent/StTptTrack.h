@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTptTrack.h,v 2.3 2002/02/22 22:56:52 jeromel Exp $
+ * $Id: StTptTrack.h,v 2.4 2004/07/15 16:36:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Aug 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTptTrack.h,v $
+ * Revision 2.4  2004/07/15 16:36:25  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.3  2002/02/22 22:56:52  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -41,8 +44,6 @@ public:
     StTrackType     type() const;
     const StVertex* vertex() const;
 
-protected:
-    StObject* clone() const;
     ClassDef(StTptTrack,1)
 };
 #endif

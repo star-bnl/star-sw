@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTofPidTraits.h,v 2.6 2004/07/12 21:04:16 jeromel Exp $
+ * $Id: StTofPidTraits.h,v 2.7 2004/07/15 16:36:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Dec 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofPidTraits.h,v $
+ * Revision 2.7  2004/07/15 16:36:25  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.6  2004/07/12 21:04:16  jeromel
  * Commented out clone()
  *
@@ -80,7 +83,6 @@ private:
     Float_t   mSigmaKaon;
     Float_t   mSigmaProton;
 
-    //StObject* clone() const;
     ClassDef(StTofPidTraits,2)
 };
 

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StRichPidTraits.h,v 2.13 2003/09/02 17:58:05 perev Exp $
+ * $Id: StRichPidTraits.h,v 2.14 2004/07/15 16:36:25 ullrich Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StRichPidTraits.h,v $
+ * Revision 2.14  2004/07/15 16:36:25  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.13  2003/09/02 17:58:05  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -126,8 +129,6 @@ private:
     Float_t           mSigned2dDca;
     StRichSpectra*    mRichSpectra;
     
-    StObject* clone() const;
-
     ClassDef(StRichPidTraits,3)
 };
 
@@ -136,7 +137,6 @@ private:
 inline StSPtrVecRichPid& StRichPidTraits::getAllPids()        { return mThePids;}
 inline const StSPtrVecRichPid&  StRichPidTraits::getAllPids() const { return mThePids;}
 inline void  StRichPidTraits::addPid(StRichPid* t) {mThePids.push_back(t);}
-inline StObject* StRichPidTraits::clone() const {return new StRichPidTraits(*this);}
 inline void StRichPidTraits::setProductionVersion(int id) {mProductionVersion = id;}
 inline void StRichPidTraits::setId(int id) {mId = id;}
 inline void StRichPidTraits::setProbability(float p) {mProbability = p;}

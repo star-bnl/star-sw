@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.h,v 2.8 2002/04/18 23:38:21 jeromel Exp $
+ * $Id: StPrimaryVertex.h,v 2.9 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.h,v $
+ * Revision 2.9  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.8  2002/04/18 23:38:21  jeromel
  * Implementation of the SVT 2 tables scheme ...
  *
@@ -72,7 +75,6 @@ protected:
     StSPtrVecPrimaryTrack    mDaughters;
     StSPtrVecPrimaryTrack    mEstDaughters;  // remove when EST becomes standard
 
-    StObject* clone() const;
     ClassDef(StPrimaryVertex,2)
 };
 #endif

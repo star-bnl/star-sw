@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackPidTraits.h,v 2.6 2002/02/22 22:56:53 jeromel Exp $
+ * $Id: StTrackPidTraits.h,v 2.7 2004/07/15 16:36:26 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTrackPidTraits.h,v $
+ * Revision 2.7  2004/07/15 16:36:26  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.6  2002/02/22 22:56:53  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -58,7 +61,6 @@ public:
 protected:
     Short_t mDetectorId;
 
-    virtual StObject* clone() const = 0;
     ClassDef(StTrackPidTraits,1)
 };
 #endif

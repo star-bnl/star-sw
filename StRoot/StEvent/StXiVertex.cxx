@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.cxx,v 2.9 2003/09/02 17:58:06 perev Exp $
+ * $Id: StXiVertex.cxx,v 2.10 2004/07/15 16:36:26 ullrich Exp $
  *
  * Author: Gene Van Buren, Feb 1999, revised Thomas Ullrich Sep 99
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.cxx,v $
+ * Revision 2.10  2004/07/15 16:36:26  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.9  2003/09/02 17:58:06  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -50,7 +53,7 @@
 #include "tables/St_dst_vertex_Table.h"
 #include "tables/St_dst_xi_vertex_Table.h"
 
-static const char rcsid[] = "$Id: StXiVertex.cxx,v 2.9 2003/09/02 17:58:06 perev Exp $";
+static const char rcsid[] = "$Id: StXiVertex.cxx,v 2.10 2004/07/15 16:36:26 ullrich Exp $";
 
 ClassImp(StXiVertex)
 
@@ -80,9 +83,6 @@ StXiVertex::StXiVertex(const dst_vertex_st& vtx,
 }
 
 StXiVertex::~StXiVertex() { /* noop */ }
-
-StObject*
-StXiVertex::clone() const { return new StXiVertex(*this); }
 
 StVertexId
 StXiVertex::type() const { return kXiVtxId; }

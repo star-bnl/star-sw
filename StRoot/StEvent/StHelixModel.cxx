@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixModel.cxx,v 2.10 2003/12/04 03:51:11 perev Exp $
+ * $Id: StHelixModel.cxx,v 2.11 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelixModel.cxx,v $
+ * Revision 2.11  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.10  2003/12/04 03:51:11  perev
  * Set small but non zero curvature
  *
@@ -50,7 +53,7 @@
 
 ClassImp(StHelixModel)
 
-static const char rcsid[] = "$Id: StHelixModel.cxx,v 2.10 2003/12/04 03:51:11 perev Exp $";
+static const char rcsid[] = "$Id: StHelixModel.cxx,v 2.11 2004/07/15 16:36:24 ullrich Exp $";
 
 StHelixModel::StHelixModel() : mModel(helixModel)
 {
@@ -94,9 +97,6 @@ StHelixModel::~StHelixModel() { /* noop */ }
 
 StTrackGeometry*
 StHelixModel::copy() const { return new StHelixModel(*this); }
-
-StObject*
-StHelixModel::clone() const { return new StHelixModel(*this); }
 
 StTrackModel
 StHelixModel::model() const {return mModel;}

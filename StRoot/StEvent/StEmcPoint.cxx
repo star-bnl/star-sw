@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcPoint.cxx,v 2.7 2004/02/17 21:43:41 ullrich Exp $
+ * $Id: StEmcPoint.cxx,v 2.8 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcPoint.cxx,v $
+ * Revision 2.8  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.7  2004/02/17 21:43:41  ullrich
  * Added code to the constructor (was empty).
  *
@@ -36,7 +39,7 @@
 #include "StEmcPoint.h"
 #include <Stiostream.h>
 
-static const char rcsid[] = "$Id: StEmcPoint.cxx,v 2.7 2004/02/17 21:43:41 ullrich Exp $";
+static const char rcsid[] = "$Id: StEmcPoint.cxx,v 2.8 2004/07/15 16:36:24 ullrich Exp $";
 
 ClassImp(StEmcPoint)
 
@@ -171,8 +174,5 @@ StEmcPoint::track() const {return mTracks;}
 
 void
 StEmcPoint::addTrack(StTrack* track) {mTracks.push_back(track);}
-
-StObject* StEmcPoint::clone() const { return new StEmcPoint(*this); };
-
 
 

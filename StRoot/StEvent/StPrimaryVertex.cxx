@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.cxx,v 2.9 2003/09/02 17:58:05 perev Exp $
+ * $Id: StPrimaryVertex.cxx,v 2.10 2004/07/15 16:36:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.cxx,v $
+ * Revision 2.10  2004/07/15 16:36:24  ullrich
+ * Removed all clone() declerations and definitions. Use StObject::clone() only.
+ *
  * Revision 2.9  2003/09/02 17:58:05  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -48,7 +51,7 @@
 
 ClassImp(StPrimaryVertex)
 
-static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.9 2003/09/02 17:58:05 perev Exp $";
+static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.10 2004/07/15 16:36:24 ullrich Exp $";
 
 StPrimaryVertex::StPrimaryVertex()
 { mType = kEventVtxId; }
@@ -57,9 +60,6 @@ StPrimaryVertex::StPrimaryVertex(const dst_vertex_st& v) : StVertex(v)
 { mType = kEventVtxId; }
 
 StPrimaryVertex::~StPrimaryVertex() {/* noop */};
-
-StObject*
-StPrimaryVertex::clone() const { return new StPrimaryVertex(*this); }
 
 StVertexId
 StPrimaryVertex::type() const { return kEventVtxId; }
