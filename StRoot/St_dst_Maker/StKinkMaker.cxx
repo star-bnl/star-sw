@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.33 2003/11/05 19:28:20 perev Exp $
+// $Id: StKinkMaker.cxx,v 1.34 2004/03/16 20:59:37 jeromel Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.34  2004/03/16 20:59:37  jeromel
+// Naming clash resolved by changing name
+//
 // Revision 1.33  2003/11/05 19:28:20  perev
 // Leak fixed, TObjArray::SetOwner() added
 //
@@ -126,10 +129,10 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define MAXNUMOFTRACKS 10000
 #define SIZETRKIDCHECK 1000
 
-ClassImp(StKinkMaker)
+ClassImp(StOldKinkMaker)
   
 //_____________________________________________________________________________
-StKinkMaker::StKinkMaker(const char *name):
+StOldKinkMaker::StOldKinkMaker(const char *name):
     StMaker(name),
     m_tkfpar(0)
 {
@@ -137,11 +140,11 @@ StKinkMaker::StKinkMaker(const char *name):
 }
 
 //_____________________________________________________________________________
-StKinkMaker::~StKinkMaker(){
+StOldKinkMaker::~StOldKinkMaker(){
 }
 
 //_____________________________________________________________________________
-Int_t StKinkMaker::Init(){
+Int_t StOldKinkMaker::Init(){
   m_tkfpar =  new St_tkf_tkfpar("tkf_tkfpar",1);
   {
     tkf_tkfpar_st parRow;  
@@ -168,30 +171,30 @@ Int_t StKinkMaker::Init(){
 }
 
 //_____________________________________________________________________________
-Int_t StKinkMaker::Make(){
+Int_t StOldKinkMaker::Make(){
   PrintInfo();
 
   St_DataSet *match = GetDataSet("match"); 
   if (!match) {
-    gMessMgr->Warning() << " match is missing. Exit from StKinkMaker." << endm;
+    gMessMgr->Warning() << " match is missing. Exit from StOldKinkMaker." << endm;
     return kStWarn;
   }  
   St_DataSetIter matchI(match);         
   St_dst_track  *globtrk = (St_dst_track *) matchI("globtrk");
   if (!globtrk) {
-    gMessMgr->Warning() << " globtrk is missing. Exit from StKinkMaker." << endm;
+    gMessMgr->Warning() << " globtrk is missing. Exit from StOldKinkMaker." << endm;
     return kStWarn;
   }
 
   St_DataSet     *primary = GetDataSet("primary"); 
   if (!primary) {
-    gMessMgr->Warning() << " primary is missing. Exit from StKinkMaker." << endm;
+    gMessMgr->Warning() << " primary is missing. Exit from StOldKinkMaker." << endm;
     return kStWarn;
   }
   St_DataSetIter primaryI(primary);         
   St_dst_vertex  *vertex   = (St_dst_vertex *) primaryI("vertex");
   if (!vertex) {
-    gMessMgr->Warning() << " vertex is missing. Exit from StKinkMaker." << endm;
+    gMessMgr->Warning() << " vertex is missing. Exit from StOldKinkMaker." << endm;
     return kStWarn;
   }
   
@@ -207,7 +210,7 @@ Int_t StKinkMaker::Make(){
     }
   }
   if( whichRow == vertex->GetNRows() ) {
-    gMessMgr->Warning() << " No primary vertex. Exit from StKinkMaker." << endm;
+    gMessMgr->Warning() << " No primary vertex. Exit from StOldKinkMaker." << endm;
     return kStWarn;
   }
 
@@ -494,7 +497,7 @@ Int_t StKinkMaker::Make(){
 }
 
 //_____________________________________________________________________________
-void StKinkMaker::FillTableRow()
+void StOldKinkMaker::FillTableRow()
 {	  
   StThreeVectorD pMomMinusDMom = parentMoment - daughterMoment;
   
@@ -625,7 +628,7 @@ void StKinkMaker::FillTableRow()
 }
 
 //_____________________________________________________________________________
-void StKinkMaker::FillIflag()
+void StOldKinkMaker::FillIflag()
 {
   if(m_kinkEvalOn) {
     St_DataSet *tpcTracks = GetDataSet("tpc_tracks"); 
@@ -760,7 +763,7 @@ void StKinkMaker::FillIflag()
 }
 
 //_____________________________________________________________________________
-Int_t StKinkMaker::MeetTwoHelices2D(const Float_t cut, 
+Int_t StOldKinkMaker::MeetTwoHelices2D(const Float_t cut, 
                                     const StPhysicalHelixD& helix1,
                                     const StPhysicalHelixD& helix2, 
                                     Float_t xCords[2], 
@@ -859,7 +862,7 @@ Int_t StKinkMaker::MeetTwoHelices2D(const Float_t cut,
 }
 
 //_____________________________________________________________________________
-Float_t  StKinkMaker::DcaTwoLines(const StThreeVectorD& t1Project, 
+Float_t  StOldKinkMaker::DcaTwoLines(const StThreeVectorD& t1Project, 
                                   const StThreeVectorD& t2Project, 
 				  const StThreeVectorD& parentMom, 
                                   const StThreeVectorD& daughterMom, 
