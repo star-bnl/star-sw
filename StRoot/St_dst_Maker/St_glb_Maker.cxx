@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.51 1999/03/20 22:34:07 perev Exp $
+// $Id: St_glb_Maker.cxx,v 1.52 1999/04/01 23:31:42 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.52  1999/04/01 23:31:42  fisyak
+// Add summary information and set return kStWarn after evr fails
+//
 // Revision 1.51  1999/03/20 22:34:07  perev
 // maker new schema
 //
@@ -390,6 +393,7 @@ Int_t St_glb_Maker::Init(){
   
   // Run summary
   m_dst_summary_param = new St_dst_summary_param("summary_param",1);
+  AddConst(m_dst_summary_param);
   dst_summary_param_st dst_summary_param;
   dst_summary_param.eta_bins[0]=  -2.;
   dst_summary_param.eta_bins[1]=  -1.;
@@ -415,7 +419,35 @@ Int_t St_glb_Maker::Init(){
   dst_summary_param.n_phi_bins=  8;
   
   m_dst_summary_param->AddAt(&dst_summary_param,0);
-  
+  St_dst_run_header *run_header = new St_dst_run_header("run_header",1);
+  AddConst(run_header);
+
+  St_dst_run_summary *dst_run_summary = new St_dst_run_summary("dst_run_summary",1);
+  AddConst(dst_run_summary);
+  dst_run_summary_st run_summary = 
+{
+  "Unknown", //char   version[20];     /* DST production software version               */
+  0,         //long   prod_run;        /* Prod. run number, F.key to dst_run_header     */
+  0,         //long   n_events_tot;    /* Total number of events in the run             */
+  0,         //long   n_events_good;   /* Total number events successfully processed    */
+  {0,0},     //long   date[2];         /* Start/stop date for processing                */
+  {0,0},     //long   time[2];         /* Start/stop time of day (sec)                  */
+  0.,        //float  cpu_total;       /* Total cpu sec for production run              */
+  {0.,0.,0.,0.,0.,0.}, //float  eta_bins[6];     /* Pseudorapidity bins, lower->upper ranges      */
+  {0.,0.,0.,0.,0.,0.}, //float  pt_bins[6];      /* Trans. momen. bins, lower->upper ranges       */
+  {0.,0.,0.,0.,0.,0.}, //float  mt_bins[6];      /* Trans. mass bins, lower->upper ranges         */
+  0,         //long   n_phi_bins;      /* # of phi bins, start at phi=0, max # is 8     */
+  {0.,0.},   //float  mean_eta[2];     /* Mean and std.dev. of <eta> for all events     */
+  {0.,0.},   //float  mean_pt[2];      /* Mean and std.dev. of <pt> for all events      */
+  { 0, 0},   //long   multiplicity[2]; /* Mean and std.dev. of total chrg. mult.        */
+  { 0, 0},   //long   num_vert[2];     /* Mean and std.dev. of total # vertices         */
+  { 0, 0},   //long   energy_emc[2];   /* Mean and std.dev. of total energy in EMC      */
+ };
+
+
+  strcpy (&run_summary.version[0],VersionTag()); // DST production software version
+  dst_run_summary->AddAt(&run_summary,0);
+ 
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -440,19 +472,13 @@ Int_t St_glb_Maker::Make(){
   St_dst_xi_vertex  *dst_xi_vertex = (St_dst_xi_vertex *) dst("dst_xi_vertex");
   St_dst_dedx       *dst_dedx    = (St_dst_dedx      *) dst("dst_dedx");
   St_dst_point      *point       = (St_dst_point     *) dst("point");
-  St_dst_run_summary *dst_run_summary = (St_dst_run_summary   *) dst("dst_run_summary");
   St_dst_event_header  *event_header  = (St_dst_event_header  *) dst("event_header");
   St_dst_event_summary *event_summary = (St_dst_event_summary *) dst("event_summary");
   St_dst_monitor_soft  *monitor_soft  = (St_dst_monitor_soft  *) dst("monitor_soft");
+
+  St_dst_run_summary *dst_run_summary = (St_dst_run_summary   *) m_ConstSet->Find("dst_run_summary");
   
-  if (!dst_run_summary) {
-    dst_run_summary = new St_dst_run_summary("dst_run_summary",1);
-    dst.Add(dst_run_summary);
-    dst_run_summary_st run_summary;
-    strcpy (&run_summary.version[0],VersionTag()); // DST production software version
-    dst_run_summary->AddAt(&run_summary,0);
-  }
-  if (! event_header) {
+   if (! event_header) {
     event_header  = new St_dst_event_header("event_header",1);
     dst.Add(event_header);
   }
@@ -594,7 +620,7 @@ Int_t St_glb_Maker::Make(){
   iRes = evr_am(m_evr_evrpar,m_egr_egrpar,globtrk,vertex);
   //	 ================================================
   
-  if (iRes !=kSTAFCV_OK) iMake = kStWarn;
+  if (iRes !=kSTAFCV_OK) return kStWarn;
   
   
   // track_propagator
@@ -773,13 +799,8 @@ Int_t St_glb_Maker::Make(){
     if(Debug()) cout << " run_dst: finished calling dst_monitor_soft_filler" << endl;
   }
   //--------------- ????????? --------------
-  St_DataSet *run_summary = GetDataSet("run_summary");
-  St_dst_run_header *run_header = 0;
-  St_dst_summary_param *summary_param = 0;
-  if (run_summary) {
-    run_header    = (St_dst_run_header *)    run_summary->Find("run_header");
-    summary_param = (St_dst_summary_param *) run_summary->Find("summary_param");
-  }
+  St_dst_run_header    *run_header    = (St_dst_run_header *)    m_ConstSet->Find("run_header");
+  St_dst_summary_param *summary_param = (St_dst_summary_param *) m_ConstSet->Find("summary_param");
   
   if (!run_header) {
     StEvtHddr * evthdr = (StEvtHddr*)GetDataSet("EvtHddr");
@@ -800,9 +821,10 @@ Int_t St_glb_Maker::Make(){
 				  globtrk,vertex,event_summary);
     //	   ================================================================
     
-    if (iRes != kSTAFCV_OK) cout << "Problem on return from FILL_DST_EVENT_SUMMARY" << endl;
-    if (iRes !=kSTAFCV_OK) iMake = kStWarn;
-    
+    if (iRes !=kSTAFCV_OK) {
+      cout << "Problem on return from FILL_DST_EVENT_SUMMARY" << endl;
+      iMake = kStWarn;
+    }
     if(Debug()) cout << " run_dst: finished calling fill_dst_event_summary" << endl;
   }
   
@@ -818,7 +840,7 @@ Int_t St_glb_Maker::Make(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.51 1999/03/20 22:34:07 perev Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.52 1999/04/01 23:31:42 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
