@@ -3,7 +3,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// StFlowTagMaker
+// StFlowTagMaker.h
+// $Id: StFlowTagMaker.h,v 1.3 1999/08/09 21:43:06 snelling Exp $
 //
 // Description: 
 //  Maker to access and analyze StEvent and fill Tag for flow analysis
@@ -15,6 +16,10 @@
 //  Raimond Snellings, LBNL, 6/99
 //
 // History:
+// $Log: StFlowTagMaker.h,v $
+// Revision 1.3  1999/08/09 21:43:06  snelling
+// removed parameters from cxx file
+//
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include <iostream>
@@ -30,14 +35,21 @@
 #include "TH2.h"
 #include "TProfile.h"
 
-class StEvent;
+// defined it here because I would like to have these
+// cuts in a header file however, I would like to have the
+// name only defined in this class (I do not know how to do this right)
+#ifdef onlyforStFlowTagMaker
+static const double trackquality[3][2] = {{10, 0}, 
+					  { 0, 0},
+					  { 0, 0}};
+#endif
 
 class StFlowTagMaker : public StMaker 
 {
 
 public:
 
-  StFlowTagMaker(const Char_t *name="FlowTag", const Char_t *title="FlowTag");
+  StFlowTagMaker(const Char_t *name="FlowTag");
   virtual ~StFlowTagMaker();
   virtual Int_t Make();
   virtual void PrintInfo();
@@ -69,6 +81,7 @@ protected:
   enum {nPhiBins = 100, nEtaBins = 100, nPtBins = 100}; 
   enum {nPsiBins = 100, nSumPtBins = 100, nMultBins = 100, 
 	n_qBins = 100}; 
+
 
   struct histHarmonic {
     TH1F *mHistPsi;
