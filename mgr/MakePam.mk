@@ -1,7 +1,7 @@
-# $Id: MakePam.mk,v 1.106 1999/08/16 16:31:33 fisyak Exp $
+# $Id: MakePam.mk,v 1.107 1999/08/16 17:03:05 fisyak Exp $
 # $Log: MakePam.mk,v $
-# Revision 1.106  1999/08/16 16:31:33  fisyak
-# Simplify Makefiles
+# Revision 1.107  1999/08/16 17:03:05  fisyak
+# Add protection against empty directories
 #
 # Revision 1.105  1999/08/15 19:09:05  fisyak
 # keep objects for pams
@@ -218,7 +218,13 @@ endif
 FILES_G  := $(wildcard $(SRC_DIR)/*.g $(SRC_DIR)/*/*.g)
 #_________________________________________________________________________
 SUFFIXES := .c .cc .C .cxx .f .F .g .h .hh .hpp .inc .idl
-sources := $(strip $(sort $(dir $(foreach s, $(SUFFIXES), $(wildcard $(SRC_DIR)/*$(s) $(SRC_DIR)/*/*$(s) $(SRC_DIR)/*/*/*$(s))))))
+sources :=$(strip $(sort $(dir $(foreach s, $(SUFFIXES), $(wildcard $(SRC_DIR)/*$(s) $(SRC_DIR)/*/*$(s) $(SRC_DIR)/*/*/*$(s))))))
+ifeq (,$(sources))
+  all:
+	@echo Nothing to do for package $(PKG), no source files
+  depend:
+	@echo Nothing to do for package $(PKG), no source files
+else
 SRC_DIRS:= $(subst /TAIL, ,$(addsuffix TAIL, $(sources)))
 SUBDIR1 := $(subst $(OUT_DIR)/pams/,, $(wildcard $(OUT_DIR)/pams/*/idl))
 SUBDIR2 := $(filter-out $(SUBDIR1), $(subst $(STAR)/pams/,, $(wildcard $(STAR)/pams/*/idl)))
@@ -511,6 +517,7 @@ clean_dep:
 	rm -rf $(DEP_DIR) 
 clean_lib:
 	rm -rf $(DEP_DIR) $(OBJ_DIR) $(wildcard $(LIB_PKG) $(SL_PKG))
+endif
 endif
 test: test_dir test_files test_mk
 test_files:
