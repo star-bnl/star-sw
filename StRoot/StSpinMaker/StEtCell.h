@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StEtCell.h,v 1.1 2002/02/11 20:30:48 akio Exp $
+// $Id: StEtCell.h,v 1.2 2002/06/24 13:22:58 akio Exp $
 // $Log: StEtCell.h,v $
+// Revision 1.2  2002/06/24 13:22:58  akio
+// numerous bug fix & updates
+//
 // Revision 1.1  2002/02/11 20:30:48  akio
 // Many updates, including very first version of jet finder.
 //
@@ -26,10 +29,10 @@
 class StEtCell : public TObject {
 public:
   StEtCell(int k, float e1, float e2, float p1, float p2) {
-    key=k;etaMin=e1;etaMax=e2;phiMin=p1;phiMax=p2; nEntry=0; et=0.0;
+    key=k;etaMin=e1;etaMax=e2;phiMin=p1;phiMax=p2; nEntry=0; et=0.0; jetId=-1;
   }
   StEtCell(int k, float e1, float e2, float p1, float p2, float v) {
-    key=k;etaMin=e1;etaMax=e2;phiMin=p1;phiMax=p2; nEntry=1; et=v;
+    key=k;etaMin=e1;etaMax=e2;phiMin=p1;phiMax=p2; nEntry=1; et=v; jetId=-1;
   }
   virtual ~StEtCell(){};
   
@@ -40,7 +43,8 @@ public:
   float phiMax;
   unsigned int nEntry;
   float et;
-  
+  int   jetId;
+
   float eta() const {return (etaMin+etaMax)/2.0;}
   float phi() const {return (phiMin+phiMax)/2.0;}
   
@@ -58,7 +62,7 @@ public:
 
   Bool_t IsSortable() const { return kTRUE; }
 
-  ClassDef(StEtCell,1)
+  ClassDef(StEtCell,2)
 };
 
 #endif

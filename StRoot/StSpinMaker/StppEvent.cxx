@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.7 2002/05/16 21:55:05 akio Exp $
+// $Id: StppEvent.cxx,v 1.8 2002/06/24 13:22:59 akio Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.8  2002/06/24 13:22:59  akio
+// numerous bug fix & updates
+//
 // Revision 1.7  2002/05/16 21:55:05  akio
 // bug fixed for unpol bunch spin bit
 //
@@ -33,22 +36,22 @@
 //#include "Rtypes.h"
 #include "StEventTypes.h"
 #include "StEvent.h"
+#include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StTriggerDetectorCollection.h"
 #include "StCtbTriggerDetector.h"
-#include "StppTrack.h"
 #include "StppEvent.h"
 #include "StEtGridFlat.h"
 #include "StJet.h"
 
 ClassImp(StppEvent);
 
+extern "C" void fpdpi0mass_(int*,float*,float*);
+
 StppEvent::StppEvent(){
-#ifdef _Offline_tracks_
-  pTracks = new TClonesArray ("StppTrack",200);  //warning hardcoded # of track limits!
-#endif
-#ifdef _L3_tracks_
-  pTracksL3 = new TClonesArray ("StppTrack",200);  //warning hardcoded # of track limits!
-#endif 
+  tracks = new TClonesArray ("StMuTrack",200);  //warning hardcoded # of track limits!
+  trackChoice = 0; //primary track is default
 #ifdef _Jet_
   jets = new TClonesArray ("StJet",20);  //warning hardcoded # of jets limits!
   jetR    = 0.7;
@@ -62,14 +65,8 @@ StppEvent::StppEvent(){
 
 StppEvent::~StppEvent() {
   clear() ;
-#ifdef _Offline_tracks_
-  pTracks->Delete();
-  delete pTracks ;
-#endif
-#ifdef _L3_tracks_
-  pTracksL3->Delete();
-  delete pTracksL3;
-#endif 
+  tracks->Delete();
+  delete tracks ;
 #ifdef _Jet_
   jets->Delete();
   delete jets;
@@ -77,7 +74,7 @@ StppEvent::~StppEvent() {
 } 
 
 void StppEvent::clear(){
-  runN = 0;
+  runN = 1;
   eventN = 0;
   token = 0;
   triggerWord = 0;
@@ -86,33 +83,17 @@ void StppEvent::clear(){
   bunchId7bit = 0;
   doubleSpinIndex = 0;
 
-#ifdef _Offline_tracks_
-  pTracks->Clear();
+  if(tracks) tracks->Clear();
   nPrimTrack = 0;
   nGoodTrack = 0;
-  xVertex = 0.0;
-  yVertex = 0.0;
-  zVertex = 0.0;
+  xVertex = -9999.0;
+  yVertex = -9999.0;
+  zVertex = -9999.0;
   LCP = 0;
   sumPt = 0.0;
   vectorSumPt = 0.0;
   weightedEta = 0.0;
   weightedPhi = 0.0;
-#endif
-
-#ifdef _L3_tracks_
-  pTracksL3->Clear();
-  nPrimTrackL3 = 0;
-  nGoodTrackL3 = 0;
-  xVertexL3 = 0.0;
-  yVertexL3 = 0.0;
-  zVertexL3 = 0.0;
-  LCPL3 = 0;
-  sumPtL3=0.0;
-  vectorSumPtL3=0.0;
-  weightedEtaL3=0.0;
-  weightedPhiL3=0.0;
-#endif
 
   bbcAdcSumEast = 0;
   bbcAdcSumWest = 0;
@@ -129,6 +110,11 @@ void StppEvent::clear(){
   fpdAdcSumSmdX   = 0;
   fpdAdcSumSmdY   = 0;
   fpdSouthVeto    = 0;
+  fpdPi0Mass      = 0;
+  fpdPi0E         = 0;
+  fpdPi0Eta       = 0;
+  fpdPi0Phi       = 0;
+  fpdPi0EShare    = 0;  
 
   ctbAdcSum = 0.0;
   ctbNHit=0;
@@ -150,213 +136,165 @@ void StppEvent::clear(){
 
 #ifndef __CINT__
 Int_t StppEvent::fill(StEvent *event){
-  eventN = event->id() ;
-  runN   = event->runId(); 
-  time   = event->time(); 
+
+  if(!event && !mudst){
+    cout << "StppEvent::fill()   Error:Neither StEvent nor Mudst exist!" << endl;
+    return 1;
+  }
   
-#ifdef _Offline_tracks_
+  StMuEvent* muevent;
+  if(!event && mudst) {muevent = mudst->event(); }
+  
+  //event info
+  if(event){
+    eventN = event->id() ;
+    runN   = event->runId(); 
+    time   = event->time(); 
+  }else{
+    eventN = muevent->eventInfo().id() ;
+    runN   = muevent->eventInfo().runId(); 
+    time   = muevent->eventInfo().time(); 
+  }
+  
   // Get primary tracks
   nPrimTrack = 0; 
+  TClonesArray* mutracks;
+  if(mudst){
+    switch(trackChoice){
+    case 0: mutracks = mudst->primaryTracks(); break;
+    case 1: mutracks = mudst->globalTracks(); break;
+    case 2: mutracks = mudst->l3Tracks(); break;
+    }
+    nPrimTrack = mutracks->GetEntries();   
+    for(int i=0; i<=mutracks->GetLast(); i++){
+      new((*tracks)[i]) StMuTrack((const StMuTrack &) *mutracks->UncheckedAt(i));
+    }
+  }else if(event){
+    //getting tracks from StEvent
+    StSPtrVecTrackNode* exnode = 0;
+    StTrackType type;
+    switch(trackChoice){
+    case 0: exnode = &(event->trackNodes()); type=primary; break;
+    case 1: exnode = &(event->trackNodes()); type=global;  break;
+    case 2:
+      StL3Trigger* l3 = event->l3Trigger();
+      if(l3) exnode = &(l3->trackNodes());
+      type=global;
+      break;
+    }    
+    Int_t nnode=exnode->size();
+    for( Int_t in=0; in<nnode; in++ ) {
+      UInt_t nprim = (*exnode)[in]->entries(type);
+       if(nprim==1){
+	 new((*tracks)[nPrimTrack++]) StMuTrack(event, (*exnode)[in]->track(type));
+       }
+    }
+  }
+
+  //fill some track related summary
   nGoodTrack = 0; 
-  StSPtrVecTrackNode& exnode = event->trackNodes();
-  Int_t nnode=exnode.size();
   float maxpt = 0.0;
   float sumPx=0.0;
   float sumPy=0.0;
-  sumPt=0.0;
-  vectorSumPt=0.0;
-  weightedEta = 0.0;
-  weightedPhi = 0.0;
-  for( Int_t in=0; in<nnode; in++ ) {
-#ifdef _take_global_tracks_
-    UInt_t nprim = exnode[in]->entries(global);
-#else
-    UInt_t nprim = exnode[in]->entries(primary);
-#endif
-    if(nprim==1){
-#ifdef _take_global_tracks_
-      StppTrack *t = new((*pTracks)[nPrimTrack]) StppTrack(exnode[in]->track(global));
-#else
-      StppTrack *t = new((*pTracks)[nPrimTrack]) StppTrack(exnode[in]->track(primary));
-#endif
-      if(t->flag>0 && t->nHits>20 && t->pt>0.2 && fabs(t->eta)<1.4){
-	if(t->pt > maxpt){
-	  maxpt = t->pt;
-	  LCP = nPrimTrack;
-	}
-	sumPt+=t->pt;
-	sumPx+=t->pt * cos(t->psi);
-	sumPy+=t->pt * sin(t->psi);
-	weightedEta += t->pt * t->eta;
-	nGoodTrack++;
+  sumPt=0.0; weightedEta=0.0; 
+  for(int i=0; i<=tracks->GetLast(); i++) {
+    StMuTrack *t = (StMuTrack *)(* tracks)[i];
+    float pt = t->pt();
+    if(t->id() > 0 && t->nHits() > 20 && pt > 0.2 && fabs(t->eta())<1.4){
+      if(pt > maxpt){
+	maxpt = pt;
+	LCP = i;
       }
-      nPrimTrack++;
+      sumPt += pt;
+      sumPx += pt * cos(t->phi());
+      sumPy += pt * sin(t->phi());
+      weightedEta += pt * t->eta();
+      nGoodTrack++;
     }
   }
+  
   if(sumPt>0.0){
-    vectorSumPt=sqrt(sumPx*sumPx+sumPy*sumPy);
-    weightedPhi=(float)atan2((double)sumPy,(double)sumPx);
-    weightedEta/=sumPt; 
+    vectorSumPt = sqrt(sumPx*sumPx+sumPy*sumPy);
+    weightedPhi = (float)atan2((double)sumPy,(double)sumPx);
+    weightedEta/= sumPt; 
+  }else{
+    vectorSumPt = -9.0; weightedPhi=-9.0; weightedEta=-9.0;
   }
   //create at least 1 track even if there is none
-  if(nPrimTrack==0) StppTrack *t = new((*pTracks)[nPrimTrack]) StppTrack();
+  if(nPrimTrack==0) new((*tracks)[0]) StMuTrack();
   if (infoLevel > 1){
     cout << "StppEvent : number of primary tracks " << nPrimTrack << endl;
   }
-
+  
   // Get primary vertex
-  StPrimaryVertex* vtx = event->primaryVertex();
-  if(vtx) {
-    xVertex = vtx->position().x();
-    yVertex = vtx->position().y();
-    zVertex = vtx->position().z();
-    if (infoLevel > 1){
-     cout << "StppEvent : primary vertex " 
-	  << xVertex << " "  << yVertex << " " << zVertex << endl;
-    }
-  }
-  else {
-    xVertex = -9999. ;
-    yVertex = -9999. ;
-    zVertex = -9999. ;
-    if (infoLevel > 1){
-      cout<<"StppEvent: There was no primary vertex"<<endl;
-    } 
-  }
-#endif
-
-  // Get tracks from L3
-  StL3Trigger* l3 = event->l3Trigger();
-  if(l3 != 0){
-#ifdef _L3_tracks_
-    nPrimTrackL3 = 0; 
-    nGoodTrackL3 = 0; 
-    sumPtL3=0.0;
-    vectorSumPtL3=0.0;
-    weightedEtaL3=0.0;
-    weightedPhiL3=0.0;
-    float sumPxL3=0.0;
-    float sumPyL3=0.0;
-    float maxptL3=0.0;
-    StSPtrVecTrackNode& exnodeL3 = l3->trackNodes();
-    Int_t nnodeL3=exnodeL3.size();
-    for( Int_t in=0; in<nnodeL3; in++ ) {
-      UInt_t nprimL3 = exnodeL3[in]->entries(global);
-      if(nprimL3==1){
-	StppTrack *t = new((*pTracksL3)[nPrimTrackL3]) StppTrack(exnodeL3[in]->track(global));
-	if(t->flag>0 && t->nHits>23 && t->pt>0.2 && fabs(t->eta)<1.4){
-	  nGoodTrackL3++;
-	  if(t->pt > maxptL3){
-	    maxptL3 = t->pt;
-	    LCPL3 = nPrimTrackL3;
-	  }
-	  sumPtL3 += t->pt;
-	  sumPxL3+=t->pt * cos(t->psi);
-	  sumPyL3+=t->pt * sin(t->psi);
-	  weightedEtaL3 += t->pt * t->eta;
-	  nGoodTrackL3++;
-	}
-	nPrimTrackL3++;
-      }
-    }
-    //create at least 1 track even if there is none
-    if(nPrimTrackL3==0) StppTrack *t = new((*pTracksL3)[nPrimTrackL3]) StppTrack();
-    if(sumPtL3>0.0){
-      vectorSumPtL3=sqrt(sumPxL3*sumPxL3+sumPyL3*sumPyL3);
-      weightedPhiL3=(float)atan2((double)sumPyL3,(double)sumPxL3);
-      weightedEtaL3/=sumPtL3; 
-    }
-    if (infoLevel > 1){
-      cout << "StppEvent : number of L3 tracks " << nPrimTrackL3 << endl;
-    }
-    
-    // Get primary vertex
-    StPrimaryVertex* vtxL3 = l3->primaryVertex();
-    if(vtxL3) {
-      xVertexL3 = vtxL3->position().x();
-      yVertexL3 = vtxL3->position().y();
-      zVertexL3 = vtxL3->position().z();
-      if (infoLevel > 1){
-	cout << "StppEvent : L3 vertex " 
-	     << xVertexL3 << " "  << yVertexL3 << " " << zVertexL3 << endl;
-      }
-    }
-    else {
-      xVertexL3 = -9999. ;
-      yVertexL3 = -9999. ;
-      zVertexL3 = -9999. ;
-      if (infoLevel > 1){
-	cout<<"StppEvent: There was no L3 vertex"<<endl;
-      } 
-    }
-
-#endif
-
-#ifdef _L3_Info_
-    StL3EventSummary * l3sum=l3->l3EventSummary();
-    if(l3sum != 0){
-      StSPtrVecL3AlgorithmInfo &l3Algo=l3sum->algorithms();
-      if (infoLevel > 1){
-	cout << "StppEvent :  No. of L3 algo switched ON = " 
-	     <<  l3sum->numberOfAlgorithms() << endl;
-      }
-      for (unsigned int k=0; k< l3Algo.size(); k++) {
-	int n = l3Algo[k]->dataSize();	
-	if(infoLevel>2){
-	  printf("k=%d, algo ID=%d on=%d accept=%d, nData=%d\n"
-		 ,k,l3Algo[k]->id(),l3Algo[k]->accept(),l3Algo[k]->accept(),n);
-	  for(int j=0;j<n;j++) printf("data[%d]=%f\n", j,l3Algo[k]->data(j));
-	}
-	if(l3Algo[k]->id()==9){
-	  if (infoLevel > 1){cout << "StppEvent :  Found Jan's pileup filter " << endl;}
-	  L3PileupFilterOn = l3Algo[k]->on();
-	  L3PileupFilterAcc = l3Algo[k]->accept();
-	  if(n>10){
-	    cout << "L3 Algorithm info data exceed limit size 10." << endl;
-	    n=10;
-	  }
-	  for(int j=0; j<n; j++){
-	    L3PileupFilterData[j] = l3Algo[k]->data(j);
-	  }
-	}
-      }
-    }
-#endif
+  StThreeVectorF vtx(-999.0, -999.0, -999.0);
+  if(event){
+    StPrimaryVertex* v = event->primaryVertex();
+    if(v) vtx = v->position();
+  }else{
+    vtx = muevent->primaryVertexPosition();
+  }  
+  xVertex = vtx.x(); yVertex = vtx.y(); zVertex = vtx.z();
+  if (infoLevel > 1){
+    cout << "StppEvent : primary vertex " 
+	 << xVertex << " "  << yVertex << " " << zVertex << endl;
   }
 
-  StTriggerDetectorCollection* trg = event->triggerDetectorCollection();
-  if(trg){
+  // Getting detector infos
+  StCtbTriggerDetector* ctb = 0;
+  StZdcTriggerDetector* zdc = 0;
+  StBbcTriggerDetector* bbc = 0;
+  StFpdCollection*      fpd = 0;
+  StL0Trigger*          l0  = 0;
+  if(event) {
+    StTriggerDetectorCollection* trg = event->triggerDetectorCollection();
+    if(trg){
+      ctb = &(trg->ctb());
+      zdc = &(trg->zdc());
+      bbc = &(trg->bbc());
+    }      
+    fpd = event->fpdCollection();
+    l0 = event->l0Trigger();
+  }else{
+    ctb = &(muevent->ctbTriggerDetector());
+    zdc = &(muevent->zdcTriggerDetector());
+    bbc = &(muevent->bbcTriggerDetector());
+    fpd = &(muevent->fpdCollection());
+    l0  = &(muevent->l0Trigger());
+  }
 
-    StCtbTriggerDetector& ctb = trg->ctb();
+  //CTB
+  if(ctb){
     ctbAdcSum = 0.0;
     ctbNHit = 0;
-    for(unsigned int i=0; i<ctb.numberOfTrays(); i++){
-      for(unsigned int j=0; j<ctb.numberOfSlats(); j++){
-	ctbAdcSum += ctb.mips(i,j);
-	if(ctb.mips(i,j)>0) ctbNHit++;
+    for(unsigned int i=0; i<ctb->numberOfTrays(); i++){
+      for(unsigned int j=0; j<ctb->numberOfSlats(); j++){
+	ctbAdcSum += ctb->mips(i,j);
+	if(ctb->mips(i,j)>0) ctbNHit++;
       }
-    }
-
-    StZdcTriggerDetector& zdc = trg->zdc();
-    //cout << "ZDC "; for(int i=0; i<16; i++){cout << zdc.adc(i) << " ";}; cout << endl;
-    zdcEast = (Int_t)zdc.adc(4);
-    zdcWest = (Int_t)zdc.adc(0);
-    zdcTdcEast = (Int_t)zdc.adc(8);
-    zdcTdcWest = (Int_t)zdc.adc(9);
-    if(zdcEast>0) {zdcRatioEast = zdc.adc(7)/zdcEast;} else {zdcRatioEast=0.0;}
-    if(zdcWest>0) {zdcRatioWest = zdc.adc(3)/zdcWest;} else {zdcRatioWest=0.0;}
-
-    StBbcTriggerDetector* bbc = &(trg->bbc());
-    if(bbc){
-      bbcAdcSumEast = bbc->adcSumEast();
-      bbcAdcSumWest = bbc->adcSumWest();
-      bbcNHitEast = bbc->nHitEast();
-      bbcNHitWest = bbc->nHitWest();
-      zVertexBbc = bbc->zVertex();
     }
   }
 
-  StFpdCollection* fpd = event->fpdCollection();
+  //ZDC
+  if(zdc){
+    zdcEast = (Int_t)zdc->adc(4);
+    zdcWest = (Int_t)zdc->adc(0);
+    zdcTdcEast = (Int_t)zdc->adc(8);
+    zdcTdcWest = (Int_t)zdc->adc(9);
+    if(zdcEast>0) {zdcRatioEast = zdc->adc(7)/zdcEast;} else {zdcRatioEast=0.0;}
+    if(zdcWest>0) {zdcRatioWest = zdc->adc(3)/zdcWest;} else {zdcRatioWest=0.0;}
+  }
+
+  //BBC
+  if(bbc){
+    bbcAdcSumEast = bbc->adcSumEast();
+    bbcAdcSumWest = bbc->adcSumWest();
+    bbcNHitEast = bbc->nHitEast();
+    bbcNHitWest = bbc->nHitWest();
+    zVertexBbc = bbc->zVertex();
+  }
+
+  //FPD
   if(fpd){
     token = fpd->token();
     fpdAdcSumNorth  = fpd->sumAdcNorth();
@@ -369,8 +307,8 @@ Int_t StppEvent::fill(StEvent *event){
     fpdAdcSumSmdY   = fpd->sumAdcSmdY();
     fpdSouthVeto    = fpd->southVeto();
   }
-  
-  StL0Trigger* l0=event->l0Trigger();
+
+  //l0 trigger info
   if(l0){
     token = l0->triggerToken();
     triggerWord = l0->triggerWord();
@@ -390,26 +328,24 @@ Int_t StppEvent::fill(StEvent *event){
       cout << "2 bunch Id did not agree "<< bunchId<<" - "<<bunchId7bit<<" = "
 	   <<diff<<" != "<<BunchIdDifference<<endl;
     }
+    cout << "AKIO-Run#/Token/Unix-Time/BunchID/7Bit/SpinBits:" 
+	 << runN << " " << token << " " << time << " " 
+	 << bunchId << " " << bunchId7bit << " " << doubleSpinIndex  << endl;
   }
 
-  cout << "AKIO-Run#/Token/Unix-Time/BunchID/7Bit/SpinBits:" 
-       << runN << " " << token << " " << time << " " 
-       << bunchId << " " << bunchId7bit << " " << doubleSpinIndex  << endl;
-
 #ifdef _Jet_
-#ifdef _Offline_tracks_
   //simple jet finder
   nJets = 0;
   StEtGridFlat *g = new StEtGridFlat;
   g->createKeys();
-  for(int i=0; i<=pTracks->GetLast(); i++){
-    StppTrack *t = (StppTrack*)(*pTracks)[i];
-    if(t->flag>0 && t->nHits>20 && t->pt>0.2 && fabs(t->eta)<1.4) g->add(t);
+  for(int i=0; i<=tracks->GetLast(); i++){
+    StMuTrack *t = (StMuTrack*)(*tracks)[i];
+    if(t->flag()>0 && t->nHits()>20 && t->pt()>0.2 && fabs(t->eta())<1.4) g->add(t);
   }
   //g->sort();
   //g->print();
   StJet* jet;
-  while( (jet = g->findJet(jetR,jetSeed,jetCut)) != 0){
+  while( (jet = g->findJet(jetR,jetSeed,jetCut,nJets)) != 0){
     StJet* jj = new((*jets)[nJets]) StJet(jet);
     delete jet;
     jj->print();
@@ -419,8 +355,34 @@ Int_t StppEvent::fill(StEvent *event){
   //g->print();
   delete g;
 #endif
-#endif
+  
+  //example fpd analysis
+  //print out fpd infos
+  fpd->dump();
+  //print out bbc infos
+  bbc->dump();
 
+  //calling fortran pi0 finder from FPD
+  float result[10]; 
+  int iadc[256];
+  unsigned short * adc = fpd->adc();
+  for(int i=0; i<256; i++){iadc[i] = (int) adc[i];}
+  fpdpi0mass_(iadc, &zVertex, result);
+  fpdPi0Mass   = result[0];
+  fpdPi0E      = result[1];
+  fpdPi0Eta    = result[2];
+  fpdPi0Phi    = result[3]; 
+  fpdPi0EShare = result[4];
+  if(fpdPi0Mass>0){
+    for(int i=0; i<5; i++){cout << result[i] << " ";}; cout<< endl;
+  }
+
+  //end
   return 0;
 }
 #endif /*__CINT__*/
+
+Int_t StppEvent::correctedBunchId(){
+  if (bunchId7bit>113) return (bunchId7bit-113)/2;
+  else                 return (bunchId7bit+7)/2;
+}

@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StEtGridFlat.cxx,v 1.1 2002/02/11 20:30:48 akio Exp $
+// $Id: StEtGridFlat.cxx,v 1.2 2002/06/24 13:22:59 akio Exp $
 // $Log: StEtGridFlat.cxx,v $
+// Revision 1.2  2002/06/24 13:22:59  akio
+// numerous bug fix & updates
+//
 // Revision 1.1  2002/02/11 20:30:48  akio
 // Many updates, including very first version of jet finder.
 //
@@ -50,8 +53,9 @@ int StEtGridFlat::findKey(float eta, float phi){
   while(phi<-M_PI) {phi+=2*M_PI;}
   int iphi = int( (phi-mPhiMin)/(mPhiMax-mPhiMin)*mNPhi );
   if(ieta < 0 || ieta >= mNEta || iphi < 0 || iphi >= mNPhi){
-    cout << "StEtGridFlat::findKey  *ERROR*  Got invalid key "
-	 << ieta << " " << iphi << " " << mNEta << " " << mNPhi << endl;
+    cout << "StEtGridFlat::findKey  *ERROR*  Got invalid key" << endl;
+    cout << "  eta, found i-eta, max i-eta = " <<eta <<" "<<ieta <<" "<<mNEta<<endl;
+    cout << "  phi, found i-phi, max i-phi = " <<phi <<" "<<iphi <<" "<<mNPhi<<endl;
     return -1;
   }    
   return ieta*mNPhi + iphi;

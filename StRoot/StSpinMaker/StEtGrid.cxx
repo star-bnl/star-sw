@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StEtGrid.cxx,v 1.1 2002/02/11 20:30:48 akio Exp $
+// $Id: StEtGrid.cxx,v 1.2 2002/06/24 13:22:59 akio Exp $
 // $Log: StEtGrid.cxx,v $
+// Revision 1.2  2002/06/24 13:22:59  akio
+// numerous bug fix & updates
+//
 // Revision 1.1  2002/02/11 20:30:48  akio
 // Many updates, including very first version of jet finder.
 //
@@ -13,6 +16,7 @@
 #include "StEventTypes.h"
 #include "StEvent.h"
 #include "StSpinMaker/StppTrack.h"
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StEtGrid.h"
 #include "math.h"
 
@@ -73,6 +77,11 @@ int StEtGrid::add(StppTrack *trk){
   return add(trk->eta, trk->psi, trk->pt);
 }
 
+int StEtGrid::add(StMuTrack *trk){
+  if(trk->flag() <= 0) return 8;
+  return add(trk->eta(), trk->phi(), trk->pt());
+}
+
 int StEtGrid::add(StTrack *trk){
   if(trk->flag() <= 0) return 8;
   float eta = -log(tan(trk->geometry()->momentum().theta()/2.));
@@ -81,18 +90,18 @@ int StEtGrid::add(StTrack *trk){
   return add(eta, phi, et);
 }
 
-StJet* StEtGrid::findJet(float radius, float minEtSeed, float minEtCell){
+StJet* StEtGrid::findJet(float radius, float minEtSeed, float minEtCell, int id){
   StJet *jet = 0;
   int n = mGrid->GetLast();
   if(n>=0) {
     sort();
     if(cell(n)->et > minEtSeed){
       jet = new StJet();
-      jet->add(cell(n));
+      jet->add(cell(n)); cell(n)->jetId = id;
       for(int i=n-1; i>=0; i--){
 	if(cell(i)->et < minEtCell) break;
 	if(cell(n)->distance(cell(i)) < radius){
-	  jet->add(cell(i));
+	  jet->add(cell(i)); cell(i)->jetId = id;
 	}
       }
     }

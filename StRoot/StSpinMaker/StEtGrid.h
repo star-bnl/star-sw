@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StEtGrid.h,v 1.1 2002/02/11 20:30:48 akio Exp $
+// $Id: StEtGrid.h,v 1.2 2002/06/24 13:22:59 akio Exp $
 // $Log: StEtGrid.h,v $
+// Revision 1.2  2002/06/24 13:22:59  akio
+// numerous bug fix & updates
+//
 // Revision 1.1  2002/02/11 20:30:48  akio
 // Many updates, including very first version of jet finder.
 //
@@ -28,6 +31,7 @@
 
 class StTrack;
 class StppTrack;
+class StMuTrack;
 
 class StEtGrid : public TObject {
 public:  
@@ -39,10 +43,11 @@ public:
   
   StEtCell* cell(int i) {return (StEtCell*)(*mGrid)[i];}
 
-  int add(int,float); 
-  int add(float,float,float); 
+  int add(int key, float et); 
+  int add(float eta ,float phi ,float et); 
   int add(StTrack*); 
   int add(StppTrack*); 
+  int add(StMuTrack*); 
 
   void print();
   void clear() {mGrid->Clear(); mState=1;}
@@ -59,7 +64,7 @@ public:
 
   void  sort() {mGrid->Sort(); mState=3;}
   void  cutAtThreshold(float);
-  StJet* findJet(float radius, float minEtSeed, float minEtCell);
+  StJet* findJet(float radius, float minEtSeed, float minEtCell, int id);
 
 protected:  
   UInt_t mState;  // created empty=0, cleared=1, grid added=2, sort updated=3.

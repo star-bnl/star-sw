@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.h,v 1.3 2002/02/11 20:30:48 akio Exp $ 
+// $Id: StppEvent.h,v 1.4 2002/06/24 13:22:59 akio Exp $ 
 // $Log: StppEvent.h,v $
+// Revision 1.4  2002/06/24 13:22:59  akio
+// numerous bug fix & updates
+//
 // Revision 1.3  2002/02/11 20:30:48  akio
 // Many updates, including very first version of jet finder.
 //
@@ -25,17 +28,14 @@
 #ifndef StppEvent_h
 #define StppEvent_h
 
-#define _Offline_tracks_
-//#define _take_global_tracks_
-//#define _L3_tracks_
-#define _L3_Info_
-//#define _Jet_
+#define _Jet_
 
 #include "TObject.h"
 #include "TClonesArray.h"
 
 class StppTrack;
 class StEvent;
+class StMuDst;
 class StJet;
 
 class StppEvent : public TObject {
@@ -44,10 +44,11 @@ class StppEvent : public TObject {
   virtual ~StppEvent();
   
 #ifndef __CINT__
-  Int_t fill(StEvent* event);
+  Int_t fill(StEvent* event);  //event=0 for reading from MuDst
 #endif /*__CINT__*/
   void clear();
   void reset();
+  void setMuDst(StMuDst* dst) {mudst=dst;}; 
     
   Int_t        runN;
   Int_t        eventN;
@@ -58,8 +59,11 @@ class StppEvent : public TObject {
   Int_t        bunchId7bit;
   Int_t        doubleSpinIndex;
 
-#ifdef _Offline_tracks_
-  TClonesArray *pTracks;
+  // The function corrects for a shift by three bunch crossings
+  // of the bunchId7bit number, and this goes from 1 to 60.
+  Int_t        correctedBunchId();
+
+  TClonesArray *tracks;
   Int_t        nPrimTrack;
   Int_t        nGoodTrack;
   Float_t      xVertex;
@@ -70,27 +74,6 @@ class StppEvent : public TObject {
   Float_t      vectorSumPt;
   Float_t      weightedEta;
   Float_t      weightedPhi;
-#endif
-
-#ifdef _L3_tracks_
-  TClonesArray *pTracksL3;
-  Int_t        nPrimTrackL3;
-  Int_t        nGoodTrackL3;
-  Float_t      xVertexL3;
-  Float_t      yVertexL3;
-  Float_t      zVertexL3;
-  Int_t        LCPL3;
-  Float_t      sumPtL3;
-  Float_t      vectorSumPtL3;
-  Float_t      weightedEtaL3;
-  Float_t      weightedPhiL3;
-#endif
-
-#ifdef _L3_Info_
-  Int_t        L3PileupFilterOn;
-  Int_t        L3PileupFilterAcc;
-  Float_t      L3PileupFilterData[10];
-#endif
 
   Int_t        bbcAdcSumEast;   
   Int_t        bbcAdcSumWest;   
@@ -108,6 +91,12 @@ class StppEvent : public TObject {
   Int_t        fpdAdcSumSmdY;   
   Int_t        fpdSouthVeto;   
 
+  Float_t      fpdPi0Mass;
+  Float_t      fpdPi0E;
+  Float_t      fpdPi0Eta;
+  Float_t      fpdPi0Phi;
+  Float_t      fpdPi0EShare;  
+
   Float_t      ctbAdcSum;   
   Int_t        ctbNHit;   
   Int_t        zdcEast;   
@@ -123,18 +112,23 @@ class StppEvent : public TObject {
 #ifdef _Jet_
   Int_t nJets;
   TClonesArray *jets;  
-  Float_t jetRadius(){return jetR;}
-  Float_t jetMinSeed(){return jetSeed;}
-  Float_t jetCutOff(){return jetCut;}
+  Float_t jetRadius() const {return jetR;} 
+  Float_t jetMinSeed() const {return jetSeed;}
+  Float_t jetCutOff() const {return jetCut;}
   void setjetRadius(Float_t v){jetR=v;}
   void setjetMinSeed(Float_t v){jetSeed=v;}
   void setjetCutOff(Float_t v){jetCut=v;}
 #endif
 
-  void setInfoLevel(int level) {infoLevel = level;};  
+  void setInfoLevel(int level) {infoLevel = level;}  
+  void setTrackChoice(int choice) {trackChoice = choice;}
+  Int_t getInfoLevel() const {return infoLevel;} 
+  Int_t getTrackChoice() const {return trackChoice;}
 
 private:
-  Int_t infoLevel;//!  
+  StMuDst* mudst; 
+  Int_t infoLevel; //!  
+  Int_t trackChoice; // 0=primary, 1=global, 2=l3
 #ifdef _Jet_
   Float_t jetR;
   Float_t jetSeed;
@@ -142,7 +136,7 @@ private:
 #endif
   Int_t BunchIdDifference;
 
-  ClassDef(StppEvent,2)
+  ClassDef(StppEvent,3)
 };
 
 #endif

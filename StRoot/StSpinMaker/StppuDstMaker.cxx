@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StppuDstMaker.cxx,v 1.2 2002/02/11 20:30:48 akio Exp $
+ * $Id: StppuDstMaker.cxx,v 1.3 2002/06/24 13:22:59 akio Exp $
  * 
  * Author: Akio Ogawa June 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StppuDstMaker.cxx,v $
+ * Revision 1.3  2002/06/24 13:22:59  akio
+ * numerous bug fix & updates
+ *
  * Revision 1.2  2002/02/11 20:30:48  akio
  * Many updates, including very first version of jet finder.
  *
@@ -27,6 +30,8 @@
 #include "StEventTypes.h"
 #include "StMessMgr.h"
 #include "StIOMaker/StIOMaker.h"
+#include "StMuDSTMaker/COMMON/StMuDst.h"
+#include "StMuDSTMaker/COMMON/StMuEvent.h"
 
 #include "StppuDstMaker.h"
 #include "StppEvent.h"
@@ -43,12 +48,13 @@ ClassImp(StppuDstMaker)
 StppuDstMaker::StppuDstMaker(const Char_t *name) 
   : StMaker(name), mGoodCounter(0), mBadCounter(0){
   infoLevel = 1;
+  mudst=0;
 }
 
-Int_t StppuDstMaker::Init() 
+Int_t StppuDstMaker::Init(const Char_t *filename) 
 {
   // creating uDst file name
-  TString uDstFileName("StppuDst.root");
+  TString uDstFileName(filename);
   StIOMaker* pIOMaker = (StIOMaker*)GetMaker("IO");
   if(!pIOMaker){ pIOMaker = (StIOMaker*)GetMaker("inputStream"); }
   if(pIOMaker){
@@ -58,10 +64,12 @@ Int_t StppuDstMaker::Init()
     if ( slashPosition != -1 &&
 	 slashPosition < uDstFileName.Length() )uDstFileName.Remove(0,slashPosition+1);
   }
-  uDstFileName.ReplaceAll(".dst.root",".uDst.root");
-  uDstFileName.ReplaceAll(".event.root",".uDst.root");
-  uDstFileName.ReplaceAll(".daq",".uDst.root");
-  cout << "StppuDstMaker: uDst output file: " << uDstFileName << endl;
+  uDstFileName.ReplaceAll(".dst.root",".spinDst.root");
+  uDstFileName.ReplaceAll(".event.root",".spinDst.root");
+  uDstFileName.ReplaceAll(".MuDst.root",".spinDst.root");
+  uDstFileName.ReplaceAll(".daq",".spinDst.root");
+  uDstFileName.ReplaceAll(":MuDst",".spinDst.root");
+  cout << "StppuDstMaker: spiunDst output file: " << uDstFileName << endl;
   
   //open udst file
   m_outfile = new TFile(uDstFileName,"recreate");
@@ -104,15 +112,23 @@ Int_t StppuDstMaker::Init()
 Int_t StppuDstMaker::Make() {
   cout <<" Start StpuDstMaker :: "<< GetName() <<" mode="<<m_Mode<<endl;   
   
-  // Get StEvent
-  StEvent* event = (StEvent *)GetInputDS("StEvent");
-  if(!event){
-    mBadCounter++;
-    return kStOK;        
+  // Get MuDst, or if it's not there, get StEvent
+  StEvent* event;
+  if(mudst) {
+    ppEvent->setMuDst(mudst);
+    event = 0;
+  }
+  else{
+    event = (StEvent *)GetInputDS("StEvent");
+    if(!event){
+      mBadCounter++;
+      return kStOK;        
+    }
   }
   
   // fill ppEvent 
-  int res = ppEvent->fill(event);
+  int res;
+  res = ppEvent->fill(event);
   if(res<0){
     mBadCounter++;
     return kStOK;        
@@ -128,25 +144,31 @@ Int_t StppuDstMaker::Make() {
   
   // Get FPD & BBC infos
 #ifdef _BBC_data_
-  bbc = &(event->triggerDetectorCollection()->bbc());
+  if(event) bbc = &(event->triggerDetectorCollection()->bbc());
+  if(mudst) bbc = &(mudst->event()->bbcTriggerDetector());
 #endif
 #ifdef _FPD_data_
-  fpd = event->fpdCollection();
+  if(event) fpd = event->fpdCollection();
+  if(mudst) fpd = &(mudst->event()->fpdCollection());
 #endif
 
   //Get EMC info
 #ifdef _EMC_CLUSTERS_
   cout << "filling emc cluster blanch" << endl; 
-  emcClusters[0] = event->emcCollection()->detector(kBarrelEmcTowerId)->cluster();
-  emcClusters[1] = event->emcCollection()->detector(kBarrelSmdEtaStripId)->cluster();
-  emcClusters[2] = event->emcCollection()->detector(kBarrelSmdPhiStripId)->cluster();
+  if(event){
+    emcClusters[0] = event->emcCollection()->detector(kBarrelEmcTowerId)->cluster();
+    emcClusters[1] = event->emcCollection()->detector(kBarrelSmdEtaStripId)->cluster();
+    emcClusters[2] = event->emcCollection()->detector(kBarrelSmdPhiStripId)->cluster();
+  }
 #endif
 #ifdef _EMC_POINTS_
   cout << "filling emcpoint blanch" << endl; 
-  StSPtrVecEmcPoint& bemcp = event->emcCollection()->barrelPoints();
-  for (int i=0; i<bemcp.size(); i++){
-    StEmcPoint *t = new((*emcPoints)[i]) StEmcPoint(*bemcp[i]);
-    cout << i << endl;
+  if(event){
+    StSPtrVecEmcPoint& bemcp = event->emcCollection()->barrelPoints();
+    for (int i=0; i<bemcp.size(); i++){
+      StEmcPoint *t = new((*emcPoints)[i]) StEmcPoint(*bemcp[i]);
+      cout << i << endl;
+    }
   }
 #endif
   
