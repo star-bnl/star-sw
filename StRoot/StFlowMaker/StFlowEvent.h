@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.26 2001/06/06 13:02:58 rcwells Exp $
+// $Id: StFlowEvent.h,v 1.27 2001/06/07 20:06:20 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -86,7 +86,7 @@ public:
   static void SetPositronCut(Float_t lo, Float_t hi);
   static void SetDeuteronCut(Float_t lo, Float_t hi);
   static void SetAntiDeuteronCut(Float_t lo, Float_t hi);
-  static void SetPtWgt();
+  static void SetDcaGlobalCut(Float_t lo, Float_t hi);
   static void SetProbPid();
   static void SetEtaSubs();
   static void SetPtWgt(Bool_t);
@@ -124,6 +124,7 @@ private:
   static Float_t      mAntiDeuteronCuts[2];
   static Float_t      mElectronCuts[2];
   static Float_t      mPositronCuts[2];
+  static Float_t      mDcaGlobalCuts[2];
 
   StFlowEvent*           pFlowEvent;         //!
   StFlowTrackCollection* pTrackCollection;   //!
@@ -228,13 +229,14 @@ inline void StFlowEvent::SetElectronCut(Float_t lo, Float_t hi) {
 inline void StFlowEvent::SetPositronCut(Float_t lo, Float_t hi) { 
   mPositronCuts[0] = lo; mPositronCuts[1] = hi; }
 
+inline void StFlowEvent::SetDcaGlobalCut(Float_t lo, Float_t hi) { 
+  mDcaGlobalCuts[0] = lo; mDcaGlobalCuts[1] = hi; }
+
 inline void  StFlowEvent::SetCTB(const Float_t ctb) { mCTB = ctb; }
 
 inline void  StFlowEvent::SetZDCe(const Float_t zdce) { mZDCe = zdce; }
 
 inline void  StFlowEvent::SetZDCw(const Float_t zdcw) { mZDCw = zdcw; }
-
-inline void  StFlowEvent::SetPtWgt() { mPtWgt = kTRUE; }
 
 inline void  StFlowEvent::SetPid(const Char_t* pid)  { 
   strncpy(mPid, pid, 9); mPid[9] = '\0'; }
@@ -250,6 +252,10 @@ inline void StFlowEvent::SetPtWgt(Bool_t PtWgt) { mPtWgt = PtWgt; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.27  2001/06/07 20:06:20  posk
+// Global Dca cut for event plane particles.
+// Removed SetPtWgt().
+//
 // Revision 1.26  2001/06/06 13:02:58  rcwells
 // Added SetPtWgt(Bool_t) function to StFlowEvent
 //
