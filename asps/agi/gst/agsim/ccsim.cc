@@ -18,6 +18,7 @@ extern "C" void ami_module_register_ ()    {}
 #include <stdlib.h>
 #include <string.h>
 #include "asuLib.h"
+#include "asuAlloc.h"
 #include "emlLib.h"
 #include "socLib.h"
 #include "spxLib.h"
@@ -346,7 +347,7 @@ int xdf_open(XdfLun_t **Lun, char *FileName,char *mode)
  
   if (*Lun) { printf("xdf_open. Error, lun is non zero %d\n",*lun); return 1;}
  
-  lun = (XdfLun_t*)malloc(sizeof(XdfLun_t));
+  lun = (XdfLun_t*)MALLOC(sizeof(XdfLun_t));
  
   strcpy(lun->fType,"r");
   if (mode && mode[0] && mode[0]!=' ') strcpy(lun->fType,mode);
@@ -356,14 +357,14 @@ int xdf_open(XdfLun_t **Lun, char *FileName,char *mode)
  
   if(!lun->fFile) {/* open error */
     printf("xdf_open. Error, can not open file %s %s\n",lun->fName,lun->fType);
-    free (lun); return 2;}
+    FREE (lun); return 2;}
  
   if(!dsNewDataset(&lun->fDataSet,"NEVSKI")) {
     printf("xdf_open. Error, can not create data set for file %s %s\n",
                                                         lun->fName,lun->fType);
-    free (lun); lun = NULL; return 2;}
+    FREE (lun); lun = NULL; return 2;}
  
-    lun->fStream=(XDR*)malloc(sizeof(XDR));
+    lun->fStream=(XDR*)MALLOC(sizeof(XDR));
  
     xdrstdio_create(lun->fStream, lun->fFile, XDR_DECODE);
  
@@ -389,8 +390,8 @@ int xdf_get_struct(XdfLun_t *lun, char *name,
    if(!lun) {
      printf("xdf_get_struct: Error, empty file handler\n"); return 13;}
  
-if (*Entry) { free (*Entry); *Entry=NULL;}; 	/* ????? */
-if (*Data)  { free (*Data);  *Data=NULL;};	/* ????? */
+if (*Entry) { FREE (*Entry); *Entry=NULL;}; 	/* ????? */
+if (*Data)  { FREE (*Data);  *Data=NULL;};	/* ????? */
  
  
 if (!dsFindEntry(Entry,lun->fDataSet,name)) return 1;
@@ -409,9 +410,9 @@ int xdf_close(XdfLun_t **Lun) {
      printf("xdf_close: Error, empty file handler\n"); return 13;}
  
   ians = fclose((*Lun)->fFile);
-  free ((*Lun)->fStream);
-  free ((*Lun)->fDataSet);
-  free ((*Lun)); *Lun=NULL;
+  FREE ((*Lun)->fStream);
+  FREE ((*Lun)->fDataSet);
+  FREE ((*Lun)); *Lun=NULL;
   return ians;
 }
  
