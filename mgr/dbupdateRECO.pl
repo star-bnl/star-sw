@@ -166,11 +166,11 @@ my @diskRecoDirs;
 
 my $inext =scalar(@Sets); 
 
-for( $ll = 0; $ll<32; $ll++) { 
+for( $ll = 0; $ll<31; $ll++) { 
   $diskRecoDirs[$ll] = $DISK2 . "/" . $Sets[$ll] . "/tfs_6";
   print "diskRecoDir: $diskRecoDirs[$ll]\n";
 }
-for( $ii = 32; $ii< 38; $ii++) { 
+for( $ii = 31; $ii< 37; $ii++) { 
 $diskRecoDirs[$ii] = $DISK1 . "/" . $Sets[$ii] . "/tfs_6";
   print "diskRecoDir: $diskRecoDirs[$ii]\n";
 }
@@ -180,9 +180,9 @@ print "\nFinding reco files in disk\n";
 my $dflag;
 
 foreach $diskDir (@diskRecoDirs) {
-  print "diskRecoDir: ", $diskDir, "\n";
+#  print "diskRecoDir: ", $diskDir, "\n";
   if (-d $diskDir) {
-  print "diskRecoDir_after: ", $diskDir, "\n";
+#  print "diskRecoDir_after: ", $diskDir, "\n";
   opendir(DIR, $diskDir) or die "can't open $diskDir\n";
   while( defined($flname = readdir(DIR)) ) {
      next if $flname =~ /^\.\.?$/;
@@ -523,7 +523,7 @@ my $newset;
    $mtype = "MC_reco";
    $fullName = $mpath ."/" . $mfName;
    $gflag = $flagHash{$fullName}; 
-     if( $gflag eq 1) {
+     if( $gflag != 0 ) {
     foreach my $jobnm (@jobSum_set){
        $mproSr   = ($$jobnm)->prSer;
        $mJobId   = ($$jobnm)->job_id;
