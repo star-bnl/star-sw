@@ -139,7 +139,8 @@ if ( $pkg =~ /^StHbtMaker$/ ) {
 
 # This block can be used for ANY make having a 2 level
 # directory structure + auto-globbing
-if ( $pkg =~ /^StMuDSTMaker$/ ) {
+if ( $pkg =~ /^StMuDSTMaker$/ ||
+     $pkg =~ /^StRichPool$/ ) {
     $CPPPATH = "#" . $Dir;
 
     foreach my $subdir ( glob("$Dir/*") ){
