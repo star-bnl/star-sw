@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.16 2004/07/21 13:02:31 subhasis Exp $
+ * $Id: StPmdClustering.cxx,v 1.17 2004/07/26 12:01:31 subhasis Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -17,6 +17,9 @@
  * 'CentroidCal()' has been put in place of 'gaussfit()'.
  **
  * $Log: StPmdClustering.cxx,v $
+ * Revision 1.17  2004/07/26 12:01:31  subhasis
+ * sigmaL, sigmaS stored in one place till StPhmdCluster.h modified
+ *
  * Revision 1.16  2004/07/21 13:02:31  subhasis
  * refclust called only when incr <2000
  *
@@ -93,6 +96,8 @@ Int_t iord[2][6912], infocl[2][96][72], inford[3][6912], clno;
 
 const Double_t pi=3.141592653, sqrth=sqrt(3.)/2.;
 const Int_t nmx    = 6912;
+Float_t cell_frac[200][2000];
+
 
 StPmdGeom *geom=new StPmdGeom(); //! utility class
 //-------------------------------------------------
@@ -494,11 +499,50 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod
 		}
 	    }
 	  // End of finding l,ocal maxima	
+	   for(Int_t icell=0; icell<200; icell++)
+	        {
+	          for(Int_t jcell=0; jcell<2000; jcell++)
+	                {
+	               cell_frac[icell][jcell]=0.;
+	                }
+	        }
+	   //
 	  
 	  Int_t censtat=CentroidCal(ncl[i],ig,x[0],y[0],z[0],xc[0],yc[0],zc[0],rcl[0],rcs[0],cells[0]);
 	 if(censtat==kStOK){
 
 	  icl=icl+ig+1;
+
+
+
+          Float_t temp[2000];
+          Int_t take_cell[2000];
+            for(Int_t jk=0; jk<2000; jk++)
+                 {
+               temp[jk]=0.;
+              take_cell[jk]=-999;
+                 }
+
+           for(Int_t jk=0; jk<2000; jk++)
+            {
+                  temp[jk]=0.;
+             }
+
+          for(Int_t pb=0;pb<=ig;pb++)
+               {
+										            for(Int_t jk=0; jk<=ncl[i]; jk++)
+											        {
+											if(cell_frac[pb][jk]>temp[jk])
+											        {
+											        take_cell[jk]=pb;
+												temp[jk]=cell_frac[pb][jk];
+												}
+              }
+	}
+
+
+
+
 	  
 	  //! Assign the cluster properties for SuperCluster having more than Two cells
 	  for(k=0; k<=ig; k++)
@@ -529,12 +573,20 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod
 	      
 	      for(Int_t jk=0; jk<=ncl[i]; jk++)
 		{// loop over all cells in supercluster
-		  dist=Dist(x[jk], y[jk], xc[k], yc[k]); 
-		  if(dist < 2.8){ //changed from 2.1 to 2.8 : dipak
-		    StPmdHit* phit = GetHit(m_pmd_det,supmod,x_org[jk],y_org[jk]);
-		    if(phit)pclust->addHitCollection(phit);
+
+		//  dist=Dist(x[jk], y[jk], xc[k], yc[k]); 
+		//  if(dist < 2.8){ //changed from 2.1 to 2.8 : dipak
+		//    StPmdHit* phit = GetHit(m_pmd_det,supmod,x_org[jk],y_org[jk]);
+		 //   if(phit)pclust->addHitCollection(phit);
 		    // attach the hits
-		  } // if dist loop
+		 // } // if dist loop
+		
+	   if(take_cell[jk]==k)
+             {
+               StPmdHit* phit = GetHit(m_pmd_det,supmod,x_org[jk],y_org[jk]);
+               if(phit)pclust->addHitCollection(phit);
+             }
+			
 		} //for loop 'jk
 	    } //for 'k' loop
 	 }//censtat check
@@ -584,6 +636,7 @@ Int_t StPmdClustering::CentroidCal(Int_t ncell,Int_t nclust,Double_t &x,
     for(j=0;j<2000;j++)
       {
 	clust_cell[i][j] = 0.;
+	cell_frac[i][j]  = 0.;	
       }
     }
   for(i=0;i<2000;i++){
@@ -708,6 +761,10 @@ Int_t StPmdClustering::CentroidCal(Int_t ncell,Int_t nclust,Double_t &x,
 	    sumy=sumy+clust_cell[i][j]*yy[j];
 	    sum=sum+clust_cell[i][j];
 	    sum1=sum1+clust_cell[i][j]/zz[j];
+	    //cell contribution 
+	    cell_frac[i][j]=clust_cell[i][j]/zz[j];
+	    
+	    //
 	    //cout<<"icl,icell,zzi,clust_cell "<<i<<" "<<j<<" "<<zz[j]<<" "<<clust_cell[i][j]<<" "<<sum1<<endl;
 	    //	    cout << xx[j] << " " << yy[j] << " " << clust_cell[i][j] << " " << 
 	    //	      clust_cell[i][j]/zz[j] <<" NClust*** "<<nclust<<" "<<i<<" "<<j<<endl; 
@@ -752,6 +809,8 @@ Int_t StPmdClustering::CentroidCal(Int_t ncell,Int_t nclust,Double_t &x,
 	  sumy=sumy+zz[j]*yy[j];
 	  sum=sum+zz[j];
 	  sum1=sum1+1.;
+// cell contribution to cluster
+	  cell_frac[i][j]=1;
 	  //	cout << xx[j] << " " << yy[j] << " " << zz[j] << endl; 
 	}
       i=0;
