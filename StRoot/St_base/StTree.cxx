@@ -102,7 +102,7 @@ TObject *StIO::Read(TFile *file, const Char_t *name)
 
   if (!key)  { printf("<StIO::Read> Key %s not found\n",name); goto RETURN; }
 
-  if (strcmp(key->GetClassName(),"StIOEvent")) 
+  if (name[0]!='*' && strcmp(key->GetClassName(),"StIOEvent")) 
              { printf("<StIO::Read> Key %s has wrong className %s\n",
                key->GetName(),key->GetClassName()); 
                toread = (TObject*)(-1); goto RETURN; }
@@ -116,9 +116,11 @@ TObject *StIO::Read(TFile *file, const Char_t *name, ULong_t  ukey)
 {
   StIOEvent *event = 0;  
   TObject   *retn  = 0;
-  event = (StIOEvent*)Read(file,(const char*)MakeKey(name,ukey));
-  if (!event) 		return 0;
-  if (event == (StIOEvent*)(-1)) return (TObject*)(-1);
+  retn = Read(file,(const char*)MakeKey(name,ukey));
+  if (!retn) 		return 0;
+  if (retn == (TObject*)(-1)) return retn;
+  if (retn->IsA()!=StIOEvent::Class()) return retn;
+  event = (StIOEvent*)retn;
   retn = event->fObj; 
   assert( !retn || retn==(TObject*)(-1) || event->GetUniqueID()==ukey);
   delete event;
@@ -199,7 +201,7 @@ Int_t StIO::IfExi(const char *name)
   TString file = RFIOName(name);
 
   if (strncmp(file,"rfio:",5)) 
-     return StIO::IfExi(file);
+     return !gSystem->AccessPathName(file);
   else 
      return !::rfio_access((const char*)file, kFileExists);
 
