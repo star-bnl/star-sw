@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.7 1999/11/19 21:58:06 porter Exp $
+ * $Id: StDbTable.cc,v 1.8 1999/11/29 21:40:08 fisyak Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.8  1999/11/29 21:40:08  fisyak
+ * Add cast to HP
+ *
  * Revision 1.7  1999/11/19 21:58:06  porter
  * added method to return "malloc'd" version of table instead of new
  * so that delete of St_Table class i done correctly
@@ -397,9 +400,9 @@ char* ptr;
    ptr = &mdata[0];
    //    getElementSpecs(i,ptr,name,length,type);
    if(isReading){
-     ReadElement(ptr,name,length,type,(StDbBuffer*)buff);
+     ReadElement(ptr,(char *) name,length,type,(StDbBuffer*)buff);
      } else {
-     WriteElement(ptr,name,length,type,(StDbBuffer*)buff);
+     WriteElement(ptr,(char *) name,length,type,(StDbBuffer*)buff);
     }       
  mrowNumber=mrows;
 
