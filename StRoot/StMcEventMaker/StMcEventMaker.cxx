@@ -1,7 +1,11 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.33 2000/06/09 19:52:42 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.34 2000/06/22 23:53:31 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.34  2000/06/22 23:53:31  calderon
+ * Changes from Aleksei for filling of emc hits.
+ * ttemp and ttempParticle are now data members.
+ *
  * Revision 1.33  2000/06/09 19:52:42  calderon
  * use compMcHit instead of compMcTpcHit and compMcSvtHit
  *
@@ -122,10 +126,8 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include <string>
-#include <vector>
 #include <algorithm>
 #ifndef ST_NO_NAMESPACES
-using std::vector;
 using std::string;
 using std::sort;
 using std::find;
@@ -168,27 +170,31 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.33 2000/06/09 19:52:42 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.34 2000/06/22 23:53:31 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
 //_____________________________________________________________________________
 
     
-StMcEventMaker::StMcEventMaker(const char*name, const char * title):StMaker(name,title)
+StMcEventMaker::StMcEventMaker(const char*name, const char * title) :
+    StMaker(name,title),
+    doPrintEventInfo (kFALSE),  
+    doPrintMemoryInfo(kFALSE),  
+    doPrintCpuInfo   (kFALSE), 
+    doUseTpc         (kTRUE),
+    doUseSvt	     (kTRUE),
+    doUseFtpc	     (kTRUE),
+    doUseRich        (kTRUE),
+    doUseBemc        (kTRUE),
+    ttemp(),
+    ttempParticle(),
+    mCurrentMcEvent(0)
+    
 {
     // StMcEventMaker - constructor
     // - set all pointers defined in the header file to zero
 
-    mCurrentMcEvent = 0; 
-    doPrintEventInfo  = kFALSE;  
-    doPrintMemoryInfo = kFALSE;  
-    doPrintCpuInfo    = kFALSE; 
-    doUseTpc          = kTRUE;
-    doUseSvt	      = kTRUE;
-    doUseFtpc	      = kTRUE;
-    doUseRich         = kTRUE;
-    doUseBemc         = kTRUE;
 }
 //_____________________________________________________________________________
 
@@ -498,14 +504,8 @@ Int_t StMcEventMaker::Make()
 	size_t usedTracksG2t = 0;
 	long NGeneratorTracks = (particleTablePointer) ? particleTablePointer->GetNRows() : 0;
 	size_t usedTracksEvGen = 0;
-#ifndef ST_NO_TEMPLATE_DEF_ARGS	  
-	vector<StMcTrack*> ttemp(NTracks); // Temporary array for Step 4
-	vector<StMcTrack*> ttempParticle(NGeneratorTracks);
-#else
-	vector<StMcTrack*, allocator<StMcTrack*> > ttemp(NTracks);
-	vector<StMcTrack*, allocator<StMcTrack*> > ttempParticle(NGeneratorTracks);
-#endif
-
+	ttemp.resize(NTracks);
+	ttempParticle.resize(NGeneratorTracks);
 	cout << "Preparing to process and fill TRACK information ....." << endl;
 	StMcTrack* egTrk = 0;
 	size_t nParticlesInBothTables = 0;
@@ -792,7 +792,7 @@ Int_t StMcEventMaker::Make()
 
 	}
 	else {
-	    cout << "No SVT Hits in this file" << endl;
+	    cout << "No SVT Hits in this event" << endl;
 	}
 	} // do use svt
 	
@@ -841,7 +841,7 @@ Int_t StMcEventMaker::Make()
 	    }
 	}
 	else {
-	    cout << "No FTPC Hits in this file" << endl;
+	    cout << "No FTPC Hits in this event" << endl;
 	}
 	}// do use ftpc
 
@@ -871,83 +871,15 @@ Int_t StMcEventMaker::Make()
 	    
 	}
 	else {
-	    cout << "No RICH Hits in this file" << endl;
+	    cout << "No RICH Hits in this event" << endl;
 	}
 	} // do use rich
 
 	// BEMC and BPRS Hits
-	if (doUseBemc) {
-	    if (g2t_emc_hitTablePointer) {
-		StEmcGeom geomBemc(1);
-		int module, eta, sub, detector; 
-		float de;
-		StMcTrack *tr; 
-		StMcCalorimeterHit *emchBemc, *emchBprs;
-		
-		StMcEmcHitCollection *bemcColl=mCurrentMcEvent->bemcHitCollection();
-		m_DataSet->Add(bemcColl);
-		bemcColl->SetName("BemcHits");
-		StMcEmcHitCollection  *bprsColl=mCurrentMcEvent->bprsHitCollection();
-		m_DataSet->Add(bprsColl);
-		bprsColl->SetName("BprsHits");
-		
-		long NHits = g2t_emc_hitTablePointer->GetNRows();
-		
-		for(long ihit=0; ihit<NHits; ihit++,emcHitTable++) { 
+	if (doUseBemc) fillBemc(g2t_emc_hitTablePointer);
 
-		    geomBemc.getVolIdBemc(emcHitTable->volume_id, module,eta,sub,detector); // Must check ??
-		    tr   = ttemp[emcHitTable->track_p - 1];
-		    de   = emcHitTable->de;
-		    emchBemc = new StMcCalorimeterHit(module,eta,sub,de, tr);
-		    
-		    if (detector == 1 || detector == 2) {
-			StMcEmcHitCollection::EAddHit bemcNew = bemcColl->addHit(emchBemc);
-			if (bemcNew == StMcEmcHitCollection::kNew){ 
-			    emchBprs = new StMcCalorimeterHit(module,eta,sub,de, tr);
-			}
-			else if(bemcNew == StMcEmcHitCollection::kAdd){ 
-			    emchBprs = emchBemc;}
-			else if(bemcNew == StMcEmcHitCollection::kErr){ 
-			    delete emchBemc;
-			    emchBprs = 0;
-			    gMessMgr->Warning()<<"<E> Bad hit in Bemc collection " << endm;
-			}
-			else {
-			    delete emchBemc;
-			    emchBprs = 0;
-			    gMessMgr->Warning()<<"<E> Funny return value! EAddHit = " << static_cast<int>(bemcNew) << endm;
-			}
-			if (emchBemc) tr->addBemcHit(emchBemc);
-			if(detector == 2 && emchBprs) {
-			    StMcEmcHitCollection::EAddHit bprsNew = bprsColl->addHit(emchBprs);
-			    if(bprsNew == StMcEmcHitCollection::kAdd) {
-				delete emchBprs;
-				emchBprs = 0;
-			    }
-			    if (emchBprs) tr->addBprsHit(emchBprs);			
-			}
-			else {
-			    delete emchBprs;
-			    emchBprs = 0;
-			}
-			
-			//                 cout<<" EAddHit "<<(int)bemcNew <<endl;
-	         //cout<<" ihit "<<ihit<<" tr "<<tr<<" detector "<<detector<<(*emch);
-
-		    }
-		    else {
-			gMessMgr->Warning() << "<E> Bad detector number " << detector << " volume_id "<< emcHitTable->volume_id << endm;
-			delete emchBemc;
-			emchBemc = 0;
-		    }
-		}
-		cout << "Filled " << mCurrentMcEvent->bemcHitCollection()->numberOfHits() << " BEMC Hits" << endl;
-		
-	    }
-	    else {
-		cout << "No BEMC and BPRS Hits in this file" << endl;
-	    }
-	}
+	// BSMDE and BSMDP Hits
+	if (doUseBsmd) fillBsmd(g2t_smd_hitTablePointer);
 	
 	ttemp.clear();
 	
@@ -980,7 +912,146 @@ Int_t StMcEventMaker::Make()
   return kStOK;
 
 }
-    
+
+void
+StMcEventMaker::fillBemc(St_g2t_emc_hit* g2t_emc_hitTablePointer)
+{
+    if (g2t_emc_hitTablePointer == 0) {
+        cout << "No BEMC and BPRS Hits in this event" << endl;
+        return;
+    }
+
+    g2t_emc_hit_st* emcHitTable = g2t_emc_hitTablePointer->GetTable();
+    StEmcGeom geomBemc(1);
+    int module, eta, sub, detector; 
+    float de;
+    StMcTrack *tr; 
+    StMcCalorimeterHit *emchBemc, *emchBprs;
+	
+    StMcEmcHitCollection *bemcColl=mCurrentMcEvent->bemcHitCollection();
+    m_DataSet->Add(bemcColl);
+    bemcColl->SetName("BemcHits");
+    StMcEmcHitCollection  *bprsColl=mCurrentMcEvent->bprsHitCollection();
+    m_DataSet->Add(bprsColl);
+    bprsColl->SetName("BprsHits");
+		
+    long NHits = g2t_emc_hitTablePointer->GetNRows();
+		
+    for(long ihit=0; ihit<NHits; ihit++,emcHitTable++) { 
+
+	geomBemc.getVolIdBemc(emcHitTable->volume_id, module,eta,sub,detector); // Must check ??
+	tr   = ttemp[emcHitTable->track_p - 1];
+	de   = emcHitTable->de;
+		    
+	if (detector == 1 || detector == 2) {
+	    emchBemc = new StMcCalorimeterHit(module,eta,sub,de, tr);
+            emchBprs = 0;                                                      // For safety
+	    StMcEmcHitCollection::EAddHit bemcNew = bemcColl->addHit(emchBemc);
+
+	    if (bemcNew == StMcEmcHitCollection::kNew){ 
+		tr->addBemcHit(emchBemc);
+		if(detector == 2) emchBprs = new StMcCalorimeterHit(module,eta,sub,de, tr);
+	    }
+	    else if(bemcNew == StMcEmcHitCollection::kAdd){ 
+		emchBprs = emchBemc;
+            }
+	    else if(bemcNew == StMcEmcHitCollection::kErr){ 
+		delete emchBemc;
+                emchBemc = 0;
+		gMessMgr->Warning()<<"<E> Bad hit in Bemc collection " << endm;
+	    }
+	    else { // Unused branch
+		delete emchBemc;
+                emchBemc = 0;
+		emchBprs = 0;
+		gMessMgr->Warning()<<"<E> Funny return value! EAddHit = " << static_cast<int>(bemcNew) <<endm;
+	    }
+
+	    if (detector == 2 && emchBprs) {
+		StMcEmcHitCollection::EAddHit bprsNew = bprsColl->addHit(emchBprs);
+		if (bprsNew == StMcEmcHitCollection::kNew) {
+                    tr->addBprsHit(emchBprs);
+                }
+		else { 
+		    delete emchBprs;
+		    emchBprs = 0;
+		}
+	    }
+	    else if(emchBprs) {
+		 delete emchBprs;
+		 emchBprs = 0;
+	    }
+        }
+        else {
+	    gMessMgr->Warning() << "<E> Bad EMC detector number " << detector << " volume_id "
+                                << emcHitTable->volume_id << " detector "<< detector << endm;
+        }
+    }
+    cout << "Filled " << mCurrentMcEvent->bemcHitCollection()->numberOfHits() << " BEMC Hits" << endl;
+    cout << "Filled " << mCurrentMcEvent->bprsHitCollection()->numberOfHits() << " BPRS Hits" << endl;
+		
+}
+
+void
+StMcEventMaker::fillBsmd(St_g2t_emc_hit* g2t_smd_hitTablePointer)
+{
+    if (g2t_smd_hitTablePointer == 0) {
+        cout << "No BSMDE and BSMDP Hits in this event" << endl;
+        return;
+    }
+
+    g2t_emc_hit_st* smdHitTable = g2t_smd_hitTablePointer->GetTable();
+    StEmcGeom geomBsmd(3);
+    int module, eta, sub, detector; 
+    float de;
+    StMcTrack *tr; 
+    StMcCalorimeterHit *emchBsmde, *emchBsmdp;
+
+    StMcEmcHitCollection *bsmdeColl=mCurrentMcEvent->bsmdeHitCollection();
+    m_DataSet->Add(bsmdeColl);
+    bsmdeColl->SetName("BsmdeHits");
+    StMcEmcHitCollection *bsmdpColl=mCurrentMcEvent->bsmdpHitCollection();
+    m_DataSet->Add(bsmdpColl);
+    bsmdpColl->SetName("BsmdpHits");
+
+    long NHits = g2t_smd_hitTablePointer->GetNRows();
+    for(long ihit=0; ihit<NHits; ihit++,smdHitTable++) { 
+	geomBsmd.getVolIdBsmd(smdHitTable->volume_id, module,eta,sub,detector); // Must check ??
+	tr   = ttemp[smdHitTable->track_p - 1];
+	de   = smdHitTable->de;
+
+        if (detector == 3) {
+            emchBsmde = new StMcCalorimeterHit(module,eta,sub,de, tr);
+	    StMcEmcHitCollection::EAddHit bsmdeNew = bsmdeColl->addHit(emchBsmde);
+            if (bsmdeNew == StMcEmcHitCollection::kNew) {
+                tr->addBsmdeHit(emchBsmde);
+            }
+	    else {
+                delete emchBsmde;
+                emchBsmde = 0;
+            } 
+        }
+        else if (detector == 4) {
+            emchBsmdp = new StMcCalorimeterHit(module,eta,sub,de, tr);
+	    StMcEmcHitCollection::EAddHit bsmdpNew = bsmdpColl->addHit(emchBsmdp);
+            if (bsmdpNew == StMcEmcHitCollection::kNew) {
+                tr->addBsmdpHit(emchBsmdp);
+            }
+	    else {
+                delete emchBsmdp;
+                emchBsmdp = 0;
+            } 
+        }
+        else {
+	    gMessMgr->Warning() << "<E> Bad SMD detector number " << detector << " volume_id "
+				<< smdHitTable->volume_id << " detector "<< detector << endm;
+        }
+    }
+    cout << "Filled " << mCurrentMcEvent->bsmdeHitCollection()->numberOfHits() << " BSMDE Hits" << endl;
+    cout << "Filled " << mCurrentMcEvent->bsmdpHitCollection()->numberOfHits() << " BSMDP Hits" << endl;
+
+}
+
 void
 StMcEventMaker::printEventInfo()
 {
