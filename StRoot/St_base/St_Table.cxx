@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.49 1999/03/11 00:34:45 perev Exp $ 
+// $Id: St_Table.cxx,v 1.50 1999/03/30 23:24:50 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.50  1999/03/30 23:24:50  fine
+// Some comments fixed
+//
 // Revision 1.49  1999/03/11 00:34:45  perev
 // St_base in new maker schema
 //
@@ -471,7 +474,7 @@ TClass  *St_Table::GetRowClass() const
 }
 //______________________________________________________________________________
 Long_t St_Table::GetNRows() const { 
-// Returns the number of the rows for the wrapped table
+// Returns the number of the used rows for the wrapped table
 return *s_MaxIndex;
 }
 //______________________________________________________________________________
@@ -481,7 +484,7 @@ Long_t St_Table::GetRowSize() const {
 }
 //______________________________________________________________________________
 Long_t St_Table::GetTableSize() const { 
-// Returns the number of the used rows 
+// Returns the number of the aloocated rows 
 return fN;
 }
 //______________________________________________________________________________
