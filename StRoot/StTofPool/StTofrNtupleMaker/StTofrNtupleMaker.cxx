@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrNtupleMaker.cxx,v 1.1 2004/03/11 22:39:54 dongx Exp $
+ * $Id: StTofrNtupleMaker.cxx,v 1.2 2004/03/29 19:10:56 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTofrNtupleMaker.cxx,v $
+ * Revision 1.2  2004/03/29 19:10:56  dongx
+ * correct the pVPD ADC read-out for year2 and year3
+ *
  * Revision 1.1  2004/03/11 22:39:54  dongx
  * first release
  *
@@ -235,7 +238,10 @@ Int_t StTofrNtupleMaker::Make(){
   }
 
   for (int i=0;i<mNPVPD;i++){
-    mPvpdAdc[i] = tofData[42+i]->adc(); 
+    mPvpdAdc[i] = tofData[42+i]->adc();
+    if(mYear3||mYear4) {
+      mPvpdAdc[i] = tofData[54+i]->adc();
+    }
     mPvpdTdc[i] = tofData[42+i]->tdc(); 
   }
 
