@@ -1,7 +1,7 @@
-// $Id: strange.C,v 1.1 1999/01/18 23:05:15 fisyak Exp $
+// $Id: strange.C,v 1.2 1999/01/19 23:05:14 genevb Exp $
 // $Log: strange.C,v $
-// Revision 1.1  1999/01/18 23:05:15  fisyak
-// Add Gene Van Buren smdst
+// Revision 1.2  1999/01/19 23:05:14  genevb
+// MakeDoc() removed
 //
 // Revision 1.1  1998/12/29 10:24:40 genevb
 // strangeness dst analysis
