@@ -1,6 +1,6 @@
-/// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
+// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2004/01/19
-// $Id: EEmcTTDisplay.cxx,v 1.6 2004/01/27 20:38:41 zolnie Exp $
+// $Id: EEmcTTDisplay.cxx,v 1.7 2004/04/13 14:53:38 zolnie Exp $
 // doxygen info here
 
 #include <ostream>
@@ -19,12 +19,15 @@
 #include "EEmcTTMMaker.h"
 #include "EEmcTTDisplay.h"
 
+static const double cLight = 3e10*centimeter/second;
+
 EEmcTTDisplay::EEmcTTDisplay(const char *name) : EEmcGeomSimple()
 { 
   mEEmc=NULL;
 
   mTrackHits=new TList;
   mTowerHits=new TList;
+  mBField   =0.5;  // in Tesla
 
   initGeometry(name);
 
@@ -60,7 +63,7 @@ EEmcTTDisplay::initGeometry(const char *topName)
   TGeoMedium   *medVac = new TGeoMedium  ("Vacuum",1, new TGeoMaterial("Vacuum",0,0,0) );
   TGeoCone     *econe  = new TGeoCone(dz,rmin1,rmax1,rmin2,rmax2);
   mEEmc                = new TGeoVolume(topName,econe,medVac);
-
+  mEEmc->SetLineColor(kWhite);
   TGeoConeSeg  *geosector = new TGeoConeSeg(dz,rmin1,rmax1,rmin2,rmax2,0.0,360.0/mNumSec);
   TGeoConeSeg  *geosubsec = new TGeoConeSeg(dz,rmin1,rmax1,rmin2,rmax2,0.0,360.0/mNumSec/mNumSSec);
   // FIXME !!!!
@@ -112,7 +115,7 @@ EEmcTTDisplay::initGeometry(const char *topName)
 
 
 void
-EEmcTTDisplay::DrawHits()
+EEmcTTDisplay::Draw(const Option_t* option)
 {
   TIter nextTower(mTowerHits);
   TIter nextTrack(mTrackHits);
@@ -134,7 +137,7 @@ EEmcTTDisplay::DrawHits()
 
 
 void
-EEmcTTDisplay::Clear(const Option_t*)
+EEmcTTDisplay::Clear(const Option_t* option)
 {
   TIter nextTower(mTowerHits);
   TGeoNode *gnode;
@@ -152,7 +155,7 @@ EEmcTTDisplay::Clear(const Option_t*)
 
 
 Bool_t
-EEmcTTDisplay::towerHit(const char *vname)
+EEmcTTDisplay::AddTower(const char *vname)
 {
   const int kSecLen=2;
   const int kSubLen=4;
@@ -177,16 +180,16 @@ EEmcTTDisplay::towerHit(const char *vname)
 }
 
 Bool_t       
-EEmcTTDisplay::towerHit(const EEmcTower& tower)
+EEmcTTDisplay::AddTower(const EEmcTower& tower)
 {
-  return towerHit(volumeName(tower.sec,tower.sub,tower.eta));
+  return AddTower(volumeName(tower.sec,tower.sub,tower.eta));
 }
 
 
 Bool_t       
-EEmcTTDisplay::trackHit(Double_t x, Double_t y, Double_t z, Double_t px, Double_t py, Double_t pz, Double_t qB)
+EEmcTTDisplay::AddTrack(Double_t x, Double_t y, Double_t z, Double_t px, Double_t py, Double_t pz, Double_t qB)
 {
-  const double cLight = 3e10*centimeter/second;
+
   THelix *helix = new THelix(x,y,z,px,py,pz,cLight*qB);
   helix->SetRange(z,mZ2);
   mTrackHits->Add(helix);
@@ -194,14 +197,13 @@ EEmcTTDisplay::trackHit(Double_t x, Double_t y, Double_t z, Double_t px, Double_
 }
 
 Bool_t       
-EEmcTTDisplay::trackHit(const StMuTrack& track)
+EEmcTTDisplay::AddTrack(const StMuTrack& track)
 {
-  const double Bfield = 0.5*tesla;
   StPhysicalHelixD h = track.helix();
   StThreeVectorD o   = h.origin(); 
-  StThreeVectorD p   = h.momentum(Bfield);
-  double         q   = h.charge(Bfield);
-  return trackHit(o.x(),o.y(),o.z(),p.x(),p.y(),p.z(),q*Bfield);
+  StThreeVectorD p   = h.momentum(mBField*tesla);
+  double         q   = h.charge(mBField*tesla);
+  return AddTrack(o.x(),o.y(),o.z(),p.x(),p.y(),p.z(),q*mBField*tesla);
 }
 
 
@@ -256,6 +258,9 @@ EEmcTTDisplay::volumeName(const EEmcTower& tower)
 
 
 // $Log: EEmcTTDisplay.cxx,v $
+// Revision 1.7  2004/04/13 14:53:38  zolnie
+// *** empty log message ***
+//
 // Revision 1.6  2004/01/27 20:38:41  zolnie
 // more docs
 //
