@@ -1,5 +1,5 @@
 /***********************************************************************
- * $Id: EztEmcRawData.cxx,v 1.3 2005/01/08 20:06:42 mvl Exp $
+ * $Id: EztEmcRawData.cxx,v 1.4 2005/01/11 21:33:40 mvl Exp $
  * Author: Alex Suaide, Mar 2004, JB
  ************************************************************************/
 
@@ -15,7 +15,7 @@ EztEmcRawData::EztEmcRawData()
 	mData[i].Set(0);
 	setCorruption(i,0xffff); // all bad is default
     }
-}
+} 
 
 //----------------------------------------------------
 EztEmcRawData::EztEmcRawData(const EztEmcRawData& h) : TObject(h)
@@ -45,7 +45,7 @@ EztEmcRawData::createBank(int bank,int sizeHeader, int sizeData)
     mData[bank].Set(sizeData);
     for(int i = 0;i<sizeHeader;i++) mHeader[bank][i] = 0;
     for(int i = 0;i<sizeData;i++) mData[bank][i] = 0;
-    setCorruption(bank,0xff); // all bad is default
+    setCorruption(bank,0xffff); // all bad is default
 
 } 
 
@@ -55,6 +55,7 @@ EztEmcRawData::deleteBank(int bank)
 {
     mHeader[bank].Set(0);
     mData[bank].Set(0);
+    setCorruption(bank,0xffff); // all bad is default
 }
 
 //----------------------------------------------------
@@ -107,8 +108,7 @@ bool
 EztEmcRawData::purgeCrateOFF(int ib){
   bool isOFF=isCrateOFF(header(ib));
   if(isOFF) { // crate was OFF based on the header
-    setCorruption(ib,bitCrateOff);
-    deleteBank(ib);
+    mData[ib].Set(0); // erase data block
   }
   return isOFF;
 } 
@@ -196,8 +196,8 @@ void EztEmcRawData::print(const UShort_t* hd, const UShort_t* d, int nd) {
 /***************************************************************************
  *
  * $Log: EztEmcRawData.cxx,v $
- * Revision 1.3  2005/01/08 20:06:42  mvl
- * Code added by Jan Balewski (for corruption checking?)
+ * Revision 1.4  2005/01/11 21:33:40  mvl
+ * Minor mod to hearder checking (do not delete data for certain error states ) By Jan Balewski.
  *
  * Revision 1.2  2004/11/29 18:36:59  mvl
  * New code for header checks and some printing (by Jan Balewski)

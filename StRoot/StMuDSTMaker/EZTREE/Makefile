@@ -28,8 +28,10 @@ all:    $(LIBNAME)
 #       -rm  $(LINK) $(DICT).*
 
 $(LIBNAME): $(OBJS)
-	$(CXX) $(LDFLAGS) $^ -o lib$(LIBNAME).so
 	$(AR)  lib$(LIBNAME).a $^
+ifndef IN_PANITKIN
+	$(CXX) $(LDFLAGS) $^ -o lib$(LIBNAME).so
+endif
 
 clean:
 	-rm -f *.o $(LINK) $(DICT).* lib$(LIBNAME).* 

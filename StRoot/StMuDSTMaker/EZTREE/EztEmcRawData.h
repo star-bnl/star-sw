@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: EztEmcRawData.h,v 1.3 2005/01/08 20:06:42 mvl Exp $
+ * $Id: EztEmcRawData.h,v 1.4 2005/01/11 21:33:40 mvl Exp $
  *
  * Author: Alex Suaide, Mar 2004, JB
  ***************************************************************************
@@ -21,7 +21,7 @@ public:
   enum { WRDCNT=0,ERRFLG=1,TOKEN=2,CRATE=3}; // header words
   enum { bitCrateID=1<<0, bitToken=1<<1, bitLenCount=1<<2, bitTrigComm=1<<3,
 	 bitErrFlag=1<<4, bitN256=1<<5, bitGhost=1<<6, bitCrateOff=1<<7, 
-	 bitStall=1<<8, bitVoid=1<<15};
+	 bitStall=1<<8};
 
   EztEmcRawData();
   EztEmcRawData(const EztEmcRawData&);
@@ -41,7 +41,7 @@ public:
   
   const UShort_t getCorruption(int ib) const { return  mCorrupt[ib];}
   void          setCorruption(int ib, UShort_t x) {mCorrupt[ib]=x;}
-  bool          isVoid(int ib) { return mCorrupt[ib] & bitVoid; }
+  bool          isCrateVoid(int ib) { return sizeData(ib)<=0; }
 
   static UShort_t  getErrFlag(const UShort_t* hd)  { 
     return  hd[ERRFLG] & 0x0FFF; }
@@ -87,8 +87,8 @@ public:
 /**************************************************************************
  *
  * $Log: EztEmcRawData.h,v $
- * Revision 1.3  2005/01/08 20:06:42  mvl
- * Code added by Jan Balewski (for corruption checking?)
+ * Revision 1.4  2005/01/11 21:33:40  mvl
+ * Minor mod to hearder checking (do not delete data for certain error states ) By Jan Balewski.
  *
  * Revision 1.2  2004/11/29 18:36:59  mvl
  * New code for header checks and some printing (by Jan Balewski)
