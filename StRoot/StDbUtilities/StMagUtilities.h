@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.h,v 1.15 2001/10/05 20:18:02 dunlop Exp $
+ * $Id: StMagUtilities.h,v 1.16 2001/10/05 21:27:35 jeromel Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.h,v $
+ * Revision 1.16  2001/10/05 21:27:35  jeromel
+ * Small comment addition for historical purposes.
+ *
  * Revision 1.15  2001/10/05 20:18:02  dunlop
  * Tweaked enumeration of distortion selection to respect first three bits for
  * year flag
@@ -53,6 +56,9 @@
 #include "TFile.h"
 
 enum   EBField  { kUndefined=0, kConstant=1, kMapped=2, kChain=3 } ;
+// DO NOT change the numbering of those constants. StBFChain depends
+// on those values to build an option mask. In StBFChain, the options
+// are set as those values x2 since the mask is right shifted first.
 enum   DistortSelect { kElectricField2001 = 1, 
 		       kBMap = 0x08,
 		       kPadrow13 = 0x10,
