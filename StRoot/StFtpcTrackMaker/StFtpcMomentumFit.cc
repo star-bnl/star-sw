@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////
-// $Id: StFtpcMomentumFit.cc,v 1.3 2000/07/25 15:21:56 hummler Exp $
+// $Id: StFtpcMomentumFit.cc,v 1.4 2000/11/23 01:33:16 oldi Exp $
 //
 // $Log: StFtpcMomentumFit.cc,v $
+// Revision 1.4  2000/11/23 01:33:16  oldi
+// Proper initialization of some variables to avoid Insure++ error messages.
+//
 // Revision 1.3  2000/07/25 15:21:56  hummler
 // use fitted instead of measured start point
 //
@@ -39,6 +42,9 @@ StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Vertex, StThreeVecto
   double yWeight[11]={100,100,100,100,100,100,100,100,100,100,100};
   // assume hit resolution = 0.01 cm if not otherwise stated
 
+  mYCenter = 0.;
+  mXCenter = 0.;
+
   mIterSteps=10;
   mNumHits=nHits;
   mVertexPointOffset=1;
@@ -57,6 +63,9 @@ StFtpcMomentumFit::StFtpcMomentumFit(StThreeVector<double> *Vertex, double xVert
   StThreeVector<double> Point[11];
   double xWeight[11];
   double yWeight[11];
+
+  mYCenter = 0.;
+  mXCenter = 0.;
 
   mIterSteps=10;
   mNumHits=nHits;
@@ -530,7 +539,7 @@ int StFtpcMomentumFit::CircleFit(double x[],double y[], double xw[], double yw[]
   double w=1;
   double wNew;
   double f,fp;
-  double xc, yc;
+  double xc = 0., yc = 0.;
 
   if(debug)  
     cout<<"Solving by Newton method"<<endl;  
@@ -619,7 +628,7 @@ void StFtpcMomentumFit::LineFit(double *xval, double *yval, double *zval, double
 	angle+=twopi;
       
       // shift into same phase
-      double lastangle;
+      double lastangle = 0.;
       if(i!=0)
 	{
 	  if(angle>lastangle+pi)
