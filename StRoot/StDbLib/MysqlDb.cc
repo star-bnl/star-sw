@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.5 2000/02/15 20:27:43 porter Exp $
+ * $Id: MysqlDb.cc,v 1.6 2000/02/18 16:58:08 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.6  2000/02/18 16:58:08  porter
+ * optimization of table-query, + whereClause gets timeStamp if indexed
+ *  + fix to write multiple rows algorithm
+ *
  * Revision 1.5  2000/02/15 20:27:43  porter
  * Some updates to writing to the database(s) via an ensemble (should
  * not affect read methods & haven't in my tests.
@@ -341,6 +345,7 @@ bool  MysqlDb::Output(StDbBuffer *aBuff){
   if (change) aBuff->SetStorageMode();
   if (tRow) {
     for (i=0;i<(int)tNbFields;i++){
+      //      cout <<mRes->mRes->fields[i].name<<" = "<< tRow[i] << endl;
       if (IS_BLOB(mRes->mRes->fields[i].flags)) {
 	    if (mRes->mRes->fields[i].flags&BINARY_FLAG) {
 	       aBuff->WriteArray((char*)tRow[i],lengths[i],mRes->mRes->fields[i].name);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManager.cc,v 1.17 2000/02/15 20:27:44 porter Exp $
+ * $Id: StDbManager.cc,v 1.18 2000/02/18 16:58:09 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.18  2000/02/18 16:58:09  porter
+ * optimization of table-query, + whereClause gets timeStamp if indexed
+ *  + fix to write multiple rows algorithm
+ *
  * Revision 1.17  2000/02/15 20:27:44  porter
  * Some updates to writing to the database(s) via an ensemble (should
  * not affect read methods & haven't in my tests.
@@ -1164,6 +1168,20 @@ if((nextNode=node->getNextNode()))commitAllNodes(nextNode);
 node->commit();
 
 return true;
+}
+
+////////////////////////////////////////////////////////////////
+void
+StDbManager::closeAllConnections(){
+
+  ServerList::iterator itr;
+  StDbServer* server;
+
+      for(itr = mservers.begin(); itr != mservers.end(); ++itr){
+         server = *itr;
+         if(server && (server->isConnected())) server->closeConnection();
+        }
+return;
 }
 
 ////////////////////////////////////////////////////////////////

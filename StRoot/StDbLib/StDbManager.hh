@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManager.hh,v 1.13 2000/02/15 20:27:44 porter Exp $
+ * $Id: StDbManager.hh,v 1.14 2000/02/18 16:58:09 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbManager.hh,v $
+ * Revision 1.14  2000/02/18 16:58:09  porter
+ * optimization of table-query, + whereClause gets timeStamp if indexed
+ *  + fix to write multiple rows algorithm
+ *
  * Revision 1.13  2000/02/15 20:27:44  porter
  * Some updates to writing to the database(s) via an ensemble (should
  * not affect read methods & haven't in my tests.
@@ -211,6 +215,7 @@ public:
   virtual bool commitAllTables(StDbConfigNode* node); //! table commits
   virtual bool commitAllNodes(StDbConfigNode* node);  //! node  commits 
 
+  virtual void closeAllConnections(); 
   virtual void closeAllConnections(StDbConfigNode* node); 
   virtual void closeConnection(StDbNode* node);
 

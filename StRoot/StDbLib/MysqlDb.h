@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.7 2000/02/15 20:27:43 porter Exp $
+ * $Id: MysqlDb.h,v 1.8 2000/02/18 16:58:09 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.8  2000/02/18 16:58:09  porter
+ * optimization of table-query, + whereClause gets timeStamp if indexed
+ *  + fix to write multiple rows algorithm
+ *
  * Revision 1.7  2000/02/15 20:27:43  porter
  * Some updates to writing to the database(s) via an ensemble (should
  * not affect read methods & haven't in my tests.
@@ -156,7 +160,10 @@ protected:
 inline
 void
 MysqlDb::Close(){
-if(mhasConnected)mysql_close(&mData);
+if(mhasConnected){
+  //cout << "Closing Connection to database="<< mData.db << endl;
+  mysql_close(&mData);
+}
 mhasConnected=false;
 }
 
