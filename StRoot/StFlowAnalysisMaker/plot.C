@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.39 2002/02/13 22:31:50 posk Exp $
+// $Id: plot.C,v 1.40 2002/05/21 18:42:18 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -375,9 +375,9 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	}
       } else if (strstr(shortName[pageNumber],".Eta")!=0) { // 2D Eta projection
 	if (singleGraph) {
-	  TH1D* projX = hist2D->ProjectionX(histName->Data(), 0, 9999);
+	  TH1D* projX = hist2D->ProjectionX(histName->Data());
 	} else {
-	  TH1D* projX = hist2D->ProjectionX(histName->Data(), 0, 9999, "E");
+	  TH1D* projX = hist2D->ProjectionX(histName->Data(), -1, 9999, "E");
 	}
 	projX->SetName(histProjName->Data());
 	char* xTitle = hist2D->GetXaxis()->GetTitle();
@@ -388,9 +388,9 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	if (!singleGraph) lineZeroY->Draw();
       } else if (strstr(shortName[pageNumber],".Pt")!=0) { // 2D Pt projection
 	if (singleGraph) {
-	  TH1D* projY = hist2D->ProjectionY(histName->Data(), 0, 9999); 
+	  TH1D* projY = hist2D->ProjectionY(histName->Data()); 
 	} else {
-	  TH1D* projY = hist2D->ProjectionY(histName->Data(), 0, 9999, "E");
+	  TH1D* projY = hist2D->ProjectionY(histName->Data(), -1, 9999, "E");
 	}
 	projY->SetName(histProjName->Data());
 	projY->SetXTitle("Pt (GeV)");
@@ -400,9 +400,9 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	if (projY) projY->Draw("H");
       } else if (strstr(shortName[pageNumber],".Phi")!=0) { // 2D Phi projection
 	if (singleGraph) {
-	  TH1D* projY = hist2D->ProjectionY(histName->Data(), 0, 9999); 
+	  TH1D* projY = hist2D->ProjectionY(histName->Data()); 
 	} else {
-	  TH1D* projY = hist2D->ProjectionY(histName->Data(), 0, 9999, "E");
+	  TH1D* projY = hist2D->ProjectionY(histName->Data(), -1, 9999, "E");
 	}
 	projY->SetName(histProjName->Data());
 	projY->SetXTitle("azimuthal angle (rad");
@@ -413,18 +413,27 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	float norm = (float)(hist->GetNbinsX()) / hist->Integral(); 
 	cout << "  Normalized by: " << norm << endl;
 	hist->Scale(norm);                           // normalize height to one
-	if (strstr(shortName[pageNumber],"Sub")!=0) { 
+	if (strstr(shortName[pageNumber],"Diff")!=0) { 
 	  TF1* funcCos1 = new TF1("funcCos1",
 				  "1+[0]*2/100*cos([1]*x)", 0., twopi);
 	  funcCos1->SetParNames("k=1", "har");
-	  if (strstr(shortName[pageNumber],"Diff")!=0) {
-	    funcCos1->SetParameters(0, j+2);                // initial values
-	  } else {
-	    funcCos1->SetParameters(0, j+1);                // initial values
-	  }
+	  funcCos1->SetParameters(0, j+2);                  // initial values
 	  funcCos1->SetParLimits(1, 1, 1);                  // har is fixed
 	  hist->Fit("funcCos1");
 	  delete funcCos1;
+	} else if (strstr(shortName[pageNumber],"Sub")!=0) { 
+	  TF1* funcCos1 = new TF1("funcCos1",
+				  "1+[0]*2/100*cos([1]*x)", 0., twopi);
+	  funcCos1->SetParNames("k=1", "har");
+	  funcCos1->SetParameters(0, j+1);                  // initial values
+	  funcCos1->SetParLimits(1, 1, 1);                  // har is fixed
+// 	  funcCos1->SetLineStyle(kDashed);
+	  hist->Fit("funcCos1");
+	  delete funcCos1;
+// 	  TF1* funcSubCorr = new TF1("SubCorr", SubCorr, 0., twopi, 1);
+// 	  funcSubCorr->SetParNames("chiJYO");
+// 	  hist->Fit("SubCorr", "Q");
+// 	  delete funcSubCorr;
 	} else {
 	  TF1* funcCos2 = new TF1("funcCos2",
 	 "1+[0]*2/100*cos([2]*x)+[1]*2/100*cos(([2]+1)*x)", 0., twopi);
@@ -628,9 +637,29 @@ static Double_t qDist(double* q, double* par) {
 
 //-----------------------------------------------------------------------
 
+static Double_t SubCorr(double* x, double* par) {
+  // Calculates the cos(n(Psi_a - Psi_b)) distribution by fitting chi of JYO
+  // From J.-Y. Ollitrault, Nucl. Phys. A590, 561c (1995), Eq. 6.
+
+  double chi2 = par[0] * par[0];
+  double z = chi2 * cos(x);
+  double TwoOverPi = 2./TMath::Pi();
+
+  Double_t dNdPsi = exp(-chi2)/2. * (TwoOverPi*(1.+chi2) 
+		    + z*(TMath::BesselI0(z) + TMath::Struve(0,z))
+		    + chi2*(TMath::BesselI1(z) + TMath::Struve(1,z)));
+  
+  return dNdPsi;
+}
+
+//-----------------------------------------------------------------------
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.40  2002/05/21 18:42:18  posk
+// Kirill's correction to minBias.C for bins with one count.
+//
 // Revision 1.39  2002/02/13 22:31:50  posk
 // Pt Weight now also weights Phi Weight. Added Eta Weught, default=FALSE.
 //

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowScalarProdMaker.cxx,v 1.6 2002/02/18 01:11:53 jeromel Exp $
+// $Id: StFlowScalarProdMaker.cxx,v 1.7 2002/05/21 18:42:17 posk Exp $
 //
 // Authors: Method proposed by Art and Sergei, code written by Aihong
 //          Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -159,8 +159,8 @@ Int_t StFlowScalarProdMaker::Init() {
     }
   }
 
-  gMessMgr->SetLimit("##### FlowScalerProdAnalysis", 2);
-  gMessMgr->Info("##### FlowScalerProdAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.6 2002/02/18 01:11:53 jeromel Exp $");
+  gMessMgr->SetLimit("##### FlowScalarProd", 2);
+  gMessMgr->Info("##### FlowScalarProdAnalysis: $Id: StFlowScalarProdMaker.cxx,v 1.7 2002/05/21 18:42:17 posk Exp $");
 
   return StMaker::Init();
 }
@@ -280,7 +280,7 @@ Int_t StFlowScalarProdMaker::Finish() {
   double error;
   double totalError;
 
-  cout << endl << "##### Scaler Product Maker:" << endl;
+  cout << endl << "##### Scalar Product Maker:" << endl;
 
   for (int k = 0; k < Flow::nSels; k++) {
     char countSels[2];
@@ -386,6 +386,9 @@ Int_t StFlowScalarProdMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowScalarProdMaker.cxx,v $
+// Revision 1.7  2002/05/21 18:42:17  posk
+// Kirill's correction to minBias.C for bins with one count.
+//
 // Revision 1.6  2002/02/18 01:11:53  jeromel
 // Mandatory fix for FLT_MAX fix i.e. include float.h
 //
