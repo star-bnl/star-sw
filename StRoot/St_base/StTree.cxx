@@ -676,9 +676,9 @@ ClassImp(StFile)
 Int_t StFile::GetNextBundle()
 {
   if (!fDS)	return 1;
-  TDataSet *d = fDS->At(fIter+1);
-  if (!d  )     return 1;
-  fIter++;      return 0;
+  if (fIter>-1 && !fDS->At(fIter)) return 1;
+  return (!fDS->At(fIter++));
+  
 }
 //_____________________________________________________________________________
 Int_t StFile::GetNBundles()
@@ -807,7 +807,7 @@ Int_t StFile::AddWild(const Char_t *file)
 
     Long_t idqwe,sizeqwe,flags,modtimeqwe;
     gSystem->GetPathInfo(fullname,&idqwe,&sizeqwe,&flags,&modtimeqwe);
-    if (flags&1 || flags&2 || !flags&4) continue;
+    if (flags&2 || !flags&4) continue;
 
 //              prepare simple regular expression
     TRegexp rexp(tbase,kTRUE);
