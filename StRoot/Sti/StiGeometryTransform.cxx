@@ -35,6 +35,7 @@
 #include "StiMapUtilities.h"
 #include "StiHit.h"
 #include "StiHitContainer.h"
+#include "StiKalmanTrack.h"
 #include "StiGeometryTransform.h"
 #include "StiDetectorFinder.h"
 
@@ -521,3 +522,80 @@ pair<double, double> StiGeometryTransform::angleAndPosition(
 
   return pair<double, double>(dRefAngle, dPosition);
 } // angleAndPosition
+
+
+void StiGeometryTransform::operator() (const StTrack* st, StiKalmanTrack* sti)
+{
+    //cout <<"StiEvaluableTrackSeedFinder::operator()(StTrack*, StiKalmanTrack*, StiDetector*)"<<endl;
+    //now get hits
+    StPtrVecHit hits = st->detectorInfo()->hits();
+    sort( hits.begin(), hits.end(), StHitRadiusGreaterThan() );
+    //sort( hits.begin(), hits.end(), StHitRadiusLessThan() );
+    hitvector hitvec;
+    
+    for (vector<StHit*>::iterator it=hits.begin(); it!=hits.end(); ++it) {
+	StTpcHit* hit = dynamic_cast<StTpcHit*>(*it);
+	if (!hit) {
+	    cout <<"Error: cast failed"<<endl;
+	    sti=0;
+	    return;
+	}
+	else {
+	    //Find StiHit for this StHit
+	    pair<double, double> myPair = StiGeometryTransform::instance()->angleAndPosition(hit);
+	    double refAngle=myPair.first;
+	    double position=myPair.second;
+	    
+	    const hitvector& stiHits = StiHitContainer::instance()->hits(refAngle, position);
+	    if (stiHits.size()==0) {
+		cout <<"Error, no StiHits for this sector, padrow"<<endl;
+		sti=0;
+		return;
+	    }
+	    
+	    SameStHit mySameStHit;
+	    mySameStHit.stHit = hit;
+	    hitvector::const_iterator where = find_if(stiHits.begin(), stiHits.end(), mySameStHit);
+	    if (where==stiHits.end()) {
+		cout <<"Error, no StiHit with this StHit was found"<<endl;
+		sti=0;
+		return;
+	    }
+	    else {
+		hitvec.push_back(*where);
+	    }
+	}
+    }
+    
+    //cout <<"Filled Hits: "<<endl;
+    //for (hitvector::const_iterator it=hitvec.begin(); it!=hitvec.end(); ++it) {
+    //cout <<(*(*it))<<endl;
+    //}
+    
+    //Now get the helix
+    StPhysicalHelixD sthelix = st->geometry()->helix();
+      
+    //Get the (x-y) center of the circle and z0 in global coordinates, that's what StiKalmanTrack needs:
+    //note, StHelix origin is the first point on the track, not the center of the circle!
+    StThreeVectorD stiGlobalOrigin( sthelix.xcenter(), sthelix.ycenter(), sthelix.origin().z());
+    
+    double curvature = sthelix.curvature();
+    if (sthelix.h()<0) {
+	curvature=curvature*-1.;
+    }
+    //cout <<"curvature: "<<curvature<<endl;
+    
+    double tanLambda = tan(sthelix.dipAngle());
+    //cout <<"tanLambda: "<<tanLambda<<endl;
+
+    sti->initialize(curvature, tanLambda, stiGlobalOrigin, hitvec);
+
+    //Test track!
+    cout <<"Test the track:"<<endl;
+    for (double xLocal=hitvec.back()->x(); xLocal<=hitvec.front()->x(); xLocal+=10.) {
+	//for (double xLocal=hitvec.front()->x(); xLocal<=hitvec.back()->x(); xLocal+=10.) {
+	StThreeVector<double> pos = sti->getGlobalPointNear(xLocal);
+	cout <<"\tx: "<<xLocal<<"\tpos: "<<pos<<endl;
+    }
+    
+}
