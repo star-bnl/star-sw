@@ -258,11 +258,17 @@ macro bfc_init _
             message ' BFC_UTIL,init: ERROR - cannot open input file - quit '
             goto EOF
            endif
-           exec read_table_from_file#read inev /dui/run/params/tpc
+ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
            if ($vexist(readprob).ne.0) then 
             message ' BFC_UTIL,init: ERROR - cannot read input file - quit '
             goto EOF
-	  endif 
+	   endif 
+           ls [params]/tpc/ROSIE_RESET
+           if (staf_status(2).eq.STAFCV_OK) then
+              rmdir [params]/tpc/ROSIE_RESET
+              goto ANR
+           endif
+
    (dstin) 
 	  exec read_table_from_file#init ind [input_file]
 	  if ($vexist(readprob).ne.0) then 
@@ -538,12 +544,18 @@ return
 	        endif
               endif
             endif
-     (mdin) exec read_table_from_file#read inev /dui/event/raw_data/tpc
-           if ($vexist(readprob).ne.0) then 
-            message ' BFC_UTIL,process: ERROR - cannot read input file - quit '
-	    nev_proc = [nev_proc] - 1
-	    nev_total = [nev_total] - 1
-            goto EOF
+     (mdin) ls [params]/tpc/TPC_DATA
+            if (staf_status(2).eq.STAFCV_OK) then
+               mkdir [raw_data]/tpc/TPC_DATA
+               mv [params]/tpc/TPC_DATA  [raw_data]/tpc/TPC_DATA
+            else
+               exec read_table_from_file#read inev /dui/event/raw_data/tpc
+               if ($vexist(readprob).ne.0) then 
+                 message ' BFC_UTIL,process: ERROR - cannot read input file - quit '
+	         nev_proc = [nev_proc] - 1
+	         nev_total = [nev_total] - 1
+                 goto EOF
+               endif
            endif
    (dstin) exec read_table_from_file#read ind [event]/data/global
            if ($vexist(readprob).ne.0) then 
