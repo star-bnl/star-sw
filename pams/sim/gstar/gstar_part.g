@@ -1,3 +1,12 @@
+* $Id: gstar_part.g,v 1.9 2003/12/19 17:51:11 potekhin Exp $
+*
+* $Log: gstar_part.g,v $
+* Revision 1.9  2003/12/19 17:51:11  potekhin
+* Added the CVS tag, and repeating the comment from the previous check-in:
+* Including the straglet nomenclature developed by Ron, with a few corresctions.
+* The PDG codes assigned are essentialy our declared GEANT codes for
+* simplicity.
+*
 ***********************************************************************
 *
                       Subroutine gstar_PART
