@@ -1,6 +1,7 @@
 //:>----------------------------------------------------------------------
 //: FILE:      FtfDedx.h
 //: HISTORY:
+//:            10/30/00  ClassDef commented out
 //:>----------------------------------------------------------------------
 #ifndef FTFDEDX
 #define FTFDEDX
@@ -8,7 +9,7 @@
 #include "FtfTrack.h"
 #include "sl3CoordinateTransform.h"
 
-#define ClassDef(a,b)
+//#define ClassDef(a,b)
 
 struct twoVectorL3 {
     double x;
@@ -38,6 +39,6 @@ class FtfDedx {
    float     fDriftLoss ;  // corr. factor for drift length dependence of charge loss in m^-1
    struct twoVectorL3 fUnitVec[24];
 
-   ClassDef(FtfDedx,1)
+// ClassDef(FtfDedx,1)
 };
 #endif
