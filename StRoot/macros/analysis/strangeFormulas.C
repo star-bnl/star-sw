@@ -1,5 +1,8 @@
-// $Id: strangeFormulas.C,v 3.2 2000/08/11 17:09:05 genevb Exp $
+// $Id: strangeFormulas.C,v 3.3 2000/08/28 16:24:33 genevb Exp $
 // $Log: strangeFormulas.C,v $
+// Revision 3.3  2000/08/28 16:24:33  genevb
+// Introduce findFormula(), handle executing on second tree
+//
 // Revision 3.2  2000/08/11 17:09:05  genevb
 // Introduce findFormulas(), findDefinition(),  and some new formulas.
 //
@@ -69,13 +72,18 @@
 // better to write something like "3*a()".
 //
 
-TTree* strangeFormulas(const char* fname=0);
-TTree* strangeFormulas(TFile* fptr);
-Int_t strangeFormulas(TTree* tree);
-void formulate(const char* name, const char* formula);
-void findFormulas(const char* c0, const char* c1=0, const char* c2=0);
-void findDefinition(const char* c0);
 
+// Public interface:
+    TTree* strangeFormulas(const char* fname=0);
+    TTree* strangeFormulas(TFile* fptr);
+     Int_t strangeFormulas(TTree* tree);
+      void findFormulas(const char* c0, const char* c1=0, const char* c2=0);
+ TFormula* findFormula(const char* c0);       // Requires exact match
+      void findDefinition(const char* c0);    // Requires exact match
+
+
+// Internal members and functions:
+void formulate(const char* name, const char* formula);
 TTree* strangeTree=0;
 TSeqCollection* ListofFuncs=gROOT->GetListOfFunctions();
 Int_t max_codes=0;
@@ -96,29 +104,37 @@ void findFormulas(const char* c0, const char* c1, const char* c2) {
 }
 
 //-----------------------------------------------------
+
+TFormula* findFormula(const char* c0) {
+  return (TFormula*) ListofFuncs->FindObject(c0);
+}
+
+//-----------------------------------------------------
     
 void findDefinition(const char* c0) {
-  for (Int_t i=0; i<ListofFuncs->GetSize(); i++) {
-    TObject* f1 = ListofFuncs->At(i);
-    if (!(strcmp(c0,f1->GetName()))) {
-      cout << "Name       : " << f1->GetName() << endl;
-      if (f1->IsA() == TTreeFormula::Class())
-        cout << "# of Codes : " << ((TTreeFormula*) f1)->GetNcodes() << endl;
-      cout << "Definition : " << f1->GetTitle() << endl;
-      i = ListofFuncs->GetSize();
-    }
+  TFormula* f1 = findFormula(c0);
+  if (f1) {
+    cout << "Name       : " << f1->GetName() << endl;
+    if (f1->IsA() == TTreeFormula::Class())
+      cout << "# of Codes : " << ((TTreeFormula*) f1)->GetNcodes() << endl;
+    cout << "Definition : " << f1->GetTitle() << endl;
   }
 }
 
 //-----------------------------------------------------
 
 void formulate(const char* name, const char* formula) {
-  TTreeFormula* f1 = new TTreeFormula(name,formula,strangeTree);
-  ListofFuncs->Add(f1);
-  if (f1->GetNcodes() > max_codes) {
-    cout << "\nWARNING!!! The following formula uses " << f1->GetNcodes();
-    cout << " values,\n too many for this version of ROOT: \n";
-    cout << f1->GetName() << " = " << f1->GetTitle() << endl;
+  TTreeFormula* f1 = (TTreeFormula*) findFormula(name);
+  if (f1) {
+    f1->SetTree(strangeTree);
+  } else {
+    f1 = new TTreeFormula(name,formula,strangeTree);
+    ListofFuncs->Add(f1);
+    if (f1->GetNcodes() > max_codes) {
+      cout << "\nWARNING!!! The following formula uses " << f1->GetNcodes();
+      cout << " values,\n too many for this version of ROOT: \n";
+      cout << f1->GetName() << " = " << f1->GetTitle() << endl;
+    }
   }
 }
 
