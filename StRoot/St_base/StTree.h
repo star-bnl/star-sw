@@ -123,7 +123,8 @@ public:
   StFile(const char** fileList=0);
   virtual ~StFile();
 
-  virtual void  ls(Option_t *opt="");
+  virtual void  ls(Option_t *opt="") ;
+  virtual void  ls(Option_t *opt="") const{ ((StFile*)this)->ls(opt);}
   virtual Int_t AddFile(const Char_t *file,const Char_t *comp=0);
   virtual Int_t AddFile(const Char_t **fileList);
   virtual Int_t AddWild(const Char_t *file);
@@ -131,12 +132,13 @@ public:
   virtual Int_t GetNBundles();
   virtual Int_t GetNFiles();
   virtual Int_t GetBundleSize(){return 1;};
- 
+  virtual StUKey GetNextEvent();
+  virtual Int_t GetNextEvent(UInt_t *NextEventNumber){return StFileI::GetNextEvent(NextEventNumber);}
+
   virtual const Char_t *GetFileName(Int_t idx=-1);
   virtual const Char_t *GetCompName(Int_t idx=0);
   virtual const Char_t *GetFormat(Int_t idx=0);
   virtual Int_t GetNextBundle();
-  virtual StUKey GetNextEvent();
   virtual void Rewind(){fIter = -1; delete fKeyIter; fKeyIter =0;}
   
 protected:

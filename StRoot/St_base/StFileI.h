@@ -44,7 +44,7 @@ public:
   virtual Int_t Init(const char *argv)
                 {const char *Argv[1]; Argv[0]=argv; return Init(1,Argv);};
  
-  virtual void  ls(Option_t *opt=""){if(opt){};};
+  virtual void  ls(Option_t *opt="") const {if(opt){};};
   virtual Int_t AddFile(const Char_t *file,const Char_t *comp=0){return 0;};
   virtual Int_t AddFile(const Char_t **fileList){return 0;};
   virtual Int_t AddWild(const Char_t *file){return 0;};
