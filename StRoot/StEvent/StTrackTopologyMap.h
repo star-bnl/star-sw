@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackTopologyMap.h,v 2.2 1999/12/13 20:16:39 ullrich Exp $
+ * $Id: StTrackTopologyMap.h,v 2.3 2000/04/10 19:59:33 genevb Exp $
  *
  * Author: Thomas Ullrich, AUg 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrackTopologyMap.h,v $
- * Revision 2.2  1999/12/13 20:16:39  ullrich
- * Changed numbering scheme for hw_position unpack methods (STAR conventions).
+ * Revision 2.3  2000/04/10 19:59:33  genevb
+ * StRoot/StEvent/doc/tex/
+ *
+ * Revision 2.3  2000/04/10 19:59:33  genevb
+ * StRoot/StEvent/doc/tex/
  *
  * Revision 2.2  1999/12/13 20:16:39  ullrich
  * Changed numbering scheme for hw_position unpack methods (STAR conventions).
@@ -44,7 +47,10 @@ public:
     
 protected:
     Bool_t bit(Int_t) const;             // range 0-63
-    ULong_t mMap[2];
+    Bool_t ftpcFormat() const;
+    
+private:
+    UInt_t mMap[2];
     // ULong_t mMap[2];
     UInt_t mMap0;
     UInt_t mMap1;
