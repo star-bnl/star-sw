@@ -204,7 +204,8 @@ C     omit points that were marked as outliers
 
                if(good_hit(i)) then
                   ient = gtrk(igtrk).ipnt(i)
-                  if( ient .gt. 0 .and. tphit(ient).flag .ne. 0) then
+                  if( ient .gt. 0 .and. (tphit(ient).flag .lt. 0 .or.
+     +             tphit(ient).flag .gt. 1)) then
                      good_hit(i) = .false.
                   endif
                   if( ient .ne. 0 .and. good_hit(i)) then

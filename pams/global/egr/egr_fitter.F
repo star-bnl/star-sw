@@ -715,6 +715,7 @@ C     SM                    globtrk(iglob).id_start_vertex = 0
      +                                  svt_spt(gtrk(igtrk).ipnt(ishit)).id) then
                                       svt_group(ient).ident=-1
                                    endif
+
                                 enddo
                              endif
                              if( svt_spt(ient).id_wafer .gt. 7000) then
