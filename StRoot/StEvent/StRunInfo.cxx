@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRunInfo.cxx,v 2.5 2004/01/22 23:14:07 ullrich Exp $
+ * $Id: StRunInfo.cxx,v 2.6 2004/07/06 23:05:21 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRunInfo.cxx,v $
+ * Revision 2.6  2004/07/06 23:05:21  ullrich
+ * Added SVT drift velocity scaler.
+ *
  * Revision 2.5  2004/01/22 23:14:07  ullrich
  * Added Rhic scaler methods (BBC).
  *
@@ -28,7 +31,7 @@
  **************************************************************************/
 #include "StRunInfo.h"
 
-static const char rcsid[] = "$Id: StRunInfo.cxx,v 2.5 2004/01/22 23:14:07 ullrich Exp $";
+static const char rcsid[] = "$Id: StRunInfo.cxx,v 2.6 2004/07/06 23:05:21 ullrich Exp $";
 
 ClassImp(StRunInfo)
 
@@ -45,6 +48,7 @@ StRunInfo::StRunInfo()
     mBbcCoincidenceRate = 0;
     mBackgroundRate = 0;
     mL0RateToRich = 0;
+    mSvtDriftVelocityScaler = 0;
 
     for (int i=0; i<2; i++) {
 	mBeamMassNumber[i] = 0;
@@ -106,6 +110,10 @@ StRunInfo::magneticField() const
 double
 StRunInfo::tpcDriftVelocity(StBeamDirection dir) const
 {return mTpcDriftVelocity[dir];}
+
+double
+StRunInfo::svtDriftVelocityScaler() const
+{return mSvtDriftVelocityScaler;}
 
 double
 StRunInfo::zdcWestRate() const
@@ -189,6 +197,10 @@ StRunInfo::setMagneticField(double val)
 void
 StRunInfo::setTpcDriftVelocity(StBeamDirection dir, double val)
 {mTpcDriftVelocity[dir] = val;}  
+
+void
+StRunInfo::setSvtDriftVelocityScaler(float val)
+{mSvtDriftVelocityScaler = val;}  
 
 void
 StRunInfo::setZdcWestRate(double val)
