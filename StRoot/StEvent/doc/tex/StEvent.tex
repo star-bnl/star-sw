@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 1.14 1999/03/30 19:11:53 genevb Exp $
+% $Id: StEvent.tex,v 1.15 1999/03/30 19:41:17 ullrich Exp $
 %
 % Author: Thomas Ullrich, March 1999
 %
@@ -21,8 +21,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 1.14  1999/03/30 19:11:53  genevb
-% Correct typo from last change
+% Revision 1.15  1999/03/30 19:41:17  ullrich
+% Added Torres 'how to' tutorial. Text pasted from web.
 %
 % Revision 1.18  1999/04/13 23:27:23  genevb
 % Slightly refined vertex code, updated V0, Xi vertex documentation
@@ -155,14 +155,14 @@
 % Revision 2.20  2000/02/24 13:25:12  ullrich
 % Added RICH and EMC to the reference section. Created
 % (empty) section for EMC and RICH in User Guide.
-  {\LARGE $ $Revision: 1.14 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/30 19:11:53 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.15 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/30 19:41:17 $ $}  % replaced by cvs with current revision
 %
 % Revision 2.18  2000/02/11 16:23:45  ullrich
 % Add info on order in which primary vertices are stored
   {\LARGE User Guide and Reference Manual}\\[2cm]
-  {\LARGE $ $Revision: 1.14 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/30 19:11:53 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.15 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/30 19:41:17 $ $}  % replaced by cvs with current revision
 % Added Helens description of iflag (see StTrack::flag()).
 %
 % Revision 2.16  2000/01/27 18:38:30  ullrich
@@ -189,7 +189,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Introduction}
-sec.~\ref{sec:StEventReaderMaker}.
+
 \StEvent\footnote{The name ``StEvent'' is somewhat misleading since it
     is \textit{(i)} the name of the package and \textit{(ii)} the name
     of a class.  We therefore write \StEvent\ when we refer to the
@@ -306,7 +306,7 @@ are not guaranteed to compile. Their only purpose is to illustrate a
 specific feature and not to provide a fully functional programming
 unit.
 
-  {\LARGE $ $Date: 1999/03/30 19:11:53 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/30 19:41:17 $ $}  % replaced by cvs with current revision
      \advance\leftmargin by \labelsep%
 \section{Further documentation}
 \label{sec:furtherdoc}
@@ -383,17 +383,61 @@ In addition \StEvent\ defines a few rules which ease its usage
     \item const arguments are guaranteed to not be modified by the
         function
     \item const return values cannot be modified
-\section{Accessing \StEvent : StEventReaderMaker}
-\label{sec:StEventReaderMaker}
+    \end{itemize}
+    \name{const}'ness implies a slightly higher compile time overhead
+    but a faster execution time.
+\item Objects which are returned by pointer are not guaranteed to
     exist in which case a null pointer is returned. It is users
-StEvent:
-... missing
+    responsibility to check for the return value and make sure the
+    pointer is valid (non-zero) before she dereference it.  Objects
+    which are granted to exist are returned by reference or by value.
+\end{itemize}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{An extended example: doEvents.C}
+\section{How to use it: doEvents.C and StEventReaderMaker}
+% text from Torres tutorial web page
+\label{sec:howto}
 \index{doEvents.C}
+\index{StEventReaderMaker}
+\index{StAnalysisMaker}
+\index{root4star}
+\index{ROOT files}
+\index{XDF files}
+The procedure starting from scratch to run the provided StEvent usage
+example is
+\begin{verbatim}
+    stardev
+    mkdir workdir
+    cd workdir
+    root4star doEvents.C
+\end{verbatim}
+
+This will run \name{\$STAR/StRoot/macros/doEvents.C} which runs a
+chain consisting of two makers:
+\begin{description}
+\item[\name{StEventReaderMaker}:] Read events from DST input files (XDF
+    files or ROOT files; the file is handled appropriately based on
+    file type) and load StEvent
+\item[\name{StAnalysisMaker}:] Pick up the StEvent event and analyze it
+    (incorporates a few simple examples)
+\end{description}
+It runs the chain on either a single file or all files under a
+specified root directory (see doEvents.C for details), eg. example
+invocations are
+\begin{verbatim}
+.x doEvents.C(10,"-","/afs/rhic/star/strange/genevb/year1a_90evts_dst.xdf")
+     processes 10 events from the specified file
+
+.x doEvents.C(9999,"/disk00000/star/auau200/hijing135/"," ")
+     processes all events from all files found recursively under the
+     specified directory
+\end{verbatim}
+The multiple-files feature currently only works for XDF files.  To
+play with it yourself you can pick up StAnalysisMaker and play with it
+or use it as a template for a Maker of your own that works with
+StEvent:
 %    Introduction
-... missing
 %
     mkdir StRoot/StMyAnalysisMaker
     cp $STAR/StRoot/StAnalysisMaker/* StRoot/StMyAnalysisMaker/
