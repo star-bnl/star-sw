@@ -1,0 +1,19 @@
+//
+  Explanation about the macros located in this directory - Marcelo Munhoz
+
+SvtDataViewer.C -> to run the online monitor;
+
+doSvtBadAnodes.C -> to generate bad anodes as explained in 
+http://www.star.bnl.gov/~munhoz/svt/year2004/year4_hits_badAnodes_Maker.html
+
+insertAlignedGeometry.C -> inserts new geometry in the data base. I believe I'm 
+the only one with karma to touch the data base, but at least we keep the macro 
+archived and other people can look at it and eventually take care of it as well.
+
+insertBadAnodes -> the same for bad anodes
+
+insertDriftVelocity.C -> the same for drift velocity
+
+calcRmsFluctuation.C -> reads RMS from daq file, and plots the RMS for all 
+pixels, calculate the mean RMS for each anode and the rns of it
+
