@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.27 2003/09/16 22:44:17 porter Exp $
+ * $Id: MysqlDb.cc,v 1.28 2003/09/18 00:51:59 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.28  2003/09/18 00:51:59  porter
+ * initialized mhasBinaryQuery flag
+ *
  * Revision 1.27  2003/09/16 22:44:17  porter
  * got rid of all ostrstream objects; replaced with ostringstream+string.
  * modified rules.make and added file stdb_streams.h for standalone compilation
@@ -188,6 +191,7 @@ static const char* binaryMessage = {"Cannot Print Query with Binary data"};
 MysqlDb::MysqlDb(): mdbhost(0), mdbName(NULL), mdbuser(0), mdbpw(0), mdbPort(0),mdbServerVersion(0),mlogTime(false) {
 
 mhasConnected=false;
+mhasBinaryQuery=false;
 mtimeout=1;
 mQuery=0;
 mQueryLast=0;
