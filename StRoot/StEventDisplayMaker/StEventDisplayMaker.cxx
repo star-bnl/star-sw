@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.26 1999/11/05 02:29:25 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.27 1999/11/05 23:18:40 fine Exp $
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.27  1999/11/05 23:18:40  fine
+// convertor degree to rad was introduced
+//
 // Revision 1.26  1999/11/05 02:29:25  fine
 // helix drawing for tpt_track table improved
 //
@@ -813,13 +816,15 @@ Int_t StEventDisplayMaker::MakeTableTracks(const St_Table *points,StVirtualEvent
         // ------------------------------------------------------------------------ //
         if (trackColor > 0) {
            tpt_track_st &t = *track++;
-           StThreeVectorD vector(t.r0*cos(t.phi0),t.r0*sin(t.phi0),t.z0);
+           const float rad = 3.1415926/180.;
+           float angle =  t.phi0 * rad;
+           StThreeVectorD vector(t.r0*cos(angle),t.r0*sin(angle),t.z0);
            StHelixD *helix  = new  StHelixD(t.curvature, atan(t.tanl), t.psi,vector); 
            //-------------------------------------------------------------//
            // Artificial length has to be replaced with the "regular" one //
            //-------------------------------------------------------------//
            Float_t artficialLength = 200; // cm
-           Int_t nSteps = 4*artficialLength*t.curvature + 1; 
+           Int_t nSteps = Int_t(4*artficialLength*t.curvature + 1); 
            Float_t step = artficialLength / nSteps;
            StHelix3DPoints *tracksPoints  = new StHelix3DPoints(helix,step,nSteps);
            m_TrackCollector->Add(tracksPoints);    // Collect to remove  
