@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.26  1999/06/21 22:27:08  ward
+// Prototype connection to StDaqLib.
+//
 // Revision 1.25  1999/05/01 03:39:52  ward
 // raw_row col PadModBreak set per row instead of per half-sector
 //
@@ -68,6 +71,12 @@
 // St_tpcdaq_Maker class
 // Herbert Ward, started Feb 1 1999.
 //////////////////////////////////////////////////////////////////////////
+#include <stdio.h>      // For binary file input (the DAQ data file).
+#include <string.h>     // For binary file input (the DAQ data file).
+#include <sys/types.h>  // For binary file input (the DAQ data file).
+#include <sys/stat.h>   // For binary file input (the DAQ data file).
+#include <fcntl.h>      // For binary file input (the DAQ data file).
+///////////////////////////////////////////////////////////////////////////
 #include "St_tpcdaq_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -91,15 +100,24 @@
 
 ClassImp(St_tpcdaq_Maker)
 
+#define PP printf(
 #define ALLOC 1.2  // Must be > 1.0.  Larger runs faster, but wastes memory.
 #define NSECT 24
 #define NROW  45
 #define DEBUG_ACTIVE_ROW 33
 #define HISTOGRAMS
 
-St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name):StMaker(name) 
+#include "StDaqLib/GENERIC/EventReader.hh"
+ZeroSuppressedReader *gZsr;  
+DetectorReader *gDetectorReader;
+
+St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name,char *daqFile):StMaker(name) 
 {
-  printf("St_tpcdaq_Maker constructor.\n");
+  printf("St_tpcdaq_Maker constructor, getting data from %s.\n",
+      daqFile?"DAQ":"TRS");
+  if(daqFile) printf("DAQ file=%s\n",daqFile);
+  printf("This is St_tpcdaq_Maker, name = \"%s\".\n",name);
+  daqInputFile=daqFile;
 }
 St_tpcdaq_Maker::~St_tpcdaq_Maker() {
 }
@@ -117,38 +135,20 @@ Int_t St_tpcdaq_Maker::Init() {
                             "pad vs num seq" , 40 , 1.0 , 40.0 );
   m_pix_AdcValue      = new TH1F("tpcdaq_adcVal" , 
                             "pix vs ADC value" , 255 , 1.0 , 255.0 );
+  if(daqInputFile) {
+    mFileDes=open(daqInputFile,O_RDONLY);
+    if(mFileDes<0) {
+      printf("St_tpcdaq_Maker can not read '%s'.\n",daqInputFile);
+      return kStErr;
+    }
+  } else {
+    PP"No DAQ file, using TRS instead.\n");
+  }
 
   return StMaker::Init();
 }
 void St_tpcdaq_Maker::PrintErr(int number,char letter) {
   printf("Severe error %d(%c) in St_tpcdaq_Maker.\n",number,letter);
-}
-int St_tpcdaq_Maker::tpcSectorZgetPadList(int ipadrow,char **padlist) {
-  static char rv[30];
-  rv[0]=12;
-  rv[1]=13;
-  rv[2]=14;
-  *padlist=rv;
-  if(ipadrow==DEBUG_ACTIVE_ROW) return 3; else return 0;
-}
-int St_tpcdaq_Maker::myDecoderZgetSequences(int ipadrow,int pad,int *nseq,
-                                  StSequence **listOfSequences) {
-  static StSequence retval;
-  static unsigned char vals[20];
-
-  vals[0]= 20; vals[1]= 40; vals[2]=120; vals[3]= 40; vals[4]= 20;
-
-  retval.startTimeBin=200;
-  retval.length=5;
-  retval.firstAdc=vals;
-
-  *listOfSequences=&retval;
-  if(ipadrow==DEBUG_ACTIVE_ROW) *nseq=1; else *nseq=0;
-
-  return 0;
-}
-int St_tpcdaq_Maker::tpcSectorZgetSector(int j1,int *j2) {
-  return 0;
 }
 char *St_tpcdaq_Maker::NameOfSector(int isect) {
   static char rv[16];
@@ -281,6 +281,36 @@ void St_tpcdaq_Maker::OrderTheSequences(int nseq,StSequence *los) {
     }
   }
 }
+int St_tpcdaq_Maker::getSector(Int_t isect) {
+  int rv;
+  if(daqInputFile) { // Use DAQ.
+    rv=0;
+    if(gDetectorReader) {
+      gZsr=gDetectorReader->getZeroSuppressedReader(isect); if(!gZsr) rv=7;
+    }
+  } else {           // Use TRS.
+    rv=mUnpacker->getSector(isect,mEvent);
+  }
+  return rv; // 0 means "no error".
+}
+int St_tpcdaq_Maker::getPadList(int whichPadRow,unsigned char **padlist) {
+  int rv;
+  if(daqInputFile) { // Use DAQ.
+    return (int)( gZsr->getPadList(whichPadRow,padlist));
+  } else {           // Use TRS.
+    rv=mUnpacker->getPadList(whichPadRow,padlist);
+  }
+  return rv;
+}
+int St_tpcdaq_Maker::getSequences(int row,int pad,int *nseq,StSequence **lst) {
+  int rv;
+  if(daqInputFile) { // Use DAQ.
+    return (int)(gZsr->getSequences(row,pad,nseq,(Sequence**)lst)); // Seq cast little dangerous
+  } else {           // Use TRS.
+    rv=mUnpacker->getSequences(row,pad,nseq,lst);
+  }
+  return rv; // < 0 means serious error.
+}
 int St_tpcdaq_Maker::Output() {
   St_raw_row *raw_row_in,*raw_row_out,*raw_row_gen;
   St_raw_pad *raw_pad_in,*raw_pad_out,*raw_pad_gen;
@@ -292,22 +322,27 @@ int St_tpcdaq_Maker::Output() {
   St_DataSet *sector;
   St_DataSetIter raw_data_tpc(m_DataSet); // m_DataSet set from name in ctor
   raw_sec_m_st singlerow;
-  Int_t isect;
   int pad,sectorStatus,ipadrow,npad,ipad,seqStatus,iseq,nseq,startTimeBin,ibin;
   int prevStartTimeBin,rowR,padR,seqR;  // row counters
   int iseqSave,pixTblWhere,seqLen,timeOff,numPadsWithSignal,pixOffset;
   int seqOffset,timeWhere;
   int nPixelThisPad,nSeqThisPadRow,offsetIntoPadTable;
   int nPixelPreviousPadRow;
-  int pixSave,pixR;
+  int isect,pixSave,pixR;
+  EventReader *er; 
   unsigned long int nPixelThisPadRow;
+  static long int offset=0L;
   StSequence *listOfSequences;
   St_raw_sec_m  *raw_sec_m = (St_raw_sec_m *) raw_data_tpc("raw_sec_m");
 
   if(!raw_sec_m) {
     raw_sec_m=new St_raw_sec_m("raw_sec_m",NSECT); raw_data_tpc.Add(raw_sec_m);
   }
-
+  if(daqInputFile) {
+    er=getEventReader(mFileDes,offset,0); if(!er) return 0; offset=er->NextEventOffset();
+    gDetectorReader=getDetectorReader(er,"TPCV2P0");
+    if(!gDetectorReader) { PP"Fatal error: Failed to get detector reader in tpcdaq.\n"); return 0; }
+  }
 
   // See "DAQ to Offline", section "Better example - access by padrow,pad",
   // modifications thereto in Brian's email, SN325, and Iwona's SN325 expl.
@@ -320,8 +355,7 @@ int St_tpcdaq_Maker::Output() {
     }
     MkTables(isect,sector,&raw_row_in,&raw_row_out,&raw_pad_in,&raw_pad_out, 
         &raw_seq_in,&raw_seq_out,&pixel_data_in,&pixel_data_out);
-    sectorStatus=mUnpacker->getSector(isect,mEvent);
-    if(sectorStatus) continue;
+    sectorStatus=getSector(isect); if(sectorStatus) continue;
     raw_row_gen=raw_row_out; raw_pad_gen=raw_pad_out; rowR=0; padR=0;
     raw_seq_gen=raw_seq_out; pixel_data_gen=pixel_data_out; seqR=0; pixR=0;
     nPixelPreviousPadRow=0;
@@ -333,12 +367,12 @@ int St_tpcdaq_Maker::Output() {
       }
       pixSave=pixR; iseqSave=seqR; nPixelThisPadRow=0; nSeqThisPadRow=0;
       offsetIntoPadTable=padR; pixTblWhere=0; numPadsWithSignal=0;
-      seqOffset=0; npad=mUnpacker->getPadList(ipadrow+1,&padlist); pixOffset=0;
+      seqOffset=0; npad=getPadList(ipadrow+1,&padlist); pixOffset=0;
       // printf("BBB isect=%d ,ipadrow=%d ,npad=%d \n",isect,ipadrow,npad);
       if(npad>0) pad=padlist[0];
       for( ipad=0 ; ipad<npad ; pad=padlist[++ipad] ) {
         nPixelThisPad=0;
-        seqStatus=mUnpacker->getSequences(ipadrow+1,pad,&nseq,&listOfSequences);
+        seqStatus=getSequences(ipadrow+1,pad,&nseq,&listOfSequences);
         OrderTheSequences(nseq,listOfSequences); // BBB writing on Brian's mem
         if(seqStatus<0) { PrintErr(seqStatus,'a'); mErr=__LINE__; return 7; }
         if(nseq) {
@@ -385,6 +419,7 @@ int St_tpcdaq_Maker::Output() {
           numPadsWithSignal,pixTblWhere,ipadrow);
       nPixelPreviousPadRow=nPixelThisPadRow;
     }   // ipadrow loop
+    delete gZsr;
   }     // sector loop
   singlerow.tfirst=1; 
   singlerow.tlast=512;
@@ -395,6 +430,7 @@ int St_tpcdaq_Maker::Output() {
     if(dataOuter[isect-1]) singlerow.RowRefOut='R'; else singlerow.RowRefOut='N';
     raw_sec_m->AddAt(&singlerow,isect-1);
   }
+  delete er; delete gDetectorReader;
   return 0;
 }
 /*------------------------------------------------------------------------
@@ -407,6 +443,7 @@ timeOff     pad         SeqWrite SeqWrite m              0x100
 ------------------------------------------------------------------------*/
 // BBB Brian don't forget LinArray[] ("DAQ to Offline").
 Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
+  if(daqInputFile) return 0;
 #ifdef TRS_SIMPLE
  mEvent=NULL;
  St_ObjectSet *decoder=(St_ObjectSet*)GetDataSet("Decoder"); if(!decoder) return 22;
@@ -422,7 +459,7 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
 Int_t St_tpcdaq_Maker::Make() {
   int ii,errorCode;
   mErr=0;
-  printf("I am Marilyn Monroe. St_tpcdaq_Maker::Make().\n");
+  printf("I am Leave it to Beaver. St_tpcdaq_Maker::Make().\n");
   errorCode=GetEventAndDecoder();
   printf("GetEventAndDecoder() = %d\n",errorCode);
   if(errorCode) {
@@ -443,7 +480,7 @@ void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
   printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.25 1999/05/01 03:39:52 ward Exp $ \n");
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.26 1999/06/21 22:27:08 ward Exp $ \n");
   printf("**************************************************************\n");
   if(Debug()) StMaker::PrintInfo();
 }

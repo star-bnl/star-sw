@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.4 1999/04/28 19:46:13 ward Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.5 1999/06/21 22:27:08 ward Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.5  1999/06/21 22:27:08  ward
+// Prototype connection to StDaqLib.
+//
 // Revision 1.4  1999/04/28 19:46:13  ward
 // QA histograms.
 //
@@ -56,8 +59,10 @@ class St_tpcdaq_Maker : public StMaker {
    TH1F *m_pad_numSeq;         // Happy sailing.
    TH1F *m_pix_AdcValue;       //
  public: 
-                  St_tpcdaq_Maker(const char *name="tpc_raw");
-   int mErr;
+   St_tpcdaq_Maker(const char *name="tpc_raw",char *daqInputFile=NULL); // If
+       // the 2nd arg (daqInputFile) is NULL, then we use TRS.
+   int mFileDes,mErr;
+   char *daqInputFile;
    
    void OrderTheSequences(int nseq,StSequence *los);
    void FatalError(int);
@@ -85,10 +90,9 @@ class St_tpcdaq_Maker : public StMaker {
    char *NameOfSector(int isect);
    void PrintErr(int,char);
    int Output();
-   int tpcSectorZgetSector(int j1,int *j2); // junk for early debugging
-   int tpcSectorZgetPadList(int ipad,char **padlist); // junk 4 early debugging
-   int myDecoderZgetSequences(int ipadrow,int pad,int *nseq,
-                 StSequence **listOfSequences); // junk for early debugging
+   int getSector(Int_t isect);
+   int getPadList(int whichPadRow,unsigned char **padlist);
+   int getSequences(int whichPadRow,int pad,int *nseq,StSequence **seqList);
    virtual       ~St_tpcdaq_Maker();
    virtual Int_t  Init();
    virtual Int_t  Make();
