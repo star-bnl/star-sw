@@ -9,7 +9,9 @@ using std::string;
 StiRootSimpleTrackFilter::StiRootSimpleTrackFilter()
   : StiTrackFilter(),
     EditableParameters()
-{}
+{
+  initialize();
+}
 
 
 StiRootSimpleTrackFilter::~StiRootSimpleTrackFilter()
@@ -81,6 +83,64 @@ void StiRootSimpleTrackFilter::setDefaults()
       par->reset();
     }
 }
+
+bool StiRootSimpleTrackFilter::accept(StiTrack * t) const
+{
+
+  int j=0;	double v;
+  if (parameterVector[j++]->getValue()) 
+    { 
+      v = t->getChi2();
+      if (v<parameterVector[j++]->getValue() || v>parameterVector[j++]->getValue())
+	return false;
+    }
+  if (parameterVector[j]->getValue()) 
+    {
+      v = t->getPseudoRapidity();  
+      if (v<parameterVector[j++]->getValue() || v>parameterVector[j++]->getValue())
+	return false;
+    }
+  if (parameterVector[j]->getValue()) 
+    { 
+      v = t->getPointCount();      
+      if (v<parameterVector[j++]->getValue()||v>parameterVector[j++]->getValue())
+	return false;
+    } 
+  if (parameterVector[j]->getValue()) 
+    {
+      v = t->getGapCount();
+      if (v<parameterVector[j++]->getValue()||v>parameterVector[j++]->getValue())
+	return false;
+    }
+  if (parameterVector[j]->getValue()) 
+    {
+      v = t->getPhi();     
+      if (v<parameterVector[j++]->getValue()||v>parameterVector[j++]->getValue())
+	return false;
+    }
+  if (parameterVector[j]->getValue()) 
+    { 
+      v = t->getPt();     
+      if (v<parameterVector[j++]->getValue()||v>parameterVector[j++]->getValue())
+	return false;
+    }
+  if (parameterVector[j]->getValue()) 
+    {
+      v = t->getP(); 
+      if (v<parameterVector[j++]->getValue()||v>parameterVector[j++]->getValue())
+	return false;
+    }
+  /*
+  if (parameterVector[j]->getValue()) 
+    { 
+      v = t->getNToNmaxPts();  
+      if (v<parameterVector[j++]->getValue()||v>parameterVector[j++]->getValue()) 
+	return false;
+    }
+  */
+  return true;
+}
+
 
 StiRootSimpleTrackFilterFactory::StiRootSimpleTrackFilterFactory(const string & newName, 
 								 int original,
