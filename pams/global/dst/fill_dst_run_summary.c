@@ -78,23 +78,17 @@ long  type_of_call fill_dst_run_summary_ (
    *:                                       very end of the event loop.
    *:
    *:      Sep 29, 1999       Margetis S.   Make it comply with new DSTs
+   *:      Jan 06, 2000       Lee Barnby    Remove unused variables.
    *:>--------------------------------------------------------------------
    */
 
   /*  ==================  Local Variables  ======================== */
   
-  int     irange, i, glb_trk_good;
-  int     itrk, ibin, iptbin, imtbin, ietabin, iphibin;
-  int     minbin, maxbin, binrange;
-  int     ivtx, vtx_id;
+  int     i, glb_trk_good, itrk;
   double  pi, piov2;
-  /* double  mt_histo[NBINS], pt_histo[NBINS], eta_histo[NBINS]; */  
-  /* float   pt_binsize, mt_binsize, eta_binsize, phi_binsize;   */  
-  float   dmt, deta1, deta2, mtweight1, mtweight2;
   float   pt, mt, eta ,phi, theta;
   float   n_events_good, mean, stddev;
   static  int     first_event=1;
-  static  int     nevents=0;
   static  double  pt_sum=0, pt2_sum=0, eta_sum=0, eta2_sum=0;
   static  double  nchgtrk_sum=0, nchgtrk2_sum=0, nvertx_sum=0, nvertx2_sum=0;
  

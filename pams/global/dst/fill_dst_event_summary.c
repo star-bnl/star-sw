@@ -13,6 +13,9 @@
 #endif
 #define DEBUG 0
 
+/* External routines*/
+#define gufld F77_NAME(gufld,GUFLD)
+extern void type_of_call gufld(float *, float *);
 /* Define global variables for defining ranges in pt, mt & eta  */
 float  pt_min, pt_max,  eta_min, eta_max;
 
@@ -78,18 +81,16 @@ long  type_of_call fill_dst_event_summary_ (
    *:                                       p_T vector) is set via
    *:                                       dst_summaryparam->n_phi_bins.
    *:      Sep 30, 1999       Margetis S.   Converted to new DST format
+   *:      Jan 06, 2000       Lee Barnby    Remove unused variables.
    *:>-------------------------------------------------------------------- 
    */
   
   /*  ==================  Local Variables  ======================== */
   int     irange, i;
   int     glb_trk_good, glb_trk_prim, glb_trk_plus, glb_trk_minus;
-  int     itrk, ibin, iptbin,  ietabin, iphibin;
-  int     minbin, maxbin, binrange,nphirange;
+  int     itrk, nphirange;
   int     ivtx, vtx_id, iflag;
   double  pi, piov2;
-  float   minval, maxval;
-  float   pt_binsize,  eta_binsize, phi_binsize; 
   float   pt, eta, rms_eta=0 ,phi, theta;
   float   mean_pt=0, mean_pt2=0, mean_eta=0 ;
   float   xlocal[3], bfield[3];
@@ -142,7 +143,7 @@ long  type_of_call fill_dst_event_summary_ (
   
   
   xlocal[0] =  xlocal[1] = xlocal[2] = 0.;
-  gufld_(xlocal,bfield);
+  gufld(xlocal,bfield);
   dst_eventsummary->field = bfield[2];      
 
 
