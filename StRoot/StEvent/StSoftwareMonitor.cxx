@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSoftwareMonitor.cxx,v 2.3 1999/11/05 11:36:00 ullrich Exp $
+ * $Id: StSoftwareMonitor.cxx,v 2.4 2000/12/08 03:53:41 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSoftwareMonitor.cxx,v $
+ * Revision 2.4  2000/12/08 03:53:41  ullrich
+ * Prepared hooks for ToF.
+ *
  * Revision 2.3  1999/11/05 11:36:00  ullrich
  * Added non-const version of methods
  *
@@ -29,6 +32,7 @@
 #include "StCtbSoftwareMonitor.h"
 #include "StGlobalSoftwareMonitor.h"
 #include "StL3SoftwareMonitor.h"
+#include "StTofSoftwareMonitor.h"
 #include "tables/St_dst_mon_soft_tpc_Table.h"
 #include "tables/St_dst_mon_soft_svt_Table.h"
 #include "tables/St_dst_mon_soft_ftpc_Table.h"
@@ -38,7 +42,7 @@
 #include "tables/St_dst_mon_soft_glob_Table.h"
 #include "tables/St_dst_mon_soft_l3_Table.h"
 
-static const char rcsid[] = "$Id: StSoftwareMonitor.cxx,v 2.3 1999/11/05 11:36:00 ullrich Exp $";
+static const char rcsid[] = "$Id: StSoftwareMonitor.cxx,v 2.4 2000/12/08 03:53:41 ullrich Exp $";
 
 ClassImp(StSoftwareMonitor)
 
@@ -52,6 +56,7 @@ StSoftwareMonitor::StSoftwareMonitor()
     mCtbMonitor = 0;
     mGlobalMonitor = 0;
     mL3Monitor = 0;
+    mTofMonitor = 0;
 }
 
 StSoftwareMonitor::StSoftwareMonitor(const dst_mon_soft_tpc_st* tpcMon,
@@ -63,6 +68,8 @@ StSoftwareMonitor::StSoftwareMonitor(const dst_mon_soft_tpc_st* tpcMon,
                                      const dst_mon_soft_glob_st* globalMon,
                                      const dst_mon_soft_l3_st* l3Mon)
 {
+    mTofMonitor = 0;   // no table
+
     if (tpcMon)
         mTpcMonitor = new StTpcSoftwareMonitor(*tpcMon);
     else
@@ -114,6 +121,7 @@ StSoftwareMonitor::~StSoftwareMonitor()
     delete mCtbMonitor;    mCtbMonitor = 0;
     delete mGlobalMonitor; mGlobalMonitor = 0;
     delete mL3Monitor;     mL3Monitor = 0;
+    delete mTofMonitor;    mTofMonitor = 0;
 }
 
 StSoftwareMonitor::StSoftwareMonitor(const StSoftwareMonitor& mon)
@@ -150,6 +158,10 @@ StSoftwareMonitor::StSoftwareMonitor(const StSoftwareMonitor& mon)
         mL3Monitor = new StL3SoftwareMonitor(*(mon.mL3Monitor));
     else
         mL3Monitor = 0;
+    if (mon.mTofMonitor)
+        mTofMonitor = new StTofSoftwareMonitor(*(mon.mTofMonitor));
+    else
+        mTofMonitor = 0;
 };
 
 StSoftwareMonitor&
@@ -164,6 +176,8 @@ StSoftwareMonitor::operator=(const StSoftwareMonitor& mon)
         delete mCtbMonitor;    mCtbMonitor = 0;
         delete mGlobalMonitor; mGlobalMonitor = 0;
         delete mL3Monitor;     mL3Monitor = 0;
+        delete mTofMonitor;    mTofMonitor = 0;
+	
         if (mon.mTpcMonitor)
             mTpcMonitor = new StTpcSoftwareMonitor(*(mon.mTpcMonitor));
         else
@@ -196,6 +210,10 @@ StSoftwareMonitor::operator=(const StSoftwareMonitor& mon)
             mL3Monitor = new StL3SoftwareMonitor(*(mon.mL3Monitor));
         else
             mL3Monitor = 0;
+	if (mon.mTofMonitor)
+	    mTofMonitor = new StTofSoftwareMonitor(*(mon.mTofMonitor));
+	else
+	    mTofMonitor = 0;
     }
     return *this;
 }
@@ -224,6 +242,9 @@ StSoftwareMonitor::global() const { return mGlobalMonitor; }
 const StL3SoftwareMonitor*
 StSoftwareMonitor::l3() const { return mL3Monitor; }
 
+const StTofSoftwareMonitor*
+StSoftwareMonitor::tof() const { return mTofMonitor; }
+
 StTpcSoftwareMonitor*
 StSoftwareMonitor::tpc() { return mTpcMonitor; }
 
@@ -247,6 +268,9 @@ StSoftwareMonitor::global() { return mGlobalMonitor; }
 
 StL3SoftwareMonitor*
 StSoftwareMonitor::l3() { return mL3Monitor; }
+
+StTofSoftwareMonitor*
+StSoftwareMonitor::tof() { return mTofMonitor; }
 
 void
 StSoftwareMonitor::setTpcSoftwareMonitor(StTpcSoftwareMonitor* val)
@@ -302,4 +326,11 @@ StSoftwareMonitor::setL3SoftwareMonitor(StL3SoftwareMonitor* val)
 {
     if (mL3Monitor) delete mL3Monitor;
     mL3Monitor = val;
+}
+
+void
+StSoftwareMonitor::setTofSoftwareMonitor(StTofSoftwareMonitor* val)
+{
+    if (mTofMonitor) delete mTofMonitor;
+    mTofMonitor = val;
 }
