@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   26/01/99  (E-mail: fine@bnl.gov)
-// $Id: St_TableSorter.h,v 1.15 1999/05/14 22:20:56 fine Exp $
+// $Id: St_TableSorter.h,v 1.16 1999/05/18 14:41:29 fine Exp $
 // $Log: St_TableSorter.h,v $
+// Revision 1.16  1999/05/18 14:41:29  fine
+// New methods: CountKey(), CountKeys(), FindFirstKey() have beent introduced
+//
 // Revision 1.15  1999/05/14 22:20:56  fine
 // CountKey and CountKeys methods have been introduced
 //
@@ -122,13 +125,14 @@ class St_TableSorter : public TNamed {
     St_TableSorter();
     St_TableSorter(const St_Table &table, TString &colName, Int_t firstRow=0,Int_t numbeRows=0);
 
-    St_TableSorter(const Float_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0);
+    St_TableSorter(const Float_t  *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0);
     St_TableSorter(const Double_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0);
-    St_TableSorter(const Long_t *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0);
+    St_TableSorter(const Long_t   *simpleArray, Int_t arraySize, Int_t firstRow=0,Int_t numberRows=0);
     virtual ~St_TableSorter();
     
-    virtual Int_t CountKey(const void *key, Int_t firstIndx=0) const;
-    virtual Int_t St_TableSorter::CountKeys() const;
+    virtual Int_t CountKey(const void *key, Int_t firstIndx=0,Bool_t bSearch=kTRUE,Int_t *firstRow=0);
+    virtual Int_t CountKeys();
+    virtual Int_t FindFirstKey(const void *key);
  
     Int_t BinarySearch(Float_t  value );
     Int_t BinarySearch(Int_t    value );
@@ -147,20 +151,20 @@ class St_TableSorter : public TNamed {
     virtual const Text_t   *GetTableName()  const;
     virtual const Text_t   *GetTableTitle() const;
     virtual const Text_t   *GetTableType()  const;
-    virtual       St_Table *GetTable() const;
+    virtual       St_Table *GetTable()      const;
     virtual       Int_t     GetNRows()      const { return m_numberOfRows;}
     virtual       Int_t     GetFirstRow()   const { return m_firstRow;}
 
     Int_t operator[](Int_t value)    { return BSearch(value); }
     Int_t operator[](Double_t value) { return BSearch(value); } 
     Int_t operator[](const Char_t *value) { return BSearch(value); }
-    Int_t operator[](TString &value) { return BSearch(value); }
+//    Int_t operator[](TString &value) { return BSearch(value); }  // to be implemented
 
     Int_t operator()(Float_t value)  { return BinarySearch(value); }
     Int_t operator()(Int_t value)    { return BinarySearch(value); }
     Int_t operator()(Double_t value) { return BinarySearch(value); }
-    Int_t operator()(const Char_t *value) { return BinarySearch(*value); }
-//    Int_t operator()(TString &value)    { return *this(value.Data());  }
+//    Int_t operator()(const Char_t *value) { return BinarySearch(*value); } // to be implemented
+//    Int_t operator()(TString &value)    { return *this(value.Data());  }   // to be implemented
 
     ClassDef(St_TableSorter,0)
 };
