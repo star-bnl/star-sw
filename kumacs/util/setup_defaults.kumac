@@ -10,6 +10,7 @@ macro run
   macro/global/import *
     
   DEFAULT = _
+[TOP],_
 [TOP]/kumacs/chain,_
 [TOP]/kumacs/ctf,_
 [TOP]/kumacs/emc,_
