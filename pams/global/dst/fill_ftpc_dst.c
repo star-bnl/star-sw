@@ -75,6 +75,8 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
    */
   
   /*  ==================  Local Variables  ======================== */
+  int     i;
+  int     ivtx_prim;
   int     itrk;
   int     iPoint;
   int     ftpcx, ftpcy, ftpcz;
@@ -84,12 +86,14 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
   float   xsq, ysq;
   /* ===========================  Begin Executable Code  =============== */
   
-/*DEBUG*/
- int i;
-  for (i=0; i<10; i++) {
-      printf("%d,%f,%f,%f\n",i,fppoint[i].x,fppoint[i].y,fppoint[i].z);
+  /* Locate primary vertex  */
+  ivtx_prim = -1;
+  for (i=0; i<dst_vertex_h->nok; i++) {
+    if (dst_vertex[i].vtx_id = 1 ){
+       ivtx_prim = i;
+       break;
+    } 
   }
-/*DEBUG*/
 
   /* Loop over all tracks in FTPC track table */
   for (itrk=0; itrk<fptrack_h->nok; itrk++) {
@@ -186,7 +190,16 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
     dst_track[dst_track_h->nok].ndegf   = 0;              
     dst_track[dst_track_h->nok].id_global_pid         = 0; 
     dst_track[dst_track_h->nok].id_hypo_pid           = 0;
-    dst_track[dst_track_h->nok].id_start_vertex       = 0;
+/* CURRENTLY treating ALL ftpc tracks as if they are primary tracks */
+    if (ivtx_prim >= 0 ) {
+       dst_track[dst_track_h->nok].id_start_vertex       = 
+                    dst_vertex[ivtx_prim].id;
+/* Increase number of charged daughter tracks for primary vertex */
+       dst_vertex[ivtx_prim].n_daughters = dst_vertex[ivtx_prim].n_daughters++;  
+    }
+    else {
+        dst_track[dst_track_h->nok].id_start_vertex  = 0;
+    }
     dst_track[dst_track_h->nok].id_stop_vertex        = 0;
     dst_track[dst_track_h->nok].id_emc                = 0;
     dst_track[dst_track_h->nok].id_smd                = 0;
@@ -294,9 +307,6 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
        }
     }   /* End of filling dst point bank for current track */
 
-
-/* Increase number of charged daughter tracks for primary vertex */
-/*  dst_vertex[1].n_daughters = dst_vertex[1].n_daughters++;  */
 
 /*  Fill dst_dedx table   */
 
