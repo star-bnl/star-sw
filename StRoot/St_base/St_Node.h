@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_Node.h,v 1.11 1999/04/13 14:26:40 fine Exp $
+// $Id: St_Node.h,v 1.12 1999/04/19 00:05:15 fine Exp $
 // $Log: St_Node.h,v $
+// Revision 1.12  1999/04/19 00:05:15  fine
+// New class St_PolylineShape has been introduced
+//
 // Revision 1.11  1999/04/13 14:26:40  fine
 // Geometry-based dataset implementation, next step
 //
@@ -77,6 +80,7 @@ class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill {
    virtual Int_t            DistancetoNodePrimitive(Int_t px, Int_t py,St_NodePosition *position=0);
            void             SetPositionsList(TList *list=0){AddObject((TObject *)list);}
    virtual void             PaintNodePosition(Option_t *option="",St_NodePosition *postion=0);
+   friend class St_PolyLineShape;
  public:
         St_Node();
         St_Node(const Text_t *name, const Text_t *title, const Text_t *shapename, Option_t *option="");
