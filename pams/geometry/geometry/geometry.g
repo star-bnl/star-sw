@@ -6,13 +6,13 @@
 *                                                                         *
 *  Update history:                                                        *
 *  08/19/98, PN: tof is not part of year_2a                               *
-*  08/20/98, PJ:                                                          *
+*  12/04/98, PN: rich  + upstream part + zero degree calo                 *
 *                                                                         *
 ***************************************************************************
    Implicit   none
-   Logical    cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,
-              mfld,mwc,pse,tof,four,ems,on/.true./,off/.false./
-   real       Par(1000),field,dcay(5),shift
+   Logical    cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,upst,rich,
+              zcal,mfld,mwc,pse,tof,t25,t1,four,ems,on/.true./,off/.false./
+   real       Par(1000),field,dcay(5),shift(2)
    Integer    LENOCC,LL,IDEB,Nsi,i,j,l,nmod(2)
    character  Commands*4000
 * - - - - - - - - - - - - - - - - -
@@ -26,16 +26,16 @@ replace[;ON#{#;] with [
 *
    call ASLGETBA ('GEOM','DETP',1000,LL,Par)
    If (JVOLUM>0) call AGDROP ('*')
-   IDEB = IDEBUG; J=1
+   IDEB = IDEBUG
 *
 * -------------------- set GSTAR absolute default ------------------------
 * Set only flags for the main configuration (everthing on, except for tof),
 * but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
 * If an empty or no DETP GEOM was issued, geometry is defined externally.
 *
-   {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld} = on;
+   {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
    {mwc,four,pse}=on      "MultiWire Chambers, 4th Si layer, pseudopadrows"   
-   {tof,ems}=off                      "TimeOfFlight, EM calorimeter Sector"
+   {tof,t25,t1,ems,rich}=off          "TimeOfFlight, EM calorimeter Sector"
    field=5;  Nsi=7;                                    "defaults constants"
    Commands=' '
 *
@@ -57,8 +57,7 @@ If LL>1
   TOFMAX        = 1.e-4 
   NtrSubEv      = 1000
 *
-  do while (j>0)
-  j=0
+  for(j=1;j>0;) { j=0;
   on HELP       { you may select the following keywords: ;
                   <W>;('---------------:----------------------------- ');
                   <W>;('Configurations : complete,tpc_only,field_only ');
@@ -71,11 +70,11 @@ If LL>1
                   <W>;('Default: complete STAR with hadr_on  ');
                   <W>;('--------------------------------------------- ');
                 }  
-  on COMPLETE   { Complete STAR geometry;      tof=on;                        }
+  on COMPLETE   { Complete STAR geometry;                             tof=on; }
   on YEAR_1A    { poor approximation to year1: TPC+CTB+FTPC;      
                                               {vpdd,calb,ecal}=off;    Nsi=0; }
-  on YEAR_1B    { better year1: TPC+CTB+FTPC+calo patch, no svt; 
-                                              {vpdd,ecal}=off; ems=on; Nsi=0; }
+  on YEAR_1B    { better year1: TPC+CTB+FTPC+calo patch+RICH, no svt; 
+                                  {vpdd,ecal}=off;  {rich,ems,t1}=on;  Nsi=0; }
   on YEAR_1C    { not a year1:  TPC+CTB+FTPC+calo;  {vpdd,ecal}=off;   Nsi=0; }
   on YEAR_2A    { asymptotic STAR;                                   tof=off; }
   on HADR_ON    { all Geant Physics On;                                       }
@@ -99,63 +98,64 @@ If LL>1
   on SPLIT_ON   { events will be split into subevents;         NtrSubEv=1000; }
   on DEBUG_ON   { verbose mode, some graphics; Idebug=max(Idebug,1); Itest=1; }
   on DEBUG_OFF  { standard debug mode;         {Idebug,Itest}=0;              }
-  enddo
- }
-
+  }
 * sanity check - if something left in commands (unknown keyword), we stop!
   l=LENOCC(commands); if l>0
   {  print *,' Unknown command left => ', commands(1:l), ' <= ',l
      if (Ideb<3) stop 'You better stop here to avoid problems'     
   }
-*
+}
 * -------------------- setup selected configuration ------------------------
 * Now when all parameters and flags are ready, make gstar work as usually
 * ie put a MODE or/and DETP command and executing them for selected systems.
 *
-
 * - to save secondaries AFTER all decays:      DETP TRAC DCAY 210 210 0.1 0.01
    dcay={210,210,0.1,0.01}
-   call AgDETP new ('Trac')
+   If (LL>1) call AgDETP new ('Trac')
    call AgDETP add ('TracDCAY',dcay,4)
 *
    if (cave) Call cavegeo
    if (pipe) Call pipegeo
+   if (upst) Call upstgeo
+   if (zcal) Call zcalgeo
 
    Call AGSFLAG('SIMU',2)
 * - to switch off the fourth svt layer:        DETP SVTT SVTG.nlayer=6 
-   call AgDETP new ('svtt')
+   If (LL>1) call AgDETP new ('SVTT')
    if (svtt & Nsi < 7) call AgDETP add ('svtg.nlayer=',Nsi,1)
    if (svtt) Call svttgeo
  
 * - MWC or pseudo padrows needed ? DETP TPCE TPCG(1).MWCread=0 TPRS(1).super=1
 *  CRAY does not accept construction: IF (mwc==off) ... I do it differntly:
 
-   call AgDETP new ('tpce')
+   If (LL>1) call AgDETP new ('TPCE')
    If (tpce &.not.mwc) call AgDETP add ('tpcg(1).MWCread=',0,1)
    If (tpce &.not.pse) call AgDETP add ('tprs(1).super='  ,1,1) 
    if (tpce) Call tpcegeo
    if (ftpc) Call ftpcgeo
 
 * - tof system should be on (for year 2):      DETP BTOF BTOG.choice=2
-   call AgDETP new ('btof')
+   If (LL>1) call AgDETP new ('BTOF')
    if (tof)  call AgDETP add ('btog.choice=',2,1)
+   if (t25)  call AgDETP add ('btog.choice=',3,1)
+   if (t1)   call AgDETP add ('btog.choice=',4,1)
    if (btof) Call btofgeo
      
    Call AGSFLAG('SIMU',1)
    if (vpdd) Call vpddgeo
 
 *  - barrel calorimeter may be a patch of 12 modules at the left side
-   Call AgDETP new ('calb')
-   nmod={0,12};  shift=51
+   nmod={12,0};  shift={51,0}
+   If (LL>1) call AgDETP new ('CALB')
    if (ems)  call AgDETP add ('calg.nmodule=',Nmod,2)
-   if (ems)  call AgDETP add ('calg.shift=',shift,1)
+   if (ems)  call AgDETP add ('calg.shift=',shift,2)
    if (calb) Call calbgeo
-
+   if (rich) Call richgeo
    if (ecal) Call ecalgeo
    if (magp) Call magpgeo
 *
 * - reset magnetic field value (default is 5): DETP MFLD MFLG.Bfield=5
-   call AgDETP new ('MFLD')
+   If (LL>1) call AgDETP new ('MFLD')
    if (mfld & field!=5) call AgDETP add ('MFLG(1).Bfield=',field,1)
    if (mfld) Call mfldgeo
 *
@@ -168,28 +168,5 @@ If LL>1
    call agphysi
 *
    end
-*
-******************************temporary here***********************************
-*
-   subroutine  AgDETP add (Cpar,p,N)
-+CDE,Typing,GCBANK,SCLINK.
-   Character   Cpar*(*),EQ*1/'='/,Cd*4/'none'/
-   Integer     LENOCC,Par(1000),p(N),N,L,I,J,LL,Id/0/,Ld
-   Real        R
-   Equivalence (R,I)
-*
-    call ASLGETBA (Cd,'DETP',1000,LL,Par)
-    L=Lenocc(Cpar)
-    Call UCTOH (Cpar,Par(LL+1),4,L);  LL+=(L+3)/4
-    do j=1,N  { I=p(j); if (abs(I)<10000) R=p(j);  LL+=1; Par(LL)=I; }   
-    call ASLSETBA (Cd,'DETP',LL,Par)
-    return
-*
-    entry AgDETP new (Cpar)
-    Cd=Cpar;  Call CLTOU(cd);  call asbdete (Cd,id)
-    call ASLDETBA (Cd,'DETP',1,Ld);  If (Ld>0) call MZDROP (IxCons,Ld,' ')
-*
-   end
-
 
 
