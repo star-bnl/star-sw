@@ -1,7 +1,10 @@
 //*-- Author : Jan Balewski
 //  
-// $Id: histoLPproject.cxx,v 1.3 2001/04/12 15:19:09 balewski Exp $
+// $Id: histoLPproject.cxx,v 1.4 2001/04/19 21:30:37 balewski Exp $
 // $Log: histoLPproject.cxx,v $
+// Revision 1.4  2001/04/19 21:30:37  balewski
+// add I/O to ppDst
+//
 // Revision 1.3  2001/04/12 15:19:09  balewski
 // *** empty log message ***
 //
@@ -21,7 +24,6 @@
 #include <math.h>
 #include <stdio.h>
 #include "StppLPprojectMaker.h"
-#include "StppMiniDst.h"
 
 #include "TH2.h"
 

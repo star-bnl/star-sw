@@ -1,6 +1,9 @@
 //*-- Author : Jan Balewski 
-// $Id: StSpinSortMaker.cxx,v 1.2 2001/04/19 15:33:17 balewski Exp $
+// $Id: StSpinSortMaker.cxx,v 1.3 2001/04/19 21:30:36 balewski Exp $
 // $Log: StSpinSortMaker.cxx,v $
+// Revision 1.3  2001/04/19 21:30:36  balewski
+// add I/O to ppDst
+//
 // Revision 1.2  2001/04/19 15:33:17  balewski
 // *** empty log message ***
 //
@@ -178,8 +181,9 @@ void StSpinSortMaker::readDB(){
 	 (int)fEvtHddr->GetUTime(),fEvtHddr->GetDate(),fEvtHddr->GetTime());
 
  time0=fEvtHddr->GetUTime( ); //<<==== this is used by DB
- TDataSet *mdb=GetDataBase("TestScheme/rhic/scheme"+sVersion);
- printf("mdb add=%d\n",(int)mdb);
+ TString myDBname="TestScheme/rhic/scheme"+sVersion;
+ TDataSet *mdb=GetDataBase(myDBname);
+ printf("mdb name=\"%s\" add=%d\n",myDBname.Data(),(int)mdb);
  assert(mdb);
 
 
