@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.9 2002/11/18 14:29:31 laue Exp $
+ * $Id: StMuChainMaker.cxx,v 1.10 2002/11/27 20:37:02 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -194,10 +194,9 @@ void StMuChainMaker::fromDir(string dir, int maxFiles) {
     if( strcmp(fileName,".")==0 || strcmp(fileName,"..")==0) good=false;
     if( strcmp(fileName,".root")==0 || strcmp(fileName,"..")==0) good=false;
     if ( name.find(".MuDst.root")==string::npos ) good=false;
-    if ( pass(name,mSubFilters) ) {
+    if ( good && pass(name,mSubFilters) ) {
       char* fullFile = gSystem->ConcatFileName(dir.c_str(),fileName);
       // add it to the chain
-      cout << mFileCounter << endl;
       add( fullFile );
       delete []fullFile;
     }
@@ -234,7 +233,7 @@ void StMuChainMaker::fromList(string list, int maxFiles) {
 //-----------------------------------------------------------------------
 void StMuChainMaker::fromFile(string file, int maxFiles) {
   DEBUGMESSAGE2("");
-  cout << mTreeName.c_str() << endl;
+  DEBUGMESSAGE2(mTreeName.c_str());
   add( file );
 }
 //-----------------------------------------------------------------------
@@ -252,6 +251,9 @@ bool StMuChainMaker::pass(string file, string* filters) {
 /***************************************************************************
  *
  * $Log: StMuChainMaker.cxx,v $
+ * Revision 1.10  2002/11/27 20:37:02  laue
+ * output removed
+ *
  * Revision 1.9  2002/11/18 14:29:31  laue
  * update for Yuri's new StProbPidTraits
  *
