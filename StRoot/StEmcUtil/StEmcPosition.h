@@ -37,11 +37,11 @@ class StEmcPosition : public TObject
              StEmcPosition();
     virtual  ~StEmcPosition();
 
-    Bool_t            projTrack(StThreeVectorD*, StThreeVectorD*, StTrack*, Double_t, Double_t = 225.405);    ///< Track projection utility
-    Bool_t            projTrack(StThreeVectorD*, StThreeVectorD*, StMcTrack*, Double_t, Double_t = 225.405);  ///< Track projection utility
+    Bool_t            projTrack(StThreeVectorD*,StThreeVectorD*,StTrack*,Double_t,Double_t=225.405,Int_t=1);    ///< Track projection utility
+    Bool_t            projTrack(StThreeVectorD*,StThreeVectorD*,StMcTrack*,Double_t,Double_t=225.405,Int_t=1);  ///< Track projection utility
     
-    Bool_t            trackOnEmc(StThreeVectorD*, StThreeVectorD*, StTrack*, Double_t, Double_t = 225.405);   ///< Track projection utility
-    Bool_t            trackOnEmc(StThreeVectorD*, StThreeVectorD*, StMcTrack*, Double_t, Double_t = 225.405); ///< Track projection utility
+    Bool_t            trackOnEmc(StThreeVectorD*,StThreeVectorD*,StTrack*,Double_t,Double_t=225.405);   ///< Track projection utility
+    Bool_t            trackOnEmc(StThreeVectorD*,StThreeVectorD*,StMcTrack*,Double_t,Double_t=225.405); ///< Track projection utility
     
     Int_t             getTowerEtaPhi(Double_t, Double_t, Float_t*, Float_t*);                                 ///< Return tower eta/phi
 
@@ -51,7 +51,7 @@ class StEmcPosition : public TObject
 		Int_t             getNextId(Int_t,Int_t,Int_t,Int_t,Int_t,Int_t);                                         ///< Return neighbor id (works for all detectors 1=bemc, 2=bprs, 3=bsmde, 4=bsmdp)
 
 		Float_t           getDistTowerToTrack(Double_t, Double_t, Int_t, Int_t);                                  ///< Return distance from track to center of one tower
-    
+
     StThreeVectorF    getPosFromVertex(StVertex*,Int_t);        ///< Return Position from collision vertex
     StThreeVectorF    getPosFromVertex(StMcVertex*,Int_t);      ///< Return position from collision vertex
     Float_t           getThetaFromVertex(StVertex*,Int_t);      ///< Return theta of the tower considering the collision vertex

@@ -37,25 +37,51 @@ StEmcPosition::~StEmcPosition()
 }
 //------------------------------------------------------------------------------
 Bool_t StEmcPosition::projTrack( StThreeVectorD* atFinal, StThreeVectorD* momentumAtFinal, 
-                            StTrack* track, Double_t magField, Double_t radius )
+                            StTrack* track, Double_t magField, Double_t radius, Int_t option )
 {
   StThreeVectorD Zero(0,0,0);
   *atFinal=Zero;
   *momentumAtFinal=Zero;
-  
+
   const StThreeVectorF& origin = track->geometry()->origin();
   const StThreeVectorF& momentum = track->geometry()->momentum();
   Double_t charge = track->geometry()->charge();
   StPhysicalHelixD* helix = new StPhysicalHelixD( momentum, origin, magField*tesla, charge );
   pairD pathLength = helix->pathLength( radius );
-  Double_t s = 0;
-  if ( pathLength.first > 0 ) s = pathLength.first;
-  else 
+  
+  Double_t s,s1,s2, mods2s1Diff;  
+  s=0;
+  s1 = pathLength.first;
+  s2 = pathLength.second;
+  
+  Bool_t goProj;
+  goProj = kFALSE;
+  
+  if ( option == 1)
   {
-    if ( pathLength.second > 0 ) s = pathLength.second;
+    if (s1 >= 0 && s2 >= 0)
+    {  
+      if (s1 < s2) s = s1;
+      else s = s2;
+      goProj = kTRUE;
+    }
+    if (s1 >= 0 && s2 < 0) { s = s1; goProj = kTRUE; }
+    if (s1 < 0 && s2 >= 0) { s = s2; goProj = kTRUE; }
   }
   
-  if ( s > 0 )  
+  if ( option == -1)
+  {
+    if (s1 <= 0 && s2 <= 0)
+    {  
+      if (fabs(s1) < fabs(s2)) s = s1;
+      else s = s2;
+      goProj = kTRUE;
+    }
+    if (s1 <= 0 && s2 > 0) { s = s1; goProj = kTRUE; }
+    if (s1 > 0 && s2 <= 0) { s = s2; goProj = kTRUE; }
+  }
+ 
+  if (goProj) 
   {
     *atFinal = helix->at( s );
     *momentumAtFinal = helix->momentumAt( s, magField*tesla );
@@ -63,31 +89,57 @@ Bool_t StEmcPosition::projTrack( StThreeVectorD* atFinal, StThreeVectorD* moment
     delete helix;
     return kTRUE;
   }
-  //else cout << " Projection of track failed - invalid radius " << endl;
-  delete helix;
-  return kFALSE;    
+  else 
+    return kFALSE;
+  // cout << " Projection of track failed - invalid radius " << endl;
 }
 //------------------------------------------------------------------------------
 Bool_t StEmcPosition::projTrack( StThreeVectorD* atFinal, StThreeVectorD* momentumAtFinal, 
-                            StMcTrack* track, Double_t magField, Double_t radius )
+                            StMcTrack* mcTrack, Double_t magField, Double_t radius, Int_t option )
 {
   StThreeVectorD Zero(0,0,0);
   *atFinal=Zero;
   *momentumAtFinal=Zero;
   
-  const StThreeVectorF& origin = track->startVertex()->position();
-  const StThreeVectorF& momentum = track->momentum();
-  Double_t charge = track->particleDefinition()->charge();
+  const StThreeVectorF& origin = mcTrack->startVertex()->position();
+  const StThreeVectorF& momentum = mcTrack->momentum();
+  Double_t charge = mcTrack->particleDefinition()->charge();
   StPhysicalHelixD* helix = new StPhysicalHelixD( momentum, origin, magField*tesla, charge );
   pairD pathLength = helix->pathLength( radius );
-  Double_t s = 0;
-  if ( pathLength.first > 0 ) s = pathLength.first;
-  else 
+  
+  Double_t s,s1,s2, mods2s1Diff;  
+  s=0;
+  s1 = pathLength.first;
+  s2 = pathLength.second;
+  
+  Bool_t goProj;
+  goProj = kFALSE;
+  
+  if ( option == 1)
   {
-    if ( pathLength.second > 0 ) s = pathLength.second;
+    if (s1 >= 0 && s2 >= 0)
+    {  
+      if (s1 < s2) s = s1;
+      else s = s2;
+      goProj = kTRUE;
+    }
+    if (s1 >= 0 && s2 < 0) { s = s1; goProj = kTRUE; }
+    if (s1 < 0 && s2 >= 0) { s = s2; goProj = kTRUE; }
   }
-
-  if ( s > 0 )  
+  
+  if ( option == -1)
+  {
+    if (s1 <= 0 && s2 <= 0)
+    {  
+      if (fabs(s1) < fabs(s2) ) s = s1;
+      else s = s2;
+      goProj = kTRUE;
+    }
+    if (s1 <= 0 && s2 > 0) { s = s1; goProj = kTRUE; }
+    if (s1 > 0 && s2 <= 0) { s = s2; goProj = kTRUE; }
+  }
+ 
+  if (goProj) 
   {
     *atFinal = helix->at( s );
     *momentumAtFinal = helix->momentumAt( s, magField*tesla );
@@ -95,9 +147,10 @@ Bool_t StEmcPosition::projTrack( StThreeVectorD* atFinal, StThreeVectorD* moment
     delete helix;
     return kTRUE;
   }
-  // else cout << " Projection of track failed - invalid radius " << endl;
-  delete helix;
-  return kFALSE;    
+  else 
+    return kFALSE;
+  // cout << " Projection of track failed - invalid radius " << endl;
+  
 }
 
 //------------------------------------------------------------------------------
