@@ -1,5 +1,8 @@
-* $Id: tpt_form_segments.F,v 1.11 2000/03/29 03:42:08 sakrejda Exp $
+* $Id: tpt_form_segments.F,v 1.12 2000/11/29 23:16:15 genevb Exp $
 * $Log: tpt_form_segments.F,v $
+* Revision 1.12  2000/11/29 23:16:15  genevb
+* Stop when maximum tracks reached
+*
 * Revision 1.11  2000/03/29 03:42:08  sakrejda
 * Assigning points to a track moved to the tpt_load_track routine
 *
@@ -182,6 +185,8 @@ C	                better than the saved one
                   write(m132(1),*)'TPTMAKES1-E1 too many track candidates'
                   write(m132(2),*)'track table size', mxtrack
                   call Message( m132, 2, idI1 )
+                  tpt_form_segments = STAFCV_BAD
+                  return
                endif ! end of check on room in the tracks table
 
 C              if there was a good track load it and mark all the hits
