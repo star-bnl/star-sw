@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.16 2002/02/27 19:09:22 ullrich Exp $
+ * $Id: StTrack.cxx,v 2.17 2002/03/14 17:42:31 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.17  2002/03/14 17:42:31  ullrich
+ * Added method to set mNumberOfPossiblePoints.
+ *
  * Revision 2.16  2002/02/27 19:09:22  ullrich
  * Updated fittingMethod(): L3 added.
  *
@@ -74,7 +77,7 @@
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.16 2002/02/27 19:09:22 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.17 2002/03/14 17:42:31 ullrich Exp $";
 
 StTrack::StTrack()
 {
@@ -335,6 +338,9 @@ StTrack::addPidTraits(StTrackPidTraits* val) { mPidTraitsVec.push_back(val); }
 
 void
 StTrack::setDetectorInfo(StTrackDetectorInfo* val) { mDetectorInfo = val; }
+
+void         
+StTrack::setNumberOfPossiblePoints(unsigned short val) {mNumberOfPossiblePoints = val;}
 
 void
 StTrack::setNode(StTrackNode* val) { mNode = val; }
