@@ -2,6 +2,9 @@
 // $Id EfficiencyAnalysis.cxx $
 //
 // $Log: EfficiencyAnalysis.cxx,v $
+// Revision 1.6  2003/07/22 17:20:24  pruneau
+// adding performance evaluation tools
+//
 // Revision 1.5  2003/07/09 01:08:07  calderon
 // Changes to access StMiniMcEvent through methods, rather than data members
 //
@@ -1195,6 +1198,7 @@ int EfficiencyAnalysis::fillHistograms(StMiniMcEvent* minimcevent) {
 	primaryPhiBiasVsP->Fill(p,(phirec-phi));
 	primaryPhiBiasVsPhi->Fill(phi,(phirec-phi));
 
+	//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	PtDistVsPt->Fill(pt,(ptrec-pt));
 	PxDistVsPx->Fill(fabs(px),(pxrec-px));
 	PxDistVsPt->Fill(pt,(pxrec-px));
