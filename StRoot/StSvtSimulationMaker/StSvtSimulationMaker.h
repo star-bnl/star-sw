@@ -1,7 +1,13 @@
-// $Id: StSvtSimulationMaker.h,v 1.12 2004/03/30 21:27:12 caines Exp $
+// $Id: StSvtSimulationMaker.h,v 1.13 2004/07/01 13:54:29 caines Exp $
 // $Log: StSvtSimulationMaker.h,v $
+// Revision 1.13  2004/07/01 13:54:29  caines
+// Changes to the simulation maker from the review
+//
 // Revision 1.12  2004/03/30 21:27:12  caines
 // Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
+//
+// Revision 1.11  2004/02/24 15:53:22  caines
+// Read all params from database
 //
 // Revision 1.10  2004/01/22 16:30:47  caines
 // Getting closer to a final simulation
@@ -67,6 +73,15 @@ class StSvtWaferCoordinate;
 class StSvtCoordinateTransform;
 class StSvtT0;
 
+/*!
+ *
+ * \class  StSvtSimulationMaker
+ * \author Chaloupka
+ * \date   2004/07/29
+ * \brief SVT Slow Simulator
+ *        Simulates hits in SVT based on geant data and database information  
+ */
+
 
 class StSvtSimulationMaker : public StMaker
 {
@@ -74,12 +89,11 @@ class StSvtSimulationMaker : public StMaker
   StSvtSimulationMaker(const char* name = "SvtSimulator");
   virtual ~StSvtSimulationMaker(); //** destructor should be virtual
 
-  //seting different options and configurations
- 
-  Int_t setOptions(char* option1, int option2, int option3, int option4);
+  ///seting different options and configurations - for testing purposes
+   Int_t setOptions(char* option1, int option2, int option3, int option4);
   Int_t setConst(double timBinSize, double anodeSize);
  
-  //inherited maker routines
+  ///inherited maker routines
   virtual Int_t Init();
   virtual Int_t Make();
   virtual void  Clear(const char *opt);
@@ -87,6 +101,7 @@ class StSvtSimulationMaker : public StMaker
   virtual Int_t InitRun(int runumber); 
   virtual Int_t FinishRun(int oldrunumber);
 
+  /// only these three constants influence the physics of electron cloud expansion 
   void setElectronLifeTime(double tLife);
   void setTrappingConst(double trapConst);
   void setDiffusionConst(double diffConst);
@@ -99,9 +114,6 @@ class StSvtSimulationMaker : public StMaker
   void FillGeantHit(int barrel, int ladder, int wafer, int hybrid,
                     StSvtWaferCoordinate* waferCoord,StThreeVector<double>* VecG,
 		    StThreeVector<double>* VecL, double peak);  
-/*
- 
-*/
 
 
   Int_t getConfig();
@@ -132,11 +144,11 @@ class StSvtSimulationMaker : public StMaker
   Int_t  mNumOfHybrids;         //!could be used to override number of simulated hybrids
   double mDefaultDriftVelocity; //! obsolete? - used if no database, error might be better
 
-  //data for whole simulation
+  ///data for whole simulation
   StSvtConfig                  *mConfig;              //! created in constructor (desctructor kills)
   Bool_t                        mDoEmbedding;         //! embedding or plain simulation?
 
-  //tools-owned by maker
+  ///tools-owned by maker
   StSvtAngles                  *mSvtAngles;          //! created in Init (desctructor kills)
   StSvtElectronCloud           *mElectronCloud;      //! created in Init (desctructor kills)
   StSvtSimulation              *mSvtSimulation;      //! created in Init (desctructor kills)
@@ -148,19 +160,19 @@ class StSvtSimulationMaker : public StMaker
   StSvtT0                      *mT0;                 //! 
           
  
-  //data for each event
+  ///data for each event - get deleted in ::Clear(), including the data inside
   StSvtData                         *mSvtSimPixelColl;    //! the simulated data - created for each run InitRun{in beginAnalyses} 
   StSvtData                         *mSvt8bitPixelColl;   //! simulated final result written to 8 bits - would be cleaner if owned by OnlSeqAdj
   StSvtData                         *mSvtGeantHitColl;    //!
   
-  //for debugging
+  ///for debugging
   int                          *counter;                //!
   TFile                        *mNtFile;                //! 
   TNtuple                      *mNTuple;                //! 
     
 
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.12 2004/03/30 21:27:12 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.13 2004/07/01 13:54:29 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
 
   ClassDef(StSvtSimulationMaker,3)
 

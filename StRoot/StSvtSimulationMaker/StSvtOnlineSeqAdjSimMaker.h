@@ -2,7 +2,8 @@
 #define STSVTONLINESEQADJSIM_HH
 
 #include "Stiostream.h"
-#include <stdlib.h>
+#include <cstdlib>
+using namespace std;
 #include "StMaker.h"
 
 class StSvtConfig;
@@ -15,7 +16,17 @@ class StSvtDaq;
 
 //used bad anode list is the same as in StSvtSeqAdjMaker => no difference between online and offline
 
-
+/*!
+ *
+ * \class  StSvtOnlineSeqAdjSimMaker
+ * \author Chaloupka
+ * \date   2004/07/29
+ * \brief  Simulates proceses in the DAQ for SVT Slow Simulator:
+ *         10 to 8 bit conversion, killing of bad anodes,
+ *         writing out of black anodes, online zero surpression.
+ *           
+ *
+ */
 class StSvtOnlineSeqAdjSimMaker:public StMaker
 {
 public:
@@ -49,8 +60,8 @@ public:
   int GetPedOffset(){return mPedOffset;}
   
   void SetAdjParams(int thresh_lo,int n_seq_lo,int thresh_hi,int n_seq_hi);
- 
- //inherited maker routines
+  
+  ///inherited maker routines
   virtual Int_t Init();
   virtual Int_t Make();
   virtual void  Clear(const char *opt);
@@ -58,23 +69,25 @@ public:
   virtual Int_t InitRun(int runumber); //caled when run number changes
 
 private:
-  StSvtData                  *mPixelColl;       //! the simulated data - created for each run InitRun{in beginAnalyses} 
-  StSvtData                  *m8bitPixelColl;   //! simulated final result written to 8 bits
+  ///the simulated data - created for each run InitRun{in beginAnalyses} 
+  StSvtData                  *mPixelColl;       //! 
+  ///simulated final result written to 8 bits
+  StSvtData                  *m8bitPixelColl;   //! 
   StSvtData                  *mRawData;         //!
   StSvtHybridCollection      *mSvtBadAnodes;    //!
   StSvtConfig                *mConfig;          //!
   StSvtDaq                   *mDaq;             //!
 
-  bool                       mKillBadAnodes;    //!
-  int                        mNumberTBinsToClear;//!number of first time bins which are set to 0 by DAQ - default 2
+  bool                       mKillBadAnodes;     //!
+  int                        mNumberTBinsToClear;//!///number of first time bins which are set to 0 by DAQ - default 2
   bool                       mSaveAnode2Raw;     //!
   bool                       mSaveAnode239Raw;   //!
 
-  //number of extra pixels around the sequence to save
+  ///number of extra pixels around the sequence to save
   int   mExtraBefore;//!
   int   mExtraAfter;//!
 
-  //parameters for seq adjusting
+  ///parameters for seq adjusting
   int m_n_seq_lo;//!
   int m_n_seq_hi;//!
   int m_thresh_lo;//!
@@ -82,7 +95,7 @@ private:
   int mPedOffset;//!
   Bool_t mMask[128*240];//!
 
-  //global variables for temporary store in the loop
+  ///global variables for temporary store
   StSvtHybridPixelsD  *mCurrentPixelData;//!
   StSvtHybridPixelsC  *mCurrent8bitPixelData;//!
   int mCurrentIndex;

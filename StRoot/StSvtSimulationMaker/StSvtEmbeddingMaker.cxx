@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtEmbeddingMaker.cxx,v 1.6 2004/03/30 21:27:12 caines Exp $
+ * $Id: StSvtEmbeddingMaker.cxx,v 1.7 2004/07/01 13:54:29 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StSvtEmbeddingMaker.cxx,v $
- * Revision 1.6  2004/03/30 21:27:12  caines
- * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
+ * Revision 1.7  2004/07/01 13:54:29  caines
+ * Changes to the simulation maker from the review
+ *
+ * Revision 1.5  2004/02/24 15:53:21  caines
+ * Read all params from database
  *
  * Revision 1.4  2004/01/22 16:30:47  caines
  * Getting closer to a final simulation
@@ -28,7 +31,8 @@
  **************************************************************************/
 
 #include "Stiostream.h"
-#include <math.h>
+#include <cmath>
+using namespace std;
 
 #include "TH2.h"
 #include "TFile.h"
@@ -51,12 +55,20 @@
 #include "StSvtClassLibrary/StSvtHybridPed.hh"
 
 ClassImp(StSvtEmbeddingMaker)
+  /*!
+   *   we use default value for RMS of the pedestal,
+   *   if nothing else is available from the database
+   *
+   */
+#define cDefaultBckgRMS 1.8
+
 
 //____________________________________________________________________________
 StSvtEmbeddingMaker::StSvtEmbeddingMaker(const char *name):StMaker(name)
 {
+///By default we want to use maxim information contained in the dabase and run embedding if possible.
   mDoEmbedding=kTRUE;     
-  setBackGround();        //sets to default true and sigma 1.8
+  setBackGround(kTRUE,cDefaultBckgRMS);//sets to default true and sigma 1.8
   SetPedRmsPreferences(kTRUE, kTRUE);  //read database
 
  
@@ -79,6 +91,9 @@ Int_t StSvtEmbeddingMaker::Init()
 }
 
 //____________________________________________________________________________
+///All database dependent data are read here. If SvtDaqMaker is found inside of the main chain
+///the simulation is run as an embedding, otherwise the EmbeddingMaker creates
+//only white noise as a background.
 Int_t StSvtEmbeddingMaker::InitRun(int runumber)
 {
   ReadPedRMSfromDb();
@@ -139,6 +154,10 @@ Int_t StSvtEmbeddingMaker::Make()
 }
 
 //____________________________________________________________________________
+///Reads information about background from the database.
+///First it tries to find RMS values for individual anodes.
+///If that's not avilable then it tries to find values for individual hybrids.
+///If not even this is available then one default value for RMS is used.
 void StSvtEmbeddingMaker::ReadPedRMSfromDb()
 {
   StSvtDbMaker *svtDb =(StSvtDbMaker*)GetMaker("svtDb");
@@ -189,21 +208,20 @@ void StSvtEmbeddingMaker::GetSvtData()
   //EmbeddingMaker requires some data(at least empty) from the SimulationMaker
   mSimPixelColl=NULL;
   mRealDataColl=NULL;
-  
+   
   St_DataSet* dataSet = GetDataSet("StSvtPixelData");
-  assert(dataSet); 
   if (dataSet==NULL){
-   gMessMgr->Error()<<"BIG TROUBLE:No data from simulator to work with!!!!"<<endm;
-   return;
-   }
+    gMessMgr->Error()<<"BIG TROUBLE:No data from simulator to work with!!!!"<<endm;
+    assert(dataSet); //for safety reasons, we could theoreticaly go on, but...
+    //return;
+  }
+
   mSimPixelColl= (StSvtData*)(dataSet->GetObject());
   if ( mSimPixelColl==NULL){
-   gMessMgr->Error()<<"BIG TROUBLE:Data from simulator is empty!!!!"<<endm;
-   return;
-   }
- 
+    gMessMgr->Error()<<"BIG TROUBLE:Data from simulator is empty!!!!"<<endm;
+    return;
+  }
   
- 
   if (!mRunningEmbedding) return; //in case it's forbiden to embed
   dataSet = GetDataSet("StSvtRawData");
   if (dataSet) mRealDataColl= (StSvtData*)(dataSet->GetObject());
@@ -212,8 +230,9 @@ void StSvtEmbeddingMaker::GetSvtData()
 }
  
 //____________________________________________________________________________
+///Mixes raw data into simulated data nad sets mask for background.
 void StSvtEmbeddingMaker::AddRawData()
-{ //mixes raw data into pixel data nad set mask for background
+{ 
   
   StSequence* Sequence;
   
@@ -226,7 +245,7 @@ void StSvtEmbeddingMaker::AddRawData()
   double offset =  mCurrentPixelData->getPedOffset(); //this could be problem if offset differs between real and simulated data!!!
   
   anolist = NULL;
-  if (realData)
+  if (realData!=NULL)
     for (int iAnode= 0; iAnode<realData->getAnodeList(anolist); iAnode++){
       
       int Anode = anolist[iAnode]; //goes from 1
@@ -266,34 +285,23 @@ void StSvtEmbeddingMaker::AddRawData()
 double StSvtEmbeddingMaker::MakeGaussDev(double sigma)
 {
   
- static int iset = 0;
- static double gset;
- double fac,rsq,v1,v2;
-
- //if(*idum < 0) iset = 0;
- if(iset == 0)
-   {
-     do {
-       v1 = 2.0*((float)rand()/(float)RAND_MAX) - 1.0;
-       v2 = 2.0*((float)rand()/(float)RAND_MAX) - 1.0;
-       rsq = v1*v1 + v2*v2;
-       
-     } while(rsq >= 1.0 || rsq == 0.0);
-     
-     fac = sigma*::sqrt(-2.0*::log(rsq)/rsq);
-     
-     gset = v1*fac;  // gset = 3.0*::sqrt(-2.0*::log(rsq))*(v1/::sqrt(rsq))
-     iset = 1;
-     return v2*fac;
-   }
- else
-   {
-     iset = 0;
-     return gset;
-   }
+  double fac,rsq,v1,v2;
+  
+  do {
+    v1 = 2.0*((float)rand()/(float)RAND_MAX) - 1.0;
+    v2 = 2.0*((float)rand()/(float)RAND_MAX) - 1.0;
+    rsq = v1*v1 + v2*v2;
+  } while(rsq >= 1.0 );
+  
+  fac = sigma*::sqrt(-2.0*::log(rsq)/rsq);
+  
+  // gset = v1*fac;  // gset = 3.0*::sqrt(-2.0*::log(rsq))*(v1/::sqrt(rsq))
+   return v2*fac;
+ 
 }
 
 //____________________________________________________________________________
+///Creates background depending on what information was retrieved from the database.
 void StSvtEmbeddingMaker::CreateBackground()
 {
   const double rmsScale=16.;

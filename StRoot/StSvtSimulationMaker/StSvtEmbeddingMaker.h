@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtEmbeddingMaker.h,v 1.6 2004/03/30 21:27:12 caines Exp $
+ * $Id: StSvtEmbeddingMaker.h,v 1.7 2004/07/01 13:54:29 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StSvtEmbeddingMaker.h,v $
- * Revision 1.6  2004/03/30 21:27:12  caines
- * Remove asserts from code so doesnt crash if doesnt get parameters it just quits with kStErr
+ * Revision 1.7  2004/07/01 13:54:29  caines
+ * Changes to the simulation maker from the review
+ *
+ * Revision 1.5  2004/02/24 15:53:21  caines
+ * Read all params from database
  *
  * Revision 1.4  2004/01/22 16:30:47  caines
  * Getting closer to a final simulation
@@ -38,7 +41,15 @@ class StSvtHybridData;
 class StSvtData;
 class StSvtHybridCollection;
 class StSvtHybridPixelsD;
-
+/*!
+ *
+ * \class  StSvtEmbeddingMaker
+ * \author Chaloupka
+ * \date   2004/07/29
+ * \brief  Automaticaly takes care of creation of the background in SVT Slow Simulator.
+ *         This is embedding or only simulated noise.
+ *
+ */
 class StSvtEmbeddingMaker : public StMaker
 {
 
@@ -52,9 +63,9 @@ public:
   virtual Int_t Finish();
   virtual Int_t InitRun(int runumber);
     
-  void setBackGround(Bool_t backgr=kTRUE,double backgSigma=1.8);      //default is TRUE and 1.8
-  void setDoEmbedding(Bool_t doIt=kTRUE);                       //this allows(when set to FALSE) to force the embedding maker to ignore raw data 
-  void SetPedRmsPreferences(Bool_t usePixelRMS=kTRUE, Bool_t useHybridRMS=kTRUE);                    // allows to disable reading RMS from database
+  void setBackGround(Bool_t backgr,double backgSigma);      //default is TRUE and 1.8
+  void setDoEmbedding(Bool_t doIt);                       //this allows(when set to FALSE) to force the embedding maker to ignore raw data 
+  void SetPedRmsPreferences(Bool_t usePixelRMS, Bool_t useHybridRMS);                    // allows to disable reading RMS from database
 							  //and create simple background -just a plain simulation; default is TRUE
   
 private:
@@ -71,14 +82,14 @@ private:
   StSvtHybridCollection*   mPedColl;            //!
   StSvtHybridCollection*   mPedRMSColl;         //!
 
-  //parameters possible set from outside
-  double mBackGSigma;  //default value if individiual RMS are not available 
-  Bool_t mBackGrOption;
-  Bool_t mDoEmbedding;   
-  Bool_t mUsePixelRMS;  //try to read individual pixel RMS from database, default TRUE
-  Bool_t mUseHybridRMS; //try to read individual hybrid RMS from database, default TRUE
+  ///parameterss - read from database 
+  double mBackGSigma;  ///default value if individiual RMS are not available 
+    Bool_t mBackGrOption; //shell I generate background
+  Bool_t mDoEmbedding;  ///shell I try to run embedding if posssible 
+  Bool_t mUsePixelRMS;  ///try to read individual pixel RMS from database, default TRUE
+  Bool_t mUseHybridRMS; ///try to read individual hybrid RMS from database, default TRUE
   
-  Bool_t mRunningEmbedding;   // can I realy run embedding - ie. missing DAQ maker?
+  Bool_t mRunningEmbedding;   /// can I realy run embedding - ie. missing DAQ maker?
   Bool_t mMask[128*240];
 
   //global variables for temporary store in the loop
