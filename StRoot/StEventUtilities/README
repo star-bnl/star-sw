@@ -1,5 +1,5 @@
 -*- mode:outline -*-
-Time-stamp: <99/12/15 14:52:08 ullrich>
+Time-stamp: <99/12/20 17:07:54 ullrich>
 
 * StEventUtitites
   This repository contains small to moderate sized
@@ -24,7 +24,7 @@ Time-stamp: <99/12/15 14:52:08 ullrich>
 
 * List of Available Utilities
 
-** StuCounter: functions to count selected global/primary tracks
+** StuCounter: Functions to count selected global/primary tracks
 ----------------------------------------------------------------
 Files:       StuCounter.hh
 Author:      Thomas Ullrich
@@ -51,7 +51,37 @@ Examples:
        int j = numberOfTracks(evt,primary, 10); // same as above
 
 
-<next comes here>
+** StuCutEvent and StuCutTrack: Classes for applying StEvent cuts
+-----------------------------------------------------------------
+Files:       StuCutTrack.hh, StuCutTrack.cxx,
+             StuCutEvent.hh, StuCutEvent.cxx 
+Author:      Art Poskanzer, LBNL
+Date:        Dec 1999
+Description:
+All functions and data members are static.
+Therefore, there is no need to instantiate.
+Just use StuCutEvent::func(); or StuCutTrack::func(); .
+The reason for making them static was to keep counters of the number of 
+events and tracks removed by each cut.
+Call the PrintCutList functions in Finish to print these counters.
+
+Right now the event cuts are on multiplicity and primary vertex position.
+The track cuts are on fit points and the ratio of fit point to max points.
+It is set up so that other cuts can be easily added. If lo >= hi on a cut
+the cut is not applied.
+
+In CheckEvent and CheckTrack the calling argument is a pointer to the event
+or track.
+
+CutTrack also stores the number of tracks with positive and negative
+pseudorapidity. In CheckEvent::CheckEtaSymmetry these counters are used to 
+calculate (Pos - Neg) / (Pos + Neg) and put a cut on this ratio. The purpose
+is to eliminate beam-gas background where most of the particles would go one
+way or the other.
+
+
+<next entry comes here>
+
 
 * Template
   Please use the following template for documentation.
