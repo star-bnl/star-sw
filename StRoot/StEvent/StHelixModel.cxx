@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixModel.cxx,v 2.6 2001/07/17 22:23:30 ullrich Exp $
+ * $Id: StHelixModel.cxx,v 2.7 2001/07/19 16:18:46 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHelixModel.cxx,v $
+ * Revision 2.7  2001/07/19 16:18:46  ullrich
+ * Added missing method helicity().
+ *
  * Revision 2.6  2001/07/17 22:23:30  ullrich
  * Added helicity to track geometry.
  *
@@ -38,7 +41,7 @@
 
 ClassImp(StHelixModel)
 
-static const char rcsid[] = "$Id: StHelixModel.cxx,v 2.6 2001/07/17 22:23:30 ullrich Exp $";
+static const char rcsid[] = "$Id: StHelixModel.cxx,v 2.7 2001/07/19 16:18:46 ullrich Exp $";
 
 StHelixModel::StHelixModel() : mModel(helixModel)
 {
@@ -91,6 +94,9 @@ StHelixModel::model() const {return mModel;}
 
 short
 StHelixModel::charge() const {return mCharge;}
+
+short
+StHelixModel::helicity() const {return mHelicity;}
 
 double
 StHelixModel::curvature() const {return mCurvature;}
