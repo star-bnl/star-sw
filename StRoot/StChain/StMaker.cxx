@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.80 1999/12/06 01:57:30 fine Exp $
+// $Id: StMaker.cxx,v 1.81 1999/12/22 16:22:45 fine Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -848,6 +848,12 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
      while ((maker = (StMaker*)nextMaker())) 
          maker->MakeDoc(stardir,outdir,kFALSE);
    }
+  static Bool_t makeIndexAtOnce = kTRUE;
+  if (makeIndexAtOnce) {
+     makeIndexAtOnce = kFALSE;
+     gHtml->MakeIndex();
+  }
+
 }
 
 //_____________________________________________________________________________
@@ -934,6 +940,9 @@ Int_t StMaker::FinishRun(int runumber) {return 0;}
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.81  1999/12/22 16:22:45  fine
+// MakeIndex for html doc introduced. Thankls Art
+//
 // Revision 1.80  1999/12/06 01:57:30  fine
 // Time statistic fixed
 //
