@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.26 1999/01/21 18:12:47 fine Exp $ 
+// $Id: St_XDFFile.cxx,v 1.27 1999/01/21 20:55:07 fine Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.27  1999/01/21 20:55:07  fine
+// Some comments have been added fro the new Browse method
+//
 // Revision 1.26  1999/01/21 18:12:47  fine
 // Browse and dir methods have been introduced
 //
@@ -142,18 +145,26 @@ St_XDFFile::~St_XDFFile(){
 //______________________________________________________________________________
 void St_XDFFile::Browse(TBrowser *b)
 {
+  // St_XDFFile::Browse(TBrowser *b)
   //
-  // Browse the next record in XDF file
-  // For this case NextEventGet will return
-  // the pointer to fBrowsable and will not
-  // read the next record
+  // Reads the next XDF file record and inserts it into the current ROOT TBrowser
   //
-  //   Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/XDFBrowser.gif"> </P> End_Html 
+  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/XDFBrowser.gif"> </P> End_Html 
   //
-  // It is GetSelected() method that return the fBrowsable only
+  // Macro begin_html <a href="../examples/XDFBrowser.C.html"><i>XDFBrowser.C</i></a> end_html shows how this method can be used.
   //
-  //  Macro begin_html <a href="../examples/XDFBrowser.C.html"><i>XDFBrowser.C</i></a> end_html shows how this method can be used.
+  // Note:
+  // ====
+  //   For this case St_XDFFile::NextEventGet takes in account
+  //   the usre's interactive action.
+  //   This means the first call of St_XDFFile::NextEventGet 
+  //   just after the user applied ROOT Browser to his/her XDF file
+  //   will return the fBrowsable object and will read the next XDF
+  //   record with the second call only.
   //
+  //   It is GetSelected() method that return the fBrowsable only
+  //
+ 
  
   if (!fFile) TObject::Browse(b);
   if (fBrowsable) {delete fBrowsable; fBrowsable = 0;}
@@ -611,3 +622,4 @@ St_DataSet *St_XDFFile::GetXdFile(const Char_t *filename)
   }
   return set;
 }
+
