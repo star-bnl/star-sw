@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.26 1999/03/03 00:29:04 sakrejda Exp $
+// $Id: St_tcl_Maker.cxx,v 1.27 1999/03/04 14:05:59 sakrejda Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.27  1999/03/04 14:05:59  sakrejda
+// table of sequences increased
+//
 // Revision 1.26  1999/03/03 00:29:04  sakrejda
 // size of the tables reduced following wasted space diagnostics
 //
@@ -192,7 +195,7 @@ Int_t St_tcl_Maker::Make(){
     St_tcl_tphit_aux *tphitau   = new St_tcl_tphit_aux("tphitau",1);   local.Add(tphitau);
     //    St_tcl_tpc_index *index     = new St_tcl_tpc_index("index",max_hit);     local.Add(index);
     St_tcl_tpcluster *tpcluster = new St_tcl_tpcluster("tpcluster",max_hit); local.Add(tpcluster);
-    St_tcl_tp_seq    *tpseq     = new St_tcl_tp_seq("tpseq",4*max_hit);      local.Add(tpseq);
+    St_tcl_tp_seq    *tpseq     = new St_tcl_tp_seq("tpseq",5*max_hit);      local.Add(tpseq);
     St_DataSet       *sector;
     St_DataSet       *raw_data_tpc = gStChain->DataSet("tpc_raw");
     Int_t sector_tot = 0;
@@ -279,7 +282,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.26 1999/03/03 00:29:04 sakrejda Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.27 1999/03/04 14:05:59 sakrejda Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
