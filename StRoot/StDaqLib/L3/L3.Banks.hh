@@ -1,3 +1,25 @@
+/***************************************************************************
+ *
+ * $Id: L3.Banks.hh,v 1.2 2000/07/06 18:16:00 ward Exp $
+ *
+ * Author: Christof Struck, struck@star.physics.yale.edu
+ ***************************************************************************
+ *
+ * Description: L3 raw data banks
+ *
+ *
+ *
+ * change log:
+ *   06 Jun 00 CS initial version
+ *
+ ***************************************************************************
+ *
+ * $Log: L3.Banks.hh,v $
+ * Revision 1.2  2000/07/06 18:16:00  ward
+ * Install L3 code from Christof Struck.
+ *
+ *
+ **************************************************************************/
 #ifndef L3_BANKS_HH
 #define L3_BANKS_HH
 
@@ -20,8 +42,8 @@
 
 
 // Top-level pointer bank
-class Bank_L3_P: public Bank {
-public:
+struct Bank_L3_P: public Bank
+{
   INT32   len;
   INT32   time;
   INT32   seq;
@@ -32,8 +54,8 @@ public:
 };
 
 
-class Bank_L3_SECP: public Bank {
-public:
+struct Bank_L3_SECP: public Bank
+{
   unsigned int len;         // length of the entire sector contribution
   unsigned int time;        // time when the event is put together in unix format
   unsigned int seq;         // sequence nr. hopefully unique inside one run ;)
@@ -47,7 +69,8 @@ public:
 
 
 // only tracktype produced on sl3 beginning 04/06/00
-struct localTrack {
+struct localTrack
+{
        short id;            // track id
        char  nHits;         // Number of hits assigned to the track 
        char  ndedx;         // Number of points used for dedx 
@@ -70,8 +93,10 @@ struct localTrack {
        unsigned short dz0;
 };
 
+
 // Global tracks
-struct globalTrack {
+struct globalTrack
+{
      int            id;            //primary key
      unsigned short flag;          // Primaries flag=1, Secondaries flag=0
      char           innerMostRow;
@@ -97,7 +122,8 @@ struct globalTrack {
 
 
 // cluster data produced on sl3:
-struct l3_cluster {
+struct l3_cluster
+{
     unsigned short pad;     // in 1/64 pads
     unsigned short time;    // in 1/64 time bins
     unsigned short charge;
@@ -112,8 +138,8 @@ struct l3_cluster {
 // Bank which actually has the global tracks in it:
 // compared to the sector level tracks this merges the pointer and data bank
 // into one Bank.
-class Bank_L3_GTD: public Bank {
-public:
+struct Bank_L3_GTD: public Bank
+{
     unsigned int  nHits;         // Nr of space points
     unsigned int  nTracks;       // Nr of Tracks
     int           xVert;         // x vertex position in 10**-6 cm
@@ -125,8 +151,8 @@ public:
 };
 
 
-class Bank_L3_LTD: public Bank {
-public:
+struct Bank_L3_LTD: public Bank
+{
     localTrack track[1];
 
     int swap();
@@ -134,8 +160,8 @@ public:
 
 // pointer bank for all sl3 track data
 // here implemented: banks[0] point to local_track (L3_LTD struct)
-class Bank_L3_SECTP: public Bank {
-public:
+struct Bank_L3_SECTP: public Bank
+{
     unsigned int nHits;    // Nr of space points
     unsigned int nTracks;  // Nr of Tracks
     unsigned int cpuTime;  // CPU time in microseconds
@@ -149,8 +175,8 @@ public:
 
 
 // cluster data produced on sl3:
-class Bank_L3_SECCD: public Bank {
-public:
+struct Bank_L3_SECCD: public Bank
+{
     unsigned int  nrClusters_in_sector;
     l3_cluster    cluster[1];
 
@@ -167,6 +193,6 @@ struct vertex {
 
 
 // Swap short
-int l3Swap_short (int data_byte_ordering, short* data, short size);
+int l3Swap_short (short* data, short size);
 
 #endif
