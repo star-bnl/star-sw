@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.86 2000/02/09 16:10:26 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.87 2000/02/09 19:22:23 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.87  2000/02/09 19:22:23  kathy
+// protect MakeHistEval method so that if there is no geant dataset, it skips out
+//
 // Revision 1.86  2000/02/09 16:10:26  kathy
 // fill all new small range histograms - forgot to fill some of them a few days ago...
 //
@@ -981,6 +984,7 @@ void St_QA_Maker::MakeHistGen(){
   
   St_particle   *part     = (St_particle  *) dstI["particle"];
   if (!part) part = (St_particle  *) DataSet("geant/particle");
+
   if (part){
     particle_st *p = part->GetTable();
     Int_t nchgpart=0;
@@ -1303,6 +1307,7 @@ void St_QA_Maker::MakeHistEval(){
   geant = GetDataSet("geant");
   if( !geant ){ 
      cout << " St_QA_Maker::Make - No pointer to GEANT DataSet \n" << endl; 
+     return;
   }
 
   St_DataSetIter geantI(geant);
