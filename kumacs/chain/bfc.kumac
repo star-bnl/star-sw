@@ -1,5 +1,8 @@
-* * $Id: bfc.kumac,v 1.69 1998/09/25 19:25:07 kathy Exp $
+* * $Id: bfc.kumac,v 1.70 1998/09/30 13:30:51 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.70  1998/09/30 13:30:51  kathy
+* make log a global variable
+*
 * Revision 1.69  1998/09/25 19:25:07  kathy
 * fix error conditions; correct nev_total and nev_proc for EOF or end run records
 *
@@ -301,7 +304,9 @@ MACRO bfc _
   output_xdf_file = [output_file].xdf
   output_fzd_file = [output_file].fzd
   output_dst_file = [output_file]_dst.xdf  
-
+  
+  log_file = [log] 
+  
 ***********************************************************
 * PRINT OUT INPUT VALUES
 ***********************************************************
@@ -326,11 +331,11 @@ MACRO bfc _
  message ' *** Ebye Prior Switch       --> ' [ebye_prior_switch]
  message ' *** Ebye Ensemble Switch    --> ' [ebye_ensemble_switch]
  message ' *** Ebye Analysis Switch    --> ' [ebye_analysis_switch] 
- message ' *** log_file                --> ' [log]
+ message ' *** log                     --> ' [log]
 
 ***********************************************************
 * GLOBAL VARIABLES - created from macro inputs 
-* **********************************************************
+***********************************************************
  
  macro/global/create input_file       [input_file]   'Input file name'
  macro/global/create output_file      [output_file]  'Output file name'
@@ -341,6 +346,7 @@ MACRO bfc _
  macro/global/create output_xdf_file  [output_xdf_file] 
  macro/global/create output_fzd_file  [output_fzd_file]
  macro/global/create output_dst_file  [output_dst_file]
+ macro/global/create log              [log]
      
  macro/global/create nunit            [nunit]
  macro/global/create nfile            [nfile]
@@ -366,13 +372,13 @@ MACRO bfc _
  
  macro/global/import *
    
- log_file = [log] 
  string =   '---<bfc>-- i:'//[input_file]//' o:'//[output_file]
- fmessage $quote([string])  [log_file]
+   fmessage $quote([string])  [log_file]
  string =   '---<bfc>-- s:'//[skip]//' f:'//[first]//' l:'//[last]
- fmessage $quote([string])  [log_file]
+   fmessage $quote([string])  [log_file]
  string =  '---<bfc>-- c:'//[chain]
- fmessage $quote([string])  [log_file]
+   fmessage $quote([string])  [log_file]
+   
  if $iquest(1)<>0 goto ABEND
  
  exec bfc_util#bfc_init chain=[chain]
