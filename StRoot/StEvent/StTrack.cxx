@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.20 2003/10/31 16:00:04 ullrich Exp $
+ * $Id: StTrack.cxx,v 2.21 2003/12/04 03:53:14 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.21  2003/12/04 03:53:14  perev
+ * Set empty, instead of crazy outer geometry
+ *
  * Revision 2.20  2003/10/31 16:00:04  ullrich
  * Added setKey() method.
  *
@@ -86,7 +89,7 @@
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.20 2003/10/31 16:00:04 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.21 2003/12/04 03:53:14 perev Exp $";
 
 StTrack::StTrack()
 {
@@ -360,6 +363,7 @@ StTrack::setNumberOfPossiblePoints(unsigned short val) {mNumberOfPossiblePoints 
 void
 StTrack::setNode(StTrackNode* val) { mNode = val; }
 
+#include "StHelixModel.h"
 int StTrack::bad() const
 {
 static const double world = 1.e+5;
@@ -370,7 +374,11 @@ static const double world = 1.e+5;
  if (::fabs(mLength)         >world) 		return 21;
  if (mLength <1./world	           )    	return 22;
  if (mGeometry      && mGeometry->bad()     )	return 30;
- if (mOuterGeometry && mOuterGeometry->bad())   return 40;
+//if (mOuterGeometry && mOuterGeometry->bad())  return 40;
+ if (mOuterGeometry && mOuterGeometry->bad())  {//Hope temporary HACK
+    StTrack *This = (StTrack *)this;
+    This->setOuterGeometry(new StHelixModel());}
+
  const StTrackDetectorInfo *di = mDetectorInfo;
  if (di             && di->bad()            )   return 50;
 return 0;
