@@ -1,4 +1,4 @@
-// $Id: St_geant_Maker.h,v 1.7 1999/02/12 14:18:27 nevski Exp $
+// $Id: St_geant_Maker.h,v 1.8 1999/02/17 15:55:39 fisyak Exp $
 
 #ifndef STAR_St_geant_Maker
 #define STAR_St_geant_Maker
@@ -10,6 +10,14 @@
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
+#ifndef __CINT__
+#include "fortranc.h"
+#define rootmaptable_ F77_NAME(rootmaptable,ROOTMAPTABLE)
+extern "C" {
+R__EXTERN  void type_of_call rootmaptable_(Char_t *,Char_t *, Char_t*, Int_t *, Char_t *);
+}
+#endif
+
 class St_Node;
 
 #endif
@@ -35,8 +43,8 @@ class St_geant_Maker : public StMaker {
    virtual void   Draw();
    virtual void   G2root();
    virtual Int_t  Make();
-   virtual void   PrintInfo();
    virtual void   LoadGeometry (Char_t *option = "detp geometry field_only");  // *MENU
+   virtual void   PrintInfo();
    virtual void   SetNwGEANT (Int_t n=2000000) {nwgeant = n;} // *MENU
    virtual void   SetNwPAW   (Int_t n=      0) {nwpaw   = n;} // *MENU
    virtual void   SetIwtype  (Int_t n=      0) {iwtype  = n;} // *MENU
