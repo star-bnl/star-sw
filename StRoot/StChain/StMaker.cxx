@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.152 2004/09/01 22:09:51 perev Exp $
+// $Id: StMaker.cxx,v 1.153 2004/09/03 00:05:48 jeromel Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -834,23 +834,22 @@ void StMaker::PrintTimer(Option_t *option)
 //_____________________________________________________________________________
 static void MakeAssociatedClassList(const TObject *obj, const Char_t *classDir=0)
 {
- //
- // This function creates the html docs of the classes pointed within
- // <obj> class source directory
- //
- // classDir - the name of the directory to search in
- //
- // Search C++ class declarations like:
- //
- //   class <className> : 
- //   class <className> { 
- //   class <className> ;
- //
- // looping over all *.h within the "classDir" directory 
- // if provided
- // otherwise within "this" class source directory
- //
-
+/*!
+ * This function creates the html docs of the classes pointed within
+ * <obj> class source directory
+ *
+ * classDir - the name of the directory to search in
+ *
+ * Search C++ class declarations like:
+ *
+ *   class <className> : 
+ *   class <className> { 
+ *   class <className> ;
+ *
+ * looping over all *.h within the "classDir" directory 
+ * if provided otherwise within "this" class source directory.
+ *
+ */
   if (!obj) return;
   const Char_t *thisDir = classDir;
   if (thisDir == 0 || thisDir[0] == 0) 
@@ -961,37 +960,37 @@ static void MakeAssociatedClassList(const TObject *obj, const Char_t *classDir=0
 //_____________________________________________________________________________
 void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseClasses)
 {
- //
- // MakeDoc - creates the HTML doc for this class and for the base classes
- //           (if baseClasses == kTRUE):
- //
- //         *  St_XDFFile   St_Module      TTable       *
- //         *  TDataSet   St_DataSetIter St_FileSet     *
- //         *  StMaker      StChain        StEvent        *
- //         *  St_TLA_Maker                               *
- //
- // stardir - the "root" directory to lookup the subdirectories as follows.
- //           = "$(STAR)"             by default
- // outdir  - directory to write the generated HTML and Postscript files into
- //           = "$(STAR)/StRoot/html" by default
- //
- //            The following subdirectories are used to look it up:
- //            $(stardir)
- //            $(stardir) + "StRoot/St_base"
- //            $(stardir) + "StRoot/StChain"
- //            $(stardir) + "StRoot/xdf2root"
- //            $(stardir) + "StRoot/StarClassLibrary"
- //            $(stardir) + "StRoot/StEvent"
- //            $(stardir) + ".share/tables"
- //            $(stardir) + "include",
- //            $(stardir) + "include/tables",
- //            $(stardir) + "StRoot/<this class name>",
- //
- //   where $(stardir) is the input parameter (by default = "$STAR")
- //
- // baseClasses - flag to mark whether the base classes HTML docs will be created as well
- //               = kTRUE by default
-
+/*!
+ * MakeDoc - creates the HTML doc for this class and for the base classes
+ *           (if baseClasses == kTRUE):
+ *
+ *         *  St_XDFFile   St_Module      TTable       *
+ *         *  TDataSet   St_DataSetIter St_FileSet     *
+ *         *  StMaker      StChain        StEvent        *
+ *         *  St_TLA_Maker                               *
+ *
+ * stardir - the "root" directory to lookup the subdirectories as follows.
+ *           = "$(STAR)"             by default
+ * outdir  - directory to write the generated HTML and Postscript files into
+ *           = "$(STAR)/StRoot/html" by default
+ *
+ *            The following subdirectories are used to look it up:
+ *            $(stardir)
+ *            $(stardir) + "StRoot/St_base"
+ *            $(stardir) + "StRoot/StChain"
+ *            $(stardir) + "StRoot/xdf2root"
+ *            $(stardir) + "StRoot/StarClassLibrary"
+ *            $(stardir) + "StRoot/StEvent"
+ *            $(stardir) + ".share/tables"
+ *            $(stardir) + "include",
+ *            $(stardir) + "include/tables",
+ *            $(stardir) + "StRoot/<this class name>",
+ *
+ *   where $(stardir) is the input parameter (by default = "$STAR")
+ *
+ * baseClasses - flag to mark whether the base classes HTML docs will be created as well
+ *               = kTRUE by default
+ */
  // Define the type of the OS
   TString STAR = stardir;
   TString delim = ":";
@@ -1009,7 +1008,7 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
 
   THtml thisHtml;
 
-//  if (!gHtml) gHtml = new THtml;
+  //  if (!gHtml) gHtml = new THtml;
 
   // Define the set of the subdirectories with the STAR class sources
   //                       | ----------------------  | ------------  | ------------------ |
@@ -1018,7 +1017,7 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
   const Char_t *source[] = {"StRoot/St_base"         , "St_DataSet"  ,    "St_base"
                            ,"StRoot/StChain"         , "StMaker"     ,    "StChain"
                            ,"StRoot/xdf2root"        , "St_XDFFile"  ,    "xdf2root"
-//                           ,"StRoot/StUtilities"     , "StMessage"   ,    "StUtilities"
+			    //,"StRoot/StUtilities"     , "StMessage"   ,    "StUtilities"
                            ,"StRoot/StarClassLibrary", ""            ,    ""
                            ,"StRoot/StEvent"         , "StEvent"     ,    "StEvent"
                            ,"StRoot/St_TLA_Maker"    , "St_TLA_Maker",    "St_TLA_Maker"
@@ -1167,17 +1166,19 @@ void StMaker::SetDEBUG(Int_t l)
    while ((maker = (StMaker*)nextMaker())) maker->SetDEBUG(l);
 }
 //_____________________________________________________________________________
-/// SetAttr(const char *key, const char *val, const char *to)
-/// key is a keyname, val is a value
-/// key is any character string. Spaces and case are ignored
-/// The "." at the beginning is reserved for the frame work only
-/// Like ".privilege" makes maker to be priveleged, i.e to skip event
-/// by return of kStERR or kStSKIP.
-/// attribute  always inserted at the begining of existing list
-/// so the last key value overwrites the previous one for the same key
-/// to =="" or == 0 means  THIS maker
-/// to =="*" means for all makers down of the first
-/// to =="name" means for maker with this name only
+/*!
+ * SetAttr(const char *key, const char *val, const char *to)
+ * key is a keyname, val is a value
+ * key is any character string. Spaces and case are ignored
+ * The "." at the beginning is reserved for the frame work only
+ * Like ".privilege" makes maker to be priveleged, i.e to skip event
+ * by return of kStERR or kStSKIP.
+ * attribute  always inserted at the begining of existing list
+ * so the last key value overwrites the previous one for the same key
+ * to =="" or == 0 means  THIS maker
+ * to =="*" means for all makers down of the first
+ * to =="name" means for maker with this name only
+ */
 int StMaker::SetAttr(const char *key, const char *val, const char *to)
 {
 
@@ -1246,7 +1247,7 @@ int StMaker::SetAttr(const char *key, double val, const char *to)
 //_____________________________________________________________________________
 const char *StMaker::SAttr(const char *key) const
 {
-   TString ret,tey(key);
+   TString tey(key);
    tey.ToLower(); tey.ReplaceAll(" ",""); tey.ReplaceAll("\t","");
    TObject *att = m_Attr.FindObject(tey.Data());
    return (att)? att->GetTitle():0;
@@ -1442,6 +1443,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.153  2004/09/03 00:05:48  jeromel
+// Comment block oxygenized, removed unused var
+//
 // Revision 1.152  2004/09/01 22:09:51  perev
 // new methods SetAttr and IAttr,DAttr,SAttr added
 //
