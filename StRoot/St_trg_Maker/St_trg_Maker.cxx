@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.21 2001/01/02 18:10:44 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.22 2001/01/10 18:12:12 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.22  2001/01/10 18:12:12  ward
+// MWC corrections from Vladimir Morozov.
+//
 // Revision 1.21  2001/01/02 18:10:44  ward
 // Pablo Yepes' modifications in support of CTU simulations.
 //
@@ -350,17 +353,20 @@ void St_trg_Maker::Vladimir2Herbert(int input,int *sector,int *subsector) {
   *sector += offset;
 }
 int St_trg_Maker::HandleMwc(St_mwc_raw *mwc_raw,St_dst_TrgDet *dst1) {
-  int sector,subsector,index,irow;
+  int prePost,sector,subsector,index,irow;
   if(!mwc_raw) { PP"Did not find the mwc_raw table mwc.\n"); return 7; }
   mwc_raw_st    *vladimir = mwc_raw->GetTable(); assert(vladimir);
-  dst_TrgDet_st *herbert  = dst1->GetTable(); assert(herbert);
+  dst_TrgDet_st *herbert  = dst1->GetTable();    assert(herbert);
   herbert->npre=0; herbert->npost=0;
-  for(irow=0;irow<mwc_raw->GetNRows();irow++) {
-    index=vladimir[irow].sector;
-    Vladimir2Herbert(index,&sector,&subsector);
-    assert(sector>=1&&sector<=24);
-    assert(subsector>=1&&subsector<=4);
-    herbert[0].nMwc[sector-1][subsector-1][0]=vladimir[irow].count; // The "[0]" means "the triggered event (pre/post).
+  assert(mwc_raw->GetNRows()==96*11); // We must have correct number of rows, else loops below will crash.
+  for(irow=0;irow<96;irow++) {
+    for(prePost=0;prePost<11;prePost++) {
+      index=vladimir[96*prePost+irow].sector; // index = 1-48 for z<0,  49-98 for z>0.  Opposite STAR convention.
+      Vladimir2Herbert(index,&sector,&subsector);
+      assert(sector>=1&&sector<=24);
+      assert(subsector>=1&&subsector<=4);
+      herbert[0].nMwc[sector-1][subsector-1][prePost]=vladimir[96*prePost+irow].count;
+    }
   }
   return 7;
 }
