@@ -65,40 +65,35 @@ CC:>------------------------------------------------------------------
       DATA    First     / .true. /
       DATA    Pi        / 3.141592654 /
 *--
-*--
-*-- Dan's testing
-
-      write (6,*) '================ MWS NEW PARAMETERS'
-      write (6,*) 'de_thresh in:',mpar(1).de_thresh_in,' out:'
-     +,mpar(1).de_thresh_out
-      write (6,*) 'Width of gaussian:',mpar(1).el_noise_width
-      write (6,*) 'Min. Ionization:',mpar(1).min_ion
-      write (6,*) 'number of hits:',mhit_h.nok
-      write (6,*) '========================================='
-*--
-      if ( First ) then
-         First   = .false.
 *--    Default this works
 *--
       MWS = STAFCV_OK
 *--
-*--     Check whether doing it counting or de sums
-*--     IF Mpar.wires = 1 then do wire hit counting
+
+	write(6,*) 'gain:',mpar(1).gain
+	write(6,*) 't_in:',mpar(1).de_thresh_in
+	write(6,*) 't_ot:',mpar(1).de_thresh_out
+	write(6,*) 'toft:',mpar(1).tof_thresh
+	write(6,*) 'nco :',mpar(1).num_counts_out
+	write(6,*) 'nwc :',mpar(1).num_wires_count
+	write(6,*) 'enw :',mpar(1).el_noise_width
+	write(6,*) 'mini:',mpar(1).min_ion
+
+      if ( First ) then
+         First   = .false.
 *--
-         if (mpar(1).wires .eq. 1) then
-            wires_set = .true.
-         else
-            wires_set = .false.
-         endif
+*--     Check whether doing it counting or de sums
+*--     IF mpar.wires = 1 then do wire hit counting
+*--
+        wires_set=.true.
 *-- 
 *--    Set the gain for output from MWC
 *--
-         if (Mpar(1).gain .eq. 0.0)  then
-            write (6,*) 'WARNING -- Gains not set'
-            write (6,*) 'Setting gain to 1.0!'
-            Mpar(1).gain = 1.0
+         if (mpar(1).gain .eq. 0.0)  then
+            write (6,*) 'MWS:WARNING -- Gains not set.  Setting gain to 1.0!'
+            mpar(1).gain = 1.0
          endif
-         gain = Mpar(1).gain
+         gain = mpar(1).gain
          Scale = 2.5e5*gain
 *--
 *--      Let's set some constants !!!
@@ -114,16 +109,15 @@ CC:>------------------------------------------------------------------
          insect_ir        = Geom(1).r1min
          wire_step        = 0.4
          num_wires_sect   = 160
-         num_counts_out   = Mpar(1).num_counts_out
-         num_wires_count  = Mpar(1).num_wires_count
+         num_counts_out   = mpar(1).num_counts_out
+         num_wires_count  = mpar(1).num_wires_count
          num_counts_sect  = num_wires_sect/num_wires_count
 *--
 *--    Check that the endcap wire segments have been set correctly
 *--
         ee_correct = abs(7680 - num_counts_out * num_wires_count)
         if (ee_correct .gt. 0) then
-           write (6,*) 'Due to GSTAR geometry there must be -- 7680'
-           write (6,*) 'total wires. Correct the error and restart!'
+           write (6,*) 'MWS: ERROR GSTAR geometry there must be 7680 wires'
            MWS = STAFCV_BAD
            return
         endif
@@ -131,7 +125,7 @@ CC:>------------------------------------------------------------------
 *--    Check that geometry set correctly
 *--
          if ( Geom(1).neta .eq. 0 ) then
-            write (6,*) ' Geometry NOT DEFINED '
+            write (6,*) 'MWS: Geometry NOT DEFINED '
             MWS = STAFCV_BAD
             return
          endif
@@ -283,7 +277,7 @@ CC:>------------------------------------------------------------------
 *--
 *--
        Mevent_h.nok = 1
-       do i = 1,num_counts_out
+       do i = 1,384
           se_hit(i) = 0
           se_de(i)  = 0
           tot_cell_hit(i) = 0
@@ -316,7 +310,7 @@ CC:>------------------------------------------------------------------
            
            iphi = int ( (float(isec-1)) / (2*num_counts_sect) ) + 1
            ieta = isec - ((iphi - 1) * ( 2*num_counts_sect ) )
-           
+           if (iphi .gt. 12) iphi = iphi - 12
 
            if (se_hit(Isec) .gt. 0.) then
                nsignal = nsignal + 1
@@ -349,6 +343,7 @@ CC:>------------------------------------------------------------------
            endif
          enddo
          write (6,*) 'Number below threshold: ',num_below_thresh
+*         write (6,*) '========================================='
 *--
 *--    Define the number of slats with raw data
 *--
@@ -388,3 +383,13 @@ CC:>------------------------------------------------------------------
        g2=ret_val
        return
        end
+
+
+
+
+
+
+
+
+
+

@@ -35,8 +35,8 @@ tdm/table/cell/putvalue 'mpar[0].num_counts_out'    96.0
 tdm/table/cell/putvalue 'mpar[0].num_wires_count'   80.0
 tdm/table/cell/putvalue 'mpar[0].el_noise_width'     0.00
 tdm/table/cell/putvalue 'mpar[0].min_ion'            0.00
-tdm/table/cell/putvalue 'mpar[0].wires'              1
-*
+* tdm/table/cell/putvalue 'mpar[0].wires'              1
+* dan killed the wires 2/9/99
 cd /dui
  
  return
