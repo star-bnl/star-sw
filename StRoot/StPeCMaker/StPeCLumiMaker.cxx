@@ -1,5 +1,8 @@
-// $Id: StPeCLumiMaker.cxx,v 1.2 2002/03/20 17:42:14 meissner Exp $
+// $Id: StPeCLumiMaker.cxx,v 1.3 2002/04/18 19:02:09 meissner Exp $
 // $Log: StPeCLumiMaker.cxx,v $
+// Revision 1.3  2002/04/18 19:02:09  meissner
+// Change Init to  InitRun
+//
 // Revision 1.2  2002/03/20 17:42:14  meissner
 // buu fix //uDst->SetFormat
 //
@@ -53,7 +56,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCLumiMaker.cxx,v 1.2 2002/03/20 17:42:14 meissner Exp $";
+static const char rcsid[] = "$Id: StPeCLumiMaker.cxx,v 1.3 2002/04/18 19:02:09 meissner Exp $";
 
 ClassImp(StPeCLumiMaker)
 
@@ -64,12 +67,15 @@ StPeCLumiMaker::StPeCLumiMaker(const Char_t *name) : StMaker(name) {
 
 StPeCLumiMaker::~StPeCLumiMaker() {}
 
-
-
 Int_t StPeCLumiMaker::Init() {
+  cout << "StPeCLumiMaker::Init,  Do nothing!";
+  return StMaker::Init();
+}
+
+Int_t StPeCLumiMaker::InitRun(Int_t runnr) {
 
   // if ( infoLevel > 0 ) 
-     cout<<"StPeCLumiMaker: Initializing..."<<endl;
+  cout<<"StPeCLumiMaker: Initializing..run " << runnr <<endl;
 //
 //  Set uDst output file
 //
@@ -110,7 +116,7 @@ Int_t StPeCLumiMaker::Init() {
   //if ( infoLevel > 0 ) 
   cout<<"StPeCLumiMaker: Initialization done!"<<endl;
   
-  return StMaker::Init();
+  return StMaker::InitRun(runnr);
 }
 
 

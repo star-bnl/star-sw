@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.20 2002/03/19 22:23:44 meissner Exp $
+// $Id: StPeCMaker.cxx,v 1.21 2002/04/18 19:02:11 meissner Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.21  2002/04/18 19:02:11  meissner
+// Change Init to  InitRun
+//
 // Revision 1.20  2002/03/19 22:23:44  meissner
 // New variables: zdc unatt., Trigger word, MC tree if Geant Branch, DCA  for primary pairs, all tracks for secondary pairs (Test)
 //
@@ -101,26 +104,30 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.20 2002/03/19 22:23:44 meissner Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.21 2002/04/18 19:02:11 meissner Exp $";
 
 ClassImp(StPeCMaker)
 
 StPeCMaker::StPeCMaker(const Char_t *name) : StMaker(name) {
-  infoLevel = 2 ;
+  infoLevel = 0 ;
   filter    = 0 ;
 }
 
 StPeCMaker::~StPeCMaker() {}
 
 
-
 Int_t StPeCMaker::Init() {
+  cout << "StPECMaker::Init,  Do nothing!";
+  return StMaker::Init();
+}
+
+Int_t StPeCMaker::InitRun(Int_t runnr) {
 
   if ( infoLevel > 0 ) 
-     cout<<"StPeCMaker: Initializing..."<<endl;
-//
-//  Set uDst output file
-//
+    cout<<"StPeCMaker: Initializing run" << runnr <<endl;
+  //
+  //  Set uDst output file
+  //
   TString uDstFileName("StPecMaker.uDst.root");    
   StIOMaker* pIOMaker = (StIOMaker*)GetMaker("IO");
   if ( pIOMaker) {
@@ -164,7 +171,7 @@ Int_t StPeCMaker::Init() {
   if ( infoLevel > 0 ) 
      cout<<"StPeCMaker: Initialization done!"<<endl;
 
-  return StMaker::Init();
+  return StMaker::InitRun(runnr);
 }
 
 
