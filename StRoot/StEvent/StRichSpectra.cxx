@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectra.cxx,v 2.2 2002/02/19 16:54:33 ullrich Exp $
+ * $Id: StRichSpectra.cxx,v 2.3 2002/02/22 03:02:12 ullrich Exp $
  *
  * Author: Brian Lasiuk, Dec 14, 2002
  ***************************************************************************
@@ -9,6 +9,9 @@
  *
  ***************************************************************************
  * $Log: StRichSpectra.cxx,v $
+ * Revision 2.3  2002/02/22 03:02:12  ullrich
+ * Fixed bug in constructor.
+ *
  * Revision 2.2  2002/02/19 16:54:33  ullrich
  * Minor changes - code not altered.
  *
@@ -18,7 +21,7 @@
  **************************************************************************/
 #include "StRichSpectra.h"
 
-static const char rcsid[] = "$Id: StRichSpectra.cxx,v 2.2 2002/02/19 16:54:33 ullrich Exp $";
+static const char rcsid[] = "$Id: StRichSpectra.cxx,v 2.3 2002/02/22 03:02:12 ullrich Exp $";
 
 ClassImp(StRichSpectra)
     
@@ -37,10 +40,11 @@ StRichSpectra::StRichSpectra(float x,   float y,   float dx,    float dy,
     : mExtrapolatedX(x) ,mExtrapolatedY(y), mDx(dx), mDy(dy), mCdx(cdx), mCdy(cdy),
       mCherenkovAngle(theta), mCherenkovAngleSigma(sigma), mNumberOfPhotons(nopho),
       mPeakAngle(pan), mPeakPhotons(ppho), mTotalPhotons(totphotons),
-      mMassSquared(mMassSquared), mLineIntegralRatio(mLineIntegralRatio),
-      mLineIntegral(mLineIntegral), mAlpha(mAlpha), mFlag(mFlag), mReserved(mReserved),
-      mDpi(dpi), mDk(dk), mDp(dp), mNDpi(ndpi), mNDk(ndk), mNDp(ndp),
-      mVersion(mVersion)
+      mMassSquared(mas), mLineIntegralRatio(lir), mLineIntegral(li), mAlpha(alpha),
+      mFlag(flag), mReserved(reserved),
+      mDpi(dpi), mDk(dk), mDp(dp),
+      mNDpi(ndpi), mNDk(ndk), mNDp(ndp),
+      mVersion(version)
 {/*nopt*/}
     
 ostream&
