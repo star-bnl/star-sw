@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrgMaker.cxx,v 1.2 2001/07/17 19:14:38 ward Exp $
+ * $Id: StTrgMaker.cxx,v 1.3 2001/07/22 23:00:27 ward Exp $
  *
  * Author: Herbert Ward April 2001
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StTrgMaker.cxx,v $
+ * Revision 1.3  2001/07/22 23:00:27  ward
+ * Added diagnostics to output file.  Also doc improvements.
+ *
  * Revision 1.2  2001/07/17 19:14:38  ward
  * Avoid edges of CTB slats and other wild situations.
  *
@@ -70,17 +73,25 @@ Int_t StTrgMaker::Make() {
   event = (StEvent *) GetInputDS("StEvent");
   if (!event) { fclose(out); return kStOK; }
   if(!event->primaryVertex()) {
-    fprintf(out,"# event %d has no primary vertex\n",mEventCounter);
+    fprintf(out,"# Event %3d: has no primary vertex\n",mEventCounter);
     fclose(out); return kStOK;
   }
   StThreeVectorD vertexPos(0,0,0);
   vertexPos=event->primaryVertex()->position();
-  printf("Event %d, the position of the primary vertex is (%g %g %g)\n",
+  printf("Event %3d: the position of the primary vertex is (%g %g %g)\n",
      mEventCounter,vertexPos.x(), vertexPos.y(), vertexPos.z());
-  if(vertexPos.z()>50.0||vertexPos.z()<-50.0) { fclose(out); return kStOK; }
+  if(vertexPos.z()>50.0||vertexPos.z()<-50.0) {
+    fprintf(out,"# Event %3d: the primary vertex is out of z-range: %6.1f.\n",mEventCounter,vertexPos.z());
+    fclose(out);
+    return kStOK;
+  }
 
   StTriggerDetectorCollection *theTriggers = event->triggerDetectorCollection();
-  if (!theTriggers) { fclose(out); return kStOK; }
+  if (!theTriggers) {
+    fprintf(out,"# Event %3d: triggerDetectorCollection is missing\n",mEventCounter);
+    fclose(out);
+    return kStOK;
+  }
   StCtbTriggerDetector &theCtb = theTriggers->ctb();
 
   fprintf(out,"e %d\n",mEventCounter);
