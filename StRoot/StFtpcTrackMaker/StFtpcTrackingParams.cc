@@ -1,5 +1,14 @@
-// $Id: StFtpcTrackingParams.cc,v 1.9 2002/11/06 13:47:34 oldi Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.10 2002/11/19 12:45:09 oldi Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.10  2002/11/19 12:45:09  oldi
+// A new database entry (installationPointY[east/west]) was introduced. Now
+// the rotation of FTPC east is done around the correct axis, which isn't
+// measured but comes from the drawings. The measurements used before were true
+// measurements but had nothing to do with the rotation axis, unfortunately.
+// Anyway, the difference is rather small since a typical cluster is rotated
+// by less than 0.1mm.
+// Some code cleanup done.
+//
 // Revision 1.9  2002/11/06 13:47:34  oldi
 // All current database values hardcoded (for stand alone usage).
 // Code clean ups.
@@ -145,43 +154,43 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
   // Initialization with hardcoded values.
 
   // FTPC geometry
-  mInnerRadius =  7.73;
-  mOuterRadius = 30.05;
+  mInnerRadius =  7.73 * centimeter;
+  mOuterRadius = 30.05 * centimeter;
 
   mNumberOfPadRows        = 20;
   mNumberOfPadRowsPerSide = 10;
   
   mPadRowPosZ = new Double_t[mNumberOfPadRows];
   
-  mPadRowPosZ[0]  =  162.75;
-  mPadRowPosZ[1]  =  171.25;
-  mPadRowPosZ[2]  =  184.05;
-  mPadRowPosZ[3]  =  192.55;
-  mPadRowPosZ[4]  =  205.35;
-  mPadRowPosZ[5]  =  213.85;
-  mPadRowPosZ[6]  =  226.65;
-  mPadRowPosZ[7]  =  235.15;
-  mPadRowPosZ[8]  =  247.95;
-  mPadRowPosZ[9]  =  256.45;
-  mPadRowPosZ[10] = -162.75;
-  mPadRowPosZ[11] = -171.25;
-  mPadRowPosZ[12] = -184.05;
-  mPadRowPosZ[13] = -192.55;
-  mPadRowPosZ[14] = -205.35;
-  mPadRowPosZ[15] = -213.85;
-  mPadRowPosZ[16] = -226.65;
-  mPadRowPosZ[17] = -235.15;
-  mPadRowPosZ[18] = -247.95;
-  mPadRowPosZ[19] = -256.45;
+  mPadRowPosZ[0]  =  162.75 * centimeter;
+  mPadRowPosZ[1]  =  171.25 * centimeter;
+  mPadRowPosZ[2]  =  184.05 * centimeter;
+  mPadRowPosZ[3]  =  192.55 * centimeter;
+  mPadRowPosZ[4]  =  205.35 * centimeter;
+  mPadRowPosZ[5]  =  213.85 * centimeter;
+  mPadRowPosZ[6]  =  226.65 * centimeter;
+  mPadRowPosZ[7]  =  235.15 * centimeter;
+  mPadRowPosZ[8]  =  247.95 * centimeter;
+  mPadRowPosZ[9]  =  256.45 * centimeter;
+  mPadRowPosZ[10] = -162.75 * centimeter;
+  mPadRowPosZ[11] = -171.25 * centimeter;
+  mPadRowPosZ[12] = -184.05 * centimeter;
+  mPadRowPosZ[13] = -192.55 * centimeter;
+  mPadRowPosZ[14] = -205.35 * centimeter;
+  mPadRowPosZ[15] = -213.85 * centimeter;
+  mPadRowPosZ[16] = -226.65 * centimeter;
+  mPadRowPosZ[17] = -235.15 * centimeter;
+  mPadRowPosZ[18] = -247.95 * centimeter;
+  mPadRowPosZ[19] = -256.45 * centimeter;
 
   // Vertex position
-  mMaxVertexPosZWarning =  50;
-  mMaxVertexPosZError   = 100;
+  mMaxVertexPosZWarning =  50 * centimeter;
+  mMaxVertexPosZError   = 100 * centimeter;
 
   // Vertex reconstruction
   mHistoBins = 300;
-  mHistoMin  = -75;
-  mHistoMax  =  75;
+  mHistoMin  = -75. * centimeter;
+  mHistoMax  =  75. * centimeter;
 
   // Tracker
   mRowSegments =  20;
@@ -229,35 +238,35 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
   mEtaScope[2] =  3;
   mEtaScope[3] = 15;
 
-  mMaxDca[0] = 100.;
-  mMaxDca[1] = 100.;
-  mMaxDca[2] = 100.;
-  mMaxDca[3] = 100.;
+  mMaxDca[0] = 100. * centimeter;
+  mMaxDca[1] = 100. * centimeter;
+  mMaxDca[2] = 100. * centimeter;
+  mMaxDca[3] = 100. * centimeter;
 
   // Tracklets
-  mMaxAngleTracklet[0] = 0.015;
-  mMaxAngleTracklet[1] = 0.03;
-  mMaxAngleTracklet[2] = 0.03;
-  mMaxAngleTracklet[3] = 0.05;
+  mMaxAngleTracklet[0] = 0.015 * radian;
+  mMaxAngleTracklet[1] = 0.03 * radian;
+  mMaxAngleTracklet[2] = 0.03 * radian;
+  mMaxAngleTracklet[3] = 0.05 * radian;
 
   // Tracks
-  mMaxAngleTrack[0] = 0.03;
-  mMaxAngleTrack[1] = 0.08;
-  mMaxAngleTrack[2] = 0.007;
-  mMaxAngleTrack[3] = 0.007;
+  mMaxAngleTrack[0] = 0.03 * radian;
+  mMaxAngleTrack[1] = 0.08 * radian;
+  mMaxAngleTrack[2] = 0.007 * radian;
+  mMaxAngleTrack[3] = 0.007 * radian;
 
-  mMaxCircleDist[0] = 0.05;
-  mMaxCircleDist[1] = 0.05;
-  mMaxCircleDist[2] = 0.03;
-  mMaxCircleDist[3] = 0.03;
+  mMaxCircleDist[0] = 0.05 * 1./centimeter;
+  mMaxCircleDist[1] = 0.05 * 1./centimeter;
+  mMaxCircleDist[2] = 0.03 * 1./centimeter;
+  mMaxCircleDist[3] = 0.03 * 1./centimeter;
 
-  mMaxLengthDist[0] = 30.;
-  mMaxLengthDist[1] = 70.;
-  mMaxLengthDist[2] = 30.;
-  mMaxLengthDist[3] = 30.;
+  mMaxLengthDist[0] = 30. * centimeter;
+  mMaxLengthDist[1] = 70. * centimeter;
+  mMaxLengthDist[2] = 30. * centimeter;
+  mMaxLengthDist[3] = 30. * centimeter;
   
   // Split tracks
-  mMaxDist       = 0.11;
+  mMaxDist       = 0.11 * centimeter;
   mMinPointRatio = 0.5;
   mMaxPointRatio = 0.5;
 
@@ -279,13 +288,13 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
   mMagField = new StMagUtilities((EBField)2, mMagFieldFactor, 0);
 
   // transformation due to rotated and displaced TPC
-  mTpcPositionInGlobal.setX(-0.256);
-  mTpcPositionInGlobal.setY(-0.082);
-  mTpcPositionInGlobal.setZ(-0.192);
+  mTpcPositionInGlobal.setX(-0.256 * centimeter);
+  mTpcPositionInGlobal.setY(-0.082 * centimeter);
+  mTpcPositionInGlobal.setZ(-0.192 * centimeter);
 
-  Double_t phi   =  0.0;  //large uncertainty, so set to 0
-  Double_t theta = -0.000381;
-  Double_t psi   = -0.000156;
+  Double_t phi   =  0.0 * radian;  //large uncertainty, so set to 0
+  Double_t theta = -0.000381 * radian;
+  Double_t psi   = -0.000156 * radian;
   
   mGlobalToTpcRotation(1, 1) =   TMath::Cos(theta) * TMath::Cos(phi);
   mGlobalToTpcRotation(1, 2) =   TMath::Cos(theta) * TMath::Sin(phi);
@@ -308,20 +317,27 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
     
   // internal FTPC rotation (East only) [has do be done before local -> global]
 
-  mInstallationPointZ[0] = -235.8855;
-  mInstallationPointZ[1] =  235.8855;
+  mInstallationPointY[0] = -22.25 * centimeter;
+  mInstallationPointY[1] = -22.25 * centimeter;
+  mInstallationPointZ[0] = -234.325 * centimeter;
+  mInstallationPointZ[1] =  234.325 * centimeter;
   
-  mObservedVertexOffsetY[0] = 0.3427;
-  mObservedVertexOffsetY[1] = 0.;
+  mObservedVertexOffsetY[0] = 0.3427 * centimeter;
+  mObservedVertexOffsetY[1] = 0. * centimeter;
   
-  // define rotation angle alpha=atan(y_vertex_offset cm/z_installation cm)
-  Double_t alpha = TMath::ATan(mObservedVertexOffsetY[0] / TMath::Abs(mInstallationPointZ[0])); // radians and > 0
+  // define rotation angle
+  Double_t zShift = mInstallationPointZ[0] + TMath::Sqrt(TMath::Power(mObservedVertexOffsetY[0], 2.) 
+		                                         - 2.*mObservedVertexOffsetY[0]*mInstallationPointY[0] 
+		                                         + TMath::Power(mInstallationPointZ[0], 2.)); // p-q-formula
+  Double_t alpha  =   TMath::ATan((mInstallationPointY[0] - mObservedVertexOffsetY[0]) / mInstallationPointZ[0]) 
+                    - TMath::ATan(mInstallationPointY[0] / (mInstallationPointZ[0] - zShift)); // radians and > 0(!)
+                      // Order had to be switched due to definition of alpha in rotation matrix (see below).
   
   // define rotation axis
   // simplify to rotation about x-axis because of very small y-z-offset
-  Double_t rx = 1.0;
-  Double_t ry = 0.0;
-  Double_t rz = 0.0;
+  Double_t rx = 1.0 * centimeter;
+  Double_t ry = 0.0 * centimeter;
+  Double_t rz = 0.0 * centimeter;
   
   // take the normal vector as rotation vector
   Double_t norm_r = TMath::Sqrt(rx*rx + ry*ry + rz*rz);
@@ -329,7 +345,7 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
   ry = ry/norm_r;
   rz = rz/norm_r;
   
-  // rotation maxtrix : rotation about r(rx, ry, rz) with angle alpha [please check!]
+  // rotation maxtrix : rotation about r(rx, ry, rz) with angle alpha
   // before that the coordinate system has to be transformed to x_installation, 
   // y_installation, z_installation as new coordinate system origin
   mFtpcRotation(1, 1) = rx * rx * (1 - TMath::Cos(alpha)) +      TMath::Cos(alpha);
@@ -340,7 +356,7 @@ StFtpcTrackingParams::StFtpcTrackingParams(Double_t magFieldFactor)
   mFtpcRotation(2, 3) = rz * ry * (1 - TMath::Cos(alpha)) - rx * TMath::Sin(alpha);
   mFtpcRotation(3, 1) = rx * ry * (1 - TMath::Cos(alpha)) - ry * TMath::Sin(alpha);
   mFtpcRotation(3, 2) = ry * rz * (1 - TMath::Cos(alpha)) + rx * TMath::Sin(alpha);
-  mFtpcRotation(3, 3) = rz * rz * (1 - TMath::Cos(alpha)) + TMath::Cos(alpha);
+  mFtpcRotation(3, 3) = rz * rz * (1 - TMath::Cos(alpha)) +      TMath::Cos(alpha);
   
   mFtpcRotationInverse = mFtpcRotation.inverse(ierr);
   
@@ -407,12 +423,12 @@ Int_t StFtpcTrackingParams::InitTrackingParams(ftpcTrackingPars_st *trackParsTab
       
       // Tracks
       mMaxAngleTrack[i] = trackParsTable->maxAngleTrack[i] * radian;
-      mMaxCircleDist[i] = trackParsTable->maxCircleDist[i] * 1/centimeter;
+      mMaxCircleDist[i] = trackParsTable->maxCircleDist[i] * 1./centimeter;
       mMaxLengthDist[i] = trackParsTable->maxLengthDist[i] * centimeter;
     }  
     
     // Split tracks
-    mMaxDist       = trackParsTable->maxDist;
+    mMaxDist       = trackParsTable->maxDist * centimeter;
     mMinPointRatio = trackParsTable->minPointRatio;
     mMaxPointRatio = trackParsTable->maxPointRatio;     
     
@@ -463,12 +479,10 @@ Int_t StFtpcTrackingParams::InitDimensions(ftpcDimensions_st* dimensionsTable) {
     mOuterRadius = dimensionsTable->outerRadiusSensitiveVolume * centimeter;
     mNumberOfPadRows        = dimensionsTable->totalNumberOfPadrows;
     mNumberOfPadRowsPerSide = dimensionsTable->numberOfPadrowsPerSide;
+    mInstallationPointY[0] = dimensionsTable->installationPointY[0] * centimeter;
+    mInstallationPointY[1] = dimensionsTable->installationPointY[1] * centimeter;
     mInstallationPointZ[0] = dimensionsTable->installationPointZ[0] * centimeter;
     mInstallationPointZ[1] = dimensionsTable->installationPointZ[1] * centimeter;
-
-    // temporary fix due to database problem
-    if (mInstallationPointZ[0] != -235.8855) mInstallationPointZ[0] = -235.8855 * centimeter;
-    if (mInstallationPointZ[1] !=  235.8855) mInstallationPointZ[1] =  235.8855 * centimeter;
 
     return 1;
   }
@@ -519,10 +533,10 @@ Int_t StFtpcTrackingParams::InitCoordTransformation(ftpcCoordTrans_st* ftpcCoord
 
   if (ftpcCoordTrans) {
     
-    Double_t old[2] = {mObservedVertexOffsetY[0], mObservedVertexOffsetY[1]};
+    Double_t old[2] = {mObservedVertexOffsetY[0] * centimeter, mObservedVertexOffsetY[1] * centimeter};
     
-    mObservedVertexOffsetY[0] = ftpcCoordTrans->observedVertexOffsetY[0];
-    mObservedVertexOffsetY[1] = ftpcCoordTrans->observedVertexOffsetY[1];  // not used
+    mObservedVertexOffsetY[0] = ftpcCoordTrans->observedVertexOffsetY[0] * centimeter;
+    mObservedVertexOffsetY[1] = ftpcCoordTrans->observedVertexOffsetY[1] * centimeter;  // not used
 
     if ((mObservedVertexOffsetY[0] != old[0] || mObservedVertexOffsetY[1] != old[1]) && 
 	(old[0] < -9990. || old[1] < -9990.)) {
@@ -551,9 +565,9 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
 
   if (gStTpcDb->GlobalPosition()) {
 
-    Double_t phi   = 0.0;  //large uncertainty, so set to 0
-    Double_t theta = gStTpcDb->GlobalPosition()->TpcRotationAroundGlobalAxisY();
-    Double_t psi   = gStTpcDb->GlobalPosition()->TpcRotationAroundGlobalAxisX();
+    Double_t phi   = 0.0 * radian;  //large uncertainty, so set to 0
+    Double_t theta = gStTpcDb->GlobalPosition()->TpcRotationAroundGlobalAxisY() * radian;
+    Double_t psi   = gStTpcDb->GlobalPosition()->TpcRotationAroundGlobalAxisX() * radian;
 
     mGlobalToTpcRotation(1, 1) =   TMath::Cos(theta) * TMath::Cos(phi);
     mGlobalToTpcRotation(1, 2) =   TMath::Cos(theta) * TMath::Sin(phi);
@@ -574,9 +588,9 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
       gMessMgr->Message("", "E", "OST") << "TPC to global rotation matrix:" << mTpcToGlobalRotation << endm;
     }
     
-    mTpcPositionInGlobal.setX(gStTpcDb->GlobalPosition()->TpcCenterPositionX());
-    mTpcPositionInGlobal.setY(gStTpcDb->GlobalPosition()->TpcCenterPositionY());
-    mTpcPositionInGlobal.setZ(gStTpcDb->GlobalPosition()->TpcCenterPositionZ());    
+    mTpcPositionInGlobal.setX(gStTpcDb->GlobalPosition()->TpcCenterPositionX() * centimeter);
+    mTpcPositionInGlobal.setY(gStTpcDb->GlobalPosition()->TpcCenterPositionY() * centimeter);
+    mTpcPositionInGlobal.setZ(gStTpcDb->GlobalPosition()->TpcCenterPositionZ() * centimeter);    
   }
   
   else {
@@ -586,14 +600,19 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
   
   // internal FTPC rotation (East only) [has do be done before local -> global]
 
-  // define rotation angle alpha=atan(y_vertex_offset cm/z_installation cm)
-  Double_t alpha = TMath::ATan(mObservedVertexOffsetY[0] / TMath::Abs(mInstallationPointZ[0])); // radians and > 0
+  // define rotation angle
+  Double_t zShift = (mInstallationPointZ[0] + TMath::Sqrt(TMath::Power(mObservedVertexOffsetY[0], 2.) 
+		                                          - 2.*mObservedVertexOffsetY[0]*mInstallationPointY[0] 
+		                                          + TMath::Power(mInstallationPointZ[0], 2.))) * centimeter; // p-q-formula
+  Double_t alpha  =   (TMath::ATan((mInstallationPointY[0] - mObservedVertexOffsetY[0]) / mInstallationPointZ[0]) 
+                     - TMath::ATan(mInstallationPointY[0] / (mInstallationPointZ[0] - zShift))) * radian; // > 0(!)
+                      // Order had to be switched due to definition of alpha in rotation matrix (see below).
   
   // define rotation axis
   // simplify to rotation about x-axis because of very small y-z-offset
-  Double_t rx = 1.0;
-  Double_t ry = 0.0;
-  Double_t rz = 0.0;
+  Double_t rx = 1.0 * centimeter;
+  Double_t ry = 0.0 * centimeter;
+  Double_t rz = 0.0 * centimeter;
   
   // take the normal vector as rotation vector
   Double_t norm_r = TMath::Sqrt(rx*rx + ry*ry + rz*rz);
@@ -601,7 +620,7 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
   ry = ry/norm_r;
   rz = rz/norm_r;
   
-  // rotation maxtrix : rotation about r(rx, ry, rz) with angle alpha [please check!]
+  // rotation maxtrix : rotation about r(rx, ry, rz) with angle alpha
   // before that the coordinate system has to be transformed to x_installation, 
   // y_installation, z_installation as new coordinate system origin
   mFtpcRotation(1, 1) = rx * rx * (1 - TMath::Cos(alpha)) +      TMath::Cos(alpha);
@@ -612,7 +631,7 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
   mFtpcRotation(2, 3) = rz * ry * (1 - TMath::Cos(alpha)) - rx * TMath::Sin(alpha);
   mFtpcRotation(3, 1) = rx * ry * (1 - TMath::Cos(alpha)) - ry * TMath::Sin(alpha);
   mFtpcRotation(3, 2) = ry * rz * (1 - TMath::Cos(alpha)) + rx * TMath::Sin(alpha);
-  mFtpcRotation(3, 3) = rz * rz * (1 - TMath::Cos(alpha)) + TMath::Cos(alpha);
+  mFtpcRotation(3, 3) = rz * rz * (1 - TMath::Cos(alpha)) +      TMath::Cos(alpha);
   
   UInt_t ierr;
   mFtpcRotationInverse = mFtpcRotation.inverse(ierr);
@@ -769,10 +788,8 @@ void StFtpcTrackingParams::PrintParams() {
 
   gMessMgr->Message("", "I", "OST") << endm;
   gMessMgr->Message("", "I", "OST") << "FTPC to global transformation" << endm;
-  Int_t precision = gMessMgr->precision(7); // switch precision to show all digits
-  gMessMgr->Message("", "I", "OST") << "Rotation point (east)..............: " << InstallationPointZ(0) << endm;
-  gMessMgr->Message("", "I", "OST") << "Rotation point (west)..............: " << InstallationPointZ(1) << " (not used)" << endm;
-  gMessMgr->precision(precision); // switch back precision
+  gMessMgr->Message("", "I", "OST") << "Installation point y, z (east, cm).: " << InstallationPointY(0) << ", " << InstallationPointZ(0) << endm;
+  gMessMgr->Message("", "I", "OST") << "Installation point y, z (west, cm).: " << InstallationPointY(1) << ", " << InstallationPointZ(1) << " (not used)" << endm;
   gMessMgr->Message("", "I", "OST") << "Observed vertex offset y (east, cm): " << ObservedVertexOffsetY(0) << endm;
   gMessMgr->Message("", "I", "OST") << "Observed vertex offset y (west, cm): " << ObservedVertexOffsetY(1) << " (not used)" << endm;
   gMessMgr->Message("", "I", "OST") << "FTPC to global rotation: " << FtpcRotation() << endm;
@@ -851,6 +868,7 @@ inline StThreeVectorD StFtpcTrackingParams::TpcPositionInGlobal() { return mTpcP
 
 inline StMatrixD StFtpcTrackingParams::FtpcRotation()                 { return mFtpcRotation;              }
 inline StMatrixD StFtpcTrackingParams::FtpcRotationInverse()          { return mFtpcRotationInverse;       }
+inline  Double_t StFtpcTrackingParams::InstallationPointY(Int_t i)    { return (i>=0 && i<=1) ? mInstallationPointY[i] : 0.; }
 inline  Double_t StFtpcTrackingParams::InstallationPointZ(Int_t i)    { return (i>=0 && i<=1) ? mInstallationPointZ[i] : 0.; }
 inline  Double_t StFtpcTrackingParams::ObservedVertexOffsetY(Int_t i) { return (i>=0 && i<=1) ? mObservedVertexOffsetY[i] : 0.; }
 
