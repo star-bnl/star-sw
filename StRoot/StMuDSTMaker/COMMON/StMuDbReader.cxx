@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDbReader.cxx,v 1.1 2002/04/11 14:19:30 laue Exp $
+ * $Id: StMuDbReader.cxx,v 1.2 2002/05/04 23:56:29 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -16,22 +16,6 @@
 #include "StChain.h"
 
 ClassImp(StMuDbReader)
-
-  
-
-
-// class FourTuple {
-//  public:
-//   string name;
-//   string date;
-//   string time;
-//   int events;
-// };
-
-// typedef vector<FourTuple*>            FourTupleVector;
-// typedef vector<FourTuple*>::iterator  FourTupleIterator;
-
-
 
 StMuDbReader* StMuDbReader::_instance=0;
 
@@ -53,6 +37,7 @@ StMuDbReader* StMuDbReader::Instance() {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/// Attention: constructor not public, this is a singleton
 StMuDbReader:: StMuDbReader() {
   DEBUGMESSAGE2("");
 }
@@ -65,6 +50,7 @@ StMuDbReader::~StMuDbReader() {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/// add entries in dbFile to internal data base ( mDb ), will call sortDb(), returns number of entries in mDb
 int StMuDbReader::addDb(const char* fileName) {
   DEBUGMESSAGE2("");
   char name[128];
@@ -82,6 +68,7 @@ int StMuDbReader::addDb(const char* fileName) {
     DEBUGVALUE3(line);
     int iret = sscanf(line,"%s%i",name, &numberOfEvents);
     if (iret==2) {
+      DEBUGVALUE2(name);
       pair<string,int> aPair(name,numberOfEvents);
       mDb.push_back( aPair );
     }
@@ -93,6 +80,7 @@ int StMuDbReader::addDb(const char* fileName) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/// show all entries in internal data base
 void StMuDbReader::showDb(){
   DEBUGMESSAGE2("");
   for (iter=mDb.begin(); iter!=mDb.end(); iter++) {
@@ -102,6 +90,7 @@ void StMuDbReader::showDb(){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/// sort all entries in internal data base according to file name
 void StMuDbReader::sortDb(){
   DEBUGMESSAGE2("");
     list< pair<string,int> > tmpList;
@@ -120,23 +109,26 @@ void StMuDbReader::sortDb(){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/// scan internal data base for file, if found return number of entries, otherwise return 0;
 int StMuDbReader::entries(const char* file){
   string fileName(file);
   int lo=0;
   int hi=mDb.size();
-  int oldPos,pos;
+  int pos=0;
+  int oldPos=0;
   int entries=0;
+  //cout << lo << " " << pos << " " << hi << endl;
   while (lo<hi) {
-    pos = (int)(lo+hi+0.5)/2;
-    if (oldPos==pos) break;
-    oldPos=pos;
+    pos = (int) (lo+hi)/2;
     //cout << lo << " " << pos << " " << hi << endl;
+    if (oldPos==pos) break;
     if (fileName > mDb[pos].first) lo=pos;
     if (fileName < mDb[pos].first) hi=pos;
     if (fileName == mDb[pos].first) { 
       entries = mDb[pos].second;
       lo=hi;
     }
+    oldPos=pos;
   }
   return entries;
 }
@@ -145,12 +137,13 @@ int StMuDbReader::entries(const char* file){
 //-----------------------------------------------------------------------
 #include "TFile.h"
 #include "TTree.h"
+/// scan the files in inputList for the number of events add add them to the dbFile file. Create dbFile file if not existent returns number of entries in mDb
 int StMuDbReader::createDB(const char* dbName, const char* inputList) {
   DEBUGMESSAGE("");
 
   /// fill db into list
   addDb(dbName);
-  showDb();
+  //showDb();
   // open db to add entries
   ofstream dbFile(dbName, ios::app);
   // open inputList
@@ -173,7 +166,7 @@ int StMuDbReader::createDB(const char* dbName, const char* inputList) {
     if (iret==1) {
       cout << fileName << " ";
       //check whether file is alread in db or not
-      if (!entries(fileName)) {
+      if (entries(fileName)==0) {
 	TFile f1(fileName);
 	TTree *tree = dynamic_cast<TTree*>(f1.Get("MuDst"));
 	if (tree) {
@@ -198,6 +191,9 @@ int StMuDbReader::createDB(const char* dbName, const char* inputList) {
 /***************************************************************************
  *
  * $Log: StMuDbReader.cxx,v $
+ * Revision 1.2  2002/05/04 23:56:29  laue
+ * some documentation added
+ *
  * Revision 1.1  2002/04/11 14:19:30  laue
  * - update for RH 7.2
  * - decrease default arrays sizes

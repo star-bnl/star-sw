@@ -1,8 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.h,v 1.5 2002/04/17 21:04:16 laue Exp $
+ * $Id: StMuChainMaker.h,v 1.6 2002/05/04 23:56:29 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
+/** @class StMuChainMaker
+    Helper class to create a TChain of Root files
+*/
+
 #ifndef StMuChainMaker_hh
 #define StMuChainMaker_hh
 
@@ -43,6 +47,9 @@ ClassDef(StMuChainMaker,0)
 /***************************************************************************
  *
  * $Log: StMuChainMaker.h,v $
+ * Revision 1.6  2002/05/04 23:56:29  laue
+ * some documentation added
+ *
  * Revision 1.5  2002/04/17 21:04:16  laue
  * minor updates
  *

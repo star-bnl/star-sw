@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.4 2002/04/17 21:04:15 laue Exp $
+ * $Id: StMuChainMaker.cxx,v 1.5 2002/05/04 23:56:29 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -25,6 +25,9 @@ ClassImp(StMuChainMaker)
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/**
+   Constructor: The argument 'name' is the name of the TTrees be chained   
+*/
 StMuChainMaker::StMuChainMaker(const char* name) : mTreeName(name) {
   DEBUGMESSAGE2("");
   mChain = new TChain(mTreeName.c_str());
@@ -34,6 +37,10 @@ StMuChainMaker::StMuChainMaker(const char* name) : mTreeName(name) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/** 
+    Destructor: The TChain will not be deleted since it is passed to the 
+    outside.
+ */
 StMuChainMaker::~StMuChainMaker() {
   DEBUGMESSAGE2("");
   int n=0;
@@ -44,6 +51,10 @@ StMuChainMaker::~StMuChainMaker() {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/** 
+    Returns a full filename, simply concats the three arguments 'dir', 
+    'fileName' and extention
+*/
 string StMuChainMaker::buildFileName(string dir, string fileName, string extention){
   DEBUGMESSAGE2("");
   fileName = dir + fileName + extention;
@@ -52,6 +63,10 @@ string StMuChainMaker::buildFileName(string dir, string fileName, string extenti
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/**
+   Return the input string's basename by stripping of all characters from 
+   the first '.' to the end and all characters after the last '/'.
+ */
 string StMuChainMaker::basename(string s){
   string name(s);
   size_t pos;
@@ -65,6 +80,11 @@ string StMuChainMaker::basename(string s){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/**
+   Return a inputs string's directory name by erasing the basename() and
+   all charcters after the last '/'. If the only remaining character is 
+   '/' and empty string "" will be returned.
+ */
 string StMuChainMaker::dirname(string s){
   string name(s);
   string base(basename(s));
@@ -79,6 +99,23 @@ string StMuChainMaker::dirname(string s){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
+/**
+   Parses the input strings. Multiple sub-filters will be built our of 
+   'filter'. Here, ":" separates the individual filter strings (e.g.
+   "MuDst:st_physics_2:raw_0001" will accept only files which have all of 
+   the sub-strings "MuDst", "st_physics_2" and "raw_0001" in them.
+
+   If 'file' is empty, the directory 'dir' will be scanned for files.
+   If 'file' has a substring "MuDst.root" a single file will be opened.
+   If 'file' has a substring ".lis" the file will be expected to be a list.
+   In the case 'file' is not empty, 'dir' will be ignored, hence the filenames
+   provided have to be full filenames (including path)
+
+   A TChain will be built for files matching the sub filters (in all cases).
+   The chain will be returned.
+  
+   
+ */
 TChain* StMuChainMaker::make(string dir, string file, string filter, int maxFiles) {
   DEBUGMESSAGE1("");
   mSubFilters = subFilter(filter);
@@ -118,18 +155,27 @@ string**  StMuChainMaker::subFilter(string filter) {
 void StMuChainMaker::add(string file) {
   DEBUGMESSAGE3("");
   /// if no entries in db, just add file
-  if (mDbReader->entriesDb()==0) {
-    mChain->Add( file.c_str(), 0 );
+  DEBUGVALUE1(file.c_str());
+
+  int entries = 0;
+
+  // read number of events in file from db
+  entries = mDbReader->entries(file.c_str());
+
+  // if I can not read the number of events from db, open file and read number.
+  if (entries==0) {
+    TFile f1(file.c_str());
+    TTree *tree = (TTree*)dynamic_cast<TTree*>(f1.Get("MuDst"));
+    if (tree) entries = (int)tree->GetEntries();
+    f1.Close();
+  } 
+
+  // add to chain if #events > 0
+  if (entries) {
+    mChain->Add( file.c_str(), entries );
     mFileCounter++;
   }
-  /// if db has entries, enter only the file with entries (otherwise it crashes)
-  else {
-    int entries = mDbReader->entries(file.c_str());
-    if (entries) {
-      mChain->Add( file.c_str(), entries );
-      mFileCounter++;
-    }
-  }
+    
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -152,7 +198,7 @@ void StMuChainMaker::fromDir(string dir, int maxFiles) {
       // add it to the chain
       cout << mFileCounter << endl;
       add( fullFile );
-      delete fullFile;
+      delete []fullFile;
     }
     if(mFileCounter >= maxFiles) break;
   }   
@@ -176,7 +222,7 @@ void StMuChainMaker::fromList(string list, int maxFiles) {
     if ( pass(temp,mSubFilters) ) {
       add(temp);
     }
-    delete temp;
+    delete []temp;
     if (mFileCounter>maxFiles) break;
   }   
   delete inputStream;
@@ -205,6 +251,9 @@ bool StMuChainMaker::pass(string file, string**  filters) {
 /***************************************************************************
  *
  * $Log: StMuChainMaker.cxx,v $
+ * Revision 1.5  2002/05/04 23:56:29  laue
+ * some documentation added
+ *
  * Revision 1.4  2002/04/17 21:04:15  laue
  * minor updates
  *

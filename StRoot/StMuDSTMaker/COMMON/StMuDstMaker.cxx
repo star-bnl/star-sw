@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.12 2002/04/26 21:02:56 jeromel Exp $
+ * $Id: StMuDstMaker.cxx,v 1.13 2002/05/04 23:56:30 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -270,7 +270,7 @@ void StMuDstMaker::write(){
     theFileName = buildFileName( mDirName+"/", basename(ioMakerFileName),".MuDst.root"); 
     break;
   case ioTreeMaker:
-    DEBUGMESSAGE2("===> ioTreeMaker\n");
+    //    ioMakerFileName = mTreeMaker->GetTree()->GetBaseName();
     ioMakerFileName = mTreeMaker->GetTree()->GetBaseName();
     theFileName = buildFileName(dirname(ioMakerFileName),basename(ioMakerFileName),".MuDst.root"); 
     break;
@@ -736,6 +736,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.13  2002/05/04 23:56:30  laue
+ * some documentation added
+ *
  * Revision 1.12  2002/04/26 21:02:56  jeromel
  * Bug fix in dirname(). Still cannot get the arg3 bla/test.root mechanism to work
  * (but it does neither for everything else). Will come back to it.
