@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPidTraits.h,v 2.1 2000/09/28 10:54:48 ullrich Exp $
+ * $Id: StRichPidTraits.h,v 2.2 2000/11/01 16:47:02 lasiuk Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,8 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPidTraits.h,v $
- * Revision 2.1  2000/09/28 10:54:48  ullrich
- * Initial Revision.
+ * Revision 2.2  2000/11/01 16:47:02  lasiuk
+ * Keep the StRichPid as the owner (use a StSPtrVec)
+ * also check the pdg encoded number now
  *
  * Revision 2.2  2000/11/01 16:47:02  lasiuk
  * Keep the StRichPid as the owner (use a StSPtrVec)
@@ -20,11 +21,12 @@
  * Revision 2.1  2000/09/28 10:54:48  ullrich
  * Initial Revision.
  *
-#include "StObject.h"
  ***************************************************************************/
+#ifndef StRichPidTraits_hh
+#define StRichPidTraits_hh
 
-#include "StContainers.h"
-#include "StParticleDefinition.hh"
+#include "StTrackPidTraits.h"
+
 #include "StParticleDefinition.hh"
 
 #include "StContainers.h"
@@ -33,33 +35,32 @@
 
 
 class StRichPidTraits : public StTrackPidTraits {
-    //StRichPidTraits(const StRichPidTraits&) {}
-    //StRichPidTraits& operator=(const StRichPidTraits&) {}
+public:
+    StRichPidTraits();
     ~StRichPidTraits();
     
     //StRichPidTraits(const StRichPidTraits&) {/* nopt */}
-    void       addPid(StRichPid* );
+    //StRichPidTraits& operator=(const StRichPidTraits&) {/* nopt */}
     
-    StSPtrVecRichPid        getAllPids();
-    const StSPtrVecRichPid  getAllPids() const;
+    Int_t  operator==(const StRichPidTraits&) const;
+    
     void                    addPid(StRichPid* );
   
-    const StRichPid*        getPid(StParticleDefinition* t) const;
+    const StSPtrVecRichPid& getAllPids() const;
     StSPtrVecRichPid&       getAllPids();
     
     StRichPid*              getPid(StParticleDefinition* t);
     const StRichPid*        getPid(StParticleDefinition* t)  const;
   
+private:
     StSPtrVecRichPid mThePids;
     
     StObject* clone();
 
     ClassDef(StRichPidTraits,1)
+};
 
-inline       StSPtrVecRichPid StRichPidTraits::getAllPids()        { return mThePids;}
-inline const StSPtrVecRichPid  StRichPidTraits::getAllPids() const { return mThePids;}
 // sets
-
 
 inline       StSPtrVecRichPid& StRichPidTraits::getAllPids()        { return mThePids;}
 inline const StSPtrVecRichPid&  StRichPidTraits::getAllPids() const { return mThePids;}
