@@ -1,4 +1,4 @@
-// $Id: StEEmcDataMaker.cxx,v 1.10 2004/03/26 14:20:04 balewski Exp $
+// $Id: StEEmcDataMaker.cxx,v 1.11 2004/03/28 04:08:12 balewski Exp $
 
 #include <Stiostream.h>
 #include <math.h>
@@ -16,7 +16,7 @@
 #include "StEEmcDbMaker/StEEmcDbIndexItem1.h"
 
 #include "StEEmcDbMaker/EEmcDbCrate.h"
-#include "StEEmcUtil/EEfeeRaw/EEfeeDataBlock.h"
+//#include "StEEmcUtil/EEfeeRaw/EEfeeDataBlock.h"
 
 ClassImp(StEEmcDataMaker)
 
@@ -81,28 +81,21 @@ Int_t StEEmcDataMaker::Make(){
   
   St_DataSet *daq = GetDataSet("StDAQReader");                 assert(daq);
   StDAQReader *fromVictor = (StDAQReader*) (daq->GetObject()); assert(fromVictor);
-  StEEMCReader *steemcreader  = fromVictor->getEEMCReader();  
-  if(!steemcreader) return kStOK;
-
+  StEEMCReader *eeReader  = fromVictor->getEEMCReader();  
+  if(!eeReader) return kStOK;
 
   int icr; 
+
 #if 0 // test of new access method  
-  //new
 
   for(icr=0;icr<mDb->getNCrate();icr++) {
     const EEmcDbCrate *crate=mDb-> getCrate(icr);
     printf("geting data for fiber: ");crate->print();
-    char type='X';
-    if(crate->crID>=1 && crate->crID<=6) 
-      type='T'; // tower
-    else if (crate->crID>=64 && crate->crID<=111) 
-      type='S'; // smd/pre/post
-    int ch;
 
     printf("---- HEAD ----\n");
     for(ch=0;ch<crate->nHead;ch++) {
       int val=-1;
-      val=steemcreader->getEemcHead(crate->fiber,ch,type); 
+      val=steemcreader->getEemcHead(crate->fiber,ch,crate->type); 
       printf("cr=%d ch=%d val=0x%04x\n",crate->crID,ch,val);
     }
 
@@ -117,29 +110,6 @@ Int_t StEEmcDataMaker::Make(){
 #endif
 
 
-  
-  EEfeeDataBlock block;
-  for(icr=0;icr<mDb->getNCrate();icr++) {
-    const EEmcDbCrate *crate=mDb-> getCrate(icr);
-    printf("geting data for fiber: ");crate->print();
-    block.clear();
-    char type='X';
-    if(crate->crID>=0 && crate->crID<=6) 
-      type='T'; // tower
-    else if (crate->crID>=64 && crate->crID<=111) 
-      type='S'; // smd/pre/post
-    block.setHead(steemcreader->getEemcHeadBlock(crate->fiber,type));
-    block.setDataArray(steemcreader->getEemcDataBlock(crate->fiber,type),crate->nch);
-    
-    block.print(0);
-
-    //StEvent-> Add(block) <===  THIS IS MISSING 
-
-    //    break;
- }
-
-
-  //old code not to be used here any more
   StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection();
 
   if(emcC==0) { // create this collection if not existing
@@ -147,6 +117,22 @@ Int_t StEEmcDataMaker::Make(){
     mEvent->setEmcCollection(emcC);
     printf(" %s::Make() has added a non existing StEmcCollection()\n", GetName());
   }
+  
+  StEmcRawData *raw=new  StEmcRawData;
+
+  emcC->setEemcRawData(raw);
+  for(icr=0;icr<mDb->getNCrate();icr++) {
+    const EEmcDbCrate *crate=mDb-> getCrate(icr);
+    printf("\nicr=%d fiber: ",icr);crate->print();
+    raw->createBank(icr,crate->nHead,crate->nCh);
+    raw->setHeader(icr,eeReader->getEemcHeadBlock(crate->fiber,crate->type));
+    raw->setData(icr,eeReader->getEemcDataBlock(crate->fiber,crate->type));
+  }
+
+
+  //old .......................
+#if 0 // recording decoded data in StEvent, abandon in 2004
+
   int det = kEndcapEmcTowerId; 
   StDetectorId id = StDetectorId(det);
   StEmcDetector* d = new StEmcDetector(id,12);
@@ -203,13 +189,16 @@ Int_t StEEmcDataMaker::Make(){
     
     printf("%s event finished nDrop=%d nMap=%d--> nOver=%d \n",GetName(), nDrop,nMap,nOver);
     
-    
+#endif // decoding of data 
+
+
+   
     return kStOK;
   }
 
 // $Log: StEEmcDataMaker.cxx,v $
-// Revision 1.10  2004/03/26 14:20:04  balewski
-// fix
+// Revision 1.11  2004/03/28 04:08:12  balewski
+// store raw EEMC data
 //
 // Revision 1.9  2004/03/20 20:25:40  balewski
 // fix for empty ETOW/ESMD
