@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSector.hh,v 1.1 1999/01/18 10:23:42 lasiuk Exp $
+ * $Id: StTrsDigitalSector.hh,v 1.2 1999/01/22 08:06:03 lasiuk Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -24,8 +24,10 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSector.hh,v $
- * Revision 1.1  1999/01/18 10:23:42  lasiuk
- * initial Revision
+ * Revision 1.2  1999/01/22 08:06:03  lasiuk
+ * use unsigned char for compatibilty with interface.
+ * requires use of two arrays...ugly but fine for now.
+ * use of pair<>; values returned by pointer
  *
  * Revision 1.1  1999/01/18 10:23:42  lasiuk
  * initial Revision
@@ -36,23 +38,25 @@
 #define ST_TRS_DIGITAL_SECTOR_HH
 
 #include <vector>
+#include <utility>
+
 #include "StTrsAnalogSignal.hh"
 #include "StTpcGeometry.hh"
 
 #include "StTpcPadCoordinate.hh"
 
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
-typedef vector<short>              digitalTimeBins;
+typedef vector<unsigned char>               digitalTimeBins;
 typedef vector<digitalTimeBins>    digitalPadRow;
 typedef vector<digitalPadRow>      digitalSector;
 
-typedef vector<short>::iterator digitialTimeBinIterator;
+typedef vector<unsigned char>::iterator digitialTimeBinIterator;
 #else
-typedef vector<short, allocator<short> >                       digitalTimeBins;
+typedef vector<unsigned char, allocator<unsigned char> >                       digitalTimeBins;
 typedef vector<digitalTimeBins, allocator<digitalTimeBins> > digitalPadRow;
 typedef vector<digitalPadRow, allocator<digitalPadRow> >     digitalSector;
 
-typedef vector<short, allocator<short> >::iterator digitalTimeBinIterator;
+typedef vector<unsigned char, allocator<unsigned char> >::iterator digitalTimeBinIterator;
 #endif
 
 typedef digitalPadRow::iterator                  digitalPadRowIterator;
@@ -67,9 +71,9 @@ public:
     //StTrsDigitalSector& operator=(const StTrsDigitalSector&);
 
     // access functions
-    digitalTimeBins&   timeBinsOfRowAndPad(int, int);
-    digitalPadRow&     padsOfRow(int);
-    digitalSector&     rows();
+    pair<digitalTimeBins*, digitalTimeBins*>   timeBinsOfRowAndPad(int, int);
+    pair<digitalPadRow*,   digitalPadRow*>     padsOfRow(int);
+    pair<digitalSector*,   digitalSector*>     rows();
 
     int  numberOfRows()             const;
     int  numberOfPadsInRow(int)     const;
@@ -78,16 +82,29 @@ public:
     // Adding
     void clear();
 
-    void assignTimeBins(int, int, digitalTimeBins&);
-    void assignTimeBins(StTpcPadCoordinate&, digitalTimeBins&);
+    void assignTimeBins(int, int, pair<digitalTimeBins*, digitalTimeBins*> );
+    void assignTimeBins(StTpcPadCoordinate&, pair<digitalTimeBins*, digitalTimeBins*>);
 
 public:
-    digitalSector mSector;
+    digitalSector mData;
+    digitalSector mZeros;
 };
-inline digitalTimeBins& StTrsDigitalSector::timeBinsOfRowAndPad(int rowN, int padN) { return (mSector[(rowN-1)][(padN-1)]); }
-inline digitalPadRow&   StTrsDigitalSector::padsOfRow(int rowN) { return (mSector[(rowN-1)]); }
-inline digitalSector&   StTrsDigitalSector::rows() { return (mSector); }
-inline int StTrsDigitalSector::numberOfRows() const { return mSector.size();}
-inline int StTrsDigitalSector::numberOfPadsInRow(int rowN) const { return mSector[(rowN-1)].size();}
-inline int StTrsDigitalSector::numberOfTimeBins(int rowN, int padN) const { return mSector[(rowN-1)][(padN-1)].size();}
+inline pair<digitalTimeBins*,digitalTimeBins*> StTrsDigitalSector::timeBinsOfRowAndPad(int rowN, int padN)
+{
+    pair<digitalTimeBins*,digitalTimeBins*> a(&mData[(rowN-1)][(padN-1)],&mZeros[(rowN-1)][(padN-1)]);
+    return (a);
+}
+inline pair<digitalPadRow*,digitalPadRow*> StTrsDigitalSector::padsOfRow(int rowN)
+{
+    pair<digitalPadRow*,digitalPadRow*> a(&mData[(rowN-1)],&mZeros[(rowN-1)]);
+    return(a);
+}
+inline pair<digitalSector*,digitalSector*> StTrsDigitalSector::rows()
+{
+    pair<digitalSector*,digitalSector*> a(&mData,&mZeros);
+    return (a);
+}
+inline int StTrsDigitalSector::numberOfRows() const { return mData.size();}
+inline int StTrsDigitalSector::numberOfPadsInRow(int rowN) const { return mData[(rowN-1)].size();}
+inline int StTrsDigitalSector::numberOfTimeBins(int rowN, int padN) const { return mData[(rowN-1)][(padN-1)].size();}
 #endif
