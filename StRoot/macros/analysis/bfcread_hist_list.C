@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list.C,v 1.19 2000/06/13 00:58:59 lansdell Exp $ 
+// $Id: bfcread_hist_list.C,v 1.20 2000/06/13 18:41:59 kathy Exp $ 
 // $Log: bfcread_hist_list.C,v $
+// Revision 1.20  2000/06/13 18:41:59  kathy
+// had to move order of library loading for some unknown reason...
+//
 // Revision 1.19  2000/06/13 00:58:59  lansdell
 // added libglobal_Tables to resolve crashes
 //
@@ -111,11 +114,11 @@ void bfcread_hist_list(
 //
     gSystem->Load("St_base");
     gSystem->Load("StChain");
-    gSystem->Load("libglobal_Tables");
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StUtilities");
     gSystem->Load("StAnalysisUtilities");
+    gSystem->Load("libglobal_Tables");
 
 // setup chain with IOMaker - can read in .dst.root, .dst.xdf files
   StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,TopDirTree);
