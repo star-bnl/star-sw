@@ -2,14 +2,15 @@
 * written by D. Weerasundara -- dhammika@npl.washington.edu
 * modified by L.D. Carr -- lcarr@u.washington.edu
 * 8/4/98 K.Turner - edited to make it standard
-*
+* 8/10/98 K. Turner - changed name of table dstrack to globtrk
+* 
 
 *********************************************************
  MACRO filter
    macro/global/import *
      
      ami/module/call sca_filter_
-        [dst]/dstrack  _
+        [dst]/globtrk  _
         [params]/ebye/sca/sca_filter_const _
 	[params]/ebye/sca/sca_switch _
 	[params]/ebye/sca/sca_const _

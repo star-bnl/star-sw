@@ -1,6 +1,6 @@
 * written by L.D. Carr 7/25/98 -- lcarr@u.washington.edu
 * 8/4/98 K. Turner - edited to make standard
- 
+* 8/10/98 K. Turner - changed name of table dstrack to globtrk
 *---------------------------------* 
 *---------------------------------*
 * ---------------------------------*
@@ -30,7 +30,7 @@ macro move_table
     
     
   cd [dst]
-  top/project_agent/project tracktab /dui/output/trkout dstrack
+  top/project_agent/project tracktab /dui/output/trkout globtrk
   
   cd /dui
 
