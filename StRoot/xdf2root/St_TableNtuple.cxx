@@ -1,5 +1,8 @@
-// $Id: St_TableNtuple.cxx,v 1.6 1999/02/20 22:15:39 fine Exp $
+// $Id: St_TableNtuple.cxx,v 1.7 1999/02/22 00:31:21 genevb Exp $
 // $Log: St_TableNtuple.cxx,v $
+// Revision 1.7  1999/02/22 00:31:21  genevb
+// Fixed problem with arrays
+//
 // Revision 1.6  1999/02/20 22:15:39  fine
 // Clean up to avoid g++ compilation warnings
 //
@@ -366,6 +369,7 @@ void St_TableNtuple::LearnTable(const St_Table &table, Bool_t buildTree, Int_t b
   Int_t i;
   Int_t pv;
   Int_t memberDim;
+  Int_t memberMaxIndex;
   Int_t memberSize;
   Int_t count = 0;
 
@@ -401,13 +405,15 @@ void St_TableNtuple::LearnTable(const St_Table &table, Bool_t buildTree, Int_t b
       mType[count] = kNAN;
     }
     if (mType[count]) {
-      if ( (memberDim = member->GetArrayDim()) ) {
+      if ( memberDim = member->GetArrayDim() ) {    // Check for arrays
+        memberMaxIndex = 0;
+        for (i=0; i<memberDim; i++) memberMaxIndex += member->GetMaxIndex(i);
         memberSize = memberType->Size();
         tempvar = varname;
         varname = vartemp;
-      }
+      } else memberMaxIndex = 1;
       mOffset[count] = member->GetOffset();
-      for (i=0; i<(memberDim+1); i++) {
+      for (i=0; i<memberMaxIndex; i++) {
         if (memberDim) sprintf(vartemp,"%s%d",tempvar,i);
         if (i) {
           mOffset[count] = mOffset[count-1] + memberSize;
@@ -453,7 +459,7 @@ void St_TableNtuple::LearnTable(const St_Table &table, Bool_t buildTree, Int_t b
 //_____________________________________________________________________________
 void St_TableNtuple::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_TableNtuple.cxx,v 1.6 1999/02/20 22:15:39 fine Exp $\n");
+  printf("* $Id: St_TableNtuple.cxx,v 1.7 1999/02/22 00:31:21 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("* Using %d columns from table with:\n",mNvar);
   printf("*   Name: %s\n",GetName());
