@@ -469,14 +469,15 @@ inline  double StiKalmanTrackNode::z_g() const
   return _p1;
 }
 
+///Calculate and returns pathlength within detector volume
+///associated with this node. Returns 0 if no detector is 
+///associated.
 inline double StiKalmanTrackNode::pathlength() const
 {
-
-  //returns pathlength within detector volume
-    const StiDetector * det = getDetector();
-    if (!det) return -1.; 
-    double thickness = det->getShape()->getThickness();
-    return (thickness*sqrt(1.+_p4*_p4)) / _cosCA;
+  const StiDetector * det = getDetector();
+  if (!det) return 0.; 
+  double thickness = det->getShape()->getThickness();
+  return (thickness*sqrt(1.+_p4*_p4)) / _cosCA;
 }
 
 ///Return the radiation length (in cm) of the 
