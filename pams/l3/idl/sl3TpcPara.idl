@@ -45,4 +45,10 @@ struct sl3TpcPara {
    float      sectorEtaMin[24];   /*  Eta Min for each sector */
    float      sectorEtaMax[24];   /*  Eta Max for each sector */
    float      sectorPhiShift[24]; /*  Phi shift when calculating phi for space points */
+//
+   float      zVertex ;
+//
+   long       numberTrackingSlices ;/* Number of tracking slices in eta */
+   float      TrackingSlices[10] ;  /* Limits of tracking slices */
+//
 };
