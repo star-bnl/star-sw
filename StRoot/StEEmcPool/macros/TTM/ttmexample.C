@@ -1,51 +1,53 @@
 // example macro to use  EEmcTTMMaker
-// Author: Piotr A. Zolnierczuk
+// Author: Piotr A. Zolnierczuk, IUCF
+// Date: 05/04/2004
+// 
 
-class StPhysicalHelixD;
-class StThreeVectorD;
-
+// ROOT/ROOT4STAR 
 class StChain;
 class StMuTrack;
 class StMuDstMaker;
 class StEventInfo;
-class StEventSummary;
-
-
+// TTM STUFF
 class EEmcTower;
 class EEmcTTMatch;
 class EEmcTTMMaker;
-
 
 StChain       *chain=0;
 EEmcTTMMaker  *ttm  =0;
 StMuDstMaker  *muDstMaker= 0;
 
-
-
 void
 ttmexample
 (
- char* inpDir  = "",         // MuDST directory
- char* inpFile = "show.lis", // MuDST file(s);                      
- char* outFile = "show.root",// output tree file
- Int_t nFiles  = 50,         // # of MuDST file(s)
- Int_t nEvents = 100         // # of events
+ char*  inpDir    = "",         // MuDST directory
+ char*  inpFile   = "show.lis", // MuDST file(s);                      
+ char*  outFile   = "show.root",// output tree file
+ Int_t  nFiles    = 50,         // # of MuDST file(s)
+ Int_t  nEvents   = 100,        // # of events
+ Int_t timeStamp  = 20040331    // format: yyyymmdd
  )
-  // remeber to adjust dbase timestamp below !!!! 
-  // what a ... design
+// NOTES: 
+// 1. StEEmcDbMaker has some limitations so beware of the following
+// ( complaints to appropriate autors) 
+// * StEEmcDbMaker works _only_ for single run , so make sure that
+//   your *.lis containf files for one run only, otherwise it will
+//   crash like Windows
+// * remember to adjust dbase timestamp above to match your runs
+//   as iStEEmcDbMaker is unable (as of Apr 2004) to read timestamp 
+//   off a muDST file
+// 2. StEEmcTTMMaker main "product" is a list of EEmcTTMatch'es
+//   which in turn are EEmcTower plus a list of StMuTrack's that
+//   fullfill certain criteria. See below how to access information
 { 
-  //gErrorIgnoreLevel=1999;
-
   // load root/root4star libraries
   gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
-
   // load more libraries :)
   gSystem->Load("libmysqlclient");
   gSystem->Load("StDbLib");
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
-
   // load even more libraries (EEMC stuff) 
   gSystem->Load("StEEmcUtil");
   gSystem->Load("StEEmcDbMaker");
@@ -53,26 +55,22 @@ ttmexample
 
   // create the chain    
   chain = new StChain("StChain"); 
-  //
-
   
   // now we add Makers to the chain...  some of that is black magic to me :) 
   muDstMaker = new StMuDstMaker(0,0,inpDir,inpFile,"",nFiles);  // muDST main chain
-  StMuDbReader  *db          = StMuDbReader::instance();                        // need the database
-  St_db_Maker   *dbMk        = new St_db_Maker("StarDb", "MySQL:StarDb");       // need the database (???)
-  StEEmcDbMaker *eemcDbMaker =new StEEmcDbMaker("eemcDb");                      // need EEMC database , no need for tricks,JB 
+  StMuDbReader  *db          = StMuDbReader::instance();        // need the database
+  StEEmcDbMaker *eemcDbMaker = new StEEmcDbMaker("eemcDb");     // need EEMC database  
+  St_db_Maker   *dbMk        = new St_db_Maker("StarDb", "MySQL:StarDb"); // need more db?
 
   // now comment in/out/change the below if you want it your way
-  eemcDbMaker->setSectors(1,12);            // request EEMC DB for sectors you need (dafault:1-12)
-  // JB, use DB tricks when necessary
-  // eemcDbMaker->setTimeStampDay(20040331);  // format: yyyymmdd
-  // eemcDbMaker->setPreferedFlavor("onlped","eemcPMTped"); // request alternative flavor (if needed)
+  eemcDbMaker->setSectors(1,12);           // request sectors you need (default:1-12)
+  eemcDbMaker->setTimeStampDay(timeStamp); // format: yyyymmdd
+  eemcDbMaker->setPreferedFlavor("onlped","eemcPMTped"); // request alternative db flavor 
 
   // finally after so many lines we arrive at the good stuff
   ttm = new  EEmcTTMMaker ("TTM",muDstMaker,eemcDbMaker);
-  ttm->SetFileName(outFile);
-  ttm->Summary(cout);    // 
-  ttm->SetMaxCTBSum(1000);
+  // have cuts your way (optional)
+  ttm->SetMaxCTBSum(1000); 
   ttm->SetMinTrackLength(20.0);
   ttm->SetMinTrackHits(5);
   ttm->SetMinTrackPt(0.5);
@@ -80,46 +78,70 @@ ttmexample
   ttm->SetMaxTrackEta(2.2);
   ttm->SetDeltaEtaCut(0.7); // ! note this is a fraction of tower width in eta
   ttm->SetDeltaPhiCut(0.7); // ! note this is a fraction of tower width in phi
+  // this is even more optional :)
+  // the lines here repeat the default
+  // ttm->ResetZPositionsArray();
+  // ttm->AddZPosition("pres",kEEmcZPRE1+0.1);
+  // ttm->AddZPosition("post",kEEmcZPOST-0.1);
+  // ttm->AddZPosition("smd" ,kEEmcZSMD);
+  ttm->Summary(cout);       // prints cut summary
 
   StMuDebug::setLevel(0);
-
   chain->Init();
   chain->ls(3);
 
   //---------------------------------------------------
   int  stat=0;
   int  event=0;
-  while(event<nEvents) {
+  while(++event<nEvents) {
     stat=chain->Make();
+    // STAR intelligence: stat=2 EOF,stat=4 FATAL; if so break the loop
+    // if not OK (and not EOF nor FATAL) !!! try another event
     if( stat==2 || stat==4) break;
     if( stat!=0           ) continue;
 
+    // if no track to tower matches try another event
     if(ttm->GetMatchList()->IsEmpty()) continue;
 
+    // set up iterator and pointers
     TIter  nextMatch(ttm->GetMatchList());
-    
     EEmcTTMatch *tmatch;
     EEmcTower   *tower;
     StMuTrack   *track;
-    //
-    event++;
-    //
-    StEventInfo    &evinfo = muDstMaker->muDst()->event()->eventInfo();   // event info
-    StEventSummary &evsumm = muDstMaker->muDst()->event()->eventSummary();// event summary
-    //
+    //event info (for fun), it shows we like xml
+    StEventInfo    &evInfo = muDstMaker->muDst()->event()->eventInfo();   
     cerr << "<Event";
-    cerr << "Run=\""  << evinfo.runId() << "\"\t";
-    cerr << "Event=\""<< evinfo.id()    << "\">\n";
+    cerr << "Run=\""  << evInfo.runId() << "\"\t";
+    cerr << "Event=\""<< evInfo.id()    << "\">\n";
+    // loop over all towers with track hits
     while ((tmatch = (EEmcTTMatch*) nextMatch())) {
-      tmatch->Out(cerr);
+      tmatch->Out(cerr); // prints all match info
+      tower = tmatch->Tower();
+      // here's how to acces tower information
+      const char *tLabel = tower->TowerLabel();
+      int sector = tower->Sec();    // 0..11
+      int subsec = tower->SubSec(); // 0..4
+      int etabin = tower->Eta();    // 0..11
+      float adc  = tower->ADC();    // adc - pedestal
+      float de   = tower->dE();     // (adc - pedestal)/gain
+      //
+      int seclab = tower->SecLabel();    // 1..12
+      int sublab = tower->SubSecLabel(); // A..E
+      int etalab = tower->EtaLabel();    // 1..12
+      // now more than one track may hit a tower
+      TIter nextTrack(tmatch->Tracks());
+      while((track=(StMuTrack *)nextTrack()))  {
+	// how to access StMuTrack consult muDST manual (does not exist)
+	TVector3 r;
+	// for example one could extrapolate track to a given z-depth
+	EEmcTTMatch::ExtrapolateToZ(track,290.0,r);
+	double pt = track->pt();
+        double x  = r.x();
+      }
     }
     cerr << "</Event>" << endl;
   }
   ttm->Summary(cerr);
 }
-
-
-
-
 
 

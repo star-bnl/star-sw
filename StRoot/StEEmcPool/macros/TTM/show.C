@@ -19,9 +19,9 @@ class EEmcTTMMaker;
 
 
 StChain       *chain=0;
-EEmcTTDisplay *eemc =0;
 EEmcTTMMaker  *ttm  =0;
-StMuDstMaker  *muDstMaker= 0;
+StMuDstMaker  *muDstMk   = 0;
+EEmcTTDisplay *eemc      = 0;
 TPaveText     *eventInfo = 0;
 TPaveLabel    *dateInfo  = 0;
 TDatime       *now       = 0;
@@ -67,9 +67,10 @@ show
   now = new TDatime;
   // for display
   TCanvas    *c1   = new TCanvas("eemc","eemc",10,10,1000,1000);
-  TPaveLabel *tlab = new TPaveLabel(-0.99,+0.99,+0.99,+0.90,"EEMC TOWERS & TPC TRACKS     Piotr A Zolnierczuk (IU)");
+  TPaveLabel *tlab = new TPaveLabel(-0.99,+0.99,+0.99,+0.90,
+				    "EEMC TOWERS & TPC TRACKS     Piotr A Zolnierczuk (IU)");
 
-  eventInfo = new TPaveText (-0.99,-0.99,+0.0 ,-0.90);
+  eventInfo = new TPaveText (-0.99,-0.99,+0.0 ,-0.80);
   dateInfo  = new TPaveLabel(+0.60,-0.99,+0.99,-0.95,now->AsString());
 
   TGeoManager  *gm    = new TGeoManager("eemc", "eemc tower display");
@@ -96,28 +97,23 @@ show
   tlab->Draw();
 
   gPad->Update();
-
   
   // now we add Makers to the chain...  some of that is black magic :) 
-  muDstMaker = new StMuDstMaker(0,0,inpDir,inpFile,"",nFiles);  // muDST main chain
-  StMuDbReader  *db          = StMuDbReader::instance();                        // need the database
-  StEEmcDbMaker *eemcDbMaker =new StEEmcDbMaker("eemcDb");                      // need EEMC database  
-  St_db_Maker   *dbMk        = new St_db_Maker("StarDb", "MySQL:StarDb");       // need the database (???)
+  muDstMk  = new StMuDstMaker(0,0,inpDir,inpFile,"",nFiles);       // muDST main chain
+  StMuDbReader  *db       = StMuDbReader::instance();              // need the database
+  StEEmcDbMaker *eemcDbMk =new StEEmcDbMaker("eemcDb");                     // need EEMC database  
+  St_db_Maker   *dbMk        = new St_db_Maker("StarDb", "MySQL:StarDb");   // need another db(?) 
 
   // now comment in/out/change the below if you want it your way
-  eemcDbMaker->setSectors(1,12);            // request EEMC DB for sectors you need (dafault:1-12)
-  eemcDbMaker->setTimeStampDay(20040331);  // format: yyyymmdd
-  eemcDbMaker->setPreferedFlavor("onlped","eemcPMTped"); // request alternative flavor (if needed)
-  // eemcDbMaker->setDBname("TestScheme/eemc");             // use alternative database (if needed)
-  // eemcDbMaker->setPreferedFlavor("set430","eemcPMTcal"); // request alternative flavor (if needed)
+  eemcDbMk->setSectors(1,12);            // request EEMC DB for sectors you need (dafault:1-12)
+  eemcDbMk->setTimeStampDay(20040331);   // format: yyyymmdd
+  eemcDbMk->setPreferedFlavor("onlped","eemcPMTped"); // request alternative flavor
 
   // finally after so many lines we arrive at the good stuff
-  ttm = new  EEmcTTMMaker ("TTM",muDstMaker,eemcDbMaker);
+
+  ttm = new  EEmcTTMMaker ("TTM",muDstMk,eemcDbMk);
   ttm->SetFileName(outFile);
   ttm->Summary(cout);    // 
-  //ttm->SetMinTrackPt(0.5);
-  //ttm->SetMinTrackEta(0.7);
-  //ttm->SetMaxTrackEta(2.2);
 
   StMuDebug::setLevel(0);
 
@@ -142,22 +138,13 @@ next(int nMatch=1)
     if( stat!=0 ) continue;
 
     TList       *matchList = ttm->GetMatchList();
-
     if(matchList->IsEmpty()) continue;
-
-
-
-    EEmcTTMatch *tmatch;
-    EEmcTower   *tower;
-    StMuTrack   *track;
-
     TIter  nextMatch(matchList);
 
     match++;
-
     
-    StEventInfo    &evinfo = muDstMaker->muDst()->event()->eventInfo();   // event info
-    StEventSummary &evsumm = muDstMaker->muDst()->event()->eventSummary();// event summary
+    StEventInfo    &evinfo = muDstMk->muDst()->event()->eventInfo();   // event info
+    StEventSummary &evsumm = muDstMk->muDst()->event()->eventSummary();// event summary
     sprintf(buffer,"Run #%d Event #%d\n",evinfo.runId(),evinfo.id());
     eventInfo->Clear();
     eventInfo->SetTextAlign(12);
@@ -167,17 +154,14 @@ next(int nMatch=1)
     cerr << "<Event";
     cerr << "Run=\""  << evinfo.runId() << "\"\t";
     cerr << "Event=\""<< evinfo.id()    << "\">\n";
+
+    EEmcTTMatch *tmatch;
     while ((tmatch = (EEmcTTMatch *) nextMatch())) {
       TString outs;
-      tower = tmatch->Tower();
-      eemc->AddTower(*tower);
-      TIter nextTrack(tmatch->Tracks());
-      while((track=(StMuTrack *)nextTrack())) { 
-	eemc->AddTrack(*track);
-	eemc->Out(cerr,*track,*tower);
-	eemc->Out(outs,*track,*tower);
-	eventInfo->AddText(outs);
-      }
+      eemc->AddMatch(*tmatch);
+      eemc->Out(cerr,*tmatch);
+      eemc->Out(outs,*tmatch);
+      eventInfo->AddText(outs);
     }
     cerr << "</Event>" << endl;
 
