@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.84  2004/03/09 18:47:53  ward
+// To silence Insure++.
+//
 // Revision 1.83  2004/01/27 23:38:14  jeromel
 // Small change (more info in message)
 //
@@ -899,6 +902,7 @@ char St_tpcdaq_Maker::WhetherToSwap(unsigned int x) {
   if(x==0x04030201) return 0;
   if(x==0x01020304) return 7;
   assert(0);
+  return 0; // To silence Insure++.
 }
 //________________________________________________________________________________
 #define MAXPADROWSPERBANK 50
