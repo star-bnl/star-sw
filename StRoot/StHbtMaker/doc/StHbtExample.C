@@ -11,8 +11,7 @@ class MinvCorrFctn;
 MinvCorrFctn* MinvCF;
 
 void StHbtExample(Int_t nevents=1,
-		  //    const char *MainFile="/disk00000/star/test/dev/tfs_Solaris/year_2a/psc0210_01_40evts.dst.root")
-		  const char *MainFile="/disk00000/star/test/dev/tfs_Solaris/Mon/year_2a/psc0208_01_40evts.dst.root")
+		  const char *MainFile="/disk00000/star/test/dev/tfs_Solaris/Wed/year_2a/psc0208_01_40evts.dst.root")
 {
 
     // Dynamically link needed shared libs
@@ -31,7 +30,7 @@ void StHbtExample(Int_t nevents=1,
     cout << "Dynamic loading done" << endl;
 
     chain = new StChain("StChain"); 
-    //    chain->SetDebug();
+    chain->SetDebug();
    
 
     // Now we add Makers to the chain...
