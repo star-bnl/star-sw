@@ -46,7 +46,8 @@ endif
 #
 # Shared Libraries				???UNTESTED???
 #export SO := $(FC) -G -PIC -h ??? -R??? -o
-export SO := $(FC) -G -PIC -o
+#export SO := $(FC) -G -PIC -o
+export SO := touch
 export SOFLAGS += $(EMPTY)
 #
 # Object Libraries
@@ -55,7 +56,7 @@ export ARFLAGS := srv
 export RANLIB := /bin/true
 #
 # OS Libraries
-export OS_LIBS := -lm -ldl
+export OS_LIBS := -lm -ldl -lPW
 #
 # Fortran Libraries
 SUNLIBDIR1 := /opt/SUNWspro/lib 
@@ -67,7 +68,8 @@ export FOR_LIBS += -L$(SUNLIBDIR1) -L$(SUNLIBDIR2) \
 	$(SUNLIBDIR2)/crtn.o
 #
 # X-Motif Libraries
-export XM_LIBS += 
+export XM_LIBS += -L/usr/openwin/lib -L/vol/pub/SunSDK/SUNWmotif/lib \
+	-L/vol/packages/X11R5/lib -lXm -lXt -lX11 -lm
 #
 ifeq ($(MOTIF),$(TRUE))
 export LOAD_LIBS += $(FOR_LIBS) $(XM_LIBS) $(OS_LIBS)

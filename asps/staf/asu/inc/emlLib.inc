@@ -1,5 +1,6 @@
 #ifndef EMLLIB_INC
 #define EMLLIB_INC
+#endif /*EMLLIB_INC*/
 
 c:----------------------------------------------------------------------
 C: Duplicate emlLib.h 
@@ -33,7 +34,7 @@ c:----------------------------------------------------------------------
 #define STAF_STATUS(A) IQ(STAF_STATUS_LLOW+ A-1 )
 #define STAF_RESULT(A)  Q(STAF_RESULT_LLOW+ A-1 )
 
-#endif /*EMLLIB_INC*/
+/*HACK ---- CHECK THIS HACK ---- endif //EMLLIB_INC*/
 
       INTEGER*4 NWPAW,IXPAWC,IHBOOK,IXHIGZ,IXKUIP,IFENCE,LMAIN
       REAL*4 WS 

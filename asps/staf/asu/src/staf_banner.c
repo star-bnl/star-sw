@@ -5,6 +5,7 @@
 #include <time.h>
 
 void staf_banner(FILE* stream);
+void staf_warning(FILE* stream);
 void staf_banner_alt(FILE* stream);
 void staf_banner_alt2(FILE* stream);
 void staf_banner_alt3(FILE* stream);
@@ -89,6 +90,19 @@ void staf_banner(FILE* stream)
       fprintf(stream,"\n");
    }
    fprintf(stream,"\n");
+// staf_warning(stream);
+}
+
+/*--------------------------------*/
+void staf_warning(FILE* stream)
+{
+   int i;
+   fprintf(stream,"18jul96 - BUG FIX IN PROGRESS\n");
+   for( i=0;i<20;i++ ){
+      fprintf(stream,"WARNING -- You have linked against a bug fix version of STAF.\n");
+   }
+   fprintf(stream,"The normal version of the STAF libraries will soon return.\n");
+   fprintf(stream,"Please wait abit and relink.\n");
 }
 
 /*--------------------------------*/

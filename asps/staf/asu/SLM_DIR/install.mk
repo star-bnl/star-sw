@@ -9,12 +9,14 @@ MODULES := $(CVSROOT)/CVSROOT/modules
 #BRANCH_DIR := $(dir $(BRANCH_DIR))
 BRANCH_DIR := $(STAR_LIB)/dev/$(BRANCH_NAME)/
 #
+INSTALL := cp
+#
 INSTALL_IDL_FILES := $(wildcard $(IDLDIR)/*.idl)
 install_idl:
 	@echo " "
 	@echo "Installing IDL files."
 ifneq ($(INSTALL_IDL_FILES),$(EMPTY))
-	cp $(INSTALL_IDL_FILES) $(BRANCH_DIR)/inc/
+	$(INSTALL) $(INSTALL_IDL_FILES) $(BRANCH_DIR)/inc/
 else
 	@echo "No IDL files installed."
 endif
@@ -27,7 +29,7 @@ install_inc:
 	@echo " "
 	@echo "Installing INC files."
 ifneq ($(INSTALL_INC_FILES),$(EMPTY))
-	cp $(INSTALL_INC_FILES) $(BRANCH_DIR)/inc/
+	$(INSTALL) $(INSTALL_INC_FILES) $(BRANCH_DIR)/inc/
 else
 	@echo "No INC files installed."
 endif
@@ -37,7 +39,7 @@ install_lib:
 	@echo " "
 	@echo "Installing LIB files."
 ifneq ($(INSTALL_LIB_FILES),$(EMPTY))
-	cp $(INSTALL_LIB_FILES) \
+	$(INSTALL) $(INSTALL_LIB_FILES) \
 		$(BRANCH_DIR)/lib/
 else
 	@echo "No LIB files installed."
@@ -49,7 +51,7 @@ install_solib:
 	@echo " "
 	@echo "Installing SOLIB files."
 ifneq ($(INSTALL_SOLIB_FILES),$(EMPTY))
-	cp $(INSTALL_SOLIB_FILES) \
+	$(INSTALL) $(INSTALL_SOLIB_FILES) \
 		$(BRANCH_DIR)/solib/
 else
 	@echo "No SOLIB files installed."
@@ -62,7 +64,7 @@ install_bin:
 	@echo "Installing BIN files."
 ifneq ($(INSTALL_BIN_FILES),$(EMPTY))
 	cd $(BINDIR); \
-	cp $(INSTALL_BIN_FILES) \
+	$(INSTALL) $(INSTALL_BIN_FILES) \
 		$(BRANCH_DIR)/bin/
 else
 	@echo "No BIN files installed."
