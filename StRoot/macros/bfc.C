@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.132 2000/05/17 20:54:48 fisyak Exp $
+// $Id: bfc.C,v 1.133 2000/05/25 21:33:09 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StMaker;        
@@ -19,8 +19,6 @@ class StEventDisplayMaker; StEventDisplayMaker *dsMk = 0;
 class StEventMaker; StEventMaker *evMk = 0;
 //_____________________________________________________________________
 void Load(){
-  gSystem->Load("libSTAR");
-  gSystem->Load("Star2Root");
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("StUtilities");
