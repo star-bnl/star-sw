@@ -1,4 +1,8 @@
-/* $Id: StarKineGenerator.cxx,v 1.2 2004/07/16 22:52:35 potekhin Exp $ */
+// $Id: StarKineGenerator.cxx,v 1.3 2004/09/02 23:27:55 potekhin Exp $
+// $Log: StarKineGenerator.cxx,v $
+// Revision 1.3  2004/09/02 23:27:55  potekhin
+// Cosmetic
+//
 
 #include <iostream.h>
 #include <TGenerator.h>
@@ -22,9 +26,7 @@ void StarKineGenerator::Init(void) {
 //_______________________________________________________________________
 void StarKineGenerator::Generate(void) { // Fill the user stack (derived from TVirtualMCStack) with primary particles.
 
-    Int_t ntr;   // Track ID (filled by stack)
- 
-
+  Int_t ntr;   // Track ID (filled by stack)
   Int_t toBeDone = 1; // Option: to be tracked
  
   // Particle type
