@@ -62,6 +62,7 @@ C---------------
 *
 CC:  Load Primary vertex position coordinates:
 
+
       mainv(1) = 0.0
       mainv(2) = 0.0
       mainv(3) = 0.0
@@ -203,9 +204,11 @@ C---- calculate the momentum components of the primary-----------
 C---- find square of impact param of reconstructed particle------
                     call ev0_v0_impact_param(mainv,xpp,pp,pv0sq,rmin
      +                   ,iflag)
+                   
                     IF((rmin.le.ev0par(det_id).dcav0**2).and.
      +                   (iflag.ne.2)) THEN
                        ok=ok+1
+                       
                        ev0out_h.nok= ev0out_h.nok+1
                        vertex_h.nok = vertex_h.nok +1
                        if (ok.gt.ev0out_h.maxlen .or.
@@ -276,8 +279,13 @@ C--   calculate Armenteros variables---
 c     Opening angles: wkw
                        dot=pst1(1)*pst2(1)+pst1(2)*pst2(2)
      +                      +pst1(3)*pst2(3)
-                       open=acosd(dot/(trak(i).p*trak(j).p))
-                       ev0out(ok).theta = open
+                       open=(dot/(trak(i).p*trak(j).p))
+                       if( open .gt. 1.0) then
+                          open = 1.0
+                       elseif( open .lt. -1.) then
+                          open = -1.0
+                       endif
+                       ev0out(ok).theta = acosd(open)
 *     
 *---  if blind run test all mass hypothesis
 *     
@@ -315,26 +323,26 @@ C                          ppar_cm=gv0*(ppar-bv0*ep)
 C                          ev0out(ok).cos_th_cm(index)=
 C     +                         cos(atan2(pper,ppar_cm))
 c     
-c     WRITE(7) rd,rv,rmin,inv_mass
+c                          WRITE(6,*) rd,rv,rmin,inv_mass
                           
                        ENDDO
                        GOTO 30  !next j
 *                    else
 *                       if( j.eq. i+1 ) then
-*                        write(6,*) 'rmin =',rmin,i,j,trak(i).id,
-*     >                         trak(j).id,trak(i).r0,trak(j).r0
+c                        write(6,*) 'rmin =',rmin,i,j,trak(i).id,
+c     >                         trak(j).id,trak(i).r0,trak(j).r0
 *                       endif
                     ENDIF       !rmin and iflag check
 *                 else
 *                    if( j.eq. i+1 ) then
-*                       write(6,*) 'rv =',rv,i,j,trak(i).p,trak(j).p
+c                      write(6,*) 'rv =',rv,i,j,trak(i).p,trak(j).p
 *                    endif
                  ENDIF          !rv check      
 *              else
 *                 if( j.eq. i+1 ) then
-*                    write(6,*) 'rd =',rd,i,j,trak(i).id,trak(j).id
-*     >                   ,trak(i).z0,trak(j).z0,xn1(1),xn1(2),
-*     >                   xn2(1),xn2(2),trk1(3),trk2(3)
+c                    write(6,*) 'rd =',rd,i,j,trak(i).id,trak(j).id
+c     >                   ,trak(i).z0,trak(j).z0,xn1(1),xn1(2),
+c     >                   xn2(1),xn2(2),trk1(3),trk2(3)
 *                    trak(i).q = 100.
 *                    trak(j).q = 100.0
 *                 endif  
