@@ -10,7 +10,7 @@ int
 compatTTM
 (
  char* inpDir  = "/star/fy2003/mudst/",
- char* inpFile = "", //"st_physics_4145010_raw_0010003.MuDst.root",
+ char* inpFile = "", //"st_physics_4145010_raw_0010001.MuDst.root",
  Int_t nFiles  = 50
  )
 { 
@@ -63,6 +63,7 @@ compatTTM
 
 
   m->SetDebugLevel(kWarning);
+  //cout << " track matched: " << m->GetNMatched()  ;
   StMuDebug::setLevel(0);
 
   chain->Init();
@@ -81,22 +82,19 @@ compatTTM
   while ( stat==0 )  {// loop over events
     //chain->Clear();
     //cerr << "file: " << chain->GetCurrentFile()->GetName() << endl;
-    cout.precision(2);
-    cout << " #" << counter;
     curUsed=memStat.Used();
     curSize=memStat.ProgSize();
     if(curSize>maxSize) maxSize=curSize;
     if(curSize<minSize) minSize=curSize;
-    cout << " heap= "<< curUsed;
-    cout << " prog= "<< curSize;
-    cout << " (" << minSize << "/" << maxSize << ")" << endl;
     counter++;
+    fprintf(stdout,"EVENT#%-6d   matched:%-6d  heap=%5.1f prog=%5.1f (%5.1f/%5.1f)\r",
+	    counter,m->GetNMatched(),curUsed,curSize,minSize,maxSize);
     stat = chain->Make();
   }
   //chain->Finish();
-
   cout << endl;
+  cout << "tracks matched: " << m->GetNMatched() << endl;
   if (counter) cout << "time/event " << timer.elapsedTime()/counter <<endl;
   cout << " # of events:" << counter << endl;
-  
+
 }
