@@ -1,0 +1,21 @@
+<h3>SUBROUTINE MSG_to_LUN_Out( MSG, LINES, LUN )</h3><pre>
+
+	CHARACTER*(*) MSG(*)
+	INTEGER LINES,LUN
+
+*  Inputs:
+*	MSG -- 1 or more line character-string message submitted for display.
+*	LINES -- Number of lines in MSG.
+*	LUN -- FORTRAN logical unit number for MSG to be written to.
+
+*  Outputs: none
+
+*  Brief description:  Write a message to a FORTRAN LUN;  bypass accounting.
+
+*  Description:
+*	Display a message MSG, containing LINES lines of up to
+*	132 characters each, on FORTRAN logical unit LUN.
+
+*  Return conditions: none
+
+</pre>

@@ -1,0 +1,30 @@
+<h2>MSG Enabled Tests</h2>
+
+There are two MSG routines which return the enabled-status of a specified
+message-prefix:  MSG_Enabled and MSG_Enabled_Trace, which perform full MSG
+accounting and increment the specified message-prefix's counter each time it is called
+if counting is enabled but display is disabled (ie, if the status is "Counting", but
+neither "Active" nor "Inactive").
+Each of these expects a full-accounting MSG call within their conditional
+blocks to do the counting if the prefix is "Active";  they do not do counting
+when a prefix is active because double-counting would occur in such cases
+(ie, one count for the MSG_Enabled call, then another for the same occurance
+of the same prefix by the nested Message call).
+The difference in these two calls is strictly in how they handle a new,
+previously undefined prefix:
+<p>
+<dl>
+<dt>MSG_Enabled ------- defines a new prefix to be "Acitve".
+<dt>MSG_Enabled_Trace -- defines a new prefix to be "Inacitve".
+</dl>
+<p>
+MSG_Enabled is meant to define a conditional MSG
+block in which various (possibly CPU-expensive) operations are performed,
+for the purpose of generating an informative message when a certain
+condition arises, but which may be disabled if desired.
+On the other
+hand, MSG_Enabled_Trace exists for a different purpose, namely to provide
+a mechanism for inserting normally-invisible debugging-type code-flow
+trace-messages, which are enabled only when specifically requested.
+MSG_Enabled_Trace will define a previously undefined prefix, but sets it
+to the "Inactive" state, in which it neither counts nor displays.
