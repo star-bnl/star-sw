@@ -15,7 +15,7 @@
 >GUIDANCE
 Table_and_Dataset_Memory commands.
 .
- #(@)$Id: tdm_def.cdf,v 1.19 1998/07/21 04:58:46 ward Exp $
+ #(@)$Id: tdm_def.cdf,v 1.20 1998/09/17 17:05:26 ward Exp $
  Edited by Bill Love on 23-24 Feb 1998
 .
 TDM is an Analysis Service Package (ASP) for the Standard Analysis
@@ -993,7 +993,7 @@ IFIRST  'First row to dump' I D=0
 NAMEOFFILE 'Name of output file' C
 COLUMNLIST 'List of columns' C
 >GUIDANCE
-Dumps a table to file.
+Dumps a table to file or to the screen without line-wrapping.
 .
 The IFIRST parameter counts from zero _UNLIKE_ Fortran.
 .
