@@ -310,9 +310,11 @@ void StMuEmcUtil::fillEmc(StEmcCollection* emc,StMuEmcCollection* muEmc)
     if(mag==0) mag = 225.40;
     //cout <<"Po = "<<i<<" eta = "<<eta<<" phi = "<<phi<<" E = "<<en<<" chi = "<<chi<<endl;
     Float_t x,y,z;
-    x = mag*sin(theta)*cos(phi);
-    y = mag*sin(theta)*sin(phi);
-    z = mag*cos(theta);
+    //AAPSUAIDE BUG POINT RADIUS CORRECTED 20030612
+    x = mag*cos(phi);
+    y = mag*sin(phi);
+    z = mag/tan(theta);
+    ///////////////////////////////////////////////
     StThreeVectorF p(x,y,z);
     StEmcPoint *pt=new StEmcPoint();
     pt->setEnergy(en);
