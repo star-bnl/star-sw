@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.81 1999/05/03 15:06:42 fisyak Exp $
+# $Id: MakeDll.mk,v 1.82 1999/05/08 23:19:13 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.82  1999/05/08 23:19:13  fisyak
+# Add cleanup of ~ stuff
+#
 # Revision 1.81  1999/05/03 15:06:42  fisyak
 # patch for Collections
 #
@@ -163,6 +166,7 @@ ifndef SO_LIB
     ifeq ($(SRC_DIR),$(GEN_DIR))
       SO_LIB := $(LIB_DIR)/St_$(PKG).$(SOEXT)
       LIBRARY := $(wildcard $(LIB_DIR)/lib$(PKG).a $(STAR_LIB)/lib$(PKG).a)
+      LIBRARY := $(filter-out %~ ~%,$(subst ~,~ ~,$(LIBRARY)))
       ifneq (,$(findstring $(PKG),global))
         LIBRARY += $(wildcard $(LIB_DIR)/libsvt.a $(STAR_LIB)/libsvt.a)
       endif
@@ -221,6 +225,8 @@ FILES_ALL := $(wildcard $(addprefix $(SRC_DIR)/, *.c *.cxx *.cc))
 FILES_ALL += $(wildcard $(addprefix $(SRC_DIR)/src/, *.c *.cxx *.cc))
 ifneq ($(GEN_DIR),$(SRC_DIR))
 FILES_ALL += $(wildcard $(addprefix $(SRC_DIR)/, *.f *.F *.g))
+FILES_ALL := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_ALL)))
+
 endif
 FILES_SRC  = $(filter-out      %Cint.cxx, $(FILES_ALL))
 FILES_SRC := $(filter-out %/.share/%/*.F, $(FILES_SRC))
@@ -228,9 +234,12 @@ FILES_SRC := $(filter-out %/.share/%/*.f, $(FILES_SRC))
 FILES_SRC := $(filter-out %/.share/%/*.c, $(FILES_SRC))
 FILES_SRC := $(filter-out %/.share/%/*.g, $(FILES_SRC))
 FILES_SRC := $(filter-out %_init.cc %_i.cc, $(FILES_SRC)) 
+FILES_SRC := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_SRC)))
+
 ifeq ($(PKG),xdf2root)
 ifndef NT
   FILES_SRC  += $(wildcard $(STAR)/asps/staf/dsl/src/*.c)
+  FILES_SRC := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_SRC)))
   INPUT_DIRS := $(STAR)/asps/staf/dsl/src
 else
   LIBS := $(LIBS) $(AFS_RHIC)/star/packages/dsl/intel_wnt/lib/dsl.lib 
@@ -261,6 +270,7 @@ FILES_DAT  := $(wildcard $(SRC_DIR)/St_DataSet.cxx)
 FILES_XDF  := $(wildcard $(SRC_DIR)/St_XDFFile.cxx)
 ifneq (tables,$(PKGNAME))
 FILES_HH   := $(wildcard $(SRC_DIR)/*.h $(SRC_DIR)/*.hh)
+FILES_HH := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_HH)))
 ifneq (,$(FILES_HH))
 FILES_H    := $(foreach p, $(FILES_HH), $(shell grep -l ClassDef $(p)))
 endif
