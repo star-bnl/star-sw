@@ -2,10 +2,10 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.53 2001/04/11 22:55:43 wdeng Exp $
+// $Id: StPrimaryMaker.cxx,v 1.54 2001/04/12 15:46:26 balewski Exp $
 // $Log: StPrimaryMaker.cxx,v $
-// Revision 1.53  2001/04/11 22:55:43  wdeng
-// Plug in egr_primfit
+// Revision 1.54  2001/04/12 15:46:26  balewski
+// *** empty log message ***
 //
 // Revision 1.52  2001/04/09 19:27:44  fisyak
 // modification for new evr
@@ -185,7 +185,6 @@
 #include "global/St_egr_fitter_Module.h"
 #include "global/St_track_propagator_Module.h"
 #include "global/St_egr_impactcl_Module.h"
-#include "global/St_egr_primfit_Module.h"
 #include "St_db_Maker/St_db_Maker.h"
 
 #define gufld   gufld_
@@ -205,6 +204,7 @@ ClassImp(StPrimaryMaker)
   m_fixedVertex(0)
 {
   m_flag      = 2;
+  zCutppLMV=0; // turn off ppLMV  as default
 }
 //_____________________________________________________________________________
 StPrimaryMaker::~StPrimaryMaker(){
@@ -299,7 +299,23 @@ Int_t StPrimaryMaker::Init(){
     m_egr2_egrpar->AddAt(&row,0);
   }
   AddRunCont(m_egr2_egrpar);
-  
+   // few histos for monitoring of ppLMV
+   { 
+     int i;
+     for(i=0;i<16;i++) {
+       char tt[10];
+       sprintf(tt,"zev%2.2d",i);
+       hppLMV1[i] = new TH1F(tt,"Zdca for all accepted by LMV tracks Nin this eve",200,-250.,250.);
+     }
+     hppLMV2[0] = new TH1F("ztr2","Zdca filtered",200,-250.,250.);
+     hppLMV2[1] = new TH1F("zver","Zvert averaged",200,-50.,50.);
+     hppLMV2[2] = new TH1F("delz","Zvert Geant-Rec",100,-5.,5.);
+     hppLMV2[3] = new TH1F("xver","Xvert averaged",100,-5.,5.);
+     hppLMV2[4] = new TH1F("delx","Xvert Geant-Rec",100,-5.,5.);
+     hppLMV2[5] = new TH1F("yver","Yvert averaged",100,-5.,5.);
+     hppLMV2[6] = new TH1F("dely","Yvert Geant-Rec",100,-5.,5.);
+   }//pp LMV end
+
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -410,13 +426,20 @@ Int_t StPrimaryMaker::Make(){
     }
   } else {  // Primary vertex is not fixed, find it
     // Switch to Low Multiplicity Primary Vertex Finder for multiplicities < 15
-    if( NGlbTrk < 15 ){
+    if(zCutppLMV>0) printf("%s-maker will use ppLMV with zCutppLMV=%.1f/cm\n",GetName(),zCutppLMV);
+    if( NGlbTrk < 15 || zCutppLMV>0 ){
+
       // lmv
 
       St_db_Maker *db = ( St_db_Maker *)GetMaker("db");
       Int_t mdate = db->GetDateTime().GetDate();
       if(Debug()) gMessMgr->Debug() << "run_lmv: calling lmv" << endm;
-      iRes = lmv(globtrk,vertex,mdate);
+
+      if(zCutppLMV>0)  
+	iRes = ppLMV(globtrk,vertex,mdate);
+      else
+	iRes = lmv(globtrk,vertex,mdate);
+      
       //   ================================================
       // Do this to solve inconsistency between kSt* and kSTAFCV* return codes
       if( iRes == kStOK ){
@@ -509,8 +532,10 @@ Int_t StPrimaryMaker::Make(){
 
       if(Debug())
         gMessMgr->Debug() << "Calling EGR_fitter - Second time" << endm;
-      iRes = egr_primfit(vertex, m_egr2_egrpar, globtrk, primtrk);
-      //    ======================================================
+      iRes = egr_fitter (tphit,    vertex,       tptrack, tpc_groups,
+			 scs_spt, m_egr2_egrpar, stk_track, svt_groups,
+			 evt_match, primtrk);
+      //	   ======================================================
       
       if (iRes !=kSTAFCV_OK) iMake = kStWarn;
       if (iRes !=kSTAFCV_OK){
