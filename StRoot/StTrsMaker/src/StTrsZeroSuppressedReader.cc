@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsZeroSuppressedReader.cc,v 1.6 2000/03/15 23:33:55 calderon Exp $
+ * $Id: StTrsZeroSuppressedReader.cc,v 1.7 2000/06/07 02:03:12 lasiuk Exp $
  *
  * Authors: bl, mcbs
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsZeroSuppressedReader.cc,v $
+ * Revision 1.7  2000/06/07 02:03:12  lasiuk
+ * exit/abort ultimatum
+ *
  * Revision 1.6  2000/03/15 23:33:55  calderon
  * Remove extra messages
  *
@@ -124,7 +127,7 @@ int StTrsZeroSuppressedReader::getPadList(int padRow, unsigned char **padList)
 #else
 	cerr << "Pad Row " << padRow << " out of range" << endl;
 	cerr << "Normally one would throw an exception here" << endl;
-	exit(1);
+	abort();
 #endif
     }
     

@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
+ * Revision 1.25  2000/06/07 02:03:11  lasiuk
+ * exit/abort ultimatum
+ *
  * Revision 1.24  2000/02/24 16:29:34  long
  * add 0.5 in digitalization for test
  *
@@ -85,8 +88,8 @@ StTrsFastDigitalSignalGenerator::instance()
 	throw range_error("StTrsFastDigitalSignalGenerator::instance() Must Supply a File name");
 #else
 	cerr << "StTrsFastDigitalSignalGenerator::instance() Must Supply a File name" << endl;
-	cerr << "Exitting..." << endl;
-	exit(1);
+	cerr << "Aborting..." << endl;
+	abort();
 #endif
     }
     return mInstance;

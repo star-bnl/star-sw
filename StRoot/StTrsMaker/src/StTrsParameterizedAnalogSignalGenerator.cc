@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.15 2000/05/19 17:22:29 long Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.16 2000/06/07 02:03:11 lasiuk Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.16  2000/06/07 02:03:11  lasiuk
+ * exit/abort ultimatum
+ *
  * Revision 1.15  2000/05/19 17:22:29  long
  * fix bug in central pad calculation (mCentralPad) for non_central rows.
  *
@@ -186,8 +189,8 @@ StTrsParameterizedAnalogSignalGenerator::instance()
 #else
 	cerr << "StTrsParameterizedAnalogSignalGenerator::instance() Invalid Arguments" << endl;
 	cerr << "Cannot create Instance" << endl;
-	cerr << "Exitting..." << endl;
-	exit(1);
+	cerr << "Aborting..." << endl;
+	abort();
 #endif
     }
     return mInstance;

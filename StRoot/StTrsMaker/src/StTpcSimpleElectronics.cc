@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcSimpleElectronics.cc,v 1.7 2000/03/15 17:39:49 calderon Exp $
+ * $Id: StTpcSimpleElectronics.cc,v 1.8 2000/06/07 02:03:11 lasiuk Exp $
  *
  * Author: brian Nov 3, 1998
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcSimpleElectronics.cc,v $
+ * Revision 1.8  2000/06/07 02:03:11  lasiuk
+ * exit/abort ultimatum
+ *
  * Revision 1.7  2000/03/15 17:39:49  calderon
  * Remove beeps
  *
@@ -92,8 +95,8 @@ StTpcSimpleElectronics::instance()
 #else
 	cerr << "StTpcSimpleElectronics::getInstance(): Argument Missing!" << endl;
 	cerr << "No arguments for instantiantion" << endl;
-	cerr << "Exiting..." << endl;
-	exit(1);
+	cerr << "Aborting..." << endl;
+	abort();
 #endif
     }
     return mInstance;

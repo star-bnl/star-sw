@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsUnpacker.cc,v 1.14 1999/12/08 02:10:43 calderon Exp $
+ * $Id: StTrsUnpacker.cc,v 1.15 2000/06/07 02:03:12 lasiuk Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsUnpacker.cc,v $
+ * Revision 1.15  2000/06/07 02:03:12  lasiuk
+ * exit/abort ultimatum
+ *
  * Revision 1.14  1999/12/08 02:10:43  calderon
  * Modified to eliminate warnings on Linux.
  *
@@ -208,7 +211,7 @@ int  StTrsUnpacker::getPadList(int padRow, unsigned char **padList)
     if(padRow<1 || padRow>45) {
 	cerr << "Pad Row " << padRow << " out of range" << endl;
 	cerr << "Normally one would throw an exception here" << endl;
-	exit(1);
+	abort();
     }
     
 //     PR(padRow);

@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcROOTGeometry.cc,v 1.5 2000/03/15 17:39:48 calderon Exp $
+ * $Id: StTpcROOTGeometry.cc,v 1.6 2000/06/07 02:03:11 lasiuk Exp $
  *
  * Author: brian May March 22, 1998
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcROOTGeometry.cc,v $
+ * Revision 1.6  2000/06/07 02:03:11  lasiuk
+ * exit/abort ultimatum
+ *
  * Revision 1.5  2000/03/15 17:39:48  calderon
  * Remove beeps
  *
@@ -209,8 +212,8 @@ StTpcROOTGeometry::instance()
 #else
 	cerr << "StTpcROOTGeometry::getInstance(): Argument Missing!" << endl;
 	cerr << "No arguments for instantiantion" << endl;
-	cerr << "Exiting..." << endl;
-	exit(1);
+	cerr << "Aborting..." << endl;
+	abort();
 #endif
     }
     return mInstance;
@@ -241,7 +244,7 @@ int StTpcROOTGeometry::numberOfPadsAtRow(int r) const
 	cerr << "Error in StTpcROOTGeometry::numberOfPadsAtRow() "
 	     << "Row limits [1--" << mPadRows << "]"
 	     << " (r=" << r << ")" << endl;
-	exit(1);
+	abort();
 #endif
     }
     else
@@ -257,7 +260,7 @@ double StTpcROOTGeometry::radialDistanceAtRow(int r) const
 	cerr << "Error in StTpcROOTGeometry::numberOfPadsAtRow() "
 	     << "Row limits [1--" << mPadRows << "]"
 	     << " (r=" << r << ")" << endl;
-	exit(1);
+	abort();
 #endif
     }
     else {
@@ -272,8 +275,8 @@ double StTpcROOTGeometry::outerSectorAnodeWire(int n) const
 	throw range_error("Invalid wire number");
 #else
 	cerr << "Wire Range must be 0 < n < " << numberOfOuterSectorAnodeWires() << endl;
-	cerr << "Exitting..." << endl;
-	exit(0);
+	cerr << "Aborting..." << endl;
+	abort();
 #endif	
     }
     return (firstOuterSectorAnodeWire() + (n-1)*anodeWirePitch());
@@ -286,8 +289,8 @@ double StTpcROOTGeometry::innerSectorAnodeWire(int n) const
 	throw range_error("Invalid wire number");
 #else
 	cerr << "Wire Range must be 0 < n < " << numberOfInnerSectorAnodeWires() << endl;
-	cerr << "Exitting..." << endl;
-	exit(0);
+	cerr << "Aborting..." << endl;
+	abort();
 #endif
     }
     return (firstInnerSectorAnodeWire() + (n-1)*anodeWirePitch());
