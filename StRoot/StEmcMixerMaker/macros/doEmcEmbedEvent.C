@@ -31,6 +31,7 @@ void doEmcEmbedEvent(int nevents = 10,char* file="*.event.root",Bool_t print = k
   gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
   gSystem->Load("libgeometry_Tables");
+  gSystem->Load("StEmcRawMaker");
   gSystem->Load("StEmcADCtoEMaker");
   gSystem->Load("StPreEclMaker");
   gSystem->Load("StEpcMaker");
