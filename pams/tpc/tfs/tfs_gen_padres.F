@@ -1,5 +1,8 @@
-* $Id: tfs_gen_padres.F,v 1.3 1998/03/03 23:03:13 hardtke Exp $
+* $Id: tfs_gen_padres.F,v 1.4 1998/03/28 01:08:17 sakrejda Exp $
 * $Log: tfs_gen_padres.F,v $
+* Revision 1.4  1998/03/28 01:08:17  sakrejda
+* Protected agains dividing by 0, sometimes gstar gives hits with 0 ionisation which translates into 0 electrons. In such cases I set number of electrons to 1
+*
 * Revision 1.3  1998/03/03 23:03:13  hardtke
 * use constants files
 *
@@ -295,6 +298,11 @@ C     pad resolution function (in p184 of Blum & Rolandi) to Roy B.'s
 C     calculated widths.
 
                Nh     = tphit(k).q/Ion_Pot
+CIS   The following line was added, because gstar sometimes feeds us with
+CIS   hits that have 0 energy loss. The following is safe but not
+CIS   necessarily correct. Should be investigated further.
+
+               if(Nh.eq.0) Nh=1
 C                  clus_per_cm_P10 = rel_dedx*clus_dis_P10
 C                  ds_ave = 1./clus_per_cm_P10
 C                  Neff_b = 2.7*wire_space/ds_ave
