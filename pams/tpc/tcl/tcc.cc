@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: tcc.cc,v 1.1 1998/11/25 19:42:55 kathy Exp $
+ * $Id: tcc.cc,v 1.2 1999/01/22 21:52:27 fisyak Exp $
  *
  * Author: L.D. Carr --> lcarr@u.washington.edu  9/1/98
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: tcc.cc,v $
+ * Revision 1.2  1999/01/22 21:52:27  fisyak
+ * comment handler
+ *
  * Revision 1.1  1998/11/25 19:42:55  kathy
  * added Lincoln Carr's tcc module to tcl package -- changes to idl,inc,tcl, kumac subdirectories
  *
@@ -68,9 +71,9 @@ long type_of_call tcc_(  TABLE_HEAD_ST *aInnerSectorAdcTable_h,
   int theCurrentSector, theSetBit;
   StTccClusterMorphology *theMorphologyObject;
   theMorphologyObject = new StTccClusterMorphology;
-
+#if 0
   set_new_handler(out_of_memory);   //replaces assert ( ... != 0 );
-
+#endif
   // set number of instances of tcc_morphology table for staf
   aMorphologyTable_h[0].nok = aClusterTable_h[0].nok;
 
