@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcSimpleGeometry.cc,v 1.1 1998/11/10 17:12:22 fisyak Exp $
+ * $Id: StTpcSimpleGeometry.cc,v 1.2 1998/12/15 11:21:20 lasiuk Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -11,8 +11,8 @@
  *****************************************************************
  *
  * $Log: StTpcSimpleGeometry.cc,v $
- * Revision 1.1  1998/11/10 17:12:22  fisyak
- * Put Brian trs versin into StRoot
+ * Revision 1.2  1998/12/15 11:21:20  lasiuk
+ * add i/o sector spacing = 3 mm
  *
  * Revision 1.1  1998/11/10 17:12:22  fisyak
  * Put Brian trs versin into StRoot
@@ -108,6 +108,7 @@ StTpcSimpleGeometry::StTpcSimpleGeometry(const char* file)
     StGetConfigValue(file,"numberOfOuterSectorAnodeWires",mNumberOfOuterSectorAnodeWires);
     StGetConfigValue(file,"innerSectorEdge",mInnerSectorEdge);
     StGetConfigValue(file,"outerSectorEdge",mOuterSectorEdge);
+    StGetConfigValue(file,"ioSectorSpacing",mIoSectorSpacing);
 
     // should be assign --- not supported by egcs 1.0.2
     //mPadsInRow.assign(mPadRows);
@@ -165,6 +166,7 @@ StTpcSimpleGeometry::StTpcSimpleGeometry(const char* file)
 
     mIoSectorSeparation    *= millimeter;
     mOuterSectorEdge       *= millimeter;
+    mIoSectorSpacing       *= millimeter;
     
     mFrischGrid            *= millimeter;
     mDriftDistance         *= millimeter;
@@ -362,6 +364,7 @@ void StTpcSimpleGeometry::print(ostream& os) const
     os << "lastOuterSectorAnodeWire      = " << mLastOuterSectorAnodeWire/millimeter      << " mm" << endl;
     os << "innerSectorEdge               = " << mInnerSectorEdge/millimeter << " mm" << endl;
     os << "outerSectorEdge               = " << mOuterSectorEdge/millimeter << " mm" << endl;
+    os << "ioSectorSpacing               = " << mIoSectorSpacing/millimeter << " mm" << endl;
     os << endl;
     os << " Row      Pads      Radial Distance to Row" << endl;
     os << "==========================================" << endl;
