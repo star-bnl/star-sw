@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.cxx,v 1.10 2003/07/18 18:31:49 perev Exp $
+ * $Id: StTofMaker.cxx,v 1.11 2003/08/08 00:20:41 geurts Exp $
  *
  * Author: W.J. Llope / Wei-Ming Zhang / Frank Geurts
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTofMaker.cxx,v $
+ * Revision 1.11  2003/08/08 00:20:41  geurts
+ * moved local collection code to StTofUtil, changed StTofMaker accordingly
+ *
  * Revision 1.10  2003/07/18 18:31:49  perev
  * test for nonexistance of XXXReader added
  *
@@ -45,10 +48,6 @@
     StEvent::tofCollection(). Based on a rough estimate of the number of hits
     a tofTag is constructed and stored.</p>
 
-    <p> Currently the tofSlatCollection() and tofHitCollection() are not filled.
-    They will be once parts of the analysis code moves into this Maker. Also, the
-    Maker only deals with m_Mode=0 (DAQ Reader).</p>
-
     <p>History:
     <ul>
     <li> StTofDataCollection added </li>
@@ -57,11 +56,6 @@
     <li> TOFP_DEBUG switch added to StTofMaker.h for print statements  </li>
     <li> Changed or Prettified all print statements (TOFP_DEBUG directive) </li>
     <li> Changed histograms filled & saved (TOFP_HISTOS directive) </li>
-    <li> Track extrapolation removed...	(for future version)  </li>
-    <li> Track matching removed...      	(for future version) </li>
-    <li> SlatCollection fill removed...	(for future version) </li>
-    <li> HitCollection fill removed... 	(for future version) </li>
-    <li> PIDTraits fill removed...     	(for future version) </li>
     <li> Overloaded << operator for dumping data to screen  </li>
     <li> Added direct check of StTofCollection entries in fillStEvent()  </li>
     <li> Added tofTag variable </li>
@@ -72,7 +66,7 @@
 #include <stdlib.h>
 #include "StEventTypes.h"
 #include "StTofUtil/StTofGeometry.h"
-#include "StTofDataCollection.h"
+#include "StTofUtil/StTofDataCollection.h"
 //VP#include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/TOF/TOF_Reader.hh"
 #include "StDAQMaker/StDAQReader.h"
