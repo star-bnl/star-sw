@@ -3,7 +3,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.21 2000/02/28 19:37:26 ullrich Exp $
+% $Id: StEvent.tex,v 2.22 2000/03/02 12:40:40 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -22,9 +22,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 2.21  2000/02/28 19:37:26  ullrich
-% Added the hypperref package to add bookmarks and hyperlinks
-% tp pdf documents.
+% Revision 2.22  2000/03/02 12:40:40  ullrich
+% Added description of modified StTpcDedxPidAlgorithm
 %
 % Revision 2.33  2000/05/22 22:04:07  ullrich
 % Removed StRichPixelCollection ref section and added description
@@ -149,8 +148,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.21 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/28 19:37:26 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.22 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/02 12:40:40 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -174,8 +173,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.21 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/28 19:37:26 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.22 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/02 12:40:40 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -183,17 +182,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.21 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/28 19:37:26 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.22 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/02 12:40:40 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.21 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/28 19:37:26 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.22 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/02 12:40:40 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.21 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/28 19:37:26 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.22 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/02 12:40:40 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -208,8 +207,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.21 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/28 19:37:26 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.22 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/02 12:40:40 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
@@ -3868,11 +3867,29 @@ definition in the header file.
 \index{StSvtSoftwareMonitor|textbf}
 \label{sec:StSvtSoftwareMonitor}
 \begin{Entry}
-\item[Description] 
-\item[Related Classes] \texttt{StTpcDedxPidAlgorithm} inherits directly from
+\item[Summary]
+\item[Synopsis]
+    \verb+#include "StSvtSoftwareMonitor.h"+\\
+    \verb+class StSvtSoftwareMonitor;+\\
+\item[Description]
+    Some of the data member in this class are arrays of size 4.
+    The first 3 elements refer to the 3 SVT barrels, the 4$^{th}$ element
+    refers to the SSD.
+\item[Related Classes]
+\item[Public\\ Constructors]
+    \verb+StSvtSoftwareMonitor();+\\
     \verb+StSvtSoftwareMonitor(const dst_mon_soft_svt_st&);+\\
+\item[Public Data\\ Member]
     \verb+Long_t n_clus_svt[4];+\\
-    \verb+StTpcDedxPidAlgorithm();+\\
+    Total number clusters in each SVT/SSD barrel/layer. 
+    
+    \verb+Long_t n_pts_svt[4];+\\
+    Total number of space points in each SVT/SSD barrel/layer. 
+    
+    \verb+Long_t n_trk_svt;+\\
+    Total number of tracks in SVT.
+    
+    \verb+Float_t chrg_svt_tot[4];+\\
     Total charge deposition in each SVT/SSD barrel/layer. 
     
     \verb+Float_t hit_frac_svt[4];+\\
