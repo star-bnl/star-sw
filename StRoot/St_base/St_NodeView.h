@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98 
-// $Id: St_NodeView.h,v 1.14 1999/06/05 00:42:32 fine Exp $
+// $Id: St_NodeView.h,v 1.15 1999/06/14 08:45:28 fine Exp $
 // $Log: St_NodeView.h,v $
+// Revision 1.15  1999/06/14 08:45:28  fine
+// List of the shapes have been introduced for St_NodeView
+//
 // Revision 1.14  1999/06/05 00:42:32  fine
 // SetLineAttribute methods have been introduced
 //
@@ -43,6 +46,9 @@
 //////////////////////////////////////////////////////////////////////////
 
 class St_NodeView : public St_ObjectSet {
+protected:
+  TList          *fListOfShapes;  //Pointer to the list of the "extra" shape definitions
+  virtual void    PaintShape(Option_t *option);
 
 public:
   St_NodeView():St_ObjectSet(){;}
@@ -53,13 +59,17 @@ public:
   St_NodeView(St_Node *thisNode,St_NodePosition *nodePosition);
   virtual ~St_NodeView();
   virtual St_Node *AddNode(St_Node *node);
+  virtual void     Add(St_NodeView *node);
+  virtual void     Add(TShape *shape, Bool_t IsMaster=kFALSE);
   virtual void     Browse(TBrowser *b);
   virtual void     Draw(Option_t *option); // *MENU* 
   virtual Int_t    DistancetoPrimitive(Int_t px, Int_t py);
   virtual St_NodePosition *GetPosition() const { return (St_NodePosition *)GetObject();}
   virtual St_Node *GetNode() const ;
   virtual Int_t    GetGlobalRange(const St_NodeView *rootNode,Float_t *min, Float_t *max);
+  virtual TList   *GetListOfShapes()  const;
   virtual void     GetLocalRange(Float_t *min, Float_t *max);
+  virtual TShape  *GetShape()  const;
   virtual Int_t    GetVisibility() const {return GetNode() ? GetNode()->GetVisibility():0;}
   virtual Bool_t   IsMarked();
   virtual Bool_t   Is3D()  {return kTRUE;}
@@ -73,6 +83,10 @@ public:
   ClassDef(St_NodeView,1)
 };
 
-inline Bool_t St_NodeView::IsMarked(){ return TestBit(kMark); }
+inline void    St_NodeView::Add(St_NodeView *node){ St_DataSet::Add(node);}
+inline Bool_t  St_NodeView::IsMarked(){ return TestBit(kMark); }
+inline TList  *St_NodeView::GetListOfShapes() const {return fListOfShapes;}
+inline TShape *St_NodeView::GetShape()  const 
+       {return fListOfShapes ? (TShape *)fListOfShapes->First():0;}
 #endif
 
