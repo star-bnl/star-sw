@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StHbtV0.hh,v $
+ * Revision 1.12  2003/01/14 09:45:14  renault
+ * enable this class to be used for theorical calculations.
+ *
  * Revision 1.11  2002/11/19 23:37:56  renault
  * Get V0 daughters helix
  *
@@ -69,7 +72,9 @@
 #ifdef __ROOT__
 #include "StStrangeMuDstMaker/StV0MuDst.hh"
 #endif
-
+/* Th stuff */
+#include "StHbtMaker/Base/StHbtHiddenInfo.hh"
+/***/
 class StHbtTTreeEvent;
 class StHbtTTreeV0;
 
@@ -81,7 +86,7 @@ public:
   StHbtV0( StV0MuDst&); // from strangeness V0 micro dst structure
   StHbtV0(const StHbtTTreeEvent*, const StHbtTTreeV0*);
 #endif
-  ~StHbtV0(){/* no-op */}
+  ~StHbtV0(){if(mHiddenInfo) delete mHiddenInfo;}
 
 
   float decayLengthV0() const;       // 3-d decay distance
@@ -228,7 +233,12 @@ public:
   void SetHelixNeg(const StPhysicalHelixD&); // Gael 12 Sept 02
 
   void SetprimaryVertex(const StHbtThreeVector v);//Gael 24 Sept 02
-
+  /* Th stuff */
+  void SetHiddenInfo(StHbtHiddenInfo* aHiddenInfo);
+  bool ValidHiddenInfo() const;
+  // Fab private : (official : const StHbtHiddenInfo* HiddenInfo() const;
+  StHbtHiddenInfo* getHiddenInfo() const;
+  /***/
   friend ostream& operator<<(ostream& out, StHbtV0& v0);
   friend istream& operator>>(istream& in,  StHbtV0& v0);
 
@@ -301,7 +311,10 @@ protected:
 
   unsigned short   mKeyNeg;
   unsigned short   mKeyPos;
-
+  /* Th stuff */
+  // Fab private : add mutable
+  mutable StHbtHiddenInfo* mHiddenInfo; //!
+  /***/
 
 
 };
@@ -351,10 +364,8 @@ inline float StHbtV0::ptPos() const {return mPtPos;}
 inline float StHbtV0::ptotPos() const {return mPtotPos;}
 inline float StHbtV0::ptNeg() const {return mPtNeg;}
 inline float StHbtV0::ptotNeg() const {return mPtotNeg;}
-inline int   StHbtV0::tpcHitsPos() const
-             { return mTpcHitsPos; }
-inline int   StHbtV0::tpcHitsNeg() const
-             { return mTpcHitsNeg; }
+inline int   StHbtV0::tpcHitsPos() const { return mTpcHitsPos; }
+inline int   StHbtV0::tpcHitsNeg() const { return mTpcHitsNeg; }
 inline float StHbtV0::dedxNeg() const {return mDedxNeg;}
 inline float StHbtV0::numdedxNeg() const {return mNumDedxNeg;} //Gael 04Fev2002
 inline float StHbtV0::errdedxNeg() const {return mErrDedxNeg;} //Gael 04Fev2002
