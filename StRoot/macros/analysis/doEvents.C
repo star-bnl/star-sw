@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.7 1999/02/25 02:51:42 wenaus Exp $
+// $Id: doEvents.C,v 1.8 1999/02/25 23:10:41 wenaus Exp $
 // $Log: doEvents.C,v $
-// Revision 1.7  1999/02/25 02:51:42  wenaus
-// make sure default file is a working one
+// Revision 1.8  1999/02/25 23:10:41  wenaus
+// fix multi-file bug
+//
+// Revision 1.8  1999/02/25 23:10:41  wenaus
+// fix multi-file bug
 //
 // Revision 1.7  1999/02/25 02:51:42  wenaus
 // make sure default file is a working one
@@ -60,6 +63,8 @@ class St_DataSetIter;
 St_DataSetIter* nextXdf;
 class St_XDFFile;
 St_XDFFile *theFile = 0;
+TString  thePath;
+TString  theFileName;
 TString  originalPath;
 TFile *rootFile=0;  
 class StChain;
@@ -76,19 +81,20 @@ const char *xdfFile ="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf";
 // .x doEvents.C(10,"-","/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/gstardata/psc0033_01_40evts.root")
 
 void doEvents(const Int_t nevents=999,
-              const Char_t *path="-/disk00000/star/auau200/hijing135/",
-              const Char_t *file="/disk1/star/test/psc0049_08_40evts.root")
+              const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
+              const Char_t *file="/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/./set0022_01_56evts_dst.xdf")
     cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
+  //const Char_t *file="/disk1/star/test/psc0049_08_40evts.root")
   // const Char_t *file="/scr22/kathy/test23/psc0049_08_40evts_dst.root")
   // const Char_t *file="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0032_03_40evts.root")
   // const Char_t *file="/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/set0015_08_49evts_dst.root")
   // const Char_t *file="/afs/rhic/star/strange/genevb/year1a_90evts_dst.xdf")
   // const Char_t *file="/disk00000/star/auau200/hijing135/default/b0_20/year2x/hadronic_on/tfs_dst/pet213_02_190evts_h_dst.xdf")
+  // const Char_t *path="-/disk00000/star/auau200/hijing135/",
 
 
 
 
-  StChain *chain=0;
   gSystem->Load("xdf2root");
   // Dynamically link needed shared libs
   gSystem->Load("St_io_Maker");
@@ -153,11 +159,9 @@ void doEvents(const Int_t nevents=999,
       istat = chain->Make(i);
       if (!istat) {
         cout << "Event processed" << endl;
-        //        chain->DataSet("dst")->ls("*");
       } else {
         cout << "Last event processed" << endl;
         St_DataSet *set = chain->DataSet("dst");
-        //        if (set) set->ls("*");
         break;
       }
       cout << "============================ Event " << i << " finish" << endl;
@@ -165,6 +169,7 @@ void doEvents(const Int_t nevents=999,
     }
   } else {
     // XDF file handling ------------------------------------
+
     // Initialize chain
     Int_t iInit = chain->Init();
     if (iInit) chain->Fatal(iInit,"on init");
@@ -172,7 +177,6 @@ void doEvents(const Int_t nevents=999,
     St_XDFFile *xdf_in = 0;
     while (xdf_in = nextFile()) {
       // Open XDF file and pass to reader
-      xdf_in = new St_XDFFile(file,"r");
       readerMaker.setXdfFile(xdf_in);
       
       // Event loop

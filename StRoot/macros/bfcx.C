@@ -1,4 +1,4 @@
-// $Id: bfcx.C,v 1.6 1999/02/22 23:28:13 fisyak Exp $
+// $Id: bfcx.C,v 1.7 1999/02/25 23:10:40 wenaus Exp $
 #define gtrack
 #define trs
 #define emc
@@ -105,7 +105,7 @@ bfcx(const Int_t Nevents=1,const Char_t *fzfile ="/disk1/star/test/psc0049_08_40
   geant->Do(cmd.Data());
 #endif
   //  geant->Do("mode tpce prin 1 digi 2");   // make tpc_hit in local coordinates
-  St_calib_Maker       *calib = new St_calib_Maker("calib","calib"); 
+  //  St_calib_Maker       *calib = new St_calib_Maker("calib","calib"); 
   //  St_evg_Maker     *evgen = new St_evg_Maker("evgen","event/evgen");
   St_fss_Maker         *ftpc_raw = new St_fss_Maker("ftpc_raw","event/raw_data/ftpc");
 #ifndef trs
