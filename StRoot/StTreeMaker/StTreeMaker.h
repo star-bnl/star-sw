@@ -17,7 +17,7 @@ class StTreeMaker : public StIOInterFace {
 private:
    Int_t  fFinished;
 public:
-   StTreeMaker(const char *name="",const char *ioFile="",const char *treeName="bfcTree");
+   StTreeMaker(const char *name="",const char *ioFile="",const char *treeName=0);
    virtual       ~StTreeMaker();
    virtual Int_t  Init();
    virtual Int_t  Make();
@@ -38,7 +38,7 @@ public:
      {if(!fTree)return 0;return (StBranch*)fTree->Find(brName);};   
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTreeMaker.h,v 1.9 1999/09/25 18:17:28 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTreeMaker.h,v 1.10 1999/11/09 02:15:37 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StTreeMaker, 1)   //StAR chain virtual base class for Makers
 };
