@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.21 2004/05/11 17:33:38 jml Exp $
+ * $Id: FCFMaker.cxx,v 1.22 2004/05/13 21:18:18 jml Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.22  2004/05/13 21:18:18  jml
+ * turned on zero-truncation, but leave 5cm overlap
+ *
  * Revision 1.21  2004/05/11 17:33:38  jml
  * Moved initialializations from init() to constructor
  *
@@ -251,7 +254,7 @@ StRTSClientFCFMaker::StRTSClientFCFMaker(const char *name):StMaker(name)
   splitRows = 1;        // split padrows as if real DAQ on i960s
   doT0Corrections = 1;  // do the t0 corrections
   doGainCorrections = 1; // done by St_tpcdaq_Maker - shouldn't be!!! Tonko
-  doZeroTruncation = 0; // don't 
+  doZeroTruncation = 1; // do it, but leave 5 cm... 
   fillDeconFlag = 1;
 
   mCreate_stevent = 0;  // Use  StEvent for ittf
@@ -982,11 +985,12 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
   hit.dz = mDt;
 
 
+  // allow 5 cm overlap...
   if(doZeroTruncation)
   {
-    if((hit.z < 0) && (sector <=12))  // sector 1..12 have positive z
+    if((hit.z < -5.0) && (sector <=12))  // sector 1..12 have positive z
       return;
-    if((hit.z > 0) && (sector > 12))
+    if((hit.z > 5.0) && (sector > 12))
       return;
   }
 
