@@ -1,4 +1,10 @@
 //*-- Author :    Valery Fine   27/04/98
+// $Id: St_XDFFile.h,v 1.8 1998/07/20 15:08:17 fisyak Exp $
+// $Log: St_XDFFile.h,v $
+// Revision 1.8  1998/07/20 15:08:17  fisyak
+// Add tcl and tpt
+//
+
 
 #ifndef STAF_St_XDFFile
 #define STAF_St_XDFFile
@@ -40,6 +46,7 @@ class St_XDFFile
     virtual St_DataSet *NextEventGet();                             // create St_DataSet and read the next event in it.
     virtual Int_t       NextEventPut(St_DataSet *dataset);          // create DS_DATASET_T from St_DataSet and write it out in XDR format
     virtual Int_t       CloseXDF();                                 // close the XDF file (it is called from dtor)
+    static void        GetXdFile(Char_t *filename, St_DataSet *dataset); // open, read and close file file
     ClassDef(St_XDFFile,0)
 
 };

@@ -1,3 +1,9 @@
+// $Id: StChain.h,v 1.6 1998/07/20 15:08:08 fisyak Exp $
+// $Log: StChain.h,v $
+// Revision 1.6  1998/07/20 15:08:08  fisyak
+// Add tcl and tpt
+//
+
 #ifndef STAR_StChain
 #define STAR_StChain
 
@@ -29,6 +35,7 @@
 class TBrowser;
 class TChain;
 class St_XDFFile; 
+//static Char_t      *m_VersionCVS="$Id: StChain.h,v 1.6 1998/07/20 15:08:08 fisyak Exp $";//StChain header CVS version
 
 class StChain : public TNamed {
 

@@ -1,3 +1,8 @@
+// $Id: StMaker.h,v 1.4 1998/07/20 15:08:09 fisyak Exp $
+// $Log: StMaker.h,v $
+// Revision 1.4  1998/07/20 15:08:09  fisyak
+// Add tcl and tpt
+//
 #ifndef STAR_StMaker
 #define STAR_StMaker
 

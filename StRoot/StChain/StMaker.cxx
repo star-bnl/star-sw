@@ -1,4 +1,8 @@
-
+// $Id: StMaker.cxx,v 1.5 1998/07/20 15:08:09 fisyak Exp $
+// $Log: StMaker.cxx,v $
+// Revision 1.5  1998/07/20 15:08:09  fisyak
+// Add tcl and tpt
+//
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // StChain virtual base class for StMaker                              //
