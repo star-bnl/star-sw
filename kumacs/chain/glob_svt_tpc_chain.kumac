@@ -24,10 +24,10 @@ MACRO run_all no_events=1 file=/afs/rhic/star/data/samples/event_0000050.xdf svt
  no_events=[1]
  file = [2]
  LOCAL = $HOME
- PAMS   = /afs/rhic/star/packages/SL98b/pams
+ PAMS   = /afs/rhic/star/packages/SL98c/pams
 
- UTIL_HOME = /afs/rhic/star/packages/SL98b/kumacs/util
- KUM_HOME = /afs/rhic/star/packages/SL98b/kumacs/chain
+ UTIL_HOME = /afs/rhic/star/packages/SL98c/kumacs/util
+ KUM_HOME = /afs/rhic/star/packages/SL98c/kumacs/chain
  SVT_HOME = [PAMS]/svt/kumac
  TPC_HOME = [PAMS]/tpc/kumac
  GLOBAL_HOME = [PAMS]/global/kumac
