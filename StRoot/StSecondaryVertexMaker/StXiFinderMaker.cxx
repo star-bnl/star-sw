@@ -71,6 +71,10 @@ Int_t StXiFinderMaker::Init()
     {gMessMgr->Error("StXiFinderMaker::Init() : wrong SVTUsage parameter set.");
      return kStErr;
      }
+ if ((useEventModel!=kUseStEvent) && (useEventModel!=kUseMuDst))
+    {gMessMgr->Error("StXiFinderMaker::Init() : wrong EventModelUsage parameter set.");
+     return kStErr;
+     }
  if ((useLikesign!=kLikesignUseStandard) && (useLikesign!=kLikesignUseLikesign))
     {gMessMgr->Error("StXiFinderMaker::Init() : wrong LikesignUsage parameter set.");
      return kStErr;
@@ -83,7 +87,10 @@ Int_t StXiFinderMaker::Init()
  if (useTracker == kTrackerUseTPT) gMessMgr->Info()<<"StXiFinderMaker : use TPT tracks."<<endm;
  if (useTracker == kTrackerUseITTF) gMessMgr->Info()<<"StXiFinderMaker : use ITTF tracks."<<endm;
  if (useTracker == kTrackerUseBOTH) gMessMgr->Info()<<"StXiFinderMaker : use TPT *and* ITTF tracks."<<endm;
- if (useSVT == kUseSVT) gMessMgr->Info()<<"StXiFinderMaker : use SVT points if possible."<<endm;///Betty
+ if (useSVT == kUseSVT) gMessMgr->Info()<<"StXiFinderMaker : use SVT points if possible."<<endm;
+ if (useSVT == kNoSVT) gMessMgr->Info()<<"StXiFinderMaker : do not use SVT points."<<endm;
+ if (useEventModel == kUseStEvent) gMessMgr->Info()<<"StXiFinderMaker : expect StEvent files in input."<<endm;
+ if (useEventModel == kUseMuDst)  gMessMgr->Info()<<"StXiFinderMaker : expect MuDst files in input."<<endm;
  if (useLikesign == kLikesignUseLikesign) gMessMgr->Info()<<"StXiFinderMaker : does like-sign finding."<<endm;
  if (useRotating == kRotatingUseRotating) gMessMgr->Info()<<"StXiFinderMaker : does rotating finding."<<endm;
  if (useRotating == kRotatingUseSymmetry) gMessMgr->Info()<<"StXiFinderMaker : does symmetry finding."<<endm;
@@ -138,6 +145,11 @@ Int_t StXiFinderMaker::Init()
  if (2&useXiLanguage) gMessMgr->Info()<<"StXiFinderMaker :    Will store C++ Xis made with Fortran V0s."<<endm;
  if (4&useXiLanguage) gMessMgr->Info()<<"StXiFinderMaker :    Will store C++ Xis made with C++ V0s."<<endm;
 
+ if (useEventModel) //initialize mMuDstMaker
+    {mMuDstMaker = (StMuDstMaker*)GetMaker("myMuDstMaker");
+     if(!mMuDstMaker) gMessMgr->Warning("StXiFinderMaker::Init can't find a valid MuDst.");
+     }
+ 
  return StMaker::Init();
  }
 
@@ -699,7 +711,7 @@ Bool_t StXiFinderMaker::UseV0() {
                               xiVertex->setDcaParentToPrimaryVertex(bxi);
                               xiVertex->setV0Vertex(v0Vertex);
                               
-                              ///Begin Betty
+                              //Set chi2 to trace SVT usage
                               long int v0ChiSq = -1*(long int)v0Vertex->chiSquared();
                               if(detId[k]==2 || detId[k]==3)
                                  {//if an SVT track was used on bachelor set the last bit to 1
@@ -707,7 +719,6 @@ Bool_t StXiFinderMaker::UseV0() {
                                   }
                               v0ChiSq *=-1;
                               xiVertex->setChiSquared((float)v0ChiSq);
-                              ///End Betty
                               
                               xiVertices.push_back(xiVertex);
                               usedV0 = kTRUE;
@@ -736,8 +747,11 @@ Bool_t StXiFinderMaker::UseV0() {
   return usedV0;
 }
 //_____________________________________________________________________________
-// $Id: StXiFinderMaker.cxx,v 1.14 2003/11/08 18:26:00 faivre Exp $
+// $Id: StXiFinderMaker.cxx,v 1.15 2004/02/02 12:10:54 faivre Exp $
 // $Log: StXiFinderMaker.cxx,v $
+// Revision 1.15  2004/02/02 12:10:54  faivre
+// XiFinder now able to run on muDsts as well :-)   + update user-friendliness.
+//
 // Revision 1.14  2003/11/08 18:26:00  faivre
 // Bfield + consistency int/short
 //
