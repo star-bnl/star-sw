@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.74 1999/08/28 01:23:12 fine Exp $ 
+// $Id: St_Table.cxx,v 1.75 1999/08/29 02:01:33 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.75  1999/08/29 02:01:33  fine
+// St_Table::Draw clean up, G__Calc is activated since it works well but too slow
+//
 // Revision 1.74  1999/08/28 01:23:12  fine
 // St_Table::Draw work well under. With no bytecode works under Linux as well
 //
@@ -227,10 +230,12 @@
 #include "TView.h"
 #include "TPolyMarker3D.h"
 
+R__EXTERN TH1 *gCurrentHist;
+
 static   Int_t         fNbins[4] = {100,100,100,100};     //Number of bins per dimension
 static   Float_t       fVmin[4]  = {0,0,0,0};             //Minima of varexp columns
 static   Float_t       fVmax[4]  = {20,20,20,20};         //Maxima of varexp columns
-static  TH1 *gCurrentHist = 0;
+
 //______________________________________________________________________________
 void *ReAllocate(table_head_st *header, Int_t newsize) 
 {
@@ -446,7 +451,7 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
 //       tree->SetEstimate(tree->GetEntries());
 //    You must call SetEstimate if the expected number of selected rows
 //    is greater than 10000.
-   printf(" %d %s %s \n", GetNRows(),varexp00,selection);
+   printf(" %d %s %s \n",(int) GetNRows(),varexp00,selection);
    if (GetNRows() == 0 || varexp00 == 0 || varexp00[0]==0) return;
    TString  opt;
    Text_t *hdefault = (char *)"htemp";
@@ -458,10 +463,9 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
    Text_t *hname = strstr(varexp0,">>");
    TH1 *oldh1 = 0;
    TEventList *elist = 0;
-   char htitle[256]; htitle[0] = '\0';
    Bool_t profile = kFALSE;
  
-//   gCurrentHist = 0;
+   gCurrentHist = 0;
    if (hname) {
      *hname  = 0;
       hname += 2;
@@ -527,17 +531,26 @@ void St_Table::Draw(const Text_t *varexp00, const Text_t *selection, Option_t *o
 //   if (!fVar1 && !elist) return;
  
 //*-*- In case oldh1 exists, check dimensionality
-//   Int_t dimension = colIndex - 1;
    Int_t dimension = colIndex;
+
+   TString title = expressions[0];
+   for (i=1;i<colIndex;i++) {
+     title += ":";
+     title += expressions[i];     
+   }
    Int_t nsel = strlen(selection);
    if (nsel > 1) {
-      if (nsel < 80-(Int_t)strlen(htitle))
-         sprintf(htitle,"%s {%s}",varexp,selection);
+      if (nsel < 80-title.Length()) {
+        title += "{"; 
+        title += selection; 
+        title += "}"; 
+      }
       else
-         sprintf(htitle,"%s {...}",varexp);
-   } else {
-      sprintf(htitle,"%s",varexp);
+        title += "{...}"; 
    }
+
+   const Char_t *htitle = title.Data();
+
    if (oldh1) {
       Int_t mustdelete = 0;
       if (oldh1->InheritsFrom("TProfile")) profile = kTRUE;
@@ -770,7 +783,6 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
  //
  //  Load file
   Float_t rmin[3],rmax[3];
-  printf(" Enter loop\n");
   switch(G__loadfile((Char_t *)exprFileName)) {
   case G__LOADFILE_SUCCESS:
   case G__LOADFILE_DUPLICATE:
@@ -783,7 +795,7 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
 
   // Float_t  Selection(Float_t *results[], void *address[])
   const Char_t *funcName = "SelectionQWERTY";  
-#define BYTECODE
+// #define BYTECODE
 #ifdef BYTECODE
   const Char_t *argtypes = "Float_t *,void **";
   long offset;
@@ -813,11 +825,11 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
   callfunc.SetArg((long)(addressArray));  // give 'void    *addressArray[]' as 2nd argument
 #else
   char buf[200];
-  sprintf(buf,"%s((Float_t*)(%ld),(void**)(%ld))",funcName,results,addressArray);
+  sprintf(buf,"%s((Float_t*)(%ld),(void**)(%ld))",funcName,(long int)results,(long int)addressArray);
 #endif
   
   // Call bytecode in loop
-  printf("first = %d; n =  %d  NRows = %d \n", firstentry, nentries, GetNRows());
+  printf("first = %d; n =  %d  NRows = %d \n", firstentry, nentries, (int) GetNRows());
 
 #ifdef BYTECODE
 #  define CALLMETHOD callfunc.Exec(0);
@@ -855,7 +867,6 @@ Bool_t St_Table::EntryLoop(const Char_t *exprFileName,Int_t &action, TObject *ob
              ((TH1 *)obj)->SetBins(fNbins[0],fVmin[0],fVmax[0]);
            }
         case  1:
-            if (action > 0) TH1 *h1 = (TH1*)obj;
             TAKEACTION_BEGIN
                if (results[1]) ((TH1 *)obj)->Fill(Axis_t(results[0]),Stat_t(results[1]));
             TAKEACTION_END
@@ -1920,7 +1931,6 @@ Char_t *St_Table::MakeExpression(const Char_t *expressions[],Int_t nExpressions)
 
    St_tableDescriptor *dsc = GetRowDescriptors();
    const tableDescriptor_st *descTable  = dsc->GetTable();
-   Int_t size = dsc->GetNRows();
    // Create function
    str << "void SelectionQWERTY(float *"<<resID<<", void **address)"   << endl;
    str << "{"                                                        << endl;
