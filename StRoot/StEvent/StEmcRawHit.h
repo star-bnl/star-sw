@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcRawHit.h,v 2.1 2000/02/23 17:34:14 ullrich Exp $
+ * $Id: StEmcRawHit.h,v 2.2 2000/05/22 19:21:54 akio Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcRawHit.h,v $
+ * Revision 2.2  2000/05/22 19:21:54  akio
+ * Bug fix, add delta into EMcPoint, wider bits for Eta in RawHit
+ *
  * Revision 2.1  2000/02/23 17:34:14  ullrich
  * Initial Revision
  *
@@ -32,7 +35,7 @@ public:
     StDetectorId detector() const;        
     UInt_t    module() const;        
     UInt_t    eta() const;        
-    UInt_t    sub() const;        
+    Int_t     sub() const;        
     UInt_t    adc() const;        
     Float_t   energy() const;
 
