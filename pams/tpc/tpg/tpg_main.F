@@ -23,7 +23,7 @@ CCCCCCCCCCCC
 
       save
 
-      data init_flag/0/, idebug/1/
+      data init_flag/0/, idebug/0/
 *
       if(init_flag.eq.0) then
          iret=tgc_pad_to_x(1.0,1.0,dummy3,pad_plane_h,pad_plane)
