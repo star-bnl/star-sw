@@ -1,4 +1,4 @@
-// $Id: makedoc.C,v 1.50 1999/12/15 22:33:30 fine Exp $
+// $Id: makedoc.C,v 1.51 1999/12/15 22:41:24 fine Exp $
 //=======================================================================
 // owner: Valery Fine
 // what it does: 
@@ -207,10 +207,10 @@
      , "/test/test9.C",                "How to read the event from XDF file and build some histograms with ROOT"
      , "/test/XDFcopy.C",              "How to read/write XDF file"
      , "/test/XDFtest.C",              "How to read/write XDF and ROOT files"
-     , "/graphics/TurnDisplay.C",     "Macro to plug StEventDisplayMaker in to chain and trun it on."
+     , "/graphics/TurnDisplay.C",      "Macro to plug StEventDisplayMaker into chain and turn it on."
      , "/graphics/SetObjectFilter.C",  "Macro to adjust the parameters of the current \"event filter\"."
-     , "/graphics/StTrackFilters/StTrackFilter.cxx", "an example of the implementation of the \"advanced\"  event filter."
-     , "/graphics/StTrackFilters/StTrackFilter.h",   "an example of the definition of the \"advanced\"  event filter."
+     , "/graphics/TrackFilters/StTrackFilter.cxx", "an example of the implementation of the \"advanced\"  event filter."
+     , "/graphics/TrackFilters/StTrackFilter.h",   "an example of the definition of the \"advanced\"  event filter."
      , "/graphics/boldStyle.C",        "Style file for making presentation histograms."
      , "/graphics/videoStyle.C",       "Style file for video presentation histograms."
      , "/graphics/PadBrowser.C",       "How to use St_geom_Maker and StPadDisplayMaker"
@@ -274,6 +274,9 @@
 //___________________________________________________________________________
 //___________________________________________________________________________
 // $Log: makedoc.C,v $
+// Revision 1.51  1999/12/15 22:41:24  fine
+// clean up
+//
 // Revision 1.50  1999/12/15 22:33:30  fine
 // new class StVirtualEventFilter doc  added
 //
