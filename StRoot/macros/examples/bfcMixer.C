@@ -1,10 +1,3 @@
-// $Log: bfcMixer.C,v $
-// Revision 1.3  2000/06/30 20:08:34  lansdell
-// fixed problem with Log and Revision not being commented
-//
-// Revision 1.2  2000/05/09 20:15:43  kathy
-// transfer obsolete macros to /macros/obsolete;  update other macros so that they use standard default inputs plus only few events by default so they'll be easy to run in autoQA macro testing
-// 
 //////////////////////////////////////////////////////////////////////////
 //
 //
@@ -14,7 +7,7 @@
 //
 //
 //
-// $Id: bfcMixer.C,v 1.3 2000/06/30 20:08:34 lansdell Exp $
+// $Id: bfcMixer.C,v 1.4 2000/07/10 15:51:44 pfachini Exp $
 //////////////////////////////////////////////////////////////////////////
 
 TBrowser *b = 0;
@@ -38,60 +31,77 @@ void Load(){
   if (chain) delete chain;
 }
 //_____________________________________________________________________
-void bfcMixer(const Int_t Nevents=1,
+void bfcMixer(const Int_t Nevents=20,
              const Char_t *kind1="fz",
-             const Char_t *file1="/afs/rhic/star/data1/pfachini/Mixer/Files/Pion1Evt.fz",
-             const Char_t *kind2="trs",
-             const Char_t *file2="/afs/rhic/star/data1/pfachini/Mixer/Files/hij_1evt.trs")
+             const Char_t *file1="/star/rcf/pwg/spectra/embedding/MickeyMouse/MickeyMousePi+_1185015_4276evt.fz",
+             const Char_t *kind2="daq",
+             const Char_t *file2="/star/data08/daq/2000/07/st_physics_1185015_raw_*.daq")
+  //const Char_t *kind2="daq",
+  //const Char_t *file2="/star/data08/daq/2000/07/st_physics_1185015_raw_*.daq")
 {
   // Dynamically link some shared libs
   if (gClassTable->GetID("StBFChain") < 0) Load();
   chain = new StChain("Embedding");   // Create the main chain object
-  if (!chain) gSystem->Exit(1);
-  StMaker *saveMk = 0;
-  if (!strcmp(kind1,"fz")) {
-    kind1="trs";
-    chain1 = new StBFChain("One");
-    saveMk = chain1->cd();
-    chain1->SetFlags("fzin y1h gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq"); // 
-    chain1->Set_IO_Files(file1);
-    chain1->Load();
-    chain1->Instantiate();
-    saveMk->cd();
-  }
 
-   if (!strcmp(kind2,"trs")) {
+  StMaker *saveMk = 0;
+  // File2 -> trs or daq
+  if (!strcmp(kind2,"trs")) {
     chain2 = new StBFChain("Two");
     saveMk = chain2->cd();
     chain2->SetFlags("NoInput tpcDB tpc trs -tcl -tpt -PreVtx -tpc_daq"); //  
     chain2->Set_IO_Files(0);
     chain2->Load();
     chain2->Instantiate();
-    StTrsMaker *trsMk = (StTrsMaker *) chain2->GetMaker("Two/.make/tpc/.make/Trs");
+    StTrsMaker *trsMk = (StTrsMaker *) chain2->GetMaker("Two");
     trsMk->readFile(file2);
- 
     saveMk->cd();
   }
+  if (!strcmp(kind2,"daq")) {
+    chain2 = new StBFChain("Two");
+    saveMk = chain2->cd();
+    chain2->SetFlags("in"); //  
+    chain2->Set_IO_Files(file2);
+    chain2->Load();
+    chain2->Instantiate();
+    saveMk->cd();
+  }
+  if (!strcmp(kind1,"fz")) {
+    kind1="trs";
+    chain1 = new StBFChain("One");
+    saveMk = chain1->cd();
+    chain1->SetFlags("fzin y1h gen_T geomT sim_T tpc HalfField trs -tcl -tpt -PreVtx -tpc_daq"); // 
+    chain1->Set_IO_Files(file1);
+    chain1->Load();
+    chain1->Instantiate();
+    saveMk->cd();
+  }
+
 
   // Mixer
   gSystem->Load("StMixerMaker");
   StMixerMaker  *mixer = new StMixerMaker("Mixer",kind1,kind2);
-  //  mixer->SetInput("Input1","mixer/.make/DaqFirst/.const/StDAQReader");
-  mixer->SetInput("Input1","Embedding/.make/One/.make/tpc/.make/Trs/.const/Event");
-  //  mixer->SetInput("Input2","mixer/.make/DaqSecond/.const/StDAQReader");
-  mixer->SetInput("Input2","Embedding/.make/Two/.make/tpc/.make/Trs/.const/Event");
+
+  chain1->SetInput("Input1","Event");
+
+  if (!strcmp(kind2,"trs")) {
+    chain2->SetInput("Input2","Event");
+  }
+  if (!strcmp(kind2,"daq")) {
+    chain2->SetInput("Input2","StDAQReader");
+  }
   mixer->writeFile("mixer.trs",Nevents);
   chain3 = new StBFChain("Three");
   saveMk = chain3->cd();
-  chain3->SetFlags("NoInput cy1h tpc_daq ");
+  chain3->SetFlags("NoInput tpc tpc_daq cdst allevent tree");
+  //chain3->SetFlags("NoInput tdaq tpc HalfField cdst allevent tree");
   chain3->Set_IO_Files(0,"output");
   chain3->Load();
   chain3->Instantiate();
-  //  St_geant_Maker *geantMk = chain->GetMaker("geant");
-  //  geantMk->SetActive(kTRUE);
+  St_geant_Maker *geantMk = chain->GetMaker("geant");
+  geantMk->SetActive(kTRUE);
   StMaker *tpcdaqMk = chain3->GetMaker("tpc_raw");
   tpcdaqMk->SetMode(1); // Trs
-  tpcdaqMk->SetInput("Event","Embedding/.make/Mixer/.const/MixerEvent");
+  tpcdaqMk->SetInput("Event","MixerEvent");
   saveMk->cd();
   {
     TDatime t;
@@ -106,6 +116,7 @@ void bfcMixer(const Int_t Nevents=1,
   if (Nevents >= 0) {
     Int_t iInit = chain->Init();
   }
+  //chain->SetDEBUG();
   TBenchmark evnt;
   Int_t iMake = 0, i = 1;
  EventLoop: if (i <= Nevents && iMake != kStEOF && iMake != kStFatal) {
