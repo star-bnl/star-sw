@@ -91,7 +91,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.23 1999/12/01 20:39:16 ward Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.24 2000/03/27 01:49:47 fine Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -782,7 +782,7 @@ void FirstRootPamFile(FILE *ff) {
     } */
 
 ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
-        cc=Capitalized(gDataType[ii][jj]); FF"    k%s%d_h, k%s%d_d",cc,jj,cc,jj);
+        cc=Capitalized(gDataType[ii][jj]); FF"    k%s%d",cc,jj);
         if(jj<gNArgName[ii]-1) FF","); FF"\n");
       }
   FF" } E%s;\n",sifn);
@@ -799,40 +799,7 @@ ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
        if(jj<gNArgName[ii]-1) FF","); FF"\n");
       }
     FF"  );\n");
-  if (gNArgName[ii] > 0 ) {
-    FF"  St_%s(\n",sifn);
-/*yf    for(i=1;i<gNIncFile;i++) {
-       FF"     table_head_st *h%d, %s_st *d%d",i,Xidl(Nq(gIncFile[i])),i);
-       if(i<gNIncFile-1) FF","); FF"\n");
-       } */
-      ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
-      FF"     table_head_st *h%d, %s_st *d%d",jj,gDataType[ii][jj],jj);
-      if(jj<gNArgName[ii]-1) FF","); FF"\n");
-      }
-    FF"  );\n");
-    FF"  Int_t ExecuteModule(\n");
-/*yf    for(i=1;i<gNIncFile;i++) {
-       FF"     table_head_st *h%d, %s_st *d%d",i,Xidl(Nq(gIncFile[i])),i);
-       if(i<gNIncFile-1) FF","); FF"\n");
-       } */
-      ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
-       FF"     table_head_st *h%d, %s_st *d%d",jj,gDataType[ii][jj],jj);
-       if(jj<gNArgName[ii]-1) FF","); FF"\n");
-      }
 
-    FF"  );\n");
-  }
-  FF"  Int_t operator() (\n");
-/*yf  for(i=1;i<gNIncFile;i++) {
-     FF"     table_head_st *h%d, %s_st *d%d",i,Xidl(Nq(gIncFile[i])),i);
-     if(i<gNIncFile-1) FF","); FF"\n");
-     } */
-      ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
-       FF"     table_head_st *h%d, %s_st *d%d",jj,gDataType[ii][jj],jj);
-       if(jj<gNArgName[ii]-1) FF","); FF"\n");
-      }
-  FF"  );\n");
-  FF"\n"); 
     FF"  Int_t ExecuteModule(\n");
 /*    for(i=1;i<gNIncFile;i++) {
        FF"     St_%s *o%d",Xidl(Nq(gIncFile[i])),i);
@@ -860,7 +827,7 @@ ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
   FF" Int_t ExecuteModule();\n");
   FF"\n");
   FF"  const Char_t *GetName(){return \"%s\";}\n",sifn);
-  FF" ClassDef(St_%s,0)\n",sifn);
+  FF" ClassDef(St_%s,0) // class-wrapper to cal %s module \n",sifn,sifn);
   FF"};\n");
   FF"\n");
   FF"\n");
@@ -888,71 +855,7 @@ void SecondRootPamFile(FILE *ff) {
   FF"\n");
   FF"ClassImp(St_%s)\n",sifn);
   FF"\n");
-  FF"//*-* Passing the \"simple\" structures\n");
-  FF"\n");
-  if (gNArgName[ii] > 0 ) { 
-    FF"//_______________________________________________________________\n");
-    FF"St_%s::St_%s(\n",sifn,sifn);
-/*yf    for(i=1;i<gNIncFile;i++) {
-      FF"   table_head_st *h%d, %s_st *d%d",i,Xidl(Nq(gIncFile[i])),i);
-      if(i<gNIncFile-1) FF","); FF"\n");
-      } */
-ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
-        FF"   table_head_st *h%d, %s_st *d%d",jj,Nq(gDataType[ii][jj]),jj);
-        if(jj<gNArgName[ii]-1) FF","); FF"\n");
-      }
-
-    FF") : St_Module(\n");
-/*yf    for(i=1;i<gNIncFile;i++) {
-       FF"   h%d, d%d",i,i);
-       if(i<gNIncFile-1) FF","); FF"\n");
-       } */
-ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
-         FF"   h%d, d%d",jj,jj);
-        if(jj<gNArgName[ii]-1) FF","); FF"\n");
-}
-    FF"  ){}\n");
-    FF"\n");
-    FF"//_______________________________________________________________\n");
-    FF"Int_t St_%s::ExecuteModule(\n",sifn);
-/*yf    for(i=1;i<gNIncFile;i++) {
-       FF"   table_head_st *h%d, %s_st *d%d",i,Xidl(Nq(gIncFile[i])),i);
-       if(i<gNIncFile-1) FF","); FF"\n");
-       } */
-ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
-        FF"   table_head_st *h%d, %s_st *d%d",jj,Nq(gDataType[ii][jj]),jj);
-        if(jj<gNArgName[ii]-1) FF","); FF"\n");
-      }
-
-    FF"  )\n");
-    FF"{return St_Module::ExecuteModule(\n");
-/*yf    for(i=1;i<gNIncFile;i++) {
-       FF"   h%d, d%d",i,i);
-       if(i<gNIncFile-1) FF","); FF"\n");
-       } */
-ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
-         FF"   h%d, d%d",jj,jj);
-        if(jj<gNArgName[ii]-1) FF","); FF"\n");
-}
-    FF"  ); }\n");
-    FF" \n");
-    FF"//_______________________________________________________________\n");
-    FF"Int_t  St_%s::operator()(\n",sifn);
-/*yf    for(i=1;i<gNIncFile;i++) {
-       FF"   table_head_st *h%d, %s_st *d%d",i,Xidl(Nq(gIncFile[i])),i);
-       if(i<gNIncFile-1) FF","); FF"\n");
-       } */
-ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
-        FF"   table_head_st *h%d, %s_st *d%d",jj,Nq(gDataType[ii][jj]),jj);
-        if(jj<gNArgName[ii]-1) FF","); FF"\n");
-      }
-
-    FF")\n");
-    FF"{return ExecuteModule(");
-/*yf    for(i=1;i<gNIncFile;i++) { FF"h%d,d%d",i,i); if(i<gNIncFile-1) FF","); } */
-ii=0;for(jj=0;jj<gNArgName[ii];jj++) {FF"h%d,d%d",jj,jj); if(jj<gNArgName[ii]-1) FF","); }
-    FF");}\n");
-    FF"\n");
+if (gNArgName[ii] > 0 ) { 
     FF"//*-* Passing the C++ objects\n");
     FF"\n");
     FF"//_______________________________________________________________\n");
@@ -971,8 +874,9 @@ ii=0;for(jj=0;jj<gNArgName[ii];jj++) {FF"h%d,d%d",jj,jj); if(jj<gNArgName[ii]-1)
        FF"   o%d->GetHeader(),o%d->GetTable()\n",i,i);
        if(i<gNIncFile-1) FF","); FF"\n");
        } */
+
       ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
-       FF"   o%d->GetHeader(),o%d->GetTable()\n",jj,jj);
+       FF"   o%d\n",jj);
        if(jj<gNArgName[ii]-1) FF","); FF"\n");
       }
     FF"   ){}\n");
@@ -993,11 +897,11 @@ ii=0;for(jj=0;jj<gNArgName[ii];jj++) {FF"h%d,d%d",jj,jj); if(jj<gNArgName[ii]-1)
        if(i<gNIncFile-1) FF","); FF"\n");
        } */
     ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
-       FF"   o%d->GetHeader(),o%d->GetTable()",jj,jj);
+       FF"   o%d",jj);
        if(jj<gNArgName[ii]-1) FF","); FF"\n");
        }
     FF" );\n}\n");
-  }  
+
   FF"//_______________________________________________________________\n");
   FF"Int_t St_%s::operator()(\n",sifn);
 /*yf  for(i=1;i<gNIncFile;i++) {
@@ -1016,6 +920,7 @@ ii=0;for(jj=0;jj<gNArgName[ii];jj++) {FF"h%d,d%d",jj,jj); if(jj<gNArgName[ii]-1)
      } */
 ii=0;for(jj=0;jj<gNArgName[ii];jj++) {FF"o%d",jj); if(jj<gNArgName[ii]-1) FF",");}
   FF");}\n");
+}
   FF"//_______________________________________________________________\n");
   FF"Int_t St_%s::ExecuteModule()\n",sifn);
   FF"{\n");
@@ -1041,7 +946,7 @@ if (gNArgName[0]){
     ii=0;for(jj=0;jj<gNArgName[ii];jj++) {
        ToUpper(uppercase,Nq(gDataType[ii][jj]));
        strcpy(cap,Capitalized(Nq(gDataType[ii][jj])));
-       FF" (TABLE_HEAD_ST *)GetParams(k%s%d_h), (%s_ST *)GetParams(k%s%d_d)",
+       FF" GetHeader(k%s%d), (%s_ST *)GetStruct(k%s%d)",
          cap,jj,uppercase,cap,jj);
        if(jj<gNArgName[ii]-1) FF","); FF"\n");
        }

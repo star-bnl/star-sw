@@ -8,12 +8,8 @@ lun [\_A-Za-z0-9]
 \*\/			{ LS; gC=7; DoComment(__LINE__,"\n"); }
 \/\*.*\*\/		{ LS; DoOneLineComment(yytext); }
 [\. \t]			{ LS; RETURN2; }
-\/\/.*			{
-                          LS; RETURN2; 
-                          DoComment(__LINE__,yytext); 
-                          DoComment(__LINE__,"\n"); 
-                        }
-^[ ]*\#.*               { /* Ignore Jeff Porter's # lines. */   }
+\/\/.*			{ LS; RETURN2; 
+          DoComment(__LINE__,yytext); DoComment(__LINE__,"\n"); }
 ^\#include		{ LS;                    RETURN(INCLU); }
 interface		{ LS;                    RETURN(INTER); }
 STAFCV_T		{ LS; yylval.str=yytext; RETURN(STAFC); }
