@@ -275,7 +275,8 @@ int Calculate_Cluster_Moments (TABLE_HEAD_ST  *seq_h,       SSF_SEQ_ST  *seq,
   fSigmaD2 = fDriftMom2;
   
   /* Finally calculate total charge under the gaussian */
-  fFittedCharge = 2 * PI * fAmp * sqrtf(fSigmaA2) * sqrtf (fSigmaD2);
+  fFittedCharge = 2 * PI * fAmp * sqrt((double)fSigmaA2) * 
+                        sqrt ((double)fSigmaD2);
   
   clus->x[0]    = fDriftMom1;
   clus->x[1]    = fAnodeMom1;
@@ -310,7 +311,7 @@ int Is_Merged_Cluster (SCS_CLUSTER_ST *Clus, SCS_PAR_ST *par)
 {
   float fCut;
   
-  fCut = fabsf(par->cuts[1] * Clus->mom2[1] - Clus->mom2[0] - par->cuts[0]);
+  fCut = fabs(par->cuts[1] * Clus->mom2[1] - Clus->mom2[0] - par->cuts[0]);
   
   /*  Does it make the cut for being a single hit? */
   
