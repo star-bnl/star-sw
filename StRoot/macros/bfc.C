@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.130 2000/04/10 16:43:37 fisyak Exp $
+// $Id: bfc.C,v 1.131 2000/04/20 22:46:04 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StMaker;        
@@ -136,6 +136,7 @@ if (Last >= 0) {
 treeMk = chain->GetMaker("tree");
 TBenchmark evnt;
 Int_t iMake = 0, i = First;
+Int_t iTotal = 0; iBad = 0;
 EventLoop: if (i <= Last && iMake != kStEOF && iMake != kStFatal) {
   evnt->Reset();
   evnt->Start("QAInfo:");
@@ -145,8 +146,8 @@ EventLoop: if (i <= Last && iMake != kStEOF && iMake != kStFatal) {
     St_DataSet *dstSet = chain->GetInputDS("dst");
     if (dstSet) xdf_out->NextEventPut(dstSet); // xdf output
   }
-
-  if (treeMk && iMake == kStErr) treeMk->Make(i);
+  iTotal++;
+  if (treeMk && iMake == kStErr) {treeMk->Make(i); iBad++;}
 
 
   //    gSystem->Exec("ps ux");
@@ -163,7 +164,8 @@ gSystem->Exec("date");
 if (evMk) Event = (StEvent *) chain->GetInputDS("StEvent");
 {
   TDatime t;
-  printf ("\nQAInfo:Run is finished at Date/Time %i/%i\n",t.GetDate(),t.GetTime());
+  printf ("\nQAInfo:Run is finished at Date/Time %i/%i; Total events processed :%i and not completed: %i\n",
+	  t.GetDate(),t.GetTime(),iTotal,iBad);
 }
 }
 //_____________________________________________________________________
