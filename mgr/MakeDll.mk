@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.120 1999/10/04 14:35:34 fisyak Exp $
+# $Id: MakeDll.mk,v 1.121 2001/04/05 19:57:38 jeromel Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.121  2001/04/05 19:57:38  jeromel
+# sun4x 58 support.
+#
 # Revision 1.120  1999/10/04 14:35:34  fisyak
 # Add StRoot in include path
 #
@@ -327,7 +330,7 @@ INCINT   := $(addprefix -I,$(INCINT))
 CPPFLAGS += -D__ROOT__ 
 
 DINCINT  :=  -DROOT_CINT $(filter-out -DST_NO_TEMPLATE_DEF_ARGS, $(CPPFLAGS)) $(ROOTCINTD) $(INCINT)
-ifeq ($(STAR_HOST_SYS),sun4x_56)
+ifeq ($(STAR_HOST_SYS),sun4x_55 sun4x_56 sun4x_58)
 CXXFLAGS +=-ptr$(OBJ_DIR)
 endif
 #
