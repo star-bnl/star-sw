@@ -13,7 +13,7 @@
    /*******************  Row struct *******************/
    struct tpt_track {          /* Tptrack_row_st */ 
        long       flag;       /* status flag */
-       long       hitid;      /* ID of the hit where parameters are given */
+       long       hitid;      /* ID of the hit close to which track parameters are given */
        long       id;         /* track id */
        long       id_globtrk; /* Pointer to the globtrk table row. */
        long       ndedx;      /* Number of points used in dE/dx calc */
