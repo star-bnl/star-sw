@@ -1,5 +1,8 @@
-// $Id: St_ctf_Maker.cxx,v 1.7 1999/02/23 21:25:42 llope Exp $
+// $Id: St_ctf_Maker.cxx,v 1.8 1999/02/25 19:38:50 kathy Exp $
 // $Log: St_ctf_Maker.cxx,v $
+// Revision 1.8  1999/02/25 19:38:50  kathy
+// fix up histograms
+//
 // Revision 1.7  1999/02/23 21:25:42  llope
 // fixed histograms, added 1/beta vs p
 //
@@ -95,12 +98,12 @@ Int_t St_ctf_Maker::Init(){
   m_cts_ctb          = (St_cts_mpara    *) params("ctf/cts/cts_ctb");
   m_cts_tof          = (St_cts_mpara    *) params("ctf/cts/cts_tof");
   // Create Histograms  
-  m_adcc  = new TH1F("ctf_ctb_adcs","CTB ADCs",96,0,1024);
-  m_adct  = new TH1F("ctf_tof_adcs","TOF ADCs",96,0,1024);
-  m_tsvsp = new TH2F("ctf_tof_tsvsp","TOF 1/beta vs. Ptrk",80,0.1,4.1,100,0.,10.);
+  m_adcc  = new TH1F("CtfCtbrawAdc","CTB ADCs",64,0.,256.);
+  m_adct  = new TH1F("CtfTofrawAdc","TOF ADCs",124,0.,1024.);
+  m_tsvsp = new TH2F("CtfDsttoftrkTsvsp","TOF 1/beta vs. Ptrk",80,0.1,4.1,100,0.,10.);
   m_tsvsp->SetXTitle("TPC track momentum (GeV/c)");
   m_tsvsp->SetYTitle("1/beta from TOFp");
-  m_tsvsp1= new TH2F("ctf_tof_tsvsp1","TOF 1/beta vs. Ptrk",80,0.1,4.1,100,0.,10.);
+  m_tsvsp1= new TH2F("CtfDsttoftrkTsvsp1","TOF 1/beta vs. Ptrk",80,0.1,4.1,100,0.,10.);
   m_tsvsp1->SetXTitle("TPC track momentum (GeV/c)");
   m_tsvsp1->SetYTitle("1/beta from TOFp, slat Nhits=1");
   return StMaker::Init();
@@ -180,7 +183,7 @@ Int_t St_ctf_Maker::Make(){
 //_____________________________________________________________________________
 void St_ctf_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_ctf_Maker.cxx,v 1.7 1999/02/23 21:25:42 llope Exp $\n");
+  printf("* $Id: St_ctf_Maker.cxx,v 1.8 1999/02/25 19:38:50 kathy Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
