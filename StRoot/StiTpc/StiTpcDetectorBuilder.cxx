@@ -25,8 +25,8 @@ StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active, const string & inputFi
   : StiDetectorBuilder("Tpc",active,inputFile)
 {
   _trackingParameters.setName("tpcTrackingParameters");
-  _innerCalc.setName("tpcInnerHitErrors");
-  _outerCalc.setName("tpcOuterHitErrors");
+  _innerCalc.setName("tpcInnerHitError");
+  _outerCalc.setName("tpcOuterHitError");
 }
 
 
