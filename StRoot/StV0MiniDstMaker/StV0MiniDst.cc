@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MiniDst.cc,v 1.7 1999/09/24 01:23:32 fisyak Exp $
+ * $Id: StV0MiniDst.cc,v 1.8 1999/11/19 19:44:47 genevb Exp $
  *
  * Author: Peter G. Jones, University of Birmingham, 04-Jun-1999
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StV0MiniDst.cc,v $
+ * Revision 1.8  1999/11/19 19:44:47  genevb
+ * Modified for StEvent 2.0
+ *
  * Revision 1.7  1999/09/24 01:23:32  fisyak
  * Reduced Include Path
  *
@@ -36,9 +39,9 @@
  ***********************************************************************/
 #include "phys_constants.h"
 #include "StV0MiniDst.hh"
-#include "StGlobalTrack.h"
+#include "StTrack.h"
+#include "StTrackFitTraits.h"
 #include "StV0Vertex.h"
-#include "SystemOfUnits.h"
 ClassImp(StV0MiniDst)
 
 StV0MiniDst::StV0MiniDst() { 
@@ -47,8 +50,6 @@ StV0MiniDst::StV0MiniDst() {
 StV0MiniDst::StV0MiniDst(StV0Vertex* v0Vertex,
 			 StEvMiniDst* event) {
 
-  double B=0.5*tesla; // Hardwired - fix later
-
   mEvent = event;
 
   mDecayVertexV0[0] = v0Vertex->position().x();
@@ -56,19 +57,19 @@ StV0MiniDst::StV0MiniDst(StV0Vertex* v0Vertex,
   mDecayVertexV0[2] = v0Vertex->position().z();
   mDcaV0Daughters = v0Vertex->dcaDaughters();
   mDcaV0ToPrimVertex = v0Vertex->dcaParentToPrimaryVertex();
-  mDcaPosToPrimVertex = v0Vertex->dcaDaughterToPrimaryVertex(positiveTrack);
-  mDcaNegToPrimVertex = v0Vertex->dcaDaughterToPrimaryVertex(negativeTrack);
-  mMomNeg[0] = v0Vertex->momentumOfDaughter(negativeTrack).x();
-  mMomNeg[1] = v0Vertex->momentumOfDaughter(negativeTrack).y();
-  mMomNeg[2] = v0Vertex->momentumOfDaughter(negativeTrack).z();
-  mMomPos[0] = v0Vertex->momentumOfDaughter(positiveTrack).x();
-  mMomPos[1] = v0Vertex->momentumOfDaughter(positiveTrack).y();
-  mMomPos[2] = v0Vertex->momentumOfDaughter(positiveTrack).z();
+  mDcaPosToPrimVertex = v0Vertex->dcaDaughterToPrimaryVertex(positive);
+  mDcaNegToPrimVertex = v0Vertex->dcaDaughterToPrimaryVertex(negative);
+  mMomNeg[0] = v0Vertex->momentumOfDaughter(negative).x();
+  mMomNeg[1] = v0Vertex->momentumOfDaughter(negative).y();
+  mMomNeg[2] = v0Vertex->momentumOfDaughter(negative).z();
+  mMomPos[0] = v0Vertex->momentumOfDaughter(positive).x();
+  mMomPos[1] = v0Vertex->momentumOfDaughter(positive).y();
+  mMomPos[2] = v0Vertex->momentumOfDaughter(positive).z();
 
   mTpcHitsPos =
-    ((StGlobalTrack *) v0Vertex->daughter(positiveTrack,B))->numberOfTpcHits();
+    v0Vertex->daughter(positive)->fitTraits().numberOfFitPoints(kTpcId);
   mTpcHitsNeg =
-    ((StGlobalTrack *) v0Vertex->daughter(negativeTrack,B))->numberOfTpcHits();
+    v0Vertex->daughter(negative)->fitTraits().numberOfFitPoints(kTpcId);
   
   this->UpdateV0();
 }

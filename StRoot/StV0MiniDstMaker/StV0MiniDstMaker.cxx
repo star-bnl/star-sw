@@ -1,5 +1,8 @@
-// $Id: StV0MiniDstMaker.cxx,v 1.4 1999/09/02 09:53:41 jones Exp $
+// $Id: StV0MiniDstMaker.cxx,v 1.5 1999/11/19 19:44:47 genevb Exp $
 // $Log: StV0MiniDstMaker.cxx,v $
+// Revision 1.5  1999/11/19 19:44:47  genevb
+// Modified for StEvent 2.0
+//
 // Revision 1.4  1999/09/02 09:53:41  jones
 // Protected Make() if called in read mode; Protected Read() if file not open
 //
@@ -24,9 +27,12 @@
 #include "StChain.h"
 #include "StEventMaker/StEventMaker.h"
 #include "StEvent.h"
+#include "StPrimaryVertex.h"
+#include "StV0Vertex.h"
 #include "StXiVertex.h"
 #include "StXiMiniDst.hh"
 #include "StV0MiniDstMaker.h"
+#include "StMessMgr.h"
 
 #define MXENT 5000
 
@@ -37,7 +43,7 @@ StV0MiniDst *v0 = 0;
 
 //_____________________________________________________________________________
 StV0MiniDstMaker::StV0MiniDstMaker(const char *name) : StMaker(name){
-  mVertexType = undefined;
+  mVertexType = kUndefinedVtxId;
   mFileName = "";
   mCollection = 0;
   mClonesArray = 0;
@@ -51,7 +57,7 @@ StV0MiniDstMaker::~StV0MiniDstMaker(){
 //_____________________________________________________________________________
 Int_t StV0MiniDstMaker::Init(){
 
-  printf("In StV0MiniDstMaker::Init() ...\n"); 
+  gMessMgr->Info("In StV0MiniDstMaker::Init() ..."); 
 
   if( mWriteFile ) {
     if( mUseTree ) {
@@ -60,16 +66,16 @@ Int_t StV0MiniDstMaker::Init(){
       Int_t split=1;
       Int_t bsize=64000;
       switch( mVertexType ) {
-      case V0:
+      case kV0VtxId:
 	mClonesArray = new TClonesArray("StV0MiniDst",MXENT);
 	tree->Branch("V0",&mClonesArray,bsize,split);
 	break;
-      case Xi:
+      case kXiVtxId:
 	mClonesArray = new TClonesArray("StXiMiniDst",MXENT);
 	tree->Branch("Xi",&mClonesArray,bsize,split);
 	break;
       default:
-	printf("StV0MiniDstMaker::Init Error - unrecognised vertex type\n");
+        gMessMgr->Error("StV0MiniDstMaker::Init(): unrecognised vertex type");
 	return kStErr;
       }
     } else {
@@ -83,7 +89,7 @@ Int_t StV0MiniDstMaker::Init(){
 //_____________________________________________________________________________
 Int_t StV0MiniDstMaker::Make(){
 
-  printf("In StV0MiniDstMaker::Make() ...\n");
+  gMessMgr->Info("In StV0MiniDstMaker::Make() ...");
 
   // Do nothing if file open for reading only
   if( ! mWriteFile ) return kStOk;
@@ -93,79 +99,69 @@ Int_t StV0MiniDstMaker::Make(){
   if( ! evMaker->event() ) return kStOK; 
   StEvent& event = *(evMaker->event());
 
-  // Obtain the vertex collection from StEvent
-  StVertexCollection* vertices = event.vertexCollection();
-  StVertexIterator iter;
-  StVertex *vertex = 0;
-  StVertex *primaryVertex = 0;
-  StXiVertex *xiVertex = 0;
-  StV0Vertex *v0Vertex = 0;
-  StEvMiniDst *ev = 0;
-  Int_t nLast = mEntries, nBad = 0;
-  
-  // First loop over vertices searches for primary vertex
-  for( iter=vertices->begin(); iter!=vertices->end(); iter++) {
-    vertex = *iter;
-    if( vertex->type() == primary ) {
-      primaryVertex = vertex;
-      break;
-    }
-  }
+  // First get primary vertex
+  StPrimaryVertex *primaryVertex = event.primaryVertex();
 
   if( !primaryVertex ) {
-    printf("StV0MiniDstMaker: Error - no primary vertex\n");
+    gMessMgr->Error("StV0MiniDstMaker: no primary vertex");
     return kStErr;
   }
 
-  ev = new StEvMiniDst(primaryVertex);
+  StEvMiniDst *ev = new StEvMiniDst(primaryVertex);
+  StXiVertex *xiVertex = 0;
+  StV0Vertex *v0Vertex = 0;
+  Int_t nLast = mEntries, nBad = 0;
+  unsigned int i;
+  
+  // Second, loop over vertices to build linked list of xi/v0 candidates
+  StSPtrVecXiVertex& xiVertices = event.xiVertices();
+  StSPtrVecV0Vertex& v0Vertices = event.v0Vertices();
 
-  // Second loop over vertices builds linked list of v0 candidates
-  for( iter=vertices->begin(); iter!=vertices->end(); iter++) {
-    vertex = *iter;
-    if( vertex->type() == mVertexType ) {
-      switch(mVertexType) {
-      case Xi:
-	xiVertex = dynamic_cast<StXiVertex*>(vertex);
-	v0Vertex = xiVertex->v0Vertex();
-	if( v0Vertex ) {
-	  if( mUseTree ) { 
-	    new((*mClonesArray)[mEntries++]) StXiMiniDst(xiVertex,v0Vertex,ev);
-	  } else {
-	    xi = new StXiMiniDst(xiVertex,v0Vertex,ev);
-	    mCollection->Add(xi);
-	    mEntries++;
-	  }
-	} else {
-	  nBad++;
-	}
-	break;
-      case V0:
-	v0Vertex = dynamic_cast<StV0Vertex*>(vertex);
-	if( mUseTree ) {
-	  new((*mClonesArray)[mEntries++]) StV0MiniDst(v0Vertex,ev);
-	} else {
-	  v0 = new StV0MiniDst(v0Vertex,ev);
-	  mCollection->Add(v0);
-	  mEntries++;
-	}
-	break;
+  switch (mVertexType) {
+  case kXiVtxId:
+    for (i=0; i<xiVertices.size(); i++) {
+      xiVertex = xiVertices[i];
+      v0Vertex = xiVertex->v0Vertex();
+      if (v0Vertex) {
+        if( mUseTree ) { 
+          new((*mClonesArray)[mEntries++]) StXiMiniDst(xiVertex,v0Vertex,ev);
+        } else {
+          xi = new StXiMiniDst(xiVertex,v0Vertex,ev);
+          mCollection->Add(xi);
+          mEntries++;
+        }
+      } else {
+        nBad++;
+      }
+    } break;
+  case kV0VtxId:
+    for (i=0; i<v0Vertices.size(); i++) {
+      v0Vertex = v0Vertices[i];
+      if( mUseTree ) { 
+        new((*mClonesArray)[mEntries++]) StV0MiniDst(v0Vertex,ev);
+      } else {
+        v0 = new StV0MiniDst(v0Vertex,ev);
+        mCollection->Add(v0);
+        mEntries++;
       }
     }
   }
   
-  printf("StV0MiniDstMaker: Info - found %d candidates\n",mEntries-nLast);
+  gMessMgr->Info() << "StV0MiniDstMaker: found " << (mEntries-nLast)
+                   << " candidates" << endm;
   if( nBad != 0 )
-    printf("StV0MiniDstMaker: Warning - %d with missing V0 vertices\n",nBad);
+    gMessMgr->Warning() << "StV0MiniDstMaker: " << nBad
+                        << "with missing V0 vertices" << endm;
 
   if( mUseTree && mEntries==MXENT ) {
-    printf("StV0MiniDstMaker: Info - filling tree\n");
+    gMessMgr->Info("StV0MiniDstMaker: filling tree");
     tree->Fill();
     mClonesArray->Clear();
     mEntries = mClonesArray->GetEntriesFast();
     //    mCollection->Delete();
     //    mEntries = mCollection->GetSize();
     if( mEntries !=0 )
-      printf("StV0MiniDstMaker: Warning - collection not empty\n");
+      gMessMgr->Warning("StV0MiniDstMaker: collection not empty");
   }
 
   return kStOK;
@@ -173,7 +169,7 @@ Int_t StV0MiniDstMaker::Make(){
 //_____________________________________________________________________________
 Int_t StV0MiniDstMaker::Finish(){
 
-  printf("In StV0MiniDstMaker::Finish() ...\n"); 
+  gMessMgr->Info("In StV0MiniDstMaker::Finish() ..."); 
 
   if( mWriteFile ) {
 
@@ -183,8 +179,8 @@ Int_t StV0MiniDstMaker::Finish(){
     // Write output
     if( mUseTree ) {
       //    mClonesArray->Write("MuDst",kSingleKey);
-      printf("StV0MiniDstMaker::Info - %d Entries\n",
-	     mClonesArray->GetEntriesFast());
+      gMessMgr->Info() << "StV0MiniDstMaker: "
+	               << mClonesArray->GetEntriesFast() << " Entries" << endm;
       tree->Fill();
       tree->Print();
       muDst->Write();
@@ -203,7 +199,8 @@ Int_t StV0MiniDstMaker::SetInputFile(const char* file) {
   mWriteFile = kFALSE;
 
   if( ! (muDst = new TFile(mFileName,"READ")) ) {
-    printf("StV0MiniDstMaker: Error - opening file %s\n",mFileName);
+    gMessMgr->Error() << "StV0MiniDstMaker: Error - opening file "
+                      << mFileName << endm;
     return kStErr;
   }
 
@@ -215,7 +212,8 @@ Int_t StV0MiniDstMaker::SetOutputFile(const char* file) {
   mWriteFile = kTRUE;
 
   if( ! (muDst = new TFile(mFileName,"RECREATE")) ) {
-    printf("StV0MiniDstMaker: Error - opening file %s\n",mFileName);
+    gMessMgr->Error() << "StV0MiniDstMaker: Error - opening file "
+                      << mFileName << endm;
     return kStErr;
   }
 
@@ -227,13 +225,13 @@ TOrdCollection* StV0MiniDstMaker::Read(Int_t* nent) {
   mCollection = 0;
   mClonesArray = 0;
 
-  if( mVertexType == undefined ) {
-    printf("StV0MiniDstMaker::Read Error - VertexType is undefined\n");
+  if( mVertexType == kUndefinedVtxId ) {
+    gMessMgr->Error("StV0MiniDstMaker::Read(): VertexType is undefined");
     return 0;
   }
 
   if( ! muDst ) {
-    printf("StV0MiniDstMaker::Read Error - File is not open\n");
+    gMessMgr->Error("StV0MiniDstMaker::Read(): File is not open");
     return 0;
   }
 
@@ -241,7 +239,8 @@ TOrdCollection* StV0MiniDstMaker::Read(Int_t* nent) {
     tree = (TTree *) muDst->Get("muDst");
     TBranch *branch = tree->GetBranch("Xi");
     branch->SetAddress(&mClonesArray);
-    printf("StV0MiniDstMaker::Read Info - %d events\n",(Int_t)tree->GetEntries());
+    gMessMgr->Info() << "StV0MiniDstMaker::Read(): "
+                     << (Int_t) (tree->GetEntries()) << " events" << endm;
     tree->GetEntry(0); // Read first event into memory
   } else
     mCollection = (TOrdCollection *) muDst->Get("MuDst;1");
@@ -251,22 +250,23 @@ TOrdCollection* StV0MiniDstMaker::Read(Int_t* nent) {
   else if( mCollection )
     mEntries = mCollection->GetSize();
   else {
-    printf("StV0MiniDstMaker::Read Error - NULL pointer to data\n");
+    gMessMgr->Error("StV0MiniDstMaker::Read(): NULL pointer to data");
     return 0;
   }
 
-  printf("StV0MiniDstMaker::Read Info - number of entries %d\n",mEntries);
+  gMessMgr->Info() << "StV0MiniDstMaker::Read(): number of entries "
+                   << mEntries << endm;
 
   for( Int_t i=0; i<mEntries; i++ ) {
     switch( mVertexType ) {
-    case V0:
+    case kV0VtxId:
       if( mUseTree )
 	v0 = (StV0MiniDst *) (*mClonesArray)[i];
       else
 	v0 = (StV0MiniDst *) mCollection->At(i);
       v0->UpdateV0();
       break;
-    case Xi:
+    case kXiVtxId:
       if( mUseTree )
 	xi = (StXiMiniDst *) (*mClonesArray)[i];
       else

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StEvMiniDst.hh,v 1.2 1999/09/24 01:23:32 fisyak Exp $
+ * $Id: StEvMiniDst.hh,v 1.3 1999/11/19 19:44:47 genevb Exp $
  *
  * Author: Peter G. Jones, University of Birmingham, 19-Aug-1999
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StEvMiniDst.hh,v $
+ * Revision 1.3  1999/11/19 19:44:47  genevb
+ * Modified for StEvent 2.0
+ *
  * Revision 1.2  1999/09/24 01:23:32  fisyak
  * Reduced Include Path
  *
@@ -23,14 +26,14 @@
 #define StEvMiniDst_hh
 #include "StHFillObject.h"
 
-class StVertex;
+class StPrimaryVertex;
 class StEvVertex;
 
 class StEvMiniDst : public StHFillObject {
 public:
   StEvMiniDst();
   ~StEvMiniDst();
-  StEvMiniDst(StVertex*);
+  StEvMiniDst(StPrimaryVertex*);
   void UpdateEv();
 
   int   run() const;            // Run number

@@ -1,5 +1,8 @@
-// $Id: StV0MiniDstMaker.h,v 1.3 1999/09/02 09:04:57 jones Exp $
+// $Id: StV0MiniDstMaker.h,v 1.4 1999/11/19 19:44:48 genevb Exp $
 // $Log: StV0MiniDstMaker.h,v $
+// Revision 1.4  1999/11/19 19:44:48  genevb
+// Modified for StEvent 2.0
+//
 // Revision 1.3  1999/09/02 09:04:57  jones
 // Added StEvMiniDst class, New file handling, Partially implemented TTrees
 //
@@ -37,7 +40,7 @@ class StV0MiniDstMaker : public StMaker {
   virtual Int_t Make();
   virtual Int_t Finish();
  protected:
-  StVertexType mVertexType;    //!
+  StVertexId mVertexType;    //!
   const Char_t *mFileName;     //!
   TClonesArray *mClonesArray;  //!
   TOrdCollection *mCollection; //!
@@ -49,9 +52,9 @@ class StV0MiniDstMaker : public StMaker {
 };
 
 inline void StV0MiniDstMaker::SetXiVertexType()
-            { mVertexType = Xi; }
+            { mVertexType = kXiVtxId; }
 inline void StV0MiniDstMaker::SetV0VertexType()
-            { mVertexType = V0; }
+            { mVertexType = kV0VtxId; }
 inline void StV0MiniDstMaker::SetUseTree(Bool_t k)
             { mUseTree = k; }
 
