@@ -51,7 +51,7 @@ ami/mod/call svm_svt_eval _
  [data]/svt/tracks/groups _
  [data]/svt/tracks/stk_track _
  [data]/tpc/tracks/tptrack _
- [data]/tpc/tracks/tpt_eval _
+ [data]/tpc/tracks/evaltrk _
  [data]/global/tracks/evt_match _
  [params]/global/svm_eval_par _
  [data]/global/tracks/svm_eval_strk
