@@ -1,13 +1,9 @@
 /***************************************************************************
  *
- * $Id: StJetOutputMaker.h,v 1.10 2003/11/12 15:48:11 thenry Exp $
+ * $Id: StJetOutputMaker.h,v 1.11 2004/03/01 22:09:50 thenry Exp $
  * $Log: StJetOutputMaker.h,v $
- * Revision 1.10  2003/11/12 15:48:11  thenry
- * Added PJetEvent accessor.
- *
- * Revision 1.9  2003/10/01 16:39:29  thenry
- * Added new getter for StProjectedTracks to StEmcTpcFourPMaker, and used
- * in StJetOutputMaker so that StTrackStruct now contains track px, py, pz
+ * Revision 1.11  2004/03/01 22:09:50  thenry
+ * Made oJetEvent public
  *
  * Revision 1.8  2003/09/24 20:54:08  thenry
  * Fixed ANSI compatibility problems.
@@ -167,7 +163,7 @@ class TrackStruct {
   TrackStruct() {};
   TrackStruct(const TrackStruct &copy) : trackE(copy.trackE),
     trackPx(copy.trackPx), trackPy(copy.trackPy), trackPz(copy.trackPz),
-    trackPhi(copy.trackPhi), trackEta(copy.trackEta), 
+    trackPhi(copy.trackPhi), trackEta(copy.trackEta), trackId(copy.trackId), 
     isTpcTrack(copy.isTpcTrack) {};
   void clear(void) {};  
   ostream& out(ostream &os)
@@ -179,6 +175,7 @@ class TrackStruct {
       os << "TrackPz: " << trackPz << endl;
       os << "TrackPhi: " << trackPhi << endl;
       os << "TrackEta: " << trackEta << endl;
+      os << "TrackId: " << trackId << endl;
       if(isTpcTrack) os << "Track is from TPC" << endl;
       else os << "Track is from EMC" << endl;
       return os;
@@ -190,6 +187,7 @@ class TrackStruct {
   double trackPz;
   double trackPhi;
   double trackEta;
+  long trackId;
   bool isTpcTrack;
 };
 
@@ -413,14 +411,15 @@ public:
     virtual Int_t Make();
     virtual Int_t doMake();
     virtual Int_t Finish();
-    PJetEvent &pjEvent(void) { return oJetEvent; };
 
 protected:
     StMuDstMaker *muDstMaker;
     StJetMaker *jetMaker;
     string ofilename;
     StEmcTpcFourPMaker* fourPMaker;
+public:
     PJetEvent oJetEvent;
+protected:
     ofstream* ofile;
     StProjectedTrack tempTrack;
     int eventsProcessed;
