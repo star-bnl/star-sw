@@ -59,17 +59,21 @@ typedef long EMLCV_T;
 
 /*-------------------------------------------- GLOBALS              --*/
 #ifdef EML_MAIN
-#       define EXTERN
+#   define EXTERN
+#   define CEXTERN(id) extern CC_P id; id
 #else
-#       define EXTERN extern
+#   define EXTERN extern
+#   define CEXTERN(id) extern CC_P id
 #endif
 
 /* pretty err messages */
-EXTERN char eml_beep_on,eml_pretty_on,eml_demand_ack_on; 
+CEXTERN(char eml_beep_on);
+CEXTERN(char eml_pretty_on);
+CEXTERN(char eml_demand_ack_on);
 
-EXTERN char eml_stack[EML_STACKSIZE];
-EXTERN char eml_buffer[EML_BUFFERSIZE];
-EXTERN char eml_context[EML_CONTEXTSIZE];
+CEXTERN(char eml_stack[EML_STACKSIZE]);
+CEXTERN(char eml_buffer[EML_BUFFERSIZE]);
+CEXTERN(char eml_context[EML_CONTEXTSIZE]);
 
 /*-------------------------------------------- PROTOTYPES           --*/
 /*- Initialization functions -*/
