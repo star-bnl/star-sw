@@ -15,13 +15,14 @@ Parameters::Parameters(const string & name, const string & description)
 
 Parameters::Parameters(const Parameters & parameter)
 {
+	/*
   ParameterConstIterator iter;
   for (iter=parameter.begin();
        iter!=parameter.end();
        iter++)
     {
       parameterVector.push_back(*iter);
-    }
+			}*/
 }
 
 Parameters::~Parameters()
@@ -30,13 +31,6 @@ Parameters::~Parameters()
 
 const Parameters & Parameters::operator=(const Parameters & parameter)
 {
-  ParameterConstIterator iter;
-  for (iter=parameter.begin();
-       iter!=parameter.end();
-       iter++)
-    {
-      parameterVector.push_back(*iter);
-    } 
   return *this;
 }
 

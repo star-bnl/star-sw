@@ -23,7 +23,7 @@ EditableParameters::~EditableParameters()
 
 const EditableParameters & EditableParameters::operator=(const EditableParameters & parameter)
 {
-  this->Parameters::operator=(parameter);
+  //this->Parameters::operator=(parameter);
   return *this;
 }
 
@@ -31,6 +31,7 @@ const EditableParameters & EditableParameters::operator=(const EditableParameter
 ///Non editable parameters are simply skipped.
 void EditableParameters::setDefaults()
 {
+  cout << "EditableParameters::setDefaults() -I- Started" << endl;
   ParameterIterator iter;
   for (iter=begin();iter!=end();iter++)
     {
@@ -38,6 +39,8 @@ void EditableParameters::setDefaults()
       if (ep)
         ep->reset();
     }
+  cout << *this;
+  cout << "EditableParameters::setDefaults() -I- Started" << endl;
 }
 
 
