@@ -24,25 +24,31 @@ my $DISK1 = "/star/rcf/disk00001/star";
 my $DISK2 =  "/star/rcf/data03/reco";
 my $DISKD = "/star/rcf";
 
-my $prodSr = "prod5";
+my $prodSr = "mdc3";
 my $jobFDir = "/star/u2e/starreco/" . $prodSr ."/requests/";
 
 my $topHpssReco  =  "/home/starreco/reco";
 
 my @SetG = (
-             "auau200/venus412/default/b0_3/year_1b/hadronic_on",
-             "auau200/venus412/default/b3_6/year_1b/hadronic_on",
-             "auau200/venus412/default/b6_9/year_1b/hadronic_on",
-             "auau200/hijing135/Bjets/b0_3/year_2a/hadronic_on",
-             "auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on", 
-             "auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on",
-             "auau200/hijing135/jetq_on/b9_12/year_1b/hadronic_on",
-             "auau200/hijing135/Cjets/b0_3/year_2a/hadronic_on",
+             "auau200/nexus/default/b0_3/year_1h/hadronic_on",
+             "auau200/mevsim/vanilla/central/year_1h/hadronic_on",
+             "auau200/mevsim/cascade/central/year_1h/hadronic_on",
+             "auau200/mevsim/vanilla/flow/year_1h/hadronic_on", 
+             "auau200/mevsim/vanilla/fluct/year_1h/hadronic_on",
+             "auau200/vni/default/b0_3/year_1h/hadronic_on",
+             "auau200/hijing/b0_3_jetq_off/jet05/year_1h/hadronic_on",
+             "auau200/hijing/b0_3_jetq_on/jet05/year_1h/hadronic_on",
+             "auau200/hijing/b8_15_jetq_off/jet05/year_1h/hadronic_on",
+             "auau200/hijing/b8_15_jetq_on/jet05/year_1h/hadronic_on", 
+             "auau200/hbt/default/peripheral/year_1h/hadronic_on",
+             "auau200/hbt/default/midperipheral/year_1h/hadronic_on",
+             "auau200/hbt/default/middle/year_1h/hadronic_on",
+             "auau200/hbt/default/central/year_1h/hadronic_on",
 );
 
 my $SetD = "dst/prod5/1999/12";
 
-my @recoDir = ("tfs_5", "trs_5");
+my @recoDir = ("tfs_6", "trs_6");
 
 
 struct JFileAttr => {
@@ -160,12 +166,12 @@ my @diskRecoDirs;
 
 my $inext =scalar(@SetG); 
 
-for( $ll = 0; $ll<scalar(@SetG); $ll++) {
-  $diskRecoDirs[$ll] = $DISK1 . "/" . $SetG[$ll] . "/tfs_5";
-  print "diskRecoDir: $diskRecoDirs[$ll]\n" if $debugOn;
-}
+#for( $ll = 0; $ll<scalar(@SetG); $ll++) {
+#  $diskRecoDirs[$ll] = $DISK1 . "/" . $SetG[$ll] . "/tfs_6";
+#  print "diskRecoDir: $diskRecoDirs[$ll]\n" if $debugOn;
+#}
 for( $ll = 0; $ll<scalar(@SetG); $ll++) { 
-  $diskRecoDirs[$inext] = $DISK2 . "/" . $SetG[$ll] . "/tfs_5";
+  $diskRecoDirs[$inext] = $DISK2 . "/" . $SetG[$ll] . "/tfs_6";
   print "diskRecoDir: $diskRecoDirs[$inext]\n" if $debugOn;
    $inext++;
 }
@@ -283,10 +289,11 @@ print "Total daq reco files: $nDiskFiles\n";
 
 ### select from JobStatus table files which should be updated
 
- $sql="SELECT prodSeries, JobID,sumFileName, sumFileDir, jobfileName FROM $cpJobStatusT WHERE prodSeries = '$prodSr' AND jobStatus = 'n/a' ";
+ $sql="SELECT prodSeries, JobID,sumFileName, sumFileDir, jobfileName FROM $cpJobStatusT WHERE prodSeries = '$prodSr' AND jobStatus = 'n/a'";
+
   $cursor =$dbh->prepare($sql)
    || die "Cannot prepare statement: $DBI::errstr\n";
- $cursor->execute;
+  $cursor->execute;
  
    while(@fields = $cursor->fetchrow) {
     my $cols=$cursor->{NUM_OF_FIELDS};
@@ -296,7 +303,7 @@ print "Total daq reco files: $nDiskFiles\n";
    for($i=0;$i<$cols;$i++) {
     my $fvalue=$fields[$i];
       my $fname=$cursor->{NAME}->[$i];
-       print "$fname = $fvalue\n" if $debugOn;
+#       print "$fname = $fvalue\n" ;
 
        ($$fObjAdr)->prSer($fvalue)    if( $fname eq 'prodSeries');
        ($$fObjAdr)->job_id($fvalue)   if( $fname eq 'JobID'); 
@@ -387,7 +394,7 @@ foreach my $jobnm (@jobSum_set){
       $mjobSt = "n\/a"; 
 
           &sumInfo("$jb_sumFile",1);
-     print "File name: ",$filename, "Job Status: ", $mjobSt, "\n";
+     print "File name: ",$filename, "JobFile=", $mjobFname, "Job Status: ", $mjobSt, "\n";
 
 ### update JobStatus table with info for jobs completed
 
@@ -492,7 +499,7 @@ my $jfile;
    $mrun = $1;
    $mrunId = substr($1,3) + 0;    
 #   print "file name = ", $mName, " fileSeq = ", $mfileSeq, "  RunID = ",$mrunId, "\n"; 
-#    print "Path = ", $mpath, "File name: ", $mfName "\n"; 
+#    print "Path = ", $mpath, "File name: ", $mfName, "\n"; 
    if($mfName =~ /dst.xdf/ ) {
      $mformat = "xdf";
      $mcomp = "dst";
@@ -521,10 +528,10 @@ foreach my $jobnm (@jobFSum_set){
       $mNevtHi = $mNevts;
       $jfile = $msumFile;
       $jfile =~ s/.sum//g;
-        
+
      if ( $mfName =~ /$jfile/) {
 
-#   print "File = ",$mfName, "Sum File = ", $msumFile, "Job ID = ", $mJobId , "\n";
+#    print "File = ",$mfName, "Path = ", $mpath, "Job ID = ", $mJobId , "\n";
       print "updating cpFileCatalogT table\n";
  
      &fillDbTestTable();   
