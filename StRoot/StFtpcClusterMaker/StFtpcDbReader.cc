@@ -1,6 +1,10 @@
-// $Id: StFtpcDbReader.cc,v 1.14 2002/10/11 15:37:36 oldi Exp $
+// $Id: StFtpcDbReader.cc,v 1.15 2002/10/15 09:46:44 fsimon Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.15  2002/10/15 09:46:44  fsimon
+// Constructor used by SlowSimulator changed to include Db access to
+// ftpcAmpSlope, ftpcAmpOffset and ftpcTimeOffset
+//
 // Revision 1.14  2002/10/11 15:37:36  oldi
 // Minor cosmetics.
 //
@@ -197,7 +201,10 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
                                St_ftpcdDeflectiondP *ddeflectiondp,
                                St_ftpcGas           *gas,
                                St_ftpcDriftField    *driftfield,
-                               St_ftpcElectronics   *electronics)
+                               St_ftpcElectronics   *electronics,
+			       St_ftpcAmpSlope      *ampslope,
+			       St_ftpcAmpOffset     *ampoffset,
+			       St_ftpcTimeOffset    *timeoffset)
 {
 
   //  just copy dimensions table start to pointer
@@ -304,8 +311,25 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
     gMessMgr->Message( " No data in table class St_ftpcElectronics","E");
   }
 
+  //  just copy AmpSlope table start to pointer
+  ampslopeTable = (ftpcAmpSlope_st*)ampslope->GetTable();
+  if(!ampslopeTable){
+    gMessMgr->Message( " No data in table class St_ftpcAmpSlope","E");
+  }
 
-//   cout << "StFtpcDbReader constructed" << endl;  
+  //  just copy AmpOffset table start to pointer
+  ampoffsetTable = (ftpcAmpOffset_st*)ampoffset->GetTable();
+  if(!ampoffsetTable){
+    gMessMgr->Message( " No data in table class St_ftpcAmpOffset","E");
+  }
+
+  //  just copy TimeOffset table start to pointer
+  timeoffsetTable = (ftpcTimeOffset_st*)timeoffset->GetTable();
+  if(!timeoffsetTable){
+    gMessMgr->Message( " No data in table class St_ftpcTimeOffset","E");
+  }
+
+   cout << "StFtpcDbReader constructed for SlowSimulator" << endl;  
 }
 
 // for StFtpcDriftMapMaker

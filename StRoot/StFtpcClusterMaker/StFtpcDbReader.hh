@@ -1,6 +1,10 @@
-// $Id: StFtpcDbReader.hh,v 1.10 2002/01/21 22:12:53 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.11 2002/10/15 09:46:46 fsimon Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.11  2002/10/15 09:46:46  fsimon
+// Constructor used by SlowSimulator changed to include Db access to
+// ftpcAmpSlope, ftpcAmpOffset and ftpcTimeOffset
+//
 // Revision 1.10  2002/01/21 22:12:53  jcs
 // add gas temperature difference between west and east FTPC to database
 //
@@ -139,7 +143,10 @@ public:
                  St_ftpcdDeflectiondP *ddeflectiondp,
                  St_ftpcGas           *gas,
                  St_ftpcDriftField    *driftfield,
-                 St_ftpcElectronics   *electronics);
+                 St_ftpcElectronics   *electronics,
+		 St_ftpcAmpSlope      *ampslope,
+                 St_ftpcAmpOffset     *ampoffset,
+                 St_ftpcTimeOffset    *timeoffset);
   // constructor used by StFtpcDriftMapMaker:
   StFtpcDbReader(St_ftpcDimensions    *dimensions,
                  St_ftpcPadrowZ       *zrow,
