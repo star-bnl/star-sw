@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.h,v 1.6 2002/11/18 14:29:32 laue Exp $
+ * $Id: StMuTrack.h,v 1.7 2003/10/28 18:57:56 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -51,6 +51,7 @@ class StMuTrack : public TObject {
     short id() const; ///< Returns the track id(or key), is unique for a track node, i.e. global and primary tracks have the same id.
     short type() const; ///< Returns the track type: 0=global, 1=primary, etc (see StEvent manual for type information) 
     short flag() const; ///< Returns flag, (see StEvent manual for type information) 
+    int   bad () const; // track is bad
     /// Returns index of associated global track. If not in order can be set with StMuDst::fixTrackIndeces() (but is taken care of in StMuDstReader.)  
     int index2Global() const;
     int index2RichSpectra() const; ///< Returns index of associated rich spectra.
@@ -185,6 +186,9 @@ inline StRichSpectra* StMuTrack::richSpectra() const { return (mIndex2RichSpectr
 /***************************************************************************
  *
  * $Log: StMuTrack.h,v $
+ * Revision 1.7  2003/10/28 18:57:56  perev
+ * BadData protection added
+ *
  * Revision 1.6  2002/11/18 14:29:32  laue
  * update for Yuri's new StProbPidTraits
  *
