@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.12 1999/12/02 16:40:23 levine Exp $
+ * $Id: EventReader.cxx,v 1.13 1999/12/03 21:39:22 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -20,6 +20,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.13  1999/12/03 21:39:22  levine
+ * ON encountering end of file, issue INFO message instead of ERROR
+ *
  * Revision 1.12  1999/12/02 16:40:23  levine
  * change test on ret value for read (line 230) to prevent looping behavior
  * at end of file
@@ -164,6 +167,7 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
   strcpy(err_string[7],"ERROR: ENDR ENCOUNTERED");
   strcpy(err_string[8],"ERROR: BAD HEADER");
   strcpy(err_string[9],"INFO: MISSING BANK");
+  strcpy(err_string[10],"INFO: END OF FILE ENCOUNTERED");
 
 
   fd = fdes;
@@ -234,7 +238,8 @@ void EventReader::InitEventReader(int fdes, long offset, int MMap)
       ret = read(fd,bank,8);
       lseek(fd,-8,SEEK_CUR); //backspace over BANK TYPE
 //       printf("%s::%d  c_offset=0x%x  BANK %s\n",__FILE__,__LINE__,c_offset,bank);
-      if(ret <= 0) ERROR(ERR_FILE);
+      if(ret < 0) ERROR(ERR_FILE);
+      if(ret == 0) ERROR(INFO_END_FILE_ENCOUNTERED);
     }
     else { // DATA record. Skip LR
 //       printf("%s::%d  c_offset=0x%x \n",__FILE__,__LINE__,c_offset);
