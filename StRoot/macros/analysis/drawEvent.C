@@ -1,6 +1,9 @@
 //*-- Author :  Valeri Fine (fine@bnl.gov)
-// $Id: drawEvent.C,v 1.5 1999/08/02 00:07:10 fine Exp $
+// $Id: drawEvent.C,v 1.6 1999/08/20 22:49:33 fine Exp $
 // $Log: drawEvent.C,v $
+// Revision 1.6  1999/08/20 22:49:33  fine
+// StChain::Finish() has been removed to keep the last picture on the screen
+//
 // Revision 1.5  1999/08/02 00:07:10  fine
 // use the new edition of StVirtualFiltr class
 //
@@ -154,12 +157,8 @@ void doEventsQQ(const Int_t nevents=999,
     }
     cout << "============================ Event " << i << " finish" << endl;
   }
-  if (nevents > 1) {
-    chain->Finish();
-  } else {
-//--    if (!b) b = new TBrowser;
-     gROOT->LoadMacro("PadControlPanel.C");
-  }
+
+   gROOT->LoadMacro("PadControlPanel.C");
 }
 void drawEvent(const Int_t nevents=2,
               const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
