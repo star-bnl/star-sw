@@ -1,5 +1,8 @@
-// $Id: StMinidaqMaker.cxx,v 1.10 1999/04/08 19:02:43 liq Exp $
+// $Id: StMinidaqMaker.cxx,v 1.11 1999/04/28 00:32:31 sakrejda Exp $
 // $Log: StMinidaqMaker.cxx,v $
+// Revision 1.11  1999/04/28 00:32:31  sakrejda
+// Dave's changes to handle missing tables checked in
+//
 // Revision 1.10  1999/04/08 19:02:43  liq
 // set protection to check whether the IT,ST,or SD empty
 //
@@ -52,6 +55,7 @@
 //////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
 #include <strings.h>
+#include <assert.h>
 #include "StMinidaqMaker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -342,12 +346,16 @@ void StMinidaqMaker::TransferData(){
                  strcat(labelst,digits);
                  strcat(labelsd,digits);
                  St_type_index *m_it     = (St_type_index *) mdaqdata(labelit);
+                 if (m_it==0) continue;
                  St_type_structtbl *m_st  = (St_type_structtbl *) mdaqdata(labelst);
+                 if (m_st==0) continue;
                  St_type_shortdata *m_sd = (St_type_shortdata *) mdaqdata(labelsd);
+                 if (m_sd==0) continue;
                  // make sure these input tables filled, then judge whether the information of IT tables concerns to this Sector Number
+                 cout<<"it size"<<m_it->GetNRows()<<" st size"<<m_st->GetNRows()<<" sd size"<<m_sd->GetNRows()<<endl;
                  type_index_st  *mmp= m_it->GetTable(); 
+                 if (mmp==0) continue;
                  Int_t kj=mmp->sector;
-                 cout<<"it size"<<m_it->GetNRows()<<"st size"<<m_st->GetNRows()<<"sd size"<<m_sd->GetNRows()<<endl;
                  if(m_it->GetNRows()&&m_st->GetNRows()&&m_sd->GetNRows()&&kj==k){
                     tss_tsspar_st *tsspar = m_tsspar->GetTable();
                     tsspar->min_sect = k;
@@ -376,7 +384,7 @@ void StMinidaqMaker::TransferData(){
 //_____________________________________________________________________________
 void StMinidaqMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StMinidaqMaker.cxx,v 1.10 1999/04/08 19:02:43 liq Exp $\n");
+  printf("* $Id: StMinidaqMaker.cxx,v 1.11 1999/04/28 00:32:31 sakrejda Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
