@@ -1,4 +1,7 @@
 #  $Log: Makefile,v $
+#  Revision 1.10  1998/02/18 22:58:03  fisyak
+#  Move staf
+#
 #  Revision 1.9  1998/02/17 18:06:46  fisyak
 #  Add dropit for PATH
 #
@@ -22,7 +25,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/02/17 18:06:46 $ 
+#             Last modification $Date: 1998/02/18 22:58:03 $ 
 ifdef SILENT
 .SILENT:
 endif
@@ -216,11 +219,11 @@ ifneq (,$(NAMES_IDM))
 FILES_K  := $(addprefix $(OBJ_DIR)/, $(PKG)_init.o)
 endif
 #-------------------------------includes----------------------------
-STICFLAGS =  $(addprefix -I, $(SRC_DIR) $(IDL_DIRS))
+STICFLAGS =  $(addprefix -I,  $(STAR)/asps/staf/idl $(SRC_DIR) $(IDL_DIRS))
 ifneq ($(SYS_STAR),hp_ux102)
 CPPFLAGS  = -D$(SYS_STAR) -D$(shell uname) 
 endif
-CPPFLAGS +=              -I. -I../ -I/usr/include \
+CPPFLAGS +=              -I. -I../ -I/usr/include -I$(STAR)/asps/staf/inc  \
              $(addprefix -I, $(SRC_DIR) $(GEN_DIR) $(INC_DIRS)) 
 ifneq ($(ROOT),$(STAR))
 CPPFLAGG :=  $(addprefix -I, $(INC_DIRG))
@@ -238,11 +241,11 @@ endif
 ifndef LIBRARIES
 ifeq ($(LIB_STAR),$(LIB_DIR))
 		LIBRARIES :=  $(LIB_STAR)/$(PKG_LIB) \
-               -L$(STAR)/staf/$(SYS_HOST_STAR)  -lmsg   
+               -L$(STAR)/asps/../lib/$(SYS_HOST_STAR)  -lmsg   
 else
 		LIBRARIES :=  $(LIB_DIR)/$(PKG_LIB)  \
                 $(shell test -f $(LIB_STAR)/$(PKG_LIB) && echo $(LIB_STAR)/$(PKG_LIB)) \
-               -L$(STAR)/staf/$(SYS_HOST_STAR) -lmsg   
+               -L$(STAR)/asps/../lib/$(SYS_HOST_STAR) -lmsg   
 endif
 endif
 #-------------------------------rules-------------------------------
@@ -253,7 +256,7 @@ $(PKG)               : $(LIB_DIR)/$(PKG_SL)
 ifeq ($(FILES_IDM),$(EMPTY))
 $(LIB_DIR)/$(PKG_SL): $(FILES_O)
 	$(LD) $(LDFLAGS) $(FILES_O) -o $(LIB_DIR)/$(PKG_SL) \
-        $(LIBRARIES) $(CERN_LIBS) $(LD_LIBS) $(CC_LIBS)
+        $(CERN_LIBS) $(LD_LIBS) $(CC_LIBS)
 else
 $(LIB_DIR)/$(PKG_SL): $(FILES_K) $(LIB_DIR)/$(PKG_LIB)
 	$(LD) $(LDFLAGS) $(FILES_K) -o $(LIB_DIR)/$(PKG_SL) \
