@@ -1,11 +1,11 @@
-/*    ftpcClusterGeometry
+/*    ftpcClusterGeom
 *
-*  Table: ftpcClusterGeometry
+*  Table: ftpcClusterGeom
 *
 *       description: //    FTPC Cluster Geometry values
 *
 */
-   struct ftpcClusterGeometry {
+   struct ftpcClusterGeom {
 
      long minTimebin;                // min timebin for cluster search inner
      long minTimebinMed;             // min timebin for cluster search medium
