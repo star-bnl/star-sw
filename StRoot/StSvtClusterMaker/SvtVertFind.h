@@ -1,4 +1,3 @@
-#define DEBUG
 #define SPT_PTR_NMAX 20000
 #define SPT_X 60
 #define SPT_Z 1400
