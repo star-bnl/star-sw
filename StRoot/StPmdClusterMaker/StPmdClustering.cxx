@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.3 2003/05/14 10:49:12 subhasis Exp $
+ * $Id: StPmdClustering.cxx,v 1.4 2003/05/29 13:11:51 subhasis Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -11,6 +11,9 @@
  ***********************************************************
  *
  * $Log: StPmdClustering.cxx,v $
+ * Revision 1.4  2003/05/29 13:11:51  subhasis
+ * lev1, lev2 dimension increased from 20 to 50
+ *
  * Revision 1.3  2003/05/14 10:49:12  subhasis
  * CPV clustering added
  *
@@ -335,7 +338,7 @@ void StPmdClustering::arrange(Int_t incr)
 void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod, Int_t idet,StPmdClusterCollection *pmdclus)
 {
   Int_t clno, i, j, k, i1, i2, id, icl, ncl[2000], iord[2000], itest, ihld;
-  Int_t ig, nsupcl,lev1[20],lev2[20];
+  Int_t ig, nsupcl,lev1[50],lev2[50];
   Double_t x[2000], y[2000], z[2000], x1, y1, z1, x2, y2, z2, rr,dist;
   Double_t x_org[2000], y_org[2000];
   Double_t xc[2000], yc[2000], zc[2000], d[96][72], cells[2000],sum,rc[2000];
