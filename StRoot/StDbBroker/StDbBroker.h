@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.12 2000/03/26 16:47:13 fine Exp $
+ * $Id: StDbBroker.h,v 1.13 2000/04/13 20:22:57 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,11 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.13  2000/04/13 20:22:57  porter
+ * - reconnected tableDescriptor that had been broken via St_tableDescriptor.
+ * - added unix timestamp as standard
+ * - top node returned via InitConfig will be a database type
+ *
  * Revision 1.12  2000/03/26 16:47:13  fine
  * Adjusted to ROOT 2.24
  *
@@ -57,7 +62,8 @@
 //     Now Broker uses StDbLib's descriptor interface
 //     and St_base's concrete descriptor.
 //
-#include "tableDescriptor.h" 
+//#include "tableDescriptor.h" 
+#include "St_tableDescriptor.h" 
 
 class StDbConfigNode;
 class StDbManager;
@@ -73,22 +79,22 @@ class StDbBroker  {
       enum EColumnType {kNAN, kFloat, kInt, kLong, kShort, kDouble, kUInt
                              ,kULong, kUShort, kUChar, kChar };
 
-typedef tableDescriptor_st Descriptor;
+typedef St_tableDescriptor Descriptor;
 
-  /*     struct Descriptor{
-     char name[32];		//variable name 
-     int firstDimension;		//first dimension, if this is an array
-     int secondDimension;	//second dimension
-     int offset;			//variable offset
-     int size;			//total size of element
-     int typeSize;		//unit size
-     int dimensions;		//number of dimensions
-     EColumnType type;		//type of element
-     };
-  */
+struct oldDescriptor {
+    char         fColumnName[32];  /* The name of this data-member: */
+    unsigned int fIndexArray[3];   /* The array of the sizes for each dimen*/
+    unsigned int fOffset;      /* The first byte in the row of this column  */
+    unsigned int fSize;   /* The full size of the selected column in bytes  */
+    unsigned int fTypeSize; /* The type size of the selected column in byte */
+    unsigned int fDimensions;/* The number of the dimensions for array   */
+    Int_t        fType;        /* The data type of the selected column   */
+};
+
 
   protected:
-    Descriptor  *m_descriptor;
+    oldDescriptor *m_descriptor;
+    Descriptor  *mdescriptor;
     Char_t *     m_structName;  //name of the struct type used in this TTable
     Char_t *     m_tableName;   //name of this instance of TTable
     UInt_t       m_sizeOfStruct;// byte size of this struct
@@ -102,15 +108,20 @@ typedef tableDescriptor_st Descriptor;
     UInt_t       m_EndDate;     // end date
     UInt_t       m_EndTime;     // end time
 
+    UInt_t       m_beginTimeStamp; // unix beginTime
+    UInt_t       m_endTimeStamp; // unix endTime
+    UInt_t       m_requestTimeStamp; // unix requestTime
+
     char*        m_tableVersion; // name of the version of the table
     char*        m_database;     // name of the database for this table
+    char*        m_ParentType;   // named dbType when "top" db is domain-level
 
     int       m_isVerbose;
     dbNodeArray *m_Nodes;
     StDbConfigNode* m_Tree;
 
-    dbConfig_st*  buildConfig(int numRows);
-    int       buildNodes(StDbConfigNode* node, int pID);
+    dbConfig_st*  buildConfig(int& numRows);
+    int           buildNodes(StDbConfigNode* node, int pID);
 
   public:
 
@@ -122,7 +133,7 @@ typedef tableDescriptor_st Descriptor;
     void * Use();
     void * Use(int tabID, int parID);
 
-    char  **GetComments(TTable *parentTable);
+    char  **GetComments(St_Table *parentTable);
     void   Fill(void * pArray, const char **ElementComment);
 
     UInt_t GetNRows()                {return m_nRows;       }
@@ -130,9 +141,14 @@ typedef tableDescriptor_st Descriptor;
     UInt_t GetBeginTime()            {return m_BeginTime;   }
     UInt_t GetEndDate()              {return m_EndDate;     }
     UInt_t GetEndTime()              {return m_EndTime;     }
+    UInt_t GetRequestTimeStamp()     {return m_requestTimeStamp; }
+    UInt_t GetBeginTimeStamp()       {return m_beginTimeStamp; }
+    UInt_t GetEndTimeStamp()         {return m_endTimeStamp; }
+
 
     StTableDescriptorI* GetTableDescriptor();
 
+    void loadOldDescriptor(){};
     static const Char_t * GetTypeName( EColumnType type) {
       switch (type)
 	{
@@ -157,7 +173,7 @@ typedef tableDescriptor_st Descriptor;
     void   SetDateTime(UInt_t date,UInt_t time);
 
     void   SetDictionary(UInt_t nElements, Descriptor *D)
-                                     {m_nElements=nElements; m_descriptor = D;}
+                                     {m_nElements=nElements; mdescriptor = D;}
 
     void   SetTableName(const Char_t *table_name)
                                   {if(m_tableName) delete [] m_tableName;
@@ -182,6 +198,10 @@ typedef tableDescriptor_st Descriptor;
     void   SetBeginTime(UInt_t BeginTime) {m_BeginTime = BeginTime;}
     void   SetEndDate(UInt_t EndDate)     {m_EndDate = EndDate;    }
     void   SetEndTime(UInt_t EndTime)     {m_EndTime = EndTime;    }
+    void   SetRequestTimeStamp(UInt_t utime) {m_requestTimeStamp = utime; }
+    void   SetBeginTimeStamp(UInt_t utime)   {m_beginTimeStamp   = utime; }
+    void   SetEndTimeStamp(UInt_t utime)     {m_endTimeStamp     = utime; }
+
     static int DbInit(const char *);  		//dbInit
 
     void   setVerbose(int isVerbose) { m_isVerbose = isVerbose; } 
@@ -201,7 +221,7 @@ extern "C" void DbFill(unsigned int *,         //datetime[4]
 		       const char *,  //tableName
 		       const char *,  //StructName
 		       unsigned int,           //nVar
-		       StDbBroker::Descriptor *d,
+		       StDbBroker::oldDescriptor *d,
 		       const char **,       //Comments
 		       unsigned int,           //nRows
 		       unsigned int,           //sizeOfStruct
@@ -213,7 +233,7 @@ extern "C" void *DbUse(unsigned int*,           //&nRows,
 		       const char *,  //StructName
 		       unsigned int,           //nVar
 		       unsigned int,           //sizeOfStruct
-		       StDbBroker::Descriptor *d);
+		       StDbBroker::oldDescriptor *d);
 
 extern "C" void *DbRead(unsigned int*,           //&nRows,
 		       unsigned int *,         //datetime[4]
@@ -221,7 +241,7 @@ extern "C" void *DbRead(unsigned int*,           //&nRows,
 		       const char *,  //StructName
 		       unsigned int,           //nVar
 		       unsigned int,           //sizeOfStruct
-		       StDbBroker::Descriptor *d,
+		       StDbBroker::oldDescriptor *d,
                const char*,            //  database Name
                const char*);           // versionName
 
