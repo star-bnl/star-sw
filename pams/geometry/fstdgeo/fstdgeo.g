@@ -1,5 +1,8 @@
-* $Id: fstdgeo.g,v 1.5 2005/01/26 01:12:46 potekhin Exp $
+* $Id: fstdgeo.g,v 1.6 2005/02/02 22:07:28 potekhin Exp $
 * $Log: fstdgeo.g,v $
+* Revision 1.6  2005/02/02 22:07:28  potekhin
+* Changed the sensor color as per Gerrit's request
+*
 * Revision 1.5  2005/01/26 01:12:46  potekhin
 * Removed active and passive layers, corrected nesting of
 * the water duct volume
@@ -221,7 +224,7 @@ Block FDSW is the Silicon Wafer (all active)
       Material  Silicon  
       Material  Sensitive  Isvol=1
 
-      Attribute FDSW  Seen=1  colo=5
+      Attribute FDSW  Seen=1  colo=4
 
       Shape TRD1 dx1=SensorDx1 dx2=SensorDx2 dy=FSTG_SensorThk/2.0 dz=SensorLength/2.0
 
