@@ -1,6 +1,6 @@
 /********************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.14 2005/02/22 07:36:52 subhasis Exp $
+ * $Id: StPmdGeom.cxx,v 1.15 2005/03/07 05:02:23 subhasis Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,6 +11,9 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
+ * Revision 1.15  2005/03/07 05:02:23  subhasis
+ * printout commented
+ *
  * Revision 1.14  2005/02/22 07:36:52  subhasis
  * big prinout on picking.. commented
  *
@@ -1282,8 +1285,8 @@ void StPmdGeom::readBoardDetail(Int_t runno1)
   Int_t year =0;
   rn=atoi(iRun);
   year=atoi(iyear);
-  cout<<"runid="<<runno1<<" run#="<<rn<<" year="<<year<<endl;
   
+  //cout<<"runid="<<runno1<<" run#="<<rn<<" year="<<year<<endl;
  if(year==5){  // 2004 run
   // Once the day is know choose the mapping file
   //     if( rn >=1 && rn <21)
