@@ -1,5 +1,8 @@
-# $Id: MakeRexe.mk,v 1.11 1999/02/12 02:50:33 fisyak Exp $
+# $Id: MakeRexe.mk,v 1.12 1999/02/14 23:10:09 fisyak Exp $
 # $Log: MakeRexe.mk,v $
+# Revision 1.12  1999/02/14 23:10:09  fisyak
+# split tables for HP, remove duplicates for root4star
+#
 # Revision 1.11  1999/02/12 02:50:33  fisyak
 # Fix St_Tables, single module
 #
@@ -9,27 +12,11 @@ ifndef STAR_MAKE_HOME
   STAR_MAKE_HOME := $(STAR)/mgr
 endif
 include $(STAR_MAKE_HOME)/MakeEnv.mk
-include $(STAR_MAKE_HOME)/MakeArch.mk
 
 #
 #	INP_DIR & OUT_DIR could be declared in invoking
 #
-ifndef INP_DIR
-  override INP_DIR := $(CWD)
-endif
-ifeq (,$(strip $(filter /%,$(INP_DIR))))
-  override INP_DIR := $(CWD)/$(INP_DIR)
-endif
-
-#
-ifndef OUT_DIR
-  override OUT_DIR := $(CWD)/EXE
-endif
-
-ifeq (,$(strip $(filter /%,$(OUT_DIR))))
-  override OUT_DIR := $(CWD)/$(OUT_DIR)
-endif
-
+include $(STAR_MAKE_HOME)/MakeDirs.mk
 
 #CPPFLAGS += -DSTAF -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON 
 CPPFLAGS += -D__ROOT__ -DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON 
@@ -57,15 +44,17 @@ ifdef ifAFS_OUT
   AFS_EXE_DIR := $(OUT_DIR)/bin
 endif
 
-SRC_DIRS := $(INP_DIR)  $(addprefix $(STAR)/asps/agi/gst/, geant zebra)
+SRC_DIRS := $(INP_DIR)  $(addprefix $(STAR)/asps/agi/gst/, agsim geant zebra)
 #                         $(addprefix $(STAR)/asps/agi/gst/, agsim  main geant comis)
-VPATH := $(SRC_DIRS) $(OUT_DIR) $(OBJ_DIR)  $(EXE_DIR) 
+VPATH := $(SRC_DIRS) $(OUT_DIR) 
+#                                  $(OBJ_DIR)  $(EXE_DIR) 
 
 NAMES_O := $(wildcard $(addsuffix /*.[fFgc]*,$(SRC_DIRS)))
 #NAMES_O := $(wildcard $(NAMES_O))
 #NAMES_O := $(filter %.g %.f %.F %.c %.cc %.cxx %.cdf,$(NAMES_O))
 NAMES_O := $(filter-out %.bck,$(NAMES_O))
 NAMES_O := $(basename $(notdir $(NAMES_O)))
+NAMES_O := $(filter-out traceqc,$(NAMES_O))
 #NAMES_O := $(filter-out gyintf,$(NAMES_O))
 # from asps/rexe
 #NAMES_0 := $(filter-out agmain  fdummy ggsim, $(NAMES_O))
@@ -74,14 +63,14 @@ NAMES_O := $(basename $(notdir $(NAMES_O)))
 #NAMES_O := $(filter-out csrmsl csjcal csaddr csfile  csext  csexec, $(NAMES_O))
 #NAMES_O := $(filter-out tdm_clear_all tdm_map_table ami_module_register agpawq hplopt, $(NAMES_O))
 #NAMES_O := $(filter-out UTILS_h2root afmain acmain ,$(NAMES_O))
-NAMES_D := $(filter-out MAIN_rmain kgsim, $(NAMES_O))
+NAMES_D := $(filter-out MAIN_rmain, $(NAMES_O))
 FILES_O := $(sort $(addprefix $(OBJ_DIR)/,$(addsuffix .o,$(NAMES_O))))
 FILES_D := $(sort $(addprefix $(DEP_DIR)/,$(addsuffix .d,$(NAMES_D)))) 
 
 # ggsim.o agdummy.o dummy.o 
 INCL  := $(ROOTSYS)/src $(STAR)/StRoot/base $(INP_DIR) $(GST_DIR) $(STAF_SYS_INCS) $(STAR)/asps/agi $(STAR)/asps/agi/kuip  $(CERN_ROOT)/include $(CERN_ROOT)/src/pawlib/paw/ntuple 
 INCL  := $(addprefix -I,$(INCL))
-
+CPPFLAGS += $(INCL)
 #STAF  = YES
 CCload = YES
 
@@ -135,7 +124,7 @@ ALL_EXE_LIBS += -lXpm $(FLIBS) $(CLIBS)
 
 
 
-root4star: $(FILES_O) $(STEVENT_OBJS)
+Root4star: $(FILES_O) $(STEVENT_OBJS)
 	$(DOEXE) $(STEVENT_OBJS) $(ALL_EXE_LIBS) -o $(EXE_DIR)/$(notdir $(TARGET))  
 #
 #
@@ -165,28 +154,10 @@ $(OBJ_DIR)/%.o :%.cdf
 #
 #
 #ifDEP_DIR := $(wildcard $(DEP_DIR))
-#ifdef ifDEP_DIR
+ifndef NODEPEND
  include $(FILES_D)
-#endif
-#
-$(DEP_DIR)/%.d:  %.g
-	$(RM)  $(ALL_TAGS)
-	$(GCC)  -MM -MG -nostdinc -w -traditional $(CPPFLAGS) $(INCLUDES) -x c $(ALL_DEPS) | sed -e 's/\.g\.o/.o/' > $(ALL_TAGS)
-
-$(DEP_DIR)/%.d: %.c 
-	$(RM) $(ALL_TAGS)
-	$(GCC)  -MM -MG -nostdinc -w  $(CPPFLAGS) $(INCLUDES)  $(ALL_DEPS) > $(ALL_TAGS)
-
-$(DEP_DIR)/%.d: %.cc 
-	$(RM) $(ALL_TAGS)
-	$(GCC)  -MM -MG -nostdinc -w  $(CPPFLAGS) $(INCLUDES)  $(ALL_DEPS) > $(ALL_TAGS)
-
-
-$(DEP_DIR)/%.d:  %.F
-	$(RM)  $(ALL_TAGS)
-	$(GCC)  -MM -MG -nostdinc -w -traditional $(CPPFLAGS) $(INCLUDES) -x c $(ALL_DEPS) | sed -e 's/\.F\.o/.o/' > $(ALL_TAGS)
-
-
+endif
+include $(STAR_MAKE_HOME)/MakeDep.mk
 
 cleanall :
 	$(RMDIR) $(OUT_DIR)

@@ -1,5 +1,8 @@
-# $Id: MakeEnv.mk,v 1.12 1999/02/12 22:12:36 fisyak Exp $
+# $Id: MakeEnv.mk,v 1.13 1999/02/14 23:10:09 fisyak Exp $
 # $Log: MakeEnv.mk,v $
+# Revision 1.13  1999/02/14 23:10:09  fisyak
+# split tables for HP, remove duplicates for root4star
+#
 # Revision 1.12  1999/02/12 22:12:36  fisyak
 # Fix STAR_OBJ_DIR for nondebug version
 #
@@ -210,6 +213,9 @@ ifndef PAMS
 endif
 ifndef PAMS
   PAMS    := $(findstring /StEvent,$(INP_DIR))
+endif
+ifndef PAMS
+  PAMS    := $(findstring /asps,$(INP_DIR))
 endif
 ROOT_DIR:= $(word 1,$(subst $(PAMS), ,$(INP_DIR)))
 LEVEL   := $(words  $(subst /, ,$(subst $(ROOT_DIR),, $(INP_DIR))))
