@@ -1,5 +1,9 @@
-/*    $Id: gstar.idl,v 1.1 1998/05/14 02:19:07 nevski Exp $
+/*    $Id: gstar.idl,v 1.2 2003/12/19 17:58:37 potekhin Exp $
       $Log: gstar.idl,v $
+      Revision 1.2  2003/12/19 17:58:37  potekhin
+      Remove references to "ami" module which is no longer
+      necessary due to obsoletion of the XDF and table interfaces.
+
       Revision 1.1  1998/05/14 02:19:07  nevski
       gstar_part update to set PDG code
 
@@ -15,4 +19,4 @@
 #include "eg_track.idl"
 #include "eg_vertex.idl"
 
-interface gstar: amiModule  { STAFCV_T call ( ); };
+
