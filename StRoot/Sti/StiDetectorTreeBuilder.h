@@ -8,7 +8,7 @@
 #include <vector>
 using std::vector;
 #include "StiCompositeTreeNode.h"
-#include "StiFactoryTypedefs.h"
+#include "StiGui/StiRootDrawableDetector.h"
 
 class StiDetectorBuilder;
 

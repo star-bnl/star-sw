@@ -1,14 +1,17 @@
 #ifndef StiKalmanTrack_H
 #define StiKalmanTrack_H 1
+
 //SCL
 #include "StThreeVector.hh"
+
 //STD
 #include <math.h>
+
 //Sti
-//#include "StiFactoryTypedefs.h"
 #include "StiTrack.h"
 #include "StiObjectFactory.h"
 #include "StiKalmanTrackNode.h"
+#include "StiHit.h" //For hit factory
 #include "StiHitContainer.h"
 
 class StiKalmanTrack : public StiTrack 

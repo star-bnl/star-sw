@@ -6,6 +6,7 @@
 #define StiEvaluableTrack_HH
 
 #include "StiKalmanTrack.h"
+#include "StiObjectFactory.h"
 
 class StTrack;
 class StMcTrack;
@@ -30,5 +31,7 @@ class StiEvaluableTrack : public StiKalmanTrack
   
  private:
 };
+
+//typedef StiObjectFactory<StiEvaluableTrack> StiEvaluableTrackFactory;
 
 #endif

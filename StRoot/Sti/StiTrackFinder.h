@@ -1,7 +1,6 @@
 #ifndef StiTrackFinder_H
 #define StiTrackFinder_H 1
 
-//#include "StiFactoryTypedefs.h"
 #include "StiConstants.h"
 
 #include "StiTrackNode.h"

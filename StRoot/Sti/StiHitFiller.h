@@ -13,7 +13,8 @@
 #include <vector>
 #include <map>
 #include "../pams/global/inc/StDetectorId.h" //for detector enumerations
-#include "StiFactoryTypedefs.h"
+
+#include "StiHit.h"
 
 using std::vector;
 using std::map;

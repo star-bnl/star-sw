@@ -12,14 +12,10 @@
 #include <algorithm>
 using std::find_if;
 
-//StiGui
-//#include "StiGui/StiRootDrawableDetector.h"
-
 //Sti
 #include "StiMapUtilities.h"
 #include "StiDetector.h"
 #include "StiMaterial.h"
-#include "StiFactoryTypedefs.h"
 #include "StiDetectorTreeBuilder.h"
 #include "StlUtilities.h"
 #include "StiCompositeLeafIterator.h"

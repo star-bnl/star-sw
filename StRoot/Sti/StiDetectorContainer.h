@@ -15,7 +15,8 @@ using std::vector;
 using std::map;
 #include "StiMapUtilities.h"
 
-#include "StiFactoryTypedefs.h"
+#include "Sti/StiCompositeTreeNode.h" //For factory
+#include "StiGui/StiRootDrawableDetector.h" //For factory
 
 using std::map;
 
