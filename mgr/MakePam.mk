@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.83 1999/02/12 15:21:07 fisyak Exp $
+# $Id: MakePam.mk,v 1.84 1999/02/13 01:52:09 didenko Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.84  1999/02/13 01:52:09  didenko
+# Fix bug with list of tables
+#
 # Revision 1.83  1999/02/12 15:21:07  fisyak
 # Add all tables to the list, not only call by module
 #
@@ -262,7 +265,7 @@ FILES_MHH := $(addprefix $(GEN_DIR)/St_,$(subst .idl,_Module.h  , $(notdir $(FIL
 FILES_ALL_MOD := $(FILES_SYM) $(FILES_ICC) $(FILES_IH) $(FILES_INC) $(FILES_MOD) $(FILES_MHH)
 #list :=  $(STIC) -T -q $(STICFLAGS) 
 FILES_IDT := $(notdir $(wildcard $(OUT_DIR)/pams/$(DOMAIN)/idl/*.idl $(STAR)/pams/$(DOMAIN)/idl/*.idl))
-#FILES_IDT += $(foreach IDM, $(FILES_IDM), $(shell $(STIC) -T -q $(STICFLAGS) $(IDM))) 
+FILES_IDT += $(foreach IDM, $(FILES_IDM), $(shell $(STIC) -T -q $(STICFLAGS) $(IDM))) 
 FILES_IDT := $(sort $(FILES_IDT))
 #FILES_IDT := $(shell  for IDM in $(FILES_IDM) ;  do [$(list) $(IDM)] ; done ) 
 #            for name [ in word; ] do list ; done                       
