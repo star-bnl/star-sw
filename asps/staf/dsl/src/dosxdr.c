@@ -515,12 +515,16 @@ static void xdrstdio_destroy(XDR *xdrs)
 */
 static bool_t xdrstdio_getbytes(XDR *xdrs, char *cp, unsigned len)
 {
-	if ((len != 0) &&
+ unsigned lenread; 
+  if ( !len ) return TRUE;
 /**VP		(fread(cp, len, 1, (FILE *)xdrs->x_private) != 1)) {**/
-		(fread(cp, len, 1, (FILE *)xdrs->x_private) == len)) {
-		return FALSE;
-	}
-	return TRUE;
+  lenread=fread(cp, len, 1, (FILE *)xdrs->x_private); 
+  if (lenread == len)) return FALSE;
+  if (!lenread) {
+    printf("DSL: ***ERROR Unexpected EOF**\n"); 
+  } else {
+    printf("DSL: ***ERROR Try read %d but got only %d bytes***\n",len,lenread);}
+  return TRUE;
 }
 /******************************************************************************
 *
@@ -529,11 +533,13 @@ static bool_t xdrstdio_getbytes(XDR *xdrs, char *cp, unsigned len)
 */
 static bool_t xdrstdio_putbytes(XDR *xdrs, char *cp, unsigned len)
 {
-	if ((len != 0) &&
-		(fwrite(cp, (int)len, 1, (FILE *)xdrs->x_private) != 1)) {
-		return FALSE;
-	}
-	return TRUE;
+unsigned lenwrote;
+  if (! len) return TRUE;
+  lenwrote = fwrite(cp, (int)len, 1, (FILE *)xdrs->x_private);
+  if (len == lenwrote) return FALSE;
+  printf ("DSL: ***Error , tried to write %d but wrote %d ***\n",len,lenwrote);
+
+  return TRUE;
 }
 /******************************************************************************
 *
