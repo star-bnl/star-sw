@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.333 2003/04/30 20:49:36 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.334 2003/05/02 01:34:53 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -414,7 +414,7 @@ Bfc_st BFC1[] = {
                                                                      "Performs vertex seed finding",kFALSE},
   {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil,-dEdxY2", "StdEdxMaker","StdEdxMaker",
                                                                          "Regular dEdx calculation",kFALSE},
-  {"svtdEdx"     ,"svtdEdx","globalChain","globT",                "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
+  {"svtdEdx"     ,"svtdEdx","globalChain","globT,TbUtil",         "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
 
 
   {"Event"       ,"","","StEvent,tpcDB","StEventMaker","StDetectorDbMaker,StEventMaker",
@@ -897,7 +897,7 @@ Bfc_st BFC2[] = {
                                                                      "Performs vertex seed finding",kFALSE},
   {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil,-dEdxY2", "StdEdxMaker","StdEdxMaker",
                                                                          "Regular dEdx calculation",kFALSE},
-  {"svtdEdx"     ,"svtdEdx","globalChain","globT",                "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
+  {"svtdEdx"     ,"svtdEdx","globalChain","globT,tpUtil",         "StSvtdEdxMaker","StdEdxMaker","",kFALSE},
 
 
   {"Event"       ,"","","StEvent,tpcDB","StEventMaker","StDetectorDbMaker,StEventMaker",
