@@ -1,5 +1,8 @@
-* $Id: control.g,v 1.15 2000/03/10 23:03:52 nevski Exp $
+* $Id: control.g,v 1.16 2000/08/10 23:54:45 nevski Exp $
 * $Log: control.g,v $
+* Revision 1.16  2000/08/10 23:54:45  nevski
+* 1st EVNT entry checked on CONTROL SIMU=1 only
+*
 * Revision 1.15  2000/03/10 23:03:52  nevski
 * accept both old and new EVNT headers
 *
@@ -32,13 +35,15 @@
       implicit   none
 +CDE,gcbank,gcnum,gcflag,gcunit,quest.
       integer ISLFLAG,AGDIGC,IEV/0/,Itrac,Ipart,Ivert,Nu,NtpcHit,Iad,
-     >        Iw,Ihit,Ltra,Ntbeam,Nttarg,Nhit,N10,Iprin,
+     >        Iw,Ihit,Ltra,Ntbeam,Nttarg,Nhit,N10,Iprin,Isimu,
      >        Nvs(15)/15*0/,NBV(15),IP,ISTAT,IDPDG,MOTH(2),IDAU(2)
       real    VMOD,Tofg,vert(4),pvert(4),ubuf(100),Digi(15),
               P(5),V(5),theta,y,R,AMASS,TIME,pt
 *
 * do not allow run without geometry
       Iprin = ISLFLAG('CONT','PRIN')
+      Isimu = ISLFLAG('CONT','SIMU')
+
       if (JVOLUM<=0) STOP ' NO GEOMETRY LOADED '
       if (JHEAD <=0) then
          Prin1; ('CONTROL: event without header rejected ');   go to :e:
@@ -50,11 +55,13 @@
          Prin1; ('CONTROL: empty event rejected');             go to :e:
       endif
 * 
+      if (Isimu>1) then
       call AgNZGETP(1,1,1,ISTAT,IDPDG,P,AMASS,MOTH,TIME,IDAU,V)
       unless (ISTAT==10&IdPDG==9999999) | (ISTAT==11&IdPDG==999997)
       {  Prin1 istat,IdPDG;('CONTROL: bad EVNT bank ',2i8,', event rejected') 
                                                                go to :e: }
-     
+      endif     
+
       if  AGDIGC(0) != 0
       {  Prin1; ('CONTROL: bad HITS bank, event rejected');    go to :e: }
 
