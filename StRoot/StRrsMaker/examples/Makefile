@@ -1,3 +1,6 @@
+#################################################
+# $Id: Makefile,v 1.2 2000/02/08 16:35:31 lasiuk Exp $
+#################################################
 SCL_SYSTEM  = $(STAR_SYS)
 
 SCL_HOME    = /home/star/lasiuk/SCL/StarClassLibrary/
@@ -8,7 +11,8 @@ CXXFLAGS    = -I$(RRS_HOME)/include\
               -I$(SCL_HOME)/include\
               -I/opt/aCC/include/SC\
               -I..\
-              -g -DRWSTD_BOUNDS_CHECKING -DST_NO_EXCEPTIONS
+              -g -DRWSTD_BOUNDS_CHECKING -DST_NO_EXCEPTIONS\
+              -DST_NO_NAMESPACES
 
 
 CXX         =  aCC
