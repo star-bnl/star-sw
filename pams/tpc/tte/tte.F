@@ -1,5 +1,10 @@
-* $Id: tte.F,v 1.31 1999/08/17 00:06:20 sakrejda Exp $
+* $Id: tte.F,v 1.32 1999/12/01 01:07:54 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.32  1999/12/01 01:07:54  sakrejda
+* In  the tte_eval table values for the MC track associated with a reconstructed
+* track were not recovered correctly. The problem was fixed thanks to help
+* from Wensheng Deng.
+*
 * Revision 1.31  1999/08/17 00:06:20  sakrejda
 * max id of rec hit is inferred EITHER from the hit table OR the index table
 *
@@ -852,8 +857,8 @@ c        let's find the biggest contribution
             endif
          end do
          eval(eval_h.nok).mtrk=mc_track_on_rec_track(1,iloc)
+         ii=list_g2t_tracks(mc_track_on_rec_track(1,iloc))
          eval(eval_h.nok).ngood=ibig
-         ii=list_g2t_tracks(mc_track)
          eval(eval_h.nok).pxvg=g2t_track(ii).p(1)
          eval(eval_h.nok).pyvg=g2t_track(ii).p(2)
          eval(eval_h.nok).pzvg=g2t_track(ii).p(3)
