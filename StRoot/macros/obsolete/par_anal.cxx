@@ -131,5 +131,7 @@
   c2->Modified();
   gBenchmark->Show("hsum");
   printf(" This is a finish \n");
+  printf(" You may pick up this example from
+  /afs/rhic/star/packages/dev/StRoot/macros/par_anal.cxx\n");
 }
 

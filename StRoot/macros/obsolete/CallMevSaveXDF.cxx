@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   26/06/98  (E-mail:fine@bnl.gov)
-// $Id: CallMevSaveXDF.cxx,v 1.3 1998/07/23 11:32:41 fisyak Exp $
+// $Id: CallMevSaveXDF.cxx,v 1.4 1998/07/25 00:31:49 fisyak Exp $
 // $Log: CallMevSaveXDF.cxx,v $
+// Revision 1.4  1998/07/25 00:31:49  fisyak
+// Working versions of tutorials
+//
 // Revision 1.3  1998/07/23 11:32:41  fisyak
 // Small fixes
 //
@@ -60,10 +63,10 @@
 
 //   Read XDF file
    const Char_t *filename;
-   //   if (NT) filename = "$(temp)/test.xdf";
-   //   else  filename = "test.xdf";
-   //   St_XDFFile  xdf;                       // Create xdf object of St_XDFFile class
-   //   if (xdf.OpenXDF(filename,"w")) return; // Try to open the inout XDF file
+   if (NT) filename = "$(temp)/test.xdf";
+   else  filename = "test.xdf";
+   St_XDFFile  xdf;                       // Create xdf object of St_XDFFile class
+   if (xdf.OpenXDF(filename,"w")) return; // Try to open the inout XDF file
 
 // File has been opened
 
@@ -80,7 +83,7 @@
       printf(" Calling the 'mevsim' module for %d event \n",i+1);
       if( mevsim(pa) ) {
         pa->ls("*");
-	//        xdf.NextEventPut(&event);               // Write the current event into XDF file
+        xdf.NextEventPut(&event);               // Write the current event into XDF file
       }
       else
         printf(" Module failed \n");
@@ -89,10 +92,11 @@
    gBenchmark->Stop("mevsim");                 // Stop timer
 
   // Print timing
-   //   printf("    Real Time Cpu Time  Os    CPU     RAM   output     size\n");
-   //   printf("      sec       sec                    Mb    file \n");
-   //   printf(" 1.  17.75     15.45    NT  Intel 266   128    local     7'116'900\n");
-   //   printf("\n ======== Your system for %d events is: \n",nevent);
+      printf("    Real Time Cpu Time  Os    CPU     RAM   output     size\n");
+      printf("      sec       sec                    Mb    file \n");
+      printf(" 1.  17.75     15.45    NT  Intel 266 128   local     7'116'900\n");
+      printf("\n ======== Your system for %d events is: \n",nevent);
     gBenchmark->Show("mevsim");
-   //   printf(" File %s in XDF format has been created\n",gSystem->ExpandPathName(filename));
+    printf(" File %s in XDF format has been created\n",gSystem->ExpandPathName(filename));
+    printf(" You may pick up this example from /afs/rhic/star/packages/dev/StRoot/macros/CallMevSaveXDF.cxx\n");
 }

@@ -6,6 +6,7 @@ void MakeHists(Char_t *xdffilename="/star/sol/users/fisyak/auau_ce_b0-2_4801_500
 {
 
   gROOT->Reset();
+  Char_t *xdffilename="/star/sol/users/fisyak/auau_ce_b0-2_4801_5000.xdf";
   Bool_t NT = kFALSE;
   if (strcmp(gSystem.GetName(),"WinNT")==0){
     NT = kTRUE;
@@ -22,7 +23,6 @@ void MakeHists(Char_t *xdffilename="/star/sol/users/fisyak/auau_ce_b0-2_4801_500
 //   Read XDF file
   // St_XDFFile  xdf("auau_ce_b0-2_4801_5000.xdf");
    St_XDFFile  xdf(xdffilename);
-   //   St_DataSet *event = xdf.NextEventGet();
    St_DataSet *event = xdf.NextEventGet();
    if (!event) { printf(" NO events \n"); return;}
    event->ls("*");
@@ -71,13 +71,15 @@ void MakeHists(Char_t *xdffilename="/star/sol/users/fisyak/auau_ce_b0-2_4801_500
 
 //*-* Create a canvas to show the result (based on  root/tutorials/hsum.C )
 
-     c1 = new TCanvas("c1","The reading STAF table: \"particle.h\"",200,10,600,400);
+     c1 = new TCanvas("c1","The reading STAF table: \"particle.h\"",200,10,600,800);
      c1->SetGrid();
      gBenchmark->Start("hsum");
 
      Int_t l = 0;
+     Int_t nev =0;
      for (l=0; l < pa->GetNRows(); l++) 
      {
+       nev++;
        particle_st *p = particle[l];
 
     //*-* Fill a'la nt/plot 666.phep(3)
@@ -129,4 +131,6 @@ void MakeHists(Char_t *xdffilename="/star/sol/users/fisyak/auau_ce_b0-2_4801_500
      gBenchmark->Show("hsum");
   }
   printf(" This is a finish \n");
+  printf(" You may pick up this example from /afs/rhic/star/packages/dev/StRoot/macros/MakeHists.cxx\n");
 }
+
