@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichPadMonitor.h,v 2.3 2000/09/29 17:36:58 gans Exp $
+ * $Id: StRichPadMonitor.h,v 2.4 2000/10/01 00:24:57 gans Exp $
  * Description:
  *  First aTtempt at a simple Pad Monitor.
  *  Runs only in ROOT
@@ -7,8 +7,11 @@
  ***************************************************************
  *
  * $Log: StRichPadMonitor.h,v $
- * Revision 2.3  2000/09/29 17:36:58  gans
- * Modified addHit(), StThreeVector<double> -> StThreeVectorF,other minor stuff
+ * Revision 2.4  2000/10/01 00:24:57  gans
+ * Fixed Stomped getRichCanvas()
+ *
+ * Revision 2.4  2000/10/01 00:24:57  gans
+ * Fixed Stomped getRichCanvas()
  *
  * Revision 2.3  2000/09/29 17:36:58  gans
  * Modified addHit(), StThreeVector<double> -> StThreeVectorF,other minor stuff
@@ -118,7 +121,7 @@ public:
     void drawEventNum(Int_t);
     void drawEventInfo(Long_t,Long_t);
     void printCanvas(char*,char*, int);
-   
+
    
     void doResiduals(double,long[],int,int);
     inline TCanvas* getRichCanvas(){ return mRichCanvas;};
