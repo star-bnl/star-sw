@@ -30,6 +30,9 @@
 #include "TString.h"
 #include "TLine.h"
 #include "TText.h"
+#include "TROOT.h"
+#include "TList.h"
+#include "TPolyMarker.h"
 #else
 class TMinuit;
 class TF1;
@@ -406,7 +409,7 @@ TF1 *FitGP(TH1D *proj, Option_t *opt="RQ", Double_t nSigma=3, Int_t pow=3) {
   g1->SetParName(1,"Mean");
   g1->SetParName(2,"Sigma");
   for (int i=0; i<=pow+1;i++) g1->SetParName(3+i,Form("a%i",i));
-  TF1 *g2 = new TF1("g1",Form("gaus(0)+pol%i(3)",pow+2),-0.2,0.2);
+  TF1 *g2 = new TF1("g2",Form("gaus(0)+pol%i(3)",pow+2),-0.2,0.2);
   g2->SetParName(0,"Constant");
   g2->SetParName(1,"Mean");
   g2->SetParName(2,"Sigma");
@@ -487,6 +490,17 @@ TF1 *FitGP(TH1D *proj, Option_t *opt="RQ", Double_t nSigma=3, Int_t pow=3) {
   g->SetRange(params[1]-nSigma*params[2],params[1]+nSigma*params[2]);
   proj->Fit(g,opt);
 #endif
+  if (! Opt.Contains("q",TString::kIgnoreCase)) {
+    g->GetParameters(params);
+    Double_t X = params[1];
+    Double_t Y = params[0]/TMath::Sqrt(2*TMath::Pi()*params[2]);
+    TPolyMarker *pm = new TPolyMarker(1, &X, &Y);
+    proj->GetListOfFunctions()->Add(pm);
+    pm->SetMarkerStyle(23);
+    pm->SetMarkerColor(kRed);
+    pm->SetMarkerSize(1.3);
+    proj->Draw();
+  }
   return g;
 }
 //________________________________________________________________________________
@@ -585,7 +599,10 @@ void dEdxFit(const Char_t *HistName = "Time",const Char_t *FitName = "GP",
   TCanvas *canvas = 0;
   TString Opt(opt);
   if (! Opt.Contains("Q",TString::kIgnoreCase)) canvas = new TCanvas("Fit","Fit results");
-  TFile *fRootFile = (TFile *) gDirectory->GetFile();
+  TList *list = (TList *) gROOT->GetListOfFiles();
+  if (! list) {printf("File list is empty\n"); return;}
+  TIter next(list);
+  TFile *fRootFile = (TFile *) next(); // gDirectory->GetFile();
   if (! fRootFile ) {printf("There is no opened file\n"); return;}
   TH1 *hist = (TH1 *) fRootFile->Get(HistName);
   if (!hist) {printf("Cannot find %s\n", HistName); return;}
