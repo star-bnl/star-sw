@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.286 2002/03/14 15:55:08 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.287 2002/03/19 17:01:33 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -281,6 +281,9 @@ Bfc_st BFC[] = {
   {"tfs"         ,"","tpcChain","Simu"                             ,"","","use tfs (no StTrsMaker)",kFALSE},
   {"ZDCVtx"      ,"","tpcChain","db"                      ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls"        ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
+  {"daqclf"      ,"","tpcChain","","StDaqClfMaker","StDaqClfMaker",    "Offline DAQ Cluster finder",kFALSE},
+
+
   {"Velo"        ,"","tpcChain","tpc_T,tls"                         ,"StVeloMaker","StVeloMaker","",kFALSE},
   {"TpcHitFilter","tpc_hit_filter","tpcChain",""    ,"StTpcHitFilterMaker","StTpcHitFilterMaker","",kFALSE},
   {"tpt"         ,"tpc_tracks","tpcChain","tpc_T,tls,"     ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
@@ -872,8 +875,37 @@ Bool_t StBFChain::GetOption(const Int_t k) const
   return (k>0 && k <NoChainOptions) ? fBFC[k].Flag : kFALSE;
 }
 
+/// Returns the comment string associated to an option
+/*!
+ * Any option passed a bla=XX is reshaped as follow ...
+ * - The SetFlags() function strip out the =XX part and replaces
+ *   the comment by the value XX
+ * - This GetOptionString() returns the comment part so makers
+ *   can globally access the option string.
+ * 
+ * <i>Note</i> : If the requested option is not part of the global BFC[]
+ * array, the kOpt() method is going to scream at you but it will still
+ * work. You can ask for that option to be added to the chain official
+ * options later whenever your code debugging is done. In other words,
+ * this method allows you to pass ANY options not officially declared
+ * and use it as test/work-around to pass any parameters to your maker.
+ *
+ * However, if the parameters are to be used in production, we DO
+ * request/require that they are declared as a valid option.
+ *
+ *
+ */
+Char_t *StBFChain::GetOptionString(const Char_t *Opt)
+{
+  int o = kOpt(Opt);
+  if(!o) return NULL;
+  else if(!GetOption(o)) return NULL;
+  else return(fBFC[o].Comment);  
+}
+
+
 //_____________________________________________________________________________
-/// Scan all flags, check if they are correct
+/// Scan all flags, check if they are correct, manipulate the comment if necessary
 void StBFChain::SetFlags(const Char_t *Chain)
 {
   Int_t k;

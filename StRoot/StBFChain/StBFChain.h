@@ -78,8 +78,9 @@ class StBFChain : public StChain {
    virtual Bool_t      GetOption(const Int_t k)  const;
    virtual Bool_t      GetOption(const TString *Opt) const {return GetOption(kOpt(Opt));}
    virtual Bool_t      GetOption(const Char_t  *Opt) const {return GetOption(kOpt(Opt));}
+   virtual Char_t     *GetOptionString(const Char_t  *);
    virtual const char *GetCVS() const {
-       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.22 2002/03/12 21:23:09 fisyak Exp $ built "__DATE__" "__TIME__ ; 
+       static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.23 2002/03/19 17:01:33 jeromel Exp $ built "__DATE__" "__TIME__ ; 
        return cvs;
    }
    /// StBFChain control class
