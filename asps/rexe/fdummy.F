@@ -30,7 +30,8 @@ C MATH
      *RDMOUT,DIRCOS,  BINOMI,RNGAMA,GAUSS,PROXIM,JUMPAD,JBYT,  
      *FINT,POLINT,LFIT,DIVDIF,LFITW,LVSIMX,  MZVOLM,MZDRED,ZVERIF,      
      *HPLFUN,HPAGSZ,HNOENT,HNFORM,  RM48,RM48IN,RSFACT,RSFINV,RSFEQN,   
-     *DSFACT,RFFT,CFFT,  SORTRQ,DGMLT1,DGMLT2                           
+     *DSFACT,RFFT,CFFT,  SORTRQ,DGMLT1,DGMLT2,
+     *erf,erfc                           
 C SIND,COSD                                                             
 * make sure that real calls will never be done even if this routine is c
       IX = IX+1                                                         
@@ -50,6 +51,9 @@ C Check IX>=0
       FDUM3 = DCOSD(0.0D0)                                              
       FDUM4 = DTAND(0.0D0)                                              
       IX=SYSTEMF(' ')                                                   
+* Erf
+      FDUM1 = ERF (0.0)
+      fDUM1 = ERFC(0.0)
 * Landau
       FDUM1 = DENLAN(0.0)
       FDUM1 = DSTLAN(0.0)
