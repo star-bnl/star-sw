@@ -19,7 +19,6 @@
 #define ST_MIXER_PARAMETERIZED_DIGITAL_SIGNAL_GENERATOR_HH
 #include <iostream.h>
 #include "StTrsMaker/include/StTrsDigitalSignalGenerator.hh"
-//#include "StDaqLib/TPC/trans_table.hh"
 class StMixerFastDigitalSignalGenerator : public StTrsDigitalSignalGenerator {
 public:
     ~StMixerFastDigitalSignalGenerator();
@@ -33,7 +32,7 @@ public:
     void addWhiteNoise()     ;
     void addCorrelatedNoise();
 private :  
-    //unsigned char do10to8Translation(int ) const;  
+    unsigned char do10to8Translation(int ) const;  
 protected:
     StMixerFastDigitalSignalGenerator(StTpcElectronics*, StTrsSector*);
 private:
