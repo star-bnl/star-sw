@@ -1,4 +1,4 @@
-// $Id: StEEmcDataMaker.cxx,v 1.17 2004/07/01 04:01:14 balewski Exp $
+// $Id: StEEmcDataMaker.cxx,v 1.18 2004/07/23 02:04:13 jeromel Exp $
 
 #include <Stiostream.h>
 #include <math.h>
@@ -87,7 +87,13 @@ Int_t StEEmcDataMaker::Make(){
   } 
   
   StEvent* mEvent = (StEvent*)GetInputDS("StEvent");
-  assert(mEvent);// fix your chain or open the right event file
+
+  //assert(mEvent);// fix your chain or open the right event file
+  if (!mEvent){
+    gMessMgr->Message("","W") << "StEEmcDataMaker::Make: No StEvent available" << endm;
+    return kStErr;
+  }
+
   // printf("\n%s  accesing StEvent ID=%d\n",GetName(),mEvent->id());
 
   hs[0]->Fill(0);
@@ -424,6 +430,9 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
  
 
 // $Log: StEEmcDataMaker.cxx,v $
+// Revision 1.18  2004/07/23 02:04:13  jeromel
+// Remove one assert(). Really exhaustive use of it without message though
+//
 // Revision 1.17  2004/07/01 04:01:14  balewski
 // fix data corruption detection, cleanup
 //
