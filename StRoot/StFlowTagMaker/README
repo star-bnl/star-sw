@@ -1,0 +1,15 @@
+StFlowTagMaker
+
+Stores x and y components of Q vectors of 2 
+	randomly chosen sub-events
+Does it for harmonics 1 through 5
+Also stores the multiplicity and the sum pt
+Does it without cuts and with cuts
+Does not need particle ID
+Will have provision for making the event 
+	plane isotropic in the lab by weighting with 
+	the inverse of the particle azimuthal 
+	distribution or by recentering in the x,y plane
+Stores and retrieves these constants
+Also public: Division of an event into equal 
+	random sub-events
