@@ -66,8 +66,8 @@ foreach my $dir (@dirs) {
 	  }
 	  my $diff = $vers - $v - $KEEP;
 	  if ($diff lt 0) {
-	    print "keep \t$file => \t$link / $s : $vers - $v - $KEEP = $diff < 0\n"; 
-	    next;
+	      #print "keep \t$file => \t$link / $s : $vers - $v - $KEEP = $diff < 0\n"; 
+	      next;
 	  }
 	  print "Delete $s \n";
 	  unlink $s;
