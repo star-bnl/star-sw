@@ -1,5 +1,8 @@
-//! $Id: StHistUtil.h,v 1.1 1999/09/20 20:12:16 kathy Exp $
+//! $Id: StHistUtil.h,v 1.2 1999/11/05 21:51:58 kathy Exp $
 //! $Log: StHistUtil.h,v $
+//! Revision 1.2  1999/11/05 21:51:58  kathy
+//! write title at top of each page of histograms in DrawHists method
+//!
 //! Revision 1.1  1999/09/20 20:12:16  kathy
 //! moved the histogram utility methods out of St_QA_Maker and into StHistUtil because they can really be used by any Maker and associated histograms
 //!
@@ -25,6 +28,7 @@
 //   -  however, if we are using the methods of TCanvas, then put include "TCanvas.h"
 class TCanvas;
 class StMaker;
+class TPaveLabel;
 
 class StHistUtil {
  private:
@@ -69,7 +73,7 @@ class StHistUtil {
   
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.1 1999/09/20 20:12:16 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHistUtil.h,v 1.2 1999/11/05 21:51:58 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StHistUtil, 1)   //needed for all code that will be used in CINT
     };
