@@ -11,12 +11,14 @@ c
 	INTEGER*4 n
 	LOGICAL*1 bytes(n)
 	CHARACTER*(*) c
-	INTEGER*4 nbytes, i, lenc
+	INTEGER*4 nbytes, i, lenc, idummy
 
 	lenc = len( c )
 	nbytes = min( n, lenc )
 	DO i = 1, nbytes
-	    c(i:i) = char( bytes(i) )
+c->rm       AIX FORTRAN intrinsic requires promotion of bytes(i)
+            idummy = bytes(i) 
+	    c(i:i) = char( idummy )
 	END DO
 	IF( nbytes .lt. lenc ) c(nbytes+1:) = ' '
 	return

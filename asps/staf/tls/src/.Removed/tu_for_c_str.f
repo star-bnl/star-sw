@@ -52,13 +52,15 @@ C-
 	LOGICAL*1 cstr(*)
 	INTEGER*4 clen
 	CHARACTER*(*) fort
-	INTEGER*4 flen,nlen,i,ok
+	INTEGER*4 flen,nlen,i,ok,idummy
  
  
 	i = 0
 	flen = len( fort )
 	DO WHILE (cstr(i+1).ne.0 .and. i.lt.flen)
 	    i = i + 1
-	    fort(i:i) = char( cstr(i) )
+c->rm       AIX FORTRAN intrinsic requires promotion of cstr(i)
+            idummy = cstr(i)
+	    fort(i:i) = char( idummy )
 	    END DO
 	END
