@@ -12,7 +12,7 @@
 * 21Jul98 K. Turner - removed gethij & gst - not needed
 * 21Jul98 K. Turner - changed to separate out the gstar & g2t parts
 * 22Jul98 K. Turner - fixed to pick up correct gstar files
-* 
+* 27Jul98 K. Turner - fixed to include all domains in bfc_defaults 
 *************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -415,32 +415,51 @@ return
 macro bfc_defaults
   
 macro/global/import *
- DEFAULT = _
-[TOP]/kumacs/sim,_
-[TOP]/kumacs/util,_
+  DEFAULT = _
 [TOP]/kumacs/chain,_
+[TOP]/kumacs/ctf,_
 [TOP]/kumacs/emc,_
+[TOP]/kumacs/ftpc,_
+[TOP]/kumacs/gen,_
+[TOP]/kumacs/mwc,_
+[TOP]/kumacs/sim,_
 [TOP]/kumacs/svt,_
 [TOP]/kumacs/tpc,_
+[TOP]/kumacs/trg,_
+[TOP]/kumacs/util,_
+[TOP]/pams/ctf/kumac,_
 [TOP]/pams/emc/kumac,_
+[TOP]/pams/ftpc/kumac,_
+[TOP]/pams/gen/kumac,_
 [TOP]/pams/global/kumac,_
+[TOP]/pams/mwc/kumac,_
+[TOP]/pams/sim/kumac,_
 [TOP]/pams/svt/kumac,_
 [TOP]/pams/tpc/kumac,_
-$STAR/kumacs/sim,_
-$STAR/kumacs/util,_
+[TOP]/pams/trg/kumac,_
+[TOP]/pams/vpd/kumac,_
 $STAR/kumacs/chain,_
+$STAR/kumacs/ctf,_
 $STAR/kumacs/emc,_
+$STAR/kumacs/ftpc,_
+$STAR/kumacs/gen,_
+$STAR/kumacs/mwc,_
+$STAR/kumacs/sim,_
 $STAR/kumacs/svt,_
 $STAR/kumacs/tpc,_
+$STAR/kumacs/trg,_
+$STAR/kumacs/util,_
 $STAR/pams/ctf/kumac,_
 $STAR/pams/emc/kumac,_
 $STAR/pams/ftpc/kumac,_
 $STAR/pams/gen/kumac,_
 $STAR/pams/global/kumac,_
 $STAR/pams/mwc/kumac,_
+$STAR/pams/sim/kumac,_
 $STAR/pams/svt/kumac,_
 $STAR/pams/tpc/kumac,_
-$STAR/pams/trg/kumac
+$STAR/pams/trg/kumac,_
+$STAR/pams/vpd/kumac
 
  def [DEFAULT]
  message ' bfc_defaults: Define default kumac search path as' [default]
