@@ -1,7 +1,12 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.h,v 1.2 2004/09/10 18:13:53 mmiller Exp $
+// $Id: StJets.h,v 1.3 2004/09/20 23:15:52 mmiller Exp $
 // $Log: StJets.h,v $
+// Revision 1.3  2004/09/20 23:15:52  mmiller
+// Fixed bug in retreiving emc towers for jet, introduced
+// TrackToJetIndex inherits from TLorentzVector now.  See StJetReader::exampleAna
+// for example of how to retreive the corrected 4-momenta used for barrel towers.
+//
 // Revision 1.2  2004/09/10 18:13:53  mmiller
 // Two fixes:
 // 1) add StDetectorId to the TTree to allow sorting of jet particles into
@@ -76,6 +81,7 @@ using std::vector;
 #include <cmath>
 #include "TObject.h"
 #include "TClonesArray.h"
+#include "TLorentzVector.h"
 #include "StDetectorId.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 
@@ -83,7 +89,8 @@ class StProtoJet;
 class StJet;
 class StMuDst;
 
-class TrackToJetIndex : public TObject
+//!class TrackToJetIndex : public TObject
+class TrackToJetIndex : public TLorentzVector
 {
 public:
     TrackToJetIndex(int ji=-1, int ti=-1, StDetectorId id=kUnknownId) : mJetIndex(ji), mTrackIndex(ti) , mDetId(id) {};
@@ -161,8 +168,10 @@ public:
     ///Access to the indices of the BEMC towers in the jet:
     vector<int> jetBemcTowerIndices(int jetIndex);
 
-    //vector<int> jetTrackIndices(int jetIndex);
-
+    ///Access to a specific track to jet index object, which stores the 4-mom used in the jet finding for that track/tower
+    const TLorentzVector* trackToJetIndex(int jetIndex, int TrackIndex); //if you know the index 
+    const TLorentzVector* trackToJetIndex(StMuDst* event, int jetIndex, const StMuTrack* track); //if you only have a track
+    
     ///access to event numbers, used to synchronize with StMuDstMaker for simultaneous reading
     int eventId();
     int eventNumber();
