@@ -5,6 +5,8 @@
 #include "TBrowser.h"
 #include "St_NodeView.h"
 #include "St_NodePosition.h"
+#include "TROOT.h"
+#include "TView.h"
 #include "TPadView3D.h"
 #include "TGeometry.h"
 #include "TVirtualPad.h"
@@ -68,6 +70,37 @@ void St_NodeView::Browse(TBrowser *b){
 //    b->Add(pos); 
 }
 
+//______________________________________________________________________________
+void St_NodeView::Draw(Option_t *option)
+{
+//*-*-*-*-*-*-*-*-*-*-*-*Draw Referenced node with current parameters*-*-*-*
+//*-*                   =============================================
+ 
+   TString opt = option;
+   opt.ToLower();
+//*-*- Clear pad if option "same" not given
+   if (!gPad) {
+      if (!gROOT->GetMakeDefCanvas()) return;
+      (gROOT->GetMakeDefCanvas())();
+   }
+   if (!opt.Contains("same")) gPad->Clear();
+ 
+//*-*- Draw Referenced node
+   gGeometry->SetGeomLevel();
+   gGeometry->UpdateTempMatrix();
+ 
+   AppendPad(option);
+ 
+//*-*- Create a 3-D View
+   TView *view = gPad->GetView();
+   if (!view) {
+      view = new TView(1);
+      view->SetAutoRange(kTRUE);
+      Paint();
+      view->SetAutoRange(kFALSE);
+   }
+}
+
 //_____________________________________________________________________________
 St_Node *St_NodeView::GetNode(){ 
   St_NodePosition *pos = GetPosition();
@@ -88,45 +121,47 @@ void St_NodeView::Paint(Option_t *option)
 //*-*  vis = -2 shape is drawn. Its sons are not drawn
 //*-*
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
- 
+  static St_NodePosition nullPosition;
   TPadView3D *view3D=gPad->GetView3D();
 
-//  while (nextView = (St_NodeView *) next()) {
-   St_Node *thisNode  = GetNode();
-   St_NodePosition *position = 0;
-   TShape  *shape = 0;
-   if (thisNode) {
-       shape    = thisNode->GetShape();
-       position = GetPosition();
-   }
+  St_Node *thisNode  = GetNode();
+  St_NodePosition *position = &nullPosition;
+  TShape  *shape = 0;
+  if (thisNode) {
+    shape    = thisNode->GetShape();
+    position = GetPosition();
+  }
+      
     
 //*-*- Update translation vector and rotation matrix for new level
-   if (gGeometry->GeomLevel()) {
-      gGeometry->UpdateTempMatrix(position->GetX(),position->GetY(),position->GetZ()
-                                 ,position->GetMatrix()->GetMatrix()
-                                 ,position->GetMatrix()->IsReflection());
-      if (view3D)
-         view3D->UpdatePosition(position->GetX(),position->GetY(),position->GetZ(),position->GetMatrix());
-   }
+  if (gGeometry->GeomLevel()) {
+     gGeometry->UpdateTempMatrix(position->GetX(),position->GetY(),position->GetZ()
+                                ,position->GetMatrix()->GetMatrix()
+                                ,position->GetMatrix()->IsReflection());
+     if (view3D)
+        view3D->UpdatePosition(position->GetX(),position->GetY(),position->GetZ(),position->GetMatrix());
+  }
  
-   Int_t nsons = 0;
-   TList *fNodes =  GetList();
-   if (fNodes) nsons = fNodes->GetSize();
- 
-   thisNode->TAttLine::Modify();
-   thisNode->TAttFill::Modify();
-   if (thisNode->GetVisibility() && shape->GetVisibility()) {
+  Int_t nsons = 0;
+  TList *fNodes =  GetList();
+  if (fNodes) nsons = fNodes->GetSize();
+  if (thisNode) {
+    thisNode->TAttLine::Modify();
+    thisNode->TAttFill::Modify();
+    if (thisNode->GetVisibility() && shape->GetVisibility()) {
 //      gNode = thisNode;
-      shape->SetLineColor(thisNode->GetLineColor());
-      shape->SetLineStyle(thisNode->GetLineStyle());
-      shape->SetLineWidth(thisNode->GetLineWidth());
-      shape->SetFillColor(thisNode->GetFillColor());
-      shape->SetFillStyle(thisNode->GetFillStyle());
-      if (view3D)
-           view3D->SetLineAttr(thisNode->GetLineColor(),thisNode->GetLineWidth(),option);
-      shape->Paint(option);
-   }
+       shape->SetLineColor(thisNode->GetLineColor());
+       shape->SetLineStyle(thisNode->GetLineStyle());
+       shape->SetLineWidth(thisNode->GetLineWidth());
+       shape->SetFillColor(thisNode->GetFillColor());
+       shape->SetFillStyle(thisNode->GetFillStyle());
+       if (view3D)
+            view3D->SetLineAttr(thisNode->GetLineColor(),thisNode->GetLineWidth(),option);
+       shape->Paint(option);
+    }
+  
 ////---   if ( thisNode->TestBit(kSonsInvisible) ) return;
+  }
  
 //*-*- Paint all sons
    if(!nsons) return;
@@ -145,6 +180,5 @@ void St_NodeView::Paint(Option_t *option)
           view3D->PopMatrix();
    }
    gGeometry->PopLevel();
- 
 }
 

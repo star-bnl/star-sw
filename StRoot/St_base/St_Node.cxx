@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.11 1999/01/31 02:03:06 fine Exp $
+// $Id: St_Node.cxx,v 1.12 1999/02/04 16:26:11 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.12  1999/02/04 16:26:11  fine
+// St_NodeView::Paint method has been introduced
+//
 // Revision 1.11  1999/01/31 02:03:06  fine
 // St_DataSetIter::Notify - new method + clean up
 //
@@ -138,15 +141,15 @@ St_Node::St_Node(const Text_t *name, const Text_t *title, const Text_t *shapenam
    fVisibility = 1;
 
    if(!fShape) {Printf("Illegal referenced shape"); return;}
+   ImportShapeAttributes();
 
-#if 0 
-   if (fParent) {
-      fParent->BuildListOfNodes();
-      fParent->GetListOfNodes()->Add(this);
-      ImportShapeAttributes();
+#if 0
+   if (GetParent()) {
+//      fParent->BuildListOfNodes();
+//      fParent->GetListOfNodes()->Add(this);
    } else {
-      gGeometry->GetListOfNodes()->Add(this);
-      cd();
+//      gGeometry->GetListOfNodes()->Add(this);
+//      cd();
    }
 #endif
 }
@@ -176,6 +179,17 @@ St_Node::St_Node(const Text_t *name, const Text_t *title, TShape *shape, Option_
    fVisibility = 1;
    SetTitle(title);
    if(!shape) {Printf("Illegal referenced shape"); return;} 
+   ImportShapeAttributes();
+#if 0
+   if (GetParent()) {
+//      fParent->BuildListOfNodes();
+//      fParent->GetListOfNodes()->Add(this);
+      ImportShapeAttributes();
+   } else {
+//      gGeometry->GetListOfNodes()->Add(this);
+//      cd();
+   }
+#endif
 
 }
 //______________________________________________________________________________
@@ -511,11 +525,13 @@ void St_Node::ImportShapeAttributes()
 //*-*-*-*-*-*-*Copy shape attributes as node attributes*-*-*-*-*--*-*-*-*-*-*
 //*-*          ========================================
  
-   SetLineColor(fShape->GetLineColor());
-   SetLineStyle(fShape->GetLineStyle());
-   SetLineWidth(fShape->GetLineWidth());
-   SetFillColor(fShape->GetFillColor());
-   SetFillStyle(fShape->GetFillStyle());
+   if (fShape) {
+     SetLineColor(fShape->GetLineColor());
+     SetLineStyle(fShape->GetLineStyle());
+     SetLineWidth(fShape->GetLineWidth());
+     SetFillColor(fShape->GetFillColor());
+     SetFillStyle(fShape->GetFillStyle());
+   }
  
    if (!GetList()) return;
    St_Node *node;
