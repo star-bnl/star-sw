@@ -1,23 +1,18 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridCollection.cc,v 1.7 2001/08/16 21:02:03 munhoz Exp $
+ * $Id: StSvtWaferCollection.cc,v 1.1 2001/08/16 21:02:04 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
  *
- * Description: SVT Hybrid Array BASE class
+ * Description: SVT Wafer Array BASE class
  *
  ***************************************************************************
  *
- * $Log: StSvtHybridCollection.cc,v $
- * Revision 1.7  2001/08/16 21:02:03  munhoz
+ * $Log: StSvtWaferCollection.cc,v $
+ * Revision 1.1  2001/08/16 21:02:04  munhoz
  * changing StObjArray to StStrArray. StSvtConfig reestructured. New classes for geometry DB
  *
- * Revision 1.6  2001/02/18 00:10:28  caines
- * Improve and use StSvtConifg
- *
- * Revision 1.5  2000/11/30 20:39:12  caines
- * Changed to allow us of database
  *
  **************************************************************************/
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -33,15 +28,15 @@
 
 #include <iostream.h>
 #include "StObject.h"
-#include "StSvtHybridCollection.hh"
+#include "StSvtWaferCollection.hh"
 #include "StSvtConfig.hh"
 #include "StMessMgr.h"
 
 #include "TString.h"
 
-ClassImp(StSvtHybridCollection)
+ClassImp(StSvtWaferCollection)
 
-StSvtHybridCollection::StSvtHybridCollection() 
+StSvtWaferCollection::StSvtWaferCollection() 
 {
   // As the SVT can present various configurations, 
   // the constructor of this class has one parameter that corresponds to the configuration name.
@@ -59,22 +54,22 @@ StSvtHybridCollection::StSvtHybridCollection()
   mSvtConfig = NULL;
 }
 
-StSvtHybridCollection::StSvtHybridCollection(const char* config) 
+StSvtWaferCollection::StSvtWaferCollection(const char* config) 
 {
   setConfiguration(config);
 }
 
-StSvtHybridCollection::StSvtHybridCollection(StSvtConfig* config) 
+StSvtWaferCollection::StSvtWaferCollection(StSvtConfig* config) 
 {
   setConfiguration(config);
 }
 
-StSvtHybridCollection::~StSvtHybridCollection()
+StSvtWaferCollection::~StSvtWaferCollection()
 {
   //delete mSvtConfig;
 }
 
-void StSvtHybridCollection::setConfiguration(const char* config)
+void StSvtWaferCollection::setConfiguration(const char* config)
 {
   // set the Collection configuration
 
@@ -82,48 +77,54 @@ void StSvtHybridCollection::setConfiguration(const char* config)
   mSvtConfig = new StSvtConfig();
   mSvtConfig->setConfiguration(config);
 
-  resize(mSvtConfig->getTotalNumberOfHybrids());
+  resize(mSvtConfig->getTotalNumberOfHybrids()/2);
   clear();
 }
 
-void StSvtHybridCollection::setConfiguration(StSvtConfig* config)
+void StSvtWaferCollection::setConfiguration(StSvtConfig* config)
 {
   // set the Collection configuration
 
   mSvtConfig = config;
   mConfig = TString(mSvtConfig->getConfiguration());
 
-  resize(mSvtConfig->getTotalNumberOfHybrids());
+  resize(mSvtConfig->getTotalNumberOfHybrids()/2);
   clear();
 }
 
-int StSvtHybridCollection::getHybridIndex(int barrelID, int ladderID, int waferID, int hybridID)
+int StSvtWaferCollection::getWaferIndex(int barrelID, int ladderID, int waferID)
 {
-  // returns an internal index for the specified hybrid. 
-  // This index should be used to store/retrieve a specific hybrid in/from the collection.
+  // returns an internal index for the specified wafer. 
+  // This index should be used to store/retrieve a specific wafer in/from the collection.
   // Or one can use the getObject method which parameters are the barrel, ladder, wafer and hybrid numbers.
 
-  if (mSvtConfig)
-    return mSvtConfig->getHybridIndex(barrelID, ladderID, waferID, hybridID);
+  int index;
+
+  if (mSvtConfig) {
+    index = (int)mSvtConfig->getHybridIndex(barrelID, ladderID, waferID, 1)/2;
+    return index;
+  }
 
   return -1;
 }
+
 /*
-StSvtHybridObject* StSvtHybridCollection::At(int index)
+StSvtHybridObject* StSvtWaferCollection::At(int index)
 {
   return (StSvtHybridObject*)at(index);
 }
 
-void StSvtHybridCollection::AddAt(StSvtHybridObject* object, int index)
+void StSvtWaferCollection::AddAt(StSvtHybridObject* object, int index)
 {
   put_at((TObject*)object,index);
 }
 */
-StSvtHybridObject* StSvtHybridCollection::getObject(int barrelID, int ladderID, int waferID, int hybridID)
-{
-  // Method to retrieve an object (StSvtHybridObject) of the collection using the barrel, ladder, wafer and hybrid numbers.
 
-  int index = getHybridIndex(barrelID, ladderID, waferID, hybridID);
+StSvtHybridObject* StSvtWaferCollection::getObject(int barrelID, int ladderID, int waferID)
+{
+  // Method to retrieve an object (StSvtHybridObject) of the collection using the barrel, ladder, wafer numbers.
+
+  int index = getWaferIndex(barrelID, ladderID, waferID);
 
   if (index<0) return 0;
 
@@ -131,10 +132,9 @@ StSvtHybridObject* StSvtHybridCollection::getObject(int barrelID, int ladderID, 
   return (StSvtHybridObject*)at(index);
 }
 
-int StSvtHybridCollection::getNumberOfBarrels() {return mSvtConfig->getNumberOfBarrels();}
-int StSvtHybridCollection::getNumberOfLadders(int barrel) {return mSvtConfig->getNumberOfLadders(barrel);}
-int StSvtHybridCollection::getNumberOfWafers(int barrel)  {return mSvtConfig->getNumberOfWafers(barrel);}
-int StSvtHybridCollection::getNumberOfHybrids() {return mSvtConfig->getNumberOfHybrids();}
-int StSvtHybridCollection::getTotalNumberOfHybrids() {return mSvtConfig->getTotalNumberOfHybrids();}
-const char* StSvtHybridCollection::getConfiguration(){return mConfig.Data();}
+int StSvtWaferCollection::getNumberOfBarrels() {return mSvtConfig->getNumberOfBarrels();}
+int StSvtWaferCollection::getNumberOfLadders(int barrel) {return mSvtConfig->getNumberOfLadders(barrel);}
+int StSvtWaferCollection::getNumberOfWafers(int barrel)  {return mSvtConfig->getNumberOfWafers(barrel);}
+int StSvtWaferCollection::getTotalNumberOfWafers() {return (int)mSvtConfig->getTotalNumberOfHybrids()/2;}
+const char* StSvtWaferCollection::getConfiguration(){return mConfig.Data();}
 

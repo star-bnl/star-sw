@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtConfig.cc,v 1.2 2001/02/18 00:10:28 caines Exp $
+ * $Id: StSvtConfig.cc,v 1.3 2001/08/16 21:02:03 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtConfig.cc,v $
+ * Revision 1.3  2001/08/16 21:02:03  munhoz
+ * changing StObjArray to StStrArray. StSvtConfig reestructured. New classes for geometry DB
+ *
  * Revision 1.2  2001/02/18 00:10:28  caines
  * Improve and use StSvtConifg
  *
@@ -47,66 +50,103 @@ void StSvtConfig::setConfiguration()
 {
   if (mTotalNumberOfHybrids == 18 )  // SYSTEM TEST  
     mConfig = TString("SYST");
-  else if (mTotalNumberOfHybrids == 14 )  // YEAR 1 LADDER  
+  else if ((mTotalNumberOfHybrids == 14) && (mNumberOfBarrels == 3))  // YEAR 1 LADDER  
     mConfig = TString("Y1L");
   else if (mTotalNumberOfHybrids == 432 )  // FULL SVT  
     mConfig = TString("FULL");
+  else if ((mTotalNumberOfHybrids == 14) && (mNumberOfBarrels == 1))  // YEAR 1 LADDER  
+    mConfig = TString("LADDER");
+  else if (mTotalNumberOfHybrids == 36 )  // FULL SVT  
+    mConfig = TString("BARREL");
+  else if (mTotalNumberOfHybrids == 3 )  // FULL SVT  
+    mConfig = TString("SVT");
+  else
+    mConfig = TString("NULL");
 }
 
 void StSvtConfig::setConfiguration(const char* config)
 {
+  // set the Collection configuration
 
   mConfig = TString(config);
+
   if ( !strncmp(config, "ASCII", strlen("ASCII")) ) {
- 
-    mNumberOfBarrels = 1;
-    mNumberOfLadders[0] = 1;
-    mNumberOfLadders[1] = 0;
-    mNumberOfLadders[2] = 0;
-    mNumberOfWafers[0] = 1;
-    mNumberOfWafers[1] = 0;
-    mNumberOfWafers[2] = 0;
-    mNumberOfHybrids = 2;
+    setNumberOfBarrels(1);
+    setNumberOfLadders(1,1);
+    setNumberOfWafers(1,1);
+    setNumberOfHybrids(2);
+    setTotalNumberOfHybrids(2);    
   }
-  else if( !strncmp(config, "SYST", strlen("SYST")) ){
+  
+  else if ( !strncmp(config, "SYST", strlen("SYST")) ) {
+    setNumberOfBarrels(3);
+    setNumberOfLadders(1,8);
+    setNumberOfLadders(2,12);
+    setNumberOfLadders(3,16);
+    setNumberOfWafers(1,4);
+    setNumberOfWafers(2,6);
+    setNumberOfWafers(3,7);
+    setNumberOfHybrids(2);
+    setTotalNumberOfHybrids(18);
+  }
 
-    mNumberOfBarrels = 3;
-    mNumberOfLadders[0] = 8;
-    mNumberOfLadders[1] = 12;
-    mNumberOfLadders[2] = 16;
-    mNumberOfWafers[0] = 4;
-    mNumberOfWafers[1] = 6;
-    mNumberOfWafers[2] = 7;
-    mNumberOfHybrids = 2;
-    mTotalNumberOfHybrids = 18; // SYSTEM TEST  
+  else if ( !strncmp(config, "Y1L", strlen("Y1L")) ) {
+    setNumberOfBarrels(3);
+    setNumberOfLadders(1,0);
+    setNumberOfLadders(2,0);
+    setNumberOfLadders(3,2);
+    setNumberOfWafers(1,0);
+    setNumberOfWafers(2,0);
+    setNumberOfWafers(3,7);
+    setNumberOfHybrids(2);
+    setTotalNumberOfHybrids(14);
   }
-  else if( !strncmp(config, "Y1L", strlen("Y1L")) ){
 
-    mNumberOfBarrels=3;
-    mNumberOfLadders[0] = 0;
-    mNumberOfLadders[1] = 0;
-    mNumberOfLadders[2] = 2;
-    mNumberOfWafers[0] = 0;
-    mNumberOfWafers[1] = 0;
-    mNumberOfWafers[2] = 7;
-    mNumberOfHybrids = 2;    
-    mTotalNumberOfHybrids = 14; // YEAR 1 LADDER  
+  else if ( !strncmp(config, "LADDER", strlen("LADDER")) ) {
+    setNumberOfBarrels(1);
+    setNumberOfLadders(1,1);
+    setNumberOfWafers(1,7);
+    setNumberOfHybrids(2);
+    setTotalNumberOfHybrids(14);
   }
-  else if( !strncmp(config, "FULL", strlen("FULL")) ){
 
-    mNumberOfBarrels=3;
-    mNumberOfLadders[0] = 8;
-    mNumberOfLadders[1]= 12;
-    mNumberOfLadders[2] = 16;
-    mNumberOfWafers[0] = 4;
-    mNumberOfWafers[1] =6;
-    mNumberOfWafers[2] = 7;
-    mNumberOfHybrids=2;
-    mTotalNumberOfHybrids = 432; // FULL SVT 
+  else if ( !strncmp(config, "BARREL", strlen("BARREL")) ) {
+    setNumberOfBarrels(3);
+    setNumberOfLadders(1,8);
+    setNumberOfLadders(2,12);
+    setNumberOfLadders(3,16);
+    setNumberOfWafers(1,1);
+    setNumberOfWafers(2,1);
+    setNumberOfWafers(3,1);
+    setNumberOfHybrids(1);
+    setTotalNumberOfHybrids(36);
   }
- else
+
+  else if ( !strncmp(config, "SVT", strlen("SVT")) ) {
+    setNumberOfBarrels(3);
+    setNumberOfLadders(1,1);
+    setNumberOfLadders(2,1);
+    setNumberOfLadders(3,1);
+    setNumberOfWafers(1,1);
+    setNumberOfWafers(2,1);
+    setNumberOfWafers(3,1);
+    setNumberOfHybrids(1);
+    setTotalNumberOfHybrids(3);
+  }
+
+  else if ( !strncmp(config, "FULL", strlen("FULL")) ) {
+    setNumberOfBarrels(3);
+    setNumberOfLadders(1,8);
+    setNumberOfLadders(2,12);
+    setNumberOfLadders(3,16);
+    setNumberOfWafers(1,4);
+    setNumberOfWafers(2,6);
+    setNumberOfWafers(3,7);
+    setNumberOfHybrids(2);
+    setTotalNumberOfHybrids(432);
+  }
+  else
     gMessMgr->Message("Configuration of SVT not defined! It must be SYST, Y1L or FULL","E");
-   
 }
 
 const char* StSvtConfig::getConfiguration()
@@ -121,6 +161,19 @@ int StSvtConfig::getHybridIndex(int barrelID, int ladderID, int waferID, int hyb
   // Or one can use the getObject method which parameters are the barrel, ladder, wafer and hybrid numbers.
 
   int index;
+  int mNumberOfBarrels;                        // Number of Barrels
+  int mNumberOfLadders[MAX_NUMBER_OF_BARRELS]; // Number of Ladders of each Barrel
+  int mNumberOfWafers[MAX_NUMBER_OF_BARRELS];  // Number of Wafers of each Ladder (Barrel dependent)
+  int mNumberOfHybrids;                        // Number of Hybrids of each Wafer ( = 2)
+
+  mNumberOfBarrels = getNumberOfBarrels();
+
+  for (int i = 0;i < mNumberOfBarrels;i++) {
+    mNumberOfLadders[i] = getNumberOfLadders(i+1);
+    mNumberOfWafers[i] = getNumberOfWafers(i+1);
+  }
+  mNumberOfHybrids = getNumberOfHybrids();
+
 
   switch  (barrelID) {
     
@@ -146,7 +199,7 @@ int StSvtConfig::getHybridIndex(int barrelID, int ladderID, int waferID, int hyb
     break;
   }
 
-  if ( mTotalNumberOfHybrids == 18 ) {  // SYSTEM TEST
+  if ( !strncmp(mConfig, "SYST", strlen("SYST")) ) {
     if      ((barrelID == 3) && (ladderID == 1) && (waferID == 7) && (hybridID == 1)) index = 0;
     else if ((barrelID == 3) && (ladderID == 1) && (waferID == 7) && (hybridID == 2)) index = 1;
     else if ((barrelID == 3) && (ladderID == 1) && (waferID == 6) && (hybridID == 1)) index = 2;
@@ -168,7 +221,7 @@ int StSvtConfig::getHybridIndex(int barrelID, int ladderID, int waferID, int hyb
     
     else index = -1;
   }
-  else if ( mTotalNumberOfHybrids == 14 ) {  // YEAR 1 LADDER
+  else if ( !strncmp(mConfig, "Y1L", strlen("Y1L")) ) {
     if      ((barrelID == 3) && (ladderID == 2) && (waferID == 1) && (hybridID == 1)) index = 0;
     else if ((barrelID == 3) && (ladderID == 2) && (waferID == 1) && (hybridID == 2)) index = 1;
     else if ((barrelID == 3) && (ladderID == 2) && (waferID == 2) && (hybridID == 1)) index = 2;
@@ -183,6 +236,74 @@ int StSvtConfig::getHybridIndex(int barrelID, int ladderID, int waferID, int hyb
     else if ((barrelID == 3) && (ladderID == 1) && (waferID == 6) && (hybridID == 2)) index = 11;
     else if ((barrelID == 3) && (ladderID == 1) && (waferID == 7) && (hybridID == 1)) index = 12;
     else if ((barrelID == 3) && (ladderID == 1) && (waferID == 7) && (hybridID == 2)) index = 13;
+
+    else index = -1;
+  }
+
+  else if ( !strncmp(mConfig, "LADDER", strlen("LADDER")) ) {
+    if      ((waferID == 1) && (hybridID == 1)) index = 0;
+    else if ((waferID == 1) && (hybridID == 2)) index = 1;
+    else if ((waferID == 2) && (hybridID == 1)) index = 2;
+    else if ((waferID == 2) && (hybridID == 2)) index = 3;
+    else if ((waferID == 3) && (hybridID == 1)) index = 4;
+    else if ((waferID == 3) && (hybridID == 2)) index = 5;
+    else if ((waferID == 4) && (hybridID == 1)) index = 6;
+    else if ((waferID == 4) && (hybridID == 2)) index = 7;    
+    else if ((waferID == 5) && (hybridID == 1)) index = 8;
+    else if ((waferID == 5) && (hybridID == 2)) index = 9;
+    else if ((waferID == 6) && (hybridID == 1)) index = 10;
+    else if ((waferID == 6) && (hybridID == 2)) index = 11;
+    else if ((waferID == 7) && (hybridID == 1)) index = 12;
+    else if ((waferID == 7) && (hybridID == 2)) index = 13;
+
+    else index = -1;
+  }
+
+  else if ( !strncmp(mConfig, "BARREL", strlen("BARREL")) ) {
+    if      ((barrelID == 1) && (ladderID == 1)) index = 0;
+    else if ((barrelID == 1) && (ladderID == 2)) index = 1;
+    else if ((barrelID == 1) && (ladderID == 3)) index = 2;
+    else if ((barrelID == 1) && (ladderID == 4)) index = 3;
+    else if ((barrelID == 1) && (ladderID == 5)) index = 4;
+    else if ((barrelID == 1) && (ladderID == 6)) index = 5;
+    else if ((barrelID == 1) && (ladderID == 7)) index = 6;
+    else if ((barrelID == 1) && (ladderID == 8)) index = 7;
+    else if ((barrelID == 2) && (ladderID == 1)) index = 8;
+    else if ((barrelID == 2) && (ladderID == 2)) index = 9;
+    else if ((barrelID == 2) && (ladderID == 3)) index = 10;
+    else if ((barrelID == 2) && (ladderID == 4)) index = 11;
+    else if ((barrelID == 2) && (ladderID == 5)) index = 12;
+    else if ((barrelID == 2) && (ladderID == 6)) index = 13;
+    else if ((barrelID == 2) && (ladderID == 7)) index = 14;
+    else if ((barrelID == 2) && (ladderID == 8)) index = 15;
+    else if ((barrelID == 2) && (ladderID == 9)) index = 16;
+    else if ((barrelID == 2) && (ladderID == 10)) index = 17;
+    else if ((barrelID == 2) && (ladderID == 11)) index = 18;
+    else if ((barrelID == 2) && (ladderID == 12)) index = 19;
+    else if ((barrelID == 3) && (ladderID == 1)) index = 20;
+    else if ((barrelID == 3) && (ladderID == 2)) index = 21;
+    else if ((barrelID == 3) && (ladderID == 3)) index = 22;
+    else if ((barrelID == 3) && (ladderID == 4)) index = 23;
+    else if ((barrelID == 3) && (ladderID == 5)) index = 24;
+    else if ((barrelID == 3) && (ladderID == 6)) index = 25;
+    else if ((barrelID == 3) && (ladderID == 7)) index = 26;
+    else if ((barrelID == 3) && (ladderID == 8)) index = 27;
+    else if ((barrelID == 3) && (ladderID == 9)) index = 28;
+    else if ((barrelID == 3) && (ladderID == 10)) index = 29;
+    else if ((barrelID == 3) && (ladderID == 11)) index = 30;
+    else if ((barrelID == 3) && (ladderID == 12)) index = 31;
+    else if ((barrelID == 3) && (ladderID == 13)) index = 32;
+    else if ((barrelID == 3) && (ladderID == 14)) index = 33;
+    else if ((barrelID == 3) && (ladderID == 15)) index = 34;
+    else if ((barrelID == 3) && (ladderID == 16)) index = 35;
+
+    else index = -1;
+  }
+
+  else if ( !strncmp(mConfig, "SVT", strlen("SVT")) ) {
+    if      ((barrelID == 1)) index = 0;
+    else if ((barrelID == 2)) index = 1;
+    else if ((barrelID == 3)) index = 2;
 
     else index = -1;
   }
