@@ -1,11 +1,10 @@
 //
-// $Id: TrsWrite.C,v 1.2 1999/11/16 22:31:02 calderon Exp $
+// $Id: TrsWrite.C,v 1.3 2000/01/10 21:49:07 kathy Exp $
 //
-// Description:
-// Write a .trs file from a muon track.
-//
-///////////////////////////////////////////////////////
 // $Log: TrsWrite.C,v $
+// Revision 1.3  2000/01/10 21:49:07  kathy
+// put owner statement in macros
+//
 // Revision 1.2  1999/11/16 22:31:02  calderon
 // Version using ROOT Database (Hopefully soon we'll switch to
 // the TPC Db).
@@ -13,7 +12,12 @@
 // Revision 1.1  1999/11/09 19:12:04  calderon
 // Initial Commit.
 // Example to write a .trs file from a muon processed through TRS.
+/////////////////////////////////////////////////////////
 //
+// owner: Manuel Calderon
+//
+// Description:
+// Write a .trs file from a muon track.
 //
 ////////////////////////////////////////////////////////
 TBrowser *b = 0;
