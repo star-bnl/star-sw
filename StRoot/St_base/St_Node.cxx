@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.26 1999/06/09 22:09:34 fine Exp $
+// $Id: St_Node.cxx,v 1.27 1999/06/14 08:45:19 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.27  1999/06/14 08:45:19  fine
+// List of the shapes have been introduced for St_NodeView
+//
 // Revision 1.26  1999/06/09 22:09:34  fine
 // St_PolyLine3D has beed redesigned
 //
@@ -581,10 +584,10 @@ Text_t *St_Node::GetObjectInfo(Int_t, Int_t)
 {
    if (!gPad) return "";
    static char info[512];
-   sprintf(info,"%s/%s, shape=%s/%s",GetName(),GetTitle());
+   sprintf(info,"%s/%s",GetName(),GetTitle());
    TIter nextShape(fListOfShapes);
    TShape *shape = 0;
-   while(shape = (TShape *)nextShape()) 
+   while( (shape = (TShape *)nextShape()) ) 
       sprintf(&info[strlen(info)]," shape=%s/%s",shape->GetName(),shape->ClassName());
    
    return info;
@@ -751,7 +754,7 @@ void St_Node::PaintShape(Option_t *option)
       shape->SetFillStyle(GetFillStyle());
       TPadView3D *view3D=gPad->GetView3D();
       if (view3D)
-          view3D->SetLineAttr(GetLineColor(),GetLineWidth(),option);
+         view3D->SetLineAttr(GetLineColor(),GetLineWidth(),option);
     }
     shape->Paint(option);
   }

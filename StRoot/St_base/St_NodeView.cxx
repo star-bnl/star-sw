@@ -37,7 +37,7 @@
 ClassImp(St_NodeView)
 //_____________________________________________________________________________
 St_NodeView::St_NodeView(St_NodeView *viewNode,St_NodePosition *nodePosition)
-            : St_ObjectSet(viewNode->GetName(),(TObject *)nodePosition)
+            : St_ObjectSet(viewNode->GetName(),(TObject *)nodePosition),fListOfShapes(0)
 {
   //
   // This ctor creates a St_NodeView structure from the "marked" nodes
@@ -66,7 +66,7 @@ St_NodeView::St_NodeView(St_NodeView *viewNode,St_NodePosition *nodePosition)
 
 //_____________________________________________________________________________
 St_NodeView::St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition,EDataSetPass iopt,Int_t level)
-            : St_ObjectSet(pattern.GetName(),(TObject *)nodePosition)
+            : St_ObjectSet(pattern.GetName(),(TObject *)nodePosition),fListOfShapes(0)
 {
   //
   // Creates St_NodeView (view) with a topology similar with St_Node *pattern
@@ -118,6 +118,7 @@ St_NodeView::St_NodeView(Double_t *translate, Double_t *rotate, UInt_t positionI
                          const Char_t *thisNodePath, const Char_t *matrixName, const Int_t matrixType)
 {
   // Special ctor to back St_NodeView::SavePrimitive() method
+  fListOfShapes     = 0;
   St_Node *thisNode = 0;
   Double_t thisX  = translate[0]; 
   Double_t thisY  = translate[1];
@@ -156,8 +157,9 @@ St_NodeView::St_NodeView(Double_t *translate, Double_t *rotate, UInt_t positionI
 
 //_____________________________________________________________________________
 St_NodeView::St_NodeView(St_Node *thisNode,St_NodePosition *nodePosition)
-            : St_ObjectSet(thisNode->GetName(),(TObject *)nodePosition)
+            : St_ObjectSet(thisNode->GetName(),(TObject *)nodePosition),fListOfShapes(0)
 {
+  SafeDelete(fListOfShapes);
   if (thisNode) 
      SetTitle(thisNode->GetTitle());
 }
@@ -180,6 +182,16 @@ St_Node *St_NodeView::AddNode(St_Node *node)
   if ( node && (pos = GetPosition() )  && (closedNode = pos->GetNode()) ) 
          closedNode->Add(node);        
   return closedNode; 
+}
+//______________________________________________________________________________
+void St_NodeView::Add(TShape *shape, Bool_t IsMaster)
+{
+  if (!shape) return;
+  if (!fListOfShapes) fListOfShapes = new TList;
+  if (IsMaster) 
+      fListOfShapes->AddFirst(shape);
+  else
+      fListOfShapes->Add(shape);
 }
 //_____________________________________________________________________________
 void St_NodeView::Browse(TBrowser *b){
@@ -391,6 +403,7 @@ void St_NodeView::Paint(Option_t *option)
      position->UpdatePosition(option);      
   }
 
+  PaintShape(option);
   if (thisNode)  thisNode->PaintShape(option);  
 ////---   if ( thisNode->TestBit(kSonsInvisible) ) return;
  
@@ -411,6 +424,32 @@ void St_NodeView::Paint(Option_t *option)
      if (view3D)  view3D->PopMatrix();
   }
   gGeometry->PopLevel();
+}
+//______________________________________________________________________________
+void St_NodeView::PaintShape(Option_t *option)
+{
+  // Paint shape of the node
+  // To be called from the TObject::Paint method only
+  Bool_t rangeView = option && option[0]=='r';
+
+  TIter nextShape(fListOfShapes);
+  TShape *shape = 0;
+  while( (shape = (TShape *)nextShape()) ) {
+    if (!shape->GetVisibility())   continue;
+    if (!rangeView) {
+#if 0
+      shape->SetLineColor(GetLineColor());
+      shape->SetLineStyle(GetLineStyle());
+      shape->SetLineWidth(GetLineWidth());
+      shape->SetFillColor(GetFillColor());
+      shape->SetFillStyle(GetFillStyle());
+#endif
+      TPadView3D *view3D=gPad->GetView3D();
+      if (view3D)
+         view3D->SetLineAttr(shape->GetLineColor(),shape->GetLineWidth(),option);
+    }
+    shape->Paint(option);
+  }
 }
 //______________________________________________________________________________
 TString St_NodeView::PathP() const
@@ -518,12 +557,22 @@ void St_NodeView::Sizeof3D() const
 {
 //*-*-*-*-*-*-*Return total size of this 3-D Node with its attributes*-*-*
 //*-*          ==========================================================
- 
+
+   if (GetListOfShapes()) {
+     TIter nextShape(GetListOfShapes());
+     TShape *shape = 0;
+      while(shape = (TShape *)nextShape()) {
+        if (shape->GetVisibility())  shape->Sizeof3D();
+     }
+   }
+
    St_Node *thisNode  = GetNode();
-   if (thisNode) {
-     TShape *shape = thisNode->GetShape();
-     if (shape && GetVisibility() && shape->GetVisibility()) 
-        shape->Sizeof3D();     
+   if (thisNode && thisNode->GetVisibility()) {
+     TIter nextShape(thisNode->GetListOfShapes());
+     TShape *shape = 0;
+      while(shape = (TShape *)nextShape()) {
+        if (shape->GetVisibility())  shape->Sizeof3D();
+     }
    }
    
 //   if ( TestBit(kSonsInvisible) ) return;
