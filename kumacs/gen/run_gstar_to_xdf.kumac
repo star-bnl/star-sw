@@ -1,0 +1,66 @@
+* RUN_g2x.KUMAC
+* 
+* generates g2x events and writes out to xdf file
+* 
+* to run in staf:
+* stardev (or whichever version)
+* staf
+* exec $STAR/kumacs/gen/run_g2x
+* 
+* 6/22/98 Kathy Turner
+* 
+* ************************************************************************
+
+ MACRO run__
+    [Nevents]=10 file=g2x_output.xdf
+   
+       
+  DEFAULT = _
+./kumacs/util,_
+./kumacs/gen,_
+./pams/gen/kumac,_
+$STAR/kumacs/util,_
+$STAR/kumacs/gen,_
+$STAR/pams/gen/kumac
+
+ def [DEFAULT]
+ message 'Define default kumac search path as' def
+ 
+ make gen/g2x
+ 
+ exec setup_dir
+ 
+
+* initialize
+   
+ 
+exec write_table_to_file#init ofile [file]
+ 
+exec init_g2x#init
+  
+* loop over event
+ 
+DO i=1,[Nevents]
+  message ' processing event ' [i]
+  exec run_g2x#run
+  if [i].eq.1 then
+    table/print  /dui/evgen/particle
+  endif
+  exec write_table_to_file#write ofile /dui/evgen
+ENDDO
+ 
+ 
+* end processing
+ 
+ exec write_table_to_file#close ofile
+
+ return
+ 
+* ***********************************************************
+
+
+
+
+
+
+
