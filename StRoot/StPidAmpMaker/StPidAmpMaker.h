@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpMaker.h,v 1.4 2000/05/01 16:59:49 aihong Exp $
+ * $Id: StPidAmpMaker.h,v 1.5 2000/07/12 15:38:33 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpMaker.h,v $
+ * Revision 1.5  2000/07/12 15:38:33  aihong
+ * update for real data
+ *
  * Revision 1.4  2000/05/01 16:59:49  aihong
  * clean up
  *
@@ -53,6 +56,8 @@ public:
     virtual Int_t  Finish();
 
     void SetNHitsFilter2LastCollection(Int_t nhits);
+    void SetDedxMethod(TString method);
+
     void AddDefaultChannelCollection(TString fitOpt="BAR", TString drawOpt=" ");
     void AddNHitsChannelCollection(Int_t x1, Int_t x2,TString fitOpt="BAR", TString drawOpt=" ");
     void AddNHitsChannelCollection(Int_t x1, Int_t x2, Int_t x3,TString fitOpt="BAR", TString drawOpt=" ");
@@ -73,13 +78,15 @@ public:
     void AddPtNHitsChannelCollection(Int_t n, Int_t* nhitsAry,Int_t p, Double_t* ptAry,TString fitOpt="BAR", TString drawOpt=" ");
   
     virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StPidAmpMaker.h,v 1.4 2000/05/01 16:59:49 aihong Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StPidAmpMaker.h,v 1.5 2000/07/12 15:38:33 aihong Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
 private:
 
     void   bookCollection();
 
+    Bool_t  mReadFromTable;
     Int_t   mNHits4BG;
+    Int_t   mDedxMethod;
     TString drawOpt;
     Char_t  collectionName[256];
 

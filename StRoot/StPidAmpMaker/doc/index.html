@@ -133,7 +133,7 @@ The StPidAmpManager can hold multiple ChannelCollections. Thus if a user want co
 
 <p><font color=blue>2.Modify doEvents.C so that your StPidAmpMaker can be added to the chain.</font></p>
 
-<p>We need to check out the doEvents.C, replace the analysis maker by our StPidAmpMaker, comment out StEventMaker related stuff.(You may ask why comment out StEventMaker? that is because StEventMaker drags our speed down. The StPidAmpMaker read directly from dst tables instead of read through StEvent. It will keep read this way untill we have bulk of data written in StEvent Object. Refer back to this page then.)</p>
+<p>We need to check out the doEvents.C, replace the analysis maker by our StPidAmpMaker.</p>
 
 <p>Our modified doEvents.C looks like following:(commentted out as green, added as red)</p>
 
@@ -156,7 +156,7 @@ The StPidAmpManager can hold multiple ChannelCollections. Thus if a user want co
 <br>    gSystem->Load("StarClassLibrary");
 <br>    gSystem->Load("StEvent");
 <br>    gSystem->Load("StMagF");
-<br> <font color=green> //   gSystem->Load("StEventMaker"); </font> 
+<br>    gSystem->Load("StEventMaker"); 
 <br> <font color=green> //     gSystem->Load("StAnalysisMaker"); </font>
 <br> <font color=red>   gSystem->Load("StPidAmpMaker");</font>
 
@@ -188,7 +188,7 @@ The StPidAmpManager can hold multiple ChannelCollections. Thus if a user want co
 <br>    //
 <br>    // Maker to read events from file or database into StEvent
 <br>    //
-<br> <font color=green> //  StEventMaker *readerMaker =  new StEventMaker("events","title");</font>
+<br>   StEventMaker *readerMaker =  new StEventMaker("events","title");
 
 
 <br>    //
@@ -270,11 +270,8 @@ The StPidAmpManager can hold multiple ChannelCollections. Thus if a user want co
 <br>#include "TF1.h"
 <br>#include "TFile.h"
 <br>#include "TCanvas.h"
-<br>#include "StPidAmpMaker/Include/BetheBloch.hh" <font color=green>//include path will change later</font>
+<br>#include "StPidAmpMaker/Include/BetheBlochFunction.hh" <font color=green>//include path will change later</font>
 <br>#include "StPidAmpMaker/StPidAmpNetOut.h"     <font color=green> //include path will change later</font>
-
-<br>double ( *funcBandPointer) (double *, double *);<font color=green> //declare a funtion pointer.</font>
-
 
 <br><font color=red>in your implementation file</font>
 
@@ -284,7 +281,7 @@ The StPidAmpManager can hold multiple ChannelCollections. Thus if a user want co
 
 <br> int NParameters=electronNetOut->GetNBandPars();
 
-<br> TF1* electronBandCenter =new TF1("electronBandCenter",funcBandPointer, 0,5, NParameters);
+<br> TF1* electronBandCenter =new TF1("electronBandCenter",BetheBlochFunction, 0,5, NParameters);
 
 <br> for ( int i=0; i<NParameters; i++)
 
@@ -312,7 +309,7 @@ The StPidAmpManager can hold multiple ChannelCollections. Thus if a user want co
   <address><a href="mailto:aihong@cnr.physics.kent.gov">Aihong Tang</a></address>
 <!-- Created: Mon Feb 14 12:52:08 EST 2000 -->
 <!-- hhmts start -->
-Last modified: Fri May  5 16:33:51 EDT 2000
+Last modified: Wed Jul 12 11:19:06 EDT 2000
 <!-- hhmts end -->
   </body>
 </html>

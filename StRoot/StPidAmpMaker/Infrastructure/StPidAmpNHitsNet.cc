@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNHitsNet.cc,v 1.5 2000/05/12 13:44:59 aihong Exp $
+ * $Id: StPidAmpNHitsNet.cc,v 1.6 2000/07/12 15:38:35 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNHitsNet.cc,v $
+ * Revision 1.6  2000/07/12 15:38:35  aihong
+ * update for real data
+ *
  * Revision 1.5  2000/05/12 13:44:59  aihong
  * adjudge fitAmp()
  *
@@ -55,7 +58,7 @@ StPidAmpNHitsNet::StPidAmpNHitsNet(StPidAmpParticle def, StPidAmpChannelInfo cha
 //------------------------------
 void StPidAmpNHitsNet::fitBand(){
 
-  double varyRange=0.1;
+  double varyRange=0.05;
 
 
    TF1 *mBetheBlochFcn = 
@@ -145,7 +148,7 @@ void StPidAmpNHitsNet::fitAmp(StPidAmpTrkVector* trks){
      double varyRange4Height=0.25;  
      double varyRange4Center=0.3;
      double varyRange4Width =0.3;
-     double heightExpected;
+     double heightExpected=(maxPoint(ampGraph(),true));
      double widthExpected=0.23*((mChannelInfo.cutVector())[0].midPoint())+4.99;
      double centerExpected=fabs(mParticleType.maxllPeakPos());
 

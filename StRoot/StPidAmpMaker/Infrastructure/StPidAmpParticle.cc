@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpParticle.cc,v 1.3 2000/05/01 16:59:26 aihong Exp $
+ * $Id: StPidAmpParticle.cc,v 1.4 2000/07/12 15:38:35 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpParticle.cc,v $
+ * Revision 1.4  2000/07/12 15:38:35  aihong
+ * update for real data
+ *
  * Revision 1.3  2000/05/01 16:59:26  aihong
  * clean up
  *
@@ -109,7 +112,7 @@ const StPidAmpParticle StPidAmpParticle::mDeuteron("deuteron", 45,1, 1.8756,   1
 //   maxll* parameters for other types are based on experience.with simu. data.
 
 //-------------------------------------------------name                  id z  mass      peakPos mWidth mRatio     start   end  window
-const StPidAmpParticle StPidAmpParticle::mBGParticle("betaGamma",     -999, 1.0,1.0,     0.0,    0.0,   0.0,        1.0e-3,760, StPidAmpWindow(0.0,4.5,17.0,33.0,35.0,146.0,578.0,680.0));
+const StPidAmpParticle StPidAmpParticle::mBGParticle("betaGamma",     -999, 1.0,1.0,     0.0,    0.0,   0.0,        1.0e-3,760, StPidAmpWindow(0.02,4.5,17.0,33.0,35.0,146.0,578.0,680.0));
 //this is a fake particle for StPidAmpNet::mBGNet construction. 
 //for dedx~betaGamma fitting.
 

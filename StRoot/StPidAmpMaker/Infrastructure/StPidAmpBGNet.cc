@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpBGNet.cc,v 1.5 2000/05/01 16:59:25 aihong Exp $
+ * $Id: StPidAmpBGNet.cc,v 1.6 2000/07/12 15:38:35 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpBGNet.cc,v $
+ * Revision 1.6  2000/07/12 15:38:35  aihong
+ * update for real data
+ *
  * Revision 1.5  2000/05/01 16:59:25  aihong
  * clean up
  *
@@ -50,7 +53,9 @@ StPidAmpBGNet::StPidAmpBGNet():StPidAmpNet(){
 
     mBandGraphLowBetaGamma   =new TGraph();
     mBandGraphMiddleBetaGamma=new TGraph();
-
+    bandGraph()->SetMaximum(0.8e-05);
+    mBandGraphLowBetaGamma->SetMaximum(0.8e-05);
+    mBandGraphMiddleBetaGamma->SetMaximum(0.8e-05);
 }
 //-------------------------------
 StPidAmpBGNet::StPidAmpBGNet(StPidAmpParticle def, StPidAmpChannelInfo channelInfo):StPidAmpNet(def, channelInfo){
@@ -63,6 +68,10 @@ StPidAmpBGNet::StPidAmpBGNet(StPidAmpParticle def, StPidAmpChannelInfo channelIn
 
     mBandGraphLowBetaGamma   =new TGraph();
     mBandGraphMiddleBetaGamma=new TGraph();
+
+    bandGraph()->SetMaximum(0.8e-05);
+    mBandGraphLowBetaGamma->SetMaximum(0.8e-05);
+    mBandGraphMiddleBetaGamma->SetMaximum(0.8e-05);
 
     setUp();
 
@@ -128,7 +137,7 @@ void StPidAmpBGNet::processNet(StPidAmpTrkVector* trks){
 void StPidAmpBGNet::fitBand(){
 
 
-   double varyRange=0.3;
+   double varyRange=0.05;
 
 
    TF1 *mBetheBlochFcn = new TF1 ("mBetheBlochFcn",funcBandPt, fabs(mParticleType.start()),fabs(mParticleType.end()),NBandParam);
@@ -140,7 +149,7 @@ void StPidAmpBGNet::fitBand(){
    mBetheBlochFcn->SetParLimits(2,(mBandParams[2]-varyRange*fabs(mBandParams[2])),(mBandParams[2]+varyRange*fabs(mBandParams[2])));
           
    mBetheBlochFcn->SetParameter(3,double(mParticleType.charge()));//charge is 1 for mBGNet.
-   mBetheBlochFcn->SetParameter(4,mParticleType.mass());//mass is 1 for mBGNet.
+   mBetheBlochFcn->SetParameter(4,double(mParticleType.mass()));//mass is 1 for mBGNet.
    mBetheBlochFcn->SetParameter(5, double(CalibFactor));
    mBetheBlochFcn->SetParameter(6, double(Saturation));
    mBetheBlochFcn->SetParLimits(3, 1,1); //fixed.
@@ -148,7 +157,7 @@ void StPidAmpBGNet::fitBand(){
    mBetheBlochFcn->SetParLimits(5, 1,1);
    mBetheBlochFcn->SetParLimits(6, 1,1);
 
-      mBetheBlochFcn->SetParLimits(2,1.2775e-10,0.025e-5);
+   // mBetheBlochFcn->SetParLimits(2,1.2775e-10,0.025e-5);
 
 
  if ((bandGraph()->GetN())>0) {
@@ -178,7 +187,7 @@ void StPidAmpBGNet::fitBand(){
 void StPidAmpBGNet::setUp(){//setUp based on mBandParams always.
 
        int i=0; int j=0; int k=0; int sz=0;
-
+       double localPathHeight=PathHeight;
 
   if (sliceVector()->size()>0) sliceVector()->clear();
   if (pathVector()->size()>0) pathVector()->clear();//clear() not only 
@@ -198,14 +207,18 @@ void StPidAmpBGNet::setUp(){//setUp based on mBandParams always.
  
    for (j=0; j<mNetWindow.NWindows(); j++){ 
 
+     if (fabs(mNetWindow.windowBegin(j+1)>500)) 
+     localPathHeight=PathHeight/2.0; //for e, we need narrow net
+
+
  SliceLoop: if ( ((i+1.0)*sliceWidth4Window[j]+fabs(mNetWindow.windowBegin(j+1)))<fabs(mNetWindow.windowEnd(j+1)) ) {
 //window index begin with 1.so j+1
 
  double midRig=sliceWidth4Window[j]*(double(i)+0.5)+fabs(mNetWindow.windowBegin(j+1));
 
 
- double lowBd=dedxAtBandCenter(midRig)- PathHeight*double(NPaths)/2.0;
- double highBd=dedxAtBandCenter(midRig)+ PathHeight*double(NPaths)/2.0;  
+ double lowBd =dedxAtBandCenter(midRig) - localPathHeight*double(NPaths)/2.0;
+ double highBd=dedxAtBandCenter(midRig) + localPathHeight*double(NPaths)/2.0;  
 
 
  StPidAmpSlice* ASlice= new StPidAmpSlice(k,midRig,lowBd, highBd,sliceWidth4Window[j], mName, &mParticleType);

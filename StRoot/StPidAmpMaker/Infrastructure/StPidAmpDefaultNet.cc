@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpDefaultNet.cc,v 1.3 2000/05/01 16:59:26 aihong Exp $
+ * $Id: StPidAmpDefaultNet.cc,v 1.4 2000/07/12 15:38:35 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpDefaultNet.cc,v $
+ * Revision 1.4  2000/07/12 15:38:35  aihong
+ * update for real data
+ *
  * Revision 1.3  2000/05/01 16:59:26  aihong
  * clean up
  *
@@ -49,7 +52,7 @@ StPidAmpDefaultNet::StPidAmpDefaultNet(StPidAmpParticle def, StPidAmpChannelInfo
 //------------------------------
 void StPidAmpDefaultNet::fitBand(){
 
-  double varyRange=0.1;
+  double varyRange=0.05;
 
 
    TF1 *mBetheBlochFcn = new TF1 ("mBetheBlochFcn",funcBandPt, BandsBegin,BandsEnd,NBandParam);
@@ -134,9 +137,10 @@ void StPidAmpDefaultNet::fitAmp(StPidAmpTrkVector* trks){
      double varyRange4Height=0.35;  
      double varyRange4Center=0.3;
      double varyRange4Width=0.3;
-     double heightExpected;
      double centerExpected=fabs(mParticleType.maxllPeakPos());
      double widthExpected=mParticleType.maxllWidth();
+     double heightExpected=(maxPoint(ampGraph(),true));
+
 
      if (mParticleType.id()==2||mParticleType.id()==3) {
        if   (maxPoint(ampGraph(),false)<0.1) {
@@ -180,6 +184,7 @@ void StPidAmpDefaultNet::fitAmp(StPidAmpTrkVector* trks){
     
   if ((ampGraph()->GetN())>0){
      ampGraph()->Fit("mMaxllBoltzFcn","R");
+
      mAmpParams.clear();
      for (int i=0; i<NAmpParam; i++) mAmpParams.push_back(mMaxllBoltzFcn->GetParameter(i));
   }

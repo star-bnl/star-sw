@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpConst.hh,v 1.1.1.1 2000/03/09 17:48:34 aihong Exp $
+ * $Id: StPidAmpConst.hh,v 1.2 2000/07/12 15:38:32 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpConst.hh,v $
+ * Revision 1.2  2000/07/12 15:38:32  aihong
+ * update for real data
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:34  aihong
  * Installation of package
  *
@@ -31,7 +34,7 @@
 #define NPaths            11 //number of paths. SOULD BE AN ODD NUMBER!
 #define BandsBegin        0.0  //begin rig
 #define BandsEnd          5.0  //end rig
-#define CalibFactor       1.69e-07 //was 1.207e-07
+#define CalibFactor       2.4505e-07 //was 1.69e-07 //was 1.207e-07
 #define Saturation        5.0e-4
 #define NBandParam        7 //number of band parameters
 #define NFitBandParam     3 //bandParam that get by fitting.

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BetheBloch.hh,v 1.3 2000/07/12 15:38:32 aihong Exp $
+ * $Id: BetheBlochFunction.hh,v 1.1 2000/07/12 15:38:32 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -10,8 +10,8 @@
  *             function describing Bethe-Block curve
  ***************************************************************************
  *
- * $Log: BetheBloch.hh,v $
- * Revision 1.3  2000/07/12 15:38:32  aihong
+ * $Log: BetheBlochFunction.hh,v $
+ * Revision 1.1  2000/07/12 15:38:32  aihong
  * update for real data
  *
  * Revision 1.2  2000/05/01 16:59:48  aihong
@@ -24,12 +24,13 @@
  * Installation of package
  *
  **************************************************************************/
+//This is identical to BetheBloch.hh
+//change the name to BetheBlochFunction to avoid name corruption from StarClassLibary
 
+#ifndef BetheBlochFunction_hh
+#define BetheBlochFunction_hh
 
-#ifndef BetheBloch_hh
-#define BetheBloch_hh
-
-double BetheBloch(double *rig,double *par) {
+double BetheBlochFunction(double *rig,double *par) {
 
 
          double charge=double(fabs(par[3]));
