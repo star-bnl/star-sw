@@ -1,5 +1,8 @@
-// $Id: tpcdraw.C,v 1.11 1999/11/23 19:50:24 snelling Exp $
+// $Id: tpcdraw.C,v 1.12 1999/11/24 02:01:43 snelling Exp $
 // $Log: tpcdraw.C,v $
+// Revision 1.12  1999/11/24 02:01:43  snelling
+// Apllied couple fixes from Li Qun
+//
 // Revision 1.11  1999/11/23 19:50:24  snelling
 // changed variable order
 //
@@ -132,26 +135,29 @@ int DrawEvent(TPad &padname, Float_t theta, Float_t phi) {
     cout <<" Track #" << j << " "<< trknrec <<" hits" << endl;
     Float_t *tkpts = new Float_t[3*trknrec];
     // define colors and markers for different tracks
-    Int_t mark = j + 19;
+    Int_t mark = j + 20;
     if (j>11) {mark = j + 8;}
     if (j>22) {mark = j - 3;}
     if (j>33) {mark = j - 14;}
     if (j>44) {mark = j - 25;}
-    Int_t incolor = j;
+    Int_t incolor = j + 2;
     //  colors 0 and 10 are white - invisible
-    if (j == 10) {incolor = 1;}
-    if (j > 50) {incolor = j - 50;} 
+    if (incolor == 10) {incolor = 2;}
+    if (incolor > 50) {incolor -= 50;} 
     // loop over hits belonging to a track
+    int k =0;
     for (Int_t i = 0; i < trknrec; i++) {
-      Int_t hitid = 1000*trkid + i;
+      Int_t hitid = 1000*trkid + i + 1; // because table start at 1
       Int_t irow_hit = sortrk[hitid];
+      if (irow_hit < 0) continue;
       if (hit1[irow_hit]->z > zmin && hit1[irow_hit]->z < zmax) {
-	tkpts[i]   = hit1[irow_hit]->x;
-	tkpts[i+1] = hit1[irow_hit]->y;
-	tkpts[i+2] = hit1[irow_hit]->z;
+	tkpts[3*k]   = hit1[irow_hit]->x;
+	tkpts[3*k+1] = hit1[irow_hit]->y;
+	tkpts[3*k+2] = hit1[irow_hit]->z;
+	k++;
       }
     }
-    TPolyMarker3D *thit = new TPolyMarker3D(trknrec,tkpts,mark);
+    TPolyMarker3D *thit = new TPolyMarker3D(k,tkpts,mark);
     thit->SetMarkerColor(incolor);
     thit->Draw();
     // Draw good tracks as polylines.
@@ -291,7 +297,6 @@ void tpcdraw() {
    * -----------------------------------------------------------------
    *	draw TPC sectors with some options 
    * -----------------------------------------------------------------*/
-  gSystem->Load("StAnalysisUtilities");
 
   /*
   if (chain->GetOption("miniDAQ")) {
