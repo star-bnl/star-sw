@@ -138,7 +138,7 @@ my $jbSt = "n\/a";
 ########## Find reco for daq files on HPSS
 
 my $nDHpssFiles = 0;
-my $nDHpssDirs = 2;
+my $nDHpssDirs = 3;
 my @hpssDstDirs;
 my @hpssDstFiles;
 my @dbDaqFiles;
