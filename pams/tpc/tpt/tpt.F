@@ -1,5 +1,9 @@
-* $Id: tpt.F,v 1.20 2000/03/19 04:20:32 sakrejda Exp $
+* $Id: tpt.F,v 1.21 2000/03/22 20:35:21 sakrejda Exp $
 * $Log: tpt.F,v $
+* Revision 1.21  2000/03/22 20:35:21  sakrejda
+* Message enable removed from the fortran routines.
+* Message control will be handled in one place in the tpt Maker.
+*
 * Revision 1.20  2000/03/19 04:20:32  sakrejda
 * An option to use straigth line to fit lasers even if the field is on.
 *
@@ -153,12 +157,6 @@ c     initialize pointers
       p_next_hit = 0
       p_trk = 0
 c
-      if(tpar(ipass).debug(1).eq.1) then
-          call Msg_Enable( 'TPTI1-E1' )
-          call Msg_Enable( 'TPTI2-E1' )
-          call Msg_Enable( 'TPTI3-E1' )
-          call Msg_Enable( 'TPTROOT1-E1' )
-      endif
 
       write(m132,*) 'TPTI3-E1 starting in the main tracking subroutine ...'
       call Message( m132, 1, idI3)

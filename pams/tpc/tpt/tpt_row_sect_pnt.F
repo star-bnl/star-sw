@@ -1,5 +1,9 @@
-* $Id: tpt_row_sect_pnt.F,v 1.21 2000/03/17 22:20:44 sakrejda Exp $
+* $Id: tpt_row_sect_pnt.F,v 1.22 2000/03/22 20:35:21 sakrejda Exp $
 * $Log: tpt_row_sect_pnt.F,v $
+* Revision 1.22  2000/03/22 20:35:21  sakrejda
+* Message enable removed from the fortran routines.
+* Message control will be handled in one place in the tpt Maker.
+*
 * Revision 1.21  2000/03/17 22:20:44  sakrejda
 * Accidental cont removed from line:214
 *
@@ -162,7 +166,6 @@ c       so deal with it separately
      >  hit_h.nok)
       endif
 
-      call Msg_Enable( 'TPT-RSP' )
 C     set up information about the slices
       ic = 0
       do i=1,mxsector
