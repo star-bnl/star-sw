@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.61 2004/06/18 12:04:57 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.62 2004/08/03 00:48:32 oldi Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.62  2004/08/03 00:48:32  oldi
+// Printout of found clusters in FTPC east and west fixed.
+//
 // Revision 1.61  2004/06/18 12:04:57  jcs
 // replace #ifdef...#elif...#endif conditional compiler directives with #ifdef...#endif #ifdef...#endif
 //
@@ -834,13 +837,17 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 	} // end of: for(iSec...)
     } // end of: for(iRow...)
 
+  Int_t westHits = 0;
+  Int_t eastHits = 0;
   if (iftpc == 0 ) {
   	  mFtpcMon->n_clus_ftpc[1] = clusters;
-	  gMessMgr->Message("", "I", "OS") << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " <<  mPoint->GetEntriesFast() << " hits in Ftpc West." << endm;
+	  westHits = mPoint->GetEntriesFast();
+	  gMessMgr->Message("", "I", "OS") << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " << westHits << " hits in Ftpc West." << endm;
   }	  
   if (iftpc == 1 ) {
 	  mFtpcMon->n_clus_ftpc[0] = clusters;
-	  gMessMgr->Message("", "I", "OS") << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " <<  mPoint->GetEntriesFast() << " hits in Ftpc East." << endm;
+	  eastHits = mPoint->GetEntriesFast() - westHits;
+	  gMessMgr->Message("", "I", "OS") << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " <<  eastHits << " hits in Ftpc East." << endm;
   }
 }  // end of: for(iftpc
   
