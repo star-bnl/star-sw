@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.hh,v 1.2 1998/11/16 14:50:22 lasiuk Exp $
+ * $Id: StTrsWireHistogram.hh,v 1.3 1999/02/10 18:03:27 lasiuk Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,9 +11,12 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.hh,v $
- * Revision 1.2  1998/11/16 14:50:22  lasiuk
- * remove diagnostics (mLastEntry, mLastWire)
+ * Revision 1.3  1999/02/10 18:03:27  lasiuk
+ * gas gain manual setting
  *
+ *
+ * Revision 1.3  1999/02/10 18:03:27  lasiuk
+ * gas gain manual setting
  *
  * Revision 1.2  1998/11/16 14:50:22  lasiuk
  * remove diagnostics (mLastEntry, mLastWire)
@@ -89,9 +92,11 @@ public:
 
     
     //Maybe needed later?
-    void   setDoGasGain(bool)                  ;
-    void   setDoGasGainFluctuations(bool)      ;
-    double avalanche(int)                      ;
+    //void sortTimeBins();
+    //void putWire(vector<StTrsWireBinEntry>&);
+
+    // Gas Gain
+    void   setGasGainInnerSector(double) ;
 
     void   setDoSingleElectronMultiplication(bool);
     double avalanche(int)                ;
