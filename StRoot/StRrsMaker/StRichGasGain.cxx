@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichGasGain.cxx,v 1.9 2000/05/17 22:25:23 lasiuk Exp $
+ * $Id: StRichGasGain.cxx,v 1.10 2000/05/31 19:24:15 dunlop Exp $
  *
  * Description:
  *  StRichGasGain computes an amplification factor of an
@@ -35,6 +35,9 @@
  *
  ****************************************************************
  * $Log: StRichGasGain.cxx,v $
+ * Revision 1.10  2000/05/31 19:24:15  dunlop
+ * Modified feedback photon behavior
+ *
  * Revision 1.9  2000/05/17 22:25:23  lasiuk
  * feedback correction
  *
@@ -86,9 +89,9 @@ StRichGasGain::StRichGasGain()
     mGasGainAmplification    = tmpPhysicsDb->gasGainAmplification();
     mPolia                   = tmpPhysicsDb->polia();
 
-//     PR(mPhotonFeedback);
-//     PR(mPhotoConversion);
-//     PR(mGasGainAmplification);
+     PR(mPhotonFeedback);
+     PR(mPhotoConversion);
+     PR(mGasGainAmplification);
 }
 
 StRichGasGain::~StRichGasGain()
@@ -126,24 +129,26 @@ void StRichGasGain::feedbackPhoton(StRichMiniHit* hit, double q, list<StRichMini
     double elec2feed = mPhotonFeedback*q;
     //
     // put 2 in for solid angle effects
-//     double phot2elec = elec2feed*(mPhotoConversion)/2.;
-//     int P = mRandom.Poisson(phot2elec);
+//      double phot2elec = elec2feed*(mPhotoConversion)/2.;
+//      int P = mRandom.Poisson(phot2elec);
 
     double numberOfFeedBackPhotons = mRandom.Poisson(mPhotonFeedback*q);
-    double P = (numberOfFeedBackPhotons*(mPhotoConversion)/2.);
+    int P = nearestInteger(numberOfFeedBackPhotons*(mPhotoConversion)/2.);
     
     if(RRS_DEBUG)
 	cout << "StRichGasGain::feedbackPhoton() P = " << P << endl;
 #ifdef RICH_WITH_VIEWER
     if ( StRichViewer::histograms ) {
 	StRichViewer::getView()->mTotalFeedback->Fill(numberOfFeedBackPhotons);
+	//StRichViewer::getView()->mTotalFeedback->Fill(phot2elec);
 	StRichViewer::getView()->mFeedback->Fill(P);
 	StRichViewer::getView()->mPoissonMean->Fill(mPhotonFeedback*q);	
     }
 #endif
     double dist, x, y, z, cost, phi;
 	
-    for (int i=1; i<=P; i++) {
+    //for (int i=1; i<=P; i++) {
+    for (int i=0; i<P; i++) {
 	cost = 	mRandom.Flat();
 	phi  =  2*M_PI *  mRandom.Flat();
 	
@@ -161,7 +166,8 @@ void StRichGasGain::feedbackPhoton(StRichMiniHit* hit, double q, list<StRichMini
 // 	x    = hit.position().x() + dist * sin(phi);
 // 	z    = hit.position().z() + dist * cos(phi);
 // 	y    = mAnodePadPlaneSeparation;
-	
+
+	//cout << "StRichGasGain::feedback() create one " << endl;
 	theList.push_back(new StRichMiniHit(StThreeVector<double>(x,y,z),
 					    hit->momentum(),
 					    hit->trackp(),
