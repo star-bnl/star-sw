@@ -123,6 +123,26 @@ class EEmcSmdMap
     default: {assert(2==3);} 
     }
   }
+  // Central strip(s) returned vis reference.
+  //
+  void getMiddleU ( Int_t sector,
+		    Int_t subsector,
+		    Int_t etabin,
+		    Int_t &umid ) {
+    umid = (
+      mSmdMap[sector][subsector][etabin].uMin +
+      mSmdMap[sector][subsector][etabin].uMax ) / 2;
+
+  }
+  void getMiddleV ( Int_t sector,
+		    Int_t subsector,
+		    Int_t etabin,
+		    Int_t &vmid ) {
+    vmid = (
+      mSmdMap[sector][subsector][etabin].vMin +
+      mSmdMap[sector][subsector][etabin].vMax ) / 2;
+
+  }
   //
   //////////////////////////////////////////////////
 
