@@ -33,7 +33,7 @@ macro tte
 
   tdm/newtable mctrk     tte_mctrk 20000
   tdm/newtable evaltrk   tte_eval  20000
-  tdm/newtable res       tte_res   20000
+  tdm/newtable res       tte_res       1
 
   cd /dui
 

@@ -7,9 +7,9 @@ macro init
 cd /dui/constants/tpc/params
 
 
-dio/newfilestream    tfspar [PARAMS_TPC]tfs_pars.xdf r
-dio/stream/getevent  tfspar
-dio/stream/close     tfspar
+dio/newfilestream    ttepar [PARAMS_TPC]tte_pars.xdf r
+dio/stream/getevent  ttepar
+dio/stream/close     ttepar
 
 cd /dui
 
