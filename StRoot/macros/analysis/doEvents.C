@@ -1,7 +1,10 @@
-// $Id: doEvents.C,v 1.28 1999/07/23 22:03:42 genevb Exp $
+// $Id: doEvents.C,v 1.29 1999/07/23 22:41:21 perev Exp $
 // $Log: doEvents.C,v $
-// Revision 1.28  1999/07/23 22:03:42  genevb
-// Extra bracket
+// Revision 1.29  1999/07/23 22:41:21  perev
+// Simplify for CINT
+//
+// Revision 1.29  1999/07/23 22:41:21  perev
+// Simplify for CINT
 //
 // Revision 1.28  1999/07/23 22:03:42  genevb
 // Extra bracket
@@ -135,10 +138,13 @@ const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 //
 // example ROOT file invocation:
 // .x doEvents.C(9999,"/disk00001/star/auau200/hijing/b0_3/jet05/year_1b/hadronic_on/tfs/","*.root")
+void doEvents(Int_t,const Char_t **);
+void doEvents(const Int_t nevents=999,
+              const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
+              const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf");
 
               const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
-void doEvents(const Int_t nevents,
-              const Char_t **fileList)
+void doEvents(Int_t nevents,const Char_t **fileList)
     cout << "       doEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
     cout << "       doEvents.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
 void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
@@ -187,24 +193,18 @@ void doEvents(Int_t nevents,const Char_t **fileList,const char *qaflag)
   // Initialize chain
   Int_t iInit = chain->Init();
   if (iInit) chain->Fatal(iInit,"on init");
-  int istat;
-  for (Int_t i=1; i<=nevents; i++) {
+  chain->PrintInfo();
+EventLoop: if (i++ <= nevents && !istat) {
   // Event loop
   int istat=0,i=1;
 EventLoop: if (i <= nevents && !istat) {
-    if (istat) {
-      cout << "Last event processed. Status = " << istat << endl;
-      chain->Clear();
-      break;
-    }
-//    St_DataSet *set = chain->DataSet("dst");
-//    if (set)  {
-//      St_DataSetIter dirt(set);
-//      dirt.Du();
-//    }
+    cout << "============================ Event " << i << " start" << endl;
+    goto EventLoop;
+    if (istat) {cout << "Last event processed. Status = " << istat << endl;}
+    i++;
 }
-  }
      chain->Clear();
+     istat = chain->Make(i);
     cout << "============================ Event " << i << " finish" << endl;
   if (nevents > 1) {
     chain->Clear();
@@ -213,9 +213,7 @@ EventLoop: if (i <= nevents && !istat) {
     if (!b) {
       //       gROOT->LoadMacro("PadControlPanel.C");
     b = new TBrowser;
-void doEvents(const Int_t nevents=999,
-              const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
-              const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf")
+void doEvents(const Int_t nevents, const Char_t *path, const Char_t *file)
   }
     }
 	if (!b) {
