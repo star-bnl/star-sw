@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.81 2003/01/14 14:19:07 oldi Exp $
+// $Id: StFlowMaker.cxx,v 1.82 2003/04/01 00:27:08 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -100,8 +100,8 @@ Int_t StFlowMaker::Make() {
     }
 
     if (mEventFileName != mEventFileNameOld) { 
-      if (Debug()) gMessMgr->Info() << "FlowMaker: New file opened " << endm;
-      gMessMgr->Info() << "##### FlowMaker: " <<  mEventFileName << endm;
+      //if (Debug()) gMessMgr->Info() << "FlowMaker: New file opened " << endm;
+      if (Debug()) gMessMgr->Info() << "##### FlowMaker: " <<  mEventFileName << endm;
       if (mPicoEventWrite) {
 	if (pPicoDST->IsOpen()) {
 	  pPicoDST->Write(0, TObject::kOverwrite);
@@ -156,8 +156,8 @@ Int_t StFlowMaker::Make() {
     if (!pFlowEvent) return kStOK; // could have been deleted
     mEventFileName = strrchr(pMuChain->GetFile()->GetName(),'/')+1;
     if (mEventFileName != mEventFileNameOld) { 
-      if (Debug()) gMessMgr->Info() << "FlowMaker: New file opened " << endm;
-      gMessMgr->Info() << "##### FlowMaker: " <<  mEventFileName << endm;
+      //if (Debug()) gMessMgr->Info() << "FlowMaker: New file opened " << endm;
+      if (Debug()) gMessMgr->Info() << "##### FlowMaker: " <<  mEventFileName << endm;
       if (mPicoEventWrite) {
 	if (pPicoDST->IsOpen()) {
 	  pPicoDST->Write(0, TObject::kOverwrite);
@@ -221,7 +221,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.81 2003/01/14 14:19:07 oldi Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.82 2003/04/01 00:27:08 posk Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -1794,7 +1794,7 @@ Int_t StFlowMaker::InitPicoEventRead() {
   pPicoChain->SetBranchAddress("pPicoEvent", &pPicoEvent);
   
   Int_t nEntries = (Int_t)pPicoChain->GetEntries(); 
-  gMessMgr->Info() << "##### FlowMaker: events in Pico-DST file = "
+  if (Debug()) gMessMgr->Info() << "##### FlowMaker: events in Pico-DST file = "
 		   << nEntries << endm;
   
   mPicoEventCounter = 0;
@@ -1826,8 +1826,8 @@ Int_t StFlowMaker::InitMuEventRead() {
     if (pTempChain) {delete pTempChain; pTempChain=0;}
     //**************  end of the block   
 
-    if (Debug()) gMessMgr->Info() << " doFlowEvents -  input fileList = " 
-				  << pMuFileList->GetFileName(0) << endm;
+//     if (Debug()) gMessMgr->Info() << " doFlowEvents -  input fileList = " 
+// 				  << pMuFileList->GetFileName(0) << endm;
 
       
     pMuChain->SetBranchAddress("MuEvent", &pMuEvents);
@@ -1842,8 +1842,10 @@ Int_t StFlowMaker::InitMuEventRead() {
     pMuChain->SetBranchStatus("GlobalTracks.mEta",1);
 
     Int_t nEntries = (Int_t)pMuChain->GetEntries(); 
-    gMessMgr->Info() << "##### FlowMaker: events in Mu-DST chain = "
-                     << nEntries << endm;
+//     if (Debug()) gMessMgr->Info() << "##### FlowMaker: events in Mu-DST chain = "
+//                      << nEntries << endm;
+    gMessMgr->Info() << "### ## FlowMaker: " << pMuFileList->GetFileName(0)
+				  << " " << nEntries << " events" << endm;
     
   }
   
@@ -1891,6 +1893,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.82  2003/04/01 00:27:08  posk
+// Little q is now unweighted by pt or eta. Big Q is unaffected.
+//
 // Revision 1.81  2003/01/14 14:19:07  oldi
 // Log of last commit changed to indicate the important introduction of the
 // pMuTrack->flag() cut.
