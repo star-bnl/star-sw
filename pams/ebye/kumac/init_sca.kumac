@@ -54,7 +54,7 @@ macro init_analysis _
 
   macro/global/import *
 
-  message ' init_sca#init_prior '
+  message ' init_sca#init_analysis '
 
   if [prior_switch].eq.1 then
    exec  init_sca#init_prior
