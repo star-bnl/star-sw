@@ -63,17 +63,9 @@ C* covar - covariance matrix
       XYZ(2) = 0.0
       XYZ(3) = 0.0
       CALL GUFLD(XYZ,BFIELD)
-C***KLUDGE
-      PARMASS = 0.139 ! Pion mass
-      if(hypoid.eq.14)PARMASS = 0.938 ! Proton mass
-      if(hypoid.eq.8)PARMASS = 0.139 ! Pion mass
-      CALL TPCINI(PARMASS,0.001,0.01)
 
-CCC      CALL TPCINI(' ',100.0,100.0)
-CCC      PARMASS = 0.139 ! pion mass
-CCC      CALL TPCINI(' ',0.0005,0.0005)
+      CALL TPCINI(hypoid,0.001,0.01)
 
-        IGPART = hypoid
         twopi = C_2PI
 C Fill the point arrays
         i=0
@@ -198,31 +190,32 @@ C convert to 0-2pi
         enddo
 c fill in covar here
         ic = 6
-        covar(1,1) = trktpc(ic+1)/trktpc(1)**2 ! phi*phi
+
+        covar(1,1) = trktpc(ic+1) ! phi*r*phi*r
         covar(2,2) = trktpc(ic+6) ! z*z
-        covar(3,3) = trktpc(ic+13)! psi*psi
-        covar(4,4) = trktpc(ic+10)! tanl*tanl
+        covar(3,3) = trktpc(ic+10)! tanl*tanl
+        covar(4,4) = trktpc(ic+13)! psi*psi
         covar(5,5) = trktpc(ic+15)! q/pt*q/pt
 
-        covar(1,2) = trktpc(ic+2)/trktpc(1) ! phi*z
-        covar(1,3) = trktpc(ic+4)/trktpc(1) ! phi*psi
-        covar(1,4) = trktpc(ic+3)/trktpc(1) ! phi*tanl
-        covar(1,5) = trktpc(ic+5)/trktpc(1) ! phi*q/pt
+        covar(1,2) = trktpc(ic+2) ! r*phi*z
+        covar(1,3) = trktpc(ic+3) ! r*phi*tanl
+        covar(1,4) = trktpc(ic+4) ! r*phi*psi
+        covar(1,5) = trktpc(ic+5) ! r*phi*q/pt
 
         covar(2,1) = covar(1,2)
-        covar(2,3) = trktpc(ic+8) ! z*psi
-        covar(2,4) = trktpc(ic+7) ! z*tanl
+        covar(2,3) = trktpc(ic+7) ! z*tanl
+        covar(2,4) = trktpc(ic+8) ! z*psi
         covar(2,5) = trktpc(ic+9) ! z*q/pt
 
         covar(3,1) = covar(1,3)
         covar(3,2) = covar(2,3)
-        covar(3,4) = trktpc(ic+11)! psi*tanl
-        covar(3,5) = trktpc(ic+14)! psi*q/pt
+        covar(3,4) = trktpc(ic+11)! tanl*psi
+        covar(3,5) = trktpc(ic+12)! tanl*q/pt
 
         covar(4,1) = covar(1,4)
         covar(4,2) = covar(2,4)
         covar(4,3) = covar(3,4)
-        covar(4,5) = trktpc(ic+12)! tanl*q/pt
+        covar(4,5) = trktpc(ic+14)! psi*q/pt
 
         covar(5,1) = covar(1,5)
         covar(5,2) = covar(2,5)
@@ -239,7 +232,7 @@ c fill in covar here
 
 
 
-      SUBROUTINE TPCINI(PARMASS,OUTFIL,OUTSMO)
+      SUBROUTINE TPCINI(HYPOID,OUTFIL,OUTSMO)
 *------------------------------------------------------------------------------
 *--
 *--   Initialise TPCFIT
@@ -253,6 +246,10 @@ c fill in covar here
 *--
 *------------------------------------------------------------------------------
 *--
+
+#include "math_constants.inc"
+#include "phys_constants.inc"
+
       PARAMETER (CONS=0.299792458D-3)
 *--
 ***      CHARACTER*(*) CHTOP
@@ -270,8 +267,21 @@ c fill in covar here
      &              SRES(2,MTPC),SPUL(2,MTPC),SCH2(MTPC)
 
       Real bfield(3),xyz(3)
+      Integer hypoid
 
-      PMASS = PARMASS
+      PMASS = M_PION_MINUS ! Default
+      if(hypoid.eq.2)PMASS = M_ELECTRON ! Electron mass
+      if(hypoid.eq.3)PMASS = M_ELECTRON ! Positron mass
+      if(hypoid.eq.5)PMASS = M_MUON_PLUS ! Muon mass
+      if(hypoid.eq.6)PMASS = M_MUON_PLUS ! Muon mass
+      if(hypoid.eq.11)PMASS = M_KAON_PLUS ! Kaon mass
+      if(hypoid.eq.12)PMASS = M_KAON_PLUS ! Kaon mass
+      if(hypoid.eq.14)PMASS = M_PROTON ! Proton mass
+      if(hypoid.eq.15)PMASS = M_PROTON ! AntiProton mass
+      if(hypoid.eq.45)PMASS = M_DEUTERON ! Deuteron mass
+
+
+      IGPART = hypoid
 *--
 *--   magnetic field (in kGauss=0.1 Tesla)
 *--
@@ -732,6 +742,11 @@ CCC      IF (TRKTPC(5).GT.2.*PI)   TRKTPC(5) = TRKTPC(5) - 2.*PI
          IRET=100
          RETURN
       ENDIF
+
+      Do i=1,5
+       P(i) = PR(i)
+      enddo
+
 *--
 *--   track model along reference surface
 *--
