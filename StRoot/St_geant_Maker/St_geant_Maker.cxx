@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.52 2000/01/04 21:51:11 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.53 2000/01/14 23:43:54 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.53  2000/01/14 23:43:54  fisyak
+// Add missing defines
+//
 // Revision 1.52  2000/01/04 21:51:11  fisyak
 // Move TGeant3 to root4star
 //
@@ -231,24 +234,25 @@ extern "C" int isprint (int);
 #include "g2r/St_g2t_vpd_Module.h"
 #include "StarCallf77.h" 
 #ifdef F77_NAME
-#define csjcal_ F77_NAME(csjcal,CSJCAL)
-#define csaddr_ F77_NAME(csaddr,CSADDR)
-#endif
-# define csaddr csaddr_
-# define csjcal csjcal_
-#define    agnzgete	 F77_NAME(agnzgete,AGNZGETE)
-
 #define    geometry	 F77_NAME(geometry,GEOMETRY)
 #define    agstroot	 F77_NAME(agstroot,AGSTROOT)
+#define    csaddr	 F77_NAME(csaddr,CSADDR)
+#define    csjcal	 F77_NAME(csjcal,CSJCAL)
 #define    g2t_volume_id F77_NAME(g2t_volume_id,G2T_VOLUME_ID)
-#define    agvolume      F77_NAME(agvolume,AGVOLUME)
+#define    gfrotm	 F77_NAME(gfrotm,GFROTM)
+#define    gfxzrm	 F77_NAME(gfxzrm,GFXZRM)
+#define    dzddiv	 F77_NAME(dzddiv,DZDDIV)
+#define    agnzgete	 F77_NAME(agnzgete,AGNZGETE)
+#define    agstroot	 F77_NAME(agstroot,AGSTROOT)
 #define    rootmaptable  F77_NAME(rootmaptable,ROOTMAPTABLE)
+#define    agvolume      F77_NAME(agvolume,AGVOLUME)
+#endif
 typedef long int (*addrfun)(); 
 R__EXTERN "C" {
   void type_of_call geometry();
   Int_t type_of_call agstroot();
-  void type_of_call *csaddr_(char *name, int l77name=0);
-  long int type_of_call csjcal_(
+  void type_of_call *csaddr(char *name, int l77name=0);
+  long int type_of_call csjcal(
 				addrfun *fun, /* addres of external routine */
 				int  *narg,   /* number   of arguments      */
 				...);         /* other narg arguments       */
@@ -545,7 +549,7 @@ Int_t St_geant_Maker::Make()
 #if 0
     Char_t *g2t = "g2t_";
     Int_t  narg = 0;
-    addrfun address  = (addrfun ) geant3->Csaddr(g2t);
+    addrfun address  = (addrfun ) csaddr(g2t);
     if (address) csjcal(&address,&narg);
 #endif
 
