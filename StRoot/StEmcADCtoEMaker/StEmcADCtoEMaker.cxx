@@ -1,9 +1,9 @@
 //*-- Author : Alexandre Suaide
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.9 2001/10/24 15:46:28 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.10 2001/10/24 22:41:39 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
-// Revision 1.9  2001/10/24 15:46:28  suaide
-// delete hits with adc==0
+// Revision 1.10  2001/10/24 22:41:39  suaide
+// small changes
 //
 // Revision 1.8  2001/10/24 14:47:16  suaide
 // type correction
@@ -97,7 +97,7 @@ Int_t StEmcADCtoEMaker::Make()
 {  
   TStopwatch clock;
   clock.Start();
-  
+  cout <<"\n\n\nStEmcADCtoEMaker::Make()******************************************************************\n";
   if(!GetEmcEvent())
   {
     gMessMgr->Warning("StEmcADCtoEMaker::Make() - Can not get pointer to EMC Event");
@@ -110,9 +110,11 @@ Int_t StEmcADCtoEMaker::Make()
     {
       cout <<"**** Calibrating detector "<<detname[det].Data()<<endl;
       
+      cout <<"***** Getting database tables\n";
       m_CalibDb=NULL;
       TString DbName="Calibrations/emc/"+detname[det];      
       m_CalibDb=GetInputDB(DbName.Data());
+      cout <<"***** Finished get new DB tables.... will check if they are Ok\n";
       if(!m_CalibDb) // try old calibration format
       {
         gMessMgr->Warning("StEmcADCtoEMaker::Make() - Can not get new calib tables.... try old format");
@@ -145,6 +147,7 @@ Int_t StEmcADCtoEMaker::Make()
   
   clock.Stop();
   cout <<"Time to run StEmcADCtoEMaker::Make() real = "<<clock.RealTime()<<"  cpu = "<<clock.CpuTime()<<" \n";
+  cout <<"*******************************************************************************************\n\n\n";
 
   return kStOK;
 }
