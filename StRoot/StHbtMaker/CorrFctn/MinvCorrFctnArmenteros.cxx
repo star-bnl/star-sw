@@ -1,6 +1,6 @@
 /***************************************************************************
  * 
- * $Id: MinvCorrFctnArmenteros.cxx,v 1.1 2000/02/28 14:31:51 laue Exp $
+ * $Id: MinvCorrFctnArmenteros.cxx,v 1.2 2000/03/16 01:56:36 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: MinvCorrFctnArmenteros.cxx,v $
+ * Revision 1.2  2000/03/16 01:56:36  laue
+ * Copy constructor added to some correlation functions
+ *
  * Revision 1.1  2000/02/28 14:31:51  laue
  * Correlation function to make the Armenteros-Podolanski plot.
  *
@@ -26,10 +29,18 @@
 #include "StHbtMaker/CorrFctn/MinvCorrFctnArmenteros.h"
 //#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 #include <cstdio>
+
 #ifdef __ROOT__
   ClassImp(MinvCorrFctnArmenteros)
 #endif
-//____________________________
+
+
+
+pairD armenteros(const StHbtPair*);
+double ptArm(const StHbtPair*);
+double alphaArm(const StHbtPair*);
+
+//___________________________
 MinvCorrFctnArmenteros::MinvCorrFctnArmenteros(char* title, 
 					 const int& nbins1, const float& MinvLo1, const float& MinvHi1,
 					 const int& nbins2, const float& MinvLo2, const float& MinvHi2){
@@ -52,8 +63,6 @@ MinvCorrFctnArmenteros::MinvCorrFctnArmenteros(char* title,
   mDenominator->SetDirectory(0);
   mDifference->SetDirectory(0);
   // default for mass window, can be changed via SetMassWindow(double, double);
-  mLo = 1.02-.05;
-  mHi = 1.02+.05;
   mRealPairs = 0;
   mMixedPairs = 0;
 }
@@ -92,50 +101,33 @@ StHbtString MinvCorrFctnArmenteros::Report(){
   return returnThis;
 }
 //____________________________
-void MinvCorrFctnArmenteros::AddRealPair(const StHbtPair* pair){
-  if ( pair->mInv()>mLo && pair->mInv()<mHi ) {
-    StHbtThreeVector pp = pair->track1()->FourMomentum().vect();
-    StHbtThreeVector pn = pair->track2()->FourMomentum().vect();
-    float pdotn = pp.dot(pn);
-    float ptotp2 = pp.mag2();
-    float ptotn2 = pn.mag2();
-    
-    //float pt2   = pair->fourMomentum().vect().perp2();
-    //float ptot2 = pair->fourMomentum().vect().mag2();
-    float ptot  = pair->fourMomentumSum().vect().mag();
-
-    float ppp = ( ptotp2 + pdotn )/ptot;
-    float ppn = ( ptotn2 + pdotn )/ptot;
-
-    float alpha     = (ppp - ppn)/(ppp + ppn);
-    float ptarm     = sqrt(fabs(ptotp2 - ppp*ppp));
-
-    mNumerator->Fill( alpha, ptarm, 1.);
-  }
-  else 
+inline void MinvCorrFctnArmenteros::AddRealPair(const StHbtPair* pair){
+  if ( pair->mInv()>mLo && pair->mInv()<mHi || mHi == mLo) {
+    pairD ptArmAlpha = armenteros(pair);
+    mNumerator->Fill( ptArmAlpha.first, ptArmAlpha.second, 1.);
     mRealPairs++;
+  }  
 }
 //____________________________
-void MinvCorrFctnArmenteros::AddMixedPair(const StHbtPair* pair){ 
-  if ( pair->mInv()>mLo && pair->mInv()<mHi ) {
-    StHbtThreeVector pp = pair->track1()->FourMomentum().vect();
-    StHbtThreeVector pn = pair->track2()->FourMomentum().vect();
-    float pdotn = pp.dot(pn);
-    float ptotp2 = pp.mag2();
-    float ptotn2 = pn.mag2();
-    
-    //float pt2   = pair->fourMomentum().vect().perp2();
-    //float ptot2 = pair->fourMomentum().vect().mag2();
-    float ptot  = pair->fourMomentumSum().vect().mag();
-
-    float ppp = ( ptotp2 + pdotn )/ptot;
-    float ppn = ( ptotn2 + pdotn )/ptot;
-
-    float alpha     = (ppp - ppn)/(ppp + ppn);
-    float ptarm     = sqrt(fabs(ptotp2 - ppp*ppp));
-
-    mDenominator->Fill( alpha, ptarm, 1.);
-  }
-  else   
+inline void MinvCorrFctnArmenteros::AddMixedPair(const StHbtPair* pair){ 
+  if ( pair->mInv()>mLo && pair->mInv()<mHi || mHi == mLo) {
+    pairD ptArmAlpha = armenteros(pair);
+    mDenominator->Fill( ptArmAlpha.first, ptArmAlpha.second, 1.);
     mMixedPairs++;
+  }
+}
+//____________________________
+inline pairD armenteros(const StHbtPair* pair ) {
+  StHbtThreeVector pp = pair->track1()->FourMomentum().vect();
+  StHbtThreeVector pn = pair->track2()->FourMomentum().vect();
+  float pdotn = pp.dot(pn);
+  float ptotp2 = pp.mag2();
+  float ptotn2 = pn.mag2();
+  
+  float ptot  = pair->fourMomentumSum().vect().mag();
+  
+  float ppp = ( ptotp2 + pdotn )/ptot;
+  float ppn = ( ptotn2 + pdotn )/ptot;
+  
+  return pairD( (ppp - ppn)/(ppp + ppn), sqrt(fabs(ptotp2 - ppp*ppp)) );
 }

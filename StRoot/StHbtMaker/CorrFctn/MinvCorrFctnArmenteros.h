@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvCorrFctnArmenteros.h,v 1.1 2000/02/28 14:31:52 laue Exp $
+ * $Id: MinvCorrFctnArmenteros.h,v 1.2 2000/03/16 01:56:36 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: MinvCorrFctnArmenteros.h,v $
+ * Revision 1.2  2000/03/16 01:56:36  laue
+ * Copy constructor added to some correlation functions
+ *
  * Revision 1.1  2000/02/28 14:31:52  laue
  * Correlation function to make the Armenteros-Podolanski plot.
  *
@@ -34,6 +37,7 @@ public:
   MinvCorrFctnArmenteros(char* title, 
 		      const int& nbins1, const float& MinvLo1, const float& MinvHi1,
 		      const int& nbins2, const float& MinvLo2, const float& MinvHi2);
+  MinvCorrFctnArmenteros(const MinvCorrFctnArmenteros&);
   virtual ~MinvCorrFctnArmenteros();
 
   virtual StHbtString Report();
@@ -62,6 +66,12 @@ private:
 inline  StHbt2DHisto* MinvCorrFctnArmenteros::Numerator(){return mNumerator;}
 inline  StHbt2DHisto* MinvCorrFctnArmenteros::Denominator(){return mDenominator;}
 inline  StHbt2DHisto* MinvCorrFctnArmenteros::Difference(){return mDifference;}
+inline  void MinvCorrFctnArmenteros::SetMassWindow(double a, double b){ mLo=a; mHi=b;}
+inline MinvCorrFctnArmenteros::MinvCorrFctnArmenteros(const MinvCorrFctnArmenteros& fctn) :StHbtCorrFctn() {
+  mNumerator = new StHbt2DHisto(*(fctn.mNumerator));
+  mDenominator= new StHbt2DHisto(*(fctn.mDenominator));
+  mDifference = new StHbt2DHisto(*(fctn.mDifference));
+}
 
 #endif
 

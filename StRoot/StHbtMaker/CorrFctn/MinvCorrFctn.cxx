@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MinvCorrFctn.cxx,v 1.4 2000/01/25 17:34:44 laue Exp $
+ * $Id: MinvCorrFctn.cxx,v 1.5 2000/03/16 01:56:36 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: MinvCorrFctn.cxx,v $
+ * Revision 1.5  2000/03/16 01:56:36  laue
+ * Copy constructor added to some correlation functions
+ *
  * Revision 1.4  2000/01/25 17:34:44  laue
  * I. In order to run the stand alone version of the StHbtMaker the following
  * changes have been done:
@@ -48,6 +51,8 @@ ClassImp(MinvCorrFctn)
 
 //____________________________
 MinvCorrFctn::MinvCorrFctn(char* title, const int& nbins, const float& MinvLo, const float& MinvHi){
+  mTagWriter = StHbtTagWriter::Instance();  // get the singleton
+
   char theTitle[100];
   // set up numerator
   char *TitNum = "MinvCorrFctn_Num";
@@ -101,13 +106,6 @@ void MinvCorrFctn::Finish(){
 
 }    
 //____________________________
-MinvCorrFctn::MinvCorrFctn(const MinvCorrFctn& fctn) // copy constructor
-  :StHbtCorrFctn() { 
-   mNumerator = new StHbt1DHisto(*(fctn.mNumerator));
-   mDenominator= new StHbt1DHisto(*(fctn.mDenominator));
-   mDifference = new StHbt1DHisto(*(fctn.mDifference));
-}
-//____________________________
 StHbtString MinvCorrFctn::Report(){
   string stemp = "Minv Correlation Function Report:\n";
   char ctemp[100];  
@@ -123,6 +121,8 @@ StHbtString MinvCorrFctn::Report(){
 //____________________________
 inline void MinvCorrFctn::AddRealPair(const StHbtPair* pair){
   mNumerator->Fill(pair->mInv());
+
+  mTagWriter->SetTag("positiveKaonsMeans",2, (float)pair->mInv() );  // <-- this is how to fill the tag
 }
 //____________________________
 inline void MinvCorrFctn::AddMixedPair(const StHbtPair* pair){
