@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.19 2000/12/05 17:54:23 hardtke Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.20 2001/05/22 22:32:14 hardtke Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.20  2001/05/22 22:32:14  hardtke
+ * Add tpc global to local transformations
+ *
  * Revision 1.19  2000/12/05 17:54:23  hardtke
  * Fix bug in sectorFromCoordinate
  *
@@ -171,7 +174,7 @@ using namespace units;
 // 						   StTpcElectronics* eldb)
 
 StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
-: mRotation(2,2,1), mRotate(2,1,0), mResult(2,1,0) {
+: mRotation(2,2,1), mRotate(2,1,0), mResult(2,1,0), mTpcToGlobalRotation(3,3,1), mGlobalToTpcRotation(3,3,1) {
   
 //     mTPCdb = geomdb;
 //     mSCdb  = scdb;
@@ -179,7 +182,8 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
     gTpcDbPtr    = globalDbPointer;
     if (gTpcDbPtr->PadPlaneGeometry() &&
 	gTpcDbPtr->Electronics() &&
-	gTpcDbPtr->SlowControlSim()) { 
+	gTpcDbPtr->SlowControlSim() &&
+        gTpcDbPtr->GlobalPosition()) { 
 	mTimeBinWidth = 1./gTpcDbPtr->Electronics()->samplingFrequency();
 	//
 	// For this version I'll put the inner/outer sector z offsets by
@@ -212,13 +216,37 @@ StTpcCoordinateTransform::StTpcCoordinateTransform(StTpcDb* globalDbPointer)
 // 	    PR(cos(beta));
 // 	    PR(sin(beta));
 	}
-	
+	double phi = 0.0;
+        double theta = gTpcDbPtr->GlobalPosition()->TpcRotationAroundGlobalAxisY();
+        double psi = gTpcDbPtr->GlobalPosition()->TpcRotationAroundGlobalAxisX();
+	//        cout << cos(theta) << " " << cos(phi) << endl;
+        mGlobalToTpcRotation(1,1) = cos(theta)*cos(phi);
+	mGlobalToTpcRotation(1,2) = cos(theta)*sin(phi);
+        mGlobalToTpcRotation(1,3) = -sin(theta);
+        mGlobalToTpcRotation(2,1) = sin(psi)*sin(theta)*cos(phi)-cos(psi)*sin(phi);
+        mGlobalToTpcRotation(2,2) = sin(psi)*sin(theta)*sin(phi) + cos(psi)*cos(phi);
+        mGlobalToTpcRotation(2,3) = cos(theta)*sin(psi);
+        mGlobalToTpcRotation(3,1) = cos(psi)*sin(theta)*cos(phi)+sin(psi)*sin(phi);
+        mGlobalToTpcRotation(3,2) = cos(psi)*sin(theta)*sin(phi)-sin(psi)*cos(phi);
+        mGlobalToTpcRotation(3,3) = cos(theta)*cos(psi);
+        unsigned int ierr;
+        mTpcToGlobalRotation = mGlobalToTpcRotation.inverse(ierr);
+//  	if (ierr==0){ 
+//            cerr << "StTpcCoordinateTransform::Cant invert rotation matrix" << endl;
+//            cout << "Global to TPC rotation matrix:" << mGlobalToTpcRotation << endl;
+//  	  cout << "TPC to global rotation matrix:" << mTpcToGlobalRotation << endl;
+//          }
+        mTpcPositionInGlobal.setX(gTpcDbPtr->GlobalPosition()->TpcCenterPositionX());
+        mTpcPositionInGlobal.setY(gTpcDbPtr->GlobalPosition()->TpcCenterPositionY());
+        mTpcPositionInGlobal.setZ(gTpcDbPtr->GlobalPosition()->TpcCenterPositionZ());
+	//        cout << "Global Position of TPC center" << mTpcPositionInGlobal << endl;
     }
     else {
 	cerr << "StTpcDb IS INCOMPLETE! Cannot contstruct Coordinate transformation." << endl;
 	assert(gTpcDbPtr->PadPlaneGeometry());
 	assert(gTpcDbPtr->Electronics());
 	assert(gTpcDbPtr->SlowControlSim());
+        assert(gTpcDbPtr->GlobalPosition());
     }
 }
 StTpcCoordinateTransform::~StTpcCoordinateTransform() { /* nopt */ }
@@ -347,17 +375,17 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate& a, StTpcLo
 void StTpcCoordinateTransform::operator()(const StTpcLocalCoordinate& a, StGlobalCoordinate& b) 
 {
     // Requires survey DB i/o!
-    // Take as unity for now
+    // Use matrix rotations and offset from database.  Hardtke, 22-may-2001
 
-    b = StGlobalCoordinate(a.position());
+    b = StGlobalCoordinate(mTpcToGlobalRotation*a.position()+mTpcPositionInGlobal);
 }
 
 void StTpcCoordinateTransform::operator()(const StGlobalCoordinate& a, StTpcLocalCoordinate& b)
 {
     // Requires survey DB i/o!
-    // Take as unity for now
+    // Use matrix rotations and offset from database.  Hardtke, 22-may-2001
 
-    b = StTpcLocalCoordinate(a.position());   
+    b = StTpcLocalCoordinate(mGlobalToTpcRotation*(a.position()-mTpcPositionInGlobal));   
 }
 
 StThreeVector<double> StTpcCoordinateTransform::sector12Coordinate(StThreeVector<double>& v, int *sector)
