@@ -1,5 +1,9 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.20 2000/01/20 23:15:33 snelling Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.21 2000/02/03 00:05:13 snelling Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.21  2000/02/03 00:05:13  snelling
+* Changed warning reporting, improved switching between 3point Gaussian fit
+* and weighted mean.
+*
 * Revision 1.20  2000/01/20 23:15:33  snelling
 * Made 3point gaussian default
 *
@@ -66,8 +70,8 @@ C     Copyright 1994    Lawrence Berkeley Laboratory
 #include "PAM.inc"
 #include "tcl_tclpar.inc"
 
-      RECORD      /TABLE_HEAD_ST/                tclpar_h
-      RECORD      /TCL_TCLPAR_ST/               tclpar(*)
+      RECORD  /TABLE_HEAD_ST/  tclpar_h
+      RECORD  /TCL_TCLPAR_ST/  tclpar(*)
 
       integer iadc(*)           ! ADC's for cluster pixels
       integer ipad(*)           ! Pads for cluster pixels
@@ -152,7 +156,7 @@ c
       logical first             ! .T. iff first call
       logical lookat_mc         ! Look at Monte Carlo info.
 
-C-----------------------------------------------------------------------
+c-----------------------------------------------------------------------
 c     functions:
 c
       integer iucomp
@@ -160,11 +164,11 @@ c
       integer tgc_time_to_z
       integer loop_over_z
       integer tph_3point_gauss  ! not in use?
-C-----------------------------------------------------------------------
+c-----------------------------------------------------------------------
       data first/.true./
       data imc_track /nmc_tracks_max*0/
       data nocc_track /nmc_tracks_max*0/
-C-----------------------------------------------------------------------
+c-----------------------------------------------------------------------
       save first
       save identity_vector
       save imc_track
@@ -172,9 +176,9 @@ C-----------------------------------------------------------------------
       save nocc_track
       save bucket_length_in
       save bucket_length_out
-C-----------------------------------------------------------------------
+
       character*132 m132(2)
-C-----------------------------------------------------------------------
+c-----------------------------------------------------------------------
       ierr = 0
       
 c     set up the identity vector for x (pad) calculation
@@ -218,12 +222,11 @@ c
          ipad_ipix = ipad(ipix)
          itdc_ipix = itdc(ipix)
 
-C     pad direction projection
+c     pad direction projection
          pad_proj(ipad_ipix)  = pad_proj(ipad_ipix) + adc_ipix
          tdc_x_adc(ipad_ipix) = tdc_x_adc(ipad_ipix)
      +        + FLOAT(itdc_ipix)*adc_ipix
          numpix_pad_proj(ipad_ipix)  = numpix_pad_proj(ipad_ipix)+1.
-C     time direction no longer a projection - WAL 13 Feb 98
          if(ipix .le. nbuck) then
             iret=tgc_time_to_z(itdc_ipix,ipad_ipix,irow,isec,zdummy) 
             z_vector(ipix) = 0.0
@@ -248,9 +251,9 @@ C     time direction no longer a projection - WAL 13 Feb 98
       enddo
       rmu(1) =  rmu(1)/adc_sum
 
-C     Calculate  sigma, skewness & kurtosis;
-C     RRB: Speed calc. by reordering loop 
-C     and carrying previous results forward:
+c     Calculate  sigma, skewness & kurtosis;
+c     RRB: Speed calc. by reordering loop 
+c     and carrying previous results forward:
       do pad_n=ipad_lo, ipad_hi
          diff(1) = float(pad_n) - rmu(1)
          do ir = 2,4
@@ -258,7 +261,7 @@ C     and carrying previous results forward:
             rmu(ir) =  rmu(ir) + pad_proj(pad_n)*diff(ir)
          enddo
       enddo
-C
+
       do ir = 2,4
          rmu(ir) = rmu(ir)/adc_sum
       enddo
@@ -289,23 +292,21 @@ c     x,dx,prf: - try 3-point gauss... if does not work, do weighted mean
 
       if (tph_3point_gauss(identity_vector, rvec, d_rvec,
      +     ipad_lo, ipad_hi, npads,
-     +     centroid, sigma, uncertainty).ne.1) then
-        call tph_weighted_mean(identity_vector, rvec,
+     +     centroid, sigma, uncertainty) .ne. 1) then
+         call tph_weighted_mean(identity_vector, rvec,
      +        d_rvec_cor, d_rvec,
      +        ipad_lo, ipad_hi, npads,
      +        centroid, sigma, uncertainty)
       endif
       x(1) = centroid
       dx(1) = uncertainty
-      if (sigma.gt.0.) then
+      if (sigma .gt. 0.) then
          prf(1) = sigma
       else
          prf(1) = 1/sqrt(12.)
       endif
 
 c     z,dz,zrf: - do weighted mean
-c     for uncertainties, see notebook2 p113
-c
       loop_over_z = nclspix
       if(loop_over_z .gt. nbuck) loop_over_z=nbuck
       do indx=1,loop_over_z
@@ -317,12 +318,12 @@ c
      +     d_rvec_cor, d_rvec_uncor,
      +     1, loop_over_z, nbuck,
      +     centroid, sigma, uncertainty)
-c
+
       z(1) = centroid
       dz(1) = uncertainty
-      if (sigma.gt.0.) then
+      if (sigma .gt. 0.) then
          zrf(1) = sigma
-      else if (irow.gt.13) then
+      else if (irow .gt. 13) then
          zrf(1) = bucket_length_out/sqrt(12.)
       else 
          zrf(1) = bucket_length_in/sqrt(12.)
@@ -332,13 +333,13 @@ c     orientation phi:
 c     ??? If pad_proj *is* 0, rvec is peculiar...but I left existing *logic*
       do indx=ipad_lo,ipad_hi
          d_rvec(indx) = pad_proj(indx)
-         if (pad_proj(indx).ne.0.) then
+         if (pad_proj(indx) .ne. 0.) then
             rvec(indx) = tdc_x_adc(indx)/d_rvec(indx)
          else
             rvec(indx) = tdc_x_adc(indx)
          end if
       enddo
-      if(ipad_range.lt.3) then
+      if(ipad_range .lt. 3) then
          phi(1)=-1.0
       else
          call lfitw(identity_vector(ipad_lo), rvec(ipad_lo),
@@ -370,11 +371,11 @@ c     switch if interested in real data (or real data performance)
          enddo
          imax = lvsimx(nocc_track,nmc_tracks,1)
          track(1) = imc_track(imax)
-c     
+     
 c     Now, clean up the workspace for next time:
          call vzero(imc_track,nmc_tracks)
          call vzero(nocc_track,nmc_tracks)
-c     
+     
       endif
       
       return
