@@ -14,8 +14,14 @@
 #include "EEfeeRunDescr.h"
 
 
+// A simple wrapper for Fortran xsort program
+// works for Linux and possibly other Unices
+// Author Piotr A. Zolnierczuk / IUCF
+// 2002-2003
+
+
 //#define DEBUG 0
-const int MaxCommentLen=1024;
+static const int MaxCommentLen=1024;
 
 static TFile   *file  = NULL ;
 static TTree   *tree  = NULL ;

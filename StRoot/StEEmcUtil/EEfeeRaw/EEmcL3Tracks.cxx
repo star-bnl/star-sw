@@ -1,5 +1,8 @@
-// $Id: EEmcL3Tracks.cxx,v 1.6 2003/05/31 02:31:30 zolnie Exp $ 
+// $Id: EEmcL3Tracks.cxx,v 1.7 2003/06/02 17:34:35 zolnie Exp $ 
 // $Log: EEmcL3Tracks.cxx,v $
+// Revision 1.7  2003/06/02 17:34:35  zolnie
+// fixed bug in EEmcHelix
+//
 // Revision 1.6  2003/05/31 02:31:30  zolnie
 // bring the changes back
 //
@@ -42,8 +45,11 @@ EEmcHelix::EEmcHelix(const EEmcHelix &h)
 {
   h.getOrigin  (mOx,mOy,mOz);
   h.getMomentum(mPx,mPy,mPz);
-  mQ    = h.Q();
-  mB    = h.B();
+  mQ      = h.Q();
+  mB      = h.B();
+  mPoints = h.Points();
+  mLength = h.Length();
+  mFlag   = h.Flag();
 };
 
 
@@ -103,7 +109,7 @@ EEmcL3Tracks::add(EEmcHelix &h, Float_t de)
   mDedx[mNTracks]  = de;
   EEmcHelix *helix = new(helices[mNTracks]) EEmcHelix(h); 
   mNTracks++;
-
+  //if(helix) helix->print();
   return ( (helix==NULL) ? 1 : 0 );
 }
 
