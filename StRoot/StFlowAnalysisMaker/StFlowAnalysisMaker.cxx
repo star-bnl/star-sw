@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.27 2000/04/13 22:34:13 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.28 2000/05/03 16:38:33 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.28  2000/05/03 16:38:33  posk
+// Compatable with ROOT 2.24/02.
+//
 // Revision 1.27  2000/04/13 22:34:13  posk
 // Resolution correction is now made.
 //
@@ -192,7 +195,7 @@ Int_t StFlowAnalysisMaker::Make() {
 
 void StFlowAnalysisMaker::PrintInfo() {
   cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.27 2000/04/13 22:34:13 posk Exp $"
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.28 2000/05/03 16:38:33 posk Exp $"
        << endl;
   cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
@@ -1028,6 +1031,9 @@ Int_t StFlowAnalysisMaker::Finish() {
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vEta = new
 	TH1F(histTitle->Data(), histTitle->Data(), 2*nEtaBins, etaMin, etaMax);
+      //histFull[k].histFullHar[j].mHist_vEta = 
+      //histFull[k].histFullHar[j].mHist_vObsEta->ProjectionX(histTitle->Data());
+      //histFull[k].histFullHar[j].mHist_vEta->SetTitle(histTitle->Data());
       histFull[k].histFullHar[j].mHist_vEta->SetXTitle("Pseudorapidity");
       histFull[k].histFullHar[j].mHist_vEta->SetYTitle("Flow (%)");
       delete histTitle;
@@ -1039,6 +1045,9 @@ Int_t StFlowAnalysisMaker::Finish() {
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vPt = new
 	TH1F(histTitle->Data(), histTitle->Data(), 2*nPtBins, ptMin, ptMax);
+      //histFull[k].histFullHar[j].mHist_vPt = 
+      //histFull[k].histFullHar[j].mHist_vObsPt->ProjectionX(histTitle->Data());
+      //histFull[k].histFullHar[j].mHist_vPt->SetTitle(histTitle->Data());
       histFull[k].histFullHar[j].mHist_vPt->SetXTitle("Pt (GeV)");
       histFull[k].histFullHar[j].mHist_vPt->SetYTitle("Flow (%)");
       delete histTitle;
@@ -1046,9 +1055,9 @@ Int_t StFlowAnalysisMaker::Finish() {
 
       // Calulate v = vObs / Resolution
       // The systematic error of the resolution is not folded in.
-      cout << "# Resolution= " << mRes[k][j] << " +/- " << mResErr[k][j] << endl;
-
       if (mRes[k][j] != 0.) {
+	cout << "##### Resolution= " << mRes[k][j] << " +/- " << mResErr[k][j] 
+	     << endl;
 	histFull[k].histFullHar[j].mHist_v2D-> Scale(1. / mRes[k][j]);
 	int n, entries;
 	float content, error;                   // convert to 1D

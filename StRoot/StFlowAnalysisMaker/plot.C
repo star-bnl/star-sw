@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.18 2000/04/13 22:34:16 posk Exp $
+// $Id: plot.C,v 1.19 2000/05/03 16:38:35 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -17,6 +17,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.19  2000/05/03 16:38:35  posk
+// Compatable with ROOT 2.24/02.
+//
 // Revision 1.18  2000/04/13 22:34:16  posk
 // Resolution correction is now made.
 //
@@ -249,7 +252,11 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
       histName->Append(*countRows);
       cout << " col= " << k+1 << " row= " << j+1 << " pad= " << padN << "\t" 
 	   << histName->Data() << endl;
-      TH1* hist = (TH1*)histFile.Get(histName->Data());
+      if (histProjName) {
+	TH2* hist = (TH2*)histFile.Get(histName->Data());
+      } else {
+	TH1* hist = (TH1*)histFile.Get(histName->Data());
+      }
       if (!hist) {
 	cout << "### Can't find histogram " << histName->Data() << endl;
 	return;
@@ -446,7 +453,15 @@ TCanvas* plotSingles(char* shortName){
     TString* histName = new TString(shortName);
   }
   cout << histName->Data() << endl;
-  TH1* hist = (TH1*)histFile.Get(histName->Data());
+  if (histProjName) {
+    if (strstr(temp,"3")) {
+      TH3* hist = (TH3*)histFile.Get(histName->Data());
+    } else {
+      TH2* hist = (TH2*)histFile.Get(histName->Data());
+    }
+  } else {
+    TH1* hist = (TH1*)histFile.Get(histName->Data());
+  }
   if (!hist) {
     cout << "### Can't find histogram " << histName->Data() << endl;
     return;

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.12 2000/04/13 22:34:15 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.13 2000/05/03 16:38:35 posk Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.13  2000/05/03 16:38:35  posk
+// Compatable with ROOT 2.24/02.
+//
 // Revision 1.12  2000/04/13 22:34:15  posk
 // Resolution correction is now made.
 //
@@ -88,8 +91,8 @@ public:
   Int_t    Finish();
   Float_t  Res(Int_t eventN, Int_t harN) const;
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
-  virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.12 2000/04/13 22:34:15 posk Exp $ built "__DATE__" "__TIME__ ;
+  virtual  const char *GetCVS() const
+    {static const char cvs[]="Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.13 2000/05/03 16:38:35 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
