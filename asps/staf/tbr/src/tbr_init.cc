@@ -26,7 +26,7 @@ tbrMotifViewer *tbr_MotifViewer;	/* HACK */
 //:<--------------------------------------------------------------------
 int tbr_init()
 {
-   EML_MESSAGE("TBR: Initializing.\n");
+   EML_MESSAGE("TBR:Initializing. ");
 
 /*- Define the TBR KUIP commands. -*/
    tbr_def_();
@@ -45,7 +45,7 @@ int tbr_init()
 //:<--------------------------------------------------------------------
 int tbr_start()
 {
-   EML_MESSAGE("TBR: Starting.\n");
+   EML_MESSAGE("TBR:Starting. ");
 
 /*- Create the TBR Viewers. -*/
    tbr = new tbrFactory("tbr");
@@ -62,7 +62,7 @@ int tbr_start()
 //:<--------------------------------------------------------------------
 int tbr_stop()
 {
-   EML_MESSAGE("TBR: Stopping.\n");
+   EML_MESSAGE("TBR:Stopping. ");
 
    return TRUE;
 }

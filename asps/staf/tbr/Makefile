@@ -5,7 +5,7 @@
 #######################################################################
 .PHONY: all clean test help setup config install default
 #
-VERSION			:= "$Id: Makefile,v 1.5 1997/07/16 22:54:33 ward Exp $"
+VERSION			:= "$Id: Makefile,v 1.6 1997/11/17 21:02:14 tull Exp $"
 #
 default: all
 #
@@ -55,7 +55,7 @@ test:
 #
 #?make help        - Show help for SLMakefile targets.
 help:
-	@$(SLM_DIR)/help $(SLM_DIR)
+	@$(SLM_DIR)/slm_help $(SLM_DIR)
 #
 Makefile: $(SLM_DIR)/SLMakefile.MAIN
 	cp $< $@

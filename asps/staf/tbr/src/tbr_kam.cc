@@ -15,7 +15,6 @@
 #include <stdio.h>
 
 #include "kuip.h"
-#include "tbr_types.h"
 
 #include "emlLib.h"
 #include "duiLib.h"
@@ -35,11 +34,14 @@
 *:* TBR/COUNT
 *:<---------------------------------------------------------------------
 */
-void kam_tbr_count_(){kam_tbr_count();}
-int kam_tbr_count()
+void kam_tbr_count_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
 
+        STAFCV_T status = tbr_count();
+}
+STAFCV_T tbr_count()
+{
    printf("TBR:\tObject count = %d \n",tbr->count());
    EML_SUCCESS(STAFCV_OK);
 }
@@ -53,11 +55,14 @@ int kam_tbr_count()
 *:* TBR/COUNT
 *:<---------------------------------------------------------------------
 */
-void kam_tbr_list_(){kam_tbr_list();}
-int kam_tbr_list()
+void kam_tbr_list_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
 
+        STAFCV_T status = tbr_list();
+}
+STAFCV_T tbr_list()
+{
    printf("%s",tbr->list() );
    EML_SUCCESS(STAFCV_OK);
 }
@@ -71,13 +76,15 @@ int kam_tbr_list()
 *:* TBR/LAUNCH
 *:<---------------------------------------------------------------------
 */
-void kam_tbr_motif_viewdataset_(){kam_tbr_motif_viewdataset();}
-int kam_tbr_motif_viewdataset()
+void kam_tbr_motif_viewdataset_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
 
-   if( !tbr_MotifViewer->viewDataset(dui->rootDO()) ){ /* Craig. Used to be dui
-                                                       ** intead of tdm */
+        STAFCV_T status = tbr_motif_viewdataset();
+}
+STAFCV_T tbr_motif_viewdataset()
+{
+   if( !tbr_MotifViewer->viewDataset(dui->rootDO()) ){
       EML_ERROR(KAM_METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
