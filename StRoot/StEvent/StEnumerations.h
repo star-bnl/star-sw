@@ -8,7 +8,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.14 2002/02/22 22:56:47 jeromel Exp $
+ * $Id: StEnumerations.h,v 2.15 2002/02/25 19:32:03 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -21,6 +21,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.15  2002/02/25 19:32:03  ullrich
+ * Added enums for RHIC ring to StBeamDirection.
+ *
  * Revision 2.14  2002/02/22 22:56:47  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -73,7 +76,10 @@
 /*!
  * \enum StBeamDirection 
  */
-enum StBeamDirection {east, west};
+enum StBeamDirection {east = 0,
+		      yellow = 0,  // yellow beam is going west -> east
+		      west = 1,
+		      blue = 1};   // blue beam is going east -> west
 
 /*!
  * \enum StBeamPolarizationAxis 
