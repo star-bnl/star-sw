@@ -29,6 +29,7 @@ typedef enum {
 } StiIntersection;
   
 
+
 /*! \class StiKalmanTrackNode
   Work class used to handle Kalman filter information while
   constructing track nodes.  A node may or may not own a hit
@@ -55,12 +56,17 @@ public:
   /// Initialize this node with the given hit information
   void initialize(StiHit*h,double alpha, double eta, double curvature, double tanl);
   
-  // Sets the various attributes of this node based on the argument list.
-  //void set(StiHit * hit, const double alpha,const double xRef,const double xx[5], const double cc[15], const double dEdx, const double chi2);
   /// Sets the Kalman state of this node equal to that of the given node. 
   void setState(const StiKalmanTrackNode * node);
-  // Extract state information from this node.
-  void get(double& alpha, double& xRef, double x[5], double cc[15], double& chi2);
+  /// Extract state information from this node.
+  void get(double& alpha, double& xRef, double x[kNPars], double cc[kNErrs], double& chi2);
+
+  /// Extract state information from this node in Radial representation.
+  void getGlobalRadial(double  x[6],double  e[15]);
+
+  /// Extract state information from this node in TPT representation.
+  void getGlobalTpt   (float   x[6],float   e[15]);
+
   /// Get the charge (sign) of the track at this node
   int getCharge() const;
   /// Convenience Method that returns the track momentum at this node
@@ -70,8 +76,6 @@ public:
   StThreeVectorF getGlobalMomentumF() const;
   StThreeVector<double> getMomentum() const;
   StThreeVector<double> getGlobalMomentum() const;
-  void setDetector(const StiDetector * detector);
-  const StiDetector * getDetector() const;
   /// Calculates and returns the momentum and error of the track at this node. The momentum is 
   /// in the local reference frame of this node.
   void getMomentum(double p[3], double e[6]=0) const;
@@ -94,20 +98,19 @@ public:
   double z_g() const;
     
   double getX() const 			{ return _x ;}
-  double getY() const 			{ return _p0;}  
-  double getZ() const 			{ return _p1;}
+  double getY() const 			{ return _y;}  
+  double getZ() const 			{ return _z;}
   
-  double getEta  () const 		{return _p2;   }
-  double getChi2 () const 		{return _chi2; }
+  double getEta  () const 		{return _eta;   }
   double getSin  () const 		{return _sinCA;}
   double getCos  () const 		{return _cosCA;}
   double getAlpha() const 		{return _alpha;}
   double getEyy()   const 		{return eyy;}
   double getEzz()   const 		{return ezz;}
-  double getCyy()   const 		{return _c00;}
-  double getCzz()   const 		{return _c11;}
-  double const *getPars()const          {return (&_p0);}
-  double getDiag(int idx)const          {return (&_c00)[(idx*(idx+3))/2];}
+  double getCyy()   const 		{return _cYY;}
+  double getCzz()   const 		{return _cZZ;}
+  double const *getPars()const          {return (&_x);}
+  double getDiag(int idx)const          {return (&_cXX)[(idx*(idx+3))/2];}
   int    getHitCount () const		{return hitCount;}
   int    getNullCount() const       	{return nullCount;}
   int    getContigHitCount () const 	{return contiguousHitCount ;}
@@ -117,20 +120,12 @@ public:
   int   &getContigHitCount ()  		{return contiguousHitCount ;}
   int   &getContigNullCount()  		{return contiguousNullCount;}
 
-#ifdef STI_NODE_DEBUG
-  void setChi2(double chi2);
-  void Break(int kase);
-#endif  
-#ifndef STI_NODE_DEBUG
-  void setChi2(double chi2){_chi2 = chi2;}
-#endif  
+  static void Break(int kase);
 
   StThreeVector<double>getPoint() const;
   StThreeVector<double>getGlobalPoint() const;
   /// Calculates and returns the momentum and error of the track at this node in global coordinates.
   void getGlobalMomentum(double p[3], double e[6]=0) const;
-  /// Set the attributes of this node as a copy of the given node.
-  void setAsCopyOf(const StiKalmanTrackNode * node);
   
   /// Propagates a track encapsulated by the given node "p" to the given detector "tDet".
   int  propagate(StiKalmanTrackNode *p, const StiDetector * tDet, int dir);	//throw (Exception);
@@ -161,13 +156,14 @@ public:
   /// the track at that point.
   StThreeVector<double> getPointAt(double xk) const;
   
-  int nudge();
+  int nudge(StiHit *hit=0);
   double evaluateChi2(const StiHit *hit); 
   int updateNode(); 
   int rotate(double alpha); 
   void add(StiKalmanTrackNode * newChild);
-  double getField()  const;
-  int    getHelicity()  const;
+  void cutTail();
+  double getField()   const;
+  int    getHelicity()const;
   double getPhase()   const;
   double getPsi()     const;
   double getWindowY();
@@ -181,7 +177,7 @@ public:
 
   double length(const StThreeVector<double>& delta, double curv);
   double getDedx() const;
-  double nice(double angle) const;
+  static double nice(double angle);
   /// Return center of helix circle in global coordinates
   StThreeVector<double> getHelixCenter() const;
   void setError(double yErr,double zErr);
@@ -199,6 +195,8 @@ public:
   static void   ResetComment(Char_t *m = "") {comment = m;}
   static const Char_t *Comment() {return comment.Data();}
   /// rotation angle of local coordinates wrt global coordinates
+  void static saveStatics(double *sav);
+  void static backStatics(double *sav);
 
 
  protected:   
@@ -210,36 +208,34 @@ public:
   /// local X-coordinate of this track (reference plane)
   double _refX;
   double _layerAngle;
+  /// sine and cosine of cross angle
+  double _cosCA;
+  double _sinCA;
   double _x;   
   /// local Y-coordinate of this track (reference plane)           
-  double _p0; 
+  double _y; 
   /// local Z-coordinate of this track (reference plane)
-  double _p1;
+  double _z;
   /// (signed curvature)*(local Xc of helix axis - X current point on track)
-  double _p2;
+  double _eta;
   /// signed curvature [sign = sign(-qB)]
-  double _p3;  
+  double _curv;  
   /// tangent of the track momentum dip angle
-  double _p4;
-  /// sine and cosine of cross angle
-  double _sinCA;
-  double _cosCA;
+  double _tanl;
   
   /// covariance matrix of the track parameters
-  double _c00;                       
-  double _c10, _c11;                 
-  double _c20, _c21, _c22;           
-  double _c30, _c31, _c32, _c33;     
-  double _c40, _c41, _c42, _c43, _c44;
-  double _chi2;
+  double _cXX;
+  double _cYX,_cYY;                       
+  double _cZX,_cZY, _cZZ;                 
+  double _cEX,_cEY, _cEZ, _cEE;           
+  double _cCX,_cCY, _cCZ, _cCE, _cCC;     
+  double _cTX,_cTY, _cTZ, _cTE, _cTC, _cTT;
   float  eyy,ezz;
   int hitCount;
   int nullCount;
   int contiguousHitCount;
   int contiguousNullCount;
-  const StiDetector * _detector;
   char   _end[1];
-  int _Kount;  //for debug only 
   static StiKalmanTrackFinderParameters * pars;
 
   static int counter;
@@ -261,43 +257,43 @@ public:
   static double radThickness, density;
   static double gasDensity,matDensity,gasRL,matRL;
   static bool   useCalculatedHitError;
-  void static saveStatics(double *sav);
-  void static backStatics(double *sav);
 //  debug variables
   static int    fDerivTestOn;   
   static double fDerivTest[5][5];   
   static int   _debug;
   static TString comment;
+public:
+  int _Kount;  //for debug only 
 };
 
 
-inline double StiKalmanTrackNode::nice(double angle) const
+inline double StiKalmanTrackNode::nice(double angle)
 { 
   if (angle <= -M_PI) angle += 2*M_PI;
-  if (angle >  M_PI) angle -= 2*M_PI;
+  if (angle >   M_PI) angle -= 2*M_PI;
   return angle;
 }
 
 inline double StiKalmanTrackNode::getCurvature() const
 {
-  return _p3;
+  return _curv;
 }
 
 inline double StiKalmanTrackNode::getDipAngle() const
 {
-  return atan(_p4);
+  return atan(_tanl);
 }
 
 inline StThreeVector<double> StiKalmanTrackNode::getMomentum() const
 {
   double pt = getPt();
-  return StThreeVector<double>(pt*_cosCA,pt*_sinCA,pt*_p4);
+  return StThreeVector<double>(pt*_cosCA,pt*_sinCA,pt*_tanl);
 }
 
 inline StThreeVectorF StiKalmanTrackNode::getMomentumF() const
 {
   double pt = getPt();
-  return StThreeVectorF(pt*_cosCA,pt*_sinCA,pt*_p4);
+  return StThreeVectorF(pt*_cosCA,pt*_sinCA,pt*_tanl);
 }
 
 inline StThreeVector<double> StiKalmanTrackNode::getGlobalMomentum() const
@@ -316,23 +312,23 @@ inline StThreeVectorF StiKalmanTrackNode::getGlobalMomentumF() const
 
 inline int StiKalmanTrackNode::getCharge() const
 {
-  return (pars->field*_p3 > 0) ? -1 : 1;
+  return (pars->field*_curv > 0) ? -1 : 1;
 }
 
 inline double StiKalmanTrackNode::getTanL() const
 {
-  return _p4;
+  return _tanl;
 }
 
 inline int StiKalmanTrackNode::getHelicity()  const
 {
-  return (_p3 < 0) ? -1 : 1;
+  return (_curv < 0) ? -1 : 1;
 }
 
 
 inline double StiKalmanTrackNode::pitchAngle() const
 {
-  return atan(_p4);
+  return atan(_tanl);
 }
 
 inline double StiKalmanTrackNode::sinCrossAngle() const
@@ -360,7 +356,7 @@ inline void StiKalmanTrackNode::setError(double ey,double ez)
 inline double StiKalmanTrackNode::getPt() const
 {
   double curvature;
-  curvature = fabs(_p3);
+  curvature = fabs(_curv);
   if (curvature<1e-12) 
     return 0.003e12*fabs(pars->field);
   else
@@ -376,7 +372,7 @@ inline double StiKalmanTrackNode::getPt() const
 */
 inline double StiKalmanTrackNode::getP() const
 {
-  return (getPt()*::sqrt(1.+_p4*_p4));
+  return (getPt()*::sqrt(1.+_tanl*_tanl));
 }
 
 inline double StiKalmanTrackNode::mcs2(double relRadThickness, double beta2, double p2)
@@ -401,27 +397,27 @@ struct StreamX
 
 inline StThreeVector<double> StiKalmanTrackNode::getPoint() const
 {
-  return StThreeVector<double>(_x,_p0,_p1);
+  return StThreeVector<double>(_x,_y,_z);
 }
 
 inline StThreeVector<double> StiKalmanTrackNode::getGlobalPoint() const
 {
-  return StThreeVector<double>(_cosAlpha*_x-_sinAlpha*_p0, _sinAlpha*_x+_cosAlpha*_p0, _p1);
+  return StThreeVector<double>(_cosAlpha*_x-_sinAlpha*_y, _sinAlpha*_x+_cosAlpha*_y, _z);
 }
 
 inline  double StiKalmanTrackNode::x_g() const
 {
-  return _cosAlpha*_x-_sinAlpha*_p0;
+  return _cosAlpha*_x-_sinAlpha*_y;
 }
 
 inline  double StiKalmanTrackNode::y_g() const
 {
-  return _sinAlpha*_x+_cosAlpha*_p0;
+  return _sinAlpha*_x+_cosAlpha*_y;
 }
 
 inline  double StiKalmanTrackNode::z_g() const
 {
-  return _p1;
+  return _z;
 }
 
 ///Calculate and returns pathlength within detector volume
@@ -432,7 +428,7 @@ inline double StiKalmanTrackNode::pathlength() const
   const StiDetector * det = getDetector();
   if (!det) return 0.; 
   double thickness = det->getShape()->getThickness();
-  return (thickness*::sqrt(1.+_p4*_p4)) / _cosCA;
+  return (thickness*::sqrt(1.+_tanl*_tanl)) / _cosCA;
 }
 
 ///Return the radiation length (in cm) of the 
@@ -487,28 +483,18 @@ inline StThreeVectorD* StiKalmanTrackNode::getLengths(StiKalmanTrackNode* nextNo
 
 inline double StiKalmanTrackNode::getDedx() const
 {
-  double de=_hit->getEloss();
+
+  StiHit *hit = getHit();
+  if (!hit) return -1;
+  double de=hit->getEloss();
   double dx=pathlength();
   if(dx>0 && de>0) return de/dx;
   return -1;
 }
 
-inline const StiDetector * StiKalmanTrackNode::getDetector() const 
-{
-  if (_hit)
-    return _hit->detector();
-  else 
-    return _detector;
-}
-
-inline void StiKalmanTrackNode::setDetector(const StiDetector * detector)
-{
-  _detector = detector;
-}
-
 inline void StiKalmanTrackNode::setCurvature(double curvature)
 {
-  _p3=curvature;
+  _curv=curvature;
 }
 
 
