@@ -220,8 +220,8 @@ c*-Subtract expected energy deposit from charged track
                else
                   goto 10    ! the track didn't hit emc
                endif
-               if(id(idet,mod,ebin,sub).eq.0) then ! No EMC hits for track,
-                  nout=nout+1                      ! then give negative energy
+               if(id(idet,mod,ebin,sub).eq.0) then 
+                  nout=nout+1    ! No EMC hits for track, then give negative energy
 *
                   if(nout .gt. emc_energy_h.maxlen)then
                      write(*,*) '***EMC_EGRID:Need more memory in EMC_ENERGY'
