@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.38 2000/09/05 16:12:12 snelling Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.39 2000/09/07 17:02:45 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.39  2000/09/07 17:02:45  snelling
+// Made the hist file standard root compatible
+//
 // Revision 1.38  2000/09/05 16:12:12  snelling
 // Added the new particles to the pid histogram
 //
@@ -768,7 +771,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.38 2000/09/05 16:12:12 snelling Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.39 2000/09/07 17:02:45 snelling Exp $");
 
   return StMaker::Init();
 }
@@ -1331,6 +1334,7 @@ Int_t StFlowAnalysisMaker::Finish() {
   TString* fileName = new TString("flow.hist.root");
   fileName->Prepend(pFlowSelect->Number());
   TFile histFile(fileName->Data(), "RECREATE");
+  histFile.SetFormat(1);
   GetHistList()->Write();
   histFile.Close();
   delete fileName;
