@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.88 2000/02/10 19:49:41 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.89 2000/02/10 19:50:55 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.89  2000/02/10 19:50:55  kathy
+// use kEventVtxId to select primary verteices instead of value 1
+//
 // Revision 1.88  2000/02/10 19:49:41  kathy
 // use kEventVtxId to select primary verteices instead of value 1
 //
@@ -1138,10 +1141,8 @@ void St_QA_Maker::MakeHistVertex(){
 
     dst_vertex_st  *t   = vertex->GetTable();
     for (Int_t i = 0; i < vertex->GetNRows(); i++,t++){
-      //         if (t->iflag>0) {  
 
-         if (t->iflag==1 && t->vtx_id==kEventVtxId){      // plot of primary vertex only
-	   // if (t->iflag==1 && t->vtx_id==1){                    // plot of primary vertex only
+      if (t->iflag==1 && t->vtx_id==kEventVtxId){      // plot of primary vertex only
 	m_pv_detid->Fill(t->det_id); 
 	m_pv_vtxid->Fill(t->vtx_id);
 	if (!isnan(double(t->x))) m_pv_x->Fill(t->x);     
@@ -1344,7 +1345,7 @@ void St_QA_Maker::MakeHistEval(){
   if (vertex) {
     dst_vertex_st  *t   = vertex->GetTable();
     for (Int_t i = 0; i < vertex->GetNRows(); i++,t++){
-      if (t->iflag==1 && t->vtx_id==1){       
+      if (t->iflag==1 && t->vtx_id==kEventVtxId){       
         recoX = t->x;
         recoY = t->y;
         recoZ = t->z;
