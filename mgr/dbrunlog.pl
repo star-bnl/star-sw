@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: dbrunlog.pl,v 1.3 1999/07/10 13:18:06 wenaus Exp $
+# $Id: dbrunlog.pl,v 1.4 1999/07/21 09:18:36 wenaus Exp $
 #
 # $Log: dbrunlog.pl,v $
+# Revision 1.4  1999/07/21 09:18:36  wenaus
+# Add last update timestamp; Add HPSS check from Wensheng
+#
 # Revision 1.3  1999/07/10 13:18:06  wenaus
 # add 'run only' and 'log only' views
 #
@@ -25,10 +28,15 @@
 #
 
 use lib "/star/u2d/wenaus/datadb";
+use Net::FTP;
 require "dbheader.pl";
 require "dbsetup.pl";
 
 $debugOn = 0;
+
+$timestampFile = '/disk1/star/daq/last_update';
+$timestamp = (stat($timestampFile))[9];
+$timestamp = localtime($timestamp);
 
 &cgiSetup();
 
@@ -37,10 +45,12 @@ foreach $par ( @paramlist ) {
     $logOnly = 1 if ( $par eq 'log' );
     $runOnly = 1 if ( $par eq 'run' );
     $showLog = 1 if ( $par eq 'show' );
+    $hpssCheck = 1 if ( $par eq 'hpss' );
 }
 
 $logLogUrl = "<a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/dbrunlog.pl?show=yes&log\">Comments only</a>";
 $runLogUrl = "<a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/dbrunlog.pl?show=yes&run\">Run log only</a>";
+$hpssLogUrl = "<a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/dbrunlog.pl?show=yes&run&hpss\">Run log with HPSS check</a>";
 $fullLogUrl = "<a href=\"http://duvall.star.bnl.gov/cgi-bin/prod/dbrunlog.pl?show=yes\">Full log</a>";
 if ( $showLog ) {
     if ( $logOnly ) {
@@ -71,6 +81,21 @@ sub displayLog {
     @daqfiles = </disk1/star/daq/*.daq>;
     # connect to the DB
     &StDbConnect();
+
+    if ( $hpssCheck ) {
+        $ftpLgn = 1;
+        $ftp = Net::FTP->new("rmds02.rhic.bnl.gov", Port=>2121, Timeout=>10)
+            or $ftpLgn = 0;
+        $ftp->login("starsink", "MockData")
+            or $ftpLgn = 0;
+        if( !$ftpLgn ) {
+            print "HPSS access is failing; HPSS check will not be done\n";
+        }
+    } else {
+        $ftpLgn = 0;
+    }
+    my $hpssDaq = "/home/starsink/raw/daq/";
+
     $table = $RunT;
     $selection = "*" ;
     $selectString = "";
@@ -94,17 +119,22 @@ Run log entry form</a> -
 Commissioning forum</a> -
 <a href="http://redford.star.bnl.gov/staronline">Online</a> -
 <a href="http://daq.star.bnl.gov/~daq/">DAQ</a> -
-<a href="/STARAFS/comp/prod/">Production</a> -
-<a href="http://redford.star.bnl.gov/staronline/shifts/shiftLogReport.htm">
-Old log</a>
+<a href="/STARAFS/comp/prod/">Production</a>
 </font></center>
 <p>
 Links at right (you need a wide window) give access to event summaries and allow editing/deleting
 of run log entries. To kill a junk entry like a 'testing' comment,
 edit it and set status=-1 (if you just delete it it will reappear if
-the database is rebuilt from the entry log). Updated hourly.
+the database is rebuilt from the entry log). Updated every three hours.
 <p>
-<font size="-1">$fullLogUrl - $runLogUrl - $logLogUrl</font>
+<table border=0 cellpadding=0 cellspacing=0 width="100%">
+<tr><td align=left>
+<font size="-1">$fullLogUrl - $runLogUrl - $logLogUrl - $hpssLogUrl</font>
+</td><td align=right>
+<font size="-1">
+Last update started at $timestamp
+</font>
+</td></tr></table>
 <hr>
 <p><pre>
 END
@@ -234,7 +264,10 @@ END
                 print $val{'comment'};
                 print "</blockquote></blockquote>";
             }
+            $gotTheFile = 0;
             if ( @daqfiles>0 ) {
+                my $gotHpssFile = 0;
+                my $hpssFilename = '';
                 print "<blockquote><blockquote>";
                 foreach $daqf ( @daqfiles ) {
                     my $name = $val{'name'};
@@ -242,7 +275,58 @@ END
                         my ($fmode, $uid, $gid, $filesize, 
                             $readTime, $writeTime, $cTime) =
                                 (stat($daqf))[2,4,5,7,8,9,10];
-                        printf("<b>Data: %-28s %6dMB</b>\n",$daqf,$filesize/1000000);
+                        printf("<b>Data: %-28s %6dMB</b>",$daqf,$filesize/1000000);
+                        if($ftpLgn) {
+                            my @daqfname = split(/\//, $daqf);
+                            my $year = substr $daqfname[4],0,2;
+                            my $month = substr $daqfname[4],2,2;
+                            if ( $year > 98 ) {
+                                $fullYear=1900+$year;
+                            } else {
+                                $fullYear=2000+$year;
+                            }
+                            $openDir = 1;
+                            my $hpssDaqDir = "$hpssDaq\/$fullYear\/$month";
+                            $ftp->cwd($hpssDaqDir) or $openDir = 0;
+                            if ( !$openDir ) {
+                                printf("<font color=\"red\"><b>%35s</b></font>", 'cannot open HPSS directory');
+                            } else { 
+                                @remoteFileList = $ftp->dir();
+                                $gotHpssFile = 0;
+                                for($jj=0; $jj<@remoteFileList; $jj++) {
+                                    @fields = split(/\s+/, $remoteFileList[$jj]);
+                                    $name = $fields[8];
+                                    if( $name eq $daqfname[4] ) {
+                                        $gotHpssFile = 1;
+                                        $hpssFilename = "$hpssDaqDir/$name";
+                                        $hpssFilename =~ s/\/\//\//g;
+                                        last;
+                                    }
+                                }                       
+                            }	      
+                        }             
+                        print "\n";
+                        $gotTheFile = 1;
+                    }
+                }
+                # for run records, report file location info
+                if ( $val{'name'} ne '' ) {
+                    if ( $gotTheFile ) {
+                        if ( $gotHpssFile ) {
+                            print "<b><font color=\"black\">In HPSS: $hpssFilename</font></b>";
+                        } else {
+                            if ($ftpLgn) {print "  <b><font color=\"red\">Not in HPSS</font></b>"}
+                        }
+                    } else {
+                        if ( $gotHpssFile ) {
+                            print "<b><font color=\"black\">In HPSS: $hpssFilename</font></b>";
+                        } else {
+                            if ($ftpLgn) {
+                                print "<b><font color=\"red\">Data file not in /disk1/star/daq and not in HPSS</b></font>";
+                            } else {
+                                print "<b>Data file not in /disk1/star/daq/</b>\n";
+                            }
+                        }
                     }
                 }
                 print "</blockquote></blockquote>";
@@ -251,6 +335,7 @@ END
     }
     print "</pre><p>\n";
 
+    $ftp->quit if( $ftpLgn );
     # finished
     &StDbDisconnect();
 }
@@ -264,18 +349,16 @@ print <<END;
 Commissioning forum</a> -
 <a href="http://redford.star.bnl.gov/staronline">Online</a> -
 <a href="http://daq.star.bnl.gov/~daq/">DAQ</a> -
-<a href="/STARAFS/comp/prod/">Production</a>
+<a href="/STARAFS/comp/prod/">Production</a> -
+<a href="http://www.rhichome.bnl.gov/RHIC/machine_status.html">RHIC status</a>
 </font></center>
 <h3>Browse the log:</h3>
 <blockquote>
 <h3>
-$fullLogUrl - $runLogUrl - $logLogUrl - 
-<a href="http://redford.star.bnl.gov/staronline/shifts/shiftLogEntry.htm">Old log</a></h3>
+$fullLogUrl - $runLogUrl - $logLogUrl - $hpssLogUrl
 </h3>
 </blockquote>
 <h3>Make a log entry:
-<font color="red">Continue to use the
-<a href="http://redford.star.bnl.gov/staronline/shifts/shiftLogEntry.htm">old log</a> for the moment to make entries)</font>
 </h3>
 <blockquote>
 <font color="red"><b>Red: Required for logging comments or runs</b></font>
