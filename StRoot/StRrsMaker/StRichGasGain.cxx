@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichGasGain.cxx,v 2.0 2000/08/09 16:17:00 gans Exp $
+ * $Id: StRichGasGain.cxx,v 2.1 2002/04/01 21:54:50 lasiuk Exp $
  *
  * Description:
  *  StRichGasGain computes an amplification factor of an
@@ -35,6 +35,9 @@
  *
  ****************************************************************
  * $Log: StRichGasGain.cxx,v $
+ * Revision 2.1  2002/04/01 21:54:50  lasiuk
+ * pedestal noise and difference in MIP/gamma
+ *
  * Revision 2.0  2000/08/09 16:17:00  gans
  * Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
  * for StRichDrawableT(foo)
@@ -116,7 +119,12 @@ double StRichGasGain::avalanche(StRichMiniHit* hit, double wirePos, list<StRichM
 	StRichViewer::getView()->mPolia->Fill(p);
 #endif
     //q = mPhysDB->ampl_factor * p;
-    q = mGasGainAmplification * p;    
+    q = mGasGainAmplification * p;
+    // addition to alter character of MIP/photon amplification
+    if(hit->process()==eCharged) {
+      q *= 3.;
+    }
+
 
     // produce feedback photon?
     feedbackPhoton(hit, q, aList);
