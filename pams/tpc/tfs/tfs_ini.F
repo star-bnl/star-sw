@@ -1,5 +1,8 @@
-* $Id: tfs_ini.F,v 1.2 1998/03/03 23:03:14 hardtke Exp $
+* $Id: tfs_ini.F,v 1.3 1998/07/02 19:13:16 sakrejda Exp $
 * $Log: tfs_ini.F,v $
+* Revision 1.3  1998/07/02 19:13:16  sakrejda
+* B field obtained via gufld call
+*
 * Revision 1.2  1998/03/03 23:03:14  hardtke
 * use constants files
 *
@@ -98,8 +101,8 @@ C     Local variables
       INTEGER  n0
 
 CDH test variables:
-CDH      real origin(3), bfield(3)      
-CDH      integer i
+      real origin(3), bfield(3)      
+      data origin /3*0/
 
       PARAMETER(CLUS_PER_CM_AR  = 22.3,
      >          CLUS_PER_CM_CH4 = 24.3,
@@ -124,11 +127,6 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
          RETURN
       endif
       
-CDH   try to extract b-field
-CDH      do i=1,3
-CDH       origin(i) = 0.
-CDH      enddo   
- 
 C     pad response function (prf)
       
 C     modefy sprf_dr2 & sigmad2 to accomodate zero B_filed case.
@@ -140,8 +138,8 @@ C     For the time being (as of 03/29/1997), for non-zero B-filed, we use
 C     C=2.8 & omega*tau=2.34 (see STAR CDR p. 4C-15 & S.R. Amendolia et al. 
 C     NIM A244 (1986) 516) and for zero B-field, C=1 & omega*tau=0. 
 C     *** DSW  03/29/1997 ***
-
-      if ( par(1).bmag .ne. 0. ) then
+      call gufld(origin,bfield)
+      if ( bfield(3).ne. 0. ) then
          Const     = 2.8
          omega_tau = 2.34
       else
