@@ -27,7 +27,9 @@ public:
    virtual Int_t  Open(const Char_t *ioFile=0);
    virtual void   Close(Option_t *opt=0);
            void   UpdateTree();
-   
+   virtual void   FillBranch(StBranch *brOnly);
+   virtual void   FillHistBranch(StBranch *histBr);
+  
    virtual void   PrintInfo();
 
    StTree        *fTree;	//!
