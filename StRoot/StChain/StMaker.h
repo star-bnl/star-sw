@@ -81,6 +81,7 @@ public:
    virtual Int_t  	FinishRun(int oldrunumber);
    virtual void	       	FatalErr(int Ierr, const char *Com);  
    virtual void   	PrintInfo();
+   virtual void         NotifyMe(const char *about,const void *ptr){;}
    virtual void         AddMaker (StMaker *mk);
 
    virtual void   MakeDoc(const TString &stardir="$(STAR)",const TString &outdir="$(STAR)/StRoot/html",Bool_t baseClasses=kTRUE); 
@@ -161,6 +162,9 @@ public:
    virtual void       	SetOutput(TDataSet *ds){SetOutput(0,ds);};
    virtual void       	SetOutputAll(TDataSet *ds,Int_t level=1);
    virtual void   	SetMode(Int_t mode=0)   {m_Mode=mode;}   // *MENU*
+   virtual void         SetNotify(const char *about,StMaker *mk);
+
+   virtual void         NotifyEm(const char *about,const void *ptr);
 
    virtual Double_t     RealTime(){ return m_Timer.RealTime();}
    virtual Double_t     CpuTime() { return m_Timer.CpuTime();}
@@ -179,7 +183,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.56 2002/02/02 23:31:14 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.57 2002/02/23 00:02:49 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -208,8 +212,11 @@ private:
 #endif
 
 
-// $Id: StMaker.h,v 1.56 2002/02/02 23:31:14 jeromel Exp $
+// $Id: StMaker.h,v 1.57 2002/02/23 00:02:49 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.57  2002/02/23 00:02:49  perev
+// NotyfyMe added
+//
 // Revision 1.56  2002/02/02 23:31:14  jeromel
 // doxygenized. Added some text for the Make() method.
 //
