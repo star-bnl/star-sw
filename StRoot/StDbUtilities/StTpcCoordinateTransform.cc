@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.15 2000/05/25 20:51:31 hardtke Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.16 2000/05/31 19:30:38 hardtke Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
+ * Revision 1.16  2000/05/31 19:30:38  hardtke
+ * lannys modification to t0 definitions
+ *
  * Revision 1.15  2000/05/25 20:51:31  hardtke
  * make z-to-time functions public, use correct t0s, get rid of spurious 0.5
  *
@@ -273,7 +276,7 @@ void StTpcCoordinateTransform::operator()(const StTpcLocalSectorCoordinate& a, S
     else{
      t0zoffset = 0;
     }
-    int tb = tBFromZ(a.position().z()+zoffset-t0zoffset);  
+    int tb = tBFromZ(a.position().z()+zoffset+t0zoffset);  
     b = StTpcPadCoordinate(sector, row, probablePad, tb);
 }
 void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLocalSectorCoordinate& b)
@@ -290,7 +293,7 @@ void StTpcCoordinateTransform::operator()(const StTpcPadCoordinate& a,  StTpcLoc
       (gTpcDbPtr->T0(a.sector())->getT0(a.row(),a.pad()) *mTimeBinWidth);  
       //t0 offset -- DH  27-Mar-00
 
-    tmp.setZ(zFromTB(a.timeBucket())-zoffset+t0zoffset);
+    tmp.setZ(zFromTB(a.timeBucket())-zoffset-t0zoffset);
     b = StTpcLocalSectorCoordinate(tmp,a.sector());
 }
 //  Tpc Local Sector <--> Global
@@ -535,9 +538,10 @@ double StTpcCoordinateTransform::zFromTB(const int tb) const
       //        (-gTpcDbPtr->Electronics()->tZero() + (timeBin+.5)*mTimeBinWidth);  // z= tpc local sector  z,no inner outer offset yet.
        double z = 
          gTpcDbPtr->DriftVelocity()*1e-6*         //cm/s->cm/us
-	 (gTpcDbPtr->triggerTimeOffset()*1e6 +  // units are s
-	  gTpcDbPtr->Electronics()->tZero() +   // units are us 
-            (timeBin)*mTimeBinWidth);  // z= tpc local sector  z,no inner outer offset yet.
+	 (gTpcDbPtr->triggerTimeOffset()*1e6   // units are s
+	+ gTpcDbPtr->Electronics()->tZero()    // units are us 
+	- gTpcDbPtr->Electronics()->shapingTime()*1e-3 +  //units are ns
+            (timeBin)*mTimeBinWidth );  // 
    
     return(z);
 }
@@ -550,8 +554,9 @@ int StTpcCoordinateTransform::tBFromZ(const double z) const
    
    
     double time = (
-	 -1*(gTpcDbPtr->triggerTimeOffset()*1e6 +  // units are s
-	  gTpcDbPtr->Electronics()->tZero())   // units are us 
+	 -1*(gTpcDbPtr->triggerTimeOffset()*1e6  // units are s
+	   + gTpcDbPtr->Electronics()->tZero()   // units are us 
+	   - gTpcDbPtr->Electronics()->shapingTime() * 1e-3)  //units are ns
 	 + ( z / (gTpcDbPtr->DriftVelocity()*1e-6))
 		   ); // tZero + (z/v_drift); the z already has the proper offset
     
