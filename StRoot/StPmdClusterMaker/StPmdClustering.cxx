@@ -1,6 +1,6 @@
 /***********************************************************
  *
- * $Id: StPmdClustering.cxx,v 1.9 2004/03/23 08:48:08 subhasis Exp $
+ * $Id: StPmdClustering.cxx,v 1.10 2004/04/29 03:12:03 perev Exp $
  *
  * Author: based on original routine written by S. C. Phatak.
  *
@@ -11,6 +11,9 @@
  ***********************************************************
  *
  * $Log: StPmdClustering.cxx,v $
+ * Revision 1.10  2004/04/29 03:12:03  perev
+ * Bug rong index fixed + arrays increased
+ *
  * Revision 1.9  2004/03/23 08:48:08  subhasis
  * refclust changed to have correct sigma/ncell
  *
@@ -73,8 +76,11 @@ Double_t d1[96][72],d2[96][72], clusters[6][6912], coord[2][96][72];
 Double_t crd_org[2][96][72];
 
 Int_t iord[2][6912], infocl[2][96][72], inford[3][6912], clno;
-const Int_t nmx=6912;   //! (72 x 96)maximum number of cells in a supermodule
-const Double_t pi=3.141593, sqrth=sqrt(3.)/2.;
+enum PmdMax {
+nmx    = 6912,   //! (72 x 96)maximum number of cells in a supermodule
+MX2000 = 6000
+};
+const Double_t pi=3.141592653, sqrth=sqrt(3.)/2.;
 
 
 //-------------------------------------------------
@@ -270,7 +276,7 @@ void StPmdClustering::printclust(Int_t i,Int_t m, StPmdCluster* pclust)
     Float_t clusigma = clusters[4][m];	 //! sigma of the cluster
 
     Float_t cluTag = clusters[5][m]; //tag used for separating clusters
-
+    if(cluTag){}//non used warning
     Float_t cluedep=zc; y0 = yc/sqrth; x0 = xc - y0/2.;
     Float_t clueta,cluphi;
     m_geom->DetCell_xy(i,y0+1,x0+1,x,y,clueta,cluphi);
@@ -373,11 +379,11 @@ void StPmdClustering::arrange(Int_t incr)
  
 void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod, Int_t idet,StPmdClusterCollection *pmdclus)
 {
-  Int_t clno, i, j, k, i1, i2, id, icl, ncl[2000], iord[2000], itest, ihld;
+  Int_t clno, i, j, k, i1, i2, id, icl, ncl[MX2000], iord[MX2000], itest, ihld;
   Int_t ig, nsupcl;
-  Double_t x[2000], y[2000], z[2000], x1, y1, z1, x2, y2, z2, rr,dist;
-  Double_t x_org[2000], y_org[2000];
-  Double_t xc[2000], yc[2000], zc[2000], d[96][72], clu_cells[2000],weight[2000],sum_weight,rc[2000];
+  Double_t x[MX2000], y[MX2000], z[MX2000], x1, y1, z1, x2, y2, z2, rr,dist;
+  Double_t x_org[MX2000], y_org[MX2000];
+  Double_t xc[MX2000], yc[MX2000], zc[MX2000], d[96][72], clu_cells[MX2000],weight[MX2000],sum_weight,rc[MX2000];
   //! clno counts the final clusters
   //! nsupcl =  # of superclusters; 
   //! ncl[i]= # of cells in supercluster i
@@ -400,10 +406,11 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod
 	}
       }
     }
-  for(i=0; i<2000; i++){ncl[i]=-1;}
+  for(i=0; i<MX2000; i++){ncl[i]=-1;}
   for(i=0; i<incr; i++){
     if(inford[0][i] != nsupcl){ nsupcl=nsupcl+1; }
-    ncl[nsupcl]=ncl[nsupcl]+1;
+    ncl[nsupcl]++;
+    assert(ncl[nsupcl]<MX2000);
   }
   id=-1;
   icl=-1;
@@ -602,11 +609,11 @@ void StPmdClustering::refclust(StPmdDetector* m_pmd_det,Int_t incr, Int_t supmod
 void StPmdClustering::gaussfit(Int_t ncell, Int_t nclust, Double_t &x, Double_t &y ,Double_t &z, Double_t &xc, Double_t &yc, Double_t &zc, Double_t &rc) 
 {
   Int_t i, j, i1, i2, jmax, novar,iclust, idd, jj,ii;
-  Double_t xx[2000], yy[2000], zz[2000], xxc[2000], yyc[2000], zzc[2000], 
-    rrc[2000];
-  Double_t a[2000], b[2000], c[2000], d[2000], ha[2000], hb[2000], hc[2000], 
-    hd[2000];
-  Int_t neib[2000][100];
+  Double_t xx[MX2000], yy[MX2000], zz[MX2000], xxc[MX2000], yyc[MX2000], zzc[MX2000], 
+    rrc[MX2000];
+  Double_t a[MX2000], b[MX2000], c[MX2000], d[MX2000], ha[MX2000], hb[MX2000], hc[MX2000], 
+    hd[MX2000];
+  Int_t neib[MX2000][100];
   Double_t sum, dx, dy, str, str1, aint, sum1, rr, dum;
   Double_t x1, x2, y1, y2;
   str=0.; str1=0.; rr=0.3; novar=0;
@@ -638,7 +645,7 @@ void StPmdClustering::gaussfit(Int_t ncell, Int_t nclust, Double_t &x, Double_t 
     aint=0.; idd=neib[i1][0];
     for(i2=1; i2<=idd; i2++){
       jj=neib[i1][i2];
-      dx=xx[i1]-xxc[jj]; dy=yy[i1]-yyc[jj]; dum=rrc[j]*rrc[jj]+rr*rr;
+      dx=xx[i1]-xxc[jj]; dy=yy[i1]-yyc[jj]; dum=rrc[jj]*rrc[jj]+rr*rr;
       aint=aint+exp(-(dx*dx+dy*dy)/dum)*zzc[idd]*rr*rr/dum;
     }
     sum=sum+(aint-zz[i1])*(aint-zz[i1])/str;
