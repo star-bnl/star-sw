@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.247 2001/11/13 18:50:50 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.248 2001/11/17 00:58:08 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -116,6 +116,9 @@ Bfc_st BFC[] = {
   {"P2001a"      ,""  ,"",
    "B2001,svt_daq,SvtD,ftpc,l3onl,tofDat,emcDY2,AlignSectors,ExB,OBmap,OClock,OPr13","",""
                                 ,"Production chain for summer 2001 data (+ ftpc, svt, l3, tof emc)",kFALSE},
+  {"P2001b"      ,""  ,"",
+   "B2001,ftpc,l3onl,tofDat,emcDY2,AlignSectors,ExB,OBmap,OClock,OPr13","",""
+                                ,"P2001a -svt ",kFALSE},
 
 
 
