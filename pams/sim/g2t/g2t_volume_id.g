@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.47 2003/11/12 22:42:37 potekhin Exp $
+* $Id: g2t_volume_id.g,v 1.48 2004/03/19 01:32:22 geurts Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.48  2004/03/19 01:32:22  geurts
+* TOFp/r changes for y2004: accomodate choice=7 (see geometry/btofgeo/btofgeo2.g)
+*
 * Revision 1.47  2003/11/12 22:42:37  potekhin
 * add the pixel detector volume encoding
 *
@@ -97,7 +100,7 @@
       Structure  SVTG  {version}
       Structure  TPCG  {version}
       Structure  VPDG  {version}
-      Structure  BTOG  {version, int choice, posit1, posit2 }
+      Structure  BTOG  {version, int choice, posit1(2), posit2 }
       Structure  CALG  {version, int Nmodule(2), int NetaT, int MaxModule, 
                                  int Nsub, int NetaSMDp, int NPhistr,
       	                         int Netfirst, int Netsecon}
@@ -112,7 +115,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           first=.false.
           call RBPUSHD
 *        in simulations done in MDC1 (1998) btog_posit1 was not saved
-          btog_posit1 = 23
+          btog_posit1 = {32,33}
           USE  /DETM/SVTT/SVTG  stat=isvt
           USE  /DETM/TPCE/TPCG  stat=itpc
           USE  /DETM/BTOF/BTOG  stat=ibtf
@@ -124,7 +127,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           if (itpc>=0) print *,' g2t_volume_id: TPC version =',tpcg_version
           if (ivpd>=0) print *,'              : VPD version =',vpdg_version
           if (ibtf>=0) print *,'              : TOF version =',btog_version,
-     >                         ' choice  =',btog_choice,btog_posit1,btog_posit2
+     >                         ' choice  =',btog_choice
           if (ical>=0) print *,'              : CALB patch  =',calg_nmodule
           if (ieem>=0) print *,'              : ECAL version=',emcg_version, 
                                ' onoff   =',emcg_onoff,emcg_FillMode
@@ -232,7 +235,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *          simulations done in 2000 - one tof tray on west side
            if (btog_choice==4) then
               rileft     = 1
-              sector     = btog_posit1
+              sector     = btog_posit1(1)
               sub_sector = numbv(1) 
               innout     = numbv(2)
               volume_id  = 100000*rileft+1000*innout+10*sector+sub_sector   
@@ -253,9 +256,13 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
              innout     = numbv(2)       !     4wide/5wide section
              sub_sector = numbv(3)       !     theta-tray
              section    = numbv(4)       !     phi-tray
-           elseif (btog_choice<=6) then  !  TOFp (single tray)
+           elseif (btog_choice<=7) then  !  TOFp (single tray)
              rileft     = 2              !     east (pre-set)
-             sector     = btog_posit1    !     tray (pre-set)
+             if (btog_choice!=7) then    !
+              sector    = btog_posit1(1) !     tray (pre-set)
+             else                        !
+              sector    = btog_posit1(2) !
+             endif                       !
              innout     = numbv(1)       !     4wide/5wide section
              sub_sector = numbv(2)       !     theta-tray
              section    = numbv(3)       !     phi-tray
@@ -290,19 +297,18 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 * ------- TOFr detector (single tray) --------------
       else If (Csys=='tfr') then   ! TOFr
-         if (btog_choice==5) then      !  single tray
+         if (btog_choice==5 .or. btog_choice==7) then      !  single tray
             rileft     = 2               !  east (pre-set)
             sector     = btog_posit2     !  tray (pre-set)
             module     = numbv(1)        !  module (eta)
             layer      = numbv(2)        !  layer (phi, get from hit position)
          else if (btog_choice==6) then ! full TOFr
-             rileft     = numbv(1)       !  west(1)/east(2)
-             sector     = numbv(2)       !  tray(1-60)
-             module     = numbv(3)       !  module (eta)
-             layer      = numbv(4)       !  layer (phi, get from hit position)
+            rileft     = numbv(1)        !  west(1)/east(2)
+            sector     = numbv(2)        !  tray(1-60)
+            module     = numbv(3)        !  module (eta)
+            layer      = numbv(4)        !  layer (phi, get from hit position)
          endif
          volume_id = layer +10*(module +100*(sector+100*rileft) )
-
 
       else If (Csys=='ctb') then
 *5*
