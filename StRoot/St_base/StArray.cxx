@@ -199,11 +199,6 @@ void StRegistry::List()
 //______________________________________________________________________________
 
 ClassImp(StObjArray)
-//______________________________________________________________________________
-void 	StObjArray::push_back(const TObject *obj) {AddLast((TObject*)obj);}
-//______________________________________________________________________________
-void 	StObjArray::pop_back() {RemoveAt(GetLast());}
-//______________________________________________________________________________
 UInt_t  StObjArray::size() const {return GetLast()+1;}
 //______________________________________________________________________________
 void    StObjArray::resize(Int_t num){Resize(num);}
@@ -213,8 +208,6 @@ Int_t 	StObjArray::capacity() const {return Capacity();}
 TObject* StObjArray::Back() const {return Last();}
 //______________________________________________________________________________
 TObject* StObjArray::Front() const {return First();}
-//______________________________________________________________________________
-void 	StObjArray::clear(){Clear();}
 //______________________________________________________________________________
 Bool_t 	StObjArray::empty() const {return IsEmpty();}
 //______________________________________________________________________________
@@ -278,29 +271,29 @@ TIterator* StObjArray::MakeIterator(Bool_t dir) const
   return (TIterator*)(new StObjArrayIter(this,dir));
 }
 //______________________________________________________________________________
-void StObjArray::Clean(StObject *obj)
+StObjArrayIter *StObjArray::Erase(StObjArrayIter *fist,StObjArrayIter *last,int flag)
 {
-  if (!obj) Clear(); else Remove(obj);
-}  
-//______________________________________________________________________________
-void StObjArray::Clean(StObjArrayIter *iter)
-{
-    int idx = iter->GetCursor(); AddAt(0,idx);
-}
-//______________________________________________________________________________
-void StObjArray::Erase(StObject *obj)
-{
-  if (!obj) {Delete();return;}
-  Remove(obj); delete obj;
+    
+    static StObjArrayIter *iteret = 0;
+    
+    int idxf = fist->GetCursor();
+    int idxl = idxf+1;
+    if (last) idxl = last->GetCursor();      
+    if (idxl > GetLast()+1)  idxl  = GetLast()+1; 
+    if (idxf >= idxl) return 0;
+    for (int i=idxf; i<idxl; i++) {
+      TObject *to = At(i); 
+      if (flag && to) delete to;
+      AddAt(0,i);    
+    }
+    Compress();
+    delete iteret;
+    iteret = (StObjArrayIter*)MakeIterator();
+    iteret->SetCursor(idxf);
+    
+    return iteret;
 }
 
-//______________________________________________________________________________
-void StObjArray::Erase(StObjArrayIter *iter)
-{ 
-  TObject *obj = iter->GetObject();
-  if (!obj) return;
-  Clean(iter); delete obj;
-}
 //______________________________________________________________________________
 void StObjArray::random_shuffle(int start,int end)
 {
@@ -580,8 +573,11 @@ void StStrArray::Streamer(TBuffer &R__b)
    }
 
 }
-// $Id: StArray.cxx,v 1.25 2000/05/09 22:05:21 fine Exp $
+// $Id: StArray.cxx,v 1.26 2000/05/20 01:12:20 perev Exp $
 // $Log: StArray.cxx,v $
+// Revision 1.26  2000/05/20 01:12:20  perev
+// Big cleanup of StArray
+//
 // Revision 1.25  2000/05/09 22:05:21  fine
 // re-invent wheel to fix the memeory leak
 //
