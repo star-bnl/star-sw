@@ -1,6 +1,6 @@
 /*!
  * \class St_spa_Maker
- * \author B.Hippolyte, Walter Pinganaud 
+ * \author B.Hippolyte, W.Pinganaud 
  * \date 2000
  *
  *  Daq simulation for the Silicon Strip Detectors
@@ -42,21 +42,18 @@ class St_spa_Maker : public StMaker {
    virtual Int_t  Finish();
    virtual void   PrintInfo();
 
-   virtual const char *GetCVS() const
-     {static const char cvs[]="Tag $Name:  $ $Id: St_spa_Maker.h,v 1.5 2003/09/10 19:47:33 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    virtual const char *GetCVS() const
+  {static const char cvs[]="Tag $Name:  $ $Id: St_spa_Maker.h,v 1.6 2003/10/08 03:46:34 suire Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-   ClassDef(St_spa_Maker,0)   //StAF chain virtual base class for Makers
+   ClassDef(St_spa_Maker, 1)   //StAF chain virtual base class for Makers
 };
 #endif
 
  /**************************************************************************
  *
  * $Log: St_spa_Maker.h,v $
- * Revision 1.5  2003/09/10 19:47:33  perev
- * ansi corrs
- *
- * Revision 1.4  2003/04/30 20:38:43  perev
- * Warnings cleanup. Modified lines marked VP
+ * Revision 1.6  2003/10/08 03:46:34  suire
+ * *** empty log message ***
  *
  * Revision 1.3  2002/03/25 20:06:44  suire
  * Doxygen documentation, cleaning
