@@ -236,7 +236,7 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
     }
   }
 
-  for (rcTrackMapIter tIter=theTrackMap->begin(); tIter!=theTrackMap->end(); ++tIter){
+  {for (rcTrackMapIter tIter=theTrackMap->begin(); tIter!=theTrackMap->end(); ++tIter){
     //    cout << "Doing track number " << ++icount << endl;
     StGlobalTrack* rTrack = (*tIter).first;
     // do I really got a track
@@ -455,7 +455,7 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
     }
     
     hbtEvent->TrackCollection()->push_back(hbtTrack);
-  }
+  }}
   
   
   hbtEvent->SetNumberOfGoodTracks(hbtEvent->TrackCollection()->size());
@@ -474,7 +474,7 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
   //the fastes way to fill the StHbtV0 is to create the StStrangeEvMuDst with the StV0MuDst and the copy into StHbtV0
   StStrangeEvMuDst strangeEvMuDst(*rEvent);
   // loop over all the StV0Vertices
-  for (rcV0MapIter tIter=theV0Map->begin(); tIter!=theV0Map->end(); ++tIter){
+  {for (rcV0MapIter tIter=theV0Map->begin(); tIter!=theV0Map->end(); ++tIter){
     StV0Vertex* rV0Vertex = (StV0Vertex*) (*tIter).first; // got the V0 from reconstruction
     StV0MuDst v0MuDst(rV0Vertex,&strangeEvMuDst);         // create the StV0MuDst
     cout << " StHbtAssociationEventReader::ReturnHbtEvent() " << theV0Map->count(rV0Vertex) << " associated V0s " << endl;
@@ -491,7 +491,7 @@ StHbtEvent* StHbtAssociationReader::ReturnHbtEvent(){
       }
     }
     hbtEvent->V0Collection()->push_back(hbtV0);  // good V0 fill in collection
-  }
+  }}
   
   cout << " StHbtAssociationReader::ReturnHbtEvent() - " << hbtEvent->V0Collection()->size();
   cout << " V0s pushed in collection " << endl;

@@ -41,7 +41,7 @@ void StNoPidSpectraAnalysis::fillHistograms(StEvent& event) {
   cout << mParticle->charge() << endl;
 
   const StSPtrVecPrimaryTrack& tracks = event.primaryVertex()->daughters();
-  StPrimaryTrackIterator iter;
+  const_StPrimaryTrackIterator iter;
   StPrimaryTrack *track;
 
   for (iter = tracks.begin();

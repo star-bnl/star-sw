@@ -1,6 +1,11 @@
 #include "StHbtMaker/Reader/StHbtTagReader.h"
+#ifdef HPUX
+#include <iostream.h>
+#include <string.h>
+#else
 #include <iostream>
 #include <string>
+#endif
 
 #include "TFile.h"
 #include "TTree.h"

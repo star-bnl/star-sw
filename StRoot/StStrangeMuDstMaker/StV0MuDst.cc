@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MuDst.cc,v 3.2 2000/08/31 21:25:34 genevb Exp $
+ * $Id: StV0MuDst.cc,v 3.3 2001/04/25 18:22:49 perev Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 04-Jun-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StV0MuDst.cc,v $
+ * Revision 3.3  2001/04/25 18:22:49  perev
+ * HPcorrs
+ *
  * Revision 3.2  2000/08/31 21:25:34  genevb
  * Adjustment for V0s used in Xis only
  *
@@ -74,14 +77,14 @@ void StV0MuDst::Fill(StV0Vertex* v0Vertex,
   mClPos = trk->fitTraits().chi2(1);
   // For now, get the truncated mean dE/dX from the TPC
   StPtrVecTrackPidTraits pidPos = trk->pidTraits(kTpcId);
-  for (UInt_t i=0; i<pidPos.size(); i++) {
+  {for (UInt_t i=0; i<pidPos.size(); i++) {
     StDedxPidTraits* pid = (StDedxPidTraits*) pidPos[i];
     if (pid->method() == kTruncatedMeanId) {
       mDedxPos = pid->mean();
       mNumDedxPos = pid->numberOfPoints();
       break;
     }
-  }
+  }}
 
   trk = v0Vertex->daughter(negative);
   mKeyNeg = trk->key();
@@ -90,14 +93,14 @@ void StV0MuDst::Fill(StV0Vertex* v0Vertex,
   mClNeg = trk->fitTraits().chi2(1);
   // For now, get the truncated mean dE/dX from the TPC
   StPtrVecTrackPidTraits pidNeg = trk->pidTraits(kTpcId);
-  for (UInt_t i=0; i<pidNeg.size(); i++) {
+  {for (UInt_t i=0; i<pidNeg.size(); i++) {
     StDedxPidTraits* pid = (StDedxPidTraits*) pidNeg[i];
     if (pid->method() == kTruncatedMeanId) {
       mDedxNeg = pid->mean();
       mNumDedxNeg = pid->numberOfPoints();
       break;
     }
-  }
+  }}
 }
 
 void StV0MuDst::Clear() {

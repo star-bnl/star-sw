@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StEmcPreClusterCollection.cxx,v $
+// Revision 1.12  2001/04/25 18:13:35  perev
+// HPcorrs
+//
 // Revision 1.11  2001/04/20 22:23:33  pavlinov
 // Clean up
 //
@@ -531,14 +534,14 @@ Int_t StEmcPreClusterCollection::applyProfile(Int_t mod,TArrayI ne)
       
       // setting arrays with clusters and positions to evaluate chisqr
       Int_t nh=0;
-      for(Int_t j=0;j<maxApply;j++)
+      {for(Int_t j=0;j<maxApply;j++)
       {
         nh+= ((StEmcPreCluster*)mClusters[applyOnThese[j]+idBeforeClustering])->Nhits();
-      }
+      }}
       
       TArrayF x(nh),y(nh);
       Int_t index=0;
-      for(Int_t j=0;j<maxApply;j++)
+      {for(Int_t j=0;j<maxApply;j++)
       {
         StEmcPreCluster *c=(StEmcPreCluster*)mClusters[applyOnThese[j]+idBeforeClustering];
         for(Int_t k=0;k<c->Nhits();k++)
@@ -553,13 +556,13 @@ Int_t StEmcPreClusterCollection::applyProfile(Int_t mod,TArrayI ne)
           y[index]=hits[c->ID(k)]->energy();
           index++;
         }
-      }
+      }}
       // finished setting arrays
       
       // starting doing combinations on clusters
       Int_t shiftmin=0,inimin=0;
       Float_t chimin=1e30;
-      for (Int_t ini=0;ini<maxApply-1;ini++)
+      {for (Int_t ini=0;ini<maxApply-1;ini++)
       {
         for(Int_t shift=0+1*(ini!=0);shift<maxApply-ini;shift++)
         {
@@ -591,7 +594,7 @@ Int_t StEmcPreClusterCollection::applyProfile(Int_t mod,TArrayI ne)
           }
           // finished applying chisqrt test for this combination
         } 
-      }
+      }}
       if(inimin!=0 || shiftmin!=0) setNewClusters(mod,inimin,shiftmin,applyOnThese);
       // finished doing combinations on clusters
     }
@@ -617,16 +620,16 @@ void StEmcPreClusterCollection::setNewClusters(Int_t mod,Int_t ini,Int_t shift,T
 {
   Float_t eta=0,phi=0,en=0;
   Int_t nhits=0,index=0;
-  for(Int_t clus=ini;clus<=ini+shift;clus++)
+  {for(Int_t clus=ini;clus<=ini+shift;clus++)
   {
     StEmcPreCluster *c=(StEmcPreCluster*)mClusters[applyOnThese[clus]+idBeforeClustering];
     nhits+=c->Nhits();        
     eta+=c->Eta()*c->Energy();
     phi+=c->Phi()*c->Energy();
     en+=c->Energy();
-  }   
+  }}   
   TArrayI newhits(nhits);
-  for(Int_t clus=ini;clus<=ini+shift;clus++)
+  {for(Int_t clus=ini;clus<=ini+shift;clus++)
   {
     StEmcPreCluster *c=(StEmcPreCluster*)mClusters[applyOnThese[clus]+idBeforeClustering];
     for(Int_t i=0;i<c->Nhits();i++)
@@ -634,14 +637,14 @@ void StEmcPreClusterCollection::setNewClusters(Int_t mod,Int_t ini,Int_t shift,T
       newhits[index]=c->ID(i);
       index++;
     }            
-  }  
+  }}  
   eta/=en;
   phi/=en;
 //  StEmcPreCluster *c=new StEmcPreCluster(mod,&newhits,mDetector);
 //  c->calcMeanAndRms(mDet,mod);
 //  mClusters.AddAt(c,applyOnThese[ini]+idBeforeClustering); 
   mClusters.AddAt(new StEmcPreCluster(mod,&newhits,mDetector,mDet),applyOnThese[ini]+idBeforeClustering);
-  for(Int_t i=ini+1;i<=ini+shift;i++) mClusters[applyOnThese[i]+idBeforeClustering]=0;
+  {for(Int_t i=ini+1;i<=ini+shift;i++) mClusters[applyOnThese[i]+idBeforeClustering]=0;}
 
 }
 //_____________________________________________________________________________

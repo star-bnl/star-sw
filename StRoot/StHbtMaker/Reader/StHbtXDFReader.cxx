@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtXDFReader.cxx,v 1.7 2000/05/25 21:04:30 laue Exp $
+ * $Id: StHbtXDFReader.cxx,v 1.8 2001/04/25 18:07:50 perev Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -92,20 +92,20 @@ StHbtString StHbtXDFReader::Report(){
 
   char Ctemp[10];
   temp += "\n  Accepted Particles (pdgId): ";
-  for (pdgIdListIterator iter=mAcceptedParticles->begin(); iter!=mAcceptedParticles->end(); iter++) {
+  {for (pdgIdListIterator iter=mAcceptedParticles->begin(); iter!=mAcceptedParticles->end(); iter++) {
     sprintf(Ctemp," %i",*iter);
     temp += Ctemp;
-  }
+  }}
   temp += "\n  Accepted Mothers (pdgId): ";
-  for (pdgIdListIterator iter=mAcceptedMothers->begin(); iter!=mAcceptedMothers->end(); iter++) {
+  {for (pdgIdListIterator iter=mAcceptedMothers->begin(); iter!=mAcceptedMothers->end(); iter++) {
     sprintf(Ctemp," %i",*iter);
     temp += Ctemp;
-  }
+  }}
   temp += "\n  Accepted Daughters (pdgId): ";
-  for (pdgIdListIterator iter=mAcceptedDaughters->begin(); iter!=mAcceptedDaughters->end(); iter++) {
+  {for (pdgIdListIterator iter=mAcceptedDaughters->begin(); iter!=mAcceptedDaughters->end(); iter++) {
     sprintf(Ctemp," %i",*iter);
     temp += Ctemp;
-  }
+  }}
   temp += "\n";
 
   return temp;

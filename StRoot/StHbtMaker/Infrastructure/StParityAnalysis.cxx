@@ -250,14 +250,14 @@ void StParityAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
     // CALCULATE the RXN PLANE here-in future we may can just use Flow Maker (?) 
 
     StHbtThreeVector RxnPlaneVec;
-       for (int iii = 0;iii<newPlusSize;iii++){
+       {for (int iii = 0;iii<newPlusSize;iii++){
 	 if (PlusBuffer[bufferIndex][iii].z() > 0 ) RxnPlaneVec += PlusBuffer[bufferIndex][iii].vect(); 
 	 if (PlusBuffer[bufferIndex][iii].z() < 0 ) RxnPlaneVec -= PlusBuffer[bufferIndex][iii].vect(); 
-       }
-       for (int iii = 0;iii<newMinusSize;iii++){
+       }}
+       {for (int iii = 0;iii<newMinusSize;iii++){
 	 if (MinusBuffer[bufferIndex][iii].z() > 0 ) RxnPlaneVec += MinusBuffer[bufferIndex][iii].vect(); 
 	 if (MinusBuffer[bufferIndex][iii].z() < 0 ) RxnPlaneVec -= MinusBuffer[bufferIndex][iii].vect(); 
-       }
+       }}
        RxnPlaneVec.setZ(0);
        double phi_rxn_plane = acos(RxnPlaneVec.x()/RxnPlaneVec.mag());
        if (RxnPlaneVec.y() < 0) phi_rxn_plane = -phi_rxn_plane;
@@ -266,54 +266,54 @@ void StParityAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
        //this could be combined with some other loop but for now we'll leave it here for simplicity
        StHbtThreeVector tempVct; // unfortunately for now need to use this to satisfy 
                                  // compiler (to avoid rotating const vector)
-       for (int iii = 0;iii<newPlusSize;iii++){
+       {for (int iii = 0;iii<newPlusSize;iii++){
 	 //	 PlusBuffer[bufferIndex][iii].vect().rotateZ(-phi_rxn_plane);
 	  tempVct = PlusBuffer[bufferIndex][iii].vect();
 	 tempVct.rotateZ(-phi_rxn_plane);
 	 (PlusBuffer[bufferIndex][iii]).setX(tempVct.x()); 
 	 (PlusBuffer[bufferIndex][iii]).setY(tempVct.y()); 
 
-       }
-       for (int iii = 0;iii<newMinusSize;iii++){
+       }}
+       {for (int iii = 0;iii<newMinusSize;iii++){
 	 // MinusBuffer[bufferIndex][iii].vect().rotateZ(-phi_rxn_plane);
 		 tempVct = MinusBuffer[bufferIndex][iii].vect();
 		 tempVct.rotateZ(-phi_rxn_plane);
 		 (MinusBuffer[bufferIndex][iii]).setX(tempVct.x()); 
 		 (MinusBuffer[bufferIndex][iii]).setY(tempVct.y()); 
 
-       }
+       }}
     // DONE w/ RXN PLANE calculation
 
     // now RANDOMIZE the BUFFERS (should in the future rotate the rxn plane here as well)
 
-    for (int iii = 0;iii<2;iii++){                             // do 2 shuffles
+    {for (int iii = 0;iii<2;iii++){                             // do 2 shuffles
        for (int iii = 0;iii<newPlusSize;iii++){
 	int switchto = (rand() % newPlusSize);
 	StHbtLorentzVector tempVec = PlusBuffer[bufferIndex][iii];
 	PlusBuffer[bufferIndex][iii] = PlusBuffer[bufferIndex][switchto];
 	PlusBuffer[bufferIndex][switchto] = tempVec;
        }
-      }
+      }}
     
-    for (int iii = 0;iii<2;iii++){                             // do 2 shuffles
+    {for (int iii = 0;iii<2;iii++){                             // do 2 shuffles
        for (int iii = 0;iii<newMinusSize;iii++){
 	int switchto = (rand() % newMinusSize);
 	StHbtLorentzVector  tempVec = MinusBuffer[bufferIndex][iii];
 	MinusBuffer[bufferIndex][iii] = MinusBuffer[bufferIndex][switchto];
 	MinusBuffer[bufferIndex][switchto] = tempVec;
        }
-      }
+      }}
     // END OF RANDOMIZING TRACK ORDER
 
     // COPY  latest EVENT to PlusSame and MinusSame vectors
      PlusSame.clear();
      MinusSame.clear();
-      for (int jjj = 0; jjj < newPlusSize; jjj++){
+      {for (int jjj = 0; jjj < newPlusSize; jjj++){
 	PlusSame.push_back(PlusBuffer[bufferIndex][jjj]);
-      }     
-      for (int jjj = 0; jjj < newMinusSize; jjj++){
+      }}     
+      {for (int jjj = 0; jjj < newMinusSize; jjj++){
 	MinusSame.push_back(MinusBuffer[bufferIndex][jjj]);
-      }     
+      }}     
     // END of COPYing latest event
 
     // NOW BUILD A MIXED EVENT in the PlusMixed and MinusMixed vectors;
@@ -329,28 +329,28 @@ void StParityAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
 	int mixedtnum;
 	                                                                                                                                   
 	// take the newest buffered event and mix it with other events
-                   for (int jjj = 0; jjj < newPlusSize; jjj++){
+                   {for (int jjj = 0; jjj < newPlusSize; jjj++){
 	    mixedenum = (rand() % BUFFERSIZ);
 	    mixedtnum = (rand() % PlusBuffer[mixedenum].size());
 	    vTemp = PlusBuffer[mixedenum][mixedtnum];
 	    PlusBuffer[mixedenum][mixedtnum] = PlusBuffer[bufferIndex][jjj];
 	    PlusBuffer[bufferIndex][jjj] = vTemp;
-                    }		     
-                   for (int jjj = 0; jjj < newMinusSize; jjj++){
+                    }}		     
+                   {for (int jjj = 0; jjj < newMinusSize; jjj++){
 	    mixedenum = (rand() % BUFFERSIZ);
 	    mixedtnum = (rand() % MinusBuffer[mixedenum].size());
 	    vTemp = MinusBuffer[mixedenum][mixedtnum];
 	    MinusBuffer[mixedenum][mixedtnum] = MinusBuffer[bufferIndex][jjj];
 	    MinusBuffer[bufferIndex][jjj] = vTemp;
-                    }		     
+                    }}		     
 		   // now that the newest buffer is randomized, copy it to mixed event
 
-                   for (int jjj = 0; jjj < newPlusSize; jjj++){
+                   {for (int jjj = 0; jjj < newPlusSize; jjj++){
                      PlusMixed.push_back(PlusBuffer[bufferIndex][jjj]);
-                   }
-                   for (int jjj = 0; jjj < newMinusSize; jjj++){
+                   }}
+                   {for (int jjj = 0; jjj < newMinusSize; jjj++){
                      MinusMixed.push_back(MinusBuffer[bufferIndex][jjj]);
-                   }
+                   }}
       }
       // END OF BUILDING MIXED EVENT
 

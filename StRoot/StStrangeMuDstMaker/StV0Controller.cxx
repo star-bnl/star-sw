@@ -1,5 +1,8 @@
-// $Id: StV0Controller.cxx,v 3.4 2000/09/18 19:25:19 genevb Exp $
+// $Id: StV0Controller.cxx,v 3.5 2001/04/25 18:22:15 perev Exp $
 // $Log: StV0Controller.cxx,v $
+// Revision 3.5  2001/04/25 18:22:15  perev
+// HPcorrs
+//
 // Revision 3.4  2000/09/18 19:25:19  genevb
 // Additional protection for missing MC info
 //
@@ -149,11 +152,11 @@ Int_t StV0Controller::MakeCreateMcDst(StMcVertex* mcVert) {
       pair<mcTrackMapIter,mcTrackMapIter> mcTrackBounds = 
             theMcTrackMap->equal_range(Pos);
       StTrackPairInfo*   bestPairInfo = (*mcTrackBounds.first).second;
-      for(mcTrackMapIter mcMapIt = mcTrackBounds.first;
+      {for(mcTrackMapIter mcMapIt = mcTrackBounds.first;
 		         mcMapIt != mcTrackBounds.second; ++mcMapIt) {
         if ((*mcMapIt).second->commonTpcHits() > bestPairInfo->commonTpcHits())
 	       bestPairInfo = (*mcMapIt).second;
-      } 
+      }} 
       if (mcTrackBounds.first != mcTrackBounds.second) {
         v0Mc->SetHitInfoPositive(bestPairInfo->commonTpcHits());
       }
@@ -163,11 +166,11 @@ Int_t StV0Controller::MakeCreateMcDst(StMcVertex* mcVert) {
       //		   StTrackPairInfo*   
       bestPairInfo = (*mcTrackBounds.first).second;
 			
-      for(mcTrackMapIter mcMapIt = mcTrackBounds.first;
+      {for(mcTrackMapIter mcMapIt = mcTrackBounds.first;
 		         mcMapIt != mcTrackBounds.second; ++mcMapIt) {
         if ((*mcMapIt).second->commonTpcHits() > bestPairInfo->commonTpcHits())
               bestPairInfo = (*mcMapIt).second;
-      } 
+      }} 
       if (mcTrackBounds.first != mcTrackBounds.second) {
         v0Mc->SetHitInfoNegative(bestPairInfo->commonTpcHits());
       }

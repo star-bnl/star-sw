@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.h,v 1.2 2001/02/21 20:54:25 yepes Exp $
+// $Id: StPeCTrigger.h,v 1.3 2001/04/25 18:12:32 perev Exp $
 // $Log: StPeCTrigger.h,v $
+// Revision 1.3  2001/04/25 18:12:32  perev
+// HPcorrs
+//
 // Revision 1.2  2001/02/21 20:54:25  yepes
 // *** empty log message ***
 //
@@ -31,7 +34,7 @@ public:
   StPeCTrigger();
   ~StPeCTrigger();
   void  clear ( ) ;
-  Int_t StPeCTrigger::process(StEvent *event);
+  Int_t process(StEvent *event);
 
   Int_t  p4 ; // p4 with swapt weigthts
   Int_t  p4c ;

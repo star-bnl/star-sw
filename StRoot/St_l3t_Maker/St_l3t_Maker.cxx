@@ -1,4 +1,4 @@
-// $Id: St_l3t_Maker.cxx,v 1.37 2000/08/18 16:52:40 yepes Exp $
+// $Id: St_l3t_Maker.cxx,v 1.38 2001/04/25 18:10:00 perev Exp $
 //
 // Revision 1.22  2000/03/28 20:22:15  fine
 // Adjusted to ROOT 2.24
@@ -489,7 +489,7 @@ Int_t St_l3t_Maker::MakeOffLine(){
 //   Fill ftf hit table
 //
    for ( int i = 0 ; i < nHits ; i++ ) {
-      tracker.hit[i].sector = (short) ceil(hit[i].row/100);
+      tracker.hit[i].sector = (short) (hit[i].row/100);
       tracker.hit[i].row = hit[i].row%100 ;
       tracker.hit[i].x   = hit[i].x ;
       tracker.hit[i].y   = hit[i].y ;

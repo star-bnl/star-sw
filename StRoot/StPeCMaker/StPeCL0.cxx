@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCL0.cxx,v 1.2 2001/02/21 20:54:24 yepes Exp $
+// $Id: StPeCL0.cxx,v 1.3 2001/04/25 18:11:25 perev Exp $
 // $Log: StPeCL0.cxx,v $
+// Revision 1.3  2001/04/25 18:11:25  perev
+// HPcorrs
+//
 // Revision 1.2  2001/02/21 20:54:24  yepes
 // *** empty log message ***
 //
@@ -57,18 +60,18 @@ Int_t StPeCL0::dsm1Sum ( ) {
 
 Int_t StPeCL0::dsm2Sum ( ){
   array3[0]=0; array3[1]=0;
-  for(int i=0; i<nL0Phi; i++){for(int j=0; j<2; j++){array3[0]+=weighted2[i][j];}}
-  for(int i=0; i<nL0Phi; i++){for(int j=2; j<4; j++){array3[1]+=weighted2[i][j];}}
+  {for(int i=0; i<nL0Phi; i++){for(int j=0; j<2; j++){array3[0]+=weighted2[i][j];}}}
+  {for(int i=0; i<nL0Phi; i++){for(int j=2; j<4; j++){array3[1]+=weighted2[i][j];}}}
 //
 //   Look at lookup tables
 //
    int sum ;
-   for ( int i = 0 ; i < 2 ; i++ ) {
+   {for ( int i = 0 ; i < 2 ; i++ ) {
       sum = array3[i] ;
       if      ( sum > 255 ) weighted3[i] = 255 ;
       else if ( sum < 0   ) weighted3[i] =   0 ;
       else                  weighted3[i] = lut3[i][sum] ;
-   }
+   }}
    return 0 ;
 }
 
@@ -750,19 +753,19 @@ void StPeCL0::setYear2Input() {
 //
 // West side
 //
-   for ( int i = 0 ; i < 50 ; i++ ) {
+   {for ( int i = 0 ; i < 50 ; i++ ) {
       cabling[i] = i + 10 ;
-   }
-   for ( int i = 50 ; i < 60 ; i++ ) {
+   }}
+   {for ( int i = 50 ; i < 60 ; i++ ) {
       cabling[i] = i - 50 ;
-   }
+   }}
 //
 // East side
 //
-   for ( int i = 65 ; i < 120 ; i++ ) {
+   {for ( int i = 65 ; i < 120 ; i++ ) {
       cabling[i] = i - 5 ;
-   }
-   for ( int i = 60 ; i < 65 ; i++ ) {
+   }}
+   {for ( int i = 60 ; i < 65 ; i++ ) {
       cabling[i] = 55 + i ;
-   }
+   }}
 }

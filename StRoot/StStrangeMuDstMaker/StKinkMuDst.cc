@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkMuDst.cc,v 3.4 2001/02/14 19:37:44 wdeng Exp $
+ * $Id: StKinkMuDst.cc,v 3.5 2001/04/25 18:20:17 perev Exp $
  *
  * Author: Wensheng Deng, Kent State University, 29-Mar-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StKinkMuDst.cc,v $
+ * Revision 3.5  2001/04/25 18:20:17  perev
+ * HPcorrs
+ *
  * Revision 3.4  2001/02/14 19:37:44  wdeng
  * Get parent momentum from primary track
  *
@@ -96,28 +99,28 @@ StKinkMuDst::StKinkMuDst(StKinkVertex* kinkVertex)
   mClParent = trk->fitTraits().chi2(1);
   // For now, get the truncated mean dE/dX from the TPC
   StPtrVecTrackPidTraits pidParent = trk->pidTraits(kTpcId);
-  for (UInt_t i=0; i<pidParent.size(); i++) {
+  {for (UInt_t i=0; i<pidParent.size(); i++) {
     StDedxPidTraits* pid = (StDedxPidTraits*) pidParent[i];
     if (pid->method() == kTruncatedMeanId) {
       mDedxParent = pid->mean();
       mNumDedxParent = pid->numberOfPoints();
       break;
     }
-  }
+  }}
 
   trk = kinkVertex->daughter();
   mChi2Daughter = trk->fitTraits().chi2(0);
   mClDaughter = trk->fitTraits().chi2(1);
   // For now, get the truncated mean dE/dX from the TPC
   StPtrVecTrackPidTraits pidDaughter = trk->pidTraits(kTpcId);
-  for (UInt_t i=0; i<pidDaughter.size(); i++) {
+  {for (UInt_t i=0; i<pidDaughter.size(); i++) {
     StDedxPidTraits* pid = (StDedxPidTraits*) pidDaughter[i];
     if (pid->method() == kTruncatedMeanId) {
       mDedxDaughter = pid->mean();
       mNumDedxDaughter = pid->numberOfPoints();
       break;
     }
-  }
+  }}
 
   findMinDeltaEnergy(kinkVertex);
   findDecayLength(kinkVertex);

@@ -1,7 +1,10 @@
 /////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.cxx,v 1.3 2001/02/21 20:54:25 yepes Exp $
+// $Id: StPeCTrigger.cxx,v 1.4 2001/04/25 18:12:05 perev Exp $
 // $Log: StPeCTrigger.cxx,v $
+// Revision 1.4  2001/04/25 18:12:05  perev
+// HPcorrs
+//
 // Revision 1.3  2001/02/21 20:54:25  yepes
 // *** empty log message ***
 //
@@ -178,7 +181,7 @@ Int_t StPeCTrigger::process(StEvent *event){
 //
   // L0 simulator
   Bool_t trgOut[40];
-  for ( int i = 0 ; i < 40 ; i++ ) trgOut[i] = 0 ;
+  {for ( int i = 0 ; i < 40 ; i++ ) trgOut[i] = 0 ;}
 
   if ( infoLevel > 2 ) {
      printf ( "trgBits : " ) ;

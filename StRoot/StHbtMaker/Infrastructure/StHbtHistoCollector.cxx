@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtHistoCollector.cxx,v 1.2 2000/09/05 14:43:21 laue Exp $
+ * $Id: StHbtHistoCollector.cxx,v 1.3 2001/04/25 18:03:41 perev Exp $
  *
  * Author: Frank Laue, Ohio State, laue@bnl.gov
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StHbtHistoCollector.cxx,v $
+ * Revision 1.3  2001/04/25 18:03:41  perev
+ * HPcorrs
+ *
  * Revision 1.2  2000/09/05 14:43:21  laue
  * cast changed from TH1D to TH1D&
  *
@@ -53,20 +56,20 @@ void StHbtHistoCollector::Clear() {
 }
 
 void StHbtHistoCollector::Write() { 
-  for (CTH1DIterator iter=m1DList.begin(); iter!=m1DList.end(); iter++) {
+  {for (CTH1DIterator iter=m1DList.begin(); iter!=m1DList.end(); iter++) {
     TH1D temp( (TH1D&)(**iter) );
       temp.SetDirectory(0);
       temp.Write();
-  }
-  for (CTH2DIterator iter=m2DList.begin(); iter!=m2DList.end(); iter++) {
+  }}
+  {for (CTH2DIterator iter=m2DList.begin(); iter!=m2DList.end(); iter++) {
     TH2D temp( (TH2D&)(**iter) );
       temp.SetDirectory(0);
       temp.Write();
-  }
-  for (CTH3DIterator iter=m3DList.begin(); iter!=m3DList.end(); iter++) {
+  }}
+  {for (CTH3DIterator iter=m3DList.begin(); iter!=m3DList.end(); iter++) {
     TH3D temp( (TH3D&)(**iter) );
       temp.SetDirectory(0);
       temp.Write();
-  }
+  }}
 }
 
