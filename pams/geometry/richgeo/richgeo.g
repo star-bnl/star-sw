@@ -62,7 +62,7 @@ created June 1, 1998 supposely
 *   
 *
 *   EXTERNAL RICHSTEP,RGAPSTEP,OQUASTEP,RCSISTEP,RGJKSTEP
-    EXTERNAL RcsiStep
+    EXTERNAL RICHSTEP,RcsiStep
 * 
 *
    Begin   
@@ -74,7 +74,7 @@ created June 1, 1998 supposely
         dz   = 73.15   ! rich half length
         phi  = 240     ! rich athimutal position
 
-*    call  AgSSTEP(RICHSTEP) 
+*   call  AgSSTEP(RICHSTEP) 
 *
 *   special material definition here:
     component O    A=16.00     Z=8    W=2
@@ -200,10 +200,10 @@ endblock
 * position width 433
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     block OQUA e me scelto per labellare il quarzo opaco
-    material  opaco
-    Medium    Sensitive      Isvol=1  
-    Attribute OQUA  seen=1   colo=2
-    shape     BOX   dx=20.65 dy=0.2   dz=66.5
+    material  opaco  
+    medium    Opaco_quartz    Isvol=1  
+    Attribute OQUA   seen=1   colo=2
+    shape     BOX    dx=20.65 dy=0.2   dz=66.5
     CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_QUARZO,EFFIC_all,RINDEX_QUARZO)
     HITS  OQUA  x:.01:   y:.01:   z:.01:   cx:10:   cy:10:   cz:10:,
                 Slen:16:(0,1.e4)  Tof:16:(0,1.e-6)  Step:16:(0,10),
@@ -251,8 +251,8 @@ endblock
 * short dimension  989 - 2*70 =  84.9 / 2 = 42.45
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 block rGAP is METANOL gap
-    material  Methane
-    Medium    Sensitive      Isvol=1
+    material  Methane       
+    Medium    Methane_Gap    Isvol=1
     Attribute RGAP  seen=1   colo=4
     shape     BOX   dx=42.45  dy=0.2   dz=66.15
     CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_METHANE,EFFIC_all,RINDEX_METHANE)
@@ -295,7 +295,7 @@ endblock
 Block rCSI is Cesium Iodide
 *   call  AgSSTEP(RGJKSTEP) 
     Material  Carbonio
-    Medium    Sensitive      Isvol=1
+    Medium    CSI   Isvol=1
     Attribute RCSI  seen=1   colo=6 
     shape     BOX   dx=19.60  dy=0.025   dz=32.0
     CALL GSCKOV(%Imed,N,PPCKOV,ABSCO_CSI,EFFIC_CSI,RINDEX_methane)
@@ -359,8 +359,26 @@ endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -     
 end
 
+
+      subroutine RICHSTEP
++CDE,TYPING,GCBANK,GCONST,GCUNIT,GCTMED,GCTRAK,GCKINE,GCSETS,AGCSTEP.
+      character  Cmed*8
+      check ISVOL>0
+      CALL UHTOC(NATMED,4,Cmed,8)
+
+* only cerenkov photons are seen in CSI
+      check Cmed=='RICH_CSI'
+
+*     print *,' Ipart ',Ipart,' in csi '
+* this may be used to switch the hit off - or you may reset AGdEstep.
+*     if (Ipart != 50) step     = 0    
+*     if (Ipart != 50) AGdEstep = 0
+*
+      end
+
+
       subroutine RCSISTEP(JJ,HIT)
-+CDE,TYPING,GCBANK,GCONST,GCUNIT,GCVOLU,GCTRAK,GCKINE,GCSETS,AGCSTEP.
++CDE,TYPING,GCBANK,GCONST,GCUNIT,GCTRAK,GCKINE,GCSETS,AGCSTEP.
       Integer JJ
       Real    HIT
 
