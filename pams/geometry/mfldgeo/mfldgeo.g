@@ -54,7 +54,7 @@ end
 *
 * ---------------------------------------------------------------------------
 *
-      Subroutine   AGUFLD (x,F)
+      real function   AGUFLD (x,F)
 +CDE,TYPING,GCBANK,AGCLINK.
       structure MFLG { version,  Bfield,  RmaxInn, ZmaxInn,
                        Bdipole,  RmaxDip, ZminDip, ZmaxDip,
@@ -111,6 +111,7 @@ end
 *     beam dipole   
       if (a>mflg_ZminDip & a<mflg_ZmaxDip & r<mflg_RmaxDip) 
          { F(2)=sign(mflg_BDipole,x(3));  F(3)=abs(F(2))/1000. }
+      AGUFLD = 0
       END
 
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -379,6 +380,7 @@ end
 
       function   BBR(z,r)
       implicit   none
+      real dummy,agufld
       complex    BBTOT
       real       IMAG,REAL,BBR,BBZ,BRR,BZZ,z,r,x(3),B(3)
       BBR = Imag(BBTOT(abs(z),abs(r)))
@@ -387,9 +389,9 @@ end
       BBZ = Real(BBTOT(abs(z),abs(r)))
       return
       entry      BRR(z,r)
-      x   = {0.,r,z};  call agufld(x,B);  BRR = abs(B(2))
+      x   = {0.,r,z};  dummy = agufld(x,B);  BRR = abs(B(2))
       return
       entry      BZZ(z,r)
-      x   = {0.,r,z};  call agufld(x,B);  BZZ = B(3)
+      x   = {0.,r,z};  dummy = agufld(x,B);  BZZ = B(3)
       return
       end
