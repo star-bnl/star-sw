@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.23 2001/05/22 20:17:30 posk Exp $
+// $Id: StFlowEvent.h,v 1.24 2001/05/23 18:11:09 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -53,7 +53,6 @@ public:
  
   void SetSelections();
   void SetPid(const Char_t*);
-  void SetPids();
   void SetPidsDeviant();
   void SetPidsProb();
   void PrintSelectionList();
@@ -245,6 +244,9 @@ inline void  StFlowEvent::SetEtaSubs() { mEtaSubs = kTRUE; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.24  2001/05/23 18:11:09  posk
+// Removed SetPids().
+//
 // Revision 1.23  2001/05/22 20:17:30  posk
 // Now can do pseudorapidity subevents.
 //
