@@ -1,5 +1,8 @@
-// $Id: Example_read_dst_browse.C,v 1.1 1999/06/07 17:31:23 kathy Exp $
+// $Id: Example_read_dst_browse.C,v 1.2 1999/06/07 21:10:36 kathy Exp $
 // $Log: Example_read_dst_browse.C,v $
+// Revision 1.2  1999/06/07 21:10:36  kathy
+// fixing up macros - removed or renamed some, fixed others so the default input file is there
+//
 // Revision 1.1  1999/06/07 17:31:23  kathy
 // clean up some macros
 //
@@ -10,7 +13,7 @@
 // owner: Kathy Turner
 // what it does:  see below
 //=======================================================================
-//  Example_root_read_dst_browse.C
+//  Example_read_dst_browse.C
 //
 // Kathy (6/7/99):
 //  This is an example showing how to read in a ROOT DST file
