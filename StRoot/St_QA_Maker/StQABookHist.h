@@ -1,5 +1,8 @@
-//! $Id: StQABookHist.h,v 1.18 2000/02/07 19:49:06 kathy Exp $ 
+//! $Id: StQABookHist.h,v 1.19 2000/02/10 21:31:29 kathy Exp $ 
 //! $Log: StQABookHist.h,v $
+//! Revision 1.19  2000/02/10 21:31:29  kathy
+//! add another set of impact param hist so we can see them in linear scale too
+//!
 //! Revision 1.18  2000/02/07 19:49:06  kathy
 //! removed L3 trigger histograms and methods that created them - this table is no longer standard on the DST; created methods BookHistEval and MakeHistEval for geant vs reco evaluation histograms; filled geant vs reco evaluation histograms for table-based data
 //!
@@ -71,7 +74,7 @@ class TH2F;
 class StQABookHist : public StMaker {
  public:
 
-//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.18 2000/02/07 19:49:06 kathy Exp $";
+//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.19 2000/02/10 21:31:29 kathy Exp $";
 
 //! Histograms booking constants
   static const Int_t nxpT;
@@ -219,6 +222,7 @@ class StQABookHist : public StMaker {
   TH1F     *m_chisq1FE;      //! chi square [1], ftpc east
   TH1F     *m_chisq1FW;      //! chi square [1], ftpc west
   TH1F     *m_glb_impactT;   //! impact parameter from primary vertex, tpc
+  TH1F     *m_glb_impactrT;  //! impact parameter from primary vertex, tpc
 
 // TPC + SVT HISTOGRAMS - 1D
   TH1F     *m_pointTS;        //! number of points on the track - tpc+svt
@@ -248,6 +252,7 @@ class StQABookHist : public StMaker {
   TH1F     *m_chisq0TS;       //! chi square [0], tpc+svt
   TH1F     *m_chisq1TS;       //! chi square [1], tpc+svt
   TH1F     *m_glb_impactTS;   //! impact parameter from primary vertex, tpc+svt
+  TH1F     *m_glb_impactrTS;  //! impact parameter from primary vertex, tpc+svt
 
 
   TH2F     *m_pT_eta_recT;     //! pT versus eta, tpc
@@ -346,6 +351,7 @@ class StQABookHist : public StMaker {
   TH1F     *m_pchisq1;        //! chi square [1]
   TH1F     *m_plength;        //! length of track
   TH1F     *m_prim_impact;    //! impact parameter from primary vertex
+  TH1F     *m_prim_impactr;   //! impact parameter from primary vertex
 
   TH2F     *m_ppT_eta_rec;    //! pT versus eta Spectra for reconstructed
   TH2F     *m_primtrk_xf_yf;  //! Y vs X of first hit on trk
@@ -503,7 +509,7 @@ class StQABookHist : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.18 2000/02/07 19:49:06 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.19 2000/02/10 21:31:29 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StQABookHist, 1)   //needed for all code that will be used in CINT
     };
