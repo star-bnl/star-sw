@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: helensV0Cut.cxx,v 1.9 2000/10/09 21:56:16 laue Exp $
+ * $Id: helensLaPV0Cut.cxx,v 1.1 2000/10/09 21:56:15 laue Exp $
  *
  * Authors: Helen Caines, Tom Humanic, Ohio State, humanic@mps.ohio-state.edu
  ***************************************************************************
@@ -10,8 +10,8 @@
  *
  ***************************************************************************
  *
- * $Log: helensV0Cut.cxx,v $
- * Revision 1.9  2000/10/09 21:56:16  laue
+ * $Log: helensLaPV0Cut.cxx,v $
+ * Revision 1.1  2000/10/09 21:56:15  laue
  * Helens new cuts
  *
  * Revision 1.7  2000/03/17 17:22:53  laue
@@ -42,20 +42,22 @@
  * Helens realistic V0Cut and Franks memory-sealed McReader
  *
  * Revision 1.1  1999/09/23 23:28:03  lisa
- * add helensV0Cut  AND  rename mikes and franks ParticleCuts to TrackCuts  AND  update documentation
+ * add helensLaPV0Cut  AND  rename mikes and franks ParticleCuts to TrackCuts  AND  update documentation
  *
  *
  **************************************************************************/
 
-#include "StHbtMaker/Cut/helensV0Cut.h"
+#include "StHbtMaker/Cut/helensLaPV0Cut.h"
+#include "StHbtMaker/Cut/helensEventCut.h"
+#include "StHbtMaker/Infrastructure/StHbtAnalysis.h"
 #include <cstdio>
 
 #ifdef __ROOT__ 
-ClassImp(helensV0Cut)
+ClassImp(helensLaPV0Cut)
 #endif
 
 
-helensV0Cut::helensV0Cut(){
+helensLaPV0Cut::helensLaPV0Cut(){
   mNV0sPassed = mNV0sFailed = 0;
   
   mV0MassRange[0] =0;
@@ -107,11 +109,11 @@ helensV0Cut::helensV0Cut(){
 
 }
 //------------------------------
-//helensV0Cut::~helensV0Cut(){
+//helensLaPV0Cut::~helensLaPV0Cut(){
 //  /* noop */
 //}
 //------------------------------
-bool helensV0Cut::Pass(const StHbtV0* V0){
+bool helensLaPV0Cut::Pass(const StHbtV0* V0){
   int inMassRange;
 
 #ifdef STHBTDEBUG  
@@ -169,18 +171,45 @@ bool helensV0Cut::Pass(const StHbtV0* V0){
                   (V0->alphaV0()   > malphaV0[0]) &&
                   (V0->alphaV0()   < malphaV0[1]));
 
-  if(goodPID){
+
+
+  if(goodPID && mChargedEdx !=0){
+
+    // Go get event cut to get my list
+
+    StHbtAnalysis* Anal = (StHbtAnalysis*) myAnalysis;
+    helensEventCut* EventCut = (helensEventCut*)Anal->EventCut();
+    StHbtTrkV0Iterator pIter;
+    StHbtTrkV0Match* TheMatch;
+
+    float dedxPos= -1000;
+    float dedxNeg=-1000;
+    for( pIter= EventCut->TrkV0MatchCollection()->begin(); pIter!= EventCut->TrkV0MatchCollection()->end(); pIter++){
+      
+      TheMatch = *pIter; 
+      if( TheMatch->TrkId() == V0->idPos() && !TheMatch->Used()){
+	dedxPos= TheMatch->dEdx();
+	TheMatch->SetUsed(1);
+      }
+      if( TheMatch->TrkId() == V0->idNeg() && !TheMatch->Used()){
+	dedxNeg=TheMatch->dEdx();
+	TheMatch->SetUsed(1);
+      }
+    }
+
     if( mChargedEdx <0){
-      goodPID = ( (V0->dedxNeg() > (mdEdx[0]*V0->ptNeg()+mdEdx[1])) &&
-		  (V0->dedxNeg() > (mdEdx[2]*V0->ptNeg()+mdEdx[3])));
+      goodPID = ( (dedxNeg > (mdEdx[0]*V0->ptNeg()+mdEdx[1])) &&
+		  (dedxNeg > (mdEdx[2]*V0->ptNeg()+mdEdx[3])));
 	}
     if( mChargedEdx > 0){
-      goodPID = ( (V0->dedxPos() > (mdEdx[0]*V0->ptPos()+mdEdx[1])) &&
-		  (V0->dedxPos() > (mdEdx[2]*V0->ptPos()+mdEdx[3])));
+      goodPID = ( (dedxPos > (mdEdx[0]*V0->ptPos()+mdEdx[1])) &&
+		  (dedxPos > (mdEdx[2]*V0->ptPos()+mdEdx[3])));
     }
   }
 
+
   if (goodPID){
+    
     float TEnergy = sqrt((V0->ptotV0())*(V0->ptotV0())+mMass*mMass);
     float TRapidity = 0.5*log((TEnergy+V0->momV0().z())/
 			    (TEnergy-V0->momV0().z()));
@@ -216,10 +245,10 @@ bool helensV0Cut::Pass(const StHbtV0* V0){
   }
 }
 //------------------------------
-StHbtString helensV0Cut::Report(){
+StHbtString helensLaPV0Cut::Report(){
   string Stemp;
   char Ctemp[100];
-  sprintf(Ctemp,"--helensV0Cut--\n Particle mass:\t%E\n",this->Mass());
+  sprintf(Ctemp,"--helensLaPV0Cut--\n Particle mass:\t%E\n",this->Mass());
   Stemp=Ctemp;
   sprintf(Ctemp,"V0 mass range:\t%E - %E\n",mV0MassRange[0],
 	  mV0MassRange[1]);
@@ -243,7 +272,7 @@ mdcaPosToPrimVertex[1]);
   sprintf(Ctemp,"dcaNegToPrimVertex:\t%E - %E\n",mdcaNegToPrimVertex[0],
 mdcaNegToPrimVertex[1]);
   Stemp+=Ctemp;
-  sprintf(Ctemp,"dedx>:\t%E pt+%E and \t%E pt+ %E for Charge %E\n ",mdEdx[0],mdEdx[1],mdEdx[2],mdEdx[3],mChargedEdx);
+  sprintf(Ctemp,"dedx>:\t%E pt+%E and \t%E pt+ %E for Charge%E\n ",mdEdx[0],mdEdx[1],mdEdx[2],mdEdx[3],mChargedEdx);
   Stemp+=Ctemp;
   sprintf(Ctemp,"ptArmV0:\t%E - %E\n",mptArmV0[0],mptArmV0[1]);
   Stemp+=Ctemp;
