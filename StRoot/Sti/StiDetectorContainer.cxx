@@ -96,7 +96,6 @@ void StiDetectorContainer::setToDetector(StiDetector* layer)
     else {
 	setToStartPoint(*where);
     }
-    //setToDetector( layer->getPlacement()->getCenterRadius(), layer->getPlacement()->getCenterRefAngle());
 }
 
 void StiDetectorContainer::reset()

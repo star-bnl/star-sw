@@ -357,6 +357,13 @@ void StiGeometryTransform::operator() (const StTpcHit* tpchit, StiHit* stihit)
     StMatrixF covMatrix = tpchit->covariantMatrix();
     stihit->setError( gCovarianceRotation( covMatrix, stihit->refangle() ) );
 
+    /*
+      if (tpchit->sector()<13) {
+      cout <<"sector:\t"<<tpchit->sector()<<endl;
+      cout <<covMatrix<<endl;
+      }
+    */
+
     return;
 }
 

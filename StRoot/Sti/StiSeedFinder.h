@@ -22,7 +22,7 @@ public:
     //User interface
     virtual bool hasMore() = 0;
     virtual StiKalmanTrack* next() = 0;
-    
+
 protected:
 private:
 };
