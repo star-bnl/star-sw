@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98 
-// $Id: St_NodeView.h,v 1.19 1999/07/09 17:52:56 fine Exp $
+// $Id: St_NodeView.h,v 1.20 1999/09/22 03:51:50 fine Exp $
 // $Log: St_NodeView.h,v $
+// Revision 1.20  1999/09/22 03:51:50  fine
+// New method and RMath class to manage different transformation have been introduced
+//
 // Revision 1.19  1999/07/09 17:52:56  fine
 // New ctors to create sub-view between two nodes
 //
@@ -94,6 +97,13 @@ public:
   virtual Int_t    GetVisibility() const;
   virtual Bool_t   IsMarked();
   virtual Bool_t   Is3D()  {return kTRUE;}
+  virtual St_NodePosition  *Local2Master(const St_NodeView *localNode,const St_NodeView *masterNode=0);
+  virtual St_NodePosition  *Local2Master(const Char_t *localName, const Char_t *masterName=0);
+  virtual Float_t *Local2Master(const Float_t *local, Float_t *master, 
+                                const Char_t *localName, const Char_t *masterName=0, Int_t nVector=1);
+  virtual Float_t   *Local2Master(const Float_t *local, Float_t *master, 
+                                const St_NodeView *localNode, 
+                                const St_NodeView *masterNode=0, Int_t nVector=1);
   virtual TList   *Nodes(){ return GetList();}
   virtual void     Paint(Option_t *option="");
   virtual TString  PathP() const;

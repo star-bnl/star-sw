@@ -559,6 +559,84 @@ void St_NodeView::GetLocalRange(Float_t *min, Float_t *max)
 }
 
 //______________________________________________________________________________
+St_NodePosition  *St_NodeView::Local2Master(const Char_t *localName, const Char_t *masterName)
+{
+  St_NodeView *masterNode = this;
+  St_NodePosition *position = 0;
+  if (masterName && masterName[0]) masterNode = (St_NodeView *)Find(masterName);
+  if (masterNode) {
+    St_NodeViewIter transform(masterNode,0);
+    if (transform(localName)) position = transform[0];
+  }
+  return position;
+}
+
+//______________________________________________________________________________
+St_NodePosition  *St_NodeView::Local2Master(const St_NodeView *localNode,const St_NodeView *masterNode)
+{
+  St_NodePosition *position = 0;
+  if (!masterNode) masterNode = this;
+  if (masterNode && localNode) {
+    St_NodeViewIter transform((St_NodeView *)masterNode,0);
+    St_NodeView *nextNode = 0;
+    while ((nextNode = (St_NodeView *)transform()) && nextNode != localNode);    
+    if (nextNode) position = transform[0];
+  }
+  return position;
+}
+//______________________________________________________________________________
+Float_t *St_NodeView::Local2Master(const Float_t *local, Float_t *master, 
+                                   const Char_t *localName, const Char_t *masterName, Int_t nVector)
+{
+  //
+  // calculate  transformation  master = (M-local->master )*local + (T-local->master )
+  //  where 
+  //     M-local->master - rotation matrix 3 x 3 from the master node to the local node
+  //     T-local->master - trasport vector 3 from the master node to the local node
+  //
+  // returns a "master" pointer if transformation has been found
+  //        otherwise 0;
+  //
+   Float_t *trans = 0;
+   St_NodePosition *position = 0;
+   St_NodeView *masterNode = this;
+   if (masterName && masterName[0]) masterNode = (St_NodeView *)Find(masterName);
+   if (masterNode) {
+     St_NodeViewIter transform(masterNode,0);
+     if (transform(localName) && (position = transform.GetPosition()) )
+         trans = position->Local2Master(local,master,nVector);
+   }
+   return trans;
+}
+
+//______________________________________________________________________________
+Float_t *St_NodeView::Local2Master(const Float_t *local, Float_t *master, 
+                                   const St_NodeView *localNode, 
+                                   const St_NodeView *masterNode, Int_t nVector)
+{
+  //
+  // calculate  transformation  master = (M-local->master )*local + (T-local->master )
+  //  where 
+  //     M-local->master - rotation matrix 3 x 3 from the master node to the local node
+  //     T-local->master - trasport vector 3 from the master node to the local node
+  //
+  // returns a "master" pointer if transformation has been found
+  //        otherwise 0;
+  //
+   Float_t *trans = 0;
+   St_NodePosition *position = 0;
+   if (!masterNode) masterNode = this;
+   if (masterNode && localNode) {
+     St_NodeViewIter transform((St_NodeView *)masterNode,0);
+     St_NodeView *nextNode = 0;
+     while ((nextNode = (St_NodeView *)transform()) && nextNode != localNode);    
+     if (nextNode && (position = transform.GetPosition()) ) 
+         trans = position->Local2Master(local,master,nVector);
+   }
+   return trans;
+}
+
+//______________________________________________________________________________
 void St_NodeView::Paint(Option_t *option)
 {
 //*-*-*-*-*-*-*-*-*-*-*-*Paint Referenced node with current parameters*-*-*-*

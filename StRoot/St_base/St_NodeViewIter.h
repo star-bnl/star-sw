@@ -14,6 +14,7 @@ class St_NodeView;
 class St_NodeViewIter : public St_DataSetIter {
 private:
 protected:
+     friend class St_NodeView;
      TObjArray    *m_Positions; // the array of the Node position in the absolute system 
      virtual const St_NodePosition *GetPosition(Int_t level=0) const;
      virtual St_NodePosition *SetPositionAt(St_Node *node,Double_t x=0, Double_t y=0, Double_t z=0, TRotMatrix *matrix=0);

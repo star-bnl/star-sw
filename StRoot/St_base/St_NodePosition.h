@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98   
-// $Id: St_NodePosition.h,v 1.15 1999/06/09 22:09:35 fine Exp $
+// $Id: St_NodePosition.h,v 1.16 1999/09/22 03:51:50 fine Exp $
 // $Log: St_NodePosition.h,v $
+// Revision 1.16  1999/09/22 03:51:50  fine
+// New method and RMath class to manage different transformation have been introduced
+//
 // Revision 1.15  1999/06/09 22:09:35  fine
 // St_PolyLine3D has beed redesigned
 //
@@ -96,8 +99,8 @@ class St_NodePosition  : public TObject /*, public St_DefineSet */ {
         Bool_t              IsFolder() {return GetNode()?kTRUE:kFALSE;}
 //        Bool_t              IsFolder() {return kFALSE;}
         virtual Bool_t      Is3D()  {return kTRUE;}
-        virtual void        Local2Master(Double_t *local, Double_t *master);
-        virtual void        Local2Master(Float_t *local, Float_t *master);
+        virtual Double_t   *Local2Master(const Double_t *local, Double_t *master,Int_t nPoints=1);
+        virtual Float_t    *Local2Master(const Float_t *local, Float_t *master,Int_t nPoints=1);
         virtual void        Paint(Option_t *option="");
         virtual void        Print(Option_t *option="");
         virtual void        UpdatePosition(Option_t *option="");
