@@ -1,11 +1,14 @@
 /**********************************************************
- * $Id: StRichPIDMaker.h,v 2.11 2000/12/08 20:10:36 horsley Exp $
+ * $Id: StRichPIDMaker.h,v 2.12 2000/12/14 19:21:37 horsley Exp $
  *
  * Description:
  *  StRrsMaker is the main module
  *  StRichRawData. It has the standard Maker functions:
  *
  *  $Log: StRichPIDMaker.h,v $
+ *  Revision 2.12  2000/12/14 19:21:37  horsley
+ *  added data member to keep track of run id, mEventRunId
+ *
  *  Revision 2.11  2000/12/08 20:10:36  horsley
  *  updated monte carlo functions,data  members
  *
@@ -153,6 +156,8 @@ private:
     StThreeVectorF mVertexPos;
     float          mMagField;
     int            mEventN;
+    int            mEventRunId;
+
 
     //
     // Tracks in the RICH
