@@ -1,5 +1,8 @@
-// $Id: Example_read_dst_print_tables.C,v 1.7 2000/04/18 20:37:25 kathy Exp $
+// $Id: Example_read_dst_print_tables.C,v 1.8 2000/06/05 16:35:35 kathy Exp $
 // $Log: Example_read_dst_print_tables.C,v $
+// Revision 1.8  2000/06/05 16:35:35  kathy
+// remove use of member function GetHeader since it is no longer available - now use memb functions of TTable
+//
 // Revision 1.7  2000/04/18 20:37:25  kathy
 // St_DataSet,St_DataSetIter,St_Table classes are nowchanged to TDataSet,TDataSetIter,TTable
 //
@@ -48,6 +51,7 @@ void Example_read_dst_print_tables(
     gSystem->Load("libglobal_Tables");
     gSystem->Load("libgen_Tables");
     gSystem->Load("libsim_Tables");
+    gSystem->Load("libtpc_Tables");
 
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
@@ -78,7 +82,8 @@ void Example_read_dst_print_tables(
     int iret = chain->Make();
     if (iret) break;
 
-    cout << " Now print info about event # " << iev << endl;
+    cout << endl << endl << 
+       " !!! Now print info about event # " << iev << endl;
 
 // ------ List all tables -----------
 // GetDataSet is a member function of St_Maker
@@ -94,7 +99,7 @@ TDataSet *ds=chain->GetDataSet("dst/globtrk");
 
 if (ds) {
 
- cout << " Now print info about globtrk, row 1 "  << endl;
+ cout << " Now print info about globtrk table "  << endl;
 
 // create iterator for the dataset
 TDataSetIter globtrkiter(ds);
@@ -117,14 +122,23 @@ glob->ls();
 //glob->Print(1,1);
 glob->Print(0,5);
  
-// get the table header data using member function of TTable
-table_head_st *tdt_h = glob->GetHeader();
- cout << " header name   = " << tdt_h->name << endl;
- cout << " header type   = " << tdt_h->type << endl;
- cout << " header maxlen = " << tdt_h->maxlen << endl;
- cout << " header nok    = " << tdt_h->nok << endl;
 
- glob->ls();
+// can't use this method anymore!!! 5June00 Kathy
+// get the table header data using member function of TTable
+//table_head_st *tdt_h =  glob->GetHeader();
+// cout << " header name   = " << tdt_h->name << endl;
+// cout << " header type   = " << tdt_h->type << endl;
+// cout << " header maxlen = " << tdt_h->maxlen << endl;
+// cout << " header nok    = " << tdt_h->nok << endl;
+
+
+// get the table header data using member functions of TTable
+   cout << " table header info:  name = " << glob->GetName() << endl;
+   cout << " table header info:  type = " << glob->GetType() << endl;
+   cout << " table header info:  #rows used = " << glob->GetNRows() << endl;
+   cout << " table header info:  #rows allocated = " << glob->GetTableSize() << endl;
+   cout << " table header info:  row size (bytes) = " << glob->GetRowSize() << endl;
+   cout << " table header info:  #columns = " << glob->GetNumberOfColumns() << endl;
 
 // get the table and print out info about it (it's printing row 0)
  dst_track_st *sth = glob->GetTable();

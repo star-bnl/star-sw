@@ -1,5 +1,8 @@
-// $Id: Example_read_xdf_makehist.C,v 1.7 2000/04/18 20:37:25 kathy Exp $
+// $Id: Example_read_xdf_makehist.C,v 1.8 2000/06/05 16:35:35 kathy Exp $
 // $Log: Example_read_xdf_makehist.C,v $
+// Revision 1.8  2000/06/05 16:35:35  kathy
+// remove use of member function GetHeader since it is no longer available - now use memb functions of TTable
+//
 // Revision 1.7  2000/04/18 20:37:25  kathy
 // St_DataSet,St_DataSetIter,St_Table classes are nowchanged to TDataSet,TDataSetIter,TTable
 //
@@ -106,14 +109,16 @@ void Example_read_xdf_makehist(
  // since sete is a pointer to an TDataSet and St_dst_vertex inherits
  // from TDataSet, you can do this - then can use St_dst_vertex functions
   pdt = (St_dst_vertex *)sete;
- // create pointer of type table_head_st and use function GetHeader in TTable
- // from which St_dst_vertex inherits 
-  table_head_st *tdt_h =  pdt->GetHeader();
- // print out results 
-  cout << "   name of object:        " << tdt_h->name   << endl;
-  cout << "   type of object:        " << tdt_h->type   << endl;
-  cout << "   maxlen of object:      " << tdt_h->maxlen << endl;
-  cout << "   num of rows of object: " << tdt_h->nok    << endl;
+
+
+// get the table header data using member functions of TTable
+   cout << " table header info:  name = " << pdt->GetName() << endl;
+   cout << " table header info:  type = " << pdt->GetType() << endl;
+   cout << " table header info:  #rows used = " << pdt->GetNRows() << endl;
+   cout << " table header info:  #rows allocated = " << pdt->GetTableSize() << endl;
+   cout << " table header info:  row size (bytes) = " << pdt->GetRowSize() << endl;
+   cout << " table header info:  #columns = " << pdt->GetNumberOfColumns() << endl;
+
   pdt->ls();
  // now get actual values in table
   dst_vertex_st *tdt_v = pdt->GetTable();
