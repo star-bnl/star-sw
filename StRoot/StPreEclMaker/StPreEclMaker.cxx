@@ -1,7 +1,10 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.29 2004/09/07 14:32:05 suaide Exp $
+// $Id: StPreEclMaker.cxx,v 1.30 2004/09/07 19:30:49 suaide Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.30  2004/09/07 19:30:49  suaide
+// small bug fixed
+//
 // Revision 1.29  2004/09/07 14:32:05  suaide
 // small changes in the histograms
 //
@@ -214,7 +217,7 @@ Int_t StPreEclMaker::Init()
   
   Histograms()->SetName("PreClustHist");  
   
-  for (Int_t i=0; i<MAXDET; i++)
+  for (Int_t i=0; i<4; i++)
   {
     TString name_m  = detname[i] + "ClNum";
     TString tit_m   = "Number hits in cluster for " + detname[i];
@@ -227,7 +230,7 @@ Int_t StPreEclMaker::Init()
   
   if(!mFillHisto) return StMaker::Init();
   
-  for (Int_t i=0; i<MAXDET; i++)
+  for (Int_t i=0; i<4; i++)
   {
     TString name_h = detname[i] + "_cluster";
     TString name_e = detname[i] + "_cluster_energy";
@@ -562,7 +565,7 @@ StPreEclMaker::SetClusterConditions(char *cdet,Int_t sizeMax,
 void 
 StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.29 2004/09/07 14:32:05 suaide Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.30 2004/09/07 19:30:49 suaide Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
