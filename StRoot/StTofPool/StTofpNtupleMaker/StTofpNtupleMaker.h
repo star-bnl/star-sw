@@ -12,10 +12,13 @@
  *  The pVPD ntuple and TOFp match TTree are used for calibration purposes.
  *  This maker is not supposed to run in regular BFC production chains.
  *
- * $Id: StTofpNtupleMaker.h,v 1.1 2003/08/07 23:55:47 geurts Exp $
+ * $Id: StTofpNtupleMaker.h,v 1.2 2004/04/01 19:19:00 dongx Exp $
  */    
 /*  -------------------------------------------------------------------------
  * $Log: StTofpNtupleMaker.h,v $
+ * Revision 1.2  2004/04/01 19:19:00  dongx
+ * update for year4 run
+ *
  * Revision 1.1  2003/08/07 23:55:47  geurts
  * first release
  *
@@ -70,6 +73,7 @@ private:
   void bookNtuples();
   Bool_t mYear2; //! STAR year2: TOFp+pVPD
   Bool_t mYear3; //! STAR year3: TOFp+pVPD+TOFr
+  Bool_t mYear4; //! STAR year4: TOFp+pVPD+TOFr'
   Bool_t mOuterTrackGeometry; //! select outer track geometry (true)
 
   Bool_t validAdc(float const);
@@ -98,7 +102,7 @@ private:
   TNtuple *mHitPosTuple; //! Hit position data
 
   virtual const char *GetCVS() const 
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofpNtupleMaker.h,v 1.1 2003/08/07 23:55:47 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofpNtupleMaker.h,v 1.2 2004/04/01 19:19:00 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StTofpNtupleMaker,1)
 };

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofpNtupleMaker.cxx,v 1.2 2003/12/04 06:54:08 geurts Exp $
+ * $Id: StTofpNtupleMaker.cxx,v 1.3 2004/04/01 19:19:00 dongx Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofpNtupleMaker.cxx,v $
+ * Revision 1.3  2004/04/01 19:19:00  dongx
+ * update for year4 run
+ *
  * Revision 1.2  2003/12/04 06:54:08  geurts
  * introduced variables relevant to TOFp flow analysis
  *  * trackId, px and py
@@ -113,7 +116,8 @@ Int_t StTofpNtupleMaker::Make(){
 
   // determine TOF configuration from run#
   mYear2= (event->runId()<4000000);
-  mYear3= (event->runId()>4000000);
+  mYear3= (event->runId()>4000000&&event->runId()<5000000);
+  mYear4= (event->runId()>5000000);
 
 
   //.........................................................................
@@ -358,7 +362,7 @@ Int_t StTofpNtupleMaker::getTofData(StTofCollection* tofCollection){
   for (int i=0;i<NPVPD;i++){
     mPvpdAdc[i] = tofData[42+i]->adc(); 
     mPvpdTdc[i] = tofData[42+i]->tdc(); 
-    if (mYear3)
+    if (mYear3||mYear4)
       mPvpdAdcLoRes[i] = tofData[54+i]->adc();
   }
 
