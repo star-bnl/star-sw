@@ -71,7 +71,7 @@ void strcf(
 
 	        )
 
-/*  Description:
+/*  Description:     Convert a C-defined text-string into a FORTRAN-suitable string.
 
 	Take a text-string, defined in a C routine and to be passed into
 a FORTRAN routine, and copy it into a text-string defined in that C routine.
@@ -139,7 +139,7 @@ void strfc(
 
 	        )
 
-/*  Description:
+/*  Description:     Convert a FORTRAN-defined text-string into a C-string.
 
 	Take a text-string, defined in a FORTRAN routine and passed into
 a C routine, and copy it into a text-string defined in that C routine.
@@ -192,6 +192,7 @@ A null is appended to the string.
 
 
 void strbyte_closer_()
+/*  Description:  Close the byte-stream file which had been opened by strbyte_openr_.  */
 {
 	if (fpr)
 	  fclose(fpr);
@@ -203,6 +204,7 @@ void strbyte_closer_()
 
 
 void strbyte_closew_()
+/*  Description:  Close the byte-stream file which had been opened by strbyte_openw_.  */
 {
 	if (fpw)
 	  fclose(fpw);
@@ -332,6 +334,7 @@ int strbyte_openw_(
 
 
 void strbyte_read_( int *Nbytes, void *buffer )
+/*  Description:  Read Nbytes into buffer from the bytestream file opened by strbyte_openr_.  */
 {
 	int Nbytes_from_file;
 
@@ -363,6 +366,7 @@ void strbyte_read_( int *Nbytes, void *buffer )
 
 
 void strbyte_write_( int *Nbytes, void *buffer )
+/*  Description:  Write Nbytes from buffer into the bytestream file opened by strbyte_openw_.  */
 {
 	int Nbytes_to_file;
 
@@ -385,3 +389,4 @@ void strbyte_write_( int *Nbytes, void *buffer )
 	}
 /*	end if (fpw)       */
 }
+
