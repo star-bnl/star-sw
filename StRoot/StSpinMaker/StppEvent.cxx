@@ -1,7 +1,11 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.12 2003/04/03 19:50:46 thenry Exp $
+// $Id: StppEvent.cxx,v 1.13 2003/05/14 18:00:24 akio Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.13  2003/05/14 18:00:24  akio
+// New addition for 2003 data ntuple prodction
+// Also fix a problem with MuTrack creating from StEvent tracks.
+//
 // Revision 1.12  2003/04/03 19:50:46  thenry
 // Whae Major Evil Bug fix:
 // muDstJets NOW is CLEARED before adding the jets found in the event, so
@@ -63,15 +67,21 @@
 //////////////////////////////////////////////////////////////////////
 #include <iostream.h>
 
-//#include "Rtypes.h"
 #include "StEventTypes.h"
 #include "StEvent.h"
+#include "StTriggerData.h"
 #include "StMuDSTMaker/COMMON/StMuDst.h"
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StMuTrackFourVec.h"
 #include "StTriggerDetectorCollection.h"
 #include "StCtbTriggerDetector.h"
+#include "StuProbabilityPidAlgorithm.h"
+#include "StuFtpcRefMult.hh"
+
+//trigger data2003
+#include "StTriggerData2003.h"
+#include "StTriggerDataMaker/trgStructures2003.h"
 
 //StJetFinder
 #include "StJetFinder/StProtoJet.h"
@@ -86,7 +96,11 @@
 
 ClassImp(StppEvent)
 
+StuProbabilityPidAlgorithm* mProbabilityPidAlgorithm;
 extern "C" void fpdpi0mass_(int*,int*,float*,float*, int*, int*);
+extern "C" void fillntp2003_(int*, float*,
+			    int*, float*);
+#include "ntp2003.h"
 
 StppEvent::StppEvent(){
     tracks = new TClonesArray ("StMuTrack",200);  //warning hardcoded # of track limits!
@@ -219,16 +233,21 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
     if(!event && mudst) {muevent = mudst->event(); }
   
     //event info
+    StTriggerData* trgdata=0;
     if(event){
 	eventN = event->id() ;
 	runN   = event->runId(); 
 	time   = event->time(); 
+	trgdata = event->triggerData();
+	//if(trgdata){
+	//  trgdata->dump();
+	//}
     }else{
-	eventN = muevent->eventInfo().id() ;
+        eventN = muevent->eventInfo().id() ;
 	runN   = muevent->eventInfo().runId(); 
 	time   = muevent->eventInfo().time(); 
     }
-  
+    
     // Get primary tracks
     nPrimTrack = 0; 
     TClonesArray* mutracks;
@@ -242,10 +261,13 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
 	for(int i=0; i<=mutracks->GetLast(); i++){
 	    new((*tracks)[i]) StMuTrack((const StMuTrack &) *mutracks->UncheckedAt(i));
 	}
-    }else if(event){
+    }else if(event){      
 	//getting tracks from StEvent
 	StSPtrVecTrackNode* exnode = 0;
 	StTrackType type;
+	if (mProbabilityPidAlgorithm) delete mProbabilityPidAlgorithm;
+	StuProbabilityPidAlgorithm*  mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm(*event);
+	StMuTrack::setProbabilityPidAlgorithm(mProbabilityPidAlgorithm);
 	switch(trackChoice){
 	case 0: exnode = &(event->trackNodes()); type=primary; break;
 	case 1: exnode = &(event->trackNodes()); type=global;  break;
@@ -259,7 +281,7 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
 	for( Int_t in=0; in<nnode; in++ ) {
 	    UInt_t nprim = (*exnode)[in]->entries(type);
 	    if(nprim==1){
-		new((*tracks)[nPrimTrack++]) StMuTrack(event, (*exnode)[in]->track(type));
+		new((*tracks)[nPrimTrack++]) StMuTrack(event,(*exnode)[in]->track(type));
 	    }
 	}
     }
@@ -369,8 +391,8 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
 
     //FPD
     if(fpd){
-      //FPD
-      if(fpd){
+      //2002 data
+      if(runN<4000000){
         token = fpd->token();	
 	if(runN<3007014){
 	  static const short SmdXoff[60] = {
@@ -506,9 +528,9 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
 	  fpdESmdY[i] = fpd->smdy(i+1) * SmdYGain[i];
 	  fpdESumSmdY += fpdESmdY[i];
 	}
-      }
+      } 
     }
-
+    
     //l0 trigger info
     if(l0){
 	token = l0->triggerToken();
@@ -577,58 +599,103 @@ Int_t StppEvent::fill(StEvent *event, StMuDst* uDst){
     
 #endif
     
-    //example fpd analysis
     //print out fpd infos
     //fpd->dump();
     //print out bbc infos
     //bbc->dump();
     
-    //calling fortran pi0 finder from FPD
-    float result[10], rin[10], bbcdif;
-    int iin[10], ibbca[32], ibbct[32];
-    for(int i=0; i<10; i++){ result[i]=0.0; }
-    unsigned short east=1500, west=1500;
-    for(int i=0; i<8; i++){
-      if(bbc->tdc(i)>0    && bbc->tdc(i)<east   ) east=bbc->tdc(i);
-      if(bbc->tdc(i+16)>0 && bbc->tdc(i+16)<west) west=bbc->tdc(i+16);
-    }
-    if(east<1500 && west<1500) { bbcdif= (float)west-(float)east; }
-    StMuTrack *t = (StMuTrack *)(* tracks)[LCP];
-    rin[0]=zVertex;
-    rin[1]=bbcdif;
-    rin[2]=t->pt();
-    rin[3]=t->eta();
-    rin[4]=t->phi();
-    rin[5]=(float)zdcTdcEast;
-    rin[6]=(float)zdcTdcWest;
-    rin[7]=(float)zdcEast;
-    rin[8]=(float)zdcWest;
-    iin[0]=token;
-    iin[1]=bunchId7bit;
-    iin[2]=triggerWord;
-    iin[3]=nPrimTrack;
-    iin[4]=runN;
-    iin[5]=eventN;
-    iin[6]=(int)east;
-    iin[7]=(int)west;
-    iin[8]=bunchId%120;
-    int iadc[256];
-    unsigned short * adc = fpd->adc();
-    for(int i=0; i<256; i++){iadc[i] = (int) adc[i];}
-    for(int i=0; i<32; i++) {ibbca[i] = (int) bbc->adc(i); ibbct[i] = (int) bbc->tdc(i);}
-    fpdpi0mass_(iadc, iin, rin, result, ibbca, ibbct);
-    fpdPi0E      = result[0];
-    fpdPi0Mass   = result[1];
-    fpdPi0EShare = result[2];
-    fpdPi0Eta    = result[3];
-    fpdPi0Phi    = result[4]; 
-    fpdPi0SmdDiff= result[5]; 
-    cout << "fpdPi0Mass: ";
-    if(fpdPi0Mass>0.0){
-      for(int i=0; i<5; i++){cout << result[i] << " ";}; cout<< endl;
-    }
-
-    return 0;
+    //Bridge to fortran/ntuple filling
+    if(runN<4000000){
+      //calling fortran pi0 finder from FPD
+      float result[10], rin[10], bbcdif;
+      int iin[10], ibbca[32], ibbct[32];
+      for(int i=0; i<10; i++){ result[i]=0.0; }
+      unsigned short east=1500, west=1500;
+      for(int i=0; i<8; i++){
+	if(bbc->tdc(i)>0    && bbc->tdc(i)<east   ) east=bbc->tdc(i);
+	if(bbc->tdc(i+16)>0 && bbc->tdc(i+16)<west) west=bbc->tdc(i+16);
+      }
+      if(east<1500 && west<1500) { bbcdif= (float)west-(float)east; }
+      StMuTrack *t = (StMuTrack *)(* tracks)[LCP];
+      rin[0]=zVertex;
+      rin[1]=bbcdif;
+      rin[2]=t->pt();
+      rin[3]=t->eta();
+      rin[4]=t->phi();
+      rin[5]=(float)zdcTdcEast;
+      rin[6]=(float)zdcTdcWest;
+      rin[7]=(float)zdcEast;
+      rin[8]=(float)zdcWest;
+      iin[0]=token;
+      iin[1]=bunchId7bit;
+      iin[2]=triggerWord;
+      iin[3]=nPrimTrack;
+      iin[4]=runN;
+      iin[5]=eventN;
+      iin[6]=(int)east;
+      iin[7]=(int)west;
+      iin[8]=bunchId%120;
+      int iadc[256];
+      unsigned short * adc = fpd->adc();
+      for(int i=0; i<256; i++){iadc[i] = (int) adc[i];}
+      for(int i=0; i<32; i++) {ibbca[i] = (int) bbc->adc(i); ibbct[i] = (int) bbc->tdc(i);}
+      fpdpi0mass_(iadc, iin, rin, result, ibbca, ibbct);
+      fpdPi0E      = result[0];
+      fpdPi0Mass   = result[1];
+      fpdPi0EShare = result[2];
+      fpdPi0Eta    = result[3];
+      fpdPi0Phi    = result[4]; 
+      fpdPi0SmdDiff= result[5]; 
+      cout << "fpdPi0Mass: ";
+      if(fpdPi0Mass>0.0){
+	for(int i=0; i<5; i++){cout << result[i] << " ";}; cout<< endl;
+      }
+    }else if(runN<5000000){
+      if(trgdata){
+	int year = trgdata->year();
+	if(year==2003){
+	  StTriggerData2003* t2003=(StTriggerData2003*)trgdata;
+	  TrgDataType2003* trgd=t2003->getTriggerStructure2003();
+	  int iin[100], iout[100];
+	  float rin[100], rout[100];
+	  iin[0]=runN;
+	  ntp2003_.event       = eventN;
+	  ntp2003_.BChi        = trgdata->bunchCounterHigh();
+	  ntp2003_.BClo        = trgdata->bunchCounterLow();
+	  ntp2003_.Token       = trgdata->token();
+	  ntp2003_.TrgWd       = trgdata->triggerWord();
+	  ntp2003_.prepost     = 0;
+	  ntp2003_.bunchId     = trgdata->bunchId48Bit();
+	  ntp2003_.bunchid7bit = trgdata->bunchId7Bit();
+	  ntp2003_.spinBit     = trgdata->spinBit();
+	  ntp2003_.NPrimTrk    = nPrimTrack;
+	  ntp2003_.NTPCTrk     = nGoodTrack;
+	  ntp2003_.NEastFTPCTrk= uncorrectedNumberOfFtpcEastPrimaries(*event);
+	  ntp2003_.xVertex     = xVertex;
+	  ntp2003_.yVertex     = yVertex;
+	  ntp2003_.zVertex     = zVertex;
+	  for(int i=0; i<8;   i++) {ntp2003_.VTXDSM[i]=trgd->TrgSum.DSMdata.VTX[i];
+	                            ntp2003_.FPDDSM[i]=trgd->TrgSum.DSMdata.FPD[i];
+	                            ntp2003_.FPDTDC[i]=(fpd->tdc())[i];}
+	  for(int i=0; i<16;  i++) {ntp2003_.ZDC[i]=trgd->rawTriggerDet[0].ZDC[i];}
+	  for(int i=0; i<256; i++) {ntp2003_.CTB[i]=trgd->rawTriggerDet[0].CTB[i];
+	                            ntp2003_.FPDADC[i]=(fpd->adc())[i];}
+	  for(int i=0; i<80;  i++) {ntp2003_.BBC[i]=trgd->rawTriggerDet[0].BBC[i];}
+	  for(int i=0; i<112; i++) {ntp2003_.FPDENS[i]=trgd->rawTriggerDet[0].FPDEastNSLayer0[i];
+	                            ntp2003_.FPDWNS[i]=trgd->rawTriggerDet[0].FPDWestNSLayer0[i];}
+	  for(int i=0; i<64; i++)  {ntp2003_.FPDETB[i]=trgd->rawTriggerDet[0].FPDEastTBLayer0[i];
+	                            ntp2003_.FPDWTB[i]=trgd->rawTriggerDet[0].FPDWestTBLayer0[i];}
+	  for(int i=0; i<32;  i++) {ntp2003_.FPDWEST[i]   =bbc->adc(i); 
+	                            ntp2003_.FPDWEST[i+32]=bbc->tdc(i);}
+	  fillntp2003_(iin,rin,iout,rout);
+	}else{
+	  printf("StppEvent: StTriggerData have wrong year %d\n",year);
+	}
+      }else{
+	printf("StppEvent: No StTriggerData found\n");
+      }
+    }      
+      return 0;
 }
 #endif /*__CINT__*/
 

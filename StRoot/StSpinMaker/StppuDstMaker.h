@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StppuDstMaker.h,v 1.5 2003/02/04 21:57:10 akio Exp $
+ * $Id: StppuDstMaker.h,v 1.6 2003/05/14 18:00:25 akio Exp $
  * $Log: StppuDstMaker.h,v $
+ * Revision 1.6  2003/05/14 18:00:25  akio
+ * New addition for 2003 data ntuple prodction
+ * Also fix a problem with MuTrack creating from StEvent tracks.
+ *
  * Revision 1.5  2003/02/04 21:57:10  akio
  * Improvments on pi0 reconstruction code and ntuple
  *
@@ -41,6 +45,8 @@
 #include "StMaker.h"
 #include "StppJetAnalyzer.h"
 
+//#define _2002ntuple_
+#define _2003ntuple_
 //#define _GEANT_
 #define _BBC_data_
 #define _FPD_data_
@@ -62,10 +68,18 @@ class StEmcMicroEvent;
 
 class StppuDstMaker : public StMaker {
 public:
-    StppuDstMaker(const Char_t *name="StppuDst");
-    Int_t Init(const Char_t* filename="spinDst.root");
-    Int_t Make();
-    Int_t Finish(); 
+  StppuDstMaker(const Char_t *name="StppuDst");
+  ~StppuDstMaker();   
+  void Clear(Option_t *option=""); 
+  Int_t Init();
+  Int_t Init(const Char_t* filename);
+  Int_t Make();
+  Int_t Finish(); 
+  virtual const char *GetCVS() const {
+    static const char cvs[]="Tag $Name:  $ $Id: StppuDstMaker.h,v 1.6 2003/05/14 18:00:25 akio Exp $ built "__DATE__" "__TIME__ ; 
+    return cvs;
+  }
+  
     void setMuDst(StMuDst* p) {mudst=p;};
     StppEvent* event() {return ppEvent;} //added by MLM
     TTree* tree() {return ppuDst;}  //added by MLM
@@ -117,5 +131,5 @@ private:
     Int_t            infoLevel;
   
     ClassDef(StppuDstMaker,0)
-	};
+};
 #endif
