@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.75 2002/04/14 22:27:29 perev Exp $
+// $Id: doEvents.C,v 1.76 2002/04/23 17:30:46 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -128,7 +128,8 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
       gSystem->Load("StDbBroker.so");
       gSystem->Load("libStDb_Tables.so");
       gSystem->Load("St_db_Maker.so");
-    }
+      gSystem->Load("StTpcDb");
+     }
 
 //   		Special libraries for EventDisplay
     if (eventDisplay) {//EventDisplay on
@@ -203,8 +204,7 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
     //
     // Maker to read events from file or database into StEvent
     //
-    if (!mainBranch.Contains("eventBranch")) {
-      gSystem->Load("StTpcDb");
+    if (mainBranch.Contains("dstBranch")) {
       gSystem->Load("StEventMaker");
       StEventMaker *readerMaker =  new StEventMaker("events","title");
     }
@@ -328,6 +328,9 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.76  2002/04/23 17:30:46  perev
+// DB loaded only with dbon flag
+//
 // Revision 1.75  2002/04/14 22:27:29  perev
 // remove reading dst by default
 //
