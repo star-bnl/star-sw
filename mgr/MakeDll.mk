@@ -1,6 +1,5 @@
 #
 ifdef SO_LIB
-#  OUT_DIR := $(shell cd $(dir $(SO_LIB))/../..; pwd)
    OUT_UP  := $(subst / ,,$(dir $(SO_LIB))  )
    OUT_UPP := $(subst / ,,$(dir $(OUT_UP))  )
    OUT_DIR := $(subst / ,,$(dir $(OUT_UPP)) )
@@ -70,9 +69,10 @@ SRC_DIR := $(INP_DIR)
 #	Includes
 #####INCLUDES := $(addprefix -I,$(wildcard $(UPP_INP_DIR)/*/inc))
 
-INCLUDES := -I$(SRC_DIR) -I$(OUT_DIR)/StRoot/base -I$(STAR)/StRoot/base -I$(STAR)/StRoot/xdf2root -I$(STAR)/asps/staf/inc -I$(ROOTSYS)/include -I$(OUT_DIR)/.share/tables -I$(STAR)/.share/tables -I$(OUT_DIR)/.share  -I$(STAR)/.share
+INCLUDES := -I$(SRC_DIR) -I$(OUT_DIR)/StRoot/base -I$(STAR)/StRoot/base -I$(STAR)/StRoot/xdf2root -I$(ROOTSYS)/include -I$(STAR)/inc -I$(OUT_DIR)/.share/tables -I$(STAR)/.share/tables -I$(OUT_DIR)/.share  -I$(STAR)/.share
+#-I$(STAR)/asps/staf/inc 
 INCL     :=  -I$(GEN_DIR) $(addprefix -I, $(INC_DIRS))
-
+CPPFLAGS += -D__ROOT__
 
 #
 #	If NO source , NOTHING to do

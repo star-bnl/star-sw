@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.11  1998/08/25 02:10:09  fisyak
+#  Add nodebug
+#
 #  Revision 1.10  1998/08/22 23:35:10  fisyak
 #  Add St_base.so dependence
 #
@@ -112,7 +115,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/08/22 23:35:10 $ 
+#           Last modification $Date: 1998/08/25 02:10:09 $ 
 #  default setings
 # Current Working Directory
 #
@@ -164,6 +167,22 @@ else
 	SUBDIRS := $(filter-out html,$(SUBDIRS))
 	SUBDIRS := $(strip    $(sort $(SUBDIRS)))
         SUBDIRS := $(filter-out util, $(SUBDIRS))
+ifneq (,$(findstring sim, $(SUBDIRS)))
+        SUBDIRS := $(filter-out sim, $(SUBDIRS))
+        DIRS    := $(strip $(wildcard sim/*))
+        SUBDIRS += $(foreach dir, $(DIRS), $(shell test -d $(dir) && \
+                test $(dir) != sim/CVS && test $(dir) != sim/kumac && \
+                test $(dir) != sim/inc && test $(dir) != sim/idl && \
+                echo $(dir))) 
+endif
+ifneq (,$(findstring gen, $(SUBDIRS)))
+        SUBDIRS := $(filter-out gen, $(SUBDIRS))
+        DIRS    := $(strip $(wildcard gen/*))
+        SUBDIRS += $(foreach dir, $(DIRS), $(shell test -d $(dir) && \
+                test $(dir) != gen/CVS && test $(dir) != gen/kumac && \
+                test $(dir) != gen/inc && test $(dir) != gen/idl && \
+                echo $(dir))) 
+endif
 #. take out trg for sgi
 ifneq (,$(findstring $(STAF_ARCH),sgi_64 ))
         SUBDIRS := $(filter-out trg, $(SUBDIRS))
@@ -205,27 +224,26 @@ endif
 ifeq ($(NAME),$(PKG))          
 	SUBDIRS :=
 endif                          
-ifneq ($(EMPTY),$(SUBDIRS))     
-ifneq (,$(findstring $(LEVEL),0 1))
-ifndef ROOT_DIR 
-ifneq (,$(wildcard $(ROOT_DIR)/StRoot/base))
+ifneq ($(EMPTY),$(findstring $(LEVEL),0 1))
+ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/base))
 BASE := St_base 
 endif
-ifneq (,$(wildcard $(ROOT_DIR)/StRoot/xdf2root))
+ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/xdf2root))
 XDF2ROOT := xdf2root
 endif
-ifneq (,$(wildcard $(ROOT_DIR)/.share/tables))
+ifneq ($(EMPTY),$(SUBDIRS))     
+TARGETS += $(addsuffix _all, $(SUBDIRS))
+endif
+ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/.share/tables))
 TARGETS += St_Tables
 endif
-ifneq (,$(wildcard $(ROOT_DIR)/StRoot/StChain))
+ifneq ($(EMPTY),$(wildcard $(ROOT_DIR)/StRoot/StChain))
 TARGETS += StChain
-endif
-endif
 endif
 #          I have subdrs
 .PHONY               :  all $(BASE) $(XDF2ROOT) $(TARGET) St_Tables StChain test clean clean_lib clean_share clean_obj
 #      I_have_subdirs
-all:  $(BASE) $(XDF2ROOT) $(addsuffix _all, $(SUBDIRS)) $(TARGETS)
+all:  $(BASE) $(XDF2ROOT)  $(TARGETS)
 ifndef NOROOT
 St_base:   $(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.so
 xdf2root:  $(ROOT_DIR)/.$(STAR_SYS)/lib/xdf2root.so 
@@ -236,7 +254,7 @@ $(ROOT_DIR)/.$(STAR_SYS)/lib/St_base.so:   $(wildcard $(ROOT_DIR)/StRoot/base/*.
 $(ROOT_DIR)/.$(STAR_SYS)/lib/xdf2root.so:   $(wildcard $(ROOT_DIR)/StRoot/xdf2root/*.*) $(wildcard $(ROOT_DIR)/StRoot/base/*.h)
 	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/xdf2root    SO_LIB=$(ALL_TAGS)
 $(ROOT_DIR)/.$(STAR_SYS)/lib/St_Tables.so: $(wildcard $(ROOT_DIR)/.share/tables/St*.*) $(wildcard $(ROOT_DIR)/StRoot/base/*.h)
-	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/.share/tables  SO_LIB=$(ALL_TAGS)
+	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/.share/tables  SO_LIB=$(ALL_TAGS) NODEBUG=YES
 $(ROOT_DIR)/.$(STAR_SYS)/lib/StChain.so: $(wildcard $(ROOT_DIR)/StRoot/StChain/St*.*) $(wildcard $(ROOT_DIR)/StRoot/base/*.h)
 	$(MAKE) -f $(MakeDll) -C $(ROOT_DIR)/StRoot/StChain  SO_LIB=$(ALL_TAGS)
 endif
@@ -279,13 +297,8 @@ test_level:
 	@echo "LEVEL     =" $(LEVEL)
 	@echo "SUBDIRS   =" $(SUBDIRS)
 	@echo "INP_DIR   =" $(INP_DIR)
-	@echo "ROOT_DIR   =" $(ROOT_DIR)
+	@echo "ROOT_DIR  =" $(ROOT_DIR)
 	@echo "CWD       =" $(CWD)
 	@echo "NAME      =" $(NAME)
 	@echo "ROOT_DIR  =" $(ROOT_DIR)
-	@echo EMPTY     = $(EMPTY)
-	@echo ZERO      = $(ZERO)
-	@echo ONE       = $(ONE)
-	@echo TWO       = $(TWO)
-	@echo THREE     = $(THREE)
-	@echo FOUR      = $(FOUR)
+	@echo "TARGETS   =" $(TARGETS)
