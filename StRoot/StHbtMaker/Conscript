@@ -10,9 +10,13 @@ $ObjDir = "#" . $ObjDir; #print "ObjDir = $ObjDir\n";
 my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 my $pkg  = basename($Dir);# print "Run cons in $Dir for $PKG\n";
 my $PKG = $pkg;
-my @src  = qx (cd StRoot/StHbtMaker; 
+my @src  = qx (
+	       cd StRoot/StHbtMaker; 
 	       find ./ -name '*.cc';
-	       find ./ -name '*.cxx';);
+	       find ./ -name '*.cxx';
+	       find ./ -name '*.F';
+	       find ./ -name '*.f';
+	      ); 
 print "src = @src\n";
 my @h_files  = qx (cd StRoot/StHbtMaker; 
 		   find ./ -name '*.h' | xargs grep -l ClassDef; 
