@@ -104,6 +104,11 @@ class StEmcMicroDstMaker : public StMaker
     
     void               addMicroEventFile(char*);                             ///< Add EMC micro DST file to read
     
+    virtual const char *GetCVS() const {
+      static const char cvs[]="Tag $Name:  $ $Id: StEmcMicroDstMaker.h,v 1.2 2002/04/26 20:58:06 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+      return cvs;
+    }
+
     	    
     ClassDef(StEmcMicroDstMaker,1)
 };
