@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.cc,v 1.8 1999/02/18 21:17:27 lasiuk Exp $
+ * $Id: StTpcCoordinateTransform.cc,v 1.9 1999/02/24 19:31:25 lasiuk Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -16,8 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.cc,v $
- * Revision 1.8  1999/02/18 21:17:27  lasiuk
- * instantiate with electronics db
+ * Revision 1.9  1999/02/24 19:31:25  lasiuk
+ * allow for tZero offset
+ * positive pushes time bins into the chamber
  *
  *
  * Revision 1.9  1999/02/24 19:31:25  lasiuk
@@ -379,8 +380,10 @@ double StTpcCoordinateTransform::xFromPad(const int row, const int pad) const
     int pads2move = pad - (mTPCdb->numberOfPadsAtRow(row))/2;
     double dist2move = pitch*(pads2move-.5);
     return(dist2move);
+}
 
-    double z = mTPCdb->frischGrid() - (mSCdb->driftVelocity()*tb);
+double StTpcCoordinateTransform::zFromTB(const int tb) const
+{
     //double frischGrid = 2098.998*millimeter;
     //PR(mElectronicsDb->tZero());
     //double z = mTPCdb->frischGrid() - (mSCdb->driftVelocity()*(tb*mTimeBinWidth));
@@ -391,19 +394,9 @@ double StTpcCoordinateTransform::xFromPad(const int row, const int pad) const
 
 int StTpcCoordinateTransform::tBFromZ(const double z) const
 {
-    double tb = (mTPCdb->frischGrid() - z)/mSCdb->driftVelocity();
-#ifndef ST_NO_NAMESPACES
-    // I do not like this.  This should be passed via the electronics data base!
-    // We will have to see what is decided about this code!
-    {
-	using namespace units;
-#endif
-    //PR(tb/(100.*nanosecond));
-	//PR(mTimeBinWidth/nanosecond);
+    //double frischGrid = 2098.998*millimeter;
+
     //PR(mTPCdb->frischGrid());
-#ifndef ST_NO_NAMESPACES    
-    }
-#endif
     //PR(z);
     //PR(mSCdb->driftVelocity());
     double tb = (mTPCdb->frischGrid() - mElectronicsDb->tZero()*mSCdb->driftVelocity() - z)/mSCdb->driftVelocity();
