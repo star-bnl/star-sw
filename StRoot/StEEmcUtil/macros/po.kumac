@@ -1,0 +1,13 @@
+*-----------------------------------------
+* open Postscript file to write
+*
+* usage  po [file]
+*
+if [#]= 0 then
+    for/file 90 dr.ps
+  else
+    for/file 90 dr[1].ps
+  endif
+meta 90 -111
+
+mess PostScript file opened  (meta 99 -111)
