@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.41 1999/08/25 21:50:20 snelling Exp $
+// $Id: St_tcl_Maker.cxx,v 1.42 1999/08/26 01:27:17 snelling Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.42  1999/08/26 01:27:17  snelling
+// Li Qun: Table fixed
+//
 // Revision 1.41  1999/08/25 21:50:20  snelling
 // Li Qun added a table for tracking
 //
@@ -508,8 +511,9 @@ Int_t St_tcl_Maker::Make(){
 
   St_tcl_tphit     *tphit     = new St_tcl_tphit("tphit",max_hit);         local.Add(tphit);
   tcl_tclpar_st *sttclpar=m_tclpar->GetTable();
-  St_tcl_hitclus *tphitclus=0;
-  if(sttclpar[0].mc>1){tphitclus=new St_tcl_hitclus("tphitclus",max_hit);local.Add(tphitclus);}
+  //  St_tcl_hitclus *tphitclus=0;
+  //if(sttclpar[0].mc>1){tphitclus=new St_tcl_hitclus("tphitclus",max_hit);local.Add(tphitclus);}
+  St_tcl_hitclus *tphitclus=new St_tcl_hitclus("tphitclus",max_hit);local.Add(tphitclus);
   St_tcl_tpcluster *tpcluster = new St_tcl_tpcluster("tpcluster",max_hit); local.Add(tpcluster);
   St_tcc_morphology *morph    = 0;
   if(m_tclMorphOn) {
