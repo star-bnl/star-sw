@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.h,v 1.3 1999/02/10 04:30:02 lasiuk Exp $
+// $Id: StTrsMaker.h,v 1.4 1999/02/19 16:28:24 fisyak Exp $
 //
 // $Log: StTrsMaker.h,v $
+// Revision 1.4  1999/02/19 16:28:24  fisyak
+// Change given name of Maker
+//
 // Revision 1.3  1999/02/10 04:30:02  lasiuk
 // add unpacker and rawevent as data members/ passed by dataset
 //
@@ -53,7 +56,7 @@ class StTrsUnpacker;
 class StTrsMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.3 1999/02/10 04:30:02 lasiuk Exp $";
+// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.4 1999/02/19 16:28:24 fisyak Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
 
@@ -87,7 +90,7 @@ class StTrsMaker : public StMaker {
 protected:
 
 public: 
-    StTrsMaker(const char *name="tpc_raw", const char *title="event/raw_data/tpc");
+    StTrsMaker(const char *name="Trs", const char *title="Trs");
     virtual       ~StTrsMaker();
     virtual Int_t Init();
     virtual Int_t  Make();
