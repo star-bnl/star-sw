@@ -1,5 +1,8 @@
-// $Id: QA_bfcread_dst_full_tables.C,v 1.9 1999/11/03 19:05:02 kathy Exp $
+// $Id: QA_bfcread_dst_full_tables.C,v 1.10 1999/11/03 21:35:35 kathy Exp $
 // $Log: QA_bfcread_dst_full_tables.C,v $
+// Revision 1.10  1999/11/03 21:35:35  kathy
+// small fixes for use of StIOMaker - had it wrong before
+//
 // Revision 1.9  1999/11/03 19:05:02  kathy
 // another small fix for output file name - now .out instead of .txt
 //
@@ -49,11 +52,11 @@ class St_DataSet;
 St_DataSet *Event;
 
 
-void QA_bfcread_dst_full_tables(Int_t nevents=15, 
+void QA_bfcread_dst_full_tables(
+ Int_t nevents=15, 
  const char *MainFile=
  "/disk00000/star/test/new/tfs_Linux/year_2a/psc0208_01_40evts.dst.root",
  const char *fname="qa_full_tables.out")
-
 {
 //
   gSystem->Load("St_base");
@@ -64,6 +67,11 @@ void QA_bfcread_dst_full_tables(Int_t nevents=15,
 
   ofstream fout(fname);
 
+//  Setup top part of chain
+  chain = new StChain("bfc");
+  chain->SetDebug();
+
+   
 // setup chain with IOMaker - can read in .dst.root, .dst.xdf files
   StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
   IOMk->SetDebug();
@@ -77,11 +85,6 @@ void QA_bfcread_dst_full_tables(Int_t nevents=15,
   fout << "QAInfo: " << MainFile << endl << endl;
   cout << "QAInfo: " << MainFile << endl << endl;
 
-//  Setup top part of chain
-  chain = new StChain("bfc");
-  chain->SetDebug();
-
-   
 
 // --- now execute chain member functions
   chain->Init();
