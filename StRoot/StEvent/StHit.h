@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.16 2004/08/19 21:58:53 ullrich Exp $
+ * $Id: StHit.h,v 2.17 2005/01/26 23:04:12 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.17  2005/01/26 23:04:12  perev
+ * const for Sthit* nextHit()
+ *
  * Revision 2.16  2004/08/19 21:58:53  ullrich
  * Fixed omitted implementation of nextHit().
  *
@@ -104,7 +107,7 @@ public:
     unsigned short  idTruth() const;
     unsigned short  quality() const;
     unsigned short  id()      const;
-    StHit*          nextHit() const;
+    const StHit*    nextHit() const;
     unsigned int    hardwarePosition() const;
     
     
@@ -144,6 +147,6 @@ inline unsigned short  StHit::idTruth() const {return mIdTruth;}
 inline unsigned short  StHit::quality() const {return mQuality;}
 inline unsigned short  StHit::id()      const {return mId;}
 inline unsigned int    StHit::hardwarePosition() const {return mHardwarePosition;}
-inline StHit*          StHit:: nextHit() const {return mNextHit;}
+inline const StHit*    StHit:: nextHit() const {return mNextHit;}
 
 #endif
