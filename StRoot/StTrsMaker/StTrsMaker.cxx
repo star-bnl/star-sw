@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.25 1999/03/20 03:23:57 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.26 1999/03/20 20:07:56 fisyak Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.26  1999/03/20 20:07:56  fisyak
+// Add access to DataSet with parameters
+//
 // Revision 1.25  1999/03/20 03:23:57  lasiuk
 // setMiniSegmentLength()
 // setFirstSectorToProcess()
@@ -108,6 +111,10 @@
 #include "StSimpleMagneticField.hh"
 #include "StTrsDeDx.hh"
 
+#include "electronicsDataSet.h"
+#include "geometryDataSet.h"
+#include "slowcontrolDataSet.h"
+
 // processes
 #include "StTrsFastChargeTransporter.hh"
 #include "StTrsSlowAnalogSignalGenerator.hh"
@@ -135,11 +142,15 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.25 1999/03/20 03:23:57 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.26 1999/03/20 20:07:56 fisyak Exp $";
 
 ClassImp(StTrsMaker)
 
-StTrsMaker::StTrsMaker(const char *name):StMaker(name)
+StTrsMaker::StTrsMaker(const char *name):
+mMiniSegmentLength(4.*millimeter),
+mFirstSectorToProcess(1),
+mLastSectorToProcess(24),
+StMaker(name)
 {
 }
 
@@ -149,9 +160,16 @@ Int_t StTrsMaker::Init()
 {
 //     // Create tables
 //     St_DataSetIter       local(GetDataBase("params"));
-
+  
     //
     // Set up the DataBase access
+  St_DataSet *TrsPars = GetDataBase("params/tpc/trspars");
+  assert(TrsPars);
+  geometryDataSet *Geometry       = (geometryDataSet    *) TrsPars->Find("Trs/Geometry");
+  electronicsDataSet *Electonics  = (electronicsDataSet *) TrsPars->Find("Trs/Electronics");
+  slowcontrolDataSet *SlowControl = (slowcontrolDataSet *) TrsPars->Find("Trs/SlowControl");
+  
+#if 1
     //
     // Check File access
     //
@@ -183,7 +201,6 @@ Int_t StTrsMaker::Init()
 	cerr << "Exitting..." << endl;
 	exit(1);
     }
-
    //
    // The DataBases
    //
@@ -201,10 +218,10 @@ Int_t StTrsMaker::Init()
    mElectronicsDb =
        StTpcSimpleElectronics::instance(electronicsFile.c_str());
    //mElectronicsDb->print();
+#endif
 
    string gas =("P10");
    mGasDb = new StTrsDeDx(gas);
-   mMiniSegmentLength = 4.*millimeter;
    //mGasDb->print();
 
    //
@@ -282,8 +299,6 @@ Int_t StTrsMaker::Init()
 //    mFirstSectorToProcess = 1;
 //    mLastSectorToProcess  = 1;
 
-   setFirstSectorToProcess(1);
-   setLastSectorToProcess(24);
 
    // This should really be a boolean
    mProcessPseudoPadRows = 0;  // 0 is no!
@@ -306,18 +321,6 @@ void StTrsMaker::whichSector(int volId, int* isDet, int* sector, int* padrow){
     volId  -= (*sector)*100;
     *padrow = volId;
 	
-}
-void StTrsMaker::setMiniSegmentLength(double len)
-{// should be inline
-    mMiniSegmentLength = len;
-}
-void StTrsMaker::setFirstSectorToProcess(int first)
-{// should be inline
-    mFirstSectorToProcess = first;
-}
-void StTrsMaker::setLastSectorToProcess(int last)
-{// should be inline
-    mLastSectorToProcess = last;
 }
 Int_t StTrsMaker::Make(){
     //  PrintInfo();
@@ -758,7 +761,7 @@ Int_t StTrsMaker::Finish()
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.25 1999/03/20 03:23:57 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.26 1999/03/20 20:07:56 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
