@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.16 2000/06/14 13:39:05 didenko Exp $
+ * $Id: StDbBroker.h,v 1.17 2000/06/30 02:00:42 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,10 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.17  2000/06/30 02:00:42  porter
+ * fixed memory leak introduced when making sure top level returned to
+ * offline is always a database type name
+ *
  * Revision 1.16  2000/06/14 13:39:05  didenko
  * Add ClassDef/ClassImp
  *
@@ -230,8 +234,7 @@ struct oldDescriptor {
     dbConfig_st* InitConfig(const char* configName, int& numRows, char* versionName=0);
 
     StDbManager* mgr;
-
-
+  
   ClassDef(StDbBroker,0)
 };
 
