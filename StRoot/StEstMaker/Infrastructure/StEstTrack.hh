@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTrack.hh,v 1.2 2001/01/25 18:20:39 lmartin Exp $
+ * $Id: StEstTrack.hh,v 1.3 2001/01/26 09:36:56 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTrack.hh,v $
+ * Revision 1.3  2001/01/26 09:36:56  lmartin
+ * Minor changes. Useless statements removed. Add a short description of the data members
+ *
  * Revision 1.2  2001/01/25 18:20:39  lmartin
  * Destructor completed to prevent memory leak.
  * New method RemoveLastBranch added to force the last branch destruction.
@@ -29,27 +32,24 @@ class StEstHit;
 class StEstTPCTrack;
 class StEstTracker;
 class StHelix;
-//#include "StHelix.hh"
-//#include "StEstBranch.hh"
-//#include "StEstTPCTrack.hh"
-class StEstTrack {
 
+class StEstTrack {
 protected:
 
-  StEstTPCTrack *mTPCTrack;
-  StEstBranch   **mBranch;
-  StEstBranch    *mIdealBranch;
-  StEstBranch    *mFindableBranch;
-  long mNBranch;     // number of branches in this track
-  long mMaxBranch;
+  StEstTPCTrack *mTPCTrack; // pointer to the TPCTrack 
+  StEstBranch   **mBranch; // list of pointers to the branches
+  StEstBranch    *mIdealBranch; // pointer to the ideal branch
+  StEstBranch    *mFindableBranch; // pointer to the findable branch
+  long mNBranch; // number of branches in this track
+  long mMaxBranch; // max number of branches allowed for this track
   int  mFlag; // 0=track available 1=track already used -1=problems
-  int mDoIt;  // local flag to know if the track should be (1) or not (0) treated by the tracker during a pass
-  int mDone;  // local flag to know if the track should be (1) or not (0) treated by the tracker at the end of a superpass
-  int mIdealPattern; 
-  int mIdealNHits;
-  int mFindablePattern; 
-  int mFindableNHits;
-  StHelix* mHelix;
+  int mDoIt;  // The track should/not (1/0) be treated by the tracker during a pass
+  int mDone;  // The track should/not (1/0) be treated by the tracker at the end of a superpass
+  int mIdealPattern; // Layer pattern for the hits of the ideal branch 
+  int mIdealNHits; // Number of hits in the ideal branch
+  int mFindablePattern; // Layer pattern for the hits of the findable branch 
+  int mFindableNHits; // Number of hits in the findable branch
+  StHelix* mHelix; // Pointer to the helix created in TPCInit
   
 public :
     
