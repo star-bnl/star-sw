@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0.cxx,v 1.3 1999/07/02 04:43:24 levine Exp $
+ * $Id: TPCV2P0.cxx,v 1.4 1999/07/03 04:25:48 levine Exp $
  * Author: Jeff Landgraf and M.J. LeVine
  ***************************************************************************
  * Description: common TPC (V2) implementation stuff
@@ -14,6 +14,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0.cxx,v $
+ * Revision 1.4  1999/07/03 04:25:48  levine
+ * changes to get past Linux cyyyYompiler
+ *
  * Revision 1.3  1999/07/02 04:43:24  levine
  * Many changes -
  *  navigates to head of TPCP bank independent of position.
@@ -229,7 +232,8 @@ TPCV2P0_Reader::TPCV2P0_Reader(EventReader *er)
 #ifdef DYNAMIC // position independent pointers to lower banks, variable DATAP length
   int len = pBankDATAP->header.BankLength - sizeof(Bank_Header)/4;
   Pointer *ptr = &pBankDATAP->TPC;
- for (int i=0; i<len; i++, ptr++) {
+  int i;
+ for (i=0; i<len; i++, ptr++) {
    if (ptr->length==0) continue;//invalid entry
    pBankTPCP = (classname(Bank_TPCP) *)(((INT32 *)pBankDATAP)+ (ptr->offset)); 
    if(!strncmp(pBankTPCP->header.BankType,"TPCP",4)) break;
@@ -250,7 +254,7 @@ TPCV2P0_Reader::TPCV2P0_Reader(EventReader *er)
   if (pBankTPCP->swap() < 0) ERROR(ERR_SWAP);
   pBankTPCP->header.CRC = 0;
   // We can have a padk for each of 24 sectors
-  for(int i=0;i<TPC_SECTORS;i++)
+  for(i=0;i<TPC_SECTORS;i++)
   {
     padk[i] = NULL;
   }
