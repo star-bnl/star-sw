@@ -41,7 +41,11 @@ ifeq (,$(findstring $(LEVEL),0 1))
   ifneq (,$(DOMAIN)$(PKG)) 
     SRC_DIR := $(INP_DIR)
     SYS_DIR := $(OUT_DIR)/.$(STAR_HOST_SYS)
-    LIB_DIR := $(SYS_DIR)/lib
+    ifndef NODEBUG
+      LIB_DIR := $(SYS_DIR)/lib
+    else
+      LIB_DIR := $(SYS_DIR)/nodeb
+    endif
     OBJ_DIR := $(SYS_DIR)/obj/$(DOMAIN)
     DEP_DIR := $(SYS_DIR)/dep/$(DOMAIN)
     DIR_GEN := $(OUT_DIR)/.share
@@ -139,8 +143,8 @@ ifneq (,$(strip $(FILES_IDM) $(FILES_G) $(FILES_CDF)))
 #endif
 endif                          
 ifneq (,$(strip $(FILES_O)))
-ifndef NODEBUG
-LIB_PKG := $(LIB_DIR)/lib$(PKG)-nodebug.a
+ifdef NODEBUG
+LIB_PKG := $(LIB_DIR)/lib$(PKG).a
 else
 LIB_PKG := $(LIB_DIR)/lib$(PKG).a
 endif
