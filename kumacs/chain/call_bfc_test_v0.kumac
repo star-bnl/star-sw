@@ -15,7 +15,7 @@
    tpc_sector_first=1 _
    tpc_sector_last=1 _
    gstar_settings=' field_only' _
-   domain=' geometry g2t tpc svt global' _
+   domain=' geometry g2t tpc svt global strange' _
    chain=' g2tin tpg svg tfs srs tpt tid tte_e sgr svm egr evr ev02 ev0d sdst2 ntup ' _
    skip=0 _
    no_events=1000 _
