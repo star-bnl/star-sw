@@ -100,7 +100,7 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 
 
     /* Reserve array for found clusters */
-    struct resx resx[1000] ;
+    struct resx resx[5000] ;
     bzero((char *)resx, sizeof(resx)) ;
     
     /* local results */
