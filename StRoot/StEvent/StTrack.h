@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.6 1999/11/29 17:32:45 ullrich Exp $
+ * $Id: StTrack.h,v 2.7 1999/11/30 23:20:32 didenko Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
- * Revision 2.6  1999/11/29 17:32:45  ullrich
- * Added non-const method pidTraits().
+ * Revision 2.7  1999/11/30 23:20:32  didenko
+ * temporary solution to get library compiled
+ *
+ * Revision 2.7  1999/11/30 23:20:32  didenko
+ * temporary solution to get library compiled
  *
  * Revision 2.6  1999/11/29 17:32:45  ullrich
  * Added non-const method pidTraits().
@@ -62,8 +65,8 @@ public:
 
     virtual StTrackType            type() const = 0;
     virtual const StVertex*        vertex() const = 0;
-    StTrackFindingMethod           findingMethod() const;
-    StTrackQualityScheme           qualityScheme() const;
+    virtual UShort_t               key() const;
+    Short_t                        flag() const;
     UShort_t                       encodedMethod() const;
 //    StTrackFindingMethod           findingMethod() const;
 //    StTrackQualityScheme           qualityScheme() const;
