@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.114 1999/09/24 22:18:27 fisyak Exp $
+# $Id: MakeDll.mk,v 1.115 1999/09/24 22:19:16 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.115  1999/09/24 22:19:16  fisyak
+# Fix print-out
+#
 # Revision 1.114  1999/09/24 22:18:27  fisyak
 # Add new Table method (VF), fix bug in VPATH
 #
@@ -663,8 +666,6 @@ test:
 	@echo FILES_COG   := $(FILES_COG)
 
 	@echo DOIT        := $(DOIT)
-	@echo PKGNAME     := $(PKGNAME)	
-	@echo PKG         := $(PKG)
 test_mk:
 	@echo "STAR_HOST_SYS= "$(STAR_HOST_SYS)" ; OPSYS = "$(OPSYS)
 	@echo "HOST      =" $(HOST)"  ; STAR_HOST_SYS = "$(STAR_HOST_SYS)
@@ -717,3 +718,5 @@ test_mk:
 	@echo "STAR      = |"$(STAR)"|"
 	@echo "ROOT_DIR  = |"$(ROOT_DIR)"|"
 	@echo "INC_DIRS  = |"$(INC_DIRS)"|"
+	@echo "PKGNAME   = |"$(PKGNAME)"|"
+	@echo "PKG       = |"$(PKG)"|"
