@@ -1,3 +1,8 @@
+* $Id: bfc_util.kumac,v 1.15 1998/07/21 18:34:05 fisyak Exp $  
+* $Log: bfc_util.kumac,v $
+* Revision 1.15  1998/07/21 18:34:05  fisyak
+* Add brackets
+*
 * 2Jul98 K. Turner - tpc code now requires geometry so make it default
 *                    in domain
 * 3Jul98 K. Turner - changed tpc kumacs so that pam kumacs are called directly
@@ -58,7 +63,7 @@ macro bfc_init _
    CASE [mod] in 
    (gethij) 
            newfile hij_in [input_file] r; 
-           user/input u evgen/particle.staf
+           user/input u [evgen]/particle.staf
    (gst)   if ($vexist(geometry_done)=0) then
              exec [TOP]/kumacs/chain/bfc_util#bfc_start domain=geometry 
            endif  
@@ -161,9 +166,10 @@ EOF:
    message ' !!! bfc_util ==> chain processing for  ' [mod]
    CASE [mod] in 
      (gethij)    
-               cd [event]; getev hij_in
-               user/input u evgen/particle.staf
-      (gst)    trig 1; cd [geant_Event]; for/call g2t; cd /dui; 
+                cd [event]; getev hij_in
+                user/input u [evgen]/particle.staf
+*                exec $STAR/pams/gen/kumac/particle
+      (gst)    trig 1; cd [geantE]; for/call g2t; cd /dui; 
     (evgin) nextl 1
      (rgst) trig 1
      (rg2t) cd [geantE]
