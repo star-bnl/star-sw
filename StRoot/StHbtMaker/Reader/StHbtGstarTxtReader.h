@@ -17,9 +17,14 @@
 #ifndef StHbtGstarTxtReader_hh
 #define StHbtGstarTxtReader_hh
 
+class StEvent;
+class ifstream;
+
+#ifdef __ROOT__
+#include "StMaker.h"
+#endif
+#include "StHbtMaker/Infrastructure/StHbtString.hh"
 #include "StHbtMaker/Base/StHbtEventReader.hh"
-#include <iostream.h>
-#include <fstream.h>
 
 class StHbtGstarTxtReader : public StHbtEventReader{
 
@@ -42,7 +47,7 @@ public:
   // methods special to this Reader
   void SetFileName(char* file);
 #ifdef __ROOT__
-  ClassDef(StHbtGstarTxtReader, 0)
+ClassDef(StHbtGstarTxtReader,0)
 #endif
 };
 

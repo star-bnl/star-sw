@@ -14,6 +14,14 @@
  * 
  **************************************************************************/
 
+
+#include <iostream.h>
+#include <fstream.h>
+#include "StHbtMaker/Infrastructure/StHbtEvent.hh"
+#include "StHbtMaker/Base/StHbtEventCut.h"
+#include "StHbtMaker/Base/StHbtTrackCut.h"
+#include "StHbtMaker/Base/StHbtV0Cut.h"
+#include "StHbtMaker/Base/StHbtKinkCut.h"
 #include "StHbtMaker/Reader/StHbtAsciiReader.h"
 
 #ifdef __ROOT__

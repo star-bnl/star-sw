@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtBinaryReader.h,v 1.12 2001/06/04 19:09:53 rcwells Exp $ 
+ * $Id: StHbtBinaryReader.h,v 1.13 2001/06/21 19:18:42 laue Exp $ 
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,17 @@
  ***************************************************************************
  *
  * $Log: StHbtBinaryReader.h,v $
+ * Revision 1.13  2001/06/21 19:18:42  laue
+ * Modified Files: (to match the changed base classes)
+ * 	StHbtAsciiReader.cxx StHbtAsciiReader.h
+ * 	StHbtAssociationReader.cxx StHbtAssociationReader.h
+ *  	StHbtBinaryReader.cxx StHbtBinaryReader.h
+ *  	StHbtGstarTxtReader.cxx StHbtGstarTxtReader.h
+ *  	StHbtStrangeMuDstEventReader.cxx
+ *  	StHbtStrangeMuDstEventReader.h StStandardHbtEventReader.cxx
+ * Added Files: new reader
+ *  	StHbtTTreeReader.cxx StHbtTTreeReader.h
+ *
  * Revision 1.12  2001/06/04 19:09:53  rcwells
  * Adding B-field, run number, and improved reaction plane functionality
  *
@@ -31,16 +42,14 @@
 #ifndef StHbtBinaryReader_hh
 #define StHbtBinaryReader_hh
 
-#include "StHbtMaker/Base/StHbtEventReader.hh"
-#include <iostream.h>
-#include <fstream.h>
-
-#include "StHbtMaker/Infrastructure/StHbtIOBinary.hh"
 
 class StFlowMaker;
 class StFlowEvent;
 class StFlowAnalysisMaker;
+class StHbtIOBinary;
 
+#include "StHbtMaker/Base/StHbtEventReader.hh"
+#include "StHbtMaker/Infrastructure/StHbtIOBinary.hh"
 
 #ifdef __ROOT__
 #include "StMaker.h"

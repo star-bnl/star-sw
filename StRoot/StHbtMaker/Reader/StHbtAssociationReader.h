@@ -1,12 +1,12 @@
 #ifndef StHbtAssociationReader_hh
 #define StHbtAssociationReader_hh
 
+
 #include <ctime>
 #include "StMaker.h"
 #include "StHbtMaker/Infrastructure/StHbtCheckPdgIdList.h"
 #include "StHbtMaker/Base/StHbtEventReader.hh"
-#include "StHbtMaker/Base/StHbtEventCut.h"
-#include "StHbtMaker/Base/StHbtTrackCut.h"
+#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 
 class StHbtAssociationReader : public StHbtEventReader, public StHbtCheckPdgIdList {
   

@@ -17,9 +17,13 @@
 #ifndef StHbtAsciiReader_hh
 #define StHbtAsciiReader_hh
 
+class ifstream;
+class ofstream;
+class StHbtEvent;
+
+#include "StHbtMaker/Infrastructure/StHbtString.hh"
 #include "StHbtMaker/Base/StHbtEventReader.hh"
-#include <iostream.h>
-#include <fstream.h>
+
 
 class StHbtAsciiReader : public StHbtEventReader{
 
