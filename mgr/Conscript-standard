@@ -43,7 +43,7 @@ foreach my $Rep (@Repo) {
 my @src     = script::sortu (@srcL);# print "src = @src\n";
 my @h_files = script::sortu (@h_filesL);
 my @idlM    = script::sortu (@idlML);# print "idlM = @idlM\n";
-if ($#idlM > -1) {$PKG = "St_" . $PKG;}
+if ($#idlM > -1 and $PKG !~ "^St") {$PKG = "St_" . $PKG;}
 my $obj  = $ObjDir;  print "obj = $obj\n" if $param::debug;
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB}; print "SO_PKG = $SO_PKG\n" if $param::debug;
 my $SO_PKGT = "";
