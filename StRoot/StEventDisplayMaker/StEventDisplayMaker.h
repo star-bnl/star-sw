@@ -1,8 +1,8 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.h,v 1.25 2001/08/14 20:37:39 fine Exp $
+// $Id: StEventDisplayMaker.h,v 1.26 2001/09/01 19:51:24 perev Exp $
 // $Log: StEventDisplayMaker.h,v $
-// Revision 1.25  2001/08/14 20:37:39  fine
-// new method GetNaeList has been introduced
+// Revision 1.26  2001/09/01 19:51:24  perev
+// StEvent added
 //
 // Revision 1.24  2001/02/14 16:52:09  perev
 // include file simplyfied
@@ -37,11 +37,13 @@
 //  Submit any problem with this code via begin_html <A HREF="http://www.star.bnl.gov/STARAFS/comp/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#include "StMaker.h"
 #include "TSeqCollection.h"
-// #include "StEventDisplayMaker/StDefaultFilter.h"
-#include "StDefaultFilter.h"
 #include "TObjString.h"
+#include "TRootHelpDialog.h"
+
+#include "StMaker.h"
+#include "StDefaultFilter.h"
+
 
 class    TVolume;
 class    TVolumeView;
@@ -53,46 +55,57 @@ class StVirtualEventFilter;
 class StTrackChair;
 class TVirtualPad;
 class TPaveLabel;
+class StEventHelper;
+class StFilterABC;
 
+class StEventDisplayInfo;
 class StEventDisplayMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.25 2001/08/14 20:37:39 fine Exp $";
+// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.26 2001/09/01 19:51:24 perev Exp $";
+
  private: 
-    TList         *m_HitCollector;     //!
-    TList         *m_TrackCollector;   //!
-    TList         *m_TableCollector;   //!
+static Int_t fgEventLoop;
+static StEventDisplayInfo *fgInfo;
+
+    TList         *m_HitCollector;     	//!
+    TList         *m_TrackCollector;   	//!
+    TList         *m_TableCollector;   	//!
 
  protected:
-    TVolume      *m_Hall;         //!
-    TVolumeView  *m_FullView;     //!
-    TVolumeView  *m_ShortView;    //!
-    TVolumeView  *m_Sensible;     //!
-    TVolume      *m_EventsNode;   //!
-    TVolumeView  *m_EventsView;   //!
-    TList        *m_ListDataSetNames; // The list of the names to be drawn
-    TList        *m_VolumeList;   // The list of the names of TVolume object
-    TTable       *m_Table;        //! The table to be drawn if any
-    TObjArray    *m_FilterArray;  // Array of the "event" user supplied filters
+    TVolume      *m_Hall;         	//!
+    TVolumeView  *m_FullView;     	//!
+    TVolumeView  *m_ShortView;    	//!
+    TVolumeView  *m_Sensible;     	//!
+    TVolume      *m_EventsNode;   	//!
+    TVolumeView  *m_EventsView;   	//!
+    TList        *m_ListDataSetNames; 	// The list of the names to be drawn
+    TList        *m_VolumeList;   	// The list of the names of TVolume object
+    TTable       *m_Table;        	//! The table to be drawn if any
+    TObjArray    *m_FilterArray;  	// Array of the "event" user supplied filters
+    StEventHelper *mEventHelper;	//!
+    TCanvas      *m_PadBrowserCanvas; 	//!
+    TPaveLabel   *mRunNumberLabel;    	//!
+    TPaveLabel   *mEventNumberLabel;  	//!
+    TPaveLabel   *mDateTimeLabel;     	//!
 
-    TCanvas      *m_PadBrowserCanvas; //!
-    TPaveLabel   *mRunNumberLabel;    //!
-    TPaveLabel   *mEventNumberLabel;  //!
-    TPaveLabel   *mDateTimeLabel;     //!
+    TList*        mFilterList;		//! list of filters for StEvent
 
-
-    Int_t         MakeTable(const Char_t **positions);
-    Int_t         MakeTableHits(const TTable *points,StVirtualEventFilter *filter,const Char_t *keyColumn,const Char_t *keyPositions[]);
-    static Int_t  ParseName(Char_t *inName, Char_t *position[]);
+    Int_t         MakeTable(const char   **positions);
+    Int_t         MakeTableHits(const TTable *points,StVirtualEventFilter *filter,const char   *keyColumn,const char   *keyPositions[]);
+    static Int_t  ParseName(char   *inName, char   *position[]);
  
  public: 
                   StEventDisplayMaker(const char *name="EventDisplay");
    virtual       ~StEventDisplayMaker();
-   virtual void   AddName(const Char_t *name);   // *MENU*
-   virtual void   AddVolume(const Char_t *name); // *MENU*
+   virtual void   AddName(const char *name);   // *MENU*
+   virtual TList *GetNameList()   { return m_ListDataSetNames;}
+           void   AddVolume(const char *name); // *MENU*
+   virtual void   AddFilter(StFilterABC* filt); 
    virtual Int_t  BuildGeometry();
    virtual Int_t  Init();
    virtual Int_t  Make();
    virtual Int_t  MakeTableTracks(const StTrackChair *points,StVirtualEventFilter *filter);
+   virtual Int_t  MakeEvent(const TObject *event,const char** positions);
    virtual void   Clear(Option_t *option="");
    virtual void   ClearCanvas(); // *MENU*
    virtual void   ClearEvents();
@@ -104,7 +117,6 @@ class StEventDisplayMaker : public StMaker {
    virtual TVolumeView *GetShortView() { return m_ShortView; }
    virtual TVolumeView *GetSensible()  { return m_Sensible;  }
    virtual TVolume     *GetEventsNode(){ return m_EventsNode;}
-   virtual TList       *GetNameList()   { return m_ListDataSetNames;}
    virtual Color_t      GetColorAttribute(Int_t adc);
    virtual void         PrintFilterStatus(); // *MENU*
    virtual void         PrintNames();   // *MENU*
@@ -115,7 +127,8 @@ class StEventDisplayMaker : public StMaker {
    virtual void         RemoveVolume(const char *name); // *MENU*
    virtual void         TurnOn() { SetMode(); }  // *MENU*
    virtual void         TurnOff(){ SetMode(1); } // *MENU*
-
+   static  Int_t        MakeLoop(Int_t flag);
+   static  void         Info(const char*info);
      // --   Filters  --
 
      enum EDisplayEvents 
@@ -143,7 +156,7 @@ class StEventDisplayMaker : public StMaker {
    // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.25 2001/08/14 20:37:39 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.26 2001/09/01 19:51:24 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:
@@ -161,4 +174,29 @@ inline TVirtualPad *StEventDisplayMaker::GetEventPad()
   }
   return (TVirtualPad *)m_PadBrowserCanvas;
 };
+
+
+class StEventDisplayInfo : public TRootHelpDialog
+{
+public:
+  StEventDisplayInfo(StEventDisplayInfo **kaddr, const char* title, UInt_t w=100, UInt_t h=50)
+  :TRootHelpDialog(gClient->GetRoot(),title,w,h){fKAddr=kaddr;*fKAddr=this;}
+  virtual ~StEventDisplayInfo(){*fKAddr=0;}
+private:
+ StEventDisplayInfo **fKAddr;	//!
+ClassDef(StEventDisplayInfo,0)
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
 #endif
