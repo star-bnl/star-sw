@@ -84,6 +84,7 @@ TTreeHelperCast &operator() (const char   *varname);
     virtual void      ls(Option_t* option) const;
     void              Reset(){fEntry=0;}
     Bool_t            Notify();
+    const char       *IsCorrupted() const;
 static const char*    TypeName(Int_t ity);
 static Int_t          TypeSize(Int_t ity);
 static Int_t          TypeCode(const char *typeName);
