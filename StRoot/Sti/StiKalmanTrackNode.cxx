@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.55 2005/01/04 01:37:47 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.56 2005/01/06 00:59:41 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.56  2005/01/06 00:59:41  perev
+ * Initial errors tuned
+ *
  * Revision 2.55  2005/01/04 01:37:47  perev
  * minor bug fix
  *
@@ -244,6 +247,27 @@ void StiKalmanTrackNode::Break(int kase)
 //VP  printf("*** Break(%d) ***\n",kase);
 }		
 #endif
+
+void StiKalmanTrackNode::reset()
+{ 
+  static const double DY=0.3,DZ=0.3,DEta=0.5,DRho=0.01,DTan=0.05;
+  StiTrackNode::reset();
+  _cosAlpha = 1.;
+  _alpha=_sinAlpha=_sinCA=_cosCA=_refX=_refAngle=_x=_p0=_p1=_p2=_p3=_p4=0.;
+  // diagonal error set to 1
+  _c00=DY*DY;
+  _c11=DZ*DZ;
+  _c22=DEta*DEta;
+  _c33=DRho*DRho;
+  _c44=DTan*DTan;
+
+  // off diagonal set to zero
+  _c10=_c20=_c21=_c30=_c31=_c32=_c40=_c41=_c42=_c43=0.;
+  eyy=ezz=0.;
+  _chi2=1e55;
+  hitCount=nullCount=contiguousHitCount=contiguousNullCount = 0;
+  _detector = 0;
+}
 //_____________________________________________________________
 /// Set the Kalman state of this node to be identical 
 /// to that of the given node.
@@ -804,6 +828,7 @@ void StiKalmanTrackNode::propagateError()
   //f = F - 1
 //		it was propagated to 0. Errors the same, return
   if (fabs(dx)<1.e-6) return;
+  testError(&_c00,0);
   double xx=x1+x2;
   double tanCA1=sinCA1/cosCA1;
   double tanCA2=sinCA2/cosCA2;
@@ -880,7 +905,7 @@ void StiKalmanTrackNode::propagateError()
   _c21 += b21; 
   _c31 += b31; 
   _c41 += b41;
-  int ierr;if ((ierr=testError(&_c00))) Break(1000+ierr);
+  testError(&_c00,1);
 #ifdef Sti_DEBUG
   // C^k-1_k = F_k * C_k-1 * F_kT + Q_k
   C = TRSymMatrix(F,TRArray::kAxSxAT,C);
@@ -1160,6 +1185,7 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   const StiDetector * detector = hit->detector();
   if (useCalculatedHitError && detector)
     {
+      assert(eyy>0);
       r00=_c00+eyy;
       r01=_c10;     r11=_c11+ezz;
     }
@@ -1217,7 +1243,7 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
 */
 int StiKalmanTrackNode::updateNode() 
 {
-  testError(&_c00);
+  testError(&_c00,0);
   double r00,r01,r11;
   const StiDetector * detector = _hit->detector();
   if (useCalculatedHitError && detector)
@@ -1242,8 +1268,7 @@ int StiKalmanTrackNode::updateNode()
   double eZZ = ezz;
   if (! (useCalculatedHitError && detector))
     {
-      eYY=_hit->syy();
-      eYZ=_hit->syz();  eZZ=_hit->szz();
+      eYY=_hit->syy(); eYZ=_hit->syz();  eZZ=_hit->szz();
     }  
   TRSymMatrix V(2,
 		eYY,
@@ -1349,7 +1374,7 @@ int StiKalmanTrackNode::updateNode()
   _c30-=k30*c00+k31*c10;_c31-=k30*c10+k31*c11;_c32-=k30*c20+k31*c21;_c33-=k30*c30+k31*c31;
   _c40-=k40*c00+k41*c10;_c41-=k40*c10+k41*c11;_c42-=k40*c20+k41*c21;_c43-=k40*c30+k41*c31;_c44-=k40*c40+k41*c41;
 
-  testError(&_c00);
+  testError(&_c00,1);
 
 #ifdef Sti_DEBUG
   TRSymMatrix W(H,TRArray::kATxSxA,G);    PrPP(updateNode,W); 
@@ -1388,6 +1413,7 @@ int StiKalmanTrackNode::rotate (double alpha) //throw ( Exception)
 
   if (fabs(alpha)<1.e-6) return 0;
   numeDeriv(alpha,2);
+  testError(&_c00,0);
   _alpha += alpha;
   _alpha = nice(_alpha);
     //cout << "    new  _alpha:"<< 180.*_alpha/3.1415927<<endl;
@@ -1453,7 +1479,7 @@ int StiKalmanTrackNode::rotate (double alpha) //throw ( Exception)
 #endif  
   _cosAlpha=cos(_alpha); 
   _sinAlpha=sin(_alpha); 
-  testError(&_c00); 
+  testError(&_c00,1); 
   return 0;
 }
 
@@ -1628,59 +1654,9 @@ static const double MyChi2 = 1.18179;
   printf("BOT OHO: %g %p\n",chi2,(void*)getHit());
 }
 #endif 
-#if 0
-//______________________________________________________________________________
-int StiKalmanTrackNode::testError(double *emx)
-{
-  static int nCalls=0; nCalls++;
-  static const double big=1.e+6;
-  enum {kC00, kC10, kC11, kC20, kC21
-       ,kC22, kC30, kC31, kC32, kC33
-       ,kC40, kC41, kC42, kC43, kC44};
-
-  return 0;
-  int ians;
-  ians=1; if (emx[kC00]<0) goto RETN;
-  ians=2; if (emx[kC11]<0) goto RETN;
-  ians=3; if (emx[kC22]<0) goto RETN;
-  ians=4; if (emx[kC33]<0) goto RETN;
-  ians=5; if (emx[kC44]<0) goto RETN;
-
-  ians=11; if (emx[kC00]>big) goto RETN;
-  ians=22; if (emx[kC11]>big) goto RETN;
-  ians=33; if (emx[kC22]>big) goto RETN;
-  ians=44; if (emx[kC33]>big) goto RETN;
-  ians=55; if (emx[kC44]>big) goto RETN;
-
-  ians=10; if (emx[kC10]*emx[kC10]>emx[kC11]*emx[kC00]) goto RETN;
-  ians=20; if (emx[kC20]*emx[kC20]>emx[kC22]*emx[kC00]) goto RETN;
-  ians=21; if (emx[kC21]*emx[kC21]>emx[kC22]*emx[kC11]) goto RETN;
-  ians=30; if (emx[kC30]*emx[kC30]>emx[kC33]*emx[kC00]) goto RETN;
-  ians=31; if (emx[kC31]*emx[kC31]>emx[kC33]*emx[kC11]) goto RETN;
-  ians=32; if (emx[kC32]*emx[kC32]>emx[kC33]*emx[kC22]) goto RETN;
-  ians=40; if (emx[kC40]*emx[kC40]>emx[kC44]*emx[kC00]) goto RETN;
-  ians=41; if (emx[kC41]*emx[kC41]>emx[kC44]*emx[kC11]) goto RETN;
-  ians=42; if (emx[kC42]*emx[kC42]>emx[kC44]*emx[kC22]) goto RETN;
-  ians=43; if (emx[kC43]*emx[kC43]>emx[kC44]*emx[kC33]) goto RETN;
-  return 0;
-RETN:
-#ifdef STI_NODE_TEST
-  printf("***StiKalmanTrackNode::testError =%d ***\n",ians);
-#endif
-  memset (emx,0,sizeof(double)*15);
-  emx[kC00]= 100*100;
-  emx[kC11]= 100*100;
-  emx[kC22]=  10*10;
-  emx[kC33]=   1*1;
-  emx[kC44]= 100*100;;
-
-
-  return ians;
-}
-#endif//0
 #if 1
 //______________________________________________________________________________
-int StiKalmanTrackNode::testError(double *emx)
+int StiKalmanTrackNode::testError(double *emx, int begend)
 {
 // Test and correct error matrix. Output : number of fixes
 // DO NOT IMPROVE weird if() here. This accounts NaN
@@ -1690,13 +1666,15 @@ int StiKalmanTrackNode::testError(double *emx)
   static const double dia[5] = { 2., 2.,2.,2.,2.};
   static const int    idx[5][5] = 
   {{0,1,3,6,10},{1,2,4,7,11},{3,4,5,8,12},{6,7,8,9,13},{10,11,12,13,14}};
+  static double emxBeg[15];
 return 0;
+  if (!begend) { memcpy(emxBeg,emx,sizeof(emxBeg)); return 0;}
   int ians=0,j1,j2,jj;
   for (j1=0; j1<5;j1++){
     jj = idx[j1][j1];
     if (emx[jj]<=10*dia[j1] && (emx[jj]>0)) continue;
     assert(finite(emx[jj]));
-    ians++; emx[jj]=dia[j1];
+//    ians++; emx[jj]=dia[j1];
 //    for (j2=0; j2<5;j2++){if (j1!=j2) emx[idx[j1][j2]]=0;}
   }
   for (j1=0; j1< 5;j1++){
