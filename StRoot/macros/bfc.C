@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.82 1999/07/09 18:57:18 fisyak Exp $
+// $Id: bfc.C,v 1.83 1999/07/11 00:06:31 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -45,19 +45,22 @@ enum EChainOptions {
   kSD97    ,kSD98    ,kY1a     ,kY1b     ,kY1c     ,kES99     ,kER99    ,kY1d     ,
   kY1e     ,kY2a     ,kEval    ,kOFF     ,
   kXINDF   ,kXOUTDF  ,kGSTAR   ,kMINIDAQ ,kTDAQ    ,kFZIN     ,kGEANT   ,kCTEST   ,
-  kField_On,kNo_Field,kHalfField,kTPC     ,kTSS     ,kTRS     ,kTFS      ,kFPC     ,
+  kField_On,kNo_Field,kHalfField,kTPC     ,kTSS     ,kTRS     ,kTFS     ,kFPC     ,
   kFSS     ,kEMC     ,kCTF     ,kL3      ,kRICH    ,kSVT      ,kGLOBAL  ,
-  kDST     ,kSQA     ,kEVENT   ,kANALYS  ,kTREE    ,kAllEvent ,kLAST    ,kDefault
+  kDST     ,kSQA     ,kEVENT   ,kANALYS  ,kTREE    ,kAllEvent ,kLAST    ,kDefault ,
+  kMakeDoc
 };
 Char_t  *ChainOptions[] = {
  "FIRST"   ,
  "sd97"    ,"sd98"   ,"Y1a"    ,"Y1b"    ,"Y1c"    ,"es99"    ,"er99"   ,"Y1d"    ,
  "Y1e"     ,"Y2a"    ,"Eval"   ,"OFF"    ,
  "XIN"     ,"XOUT"   ,"GSTAR"  ,"MINIDAQ","TDAQ"   ,"FZIN"    ,"GEANT"  ,"CTEST"  ,
- "FieldOn" ,"NoField","HalfField","TPC"    ,"TSS"    ,"TRS"    ,"TFS"     ,"FPC"    ,
+ "FieldOn" ,"NoField","HalfField","TPC"  ,"TSS"    ,"TRS"    ,"TFS"     ,"FPC"    ,
  "FSS"     ,"EMC"    ,"CTF"    ,"L3"     ,"RICH"   ,"SVT"     ,"GLOBAL" ,
- "DST"     ,"SQA"    ,"EVENT"  ,"ANALYS" ,"TREE"   ,"AllEvent","LAST"   ,"Default"
+ "DST"     ,"SQA"    ,"EVENT"  ,"ANALYS" ,"TREE"   ,"AllEvent","LAST"   ,"Default",
+ "MakeDoc"
 };
+Int_t NoChainOptions = sizeof (ChainOptions)/sizeof (Char_t  *);
 UChar_t  ChainFlags[] = {
   kFALSE   ,
   kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE    ,kFALSE   ,kFALSE   ,
@@ -65,7 +68,8 @@ UChar_t  ChainFlags[] = {
   kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE    ,kFALSE   ,kFALSE   ,
   kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE    ,kFALSE   ,kFALSE   ,
   kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE    ,kFALSE   ,
-  kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE    ,kFALSE   ,kFALSE  
+  kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE   ,kFALSE    ,kFALSE   ,kFALSE   ,
+  kFALSE
 };
 Char_t *ChainComments[] = {
   "Nothing to comment",
@@ -111,7 +115,8 @@ Char_t *ChainComments[] = {
   "write event to StTree",
   "Write whole event to StTree",
   "Nothing to comment",
-  "Default Set has been set"
+  "Default Set has been set",
+  "Make HTML documentation for the given chain"
 };
 //_____________________________________________________________________
 void SetOptionOff(EChainOptions k){// set all OFF
@@ -125,7 +130,7 @@ void SetOption(EChainOptions k){// set all OFF
 }
 //_____________________________________________________________________
 void SetChainOff(){// set all OFF
-  for (EChainOptions k = kFIRST;k<=kLAST;k++) SetOptionOff(k);
+  for (EChainOptions k = kFIRST;k<NoChainOptions;k++) SetOptionOff(k);
 }
 //_____________________________________________________________________
 void SetDefaultChain(){// default for standard chain
@@ -181,7 +186,7 @@ Examples:
 \n");
                         
     printf ("============= \tPossible Chain Options are: \n"); 
-    for (k=kFIRST;k<kLAST;k++) printf ("============ %2d \t[-]%s   \t:%s \n",
+    for (k=kFIRST;k<NoChainOptions;k++) printf ("============ %2d \t[-]%s   \t:%s \n",
 				       k,ChainOptions[k],ChainComments[k]);
     printf ("============= \tImportant two changes:
                            \tIt is required exact matching in Chain definition
@@ -201,7 +206,7 @@ Examples:
       Tag = tChain(index,end);
     }
     begin += end+1;
-    for (k = kFIRST+1; k<kLAST; k++) {
+    for (k = kFIRST+1; k<NoChainOptions; k++) {
       opt = TString(ChainOptions[k]);
       opt.ToLower();
       if (!strstr(Tag.Data(),opt.Data())) continue;
@@ -251,7 +256,6 @@ Examples:
 	SetOption(kANALYS);
 	break;
       case  kY2a:
-	SetOption(kDefault);
 	SetOption(kY2a);
 	SetDefaultChain();
 	break;
@@ -302,7 +306,8 @@ Examples:
 	SetOptionOff(kFSS);
 	break;
       default:
-	if (k <= 0 || k > kLAST ) {printf ("Option %s unrecognized\n",ChainOptions[k]);}
+	if (k <= 0 || k >  NoChainOptions) 
+	  {printf ("Option %s unrecognized\n",ChainOptions[k]);}
 	if (kgo<0) SetOptionOff(k);
 	else       SetOption(k);
       }
@@ -322,7 +327,7 @@ Examples:
   }
   SetOptionOff(kL3);
   // Print set values
-  for (k = kFIRST; k<kLAST;k++) {
+  for (k = kFIRST; k<NoChainOptions;k++) {
     if (ChainFlags[k]) {
       printf ("================== %2d \t%s      \tis ON \t:%s \n",k,ChainOptions[k],ChainComments[k]);
     }
@@ -336,8 +341,8 @@ void Load(const Char_t *Chain="gstar tfs"){
   gSystem->Load("StChain");
   gSystem->Load("xdf2root");
   gSystem->Load("St_Tables");
-  gSystem->Load("StUtilities");
-  //  gSystem->Load("libmsg");
+  //  gSystem->Load("StUtilities");
+  gSystem->Load("libmsg");
   gSystem->Load("libtls");
   gSystem->Load("St_db_Maker");
   if (ChainFlags[kXINDF]) gSystem->Load("St_xdfin_Maker");
@@ -653,7 +658,7 @@ void bfc (const Int_t First,
     primaryMk = new StPrimaryMaker();
     v0Mk      = new StV0Maker();
     xiMk      = new StXiMaker();
-    kinkMk    = new StKinkMaker();
+    //    kinkMk    = new StKinkMaker();
     saveMK->cd();
     if (ChainFlags[kEval]) {//Additional switches 
       v0Mk->ev0EvalOn();   //Turn on the ev0 evaluation  
@@ -731,7 +736,7 @@ void bfc (const Int_t First,
   chain->PrintInfo();
   // START the chain (may the force be with you)
   // Create HTML docs of all Maker's inv#ifdef ChainFlags[kCTF]
-  // chain->MakeDoc();
+  if (ChainFlags[kMakeDoc]) chain->MakeDoc();
   
   // Init the chain and all its makers
   //  chain->SetDebug(1);
