@@ -3,12 +3,15 @@
 #ifndef EEtwHitDst_h
 #define EEtwHitDst_h
 /*********************************************************************
- * $Id: EEtwHitDst.h,v 1.1 2003/01/28 23:16:07 balewski Exp $
+ * $Id: EEtwHitDst.h,v 1.2 2003/02/20 05:15:15 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw Hits
  *********************************************************************
  * $Log: EEtwHitDst.h,v $
+ * Revision 1.2  2003/02/20 05:15:15  balewski
+ * reorganization
+ *
  * Revision 1.1  2003/01/28 23:16:07  balewski
  * start
  *
@@ -55,7 +58,7 @@ public:
   Float_t             energy()     const { return mEnergy;    }
   Int_t               eta()        const { return mEta;    }
   Int_t               sub()        const { return mSubSec;    }
-  void                set( int, int, Float_t e);
+  void                set( char, int, Float_t e);
   void                get( char &sub, int &eta, Float_t &e);
   void                print();
   

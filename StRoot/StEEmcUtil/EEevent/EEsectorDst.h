@@ -4,12 +4,15 @@
 #ifndef EEsectorDst_h
 #define EEsectorDst_h
 /*********************************************************************
- * $Id: EEsectorDst.h,v 1.1 2003/01/28 23:16:07 balewski Exp $
+ * $Id: EEsectorDst.h,v 1.2 2003/02/20 05:15:14 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw Hits
  *********************************************************************
  * $Log: EEsectorDst.h,v $
+ * Revision 1.2  2003/02/20 05:15:14  balewski
+ * reorganization
+ *
  * Revision 1.1  2003/01/28 23:16:07  balewski
  * start
  *
@@ -52,20 +55,20 @@ public:
   TClonesArray *PostHits; 
   int ID ;// range 1-12
 
-  void addTwHit(int, int,float,TClonesArray *hitA); //generic for tower-like entries
-  void addSmdHit(int, float,TClonesArray *hitA); //generic for smd-like entries
+  void addTwHit(char, int,float,TClonesArray *hitA); //generic for tower-like entries
+  void addSmdHit(char, float,TClonesArray *hitA); //generic for smd-like entries
 
   EEsectorDst(int=1000);
   virtual ~EEsectorDst();
   void print();
   int getID(){return ID;}
 
-  void addPre1Hit(int sub, int eta,float ener) {addTwHit(sub,eta,ener,Pre1Hits);}
-  void addPre2Hit(int sub, int eta,float ener) {addTwHit(sub,eta,ener,Pre2Hits);}
-  void addTwHit(int sub, int eta,float ener) {addTwHit(sub,eta,ener,TwHits);}
-  void addPostHit(int sub, int eta,float ener) {addTwHit(sub,eta,ener,PostHits);}
-  void addSmdUHit(int strip,float ener) {addSmdHit(strip,ener,SmdUHits);}
-  void addSmdVHit(int strip,float ener) {addSmdHit(strip,ener,SmdVHits);}
+  void addPre1Hit(char sub, int eta,float ener) {addTwHit(sub,eta,ener,Pre1Hits);}
+  void addPre2Hit(char sub, int eta,float ener) {addTwHit(sub,eta,ener,Pre2Hits);}
+  void addTwHit(char sub, int eta,float ener) {addTwHit(sub,eta,ener,TwHits);}
+  void addPostHit(char sub, int eta,float ener) {addTwHit(sub,eta,ener,PostHits);}
+  void addSmdUHit(char strip,float ener) {addSmdHit(strip,ener,SmdUHits);}
+  void addSmdVHit(char strip,float ener) {addSmdHit(strip,ener,SmdVHits);}
 
   void sumRawMC(EEsectorDst *outSec, float minE); 
   void sumRawMCtw(TClonesArray *inH, float* sum, int mx);// add hist from many tracks within one detector element
