@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: CRC.cxx,v 1.3 1999/07/02 21:07:45 levine Exp $
+ * $Id: CRC.cxx,v 1.4 1999/12/07 23:10:30 levine Exp $
  * Author: M.W. Schulz
  ***************************************************************************
  * Description: calculate and check the CRC
@@ -11,6 +11,9 @@
  *
  ***************************************************************************
  * $Log: CRC.cxx,v $
+ * Revision 1.4  1999/12/07 23:10:30  levine
+ * changes to silence the gcc compiler warnings
+ *
  * Revision 1.3  1999/07/02 21:07:45  levine
  * removed redundant default value for function parameter, which caused error in
  * Linux gcc compiler. Default value already declared in function prototype
@@ -39,7 +42,6 @@ unsigned int compute_crc_bank(Bank* d,unsigned int lcrc )
   /* first do the header, but not the crc  */
   int i ;
   int* p;
-  int iret ;
   if(d->header.ByteOrder == 0x04030201)  /* fine no swap */
     {
       p = (int*)&d->header  ;
@@ -83,7 +85,6 @@ unsigned int compute_crc_bank(Bank* d,unsigned int lcrc )
 unsigned int compute_crc_block(int* p,unsigned int ByteOrder,int Length,unsigned int lcrc ) 
 {
   int i ;
-  int iret ;
   if(ByteOrder == 0x04030201)  /* fine no swap */
     {
       for(i = 0 ; i < Length ;i++) CRC32DEF(p[i],lcrc) ;

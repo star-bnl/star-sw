@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: RecHeaderFormats.cxx,v 1.4 1999/07/04 01:47:59 levine Exp $
+ * $Id: RecHeaderFormats.cxx,v 1.5 1999/12/07 23:10:31 levine Exp $
  * Author: M.W. Schulz, Jeff Landgraf, M.J. LeVine
  ***************************************************************************
  * Description: Bank header formats common to all detectors in STAR:
@@ -13,6 +13,9 @@
  *
  ***************************************************************************
  * $Log: RecHeaderFormats.cxx,v $
+ * Revision 1.5  1999/12/07 23:10:31  levine
+ * changes to silence the gcc compiler warnings
+ *
  * Revision 1.4  1999/07/04 01:47:59  levine
  * minor changes to make solaris CC compiler happy
  *
@@ -189,7 +192,7 @@ void Logical_Record::print(int level)
   header.print();
   
   int words = header.BankLength ;
-  int iret = swap_raw(header.ByteOrder,&words,1);
+  swap_raw(header.ByteOrder,&words,1);
 
   dump_data(((char *)this) + sizeof(header),words - sizeof(header)/4);
 }
@@ -278,7 +281,7 @@ void Bank::print(int level)
   header.print();
   
   int words = header.BankLength ;
-  int iret = swap_raw(header.ByteOrder,&words,1);
+  swap_raw(header.ByteOrder,&words,1);
 
   printf( "XXXXXX:  length= %d, %d\n",  words, words*4);
   dump_data(((char *)this) + sizeof(header),words - sizeof(header)/4);

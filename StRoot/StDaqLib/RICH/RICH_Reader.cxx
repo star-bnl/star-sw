@@ -23,7 +23,6 @@ void RICH_Reader::ProcessEvent(const Bank_RICP * RichPTR)
   RICCRAMP * RicCramP;
   RICDATAD * RicDataD;
   unsigned short channelNum,ADC;
-  unsigned int lengthOfRicDataD;
   
   for (cramBlock = 0; cramBlock < 2 * MAX_NUM_CRAMS ; cramBlock++) {
                 // for each C-RAM block
@@ -54,7 +53,7 @@ void RICH_Reader::ProcessEvent(const Bank_RICP * RichPTR)
 	      // sizeof(BANK_HEADER)/4 however, i am also develuping this code in ROOT
 	      // and it has problems with inheritence, so am leave the code like this for portability
 	      
-	      for (dataDWord = 0; dataDWord < RicDataD->header.BankLength - sizeof(Bank_Header)/4 ; dataDWord++)
+	      for (dataDWord = 0; (INT32)dataDWord < RicDataD->header.BankLength - (INT32)sizeof(Bank_Header)/4 ; dataDWord++)
 		{ 
 		  channelNum = (secPTR[ dataDWord ] >> 16) & 0x3ff; // Channel in High Bits
 		  ADC = secPTR[ dataDWord ] & 0xfff;                // ADC in Low Bits

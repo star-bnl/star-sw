@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV1P0_ZS_SR.cxx,v 1.6 1999/09/02 21:47:11 fisyak Exp $
+ * $Id: TPCV1P0_ZS_SR.cxx,v 1.7 1999/12/07 23:10:45 levine Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V1.0 Zero Suppressed Reader
@@ -15,6 +15,9 @@
  * 23-Jun-99 MJL change declaration of row, rcb outside of all for loops
  ***************************************************************************
  * $Log: TPCV1P0_ZS_SR.cxx,v $
+ * Revision 1.7  1999/12/07 23:10:45  levine
+ * changes to silence the gcc compiler warnings
+ *
  * Revision 1.6  1999/09/02 21:47:11  fisyak
  * HP corrections
  *
@@ -148,7 +151,7 @@ int TPCV1P0_ZS_SR::initialize()
   // The original line should go in when we upgrade to a better compiler 
   //  for (int row=0; row<TPC_PADROWS; row++) {
   for (row=0; row<TPC_PADROWS; row++) {
-    int npads = Row_array[row].npads;
+    //    int npads = Row_array[row].npads;  
     for (int pad=0; pad<TPC_MAXPADS; pad++) {
        int nseq = Pad_array[row][pad].nseq;
        if (nseq) { // only if there are sequences on this pad
