@@ -3,7 +3,7 @@
 #ifndef EEsoloPi0_h
 #define EEsoloPi0_h
 /*********************************************************************
- * $Id: EEsoloPi0.h,v 1.1 2004/04/14 17:09:09 balewski Exp $
+ * $Id: EEsoloPi0.h,v 1.2 2004/04/14 19:34:01 balewski Exp $
  *********************************************************************
  * Descripion:
  *  finds pi0 based on EEMC tower response
@@ -31,15 +31,15 @@ class EEmcEventHeader;
 
 
 class EEsoloPi0 :public TObject{
-  // private:
  protected:
+  enum {MxTwEta=12, MxTwPhi=60, MxTw=12*60};
+
+ private:
   EEmcGeomSimple *geom;
-  float scaleFactor; // converts energy from eeTree --> GeV
   float seedEnergy; // lower limit in search for seeds
   float shapeLimit; // cut on eHTower/eCluster 
   float mLo, mHi; // define mass of meson
 
-  enum {MxTwEta=12, MxTwPhi=60, MxTw=12*60};
  
   struct EEsoloMipA{int key,id; float e;};
   struct Cluster {int k1; float eH,eC,fphi,feta; } clust[MxTw] ,oldClust;
@@ -49,8 +49,13 @@ class EEsoloPi0 :public TObject{
   int totPi0; // total # of real pi0
   int totXPi0; // total # of  pi0 from mixed events
   
+ protected:
+
+  float scaleFactor; // converts energy from eeTree --> GeV, old
+
   TH1F *hA[32], *hR[64], *hM[64]; // all, real , mixed eve
   EEsoloMipA soloMip[MxTw]; // stores all towers
+
   void doEEsoloPi0();
   void clear();
   void tagCluster(int k0,int d=1);
@@ -75,6 +80,9 @@ class EEsoloPi0 :public TObject{
 
 /*****************************************************************
  * $Log: EEsoloPi0.h,v $
+ * Revision 1.2  2004/04/14 19:34:01  balewski
+ * access to trigger data
+ *
  * Revision 1.1  2004/04/14 17:09:09  balewski
  * new copy of pi0finder with towers only, should work on ezTree as well (after small cleanup)
  *

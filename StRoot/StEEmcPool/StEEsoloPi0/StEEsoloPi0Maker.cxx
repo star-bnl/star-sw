@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEsoloPi0Maker.cxx,v 1.1 2004/04/14 17:09:09 balewski Exp $
+// $Id: StEEsoloPi0Maker.cxx,v 1.2 2004/04/14 19:34:01 balewski Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -16,8 +16,10 @@
 #include "StMuDSTMaker/COMMON/StMuEvent.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 #include "StMuDSTMaker/COMMON/StMuDstMaker.h"
+#include "StMuDSTMaker/COMMON/StMuTriggerIdCollection.h"
+#include "StEvent/StTriggerId.h"
 
-//new
+
 #include "StEEmcDbMaker/EEmcDbItem.h"
 #include "StEEmcDbMaker/StEEmcDbMaker.h"
 
@@ -64,15 +66,29 @@ Int_t StEEsoloPi0Maker::Finish(){
 //________________________________________________
 Int_t StEEsoloPi0Maker::Make(){
   
-  static int kEve=0; 
-  kEve++;
+  static int n0=0,n1=0,n2=0,n3=0;
+  printf("%s::Make() is called ..........n0,1,2,3= %d %d %d %d \n",StMaker::GetName(),n0,n1,n2,n3);
+
+  n0++;
 
   clear();
 
-  //  printf("%s::Make() is called ..........\n",StMaker::GetName());
+  //............. trigger sort
+  getTrig();
+  n1++;
+
+
+  //................. CTB sort
+  float sum=getCtbSum();
+  if(sum<75 || sum > 800) return kStOK; 
+  n2++;
+    
+
  
-  if(getAdc()<0)   return kStOK;
-  
+  // ............. acuire EEMC data 
+  if(getEEmcAdc()<0)   return kStOK;
+  n3++;
+
   // print();
   doEEsoloPi0();
 
@@ -120,7 +136,7 @@ Int_t StEEsoloPi0Maker::Make(){
 
 //________________________________________________
 //________________________________________________
-Int_t StEEsoloPi0Maker::getAdc(){
+Int_t StEEsoloPi0Maker::getEEmcAdc(){
   
   // printf("%s::getAdc() is called ..........\n",StMaker::GetName());
 
@@ -177,8 +193,68 @@ Int_t StEEsoloPi0Maker::getAdc(){
 }
 
 
+//________________________________________________
+//________________________________________________
+void StEEsoloPi0Maker::getTrig(){
+  
+  printf("%s::getTrig() is called ..........\n",StMaker::GetName());
+ 
+  // Access to muDst .......................
+  StMuEvent* muEve = mMuDstMaker->muDst()->event();
+  int nPrim = mMuDstMaker->muDst()->primaryTracks()->GetEntries();  // get number of primary tracks
+  StEventInfo &info=muEve->eventInfo();
+  
+  StMuTriggerIdCollection& trgIdColl=muEve->triggerIdCollection();
+
+  const StTriggerId& oflTrgId=trgIdColl.nominal();
+
+  
+  vector<unsigned int> trgId=oflTrgId.triggerIds();
+
+  printf("\n\n ==================== processing eventID %d nPrim=%d nTrig=%d==============\n", info.id(),nPrim, trgId.size());
+
+
+  uint i;
+  for(i = 0; i < trgId.size() ; i++){
+    printf("i=%d id=%d\n",i,trgId[i]);
+  }
+  
+  // StL0Trigger &trig=muEve->l0Trigger();
+  
+  
+  //StEventSummary &smry=muEve->eventSummary();
+  
+}
+
+//________________________________________________
+//________________________________________________
+float StEEsoloPi0Maker::getCtbSum(){
+  
+  // printf("%s::getCtbSum() is called ..........\n",StMaker::GetName());
+ 
+  // Access to muDst .......................
+  StMuEvent* muEve = mMuDstMaker->muDst()->event();
+  StCtbTriggerDetector* ctbDet = &(muEve->ctbTriggerDetector());
+  
+  assert(ctbDet);
+  float ctbSum = 0;
+  int nHit=0;
+  for (uint slat = 0; slat < ctbDet->numberOfSlats(); slat++) {
+    for (uint tray = 0; tray < ctbDet->numberOfTrays(); tray++) {
+      float  adc = ctbDet->mips(tray,slat,0);
+      ctbSum += adc;      
+      if(adc > 5) nHit++;
+    }
+  }
+  printf("CTB %d hit ADC>5  sumADC=%f (all) \n",nHit, ctbSum);
+  hA[7]->Fill(ctbSum); 
+  return ctbSum;
+}
 
 // $Log: StEEsoloPi0Maker.cxx,v $
+// Revision 1.2  2004/04/14 19:34:01  balewski
+// access to trigger data
+//
 // Revision 1.1  2004/04/14 17:09:09  balewski
 // new copy of pi0finder with towers only, should work on ezTree as well (after small cleanup)
 //
