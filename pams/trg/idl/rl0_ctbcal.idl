@@ -1,9 +1,0 @@
-/*   rl0_ctbcal.idl
-*   Table: rl0_ctbcal
-*        description: Level 0 Calibration Table for CTB       
-*/
-   struct rl0_ctbcal { 
-       float     fit[2];     /* Fit for ADC to hit calibration */
-   };
-/*  Last mod. for rl0ctb_cal:   $Date 1997/10/09 10:00:00 $ */
-

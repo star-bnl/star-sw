@@ -1,6 +1,0 @@
-   struct ctu_raw {          /* Ctf_raw_row_st */ 
-       long      i_eta;      /* eta index */
-       long      i_phi;      /* Phi index */
-       long      adc;        /* ADC from scintilator */
-       long      tdc;        /* TDC from scintillator */
-   } ;
