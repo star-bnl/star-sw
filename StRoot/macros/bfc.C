@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.147 2000/09/11 19:03:46 fisyak Exp $
+// $Id: bfc.C,v 1.148 2000/11/25 18:53:17 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -20,23 +20,29 @@
 #include "StEventMaker/StEventMaker.h"
 #include "StAssociationMaker/StMcParameterDB.h"
 #include "St_dst_Maker/StV0Maker.h"
-#include "xdf2root/St_XDFFile.h"
+#include "xdf2root/St_XDFFile.h" 
+#include "StTpcT0Maker/StTpcT0Maker.h" 
 void Usage();
 void Load();
-#endif
-TBrowser *b = 0;
+#else 
 class StMaker;        
 class StBFChain;        
-StBFChain  *chain=0;
-StMaker    *treeMk=0;
 class StEvent;
-StEvent *Event;
 class St_geant_Maker;
-St_geant_Maker *geant = 0;
 class StIOMaker;
 class St_XDFFile;
-class StEventDisplayMaker; StEventDisplayMaker *dsMk = 0;
-class StEventMaker; StEventMaker *evMk = 0;
+class StEventDisplayMaker; 
+class StEventMaker; 
+class StTpcT0Maker;
+#endif
+TBrowser *b = 0;
+StBFChain  *chain=0; 
+StMaker    *treeMk=0;
+StEvent *Event;
+St_geant_Maker *geant = 0;
+StEventDisplayMaker *dsMk = 0;
+StEventMaker *evMk = 0;
+StTpcT0Maker *t0mk = 0;
 //_____________________________________________________________________
 void Load(){
   if (gClassTable->GetID("TTable") < 0) gSystem->Load("libStar");
@@ -44,11 +50,15 @@ void Load(){
   gSystem->Load("StChain");
   gSystem->Load("StUtilities");
   gSystem->Load("StBFChain");
+  gSystem->Load("StChallenger");
 }
 //_____________________________________________________________________
 void bfc(const Int_t First,
 	 const Int_t Last,
-	 const Char_t *Chain="gstar Cy2a tfs",Char_t *infile=0, Char_t *outfile=0, Char_t *TreeFile=0)
+	 const Char_t *Chain="gstar Cy2a tfs",
+	 const Char_t *infile=0,
+	 const Char_t *outfile=0,
+	 const Char_t *TreeFile=0)
 { // Chain variable define the chain configuration 
   // All symbols are significant (regardless of case)
   // "-" sign before requiest means that this option is disallowed
@@ -89,6 +99,7 @@ void bfc(const Int_t First,
     if (tclmk) chain->AddAfter(after,myMk);
   }
 #endif
+#ifdef __CINT__      
   if (chain->GetOption("TCL") && chain->GetOption("Eval")) {
     St_tcl_Maker *tclMk= (St_tcl_Maker *) chain->GetMaker("tpc_hits");
     if (tclMk) {
@@ -108,7 +119,6 @@ void bfc(const Int_t First,
     StTpcT0Maker *t0mk = (StTpcT0Maker *) chain->GetMaker("TpcT0");
     if (t0mk) t0mk->SetDesiredEntries(10);
   }
-      
   if (chain->GetOption("McAss")) {
     // Define the cuts for the Associations
     
@@ -132,6 +142,7 @@ void bfc(const Int_t First,
     StV0Maker    *v0Mk = (StV0Maker *) chain->GetMaker("v0");
     if (v0Mk) 	v0Mk->ev0EvalOn();   //Turn on the ev0 evaluatio
   }
+#endif
   {
     TDatime t;
     printf ("QAInfo:Run is started at Date/Time %i/%i\n",t.GetDate(),t.GetTime());
@@ -143,6 +154,9 @@ void bfc(const Int_t First,
   
   // Init the chain and all its makers
   Int_t iTotal = 0, iBad = 0;
+  St_XDFFile *xdf_out = 0;
+  TBenchmark evnt;
+  Int_t iMake = 0, i = First;
   if (Last >= 0) {
     Int_t iInit = chain->Init();
     if (iInit >=  kStEOF) {
@@ -150,7 +164,7 @@ void bfc(const Int_t First,
       goto END;
     }
     StEvtHddr *hd = (StEvtHddr*)chain->GetDataSet("EvtHddr");
-    hd->SetRunNumber(-2); // to be sure that InitRun calls at least once
+    if (hd) hd->SetRunNumber(-2); // to be sure that InitRun calls at least once
     // skip if any
     if (First > 1) {
       if (chain->GetOption("fzin")) {
@@ -165,11 +179,9 @@ void bfc(const Int_t First,
       }
     }
   }
-  St_XDFFile *xdf_out = chain->GetXdfOut();
+  xdf_out = chain->GetXdfOut();
   if (chain->GetOption("Event")) evMk  = (StEventMaker   *) chain->GetMaker("StEventMaker");  
   treeMk = chain->GetMaker("tree");
-  TBenchmark evnt;
-  Int_t iMake = 0, i = First;
  EventLoop: if (i <= Last && iMake != kStEOF && iMake != kStFatal) {
    evnt.Reset();
    evnt.Start("QAInfo:");
@@ -204,12 +216,18 @@ void bfc(const Int_t First,
 }
 //_____________________________________________________________________
 void bfc (const Int_t Last, 
-	  const Char_t *Chain="gstar Cy2a tfs evout",Char_t *infile=0, Char_t *outfile=0, Char_t *TreeFile=0)
+	  const Char_t *Chain="gstar Cy2a tfs evout",
+	  const Char_t *infile=0, 
+	  const Char_t *outfile=0, 
+	  const Char_t *TreeFile=0)
 {
   bfc(1,Last,Chain,infile,outfile,TreeFile);
 }
 //_____________________________________________________________________
-void bfc (const Char_t *Chain="",Char_t *infile=0, Char_t *outfile=0, Char_t *TreeFile=0)
+void bfc (const Char_t *Chain="",
+	  const Char_t *infile=0, 
+	  const Char_t *outfile=0, 
+	  const Char_t *TreeFile=0)
 {
   if (!Chain || !strlen(Chain)) {
     Usage();
