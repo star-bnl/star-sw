@@ -279,7 +279,6 @@ c      RVAL(1,0) = SECNDS (RVAL(1,1))
 
       CCA = CCA*CCB/(CCA+CCB)
       CCA = CCA/RRR
-      CCA = AIMAG(1.1,2.2)
       CCA = exp(cca) + log(cca) +cos(cca) + sin(cca)
 
  999  return
