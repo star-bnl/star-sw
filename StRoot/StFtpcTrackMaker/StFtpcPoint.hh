@@ -1,5 +1,10 @@
-// $Id: StFtpcPoint.hh,v 1.1 2000/05/11 15:14:49 oldi Exp $
+// $Id: StFtpcPoint.hh,v 1.2 2000/06/13 14:49:25 oldi Exp $
 // $Log: StFtpcPoint.hh,v $
+// Revision 1.2  2000/06/13 14:49:25  oldi
+// Added SetTrackedFlag(Bool_t tracked) and GetTrackedFlag() to take care of the
+// bit 5 of mFlags.
+// Changed SetUsage(Bool_t f) to change the bit 5 of mFlags, too.
+//
 // Revision 1.1  2000/05/11 15:14:49  oldi
 // Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
 //
@@ -68,7 +73,9 @@ public:
   Double_t GetSigmaR()     const { return mSigmaR;      }
   
   StFtpcTrack *GetTrack(TClonesArray *tracks) const;
-  
+         void  SetTrackedFlag(Bool_t tracked);
+       Bool_t  GetTrackedFlag();
+
   Bool_t   GetUsage()         const { return mUsed;          }
   Int_t    GetHitNumber()     const { return mHitNumber;     }
   Int_t    GetNextHitNumber() const { return mNextHitNumber; }
@@ -89,7 +96,7 @@ public:
   void    SetYerr(Double_t f)     {     mError.setY(f); }
   void    SetZerr(Double_t f)     {     mError.setZ(f); }
   
-  void    SetUsage(Bool_t f)        {          mUsed =  f;  }
+  void    SetUsage(Bool_t f)        {          mUsed =  f; SetTrackedFlag(f); }
   void    SetHitNumber(Int_t f)     {     mHitNumber =  f;  }
   void    SetNextHitNumber(Int_t f) { mNextHitNumber =  f;  }
   void    SetTrackNumber(Int_t f)   {   mTrackNumber =  f;  }
