@@ -3,7 +3,7 @@
 #ifndef EEsmdCal_h
 #define EEsmdCal_h
 /*********************************************************************
- * $Id: EEsmdCal.h,v 1.6 2004/07/10 18:40:54 balewski Exp $
+ * $Id: EEsmdCal.h,v 1.7 2004/07/27 21:59:46 balewski Exp $
  *********************************************************************
  * Descripion:
  *  Calibration of SMD/pre/post using MIPs from UxV
@@ -36,7 +36,7 @@ class EEsmdCal {
 
  private: 
   
-  float thrMipSmdE; // threshold on MIP signal in SMD strip
+  float thrMipSmdE; //(GeV)  threshold on MIP signal in SMD strip
   float twMipRelEneLow, twMipRelEneHigh; // relative maximal energy deviation for MIP in towers 
   float presMipElow,presMipEhigh ; // relative maximal energy deviation for MIP in pres1,2,post 
 
@@ -132,6 +132,9 @@ class EEsmdCal {
 
 /*****************************************************************
  * $Log: EEsmdCal.h,v $
+ * Revision 1.7  2004/07/27 21:59:46  balewski
+ * now runs on muDst as well
+ *
  * Revision 1.6  2004/07/10 18:40:54  balewski
  * use now first and last 8 strips in 00xx00
  *

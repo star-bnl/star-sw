@@ -1,4 +1,4 @@
-// $Id: EEsmdCalHisto.cxx,v 1.7 2004/07/10 18:40:54 balewski Exp $
+// $Id: EEsmdCalHisto.cxx,v 1.8 2004/07/27 21:59:46 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -63,6 +63,7 @@ void EEsmdCal::initTileHistoEne(char cut, char *title, int col) {
 
   char *cTile[mxTile]={"Tower","Pres1","Pres2","Post"};
   char cT[mxTile]={'T','P','Q','R'};
+  char *cUnits[mxTile]={"(GeV)_EM", "(MEV)_MIP", "(MEV)_MIP", "(MEV)_MIP"};
   
   int iT=0;
   for(iT=0;iT<mxTile;iT++) {
@@ -74,9 +75,9 @@ void EEsmdCal::initTileHistoEne(char cut, char *title, int col) {
 	char core[100];
 	sprintf(core,"%02d%c%c%02d",sectID,cT[iT],sub,eta);
 	sprintf(tt1,"%c%s",cut,core);
-	sprintf(tt2,"%s(%c) %s , %s; ADC-ped/gain",cTile[iT],cut,core,title);
+	sprintf(tt2,"%s(%c) %s , %s; ADC-ped/gain %s",cTile[iT],cut,core,title,cUnits[iT]);
 	//printf("tt1=%s, tt2=%s\n",tt1,tt2);
-	TH1F *h=new TH1F(tt1,tt2,250,-3.,22.);
+	TH1F *h=new TH1F(tt1,tt2,250,-0.5,4.5);
 	h->SetLineColor(col);
 	HList->Add(h);
 	hT[iCut][iT][iEta][iPhi]=h;
@@ -132,9 +133,14 @@ void EEsmdCal::addTwMipEbarsToHisto (int col, char mxC) {
     TList *L=h->GetListOfFunctions();
 
     float adcC=towerMipE[iEta]*x->gain;
+    if(name[0]>'e') adcC=towerMipE[iEta]; //ugly hack,JB, last two not ADC
+
+    TLine *ln=new TLine(adcC,0,adcC,yMax);
+    ln->SetLineColor(kRed); ln->SetLineStyle(2);
+    L->Add(ln);
 
     float adc=adcC*twMipRelEneLow;
-    TLine *ln=new TLine(adc,0,adc,yMax);
+    ln=new TLine(adc,0,adc,yMax);
     ln->SetLineColor(col);
     L->Add(ln);
 
@@ -198,7 +204,7 @@ void EEsmdCal::initSmdHist(char cut, char *title, int col) {
 	// sum of energy from pairs
 	sprintf(core,"%02d%c%03d",sectID,iuv+'U',istrip+1);
 	sprintf(tt1,"%c%sp",cut,core);
-	sprintf(tt2,"SMD(%c) %s+1 , %s; ADC-ped/gain, pair sum",cut,core,title);
+	sprintf(tt2,"SMD(%c) %s+1 , %s; ADC-ped/gain (MeV), pair sum",cut,core,title);
 	//printf("tt1=%s, tt2=%s\n",tt1,tt2);
 	TH1F *h=new TH1F(tt1,tt2,100,0.,5.);
 	h->SetLineColor(col);
@@ -207,7 +213,7 @@ void EEsmdCal::initSmdHist(char cut, char *title, int col) {
 
 	// single strip (ADC-ped) spectra
 	sprintf(tt1,"%c%s",cut,core);
-	sprintf(tt2,"SMD(%c) %s , %s; ADC-ped/gain",cut,core,title);
+	sprintf(tt2,"SMD(%c) %s , %s; ADC-ped",cut,core,title);
 	//printf("tt1=%s, tt2=%s\n",tt1,tt2);
 	h=new TH1F(tt1,tt2,300,-50,250);
 	h->SetLineColor(col);
@@ -350,13 +356,14 @@ void EEsmdCal::fillSmdHisto_a(){
   int iuv,istrip;
   for(iuv=0;iuv<MaxSmdPlains;iuv++) {
     float *adc=smdAdc[iuv];
-    float *val=smdEne[iuv];
+    float *ene=smdEne[iuv];
     TH1F **hs=hSs[iCut][iuv]; // single strip spectra
     TH1F **hp=hSp[iCut][iuv]; // pairs of strip spectra
     // note, to loop over N-2 strips to get right the sum of pairs 
     for(istrip=0;istrip<MaxSmdStrips-1;istrip++) {
       hs[istrip]->Fill(adc[istrip]);
-      hp[istrip]->Fill(val[istrip]+val[istrip+1]);
+      float esum=ene[istrip]+ene[istrip+1];
+      hp[istrip]->Fill(esum*1000);
     }
   }
 }

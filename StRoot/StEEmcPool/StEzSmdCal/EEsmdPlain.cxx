@@ -103,9 +103,10 @@ void EEsmdPlain::findMipPattern(){
 //-------------------------------------------------
 //-------------------------------------------------
 void EEsmdPlain::scanAdc(float *val, float thr) {
+
   int istrip;
   for(istrip=0;istrip<MaxSmdStrips;istrip++) {
       if( val[istrip]>thr) hitOver[istrip]='x';
-      // printf("iuv/istrip=%d/%3d  val=%6.2f --> '%c'\n",iuv,istrip,val[istrip],hitOver[istrip]);
+      // printf("istrip=%3d  val=%6.2f --> '%c'\n",istrip,val[istrip],hitOver[istrip]);
     }
 }
