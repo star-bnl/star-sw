@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.17 2000/06/30 02:00:42 porter Exp $
+ * $Id: StDbBroker.h,v 1.18 2000/08/15 22:53:14 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,12 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.18  2000/08/15 22:53:14  porter
+ * Added 2 write methods.
+ *  - 1 works once "list" is requested from database
+ *  - 1 works just by specifying the full path from which
+ *    the code extracts the database name.
+ *
  * Revision 1.17  2000/06/30 02:00:42  porter
  * fixed memory leak introduced when making sure top level returned to
  * offline is always a database type name
@@ -81,6 +87,7 @@
 class StDbConfigNode;
 class StDbManager;
 class StTableDescriptorI;
+class StDbTable;
 
 /* needed for GetComments only   */
 class TTable;
@@ -153,6 +160,20 @@ struct oldDescriptor {
     char  **GetComments(St_Table *parentTable);
     void   Fill(void * pArray, const char **ElementComment);
 
+    // Write Into Database methods
+    //  with tabID -> assumes StDbBroker::InitConfig() has been called 
+    //  which returns the list of table names with unique tabID association.
+    Int_t WriteToDb(void* pArray, int tabID);
+
+    //  with fullPath -> find the database from the path. Table information
+    //  is requested from db but over-ridden by input options (idList).
+    //  This method will be slow for writting several tables but speed of writes
+    //  should not be an issue.
+    Int_t WriteToDb(void* pArray, const char* fullPath, int* idList=0);
+
+
+    StDbTable* findTable(const char* databaseName);
+
     UInt_t GetNRows()                {return m_nRows;       }
     UInt_t GetBeginDate()            {return m_BeginDate;   }
     UInt_t GetBeginTime()            {return m_BeginTime;   }
@@ -165,6 +186,7 @@ struct oldDescriptor {
 
 
     StTableDescriptorI* GetTableDescriptor();
+  
 
     void loadOldDescriptor(){};
     static const Char_t * GetTypeName( EColumnType type) {
