@@ -1,5 +1,8 @@
-// $Id: StMagFMaker.cxx,v 1.5 2000/06/26 22:11:52 fisyak Exp $
+// $Id: StMagFMaker.cxx,v 1.6 2001/05/17 20:38:26 fisyak Exp $
 // $Log: StMagFMaker.cxx,v $
+// Revision 1.6  2001/05/17 20:38:26  fisyak
+// Move check for mag. scale factor into InitRun
+//
 // Revision 1.5  2000/06/26 22:11:52  fisyak
 // remove params
 //
@@ -40,7 +43,7 @@ StMagFMaker::StMagFMaker(const char *name):StMaker(name),fMagFactor(0),fMagF(0),
 //_____________________________________________________________________________
 StMagFMaker::~StMagFMaker(){}
 //_____________________________________________________________________________
-Int_t StMagFMaker::Init(){
+Int_t StMagFMaker::InitRun(Int_t RunNo){
   if (!fMagFactor) {
     TDataSet *RunLog = GetDataBase("RunLog");
     fMagFactor = (St_MagFactor *) RunLog->Find("MagFactor"); assert(fMagFactor);
@@ -58,7 +61,7 @@ Int_t StMagFMaker::Init(){
 				    kConMesh,fScale);
   else         fMagF = new StMagFC("Star Constant Field","Constant Field",fScale);
   cout << "Initialize STAR magnetic field with scale factor " << fScale << endl;
-  return StMaker::Init();
+  return kStOK;
 }
 //_____________________________________________________________________________
 

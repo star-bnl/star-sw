@@ -1,5 +1,8 @@
-// $Id: StMagFMaker.h,v 1.2 2000/01/07 00:42:33 fisyak Exp $
+// $Id: StMagFMaker.h,v 1.3 2001/05/17 20:38:26 fisyak Exp $
 // $Log: StMagFMaker.h,v $
+// Revision 1.3  2001/05/17 20:38:26  fisyak
+// Move check for mag. scale factor into InitRun
+//
 // Revision 1.2  2000/01/07 00:42:33  fisyak
 // merge Make with Init
 //
@@ -30,11 +33,11 @@ class StMagFMaker : public StMaker {
  public: 
                   StMagFMaker(const char *name="MagField");
    virtual       ~StMagFMaker();
-   virtual Int_t  Init();
-   virtual Int_t  Make(){return Init();}
-
+   virtual Int_t  Init() {return kStOK;}
+   virtual Int_t  InitRun(Int_t run);
+   Int_t          Make() {return kStOK;}
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMagFMaker.h,v 1.2 2000/01/07 00:42:33 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMagFMaker.h,v 1.3 2001/05/17 20:38:26 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMagFMaker, 1)   //StAF chain virtual base class for Makers
 };
