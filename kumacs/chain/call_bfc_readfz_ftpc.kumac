@@ -12,7 +12,7 @@
    tpc_sector_last=24 _
    gstar_settings=' field_only' _
    domain=' geometry g2t ftpc ' _
-   chain=' fzin rg2t fss fcl fpt_s fte_s evout' _
+   chain=' fzin rg2t fss fcl fpt fte evout' _
    skip=0 _
    no_events=1 _
    input_data_file=/disk1/star/kathy/year2a_psc079_01_46evts.fza _
