@@ -1,5 +1,8 @@
-// $Id: DstStruct.C,v 3.1 2000/08/02 01:32:02 fine Exp $
+// $Id: DstStruct.C,v 3.2 2000/08/02 16:36:39 fine Exp $
 // $Log: DstStruct.C,v $
+// Revision 3.2  2000/08/02 16:36:39  fine
+// Fixed wrong counter
+//
 // Revision 3.1  2000/08/02 01:32:02  fine
 // New macro to print the struture of the selected event from the DST file
 //
@@ -58,7 +61,7 @@ void DstStruct(Int_t firstEvent, Int_t numberOfEvents, const char *MainFile)
   int iret=0,iev=0;
   // Loop over events
   if (!numberOfEvents) numberOfEvents = 9999;
-  int counter = numberOfEvents+firstEvent-1;
+  int counter = numberOfEvents;
   for (iev = 0; iev < counter; iev++) {         // goto loop code
      chain->Clear();
      iret = chain->Make();
