@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.55 2000/04/05 03:58:20 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.56 2000/04/10 20:11:03 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -154,8 +154,9 @@ Int_t StEventDisplayMaker::BuildGeometry()
   TDataSetIter volume(m_Hall,0);
 // ---  Create "standard" TPC and SVT views ----
   TVolume *sector = 0;
-  const Char_t *volueNames[] = {"TPSS","SLDI","SFDM"};
-  const Int_t lvolueNames = sizeof(volueNames)/sizeof(Char_t *);
+//  const Char_t *volueNames[] = {"TPSS","SLDI","SFDM"};
+   const Char_t *volueNames[] = {"TPSS","STSI"}; // STLI"};
+   const Int_t lvolueNames = sizeof(volueNames)/sizeof(Char_t *);
   while ( (sector = ( TVolume *)volume()) ){
     Bool_t found = kFALSE;
     Int_t i;
@@ -967,6 +968,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.56  2000/04/10 20:11:03  fine
+// change the default valume fro SVT from SLDI to STSI
+//
 // Revision 1.55  2000/04/05 03:58:20  fine
 // Adjusted for ROOT 2.24
 //
