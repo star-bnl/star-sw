@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.cc,v 1.15 2000/02/15 20:27:44 porter Exp $
+ * $Id: StDbConfigNode.cc,v 1.16 2000/03/01 20:56:15 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.cc,v $
+ * Revision 1.16  2000/03/01 20:56:15  porter
+ * 3 items:
+ *    1. activated reConnect for server timeouts
+ *    2. activated connection sharing; better resource utilization but poorer
+ *       logging
+ *    3. made rollback method in mysqlAccessor more robust (affects writes only)
+ *
  * Revision 1.15  2000/02/15 20:27:44  porter
  * Some updates to writing to the database(s) via an ensemble (should
  * not affect read methods & haven't in my tests.
@@ -150,6 +157,10 @@ StDbConfigNode::buildTree(){
  server = StDbManager::Instance()->findServer(mnode.dbType, mnode.dbDomain);
  if(server){
    char* dbName = server->getDbName();
+   if(!dbName){
+     cerr<<" No database specified in Server " << endl;
+     return;
+   }
    setDbName(dbName); delete [] dbName;
    if(!server->QueryDb(this)){
      if(StDbManager::Instance()->IsVerbose())

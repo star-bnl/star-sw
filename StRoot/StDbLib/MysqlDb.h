@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.h,v 1.8 2000/02/18 16:58:09 porter Exp $
+ * $Id: MysqlDb.h,v 1.9 2000/03/01 20:56:15 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.h,v $
+ * Revision 1.9  2000/03/01 20:56:15  porter
+ * 3 items:
+ *    1. activated reConnect for server timeouts
+ *    2. activated connection sharing; better resource utilization but poorer
+ *       logging
+ *    3. made rollback method in mysqlAccessor more robust (affects writes only)
+ *
  * Revision 1.8  2000/02/18 16:58:09  porter
  * optimization of table-query, + whereClause gets timeStamp if indexed
  *  + fix to write multiple rows algorithm
@@ -119,11 +126,20 @@ private:
   bool mqueryState;
   bool mhasConnected;
   
+  // temporary until exception handling is enabled
+
+  char* mdbhost;
+  char* mdbName;
+  char* mdbuser;
+  char* mdbpw;
+  int mdbPort;  
+
 public:
-  MysqlDb() ;
+  MysqlDb();
   virtual ~MysqlDb();
   virtual bool Connect(const char *aHost, const char *aUser, 
 	const char *aPasswd, const char *aDb, const int aPort=0);
+  virtual bool reConnect();
 
   virtual unsigned NbRows () {return mRes->NbRows();};
   virtual unsigned NbFields () {return mRes->NbFields();};
@@ -143,6 +159,8 @@ public:
   virtual bool QueryStatus() { return mqueryState; }
   virtual void Close();
   virtual bool IsConnected() { return mhasConnected; }
+  virtual bool setDefaultDb(const char* dbName);
+
 
 protected:
   virtual void RazQuery() ;

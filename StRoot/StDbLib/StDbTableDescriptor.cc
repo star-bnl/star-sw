@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.12 2000/02/24 20:30:47 porter Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.13 2000/03/01 20:56:16 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,13 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.13  2000/03/01 20:56:16  porter
+ * 3 items:
+ *    1. activated reConnect for server timeouts
+ *    2. activated connection sharing; better resource utilization but poorer
+ *       logging
+ *    3. made rollback method in mysqlAccessor more robust (affects writes only)
+ *
  * Revision 1.12  2000/02/24 20:30:47  porter
  * fixed padding for uchar; beginTime in mysqlAccessor;
  * added rollback safety checkes in StDbManger
@@ -228,7 +235,7 @@ bool ClientMode;
 
    // for multiple rows, add padding as needed at end of structure (tableSize)
    int rowpad;
-   if((rowpad=offsetToNextEmptyByte%4))rowpad=4-rowpad;
+   if((rowpad=offsetToNextEmptyByte%2))rowpad=2-rowpad;
 
    mtableSize = offsetToNextEmptyByte+rowpad;
 

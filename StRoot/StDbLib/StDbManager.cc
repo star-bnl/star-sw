@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManager.cc,v 1.19 2000/02/24 20:30:45 porter Exp $
+ * $Id: StDbManager.cc,v 1.20 2000/03/01 20:56:16 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.20  2000/03/01 20:56:16  porter
+ * 3 items:
+ *    1. activated reConnect for server timeouts
+ *    2. activated connection sharing; better resource utilization but poorer
+ *       logging
+ *    3. made rollback method in mysqlAccessor more robust (affects writes only)
+ *
  * Revision 1.19  2000/02/24 20:30:45  porter
  * fixed padding for uchar; beginTime in mysqlAccessor;
  * added rollback safety checkes in StDbManger
@@ -77,6 +84,7 @@
 #include "StDbTable.h"
 #include "StDbTime.h"
 #include "StDbTableIter.hh"
+#include "mysqlAccessor.hh"
 #include <iostream.h>
 #include <strstream.h>
 #include <strings.h>
@@ -88,6 +96,7 @@ StDbManager* StDbManager::mInstance=0;
 StDbManager::~StDbManager(){
  
   deleteServers();
+  deleteQueryObjects();
   deleteDomains();
   deleteTypes();
   mInstance=0;
@@ -161,6 +170,25 @@ StDbManager::deleteServers() {
          break;
         }
      } while( mservers.begin() != mservers.end() );
+
+}
+
+////////////////////////////////////////////////////////////////
+
+void
+StDbManager::deleteQueryObjects() {  
+
+  QueryObjects::iterator itr;
+  tableQuery* qo;
+
+  do {
+      for(itr = mqobjects.begin(); itr != mqobjects.end(); ++itr){
+         qo = *itr;
+         mqobjects.erase(itr);
+         delete qo;
+         break;
+        }
+     } while( mqobjects.begin() != mqobjects.end() );
 
 }
 
@@ -310,10 +338,15 @@ StDbManager::findServersXml(ifstream& is){
   char* dbNames = mparser.getString(stardatabase,(char*)bdb,(char*)edb);
 
    StDbServer* server = new StDbServer();
-   server->setServerName((const char*)servName); delete [] servName;
+   server->setServerName((const char*)servName); 
    server->setHostName((const char*)hostName); delete [] hostName;
    server->setUnixSocket((const char*)uSocket); delete [] uSocket;
    server->setPortNumber(portNum); 
+
+   tableQuery* qo=new mysqlAccessor(servName,portNum); delete [] servName;
+   mqobjects.push_back(qo);
+   server->setQueryObject(qo);
+
 
   if( !dbNames && !mhasDefaultServer ){
 
@@ -477,11 +510,6 @@ StDbManager::findServer(StDbType type, StDbDomain domain){
 
  }
 
- // connect to database if needed
-
- // if(server && !server->hasConnected()){
- //   server->init();
- // }
 
  // report failure
  if(!server) {
@@ -489,7 +517,9 @@ StDbManager::findServer(StDbType type, StDbDomain domain){
    cerr << "DataBase Type Name= " << getDbTypeName(type) << endl;
    cerr << "DataBase Domain Name = " << getDbDomainName(domain) << endl;
    cerr << endl;
-}
+ } else {
+   server->selectDb();
+ }
 
 return server;
 }
@@ -736,7 +766,6 @@ char* name;
  configNode = new StDbConfigNode(type,domain,name,configName);
  configNode->buildTree();
  return configNode;
-
 }
 
 ////////////////////////////////////////////////////////////////
