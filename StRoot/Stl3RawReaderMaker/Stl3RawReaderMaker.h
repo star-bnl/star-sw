@@ -1,7 +1,10 @@
 //
-//  $Id: Stl3RawReaderMaker.h,v 1.5 2001/08/29 20:24:49 struck Exp $
+//  $Id: Stl3RawReaderMaker.h,v 1.6 2001/09/27 03:49:53 struck Exp $
 //
 //  $Log: Stl3RawReaderMaker.h,v $
+//  Revision 1.6  2001/09/27 03:49:53  struck
+//  actual no. of gl3s handled flexible, max no. of gl3s and algorithms now global define-statements
+//
 //  Revision 1.5  2001/08/29 20:24:49  struck
 //  makes Solaris compiler happy
 //
@@ -26,6 +29,11 @@
 #include "StDAQMaker/StDAQReader.h"
 #include "TTree.h"
 #include "Stl3MiniEvent.h"
+
+// global upper limits
+// correct numbers should come from the database
+#define MaxNumberOfGl3Nodes   10
+#define MaxNumberOfAlgorithms 20
 
 // some foreward declaration since includes don't work
 // in these cases 
@@ -71,16 +79,12 @@ class Stl3RawReaderMaker : public StMaker {
     bool               mL3On;
 
     // counter
-    GlobalCounter      mGlobalCounter[10];
-    AlgorithmCounter   mAlgorithmCounter[10][20];
+    GlobalCounter      mGlobalCounter[MaxNumberOfGl3Nodes];
+    AlgorithmCounter   mAlgorithmCounter[MaxNumberOfGl3Nodes][MaxNumberOfAlgorithms];
 
     int                mNumberOfGl3Nodes;
     int                mNumberOfAlgorithms;
-
-    // limits
-    int                mMaxNumberOfGl3Nodes;
-    int                mMaxNumberOfAlgorithms;
-
+    int                mEventCounter;
 
  protected:
  public: 
@@ -108,7 +112,7 @@ class Stl3RawReaderMaker : public StMaker {
    TTree* GetGlobalTrackTree() {return mGlobalTrackTree;} ;
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: Stl3RawReaderMaker.h,v 1.5 2001/08/29 20:24:49 struck Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: Stl3RawReaderMaker.h,v 1.6 2001/09/27 03:49:53 struck Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(Stl3RawReaderMaker, 1)   //StAF chain virtual base class for Makers
 };

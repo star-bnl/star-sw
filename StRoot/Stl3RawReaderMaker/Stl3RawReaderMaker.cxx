@@ -9,9 +9,12 @@
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 //
-//  $Id: Stl3RawReaderMaker.cxx,v 1.8 2001/09/25 01:42:51 struck Exp $
+//  $Id: Stl3RawReaderMaker.cxx,v 1.9 2001/09/27 03:49:52 struck Exp $
 //
 //  $Log: Stl3RawReaderMaker.cxx,v $
+//  Revision 1.9  2001/09/27 03:49:52  struck
+//  actual no. of gl3s handled flexible, max no. of gl3s and algorithms now global define-statements
+//
 //  Revision 1.8  2001/09/25 01:42:51  struck
 //  cs: l3 vertex now put into StL3Trigger
 //
@@ -74,21 +77,19 @@ Int_t Stl3RawReaderMaker::Init(){
 
   SetDebug(1);
 
-  mMaxNumberOfGl3Nodes = 10;
-  mMaxNumberOfAlgorithms = 20;
-
   // allocate memory
   //mGlobalCounter = new GlobalCounter[mMaxNumberOfGl3Nodes];
   //mAlgorithmCounter = new AlgorithmCounter[mMaxNumberOfGl3Nodes][mMaxNumberOfAlgorithms];
 
   mNumberOfGl3Nodes = 3;
   mNumberOfAlgorithms = 0;
+  mEventCounter = 0;
 
   // reset counter
-  for (int i=0; i<mMaxNumberOfGl3Nodes; i++) {
+  for (int i=0; i<MaxNumberOfGl3Nodes; i++) {
         mGlobalCounter[i].nProcessed = 0;
 	mGlobalCounter[i].nReconstructed = 0;
-	for (int j=0; j<mMaxNumberOfAlgorithms; j++) {
+	for (int j=0; j<MaxNumberOfAlgorithms; j++) {
 	      mAlgorithmCounter[i][j].algId = 0;
 	      mAlgorithmCounter[i][j].nProcessed = 0;
 	      mAlgorithmCounter[i][j].nAccept = 0;
@@ -345,15 +346,15 @@ Int_t Stl3RawReaderMaker::fillStEvent()
   mNumberOfAlgorithms = gl3Reader->getNumberofAlgorithms();
   
   // check number of algorithms and gl3 node id
-  if (mNumberOfAlgorithms >= mMaxNumberOfAlgorithms) {
+  if (mNumberOfAlgorithms >= MaxNumberOfAlgorithms) {
         cout << "ERROR: number of algorithms exceeds limit: found "
-	     << mNumberOfAlgorithms << ", limit " << mMaxNumberOfAlgorithms
+	     << mNumberOfAlgorithms << ", limit " << MaxNumberOfAlgorithms
 	     << endl;
 	return 1;
   }
-  if (gl3Id<=0 || gl3Id>= mMaxNumberOfGl3Nodes) {
+  if (gl3Id<=0 || gl3Id>= MaxNumberOfGl3Nodes) {
         cout << "ERROR: gl3 id exceeds limit: found "
-	     << gl3Id << ", limit " << mMaxNumberOfGl3Nodes
+	     << gl3Id << ", limit " << MaxNumberOfGl3Nodes
 	     << endl;
 	return 1;
   }
@@ -361,6 +362,9 @@ Int_t Stl3RawReaderMaker::fillStEvent()
   //--------------------------
   // now do the bookkeeping
   //--------------------------
+
+  // increase the event counter
+  mEventCounter++;
 
   // first: global counter
   mGlobalCounter[gl3Id-1].nProcessed     = gl3Reader->getNumberOfProcessedEvents();
@@ -394,7 +398,7 @@ Int_t Stl3RawReaderMaker::fillStEvent()
   for (int i=0; i<mNumberOfGl3Nodes; i++) {
         // if one gl3 node wasn't seen so far,
         // the counters are still undefined
-        if (mGlobalCounter[i].nProcessed==0) {
+        if (mGlobalCounter[i].nProcessed==0 && mEventCounter<MaxNumberOfGl3Nodes) {
 	      totalCounter.nProcessed     = -1;
 	      totalCounter.nReconstructed = -1;
 	      for (int j=0; j<mNumberOfAlgorithms; j++) {
@@ -406,6 +410,7 @@ Int_t Stl3RawReaderMaker::fillStEvent()
 	      break;
 	}
 	// summ-up the counters of all gl3 nodes
+	// we have seen so far after #(MaxNumberOfGl3Nodes) events
 	totalCounter.nProcessed     += mGlobalCounter[i].nProcessed;
 	totalCounter.nReconstructed += mGlobalCounter[i].nReconstructed;
 	for (int k=0; k<mNumberOfAlgorithms; k++) {
