@@ -439,7 +439,7 @@ CC: ERROR CONDITIONS : None
 CC: STATUS	     : Test
 CC:
 CC:>---------------------------------------------------------------------
-#include "math_constants.inc"
+
       REAL psi,pt,tanl,x0,y0,bfld,z0,adb
       INTEGER q,i
       REAL rh,phih,psin

@@ -39,6 +39,7 @@ long type_of_call track_propagator_(
   float psi, pt, tanl, x0, y0, z0, xp[2], xout[4], p[3], xv[3], xx0[3];
   float trk[7], r1, r2, xc1[2], xc2[2], x[2], y[2], cut, x1[3];
   float phi0, phi, dphi, temppsi, test=1. ;
+  float pStraight[3];
   long  q, psiftr;
   float xlocal[3],bfield[3];
   
@@ -59,14 +60,21 @@ long type_of_call track_propagator_(
       psi  = gtrack[i].psi;
       q    = (long) gtrack[i].icharge;
       tanl = gtrack[i].tanl;
-      if(gtrack[i].invpt != 0 )
-	{
-	  pt    = 1/gtrack[i].invpt ;
+      if(target->iflag == 5)
+	{ 
+	  pt = 1.;
 	}
       else
 	{
-	  /*	    message('Error, invpt); */
-	  pt = 0.01;
+	  if(gtrack[i].invpt != 0 )
+	    {
+	      pt    = 1/gtrack[i].invpt ;
+	    }
+	  else
+	    {
+	      /* message('Error, invpt); */
+	      pt = 0.01;
+	    }
 	}
       x0   = gtrack[i].x0 ;
       y0   = gtrack[i].y0 ;
@@ -80,7 +88,7 @@ long type_of_call track_propagator_(
       trk[6] = pt;
       r1     = ((float) gtrack[i].icharge)*(1/gtrack[i].invpt)/(0.0003*bfld);
       /* we should take the absolute value of r1 */
-     
+      r1     = fabs(r1);
       
       if(target->iflag == 1 || target->iflag == 2)
 	{
@@ -174,10 +182,22 @@ long type_of_call track_propagator_(
 	    }
 	  ptrack[i].psi= temppsi - 360.* (float)psiftr; 
 	  /*  Do we have to consider if psi is within (0, 360) degree? */ 
-	  
+	}
+
+      if(target->iflag == 5)
+	{
+	  xv[0] = target->x[0];
+	  xv[1] = target->x[1];
+	  xv[2] = target->x[2];
+	  pStraight[0] = pt * cos(psi);
+	  pStraight[1] = pt * sin(psi);
+	  pStraight[2] = pt * tanl;
+	  prop_fine_approach_(xv, x0, pStraight, &xx0);
+	  ptrack[i].x0 = xx0[0];
+	  ptrack[i].y0 = xx0[1];
+	  ptrack[i].z0 = xx0[2]; 
 	}
     }
   return STAFCV_OK;
-}
-  
+}  
 
