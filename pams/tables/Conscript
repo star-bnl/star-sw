@@ -41,7 +41,7 @@ my $ROOTCINT_CPP = $INCLUDE . ":" . $INCLUDE . "/tables:" . $share;
 		    'CPPPATH'    =>$ROOTCINT_CPP
 		    );
 my $cscanner= find scan::cpp($env->{_cwd}, $ROOTCINT_CPP);# print "ROOTCINT_CPP = $ROOTCINT_CPP\n";
-my $ROOTCINT_CPPPATH = $cscanner->iflags; print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
+my $ROOTCINT_CPPPATH = $cscanner->iflags;# print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
 
 foreach my $idll (@idlT) { 
   my $stem     = basename ($idll, ".idl");# print "stem = $stem; idll: $idll\n";
