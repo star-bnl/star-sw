@@ -6,26 +6,31 @@
 use strict;
 use Sys::Hostname;
 my $hostname     = hostname();
-my $dir_log      = "/disk00001/star/MDC3/test";
-my $dir_sim      = "../sum";
-my $dir_archive  = "../log";   
+my $dir_log      = "/disk00001/star/MDC3/testl";
+my $dir_sum      = "../sum";   
 my @set ;
 my @list;      
 my $job_log;
 my $dummy;
 my $file_sum;
+my $dir_lg       = "../log";
+my $name_log;
+
 #=========================================================
-chdir $dir_log;
-@list = `ls *evts`;
+#chdir $dir_log;
+@list = `ls *log`;
 foreach my $file (@list) {
        my  $ltime = `mod_time $file`;
-           if( $ltime > 1200){ 
+           if( $ltime > 3600){ 
              parse_log($file);
              timestamp($file);
-         $dummy = `mv $file_sum ../sum`
-#         $dummy = `mv $file ../log`;   
+              chop $file;
+            $name_log = $file; 
+         $dummy = `mv $file_sum sum`;
+#         $dummy = `mv $name_log $dir_lg`;   
            }             
     }
+
 exit(0);
 #==========================================================
  sub mod_time($) { 
@@ -58,9 +63,12 @@ printf  ($dtime) ;
 sub parse_log($) {
 
   my $filename = $_[0];
-  my $tag = "_sum";
+  my $tag = ".sum";
+  my $file_sm;
      chop $filename;
-  $file_sum = $filename . $tag;
+  $file_sm = $filename;
+  $file_sm =~ s/.log//g;
+  $file_sum = $file_sm . $tag;
   my $input_fn;
   my $command_option;
   my $lib_version;  
@@ -72,7 +80,7 @@ sub parse_log($) {
   my $line; 
   my $jrun = "Run not completed";
   my $segmentation_violation;
-  
+  my $break_buss;
   my $previous_line = "";
   #----------------------------------------------------------
 
@@ -87,21 +95,27 @@ sub parse_log($) {
   
   # dump contents of log file to array for parsing
   my @logfile = <LOGFILE>;
-  my @size_line;
   my $num_line = 0; 
   my @maker_size = 0;
   my @mem_words;
   my $num_maker = 0;
   my @maker_name;
   my @msize_aver = 0; 
-  my @mymaker; 
+  my $mymaker; 
   my $i;
   my $last_maker;
+  my @size_line;
+  my $ij = 0;
+  my @line_tag;
+  my $tag_flag = 0;
+  my @tag_word;
+  my $last_tag_line;
+  my $last_tag = "last";
   #---------------------------------------------------------
   
   # parse beginning of file
   
-  $start_line = $logfile[0];
+  $start_line = $logfile[1];
  
   foreach $line (@logfile) {
      chop $line ;
@@ -121,7 +135,7 @@ sub parse_log($) {
     }
     
     # get input file name
-    if ( (! $input_fn) && $line =~ /Input file name = (\S+).*process = ([0-9]+)/ ) {
+    if ( (! $input_fn) && $line =~ /QAInfo:Input file name = (\w+)/ ) {
       $input_fn = $1;
       $record_run_options = 0;
     }
@@ -130,31 +144,48 @@ sub parse_log($) {
     $record_run_options and $run_option_length and $run_option_string .= $line."\n";
     $record_run_options and $run_option_length++;
 
-
+    # print tag for each Maker
+     if ( $line =~ /built/) {      
+      if($tag_flag != 1) { 
+      @tag_word = split(" ", $line);
+      if( $tag_word[0] eq "QAInfo:StTreeMaker") {
+         $tag_flag = 1;
+        $last_tag_line = $ij;
+       }
+        $line_tag[$ij] = $line;
+        $ij++;
+     } 
+    }
     # get memory size for each Maker
+     if ($num_line > 100){
      if( $line =~ /EndMaker/){
-        $size_line[0] = $logfile[$num_line + 1];   
-        $size_line[1] = $logfile[$num_line + 2]; 
-       @mem_words = split(" ",$size_line[0]);  
-       $maker_size[$num_maker] += $mem_words[4];
-       @mem_words = split(" ",$size_line[1]);
-       @mymaker = split ("::",$mem_words[1]);
- 
-       $maker_name[$num_maker] = $mymaker[0];
+       @size_line = split(" ",$line); 
+       if($size_line[0] eq "QAInfo:" and $size_line[5] eq "starreco") {
+     
+        $maker_size[$num_maker] += $size_line[9];
+         $mymaker = $size_line[3];
+       $maker_name[$num_maker] = $mymaker;
        $num_maker++;
-       if( $line =~ /tree.EndMaker/){
+       if( $mymaker eq "tree:"){
          $last_maker = $num_maker;
          $num_maker = 0; 
        }
       }
-  
+     }
+   }
     # get  number of events
-    if ( $line =~ /Done with Event no. ([0-9]+)\W+([0-9]+)/ ) {
+    if ( $line =~ /QAInfo: Done with Event no. ([0-9]+)\W+([0-9]+)/ ) {
       $num_event = $1;
 
     } 
+    
+    # check if job crashed due to break_buss_error
+     if($line =~ /buss error/) {
+         $break_buss = "Break buss error";
+       }
 
-    # check if job crashed
+
+    # check if job crashed due to segmentation violation
     if ($line =~ /segmentation violation/) {
              $segmentation_violation = $previous_line;
     }
@@ -203,58 +234,103 @@ sub parse_log($) {
    
    if ( defined($segmentation_violation) ){
 
-   print( "***Segmentation violation found:  ", $segmentation_violation, "***\n");
+   print( "***Segmentation violation found:  ", "***\n");
 
  }
-   print(">>>>>>>>>>  Job status:  ", $jrun, "  <<<<<<<<<<\n");
+  if ( defined($break_buss) ){
+
+   print( "***Break *** buss error:  ", "\n");
+
+ } 
+
+  print("Job status:  ", $jrun, " \n");
 
    print '=' x 80, "\n";
-   print(">>> Average memory usage for each Maker at the time of execution <<<\n");
-   print '=' x 80, "\n";
+   print(">>>>>>>>>> Maker's tag <<<<<<<<<<\n");
+   print '=' x 80, "\n"; 
 
-   for ($i = 1; $i < $last_maker; $i++){
+   for ($i = 0; $i <= $last_tag_line; $i++){
+   print $line_tag[$i], "\n";
+ }
+
+   print '=' x 80, "\n";
+   print(">>> Average memory usage for each package at the time of execution <<<\n");
+   print '=' x 80, "\n";
+   
+
+   for ($i = 0; $i < $last_maker; $i++){
 
    $msize_aver[$i] = $maker_size[$i]/($num_event * 1000);
-   printf("%s :       Memory size =  %10.3f  MB; \n", $maker_name[$i], $msize_aver[$i]);
-   }        
+}
+   printf("Package   %s              Memory size =  %10.3f  MB; \n", $maker_name[0], $msize_aver[0]);
+   printf("Package   %s           Memory size =  %10.3f  MB; \n", $maker_name[1], $msize_aver[1]);
+   printf("Package   %s           Memory size =  %10.3f  MB; \n", $maker_name[2], $msize_aver[2]);
+   printf("Package   %s         Memory size =  %10.3f  MB; \n", $maker_name[3], $msize_aver[3]);
+   printf("Package   %s        Memory size =  %10.3f  MB; \n", $maker_name[4], $msize_aver[4]);
+   printf("Package   %s       Memory size =  %10.3f  MB; \n", $maker_name[5], $msize_aver[5]);
+   printf("Package   %s      Memory size =  %10.3f  MB; \n", $maker_name[6], $msize_aver[6]);
+   printf("Package   %s     Memory size =  %10.3f  MB; \n", $maker_name[7], $msize_aver[7]);
+   printf("Package   %s             Memory size =  %10.3f  MB; \n", $maker_name[8], $msize_aver[8]);
+   printf("Package   %s             Memory size =  %10.3f  MB; \n", $maker_name[9], $msize_aver[9]);  
+   printf("Package   %s             Memory size =  %10.3f  MB; \n", $maker_name[10], $msize_aver[10]);
+   printf("Package   %s           Memory size =  %10.3f  MB; \n", $maker_name[11], $msize_aver[11]);
+   printf("Package   %s         Memory size =  %10.3f  MB; \n", $maker_name[12], $msize_aver[12]);
+   printf("Package   %s              Memory size =  %10.3f  MB; \n", $maker_name[13], $msize_aver[13]);
+   printf("Package   %s              Memory size =  %10.3f  MB; \n", $maker_name[14], $msize_aver[14]);
+   printf("Package   %s            Memory size =  %10.3f  MB; \n", $maker_name[15], $msize_aver[15]);
+   printf("Package   %s          Memory size =  %10.3f  MB; \n", $maker_name[16], $msize_aver[16]);
+   printf("Package   %s             Memory size =  %10.3f  MB; \n", $maker_name[17], $msize_aver[17]);
+   printf("Package   %s    Memory size =  %10.3f  MB; \n", $maker_name[18], $msize_aver[18]);
+   printf("Package   %s        Memory size =  %10.3f  MB; \n", $maker_name[19], $msize_aver[19]);
+   printf("Package   %s              Memory size =  %10.3f  MB; \n", $maker_name[20], $msize_aver[20]);
+   printf("Package   %s            Memory size =  %10.3f  MB; \n", $maker_name[21], $msize_aver[21]);  
 }
  #--------------------------------------------------------------------------
   
  # parse end of file
  sub timestamp($) {
    my $job_log = $_[0];
-   my $no_events;    
+   my $no_event ;   
    my @cpu_output;
    my @part;
+   my @myword; 
    my $end_line;
    my $Maker;
    my @words;
    my $real_time;
    my $cpu_time;
-
+   my $num_ln = 0;
+   my $jj;
     print '=' x 80, "\n";
     print ">>>>>>>>>>>>>>>  Average CPU TIME per EVENT for Makers <<<<<<<<<<<<<<<\n";
     print '=' x 80, "\n";    
-  @cpu_output = `tail -70 $job_log`;
+
+ @cpu_output = `tail -90 $job_log`;
   foreach $end_line (@cpu_output){
-   if ($end_line =~ /Done with Event no. ([0-9]+)\W+([0-9]+)/ ) {
-      $no_events = $1;
-    } 
+          chop $end_line;
+    if ($end_line =~ /Done with Event/ ) {
+       @words = split (" ",$end_line);
+      $no_event = $words[5]; 
+    }
+     
    if ($end_line =~ /Cpu Time/) {
-     @part = split /:/, $end_line;
-     $Maker = $part[0];
-     @words = split(" ",$part[1]);
-     $real_time = $words[3] / $no_events;
-     $cpu_time = $words[8] / $no_events;
+     @part = split (" ", $end_line); 
+    if($part[0] ne "QAInfo:" and $part[2] =~ /Real/) {        
+     @myword = split /:/, $end_line; 
+     $Maker = $myword[1]; 
+     @words = split(" ",$myword[2]);
+     $real_time = $words[3] / $no_event;
+     $cpu_time = $words[8] / $no_event;
 
 #    print ($Maker, ": Real Time = ", $real_time," seconds;   Cpu Time = ", $cpu_time, " seconds; \n");
-    printf ("%s : Real Time =  %10.3f seconds;   Cpu Time = %10.3f seconds;\n", $Maker, $real_time, $cpu_time);
+   printf ("%s : Real Time =  %10.3f seconds;   Cpu Time = %10.3f seconds;\n", $Maker, $real_time, $cpu_time);
      if ($end_line =~ /bfc/){
         last;
-     } 
-    }
    }
-   print '=' x 80, "\n";
+  }
+ }   
+} 
+  print '=' x 80, "\n";
    print "End of file";
    close (STDOUT);
  }
