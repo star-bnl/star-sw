@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 1.17 2000/05/18 21:57:19 lasiuk Exp $
+ * $Id: StRchMaker.cxx,v 1.18 2000/05/23 16:49:51 lasiuk Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
- * Revision 1.17  2000/05/18 21:57:19  lasiuk
- * dev patch
+ * Revision 1.18  2000/05/23 16:49:51  lasiuk
+ * writing to StEvent/StRichCollection
  *
  * Revision 1.18  2000/05/23 16:49:51  lasiuk
  * writing to StEvent/StRichCollection
@@ -51,22 +51,37 @@
 
 #include "StRchMaker.h"
 #include "StChain.h"
+#include "St_DataSetIter.h"
 
+#include "StGlobals.hh"
 #include "StEventTypes.h"
+// #include "StContainers.h"
+// #include "StRichCollection.h"
+// #include "StRichHit.h"
+#include "StRichPixel.h"
+#include "StRichMCPixel.h"
 #include "StEvent/StRichMCHit.h"
+#include "StEvent/StRichPixel.h"
+#include "StEvent/StRichMCPixel.h"
+
+//
 // Interfaces
 //
 // DAQ Libraries
-
+#include "StDaqLib/GENERIC/EventReader.hh"
 #include "StDaqLib/RICH/RICH_Reader.hh"
 #include "StDAQMaker/StDAQReader.h"
+// Simulation
+#include "StRrsMaker/StRrsReader.h"
 #include "StRrsMaker/StRichPadPlane.h"
+#include "StRrsMaker/StRichSinglePixel.h"
 #include "StRrsMaker/StRichSingleMCPixel.h"
 // Database
 #ifdef RCH_WITH_PAD_MONITOR
 #include "StRrsMaker/StRichPadMonitor.h"
 
 #ifdef RICH_WITH_PAD_MONITOR
+#include "StRichDisplayMaker/StRichPadMonitor.h"
 #endif
 
 // Internal Rch
@@ -85,8 +100,8 @@
 //idl in $STAR/include/../pams/global/idl/dst_rch_pixel.idl
 #include "dst_rch_pixel.h"
 ClassImp(StRchMaker) // macro
-StRchMaker::StRchMaker(const char *name, int daq, int matrix, int sa)
-    : StMaker(name), mDaq(daq), mUseMatrix(matrix), mWithDstPixels(sa)
+StRchMaker::StRchMaker(const char *name, int daq, int matrix, int cf)
+    : StMaker(name), mDaq(daq), mUseMatrix(matrix), mCfOnly(cf)
 
     StRchMaker::StRchMaker(const char *name, int daq, int matrix, int cf)
 	: StMaker(name), mDaq(daq), mUseMatrix(matrix), mCfOnly(cf)
@@ -169,189 +184,227 @@ int StRchMaker::adcDecoder(unsigned long code,
 }
 
 //-----------------------------------------------------------------
-    ofstream raw("./sa.txt");
+
 Int_t StRchMaker::Make() {
+#ifdef RCH_DEBUG
     ofstream raw("./rchMaker.txt");
+#endif
     cout << "RchMaker::Make()" << endl;
+
+    //
+    // Initialize Flags
+    //
+    mRichCollectionPresent    = 0;
+    mPixelCollectionPresent   = 0;
+    mClusterCollectionPresent = 0;
+    mHitCollectionPresent     = 0;
+
+
+    //
+    // ptr initialization
     //
     mTheRichCollection = 0;
-    //
-    //cout << "  # " << mEventNumber << endl;
-    //
-    vector<StRichSinglePixel*> pixelStore;
-    pixelStore.clear();
     
-//     cout << "\n **************************\n" << endl;
-//     cout << "Try get StEvent " << endl;
+    //
+    // increase event counter
+    //
+    mEventNumber++;
+    //PR(mEventNumber);
+
+    //
+    // Load the pixels into a container for
 //      do {
-    StEvent* myEvent = (StEvent *) GetInputDS("StEvent");
-    StEvent& ev = *myEvent;
+//        if(getchar()) break;
+//      } while (true);
+
     //
-    // should be a data member?
-    StRichPixelCollection* theCollection;
-    int pixelsInHand = 0;
+    // Try get StEvent Structure
     //
-    if (myEvent) {
-	//cout << "StEvent structure Exists! " << endl;
-	theCollection = ev.richPixelCollection();
-	cout << " *** Try make one yourself" << endl;
-	if(theCollection) {
-	    cout << "RICH Pixels in StEvent\n";
-	    pixelsInHand = 1;
+    mEvent = (StEvent *) GetInputDS("StEvent");
+    //StEvent& ev = *mEvent;
+
+    //
+    // Interogate StEvent structure
+    //
+    
+    if (mEvent) {
+	mTheRichCollection = mEvent->richCollection();
+	if(mTheRichCollection) {
+	    cout << "StEvent richCollection Exists" << endl;
+	    mRichCollectionPresent = 1;
+	    if(mTheRichCollection->pixelsPresent()) {
+		cout << "StEvent RichPixelCollection Exists" << endl;
+		mPixelCollectionPresent = 1;
+	    }
+	    else {
+		cout << "** StEvent RichPixelCollection DOES NOT Exist" << endl;
+	    }
+	    if(mTheRichCollection->clustersPresent()) {
+		cout << "StEvent RichClusters Exists" << endl;
+		mClusterCollectionPresent = 1;
+	    }
+	    else {
+		cout << "** StEvent RichClusters DOES NOT Exist" << endl;
+	     cout << "** StEvent richCollection DOES NOT Exist" << endl;
+	     cout << "** StEvent RichPixelCollection DOES NOT Exist" << endl;
+	     cout << "** StEvent RichClusterCollection DOES NOT Exist" << endl;
+	     cout << "** StEvent RichHitCollection DOES NOT Exist" << endl;
+	    cout << "** StEvent RichPixelCollection DOES NOT Exist" << endl;
+	    cout << "** StEvent RichClusterCollection DOES NOT Exist" << endl;
+	    cout << "** StEvent RichHitCollection DOES NOT Exist" << endl;
 	}
+    }
+    else {
+	cout << " *****WARNING IN STRCHMAKER*****" << endl;
+	cout << " *****StEvent structure does not exist" << endl;
+	cout << " *** Try make one yourself" << endl;
 	mEvent = new StEvent();
-    if(!pixelsInHand) {
-	//cout << "RICH Pixels not in StEvent\n";
-	//cout << "\tTRY GET THE DATA SETS!" << endl;
+	//AddData(new St_ObjectSet("StRichEvent", mEvent));
+
+    }
+
     //
-	    //cout << "Sim" << endl;
-	    St_ObjectSet *rrsEvent = (St_ObjectSet*)GetDataSet("Rrs/.const/richPixels");
+    // If there are no pixels, get the interface access to the data
+    //
+    if(!mPixelCollectionPresent) {
+	cout << " No Pixel Collection!!!  -->  TRY GET THE DATA SETS!" << endl;
+	if(!mDaq) {
 	    cout << "Sim Mode" << endl;
 	    St_ObjectSet *rrsEvent =
 		(St_ObjectSet*)GetDataSet("Rrs/.const/richPixels");
 	    if(!rrsEvent) {
 		cout << "\tDataSet: rrsEvent not there\n";
 		cout << "\tSkip this event\n" << endl;
-	    StRichPadPlane* myRichSimData = (StRichPadPlane*)(rrsEvent->GetObject());
-	    if(!myRichSimData) {
+		clearPadMonitor();
+		return kStWarn;
+	    }
+
 	    StRichPadPlane* theRichSimData =
 		(StRichPadPlane*)(rrsEvent->GetObject());
 	    if(!theRichSimData) {
 		cout << "\tRichSimData: not there\n";
 		cout << "\tSkip this event\n" << endl;
-	    mTheRichReader = new StRrsReader(myRichSimData, -9);
-		return kStWarn;
-	    }
-	    //cout << "DAQ" << endl;
-	}
-		return kStWarn;
 		clearPadMonitor();
 		return kStWarn;
-	
-	//
-	// If the StRichPixelCollection hasn't been retrieved from StEvent
-	// the dataSet must be produced.
-	//
-	// Create the table...right now with the maximum number of entries
-	// this is cleaned up immediately
-	//
-
-	//cout << "Try allocalte richPixelTable" << endl;
-	St_dst_rch_pixel* richPixelTable =
-	    new St_dst_rch_pixel("dst_rch_pixel",mNumberOfPads);
-	
-	if(mTheRichReader) { // no reader
-	    //
-	    // Write to the DST!
-	    //
-	    // this is used in order to index the table entry!
-	    int currentTableRow = 0;
 	    }
-	    for(int iPad=0; iPad<mPads; iPad++) {  //x--> 160
-		for(int iRow=0; iRow<mRows; iRow++) { // y -> 96
-		
-		    unsigned long theADCValue =
-			mTheRichReader->GetADCFromCoord(iPad,iRow);
-		    
-		    //pack adc/row/pad into a single long.  Use:
-		    // the first 8 bits for the Pad (0-159)
-		    // the next  8 bits for the Row (0-96)
-		    // the next 11 bits for the ADC (0-1023)
+	    mTheRichReader = new StRrsReader(theRichSimData, -9);
+	}
+		return kStWarn;
+	    }
 
-		    if(theADCValue) {
-			unsigned long codedValue = 0;
-			codedValue = (theADCValue << 16) | (iRow << 8) | iPad;
+	    mTheDataReader = (StDAQReader*)(mTheRichData->GetObject());
+	    if(!mTheDataReader) {
+		cout << "\tStDAQReader*: not there\n";
+		cout << "\tSkip this event\n" << endl;
+		clearPadMonitor();
+		return kStWarn;
+	    }
+	    mTheRichReader = mTheDataReader->getRICHReader();
+	}
 
-			//
-			// fill the pixel store
-			pixelStore.push_back(new StRichSinglePixel(iPad,
-								   iRow,
-								   theADCValue));
-
-			//
-			// fill the dst structure
-			dst_rch_pixel_st* aPixel = new dst_rch_pixel_st;
-			aPixel->codedData = codedValue;
-		    
-			//
-			// add to the table
-			//
-			richPixelTable->AddAt(aPixel, currentTableRow);
-			currentTableRow++;
-			    
-#ifdef RCH_DEBUG
-			if (theADCValue > 0) {
-			    raw << "pad: "  << iPad
-				<< " row: " << iRow
-				<< " adc: " << theADCValue
-				<< " code " << codedValue << endl;
-			    
-			    unsigned long decodepad;
-			    unsigned long decoderow;
-			    unsigned long decodeadc;
-			    if(adcDecoder(codedValue,&decodepad,&decoderow,&decodeadc)) {
-				raw << decodepad << "/"
-				    << decoderow << "/"
-				    << decodeadc << endl;
-			    }
-			}
-#endif	    
-#ifdef RCH_HISTOGRAM
-			mRawData[0] = iRow;
-			mRawData[1] = iPad;
-			mRawData[2] = theADCValue;
-			mRawData[3] = mEventNumber;
-			mPadPlane->Fill(mRawData);
-#endif
-		    } // if (theADCvalue) ?fill the dst structure 
-		} // loop over rows
-	    } // loop over pads
-
-	    //
-	    // Add the data to the dataset!
-	    //
-	    AddData(richPixelTable);
-
-		
-	} // if I couldn't get the reader!
 	if(mTheRichReader) {
-	    cout << "Error::StRchMaker::Make()\n";
-	    cout << "\tCannot get the mTheRichReader\n";
+	    cout << "Got the Reader " << endl;
+	}
 	else {
 	    cout << "\tCould not get a Reader\n";
 	    cout << "\tSkip Event" << endl;
-	    
-    } // RICH pixels not in hand...not in STEVENT
-    else {
-	// the pixels are in StEvent
-	// get the pixels
-	cout << "Load the pixels from StEvent" << endl;
-	for(unsigned int ii=0; ii< theCollection->size(); ii++) {
-	    StRichPixel aPixel = theCollection->pixel(ii);
-	    pixelStore.push_back(new StRichSinglePixel(aPixel.pad(),
-						       aPixel.row(),
-						       aPixel.adc()));
-	}
 		} // if (theADCvalue) ?fill the dst structure 
-
-    // StEvent Structure does NOT exist
-    if(!pixelsInHand && !mDaq) {
-	// delete the reader each time!
-	delete mTheRichReader;
-	mTheRichReader = 0;
+	    } // loop over rows
+	} // loop over pads
     }
+    
+    //
+    // If the StRichPixelCollection hasn't been retrieved from StEvent
+
+    for(int iPad=0; iPad<mPads; iPad++) {  //x--> 160
+	for(int iRow=0; iRow<mRows; iRow++) { // y -> 96
+	    
+	    unsigned long theADCValue =
+		mTheRichReader->GetADCFromCoord(iPad,iRow);
+	    if (theADCValue) {
+	    //pack adc/row/pad into a single long.  Use:
+	    // the first 8 bits for the Pad (0-159)
+	    // the next  8 bits for the Row (0-96)
+	    // the next 11 bits for the ADC (0-1023)
+		
+	    if(theADCValue) {
+		unsigned long codedValue = 0;
+		codedValue = (theADCValue << 16) | (iRow << 8) | iPad;
+		
+		//
+		// fill the pixel store
+		//
+		if(dynamic_cast<StRrsReader*>(mTheRichReader)) {
+		    // ...from simulation
+		    anIDList mcInfo =
+			dynamic_cast<StRrsReader*>(mTheRichReader)->GetMCDetectorInfo(iPad, iRow);
+		    mPixelStore.push_back(new StRichSingleMCPixel(iPad,
+								  iRow,
+								  theADCValue,
+			    );
+		    }
+		    mPixelStore.push_back(new StRichSingleMCPixel(iPad,iRow,theADCValue,
+		    // ...from data
+								  mcInfo));
+		}
+#ifdef RCH_DEBUG
+		if (theADCValue > 0) {
+		    raw << "pad: "  << iPad
+			<< " row: " << iRow
+			<< " adc: " << theADCValue
+			<< " code " << codedValue << endl;
+			
+		    unsigned long decodepad;
+		    unsigned long decoderow;
+		    unsigned long decodeadc;
+		    if(adcDecoder(codedValue,&decodepad,&decoderow,&decodeadc)) {
+			raw << decodepad << "/"
+			    << decoderow << "/"
+			    << decodeadc << endl;
+		    }
+		}
+#endif	    
+#ifdef RCH_HISTOGRAM
+		mRawData[0] = iRow;
+		mRawData[1] = iPad;
+		mRawData[2] = theADCValue;
+		mRawData[3] = mEventNumber;
+		mPadPlane->Fill(mRawData);
+#endif
+	    } // if (theADCvalue) ?fill the dst structure 
+	} // loop over rows
+    } // loop over pads
+	
 	}
     }
+    
+
+    //
+    // If we only want to run the cluster finder...load the pixels from
+    // StEvent...
+    //
+//     if(mCfOnly) {
+// 	// Load the pixels from StEvent
+// 	// get the pixels
+// 	cout << "WARNING:\n";
+// 	cout << "\tLoad the *CODED* pixels from StEvent\n";
+// 	cout << "\tNo MC info is available"  << endl;
+// 	for(unsigned int ii=0; ii< theCodedCollection->size(); ii++) {
+// 	    StRichPixel aPixel = theCodedCollection->pixel(ii);
+// 	    mPixelStore.push_back(new StRichSinglePixel(aPixel.pad(),
+// 						       aPixel.row(),
+// 						       aPixel.adc()));
+// 	}
 //     }
-    // Start the cluster finder
-    // write it into StEvent if possible
+    
+    //
     // If there are pixels in the pixelStore
     // Start the cluster finder...
     // ...then, write it into StEvent...if possible
     //
     
     // the cluster finder stuff
-    mClusterFinder->loadPixels(pixelStore);
+    //
     cout << "At the cluster finder" << endl;
     mClusterFinder->clearAndDestroyAll();
 #ifdef RCH_WITH_PAD_MONITOR
@@ -360,11 +413,11 @@ Int_t StRchMaker::Make() {
 #endif
     
 #ifdef RCH_WITH_PAD_MONITOR
-    if(!mTheRichReader) {
-	for(unsigned int jj=0; jj<pixelStore.size(); jj++) {
-	    thePadMonitor->drawPad(*pixelStore[jj]);
-	}
-    }
+//     if(!mTheRichReader) {
+// 	for(unsigned int jj=0; jj<mPixelStore.size(); jj++) {
+// 	    thePadMonitor->drawPad(*mPixelStore[jj]);
+// 	}
+//     }
 	cerr << "\n In drawing Pixels\n";
     }
     thePadMonitor->update();
@@ -378,7 +431,10 @@ Int_t StRchMaker::Make() {
     mClusterFinder->makeTheClustersAndFilter();
     
 #ifdef RCH_DEBUG
-    
+    mClusterFinder->printList(raw);
+    mClusterFinder->dumpClusterInformation(raw);
+#endif
+
     if(mUseMatrix) {
 	cout << "==> USE MATRIX" << endl;
 	if(!mClusterFinder->makeHitsFromPixelMatrix()) {
@@ -399,14 +455,19 @@ Int_t StRchMaker::Make() {
     
 #ifdef RCH_DEBUG
     cout << "Dump Hit Info==>size: " << mClusterFinder->getHits().size() << endl;
-    cout << "Try get the hits" << endl;
-    HitVector theHits = mClusterFinder->getHits();
-    cout << "got the hits" << endl;
+    mClusterFinder->dumpHitInformation(raw);
+#endif
+
+    //
+    // get the hits for 2 reasons:
+    // - pass via the data set
+    // - histogram and padMonitor
+    //
 
 #ifdef RCH_WITH_PAD_MONITOR
-    for(unsigned int jj=0; jj<theHits.size(); jj++) {
-	//cout << "StRchMaker::drawHit() " << *theHits[jj] << endl;
-	thePadMonitor->drawHit(theHits[jj]);
+    mTheHits = mClusterFinder->getHits();
+
+#ifdef RICH_WITH_PAD_MONITOR
     for(unsigned int jj=0; jj<mTheHits.size(); jj++) {
 	//cout << "StRchMaker::drawHit() " << *mTheHits[jj] << endl;
 	thePadMonitor->drawHit(mTheHits[jj]);
@@ -434,42 +495,194 @@ Int_t StRchMaker::Make() {
 	mCluster[3] = myClusters[kk]->numberOfPads();
 	mCluster[4] = mEventNumber;
 	mClusters->Fill(mCluster);
-    for(kk=0; kk<theHits.size(); kk++) {
-	mhc->Fill(theHits[kk]->charge());
-	mhmc->Fill(theHits[kk]->maxAmplitude());
-	mhc2m->Fill(theHits[kk]->charge()/theHits[kk]->maxAmplitude());
+    }
+    
+    // hits
+    for(kk=0; kk<mTheHits.size(); kk++) {
 	mhc->Fill(mTheHits[kk]->charge());
-	mHit[0] = theHits[kk]->charge();
-	mHit[1] = theHits[kk]->maxAmplitude();
+	mhmc->Fill(mTheHits[kk]->maxAmplitude());
+	mhc2m->Fill(mTheHits[kk]->charge()/mTheHits[kk]->maxAmplitude());
 	
 	mHit[0] = mTheHits[kk]->charge();
 	mHit[1] = mTheHits[kk]->maxAmplitude();
 	mHit[2] = mEventNumber;
 	mHits->Fill(mHit);
-   
-
+	
+    }
 #endif
     
+    
     //
-    PR(theHits.size());
-    mSimpleHitCollection->mTheHits = theHits;
+    // Here is where the Hit Collection should be written out
+    // ...pass the hits via the data set
     //
+    PR(mTheHits.size());
+    mSimpleHitCollection->mTheHits = mTheHits;
+    PR(mSimpleHitCollection->mTheHits.size());
+    
+	//delete mTheRichCollection;
+	mTheRichCollection = 0;
+    }
+    if(mEvent) {
+	this->fillStEvent();
+    }
+
+
+    // Cleanup the reader if using daq
+    if(!mDaq) {
+	// delete the reader each time!
+	if(mTheRichReader) {
+	    delete mTheRichReader;
 	}
-//     for(int zz=0; zz<mSimpleHitCollection->mTheHits.size(); zz++) {
-// 	PR(mSimpleHitCollection->mTheHits[zz]);
-//     }
 	mTheRichReader = 0;
     }
 
+    return kStOK;
+}
+
+void StRchMaker::fillStEvent()
+{
+    //
+    // This function means there is a dependency on the
+    // StEvent classes
+    //
+    //
+    // Write At Least the Hits?
+    //
+    cout << "\nStRchMaker::fillStEvent()" << endl;
+    StRichCollection *richCollection;
+
+    if(!mTheRichCollection) {
+	cout << " StRchMaker::Make a new collection" << endl;
+	richCollection = new StRichCollection();
+
+	//AddData(new St_ObjectSet("RichCollection", richCollection));
+    }
+    else {
+	cout << " StRchMaker::use the already existing collection" << endl;
+	richCollection = mTheRichCollection;
+    }
+
+    if(!(richCollection->pixelsPresent())) {
+    //
+//    if(!(richCollection->pixelsPresent())) {
+	cout << " StRchMaker::fill the pixels" << endl;
+	StRichSinglePixelCollection thePixels = mClusterFinder->getPixels();
+	PR(thePixels.size());
+	for(size_t ii=0; ii<thePixels.size(); ii++) {
+ 	    unsigned long codedValue = 0;
+	    //PR(dynamic_cast<StRichSingleMCPixel*>(thePixels[ii]));
+ 	    unsigned long adc = static_cast<unsigned long>(thePixels[ii]->charge());
+ 	    unsigned long row = thePixels[ii]->row();
+ 	    unsigned long pad = thePixels[ii]->pad();
+	    
+ 	    codedValue = (adc << 16) | (row << 8) | pad;
+
+  	    if(dynamic_cast<StRichSingleMCPixel*>(thePixels[ii])) {
+  		//cout << " ::fillStEvent() -> MC pixel" << endl;
+		StRichMCPixel* persistentPixel = new StRichMCPixel(codedValue);
+	        anIDList mcInfo = dynamic_cast<StRichSingleMCPixel*>(thePixels[ii])->MCInfo();
+		//
+		for(size_t jj=0; jj<mcInfo.size(); jj++) {
+ 		    persistentPixel->addInfo(new StRichMCInfo(mcInfo[jj].mHitID,
+							      mcInfo[jj].mG_ID,
+							      mcInfo[jj].mTrackp,
+							      mcInfo[jj].mCharge,
+							      static_cast<unsigned short>(mcInfo[jj].mSignalType)));
+		}
+
+ 		cout << " ::fillStEvent() -> plain pixel" << endl;
+	    }
+ 	    else {
+ 		//cout << " ::fillStEvent() -> plain pixel" << endl;
+ 		richCollection->addPixel(new StRichPixel(codedValue));
+ 	    }
+  	}
+    }
+    
+    //
+    if(!richCollection->clustersPresent()) {
+    //PR(richCollection->clustersPresent());
+//    if(!richCollection->clustersPresent()) {
+    if(1) {
+	cout << " StRchMaker::fill the clusters" << endl;
+	ClusterVector theClusters = mClusterFinder->getClusters();
+	PR(theClusters.size());
+	for(size_t ii=0; ii<theClusters.size(); ii++) {
+	    StRichCluster* thePersistentCluster = new StRichCluster(theClusters[ii]->numberOfPads(),
+								    theClusters[ii]->numberOfLocalMax(),
+								    theClusters[ii]->firstPad(),
+								    theClusters[ii]->rms2());
+	    thePersistentCluster->setMinimumAmplitudeOfLocalMax(theClusters[ii]->minimumAmplitudeOfLocalMax());
+	    
+	    richCollection->addCluster(thePersistentCluster);
 	}
+        
+    }
+
+    //
+    if(!richCollection->hitsPresent()) {
+    //
+//    if(!richCollection->hitsPresent()) {
+    if(1) {
+	cout << " StRchMaker::fill the hits" << endl;
+	PR(mTheHits.size());
+	for(size_t ii=0; ii<mTheHits.size(); ii++) {
+	    if(dynamic_cast<StRichSimpleMCHit*>(mTheHits[ii])) {
+		//cout << "mchit ";
+								StThreeVectorF(0,0,0),
+								StThreeVectorF(mTheHits[ii]->localError().x(),
+									       mTheHits[ii]->localError().y(),
+									       mTheHits[ii]->localError().z()),
+								1,
+		//StRichMCInfo make this, then add it
+		//thePersistentHit.setMCInof(StRichMCInfo)
+		//
+		    );
+		
+		// Add it
+		richCollection->addHit(thePersistentHit);
+	    }
+	    else {
+		//cout << "hit ";
+							    StThreeVectorF(0,0,0),
+							    StThreeVectorF(mTheHits[ii]->localError().x(),
+									   mTheHits[ii]->localError().y(),
+									   mTheHits[ii]->localError().z()),
+							    1,
+		//
+		// member functions to add other info if necessary?
+		//
+		//thePersistentHit->setClusterNumber();
+							    mTheHits[ii]->maxAmplitude(),
+							    static_cast<unsigned char>(0));
+	
+		= StThreeVectorF( mTheHits[ii]->internal().x(),
+				  mTheHits[ii]->internal().y(),
+				  mTheHits[ii]->internal().z());
+	}
+        
+    }
+    //
+    //cout << endl;
+    //
+    //
+    // Store the rich collection into StEvent
+    cout << "Write to StEvent" << endl;
+    //PR(richCollection);
+    //PR(mEvent);
+    mEvent->setRichCollection(richCollection);
+    //PR(mEvent->richCollection());
+    //
+    //cout << "Pass the collection via the data set now as well" << endl;
     AddData(new St_ObjectSet("StRichEvent", richCollection));
     
 }
 //-----------------------------------------------------------------
-  printf("* $Id: StRchMaker.cxx,v 1.17 2000/05/18 21:57:19 lasiuk Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.18 2000/05/23 16:49:51 lasiuk Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
-    printf("* $Id: StRchMaker.cxx,v 1.17 2000/05/18 21:57:19 lasiuk Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 1.18 2000/05/23 16:49:51 lasiuk Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
