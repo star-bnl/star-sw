@@ -10,8 +10,11 @@
 #include "StiMapUtilities.h"
 
 
-StiDetector::StiDetector() : gas(0), material(0), shape(0), placement(0), mNode(0), _cos(0), _sin(0),_key1(-1),_key2(-1)
-{ }
+StiDetector::StiDetector()
+{
+  memset(mBeg,0,mEnd-mBeg+1);
+  _key1 = _key2 = -1;
+}
 
 StiDetector::~StiDetector()
 {}

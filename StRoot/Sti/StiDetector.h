@@ -116,6 +116,7 @@ public:
 
  protected:
     
+     char mBeg[1];
     /// Toggle switch determining whether this detector is to be added to the detector tree.
     /// The detector is added if the switch is "true"
     bool on;    
@@ -157,7 +158,7 @@ public:
     int _key1, _key2;
 
     StiElossCalculator * _elossCalculator;
-
+    char mEnd[1];
 };
 
 inline void StiDetector::setHitErrorCalculator(const StiHitErrorCalculator * calculator)
