@@ -1,0 +1,12 @@
+/*************************************************************************
+                     sal_get_chi.idl
+*************************************************************************/
+#include "PAM.idl"
+#include "svg_config.idl"
+#include "sal_spt.idl"
+
+interface sal_get_chi: amiModule 
+{
+ STAFCV_T call(in svg_config config,
+               in sal_spt sal_spt);
+};

@@ -1,0 +1,28 @@
+#include "PAM.idl"
+#include "spr_sprpar.idl"
+#include "g2t_svt_hit.idl"
+#include "g2t_track.idl"
+#include "stk_kine.idl"
+#include "svg_geom.idl"
+#include "stk_ctrack.idl"
+#include "stk_track.idl"
+#include "scs_spt.idl"
+#include "egr_globtrk.idl"
+#include "epi_hypo_pid.idl"
+
+interface spr_am : amiModule {
+        STAFCV_T call
+                ( inout spr_sprpar   sprpar
+                , in    g2t_svt_hit  mhits_svt
+                , in    g2t_track    g2t_track
+                , in    stk_kine     mkine
+                , in    svg_geom     svt_geom
+                , inout stk_ctrack   svt_ctrack
+                , inout stk_ctrack   svt_dtrack
+                , inout stk_track    svt_mctrack
+                , in    scs_spt      svt_spt
+                , inout stk_track    svt_track
+                , inout egr_globtrk  globtrk
+                , inout epi_hypo_pid hypo_pid
+                );
+        };

@@ -1,0 +1,15 @@
+/* tpt_res.idl
+*
+*	Table: tpt_res
+*
+*	description: Track residua
+*/
+
+	struct tpt_res{
+		long	trk;
+		long	hit;
+		float	resy;
+		float	resz;
+};
+
+/* Last mod. for tpt_res: $Date: 1997/12/31 14:34:12 $ */

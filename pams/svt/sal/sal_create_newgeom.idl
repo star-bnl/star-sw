@@ -1,0 +1,12 @@
+#include "PAM.idl"
+#include "svg_config.idl"
+#include "sal_rotran.idl"
+#include "sal_geom.idl"
+
+interface sal_create_newgeom:amiModule 
+{
+STAFCV_T call( in svg_config config,
+               in  sal_rotran sal_rotran,
+               out sal_geom sal_geom_real);
+};
+

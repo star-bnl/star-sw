@@ -1,0 +1,10 @@
+/* Filename = mwgg.idl */
+#include "PAM.idl"
+#include "mwc_geo.idl"
+#include "mwc_cal.idl"
+interface mwg:amiModule {
+  STAFCV_T call (
+             inout      mwc_geo     geom ,
+             inout      mwc_cal     cal
+  );
+};

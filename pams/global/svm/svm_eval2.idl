@@ -1,0 +1,30 @@
+/* svm_eval2.idl
+* Module to evalute svm performance
+*/
+
+#include "PAM.idl"
+#include "g2t_gepart.idl"
+#include "scs_spt.idl"
+#include "sgr_groups.idl"
+#include "stk_track.idl"
+#include "tpt_track.idl"
+#include "tte_eval.idl"
+#include "svm_evt_match.idl"
+#include "svm_eval_par.idl"
+#include "svm_eval_svt.idl"
+#include "svm_eval_tpc.idl"
+
+
+interface svm_eval2 : amiModule {
+	STAFCV_T call
+	(in g2t_gepart gepart,
+         in scs_spt svt_spt,
+         in sgr_groups svt_groups,
+	 in stk_track svt_track,
+	 in tpt_track tptrack,
+	 in tte_eval tpeval,
+         inout svm_evt_match evt_match,
+	 inout svm_eval_par eval_par,
+         out svm_eval_svt svt_eval,
+         out svm_eval_tpc tpc_eval);
+};

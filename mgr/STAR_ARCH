@@ -1,0 +1,46 @@
+#!/bin/csh
+#
+# Determine STAR_ARCH variable.
+#
+set mach_os = ` uname -sr | sed -e 's/ //g' -e 's/\.//g' `
+#
+switch ($mach_os)
+case "AIX*":
+	setenv STAR_ARCH aix
+	breaksw
+case "HP-UX*":
+	setenv STAR_ARCH hpux
+	breaksw
+case "IRIX4*":
+case "IRIX5*":
+case "IRIX6*":
+	setenv STAR_ARCH irix
+	breaksw
+case "Linux*":
+	setenv STAR_ARCH linux
+	breaksw
+case "OSF1*":
+	setenv STAR_ARCH osf1
+	breaksw
+case "SunOS4*":
+	setenv STAR_ARCH sun4
+	breaksw
+case "SunOS5*":
+	switch ("`uname -p`")
+	case "*86":
+		setenv STAR_ARCH sun4os5pc
+		breaksw
+	default:
+		setenv STAR_ARCH sun4os5
+		breaksw
+	endsw
+	breaksw
+default:
+	setenv STAR_ARCH unknown
+	breaksw
+endsw
+#
+#echo "mach_os = " $mach_os
+#echo "STAR_ARCH = " $STAR_ARCH
+#echo $STAR_ARCH
+#

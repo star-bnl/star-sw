@@ -1,0 +1,20 @@
+/*   tpipar.h
+*   Table: tpipar
+*        description: parameter file for tpi package          
+*             more..:                                         
+*/
+   struct tpipar {           
+       long       method[2];  /* control used to change method of calc. */
+       long      nrec_cut;   /* cut on nrec */
+       float     chisq1_cut; /* cut on chisq1/nrec */
+       float     chisq2_cut; /* cut on chisq2/nrec */
+       float     mean1[4];   /* dedx vs p mean values 1st param,e,pi,k,p */
+       float     mean2[4];   /* dedx vs p mean 2nd param, e, pi,k,p */
+       float     mean3[4];   /* dedx vs p mean 3rd param, e, pi,k,p */
+       float     sigma1[4];  /* dedx sigma fun of p 1st param, e, pi, K, */
+       float     sigma2[4];  /* sigma dedx fn of p,2nd param e, pi, K, p */
+       float     skew[8];    /* skew of dedx, e, pi, k, p */
+   } ;
+
+/*  Last mod. for tpipar:   774630852 Tue Jul 19 11:14:12 1994 */
+

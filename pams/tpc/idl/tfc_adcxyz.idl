@@ -1,0 +1,19 @@
+/* tfc_adcxyz
+ * Table containing pixel coordinates and ADC values yielded from
+ * the Slow Simulator.
+*/
+   struct tfc_adcxyz{
+	long	nseq;	/* number of sequences on a pad */
+	long	nbuck;	/* number of buckets in a sequence */
+	long	adc;	/* ADC value */
+	long	sector; /* sector number */
+	long	row;	/* local row number */
+	long	pad;	/* local pad number */
+	long	bucket; /* local bucket number */
+	long	fee;	/* fee card number on sector */
+	long	chip;	/* chip number (1 or 2) on fee card */
+	float	x;	/* global x coordinate */
+	float	y;	/* global y coordinate */
+	float	z;	/* global z coordinate */
+   };
+/*  Last modified $Date: 1997/12/31 14:34:11 $ */

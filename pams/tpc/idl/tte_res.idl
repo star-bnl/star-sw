@@ -1,0 +1,14 @@
+/*   tte_res.idl
+*
+*   Table: tte_res
+*   description: Evaluation of the fitting routine       
+*/
+
+   /*******************  Row struct *******************/
+   struct tte_res {          /* Trkres_row_st */ 
+       long      trk;        /* Track id */
+       float     sr;         /* Pulls in the x-y plane */
+       float     sz;         /* Pulls in the s-z plane */
+   };
+/*  Last mod. for tte_kres: $DATE*/
+

@@ -1,0 +1,14 @@
+/* tdi_residual.idl
+ *
+ * Table: tdi_residual
+ * 
+ * Description: residual table
+ */
+
+struct tdi_residual {
+  long trackid;    /* id of track */
+  long hitid;      /* id of hit */
+  long row;        /* tpc row number */
+  float res_xy;    /* xy residual */
+  float res_yz;    /* rz residual */
+};

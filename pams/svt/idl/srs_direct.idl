@@ -1,0 +1,10 @@
+/*   srs_direct.idl
+*   Table: srs_direct
+*        description: srs direct smearing (gaussian)          
+*/
+	struct srs_direct {
+       float     sd;         /* sigma in drift direction */
+       float     st;         /* sigma transverse direction */
+   };
+/*  Last mod. for srs_direct: $Date: 1997/12/31 14:33:40 $ */
+

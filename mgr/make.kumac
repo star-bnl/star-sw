@@ -1,0 +1,35 @@
+macro make pam=pams/tpc/tpt makefile=$STAR_ROOT/mgr/Makefile
+list = $shell('find '//[pam]//' -type d -print')
+exec loop $unquote([list])
+ami/list
+return
+**************************************************
+macro loop 
+do i=1, [#]
+  pam = [%i]
+  if $index([pam],'CVS') = 0 .and. _
+     $index([pam],'inc') = 0 .and. _
+     $index([pam],'idl') = 0 .and. _
+     $index([pam],'wrk') = 0 .and. _
+     $index([pam],'doc') = 0 .and. _
+     $index([pam],'exa') = 0 .and. _
+     $index([pam],'src') = 0 then
+    n = $words([pam],'/') 
+    p = $word([pam],[n],[n],'/')
+    list = $shell('cd '//[pam]//';ls *.idl* *.g')
+    lidm    = $index([list],'.idl') 
+    lg      = $index([list],'.g')
+*   message [pam] [p] [listidm] [lidm] [listg] [lg] 
+    if [lidm]>0 .or. [lg]>0 then
+      shell make -f $STAR_ROOT/mgr/Makefile -C [pam]
+*     message [pam] [p]
+      slib = $STAR_LIB/[p].sl
+      sl = $fexist([slib])
+      if [sl]=1 then
+        gexec $STAR_LIB/[p].sl
+      endif
+    endif
+  endif
+enddo
+return
+endkumac

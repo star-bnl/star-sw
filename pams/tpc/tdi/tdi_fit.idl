@@ -1,0 +1,20 @@
+/* tdi_fit.idl
+ *
+ * Module: tdi_fit
+ *
+ * Description: Tpc DIstortions - selective straight track FIT routine
+ */
+#include "PAM.idl"
+#include "tdi_fit_pars.idl"
+#include "tcl_tphit.idl"
+#include "tdi_strack.idl"
+#include "tdi_residual.idl"
+
+interface tdi_fit : amiModule {
+	STAFCV_T call
+		( in    tdi_fit_pars fit_pars
+                , in    tcl_tphit tphit
+                , out   tdi_strack strack
+                , out   tdi_residual residual
+		);
+};

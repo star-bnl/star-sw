@@ -1,0 +1,18 @@
+/*   epi_glob_pid_eval.idl
+*   Table: epi_glob_pid_eval
+*        description: Evaluation data for each row in table   
+*/
+
+   struct epi_glob_pid_eval {
+       long      id;         /* primary key = global_pid.id              */
+       long      mc_check;   /* =1(0) if glb. trk. is(not) good MC track */
+       long      mc_pid;     /* if mc_check=1 is the Geant pid code #    */
+       long      pid;        /* Reconstr.PID #, copied from global_pid   */
+       long      svt_seg;    /* indicates if global track has svt segmnt */
+       long      tof_seg;    /* indicates if global track has TOF hit    */
+       long      tpc_seg;    /* indicates if global track has tpc segmnt */
+       float     eta;        /* pseudorapidity for global track          */
+       float     invpt;      /* 1/pt copied from globtrk.invpt           */
+   } ;
+/*  Last mod. for glob_pid_eval:  $Date: 1997/12/31 14:33:28 $  */
+

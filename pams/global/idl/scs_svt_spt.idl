@@ -1,0 +1,19 @@
+/* scs_svt_spt.idl 
+*  Table: scs_svt_spt
+*  Parametric representation of recon     
+*  structed SVT space points.              
+*/
+struct scs_svt_spt {
+	long flag; /* Status of point. (Need to define bits) */
+	long id; /* Identifier of reconstructed space point */
+	long id_cluster; /* link to cluster point came from */
+	long id_globtrk; /* key to global track table */
+	long id_match; /* key to match table */
+	long id_mctrack; /* id of montecarlo track */
+	long id_track; /* Link to reconstructed track X is on. */
+	long id_wafer; /* Identifier in svt_geom table of wafer */
+	float cov[3]; /* Errors on X (diagonal for now) */
+	float de[2]; /* Fitted or estimated dE in Si (+error) */
+	float res[3]; /* residu of fit */
+	float x[3]; /* Coordinates in STAR reference system */
+};
