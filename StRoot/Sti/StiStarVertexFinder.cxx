@@ -5,7 +5,9 @@
 #include "StEvent.h"
 #include "StPrimaryVertex.h"
 #include "Sti/Base/Factory.h"
-
+#include "StGenericVertexMaker/StGenericVertexMaker.h"
+#include "StGenericVertexMaker/StGenericVertexFinder.h"
+#include "StMaker.h"
 
 StiStarVertexFinder::StiStarVertexFinder(const string & name)
   : StiVertexFinder(name) //, StGenericVertexFinderMaker()
@@ -36,9 +38,14 @@ StiHit * StiStarVertexFinder::findVertex(StEvent * event)
     throw runtime_error("StiStarVertexFinder::findVertex(StEvent * event) -I- primaryVertex exist");
   
   // call the actual vertex finder method here...
-  // ... something smart happens here...
   // assume the result is stored in StEvent...
-  // extract the position and the 
+  
+  StGenericVertexMaker* gvm = (StGenericVertexMaker*)GetMaker("GenericVertex");
+  StGenericVertexFinder* gvf = gvm->GetGenericFinder();
+  gvf->fit(event);
+  gvf->FillStEvent(event);
+
+
   const StThreeVectorF& vp = event->primaryVertex()->position();
   const StThreeVectorF& ve = event->primaryVertex()->positionError();
   cout <<"StiStarVertexFinder::findVertex(StEvent * event) -I- set hit parameters"<<endl;
