@@ -111,7 +111,6 @@ ULong_t StIO::GetNextKey(TFile *file, const Char_t *name, ULong_t ukey)
   int lname = strlen(name)+1;
   
   lk = file->GetListOfKeys();  if(!lk) goto RETURN;
-  if (!lk->TestBit(kStSorted)) {lk->Sort(); lk->SetBit(kStSorted);}
 
    // Find an object in this list using its name. Requires a sequential
    // scan till the object has been found. Returns 0 if object with specified
