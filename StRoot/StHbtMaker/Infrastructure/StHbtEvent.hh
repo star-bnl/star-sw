@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.hh,v 1.10 2000/08/31 22:31:31 laue Exp $
+ * $Id: StHbtEvent.hh,v 1.11 2001/05/15 15:30:16 rcwells Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.hh,v $
+ * Revision 1.11  2001/05/15 15:30:16  rcwells
+ * Added magnetic field to StHbtEvent
+ *
  * Revision 1.10  2000/08/31 22:31:31  laue
  * StHbtAnalysis: output changed (a little bit less)
  * StHbtEvent: new version, members for reference mult added
@@ -83,6 +86,7 @@ public:
   StHbtThreeVector PrimVertPos() const;
   StHbtTrackCollection* TrackCollection() const;
   StHbtV0Collection* V0Collection() const;
+  double MagneticField() const;
 
   void SetEventNumber(const unsigned short&);
   void SetCtbMult(const unsigned short&);
@@ -96,6 +100,7 @@ public:
   void SetReactionPlane(const float&);
   void SetReactionPlaneError(const float&);
   void SetPrimVertPos(const StHbtThreeVector&);
+  void SetMagneticField(const double&);
 
   // For I/O of this object -- functions defined in StHbtIO.cc
   friend ostream& operator<<(ostream& out, StHbtEvent& ev);
@@ -115,6 +120,7 @@ private:
   StHbtThreeVector mPrimVertPos;
   StHbtTrackCollection* mTrackCollection;
   StHbtV0Collection* mV0Collection;
+  double mMagneticField; // magnetic field in Z direction
 
   friend class StHbtIOBinary;
 };
@@ -131,6 +137,7 @@ inline void StHbtEvent::SetUncorrectedNumberOfNegativePrimaries(const unsigned i
 inline void StHbtEvent::SetReactionPlane(const float& rp){mReactionPlane[0] = rp ;}
 inline void StHbtEvent::SetReactionPlaneError(const float& rp ){mReactionPlane[1]=rp;}
 inline void StHbtEvent::SetPrimVertPos(const StHbtThreeVector& vp){mPrimVertPos = vp;}
+inline void StHbtEvent::SetMagneticField(const double& magF){mMagneticField = magF;}
 
 inline  unsigned short StHbtEvent::EventNumber() const {return mEventNumber;}
 inline  unsigned short StHbtEvent::CtbMult() const {return mCtbMultiplicity;}
@@ -146,6 +153,7 @@ inline  float          StHbtEvent::ReactionPlaneError() const {return mReactionP
 inline StHbtTrackCollection* StHbtEvent::TrackCollection() const {return mTrackCollection;}
 inline StHbtV0Collection* StHbtEvent::V0Collection() const {return mV0Collection;}
 inline StHbtThreeVector StHbtEvent::PrimVertPos() const {return mPrimVertPos;}
+inline double StHbtEvent::MagneticField() const {return mMagneticField;}
 
 
 #endif

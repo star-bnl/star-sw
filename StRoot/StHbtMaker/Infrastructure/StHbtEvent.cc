@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.cc,v 1.9 2000/08/31 22:31:31 laue Exp $
+ * $Id: StHbtEvent.cc,v 1.10 2001/05/15 15:30:16 rcwells Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.cc,v $
+ * Revision 1.10  2001/05/15 15:30:16  rcwells
+ * Added magnetic field to StHbtEvent
+ *
  * Revision 1.9  2000/08/31 22:31:31  laue
  * StHbtAnalysis: output changed (a little bit less)
  * StHbtEvent: new version, members for reference mult added
@@ -67,6 +70,7 @@ StHbtEvent::StHbtEvent(){
   mPrimVertPos[2]=-999.0;
   mTrackCollection = new StHbtTrackCollection;
   mV0Collection = new StHbtV0Collection;
+  mMagneticField=0.0;
 }
 //___________________
 StHbtEvent::StHbtEvent(const StHbtEvent& ev, StHbtTrackCut* tCut, StHbtV0Cut* vCut){ // copy constructor with track and v0 cuts
@@ -102,6 +106,7 @@ StHbtEvent::StHbtEvent(const StHbtEvent& ev, StHbtTrackCut* tCut, StHbtV0Cut* vC
 	  mV0Collection->push_back(v0Copy);
       }
   }
+  mMagneticField=0.0;
 }
 //___________________
 StHbtEvent::~StHbtEvent(){
