@@ -1,44 +1,13 @@
-/***********************************************************************
+/*!
+ * \class StV0I
+ * \author Gene Van Buren, BNL, 24-Apr-2001
  *
- * $Id: StV0I.hh,v 3.8 2003/02/10 15:47:14 genevb Exp $
+ *               V0 micro dst object interface class
+ *               Used for StV0MuDst (reconstructed), StV0Mc (Monte Carlo),
+ *               and StXiI (which is used for StXiMuDst and StXiMc).
  *
- * Author: Gene Van Buren, BNL, 24-Apr-2001
- *
- ***********************************************************************
- *
- * Description: V0 micro dst object interface class
- *              Used for StV0I (reconstructed), StV0Mc (Monte Carlo),
- *              and StXiI (which is used for StXiMuDst and StXiMc).
- *
- ***********************************************************************
- *
- * $Log: StV0I.hh,v $
- * Revision 3.8  2003/02/10 15:47:14  genevb
- * Fixed mt calculations
- *
- * Revision 3.7  2002/07/30 20:07:52  genevb
- * Better cTau calcs
- *
- * Revision 3.6  2002/04/30 16:02:48  genevb
- * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
- *
- * Revision 3.5  2002/02/10 15:29:09  genevb
- * Additional functions for momenta of decay daughters in CM frame
- *
- * Revision 3.4  2001/11/28 05:14:59  genevb
- * Additional decay angle functions
- *
- * Revision 3.3  2001/11/05 23:41:06  genevb
- * Add more dEdx, B field info, careful of changes to TTree unrolling
- *
- * Revision 3.2  2001/08/23 13:20:58  genevb
- * Many bug workarounds...
- *
- * Revision 3.1  2001/05/04 20:15:14  genevb
- * Common interfaces and reorganization of components, add MC event info
- *
- *
- ***********************************************************************/
+ */
+
 #ifndef StV0I_hh
 #define StV0I_hh
 #include "phys_constants.h"
@@ -63,110 +32,170 @@ class StV0I {
 public:
   StV0I() {}
   virtual ~StV0I() {}
+
+// ************************************************************************
+/// @name _________________FUNCTIONS_USEFUL_IN_ALL_V0_TYPES_________________
+// ************************************************************************
+
+  //@{
   virtual void Clear();
-
-// ************************************************************************
-// The following functions are useful in all V0 types
-// ************************************************************************
-
-  // Pointer to event information
-  virtual StStrangeEvMuDst* event();
-  // Set pointer to event information
+  /// Pointer to event information
+          StStrangeEvMuDst* event();
+  /// Set pointer to event information
   virtual void SetEvent(StStrangeEvMuDst*);
-                                                                                  // Chi square of V0 (used only by MuDst)
-  virtual Float_t decayLengthV0() const;         // 3-d decay distance
-  virtual Float_t decayVertexV0X() const=0;      // Coordinates of decay vertex
-  virtual Float_t decayVertexV0Y() const=0;
+  //@}
+
+  /// @name Decay properties
+  //@{
+  /// 3-d decay distance
+  virtual Float_t decayLengthV0() const;
+  virtual Float_t decayVertexV0X() const=0;
+  virtual Float_t decayVertexV0Y() const=0; /// Coordinates of decay vertex
   virtual Float_t decayVertexV0Z() const=0;
+          Float_t alphaV0(); /// Armenteros-Podolanski variables
+          Float_t ptArmV0();
+  /// Lifetime (ctau) assuming (anti)lambda
+          Float_t cTauLambda();
+  /// Lifetime (ctau) assuming k-short
+          Float_t cTauK0Short();
+  //@}
 
-  virtual TVector3 momPos();                     // Momentum of pos. daughter
-  virtual Float_t momPosX() const=0;             // Momentum components of pos. daughter
-  virtual Float_t momPosY() const=0;
+  /// @name Momenta
+  //@{
+  /// Momentum of pos. daughter
+          TVector3 momPos();
+  virtual Float_t momPosX() const=0;
+  virtual Float_t momPosY() const=0; /// Momentum components of pos. daughter
   virtual Float_t momPosZ() const=0;
-  virtual TVector3 momNeg();                     // Momentum of neg. daughter
-  virtual Float_t momNegX() const=0;             // Momentum components of neg. daughter
-  virtual Float_t momNegY() const=0;
+  /// Momentum of neg. daughter
+          TVector3 momNeg();
+  virtual Float_t momNegX() const=0;
+  virtual Float_t momNegY() const=0; /// Momentum components of neg. daughter
   virtual Float_t momNegZ() const=0;
-  virtual TVector3 momV0();                 // Momentum of V0
-  virtual Float_t momV0X() const=0;         // Momentum components of V0
-  virtual Float_t momV0Y() const=0;
+  /// Momentum of V0
+          TVector3 momV0();
+  virtual Float_t momV0X() const=0;
+  virtual Float_t momV0Y() const=0; /// Momentum components of V0
   virtual Float_t momV0Z() const=0;
+  /// Transverse momentum
+          Float_t ptV0();
+  /// Transverse momentum of pos. daughter
+          Float_t ptPos();
+  /// Transverse momentum of neg. daughter
+          Float_t ptNeg();
+  /// Total momentum
+          Float_t ptotV0();
+  /// Total momentum of pos. daughter
+          Float_t ptotPos();
+  /// Total momentum of neg. daughter  
+          Float_t ptotNeg();
+  //@}
 
-  virtual Float_t alphaV0();              // Armenteros-Podolanski variable
-  virtual Float_t ptArmV0();              // Armenteros-Podolanski variable
+  /// @name Mass-dependent properties
+  //@{
+  /// Energy assuming lambda hypothesis
+          Float_t eLambda();
+  /// Energy assuming k-short hypothesis
+          Float_t eK0Short();
+  /// Energy of pos. daughter assuming proton
+          Float_t ePosProton();
+  /// Energy of pos. daughter assuming pion
+          Float_t ePosPion();
+  /// Energy of neg. daughter assuming antiproton
+          Float_t eNegProton();
+  /// Energy of neg. daughter assuming pion
+          Float_t eNegPion();
+  /// Mass assuming lambda hypothesis
+          Float_t massLambda();
+  /// Mass assuming antilambda hypothesis
+          Float_t massAntiLambda();
+  /// Mass assuming k-short hypothesis
+          Float_t massK0Short();
+  /// Rapidity assuming (anti)lambda
+          Float_t rapLambda();
+  /// Rapidity assuming k-short
+          Float_t rapK0Short();
+  //@}
 
-  virtual Float_t eLambda();              // Energy assuming lambda hypothesis
-  virtual Float_t eK0Short();             // Energy assuming k-short hypothesis
-  virtual Float_t ePosProton();           // Energy of pos. daughter assuming proton
-  virtual Float_t ePosPion();             // Energy of pos. daughter assuming pion
-  virtual Float_t eNegProton();           // Energy of neg. daughter assuming antiproton
-  virtual Float_t eNegPion();             // Energy of neg. daughter assuming pion
-  virtual Float_t massLambda();           // Mass assuming lambda hypothesis
-  virtual Float_t massAntiLambda();       // Mass assuming antilambda hypothesis
-  virtual Float_t massK0Short();          // Mass assuming k-short hypothesis
-  virtual Float_t rapLambda();            // Rapidity assuming (anti)lambda
-  virtual Float_t rapK0Short();           // Rapidity assuming k-short
-  virtual Float_t cTauLambda();           // Lifetime (ctau) assuming (anti)lambda
-  virtual Float_t cTauK0Short();          // Lifetime (ctau) assuming k-short
+  /// @name Mass-independent properties
+  //@{
+  /// Polar angle theta
+          Float_t thetaV0();
+  /// Polar angle theta of pos. daughter
+          Float_t thetaPos();
+  /// Polar angle theta of neg. daughter
+          Float_t thetaNeg();
+  /// Pseudorapidity
+          Float_t pseudoRapV0();
+  /// Pseudorapidity of pos. daughter
+          Float_t pseudoRapPos();
+  /// Pseudorapidity of neg. daughter
+          Float_t pseudoRapNeg();
+  //@}
+  
+  /// @name Transverse mass formulae
+  //@{
+  /// Transverse mass assuming lambda
+          Float_t mtLambda();
+  /// Transverse mass assuming k-short
+          Float_t mtK0Short();
+  /// mt-m0 assuming lambda
+          Float_t mtm0Lambda();
+  /// mt-m0 assuming k-short
+          Float_t mtm0K0Short();
+  //@}
+  
+  /// @name Energy and invariant mass formulae for hypothetical masses
+  //@{
+  /// Energy of pos. daughter assuming its mass
+          Float_t ePosHyp(Float_t mass);
+  /// Energy of neg. daughter
+          Float_t eNegHyp(Float_t mass);
+          Float_t massHypV0(Float_t massPos, Float_t massNeg);
+          Float_t eHypV0(Float_t mass);
+          Float_t rapHypV0(Float_t mass);
+          Float_t mtHypV0(Float_t mass);
+  /// Energy, rapidity, mt, mt-m0 of V0 assuming its mass
+          Float_t mtm0HypV0(Float_t mass);
+  //@}
 
-  virtual Float_t ptV0();                 // Transverse momentum
-  virtual Float_t ptPos();                // Transverse momentum of pos. daughter
-  virtual Float_t ptNeg();                // Transverse momentum of neg. daughter
-  virtual Float_t ptotV0();               // Total momentum
-  virtual Float_t ptotPos();              // Total momentum of pos. daughter
-  virtual Float_t ptotNeg();              // Total momentum of neg. daughter  
-  virtual Float_t thetaV0();              // Polar angle theta
-  virtual Float_t thetaPos();             // Polar angle theta of pos. daughter
-  virtual Float_t thetaNeg();             // Polar angle theta of neg. daughter
-  virtual Float_t pseudoRapV0();          // Pseudorapidity
-  virtual Float_t pseudoRapPos();         // Pseudorapidity of pos. daughter
-  virtual Float_t pseudoRapNeg();         // Pseudorapidity of neg. daughter
+  /// @name Cosines of decay and polarization angles for different particle hypotheses
+  //@{
+          Float_t decayCosThetaK0Short();       // k-short    - pos. daughter
+          Float_t decayCosThetaLambda();        // lambda     - pos. daughter
+          Float_t decayCosThetaAntiLambda();    // antilambda - neg. daughter
+          Float_t polCosThetaLambda();          // lambda     - pos. daughter
+          Float_t polCosThetaAntiLambda();      // antilambda - neg. daughter
+          Float_t decayCosThetaPosLambda();     // lambda     - pos. daughter
+          Float_t decayCosThetaNegLambda();     // lambda     - neg. daughter
+          Float_t decayCosThetaPosAntiLambda(); // antilambda - pos. daughter
+          Float_t decayCosThetaNegAntiLambda(); // antilambda - neg. daughter
+  /// This helper function can be used for decayCosTheta of any hypothesis
+  /** m1,m2 = parent,daughter mass; charge = positive/negative daughter */
+          Float_t dCTV0(Float_t m1, Float_t m2, StChargeSign charge);
+  //@}
 
-  virtual Float_t mtLambda();             // Transverse mass assuming lambda
-  virtual Float_t mtK0Short();            // Transverse mass assuming k-short
-  virtual Float_t mtm0Lambda();           // mt-m0 assuming lambda
-  virtual Float_t mtm0K0Short();          // mt-m0 assuming k-short
-
-  // Energy and mass formulae for hypothetical masses
-  virtual Float_t ePosHyp(Float_t mass);  // Energy of pos. daughter
-  virtual Float_t eNegHyp(Float_t mass);  // Energy of neg. daughter
-  virtual Float_t massHypV0(Float_t massPos, Float_t massNeg);
-  virtual Float_t eHypV0(Float_t mass);   // Energy of V0 assuming its mass
-  virtual Float_t rapHypV0(Float_t mass);
-  virtual Float_t mtHypV0(Float_t mass);
-  virtual Float_t mtm0HypV0(Float_t mass);
-
-  // Cosines of decay and polarization angles for different particle hypotheses
-  virtual Float_t decayCosThetaK0Short();       // k-short    - pos. daughter
-  virtual Float_t decayCosThetaLambda();        // lambda     - pos. daughter
-  virtual Float_t decayCosThetaAntiLambda();    // antilambda - neg. daughter
-  virtual Float_t polCosThetaLambda();          // lambda     - pos. daughter
-  virtual Float_t polCosThetaAntiLambda();      // antilambda - neg. daughter
-  virtual Float_t decayCosThetaPosLambda();     // lambda     - pos. daughter
-  virtual Float_t decayCosThetaNegLambda();     // lambda     - neg. daughter
-  virtual Float_t decayCosThetaPosAntiLambda(); // antilambda - pos. daughter
-  virtual Float_t decayCosThetaNegAntiLambda(); // antilambda - neg. daughter
-  // This helper function can be used for decayCosTheta of any hypothesis:
-  // m1 = parent mass, m2 = daughter mass, charge = positive/negative daughter
-  virtual Float_t dCTV0(Float_t m1, Float_t m2, StChargeSign charge);
-
-  // Momenta of daughters in V0 rest frame for different particle hypotheses
-  virtual TVector3 momPosK0Short();             // k-short    - pos. daughter
-  virtual TVector3 momNegK0Short();             // k-short    - neg. daughter
-  virtual TVector3 momPosLambda();              // lambda     - neg. daughter
-  virtual TVector3 momNegLambda();              // lambda     - neg. daughter
-  virtual TVector3 momPosAntiLambda();          // antilambda - pos. daughter
-  virtual TVector3 momNegAntiLambda();          // antilambda - neg. daughter
-  // This helper function can be used for momentum of daughter in
-  // V0 rest frame of any hypothesis:
-  // m1 = parent mass, m2 = daughter mass, charge = positive/negative daughter
-  virtual TVector3 momV0Frame(Float_t m1, Float_t m2, StChargeSign charge);
+  /// @name Momenta of daughters in V0 rest frame for different particle hypotheses
+  //@{
+          TVector3 momPosK0Short();             // k-short    - pos. daughter
+          TVector3 momNegK0Short();             // k-short    - neg. daughter
+          TVector3 momPosLambda();              // lambda     - neg. daughter
+          TVector3 momNegLambda();              // lambda     - neg. daughter
+          TVector3 momPosAntiLambda();          // antilambda - pos. daughter
+          TVector3 momNegAntiLambda();          // antilambda - neg. daughter
+  /// This helper function can be used for the momentum of daughters
+  /// in the V0 rest frame of any hypothesis
+  /** m1,m2 = parent,daughter mass; charge = positive/negative daughter */
+          TVector3 momV0Frame(Float_t m1, Float_t m2, StChargeSign charge);
+  //@}
 
 // ************************************************************************
-// The next few functions are presently used only by MC
+/// @name _______________FUNCTIONS_PRESENTLY_USED_ONLY_BY_MC_______________
 // ************************************************************************
 
-  // Index of decay mode (see tables in MC header files)
+  //@{
+  /// Returns the decay process for the vertex,
+  /// where the decay modes are enumerated in ::decayModeType
   virtual Int_t decayMode() const {return -1;}
   virtual Int_t geantIdParent() const   {return -1;}
   virtual Int_t geantIdPositive() const {return -1;}
@@ -175,67 +204,79 @@ public:
   virtual Int_t positiveCommonTpcHits() const {return -1;}
   virtual Int_t negativeSimTpcHits() const    {return -1;}
   virtual Int_t negativeCommonTpcHits() const {return -1;}
+  //@}
 
 // ************************************************************************
-// All of the functions from this point on are presently used only by MuDst
+/// @name ______________FUNCTIONS_PRESENTLY_USED_ONLY_BY_MuDst______________
 // ************************************************************************
 
-  // DCA of v0 daughters at decay vertex
-  virtual Float_t dcaV0Daughters() const {return 0;}
-  // DCA of v0 to primary vertex
-  virtual Float_t dcaV0ToPrimVertex()  const {return -1;}
-  // DCA of pos v0 daughter to pri vertex
-  virtual Float_t dcaPosToPrimVertex() const {return -1;}
-  // DCA of neg v0 daughter to pri vertex
-  virtual Float_t dcaNegToPrimVertex() const {return -1;}
-
-  // Pos. daughter track topology map
+  //@{
+  /// Pos. daughter track key
+  virtual UShort_t keyPos() const {return 0;}
+  /// Neg. daughter track key
+  virtual UShort_t keyNeg() const {return 0;}
+  /// Pos. daughter track topology map
   virtual StTrackTopologyMap& topologyMapPos() {return (*gFakeTopoPtr);}
-  // Neg. daughter track topology map
+  /// Neg. daughter track topology map
   virtual StTrackTopologyMap& topologyMapNeg() {return (*gFakeTopoPtr);}
-  virtual UShort_t keyPos() const {return 0;}    // Track id v0 daughters
-  virtual UShort_t keyNeg() const {return 0;}    // Track id v0 daughters
-
-  virtual Float_t chi2V0()  const {return 0;}
-  // Confidence level of V0
-  virtual Float_t clV0()    const {return 0;}
-  // Chi square of pos. daughter
-  virtual Float_t chi2Pos() const {return 0;}
-  // Confidence level of pos. daughter
-  virtual Float_t clPos()   const {return 0;}
-  // Chi square of neg. daughter
-  virtual Float_t chi2Neg() const {return 0;}
-  // Confidence level of neg. daughter
-  virtual Float_t clNeg()   const {return 0;}
-  // Detector ID for V0 Vertex
-  virtual Long_t  detectorIdV0() {return 0;}
-  // Detector ID for pars used in V0 finder
-  virtual Long_t detectorIdPars() {return 0;}
-  // dE/dX of pos. daughter
+  /// dE/dX of pos. daughter
   virtual Float_t dedxPos() const {return 0;}
-  // dE/dX of neg. daughter
+  /// dE/dX of neg. daughter
   virtual Float_t dedxNeg() const {return 0;}
-  // Error on mean of dE/dX of pos. daughter
+  /// Error on mean of dE/dX of pos. daughter
   virtual Float_t errDedxPos() const {return 0;}
-  // Error on mean of dE/dX of neg. daughter
+  /// Error on mean of dE/dX of neg. daughter
   virtual Float_t errDedxNeg() const {return 0;}
-  // Number of dE/dX points for pos. daughter
+  /// Number of dE/dX points for pos. daughter
   virtual UShort_t numDedxPos() const {return 0;}
-  // Number of dE/dX points for neg. daughter
+  /// Number of dE/dX points for neg. daughter
   virtual UShort_t numDedxNeg() const {return 0;}
-  // Length of dE/dX track of pos. daughter
+  /// Length of dE/dX track of pos. daughter
   virtual Float_t lenDedxPos() const {return 0;}
-  // Length of dE/dX track of neg. daughter
+  /// Length of dE/dX track of neg. daughter
   virtual Float_t lenDedxNeg() const {return 0;}
+  //@}
+
+  /// @name DCAs
+  //@{
+  /// DCA of v0 daughters at decay vertex
+  virtual Float_t dcaV0Daughters() const {return 0;}
+  /// DCA of v0 to primary vertex
+  virtual Float_t dcaV0ToPrimVertex()  const {return -1;}
+  /// DCA of pos v0 daughter to pri vertex
+  virtual Float_t dcaPosToPrimVertex() const {return -1;}
+  /// DCA of neg v0 daughter to pri vertex
+  virtual Float_t dcaNegToPrimVertex() const {return -1;}
+  //@}
+  
+  /// @name Fit/Finding properties
+  //@{
+  /// Chi square of V0
+  virtual Float_t chi2V0()  const {return 0;}
+  /// Confidence level of V0
+  virtual Float_t clV0()    const {return 0;}
+  /// Chi square of pos. daughter
+  virtual Float_t chi2Pos() const {return 0;}
+  /// Confidence level of pos. daughter
+  virtual Float_t clPos()   const {return 0;}
+  /// Chi square of neg. daughter
+  virtual Float_t chi2Neg() const {return 0;}
+  /// Confidence level of neg. daughter
+  virtual Float_t clNeg()   const {return 0;}
+  /// Detector ID for V0 Vertex
+  virtual Long_t  detectorIdV0() {return 0;}
+  /// Detector ID for pars used in V0 finder
+  virtual Long_t detectorIdPars() {return 0;}
+  //@}
+
 
 protected:
-
-  virtual Float_t Ptot2Pos();          
-  virtual Float_t Ptot2Neg();             
-  virtual Float_t Ptot2V0();            
-  virtual Float_t Pt2V0();  
-  virtual Float_t MomPosAlongV0();
-  virtual Float_t MomNegAlongV0();
+          Float_t Ptot2Pos();
+          Float_t Ptot2Neg();
+          Float_t Ptot2V0();
+          Float_t Pt2V0();
+          Float_t MomPosAlongV0();
+          Float_t MomNegAlongV0();
 
   StStrangeEvMuDst *mEvent;       //!                                           
 };
@@ -548,3 +589,37 @@ inline void StV0I::Clear() {
 }
 
 #endif
+
+
+/***********************************************************************
+ * $Id: StV0I.hh,v 3.9 2003/05/30 21:20:19 genevb Exp $
+ * $Log: StV0I.hh,v $
+ * Revision 3.9  2003/05/30 21:20:19  genevb
+ * doxygen savvy, encoding of FTPC mults, change virtual funcs
+ *
+ * Revision 3.8  2003/02/10 15:47:14  genevb
+ * Fixed mt calculations
+ *
+ * Revision 3.7  2002/07/30 20:07:52  genevb
+ * Better cTau calcs
+ *
+ * Revision 3.6  2002/04/30 16:02:48  genevb
+ * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+ *
+ * Revision 3.5  2002/02/10 15:29:09  genevb
+ * Additional functions for momenta of decay daughters in CM frame
+ *
+ * Revision 3.4  2001/11/28 05:14:59  genevb
+ * Additional decay angle functions
+ *
+ * Revision 3.3  2001/11/05 23:41:06  genevb
+ * Add more dEdx, B field info, careful of changes to TTree unrolling
+ *
+ * Revision 3.2  2001/08/23 13:20:58  genevb
+ * Many bug workarounds...
+ *
+ * Revision 3.1  2001/05/04 20:15:14  genevb
+ * Common interfaces and reorganization of components, add MC event info
+ *
+ *
+ ***********************************************************************/

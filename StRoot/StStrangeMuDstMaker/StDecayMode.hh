@@ -2,8 +2,14 @@
   \class StDecayMode
   
   StDecayMode: Singleton class for determining decay modes of MC vertices
+  \code
+    if (StDecayMode::Instance()->Process(vtx) == kLambda2ProtonPiMinus) {...}
+  \endcode
+  \sa decayModeType
 
 */
+
+/*! \file StDecayMode.hh */
 
 #ifndef  STAR_StDecayMode
 #define  STAR_StDecayMode
@@ -13,6 +19,7 @@
 class StMcVertex;
 class StMcTrack;
 
+/// Enumeration of strange decay modes
 enum decayModeType {
   kWrongDecay                           =  0,
 
@@ -92,7 +99,17 @@ public:
   StDecayMode();
   virtual ~StDecayMode();
   static StDecayMode* Instance();
+
+  /// Returns the charge of the parent particle for a given decay process,
+  /// where the decay modes are enumerated in ::decayModeType
+  Int_t ParentCharge(Int_t mode);
+
+  /// Returns the decay process for the vertex,
+  /// where the decay modes are enumerated in ::decayModeType
   Int_t Process(StMcVertex* mcVertex);
+
+  /// @name Process helper functions
+  //@{
   Int_t KPlusProcess(Int_t ID); 
   Int_t KMinusProcess(Int_t ID);  
   Int_t KLongProcess(Int_t ID, Int_t ID2);
@@ -107,8 +124,7 @@ public:
   Int_t AntiXiProcess(Int_t ID); 
   Int_t OmegaProcess(Int_t ID); 
   Int_t AntiOmegaProcess(Int_t ID); 
-
-  Int_t ParentCharge(Int_t mode);
+  //@}
 
 private:
   static StDecayMode* mInstance;
@@ -124,8 +140,11 @@ inline StDecayMode* StDecayMode::Instance()
 
 /***********************************************************************
  *
- * $Id: StDecayMode.hh,v 3.3 2002/05/29 19:08:44 genevb Exp $
+ * $Id: StDecayMode.hh,v 3.4 2003/05/30 21:20:18 genevb Exp $
  * $Log: StDecayMode.hh,v $
+ * Revision 3.4  2003/05/30 21:20:18  genevb
+ * doxygen savvy, encoding of FTPC mults, change virtual funcs
+ *
  * Revision 3.3  2002/05/29 19:08:44  genevb
  * Some additional decay modes, better organization of enumeration
  *

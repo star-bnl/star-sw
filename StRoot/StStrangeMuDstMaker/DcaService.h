@@ -3,6 +3,7 @@
   \author G. Van Buren, BNL
 
   Tool to re-calculate DCAs for strangeMuDst classes
+  \sa http://www.star.bnl.gov/STAR/comp/pkg/dev/StRoot/StStrangeMuDstMaker/doc/
 
 */
 #ifndef STAR_DcaService
@@ -20,20 +21,22 @@ class DcaService {
                 DcaService() {}
         virtual ~DcaService() {}
 
-  // Event initialization functions:
-  //   B Field
+  /// @name Event initialization functions:
+  //@{
   static   void setBfield(double b);
-  static   void setBfield(StStrangeEvMuDst* ev);
+  static   void setBfield(StStrangeEvMuDst* ev);      /// B Field
   static   void setBfield(StStrangeMuDstMaker* mk);
-  //   Primary Vertex
+  
   static   void setPrimVertex(StThreeVectorD& pv);
-  static   void setPrimVertex(StStrangeEvMuDst* ev);
+  static   void setPrimVertex(StStrangeEvMuDst* ev);  /// Primary Vertex
   static   void setPrimVertex(StStrangeMuDstMaker* mk);
-  //   Both of the above
-  static   void initEvent(StStrangeEvMuDst* ev);
+  
+  static   void initEvent(StStrangeEvMuDst* ev);      /// Both of the above
   static   void initEvent(StStrangeMuDstMaker* mk);
+  //@}
 
-  // Functions which return recalculated DCAs
+  /// @name Functions which return recalculated DCAs
+  //@{
   static double dcaXiToPrimVertex(StXiMuDst* xi);
   //   For daughter tracks:
   //     Note that the track is assumed to pass
@@ -42,37 +45,49 @@ class DcaService {
   static double dcaBachelorToPrimVertex(StXiMuDst* xi);
   static double dcaPosToPrimVertex(StV0MuDst* v0);
   static double dcaNegToPrimVertex(StV0MuDst* v0);
+  //@}
 
-  // Functions which return signed DCAs
+  /// @name Functions which return signed DCAs
+  //@{
   static double signedDcaXiToPrimVertex(StXiMuDst* xi);
   static double signedDcaBachelorToPrimVertex(StXiMuDst* xi);
   static double signedDcaPosToPrimVertex(StV0MuDst* v0);
   static double signedDcaNegToPrimVertex(StV0MuDst* v0);
+  //@}
 
-  // Functions which replace the actual data members
+  /// @name Functions which replace the actual data members
+  //@{
   static   void replaceDcaXiToPrimVertex(StXiMuDst* xi, float dca);
   static   void replaceDcaBachelorToPrimVertex(StXiMuDst* xi, float dca);
   static   void replaceDcaPosToPrimVertex(StV0MuDst* v0, float dca);
   static   void replaceDcaNegToPrimVertex(StV0MuDst* v0, float dca);
+  //@}
 
-  // Functions which replace the data members with the correct DCAs
+  /// @name Functions which replace the data members with the correct DCAs
+  //@{
   static   void fixDcaXiToPrimVertex(StXiMuDst* xi);
   static   void fixSignedDcaXiToPrimVertex(StXiMuDst* xi);
   static   void fixSignedDcaBachelorToPrimVertex(StXiMuDst* xi);
   static   void fixSignedDcaPosToPrimVertex(StV0MuDst* v0);
   static   void fixSignedDcaNegToPrimVertex(StV0MuDst* v0);
+  //@}
 
-  // Functions which call the event initialization,
-  // then loop over the event and fix the DCAs
+  /// @name Functions which call the event initialization, then loop over the event and fix the DCAs
+  //@{
   static   void fixDcaXiToPrimVertex(StStrangeMuDstMaker* mk);
   static   void fixSignedDcaXiToPrimVertex(StStrangeMuDstMaker* mk);
   static   void fixSignedDcaBachelorToPrimVertex(StStrangeMuDstMaker* mk);
   static   void fixSignedDcaPosToPrimVertex(StStrangeMuDstMaker* mk);
   static   void fixSignedDcaNegToPrimVertex(StStrangeMuDstMaker* mk);
+
   //   Multiple fixes simultaneously
+  /// All DCAs for Xis
   static   void fixSignedDcasXis(StStrangeMuDstMaker* mk);
+  /// All DCAs for V0s
   static   void fixSignedDcasV0s(StStrangeMuDstMaker* mk);
+  /// All DCAs for V0s and Xis
   static   void fixSignedDcas(StStrangeMuDstMaker* mk);
+  //@}
 
 
  private:
@@ -148,8 +163,11 @@ inline void DcaService::fixSignedDcas(StStrangeMuDstMaker* mk)
 #endif
 
 //_____________________________________________________________________________
-// $Id: DcaService.h,v 3.1 2002/08/13 19:18:54 genevb Exp $
+// $Id: DcaService.h,v 3.2 2003/05/30 21:20:18 genevb Exp $
 // $Log: DcaService.h,v $
+// Revision 3.2  2003/05/30 21:20:18  genevb
+// doxygen savvy, encoding of FTPC mults, change virtual funcs
+//
 // Revision 3.1  2002/08/13 19:18:54  genevb
 // Introduction of DcaService
 //

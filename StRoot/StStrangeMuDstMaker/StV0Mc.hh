@@ -1,22 +1,11 @@
-/***********************************************************************
+/*!
+ * \class StV0Mc
+ * \author Gene Van Buren
  *
- * $Id: StV0Mc.hh,v 3.1 2001/05/04 20:15:14 genevb Exp $
- * $Log: StV0Mc.hh,v $
- * Revision 3.1  2001/05/04 20:15:14  genevb
- * Common interfaces and reorganization of components, add MC event info
+ *               Monte Carlo V0 micro dst class 
  *
- * Revision 3.0  2000/07/14 12:56:50  genevb
- * Revision 3 has event multiplicities and dedx information for vertex tracks
- *
- * Revision 2.0  2000/06/05 05:19:45  genevb
- * New version of Strangeness micro DST package
- *
- *
- ***********************************************************************
- *
- * Description: Monte Carlo V0 micro dst class
- *
- ***********************************************************************/
+ */
+
 #ifndef  STAR_StV0Mc
 #define  STAR_StV0Mc
 #include "StV0I.hh"
@@ -150,3 +139,21 @@ inline Float_t StV0Mc::positionZ() const
             { return mPositionZ; }
 
 #endif
+
+
+/***********************************************************************
+ * $Id: StV0Mc.hh,v 3.2 2003/05/30 21:20:20 genevb Exp $
+ * $Log: StV0Mc.hh,v $
+ * Revision 3.2  2003/05/30 21:20:20  genevb
+ * doxygen savvy, encoding of FTPC mults, change virtual funcs
+ *
+ * Revision 3.1  2001/05/04 20:15:14  genevb
+ * Common interfaces and reorganization of components, add MC event info
+ *
+ * Revision 3.0  2000/07/14 12:56:50  genevb
+ * Revision 3 has event multiplicities and dedx information for vertex tracks
+ *
+ * Revision 2.0  2000/06/05 05:19:45  genevb
+ * New version of Strangeness micro DST package
+ *
+ ***********************************************************************/

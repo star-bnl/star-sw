@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerBase.cxx,v 3.14 2003/05/15 21:14:06 jones Exp $
+// $Id: StStrangeControllerBase.cxx,v 3.15 2003/05/30 21:20:19 genevb Exp $
 // $Log: StStrangeControllerBase.cxx,v $
+// Revision 3.15  2003/05/30 21:20:19  genevb
+// doxygen savvy, encoding of FTPC mults, change virtual funcs
+//
 // Revision 3.14  2003/05/15 21:14:06  jones
 // Added Copy() function to player, fixed ControllerBase to handle common MuDst names, didn't do it right first time.
 //
@@ -347,8 +350,19 @@ void StStrangeControllerBase::Unselect(Int_t i) {
 }
 //_____________________________________________________________________________
 void StStrangeControllerBase::PrintNumMc() {
-  gMessMgr->Info() << IsA()->GetName() << ": found " <<
+  gMessMgr->Info("","O-") << IsA()->GetName() << ": found " <<
         mcEntries << " Monte Carlo " << GetName() << "s" << endm;
-  gMessMgr->Info() << IsA()->GetName() << ": found " <<
+  gMessMgr->Info("","O-") << IsA()->GetName() << ": found " <<
         assocEntries << " " << GetName() << " associations" << endm;
 }
+//_____________________________________________________________________________
+TClonesArray* StStrangeControllerBase::GetArray(Int_t branchType) {
+  switch (branchType) {
+    case (dataBranch)  : return dataArray;
+    case (mcBranch)    : return mcArray;
+    case (assocBranch) : return assocArray;
+    default            : {}
+  }
+  return 0;
+}   
+

@@ -132,43 +132,81 @@ the event. For example, the event number and primary vertex position
 coordinates are stored here, as storing this information with every component
 class would be redundant and inefficient.<p>
 
-<dt>V0 Information (<b>StV0MuDst</b>)
+<dt>V0 Information <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStV0MuDst.html">
+(<b>StV0MuDst</b></a>, see interface <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStV0I.html">
+<b>StV0I</b>)</a>
 <dd>Information about the V0 daughter tracks are stored along with parameters
 of the vertex itself. Member functions are provided to get more detailed
 information such as the mass of the V0 under the lambda hypothesis.<p>
 
-<dt>Xi Information (<b>StXiMuDst</b>)
+<dt>Xi Information <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStXiMuDst.html">
+(<b>StXiMuDst</b></a>, see interfaces <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStXiI.html">
+<b>StXiI</b></a> and <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStV0I.html">
+<b>StV0I</b>)</a>
 <dd>Similar to the V0, information about the bachelor track and vertex
 parameters are stored. The class also inherits from <b>StV0MuDst</b> to
 store all the information about the associated V0.<p>
 
-<dt>Kink Information (<b>StKinkMuDst</b>)
+<dt>Kink Information <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStKinkMuDst.html">
+(<b>StKinkMuDst</b></a>, see interface <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStKinkI.html">
+<b>StKinkI</b>)</a>
 <dd>This class keeps data on kink parent and daughter tracks and parameters
 of the kink decay vertex.<p>
 
-<dt>Event Monte Carlo Information (<b>StStrangeEvMuDst</b>)
+<dt>Event Monte Carlo Information <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStStrangeEvMuDst.html">
+(<b>StStrangeEvMuDst</b>)</a>
 <dd>The event-wise Monte Carlo information is stored using the same
 class as the reconstructed event-wise information.<p>
 
-<dt>V0 Monte Carlo Information (<b>StV0Mc</b>)
+<dt>V0 Monte Carlo Information <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStV0Mc.html">
+(<b>StV0Mc</b></a>, see interface <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStV0I.html">
+<b>StV0I</b>)</a>
 <dd>This class is for Monte Carlo V0 vertex information. There may be
 a different number of these than reconstructed V0 vertices.<p>
 
-<dt>Xi Monte Carlo Information (<b>StXiMc</b>)
+<dt>Xi Monte Carlo Information <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStXiMc.html">
+(<b>StXiMc</b></a>, see interfaces <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStXiI.html">
+<b>StXiI</b></a> and <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStV0I.html">
+<b>StV0I</b></a> and <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStKinkI.html">
+<b>StKinkI</b>)</a>
 <dd>Monte Carlo storage class for Xi vertices, inheriting all functionality
 from the <b>StODMc</b> class which it shares with <b>StKinkMc</b>.<p>
 
-<dt>Kink Monte Carlo Information (<b>StKinkMc</b>)
+<dt>Kink Monte Carlo Information <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStKinkMc.html">
+(<b>StKinkMc</b></a>, see interface <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStKinkI.html">
+<b>StKinkI</b>)</a>
 <dd>Monte Carlo storage class for Kink vertices, also inheriting all
 functionality from <b>StODMc</b>.<p>
 
-<dt>Monte Carlo Association Information (<b>StStrangeAssoc</b>)
+<dt>Monte Carlo Association Information <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStStrangeAssoc.html">
+(<b>StStrangeAssoc</b>)</a>
 <dd>The <b>StStrangeAssoc</b> class links matching reconstructed and
 Monte Carlo vertices, and there exist only as many as the number of
 matches between the two sets. There will be an association component
 for each Monte Carlo component<p>
 
-<dt>Cut Information (<b>TCut</b>)
+<dt>Cut Information <a
+href="http://root.cern.ch/root/html/TCut">
+(<b>TCut</b></a>, see also <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStStrangeCuts.html">
+<b>StStrangeCuts</b>)</a>
 <dd>Cuts are stored in a generic Root class called <b>TCut</b>. Each
 cut has a name and value (using the title data member of <b>TCut</b>).
 Usage of the cuts is discussed  <a href="cuts.html">here</a>.

@@ -1,40 +1,14 @@
-/***********************************************************************
+/*!
+ * \class StXiI
+ * \author Gene Van Buren, BNL, 24-Apr-2001
  *
- * $Id: StXiI.hh,v 3.7 2002/07/30 20:07:52 genevb Exp $
+ *               Xi (cascade) micro dst object interface class
+ *               Used for StXiMuDst (reconstructed), StXiMc (Monte Carlo)
  *
- * Author: Gene Van Buren, BNL, 24-Apr-2001
- *
- ***********************************************************************
- *
- * Description: Xi (cascade) micro dst object interface class
- *              Used for StXiMuDst (reconstructed), StXiMc (Monte Carlo)
- *
- ***********************************************************************
- *
- * $Log: StXiI.hh,v $
- * Revision 3.7  2002/07/30 20:07:52  genevb
- * Better cTau calcs
- *
- * Revision 3.6  2002/04/30 16:02:48  genevb
- * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
- *
- * Revision 3.5  2002/02/10 15:29:09  genevb
- * Additional functions for momenta of decay daughters in CM frame
- *
- * Revision 3.4  2001/11/28 05:14:59  genevb
- * Additional decay angle functions
- *
- * Revision 3.3  2001/11/05 23:41:07  genevb
- * Add more dEdx, B field info, careful of changes to TTree unrolling
- *
- * Revision 3.2  2001/08/23 13:20:59  genevb
- * Many bug workarounds...
- *
- * Revision 3.1  2001/05/04 20:15:15  genevb
- * Common interfaces and reorganization of components, add MC event info
- *
- *
- ***********************************************************************/
+ */
+
+/*! \file StXiI.hh */
+
 #ifndef StXiI_hh
 #define StXiI_hh
 
@@ -43,6 +17,7 @@ static const Float_t M_OMEGA_2 = pow(M_OMEGA_MINUS,2);
 static const Float_t M_XI_2 = pow(M_XI_MINUS,2);
 static const Float_t M_KAON_MINUS_2 = pow(M_KAON_MINUS,2);
 
+/// Enumeration of Xi daughter types
 enum StXiDaughter {bachelor, v0};
 
 
@@ -52,131 +27,202 @@ public:
   virtual ~StXiI() {}
 
 // ************************************************************************
-// The following functions are useful in all Xi types
+/// @name _________________FUNCTIONS_USEFUL_IN_ALL_XI_TYPES_________________
 // ************************************************************************
 
-  virtual Int_t   charge() const=0;         // Particle charge
-  virtual Float_t decayLengthV0() const;    // 3-d decay distance
-  virtual Float_t decayLengthXi() const;    // 3-d decay distance
-  virtual Float_t decayVertexXiX() const=0; // Coordinate of decay vertex
-  virtual Float_t decayVertexXiY() const=0;
+  //@{
+  /// Particle charge
+  virtual Int_t   charge() const=0;
+  //@}
+
+  /// @name Decay properties
+  //@{
+  /// 3-d distance of V0 decay from primary vertex
+          Float_t decayDistanceV0() const;
+  /// 3-d decay distance of V0 from Xi
+  virtual Float_t decayLengthV0() const;
+  /// 3-d decay distance of Xi
+          Float_t decayLengthXi() const;
+  virtual Float_t decayVertexXiX() const=0;
+  virtual Float_t decayVertexXiY() const=0; /// Coordinates of decay vertex
   virtual Float_t decayVertexXiZ() const=0;
+          Float_t alphaXi(); /// Armenteros-Podolanski variables
+          Float_t ptArmXi();
+  /// Lifetime (ctau) assuming (anti)Omega
+          Float_t cTauOmega();
+  /// Lifetime (ctau) assuming (anti)Xi
+          Float_t cTauXi();
+  //@}
 
-  virtual TVector3 momBachelor();           // Momentum of bachelor
-  virtual Float_t momBachelorX() const=0;   // Momentum components of bachelor
-  virtual Float_t momBachelorY() const=0;
+  /// @name Momenta
+  //@{
+  /// Momentum of bachelor
+          TVector3 momBachelor();
+  virtual Float_t momBachelorX() const=0;
+  virtual Float_t momBachelorY() const=0; /// Momentum components of bachelor
   virtual Float_t momBachelorZ() const=0;
-  virtual TVector3 momXi();                 // Momentum of Xi/Omega
-  virtual Float_t momXiX() const=0;         // Momentum components of Xi/Omega
-  virtual Float_t momXiY() const=0;
+  /// Momentum of Xi/Omega
+          TVector3 momXi();
+  virtual Float_t momXiX() const=0;
+  virtual Float_t momXiY() const=0; /// Momentum components of Xi/Omega
   virtual Float_t momXiZ() const=0;
-  virtual Float_t alphaXi();                // Armenteros-Podolanski variable
-  virtual Float_t ptArmXi();                // Armenteros-Podolanski variable
+  /// Transverse momentum of Xi/Omega
+          Float_t ptXi();
+  /// Transverse momentum of bachelor
+          Float_t ptBachelor();
+  /// Total momentum of Xi/Omega
+          Float_t ptotXi();
+  /// Total momentum of bachelor
+          Float_t ptotBachelor();
+  //@}
 
-  virtual Float_t eOmega();                 // Energy assuming Omega hypothesis
-  virtual Float_t eXi();                    // Energy assuming Xi hypothesis
-  virtual Float_t eBachelorPion();          // Energy of bachelor assuming pion
-  virtual Float_t eBachelorKaon();          // Energy of bachelor assuming kaon
-  virtual Float_t massOmega();              // Mass assuming Omega hypothesis
-  virtual Float_t massXi();                 // Mass assuming Xi hypothesis
-  virtual Float_t rapOmega();               // Rapidity assuming (anti)Omega
-  virtual Float_t rapXi();                  // Rapidity assuming (anti)Xi
-  virtual Float_t cTauOmega();              // Lifetime (ctau) assuming (anti)Omega
-  virtual Float_t cTauXi();                 // Lifetime (ctau) assuming (anti)Xi
+  /// @name Mass-dependent properties
+  //@{
+  /// Energy assuming Omega hypothesis
+          Float_t eOmega();
+  /// Energy assuming Xi hypothesis
+          Float_t eXi();
+  /// Energy of bachelor assuming pion
+          Float_t eBachelorPion();
+  /// Energy of bachelor assuming kaon
+          Float_t eBachelorKaon();
+  /// Mass assuming Omega hypothesis
+          Float_t massOmega();
+  /// Mass assuming Xi hypothesis
+          Float_t massXi();
+  /// Rapidity assuming (anti)Omega
+          Float_t rapOmega();
+  /// Rapidity assuming (anti)Xi
+          Float_t rapXi();
+  //@}
 
-  virtual Float_t ptXi();                   // Transverse momentum of Xi/Omega
-  virtual Float_t ptBachelor();             // Transverse momentum of bachelor
-  virtual Float_t ptotXi();                 // Total momentum of Xi/Omega
-  virtual Float_t ptotBachelor();           // Total momentum of bachelor
-  virtual Float_t thetaXi();                // Polar angle theta of Xi/Omega
-  virtual Float_t thetaBachelor();          // Polar angle theta of bachelor
-  virtual Float_t pseudoRapXi();            // Pseudorapidity of Xi/Omega
-  virtual Float_t pseudoRapBachelor();      // Pseudorapidity of bachelor
+  /// @name Mass-independent properties
+  //@{
+  /// Polar angle theta of Xi/Omega
+          Float_t thetaXi();
+  /// Polar angle theta of bachelor
+          Float_t thetaBachelor();
+  /// Pseudorapidity of Xi/Omega
+          Float_t pseudoRapXi();
+  /// Pseudorapidity of bachelor
+          Float_t pseudoRapBachelor();
+  //@}
 
-  virtual Float_t mtOmega();                // Transverse mass assuming (anti)Omega
-  virtual Float_t mtXi();                   // Transverse mass assuming (anti)Xi
-  virtual Float_t mtm0Omega();              // mt-m0 assuming (anti)Omega
-  virtual Float_t mtm0Xi();                 // mt-m0 assuming (anti)Xi
+  /// @name Transverse mass formulae
+  //@{
+  /// Transverse mass assuming (anti)Omega
+          Float_t mtOmega();
+  /// Transverse mass assuming (anti)Xi
+          Float_t mtXi();
+  /// mt-m0 assuming (anti)Omega
+          Float_t mtm0Omega();
+  /// mt-m0 assuming (anti)Xi
+          Float_t mtm0Xi();
+  //@}
 
-  // Energy and mass formulae for hypothetical masses
-  virtual Float_t eBachelorHyp(Float_t mass);  // Energy of bachelor
-  virtual Float_t massHypXi(Float_t massV0, Float_t massBachelor);
-  virtual Float_t eHypXi(Float_t mass);     // Energy of Xi assuming its mass
-  virtual Float_t rapHypXi(Float_t mass);
-  virtual Float_t mtHypXi(Float_t mass);
-  virtual Float_t mtm0HypXi(Float_t mass);
+  /// @name Energy and invariant mass formulae for hypothetical masses
+  //@{
+  /// Energy of bachelor assuming its mass
+          Float_t eBachelorHyp(Float_t mass);
+  /// Invariant mass assuming daughter masses
+          Float_t massHypXi(Float_t massV0, Float_t massBachelor);
+          Float_t eHypXi(Float_t mass);
+          Float_t rapHypXi(Float_t mass);
+          Float_t mtHypXi(Float_t mass);
+  /// Energy, rapidity, mt, mt-m0 of Xi assuming its mass
+          Float_t mtm0HypXi(Float_t mass);
+  //@}
 
-  // Cosines of decay and polarization angles for different particle hypotheses
-  virtual Float_t decayCosThetaBachelorXi();    // xi    - bachelor
-  virtual Float_t decayCosThetaV0Xi();          // xi    - V0 
-  virtual Float_t decayCosThetaBachelorOmega(); // omega - bachelor
-  virtual Float_t decayCosThetaV0Omega();       // omega - V0
-  // This helper function can be used for decayCosTheta of any hypothesis:
-  // m1 = parent mass, m2 = daughter mass, type = bachelor/v0 daughter
-  virtual Float_t dCTXi(Float_t m1, Float_t m2, StXiDaughter type);
+  /// @name Cosines of decay and polarization angles for different particle hypotheses
+  //@{
+          Float_t decayCosThetaBachelorXi();    // xi    - bachelor
+          Float_t decayCosThetaV0Xi();          // xi    - V0 
+          Float_t decayCosThetaBachelorOmega(); // omega - bachelor
+          Float_t decayCosThetaV0Omega();       // omega - V0
+  /// This helper function can be used for decayCosTheta of any hypothesis
+  /** m1,m2 = parent,daughter mass; type = bachelor/v0 daughter */
+          Float_t dCTXi(Float_t m1, Float_t m2, StXiDaughter type);
+  //@}
 
-  // Momenta of daughters in Xi rest frame for different particle hypotheses
-  virtual TVector3 momBachelorXi();             // xi    - bachelor
-  virtual TVector3 momV0Xi();                   // xi    - V0
-  virtual TVector3 momBachelorOmega();          // omega - bachelor
-  virtual TVector3 momV0Omega();                // omega - V0
-  // This helper function can be used for momentum of daughter in
-  // Xi rest frame of any hypothesis:
-  // m1 = parent mass, m2 = daughter mass, charge = positive/negative daughter
-  virtual TVector3 momXiFrame(Float_t m1, Float_t m2, StXiDaughter type);
+  /// @name Momenta of daughters in Xi rest frame for different particle hypotheses
+  //@{
+          TVector3 momBachelorXi();             // xi    - bachelor
+          TVector3 momV0Xi();                   // xi    - V0
+          TVector3 momBachelorOmega();          // omega - bachelor
+          TVector3 momV0Omega();                // omega - V0
+  /// This helper function can be used for the momentum of daughters
+  /// in the Xi rest frame of any hypothesis
+  /** m1,m2 = parent,daughter mass; type = bachelor/v0 daughter */
+          TVector3 momXiFrame(Float_t m1, Float_t m2, StXiDaughter type);
+  //@}
 
 // ************************************************************************
-// The next few functions are presently used only by MC
+/// @name _______________FUNCTIONS_PRESENTLY_USED_ONLY_BY_MC_______________
 // ************************************************************************
-                                                                                  // Index of V0 (used only by MC)
+
+  //@{
   virtual Int_t V0Index() {return -1;}
+  //@}
   
 // ************************************************************************
-// All of the functions from this point on are presently used only by MuDst
+/// @name ______________FUNCTIONS_PRESENTLY_USED_ONLY_BY_MuDst______________
 // ************************************************************************
 
-  // DCA of xi daughters at decay vertex
-  virtual Float_t dcaXiDaughters() {return 0;}
-  // DCA of bachelor to primary vertex
-  virtual Float_t dcaBachelorToPrimVertex() {return -1;}
-  // DCA of xi to primary vertex
-  virtual Float_t dcaXiToPrimVertex() {return -1;}
-
-  // Bachelor track key
+  //@{
+  /// Bachelor track key
   virtual UShort_t keyBachelor() const {return 0;}
-  // Bachelor track topology map
+  /// Bachelor track topology map
   virtual StTrackTopologyMap& topologyMapBachelor() {return (*gFakeTopoPtr);}
-
-  // Chi square of Xi (used only by MuDst)
-  virtual Float_t chi2Xi() const {return 0;}
-  // Confidence level of Xi
-  virtual Float_t clXi()   const {return 0;}
-  // Chi square of bachelor
-  virtual Float_t chi2Bachelor() const {return 0;}
-  // Confidence level of bachelor
-  virtual Float_t clBachelor()   const {return 0;}
-  // Detector ID for Xi vertex
-  virtual Long_t  detectorIdXi() {return 0;}
-  // Detector ID for pars used in Xi finder
-  virtual Long_t detectorIdPars() {return 0;}
-  // dE/dX of bachelor
+  /// dE/dX of bachelor
   virtual Float_t dedxBachelor() const {return 0;}
-  // Error on mean of dE/dX of bachelor
+  /// Error on mean of dE/dX of bachelor
   virtual Float_t errDedxBachelor() const {return 0;}
-  // Number of dE/dX points for bachelor
+  /// Number of dE/dX points for bachelor
   virtual UShort_t numDedxBachelor() const {return 0;}
-  // Length of dE/dX track for bachelor
+  /// Length of dE/dX track for bachelor
   virtual Float_t lenDedxBachelor() const {return 0;}
+  //@}
+
+  /// @name DCAs
+  //@{
+  /// DCA of xi daughters at decay vertex
+  virtual Float_t dcaXiDaughters() {return 0;}
+  /// DCA of bachelor to primary vertex
+  virtual Float_t dcaBachelorToPrimVertex() {return -1;}
+  /// DCA of xi to primary vertex
+  virtual Float_t dcaXiToPrimVertex() {return -1;}
+  //@}
+
+  /// @name Fit/Finding properties
+  //@{
+  /// Chi square of Xi (used only by MuDst)
+  virtual Float_t chi2Xi() const {return 0;}
+  /// Confidence level of Xi
+  virtual Float_t clXi()   const {return 0;}
+  /// Chi square of bachelor
+  virtual Float_t chi2Bachelor() const {return 0;}
+  /// Confidence level of bachelor
+  virtual Float_t clBachelor()   const {return 0;}
+  /// Detector ID for Xi vertex
+  virtual Long_t  detectorIdXi() {return 0;}
+  /// Detector ID for pars used in Xi finder
+  virtual Long_t detectorIdPars() {return 0;}
+  //@}
+
 
 protected:
-  virtual Float_t Ptot2Bachelor();
-  virtual Float_t Ptot2Xi();
-  virtual Float_t Pt2Xi();
-  virtual Float_t MomBachelorAlongXi();
-  virtual Float_t MomV0AlongXi();
+          Float_t Ptot2Bachelor();
+          Float_t Ptot2Xi();
+          Float_t Pt2Xi();
+          Float_t MomBachelorAlongXi();
+          Float_t MomV0AlongXi();
 };
 
 inline StXiI::StXiI() : StV0I() {}
+
+inline Float_t StXiI::decayDistanceV0() const {
+  return StV0I::decayLengthV0();
+}
 
 inline Float_t StXiI::decayLengthV0() const {
   return sqrt(pow(decayVertexV0X() - decayVertexXiX(),2) +
@@ -407,3 +453,33 @@ inline TVector3 StXiI::momXiFrame(Float_t m1, Float_t m2, StXiDaughter type) {
 }
 
 #endif
+
+
+/***********************************************************************
+ * $Id: StXiI.hh,v 3.8 2003/05/30 21:20:20 genevb Exp $
+ * $Log: StXiI.hh,v $
+ * Revision 3.8  2003/05/30 21:20:20  genevb
+ * doxygen savvy, encoding of FTPC mults, change virtual funcs
+ *
+ * Revision 3.7  2002/07/30 20:07:52  genevb
+ * Better cTau calcs
+ *
+ * Revision 3.6  2002/04/30 16:02:48  genevb
+ * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+ *
+ * Revision 3.5  2002/02/10 15:29:09  genevb
+ * Additional functions for momenta of decay daughters in CM frame
+ *
+ * Revision 3.4  2001/11/28 05:14:59  genevb
+ * Additional decay angle functions
+ *
+ * Revision 3.3  2001/11/05 23:41:07  genevb
+ * Add more dEdx, B field info, careful of changes to TTree unrolling
+ *
+ * Revision 3.2  2001/08/23 13:20:59  genevb
+ * Many bug workarounds...
+ *
+ * Revision 3.1  2001/05/04 20:15:15  genevb
+ * Common interfaces and reorganization of components, add MC event info
+ *
+ ***********************************************************************/

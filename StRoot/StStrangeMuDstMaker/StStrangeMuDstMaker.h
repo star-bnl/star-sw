@@ -2,8 +2,11 @@
   \class StStrangeMuDstMaker
   
   StStrangeMuDstMaker strangeness micro DST maker
+  \sa http://www.star.bnl.gov/STAR/comp/pkg/dev/StRoot/StStrangeMuDstMaker/doc/
 
 */
+
+/*! \file StStrangeMuDstMaker.h */
 
 #ifndef STAR_StStrangeMuDstMaker
 #define STAR_StStrangeMuDstMaker
@@ -14,33 +17,64 @@
 class TFile;
 class TTree;
 class TChain;
+class StStrangeMuDst;
 class StStrangeEvMuDst;
+class StV0I;
 class StV0MuDst;
+class StV0Mc;
+class StXiI;
 class StXiMuDst;
+class StXiMc;
+class StKinkI;
 class StKinkMuDst;
+class StKinkMc;
 class StStrangeAssoc;
 class StFile;
-class StV0Mc;
-class StXiMc;
-class StKinkMc;
 class StStrangeCuts;
 
-enum StrangeEnum {StrangeNoKeep, StrangeNoFile, StrangeWrite, StrangeRead};
-enum StrDstType  {evT = 0, v0T, xiT, kinkT, strDstT} ;
+/// DST types
+enum StrDstType  {
+  /// Event
+  evT = 0,
+  /// V0
+  v0T,
+  /// Xi
+  xiT,
+  /// Kink
+  kinkT,
+  strDstT};
+
+/// DST type names
 static char* strTypeNames[strDstT] = {"Ev","V0","Xi","Kink"};
+/// I/O modes
+enum StrangeEnum {StrangeNoKeep, StrangeNoFile, StrangeWrite, StrangeRead};
 
 class StStrangeMuDstMaker : public StMaker {
  public: 
   StStrangeMuDstMaker(const char *name="strangeMuDst");
   virtual ~StStrangeMuDstMaker();
+  void DoT0JitterAbort(Bool_t doIt=kTRUE);
+  /// turn off filling of TTree for this event, regardless
+  void AbortEvent() { abortEvent = kTRUE; }
+
+  /// @name Files for multiplicities/centralities
+  //@{
+  void SetCorrectionFile(char*);
+  void SetFractionFile(char*);
+  //@}
+
+  /// @name I/O modes
+  //@{
   void SetRead (const char* eFile=0, char* treeName=0);
   void SetRead (StFile* eFiles, char* treeName=0);
   void SetWrite(const char* eFile=0);
   void SetNoKeep();
   StrangeEnum GetMode();
   char* GetFile() const;
-  void DoT0JitterAbort(Bool_t doIt=kTRUE);
+  //@}
 
+  /// @name Branch modes
+  //@{
   void DoV0(Bool_t doIt=kTRUE);
   void DoXi(Bool_t doIt=kTRUE);
   void DoKink(Bool_t doIt=kTRUE);
@@ -48,14 +82,61 @@ class StStrangeMuDstMaker : public StMaker {
   void Do(Int_t dstType, Bool_t doIt=kTRUE);
   void Do(const char* name, Bool_t doIt=kTRUE);
   Bool_t GetDoMc();
+  //@}
 
-  void SetCorrectionFile(char*);
-  void SetFractionFile(char*);
+  /// @name Data array size accessor functions
+  //@{
+  Int_t GetNV0I(Bool_t MC=kFALSE)   { return (MC ? GetNV0Mc()   : GetNV0()); }
+  Int_t GetNXiI(Bool_t MC=kFALSE)   { return (MC ? GetNXiMc()   : GetNXi()); }
+  Int_t GetNKinkI(Bool_t MC=kFALSE) { return (MC ? GetNKinkMc() : GetNKink()); }
 
-  
-  StStrangeControllerBase* Get(const char* name) const;
-  StStrangeControllerBase* Get(Int_t dstType) const;
-  
+  Int_t GetNV0()        { return v0->GetN(); }
+  Int_t GetNV0Mc()      { return v0->GetNMc(); }
+  Int_t GetNV0Assoc()   { return v0->GetNAssoc(); }
+  Int_t GetNXi()        { return xi->GetN(); }
+  Int_t GetNXiMc()      { return xi->GetNMc(); }
+  Int_t GetNXiAssoc()   { return xi->GetNAssoc(); }
+  Int_t GetNKink()      { return kink->GetN(); }
+  Int_t GetNKinkMc()    { return kink->GetNMc(); }
+  Int_t GetNKinkAssoc() { return kink->GetNAssoc(); }
+  //@}
+
+  /// @name Data accessor functions
+  //@{
+  /// General datum, where dstType is of the enumeration ::StrDstType
+  StStrangeMuDst* GetDatum(Int_t i=0, Bool_t MC=kFALSE, Int_t dstType=evT);
+
+  StStrangeEvMuDst* GetEventI(Bool_t MC=kFALSE);
+  StV0I*   GetV0I(Int_t i=0, Bool_t MC=kFALSE);
+  StXiI*   GetXiI(Int_t i=0, Bool_t MC=kFALSE); /// Interfaces for data and MC
+  StKinkI* GetKinkI(Int_t i=0, Bool_t MC=kFALSE);
+
+  StStrangeEvMuDst* GetEvent(); /// Event information
+  StStrangeEvMuDst* GetMcEvent();
+
+  StV0MuDst*      GetV0(Int_t i=0);
+  /// See StV0I interface for available functions
+  StV0Mc*         GetV0Mc(Int_t i=0);
+
+  StXiMuDst*      GetXi(Int_t i=0);
+  /// See StXiI, StV0I interfaces for available functions
+  /// (MC also uses StKinkI interface)
+  StXiMc*         GetXiMc(Int_t i=0);
+
+  StKinkMuDst*    GetKink(Int_t i=0);
+  /// See StKinkI interface for available functions
+  StKinkMc*       GetKinkMc(Int_t i=0);
+
+  StStrangeAssoc* GetXiAssoc(Int_t i=0);
+  StStrangeAssoc* GetV0Assoc(Int_t i=0);   /// Data-MC association maps
+  StStrangeAssoc* GetKinkAssoc(Int_t i=0);
+
+  StStrangeCuts& Cuts();
+  //@}
+
+  /// @name Data structure accessor functions
+  //@{
+  TTree* GetTree();
   TClonesArray* GetEvClonesArray();
   TClonesArray* GetEvMcArray();
   TClonesArray* GetCutsArray();
@@ -69,47 +150,34 @@ class StStrangeMuDstMaker : public StMaker {
   TClonesArray* GetKinkClonesArray() { return kink->GetDataArray(); }
   TClonesArray* GetKinkMcArray()     { return kink->GetMcArray(); }
   TClonesArray* GetKinkAssocArray()  { return kink->GetAssocArray(); }
+  //@}
 
-  Int_t GetNV0()        { return v0->GetN(); }
-  Int_t GetNV0Mc()      { return v0->GetNMc(); }
-  Int_t GetNV0Assoc()   { return v0->GetNAssoc(); }
-  Int_t GetNXi()        { return xi->GetN(); }
-  Int_t GetNXiMc()      { return xi->GetNMc(); }
-  Int_t GetNXiAssoc()   { return xi->GetNAssoc(); }
-  Int_t GetNKink()      { return kink->GetN(); }
-  Int_t GetNKinkMc()    { return kink->GetNMc(); }
-  Int_t GetNKinkAssoc() { return kink->GetNAssoc(); }
-
-  StStrangeEvMuDst* GetEvent();
-  StStrangeEvMuDst* GetMcEvent();
-
-  StV0MuDst* GetV0(Int_t i=0)              { return (StV0MuDst*) v0->Get(i); }
-  StV0Mc* GetV0Mc(Int_t i=0)               { return (StV0Mc*) v0->GetMc(i); }
-  StStrangeAssoc* GetV0Assoc(Int_t i=0)    { return v0->GetAssoc(i); }
-  StXiMuDst* GetXi(Int_t i=0)              { return (StXiMuDst*) xi->Get(i); }
-  StXiMc* GetXiMc(Int_t i=0)               { return (StXiMc*) xi->GetMc(i); }
-  StStrangeAssoc* GetXiAssoc(Int_t i=0)    { return xi->GetAssoc(i); }
-  StKinkMuDst* GetKink(Int_t i=0)          { return (StKinkMuDst*) kink->Get(i); }
-  StKinkMc* GetKinkMc(Int_t i=0)           { return (StKinkMc*) kink->GetMc(i); }
-  StStrangeAssoc* GetKinkAssoc(Int_t i=0)  { return kink->GetAssoc(i); }
-
-  TTree* GetTree();
-  StStrangeCuts& Cuts();
-
+  /// @name Maker functions
+  //@{
   virtual Int_t Init();
   virtual Int_t Make();
   virtual void  Clear(Option_t *option="");
   virtual Int_t Finish();
+  virtual const char *GetCVS() const {
+    static const char cvs[]="Tag $Name:  $ $Id: StStrangeMuDstMaker.h,v 3.13 2003/05/30 21:20:19 genevb Exp $ built "__DATE__" "__TIME__ ; 
+    return cvs;
+  }
+  //@}
   
-  // Functions for sub-dsts:
+  /// @name Functions for sub-dsts:
+  //@{
   void SubDst(StStrangeMuDstMaker* maker);
   void SubDst(StStrangeMuDstMaker& maker);
   void SubDst(const char* maker_name);
   StStrangeMuDstMaker* GetSubDst();
+  //@}
   
-  // Selects entire event for sub DST...
-  void SelectEvent();                  // selects whole event for sub DST
-  void UnselectEvent();                // unselects whole event for sub DST
+  /// @name Sub DST data selection functions
+  //@{
+  /// Select whole event for sub DST
+  void SelectEvent();
+  /// Unselect whole event for sub DST
+  void UnselectEvent();
   // ...or select portions (use i<0 to select all of the V0s, etc...
   void SelectV0(Int_t i=-1)     { v0->Select(i); }
   void SelectXi(Int_t i=-1)     { xi->Select(i); }
@@ -117,23 +185,25 @@ class StStrangeMuDstMaker : public StMaker {
   void UnselectV0(Int_t i=-1)   { v0->Unselect(i); }
   void UnselectXi(Int_t i=-1)   { xi->Unselect(i); }
   void UnselectKink(Int_t i=-1) { kink->Unselect(i); }
+  //@}
 
+  /// @name Buffer sizes
+  //@{
   void SetV0BufferSize(Int_t b)   { bsize[v0T]=b; }
   void SetXiBufferSize(Int_t b)   { bsize[xiT]=b; }
   void SetKinkBufferSize(Int_t b) { bsize[kinkT]=b; }
+  //@}
 
-  // turn off filling of TTree for this event, regardless
-  void AbortEvent() { abortEvent = kTRUE; }
-
-  virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StStrangeMuDstMaker.h,v 3.12 2003/02/16 21:28:45 jeromel Exp $ built "__DATE__" "__TIME__ ; 
-    return cvs;
-  }
-
-
-
+  /// @name Controllers
+  //@{
+  StStrangeControllerBase* Get(const char* name) const;
+  StStrangeControllerBase* Get(Int_t dstType) const;
+  //@}
+  
 
  protected:
+  /// @name Maker helper functions
+  //@{
   virtual void InitReadDst();
   virtual void InitCreateDst();
   virtual void InitCreateSubDst();
@@ -141,13 +211,17 @@ class StStrangeMuDstMaker : public StMaker {
   virtual Int_t MakeCreateDst();
   virtual Int_t MakeCreateMcDst();
   virtual Int_t MakeCreateSubDst();
+  //@}
   
+  /// @name File I/O functions
+  //@{
   void SetFile(const char* eFile);
   void SetTreeName(const char* treeName);
   void SkipChainFile(Int_t curTree);
   Int_t OpenFile();
   Int_t CloseFile();
   void CheckFile();
+  //@}
 
   Int_t MatchName(const char* name) const;
 
@@ -212,12 +286,42 @@ inline TClonesArray* StStrangeMuDstMaker::GetEvMcArray()
             { return evMcArray; }
 inline TClonesArray* StStrangeMuDstMaker::GetCutsArray()
             { return cutsArray; }
+inline StStrangeMuDst* StStrangeMuDstMaker::GetDatum(Int_t i, Bool_t MC,
+                                                     Int_t dstType)
+            { if (dstType) return cont[dstType]->Get(i,(int) MC);
+              else return (StStrangeMuDst*) GetEventI(MC); }
 inline StStrangeEvMuDst* StStrangeMuDstMaker::GetEvent()
             { return (evClonesArray ?
             (StStrangeEvMuDst*) (*evClonesArray)[0] : 0); }
 inline StStrangeEvMuDst* StStrangeMuDstMaker::GetMcEvent()
             { return (evMcArray ?
             (StStrangeEvMuDst*) (*evMcArray)[0] : 0); }
+inline StStrangeEvMuDst* StStrangeMuDstMaker::GetEventI(Bool_t MC)
+            { return (MC ? GetMcEvent() : GetEvent()); }
+inline StV0I* StStrangeMuDstMaker::GetV0I(Int_t i, Bool_t MC)
+            { return (StV0I*) (MC ? v0->GetMc(i) : v0->Get(i)); }
+inline StXiI* StStrangeMuDstMaker::GetXiI(Int_t i, Bool_t MC)
+            { return (StXiI*) (MC ? xi->GetMc(i) : xi->Get(i)); }
+inline StKinkI* StStrangeMuDstMaker::GetKinkI(Int_t i, Bool_t MC)
+            { return (StKinkI*) (MC ? kink->GetMc(i) : kink->Get(i)); }
+inline StV0MuDst* StStrangeMuDstMaker::GetV0(Int_t i)
+            { return (StV0MuDst*) v0->Get(i); }
+inline StXiMuDst* StStrangeMuDstMaker::GetXi(Int_t i)
+            { return (StXiMuDst*) xi->Get(i); }
+inline StKinkMuDst* StStrangeMuDstMaker::GetKink(Int_t i)
+            { return (StKinkMuDst*) kink->Get(i); }
+inline StV0Mc* StStrangeMuDstMaker::GetV0Mc(Int_t i)
+            { return (StV0Mc*) v0->GetMc(i); }
+inline StXiMc* StStrangeMuDstMaker::GetXiMc(Int_t i)
+            { return (StXiMc*) xi->GetMc(i); }
+inline StKinkMc* StStrangeMuDstMaker::GetKinkMc(Int_t i)
+            { return (StKinkMc*) kink->GetMc(i); }
+inline StStrangeAssoc* StStrangeMuDstMaker::GetV0Assoc(Int_t i)
+            { return xi->GetAssoc(i); }
+inline StStrangeAssoc* StStrangeMuDstMaker::GetXiAssoc(Int_t i)
+            { return xi->GetAssoc(i); }
+inline StStrangeAssoc* StStrangeMuDstMaker::GetKinkAssoc(Int_t i)
+            { return xi->GetAssoc(i); }
 inline TTree* StStrangeMuDstMaker::GetTree()
             { return tree; }
 inline StStrangeCuts& StStrangeMuDstMaker::Cuts()
@@ -241,8 +345,11 @@ inline Int_t StStrangeMuDstMaker::MatchName(const char* name) const
 
 //____________________________________________________________________
 //
-// $Id: StStrangeMuDstMaker.h,v 3.12 2003/02/16 21:28:45 jeromel Exp $
+// $Id: StStrangeMuDstMaker.h,v 3.13 2003/05/30 21:20:19 genevb Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 3.13  2003/05/30 21:20:19  genevb
+// doxygen savvy, encoding of FTPC mults, change virtual funcs
+//
 // Revision 3.12  2003/02/16 21:28:45  jeromel
 // GetCVS() added
 //

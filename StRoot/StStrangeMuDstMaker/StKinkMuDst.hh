@@ -1,52 +1,19 @@
-/***********************************************************************
+/*!
+ * \class StKinkMuDst
+ * \author Wensheng Deng, Kent State University, 29-Mar-2000
+ * \author Gene Van Buren
  *
- * $Id: StKinkMuDst.hh,v 3.5 2002/04/30 16:02:47 genevb Exp $
+ *              Kink micro dst class
  *
- * Author: Wensheng Deng, Kent State University, 29-Mar-2000
- *
- ***********************************************************************
- *
- * Description: Kink micro dst class
- *
- ***********************************************************************
- *
- * $Log: StKinkMuDst.hh,v $
- * Revision 3.5  2002/04/30 16:02:47  genevb
- * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
- *
- * Revision 3.4  2001/11/05 23:41:06  genevb
- * Add more dEdx, B field info, careful of changes to TTree unrolling
- *
- * Revision 3.3  2001/05/04 20:15:14  genevb
- * Common interfaces and reorganization of components, add MC event info
- *
- * Revision 3.2  2000/09/06 21:09:03  wdeng
- * Added track charges and total momenta
- *
- * Revision 3.1  2000/08/10 01:16:24  genevb
- * Added number of dedx points
- *
- * Revision 3.0  2000/07/14 12:56:48  genevb
- * Revision 3 has event multiplicities and dedx information for vertex tracks
- *
- * Revision 2.1  2000/06/09 22:17:10  genevb
- * Allow MC data to be copied between DSTs, other small improvements
- *
- * Revision 2.0  2000/06/02 22:11:54  genevb
- * New version of Strangeness micro DST package
- *
- * Revision 1.1  2000/03/30 00:18:08  genevb
- * Introduction of StKinkMuDst
- *
- *
- ***********************************************************************/
+ */
+
 #ifndef  STAR_StKinkMuDst
 #define  STAR_StKinkMuDst
 #include "StKinkBase.hh"
 
 class StKinkVertex;
 
-class StKinkMuDst : public virtual StKinkI, public StKinkBase {
+class StKinkMuDst : public StKinkBase {  // StKinkBase inherits StKinkI methods
 public:
   StKinkMuDst();
   StKinkMuDst(StKinkVertex*);
@@ -179,3 +146,39 @@ inline Float_t StKinkMuDst::lenDedxParent()   const
 inline Float_t StKinkMuDst::lenDedxDaughter() const
                { return (mNumDedxDaughter/100); }
 #endif
+
+
+/***********************************************************************
+ * $Id: StKinkMuDst.hh,v 3.6 2003/05/30 21:20:19 genevb Exp $
+ * $Log: StKinkMuDst.hh,v $
+ * Revision 3.6  2003/05/30 21:20:19  genevb
+ * doxygen savvy, encoding of FTPC mults, change virtual funcs
+ *
+ * Revision 3.5  2002/04/30 16:02:47  genevb
+ * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
+ *
+ * Revision 3.4  2001/11/05 23:41:06  genevb
+ * Add more dEdx, B field info, careful of changes to TTree unrolling
+ *
+ * Revision 3.3  2001/05/04 20:15:14  genevb
+ * Common interfaces and reorganization of components, add MC event info
+ *
+ * Revision 3.2  2000/09/06 21:09:03  wdeng
+ * Added track charges and total momenta
+ *
+ * Revision 3.1  2000/08/10 01:16:24  genevb
+ * Added number of dedx points
+ *
+ * Revision 3.0  2000/07/14 12:56:48  genevb
+ * Revision 3 has event multiplicities and dedx information for vertex tracks
+ *
+ * Revision 2.1  2000/06/09 22:17:10  genevb
+ * Allow MC data to be copied between DSTs, other small improvements
+ *
+ * Revision 2.0  2000/06/02 22:11:54  genevb
+ * New version of Strangeness micro DST package
+ *
+ * Revision 1.1  2000/03/30 00:18:08  genevb
+ * Introduction of StKinkMuDst
+ *
+ ***********************************************************************/

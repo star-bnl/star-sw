@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerBase.h,v 3.5 2001/09/14 21:39:02 genevb Exp $
+// $Id: StStrangeControllerBase.h,v 3.6 2003/05/30 21:20:19 genevb Exp $
 // $Log: StStrangeControllerBase.h,v $
+// Revision 3.6  2003/05/30 21:20:19  genevb
+// doxygen savvy, encoding of FTPC mults, change virtual funcs
+//
 // Revision 3.5  2001/09/14 21:39:02  genevb
 // Adjustments to not depend on order in which maker Clear() is called
 //
@@ -44,20 +47,25 @@ class StStrangeMuDstMaker;
 class TBranch;
 class TClass;
 
+enum StrBranchType {dataBranch=0, mcBranch=1, assocBranch};
+
 class StStrangeControllerBase : public TNamed {
  public: 
   StStrangeControllerBase(Int_t type);
   virtual ~StStrangeControllerBase();
   static StStrangeControllerBase* Instantiate(Int_t type);
 
+  TClonesArray* GetArray(Int_t branchType);
   TClonesArray* GetDataArray();
   TClonesArray* GetMcArray();   
   TClonesArray* GetAssocArray();   
 
+  Int_t GetN(Int_t branchType);
   Int_t GetN();
   Int_t GetNMc();
   Int_t GetNAssoc();
 
+  StStrangeMuDst* Get(Int_t i, Int_t branchType);
   StStrangeMuDst* Get(Int_t i=0);
   StStrangeMuDst* GetMc(Int_t i = 0);
   StStrangeAssoc* GetAssoc(Int_t i = 0);
@@ -139,6 +147,9 @@ inline TClonesArray* StStrangeControllerBase::GetMcArray()
 inline TClonesArray* StStrangeControllerBase::GetAssocArray()
             { return assocArray; }
 	    
+inline Int_t StStrangeControllerBase::GetN(Int_t branchType)
+            { TClonesArray* array = GetArray(branchType);
+              return (array ? array->GetEntriesFast() : 0); }
 inline Int_t StStrangeControllerBase::GetN()
             { return (dataArray ? dataArray->GetEntriesFast() : 0); }
 inline Int_t StStrangeControllerBase::GetNMc()
@@ -146,6 +157,9 @@ inline Int_t StStrangeControllerBase::GetNMc()
 inline Int_t StStrangeControllerBase::GetNAssoc()
             { return (assocArray ? assocArray->GetEntriesFast() : 0); }
 
+inline StStrangeMuDst* StStrangeControllerBase::Get(Int_t i, Int_t branchType)
+            { TClonesArray* array = GetArray(branchType);
+              return (array ? (StStrangeMuDst*) (*array)[i] : 0); }
 inline StStrangeMuDst* StStrangeControllerBase::Get(Int_t i)
             { return (dataArray ? (StStrangeMuDst*) (*dataArray)[i] : 0); }
 inline StStrangeMuDst* StStrangeControllerBase::GetMc(Int_t i)

@@ -55,6 +55,7 @@
 <HR width=60%>
 
 <h1>The Maker</h1>
+<a href="#code">The Code</a><br>
 <a href="#content">Specifying Content</a><br>
 <a href="#creating">Creating</a><br>
 <a href="#reading">Reading</a><br>
@@ -62,6 +63,15 @@
 <a href="#tools">Tools</a><br>
 <a href="#buffer">Buffer Sizes</a><br>
 </center>
+
+<p>
+<HR width=60%>
+<p>
+
+<a name="code"><h2>The Code</h2></a>
+The self-documented code can be viewed through doxygen <a
+href="http://www.star.bnl.gov/webdatanfs/dox/html/classStStrangeMuDstMaker.html">
+here</a>.
 
 <p>
 <HR width=60%>
@@ -221,6 +231,47 @@ event on file is event zero). This allows the user to skip events or
 read in only a portion of the events on the micro-DST. If no parameter is
 given to <tt>Make()</tt>, the micro-DST file is read from the beginning.<p>
 
+<h4>Monte Carlo Data</h4>
+Monte Carlo data is accessed similarly using functions with "Mc" in their
+names. Associations between Monte Carlo and reconstructed data can be
+accessed via functions with "Assoc" in their names. Examining associated
+vertices may look something like this:
+<pre>
+  Int_t Nevents = 10;
+  // Loop over events
+  for( Int_t i=0; i &lt; Nevents; i++ ) {
+    if( chain.Make(i) ) break;
+    // Loop over V0 vertices
+    for( Int_t j=0; j &lt; strangeDst.GetNV0Assoc(); j++ ) {
+      StStrangeAssoc* v0a = strangeDst.GetV0Assoc(j);
+      StV0MuDst* v0m = strangeDst.GetV0(v0a->indexRecoArray());
+      StV0Mc* v0mc = strangeDst.GetV0Mc(v0a->indexMcArray());
+      hist->Fill(v0m->ptV0() - v0mc->ptV0());
+    }
+    if( i != Nevents) chain.Clear();
+  }
+  chain.Finish();
+</pre>
+<p>
+
+Code can be written that works identically for reconstructed and Monte Carlo
+data using the <tt>Get*I()</tt> functions and interface classes:
+<pre>
+  Bool_t MC = kTRUE; // kFALSE for reconstructed data
+  Int_t Nevents = 10;
+  // Loop over events
+  for( Int_t i=0; i &lt; Nevents; i++ ) {
+    if( chain.Make(i) ) break;
+    // Loop over V0 vertices
+    for( Int_t j=0; j &lt; strangeDst.GetNV0I(MC); j++ ) {
+      StV0I *v0i = strangeDst.GetV0I(j,MC);
+      hist->Fill(v0i->pseudoRapV0());
+    }
+    if( i != Nevents) chain.Clear();
+  }
+  chain.Finish();
+</pre>
+<p>
 
 <hr width=10% align=left>
 <a name="filtering"><h2>Filtering Micro-DSTs</h2></a>
@@ -371,7 +422,9 @@ only in the read mode (see <a href="#reading">Reading Micro-DSTs</a>)<p>
 <br><tt>Int_t GetNV0()</tt>
 <br><tt>Int_t GetNXi()</tt>
 <br><tt>Int_t GetNKink()</tt>
-<br>- Returns an integer with the number of that particular vertex type.<p>
+<br>- Returns an integer with the number of that particular vertex type.
+<br>- Append "Mc" or "Assoc" to the function name for Monte Carlo vertices
+or associations between MC and reconstructed data.<p>
 
 <li>Getting a pointer to a particular vertex:
 <br><tt>StV0MuDst* GetV0(j)</tt>
@@ -379,7 +432,9 @@ only in the read mode (see <a href="#reading">Reading Micro-DSTs</a>)<p>
 <br><tt>StKinkMuDst* GetKink(j)</tt>
 <br>- Use the input parameter <tt>j</tt> to specify the index of the vertex
 from that event, with indices starting at zero for each event.
-<br><p>
+<br>- Append "Mc" or "Assoc" to the function name for Monte Carlo vertices
+or associations between MC and reconstructed data.<p>
+<p>
 
 <li>Getting a pointer to the event information:
 <br><tt>StStrangeEvMuDst* GetEvent()</tt>
@@ -407,22 +462,13 @@ the <tt>operator[]</tt>, like <tt>(*(maker.GetV0ClonesArray()))[j]</tt>, but
 this is more simply done with the <tt>Get*(j)</tt> member functions
 described above.<p>
 
-<li>Getting more detailed info for a vertex type:
-<br><tt>Get(<i>type</i>)->Get*()</tt>
-<br>- Here, <tt><i>type</i></tt> is a character string, one of:
-<br><tt>"V0"</tt>
-<br><tt>"Xi"</tt>
-<br><tt>"Kink"</tt>
-<br>- The subfunctions are one of the following:
-<br><tt>Int_t GetN()</tt> - [<tt>Get("V0")->GetN()</tt> == <tt>GetNV0()</tt> above]
-<br><tt>Int_t GetNMc()</tt>
-<br><tt>Int_t GetNAssoc()</tt>
-<br><tt>StStrangeMuDst* Get(j)</tt> - [<tt>(StV0MuDst*) Get("V0")->Get(j)</tt> == <tt>GetV0(j)</tt> above]
-<br><tt>StStrangeMuDst* GetMc(j)</tt>
-<br><tt>StStrangeAssoc* GetAssoc(j)</tt>
-<br><tt>TClonesArray* GetDataArray()</tt> - [<tt>Get("V0")->GetDataArray()</tt> == <tt>GetV0ClonesArray()</tt> above]
-<br><tt>TClonesArray* GetMcArray()</tt>
-<br><tt>TClonesArray* GetAssocArray()</tt>
+<li>Treating MC and reconstructed data the same (interfaces):
+<br><tt>Get*I(Bool_t MC)</tt>
+<br>- Switch easily back and forth between Monte Carlo and reconstructed data
+via input boolean <tt>MC</tt>.
+<br>- Return types are usable for Monte Carlo and reconstructed data
+(i.e. <tt>StV0I</tt> is usable for both <tt>StV0MuDst</tt> and <tt>StV0Mc</tt>
+data classes).
 </ul>
 
 
