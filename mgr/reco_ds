@@ -1,6 +1,9 @@
 #!/usr/local/bin/tcsh
-#  $Id: reco_ds,v 1.1 1998/08/21 15:44:48 fisyak Exp $
+#  $Id: reco_ds,v 1.2 1998/08/21 20:08:36 fisyak Exp $
 #  $Log: reco_ds,v $
+#  Revision 1.2  1998/08/21 20:08:36  fisyak
+#  add log
+#
 #  Revision 1.1  1998/08/21 15:44:48  fisyak
 #  Add reco_ds
 #
@@ -82,6 +85,7 @@ if (! ${?JOB_ID}) then
   set JOB_ID = 000 
   set DQS_STDOUT = "$HOME/PILOT/summary/reco/run_${first}_${JOB_ID}_`hostname`_bfc"
 endif
+  set log_file = `basename $DQS_STDOUT`
   set log      = ${SCRATCH}/reco/`hostname`_job_${JOB_ID}_bfc_${first}_${no_events}
   set log_dir  = `dirname ${log}`
   if ( -d ${log_dir} == 0) mkdir -p ${log_dir}
@@ -107,11 +111,12 @@ debug on
    input_data_prefix=${prefix_in} _ 
    input_data_file=${input_file}.xdf _ 
    output_file=${dir_out}/${input_file} _ 
-   log=\\\$DQS_STDOUT 
+   log=$log_file 
 exit 
 EOF
 time  staf -w 0 -b batch_${first}.kumac >& ${log}
 # Clean files/links not needed anymore...
+cat $log_file >> $DQS_STDOUT
 mv ${log} ${log_done}
 echo
 echo   Job finished at `date`
