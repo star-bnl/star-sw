@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 1.13 2000/02/21 23:20:10 lasiuk Exp $
+ * $Id: StRchMaker.cxx,v 1.14 2000/03/12 23:49:26 lasiuk Exp $
  *
  * Author: Jon Gans
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
- * Revision 1.13  2000/02/21 23:20:10  lasiuk
- * debug output formatting and reduce output to screen
+ * Revision 1.14  2000/03/12 23:49:26  lasiuk
+ * order of arguments for the reader
+ *
+ * Revision 1.16  2000/05/18 11:42:20  lasiuk
+ * mods for pre StEvent writing
  *
  * Revision 1.15  2000/04/05 21:25:18  lasiuk
  * with CF
@@ -149,7 +152,7 @@ Int_t StRchMaker::Make() {
 	    for(int iRow=0; iRow<mRows; iRow++) { // y -> 96
 		
 		unsigned long theADCValue =
-		    mTheRichReader->GetADCFromCoord(iRow,iPad);
+		    mTheRichReader->GetADCFromCoord(iPad,iRow);
 	// If the StRichPixelCollection hasn't been retrieved from StEvent
 		//pack adc/row/pad into a single long.  Use:
 		// the first 8 bits for the Pad (0-159)
@@ -227,16 +230,16 @@ Int_t StRchMaker::Make() {
 //     }
 	mTheRichReader = 0;
   printf("**************************************************************\n");
-  printf("* $Id: StRchMaker.cxx,v 1.13 2000/02/21 23:20:10 lasiuk Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.14 2000/03/12 23:49:26 lasiuk Exp $\n");
 	}
     AddData(new St_ObjectSet("StRichEvent", richCollection));
-  printf("* $Id: StRchMaker.cxx,v 1.13 2000/02/21 23:20:10 lasiuk Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.14 2000/03/12 23:49:26 lasiuk Exp $\n");
 }
 //-----------------------------------------------------------------
-  printf("* $Id: StRchMaker.cxx,v 1.13 2000/02/21 23:20:10 lasiuk Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.14 2000/03/12 23:49:26 lasiuk Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
-    printf("* $Id: StRchMaker.cxx,v 1.13 2000/02/21 23:20:10 lasiuk Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 1.14 2000/03/12 23:49:26 lasiuk Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 
