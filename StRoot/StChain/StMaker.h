@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.51 2001/05/31 02:40:30 perev Exp $
+// $Id: StMaker.h,v 1.52 2001/06/01 02:47:31 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.52  2001/06/01 02:47:31  perev
+// Memory consumption measurement added
+//
 // Revision 1.51  2001/05/31 02:40:30  perev
 // const(ing)
 //
@@ -153,6 +156,7 @@ class TBrowser;
 class TChain;
 class TTree;
 class TTable;
+class TMemStat;
 
 class StMaker : public TDataSet{
 public:
@@ -168,16 +172,18 @@ protected:
    TDataSet     *m_Ouputs;	 	//!list of logOuput:ActualOuput
    TDataSet     *m_Runco;	 	//!Run Control parameters
    TList          *m_Histograms;	//!list of Histograms
-   static StMaker *fgStChain;     	//current pointer to StChain
-   static StMaker *fgFailedMaker;     	//current pointer to failed maker
-   static Int_t fgTallyMaker[kStFatal+1]; //counters
-   Int_t	   m_Mode;		// Integer mode of maker
-   Int_t           m_Number;        	//Serial event number
-   Int_t           m_DebugLevel;    	//Debug level
-   Int_t           m_MakeReturn;    	//Make() return flag
-   TStopwatch      m_Timer;             //Timer object
-  
+   static StMaker *fgStChain;     	//!current pointer to StChain
+   static StMaker *fgFailedMaker;     	//!current pointer to failed maker
+   static Int_t fgTallyMaker[kStFatal+1];//!counters
+   Int_t	   m_Mode;		//!Integer mode of maker
+   Int_t           m_Number;        	//!Serial event number
+   Int_t           m_DebugLevel;    	//!Debug level
+   Int_t           m_MakeReturn;    	//!Make() return flag
+   TStopwatch      m_Timer;             //!Timer object
+   TMemStat       *fMemStatMake;	//!TMemStat for Make
+   TMemStat       *fMemStatClear;	//!TMemStat for Clear
    Bool_t          fActive;             // true if active
+
 public:
 
 //		Constructor & Destructor
@@ -235,9 +241,7 @@ public:
 
 //		Get
    virtual TDataSet  *GetData(const char *name, const char* dir=".data") const;
-   virtual TDataSet  *GetDataSet (const char* logInput,
-                                    const StMaker *uppMk=0,
-                                    const StMaker *dowMk=0) const ;
+   virtual TDataSet  *GetDataSet (const char* logInput) const {return FindDataSet(logInput);}
    virtual TDataSet  *   DataSet (const char* logInput)   const 
                            {return GetDataSet(logInput);};
    virtual TDataSet  *GetInputDS (const char* logInput)   const 
@@ -296,7 +300,13 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.51 2001/05/31 02:40:30 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.52 2001/06/01 02:47:31 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+protected:
+   virtual TDataSet  *FindDataSet (const char* logInput,
+                                    const StMaker *uppMk=0,
+                                    const StMaker *dowMk=0) const ;
+
+
 
    ClassDef(StMaker, 0)   // base class to define  one step of the recontsruction chain
 };
