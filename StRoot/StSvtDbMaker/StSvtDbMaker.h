@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbMaker.h,v 1.8 2004/01/30 07:22:07 munhoz Exp $
+ * $Id: StSvtDbMaker.h,v 1.9 2004/03/30 21:16:18 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbMaker.h,v $
+ * Revision 1.9  2004/03/30 21:16:18  caines
+ * Get daq parameters
+ *
  * Revision 1.8  2004/01/30 07:22:07  munhoz
  * adding rms and daq parameters reading
  *
@@ -105,6 +108,8 @@ class StSvtDbMaker : public StMaker {
   void readSvtBadAnodes();
   void setSvtT0();
   void readSvtT0();
+  void setSvtDaqParameters();
+  void readSvtDaqParameters();
 
   void writeSvtDriftVelocity(StSvtHybridCollection* driftVeloc=0);
   void writeSvtPedestals(StSvtHybridCollection* pedestals=0);
@@ -115,7 +120,7 @@ class StSvtDbMaker : public StMaker {
   StSvtDbWriter* getSvtDbWriter(){return mWriter;}  
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtDbMaker.h,v 1.8 2004/01/30 07:22:07 munhoz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtDbMaker.h,v 1.9 2004/03/30 21:16:18 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StSvtDbMaker,0)   //StAF chain virtual base class for Makers
 };
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: St_SvtDb_Reader.cc,v 1.8 2004/01/30 07:22:07 munhoz Exp $
+ * $Id: St_SvtDb_Reader.cc,v 1.9 2004/03/30 21:16:18 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: St_SvtDb_Reader.cc,v $
+ * Revision 1.9  2004/03/30 21:16:18  caines
+ * Get daq parameters
+ *
  * Revision 1.8  2004/01/30 07:22:07  munhoz
  * adding rms and daq parameters reading
  *
@@ -607,7 +610,7 @@ StSvtDaq* St_SvtDb_Reader::getDaqParameters()
   gMessMgr->Info() << "St_SvtDb_Reader::getDaqParameters" << endm;
 
   St_svtDaq *daq;
-  const int dbIndex = kGeometry;
+  const int dbIndex = kCalibration;
   if (svtDb[dbIndex]){
     daq = (St_svtDaq*)svtDb[dbIndex]->Find("svtDaq");
     if (!(daq && daq->HasData()) ){

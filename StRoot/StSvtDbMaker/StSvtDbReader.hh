@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbReader.hh,v 1.4 2004/01/30 07:22:07 munhoz Exp $
+ * $Id: StSvtDbReader.hh,v 1.5 2004/03/30 21:16:18 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbReader.hh,v $
+ * Revision 1.5  2004/03/30 21:16:18  caines
+ * Get daq parameters
+ *
  * Revision 1.4  2004/01/30 07:22:07  munhoz
  * adding rms and daq parameters reading
  *
@@ -42,6 +45,7 @@ class StSvtHybridDriftVelocity;
 class StSvtConfig;
 class StSvtGeometry;
 class StSvtT0;
+class StSvtDaq;
 
 class StSvtDbReader 
 {
@@ -75,6 +79,7 @@ class StSvtDbReader
   StSvtHybridCollection* getBadAnodes();
   StSvtGeometry* getGeometry();
   StSvtT0* getT0(){return 0;}
+  StSvtDaq* getDaqParameters(){return 0;}
 
 #ifdef __ROOT__
   ClassDef(StSvtDbReader, 1)   //StAF chain virtual base class for Makers
