@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.37 2004/07/27 22:00:19 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.38 2004/08/07 02:46:51 perev Exp $
  
 
 #include <time.h>
@@ -886,7 +886,7 @@ void StEEmcDbMaker::setAsciiDatabase( const Char_t *ascii )
   //--
   for ( Int_t mySec = 1; mySec <= 12; mySec++ ) 
     for ( Char_t uv = 'U'; uv <= 'V'; uv++ ) 
-      for ( Int_t myStrip = 1; myStrip <= 288; myStrip++ ) byStrip[mySec-1][uv-'U'][myStrip-1] = getStrip(mySec,uv,myStrip);
+      for ( Int_t myStrip = 1; myStrip <= 288; myStrip++ ) byStrip[mySec-1][uv-'U'][myStrip-1] = (EEmcDbItem*)getStrip(mySec,uv,myStrip);
 
       
   //--
@@ -1014,6 +1014,9 @@ void  StEEmcDbMaker::changeMaskAction(const char *fname) {
 
 
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.38  2004/08/07 02:46:51  perev
+// WarnOff
+//
 // Revision 1.37  2004/07/27 22:00:19  balewski
 // can overwrite gains & stat from DB
 //
