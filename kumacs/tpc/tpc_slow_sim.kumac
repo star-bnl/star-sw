@@ -14,9 +14,13 @@ macro tpc_slow_sim__
 * --> to run
 *    - change the inputs above as desired
 *    - run staf++
-*    -   make tpc   (need pams tpg,tfc,tss,tcl)
-*    -   exec tpc_slow_sim#run
-*            
+*    -   make tpc   (you'll get pams tpg,tfc,tss,tcl)
+*    -   exec tpc_slow_sim
+*         
+* in general, the things in [small letters] are input values
+*                           [CAPITAL LETTERS] are directories   
+*
+*
 
 message ' *** Input G2T file -->        '  [input_g2t_file]
 message ' *** Num Events to process --> '  [num_events]
