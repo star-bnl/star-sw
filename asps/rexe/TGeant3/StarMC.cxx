@@ -15,6 +15,9 @@
 
 /*
 $Log: StarMC.cxx,v $
+Revision 1.3  2004/03/01 16:02:49  fisyak
+new interface to simulation based on starsim
+
 Revision 1.2  2000/04/23 19:18:09  fisyak
 Merge with Alice V3.03
 
@@ -42,7 +45,7 @@ StarMC::StarMC()
 {
 }
 
-StarMC::StarMC(const char *name, const char *title) : TNamed(name,title)
+StarMC::StarMC(const char *name, const char *title) : TNamed(name,title),  fRandom(0)
 {
   if(fgMC) {
     printf("Cannot initialise twice MonteCarlo class\n");
@@ -50,5 +53,16 @@ StarMC::StarMC(const char *name, const char *title) : TNamed(name,title)
     fgMC=this;
     gMC=this;
   }
+  fRandom = gRandom;
+}
+
+//_____________________________________________________________________________
+void StarMC::SetRandom(TRandom* random) 
+{ 
+// 
+// Set random number generator.
+//
+
+   fRandom = random; 
 }
 
