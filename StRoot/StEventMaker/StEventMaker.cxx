@@ -42,7 +42,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.54 2003/04/08 18:44:03 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.55 2003/04/13 23:07:01 jeromel Exp $";
 
 ClassImp(StEventMaker)
   
@@ -292,6 +292,7 @@ StEventMaker::makeEvent()
     //
     //  Trigger ID summary
     //
+    Int_t idx;
     StTriggerIdCollection* triggerIdColl = mCurrentEvent->triggerIdCollection();
     if (!triggerIdColl) {
         mCurrentEvent->setTriggerIdCollection((triggerIdColl =
@@ -338,7 +339,9 @@ StEventMaker::makeEvent()
 		    }
 		}
 	    }	    
-	    triggerIdColl->setNominal(new StTriggerId(*(trigId[dbTriggerId->getDefaultTriggerLevel()-1])));
+	    if ( (idx=dbTriggerId->getDefaultTriggerLevel() ) != kDbTriggerBadID ){
+	      triggerIdColl->setNominal(new StTriggerId(*(trigId[idx-1])));
+	    }
 	}
     }
     else {
@@ -1482,8 +1485,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.54 2003/04/08 18:44:03 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.55 2003/04/13 23:07:01 jeromel Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.55  2003/04/13 23:07:01  jeromel
+ * Use of access method on null already fixed. Additional dbTriggerId fix closes bug # 85
+ *
  * Revision 2.54  2003/04/08 18:44:03  ullrich
  * Added protection for cases where StDetectorDbTriggerID and
  * StTrigSummary couldn't be obtained (see Trigger Id summary).
