@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "StEEmcDbIndexItem1.h"
 
@@ -9,20 +10,27 @@
 
 
 void StEEmcDbIndexItem1::print() const{
-  printf("DbIndexItem: %s crate=%d chan=%d gain=%.3f hv=%.1f ped=%.2f\n",name,crate,chan,gain,hv,ped);
+  printf("DbIndexItem: %s crate=%d chan=%3d sec=%d sub=%c eta=%d gain=%.3f hv=%6.1f ped=%.2f ADC thr=%.2f\n",name,crate,chan,sec,sub,eta,gain,hv,ped,thr);
 }
 
 void StEEmcDbIndexItem1::clear() {
-
   name[0]=0;
   crate= chan=-1; 
   gain=hv=-2;
   ped=-3;
+  sec=-4;
+  sub='Z';
+  eta=-5;  
+  thr=-6;
 }
 
 void StEEmcDbIndexItem1::setName(char *text) {
-      strncpy(name,text,StEEmcNameLen); 
+  strncpy(name,text,StEEmcNameLen); 
+  sec=atoi(text);
+  eta=atoi(text+4);
+  sub=text[3];
 }
+
 
 
 

@@ -1,7 +1,10 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.4 2003/03/07 15:35:44 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.5 2003/03/26 15:26:23 balewski Exp $
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.5  2003/03/26 15:26:23  balewski
+// add print()
+//
 // Revision 1.4  2003/03/07 15:35:44  balewski
 // towards EEMC daq reader
 //
@@ -65,6 +68,15 @@ StEEmcDbMaker::StEEmcDbMaker(const char *name):StMaker(name){
   myTimeStampUnix=0;
   mDbItem1=new  StEEmcDbIndexItem1[EEindexMax];
 
+
+  mxAdcCrate=7;
+  mxAdcChan=128; 
+  mLookup=new  StEEmcDbIndexItem1 ** [mxAdcCrate];
+  
+  int i;
+  for(i=0;i<mxAdcCrate;i++)
+    mLookup[i]=new StEEmcDbIndexItem1 * [mxAdcChan];
+
 }
 
 
@@ -73,6 +85,11 @@ StEEmcDbMaker::StEEmcDbMaker(const char *name):StMaker(name){
 //_______________________________________________________
 StEEmcDbMaker::~StEEmcDbMaker(){
   delete [] mDbItem1;
+
+  int i;
+  for(i=0;i<mxAdcCrate;i++)
+    delete [] mLookup[i];
+  delete [] mLookup;
 
   if( mNSector) {
     delete [] mDbADCconf;
@@ -118,12 +135,20 @@ void  StEEmcDbMaker::setTimeStampDay( int tD) {
 
 
 }
+//------------------
+void StEEmcDbMaker::setThreshold(float x){
+ KsigOverPed=x;
+ printf("set KsigOverPed=%f, threshold=ped+sig*KsigOverPed\n",KsigOverPed);
+}
+
 
 //________________________________________________________
 //________________________________________________________
 //________________________________________________________
 Int_t StEEmcDbMaker::Init(){
   if( mNSector==0) setSectors(5,8);//default
+  setThreshold(-100.);  // defines threshold for ADCs
+  // should be +2 or +3 sigma in the future
   return StMaker::Init();
 }
 
@@ -152,13 +177,26 @@ void StEEmcDbMaker::setSectors(int sec1,int sec2){
 //__________________________________________________
 //__________________________________________________
 
-
 const StEEmcDbIndexItem1*  
 StEEmcDbMaker::getT(int sec, char sub, int eta){
   char name[20];
   sprintf(name,"%2.2dT%c%2.2d",sec,sub,eta);
   int index=EEname2Index(name);
   return mDbItem1+index;  
+}
+
+//__________________________________________________
+//__________________________________________________
+//__________________________________________________
+
+const StEEmcDbIndexItem1*  
+StEEmcDbMaker::get(int crate, int channel){
+  assert(crate>=0);
+  assert(crate<mxAdcCrate);
+  assert(channel>=0);
+  assert(channel<mxAdcChan);
+  
+  return mLookup[crate][channel];  
 }
 
 
@@ -181,7 +219,7 @@ void  StEEmcDbMaker::mReloadDb  (){
 
   int found=0;
   int i;
-  printf("%s::reloadDb use TimeStamp from:  %p %p \n",GetName(),GetMaker("StarDb"),GetMaker("db"));
+  printf("%s::reloadDb use TimeStamp from:  %p or %p \n",GetName(),GetMaker("StarDb"),GetMaker("db"));
 
   St_db_Maker* mydb = (St_db_Maker*)GetMaker("StarDb");
   if(mydb==0) mydb = (St_db_Maker*)GetMaker("db");
@@ -189,20 +227,22 @@ void  StEEmcDbMaker::mReloadDb  (){
   TDatime aa;
   
   if(myTimeStampDay==0) {    
+#if 0
     StEvent *stEvent= (StEvent *) GetInputDS("StEvent"); 
     assert(stEvent); 
     
     printf("StEvent time=%d, ID=%d, runID=%d\n",(int)stEvent->time(),(int)stEvent->id(),(int)stEvent->runId());
+#endif
     
     StEvtHddr* fEvtHddr = (StEvtHddr*)GetDataSet("EvtHddr");
-    printf("EvtHddr actual event time stamp= %d, yyyy/mm/dd=%d hh/mm/ss=%d\n",
+    printf("use EvtHddr actual event time stamp= %d, yyyy/mm/dd=%d hh/mm/ss=%d\n",
 	   (int)fEvtHddr->GetUTime(),fEvtHddr->GetDate(),fEvtHddr->GetTime());
   
     //  int time0; // (sec) GMT of the first event
     //  time0=fEvtHddr->GetUTime( ); //<<==== this is used by DB
 
   } else {
-    printf("fixed TimeStampDay=%d \n",myTimeStampDay);
+    printf("replace  TimeStampDay to %d \n",myTimeStampDay);
     mydb->SetDateTime(myTimeStampDay,0); // set ~day & ~hour by hand
   }
   // mydb->SetDateTime(20021201,0); // set ~day & ~hour by hand
@@ -231,6 +271,11 @@ void  StEEmcDbMaker::mReloadDb  (){
 
   for(i=0; i<EEindexMax; i++)
     mDbItem1[i].clear();
+
+  int j;
+  for(i=0;i<mxAdcCrate;i++)
+    for(j=0;j<mxAdcChan;j++)
+      mLookup[i][j]=0;
 
   int is;
   for(is=0; is< mNSector; is++) {
@@ -299,6 +344,21 @@ void  StEEmcDbMaker::mReloadDb  (){
   printf("Found %d EEMC related tables for the present time stamp\n",found);
   assert(found); // no relevant records were in db, makes no sense to use this maker for any work
 }
+ 
+//__________________________________________________
+//__________________________________________________
+//__________________________________________________
+
+void  StEEmcDbMaker::print(int k){
+
+  int i;
+  printf("%s::print()\n",GetName());
+
+  for(i=0; i<EEindexMax; i++) {
+    if(mDbItem1[i].name[0]==0) continue;
+    mDbItem1[i].print();
+  }
+}
 
 //__________________________________________________
 //__________________________________________________
@@ -310,7 +370,7 @@ void  StEEmcDbMaker::mOptimizeDb(){
   printf("\n\noptimizeDb :::::: %s\n\n\n",GetName());
 
 
-  // primary information: slot,chan <--> element name
+  // primary information: crate,chan <--> element name
   for(i=0; i<mNSector; i++) {
     eemcDbADCconf_st *t= mDbADCconf[i];
     if(t==0) continue;
@@ -331,6 +391,10 @@ void  StEEmcDbMaker::mOptimizeDb(){
       mDbItem1[index].chan=t->channel[j];
       mDbItem1[index].setName(name);
 
+      assert(t->slot[j]>=0 && t->slot[j]<mxAdcCrate);
+      assert(t->channel[j]>=0 && t->channel[j]<mxAdcChan);
+      mLookup[t->slot[j]][t->channel[j]]=&mDbItem1[index];
+      
       //      if(j>300) break;
       printf("Mapped %s -->index=%d -->slot/chan=%d/%d \n",mDbItem1[index].name,index,t->slot[j],t->channel[j]);
     }
@@ -378,11 +442,11 @@ void  StEEmcDbMaker::mOptimizeDb(){
       //	printf("ppp %p %s %s \n",p,item->name,name1);
       if(p==0) continue;
       mDbItem1[index].ped=ped->ped[j];
+      mDbItem1[index].thr=ped->ped[j]+KsigOverPed*ped->sig[j];
       break;
     }
     
   }// end of loop over index
-
 
 }
 
