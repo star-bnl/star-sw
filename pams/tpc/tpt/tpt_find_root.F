@@ -1,5 +1,8 @@
-* $Id: tpt_find_root.F,v 1.11 1999/12/17 16:30:52 sakrejda Exp $
+* $Id: tpt_find_root.F,v 1.12 2000/02/14 00:57:37 sakrejda Exp $
 * $Log: tpt_find_root.F,v $
+* Revision 1.12  2000/02/14 00:57:37  sakrejda
+* iVertex constrain removed from the root formation.
+*
 * Revision 1.11  1999/12/17 16:30:52  sakrejda
 * Introduced additional integer to avit having mod(short,int).
 * It was not harmful, but confusing and debuggers complained about it.
@@ -86,7 +89,6 @@ C     Local variables
       REAL    zorigl,r3,r2,delr23,zp2,delz2p,dely23
       REAL    delx23,delz23,an,bn,sl23,zp1,xp1,yp1
       REAL    as,bs,ddr,fact,delrow,dummy, det_local
-      LOGICAL h2good
 
 c     message related variables
       character*132 m132
@@ -120,8 +122,12 @@ C     find in what slice the hits for the next row are going to be
       if( gap_2 .lt. -1 ) go to 999
 
       delrow = 2.5
-      if(ir2.lt.14) delrow = 6.0
-      zp2 = zp3*(1.0-delrow/r3)
+      if(ir2.lt.16) then
+         delrow = 6.0
+         zp2 = zp3*(1.0-delrow/r3)
+      else
+         zp2=zp3
+      endif
       if(abs(zp2).gt.200.0) zp2=sign(200.0,zp2)
       irets=tpt_find_slic(zp2,tpar(ipass).nzslic,islic)
       is_pnt = slice_loc(isect_trunc,ir2,islic) 
@@ -149,6 +155,37 @@ C         Start looking for a link - down to business
 C         loop over all hits in slice-next i'th hit is set at enddo
           do ilc=1,nh2
 	    if( hit(i).track .le. 0 ) then
+            if(ir3.gt.15) then
+            if((hit(i).minpad.le.hit(k).maxpad).and.
+     >        (hit(i).maxpad.ge.hit(k).minpad).and.
+     >        (hit(i).mintmbk.le.hit(k).maxtmbk).and.
+     >        (hit(i).maxtmbk.ge.hit(k).mintmbk)) then
+              zp1=hit(k).z
+              irets=tpt_find_slic(zp1,tpar(ipass).nzslic,islic)
+              js_pnt = slice_loc(isect_trunc,ir1,islic) 
+              j = slice_pnt(1,js_pnt)
+              do jlc=1,slice_pnt(2,js_pnt)
+                 if( hit(j).track.le.0 ) then
+                   if((hit(j).minpad.le.hit(j).maxpad).and.
+     >             (hit(k).maxpad.ge.hit(j).minpad).and.
+     >             (hit(k).mintmbk.le.hit(j).maxtmbk).and.
+     >             (hit(k).maxtmbk.ge.hit(j).mintmbk)) then
+c                      we have a good root
+                       nroot=nroot+1
+	    	       root(nroot).hit(1) = k
+	  	       root(nroot).hit(2) = i
+		       root(nroot).hit(3) = j
+                       if(nroot.eq.mxroot) then
+                          write(m132,*) 'TPTROOT1-E1 root limit!',nroot
+                          call Message(m132, 1, idR1)
+                          go to 999
+                       endif
+                   endif
+                 endif
+                 j = next_hit(j)
+              end do
+            endif
+            else
 	      r2 = sqrt(hit(i).x**2+hit(i).y**2)
 	      delr23 = r3 - r2
 	      if( delr23 .gt. 0.0000001 ) then
@@ -168,7 +205,6 @@ c               squared distance between the prediction and the track (r-z proje
      >              (tpar(ipass).delrlm*tol23)**2) then
                     delz23 = hit(k).z - hit(i).z
 c                   we have a candidate for the second point
-                    h2good = .true.
 C                   calculate prediction for the row ir1
 c                   get the row parametrisation
                     iret = tgc_row_par(isect,real(ir1),as,bs,dummy,
@@ -217,6 +253,7 @@ c                              we have a good root
                   endif
                 endif
               endif
+            endif
             endif
             i = next_hit(i)
           enddo               ! loop over hits in ir2
