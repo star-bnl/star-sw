@@ -1,5 +1,8 @@
-* * $Id: bfc.kumac,v 1.76 1998/11/06 19:32:55 kathy Exp $
+* * $Id: bfc.kumac,v 1.77 1998/12/08 19:25:50 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.77  1998/12/08 19:25:50  kathy
+* now allow skip events when using mdin
+*
 * Revision 1.76  1998/11/06 19:32:55  kathy
 * allow 2 ntuples to be written to same ntuple file
 *
@@ -419,7 +422,7 @@ MACRO bfc _
      nw=$words([test])
      do i=1,[nw]
        mod=$word([test],[i],1)
-       if [mod].eq.evgin.or.[mod].eq.g2tin.or.[mod].eq.evin.or.[mod].eq.esin.or.[mod].eq.fzin.or.[mod].eq.dstin then 
+       if [mod].eq.evgin.or.[mod].eq.g2tin.or.[mod].eq.evin.or.[mod].eq.esin.or.[mod].eq.fzin.or.[mod].eq.dstin.or.[mod].eq.mdin then 
            message ' SKIP ' [skip] ' EVENTS FOR ' [mod]
 	   do ievent = 1,[skip]
 	       nev_total = [nev_total] + 1
