@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.h,v 1.12 1999/09/24 01:23:36 fisyak Exp $
+// $Id: StKinkMaker.h,v 1.13 1999/10/25 21:46:53 wdeng Exp $
 // $Log: StKinkMaker.h,v $
+// Revision 1.13  1999/10/25 21:46:53  wdeng
+// More iflag options
+//
 // Revision 1.12  1999/09/24 01:23:36  fisyak
 // Reduced Include Path
 //
@@ -40,6 +43,7 @@
 #endif
 
 #include "StKinkLocalTrack.hh"
+#include "StKinkTrkIdCheck.hh"
 #include "StPhysicalHelixD.hh"
 
 #include "tables/St_tkf_tkfpar_Table.h"
@@ -58,6 +62,7 @@ class St_dst_vertex;
 class St_dst_tkf_vertex;
 
 class StKinkLocalTrack;
+class StKinkTrkIdCheck;
 class StPhysicalHelixD;
 
 #if !defined(ST_NO_NAMESPACES)
@@ -67,7 +72,7 @@ using namespace std;
 class StKinkMaker : public StMaker {
  private:
   Bool_t            m_kinkEvalOn;   //switch for the evaluation
-  // static Char_t  m_VersionCVS = "$Id: StKinkMaker.h,v 1.12 1999/09/24 01:23:36 fisyak Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StKinkMaker.h,v 1.13 1999/10/25 21:46:53 wdeng Exp $";
   St_tkf_tkfpar    *m_tkfpar;          //!
 
   StKinkLocalTrack *myTrack1;          //! 
@@ -102,7 +107,7 @@ class StKinkMaker : public StMaker {
   virtual  void   kinkEvalOn() {kinkEval();} 
   virtual  void   kinkEvalOff(){kinkEval(kFALSE);}      
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.12 1999/09/24 01:23:36 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.13 1999/10/25 21:46:53 wdeng Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   ClassDef(StKinkMaker, 1)   //StAF chain virtual base class for Makers
 };
     

@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.22 1999/09/30 13:34:27 wdeng Exp $
+// $Id: StKinkMaker.cxx,v 1.23 1999/10/25 21:46:52 wdeng Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.23  1999/10/25 21:46:52  wdeng
+// More iflag options
+//
 // Revision 1.22  1999/09/30 13:34:27  wdeng
 // Diminish the degree or radian bug
 //
@@ -99,6 +102,7 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define degToRad     C_RAD_PER_DEG               
   
 #define MAXNUMOFTRACKS 10000
+#define SIZETRKIDCHECK 1000
 
 ClassImp(StKinkMaker)
   
@@ -383,6 +387,77 @@ Int_t StKinkMaker::Make(){
     }
   trackArray->Delete();
   gMessMgr->Info() << " Found " << kinkCandidate << " kink candidates " << endm;
+
+  // Check if two or more parents (daughters) have the same dst_track id. 
+  // Refill iflag entry of dst_vertex as -1 (-2) if necessary. This also works for real data.
+
+  TObjArray* trkIdChkArray = new TObjArray(SIZETRKIDCHECK);
+  StKinkTrkIdCheck *trkIdChk1;
+  StKinkTrkIdCheck *trkIdChk2;
+ 
+  dst_tkf_vertex_st *kinkVtxStart = kinkVertex->GetTable();
+  dst_vertex_st     *dstVtxStart = vertex->GetTable();
+
+  for(Int_t lv1=0; lv1<kinkVertex->GetNRows()-1; lv1++) {
+    dst_tkf_vertex_st *kinkVtxPtr1 = kinkVtxStart + lv1;
+
+    for(Int_t lv2=lv1+1; lv2<kinkVertex->GetNRows(); lv2++) {
+      dst_tkf_vertex_st *kinkVtxPtr2 = kinkVtxStart + lv2;
+      
+      if( kinkVtxPtr1->idp == kinkVtxPtr2->idp ) {
+        trkIdChk1 = new StKinkTrkIdCheck();
+        trkIdChk2 = new StKinkTrkIdCheck();
+
+        trkIdChk1->setCommonIdp(1);
+        trkIdChk1->setPosInKinkVtx(lv1);
+
+        trkIdChk2->setCommonIdp(1);
+        trkIdChk2->setPosInKinkVtx(lv2);
+
+        trkIdChkArray->Add(trkIdChk1);
+        trkIdChkArray->Add(trkIdChk2);
+      }
+      
+      if( kinkVtxPtr1->idd == kinkVtxPtr2->idd ) {
+        trkIdChk1 = new StKinkTrkIdCheck();
+        trkIdChk2 = new StKinkTrkIdCheck();
+
+        trkIdChk1->setCommonIdd(1);
+        trkIdChk1->setPosInKinkVtx(lv1);
+
+        trkIdChk2->setCommonIdd(1);
+        trkIdChk2->setPosInKinkVtx(lv2);
+
+        trkIdChkArray->Add(trkIdChk1);
+        trkIdChkArray->Add(trkIdChk2);
+      }
+
+    }
+  }
+
+  for( i = 0; i <=trkIdChkArray->GetLast(); i++)
+    {
+      StKinkTrkIdCheck* trkIdChk3 = (StKinkTrkIdCheck*)trkIdChkArray->At(i);
+
+      if( trkIdChk3->commonIdp() == 1 ) {
+        Int_t posInKinkVtx = trkIdChk3->posInKinkVtx();
+        dst_tkf_vertex_st *tkfVtx = kinkVtxStart + posInKinkVtx;
+        Int_t dstVtxId = tkfVtx->id_vertex;
+        dst_vertex_st *dstVtx = dstVtxStart + dstVtxId -1;
+        dstVtx->iflag = -1;
+      }
+             
+      if( trkIdChk3->commonIdd() == 1 ) {
+        Int_t posInKinkVtx = trkIdChk3->posInKinkVtx();
+        dst_tkf_vertex_st *tkfVtx = kinkVtxStart + posInKinkVtx;
+        Int_t dstVtxId = tkfVtx->id_vertex;
+        dst_vertex_st *dstVtx = dstVtxStart + dstVtxId -1;
+        dstVtx->iflag = -2;
+      }
+    
+    }
+
+  trkIdChkArray->Delete();
   
   return kStOK; 
 }
@@ -548,7 +623,7 @@ void StKinkMaker::FillIflag()
 	Int_t stopIdParent;
 	Int_t startIdDaughter;	
 	Int_t vertexGeProc; 
-	Int_t numDaughter;
+	// Int_t numDaughter;
 	
 	St_DataSet *geant = GetDataSet("geant"); 
 	St_DataSetIter geantI(geant);         
@@ -587,15 +662,32 @@ void StKinkMaker::FillIflag()
 	g2tVertexPtr = g2tVertexStart + (startIdDaughter -1);
 	
 	vertexGeProc = g2tVertexPtr->ge_proc;
-	numDaughter = g2tVertexPtr->n_daughter;
+	// numDaughter = g2tVertexPtr->n_daughter;
 	
-	if( stopIdParent==startIdDaughter  && ( parentPid==11 || parentPid==12 )
-	    && vertexGeProc==5  && numDaughter==2 )
-	  {
-	    dstVtxRow.iflag = 1;
-	  } else {
-	    dstVtxRow.iflag = 0;
+	dstVtxRow.iflag = -10;
+
+	if( stopIdParent != startIdDaughter ) {
+	  dstVtxRow.iflag = 0;
+	} else {
+	  if( vertexGeProc == 12 ) {
+	    dstVtxRow.iflag = -3;
 	  }
+
+	  if( vertexGeProc != 12 && vertexGeProc != 5 ) {
+	    dstVtxRow.iflag = -4;
+	  }
+	  
+	  if( vertexGeProc == 5 ) {
+	    if( parentPid == kinkVtxRow.pidp ) {
+	      dstVtxRow.iflag = 1;
+	    } else {
+	      dstVtxRow.iflag = 100 * parentPid + 1;
+	    }
+	  }
+	}                    
+
+	if( parentMcId == daughterMcId )  dstVtxRow.iflag = -9;
+
 	goto PROPERFILL;
       }
     }
