@@ -1,5 +1,9 @@
-// $Id: St_geant_Maker.cxx,v 1.96 2005/02/07 21:09:20 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.97 2005/03/23 21:56:30 potekhin Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.97  2005/03/23 21:56:30  potekhin
+// Added the latest Kai's code for reading hits
+// from the IST and FST tables
+//
 // Revision 1.96  2005/02/07 21:09:20  fisyak
 // rename antique TGeant3 to TGiant3
 //
@@ -365,6 +369,8 @@
 // Subsystems:
 #include "g2t/St_g2t_svt_Module.h"
 #include "g2t/St_g2t_pix_Module.h"
+#include "g2t/St_g2t_ist_Module.h"
+#include "g2t/St_g2t_fst_Module.h"
 #include "g2t/St_g2t_tpc_Module.h"
 #include "g2t/St_g2t_mwc_Module.h"
 #include "g2t/St_g2t_ftp_Module.h"
@@ -649,6 +655,28 @@ Int_t St_geant_Maker::Make()
     //
   }
   
+  geant3->Gfnhit("ISTH","IBSS", nhits);
+  
+  if (nhits>0) { 
+    St_g2t_ist_hit *g2t_ist_hit = new St_g2t_ist_hit("g2t_ist_hit",nhits);
+    m_DataSet->Add(g2t_ist_hit);
+    
+    iRes = g2t_ist(g2t_track,g2t_ist_hit);
+    cout << "found IST hits!" << endl;
+    g2t_ist_hit->Print(0,10);
+  }
+
+  geant3->Gfnhit("FSTH","FDSW", nhits);
+  
+  if (nhits>0) { 
+    St_g2t_fst_hit *g2t_fst_hit = new St_g2t_fst_hit("g2t_fst_hit",nhits);
+    m_DataSet->Add(g2t_fst_hit);
+    
+    iRes = g2t_fst(g2t_track,g2t_fst_hit);
+    cout << "found FST hits!" << endl;
+    g2t_fst_hit->Print(0,10);
+  }
+
   geant3->Gfnhit("TPCH","TPAD", nhits);
   if (nhits>0){ 
     St_g2t_tpc_hit *g2t_tpc_hit = new St_g2t_tpc_hit("g2t_tpc_hit",nhits);
