@@ -1,7 +1,10 @@
 //*-- Author : Jan Balewski
 //  
-// $Id: StppLPprojectMaker.cxx,v 1.8 2001/05/08 03:24:51 balewski Exp $
+// $Id: StppLPprojectMaker.cxx,v 1.9 2001/11/28 23:03:42 balewski Exp $
 // $Log: StppLPprojectMaker.cxx,v $
+// Revision 1.9  2001/11/28 23:03:42  balewski
+// ppLMV uses only tracks matched to CTB slats, runs with DAQ & MC data
+//
 // Revision 1.8  2001/05/08 03:24:51  balewski
 // *** empty log message ***
 //
@@ -45,6 +48,7 @@
 
 ClassImp(StppLPprojectMaker)
 
+
 //_____________________________________________________________________________
 StppLPprojectMaker::StppLPprojectMaker(const char *name):StMaker(name){
   JspinID=NULL;
@@ -58,7 +62,7 @@ StppLPprojectMaker::~StppLPprojectMaker(){
 
   int is,ib;
   for(is=0;is<MxSpinID;is++) {
-    printf("is=%d, add=%d\n",is, hpol[is]);
+    //printf("is=%d, add=%d\n",is, hpol[is]);
     p[is]=((TH1F*) hpol[is])->GetArray();
     assert(p[is]);
     tot[is]=0;
@@ -97,14 +101,15 @@ Int_t StppLPprojectMaker::Make(){
   cout <<" Mmmmmmmmmmmmmmmmmmmmmm   start maker ::"<<GetName() <<" mode="<<m_Mode<<endl;
 
   int spinID=1; // default value
-  //assert(JspinID);
+
   if(JspinID) {
     spinID=*JspinID;
   }
   else {
     printf("%s-maker WARN, default value of spinID=%d used\n",GetName(),spinID);
   }
-	   
+
+
   //StEvent *stEvent= (StEvent *) GetInputDS("StEvent");  assert(stEvent);
      
   //printf("spinID=%d, eveID=%d\n",spinID,(int)stEvent->id());

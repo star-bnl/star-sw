@@ -1,6 +1,9 @@
 //*-- Author : Jan Balewski 
-// $Id: StSpinSortMaker.cxx,v 1.4 2001/04/24 21:58:26 balewski Exp $
+// $Id: StSpinSortMaker.cxx,v 1.5 2001/11/28 23:03:41 balewski Exp $
 // $Log: StSpinSortMaker.cxx,v $
+// Revision 1.5  2001/11/28 23:03:41  balewski
+// ppLMV uses only tracks matched to CTB slats, runs with DAQ & MC data
+//
 // Revision 1.4  2001/04/24 21:58:26  balewski
 // *** empty log message ***
 //
@@ -42,6 +45,11 @@
 #include "tables/St_ppDbSpinAvr_Table.h"
 #include "tables/St_ppDbSpinConf_Table.h"
 
+#include "St_trg_Maker/St_trg_Maker.h"
+
+#include "tables/St_event_header_Table.h" // not working bXing
+
+
 ClassImp(StSpinSortMaker)
 
 //_____________________________________________________________________________
@@ -69,6 +77,8 @@ Int_t StSpinSortMaker::Init(){
   h[3] = new TH1F("ID3","N(spinID=3) vs. time (sec)",ntbin,tstart,tstop);
   h[4] = new TH1F("ID4","N(spinID=4) vs. time (sec)",ntbin,tstart,tstop);
   h[5] = new TH1F("ID5","N(spinID>=5) vs. time (sec)",ntbin,tstart,tstop);
+  h[6]=new TH1F("bX1","RevTic lower bits",10000,0.,1000000);
+  h[7]=new TH1F("bX2","RevTic%120 ",122,-0.5,121.5);
 
   printf("InInInInInInInInInIn Initialization \"%s\"end\n",GetName());
 
@@ -109,6 +119,48 @@ Int_t StSpinSortMaker::Make(){
   printf("AA3 StEvent: time=%d, ID=%d \n",(int)stEvent->time(),(int)stEvent->id());
    printf("AA bunchCrossingNumber(0)=%d, (1)=%d\n",(int)stEvent->bunchCrossingNumber(0),(int)stEvent->bunchCrossingNumber(1));
 
+
+  St_DataSet    *ds0=GetDataSet("dst/event_header"); assert(ds0);
+    St_event_header *evhd=(St_event_header*) ds0->Find("event_header");
+  assert(evhd);
+  evhd->Print(0,1);
+
+  //extract bXing ID from trigger Maker
+
+
+  St_trg_Maker *trg=(St_trg_Maker *)GetMaker("trg");
+  // assert(trg);
+  int  bx_lo=3, bXing=33;
+
+  if(trg) {
+#if 0
+    long long revTic;
+    revTic=trg->jtd.bXing_hi;
+    revTic=revTic << 32;
+    revTic+=revTic=trg->jtd.bXing_lo;
+    bXing=(revTic%120)+1;
+    revTic=revTic;
+    bx_lo=trg->jtd.bXing_lo>>1;
+    static int bx_lo_off=0;
+    if(bx_lo_off==0) bx_lo_off=bx_lo-1;
+    bx_lo-=bx_lo_off;
+
+    printf("JB2 bx_hi=0x%0x, bx_lo=0x%0x, bx_lo=%d, bXing=%d len=%d\n\n",
+               trg->jtd.bXing_hi,trg->jtd.bXing_lo,  bx_lo,  bXing, sizeof(revTic));
+#endif  
+  } else {
+    bx_lo=2;
+    bXing=22;
+  }
+  
+
+  h[6]->Fill(bx_lo);
+  h[7]->Fill(bXing); 
+  
+  // get TRIG-bunch crossing ID
+  IDbunch=bXing/2;
+ 
+
   if(!spinAvr) readDB();  // access DB for the first time
   if(spinAvr==NULL) {
     printf("%s-DB table not existing, set spinID=0\n",GetName()); 
@@ -130,14 +182,6 @@ Int_t StSpinSortMaker::Make(){
   assert(conf);
   assert(conf->nBunch>0);  // temporay NULL-table check
   
-  
-  // get TRIG-bunch crossing ID
-  IDbunch=stEvent->bunchCrossingNumber(1);
-
- {// temp, untill good value filled to DAQ
-   IDbunch=1+ stEvent->id() % conf->nBunch;
- }// temp end
- 
   // match TRIG-bunch crossing to user spin conf scheme
   for(j=0; j<conf->nBunch; j++) {
     // I'm assuming Trig-bunch cross=yellow bunch crossing ??
@@ -145,6 +189,7 @@ Int_t StSpinSortMaker::Make(){
     if(conf->IDyell[j]!=IDbunch) continue;
     // match found
     spinID=conf->IDspin[j];
+    printf("%s choose spinID=%d\n",GetName(),spinID);
     goto end;
   }
   printf("JB: error: TRIG-bunch crossing=%d is not in DB spinConf table, STOP\n",IDbunch);

@@ -1,6 +1,9 @@
 //*-- Author : Jan Balewski
-// $Id: StppDst.h,v 1.1 2001/04/19 21:40:09 balewski Exp $
+// $Id: StppDst.h,v 1.2 2001/11/28 23:03:41 balewski Exp $
 // $Log: StppDst.h,v $
+// Revision 1.2  2001/11/28 23:03:41  balewski
+// ppLMV uses only tracks matched to CTB slats, runs with DAQ & MC data
+//
 // Revision 1.1  2001/04/19 21:40:09  balewski
 // *** empty log message ***
 //
@@ -18,6 +21,7 @@
 #include "TTable.h"
 
 typedef struct {
+  int bXing;// [1,120] // empty for now
   float pt; // (GeV/c) pT of recon LP
   float eta; // (1) pseudorapidity of  recon LP
   float psi; // (deg) azimuth recon LP
@@ -27,7 +31,7 @@ typedef struct {
   float Rxy;  // (cm) R(x,y) recLP at DCA to recVer
   float chi2f; // chi2/DOF for rec LP
   int PrimId;  // of rec LP for evaluation only
-  int nPrim;  // total number of prim tracks found bt ppLMV
+  int nPrim;  // total number of prim tracks found by ppLMV
   float vertX; // (cm) vertex found by ppLMV
   float vertY,vertZ;
 } ppDst_t;

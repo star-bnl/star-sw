@@ -2,8 +2,11 @@
 //  
 // JB 3/30/01 - divorce with MC. Only StEvent is used. No evaluation
 //
-// $Id: StppLPfindMaker.cxx,v 1.7 2001/06/07 17:02:52 balewski Exp $
+// $Id: StppLPfindMaker.cxx,v 1.8 2001/11/28 23:03:41 balewski Exp $
 // $Log: StppLPfindMaker.cxx,v $
+// Revision 1.8  2001/11/28 23:03:41  balewski
+// ppLMV uses only tracks matched to CTB slats, runs with DAQ & MC data
+//
 // Revision 1.7  2001/06/07 17:02:52  balewski
 // *** empty log message ***
 //
@@ -261,8 +264,8 @@ Int_t StppLPfindMaker::Make()
     hv[13]->Fill(rLP->psi,reta);
   }
 
-  // tmp
-  {
+  
+  if(0){ // for M-C
     //    G E A N T
     St_DataSet *gds=GetDataSet("geant"); assert(gds);
     St_g2t_vertex  *gver=(St_g2t_vertex  *) gds->Find("g2t_vertex");
