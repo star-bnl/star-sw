@@ -1,4 +1,9 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.66  2004/05/19 17:44:46  oldi
+// For simulated data the ftpcHitCollection inside StEvent doesn't exist yet.
+// We have to create it on our own. Additional check for ftpcHitCollection
+// introduced in StFtpcTrackMaker.
+//
 // Revision 1.65  2004/04/19 22:00:46  oldi
 // Minor changes.
 //
@@ -383,7 +388,10 @@ Int_t StFtpcClusterMaker::Make()
 
   mCurrentEvent = (StEvent*) GetInputDS("StEvent");
   if (mCurrentEvent) {
-    mFtpcHitColl = mCurrentEvent->ftpcHitCollection();
+    if (!(mFtpcHitColl = mCurrentEvent->ftpcHitCollection())) {
+      mFtpcHitColl = new StFtpcHitCollection;
+      mCurrentEvent->setFtpcHitCollection(mFtpcHitColl);
+    }
   } else mFtpcHitColl = 0;
 
   St_DataSet *ftpc_geometry_db = GetDataBase("Geometry/ftpc");
