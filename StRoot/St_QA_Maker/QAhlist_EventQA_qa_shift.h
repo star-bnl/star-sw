@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.22 2004/03/15 23:32:14 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.23 2004/03/17 00:35:14 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.23  2004/03/17 00:35:14  genevb
+// Left Mult off hist names in previous commit
+//
 // Revision 2.22  2004/03/15 23:32:14  genevb
 // Add primary vertex check for event classes to QA Shift set
 //
@@ -247,7 +250,6 @@
   "StELMQaPointBarrelS",
   "StELMQaPointPlaneF",
   "StELMQaRichTot",
-  "StELMQaNullPrimVtx",
   "StELMQaGtrkZfTS",
   "StELMQaGtrkPhifTS",
   "StELMQaGtrkZfT",
@@ -305,7 +307,7 @@
   "StELMQaPtrkImpactrTTS",
   "StELMQaPtrkGlob",
   "StELMQaPtrkFitPntLTTS",
-  "StELMQaNullPrimVtx",
+  "StELMQaNullPrimVtxMult",
   "StELMQaVtxPrXY",
   "StELMQaVtxPrZ",
   "StELMQaVtxSvtvsTpc",
@@ -393,7 +395,6 @@
   "StEMMQaPointBarrelS",
   "StEMMQaPointPlaneF",
   "StEMMQaRichTot",
-  "StEMMQaNullPrimVtx",
   "StEMMQaGtrkZfTS",
   "StEMMQaGtrkPhifTS",
   "StEMMQaGtrkZfT",
@@ -451,7 +452,7 @@
   "StEMMQaPtrkImpactrTTS",
   "StEMMQaPtrkGlob",
   "StEMMQaPtrkFitPntLTTS",
-  "StEMMQaNullPrimVtx",
+  "StEMMQaNullPrimVtxMult",
   "StEMMQaVtxPrXY",
   "StEMMQaVtxPrZ",
   "StEMMQaVtxSvtvsTpc",
@@ -539,7 +540,6 @@
   "StEHMQaPointBarrelS",
   "StEHMQaPointPlaneF",
   "StEHMQaRichTot",
-  "StEHMQaNullPrimVtx",
   "StEHMQaGtrkZfTS",
   "StEHMQaGtrkPhifTS",
   "StEHMQaGtrkZfT",
@@ -597,7 +597,7 @@
   "StEHMQaPtrkImpactrTTS",
   "StEHMQaPtrkGlob",
   "StEHMQaPtrkFitPntLTTS",
-  "StEHMQaNullPrimVtx",
+  "StEHMQaNullPrimVtxMult",
   "StEHMQaVtxPrXY",
   "StEHMQaVtxPrZ",
   "StEHMQaVtxSvtvsTpc",
@@ -685,7 +685,6 @@
   "StECLQaPointBarrelS",
   "StECLQaPointPlaneF",
   "StECLQaRichTot",
-  "StECLQaNullPrimVtx",
   "StECLQaGtrkZfTS",
   "StECLQaGtrkPhifTS",
   "StECLQaGtrkZfT",
@@ -743,7 +742,7 @@
   "StECLQaPtrkImpactrTTS",
   "StECLQaPtrkGlob",
   "StECLQaPtrkFitPntLTTS",
-  "StECLQaNullPrimVtx",
+  "StECLQaNullPrimVtxMult",
   "StECLQaVtxPrXY",
   "StECLQaVtxPrZ",
   "StECLQaVtxSvtvsTpc",
@@ -831,7 +830,6 @@
   "StEHTQaPointBarrelS",
   "StEHTQaPointPlaneF",
   "StEHTQaRichTot",
-  "StEHTQaNullPrimVtx",
   "StEHTQaGtrkZfTS",
   "StEHTQaGtrkPhifTS",
   "StEHTQaGtrkZfT",
@@ -889,7 +887,7 @@
   "StEHTQaPtrkImpactrTTS",
   "StEHTQaPtrkGlob",
   "StEHTQaPtrkFitPntLTTS",
-  "StEHTQaNullPrimVtx",
+  "StEHTQaNullPrimVtxMult",
   "StEHTQaVtxPrXY",
   "StEHTQaVtxPrZ",
   "StEHTQaVtxSvtvsTpc",
@@ -977,7 +975,6 @@
   "StEMBQaPointBarrelS",
   "StEMBQaPointPlaneF",
   "StEMBQaRichTot",
-  "StEMBQaNullPrimVtx",
   "StEMBQaGtrkZfTS",
   "StEMBQaGtrkPhifTS",
   "StEMBQaGtrkZfT",
@@ -1035,7 +1032,7 @@
   "StEMBQaPtrkImpactrTTS",
   "StEMBQaPtrkGlob",
   "StEMBQaPtrkFitPntLTTS",
-  "StEMBQaNullPrimVtx",
+  "StEMBQaNullPrimVtxMult",
   "StEMBQaVtxPrXY",
   "StEMBQaVtxPrZ",
   "StEMBQaVtxSvtvsTpc",
