@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.7 2004/02/17 04:56:36 jeromel Exp $
+ * $Id: StMuEvent.cxx,v 1.8 2004/08/04 17:57:13 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -90,6 +90,8 @@ void StMuEvent::fill(const StEvent* event){
     mCtbTriggerDetector = event->triggerDetectorCollection()->ctb();
     mZdcTriggerDetector = event->triggerDetectorCollection()->zdc();
     mBbcTriggerDetector = event->triggerDetectorCollection()->bbc();
+    mEmcTriggerDetector = event->triggerDetectorCollection()->emc();
+    mFpdTriggerDetector = event->triggerDetectorCollection()->fpd();
   }
 
   if (event->fpdCollection())
@@ -114,6 +116,9 @@ void StMuEvent::fill(const StEvent* event){
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.8  2004/08/04 17:57:13  mvl
+ * Added EMC trigger information and fpd trigger (tower) information
+ *
  * Revision 1.7  2004/02/17 04:56:36  jeromel
  * Extended help, added crs support, restored __GNUC__ for PRETTY_FUNCTION(checked once
  * more and yes, it is ONLY defined in GCC and so is __FUCTION__),  use of a consistent
