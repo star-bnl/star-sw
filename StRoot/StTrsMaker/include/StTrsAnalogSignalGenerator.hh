@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsAnalogSignalGenerator.hh,v 1.5 1999/04/23 19:20:55 lasiuk Exp $
+ * $Id: StTrsAnalogSignalGenerator.hh,v 1.6 1999/11/10 15:45:50 calderon Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StTrsAnalogSignalGenerator.hh,v $
+ * Revision 1.6  1999/11/10 15:45:50  calderon
+ * Made changes to reduce timing, including:
+ * Made coordinate transfrom a data member of StTrsAnalogSignalGenerator
+ * Added upper-lower bound instead of symmetric cut.
+ * Revived checking if signal is above threshold.
+ *
  * Revision 1.5  1999/04/23 19:20:55  lasiuk
  * add mTimeShiftOfSignalCentroid
  *
@@ -55,7 +61,7 @@
 #include "StTpcGeometry.hh"
 #include "StTpcSlowControl.hh"
 #include "StTpcElectronics.hh"
-
+#include "StTpcCoordinateTransform.hh"
 #include "StTrsWireHistogram.hh"
 #include "StTrsSector.hh"
 
@@ -90,7 +96,7 @@ protected:
     StTpcGeometry*       mGeomDb;
     StTpcSlowControl*    mSCDb;
     StTpcElectronics*    mElectronicsDb;
-
+    StTpcCoordinateTransform transformer;
     int                  mDeltaPad;
     int                  mDeltaRow;
     pair<int, int>       mRowLimits;
@@ -125,6 +131,8 @@ protected:
 
     // Time Shift for electronics
     double mTimeShiftOfSignalCentroid;
+
+    
     static HepJamesRandom mEngine;
     static RandGauss      mGaussDistribution;
 };

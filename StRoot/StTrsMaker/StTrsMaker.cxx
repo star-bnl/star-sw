@@ -1,6 +1,12 @@
-// $Id: StTrsMaker.cxx,v 1.47 1999/11/05 22:10:13 calderon Exp $
+// $Id: StTrsMaker.cxx,v 1.48 1999/11/10 15:45:39 calderon Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.48  1999/11/10 15:45:39  calderon
+// Made changes to reduce timing, including:
+// Made coordinate transfrom a data member of StTrsAnalogSignalGenerator
+// Added upper-lower bound instead of symmetric cut.
+// Revived checking if signal is above threshold.
+//
 // Revision 1.47  1999/11/05 22:10:13  calderon
 // Added Clear() method in StTrsMaker.
 // Removed StTrsUnpacker from maker.
@@ -177,6 +183,7 @@
 #include <fstream.h>
 #include <math.h>
 #include <string>
+#include <algorithm>
 #include <vector>
 #include <list>
 #include <utility>    // pair
@@ -263,7 +270,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.47 1999/11/05 22:10:13 calderon Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.48 1999/11/10 15:45:39 calderon Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -818,7 +825,8 @@ Int_t StTrsMaker::Make(){
 	// Otherwise, do the digitization...
 	
 
-
+	PR(currentSectorProcessed);
+	cout << endl;
 	//
 	// Generate the ANALOG Signals on pads
 	//
@@ -835,7 +843,6 @@ Int_t StTrsMaker::Make(){
 	time_t sampleAnalogSignalEnd= time(0);
 	double sampleAnalogSignalTime = difftime(sampleAnalogSignalEnd,sampleAnalogSignalBegin);
 	cout << "Time to sample Analog Signal: " << sampleAnalogSignalTime << " sec\n\n";
-
 
 	//
 	// Digitize the Signals

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsAnalogSignalGenerator.cc,v 1.6 1999/10/04 15:28:31 long Exp $
+ * $Id: StTrsAnalogSignalGenerator.cc,v 1.7 1999/11/10 15:46:25 calderon Exp $
  *
  * Author: brian Nov 3, 1998 
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StTrsAnalogSignalGenerator.cc,v $
+ * Revision 1.7  1999/11/10 15:46:25  calderon
+ * Made changes to reduce timing, including:
+ * Made coordinate transfrom a data member of StTrsAnalogSignalGenerator
+ * Added upper-lower bound instead of symmetric cut.
+ * Revived checking if signal is above threshold.
+ *
  * Revision 1.6  1999/10/04 15:28:31  long
  * change on the value of mTimeShiftOfSignalCentroid
  *
@@ -53,9 +59,11 @@ HepJamesRandom  StTrsAnalogSignalGenerator::mEngine;
 RandGauss       StTrsAnalogSignalGenerator::mGaussDistribution(mEngine);
 
 StTrsAnalogSignalGenerator::StTrsAnalogSignalGenerator(StTpcGeometry* geo, StTpcSlowControl* sc, StTpcElectronics* el, StTrsSector* sec)
-    : mGeomDb(geo), mSCDb(sc), mElectronicsDb(el), mSector(sec),
-      mDeltaRow(1),
+    : mGeomDb(geo), mSCDb(sc), mElectronicsDb(el),
+      transformer(mGeomDb, mSCDb, mElectronicsDb),
       mDeltaPad(6),
+      mDeltaRow(1),
+      mSector(sec),
       mSignalThreshold(0.*volt),
       mSuppressEmptyTimeBins(true)
 {
@@ -78,6 +86,7 @@ StTrsAnalogSignalGenerator::StTrsAnalogSignalGenerator(StTpcGeometry* geo, StTpc
    //  mTimeShiftOfSignalCentroid = 3.* mTau;
     mTimeShiftOfSignalCentroid =mElectronicsDb->tZero();//HL,8/31/99
     PR(mTimeShiftOfSignalCentroid/nanosecond);
+
 }
 
 void StTrsAnalogSignalGenerator::fractionSampled()
