@@ -14,6 +14,9 @@ void RunStiGeometryGenerator()
     gSystem->Load("StUtilities");
 
     gSystem->Load("StarClassLibrary");
+    //We have to activate this to run in dev
+    //gSystem->Load("StarRoot");
+    
 
     gSystem->Load("StDbUtilities");
     gSystem->Load("StDbLib");
