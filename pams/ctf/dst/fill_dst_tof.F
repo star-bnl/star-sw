@@ -101,8 +101,8 @@ c---- privert setup
       y_privert = 0.
       z_privert = 0.
       DO ivtx=1,dst_vertex_h.nok
-         IF( (dst_vertex(ivtx).vtx_id=1).AND.
-     +       (dst_vertex(ivtx).iflag=1)) THEN
+         IF( (dst_vertex(ivtx).vtx_id .eq. 1).AND.
+     +       (dst_vertex(ivtx).iflag  .eq. 1)) THEN
             x_privert = dst_vertex(ivtx).x
             y_privert = dst_vertex(ivtx).y
             z_privert = dst_vertex(ivtx).z
