@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.57 1999/11/05 15:25:38 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.58 1999/11/09 20:37:33 fisyak Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.58  1999/11/09 20:37:33  fisyak
+// Correct tables
+//
 // Revision 1.57  1999/11/05 15:25:38  kathy
 // fix hist limits for detector id hist; small updates to documentation
 //
@@ -204,14 +207,12 @@
 #include "tables/St_dst_event_summary_Table.h" // event_summary (1 row)
 #include "tables/St_event_header_Table.h"  // event_header (1 row)
 #include "tables/St_dst_track_Table.h"         // 3 tables: globtrk,globtrk2,primtrk
-#include "tables/St_dst_track_aux_Table.h"     // 2 tables: globtrk_aux,primtrk_aux
 #include "tables/St_dst_vertex_Table.h"        // vertex
 #include "tables/St_dst_point_Table.h"         // point
 #include "tables/St_dst_v0_vertex_Table.h"     // dst_v0_vertex
 #include "tables/St_dst_xi_vertex_Table.h"     // dst_xi_vertex
 #include "tables/St_dst_dedx_Table.h"          // dst_dedx
 #include "tables/St_dst_TrgDet_Table.h"        // TrgDet (1 row)
-#include "tables/St_dst_monitor_soft_Table.h"  // monitor_soft (1 row) 
 #include "tables/St_dst_tkf_vertex_Table.h"    // kinkVertex
 #include "tables/St_particle_Table.h"          // particle
 #include "tables/St_g2t_rch_hit_Table.h"       // g2t_rch_hit
