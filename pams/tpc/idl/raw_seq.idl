@@ -1,9 +1,0 @@
-/*   raw_seq
- * listing for sequences on one pad 
- * 
-*/
-   struct raw_seq{
-       octet           m;        /* beginning of seq, mod 256 */
-       octet           i;        /* # of time bins in sequence after first */ 
-   };
-/*  Last mod. for raw_seq: $Date: 1998/04/08 17:04:27 $ */

@@ -1,9 +1,0 @@
-StHbtMaker - STAR HBT analysis framework
-
-for documentation see
-http://duvall.star.bnl.gov/STARAFS/comp/pkg/dev/StRoot/StHbtMaker/doc/
-
-26jul99 - MALisa - StHbtMaker works now in dev/
-	- do NOT have to do any fancy stuff with MakeDll
-
-
