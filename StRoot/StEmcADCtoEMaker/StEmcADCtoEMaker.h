@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.38 2003/10/14 13:36:42 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.39 2004/03/17 21:07:13 fisyak Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.39  2004/03/17 21:07:13  fisyak
+// icc does like to have the same variable for different parameters
+//
 // Revision 1.38  2003/10/14 13:36:42  suaide
 // small change
 //
@@ -218,11 +221,11 @@ class StEmcADCtoEMaker : public StMaker
   void                      setEmbeddingMode(Bool_t a) {mEmbedd = a; } ///< Set embedding mode (default is kFALSE)
   void                      setPrint(Bool_t a) {mPrint = a; } ///< Set it to kFALSE if you do not want to print messages
   void                      setFillHisto(Bool_t a) {mFillHisto = a;} ///< Turns on/off histogram filling
-  void                      setSMDEnergyCut(Float_t a = 0.07,Float_t a = 0.07); ///< Turns on SMD hit cut based on energy and set the thresholds for eta and phi planes
-  void                      setSMDRmsCut(Float_t a = 1.5,Float_t a = 1.5); ///< Turns on SMD hit cut based on pedestal RMS and set the thresholds for eta and phi planes
+  void                      setSMDEnergyCut(Float_t a = 0.07,Float_t b = 0.07); ///< Turns on SMD hit cut based on energy and set the thresholds for eta and phi planes
+  void                      setSMDRmsCut(Float_t a = 1.5,Float_t b = 1.5); ///< Turns on SMD hit cut based on pedestal RMS and set the thresholds for eta and phi planes
   void                      setSMDPhiIdMinus1Bug(Bool_t a = kFALSE) { mSMDPidMinus1Bug = a;} ///< Turns on the correction for the SMD-phi id-1 Pedestal bug if using old Pedestal tables for the y2003 d+Au and p+p runs
   
-  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.38 2003/10/14 13:36:42 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.39 2004/03/17 21:07:13 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcADCtoEMaker, 2)  
 };
