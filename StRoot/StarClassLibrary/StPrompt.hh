@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrompt.hh,v 1.2 1999/12/21 15:14:28 ullrich Exp $
+ * $Id: StPrompt.hh,v 1.3 1999/12/21 20:20:35 ullrich Exp $
  *
  * Author: Thomas Ullrich, Oct 15 1997
  ***************************************************************************
@@ -32,8 +32,8 @@
  ***************************************************************************
  *
  * $Log: StPrompt.hh,v $
- * Revision 1.2  1999/12/21 15:14:28  ullrich
- * Modified to cope with new compiler version on Sun (CC5.0).
+ * Revision 1.3  1999/12/21 20:20:35  ullrich
+ * Fixed bug in macro for Sun.
  *
  * Revision 1.2  1999/12/21 15:14:28  ullrich
  * Modified to cope with new compiler version on Sun (CC5.0).
@@ -87,9 +87,9 @@ inline void StPrompt(const char *text, string& var)
 }
 
 #if defined (__SUNPRO_CC) && __SUNPRO_CC < 0x500
-inline void StPrompt(const char *text, bool& var)
-#else
 inline void StBoolPrompt(const char *text, bool& var)
+#else
+inline void StPrompt(const char *text, bool& var)
 #endif
 {
     string line;
