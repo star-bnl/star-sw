@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.cc,v 1.5 1999/01/25 23:37:50 lasiuk Exp $
+ * $Id: StTrsDeDx.cc,v 1.6 1999/01/26 20:43:29 lasiuk Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,8 +13,11 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.cc,v $
- * Revision 1.5  1999/01/25 23:37:50  lasiuk
- * sun string
+ * Revision 1.6  1999/01/26 20:43:29  lasiuk
+ * Jan 26
+ *
+ * Revision 1.6  1999/01/26 20:43:29  lasiuk
+ * Jan 26
  *
  * Revision 1.5  1999/01/25 23:37:50  lasiuk
  * sun string
@@ -306,6 +309,14 @@ double StTrsDeDx::betheBloch(double bg) const
     os << "mExponent  " << (mExponent)                       << endl;
     os << "mZa        " << mZa                               << endl;
     os << "--------------------------------------"           << endl;
+    os << "mPadLength " << (mPadLength/centimeter) << " cm"  << endl;
+    os << "======================================\n"         << endl;
+}
+
+
+
+
+
 
 
 
