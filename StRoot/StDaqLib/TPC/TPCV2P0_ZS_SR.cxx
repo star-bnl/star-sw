@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.18 2000/07/05 09:17:26 ward Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.19 2000/11/07 16:30:27 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -35,6 +35,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.19  2000/11/07 16:30:27  ward
+ * New check for .daq corruption, with kStErr from St_tpcdaq_Maker.
+ *
  * Revision 1.18  2000/07/05 09:17:26  ward
  * Fixed a one-off subscripting err & removed ref to a deleted obj.
  *
@@ -284,8 +287,10 @@ int TPCV2P0_ZS_SR::initialize()
 	// get a pointer to the PADK bank for debugging only
 	//	TPCV2P0_PADK_SR *padkr = detector->getPADKReader(sector);
 
-	int i=0;
+	int i=0,iOld=-1; // Herb, 02nov2000
 	while (i<numseq) { // loop over the #sequences in TPCSEQD
+          if(i<=iOld) return FALSE;   // Herb, 02nov2000, as a check for corruption in .daq file
+          iOld=i;   // Herb, 02nov2000
 	  if (seqd_p[rcb][mz]->sequence[i]<0) { //padrow, pad
 	    padrow = (seqd_p[rcb][mz]->sequence[i]>>8)& 0x7f;
 	    pad = (seqd_p[rcb][mz]->sequence[i])& 0xff;
