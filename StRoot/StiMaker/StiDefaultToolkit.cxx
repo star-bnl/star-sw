@@ -15,6 +15,7 @@
  */
 #include "StiDefaultToolkit.h"
 #include "../Sti/StiFactoryTypes.h"
+#include "../Sti/StiMcTrack.h"
 #include "../StiGui/StiGuiFactoryTypes.h"
 #include "../StiGui/StiRootDrawableHitContainer.h"
 #include "../Sti/StiHitContainer.h"
@@ -27,7 +28,6 @@
 #include "../Sti/StiTrackSeedFinder.h"
 #include "../Sti/StiTrackFinder.h"
 #include "../Sti/StiTrackFitter.h"
-#include "../Sti/StiTrackFilter.h"
 #include "../Sti/StiSimpleTrackFilter.h"
 #include "../Sti/StiKalmanTrackFitter.h"
 #include "../Sti/StiKalmanTrackFinder.h"
@@ -38,8 +38,12 @@
 #include "../Sti/StiIOBroker.h"
 #include "../Sti/StiDynamicTrackFilter.h"
 #include "../Sti/StiHitFiller.h"
+#include "../Sti/Parameter.h"
+#include "../StiMaker/RootEditableParameter.h"
 #include "../StiMaker/StiRootIOBroker.h"
+#include "../StiMaker/StiRootSimpleTrackFilter.h"
 #include "../StiGui/StiRootDisplayManager.h"
+#include "../StiGui/StiRootDrawableMcTrack.h"
 
 #include "../StiEvaluator/StiEvaluator.h"
 #include "../StiEvaluator/StiEventAssociator.h"
@@ -48,18 +52,21 @@
 #include "../Sti/StiHitErrorCalculator.h"
 
 StiDefaultToolkit::StiDefaultToolkit() :
+  trackFilterFactory(0),
+  parameterFactory(0),
   hitFactory(0),
   trackFactory(0),
+  mcTrackFactory(0),
   detectorFactory(0),
   trackNodeFactory(0),
   detectorContainer(0),
   hitContainer(0),
   trackContainer(0),
+  mcTrackContainer(0),
   geometryTransform(0),
   coordinateTransform(0),
   detectorFinder(0),
   trackSeedFinder(0),
-  trackFilter(0),
   trackFinder(0),
   trackFitter(0),
   trackMerger(0),
@@ -73,6 +80,7 @@ StiDefaultToolkit::StiDefaultToolkit() :
 
 StiDefaultToolkit::~StiDefaultToolkit()
 {
+  delete trackFilterFactory;
   delete hitFactory;
   delete hitContainer;
   delete detectorFactory;
@@ -80,12 +88,14 @@ StiDefaultToolkit::~StiDefaultToolkit()
   StiDetectorFinder::kill();
   delete trackNodeFactory;
   delete trackContainer;
+  delete mcTrackContainer;
   StiGeometryTransform::kill();
   StiCoordinateTransform::kill();
   delete trackFactory;
+  delete mcTrackFactory;
+  delete parameterFactory;
   delete trackSeedFinder;
   delete trackFinder;
-  delete trackFilter;
   delete trackFitter;
   delete trackMerger;
   //delete displayManager;
@@ -94,7 +104,36 @@ StiDefaultToolkit::~StiDefaultToolkit()
   delete ioBroker;
 };
 
-StiGeometryTransform *StiDefaultToolkit::getGeometryTransform(){
+StiObjectFactoryInterface<StiTrackFilter>  * StiDefaultToolkit::getTrackFilterFactory()
+{
+  if (trackFilterFactory)
+    return trackFilterFactory;
+  StiIOBroker * ioBroker = getIOBroker();
+  if (ioBroker->useGui())
+    trackFilterFactory = new StiRootSimpleTrackFilterFactory("RootEditableTrackFilterterFactory");
+  else
+    trackFilterFactory = new StiSimpleTrackFilterFactory("SimpleTrackFilterFactory");
+  trackFilterFactory->setIncrementalSize(500);
+  trackFilterFactory->setMaxIncrementCount(5);
+  return trackFilterFactory;
+}
+
+StiObjectFactoryInterface<Parameter>  * StiDefaultToolkit::getParameterFactory()
+{
+  if (parameterFactory)
+    return parameterFactory;
+  StiIOBroker * ioBroker = getIOBroker();
+  if (ioBroker->useGui())
+    parameterFactory = new RootEditableParameterFactory("RootEditableParameterFactory");
+  else
+    parameterFactory = new ParameterFactory("ParameterFactory");
+  parameterFactory->setIncrementalSize(500);
+  parameterFactory->setMaxIncrementCount(5);
+  return parameterFactory;
+}
+
+StiGeometryTransform * StiDefaultToolkit::getGeometryTransform()
+{
   if(!geometryTransform){
     geometryTransform = StiGeometryTransform::instance();
   }
@@ -154,6 +193,28 @@ StiObjectFactoryInterface<StiKalmanTrack>* StiDefaultToolkit::getTrackFactory()
   trackFactory->setMaxIncrementCount(200);
   return trackFactory;
 }
+
+StiObjectFactoryInterface<StiMcTrack>* StiDefaultToolkit::getMcTrackFactory()
+{
+  if (mcTrackFactory)
+    return mcTrackFactory;
+  StiIOBroker * ioBroker = getIOBroker();
+  cout << "StiDefaultToolkit::getMcTrackFactory() - INFO - "; 
+  if (ioBroker->useGui())
+    {
+      mcTrackFactory = new StiRootDrawableMcTrackFactory("StiRootDrawableMcTrackFactory",50);
+      cout << "instantiating StiRootDrawableMcTrackFactory" << endl;
+    }
+  else // no gui needed
+    {	
+      mcTrackFactory = new StiMcTrackFactory("StiMcTrackFactory",50);
+      cout << "instantiating StiMcTrackFactory" << endl;
+    }
+  mcTrackFactory->setIncrementalSize(1000);
+  mcTrackFactory->setMaxIncrementCount(200);
+  return mcTrackFactory;
+}
+
 
 StiObjectFactoryInterface<StiDetector>* StiDefaultToolkit::getDetectorFactory()
 {
@@ -231,10 +292,22 @@ StiHitContainer       * StiDefaultToolkit::getHitContainer()
 
 StiTrackContainer     * StiDefaultToolkit::getTrackContainer()
 {	
+  cout << "StiDefaultToolkit::getTrackContainer() - INFO - Starting" << endl;
   if (trackContainer)
     return trackContainer;
+  cout << "StiDefaultToolkit::getTrackContainer() - INFO - Instantiating Container" << endl;
   trackContainer = new StiTrackContainer();
   return trackContainer;
+}
+
+StiTrackContainer     * StiDefaultToolkit::getMcTrackContainer()
+{	
+  cout << "StiDefaultToolkit::getMcTrackContainer() - INFO - Starting" << endl;
+  if (mcTrackContainer)
+    return mcTrackContainer;
+  cout << "StiDefaultToolkit::getMcTrackContainer() - INFO - Instantiating Container" << endl;
+  mcTrackContainer = new StiTrackContainer();
+  return mcTrackContainer;
 }
 
 
@@ -284,15 +357,6 @@ StiTrackFitter       * StiDefaultToolkit::getTrackFitter()
   trackFitter = new StiKalmanTrackFitter();
   StiTrack::setTrackFitter(trackFitter);
   return trackFitter;
-}
-
-StiTrackFilter       * StiDefaultToolkit::getTrackFilter()
-{
-  if (trackFilter)
-    return trackFilter;
-  trackFilter = new StiSimpleTrackFilter();
-  //trackFilter = new StiDynamicTrackFilter(getIOBroker());
-  return trackFilter;
 }
 
 StiTrackMerger       * StiDefaultToolkit::getTrackMerger()

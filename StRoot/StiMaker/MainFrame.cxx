@@ -21,6 +21,7 @@ using std::find_if;
 #include "StMemoryInfo.hh"
 
 //Sti
+#include "Sti/StiToolkit.h"
 #include "Sti/StiIOBroker.h"
 #include "Sti/Messenger.h"
 #include "Sti/StiDetector.h"
@@ -40,8 +41,9 @@ using std::find_if;
 
 //StiMaker
 #include "StiMaker.h"
-
 #include "MainFrame.h"
+#include "StiOptionFrame.h"
+#include "StiRootSimpleTrackFilter.h"
 
 MainFrame* MainFrame::s_instance = 0;
 
@@ -209,6 +211,8 @@ ClassImp(MainFrame)
     mOptionsMenu->AddEntry("Evaluable Seed Finder Options", M_SeedFinderOptions);
     mOptionsMenu->AddEntry("Local Seed Finder Options", M_LocalSeedFinderOptions);
     mOptionsMenu->AddEntry("Kalman Track Finder Options", M_TrackFinderOptions);
+    mOptionsMenu->AddEntry("MC Track Filter Options", M_McTrackFilterOptions);
+    mOptionsMenu->AddEntry("Rec Track Filter Options", M_TrackFilterOptions);
 
     fMenuHelp = new TGPopupMenu(fClient->GetRoot());
     fMenuHelp->AddEntry("&Contents", M_HELP_CONTENTS);
@@ -421,44 +425,54 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 		}
 		break;
 		//Mike's stuff here:
-	    case M_Messenger:	new TestMsgBox(fClient->GetRoot(), this, 400, 200);break;
-	    case M_ShowRootColors: ShowRootColors();	break;
-	    case M_DisplayOptions: new EntryTestDlg(fClient->GetRoot(), this); break;
-	    case M_SeedFinderOptions: new SeedFinderIO(fClient->GetRoot(), this);break;
-	    case M_TrackFinderOptions:new KalmanTrackFinderIO(fClient->GetRoot(), this);break;
-	    case M_LocalSeedFinderOptions: new LocalSeedFinderIO(fClient->GetRoot(), this);break;
-	    case M_Draw_TestObject:testDraw();break;
-	    case M_DetView_AllVisible: 	 setAllVisible();  break;
-	    case M_DetView_AllInvisible: setAllInvisible();break;
-	    case M_DetView_TpcVisible:   setTpcVisible();    break;
-	    case M_DetView_TpcInvisible: setTpcInvisible();  break;
-	    case M_DetView_SvtVisible:   setSvtVisible();    break;
-	    case M_DetView_SvtInvisible: setSvtInvisible();  break;
-	    case M_DetView_IfcVisible:   setIfcVisible();    break;
-	    case M_DetView_IfcInvisible: setIfcInvisible();  break;
-	    case M_DetView_ManualView:   setManualView();    break;
-	    case M_DetView_SkeletonView: setSkeletonView();  break;
-	    case M_DetView_ZoomSkeletonView: setZoomSkeletonView(); break;
-	    case M_DetOnOff:	 new DetectorActivator(fClient->GetRoot(), this, 800, 200); break;
-	    case M_Det_Navigate: new Navigator(fClient->GetRoot(), this, 400, 200); break;
-	    case M_DetNavigate_MoveIn:      moveIn();  break;
-	    case M_DetNavigate_MoveOut:	    moveOut(); break;
-	    case M_DetNavigate_MovePlusPhi: movePlusPhi();break;
-	    case M_DetNavigate_MoveMinusPhi:moveMinusPhi();break;
-	    case M_DetNavigate_SetLayer:    setLayer();	break;
-	    case M_DetNavigate_SetLayerAndAngle:setLayerAndAngle();break;
-	    case M_Tracking_ToggleFitFind:toggleFitFind();break;
-	    case M_TrackingSwitch_NextDetector:	StiMaker::instance()->defineNextTrackStep(StepByDetector);break;
-	    case M_TrackingSwitch_ScanLayer:StiMaker::instance()->defineNextTrackStep(StepByLayer);break;
-	    case M_Tracking_DoTrackStep:doNextTrackStep();break;
-	    case M_Tracking_FinishTrack:finishTrack();	break;
-	    case M_Tracking_FinishEvent:finishEvent();	break;
-	    case M_Tracking_EventStep:	stepToNextEvent();break;
-	    case M_Tracking_NEventStep:	stepThroughNEvents();break;
-	    case M_FILE_SAVE:	printf("M_FILE_SAVE\n");break;
-	    case M_FILE_EXIT:	CloseWindow();   // this also terminates theApp
-	      break;		
-	    default:
+	      case M_Messenger:	new TestMsgBox(fClient->GetRoot(), this, 400, 200);break;
+	      case M_ShowRootColors: ShowRootColors();	break;
+	      case M_DisplayOptions: new EntryTestDlg(fClient->GetRoot(), this); break;
+	      case M_SeedFinderOptions: new SeedFinderIO(fClient->GetRoot(), this);break;
+	      case M_TrackFinderOptions:new KalmanTrackFinderIO(fClient->GetRoot(), this);break;
+	      case M_McTrackFilterOptions: 
+		StiRootSimpleTrackFilter * mcFilter;
+		mcFilter = static_cast<StiRootSimpleTrackFilter *>(StiToolkit::instance()->getTrackFinder()->getGuiMcTrackFilter());
+		new StiOptionFrame(fClient->GetRoot(), this, mcFilter);
+		break;
+	      case M_TrackFilterOptions: 
+		StiRootSimpleTrackFilter * filter;
+		filter = static_cast<StiRootSimpleTrackFilter *>(StiToolkit::instance()->getTrackFinder()->getGuiMcTrackFilter());
+		new StiOptionFrame(fClient->GetRoot(), this, filter);
+		break;
+	      case M_LocalSeedFinderOptions: new LocalSeedFinderIO(fClient->GetRoot(), this);break;
+	      case M_Draw_TestObject:testDraw();break;
+	      case M_DetView_AllVisible: 	 setAllVisible();  break;
+	      case M_DetView_AllInvisible: setAllInvisible();break;
+	      case M_DetView_TpcVisible:   setTpcVisible();    break;
+	      case M_DetView_TpcInvisible: setTpcInvisible();  break;
+	      case M_DetView_SvtVisible:   setSvtVisible();    break;
+	      case M_DetView_SvtInvisible: setSvtInvisible();  break;
+	      case M_DetView_IfcVisible:   setIfcVisible();    break;
+	      case M_DetView_IfcInvisible: setIfcInvisible();  break;
+	      case M_DetView_ManualView:   setManualView();    break;
+	      case M_DetView_SkeletonView: setSkeletonView();  break;
+	      case M_DetView_ZoomSkeletonView: setZoomSkeletonView(); break;
+	      case M_DetOnOff:	 new DetectorActivator(fClient->GetRoot(), this, 800, 200); break;
+	      case M_Det_Navigate: new Navigator(fClient->GetRoot(), this, 400, 200); break;
+	      case M_DetNavigate_MoveIn:      moveIn();  break;
+	      case M_DetNavigate_MoveOut:	    moveOut(); break;
+	      case M_DetNavigate_MovePlusPhi: movePlusPhi();break;
+	      case M_DetNavigate_MoveMinusPhi:moveMinusPhi();break;
+	      case M_DetNavigate_SetLayer:    setLayer();	break;
+	      case M_DetNavigate_SetLayerAndAngle:setLayerAndAngle();break;
+	      case M_Tracking_ToggleFitFind:toggleFitFind();break;
+	      case M_TrackingSwitch_NextDetector:	StiMaker::instance()->defineNextTrackStep(StepByDetector);break;
+	      case M_TrackingSwitch_ScanLayer:StiMaker::instance()->defineNextTrackStep(StepByLayer);break;
+	      case M_Tracking_DoTrackStep:doNextTrackStep();break;
+	      case M_Tracking_FinishTrack:finishTrack();	break;
+	      case M_Tracking_FinishEvent:finishEvent();	break;
+	      case M_Tracking_EventStep:	stepToNextEvent();break;
+	      case M_Tracking_NEventStep:	stepThroughNEvents();break;
+	      case M_FILE_SAVE:	printf("M_FILE_SAVE\n");break;
+	      case M_FILE_EXIT:	CloseWindow();   // this also terminates theApp
+		break;		
+	      default:
 	      break;
 	    }
 	default:

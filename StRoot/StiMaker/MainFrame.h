@@ -92,7 +92,9 @@ enum ETestCommandIdentifiers {
     M_SeedFinderOptions,
     M_LocalSeedFinderOptions,
     M_TrackFinderOptions,
-    
+    M_McTrackFilterOptions,
+    M_TrackFilterOptions,
+
     M_TrackingSwitch_NextDetector,
     M_TrackingSwitch_ScanLayer,
     

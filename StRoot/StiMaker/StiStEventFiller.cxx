@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 1.18 2002/08/29 21:09:22 andrewar Exp $
+ * $Id: StiStEventFiller.cxx,v 1.19 2002/09/05 05:47:36 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 1.19  2002/09/05 05:47:36  pruneau
+ * Adding Editable Parameters and dynamic StiOptionFrame
+ *
  * Revision 1.18  2002/08/29 21:09:22  andrewar
  * Fixed seg violation bug.
  *
@@ -223,8 +226,8 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
     StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo(); 
     
     int errorCount=0;
-    for (KalmanTrackMap::const_iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt) {
-	const StiKalmanTrack* kTrack = (*trackIt).second;
+    for (TrackMap::const_iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt) {
+	const StiKalmanTrack* kTrack = static_cast<const StiKalmanTrack*>((*trackIt).second);
 	// Mike's test of track->stHits();
 	//vector<StHit*> vec = kTrack->stHits();
 	//cout <<" --- Hits for next track --- "<<endl;
@@ -319,10 +322,10 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t) 
     // loop over StiKalmanTracks
     //cout << "Tracks in container " << mTrackStore->size() << endl;
     int mTrackN=0;
-    for (KalmanTrackMap::const_iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt,++mTrackN) {
+    for (TrackMap::const_iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt,++mTrackN) {
       //cout <<"Current track: "<< mTrackN<<endl;
 	// get track and corresponding StTrackNode
-	const StiKalmanTrack* kTrack = (*trackIt).second;
+	const StiKalmanTrack* kTrack = static_cast<const StiKalmanTrack*>((*trackIt).second);
 	//mResMaker.setTrackResiduals(kTrack);
 	if (kTrack==0) {
 	  //cout<< "kTrackLoop: kTrack pointer==0"<<endl;

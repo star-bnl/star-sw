@@ -25,17 +25,20 @@ class StiDefaultToolkit : public StiToolkit
 {
 public:
   
- 	virtual StiObjectFactoryInterface<StiHit> * getHitFactory();
-	//virtual StiTrackFactory * getTrackFactory();
-	virtual StiObjectFactoryInterface<StiKalmanTrack> * getTrackFactory();
-	virtual StiObjectFactoryInterface<StiDetector>  * getDetectorFactory();
-	virtual StiObjectFactoryInterface<StiDetectorNode>  * getDetectorNodeFactory();
-	virtual StiObjectFactoryInterface<StiKalmanTrackNode> * getTrackNodeFactory();
-	
-	// common object containers
+  virtual StiObjectFactoryInterface<StiHit> * getHitFactory();
+  virtual StiObjectFactoryInterface<StiKalmanTrack> * getTrackFactory();
+  virtual StiObjectFactoryInterface<StiMcTrack> * getMcTrackFactory();
+  virtual StiObjectFactoryInterface<StiDetector>  * getDetectorFactory();
+  virtual StiObjectFactoryInterface<StiDetectorNode>  * getDetectorNodeFactory();
+  virtual StiObjectFactoryInterface<StiKalmanTrackNode> * getTrackNodeFactory();
+  virtual StiObjectFactoryInterface<Parameter>  * getParameterFactory();
+  virtual StiObjectFactoryInterface<StiTrackFilter>  * getTrackFilterFactory();
+
+  // common object containers
 	virtual StiDetectorContainer  * getDetectorContainer();
 	virtual StiHitContainer       * getHitContainer();
 	virtual StiTrackContainer     * getTrackContainer();
+	virtual StiTrackContainer     * getMcTrackContainer();
 
 	// service and convenience class objects.
 	virtual StiGeometryTransform * getGeometryTransform();
@@ -43,7 +46,6 @@ public:
 	virtual StiDetectorFinder    * getDetectorFinder();
 	virtual StiSeedFinder        * getTrackSeedFinder();
 	virtual StiTrackFinder       * getTrackFinder();
-	virtual StiTrackFilter       * getTrackFilter();
 	virtual StiTrackFitter       * getTrackFitter();
 	virtual StiTrackMerger       * getTrackMerger();
 	virtual StiDisplayManager    * getDisplayManager();
@@ -73,24 +75,26 @@ protected:
   
   
   // small object factories
-  StiObjectFactoryInterface<StiHit> * hitFactory;
-  StiObjectFactoryInterface<StiKalmanTrack> * trackFactory;
-  StiObjectFactoryInterface<StiDetector> * detectorFactory;
-  StiObjectFactoryInterface<StiDetectorNode> * detectorNodeFactory;
+  StiObjectFactoryInterface<StiTrackFilter>     * trackFilterFactory;
+  StiObjectFactoryInterface<Parameter>          * parameterFactory;
+  StiObjectFactoryInterface<StiHit>             * hitFactory;
+  StiObjectFactoryInterface<StiKalmanTrack>     * trackFactory;
+  StiObjectFactoryInterface<StiMcTrack>         * mcTrackFactory;
+  StiObjectFactoryInterface<StiDetector>        * detectorFactory;
+  StiObjectFactoryInterface<StiDetectorNode>    * detectorNodeFactory;
   StiObjectFactoryInterface<StiKalmanTrackNode> * trackNodeFactory;
   
   // common object containers
   StiDetectorContainer      * detectorContainer;
   StiHitContainer           * hitContainer;
   StiTrackContainer         * trackContainer;
+  StiTrackContainer         * mcTrackContainer;
   
   // service and convenience class objects.
   StiGeometryTransform  * geometryTransform;
   StiCoordinateTransform  * coordinateTransform;
   StiDetectorFinder     * detectorFinder;
   StiSeedFinder         * trackSeedFinder;
-  //StiTrackSeedFinder  * trackSeedFinder;
-  StiTrackFilter        * trackFilter;
   StiTrackFinder        * trackFinder;
   StiTrackFitter        * trackFitter;
   StiTrackMerger        * trackMerger;
