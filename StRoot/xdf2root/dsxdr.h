@@ -16,6 +16,9 @@ TBS ...
 #ifndef DSXDR_H
 #define DSXDR_H
 #include "dstype.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 int dsReadAll(XDR *xdrs);
 int dsReadTest(XDR *xdrs, size_t count);
 int dsWriteTest(XDR *xdrs, size_t count);
@@ -72,4 +75,7 @@ void xdrstdio_create(XDR *xdrs, FILE *stream, enum xdr_op op);
 #endif /* XDR_NO_PROTO */
 
 #endif /* DS_PRIVATE */
+#ifdef __cplusplus
+}
+#endif
 #endif /* DSXDR_H */
