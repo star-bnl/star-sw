@@ -1,7 +1,11 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.41 2004/02/08 00:08:14 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.42 2004/02/13 22:39:39 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.42  2004/02/13 22:39:39  calderon
+ * At Helen's request, during the opton for associating est tracks,
+ * if there is not an est track in the node, use the original global track.
+ *
  * Revision 1.41  2004/02/08 00:08:14  calderon
  * Added method useEstTracks() requested by Helen, for association of estGlobals.
  *
@@ -1167,9 +1171,11 @@ Int_t StAssociationMaker::Make()
 	trkNode = rcTrackNodes[trkNodeI]; // For a by-pointer collection we need to dereference once
 	if (!mEstTracksOn)
 	    rcTrack = dynamic_cast<StGlobalTrack*>(trkNode->track(global));
-	else
+	else { // Helen wants to keep the old global track from this node 
 	    rcTrack = dynamic_cast<StGlobalTrack*>(trkNode->track(estGlobal));
-	    
+	    if( !rcTrack)
+	      rcTrack = dynamic_cast<StGlobalTrack*>(trkNode->track(global));
+	}
 	if (!rcTrack || !(rcTrack->detectorInfo()->hits().size()))
 	    continue; // If there are no Tpc Hits, skip track.
 	if (mInTrackerOn  && rcTrack->encodedMethod()!=263) continue; //for IT Tracks, skip the old globals
