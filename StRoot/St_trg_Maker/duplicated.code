@@ -117,9 +117,11 @@ int St_trg_Maker::SWITCH(Daq)(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Tri
   SWITCH(gs)=(SWITCH(MarilynMonroe)*)ptr;
   Int_t Iret = SWITCH(SanityCheck)();
   if (Iret !=  kStOK) return Iret;
-  if(  (SWITCH(gs)->EvtDesc.TCU1.FIFO1.TrgActionWd)&0xf000==0x9000 &&
-       (SWITCH(gs)->EvtDesc.TCU1.FIFO1.TrgActionWd)&0x0001==0x0001 &&
-        SWITCH(gs)->EvtDesc.TCU3.FIFO3.TriggerWd          ==0xf200) isLaser=7; // See comment 77y above.
+  if(  
+       (((SWITCH(gs)->EvtDesc.TCU1.FIFO1.TrgActionWd)&0xf000)==0x9000 ) &&
+       (((SWITCH(gs)->EvtDesc.TCU1.FIFO1.TrgActionWd)&0x0001)==0x0001 ) &&
+       ( SWITCH(gs)->EvtDesc.TCU3.FIFO3.TriggerWd          ==0xf200 )
+  ) isLaser=7; // See comment 77y above.
   if(SWITCH(gs)->EvtDesc.TCU1.FIFO1.TrgActionWd>>12==4) isPhysics=7;
   if(SWITCH(gs)->EvtDesc.TCU3.FIFO3.TriggerWd==0xf101) isPulser=7;
   if((m_Mode&1)&&isPhysics) thisEventOk=7;
@@ -128,9 +130,9 @@ int St_trg_Maker::SWITCH(Daq)(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Tri
 
   oo="";
   if(isPhysics) oo="Physics"; if(isLaser) oo="Laser"; if(isPulser) oo="Pulser";
-  printf("St_trg_Maker.  %s event.  TrgActionWd=0x%x.  TriggerWd=0x%0x. Returning %s.\n",
+  printf("St_trg_Maker.  %s event.  TrgActionWd=0x%x.  TriggerWd=0x%0x. Returning %s. m_Mode=%d.\n",
       oo,SWITCH(gs)->EvtDesc.TCU1.FIFO1.TrgActionWd,
-      SWITCH(gs)->EvtDesc.TCU3.FIFO3.TriggerWd,thisEventOk?"kStOK":"kStErr");
+      SWITCH(gs)->EvtDesc.TCU3.FIFO3.TriggerWd,thisEventOk?"kStOK":"kStErr",m_Mode);
 
   if (!thisEventOk) return kStErr; // Skip this event.
 
