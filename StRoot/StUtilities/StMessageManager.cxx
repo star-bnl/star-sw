@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.17 1999/07/22 00:19:31 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.18 1999/07/23 16:56:40 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.18  1999/07/23 16:56:40  genevb
+// Fix extern C prototypes, default options for omitted types, Linux bug with multi-line messages
+//
 // Revision 1.17  1999/07/22 00:19:31  genevb
 // Add MessageOut(), fix Linux bugs with character array lengths passed from FORTRAN
 //
@@ -350,7 +353,10 @@
 
 #include "StMessageManager.h"
 #include <ctype.h>
-#include <string>
+#include <string.h>
+#ifdef LINUX
+#include <math.h>
+#endif
 
 StMessMgr* gMessMgr = 0;
 StMessage* gMessage=0;
@@ -382,7 +388,11 @@ void type_of_call Message_(char* mess, int* lines, int*, size_t len) {
   size_t messSize = strlen(mess);
   if (*lines>1) {
 #ifdef LINUX
-    int lineSize = (messSize+1)/(*lines) - 1;  // Avoid Linux's extra chars bug
+    // Linux sometimes makes messSize too big. This algorithm seems to work.
+    float lineSize2 = ((float) messSize)/((float) *lines);
+    float lineSize1 = floor(lineSize2 - 0.51);
+    if ((lineSize2-lineSize1) <= 1.0) lineSize1++;
+    int lineSize = (int) lineSize1;
 #else
     int lineSize = messSize/(*lines);
 #endif
@@ -435,7 +445,7 @@ void type_of_call StMessage_(char* mess, char* type, char* opt,
   if ((len2<=0) || (len2>oSize)) type=emptyString;
   else if (strlen(type) > len2) strcpy(&(type[len2]),emptyString);
   if ((len3<=0) || (len3>oSize)) opt=oOpt;
-  else if (strlen(opt) > len3) strcpy(&(opt[len3]),emptyString);
+  else if ((opt) && (strlen(opt) > len3)) strcpy(&(opt[len3]),emptyString);
   gMessMgr->Message(mess,type,opt);
 }
 //________________________________________
@@ -487,7 +497,7 @@ void type_of_call StMessAddType_(const char* type, const char* text,
 }
 //________________________________________
 void type_of_call MessageOut( const char *msg ) {
-  StMessage(const_cast<char*> (msg));
+  StMessage_(const_cast<char*> (msg));
 }
 
 //
@@ -592,6 +602,12 @@ void StMessageManager::BuildMessage(char* mess, char* type, char* opt) {
     if (cptr) curType[0] = cptr[1];
   } else {
     curType = 0;
+  }
+  if (!opt) {
+    if ((*type == 'E') || (*type == 'W'))     // Error and Warning messages
+      opt = eOpt;                             // default to stderr,
+    else                                      // otherwise
+      opt = oOpt;                             // default to stdout
   }
   int typeN = messTypeList->FindTypeNum(type);
   if (!typeN) {
@@ -815,7 +831,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.17 1999/07/22 00:19:31 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.18 1999/07/23 16:56:40 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

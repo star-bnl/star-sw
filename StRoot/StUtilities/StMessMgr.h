@@ -1,5 +1,8 @@
-// $Id: StMessMgr.h,v 1.3 1999/07/17 00:23:22 genevb Exp $
+// $Id: StMessMgr.h,v 1.4 1999/07/23 16:56:39 genevb Exp $
 // $Log: StMessMgr.h,v $
+// Revision 1.4  1999/07/23 16:56:39  genevb
+// Fix extern C prototypes, default options for omitted types, Linux bug with multi-line messages
+//
 // Revision 1.3  1999/07/17 00:23:22  genevb
 // Fixed bug when option fields are empty in FORTRAN, and let type limits be set before types are even added
 //
@@ -38,26 +41,27 @@
 #define StDebug_ F77_NAME(stdebug,STDEBUG)
 #define StMessAddType_ F77_NAME(stmessaddtype,StMESSADDTYPE)
 extern "C" {
-R__EXTERN  void type_of_call Message_(char* mess="", int *lines=0, int *id=0,
+void type_of_call Message_(char* mess="", int *lines=0, int *id=0,
                                   size_t len=0);
-R__EXTERN  void type_of_call Msg_Enable_(char* mess="",
+void type_of_call Msg_Enable_(char* mess="",
                                   size_t len=0);
-R__EXTERN   int type_of_call Msg_Enabled_(char* mess="", int *id=0,
+ int type_of_call Msg_Enabled_(char* mess="", int *id=0,
                                   size_t len=0);
-R__EXTERN  void type_of_call Msg_Disable_(char* mess="",
+void type_of_call Msg_Disable_(char* mess="",
                                   size_t len=0);
-R__EXTERN  void type_of_call StMessage_(char* mess="", char* type="", char* opt="O",
-                                  size_t len1=0, size_t len2=0, size_t len3=1);
-R__EXTERN  void type_of_call StInfo_(char* mess="", char* opt="O",
+void type_of_call StMessage_(char* mess="", char* type="", char* opt=0,
+                                  size_t len1=0, size_t len2=0, size_t len3=0);
+void type_of_call StInfo_(char* mess="", char* opt="O",
                                   size_t len1=0, size_t len2=1);
-R__EXTERN  void type_of_call StWarning_(char* mess="", char* opt="E",
+void type_of_call StWarning_(char* mess="", char* opt="E",
                                   size_t len1=0, size_t len2=1);
-R__EXTERN  void type_of_call StError_(char* mess="", char* opt="E",
+void type_of_call StError_(char* mess="", char* opt="E",
                                   size_t len1=0, size_t len2=1);
-R__EXTERN  void type_of_call StDebug_(char* mess="", char* opt="O",
+void type_of_call StDebug_(char* mess="", char* opt="O",
                                   size_t len1=0, size_t len2=1);
-R__EXTERN  void type_of_call StMessAddType_(const char* type, const char* text,
+void type_of_call StMessAddType_(const char* type, const char* text,
                                   size_t len1=0, size_t len2=0);
+void type_of_call MessageOut(const char* msg);
 }
 #endif
 
@@ -83,8 +87,7 @@ class StMessMgr : public ostrstream {
    virtual ~StMessMgr() =0;
 
 // Generic Messages:
-   virtual StMessMgr& Message(char* mess="", char* type="",
-                                                      char* opt="O") =0;
+   virtual StMessMgr& Message(char* mess="", char* type="", char* opt=0) =0;
    virtual       void Print() =0;
    virtual        int PrintList(messVec* list) =0;
    virtual        int PrintAll() =0;
