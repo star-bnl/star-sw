@@ -1,7 +1,8 @@
 /*:>--------------------------------------------------------------------
 **: FILE:       energy_to_adc.c
 **: HISTORY:
-**:             00jan93-v000a-hpl- Created by OGAWA, Akio
+**:             00jan1998     Created by OGAWA, Akio
+**:             10sep1998     Import Pavlinov Aleksei's codes 
 **:  Id: idl.y,v 1.28 1997/12/20 23:18:56 ward Exp  
 **:<------------------------------------------------------------------*/
 #include <stdio.h>
@@ -19,7 +20,7 @@ long type_of_call energy_to_adc_(
 {
 /*:>--------------------------------------------------------------------
 **: ROUTINE:    energy_to_adc_
-**: DESCRIPTION: Convert simulation energy deposit to ADC
+**: DESCRIPTION: Give fake pedestals and slope valiations to ADC
 **: AUTHOR:     OGAWA, AKio (akio@bnl.gov)
 **: ARGUMENTS:
 **:       IN:
@@ -36,16 +37,16 @@ long type_of_call energy_to_adc_(
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
 
-    long i, det, eta, phi, bits, kink=0;
+    long i, det, eta, phi, bits;
     long nok_c, nok_p, nok_s, nok_cc, ped_width, ped;
     long iseed = 99999;
 
     if(emc_adc_h->maxlen <= 0 ) {
-      puts("emc_adc_h->maxlen is less equal zero\n");
+      puts("emc_adc_h->maxlen is less equal zero");
       return STAFCV_BAD;
     }
     if(emc_adc_h->nok > emc_adc_h->maxlen){
-      puts("emc_adc_h->nok is more than maxlen\n");
+      puts("emc_adc_h->nok is more than maxlen");
       return STAFCV_BAD;
     }
     nok_c=ems_control_h->nok-1;
@@ -57,11 +58,9 @@ long type_of_call energy_to_adc_(
     switch(det){
     case BEMC:
       bits = (float)ems_control[nok_c].bemc_adcbits;
-      kink=ems_cal_control[nok_cc].bemc_adckink;
       break;
     case EEMCR: case EEMCL:
       bits = (float)ems_control[nok_c].eemc_adcbits;
-      kink=ems_cal_control[nok_cc].eemc_adckink;
       break;
     case BPRS:
       bits = (float)ems_control[nok_c].bprs_adcbits;
@@ -86,20 +85,17 @@ long type_of_call energy_to_adc_(
     for(i = 0; i < emc_adc_h->nok; i++){
 	eta = emc_adc[i].eta_bin;
 	phi = emc_adc[i].phi_bin;
-	ped = ped_width*(ran0(&iseed)-0.5); /* put some width on pedestal */
-	emc_adc[i].adc = ped + emc_pedestal[nok_p].pedA[phi][eta]
-	               + emc_adc[i].energy/emc_adcslope[nok_p].pA0[phi][eta];
-	if(ems_cal_control[nok_cc].force_B != 0 || 
-           (kink != 0 && emc_adc[i].adc > kink)) {
-	    emc_adc[i].adc = ped + emc_pedestal[nok_p].pedB[phi][eta]
-	               + emc_adc[i].energy/emc_adcslope[nok_p].pB0[phi][eta]; 
-	    if (emc_adc[i].adc < bits){ 
-	      emc_adc[i].adc += bits;
-	    } else {           /*overflow*/
-	      emc_adc[i].adc = 2*bits - 1;
-	    }
+	ped = ped_width*(ran0(&iseed)-0.5);       /* put some width on pedestal */
+	emc_adc[i].adc = ped + emc_pedestal[nok_p].ped[phi][eta]
+	               + (float)emc_adc[i].adc/emc_adcslope[nok_p].p0[phi][eta];
+	if (emc_adc[i].adc < 0){ 
+	  emc_adc[i].adc = 0;              
+	}
+	if (emc_adc[i].adc > bits-1){ 
+	  emc_adc[i].adc = bits - 1;              /*OVERFLOW*/
 	}
     }    
     ems_cal_control[nok_cc].iseed=iseed;
     return STAFCV_OK;
 }
+

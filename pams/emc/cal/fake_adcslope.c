@@ -13,7 +13,6 @@ extern float ran0(long*);
 long type_of_call fake_adcslope_(
   TABLE_HEAD_ST     *ems_control_h,  EMS_CONTROL_ST          *ems_control ,
   TABLE_HEAD_ST *ems_cal_control_h,  EMS_CAL_CONTROL_ST  *ems_cal_control ,
-  TABLE_HEAD_ST   *fake_pedestal_h,  EMC_PEDESTAL_ST       *fake_pedestal ,
   TABLE_HEAD_ST   *fake_adcslope_h,  EMC_ADCSLOPE_ST       *fake_adcslope )
 {
 /*:>--------------------------------------------------------------------
@@ -44,7 +43,6 @@ long type_of_call fake_adcslope_(
     n=fake_adcslope_h->nok;
     nok_c=ems_control_h->nok-1;
     nok_cc=ems_cal_control_h->nok-1;
-    nok_fp=fake_pedestal_h->nok-1;
     det = ems_cal_control[nok_cc].det;
     if(ems_cal_control[nok_cc].iseed != 0) iseed=ems_cal_control[nok_cc].iseed;
     switch (det){
@@ -83,14 +81,8 @@ long type_of_call fake_adcslope_(
     case 1:
       for( i = 0; i < fake_adcslope[n].nphi ; i++ ){
 	for( j = 0; j < fake_adcslope[n].neta ; j++ ){
-	  fake_adcslope[n].pA0[i][j]= ems_cal_control[nok_cc].adc_rangeA
-	                       /(bits-fake_pedestal[nok_fp].pedA[i][j])
-	                       *(1.0+ems_cal_control[nok_cc].slope_var
-		               *(ran0(&iseed)-0.5));
-	  fake_adcslope[n].pB0[i][j]= ems_cal_control[nok_cc].adc_rangeB
-	                       /(bits-fake_pedestal[nok_fp].pedB[i][j])
-		               *(1.0 +ems_cal_control[nok_cc].slope_var
-		               *(ran0(&iseed)-0.5));
+	  fake_adcslope[n].p0[i][j]= ems_cal_control[nok_cc].slope_ave *
+	    (1.0 + ems_cal_control[nok_cc].slope_var*(ran0(&iseed)-0.5));
 	}
       }
       break;
@@ -98,8 +90,7 @@ long type_of_call fake_adcslope_(
       puts("Function is not implimented yet!");
       return STAFCV_BAD;
     }    
-    fake_adcslope[n].funA=func;
-    fake_adcslope[n].funB=func;
+    fake_adcslope[n].fun=func;
     fake_adcslope_h->nok++;
     ems_cal_control[nok_cc].iseed=iseed;
     return STAFCV_OK;

@@ -11,7 +11,6 @@
        long        det;           /* see emc_def.h */
        long        neta;          /* number of eta bin */
        long        nphi;          /* number of phi bin */
-       short       pedA[120][40]; /* pedestal for low energy ADC channel */
-       short       pedB[120][40]; /* pedestal for high energy ADC channel */
+       short       ped[120][40]; /* pedestal for low energy ADC channel */
    };
 

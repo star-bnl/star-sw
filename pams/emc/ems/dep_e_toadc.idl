@@ -1,0 +1,16 @@
+/* Deposit Energy to adc		Pavlinov Aleksei */
+
+#include "PAM.idl"
+#include "ems_control.idl"
+#include "control_toadc.idl"
+#include "ems_hits_bemc.idl"
+#include "emc_adc.idl"
+
+interface dep_e_toadc : amiModule {
+	STAFCV_T call
+        ( in  ems_control      ems_control
+        , in  control_toadc    control_toadc
+        , in  ems_hits_bemc    hits_bemc
+	, out emc_adc          adc_bemc
+	);
+};

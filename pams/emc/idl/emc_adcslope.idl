@@ -10,9 +10,7 @@
        long        det;           /* see emc_def.h */
        long        neta;          /* number of eta bin */
        long        nphi;          /* number of phi bin */
-       long        funA;          /* function selection */
-       long        funB;          /* function selection */
-       float       pA0[120][40];  /* pedestal for low energy ADC channel */
-       float       pB0[120][40];  /* pedestal for high energy ADC channel */
+       long        fun;           /* function selection */
+       float       p0[120][40];   /* pedestal for low energy ADC channel */
    };
 

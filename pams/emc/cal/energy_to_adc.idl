@@ -10,7 +10,7 @@
 interface energy_to_adc : amiModule {
 	STAFCV_T call
          (in ems_control      ems_control
-        , in ems_cal_control  ems_cal_control
+         ,in ems_cal_control  ems_cal_control
       	 ,in emc_pedestal     emc_pedestal
 	 ,in emc_adcslope     emc_adcslope
 	 ,out emc_adc         emc_adc

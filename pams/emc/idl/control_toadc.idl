@@ -1,0 +1,21 @@
+/*
+****************************************************************************
+*   Table: control_toadc.idl
+*   Description: define coefficients for transition from deposit energy
+*                to ADC only for BEMC
+*                  Pavlinov Aleksei.
+**************************************************************************** 
+*/
+   struct control_toadc {
+     long  mode;     /* =0, no convert; =1, convert without photo statistics */
+                     /* =2, convert with accounting photo statistics */
+     float energy;   /* Max energy in BEMC tower (~60 GeV/c)*/
+     float dep_mip;  /* MIP deposit energy in Sc.layers at zero angle */ 
+     float nphe_mip; /* The number of PHE for MIP at zero angle */ 
+     float c1;       /* Transition coefficient from Dep.Energy to ADC=> */
+                     /* ( = sampfrac*bemc_adcbits) / energy   */
+     float c2;       /* Transition coefficient from Dep.Energy to NPHE=>*/
+                     /* ( = nphe_mip) / dep_mip) */
+     float c3;       /* Transition coefficient from NPHE to ADC=>       */
+                     /* (sampfrac*bems_adcbits*dep_mip) / (energy*nphe_mip)*/
+  };
