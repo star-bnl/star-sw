@@ -352,7 +352,7 @@ int dsDatasetMaxEntryCount(size_t *pCount, DS_DATASET_T *pDataset)
 	if (!DS_IS_DATASET(pDataset)) {
 		DS_ERROR(DS_E_INVLAID_DATASET);
 	}
-	*pCount = pDataset->elcount;
+	*pCount = pDataset->maxcount;
 	return TRUE;
 }
 /*****************************************************************************
