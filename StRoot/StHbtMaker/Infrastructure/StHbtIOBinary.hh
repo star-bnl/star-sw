@@ -29,7 +29,8 @@ typedef unsigned int colSizeType;
 enum ioStatus { ioOK=0, ioERR, ioEOF, ioEOL, ioERROpen }; 
 
 class StHbtIOBinary /*: friend StHbtEvent, friend StHbtTrack, friend StHbtV0*/ {
-    
+protected:
+  int mDebug;
 public:
   int byteCounterEvent;
   int byteCounterTotal;
