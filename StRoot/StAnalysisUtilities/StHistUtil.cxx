@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 2.18 2004/02/12 05:02:59 genevb Exp $
+// $Id: StHistUtil.cxx,v 2.19 2004/02/12 16:54:22 genevb Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 2.19  2004/02/12 16:54:22  genevb
+// Separate MinBias histos
+//
 // Revision 2.18  2004/02/12 05:02:59  genevb
 // Year 4 AuAu changes. New SVT histos.
 //
@@ -90,15 +93,16 @@
 
 typedef TH1* TH1ptr;
 
-Int_t numOfPosPrefixes = 8;
-char* possiblePrefixes[8] = {"","LM","MM","HM","HP","XX","CL","HT"};
-char* possibleSuffixes[8] = {
+Int_t numOfPosPrefixes = 9;
+char* possiblePrefixes[9] = {"","LM","MM","HM","HP","XX","MB","CL","HT"};
+char* possibleSuffixes[9] = {
   "General",
   "Low Mult",
   "Mid Mult",
   "High Mult",
   "High Pt",
   "Other Physics",
+  "MinBias",
   "Central",
   "High Tower"
 };
