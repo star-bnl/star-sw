@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html><body bgcolor="#ffffff">
+  <head>
+    <title>howtoPID</title>
+  </head>
+
+  <body>
+    <h1>howtoPID</h1>
+
+
+<p>If you have less than 900000 tracks(global) and wanna do PID by using probability algorithm, my suggestion is do not do it. This is a tool that rely on STATISTICS heavily</p>
+<p>In order to use StuProbabilityPidAlgorithm, we have to use StPidAmpMaker to produce a set of parameters that can be used by StuProbabilityPidAlgorithm. So, before do PID, we should: </p>
+
+<p> <font size=5 color=#EE1110>First,Run StPidAmpMaker to produce parameters:</font></p>
+
+<p> follow the step by step guidance below:</p>
+
+<p><font color=blue>1.Decide which channel collection type are you going to use. There are three channel collection types available in StPidAmpMaker:</font></p>
+<p><img src="hand-right.gif"> StPidAmpMaker::AddDefaultChannelCollection( <a href="option.html">"your fit options"</a>)</p>
+<p>The default channel collection does not consider any PID dependence. It requires at least 1e+6 tracks.  For 1e+6 tracks, it costs ~1 hrs.</p>
+<p><img src="hand-right.gif">StPidAmpMaker::AddNHitsChannelCollection(yourNHitsBin1, yourNHitsBin2,etc.<a href="option.html">"your fit options"</a>)</p>
+<p>The NHits channel collection consider NHits dependence for PID. It requires ~4e+6 tracks.For 4e+6 tracks, it costs ~3 hrs to run. The maximum # of NHits bins you can set is 4. The recommended input is: AddNHitsChannelCollection(0,10,20,45,"A").</p>
+<p><img src="hand-right.gif">StPidAmpMaker::AddNHitsDcaChannelCollection(yourNHitsBin1Start, yourNHitsBin1End, yourNHitsBin2End, etc.<a href="option.html">"your fit options"</a>,yourDcaBin1Start, yourDcaBin1End, yourDcaBin2End)</p>     
+<p>The NHitsDca channel collection consider both Dca and NHits dependences for PID. It requires 6e+6 tracks. For 6e+6 tracks, it costs ~5 hrs to run. The maximum # of NHits bins you can set is 4. yourDcaBin1Start should be 0 always, yourDcaBin2End should be infinity (a large number like 50000 would be good). The recommended input is : AddNHitsDcaChannelCollection(0,10,20,45,"A",0,2.0,50000)</p>
+
+
+<br> 
+<p>The last channel collection (NHitsDca) has the best performance, but it requires more data sample and more time to run. The first channel collection has the worst performance if compare to the other two, but it requires less data sample and less run time.
+
+<br><p>Now, suppose we have 2k events on disk, and we do not care about the run time. We decide to use the NHitsDcaChannelCollection. Then, the next thing is:</p>
+
+<p><font color=blue>2.Modify doEvents.C so that your StPidAmpMaker can be added to the chain.</font></p>
+
+<p>We need to check out the doEvents.C, replace the analysis maker by our StPidAmpMaker.</p>
+
+<p>Our modified doEvents.C looks like following:(commentted out as green, added as red)</p>
+
+
+<br>void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
+<br>{
+<br>    //
+<br>    // First load some shared libraries we need
+<br>    //
+
+<br>    gSystem->Load("St_base");
+<br>    gSystem->Load("StChain");
+<br>
+<br>    gSystem->Load("libgen_Tables");
+<br>    gSystem->Load("libsim_Tables");
+<br>    gSystem->Load("libglobal_Tables");
+<br>
+<br>    gSystem->Load("StUtilities");
+<br>    gSystem->Load("StIOMaker");
+<br>    gSystem->Load("StarClassLibrary");
+<br>    gSystem->Load("StEvent");
+<br>    gSystem->Load("StMagF");
+<br>    gSystem->Load("StEventMaker"); 
+<br> <font color=green> //     gSystem->Load("StAnalysisMaker"); </font>
+<br> <font color=red>   gSystem->Load("StPidAmpMaker");</font>
+
+<br>    //
+<br>    // Handling depends on whether file is a ROOT file or XDF file
+<br>    //
+<br>    chain  = new StChain("StChain");
+<br>    StFileI *setFiles =0;
+<br>    if (fileList) {     //Normal case
+<br>      setFiles= new StFile(fileList);
+<br>    } else        {     //Grand Chalenge
+<br>      gSystem->Load("StChallenger");
+<br>      setFiles = StChallenger::Challenge();
+<br>      setFiles->SetDebug();
+<br>      Int_t Argc=4;
+<br>      const char *Argv[4]= {
+<br>        "-s","dst;hist;runco",
+<br>        "-q","-5<=qxa_3<0.3 && 22>qxc_1>18"
+<br>        };
+<br>      setFiles->Init(Argc,Argv);
+<br>    }
+<br>    StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
+<br>     IOMk->SetIOMode("r");
+<br>     IOMk->SetBranch("*",0,"0");                 //deactivate all branches
+<br>     IOMk->SetBranch("dstBranch",0,"r");
+<br>     IOMk->SetBranch("runcoBranch",0,"r");
+<br>     IOMk->SetDebug();
+
+<br>    //
+<br>    // Maker to read events from file or database into StEvent
+<br>    //
+<br>   StEventMaker *readerMaker =  new StEventMaker("events","title");
+
+
+<br>    //
+<br>    //  Sample analysis maker
+<br>    //
+<br>  <font color=green> // StAnalysisMaker *analysisMaker = new StAnalysisMaker("analysis");</font>
+<br> <font color=red> StPidAmpMaker *myPidAmpMaker = new StPidAmpMaker("pidAmp");
+<br>    myPidAmpMaker->AddNHitsDcaChannelCollection(0,10,20,45,"A",0.0,2.0,50000);
+<br>    myPidAmpMaker->SetTotalTracks(5000000);</font><font color=green>//If we do not have the required number of tracks (here the required #tracks is 6e+6), the maker will stop after it finish scanning all events. But this option can let you force the maker to run at less stastics. </font>
+
+<br>
+<br>    //
+<br>    // Initialize chain
+<br>    //
+<br>  ......
+<br>
+<br>
+
+<br>  Please be aware that the maximum value for the argument of SetTotalTracks(int)  is 8000000.
+<br>
+<br>
+<p>Then, </p>
+<p><font color=blue>3.In root4star, run doEvents.C over a certain number of events. (in our example, we run 2k events)</font></p>
+<p>After the run, we should see two files, one is <br>"nhitsBin_0_10_20_45_ptBin_0_Inf_dcaBin_0_2_50000_Amp.root" <br>the other is <br>"nhitsBin_0_10_20_45_ptBin_0_Inf_dcaBin_0_2_50000_BGBands.root". 
+<br>What we need here is the first one. The second one is for band parameters only. We can ignore it for the moment.</p>
+<p>We have got the parameters, Now we can do:</p>
+<p> <font size=5 color=#EE1110>The second, do PID in the user's analysis code.</font></p>
+
+<p><br>Following a few lines of code will give you the ideal:</p>
+<br><font color=green>//  In your macro(sth. like doEvents.C), do not forget : </font>
+<br>gSystem->Load("StEvent"); 
+<br>gSystem->Load("StEventUtilities"); 
+<br><font color=green> // and load some other libraries as well.</font>
+<br>
+<br>
+<br> <font color=green>// In your source code:</font>
+<br>#include "StEventTypes.h"
+<br>#include "StuProbabilityPidAlgorithm.h"
+<br>
+<br><font color=green>//put the following line some where before your event loop:</font>
+<br>StuProbabilityPidAlgorithm::readParametersFromFile("nhitsBin_0_10_20_45_ptBin_0_Inf_dcaBin_0_2_50000_Amp.root");<font color=green>//read in the parameters.</font>
+<br>
+<br><font color=green>//inside your event loop (but outside the track loop): </font>
+<br>StuProbabilityPidAlgorithm myPID(event);<font color=green>   //define a functor.</font>
+
+<br><font color=green>//inside your track loop: </font>
+<br>StParticleDefinition* def=theTrack->pidTraits(myPID);<font color=green>  //invoke functor. </font>
+<br> if( def->name()=="e-" && myPID.getProbability(0) > 0.9 ) 
+<br>printf("Got an electron at 90% confidence!\n");  
+<br>if( def->name()=="pi-" && myPID.getProbability(0) > 0.8 && myPID.isExtrap()==1) 
+<br>printf("got a pi- with 80% confidence, probability caculated based on the extrapolation\n");
+<br> <font color=green> // an extrapolation is a resonable extend of the fitting from clean region to overlapping region </font>
+<br>
+<br>
+<br>
+
+    <hr>
+    <address><a href="mailto:aihong@cnr.physics.kent.edu">Aihong Tang</a></address>
+<!-- Created: Mon Aug 21 15:28:18 EDT 2000 -->
+<!-- hhmts start -->
+Last modified: Mon Aug 21 15:48:25 EDT 2000
+<!-- hhmts end -->
+  </body>
+</html>
