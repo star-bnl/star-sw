@@ -57,9 +57,12 @@ public:
     virtual double  getDca3(StiTrack *t)   const=0;   // distance of closest approach to given track - 3D calc
     
     virtual int    getFitPointCount()   const=0;  // number of points used in fit
-    // number of total number of points 
-    // currently assigned to the track
-    virtual int    getPointCount()      const=0;  
+    
+    // number of total number of points currently assigned to the track
+    virtual int    getPointCount()      const=0;
+
+    /// number of hits used to seed the track
+    int getSeedHitCount() const {return mSeedHitCount;}
     
     StiHit * getVertex() const;  // return pointer to vertex associated with this track if any. 
     
@@ -68,6 +71,7 @@ public:
     void  setFitPointCount(int v) ;  // number of points used in fit
     void  setPointCount(int v)    ;  // number of points currently assigned to the track;
     void  setVertex(StiHit *v);
+    void setSeedHitCount(int c) {mSeedHitCount=c;}
   
     
 protected:
@@ -78,6 +82,7 @@ protected:
     int    q;          // charge of the track 
     int    nPts;       // number of points on the track
     int    nFitPts;    // number of points included in the fit of the track
+    int mSeedHitCount; //number of points used to seed the track
     StiHit * vertex; // parent vertex of this track
     double  m;          // mass hypothesis
     double  chi2;

@@ -25,6 +25,7 @@ void StiTrack::reset()
   q = 0;
   nPts = 0;
   nFitPts = 0;
+  mSeedHitCount = 0;
   vertex = 0;
   m      = -1.;
   chi2   = 0.;
