@@ -5,12 +5,15 @@
 #ifndef EEmcMCData_h
 #define EEmcMCData_h
 /*********************************************************************
- * $Id: EEmcMCData.h,v 1.2 2003/02/20 20:13:20 balewski Exp $
+ * $Id: EEmcMCData.h,v 1.3 2003/02/20 21:27:06 zolnie Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Monte Carlo Data
  *********************************************************************
  * $Log: EEmcMCData.h,v $
+ * Revision 1.3  2003/02/20 21:27:06  zolnie
+ * added simple geometry class
+ *
  * Revision 1.2  2003/02/20 20:13:20  balewski
  * fixxy
  * xy
@@ -51,7 +54,6 @@
  *
  *********************************************************************/
 #include "TObject.h"
-#include "EEmcDefs.h"
 //#include "EEmcException.h"
 
 class   StMaker;
@@ -64,6 +66,23 @@ class   EEeventDst;
 
 const   Float_t kEEmcDefaultEnergyThreshold = 0.0005; // 0.5 MeV
 const   Int_t   kEEmcDefaultMCHitSize       = 0x1000; // 4k hitow
+
+
+enum EEmcVolId {
+  // for Tower
+  kEEmcTowerHalfId =  100000,
+  kEEmcTowerPhiId  =    1000,
+  kEEmcTowerEtaId  =      10,
+  kEEmcTowerDepId  =       1,
+  
+  // for SMDs
+  kEEmcSmdHalfId   = 1000000,
+  kEEmcSmdPhiId    =   10000,
+  kEEmcSmdPlaneId  =    1000,
+  kEEmcSmdStripId  =        1
+};
+
+
 
 
 struct EEmcMCHit {
