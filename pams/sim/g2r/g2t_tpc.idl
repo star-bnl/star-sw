@@ -2,6 +2,9 @@
 *           Module: g2tmain
 */
 #include "PAM.idl"
+#include "g2t_track.idl"
 #include "g2t_tpc_hit.idl"
 
-interface g2t_tpc : amiModule{ STAFCV_T call (out g2t_tpc_hit g2t_tpc_hit ); };
+interface g2t_tpc : amiModule{ STAFCV_T call (inout g2t_track g2t_track,
+                                              out g2t_tpc_hit g2t_tpc_hit ); };
+                      
