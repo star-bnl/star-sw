@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 3.16 2002/05/10 20:59:31 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.17 2002/05/20 21:37:12 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.17  2002/05/20 21:37:12  genevb
+// Fixed problem with file names for branches
+//
 // Revision 3.16  2002/05/10 20:59:31  genevb
 // Fixed bug with branch status and changed cuts split level
 //
@@ -207,6 +210,15 @@ void StStrangeMuDstMaker::InitReadDst() {
     return;
   }
 
+  // 5/20/02 - GVB
+  // Correct for a problem with setting branch file names in old MuDSTs.
+  // Setting of branch file names has now been removed (never worked anyhow).
+  if (strcmp(tree->GetBranch("Event")->GetFileName(),"")) {
+    TObjArray* listOfBranches = tree->GetListOfBranches();
+    for (int i=0; i<listOfBranches->GetEntriesFast(); i++)
+      ((TBranch*) listOfBranches->At(i))->SetFile(muDst);
+  }
+
   tree->SetBranchStatus("*",0);
   tree->SetBranchStatus("Event.*",1);
   tree->SetBranchAddress("Event",&evClonesArray);
@@ -238,13 +250,10 @@ void StStrangeMuDstMaker::InitCreateDst() {
 
   Int_t split = 99;
   TBranch* branch = tree->Branch("StrangeCuts",&cutsArray,bsize[evT],split);
-  branch->SetFile(file[evT]);
   if (!dstMaker) {
     branch = tree->Branch("Event",&evClonesArray,bsize[evT],split);
-    branch->SetFile(file[evT]);
     if (doMc) {
       branch = tree->Branch("McEvent",&evMcArray,bsize[evT],split);
-      branch->SetFile(file[evT]);
     }
   }
 }
@@ -254,11 +263,9 @@ void StStrangeMuDstMaker::InitCreateSubDst() {
   Int_t split=2;
   evClonesArray = dstMaker->GetEvClonesArray();
   TBranch* branch = tree->Branch("Event",&evClonesArray,bsize[evT],split);
-  branch->SetFile(file[evT]);
   if (doMc) {
     evMcArray = dstMaker->GetEvMcArray();
     branch = tree->Branch("McEvent",&evMcArray,bsize[evT],split);
-    branch->SetFile(file[evT]);
   }
   EachController(InitCreateSubDst());
 }

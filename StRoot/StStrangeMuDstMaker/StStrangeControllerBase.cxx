@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerBase.cxx,v 3.10 2002/05/10 20:59:31 genevb Exp $
+// $Id: StStrangeControllerBase.cxx,v 3.11 2002/05/20 21:37:12 genevb Exp $
 // $Log: StStrangeControllerBase.cxx,v $
+// Revision 3.11  2002/05/20 21:37:12  genevb
+// Fixed problem with file names for branches
+//
 // Revision 3.10  2002/05/10 20:59:31  genevb
 // Fixed bug with branch status and changed cuts split level
 //
@@ -205,7 +208,6 @@ TBranch* StStrangeControllerBase::AssignBranch(const char* name,
 
   static Int_t split=99;
   TBranch* branch = tree->Branch(name,address,bsize,split);
-  if (masterMaker->GetMode() == StrangeWrite) branch->SetFile(file);
   return branch;
 }
 //_____________________________________________________________________________
