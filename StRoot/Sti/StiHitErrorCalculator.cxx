@@ -1,6 +1,6 @@
 
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.15 2003/09/07 03:49:08 perev Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.16 2003/10/28 15:58:01 andrewar Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -12,6 +12,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.16  2003/10/28 15:58:01  andrewar
+ * Added set method to set parameters from input file.
+ *
  * Revision 2.15  2003/09/07 03:49:08  perev
  * gcc 3.2 + WarnOff
  *
@@ -84,6 +87,28 @@ void StiDefaultHitErrorCalculator::set(double intrinsicZ, double driftZ,
   coeff[3]= intrinsicX;
   coeff[4]= driftX;
   coeff[5]= crossX;
+
+  report();
+}
+
+void StiDefaultHitErrorCalculator::set(ifstream& iFle)
+{
+  iFle >> coeff[0] >> coeff[1] >> coeff[2];
+  iFle >> coeff[3] >> coeff[4] >> coeff[5];
+  
+  report();
+ 
+  return;
+}
+
+void StiDefaultHitErrorCalculator::report()
+{
+  cout <<"Hit Error Parameters: "<<coeff[0]
+       <<" "<<coeff[1]
+       <<" "<<coeff[2]
+       <<" "<<coeff[3]
+       <<" "<<coeff[4]
+       <<" "<<coeff[5]<<endl;
 }
 
 void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode * node) const
@@ -100,15 +125,7 @@ void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode * node) con
   double edip=coeff[3]+coeff[4]*dz*cosDipInv2+coeff[5]*tanDip*tanDip;
   if (ecross>50) ecross = 50.; 
   if (edip>50) edip = 50.; 
-  double scaling=0; if(scaling){}
-  /*
-  if (node->_x>120)
-    scaling = StiKalmanTrackNode::pars->getOuterScaling();
-  else
-    scaling = StiKalmanTrackNode::pars->getInnerScaling();
-  node->eyy = ecross*scaling*scaling; // in cm^2
-  node->ezz = edip*scaling*scaling;
-  */
+
   node->eyy = ecross;
   node->ezz = edip;
 }
