@@ -149,12 +149,10 @@ const char* MainFile="/star/data17/ITTF/data/simple_geant/DEV_10_8_01/*.event.ro
     // now execute the chain member functions    
     chain->PrintInfo();
     
-    //Make Control-Bar
-    StiControlBar* sti=0;
-    if (draw==true) {
-	sti = new StiControlBar();
-	sti->setStChain(chain);
-    }
+    //Make Control Window
+    //if (draw==true) {
+    MainFrame* sti = new MainFrame(gClient->GetRoot(), 400, 220);
+    sti->setStChain(chain);
     
     cout <<"Calling Init() Methods "<<endl;
     chain->Init();
