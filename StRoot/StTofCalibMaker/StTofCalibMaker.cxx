@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.5 2004/07/16 18:28:17 dongx Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.6 2004/07/24 03:33:56 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.6  2004/07/24 03:33:56  dongx
+ * Tofp slewing function changed back
+ *
  * Revision 1.5  2004/07/16 18:28:17  dongx
  * -Tofp Slewing function changed in AuAu200 GeV Run IV
  * -Include those runs with eastern PVPD dead
@@ -159,9 +162,10 @@ void StTofCalibMaker::initFormulas()
 {
   /// define the calibration functions
   mTofrSlewing = new TF1("TofrSlewing", "[0]+[1]/sqrt(x)+[2]/x+[3]/sqrt(x)/x+[4]/x/x");
-  //  mTofpSlewing = new TF1("TofpSlewing", "[0]+[1]/sqrt(x)+[2]/x+[3]/sqrt(x)/x+[4]/x/x");
-  // Run 4, AuAu200GeV, Jiansong's calibration function
-  mTofpSlewing = new TF1("TofpSlewing","[0]+[1]*sqrt(x)+[2]*x+[3]*x*sqrt(x)");
+  // changed back
+  mTofpSlewing = new TF1("TofpSlewing", "[0]+[1]/sqrt(x)+[2]/x+[3]/sqrt(x)/x+[4]/x/x");
+  // Run 4, AuAu200GeV, Jiansong's calibration function -- removed later
+  //  mTofpSlewing = new TF1("TofpSlewing","[0]+[1]*sqrt(x)+[2]*x+[3]*x*sqrt(x)");
   mTofrZCorr = new TF1("TofrZCorr", "pol7");
   //  mTofpZCorr = new TF1("TofpZCorr", "pol7");
   // Run 4, AuAu200GeV, Jiansong's calibration function
