@@ -6,10 +6,11 @@
 	 ,INITIALSIZE_FLAG,INITIALSIZE_IARG
 	 ,BLOCKSIZE_FLAG,BLOCKSIZE_IARG
 	 ,MAXREC_FLAG,MAXREC_IARG
+	 ,READONLY_FLAG
    )</h3>
 
 
-*  Input arguments:
+*  Inputs:
 	INTEGER LUN !Logical unit on which to open file.
 	CHARACTER*(*) FILENAME !Name of file.
 	CHARACTER*(*) STATUS_CARG !"STATUS=" character argument
@@ -27,9 +28,13 @@
 	INTEGER BLOCKSIZE_IARG !"BLOCKSIZE=" integer argument -- not used.
 	LOGICAL MAXREC_FLAG !MAXREC specified/not flag.
 	INTEGER MAXREC_IARG !"MAXREC=" integer argument.
+	LOGICAL READONLY_FLAG !Whether the file is readonly
 
-*  Functional Description:
+*  Description:
 *	Provides a machine-dependent (native) OPEN routine, intended
 *	to be called only from STROPEN (qv).
+
+*	Note that the "ACTION" keyword is disabled, since it's only
+*	available with the newer compiler.  1jul94  RWH
 
 </pre>
