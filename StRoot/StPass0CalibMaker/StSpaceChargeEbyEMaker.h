@@ -16,6 +16,7 @@
 
 class StMagUtilities;
 class TH1F;
+class TH2F;
 class TH3F;
 class StPhysicalHelixD;
 class St_spaceChargeCor;
@@ -32,7 +33,7 @@ public:
   virtual Int_t  DecideSpaceCharge(int time);
   
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.1 2004/06/30 23:16:00 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSpaceChargeEbyEMaker.h,v 1.2 2004/08/13 20:49:12 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
 
 protected:
@@ -72,6 +73,8 @@ protected:
   float ntrks[32];
   float ntrkssum;
   int evts[32];
+  float evtstbin[32];
+  float evtsnow;
   
   // PrePass info
   TString tabname;
@@ -87,6 +90,8 @@ protected:
   TH3F* myhistP;             //!
   TH3F* myhistE;             //!
   TH3F* myhistW;             //!
+  TH2F* dcehist;             //!
+  TH2F* dcphist;             //!
   TH3F* dcahist;             //!
   TH3F* dcahistN;            //!
   TH3F* dcahistP;            //!
@@ -103,8 +108,11 @@ protected:
 #endif
 
 //_____________________________________________________________________________
-// $Id: StSpaceChargeEbyEMaker.h,v 1.1 2004/06/30 23:16:00 genevb Exp $
+// $Id: StSpaceChargeEbyEMaker.h,v 1.2 2004/08/13 20:49:12 genevb Exp $
 // $Log: StSpaceChargeEbyEMaker.h,v $
+// Revision 1.2  2004/08/13 20:49:12  genevb
+// Improve upon keeping method locked on for each event, and timestamp change
+//
 // Revision 1.1  2004/06/30 23:16:00  genevb
 // Introduction of StSpaceChargeEbyEMaker
 //
