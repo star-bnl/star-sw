@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.54 2003/09/19 14:34:39 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.55 2003/10/02 15:51:13 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.55  2003/10/02 15:51:13  suaide
+// possible memory leak removed
+//
 // Revision 1.54  2003/09/19 14:34:39  suaide
 // Removed muDST option from StEmcADCtoEMaker. Will find another solution for that
 //
@@ -925,12 +928,12 @@ Bool_t StEmcADCtoEMaker::fillStEvent()
 					{
 						mEmc =new StEmcCollection();
 						if(event) event->setEmcCollection(mEmc);
-            else // if there is no StEvent, creates one and save in the .data structure
-            {
-              event = new StEvent();
-              event->setEmcCollection(mEmc);
-              AddData(event);
-            }
+            //else // if there is no StEvent, creates one and save in the .data structure
+            //{
+              //event = new StEvent();
+              //event->setEmcCollection(mEmc);
+              //AddData(event);
+            //}
 					}
       		StDetectorId id = static_cast<StDetectorId>(det+kBarrelEmcTowerId);
       		StEmcDetector* detector=mEmc->detector(id);
