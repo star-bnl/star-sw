@@ -1,4 +1,4 @@
-// static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.27 1998/10/02 17:47:43 perev Exp $";
+// static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.28 1999/11/17 03:05:11 fisyak Exp $";
 //:Copyright 1995, Lawrence Berkeley National Laboratory
 //:>--------------------------------------------------------------------
 //:FILE:        amiClasses.C
@@ -103,6 +103,11 @@ STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
 			,(tbl._buffer[i])->Name());
 	 delete[] h;
 	 delete[] d;
+	 // PN, 11/11/99: give explicite types
+	  char *a = (tbl._buffer[i])->typeSpecifier();
+          printf (" => argument table specification \n %s \n",a);
+          printf (" => required table specification \n %s \n",myTblSpecs[i]);
+          FREE (a);
 	 EML_ERROR(WRONG_TABLE_TYPE);
       }
 //- Convert table objs to 2-struct (TAS-like) tables.
