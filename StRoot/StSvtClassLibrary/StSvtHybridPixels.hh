@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridPixels.hh,v 1.1.1.1 2000/03/10 14:26:21 munhoz Exp $
+ * $Id: StSvtHybridPixels.hh,v 1.2 2000/08/23 12:48:44 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridPixels.hh,v $
+ * Revision 1.2  2000/08/23 12:48:44  munhoz
+ * add reset method
+ *
  * Revision 1.1.1.1  2000/03/10 14:26:21  munhoz
  * SVT Class Library
  *
@@ -36,6 +39,8 @@ public:
   int getNumberOfTimeBins() {return mNumberOfTimeBins;}
   int getTotalNumberOfPixels() {return mTotalNumberOfPixels;}
   int getPixelIndex(int anode, int time);
+
+  void reset();
 
 protected:
 

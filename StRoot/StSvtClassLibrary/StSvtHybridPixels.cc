@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtHybridPixels.cc,v 1.1.1.1 2000/03/10 14:26:21 munhoz Exp $
+ * $Id: StSvtHybridPixels.cc,v 1.2 2000/08/23 12:48:44 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridPixels.cc,v $
+ * Revision 1.2  2000/08/23 12:48:44  munhoz
+ * add reset method
+ *
  * Revision 1.1.1.1  2000/03/10 14:26:21  munhoz
  * SVT Class Library
  *
@@ -98,3 +101,8 @@ int StSvtHybridPixels::getPixelIndex(int anode, int time)
   return index;
 }
 
+void StSvtHybridPixels::reset()
+{
+  for (int i=0;i<mTotalNumberOfPixels;i++)
+    AddAt(0,i);  
+}
