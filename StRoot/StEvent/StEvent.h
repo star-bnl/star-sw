@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.21 2001/05/30 17:45:53 perev Exp $
+ * $Id: StEvent.h,v 2.22 2001/09/18 00:15:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
+ * Revision 2.22  2001/09/18 00:15:25  ullrich
+ * Added StRunInfo and access functions.
+ *
  * Revision 2.21  2001/05/30 17:45:53  perev
  * StEvent branching
  *
@@ -105,6 +108,7 @@ class StTriggerDetectorCollection;
 class StL0Trigger;
 class StL3Trigger;
 class StPrimaryVertex;
+class StRunInfo;
 class StV0Vertex;
 class StXiVertex;
 class StKinkVertex;
@@ -131,6 +135,9 @@ public:
     
     StEventInfo*                        info();
     const StEventInfo*                  info() const;
+
+    StRunInfo*                          runInfo();
+    const StRunInfo*                    runInfo() const;
 
     StEventSummary*                     summary();
     const StEventSummary*               summary() const;
@@ -196,6 +203,7 @@ public:
     void setTriggerMask(unsigned int);
     void setBunchCrossingNumber(unsigned int, unsigned int);
     void setInfo(StEventInfo*);
+    void setRunInfo(StRunInfo*);
     void setSummary(StEventSummary*);
     void setSoftwareMonitor(StSoftwareMonitor*);
     void setTpcHitCollection(StTpcHitCollection*);
@@ -212,17 +220,19 @@ public:
     void addPsd(StPsd*);
     void removePsd(StPsd*);
     
-virtual Bool_t Notify();   
+    virtual Bool_t Notify();
+    
 protected:
     mutable StSPtrVecObject  mContent;
     static  TString          mCvsTag;
     void    Split();
+
 private:
     StEvent& operator=(const StEvent&);
     StEvent(const StEvent&);
     void initToZero();
     void init(const event_header_st&);
-    ClassDef(StEvent,2)
+    ClassDef(StEvent,3)
 };
 #endif
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.26 2001/06/05 21:59:56 perev Exp $
+ * $Id: StEvent.cxx,v 2.27 2001/09/18 00:15:25 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,8 +12,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
+ * Revision 2.27  2001/09/18 00:15:25  ullrich
+ * Added StRunInfo and access functions.
+ *
  * Revision 2.26  2001/06/05 21:59:56  perev
- * Split in Streamer added
+ *  Split in Streamer added
  *
  * Revision 2.25  2001/05/30 17:45:53  perev
  * StEvent branching
@@ -112,6 +115,7 @@
 #include "StFtpcHitCollection.h"
 #include "StEmcCollection.h"
 #include "StRichCollection.h"
+#include "StRunInfo.h"
 #include "StTofCollection.h"
 #include "StTrackDetectorInfo.h"
 #include "StTriggerDetectorCollection.h"
@@ -129,8 +133,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.26 2001/06/05 21:59:56 perev Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.26 2001/06/05 21:59:56 perev Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.27 2001/09/18 00:15:25 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.27 2001/09/18 00:15:25 ullrich Exp $";
 
 ClassImp(StEvent)
 
@@ -166,6 +170,7 @@ void _lookupOrCreate(      T*& val, StSPtrVecObject &vec){_lookup(val->Class(),(
 void _lookupAndSet  (      T*& val, StSPtrVecObject &vec){_lookup(val->Class(),(StObject*&)val,vec,2);}
 
 _LOOKUP(StEventInfo)
+_LOOKUP(StRunInfo)
 _LOOKUP(StEventSummary)
 _LOOKUP(StSoftwareMonitor)
 _LOOKUP(StTpcHitCollection)
@@ -225,6 +230,7 @@ _lookupAndSet(T* val, StSPtrVecObject &vec)
     vec.push_back(val);
 }
 #endif /*-HPUX*/
+
 void
 StEvent::initToZero() { /* noop */ }
 
@@ -318,6 +324,22 @@ const StEventInfo*
 StEvent::info() const
 {
     StEventInfo* info = 0;
+    _lookup(info, mContent);
+    return info;
+}
+
+StRunInfo*
+StEvent::runInfo()
+{
+    StRunInfo* info = 0;
+    _lookup(info, mContent);
+    return info;
+}
+
+const StRunInfo*
+StEvent::runInfo() const
+{
+    StRunInfo* info = 0;
     _lookup(info, mContent);
     return info;
 }
@@ -741,6 +763,12 @@ StEvent::setBunchCrossingNumber(unsigned int val, unsigned int i)
 
 void
 StEvent::setInfo(StEventInfo* val)
+{
+    _lookupAndSet(val, mContent);
+}
+
+void
+StEvent::setRunInfo(StRunInfo* val)
 {
     _lookupAndSet(val, mContent);
 }
