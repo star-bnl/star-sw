@@ -1,26 +1,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.3 2001/11/06 17:55:29 posk Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.4 2002/11/15 22:18:03 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Description:  Maker to analyze Flow using StFlowEvent
-//
-///////////////////////////////////////////////////////////////////////////////
-//
-// $Log: StFlowAnalysisMaker.h,v $
-// Revision 1.3  2001/11/06 17:55:29  posk
-// Only sin terms at 40 GeV.
-//
-// Revision 1.2  2001/08/17 22:03:32  posk
-// Now can also do 40 GeV data.
-//
-// Revision 1.1  2001/02/22 23:34:25  posk
-// NA49 version of STAR flow software.
-//
-// Revision 1.25  2000/09/29 22:53:16  posk
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -178,3 +164,22 @@ inline Float_t StFlowAnalysisMaker::ResErr(Int_t eventN, Int_t harN) const
 inline void StFlowAnalysisMaker::SetV21() { mV21 = kTRUE; }
 
 #endif
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.4  2002/11/15 22:18:03  posk
+// updates.
+//
+// Revision 1.3  2001/11/06 17:55:29  posk
+// Only sin terms at 40 GeV.
+//
+// Revision 1.2  2001/08/17 22:03:32  posk
+// Now can also do 40 GeV data.
+//
+// Revision 1.1  2001/02/22 23:34:25  posk
+// NA49 version of STAR flow software.
+//
+// Revision 1.25  2000/09/29 22:53:16  posk
+//
+///////////////////////////////////////////////////////////////////////////////
