@@ -1,7 +1,14 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.6 1999/09/09 23:51:21 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.7 1999/09/15 18:40:56 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.7  1999/09/15 18:40:56  calderon
+ * -If there is no StEvent or StMcEvent, print message to cerr and exit.
+ * -Update README for changes
+ *
+ * -If there is no StEvent or StMcEvent, print message to cerr and exit.
+ * -Update README for changes
+ *
  * Revision 1.6  1999/09/09 23:51:21  calderon
  * Made the following changes:
  * StAssociationMaker
@@ -13,9 +20,6 @@
  * StLocalHit
  *
  * -use math.h instead of cmath because of abs()
- * -change abs() to fabs() everywhere
- * -change bool's to int's so Solaris doesn't complain
- *
  * -change abs() to fabs() everywhere
  * -change bool's to int's so Solaris doesn't complain
  *
@@ -198,12 +202,18 @@ Int_t StAssociationMaker::Finish()
 #else
     // Get StEvent
 #endif
-    if (!rEvent) cout << "No StEvent!!! " << endl;
+    StEvent* rEvent = 0;
+    rEvent = (StEvent*) GetInputDS("StEvent");
+
+    if (!rEvent) {
+	cerr << "No StEvent!!! " << endl;
     //
     // Get StMcEvent
-    if (!mEvent) cout << "No StMcEvent!!! " << endl;
-    
-    
+    //
+    StMcEvent* mEvent = 0;
+    mEvent = ((StMcEventMaker*) gStChain->Maker("MCEvent"))->currentMcEvent();
+    if (!mEvent) {
+	cerr << "No StMcEvent!!! " << endl;
 	cerr << "Bailing out ..." << endl;
     // fill SubDetector (TPC) structure with local >Reconstructed< hits
     

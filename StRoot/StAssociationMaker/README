@@ -21,11 +21,10 @@ available.
 
 To be done
 ==========
-Need to define the multimaps appropriately for the
-sun compiler to work.
+Associate hits in SVT and FTPC.
 
 Tests done
 ----------
-Compiles on i386_redhat51.
+Compiles on i386_redhat51, sun4x_56, and hp_ux102
 
 
