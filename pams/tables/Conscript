@@ -14,18 +14,26 @@ my $share  = "#.share/tables";# print "share = $share\n";
 my $SHARE  = $DIR . "/.share/tables";
 Link $DirPath =>  $SHARE; print "Link $DirPath =>  $SHARE\n";
 my $SO_PKG = "St_Tables.so";
-foreach my $idl (@idl) {#  print "$idl\n";
-  if (! grep (/\/idl\//,$idl)) {next;} 
-  my $IDL =  $DIR . "/" . $Dir . "/" . $idl;# print "i=",$i++," idl = $idl IDL=$IDL\n";
-  my $stem = basename ($IDL, ".idl");# print "stem = $stem\n";
-  my $idlt = $SHARE . "/" . basename($idl);
-  push @idlT, $IDL; 
-}# print "idlT = @idlT\n";
-Install $my_env $share, @idlT;
+opendir (DIR, $SHARE) or die "Can't open $SHARE\n";
+my @srcs = readdir (DIR);# print "tables in $SHAER : @srcs\n";
+closedir DIR;
+foreach my $IDL (@srcs) {
+  if ($IDL =~ /\.idl$/) {push @idlT, $SHARE . "/" . $IDL;}# print "add $IDL to idlT\n";}
+}
+#foreach my $idl (@idl) {#  print "$idl\n";
+#  if (! grep (/\/idl\//,$idl)) {next;} 
+#  my $IDL =  $DIR . "/" . $Dir . "/" . $idl;# print "i=",$i++," idl = $idl IDL=$IDL\n";
+#  my $stem = basename ($IDL, ".idl");# print "stem = $stem\n";
+#  my $idlt = $SHARE . "/" . basename($idl);
+#  push @idlT, $IDL; 
+#}# print "idlT = @idlT\n";
+#Install $my_env $share, @idlT;
 #___________________________________
 (my $build = $obj) =~ s/\#//g;  #print "OBJ = $OBJ build = $build MAIN = $MAIN\n";
-my($cscanner) = find scan::cpp($env->{_cwd}, $env->{CPPPATH});
-my $CPPPATH = $cscanner->iflags;#  print "CPPPATH = $CPPPATH\n";
+my $ROOTCINT_CPP =$INCLUDE . ":" . $env->{ENV}->{STAF} . "/inc:" .  $env->{ENV}->{ROOTSRC};
+my $cscanner= find scan::cpp($env->{_cwd}, $ROOTCINT_CPP);# print "ROOTCINT_CPP = $ROOTCINT_CPP\n";
+my $ROOTCINT_CPPPATH = $cscanner->iflags;# print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
+
 foreach my $idll (@idlT) { 
   my $stem     = basename ($idll, ".idl");# print "stem = $stem; idll: $idll\n";
   my $dir      = dirname ($idll); #print "dir = $dir\n"; 
@@ -48,7 +56,7 @@ foreach my $idll (@idlT) {
   push @Deps, $idlh;
   push @Deps, $idli;
   Command $my_env [$idlCintC, $idlCintH], @Deps,  
-  qq (rootcint.pl %>:d -f %>:f -c  "$CPPPATH -D__ROOT__" %1:f %2:f);
+  qq (rootcint.pl %>:d -f %>:f -c  "$ROOTCINT_CPPPATH -D__ROOT__" %1:f %2:f);
   push @Deps, $idlCintC;
   push @Deps, $idlCintH;
   push @Deps, $idlC;
