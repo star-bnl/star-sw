@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: L3_Reader.hh,v 1.5 2000/09/11 16:31:39 struck Exp $
+ * $Id: L3_Reader.hh,v 1.6 2001/06/21 19:24:50 struck Exp $
  *
  * Author: Christof Struck, struck@star.physics.yale.edu
  ***************************************************************************
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: L3_Reader.hh,v $
+ * Revision 1.6  2001/06/21 19:24:50  struck
+ * corrected typo in filenames
+ *
  * Revision 1.5  2000/09/11 16:31:39  struck
  * removed memory leak in L3_Reader
  *
@@ -43,7 +46,7 @@ using std::string;
 #include "StDaqLib/GENERIC/RecHeaderFormats.hh"
 #include "StDaqLib/GENERIC/swaps.hh"
 #include "StDaqLib/GENERIC/Error.hh"
-#include "L3.Banks.hh"
+#include "L3_Banks.hh"
 
 //////////////////////////////////  classes and structures  /////////
 
