@@ -1,9 +1,9 @@
 /////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.cxx,v 1.2 2001/02/12 21:39:45 yepes Exp $
+// $Id: StPeCTrigger.cxx,v 1.3 2001/02/21 20:54:25 yepes Exp $
 // $Log: StPeCTrigger.cxx,v $
-// Revision 1.2  2001/02/12 21:39:45  yepes
-// get rid of old trigger simulation
+// Revision 1.3  2001/02/21 20:54:25  yepes
+// *** empty log message ***
 //
 // Revision 1.0  2000/12/11 
 //
@@ -15,6 +15,7 @@
 #include "StChain.h"
 #include "Stypes.h"
 #include "StMessMgr.h"
+#include "StPeCCtbSlat.h"
 
 
 
@@ -27,7 +28,6 @@ StPeCTrigger::StPeCTrigger() {
    l0_2000 = new StPeCL0 ();
    l0_2000->setYear1Input ();
    l0_2000->setP4SLuts ();
-// l0_2000->setInfoLevel (1);
 //
 //  Set y2k corrected L0
 //
@@ -40,18 +40,24 @@ StPeCTrigger::StPeCTrigger() {
    l0Offline2001 = new StPeCL0 ();
    l0Offline2001->setYear2Input ();
    l0Offline2001->setCountingLuts ();
-  //l0Offline2001->setInfoLevel(1) ;
+//
+   ctbSlats  = new TClonesArray ("StPeCCtbSlat", 10);
 
 }
 StPeCTrigger::~StPeCTrigger() {
+   ctbSlats->Clear();
+   delete ctbSlats ;
 }
 
+void StPeCTrigger::clear() {
+   ctbSlats->Clear();
+}
 
 Int_t StPeCTrigger::process(StEvent *event){
   unsigned int i,j;
  
   l0_2000->setInfoLevel ( infoLevel );
-  l0_2000Corrected->setInfoLevel ( infoLevel );
+//  l0_2000Corrected->setInfoLevel ( infoLevel );
 
   StL0Trigger* l0Data = event->l0Trigger();
   StTriggerDetectorCollection* trg = event->triggerDetectorCollection();
@@ -131,11 +137,18 @@ Int_t StPeCTrigger::process(StEvent *event){
   nCtbHits = 0 ;
   float ctbThres = 2. ;
   if(&ctb){
+    TClonesArray &pCtbSlats = *ctbSlats;
     for(i=0; i<120; i++){
       for(j=0; j<2; j++){
 	ctbsum += ctb.mips(i,j,0);
+	if ( ctb.mips(i,j,0) > 0 ) {
+	   Byte_t i_eta = (Byte_t)(j+1);
+	   Byte_t i_phi = (Byte_t)(i+1);
+	   Int_t  adc   = (Int_t)ctb.mips(i,j,0) ;
+           new(pCtbSlats[nCtbHits++]) StPeCCtbSlat(i_phi,i_eta,adc) ;
+	}
+
 	if ( ctb.mips(i,j,0) > ctbThres ) {
-	   nCtbHits++ ; 
            if      ( i >=   5 && i <  20 ) ctbSW++ ;
 	   else if ( i >=  20 && i <  35 ) ctbBW++ ;
 	   else if ( i >=  35 && i <  50 ) ctbNW++ ;
@@ -161,12 +174,25 @@ Int_t StPeCTrigger::process(StEvent *event){
   p4c = l0_2000Corrected->process ( event ) ;
   p5  = l0Offline2001->process ( event ) ;
 //
+//   Take quadrants from 2001 wiring
+//
+  // L0 simulator
+  Bool_t trgOut[40];
+  for ( int i = 0 ; i < 40 ; i++ ) trgOut[i] = 0 ;
+
+  if ( infoLevel > 2 ) {
+     printf ( "trgBits : " ) ;
+     for ( int i = 0 ; i < 24 ; i++ ) {
+        printf ( "%d ", trgOut[i] ) ;
+     }
+     printf ( "\n" ) ;
+  }
+//
 //   Get Ftpc info
 //
   StFtpcHitCollection*        ftpHitC = 0 ;
   StFtpcPlaneHitCollection*   plane;
   StFtpcSectorHitCollection*  sector;
-
 
   ftpW = 0 ;
   ftpE = 0 ;
@@ -195,7 +221,6 @@ Int_t StPeCTrigger::process(StEvent *event){
      }
 
   }
-
-  return 0;
+  return 0 ;
 }
 

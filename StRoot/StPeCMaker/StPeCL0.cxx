@@ -1,9 +1,9 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCL0.cxx,v 1.1 2001/02/12 21:15:50 yepes Exp $
+// $Id: StPeCL0.cxx,v 1.2 2001/02/21 20:54:24 yepes Exp $
 // $Log: StPeCL0.cxx,v $
-// Revision 1.1  2001/02/12 21:15:50  yepes
-// New version of StPeCMaker, lots of changes
+// Revision 1.2  2001/02/21 20:54:24  yepes
+// *** empty log message ***
 //
 // Revision 1.0  2000/12/11 
 //
@@ -36,7 +36,7 @@ Int_t StPeCL0::dsm1Sum ( ) {
    for(i=15;  i<30;  i++){for(j=0; j<nL0Slats; j++){array2[3][2+j]+=weighted1[i][j];}}
    for(i=30;  i<45;  i++){for(j=0; j<nL0Slats; j++){array2[2][2+j]+=weighted1[i][j];}}
    for(i=45;  i<60;  i++){for(j=0; j<nL0Slats; j++){array2[1][2+j]+=weighted1[i][j];}}
-   for(i=60;  i<75;  i++){for(j=0; j<nL0Slats; j++){array2[1][2+j]+=weighted1[i][j];}}
+   for(i=60;  i<75;  i++){for(j=0; j<nL0Slats; j++){array2[1][1-j]+=weighted1[i][j];}}
    for(i=75;  i<90;  i++){for(j=0; j<nL0Slats; j++){array2[2][1-j]+=weighted1[i][j];}}
    for(i=90;  i<105; i++){for(j=0; j<nL0Slats; j++){array2[3][1-j]+=weighted1[i][j];}}
    for(i=105; i<120; i++){for(j=0; j<nL0Slats; j++){array2[0][1-j]+=weighted1[i][j];}}
@@ -160,7 +160,7 @@ void StPeCL0::printPatches ( ) {
   for(int j=0; j<nL0Eta; j++){    
     cout << "eta= " << j << " : ";
     for(int i=0; i<nL0Phi; i++){
-      cout << " " << (int)array2[i][j];
+      cout << " " << (int)array2[i][j]<<" "<<i<<j<<" "<<(int)(lut2[i][j][array2[i][j]]);
     }
     cout << endl;
   }
@@ -396,6 +396,7 @@ void StPeCL0::setP4Luts() {
             if      ( k == 1 ) lut2[i][j][k] = 1 ;
             else if ( k == 4 ) lut2[i][j][k] = 4 ;
             else if ( k == 5 ) lut2[i][j][k] = 5 ;
+            else if ( k == 8 ) lut2[i][j][k] = 8 ;
 	    else lut2[i][j][k] = 0 ; 
 	 }
       }
@@ -528,7 +529,7 @@ void StPeCL0::setP4PLuts() {
       for ( j = 0 ; j < nL0Slats ; j++ ) {
          for ( k = 0 ; k < nL0Range ; k++ ) { 
             if      ( k < minAdc  ) lut1[i][j][k] = 0 ;
-            else if ( k < maxAdc  ) lut1[i][j][k] = 1 ;
+            else if ( k < maxAdc  ) lut1[i][j][k] = 4 ;
             else               lut1[i][j][k] = 17 ;
          }
       }
@@ -540,7 +541,7 @@ void StPeCL0::setP4PLuts() {
       for ( j = 0 ; j < nL0Slats ; j++ ) {
          for ( k = 0 ; k < nL0Range ; k++ ) { 
             if      ( k < minAdc  ) lut1[i][j][k] = 0 ;
-            else if ( k < maxAdc  ) lut1[i][j][k] = 4 ;
+            else if ( k < maxAdc  ) lut1[i][j][k] = 1 ;
             else               lut1[i][j][k] = 17 ;
          }
       }
@@ -578,6 +579,7 @@ void StPeCL0::setP4PLuts() {
             if      ( k == 1 ) lut2[i][j][k] = 1 ;
             else if ( k == 4 ) lut2[i][j][k] = 4 ;
             else if ( k == 5 ) lut2[i][j][k] = 5 ;
+            else if ( k == 8 ) lut2[i][j][k] = 8 ;
 	    else lut2[i][j][k] = 0 ; 
 	 }
       }
@@ -677,9 +679,7 @@ void StPeCL0::setP4SLuts() {
    for ( i =  33 ; i <  52 ; i++ ) {
       for ( j = 0 ; j < nL0Slats ; j++ ) {
          for ( k = 0 ; k < nL0Range ; k++ ) { 
-            if      ( k < minAdc  ) lut1[i][j][k] = 0 ;
-            else if ( k < maxAdc  ) lut1[i][j][k] = 1 ;
-            else               lut1[i][j][k] = 17 ;
+            lut1[i][j][k] = k ;
          }
       }
    }
@@ -689,9 +689,7 @@ void StPeCL0::setP4SLuts() {
    for ( i =   3 ; i <  22 ; i++ ) {
       for ( j = 0 ; j < nL0Slats ; j++ ) {
          for ( k = 0 ; k < nL0Range ; k++ ) { 
-            if      ( k < minAdc  ) lut1[i][j][k] = 0 ;
-            else if ( k < maxAdc  ) lut1[i][j][k] = 4 ;
-            else               lut1[i][j][k] = 17 ;
+            lut1[i][j][k] = k ;
          }
       }
    }
@@ -701,9 +699,7 @@ void StPeCL0::setP4SLuts() {
    for ( i =  63 ; i <  82 ; i++ ) {
       for ( j = 0 ; j < nL0Slats ; j++ ) {
          for ( k = 0 ; k < nL0Range ; k++ ) { 
-            if      ( k < minAdc  ) lut1[i][j][k] = 0 ;
-            else if ( k < maxAdc  ) lut1[i][j][k] = 4 ;
-            else               lut1[i][j][k] = 17 ;
+            lut1[i][j][k] = k ;
          }
       }
    }
@@ -713,22 +709,23 @@ void StPeCL0::setP4SLuts() {
    for ( i =  93 ; i < 112 ; i++ ) {
       for ( j = 0 ; j < nL0Slats ; j++ ) {
          for ( k = 0 ; k < nL0Range ; k++ ) { 
-            if      ( k < minAdc  ) lut1[i][j][k] = 0 ;
-            else if ( k < maxAdc  ) lut1[i][j][k] = 1 ;
-            else               lut1[i][j][k] = 17 ;
+            lut1[i][j][k] = k ;
          }
       }
    }
 //
 //   Depth 2 LUT
 //
+   int ns[4][4] = {4,4,1,1,1,1,4,4,1,1,4,4,4,4,1,1};
+   int adc_sum_min=2, adc_sum_max=9;
+
    for ( i = 0 ; i < nL0Phi ; i++ ) {
       for ( j = 0 ; j < nL0Eta ; j++ ) {
          for ( k = 0 ; k < nL0Range ; k++ ) { 
-            if      ( k == 1 ) lut2[i][j][k] = 1 ;
-            else if ( k == 4 ) lut2[i][j][k] = 4 ;
-            else if ( k == 5 ) lut2[i][j][k] = 5 ;
-	    else lut2[i][j][k] = 0 ; 
+            if ( k <= adc_sum_min  ) lut2[i][j][k] = 0 ; 
+            else if ( k <= adc_sum_max ) lut2[i][j][k] = ns[i][j] ; 
+            else if ( k <= 16 ) lut2[i][j][k] = 0 ; 
+            else lut2[i][j][k] = k ; 
 	 }
       }
    }
@@ -737,7 +734,8 @@ void StPeCL0::setP4SLuts() {
 //
    for ( i = 0 ; i < 2 ; i++ ) {
       for ( k = 0 ; k < nL0Range ; k++ ) { 
-         lut3[i][k] = k ;
+         if ( k == 1 || k == 4 || k == 5 ) lut3[i][k] = k ;
+	 else lut3[i][k] = 0 ;
       }
    }
 }
