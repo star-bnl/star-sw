@@ -16,14 +16,14 @@ class StRTpcPadPlane : public StTpcPadPlaneI {
 
 private:
 
-  St_tpcPadPlanes* mPadPlane;
+  tpcPadPlanes_st mPadPlane;
 
 public:
 
   StRTpcPadPlane(St_tpcPadPlanes* PadIn=0){AddData(PadIn);}
   ~StRTpcPadPlane(){}
   void AddData(St_tpcPadPlanes* PadIn) {
-   mPadPlane = PadIn;
+   if (PadIn) mPadPlane = (*PadIn)[0];
  } 
 
   //Implements Abstract Interface 
@@ -66,108 +66,108 @@ public:
  ClassDef(StRTpcPadPlane,0)
 
 };
-inline int   StRTpcPadPlane::numberOfRows() const { return (*mPadPlane)[0].padRows;}
+inline int   StRTpcPadPlane::numberOfRows() const { return mPadPlane.padRows;}
 
 inline int   StRTpcPadPlane::numberOfInnerRows() const {
-return (*mPadPlane)[0].innerPadRows;
+return mPadPlane.innerPadRows;
 }
 
 inline int   StRTpcPadPlane::numberOfInnerRows48() const {
-return (*mPadPlane)[0].innerPadRows48;
+return mPadPlane.innerPadRows48;
 }
 
 inline int   StRTpcPadPlane::numberOfInnerRows52() const {
-return (*mPadPlane)[0].innerPadRows52;
+return mPadPlane.innerPadRows52;
 }
  
 inline int   StRTpcPadPlane::numberOfOuterRows() const {
-return (*mPadPlane)[0].outerPadRows;
+return mPadPlane.outerPadRows;
 }
 
 inline double StRTpcPadPlane::innerSectorPadWidth() const {
-return (*mPadPlane)[0].innerSectorPadWidth;
+return mPadPlane.innerSectorPadWidth;
 }
 
 inline double StRTpcPadPlane::innerSectorPadLength() const {
-return (*mPadPlane)[0].innerSectorPadLength;
+return mPadPlane.innerSectorPadLength;
 }
 
 inline double StRTpcPadPlane::innerSectorPadPitch() const {
-return (*mPadPlane)[0].innerSectorPadPitch;
+return mPadPlane.innerSectorPadPitch;
 }
 
 inline double StRTpcPadPlane::innerSectorRowPitch1() const {
-return (*mPadPlane)[0].innerSectorRowPitch1;
+return mPadPlane.innerSectorRowPitch1;
 }
 inline double StRTpcPadPlane::innerSectorRowPitch2() const {
-return (*mPadPlane)[0].innerSectorRowPitch2;
+return mPadPlane.innerSectorRowPitch2;
 }
 
 inline double StRTpcPadPlane::firstPadRow() const {
-return (*mPadPlane)[0].firstPadRow;
+return mPadPlane.firstPadRow;
 }
 
 inline double StRTpcPadPlane::firstOuterSectorPadRow() const {
-return (*mPadPlane)[0].firstOuterSectorPadRow;
+return mPadPlane.firstOuterSectorPadRow;
 }
 
 inline double StRTpcPadPlane::lastOuterSectorPadRow() const {
-return (*mPadPlane)[0].lastOuterSectorPadRow;
+return mPadPlane.lastOuterSectorPadRow;
 }
 
 inline double StRTpcPadPlane::firstRowWidth() const {
-return (*mPadPlane)[0].firstRowWidth;
+return mPadPlane.firstRowWidth;
 }
  
 inline double StRTpcPadPlane::lastRowWidth() const {
-return (*mPadPlane)[0].lastRowWidth;
+return mPadPlane.lastRowWidth;
 }
 
 inline double StRTpcPadPlane::outerSectorPadWidth() const {
-return (*mPadPlane)[0].outerSectorPadWidth;
+return mPadPlane.outerSectorPadWidth;
 }
 
 inline double StRTpcPadPlane::outerSectorPadLength() const {
-return (*mPadPlane)[0].outerSectorPadLength;
+return mPadPlane.outerSectorPadLength;
 }
 
 inline double StRTpcPadPlane::outerSectorPadPitch() const {
-return (*mPadPlane)[0].outerSectorPadPitch;
+return mPadPlane.outerSectorPadPitch;
 }
 
 inline double StRTpcPadPlane::outerSectorRowPitch() const {
-return (*mPadPlane)[0].outerSectorRowPitch;
+return mPadPlane.outerSectorRowPitch;
 }
 
 inline double StRTpcPadPlane::outerSectorLength() const {
-return (*mPadPlane)[0].outerSectorLength;
+return mPadPlane.outerSectorLength;
 }
 
 inline double StRTpcPadPlane::ioSectorSeparation() const {
-return (*mPadPlane)[0].ioSectorSeparation;
+return mPadPlane.ioSectorSeparation;
 }
 
 inline double StRTpcPadPlane::innerSectorEdge() const {
-return (*mPadPlane)[0].innerSectorEdge;
+return mPadPlane.innerSectorEdge;
 }
 
 inline double StRTpcPadPlane::outerSectorEdge() const {
-return (*mPadPlane)[0].outerSectorEdge;
+return mPadPlane.outerSectorEdge;
 }
 
 inline double StRTpcPadPlane::innerSectorPadPlaneZ() const {
-return (*mPadPlane)[0].innerSectorPadPlaneZ;
+return mPadPlane.innerSectorPadPlaneZ;
 }
 
 inline double StRTpcPadPlane::outerSectorPadPlaneZ() const {
-return (*mPadPlane)[0].outerSectorPadPlaneZ;
+return mPadPlane.outerSectorPadPlaneZ;
 }
 
 #endif
 
 /***************************************************************************
  *
- * $Id: StRTpcPadPlane.h,v 1.13 2002/02/22 01:03:22 jeromel Exp $
+ * $Id: StRTpcPadPlane.h,v 1.14 2004/08/26 20:34:17 genevb Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -177,6 +177,9 @@ return (*mPadPlane)[0].outerSectorPadPlaneZ;
  ***************************************************************************
  *
  * $Log: StRTpcPadPlane.h,v $
+ * Revision 1.14  2004/08/26 20:34:17  genevb
+ * Improve speed by keeping own copy of table row
+ *
  * Revision 1.13  2002/02/22 01:03:22  jeromel
  * Undo recent changes (don't understand it yet). Will be recoverable ...
  *

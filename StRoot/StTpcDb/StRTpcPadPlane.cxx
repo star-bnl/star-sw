@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTpcPadPlane.cxx,v 1.12 2002/02/22 01:03:21 jeromel Exp $
+ * $Id: StRTpcPadPlane.cxx,v 1.13 2004/08/26 20:34:16 genevb Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRTpcPadPlane.cxx,v $
+ * Revision 1.13  2004/08/26 20:34:16  genevb
+ * Improve speed by keeping own copy of table row
+ *
  * Revision 1.12  2002/02/22 01:03:21  jeromel
  * Undo recent changes (don't understand it yet). Will be recoverable ...
  *
@@ -35,9 +38,9 @@ int   StRTpcPadPlane::numberOfPadsAtRow(int row) const {
  int npad = 0;
  if (row >= 1 && row<=numberOfRows()) {
     if ( row<=numberOfInnerRows() ) 
-      npad = (*mPadPlane)[0].innerPadsPerRow[row-1];
+      npad = mPadPlane.innerPadsPerRow[row-1];
     else 
-      npad = (*mPadPlane)[0].outerPadsPerRow[row-1-numberOfInnerRows()];
+      npad = mPadPlane.outerPadsPerRow[row-1-numberOfInnerRows()];
  }
  return npad;
 }
@@ -47,9 +50,9 @@ double   StRTpcPadPlane::radialDistanceAtRow(int row) const {
  double radius = 0;
  if (row >= 1 && row<=numberOfRows()) {
    if ( row<=numberOfInnerRows() ) 
-     radius = (*mPadPlane)[0].innerRowRadii[row-1];
+     radius = mPadPlane.innerRowRadii[row-1];
    else 
-     radius = (*mPadPlane)[0].outerRowRadii[row-1-numberOfInnerRows()];
+     radius = mPadPlane.outerRowRadii[row-1-numberOfInnerRows()];
  }
  return radius;
 }
