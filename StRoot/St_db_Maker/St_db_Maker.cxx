@@ -10,8 +10,11 @@
 
 // Most of the history moved at the bottom
 //
-// $Id: St_db_Maker.cxx,v 1.69 2003/09/23 01:04:55 jeromel Exp $
+// $Id: St_db_Maker.cxx,v 1.70 2003/09/28 21:11:30 jeromel Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.70  2003/09/28 21:11:30  jeromel
+// Unsued variable ldsname removed
+//
 // Revision 1.69  2003/09/23 01:04:55  jeromel
 // READ_BAD_INDEX fixed
 //
@@ -572,14 +575,15 @@ EDataSetPass St_db_Maker::PrepareDB(TDataSet* ds, void *user)
   St_ValiSet *pseudo;
   const char *dsname,*filename,*dot;     
   char psname[100];
-  int ldsname,lpsname;
+  //int ldsname,lpsname;
+  int lpsname;
   
   TList *list = ds->GetList();
   if (!list) return kContinue;
   if (strcmp("directory",ds->GetTitle())) return kPrune;
   dsname = ds->GetName(); ;
   if (!strcmp("CVS",dsname)) { delete ds; return kPrune;}
-  ldsname= strlen(dsname);
+  //ldsname= strlen(dsname);
 
   TString newTitle = "file ";
   if (user) newTitle += *((TString*)user);
