@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.30 2000/10/11 19:24:42 genevb Exp $
+// $Id: StKinkMaker.cxx,v 1.31 2001/04/18 21:49:10 wdeng Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.31  2001/04/18 21:49:10  wdeng
+// The argument of asin function
+//
 // Revision 1.30  2000/10/11 19:24:42  genevb
 // Different handling of trackArray
 //
@@ -498,35 +501,67 @@ void StKinkMaker::FillTableRow()
 				sqrt(daughterMoment.mag2() + muonMass*muonMass) - 
 				pMomMinusDMom.mag());  
   
-  if( (deltaKaonPion < deltaKaonMuon) && (deltaKaonPion < deltaPionMuon) )
+  if( (deltaKaonPion < deltaKaonMuon) && (deltaKaonPion < deltaPionMuon) ) 
     {
-      kinkVtxRow.theta_cm = (1./degree) * asin((daughterMoment.mag()/kaonToPionQ)*sin(decayAngle*degree));
-      if( myTrack1->charge() > 0 )	  
+      Float_t asinArg = (daughterMoment.mag()/kaonToPionQ)*sin(decayAngle*degree);
+      if( fabs(asinArg)<1. ) 
+	{
+	  kinkVtxRow.theta_cm = (1./degree) * asin(asinArg);
+	} 
+      else 
+	{
+	  kinkVtxRow.theta_cm = 999.;
+	}
+      if( myTrack1->charge() > 0 ) 
 	{
 	  kinkVtxRow.pidd = 8;
 	  kinkVtxRow.pidp = 11;
-	} else {
+	}
+      else 
+	{
 	  kinkVtxRow.pidd = 9;
 	  kinkVtxRow.pidp = 12;
 	}
-    } else if( (deltaKaonMuon < deltaKaonPion) && (deltaKaonMuon < deltaPionMuon) )
+    } 
+  else if( (deltaKaonMuon < deltaKaonPion) && (deltaKaonMuon < deltaPionMuon) ) 
+    {
+      Float_t asinArg = (daughterMoment.mag()/kaonToMuonQ)*sin(decayAngle*degree);
+      if( fabs(asinArg)<1. ) 
+	{
+	  kinkVtxRow.theta_cm = (1./degree) * asin(asinArg);
+	} 
+      else 
+	{
+	  kinkVtxRow.theta_cm = 999.;
+	}
+      if( myTrack1->charge() > 0 ) 
+	{
+	  kinkVtxRow.pidd = 5;
+	  kinkVtxRow.pidp = 11;
+	} 
+      else 
+	{
+	  kinkVtxRow.pidd = 6;
+	  kinkVtxRow.pidp = 12;
+	}   
+    } else 
       {
-	kinkVtxRow.theta_cm = (1./degree) * asin((daughterMoment.mag()/kaonToMuonQ)*sin(decayAngle*degree));
-	if( myTrack1->charge() > 0 )	  
+	Float_t asinArg = (daughterMoment.mag()/pionToMuonQ)*sin(decayAngle*degree);
+	if( fabs(asinArg)<1. ) 
 	  {
-	    kinkVtxRow.pidd = 5;
-	    kinkVtxRow.pidp = 11;
-	  } else {
-	    kinkVtxRow.pidd = 6;
-	    kinkVtxRow.pidp = 12;
-	  }   
-      } else {
-	kinkVtxRow.theta_cm = (1./degree) * asin((daughterMoment.mag()/pionToMuonQ)*sin(decayAngle*degree));
-	if( myTrack1->charge() > 0 )	  
+	    kinkVtxRow.theta_cm = (1./degree) * asin(asinArg);
+	  } 
+	else 
+	  {
+	    kinkVtxRow.theta_cm = 999.;
+	  }
+	if( myTrack1->charge() > 0 ) 
 	  {
 	    kinkVtxRow.pidd = 5;
 	    kinkVtxRow.pidp = 8;
-	  } else {
+	  } 
+	else 
+	  {
 	    kinkVtxRow.pidd = 6;
 	    kinkVtxRow.pidp = 9;
 	  }   
