@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StEbye2ptMaker.cxx,v 1.5 2000/09/19 19:45:51 jgreid Exp $
+ * $Id: StEbye2ptMaker.cxx,v 1.6 2000/09/19 19:49:50 jgreid Exp $
  *
  * StEbye2ptMaker.cxx
  *
@@ -15,8 +15,8 @@
  ***************************************************************************
  *
  * $Log: StEbye2ptMaker.cxx,v $
- * Revision 1.5  2000/09/19 19:45:51  jgreid
- * added functionality for urgent analysis
+ * Revision 1.6  2000/09/19 19:49:50  jgreid
+ * added functionality for urgent analysis - DNP2000
  *
  * Revision 1.4  2000/08/14 22:05:19  jseger
  * Added eta-spectra.  Now reads Ebye mini-DST as input.  Bins events in
@@ -52,7 +52,7 @@
 using namespace units;
 #endif
 
-static const char rcsid[] = "$Id: StEbye2ptMaker.cxx,v 1.5 2000/09/19 19:45:51 jgreid Exp $";
+static const char rcsid[] = "$Id: StEbye2ptMaker.cxx,v 1.6 2000/09/19 19:49:50 jgreid Exp $";
 
 ClassImp(StEbye2ptMaker)
 
