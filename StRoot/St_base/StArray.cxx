@@ -48,7 +48,7 @@ Int_t StObjArray::getEntries() const
 TObject** StObjArray::Erase(TObject** it,int del) 
 {
    int i = it-&fV[0];
-   if (del) delete fV[i];
+   if (del) {delete fV[i]; fV[i]=0;}
    return &(*(fV.erase(fV.begin()+i)));		
 }		
 //______________________________________________________________________________
@@ -56,7 +56,7 @@ TObject** StObjArray::Erase(TObject** fst,TObject** lst,int del)
 {
    int ifst = fst-&fV[0];
    int ilst = lst-&fV[0];
-   if (del) {for (int i=ifst;i<ilst;i++) delete fV[i];}
+   if (del) {for (int i=ifst;i<ilst;i++) {delete fV[i];fV[i]=0;}}
    return &(*(fV.erase(fV.begin()+ifst,fV.begin()+ilst)));		
 }		
 //______________________________________________________________________________
