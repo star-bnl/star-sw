@@ -1,11 +1,15 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.7 1999/09/15 18:40:56 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.8 1999/09/23 21:25:18 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
- * Revision 1.7  1999/09/15 18:40:56  calderon
- * -If there is no StEvent or StMcEvent, print message to cerr and exit.
- * -Update README for changes
+ * Revision 1.8  1999/09/23 21:25:18  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
  *
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
+ * Revision 1.7  1999/09/15 18:40:56  calderon
  * -If there is no StEvent or StMcEvent, print message to cerr and exit.
  * -Update README for changes
  *
@@ -40,7 +44,7 @@ using std::vector;
 #include "StTrackPairInfo.hh"
 
 #include "SystemOfUnits.h"
-#include "StChain/StChain.h"
+#include "StThreeVectorF.hh"
 
 
 #include "St_DataSet.h"
@@ -57,32 +61,32 @@ using std::vector;
 #ifndef USING_PERSISTENT
 #include "StThreeVector.hh"
 
-#include "StEvent/StEvent.hh"
-#include "StEvent/StTpcHit.hh"
-#include "StEvent/StVecPtrTpcHit.hh"
-#include "StEvent/StGlobalTrack.hh"
-#include "StEvent/StTrackCollection.hh"
-#include "StEvent/StVertex.hh"
-#include "StEvent/StVertexCollection.hh"
+#include "StEvent.hh"
+#include "StTpcHit.hh"
+#include "StVecPtrTpcHit.hh"
+#include "StGlobalTrack.hh"
+#include "StTrackCollection.hh"
+#include "StVertex.hh"
+#include "StVertexCollection.hh"
 
 #else
 #include "StThreeVectorF.hh"
 #include "St_DataSetIter.h"
-#include "StEvent/StEvent.h"
-#include "StEvent/StTpcHit.h"
-#include "StEvent/StGlobalTrack.h"
-#include "StEvent/StVertex.h"
+#include "StEvent.h"
+#include "StTpcHit.h"
+#include "StGlobalTrack.h"
+#include "StVertex.h"
 
 
 #endif
 
-#include "StMcEvent/StMcEvent.hh"
-#include "StMcEvent/StMcTpcHit.hh"
-#include "StMcEvent/StMcTpcHitCollection.hh"
-#include "StMcEvent/StMcTrack.hh"
-#include "StMcEvent/StMcTrackCollection.hh"
-#include "StMcEvent/StMcVertex.hh"
-#include "StMcEvent/StMcVertexCollection.hh"
+#include "StMcEvent.hh"
+#include "StMcTpcHit.hh"
+#include "StMcTpcHitCollection.hh"
+#include "StMcTrack.hh"
+#include "StMcTrackCollection.hh"
+#include "StMcVertex.hh"
+#include "StMcVertexCollection.hh"
 #include "StEventTypes.h"
 
 #include "StMcEventTypes.hh"

@@ -1,7 +1,11 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.5 1999/09/15 18:39:28 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.6 1999/09/23 21:25:59 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.6  1999/09/23 21:25:59  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
  * Revision 1.5  1999/09/15 18:39:28  calderon
  * -Do not require g2t_ftp_hit table for filling of StMcEvent
  * -Update README for changes
@@ -28,7 +32,7 @@
 
 #include "StThreeVectorF.hh"
 
-#include "StChain/StChain.h"
+#include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 
@@ -48,12 +52,12 @@
 
 // #include "StMcEvent/StMemoryInfo.hh"
 
-#include "StMcEvent/StMcEvent.hh"
-#include "StMcEvent/StMcTrack.hh"
-#include "StMcEvent/StMcTpcHit.hh"
-#include "StMcEvent/StMcFtpcHit.hh"
-#include "StMcEvent/StMcSvtHit.hh"
-#include "StMcEvent/StMcVertex.hh"
+#include "StMcEvent.hh"
+#include "StMcTrack.hh"
+#include "StMcTpcHit.hh"
+#include "StMcFtpcHit.hh"
+#include "StMcSvtHit.hh"
+#include "StMcVertex.hh"
 
 #ifndef ST_NO_NAMESPACES
 using namespace std;
@@ -112,7 +116,7 @@ void StMcEventMaker::Clear(const char*)
 void StMcEventMaker::PrintInfo() {
     // StMcEventMaker - PrintInfo,
     printf("**************************************************************\n");
-    printf("* $Id: StMcEventMaker.cxx,v 1.5 1999/09/15 18:39:28 calderon Exp $\n");
+    printf("* $Id: StMcEventMaker.cxx,v 1.6 1999/09/23 21:25:59 calderon Exp $\n");
     printf("**************************************************************\n");
 
    

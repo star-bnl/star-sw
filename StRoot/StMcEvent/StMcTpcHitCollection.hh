@@ -1,6 +1,11 @@
 /***************************************************************************
  *
- * StMcTpcHitCollection.hh
+ * $Id: StMcTpcHitCollection.hh,v 1.2 1999/09/23 21:25:53 calderon Exp $
+ * $Log: StMcTpcHitCollection.hh,v $
+ * Revision 1.2  1999/09/23 21:25:53  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
  *
  **************************************************************************/
 #ifndef StMcTpcHitCollection_hh

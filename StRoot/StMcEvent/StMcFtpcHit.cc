@@ -1,14 +1,19 @@
 /***************************************************************************
  *
- * StMcFtpcHit.cc
+ * $Id: StMcFtpcHit.cc,v 1.3 1999/09/23 21:25:50 calderon Exp $
+ * $Log: StMcFtpcHit.cc,v $
+ * Revision 1.3  1999/09/23 21:25:50  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
  *
  **************************************************************************/
 #include "StThreeVectorF.hh"
 
-#include "StMcEvent/StMcFtpcHit.hh"
-#include "StMcEvent/StMcTrack.hh"
+#include "StMcFtpcHit.hh"
+#include "StMcTrack.hh"
 
-static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 1.2 1999/07/28 20:27:33 calderon Exp $";
+static const char rcsid[] = "$Id: StMcFtpcHit.cc,v 1.3 1999/09/23 21:25:50 calderon Exp $";
 
 StMcFtpcHit::StMcFtpcHit(const StThreeVectorF& p,
 			 const float de, const float ds,

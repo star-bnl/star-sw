@@ -1,7 +1,11 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.6 1999/09/10 19:11:15 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.7 1999/09/23 21:25:48 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.7  1999/09/23 21:25:48  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
  * Revision 1.6  1999/09/10 19:11:15  calderon
  * Write the Ntuple in StMcAnalysisMaker into a file.
  * This way it can be accessed after the macro finishes,
@@ -48,7 +52,7 @@
 #include "SystemOfUnits.h"
 #include "StPhysicalHelixD.hh"
 
-#include "StChain/StChain.h"
+#include "StChain.h"
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
 
@@ -60,29 +64,29 @@
 #ifndef USING_PERSISTENT
 #include "StThreeVector.hh"
 
-#include "StEvent/StEvent.hh"
-#include "StEvent/StTpcHit.hh"
-#include "StEvent/StVecPtrTpcHit.hh"
-#include "StEvent/StGlobalTrack.hh"
-#include "StEvent/StTrackCollection.hh"
-#include "StEvent/StVertex.hh"
-#include "StEvent/StVertexCollection.hh"
+#include "StEvent.hh"
+#include "StTpcHit.hh"
+#include "StVecPtrTpcHit.hh"
+#include "StGlobalTrack.hh"
+#include "StTrackCollection.hh"
+#include "StVertex.hh"
+#include "StVertexCollection.hh"
 #else
 #include "StThreeVectorF.hh"
 
-#include "StEvent/StEvent.h"
-#include "StEvent/StTpcHit.h"
-#include "StEvent/StGlobalTrack.h"
-#include "StEvent/StVertex.h"
+#include "StEvent.h"
+#include "StTpcHit.h"
+#include "StGlobalTrack.h"
+#include "StVertex.h"
 #endif
 
-#include "StMcEvent/StMcEvent.hh"
-#include "StMcEvent/StMcTpcHit.hh"
-#include "StMcEvent/StMcTpcHitCollection.hh"
-#include "StMcEvent/StMcTrack.hh"
-#include "StMcEvent/StMcTrackCollection.hh"
-#include "StMcEvent/StMcVertex.hh"
-#include "StMcEvent/StMcVertexCollection.hh"
+#include "StMcEvent.hh"
+#include "StMcTpcHit.hh"
+#include "StMcTpcHitCollection.hh"
+#include "StMcTrack.hh"
+#include "StMcTrackCollection.hh"
+#include "StMcVertex.hh"
+#include "StMcVertexCollection.hh"
 
 #include "StEventMaker/StEventMaker.h"
 #include "StMcEventMaker/StMcEventMaker.h"

@@ -1,9 +1,20 @@
-/* 
+/***************************************************************************
+ *
+ * $Id: StDevice.hh,v 1.3 1999/09/23 21:25:20 calderon Exp $
    Generic device class.  Each (generic) StSubDetector object
    has a set of StDevices (like the TPC StSubDetector has 24
    sector StDevices).  Each StDevice object has a set of StDevRows
    (like the TPC sector StDevice has 45 padrows, each one is a StDevRow)
-*/
+
+ * $Log: StDevice.hh,v $
+ * Revision 1.3  1999/09/23 21:25:20  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
+ *
+ **************************************************************************/
+ 
+
 
 #ifndef StDevice_HH
 #define StDevice_HH

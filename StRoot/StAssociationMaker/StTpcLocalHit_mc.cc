@@ -1,3 +1,13 @@
+/***************************************************************************
+ *
+ * $Id: StTpcLocalHit_mc.cc,v 1.2 1999/09/23 21:25:22 calderon Exp $
+ * $Log: StTpcLocalHit_mc.cc,v $
+ * Revision 1.2  1999/09/23 21:25:22  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
+ *
+ **************************************************************************/
 
 #include "StTpcLocalHit_mc.hh"
 

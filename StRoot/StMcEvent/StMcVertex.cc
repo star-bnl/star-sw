@@ -1,7 +1,11 @@
 /***************************************************************************
  *
- * $Id: StMcVertex.cc,v 1.3 1999/07/29 00:13:14 calderon Exp $
+ * $Id: StMcVertex.cc,v 1.4 1999/09/23 21:25:55 calderon Exp $
  * $Log: StMcVertex.cc,v $
+ * Revision 1.4  1999/09/23 21:25:55  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
  * Revision 1.3  1999/07/29 00:13:14  calderon
  * Read ge_volume correctly
  *
@@ -9,9 +13,10 @@
  **************************************************************************/
 #include "StThreeVectorF.hh"
 
-#include "StMcEvent/StMcVertex.hh"
-#include "StMcEvent/StMcTrack.hh"
-static const char rcsid[] = "$Id: StMcVertex.cc,v 1.3 1999/07/29 00:13:14 calderon Exp $";
+#include "StMcVertex.hh"
+#include "StMcTrack.hh"
+#include "StMcTrackCollection.hh"
+static const char rcsid[] = "$Id: StMcVertex.cc,v 1.4 1999/09/23 21:25:55 calderon Exp $";
 
 StMcVertex::StMcVertex()
 {

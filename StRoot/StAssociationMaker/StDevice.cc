@@ -1,3 +1,13 @@
+/***************************************************************************
+ *
+ * $Id: StDevice.cc,v 1.2 1999/09/23 21:25:20 calderon Exp $
+ * $Log: StDevice.cc,v $
+ * Revision 1.2  1999/09/23 21:25:20  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
+ *
+ **************************************************************************/
 
 #include "StDevice.hh"
 

@@ -1,6 +1,11 @@
 /***************************************************************************
  *
- *  StMcHit.hh
+ * $Id: StMcHit.hh,v 1.3 1999/09/23 21:25:51 calderon Exp $
+ * $Log: StMcHit.hh,v $
+ * Revision 1.3  1999/09/23 21:25:51  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
  *
  **************************************************************************/
 #ifndef StMcHit_hh

@@ -1,3 +1,13 @@
+/***************************************************************************
+ *
+ * $Id: StLocalHit.cc,v 1.3 1999/09/23 21:25:20 calderon Exp $
+ * $Log: StLocalHit.cc,v $
+ * Revision 1.3  1999/09/23 21:25:20  calderon
+ * Added Log & Id
+ * Modified includes according to Yuri
+ *
+ *
+ **************************************************************************/
 #include "StLocalHit.hh"
 #include "StMcParameterDB.h"
 #include <iostream.h>
