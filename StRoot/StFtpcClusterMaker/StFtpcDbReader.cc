@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.15 2002/10/15 09:46:44 fsimon Exp $
+// $Id: StFtpcDbReader.cc,v 1.16 2002/10/16 12:25:13 fsimon Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.16  2002/10/16 12:25:13  fsimon
+// Cleanup: Use gMessMgr instead of cout
+//
 // Revision 1.15  2002/10/15 09:46:44  fsimon
 // Constructor used by SlowSimulator changed to include Db access to
 // ftpcAmpSlope, ftpcAmpOffset and ftpcTimeOffset
@@ -329,7 +332,7 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
     gMessMgr->Message( " No data in table class St_ftpcTimeOffset","E");
   }
 
-   cout << "StFtpcDbReader constructed for SlowSimulator" << endl;  
+   gMessMgr->Message("StFtpcDbReader constructed for SlowSimulator"  ,"I"); 
 }
 
 // for StFtpcDriftMapMaker
