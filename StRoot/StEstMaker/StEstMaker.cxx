@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.24 2004/03/18 02:05:08 caines Exp $
+ * $Id: StEstMaker.cxx,v 1.25 2004/04/15 16:28:16 jeromel Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.25  2004/04/15 16:28:16  jeromel
+ * No functional changes, messages prepended with Class name.
+ *
  * Revision 1.24  2004/03/18 02:05:08  caines
  * Maker sure tracker gest deleted before every return from make - wasnt happening if errors were found so created memory leak on the odd occasion this happend
  *
@@ -464,7 +467,7 @@ Int_t StEstMaker::Make() {
   St_DataSet* dataSet;
   dataSet = GetDataSet("StSvtGeometry");
   if(!dataSet) {
-    gMessMgr->Error("Failure to get SVT geometry - THINGS HAVE GONE SERIOUSLY WRONG!!!!! \n");
+    gMessMgr->Error("StEstMaker : Failure to get SVT geometry - THINGS HAVE GONE SERIOUSLY WRONG!!!!! \n");
     
     return kStOK;
   }
@@ -515,13 +518,13 @@ Int_t StEstMaker::Make() {
   St_scs_spt*   Stscsspt=0;
   svt  = GetInputDS("svt_hits");
   if (!svt) {
-    gMessMgr->Warning("No svt_hits Dataset !");
+    gMessMgr->Warning("StEstMaker : No svt_hits Dataset !");
     return kStWarn;
   }    
 
   Stscsspt = (St_scs_spt *)svt->Find("scs_spt");
   if (!Stscsspt) { 
-    gMessMgr->Warning("No SVT/SSD hits !");
+    gMessMgr->Warning("StEstMaker : No SVT/SSD hits !");
     return kStWarn;
   }
   
@@ -529,13 +532,13 @@ Int_t StEstMaker::Make() {
   St_tcl_tphit*   Sttphit=0;
   St_DataSet* tpc  = GetInputDS("tpc_hits");
   if (!tpc) {
-    gMessMgr->Warning("No tpc_hits Dataset !");
+    gMessMgr->Warning("StEstMaker : No tpc_hits Dataset !");
     return kStWarn;
   }    
 
   Sttphit = (St_tcl_tphit *)tpc->Find("tphit");
   if (!Sttphit) {
-    gMessMgr->Warning("No TPC hits !");
+    gMessMgr->Warning("StEstMaker : No TPC hits !");
     return kStWarn;
   }
   //Getting the TPC track table
@@ -548,7 +551,7 @@ Int_t StEstMaker::Make() {
 
   Sttptrack = (St_tpt_track *)tpc->Find("tptrack");
   if (!Sttptrack) {
-    gMessMgr->Warning("No TPC tracks !");
+    gMessMgr->Warning("StEstMaker : No TPC tracks !");
     return kStWarn;
   }
 
@@ -564,7 +567,7 @@ Int_t StEstMaker::Make() {
       Stg2tvertex = (St_g2t_vertex *)geant->Find("g2t_vertex");
     }
     else {
-      gMessMgr->Warning("The geant dataset does not exist, looking for the geantBranch DataSet...");
+      gMessMgr->Warning("StEstMaker : The geant dataset does not exist, looking for the geantBranch DataSet...");
       St_DataSet *geant2  = GetInputDS("geantBranch");
       Stg2ttrack = (St_g2t_track *)geant2->Find("g2t_track");
       Stg2tvertex = (St_g2t_vertex *)geant2->Find("g2t_vertex");
@@ -575,7 +578,7 @@ Int_t StEstMaker::Make() {
     mIdealTracking=0;
   }
 
-  gMessMgr->Info()<<"IdealTracking="<<mIdealTracking<<" DebugLevel="<<mDebugLevel<<endm;
+  gMessMgr->Info()<<"StEstMaker : IdealTracking="<<mIdealTracking<<" DebugLevel="<<mDebugLevel<<endm;
 
   gMessMgr->Info()<<"StEstMaker : Constructing a Tracker"<<endm;
   StEstTracker* Tracker = new StEstTracker(mNPass,
