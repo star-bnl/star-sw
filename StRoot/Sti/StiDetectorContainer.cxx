@@ -9,7 +9,7 @@
 #include <string>
 
 //StiGui
-#include "StiGui/StiDrawableDetector.h"
+#include "StiGui/StiRootDrawableDetector.h"
 
 //Sti
 #include "StiMapUtilities.h"
@@ -266,7 +266,7 @@ void StiDetectorContainer::buildDetectors(const char* buildDirectory)
     if(S_ISREG(fileStat.st_mode)){
       StiDetector* layer;
       if (mdraw) {
-        layer = new StiDrawableDetector();
+        layer = new StiRootDrawableDetector();
       }else {
         layer = new StiDetector();
       }
