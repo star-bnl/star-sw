@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, A.Ogawa, P.Zolnierczuk
 // 
-// $Id: StEEmcFastMaker.cxx,v 1.7 2003/11/12 19:58:31 balewski Exp $
+// $Id: StEEmcFastMaker.cxx,v 1.8 2004/03/24 19:37:55 balewski Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -170,7 +170,7 @@ void  StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEvent* stevt){
 	  StEmcRawHit* h = new StEmcRawHit(id,isec,jeta,jsub,adc,t->energy());
 	  d->addHit(h);
 	  //	  printf("yyy secID=%d, id2=%d\n",isec,h->module());
-	  printf("Tw   %c  %d  %f  %d \n",t->sub(),t->eta(),t->energy(),adc);
+	   if(mdbg) printf("Tw   %c  %d  %f  %d \n",t->sub(),t->eta(),t->energy(),adc);
 	} break;
 	
       case kEndcapEmcPreShowerId: {//............................
@@ -182,7 +182,7 @@ void  StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEvent* stevt){
 	  int adc= (int) (t->energy()* mfixPgain);
 	  StEmcRawHit* h = new StEmcRawHit(id,isec,jeta,jsub,adc,t->energy());
 	  d->addHit(h);
-	  printf("Pr1   %c  %d  adc=%d e=%f\n",t->sub(),t->eta(),adc,t->energy());
+	   if(mdbg) printf("Pr1   %c  %d  adc=%d e=%f\n",t->sub(),t->eta(),adc,t->energy());
 	}
 
 	tca = EEsec->getPre2Hits();      
@@ -204,7 +204,7 @@ void  StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEvent* stevt){
 	  int adc= (int) (t->energy()* mfixPgain);
 	  StEmcRawHit* h = new StEmcRawHit(id,isec,jeta,jsub,adc,t->energy());
 	  d->addHit(h);
-	  printf("Post   %c  %d  %d %f\n",t->sub(),t->eta(),adc,t->energy());
+	   if(mdbg) printf("Post   %c  %d  %d %f\n",t->sub(),t->eta(),adc,t->energy());
 	}
       } break;
 
@@ -217,7 +217,7 @@ void  StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEvent* stevt){
 	  int adc= (int) (t->energy()* mfixPgain);
 	  StEmcRawHit* h = new StEmcRawHit(id,isec,jeta,0,adc,t->energy());
 	  d->addHit(h);
-	  printf("SMDU     %d  %d %f\n",t->strip(),adc,t->energy());
+	  if(mdbg) printf("SMDU     %d  %d %f\n",t->strip(),adc,t->energy());
 	}
       } break;
 
@@ -229,7 +229,7 @@ void  StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEvent* stevt){
 	  int jeta=t->strip()-1;
 	  int adc= (int) (t->energy()* mfixSMDgain);
 	  StEmcRawHit* h = new StEmcRawHit(id,isec,jeta,0,adc,t->energy());
-	  printf("SMDV    %d  %d  %f\n",t->strip(),adc,t->energy());
+	  if(mdbg)  printf("SMDV    %d  %d  %f\n",t->strip(),adc,t->energy());
 	  d->addHit(h);
 	} 
       }break;
@@ -316,6 +316,9 @@ void  StEEmcFastMaker::mST2EE(EEeventDst* evt, StEvent* stevt){
 
 
 // $Log: StEEmcFastMaker.cxx,v $
+// Revision 1.8  2004/03/24 19:37:55  balewski
+// be quiet
+//
 // Revision 1.7  2003/11/12 19:58:31  balewski
 // bug for pre2 in StEvent fixed (was either copy of pre1 or garbage)
 //
