@@ -109,35 +109,35 @@ void ResolutionPlots::initialize()
   
   _h_dpVsP     = book("_h_dpVsP",     "p diff vs p",  100,0., 10., 100, -0.5, 0.5);
   _h_dptVsP    = book("_h_dptVsP",    "pt diff vs p", 100,0., 10., 100, -0.5, 0.5);
-  _h_dptVsPt   = book("_h_dptVsPt"  , "pt diff vs pt", 100,0., 10., 100, -0.5, 0.5);
+  //_h_dptVsPt   = book("_h_dptVsPt"  , "pt diff vs pt", 100,0., 10., 100, -0.5, 0.5);
   _h_detaVsEta = book("_h_detaVsEta", "eta diff vs eta", 80, -2., 2., 100, -0.5, 0.5);
   _h_dphiVsPt  = book("_h_dphiVsPt",  "phi diff vs pt", 100,0., 10., 100, -0.5, 0.5);
 
   _h_dpByPVsP     = book("_h_dpByPVsP",    "p rel diff vs p",  100,0., 10., 100, -0.2, 0.2);
-  _h_dptByPtVsPt  = book("_h_dptByPtVsPt", "pt rel diff vs p", 100,0., 10., 100, -0.2, 0.2);
+  //_h_dptByPtVsPt  = book("_h_dptByPtVsPt", "pt rel diff vs p", 100,0., 10., 100, -0.2, 0.2);
   _h_dptByPtVsP   = book("_h_dptByPtVsP",  "pt rel diff vs p", 100,0., 10., 100, -0.2, 0.2);
 
   _p_dpVsP     = bookProfile("_p_dpVsP",     "p diff vs p (prof)",  100,0., 10.);
   _p_dptVsP    = bookProfile("_p_dptVsP",    "pt diff vs p (prof)", 100,0., 10.);
-  _p_dptVsPt   = bookProfile("_p_dptVsPt"  , "pt diff vs pt (prof)", 100,0., 10.);
+  //_p_dptVsPt   = bookProfile("_p_dptVsPt"  , "pt diff vs pt (prof)", 100,0., 10.);
   _p_detaVsEta = bookProfile("_p_detaVsEta", "eta diff vs eta (prof)", 80, -2., 2.);
   _p_dphiVsPt  = bookProfile("_p_dphiVsPt",  "phi diff vs pt (prof)", 100,0., 10.);
 
   _p_dpByPVsP     = bookProfile("_p_dpByPVsP",    "p rel diff vs p (prof)",  100,0., 10.);
-  _p_dptByPtVsPt  = bookProfile("_p_dptByPtVsPt", "pt rel diff vs pt (prof)", 100,0., 10.);
+  //_p_dptByPtVsPt  = bookProfile("_p_dptByPtVsPt", "pt rel diff vs pt (prof)", 100,0., 10.);
   _p_dptByPtVsP   = bookProfile("_p_dptByPtVsP",  "pt rel diff vs p (prof)", 100,0., 10.);
 
-  _p_dpByP2VsP     = bookProfile("_p_dpByP2VsP",    "(p rel diff)^2 vs p (prof)",  100,0., 10.);
-  _p_dptByPt2VsPt  = bookProfile("_p_dptByPt2VsPt", "(pt rel diff)^2 vs pt (prof)", 100,0., 10.);
-  _p_dptByPt2VsP   = bookProfile("_p_dptByPt2VsP",  "(pt rel diff)^2 vs p (prof)", 100,0., 10.);
-  _p_deta2VsEta    = bookProfile("_p_deta2VsEta",   "(eta diff)^2 vs eta (prof)", 80, -2., 2.);
-  _p_dphi2VsPt     = bookProfile("_p_dphi2VsPt",    "(phi diff)^2 vs pt (prof)", 100,0., 10.);
+  //_p_dpByP2VsP     = bookProfile("_p_dpByP2VsP",    "(p rel diff)^2 vs p (prof)",  100,0., 10.);
+  //_p_dptByPt2VsPt  = bookProfile("_p_dptByPt2VsPt", "(pt rel diff)^2 vs pt (prof)", 100,0., 10.);
+  //_p_dptByPt2VsP   = bookProfile("_p_dptByPt2VsP",  "(pt rel diff)^2 vs p (prof)", 100,0., 10.);
+  //_p_deta2VsEta    = bookProfile("_p_deta2VsEta",   "(eta diff)^2 vs eta (prof)", 80, -2., 2.);
+  //_p_dphi2VsPt     = bookProfile("_p_dphi2VsPt",    "(phi diff)^2 vs pt (prof)", 100,0., 10.);
 
-  _h_sigdpByPVsP     = book("_h_sigdpByPVsP",    "sig(p rel diff) vs p",  100,0., 10.);
-  _h_sigdptByPtVsPt  = book("_h_sigdptByPtVsPt", "sig(pt rel diff) vs pt", 100,0., 10.);
-  _h_sigdptByPtVsP   = book("_h_sigdptByPtVsP",  "sig(pt rel diff) vs p", 100,0., 10.);
-  _h_sigdetaVsEta    = book("_h_sigdetaVsEta",   "sig(eta) vs eta", 80, -2., 2.);
-  _h_sigdphiVsPt     = book("_h_sigdphiVsPt",    "sig(phi) vs pt", 100,0., 10.);
+  //_h_sigdpByPVsP     = book("_h_sigdpByPVsP",    "sig(p rel diff) vs p",  100,0., 10.);
+  //_h_sigdptByPtVsPt  = book("_h_sigdptByPtVsPt", "sig(pt rel diff) vs pt", 100,0., 10.);
+  //_h_sigdptByPtVsP   = book("_h_sigdptByPtVsP",  "sig(pt rel diff) vs p", 100,0., 10.);
+  //_h_sigdetaVsEta    = book("_h_sigdetaVsEta",   "sig(eta) vs eta", 80, -2., 2.);
+  //_h_sigdphiVsPt     = book("_h_sigdphiVsPt",    "sig(phi) vs pt", 100,0., 10.);
 
   _h_curvPull = book("curvPull","Curvature Pull",           250, -5., 5.);
   _h_ptPull   = book("ptPull",  "Transverse Momentum Pull", 250, -5., 5.);
@@ -282,30 +282,30 @@ void ResolutionPlots::fill(StMiniMcEvent* minimcevent)
 	
       _h_dpVsP->Fill(p_mc,       dp);   
       _h_dptVsP->Fill(p_mc,      dpt);  
-      _h_dptVsPt->Fill(pt_mc,    dpt);
+      //_h_dptVsPt->Fill(pt_mc,    dpt);
       _h_detaVsEta->Fill(eta_mc, deta);  
       _h_dphiVsPt->Fill(pt_mc,   dphi);   
       _p_dpVsP->Fill(p_mc,dp);       
       _p_dptVsP->Fill(p_mc,dpt);      
-      _p_dptVsPt->Fill(pt_mc,dpt);     
+      //_p_dptVsPt->Fill(pt_mc,dpt);     
       _p_detaVsEta->Fill(eta_mc,deta);   
       _p_dphiVsPt->Fill(phi_mc, dphi);    
 	
       if (pt_mc>0)
 	{
 	  _h_dpByPVsP->Fill(p_mc,     dp/p_mc);   
-	  _h_dptByPtVsPt->Fill(pt_mc, dpt/pt_mc);  
+	  //_h_dptByPtVsPt->Fill(pt_mc, dpt/pt_mc);  
 	  _h_dptByPtVsP->Fill(p_mc,   dpt/pt_mc);   
 	
 	  _p_dpByPVsP->Fill(p_mc,dp/p_mc);    
-	  _p_dptByPtVsPt->Fill(pt_mc, dpt/pt_mc); 
+	  //_p_dptByPtVsPt->Fill(pt_mc, dpt/pt_mc); 
 	  _p_dptByPtVsP->Fill(p_mc, dpt/pt_mc);
 	
-	  _p_dpByP2VsP->Fill(p_mc,dp*dp);    
-	  _p_dptByPt2VsPt->Fill(pt_mc, dpt*dpt/(pt_mc*pt_mc)); 
-	  _p_dptByPt2VsP->Fill(p_mc, dpt*dpt/(pt_mc*pt_mc));
-	  _p_deta2VsEta->Fill(eta_mc, deta*deta);
-	  _p_dphiVsPt->Fill(pt_mc, deta*deta);
+	  //_p_dpByP2VsP->Fill(p_mc,dp*dp);    
+	  //_p_dptByPt2VsPt->Fill(pt_mc, dpt*dpt/(pt_mc*pt_mc)); 
+	  //_p_dptByPt2VsP->Fill(p_mc, dpt*dpt/(pt_mc*pt_mc));
+	  //_p_deta2VsEta->Fill(eta_mc, deta*deta);
+	  //_p_dphiVsPt->Fill(pt_mc, deta*deta);
 	}
 
       if (curvError) 
@@ -337,34 +337,36 @@ void ResolutionPlots::fill(StMiniMcEvent* minimcevent)
 
 void ResolutionPlots::finish()
 {
-  calculateSTD(_p_dpByPVsP,   _p_dpByP2VsP,    _h_sigdpByPVsP);
-  calculateSTD(_p_dptByPtVsPt,_p_dptByPt2VsPt, _h_sigdptByPtVsPt);
-  calculateSTD(_p_dptByPtVsP, _p_dptByPt2VsP,  _h_sigdptByPtVsP);
-  calculateSTD(_p_detaVsEta,  _p_deta2VsEta,   _h_sigdetaVsEta);
-  calculateSTD(_p_dphiVsPt,   _p_dphi2VsPt,    _h_sigdphiVsPt);
+  //calculateSTD(_p_dpByPVsP,   _p_dpByP2VsP,    _h_sigdpByPVsP);
+  //calculateSTD(_p_dptByPtVsPt,_p_dptByPt2VsPt, _h_sigdptByPtVsPt);
+  //calculateSTD(_p_dptByPtVsP, _p_dptByPt2VsP,  _h_sigdptByPtVsP);
+  //calculateSTD(_p_detaVsEta,  _p_deta2VsEta,   _h_sigdetaVsEta);
+  //calculateSTD(_p_dphiVsPt,   _p_dphi2VsPt,    _h_sigdphiVsPt);
 
   _p_dpVsP->SetMinimum(-1.);      _p_dpVsP->SetMaximum(1.);
   _p_dptVsP->SetMinimum(-1.);     _p_dptVsP->SetMinimum(1.);
-  _p_dptVsPt->SetMinimum(-1.);    _p_dptVsPt->SetMinimum(1.);
+  //_p_dptVsPt->SetMinimum(-1.);    _p_dptVsPt->SetMinimum(1.);
   _p_detaVsEta->SetMinimum(-0.2); _p_detaVsEta->SetMaximum(0.2);
   _p_dphiVsPt->SetMinimum(-1.);   _p_dphiVsPt->SetMaximum(1.);
   _p_dpByPVsP->SetMinimum(-0.1); _p_dpByPVsP->SetMaximum(0.1);
-  _p_dptByPtVsPt->SetMinimum(-0.1); _p_dptByPtVsPt->SetMaximum(0.1);
+  //_p_dptByPtVsPt->SetMinimum(-0.1); _p_dptByPtVsPt->SetMaximum(0.1);
   _p_dptByPtVsP->SetMinimum(-0.1);  _p_dptByPtVsP->SetMaximum(0.1);
 
-  _h_sigdpByPVsP->SetMinimum(0.);    _h_sigdpByPVsP->SetMaximum(0.1);
-  _h_sigdptByPtVsPt->SetMinimum(0.); _h_sigdptByPtVsPt->SetMaximum(0.1);
-  _h_sigdptByPtVsP->SetMinimum(0.);  _h_sigdptByPtVsP->SetMaximum(0.1);
-  _h_sigdetaVsEta->SetMinimum(0.);   _h_sigdetaVsEta->SetMaximum(0.1);
-  _h_sigdphiVsPt->SetMinimum(0.);    _h_sigdphiVsPt->SetMaximum(0.1);
+  //_h_sigdpByPVsP->SetMinimum(0.);    _h_sigdpByPVsP->SetMaximum(0.1);
+  //_h_sigdptByPtVsPt->SetMinimum(0.); _h_sigdptByPtVsPt->SetMaximum(0.1);
+  //_h_sigdptByPtVsP->SetMinimum(0.);  _h_sigdptByPtVsP->SetMaximum(0.1);
+  //_h_sigdetaVsEta->SetMinimum(0.);   _h_sigdetaVsEta->SetMaximum(0.1);
+  //_h_sigdphiVsPt->SetMinimum(0.);    _h_sigdphiVsPt->SetMaximum(0.1);
 
-  slice(_h_dptVsPt);   
-  slice(_h_detaVsEta);
-  slice(_h_dphiVsPt);
-  slice(_h_dptByPtVsP);
-
-  slice(_h_curvPullVsPt);
-  slice(_h_ptPullVsPt);
-  slice(_h_tanPullVsPt);
+  //slice(_h_dptVsPt);   
+  slice(_h_detaVsEta,-0.1, 0.1, 0., 0.1);
+  slice(_h_dphiVsPt, -1., 1., 0., 2.);
+  slice(_h_dptByPtVsP, -0.05, 0.05, 0., 0.05);
+  _h_curvPull->Fit("gaus","","",-2.,2.);
+  _h_ptPull->Fit("gaus","","",-2.,2.);
+  _h_tanPull->Fit("gaus","","",-2.,2.);
+  slice(_h_curvPullVsPt, -3., 3., 0., 5.);
+  slice(_h_ptPullVsPt, -3., 3., 0., 5.);
+  slice(_h_tanPullVsPt, -3., 3., 0., 5.);
 }
 

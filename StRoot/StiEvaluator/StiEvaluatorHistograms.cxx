@@ -77,7 +77,7 @@ bool StiEvaluatorHistograms::acceptGeantId(int id)
 
 /// FitSlicesY the given histogram and
 /// add the results to the group
-void StiEvaluatorHistograms::slice(TH2D*h)
+void StiEvaluatorHistograms::slice(TH2D*h,double meanMin,double meanMax,double sigmaMin,double sigmaMax)
 {
   h->FitSlicesY();  
   string name;
@@ -88,8 +88,8 @@ void StiEvaluatorHistograms::slice(TH2D*h)
   hh = (TH1D*)gDirectory->Get(name.c_str());
   if (hh)
     {
-      hh->SetMinimum(-0.04);
-      hh->SetMaximum( 0.04); 
+      hh->SetMinimum(meanMin);
+      hh->SetMaximum(meanMax); 
       name = h->GetName();
       name += "_Mean";
       title = h->GetName();
@@ -103,8 +103,8 @@ void StiEvaluatorHistograms::slice(TH2D*h)
   hh = (TH1D*)gDirectory->Get(name.c_str());
   if (hh)
     {
-      hh->SetMinimum( 0.);
-      hh->SetMaximum( 0.05);
+      hh->SetMinimum(sigmaMin);
+      hh->SetMaximum(sigmaMax);
       name  = h->GetName();
       name  += "_Sigma";
       title = h->GetName();

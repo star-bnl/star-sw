@@ -21,29 +21,23 @@ void EfficiencyEvaluator(bool writeHistos=true, bool writeHtml=false)
 
   // Instantiate/setup evaluator
   Evaluator evaluator;
-  evaluator.add(new EfficiencyPlots("LoPiPlus","Low Occ PiPlus Efficiency",  
-				    0., 200., 
-				    -50., 50., 
-				    8, 
-				    10., 10., 
-				    3.,  
-				    -1., 1.,
-				    0));
-  evaluator.add(new EfficiencyPlots("HiPiPlus","High Occ PiPlus Efficiency", 
-				    2000., 10000., 
-				    -50., 50., 
-				    8, 
-				    10., 10., 
-				    3.,  
-				    -1., 1.,
-				    0));
 
+  evaluator.add(new EfficiencyPlots("PiPlus","All- PiPlus Efficiency",0., 20000., -100., 100., 8, 10., 10., 
+				    3., -1., 1., 0));
+  evaluator.add(new EfficiencyPlots("LoPiPlus","All- PiPlus Efficiency",0., 2000., -100., 100., 8, 10., 10., 
+				    3., -1., 1., 0));
+  evaluator.add(new EfficiencyPlots("MePiPlus","All- PiPlus Efficiency",2000., 4000., -100., 100., 8, 10., 10., 
+				    3., -1., 1., 0));
+  evaluator.add(new EfficiencyPlots("HiPiPlus","All- PiPlus Efficiency",4000., 20000., -100., 100., 8, 10., 10., 
+				    3., -1., 1., 0));
   // run evaluator
+  //evaluator.run("rcf0183_05_300evts.minimc.root");
+  //evaluator.run("rcf0191_104_400evts.minimc.root");
+  
   evaluator.run("rcf0183_01_300evts.minimc.root");
   evaluator.run("rcf0183_02_300evts.minimc.root");
   evaluator.run("rcf0183_03_300evts.minimc.root");
   evaluator.run("rcf0183_04_300evts.minimc.root");
-
   // save files
   evaluator.save("html/Efficiency");
 
