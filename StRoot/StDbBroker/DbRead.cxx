@@ -2,12 +2,12 @@
 // #include <stdlib.h>
 // #include <string.h>
 
-#include "StDbManager.hh"
+#include "StDbLib/StDbManager.hh"
 #include "StDbBroker.h"
-#include "StDbDefs.hh"
-#include "StDbConfigNode.hh"
-#include "StDbManager.hh"
-#include "StDbTable.h"
+#include "StDbLib/StDbDefs.hh"
+#include "StDbLib/StDbConfigNode.hh"
+#include "StDbLib/StDbManager.hh"
+#include "StDbLib/StDbTable.h"
 
 // modified for general access
 
