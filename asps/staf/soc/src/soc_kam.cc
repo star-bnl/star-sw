@@ -4,6 +4,7 @@
 *:DESCRIPTION:  C KUIP Action Modules for Error & Message Logger
 *:AUTHOR:       cet - Craig E. Tull, cetull@lbl.gov
 *:BUGS:         -- STILL IN DEVELOPMENT --
+*:HISTORY:      11nov96-v001a-cet- seperate KAM and non-KAM func.s
 *:HISTORY:      26jul95-v000a-cet- creation
 *:<---------------------------------------------------------------------
 */
@@ -43,14 +44,17 @@
 *:* SOC/BIND ASP SOLIB
 *:<---------------------------------------------------------------------
 */
-
-void kam_soc_bind_(){kam_soc_bind();}
-int kam_soc_bind()
+void kam_soc_bind_()
 {
    long npars = ku_npar();	/* number of KUIP parameters */
    char* aspName = ku_gets();	/* ASP name */
    char* solibName = ku_gets();	/* shared library */
 
+   STAFCV_T status = soc_bind(aspName,solibName);
+}
+
+STAFCV_T soc_bind(char* aspName, char* solibName)
+{
 #ifdef ARCH_DL_SUPPORTED
    void *solibHandle;
    char funcName[9];
@@ -88,15 +92,18 @@ int kam_soc_bind()
 *:* SOC/RELEASE ASP SOLIB
 *:<---------------------------------------------------------------------
 */
-
-void kam_soc_release_(){kam_soc_release();}
-int kam_soc_release()
+void kam_soc_release_()
 {
-#ifdef ARCH_DL_SUPPORTED
    long npars = ku_npar();	/* number of KUIP parameters */
    char* aspName = ku_gets();	/* ASP name */
    char* solibName = ku_gets();	/* shared library */
 
+   STAFCV_T status = soc_release(aspName,solibName);
+}
+
+STAFCV_T soc_release(char * aspName, char* solibName)
+{
+#ifdef ARCH_DL_SUPPORTED
    if( 0 == strcmp(solibName,"-") ){
       solibName = (char*)ASUALLOC(9);
       sprintf(solibName,"lib%3s.so",aspName);
@@ -129,12 +136,16 @@ int kam_soc_release()
 *:* SOC/OBJECT/NAME IDREF
 *:<---------------------------------------------------------------------
 */
-void kam_socobject_name_(){kam_socobject_name();}
-int kam_socobject_name()
+void kam_socobject_name_()
 {
    long npars = ku_npar();	/* number of KUIP parameters */
    long idref = ku_geti();	/* idRef of object */
 
+   STAFCV_T status = socobject_name(idref);
+}
+
+STAFCV_T socobject_name(long idref)
+{
    if( !VALID_IDREF(idref) ){
       EML_ERROR(KAM_INVALID_IDREF);
    }
@@ -159,12 +170,16 @@ int kam_socobject_name()
 *:* SOC/OBJECT/TYPE IDREF
 *:<---------------------------------------------------------------------
 */
-void kam_socobject_type_(){kam_socobject_type();}
-int kam_socobject_type()
+void kam_socobject_type_()
 {
    long npars = ku_npar();	/* number of KUIP parameters */
    long idref = ku_geti();	/* idRef of object */
 
+   STAFCV_T status = socobject_type(idref);
+}
+
+STAFCV_T socobject_type(long idref)
+{
    if( !VALID_IDREF(idref) ){
       EML_ERROR(KAM_INVALID_IDREF);
    }
@@ -189,12 +204,16 @@ int kam_socobject_type()
 *:* SOC/OBJECT/VERSION IDREF
 *:<---------------------------------------------------------------------
 */
-void kam_socobject_version_(){kam_socobject_version();}
-int kam_socobject_version()
+void kam_socobject_version_()
 {
    long npars = ku_npar();	// number of KUIP parameters 
    long idref = ku_geti();	// idRef of object 
 
+   STAFCV_T status = socobject_version(idref);
+}
+
+STAFCV_T socobject_version(long idref)
+{
    if( !VALID_IDREF(idref) ){
       EML_ERROR(KAM_INVALID_IDREF);
    }
@@ -219,11 +238,13 @@ int kam_socobject_version()
 *:* SOC/CATALOG/COUNT
 *:<---------------------------------------------------------------------
 */
-void kam_soc_count_(){kam_soc_count();}
-int kam_soc_count()
-{
+void kam_soc_count_(){
    long npars = ku_npar();	/* number of KUIP parameters */
 
+   STAFCV_T status = soc_count();
+}
+STAFCV_T soc_count()
+{
    long i = soc->count();
    printf("SOC:\tObject count = %d \n",i);
    EML_SUCCESS(STAFCV_OK);
@@ -238,12 +259,16 @@ int kam_soc_count()
 *:* SOC/CATALOG/DELETEOBJECT NAME [ TYPE ]
 *:<---------------------------------------------------------------------
 */
-void kam_soc_deleteid_(){kam_soc_deleteid();}
-int kam_soc_deleteid()
+void kam_soc_deleteid_()
 {
    long npars = ku_npar();	/* number of KUIP parameters */
    long id = ku_geti();		/* object id */
 
+   STAFCV_T status = soc_deleteid(id);
+}
+
+STAFCV_T soc_deleteid(long id)
+{
    soc->deleteID(id);
    EML_SUCCESS(STAFCV_OK);
 }
@@ -257,13 +282,17 @@ int kam_soc_deleteid()
 *:* SOC/CATALOG/DELETEOBJECT NAME [ TYPE ]
 *:<---------------------------------------------------------------------
 */
-void kam_soc_deleteobject_(){kam_soc_deleteobject();}
-int kam_soc_deleteobject()
+void kam_soc_deleteobject_()
 {
    long npars = ku_npar();	/* number of KUIP parameters */
    char* name = ku_gets();	/* object name */
    char* type = ku_gets();	/* object type */
 
+   STAFCV_T status = soc_deleteobject(name, type);
+}
+
+STAFCV_T soc_deleteobject(char* name, char* type)
+{
    soc->deleteObject(name,type);
    EML_SUCCESS(STAFCV_OK);
 }
@@ -277,13 +306,17 @@ int kam_soc_deleteobject()
 *:* SOC/CATALOG/FINDOBJECT NAME [ TYPE ]
 *:<---------------------------------------------------------------------
 */
-void kam_soc_idobject_(){kam_soc_idobject();}
-int kam_soc_idobject()
+void kam_soc_idobject_()
 {
    long npars = ku_npar();	/* number of KUIP parameters */
    char* name = ku_gets();	/* object name */
    char* type = ku_gets();	/* object type */
 
+   STAFCV_T status = soc_idobject(name, type);
+}
+
+STAFCV_T soc_idobject(char* name, char* type)
+{
    IDREF_T id;
    if( !soc->idObject(name,type,id) ){
       EML_ERROR(KAM_INVALID_IDREF);
@@ -301,11 +334,15 @@ int kam_soc_idobject()
 *:* SOC/CATALOG/LIST
 *:<---------------------------------------------------------------------
 */
-void kam_soc_list_(){kam_soc_list();}
-int kam_soc_list()
+void kam_soc_list_()
 {
    long npars = ku_npar();	/* number of KUIP parameters */
 
+   STAFCV_T status = soc_list();
+}
+
+STAFCV_T soc_list()
+{
    printf("%s",soc->list() );
    EML_SUCCESS(STAFCV_OK);
 }
@@ -319,12 +356,16 @@ int kam_soc_list()
 *:* SOC/CATALOG/NEWOBJECT NAME [ TYPE ]
 *:<---------------------------------------------------------------------
 */
-void kam_soc_newobject_(){kam_soc_newobject();}
-int kam_soc_newobject()
+void kam_soc_newobject_()
 {
    long npars = ku_npar();	/* number of KUIP parameters */
    char* name = ku_gets();	/* object name */
 
+   STAFCV_T status = soc_newobject(name);
+}
+
+STAFCV_T soc_newobject(char* name)
+{
    soc->newObject(name);
 
    EML_SUCCESS(STAFCV_OK);
