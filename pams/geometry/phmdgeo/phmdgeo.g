@@ -10,15 +10,16 @@
 * In each module we place the cells stripwise (STRA) and in
 * each strip we create and position pusedo-cell (PSTR)
 *
-*June 2001 : Viyogi and Dipak
+*Viyogi,Dipak,Tapan, Murthy
 *
 * The geometry for PMD, with all materials properly
 * taken care of. PCB, Base plate(G10), Lead, steel support.
 * The hole in PMD automatically formed
-* by positioning of modules.
-* 
+* by positioning of modules. The New geometry design was
+* finalised
+*
 +include,AGECOM,GCUNIT,GCONST.
-    Author    Subhasis, Viyogi, Bedanga
+    Author    Y.P. Viyogi,Subhasis,Tapan,Bedanga,Anand and Dipak
     Created   03-july-2001
     Content   PHMD,PMDA,PHCA,PCBA,BASA,AIRA,PPBA,PFEA,
 	      STRA,PDCU,PDGS,PSTR,PHMS
