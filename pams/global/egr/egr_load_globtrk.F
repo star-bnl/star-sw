@@ -46,7 +46,7 @@ C     Local variables
       
       INTEGER igtrk,sgn,lasthit,firsthit,iglob,itpct,isvtt
       INTEGER imsg,ipriv,i,det
-      REAL    covar(3,3),bfield
+      REAL    covar(3,3),bfield,x0,y0
       DATA    imsg /0/
 
 
@@ -63,10 +63,18 @@ C Adjust for ssd later
      +     1000*(gtrk(igtrk).nhit-gtrk(igtrk).ntpc)
       globtrk(iglob).n_max_point = 0
       globtrk(iglob).n_fit_point = gtrk(igtrk).nfit
+      if( ipriv .gt. 0) then
+         globtrk(iglob).n_fit_point =   globtrk(iglob).n_fit_point-1
+         globtrk(iglob).n_point     =  globtrk(iglob).n_point - 1000
+      endif
       globtrk(iglob).icharge = sign(1.0,gtrk(igtrk).p(2))
-      globtrk(iglob).r0 = abs(gtrk(igtrk).p(2))+
+
+      x0= abs(gtrk(igtrk).p(2))*cos(gtrk(igtrk).p(5))+
      +     gtrk(igtrk).p(3)
-      globtrk(iglob).phi0 = gtrk(igtrk).p(5)*C_DEG_PER_RAD
+      y0= abs(gtrk(igtrk).p(2))*sin(gtrk(igtrk).p(5))+
+     +     gtrk(igtrk).p(4)
+      globtrk(iglob).r0 = sqrt(x0**2+y0**2)
+      globtrk(iglob).phi0 = atan2d(y0,x0)
       globtrk(iglob).phi0 = AMOD(globtrk(iglob).phi0, 360.0)
       if( globtrk(iglob).phi0 .lt. .0) then
          globtrk(iglob).phi0 = globtrk(iglob).phi0 + 360.0
@@ -257,7 +265,7 @@ C---  <<<<<<<
          globtrk(iglob).length=99999.9
       endif
       globtrk(iglob).impact = 0.
-      globtrk(iglob).curvature = 1/gtrk(igtrk).p(2)
+      globtrk(iglob).curvature = abs(1/gtrk(igtrk).p(2))
       globtrk(iglob).method = 0
       globtrk(iglob).map(1) = 0
       globtrk(iglob).map(2) = 0
