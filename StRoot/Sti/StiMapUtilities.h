@@ -1,14 +1,9 @@
-//TpcMapUtilities.h
-//M.L. Miller, Yale Software, 4/13
-
-#ifndef TpcMapUtilities_h
-#define TpcMapUtilities_h
+#ifndef StiMapUtilities_h
+#define StiMapUtilities_h
 
 #include <string>
 using std::string;
-
 class StiDetector;
-//class StHit;
 class StiHit;
 class StTpcHit;
 class StiTrackNode;
@@ -38,65 +33,10 @@ struct NameMapKey {
     string name;
 };
 
-/*
-//Functors for ordering hits
-struct StHitRadiusLessThan
-{
-bool operator() (const StHit*, const StHit*) const;
-};
-
-struct StHitRadiusGreaterThan
-{
-   bool operator() (const StHit*, const StHit*) const;
-};
-*/
-
-struct StidHitLessThan
-{
-  bool operator() (const StiHit*, const StiHit*) const;
-};
-
-struct StizHitLessThan
-{
-    bool operator() (const StiHit*, const StiHit*) const;
-};
-
-struct StiHitIsUsed
-{
-    bool operator() (const StiHit*) const;
-};
-
 //Detector sorter
 struct StiDetectorNodePositionLessThan
 {
     bool operator() (const StiCompositeTreeNode<StiDetector> *, const StiCompositeTreeNode<StiDetector> *) const;
-};
-
-/*
-//StHit utility
-struct SameStHit
-{
-bool operator() (const StiHit*) const;
-StHit* stHit;
-};*/
-
-//unary predicate
-class StTpcHitFilter
-{
-public:
-    virtual ~StTpcHitFilter() {};
-    virtual bool operator()(const StTpcHit&) const = 0;
-};
-
-class StTpcPadrowHitFilter : public StTpcHitFilter
-{
-public:
-    StTpcPadrowHitFilter();
-    virtual ~StTpcPadrowHitFilter() {};
-    virtual bool operator()(const StTpcHit&) const;
-private:
-    unsigned int mMinPadrow;
-    unsigned int mMaxPadrow;
 };
 
 struct SetHitUsed
