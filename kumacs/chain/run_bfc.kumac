@@ -39,7 +39,9 @@
  *  editted June 3, 1998 by Kathy Turner - new versions of tpc kumacs
 *   editted June 3, 1998 by Kathy Turner - new versions of svt kumacs
 *  editted 6/10/98 Kathy Turner - new tpc tables in new version of tpc kumac
-**************************************************
+* editted 6/12/98 Kathy Turner - put in tpc slow sim - had to add new inputs
+*                               to macro (adcxyzon,tpc_sector_first,_last)
+* *************************************************
  
 MACRO run_all _
    no_events=1 _ 
@@ -55,7 +57,10 @@ MACRO run_all _
    ev0_finder=ev0 _
    emc_sim_jet=none _
    outfile=ev0out_tte.xdf _
-   outtable=/dui/data/global
+  outtable=/dui/data/global _
+  adcxyzon=0 _
+  tpc_sector_first=18 _
+  tpc_sector_last=18
 
 ***********************************************************
 * PRINT OUT INPUT VALUES
@@ -198,9 +203,18 @@ $STAR/pams/trg/kumac
  *****************************************
  * TPC initialization - simulation
  *****************************************
-  exec tpc_clustering#initialize_fast
-  exec tpc_fast_sim#initialize
-
+  if [tpc_simul]=tfs then
+    exec tpc_clustering#initialize_fast
+    exec tpc_fast_sim#initialize
+  elseif [tpc_simul]=tss then
+    exec tpc_slow_sim#initialize 
+      [adcxyzon] [tpc_sector_first] [tpc_sector_last]
+    exec tpc_clustering#initialize
+  else
+    message ' not a valid tpc simulator! '
+  endif
+  
+ 
  *****************************************
  * TPC initialization - tracker
  *****************************************
@@ -210,9 +224,15 @@ $STAR/pams/trg/kumac
  *****************************************
  * TPC initialization - tracker
  *****************************************
-
-  exec tpc_evaluation#initialize
-
+ 
+  if [tpc_evaluator]=tte then
+   if [tpc_simul]=tfs then
+     exec tpc_evaluation#initialize
+   elseif [tpc_simul]=tss then
+     message ' NO evaluation for tpc slow sim'
+   endif
+  endif
+  
  ****************************************
  * EMC  geometry &  pam initialization 
  ****************************************
@@ -260,6 +280,20 @@ $STAR/pams/trg/kumac
       message ' problem with tpc_fast_sim_process_event'
       goto NEXT_EVENT
     endif
+    sigma vtfs = vtfs + $cptime
+  elseif [tpc_simul]=tss then
+    exec tpc_slow_sim#process_event _
+        [ievent] [adcxyzon] [tpc_sector_first] [tpc_sector_last]
+    if (staf_status(1) .ne. stafcv_ok) then
+      message ' problem with tpc_slow_sim_process_event'
+      goto NEXT_EVENT
+    endif
+    exec tpc_clustering#process_event _
+      [ievent] [tpc_sector_first] [tpc_sector_last]
+     if (staf_status(1) .ne. stafcv_ok) then
+      message ' problem with tpc_clustering_process_event'
+      goto NEXT_EVENT
+    endif   
     sigma vtfs = vtfs + $cptime
   else
     message ' TPC simulator not  valid!! '
