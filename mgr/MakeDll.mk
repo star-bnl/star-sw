@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.36 1998/12/01 01:53:01 fisyak Exp $
+# $Id: MakeDll.mk,v 1.37 1998/12/02 20:01:50 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.37  1998/12/02 20:01:50  fisyak
+# More NT
+#
 # Revision 1.36  1998/12/01 01:53:01  fisyak
 # Merge with NT
 #
@@ -416,7 +419,7 @@ $(MY_SO) : $(MY_EXPLIB)
 	@echo LIBRARY   : = $(LIBRARY)
 	@echo MY_PDB    : = $(MY_PDB)
 	@echo MY_SOLIB    : = $(MY_SOLIB)
-	$(SO) $(SOFLAGS) $(subst /,\\,$(subst \,/,$(SoOUT)$(MY_SO)  $(OBJ_DIR)/*.$(O)  $(STAR_OBJ_DIR)/*.$(O) $(LIBS) $(LIBRARY) -PDB:$(MY_PDB))) $(SYS_DIR)/obj/base/St_staf_dummies.$(O)
+	$(SO) $(SOFLAGS) $(subst /,\\,$(subst \,/,$(SoOUT)$(MY_SO) $(sort $(OBJ_DIR)/*.$(O)  $(STAR_OBJ_DIR)/*.$(O) $(SYS_DIR)/obj/base/St_staf_dummies.$(O)) $(LIBS) $(LIBRARY) -PDB:$(MY_PDB))) 
 #	$(SO) $(SOFLAGS) $(subst /,\\,$(subst \,/,$(SoOUT)$(MY_SO) $(FILES_O)  $(STAR_FILES_O) $(LIBS) $(LIBRARY) -PDB:$(MY_PDB)))
 #	$(SO) $(SOFLAGS) $(subst /,\\,$(subst \,/,$(SoOUT)$(SL_NEW) $(FILES_O) $(LIBS) $(LIBRARY) -PDB:$(MY_PDB)))
 #        $(RM) $(MY_SO)
