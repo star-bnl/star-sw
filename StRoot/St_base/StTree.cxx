@@ -233,6 +233,7 @@ void StBranch::Close(const char *)
   printf("** <StBranch::Close> Branch=%s \tFile=%s \tClosed **\n"
         ,GetName(),(const char*)fFile); 
   delete tf;
+  fIOMode=0;
 }
 //_______________________________________________________________________________
 const char *StBranch::GetFile()
