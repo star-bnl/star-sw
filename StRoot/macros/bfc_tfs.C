@@ -1,4 +1,4 @@
-// $Id: bfc_tfs.C,v 1.5 1999/03/01 19:09:24 fisyak Exp $
+// $Id: bfc_tfs.C,v 1.6 1999/03/01 20:43:24 fisyak Exp $
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
@@ -33,8 +33,8 @@ void Load(){
     gSystem->Load("St_mwc_Maker");
     gSystem->Load("St_trg");
     gSystem->Load("St_trg_Maker");
-    gSystem->Load("St_l3");
-    gSystem->Load("St_l3t_Maker");
+    //    gSystem->Load("St_l3");
+    //    gSystem->Load("St_l3t_Maker");
     //    gSystem->Load("StRchMaker");
     gSystem->Load("St_svt");
     gSystem->Load("St_srs_Maker");
@@ -103,7 +103,7 @@ bfc_tfs(const Int_t Nevents=1000,
   St_ctf_Maker         *ctf      = new St_ctf_Maker("ctf","event/data/ctf");
   St_mwc_Maker         *mwc      = new St_mwc_Maker("mwc","event/data/mwc");
   St_trg_Maker         *trg      = new St_trg_Maker("trg","event/data/trg");
-  St_l3t_Maker         *l3Tracks   = new St_l3t_Maker("l3Tracks","event/data/l3/tracks");
+  //  St_l3t_Maker         *l3Tracks   = new St_l3t_Maker("l3Tracks","event/data/l3/tracks");
 
   St_run_summary_Maker *summary = new St_run_summary_Maker("run_summary","run/dst");
   St_dst_Maker         *dst     = new St_dst_Maker("dst","dst");
