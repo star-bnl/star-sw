@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.93 2004/11/11 18:14:56 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.94 2004/12/07 17:04:46 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -222,7 +222,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.93 2004/11/11 18:14:56 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.94 2004/12/07 17:04:46 posk Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -299,11 +299,6 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
     for (int j = 0; j < Flow::nHars; j++) {
       char countHars[2];
       sprintf(countHars,"%d",j+1);
-      // Tpc
-      TString* histTitle = new TString("Flow_Phi_Weight_Sel");
-      histTitle->Append(*countSels);
-      histTitle->Append("_Har");
-      histTitle->Append(*countHars);
       // Tpc (FarEast)
       TString* histTitleFarEast = new TString("Flow_Phi_Weight_FarEast_Sel");
       histTitleFarEast->Append(*countSels);
@@ -345,35 +340,23 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
       histTitleFtpcFarWest->Append("_Har");
       histTitleFtpcFarWest->Append(*countHars);
       if (pPhiWgtFile->IsOpen()) {
-	TH1* phiWgtHist = dynamic_cast<TH1*>(pPhiWgtFile->Get(histTitle->Data()));
-	if (k==0 && j==0 && phiWgtHist) {
-	  mOnePhiWgt = kTRUE;
-	  gMessMgr->Info("##### FlowMaker: Using old type phi weight file.");
-	}
-	if (mOnePhiWgt) {
-	  for (int n = 0; n < Flow::nPhiBins; n++) {
-	    mPhiWgt[k][j][n] = (phiWgtHist) ? 
-	      phiWgtHist->GetBinContent(n+1) : 1.;
-	  }
-	} else {
-	  TH1* phiWgtHistFarEast = dynamic_cast<TH1*>(pPhiWgtFile->
-						      Get(histTitleFarEast->Data()));
-	  TH1* phiWgtHistEast = dynamic_cast<TH1*>(pPhiWgtFile->
-						   Get(histTitleEast->Data()));
-	  TH1* phiWgtHistWest = dynamic_cast<TH1*>(pPhiWgtFile->
-						   Get(histTitleWest->Data()));
-	  TH1* phiWgtHistFarWest = dynamic_cast<TH1*>(pPhiWgtFile->
-						      Get(histTitleFarWest->Data()));
-	  for (int n = 0; n < Flow::nPhiBins; n++) {
-	    mPhiWgtFarEast[k][j][n] = (phiWgtHistFarEast) ? 
-	      phiWgtHistFarEast->GetBinContent(n+1) : 1.;
-	    mPhiWgtEast[k][j][n] = (phiWgtHistEast) ? 
-	      phiWgtHistEast->GetBinContent(n+1) : 1.;
-	    mPhiWgtWest[k][j][n] = (phiWgtHistWest) ? 
-	      phiWgtHistWest->GetBinContent(n+1) : 1.;
-	    mPhiWgtFarWest[k][j][n] = (phiWgtHistFarWest) ? 
-	      phiWgtHistFarWest->GetBinContent(n+1) : 1.;
-	  }
+	TH1* phiWgtHistFarEast = dynamic_cast<TH1*>(pPhiWgtFile->
+						    Get(histTitleFarEast->Data()));
+	TH1* phiWgtHistEast = dynamic_cast<TH1*>(pPhiWgtFile->
+						 Get(histTitleEast->Data()));
+	TH1* phiWgtHistWest = dynamic_cast<TH1*>(pPhiWgtFile->
+						 Get(histTitleWest->Data()));
+	TH1* phiWgtHistFarWest = dynamic_cast<TH1*>(pPhiWgtFile->
+						    Get(histTitleFarWest->Data()));
+	for (int n = 0; n < Flow::nPhiBins; n++) {
+	  mPhiWgtFarEast[k][j][n] = (phiWgtHistFarEast) ? 
+	    phiWgtHistFarEast->GetBinContent(n+1) : 1.;
+	  mPhiWgtEast[k][j][n] = (phiWgtHistEast) ? 
+	    phiWgtHistEast->GetBinContent(n+1) : 1.;
+	  mPhiWgtWest[k][j][n] = (phiWgtHistWest) ? 
+	    phiWgtHistWest->GetBinContent(n+1) : 1.;
+	  mPhiWgtFarWest[k][j][n] = (phiWgtHistFarWest) ? 
+	    phiWgtHistFarWest->GetBinContent(n+1) : 1.;
 	}
 	TH1* phiWgtHistFtpcFarEast = dynamic_cast<TH1*>(pPhiWgtFile->
 							Get(histTitleFtpcFarEast->Data()));
@@ -440,7 +423,6 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 	}//zdcsmd_nPsiBins	
       }
 
-      delete histTitle;
       delete histTitleFarEast;
       delete histTitleEast;
       delete histTitleWest;
@@ -466,16 +448,11 @@ void StFlowMaker::FillFlowEvent() {
   if (Debug()) gMessMgr->Info() << "FlowMaker: FillFlowEvent()" << endm;
 
   // Fill PhiWgt array
-  if (mOnePhiWgt) {
-    pFlowEvent->SetOnePhiWgt();
-    pFlowEvent->SetPhiWeight(mPhiWgt);
-  } else {
-    if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
-    pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
-    pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
-    pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
-    pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
-  }
+  if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
+  pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
+  pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
+  pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
+  pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
   pFlowEvent->SetPhiWeightFtpcFarEast(mPhiWgtFtpcFarEast);
   pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
@@ -766,16 +743,11 @@ void StFlowMaker::FillFlowEvent(StHbtEvent* hbtEvent) {
   cout << "Inside FlowMaker::FillFlowEvent(HbtEvent)..." << endl;
 
   // set phiweights
-  if (mOnePhiWgt) {
-    pFlowEvent->SetOnePhiWgt();
-    pFlowEvent->SetPhiWeight(mPhiWgt);
-  } else {
-    if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
-    pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
-    pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
-    pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
-    pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
-  }
+  if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
+  pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
+  pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
+  pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
+  pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
   pFlowEvent->SetPhiWeightFtpcFarEast(mPhiWgtFtpcFarEast);
   pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
@@ -998,16 +970,11 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
   }
   
   // Set phi weights
-  if (mOnePhiWgt) {
-    pFlowEvent->SetOnePhiWgt();
-    pFlowEvent->SetPhiWeight(mPhiWgt);
-  } else {
-    if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
-    pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
-    pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
-    pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
-    pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
-  }
+  if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
+  pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
+  pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
+  pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
+  pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
   pFlowEvent->SetPhiWeightFtpcFarEast(mPhiWgtFtpcFarEast);
   pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
@@ -1038,14 +1005,6 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
     break;
   case 4: FillFromPicoVersion4DST(pPicoEvent);
     break;
-//   case 3: FillFromPicoVersion3DST(pPicoEvent);
-//     break;
-//   case 2: FillFromPicoVersion2DST(pPicoEvent);
-//     break;
-//   case 1: FillFromPicoVersion1DST(pPicoEvent);
-//     break;
-//   case 0: FillFromPicoVersion0DST(pPicoEvent);
-//     break;
   default:
     cout << "##### FlowMaker: Illegal pico file version" << endl;
     return kStFatal;
@@ -1630,16 +1589,11 @@ Bool_t StFlowMaker::FillFromMuDST() {
   pMuEvent=(StMuEvent*)pMuEvents->UncheckedAt(0);
 
   // Set phi weights
-  if (mOnePhiWgt) {
-    pFlowEvent->SetOnePhiWgt();
-    pFlowEvent->SetPhiWeight(mPhiWgt);
-  } else {
-    if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
-    pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
-    pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
-    pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
-    pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
-  }
+  if (mFirstLastPhiWgt) pFlowEvent->SetFirstLastPhiWgt();
+  pFlowEvent->SetPhiWeightFarEast(mPhiWgtFarEast);
+  pFlowEvent->SetPhiWeightEast(mPhiWgtEast);
+  pFlowEvent->SetPhiWeightWest(mPhiWgtWest);
+  pFlowEvent->SetPhiWeightFarWest(mPhiWgtFarWest);
   pFlowEvent->SetPhiWeightFtpcFarEast(mPhiWgtFtpcFarEast);
   pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
@@ -2114,6 +2068,10 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.94  2004/12/07 17:04:46  posk
+// Eliminated the very old mOnePhiWgt, which used one phiWgt histogram for flttening
+// instead of four.
+//
 // Revision 1.93  2004/11/11 18:14:56  posk
 // Added a debug print statement.
 //
