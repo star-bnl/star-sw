@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.74 2000/02/27 22:29:52 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.75 2000/02/29 01:58:30 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.75  2000/02/29 01:58:30  fisyak
+// Fix MDC3 chain
+//
 // Revision 1.74  2000/02/27 22:29:52  fisyak
 // Remove clash with I/O Maker in file names
 //
@@ -301,7 +304,7 @@ BfcItem BFC[] = {
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"doEvents"    ,""  ,"","xin,event,analysis,FieldOn"                                    ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis"                                  ,"","","",kFALSE},
-  {"Cdefault"    ,""  ,"","tpc,ftpc,rrs,rich,l3,Cdst,qa,tags,tree"           ,"","","Default chain",kFALSE}, 
+  {"Cdefault"    ,""  ,"","tpc,ftpc,rrs,rich,l0,l3,Cdst,qa,tags,tree"        ,"","","Default chain",kFALSE}, 
   {"Cy1a"        ,""  ,"","y1a,Cdefault"                                 ,"","","Turn on chain y1a",kFALSE},
   {"Cy1b"        ,""  ,"","y1b,Cdefault"                                 ,"","","Turn on chain y1b",kFALSE},
   {"Cy1c"        ,""  ,"","y1c,Cdefault"                                 ,"","","Turn on chain y1c",kFALSE},
@@ -309,6 +312,7 @@ BfcItem BFC[] = {
   {"cy1e"        ,""  ,"","y1e,Cdefault"                                 ,"","","Turn on chain y1h",kFALSE},
   {"cy1h"        ,""  ,"","y1h,Cdefault"                                 ,"","","Turn on chain y1e",kFALSE},
   {"Cy2a"        ,""  ,"","y2a,Cdefault,svt"                             ,"","","Turn on chain y2a",kFALSE},
+  {"mdc3"        ,""  ,"","cy1h,GeantOut"                               ,"","","MDC3 default chain",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
@@ -332,6 +336,7 @@ BfcItem BFC[] = {
   {"big"         ,""  ,"",""                                         ,"","","Set NwGEANT =20Mwords",kFALSE},
   {"bigbig"      ,""  ,"",""                                         ,"","","Set NwGEANT =40Mwords",kFALSE},
   {"EvOut"       ,""  ,"",""                                       ,"","","Write StEvent to StTree",kFALSE},
+  {"GeantOut"    ,""  ,"",""                                    ,"","","Write g2t tables to StTree",kFALSE},
   {"AllEvent"    ,""  ,"",""                                   ,"","","Write whole event to StTree",kFALSE},
   {"AllTables"   ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
@@ -919,4 +924,5 @@ void StBFChain::SetTreeOptions()
     if (GetOption("l3t"))    treeMk->IntoBranch("l3tBranch","l3Tracks");
     if (GetOption("global")) treeMk->IntoBranch("globalBranch","global/.data");
   }
+  else if (GetOption("GeantOut") && geantMk) treeMk->IntoBranch("geantBranch","geant");
 }
