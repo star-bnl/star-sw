@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPid.cxx,v 2.4 2000/11/25 11:51:49 lasiuk Exp $
+ * $Id: StRichPid.cxx,v 2.5 2000/12/08 03:50:31 ullrich Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPid.cxx,v $
+ * Revision 2.5  2000/12/08 03:50:31  ullrich
+ * Removed compiler warning (signed/unsigned comparison).
+ *
  * Revision 2.4  2000/11/25 11:51:49  lasiuk
  * remove D vector and replace with a container of StRichPhotonInfo
  *
@@ -29,7 +32,7 @@
  ***************************************************************************/
 #include "StRichPid.h"
 
-static const char rcsid[] = "$Id: StRichPid.cxx,v 2.4 2000/11/25 11:51:49 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPid.cxx,v 2.5 2000/12/08 03:50:31 ullrich Exp $";
 
 ClassImp(StRichPid)
 
@@ -65,7 +68,7 @@ const StSPtrVecRichPhotonInfo& StRichPid::getPhotonInfo() {return mPhotonInfo;}
 
 StRichPhotonInfo* StRichPid::getPhotonInfo(int i)
 {
-    if(i>mPhotonInfo.size())
+    if(static_cast<unsigned int>(i) > mPhotonInfo.size())
 	return 0;
     else
 	return mPhotonInfo[i];
