@@ -1,9 +1,10 @@
-LIBNAME=StEEmcUtil
-SUBDIRS=EEevent EEfeeRaw EEmcGeom 
+LIBNAME= StEEmcUtil
+SUBDIRS= EEevent EEfeeRaw EEmcGeom 
 AR     = ar rul
 ARX    = ar x
 CXX    = g++
 LDFLAGS= -shared
+LIBDIR = ../../lib
 
 all:	compile lib
 
@@ -22,5 +23,5 @@ lib:
 	rm -f *.o
 
 install:
-	mkdir -p ../../lib
-	cp -pr *.a *.so ../../lib
+	mkdir -p        $(LIBDIR)
+	cp -pr *.a *.so $(LIBDIR)
