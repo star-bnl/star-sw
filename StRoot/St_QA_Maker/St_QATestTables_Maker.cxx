@@ -1,11 +1,8 @@
-//
-// Adding TestTableInt in init() to check the average Pt.
-// 
-//
-// This is made by Kathy at 14th July, and added the globtrk
-//
-// $Id: St_QATestTables_Maker.cxx,v 1.2 1999/09/02 21:47:22 kathy Exp $
+// $Id: St_QATestTables_Maker.cxx,v 1.3 1999/09/23 16:04:31 kathy Exp $
 // $Log: St_QATestTables_Maker.cxx,v $
+// Revision 1.3  1999/09/23 16:04:31  kathy
+// change paths for include files to standard way according to Yuri's request
+//
 // Revision 1.2  1999/09/02 21:47:22  kathy
 // changed code so that it uses TMath functions so will compile on HP
 //
@@ -32,9 +29,9 @@
 #include "St_QATestTables_Maker.h"
 
 // tables currently in 99e,99f
-#include "St_dst_event_summary_Table.h"
-#include "St_dst_event_header_Table.h"
-#include "St_dst_track_Table.h" 
+#include "tables/St_dst_event_summary_Table.h"
+#include "tables/St_dst_event_header_Table.h"
+#include "tables/St_dst_track_Table.h" 
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -294,7 +291,7 @@ void St_QATestTables_Maker::TestTablesFinish(){
 //---------------------------------------------------------------------------------------
 void St_QATestTables_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QATestTables_Maker.cxx,v 1.2 1999/09/02 21:47:22 kathy Exp $\n");
+  printf("* $Id: St_QATestTables_Maker.cxx,v 1.3 1999/09/23 16:04:31 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
