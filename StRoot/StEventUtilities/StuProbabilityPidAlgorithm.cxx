@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.25 2002/01/17 03:25:27 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.26 2002/04/19 16:36:41 perev Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.26  2002/04/19 16:36:41  perev
+ * bug fix,init to zero
+ *
  * Revision 1.25  2002/01/17 03:25:27  aihong
  * add production Tag to take care of different centrality def. between different productions
  *
@@ -267,7 +270,7 @@ StParticleDefinition* StuProbabilityPidAlgorithm::operator() (const StTrack& the
   cent = getCentrality(uncorrectedNumberOfNegativePrimaries(*mEvent));
 
    
-          const StDedxPidTraits* dedxPidTr;
+          const StDedxPidTraits* dedxPidTr=0;
 
 
        charge=(theTrack.geometry())->charge();
