@@ -77,7 +77,8 @@ if ($pkg =~ /^StHbtMaker$/) {
 }
 
 if ($pkg =~ /^StDaqLib$/) {$CPPPATH = "#" . $Dir . $main::PATH_SEPARATOR . $env->{CPPPATH}; print "CPPPATH = $CPPPATH\n"  if $param::debug;}
-if ($Dir =~ /pams\//) {
+#if ($Dir =~ /pams\// || $Dir =~ /StRoot\//) {
+if ($#idlM > -1) {
   $CPPPATH = $INCLUDE . "/" . $pkg . $main::PATH_SEPARATOR . $CPPPATH; print "CPPPATH = $CPPPATH\n" if $param::debug;
 }
 elsif ($#idlL > -1) {
