@@ -11,11 +11,14 @@
   ds->SetFilter(f,StEventDisplayMaker::kTable);
 
   // Edit the list of tables to be drawn
-  ds->RemoveName("dst/point(id_track,position[0]:position[1]:charge)");
+  // ds->RemoveName("dst/point(id_track,position[0]:position[1]:charge)");
   ds->RemoveName("dst/primtrk");
   ds->AddName("dst/globtrk");
   ds->PrintNames();
 
   // Redraw the last event
+   cout << " if you want to remove hit points type:" << endl
+        << "\t ds->RemoveName(\"dst/point(id_track,position[0]:position[1]:charge)\");" << endl 
+        << "then:" << "\t ds->ReDraw()" << endl;
   ds->ReDraw();
 }
