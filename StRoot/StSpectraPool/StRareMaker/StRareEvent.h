@@ -58,11 +58,12 @@ class StRareEvent : public TObject {
   float fTriggerData[10];
   int   fL3Flag;
 
-  ClassDef(StRareEvent,1)
+  ClassDef(StRareEvent,2)
 };
 
  
 inline int StRareEvent::eventNumber() const {return fEventNumber;}
+inline int StRareEvent::runNumber() const {return fRunNumber;}
 inline int StRareEvent::numberOfGoodPrimaryTracks() const {return fnumberOfGoodPrimaryTracks;}
 inline int StRareEvent::numberOfTracks() const {return fNRareTrack;}
 inline float StRareEvent::vertexZ() const {return fVertexZ;}

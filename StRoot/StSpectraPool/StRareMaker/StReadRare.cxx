@@ -94,7 +94,7 @@ void StReadRare::Init()
   //mChain->Add("RareEvent.root");
 
   // set number of events
-  mNEvents = mChain->GetEntries();
+  mNEvents = (Int_t) mChain->GetEntries();
   printf("Total # events: %i\n", mNEvents);
 }
 

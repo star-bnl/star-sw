@@ -12,7 +12,6 @@ StNegativeTracks::StNegativeTracks(float plow,float phigh){
 int StNegativeTracks::Accept(StPrimaryTrack* trk){
   int iret = 0;
   int chargeOK = 0;
-  int dedxOK = 0;
   int pOK=0;
   StRareTrack track(trk);
   if (track.chargesign()<0) {chargeOK=1;}

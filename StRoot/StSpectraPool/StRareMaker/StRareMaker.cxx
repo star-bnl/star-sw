@@ -1,5 +1,8 @@
-// $Id: StRareMaker.cxx,v 1.6 2001/11/02 00:05:41 struck Exp $
+// $Id: StRareMaker.cxx,v 1.7 2001/12/04 18:26:10 struck Exp $
 // $Log: StRareMaker.cxx,v $
+// Revision 1.7  2001/12/04 18:26:10  struck
+// update for gcc2.95-3
+//
 // Revision 1.6  2001/11/02 00:05:41  struck
 // major update: bug fixes in StRareMaker to get dca for l3 tracks and correct wrong l3 field setting in run 291023
 //
@@ -47,7 +50,7 @@ ClassImp(StRareEventCut)
 ClassImp(StRareTrackCut)
 ClassImp(StL3RareTrackCut)
 
-static const char rcsid[] = "$Id: StRareMaker.cxx,v 1.6 2001/11/02 00:05:41 struck Exp $";
+static const char rcsid[] = "$Id: StRareMaker.cxx,v 1.7 2001/12/04 18:26:10 struck Exp $";
 
 double dEdx_formula(double momentum, double mass);
 
@@ -118,7 +121,7 @@ Int_t StRareMaker::Make() {
 	  StPrimaryTrackIterator itr;
 	  StPrimaryTrack *trk;
 	  if (mEvent->primaryVertex()) {
-	        const StSPtrVecPrimaryTrack& tracks = mEvent->primaryVertex()->daughters();
+	        StSPtrVecPrimaryTrack& tracks = mEvent->primaryVertex()->daughters();
 		for (itr=tracks.begin(); itr != tracks.end(); itr++){
 		      trk = *itr;
 		      if (mTrackCut->Accept(trk)) mRareEvent->addTrack(trk);
@@ -136,7 +139,7 @@ Int_t StRareMaker::Make() {
 		// Loop over tracks
 		StGlobalTrack *l3trk;
 		StSPtrVecTrackNode& mtracknodes = (StSPtrVecTrackNode&) l3Event->trackNodes();
-		for (Int_t i=0; i<mtracknodes.size(); i++) {
+		for (unsigned int i=0; i<mtracknodes.size(); i++) {
 		      l3trk = (StGlobalTrack* )mtracknodes[i]->track(0);
 		      // correct my bug in StEvent filling
 		      StGlobalTrack* newL3Track = new StGlobalTrack(*l3trk);
@@ -190,7 +193,7 @@ void StRareMaker::Report(){
 
 void StRareMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StRareMaker.cxx,v 1.6 2001/11/02 00:05:41 struck Exp $\n");
+  printf("* $Id: StRareMaker.cxx,v 1.7 2001/12/04 18:26:10 struck Exp $\n");
   printf("**************************************************************\n");
 }
 
