@@ -9,6 +9,8 @@
 //  and rawToGlobal
 //:
 //:       apr 19  2000  cs ppy: padLengthInner(Outer)Sector added
+//:       may 02  2000  cs  minor cleanup in localToGlobal()
+//:                         added globalToRaw()
 
 //
 
@@ -25,8 +27,10 @@
 #define outerSectorPadPitch     0.67     // cm
 #define padLengthInnerSector    1.15     // cm
 #define padLengthOuterSector    1.95     // cm
-#define driftLength             208.     // cm
-#define lengthPerTb             0.5977   // = 208/348
+#define lengthPerTBInnerSector  0.574731
+#define lengthPerTBOuterSector  0.574731
+#define driftLengthInnerSector  200.668  // cm
+#define driftLengthOuterSector  201.138  // cm
 
 
 // number of pads in padrow
@@ -57,13 +61,13 @@ static double SectorSin[NSECTORS] = {
      0.5,  0.,          // 5-6
     -0.5, -0.866025404, // 7-8 
     -1.0, -0.866025404, // 9-10
-    -0.5,  0.,  
-    -0.5, -0.866025404,
-    -1.0, -0.866025404,
-    -0.5,  0.,
-     0.5,  0.866025404,
-     1.0,  0.866025404,
-     0.5,  0.,
+    -0.5,  0.,          // 11-12
+     0.5,  0.866025404, // 13-14
+     1.0,  0.866025404, // 15-16
+     0.5,  0.,          // 17-18
+    -0.5, -0.866025404, // 19-20
+    -1.0, -0.866025404, // 21-22
+    -0.5,  0.,          // 23-24
 };
 
 static double SectorCos[NSECTORS] = {
@@ -73,12 +77,12 @@ static double SectorCos[NSECTORS] = {
     -0.866025404, -0.5, // 7-8
      0.,           0.5, // 9-10
      0.866025404,  1.0, // 11-12
-     -0.866025404, -0.5, // 13-14
-     0.,           0.5,  // 15-16
-     0.866025404,  1.0,  // 17-18
-     0.866025404,  0.5,  // 19-20
-     0.,          -0.5,  // 21-22
-     -0.866025404, -1.0, // 23-24
+     0.866025404,  0.5, // 13-14
+     0.,          -0.5, // 15-16
+    -0.866025404, -1.0, // 17-18
+    -0.866025404, -0.5, // 19-20
+     0.,           0.5, // 21-22
+     0.866025404,  1.0, // 23-24
 };
 
 inline int rawToLocal ( int row, double pad, double tb,
@@ -98,24 +102,11 @@ inline int rawToLocal ( int row, double pad, double tb,
   // needs access to db probably
   //     Brian's version (see TRS lib):
   //     double z = frischGrid - driftVelocity * (tZero + tb*timebinWidth);
-  //*zLocal = driftLength - tb*lengthPerTb;
-  
-  //
-  // temporary patch for inner and outer rows
   //
   if (row<=13) 
-      { 
-   	  double driftlen = 200.668 ; 
-  	  double lengthpertimebucket = 0.574731 ;
-   	  *zLocal = driftlen - tb*lengthpertimebucket;
-      }
+     *zLocal = driftLengthInnerSector - tb*lengthPerTBInnerSector;
   else 
-      {
-	  double driftlen =  201.138 ;
-	  double lengthpertimebucket = 0.574731 ;
-	  *zLocal = driftlen - tb*lengthpertimebucket;  
-      }
-  //printf("z coordinate: %f\n", *zLocal);
+     *zLocal = driftLengthOuterSector - tb*lengthPerTBOuterSector;
   return 0;
 }
 
@@ -128,7 +119,11 @@ inline int localToRaw ( int row,
 
   double pad2move = xLocal / pitch + .5 ;
   pad             = pad2move + numberOfPadsAtRow[row-1]/2; 
-  tb              = (driftLength - zLocal) / lengthPerTb ;
+  if (row<=13) 
+     tb = (driftLengthInnerSector - zLocal) / lengthPerTBInnerSector ;
+  else 
+     tb = (driftLengthOuterSector - zLocal) / lengthPerTBOuterSector ;
+
   if ( pad < 0 ) {
 //   printf ( "xLocal %e pad2move %e pad %e nPads %d \n",
 //             xLocal, pad2move, pad, numberOfPadsAtRow[row-1] ) ;
@@ -149,23 +144,34 @@ inline int localToGlobal ( int sector, double xLocal, double yLocal, double zLoc
   // 2x2 rotation matrix:
   //   ( cos b    sin b )
   //   (-sin b    cos b )
-  *x = SectorCos[sector-1] * xLocal + SectorSin[sector-1] * yLocal;
+  //
   // caution: sector>12 needs x->-x and y->y (east side!)
-  // ==> set sector to sector-12
-  int eastsector = (sector>12) ? sector-12 : sector;
-  *y = -1.*SectorSin[eastsector-1] *xLocal + SectorCos[eastsector-1] * yLocal;
-//*y = -1.*SectorSin[sector-1] *xLocal + SectorCos[sector-1] * yLocal;
+  *x = SectorCos[sector-1] * xLocal + SectorSin[sector-1] * yLocal;
+  if (sector>12) *x = -(*x);
+
+  *y = -1.* SectorSin[sector-1] * xLocal + SectorCos[sector-1] * yLocal;
+
   *z = (sector<13) ? zLocal : -zLocal ;
+
   return 0;
 }
 
-inline int globalToLocal ( int sector, int row,  
+inline int globalToLocal ( int sector, int row,
                            double xGlobal, double yGlobal, double zGlobal,
 			   double &xLocal, double &yLocal, double &zLocal ) {
 
-  xLocal = SectorCos[sector-1] * xGlobal - SectorSin[sector-1] * yGlobal ;
-  yLocal = radialDistanceAtRow[row-1];
-  zLocal = fabs(zGlobal) ;
+  // rotate global x,y coordinates back to local
+  // 2x2 rotation matrix:
+  //   ( cos b   -sin b )
+  //   ( sin b    cos b )
+  //
+  // caution: sector>12 needs x->-x and y->y (east side!)  
+  if (sector>12) xGlobal = -xGlobal;
+
+  xLocal = SectorCos[sector-1] * xGlobal - SectorSin[sector-1] * yGlobal;
+  yLocal = SectorSin[sector-1] * xGlobal + SectorCos[sector-1] * yGlobal;
+
+  zLocal = fabs(zGlobal);
   return 0;
 }
 
@@ -175,6 +181,18 @@ inline int rawToGlobal ( int sector, int row, double pad, double tb,
   double xLocal, yLocal, zLocal ;
   rawToLocal ( row, pad, tb, &xLocal, &yLocal, &zLocal ) ;
   localToGlobal ( sector, xLocal, yLocal, zLocal, x, y, z ) ;   
+  return 0;
+}
+
+inline int globalToRaw ( int sector, int row, double x, double y, double z,
+			 double &pad, double &tb) {
+
+  double xLocal;
+  double yLocal;
+  double zLocal;
+  globalToLocal ( sector, row, x, y, z, xLocal, yLocal, zLocal );
+  localToRaw ( row, xLocal, yLocal, zLocal, pad, tb );
+
   return 0;
 }
 
