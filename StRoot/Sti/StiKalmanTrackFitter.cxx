@@ -65,37 +65,20 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	  else if (targetHit)
 	    status = targetNode->propagate(&(*source),targetHit);  // vertex
 	  // if targetNode has hit, get chi2 and update track parameters accordingly
-	  if (targetHit && status==0)
+	  if (targetHit)
 	    {
-	      targetNode->nudge();
-	      chi2 = targetNode->evaluateChi2(targetHit);
-	      targetNode->setChi2(1e52);
-	      if (targetNode->_x>40.)
+	      if (status==0)
 		{
+		  targetNode->nudge();
+		  chi2 = targetNode->evaluateChi2(targetHit);
+		  targetNode->setChi2(1e52);
 		  if (chi2<_pars.getMaxChi2() ) 
 		    {
 		      targetNode->setChi2(chi2);
 		      status = targetNode->updateNode();
 		    }
 		}
-	      else
-		{
-		  if (chi2<50.)
-		    {
-		      targetNode->setChi2(chi2);
-		      status = targetNode->updateNode();
-		    }
-		}
 	    }
-	  /*	  if (status<0)
-	    {
-	      // truncate because the propagation to the targetNode was not successful
-	      //cout << " truncation 1 +++++++++++++++++++++++++++++" << endl;
-	      //(*source).removeAllChildren();
-	      //track->setLastNode(&(*source));
-	      //cout << " truncation 1 completed +++++++++++++++++++++++++++++" << endl;
-	      //break;
-	      }*/
 	  source++;
 	  //cout<<"=="<<endl;
 	}
@@ -123,32 +106,22 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	  else if (targetHit)
 	    status = targetNode->propagate(&(*source),targetHit);  // vertex
 	  // if targetNode has hit, get chi2 and update track parameters accordingly
-	  if (targetHit && status==0)
+	  if (targetHit)
 	    {
-	      targetNode->nudge();
-	      chi2 = targetNode->evaluateChi2(targetHit);
-	      targetNode->setChi2(1e51);
-	      if (chi2>20)
-		status = -50;
-	      else if (chi2 < _pars.getMaxChi2())
+	      if (status==0)
 		{
-		  targetNode->setChi2(chi2);
-		  status = targetNode->updateNode();
+		  targetNode->nudge();
+		  chi2 = targetNode->evaluateChi2(targetHit);
+		  targetNode->setChi2(1e51);
+		  if (chi2 < _pars.getMaxChi2())
+		    {
+		      targetNode->setChi2(chi2);
+		      status = targetNode->updateNode();
+		    }
 		}
 	    }
-	  //if (status<0)
-	  //{
-	      //cout << "STATUS : " << status << endl;
-	      //cout << *targetNode << endl;
-	      // truncate because the propagation to the targetNode was not successful
-	      //cout << " truncation 2 +++++++++++++++++++++++++++++" << endl;
-	      // test 40
-	      // track->setFirstNode(&(*source));
-	      // (*source).setParent(0);
-	      //cout << " truncation 2 completed +++++++++++++++++++++++++++++" << endl;
-	      //break;
-	  //}
-	  source++;//cout<<"!="<<endl;
+	  source++;
+	  //cout<<"!="<<endl;
 	}
       //cout << "   <<<<<<<<<<<Done Refit" << endl;
     }
