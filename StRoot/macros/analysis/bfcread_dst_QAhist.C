@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.11 1999/11/29 20:25:56 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.12 1999/11/29 21:11:31 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.12  1999/11/29 21:11:31  kathy
+// removed unneccessary commented out lines
+//
 // Revision 1.11  1999/11/29 20:25:56  kathy
 // remove call to method SetDraw - doesn't do anything
 //
@@ -101,8 +104,7 @@ void bfcread_dst_QAhist(Int_t nevents=1,
 // Input File Maker
     StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
 
-
-// constructor for other maker (not used in chain)
+// constructor for other class  (not a Maker so not used in chain)
    StHistUtil   *HU  = new StHistUtil;
 
 // now must set pointer to StMaker so HistUtil can find histograms
@@ -112,11 +114,6 @@ void bfcread_dst_QAhist(Int_t nevents=1,
 
 //  add other makers to chain:
   St_QA_Maker  *QA  = new St_QA_Maker;
-
-// must set pointer to HistUtil so can use it's methods
-// 9/21/99 (KT) actually, this is not needed since I took out
-//          StHistUtil method calls from St_QA_Maker 
-//   QA->SetPntrToHistUtil(HU);
 
 // --- now execute chain member functions
   chain->Init();
