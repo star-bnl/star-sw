@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.133 2000/05/25 21:33:09 fisyak Exp $
+// $Id: bfc.C,v 1.134 2000/05/26 13:44:09 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StMaker;        
@@ -137,7 +137,7 @@ if (Last >= 0) {
 treeMk = chain->GetMaker("tree");
 TBenchmark evnt;
 Int_t iMake = 0, i = First;
-Int_t iTotal = 0; iBad = 0;
+Int_t iTotal = 0, iBad = 0;
 EventLoop: if (i <= Last && iMake != kStEOF && iMake != kStFatal) {
   evnt->Reset();
   evnt->Start("QAInfo:");
