@@ -2,8 +2,11 @@
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
-// $Id: St_DataSet.cxx,v 1.53 1999/09/04 00:28:01 fine Exp $
+// $Id: St_DataSet.cxx,v 1.54 1999/09/24 23:31:37 perev Exp $
 // $Log: St_DataSet.cxx,v $
+// Revision 1.54  1999/09/24 23:31:37  perev
+// Add title update in St_DataSet::Update
+//
 // Revision 1.53  1999/09/04 00:28:01  fine
 // St_Table::NaN from VP and gloabl dataset have been introduced
 //
@@ -615,6 +618,7 @@ void St_DataSet::Update(St_DataSet* set,UInt_t opt)
   if(opt){/*unused*/}
   if(!set) return;
 
+  SetTitle(set->GetTitle());
   St_DataSetIter nextnew(set);
   St_DataSet *newset = 0;
   while((newset = nextnew())) {
