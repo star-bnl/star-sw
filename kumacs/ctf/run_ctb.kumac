@@ -1,52 +1,131 @@
-macro run_ctb 1=a nevents=10
-macro/global/import *
-*
-if [1]=r goto run
-*
-*   Load geometry
-*
-newfilestream ctb_geo /afs/rhic/star/data/geometry/ctf/ctb_geo.dsl r
-getevent ctb_geo
-*
-*    Setup cts
-*
-cd ctb
-exec $STAR/pams/ctf/kumac/cts_ctb_setup
-*
-*    Book new tables
-*
-newtab mslat cts_mslat 240
-newtab event cts_event 500
-newtab raw   ctu_raw   240
-newtab cor   ctu_cor   240
-*
-cd ..
-*
-*    Get Run info
-*
-mfile='/afs/rhic/star/data/g2t_datafiles/muons_100_ctb.dsl'
+* *************************************************************************
+* run_ctb.kumac
+* 
+* 7/28/98 K. Turner - editted to make it standard
+************************************************************************
+************************************************************************
 
-newfilestream events [mfile] r
-getevent events
-*
-run:
-*
-do i=1,[nevents]
-*
-*    Get Event info
-*
-   getevent events
-*   
-*    Call cts
-*
-   ami/module/call cts _ 
-             Event/g2t_ctb_hit Event/g2t_track ctb/geo ctb/slat _ 
-             ctb/slat_phi ctb/slat_eta ctb/mpara ctb/event ctb/mslat ctb/raw
-*
-   table/print ctb/raw
-*  getvalue 'Event/g2t_ctb_hit[0].x'
-*
-   ami/module/call ctu ctb/geo ctb/slat ctb/raw ctb/cor
-   wait
-*
-enddo
+ macro run__
+          TOP=/scr22/kathy/test26 _
+          domain='ctf' _
+          INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
+          input_g2t_file=muons_central_2.xdf _
+          num_events=1 _
+          writegeom=0 _
+          funit=21 _
+          nfile=ctb.ntup _
+          nid=111 _
+          table=ctf/ctb_cor
+* 
+*  this is an example!! you must change to fill your needs
+*  
+* --> to run
+*    - change the inputs above as desired
+*    - run staf
+*    -   exec run_ctb
+* 
+	  
+  message ' *** TOP directory to search for kumacs --> ' [TOP]
+  message ' *** domains to load  -->                   ' [domain]
+  message ' *** Data Sample directory -->              ' [INPUT_DATA_DIR]
+  message ' *** Input G2T file -->                     ' [input_g2t_file]
+  message ' *** Num Events to process -->              ' [num_events]
+  message ' *** write out geometry to file yes,no = 1,0 ' [writegeom]
+  message ' *** ntup file unit -->                     ' [funit]
+  message ' *** output Ntuple filename  -->            ' [nfile]
+  message ' *** Ntuple ID # -->                        ' [nid]
+  message ' *** Table to write to ntup -->             ' [table]
+
+***********************************************************
+* General Setup
+***********************************************************
+  
+ macro/global/create TOP              [TOP]
+
+* setup default directories to search for kumacs in
+* setup default table directory structure in STAF
+* load libraries [domain]
+   
+   
+   exec $STAR/kumacs/util/setup_defaults#run
+   
+   exec setup#setup
+   
+   macro/global/import *
+     
+   exec load_libraries#run [domain]
+
+* **************************************************************
+* --------- Setup and run tpc fast simulator & tracker pams -------------*
+   
+* open input g2t data file
+  exec input_g2t_file#init [INPUT_DATA_DIR][input_g2t_file]
+
+  if STAF_STATUS(1).eq.0 goto ENDOFDATA
+  
+* open output ntuple
+  exec write_table_to_ntuple#init_disk [funit] [nfile]  
+   
+* --------------------- initialization ----------------------------*
+  
+* load geometry
+  if [writegeom].eq.1 then
+    exec ctg_init#write
+  else 
+    exec ctg_init#read
+  endif
+    
+  exec cts_init
+  
+  exec create_tables_ctf#init
+  
+* ------------------- process events ------------------------------*
+
+* read event and then process thru simulator
+  do i=1,[num_events]
+    message ' run_ctb: processing event ' [i]
+* clear all event tables
+    tabclear [event]
+* read input file
+    exec input_g2t_file#read
+    if STAF_STATUS(1).eq.0 goto ENDOFDATA
+* do simulation
+    exec cts_run
+* fill pixel tables
+    exec ctu_run
+* write table to ntuple
+    exec write_table_to_ntuple#write_event_disk [nid] [data]/[table]
+  enddo
+
+  
+* -------------------- end stuff -----------------------------*
+  
+  ENDOFDATA:
+  if [i].lt.[num_events] then
+    message ' End of input file'
+  endif  
+
+* close ntuple
+  message ' close ntuple'
+  exec write_table_to_ntuple#close_disk [funit]
+
+* close input file
+  message ' close input file'
+  exec input_g2t_file#close
+
+return
+ 
+************************************************************************
+
+
+
+
+
+
+
+
+
+
+
+
+
