@@ -1,6 +1,8 @@
-//StiTrackMerger.h
-//M.L. Miller (Yale Software)
-//12/01
+#ifndef StiTrackMerger_HH
+#define StiTrackMerger_HH
+#include "SubjectObserver.h"
+
+class StiTrackContainer;
 
 /*! \class StiTrackMerger
   StiTrackMerger is a pure virtual class that defines the interface for a class that
@@ -14,61 +16,19 @@
   via the pointer to StiTrackContainer.
 
  */
-
-#ifndef StiTrackMerger_HH
-#define StiTrackMerger_HH
-
-#include "SubjectObserver.h"
-
-class StiTrackContainer;
-
 class StiTrackMerger : public Observer
 {
 public:
-
     ///One must provide a valid pointer to the track container.
     StiTrackMerger(StiTrackContainer*);
-    
     virtual ~StiTrackMerger();
-
     ///Merge the tracks in the track container.
     virtual void mergeTracks() = 0;
-
-    //Implmentation of Observer pattern
-    virtual void update(Subject* changedSubject);
-    virtual void forgetSubject(Subject* theObsoleteSubject);
-
 protected:
     StiTrackMerger(); //This is not implemented
     virtual void getNewState() = 0;
-    
     StiTrackContainer* mTrackStore;
-    Subject* mSubject;
 };
 
-
-//inlines
-
-inline void StiTrackMerger::update(Subject* changedSubject)
-{
-    if (changedSubject!=mSubject) {
-	cout <<"StiTrackMerger::update(Subject*). ERROR:\t"
-	     <<"changedSubject!=mSubject"<<endl;
-    }
-    else {
-	getNewState();
-    }   
-}
-
-inline void StiTrackMerger::forgetSubject(Subject* obsolete)
-{
-    if (obsolete==mSubject) {
-	mSubject=0;
-    }
-    else {
-	cout <<"StiTrackMerger::forgetSubject(Subject*). ERROR:\t"
-	     <<"changedSubject!=mSubject"<<endl;
-    }
-}
 
 #endif

@@ -43,9 +43,10 @@ ostream& operator<<(ostream&, const StiHit&);
   object is owned by some other scope.
 */
 StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder(StAssociationMaker* assoc, StiHitContainer* hc)
-    : StiSeedFinder(hc),
+    : Observer(StiIOBroker::instance()),
+      StiSeedFinder(hc),
       mAssociationMaker(assoc), mMcEvent(0), mTpcHitFilter(0),
-      mIOBroker(StiIOBroker::instance()), mSubject(StiIOBroker::instance()),
+      mIOBroker(StiIOBroker::instance()),
       mLowerBound(0), mMaxHits(0)
 {
     cout <<"StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder()"<<endl;

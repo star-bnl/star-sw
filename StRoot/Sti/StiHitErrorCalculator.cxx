@@ -39,21 +39,12 @@ class StiDetector;
 
 #define DEG2RAD 57.2958
 
-//StiHitErrorDefault* StiHitErrorDefault::sinstance=0;
-
 StiHitErrorCalculator::StiHitErrorCalculator()
-  :mIOBroker(StiIOBroker::instance()), mSubject(StiIOBroker::instance())
-{  
-  mSubject->attach(this);
-  //getNewState();
-}
+  :mIOBroker(StiIOBroker::instance())
+{}
 
 StiHitErrorCalculator::~StiHitErrorCalculator()
-{  //disconnect from IO Broker
-    if (mSubject) {
-	mSubject->detach(this);
-    }
-}
+{ }
 
 StiHitErrorDefault::StiHitErrorDefault()
      :fTpcSource(0), fSvtSource(0), fFtpcSource(0)
@@ -62,20 +53,13 @@ StiHitErrorDefault::StiHitErrorDefault()
 }
 
 StiHitErrorDefault::~StiHitErrorDefault()
-{
-  //delete StiHitError Functions
-
-}
-
-//StiHitErrorDefault* StiHitErrorDefault::instance()
-//{
-//    return (sinstance) ? sinstance : new StiHitErrorDefault();
-//}
+{}
 
 void StiHitErrorDefault::Init()
-{//set parameters from IOBroker->Database or defaults
+{
+  //set parameters from IOBroker->Database or defaults
   //should probably get a list of detectors from Detector Factory?
-
+  
   //get TPC parameters from database
   //no brokered io for now, set function to defaults
   SetTpcInnerParam(3.12735e-03,1.51055e-04,2.43806e-02,1.68243e-03,5.23272e-05,5.75341e-02);

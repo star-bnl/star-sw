@@ -22,7 +22,7 @@ ostream& operator<<(ostream&, const StiDetector&);
 
 StiLocalTrackSeedFinder::StiLocalTrackSeedFinder(StiDetectorContainer* det,
 						 StiHitContainer* hits)
-    : StiTrackSeedFinder(det, hits), mSubject(StiIOBroker::instance()), mDoHelixFit(false)
+    : StiTrackSeedFinder(det, hits), mDoHelixFit(false)
 {
     mMessenger <<"StiLocalTrackSeedFinder::StiLocalTrackSeedFinder()"<<endl;
     mSubject->attach(this);

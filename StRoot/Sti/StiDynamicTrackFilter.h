@@ -44,32 +44,12 @@ private:
     ///Not implemented
     StiDynamicTrackFilter();
     
-    ///Implement the update() function from the base class.
-    virtual void update(Subject*);
-    virtual void forgetSubject(Subject*);
     void getNewState();
     
     void clearAndDestroy();
     
-    Subject* mSubject;
     StiIOBroker* mBroker;
     FilterMap mMap;
 };
-
-//inlines
-
-inline void StiDynamicTrackFilter::update(Subject* changedSubject)
-{
-    if (changedSubject==mSubject) {
-	getNewState();
-    }   
-}
-
-inline void StiDynamicTrackFilter::forgetSubject(Subject* obsolete)
-{
-    if (obsolete==mSubject) {
-	mSubject=0;
-    }
-}
 
 #endif

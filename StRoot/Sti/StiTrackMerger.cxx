@@ -17,7 +17,8 @@ using namespace std;
 #include "StiTrackMerger.h"
 
 StiTrackMerger::StiTrackMerger(StiTrackContainer* store)
-    : mTrackStore(store), mSubject(StiIOBroker::instance())
+  : Observer(StiIOBroker::instance()),
+    mTrackStore(store)
 {
     cout <<"StiTrackMerger::StiTrackMerger()"<<endl;
     mSubject->attach(this);
@@ -25,8 +26,8 @@ StiTrackMerger::StiTrackMerger(StiTrackContainer* store)
 
 StiTrackMerger::~StiTrackMerger()
 {
-    cout <<"StiTrackMerger::~StiTrackMerger()"<<endl;
-    if (mSubject) {
-	mSubject->detach(this);
-    }
+  cout <<"StiTrackMerger::~StiTrackMerger()"<<endl;
+  if (mSubject) {
+    mSubject->detach(this);
+  }
 }

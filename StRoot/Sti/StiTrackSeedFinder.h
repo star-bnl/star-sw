@@ -40,9 +40,6 @@ public:
 
     //Implementation of Observer pattern
     virtual void getNewState() = 0;
-    virtual void update(Subject* changedSubject) = 0;
-    virtual void forgetSubject(Subject* theObsoleteSubject) = 0;
-
     
 protected:
     

@@ -58,17 +58,18 @@ void Subject::notify()
 {
     // cout <<"Subject::notify()"<<endl;
     for (ObserverVec::iterator it=mObservers.begin(); it!=mObservers.end(); ++it) {
-	(*it)->update(this);
+	(*it)->changed(this);
     }
 }
 
 Observer::Observer()
-{
-    // cout <<"Observer::Observer()"<<endl;
-}
+  : mSubject(0)
+{}
+
+Observer::Observer(Subject * subject)
+  : mSubject(subject)
+{}
 
 Observer::~Observer()
-{
-    // cout <<"Observer::~Observer()"<<endl;    
-}
+{}
 
