@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.6 2000/04/06 08:34:56 calderon Exp $
+ * $Id: StMcTrack.hh,v 2.7 2000/04/06 23:29:10 calderon Exp $
  * $Log: StMcTrack.hh,v $
+ * Revision 2.7  2000/04/06 23:29:10  calderon
+ * Store the parent track for all tracks.
+ *
  * Revision 2.6  2000/04/06 08:34:56  calderon
  * Version using the particle table:
  * 1) Constructor for particle_st*
@@ -76,8 +79,8 @@ public:
     const StMcVertex*            startVertex() const; //!
     StMcVertex*                  stopVertex(); //!
     const StMcVertex*            stopVertex() const; //!
-    StMcTrack*                   generatorParent(); //!
-    const StMcTrack*             generatorParent() const; //!
+    StMcTrack*                   parent(); //!
+    const StMcTrack*             parent() const; //!
     StPtrVecMcVertex&            intermediateVertices(); //!
     const StPtrVecMcVertex&      intermediateVertices() const; //!
     StPtrVecMcTpcHit&            tpcHits(); //!
@@ -111,7 +114,7 @@ public:
     void setPdgId(long); //!
     void setKey(long);     //!
     void setEventGenLabel(long);     //!
-    void setGeneratorParent(StMcTrack*);     //!
+    void setParent(StMcTrack*);     //!
 
     void addTpcHit(StMcTpcHit*); //!
     void addSvtHit(StMcSvtHit*); //!
@@ -134,7 +137,7 @@ protected:
     StPtrVecMcFtpcHit      mFtpcHits; //!
     StPtrVecMcRichHit      mRichHits; //!
     StParticleDefinition*  mParticleDefinition; //!
-    StMcTrack*             mGeneratorParent;
+    StMcTrack*             mParent;
     char                   mIsShower; //!
     long                   mGeantId; //!
     long                   mPdgId; //!
@@ -165,9 +168,9 @@ inline StMcVertex* StMcTrack::stopVertex() { return mStopVertex; }
 
 inline const StMcVertex* StMcTrack::stopVertex() const { return mStopVertex; }
 
-inline StMcTrack* StMcTrack::generatorParent() { return mGeneratorParent; }
+inline StMcTrack* StMcTrack::parent() { return mParent; }
 
-inline const StMcTrack* StMcTrack::generatorParent() const { return mGeneratorParent; }
+inline const StMcTrack* StMcTrack::parent() const { return mParent; }
 
 inline StPtrVecMcVertex& StMcTrack::intermediateVertices() { return mIntermediateVertices; }
 
