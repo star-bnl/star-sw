@@ -1,4 +1,5 @@
-//StiLocalTrackSeedFinder.cxx M.L. Miller (Yale Software) 10/01
+///\file StiLocalTrackSeedFinder.cxx 
+///\author M.L. Miller (Yale Software) 10/01
 #include <stdexcept>
 #include <math.h>
 #include "StThreeVectorF.hh"
@@ -13,8 +14,10 @@
 #include "StiDetectorContainer.h"
 #include "StiLocalTrackSeedFinder.h"
 #include "StiSortedHitIterator.h"
+#include "StiToolkit.h"
 #include "Sti/Base/MessageType.h"
 #include "Sti/Base/Messenger.h"
+#include "Sti/Base/EditableParameter.h"
 
 ostream& operator<<(ostream&, const StiDetector&);
 
@@ -37,6 +40,27 @@ StiLocalTrackSeedFinder::~StiLocalTrackSeedFinder()
   if (mSubject) {
     mSubject->detach(this);
   }
+}
+
+void StiLocalTrackSeedFinder::initialize()
+{
+  Factory<EditableParameter> * f = StiToolkit::instance()->getParameterFactory();
+  if (!f)
+    {
+      cout << "StiLocalTrackSeedFinder::initialize() -F- Parameter factory is null" << endl;
+      throw logic_error("StiLocalTrackSeedFinder::initialize() -F- Parameter factory is null");
+    }
+  add(f->getInstance()->set("DeltaY",    "Delta-Y",        &mDeltaY,        4., 0.5, 20., 0.1, 0));
+  add(f->getInstance()->set("DeltaZ",     "Delta-Z",       &mDeltaZ,       10., 0.5, 20., 0.1, 0));
+  add(f->getInstance()->set("SeedLength", "Seed Length",   &mSeedLength,    2,  2, 6, 1, 0));
+  add(f->getInstance()->set("extraDeltaY","extra-Delta-Y", &mExtrapDeltaY, 1., 0.5, 10., 0.1, 0));
+  add(f->getInstance()->set("extraDeltaZ","extra-Delta-Z", &mExtrapDeltaZ, 2., 0.5, 10., 0.1, 0));
+
+  add(f->getInstance()->set("MaxSkipped","Max Layers Skipped",  &mMaxSkipped, 2, 0, 5, 1, 0));
+  add(f->getInstance()->set("ExtrapMinLength","Min Length of Extrapolation", &mExtrapMinLength , 4, 1, 10, 1, 0));
+  add(f->getInstance()->set("ExtrapMaxLength","Max Length of Extrapolation", &mExtrapMaxLength,  5, 1, 10, 1, 0));
+  add(f->getInstance()->set("UseOrigin","Use Origin in Fit", &mUseOrigin, true, 0));
+  add(f->getInstance()->set("DoHelixFit","Do Helix Fit",  &mDoHelixFit, true, 0));
 }
 
 /// Produce the next track seed 
@@ -92,7 +116,7 @@ bool StiLocalTrackSeedFinder::extendHit(StiHit* hit)
 			     hit->y(), hit->z());
   //Loop on hits, find closest in z:
   //This too should be replaced by an algorithm call which can be inlined.
-  unsigned int nhits=0;
+  int nhits=0;
   StiHit* closestHit = 0;
   double  closestDz = DBL_MAX;
   while (_hitContainer->hasMore()) 
@@ -214,7 +238,7 @@ bool StiLocalTrackSeedFinder::extrapolate()
   //Now look for a hit in the next layer in:
   _detectorContainer->setToDetector( hit2->detector() );
   //Test to see if move in worked
-  for (unsigned int i=0; i<=mSkipped; ++i) 
+  for (int i=0; i<=mSkipped; ++i) 
     {
       if ( _detectorContainer->moveIn()==false) 
 	{
@@ -273,7 +297,7 @@ bool StiLocalTrackSeedFinder::extrapolate()
   //This too should be replaced by an algorithm call which can be inlined.
   //Add it to the tbd list!
     
-  unsigned int nhits=0;
+  int nhits=0;
   StiHit* closestHit = 0;
   double dist_max = DBL_MAX;
     
@@ -404,6 +428,7 @@ void StiLocalTrackSeedFinder::getNewState()
   mSeedLength = broker->ltsfSeedLength();
   mExtrapDeltaY = broker->ltsfExtrapYWindow();
   mExtrapDeltaZ = broker->ltsfExtrapZWindow();
+ 
   mMaxSkipped = broker->ltsfExtrapMaxSkipped();
   mExtrapMinLength = broker->ltsfExtrapMinLength();
   mExtrapMaxLength = broker->ltsfExtrapMaxLength();

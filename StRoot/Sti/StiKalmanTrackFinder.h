@@ -1,9 +1,7 @@
 #ifndef StiKalmanTrackFinder_H
 #define StiKalmanTrackFinder_H 1
 
-#include "Sti/Base/SubjectObserver.h"
 #include "Sti/StiTrackFinder.h"
-
 class Messenger;
 class StiDetector;
 class StiDetectorBuilder;
@@ -25,14 +23,22 @@ class StiKalmanTrackFinderParameters;
 template<class Factorized>class Factory;
 template<class Event,class Detector>class StiHitLoader;
 
-class StiKalmanTrackFinder : public StiTrackFinder, public Observer
+
+///\class StiKalmanTrackFinder  
+///
+///\author  Claude Pruneau, Wayne State University                        
+///\date March 2001                                                    
+///
+///\note The Kalman Filter Code imbedded in this class was given
+///to us gracioulsy by Jouri Belikov from the ALICE       
+///collaboration. i.e. code reproduced with autorization. 
+///
+class StiKalmanTrackFinder : public StiTrackFinder
 {
 public:
   StiKalmanTrackFinder(StiToolkit*toolkit);
   virtual ~StiKalmanTrackFinder();
   
-  virtual void update();
-  virtual void changed(Subject* changedSubject);
 
   /// Initialize the finder
   virtual void initialize();
@@ -63,6 +69,7 @@ public:
   virtual void extendTracksToVertex(StiHit* vertex);
   /// Reset the tracker
   virtual void reset();
+  virtual void update();
   /// Clear the tracker
   virtual void clear();
   /// Get the number of number of track seed used by the seed finder
@@ -90,7 +97,8 @@ public:
   StiFindStep getTrackingMode() const;
   
   void setParameters(StiKalmanTrackFinderParameters *par);
-  StiKalmanTrackFinderParameters * getParameters();
+  //StiKalmanTrackFinderParameters * getParameters();
+  virtual EditableParameters * getParameters();
   
   void doInitLayer(int trackingDirection);
   void doNextDetector();
@@ -99,13 +107,10 @@ public:
   void doNextTrackStep();
 
   
-  
 
 protected:
 
-    void getNewState();
     void printState();
-
     StiToolkit                  * _toolkit;
     Filter<StiTrack>            * _trackFilter;
     Filter<StiTrack>            * _guiTrackFilter;

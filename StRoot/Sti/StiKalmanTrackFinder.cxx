@@ -14,17 +14,6 @@
   
 */
 
-/*
-  \class StiKalmanTrackFinder  
-  
-  \author  Claude Pruneau, Wayne State University                        
-  \date March 2001                                                    
-  
-  \note The Kalman Filter Code imbedded in this class was given
-  to us gracioulsy by Jouri Belikov from the ALICE       
-  collaboration. i.e. code reproduced with autorization. 
-*/
-
 //Std
 #include <iostream>
 #include <stdexcept>
@@ -35,11 +24,10 @@ using std::endl;
 
 //Sti
 #include "Sti/Base/Parameter.h"
-#include "Sti/EditableFilter.h"
+#include "Sti/Base/EditableFilter.h"
 #include "StiHitLoader.h"
 #include "StiToolkit.h"
 #include "StiKTNIterator.h"
-#include "StiIOBroker.h"
 #include "StiHit.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
@@ -77,6 +65,8 @@ using std::endl;
 
 ostream& operator<<(ostream&, const StiTrack&);
 
+
+
 void StiKalmanTrackFinder::initialize()
 {
   //set the cached variables
@@ -96,8 +86,7 @@ void StiKalmanTrackFinder::initialize()
 }
 
 StiKalmanTrackFinder::StiKalmanTrackFinder(StiToolkit*toolkit)
-  : Observer(StiIOBroker::instance()),
-    _toolkit(toolkit),
+  : _toolkit(toolkit),
     _trackFilter(0), 
     _guiTrackFilter(0), 
     _guiMcTrackFilter(0), 
@@ -120,107 +109,14 @@ StiKalmanTrackFinder::StiKalmanTrackFinder(StiToolkit*toolkit)
 {
   if (!_toolkit)
     throw runtime_error("StiKalmanTrackFinder::StiKalmanTrackFinder(...) - FATAL - toolkit==0");
-
-  StiIOBroker *  broker = _toolkit->getIOBroker();
-  Factory< Filter<StiTrack>  >* _trackFilterFactory = _toolkit->getTrackFilterFactory();
-  _trackFilter      = _trackFilterFactory->getInstance();
-  if (broker->useGui())
-    {
-      _messenger << "StiKalmanTrackFinder() - INFO - Instantiating gui filters" << endl;
-      EditableFilter<StiTrack> * guiFilter;
-      _guiTrackFilter = _trackFilterFactory->getInstance();
-      guiFilter = static_cast< EditableFilter<StiTrack> * >(_guiTrackFilter);
-      guiFilter->setName("RecTrackFilter");
-      guiFilter->add("Chi2Used", "Use Chi2",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kChi2);
-      guiFilter->add("Chi2Min",  "Minimum Chi2", 0., 0., 0., 100.,1,Parameter::Double, StiTrack::kChi2);
-      guiFilter->add("Chi2Max",  "Maximum Chi2", 20., 20., 0., 100.,1,Parameter::Double, StiTrack::kChi2);
-      
-      guiFilter->add("PhiUsed",  "Use Phi",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPhi);
-      guiFilter->add("PhiMin",   "Minimum Phi", 0.,   0.,  0., 6.3,2,Parameter::Double, StiTrack::kPhi);
-      guiFilter->add("PhiMax",   "Maximum Phi", 6.3, 6.3, 0., 6.3,2,Parameter::Double, StiTrack::kPhi);
-      
-      guiFilter->add("PtUsed",   "Use Pt",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPt);
-      guiFilter->add("PtMin",    "Minimum Pt", 0., 0., 0., 100.,2,Parameter::Double, StiTrack::kPt);
-      guiFilter->add("PtMax",    "Maximum Pt", 10., 10., 0., 100.,2,Parameter::Double, StiTrack::kPt);
-      
-      guiFilter->add("PUsed",    "Use P",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kP);
-      guiFilter->add("PMin",     "Minimum P", 0., 0., 0., 100.,2,Parameter::Double, StiTrack::kP);
-      guiFilter->add("PMax",     "Maximum P", 10., 10., 0., 100.,2,Parameter::Double, StiTrack::kP);
-      
-      guiFilter->add("EtaUsed",  "Use Eta",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPseudoRapidity);
-      guiFilter->add("EtaMin",   "Minimum Eta", -1.5, -1.5, -10., 10.,2,Parameter::Double, StiTrack::kPseudoRapidity);
-      guiFilter->add("EtaMax",   "Maximum Eta",  1.5,  1.5, -10., 10.,2,Parameter::Double, StiTrack::kPseudoRapidity);
-      
-      guiFilter->add("nPtsUsed", "Use nPts",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPointCount);
-      guiFilter->add("nPtsMin",  "Minimum nPts", 0., 0., 0., 100.,1,Parameter::Integer, StiTrack::kPointCount);
-      guiFilter->add("nPtsMax",  "Maximum nPts", 60., 60., 0., 100.,1,Parameter::Integer, StiTrack::kPointCount);
-      
-      guiFilter->add("nGapsUsed","Use nGaps",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kGapCount);
-      guiFilter->add("nGapsMin", "Minimum nGaps", 0., 0., 0., 100.,1,Parameter::Integer, StiTrack::kGapCount);
-      guiFilter->add("nGapsMax", "Maximum nGaps", 60., 60., 0., 100.,1,Parameter::Integer, StiTrack::kGapCount);
-      
-      guiFilter->add("chargeUsed","Use Charge",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kCharge);
-      guiFilter->add("chargeMin", "Minimum Charge", -1., -1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge);
-      guiFilter->add("chargeMax", "Maximum Charge",  1.,  1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge);
-      Observer * obs = dynamic_cast<Observer *>(this);
-      dynamic_cast<Subject*>(_guiTrackFilter)->attach(obs);
-
-      _guiMcTrackFilter = _trackFilterFactory->getInstance();
-      guiFilter = static_cast<EditableFilter<StiTrack> * >(_guiMcTrackFilter);
-      guiFilter->setName("McTrackFilter");
-      guiFilter->add("PhiUsed",  "Use Phi",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPhi);
-      guiFilter->add("PhiMin",   "Minimum Phi", 0.,   0.,  0., 6.3,2,Parameter::Double, StiTrack::kPhi);
-      guiFilter->add("PhiMax",   "Maximum Phi", 6.3, 6.3, 0., 6.3,2,Parameter::Double, StiTrack::kPhi);
-      guiFilter->add("PtUsed",   "Use Pt",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPt);
-      guiFilter->add("PtMin",    "Minimum Pt", 0., 0., 0., 100.,2,Parameter::Double, StiTrack::kPt);
-      guiFilter->add("PtMax",    "Maximum Pt", 10., 10., 0., 100.,2,Parameter::Double, StiTrack::kPt);
-      guiFilter->add("PUsed",    "Use P",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kP);
-      guiFilter->add("PMin",     "Minimum P", 0., 0., 0., 100.,2,Parameter::Double, StiTrack::kP);
-      guiFilter->add("PMax",     "Maximum P", 10., 10., 0., 100.,2,Parameter::Double, StiTrack::kP);
-      guiFilter->add("EtaUsed",  "Use Eta",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPseudoRapidity);
-      guiFilter->add("EtaMin",   "Minimum Eta", -1.5, -1.5, -10., 10.,2,Parameter::Double, StiTrack::kPseudoRapidity);
-      guiFilter->add("EtaMax",   "Maximum Eta",  1.5,  1.5, -10., 10.,2,Parameter::Double, StiTrack::kPseudoRapidity);
-      guiFilter->add("nPtsUsed", "Use nPts",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPointCount);
-      guiFilter->add("nPtsMin",  "Minimum nPts", 0., 0., 0., 100.,1,Parameter::Integer, StiTrack::kPointCount);
-      guiFilter->add("nPtsMax",  "Maximum nPts", 60., 60., 0., 100.,1,Parameter::Integer, StiTrack::kPointCount);
-      guiFilter->add("chargeUsed","Use Charge",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kCharge);
-      guiFilter->add("chargeMin", "Minimum Charge", -1., -1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge);
-      guiFilter->add("chargeMax", "Maximum Charge",  1.,  1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge);
-      dynamic_cast<Subject*>(_guiMcTrackFilter)->attach(obs);
-    }
-  else
-    _messenger << "StiKalmanTrackFinder() - INFO - No GUI filters selected" << endl;
-
+  //Factory< Filter<StiTrack>  >* _trackFilterFactory = _toolkit->getTrackFilterFactory();
+  _trackFilter =0;//     = _trackFilterFactory->getInstance();
   setParameters(new StiKalmanTrackFinderParameters());
-  mSubject->attach(this);
-  getNewState();
   _messenger << "StiKalmanTrackFinder::StiKalmanTrackFinder() - Done"<<endl;
 }
 
 StiKalmanTrackFinder::~StiKalmanTrackFinder()
-{
-  //progFlowMes <<"StiKalmanTrackFinder::~StiKalmanTrackFinder() - Begin/End"<<endl;
-  if (mSubject) {
-    mSubject->detach(this);
-  }
-}
-
-void StiKalmanTrackFinder::getNewState()
-{
-  StiIOBroker *  broker = _toolkit->getIOBroker();
-  //_messenger <<"StiKalmanTrackFinder::getNewState()"<<endl;
-  _pars->setMCSCalculated(broker->ktfMcsCalculated()); //check
-  _pars->setElossCalculated(broker->ktfElossCalculated()); //check
-  _pars->setMaxChi2ForSelection(broker->ktfMaxChi2ForSelection());//check
-  _pars->setField(broker->ktfBField()); //check
-  _pars->setMassHypothesis(broker->ktfMassHypothesis()); //check
-  _pars->setMinContiguousHitCount(broker->ktfMinContiguousHitCount());  //check
-  _pars->setMaxNullCount(broker->ktfMaxNullCount()); //check
-  _pars->setMaxContiguousNullCount(broker->ktfMaxContiguousNullCount()); //check
-  _pars->setMinSearchWindow(broker->ktfMinSearchRadius()); //check
-  _pars->setMaxSearchWindow(broker->ktfMaxSearchRadius()); //check
-  _pars->setSearchWindowScale(broker->ktfSearchWindowScale()); //check
-}
+{ }
 
 /*!
  Reset the state of the finder  to "event not tracked"
@@ -236,6 +132,7 @@ void StiKalmanTrackFinder::reset()
   _trackFactory->reset();
   _trackNodeFactory->reset();
   _trackContainer->clear();
+  _trackSeedFinder->reset();
   _messenger << "StiKalmanTrackFinder::reset() - INFO - Done" <<endl;
 }
 
@@ -744,18 +641,16 @@ void StiKalmanTrackFinder::findTracks(StEvent * event, StMcEvent * mcEvent)
   _messenger << "StiKalmanTrackFinder::findTracks(StEvent*) - INFO - Done"  << endl;
 }
 
-void StiKalmanTrackFinder::changed(Subject* changedSubject)
-{
-  _messenger << "StiKalmanTrackFinder::changed(Subject* changedSubject)" << endl;
-  getNewState();
-  update();
-}
-
 void StiKalmanTrackFinder::setParameters(StiKalmanTrackFinderParameters *par)
 {
   _pars = par;
   StiKalmanTrack::setParameters(par);
   StiKalmanTrackNode::setParameters(par);
+}
+
+EditableParameters * StiKalmanTrackFinder::getParameters() 
+{
+  return _pars;
 }
 
 /// Get the vertex finder used by this track finder
@@ -774,3 +669,69 @@ void StiKalmanTrackFinder::loadTracks(StEvent * event)
 {
   /* not implemented yet */
 }
+
+
+
+/*
+  _messenger << "StiKalmanTrackFinder() - INFO - Instantiating gui filters" << endl;
+  EditableFilter<StiTrack> * guiFilter;
+  _guiTrackFilter = _trackFilterFactory->getInstance();
+  guiFilter = static_cast< EditableFilter<StiTrack> * >(_guiTrackFilter);
+  guiFilter->setName("RecTrackFilter");
+  guiFilter->add("Chi2Used", "Use Chi2",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kChi2);
+  guiFilter->add("Chi2Min",  "Minimum Chi2", 0., 0., 0., 100.,1,Parameter::Double, StiTrack::kChi2);
+  guiFilter->add("Chi2Max",  "Maximum Chi2", 20., 20., 0., 100.,1,Parameter::Double, StiTrack::kChi2);
+  
+  guiFilter->add("PhiUsed",  "Use Phi",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPhi);
+  guiFilter->add("PhiMin",   "Minimum Phi", 0.,   0.,  0., 6.3,2,Parameter::Double, StiTrack::kPhi);
+  guiFilter->add("PhiMax",   "Maximum Phi", 6.3, 6.3, 0., 6.3,2,Parameter::Double, StiTrack::kPhi);
+  
+  guiFilter->add("PtUsed",   "Use Pt",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPt);
+  guiFilter->add("PtMin",    "Minimum Pt", 0., 0., 0., 100.,2,Parameter::Double, StiTrack::kPt);
+  guiFilter->add("PtMax",    "Maximum Pt", 10., 10., 0., 100.,2,Parameter::Double, StiTrack::kPt);
+  
+  guiFilter->add("PUsed",    "Use P",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kP);
+  guiFilter->add("PMin",     "Minimum P", 0., 0., 0., 100.,2,Parameter::Double, StiTrack::kP);
+  guiFilter->add("PMax",     "Maximum P", 10., 10., 0., 100.,2,Parameter::Double, StiTrack::kP);
+  
+  guiFilter->add("EtaUsed",  "Use Eta",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPseudoRapidity);
+  guiFilter->add("EtaMin",   "Minimum Eta", -1.5, -1.5, -10., 10.,2,Parameter::Double, StiTrack::kPseudoRapidity);
+  guiFilter->add("EtaMax",   "Maximum Eta",  1.5,  1.5, -10., 10.,2,Parameter::Double, StiTrack::kPseudoRapidity);
+  
+  guiFilter->add("nPtsUsed", "Use nPts",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPointCount);
+  guiFilter->add("nPtsMin",  "Minimum nPts", 0., 0., 0., 100.,1,Parameter::Integer, StiTrack::kPointCount);
+  guiFilter->add("nPtsMax",  "Maximum nPts", 60., 60., 0., 100.,1,Parameter::Integer, StiTrack::kPointCount);
+  
+  guiFilter->add("nGapsUsed","Use nGaps",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kGapCount);
+  guiFilter->add("nGapsMin", "Minimum nGaps", 0., 0., 0., 100.,1,Parameter::Integer, StiTrack::kGapCount);
+  guiFilter->add("nGapsMax", "Maximum nGaps", 60., 60., 0., 100.,1,Parameter::Integer, StiTrack::kGapCount);
+  
+  guiFilter->add("chargeUsed","Use Charge",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kCharge);
+  guiFilter->add("chargeMin", "Minimum Charge", -1., -1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge);
+  guiFilter->add("chargeMax", "Maximum Charge",  1.,  1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge);
+  Observer * obs = dynamic_cast<Observer *>(this);
+  dynamic_cast<Subject*>(_guiTrackFilter)->attach(obs);
+  
+  _guiMcTrackFilter = _trackFilterFactory->getInstance();
+  guiFilter = static_cast<EditableFilter<StiTrack> * >(_guiMcTrackFilter);
+  guiFilter->setName("McTrackFilter");
+  guiFilter->add("PhiUsed",  "Use Phi",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPhi);
+  guiFilter->add("PhiMin",   "Minimum Phi", 0.,   0.,  0., 6.3,2,Parameter::Double, StiTrack::kPhi);
+  guiFilter->add("PhiMax",   "Maximum Phi", 6.3, 6.3, 0., 6.3,2,Parameter::Double, StiTrack::kPhi);
+  guiFilter->add("PtUsed",   "Use Pt",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPt);
+  guiFilter->add("PtMin",    "Minimum Pt", 0., 0., 0., 100.,2,Parameter::Double, StiTrack::kPt);
+  guiFilter->add("PtMax",    "Maximum Pt", 10., 10., 0., 100.,2,Parameter::Double, StiTrack::kPt);
+  guiFilter->add("PUsed",    "Use P",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kP);
+  guiFilter->add("PMin",     "Minimum P", 0., 0., 0., 100.,2,Parameter::Double, StiTrack::kP);
+  guiFilter->add("PMax",     "Maximum P", 10., 10., 0., 100.,2,Parameter::Double, StiTrack::kP);
+  guiFilter->add("EtaUsed",  "Use Eta",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPseudoRapidity);
+  guiFilter->add("EtaMin",   "Minimum Eta", -1.5, -1.5, -10., 10.,2,Parameter::Double, StiTrack::kPseudoRapidity);
+  guiFilter->add("EtaMax",   "Maximum Eta",  1.5,  1.5, -10., 10.,2,Parameter::Double, StiTrack::kPseudoRapidity);
+  guiFilter->add("nPtsUsed", "Use nPts",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kPointCount);
+  guiFilter->add("nPtsMin",  "Minimum nPts", 0., 0., 0., 100.,1,Parameter::Integer, StiTrack::kPointCount);
+  guiFilter->add("nPtsMax",  "Maximum nPts", 60., 60., 0., 100.,1,Parameter::Integer, StiTrack::kPointCount);
+  guiFilter->add("chargeUsed","Use Charge",     false, false, 0,1,1,Parameter::Boolean, StiTrack::kCharge);
+  guiFilter->add("chargeMin", "Minimum Charge", -1., -1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge);
+  guiFilter->add("chargeMax", "Maximum Charge",  1.,  1., -100.,   100.,1,Parameter::Integer, StiTrack::kCharge);
+  dynamic_cast<Subject*>(_guiMcTrackFilter)->attach(obs);
+*/
