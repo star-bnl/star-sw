@@ -187,7 +187,8 @@
 * 12/9/98 K. Turner - fix sgr chain to check if sgr ran okay before running stk
 *                   - after reading in fz file in fzin (init) do make gstar
 *                     again so that hepe_* tables get created
-* 
+*                   - fix tfc_r chain so that it uses tpc sector #'s
+*  
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -712,7 +713,7 @@ return
 		 goto NEXT_EVENT
                endif
       (tfc)    exec tfc_run#run_newtab [tpc_sector_first] [tpc_sector_last]
-      (tfc_r)  exec tfc_run#run_reformat_newtab
+      (tfc_r)  exec tfc_run#run_reformat_newtab [tpc_sector_first] [tpc_sector_last]
       (tcl)    
                exec tcl_run#run_tcl [tpc_sector_first] [tpc_sector_last] 
 * exec tcl_run#run_tcc [tpc_sector_first] [tpc_sector_last] 
