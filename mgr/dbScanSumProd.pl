@@ -228,7 +228,7 @@ my $TdstHEvt  = 0;
 
 
   print HTML "<TR ALIGN=CENTER VALIGN=CENTER>\n";
-  print HTML "<TD><a href=\"http://duvall.star.bnl.gov/devcgi/dbFileCatalogRetrv.pl?set=$setE\">$setE</TD>\n"; 
+  print HTML "<TD><a href=\"http://duvall.star.bnl.gov/devcgi/dbFileMdc3Retrv.pl?set=$setE\">$setE</TD>\n"; 
   print HTML "<td>$InSize{$setE}</td><td>$InEvts{$setE}</td><td>$dstHpsize{$setE}</td><td>$dstHpEvts{$setE}</td><td>$dstDsize{$setE}</td><td>$dstDEvts{$setE}</td></tr>\n"; 
 
 }
