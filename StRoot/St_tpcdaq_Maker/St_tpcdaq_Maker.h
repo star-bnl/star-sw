@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.5 1999/06/21 22:27:08 ward Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.6 1999/06/22 21:50:28 ward Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.6  1999/06/22 21:50:28  ward
+// Remove FatalError from class definition.
+//
 // Revision 1.5  1999/06/21 22:27:08  ward
 // Prototype connection to StDaqLib.
 //
@@ -65,7 +68,7 @@ class St_tpcdaq_Maker : public StMaker {
    char *daqInputFile;
    
    void OrderTheSequences(int nseq,StSequence *los);
-   void FatalError(int);
+   // void FatalError(int);
    void SeqWrite(St_raw_seq *raw_seq_gen,int rownum,
                   int startTimeBin,int numberOfBinsInSequence);
    void PixelWrite(St_type_shortdata *pixel_data_gen,
