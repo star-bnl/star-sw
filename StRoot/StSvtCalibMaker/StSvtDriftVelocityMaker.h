@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDriftVelocityMaker.h,v 1.1 2002/01/18 19:57:43 willson Exp $
+ * $Id: StSvtDriftVelocityMaker.h,v 1.2 2002/01/18 20:53:47 willson Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtDriftVelocityMaker.h,v $
- * Revision 1.1  2002/01/18 19:57:43  willson
- * Drift Velocity Calculation v.1
+ * Revision 1.2  2002/01/18 20:53:47  willson
+ * Some bug fixes by Helen
  *
  *
  **************************************************************************/
@@ -38,7 +38,8 @@ class StSvtHitCollection;
 
 class StSvtDriftVelocityMaker : public StMaker {
   private:
-  StSvtHybridCollection* mSvtData;                    //!
+  StSvtHybridCollection* mSvtData;        //!
+  StSvtData* mSvtRawData;                 //!
   StSvtHybridCollection* mSvtDriftVeloc;  //!
   TH1D** mHybridDriftVelocityHisto; //!
   TH2D** mHybridDriftVelocity2DHisto; //!
@@ -85,6 +86,7 @@ class StSvtDriftVelocityMaker : public StMaker {
   bool accept(StSvtHit* hit);
 
   virtual Int_t  SetSvtData();
+  virtual Int_t  SetSvtRawData();
   virtual Int_t  SetSvtDriftVelocity();
   virtual Int_t  FillHistogramsRaw();
   virtual Int_t  FillHistogramsStEvent();
