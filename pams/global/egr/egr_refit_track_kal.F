@@ -203,16 +203,20 @@ C     load the working arrays for the fitting subroutines
 C     omit points that were marked as outliers
 
                if(good_hit(i)) then
-                  ncir = ncir+1
                   ient = gtrk(igtrk).ipnt(i)
-                  xcir(ncir) = tphit(ient).x
-                  ycir(ncir) = tphit(ient).y
-                  zcir(ncir) = tphit(ient).z
-                  xerr(ncir) = tphit(ient).dx
-                  yerr(ncir) = tphit(ient).dy
-                  zerr(ncir) = tphit(ient).dz
+                  if( ient .gt. 0 .and. tphit(ient).flag .ne. 0) then
+                     good_hit(i) = .false.
+                  endif
+                  if( ient .ne. 0 .and. good_hit(i)) then
+                     ncir = ncir+1
+                     xcir(ncir) = tphit(ient).x
+                     ycir(ncir) = tphit(ient).y
+                     zcir(ncir) = tphit(ient).z
+                     xerr(ncir) = tphit(ient).dx
+                     yerr(ncir) = tphit(ient).dy
+                     zerr(ncir) = tphit(ient).dz
+                  endif
                endif
-
             enddo
          endif
 

@@ -513,27 +513,22 @@ CSM
                endif            ! End of what type of tpc copying to do
                
 
-               if( ipriv .eq. 0) then
-                  do ient = 1, gtrk(itrk).ntpc
-                     if( gtrk(itrk).pos(ient) .lt. 0) then
-                        tpc_group(ithit).ident = -1
-                     else
-                        if( ient .le .mxpnt_tpc) then
-                           ithit = gtrk(itrk).ipnt(ient)
-                           if (ithit.ne.-999 .and. ithit .ne. 0) then
-                              tphit(ithit).id_globtrk 
-     +                             = globtrk_h.nok
-                           endif
+               do ient = 1, gtrk(itrk).ntpc
+                  if( ient .le .mxpnt_tpc) then
+                     ithit = gtrk(itrk).ipnt(ient)
+                     if (ithit.ne.-999 .and. ithit .ne. 0) then
+                        if( gtrk(itrk).pos(ient) .lt. 0) then
+                           tpc_group(ithit).ident = -1
+                        else if( ipriv .eq. 0) then
+                           tphit(ithit).id_globtrk 
+     +                          = globtrk_h.nok
                         endif
                      endif
-                  enddo
+                  endif
+               enddo
+               if( ipriv .eq. 0) then
                   tptrack(itrk).id_globtrk = globtrk_h.nok
                else
-                  do ient = 1, gtrk(itrk).ntpc
-                     if( gtrk(itrk).pos(ient) .lt. 0) then
-                        tpc_group(ithit).ident = -1
-                     endif
-                  enddo
                   tptrack(itrk).id_globtrk = -1*tptrack(itrk).id_globtrk 
                endif
             endif               ! End of test if good tpc track
