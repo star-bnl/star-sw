@@ -1,5 +1,8 @@
-// $Id: Example_look_at_tables_after_bfcread.C,v 1.2 1999/06/07 21:10:35 kathy Exp $
+// $Id: Example_look_at_tables_after_bfcread.C,v 1.3 1999/06/17 18:26:16 kathy Exp $
 // $Log: Example_look_at_tables_after_bfcread.C,v $
+// Revision 1.3  1999/06/17 18:26:16  kathy
+// bfcread: change default input file; Example.. fix so works if you just execute it
+//
 // Revision 1.2  1999/06/07 21:10:35  kathy
 // fixing up macros - removed or renamed some, fixed others so the default input file is there
 //
@@ -53,19 +56,18 @@ glob->Print(0,5);
 
 // get the table header data
 table_head_st *tdt_h = glob->GetHeader();
-tdt_h->name;
-tdt_h->type;
-tdt_h->maxlen;
-tdt_h->nok;
+ cout << " header name   = " << tdt_h->name << endl;
+ cout << " header type   = " << tdt_h->type << endl;
+ cout << " header maxlen = " << tdt_h->maxlen << endl;
+ cout << " header nok    = " << tdt_h->nok << endl;
 
 // get the table and print out info about it (it's printing row 0)
 dst_track_st *sth = glob->GetTable();
-sth->ndegf;
-sth->x0;
-sth->impact;
-sth->invpt;
-sth->y0;
-
+ cout << " globtrk ndegf   = " << sth->ndegf  << endl;
+ cout << " globtrk x0      = " << sth->x0     << endl;
+ cout << " globtrk impact  = " << sth->impact << endl;
+ cout << " globtrk invpt   = " << sth->invpt  << endl;
+ cout << " globtrk y0      = " << sth->y0     << endl;
 
 }
 
