@@ -279,7 +279,7 @@ C*-Calculate (phi,eta) bin for Track at vertex
                phi=phi+PI2
             enddo
             pbin=int(phi/PI2*float(ems_control(1).chrg_phi_nbin))+1
-            write(*,*) phi,eta,pbin,ebin
+c            write(*,*) phi,eta,pbin,ebin
             e_vtx=sqrt(p_tot**2 + 0.13957**2)        !assume pion
             if(id(rl,pbin,ebin).eq.0) then
                nout=nout+1
