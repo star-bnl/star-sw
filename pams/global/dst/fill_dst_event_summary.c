@@ -23,7 +23,7 @@
 #ifdef DEBUG
 #undef DEBUG
 #endif
-#define DEBUG 1
+#define DEBUG 0
 
 float  mt_inverse_slope(double *mt_histo,int iBegin, int iStop);
 
@@ -65,8 +65,14 @@ long  type_of_call fill_dst_event_summary_ (
    *: RETURNS:    STAF Condition Value
    *:
    *: HISTORY:    
-   *:      Aug 08, 1998       Dhammika W.        Original
-   *:
+   *:      Aug 08, 1998       Dhammika W.   Original
+   *:      Aug 27, 1998       Dhammika W.   Fixed mt inverse slope calculation.
+   *:                                       Added mean_pt2, rms_eta and 
+   *:                                       T_eta_bins[3] to dst_event_summary 
+   *:                                       table.
+   *:                                       Tested successfully on 500 Lanny's
+   *:                                       DST events
+   *:                                            
    *:>-------------------------------------------------------------------- 
    */
 
@@ -223,15 +229,15 @@ long  type_of_call fill_dst_event_summary_ (
       phi_histo[iphibin]++;  /* phi histogram   */
     /*  weight the mt bin by  1/(mt*dy*dmt)     */
     if (imtbin<NBINS) {
-       /* log(dN/mt*dy*dmt) histogram */
-      mt_histo[imtbin] += log(mtweight1/mt); 
+       /* dN/mt*dy*dmt histogram */
+      mt_histo[imtbin] += mtweight1/mt; 
       /*  Fill mt historgrams for three eta bins  */
       if ( -1.5 <= eta && eta < -0.5 )
-	eta1_mt_histo[imtbin] += log(mtweight2/mt);
+	eta1_mt_histo[imtbin] += mtweight2/mt;
       if ( -0.5 <= eta && eta <  0.5 )
-	eta2_mt_histo[imtbin] += log(mtweight2/mt);
+	eta2_mt_histo[imtbin] += mtweight2/mt;
       if (  0.5 <= eta && eta <  1.5 )
-	eta3_mt_histo[imtbin] += log(mtweight2/mt);
+	eta3_mt_histo[imtbin] += mtweight2/mt;
     }
     /* Sum pt, pt^2, eta, eta^2  for all good global charged tracks*/ 
     mean_pt  += pt;
@@ -357,22 +363,26 @@ float  mt_inverse_slope(double *mthisto,int ibegin, int istop)
 
   mt_binsize  = (MT_MAX - MT_MIN)/NBINS;
 
-  if (DEBUG){
-    for (imtbin=ibegin; imtbin<istop; imtbin++)
-      fprintf (stderr, "%f ", mthisto[imtbin]);
-  }
-
-  /*  Do a linear Leat Square fit to  log(dN/mt*dy*dmt) = -mt/T  */
+  /*  Do a Linear Leat Square fit to  log(dN/mt*dy*dmt) = -mt/T  */
   for  (index=ibegin; index<istop;  index++) {
+    if (!mthisto[index])
+      continue;
     mtx  = mt_binsize*(float)index + mt_binsize/2.;
     sx  += mtx;
-    sy  += mthisto[index];
+    sy  += log(mthisto[index]);
     sxx += mtx*mtx;
-    sxy += mthisto[index]*mtx;
+    sxy += log(mthisto[index])*mtx;
     s++;
   }
   delta    = s*sxx - sx*sx;
   invslope = fabs ((s*sxy - sx*sy)/delta);
   invslope = 1./invslope;
+  if (DEBUG){
+    for (imtbin=ibegin; imtbin<istop-1; imtbin++)
+      fprintf (stderr, "%f ", mthisto[imtbin]);
+    fprintf (stderr, "%f  \n", mthisto[istop-1]);
+    fprintf (stderr, "s=%f,sx=%f,sy=%f,sxx=%f,sxy=%f\n",s,sx,sy,sxx,sxy);
+    fprintf (stderr, "delta=%f,invslope=%f \n",delta,invslope);
+  }
   return invslope;
 } /* end of mt_inverse_slope */

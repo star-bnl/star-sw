@@ -22,9 +22,7 @@ long  type_of_call fill_dst_run_summary_ (
   TABLE_HEAD_ST  *dst_run_header_h,    DST_RUN_HEADER_ST     *dstRunHeader,
   TABLE_HEAD_ST  *dst_event_header_h,  DST_EVENT_HEADER_ST   *dstEventHeader,
   TABLE_HEAD_ST  *dst_event_summary_h, DST_EVENT_SUMMARY_ST  *dstEventSummary,
-  TABLE_HEAD_ST  *dst_tof_h,           DST_TOF_ST            *dstTof,
   TABLE_HEAD_ST  *dst_track_h,         DST_TRACK_ST          *dstTrack,
-  TABLE_HEAD_ST  *dst_track_aux_h,     DST_TRACK_AUX_ST      *dstTrackAux,
   TABLE_HEAD_ST  *dst_vertex_h,        DST_VERTEX_ST         *dstVertex,
   TABLE_HEAD_ST  *dst_run_summary_h,   DST_RUN_SUMMARY_ST    *dstRunSummary)
 {
@@ -48,8 +46,6 @@ long  type_of_call fill_dst_run_summary_ (
    *:             dst_event_header_h   - Header Structure for dstEventHeader
    *:             dstEventSummary      - DST event summary table 
    *:             dst_event_summary_h  - Header Structure for dstEventSummary
-   *:             dstTof               - DST TOF table
-   *:             dst_tof_h            - Header Structure for dstTof       
    *:             dstTrack             - DST tracks table       
    *:             dst_track_h          - Header Structure for dstTrack
    *:             dstTrackAux          - DST track auxiliary table
@@ -78,7 +74,7 @@ long  type_of_call fill_dst_run_summary_ (
 
   /* ===========================  Begin Executable Code  =============== */
 
-  
+  dst_run_summary_h->nok = 0;  
   dstRunSummary->prod_run          = 0;
   /* dstRunSummary->version[0]        = "u"; */
   dstRunSummary->n_events_tot      = 0;
@@ -102,6 +98,7 @@ long  type_of_call fill_dst_run_summary_ (
     dstRunSummary->energy_emc[i]   = 0;
   }
 
+  dst_run_summary_h->nok = 1;  
   return STAFCV_OK;
 }  /*  End of fill_dst_run_summary  */
 

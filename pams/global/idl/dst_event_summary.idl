@@ -21,14 +21,17 @@
   long   mult_pt[5];        /* # good glb chrg trk, all eta for pt bins    */
   long   mult_phi[8];       /* # good glb chrg trk, all pt,eta for phi bins*/
   float  mean_pt;           /* Mean pt for all good glb chrg tracks        */
+  float  mean_pt2;          /* Mean pt^2 for all good glb chrg tracks      */
   float  mean_eta;          /* Mean pseudorap. for all good glb chrg trks  */
+  float  rms_eta;           /* RMS pseudorap. for all good glb chrg trks   */
   float  T_average;         /* T as in dN/(dy*mt*dmt) = exp(-mt/T) for     */
                             /* all good global charged tracks              */
-  float  T_bins[5];         /* T as above for various mt bins              */
+  float  T_mt_bins[5];      /* T as above for various mt bins              */
+  float  T_eta_bins[3];     /* T as above for various eta bins             */
   float  energy_emc_eta[5]; /* EMC energy (or raw ADC sum) for eta bins    */
   float  energy_emc_phi[8]; /* EMC energy (or raw ADC sum) for phi bins    */
   float  prim_vrtx[3];      /* Primary vrtx x,y,z-position -SCS(cm)        */
   float  prim_vrtx_cov[6];  /* Primary vrtx covariance matrix              */
   float  prim_vrtx_chisq;   /* Primary vertex chi-square of fit            */
  } ;
-/*  Last mod. for dst_event:   $Date: 1998/06/03 13:52:00 $ */
+/*  Last mod. for dst_event_summary:   $Date: 1998/08/28 16:06:42 $ */

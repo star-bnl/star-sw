@@ -69,9 +69,7 @@ return
 ami/mod/call fill_dst_event_summary_
         [run_dst]/run_header _
         [dst]/event_header _
-        [dst]/tof _
         [dst]/globtrk _
-        [dst]/globtrk_aux _
         [dst]/vertex _
         [dst]/event_summary
 
