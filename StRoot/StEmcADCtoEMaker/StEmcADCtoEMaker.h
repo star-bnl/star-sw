@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.45 2004/09/03 03:09:07 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.46 2004/10/09 18:02:57 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.46  2004/10/09 18:02:57  suaide
+// small fix
+//
 // Revision 1.45  2004/09/03 03:09:07  suaide
 // changes in the histograms
 //
@@ -206,8 +209,10 @@ class StEmcADCtoEMaker : public StMaker
   Bool_t            mDebug;
   Bool_t            mSMDPidMinus1Bug;
   Bool_t            mSaveAllStEvent;
+  Bool_t            mExtGain[MAXDETBARREL];
   
   TString           mMuName;
+  TString           mExtFile[MAXDETBARREL];
 					 
 					 
   void              zeroAll(); ///< Zero all temporary vectors
@@ -231,6 +236,8 @@ class StEmcADCtoEMaker : public StMaker
   virtual Int_t             Init(); ///< Init function. This method initializes the histograms
   virtual Int_t             Make(); ///< Process each event
   virtual Int_t             Finish(); ///< This method creates mean ADC and RMS histograms.
+  
+  void                      loadGain(Int_t det, char* file) {mExtGain[det-1]=kTRUE; mExtFile[det-1] = file;} ///< Load external gain corr$
    
   controlADCtoE_st*         getControlTable()  {return mControlADCtoE;} ///< Return Control table (NULL)
   StEmcCollection*          getEmcCollection() {return mEmc;} ///< Return emcCollection
@@ -253,7 +260,7 @@ class StEmcADCtoEMaker : public StMaker
 
   void                      saveHistograms(char*); ///<saves the histograms in a ROOT file
   
-  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.45 2004/09/03 03:09:07 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  virtual const char *      GetCVS() const {static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.46 2004/10/09 18:02:57 suaide Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEmcADCtoEMaker, 2)  
 };
