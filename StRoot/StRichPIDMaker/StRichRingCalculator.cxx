@@ -1,14 +1,12 @@
 /**********************************************************
- * $Id: StRichRingCalculator.cxx,v 2.5 2000/11/21 16:24:23 horsley Exp $
+ * $Id: StRichRingCalculator.cxx,v 2.6 2000/11/22 16:58:42 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingCalculator.cxx,v $
- *  Revision 2.5  2000/11/21 16:24:23  horsley
- *  Major overhaul of StRichArea, introduced monte carlo integration cross check,
- *  all possible areas, angles calculated together. StRichRingCalculator, StRichPIDMaker modified to support new StRichArea. StRichPIDMaker's hit finder
- *  typo corrected.
+ *  Revision 2.6  2000/11/22 16:58:42  lasiuk
+ *  add this to argument
  *
  *  Revision 2.5  2000/11/21 16:24:23  horsley
  *  Major overhaul of StRichArea, introduced monte carlo integration cross check,
@@ -55,14 +53,16 @@ using namespace units;
 #endif
 
 StRichRingCalculator::StRichRingCalculator(StRichTrack* track) {
-  init(track);
+
+    this->init(track);
 }
 
 
 
-StRichRingCalculator::StRichRingCalculator(StRichTrack* track, StParticleDefinition* particle)  {
-  init(track);
-  setParticleType(particle);
+StRichRingCalculator::StRichRingCalculator(StRichTrack* track,
+					   StParticleDefinition* particle)  {
+    this->init(track);
+    this->setParticleType(particle);
 }
 
 
