@@ -42,14 +42,19 @@ foreach my $Rep(@Repo) {
 my @idlML    = script::find_idlM($Dir);
 my @srcL     = script::find_sources($Dir);
 my @h_filesL = script::find_hfiles($Dir);
-my (@src, @h_files, @idlM);
-my ($i, $obj);
 
 print "idlL = @idlL\n" if $param::debug;
 
+my (@src, @h_files, @idlM);
+my ($LIBS, $LIBPATH, $CPPPATH, $CXXFLAGS, $FC, $FFLAGS, $FEXTEND);
+my ($MYSQLINC,$MYSQLLIB,$QTDIR);
+my ($i, $obj);
+my $LIBPKG = "";
+
+
+
 if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     #goto Tables;
-
 
     if ($param::debug) {
 	$i = 0;
@@ -87,17 +92,16 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     $SO_PKG = $PKG . "." . $env->{SUFSOLIB};
     print "SO_PKG = $SO_PKG\n" if $param::debug;
 
-    my $LIBS    = $env->{LIBS};
-    my $LIBPATH = $env->{LIBPATH};
-    my $CPPPATH = $env->{CPPPATH};
-    my $CXXFLAGS= $env->{CXXFLAGS};
-    my $FC      = $env->{FC};
-    my $FFLAGS  = $env->{FFLAGS};
-    my $FEXTEND = $env->{FEXTEND};
+    $LIBS    = $env->{LIBS};
+    $LIBPATH = $env->{LIBPATH};
+    $CPPPATH = $env->{CPPPATH};
+    $CXXFLAGS= $env->{CXXFLAGS};
+    $FC      = $env->{FC};
+    $FFLAGS  = $env->{FFLAGS};
+    $FEXTEND = $env->{FEXTEND};
 
     # Resolve Mysql right away i.e. use the Linux local installed
     # library instead of the eventually provided /opt/star one.
-    my ($MYSQLINC,$MYSQLLIB);
     if (-d "/usr/include/mysql"){
 	$MYSQLINC = "/usr/include/mysql";
 	$MYSQLLIB = "/usr/lib/mysql";
@@ -105,7 +109,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 	$MYSQLINC = $env->{ENV}->{OPTSTAR} . "/include/mysql";
 	$MYSQLLIB = $env->{ENV}->{OPTSTAR} . "/lib";
     }
-    my $QTDIR = $ENV{QTDIR};
+    $QTDIR = $ENV{QTDIR};
 
 
 
@@ -211,10 +215,6 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
     print "new share $share\n" if $param::debug;
     $share =~ s/\/StRoot//g;
     $share =~ s/\/(sim|gen)//g;
-
-    my $LIBPKG = "";
-    my @srco   = @src;
-
 
 
     if ( $#idlM > -1 ) {
@@ -444,23 +444,22 @@ if ( $#idlL > -1 ) {
 
         #___________________________________
         my $ROOTCINT_CPP =
-          $INCLUDE . $main::PATH_SEPARATOR . $INCLUDE . "/tables";
+	    $INCLUDE . $main::PATH_SEPARATOR . $INCLUDE . "/tables";
         $ROOTCINT_CPP .=
-          $main::PATH_SEPARATOR . $shareT . $main::PATH_SEPARATOR
-          . $env->{ENV}->{ROOTSRC};
+	    $main::PATH_SEPARATOR . $shareT . $main::PATH_SEPARATOR
+	    . $env->{ENV}->{ROOTSRC};
+
         my $tobj_dir = $obj_dir . "/Tables";
         $CPPPATH =
-          $env->{CPPPATH} . $main::PATH_SEPARATOR . $INCLUDE . "/tables";
+	    $env->{CPPPATH} . $main::PATH_SEPARATOR . $INCLUDE . "/tables";
         $env3 = $env->clone(
           'DEBUG'   => ' ',
           'CPPPATH' => $CPPPATH,
           'ObjDir'  => $tobj_dir
         );
         my $cscanner =
-          find scan::cpp( $env->{_cwd}, $ROOTCINT_CPP )
-          ;    # print "ROOTCINT_CPP = $ROOTCINT_CPP\n";
-        my $ROOTCINT_CPPPATH = $cscanner->iflags($env3)
-          ;    # print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n";
+	    find scan::cpp( $env->{_cwd}, $ROOTCINT_CPP );
+        my $ROOTCINT_CPPPATH = $cscanner->iflags($env3);
 
         foreach my $idll(@idlT) {
             my $stem = File::Basename::basename( $idll, ".idl" );
@@ -521,8 +520,8 @@ qq (rootcint.pl %>:d -f %>:f -c  "$ROOTCINT_CPPPATH -D__ROOT__" %1:f %2:f);
                 push @src, $s;
                 ( $s = $idlCintC ) =~ s/$shareT/$objT/g;
                 push @src, $s;
-            }
-            else {
+
+            } else {
                 ( $s = $idlC ) =~ s/$shareT/$objT/g;
                 push @sourcesT, $s;
                 ( $s = $idlCintC ) =~ s/$shareT/$objT/g;
@@ -561,29 +560,26 @@ if ( $#src > -1 ) {
 
 #_________________________________________________________________________________
 sub script::MakeMoc {
-  my $env  = shift;
-  my $pkg  = shift;
-  my $done = shift;
-  my @includes = split $main::PATH_SEPARATOR,shift;
-  my $Dir  = $env->{Dir};
-  my $ROOTCINTFLAGS = "-I" . $Dir . "/inc";
-  my $ObjDir        = "#" . $env->{ObjDir};  #    print "MakeMoc ObjDir = $ObjDir\n";
-  my @src      = ();
-  my @Defs     = ();
-  my $PLATFORM = $env->{PLATFORM};
-  foreach my $header (@includes) {
-    my $dd = $d;
-    my $G__name = "moc_" . $header;
-    $G__name =~ s/\.h$/\.cxx/; # print "G__name = $G__name\n";
-    my $moc = $QTDIRBIN . "/moc";
-#    my $moc = "moc";
-#    print "moc = $moc\n";
-    Command $env ($G__name), ($header),
-    qq($moc -o %>  %<);
-    push @src, $G__name;
-    print "+==========add moc file: $G__name\n" if $param::debug;
-  }
-  return @src;
+    my $env  = shift;
+    my $pkg  = shift;
+    my $done = shift;
+    my @includes = split $main::PATH_SEPARATOR,shift;
+    my $Dir  = $env->{Dir};
+    my $ROOTCINTFLAGS = "-I" . $Dir . "/inc";
+    my $ObjDir        = "#" . $env->{ObjDir};  #    print "MakeMoc ObjDir = $ObjDir\n";
+    my @src      = ();
+    my @Defs     = ();
+    my $PLATFORM = $env->{PLATFORM};
+    foreach my $header (@includes) {
+	my $dd = $d;
+	my $G__name = "moc_" . $header;
+	$G__name =~ s/\.h$/\.cxx/; # print "G__name = $G__name\n";
+	my $moc = $QTDIRBIN . "/moc";
+	Command $env ($G__name), ($header), qq($moc -o %>  %<);
+	push @src, $G__name;
+	print "+==========add moc file: $G__name\n" if $param::debug;
+    }
+    return @src;
 }
 
 #________________________________________________________________________________
