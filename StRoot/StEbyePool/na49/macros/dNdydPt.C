@@ -1,5 +1,23 @@
-// Calculates dNdydPt
-// Glenn Cooper with help from Art Poskanzer, May '00
+///////////////////////////////////////////////////////////////////////////////
+//
+// $Id: dNdydPt.C,v 1.2 2001/03/06 17:32:53 posk Exp $
+//
+// Author:       Glenn Cooper with help from Art Poskanzer, May '00
+// Description:  Calculates dNdydPt .
+//
+//
+///////////////////////////////////////////////////////////////////////////////
+//
+// $Log: dNdydPt.C,v $
+// Revision 1.2  2001/03/06 17:32:53  posk
+// All macros now work.
+//
+//
+// Revision 1.1  2001/02/23 00:58:19  posk
+// NA49 version of STAR software.
+//
+///////////////////////////////////////////////////////////////////////////////
+
 #include <stdio.h>
 
 enum Pid_t { kPionPlus, kPionMinus, kKaonPlus, kKaonMinus, kProton, kPbar };

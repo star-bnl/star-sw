@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotMinBias.C,v 1.1 2001/02/26 23:07:21 posk Exp $
+// $Id: plotMinBias.C,v 1.2 2001/03/06 17:33:02 posk Exp $
 //
 // Author:       Sergei Voloshin and Art Poskanzer, Sep. 2000
 // Description:  Macro to add centrality-selected histograms together with
@@ -18,6 +18,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotMinBias.C,v $
+// Revision 1.2  2001/03/06 17:33:02  posk
+// All macros now work.
+//
 // Revision 1.1  2001/02/26 23:07:21  posk
 // Rearranged macros.
 //
@@ -34,11 +37,12 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-Int_t runNumber      = 0;
-const Int_t nCens    = 8;
+Int_t  runNumber      = 0;
+const  Int_t nCens    = 6;
 TFile* histFile[nCens];
+char   tmp[10];
 
-TCanvas* plotMinBias(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2) {
+TCanvas* plotMinBias(Int_t pageNumber=0, Int_t selN=2, Int_t harN=2) {
 
   TCanvas* cOld = (TCanvas*)gROOT->GetListOfCanvases(); // delete old canvas
   if (cOld) cOld->Delete();
@@ -52,12 +56,10 @@ TCanvas* plotMinBias(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2) {
   
   // names of histograms made by StFlowAnalysisMaker
   const char* baseName[] = {
-    "Flow_Phi_Flat",
     "Flow_Psi",
-    "Flow_q",
     "Flow_Psi_Sub_Corr",
-    "Flow_Psi_Sub_Corr_Diff",
-    "Flow_vEta",
+    "Flow_Phi_Corr",
+    "Flow_vY",
     "Flow_vPt"
   };
   const int nNames = sizeof(baseName) / sizeof(char*);
@@ -65,7 +67,8 @@ TCanvas* plotMinBias(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2) {
   // input the first run number
   if (runNumber == 0) {
     cout << "     first run number? ";
-    cin >> runNumber;
+    fgets(tmp, sizeof(tmp), stdin);
+    runNumber = atoi(tmp);
     sprintf(runName, "ana%2d", runNumber);               // add ana prefix
     cout << " first run name = " << runName << endl;
     
@@ -88,7 +91,8 @@ TCanvas* plotMinBias(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2) {
       cout << i+1 << ":\t " << baseName[i] << endl;
     }
     cout << "     page number? ";
-    cin >> pageNumber;
+    fgets(tmp, sizeof(tmp), stdin);
+    pageNumber = atoi(tmp);
   }
   pageNumber--;
   
@@ -180,11 +184,12 @@ TCanvas* plotMinBias(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2) {
 void minBiasAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
   char temp[3];
   for (int i =  first; i < nNames + 1; i++) {
-    TCanvas* c = minBias(i, selN, harN);
+    TCanvas* c = plotMinBias(i, selN, harN);
     c->Update();
-    cout << "save? y/[n]" << endl;
-    fgets(temp, sizeof(temp), stdin);
-    if (strstr(temp,"y")!=0) c->Print(".ps");
+    cout << "save? y/[n], quit? q" << endl;
+    fgets(tmp, sizeof(tmp), stdin);
+    if (strstr(tmp,"y")!=0) c->Print(".ps");
+    else if (strstr(tmp,"q")!=0) return;
     c->Delete();
   }
   cout << "  Done" << endl;
