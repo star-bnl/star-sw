@@ -2,6 +2,9 @@
 // $Id EfficiencyAnalysis.cxx $
 //
 // $Log: EfficiencyAnalysis.cxx,v $
+// Revision 1.5  2003/07/09 01:08:07  calderon
+// Changes to access StMiniMcEvent through methods, rather than data members
+//
 // Revision 1.4  2003/06/19 01:37:03  calderon
 // Adding all the histograms from Zbigniew.
 //
@@ -1046,14 +1049,14 @@ int EfficiencyAnalysis::fillHistograms(StMiniMcEvent* minimcevent) {
 
     cout << "EfficiencyAnalysis::fillHistograms " <<  mSuffix << endl;
     ++mNEvents;
-    int nTracks = minimcevent->mNMcTrack;
+    int nTracks = minimcevent->nMcTrack();
     cout << "No. MC Tracks " << nTracks <<endl;
 
     // raw & accepted MC tracks
     int nPiKP = 0;
     for (int j=0; j<nTracks; ++j) {
 	// mMcTracks loop
-	StTinyMcTrack* tinymctrack = (StTinyMcTrack*) minimcevent->mMcTracks->At(j);
+	StTinyMcTrack* tinymctrack = (StTinyMcTrack*) minimcevent->tracks(MC)->At(j);
 	if (!tinymctrack) continue;
 	int geantId = tinymctrack->geantId(); 
 	if (!acceptGeantId(geantId)) continue; // only look at pi-, k-, pbar = 9, 12, 15 and pi+, k+, prot = 8, 11, 14
@@ -1092,11 +1095,11 @@ int EfficiencyAnalysis::fillHistograms(StMiniMcEvent* minimcevent) {
 
     // matched and matched rec
     int nMatchedPiKP=0;
-    int nMatchedPairs = minimcevent->mNMatchedPair;
-    cout << "# MatchedPairs  " << nMatchedPairs << " array says " << minimcevent->mMatchedPairs->GetEntries() << endl;
+    int nMatchedPairs = minimcevent->nMatchedPair();
+    cout << "# MatchedPairs  " << nMatchedPairs << " array says " << minimcevent->tracks(MATCHED)->GetEntries() << endl;
     for (int k=0; k<nMatchedPairs; ++k) {
 	// mNMatchedPair loop
-	StMiniMcPair* minimcpair = (StMiniMcPair*) minimcevent->mMatchedPairs->At(k);
+	StMiniMcPair* minimcpair = (StMiniMcPair*) minimcevent->tracks(MATCHED)->At(k);
 	if (!minimcpair) continue;
 	
 	// for the matches, cut on the geant id (not needed for splits and ghosts)
@@ -1136,12 +1139,8 @@ int EfficiencyAnalysis::fillHistograms(StMiniMcEvent* minimcevent) {
 	float curvPr    = minimcpair->curvPr();
 	float curvGl    = minimcpair->curvGl();
 
-	float tanGl_err;
-	float tanPr_err;
-	float curvGl_err;
-	float curvPr_err;
-	float ptPr_err;
-	float ptGl_err;
+	float tanGl_err, curvGl_err, ptPr_err = -999;
+	float tanPr_err, curvPr_err, ptGl_err = -999;
 	
 	float B = 0.49795819;
 	float c = 0.299792458;
@@ -1276,11 +1275,11 @@ int EfficiencyAnalysis::fillHistograms(StMiniMcEvent* minimcevent) {
 	primaryTrackEffMult->Fill((float) nTracks,(float)nMatchedPiKP/(float)nPiKP);
 
     // merged
-    int nMergedPair = minimcevent->mNMergedPair;
-    cout << "# MergedPair  " << nMergedPair << " array says " << minimcevent->mMergedPairs->GetEntries() << endl;
+    int nMergedPair = minimcevent->nMergedPair();
+    cout << "# MergedPair  " << nMergedPair << " array says " << minimcevent->tracks(MERGED)->GetEntries() << endl;
     for (int j=0; j<nMergedPair; ++j) {
 	// mNMergedPair loop
-	StMiniMcPair* minimcpair = (StMiniMcPair*) minimcevent->mMergedPairs->At(j);
+	StMiniMcPair* minimcpair = (StMiniMcPair*) minimcevent->tracks(MERGED)->At(j);
 	if (!minimcpair) continue;
 	
 	// for the merged, cut on the geant id and MC Tpc hits
@@ -1294,14 +1293,14 @@ int EfficiencyAnalysis::fillHistograms(StMiniMcEvent* minimcevent) {
     }
     
     // background, electron and decay/secondary
-    int nContamPairs = minimcevent->mNContamPair;
+    int nContamPairs = minimcevent->nContamPair();
     int nContamPiKP=0;
-    cout << "minimcevent->mContamPairs " << minimcevent->mContamPairs << endl;
-    if (minimcevent->mContamPairs) { 
-	cout << "# ContamPairs  " << nContamPairs << " array says " << minimcevent->mContamPairs->GetEntries() << endl;
+    cout << "minimcevent->mContamPairs " << minimcevent->tracks(CONTAM) << endl;
+    if (minimcevent->tracks(CONTAM)) { 
+	cout << "# ContamPairs  " << nContamPairs << " array says " << minimcevent->tracks(CONTAM)->GetEntries() << endl;
 	for (int j=0; j<nContamPairs; ++j) {
 	    // mNContamPair loop
-	    StMiniMcPair* minimcpair = (StMiniMcPair*) minimcevent->mContamPairs->At(j);
+	    StMiniMcPair* minimcpair = (StMiniMcPair*) minimcevent->tracks(CONTAM)->At(j);
 	    if (!minimcpair) continue;
 	    
 	    // for the contamination, make sure the rec satisfies the cuts and
@@ -1328,10 +1327,10 @@ int EfficiencyAnalysis::fillHistograms(StMiniMcEvent* minimcevent) {
 	cout << "The array mNContamPairs is null " << endl;
     }
     // split
-    int nSplitPairs = minimcevent->mNSplitPair;
-    // 	    cout << "# SplitPairs  " << nSplitPairs << " array says " << minimcevent->mSplitPairs->GetEntries() << endl;
+    int nSplitPairs = minimcevent->nSplitPair();
+    // 	    cout << "# SplitPairs  " << nSplitPairs << " array says " << minimcevent->tracks(SPLIT)->GetEntries() << endl;
     for (int j=0; j<nSplitPairs; ++j) { // mNSplitPair loop
-	StMiniMcPair* minimcpair = (StMiniMcPair*) minimcevent->mSplitPairs->At(j);
+	StMiniMcPair* minimcpair = (StMiniMcPair*) minimcevent->tracks(SPLIT)->At(j);
 	if (!minimcpair) continue;
 	
 	if (!acceptPair(minimcpair)) continue;
@@ -1345,10 +1344,10 @@ int EfficiencyAnalysis::fillHistograms(StMiniMcEvent* minimcevent) {
     
     
     // ghosts
-    int nGhostPairs = minimcevent->mNGhostPair;
+    int nGhostPairs = minimcevent->nGhostPair();
     // 	    cout << "# GhostPairs  " << nGhostPairs << endl;
     for (int j=0; j<nGhostPairs; ++j) { // mNGhostPair loop
-	StMiniMcPair* minimcpair = (StMiniMcPair*) minimcevent->mGhostPairs->At(j);
+	StMiniMcPair* minimcpair = (StMiniMcPair*) minimcevent->tracks(GHOST)->At(j);
 	if (!minimcpair) continue;
 	
 	if (!acceptPair(minimcpair)) continue;
