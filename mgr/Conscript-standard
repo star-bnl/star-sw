@@ -71,6 +71,9 @@ if ($Dir =~ /pams\// || $STAR_SYS =~ /^intel_wnt$/) {
     $LIBS .= " " . $_lib;#     print "LIBS    = $LIBS\n"
   }
 }
+if ($STAR_SYS =~ /^hp_ux102$/ && $pkg =~ /^St_base$/) {
+$CPPP .= ":/usr/local/include";
+}
 my $CXXFLAGS = $env->{CXXFLAGS};
 my $FCCOM    = $env->{FCCOM};
 if ($STAR_SYS =~ /^sun4x_5/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
