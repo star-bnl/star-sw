@@ -2,7 +2,7 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/11/99
 #ifndef ROOT_TAxis3D
 #define ROOT_TAxis3D
-// $Id: TAxis3D.h,v 1.6 1999/12/12 01:07:22 fine Exp $ 
+// $Id: TAxis3D.h,v 1.7 1999/12/12 17:25:52 fine Exp $ 
 // ***********************************************************************
 // *  C++ class library to paint axis "arround" TView object
 // * Copyright(c) 1997~1999  [BNL] Brookhaven National Laboratory, STAR, All rights reserved
@@ -64,7 +64,7 @@ class TF1;
 class TBrowser;
 class TGaxis;
 class TVirtualPad;
- 
+class TView; 
 class TAxis3D : public TNamed  {
  
 protected:
@@ -119,6 +119,7 @@ public:
     virtual Bool_t  IsFolder(){ return kTRUE;}
     virtual void    Paint(Option_t *option="");
             void     PaintAxis(TGaxis *axis, Float_t ang);
+    static Axis_t  *PixeltoXYZ(Axis_t px, Axis_t py, Axis_t *point3D, TView *view =0);
 //    virtual void     Print(Option_t *option="");
     virtual void     SavePrimitive(ofstream &out, Option_t *option);
  
@@ -149,6 +150,9 @@ public:
 inline Bool_t TAxis3D::SwitchZoom(){Bool_t s = fZoomMode; fZoomMode = !fZoomMode; return s;}
 //__________________________________________________________________________
 // $Log: TAxis3D.h,v $
+// Revision 1.7  1999/12/12 17:25:52  fine
+// smart zooming
+//
 // Revision 1.6  1999/12/12 01:07:22  fine
 // remove the compilation warnings
 //
