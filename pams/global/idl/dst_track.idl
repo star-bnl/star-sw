@@ -48,10 +48,13 @@
  *                       $STAR/pams/global/inc/StDetectorDefinitions.h
  *
  *       method          Track finding and track fitting methods in a
- *                       packed format (to be defined).  This will be used
- *                       to indicate the track finding methods, track finding
- *                       pass numbers, and track fitting methods used to 
+ *                       packed format. This is defined in 
+ *                       $STAR/pams/global/inc/StTrackMethDefinitions.h
+ *                       This is used  to indicate the track finding 
+ *                       methods, track finding, pass numbers 
+ *                       and track fitting methods used to 
  *                       generate the global tracks:
+ *                       method=finder+10*quality+100*fitting method
  *                       Track finding methods (examples):
  *                            (1) SVT - grouper
  *                            (2) SVT-SSD - stk, "follow your nose"
@@ -237,7 +240,7 @@
   float      impact;           /* impact parameter based on 3D DCA from  */
                                /* primary vertex (cm)                    */
  } ;
-/*  Last mod. for dst_track:   $Date: 1999/10/12 21:42:50 $ */
+/*  Last mod. for dst_track:   $Date: 1999/11/15 19:22:35 $ */
 
 
 
