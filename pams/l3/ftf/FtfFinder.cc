@@ -2,7 +2,12 @@
 //: FILE:       FtfFinder.cpp
 //: HISTORY:
 //:             28oct1996 version 1.00
+<<<<<<< FtfFinder.cc
+//:             03jun1999 para.fillTracks included. Merging only when tracks filled
+//:             03jun1999 add a function for real time, clock gives cpu time 
+=======
 //:             06may1999 ppy  getTracks returns 1 for error
+>>>>>>> 1.6
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
 //: CLASS:       FtfFinder, steers track finding
@@ -27,7 +32,7 @@ FtfFinder::FtfFinder ( )
 //*********************************************************************
 //      Steers the tracking 
 //*********************************************************************
-float FtfFinder::process (  ) {  
+double FtfFinder::process (  ) {  
 //-----------------------------------------------------------------
 //        Make sure there is something to work with
 //------------------------------------------------------------------ 
@@ -35,7 +40,9 @@ float FtfFinder::process (  ) {
          printf ( "fft: Hit structure is empty \n " ) ;
          return 1 ;
     }
-    initTime = time ( );
+//
+    double initCpuTime  = CpuTime ( );
+    double initRealTime = RealTime ( );
 //
 //        General initialization 
 //
@@ -62,10 +69,18 @@ float FtfFinder::process (  ) {
 
 //   if ( para.dEdx ) dEdx ( ) ;
 
+<<<<<<< FtfFinder.cc
+   cpuTime  = CpuTime ( ) ;
+   realTime = RealTime ( ) ;
+   if ( para.infoLevel > 0 )
+      printf ( "ftf time: cpu %7.3f real %f7.2 \n ", cpuTime, realTime ) ;
+   return cpuTime ;
+=======
    totalTime = time ( ) ;
 // if ( para.infoLevel > 0 )
 //    printf ( "ftf time: %7.3f \n ", totalTime ) ;
    return totalTime ;
+>>>>>>> 1.6
 } 
 //********************************************************************
 //     Calculates deposited Energy
@@ -126,7 +141,7 @@ int FtfFinder::getTracks ( ) {
 	 thisTrack->id       = nTracks - 1 ;
          thisTrack->firstHit = thisTrack->lastHit = thisTrack->refHit = firstHit ;
 #ifdef TRDEBUG
-         thisTrack->Debug_New ( ) ;
+         thisTrack->debugNew ( ) ;
 #endif
 //
 //              Set fit parameters to zero
@@ -139,10 +154,11 @@ int FtfFinder::getTracks ( ) {
 //
 //    Merge Tracks if requested
 //
-        if ( para.primaries &&
-             para.mergePrimaries == 1 &&
-             thisTrack->mergePrimary( trackArea )  ) nTracks-- ;
-	}
+           if ( para.primaries &&
+                para.mergePrimaries == 1 &&
+                para.fillTracks &&
+                thisTrack->mergePrimary( trackArea )  ) nTracks-- ;
+           }
        else{
 //
 //      If track was not built delete candidate
@@ -193,7 +209,7 @@ void FtfFinder::mergePrimaryTracks ( ) {
 //*********************************************************************
 int FtfFinder::reset (void)
 {
-   float phiDiff ;
+   double phiDiff ;
 //
 //   Initialization flag in principle assume failure
 //
@@ -220,7 +236,9 @@ int FtfFinder::reset (void)
    if (volume != NULL) free ( (void *) volume ) ; 
 #ifdef TRDEBUG
    printf("Allocating %d bytes of memory for volume\n",
-               para->nRp*para.nPhip*para.nEtap*sizeof(VOLUME));
+               para.nRowsPlusOne*
+               para.nPhiPlusOne*
+               para.nEtaPlusOne*sizeof(VOLUME));
 #endif
    volume = (VOLUME *)malloc(para.nRowsPlusOne*
                              para.nPhiPlusOne *
@@ -235,7 +253,7 @@ int FtfFinder::reset (void)
    if (rowk != NULL) free ( (void *) rowk ) ;
 #ifdef TRDEBUG
    printf("Allocating %d bytes of memory for rowk\n",
-                              para->nRp*sizeof(ROW));
+                              para.nRowsPlusOne*sizeof(ROW));
 #endif
    rowk = (ROW *)malloc(para.nRowsPlusOne*sizeof(ROW));
    if ( rowk == ( ROW *)NULL) {
@@ -249,7 +267,8 @@ int FtfFinder::reset (void)
       if (trackArea != NULL) free ( (void *) trackArea ) ;
 #ifdef TRDEBUG
          printf("Allocating %d bytes of memory for track_area\n",
-                       para.n_phip*para.n_etap*sizeof(AREA));
+                       para.nPhiTrackPlusOne*
+                       para.nEtaTrackPlusOne*sizeof(AREA));
 #endif
          trackArea = (AREA *)malloc(para.nPhiTrackPlusOne*
                                     para.nEtaTrackPlusOne*sizeof(AREA));
@@ -294,9 +313,9 @@ int FtfFinder::reset (void)
 //    Set vertex parameters
 //
    if ( para.xVertex != 0 || para.yVertex != 0 ) { 
-      para.rVertex   = (float)sqrt (para.xVertex*para.xVertex +
+      para.rVertex   = (double)sqrt (para.xVertex*para.xVertex +
 	                            para.yVertex*para.yVertex) ;
-      para.phiVertex = (float)atan2(para.yVertex,para.xVertex);
+      para.phiVertex = (double)atan2(para.yVertex,para.xVertex);
    }
    else {
       para.rVertex   = 0.F ;
@@ -304,7 +323,7 @@ int FtfFinder::reset (void)
    }
 
    if ( para.dxVertex != 0 || para.dyVertex != 0 )
-      para.xyWeightVertex = 1.F / ((float)sqrt(para.dxVertex*para.dxVertex+
+      para.xyWeightVertex = 1.F / ((double)sqrt(para.dxVertex*para.dxVertex+
 	                                       para.dyVertex*para.dyVertex) ) ;
    else para.xyWeightVertex = 1.0F ;
 //
@@ -328,7 +347,7 @@ int FtfFinder::setConformalCoordinates ( )
         Loop over hits 
 -------------------------------------------------------------------------*/
    FtfHit* thisHit ;
-   float x, y, r2, invR2 ;
+   double x, y, r2, invR2 ;
    for ( int ihit = 0 ; ihit<nHits ; ihit++ )
    {
 /*-------------------------------------------------------------------------
@@ -356,7 +375,7 @@ int FtfFinder::setPointers ( )
 {
     int ihit, localRow ;
     register int volumeIndex;
-    float r, r2, phi, eta ;
+    double r, r2, phi, eta ;
     FtfHit *thisHit ;
 //
 //   Set volumes to zero
@@ -390,14 +409,18 @@ int FtfFinder::setPointers ( )
         Transform coordinates
 -------------------------------------------------------------------------*/
       r2            = thisHit->x * thisHit->x + thisHit->y * thisHit->y ;
-      r             = (float)sqrt ( r2 ) ;
-      phi           = (float)atan2(thisHit->y,thisHit->x) + para.phiShift ;
+      r             = (double)sqrt ( r2 ) ;
+      phi           = (double)atan2(thisHit->y,thisHit->x) + para.phiShift ;
       if ( phi < 0 ) phi = phi + twoPi ;
+<<<<<<< FtfFinder.cc
+      eta           = (double)seta(r,thisHit->z) ;
+=======
       eta           = (float)seta(r,(thisHit->z-para.zVertex)) ;
+>>>>>>> 1.6
 
       if ( para.szFitFlag ) {
         thisHit->s  = 0.F ;
-        thisHit->wz = (float)(1./ square ( para.szErrorScale * thisHit->dz ));
+        thisHit->wz = (double)(1./ square ( para.szErrorScale * thisHit->dz ));
       }
 
       thisHit->r   = r   ;
@@ -477,8 +500,7 @@ int FtfFinder::setPointers ( )
 #include <time.h>
 
 static clock_t last_time ;
-float FtfFinder::time( void )
-
+double FtfFinder::CpuTime( void )
 {
    clock_t now ;
    double  duration;
@@ -487,5 +509,22 @@ float FtfFinder::time( void )
    duration = (double)(now - last_time) / CLOCKS_PER_SEC;
    last_time = now ;
 
-   return (float)duration ;
+   return (double)duration ;
 }
+
+//
+#ifdef LINUX
+static unsigned long lastRealTime ;
+double FtfFinder::RealTime (void) {
+  const long nClicks = 400000000 ;
+  unsigned long eax, edx;
+  asm volatile("rdtsc":"=a" (eax), "=d" (edx));
+  double realTime = (double)(eax-lastRealTime)/ nClicks;
+  lastRealTime = eax ;
+  return realTime;
+}
+#else
+double FtfFinder::RealTime (void) {
+   return 1. ;
+}
+#endif

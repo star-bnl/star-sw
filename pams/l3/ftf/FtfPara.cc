@@ -3,6 +3,7 @@
 //: HISTORY:
 //:             28oct1996 version 1.00
 //:              7dec1998 variable names changed to C++ style
+//:              3jun1999 add fillTracks flag
 //:                       
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
@@ -35,6 +36,7 @@ void FtfPara::setDefaults (void)
    etaMaxTrack       =  2.2F  ;
    eventReset        =  1     ;
    getErrors         =  0     ;
+   fillTracks        =  1     ;
    ghostFlag         =  0     ;
    goBackwards       =  0     ;
    goodDistance      =  1.F * modRow ;
@@ -54,7 +56,7 @@ void FtfPara::setDefaults (void)
    nPrimaryPasses    = 1      ;
    nSecondaryPasses  = 1      ;
    rowInnerMost      = 1      ;
-   rowOuterMost      = 1      ;
+   rowOuterMost      = 45     ;
    rowStart          = 45     ;
    segmentMaxAngle   = 10.F/toDeg ;
    szFitFlag         = 1      ;
