@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.4 2000/03/07 14:38:12 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.5 2000/03/15 21:06:06 fisyak Exp $
 {
  if (defined($AFS)) {$File::Find::dont_use_nlink;}
  use File::Basename;
@@ -301,6 +301,9 @@
  if (defined($ARG{NODEBUG}))  {$DEBUG = "-O2"              ; print "set DEBUG = $DEBUG\n" unless ($param::quiet);}
  if (defined($ARG{DEBUG}))    {$DEBUG = $ARG{DEBUG}        ; print "set DEBUG = $DEBUG\n" unless ($param::quiet);}
  if (defined($ARG{CPPFLAGS})) {$CPPFLAGS = $ARG{CPPFLAGS}  ; print "set CPPFLAGS = $CPPFLAGS\n" unless ($param::quiet);}
+ if (defined($ARG{EXTRA_CPPFLAGS})) {$EXTRA_CPPFLAGS = $ARG{EXTRA_CPPFLAGS}  ; print "set EXTRA_CPPFLAGS = $EXTRA_CPPFLAGS\n" unless ($param::quiet);}
+ if (defined($ARG{CPPPATH})) {$CPPPATH = $ARG{CPPPATH}  ; print "set CPPPATH = $CPPPATH\n" unless ($param::quiet);}
+ if (defined($ARG{EXTRA_CPPPATH})) {$EXTRA_CPPPATH = $ARG{EXTRA_CPPPATH}  ; print "set EXTRA_CPPPATH = $EXTRA_CPPPATH\n" unless ($param::quiet);}
  if (defined($ARG{CPP}))      {$CPP = $ARG{CPP}            ; print "set CPP = $CPP\n" unless ($param::quiet);}
  if (defined($ARG{CC}))       {$CC = $ARG{CC}              ; print "set CC = $CC\n" unless ($param::quiet);}
  if (defined($ARG{CFLAGS}))   {$CFLAGS = $ARG{CFLAGS}      ; print "set CFLAGS = $CFLAGS\n" unless ($param::quiet);}
