@@ -1,182 +1,13 @@
-/***************************************************************************
- *
- * $Id: StEventMaker.cxx,v 2.50 2002/11/26 02:19:48 perev Exp $
- *
- * Author: Original version by T. Wenaus, BNL
- *         Revised version for new StEvent by T. Ullrich, Yale
- ***************************************************************************
- *
- * Description: Setup of StEvent
- *
- ***************************************************************************
- *
- * $Log: StEventMaker.cxx,v $
- * Revision 2.50  2002/11/26 02:19:48  perev
- * StEventMaker ITTF modif
- *
- * Revision 2.49  2002/05/02 03:07:18  ullrich
- * Changed mechanism to reject EST tracks without SVT hits.
- *
- * Revision 2.48  2002/05/01 01:08:31  ullrich
- * Add SVT dE/dx only to EST tracks.
- *
- * Revision 2.47  2002/04/18 23:29:34  jeromel
- * Implementation of the SVT 2 tables scheme ...
- *
- * Revision 2.46  2002/02/25 19:34:14  ullrich
- * Fill parts of StRunInfo from StDetectorDbBeamInfo.
- *
- * Revision 2.45  2002/02/15 23:06:58  ullrich
- * Fill detector state for RICH.
- *
- * Revision 2.44  2002/01/31 23:50:28  ullrich
- * More filling of StRunInfo (by J. Gans).
- *
- * Revision 2.43  2002/01/11 16:44:12  ullrich
- * Fill bunch crossing numbers in StEventInfo.
- *
- * Revision 2.42  2001/12/21 22:39:32  ullrich
- * Disabled filling parts of StRunInfo.
- *
- * Revision 2.41  2001/12/21 21:13:03  ullrich
- * Fixed bug: loading multiple primary vertices.
- *
- * Revision 2.40  2001/11/10 23:54:21  ullrich
- * Added calibration vertices.
- *
- * Revision 2.39  2001/11/07 21:20:46  ullrich
- * Added L1 trigger.
- *
- * Revision 2.38  2001/09/28 22:22:05  ullrich
- * Load helix geometry at last point of each track.
- *
- * Revision 2.37  2001/09/19 04:49:05  ullrich
- * Set event size in StEventInfo.
- *
- * Revision 2.36  2001/09/18 00:16:06  ullrich
- * Fill and add StRunInfo.
- *
- * Revision 2.35  2001/09/12 23:49:22  ullrich
- * Removed code to build StRun and StRunSummary.
- *
- * Revision 2.34  2001/07/19 00:05:28  ullrich
- * New StL0Trigger needs additional table in constructor.
- *
- * Revision 2.33  2001/07/17 22:21:50  ullrich
- * Use B from event summary to set helicity of tracks.
- *
- * Revision 2.32  2001/05/17 22:46:37  ullrich
- * Removed loading of event summary params.
- *
- * Revision 2.31  2001/02/22 05:02:40  ullrich
- * Added new protected method getStEventInstance().
- * Modified maker to allow multiple calls of Make() within
- * one event. If instance already it is re-used and the data
- * from existing tables gets added.
- *
- * Revision 2.30  2000/11/02 16:33:28  ullrich
- * Fixed tiny memory leak.
- *
- * Revision 2.29  2000/08/30 05:37:02  ullrich
- * Obtain trigger mask from StEvtHddr dataset.
- *
- * Revision 2.28  2000/08/17 00:38:48  ullrich
- * Allow loading of tpt tracks.
- *
- * Revision 2.27  2000/05/26 11:36:19  ullrich
- * Default is to NOT print event info (doPrintEventInfo  = kFALSE).
- *
- * Revision 2.26  2000/05/26 11:34:08  ullrich
- * Skip the attempt of creating an instance of StRun in case
- * no dst dataset is available.
- *
- * Revision 2.25  2000/05/25 14:44:43  ullrich
- * Removed remaining pieces of the RICH pixel table.
- *
- * Revision 2.24  2000/05/24 15:48:15  ullrich
- * Instance of StEvent now also created if no DST dataset
- * is available.
- *
- * Revision 2.23  2000/05/22 21:53:41  ullrich
- * No more copying of RICH tables. RICH now writes directly
- * to StEvent. printEventInfo() and makeEvent() modified.
- *
- * Revision 2.22  2000/04/26 20:29:13  ullrich
- * Create instance of StEvent not StBrowsableEvent.
- *
- * Revision 2.21  2000/03/22 17:11:20  ullrich
- * Added further checks for case were tables exist but have
- * zero length. Added for primary and global tracks.
- *
- * Revision 2.20  2000/02/23 12:11:49  ullrich
- * Added printout of covariant matrix to printTrackInfo().
- *
- * Revision 2.19  2000/02/17 18:19:05  ullrich
- * Adapted new SVT hit storage layout. Barrels instead of layers.
- *
- * Revision 2.18  2000/02/11 16:12:33  ullrich
- * Modified check for valid primary vertices.
- *
- * Revision 2.17  2000/02/08 21:14:16  genevb
- * Handle cases with no tracks.
- *
- * Revision 2.16  2000/01/25 20:11:11  ullrich
- * Fixed bug in loading the Xi vertices.
- *
- * Revision 2.15  2000/01/14 18:51:06  ullrich
- * Added printout of quasi-histos in the event summary
- * to printEventInfo().
- *
- * Revision 2.14  2000/01/14 13:58:03  ullrich
- * Create and fill the RICH pixel collection. Added also
- * the debug output for the RICH to printEventInfo().
- *
- * Revision 2.13  2000/01/11 16:05:34  ullrich
- * With Victors help now possible to read the dst_summary_param
- * table from the runco branch and build StEventSummary objects.
- *
- * Revision 2.12  2000/01/10 18:20:32  ullrich
- * Create new StTrackDetectorInfo object for primary tracks if
- * first or last points differ from the referring global track.
- *
- * Revision 2.11  2000/01/05 16:07:44  ullrich
- * Added loading of SSD hits and handling of runco branch.
- *
- * Revision 2.10  1999/12/21 15:13:13  ullrich
- * Modified to cope with new compiler version on Sun (CC5.0).
- *
- * Revision 2.9  1999/12/07 18:58:39  ullrich
- * Modified to get rid of some warnings on Linux
- *
- * Revision 2.8  1999/11/23 17:14:19  ullrich
- * Forgot to fill PID traits. Fixed now.
- *
- * Revision 2.7  1999/11/17 14:10:27  ullrich
- * Added more checks to protect from corrupted table data.
- *
- * Revision 2.6  1999/11/11 17:46:30  ullrich
- * Added more checks and warning messages. Handling
- * of primary vertices made safer
- *
- * Revision 2.5  1999/11/11 10:02:58  ullrich
- * Added warning message in case some hits cannot be stored.
- *
- * Revision 2.4  1999/11/10 22:40:27  ullrich
- * Delete hit if it cannot be added to collection.
- *
- * Revision 2.3  1999/11/08 17:04:59  ullrich
- * Hits now allocated individually.
- *
- * Revision 2.2  1999/11/05 18:35:54  ullrich
- * Added methods and flags for debugging and monitoring.
- *
- * Revision 2.1  1999/11/04 19:55:37  ullrich
- * Corrected typo.
- *
- * Revision 2.0  1999/11/04 19:03:00  ullrich
- * Revised to build new StEvent version
- *
- **************************************************************************/
+/*!
+   StEventMaker
+
+   Description: Setup of StEvent
+
+   Author: Original version by T. Wenaus, BNL
+           Revised version for new StEvent by T. Ullrich, Yale
+
+*/
+
 #include <vector>
 #include <algorithm>
 #include <utility>
@@ -194,6 +25,8 @@
 #include "StTpcDb/StTpcDb.h"
 #include "StDetectorDbMaker/StDetectorDbRichScalers.h"
 #include "StDetectorDbMaker/StDetectorDbBeamInfo.h"
+#include "StDetectorDbMaker/StDetectorDbTriggerID.h"
+#include "StDAQMaker/StDAQReader.h"
 #include "StPrompt.hh"
 #include <typeinfo>
 
@@ -209,7 +42,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.50 2002/11/26 02:19:48 perev Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.51 2003/02/15 20:19:31 genevb Exp $";
 
 ClassImp(StEventMaker)
   
@@ -455,6 +288,50 @@ StEventMaker::makeEvent()
 
     if (dstL0Trigger && dstL1Trigger && !mCurrentEvent->l1Trigger())
 	mCurrentEvent->setL1Trigger(new StL1Trigger(*dstL0Trigger, *dstL1Trigger));
+
+    //
+    //  Trigger ID summary
+    //
+    StTriggerIdCollection* triggerIdColl = mCurrentEvent->triggerIdCollection();
+    if (!triggerIdColl) {
+        mCurrentEvent->setTriggerIdCollection((triggerIdColl =
+            new StTriggerIdCollection()));
+    }
+    StTriggerId* trigId[3];
+    triggerIdColl->setL1((trigId[0] = new StTriggerId()));
+    triggerIdColl->setL2((trigId[1] = new StTriggerId()));
+    triggerIdColl->setL3((trigId[2] = new StTriggerId()));
+
+    St_DataSet *daqReaderSet=GetDataSet("StDAQReader");
+    if (daqReaderSet) {
+
+        StTrigSummary* trigSummary =
+            ((StDAQReader*) (daqReaderSet->GetObject()))->getTrigSummary();
+
+        trigId[0]->setMask(trigSummary->L1summary[0]);
+        trigId[1]->setMask(trigSummary->L2summary[0]);
+        trigId[2]->setMask(trigSummary->L3summary[0]);
+
+        StDetectorDbTriggerID* dbTriggerId = StDetectorDbTriggerID::instance();
+        triggerIdColl->setNominal(trigId[dbTriggerId->getDefaultTriggerLevel()]);
+        for (unsigned int iTrg = 0; iTrg < dbTriggerId->getIDNumRows() ; iTrg++)
+        {
+            StTriggerId* whichTrig = trigId[dbTriggerId->getIdxLevel(iTrg) - 1];
+            // Shift the mask by daqTrigId bits to examine that bit
+            if ((whichTrig->mask()) >> (dbTriggerId->getDaqTrgId(iTrg)) & 1U) {
+                whichTrig->addTrigger(
+                    dbTriggerId->getOfflineTrgId(iTrg),
+                    dbTriggerId->getTrgVersion(iTrg),
+                    dbTriggerId->getTrgNameVersion(iTrg),
+                    dbTriggerId->getThreashVersion(iTrg),
+                    dbTriggerId->getPsVersion(iTrg)
+                );
+            }
+        }
+    } else {
+      gMessMgr->Warning("StEventMaker: No StDAQReader found");
+    }
+
 
     //
     //  Some variables we need in the following
@@ -1592,3 +1469,175 @@ StEventMaker::printTrackInfo(StTrack* track)
     }
 }
 
+/**************************************************************************
+ * $Id: StEventMaker.cxx,v 2.51 2003/02/15 20:19:31 genevb Exp $
+ * $Log: StEventMaker.cxx,v $
+ * Revision 2.51  2003/02/15 20:19:31  genevb
+ * Added Trigger ID Summary
+ *
+ * Revision 2.50  2002/11/26 02:19:48  perev
+ * StEventMaker ITTF modif
+ *
+ * Revision 2.49  2002/05/02 03:07:18  ullrich
+ * Changed mechanism to reject EST tracks without SVT hits.
+ *
+ * Revision 2.48  2002/05/01 01:08:31  ullrich
+ * Add SVT dE/dx only to EST tracks.
+ *
+ * Revision 2.47  2002/04/18 23:29:34  jeromel
+ * Implementation of the SVT 2 tables scheme ...
+ *
+ * Revision 2.46  2002/02/25 19:34:14  ullrich
+ * Fill parts of StRunInfo from StDetectorDbBeamInfo.
+ *
+ * Revision 2.45  2002/02/15 23:06:58  ullrich
+ * Fill detector state for RICH.
+ *
+ * Revision 2.44  2002/01/31 23:50:28  ullrich
+ * More filling of StRunInfo (by J. Gans).
+ *
+ * Revision 2.43  2002/01/11 16:44:12  ullrich
+ * Fill bunch crossing numbers in StEventInfo.
+ *
+ * Revision 2.42  2001/12/21 22:39:32  ullrich
+ * Disabled filling parts of StRunInfo.
+ *
+ * Revision 2.41  2001/12/21 21:13:03  ullrich
+ * Fixed bug: loading multiple primary vertices.
+ *
+ * Revision 2.40  2001/11/10 23:54:21  ullrich
+ * Added calibration vertices.
+ *
+ * Revision 2.39  2001/11/07 21:20:46  ullrich
+ * Added L1 trigger.
+ *
+ * Revision 2.38  2001/09/28 22:22:05  ullrich
+ * Load helix geometry at last point of each track.
+ *
+ * Revision 2.37  2001/09/19 04:49:05  ullrich
+ * Set event size in StEventInfo.
+ *
+ * Revision 2.36  2001/09/18 00:16:06  ullrich
+ * Fill and add StRunInfo.
+ *
+ * Revision 2.35  2001/09/12 23:49:22  ullrich
+ * Removed code to build StRun and StRunSummary.
+ *
+ * Revision 2.34  2001/07/19 00:05:28  ullrich
+ * New StL0Trigger needs additional table in constructor.
+ *
+ * Revision 2.33  2001/07/17 22:21:50  ullrich
+ * Use B from event summary to set helicity of tracks.
+ *
+ * Revision 2.32  2001/05/17 22:46:37  ullrich
+ * Removed loading of event summary params.
+ *
+ * Revision 2.31  2001/02/22 05:02:40  ullrich
+ * Added new protected method getStEventInstance().
+ * Modified maker to allow multiple calls of Make() within
+ * one event. If instance already it is re-used and the data
+ * from existing tables gets added.
+ *
+ * Revision 2.30  2000/11/02 16:33:28  ullrich
+ * Fixed tiny memory leak.
+ *
+ * Revision 2.29  2000/08/30 05:37:02  ullrich
+ * Obtain trigger mask from StEvtHddr dataset.
+ *
+ * Revision 2.28  2000/08/17 00:38:48  ullrich
+ * Allow loading of tpt tracks.
+ *
+ * Revision 2.27  2000/05/26 11:36:19  ullrich
+ * Default is to NOT print event info (doPrintEventInfo  = kFALSE).
+ *
+ * Revision 2.26  2000/05/26 11:34:08  ullrich
+ * Skip the attempt of creating an instance of StRun in case
+ * no dst dataset is available.
+ *
+ * Revision 2.25  2000/05/25 14:44:43  ullrich
+ * Removed remaining pieces of the RICH pixel table.
+ *
+ * Revision 2.24  2000/05/24 15:48:15  ullrich
+ * Instance of StEvent now also created if no DST dataset
+ * is available.
+ *
+ * Revision 2.23  2000/05/22 21:53:41  ullrich
+ * No more copying of RICH tables. RICH now writes directly
+ * to StEvent. printEventInfo() and makeEvent() modified.
+ *
+ * Revision 2.22  2000/04/26 20:29:13  ullrich
+ * Create instance of StEvent not StBrowsableEvent.
+ *
+ * Revision 2.21  2000/03/22 17:11:20  ullrich
+ * Added further checks for case were tables exist but have
+ * zero length. Added for primary and global tracks.
+ *
+ * Revision 2.20  2000/02/23 12:11:49  ullrich
+ * Added printout of covariant matrix to printTrackInfo().
+ *
+ * Revision 2.19  2000/02/17 18:19:05  ullrich
+ * Adapted new SVT hit storage layout. Barrels instead of layers.
+ *
+ * Revision 2.18  2000/02/11 16:12:33  ullrich
+ * Modified check for valid primary vertices.
+ *
+ * Revision 2.17  2000/02/08 21:14:16  genevb
+ * Handle cases with no tracks.
+ *
+ * Revision 2.16  2000/01/25 20:11:11  ullrich
+ * Fixed bug in loading the Xi vertices.
+ *
+ * Revision 2.15  2000/01/14 18:51:06  ullrich
+ * Added printout of quasi-histos in the event summary
+ * to printEventInfo().
+ *
+ * Revision 2.14  2000/01/14 13:58:03  ullrich
+ * Create and fill the RICH pixel collection. Added also
+ * the debug output for the RICH to printEventInfo().
+ *
+ * Revision 2.13  2000/01/11 16:05:34  ullrich
+ * With Victors help now possible to read the dst_summary_param
+ * table from the runco branch and build StEventSummary objects.
+ *
+ * Revision 2.12  2000/01/10 18:20:32  ullrich
+ * Create new StTrackDetectorInfo object for primary tracks if
+ * first or last points differ from the referring global track.
+ *
+ * Revision 2.11  2000/01/05 16:07:44  ullrich
+ * Added loading of SSD hits and handling of runco branch.
+ *
+ * Revision 2.10  1999/12/21 15:13:13  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
+ *
+ * Revision 2.9  1999/12/07 18:58:39  ullrich
+ * Modified to get rid of some warnings on Linux
+ *
+ * Revision 2.8  1999/11/23 17:14:19  ullrich
+ * Forgot to fill PID traits. Fixed now.
+ *
+ * Revision 2.7  1999/11/17 14:10:27  ullrich
+ * Added more checks to protect from corrupted table data.
+ *
+ * Revision 2.6  1999/11/11 17:46:30  ullrich
+ * Added more checks and warning messages. Handling
+ * of primary vertices made safer
+ *
+ * Revision 2.5  1999/11/11 10:02:58  ullrich
+ * Added warning message in case some hits cannot be stored.
+ *
+ * Revision 2.4  1999/11/10 22:40:27  ullrich
+ * Delete hit if it cannot be added to collection.
+ *
+ * Revision 2.3  1999/11/08 17:04:59  ullrich
+ * Hits now allocated individually.
+ *
+ * Revision 2.2  1999/11/05 18:35:54  ullrich
+ * Added methods and flags for debugging and monitoring.
+ *
+ * Revision 2.1  1999/11/04 19:55:37  ullrich
+ * Corrected typo.
+ *
+ * Revision 2.0  1999/11/04 19:03:00  ullrich
+ * Revised to build new StEvent version
+ *
+ **************************************************************************/
