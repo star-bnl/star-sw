@@ -23,17 +23,17 @@ elsif ($file =~ /LinkDef\.h/) {
 sub tableH ($) {
   my $stem = $_[0];
   my $h = '
-class St_' . $stem . ' : public St_Table
+class St_' . $stem . ' : public TTable
 {
 protected:
-  static St_tableDescriptor *fgColDescriptors;
-  virtual St_tableDescriptor *GetDescriptorPointer() const { return fgColDescriptors;}
-  virtual void SetDescriptorPointer(St_tableDescriptor *list) const { fgColDescriptors = list;}
+  static TTableDescriptor *fgColDescriptors;
+  virtual TTableDescriptor *GetDescriptorPointer() const { return fgColDescriptors;}
+  virtual void SetDescriptorPointer(TTableDescriptor *list) const { fgColDescriptors = list;}
 public:
-  St_' . $stem . '() : St_Table("' . $stem . '",sizeof(' . $stem . '_st)) {SetType("' . $stem . '");}
-  St_' . $stem . '(Text_t *name) : St_Table(name,sizeof(' . $stem . '_st)) {SetType("' . $stem . '");}
-  St_' . $stem . '(Int_t n): St_Table("' . $stem . '",n,sizeof(' . $stem . '_st)) {SetType("' . $stem . '");}
-  St_' . $stem . '(Text_t *name,Int_t n): St_Table(name,n,sizeof(' . $stem . '_st)) {SetType("' . $stem . '");}
+  St_' . $stem . '() : TTable("' . $stem . '",sizeof(' . $stem . '_st)) {SetType("' . $stem . '");}
+  St_' . $stem . '(Text_t *name) : TTable(name,sizeof(' . $stem . '_st)) {SetType("' . $stem . '");}
+  St_' . $stem . '(Int_t n): TTable("' . $stem . '",n,sizeof(' . $stem . '_st)) {SetType("' . $stem . '");}
+  St_' . $stem . '(Text_t *name,Int_t n): TTable(name,n,sizeof(' . $stem . '_st)) {SetType("' . $stem . '");}
   ' . $stem . '_st *GetTable(Int_t i=0) const { return ((' . $stem . '_st *)GetArray())+i;}
   ' . $stem . '_st &operator[](Int_t i){ assert(i>=0 && i < GetNRows()); return *GetTable(i); }
   const ' . $stem . '_st &operator[](Int_t i) const { assert(i>=0 && i < GetNRows()); 
@@ -62,7 +62,7 @@ sub TableH {
 #ifndef STAF_St_' . $stem . '_Table
 #define STAF_St_' . $stem . '_Table
 
-#include "St_Table.h"
+#include "TTable.h"
 
 #include "' . $stem . '.h"
 ';
@@ -83,7 +83,7 @@ sub TableD {
 #ifndef STAF_St_' . $stem . '_Table
 #define STAF_St_' . $stem . '_Table
 
-#include "St_Table.h"
+#include "TTable.h"
 
 #include "' . $stem . '.h"
 
@@ -101,11 +101,11 @@ sub TableCXX {
   my $dir = dirname($dst);
   rmkdir($dir);
   open (OUT,">$dst") or die "Can't open $dst\n";
-  if ($stem eq "g2t_rch_hit") {
-    my $g2t_rch_hit_streamer = g2t_rch_hit_streamer();
-    print OUT $g2t_rch_hit_streamer;
-  }
-  else {
+#  if ($stem eq "g2t_rch_hit") {
+#    my $g2t_rch_hit_streamer = g2t_rch_hit_streamer();
+#    print OUT $g2t_rch_hit_streamer;
+#  }
+#  else {
 my $c = '
 #include "tables/St_' . $stem . '_Table.h"
 /////////////////////////////////////////////////////////////////////////
@@ -119,7 +119,7 @@ my $c = '
 TableImpl(' . $stem . ')
 ';
   print OUT $c;
-}
+#}
   close (OUT);
 }
 #________________________________________
@@ -166,38 +166,37 @@ sub g2t_rch_hit_streamer {
 /////////////////////////////////////////////////////////////////////////
 
 #include "Stypes.h" 
-#include "St_tableDescriptor.h"
-#include "St_TableElementDescriptor.h"
+#include "TTableDescriptor.h"
+#include "TTableElementDescriptor.h"
 //____________________________________________________________________________
-  St_tableDescriptor *St_g2t_rch_hit::fgColDescriptors = 0;
+  TTableDescriptor *St_g2t_rch_hit::fgColDescriptors = 0;
   TableImp(g2t_rch_hit)
 
-#define StreamElementIn(type)  case St_TableElementDescriptor::_NAME2_(k,type):            \
+#define StreamElementIn(type)  case TTableElementDescriptor::_NAME2_(k,type):            \
  if (nextCol->m_Dimensions)                                   \
    R__b.ReadStaticArray((_NAME2_(type,_t) *)(row+nextCol->m_Offset));                      \
  else                                                         \
    R__b >> *(_NAME2_(type,_t) *)(row+nextCol->m_Offset);      \
  break 
-
 //____________________________________________________________________________
 void St_g2t_rch_hit::Streamer(TBuffer &R__b) 
 {
    if (!R__b.IsReading()) {
      R__b.WriteVersion(St_g2t_rch_hit::IsA());
-     St_Table::Streamer(R__b); 
+     TTable::Streamer(R__b); 
    } else {
       Int_t save =  R__b.Length();
       Version_t R__v = R__b.ReadVersion(); 
       if (R__v) {
         R__b.SetBufferOffset(save); // reset TBuffer offset;
-        St_Table::Streamer(R__b); 
+        TTable::Streamer(R__b); 
         return; 
       }
       // Special case to read "old" version of St_g2t_rch table
-      St_Table::StreamerTable(R__b);
-      if (*s_MaxIndex <= 0) return; 
+      TTable::StreamerTable(R__b);
+      if (s_MaxIndex <= 0) return; 
       char *row = (char *)GetArray();
-      for (Int_t indx=0;indx<*s_MaxIndex;indx++,row += GetRowSize()) {
+      for (Int_t indx=0;indx<s_MaxIndex;indx++,row += GetRowSize()) {
         tableDescriptor_st *nextCol = GetRowDescriptors()->GetTable();
         Int_t maxColumns = GetNumberOfColumns();
         for (Int_t colCounter=0; colCounter < maxColumns; nextCol++,colCounter++) 
