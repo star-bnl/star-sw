@@ -15,10 +15,26 @@
 
 using std::sort;
 
+StiHitContainer* StiHitContainer::sinstance = 0;
+
+StiHitContainer* StiHitContainer::instance()
+{
+    return (sinstance) ? sinstance : new StiHitContainer();
+}
+
+void StiHitContainer::kill()
+{
+    if (sinstance) {
+	delete sinstance;
+	sinstance = 0;
+    }
+}
+
 StiHitContainer::StiHitContainer() 
 { 
     mminpoint = new StiHit();
     mmaxpoint = new StiHit();
+    sinstance = this;
 }
 
 StiHitContainer::~StiHitContainer() {};

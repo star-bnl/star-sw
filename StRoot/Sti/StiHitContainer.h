@@ -26,9 +26,12 @@ typedef map<HitMapKey, hitvector, MapKeyLessThan>::value_type hitMapValType;
 class StiHitContainer
 {
 public:
-    StiHitContainer();
     virtual ~StiHitContainer();
 
+    //Singleton access
+    static StiHitContainer* instance();
+    static void kill();
+    
     void setDeltaD(double val) {mdeltad = val;}
     void setDeltaZ(double val) {mdeltaz = val;}
 
@@ -55,8 +58,12 @@ public:
     bool hasMore() const;
     StiHit* getHit();
 
-private:
+protected:
+    StiHitContainer();
 
+private:
+    static StiHitContainer* sinstance;
+    
     HitMapKey mkey; //store a map key member to avoid constructor call per hit
     
     double mdeltad; //Search limit in local d-direction
