@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.6 1998/09/15 20:55:29 fisyak Exp $
+// $Id: St_tpt_Maker.cxx,v 1.7 1998/09/19 00:15:44 fisyak Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.7  1998/09/19 00:15:44  fisyak
+// move iostrem into <>
+//
 // Revision 1.6  1998/09/15 20:55:29  fisyak
 // Split St_DataSet -> St_DataSet + St_DataSetIter
 //
@@ -20,7 +23,7 @@
 // St_tpt_Maker class for Makers                                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#include "iostream.h"
+#include <iostream.h>
 #include "St_tpt_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -152,7 +155,7 @@ Int_t St_tpt_Maker::Make(){
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.6 1998/09/15 20:55:29 fisyak Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.7 1998/09/19 00:15:44 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
