@@ -200,10 +200,10 @@ typedef struct {
 
 /*  Trigger Event Structure */
 
-typedef struct {
+struct TrgDataType2004 {
   EvtDescData2004    EvtDesc;               /* L1 Event Descriptor Data */  
   TrgSumData2004     TrgSum;                /* Summary data */
   RawTrgDet2004      rawTriggerDet[y4MAX_RAW_DATA_BLOCKS];    /* Raw Detector Data with pre and post History */
-} TrgDataType2004;         /* 19704 bytes */
+} ;         /* 19704 bytes */
 
 #endif
