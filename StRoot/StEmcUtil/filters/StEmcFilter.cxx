@@ -466,7 +466,7 @@ Bool_t StEmcFilter::accept(StMcTrack *track)
 //------------------------------------------------------------------------------/
 Bool_t StEmcFilter::accept(Int_t rid)
 {
-  if(rid<1 && rid>4800) return kFALSE;
+  if(rid<1 || rid>4800) return kFALSE;
 	if(getEmcStatus(1,rid)!=kGOOD) return kFALSE;
   if(mNTracksTower[rid-1]>mMaxTracksPerTower) return kFALSE;
   if(mETower[rid-1]<mEMin || mETower[rid-1]>mEMax) return kFALSE;
@@ -500,7 +500,7 @@ Bool_t StEmcFilter::accept(Int_t m, Int_t e, Int_t s)
 //------------------------------------------------------------------------------/
 Int_t StEmcFilter::getNTracksTower(Int_t rid)
 {
-  if(rid<1 && rid>4800) return 0;
+  if(rid<1 || rid>4800) return 0;
   return mNTracksTower[rid-1];
 }
 //------------------------------------------------------------------------------/
@@ -513,7 +513,7 @@ Int_t StEmcFilter::getNTracksTower(Int_t m, Int_t e, Int_t s)
 //------------------------------------------------------------------------------/
 Float_t StEmcFilter::getPtTower(Int_t rid)
 {
-  if(rid<1 && rid>4800) return 0;
+  if(rid<1 || rid>4800) return 0;
   return mPtTower[rid-1];
 }
 //------------------------------------------------------------------------------/
