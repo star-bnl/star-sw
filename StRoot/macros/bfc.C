@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.88 1999/07/15 15:06:55 fisyak Exp $
+// $Id: bfc.C,v 1.89 1999/07/15 16:20:34 didenko Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -581,6 +581,8 @@ void Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0 ){
     printf("Output root file name %s\n", FileOut->Data());
     printf("==============================================\n");
   }
+  //    gSystem->Exit(1);
+  
 }
 //_____________________________________________________________________
 void bfc(const Int_t First,
@@ -667,6 +669,8 @@ void bfc(const Int_t First,
 	//  geant->Do("debug on;");
 	geant->Do("swit 2 3;");
 	// geant->LoadGeometry("detp geometry ChainFlags[kFieldOn] field_off");
+      }
+      else {
 	if (ChainFlags[kFZIN]) {
 	  if (geant->SetInputFile(InFile->Data()) > kStOK) {
 	    printf ("File %s cannot be opened. Exit! \n",InFile->Data());
