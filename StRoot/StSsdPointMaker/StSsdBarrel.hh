@@ -1,3 +1,10 @@
+// $Id: StSsdBarrel.hh,v 1.5 2005/03/18 14:04:06 lmartin Exp $
+//
+// $Log: StSsdBarrel.hh,v $
+// Revision 1.5  2005/03/18 14:04:06  lmartin
+// missing CVS header added
+//
+
 #ifndef STSSDBARREL_HH
 #define STSSDBARREL_HH
 

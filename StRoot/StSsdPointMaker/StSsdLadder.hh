@@ -1,3 +1,10 @@
+// $Id: StSsdLadder.hh,v 1.5 2005/03/18 14:06:30 lmartin Exp $
+//
+// $Log: StSsdLadder.hh,v $
+// Revision 1.5  2005/03/18 14:06:30  lmartin
+// missing CVS header added
+//
+
 /*!
  * \class StSsdLadder
  * \author to be filled - doc by L.Martin

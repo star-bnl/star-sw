@@ -1,3 +1,10 @@
+// $Id: StSsdLadder.cc,v 1.5 2005/03/18 14:06:30 lmartin Exp $
+//
+// $Log: StSsdLadder.cc,v $
+// Revision 1.5  2005/03/18 14:06:30  lmartin
+// missing CVS header added
+//
+
 #include "StSsdLadder.hh"
 #include "StSsdWafer.hh"
 #include <Stiostream.h>
