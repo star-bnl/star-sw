@@ -11,7 +11,11 @@
  * does it for the "normal" C++ classes                                 
  *                                                                      
  * This header file should be included into the all STAF table wrapper  
- * classes (by stic compiler)                                           
+ * classes (by stic compiler)  
+ * 
+ * Note: while kStErr used to skip an event, this behavior
+ * was changed in 2002 to only leave the current maker / sub-chain but
+ * not the entire chain.
  *                                                                      
  */
 #ifndef ST_NO_NAMESPACES
@@ -33,18 +37,18 @@ using namespace std;
  * \enum EReturnCodes 
  */
 enum EReturnCodes {                                                    
-  kStOK    = 0,                           /**< OK     */
-  kStOk    = 0,                           /**< OK     */
+  kStOK    = 0,                           /**< OK                                                 */
+  kStOk    = 0,                           /**< OK                                                 */
   kStWarn  = 1,                           /**< Warning, something wrong but work can be continued */
-  kStEOF   = 2,                           /**< End Of File   */
-  kStErr   = 3,                           /**< Error, drop this and go to the next event    */
-  kStERR   = 3,                           /**< Error, drop this and go to the next event   */
-  kStFatal = 4,                           /**< Fatal error, processing impossible  */
-  kStFATAL = 4,                           /**< Fatal error, processing impossible  */
-  kStSKIP  = kStErr   + 10,               /**< enum value kStSKIP   */
-  kStSkip  = kStSKIP,                     /**< enum value kStSkip   */
-  kStSTOP  = kStFATAL + 10,               /**< enum value kStSTOP   */
-  kStStop  = kStSTOP                      /**< enum value kStStop   */
+  kStEOF   = 2,                           /**< End Of File                                        */
+  kStErr   = 3,                           /**< Error, drop this i.e. leave the sub-chain          */
+  kStERR   = 3,                           /**< Error, drop this i.e. leave the sub-chain          */
+  kStFatal = 4,                           /**< Fatal error, processing impossible                 */
+  kStFATAL = 4,                           /**< Fatal error, processing impossible                 */
+  kStSKIP  = kStErr   + 10,               /**< Skip this event if chain allows                    */
+  kStSkip  = kStSKIP,                     /**< Skip this event if chain allows                    */
+  kStSTOP  = kStFATAL + 10,               /**< enum value kStSTOP                                 */
+  kStStop  = kStSTOP                      /**< enum value kStStop                                 */
 };  
 
 #endif 
