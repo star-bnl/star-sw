@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.20  2003/10/21 15:35:25  suaide
+// fix a break segmentation introduced when a memory leak was fixed
+//
 // Revision 1.19  2003/10/12 02:56:51  perev
 // LeakOff TClonesArray::Delete added
 //
@@ -155,7 +158,7 @@ StPointCollection::StPointCollection(const Char_t *Name):TDataSet(Name)
 StPointCollection::~StPointCollection()
 {
     mPoints.Delete();
-    mPointsReal.Delete();
+    //mPointsReal.Delete(); // The objects saved here are owned by StEvent
     mNPoints =0; mNPointsReal=0;
 }
 
