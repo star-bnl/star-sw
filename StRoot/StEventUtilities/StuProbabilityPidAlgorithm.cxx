@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.30 2003/05/02 21:32:08 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.31 2003/06/24 02:53:14 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.31  2003/06/24 02:53:14  aihong
+ * update for dAu PIDtable
+ *
  * Revision 1.30  2003/05/02 21:32:08  aihong
  * destroy myBandBGFcn in destructor
  *
@@ -85,6 +88,7 @@
 #include "StEventUtilities/MaxllBoltz.hh"
 #include "StEventUtilities/Linear.hh"
 
+#include "StEventUtilities/StuFtpcRefMult.hh"
 #include "StEventUtilities/StuRefMult.hh"
 
 //TMap::FindObject goes wild!! TMap::GetValue works.
@@ -280,7 +284,24 @@ StParticleDefinition* StuProbabilityPidAlgorithm::operator() (const StTrack& the
     const StPhysicalHelixD& helix=theTrack.geometry()->helix();
            dca=helix.distance(primaryVtx->position());
 
-  cent = getCentrality(uncorrectedNumberOfNegativePrimaries(*mEvent));
+  //cent in cross section
+
+  if (mProductionTag){
+
+  if ( (mProductionTag->GetString()).Contains("P01gl")
+       || (mProductionTag->GetString()).Contains("P02gd") ){
+        cent = getCentrality(uncorrectedNumberOfNegativePrimaries(*mEvent));  
+  }  else if ( (mProductionTag->GetString()).Contains("P03ia_dAu") ){
+        cent = getCentrality(uncorrectedNumberOfFtpcEastPrimaries(*mEvent)); 
+  }  else {
+        gMessMgr->Error()<<"Production tag "<<mProductionTag->GetString().Data()<<" in PIDTable is filled but its name is not recognized ! "<<endm;
+  }
+
+
+  } else { //the first PID table has no production tag
+        cent = getCentrality(uncorrectedNumberOfNegativePrimaries(*mEvent));
+  }
+
 
    
           const StDedxPidTraits* dedxPidTr=0;
@@ -318,7 +339,24 @@ StParticleDefinition* StuProbabilityPidAlgorithm::operator() (const StTrack& the
 
     const StThreeVectorF& p=theTrack.geometry()->momentum();
     rig=double(p.mag()/charge);
+
+
+
+    if (mProductionTag){ //for AuAu, +/- eta were folded together when building PID
+      //table, for dAu, + and - eta were treated differently.
+
+  if ( (mProductionTag->GetString()).Contains("P01gl")
+       || (mProductionTag->GetString()).Contains("P02gd") ){
     eta=fabs(p.pseudoRapidity());
+  }  else if ( (mProductionTag->GetString()).Contains("P03ia_dAu") ){
+    eta=p.pseudoRapidity();
+  }  else {
+        gMessMgr->Error()<<"Production tag "<<mProductionTag->GetString().Data()<<" in PIDTable is filled but its name is not recognized ! "<<endm;
+  }
+
+  } else { //the first PID table has no production tag
+    eta = fabs(p.pseudoRapidity());
+  }
 
     rig   = fabs(rig);
     dedx  = (dedx>thisDedxStart) ? dedx : thisDedxStart;
@@ -684,7 +722,7 @@ void StuProbabilityPidAlgorithm::fillPIDByLookUpTable(double myCentrality, doubl
   int theDcaBin = (myDca>(*mDcaBinEdgeSet)(1)) ? 1 : 0;
   int theChargeBin=(myCharge>0) ? 1 : 0;
   int thePBin=int(thisPBins*myRig/(thisPEnd-thisPStart));
-  int theEtaBin=int(thisEtaBins*myEta/(thisEtaEnd-thisEtaStart));
+  int theEtaBin=int(thisEtaBins*(myEta-thisEtaStart)/(thisEtaEnd-thisEtaStart));
   int theNHitsBin=int(thisNHitsBins*float(myNhits)/(thisNHitsEnd-thisNHitsStart));
 
 
@@ -828,14 +866,16 @@ double StuProbabilityPidAlgorithm::getCentrality(int theMult){
 
 
   if ( (mProductionTag->GetString()).Contains("P01gl")
-    || (mProductionTag->GetString()).Contains("P02gd") )
+       || (mProductionTag->GetString()).Contains("P02gd") ){
   return  getCentrality_P01gl(theMult);
-
-  else gMessMgr->Error()<<"Production tag "<<mProductionTag->GetString().Data()<<" in PIDTable is filled but its name is not recognized ! "<<endm;
-
+  } else if ((mProductionTag->GetString()).Contains("P03ia_dAu")){
+  return  getCentrality_P03ia_dAu(theMult);
+  }  else {
+  gMessMgr->Error()<<"Production tag "<<mProductionTag->GetString().Data()<<" in PIDTable is filled but its name is not recognized ! "<<endm;
   }
 
-  else {
+
+  }  else {//the first PID table does not have a productionTag
 
      // limits 
     // For Cut Set 1       
@@ -896,6 +936,22 @@ double StuProbabilityPidAlgorithm::getCentrality_P01gl(int theMult){
   else return 0.99;
 }
 
+//-------------------------------
+
+
+double StuProbabilityPidAlgorithm::getCentrality_P03ia_dAu(int theMult){
+     
+  //from Joern's study    
+  // * centrality bin    multiplicity FTPC east    percentOfEvents
+  // *        1                   <=11                 100-40
+  // *        2                   <=17                 40-20
+  // *        3                   >=18                 20-0
+
+  if (theMult >= 18 )      return 0.19; //do not need to be exact. 
+  else if (theMult >= 12 ) return 0.39; //just for gettting bin # correctly.
+  else if (theMult > 0 )   return 0.8;
+  else return 0.99;
+}
 
 //-------------------------------
 void StuProbabilityPidAlgorithm::fill(double prob, int geantId){
@@ -935,7 +991,7 @@ void StuProbabilityPidAlgorithm::fill(double prob, int geantId){
 //------------------------------------------------
 int StuProbabilityPidAlgorithm::getCalibPosition(double theEta, int theNHits){
 
-  int theEtaBin=int(thisEtaBins*theEta/(thisEtaEnd-thisEtaStart));
+  int theEtaBin=int(thisEtaBins*(theEta-thisEtaStart)/(thisEtaEnd-thisEtaStart));
   int theNHitsBin=int(thisNHitsBins*float(theNHits)/(thisNHitsEnd-thisNHitsStart));
 
     int totalEntry
@@ -1010,8 +1066,27 @@ void StuProbabilityPidAlgorithm::processPIDAsFunction (double theCent, double th
 	  double dca    =theDca; //in units of cm.
           int    nhits  =theNhits;
           int    charge =theCharge;
-          double eta    =fabs(theEta); 
+          double eta    =0.; 
           double cent   =theCent; // % central
+
+
+    if (mProductionTag){ //for AuAu, +/- eta were folded together when building PID
+      //table, for dAu, + and - eta were treated differently.
+
+  if ( (mProductionTag->GetString()).Contains("P01gl")
+       || (mProductionTag->GetString()).Contains("P02gd") ){
+    eta=fabs(theEta);
+  }  else if ( (mProductionTag->GetString()).Contains("P03ia_dAu") ){
+    eta=theEta;
+  }  else {
+        gMessMgr->Error()<<"Production tag "<<mProductionTag->GetString().Data()<<" in PIDTable is filled but its name is not recognized ! "<<endm;
+  }
+
+  } else { //the first PID table has no production tag
+    eta = fabs(theEta);
+  }
+
+
 
 
 
