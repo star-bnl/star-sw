@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.29 2001/04/27 18:41:47 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.30 2001/05/08 21:29:56 calderon Exp $
  * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.30  2001/05/08 21:29:56  calderon
+ * Resize the candidates vector when we have more than 20 candidates.
+ *
  * Revision 1.29  2001/04/27 18:41:47  calderon
  * Update with switches to use L3 Trigger.
  *
@@ -1039,7 +1042,7 @@ Int_t StAssociationMaker::Make()
 	if (!rcTrack || !(rcTrack->detectorInfo()->hits().size()))
 	    continue; // If there are no Tpc Hits, skip track.
 	
-	int nCandidates = 0;
+	unsigned int nCandidates = 0;
 
 
 		
@@ -1075,7 +1078,7 @@ Int_t StAssociationMaker::Make()
 		    }
 		    
 		    else {
-			for (int iCandidate=0; iCandidate<nCandidates; iCandidate++){ 
+			for (unsigned int iCandidate=0; iCandidate<nCandidates; iCandidate++){ 
 			    if (trackCand==candidates[iCandidate].mcTrack){
 				candidates[iCandidate].nPingsTpc++;
 				break;
@@ -1084,6 +1087,9 @@ Int_t StAssociationMaker::Make()
 				candidates[nCandidates].mcTrack = trackCand;
 				candidates[nCandidates].nPingsTpc  = 1;
 				nCandidates++;
+				// check that we don't overstep the bounds,
+				// if so increase the size of the vector in steps of 20 candidates
+				if (nCandidates>=candidates.size()) candidates.resize(nCandidates+20);
 				break;
 			    }
 			} // candidate loop
@@ -1126,7 +1132,7 @@ Int_t StAssociationMaker::Make()
 		    }
 		    
 		    else {
-			for (int iCandidate=0; iCandidate<nCandidates; iCandidate++){ 
+			for (unsigned int iCandidate=0; iCandidate<nCandidates; iCandidate++){ 
 			    if (trackCand==candidates[iCandidate].mcTrack){
 				candidates[iCandidate].nPingsSvt++;
 				break;
@@ -1135,6 +1141,9 @@ Int_t StAssociationMaker::Make()
 				candidates[nCandidates].mcTrack = trackCand;
 				candidates[nCandidates].nPingsSvt  = 1;
 				nCandidates++;
+				// check that we don't overstep the bounds,
+				// if so increase the size of the vector in steps of 20 candidates
+				if (nCandidates>=candidates.size()) candidates.resize(nCandidates+20);
 				break;
 			    }
 			} // candidate loop
@@ -1182,7 +1191,7 @@ Int_t StAssociationMaker::Make()
 		    }
 		    
 		    else {
-			for (int iCandidate=0; iCandidate<nCandidates; iCandidate++){ 
+			for (unsigned int iCandidate=0; iCandidate<nCandidates; iCandidate++){ 
 			    if (trackCand==candidates[iCandidate].mcTrack){
 				candidates[iCandidate].nPingsFtpc++;
 				break;
@@ -1191,6 +1200,9 @@ Int_t StAssociationMaker::Make()
 				candidates[nCandidates].mcTrack = trackCand;
 				candidates[nCandidates].nPingsFtpc  = 1;
 				nCandidates++;
+				// check that we don't overstep the bounds,
+				// if so increase the size of the vector in steps of 20 candidates
+				if (nCandidates>=candidates.size()) candidates.resize(nCandidates+20);
 				break;
 			    }
 			} // candidate loop
@@ -1228,7 +1240,7 @@ Int_t StAssociationMaker::Make()
 		    }
 		    
 		    else {
-			for (int iCandidate=0; iCandidate<nCandidates; iCandidate++){ 
+			for (unsigned int iCandidate=0; iCandidate<nCandidates; iCandidate++){ 
 			    if (trackCand==candidates[iCandidate].mcTrack){
 				candidates[iCandidate].nPingsFtpc++;
 				break;
@@ -1237,6 +1249,9 @@ Int_t StAssociationMaker::Make()
 				candidates[nCandidates].mcTrack = trackCand;
 				candidates[nCandidates].nPingsFtpc  = 1;
 				nCandidates++;
+				// check that we don't overstep the bounds,
+				// if so increase the size of the vector in steps of 20 candidates
+				if (nCandidates>=candidates.size()) candidates.resize(nCandidates+20);
 				break;
 			    }
 			} // candidate loop
@@ -1250,9 +1265,13 @@ Int_t StAssociationMaker::Make()
 	// Now we need to associate the tracks that meet the commonHits criteria.
 	//
 	
-	if (nCandidates>20) cout << "We Have More than 20 candidates!!! " << endl;
-	if (candidates.size()>20) cout << "The candidate track vector has grown more than expected!! " << endl;
- 	for (int iCandidate=0; iCandidate<nCandidates; iCandidate++){
+	if (nCandidates>20 || candidates.size()>20)
+	    cout << "We Have " << candidates.size() << " candidates!!! " << endl;
+	if (candidates.size()<nCandidates) {
+	    cout << "The candidate track vector has grown more than expected!! " << endl;
+	    cout << "Something is wrong! We probably went out-of-bounds! " << endl;
+	}
+ 	for (unsigned int iCandidate=0; iCandidate<nCandidates; iCandidate++){
 	    //mNumberOfPings->Fill((float) candidates[iCandidate].nPings);
 	    
 	    
