@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StKinkMuDst.cc,v 3.0 2000/07/14 12:56:48 genevb Exp $
+ * $Id: StKinkMuDst.cc,v 3.1 2000/08/09 18:56:18 wdeng Exp $
  *
  * Author: Wensheng Deng, Kent State University, 29-Mar-2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StKinkMuDst.cc,v $
+ * Revision 3.1  2000/08/09 18:56:18  wdeng
+ * Get parent track lengths from primary tracks.
+ *
  * Revision 3.0  2000/07/14 12:56:48  genevb
  * Revision 3 has event multiplicities and dedx information for vertex tracks
  *
@@ -25,6 +28,7 @@
 #include "StKinkMuDst.hh"
 #include "StKinkVertex.h"
 #include "StTrack.h"
+#include "StTrackNode.h"
 #include "StTrackFitTraits.h"
 #include "StDedxPidTraits.h"
 
@@ -109,7 +113,13 @@ StKinkMuDst::findMinDeltaEnergy(StKinkVertex* kinkVertex)
 void
 StKinkMuDst::findDecayLength(StKinkVertex* kinkVertex)
 {
-  mDecayLength = kinkVertex->parent()->length();
+  StTrack* parentPrimaryTrack = 
+    kinkVertex->parent()->node()->track(primary);
+  if( parentPrimaryTrack ) {
+    mDecayLength = parentPrimaryTrack->length();
+  } else {
+    mDecayLength = 999.;
+  }
 }
 
 void  
