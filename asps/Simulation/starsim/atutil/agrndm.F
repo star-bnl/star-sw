@@ -1,5 +1,8 @@
-* $Id: agrndm.F,v 1.2 2004/07/13 03:28:03 perev Exp $
+* $Id: agrndm.F,v 1.3 2004/07/13 16:29:42 perev Exp $
 * $Log: agrndm.F,v $
+* Revision 1.3  2004/07/13 16:29:42  perev
+* More accurate auto init
+*
 * Revision 1.2  2004/07/13 03:28:03  perev
 * automatic init added for grndm
 *
@@ -36,7 +39,7 @@ C.
       COMMON / GCRNDM / JSEQ(2), ISEED(2,MAXSEQ)
 C
       ISEQ   = JSEQ(1)
-      if (ISEQ .EQ. 0) THEN
+      if (ISEQ .LE. 0 .OR. ISEQ >255) THEN
         ISEQ   = 1
 	JSEQ(1)= 1
 	ISEED(1,ISEQ) = 9876 
