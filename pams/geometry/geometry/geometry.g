@@ -1,5 +1,11 @@
-* $Id: geometry.g,v 1.100 2005/01/19 16:40:53 potekhin Exp $
+* $Id: geometry.g,v 1.101 2005/02/02 00:16:09 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.101  2005/02/02 00:16:09  potekhin
+* We now have a new estimate of the copper cable mass, for
+* the cables feeding the SVT and residing on the support cones.
+* Included in the code now are the switches and logic to allow
+* the updated configuration to be created.
+*
 * Revision 1.100  2005/01/19 16:40:53  potekhin
 * We extended the y2005x tag from y2004x and made
 * a mistake of creating only a half barrel of the SSD,
@@ -431,7 +437,7 @@
               BtofConfig, VpddConfig, FpdmConfig,
               SisdConfig, PipeConfig, CalbConfig,
               PixlConfig, IstbConfig, FstdConfig,
-              FtroConfig
+              FtroConfig, ConeConfig
 
 * Note that SisdConfig can take values in the tens, for example 20
 * We do this to not proliferate additional version flags -- there has
@@ -495,6 +501,7 @@ replace[;ON#{#;] with [
    IstbConfig  = 0 ! 0=no, >1=version
    FstdConfig  = 0 ! 0=no, >1=version
    FtroConfig  = 0 ! 0=no, >1=version
+   ConeConfig  = 1 ! 1 (def) old version, 2=more copper
 
 * Set only flags for the main configuration (everthing on, except for tof),
 * but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
@@ -1168,6 +1175,8 @@ If LL>1
                      wfr=0  " numbering is in the code   ";
                      wdm=0  " width is in the code      ";
 
+                     ConeConfig=2 " new cable weight estimate ";
+
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
                      pse=on " inner sector has pseudo padrows ";
@@ -1225,6 +1234,8 @@ If LL>1
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
                      wdm=0  " width is in the code      ";
+
+                     ConeConfig=2 " new cable weight estimate ";
 
                   "tpc: standard, i.e.  "
                      mwc=on " Wultiwire chambers are read-out ";
@@ -1377,6 +1388,15 @@ If LL>1
 ******************************************************************
 * Take care of the correction level and call the appropriate constructor:
   if(svtt) then
+
+*   This applies to the newer versions of the svt code:
+*   we can now switch to a better description of the cone
+*   material (copper cables) thanks to a new measurement by
+*   Dave Lynn
+
+    call AgDETP add ('svtg.ConeVer=',ConeConfig ,1) ! could have more copper on the cone
+
+
     if    (CorrNum==0) then
        call svttgeo
 
@@ -1393,6 +1413,7 @@ If LL>1
        call AgDETP add ('svtg.SupportVer=',2 ,1) ! switch to a larger inner shield, AND smaller beampipe support
        call svttgeo3 ! +silicon strip detector separated into its own geo file
     endif
+
   endif
 
 * Set the proper configuration of the Silicon Strip Detector
