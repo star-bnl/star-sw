@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.25 2002/01/21 22:09:29 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.26 2002/02/10 21:10:44 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.26  2002/02/10 21:10:44  jcs
+// allow for individual west/east Ftpc temperature/pressure corrections
+//
 // Revision 1.25  2002/01/21 22:09:29  jcs
 // use average FTPC gas temperature adjusted air pressure
 //
@@ -115,6 +118,7 @@ int StFtpcClusterFinder::search()
   Double_t  *pdeflection;
   int iRow, iSec, iPad, iPadBuf, iHardSec, iHardRow;
   int iRowBuf, iSecBuf;
+  int firstPadrowToSearch;
   int bNewSec;
   int clusters;
   int iNowSeqIndex, iNewSeqIndex, iOldSeqNumber, iOldSeqIndex;
@@ -127,6 +131,8 @@ int StFtpcClusterFinder::search()
 
   int iIndex;
   float fastlog[256];
+
+  double deltaAirPressure;
 
   /* variables for dynamic CUC memory handling */
   TClusterUC CUCMemory[MAXNUMCUC];
@@ -160,8 +166,22 @@ int StFtpcClusterFinder::search()
       return 0;
     }
 
+// Loop over FTPC West and East individually
+
+for ( int iftpc=0; iftpc<2; iftpc++) {
+   if ( iftpc == 0 ) {
+      deltaAirPressure = mParam->adjustedAirPressureWest() - mParam->standardPressure();
+      firstPadrowToSearch = mDb->firstPadrowToSearch() - 1;
+      gMessMgr->Info() <<"Ftpc West: deltaAirPressure = "<<deltaAirPressure<<endm;
+   }
+   if ( iftpc == 1 ) {
+      deltaAirPressure = mParam->adjustedAirPressureEast() - mParam->standardPressure();
+      firstPadrowToSearch = mDb->firstPadrowToSearch() - 1 + mDb->numberOfPadrowsPerSide();
+      gMessMgr->Info() <<"Ftpc East: deltaAirPressure = "<<deltaAirPressure<<endm;
+   }
+
   /* integrate padtrans table from magboltz database */
-  if(!calcpadtrans(pradius, pdeflection))
+  if(!calcpadtrans(pradius, pdeflection,deltaAirPressure))
     {
       gMessMgr->Message("", "E", "OST") << "Couldn't calculate padtrans table, exiting!" << endm;
       return 0;
@@ -201,9 +221,7 @@ int StFtpcClusterFinder::search()
   iRow=0;
   bLastSequence=0;
 
-  for(iRow=mDb->firstPadrowToSearch()-1,
-	iRowBuf=mDb->firstPadrowToSearch()-1; 
-      iRow<mDb->lastPadrowToSearch(); iRow++)
+  for(iRow=firstPadrowToSearch,iRowBuf=firstPadrowToSearch;iRow<firstPadrowToSearch+mDb->numberOfPadrowsPerSide(); iRow++)
     {
       for(iSec=mDb->firstSectorToSearch()-1,
 	    iSecBuf=mDb->firstSectorToSearch()-1; 
@@ -595,6 +613,7 @@ int StFtpcClusterFinder::search()
 	} // end of: for(iSec...)
     } // end of: for(iRow...)
 
+}  // end of: for(iftpc
   gMessMgr->Message("", "I", "OST") << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " <<  mPoint->GetEntriesFast() << " hits." << endm;
   
 #ifdef DEBUGFILE
@@ -1840,18 +1859,16 @@ float StFtpcClusterFinder::sigmat(float timebin)
 }
 
 int StFtpcClusterFinder::calcpadtrans(double *pradius, 
-				      double *pdeflection)
+				      double *pdeflection, double deltap)
 {
   int i, j, v_buf, padrow;
   double t_last, t_next, r_last, r_next, e_now, v_now, psi_now;
-  double step_size, deltap;
+  double step_size;
   
   step_size=((float) mDb->numberOfTimebins()
 	     / (float) mParam->numberOfDriftSteps());
 
-  deltap=(mParam->adjustedAirPressureWest() + mParam->adjustedAirPressureEast())/2 - mParam->standardPressure();
-
-  gMessMgr->Info() <<"deltap = average adjustedAirPressure - standardPressure = "<<deltap<<endm;
+  gMessMgr->Info() <<"deltap = "<<deltap<<endm;
   
 #ifdef DEBUG
   printf("integrating padtrans table...\n");
