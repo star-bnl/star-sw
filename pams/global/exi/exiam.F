@@ -32,6 +32,8 @@ C   Modified by                 WK.Wilson
 C   Moved to STAF JUNE-1997     S. Margetis
 C   26-Aug-1998 PGJ Clean-up and modified to use dst tables.
 C   10-Feb-1999 PGJ Made ready for MDC2. 
+C   31-Jan-2000 ACS Modified dca to 3d calculation by using
+C                   local linearization
 C 
 C   Error conditions	: None-Yet
 C   Status		: Tested 
@@ -52,24 +54,29 @@ C<----------------------------------------------------------------------
  
       INTEGER   id, id1, id2
       INTEGER   ierr, iflag, iflag1
-      INTEGER   i, j, k, jk
+      INTEGER   i, j, k, jk, tries
       INTEGER   last_vertex, id_vertex, id_v0
       INTEGER   n_v, n_xi
       INTEGER   idet_daughter(2), idet_v0, idet_b, id_det
  
       REAL	dca_max(MXDET), rv_xi(MXDET), rv_v0(MXDET)
       REAL      bxi_max(MXDET), dmass(MXDET), bpn_v0(MXDET)
-      REAL	dr, pb(3), rv, xv0(3), zcom(2)
+      REAL	dr, pb(3), rv, xv0(3), xcom(2),ycom(2)
       REAL      dx,ptot, ptot_2, ptot_b, ptot_b2, ptot_v0, ptot_v02
       REAL      epi, ek, ela, exi, eom
       REAL	ptrk, trkb(6), bdotx, vdotx, pv0(3), ppar, npar, pper
       REAL	trki(6), trkj(6)
-      REAL	xc1(2), r1, r2, xcom(2), ycom(2), bxi, bb, bv0, check
+      REAL	xc1(2), r1, r2, bxi, bb, bv0, check
       REAL      invs_xi, invms_om, mala, malb, v0_mass
-      REAL	xp(2), xn1(2), xn2(2), dca, xpp(3), pxi(3)
+      REAL	xn1(2), xn2(2), dca, xpp(3), pxi(3)
       REAL      energy_v0, beta_v0, gamma_v0, ep, ppar_cm, vmain(3)
       REAL      xlocal(3), bfield(3), bscale, charge
       REAL      ptotp2, ptotn2, pdotn, eprp, eprn, epip, epin
+
+      REAL*8    pv0t,dp0x,dp0y,dp0z,pbt,dpbx,dpby,dpbz,dv0dotdb,denom
+      REAL*8    diffcx,diffcy,diffcz,s1,s2,valid
+      REAL*8    xv0atv,yv0atv,zv0atv,xbatv,ybatv,zbatv
+
 
       LOGICAL   first
       CHARACTER*132 m132
@@ -281,30 +288,86 @@ c*** pgj: calculate distance(s) of closest approach
           CALL vzero(ycom,2)
 
           iflag1=0
-          CALL casc_geom(dca_max(id_det),pv0,xv0,xc1,r1,xcom,ycom,zcom,iflag1)
+	  ! Find candidates in 2-D
+          CALL casc_geom(dca_max(id_det),pv0,xv0,xc1,r1,xcom,ycom,iflag1)
           IF( iflag1.eq.5 ) GO TO 20
 
 c*** loop over the two intersection points
 
           DO jk = 1,2
 
+            xn1(1)=xcom(jk)  ! Points on circle of intersection/closest
+	    xn1(2)=ycom(jk)  ! approach from 2-D search in casc_geom above.
+            tries = 1
+
+C Recalculate the closest distance of approach using linear approx.
+            pv0t = sqrt(pv0(1)**2 + pv0(2)**2 +pv0(3)**2)
+            dp0x = pv0(1)/pv0t ! direction cosines
+            dp0y = pv0(2)/pv0t
+            dp0z = pv0(3)/pv0t
+
+C Use local linearization of helix
+ 60         CALL update_track_param(xc1,r1,xn1,trki,trkb)
+            CALL track_mom(trkb,0,pb,bfield(3))
+            pbt  = sqrt(pb(1)**2 + pb(2)**2 + pb(3)**2)
+            dpbx = pb(1)/pbt ! direction cosines
+            dpby = pb(2)/pbt
+            dpbz = pb(3)/pbt
+
+C Dot product of the two trajectories
+            dv0dotdb = dp0x*dpbx + dp0y*dpby + dp0z*dpbz
+
+            diffcx = xv0(1) - xn1(1)
+            diffcy = xv0(2) - xn1(2)
+            diffcz = xv0(3) - trkb(3)
+
+C s1 and s2 are the distances from a point on the lines to the
+C closest distance of approach of the lines in space
+
+            denom = dv0dotdb**2 - 1.
+            s2 = (dp0x*dv0dotdb - dpbx)*diffcx
+     &          +(dp0y*dv0dotdb - dpby)*diffcy
+     &          +(dp0z*dv0dotdb - dpbz)*diffcz
+            s2 =  s2/denom
+
+C Check validity of linear approx. (distance moved in x and y << r1)
+C If only mildly invalid, re-try starting with new point (up to 3 tries)
+            valid = dabs(s2*dsqrt(dpbx**2 + dpby**2))
+            if ((valid.lt.(r1*2D-2)).and.(tries.le.3)) then
+
+            xbatv = dpbx*s2 + xn1(1)
+            ybatv = dpby*s2 + xn1(2)
+            zbatv = dpbz*s2 + trkb(3)
+
+            if (valid.gt.(r1*1D-3)) then    ! tight/mild validity check
+	      tries = tries + 1
+              xn2(1) = xbatv
+              xn2(2) = ybatv
+              call ev0_project_track(xc1,r1,xn2,xn1)
+	      goto 60
+	    endif
+
+            s1 = (dpbx*dv0dotdb - dp0x)*diffcx
+     &          +(dpby*dv0dotdb - dp0y)*diffcy
+     &          +(dpbz*dv0dotdb - dp0z)*diffcz
+            s1 = -s1/denom
+
+            xv0atv = dp0x*s1 + xv0(1)
+            yv0atv = dp0y*s1 + xv0(2)
+            zv0atv = dp0z*s1 + xv0(3)
+
 C           Check that V0 points away from Xi vertex
-            check=(xv0(1)-xcom(jk))*pv0(1)+
-     +            (xv0(2)-ycom(jk))*pv0(2)+(xv0(3)-zcom(jk))*pv0(3)
+            check=(xv0(1)-xv0atv)*pv0(1)+
+     +            (xv0(2)-yv0atv)*pv0(2)+(xv0(3)-zv0atv)*pv0(3)
             IF(check.gt.0.0) THEN
 
-            xp(1)=xcom(jk)
-            xp(2)=ycom(jk)
+            dca=dsqrt( (xv0atv-xbatv)**2 + (yv0atv-ybatv)**2 +
+     >                (zv0atv-zbatv)**2 )
 
-            CALL ev0_project_track(xc1,r1,xp,xn1)
-            CALL update_track_param(xc1,r1,xn1,trki,trkb)
+            xpp(1)=(xv0atv+xbatv)/2.
+            xpp(2)=(yv0atv+ybatv)/2.
+            xpp(3)=(zv0atv+zbatv)/2
 
-            dca=sqrt( (xn1(1)-xp(1))**2 + (xn1(2)-xp(2))**2 +
-     >                (trkb(3)-zcom(jk))**2 )
-
-            xpp(1)=(xn1(1)+xp(1))/2.
-            xpp(2)=(xn1(2)+xp(2))/2.
-            xpp(3)=(trkb(3)+zcom(jk))/2
 
 C*** Problem with vmain not being a 0,0,0 again fixed HLC 3/3/98.
             rv=sqrt((xpp(1)-vmain(1))**2+(xpp(2)-vmain(2))**2+
@@ -318,13 +381,11 @@ c*** decide here if it is a good candidate (pgj: removed lambda mass check)
 c*** calculate xi impact parameter - careful, needs main vertex at (0,0,0)
 c*** Not any more HLC 3/3/98
 
-              CALL track_mom(trkb,0,pb,bfield(3))
 
               pxi(1) = pv0(1) + pb(1)
               pxi(2) = pv0(2) + pb(2)
               pxi(3) = pv0(3) + pb(3)
 
-c              CALL casc_impact_param(vmain,xpp,pxi,bxi,iflag,charge,bfield(3))
 C             Check that Xi points away from primary vertex
               check=(xpp(1)-vmain(1))*pxi(1)+
      +              (xpp(2)-vmain(2))*pxi(2)+(xpp(3)-vmain(3))*pxi(3)
@@ -494,6 +555,8 @@ c                  exiaux(n_xi).costh   =
             ENDIF				! dca and rv check
 
             ENDIF				! V0 pointing away from Xi
+
+            ENDIF				! linear approx. check
 
             IF( iflag1.eq.3 ) GO TO 30		! touching circles-loop once
 

@@ -211,7 +211,7 @@ C-----calculate the new track parameters
 
 C*********************************************************************
 
-      SUBROUTINE casc_geom(dcut,p,xn,xc,r,x,y,z,iflag)
+      SUBROUTINE casc_geom(dcut,p,xn,xc,r,x,y,iflag)
       IMPLICIT NONE
 C---------------------------------------------------------------------
 C   Input arguments  :	dcut    !dca cut value 
@@ -222,7 +222,6 @@ C				!centre of the circle (charged part.)
 C			r	!radius of the above circle
 C   Output arguments : 	x(2)	!x-coord. of the two possible intersections
 C			y(2)	!y-coord. "   "        "        "
-C			z(2)	!z-coord. "   "        "        "
 C			iflag	!if iflag=5 there is no solution
 C				!if iflag=3 there only one solution
 C   Functional Description :	It finds the two possible intersections
@@ -234,87 +233,70 @@ C   Status	     : Tested
 C-------------------------------------------------------------------
       INTEGER iflag
       REAL r,p(3),xn(3),xc(2),dcut
-      REAL x(2),y(2),z(2),xd,yd,rd
-      REAL*8 a,b,c,d,rsq,ab,theta
+      REAL x(2),y(2),xd,yd,dist
+      REAL*8 a,b,c,d,rsq,ab
 C-----find the intersection points of a circle and a straight line--
-      rsq=r*r
+      rsq=r**2
       xd=xn(1)-xc(1)
       yd=xn(2)-xc(2)
       IF(p(1).ne.0.0) THEN
 	a=p(2)/p(1)
 	b=-a*xd +yd
-	d=a*a+1
-	c=d*rsq-b*b
+	d=(a**2)+1.
+	c=d*rsq-(b**2)
 	IF(c.lt.0.0) GOTO 137
 	IF(c.eq.0.0) iflag=3
-	c=sqrt(c)
+	c=dsqrt(c)
 	ab=a*b
+	b=b+xc(2)
 	x(1)=( -ab+c )/d + xc(1)
 	x(2)=( -ab-c )/d + xc(1)
-	y(1)=a*(x(1)-xc(1)) + b + xc(2)
-	y(2)=a*(x(2)-xc(1)) + b + xc(2)
+	y(1)=a*(x(1)-xc(1)) + b
+	y(2)=a*(x(2)-xc(1)) + b
       ELSE
 	x(1)=xn(1)
 	x(2)=xn(1)
-	c   =rsq-(xd**2.)
+	c   =rsq-(xd**2)
 	IF(c.lt.0.0) GOTO 137
 	IF(c.eq.0.0) iflag=3
-	c=sqrt(c)
+	c=dsqrt(c)
 	y(1)=xc(2) + c
 	y(2)=xc(2) - c
       ENDIF	!if(p(1).ne.0.0)
-C---------find the z1,z2 points for the neutral---------------------
-      d=p(3)/p(2)
-      z(1)=d*(y(1)-xn(2)) + xn(3)
-      z(2)=d*(y(2)-xn(2)) + xn(3)
 C-------------------------------------------------------------------
   999 CONTINUE
       RETURN
 
-  137 theta=xd*p(1)+yd*p(2)
-      rd = sqrt(xd**2. + yd**2.)
-      theta=theta/rd
-      theta=theta/sqrt(p(1)*p(1)+p(2)*p(2))
-      theta=acos(theta)
-      c=rd*sin(theta)
-      IF(c.ge.(r+dcut)) THEN
+C Take vector v which is perp to (xd,yd), and p = (p1,p2)
+C dot(v,p) = |p| * |v| * cos
+C dist = |v| * cos = dot(v,p) / |p|
+
+  137 dist=abs(xd*p(2)-yd*p(1))/sqrt(p(1)**2+p(2)**2)
+      IF(dist.ge.(r+dcut)) THEN
         iflag=5
       ELSE
         iflag=3
         IF(p(1).ne.0.0) THEN
-                a=p(2)/p(1)
-                y(1)=sqrt(rsq/(a*a+1))
-                y(2)=-y(1)
-                x(1)=-a*y(1)
-                x(2)=-a*y(2)
-                y(1)=y(1)+xc(2)
-                y(2)=y(2)+xc(2)
-                x(1)=x(1)+xc(1)
-                x(2)=x(2)+xc(1)
-                b=(x(1)-xc(1))*xd+(y(1)-xc(2))*yd
+                a=p(2)/p(1)         ! a = -cot(radius) = tan(neutral)
+                ! c = delta y = r*sin = r/csc = sqrt(rsq/(cot**2 + 1)
+		c=dsqrt(rsq/((a**2)+1.0))
+                d=-a*c              ! d = delta x = cot * delta y
+                b=d*xd+c*yd
                 IF(b.gt.0.0) THEN
-                  x(2)=x(1)
-                  y(2)=y(1)
+                  x(1)=d+xc(1)
+                  y(1)=c+xc(2)
                 ELSE
-                  x(1)=x(2)
-                  y(1)=y(2)
+                  x(1)=-d+xc(1)
+                  y(1)=-c+xc(2)
                 ENDIF
         ELSE
                 y(1)=xc(2)
-                y(2)=xc(2)
-                x(1)=xc(1)+r
-                x(2)=xc(1)-r
                 IF(xn(1).gt.xc(1)) THEN
-                  x(2)=x(1)
-                  y(2)=y(1)
+                  x(1)=xc(1)+r
                 ELSE
-                  x(1)=x(2)
-                  y(1)=y(2)
+                  x(1)=xc(1)-r
                 ENDIF
         ENDIF
-C---------find the z1 point for the neutral---------------------------
-      z(1)=(p(3)/p(2))*(y(1)-xn(2)) + xn(3)
-      z(2)=z(1)
 C---------------------------------------------------------------------
       ENDIF
       RETURN
