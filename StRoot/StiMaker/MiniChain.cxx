@@ -80,7 +80,7 @@ void MiniChain::run(int first,
 	  _toolkit->setGuiEnabled(true);
 	  setupGui();
 	}
-      setupOutput(filePrefix,outfile);
+      setupOutput(filePrefix,fileList[0],outfile);
       eventLoop(first, first+nEvents);
     }
   catch (runtime_error & rte)
@@ -193,27 +193,48 @@ void MiniChain::setupGui()
   MiniDst.
  */
 void MiniChain::setupOutput(const char * filePrefix,
+			    const char * infile,
 			    const char * fileTemplate)
 {
   cout <<"MiniChain::setupOutput -I- Started"<<endl;
 
-  //Now clip prefix and 'event.root' from filename
-  TString templateFile = fileTemplate;
-  int fileBeginIndex = templateFile.Index(filePrefix,0);
+  //make local copies
+  TString inputfile = infile;
+  TString outdir = fileTemplate;
+  TString templateFile=fileTemplate;
 
-  if(fileBeginIndex==-1) templateFile.Append(".event.root");
-  //templateFile.Remove(0,fileBeginIndex);
+  //get only the dir part
+  if(fileTemplate==inputfile)
+    {
+      //no outfile specified, so now make output from input file names
+      outdir = "./";
+      templateFile=inputfile.Remove(0,inputfile.Last('/')+1);
+    }
+
+
+  if(outdir.Last('/')==-1)
+    {
+      outdir="./";
+    }
+  else
+    {
+      outdir.Remove(outdir.Last('/')+1,outdir.Capacity());
+    }
+
+  //make minimc file
+  //Since miniMcMaker redefines names, pass it what it expects....
+  TString miniMcName= infile;
+  //get rid of any directory part...
+  if(miniMcName.Last('/')!=-1) miniMcName.Remove(0,miniMcName.Last('/')+1);
+  miniMcName.Prepend("Sti_");
 
   
-  templateFile.ReplaceAll("geant","event"); //replace "geant" if it's there
+  //Now make output file name for StEvent file
+  templateFile.ReplaceAll("geant.root","event.root"); //replace "geant" if it's there
   TString eventName = templateFile.ReplaceAll(".event.root","_sti.event.root");
   //.event.root now replaced with _sti.event.root
   
-  TString dstName = templateFile.ReplaceAll(".event.root",".MuDst.root");
-  //_sti.event.root now replaced with _sti.mudst.root
-  
-  TString miniMcName = templateFile.ReplaceAll(".MuDst.root",".minimc.root");
-  //_sti.mudst.root now replaced with _sti.minimc.root
+
   
   if (_pars->doStEventOutput) 
     {
@@ -234,8 +255,9 @@ void MiniChain::setupOutput(const char * filePrefix,
 
       StMiniMcMaker * minimcMaker = new StMiniMcMaker;
       minimcMaker->setDebug();
-      minimcMaker->setOutDir("./");
-      cout <<"MiniMc to be written out, file : "<<miniMcName<<endl;
+
+      minimcMaker->setOutDir(outdir);
+      cout <<"MiniMc to be written out, file : "<<outdir<<miniMcName<<endl;
       minimcMaker->setFileName(miniMcName);
     }
   else
