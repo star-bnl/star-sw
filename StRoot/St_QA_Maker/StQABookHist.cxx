@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.14 2001/05/25 17:20:09 lansdell Exp $
+// $Id: StQABookHist.cxx,v 2.15 2001/05/29 23:23:06 lansdell Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.15  2001/05/29 23:23:06  lansdell
+// removed impact param plots for FTPC from qa_shift list
+//
 // Revision 2.14  2001/05/25 17:20:09  lansdell
 // squashed a small bug
 //
@@ -1360,11 +1363,11 @@ void StQABookHist::BookHistPrim(){
   m_pchisq0F->Rebin(0,"East");
   m_pchisq0F->Rebin(1,"West");
   m_pchisq0F->SetStats(kFALSE);
-  m_prim_impactF = QAH::MH1F("QaGtrkImpactF", "primtrk: log10 impact param from prim vtx, ftpc",120,-3.0,3.,2);
+  m_prim_impactF = QAH::MH1F("QaPtrkImpactF", "primtrk: log10 impact param from prim vtx, ftpc",120,-3.0,3.,2);
   m_prim_impactF->Rebin(0,"East");
   m_prim_impactF->Rebin(1,"West");
   m_prim_impactF->SetStats(kFALSE);
-  m_prim_impactrF = QAH::MH1F("QaGtrkImpactrF", "primtrk: impact param from prim vtx, ftpc",100,0.,30.,2);
+  m_prim_impactrF = QAH::MH1F("QaPtrkImpactrF", "primtrk: impact param from prim vtx, ftpc",100,0.,30.,2);
   m_prim_impactrF->Rebin(0,"East");
   m_prim_impactrF->Rebin(1,"West");
   m_prim_impactrF->SetStats(kFALSE);

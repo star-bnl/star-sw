@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.6 2001/05/25 16:31:20 lansdell Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.7 2001/05/29 23:23:05 lansdell Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.7  2001/05/29 23:23:05  lansdell
+// removed impact param plots for FTPC from qa_shift list
+//
 // Revision 2.6  2001/05/25 16:31:20  lansdell
 // more updates to qa shift histograms
 //
@@ -68,7 +71,6 @@
   "StEQaGtrkImpactTTS",
   "StEQaGtrkImpactrTTS",
   "StEQaGtrkImpactF",
-  "StEQaGtrkImpactrF",
   "StEQaGtrkDetId",
   "StEQaGtrkTanlzf",
   "StEQaGtrkTanlzfTS",
@@ -89,8 +91,7 @@
   "StEQaPtrkFlag",
   "StEQaPtrkImpactTTS",
   "StEQaPtrkImpactrTTS",
-  "StEQaGtrkImpactF",
-  "StEQaGtrkImpactrF",
+  "StEQaPtrkImpactF",
   "StEQaPtrkGlob",
   "StEQaPtrkFitPntLTTS",
   "StEQaNullPrimVtx",
@@ -179,7 +180,6 @@
   "StELMQaGtrkImpactTTS",
   "StELMQaGtrkImpactrTTS",
   "StELMQaGtrkImpactF",
-  "StELMQaGtrkImpactrF",
   "StELMQaGtrkDetId",
   "StELMQaGtrkTanlzf",
   "StELMQaGtrkTanlzfTS",
@@ -200,8 +200,7 @@
   "StELMQaPtrkFlag",
   "StELMQaPtrkImpactTTS",
   "StELMQaPtrkImpactrTTS",
-  "StELMQaGtrkImpactF",
-  "StELMQaGtrkImpactrF",
+  "StELMQaPtrkImpactF",
   "StELMQaPtrkGlob",
   "StELMQaPtrkFitPntLTTS",
   "StELMQaNullPrimVtx",
@@ -289,7 +288,6 @@
   "StEMMQaGtrkImpactTTS",
   "StEMMQaGtrkImpactrTTS",
   "StEMMQaGtrkImpactF",
-  "StEMMQaGtrkImpactrF",
   "StEMMQaGtrkDetId",
   "StEMMQaGtrkTanlzf",
   "StEMMQaGtrkTanlzfTS",
@@ -310,8 +308,7 @@
   "StEMMQaPtrkFlag",
   "StEMMQaPtrkImpactTTS",
   "StEMMQaPtrkImpactrTTS",
-  "StEMMQaGtrkImpactF",
-  "StEMMQaGtrkImpactrF",
+  "StEMMQaPtrkImpactF",
   "StEMMQaPtrkGlob",
   "StEMMQaPtrkFitPntLTTS",
   "StEMMQaNullPrimVtx",
@@ -399,7 +396,6 @@
   "StEHMQaGtrkImpactTTS",
   "StEHMQaGtrkImpactrTTS",
   "StEHMQaGtrkImpactF",
-  "StEHMQaGtrkImpactrF",
   "StEHMQaGtrkDetId",
   "StEHMQaGtrkTanlzf",
   "StEHMQaGtrkTanlzfTS",
@@ -420,8 +416,7 @@
   "StEHMQaPtrkFlag",
   "StEHMQaPtrkImpactTTS",
   "StEHMQaPtrkImpactrTTS",
-  "StEHMQaGtrkImpactF",
-  "StEHMQaGtrkImpactrF",
+  "StEHMQaPtrkImpactF",
   "StEHMQaPtrkGlob",
   "StEHMQaPtrkFitPntLTTS",
   "StEHMQaNullPrimVtx",
