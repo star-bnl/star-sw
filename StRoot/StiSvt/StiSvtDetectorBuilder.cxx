@@ -177,8 +177,6 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 	  StiPlacement *pPlacement = new StiPlacement;
 	  pPlacement->setZcenter(0.);
 	  pPlacement->setLayerRadius(fLayerRadius);
-	  //pPlacement->setLayerRadius(rn);
-	  //pPlacement->setLayerAngle(phiC);
 	  pPlacement->setLayerAngle(fLadderPhi);
 	  pPlacement->setRegion(StiPlacement::kMidRapidity);
 	  pPlacement->setCenterRep(phiC, rc, -dPhi); 
@@ -194,18 +192,20 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 	  pLadder->setShape(_waferShape[layer]);
 	  pLadder->setPlacement(pPlacement); 
 	  pLadder->setHitErrorCalculator(&_calc);
+	  pLadder->setKey(1,layer);
+	  pLadder->setKey(2,ladder);
+
 	  add(layer,ladder,pLadder);
 	  
 	  double offset = _hybridShape[layer]->getHalfWidth() - fHalfGap;
+	  double rHybrid = rc*cos(dPhi)*cos(fHalfGapPhi)/cos(fHalfLadderPhi);
 	  // hybrid 1
 	  pPlacement = new StiPlacement;
 	  pPlacement->setZcenter(0.);
 	  pPlacement->setLayerRadius(fLayerRadius);
 	  pPlacement->setLayerAngle(fLadderPhi + fDeltaPhi);
 	  pPlacement->setRegion(StiPlacement::kMidRapidity);
-	  pPlacement->setNormalRep(fLadderPhi + fDeltaPhi, 
-				   fGapRadius,
-				   -offset);
+	  pPlacement->setNormalRep(fLadderPhi + fDeltaPhi, rHybrid, -offset);
 	  sprintf(name, "Svt/Layer_%d/Ladder_%d/Hybrids_1", layer, ladder);
 	  StiDetector *pHybrid1 = _detectorFactory->getInstance();
 	  pHybrid1->setName(name);
@@ -217,22 +217,20 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
 	  pHybrid1->setMaterial(_hybridMat);
 	  pHybrid1->setShape(_hybridShape[layer]);
 	  pHybrid1->setPlacement(pPlacement);
-	  //add(pHybrid1);
+	  add(pHybrid1);
 	  // hybrid 2
 	  pPlacement = new StiPlacement;
 	  pPlacement->setZcenter(0.);
 	  pPlacement->setLayerRadius(fLayerRadius);
 	  pPlacement->setLayerAngle(fLadderPhi - fDeltaPhi);
 	  pPlacement->setRegion(StiPlacement::kMidRapidity);
-	  pPlacement->setNormalRep(fLadderPhi - fDeltaPhi, 
-				   fGapRadius,
-				   offset);
+	  pPlacement->setNormalRep(fLadderPhi - fDeltaPhi, rHybrid, offset);
 	  sprintf(name, "Svt/Layer_%d/Ladder_%d/Hybrids_2", layer, ladder);
 	  StiDetector *pHybrid2 = _detectorFactory->getInstance();
 	  pHybrid2->copy(*pHybrid1);
 	  pHybrid2->setName(name);
 	  pHybrid2->setPlacement(pPlacement);
-	  //add(pHybrid2);
+	  add(pHybrid2);
 	} // for ladder
     } // for layer
 }
