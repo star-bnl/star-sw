@@ -42,7 +42,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.32 2001/10/18 13:13:39 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.33 2001/10/22 16:54:16 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -65,7 +65,7 @@ public:
     void doNextTrackStep();
     void finishTrack();
     void finishEvent();
-    void defineNextTrackStep(unsigned int);
+    void defineNextTrackStep(StiFindStep);
 
     //Temporary definition to defaut cvs/DEV mismatch
     void doNextAction() {}; //

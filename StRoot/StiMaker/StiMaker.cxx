@@ -393,10 +393,11 @@ void StiMaker::doNextTrackStep()
     mtracker->doNextTrackStep();
 }
 
-void StiMaker::defineNextTrackStep(unsigned int val)
+void StiMaker::defineNextTrackStep(StiFindStep val)
 {
-    cout <<"StiMaker::defineNextTrackStep(). Set to: "<<val<<endl;
-    //mtracker->defineNextTrackStep(val);
+    cout <<"StiMaker::defineNextTrackStep(). Set to: ";
+    cout <<static_cast<int>(val)<<endl;
+    mtracker->setStepMode(val);
 }
 
 void StiMaker::setSeedFinderType(SeedFinderType val)

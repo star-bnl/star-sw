@@ -500,11 +500,11 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 		break;
 
 	    case M_TrackingSwitch_NextDetector:
-		StiMaker::instance()->defineNextTrackStep(0);
+		StiMaker::instance()->defineNextTrackStep(StepByDetector);
 		break;
 		
 	    case M_TrackingSwitch_ScanLayer:
-		StiMaker::instance()->defineNextTrackStep(1);
+		StiMaker::instance()->defineNextTrackStep(StepByLayer);
 		break;
 		
 	    case M_Tracking_DoTrackStep:
