@@ -1,5 +1,8 @@
-// $Id: Example_plotTable.C,v 1.8 2000/04/12 16:13:39 kathy Exp $
+// $Id: Example_plotTable.C,v 1.9 2000/04/18 20:37:24 kathy Exp $
 // $Log: Example_plotTable.C,v $
+// Revision 1.9  2000/04/18 20:37:24  kathy
+// St_DataSet,St_DataSetIter,St_Table classes are nowchanged to TDataSet,TDataSetIter,TTable
+//
 // Revision 1.8  2000/04/12 16:13:39  kathy
 // have changed so that macro loads only table libraries needed instead of all table libraries
 //
@@ -32,7 +35,7 @@ gSystem->Load("St_Tables");
 gSystem->Load("xdf2root");
 gSystem->Load("StUtilities");
 gSystem->Load("StAnalysisUtilities");
-St_TableNtuple myNtuple((St_Table&) St_dst_v0_vertex());
+St_TableNtuple myNtuple((TTable&) St_dst_v0_vertex());
 myNtuple.AddXDFFile("/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.dst.xdf",
 "dst","dst_v0_vertex");
 myNtuple.Draw("pos_py:pos_px");

@@ -1,5 +1,8 @@
-// $Id: bfcread_dstBranch.C,v 1.6 2000/04/13 21:46:22 kathy Exp $
+// $Id: bfcread_dstBranch.C,v 1.7 2000/04/18 20:37:26 kathy Exp $
 // $Log: bfcread_dstBranch.C,v $
+// Revision 1.7  2000/04/18 20:37:26  kathy
+// St_DataSet,St_DataSetIter,St_Table classes are nowchanged to TDataSet,TDataSetIter,TTable
+//
 // Revision 1.6  2000/04/13 21:46:22  kathy
 // remove loading of libtpc_Tables since l3Track table is now dst_track type from global
 //
@@ -60,9 +63,9 @@ void bfcread_dstBranch(
 // --- now execute chain member functions
   chain->Init();
 
-  St_DataSet *ds=0;
-  St_Table   *tabl=0;
-  St_DataSet *obj=0;
+  TDataSet *ds=0;
+  TTable   *tabl=0;
+  TDataSet *obj=0;
 
 // Event loop
   int istat=0,i=1;
@@ -79,7 +82,7 @@ EventLoop: if (i <= nevents && !istat) {
 
     if (!istat) {
       ds=chain->GetDataSet("dst");
-      St_DataSetIter tabiter(ds);
+      TDataSetIter tabiter(ds);
       if (ds) {
 //        ds->ls(2);  
         while (obj = tabiter.Next()) {
@@ -88,8 +91,8 @@ EventLoop: if (i <= nevents && !istat) {
 
 
 //.. count all tables that exist:
-          if (obj->InheritsFrom("St_Table")) {
-            tabl = (St_Table *)tabiter.Find(obj->GetName());
+          if (obj->InheritsFrom("TTable")) {
+            tabl = (TTable *)tabiter.Find(obj->GetName());
             if (tabl) {
               countTable++;
               cout << " Found Object (Table) "<< endl;

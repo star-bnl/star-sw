@@ -1,5 +1,8 @@
-// $Id: Example_readfz_plot.C,v 1.3 1999/05/21 15:45:02 kathy Exp $
+// $Id: Example_readfz_plot.C,v 1.4 2000/04/18 20:37:25 kathy Exp $
 // $Log: Example_readfz_plot.C,v $
+// Revision 1.4  2000/04/18 20:37:25  kathy
+// St_DataSet,St_DataSetIter,St_Table classes are nowchanged to TDataSet,TDataSetIter,TTable
+//
 // Revision 1.3  1999/05/21 15:45:02  kathy
 // fixed owner on Example_readfz_plot.C
 //
@@ -22,10 +25,10 @@ geant(1,"/disk1/star/test/psc0049_08_40evts.fzd");
 //this will run 1 event and give you a browser
 // if you want to plot something from geant/event/g2t_track then
 
-St_DataSet *yp = chain->DataSet("geant");
+TDataSet *yp = chain->DataSet("geant");
 //pointer to geant set
 
-St_DataSetIter geantIter(yp);
+TDataSetIter geantIter(yp);
 // iterator
 
 St_g2t_track *pt = (St_g2t_track *) geantIter.Find("g2t_track");

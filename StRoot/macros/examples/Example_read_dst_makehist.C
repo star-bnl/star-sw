@@ -1,5 +1,8 @@
-// $Id: Example_read_dst_makehist.C,v 1.7 2000/04/13 21:46:21 kathy Exp $
+// $Id: Example_read_dst_makehist.C,v 1.8 2000/04/18 20:37:24 kathy Exp $
 // $Log: Example_read_dst_makehist.C,v $
+// Revision 1.8  2000/04/18 20:37:24  kathy
+// St_DataSet,St_DataSetIter,St_Table classes are nowchanged to TDataSet,TDataSetIter,TTable
+//
 // Revision 1.7  2000/04/13 21:46:21  kathy
 // remove loading of libtpc_Tables since l3Track table is now dst_track type from global
 //
@@ -89,8 +92,8 @@ void Example_read_dst_makehist(
 
     cout << " !!!!! Now read  event # " << iev << endl;
 
-    St_DataSet *ds=chain->GetDataSet("dst/vertex");
-    St_DataSetIter dsiter(ds);
+    TDataSet *ds=chain->GetDataSet("dst/vertex");
+    TDataSetIter dsiter(ds);
     St_dst_vertex *vert = (St_dst_vertex *) dsiter.Find("vertex");
 
   cout << "    vertex table pointer = " << vert << endl;
@@ -100,7 +103,7 @@ void Example_read_dst_makehist(
 // data on it. After this record is passed, the while loop ends
   if (!vert)  continue;
 
-// get the table header data using member function of St_Table
+// get the table header data using member function of TTable
   table_head_st *tdt_h = vert->GetHeader();
    cout << " header name   = " << tdt_h->name << endl;
    cout << " header type   = " << tdt_h->type << endl;

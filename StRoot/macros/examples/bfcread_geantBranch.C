@@ -1,4 +1,4 @@
-// $Id: bfcread_geantBranch.C,v 1.6 2000/04/13 18:33:01 kathy Exp $
+// $Id: bfcread_geantBranch.C,v 1.7 2000/04/18 20:37:26 kathy Exp $
 // $Log $
 
 //======================================================================
@@ -58,9 +58,9 @@ void bfcread_geantBranch(
 // --- now execute chain member functions
   chain->Init();
 
-  St_DataSet *ds=0;
-  St_Table   *tabl=0;
-  St_DataSet *obj=0;
+  TDataSet *ds=0;
+  TTable   *tabl=0;
+  TDataSet *obj=0;
 
 
   Float_t tottabcntr=0;
@@ -85,7 +85,7 @@ EventLoop: if (i < nevents && !istat) {
     cout << " start event # " << i << endl;
 
       ds=chain->GetDataSet("geant");
-      St_DataSetIter tabiter(ds);
+      TDataSetIter tabiter(ds);
       if (ds) {
 //        ds->ls(2);  
         while (obj = tabiter.Next()) {
@@ -93,8 +93,8 @@ EventLoop: if (i < nevents && !istat) {
           countObj++;
 
 //.. count all tables that exist:
-          if (obj->InheritsFrom("St_Table")) {
-            tabl = (St_Table *)tabiter.Find(obj->GetName());
+          if (obj->InheritsFrom("TTable")) {
+            tabl = (TTable *)tabiter.Find(obj->GetName());
             if (tabl) {
               countTable++;
 	      // cout << " Found Object (Table) " << endl;

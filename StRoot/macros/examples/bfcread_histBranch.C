@@ -1,4 +1,4 @@
-// $Id: bfcread_histBranch.C,v 1.3 2000/04/12 16:13:41 kathy Exp $
+// $Id: bfcread_histBranch.C,v 1.4 2000/04/18 20:37:26 kathy Exp $
 // $Log $
 
 //======================================================================
@@ -40,9 +40,8 @@ void bfcread_histBranch(
 // --- now execute chain member functions
   chain->Init();
 
-  St_DataSet *ds=0;
-  St_Table   *tabl=0;
-  St_DataSet *obj=0;
+  TDataSet *ds=0;
+  TDataSet *obj=0;
 
 // Event loop
   int istat=0,i=1;
@@ -60,11 +59,11 @@ EventLoop: if (i <= nevents && !istat) {
 
     if (!istat) {
       ds=chain->GetDataSet("hist");
-      St_DataSetIter tabiter(ds);
+      TDataSetIter tabiter(ds);
       if (ds) {
 //        ds->ls(2); 
 
-        St_DataSetIter nextHistList(ds);
+        TDataSetIter nextHistList(ds);
         St_ObjectSet *histContainer = 0;
         TList *dirList = 0;
 

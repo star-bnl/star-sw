@@ -1,5 +1,8 @@
-// $Id: Example_read_dst_print_tables.C,v 1.6 2000/04/13 21:46:21 kathy Exp $
+// $Id: Example_read_dst_print_tables.C,v 1.7 2000/04/18 20:37:25 kathy Exp $
 // $Log: Example_read_dst_print_tables.C,v $
+// Revision 1.7  2000/04/18 20:37:25  kathy
+// St_DataSet,St_DataSetIter,St_Table classes are nowchanged to TDataSet,TDataSetIter,TTable
+//
 // Revision 1.6  2000/04/13 21:46:21  kathy
 // remove loading of libtpc_Tables since l3Track table is now dst_track type from global
 //
@@ -30,8 +33,8 @@
 class StChain;
 StChain *chain;
 
-class St_DataSet;
-St_DataSet *Event;
+class TDataSet;
+TDataSet *Event;
 
 void Example_read_dst_print_tables(
  Int_t nevents=1, 
@@ -87,14 +90,14 @@ void Example_read_dst_print_tables(
 
 // ---------------------- globtrk table ---------------------
 //  get dataset for globtrk
-St_DataSet *ds=chain->GetDataSet("dst/globtrk");
+TDataSet *ds=chain->GetDataSet("dst/globtrk");
 
 if (ds) {
 
  cout << " Now print info about globtrk, row 1 "  << endl;
 
 // create iterator for the dataset
-St_DataSetIter globtrkiter(ds);
+TDataSetIter globtrkiter(ds);
 
 // Du,Pwd return things, but we choose not to keep the return value
 globtrkiter.Du();
@@ -104,17 +107,17 @@ globtrkiter.Pwd();
 St_dst_track *glob = (St_dst_track *) globtrkiter.Find("globtrk");
 
 // print out info about it
-// using ls() from St_DataSetIter
+// using ls() from TDataSetIter
 glob->ls();
 
-// Print() is a member function of St_Table
+// Print() is a member function of TTable
 //glob->Print(9,1);
 //glob->Print(8,1);
 //glob->Print(8,2);
 //glob->Print(1,1);
 glob->Print(0,5);
  
-// get the table header data using member function of St_Table
+// get the table header data using member function of TTable
 table_head_st *tdt_h = glob->GetHeader();
  cout << " header name   = " << tdt_h->name << endl;
  cout << " header type   = " << tdt_h->type << endl;
