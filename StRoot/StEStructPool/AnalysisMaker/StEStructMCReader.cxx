@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMCReader.cxx,v 1.5 2004/03/18 18:35:48 chunhuih Exp $
+ * $Id: StEStructMCReader.cxx,v 1.6 2004/03/19 21:42:48 chunhuih Exp $
  *
  * Author: Chunhui Han
  *
@@ -13,7 +13,11 @@
  **********************************************************************
  *
  * $Log: StEStructMCReader.cxx,v $
+ * Revision 1.6  2004/03/19 21:42:48  chunhuih
+ * calculate pseudorapidity instead of rapidity for eta used in track cuts
+ *
  * Revision 1.5  2004/03/18 18:35:48  chunhuih
+ *
  * use const char * instead of char * for the constructor argument filelistfile.
  *
  * Revision 1.4  2004/03/05 23:48:11  chunhuih
@@ -314,13 +318,8 @@ void StEStructMCReader::fillTracks(StEStructEvent* estructEvent) {
     bool useTrack = true;
     useTrack = (mTCuts->goodGlobalDCA(gdca[3]) && useTrack);
 
-    float num=ener + Pxyz[2];
-    float den=ener - Pxyz[2];
-    float eta=-999.;
-    if(den!=0.) { 
-       float arg=num/den;
-       if(arg>0.) eta=0.5*log(arg);
-    }
+    float theta = acos(Pxyz[2] / TMath::Sqrt(Pxyz[2] * Pxyz[2] + pt * pt));
+    float eta = -log(tan(theta/2.));
     useTrack = (mTCuts->goodEta(eta) && useTrack);
     float phi=atan2((double)Pxyz[1], (double)Pxyz[0]);
     useTrack=(mTCuts->goodPhi(phi) && useTrack);
