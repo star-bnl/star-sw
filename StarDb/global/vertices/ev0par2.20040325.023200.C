@@ -23,7 +23,7 @@ TDataSet *CreateTable() {
 // TPC-only cuts
   memset(&row,0,size);
   row.dca	 =        1.2; // cut on dca between the two tracks ;
-  row.dcav0	 =      10000; // cut on dca(impact param) of V0 from event vertex ;
+  row.dcav0	 =        5.0; // cut on dca(impact param) of V0 from event vertex ;
   row.dlen	 =          2; // cut on dist. of decay from prim. vertex ;
   row.alpha_max	 =        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
   row.ptarm_max	 =        0.3; // Max. value of arm. pt allowed, only first entry used;
@@ -47,7 +47,7 @@ TDataSet *CreateTable() {
 // SVT+TPC cuts
   memset(&row,0,size);
   row.dca	 =        1.2; // cut on dca between the two tracks ;
-  row.dcav0	 =      10000; // cut on dca(impact param) of V0 from event vertex ;
+  row.dcav0	 =        5.0; // cut on dca(impact param) of V0 from event vertex ;
   row.dlen	 =        0.6; // cut on dist. of decay from prim. vertex ;
   row.alpha_max	 =        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
   row.ptarm_max	 =        0.3; // Max. value of arm. pt allowed, only first entry used;
@@ -61,7 +61,7 @@ TDataSet *CreateTable() {
 // TPC-only cuts
   memset(&row,0,size);
   row.dca	 =        1.2; // cut on dca between the two tracks ;
-  row.dcav0	 =      10000; // cut on dca(impact param) of V0 from event vertex ;
+  row.dcav0	 =        1.2; // cut on dca(impact param) of V0 from event vertex ;
   row.dlen	 =          2; // cut on dist. of decay from prim. vertex ;
   row.alpha_max	 =        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
   row.ptarm_max	 =        0.3; // Max. value of arm. pt allowed, only first entry used;
@@ -85,7 +85,7 @@ TDataSet *CreateTable() {
 // SVT+TPC cuts
   memset(&row,0,size);
   row.dca	 =        1.2; // cut on dca between the two tracks ;
-  row.dcav0	 =      10000; // cut on dca(impact param) of V0 from event vertex ;
+  row.dcav0	 =        1.2; // cut on dca(impact param) of V0 from event vertex ;
   row.dlen	 =        0.6; // cut on dist. of decay from prim. vertex ;
   row.alpha_max	 =        1.2; // Max. abs. value of arm. alpha allowed, only first entry used ;
   row.ptarm_max	 =        0.3; // Max. value of arm. pt allowed, only first entry used;
