@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtPedSub.cc,v 1.6 2000/11/30 20:45:56 caines Exp $
+ * $Id: StSvtPedSub.cc,v 1.7 2001/07/22 20:31:28 caines Exp $
  *
  * Author: Helen Caines
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtPedSub.cc,v $
+ * Revision 1.7  2001/07/22 20:31:28  caines
+ * Better tuning for real data. Common mode noise calc and sub. Avoid overlapping seq. Fill histograms only in debug
+ *
  * Revision 1.6  2000/11/30 20:45:56  caines
  * Dynamically calc prob values, use database
  *
@@ -79,9 +82,10 @@ int StSvtPedSub::SubtractPed( StSvtHybridData* fData, int Index, int PedOffset)
 	
 	// Actually subtract the pedestal per pixel. PedOffset  
 	//allows undershoot to be seen 
-		newAdc= (int)Seq[iseq].firstAdc[time]-
-		  (int) mPed->getPixelContent(anodeID,Seq[iseq].startTimeBin+time)
-		  +PedOffset;
+	newAdc= (int)Seq[iseq].firstAdc[time]-
+	  (int) mPed->getPixelContent(anodeID,Seq[iseq].startTimeBin+time)
+	  +PedOffset;
+
 	//Check adc hasn't gone -ve
 	if( newAdc < 0) newAdc=0;
 	else if( newAdc >= 256) newAdc=255;

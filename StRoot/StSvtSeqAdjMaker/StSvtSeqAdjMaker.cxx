@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.19 2001/05/06 22:16:35 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.20 2001/07/22 20:31:28 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  **************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.20  2001/07/22 20:31:28  caines
+ * Better tuning for real data. Common mode noise calc and sub. Avoid overlapping seq. Fill histograms only in debug
+ *
  * Revision 1.19  2001/05/06 22:16:35  caines
  * Fix pointer problem for DAQ Ped files
  *
@@ -98,8 +101,11 @@ StSvtSeqAdjMaker::StSvtSeqAdjMaker(const char *name) : StMaker(name)
   mSvtDataSet = NULL;
   mSvtAdjData = NULL;
   mSvtRawData = NULL;
+  mSvtBadAnodes = NULL;
+  mSvtBadAnodeSet = NULL;
   mHybridRawData = NULL;
   mHybridAdjData = NULL;
+  mSvtPedSub = NULL;
   anolist = NULL;
   mInvProd = NULL;
   mProbValue = NULL;
@@ -109,7 +115,7 @@ StSvtSeqAdjMaker::StSvtSeqAdjMaker(const char *name) : StMaker(name)
   // Set up some defaults
 
   mPedFile = NULL;
-  mPedOffSet = 25;
+  mPedOffSet = 10;
   m_thresh_lo = 1+mPedOffSet;
   m_thresh_hi = 5+mPedOffSet; 
   m_n_seq_lo  = 2;
@@ -157,7 +163,7 @@ Int_t StSvtSeqAdjMaker::Init()
 	    else
 	      sigma = mProbValue->GetSigma();
 	    
-	    gMessMgr->Warning() << "No sigma set for hybrid index " << index << " using defaut sigma = " << sigma << endm;
+	    //gMessMgr->Warning() << "No sigma set for hybrid index " << index << " using defaut sigma = " << sigma << endm;
 	    mProbValue->SetProbValue(sigma);    
 	    mInvProd->SetProbTable(mProbValue);
 	}
@@ -165,11 +171,9 @@ Int_t StSvtSeqAdjMaker::Init()
     }
   }
 
-  GetBadAnodes();
+  //GetBadAnodes();
   
-return  StMaker::Init();
-  
-
+  return  StMaker::Init();  
 }
 
 //_____________________________________________________________________________
@@ -221,7 +225,7 @@ Int_t StSvtSeqAdjMaker::GetSvtPedestals()
 Int_t  StSvtSeqAdjMaker::SetSvtData()
 {
   mSvtDataSet = new St_ObjectSet("StSvtData");
-  AddData(mSvtDataSet);  
+  AddConst(mSvtDataSet);  
 
   mSvtAdjData = new StSvtData(*mSvtRawData);
   //cout<<"mSvtAdjData  = "<<mSvtAdjData<<endl;
@@ -236,12 +240,12 @@ Int_t  StSvtSeqAdjMaker::SetSvtData()
 Int_t StSvtSeqAdjMaker::SetMinAdcLevels( int MinAdc1,  int MinAbove1,
 				         int MinAdc2,   int MinAbove2, int PedOffset){
 
-  m_thresh_lo = MinAdc1;
-  m_thresh_hi = MinAdc2; 
+  m_thresh_lo = MinAdc1+PedOffset;
+  m_thresh_hi = MinAdc2+PedOffset; 
   m_n_seq_lo  = MinAbove1;
   m_n_seq_hi  = MinAbove2;
 
-  if (PedOffset)
+  //if (PedOffset)
     mPedOffSet = PedOffset;
 
   return kStOK;
@@ -388,6 +392,7 @@ Int_t StSvtSeqAdjMaker::CreateHist(Int_t tNuOfHyb)
     }
   }
 
+  mCommonModePitch = new TH1F("ComModPitch","Pitch of Common Mode Noise",120,0,120);
 
   return kStOK;
 }
@@ -399,13 +404,13 @@ Int_t StSvtSeqAdjMaker::Make()
 
   int Anode;
 
-  StSvtBadAnode* BadAnode;
+  StSvtBadAnode* BadAnode=NULL;
 
   // copy event information to adjusted data collection
   (*mSvtAdjData) = (*mSvtRawData);
 
   gMessMgr->Info() << "Working On Event: " << mSvtAdjData->getEventNumber() << endm;
-  
+
   for(int Barrel = 1;Barrel <= mSvtRawData->getNumberOfBarrels();Barrel++) {    
     for (int Ladder = 1;Ladder <= mSvtRawData->getNumberOfLadders(Barrel);Ladder++) {      
       for (int Wafer = 1;Wafer <= mSvtRawData->getNumberOfWafers(Barrel);Wafer++) {
@@ -426,8 +431,8 @@ Int_t StSvtSeqAdjMaker::Make()
 	  }
 
 	  // retrieve bad anodes
-	  BadAnode = (StSvtBadAnode*)mSvtBadAnodes->at(index);
-
+	  if (mSvtBadAnodes)
+	    BadAnode = (StSvtBadAnode*)mSvtBadAnodes->at(index);
 
           mHybridAdjData = (StSvtHybridData *)mSvtAdjData->at(index);
 	  if (mHybridAdjData)
@@ -435,15 +440,23 @@ Int_t StSvtSeqAdjMaker::Make()
 
 	  mHybridAdjData = new StSvtHybridData(Barrel,Ladder,Wafer,Hybrid);
 
+	  // Zero Common Mode Noise arrays
+	  for(int Timebin=0; Timebin<128; Timebin++){
+	    mCommonModeNoise[Timebin]=0;
+	    mCommonModeNoiseAn[Timebin]=0;	
+	  }  
+
 	  // Loop through anodes from Raw data
 	  for( int iAnode= 0; iAnode<mHybridRawData->getAnodeList(anolist); iAnode++)
             {
 	      Anode = anolist[iAnode];
+
+	      //if (Barrel == 1 && Ladder==1 && Wafer ==1 && Hybrid==1)
+	      //	cout << "raw data, iAnode = " << iAnode << ", Anode = " << Anode << endl;
 	    
 	      if( BadAnode){
 		if( BadAnode->IsBadAnode(Anode-1)){
 
-		  
 		  // If anode is bad set sequences to zero
 		  int nSequence = 0;
 		  StSequence* seq = NULL;
@@ -451,12 +464,49 @@ Int_t StSvtSeqAdjMaker::Make()
 		  mHybridAdjData->setListSequences(iAnode, Anode, nSequence, seq);
 		  continue;
 		}
-	      } 
-
+	      }
+	      
 	      // here anode is real anode number (1-240)
 	      if (Debug())MakeHistogramsAdc(mHybridRawData,index,Anode,1);
+	      CommonModeNoiseCalc(iAnode);
+		}
+	 
+	  int TimeLast, TimeAv, TimeSum, TimeAvSav;
+	  TimeLast = 0;
+	  TimeSum = 0;
+	  TimeAv=0;
+	  TimeAvSav = 0;
+	  for( int TimeBin=0; TimeBin<128; TimeBin++){
+	    if(mCommonModeNoiseAn[TimeBin] > 50)
+	      mCommonModeNoise[TimeBin] /= mCommonModeNoiseAn[TimeBin];
+	    else  mCommonModeNoise[TimeBin] =0;
+	    
+	    if( Debug()){
+	      if( index < 4 && mCommonModeNoiseAn[TimeBin] > 50){
+		if( TimeLast < TimeBin-3 && TimeSum > 0){
+		  
+		  TimeAv /= TimeSum;
+		  TimeLast = TimeBin;
+		  mCommonModePitch->Fill(TimeAv-TimeAvSav);
+		  TimeAvSav = TimeAv;
+		  TimeAv = 0;
+		  TimeSum=0;
+		}
+		else{
+		  TimeAv +=TimeBin;
+		  TimeSum++;
+		  TimeLast = TimeBin;
+		}
+	      }
+	    }
+	  }
+	
+	  for( int iAnode= 0; iAnode<mHybridRawData->getAnodeList(anolist); iAnode++)
+            {
+	      Anode = anolist[iAnode];
 
-	     
+	      CommonModeNoiseSub(iAnode);
+
 	      //Perform Asic like zero suppression
 	      AdjustSequences1(iAnode, Anode);
 	      
@@ -498,10 +548,12 @@ Int_t StSvtSeqAdjMaker::AdjustSequences1(int iAnode, int Anode){
   unsigned char* adc;
   int ExtraBefore = 1;
   int ExtraAfter = 3;
+  int firstTimeBin, previousEndTimeBin;
 
   //Anode is the index into the anolist array
   
   status= mHybridRawData->getListSequences(iAnode,nSeqOrig,Sequence);
+  //status= mHybridRawData->getSequences(Anode,nSeqOrig,Sequence);
 
   nSeqNow=0;
 
@@ -515,8 +567,6 @@ Int_t StSvtSeqAdjMaker::AdjustSequences1(int iAnode, int Anode){
     while( j<length){
       count1=0;
       count2=0;
-
-      // data << (int) adc[j] << " " ;
       
       while( (int)adc[j] > m_thresh_lo && j<length){
 	count1++;
@@ -525,22 +575,49 @@ Int_t StSvtSeqAdjMaker::AdjustSequences1(int iAnode, int Anode){
 	  count2++;
 	}
 
+	//cout << (int) adc[j] << " " ;
 	j++;
-
-	//	data << (int) adc[j] << " " ;
       }
+
       if( count2 > m_n_seq_hi && count1 > m_n_seq_lo){
-	//	cout << "Adjusting Sequences for Anode=" << Anode<<  endl;
-	tempSeq1[nSeqNow].firstAdc=&adc[j- count1 - ExtraBefore];
-	tempSeq1[nSeqNow].startTimeBin = startTimeBin + j - count1 - ExtraBefore;
-	if((startTimeBin + j - count1 - ExtraBefore)  < 0){
-	  tempSeq1[nSeqNow].startTimeBin=0;
-	  tempSeq1[nSeqNow].firstAdc=&adc[0];
+
+	firstTimeBin = startTimeBin + j - count1 - ExtraBefore;
+	if (nSeqNow > 0)
+	  previousEndTimeBin = tempSeq1[nSeqNow-1].startTimeBin + tempSeq1[nSeqNow-1].length;
+	else
+	  previousEndTimeBin = -1;
+
+	if (firstTimeBin >= previousEndTimeBin) {
+	  tempSeq1[nSeqNow].firstAdc=&adc[j- count1 - ExtraBefore];
+	  tempSeq1[nSeqNow].startTimeBin = firstTimeBin;
+	  if((startTimeBin + j - count1 - ExtraBefore)  < 0){
+	    tempSeq1[nSeqNow].startTimeBin=0;
+	    tempSeq1[nSeqNow].firstAdc=&adc[0];
+	  }
+	  if((startTimeBin + j - count1 - ExtraBefore)  < startTimeBin){
+	    tempSeq1[nSeqNow].startTimeBin=startTimeBin;
+	    tempSeq1[nSeqNow].firstAdc=&adc[0];
+	  }
+	  tempSeq1[nSeqNow].length= count1+ ExtraAfter+ ExtraBefore;
+	  if( tempSeq1[nSeqNow].length + tempSeq1[nSeqNow].startTimeBin  > 128) 
+	    tempSeq1[nSeqNow].length=128-tempSeq1[nSeqNow].startTimeBin;
+	  if ( tempSeq1[nSeqNow].startTimeBin+ tempSeq1[nSeqNow].length >
+	       startTimeBin +length){
+	    tempSeq1[nSeqNow].length =  (startTimeBin +length) -
+	      tempSeq1[nSeqNow].startTimeBin ;
+	  }
+	  nSeqNow++;
 	}
-	tempSeq1[nSeqNow].length= count1+ ExtraAfter+ ExtraBefore;
-	if( tempSeq1[nSeqNow].length + tempSeq1[nSeqNow].startTimeBin  > 128) 
-	  tempSeq1[nSeqNow].length=128-tempSeq1[nSeqNow].startTimeBin;
-	nSeqNow++;
+	else {
+	  tempSeq1[nSeqNow-1].length += ((count1+ ExtraAfter+ ExtraBefore)-(previousEndTimeBin-firstTimeBin+1));
+	  if( tempSeq1[nSeqNow-1].length + tempSeq1[nSeqNow-1].startTimeBin  > 128) 
+	    tempSeq1[nSeqNow-1].length=128-tempSeq1[nSeqNow-1].startTimeBin;
+	  if ( tempSeq1[nSeqNow-1].startTimeBin+ tempSeq1[nSeqNow-1].length >
+	       startTimeBin +length){
+	    tempSeq1[nSeqNow-1].length = (startTimeBin +length) 
+	      - tempSeq1[nSeqNow-1].startTimeBin ;
+	  }
+	}
       }
       j++;
     }
@@ -566,15 +643,15 @@ Int_t StSvtSeqAdjMaker::AdjustSequences2(int iAnode, int Anode){
   // counts that do not have the shape of noise
 
   int nSeqBefore, nSeqNow, count;
-  int startTimeBin, len, status;
+  int startTimeBin, length, status;
   StSequence* Sequence;
   unsigned char* adc;
-  int ExtraBefore=0;
-  int ExtraAfter=0;
-  
+  int ExtraBefore=1;
+  int ExtraAfter=3;
+
+  int firstTimeBin, previousEndTimeBin;
   
   double tempBuffer = 0;
-  
   
   nSeqNow = 0;
   
@@ -583,36 +660,62 @@ Int_t StSvtSeqAdjMaker::AdjustSequences2(int iAnode, int Anode){
   for(int Seq = 0; Seq < nSeqBefore; Seq++) 
     {
       startTimeBin =Sequence[Seq].startTimeBin; 
-      len = Sequence[Seq].length;
+      length = Sequence[Seq].length;
       adc = Sequence[Seq].firstAdc;
       
       int j=0;
-      while( j < len)
+      while( j < length)
 	{ 
 	  count = 0;
 	  tempBuffer = mInvProd->GetBuffer(startTimeBin + j);
 	  
-	  while(tempBuffer > m_inv_prod_lo && j < len)
+	  while(tempBuffer > m_inv_prod_lo && j < length)
 	    {
 	      ++count;
 	      ++j;
 	      tempBuffer = mInvProd->GetBuffer(startTimeBin + j);
-	      if(count > 0  && (tempBuffer < m_inv_prod_lo || j == len))
+	      if(count > 0  && (tempBuffer < m_inv_prod_lo || j == length))
 		{
-		  tempSeq1[nSeqNow].firstAdc=&adc[j- count - ExtraBefore];
-		  tempSeq1[nSeqNow].startTimeBin = startTimeBin + j - count - ExtraBefore;
-		  if( (startTimeBin + j - count - ExtraBefore) < 0){
-		    tempSeq1[nSeqNow].startTimeBin=0;
-		    tempSeq1[nSeqNow].firstAdc=&adc[0];
+		  firstTimeBin = startTimeBin + j - count - ExtraBefore;
+		  if (nSeqNow > 0)
+		    previousEndTimeBin = tempSeq1[nSeqNow-1].startTimeBin + tempSeq1[nSeqNow-1].length;
+		  else
+		    previousEndTimeBin = -1;
+		  
+		  if (firstTimeBin >= previousEndTimeBin) {
+		    tempSeq1[nSeqNow].firstAdc=&adc[j- count - ExtraBefore];
+		    tempSeq1[nSeqNow].startTimeBin = firstTimeBin;
+		    if((startTimeBin + j - count - ExtraBefore)  < 0){
+		      tempSeq1[nSeqNow].startTimeBin=0;
+		      tempSeq1[nSeqNow].firstAdc=&adc[0];
+		    }
+		    if((startTimeBin + j - count - ExtraBefore)  < startTimeBin){
+		      tempSeq1[nSeqNow].startTimeBin=startTimeBin;
+		      tempSeq1[nSeqNow].firstAdc=&adc[0];
+		    }
+		    tempSeq1[nSeqNow].length= count+ ExtraAfter+ ExtraBefore;
+		    if( tempSeq1[nSeqNow].length + tempSeq1[nSeqNow].startTimeBin  > 128) 
+		      tempSeq1[nSeqNow].length=128-tempSeq1[nSeqNow].startTimeBin;
+		    if ( tempSeq1[nSeqNow].startTimeBin+ tempSeq1[nSeqNow].length >
+			 startTimeBin +length){
+		      tempSeq1[nSeqNow].length =  (startTimeBin +length) -
+			tempSeq1[nSeqNow].startTimeBin ;
+		    }
+		    nSeqNow++;
 		  }
-		  tempSeq1[nSeqNow].length=count+ExtraAfter+ExtraBefore;
-		  if( tempSeq1[nSeqNow].length + 
-		      tempSeq1[nSeqNow].startTimeBin>128)
-		    tempSeq1[nSeqNow].length=128-
-		      tempSeq1[nSeqNow].startTimeBin;
-		  nSeqNow++;
+		  else {
+		    tempSeq1[nSeqNow-1].length += ((count+ ExtraAfter+ ExtraBefore)-(previousEndTimeBin-firstTimeBin+1));
+		    if( tempSeq1[nSeqNow-1].length + tempSeq1[nSeqNow-1].startTimeBin  > 128) 
+		      tempSeq1[nSeqNow-1].length=128-tempSeq1[nSeqNow-1].startTimeBin;
+		    if ( tempSeq1[nSeqNow-1].startTimeBin+ tempSeq1[nSeqNow-1].length >
+			 startTimeBin +length){
+		      tempSeq1[nSeqNow-1].length = (startTimeBin +length) 
+			- tempSeq1[nSeqNow-1].startTimeBin ;
+		    }
+		  }
 		}
 	    }
+	  
 	  j++;
 	}
       
@@ -629,6 +732,72 @@ Int_t StSvtSeqAdjMaker::AdjustSequences2(int iAnode, int Anode){
   
 }
 
+//_____________________________________________________________________________
+
+void StSvtSeqAdjMaker::CommonModeNoiseCalc(int iAnode){
+
+  // Calc common mode noise
+
+  int  nSeqOrig, length;
+  int startTimeBin,  status;
+  StSequence* Sequence;
+  unsigned char* adc;
+
+  //Anode is the index into the anolist array
+  
+  status= mHybridRawData->getListSequences(iAnode,nSeqOrig,Sequence);
+
+  for( int nSeq=0; nSeq< nSeqOrig ; nSeq++){
+  
+    adc=Sequence[nSeq].firstAdc;
+    length = Sequence[nSeq].length;
+    startTimeBin=Sequence[nSeq].startTimeBin;
+
+    int j =0;
+    while( j<length){
+      
+      mCommonModeNoise[j+startTimeBin] += (int)adc[j] - mPedOffSet;
+      mCommonModeNoiseAn[j+startTimeBin]++;
+      j++;
+ 
+
+    }
+  }
+  return;
+}
+
+//_____________________________________________________________________________
+
+void StSvtSeqAdjMaker::CommonModeNoiseSub(int iAnode){
+
+  // Calc common mode noise
+
+  int  nSeqOrig, length;
+  int startTimeBin,  status;
+  StSequence* Sequence;
+  unsigned char* adc;
+
+  //Anode is the index into the anolist array
+  
+  status= mHybridRawData->getListSequences(iAnode,nSeqOrig,Sequence);
+
+  for( int nSeq=0; nSeq< nSeqOrig ; nSeq++){
+  
+    adc=Sequence[nSeq].firstAdc;
+    length = Sequence[nSeq].length;
+    startTimeBin=Sequence[nSeq].startTimeBin;
+
+    int j =0;
+    while( j<length){
+      if( (int) adc[j]-mCommonModeNoise[j+startTimeBin] < 0) adc[j]=0;
+      else{
+	adc[j] -=mCommonModeNoise[j+startTimeBin];
+      }
+      j++;
+    }
+  }
+  return;
+}
 
 //______________________________________________________________________________
 void StSvtSeqAdjMaker::MakeHistogramsProb(int index,int Anode){
@@ -683,6 +852,28 @@ void StSvtSeqAdjMaker::MakeHistogramsAdc(StSvtHybridData* hybridData, int index,
   //cout<<"******* making histogram finished *******"<<endl; 
 }
 
+//_____________________________________________________________________________
+Int_t StSvtSeqAdjMaker::Reset(){
+
+  //delete mInvProd;
+  //delete mProbValue;
+  //delete [] tempSeq1;
+
+  mSvtDataSet = NULL;
+  mSvtAdjData = NULL;
+  mSvtRawData = NULL;
+  mHybridRawData = NULL;
+  mHybridAdjData = NULL;
+  mSvtPedSub = NULL;
+  mSvtPedColl = NULL;
+  mSvtBadAnodes = NULL;
+  mInvProd = NULL;
+  mProbValue = NULL;
+
+  m_ConstSet->Delete();
+  
+  return kStOK;
+}
 
 //_____________________________________________________________________________
 Int_t StSvtSeqAdjMaker::Finish(){
@@ -697,12 +888,3 @@ Int_t StSvtSeqAdjMaker::Finish(){
 
 //_____________________________________________________________________________
 ClassImp(StSvtSeqAdjMaker)
- 
-
-
-
-
-
-
-
-
