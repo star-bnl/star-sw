@@ -1,4 +1,7 @@
 #  $Log: Makefile,v $
+#  Revision 1.13  1998/02/22 02:08:25  fisyak
+#  CPPFLAGS for HPX
+#
 #  Revision 1.12  1998/02/21 18:33:54  fisyak
 #  Add util domain
 #
@@ -31,7 +34,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/02/21 18:33:54 $ 
+#             Last modification $Date: 1998/02/22 02:08:25 $ 
 ifdef SILENT
 .SILENT:
 endif
@@ -218,7 +221,7 @@ endif
 #-------------------------------includes----------------------------
 STICFLAGS =  $(addprefix -I,  $(STAR)/asps/staf/idl $(SRC_DIR) $(IDL_DIRS))
 ifneq ($(SYS_STAR),hp_ux102)
-CPPFLAGS  = -D$(SYS_STAR) -D$(shell uname) 
+CPPFLAGS += -D$(SYS_STAR) -D$(shell uname) 
 endif
 CPPFLAGS +=              -I. -I../ -I/usr/include -I$(STAR)/asps/staf/inc  \
              $(addprefix -I, $(SRC_DIR) $(GEN_DIR) $(INC_DIRS)) 
