@@ -1,7 +1,22 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StEtGridEMCMatched.cxx,v 1.1 2002/02/11 20:30:48 akio Exp $
+// $Id: StEtGridEMCMatched.cxx,v 1.2 2002/12/04 20:28:07 thenry Exp $
 // $Log: StEtGridEMCMatched.cxx,v $
+// Revision 1.2  2002/12/04 20:28:07  thenry
+// StppuDstMaker was modified to allow multiple jet analysis modules to be
+// run simultaneosly with various parameters while the Maker loads the events
+// and analyses them.  Four different jet analyzers exist:
+//
+// Konstanin's Analyzers:
+//     Kt type: StppKonstKtJetAnalyzer
+//     Cone type: StppKonstConeJetAnalyzer
+//
+// Mike's Analyzers:
+//     Kt type: StppMikeKtJetAnalyzer
+//     Cone type: StppMikeConeJetAnalyzer
+//
+// These modules all require the StJetFinder modules.
+//
 // Revision 1.1  2002/02/11 20:30:48  akio
 // Many updates, including very first version of jet finder.
 //
@@ -15,7 +30,7 @@
 #include "StEtGridEMCMatched.h"
 #include "TClonesArray.h"
 
-ClassImp(StEtGridEMCMatched);
+ClassImp(StEtGridEMCMatched)
 
 void StEtGridEMCMatched::createKeys(){
   mNEta   = 40;

@@ -1,7 +1,22 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StEtGridFlat.cxx,v 1.2 2002/06/24 13:22:59 akio Exp $
+// $Id: StEtGridFlat.cxx,v 1.3 2002/12/04 20:28:07 thenry Exp $
 // $Log: StEtGridFlat.cxx,v $
+// Revision 1.3  2002/12/04 20:28:07  thenry
+// StppuDstMaker was modified to allow multiple jet analysis modules to be
+// run simultaneosly with various parameters while the Maker loads the events
+// and analyses them.  Four different jet analyzers exist:
+//
+// Konstanin's Analyzers:
+//     Kt type: StppKonstKtJetAnalyzer
+//     Cone type: StppKonstConeJetAnalyzer
+//
+// Mike's Analyzers:
+//     Kt type: StppMikeKtJetAnalyzer
+//     Cone type: StppMikeConeJetAnalyzer
+//
+// These modules all require the StJetFinder modules.
+//
 // Revision 1.2  2002/06/24 13:22:59  akio
 // numerous bug fix & updates
 //
@@ -18,7 +33,7 @@
 #include "StEtGridFlat.h"
 #include "TClonesArray.h"
 
-ClassImp(StEtGridFlat);
+ClassImp(StEtGridFlat)
 
 void StEtGridFlat::createKeys(int neta, int nphi, float eta1, float eta2, float phi1, float phi2){
   mNEta=neta;
