@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.cc,v 1.13 1999/05/22 19:30:10 perev Exp $
+ * $Id: StGlobalTrack.cc,v 1.14 1999/06/07 14:53:02 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,9 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.cc,v $
- * Revision 1.13  1999/05/22 19:30:10  perev
- * length & methods added
+ * Revision 1.14  1999/06/07 14:53:02  ullrich
+ * Added separate method to set and access number of hits in case the hit
+ * collections aren't filled, ie no hits are stored on the DST.
  *
  * Revision 1.13  1999/05/22 19:30:10  perev
  * length & methods added
@@ -55,15 +56,18 @@
  **************************************************************************/
 #include "StEvent/StGlobalTrack.hh"
 
-static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.13 1999/05/22 19:30:10 perev Exp $";
+static const char rcsid[] = "$Id: StGlobalTrack.cc,v 1.14 1999/06/07 14:53:02 ullrich Exp $";
  
 StGlobalTrack::StGlobalTrack() : mPidTraits(*this)
 {
     mTpcDedx = 0; 
     mFtpcDedx = 0;
-    mSvtDedx = 0; 
-}
-
+    mSvtDedx = 0;
+    mNumberOfTpcHits = 0;
+    mNumberOfSvtHits = 0;
+    mNumberOfFtpcHits = 0; 
+}  
+   
 StGlobalTrack::StGlobalTrack(dst_track_st* trk,
                              double curvature,
                              double dip,
@@ -75,6 +79,9 @@ StGlobalTrack::StGlobalTrack(dst_track_st* trk,
     mTpcDedx = 0; 
     mFtpcDedx = 0;
     mSvtDedx = 0; 
+    mNumberOfTpcHits = 0;
+    mNumberOfSvtHits = 0;
+    mNumberOfFtpcHits = 0; 
     mLength = trk->length;
 }
 
@@ -118,26 +125,32 @@ void StGlobalTrack::addTpcHit(StTpcHit* hit)
 {
     mTpcHits.push_back(hit);
     hit->setTrackReferenceCount(hit->trackReferenceCount()+1);
+    mNumberOfTpcHits++;
 }
 
 void StGlobalTrack::addFtpcHit(StFtpcHit* hit)
 {
     mFtpcHits.push_back(hit);
     hit->setTrackReferenceCount(hit->trackReferenceCount()+1);
+    mNumberOfFtpcHits++;
 }
 
 void StGlobalTrack::addSvtHit(StSvtHit* hit)
 {
     mSvtHits.push_back(hit);
     hit->setTrackReferenceCount(hit->trackReferenceCount()+1);
+    mNumberOfSvtHits++;
 }
 
 void StGlobalTrack::removeTpcHit(StTpcHit* hit)
 {
     StVecPtrTpcHitIterator iter = find(mTpcHits.begin(), mTpcHits.end(), hit);
-    if (iter != mTpcHits.end()) mTpcHits.erase(iter);
-    int i = hit->trackReferenceCount();
-    hit->setTrackReferenceCount(i > 0 ? i-1 : 0);
+    if (iter != mTpcHits.end()) {
+	mTpcHits.erase(iter);
+	int i = hit->trackReferenceCount();
+	hit->setTrackReferenceCount(i > 0 ? i-1 : 0);
+	mNumberOfTpcHits--;
+    }
 }
 
 void StGlobalTrack::removeFtpcHit(StFtpcHit* hit)
@@ -147,6 +160,7 @@ void StGlobalTrack::removeFtpcHit(StFtpcHit* hit)
 	mFtpcHits.erase(iter);
 	int i = hit->trackReferenceCount();
 	hit->setTrackReferenceCount(i > 0 ? i-1 : 0);
+	mNumberOfFtpcHits--;
     }
 }
 
@@ -157,6 +171,46 @@ void StGlobalTrack::removeSvtHit(StSvtHit* hit)
 	mSvtHits.erase(iter);
 	int i = hit->trackReferenceCount();
 	hit->setTrackReferenceCount(i > 0 ? i-1 : 0);
+	mNumberOfSvtHits--;
     }
+}
+
+int StGlobalTrack::numberOfTpcHits() const
+{
+    if (mTpcHits.size() == 0)
+	return (int)mNumberOfTpcHits;
+    else
+	return mTpcHits.size();
+}
+
+int StGlobalTrack::numberOfSvtHits() const
+{
+    if (mSvtHits.size() == 0)
+	return (int)mNumberOfSvtHits;
+    else
+	return mSvtHits.size();
+}
+
+int StGlobalTrack::numberOfFtpcHits() const
+{
+    if (mFtpcHits.size() == 0)
+	return (int)mNumberOfFtpcHits;
+    else
+	return mFtpcHits.size();
+}
+
+void StGlobalTrack::setNumberOfTpcHits(unsigned char n)
+{
+    mNumberOfTpcHits = n;
+}
+
+void StGlobalTrack::setNumberOfSvtHits(unsigned char n)
+{
+    mNumberOfSvtHits = n;
+}
+
+void StGlobalTrack::setNumberOfFtpcHits(unsigned char n)
+{
+    mNumberOfFtpcHits = n;
 }
 
