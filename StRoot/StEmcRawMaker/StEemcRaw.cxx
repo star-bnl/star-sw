@@ -1,4 +1,4 @@
-// $Id: StEemcRaw.cxx,v 1.2 2004/10/21 00:01:50 suaide Exp $
+// $Id: StEemcRaw.cxx,v 1.3 2004/11/14 21:55:52 jeromel Exp $
 
 #include <math.h>
 #include <assert.h>
@@ -35,7 +35,7 @@ StEemcRaw::~StEemcRaw(){
 //____________________________________________________
 //____________________________________________________
 Bool_t   StEemcRaw::make(StEEMCReader *eeReader, StEvent* mEvent){//, StEmcRawData *raw, int token
-  //printf("JB make()  EEMC\n");
+  //  printf("JB make()  EEMC\n");
 
   if (hs[0]) hs[0]->Fill(0);
 
@@ -76,15 +76,18 @@ Bool_t   StEemcRaw::make(StEEMCReader *eeReader, StEvent* mEvent){//, StEmcRawDa
 //____________________________________________________
 //____________________________________________________
 Bool_t   StEemcRaw::copyRawData(StEEMCReader *eeReader, StEmcRawData *raw){
-   
+  int nb=0; 
   int icr;
   for(icr=0;icr<mDb->getNFiber();icr++) {
     const EEmcDbCrate *fiber=mDb-> getFiber(icr);
-    //printf("copy EEMC raw: ");fiber->print();
+    if(!eeReader->isEemcBankIn(fiber->type)) continue;
+    nb++;
+    //    printf("copy EEMC raw: ");fiber->print();
     raw->createBank(icr,fiber->nHead,fiber->nCh);    
     raw->setHeader(icr,eeReader->getEemcHeadBlock(fiber->fiber,fiber->type));
     raw->setData(icr,eeReader->getEemcDataBlock(fiber->fiber,fiber->type));
   }
+  gMessMgr->Message("","I") << "StEemcRaw::copyRawData() "<<nb<<" data bloks copied" << endm;
   return true;
 }
 
@@ -108,6 +111,7 @@ Bool_t   StEemcRaw::headersAreSick(StEmcRawData *raw, int token) {
   for(icr=0;icr<mDb->getNFiber();icr++) {
     const EEmcDbCrate *fiber=mDb-> getFiber(icr);
     if(!fiber->useIt) continue; // drop masked out crates
+    if(raw->sizeHeader(icr)<=0) continue;  //drop cartes not present in data blocks
     //printf(" EEMC raw-->pix crID=%d type=%c \n",fiber->crID,fiber->type);
     //    const  UShort_t* head=raw->header(icr); assert(head);
     block.clear();
@@ -132,12 +136,12 @@ Bool_t   StEemcRaw::headersAreSick(StEmcRawData *raw, int token) {
       //      printf("ic=%d on bit=%d k=%d   %d %d  \n",ic,i,k,1<<i,sn&(1<<i) );
       if (hs[3]) hs[3]->Fill(k);
     }
-    gMessMgr->Message("","I") << GetName()<<"::headersAreSick("<<fiber->name<<"), errors found="<<sanity<<endm;
+    gMessMgr->Message("","I") << GetName()<<"::headersAreSick("<<fiber->name<<"), sanity="<<sanity<<endm;
   }
 
   if (hs[4]) hs[4]->Fill(totErrBit);
    
-  gMessMgr->Message("","I") << GetName()<<"::headersAreSick() totErrBit="<<totErrBit<< endm;
+  gMessMgr->Message("","I") << GetName()<<"::headersAreSick() totErrBit "<<totErrBit<<" in all crates"<<endm;
   return totErrBit;
 }
 
@@ -311,6 +315,9 @@ void StEemcRaw::initHisto(){
 
 
 // $Log: StEemcRaw.cxx,v $
+// Revision 1.3  2004/11/14 21:55:52  jeromel
+// Unit var initialized (++ used later)
+//
 // Revision 1.2  2004/10/21 00:01:50  suaide
 // small changes in histogramming and messages for BEMC
 // Complete version for EEMC done by Jan Balewski
