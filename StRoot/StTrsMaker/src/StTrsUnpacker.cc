@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsUnpacker.cc,v 1.4 1999/02/12 01:27:18 lasiuk Exp $
+ * $Id: StTrsUnpacker.cc,v 1.5 1999/02/14 20:45:15 lasiuk Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsUnpacker.cc,v $
- * Revision 1.4  1999/02/12 01:27:18  lasiuk
- * Limit Debug output
+ * Revision 1.5  1999/02/14 20:45:15  lasiuk
+ * use assert and index (ii) was 'off by 1'
  *
  * Revision 1.6  1999/02/16 18:15:41  fisyak
  * Check in the latest updates to fix them
@@ -26,6 +26,8 @@
  * Feb 10,1999
  *
  * Revision 1.2  1999/02/10 04:26:21  lasiuk
+ * TObject for passing
+ *
  * Revision 1.1  1999/02/04 18:38:10  lasiuk
  * Initial Revision
  *
@@ -38,9 +40,14 @@
 
 StTrsUnpacker::StTrsUnpacker() { /* nopt */}
 
-    //PR(theData->mSectors.size());
+    PR(theData->mSectors.size());
+    
+int StTrsUnpacker::getSector(int which, StTpcRawDataEvent* eventData)
+{
+    int status;
+    StTrsRawDataEvent *theData = (StTrsRawDataEvent*)eventData;
 //     PR(theData->mSectors.size());
-	if (theData->mSectors[(which-1)]) { // check the pointer...
+
     // Diagnostic...make sure the pointers are zero!
 //     for(int bbb=0; bbb<theData->mSectors.size(); bbb++)
 // 	cout << bbb << '\t' << (theData->mSectors[bbb]) << endl;
@@ -67,7 +74,8 @@ int StTrsUnpacker::getSequences(int padRow, int npad, int *nSeq, StSequence** Se
 	TrsPadData = mSector->timeBinsOfRowAndPad(padRow,npad);
 
 //     PR(TrsPadData.first->size());
-    //assert(numberOfEntriesD == numberOfEntriesZ);
+
+    short numberOfZeros = 0;
     short numberOfEntriesD = TrsPadData.first->size();
     short numberOfEntriesZ = TrsPadData.second->size();
     //PR(numberOfEntriesD);
@@ -80,11 +88,8 @@ int StTrsUnpacker::getSequences(int padRow, int npad, int *nSeq, StSequence** Se
 
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
     vector<StSequence> tmp;
-	//PR(static_cast<int>(TrsPadData.first->at(ii)));
-	//cout << "***" << static_cast<int>((*TrsPadData.first)[ii]) << endl;
 #else
 //     for(int bbb=0; bbb<numberOfEntriesD; bbb++) {
-	    //PR(numberOfZeros);
 // 	cout << bbb << '\t' << (int)(*TrsPadData.first)[bbb] << '\t' << (int)(*TrsPadData.second)[bbb] << endl;
 //     }
     // Construct the sequences:
@@ -93,19 +98,20 @@ int StTrsUnpacker::getSequences(int padRow, int npad, int *nSeq, StSequence** Se
 	    numberOfZeros += (*TrsPadData.second)[ii];
 	    continue;
 	}
-	PR(aSequence.startTimeBin);
-	//PR(static_cast<int>(*aSequence.firstAdc));
-	//unsigned short theLength = 0;
+	if ( (*TrsPadData.second)[ii] == static_cast<unsigned char>(255) )
+	    continue;
+
 	StSequence aSequence;
+// 	PR(aSequence.startTimeBin);
 // 	PR(static_cast<int>(*aSequence.firstAdc));
 //  	PR(aSequence.startTimeBin);
 
 // 	PR(numberOfEntriesD);
 	aSequence.length = static_cast<unsigned short>(0);
-	//aSequence.length--;
+	
+// 	    PR(aSequence.length);
+		  (ii<numberOfEntriesD) );
 // 	    PR(static_cast<int>((*TrsPadData.first)[ii]));
-
-	numberOfZeros = 0;
 // 	PR(aSequence.length);
 		   (ii<numberOfEntriesD) );
 	ii--; // Adjust it, since you overstep the sequence...
@@ -157,7 +163,7 @@ int  StTrsUnpacker::getPadList(int padRow, unsigned char **padList)
     vector<unsigned char> tmp;
 #else
     // For the SUN
-	    cout << " pad " << ii << " " << (mSector->numberOfTimeBins(padRow,ii)) << endl;
+    vector<unsigned char, allocator<unsigned char> > tmp;
 #endif
     tmp.clear();
 // 	    cout << " pad " << ii << " " << (mSector->numberOfTimeBins(padRow,ii)) << endl;
