@@ -305,12 +305,9 @@
  <h4>
  <pre>
    name in bfc      Maker
-  inputStream   --> StIOMaker
-  tree          --> StTreeMaker
+  ------------      ------
   geant             St_geant_Maker
-  db                St_db_Maker
   tpc_raw           St_tpcdaq_Maker
-  ?                 StTrsMaker
   tpc_hits    *     St_tcl_Maker
   tpc_tracks  *     St_tpt_Maker
   tpc_tracks        StLaserEventMaker
@@ -336,8 +333,7 @@
   analysis          StAnalysisMaker
   QA          *     St_QA_Maker
   CosmicsQA         StQACosmicMaker
-  EventDisplay      StEventDisplayMaker
-  
+  EventDisplay      StEventDisplayMaker  
  </pre>
  </h4>
  
