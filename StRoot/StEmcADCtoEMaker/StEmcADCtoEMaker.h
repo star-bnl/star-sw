@@ -1,5 +1,8 @@
-// $Id: StEmcADCtoEMaker.h,v 1.22 2003/01/17 23:02:25 suaide Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.23 2003/01/23 03:09:05 jeromel Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.23  2003/01/23 03:09:05  jeromel
+// Include modif
+//
 // Revision 1.22  2003/01/17 23:02:25  suaide
 // small modification
 //
@@ -80,7 +83,7 @@ This class gets EMC raw ADC's and convert them to calibrated energy.<br><br>
 
 #include "tables/St_controlADCtoE_Table.h"
 
-#include "StEmcUtil/emcInternalDef.h"
+#include "StEmcUtil/others/emcInternalDef.h"
 #include "TH1.h"
 #include "TH2.h"
 

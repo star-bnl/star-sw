@@ -1,12 +1,12 @@
 //
-// $Id: StBemcTrigger.cxx,v 1.10 2002/01/03 21:41:15 suaide Exp $
+// $Id: StBemcTrigger.cxx,v 1.11 2003/01/23 03:08:58 jeromel Exp $
 //
 //    
 
 #include "StBemcTrigger.h"
 #include "StEvent/StEvent.h"
 #include "StEvent/StEventTypes.h"
-#include "StEmcUtil/StEmcGeom.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
   
 ClassImp(StBemcTrigger);
 

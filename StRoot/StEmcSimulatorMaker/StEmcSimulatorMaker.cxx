@@ -48,7 +48,7 @@ ClassImp(StEmcSimulatorMaker)
 TDataSet  *geaIn, *ems;
 St_g2t_emc_hit *g2t_emc_hit, *g2t_smd_hit;
 
-#include "StEmcUtil/emcDetectorName.h"
+#include "StEmcUtil/others/emcDetectorName.h"
 
 St_controlEmcSimulatorMaker* controlMaker; controlEmcSimulatorMaker_st* controlTable;
 
@@ -948,8 +948,11 @@ void StEmcSimulatorMaker::printStatusTable(Int_t det, Int_t hist)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.15 2003/01/17 21:21:28 suaide Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.16 2003/01/23 03:09:02 jeromel Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.16  2003/01/23 03:09:02  jeromel
+// Include modif
+//
 // Revision 1.15  2003/01/17 21:21:28  suaide
 // small bug fixed to compile on Solaris
 //

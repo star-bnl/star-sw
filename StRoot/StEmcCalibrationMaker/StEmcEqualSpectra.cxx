@@ -10,7 +10,7 @@
 #include "emc_def.h"
 #include "TCanvas.h"
 #include "TGraph.h"
-#include "StEmcUtil/StEmcGeom.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 #include "StEvent/StEvent.h"
 
 ClassImp(StEmcEqualSpectra);

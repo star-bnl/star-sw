@@ -3,8 +3,8 @@
 #include "StEmcMath.h"
 #include "StEvent/StMeasuredPoint.h"
 #include "StarClassLibrary/StThreeVectorF.hh"
-#include "StEmcUtil/emcInternalDef.h"
-#include "StEmcUtil/StEmcGeom.h"
+#include "StEmcUtil/others/emcInternalDef.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 
 ClassImp(StEmcMath)
 

@@ -1,5 +1,5 @@
 #include "StEmcPmtSimulator.h"
-#include "StEmcUtil/emcInternalDef.h"
+#include "StEmcUtil/others/emcInternalDef.h"
 #include "StMessMgr.h"
 
 ClassImp(StEmcPmtSimulator)
@@ -128,8 +128,11 @@ void  StEmcPmtSimulator::setParameters
 
 
 //////////////////////////////////////////////////////////////////////////
-//  $Id: StEmcPmtSimulator.cxx,v 1.3 2002/06/04 16:09:34 pavlinov Exp $
+//  $Id: StEmcPmtSimulator.cxx,v 1.4 2003/01/23 03:09:02 jeromel Exp $
 //  $Log: StEmcPmtSimulator.cxx,v $
+//  Revision 1.4  2003/01/23 03:09:02  jeromel
+//  Include modif
+//
 //  Revision 1.3  2002/06/04 16:09:34  pavlinov
 //  added option with DB(pedestal ans calibration  coefficients
 //

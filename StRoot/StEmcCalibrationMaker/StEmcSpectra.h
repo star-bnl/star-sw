@@ -18,8 +18,8 @@ standard functions to manipulate spectra, such as mean, rms, rebins, etc.
 #include "TH1.h"
 #include "TH2.h"
 #include "TH1.h"
-#include "StEmcUtil/StEmcFilter.h"
-#include "StEmcUtil/StEmcPosition.h"
+#include "StEmcUtil/filters/StEmcFilter.h"
+#include "StEmcUtil/projection/StEmcPosition.h"
 
 class StEmcGeom;
 class StEvent;
