@@ -1,8 +1,11 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved 
-// $Id: St_DataSetIter.cxx,v 1.26 1999/04/16 16:35:35 perev Exp $
+// $Id: St_DataSetIter.cxx,v 1.27 1999/04/30 13:15:56 fisyak Exp $
 // $Log: St_DataSetIter.cxx,v $
+// Revision 1.27  1999/04/30 13:15:56  fisyak
+// Ad StObject, modification StArray for StRootEvent
+//
 // Revision 1.26  1999/04/16 16:35:35  perev
 // last tips for StTree and St_DataSetIter
 //
@@ -205,7 +208,8 @@ Int_t St_DataSetIter::Du() const {
       count++;
       if (nextset->IsFolder()) cout << endl;
       TString path = nextset->Path();
-      cout << path << setw(TMath::Max(Int_t(40-strlen(path.Data())),Int_t(0))) << "...";
+      cout << setw(2) << next.GetDepth() << ". ";
+      cout << path << setw(TMath::Max(Int_t(60-strlen(path.Data())),Int_t(0))) << "...";
       const Char_t *type = nextset->IsFolder() ? "directory" : "table" ;
       cout << setw(10) << type;
       cout  << " : " << setw(10) << nextset->GetTitle();
@@ -400,9 +404,11 @@ St_DataSet *St_DataSetIter::Next( EDataSetPass mode)
       if (list && list->GetSize() ) {
          fDepth++;
          mustNotify = kTRUE;
-         if (fDepth >= 100) 
+         if (fDepth >= 100) {
             Error("Next()"
-                  ," to many nested levels of your St_DataSet has been detected");
+                  ," too many (%d) nested levels of your St_DataSet has been detected",fDepth);
+           return 0;
+         }
          fNextSet[fDepth-1] = new TIter(list);
       }
     }
