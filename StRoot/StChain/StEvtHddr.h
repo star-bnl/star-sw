@@ -9,9 +9,10 @@ class StEvtHddr : public TDataSet
 {
 public:
   StEvtHddr(TDataSet *parent=0);
+  StEvtHddr(const StEvtHddr &hddr, const char *name=0);
  ~StEvtHddr(){};
   StEvtHddr &operator=(const StEvtHddr &hddr);
-  virtual TObject *Clone() const{StEvtHddr *to=new StEvtHddr();*to = *this; return to;};
+  virtual TObject *Clone(const char *name=0) const {return new StEvtHddr(*this,name);}
   virtual TObject *Clone()      {return ((const StEvtHddr*)this)->Clone();};
 //		Get methods
 
@@ -91,8 +92,14 @@ protected:
     TDatime     mProdTime;		//Production time
     TString     mEventType;
 
-ClassDef(StEvtHddr,2)
+ClassDef(StEvtHddr,2)                   // Event header
 };
+
+//__________________________________________________________________________________
+inline  StEvtHddr::StEvtHddr(const StEvtHddr &hddr,const char *name):TDataSet(name,"")
+{ operator=(hddr); }
+
+//__________________________________________________________________________________
 struct EvtHddr_st 
 {
     Int_t	mRunNumber;
