@@ -42,7 +42,6 @@ MarilynMonroe2000 *gs2000;
 
 
 ClassImp(St_trg_Maker)
-#define PP printf(
 #define SANITYCheck(name,value) \
  if (name != value) {cout << "Value of "#name" = |" << name << "| instead of expected "#value << endl; return  kStErr;}
 
@@ -135,7 +134,7 @@ Int_t St_trg_Maker::Make(){
   if(DAQdset) {
     switch(YearOfData(DAQdset)) {
       case 2000:
-        PP"St_trg_Maker:: Make()  : analyzing year 2000 trigger data.\n");
+        (void) printf("St_trg_Maker:: Make()  : analyzing year 2000 trigger data.\n");
         if(!initializationDone) { 
 	  InitCtbArrays(); initializationDone=7; 
 	}
@@ -143,7 +142,7 @@ Int_t St_trg_Maker::Make(){
         break;
 
       case 2001:
-        PP"St_trg_Maker:: Make()  : analyzing year 2001 trigger data.\n");
+        (void) printf("St_trg_Maker:: Make()  : analyzing year 2001 trigger data.\n");
         if(!initializationDone) { 
 	  InitCtbArrays2001(); 
 	  initializationDone=7; 
@@ -152,13 +151,24 @@ Int_t St_trg_Maker::Make(){
         break;
 
       case 2003:
-        PP"St_trg_Maker:: Make()  : analyzing year 2003 trigger data.\n");
+        (void) printf("St_trg_Maker:: Make()  : analyzing year 2003 trigger data.\n");
         if(!initializationDone) { 
 	  InitCtbArrays2001(); /* use 2001 for 2003 */ 
 	  initializationDone=7; 
 	}
         return Daq2003(DAQdset,dst1,dst2,dst3,dst4);
         break;
+
+
+      case 2004:
+        (void) printf("St_trg_Maker:: Make()  : analyzing year 2004 trigger data (using 2003)\n");
+        if(!initializationDone) { 
+	  InitCtbArrays2001();                        /* use 2001 for 2004       */ 
+	  initializationDone=7; 
+	}
+        return Daq2003(DAQdset,dst1,dst2,dst3,dst4);  /* use same scheme as 2003 */
+        break;
+
 
       default: assert(0);
     }
@@ -265,7 +275,7 @@ void St_trg_Maker::Vladimir2Herbert(int input,int *sector,int *subsector) {
 }
 int St_trg_Maker::HandleMwc(St_mwc_raw *mwc_raw,St_dst_TrgDet *dst1) {
   int prePost,sector,subsector,index,irow;
-  if(!mwc_raw) { PP"Did not find the mwc_raw table mwc.\n"); return 7; }
+  if(!mwc_raw) { (void) printf("Did not find the mwc_raw table mwc.\n"); return 7; }
   mwc_raw_st    *vladimir = mwc_raw->GetTable(); assert(vladimir);
   dst_TrgDet_st *herbert  = dst1->GetTable();    assert(herbert);
   herbert->npre=5; herbert->npost=5;
@@ -982,8 +992,11 @@ void St_trg_Maker::InitMwcArrays(void) {
 
 
 
-// $Id: St_trg_Maker.cxx,v 1.46 2003/10/06 04:07:20 perev Exp $
+// $Id: St_trg_Maker.cxx,v 1.47 2004/01/03 03:32:26 jeromel Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.47  2004/01/03 03:32:26  jeromel
+// Temptative 2003-like approach
+//
 // Revision 1.46  2003/10/06 04:07:20  perev
 // bug in duplicated.code fixed and this file renamed
 //
