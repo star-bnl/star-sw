@@ -230,6 +230,7 @@ class TNNKernel : public TNamed
   void LearnBackward();   // gradient retropropagation (updates of biases and weights)
   void Forward(); // do a simple forward propagation
   Double_t Error();// compute the error between forward propagation and teaching
+  void Error(const char*,const char*,...) const {;}//WarnOff
   Double_t ErrorO();// compute the error between forward propagation and teaching
   void FreeVW();  
   void AllocateVW(Int_t nInput, Text_t *hidden, Int_t nOutput);  

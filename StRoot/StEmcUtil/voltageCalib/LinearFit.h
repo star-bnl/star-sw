@@ -71,7 +71,7 @@ void LinearFit<Number>::fit()
   Number sumx=0,sumy=0,sumx2=0,sumy2=0,sumxy=0;
   Number x, y,sxx,syy,sxy;
   // Compute error matrix
-  map<Number, Number>::const_iterator i;
+  typename map<Number, Number>::const_iterator i;
   for (i = _points->begin(); i != _points->end(); i++)
     {
       x = i->first;

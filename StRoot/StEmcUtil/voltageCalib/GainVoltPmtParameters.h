@@ -1,7 +1,7 @@
 #ifndef GainVoltPmtParameters_H_INCLUDED
 #define GainVoltPmtParameters_H_INCLUDED
 #include <Stiostream.h>
-#include <vector.h>
+#include <vector>
 using std::vector;
 #include "PowerLawFit.h"
 #include "PmtIdentifier.h"
