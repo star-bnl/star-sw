@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MuDst.hh,v 1.3 2000/03/29 20:52:13 genevb Exp $
+ * $Id: StV0MuDst.hh,v 1.4 2000/03/31 03:20:24 jones Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 04-Jun-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StV0MuDst.hh,v $
+ * Revision 1.4  2000/03/31 03:20:24  jones
+ * Added topology map to V0/Xi; access funcs for each data member
+ *
  * Revision 1.3  2000/03/29 20:52:13  genevb
  * Added StKinkMuDst, replaced arrays
  *
@@ -26,6 +29,11 @@
 #ifndef StV0MuDst_hh
 #define StV0MuDst_hh
 #include "TObject.h"
+
+#ifndef StTrackTopologyMap_hh
+#include "StEvent/StTrackTopologyMap.h"
+//#include "StEvent/StTrackTopologyMap.cxx"
+#endif
 
 class StVertex;
 class StV0Vertex;
@@ -42,19 +50,28 @@ public:
 
   StStrangeEvMuDst *event();           // Pointer to event information
 
-  Float_t decayLengthV0();             // 3-d decay distance
-  Float_t decayVertexV0(Int_t n);      // Coordinates of decay vertex
+  Float_t decayLengthV0() const;       // 3-d decay distance
+  Float_t decayVertexV0X() const;      // Coordinates of decay vertex
+  Float_t decayVertexV0Y() const;
+  Float_t decayVertexV0Z() const;
   Float_t dcaV0Daughters() const;      // DCA of v0 daughters at decay vertex
   Float_t dcaV0ToPrimVertex() const;   // DCA of v0 to primary vertex
   Float_t dcaPosToPrimVertex() const;  // DCA of pos v0 daughter to pri vertex
   Float_t dcaNegToPrimVertex() const;  // DCA of neg v0 daughter to pri vertex
-  Float_t momPos(Int_t n);             // Momentum components of pos. daughter
-  Float_t momNeg(Int_t n);             // Momentum components of neg. daughter
+  Float_t momPosX() const;             // Momentum components of pos. daughter
+  Float_t momPosY() const;
+  Float_t momPosZ() const;
+  Float_t momNegX() const;             // Momentum components of neg. daughter
+  Float_t momNegY() const;
+  Float_t momNegZ() const;
+  StTrackTopologyMap& topologyMapPos();
+  StTrackTopologyMap& topologyMapNeg();
+  UShort_t keyPos() const;             // Track id v0 daughters
+  UShort_t keyNeg() const;             // Track id v0 daughters
 
-  Int_t   tpcHitsPos() const;          // Number of TPC hits on pos. daughter
-  Int_t   tpcHitsNeg() const;          // Number of TPC hits on neg. daughter
-
-  Float_t momV0(Int_t n);         // Momentum components of V0
+  Float_t momV0X() const;         // Momentum components of V0
+  Float_t momV0Y() const;
+  Float_t momV0Z() const;
   Float_t alphaV0();              // Armenteros-Podolanski variable
   Float_t ptArmV0();              // Armenteros-Podolanski variable
   Float_t eLambda();              // Energy assuming lambda hypothesis
@@ -94,8 +111,14 @@ protected:
   Float_t mMomNegY;
   Float_t mMomNegZ;
 
-  Int_t   mTpcHitsPos;
-  Int_t   mTpcHitsNeg;
+  UShort_t mKeyPos;
+  UShort_t mKeyNeg;
+
+  StTrackTopologyMap mTopologyMapPos;
+  StTrackTopologyMap mTopologyMapNeg;
+
+  //  Int_t   mTpcHitsPos;
+  //  Int_t   mTpcHitsNeg;
 
   Float_t Ptot2Pos();          
   Float_t Ptot2Neg();             
@@ -113,6 +136,9 @@ inline void StV0MuDst::SetEvent(StStrangeEvMuDst* ev)
              { mEvent = ev; }
 inline StStrangeEvMuDst *StV0MuDst::event()
              { return mEvent; }
+inline Float_t StV0MuDst::decayVertexV0X() const { return mDecayVertexV0X; }
+inline Float_t StV0MuDst::decayVertexV0Y() const { return mDecayVertexV0Y; }
+inline Float_t StV0MuDst::decayVertexV0Z() const { return mDecayVertexV0Z; }
 inline Float_t StV0MuDst::dcaV0Daughters() const 
              { return mDcaV0Daughters; }
 inline Float_t StV0MuDst::dcaV0ToPrimVertex() const 
@@ -121,8 +147,19 @@ inline Float_t StV0MuDst::dcaPosToPrimVertex() const
              { return mDcaPosToPrimVertex; }
 inline Float_t StV0MuDst::dcaNegToPrimVertex() const 
              { return mDcaNegToPrimVertex; }
-inline Int_t   StV0MuDst::tpcHitsPos() const
-             { return mTpcHitsPos; }
-inline Int_t   StV0MuDst::tpcHitsNeg() const
-             { return mTpcHitsNeg; }
+inline Float_t StV0MuDst::momPosX() const { return mMomPosX; }
+inline Float_t StV0MuDst::momPosY() const { return mMomPosY; }
+inline Float_t StV0MuDst::momPosZ() const { return mMomPosZ; }
+inline Float_t StV0MuDst::momNegX() const { return mMomNegX; }
+inline Float_t StV0MuDst::momNegY() const { return mMomNegY; }
+inline Float_t StV0MuDst::momNegZ() const { return mMomNegZ; }
+inline StTrackTopologyMap& StV0MuDst::topologyMapPos()
+             { return mTopologyMapPos; }
+inline StTrackTopologyMap& StV0MuDst::topologyMapNeg()
+             { return mTopologyMapNeg; }
+inline UShort_t StV0MuDst::keyPos() const { return mKeyPos; } 
+inline UShort_t StV0MuDst::keyNeg() const { return mKeyNeg; } 
+inline Float_t StV0MuDst::momV0X() const { return mMomPosX + mMomNegX; }
+inline Float_t StV0MuDst::momV0Y() const { return mMomPosY + mMomNegY; }
+inline Float_t StV0MuDst::momV0Z() const { return mMomPosZ + mMomNegZ; }
 #endif

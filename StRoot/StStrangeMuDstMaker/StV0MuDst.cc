@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MuDst.cc,v 1.2 2000/03/29 20:52:13 genevb Exp $
+ * $Id: StV0MuDst.cc,v 1.3 2000/03/31 03:20:24 jones Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 04-Jun-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StV0MuDst.cc,v $
+ * Revision 1.3  2000/03/31 03:20:24  jones
+ * Added topology map to V0/Xi; access funcs for each data member
+ *
  * Revision 1.2  2000/03/29 20:52:13  genevb
  * Added StKinkMuDst, replaced arrays
  *
@@ -49,11 +52,12 @@ void StV0MuDst::Fill(StV0Vertex* v0Vertex,
   mMomPosY = v0Vertex->momentumOfDaughter(positive).y();
   mMomPosZ = v0Vertex->momentumOfDaughter(positive).z();
 
-  mTpcHitsPos =
-    v0Vertex->daughter(positive)->fitTraits().numberOfFitPoints(kTpcId);
-  mTpcHitsNeg =
-    v0Vertex->daughter(negative)->fitTraits().numberOfFitPoints(kTpcId);
-  }
+  mKeyPos = v0Vertex->daughter(positive)->key();
+  mKeyNeg = v0Vertex->daughter(negative)->key();
+
+  mTopologyMapPos = v0Vertex->daughter(positive)->topologyMap();
+  mTopologyMapNeg = v0Vertex->daughter(negative)->topologyMap();
+}
 
 void StV0MuDst::Clear() {
   mEvent = 0;
@@ -62,35 +66,11 @@ void StV0MuDst::Clear() {
 StV0MuDst::~StV0MuDst() {
 }
 
-Float_t StV0MuDst::decayVertexV0(Int_t n) {
-  switch (n) {
-    case (2): return mDecayVertexV0Z;
-    case (1): return mDecayVertexV0Y;
-    default : return mDecayVertexV0X;
-  }
-}
-
-Float_t StV0MuDst::momPos(Int_t n) {
-  switch (n) {
-    case (2): return mMomPosZ;
-    case (1): return mMomPosY;
-    default : return mMomPosX;
-  }
-}
-
-Float_t StV0MuDst::momNeg(Int_t n) {
-  switch (n) {
-    case (2): return mMomNegZ;
-    case (1): return mMomNegY;
-    default : return mMomNegX;
-  }
-}
-
-Float_t StV0MuDst::decayLengthV0() {
+Float_t StV0MuDst::decayLengthV0() const {
      if (mEvent)
-       return sqrt(pow(mDecayVertexV0X - mEvent->primaryVertex(0),2) +
-                   pow(mDecayVertexV0Y - mEvent->primaryVertex(1),2) +
-                   pow(mDecayVertexV0Z - mEvent->primaryVertex(2),2));
+       return sqrt(pow(mDecayVertexV0X - mEvent->primaryVertexX(),2) +
+                   pow(mDecayVertexV0Y - mEvent->primaryVertexY(),2) +
+                   pow(mDecayVertexV0Z - mEvent->primaryVertexZ(),2));
      return 0.;
 }
 
@@ -106,36 +86,32 @@ Float_t StV0MuDst::Ptot2Neg() {
              mMomNegZ*mMomNegZ);
 }
 
-Float_t StV0MuDst::momV0(Int_t n) {
-     return (momPos(n) + momNeg(n));
-}
-
 Float_t StV0MuDst::Pt2V0() {
-     Float_t mMomV0_0 = momV0(0);
-     Float_t mMomV0_1 = momV0(1);
-     return (mMomV0_0*mMomV0_0 + mMomV0_1*mMomV0_1);
+     Float_t mMomV0X = momV0X();
+     Float_t mMomV0Y = momV0Y();
+     return (mMomV0X*mMomV0X + mMomV0Y*mMomV0Y);
 }
 
 Float_t StV0MuDst::Ptot2V0() {
-     Float_t mMomV0_2 = momV0(2);
-     return (Pt2V0() + mMomV0_2*mMomV0_2);
+     Float_t mMomV0Z = momV0Z();
+     return (Pt2V0() + mMomV0Z*mMomV0Z);
 }
 
 Float_t StV0MuDst::MomPosAlongV0() {
      Float_t mPtot2V0 = Ptot2V0();
      if (mPtot2V0)
-       return (mMomPosX*momV0(0) + 
-               mMomPosY*momV0(1) +
-               mMomPosZ*momV0(2)) / sqrt(mPtot2V0);
+       return (mMomPosX*momV0X() + 
+               mMomPosY*momV0Y() +
+               mMomPosZ*momV0Z()) / sqrt(mPtot2V0);
      return 0.;
 }
 
 Float_t StV0MuDst::MomNegAlongV0() {
      Float_t mPtot2V0 = Ptot2V0();
      if (mPtot2V0)
-       return (mMomNegX*momV0(0) + 
-               mMomNegY*momV0(1) +
-               mMomNegZ*momV0(2)) / sqrt(mPtot2V0);
+       return (mMomNegX*momV0X() + 
+               mMomNegY*momV0Y() +
+               mMomNegZ*momV0Z()) / sqrt(mPtot2V0);
      return 0.;
 }
 
@@ -189,14 +165,14 @@ Float_t StV0MuDst::massK0Short() {
 
 Float_t StV0MuDst::rapLambda() {
   Float_t ela = eLambda();
-  Float_t mMomV0_2 = momV0(2);
-  return 0.5*log((ela+mMomV0_2)/(ela-mMomV0_2));
+  Float_t mMomV0Z = momV0Z();
+  return 0.5*log((ela+mMomV0Z)/(ela-mMomV0Z));
 }
 
 Float_t StV0MuDst::rapK0Short() {
   Float_t ek0 = eK0Short();
-  Float_t mMomV0_2 = momV0(2);
-  return 0.5*log((ek0+mMomV0_2)/(ek0-mMomV0_2));
+  Float_t mMomV0Z = momV0Z();
+  return 0.5*log((ek0+mMomV0Z)/(ek0-mMomV0Z));
 }
 
 Float_t StV0MuDst::cTauLambda() {

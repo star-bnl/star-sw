@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeEvMuDst.cc,v 1.2 2000/03/29 20:52:13 genevb Exp $
+ * $Id: StStrangeEvMuDst.cc,v 1.3 2000/03/31 03:20:24 jones Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 19-Aug-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeEvMuDst.cc,v $
+ * Revision 1.3  2000/03/31 03:20:24  jones
+ * Added topology map to V0/Xi; access funcs for each data member
+ *
  * Revision 1.2  2000/03/29 20:52:13  genevb
  * Added StKinkMuDst, replaced arrays
  *
@@ -40,10 +43,3 @@ void StStrangeEvMuDst::Fill(StPrimaryVertex* primaryVertex) {
 StStrangeEvMuDst::~StStrangeEvMuDst() {
 }
 
-Float_t StStrangeEvMuDst::primaryVertex(Int_t n) {
-  switch (n) {
-    case (2): return mPrimaryVertexZ;
-    case (1): return mPrimaryVertexY;
-    default : return mPrimaryVertexX;
-  }
-}
