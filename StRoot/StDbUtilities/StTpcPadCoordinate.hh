@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcPadCoordinate.hh,v 1.3 2003/09/02 17:57:51 perev Exp $
+ * $Id: StTpcPadCoordinate.hh,v 1.4 2004/01/14 22:40:05 fisyak Exp $
  *
  * Author: brian Feb 6, 1998
  *
@@ -11,6 +11,9 @@
  ************************************************************************
  *
  * $Log: StTpcPadCoordinate.hh,v $
+ * Revision 1.4  2004/01/14 22:40:05  fisyak
+ * remove constness to make alpha happy
+ *
  * Revision 1.3  2003/09/02 17:57:51  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -55,15 +58,19 @@ public:
     int operator==(const StTpcPadCoordinate&) const;
     int operator!=(const StTpcPadCoordinate&) const;
     // access functions
-    const int sector()       const;
-    const int row()          const;
-    const int pad()          const;
-    const int timeBucket()   const;
+    int sector()           const {return mSector;}    
+    int row()              const {return mRow;}       
+    int pad()          	   const {return mPad;}       
+    int timeBucket()       const {return mTimeBucket;}
+    int sector()                 {return mSector;}    
+    int row()          		 {return mRow;}       
+    int pad()          		 {return mPad;}       
+    int timeBucket()    	 {return mTimeBucket;}
 
-    void setSector(int);
-    void setRow(int);
-    void setPad(int);
-    void setTimeBucket(int);
+    void setSector(int s)        {mSector = s;}
+    void setRow(int r)           {mRow = r;}
+    void setPad(int p)           {mPad = p;}
+    void setTimeBucket(int t)    {mTimeBucket = t;}
     
 protected:
     int mSector;
@@ -72,16 +79,6 @@ protected:
     int mTimeBucket;
 
 };
-
-const inline int StTpcPadCoordinate::sector()     const {return(mSector);}
-const inline int StTpcPadCoordinate::row()        const {return(mRow);}
-const inline int StTpcPadCoordinate::pad()        const {return(mPad);}
-const inline int StTpcPadCoordinate::timeBucket() const {return(mTimeBucket);}
-inline void StTpcPadCoordinate::setSector(int s)        {mSector = s;}
-inline void StTpcPadCoordinate::setRow(int r)           {mRow = r;}
-inline void StTpcPadCoordinate::setPad(int p)           {mPad = p;}
-inline void StTpcPadCoordinate::setTimeBucket(int t)    {mTimeBucket = t;}
-
 // Non-member
 ostream& operator<<(ostream&, const StTpcPadCoordinate&);
 
