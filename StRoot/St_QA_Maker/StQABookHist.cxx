@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.35 2000/02/10 19:49:40 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.36 2000/02/10 21:31:29 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.36  2000/02/10 21:31:29  kathy
+// add another set of impact param hist so we can see them in linear scale too
+//
 // Revision 1.35  2000/02/10 19:49:40  kathy
 // use kEventVtxId to select primary verteices instead of value 1
 //
@@ -272,6 +275,7 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_chisq1FE=0;
   m_chisq1FW=0;     
   m_glb_impactT=0; 
+  m_glb_impactrT=0; 
 
   m_pointTS=0;        
   m_max_pointTS=0;    
@@ -300,6 +304,7 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_chisq0TS=0;       
   m_chisq1TS=0;       
   m_glb_impactTS=0;   
+  m_glb_impactrTS=0;   
 
   m_pT_eta_recT = 0;
   m_pT_eta_recFE = 0;
@@ -390,7 +395,8 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_pchisq0=0;     
   m_pchisq1=0;     
   m_plength=0;     
-  m_prim_impact=0; 
+  m_prim_impact=0;
+  m_prim_impactr=0; 
 
 
   m_ppT_eta_rec = 0;
@@ -662,6 +668,7 @@ void StQABookHist::BookHistGlob(){
   m_chisq0T     = QAH1F("QaGtrkChisq0T", "globtrk: chisq0 - xy, tpc", 50, 0.,5.);
   m_chisq1T     = QAH1F("QaGtrkChisq1T", "globtrk: chisq1 - z, tpc", 50, 0.,5.);
   m_glb_impactT = QAH1F("QaGtrkImpactT", "globtrk: log10 impact param from prim vtx, tpc",120,-3.0,3.0);
+  m_glb_impactrT = QAH1F("QaGtrkImpactrT", "globtrk: impact param from prim vtx, tpc",100,0.,500.0);
 
 
 // 2D - tpc
@@ -775,6 +782,8 @@ void StQABookHist::BookHistGlob(){
   m_chisq1TS     = QAH1F("QaGtrkChisq1TS", "globtrk: chisq1 - z, tpc+svt", 50, 0.,5.);
   m_glb_impactTS = QAH1F("QaGtrkImpactTS", "globtrk: log10 impact param from prim vtx, tpc+svt",
                             120,-3.0,3.0);
+  m_glb_impactrTS = QAH1F("QaGtrkImpactrTS", "globtrk: impact param from prim vtx, tpc+svt",
+                            100,0.,500.);
 
 
 // 2D - tpc + silicon (svt + ssd)
@@ -972,6 +981,7 @@ void StQABookHist::BookHistPrim(){
   m_pchisq1     = QAH1F("QaPtrkChisq1",  "primtrk: chisq1 - z", 50, 0.,5.);
   m_plength     = QAH1F("QaPtrkLength",  "primtrk: track length", 50,0.,300.);
   m_prim_impact = QAH1F("QaPtrkImpact",  "primtrk: log10 impact param from prim vtx ", 120,-3.,3.0);
+  m_prim_impactr = QAH1F("QaPtrkImpactr",  "primtrk: impact param from prim vtx ", 100,0.,100.);
 
 
 // 2D

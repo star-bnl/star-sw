@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.89 2000/02/10 19:50:55 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.90 2000/02/10 21:31:30 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.90  2000/02/10 21:31:30  kathy
+// add another set of impact param hist so we can see them in linear scale too
+//
 // Revision 1.89  2000/02/10 19:50:55  kathy
 // use kEventVtxId to select primary verteices instead of value 1
 //
@@ -617,6 +620,7 @@ void St_QA_Maker::MakeHistGlob(){
         m_glb_yf0->Fill(ydif);
         m_glb_zf0->Fill(zdif);
         m_glb_impactT->Fill(logImpact);
+        m_glb_impactrT->Fill(t->impact);
 	
 // these are tpc & ftpc
 	m_pointT->Fill(trkpnt);
@@ -674,6 +678,7 @@ void St_QA_Maker::MakeHistGlob(){
         m_glb_yf0TS->Fill(ydif);
         m_glb_zf0TS->Fill(zdif);
         m_glb_impactTS->Fill(logImpact);
+        m_glb_impactrTS->Fill(t->impact);
 	
 	m_pointTS->Fill(trkpnt);
 	m_max_pointTS->Fill(trkmpnt);
@@ -954,6 +959,7 @@ void St_QA_Maker::MakeHistPrim(){
         m_pmom->Fill(gmom);
 	m_plength->Fill(t->length);
         m_prim_impact->Fill(logImpact);
+        m_prim_impactr->Fill(t->impact);
        	m_pchisq0->Fill(chisq0);
 	m_pchisq1->Fill(chisq1);
 
