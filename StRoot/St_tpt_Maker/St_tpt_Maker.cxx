@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.55 2000/11/25 23:22:51 fisyak Exp $
+// $Id: St_tpt_Maker.cxx,v 1.56 2001/02/08 20:37:15 saulys Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.56  2001/02/08 20:37:15  saulys
+// Update call to ExB
+//
 // Revision 1.55  2000/11/25 23:22:51  fisyak
 // move dEdx calculations into StdEdxMaker
 //
@@ -182,6 +185,7 @@
 #include "tpc/St_tpt_residuals_Module.h"
 #include "tpc/St_tte_track_Module.h"
 #include "tpc/St_tte_Module.h"
+#include "tpc/St_tfs_g2t_Module.h"  
 #include "TH1.h"
 #include "TF1.h"
 #include "TH2.h"
@@ -189,7 +193,9 @@
 #include "TNtuple.h"
 #include "tables/St_type_index_Table.h"
 #include "tables/St_dst_vertex_Table.h"
-#include "tpc/St_tfs_g2t_Module.h"  
+#include "StDbUtilities/StMagUtilities.h"
+
+static StMagUtilities* m_ExB = 0 ;
 
 void estimateVertexZ(St_tcl_tphit *tphit, Float_t& vertexZ, Float_t& relativeHeight);
  
@@ -318,36 +324,40 @@ Int_t St_tpt_Maker::Make(){
 
 //			TPT
   if (!m_iftteTrack) {
-
+    
     //undo ExB distortions - only if exb switch is set
-
-    if(m_Mode == 1){
-    m_mag = new StMagUtilities() ;
-    Float_t x[3], xprime[3];
-    tcl_tphit_st  *spc   = tphit->GetTable();
-    for(Int_t i=0; i<tphit->GetNRows(); i++, spc++){
-     //ExB corections
-       x[0] = spc->x;    
-       x[1] = spc->y;    
-       x[2] = spc->z;
-       m_mag->UndoDistortion(x,xprime);   // input x[3], return xprime[3]
-       spc->x = xprime[0];
-       spc->y = xprime[1];
-       spc->z = xprime[2];
-    }
-    }
+    
+    if(m_Mode == 1)
+      {
+	Float_t x[3], xprime[3] ;
+	if ( m_ExB == 0 ) m_ExB = new StMagUtilities() ;
+	tcl_tphit_st *spc = tphit -> GetTable() ;
+	for ( Int_t i = 0 ; i < tphit->GetNRows() ; i++ , spc++ )
+	  {
+	    //ExB corrections
+	    x[0] = spc -> x;    
+	    x[1] = spc -> y;    
+	    x[2] = spc -> z;
+	    m_ExB -> UndoDistortion(x,xprime);   // input x[3], return xprime[3]
+	    spc -> x = xprime[0];
+	    spc -> y = xprime[1];
+	    spc -> z = xprime[2];
+	  }
+      }
 
     if (Debug()) cout << " start tpt_run " << endl;
     Int_t Res_tpt = tpt(m_tpt_pars,tphit,tptrack,clusterVertex);
-//                      ==============================
+    //                      ==============================
     
     if (Res_tpt != kSTAFCV_OK) {cout << "Problem with tpt.." << endl;}
     if (Debug()) cout << " finish tpt_run " << endl;
-
-  }  else {//tte_track
-    St_DataSet *geant = GetInputDS("geant");
-    if (geant) {
-      St_DataSetIter geantI(geant);
+    
+  } 
+  else 
+    {//tte_track
+      St_DataSet *geant = GetInputDS("geant");
+      if (geant) {
+	St_DataSetIter geantI(geant);
       
       St_g2t_track   *g2t_track    = (St_g2t_track  *) geantI("g2t_track");
       St_g2t_tpc_hit *g2t_tpc_hit  = (St_g2t_tpc_hit *)geantI("g2t_tpc_hit");
