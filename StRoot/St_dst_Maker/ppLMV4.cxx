@@ -1,5 +1,8 @@
-// $Id: ppLMV4.cxx,v 1.8 2002/02/22 04:36:11 genevb Exp $
+// $Id: ppLMV4.cxx,v 1.9 2002/02/25 21:12:45 balewski Exp $
 // $Log: ppLMV4.cxx,v $
+// Revision 1.9  2002/02/25 21:12:45  balewski
+// correct wrong usage of hlx.pathLength(x,y)
+//
 // Revision 1.8  2002/02/22 04:36:11  genevb
 // Set vertex id to vertex table entry row
 //
@@ -46,7 +49,7 @@ using namespace units;
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define gufld F77_NAME(gufld,GUFLD)
 
-//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.8 2002/02/22 04:36:11 genevb Exp $";
+//static const char rcsid[] = "$Id: ppLMV4.cxx,v 1.9 2002/02/25 21:12:45 balewski Exp $";
 
 struct Jcyl {float eta,phi;};
 
@@ -119,8 +122,14 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
 
   //  ----------  D O   F I N D    V E R T E X
   
-  printf("%s - search for vertex using %d matched tracks: start ...\n",GetName(),(*tracks).size());
+  // printf("%s - search for vertex using %d matched tracks: start ...\n",GetName(),(*tracks).size());
 
+  double xo=0.0,yo=0.0;
+  if( beam4ppLMV.equivNtr>0) {// use the beam line as a starting point
+    xo=beam4ppLMV.x0;
+    yo=beam4ppLMV.y0;
+  }
+  
   //Do the actual vertex fitting, continue until good
   double A11=0.0,A12=0.0,A13=0.0,A21=0.0,A22=0.0,A23=0.0;
   double A31=0.0,A32=0.0,A33=0.0; // Matrix Elements
@@ -146,15 +155,12 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
     // Compute matrix A and vector b
     for(unsigned int itr=0; itr < (*tracks).size(); itr++){ 
 
-      double xo=0.0,yo=0.0;
-      if( beam4ppLMV.equivNtr>0) {// use the beam line as a starting point
-	xo=beam4ppLMV.x0;
-	yo=beam4ppLMV.y0;
-      }
       double spath = (*tracks)[itr].helix.pathLength(xo,yo);
       StThreeVectorD XClosest = (*tracks)[itr].helix.at(spath);
       StThreeVectorD XMomAtClosest = (*tracks)[itr].helix.momentumAt(spath,bfield*tesla);
       double xp   = XClosest.x(); double yp= XClosest.y(); double zp= XClosest.z();  
+      // printf("itr=%d  DCA x=%f y=%f z=%f  sig=%f\n",itr,xp,yp,zp,(*tracks)[itr].sigma);
+
       double xhat = XMomAtClosest.x()/XMomAtClosest.mag();
       double yhat = XMomAtClosest.y()/XMomAtClosest.mag();
       double zhat = XMomAtClosest.z()/XMomAtClosest.mag();
@@ -187,8 +193,8 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
     double Yv = C21*b1 + C22*b2 + C23*b3;
     double Zv = C31*b1 + C32*b2 + C33*b3;
     XVertex.setX(Xv); XVertex.setY(Yv); XVertex.setZ(Zv);
-    cout<<"Vertex Position   : "<<XVertex.x()<<" "<<XVertex.y()<<" "<<XVertex.z()<<endl;
-    cout<<"Error in Position : "<<sqrt(C11)<<" "<<sqrt(C22)<<" "<<sqrt(C33)<<endl;
+    //    cout<<"Vertex Position   : "<<XVertex.x()<<" "<<XVertex.y()<<" "<<XVertex.z()<<endl;
+    // cout<<"Error in Position : "<<sqrt(C11)<<" "<<sqrt(C22)<<" "<<sqrt(C33)<<endl;
     
 
     // Check if the fit is any good
@@ -208,7 +214,7 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
       if( (*itehlx).glb_track_pointer==0) {itehlx++; continue;}// beamLine track
       StPhysicalHelixD hlx = (*itehlx).helix;
       double sig = (*itehlx).sigma;
-      double spath = hlx.pathLength(XVertex); 
+      double spath = hlx.pathLength(XVertex.x(),XVertex.y()); 
       StThreeVectorD XHel = hlx.at(spath);
       double d=(XHel.x()-XVertex.x())*(XHel.x()-XVertex.x());
          d = d+(XHel.y()-XVertex.y())*(XHel.y()-XVertex.y());
@@ -216,6 +222,7 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
          d = sqrt(d);
       chi2 = chi2 + (d*d)/(sig*sig);
       double drel = d/sig;
+      //      printf(" DCA x=%f y=%f z=%f d=%f drel=%f dmax=%f\n",XHel.x(),XHel.y(),XHel.z(),d,drel,dmax);
       if( drel > dmax ){
 	// Save the track that deviates the most from vertex
         dmax = drel;
@@ -292,7 +299,7 @@ long StVertexMaker::ppLMV4(MatchedTrk &maTrk,St_dst_track *trackAll, St_dst_vert
   // mark also other global tracks close enough to the vertex
 
   for(uint j=0;j<maTrk.primCan.size(); j++) {
-      printf("glob j=%d x,y,z %f %f %f  trID=%d verID=%d\n",j, maTrk.primCan[j].x0,maTrk.primCan[j].y0,maTrk.primCan[j].z0,maTrk.primCan[j].glb_track_pointer->id,maTrk.primCan[j].glb_track_pointer->id_start_vertex);
+    // printf("glob j=%d x,y,z %f %f %f  trID=%d verID=%d\n",j, maTrk.primCan[j].x0,maTrk.primCan[j].y0,maTrk.primCan[j].z0,maTrk.primCan[j].glb_track_pointer->id,maTrk.primCan[j].glb_track_pointer->id_start_vertex);
       if(maTrk.primCan[j].glb_track_pointer->id_start_vertex>=10) continue; // already marked
       double dz=maTrk.primCan[j].z0 - XVertex.z();
       if(fabs(dz)>DVtxMax) continue; // too fare in Z
