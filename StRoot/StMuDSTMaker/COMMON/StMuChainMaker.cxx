@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.14 2003/01/22 13:49:12 laue Exp $
+ * $Id: StMuChainMaker.cxx,v 1.15 2003/03/06 01:34:18 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -169,11 +169,12 @@ void StMuChainMaker::add(string file) {
   /// if no entries in db, just add file
   DEBUGVALUE2(file.c_str());
 
-  int entries = 0;
+  int entries;
 
   // read number of events in file from db
   entries = mDbReader->entries(file.c_str());
 
+  entries = 10000;
   // if I can not read the number of events from db, open file and read number.
   if (entries==0) {
     TFile f1(file.c_str());
@@ -333,6 +334,10 @@ bool StMuChainMaker::pass(string file, string* filters) {
 /***************************************************************************
  *
  * $Log: StMuChainMaker.cxx,v $
+ * Revision 1.15  2003/03/06 01:34:18  laue
+ * StAddRunInfoMaker is a make helper maker to add the StRunInfo for the
+ * only year1 Au+Au 130GeV data
+ *
  * Revision 1.14  2003/01/22 13:49:12  laue
  * debug message removed
  *

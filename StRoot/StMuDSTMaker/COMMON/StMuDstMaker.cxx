@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.27 2003/02/20 15:29:42 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.28 2003/03/06 01:34:18 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -123,6 +123,8 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   
   for ( int i=0; i<__NARRAYS__; i++) { arrays[i]=0;} 
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) { strangeArrays[i]=0;}
+
+  setProbabilityPidFile();
 
   mEventCounter=0;
   mStMuDst = new StMuDst();
@@ -884,6 +886,10 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.28  2003/03/06 01:34:18  laue
+ * StAddRunInfoMaker is a make helper maker to add the StRunInfo for the
+ * only year1 Au+Au 130GeV data
+ *
  * Revision 1.27  2003/02/20 15:29:42  laue
  * StMuTriggerIdCollection added
  *
