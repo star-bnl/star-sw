@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.8 2001/04/23 19:24:31 porter Exp $
+ * $Id: StDbSql.cc,v 1.9 2001/07/23 16:39:30 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.9  2001/07/23 16:39:30  porter
+ * removed an extraneous "cout" left in by mistake
+ *
  * Revision 1.8  2001/04/23 19:24:31  porter
  * fixed row limit & initial buffer contents for query by where clause
  *
@@ -432,8 +435,8 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
      }
 
      int retRows=Db.NbRows();
-     cout<<"Number of Rows at start " << table->GetNRows()<<endl; 
-     cout<< " Number of Rows = "<<retRows<<endl;
+     //  cout<<"Number of Rows at start " << table->GetNRows()<<endl; 
+     // cout<< " Number of Rows = "<<retRows<<endl;
      if(retRows==0) continue;
 
      int* elements = new int[retRows];
