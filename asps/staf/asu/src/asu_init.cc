@@ -8,8 +8,8 @@
 //:HISTORY:	20nov95-v000a-cet- creation
 //:<--------------------------------------------------------------------
 
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 #include "asuAlloc.h"
 #include "asuLib.h"	/* Analysis Service Utilities */
 #include "emlLib.h"	/* Error Messaging & Logging */
@@ -29,7 +29,9 @@ extern "C" void staf_kuip_init_();
 //:<--------------------------------------------------------------------
 int asu_init()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("ASU:Initializing. ");
+#endif
 
    asuMallocInit();			/* initalize asuAlloc */
 
@@ -51,7 +53,9 @@ int asu_init()
 //:<--------------------------------------------------------------------
 int asu_start()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("ASU:Starting. ");
+#endif
 
    return TRUE;
 }
@@ -64,7 +68,9 @@ int asu_start()
 //:<--------------------------------------------------------------------
 int asu_stop()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("ASU:Stopping. ");
+#endif
 
    asuMallocStats();			/* show allocation stats */
    return TRUE;

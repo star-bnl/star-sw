@@ -29,7 +29,9 @@ extern CC_P void type_of_call eml_kuvec_init_();
 //:<--------------------------------------------------------------------
 int eml_init()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("EML:Initializing. ");
+#endif
 
 /*- Define the EML KUIP commands. -*/
 //   eml_def_();
@@ -55,7 +57,9 @@ int eml_init()
 //:<--------------------------------------------------------------------
 int eml_start()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("EML:Starting. ");
+#endif
 
    return TRUE;
 }
@@ -68,7 +72,9 @@ int eml_start()
 //:<--------------------------------------------------------------------
 int eml_stop()
 {
+#ifndef QUIET_ASP
    EML_MESSAGE("EML:Stopping. ");
+#endif
 
    return TRUE;
 }
