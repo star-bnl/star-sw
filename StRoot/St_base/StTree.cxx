@@ -10,6 +10,8 @@ const char* TFOPT[9] = {"0","READ","RECREATE","UPDATE",
 const char  RWU[] = "0rwu0rnu0rcu";
 char IOMODE[] = "0";
 
+Int_t StIO::fgDebug = 0;
+
 static inline Int_t IntOMode(char ciomode)
 {
 char *c=(char *)strchr(RWU,tolower(ciomode));
@@ -96,7 +98,9 @@ TObject *StIO::Read(TFile *file, const Char_t *name)
   }
   else key = (TKey*)gDirectory->GetListOfKeys()->FindObject(name);
 
-  if (!key)  { printf("<StIO::Read> Key %s not found\n",name); goto RETURN; }
+  if (!key) {
+    if(fgDebug) printf("<StIO::Read> Key %s not found\n",name);
+    goto RETURN; }
 
   if (name[0]!='*' && strcmp(key->GetClassName(),"StIOEvent"))
              { printf("<StIO::Read> Key %s has wrong className %s\n",
@@ -123,7 +127,7 @@ TObject *StIO::Read(TFile *file, const StUKey &ukey)
   return retn;
 }
 //_______________________________________________________________________________
-Int_t StIO::GetNextKey(TFile *file, StUKey &ukey)
+Int_t StIO::GetNextKey(TFile *file, StUKey &ukey,ULong_t &handle)
 {
   TObjLink *lnk; TList *lk; const char *kname; TObject *obj;
   enum { kSorted = 1};
@@ -134,14 +138,22 @@ Int_t StIO::GetNextKey(TFile *file, StUKey &ukey)
   int lname = strlen(ukey.GetName())+1;
 
   lk = file->GetListOfKeys();  if(!lk) return 1;
-  if (!lk->TestBit(kSorted)) {lk->Sort(); lk->SetBit(kSorted);}
+  if (!lk->TestBit(kSorted)) {lk->Sort(); lk->SetBit(kSorted);handle = 0;}
 
    // Find an object in this list using its name. Requires a sequential
    // scan till the object has been found. Returns 0 if object with specified
    // name is not found. This method overrides the generic FindObject()
    // of TCollection for efficiency reasons.
 
-  lnk = lk->FirstLink();
+  if (handle) {
+     lnk = (TObjLink*)handle;
+     handle = 0;
+     obj = lnk->GetObject();
+     if (strcmp(prevkey,obj->GetName())>0) lnk = lk->FirstLink();
+  } else {
+     lnk = lk->FirstLink();
+  }
+
   while (lnk) {
     obj = lnk->GetObject();
     kname = obj->GetName();
@@ -152,12 +164,13 @@ Int_t StIO::GetNextKey(TFile *file, StUKey &ukey)
   if (strncmp(prevkey,kname,lname)) lnk = 0;
   if (!lnk) return 1;
   ukey.SetKey(kname);
+  handle = (ULong_t)lnk;
   return 0;
 }
 //_______________________________________________________________________________
-TObject *StIO::ReadNext(TFile *file, StUKey &ukey)
+TObject *StIO::ReadNext(TFile *file, StUKey &ukey, ULong_t &handle)
 {
-  if(GetNextKey(file,ukey)) return 0;;
+  if(GetNextKey(file,ukey,handle)) return 0;;
   return Read(file,ukey);
 }
 //_______________________________________________________________________________
@@ -208,7 +221,7 @@ StBranch::StBranch(const Char_t *name, StTree *parent,Option_t *opt):TDataSet(na
 {
 
   SetTitle(".StBranch");
-  fNEvents=0;fUKey=name;fUKey=0;fIOMode=0;fTFile=0;fDebug=0;
+  fNEvents=0;fUKey=name;fUKey=0;fIOMode=0;fTFile=0;fDebug=0;fHandle=0;
   SetOption(opt);
 
 }
@@ -226,8 +239,10 @@ void StBranch::SetOption(Option_t *opt)
 //_______________________________________________________________________________
 void StBranch::SetIOMode(Option_t *iomode)
 {
+
 if (!iomode || !iomode[0]) return;
 fIOMode = ::IntOMode(iomode[0]);
+fHandle=0;
 }
 //_______________________________________________________________________________
 Option_t *StBranch::GetIOMode()
@@ -238,6 +253,7 @@ IOMODE[0]=0; if (fIOMode>0) IOMODE[0] = RWU[fIOMode]; return IOMODE;
 //_______________________________________________________________________________
 Int_t StBranch::SetFile(const Char_t *file,const Char_t *mode,int insist)
 {
+  fHandle=0;
   fIOMode = abs(fIOMode);
   if (fTFile && !insist) { Error("SetFile","File is already opened");return kStWarn;}
   if (file && file[0]) fFile=file;
@@ -247,6 +263,7 @@ Int_t StBranch::SetFile(const Char_t *file,const Char_t *mode,int insist)
 //_______________________________________________________________________________
 Int_t StBranch::UpdateFile(const Char_t *file)
 {
+fHandle=0;
 fIOMode = abs(fIOMode);
 TString bas[2],dir[2];
 TString nam(GetName()); nam.ReplaceAll("Branch","");
@@ -282,6 +299,7 @@ Int_t StBranch::SetTFile(TFile *tfile)
 {
   if (!tfile)           return 0;
   if (fTFile==tfile)    return 0;
+  fHandle=0;
   if (fTFile) Close();
   fTFile=0;
   SetFile(tfile->GetName());
@@ -292,6 +310,7 @@ Int_t StBranch::SetTFile(TFile *tfile)
 //_______________________________________________________________________________
 void StBranch::Close(const char *)
 {
+  fHandle=0;
   if (!fIOMode) return;
   if (!fTFile)  return;
   if (strncmp(".none",GetFile(),4)==0) return;
@@ -349,8 +368,15 @@ Int_t StBranch::WriteEvent(const StUKey &ukey)
 
   TList *savList = new TList;
   SetParAll(0,savList);
-  iret= StIO::Write(fTFile,fUKey,fList);
+  if (IsOption("const"))        {//Write constant branch (event independent)
+    StUKey uk(fUKey); uk = (UInt_t)(-2);
+    iret = StIO::Write(fTFile,uk,   fList);
+    fIOMode = -fIOMode;
+  } else {
+    iret = StIO::Write(fTFile,fUKey,fList);
+  }
   SetParAll(savList); delete savList;
+
   return 0;
 }
 
@@ -366,10 +392,9 @@ Int_t StBranch::GetEvent(Int_t mode)
   if (IsOption("const"))        {//Read constant branch (event independent)
     StUKey uk(fUKey); uk = (UInt_t)(-2);
     obj = StIO::Read (fTFile,uk);  fIOMode = -fIOMode;
-    if (!obj)                   return kStErr;}
 
-  else if (mode)                {//Read next
-    obj = StIO::ReadNext(fTFile,fUKey);
+  } else if (mode)                {//Read next
+    obj = StIO::ReadNext(fTFile,fUKey,fHandle);
 
   } else                        {//Read this one
     obj = StIO::Read    (fTFile,fUKey);
@@ -437,6 +462,7 @@ void StBranch::SetParAll(TList *savList)
 void StBranch::OpenTFile()
 {
   if (fTFile) return;
+  fHandle = 0;
   TFile *tf= gROOT->GetFile(GetFile());
   fTFile = tf;
   if (!fTFile) {
@@ -578,33 +604,61 @@ Int_t StTree::ReadEvent(const StUKey &ukey)
 }
 
 //_______________________________________________________________________________
+Int_t StTree::NextKey()
+{
+  if (Open()) return kStEOF;
+  TDataSetIter next(this); StBranch *br;
+  StUKey minKey = kUMAX;
+  StUKey tryKey;
+
+
+  while ((br=(StBranch*)next())) {
+    if (  br->fIOMode<0) 				continue;
+    if (! br->fIOMode&1) 				continue;
+    if (br->IsOption("const"))				continue;
+    tryKey.Update(fUKey,br->GetName());
+    if (StIO::GetNextKey(br->fTFile,tryKey,br->fHandle))continue;
+    tryKey = "";
+    if (tryKey.Compare(minKey)<0) minKey=tryKey;
+  }
+  fUKey = minKey;
+  return minKey.EOK() ? kStEOF:0;
+}
+//_____________________________________________________________________________
+Int_t StTree::Skip(int nskip)
+{  
+  for (; nskip; nskip--) 
+  {
+    int ret = NextKey(); 
+    if (ret) break;
+  }
+
+  return nskip;
+}
+//_______________________________________________________________________________
 Int_t StTree::NextEvent(StUKey  &ukey)
 {
   fUKey.Update(ukey,GetName());int iret=NextEvent(); ukey.Update(fUKey); return iret;
 }
-
 //_______________________________________________________________________________
 Int_t StTree::NextEvent()
 {
-  int iret=0;
-  int iakt=0;
-  if (Open()) return kStEOF;
-  TDataSetIter next(this); StBranch *br; int fst = 1;
+  int iret=0,iEOF=0,nAkt=0;
+  iEOF = NextKey();
+
+  TDataSetIter next(this); StBranch *br;
+
   while ((br=(StBranch*)next())) {
-    if (! br->fIOMode<0) continue;
-    if (! br->fIOMode&1) continue;
-    iakt++;  
-    if (fst && !br->IsOption("const")) {  //Read only 1st branch
-      iret = br->NextEvent(fUKey); 
-      if(iret) return iret;
-      fst=0;
-      continue;
-    }
+    if (  br->fIOMode<0) 		continue;
+    if (! br->fIOMode&1) 		continue;
+    if(iEOF && !br->IsOption("const"))	continue;
     iret = br->ReadEvent(fUKey);
     if (iret==kStErr) return iret;
+    if (iret)				continue;
+    nAkt++;
   }
   
-  return (iakt) ? 0:kStEOF;
+  return (nAkt) ? 0:kStEOF;
 }
 
 //_______________________________________________________________________________

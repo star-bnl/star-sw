@@ -22,11 +22,13 @@ class StIO
  static Int_t    Write    (TFile *file, const StUKey &ukey, TObject  *obj);
  static TObject *Read     (TFile *file, const Char_t *name);
  static TObject *Read     (TFile *file, const StUKey &ukey);
- static Int_t   GetNextKey(TFile *file,       StUKey &ukey);
- static TObject *ReadNext (TFile *file,       StUKey &ukey);
+ static Int_t   GetNextKey(TFile *file,       StUKey &ukey, ULong_t &handle);
+ static TObject *ReadNext (TFile *file,       StUKey &ukey, ULong_t &handle);
  static TString  RFIOName (const char *name);
  static TFile   *Open     (const char *name, Option_t *option="",const char *title="",Int_t compress=1);
  static Int_t    IfExi(const char *file);
+ static void    SetDebug(Int_t dblev=1){fgDebug=dblev;}
+ static Int_t   fgDebug;
 };
 
 class StTree;
@@ -74,6 +76,7 @@ protected:
   TString fOption;		//  Option string
   TFile   *fTFile;		//! Opened TFile
   Int_t   fDebug;		//! debug level
+  ULong_t fHandle;              //!
 ClassDef(StBranch,1)
 };  
 
@@ -87,6 +90,8 @@ public:
   virtual Int_t ReadEvent (const StUKey &ukey);
   virtual Int_t NextEvent (      StUKey &ukey);
   virtual Int_t NextEvent ();
+          Int_t NextKey();
+          Int_t Skip(int nskip);
   virtual Int_t WriteEvent(const StUKey &ukey);
   virtual void  Close(const char *opt=0);
   virtual Int_t Open();
