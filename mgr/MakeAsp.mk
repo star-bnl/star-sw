@@ -377,26 +377,26 @@ $(DEP_DIR)/%.d:  %.F
 	$(RM)  $(ALL_TAGS)
 	$(GCC)  -MM -MG -nostdinc -w -traditional $(CPPFLAGS) $(INCLUDES) -x c $(ALL_DEPS) | sed -e 's/\.F\.o/.o/' > $(ALL_TAGS)
 
-$(DEP_DIR)/%.d:  $(IDL_DIR)/%.idl
-	$(RM)  $(ALL_TAGS)
-	$(STIC)  -M   $(ALL_DEPS)  | sed -e '1d' > $(ALL_TAGS)
-
-$(INC_GEN_DIR)/%.h:  %.idl
-	cd $(INC_GEN_DIR) ; cp $(1ST_DEPS) .;\
-	$(STIC)  -f $(INCLUDES)   $(1ST_DEPS)  
-
-
-
-
-$(DEP_DIR)/%.didlm : $(IDM_DIR)%.$(SUFF_IDM) 
-	cd $(GEN_DIR); $(STIC) $(STICFLAGS) $(SRC_DIR)/$(STEM).idlm; \
-        $(GCC)  $(MKDEPFLAGS) $(STICFLAGS) $(SRC_DIR)/$(STEM).idlm | \
-        sed -e 's/.idlm.o/.didlm/g' > $(GEN_DIR)/$(STEM).didlm
-	$(STIC) -M  $(STICFLAGS) $(SRC_DIR)/$(STEM).idlm | grep ":" >> $(GEN_DIR)/$(STEM).didlm
-#       temporarly, until stic is fixed:
-	@sed -e 's/broker->newInvoker(\(.*\),/broker->deleteInvoker(\1); broker->newInvoker(\1,/' \
-                $(GEN_DIR)/$(STEM)_i.cc > temp
-	@mv  -f temp $(GEN_DIR)/$(STEM)_i.cc
+#$(DEP_DIR)/%.d:  $(IDL_DIR)/%.idl
+#	$(RM)  $(ALL_TAGS)
+#	$(STIC)  -M   $(ALL_DEPS)  | sed -e '1d' > $(ALL_TAGS)
+#
+#$(INC_GEN_DIR)/%.h:  %.idl
+#	cd $(INC_GEN_DIR) ; cp $(1ST_DEPS) .;\
+#	$(STIC)  -f $(INCLUDES)   $(1ST_DEPS)  
+#
+#
+#
+#
+#$(DEP_DIR)/%.didlm : $(IDM_DIR)%.$(SUFF_IDM) 
+#	cd $(GEN_DIR); $(STIC) $(STICFLAGS) $(SRC_DIR)/$(STEM).idlm; \
+#        $(GCC)  $(MKDEPFLAGS) $(STICFLAGS) $(SRC_DIR)/$(STEM).idlm | \
+#        sed -e 's/.idlm.o/.didlm/g' > $(GEN_DIR)/$(STEM).didlm
+#	$(STIC) -M  $(STICFLAGS) $(SRC_DIR)/$(STEM).idlm | grep ":" >> $(GEN_DIR)/$(STEM).didlm
+##       temporarly, until stic is fixed:
+#	@sed -e 's/broker->newInvoker(\(.*\),/broker->deleteInvoker(\1); broker->newInvoker(\1,/' \
+#                $(GEN_DIR)/$(STEM)_i.cc > temp
+#	@mv  -f temp $(GEN_DIR)/$(STEM)_i.cc
 
 
 DeleteDirs :
