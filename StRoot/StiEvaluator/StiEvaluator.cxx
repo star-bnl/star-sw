@@ -8,6 +8,11 @@
 // and both charge signs
 // 
 // $Log: StiEvaluator.cxx,v $
+// Revision 1.38  2003/11/20 22:58:10  calderon
+// Move inline functions to header file.
+// Initialize minimcevent pointer to zero in constructor of StiEvaluator.  Otherwise
+// we can't set the branch address properly and the code breaks.
+//
 // Revision 1.37  2003/09/02 17:59:47  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -38,6 +43,7 @@ StiEvaluator::StiEvaluator() :
     // These values should be given in the macro, so set
     // the default values to something unusable, following the golden
     // rule: setting default values to something sensible is akin to sabotage.
+    minimcevent(0),
     mFitPtsLimit(99),
     mDcaLimit(99),
     mGeantId(9999),
