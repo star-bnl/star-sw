@@ -1,5 +1,8 @@
-// $Id: StEventMaker.cxx,v 1.9 1999/06/27 22:45:28 fisyak Exp $
+// $Id: StEventMaker.cxx,v 1.10 1999/07/09 01:17:54 fisyak Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.10  1999/07/09 01:17:54  fisyak
+// clean up
+//
 // Revision 1.9  1999/06/27 22:45:28  fisyak
 // Merge StRootEvent and StEvent
 //
@@ -108,8 +111,11 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-// $Id: StEventMaker.cxx,v 1.9 1999/06/27 22:45:28 fisyak Exp $
+// $Id: StEventMaker.cxx,v 1.10 1999/07/09 01:17:54 fisyak Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.10  1999/07/09 01:17:54  fisyak
+// clean up
+//
 // Revision 1.9  1999/06/27 22:45:28  fisyak
 // Merge StRootEvent and StEvent
 //
@@ -229,7 +235,7 @@
 #endif
 #include "StEventMaker/StRootEventManager.hh"
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.9 1999/06/27 22:45:28 fisyak Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.10 1999/07/09 01:17:54 fisyak Exp $";
 #include "StEventManager.hh"
  * Revision 2.23  2000/05/22 21:53:41  ullrich
 const long detid_tpc = 1;
@@ -287,7 +293,7 @@ Int_t StEventMaker::Make(){
   int i;
 
   status = theEventManager->openEvent("dst");
-
+  if (!status) return kStOK; 
   dstRunHeader = theEventManager->returnTable_dst_run_header (nrows);
   if (!dstRunHeader) dstRunHeader = defRunHeader;
 
@@ -726,7 +732,7 @@ void StEventMaker::setEventManager(StEventManager* mgr)
 //_____________________________________________________________________________
 void StEventMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StEventMaker.cxx,v 1.9 1999/06/27 22:45:28 fisyak Exp $\n");
+  printf("* $Id: StEventMaker.cxx,v 1.10 1999/07/09 01:17:54 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
