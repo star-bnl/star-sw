@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.14 1999/12/15 18:31:05 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.15 1999/12/15 20:32:17 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.15  1999/12/15 20:32:17  kathy
+// separated the tpc and tpc+svt histograms for globtrk table; had to book and fill new histograms, add histograms to default logy list AND had to change what values of iflag I cut on for filling each different type of track in makehistglob method
+//
 // Revision 1.14  1999/12/15 18:31:05  kathy
 // added 4 new histogram to globtrk for tpc - r0,phi0,z0,curvature; also put 3 of these in default logY list; also changed scale on iflag hist. for globtrk & primtrk
 //
@@ -493,6 +496,28 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "TabQaGtrkThetaT",
  "TabQaGtrkEtaT",
  "TabQaGtrkLengthT",
+ "TabQaGtrkXf0TS",
+ "TabQaGtrkYf0TS",
+ "TabQaGtrkZf0TS",
+ "TabQaGtrkImpactTS",
+ "TabQaGtrkNPntTS",
+ "TabQaGtrkNPntMaxTS",
+ "TabQaGtrkNPntFitTS",
+ "TabQaGtrkPtTS",
+ "TabQaGtrkPTS",
+ "TabQaGtrkR0TS",
+ "TabQaGtrkZ0TS",
+ "TabQaGtrkCurvTS",
+ "TabQaGtrkXfTS",
+ "TabQaGtrkYfTS",
+ "TabQaGtrkZfTS",
+ "TabQaGtrkRTS",
+ "TabQaGtrkRnfTS",
+ "TabQaGtrkRnmTS",
+ "TabQaGtrkTanlTS",
+ "TabQaGtrkThetaTS",
+ "TabQaGtrkEtaTS",
+ "TabQaGtrkLengthTS",
  "TabQaGtrkNPntFE",
  "TabQaGtrkNPntMaxFE",
  "TabQaGtrkNPntFitFE",

@@ -1,5 +1,8 @@
-//! $Id: StQABookHist.h,v 1.11 1999/12/15 18:31:05 kathy Exp $ 
+//! $Id: StQABookHist.h,v 1.12 1999/12/15 20:32:17 kathy Exp $ 
 //! $Log: StQABookHist.h,v $
+//! Revision 1.12  1999/12/15 20:32:17  kathy
+//! separated the tpc and tpc+svt histograms for globtrk table; had to book and fill new histograms, add histograms to default logy list AND had to change what values of iflag I cut on for filling each different type of track in makehistglob method
+//!
 //! Revision 1.11  1999/12/15 18:31:05  kathy
 //! added 4 new histogram to globtrk for tpc - r0,phi0,z0,curvature; also put 3 of these in default logY list; also changed scale on iflag hist. for globtrk & primtrk
 //!
@@ -50,7 +53,7 @@ class TH2F;
 class StQABookHist : public StMaker {
  public:
 
-//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.11 1999/12/15 18:31:05 kathy Exp $";
+//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.12 1999/12/15 20:32:17 kathy Exp $";
 
 //! Histograms booking constants
   static const Int_t nxpT;
@@ -116,21 +119,22 @@ class StQABookHist : public StMaker {
   TH1F     *m_glb_trk_plusminus;  //! # trks pos/neg. 
   TH1F     *m_glb_trk_prim;       //! # trks from primaries
   TH1F     *m_vert_total;         //! total number of vertices
-  //  TH1F     *m_vert_V0;            //! number of V0 vertices
-  TH1F     *m_mean_pt;       //! mean pt value
-  TH1F     *m_mean_eta;      //! mean eta value 
-  TH1F     *m_rms_eta;       //! rms eta value 
-  //  TH1F     *m_T_average;     //! mean Temp
-  TH1F     *m_prim_vrtx0;    //! primary vrtx x position
-  TH1F     *m_prim_vrtx1;    //! primary vrtx y position
-  TH1F     *m_prim_vrtx2;    //! primary vrtx z position
-  //  TH1F     *m_vrtx_chisq;    //! primary vrtx chisq
+  //  TH1F     *m_vert_V0;        //! number of V0 vertices
+  TH1F     *m_mean_pt;            //! mean pt value
+  TH1F     *m_mean_eta;           //! mean eta value 
+  TH1F     *m_rms_eta;            //! rms eta value 
+  //  TH1F     *m_T_average;      //! mean Temp
+  TH1F     *m_prim_vrtx0;         //! primary vrtx x position
+  TH1F     *m_prim_vrtx1;         //! primary vrtx y position
+  TH1F     *m_prim_vrtx2;         //! primary vrtx z position
+  //  TH1F     *m_vrtx_chisq;     //! primary vrtx chisq
   
   // for method MakeGlob - from table globtrk
   TH1F     *m_globtrk_tot;   //! # tracks in table
   TH1F     *m_globtrk_good;  //! # tracks in table with iflag>0 
   TH1F     *m_globtrk_iflag; //! iflag value
   TH1F     *m_det_id;        //! detector id of track
+
   TH1F     *m_pointT;        //! number of points on the track - tpc
   TH1F     *m_pointFE;       //! number of points on the track - ftpc east
   TH1F     *m_pointFW;       //! number of points on the track - ftpc west
@@ -193,14 +197,44 @@ class StQABookHist : public StMaker {
   TH1F     *m_chisq1FW;      //! chi square [1], ftpc west
   TH1F     *m_glb_impactT;   //! impact parameter from primary vertex, tpc
 
+// TPC + SVT HISTOGRAMS - 1D
+  TH1F     *m_pointTS;        //! number of points on the track - tpc+svt
+  TH1F     *m_max_pointTS;    //! number of max possible track points - tpc+svt
+  TH1F     *m_fit_pointTS;    //! number of track points used for fitting - tpc+svt
+  TH1F     *m_glb_ratioTS;    //! ratio of n fit pnts over tot n pnts - tpc+svt
+  TH1F     *m_glb_ratiomTS;   //! ratio of n fit pnts over max n pnts - tpc+svt
+  TH1F     *m_glb_chargeTS;   //! particle charge in units of |e| - tpc+svt
+  TH1F     *m_glb_r0TS;       //! radius at start (cm), tpc+svt
+  TH1F     *m_glb_phi0TS;     //! azimuthal angle at start (deg), tpc+svt
+  TH1F     *m_glb_z0TS;       //! z-coord at start (cm), tpc+svt
+  TH1F     *m_glb_curvTS;     //! curvature (1/cm), tpc+svt
+  TH1F     *m_glb_xfTS;       //! x-coord. of first hit on trk, tpc+svt
+  TH1F     *m_glb_yfTS;       //! y-coord. of first hit on trk, tpc+svt
+  TH1F     *m_glb_zfTS;       //! z-coord. of first hit on trk, tpc+svt
+  TH1F     *m_glb_xf0TS;       //! x-coord. of first hit - at start of helix+svt
+  TH1F     *m_glb_yf0TS;       //! y-coord. of first hit - at start of helix+svt
+  TH1F     *m_glb_zf0TS;       //! z-coord. of first hit - at start of helix+svt
+  TH1F     *m_glb_radfTS;     //! radial (xy) coordinate of first hit, tpc+svt
+  TH1F     *m_psiTS;          //! psi reconstructed, tpc+svt
+  TH1F     *m_tanlTS;         //! tan(dip) =pz/pt at start, tpc+svt
+  TH1F     *m_glb_thetaTS;    //! theta - tpc+svt
+  TH1F     *m_etaTS;          //! eta, tpc+svt
+  TH1F     *m_momTS;          //! momentum, tpc+svt
+  TH1F     *m_pTTS;           //! pT, tpc+svt
+  TH1F     *m_lengthTS;       //! length of track, tpc+svt
+  TH1F     *m_chisq0TS;       //! chi square [0], tpc+svt
+  TH1F     *m_chisq1TS;       //! chi square [1], tpc+svt
+  TH1F     *m_glb_impactTS;   //! impact parameter from primary vertex, tpc+svt
+
+
   TH2F     *m_pT_eta_recT;     //! pT versus eta, tpc
   TH2F     *m_pT_eta_recFE;    //! pT versus eta, ftpcE
   TH2F     *m_pT_eta_recFW;    //! pT versus eta, ftpcW
   TH2F     *m_globtrk_xf_yfT;  //! Y vs X of first hit on trk, tpc
   TH2F     *m_globtrk_xf_yfFE; //! Y vs X of first hit on trk, ftpc east
   TH2F     *m_globtrk_xf_yfFW; //! Y vs X of first hit on trk, ftpc west
-  TH2F     *m_tanl_zfT;        //! tanl(dip angle) vs zfirst
-  TH2F     *m_mom_trklengthT;  //! mom vs. trk length
+  TH2F     *m_tanl_zfT;        //! tanl(dip angle) vs zfirst, tpc
+  TH2F     *m_mom_trklengthT;  //! mom vs. trk length, tpc
   TH2F     *m_eta_trklengthT;  //! trk length vs. eta, tpc
   TH2F     *m_eta_trklengthFE; //! trk length vs. eta, ftpc east
   TH2F     *m_eta_trklengthFW; //! trk length vs. eta, ftpc west
@@ -220,6 +254,25 @@ class StQABookHist : public StMaker {
   TH2F     *m_chisq1_zfT;      //! chisq1 vs zfirst, tpc 
   TH2F     *m_nfptonpt_momT;   //! mom vs ratio of n fit pnts over n pnts, tpc
   TH2F     *m_nfptonpt_etaT;   //! eta vs ratio of n fit pnts over n pnts, tpc
+
+// TPC + SVT HISTOGRAMS - 2D
+  TH2F     *m_pT_eta_recTS;     //! pT versus eta, tpc+svt
+  TH2F     *m_globtrk_xf_yfTS;  //! Y vs X of first hit on trk, tpc+svt
+  TH2F     *m_tanl_zfTS;        //! tanl(dip angle) vs zfirst, tpc+svt
+  TH2F     *m_mom_trklengthTS;  //! mom vs. trk length, tpc+svt
+  TH2F     *m_eta_trklengthTS;  //! trk length vs. eta, tpc+svt
+  TH2F     *m_fpoint_lengthTS;  //! num fit points vs length, tpc+svt
+  TH2F     *m_npoint_lengthTS;  //! tot num points vs length, tpc+svt
+  TH2F     *m_chisq0_momTS;     //! chisq0 vs momentum, tpc+svt
+  TH2F     *m_chisq1_momTS;     //! chisq1 vs momentum, tpc+svt
+  TH2F     *m_chisq0_etaTS;     //! chisq0 vs eta, tpc+svt
+  TH2F     *m_chisq1_etaTS;     //! chisq1 vs eta, tpc+svt
+  TH2F     *m_chisq0_dipTS;     //! chisq0 vs dip angle, tpc+svt
+  TH2F     *m_chisq1_dipTS;     //! chisq1 vs dip angle, tpc+svt
+  TH2F     *m_chisq0_zfTS;      //! chisq0 vs zfirst, tpc+svt
+  TH2F     *m_chisq1_zfTS;      //! chisq1 vs zfirst, tpc+svt
+  TH2F     *m_nfptonpt_momTS;   //! mom vs ratio of n fit pnts over n pnts, tpc+svt
+  TH2F     *m_nfptonpt_etaTS;   //! eta vs ratio of n fit pnts over n pnts, tpc+svt
 
   
 // for method MakeDE - from table dst_dedx
@@ -405,7 +458,7 @@ class StQABookHist : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.11 1999/12/15 18:31:05 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.12 1999/12/15 20:32:17 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StQABookHist, 1)   //needed for all code that will be used in CINT
     };

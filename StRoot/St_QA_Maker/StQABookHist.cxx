@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.16 1999/12/15 18:31:05 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.17 1999/12/15 20:32:17 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.17  1999/12/15 20:32:17  kathy
+// separated the tpc and tpc+svt histograms for globtrk table; had to book and fill new histograms, add histograms to default logy list AND had to change what values of iflag I cut on for filling each different type of track in makehistglob method
+//
 // Revision 1.16  1999/12/15 18:31:05  kathy
 // added 4 new histogram to globtrk for tpc - r0,phi0,z0,curvature; also put 3 of these in default logY list; also changed scale on iflag hist. for globtrk & primtrk
 //
@@ -208,6 +211,34 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_chisq1FW=0;     
   m_glb_impactT=0; 
 
+  m_pointTS=0;        
+  m_max_pointTS=0;    
+  m_fit_pointTS=0;    
+  m_glb_ratioTS=0;    
+  m_glb_ratiomTS=0;   
+  m_glb_chargeTS=0;   
+  m_glb_r0TS=0;       
+  m_glb_phi0TS=0;     
+  m_glb_z0TS=0;       
+  m_glb_curvTS=0;     
+  m_glb_xfTS=0;       
+  m_glb_yfTS=0;       
+  m_glb_zfTS=0;       
+  m_glb_xf0TS=0;      
+  m_glb_yf0TS=0;      
+  m_glb_zf0TS=0;      
+  m_glb_radfTS=0;     
+  m_psiTS=0;          
+  m_tanlTS=0;         
+  m_glb_thetaTS=0;    
+  m_etaTS=0;          
+  m_momTS=0;          
+  m_pTTS=0;           
+  m_lengthTS=0;       
+  m_chisq0TS=0;       
+  m_chisq1TS=0;       
+  m_glb_impactTS=0;   
+
   m_pT_eta_recT = 0;
   m_pT_eta_recFE = 0;
   m_pT_eta_recFW = 0;
@@ -235,6 +266,24 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_chisq1_zfT = 0;
   m_nfptonpt_momT = 0;
   m_nfptonpt_etaT = 0;
+
+  m_pT_eta_recTS= 0;
+  m_globtrk_xf_yfTS = 0;
+  m_tanl_zfTS  = 0;
+  m_mom_trklengthTS = 0;
+  m_eta_trklengthTS = 0;
+  m_npoint_lengthTS = 0;	
+  m_fpoint_lengthTS = 0;
+  m_chisq0_momTS = 0;
+  m_chisq1_momTS = 0;
+  m_chisq0_etaTS = 0;
+  m_chisq1_etaTS = 0;
+  m_chisq0_dipTS = 0;
+  m_chisq1_dipTS = 0;
+  m_chisq0_zfTS = 0;
+  m_chisq1_zfTS = 0;
+  m_nfptonpt_momTS = 0;
+  m_nfptonpt_etaTS = 0;
 
   
 // for method MakeDE - from table dst_dedx
@@ -596,6 +645,113 @@ void StQABookHist::BookHistGlob(){
   m_nfptonpt_etaT = QAH2F("QaGtrkRPntEtaT","globtrk: ratio Nfitpnt,Npnt vs Eta, tpc",40,-2.,2.,50,0.,1.2005); 
      m_nfptonpt_etaT->SetXTitle("eta");
      m_nfptonpt_etaT->SetYTitle("Ratio Nfitpnt/Npnt");
+
+
+// 1D tpc + silicon (svt+ssd)
+
+  m_pointTS      = QAH1F("QaGtrkNPntTS",   "globtrk: N points on trk,tpc+svt", 50, 0.,10000.);
+  m_max_pointTS  = QAH1F("QaGtrkNPntMaxTS","globtrk: N max pnts on trk, tpc+svt", 50, 0.,100.);
+  m_fit_pointTS  = QAH1F("QaGtrkNPntFitTS","globtrk: N fit pnts on trk, tpc+svt", 50, 0.,50.);
+  m_glb_ratioTS  = QAH1F("QaGtrkRnfTS",    "globtrk: ratio Nfit/tot pnt, tpc+svt", 55, 0., 1.1);
+  m_glb_ratiomTS = QAH1F("QaGtrkRnmTS",    "globtrk: ratio Nfit/max pnt, tpc+svt", 55, 0., 1.1);
+  m_glb_chargeTS = QAH1F("QaGtrkChrgTS",   "globtrk: charge, tpc+svt ", 20,-2.,2.);
+  m_glb_r0TS     = QAH1F("QaGtrkR0TS",     "globtrk: radius at start (cm), tpc+svt", 50,0.,500.);
+  m_glb_phi0TS   = QAH1F("QaGtrkPhi0TS",   "globtrk: azimuth ang at start (deg), tpc+svt", 36,0.,360.);
+  m_glb_z0TS     = QAH1F("QaGtrkZ0TS",     "globtrk: z-coord at start (cm), tpc+svt", 50, -300.,300.);
+  m_glb_curvTS   = QAH1F("QaGtrkCurvTS",   "globtrk: curvature (1/cm), tpc+svt", 50,0.,.1);
+  m_glb_xfTS     = QAH1F("QaGtrkXfTS",     "globtrk: x of first hit on trk, tpc+svt", 50,-200.,200.);
+  m_glb_xf0TS    = QAH1F("QaGtrkXf0TS",    "globtrk: x of first hit - on helix at start, tpc+svt",50,-5.,5.);
+  m_glb_yfTS     = QAH1F("QaGtrkYfTS",     "globtrk: y of first hit on trk, tpc+svt", 50,-200.,200.);
+  m_glb_yf0TS    = QAH1F("QaGtrkTf0TS",    "globtrk: y of first hit - on helix at start, tpc+svt",50,-5.,5.);
+  m_glb_zfTS     = QAH1F("QaGtrkZfTS",     "globtrk: z of first hit on trk, tpc+svt", 50,-300.,300.);
+  m_glb_zf0TS    = QAH1F("QaGtrkZf0TS",    "globtrk: z of first hit - on helix at start, tpc+svt",50,-5.,5.);
+  m_glb_radfTS   = QAH1F("QaGtrkRTS",      "globtrk: radial position of first hit, tpc+svt", 50,0.,200.);
+  m_lengthTS     = QAH1F("QaGtrkLengthTS", "globtrk: track length, tpc+svt", 50,0.,300.);
+  m_psiTS        = QAH1F("QaGtrkPsiTS",    "globtrk: psi, tpc+svt", 36, 0.,360.);
+  m_tanlTS       = QAH1F("QaGtrkTanlTS",   "globtrk: tanl, tpc+svt",32,-4.,4.);
+  m_glb_thetaTS  = QAH1F("QaGtrkThetaTS",  "globtrk: theta, tpc+svt",20,0.,4.);
+  m_etaTS        = QAH1F("QaGtrkEtaTS",    "globtrk: eta, tpc+svt",60,-6.,6.);
+  m_pTTS         = QAH1F("QaGtrkPtTS",     "globtrk: pT, tpc+svt",50,0.,5.);
+  m_momTS        = QAH1F("QaGtrkPTS",      "globtrk: momentum, tpc+svt",50,0.,5.);
+  m_chisq0TS     = QAH1F("QaGtrkChisq0TS", "globtrk: chisq0 - xy, tpc+svt", 50, 0.,15.);
+  m_chisq1TS     = QAH1F("QaGtrkChisq1TS", "globtrk: chisq1 - z, tpc+svt", 50, 0.,15.);
+  m_glb_impactTS = QAH1F("QaGtrkImpactTS", "globtrk: impact param from prim vtx, tpc+svt", 50,0.,500.);
+
+
+// 2D - tpc + sillicon (svt + ssd)
+
+  m_pT_eta_recTS = QAH2F("QaGtrkPtVsEtaTS","globtrk: log pT versus eta, tpc", 20,-2.,2.,40,1.,4.);
+    m_pT_eta_recTS->SetXTitle("eta");
+    m_pT_eta_recTS->SetYTitle(" log pT (MeV)");
+
+  m_globtrk_xf_yfTS = QAH2F("QaGtrkXfYfTS",  "globtrk: Y vs X of first hit on trk, tpc", 40,-200.,200.,40,-200.,200.);
+    m_globtrk_xf_yfTS->SetXTitle("x first");
+    m_globtrk_xf_yfTS->SetYTitle("y first");
+
+
+  m_tanl_zfTS = QAH2F("QaGtrkTanlzfTS","globtrk: tanl(dip) versus zfirst, tpc",50,-250.,250.,60,-3.,3.);
+    m_tanl_zfTS->SetXTitle("zfirst");
+    m_tanl_zfTS->SetYTitle("tanl");
+
+  m_mom_trklengthTS = QAH2F("QaGtrkPVsTrkLTS","globtrk: log mom vs trk length, tpc",
+			     50,0.,250.,40,1.,4.);
+    m_mom_trklengthTS->SetXTitle("trk length");  
+    m_mom_trklengthTS->SetYTitle("log P (MeV)");
+
+  m_eta_trklengthTS = QAH2F("QaGtrkLVEtaTS","globtrk: trk length vs eta, tpc",
+			     20,-2.,2.,50,0.,250.);
+    m_eta_trklengthTS->SetXTitle("eta");
+    m_eta_trklengthTS->SetYTitle("length");
+
+  m_npoint_lengthTS = QAH2F("QaGtrkNPntLTS","globtrk: N pnts vs length, tpc",
+			     25,0.,250.,25,0.,50.);
+    m_npoint_lengthTS->SetXTitle("trk length");
+    m_npoint_lengthTS->SetYTitle("Npoints on trk");
+
+  m_fpoint_lengthTS = QAH2F("QaGtrkFitPntLTS","globtrk: N fit pnts vs length, tpc",
+			     25,0.,250.,25,0.,50.);
+    m_fpoint_lengthTS->SetXTitle("trk length");
+    m_fpoint_lengthTS->SetYTitle("Npoints on trk");
+
+  m_chisq0_momTS = QAH2F("QaGtrkChi0MomTS","globtrk: Chisq0 vs log mom, tpc",40,1.,4.,50,0.,10.);
+    m_chisq0_momTS->SetXTitle("log P (MeV)");
+    m_chisq0_momTS->SetYTitle("chisq0") ;
+
+  m_chisq1_momTS = QAH2F("QaGtrkChi1MomTS","globtrk: Chisq1 vs log mom, tpc",40,1.,4.,50,0.,10.);
+    m_chisq1_momTS->SetXTitle("log P (MeV)");
+    m_chisq1_momTS->SetYTitle("chisq1");
+
+  m_chisq0_etaTS = QAH2F("QaGtrkChi0EtaTS","globtrk: Chisq0 vs eta, tpc",20,-2.,2.,20,0.,10.);
+    m_chisq0_etaTS->SetXTitle("eta");
+    m_chisq0_etaTS->SetYTitle("chisq0");
+
+  m_chisq1_etaTS = QAH2F("QaGtrkChi1EtaTS","globtrk: Chisq1 vs eta, tpc",20,-2.,2.,20,0.,10.);
+    m_chisq1_etaTS->SetXTitle("eta");
+    m_chisq1_etaTS->SetYTitle("chisq1");
+
+  m_chisq0_dipTS = QAH2F("QaGtrkChi0TanlTS","globtrk: Chisq0 vs tanl(dip), tpc",20,-5.,5.,20,0.,10.);
+    m_chisq0_dipTS->SetXTitle("dip angle");
+    m_chisq0_dipTS->SetYTitle("chisq0");
+
+  m_chisq1_dipTS = QAH2F("QaGtrkChi1TanlTS","globtrk: Chisq1 vs tanl(dip), tpc",20,-5.,5.,20,0.,10.);
+    m_chisq1_dipTS->SetXTitle("dip angle");
+    m_chisq1_dipTS->SetYTitle("chisq1");
+
+  m_chisq0_zfTS = QAH2F("QaGtrkChi0zfTS","globtrk: Chisq0 vs zfirst, tpc",20,-250.,250.,20,0.,10.);
+    m_chisq0_zfTS->SetXTitle("zfirst");
+    m_chisq0_zfTS->SetYTitle("chisq0");
+
+  m_chisq1_zfTS = QAH2F("QaGtrkChi1zfT","globtrk: Chisq1 vs zfirst, tpc",20,-250.,250.,20,0.,10.);
+    m_chisq1_zfTS->SetXTitle("zfirst");
+    m_chisq1_zfTS->SetYTitle("chisq1");
+
+  m_nfptonpt_momTS = QAH2F("QaGtrkRPntMomTS","globtrk: ratio Nfitpnt,Npnt vs log mom., tpc",40,1.,4.,50,0.,1.2005); 
+     m_nfptonpt_momTS->SetXTitle("log P (MeV)");
+     m_nfptonpt_momTS->SetYTitle("Ratio Nfitpnt/Npnt");
+
+  m_nfptonpt_etaTS = QAH2F("QaGtrkRPntEtaTS","globtrk: ratio Nfitpnt,Npnt vs Eta, tpc",40,-2.,2.,50,0.,1.2005); 
+     m_nfptonpt_etaTS->SetXTitle("eta");
+     m_nfptonpt_etaTS->SetYTitle("Ratio Nfitpnt/Npnt");
 
 
 // 1D ftpc
