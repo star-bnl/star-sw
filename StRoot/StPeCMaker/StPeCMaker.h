@@ -1,8 +1,8 @@
-// $Id: StPeCMaker.h,v 1.4 1999/09/24 01:23:19 fisyak Exp $
+// $Id: StPeCMaker.h,v 1.5 2000/01/20 23:03:15 nystrand Exp $
 //
 // $Log: StPeCMaker.h,v $
-// Revision 1.4  1999/09/24 01:23:19  fisyak
-// Reduced Include Path
+// Revision 1.5  2000/01/20 23:03:15  nystrand
+// First Version of StPeCMaker with new StEvent
 //
 // Revision 1.3  1999/07/15 13:57:21  perev
 // cleanup
@@ -37,7 +37,6 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 #include "StMaker.h"
-#include "HighPtTag.h"
 #include "TH1.h"
 
 class StEvent;
@@ -47,14 +46,10 @@ class TH1F;
 class StPeCMaker : public StMaker {
 
 private:
-  Bool_t drawinit;
-  Char_t collectionName[256];
 
   // Maker generates a tag
-  HighPtTag_st* theTag; //!
   void  GetMwcHits(StEvent& event);// MWC Hits
   void  GetCtbHits(StEvent& event);// CTB Hits
-  void  FindVertex(StEvent& event);// Vertex
 
 protected:
   TH1F *m_hstat;
@@ -75,18 +70,18 @@ public:
 
   StPeCMaker(const Char_t *name="analysis", const Char_t *title="analysis");
   virtual ~StPeCMaker();
-  virtual void Clear(Option_t *option="");
   virtual Int_t Init();
   virtual Int_t  Make();
   virtual Int_t  Finish();
 
-  // Tag accessor
-  HighPtTag_st* tag() {return theTag;};
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.4 1999/09/24 01:23:19 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.5 2000/01/20 23:03:15 nystrand Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StPeCMaker, 1)
 };
 
 #endif
+
+
+
