@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 2.6 2001/02/07 16:06:38 lasiuk Exp $
+ * $Id: StRchMaker.cxx,v 2.7 2001/09/27 00:53:54 perev Exp $
  *
  * Author:  bl
  ***************************************************************************
@@ -849,7 +849,7 @@ void StRchMaker::fillStEvent()
     // Pass the collection via the data set now as well
     // This should be removed at a later date
     //
-    AddData(new St_ObjectSet("StRichEvent", richCollection));
+    AddData(new St_ObjectSet("StRichEvent", richCollection,0));
 
     StRichSoftwareMonitor* theMonitor = mEvent->softwareMonitor()->rich();
     if(theMonitor) {
@@ -868,7 +868,7 @@ void StRchMaker::fillStEvent()
 void StRchMaker::PrintInfo() 
 {
     printf("**************************************************************\n");
-    printf("* $Id: StRchMaker.cxx,v 2.6 2001/02/07 16:06:38 lasiuk Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 2.7 2001/09/27 00:53:54 perev Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 }
@@ -913,6 +913,9 @@ void StRchMaker::clearPadMonitor(){
 /****************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
+ * Revision 2.7  2001/09/27 00:53:54  perev
+ * TObjectSet is not an owner
+ *
  * Revision 2.6  2001/02/07 16:06:38  lasiuk
  * adc decoder modified for 11bit check
  * this-> for internal calls
