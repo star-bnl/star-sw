@@ -10,11 +10,11 @@
 
  struct event_header  {
   char   event_type[40];    /* Event type: collision, cosmic, lasers...    */
-  long   n_event[2];        /* Unique 64 bit event ID number               */
-  long   exp_run_id;        /* Reference to the experiment run ID number  */
+  long   n_event;           /* Unique  event ID number                     */
+  long   exp_run_id;        /* Reference to the experiment run ID number   */
   long   time;              /* Unique time stamp for event                 */
   long   trig_mask;         /* Trigger mask                                */
   long   bunch_cross;       /* Beam-Beam bunch crossing number             */
  } ;
-/*  Last mod. for event_header:   $Date: 1999/09/27 16:54:11 $ */
+/*  Last mod. for event_header:   $Date: 1999/10/01 02:14:07 $ */
 
