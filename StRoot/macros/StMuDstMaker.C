@@ -3,19 +3,28 @@
 // Modified from StRoot/StMuDstmaker/COMMON/macros i.e. initially
 // written by Frank Laue.
 //
+// Extend to account for production purposes.
+// Arguments are
+//      mode             bitmaks CMuDST always on regardless of bit 1
+//                       bit 2    EMC MuDST ON/OFF
+//      nevents           
+//      path             Path where the InputFile resides ; "-" for local
+//      InputFile        Should be an event.root file
+//      OutputDirectory  Optional output directory (does not fully work)
+//      
+//
 class   StChain;
 StChain *chain=0;    
-void    ProcessQQ(const Int_t nevents, const Char_t **fileList, const Char_t*, const Char_t* );
+void    ProcessQQ(const Int_t, const Int_t, const Char_t **, const Char_t*, const Char_t* );
 
 
 
 //==========================================================================================
-void StMuDstMaker(const Int_t nevents=10,
-		    const Char_t *path="-",
-		    const Char_t *file="/star/data13/reco/dev/2001/10/st_physics_2304060_raw_0303.event.root",
-		    const Char_t* outDir="./",		
-		    const Char_t* outFile="dummy",
-		    const Char_t* appendix="test.microDst")		
+void StMuDstMaker(const Int_t   mode=0,
+		  const Int_t   nevents=10,
+		  const Char_t  *path="/star/data13/reco/dev/2001/10/",
+		  const Char_t  *file="st_physics_2304060_raw_0303.event.root",
+		  const Char_t* outDir="./")		
 { 
 
   const char *fileListQQ[]={0,0};
@@ -25,18 +34,21 @@ void StMuDstMaker(const Int_t nevents=10,
   } else {
     fileListQQ[0] = gSystem->ConcatFileName(path,file);
   }
-  ProcessQQ(nevents,fileListQQ,outDir,outFile);
+  ProcessQQ(mode,nevents,fileListQQ,outDir);
 }
 
 
 //==========================================================================================
-void ProcessQQ(const Int_t nevents, const Char_t **fileList, const Char_t* dirName, const Char_t* fileName)
+void ProcessQQ(const Int_t mode, const Int_t nevents, 
+	       const Char_t **fileList, const Char_t* dirName)
 {
+  cout << "Loading libraries ..." << endl;
   gSystem->Load("St_base");
   gSystem->Load("StChain");
+  gSystem->Load("StDaqLib");
   gSystem->Load("St_Tables");
   gSystem->Load("StMagF");
-  gSystem->Load("StUtilities"); 
+  gSystem->Load("StUtilities");
   gSystem->Load("StTreeMaker");
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
@@ -48,21 +60,26 @@ void ProcessQQ(const Int_t nevents, const Char_t **fileList, const Char_t* dirNa
   gSystem->Load("StMcEventMaker"); 
   gSystem->Load("StAssociationMaker");
 
-  //gSystem->Load("StDbLib");
-  //gSystem->Load("StDbBroker");
-  //gSystem->Load("St_db_Maker");
+  if( mode & 0x2){
+    // EMC specific
+    gSystem->Load("StEmcUtil"); 
+    gSystem->Load("StDbLib");
+    gSystem->Load("StDbBroker");
+    gSystem->Load("St_db_Maker");
+  }
 
   gSystem->Load("StMcAnalysisMaker");
   gSystem->Load("StStrangeMuDstMaker");
   gSystem->Load("StMuDSTMaker");
 
-  //gSystem->Load("StEmcADCtoEMaker"); // analysis maker
-  //gSystem->Load("StPreEclMaker"); // analysis maker
-  //gSystem->Load("StEpcMaker"); // analysis maker
+  if( mode & 0x2 ){
+    // EMC specific
+    gSystem->Load("StEmcADCtoEMaker"); // analysis maker
+    gSystem->Load("StPreEclMaker");    // analysis maker
+    gSystem->Load("StEpcMaker");       // analysis maker
+  }
+  cout << "Loading done " << endl;
 
-
-
-  cout << " loading done " << endl;
 
   chain = new StChain("StChain"); 
   chain->SetDebug();
@@ -85,25 +102,19 @@ void ProcessQQ(const Int_t nevents, const Char_t **fileList, const Char_t* dirNa
 
   ioMaker->SetIOMode("r");
   ioMaker->SetDebug();
-  ioMaker->SetBranch("*",0,"0");         //deactivate all branches
+  ioMaker->SetBranch("*",0,"0");           //deactivate all branches
   ioMaker->SetBranch("eventBranch",0,"r"); //activate evt.root Branch
 
-  // ***********************
-  // the StStrangeMuDstMaker
-  // ***********************
 
+  // ***********************************************
+  // MuDstMaker(s) instantiation / chain activation
+  // ***********************************************
+  // Common MuDST part
   StStrangeMuDstMaker* v0dst = new StStrangeMuDstMaker("StrangeMaker");
-  v0dst->DoV0(); //Set v0MiniDstMaker to find only v0s
-  v0dst->DoXi(); //Set v0MiniDstMaker to find only v0s
-  v0dst->DoKink(); //Set v0MiniDstMaker to find only v0s
+  v0dst->DoV0();      //Set v0MiniDstMaker to find only v0s
+  v0dst->DoXi();      //Set v0MiniDstMaker to find only v0s
+  v0dst->DoKink();    //Set v0MiniDstMaker to find only v0s
   v0dst->SetNoKeep(); 
-  //v0dst->SetWrite("depp.root"); // Set V0muDStMaker output file and Event output file
-  // v0dst->SetWrite("StrangemuEventHBTPeriphdst.root","Strangemuv0HBTPeriphdst.root"); // Set V0muDStMaker output file and Event output file
-
-
-  // ******************
-  // Processing here
-  // ******************
 
   StMuDstMaker* maker = new StMuDstMaker(1,1,dirName);
   maker->setProbabilityPidFile("/afs/rhic/star/users/aihong/www/PIDTableP01gl.root");
@@ -111,20 +122,33 @@ void ProcessQQ(const Int_t nevents, const Char_t **fileList, const Char_t* dirNa
   StMuL3Filter* l3Filter = new StMuL3Filter(); maker->setL3TrackFilter(l3Filter);
   StMuFilter* filter = new StMuFilter();       maker->setTrackFilter(filter);
 
+  // EMC part
+  if( mode & 0x2){
+    St_db_Maker *dbMk = new St_db_Maker("StarDb","MySQL:StarDb");       	
+    StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
+    StPreEclMaker *pre = new StPreEclMaker();
+    StEpcMaker *epc = new StEpcMaker();
+    StEmcMicroDstMaker *write = new StEmcMicroDstMaker();
+    write->setOutputDir(dirName);
+  }
 
-  chain->Init(); // This should call the Init() method in ALL makers
+  chain->Init();      // This should call the Init() method in ALL makers
   chain->PrintInfo();
-  for (Int_t iev=0;iev<nevents; iev++) {
-    cout << "--> Working on eventNumber " << iev << endl;
+
+  // Event Loop
+  Int_t iev=0;
+  for ( ; iev < nevents ; iev++) {
+    cout << "-----> Working on eventNumber " << iev << endl;
     chain->Clear();
     int iret = chain->Make(iev); // This should call the Make() method in ALL makers    
     if (iret) {
       cout << "Bad return code!" << endl;
       break;
     }
-  } // Event Loop
-  chain->Finish(); // This should call the Finish() method in ALL makers
+  } 
+  chain->Finish();    // This should call the Finish() method in ALL makers
 
-  cout << " End of Analysis " << endl;
+  iev--;
+  cout << endl << "******************* Last event processed = " << iev << endl; 
 }
 
