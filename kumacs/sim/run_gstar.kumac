@@ -15,7 +15,7 @@
 * editted 7/8/98 Kathy Turner - put in default STAR geometry
 *                               and make kumac more standard
 * editted 7/10/98 Kathy Turner - change directories where tables get written
-* editted 7/11/98 K. Turner - 
+* 
 * *******************************************************************
 * ---------available values of input parameters ---------------
 * 
@@ -50,9 +50,9 @@
    num_events=1 _
    debugger=off _
    intype=file _
-  input_data_dir=/star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/ _
- input_file=auau_ce_b0-2_1_200.xdf _ 
-   output_file=auau_central_hijing.xdf
+   input_data_dir=/star/mds/data/SD98/auau200/evg/central/hijing/set0001/regular/ _
+   input_file=auau_ce_d0-2_1_200.xdf _
+   output_file=gstar_output.xdf
  
 * 
 *  this is an example!! you must change to fill your needs
@@ -76,71 +76,23 @@
 
 * ----------- General setup stuff ------------------------*
   macro/global/create TOP              [TOP]
-    
+  macro/global/create phystype
+  macro/global/create geomtype
+* 
 * setup default directories to search for kumacs in
 * setup default table directory structure in STAF
 
-   exec $STAR/kumacs/chain/bfc_util#bfc_defaults [domain]
+    exec $STAR/kumacs/chain/bfc_util#bfc_defaults [domain]
+* 
    exec setup#setup
+* 
    macro/global/import *
      
-* --------------------------------------------------------------
-* must initialize before make!
-* ---------------------------------------------------------------
-* initialize physics type:
-     exec set_hadr_phys_[phystype]
-     message ' gstar: set hadronic physics ' [phystype]
-     
-* initialize geometry
-     if [geomtype].eq.all then 
-       message ' gstar: load star geometry - all '
-       exec load_star_geom#all
-     elseif [geomtype].eq.tpc_nofield then
-       message ' gstar: load star geometry - tpc only, no mag.field '
-       exec load_star_geom#tpc_nofield
-     elseif [geomtype].eq.tpc_field then
-       message ' gstar: load star geometry - tpc only, with mag.field '
-       exec load_star_geom#tpc_field
-     else 
-         message ' gstar: geometry type not available!! '
-     endif
-       
-* only if doing g2t: tell g2t where to put tables
-    detp g2tmain gttc.rdir=0 
-    
-* ----------------------------------------------
-       
- if $vexist(make_done)=0 then
-   message "Load domains:" [domain]
-   test = [domain]
-   nw = $words([test])
-   do i = 1, [nw]
-     mod = $word([test],[i],1)
-     n = $words([mod],'/') 
-     module = $word([mod],[n],[n],'/')
-     test_done = [module]_done
-     if ($vexist([test_done])=0) then
-       vec/cre [test_done]
-         message ' doing make ' [mod]
-         make [mod]
-       if $iquest(1)<>0 then
-            message "<bfc> Shared libraries have not been loaded : ABend"
-       endif
-     endif
-     if $iquest(1)<>0 then
-       message "<bfc> Shared libraries have not been loaded : ABend"
-     endif
-   enddo
-   vec/cre make_done
- endif
- 
- 
-* --------------------------------------------------------------
-* if reading gstar from tape (file) or running gstar
-* don't need if I'm reading from xdf file
-* this command fills geant Run tables
- tables ' ' [geant_Run]
- 
+*  THESE NEXT 3 MUST BE DONE IN THIS ORDER!!!!
+   exec bfc_util#bfc_gstar [chain]
+   exec bfc_util#bfc_load [domain]
+   exec bfc_util#bfc_g2t [chain]
+   
  
 ******** turn debugger on just for GSTAR! ******************************
  if [debugger].eq.on then
