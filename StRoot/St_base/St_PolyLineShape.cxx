@@ -507,11 +507,11 @@ void St_PolyLineShape::PaintPolyMarker(Int_t n, Float_t *, Marker_t, Option_t *)
    TAttMarker::Modify();  //Change marker attributes only if necessary
  
 //*-*- invoke the graphics subsystem
-   if (!gPad->IsBatch()) gGXW->DrawPolyMarker(nin, pxy);
+   if (!gPad->IsBatch()) gVirtualX->DrawPolyMarker(nin, pxy);
  
  
-   if (gCurrentPS) {
-      gCurrentPS->DrawPolyMarker(nin, x, y);
+   if (gVirtualPS) {
+      gVirtualPS->DrawPolyMarker(nin, x, y);
    }
    delete [] x;
    delete [] y;

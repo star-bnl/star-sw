@@ -6,24 +6,12 @@
  
 //*KEEP,TROOT.
 #include "TROOT.h"
-//*KEEP,TClass.
 #include "TClass.h"
-//*KEEP,St_PolyLine3D.
-#include "St_PolyLine3D.h"
-//*KEEP,TVirtualPad.
 #include "TVirtualPad.h"
-//*KEEP,TPostScript.
-#include "TPostScript.h"
-//*KEEP,TPoint.
-#include "TPoint.h"
-//*KEEP,TGLKernelABC,T=C++.
-#include "TGLKernelABC.h"
-//*KEEP,TView.
 #include "TView.h"
-//*KEEP,TPadView3D,T=C++.
 #include "TPadView3D.h"
-//*KEND.
 
+#include "St_PolyLine3D.h"
 #include "St_Points3D.h"
 
 ClassImp(St_PolyLine3D)

@@ -49,7 +49,11 @@ public:
         virtual Float_t  *GetXYZ(Float_t *xyz,Int_t idx,Int_t num=1)  const;
         virtual const Float_t  *GetXYZ(Int_t idx);
         virtual Option_t *GetOption() const ;
+#ifndef __CINT__
+#if ROOT_VERSION_CODE < ROOT_VERSION(2,23,4)
         virtual Bool_t    Is3D();
+#endif
+#endif
         virtual void      ls(Option_t *option="");
         virtual void      PaintPoints(Int_t n, Float_t *p,Option_t *option=""){;}
         virtual void      Print(Option_t *option="");
@@ -73,7 +77,11 @@ inline const Float_t  *St_Points3D::GetXYZ(Int_t idx)    {return fPoints?fPoints
 inline Float_t  *St_Points3D::GetXYZ(Float_t *xyz,Int_t idx,Int_t num)  const
                           {return fPoints?fPoints->GetXYZ(xyz,idx,num):0;}
 inline Option_t *St_Points3D::GetOption() const          {return fPoints?fPoints->GetOption():"";}
+#ifndef __CINT__
+#if ROOT_VERSION_CODE < ROOT_VERSION(2,23,4)
 inline Bool_t    St_Points3D::Is3D()                     {return fPoints?fPoints->Is3D():kFALSE;}
+#endif
+#endif
 inline Int_t     St_Points3D::SetLastPosition(Int_t idx) {return fPoints?fPoints->SetLastPosition(idx):0;}
 inline void      St_Points3D::SetOption(Option_t *option){if (fPoints) fPoints->SetOption(option);}
 inline Int_t     St_Points3D::SetPoint(Int_t point, Float_t x, Float_t y, Float_t z){return fPoints?fPoints->SetPoint(point,x,y,z):0;}
