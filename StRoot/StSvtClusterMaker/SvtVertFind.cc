@@ -314,25 +314,25 @@ float sft_find_vertex ()
 
    icall = 1;
 
+   d = 0.0;
 
    /* Home in on primary vertex */
-   d = 0.0;
-   iNumPoints = bracket2 (sft_vf_ntrack, (float)d, step, &ax, &bx, &cx, &fa, &fb, &fc);
+   // No longer do first scane as noise makes a bias towards z=0 and
+   // were often missing the high z vertices.
+   // So for now just dumbly scan from -50 to 50 , hey it works
 
-
-   r = (double)((bx - cx) * (fb - fa));
-   q = (double)((bx - ax) * (fb - fc));
-   p = (double)((bx - ax)*q - (bx - cx)*r);
-   q = 2.0 * (q - r);
+   //iNumPoints = bracket2 (sft_vf_ntrack, (float)d, step, &ax, &bx, &cx, &fa, &fb, &fc);
 
 
 
      step=.1;
-   iNumPoints = bracket2 (sft_vf_ntrack, bx, step, &ax, &bx, &cx, &fa, &fb, &fc);
+     //iNumPoints = bracket2 (sft_vf_ntrack, bx, step, &ax, &bx, &cx, &fa, &fb, &fc);
    /* printf ("point a:   % 12.5f    % 12.5f\n", ax, fa);
       printf ("point b:   % 12.5f    % 12.5f\n", bx, fb);
       printf ("point c:   % 12.5f    % 12.5f\n", cx, fc);  */
 
+     iNumPoints = bracket2 (sft_vf_ntrack, (float)d, step, &ax, &bx, &cx, &fa, &fb, &fc);
+   
    /* Not sure how this works!*/
    r = (double)((bx - cx) * (fb - fa));
    q = (double)((bx - ax) * (fb - fc));
@@ -377,8 +377,8 @@ bracket2 ( float (*func)(double),
            fVal,
            fMaxVal = 0.0,
            fMaxPos;
-   POINT   pPoints[100];
-   int     iMaxPoints = 100;
+   POINT   pPoints[1000];
+   int     iMaxPoints = 1000;
 #ifdef DEBUG
    FILE    *fout;
 #endif
