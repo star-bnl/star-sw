@@ -141,6 +141,15 @@ macro/global/import *
 
 return
 
+macro tpt_residuals
+macro/global/import *
+  
+  cd [data]/tpc/hits
+
+  tdm/newtable res       tpt_res  200000
+
+  cd /dui
+return
 
 *-------------------------------------------------------
 
