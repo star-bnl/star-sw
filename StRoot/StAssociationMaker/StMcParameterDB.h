@@ -1,7 +1,12 @@
 /*****************************************
  *
- * $Id: StMcParameterDB.h,v 1.5 1999/12/14 07:07:41 calderon Exp $
+ * $Id: StMcParameterDB.h,v 1.6 2003/06/27 03:01:19 calderon Exp $
  * $Log: StMcParameterDB.h,v $
+ * Revision 1.6  2003/06/27 03:01:19  calderon
+ * The z cut now depends on z_mc.
+ * The parameterization is done in the parameter DB
+ * with a linearly increasing rms, symmetric in +/- z.
+ *
  * Revision 1.5  1999/12/14 07:07:41  calderon
  * Added Ratio Number of Common Hits / Number of Reconstructed Hits for
  * each detector.
@@ -46,8 +51,9 @@ public:
     static StMcParameterDB* instance(); // *MENU*
 
     float xCutTpc() const; // *MENU*
-    float yCutTpc() const;
+    float yCutTpc() const; // *MENU*
     float zCutTpc() const; // *MENU*
+    float zCutTpc(float z) const;
     unsigned int reqCommonHitsTpc() const; // *MENU*
 
     float xCutSvt() const; // *MENU*
