@@ -1,5 +1,8 @@
-// $Id: Example_read_dst_browse.C,v 1.4 2000/01/19 15:46:04 kathy Exp $
+// $Id: Example_read_dst_browse.C,v 1.5 2000/04/12 16:13:40 kathy Exp $
 // $Log: Example_read_dst_browse.C,v $
+// Revision 1.5  2000/04/12 16:13:40  kathy
+// have changed so that macro loads only table libraries needed instead of all table libraries
+//
 // Revision 1.4  2000/01/19 15:46:04  kathy
 // change default input files to point to ones in /afs/rhic/star/data/samples
 //
@@ -34,7 +37,12 @@
 {
 
 gSystem->Load("St_base");
-gSystem->Load("St_Tables");
+
+gSystem->Load("libglobal_Tables");
+gSystem->Load("libgen_Tables");
+gSystem->Load("libsim_Tables");
+gSystem->Load("libtpc_Tables");
+
 
 TFile *root_file=0;
 root_file  =  new TFile(

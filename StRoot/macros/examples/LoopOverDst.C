@@ -1,6 +1,9 @@
 //*CMZ :          01/04/99  18.27.27  by  Valery Fine(fine@mail.cern.ch)
-// $Id: LoopOverDst.C,v 1.2 1999/05/21 15:33:51 kathy Exp $
+// $Id: LoopOverDst.C,v 1.3 2000/04/12 16:13:40 kathy Exp $
 // $Log: LoopOverDst.C,v $
+// Revision 1.3  2000/04/12 16:13:40  kathy
+// have changed so that macro loads only table libraries needed instead of all table libraries
+//
 // Revision 1.2  1999/05/21 15:33:51  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
 //
@@ -25,7 +28,12 @@ void Load()
 {
     gSystem->Load("St_base");
     gSystem->Load("StChain");
-    gSystem->Load("St_Tables");
+
+  gSystem->Load("libglobal_Tables");
+  gSystem->Load("libgen_Tables");
+  gSystem->Load("libsim_Tables");
+  gSystem->Load("libtpc_Tables");
+
     gSystem->Load("St_io_Maker");
 };
 

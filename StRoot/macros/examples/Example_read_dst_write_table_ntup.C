@@ -1,5 +1,8 @@
-// $Id: Example_read_dst_write_table_ntup.C,v 1.1 2000/01/21 18:20:45 kathy Exp $
+// $Id: Example_read_dst_write_table_ntup.C,v 1.2 2000/04/12 16:13:40 kathy Exp $
 // $Log: Example_read_dst_write_table_ntup.C,v $
+// Revision 1.2  2000/04/12 16:13:40  kathy
+// have changed so that macro loads only table libraries needed instead of all table libraries
+//
 // Revision 1.1  2000/01/21 18:20:45  kathy
 // now have macro that writes a table-based ntuple and another that reads the ntuple back in and draws from it
 //
@@ -28,7 +31,12 @@ void Example_read_dst_write_table_ntup(
 
     gSystem->Load("St_base");
     gSystem->Load("StChain");
-    gSystem->Load("St_Tables");
+
+gSystem->Load("libglobal_Tables");
+gSystem->Load("libgen_Tables");
+gSystem->Load("libsim_Tables");
+gSystem->Load("libtpc_Tables");
+
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StUtilities");

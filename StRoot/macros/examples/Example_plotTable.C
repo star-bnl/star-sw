@@ -1,5 +1,8 @@
-// $Id: Example_plotTable.C,v 1.7 2000/01/20 17:03:26 genevb Exp $
+// $Id: Example_plotTable.C,v 1.8 2000/04/12 16:13:39 kathy Exp $
 // $Log: Example_plotTable.C,v $
+// Revision 1.8  2000/04/12 16:13:39  kathy
+// have changed so that macro loads only table libraries needed instead of all table libraries
+//
 // Revision 1.7  2000/01/20 17:03:26  genevb
 // Need to cast reference pointer now???
 //
@@ -34,3 +37,10 @@ myNtuple.AddXDFFile("/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gsta
 "dst","dst_v0_vertex");
 myNtuple.Draw("pos_py:pos_px");
 }
+
+
+
+
+
+
+

@@ -1,5 +1,8 @@
-// $Id: Example_read_xdf_makehist.C,v 1.4 2000/01/19 21:00:40 kathy Exp $
+// $Id: Example_read_xdf_makehist.C,v 1.5 2000/04/12 16:13:40 kathy Exp $
 // $Log: Example_read_xdf_makehist.C,v $
+// Revision 1.5  2000/04/12 16:13:40  kathy
+// have changed so that macro loads only table libraries needed instead of all table libraries
+//
 // Revision 1.4  2000/01/19 21:00:40  kathy
 // update macros to use standard default xdf files in /afs/rhic/star/data/samples
 //
@@ -30,7 +33,12 @@ void Example_read_xdf_makehist(
  // load libraries 
  gSystem.Load("St_base");
  gSystem.Load("xdf2root");
- gSystem.Load("St_Tables");
+ gSystem->Load("libglobal_Tables");
+ gSystem->Load("libgen_Tables");
+ gSystem->Load("libsim_Tables");
+ gSystem->Load("libtpc_Tables");
+
+
  // create instance of St_XDFFile called f1
  // use method OpenXDF of St_XDFFile with instance f1 to open input file
  St_XDFFile f1;
