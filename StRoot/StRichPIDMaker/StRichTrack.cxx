@@ -1,12 +1,12 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.9 2000/11/25 12:27:42 lasiuk Exp $
+ * $Id: StRichTrack.cxx,v 2.10 2000/11/28 19:18:54 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
- *  Revision 2.9  2000/11/25 12:27:42  lasiuk
- *  implement algorithm for finding MIP
+ *  Revision 2.10  2000/11/28 19:18:54  lasiuk
+ *  Include protection/error warning if no MIP
  *
  *  Revision 2.10  2000/11/28 19:18:54  lasiuk
  *  Include protection/error warning if no MIP
@@ -655,7 +655,7 @@ void StRichTrack::assignMIP(const StSPtrVecRichHit* hits) {
     //
     // if there is more than 1 candidate
     // take the one with the highest charge
- 	cout << "StRichTrack::associateHit()\n";
+    //
     
     if(candidateHits.size()>1) {
  	cout << "StRichTrack::associateMIP()\n";
@@ -688,9 +688,13 @@ void StRichTrack::assignMIP(const StSPtrVecRichHit* hits) {
 	    
     }
     //
-    
+    // set the associated MIP
     // In the best case the eMip and eAssociatedMip flag should be set
     //
+
+    if(mAssociatedMIP) {
+	mAssociatedMIP->setBit(eAssociatedMip);
+    }
     else {
 	cout << "StRichTrack::associateMIP()\n";
 	cout << "\tWARNING no assocatied MIP" << endl;
