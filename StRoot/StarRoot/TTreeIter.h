@@ -7,7 +7,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// TTreeIter                                                          //
+// TTreeIter                                                            //
 //                                                                      //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
@@ -74,8 +74,10 @@ public:
     virtual ~TTreeIter();
 
 TTreeIterCast &operator() (const TString varname);
+void **Void(const TString varname);
 #ifndef __CINT__
 TTreeIterCast &operator() (const char   *varname);
+void **Void(const char   *varname);
 #endif
     Int_t             AddFile(const char *file);
     TBranch          *GetBranch(int idx) const;     

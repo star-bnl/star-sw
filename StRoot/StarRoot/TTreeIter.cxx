@@ -57,6 +57,8 @@
 #include "TFriendElement.h"
 #endif
 #include "TLeaf.h"
+#include "TStreamerInfo.h"
+#include "TStreamerElement.h"
 #include "TTreeIter.h"
 #include "TList.h"
 #include "TObjArray.h"
@@ -165,29 +167,30 @@ TTreeIterCast::operator const ULong_t        *&()
 
 
 
-
 //______________________________________________________________________________
 class TTreeIterMem  : public TNamed { //special class for TTreeIter
 public:
    Int_t  fType;
    Int_t  fUnits;
    Int_t  fSize;
+   TString fTyName;
    Char_t *fMem;
 
 public:
-   TTreeIterMem(const char *name,Int_t type,Int_t units);
+   TTreeIterMem(const char *name,Int_t type,Int_t units,const char *tyName);
   ~TTreeIterMem(){ delete [] fMem;}
    void 	**Alloc(int units=-1);
    void 	**GetMem(){return (void**)&fMem;}   
 };
 //______________________________________________________________________________
-TTreeIterMem::TTreeIterMem(const char *name,Int_t type,Int_t units)
+TTreeIterMem::TTreeIterMem(const char *name,Int_t type,Int_t units,const char *tyName)
                 :TNamed(name,"")
 {
-  fType  = type;
-  fUnits = units;
-  fSize  = 0;
-  fMem   = 0;
+  fType   = type;
+  fTyName = tyName;
+  fUnits  = units;
+  fSize   = 0;
+  fMem    = 0;
   Alloc();
 }
 
@@ -196,10 +199,24 @@ void **TTreeIterMem::Alloc(int units)
 {
    if (units>-1) fUnits = units;
    if (!fUnits) fUnits=1;
-   delete [] fMem;
-   fSize = TTreeIter::TypeSize(fType)*fUnits;
+   delete [] fMem; fMem=0;
+   TClass *kl = 0;
+   int uSize  = sizeof(void*);
+   if (fType) {
+     fSize = TTreeIter::TypeSize(fType)*fUnits;
+   } else { //real class
+     if (fTyName[fTyName.Length()-1]!='*') { // not a pointer 
+       kl = gROOT->GetClass(fTyName);
+       if (!kl) {
+         Warning("Alloc","No dictionary for class %s",fTyName.Data());
+         return 0;}
+       uSize = kl->Size();
+     }
+     fSize = uSize*fUnits;
+   }     
    fMem = new char[fSize+8];
    memset(fMem,0,fSize);
+   if (kl){for (char *cc=fMem; cc < fMem+fSize; cc+=uSize){kl->New((void*)cc);}}
    strcpy(fMem+fSize,"Perev");
    return (void**)&fMem;
 } 
@@ -256,7 +273,8 @@ TTreeIter::~TTreeIter()
 void TTreeIter::GetInfo(const TBranch *tbp, const char *&tyName
                         ,Int_t &units,void  *&add, Int_t &brType) 
 {
-   brType =0;
+   tyName = 0;
+   brType = 0;
    TBranch *tb = (TBranch*)tbp;
    add = tb->GetAddress();
    units = 0;
@@ -279,7 +297,17 @@ void TTreeIter::GetInfo(const TBranch *tbp, const char *&tyName
 #ifndef __OLDROOT__
      case 1: {TBranchElement *te = (TBranchElement*)tb;
               max = te->GetMaximum();
-              brType  = te->GetType();}
+              brType  = te->GetType();
+              TString ts(te->GetName());
+              int i = 0;              
+              while ((i=ts.Index("."))>=0) { ts.Replace(0,i+1,"");}
+              i=ts.Index("["); if (i>=0) ts.Replace(i,9999,"");
+              TStreamerInfo *si = te->GetInfo();
+              assert(si); 
+              TStreamerElement *se = si->GetStreamerElement(ts.Data(),i);
+              if (!se) { tyName = si->GetName(); }
+              else     { tyName = se->GetTypeName();}
+             }
               break;
 #endif
      case 2: max = 0; tyName = "Int_t"; return;
@@ -293,10 +321,7 @@ void TTreeIter::GetInfo(const TBranch *tbp, const char *&tyName
    }
    if (max) {if (!units) units = 1; units *= max;}
    if (brType==3) units=0;
-   
-
-
-
+   if (tyName) return;
 
    TObjArray *lfList = tb->GetListOfLeaves();
    TLeaf *tl = (lfList) ? (TLeaf*)lfList->UncheckedAt(0):0;
@@ -313,13 +338,13 @@ TBranch *TTreeIter::GetBranch(int idx) const
 }
 
 //______________________________________________________________________________
-TTreeIterCast &TTreeIter::operator() (const TString varname)
+void **TTreeIter::Void(const TString varname)
 {
    fCint = 1;
-   return operator() (varname.Data());
+   return Void(varname.Data());
 }
 //______________________________________________________________________________
-TTreeIterCast &TTreeIter::operator() (const char *varname)
+void **TTreeIter::Void(const char *varname)
 {
    fCast.Set(0,0,varname);
 //   TBranch *br = GetBranch(varname);
@@ -330,7 +355,7 @@ TTreeIterCast &TTreeIter::operator() (const char *varname)
    }
    if (!br) {
      Warning("operator()","Branch %s NOT FOUND",varname);
-     return fCast;
+     return 0;
    }
 
    void *addr,**pddr;
@@ -340,13 +365,12 @@ TTreeIterCast &TTreeIter::operator() (const char *varname)
 
    int tyCode = TypeCode(tyName);
    if (!tyCode) {
-     Warning("operator()","Branch %s of UNKNOWN %s type",varname,tyName);
-     return fCast;
+//   Warning("operator()","Branch %s non basic %s type,Units %d brType %d",varname,tyName,fUnits,brType);
    }
    TTreeIterMem *mem;
    mem = (TTreeIterMem*)fMemList.FindObject(br->GetName());
    if (!mem) {
-     mem = new TTreeIterMem(br->GetName(),tyCode,fUnits);
+     mem = new TTreeIterMem(br->GetName(),tyCode,fUnits,tyName);
      fMemList.Add(mem);
      pddr = mem->GetMem();
      fTree->SetBranchStatus(br->GetName(),1);
@@ -357,9 +381,21 @@ TTreeIterCast &TTreeIter::operator() (const char *varname)
      pddr = mem->GetMem();
    }
    addr = *pddr;
-   if (fUnits) { tyCode+=20; addr = (void*)pddr;}
+   if (fUnits) { if(tyCode) tyCode+=20; addr = (void*)pddr;}
    fCast.Set(addr,tyCode,varname);
 
+   return pddr;
+}     
+//______________________________________________________________________________
+TTreeIterCast &TTreeIter::operator() (const TString varname)
+{
+   fCint = 1;
+   return operator() (varname.Data());
+}
+//______________________________________________________________________________
+TTreeIterCast &TTreeIter::operator() (const char *varname)
+{
+   void *addr = Void(varname);
    if (fCint)  {
      fCint = 0;
      TTreeIterCast *v =(TTreeIterCast*)addr;
@@ -550,7 +586,7 @@ Int_t TTreeIter::TypeSize(Int_t ity)
 Int_t  TTreeIter::TypeCode(const char *typeName)
 {
    for (int i=1; NTTI[i]; i++) {if (strcmp(typeName,NTTI[i])==0) return i;}
-   printf("*** TypeCode ERROR: %s is UNKNOWN ***\n",typeName);
+// printf("*** TypeCode ERROR: %s is UNKNOWN ***\n",typeName);
    return 0;
 } 
 //______________________________________________________________________________
