@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEvent.cc,v 1.19 2003/01/17 16:46:58 mercedes Exp $
+ * $Id: StHbtEvent.cc,v 1.20 2003/01/31 19:43:20 magestro Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEvent.cc,v $
+ * Revision 1.20  2003/01/31 19:43:20  magestro
+ * several casts added to remove compiler warnings
+ *
  * Revision 1.19  2003/01/17 16:46:58  mercedes
  * StMuEvent::refMult() added
  *
@@ -125,9 +128,9 @@ StHbtEvent::StHbtEvent(const StHbtTTreeEvent* ev) {
   mTpcNhits = ev->mTpcNhits;
   mNumberOfTracks = ev->mNumberOfTracks;
   mNumberOfGoodTracks = ev->mNumberOfGoodTracks;
-  mCtbMultiplicity = ev->mCtbMultiplicity;
-  mZdcAdc[0] = ev->mZdcAdc[0];
-  mZdcAdc[1] = ev->mZdcAdc[1];
+  mCtbMultiplicity = (unsigned short) ev->mCtbMultiplicity;
+  mZdcAdc[0] = (unsigned short) ev->mZdcAdc[0];
+  mZdcAdc[1] = (unsigned short) ev->mZdcAdc[1];
   mUncorrectedNumberOfPositivePrimaries = ev->mUncorrectedNumberOfPositivePrimaries;
   mUncorrectedNumberOfNegativePrimaries = ev->mUncorrectedNumberOfNegativePrimaries;
   mReactionPlane[0] = ev->mReactionPlane[0];
@@ -201,9 +204,9 @@ StHbtEvent::StHbtEvent(const StMuDst* dst, int trackType) {
   mTpcNhits = 0;
   mNumberOfTracks = ev->eventSummary().numberOfTracks();
   mNumberOfGoodTracks = ev->eventSummary().numberOfGoodTracks();
-  mCtbMultiplicity = ev->ctbMultiplicity();
-  mZdcAdc[0] = ev->zdcAdcAttentuatedSumWest();
-  mZdcAdc[1] = ev->zdcAdcAttentuatedSumEast();
+  mCtbMultiplicity = (unsigned short) ev->ctbMultiplicity();
+  mZdcAdc[0] = (unsigned short) ev->zdcAdcAttentuatedSumWest();
+  mZdcAdc[1] = (unsigned short) ev->zdcAdcAttentuatedSumEast();
   mUncorrectedNumberOfPositivePrimaries = ev->refMultPos();
   mUncorrectedNumberOfNegativePrimaries = ev->refMultNeg();
   mUncorrectedNumberOfPrimaries = ev->refMult();
@@ -283,9 +286,9 @@ StHbtEvent::StHbtEvent(const StMuDst* dst, int trackType, bool readV0Daughters) 
   mTpcNhits = 0;
   mNumberOfTracks = ev->eventSummary().numberOfTracks();
   mNumberOfGoodTracks = ev->eventSummary().numberOfGoodTracks();
-  mCtbMultiplicity = ev->ctbMultiplicity();
-  mZdcAdc[0] = ev->zdcAdcAttentuatedSumWest();
-  mZdcAdc[1] = ev->zdcAdcAttentuatedSumEast();
+  mCtbMultiplicity = (unsigned short) ev->ctbMultiplicity();
+  mZdcAdc[0] = (unsigned short) ev->zdcAdcAttentuatedSumWest();
+  mZdcAdc[1] = (unsigned short) ev->zdcAdcAttentuatedSumEast();
   mUncorrectedNumberOfPositivePrimaries = ev->refMultPos();
   mUncorrectedNumberOfNegativePrimaries = ev->refMultNeg();
   mUncorrectedNumberOfPrimaries = ev->refMult();
