@@ -1,9 +1,12 @@
 .rn '' }`
-''' $RCSfile: cons.1,v $$Revision: 1.2 $$Date: 2000/03/14 01:46:56 $
+''' $RCSfile: cons.1,v $$Revision: 1.3 $$Date: 2000/06/14 22:52:42 $
 '''
 ''' $Log: cons.1,v $
-''' Revision 1.2  2000/03/14 01:46:56  fisyak
-''' Cons version 1-8-dev
+''' Revision 1.3  2000/06/14 22:52:42  fisyak
+''' merge with 2.0.1
+'''
+''' Revision 1.1.1.4  2000/06/14 22:44:42  fisyak
+''' 2.0.1
 '''
 ''' Revision 1.1.1.2  2000/03/12 18:58:48  fisyak
 ''' cons release 1.8-dev
@@ -99,7 +102,7 @@
 .nr % 0
 .rr F
 .\}
-.TH CONS 1 "1.8-dev" "16/Feb/2000" "Cons - Software Construction System"
+.TH CONS 1 "2.0.1" "14/Jun/2000" "Cons - Software Construction System"
 .UC
 .if n .hy 0
 .if n .na
@@ -202,7 +205,7 @@ the original.
 .SH "\fBCons: A Software Construction System\fR"
 by Bob Sidebotham \fIrns@fore.com\fR
 .PP
-A guide and reference for version 1.8-dev
+A guide and reference for version 2.0.1
 .PP
 Copyright (c) 1996-1999 FORE Systems, Inc. All rights reserved.
 .PP
@@ -1909,7 +1912,7 @@ installed in the script:
 .Ve
 .Vb 7
 \&  sub cons::InstallScript {
-\&        my($env, $dst, $src) = shift;
+\&        my ($env, $dst, $src) = @_;
 \&        Command $env $dst, $src, qq(
 \&                sed s+your-path-here+$BIN_DIR+ %< > %>
 \&                chmod oug+x %>

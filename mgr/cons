@@ -12,13 +12,14 @@ use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
 
-# $Id: cons,v 1.42 2000/06/12 18:22:55 fisyak Exp $
+# $Id: cons,v 1.43 2000/06/14 22:52:41 fisyak Exp $
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 $ver_num = 2.0;
-$ver_rev = "";
-$version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.42 2000/06/12 18:22:55 fisyak Exp $)'. "\n";
+$ver_rev = ".1";
+$version = sprintf "This is Cons %2.1f%s " .
+	    '($Id: cons,v 1.43 2000/06/14 22:52:41 fisyak Exp $)'. "\n",
+	    $ver_num, $ver_rev;
 
 # Cons: A Software Construction Tool.
 # Copyright (c) 1996-2000 Free Software Foundation, Inc.
@@ -272,6 +273,9 @@ if ($main::_WIN32) {
 	'RCFLAGS'	=> '/l 0x409 %RCOPTFLAGS', # default language is US English
 	'RCCOM'		=> '%RC %RCFLAGS /i%>:d %_IFLAGS /fo%> %<',
 	'CCCOM'          => '%CC %CFLAGS %_IFLAGS /c %< /Fo%>',
+	'CXX'            => '%CC',
+	'CXXFLAGS'       => '%CFLAGS',
+	'CXXCOM'         => '%CXX %CXXFLAGS %_IFLAGS -c %< /Fo%>',
 	'INCDIRPREFIX'   => '/I',
 	'LINK'           => 'link',
 	'LINKCOM'        => '%LINK %LDFLAGS /out:%> %< %_LDIRS %LIBS',
@@ -820,7 +824,7 @@ sub SplitPath {
     if (ref($dirs) ne ARRAY) {
 	$dirs = [ split(/$main::PATH_SEPARATOR/o, $dirs) ];
     }
-    map { DirPath(@_) } @$dirs;
+    map { DirPath($_) } @$dirs;
 }
 
 # Return true if the supplied path is available as a source file
@@ -2147,10 +2151,8 @@ sub scan {
     my(@includes);
     # File should have been built by now. If not, we'll ignore it.
     return () unless open(SCAN, $file->rpath);
-###    local($script::env) = $self->{env};
     while(<SCAN>) {
-	my $f = &$code;
-	push(@includes, $f) if $f ne '';
+	push(@includes, grep($_ ne '', &$code));
     }
     close(SCAN);
     my($wd) = $file->{dir};
@@ -3474,7 +3476,7 @@ the original.
 
 by Bob Sidebotham, et al. F<cons-discuss@gnu.org>
 
-A guide and reference for version 2.0
+A guide and reference for version 2.0.1
 
 Copyright (c) 1996-2000 Free Software Foundation, Inc.
 
@@ -5408,7 +5410,7 @@ installed in the script:
   # path $BIN_DIR.
 
   sub cons::InstallScript {
-	my($env, $dst, $src) = shift;
+	my ($env, $dst, $src) = @_;
 	Command $env $dst, $src, qq(
 		sed s+your-path-here+$BIN_DIR+ %< > %>
 		chmod oug+x %>

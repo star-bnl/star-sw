@@ -69,7 +69,7 @@ by Bob Sidebotham <EM>rns@fore.com</EM>
 
 
 <P>
-A guide and reference for version 1.8-dev
+A guide and reference for version 2.0.1
 
 <P>
 
@@ -2661,7 +2661,7 @@ the script:
 <P>
 
 <PRE>  sub cons::InstallScript {
-        my($env, $dst, $src) = shift;
+        my ($env, $dst, $src) = @_;
         Command $env $dst, $src, qq(
                 sed s+your-path-here+$BIN_DIR+ %&lt; &gt; %&gt;
                 chmod oug+x %&gt;
