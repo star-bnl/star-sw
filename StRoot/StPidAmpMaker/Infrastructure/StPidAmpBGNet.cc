@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpBGNet.cc,v 1.3 2000/04/09 15:40:58 aihong Exp $
+ * $Id: StPidAmpBGNet.cc,v 1.4 2000/04/14 16:07:30 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpBGNet.cc,v $
+ * Revision 1.4  2000/04/14 16:07:30  aihong
+ * change BetheBlock to BetheBloch :-)
+ *
  * Revision 1.3  2000/04/09 15:40:58  aihong
  * change sliceWidth4Window[1] to 0.03 for mBGNet
  *
@@ -125,36 +128,36 @@ void StPidAmpBGNet::fitBand(TH3D* histo){
    double varyRange=0.3;
 
 
-   TF1 *mBetheBlockFcn = new TF1 ("mBetheBlockFcn",funcBandPt, fabs(mParticleType.start()),fabs(mParticleType.end()),NBandParam);
+   TF1 *mBetheBlochFcn = new TF1 ("mBetheBlochFcn",funcBandPt, fabs(mParticleType.start()),fabs(mParticleType.end()),NBandParam);
   
   
 
-   mBetheBlockFcn->SetParLimits(0,(mBandParams[0]-varyRange*fabs(mBandParams[0])),(mBandParams[0]+varyRange*fabs(mBandParams[0])));
-   mBetheBlockFcn->SetParLimits(1,(mBandParams[1]-varyRange*fabs(mBandParams[1])),(mBandParams[1]+varyRange*fabs(mBandParams[1])));
-   mBetheBlockFcn->SetParLimits(2,(mBandParams[2]-varyRange*fabs(mBandParams[2])),(mBandParams[2]+varyRange*fabs(mBandParams[2])));
+   mBetheBlochFcn->SetParLimits(0,(mBandParams[0]-varyRange*fabs(mBandParams[0])),(mBandParams[0]+varyRange*fabs(mBandParams[0])));
+   mBetheBlochFcn->SetParLimits(1,(mBandParams[1]-varyRange*fabs(mBandParams[1])),(mBandParams[1]+varyRange*fabs(mBandParams[1])));
+   mBetheBlochFcn->SetParLimits(2,(mBandParams[2]-varyRange*fabs(mBandParams[2])),(mBandParams[2]+varyRange*fabs(mBandParams[2])));
           
-   mBetheBlockFcn->SetParameter(3,double(mParticleType.charge()));//charge is 1 for mBGNet.
-   mBetheBlockFcn->SetParameter(4,mParticleType.mass());//mass is 1 for mBGNet.
-   mBetheBlockFcn->SetParameter(5, double(CalibFactor));
-   mBetheBlockFcn->SetParameter(6, double(Saturation));
-   mBetheBlockFcn->SetParLimits(3, 1,1); //fixed.
-   mBetheBlockFcn->SetParLimits(4, 1,1);
-   mBetheBlockFcn->SetParLimits(5, 1,1);
-   mBetheBlockFcn->SetParLimits(6, 1,1);
+   mBetheBlochFcn->SetParameter(3,double(mParticleType.charge()));//charge is 1 for mBGNet.
+   mBetheBlochFcn->SetParameter(4,mParticleType.mass());//mass is 1 for mBGNet.
+   mBetheBlochFcn->SetParameter(5, double(CalibFactor));
+   mBetheBlochFcn->SetParameter(6, double(Saturation));
+   mBetheBlochFcn->SetParLimits(3, 1,1); //fixed.
+   mBetheBlochFcn->SetParLimits(4, 1,1);
+   mBetheBlochFcn->SetParLimits(5, 1,1);
+   mBetheBlochFcn->SetParLimits(6, 1,1);
 
-      mBetheBlockFcn->SetParLimits(2,1.2775e-10,0.025e-5);
-   // mBetheBlockFcn->SetParLimits(2,0.0310e-5,0.06e-5);
+      mBetheBlochFcn->SetParLimits(2,1.2775e-10,0.025e-5);
+   // mBetheBlochFcn->SetParLimits(2,0.0310e-5,0.06e-5);
 
 
 
 
  if ((bandGraph()->GetN())>0) {
 
-   bandGraph()->Fit("mBetheBlockFcn","R"); //R means use the range in TF1.
+   bandGraph()->Fit("mBetheBlochFcn","R"); //R means use the range in TF1.
    mBandParams.clear();
 
    for (int i=0; i<NBandParam; i++)
-   mBandParams.push_back(mBetheBlockFcn->GetParameter(i));
+   mBandParams.push_back(mBetheBlochFcn->GetParameter(i));
    
 
  }
@@ -164,11 +167,11 @@ void StPidAmpBGNet::fitBand(TH3D* histo){
 
    mBandFitFcn = new TF1 ("mBandsFcn",funcBandPt, BandsBegin,mParticleType.end(),NBandParam);
     for (int i=0; i<NBandParam; i++) 
-    mBandFitFcn->SetParameter(i,mBetheBlockFcn->GetParameter(i));
+    mBandFitFcn->SetParameter(i,mBetheBlochFcn->GetParameter(i));
        
    
 
-   delete mBetheBlockFcn;
+   delete mBetheBlochFcn;
 
   
 }
@@ -256,18 +259,18 @@ double StPidAmpBGNet::dedxAtBandCenter(double rig){
 
 
 
-          TF1 mBandBetheBlockFcn("mBandBetheBlockFcn",funcBandPt, localBandsBegin,localBandsEnd, NBandParam);
+          TF1 mBandBetheBlochFcn("mBandBetheBlochFcn",funcBandPt, localBandsBegin,localBandsEnd, NBandParam);
 
-       mBandBetheBlockFcn.SetParameter(0,mBandParams[0]);
-       mBandBetheBlockFcn.SetParameter(1,mBandParams[1]);
-       mBandBetheBlockFcn.SetParameter(2,mBandParams[2]);
+       mBandBetheBlochFcn.SetParameter(0,mBandParams[0]);
+       mBandBetheBlochFcn.SetParameter(1,mBandParams[1]);
+       mBandBetheBlochFcn.SetParameter(2,mBandParams[2]);
         
-       mBandBetheBlockFcn.SetParameter(3,double(mParticleType.charge()));
-       mBandBetheBlockFcn.SetParameter(4,mParticleType.mass());
-       mBandBetheBlockFcn.SetParameter(5, double(CalibFactor));
-       mBandBetheBlockFcn.SetParameter(6, double(Saturation));
+       mBandBetheBlochFcn.SetParameter(3,double(mParticleType.charge()));
+       mBandBetheBlochFcn.SetParameter(4,mParticleType.mass());
+       mBandBetheBlochFcn.SetParameter(5, double(CalibFactor));
+       mBandBetheBlochFcn.SetParameter(6, double(Saturation));
 
-          return mBandBetheBlockFcn.Eval(fabs(rig),0,0);
+          return mBandBetheBlochFcn.Eval(fabs(rig),0,0);
 
 
 }
@@ -320,14 +323,14 @@ void StPidAmpBGNet::drawNetFittings(){
     TCanvas* theLowBandCanvas=new TCanvas(stLowBand.str(),stLowBand.str(),20,10,800,600);
    theLowBandCanvas->cd(); 
   mBandGraphLowBetaGamma->Draw("A*");
-  //   bandGraph()->GetFunction("mBandBetheBlockFcn")->Draw("SAME");
+  //   bandGraph()->GetFunction("mBandBetheBlochFcn")->Draw("SAME");
 if (mBandFitFcn) mBandFitFcn->Draw("SAME");
 
      stMiddleBand<<stBand.str()<<"MiddleBG Part";
     TCanvas* theMiddleBandCanvas=new TCanvas(stMiddleBand.str(),stMiddleBand.str(),20,10,800,600);
    theMiddleBandCanvas->cd(); 
   mBandGraphMiddleBetaGamma->Draw("A*");
-  //   bandGraph()->GetFunction("mBandBetheBlockFcn")->Draw("SAME");
+  //   bandGraph()->GetFunction("mBandBetheBlochFcn")->Draw("SAME");
 if (mBandFitFcn) mBandFitFcn->Draw("SAME");
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNHitsNet.cc,v 1.2 2000/04/11 15:34:23 aihong Exp $
+ * $Id: StPidAmpNHitsNet.cc,v 1.3 2000/04/14 16:07:30 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNHitsNet.cc,v $
+ * Revision 1.3  2000/04/14 16:07:30  aihong
+ * change BetheBlock to BetheBloch :-)
+ *
  * Revision 1.2  2000/04/11 15:34:23  aihong
  * change to adapt dividing trks by channel for faster filling
  *
@@ -50,31 +53,31 @@ void StPidAmpNHitsNet::fitBand(TH3D* histo){
 
   if (histo) histo->SetDirectory(0);
 
-   TF1 *mBetheBlockFcn = new TF1 ("mBetheBlockFcn",funcBandPt, BandsBegin,BandsEnd,NBandParam);
+   TF1 *mBetheBlochFcn = new TF1 ("mBetheBlochFcn",funcBandPt, BandsBegin,BandsEnd,NBandParam);
   
 
-   mBetheBlockFcn->SetParLimits(0,(mBandParams[0]-varyRange*fabs(mBandParams[0])),(mBandParams[0]+varyRange*fabs(mBandParams[0])));
-   mBetheBlockFcn->SetParLimits(1,(mBandParams[1]-varyRange*fabs(mBandParams[1])),(mBandParams[1]+varyRange*fabs(mBandParams[1])));
-   mBetheBlockFcn->SetParLimits(2,(mBandParams[2]-varyRange*fabs(mBandParams[2])),(mBandParams[2]+varyRange*fabs(mBandParams[2])));
+   mBetheBlochFcn->SetParLimits(0,(mBandParams[0]-varyRange*fabs(mBandParams[0])),(mBandParams[0]+varyRange*fabs(mBandParams[0])));
+   mBetheBlochFcn->SetParLimits(1,(mBandParams[1]-varyRange*fabs(mBandParams[1])),(mBandParams[1]+varyRange*fabs(mBandParams[1])));
+   mBetheBlochFcn->SetParLimits(2,(mBandParams[2]-varyRange*fabs(mBandParams[2])),(mBandParams[2]+varyRange*fabs(mBandParams[2])));
           
-   mBetheBlockFcn->SetParameter(3,double(mParticleType.charge()));
-   mBetheBlockFcn->SetParameter(4,double(mParticleType.mass()));
-   mBetheBlockFcn->SetParameter(5, double(CalibFactor));
-   mBetheBlockFcn->SetParameter(6, double(Saturation));
-   mBetheBlockFcn->SetParLimits(3, 1,1); //fixed.
-   mBetheBlockFcn->SetParLimits(4, 1,1);
-   mBetheBlockFcn->SetParLimits(5, 1,1);
-   mBetheBlockFcn->SetParLimits(6, 1,1);
+   mBetheBlochFcn->SetParameter(3,double(mParticleType.charge()));
+   mBetheBlochFcn->SetParameter(4,double(mParticleType.mass()));
+   mBetheBlochFcn->SetParameter(5, double(CalibFactor));
+   mBetheBlochFcn->SetParameter(6, double(Saturation));
+   mBetheBlochFcn->SetParLimits(3, 1,1); //fixed.
+   mBetheBlochFcn->SetParLimits(4, 1,1);
+   mBetheBlochFcn->SetParLimits(5, 1,1);
+   mBetheBlochFcn->SetParLimits(6, 1,1);
 
    if ((bandGraph()->GetN())>0){
-   bandGraph()->Fit("mBetheBlockFcn","R"); //R means use the range in TF1.
+   bandGraph()->Fit("mBetheBlochFcn","R"); //R means use the range in TF1.
    mBandParams.clear();
    for (int i=0; i<NBandParam; i++) 
-   mBandParams.push_back(mBetheBlockFcn->GetParameter(i));
+   mBandParams.push_back(mBetheBlochFcn->GetParameter(i));
    }
 
 
-   delete mBetheBlockFcn;
+   delete mBetheBlochFcn;
 
 
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNet.cc,v 1.5 2000/04/14 14:30:53 aihong Exp $
+ * $Id: StPidAmpNet.cc,v 1.6 2000/04/14 16:07:30 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNet.cc,v $
+ * Revision 1.6  2000/04/14 16:07:30  aihong
+ * change BetheBlock to BetheBloch :-)
+ *
  * Revision 1.5  2000/04/14 14:30:53  aihong
  * bug fixed in pushATrk()
  *
@@ -36,7 +39,7 @@
 #include "StMessMgr.h"
 
 #include "StPidAmpMaker/Infrastructure/StPidAmpNet.hh"
-#include "StPidAmpMaker/Include/BetheBlock.hh"
+#include "StPidAmpMaker/Include/BetheBloch.hh"
 
 #include "StPidAmpMaker/Infrastructure/StPidAmpChannelCollection.hh"
 
@@ -84,7 +87,7 @@ StPidAmpNet::StPidAmpNet(StPidAmpParticle def, StPidAmpChannelInfo channelInfo){
              mFitAmp=true;
             mFitReso=true;
 
-      StPidAmpNet::funcBandPt=&BetheBlock;
+      StPidAmpNet::funcBandPt=&BetheBloch;
      
      if(mParticleType.id()>0) setUp(); //set up slices and paths.
      //although setUp() is declared as virtual, in the constructor a 
@@ -136,18 +139,18 @@ double StPidAmpNet::dedxAtBandCenter(double rig){
   //always calculate the dedx at band center by using 
   //parameters in mBandParams.
        
-    TF1 mBandBetheBlockFcn("mBandBetheBlockFcn",funcBandPt, BandsBegin,BandsEnd, NBandParam);
+    TF1 mBandBetheBlochFcn("mBandBetheBlochFcn",funcBandPt, BandsBegin,BandsEnd, NBandParam);
 
-       mBandBetheBlockFcn.SetParameter(0,mBandParams[0]);
-       mBandBetheBlockFcn.SetParameter(1,mBandParams[1]);
-       mBandBetheBlockFcn.SetParameter(2,mBandParams[2]);
+       mBandBetheBlochFcn.SetParameter(0,mBandParams[0]);
+       mBandBetheBlochFcn.SetParameter(1,mBandParams[1]);
+       mBandBetheBlochFcn.SetParameter(2,mBandParams[2]);
         
-       mBandBetheBlockFcn.SetParameter(3,double(mParticleType.charge()));
-       mBandBetheBlockFcn.SetParameter(4,mParticleType.mass());
-       mBandBetheBlockFcn.SetParameter(5, double(CalibFactor));
-       mBandBetheBlockFcn.SetParameter(6, double(Saturation));
+       mBandBetheBlochFcn.SetParameter(3,double(mParticleType.charge()));
+       mBandBetheBlochFcn.SetParameter(4,mParticleType.mass());
+       mBandBetheBlochFcn.SetParameter(5, double(CalibFactor));
+       mBandBetheBlochFcn.SetParameter(6, double(Saturation));
 
-       return mBandBetheBlockFcn.Eval(fabs(rig),0,0);
+       return mBandBetheBlochFcn.Eval(fabs(rig),0,0);
 }
 //----------------------------------
 void StPidAmpNet::fillNet(StPidAmpTrkVector* trks, StPidAmpChannelCollection* set){
@@ -504,37 +507,37 @@ void StPidAmpNet::fitBand(TH3D* histo){
    double varyRange=0.3;
 
 
-   TF1 *mBetheBlockFcn = new TF1 ("mBetheBlockFcn",funcBandPt, fabs(mParticleType.start()),fabs(mParticleType.end()),NBandParam);
+   TF1 *mBetheBlochFcn = new TF1 ("mBetheBlochFcn",funcBandPt, fabs(mParticleType.start()),fabs(mParticleType.end()),NBandParam);
    //in derived classes, range should be BandsBegin, BandsEnd.
   
   
 
-   mBetheBlockFcn->SetParLimits(0,(mBandParams[0]-varyRange*fabs(mBandParams[0])),(mBandParams[0]+varyRange*fabs(mBandParams[0])));
-   mBetheBlockFcn->SetParLimits(1,(mBandParams[1]-varyRange*fabs(mBandParams[1])),(mBandParams[1]+varyRange*fabs(mBandParams[1])));
-   mBetheBlockFcn->SetParLimits(2,(mBandParams[2]-varyRange*fabs(mBandParams[2])),(mBandParams[2]+varyRange*fabs(mBandParams[2])));
+   mBetheBlochFcn->SetParLimits(0,(mBandParams[0]-varyRange*fabs(mBandParams[0])),(mBandParams[0]+varyRange*fabs(mBandParams[0])));
+   mBetheBlochFcn->SetParLimits(1,(mBandParams[1]-varyRange*fabs(mBandParams[1])),(mBandParams[1]+varyRange*fabs(mBandParams[1])));
+   mBetheBlochFcn->SetParLimits(2,(mBandParams[2]-varyRange*fabs(mBandParams[2])),(mBandParams[2]+varyRange*fabs(mBandParams[2])));
           
-   mBetheBlockFcn->SetParameter(3,double(mParticleType.charge()));//charge is 1 for mBGNet.
-   mBetheBlockFcn->SetParameter(4,mParticleType.mass());//mass is 1 for mBGNet.
-   mBetheBlockFcn->SetParameter(5, double(CalibFactor));
-   mBetheBlockFcn->SetParameter(6, double(Saturation));
-   mBetheBlockFcn->SetParLimits(3, 1,1); //fixed.
-   mBetheBlockFcn->SetParLimits(4, 1,1);
-   mBetheBlockFcn->SetParLimits(5, 1,1);
-   mBetheBlockFcn->SetParLimits(6, 1,1);
+   mBetheBlochFcn->SetParameter(3,double(mParticleType.charge()));//charge is 1 for mBGNet.
+   mBetheBlochFcn->SetParameter(4,mParticleType.mass());//mass is 1 for mBGNet.
+   mBetheBlochFcn->SetParameter(5, double(CalibFactor));
+   mBetheBlochFcn->SetParameter(6, double(Saturation));
+   mBetheBlochFcn->SetParLimits(3, 1,1); //fixed.
+   mBetheBlochFcn->SetParLimits(4, 1,1);
+   mBetheBlochFcn->SetParLimits(5, 1,1);
+   mBetheBlochFcn->SetParLimits(6, 1,1);
 
 
 
  if ((bandGraph()->GetN())>0) {
-   bandGraph()->Fit("mBetheBlockFcn","R"); //R means use the range in TF1.
+   bandGraph()->Fit("mBetheBlochFcn","R"); //R means use the range in TF1.
    mBandParams.clear();
    for (int i=0; i<NBandParam; i++) 
-   mBandParams.push_back(mBetheBlockFcn->GetParameter(i));
+   mBandParams.push_back(mBetheBlochFcn->GetParameter(i));
  }
 
 
    if (histo) histo->SetDirectory(0);
 
-   delete mBetheBlockFcn;
+   delete mBetheBlochFcn;
 
 }
 
@@ -650,7 +653,7 @@ void StPidAmpNet::pushATrk(StPidAmpTrk* theTrack,StPidAmpChannelCollection* set)
  //  if ( (rg>((*mSliceCollect)[idx])->leftEdge()) && (rg <((*mSliceCollect)[idx])->rightEdge()) ) { //slice bound checking needed for debugging.
  //to reduce run time, comment it out in the code released.
      ((*mSliceCollect)[idx])->fill(theTrack,(dedx-(dedxAtBandCenter(rg)-dedxAtBandCenter((*mSliceCollect)[idx]->meanRig())))); //transform to pixel 
-     //following the slope of BetheBlock curve, and do filling
+     //following the slope of BetheBloch curve, and do filling
  //  }
   
  } else if (set) {
