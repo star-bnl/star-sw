@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BetheBlochCalibrator.C,v 1.2 2000/08/10 20:52:56 aihong Exp $
+ * $Id: BetheBlochCalibrator.C,v 1.3 2002/12/30 20:03:19 aihong Exp $
  *
  * Author:Aihong Tang           Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: BetheBlochCalibrator.C,v $
+ * Revision 1.3  2002/12/30 20:03:19  aihong
+ * change include path
+ *
  * Revision 1.2  2000/08/10 20:52:56  aihong
  * change directory of Ntuples
  *
@@ -54,7 +57,7 @@
 
 
 #include <strstream.h>
-#include "/afs/rhic/star/packages/DEV00/StRoot/StEventUtilities/BetheBlochFunction.hh"
+#include "/afs/rhic/star/packages/DEV/StRoot/StEventUtilities/BetheBlochFunction.hh"
 
 
 void BetheBlochCalibrator(){
@@ -83,7 +86,7 @@ void BetheBlochCalibrator(){
 
 
 
- double pars[NParameters]={1.072,0.3199,2.028e-07,1,1,2.69555e-7,5.0e-4};//for mean70
+ double pars[NParameters]={1.072,0.3199,2.30966e-07,1,1,4.74599e-07,5.0e-4};//for mean70
     //we need to adjudge pars[2] and pars[5].
     //pars[2] describe uniform dE/dx shift.
     //pars[5] describe dE/dx squeeze or enlarge.
