@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0_ZS_SR.cxx,v 1.23 2004/02/03 20:07:18 jml Exp $
+ * $Id: TPCV2P0_ZS_SR.cxx,v 1.24 2004/03/04 21:51:29 ward Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC V2.0 Zero Suppressed Reader
@@ -35,6 +35,9 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0_ZS_SR.cxx,v $
+ * Revision 1.24  2004/03/04 21:51:29  ward
+ * Replaced MERGE_SEQUENCES with a StDAQMaker chain parameter, as suggested by Landgraf and Lauret.
+ *
  * Revision 1.23  2004/02/03 20:07:18  jml
  * added MERGE_SEQUENCES define
  *
@@ -111,13 +114,14 @@
 #include "TPCV2P0.hh"
 
 #define MAKE_THE_DAMNED_COMPILER_SILENT
-#define MERGE_SEQUENCES
+// #define MERGE_SEQUENCES replaced by mMergeSequences, Herb Ward, Mar 4 2004.
 
 #include "fee_pin.h"
 // 
 
-TPCV2P0_ZS_SR::TPCV2P0_ZS_SR(int s, TPCV2P0_Reader *det)
+TPCV2P0_ZS_SR::TPCV2P0_ZS_SR(int s, TPCV2P0_Reader *det, char mergeSequences)
 {
+  assert(mergeSequences==0||mergeSequences==1); mMergeSequences=mergeSequences;
   sector = s-1; // convert the sector into internal representation
   detector = det;
   if (detector->ercpy->verbose) cout << "Constructing TPCV2P0_ZS_SR" << endl;
@@ -327,11 +331,8 @@ int TPCV2P0_ZS_SR::initialize()
 	    int len = work & 0x1f;
 	    if (start >= oldstart) { // still on same pad
 
-#ifdef MERGE_SEQUENCES
-	      if (start>lastbin+1)  Pad_array[padrow-1][pad-1].nseq++;
-#else
-	      Pad_array[padrow-1][pad-1].nseq++;   
-#endif
+              if(mMergeSequences) { if (start>lastbin+1)  Pad_array[padrow-1][pad-1].nseq++; }
+	      else { Pad_array[padrow-1][pad-1].nseq++;  }
 
 	      // don't increment nseq if sequences are adjacent!
 	      lastbin = start+len-1;
@@ -431,7 +432,7 @@ int TPCV2P0_ZS_SR::initialize()
 	    if (start >= oldstart) { // still on same pad
 	      //is this sequence adjacent to previous one?
 
-#ifdef MERGE_SEQUENCES
+              if(mMergeSequences) {  // Replaces an ifdef MERGE_SEQUENCES, Herb Ward, Mar 4 2004
 	      if (start>lastbin+1)  {   // Not adjoining previous sequence, no merge!
 		if (pad_seq>=Pad_array[padrow-1][pad-1].nseq) {
 		  printf("sequence overrun %s %d row %d pad %d seq %d\n",
@@ -453,7 +454,7 @@ int TPCV2P0_ZS_SR::initialize()
  		Pad_array[padrow-1][pad-1].seq[pad_seq-1].Length += len;
  		adc_locn +=len;
  	      }
-#else
+              } else { // if(mMergeSequences   Herb replaces an #else, Mar 4 2004.
 
 	      if (pad_seq>=Pad_array[padrow-1][pad-1].nseq) {
 		printf("sequence overrun %s %d row %d pad %d seq %d\n",
@@ -465,7 +466,7 @@ int TPCV2P0_ZS_SR::initialize()
 	      Pad_array[padrow-1][pad-1].seq[pad_seq].FirstAdc = adc_locn;
 	      adc_locn +=len;
 	      pad_seq++;
-#endif
+              } // if(mMergeSequences)  Herb Ward, Mar 4 2004.
  
 	      lastbin = start+len-1;
 	      oldstart = start;

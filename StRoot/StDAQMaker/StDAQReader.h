@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.26 2004/02/18 20:17:45 ward Exp $
+ * $Id: StDAQReader.h,v 1.27 2004/03/04 21:51:27 ward Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.27  2004/03/04 21:51:27  ward
+ * Replaced MERGE_SEQUENCES with a StDAQMaker chain parameter, as suggested by Landgraf and Lauret.
+ *
  * Revision 1.26  2004/02/18 20:17:45  ward
  * Access SSD data in makers.
  *
@@ -168,7 +171,7 @@ public:
   virtual void setFTPCVersion(const char* vers = "FTPV1P0"); 
   virtual const char *getTPCVersion()  const {return fTPCVersion ;} 
   virtual const char *getFTPCVersion() const {return fFTPCVersion;} 
-  StTPCReader  *getTPCReader (); 
+  StTPCReader  *getTPCReader (char mergeSequences); 
   StSSDReader  *getSSDReader ();
   StEMCReader  *getEMCReader (); 
   StEEMCReader  *getEEMCReader (); 

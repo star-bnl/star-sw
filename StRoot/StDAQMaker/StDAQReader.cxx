@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.42 2004/02/18 20:17:44 ward Exp $
+ * $Id: StDAQReader.cxx,v 1.43 2004/03/04 21:51:27 ward Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.43  2004/03/04 21:51:27  ward
+ * Replaced MERGE_SEQUENCES with a StDAQMaker chain parameter, as suggested by Landgraf and Lauret.
+ *
  * Revision 1.42  2004/02/18 20:17:44  ward
  * Access SSD data in makers.
  *
@@ -347,12 +350,12 @@ void StDAQReader::setFTPCVersion(const char* vers)
 //_____________________________________________________________________________
    int StDAQReader::getEventSize()const {return  fEventInfo->EventLength;}
 //_____________________________________________________________________________
-StTPCReader *StDAQReader::getTPCReader() 
+StTPCReader *StDAQReader::getTPCReader(char mergeSequences) 
 {
   int updateStatus;
   if(!TPCPresent()) return 0;
   if (!fTPCReader) {
-    fTPCReader = new StTPCReader(this);
+    fTPCReader = new StTPCReader(this,mergeSequences);
     updateStatus=fTPCReader->Update();
     if(updateStatus) { delete fTPCReader; fTPCReader=0; return 0; } // No TPC data.  Herb Ward, Apr 22 2003.
   }

@@ -21,6 +21,7 @@ class StDAQMaker : public StIOInterFace {
   StEvtHddr 	*fEvtHddr;	//! pointer to Event Header
   StDAQReader 	*fDAQReader;	//! pointer to StDAQReader
   TObjectSet 	*fDAQReaderSet;	//! pointer to StDAQReader DataSet
+  char mMergeSequences;
  public:
   StDAQMaker(const char *name="DAQInput",const char *inputFile=0);
   virtual       ~StDAQMaker();
@@ -33,11 +34,11 @@ class StDAQMaker : public StIOInterFace {
   virtual Int_t  Skip(Int_t Nskip=1);
 //	for compatability with StIOInterFace
   void SetBranch(const Char_t*,const Char_t*,const Char_t*, const Option_t*){};
-
-
+  void MergeSequences() { mMergeSequences=1; }
+  void DoNotMergeSequences() { mMergeSequences=0; }
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StDAQMaker.h,v 1.7 2003/09/02 17:55:30 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StDAQMaker.h,v 1.8 2004/03/04 21:51:27 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StDAQMaker, 0)   //
 };

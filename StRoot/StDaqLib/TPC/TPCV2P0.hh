@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: TPCV2P0.hh,v 1.3 1999/07/21 21:32:38 levine Exp $
+ * $Id: TPCV2P0.hh,v 1.4 2004/03/04 21:51:29 ward Exp $
  * Author: Jeff Landgraf and M.J. LeVine
  ***************************************************************************
  * Description: declarations For TPC version 2.0
@@ -12,7 +12,12 @@
  *
  ***************************************************************************
  * $Log: TPCV2P0.hh,v $
+ * Revision 1.4  2004/03/04 21:51:29  ward
+ * Replaced MERGE_SEQUENCES with a StDAQMaker chain parameter, as suggested by Landgraf and Lauret.
+ *
  * Revision 1.3  1999/07/21 21:32:38  levine
+ *
+ *
  * changes to include error logging to file.
  *
  * There are now 2 constructors for EventReader:
@@ -64,7 +69,7 @@ public:
 
   int MemUsed();
 
-  TPCV2P0_ZS_SR(int sector, TPCV2P0_Reader *);
+  TPCV2P0_ZS_SR(int sector, TPCV2P0_Reader *,char mergeSequences);
   int initialize();
   int getFeeSequences(int Fee, int Pin, int *nSeq, Sequence **SeqData);
   
@@ -77,6 +82,7 @@ private:
   classname(Bank_TPCSEQD) *seqd_p[6][3];
   classname(Bank_TPCMZCLD) *cld_p[6][3];
   
+  char mMergeSequences;
   int sector;
   int nsptrow[TPC_PADROWS]; // num space pts each pad row
   SpacePt *RowSpacePts[TPC_PADROWS]; // pointer to SpacePt array for each padrow 

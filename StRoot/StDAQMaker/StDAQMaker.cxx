@@ -88,7 +88,7 @@ Int_t StDAQMaker::Make(){
 
   if (GetDebug()<=1) return 0;
 
-  StTPCReader *myTPCReader = fDAQReader->getTPCReader();
+  StTPCReader *myTPCReader = fDAQReader->getTPCReader(mMergeSequences);
   for (int sector =1; sector <=12; sector++)
   {
     unsigned char* padList;
