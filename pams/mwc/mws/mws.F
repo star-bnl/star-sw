@@ -161,7 +161,8 @@ CC:>------------------------------------------------------------------
      +.and.        (Rhit .lt. Geom(1).r2max+10.0)  ) then
 *--
                Mevent(1).no_hits = Mevent(1).no_hits + 1
-               if (Mhit(Ihit).track_p .ne. Mhit(Ihit-1).track_p) then
+               if (Ihit .eq. 1 .or. 
+     &          Mhit(Ihit).track_p .ne. Mhit(Ihit-1).track_p) then
                   Mevent(1).no_tracks = Mevent(1).no_tracks + 1
                endif 
 *--
