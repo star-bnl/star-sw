@@ -61,14 +61,26 @@ endif
 if ( -e .sl302_gcc323) then
     # Support for earlier version seems strange but
     # in this case, kernel and gcc libs are the same
-    if ( ! -e .sl301_gcc323) then
-	echo "Forward compatibility assumed between SL301 -> SL302"
-	ln -s .sl302_gcc323 .sl301_gcc323
+
+    #if ( ! -e .sl301_gcc323) then
+    #	echo "Forward compatibility assumed between SL301 -> SL302"
+    #	ln -s .sl302_gcc323 .sl301_gcc323
+    #endif
+    # Due to BNL custom packages in SL302, SL301 is NOT forward compatible
+    # If a link is found, remove it.
+    if ( -l .sl301_gcc323 ) then
+	echo "Assumed forward compatibility SL301 -> SL302 erroneous. Removing"
+	rm -f .sl301_gcc323
     endif
+    if ( ! -e .sl303_gcc323) then
+    	echo "Backward compatibility assumed between SL303 -> SL302"
+    	ln -s .sl302_gcc323 .sl303_gcc323
+    endif    
     if ( ! -e .rh3_gcc323 ) then
 	echo "RHE supported through SL3"
 	ln -s .sl302_gcc323 .rh3_gcc323
     endif
+
 else
     # A bit risky. Will get argument as confirmation
     # Note that those are bacward compatibility links
