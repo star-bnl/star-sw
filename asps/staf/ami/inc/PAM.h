@@ -2,6 +2,7 @@
 #define PAM_H
 
 #include "emlLib.h"
+#include "idl_types.h"
 #include "table_header.h"
 #include "amiLib.h"
 
