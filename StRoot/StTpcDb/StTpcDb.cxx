@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.14 2000/01/11 15:49:52 hardtke Exp $
+ * $Id: StTpcDb.cxx,v 1.15 2000/01/24 15:31:31 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.15  2000/01/24 15:31:31  hardtke
+ * change to use new gain and t0 tables
+ *
  * Revision 1.14  2000/01/11 15:49:52  hardtke
  * get Electronics table from Calibrations database, Fix error messages
  *
@@ -197,16 +200,18 @@ StTpcGainI* StTpcDb::Gain(int sector){
   }
   if(!gain[sector-1]){
    const int dbIndex = kCalibration;
-   char dbname[25];
-   sprintf(dbname,"Sector_%.2d/tpcGainFactors",sector);
-   printf("Getting %s \n",dbname);
+   char dbname[25],dbname2[25];
+   sprintf(dbname,"Sector_%.2d/tpcISGains",sector);
+   sprintf(dbname2,"Sector_%.2d/tpcOSGains",sector);
+   printf("Getting %s , %s\n",dbname,dbname2);
    if (tpc[dbIndex]){
     St_DataSet* tpd = tpc[dbIndex]->Find(dbname);
-    if (!(tpd && tpd->HasData()) ){
+    St_DataSet* tpd2 = tpc[dbIndex]->Find(dbname2);
+    if (!(tpd && tpd->HasData() && tpd2 && tpd2->HasData()) ){
      gMessMgr->Message("StTpcDb::Error Finding Tpc Gain Factors","E");
      return 0;
     }
-    StRTpcGain* wptemp = new StRTpcGain((St_tpcGainFactors* )tpd);
+    StRTpcGain* wptemp = new StRTpcGain((St_tpcISGains*)tpd,(St_tpcOSGains*)tpd2);
     wptemp->SetPadPlanePointer(PadPlaneGeometry());
     gain[sector-1] = (StTpcGainI*)wptemp;
    }
@@ -222,16 +227,18 @@ StTpcT0I* StTpcDb::T0(int sector){
   }
   if(!t0[sector-1]){
    const int dbIndex = kCalibration;
-   char dbname[25];
-   sprintf(dbname,"Sector_%.2d/tpcTimeOffsets",sector);
-   printf("Getting %s \n",dbname);
+   char dbname[25],dbname2[25];
+   sprintf(dbname,"Sector_%.2d/tpcISTimeOffsets",sector);
+   sprintf(dbname2,"Sector_%.2d/tpcOSTimeOffsets",sector);
+   printf("Getting %s , %s \n",dbname,dbname2);
    if (tpc[dbIndex]){
     St_DataSet* tpd = (St_DataSet*)tpc[dbIndex]->Find(dbname);
-    if (!(tpd && tpd->HasData()) ){
+    St_DataSet* tpd2 = (St_DataSet*)tpc[dbIndex]->Find(dbname2);
+    if (!(tpd && tpd->HasData() && tpd2 && tpd2->HasData()) ){
      gMessMgr->Message("StTpcDb::Error Finding Tpc Time Offsets","E");
      return 0;
     }
-    StRTpcT0* wptemp = new StRTpcT0((St_tpcTimeOffsets*)tpd);
+    StRTpcT0* wptemp = new StRTpcT0((St_tpcISTimeOffsets*)tpd,(St_tpcOSTimeOffsets*)tpd2);
     wptemp->SetPadPlanePointer(PadPlaneGeometry());
     t0[sector-1] = (StTpcT0I*)wptemp;
    }

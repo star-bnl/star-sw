@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTpcGain.cxx,v 1.7 1999/12/16 22:00:53 hardtke Exp $
+ * $Id: StRTpcGain.cxx,v 1.8 2000/01/24 15:31:31 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRTpcGain.cxx,v $
+ * Revision 1.8  2000/01/24 15:31:31  hardtke
+ * change to use new gain and t0 tables
+ *
  * Revision 1.7  1999/12/16 22:00:53  hardtke
  * add CVS tags
  *
@@ -29,9 +32,9 @@ float StRTpcGain::getGain(int row, int pad)   const {
   float gain = 0;
   if (row > 0 && padplane->indexForRowPad(row,pad) > 0) {
     if (row<=padplane->numberOfInnerRows())
-      gain =  (*mGain)[0].innerSectorGainFactors[padplane->indexForRowPad(row,pad)];
+      gain =  (*mGainIS)[0].gain[padplane->indexForRowPad(row,pad)];
     else if (row>padplane->numberOfInnerRows()&&row<=padplane->numberOfRows())
-      gain = (*mGain)[0].outerSectorGainFactors[padplane->indexForRowPad(row,pad)];
+      gain = (*mGainOS)[0].gain[padplane->indexForRowPad(row,pad)];
   }
   return gain;
 } 
