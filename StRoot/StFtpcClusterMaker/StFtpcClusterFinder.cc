@@ -1,6 +1,10 @@
-// $Id: StFtpcClusterFinder.cc,v 1.63 2004/08/09 12:50:14 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.64 2004/09/07 14:08:17 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.64  2004/09/07 14:08:17  jcs
+// use the IAttr(".histos") to control histogramming
+// remove obsolete clfradius histogram
+//
 // Revision 1.63  2004/08/09 12:50:14  jcs
 // move initialization or westHits and eastHits outside of loop over iftpc
 //
@@ -210,7 +214,6 @@
 
 #include "asic_map_correction.h"
 
-//TH1F *clfradius;
 
 #ifndef  DEBUGFILE
 
@@ -303,7 +306,6 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
   mhpad = hpad;
   mhtime = htime;
 
-//clfradius=new TH1F("clfradius","radius",140,0,35);
 }
 
 StFtpcClusterFinder::~StFtpcClusterFinder()
@@ -551,7 +553,7 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
                   int entry;
                   for(entry=0; entry<NewSequences[iNewSeqIndex].Length; entry++)
                     {
-                      mHisto->Fill(iHardSec-1, // sector
+                      if (mHisto) mHisto->Fill(iHardSec-1, // sector
                                    entry+NewSequences[iNewSeqIndex].startTimeBin, //bin
                                    NewSequences[iNewSeqIndex].FirstAdc[entry]); // weight
                       if (iHardSec >= 1 && iHardSec <= 30 ) {
@@ -860,7 +862,6 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 #ifdef DEBUG 
   cout<<"finished running cluster search"<<endl;
 #endif
-  //clfradius->DrawCopy();
   int dummy=1;
   return dummy;
 }
@@ -1245,7 +1246,6 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
       if(padtrans(Peak, iRow, iSec, 
 		   pRadius, pDeflection))
       {
-	//clfradius->Fill(Peak->Rad);
       if (Peak->x == 0. && Peak->y == 0.) {
 	// This if-statement can be deleted as soon as the slow simulator is fixed. This also occurs for FTPC DAQ data.
 	gMessMgr->Message("Hit rejected because of an error in the FTPC data. (x, y, z) = (0. ,0., z)", "W", "OS");
@@ -1263,9 +1263,9 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	{
 	  // create new point
 
-	  // fill QA histograms
-	  mhpad->Fill(Cluster->EndPad +1 - Cluster->StartPad,1);
-	  mhtime->Fill(Peak->Sequence.Length,1);
+	  // fill QA histograms - unless BFC option "noHists" selected
+	  if (mhpad)  mhpad->Fill(Cluster->EndPad +1 - Cluster->StartPad,1);
+	  if (mhtime) mhtime->Fill(Peak->Sequence.Length,1);
 
 	  Int_t numPoint = mPoint->GetEntriesFast();
 	  if (numPoint >= mPoint->GetSize()) mPoint->Expand(mPoint->GetSize()+5000);
@@ -1714,7 +1714,6 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	  if(padtrans(&(Peak[iPeakIndex]), iRow, iSec, 
 		       pRadius, pDeflection))
           {
-	    //clfradius->Fill(Peak[iPeakIndex].Rad);
 	  if (Peak[iPeakIndex].x == 0. && Peak[iPeakIndex].y == 0.) {
 	    // This if-statement can be deleted as soon as the slow simulator is fixed. This also occurs for FTPC DAQ data.
 	    gMessMgr->Message("Hit rejected because of an error in the FTPC data. (x, y, z) = (0. ,0., z)", "W", "OS");
@@ -1735,9 +1734,9 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	    //&& Peak[iPeakIndex].Sequence.Length<=MAXTIMELENGTH)
 	    {
 
-	      // fill QA histograms
-	      mhpad->Fill(Cluster->EndPad +1 - Cluster->StartPad,iNumPeaks);
-	      mhtime->Fill(Peak[iPeakIndex].Sequence.Length,iNumPeaks);
+	      // fill QA histograms - unless BFC option "noHists" selected
+	      if (mhpad)  mhpad->Fill(Cluster->EndPad +1 - Cluster->StartPad,iNumPeaks);
+	      if (mhtime) mhtime->Fill(Peak[iPeakIndex].Sequence.Length,iNumPeaks);
 
 	      // create new point
 	      Int_t numPoint = mPoint->GetEntriesFast();
