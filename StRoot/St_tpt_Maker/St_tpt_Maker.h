@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.h,v 1.16 2000/11/03 21:23:43 saulys Exp $
+// $Id: St_tpt_Maker.h,v 1.17 2000/11/25 23:22:51 fisyak Exp $
 // $Log: St_tpt_Maker.h,v $
+// Revision 1.17  2000/11/25 23:22:51  fisyak
+// move dEdx calculations into StdEdxMaker
+//
 // Revision 1.16  2000/11/03 21:23:43  saulys
 // Added ExB correction code
 //
@@ -69,8 +72,6 @@ class St_tcl_tpc_index_type;
 class St_tpt_pars;
 class St_tpt_spars;
 class St_tte_control;
-class St_tdeparm;
-class St_tpipar;
 class TH1F;
 class TH2F;
 class TH3F;
@@ -84,19 +85,16 @@ private:
   Bool_t m_mkfinal;   	//control flag for final ntuple production
   Bool_t m_tteEvalOn; 	//switch for the evaluation
   Bool_t m_tptResOn;  	//switch for the residuals calculation
-  Bool_t m_ensembleOn;  //switch for ensemble truncation
   TString m_InputDataSetName; //! 
   TString m_InputHitName; //!
 
-//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.16 2000/11/03 21:23:43 saulys Exp $";
+//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.17 2000/11/25 23:22:51 fisyak Exp $";
   St_tpg_pad_plane      *m_tpg_pad_plane;	//! Constants that describe TPC pad plane
   St_tcl_tpc_index_type *m_type;   		//! Table of many-to-many index 
 	                                        //! correlations for tpc evaluations
   St_tpt_pars           *m_tpt_pars;  		//! Parameters for the track finding
   St_tpt_spars          *m_tpt_spars; 		//! Parameters for the track finding
   St_tte_control        *m_tte_control;		//! Control switches for the evaluation 
-  St_tdeparm            *m_tdeparm;   		//! Parameters for the tde dedx module
-  St_tpipar             *m_tpipar;    		//! parameter file for tpi package
   StMagUtilities            *m_mag;                 //! ExB code
   void         MakeHistograms();// Histograms for tracking
   void         VertexEffResolutionInit();// Initial function  for VertexEffResolution
@@ -213,7 +211,7 @@ public:
   virtual Int_t  Finish();
   virtual void   Set_final(Bool_t m=kFALSE){m_mkfinal = m;}
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_tpt_Maker.h,v 1.16 2000/11/03 21:23:43 saulys Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_tpt_Maker.h,v 1.17 2000/11/25 23:22:51 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  ClassDef(St_tpt_Maker, 1)   //StAF chain virtual base class for Makers
 };
