@@ -1,12 +1,15 @@
-#ifndef STAR_RMath
-#define STAR_RMath
+#ifndef STAR_StCL
+#define STAR_StCL
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/09/99  
 //
 // The set of methods to work with the plain matrix / vector
 // "derived" from  http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 //
-// $Id: RMath.h,v 1.6 1999/09/27 23:45:43 fine Exp $
-// $Log: RMath.h,v $
+// $Id: StCL.h,v 1.1 1999/09/28 19:45:10 fine Exp $
+// $Log: StCL.h,v $
+// Revision 1.1  1999/09/28 19:45:10  fine
+// RMath class has been renamed to StCL - STAR CERN Library
+//
 // Revision 1.6  1999/09/27 23:45:43  fine
 // Several methods to calculate errors were introduced
 //
@@ -36,7 +39,7 @@
 //                                                                                   //
 ///////////////////////////////////////////////////////////////////////////////////////
 
-class RMath  {
+class StCL  {
   public:
     static float  *ucopy(const float  *a, float  *b, int n);
     static double *ucopy(const float  *a, double *b, int n);
@@ -146,90 +149,90 @@ class RMath  {
        static double *trupck(double *u, double *s, int m);
        static double *trsat (double *s, double *a, double *b, int m, int n);
 
-    ClassDef(RMath,0)  //Interface to matrix routines
+    ClassDef(StCL,0)  //Interface to matrix routines
 
 };
 
 //___________________________________________________________________________
-inline void RMath::mxmad(float *a, float *b, float *c, int i, int j, int k)
+inline void StCL::mxmad(float *a, float *b, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
   mxmad_0_(0, a, b, c, i, j, k);   }
 
 //___________________________________________________________________________
-inline void RMath:: mxmad1(float *a, float *q, float *c, int i, int j, int k)
+inline void StCL:: mxmad1(float *a, float *q, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad1.gif"> </P> End_Html // 
  mxmad_0_(1, a, q, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline void RMath::mxmad2(float *p, float *b, float *c, int i, int j, int k)
+inline void StCL::mxmad2(float *p, float *b, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad2.gif"> </P> End_Html // 
  mxmad_0_(2, p, b, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline void RMath::mxmad3(float *p, float *q, float *c, int i, int j, int k)
+inline void StCL::mxmad3(float *p, float *q, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad3.gif"> </P> End_Html // 
  mxmad_0_(3, p, q, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline void RMath::mxmpy(float *a, float *b, float *c, int i, int j, int k)
+inline void StCL::mxmpy(float *a, float *b, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmpy.gif"> </P> End_Html // 
   mxmad_0_(4, a, b, c, i, j, k); }
 
 //___________________________________________________________________________
-inline void RMath::mxmpy1(float *a, float *q, float *c, int i, int j, int k)
+inline void StCL::mxmpy1(float *a, float *q, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmpy1.gif"> </P> End_Html // 
  mxmad_0_(5, a, q, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline void RMath::mxmpy2(float *p, float *b, float *c, int i, int j, int k)
+inline void StCL::mxmpy2(float *p, float *b, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmpy2.gif"> </P> End_Html // 
  mxmad_0_(6, p, b, c, i, j, k); }
 
 //___________________________________________________________________________
-inline void RMath::mxmpy3(float *p, float *q, float *c, int i, int j, int k)
+inline void StCL::mxmpy3(float *p, float *q, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmpy3.gif"> </P> End_Html // 
  mxmad_0_(7, p, q, c, i, j, k); }
 
 //___________________________________________________________________________
-inline void RMath::mxmub(float *a, float *b, float *c, int i, int j, int k)
+inline void StCL::mxmub(float *a, float *b, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmub.gif"> </P> End_Html // 
  mxmad_0_(8, a, b, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline void RMath::mxmub1(float *a, float *q, float *c, int i, int j, int k)
+inline void StCL::mxmub1(float *a, float *q, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmub1.gif"> </P> End_Html // 
   mxmad_0_(9, a, q, c, i, j, k); }
 
 //___________________________________________________________________________
-inline void RMath::mxmub2(float *p, float *b, float *c, int i, int j, int k)
+inline void StCL::mxmub2(float *p, float *b, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmub2.gif"> </P> End_Html // 
   mxmad_0_(10, p, b, c, i, j, k); }
 
 //___________________________________________________________________________
-inline void RMath::mxmub3(float *p, float *q, float *c, int i, int j, int k)
+inline void StCL::mxmub3(float *p, float *q, float *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmub3.gif"> </P> End_Html // 
   mxmad_0_(11, p, q, c, i, j, k); }
 
 //___________________________________________________________________________
-inline void RMath::mxmlrt(float *a, float *b, float *x, int ni, int nj)
+inline void StCL::mxmlrt(float *a, float *b, float *x, int ni, int nj)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmlrt.gif"> </P> End_Html // 
   mxmlrt_0_(0, a, b, x, ni, nj); }
 
 //___________________________________________________________________________
-inline void RMath::mxmltr(float *a, float *b, float *x, int ni, int nj)
+inline void StCL::mxmltr(float *a, float *b, float *x, int ni, int nj)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmltr.gif"> </P> End_Html // 
   mxmlrt_0_(1, a, b, x, ni, nj);   }
@@ -238,85 +241,85 @@ inline void RMath::mxmltr(float *a, float *b, float *x, int ni, int nj)
 //--   double version --
 
 //___________________________________________________________________________
-inline void RMath::mxmad(double *a, double *b, double *c, int i, int j, int k)
+inline void StCL::mxmad(double *a, double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
   mxmad_0_(0, a, b, c, i, j, k);   }
 
 //___________________________________________________________________________
-inline void RMath:: mxmad1(double *a, double *b, double *c, int i, int j, int k)
+inline void StCL:: mxmad1(double *a, double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
  mxmad_0_(1, a, b, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline void RMath::mxmad2(double *a, double *b, double *c, int i, int j, int k)
+inline void StCL::mxmad2(double *a, double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
  mxmad_0_(2, a, b, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline void RMath::mxmad3(double *a, double *b, double *c, int i, int j, int k)
+inline void StCL::mxmad3(double *a, double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
  mxmad_0_(3, a, b, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline void RMath::mxmpy(double *a, double *b, double *c, int i, int j, int k)
+inline void StCL::mxmpy(double *a, double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
   mxmad_0_(4, a, b, c, i, j, k); }
 
 //___________________________________________________________________________
-inline void RMath::mxmpy1(double *a, double *b, double *c, int i, int j, int k)
+inline void StCL::mxmpy1(double *a, double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
  mxmad_0_(5, a, b, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline void RMath::mxmpy2(double *a, double *b, double *c, int i, int j, int k)
+inline void StCL::mxmpy2(double *a, double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
  mxmad_0_(6, a, b, c, i, j, k); }
 
 //___________________________________________________________________________
-inline void RMath::mxmpy3(double *a, double *b, double *c, int i, int j, int k)
+inline void StCL::mxmpy3(double *a, double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
  mxmad_0_(7, a, b, c, i, j, k); }
 
 //___________________________________________________________________________
-inline void RMath::mxmub(double *a, double *b, double *c, int i, int j, int k)
+inline void StCL::mxmub(double *a, double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
  mxmad_0_(8, a, b, c, i, j, k);  }
 
 //___________________________________________________________________________
-inline void RMath::mxmub1(double *a, double *b, double *c, int i, int j, int k)
+inline void StCL::mxmub1(double *a, double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
   mxmad_0_(9, a, b, c, i, j, k); }
 
 //___________________________________________________________________________
-inline void RMath::mxmub2(double *a, double *b, double *c, int i, int j, int k)
+inline void StCL::mxmub2(double *a, double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
   mxmad_0_(10, a, b, c, i, j, k); }
 
 //___________________________________________________________________________
-inline void RMath::mxmub3(double *a, double *b, double *c, int i, int j, int k)
+inline void StCL::mxmub3(double *a, double *b, double *c, int i, int j, int k)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
   mxmad_0_(11, a, b, c, i, j, k); }
 
 //___________________________________________________________________________
-inline void RMath::mxmlrt(double *a, double *b, double *c, int ni, int nj)
+inline void StCL::mxmlrt(double *a, double *b, double *c, int ni, int nj)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
  mxmlrt_0_(0, a, b, c, ni, nj); }
 
 //___________________________________________________________________________
-inline void RMath::mxmltr(double *a, double *b, double *c, int ni, int nj)
+inline void StCL::mxmltr(double *a, double *b, double *c, int ni, int nj)
 {
  // Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/mxpack_mxmad.gif"> </P> End_Html // 
  mxmlrt_0_(1, a, b, c, ni, nj);   }
@@ -324,11 +327,11 @@ inline void RMath::mxmltr(double *a, double *b, double *c, int ni, int nj)
 // ----
 
 //________________________________________________________
-inline float *RMath::ucopy(const float *b, float *a, int n)
+inline float *StCL::ucopy(const float *b, float *a, int n)
 { if (n <= 0) return 0; memcpy(a,b,n*sizeof(float)); return a;}
 
 //________________________________________________________
-inline float *RMath::ucopy(const double *b, float *a, int n)
+inline float *StCL::ucopy(const double *b, float *a, int n)
 { 
   if (n <= 0) return 0; 
   for (int i=0;i<n;i++,a++,b++) *a = float(*b);
@@ -336,7 +339,7 @@ inline float *RMath::ucopy(const double *b, float *a, int n)
 }
 
 //________________________________________________________
-inline double *RMath::ucopy(const float *b, double *a, int n)
+inline double *StCL::ucopy(const float *b, double *a, int n)
 { 
   if (n <= 0) return 0; 
   for (int i=0;i<n;i++,a++,b++) *a = double(*b);
@@ -344,11 +347,11 @@ inline double *RMath::ucopy(const float *b, double *a, int n)
 }
 
 //________________________________________________________
-inline double *RMath::ucopy(const double *b, double *a, int n)
+inline double *StCL::ucopy(const double *b, double *a, int n)
 { if (n <= 0) return 0; memcpy(a,b,n*sizeof(double)); return a;}
 
 //________________________________________________________
-inline float *RMath::vadd(float *b, float *c,  float *a, int n)
+inline float *StCL::vadd(float *b, float *c,  float *a, int n)
 { 
   if (n <= 0)  return 0;
   for (int i=0;i<n;i++) a[i] = b[i] + c[i];
@@ -356,7 +359,7 @@ inline float *RMath::vadd(float *b, float *c,  float *a, int n)
 }
 
 //________________________________________________________
-inline double *RMath::vadd(double *b, double *c,  double *a, int n)
+inline double *StCL::vadd(double *b, double *c,  double *a, int n)
 { 
   if (n <= 0)  return 0;
   for (int i=0;i<n;i++) a[i] = b[i] + c[i];
@@ -364,7 +367,7 @@ inline double *RMath::vadd(double *b, double *c,  double *a, int n)
 }
 
 //________________________________________________________
-inline float *RMath::vsub(float *a, float *b, float *x, int n)
+inline float *StCL::vsub(float *a, float *b, float *x, int n)
 { 
   if (n <= 0) return 0;
   for (int i=0;i<n;i++) x[i] = a[i]-b[i];
@@ -372,7 +375,7 @@ inline float *RMath::vsub(float *a, float *b, float *x, int n)
 }
 
 //________________________________________________________
-inline double *RMath::vsub(double *a, double *b, double *x, int n)
+inline double *StCL::vsub(double *a, double *b, double *x, int n)
 { 
   if (n <= 0) return 0;
   for (int i=0;i<n;i++) x[i] = a[i]-b[i];
@@ -380,14 +383,14 @@ inline double *RMath::vsub(double *a, double *b, double *x, int n)
 }
 
 //________________________________________________________
-inline float *RMath::vcopyn(float *a, float *x, int n)
+inline float *StCL::vcopyn(float *a, float *x, int n)
 { 
   if (n <= 0) return 0;
   for (int i=0;i<n;i++) x[i] = -a[i];
   return x;
 }
 //________________________________________________________
-inline double *RMath::vcopyn(double *a, double *x, int n)
+inline double *StCL::vcopyn(double *a, double *x, int n)
 { 
   if (n <= 0) return 0;
   for (int i=0;i<n;i++) x[i] = -a[i];
@@ -395,7 +398,7 @@ inline double *RMath::vcopyn(double *a, double *x, int n)
 }
 
 //________________________________________________________
-inline float *RMath::uzero(float *a, int n1, int n2)
+inline float *StCL::uzero(float *a, int n1, int n2)
 { 
   // Attention: n1, n2 is "Fortran-like index
   // namely the first element has index "1" 
@@ -404,7 +407,7 @@ inline float *RMath::uzero(float *a, int n1, int n2)
 }
 
 //________________________________________________________
-inline double *RMath::uzero(double *a, int n1, int n2)
+inline double *StCL::uzero(double *a, int n1, int n2)
 { 
   // Attention: n1, n2 is "Fortran-like index
   // namely the first element has index "1" 
@@ -413,14 +416,14 @@ inline double *RMath::uzero(double *a, int n1, int n2)
 }
 
 //________________________________________________________
-inline float *RMath::vzero(float *a, int n1)
+inline float *StCL::vzero(float *a, int n1)
 { 
   if (n1 <= 0) return 0;
   return (float *)memset(a,0,n1*sizeof(float));
 }
 
 //________________________________________________________
-inline double *RMath::vzero(double *a, int n1)
+inline double *StCL::vzero(double *a, int n1)
 { 
   if (n1 <= 0) return 0;
   return (double *)memset(a,0,n1*sizeof(double));
