@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.cc,v 1.14 2002/01/04 16:05:48 caines Exp $
+ * $Id: StSvtAnalysis.cc,v 1.15 2002/04/25 20:34:50 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -51,6 +51,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysis.cc,v $
+ * Revision 1.15  2002/04/25 20:34:50  caines
+ * Pass bad anode information into cluster fitter
+ *
  * Revision 1.14  2002/01/04 16:05:48  caines
  * fix overstepping of array bounds
  *
@@ -106,7 +109,7 @@
 #include "StSequence.hh"
 #include "StDAQMaker/StSVTReader.h"
 #include "StSvtClassLibrary/StSvtHybridData.hh"
-
+#include "StSvtSeqAdjMaker/StSvtBadAnode.hh"
 #include "StSvtAnalysis.hh"
 
 int    Compare_Point ( const void *, const void *);   //nedd to declare here for some odd reason.
@@ -117,6 +120,7 @@ StSvtAnalysis::StSvtAnalysis(int TotalNumberOfHybrids)
   mHybridRawData           = NULL;
   mHybridCluster           = NULL;
   mSvtSequence             = NULL;
+  mSvtBadAnode             = NULL;
 
   m_nWrkBkt = 0;
   m_nUndBkt = 0;
@@ -247,6 +251,7 @@ StSvtAnalysis::~StSvtAnalysis()
 void StSvtAnalysis::SetPointers(StSvtHybridData* hybAdjData,
 				StSvtHybridData* hybRawData,  
                                 StSvtHybridCluster* hybClu,
+				StSvtBadAnode* BadAnodes,
 				int NumberOfHybrids, int PedOffset )
 // This is how the Maker communicates with this object to tell it where the data is. We also 
 // want access to the raw data for the deconvolution and for the one anode hits to get a better
@@ -256,6 +261,7 @@ void StSvtAnalysis::SetPointers(StSvtHybridData* hybAdjData,
   mHybridRawData = hybRawData;
   mHybridCluster = hybClu;
   mPedOffset     = PedOffset;
+  mSvtBadAnode  =  BadAnodes;
 
   mNumOfClusters = mHybridCluster->getNumberOfClusters();
   if (mNumOfClusters>500) {
@@ -1246,8 +1252,11 @@ int StSvtAnalysis::FillRawAdc()
   numAnodes = mHybridRawData->getAnodeList(anodeList);
   //cout<<"Raw number of anodes: "<<numAnodes<<endl;
 
+
   for(int an = 0; an < numAnodes; an++) {
     actualAn = anodeList[an];
+    if( mSvtBadAnode)
+      if(mSvtBadAnode->IsBadAnode(actualAn)) continue; //Dont fill pixel array if anode is bad
     mHybridRawData->getListSequences(an,numOfSeq,svtSequence);
     for(int seq = 0; seq < numOfSeq; seq++) {
       seqStart =  svtSequence[seq].startTimeBin;

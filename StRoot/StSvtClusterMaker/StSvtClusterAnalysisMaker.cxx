@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtClusterAnalysisMaker.cxx,v 1.19 2002/04/04 16:00:16 caines Exp $
+ * $Id: StSvtClusterAnalysisMaker.cxx,v 1.20 2002/04/25 20:34:50 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,11 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterAnalysisMaker.cxx,v $
- * Revision 1.19  2002/04/04 16:00:16  caines
- * Finally got phase correction correct
- *
- * Revision 1.18  2002/03/20 00:33:32  munhoz
- * temporary fix for memory leaks and new vertex finder params for pp
+ * Revision 1.20  2002/04/25 20:34:50  caines
+ * Pass bad anode information into cluster fitter
  *
  * Revision 1.17  2002/01/05 21:45:18  caines
  * Inlcude t0 correction in hit
@@ -83,6 +80,7 @@
 #include "StSvtClassLibrary/StSvtHybridData.hh"
 #include "StSvtClassLibrary/StSvtHybridPixels.hh"
 #include "StSvtClassLibrary/StSvtData.hh"
+#include "StSvtSeqAdjMaker/StSvtBadAnode.hh"
 #include "StSequence.hh"
 #include "StSvtAnalysis.hh"
 #include "StSvtAnalysedHybridClusters.hh"
@@ -98,6 +96,9 @@ StSvtClusterAnalysisMaker::StSvtClusterAnalysisMaker(const char *name) : StMaker
    mHybridRawData   = NULL;
    mHybridAdjData   = NULL;
    mHybridPixelData = NULL;
+
+   mSvtBadAnode     = NULL;
+   mSvtBadAnodeSet  = NULL;
 
    mSvtRawEventColl = NULL;
    mSvtClusterColl  = NULL;
@@ -132,16 +133,20 @@ Int_t StSvtClusterAnalysisMaker::Init()
 				 << GetName() <<endm;
 
   mNoEvents=0;
+
   
   GetSvtRawEvent();
-  GetSvtEvent();
-  GetSvtCluster();
-  SetSvtAnalysis();
+  //GetSvtEvent();
+  //GetSvtCluster();
+  //SetSvtAnalysis();
 
    
   mTotalNumberOfHybrids = mSvtRawEventColl->getTotalNumberOfHybrids();
   CreateClusterHist(mTotalNumberOfHybrids);
 
+  St_DataSet* dataSet;
+  dataSet = GetDataSet("SvtBadAnodeSet"); 
+  mSvtBadAnodeSet = (StSvtHybridCollection*)(dataSet->GetObject());
 
   mSvtAnalysis = new StSvtAnalysis(mTotalNumberOfHybrids);
 
@@ -206,8 +211,7 @@ Int_t StSvtClusterAnalysisMaker::GetSvtPixels()
 Int_t StSvtClusterAnalysisMaker::SetSvtAnalysis()
 {
   mSvtAnalSet = new St_ObjectSet("StSvtAnalResults");
-  //AddData(mSvtAnalSet);  
-  AddConst(mSvtAnalSet);  
+  AddData(mSvtAnalSet);  
   SetOutput(mSvtAnalSet); //Declare for output
 
   mSvtAnalColl = new StSvtHybridCollection(mSvtAdjEvent->getConfiguration());
@@ -294,7 +298,7 @@ Int_t StSvtClusterAnalysisMaker::Make()
     return kStWarn;
   }
 
-  //  SetSvtAnalysis();
+  SetSvtAnalysis();
   SetClusterAnalysis();
 
   if( Debug()) MakeHistograms();
@@ -329,13 +333,13 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
 	  // Adjust recorded phase for each hybrid into frcation of a 
 	  // time bucket
 	  T0Jitter = (float)(mHybridAdjData->getTimeZero());
-	  if( T0Jitter >  2. && T0Jitter < 4.){
+	  if( T0Jitter < 4. && T0Jitter > 2.){
 	    T0Jitter = 0.;
 	  }
-	  if( T0Jitter > 3. && T0Jitter < 5.){
+	  else if( T0Jitter < 5. && T0Jitter > 3.){
 	    T0Jitter = 3. - (8./3.);
 	  }
-	  if( T0Jitter > 4 && T0Jitter < 6.){
+	  else if( T0Jitter < 6. && T0Jitter > 4.){
 	    T0Jitter =  6. - ( 2.*8./3.);
 	  }
 
@@ -345,8 +349,10 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
 
           mNumOfClusters = mHybridCluster->getNumberOfClusters(); 
  
+	  mSvtBadAnode=0;
+	  if( mSvtBadAnodeSet) mSvtBadAnode = (StSvtBadAnode*)mSvtBadAnodeSet->at(index);
           mSvtAnalysis->SetPointers(mHybridAdjData,mHybridRawData,
-				    mHybridCluster,
+				    mHybridCluster,mSvtBadAnode,
 				    mSvtAdjEvent->getTotalNumberOfHybrids(),
 	                            StSvtSeqMaker->GetPedOffset());
 	  mSvtAnalysis->SetHybIndex(index);
@@ -380,7 +386,7 @@ Int_t StSvtClusterAnalysisMaker::SetClusterAnalysis()
 		m_PeakADCvsTime->Fill((float)mSvtAnalysis->GetMeanClusterTimeBin(clu),(float)mSvtAnalysis->GetCluPeakAdc(clu));
 		m_n_seq->Fill(mSvtAnalysis->GetCluNumPixels(clu));
 	      }
-	     
+	    
 	    }
 	  }
         }
