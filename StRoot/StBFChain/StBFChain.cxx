@@ -125,7 +125,7 @@ BfcItem BFC[] = {
   {"magF"        ,"","","NoFieldSet,StDbT,db","StMagFMaker","StMagF"
                                                          ,"Mag.field map with scale factor from Db",kFALSE},
   {"tpcDB"       ,"tpcDB","","tpc_T,dbutil,db"                         ,"StTpcDbMaker","StTpcDb","",kFALSE},
-  {"l0"          ,"l0Chain","","trg_T,globT,ctf,mwc,trg"               ,"StChainMaker","StChain","",kFALSE}, 
+  {"l0"          ,"l0Chain","","trg_T,globT,ctf,trg"                   ,"StChainMaker","StChain","",kFALSE}, 
   {"ctf"         ,"ctf","l0Chain","ctf_T,db"               ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE}, 
   {"mwc"         ,"mwc","l0Chain","mwc_T,db,tpcDB"         ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE}, 
   {"trg"         ,"trg","l0Chain","trg_T,db"               ,"St_trg_Maker","St_trg,St_trg_Maker","",kFALSE},
@@ -743,5 +743,5 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.112 2000/07/03 02:07:43 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.113 2000/07/04 16:06:38 fisyak Exp $
 //_____________________________________________________________________
