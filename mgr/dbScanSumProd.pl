@@ -22,18 +22,26 @@ use Class::Struct;
 my $debugOn=0;
 
 my @SetS = (
-             "auau200/venus412/default/b0_3/year_1b/hadronic_on",
-             "auau200/venus412/default/b3_6/year_1b/hadronic_on",
-             "auau200/venus412/default/b6_9/year_1b/hadronic_on",
-             "auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on",
-             "auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on", 
-             "auau200/hijing135/jetq_off/b9_12/year_1b/hadronic_on",
+             "auau200/mevsim/vanilla/central/year_1h/hadronic_on",
+             "auau200/mevsim/cascade/central/year_1h/hadronic_on",
+             "auau200/mevsim/vanilla/flow/year_1h/hadronic_on", 
+             "auau200/mevsim/vanilla/fluct/year_1h/hadronic_on",
+             "auau200/nexus/default/b0_3/year_1h/hadronic_on",
+             "auau200/hijing/b8_15_jetq_off/jet05/year_1h/hadronic_on",
+             "auau200/hijing/b8_15_jetq_on/jet05/year_1h/hadronic_on",
+             "auau200/hijing/b0_3_jetq_off/jet05/year_1h/hadronic_on",
+             "auau200/hijing/b0_3_jetq_on/jet05/year_1h/hadronic_on",
+             "auau200/hbt/default/peripheral/year_1h/hadronic_on",
+             "auau200/hbt/default/midperipheral/year_1h/hadronic_on",
+             "auau200/hbt/default/middle/year_1h/hadronic_on",
+             "auau200/hbt/default/central/year_1h/hadronic_on", 
+             "auau200/vni/default/b0_3/year_1h/hadronic_on",
  );
 
-my $SetD = "daq/1999/12/";
+my $SetD = "daq/2000/02/";
 
-my $prod_html_back = "/star/u2e/starreco/prod5/summary/Prod5.summary\.html_back";
-my $prod_html = "/star/u2e/starreco/prod5/summary/Prod5.summary\.html";
+my $prod_html_back = "/star/u2e/starreco/mdc3/summary/mdc3.summary\.html_back";
+my $prod_html = "/star/u2e/starreco/mdc3/summary/mdc3.summary\.html";
 
 struct FilAttr => {
     dataS      => '$',
@@ -43,7 +51,7 @@ struct FilAttr => {
     
 };
 
-my $prodSer = "prod5";
+my $prodSer = "mdc3";
 
 &beginHtml();
 
@@ -58,6 +66,8 @@ my %dstDsize= ();
 my %dstHpsize = ();
 my %dstDEvts = ();
 my %dstHpEvts = ();
+
+
 
 ### select Geant files from FileCatalog
 my $nmfile;
@@ -114,7 +124,7 @@ $nhpssDstFiles = 0;
 
 for ($ll=0; $ll<scalar(@SetS); $ll++) {
 
-$sql="SELECT dataset, fName, Nevents, size  FROM $cpFileCatalogT WHERE dataset = '$SetS[$ll]' AND fName LIKE '%dst.root' AND JobID LIKE '%prod5%' AND hpss ='Y'";
+$sql="SELECT dataset, fName, Nevents, size  FROM $cpFileCatalogT WHERE dataset = '$SetS[$ll]' AND fName LIKE '%dst.root' AND JobID LIKE '%mdc3%' AND hpss ='Y'";
 $cursor =$dbh->prepare($sql)
   || die "Cannot prepare statement: $DBI::errstr\n";
 $cursor->execute;
@@ -157,7 +167,7 @@ $ndiskDstFiles = 0;
 
 for ($kk=0; $kk<scalar(@SetS); $kk++) {
 
-$sql="SELECT dataset, fName, Nevents, size  FROM $cpFileCatalogT WHERE dataset = '$SetS[$kk]' AND fName LIKE '%dst.root' AND JobID LIKE '%prod5%' AND site = 'disk_rcf'";
+$sql="SELECT dataset, fName, Nevents, size  FROM $cpFileCatalogT WHERE dataset = '$SetS[$kk]' AND fName LIKE '%dst.root' AND JobID LIKE '%mdc3%' AND site = 'disk_rcf'";
 $cursor =$dbh->prepare($sql)
   || die "Cannot prepare statement: $DBI::errstr\n";
 $cursor->execute;
@@ -211,6 +221,8 @@ my $TdstHEvt  = 0;
       $TInEvt      +=  $InEvts{$setE};
       $TdstDsize   +=  $dstDsize{$setE};
       $TdstHpsize  +=  $dstHpsize{$setE};
+      if (! defined $dstHpEvts{$setE}) {$dstHpEvts{$setE} = 0 };
+      if (! defined $dstDEvts{$setE}) {$dstDEvts{$setE} = 0 };
       $TdstHEvt    +=  $dstHpEvts{$setE};   
       $TdstDEvt    +=  $dstDEvts{$setE}; 
 
@@ -223,7 +235,7 @@ my $TdstHEvt  = 0;
 
 # print total amount
   print HTML "<TR ALIGN=CENTER VALIGN=CENTER>\n";
-  print HTML "<td>Total for prod5 </td>\n"; 
+  print HTML "<td>Total for MDC3 </td>\n"; 
   print HTML "<td>$TInSize </td><td>$TInEvt </td><td>$TdstHpsize </td><td>$TdstHEvt</td><td>$TdstDsize </td><td>$TdstDEvt </td></tr>\n"; 
 
 ##
@@ -243,10 +255,10 @@ sub beginHtml {
   print HTML "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML//EN\">\n";
   print HTML "<html>\n";
   print HTML "  <head>\n";
-  print HTML "          <title>Prod5 Series Production summary </title>\n";
+  print HTML "          <title> MDC3 Production summary </title>\n";
   print HTML "  </head>\n";
   print HTML "  <body BGCOLOR=\"#ccffff\"> \n";
-  print HTML "      <h1>Prod5 Series Production summary</h1>\n";
+  print HTML "      <h1>MDC3 Production summary</h1>\n";
   print HTML "<TABLE BORDER=5 CELLSPACING=1 CELLPADDING=2 >\n";
   print HTML "<TR>\n";
   print HTML "<TR ALIGN=CENTER VALIGN=CENTER>\n";
