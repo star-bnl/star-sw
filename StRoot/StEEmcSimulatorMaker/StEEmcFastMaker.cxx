@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, A.Ogawa, P.Zolnierczuk
 // 
-// $Id: StEEmcFastMaker.cxx,v 1.8 2004/03/24 19:37:55 balewski Exp $
+// $Id: StEEmcFastMaker.cxx,v 1.9 2004/03/25 18:13:56 balewski Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -193,7 +193,7 @@ void  StEEmcFastMaker::mEE2ST(EEeventDst* eevt, StEvent* stevt){
 	  int adc= (int) (t->energy()* mfixPgain);
 	  StEmcRawHit* h = new StEmcRawHit(id,isec,jeta,jsub,adc,t->energy());
 	  d->addHit(h);
-	  printf("Pr2   %c  %d  %d %f\n",t->sub(),t->eta(),adc,t->energy());
+	    if(mdbg)printf("Pr2   %c  %d  %d %f\n",t->sub(),t->eta(),adc,t->energy());
 	}
 
 	tca = EEsec->getPostHits();      
@@ -316,6 +316,9 @@ void  StEEmcFastMaker::mST2EE(EEeventDst* evt, StEvent* stevt){
 
 
 // $Log: StEEmcFastMaker.cxx,v $
+// Revision 1.9  2004/03/25 18:13:56  balewski
+// cleanup
+//
 // Revision 1.8  2004/03/24 19:37:55  balewski
 // be quiet
 //
