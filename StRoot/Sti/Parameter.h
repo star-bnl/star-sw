@@ -5,10 +5,10 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-//#include "Named.h"
-//#include "Described.h"
-//: public Named, public Described
-class Parameter 
+#include "Named.h"
+#include "Described.h"
+
+class Parameter : public Named, public Described
 {
  public:
 
@@ -17,7 +17,9 @@ class Parameter
   static const int Double;
 
   Parameter();
-  Parameter(int type,
+  Parameter(const string & name, 
+	    const string & description,
+	    int type,
             double value);
   Parameter(const Parameter & parameter);
   virtual ~Parameter();

@@ -7,12 +7,14 @@ ConstrainedParameter::ConstrainedParameter()
     _default(0.)
 {}
  
-ConstrainedParameter::ConstrainedParameter(double value, 
-		     double defaultValue, 
-		     double min, 
-		     double max, 
-		     int    type)
-  : Parameter(type,value),
+ConstrainedParameter::ConstrainedParameter(const string & name, 
+					   const string & description,
+					   double value, 
+					   double defaultValue, 
+					   double min, 
+					   double max, 
+					   int    type)
+  : Parameter(name,description,type,value),
     _minimum(min),
     _maximum(max),
     _default(defaultValue)

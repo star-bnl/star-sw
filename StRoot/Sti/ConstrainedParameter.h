@@ -11,7 +11,9 @@ class ConstrainedParameter : public Parameter
 {
 public:
   ConstrainedParameter();
-  ConstrainedParameter(double value, 
+  ConstrainedParameter(const string & name, 
+		       const string & description,
+		       double value, 
                        double defaultValue, 
                        double min, 
                        double max, 
