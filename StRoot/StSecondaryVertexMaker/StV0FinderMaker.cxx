@@ -31,7 +31,7 @@
  extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}   
  #define gufld F77_NAME(gufld,GUFLD) */
 
-static const int BLOCK=512;
+static const int BLOCK=1024;
 
 
 StV0FinderMaker* StV0FinderMaker::mInstance = 0;
@@ -365,8 +365,8 @@ Int_t StV0FinderMaker::Prepare() {
   }
 
   // Manage vector memory usage
-  //   If maximum needed is less than 2/3rds allocated for 10 events, resize
-  if (trks < ((trk.size()*2)/3)) {
+  //   If maximum needed is less than half allocated for 10 events, resize
+  if (trks < (trk.size()/2)) {
     if (trks > trkmax) trkmax = trks;
     trkcnt++;
     if (trkcnt >= 10) {
@@ -841,8 +841,11 @@ void StV0FinderMaker::ExpandVectors(unsigned short size) {
   trkID.resize(newsize);
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.25 2004/08/26 03:00:46 genevb Exp $
+// $Id: StV0FinderMaker.cxx,v 1.26 2004/08/27 05:37:28 genevb Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.26  2004/08/27 05:37:28  genevb
+// Slightly modify parameters of vector memory control
+//
 // Revision 1.25  2004/08/26 03:00:46  genevb
 // Improved vector size management
 //
