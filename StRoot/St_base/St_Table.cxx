@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.46 1999/02/24 17:10:57 fine Exp $ 
+// $Id: St_Table.cxx,v 1.47 1999/02/28 20:21:43 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.47  1999/02/28 20:21:43  fine
+// operator = reallocates the target table to fit used rows only, not allocated as before
+//
 // Revision 1.46  1999/02/24 17:10:57  fine
-// St_Table  New and Purge method have been introdiced, some clean up for St_module as well
+//  St_Table  New and Purge method have been introdiced, some clean up for St_module as well
 //
 // Revision 1.45  1999/02/22 23:54:37  fine
 // St_Table::New() - method has been prepared but not activated yet
@@ -297,10 +300,17 @@ St_Table::St_Table(const St_Table &table)
 St_Table &St_Table::operator=(const St_Table &rhs)
 {
    // St_Table assingment operator.
-  if (this != &rhs){
-      Set(rhs.fN, rhs.s_Table);
-      SetUsedRows(rhs.GetNRows());
+   // This operator REALLOCATE this table to fit the number of 
+   // the USED rows of the source table if any
+
+  if (strcmp(GetType(),rhs.GetType()) == 0) {
+    if (this != &rhs && rhs.GetNRows() >0 ){
+        Set(rhs.GetNRows(), rhs.s_Table);
+        SetUsedRows(rhs.GetNRows());
+    }
   }
+  else 
+    Error("operator=","Can not copy <%s> table into <%s> table", rhs.GetType(),GetType());
   return *this;
 }
  
@@ -1493,14 +1503,14 @@ void St_Table::Set(Int_t n, Char_t *array)
    // If n<0 leave array unchanged.
  
    if (n < 0) return;
-   if (fN != n) Clear();
+   if (fN < n) Clear();
 
    SetfN(n);
 
    if (fN == 0) return;
    if (!s_Table) s_Table = Create();
    CopyStruct(s_Table,array);
-   *s_MaxIndex = n;
+   *s_MaxIndex = n;   
 }
  
 //_______________________________________________________________________
