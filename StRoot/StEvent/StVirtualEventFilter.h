@@ -19,6 +19,8 @@
 
 class StObjArray;
 class StGlobalTrack;
+class St_Table;
+class StVertex;
 
 class StVirtualEventFilter : public TObject {
  protected:
@@ -35,6 +37,8 @@ class StVirtualEventFilter : public TObject {
     Int_t Toggle() { return GetFlag()? TurnOff():TurnOn();}
     virtual Int_t Filter(StGlobalTrack *globTrack,Width_t &size,Style_t &style);
     virtual Int_t Filter(const StObjArray *hitCollection,Width_t &size,Style_t &style);
+    virtual Int_t Filter(const St_Table *tableObject,Int_t index,Width_t &size,Style_t &style);
+    virtual Int_t Filter(const StVertex *vertexObject,Width_t &size,Style_t &style);
     ClassDef(StVirtualEventFilter,0)
 };
 
