@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_files_add.C,v 2.13 2000/07/26 19:53:45 lansdell Exp $
+// $Id: bfcread_hist_files_add.C,v 2.14 2002/09/06 02:50:22 genevb Exp $
 // $Log: bfcread_hist_files_add.C,v $
+// Revision 2.14  2002/09/06 02:50:22  genevb
+// Update compatibility with library changes
+//
 // Revision 2.13  2000/07/26 19:53:45  lansdell
 // made changes for creating new QA histograms
 //
@@ -81,19 +84,20 @@ void bfcread_hist_files_add(
   gSystem->Load("StUtilities");
   gSystem->Load("StAnalysisUtilities");
   gSystem->Load("libglobal_Tables");
+  gSystem->Load("libtpc_Tables");
   gSystem->Load("StTpcDb");
   gSystem->Load("StEvent");
   gSystem->Load("St_QA_Maker");
   gSystem->Load("StTreeMaker");
 
-// read file list from text file
-  char **fList = new char[512][200];
+// read file list from text file (maximum of 8192 files)
+  char **fList = new char[8192][256];
   ifstream fin(fileName);
   if (fin) {
     int j=0;
     cout << "Input file " << fileName << " found." << endl;
     while (!fin.eof()) {
-      char *line = new char[200];
+      char *line = new char[256];
       fin >> line;
       fList[j] = line;
       cout << " Added file : " << fList[j] << endl;
@@ -104,7 +108,7 @@ void bfcread_hist_files_add(
 
 // set up write chain which knows about hist and tree makers
   StChain* chainW = new StChain("writeChain");
-  char *MakerHistDir= new char[128];
+  char *MakerHistDir= new char[256];
 
 // set up output file structure
   StTreeMaker* treeMk = new StTreeMaker("outTree",outHistFile,TopDirTree);
@@ -116,7 +120,6 @@ void bfcread_hist_files_add(
   Int_t istat=0;
   Int_t ifl=0;
   Int_t hCCount=0;
-  Int_t hACount=0;
 
   StFile fff(fList);
   StIOMaker *IOMk = new StIOMaker("IO","r",&fff,TopDirTree);
@@ -186,6 +189,7 @@ void bfcread_hist_files_add(
        cout << "bfcread_hist_files_add.C, # histograms copied = " << 
 	 hCCount << endl;
 
+       HM[bnum]->SetHArraySize(HU[bnum]->getNewHistSize());
        HM[bnum]->SetHArray(HU[bnum]->getNewHist());
        HM[bnum]->Make();
      }  // first time
@@ -194,10 +198,10 @@ void bfcread_hist_files_add(
        dirList = HU[bnum]->FindHists(MakerHistDir);
 
 // now make a copy of all histograms into my new histograms!
-       hACount = HU[bnum]->AddHists(dirList);
+       hCCount = HU[bnum]->AddHists(dirList);
 
        cout << "bfcread_hist_files_add.C, # histograms added = " << 
-	 hACount << endl;
+	 hCCount << endl;
 
      }  //else (ifl not #1)
 
