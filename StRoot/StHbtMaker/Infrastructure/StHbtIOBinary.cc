@@ -245,7 +245,7 @@ char* StHbtIOBinary::parseDirFile(const char* dir, const char* file, const char*
     cout << theFile.c_str() << " ";
     string::size_type pos =  theFile.find("/");
     cout << pos << endl;
-    theFile.erase(0, pos );
+    theFile.erase(0, pos+1 );
     cout << theFile.c_str() << endl;
   }
   cout << (theDir+theFile+theAppendix).c_str() << endl;
