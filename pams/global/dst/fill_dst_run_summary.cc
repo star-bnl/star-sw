@@ -183,9 +183,9 @@ long  type_of_call fill_dst_run_summary_ (
 
   /* charge track multiplicity and vertices */
   nchgtrk_sum  += glb_trk_good;
-  nchgtrk2_sum += pow(glb_trk_good,2);
+  nchgtrk2_sum += pow((double)glb_trk_good,2);
   nvertx_sum   += dstVertex_h->nok;
-  nvertx2_sum  += pow(dstVertex_h->nok,2);
+  nvertx2_sum  += pow((double)dstVertex_h->nok,2);
   
   /*  
       I assume here that dstRunSummary->n_events_good will only be filled at
