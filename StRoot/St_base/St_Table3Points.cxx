@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/05/99  (E-mail: fine@bnl.gov)
-// $Id: St_Table3Points.cxx,v 1.1 1999/05/18 20:21:24 fine Exp $
+// $Id: St_Table3Points.cxx,v 1.2 1999/05/24 01:54:02 fine Exp $
 // $Log: St_Table3Points.cxx,v $
+// Revision 1.2  1999/05/24 01:54:02  fine
+// clean up
+//
 // Revision 1.1  1999/05/18 20:21:24  fine
 // New class to 3D table viewer
 //  
@@ -65,7 +68,7 @@ void St_Table3Points::SetAnyColumn(const Char_t *anyName, EPointDirection indx)
 }
 
 //____________________________________________________________________________
-Float_t *St_Table3Points::GetXYZ(Float_t *xyz,Int_t idx, Int_t num)const
+Float_t *St_Table3Points::GetXYZ(Float_t *xyz,Int_t idx, Int_t num) const
 {
   if (xyz) {
     Int_t size = TMath::Min(idx+num,Size());
