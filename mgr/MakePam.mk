@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.86 1999/02/19 14:40:13 fisyak Exp $
+# $Id: MakePam.mk,v 1.87 1999/03/03 03:52:09 perev Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.87  1999/03/03 03:52:09  perev
+# Add additional sort to mechanism ln -s .so
+#
 # Revision 1.86  1999/02/19 14:40:13  fisyak
 # remove extra dependencies for idls
 #
@@ -295,7 +298,7 @@ NAMES_O   = $(notdir $(FILES_O))
 ifndef NT
 ifneq (,$(strip $(FILES_IDM) $(FILES_G) $(FILES_CDF))) 
   SL_PKG  := $(LIB_DIR)/$(PKG).sl
-  QWE  := $(wildcard $(SL_PKG).*)
+  QWE  := $(sort $(wildcard $(SL_PKG).*))
   SL_NEW := $(SL_PKG).1000
 ifneq (,$(QWE))
   NQWE := $(words $(QWE))
