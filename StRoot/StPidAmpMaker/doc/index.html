@@ -1,0 +1,225 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+<body bgcolor="#ffffff">
+
+  <head>
+    <title>StPidAmpMaker</title>
+  </head>
+
+  <body>
+   <center> <h1>StPidAmpMaker - STAR Particle Identification vi Amplitute Approach </h1></center>
+
+<p>Please send questions to aihong@cnr.physics.kent.edu </p>
+    <hr>
+
+<ul>
+
+<li><a href="#General">General</a>
+
+<li><a href="#Algorithm">Algorithm</a>
+
+<li><a href="#Infrastructure">Infrastructure</a>
+
+<li><a href="#Performance">Performance</a>
+<li><a href="#Tutorial">Tutorial</a>
+
+
+
+</ul>
+
+
+<hr>
+
+<h2><a name="General">General</h2>
+
+The StPidAmpMaker is designed to be used with StuProbabilityPidAlgorithm, which is a functor in StEventUtilities.
+<p>
+The StPidAmpMaker loop through StEvents, and output a bunch of   *.root files.
+What those .root files contain are the parameters for describing the Bethe-Block curve, the statistic information for describing the amplitude and resolution's variation along p/z, which can be used to do the Particle Identification. Also this package generates  parameters for calibration of de/dx vs p/z.
+</p>
+<hr>
+<h2><a name="Algorithm">Algorithm</h2>
+Richard Witt, who wrote the initial Fortran version of amplitude PID, has a nice page describing the algorithm. Click <a href="http://cnr2.kent.edu/~witt/pid/"> here </a>to go to his page.
+
+<hr>
+
+<h2><a name="Infrastructure">Infrastructure</h2>
+Currently we agree that PID depends on NHits, Pt, etc. Those dependences with their combinations make the infrastructure a little complicate.
+
+<p>So let's carify some important concepts in this package first.</p>
+<p> <font color=#EE1110> StPidAmpNet</font>
+StPidAmpNet is a <a href="netShape.html">predefined "net" </a>on the de/dx~p/z plane:(from now on I will use net refer to an  instance of StPidAmpNet). Each particle type has a such net. All particles will be filled into those nets and build up statistic information by fitting.</p>
+<p> <font color=#EE1110> StPidAmpChannel</font>
+
+A channel is made up by a set of nets (electron net, pion net...) which can only be filled by the tracks that satisfy the channel confinement. For example, we have a channel with confinement NHits between 10,15, Pt between 0,0.5 Gev. then only those tracks with NHits between 10-15 and Pt between 0-0.5 can be filled into nets in this channel. (from now on I will use channel refer to an instance of StPidAmpChannel)</p>
+
+
+<p> <font color=#EE1110> StPidAmpChannelCollection</font>
+
+A ChannelCollection is made up of several channels. For example, channel NHits(0,10), NHits(10,20), NHits(20,45) build up a ChannelCollection. 
+
+A ChannelCollection is a complete ensemble of channels. A ChannelCollection itself can generate all the information for PID.</p>
+
+
+<p> <font color=#EE1110> StPidAmpManager</font>
+
+The StPidAmpManager can hold multiple ChannelCollections. Thus if a user want compare results between two different ChannelCollections, all he needs to do is simply adding two ChannelCollections into StPidAmpManager.</p>
+<p><font color=#EE1110> StPidAmpMaker </font>is a mediator between StEvent and StPidAmpManager. What ChannelCollection should be used to generate parameters is up to the user. </p>
+
+<p>  <a href="StPidAmpMakerUML.html">Know more about the Infrastructure...</a></p>
+
+<hr>
+
+<h2><a name="Performance">Performance</h2>
+The Bethe-Block curve based on the result of StPidAmpMaker:
+<center><a href="bandCenter.gif"><img src="bandCentersmall.gif"></a></center>
+Particle Identification result:
+<br>
+<br><font color=green>1.result from NHitsNetSet:</font>
+<center>Channel Nhits 0-10</center>
+<center><a href="NHits0_10PID.gif"><img src="NHits0_10PIDsmall.gif"></a></center>
+<center>Channel Nhits 10-20</center>
+<center><a href="NHits10_20PID.gif"><img src="NHits10_20PIDsmall.gif"></a></center>
+<center>Channel Nhits 20-45</center>
+<center><a href="NHits20_45PID.gif"><img src="NHits20_45PIDsmall.gif"></a></center>
+<center>Combine All 3 channels</center>
+<center><a href="NHitsTotalPID.gif"><img src="NHitsTotalPIDsmall.gif"></a></center>
+<br><font color=green>2. result from defaultNetSet:</font>
+<center><a href="defaultPID.gif"><img src="defaultPIDsmall.gif"></a></center>
+BetheBlock curve fitting:
+<br>
+<br><font color=green>1. low beta*gamma region:</font>
+<center><a href="bandFittingLow.gif"><img src="bandFittingLowsmall.gif"></a></center>
+<br><font color=green>2. high beta*gamma region:</font>
+<center><a href="bandFittingTotal.gif"><img src="bandFittingTotalsmall.gif"></a></center>
+<br><font color=green>3. contribution due to different particle types:</font>
+<center><a href="bandMultiLow.gif"><img src="bandMultiLowsmall.gif"></a></center>
+<center><a href="bandMultiTotal.gif"><img src="bandMultiTotalsmall.gif"></a></center>
+
+<hr>
+<h2><a name="Tutorial">Tutorial</h2>
+<p> <font size=5 color=#EE1110>1. How to run StPidAmpMaker?</font></p>
+Following is a piece of code showing how to run StPidAmpMaker:(I assume you drive it by doEvents.C)
+<br>
+
+void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
+<br>
+{
+<br>    //
+<br>    // First load some shared libraries we need
+<br>    //
+<br>    gSystem->Load("St_base");
+<br>    gSystem->Load("StChain");
+<br>    gSystem->Load("St_Tables");
+<br>    gSystem->Load("StUtilities");
+<br>    gSystem->Load("StIOMaker");
+<br>    gSystem->Load("StarClassLibrary");
+<br>    gSystem->Load("StEvent");
+<br>    gSystem->Load("StMagF");
+<br>    gSystem->Load("StEventMaker");
+<br>  <font color=red>  gSystem->Load("StPidAmpMaker");</font>
+
+ <br>   chain  = new StChain("StChain");
+
+<br>    StFile *setFiles= new StFile();
+
+<br>    for (int ifil=0; fileList[ifil]; ifil++)
+<br>	{ setFiles->AddFile(fileList[ifil]);}
+<br>    StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
+<br>        IOMk->SetBranch("runcoBranch",0,"r");
+<br>    StEventMaker *readerMaker =  new StEventMaker("events","title");
+<br>   <font color=red>  StPidAmpMaker *ampMaker = new StPidAmpMaker("pidAmp");</font>
+<br>  <font color=red>   ampMaker->AddDefaultChannelCollection("BAR","BAR");</font><font color=green>//add a default StPidAmpChannelCollection(no PID dependence thus only 1 channel) to StPidAmpManager. Its fit <a href="option.html">option</a> is "BAR", draw  <a href="option.html">option </a>is "BAR".</font>
+<br> <font color=red>// ampMaker->SetNHitsFilter2LastCollection(5);</font><font color=green>//get rig of noise ( tracks with nhits<5 ) when fitting de/dx~beta*gamma.</font>
+<br>  <font color=red>  //   ampMaker->AddNHitsChannelCollection(0,10,20,45,"BAR","BAR");</font><font color=green>//add a nhits StPidAmpChannelCollection to StPidAmpManager. Here we have 3 channels in the collection, the corresponding nhits slices for each channel are 0-10,10-20,20-45.</font>
+
+ <br>   //
+<br>    // Initialize chain
+<br>    //
+<br>    Int_t iInit = chain->Init();
+<br>    if (iInit) chain->Fatal(iInit,"on init");
+<br>    chain->PrintInfo();
+<br>    <font size=100>......</font>
+<br><br>
+
+<p> <font size=5 color=#EE1110>2. How to read out the parameters from "Bands.root" file and draw the Bethe-Block curve?</font></p>
+<br><font color=green>In your source code, the following lines of code will do the job. Later version will make it work at the command line.</font>
+<br>
+<br><font color=red>in your header file</font>
+
+<br>#include "TF1.h"
+<br>#include "TFile.h"
+<br>#include "TCanvas.h"
+<br>#include "StPidAmpMaker/Include/BetheBlock.hh"
+<br>#include "StPidAmpMaker/StPidAmpNetOut.h"
+
+<br>double ( *funcBandPointer) (double *, double *); //declare a funtion pointer.
+
+
+<br><font color=red>in your source file</font>
+
+<br> TFile f("nhitsBin_0_45_ptBin_0_Infinity_BGBands.root","READ","nhitsBin_0_45_ptBin_0_Infinity_BGBands.root"); <font color=green>//open a file produced by StPidAmpMaker.</font>
+
+<br> StPidAmpNetOut*  electronNetOut=(StPidAmpNetOut *)f.Get("e-");<font color=green> //read in band parameters for electron band.</font>
+
+<br> int NParameters=electronNetOut->GetNBandPars();
+
+<br> TF1* electronBandCenter =new TF1("electronBandCenter",funcBandPointer, 0,5, NParameters);
+
+<br> for ( int i=0; i<NParameters; i++)
+
+<br>      electronBandCenter->SetParameter(i,(electronNetOut->GetBandParArray()).At(i)); <font color=green>//set parameters.</font>
+
+
+
+
+<br>  c1=new TCanvas("e- de/dx~p/z curve","e- de/dx~p/z curve",20,10,700,500);
+<br> c1->cd();
+
+<br> electronBandCenter->Draw("L");<font color=green>//done.</font>
+
+<br><font color=red> what if I want to draw a pure dedx~beta*gamma curve?</font>
+<br><font color=green>Just replace the line </font>
+<br>StPidAmpNetOut*  electronNetOut=(StPidAmpNetOut *)f.Get("e-");
+<br><font color=green>by</font>
+<br>StPidAmpNetOut*  electronNetOut=(StPidAmpNetOut *)f.Get("betaGamma");
+<br><font color=green>in the example above.</font>
+<br>
+
+<p> <font size=5 color=#EE1110>3. How to identify a track in StEvent?</font></p>
+
+<br><font color=green> In your macro, do not forget : </font>
+<br>gSystem->Load("StEvent"); 
+<br>gSystem->Load("StEventUtilities"); 
+<br><font color=green> and load some other libraries as well.</font>
+<br>
+<br>
+<br> <font color=green>In your source code:</font>
+<br>
+
+<br>#include "StEventTypes.h"
+
+<br>#include "StuProbabilityPidAlgorithm.h"
+<br>
+<br><font color=green>//put the following line some where before your event loop:</font>
+<br>StuProbabilityPidAlgorithm::readInputFile("nhitsBin_0_45_ptBin_0_Inf_Amp.root");<font color=green>//read in the parameters.</font>
+<br>
+<br><font color=green>//inside your track loop: </font>
+<br>StuProbabilityPidAlgorithm ampPid;<font color=green>   //define a functor.</font>
+<br>StParticleDefinition* def=theTrack->pidTraits(ampPid);<font color=green>  //invoke functor. </font>
+<br> if( def->name()=="e-" && ampPid.getProbability(0) > 0.9 ) 
+<br>printf("Got an electron at 90% confidence!\n");  
+<br>if( def->name()=="pi-" && ampPid.getProbability(0) > 0.8 && ampPid.isExtrap()==1) 
+<br>printf("got a pi- with 80% confidence, probability caculated based on the extrapolation\n");//<font color=green>an extrapolation is a resonable extend of the fitting from clear region to unclear region </font>
+<br>
+<br>
+<br>
+
+<hr>
+  <address><a href="mailto:aihong@cnr.physics.kent.gov">Aihong Tang</a></address>
+<!-- Created: Mon Feb 14 12:52:08 EST 2000 -->
+<!-- hhmts start -->
+Last modified: Thu Mar  9 10:01:57 EST 2000
+<!-- hhmts end -->
+  </body>
+</html>
