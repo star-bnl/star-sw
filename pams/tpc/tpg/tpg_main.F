@@ -73,7 +73,7 @@ CCCCC
       do i=1,24
          do j=1,45
          iret=tgc_row_par(i,real(j),xlocal(1),xlocal(2),dummy1,dummy2)
-         write(66,*)i,j,xlocal(1),xlocal(2)
+c         write(66,*)i,j,xlocal(1),xlocal(2)
          end do
       enddo
 
