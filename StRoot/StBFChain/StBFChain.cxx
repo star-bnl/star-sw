@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.322 2003/02/07 02:03:55 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.323 2003/02/16 20:17:23 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -263,6 +263,7 @@ Bfc_st BFC1[] = {
   {"TofUtil"     ,""  ,"","",""                                       ,"StTofUtil","Load StTofUtil",kFALSE},
   {"StEvent"     ,""  ,"","globT,SCL",""                                  ,"StEvent","Load StEvent",kFALSE},
   {"EmcUtil"     ,""  ,"","emc_T",""                                  ,"StEmcUtil","Load StEmcUtil",kFALSE},
+  {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -414,6 +415,11 @@ Bfc_st BFC1[] = {
   {"Epc"         ,"epc","PostChain","PreEcl,Match,EmcUtil"            ,"StEpcMaker","StEpcMaker","",kFALSE},
 
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
+
+
+  {"EEfs"        ,"eefs","",                   "geant,db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker",
+                                                                              "EEMC fast simulator",kFALSE},
+
 
   {"rich"        ,"RichChain","","rch,RichPiD,RichSpectra",        "StMaker","StChain","RICH chain",kFALSE},
   {"Rrs"         ,"","RichChain","sim_T,Simu"                         ,"StRrsMaker","StRrsMaker","",kFALSE},
@@ -727,6 +733,7 @@ Bfc_st BFC2[] = {
   {"TofUtil"     ,""  ,"","",""                                       ,"StTofUtil","Load StTofUtil",kFALSE},
   {"StEvent"     ,""  ,"","globT,SCL",""                                  ,"StEvent","Load StEvent",kFALSE},
   {"EmcUtil"     ,""  ,"","emc_T",""                                  ,"StEmcUtil","Load StEmcUtil",kFALSE},
+  {"EEmcUtil"    ,""  ,"","",""                                     ,"StEEmcUtil","Load StEEmcUtil",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"I/O Makers  ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -880,6 +887,11 @@ Bfc_st BFC2[] = {
   {"Epc"         ,"epc","PostChain","PreEcl,Match,EmcUtil"            ,"StEpcMaker","StEpcMaker","",kFALSE},
 
   {"fpd"         ,"fpd","","",                  "StFpdMaker","StFpdMaker","FPD/BBC Data base chain",kFALSE},
+
+
+  {"EEfs"        ,"eefs","",                   "geant,db,EEmcUtil","StEEmcFastMaker","StEEmcSimulatorMaker",
+                                                                              "EEMC fast simulator",kFALSE},
+
 
   {"rich"        ,"RichChain","","rch,RichPiD,RichSpectra",        "StMaker","StChain","RICH chain",kFALSE},
   {"Rrs"         ,"","RichChain","sim_T,Simu"                         ,"StRrsMaker","StRrsMaker","",kFALSE},
