@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.56 2003/09/09 13:52:28 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.57 2003/09/09 21:21:00 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -151,6 +151,12 @@
         $ARCH     = "linuxegcs";
         $OSFID    = "f2cFortran";
         $OSFID .= " lnx Linux linux LINUX";
+	# beware, ANSI disables some hidden auto-define and i386 is
+	# one of them
+	if ($STAR_SYS =~ /^i386_/){
+	    $OSFID .= " i386";
+	}
+
         $OSFID .=
           " CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX NEW_ARRAY_ON GNU_GCC";
 
@@ -164,6 +170,7 @@
 	$CXXFLAGS    .= " -Wall";# -W -Wwrite-strings -Wpointer-arith";# -Wnested-externs";
 	$CXXFLAGS    .= " -Woverloaded-virtual";# -Wbad-function-cast";
 #	$CXXFLAGS    .= " -Werror";# warning==error;
+	$CXXFLAGS    .= " -ansi -pedantic -Wno-long-long";#ansi;
 #	$CXXFLAGS    .= " -fnonnull-objects";
 	if ( defined( $ARG{NODEBUG} ) or $NODEBUG ) {
 	    if ($STAR_HOST_SYS =~ /gcc/){
