@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstInit.cxx,v 1.5 2001/02/10 20:45:14 caines Exp $
+ * $Id: StEstInit.cxx,v 1.6 2001/02/22 16:34:09 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstInit.cxx,v $
+ * Revision 1.6  2001/02/22 16:34:09  lmartin
+ * cout replaced by gMessMgr.
+ *
  * Revision 1.5  2001/02/10 20:45:14  caines
  * Reset mNSvtHit after removal of bad flagged hits
  *
@@ -29,6 +32,7 @@
  * First CVS commit
  *
  **************************************************************************/
+#include "StMessMgr.h"
 #include "StThreeVectorD.hh"
 #include "math_constants.h"
 #include "phys_constants.h"
@@ -59,12 +63,10 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 
 int StEstTracker::VertexSetup(St_dst_vertex *preVertex){
 
-  cout<<"StEstTracker::VertexSetup"<<endl;
+    if (mDebugLevel>0) gMessMgr->Info()<<"StEstTracker::VertexSetup Starting"<<endm;
   StThreeVectorD* xg = new StThreeVectorD(0,0,0);
   StThreeVectorD* xl = new StThreeVectorD(0,0,0);
 
-  //  St_dst_vertex  *preVertex = (St_dst_vertex *)GetDataSet("preVertex/.data/preVertex"); 
-  
   if( preVertex){
     dst_vertex_st *preVtxPtr = preVertex->GetTable();
     
@@ -77,7 +79,7 @@ int StEstTracker::VertexSetup(St_dst_vertex *preVertex){
       }
     }
   }
-  else cout<<"StEstTracker::VertexSetup : Prevertex not found. Main vertex set to (0,0,0)"<<endl;
+  else gMessMgr->Warning()<<"StEstTracker::VertexSetup : Prevertex not found. Main vertex set to (0,0,0)"<<endm;
   mVertex = new StEstHit(9999,xg,xl,1,1,mIndexWaf[0]);
   
   return kStOK;
@@ -88,25 +90,25 @@ int StEstTracker::BranchInit(){
   int i;
   StEstBranch *branch;
 
-  cout<<"StEstTracker::BranchInit starting"<<endl;
+  if (mDebugLevel>0) gMessMgr->Info()<<"StEstTracker::BranchInit starting"<<endm;
   mNTrack = mNTPCTrack;
   mTrack = new StEstTrack*[mNTPCTrack];
   if(!mTrack){
-    cerr<<"ERROR!!! not enough memory"<<endl;
-    cerr<<"StEstMaker::Init mTrack = new StEstTrack*[ "<< mNTPCTrack<<"];"<<endl;
+    gMessMgr->Error()<<"ERROR!!! not enough memory"<<endm;
+    gMessMgr->Error()<<"StEstMaker::Init mTrack = new StEstTrack*[ "<< mNTPCTrack<<"];"<<endm;
     return 1;
   }
   
   for (i=0;i<mNTPCTrack;i++) {
     mTrack[i] = new StEstTrack(mParams[0]->maxbranches,mTPCTrack[i]);
     if (mTrack[i]==NULL)
-      cerr << "ERROR StEstMaker::Init mTrack[i]==NULL" <<endl;
+      gMessMgr->Error()<<"ERROR StEstMaker::Init mTrack[i]==NULL"<<endm;
     else {
       if(mDebugLevel>3)
-	cout<<" New track has been created #"<<i<<endl;
+	gMessMgr->Info()<<"New track has been created #"<<i<<endm;
       branch = new StEstBranch(NULL, long(mParams[0]->maxsvthits));
       if (branch==NULL)
-	cerr << "ERROR StEstMaker::Init branch==NULL" << endl;
+	gMessMgr->Error()<<"ERROR StEstMaker::Init branch==NULL"<<endm;
       else {
 	// branch initialization
 	// we should copy first the tpc helix before attaching 
@@ -116,7 +118,7 @@ int StEstTracker::BranchInit(){
 	branch->JoinTrack(mTrack[i],0);
 	branch->SetDebugLevel(0);
 	if(mDebugLevel>3)
-	  cout<<" Branch added"<<endl;
+	  gMessMgr->Info()<<" Branch added"<<endm;
 	StThreeVector<double> a(mVertex->mXG->z(),mVertex->mXG->y(),mVertex->mXG->z());
   	if (mTPCTrack[i]->GetFlag()>=0) {
 	  // First the branch is refitted without the tpc hits only.
@@ -129,7 +131,7 @@ int StEstTracker::BranchInit(){
 	  else
 	    RefitBranch(branch,NULL,-1,0,&fitstatus);
 	if(mDebugLevel>3)
-	  cout<<" Branch refitted"<<endl;
+	  gMessMgr->Info()<<" Branch refitted"<<endm;
 	  //	  branch->mTrack->mTPCTrack->mChiSq = branch->GetChiSq();
 	  //	  branch->mTrack->mTPCTrack->mChiSqCir = branch->GetChiSqCir();
 	  //	  branch->mTrack->mTPCTrack->mChiSqLin = branch->GetChiSqLin();
@@ -141,7 +143,7 @@ int StEstTracker::BranchInit(){
     }
   }
 
-  cout<<"StEstTracker::BranchInit stopped"<<endl;
+  if(mDebugLevel>0) gMessMgr->Info()<<"StEstTracker::BranchInit stopped"<<endm;
   return kStOK;
 }
   
@@ -152,8 +154,8 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
 			  St_scs_spt*   Stscsspt)
 {
 
-  if (mDebugLevel>2) 
-    cout << "SVTInit **** START ****"<<endl;  
+  if (mDebugLevel>0) 
+    gMessMgr->Info()<<"SVTInit **** START ****"<<endm;  
 
   long il, jl, kl, maxl, lay, shape;
   long	lay2, lad, waf, maxlad, minlad, maxwaf, minwaf;
@@ -169,7 +171,7 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
   svg_shape_st*    svgshape;
 
   if (mDebugLevel>2) 
-    cout << "SVTInit **** Getting data from tables ***"<<endl;  
+    gMessMgr->Info()<<"SVTInit **** Getting data from tables ***"<<endm;  
 
 
   svggeom   = Stsvggeom->GetTable();
@@ -180,18 +182,18 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
   scsspt   = Stscsspt->GetTable();
 
 
-  if (mDebugLevel>0) 
-    cout << "SVTInit **** Creating "<<mNWafers<<" wafers ****"<<endl;  
+  if (mDebugLevel>2) 
+    gMessMgr->Info()<<"SVTInit **** Creating "<<mNWafers<<" wafers ****"<<endm;  
   mIndexGeom = new StEstIndexGeom(mNPhiBins,mNZBins);
   mIndexWaf  =  new StEstWafer*[mNWafers];
   if(!mIndexWaf){
-    cerr<<"ERROR!!! not enough memory"<<endl;
-    cerr<<"StEstMaker::SVTInit mIndexWaf = new StEstWafer*["<<mNWafers<<"];"<<endl;
+    gMessMgr->Error()<<"ERROR!!! not enough memory"<<endm;
+    gMessMgr->Error()<<"StEstMaker::SVTInit mIndexWaf = new StEstWafer*["<<mNWafers<<"];"<<endm;
     return 1;
   }
 
   if (mDebugLevel>2) 
-    cout << "SVTInit **** Loop over the wafers **** : "<<mNWafers<<endl;  
+    gMessMgr->Info()<<"SVTInit **** Loop over the wafers **** : "<<mNWafers<<endm;  
 
   // We scan once the scs_spt table the count the number of hits in each 
   // wafer and allocate suited memory space for the hits in the wafer object.
@@ -211,8 +213,8 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
     shape=svggeom[il].id_shape-1;
     mIndexWaf[il]  =  new StEstWafer(svggeom[il].id, HitPerWafer[svggeom[il].id], xx, nn, shape);
     if(!mIndexWaf[il] || !xx || !nn){
-      cout<<"ERROR!!! not enough memory"<<endl;
-      cout<<"mIndexWaf["<<il<<"] = new StEstWafer("<<svggeom[il].id<<", 200);"<<endl;
+      gMessMgr->Error()<<"ERROR!!! not enough memory"<<endm;
+      gMessMgr->Error()<<"mIndexWaf["<<il<<"] = new StEstWafer("<<svggeom[il].id<<", 200);"<<endm;
       return 1;
     }
 
@@ -240,11 +242,6 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
       for(kl=zmin; kl<=zmax; kl++)
 	mIndexGeom->setWafTab(jl,kl,lay,mIndexWaf[il]);
     }while(jl!=pmax);
-    
-    if (mDebugLevel>3) 
-      if ((il%10)==0)
-	cout << "Wafer #"<<svggeom[il].id<<" coord: "<<mIndexWaf[il]->GetX()->x()<<"  "<<mIndexWaf[il]->GetX()->y()<<"  "<<mIndexWaf[il]->GetX()->z()<<endl;  
-
   } // end of for(il=0; il<mNWafers; il++)
   
   
@@ -253,7 +250,7 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
   // the first svt sub-layer now contains only ladders 2,4,6,8 (before 1,2,3,4)
   // the second sub-layer contains only the ladders 1,3,5,7 (before 1,2,3,4)
   if (mDebugLevel>2) 
-    cout << "SVTInit **** Finding neighbouring wafers ****"<<endl;  
+    gMessMgr->Info()<<"SVTInit **** Finding neighbouring wafers ****"<<endm;  
 
   for (il=0; il<mNWafers; il++) {
     lay=(int)svggeom[il].id/1000;
@@ -339,7 +336,7 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
   // get SVT hits for each wafer
 
   if (mDebugLevel>2) 
-    cout << "SVTInit **** Creating Hit objects ****"<<endl;  
+    gMessMgr->Info()<<"SVTInit **** Creating Hit objects ****"<<endm;  
 
 
   maxwaf=0;
@@ -348,8 +345,8 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
 
   mSvtHit  =  new StEstHit*[maxl];
   if(!mSvtHit){
-    cerr<<"ERROR!!! not enougth memory"<<endl;
-    cerr<<"StEstMaker::SVTInit mSvtHit = new StEstHit*["<<maxl<<"];"<<endl;
+    gMessMgr->Error()<<"ERROR!!! not enougth memory"<<endm;
+    gMessMgr->Error()<<"StEstMaker::SVTInit mSvtHit = new StEstHit*["<<maxl<<"];"<<endm;
     return 1;
   }
 
@@ -362,7 +359,8 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
     if (mParams[0]->nbranch[il]*mParams[0]->onoff[il]>ExtremeBranching) 
       ExtremeBranching=mParams[0]->nbranch[il]*mParams[0]->onoff[il];
   ExtremeBranching=ExtremeBranching*mParams[0]->ntotbranch[0];
-  cout<<"mSvtInit : ExtremeBranching = "<<ExtremeBranching<<endl;
+  if (mDebugLevel>1) 
+    gMessMgr->Info()<<"mSvtInit : ExtremeBranching = "<<ExtremeBranching<<endm;
   int ill=0;
   for(il=0; il<maxl; il++) //loop over SVT hits
     {
@@ -378,14 +376,14 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
 	mSvtHit[ill] = new StEstHit(scsspt[il].id,xg,xl,ExtremeBranching,mParams[0]->share[lay],mIndexWaf[jl]);
 	
 	if(!mSvtHit[ill]){
-	  cerr<<"ERROR!!! not enougth memory"<<endl;
-	  cerr<<"StEstMaker::SVTInit mSvtHit["<<ill<<"] = new StEstHit(...);"<<endl;
+	  gMessMgr->Error()<<"ERROR!!! not enougth memory"<<endm;
+	  gMessMgr->Error()<<"StEstMaker::SVTInit mSvtHit["<<ill<<"] = new StEstHit(...);"<<endm;
 	  return 1;
 	}
 	
 	//add a hit to the wafer
 	if (mIndexWaf[jl]->AddHit(mSvtHit[ill])==1) 
-	  cerr << "ERROR!!! StEstMaker::SVTInit Too many hits on wafer #"<<scsspt[il].id_wafer<<endl;
+	  gMessMgr->Error()<<"ERROR!!! StEstMaker::SVTInit Too many hits on wafer #"<<scsspt[il].id_wafer<<endm;
 	if (mIndexWaf[jl]->GetNHits()>maxwaf)
 	  maxwaf = mIndexWaf[jl]->GetNHits();
 	ill++;
@@ -394,10 +392,10 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
   
   mNSvtHit = ill-1;
   if(mDebugLevel>0)
-    cout << "SVTInit **** Maximum number of hits per wafer=" << maxwaf << " ****" <<endl;
+    gMessMgr->Info()<<"SVTInit **** Maximum number of hits per wafer=" << maxwaf << " ****" <<endm;
   
   if(mDebugLevel>0)
-    cout << "SVTInit *** STOP ***"<<endl;  
+    gMessMgr->Info()<<"SVTInit *** STOP ***"<<endm;  
   
   return 0;
 }
@@ -405,8 +403,8 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
 int StEstTracker::TPCInit(St_tpt_track* Sttptrack,
 			  St_tcl_tphit* Sttphit){
 
-  if(mDebugLevel>1)
-    cout << "TPCInit *** START ***"<<endl;  
+  if(mDebugLevel>0)
+    gMessMgr->Info()<<"TPCInit *** START ***"<<endm;  
 
   long il, jl, kl, maxl;
   long MaxIndex, MaxTPCTrack;
@@ -419,7 +417,8 @@ int StEstTracker::TPCInit(St_tpt_track* Sttptrack,
   float b[3];
   gufld(x,b);
 
-  cout << " Using a field of " << b[2] << endl;
+  if(mDebugLevel>0)
+    gMessMgr->Info()<<"Using a field of "<<b[2]<<endm;
 
   // reading tables with TPC data
 
@@ -436,15 +435,17 @@ int StEstTracker::TPCInit(St_tpt_track* Sttptrack,
     if (tptrack[il].flag>0) MaxTPCTrack++;
     if (tptrack[il].id>MaxIndex) MaxIndex=tptrack[il].id;
   }
-  cout<<"number of tpc tracks : "<<MaxTPCTrack<<endl;
-  cout<<"maximum tpc index : "<<MaxIndex+1<<endl;
+  if (mDebugLevel>0) {
+    gMessMgr->Info()<<"number of tpc tracks : "<<MaxTPCTrack<<endm;
+    gMessMgr->Info()<<"maximum tpc index : "<<MaxIndex+1<<endm;
+  }
 
   //we allocated the memory for the TPCTrack objects 
   mNTPCTrack   = MaxTPCTrack;
   mTPCTrack = new StEstTPCTrack*[MaxTPCTrack];
   if(!mTPCTrack) {
-    cerr<<"ERROR!!! not enough memory"<<endl;
-    cerr<<"StEstMaker::TPCInit mTPCTrack = new StEstTPCTrack*["<<mNTPCTrack<<"];"<<endl;
+    gMessMgr->Error()<<"ERROR!!! not enough memory"<<endm;
+    gMessMgr->Error()<<"StEstMaker::TPCInit mTPCTrack = new StEstTPCTrack*["<<mNTPCTrack<<"];"<<endm;
     return 1;
   }
   
@@ -452,8 +453,8 @@ int StEstTracker::TPCInit(St_tpt_track* Sttptrack,
   // we need +1 since the id value run from 1 to XXX
   mTptIndex = new long[MaxIndex+1]; 
   if(!mTptIndex) {
-    cerr<<"ERROR!!! not enough memory"<<endl;
-    cerr<<"StEstMaker::TPCInit mTptIndex = new long["<<MaxIndex<<"];"<<endl;
+    gMessMgr->Error()<<"ERROR!!! not enough memory"<<endm;
+    gMessMgr->Error()<<"StEstMaker::TPCInit mTptIndex = new long["<<MaxIndex<<"];"<<endm;
     return 1;
   }
 
@@ -461,7 +462,7 @@ int StEstTracker::TPCInit(St_tpt_track* Sttptrack,
     mTptIndex[il] = -1;
 
   if(mDebugLevel>2)
-    cout << "TPCInit **** Creating TPC tracks ****"<<endl;  
+    gMessMgr->Info()<<"TPCInit **** Creating TPC tracks ****"<<endm;  
 
   StHelix *hel;
   StThreeVector<double> orig;
@@ -480,8 +481,8 @@ int StEstTracker::TPCInit(St_tpt_track* Sttptrack,
 
       hel = new StHelix(c,dip,phase,orig,h);
       if(!hel) {
-	cerr<<"ERROR!!! not enough memory"<<endl;
-	cerr<<"StEstMaker::TPCInit hel = new StHelix(c,dip,phase,orig,h);"<<endl;
+	gMessMgr->Error()<<"ERROR!!! not enough memory"<<endm;
+	gMessMgr->Error()<<"StEstMaker::TPCInit hel = new StHelix(c,dip,phase,orig,h);"<<endm;
 	return 1;
       }
       
@@ -490,9 +491,9 @@ int StEstTracker::TPCInit(St_tpt_track* Sttptrack,
       r0[RowToFill] = tptrack[il].r0; // !!!!
       
       if(!mTPCTrack[RowToFill]) {
-	cerr<<"ERROR!!! not enough memory"<<endl;
-	cerr<<"StEstMaker::TPCInit mTPCTrack["<<RowToFill<<"] = new StEstTPCTrack("<<il 
-	    <<",mParams[0]->maxtpchits,hel);"<<endl;
+	gMessMgr->Error()<<"ERROR!!! not enough memory"<<endm;
+	gMessMgr->Error()<<"StEstMaker::TPCInit mTPCTrack["<<RowToFill<<"] = new StEstTPCTrack("<<il 
+	    <<",mParams[0]->maxtpchits,hel);"<<endm;
 	return 1;
       }
       
@@ -509,7 +510,7 @@ int StEstTracker::TPCInit(St_tpt_track* Sttptrack,
   // loop filing the St_TPCTrack with the TPC hits
   // flip the order of the tpc hits....
   if(mDebugLevel>2)
-    cout << "*** INIT - Filling the TPC tracks with the hits ***"<<endl;  
+    gMessMgr->Info()<< "*** INIT - Filling the TPC tracks with the hits ***"<<endm;  
   maxl=Sttphit->GetNRows();
   for(il=0; il<maxl; il++) {
     jl=tphit[il].track/1000;
@@ -521,8 +522,8 @@ int StEstTracker::TPCInit(St_tpt_track* Sttptrack,
 	xhit = new StThreeVectorD(tphit[il].x,tphit[il].y,tphit[il].z);
 	xdhit = new StThreeVectorD(tphit[il].dx,tphit[il].dy,tphit[il].dz);
 	if(!mTPCTrack[jl]->AddHit(kl,xhit,xdhit,tphit[il].row,tphit[il].flag)) {
-	  cout<<"ERROR!!! StEstMaker::TPCInit too many hits for TPCTrack["<<jl<<"] = " \
-	      <<mTPCTrack[jl]->GetNHits()<<endl;
+	  gMessMgr->Error()<<"ERROR!!! StEstMaker::TPCInit too many hits for TPCTrack["<<jl
+			   <<"] = "<<mTPCTrack[jl]->GetNHits()<<endm;
 	  return 1;
 	}
       }
@@ -539,13 +540,13 @@ int StEstTracker::TPCInit(St_tpt_track* Sttptrack,
 		 + mTPCTrack[il]->mR[mTPCTrack[il]->mHitIndex[0]]->y()*mTPCTrack[il]->mR[mTPCTrack[il]->mHitIndex[0]]->y());
       mTPCTrack[il]->SetR(rrr);
       if (fabs(r0[il] - rrr)>30) {
-	cout << "HUGE DIFF= "<<fabs(r0[il] - rrr)<<" id= "<<mTPCTrack[il]->mId<<" pt= "<<mTPCTrack[il]->mPt<<" hit.r0= "<<rrr<<" tpc.r0= "<<r0[il]<<endl;
+	gMessMgr->Warning()<< "HUGE DIFF= "<<fabs(r0[il] - rrr)<<" id= "<<mTPCTrack[il]->mId<<" pt= "<<mTPCTrack[il]->mPt<<" hit.r0= "<<rrr<<" tpc.r0= "<<r0[il]<<endm;
       }
     }
   }
 
-  if(mDebugLevel>2)
-    cout << "TPCInit **** STOP ***"<<endl;  
+  if(mDebugLevel>0)
+    gMessMgr->Info()<<"TPCInit **** STOP ***"<<endm;  
   
   return 0;	
 }
@@ -564,22 +565,19 @@ int StEstTracker::SetupMc(St_scs_spt* Stscsspt,
 
 
   // EvalInit start
-  if(mDebugLevel>2) cout << "EvalInit start" <<endl;
+  if(mDebugLevel>0) gMessMgr->Info()<<"EvalInit start"<<endm;
 
   // translation table (mcid -> est_id)
   Eval_id_mctrk2est_Track = new long[mNTPCTrack*10];
   if(!Eval_id_mctrk2est_Track){
-    cerr<<"ERROR!!! not enough memory"<<endl;
-    cerr<<"StEstMaker::Init Eval_id_mctrk2est_Track = new long["<< mNTPCTrack*10<<"];"<<endl;
+    gMessMgr->Error()<<"ERROR!!! not enough memory"<<endm;
+    gMessMgr->Error()<<"StEstMaker::Init Eval_id_mctrk2est_Track = new long["<< mNTPCTrack*10<<"];"<<endm;
     return 1;
   }
 
-  //  int* mctest = new int[mNTPCTrack*10];
 
-  for (i=0;i<mNTPCTrack*10;i++) {
+  for (i=0;i<mNTPCTrack*10;i++) 
     Eval_id_mctrk2est_Track[i]=-1;
-    //    mctest[i] = 0;
-  }
 
   
   tte_eval_st*   evaltrk      = Stevaltrk->GetTable();
@@ -588,7 +586,6 @@ int StEstTracker::SetupMc(St_scs_spt* Stscsspt,
 
   for(i=0; i<Stevaltrk->GetNRows(); i++) {
     if(evaltrk[i].mtrk<mNTPCTrack*10) {
-      //      mctest[evaltrk[i].mtrk]++;
       // filling translation table; index is mcid, content is id of TPC track
       Eval_id_mctrk2est_Track[evaltrk[i].mtrk] = mTptIndex[evaltrk[i].rtrk];
       if (mTptIndex[evaltrk[i].rtrk]!=-1) {
@@ -614,21 +611,21 @@ int StEstTracker::SetupMc(St_scs_spt* Stscsspt,
       }
     }
     else
-      cerr << "ERROR StEstMaker::Init mctrk[i].mcid>=mNTPCTrack*10" << endl;
+      gMessMgr->Error()<<"ERROR StEstMaker::Init mctrk[i].mcid>=mNTPCTrack*10"<<endm;
   }
 
   Eval_mchits = new StEstHit**[mNTPCTrack];
   if(!Eval_mchits){
-    cerr<<"ERROR!!! not enougth memory"<<endl;
-    cerr<<"StEstMaker::Init Eval_mchits = new StEstHit**["<< mNTPCTrack<<"];"<<endl;
+    gMessMgr->Error()<<"ERROR!!! not enougth memory"<<endm;
+    gMessMgr->Error()<<"StEstMaker::Init Eval_mchits = new StEstHit**["<< mNTPCTrack<<"];"<<endm;
     return 1;
   }
 
   for(i=0; i<mNTPCTrack; i++) {
     Eval_mchits[i] = new StEstHit*[10];
       if(!Eval_mchits[i]){
-	cerr<<"ERROR!!! not enougth memory"<<endl;
-	cerr<<"StEstMaker::Init Eval_mchits["<<i<<"] = new StEstHit*[10];"<<endl;
+	gMessMgr->Error()<<"ERROR!!! not enougth memory"<<endm;
+	gMessMgr->Error()<<"StEstMaker::Init Eval_mchits["<<i<<"] = new StEstHit*[10];"<<endm;
 	return 1;
       }
       else {
@@ -682,8 +679,8 @@ int StEstTracker::SetupMc(St_scs_spt* Stscsspt,
     }
   }
   
-  if(mDebugLevel>0) cout << "Number of SVT/SSD hits without TPC tracks :"<<IsolatedSvtHits<<endl;
-  if(mDebugLevel>0) cout << "EvalInit STOP" <<endl;
+  if(mDebugLevel>0) gMessMgr->Info()<<"Number of SVT/SSD hits without TPC tracks :"<<IsolatedSvtHits<<endm;
+  if(mDebugLevel>0) gMessMgr->Info()<<"EvalInit STOP" <<endm;
 
   //EvalInit STOP
 
@@ -692,7 +689,7 @@ int StEstTracker::SetupMc(St_scs_spt* Stscsspt,
       j=0;
       while (Eval_mchits[i][j] !=NULL)
 	j++;
-      cout<<"i = "<<i<<"  nTPCHits = "<<mTPCTrack[i]->GetNHits()<<"  flag = "<<mTPCTrack[i]->GetFlag()<<"  nSVTHits = "<<j<<endl;
+      gMessMgr->Info()<<"i = "<<i<<"  nTPCHits = "<<mTPCTrack[i]->GetNHits()<<"  flag = "<<mTPCTrack[i]->GetFlag()<<"  nSVTHits = "<<j<<endm;
     }
   }
   return 0;
