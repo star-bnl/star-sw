@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   09/08/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.cxx,v 1.6 1999/12/03 20:51:27 fine Exp $
+// $Id: St_tableDescriptor.cxx,v 1.7 2000/01/24 03:55:47 fine Exp $
 // $Log: St_tableDescriptor.cxx,v $
+// Revision 1.7  2000/01/24 03:55:47  fine
+// new nethod CreateLeafList() to create text descriptor compatible with TBranch ctor
+//
 // Revision 1.6  1999/12/03 20:51:27  fine
 // change the data-member name size from 20 to 32 to be in line with dstype.h
 //
@@ -45,9 +48,25 @@ St_tableDescriptor::St_tableDescriptor(const St_Table *parentTable)
   SetType("tableDescriptor");
   if (parentTable) {
       SetName(parentTable->GetName());
-      LearnTable(parentTable); 
+      TClass *classPtr = parentTable->GetRowClass();
+      if (classPtr) LearnTable(classPtr); 
+      else MakeZombie();
   }  
 }
+//______________________________________________________________________________
+St_tableDescriptor::St_tableDescriptor(TClass *classPtr)
+ : St_Table("tableDescriptor",sizeof(tableDescriptor_st))
+{ 
+  // Create a descriptor of the C-structure defined by TClass
+  // TClass *classPtr must be a valid pointer to TClass object for
+  // "plain" C_struture only !!! 
+  SetType("tableDescriptor");
+  if (classPtr) {
+      SetName(classPtr->GetName());
+      LearnTable(classPtr); 
+  }  
+}
+
 //______________________________________________________________________________
 St_tableDescriptor::~St_tableDescriptor()
 {
@@ -61,10 +80,40 @@ St_tableDescriptor::~St_tableDescriptor()
   }
 }
 //____________________________________________________________________________
+TString St_tableDescriptor::CreateLeafList() const 
+{
+  // Create a list of leaf to be useful for TBranch::TBranch ctor
+  const Char_t TypeMapTBranch[]="\0FIISDiisbBC";
+  Int_t maxRows = GetNumberOfColumns();
+  TString string;
+  for (Int_t i=0;i<maxRows;i++){
+    if (i) string += ":";
+    string += GetColumnName(i);
+    string += "/";
+    string += TypeMapTBranch[GetColumnType(i)];
+  }
+  return string;
+}
+
+//____________________________________________________________________________
 void St_tableDescriptor::LearnTable(const St_Table *parentTable)
+{
+  if (!parentTable) {
+    MakeZombie();
+    return;
+  }
+  LearnTable(parentTable->GetRowClass());
+}
+
+//____________________________________________________________________________
+void St_tableDescriptor::LearnTable(TClass *classPtr)
 {
 //
 //  LearnTable() creates an array of the descriptors for elements of the row
+//
+// It creates a descriptor of the C-structure defined by TClass
+// TClass *classPtr must be a valid pointer to TClass object for
+// "plain" C_struture only !!! 
 //
 //  This is to introduce an artificial restriction demanded by STAR database group
 //
@@ -74,12 +123,7 @@ void St_tableDescriptor::LearnTable(const St_Table *parentTable)
 //  To lift this restriction one has to provide -DNORESTRICTIONS CPP symbol and
 //  recompile code.
 //
-  if (!parentTable) {
-    MakeZombie();
-    return;
-  }
- 
-  TClass *classPtr = parentTable->GetRowClass();
+
   if (!classPtr) return;
 
   if (!classPtr->GetListOfRealData()) classPtr->BuildRealData();
@@ -139,7 +183,7 @@ void St_tableDescriptor::LearnTable(const St_Table *parentTable)
         }
       } 
     }
-    else Error("LearnTable","Wrong data type for <%s> table",parentTable->GetType());
+    else Error("LearnTable","Wrong data type for <%s> structure",classPtr->GetName());
     elementDescriptor.m_Size   =  globalIndex * (elementDescriptor.m_TypeSize);
     elementDescriptor.m_Offset = member->GetOffset();
     AddAt(&elementDescriptor,columnIndex); columnIndex++;
@@ -153,7 +197,7 @@ const Int_t St_tableDescriptor::GetColumnByName(const Char_t *columnName) const
  if (!elementDescriptor) return i;
  Int_t nRows = GetNRows();
  if (nRows) {
-   for (Int_t i=0; i < nRows; i++)
+   for (Int_t ii=0; ii < nRows; ii++)
      if (strcmp(columnName,elementDescriptor->m_ColumnName) == 0) break;
  }
  if (i==nRows) i = -1;
