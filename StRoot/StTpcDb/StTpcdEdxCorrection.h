@@ -1,4 +1,4 @@
-// $Id: StTpcdEdxCorrection.h,v 1.8 2004/10/27 21:45:32 fisyak Exp $
+// $Id: StTpcdEdxCorrection.h,v 1.9 2005/01/28 17:17:10 fisyak Exp $
 #ifndef STAR_StTpcdEdxCorrection
 #define STAR_StTpcdEdxCorrection
 //
@@ -85,7 +85,7 @@ class StTpcdEdxCorrection : public TObject {
  public:
   enum ESector  {kTpcOuter = 0, kTpcInner = 1};
   enum EOptions {
-    kUncorrected         , //U
+    kUncorrected = 1     , //U
     kAdcCorrection       , //R
     kTpcSecRow,
     kTpcSecRowB=kTpcSecRow,//S
