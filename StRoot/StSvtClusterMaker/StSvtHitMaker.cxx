@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.17 2002/01/28 23:42:10 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.18 2002/01/31 22:56:39 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.18  2002/01/31 22:56:39  caines
+ * Make code cope with database failing, now just sends error messages and quits but doesnt make chain end
+ *
  * Revision 1.17  2002/01/28 23:42:10  caines
  * Move to SVT database with StSvtDbMaker
  *
@@ -126,28 +129,7 @@ Int_t StSvtHitMaker::Init()
 
  // 		geometry parameters
 
-  GetSvtGeometry();
- //   m_shape       = (St_svg_shape   *) local("svgpars/shape");
-
-//    if(  !strncmp(mSvtData->getConfiguration(), "Y1L", strlen("Y1L"))){
-//    m_geom        = (St_svg_geom    *) local("svgpars/geomy1l");
-//    }
-//    else{
-//    m_geom        = (St_svg_geom    *) local("svgpars/geom");
-//    }
-
-//    if (!m_geom) {
-//      if (!(m_shape)){
- 
-//        gMessMgr->Error() << "SVT- StSvtHitMaker:svt shapes not exist" << endm;
-//        return kStWarn;
-//      }
-//    }
-   
-//    m_srs_srspar  = (St_srs_srspar  *) local("srspars/srs_srspar");
-   
-   //srs_srspar_st *srs_par = m_srs_srspar->GetTable();
-  
+  if( GetSvtGeometry() != kStOK) return kStWarn;
 
   m_x_vs_y = new TH2F("si_x_vs_y","X vs Y of Si space points",
 		      300,-30,30,300,-30,30);
@@ -250,9 +232,15 @@ Int_t StSvtHitMaker::GetSvtClusterData()
 //___________________________________________________________________________
 Int_t StSvtHitMaker::GetSvtGeometry()
 {
+  m_geom = 0;
   St_DataSet* dataSet;
   dataSet = GetDataSet("StSvtGeometry");
- 
+  if(!dataSet) {
+    gMessMgr->Error("Failure to get SVT geometry - THINGS HAVE GONE SERIOUSLY WRONG!!!!!");
+    
+    return kStFatal;
+  }
+
   m_geom = (StSvtGeometry*)dataSet->GetObject();
   
   return kStOK;
@@ -276,6 +264,11 @@ Int_t StSvtHitMaker::Make()
 
   if( GetSvtClusterData()){
     gMessMgr->Warning() <<" No SVT Cluster data" << endm;
+    return kStWarn;
+  }
+
+  if( !m_geom){
+     gMessMgr->Warning() <<" Things are wrong with the SVT database!!" << endm;
     return kStWarn;
   }
 
