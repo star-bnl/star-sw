@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGeant3.h,v 1.1 2000/01/04 16:04:05 fisyak Exp $ */
+/* $Id: TGeant3.h,v 1.2 2000/01/07 00:17:10 fisyak Exp $ */
 
 //////////////////////////////////////////////// 
 //  C++ interface to Geant3 basic routines    // 
@@ -453,6 +453,7 @@ typedef struct {
   Bool_t    leplan;
   Bool_t    lepoin;
   Bool_t    levolu;
+  Bool_t    levmix;
 } Eropts_t;
 
 typedef struct {
