@@ -11,6 +11,7 @@ void plotGraphs(Char_t* part = "pion") {
   Bool_t crossSection = kTRUE;
   //Bool_t crossSection = kFALSE;  // yield weighting
   Bool_t pCons = kTRUE;            // with momentum conservation
+  //Bool_t pCons = kFALSE;            // without momentum conservation
 
 
   if (pCons) {
@@ -90,28 +91,31 @@ void plotGraphs(Char_t* part = "pion") {
   TF1* o3 = new TF1("o3", "pol4", 0.05, 1.85);
   TF1* o4 = new TF1("o4", "pol5", 0.05, 1.85);
 
-  // pt polynomials which goes to zero
+  // pt polynomials near zero pt, which go to zero
   TF1* n2 = new TF1("n2", "[0]*x + [1]*x*x", 0., 0.08);
 
   // y for first (f), second (s), and reflected (r)
-  TF1* s1 = new TF1("s1", "[0] + [1]*pow(x-2.92,2)", yMin, yMax);
-  TF1* r1 = new TF1("r1", "[0] + [1]*pow(x-2.92,2)", yReflMin, yReflMax);
   TF1* f1 = new TF1("f1", "[0] + [1]*(x-2.92)", yMin, yMax);
+  TF1* f2 = new TF1("f2", "[0] + [1]*(x-2.92) + [2]*pow(x-2.92,3)", yMin, yMax);
+  TF1* f3 = new TF1("f3",
+    "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yMin, yMax);
+
+  TF1* s1 = new TF1("s1", "[0] + [1]*pow(x-2.92,2)", yMin, yMax);
   TF1* s2 = new TF1("s2", "[0] + [1]*pow(x-2.92,2) + [2]*pow(x-2.92,4)", 
     yMin, yMax);
+
+  TF1* r1 = new TF1("r1", "[0] + [1]*pow(x-2.92,2)", yReflMin, yReflMax);
   TF1* r2 = new TF1("r2", "[0] + [1]*pow(x-2.92,2) + [2]*pow(x-2.92,4)",
     yReflMin, yReflMax);
+  TF1* r3 = new TF1("r3",
+    "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yReflMin, yReflMax);
+
+  TF1* f3All = new TF1("f3All",
+    "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yMin, yAllMax);
   TF1* s2All = new TF1("s2All", "[0] + [1]*pow(x-2.92,2) + [2]*pow(x-2.92,4)", 
     yMin, yAllMax);
   TF1* r2All = new TF1("r2All", "[0] + [1]*pow(x-2.92,2) + [2]*pow(x-2.92,4)",
     yAllReflMin, yReflMax);
-  TF1* f2 = new TF1("f2", "[0] + [1]*(x-2.92) + [2]*pow(x-2.92,3)", yMin, yMax);
-  TF1* f3 = new TF1("f3",
-    "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yMin, yMax);
-  TF1* r3 = new TF1("r3",
-    "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yReflMin, yReflMax);
-  TF1* f3All = new TF1("f3All",
-    "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yMin, yAllMax);
   TF1* r3All = new TF1("r3All",
     "[0]*(x-2.92) + [1]*pow(x-2.92,3) + [2]*pow(x-2.92,5)", yAllReflMin, yReflMax);
 
