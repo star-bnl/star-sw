@@ -1,7 +1,7 @@
 //StiResidualCalculator.cxx
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.cxx,v 2.3 2003/04/30 15:38:56 pruneau Exp $
+ * $Id: StiResidualCalculator.cxx,v 2.4 2003/04/30 16:38:16 pruneau Exp $
  *
  * \class  StiResidualCalculator provides a utility for determining the
  *         track residuals.
@@ -9,6 +9,9 @@
  * \date   October 2002
  ***************************************************************************
  * $Log: StiResidualCalculator.cxx,v $
+ * Revision 2.4  2003/04/30 16:38:16  pruneau
+ * active detector hit filtering
+ *
  * Revision 2.3  2003/04/30 15:38:56  pruneau
  * Integrating StiResidualCalculator into the main stream.
  *
@@ -286,7 +289,7 @@ int StiResidualCalculator::trackResidue(const StiKalmanTrack *track)
   	  candidateHits->setDeltaD(20.);
   	  candidateHits->setDeltaZ(20.);
  	  candidateHits->setRefPoint(iNode);
-	
+	  //HitVectorType hits = candidateHits->hits(iNode.getDetector());
 
 	  StiHit* hit;
 	  //cout <<"Hit container size: "<<candidateHits.size()<<endl;
