@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // StFlowTagMaker.hh
-// $Id: StFlowTagMaker.h,v 1.9 2000/03/21 00:23:00 posk Exp $
+// $Id: StFlowTagMaker.h,v 1.10 2000/03/28 23:23:26 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -16,6 +16,9 @@
 //
 // History:
 // $Log: StFlowTagMaker.h,v $
+// Revision 1.10  2000/03/28 23:23:26  posk
+// Allow multiple instances of the AnalysisMaker.
+//
 // Revision 1.9  2000/03/21 00:23:00  posk
 // Added GetCVS.
 //
@@ -82,8 +85,7 @@ class StFlowTagMaker : public StMaker
 
 public:
 
-               StFlowTagMaker(const Char_t* name = "FlowTag");
-               StFlowTagMaker(const Char_t* name, const StFlowSelection&);
+               StFlowTagMaker(const Char_t* name="FlowTag");
   virtual      ~StFlowTagMaker();
 
   Int_t        Init();
@@ -92,7 +94,7 @@ public:
   Int_t        Finish();
   FlowTag_st*  TagPointer() const;         // returns pointer to the tag table
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFlowTagMaker.h,v 1.9 2000/03/21 00:23:00 posk Exp $ built "__DATE__" "__TIME__ ;
+    {static const char cvs[]="Tag $Name:  $ $Id: StFlowTagMaker.h,v 1.10 2000/03/28 23:23:26 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.3 2000/03/21 00:22:02 posk Exp $
+//  $Id: StFlowMaker.h,v 1.4 2000/03/28 23:21:03 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -13,6 +13,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.4  2000/03/28 23:21:03  posk
+//  Allow multiple instances of the AnalysisMaker.
+//
 //  Revision 1.3  2000/03/21 00:22:02  posk
 //  Added GetCVS and some print commands.
 //
@@ -69,12 +72,15 @@ class StPrimaryTrack;
 class StParticleDefinition;
 class StFlowEvent;
 class StFlowNanoEvent;
+class StFlowSelection;
 
 class StFlowMaker : public StMaker {
 
 public:
 
-                  StFlowMaker(const Char_t *name="Flow");
+                  StFlowMaker(const Char_t* name="Flow");
+		  StFlowMaker(const Char_t* name,
+			      const StFlowSelection& pFlowSelect);
   virtual         ~StFlowMaker();
 
   Int_t           Init();
@@ -85,7 +91,7 @@ public:
   virtual void    NanoFlowEventOn() {NanoFlowEvent(kTRUE);}
   virtual void    NanoFlowEventOff(){NanoFlowEvent();} 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFlowMaker.h,v 1.3 2000/03/21 00:22:02 posk Exp $ built "__DATE__" "__TIME__ ;
+    {static const char cvs[]="Tag $Name:  $ $Id: StFlowMaker.h,v 1.4 2000/03/28 23:21:03 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 protected:
@@ -94,7 +100,8 @@ protected:
 
 private:
   Bool_t           mNanoFlowEventOn;          // switch for the nano DST
-  void             NanoFlowEvent(Bool_t flag=kFALSE){mNanoFlowEventOn=flag;}
+  void             NanoFlowEvent(Bool_t flag=kFALSE){ mNanoFlowEventOn=flag; }
+  StFlowSelection* pFlowSelect;               //! selection object
   Int_t            ReadPhiWgtFile();          // get the weight file
   void             InitFlowNanoEvent();       // fill a persistent nano dst
   void             FillFlowEvent();           // fill the transient flow event

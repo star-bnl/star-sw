@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.1 2000/03/02 23:02:36 posk Exp $
+// $Id: StFlowConstants.h,v 1.2 2000/03/28 23:21:01 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //////////////////////////////////////////////////////////////////////
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.2  2000/03/28 23:21:01  posk
+// Allow multiple instances of the AnalysisMaker.
+//
 // Revision 1.1  2000/03/02 23:02:36  posk
 // Changed extensions from .hh and .cc to .h and .cxx .
 //
@@ -29,10 +32,10 @@ class Flow{
 
  public:
 
-  enum { nHars    =  6, 
-	 nSels    =  2,
-	 nSubs    =  2,
-	 nPhiBins = 60 };
+  enum { nHars    =   6, 
+	 nSels    =   2,
+	 nSubs    =   2,
+	 nPhiBins = 120 };
 
   typedef Double_t PhiWgt_t[nSels][nHars][nPhiBins];
 

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.3 2000/03/15 23:33:54 posk Exp $
+// $Id: doFlowEvents.C,v 1.4 2000/03/28 23:26:46 posk Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -36,6 +36,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.4  2000/03/28 23:26:46  posk
+// Allow multiple instances of the AnalysisMaker.
+//
 // Revision 1.3  2000/03/15 23:33:54  posk
 // Added StFlowSelection.
 //
@@ -102,30 +105,41 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
       { setFiles->AddFile(fileList[ifil]);}
     StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
     IOMk->SetBranch("runcoBranch",0,"r");
-    //IOMk->SetDebug();
-
+    IOMk->SetDebug();
 
     //
     // Maker to read events from file or database into StEvent
     //
     StEventMaker *readerMaker =  new StEventMaker("events","title");
 
-
     //
     // Flow Makers
-    //   Use either the ones without selection, or the ones with selection
-    //   Use of the TagMaker is optional
+    //   Use of the TagMaker is optional.
+    //   The AnalysisMaker may be used with a selection object.
+    //   If you instantiate more than one AnalysisMaker,
+    //      make sure each has a different selection object number
+    //      and that you do not instantiate the TagMaker.
+    //   If you want to read more than one PhiWeight file, instantiate multiple
+    //      FlowMakers with the corresponding selection objects.
     //
-    StFlowMaker* flowMaker = new StFlowMaker("Flow");
-    //StFlowTagMaker* flowTagMaker = new StFlowTagMaker("FlowTag");
-    //StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker("FlowAnalysis");
-    StFlowSelection flowSelect;
-    //flowSelect->SetNumber(1);
-    //flowSelect->SetCentrality(0);
-    //flowSelect->SetPid("pi+");
-    //flowSelect->SetPidPart("pi-");
-    StFlowTagMaker* flowTagMaker = new StFlowTagMaker("FlowTag", flowSelect);
-    StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker("FlowAnalysis", flowSelect);
+    StFlowMaker* flowMaker = new StFlowMaker();
+    StFlowTagMaker* flowTagMaker = new StFlowTagMaker();
+    StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker();
+//     StFlowSelection flowSelect;
+//     StFlowSelection flowSelect1;
+//     flowSelect1->SetNumber(1);
+//     //flowSelect->SetCentrality(0);
+//     flowSelect1->SetPid("pi"); // pi+, pi-, pi, or proton
+//     flowSelect1->SetPidPart("pi"); // pi+, pi-, pi, or proton
+//     char makerName[30];
+//     sprintf(makerName, "Flow%s", flowSelect->Number());
+//     StFlowMaker* flowMaker = new StFlowMaker(makerName, flowSelect);
+//     sprintf(makerName, "FlowAnalysis%s", flowSelect->Number());
+//     StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker(makerName, flowSelect);
+//     sprintf(makerName, "Flow%s", flowSelect1->Number());
+//     StFlowMaker* flowMaker1 = new StFlowMaker(makerName, flowSelect1);
+//     sprintf(makerName, "FlowAnalysis%s", flowSelect1->Number());
+//     StFlowAnalysisMaker* flowAnalysisMaker1 = new StFlowAnalysisMaker(makerName, flowSelect1);
 
 //     flowMaker->NanoFlowEventOff();
 //     flowMaker->NanoFlowEventOn();

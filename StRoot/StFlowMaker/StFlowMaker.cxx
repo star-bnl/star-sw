@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.21 2000/03/21 00:22:01 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.22 2000/03/28 23:21:02 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.22  2000/03/28 23:21:02  posk
+// Allow multiple instances of the AnalysisMaker.
+//
 // Revision 1.21  2000/03/21 00:22:01  posk
 // Added GetCVS and some print commands.
 //
@@ -87,6 +90,7 @@
 #include "StEventTypes.h"
 #include "StFlowCutEvent.h"
 #include "StFlowCutTrack.h"
+#include "StFlowSelection.h"
 #include "PhysicalConstants.h"
 #include "SystemOfUnits.h"
 #include "StThreeVector.hh"
@@ -105,9 +109,14 @@ ClassImp(StFlowMaker)
 //-----------------------------------------------------------------------
 
 StFlowMaker::StFlowMaker(const Char_t* name): 
-  StMaker(name),
-  mNanoFlowEventOn(kFALSE),
-  pEvent(NULL) {
+  StMaker(name), mNanoFlowEventOn(kFALSE), pEvent(NULL) {
+  pFlowSelect = new StFlowSelection();
+}
+
+StFlowMaker::StFlowMaker(const Char_t* name,
+					 const StFlowSelection& flowSelect) :
+  StMaker(name), mNanoFlowEventOn(kFALSE), pEvent(NULL) {
+  pFlowSelect = new StFlowSelection(flowSelect); //copy constructor
 }
 
 //-----------------------------------------------------------------------
@@ -124,6 +133,7 @@ Int_t StFlowMaker::Make() {
   if (!pEvent) return kStOK; // If no event, we're done
 
   // Check the event cuts and fill StFlowEvent
+  if (pFlowEvent) delete pFlowEvent;    // it deletes pTrackCollection
   pFlowEvent = NULL;
   if (StFlowCutEvent::CheckEvent(pEvent)) {
     FillFlowEvent();
@@ -134,13 +144,17 @@ Int_t StFlowMaker::Make() {
 
   }
 
+  //PrintInfo();
+
   return kStOK;
 }
 
 //-----------------------------------------------------------------------
 
 void StFlowMaker::PrintInfo() {
-  cout << "$Id: StFlowMaker.cxx,v 1.21 2000/03/21 00:22:01 posk Exp $" << endl;
+  cout << "*************************************************************" << endl;
+  cout << "$Id: StFlowMaker.cxx,v 1.22 2000/03/28 23:21:02 posk Exp $" << endl;
+  cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
 
 }
@@ -162,7 +176,7 @@ Int_t StFlowMaker::Init() {
 Int_t StFlowMaker::Finish() {
   // Print the cut lists
   cout << "#######################################################" << endl;
-  cout << "##### FlowMaker: Cut Print Lists" << endl;
+  cout << "##### FlowMaker: Cut Lists" << endl;
   StFlowCutEvent::PrintCutList();
   StFlowCutTrack::PrintCutList();
   pFlowEvent->PrintSelectionList();
@@ -178,10 +192,13 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
   // Read the PhiWgt root file
 
   TDirectory* dirSave = gDirectory;
-  TFile* pPhiWgtFile = new TFile("flowPhiWgt.hist.root", "READ");
+  TString* fileName = new TString("flowPhiWgt.hist.root");
+  fileName->Prepend(pFlowSelect->Number());
+  TFile* pPhiWgtFile = new TFile(fileName->Data(), "READ");
   if (!pPhiWgtFile->IsOpen()) {
-    cout << "##### No PhiWgt file. Will set weights = 1." << endl;
+    cout << "##### FlowMaker: No PhiWgt file. Will set weights = 1." << endl;
   }
+  delete fileName;
   gDirectory = dirSave;
 
   // Fill mPhiWgt
@@ -350,7 +367,7 @@ void StFlowMaker::FillFlowNanoEvent() {
     pFlowNanoEvent->SetHeader(eventID, 200, 960312);
   }
   else {
-    cout << "Warning: No FlowNanoEvent" << endl;
+    cout << "##### FlowMaker: Warning: No FlowNanoEvent" << endl;
   }
 
   for (itr = pFlowTracks->begin(); itr != pFlowTracks->end(); itr++) {
@@ -362,7 +379,7 @@ void StFlowMaker::FillFlowNanoEvent() {
       pFlowNanoEvent->AddTrack(Pt,Phi,Eta);
     }
     else {
-      cout << "Warning: No FlowNanoEvent" << endl;
+      cout << "##### FlowMaker: Warning: No FlowNanoEvent" << endl;
     }
   }
 
