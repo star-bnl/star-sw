@@ -1,5 +1,8 @@
-// $Id: St_l3t_Maker.cxx,v 1.17 2000/02/01 18:37:54 yepes Exp $
+// $Id: St_l3t_Maker.cxx,v 1.18 2000/02/09 20:05:31 yepes Exp $
 // $Log: St_l3t_Maker.cxx,v $
+// Revision 1.18  2000/02/09 20:05:31  yepes
+// modifications to accomodate new gl3 including analysis modules
+//
 // Revision 1.17  2000/02/01 18:37:54  yepes
 // tphit table filled now with l3 clusters including track associated with hit
 //
@@ -63,8 +66,12 @@
 #include "St_XDFFile.h"
 #include "tpc/St_tpt_Module.h"
 #include "FtfSl3.h"
-#include "gl3Event.h"
-#include "daqFormats.h"
+#include "gl3Conductor.h"
+#include "gl3GeneralHistos.h"
+#include "gl3JPsi.h"
+#include "gl3GammaGamma.h"
+#include "gl3dEdx.h"
+#include "gl3HighPt.h"
 #include "TH1.h"
 #include "tables/St_hitarray_Table.h"
 ClassImp(St_l3t_Maker)
@@ -134,27 +141,44 @@ Int_t St_l3t_Maker::MakeOnLine(){
 //    Create tracker and gl3 objects
 //
    FtfSl3   tracker ;
-   gl3Event gl3 ;
-   int const maxBytes = 100000 ;
+   gl3Conductor gl3 ;
+   gl3GeneralHistos  fillHistoModule ;
+   gl3JPsi           jPsiM ;
+   gl3GammaGamma     gammaGammaM ;
+   gl3dEdx           dEdxM ;
+   gl3HighPt         highPtM ;
+
+   gl3.add ( &fillHistoModule ) ;
+   gl3.add ( &jPsiM   ) ;
+   gl3.add ( &gammaGammaM ) ;
+   gl3.add ( &dEdxM ) ;
+   gl3.add ( &highPtM ) ;
+
+   gl3.init();
+
+   int const maxBytes = 500000 ;
    char   buffer[maxBytes] ;
-   printf ( "St_l3t_Maker: start online processing \n" ) ;
+   L3_P* gl3Header  = (L3_P *)buffer ;
+   memset ( buffer, 0, sizeof(L3_P) ) ;
+   int   nBytesUsed  = sizeof(L3_P);
+   char* trackDataPointer = buffer + nBytesUsed  ;
 //
 //    Set parameters
 //
    tracker.setup (  ) ;
 // tracker.para.infoLevel = 10 ;
-   gl3.bField = 0.5 ;
+   for ( int ie = 0 ; ie < gl3.nEvents ; ie++ ) gl3.event[ie].bField = 0.5 ;
    tracker.reset();
 //
 //    Create hit table to store L3 clusters in offline format
 //
-   int maxHits = 500000 ;
+   int maxHits = 300000 ;
    int nHits = 0 ;
+   int token ;
    St_tcl_tphit *hitS = new St_tcl_tphit("l3Hit",maxHits); 
    m_DataSet->Add(hitS);
    tcl_tphit_st*  hit  = (tcl_tphit_st  *)hitS->GetTable();
    table_head_st* hitH = (table_head_st *)hitS->GetHeader(); 
-
 
 // create iterator
 
@@ -199,12 +223,18 @@ Int_t St_l3t_Maker::MakeOnLine(){
 //
 //      Write online track buffer
 //
-      unsigned int token = ((TPCSECLP *)bankEntriesSt)->bh.token ;
-      tracker.fillTracks ( maxBytes, buffer, token ) ;
-//
-//     Pass buffer to gl3
-//
-      gl3.readSector ( maxBytes, buffer ) ;
+      token = ((TPCSECLP *)bankEntriesSt)->bh.token ;
+      int nBytes = tracker.fillTracks ( maxBytes-nBytesUsed, trackDataPointer,
+	                                token ) ;
+      if ( nBytes < 0 ) continue ;
+      //
+      //   Update gl3 header
+      //
+      nBytesUsed += nBytes ;
+      gl3Header->bh.token = token ;
+      gl3Header->sector[secIndex].len = nBytes ;
+      gl3Header->sector[secIndex].off = trackDataPointer - buffer ;
+      trackDataPointer += nBytes ;
 //
 //   Fill histos
 //
@@ -237,11 +267,18 @@ Int_t St_l3t_Maker::MakeOnLine(){
 	 }
       }
    }
-//
-//   Generate output table
-//
-   int nTracks = max(1,gl3.nTracks);   
-   printf ( "St_sl3Maker: # Tracks Found %d ",nTracks ) ;
+
+   //
+   //  Read event in gl3Event
+   //
+
+   gl3.processEvent ( nBytesUsed, buffer ) ;
+   gl3Event* eventP = gl3.getEvent(token);
+
+   //
+   //   Generate output table
+   //
+   int nTracks = max(1,eventP->getNTracks());   
    St_tpt_track *trackS = new St_tpt_track("l3Track",nTracks); 
    m_DataSet->Add(trackS);
 //
@@ -252,8 +289,8 @@ Int_t St_l3t_Maker::MakeOnLine(){
 //
    gl3Track*     gTrk ;
    tpt_track_st* tTrk ;
-   for ( int i = 0 ; i < (int)gl3.nTracks ; i++ ) {
-      gTrk = gl3.getTrack(i);
+   for ( int i = 0 ; i < (int)eventP->getNTracks() ; i++ ) {
+      gTrk = eventP->getTrack(i);
       if ( !gTrk ) continue ;
       tTrk = &(track[i]);
       tTrk->id       = gTrk->id ;
@@ -271,9 +308,8 @@ Int_t St_l3t_Maker::MakeOnLine(){
       tTrk->tanl     = gTrk->tanl ;
       tTrk->z0       = gTrk->z0   ;
    }
-   trackH->nok = gl3.nTracks ;
+   trackH->nok = eventP->getNTracks() ;
    hitH->nok   = nHits ;
-
    MakeHistograms();
   
    return kStOk ;
