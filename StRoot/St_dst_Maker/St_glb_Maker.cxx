@@ -1,7 +1,10 @@
-// $Id: St_glb_Maker.cxx,v 1.25 1999/02/14 18:38:22 caines Exp $
+// $Id: St_glb_Maker.cxx,v 1.26 1999/02/16 03:03:46 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.26  1999/02/16 03:03:46  fisyak
+// Split Make and Histograms
+//
 // Revision 1.25  1999/02/14 18:38:22  caines
-// Fixed ev0 bugs in hist
+//  Fixed ev0 bugs in hist
 //
 // Revision 1.24  1999/02/13 20:22:31  caines
 // Added exi and temp dir for when svt not there
@@ -118,6 +121,8 @@
 #include "global/St_dst_point_filler_Module.h"
 #include "global/St_fill_dst_event_summary_Module.h"
 
+#include "St_dst_tof_Table.h"
+#include "St_dst_v0_vertex_Table.h"
 const Int_t St_glb_Maker::nxpT = 50;
 const Int_t St_glb_Maker::nyeta = 50;
 const Float_t St_glb_Maker::xminpT = 0.0;
@@ -220,7 +225,6 @@ Int_t St_glb_Maker::Init(){
   }
   ev0_ev0par2_st *ev0par2 = m_ev0par2->GetTable();
   m_ev0par2->SetNRows(3);
-  Int_t l;
   // TPC only cuts
 
   ev0par2->dca        =  0.8;
@@ -350,7 +354,7 @@ Int_t St_glb_Maker::Make(){
     dst.Add(event_header);
   }
   dst_event_header_st  event =   {"Collision", //event_type
-				  0,0,         // n_event[2]
+				  {0,0},       // n_event[2]
 				  0, 0, 0, 0}; // n_run,time,trig_mask,bunch_cross
   event_header->AddAt(&event,0);
   if (! event_summary) {
@@ -374,7 +378,7 @@ Int_t St_glb_Maker::Make(){
     tphit     = (St_tcl_tphit     *) tpc_hits("tphit");
     tpcluster = (St_tcl_tpcluster *) tpc_hits("tpcluster");
   }
-  if (! tpcluster)    tpcluster = new St_tcl_tpcluster("tpcluster",1); 
+  if (! tpcluster)    {tpcluster = new St_tcl_tpcluster("tpcluster",1); temp->Add(tpcluster);}
   St_DataSet     *svtracks = gStChain->DataSet("svt_tracks"); 
   St_stk_track  *stk_track = 0;
   St_sgr_groups *groups    = 0;
@@ -397,53 +401,23 @@ Int_t St_glb_Maker::Make(){
   }
   if (!scs_spt) {scs_spt = new St_scs_spt("scs_spt",1); temp->Add(scs_spt);}
   // What is [data]/svt/hits/scs_cluster ?
-  if (! scs_cluster) scs_cluster = new St_scs_cluster("scs_cluster",1); 
-  St_DataSet  *global_track = global("tracks");
-  if (!global_track) global_track = global.Mkdir("tracks");
-  St_DataSetIter track(global_track);
-  St_svm_evt_match *evt_match = (St_svm_evt_match *) track("evt_match");
+  if (! scs_cluster) {scs_cluster = new St_scs_cluster("scs_cluster",1); temp->Add(scs_cluster);}
   St_DataSet *ctf = gStChain->DataSet("ctf");
   St_ctu_cor *ctb_cor = 0;
   if (!ctf) {cout << "St_ctf_Maker has not been called " << endl;}
   else {
     St_DataSetIter ctf_hits(ctf);
     ctb_cor = (St_ctu_cor *) ctf_hits("ctb_cor"); 
-    if (! ctb_cor) {ctb_cor = new St_ctu_cor("ctb_cor",1); ctf_hits.Add(ctb_cor,"ctf");}
+    if (! ctb_cor) {ctb_cor = new St_ctu_cor("ctb_cor",1); temp->Add(ctb_cor);}
   }
   if (!primtrk){ //create dst
-    
+    St_svm_evt_match *evt_match = 0;
     if (tptrack && stk_track) {
        //svm
-      if (!evt_match) {
-	evt_match  = new St_svm_evt_match("evt_match",3000);
-	track.Add(evt_match);
-      }
+      evt_match = (St_svm_evt_match *) global("tracks/evt_match");
+      if (!evt_match) {evt_match  = new St_svm_evt_match("evt_match",3000); temp->Add(evt_match);}
       Int_t res_svm =  svm_am (stk_track, tptrack,
 			       m_svm_ctrl, evt_match);
-#if 0
-      cout << "Calling SVM_EVAL2.." << endl;
-      
-      St_DataSetIter run(gStChain->DataSet("geom"));
-      St_g2t_gepart *g2t_gepart  = (St_g2t_gepart *) run("g2t_gepart");
-      if (!g2t_gepart){
-        g2t_gepart   = new St_g2t_gepart("g2t_gepart",1);
-        run.Add(g2t_gepart);
-      }
-      St_svm_eval_par *svm_eval_par = new St_svm_eval_par("svm_eval_par",1); track.Add(svm_eval_par);
-      St_svm_eval_svt *svm_eval_svt = new St_svm_eval_svt("svm_eval_svt",3000); track.Add(svm_eval_svt);
-      St_svm_eval_tpc *svm_eval_tpc = new St_svm_eval_tpc("svm_eval_tpc",3000); track.Add(svm_eval_tpc);
-      
-      Int_t Res_svm_eval = svm_eval2(g2t_gepart,scs_spt,groups,stk_track,tptrack,
-				     evaltrk,evt_match,svm_eval_par,
-				     svm_eval_svt,svm_eval_tpc);
-      
-      cout << " Calling SVM_SVT_EVAL " << endl;
-      // What is [data]/glosvm_eval_strkbal/tracks/svm_eval_strk ?
-      St_svm_eval_strk *svm_eval_strk = new St_svm_eval_strk("svm_eval_strk",100000);
-      track.Add(svm_eval_strk);
-      Int_t Res_svm_svt_eval  = svm_svt_eval(scs_spt,groups,stk_track,tptrack,evaltrk,
-					     evt_match, svm_eval_par,svm_eval_strk);
-#endif
       if (! globtrk)    {globtrk = new St_dst_track("globtrk",100000);             dst.Add(globtrk);}
       if (! globtrk_aux){globtrk_aux = new St_dst_track_aux("globtrk_aux",100000); dst.Add(globtrk_aux);}
       if (! vertex) {vertex = new St_dst_vertex("vertex",100000); dst.Add(vertex);}
@@ -552,9 +526,7 @@ Int_t St_glb_Maker::Make(){
       cout << " run_dst: Calling dst_point_filler" << endl;
       // dst_point_filler
       if (! point) {point = new St_dst_point("point",200000); dst.Add(point);}
-#if 0
       St_dst_tof *tof = new St_dst_tof("tof",2000); dst.Add(tof);
-#endif
       Int_t Res_dst_point_filler = dst_point_filler(tphit, scs_spt, point);
     
       if ( Res_dst_point_filler != kSTAFCV_OK) {
@@ -617,14 +589,20 @@ Int_t St_glb_Maker::Make(){
       }
       cout << " run_dst: finished calling fill_dst_event_summary" << endl;
     }
-    if (! svtracks) SafeDelete (stk_track);
-    SafeDelete (tpcluster);
-    SafeDelete (scs_cluster);
-#if 0
-    SafeDelete (ctb_cor);
-#endif
   }
   // Fill histograms
+  Histograms();
+ // look for generator data
+
+  // delete temp dir which holds fake svt when its not there
+  SafeDelete(temp);
+  return kStOK;
+}
+
+//_____________________________________________________________________________
+void St_glb_Maker::Histograms(){
+  St_DataSetIter global(m_DataSet);         // data/global
+  St_dst_track      *primtrk     = (St_dst_track     *) global("dst/primtrk");
   if (primtrk) {
     table_head_st *trk_h = primtrk->GetHeader();
     dst_track_st  *trk   = primtrk->GetTable();
@@ -645,7 +623,7 @@ Int_t St_glb_Maker::Make(){
       }
     }
   }
-  St_hepe_gent *hepev = (St_hepe_gent *) dst("hepe_gent");
+  St_hepe_gent *hepev = (St_hepe_gent *) global("dst/particle");
   St_particle  *particle=0;
   if (hepev) {
     hepe_gent_st *p = hepev->GetTable();
@@ -684,6 +662,7 @@ Int_t St_glb_Maker::Make(){
     }
   }
   // V0
+  St_dst_v0_vertex  *dst_v0_vertex = (St_dst_v0_vertex *) global("dst/dst_v0_vertex");
   if (dst_v0_vertex) {
 
     cout << "Filling ev0 histos" << endl;
@@ -711,6 +690,7 @@ Int_t St_glb_Maker::Make(){
     }
   }
   // spectra-PID diagnostic histograms
+  St_dst_dedx       *dst_dedx    = (St_dst_dedx *) global("dst/dst_dedx");
   if (dst_dedx && primtrk) {
      	dst_dedx_st  *de   = dst_dedx->GetTable();
         dst_track_st  *trk   = primtrk->GetTable();
@@ -737,17 +717,13 @@ Int_t St_glb_Maker::Make(){
 		 m_p_dedx_rec->Fill(p,dedx_m);
 	       }
 	}
-      cout << " run_dst: finished filling dedx histograms" << endl;
+	cout << " run_dst: finished filling dedx histograms" << endl;
   }
-
-  // delete temp dir which holds fake svt when its not there
-  SafeDelete(temp);
-  return kStOK;
 }
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.25 1999/02/14 18:38:22 caines Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.26 1999/02/16 03:03:46 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
