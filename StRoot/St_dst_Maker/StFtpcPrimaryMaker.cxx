@@ -1,5 +1,8 @@
-// $Id: StFtpcPrimaryMaker.cxx,v 1.15 2003/09/02 17:59:26 perev Exp $
+// $Id: StFtpcPrimaryMaker.cxx,v 1.16 2003/12/04 14:49:30 jcs Exp $
 // $Log: StFtpcPrimaryMaker.cxx,v $
+// Revision 1.16  2003/12/04 14:49:30  jcs
+// activate Markus' code to fill values at outermost point on ftpc tracks
+//
 // Revision 1.15  2003/09/02 17:59:26  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -212,13 +215,20 @@ Int_t StFtpcPrimaryMaker::Make(){
       ptrk->tanl  = trk->p[2] * ptrk->invpt;
       ptrk->curvature = trk->curvature;
 
-      // This has to go in as soon as 
-      // r0out, phi0out, z0out, psiout, tanlout, invptout 
-      // in the dst_track table are needed.
-      /*
-      ptrk->r0out    = ::sqrt(trk->l[0]*trk->l[0] + trk->l[1]*trk->l[1]);
-      ptrk->phi0out  = atan2(trk->l[1],trk->l[0]) * C_DEG_PER_RAD;
-      ptrk->z0out    = trk->l[2];
+
+      Int_t i = 0;
+      for (i=0; i<15; i++) { ptrk->covar[i] = 0; }
+      
+      iglobtrk=trk->id_globtrk-1;
+      
+      for (i=0; i<3; i++) {
+	ptrk->x_first[i] = gtrk[iglobtrk].x_first[i];
+	ptrk->x_last[i] = gtrk[iglobtrk].x_last[i];
+      }
+      
+      ptrk->r0out    = gtrk[iglobtrk].r0out;
+      ptrk->phi0out  = gtrk[iglobtrk].phi0out;
+      ptrk->z0out    = gtrk[iglobtrk].z0out;
 
       // For Kalman fitting 'inner' and 'outer' momenta differ.
       // For FTPC fitting they are the same,
@@ -230,17 +240,6 @@ Int_t StFtpcPrimaryMaker::Make(){
       ptrk->psiout = ptrk->psiout * C_DEG_PER_RAD;
       ptrk->invptout = 1./::sqrt(trk->p[0]*trk->p[0]+trk->p[1]*trk->p[1]);
       ptrk->tanlout  = trk->p[2] * ptrk->invptout;
-      */
-
-      Int_t i = 0;
-      for (i=0; i<15; i++) { ptrk->covar[i] = 0; }
-      
-      iglobtrk=trk->id_globtrk-1;
-      
-      for (i=0; i<3; i++) {
-	ptrk->x_first[i] = gtrk[iglobtrk].x_first[i];
-	ptrk->x_last[i] = gtrk[iglobtrk].x_last[i];
-      }
       
       ptrk->length    = trk->length;
       ptrk->impact    = trk->impact;
