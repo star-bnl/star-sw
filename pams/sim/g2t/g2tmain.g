@@ -17,12 +17,13 @@
       External  TDM_MAP_TABLE,DUI_CDIR
       Record    /G2T_EVENT_ST/  g2t_event
       Character*1  o
-      o = char(0)
+      character*16 dir
+      o   = char(0)
+      dir ='/dui/Event'//o
 
       Call AGSTRUT(' ',' ')
-      i =  TDM_map_table('/dui/event'//o,'g2t_event'//o,
-                                          g2t_event_spec//o,1,g2t_event)
-      i =  DUI_CDIR ('/dui/event'//o)
+      i =  TDM_map_table(dir,'g2t_event'//o,g2t_event_spec//o,1,g2t_event)
+      i =  DUI_CDIR (dir)
       call TDM_NEW_TABLE ('g2t_svt_hit'//o, g2t_svt_hit_spec//o, 1) 
       call TDM_NEW_TABLE ('g2t_tpc_hit'//o, g2t_tpc_hit_spec//o, 1)
       call TDM_NEW_TABLE ('g2t_mwc_hit'//o, g2t_mwc_hit_spec//o, 1)
