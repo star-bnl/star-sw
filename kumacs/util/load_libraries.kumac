@@ -1,6 +1,7 @@
 * 28Jul98 K. Turner - separate from bfc_util.kumac
 * 25Aug98 K. Turner - load db libraries & all run/params tables
 * 9Sep98  K. Turner - rmdir run/params/geant: put in unnecessarily by par2mem
+* 11Sep98 K. Turner - take out rmdir run/params/geant - not there anymore
 * ************************************************************
 *************************************************************
 ******************************************************************
@@ -42,8 +43,9 @@
  fortran/call par2mem
  cd /dui
  
- message ' load_libraries: remove run/params/geant - not needed!'
- rmdir run/params/geant
+
+* message ' load_libraries: remove run/params/geant - not needed!'
+* rmdir run/params/geant
  
  return
  
