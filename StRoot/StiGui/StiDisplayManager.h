@@ -40,16 +40,19 @@ public:
     void draw();
     //void draw(StiDrawable*); //Update just this object
 
-    void setInvisible(); //All
+    void setInvisible();
     void setInvisible(const StiDrawable*);
-    void setVisible(); //All
+    void setVisible();
     void setVisible(const StiDrawable*);
+    
     void setSkeletonView();
+    void setZoomSkeletonView();
 
     void setTpcVisible();
     void setTpcInvisible();
     void setSvtVisible();
     void setSvtInvisible();
+    void setIfcVisible();
     void setIfcInvisible();
 
     //Utility
