@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.12 2000/01/24 20:35:37 ward Exp $
+ * $Id: StDAQReader.cxx,v 1.13 2000/02/03 23:19:11 fisyak Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.13  2000/02/03 23:19:11  fisyak
+ * Reduce file map size
+ *
  * Revision 1.12  2000/01/24 20:35:37  ward
  * Access trigger data.
  *
@@ -120,7 +123,8 @@ int StDAQReader::readEvent()
   delete fRICHReader; fRICHReader = 0;
   if (fOffset == -1) return kStEOF;
   fEventReader = new EventReader();
-  fEventReader->InitEventReader(fFd, fOffset, 0);
+  //  fEventReader->InitEventReader(fFd, fOffset, 0);
+  fEventReader->InitEventReader(fFd, fOffset);
   if(fEventReader->errorNo()) return kStErr;  
   fOffset = fEventReader->NextEventOffset();
   *fEventInfo = fEventReader->getEventInfo();
@@ -139,7 +143,8 @@ int StDAQReader::skipEvent(int nskip)
     delete fEventReader;
     if (fOffset == -1) return kStEOF;
     fEventReader = new EventReader();
-    fEventReader->InitEventReader(fFd, fOffset, 0);
+    //    fEventReader->InitEventReader(fFd, fOffset, 0);
+    fEventReader->InitEventReader(fFd, fOffset);
     if(fEventReader->errorNo()) return kStErr;  
     fOffset = fEventReader->NextEventOffset();
   }
