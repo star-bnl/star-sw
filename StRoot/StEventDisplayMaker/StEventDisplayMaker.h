@@ -11,7 +11,7 @@
 //                                                                      //
 //                                                                      //
 //  Submit any problem with this code via begin_html <A HREF="http://www.star.bnl.gov/STARAFS/comp/sofi/bugs/send-pr.html"><B><I>"STAR Problem Report Form"</I></B></A> end_html
-//
+//                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
@@ -24,12 +24,14 @@ class    St_NodeView;
 class TH2F;
 class TCanvas;
 class StEvent;
+class StObjArray;
 class StVecPtrTpcHit;
 class StGlobalTrack;
+class StVirtualEventFilter;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.4 1999/07/15 13:54:34 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.5 1999/07/23 00:25:30 fine Exp $";
  private: 
     TList         *m_HitCollector;     //!
     TList         *m_TrackCollector;   //!
@@ -42,8 +44,7 @@ class StEventDisplayMaker : public StMaker {
     St_Node      *m_EventsNode;   //!
     St_NodeView  *m_EventsView;   //!
     StEvent      *m_Event;        //!
-    Int_t         m_TrackFilterFlag; // Flag to control whether tracks should be drawn
-    Int_t         m_HitFilterFlag;   // Flag to control whether hits should be drawn
+    TObjArray    *m_FilterArray;     // Array of the "event" user supplied filters
 
     TCanvas      *m_PadBrowserCanvas; //!
 
@@ -53,7 +54,9 @@ class StEventDisplayMaker : public StMaker {
    virtual Int_t  BuildGeometry();
    virtual Int_t  Init();
    virtual Int_t  Make();
-
+   virtual Int_t  MakeGlobalTracks();
+   virtual Int_t  MakeTracks( StGlobalTrack *globTrack,StVirtualEventFilter *filter);
+   virtual Int_t  MakeHits(const StObjArray *eventCollection,StVirtualEventFilter *filter);
    virtual void   Clear(Option_t *option="");
    virtual void   ClearCanvas(); // *MENU*
    virtual void   ClearEvents();
@@ -66,22 +69,75 @@ class StEventDisplayMaker : public StMaker {
    virtual St_Node     *GetEventsNode(){ return m_EventsNode;}
    virtual Color_t      GetColorAttribute(Int_t adc);
    virtual void         SetMode       (Int_t   m = 0){StMaker::SetMode(m);} // *MENU*
-   virtual Int_t        GetTrackFilterFlag(){ return m_TrackFilterFlag;}
-   virtual Int_t        GetHitFilterFlag(){ return m_HitFilterFlag;}
    virtual Int_t        ReDraw(){ClearCanvas(); return Make();} // *MENU*
-
-   virtual Int_t        SetTrackFilterFlag(Int_t flag=1){Int_t f = m_TrackFilterFlag; m_TrackFilterFlag=flag; return f;} // *MENU*
-   virtual Int_t        SetHitFilterFlag(Int_t flag=1)  {Int_t f = m_HitFilterFlag; m_HitFilterFlag=flag; return f;}  // *MENU*
-
-   virtual Int_t        HitsFilter(const StVecPtrTpcHit &hitPoints);
-   virtual Int_t        GlobalTrackFilter(StGlobalTrack *globTrack);
-   virtual Int_t        TrackFilter(StGlobalTrack *globTrack);
    virtual void         TurnOn() { SetMode(); }  // *MENU*
    virtual void         TurnOff(){ SetMode(1); } // *MENU*
+     // --   Filters  --
 
+     enum EDisplayEvents 
+          {
+            kPrimaryVertex  ,kTpcHit      ,kSvtHit      ,kFtpcHit      ,kEmcTowerHit,
+            kEmcPreShowerHit,kSmdPhiHit   ,kSmdEtaHit   ,kGlobalTracks ,
+            kTrack          ,kTrackTpcHits,kTrackSvtHits,kTrackFtpcHits, 
+            kEndOfEventList
+          } ;
+
+
+ 
+     // --   Filters  --
+ 
+     Int_t SetFlag(Int_t flag, EDisplayEvents filterIndex);
+     StVirtualEventFilter *SetFilter(StVirtualEventFilter *filter, EDisplayEvents filterIndex);
+
+     // -- Vertex filters --
+
+     Int_t SetPrimaryVertexFlag(Int_t flag=1); // *MENU*
+     StVirtualEventFilter *SetPrimaryVertex(StVirtualEventFilter *filter);
+
+     // -- Hits collections filters --
+
+     Int_t SetTpcHitFlag(Int_t flag=1); // *MENU*
+     StVirtualEventFilter *SetTpcHit(StVirtualEventFilter *filter);
+
+     Int_t SetSvtHitFlag(Int_t flag=1); // *MENU*
+     StVirtualEventFilter *SetSvtHit(StVirtualEventFilter *filter);
+
+     Int_t SetFtpcHitFlag(Int_t flag=1); // *MENU*
+     StVirtualEventFilter *SetFtpcHit(StVirtualEventFilter *filter);
+
+     Int_t SetEmcTowerHitFlag(Int_t flag=1); // *MENU*
+     StVirtualEventFilter *SetEmcTowerHit(StVirtualEventFilter *filter);
+
+     Int_t SetEmcPreShowerHitFlag(Int_t flag=1); // *MENU*
+     StVirtualEventFilter *SetEmcPreShowerHit(StVirtualEventFilter *filter);
+
+     Int_t SetSmdPhiHitFlag(Int_t flag=1); // *MENU*
+     StVirtualEventFilter *SetSmdPhiHit(StVirtualEventFilter *filter);
+
+     Int_t SetSmdEtaHitFlag(Int_t flag=1); // *MENU*
+     StVirtualEventFilter *SetSmdEtaHit(StVirtualEventFilter *filter);
+
+     // -- StGlobalTrack filters --
+
+     Int_t SetGlobalTracksFlag(Int_t flag=1); // *MENU*
+     StVirtualEventFilter *SetGlobalTracks(StVirtualEventFilter *filter);
+
+     Int_t SetTrackFlag(Int_t flag=1);    // *MENU*
+     StVirtualEventFilter *SetTrack(StVirtualEventFilter *filter);
+
+     Int_t SetTrackTpcHitsFlag(Int_t flag=1); // *MENU*
+     StVirtualEventFilter *SetTrackTpcHits(StVirtualEventFilter *filter);
+
+     Int_t SetTrackSvtHitsFlag(Int_t flag=1); // *MENU*
+     StVirtualEventFilter *SetTrackSvtHits(StVirtualEventFilter *filter);
+
+     Int_t SetTrackFtpcHitsFlag(Int_t flag=1); // *MENU*
+     StVirtualEventFilter *SetTrackFtpcHits(StVirtualEventFilter *filter);
+
+  // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.4 1999/07/15 13:54:34 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.5 1999/07/23 00:25:30 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
 };
