@@ -2,7 +2,7 @@
 #
 #  
 #
-# dbupdateDAQProd.pl - script to update Production FileCatalog and JobStatus
+# dbupdateEMBProd.pl - script to update Production FileCatalog and JobStatus
 #
 # L.Didenko
 ############################################################################
@@ -18,9 +18,6 @@ require "/afs/rhic/star/packages/DEV00/mgr/dbOnLineSetup.pl";
 require "/afs/rhic/star/packages/DEV00/mgr/dbDescriptorSetup.pl";
 
 my $debugOn=0;
-
-
-#my $DISK1 = "/star/rcf/disk00001/star";
 
 my $DISK1 = "/star/rcf/data06/reco";
 my @DISKR = (
@@ -51,11 +48,14 @@ my @SetS = (
 );
 
 my @EmSet = (
+#              "embedding";
+#              "embeddingk-"; 
 #              "embedding_alamhipt", 
 #              "embedding_alamlopt",
 #              "embedding_lamhipt",
 #              "embedding_lamlopt",
-              "embedding_pbar",
+#              "embedding_phi";
+               "embedding_pbar",
 );
               
 
@@ -200,7 +200,7 @@ my $ndbOnFiles = 0;
  }
  
  print "\nFinding daq DST files in HPSS\n";
- my $ftpRDaq = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>200)
+ my $ftpRDaq = Net::FTP->new("hpss.rcf.bnl.gov", Port => 2121, Timeout=>400)
    or die "HPSS access failed";
  $ftpRDaq->login("starreco","MockData") or die "HPSS access failed";
 
@@ -215,95 +215,10 @@ my $flname;
 my $nDiskFiles = 0;
 my $ndir = 0;
 
-#####  find daq reco files on disk
-
- my @diskDstDirs;
- $nDiskFiles = 0;
- print "\nFinding daq reco files in disk\n";
-
- for( $kk = 0; $kk<scalar(@DISKR); $kk++)  { 
- for( $ll = 0; $ll<scalar(@EmSet); $ll++) {
-   $diskDstDirs[$ndir] = $DISKR[$kk] . "/" . "$EmSet[$ll]" . "/" . $prodSr . "/" . $SetD[0];
-   print "diskDstDir: $diskDstDirs[$ndir]\n";
-   $ndir++;   
- }
-}
-
-
- foreach $diskDir (@diskDstDirs) {
-             if (-d $diskDir) {
-    opendir(DIR, $diskDir) or die "can't open $diskDir\n";
-   while( defined($flname = readdir(DIR)) ) {
-      next if $flname =~ /^\.\.?$/;
-
-         $maccess = "-rw-r--r--"; 
-         $mdowner = "starreco";
-
-      $fullname = $diskDir."/".$flname;
-   
-      my @dirF = split(/\//, $diskDir); 
-#      my $set = sprintf("%s\/%s\/%s\/%s",$dirF[3],$dirF[4],$dirF[5],$dirF[6]);
-#    print "Dst Set = ", $set, "\n";                                       
-     ($size, $mTime) = (stat($fullname))[7, 9];
-
-    ($sec,$min,$hr,$dy,$mo,$yr) = (localtime($mTime))[0,1,2,3,4,5];
-     $mo = sprintf("%2.2d", $mo+1);
-     $dy = sprintf("%2.2d", $dy);
-  
-     if( $yr > 98 ) {
-       $fullyear = 1900 + $yr;
-     } else {
-       $fullyear = 2000 + $yr;
-     }
-
-     $timeS = sprintf ("%4.4d%2.2d%2.2d",
-                       $fullyear,$mo,$dy);
-    
-     $fObjAdr = \(FileAttr->new());
-     ($$fObjAdr)->filename($flname);
-     ($$fObjAdr)->fpath($diskDir);
-     ($$fObjAdr)->dsize($size);
-     ($$fObjAdr)->timeS($timeS);
-     ($$fObjAdr)->faccess($maccess);
-     ($$fObjAdr)->fowner($mdowner);
-     $hpssDstFiles[$nDHpssFiles] = $fObjAdr;
-    $nDHpssFiles++;
-    $nDiskFiles++;
-  }
- closedir DIR;
- }
-}
- print "Total daq reco files: $nDiskFiles\n";
 
 ##### connect to the DB
 
  &StDbProdConnect();
-
- for ($ll = 0; $ll<scalar(@SetS); $ll++) {
-
- $sql="SELECT fName, Nevents FROM $FileCatalogT WHERE path like '%$SetS[$ll]%' AND fName like '%daq' AND Nevents = 0";
-
-   $cursor =$dbh->prepare($sql)
-    || die "Cannot prepare statement: $DBI::errstr\n";
-   $cursor->execute;
- 
-    while(@fields = $cursor->fetchrow) {
-     my $cols=$cursor->{NUM_OF_FIELDS};
-        $fObjAdr = \(DaqAttr->new());
-
-        for($i=0;$i<$cols;$i++) {
-          my $fvalue=$fields[$i];
-          my $fname=$cursor->{NAME}->[$i];
-#        print "$fname = $fvalue\n" ;
-
-        ($$fObjAdr)->dName($fvalue)     if( $fname eq 'fName');
-        ($$fObjAdr)->numEvt($fvalue)    if( $fname eq 'Nevents');  
-   }
-
-       $dbDaqFiles[$ndbDaqFiles] = $fObjAdr;
-       $ndbDaqFiles++; 
- }
- }
 
 ##### select from JobStatus table files which should be updated
 
@@ -544,10 +459,6 @@ my $embType;
   if ($mpath =~ /starreco/) {  
   $msite = "hpss_rcf";
   $mhpss = "Y";
-   }else {
-  $msite = "disk_rcf";
-  $mhpss = "N";
- }
   $mtype = "emb_reco";
 
   $daqType = 0; 
@@ -676,6 +587,7 @@ my $enrg;
 my $magF;
 my $dataset = "n/a";
 my $mrunID;
+my $EmbSet;
 
  &StDbProdConnect();
 
@@ -725,7 +637,10 @@ foreach my $runDsc (@runDescr) {
        $mrunID = $Numrun;
        $mdataset = $daqHash{$Numrun}; 
     if ( defined $mdataset) { 
+ for ($ll = 0; $ll<scalar(@EmSet); $ll++) {
+    $EmbSet = $EmSet[$ll];
     &updateDataSet();
+  }
    }
  } 
 
@@ -798,28 +713,13 @@ sub fillDbTable {
    $rv = $dbh->do($sql) || die $dbh->errstr;
 
   }
-#############################################################################
-
- sub updateDAQTable {
-  
-  $sql="update $FileCatalogT set ";   
-  $sql.="Nevents='$mNevts',";
-  $sql.="NevLo='$mNevtLo',";
-  $sql.="NevHi='$mNevtHi',";
-  $sql.="eventType='$mEvType'";  
-  $sql.=" WHERE fName = '$mFile'"; 
-  print "$sql\n" if $debugOn;
-  $rv = $dbh->do($sql) || die $dbh->errstr;
-  
- }
-
 ##############################################################################
 
    sub updateDataSet {
   
     $sql="update $FileCatalogT set ";   
     $sql.="dataset='$mdataset'";
-    $sql.=" WHERE runID = '$mrunID' AND path like '%embedding_pbar%'"; 
+    $sql.=" WHERE runID = '$mrunID' AND path like '%$EmbSet%'"; 
     print "$sql\n" if $debugOn;
     $rv = $dbh->do($sql) || die $dbh->errstr;
   
