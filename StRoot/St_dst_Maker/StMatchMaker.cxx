@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + egr )                                     //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.34 2001/01/29 21:01:06 caines Exp $
+// $Id: StMatchMaker.cxx,v 1.35 2001/02/02 16:09:07 caines Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.35  2001/02/02 16:09:07  caines
+// Remove usage of svm and get svt tracks from est branch
+//
 // Revision 1.34  2001/01/29 21:01:06  caines
 // Remove est calls from StMatchMaker no longer used
 //
@@ -125,10 +128,8 @@ using namespace units;
 #include "tables/St_tcl_tpcluster_Table.h"
 #include "tables/St_ctu_cor_Table.h"
 
-#include "global/St_svm_am_Module.h"
-#include "global/St_svm_eval2_Module.h"
-#include "global/St_svm_svt_eval_Module.h"
-#include "global/St_svm_efficiency_Module.h"
+#include "tables/St_svm_evt_match_Table.h" 
+ 
 
 #include "global/St_egr_fitter_Module.h"
 #define gufld   gufld_
@@ -142,7 +143,6 @@ ClassImp(StMatchMaker)
   
   //_____________________________________________________________________________
   StMatchMaker::StMatchMaker(const char *name):StMaker(name),
-  m_svm_ctrl(0),
   m_egr_egrpar(0)
 {
   drawinit=kFALSE;
@@ -159,49 +159,6 @@ StMatchMaker::~StMatchMaker(){
 //_____________________________________________________________________________
 Int_t StMatchMaker::Init(){
   // Create tables
-   Float_t x[3] = {0,0,0};
-   Float_t b[3];
-   gufld(x,b);
-   Double_t B = b[2]*kilogauss;
-  //svm
-   m_svm_ctrl = new St_svm_ctrl("svm_ctrl",1);
-  {
-    svm_ctrl_st row;
-    memset(&row,0,m_svm_ctrl->GetRowSize());
-    row.ktrl1	 =          0; // control switch 1: allows errors in helix ;
-    row.ktrl2	 =          0; // chi-sq form:0->e1*e2,1->(e1**2 + e2**2) ;
-    row.ktrl3	 =          0; // control switch 3: =2 for level 2 matchin ;
-    row.ktrl4	 =          1; // control switch 4: selects MCS formula ;
-    row.ktrl5	 =          3; // .ne.0 limits # loops in bi-direc. match. ;
-    row.arfinc	 =          4; // search area increase factor ;
-    row.bmag	 =          b[2]; // magnetic field (KGauss) ;
-    row.dacep	 =          0; // not used at present ;
-    row.efaca	 =          1; // relative weight for direc. part of chisq ;
-    row.efacp	 =         10; // invpt cut-off for matched tpc tracks ;
-    row.efacz	 =        400; // chi-square cut-off for matching ;
-    row.pmerr	 =       0.05; // initial size of search area: momentum ;
-    row.rifc	 =     46.825; // radial position of tpc IFC (cm) ;
-    row.rlgas	 =      36000; // radiation length of gas (cm) ;
-    row.rlifc	 =        128; // radiation length of tpc IFC (cm) ;
-    row.rlsdd3	 =       9.36; // rad. length for SDD outermost layer (cm) ;
-    row.rltpc_gas=      10949; // Radiation length of TPC gas (cm) ;
-    row.rltube	 =         25; // rad. length of svt support tube (cm) ;
-    row.rmatch	 =         40; // matching radius from beam axis (cm) ;
-    row.rming	 =         15; // inner radial position of gas vessel (cm) ;
-    row.rsdd3	 =      14.91; // radial position of SDD outer layer (cm) ;
-    row.rtpc_gas =     47.476; // Inner radius of TPC gas vessel (cm) ;
-    row.rtube	 =       17.5; // radial position of svt support tube (cm) ;
-    row.slpcut	 = 1.91668e-38; // dip angle cut-off, 2nd level matching ;
-    row.tgas	 =         36; // thickness of gas vessel region (cm) ;
-    row.tifc	 =        0.3; // thickness of tpc inner field cage (cm) ;
-    row.tsdd3	 =       0.03; // thickness of SDD outermost layer (cm) ;
-    row.ttpc_gas =        150; // Thickness of TPC gas vessel ;
-    row.ttube	 =       0.31; // thickness of svt support tube (cm) ;
-    row.xcut	 =          0; // x cut-off for 2nd level matching (cm) ;
-    row.ycut	 =          0; // y cut-off for 2nd level matching (cm) ;
-    m_svm_ctrl->AddAt(&row,0);
-  }
-  AddRunCont(m_svm_ctrl);
   //egr 
   m_egr_egrpar = new St_egr_egrpar("egr_egrpar",2);
   {
@@ -305,16 +262,12 @@ Int_t StMatchMaker::Make(){
   
   St_DataSet    *tpctracks = GetInputDS("tpc_tracks");
   St_tpt_track  *tptrack   = 0;
-  St_tte_eval   *evaltrk   = 0;
-  St_tte_mctrk  *mctrk     = 0;
   if (tpctracks) {
     St_DataSetIter tpc_tracks(tpctracks); 
     tptrack   = (St_tpt_track  *) tpc_tracks("tptrack");
-    evaltrk   = (St_tte_eval   *) tpc_tracks("evaltrk");
-    mctrk     = (St_tte_mctrk  *) tpc_tracks("mctrk");
+ 
   }
-  if (! evaltrk)    {evaltrk = new St_tte_eval("evaltrk",1); AddGarb(evaltrk);}
-  if (! mctrk)    {mctrk = new St_tte_mctrk("mctrk",1); AddGarb(mctrk);}
+ 
   if (! tptrack)    {tptrack = new St_tpt_track("tptrack",1); AddGarb(tptrack);}
   St_DataSet    *tpchits = GetInputDS("tpc_hits");
   St_tcl_tphit     *tphit     = 0;
@@ -326,17 +279,20 @@ Int_t StMatchMaker::Make(){
   if (! tpcluster)    {tpcluster = new St_tcl_tpcluster("tpcluster",1); AddGarb(tpcluster);}
  if (! tphit)    {tphit = new St_tcl_tphit("tphit",1); AddGarb(tphit);}
   
-  St_DataSet     *svtracks = GetInputDS("svt_tracks");
+  St_DataSet     *svtracks = GetInputDS("est");
   St_DataSet     *svthits  = GetInputDS("svt_hits");
   
   St_stk_track   *stk_track   = 0;
   St_sgr_groups  *svt_groups  = 0;
   St_scs_spt     *scs_spt     = 0;
+  St_svm_evt_match *evt_match = 0; 
   
   // Case svt tracking performed
   if (svtracks) {
-    stk_track = (St_stk_track  *) svtracks->Find("stk_track");
-    svt_groups= (St_sgr_groups *) svtracks->Find("groups");
+    stk_track = (St_stk_track  *) svtracks->Find("EstSvtTrk");
+    svt_groups= (St_sgr_groups *) svtracks->Find("EstGroups");
+    evt_match=  (St_svm_evt_match *) svtracks->Find("EstMatch");
+    
   }
   if (svthits) {
     scs_spt     = (St_scs_spt    *)  svthits->Find("scs_spt");
@@ -346,13 +302,9 @@ Int_t StMatchMaker::Make(){
   // Case silicon not there
   if (!stk_track) {stk_track = new St_stk_track("stk_track",1); AddGarb(stk_track);}
   if (!svt_groups)    {svt_groups = new St_sgr_groups("svt_groups",1); AddGarb(svt_groups);}
+ if (!evt_match) { evt_match = new St_svm_evt_match("evt_match",1); AddGarb(evt_match);}
+
   if (!scs_spt)   {scs_spt = new St_scs_spt("scs_spt",1); AddGarb(scs_spt);}
-  // 			Case running est tpc -> Si space point tracking
-  if ( !(svtracks) && svthits ){
-    svt_groups = new St_sgr_groups("svt_groups",10000); AddGarb(svt_groups);
-    stk_track    = (St_stk_track *) m_GarbSet->Find("stk_tracks");
-    if( !stk_track){ stk_track = new St_stk_track("stk_tracks",5000); AddGarb(stk_track);}
-  } 
 
   St_DataSet *ctf = GetInputDS("ctf");
   St_ctu_cor *ctb_cor = 0;
@@ -363,17 +315,8 @@ Int_t StMatchMaker::Make(){
     if (! ctb_cor) {ctb_cor = new St_ctu_cor("ctb_cor",1); AddGarb(ctb_cor);}
   }
   
-  St_svm_evt_match *evt_match  = new St_svm_evt_match("evt_match",3000);    AddData(evt_match);
   
-  if (tptrack && svtracks) {
-    
-    //			svm
-    iRes =  svm_am (stk_track, tptrack, m_svm_ctrl, evt_match);
-    //          ==================================================
-    
-    if (iRes !=kSTAFCV_OK) iMake = kStWarn;
-    
-  }
+ 
   // Create groups table for tpc
   St_sgr_groups *tpc_groups;
   if (tphit->GetNRows() != 0){
@@ -386,7 +329,6 @@ Int_t StMatchMaker::Make(){
   }
   
   // egr
-
 
    tcl_tphit_st  *spc   = tphit->GetTable();
    sgr_groups_st *tgroup = tpc_groups->GetTable();
