@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.11 2004/04/14 03:27:30 jeromel Exp $
+ * $Id: StMuTrack.cxx,v 1.12 2004/04/14 14:21:53 jeromel Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -52,10 +52,10 @@ StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, int index2Globa
     // BEWARE : Data members initialized to __NOVALUE__ was an hazardous
     // bunsiness as both NOVALUE and SIGMA_SCALE would have to be changed 
     // simultaneously (error prone). The above is equivalent while safer ...
-    mNSigmaElectron = int(-__NOVALUE__*__SIGMA_SCALE__); // pack2Int( fabsMin(__NOVALUE__*1.0,__SIGMA_SCALE__), __SIGMA_SCALE__ );
-    mNSigmaPion =     int(-__NOVALUE__*__SIGMA_SCALE__); // pack2Int( fabsMin(__NOVALUE__*1.0,__SIGMA_SCALE__), __SIGMA_SCALE__ );
-    mNSigmaKaon =     int(-__NOVALUE__*__SIGMA_SCALE__); // pack2Int( fabsMin(__NOVALUE__*1.0,__SIGMA_SCALE__), __SIGMA_SCALE__ );
-    mNSigmaProton =   int(-__NOVALUE__*__SIGMA_SCALE__); // pack2Int( fabsMin(__NOVALUE__*1.0,__SIGMA_SCALE__), __SIGMA_SCALE__ );
+    mNSigmaElectron = int(__NOVALUE__*__SIGMA_SCALE__); // pack2Int( fabsMin(__NOVALUE__*1.0,__SIGMA_SCALE__), __SIGMA_SCALE__ );
+    mNSigmaPion =     int(__NOVALUE__*__SIGMA_SCALE__); // pack2Int( fabsMin(__NOVALUE__*1.0,__SIGMA_SCALE__), __SIGMA_SCALE__ );
+    mNSigmaKaon =     int(__NOVALUE__*__SIGMA_SCALE__); // pack2Int( fabsMin(__NOVALUE__*1.0,__SIGMA_SCALE__), __SIGMA_SCALE__ );
+    mNSigmaProton =   int(__NOVALUE__*__SIGMA_SCALE__); // pack2Int( fabsMin(__NOVALUE__*1.0,__SIGMA_SCALE__), __SIGMA_SCALE__ );
   }
 
   // if we have pid traits
@@ -181,6 +181,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.12  2004/04/14 14:21:53  jeromel
+ * Not sure why I made it - but better to preserve the sign
+ *
  * Revision 1.11  2004/04/14 03:27:30  jeromel
  * Change init of mNSigma
  *
