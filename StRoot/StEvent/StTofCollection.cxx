@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofCollection.cxx,v 2.4 2003/05/21 18:22:46 ullrich Exp $
+ * $Id: StTofCollection.cxx,v 2.5 2003/05/23 16:10:59 ullrich Exp $
  *
  * Author: Thomas Ullrich, Dec 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTofCollection.cxx,v $
+ * Revision 2.5  2003/05/23 16:10:59  ullrich
+ * Changed name of access functions.
+ *
  * Revision 2.4  2003/05/21 18:22:46  ullrich
  * Major Revision of ToF classes (F. Geurts)
  *
@@ -29,7 +32,7 @@
  **************************************************************************/
 #include "StTofCollection.h"
 
-static const char rcsid[] = "$Id: StTofCollection.cxx,v 2.4 2003/05/21 18:22:46 ullrich Exp $";
+static const char rcsid[] = "$Id: StTofCollection.cxx,v 2.5 2003/05/23 16:10:59 ullrich Exp $";
 
 ClassImp(StTofCollection)
     
@@ -38,25 +41,25 @@ StTofCollection::StTofCollection() { /* noop */ }
 StTofCollection::~StTofCollection() { /* noop */ }
 
 const StSPtrVecTofCell&
-StTofCollection::tofCell() const
+StTofCollection::tofCells() const
 {
     return mTofCell;
 }
 
 StSPtrVecTofCell&
-StTofCollection::tofCell()
+StTofCollection::tofCells()
 {
     return mTofCell;
 }
 
 const StSPtrVecTofSlat&
-StTofCollection::tofSlat() const
+StTofCollection::tofSlats() const
 {
     return mTofSlat;
 }
 
 StSPtrVecTofSlat&
-StTofCollection::tofSlat()
+StTofCollection::tofSlats()
 {
     return mTofSlat;
 }
