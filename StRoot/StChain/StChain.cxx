@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.41 1999/12/03 01:24:39 fine Exp $
+// $Id: StChain.cxx,v 1.42 1999/12/06 01:57:29 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.42  1999/12/06 01:57:29  fine
+// Time statistic fixed
+//
 // Revision 1.41  1999/12/03 01:24:39  fine
 // Advanced timer has been introduced
 //
@@ -139,30 +142,31 @@ void StChain::Streamer(TBuffer &)
 //_____________________________________________________________________________
 void StChain::Clear(Option_t *option)
 {
- StartTimer();
+ // StartTimer();
  StMaker::Clear(option);
- StopTimer();
+ // StopTimer();
 }
 //_____________________________________________________________________________
 Int_t StChain::Finish(){
- StartTimer();
+ // StartTimer();
  Int_t res = StMaker::Finish();
- StopTimer();
+ // StopTimer();
+ PrintTotalTime();
  return res;
 }
 //_____________________________________________________________________________
 Int_t StChain::Init()
 {
- StartTimer();
+ // StartTimer();
  Int_t res = StMaker::Init();
- StopTimer();
+ // StopTimer();
  return res;
 }
 //_____________________________________________________________________________
 Int_t StChain::Make() {
- StartTimer();
+ // StartTimer();
  Int_t res = StMaker::Make();
- StopTimer();
+ // StopTimer();
  return res;
 }
 //_____________________________________________________________________________

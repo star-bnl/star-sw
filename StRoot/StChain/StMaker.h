@@ -1,7 +1,7 @@
-// $Id: StMaker.h,v 1.40 1999/12/03 01:24:40 fine Exp $
+// $Id: StMaker.h,v 1.41 1999/12/06 01:57:30 fine Exp $
 // $Log: StMaker.h,v $
-// Revision 1.40  1999/12/03 01:24:40  fine
-// Advanced timer has been introduced
+// Revision 1.41  1999/12/06 01:57:30  fine
+// Time statistic fixed
 //
 // Revision 1.39  1999/12/01 23:51:25  perev
 // Alias AddRunco - AddRunCont
@@ -244,7 +244,8 @@ public:
    virtual void   	StartTimer(Bool_t reset = kFALSE){m_Timer.Start(reset);}
    virtual void   	StopTimer(){m_Timer.Stop();}
    virtual void   	PrintTimer(Option_t *option="");
-   virtual void         PrintTotalTime();
+   virtual void         PrintTotalTime(){}
+
 //		Static functions
    static  StMaker     *GetMaker(const St_DataSet *ds)  ;
    static EDataSetPass  ClearDS (St_DataSet* ds,void *user );
@@ -255,7 +256,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.40 1999/12/03 01:24:40 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.41 1999/12/06 01:57:30 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   //StChain virtual base class for Makers
 };
