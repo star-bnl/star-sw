@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.18 2001/08/07 19:52:35 akio Exp $
+// $Id: StPeCMaker.cxx,v 1.19 2002/02/11 20:20:09 akio Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.19  2002/02/11 20:20:09  akio
+// remove SetFormat
+//
 // Revision 1.18  2001/08/07 19:52:35  akio
 // added a flag to make udst can have more than 1 depth of branches.
 //
@@ -95,7 +98,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.18 2001/08/07 19:52:35 akio Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.19 2002/02/11 20:20:09 akio Exp $";
 
 ClassImp(StPeCMaker)
 
@@ -135,7 +138,7 @@ Int_t StPeCMaker::Init() {
 
   m_outfile   = new TFile( uDstFileName,"recreate");
   // Get the standard root format to be independent of Star IO   
-  m_outfile->SetFormat(1);
+  //  m_outfile->SetFormat(1);
   m_outfile->SetCompressionLevel(1);
   
   
