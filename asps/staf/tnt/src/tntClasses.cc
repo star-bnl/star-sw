@@ -481,7 +481,7 @@ tntFactory::list () {
   socObject *obj;
   int i, lc;
 
-  c = (char *) MALLOC (80 * (4 + soc->maxCount()));
+  c = (char *) MALLOC (80 * (4 + soc->count()));
 
   // Print the header
   sprintf(c, 

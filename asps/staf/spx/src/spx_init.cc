@@ -46,7 +46,7 @@ int spx_start()
 
 /*- Create the SPX Factory. -*/
    spx = new spxFactory("spx");
-
+   
    return TRUE;
 }
 

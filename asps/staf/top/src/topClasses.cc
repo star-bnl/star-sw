@@ -89,12 +89,8 @@ char * topProject::  listing () {
    char* c = socObject::listing();
    char* cc = NULL;
    char* s = selectionSpecification();
-   char ss[33];
-   strncpy(ss,s,32); 
-   ss[32]=0; /* hjw 19Feb98 */
-   cc = (char*)MALLOC(79);
-   memset(cc,0,79);
-   sprintf(cc,"%s %s",c,ss);
+   cc = (char*)MALLOC(79+100);
+   sprintf(cc,"%s %-32s",c,s);
    FREE(c);
    FREE(s);
    return cc;
@@ -613,8 +609,7 @@ char * topJoin::  listing () {
    char ww[16];
    strncpy(ww,w,15); 
    ww[15]=0; /* hjw 19Feb98 */
-   cc = (char*)MALLOC(79);
-   memset(cc,0,79);
+   cc = (char*)MALLOC(79+100);
    sprintf(cc,"%s %s#%s",c,ss,ww);
    FREE(c); FREE(s); FREE(w);
    return cc;
@@ -749,18 +744,20 @@ topFactory:: ~topFactory() {
 
 //:----------------------------------------------- INTERFACE METHODS  --
 char * topFactory:: list () {
-   char *c = socFactory::list();
-
-   char *cc = (char*)MALLOC(strlen(c) +1 +162);
-
-   sprintf(cc, 
+   char tit[] =
                 "\n"
                 "+-------------------------------------------"
                 "-----------------------------------\n"
                 "|*********************** "
                 "TOP - Table Operators listing"
                 " ************************\n"
-                "%s\n",c);
+                "%s\n";
+
+   char *c = socFactory::list();
+
+   char *cc = (char*)MALLOC(strlen(c) +1 + strlen(tit));
+
+   sprintf(cc, tit, c);
    FREE(c);
    return cc;
 }

@@ -45,10 +45,9 @@ char *shortname(char *longname, size_t length)
 	char *nn;
 	char *b;
 
-	n[length] = 0;
+	n[0] = 0;
 	if( length < strlen(longname) ){
-		strncpy(n,longname,l1); 
-		n[l1]=0; /* hjw 19Feb98 */
+		strncat(n,longname,l1); 
 		nn = n; nn += (l1+1);
 		b = longname; b += ll;
 		strncpy(nn,b,l2); 
@@ -56,8 +55,7 @@ char *shortname(char *longname, size_t length)
 		n[l1] = '~';
 	}
 	else {
-		strncpy(n,longname,length); 
-		n[length]=0; /* hjw 19Feb98 */
+		strncat(n,longname,length); 
 	}
 	return n;
 }
