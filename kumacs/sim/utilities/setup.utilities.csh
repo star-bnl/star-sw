@@ -11,7 +11,9 @@ unalias gstar
 
 if ( $OSTYPE == "unicos" ) then
 
-   alias gstar "~nevski/gstar/bin/gstar -l $GSTAR_UTIL_DIR/setup.kumac"
+# use "-P 0" to set NwPAW to zero
+
+   alias gstar "~nevski/gstar/bin/gstar -l $GSTAR_UTIL_DIR/setup.kumac -P 0"
 
 else
 
