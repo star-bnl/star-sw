@@ -22,6 +22,7 @@ Int_t AggregateVtxSeed(char* dir) {
   gSystem->Load("StChain");
   gSystem->Load("St_Tables");
   gSystem->Load("StUtilities");
+  gSystem->Load("StDbLib");
   gSystem->Load("StPass0CalibMaker");
 
   StVertexSeedMaker vtxSeedMk;
@@ -29,8 +30,11 @@ Int_t AggregateVtxSeed(char* dir) {
   return nfiles;
 }
 
-// $Id: AggregateVtxSeed.C,v 1.1 2002/03/20 00:51:42 genevb Exp $
+// $Id: AggregateVtxSeed.C,v 1.2 2003/02/11 21:43:15 genevb Exp $
 // $Log: AggregateVtxSeed.C,v $
+// Revision 1.2  2003/02/11 21:43:15  genevb
+// added needed library
+//
 // Revision 1.1  2002/03/20 00:51:42  genevb
 // Introduction
 //
