@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackNode.h,v 2.2 1999/10/28 22:27:47 ullrich Exp $
+ * $Id: StTrackNode.h,v 2.3 1999/11/05 15:27:12 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackNode.h,v $
- * Revision 2.2  1999/10/28 22:27:47  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.3  1999/11/05 15:27:12  ullrich
+ * Added non-const versions of several methods
  *
  * Revision 2.3  1999/11/05 15:27:12  ullrich
  * Added non-const versions of several methods
@@ -37,9 +37,11 @@ public:
     virtual ~StTrackNode();
 
     void           addTrack(StTrack*);
+    void           removeTrack(StTrack*);
 
     UInt_t         entries() const;
     StTrack*       track(UInt_t);
+    const StTrack* track(UInt_t) const;
 
     UInt_t         entries(StTrackType) const;
     StTrack*       track(StTrackType, UInt_t = 0);

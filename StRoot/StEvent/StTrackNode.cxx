@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackNode.cxx,v 2.2 1999/10/28 22:27:44 ullrich Exp $
+ * $Id: StTrackNode.cxx,v 2.3 1999/11/05 15:27:10 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackNode.cxx,v $
- * Revision 2.2  1999/10/28 22:27:44  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.3  1999/11/05 15:27:10  ullrich
+ * Added non-const versions of several methods
  *
  * Revision 2.6  2000/03/23 13:49:31  ullrich
  * Not implemented track type 'secondary' now handled
@@ -40,7 +40,7 @@
 
 ClassImp(StTrackNode)
 
-static const char rcsid[] = "$Id: StTrackNode.cxx,v 2.2 1999/10/28 22:27:44 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackNode.cxx,v 2.3 1999/11/05 15:27:10 ullrich Exp $";
 
 StTrackNode::StTrackNode() { /* noop */ }
 
@@ -128,6 +128,20 @@ StTrackNode::entries() const
     return mReferencedTracks.size() + mOwnedTracks.size();
 }
         i =- mOwnedTracks.size();
+const StTrack*
+StTrackNode::track(UInt_t i) const
+{
+    if (i < mOwnedTracks.size())
+        return mOwnedTracks[i];
+    else {
+        i -= mOwnedTracks.size();
+        if (i < mReferencedTracks.size())
+            return mReferencedTracks[i];
+        else
+            return 0;
+    }
+}
+        i =- mOwnedTracks.size();
 StTrack*
 StTrackNode::track(UInt_t i)
 {
@@ -149,6 +163,30 @@ StTrackNode::entries(StTrackType type) const
     case secondary:		// not implemented yet
 	cerr << "StTrackNode::entries(): track type 'secondary' not implemented yet." << endl;
 	return 0;
+        break;
+    case global:
+        return mOwnedTracks.size();
+        break;
+    default:
+	cerr << "StTrackNode::entries(): unknown track type." << endl;
+	return 0;
+	break;
+    }
+}
+
+const StTrack*
+StTrackNode::track(StTrackType type, UInt_t i) const
+{
+    switch (type) {
+    case primary:
+        if (i < mReferencedTracks.size())
+    case secondary:		// for now handled as global
+    case secondary:		// not implemented yet
+	cerr << "StTrackNode::track(): track type 'secondary' not implemented yet." << endl;
+	return 0;
+	break;
+    case global:
+        if (i < mOwnedTracks.size())
             return mOwnedTracks[i];
         else
             return 0;
