@@ -1,5 +1,8 @@
-* $Id: tpt_find_root.F,v 1.4 1998/04/22 15:57:57 sakrejda Exp $
+* $Id: tpt_find_root.F,v 1.5 1998/04/23 17:13:01 sakrejda Exp $
 * $Log: tpt_find_root.F,v $
+* Revision 1.5  1998/04/23 17:13:01  sakrejda
+* more comments added and speed improved by removing sqrt and sqaring tolerances
+*
 * Revision 1.4  1998/04/22 15:57:57  sakrejda
 * write to unit 6 replaced by message calls
 *
@@ -47,20 +50,24 @@ C     Local variables
       INTEGER next_hit(tpt_mxhit)
       INTEGER slice_loc(mxsector,mxrow,mxslic)
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic)
-      INTEGER k,nroot,isect,ir3,ir2,ir1
-      INTEGER gap_1,gap_2
+      INTEGER k                            !pointer to the hit we start with
+      INTEGER nroot                        !number of track roots starting from this point
+      INTEGER isect,ir3,ir2,ir1
+      INTEGER gap_1                        !gap counter between ir2 and ir1
+      INTEGER gap_2                        !gap counter between ir3 and ir2
       INTEGER nh1,nh2
       INTEGER tol23,i,j,iret,tol12,itest,ilc,jlc,ipass
-      INTEGER tgc_row_par
-      INTEGER tpt_ptcrs
+      INTEGER tgc_row_par                  !function that returns row parametrisation
+      INTEGER tpt_ptcrs                    !function calculating a crossing point of 2 lines
       INTEGER islic,is_pnt,js_pnt
       INTEGER tpt_find_slic, irets
       REAL    zp3
       REAL    zorigl,r3,r2,delr23,zp2,delz2p,dely23
-      REAL    delx23,delz23,an,bn,sl23,pred,delrp,zp1,xp1,yp1
+      REAL    delx23,delz23,an,bn,sl23,zp1,xp1,yp1
       REAL    as,bs,ddr,fact,delrow,dummy
       LOGICAL h2good
 
+c     message related variables
       character*132 m132
       integer       idR1
       data          idR1 /0/
@@ -121,46 +128,51 @@ C         loop over all hits in slice-next i'th hit is set at enddo
 	      delr23 = r3 - r2
 	      if( delr23 .gt. 0.0000001 ) then
 C               make tolerance proportional to the gap size
-                tol23 = ir3 - ir2
                 fact=1.0
                 if( ir2 .lt. 14 ) fact=2.5
+                tol23 = real(ir3 - ir2)*fact
 C               calculate prediction
 	        zp2 = (hit(k).z - zorigl) * r2 / r3 + zorigl
-	        delz2p = (hit(i).z-zp2)/sqrt(1.0+
-     >                   ((hit(k).z-zorigl)/r3)**2)
-                if( abs(delz2p).lt.fact*tpar(ipass).delzlm*tol23 )
+c               squared distance between the prediction and the track (r-z projection)
+	        delz2p = (hit(i).z-zp2)**2/(1.0+((hit(k).z-zorigl)/r3)**2)
+                if(delz2p.lt.(tpar(ipass).delzlm*tol23)**2)
      >          then
 		  dely23 = hit(k).y-hit(i).y
                   delx23 = hit(k).x-hit(i).x
                   if( dely23**2+delx23**2 .lt. 
-     >              (fact*tpar(ipass).delrlm*tol23)**2) then
+     >              (tpar(ipass).delrlm*tol23)**2) then
                     delz23 = hit(k).z - hit(i).z
+c                   we have a candidate for the second point
                     h2good = .true.
 C                   calculate prediction for the row ir1
+c                   get the row parametrisation
                     iret = tgc_row_par(isect,real(ir1),as,bs,dummy,
      >              dummy)
+c                   calculate the track parametrisation as an*x+bn*y=1
                     an=(hit(k).y-hit(i).y)/
      >                 (hit(i).x*hit(k).y-hit(k).x*hit(i).y)
                     bn=-(hit(k).x-hit(i).x)/
      >                 (hit(i).x*hit(k).y-hit(k).x*hit(i).y)
+c                   calculate the prediction in x-y plane
                     iret = tpt_ptcrs(as,bs,an,bn,xp1,yp1)
+c                   calculate the prediction in the r-z plane
                     sl23 = delz23/delr23
-                    pred = sqrt(xp1**2+yp1**2)
-                    delrp = r2 - pred
-                    zp1 = hit(i).z - sl23*delrp
+                    zp1 = hit(i).z - sl23*(r2-sqrt(xp1**2+yp1**2))
+c                   find the slice number for the prediction and look for a hit there
                     irets=tpt_find_slic(zp1,tpar(ipass).nzslic,islic)
                     js_pnt = slice_loc(isect,ir1,islic) 
                     j = slice_pnt(1,js_pnt)
 C                   next j'th hit is set at enddo
                     do jlc=1,slice_pnt(2,js_pnt)
 		      if( hit(j).track.le.0 ) then
-		         tol12 = ir2 - ir1
-		         ddr = fact*tpar(ipass).drlm1*tol12*hit(j).prf
+		         tol12 = real(ir2 - ir1)*fact
+		         ddr = tpar(ipass).drlm1*tol12*hit(j).prf
                          if( (hit(j).x-xp1)**2+(hit(j).y-yp1)**2
      +                     .lt.ddr**2) then
-			   if( abs(hit(j).z-zp1)/sqrt
-     +                     (1.+sl23**2) .lt.tpar(ipass).dzlm1*
-     +                     tol12*hit(j).zrf*fact) then
+c                          candidate passed cuts in x-y
+			   if((hit(j).z-zp1)**2/(1.+sl23**2) 
+     >                     .lt.(tpar(ipass).dzlm1*tol12*hit(j).zrf)**2) then
+c                              we have a good root
                                nroot=nroot+1
 		      	       root(nroot).hit(1) = k
 		  	       root(nroot).hit(2) = i
