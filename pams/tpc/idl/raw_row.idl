@@ -1,0 +1,30 @@
+/*   raw_row
+ * pad row description, representing mapped data from one row within a 
+ * subsector
+*/
+   struct raw_row{
+       unsigned long   ipixel;     /* index for pixel-data tables */
+       unsigned long   iseq;       /* index for sequence tables */
+       unsigned long   npixel;     /* # of pixel-data entries */
+       unsigned short  nseq;       /* # of sequence table entries */ 
+       unsigned short  ipad;       /* Index for pad tables */
+       octet           PadFirst;   /* First pad in range */
+       octet           npad;       /* # of Pad-table entries */
+       octet           PadModBreak; /* # of pad-table entries before offset */
+       char            PadRef;     /* pad referencing (N,R, or L) */
+       octet           unused1;     /* Unused variable */
+       octet           unused2;     /* Unused variable */
+       octet           unused3;     /* Unused variable */
+       octet           RowId;        /* Pad Row ID */
+   };
+/*  Last mod. for raw_row: $Date: 1998/04/08 17:03:28 $ */
+
+
+
+
+
+
+
+
+
+
