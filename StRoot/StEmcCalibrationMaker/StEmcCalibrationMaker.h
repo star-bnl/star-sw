@@ -43,6 +43,7 @@ class StEmcCalibrationMaker : public StMaker
            Float_t ptMip;
            Float_t miptemp;
            Float_t equaltemp;
+           
            Float_t evnumber;
            Float_t avg;
            Float_t sigma;
@@ -57,9 +58,13 @@ class StEmcCalibrationMaker : public StMaker
            Int_t   runMode;
            Int_t   EqStatus;
            Int_t   MipStatus;
+           Int_t   ElectronStatus;
+           Int_t   Pi0Status;
            Int_t   CalibStatus;
            Int_t   m_equalCounter;
            Int_t   m_mipCounter;
+           Int_t   m_electronCounter;
+           Int_t   m_pi0Counter;
            Float_t m_equalStep;
            Float_t m_calibStep;
            Int_t   nTracks;
@@ -78,8 +83,12 @@ class StEmcCalibrationMaker : public StMaker
            Bool_t  CalcZVertex();
            Bool_t  FillEqual();
            Bool_t  FillMipCalib();
+           Bool_t  FillElectron();
+           Bool_t  FillPi0();
            Bool_t  Equalize();
            Bool_t  MipCalib();
+           Bool_t  ElectronCalib();
+           Bool_t  Pi0Calib();
            Bool_t  MakeCalibration();
            Bool_t  SaveTables();
            Bool_t  IsThisTrackGood(Int_t,Float_t*,Float_t*);
