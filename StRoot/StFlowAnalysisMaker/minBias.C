@@ -1,8 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: minBias.C,v 1.6 2002/05/21 18:42:18 posk Exp $
+// $Id: minBias.C,v 1.7 2002/06/11 21:54:15 posk Exp $
 //
 // Author:       Art Poskanzer and Alexander Wetzler, Mar 2001
+//                 Kirill Filimonov treated the one count case
 // Description:  Macro to add histograms together.
 //               The v histograms will be added with yield weighting.
 //               First file anaXX.root given by first run number XX.
@@ -10,14 +11,23 @@
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
+#ifndef __CINT__
+#include <fstream.h>
+#include "TSystem.h"
+#include <TFile.h>
+#include "TH1.h"
+#include "TH2.h"
+#include "TProfile.h"
+#include "TKey.h"
+#include "TObject.h"
+#endif
 
 void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 
   const  int nCens = 8;
   int    nSels = 2;
   const  int nHars = 6;
-  float  yCM   = 0.0;
-  char   fileName[30];
+  char   fileName[80];
   TFile* histFile[nCens+1];
   TH1*   hist[nCens+1];
   TH2*   yieldPartHist[nCens];
@@ -54,9 +64,10 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
     histFile[0]->cd();
     //key->ls();
     obj = key->ReadObj();
+    const char* objName;
     if (obj->InheritsFrom("TH1")) { // TH1 or TProfile
       hist[0] = (TH1*)obj;
-      char* objName = key->GetName();
+      objName = key->GetName();
       cout << "hist name= " << objName << endl;
       for (int n = 1; n < nCens; n++) {
 	hist[1] = (TH1*)histFile[n]->Get(objName);
@@ -122,16 +133,17 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 	int nBins;      // set by 2D
 	int xBins = hist[0]->GetNbinsX();
 	int yBins;
+	TH1F *yieldY, *yieldPt;
 	if (twoD) {
 	  yBins = hist[0]->GetNbinsY();
 	  nBins = xBins + (xBins + 2) * yBins;
 	  float yMax  = hist[0]->GetXaxis()->GetXmax();
 	  float yMin  = hist[0]->GetXaxis()->GetXmin();
-	  TH1F* yieldY = new TH1F("Yield_Y", "Yield_Y", xBins, yMin, yMax);
+	  yieldY = new TH1F("Yield_Y", "Yield_Y", xBins, yMin, yMax);
 	  yieldY->SetXTitle("Rapidity");
 	  yieldY->SetYTitle("Counts");
 	  float ptMax  = hist[0]->GetYaxis()->GetXmax();
-	  TH1F* yieldPt = new TH1F("Yield_Pt", "Yield_Pt", yBins, 0., ptMax);
+	  yieldPt = new TH1F("Yield_Pt", "Yield_Pt", yBins, 0., ptMax);
 	  yieldPt->SetXTitle("Pt (GeV/c)");
 	  yieldPt->SetYTitle("Counts");
 	} else {
@@ -172,6 +184,7 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 	  float v;
 	  float verr;
 	  float vSum;
+	  double vSum2;
 	  float content;
 	  float error;
 	  float error2sum;
@@ -179,15 +192,26 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 	  float yieldSum;
 	  float y;
 	  float pt;
+	  double vRms;
+	  double verrRms;
+	  double vSumRms;
+	  double yieldSumRms;
+	  double vSumRms2;
 	  for (int bin = 0; bin < nBins; bin++) {
 	    v         = 0.;
 	    verr      = 0.;
 	    vSum      = 0.;
+	    vSum2     = 0.;
 	    content   = 0.;
 	    error     = 0.;
 	    error2sum = 0.;
 	    yield     = 0.;
 	    yieldSum  = 0.;
+	    vRms        = 0.;
+	    verrRms     = 0.;
+	    vSumRms     = 0.;
+	    yieldSumRms = 0.;
+	    vSumRms2    = 0.;
 	    for (int n = 0; n < nCens; n++) {
 	      if (strstr(histName->Data(),"v2D")) {
 		yield = yieldPartHist[n]->GetBinContent(bin);
@@ -207,29 +231,43 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 		yield = yieldPartHist[n]->Integral();
 	      }
 	      v = hist[n]->GetBinContent(bin);
-	      if (yield==1) { // special case for calculating the error
-		if (yieldSum > 1.) {
-		  verr = (yieldSum / (yieldSum + 1.)) *
-		    sqrt(error*error + (v - content)*(v - content) /
-			 (yieldSum*(yiledSum + 1.)));
-		} else {
-		  verr = 0.;
-		}
+	      if(yield==1) { // special case to calculate the correct error
+		vSumRms     += v;
+		yieldSumRms += yield;
+		vSumRms2    += v*v;
 	      } else {
 		verr = hist[n]->GetBinError(bin);
-	      }
-	      if (v != 0) {
-		yieldSum  += yield;
-		vSum      += yield * v;
-		error2sum += pow(yield * verr, 2.);
+		if (v != 0 ) {
+		  yieldSum  += yield;
+		  vSum      += yield * v;
+		  vSum2     += v * v * yield;
+		  error2sum += pow(yield * verr, 2.);
+		}
 	      }
 	    }
+	    
+	    if(yieldSumRms) vRms = vSumRms / yieldSumRms;
+	    if(yieldSumRms>1) {
+	      verrRms    = sqrt(vSumRms2 - vSumRms*vSumRms / yieldSumRms)
+		/ yieldSumRms;
+	      yieldSum  += yieldSumRms;
+	      vSum      += vSumRms;
+	      error2sum += pow(yieldSumRms * verrRms, 2.);
+	      vSum2     += vRms * vRms * yieldSumRms;
+	    }
+	    
 	    if (yieldSum) {
 	      content = vSum / yieldSum;
-	      error   = sqrt(error2sum) / yieldSum;
+	      if (yieldSumRms==1) {
+		error = sqrt(error2sum + vSum2 - vSum*vSum / yieldSum) / yieldSum;
+		error = yieldSum / (yieldSum+1) * sqrt(error*error + 
+		   (vRms - content)*(vRms - content) / (yieldSum * (yieldSum+1)));
+	      } else {
+		error = sqrt(error2sum + vSum2 - vSum*vSum/yieldSum) / yieldSum;
+	      }
+	      hist[nCens]->SetBinContent(bin, content);
+	      hist[nCens]->SetBinError(bin, error);
 	    }
-	    hist[nCens]->SetBinContent(bin, content);
-	    hist[nCens]->SetBinError(bin, error);
 	  }
 	} 
 	delete histName;
@@ -247,6 +285,9 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: minBias.C,v $
+// Revision 1.7  2002/06/11 21:54:15  posk
+// Kirill's further correction to minBias.C for bins with one count.
+//
 // Revision 1.6  2002/05/21 18:42:18  posk
 // Kirill's correction to minBias.C for bins with one count.
 //
