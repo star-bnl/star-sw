@@ -10,7 +10,7 @@ void RunStiMaker(Int_t nevents=1,
 		 //bool doFit=true, // true->fit track only
 		 bool doFit=false, // false->find track only
 		 const char* outfile = "Evaluation.root",
-		 bool doProfile=true, // produce profiling output?
+		 bool doProfile=false, // produce profiling output?
 		 
 		 //This file points to 30 events of 10 neg muons w/ pt=.9 
 		 const char* MainFile="/star/data22/ITTF/data/simple_geant/DEV_10_8_01/muon_10_neg.event.root")
