@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.27 2002/12/11 15:35:53 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.28 2002/12/20 20:26:44 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.28  2002/12/20 20:26:44  aihong
+ * let it handle P02gd table
+ *
  * Revision 1.27  2002/12/11 15:35:53  aihong
  * put in fabs in processPIDAsFuntion()
  *
@@ -817,7 +820,8 @@ double StuProbabilityPidAlgorithm::getCentrality(int theMult){
   if (mProductionTag){
 
 
-  if ( (mProductionTag->GetString()).Contains("P01gl") )
+  if ( (mProductionTag->GetString()).Contains("P01gl")
+    || (mProductionTag->GetString()).Contains("P02gd") )
   return  getCentrality_P01gl(theMult);
 
   else gMessMgr->Error()<<"Production tag "<<mProductionTag->GetString().Data()<<" in PIDTable is filled but its name is not recognized ! "<<endm;
@@ -953,7 +957,8 @@ void StuProbabilityPidAlgorithm::setCalibrations(double theEta, int theNhits){
 
  if (mProductionTag){
 
-   if ( (mProductionTag->GetString()).Contains("P01gl") ){
+   if ( (mProductionTag->GetString()).Contains("P01gl") 
+     || (mProductionTag->GetString()).Contains("P02gd")){
      
    myBandBGFcn->SetParameter(0,(*mBBPrePar)(thePosition));
    myBandBGFcn->SetParameter(1,(*mBBTurnOver)(thePosition));
