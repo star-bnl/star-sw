@@ -1,5 +1,8 @@
-// $Id: St_ctf_Maker.h,v 1.2 1999/01/02 19:08:14 fisyak Exp $
+// $Id: St_ctf_Maker.h,v 1.3 1999/01/25 23:39:13 fisyak Exp $
 // $Log: St_ctf_Maker.h,v $
+// Revision 1.3  1999/01/25 23:39:13  fisyak
+// Add tof
+//
 // Revision 1.2  1999/01/02 19:08:14  fisyak
 // Add ctf
 //
@@ -47,7 +50,12 @@ class St_ctf_Maker : public StMaker {
    St_ctg_slat_phi  *m_ctb_slat_phi; //!
    St_ctg_slat_eta  *m_ctb_slat_eta; //!
    St_ctg_slat      *m_ctb_slat;     //!
-   St_cts_mpara     *m_cts;          //!
+   St_cts_mpara     *m_cts_ctb;      //!
+   St_ctg_geo       *m_tof;          //!
+   St_ctg_slat_phi  *m_tof_slat_phi; //!
+   St_ctg_slat_eta  *m_tof_slat_eta; //!
+   St_ctg_slat      *m_tof_slat;     //!
+   St_cts_mpara     *m_cts_tof;      //!
  protected:
  public: 
                   St_ctf_Maker(const char *name="ctf", const char *title="event/data/ctf");

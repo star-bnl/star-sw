@@ -1,5 +1,8 @@
-// $Id: St_ctf_Maker.cxx,v 1.3 1999/01/21 00:52:31 fisyak Exp $
+// $Id: St_ctf_Maker.cxx,v 1.4 1999/01/25 23:39:12 fisyak Exp $
 // $Log: St_ctf_Maker.cxx,v $
+// Revision 1.4  1999/01/25 23:39:12  fisyak
+// Add tof
+//
 // Revision 1.3  1999/01/21 00:52:31  fisyak
 // Cleanup
 //
@@ -49,7 +52,12 @@ m_ctb(0),
 m_ctb_slat_phi(0),
 m_ctb_slat_eta(0),
 m_ctb_slat(0),
-m_cts(0)
+m_cts_ctb(0),
+m_tof(0),
+m_tof_slat_phi(0),
+m_tof_slat_eta(0),
+m_tof_slat(0),
+m_cts_tof(0)
 {
    drawinit=kFALSE;
 }
@@ -64,10 +72,16 @@ Int_t St_ctf_Maker::Init(){
   m_ctb_slat_phi = (St_ctg_slat_phi *) params("ctf/ctg/ctb_slat_phi");
   m_ctb_slat_eta = (St_ctg_slat_eta *) params("ctf/ctg/ctb_slat_eta");
   m_ctb_slat     = (St_ctg_slat     *) params("ctf/ctg/ctb_slat");
-  Int_t Res_ctg  =  ctg (m_ctb,m_ctb_slat_phi,m_ctb_slat_eta,m_ctb_slat);
+  Int_t Res_ctg_ctb  =  ctg (m_ctb,m_ctb_slat_phi,m_ctb_slat_eta,m_ctb_slat);
+  m_tof          = (St_ctg_geo      *) params("ctf/ctg/tof");
+  m_tof_slat_phi = (St_ctg_slat_phi *) params("ctf/ctg/tof_slat_phi");
+  m_tof_slat_eta = (St_ctg_slat_eta *) params("ctf/ctg/tof_slat_eta");
+  m_tof_slat     = (St_ctg_slat     *) params("ctf/ctg/tof_slat");
+  Int_t Res_ctg_tof  =  ctg (m_tof,m_tof_slat_phi,m_tof_slat_eta,m_tof_slat);
   // Special treatment for double names
   //  m_cts          = (St_cts_mpara    *) params("ctf/cts")->GetList()->FindObject("cts");
-  m_cts          = (St_cts_mpara    *) params("ctf/cts/cts");
+  m_cts_ctb          = (St_cts_mpara    *) params("ctf/cts/cts_ctb");
+  m_cts_tof          = (St_cts_mpara    *) params("ctf/cts/cts_tof");
   // Create Histograms    
   return StMaker::Init();
 }
@@ -75,27 +89,40 @@ Int_t St_ctf_Maker::Init(){
 Int_t St_ctf_Maker::Make(){
 //  PrintInfo();
   if (!m_DataSet->GetList())  {//if DataSet is empty fill it
-  St_cts_mslat *ctb_mslat = new  St_cts_mslat("ctb_mslat",240); m_DataSet->Add(ctb_mslat);
-  St_cts_event *ctb_event = new  St_cts_event("ctb_event",500); m_DataSet->Add(ctb_event);
-  St_ctu_raw   *ctb_raw   = new  St_ctu_raw("ctb_raw",240);     m_DataSet->Add(ctb_raw);
-  St_ctu_cor   *ctb_cor   = new  St_ctu_cor("ctb_cor",240);     m_DataSet->Add(ctb_cor);
   St_DataSetIter geant(gStChain->DataSet("geant"));
-  St_g2t_ctf_hit *g2t_ctb_hit = (St_g2t_ctf_hit *) geant("g2t_ctb_hit");
   St_g2t_track   *g2t_track   = (St_g2t_track *)   geant("g2t_track");
-  Int_t Res_cts = cts(g2t_ctb_hit, g2t_track,
-		      m_ctb,  m_ctb_slat, m_ctb_slat_phi, m_ctb_slat_eta, m_cts,
-		      ctb_event, ctb_mslat, ctb_raw);
- 
-  Int_t Res_ctu =  ctu(m_ctb,  m_ctb_slat,
-		       ctb_raw, ctb_cor);
-
+  St_g2t_ctf_hit *g2t_ctb_hit = (St_g2t_ctf_hit *) geant("g2t_ctb_hit");
+  if (g2t_ctb_hit) {
+    St_cts_mslat *ctb_mslat = new  St_cts_mslat("ctb_mslat", 240); m_DataSet->Add(ctb_mslat);
+    St_cts_event *ctb_event = new  St_cts_event("ctb_event",5000); m_DataSet->Add(ctb_event);
+    St_ctu_raw   *ctb_raw   = new  St_ctu_raw("ctb_raw",     240); m_DataSet->Add(ctb_raw);
+    St_ctu_cor   *ctb_cor   = new  St_ctu_cor("ctb_cor",     240); m_DataSet->Add(ctb_cor);
+    Int_t Res_cts_ctb = cts(g2t_ctb_hit, g2t_track,
+			    m_ctb,  m_ctb_slat, m_ctb_slat_phi, m_ctb_slat_eta, m_cts_ctb,
+			    ctb_event, ctb_mslat, ctb_raw);
+    
+    Int_t Res_ctu_ctb =  ctu(m_ctb,  m_ctb_slat,
+			     ctb_raw, ctb_cor);
+  }
+  St_g2t_ctf_hit *g2t_tof_hit = (St_g2t_ctf_hit *) geant("g2t_tof_hit");
+  if (g2t_tof_hit) {
+    St_cts_mslat *tof_mslat = new  St_cts_mslat("tof_mslat",5400); m_DataSet->Add(tof_mslat);
+    St_cts_event *tof_event = new  St_cts_event("tof_event",5000); m_DataSet->Add(tof_event);
+    St_ctu_raw   *tof_raw   = new  St_ctu_raw("tof_raw",    5400); m_DataSet->Add(tof_raw);
+    St_ctu_cor   *tof_cor   = new  St_ctu_cor("tof_cor",    5400); m_DataSet->Add(tof_cor);
+    Int_t Res_cts_tof = cts(g2t_tof_hit, g2t_track,
+			    m_tof,  m_tof_slat, m_tof_slat_phi, m_tof_slat_eta, m_cts_tof,
+			    tof_event, tof_mslat, tof_raw);
+    Int_t Res_ctu_tof =  ctu(m_tof,  m_tof_slat,
+			     tof_raw, tof_cor);
+  }
   }
  return kStOK;
 }
 //_____________________________________________________________________________
 void St_ctf_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_ctf_Maker.cxx,v 1.3 1999/01/21 00:52:31 fisyak Exp $\n");
+  printf("* $Id: St_ctf_Maker.cxx,v 1.4 1999/01/25 23:39:12 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
