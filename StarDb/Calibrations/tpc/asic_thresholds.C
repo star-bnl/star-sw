@@ -10,9 +10,9 @@ St_DataSet *CreateTable() {
   //
   memset(&row,0,tableSet->GetRowSize());
   row.thresh_lo = 1;
-  row.thresh_hi = 3;
-  row.n_seq_lo  = 3;
-  row.n_seq_hi  = 1;
+  row.thresh_hi = 4;
+  row.n_seq_lo  = 2;
+  row.n_seq_hi  = 0;
   tableSet->AddAt(&row,0);
  // ----------------- end of code ---------------
   return (St_DataSet *)tableSet;
