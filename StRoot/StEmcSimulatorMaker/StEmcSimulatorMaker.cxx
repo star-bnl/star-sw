@@ -163,6 +163,8 @@ void StEmcSimulatorMaker::bookHistograms(const Int_t i)
   const Float_t xl[] = {-1.0,-1.0,-1.0,-1.0, 0.5 , 0.5, 0.5, 0.5};
   const Float_t xu[] = { 1.0, 1.0, 1.0, 1.0, 12.5,12.5,12.5,12.5};
   const Int_t   ny[] = {120, 120, 60, 900, 60, 60, 60, 60};
+  const Int_t   binEnergySum[4] = {4000, 1000, 500, 500};
+  const Float_t energySum[4] = {100., 10., 50., 50.};
   if(!m_nhit){
     m_nhit = new TH2F("EmcNHitsVsDet" ,"Number of hit(log) .vs. Detector #",100,0.0,4.5,8,0.5,8.5);
     m_etot = new TH2F("EmcEtotVsDet" ,"Total energy(log) .vs. Detector #",100,-4.0,4.5,8,0.5,8.5);
@@ -207,7 +209,7 @@ void StEmcSimulatorMaker::bookHistograms(const Int_t i)
     m_energy[i] = new TH2F(name_e,title_e, nx[i],xl[i],xu[i], ny[i],rpiMin,rpiMax);
   }
   Int_t maxAdc= mGeom[i]->getMaxAdc();
-  m_adc[i]    = new TH1F(name_adc,title_adc, maxAdc+1, -0.5, float(maxAdc)+0.5); // ??
+  m_adc[i]    = new TH1F(name_adc,title_adc, maxAdc+1, -0.5, float(maxAdc)+0.5); 
 
   if(mHistControl >= 2) {
     TString nameM    = detname[i] + "M";
@@ -216,6 +218,12 @@ void StEmcSimulatorMaker::bookHistograms(const Int_t i)
     nameM     = detname[i] + "Sub";
     titModule = tit[ind] + detname[i] + " #Sub. dist.";
     mhSub[i]  = new TH1F(nameM,titModule, 15, 0.5, 15.5);
+    if(i<4) {
+      // this is only for checking
+       name_e        = detname[i] + "EnergySum";
+       title_e       = tit[ind] + detname[i] + " energy dist(sum)";
+       mEnergySum[i] = new TH1F(name_e, title_e, binEnergySum[i], 0.0, energySum[i]);
+    }
   }
 
   if(mCompare){
@@ -254,7 +262,7 @@ void StEmcSimulatorMaker::makeHistograms(const Int_t det)
          if(E){
            m_hits[det-1]->Fill(eta,phi); 
            m_energy[det-1]->Fill(eta,phi,E); 
-           m_adc[det-1]->Fill((float)adc); 
+           m_adc[det-1]->Fill((float)adc);
            nhit      += 1; 
            energysum += E; 
            etsum     += E/cosh(eta);  // Et = E*sin(theta); sin(theta) = 1./cos(eta)
@@ -269,6 +277,7 @@ void StEmcSimulatorMaker::makeHistograms(const Int_t det)
     }
     m_nhit->Fill(log10((Double_t)nhit), (Float_t)det);
     m_etot->Fill(log10((Double_t)energysum), (Float_t)det);
+    if(mHistControl >= 2) mEnergySum[det-1]->Fill(Double_t(energysum));
   }
 }
 
@@ -644,8 +653,11 @@ void StEmcSimulatorMaker::pictureCompareDe(Int_t print)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// $Id: StEmcSimulatorMaker.cxx,v 1.8 2002/05/30 17:35:06 pavlinov Exp $
+// $Id: StEmcSimulatorMaker.cxx,v 1.9 2002/06/03 23:35:10 pavlinov Exp $
 // $Log: StEmcSimulatorMaker.cxx,v $
+// Revision 1.9  2002/06/03 23:35:10  pavlinov
+// Last correction without DB for ped and calib. coeff.
+//
 // Revision 1.8  2002/05/30 17:35:06  pavlinov
 // changed the way of searching of GEANT data
 //
