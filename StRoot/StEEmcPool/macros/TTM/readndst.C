@@ -18,33 +18,36 @@ loadlibs()
 }
 
 
-void readnanodst()
+void 
+readndst(const char *fName="/star/current/ndst/run*.ndst.root")
 {
   loadlibs();
-  TFile *ttm = new TFile("ttm093.ndst.root");
-  TTree *t   = (TTree *)ttm->Get("ttm");
-  int nev = t->GetEntries();
+  TChain *chain = new TChain("ttm");
+  chain->Add(fName);
+  Double_t nev = chain->GetEntries();
+
+  cerr << nev << endl;
 
   TList          *matchlist       = new TList;                  
   StEventInfo    *evinfo          = new StEventInfo();
   StEventSummary *evsumm          = new StEventSummary();
   StMuTriggerIdCollection *evtrig = new StMuTriggerIdCollection();
 
-  t->GetBranch("matches")->SetAddress(&matchlist);
-  t->GetBranch("info")->SetAddress(&evinfo);
-  t->GetBranch("summary")->SetAddress(&evsumm);
-  t->GetBranch("trigger")->SetAddress(&evtrig);
+  chain->SetBranchAddress("matches",&matchlist);
+  chain->SetBranchAddress("info"   ,&evinfo);
+  chain->SetBranchAddress("summary",&evsumm);
+  chain->SetBranchAddress("trigger",&evtrig);
 
   for(int i=0; i<nev; i++) {
     EEmcTTMatch *tmatch;
-    t->GetEntry(i);
+    chain->GetEntry(i);
     if(matchlist->IsEmpty()) continue;
     StTriggerId &trig = evtrig->nominal();
     cerr << "<Event id=\""        << evinfo->id() << "\" run=\" " << evinfo->runId() << "\" >\n";
     cerr << "<MagneticField b=\"" << evsumm->magneticField() << "\" >\n";
     TIter nextMatch(matchlist);
-    //while ((tmatch = (EEmcTTMatch *) nextMatch())) 
-    //  tmatch->Out(cerr);
+    while ((tmatch = (EEmcTTMatch *) nextMatch())) 
+      tmatch->Out(cerr);
     cerr << "</Event>\n" << endl;
   }
 } 

@@ -1,4 +1,4 @@
-// $Id: EEmcTTMatch.cxx,v 1.6 2004/05/07 22:02:56 zolnie Exp $
+// $Id: EEmcTTMatch.cxx,v 1.7 2004/05/14 01:47:22 zolnie Exp $
 /**
  *                                                                     
  * \class  EEmcTTMatch
@@ -10,8 +10,8 @@
  * 
  * \author Piotr A. Zolnierczuk
  * 
- * $Date: 2004/05/07 22:02:56 $ 
- * $Revision: 1.6 $
+ * $Date: 2004/05/14 01:47:22 $ 
+ * $Revision: 1.7 $
  *
  *
  * \section eemcttmachexample Example 
@@ -51,7 +51,6 @@ EEmcTTMatch::EEmcTTMatch()
 {
   mTower  = NULL;
   mTracks = new TList();
-  mNTracks= 0;
 }
 
 //_____________________________________________________________________________
@@ -71,7 +70,6 @@ EEmcTTMatch::Clear(Option_t *opt)
 {
   mTower = NULL;
   mTracks->Clear();
-  mNTracks=0;
 }
 
 //_____________________________________________________________________________
@@ -88,7 +86,15 @@ void
 EEmcTTMatch::Add(StMuTrack *t) 
 {
   mTracks->Add(t);
-  mNTracks++;  // do not trust ROOT :)
+}
+
+
+//_____________________________________________________________________________
+//! 
+Int_t
+EEmcTTMatch::Matches()
+{
+  return mTracks->GetSize();
 }
 
 

@@ -1,5 +1,5 @@
 // Hey Emacs this is -*-c++-*-
-// $Id: EEmcTTMatch.h,v 1.3 2004/05/07 22:02:57 zolnie Exp $
+// $Id: EEmcTTMatch.h,v 1.4 2004/05/14 01:47:22 zolnie Exp $
 #ifndef STAR_EEmcTTMatch
 #define STAR_EEmcTTMatch
 
@@ -38,7 +38,7 @@ public:
   /// returns a list of matched tracks
   TList     *Tracks()  { return mTracks;  }
   /// returns number of matched tracks
-  Int_t      Matches() { return mNTracks; }
+  Int_t      Matches();
 
 
   /// prints itself to a ostream
@@ -56,8 +56,6 @@ private:
   EEmcTower *mTower;   //
   /// list of matched tracks
   TList     *mTracks;  //
-  /// number of matched tracks (do not trust root)
-  Int_t      mNTracks; //! 
 
 public:
 
