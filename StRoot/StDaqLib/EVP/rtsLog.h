@@ -50,7 +50,8 @@ extern "C" {
 #endif
 
 /* exists in all flavors */
-extern volatile int tonkoLogLevel ;	
+//extern volatile int tonkoLogLevel ;	
+  int tonkoLogLevel;
 
 extern int rtsLogAddDest(char *server, int port) ;
 
