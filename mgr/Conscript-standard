@@ -333,7 +333,7 @@ if ( $pkg !~ /^sim$/ && $pkg !~ /^gen$/ ) {
 
 	    if ( $STAR_SYS !~ /^intel_wnt$/ ) {
 	      my $stic_cmd = 
-		  "mkdir /tmp/\$\$ && cd /tmp/\$\$ && ".
+		  "mkdir -p /tmp/\$\$ && cd /tmp/\$\$ && ".
 		  "stic -s -r $STIC_CPPPATH -q %<:a && ".
 		  "(mv %>:f %>:a; cd /tmp ; rm -rf /tmp/\$\$)";
 	      Command $env2 [$modh], @idlS, qq($stic_cmd);
@@ -498,7 +498,7 @@ if ( $#idlL > -1 ) {
                 print "Deps: $Deps[0]\n" if $param::debug;
                 if ( $STAR_SYS !~ /^intel_wnt$/ ) {
 		    my $stic_cmd  = 
-			"mkdir /tmp/\$\$ && cd /tmp/\$\$ && ".
+			"mkdir -p /tmp/\$\$ && cd /tmp/\$\$ && ".
 			"stic -q %<:a && ".
 			"(mv %>:f %>:a ; cd /tmp ; rm -rf /tmp/\$\$)";
                     Command $env3 [$idlh], @Deps, qq ($stic_cmd);
