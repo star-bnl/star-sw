@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.7 2001/04/28 22:05:13 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.8 2001/05/01 15:17:36 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.8  2001/05/01 15:17:36  genevb
+// Execute EMC code only if EMC libs loaded
+//
 // Revision 2.7  2001/04/28 22:05:13  genevb
 // Added EMC histograms
 //
@@ -37,6 +40,7 @@
 #include "StQABookHist.h"
 #include "StEmcUtil/StEmcMath.h"
 #include "StEmcUtil/emcDetectorName.h"
+#include "TROOT.h"
 
 
 ClassImp(StQABookHist)
@@ -1221,6 +1225,8 @@ void StQABookHist::BookHistRich(){
 //_____________________________________________________________________________
 void StQABookHist::BookHistEMC(){
 
+  if (!((gROOT->GetClass("StEmcMath")) && (gROOT->GetClass("StEmcGeom"))))
+    return;
 // Book the hists for SimulatorMaker
   m_emc_nhit=QAH::H2F("EmcNHitsVsDet","emc: Number of hit(log) .vs. Detector #",100,0.0,4.5,4,0.5,4.5);
   m_emc_etot=QAH::H2F("EmcEtotVsDet","emc: Total energy(log) .vs. Detector #",100,-4.0,4.5,8,0.5,4.5);
