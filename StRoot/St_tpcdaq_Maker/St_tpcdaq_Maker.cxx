@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.56  2000/06/26 18:25:20  ward
+// mulitple veto zones for ExcludeTheseTimeBins
+//
 // Revision 1.55  2000/06/24 19:26:31  ward
 // changed the name of the function to ExcludeTheseTimeBins
 //
@@ -491,14 +494,24 @@ void St_tpcdaq_Maker::SetNoiseEliminationStuff() {
 
   }
 }
-void St_tpcdaq_Maker::ExcludeTheseTimeBins(int lo,int hi) {
-  int sector;
-  assert(lo<=hi);
+void St_tpcdaq_Maker::ExcludeTheseTimeBins(int lo1,int hi1,int lo2,int hi2,int lo3,int hi3) {
+  int sector,nbin;
+  assert(lo1<=hi1);
+  assert(lo2<=hi2);
+  assert(lo3<=hi3);
   alreadySet=7; // TRUE
+  nbin=3;
+  if(lo3<0||hi3<0) nbin=2;
+  if(lo2<0||hi2<0) nbin=1;
+  if(lo1<0||hi1<0) nbin=0;
   for(sector=0;sector<24;sector++) {
-    noiseElim[sector].nbin=1;
-    noiseElim[sector].low[0]=lo;
-    noiseElim[sector].up [0]=hi;
+    noiseElim[sector].nbin=nbin;
+    noiseElim[sector].low[0]=lo1;
+    noiseElim[sector].up [0]=hi1;
+    noiseElim[sector].low[1]=lo2;
+    noiseElim[sector].up [1]=hi2;
+    noiseElim[sector].low[2]=lo3;
+    noiseElim[sector].up [2]=hi3;
   }
 }
 void St_tpcdaq_Maker::WriteStructToScreenAndExit() {
