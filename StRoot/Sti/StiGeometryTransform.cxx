@@ -546,10 +546,10 @@ using namespace units;
 /* This is the old way, gives same results:
 
   // dip angle & curvature easy
-  //*(Messenger::instance(MessageType::kGeometryMessage)) 
+  // *(Messenger::instance(MessageType::kGeometryMessage)) 
   //<< "tanDip=" << pTrackNode->fP4 << endl;
   double dDip = atan(pTrackNode->fP4);
-  //*(Messenger::instance(MessageType::kGeometryMessage))
+  // *(Messenger::instance(MessageType::kGeometryMessage))
   //<< "dip=" << dDip << endl;
   double dCurvature = fabs(pTrackNode->fP3);
   int iH = (pTrackNode->fP3 > 0) ? 1 : -1;

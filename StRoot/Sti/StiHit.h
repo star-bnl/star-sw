@@ -104,6 +104,10 @@ public:
     ///instance
     const StHit* stHit() const;
 
+    ///If we are running in simulated mode, return a const pointer to the
+    /// StMcHit associated with this StiHit.
+    //const StMcHit* stMcHit() const;
+
     ///Return a boolean that marks whether or not this hit is assigne to a
     ///track.
     bool   isUsed() const;
