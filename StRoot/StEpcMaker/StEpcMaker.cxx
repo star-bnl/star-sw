@@ -1,6 +1,9 @@
 //
-// $Id: StEpcMaker.cxx,v 1.24 2003/10/02 15:27:54 suaide Exp $
+// $Id: StEpcMaker.cxx,v 1.25 2004/09/03 00:15:28 jeromel Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.25  2004/09/03 00:15:28  jeromel
+// Create histo arrays only if histos attribute is set
+//
 // Revision 1.24  2003/10/02 15:27:54  suaide
 // changed some return values to avoid non-necessary printouts
 //
@@ -146,49 +149,49 @@ Int_t StEpcMaker::Init()
 //Making QA histgrams
 // for points
 
-
-  const TString catname[] = {"Cat1", "Cat2", "cat3", "cat4"};
-  for (Int_t i=0; i<4; i++)
-  {
-      TString name_e = catname[i] + "_Point_Energy";
-      TString tit_e = catname[i] + " Point Energy";
-      m_point_energy[i]= new TH1F(name_e,tit_e,100,0.,10.);
-
-
-      TString name_eta = catname[i] + "_Point_Eta";
-      TString tit_eta = catname[i] + " Point Eta";
-      m_point_eta[i]= new TH1F(name_eta,tit_eta,100,-1.,1.);
-
-      TString name_phi = catname[i] + "_Point_Phi";
-      TString tit_phi = catname[i] + " Point Phi";
-      m_point_phi[i]= new TH1F(name_phi,tit_phi,100,-3.14,3.14);
-   
-      TString name_sigeta = catname[i] + "_Sigma_Eta";
-      TString tit_sigeta = catname[i] + " Sigma Eta";
-      m_point_sigeta[i]= new TH1F(name_sigeta,tit_sigeta,100,0.,.2);
-  
-      TString name_sigphi = catname[i] + "_Sigma_Phi";
-      TString tit_sigphi = catname[i] + " Sigma Phi";
-      m_point_sigphi[i]= new TH1F(name_sigphi,tit_sigphi,100,0.,.2);
-
-      TString name_deleta = catname[i] + "_Delta_Eta";
-      TString tit_deleta = catname[i] + " Delta Eta";
-      m_point_deleta[i]= new TH1F(name_deleta,tit_deleta,100,-.5,.5);
-
-      TString name_delphi = catname[i] + "_Delta_Phi";
-      TString tit_delphi = catname[i] + " Delta Phi";
-      m_point_delphi[i]= new TH1F(name_delphi,tit_delphi,100,-.5,.5);
-
-      TString name_points = catname[i] + "_Points_Multiplicity";
-      TString tit_points = catname[i] + " Points Multiplicity";
-      m_emc_points[i]= new TH1F(name_points,tit_points,200,0.,2000.);
-
-      TString name_mom = catname[i] + "_Track_Momenta";
-      TString tit_mom = catname[i] + " Track Momenta ";
-      m_point_trmom[i]= new TH1F(name_mom,tit_mom,100,0.,10.);
+  if (IAttr(".histo")) {
+    const TString catname[] = {"Cat1", "Cat2", "cat3", "cat4"};
+    for (Int_t i=0; i<4; i++)
+      {
+	TString name_e = catname[i] + "_Point_Energy";
+	TString tit_e = catname[i] + " Point Energy";
+	m_point_energy[i]= new TH1F(name_e,tit_e,100,0.,10.);
+	
+	
+	TString name_eta = catname[i] + "_Point_Eta";
+	TString tit_eta = catname[i] + " Point Eta";
+	m_point_eta[i]= new TH1F(name_eta,tit_eta,100,-1.,1.);
+	
+	TString name_phi = catname[i] + "_Point_Phi";
+	TString tit_phi = catname[i] + " Point Phi";
+	m_point_phi[i]= new TH1F(name_phi,tit_phi,100,-3.14,3.14);
+	
+	TString name_sigeta = catname[i] + "_Sigma_Eta";
+	TString tit_sigeta = catname[i] + " Sigma Eta";
+	m_point_sigeta[i]= new TH1F(name_sigeta,tit_sigeta,100,0.,.2);
+	
+	TString name_sigphi = catname[i] + "_Sigma_Phi";
+	TString tit_sigphi = catname[i] + " Sigma Phi";
+	m_point_sigphi[i]= new TH1F(name_sigphi,tit_sigphi,100,0.,.2);
+	
+	TString name_deleta = catname[i] + "_Delta_Eta";
+	TString tit_deleta = catname[i] + " Delta Eta";
+	m_point_deleta[i]= new TH1F(name_deleta,tit_deleta,100,-.5,.5);
+	
+	TString name_delphi = catname[i] + "_Delta_Phi";
+	TString tit_delphi = catname[i] + " Delta Phi";
+	m_point_delphi[i]= new TH1F(name_delphi,tit_delphi,100,-.5,.5);
+	
+	TString name_points = catname[i] + "_Points_Multiplicity";
+	TString tit_points = catname[i] + " Points Multiplicity";
+	m_emc_points[i]= new TH1F(name_points,tit_points,200,0.,2000.);
+	
+	TString name_mom = catname[i] + "_Track_Momenta";
+	TString tit_mom = catname[i] + " Track Momenta ";
+	m_point_trmom[i]= new TH1F(name_mom,tit_mom,100,0.,10.);
+      }
+    m_point_flag= new TH1F(" Point Flag "," Point Flag ",5,0.5,5.5);
   }
-
-  m_point_flag= new TH1F(" Point Flag "," Point Flag ",5,0.5,5.5);
   return StMaker::Init();
 }  
 //_________________________________________________________________________
@@ -323,7 +326,9 @@ Int_t StEpcMaker::Make()
 	} 
       else if(mPrint) cout << "findEmcPoint == kStOK" << endl;
 
-      MakeHistograms(); // Fill QA histgrams
+      if (IAttr(".histos")) {
+	MakeHistograms(); // Fill QA histgrams
+      }
       //------------------------------------------
       // WRITING IN EMCCOLLECTION IN STEVENT
       //------------------------------------------
