@@ -200,6 +200,7 @@ class StiKalmanTrack : public StiTrack
 
 	double calculateTrackLength() const;
 	double calculateTrackSegmentLength(const StiKalmanTrackNode &p1, const StiKalmanTrackNode &p2) const;
+	double getTrackRadLength() const;
 	int calculatePointCount() const;
 	int calculateMaxPointCount() const;
 
