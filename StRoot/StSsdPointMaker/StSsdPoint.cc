@@ -1,6 +1,9 @@
-// $Id: StSsdPoint.cc,v 1.2 2005/03/18 14:19:44 lmartin Exp $
+// $Id: StSsdPoint.cc,v 1.3 2005/03/18 16:29:08 lmartin Exp $
 //
 // $Log: StSsdPoint.cc,v $
+// Revision 1.3  2005/03/18 16:29:08  lmartin
+// new members mIdClusterP and mIdClusterN and associated methods
+//
 // Revision 1.2  2005/03/18 14:19:44  lmartin
 // missing CVS header added
 //
@@ -13,6 +16,8 @@ StSsdPoint::StSsdPoint(int rNPoint, int rNWafer, int rNumPackage, int rKindPacka
   mNPoint         = rNPoint;
   mNCluster       = rNumPackage;
   mNMatched       = rKindPackage;
+  mIdClusterP     = -1;
+  mIdClusterN     = -1;
   mNMchit         = new int[5];
   mNWafer         = rNWafer;
   mPositionU      = new float[2];
@@ -43,6 +48,8 @@ StSsdPoint::StSsdPoint(const StSsdPoint & originalPoint)
   mNPoint         = originalPoint.mNPoint;
   mNCluster       = originalPoint.mNCluster;
   mNMatched       = originalPoint.mNMatched;
+  mIdClusterP     = originalPoint.mIdClusterP;
+  mIdClusterN     = originalPoint.mIdClusterN;
   mNMchit         = new int[5];
   mNWafer         = originalPoint.mNWafer;
   mPositionU      = new float[2];
@@ -82,6 +89,8 @@ StSsdPoint& StSsdPoint::operator=(const StSsdPoint originalPoint)
   this->mNPoint         = originalPoint.mNPoint;
   this->mNCluster       = originalPoint.mNCluster;
   this->mNMatched       = originalPoint.mNMatched;
+  this->mIdClusterP     = originalPoint.mIdClusterP;
+  this->mIdClusterN     = originalPoint.mIdClusterN;
   this->mNWafer         = originalPoint.mNWafer;
 
   int i = 0;
@@ -185,11 +194,26 @@ StSsdPoint* StSsdPoint::getNextPoint()
 {  return mNextPoint; }
 
 
+void  StSsdPoint::setIdClusterP(int iIdClusterP)
+{  mIdClusterP = iIdClusterP; }
+
+int StSsdPoint::getIdClusterP()
+{  return mIdClusterP; }
+
+void  StSsdPoint::setIdClusterN(int iIdClusterN)
+{  mIdClusterN = iIdClusterN; }
+
+int StSsdPoint::getIdClusterN()
+{  return mIdClusterN; }
+
+
 StSsdPoint* StSsdPoint::giveCopy()
 {
   StSsdPoint *ptrClone = new StSsdPoint(this->mNPoint, this->mNWafer, this-> mNCluster, this->mNMatched);
   int i = 0;
   ptrClone->mFlag = this->mFlag;
+  ptrClone->mIdClusterP = this->mIdClusterP;
+  ptrClone->mIdClusterN = this->mIdClusterN;
   for (i = 0; i < 5; i++)
       ptrClone->mNMchit[i]   = this->mNMchit[i];
 
