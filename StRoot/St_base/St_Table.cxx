@@ -1,8 +1,8 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.22 1998/10/14 21:43:02 fisyak Exp $ 
+// $Id: St_Table.cxx,v 1.23 1998/10/14 22:40:48 fine Exp $ 
 // $Log: St_Table.cxx,v $
-// Revision 1.22  1998/10/14 21:43:02  fisyak
-// Make ami void
+// Revision 1.23  1998/10/14 22:40:48  fine
+// St_Table::ReAllocate method and "plain" C interface to that has been introduced
 //
 // Revision 1.20  1998/10/04 02:20:12  fine
 // St_Table.h Some clashes with TNamed and TObject have been fixed (affected Delete() method)
@@ -62,7 +62,24 @@
 #include "Api.h"
 
 #include "St_Table.h"
- 
+
+//______________________________________________________________________________
+void *ReAllocate(table_head_st *header, Int_t newsize) 
+{
+  //
+  // header - "plain" C interface to re-allocate the STAF table
+  //          "this"  pointer is  supplied indirectly via 
+  //          header->dsl_pointer member
+  //
+  // newsize - is a new size of the STAF table. 
+  //           If it is smaller is the old one then nothing happens
+  //
+ if (header && newsize) 
+   return ((St_Table *)header->dsl_pointer)->ReAllocate(newsize);
+ else 
+   return 0;
+}
+
 ClassImp(St_Table)
  
 
@@ -208,6 +225,17 @@ void St_Table::CopySet(St_Table &array)
   array.Set(fN); 
   CopyStruct(array.s_Table,s_Table); 
  *(array.s_TableHeader) = *s_TableHeader; 
+}
+
+//______________________________________________________________________________
+void *St_Table::ReAllocate(Int_t newsize)
+{
+  if (s_Size && newsize > fN) {
+   void *arr =  realloc(s_Table,*s_Size*fN);
+   SetfN(newsize);
+   s_Table = (char *)arr;
+ }  
+ return (void *)s_Table;
 }
 
 //______________________________________________________________________________
