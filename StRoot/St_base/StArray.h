@@ -72,11 +72,12 @@ class StTObjArray : public TSeqCollection {
                          { fArr = new TObjArray(s,lowerBound); }
                          StTObjArray(const StTObjArray& a){ fArr = new TObjArray(*a.fArr);}
             virtual  ~StTObjArray(){delete fArr;}
+            virtual void operator =(const StTObjArray &a){ delete fArr;fArr = new TObjArray(*a.fArr);} 
             virtual void Add(TObject* obj){fArr->Add(obj);}
             virtual void AddAfter(TObject* after, TObject* obj){fArr->AddAfter(after,obj);}
             virtual void AddAt(TObject* obj, Int_t idx){fArr->AddAt(obj,idx);}
             virtual void AddAtAndExpand(TObject* obj, Int_t idx){fArr->AddAtAndExpand(obj,idx);}
-           virtual Int_t AddAtFree(TObject* obj){return fArr->AddAtFree(obj);}
+            virtual Int_t AddAtFree(TObject* obj){return fArr->AddAtFree(obj);}
             virtual void AddBefore(TObject* before, TObject* obj){fArr->AddBefore(before,obj);}
             virtual void AddFirst(TObject* obj){fArr->AddFirst(obj);}
             virtual void AddLast(TObject* obj){fArr->AddLast(obj);}
@@ -111,7 +112,7 @@ class StObjArray : public StTObjArray
 {
 public:
             StObjArray(Int_t s = TCollection::kInitCapacity):StTObjArray(s,0){};
-            StObjArray(StObjArray& from);
+            StObjArray(const StObjArray& from):StTObjArray(from){};
                 
             
 virtual        ~StObjArray(){};
@@ -182,7 +183,9 @@ protected:
 
 public:
  StStrArray(const Char_t *name=0, Int_t s=0);
+ StStrArray(const StStrArray &from);
  virtual ~StStrArray();
+ virtual void operator =(const StStrArray &a); 
 
  virtual const Char_t *GetName() const ;
  virtual void          SetName(const char* name) ; 
@@ -205,6 +208,7 @@ class StRefArray : public StObjArray
 {
 public:
 StRefArray(Int_t s = TCollection::kInitCapacity):StObjArray(s){};
+StRefArray(const StRefArray &from):StObjArray(from){};
 virtual void Decode();
 virtual ~StRefArray(){};
 ClassDef(StRefArray,1)
@@ -219,7 +223,7 @@ class StPtrVec ## QWERTY : public StRefArray \
 { \
 public: \
 StPtrVec ## QWERTY(Int_t s = TCollection::kInitCapacity);\
-StPtrVec ## QWERTY(StPtrVec ## QWERTY &from);\
+StPtrVec ## QWERTY(const StPtrVec ## QWERTY &from);\
 virtual        ~StPtrVec ## QWERTY ##(){};\
 virtual void push_back(const St ## QWERTY &Obj);\
 virtual void push_back(const St ## QWERTY *Obj);\
@@ -243,6 +247,7 @@ class StSPtrVec ## QWERTY : public StStrArray \
 { \
 public: \
 StSPtrVec ## QWERTY(const Char_t *name=0,Int_t s = TCollection::kInitCapacity);\
+StSPtrVec ## QWERTY(const StSPtrVec ## QWERTY &from);\
 virtual void push_back(const St ## QWERTY &Obj);\
 virtual void push_back(const St ## QWERTY *Obj);\
 virtual St ## QWERTY ## * back() const;\
@@ -288,7 +293,7 @@ TIterator* 	StPtrVec ## QWERTY 		::MakeIterator	(Bool_t dir) const \
 \
 ClassImp(StPtrVec ## QWERTY ##) \
 		StPtrVec ## QWERTY::StPtrVec ## QWERTY(Int_t s):StRefArray(s){};\
-		StPtrVec ## QWERTY::StPtrVec ## QWERTY(StPtrVec ## QWERTY &from):StRefArray(from){};\
+		StPtrVec ## QWERTY::StPtrVec ## QWERTY(const StPtrVec ## QWERTY &from):StRefArray(from){};\
 void 		StPtrVec ## QWERTY::push_back(const St ## QWERTY &Obj){StObjArray::push_back((TObject*)&Obj);}  \
 void 		StPtrVec ## QWERTY::push_back(const St ## QWERTY *Obj){StObjArray::push_back((TObject*)Obj);} \
 St ## QWERTY*	StPtrVec ## QWERTY::back() const \
@@ -306,9 +311,11 @@ void 				StPtrVec ## QWERTY::clean(St ## QWERTY&			obj ){Clean(&obj); }	  \
 void 				StPtrVec ## QWERTY::erase(St ## QWERTY&			obj ){Clean(&obj); }	  \
 void 				StPtrVec ## QWERTY::clean(St ## QWERTY ## Iterator&	iter){Clean(&iter);}	  \
 void 				StPtrVec ## QWERTY::erase(St ## QWERTY ## Iterator&	iter){Clean(&iter);}	  \
+St ## QWERTY*& StPtrVec ## QWERTY::operator[](Int_t i) const{return *((St ## QWERTY**)GetCell(i));};\
 \
 ClassImp(StSPtrVec ## QWERTY) \
 	StSPtrVec ## QWERTY::StSPtrVec ## QWERTY(const Char_t *name,Int_t s ):StStrArray(name,s){};\
+	StSPtrVec ## QWERTY::StSPtrVec ## QWERTY(const StSPtrVec ## QWERTY &from):StStrArray(from){};\
 void 		StSPtrVec ## QWERTY::push_back(const St ## QWERTY &Obj){StObjArray::push_back((TObject*)&Obj);} \
 void 		StSPtrVec ## QWERTY::push_back(const St ## QWERTY *Obj){StObjArray::push_back((TObject*)Obj);} \
 St ## QWERTY* 	StSPtrVec ## QWERTY::back() const \
@@ -337,6 +344,7 @@ void StSPtrVec ## QWERTY::clean(St ## QWERTY &obj){Clean(&obj);}\
 void StSPtrVec ## QWERTY::erase(St ## QWERTY &obj){Erase(&obj);}\
 void StSPtrVec ## QWERTY::clean(St ## QWERTY ## Iterator &iter){Clean(&iter);}\
 void StSPtrVec ## QWERTY::erase(St ## QWERTY ## Iterator &iter){Erase(&iter);}\
+St ## QWERTY*& StSPtrVec ## QWERTY::operator[](Int_t i) const{return *((St ## QWERTY**)GetCell(i));};\
 
 #endif
 
