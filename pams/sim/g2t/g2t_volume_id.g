@@ -5,7 +5,7 @@
       implicit none
       integer  g2t_volume_id
 * 
-      Character*4      Csys
+      Character*3      Csys
       Integer          NUMBV(15)
       Integer          innout,sector,sub_sector,volume_id
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
