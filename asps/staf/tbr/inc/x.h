@@ -1,6 +1,8 @@
 #define MAXWIN 100 /* all 3 types, catalog, dataset, and table */
 static XtAppContext gAppCon;
-static Widget gMainWindow,gAppShell,gSigFigScalePopup;
+static Widget gMainWindow,gAppShell;
+/* No code uses this:
+   static Widget gSigFigScalePopup; */
 static Display *gDisplay;
 
 /* These are global variables necesitated by the function pointer passed
@@ -102,3 +104,12 @@ typedef struct {
 WINDOW_INFO *gWin[MAXWIN]; /* the memory is malloc'ed, except for the small
                            ** amount needed to hold the MAXWIN pointers. */
 #define ARGS Arg args[50]; int nn;
+
+/* DPM: Need to have these decl's to pacify compilers. */
+extern void ExposeCB (Widget, caddr_t, caddr_t);
+extern void ContractCase (int);
+extern void ExpandExceptCase (int);
+extern void PrimaryList (char *, int, int *, int *, int, char *, int);
+extern void MakeDrawingArea (Widget,Dimension, Dimension);
+extern void dsu_Clear ();
+extern void ExpandCase (int);
