@@ -15,6 +15,15 @@ StEmcMicroUtil::StEmcMicroUtil()
 }
 StEmcMicroUtil::~StEmcMicroUtil()
 {
+	if(mV0Tracks) delete mV0Tracks;
+}
+void StEmcMicroUtil::clearGarbage()
+{
+	for(Int_t i=0;i<mNV0Tracks;i++)
+	{
+		if(mV0Tracks[i]) { delete mV0Tracks[i]; mV0Tracks[i]=NULL; }
+	}
+	mNV0Tracks=0;
 }
 StEmcMicroEvent* StEmcMicroUtil::getMicroEvent(StEvent *event)
 {
@@ -454,7 +463,8 @@ void StEmcMicroUtil::processStEventFPD()
 }
 void StEmcMicroUtil::processMicroEvent()
 {
-  mStEvent = new StEvent;
+  clearGarbage();
+	mStEvent = new StEvent;
   processMicroEventInfo();
   processMicroEventTracks();
   processMicroEventV0();
@@ -595,7 +605,8 @@ void StEmcMicroUtil::createTrack(StEmcMicroTrack* MicroTrack,StTrack* Track)
 }
 void StEmcMicroUtil::processMicroEventV0()
 {
-  Int_t nv0 = mMicroEvent->getNV0();
+  mNV0Tracks=0;
+	Int_t nv0 = mMicroEvent->getNV0();
   if (nv0==0) return;
   StSPtrVecV0Vertex&  v0=mStEvent->v0Vertices();
   for(Int_t i=0;i<nv0;i++)
@@ -616,6 +627,11 @@ void StEmcMicroUtil::processMicroEventV0()
             StThreeVectorF p = t->geometry()->momentum();
             v->setMomentumOfDaughter((StChargeSign)j,p);
 						v->addDaughter(t);
+						if(mNV0Tracks<MAXV0TRACKS)
+						{
+							mV0Tracks[mNV0Tracks] = t;
+							mNV0Tracks++;
+						}
           }
         }
       }
