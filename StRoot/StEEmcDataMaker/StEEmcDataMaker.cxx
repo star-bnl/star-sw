@@ -1,4 +1,4 @@
-// $Id: StEEmcDataMaker.cxx,v 1.11 2004/03/28 04:08:12 balewski Exp $
+// $Id: StEEmcDataMaker.cxx,v 1.12 2004/03/30 04:44:52 balewski Exp $
 
 #include <Stiostream.h>
 #include <math.h>
@@ -77,7 +77,7 @@ Int_t StEEmcDataMaker::Make(){
   
   StEvent* mEvent = (StEvent*)GetInputDS("StEvent");
   assert(mEvent);// fix your chain or open the right event file
-  printf("\n%s  accesing StEvent ID=%d\n",GetName(),mEvent->id());
+  // printf("\n%s  accesing StEvent ID=%d\n",GetName(),mEvent->id());
   
   St_DataSet *daq = GetDataSet("StDAQReader");                 assert(daq);
   StDAQReader *fromVictor = (StDAQReader*) (daq->GetObject()); assert(fromVictor);
@@ -121,11 +121,15 @@ Int_t StEEmcDataMaker::Make(){
   StEmcRawData *raw=new  StEmcRawData;
 
   emcC->setEemcRawData(raw);
+  printf("%s:: copy %d EEMC raw data blocks\n",GetName(),mDb->getNCrate());
+
   for(icr=0;icr<mDb->getNCrate();icr++) {
     const EEmcDbCrate *crate=mDb-> getCrate(icr);
-    printf("\nicr=%d fiber: ",icr);crate->print();
+    printf("copy EEMC raw: ");crate->print();
     raw->createBank(icr,crate->nHead,crate->nCh);
-    raw->setHeader(icr,eeReader->getEemcHeadBlock(crate->fiber,crate->type));
+    //  printf("aa=%p bb=%p\n",eeReader->getEemcHeadBlock(crate->fiber,crate->type),eeReader->getEemcDataBlock(crate->fiber,crate->type));
+
+raw->setHeader(icr,eeReader->getEemcHeadBlock(crate->fiber,crate->type));
     raw->setData(icr,eeReader->getEemcDataBlock(crate->fiber,crate->type));
   }
 
@@ -197,6 +201,9 @@ Int_t StEEmcDataMaker::Make(){
   }
 
 // $Log: StEEmcDataMaker.cxx,v $
+// Revision 1.12  2004/03/30 04:44:52  balewski
+// raw EEMC in StEvent done
+//
 // Revision 1.11  2004/03/28 04:08:12  balewski
 // store raw EEMC data
 //
