@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.32 2003/09/02 17:58:09 perev Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.33 2004/04/09 15:46:16 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.33  2004/04/09 15:46:16  aihong
+ * add isPIDTableRead()
+ *
  * Revision 1.32  2003/09/02 17:58:09  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -180,6 +183,12 @@ StuProbabilityPidAlgorithm::~StuProbabilityPidAlgorithm(){
 void StuProbabilityPidAlgorithm::setDedxMethod(StDedxMethod method){
       StuProbabilityPidAlgorithm::mDedxMethod=method;
 }
+
+//-------------------------------
+bool StuProbabilityPidAlgorithm::isPIDTableRead(){
+      return StuProbabilityPidAlgorithm::mPIDTableRead;
+}
+
 
 //-------------------------------
 StParticleDefinition* StuProbabilityPidAlgorithm::mostLikelihoodParticle(){

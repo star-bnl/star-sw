@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.h,v 1.15 2003/06/24 02:53:14 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.h,v 1.16 2004/04/09 15:46:21 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.h,v $
+ * Revision 1.16  2004/04/09 15:46:21  aihong
+ * add isPIDTableRead()
+ *
  * Revision 1.15  2003/06/24 02:53:14  aihong
  * update for dAu PIDtable
  *
@@ -114,6 +117,9 @@ class StuProbabilityPidAlgorithm : public StPidAlgorithm {
       static void setDedxMethod(StDedxMethod method);
 
       static void readParametersFromFile(TString fileName);
+
+      static bool isPIDTableRead();
+
       //      static void readParametersFromTable(St_Table* tb);
                   //from data base.
 
