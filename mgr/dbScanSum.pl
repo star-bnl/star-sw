@@ -225,12 +225,12 @@ my $TdstEv  = 0;
 
 &endHtml();
 
-`cp $prod_html_back $prod_html` 
+`cp $prod_html_back $prod_html` ;
 
 ######################
 sub beginHtml {
 
-  open (HTML,">$prod_html_back") or die "can't write to $new_html";
+  open (HTML,">$prod_html_back") or die "can't write to $prod_html_back ";
   print HTML "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML//EN\">\n";
   print HTML "<html>\n";
   print HTML "  <head>\n";
