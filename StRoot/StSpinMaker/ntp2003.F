@@ -1,5 +1,5 @@
       subroutine initntp2003(filename)
-      character*100 filename
+      character*100 filename   
       integer ISTAT
       COMMON /PAWC/ hmem(2000000)
       include 'StSpinMaker/ntp2003.inc'
