@@ -2,6 +2,7 @@
 #include "StDetectorDbFTPCGas.h"
 #include "StDetectorDbRichScalers.h"
 #include "StDetectorDbTpcRDOMasks.h"
+#include "StDetectorDbMagnet.h"
 
 ClassImp(StDetectorDbMaker)
 
@@ -23,6 +24,9 @@ Int_t StDetectorDbMaker::InitRun(int runNumber){
     StDetectorDbTpcRDOMasks* masks = StDetectorDbTpcRDOMasks::instance();
     masks->update(this);
 
+    StDetectorDbMagnet* magnet = StDetectorDbMagnet::instance();
+    magnet->update(this);
+    
     return StMaker::InitRun(runNumber);
 }
 //_____________________________________________________________________________
@@ -30,8 +34,8 @@ Int_t StDetectorDbMaker::Make(){
 
    
     // Update FTPC Gas
-    StDetectorDbFTPCGas* gas = StDetectorDbFTPCGas::instance();
-    gas->update(this);
+   //  StDetectorDbFTPCGas* gas = StDetectorDbFTPCGas::instance();
+//     gas->update(this);
 
     // Update Rich Scalers/Voltages
     StDetectorDbRichScalers* scalers = StDetectorDbRichScalers::instance();
