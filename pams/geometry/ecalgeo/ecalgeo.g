@@ -1,6 +1,9 @@
-* $Id: ecalgeo.g,v 1.10 2001/04/09 14:20:24 akio Exp $
+* $Id: ecalgeo.g,v 1.11 2001/08/18 21:17:41 yqwang Exp $
 * $Name:  $
 * $Log: ecalgeo.g,v $
+* Revision 1.11  2001/08/18 21:17:41  yqwang
+* *** empty log message ***
+*
 * Revision 1.10  2001/04/09 14:20:24  akio
 * set default to de, not cherenkov, for fpd
 *
@@ -40,6 +43,8 @@ Author    Rashid Mehdiyev
 *               - Include forward pion detectors
 * 		- EMCG_ChkvSim to do either cherenkov photon simulation
 *                 or just take de above thresholds.
+* Version 4.2, O. Yiqun Wang                                  31 July 01
+*               - Update FPD Pb-glass geometry
 ******************************************************************************
 +CDE,AGECOM,GCONST,GCUNIT.
 *
@@ -62,7 +67,7 @@ Author    Rashid Mehdiyev
 *
       Structure  EXSE {Jsect,Swidth,Aplate}
 *
-      Structure  ELGG {Width,Depth,ZPos,DGap,NPhi,NEta,RDis,DipAng,
+      Structure  ELGG {Width,Depth,ZPos(4),DGap,NPhi,NEta,RDis(4),DipAng,
 	               AlThick,SiRubDz,PhCathDz,PhCathR,MuMetDz,MuMetR}
 *
       Structure  ELGM {Density,RadLen,Index,PbContent,CritEne,MoliereR}
@@ -123,7 +128,7 @@ Fill  EMCS                          ! EM Ebdcap Calorimeter geometry
       Nsupsec  = 12                 ! Number of azimuthal supersectors        
       Nsector  = 60                 ! Number of azimutal sectors (Phi granularity)
       Nslices  = 5                  ! number of phi slices in supersector
-      Nsection = 3                  ! Number of readout sections
+      Nsection = 8                  ! Number of readout sections
       Front    = 0.953              ! thickness of the front AL plates
       Gten     = 0.16               ! Fiber routing guides
       Plate    =  0.468             ! Lead radiator thickness
@@ -137,8 +142,8 @@ Fill  EMCS                          ! EM Ebdcap Calorimeter geometry
       GapSMD   = 3.2                ! space for SMD detector
 Fill  EMCS                          ! EM Ebdcap Calorimeter geometry
       Type     =  2                 ! =1 endcap, =2 fpd edcap prototype
-      ZOrig    =  800               ! calorimeter origin in z
-      ZEnd     =  836.507           ! Calorimeter end in z
+      ZOrig    =  820               ! calorimeter origin in z
+      ZEnd     =  856.507           ! Calorimeter end in z
       EtaMin   =  1.6317            ! upper feducial eta cut 
       EtaMax   =  2.0               ! lower feducial eta cut
       PhiMin   =  -9                ! Min phi 
@@ -147,7 +152,7 @@ Fill  EMCS                          ! EM Ebdcap Calorimeter geometry
       Nsupsec  =    1               ! Number of azimuthal supersectors        
       Nsector  =    3               ! Number of azimutal sectors (Phi granularity)
       Nslices  =    3               ! number of phi slices in supersector
-      Nsection =    3               ! Number of readout sections
+      Nsection =    8               ! Number of readout sections
       Front    = 0.953              ! thickness of the front AL plates
       Gten     = 0.16               ! Fiber routing guides
       Plate    = 0.5                ! Lead radiator thickness
@@ -181,13 +186,43 @@ Fill ESEC           ! First EM section
 *
 Fill ESEC           ! Second EM section
       ISect    = 2                           ! Section number
-      Nlayer   = 3                           ! Number of Sci layers along z
+      Nlayer   = 4                           ! Number of Sci layers along z
       Cell     = 1.228                       ! Cell full width in z
       Scint    = {0.4,0.5}     		     ! Sci layer thickness
 *
 Fill ESEC           ! Third EM section
       ISect    = 3                           ! Section
-      Nlayer   = 19                          ! Number of Sci layers along z
+      Nlayer   = 3                           ! Number of Sci layers along z
+      Cell     = 1.228                       ! Cell full width in z
+      Scint    = {0.4,0.5}      	     ! Sci layer thickness
+*
+Fill ESEC           ! 4th EM section
+      ISect    = 4                           ! Section
+      Nlayer   = 3                          ! Number of Sci layers along z
+      Cell     = 1.228                       ! Cell full width in z
+      Scint    = {0.4,0.5}      	     ! Sci layer thickness
+*
+Fill ESEC           ! 5th EM section
+      ISect    = 5                           ! Section
+      Nlayer   = 3                          ! Number of Sci layers along z
+      Cell     = 1.228                       ! Cell full width in z
+      Scint    = {0.4,0.5}      	     ! Sci layer thickness
+*
+Fill ESEC           ! 6th EM section
+      ISect    = 6                           ! Section
+      Nlayer   = 3                          ! Number of Sci layers along z
+      Cell     = 1.228                       ! Cell full width in z
+      Scint    = {0.4,0.5}      	     ! Sci layer thickness
+*
+Fill ESEC           ! 7th EM section
+      ISect    = 7                           ! Section
+      Nlayer   = 3                          ! Number of Sci layers along z
+      Cell     = 1.228                       ! Cell full width in z
+      Scint    = {0.4,0.5}      	     ! Sci layer thickness
+*
+Fill ESEC           ! 8th EM section
+      ISect    = 8                           ! Section
+      Nlayer   = 3                          ! Number of Sci layers along z
       Cell     = 1.228                       ! Cell full width in z
       Scint    = {0.4,0.5}      	     ! Sci layer thickness
 *----------------------------------------------------------------------------
@@ -210,10 +245,10 @@ Fill ELGG                                    ! PbG detector geometry
       Width    = 3.8			     ! PbG width	
       Depth    = 45.0			     ! PbG depth
       DGap     = 0.01			     ! Gap between PbG
-      Zpos     = 800.0                       ! Z position
+      Zpos     = {800.0,820.0,805.0,800.0}   ! Z positions
       NPhi     = 4			     ! # of tower in phi
       NEta     = 4                           ! # of tower in eta
-      RDis     = 30.0	 		     ! distance from beam
+      RDis     = {30.0,30.0,30.0,30.0}       ! distances from beam
       DipAng   = 15.0                        ! Dip angle
       AlThick  = 0.002			     ! almunim wrap thinkness
       SiRubDz  = 2.0			     ! silicon lubber thinkness
@@ -303,30 +338,39 @@ Fill ELGM				     ! PbG detector materials
 	ztot = (ELGG_Depth+ELGG_AlThick+ELGG_MuMetDz)/2.0
         yy = (ELGG_NEta*ELGG_Width + (ELGG_NEta+1)*ELGG_DGap)/2.0
 
+* West
         if(emcg_OnOff(2)==1 | emcg_OnOff(2)==3) then
-                Create and Position ELGD in CAVE z=ELGG_ZPos+ztot y=ELGG_Rdis+yy x=0, 
+* top
+                Create and Position ELGD in CAVE z=ELGG_ZPos(1)+ztot y=ELGG_Rdis(1)+yy x=0, 
                                phix=0    phiy=90               phiz=90,
                                thetax=90 thetay=90+ELGG_DipAng thetaz=ELGG_DipAng
-                Create and Position ELGD in CAVE z=ELGG_ZPos+ztot x=-ELGG_Rdis+yy y=0,
+* north
+                Create and Position ELGD in CAVE z=ELGG_ZPos(4)+ztot x=-ELGG_Rdis(4)+yy y=0,
                                phix=90   phiy=180              phiz=0,
                                thetax=90 thetay=90+ELGG_DipAng thetaz=ELGG_DipAng 
-                Create and Position ELGD in CAVE z=ELGG_ZPos+ztot y=-(ELGG_Rdis+yy) x=0,
+* bottom
+                Create and Position ELGD in CAVE z=ELGG_ZPos(3)+ztot y=-(ELGG_Rdis(3)+yy) x=0,
                                phix=180  phiy=270              phiz=-90,
                                thetax=90 thetay=90+ELGG_DipAng thetaz=ELGG_DipAng 
-                Create and Position ELGD in CAVE z=ELGG_ZPos+ztot x=(ELGG_Rdis+yy) y=0,
+* south
+                Create and Position ELGD in CAVE z=ELGG_ZPos(2)+ztot x=(ELGG_Rdis(2)+yy) y=0,
                                phix=270  phiy=0                phiz=-180,
                                thetax=90 thetay=90+ELGG_DipAng thetaz=ELGG_DipAng 
         endif
-        if(emcg_OnOff(2)==2 | emcg_OnOff(2)==3) then
-                Create and Position ELGD in CAVE z=-(ELGG_ZPos+ztot) y=ELGG_Rdis+yy x=0,
+* East
+        if(emcg_OnOff(3)==2 | emcg_OnOff(3)==3) then
+* top
+                Create and Position ELGD in CAVE z=-(ELGG_ZPos(1)+ztot) y=ELGG_Rdis(1)+yy x=0,
                                phix=180  phiy=90               phiz=90,
-                               thetax=90 thetay=90-ELGG_DipAng thetaz=180-ELGG_DipAng
-                Create and Position ELGD in CAVE z=-(ELGG_ZPos+ztot) x=ELGG_Rdis+yy y=0,
+                               thetax=90 thetay=90             thetaz=180
+* south
+                Create and Position ELGD in CAVE z=-(ELGG_ZPos(2)+ztot) x=ELGG_Rdis(2)+yy y=0,
                                phix=90   phiy=0                phiz=0,
                                thetax=90 thetay=90-ELGG_DipAng thetaz=180-ELGG_DipAng
-                Create and Position ELGD in CAVE z=-(ELGG_ZPos+ztot) y=-(ELGG_Rdis+yy) x=0,
+* bottom
+                Create and Position ELGD in CAVE z=-(ELGG_ZPos(3)+ztot) y=-(ELGG_Rdis(3)+yy) x=0,
                                phix=0    phiy=-90              phiz=-90,
-                               thetax=90 thetay=90-ELGG_DipAng thetaz=180-ELGG_DipAng
+                               thetax=90 thetay=90             thetaz=180
         endif
 
       endif
@@ -421,7 +465,7 @@ Block EMOD is one module  of the EM EndCap
          USE ESEC Isect=I_section  
 *
          Secwid  = esec_cell*esec_Nlayer
-         if (I_section == 3) then      ! Last section
+         if (I_section == nint(Emcs_Nsection)) then      ! Last section
           Secwid  = Secwid - emcs_plate - 2*emcs_plateS
 	 endif	
          Create and position ESEC      z=section-center+secwid/2
@@ -441,7 +485,7 @@ Block EMOD is one module  of the EM EndCap
          section = section + secwid
 endblock
 * ----------------------------------------------------------------------------
-Block ESEC is a sinle EM section
+Block ESEC is a single EM section
       Attribute ESEC   seen=1  colo=1 
       Material Air
       Material CAir Isvol=0
@@ -478,8 +522,9 @@ Block ETOW is an individual 1/60 phi EM tower (section in fact)
          Plate  = emcs_Plate + 2*emcs_PlateS
          Gap = esec_cell - Plate - esec_scint(emcs_Type)
          Cell = esec_cell
-*
-         if (is==nint(esec_Nlayer) & I_section == 3) then
+
+* below: change from 3 to nint(Emcs_Nsection)=8: 08/03/2001
+         if (is==nint(esec_Nlayer) & I_section == nint(Emcs_Nsection)) then  
           Cell = esec_cell - Plate  
 	  Plate=0
          endif
@@ -745,7 +790,8 @@ Block EXSG  is the Shower max  Gap for scintillator strips
 	End do
       else
 	if (J_section=1) then
-	  Nstr = 60
+*	  Nstr = 60
+	  Nstr = 100
 	  len  = 36
           Do i_str = 1,nstr
 		xc = (Rbot+Rtop)/2 + (i_str-Nstr/2.0)*emxg_Sbase/2.0
@@ -757,7 +803,8 @@ Block EXSG  is the Shower max  Gap for scintillator strips
 		endif
 	  End do
 	else
-	  Nstr = 100
+*	  Nstr = 100
+	  Nstr = 60
 	  len  = 36
           Do i_str = 1,nstr
 		xc = (Rbot+Rtop)/2.0
