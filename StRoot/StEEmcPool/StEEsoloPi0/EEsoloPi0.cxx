@@ -1,4 +1,4 @@
-// $Id: EEsoloPi0.cxx,v 1.5 2004/08/17 15:46:56 balewski Exp $
+// $Id: EEsoloPi0.cxx,v 1.6 2004/08/26 04:39:40 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -22,7 +22,7 @@
 #include "StEEmcDbMaker/EEmcDbItem.h"
 
 
-#ifdef NO_ROOT4STAR
+#ifdef StRootFREE
   #include "EEmcDb/EEmcDb.h"
 #else
   #include "StEEmcDbMaker/StEEmcDbMaker.h"
@@ -35,6 +35,12 @@ ClassImp(EEsoloPi0)
 //--------------------------------------------------
 //--------------------------------------------------
 EEsoloPi0::EEsoloPi0(){
+
+  nInpEve=0;
+  HList=0;
+  eeDb=0;
+  dbMapped=-1;
+
   geom= new EEmcGeomSimple();
   set(0,0,0);
   printf("EEsoloPi0() constructed\n");
@@ -57,12 +63,19 @@ EEsoloPi0::EEsoloPi0(){
 //--------------------------------------------------
 EEsoloPi0::~EEsoloPi0() {/* noop */}
 
+//-------------------------------------------------
+//-------------------------------------------------
+void EEsoloPi0::initRun(int runID){
+  printf(" EEsoloPi0::initRun(%d)\n",runID);
+
+  assert(dbMapped<0); // at the moment DB reloading is not implemented/tested,JB
+  dbMapped=runID;
+}
 
 //-------------------------------------------------
 //-------------------------------------------------
 //-------------------------------------------------
-void EEsoloPi0::init( MYDB*dbx, TObjArray * HList ){
-  db=dbx;
+void EEsoloPi0::init(){
   int i;
   float Emax=20;
   TString C="";
@@ -214,102 +227,6 @@ void EEsoloPi0::print(){
     printf("%d   %d   %.2f %.2f %5g\n",ic+1, clust[ic].k1,clust[ic].feta,clust[ic].fphi,clust[ic].eC);
   }
 }
-  
-#ifdef NO_ROOT4STAR
-//--------------------------------------------------
-//--------------------------------------------------
-//--------------------------------------------------
-int EEsoloPi0::getTowerAdc(EEfeeRawEvent  *feeEve,EEstarTrig *eTrig,EEmcEventHeader *eHead, int ctbMin, int ctbMax ){
-  static int time0=-1;
-  if(time0<0) time0=eHead->getTimeStamp();
-  timeSec=eHead->getTimeStamp()-time0;
-  int n1=0,n2=0;
-
-  if(eTrig) { // check CTB multiplicity 
-    // Find number of ctb slats which fired
-    int ctbSum=0;
-    int isl;
-    for ( isl = 0; isl < 240; isl++ ) {
-      ctbSum+= eTrig -> CTB[isl];
-    }
-    // printf("ctbSum=%d \n",ctbSum);
-    hA[7]->Fill(ctbSum); 
-    if(ctbSum<ctbMin || ctbSum>ctbMax) return 0;
-  }
-
-  clear();
-
-#if 0
-  float adc2gev[MaxEtaBins]={ // ideal gain (ch/GeV)
-    18.938, 20.769,  22.650,  24.575,
-    26.539,  28.514, 30.493, 32.473,
-    34.438, 36.387, 38.28, 40.146 };
-#endif 
-  int ic;
-  float totEner=0;
-
-
-  for(ic=0;ic<feeEve->block->GetEntries();ic++) {
-    EEfeeDataBlock *b=(EEfeeDataBlock *)feeEve->block->At(ic);
-    if( !b->isValid() ) continue;
-
-    int crateID=b->getCrateID();    
-    if(crateID>MaxTwCrateID) continue; // just tower crates
-    n1++;
-    int chan;
-    UShort_t* data=b->getData();
-    int nd=b->getValidDataLen();
-    
-
-    for(chan=0;chan<nd;chan++) {
-      const  EEmcDbItem  *x=db->getByCrate(crateID,chan);
-      if(x==0) continue; 
-      if(x->fail ) continue; // drop broken channels
-
-      float value=data[chan]; // raw ADC 
-      if(value <x->thr) continue;
-      n2++;
-      
-      int ii=(x->sec-1)*60+(x->sub-'A')*12+x->eta-1;
-      //printf("ii=%d '%s' --> %f th=%f\n",ii,x->name,value,x->thr);
-      value-=x->ped;
-
-
-      // if(ii>500) continue;
-      //      if(ii==533 || ii==341) continue;
-      //      if(ii==533) printf("ii=%d '%s'\n",ii, x->name);
-      //if(ii==341) printf("ii=%d '%s'\n",ii, x->name);
-
-       //      printf("     sec=%d sub=%c etaBin=%d enerRaw=%f ii=%d\n",ih, secH->getID(), sub, eta,enerRaw,ii);
-      assert(ii>=0 && ii<MxTw);
-
-      //float recoEner=value/adc2gev[x->eta-1]/scaleFactor; // ideal
-
-      if(x->gain<=0 ) continue; // gains not avaliable
-      if(strstr(x->name,"01TA05")) continue;
-      if(strstr(x->name,"11TD09")) continue;
-      if(strstr(x->name,"09TB06")) continue;
-
-      float recoEner=value/x->gain/scaleFactor; // ideal
-      totEner+=recoEner;
-      soloMip[ii].e= recoEner;
-      if (soloMipDb[ii]==0) soloMipDb[ii]=x;
-
-      float etaCenter=geom->getEtaMean(x->eta-1);
-      hA[0]->Fill(recoEner);
-
-      hA[5]->Fill(recoEner/cosh(etaCenter));
-
-    }
-  }
-  
-  printf(" n1=%d, n2=%d\n",n1,n2);
-  hA[1]->Fill(totEner);
-  return 1;
-
-}
-
-#endif
 
 //---------------------------------------------------
 //---------------------------------------------------
@@ -335,7 +252,7 @@ int  EEsoloPi0:: findTowerClust() {
      soloMip[k1].id=nClust;
      tagCluster(k1);     
   }
-  // printf("nClust=%d\n",nClust);
+  //  printf("nClust=%d\n",nClust);
   //if(nClust<2) return ;
   
   //............  sum energy of clusters, find centroid
@@ -609,4 +526,110 @@ int EEsoloPi0::findInvM(Cluster *c1, Cluster *c2, TH1F **h){
   }
   return isPi0;
 }
+
+
+/*****************************************************************
+ * $Log: EEsoloPi0.cxx,v $
+ * Revision 1.6  2004/08/26 04:39:40  balewski
+ * towards pi0
+ *
+ */ 
+
+
+  
+#if 0
+//--------------------------------------------------
+//--------------------------------------------------
+//--------------------------------------------------
+int EEsoloPi0::getTowerAdc(EEfeeRawEvent  *feeEve,EEstarTrig *eTrig,EEmcEventHeader *eHead, int ctbMin, int ctbMax ){
+  static int time0=-1;
+  if(time0<0) time0=eHead->getTimeStamp();
+  timeSec=eHead->getTimeStamp()-time0;
+  int n1=0,n2=0;
+
+  if(eTrig) { // check CTB multiplicity 
+    // Find number of ctb slats which fired
+    int ctbSum=0;
+    int isl;
+    for ( isl = 0; isl < 240; isl++ ) {
+      ctbSum+= eTrig -> CTB[isl];
+    }
+    // printf("ctbSum=%d \n",ctbSum);
+    hA[7]->Fill(ctbSum); 
+    if(ctbSum<ctbMin || ctbSum>ctbMax) return 0;
+  }
+
+  clear();
+
+#if 0
+  float adc2gev[MaxEtaBins]={ // ideal gain (ch/GeV)
+    18.938, 20.769,  22.650,  24.575,
+    26.539,  28.514, 30.493, 32.473,
+    34.438, 36.387, 38.28, 40.146 };
+#endif 
+  int ic;
+  float totEner=0;
+
+
+  for(ic=0;ic<feeEve->block->GetEntries();ic++) {
+    EEfeeDataBlock *b=(EEfeeDataBlock *)feeEve->block->At(ic);
+    if( !b->isValid() ) continue;
+
+    int crateID=b->getCrateID();    
+    if(crateID>MaxTwCrateID) continue; // just tower crates
+    n1++;
+    int chan;
+    UShort_t* data=b->getData();
+    int nd=b->getValidDataLen();
+    
+
+    for(chan=0;chan<nd;chan++) {
+      const  EEmcDbItem  *x=db->getByCrate(crateID,chan);
+      if(x==0) continue; 
+      if(x->fail ) continue; // drop broken channels
+
+      float value=data[chan]; // raw ADC 
+      if(value <x->thr) continue;
+      n2++;
+      
+      int ii=(x->sec-1)*60+(x->sub-'A')*12+x->eta-1;
+      //printf("ii=%d '%s' --> %f th=%f\n",ii,x->name,value,x->thr);
+      value-=x->ped;
+
+
+      // if(ii>500) continue;
+      //      if(ii==533 || ii==341) continue;
+      //      if(ii==533) printf("ii=%d '%s'\n",ii, x->name);
+      //if(ii==341) printf("ii=%d '%s'\n",ii, x->name);
+
+       //      printf("     sec=%d sub=%c etaBin=%d enerRaw=%f ii=%d\n",ih, secH->getID(), sub, eta,enerRaw,ii);
+      assert(ii>=0 && ii<MxTw);
+
+      //float recoEner=value/adc2gev[x->eta-1]/scaleFactor; // ideal
+
+      if(x->gain<=0 ) continue; // gains not avaliable
+      if(strstr(x->name,"01TA05")) continue;
+      if(strstr(x->name,"11TD09")) continue;
+      if(strstr(x->name,"09TB06")) continue;
+
+      float recoEner=value/x->gain/scaleFactor; // ideal
+      totEner+=recoEner;
+      soloMip[ii].e= recoEner;
+      if (soloMipDb[ii]==0) soloMipDb[ii]=x;
+
+      float etaCenter=geom->getEtaMean(x->eta-1);
+      hA[0]->Fill(recoEner);
+
+      hA[5]->Fill(recoEner/cosh(etaCenter));
+
+    }
+  }
+  
+  printf(" n1=%d, n2=%d\n",n1,n2);
+  hA[1]->Fill(totEner);
+  return 1;
+
+}
+
+#endif
 

@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEsoloPi0Maker.cxx,v 1.6 2004/08/17 15:46:56 balewski Exp $
+// $Id: StEEsoloPi0Maker.cxx,v 1.7 2004/08/26 04:39:40 balewski Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -23,15 +23,30 @@
 #include "StEEmcDbMaker/EEmcDbItem.h"
 #include "StEEmcDbMaker/StEEmcDbMaker.h"
 
-ClassImp(StEEsoloPi0Maker)
+#include <StMessMgr.h>
 
+ClassImp(StEEsoloPi0Maker)
 
 //________________________________________________
 //________________________________________________
 StEEsoloPi0Maker::StEEsoloPi0Maker(const char* self ,const char* muDstMakerName) : StMaker(self){
   mMuDstMaker = (StMuDstMaker*)GetMaker(muDstMakerName);
   assert(mMuDstMaker);
-  HList=0;
+  MCflag=0;// default off
+   // towers are gain matched to fixed E_T
+  float maxAdc=4095;
+  float maxEtot=60;  // in GeV
+  const float feta[MaxEtaBins]= {1.95,1.855,1.765,1.675,1.59,1.51,1.435,1.365,1.3,1.235,1.17,1.115};
+
+  int i;
+
+  mfixEmTgain=new float [MaxEtaBins];
+  for (i=0;i<MaxEtaBins;i++) {
+    mfixEmTgain[i]=maxAdc/maxEtot/cosh(feta[i]);
+  }
+  mfixSMDgain=23000;
+  mfixPgain=23000;
+
 }
 
 
@@ -42,14 +57,20 @@ StEEsoloPi0Maker::~StEEsoloPi0Maker(){
   // hfile->Write();
 }
 
+//________________________________________________
+//________________________________________________
+Int_t StEEsoloPi0Maker::InitRun(int runNo){
+  initRun(runNo);
+  return kStOK;
+}
  
 //________________________________________________
 //________________________________________________
 Int_t StEEsoloPi0Maker::Init(){
-  MYDB *db=(MYDB*)GetMaker("eemcDb");
-  assert(db);
-  init(db,HList);
- return StMaker::Init();
+  eeDb=(EEDB*)GetMaker("eemcDb");
+  EEsoloPi0::init();
+  gMessMgr->Info() << GetName() << "has MCflag="<< MCflag<<endm;
+  return StMaker::Init();
 }
 
 //________________________________________________
@@ -85,9 +106,12 @@ Int_t StEEsoloPi0Maker::Make(){
   n2++;
     
 
- 
-  // ............. acuire EEMC data 
-  if(getEEmcAdc()<0)   return kStOK;
+
+  // ............. acquire EEMC data 
+
+  //if(getEEmcAdc()<0)   return kStOK;
+  if(unpackMuDst()<0)   return kStOK;
+
   n3++;
 
   // print();
@@ -95,48 +119,11 @@ Int_t StEEsoloPi0Maker::Make(){
   findTowerClust();
   findTowerPi0();
 
-#if 0  
-
-// Access to muDst .......................
-    StMuEvent* muEve = mMuDstMaker->muDst()->event();
-    int nPrim = mMuDstMaker->muDst()->primaryTracks()->GetEntries();  // get number of primary tracks
-    StEventInfo &info=muEve->eventInfo();
-  printf("\n\n ====================%d  processing eventID %d nPrim=%d ==============\n", kEve,info.id(),nPrim);
-
-
-  StMuDst* dst = mMuDstMaker->muDst();
-  primTrA=dst->primaryTracks();
-    
-  StMuEvent* muEve = dst->event();
-  StL0Trigger &trig=muEve->l0Trigger();
-  StEventInfo &info=muEve->eventInfo();
-  StEventSummary &smry=muEve->eventSummary();
-
-  ctb->loadHits(muEve);
-  StThreeVectorF ver=smry.primaryVertexPosition();
-  if(runID>100) InitRunFromMake(info.runId());
-
-  //  printf("trgWrd=%d nPrim=%d, Vz=%f \n", trig.triggerWord(),primTrA->GetEntries(),ver.z());
-  // use only minB trigger events 
-   if(trig.triggerWord()!=0x2000)  return kStOK;
-  
-  // reject events without primtracks
-     if(primTrA->GetEntries()<=0)  return kStOK;
- 
-  // fill eve-related tree values
-  eve_vz=ver.z(); 
-     if(fabs(eve_vz)>C_maxZvertex) return kStOK;
-
-  int bx7=trig.bunchCrossingId7bit(info.runId());
-  eve_id=info.id();
-  eve_bx48 = trig.bunchCrossingId();
-  eve_bx120 =(trig.bunchCrossingId()+off48 )%120;
-  eve_sb=trig.spinBits();
-#endif  
   return kStOK;
 }
 
 
+#if 1 // old
 //________________________________________________
 //________________________________________________
 Int_t StEEsoloPi0Maker::getEEmcAdc(){
@@ -163,7 +150,7 @@ Int_t StEEsoloPi0Maker::getEEmcAdc(){
     n0++;
     //printf("i=%d  Tower %2.2dT%c%2.2d   adc=%4d\n",i,sec,sub+'A'-1,eta,adc );
     
-    const EEmcDbItem *x=db->getTile(sec,'A'+sub-1,eta,'T');
+    const EEmcDbItem *x=eeDb->getTile(sec,'A'+sub-1,eta,'T');
     if(x==0) continue; // it should never happened for muDst
     if(x->fail) continue; // ignore broken towers
     
@@ -183,7 +170,7 @@ Int_t StEEsoloPi0Maker::getEEmcAdc(){
     soloMip[ii].e= recoEner;
     
     hA[0]->Fill(recoEner);
-
+    printf("old ii=%d ene=%f\n",ii,recoEner);
     // printf("%d %d --> %f\n",iEta, iPhi,value)
     // printf("adc=%d value=%f %f %f recoEner=%f\n",adc,value,x->gain,scaleFactor,recoEner);
   }
@@ -193,6 +180,7 @@ Int_t StEEsoloPi0Maker::getEEmcAdc(){
   // printf("  Total %d towers with ADC>thr\n",n1);
   return n1;
 }
+#endif
 
 
 //________________________________________________
@@ -251,7 +239,176 @@ float StEEsoloPi0Maker::getCtbSum(){
   return ctbSum;
 }
 
+
+//________________________________________________
+//________________________________________________
+Int_t StEEsoloPi0Maker::unpackMuDst(){
+  
+  nInpEve++;
+  gMessMgr->Debug() <<GetName()<<"::unpackMuDst() is called "<<endm;
+  
+  // Access to muDst .......................
+  StMuEmcCollection* emc = mMuDstMaker->muDst()->emcCollection();
+  if (!emc) {
+    gMessMgr->Message("","W") <<"No EMC data for this event"<<endm;    return kStOK;
+  }
+    
+  int i, n1=0,n2=0,n3=0;
+  //.........................  T O W E R S .....................
+  for (i=0; i< emc->getNEndcapTowerADC(); i++) {
+    int sec,eta,sub,val;
+    //muDst  ranges:sec:1-12, sub:1-5, eta:1-12
+    emc->getEndcapTowerADC(i,val,sec,sub,eta);
+    assert(sec>0 && sec<=MaxSectors);// total corruption of muDst
+
+    //tmp, for fasted analysis use only hits from sectors init in DB
+    if(sec<eeDb->mfirstSecID || sec>eeDb->mlastSecID) continue;
+ 
+    const EEmcDbItem *x=eeDb->getTile(sec,'A'+sub-1,eta,'T');
+    assert(x); // it should never happened for muDst
+    if(x->fail ) continue; // drop broken channels
+
+    int iphi=(x->sec-1)*MaxSubSec+(x->sub-'A');
+    int ieta=x->eta-1;
+    assert(iphi>=0 && iphi<MaxPhiBins);
+    assert(ieta>=0 && ieta<MaxEtaBins);
+    int ispir=iphi*MaxEtaBins+ieta; // unified spiral index
+    assert(ispir>=0 && ispir<EEsoloPi0::MxTw);
+
+    float adc=-100, rawAdc=-101, ene=-102;
+    
+    if(MCflag) {  // M-C & real data needs different handling
+      adc=val; //  this is stored in muDst
+      rawAdc=adc+x->ped; // ped noise could be added
+      ene=adc/ mfixEmTgain[ieta];
+    } else {
+      rawAdc=val;
+      adc=rawAdc-x->ped;
+      if(x->gain) ene=adc/x->gain;
+    }
+
+    int ii=(x->sec-1)*60+(x->sub-'A')*12+x->eta-1;
+    assert(ii==ispir);
+    // if(adc>0) printf("adc=%f ene/GeV=%f rawAdc=%f idG=%f,hSec=%d %s\n",adc,ene,rawAdc,mfixEmTgain[ieta],sectID,x->name); 
+    
+    //aa int iT=0;// for towers   
+    //aa tileAdc[iT][ieta][iphi]=adc;// store towers
+    //aa tileThr[iT][ieta][iphi]=rawAdc>x->thr;
+    if(rawAdc<x->thr) continue;
+    n1++;
+    if(x->gain<=0) continue;// drop channels w/o gains
+    //aa tileEne[iT][ieta][iphi]=ene;
+    float recoEner=ene/scaleFactor; // ideal
+    // printf("new ii=%d ene=%f del=%f mcf=%d\n",ispir,recoEner,recoEner-soloMip[ispir].e,MCflag);
+    soloMip[ispir].e= recoEner;
+    
+    hA[0]->Fill(recoEner);
+
+  }// end of loop over towers
+
+  gMessMgr->Debug() <<GetName()<<"::unpackMuDst(),  found total" <<n1<<" towers with ADC>thr"<<endm;
+
+#if 0 // not in use (yet)
+  //.........................  P R E - P O S T .....................  
+  int pNh= emc->getNEndcapPrsHits();
+  for (i=0; i<pNh; i++) {
+    int pre;
+    int sec,eta,sub;
+    //muDst  ranges: sec:1-12, sub:1-5, eta:1-12 ,pre:1-3==>pre1/pre2/post
+    StMuEmcHit *hit=emc->getEndcapPrsHit(i,sec,sub,eta,pre);
+
+    //tmp, for fasted analysis use only hits from sectors init in DB
+    if(sec<eeDb->mfirstSecID || sec>eeDb->mlastSecID) continue;
+ 
+    
+    //Db ranges: sec=1-12,sub=A-E,eta=1-12,type=T,P-R ; slow method
+    const EEmcDbItem *x=eeDb-> getTile(sec,sub-1+'A', eta, pre-1+'P'); 
+    if(x==0) continue;
+    if(x->fail ) continue; // drop broken channels
+    
+    // accept this hit
+    int iphi=(x->sec-1)*MaxSubSec+(x->sub-'A');
+    int ieta=x->eta-1;
+    assert(iphi>=0 && iphi<MaxPhiBins);
+    assert(ieta>=0 && ieta<MaxEtaBins);
+    int iT=pre; // P,Q,R fall in to iT=1,2,3 <== there is no '+1' error, JB
+    assert(iT>0 && iT<mxTile);
+    
+    float val=hit->getAdc();
+    float adc=-100, rawAdc=-101, ene=-102;
+  
+    if(MCflag) {// val is Geant energy * const
+      adc=val;
+      rawAdc=adc+x->ped; // ped noise could be added
+      ene=val/mfixPgain; // (GeV) Geant energy deposit 
+    } else {
+      rawAdc=val;
+      adc=rawAdc-x->ped;
+      if(x->gain) ene=adc/x->gain;
+    }
+    if(rawAdc>x->thr)  n2++;
+    //if(adc>0) printf("adc=%f ene/GeV=%f  hSec=%d %s g=%f\n",adc,ene,sectID,x->name, x->gain); 
+      
+    tileAdc[iT][ieta][iphi]=adc;// // store P,Q,R depending on 'iT'
+    tileThr[iT][ieta][iphi]=rawAdc>x->thr;
+    
+    if(x->gain<=0) continue;// drop channels w/o gains
+    tileEne[iT][ieta][iphi]=ene;
+
+  }
+  
+
+  //.......................  S M D ................................
+  
+  char uv='U';
+  for(uv='U'; uv<='V'; uv++) {
+    int sec,strip;
+    int nh= emc->getNEndcapSmdHits(uv);
+    //printf("pl=%c nH=%d  secLim=%d %d\n",uv,nh,eeDb->mfirstSecID,eeDb->mlastSecID);
+    for (i=0; i<nh; i++) {
+      StMuEmcHit *hit=emc->getEndcapSmdHit(uv,i,sec,strip);
+      assert(sec>0 && sec<=MaxSectors);// total corruption of muDst
+      
+      //tmp, for fasted analysis use only hits from sectors init in DB
+      if(sec<eeDb->mfirstSecID || sec>eeDb->mlastSecID) continue;
+      
+      const EEmcDbItem *x=eeDb->getByStrip(sec,uv,strip);
+      assert(x); // it should never happened for muDst
+      if(x->fail ) continue; // drop broken channels
+
+      float val=hit->getAdc();
+      float adc=-100, rawAdc=-101, ene=-102;
+
+      // M-C & real data needs different handling
+      if(MCflag) {
+        adc=val;
+        rawAdc=adc+x->ped; // ped noise could be added
+        ene=val/mfixSMDgain; // (GeV) Geant energy deposit 
+      }else {
+        rawAdc=val;
+        adc=rawAdc-x->ped;
+        if(x->gain) ene=adc/x->gain;
+      }
+      if(rawAdc>x->thr)  n3++;
+      //   if(adc>0)    printf("adc=%f ene/GeV=%f  hSec=%d %s\n",adc,ene,sectID,x->name); 
+
+      smdAdc[x->plane-'U'][x->strip-1]=adc;
+      if(x->gain<=0)continue; // drop channels w/o gains
+      smdEne[x->plane-'U'][x->strip-1]=ene;
+    }
+  }
+  //  printf("nTw=%d nPQR=%d,nSmd=%d\n",n1,n2,n3);
+
+#endif  
+  return n1;
+}
+
+
+
 // $Log: StEEsoloPi0Maker.cxx,v $
+// Revision 1.7  2004/08/26 04:39:40  balewski
+// towards pi0
+//
 // Revision 1.6  2004/08/17 15:46:56  balewski
 // clenup for pp200 in 2004
 //

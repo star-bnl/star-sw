@@ -1,6 +1,6 @@
 LIBNAME  = EEsoloPi0
-HDRS     = $(wildcard EE*.h)
-SRCS     = $(wildcard EE*.cxx)
+HDRS     = $(wildcard EE*.h) EzEEsoloPi0.h
+SRCS     = $(wildcard EE*.cxx) EzEEsoloPi0.cxx
 
 
 CXX    = g++
@@ -21,7 +21,7 @@ OBJS   = $(notdir $(patsubst %.cxx,%.o,$(SRCS)))
 
 #
 CFLAGS   = -Wall $(DEBUG) $(DEFINES) -fPIC $(ROOTCFLAGS)
-CXXFLAGS = $(CFLAGS)  -I../../../StRoot -I../../../ -DNO_ROOT4STAR
+CXXFLAGS = $(CFLAGS)  -I../../../StRoot -I../../../ -DStRootFREE
 
 LDFLAGS  = -shared 
 
