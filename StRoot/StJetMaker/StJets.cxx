@@ -1,7 +1,15 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.cxx,v 1.1 2004/07/08 15:41:04 mmiller Exp $
+// $Id: StJets.cxx,v 1.2 2004/09/10 18:13:53 mmiller Exp $
 // $Log: StJets.cxx,v $
+// Revision 1.2  2004/09/10 18:13:53  mmiller
+// Two fixes:
+// 1) add StDetectorId to the TTree to allow sorting of jet particles into
+// StMuTrack and BemcTowers.  See StJetReader::exampleEventAna() for usage
+//
+// 2) removed a continue line in StJetMaker::Make that created a non-synch between
+// the jet tree and the MuDst
+//
 // Revision 1.1  2004/07/08 15:41:04  mmiller
 // First release of StJetMaker.  Mike's commit of full clean of StJetFinder, StJetMaker, and StSpinMaker.  builds and runs in dev.
 //
@@ -123,13 +131,22 @@ void StJets::addProtoJet(StProtoJet& pj)
 	    return;
 	}
 	int muTrackIndex = track->getIndex();
-	//cout << "muTrackIndex: " << track->getIndex();
-	if (muTrackIndex >=0) {
+	if (muTrackIndex <0) {
+	    cout <<"Error, muTrackIndex<0. abort()"<<endl;
+	    abort();
+	}
+	else {
+	    //cout <<"here's the track:\t"<<*track<<endl;
+	    
 	    //add to trackToJetIndices
 	    int addAt = mTrackToJetIndices->GetLast()+1;
-	    new ( (*mTrackToJetIndices)[addAt]) TrackToJetIndex( jetIndex, muTrackIndex);
-	    ((TrackToJetIndex*)(*mTrackToJetIndices)[addAt])->setTrackIndex(muTrackIndex);
-	    ((TrackToJetIndex*)(*mTrackToJetIndices)[addAt])->setJetIndex(jetIndex);
+	    TrackToJetIndex t2j( jetIndex, muTrackIndex, track->detectorId() );
+	    //cout <<"here's the t2j:\t"<<t2j<<endl;
+	    
+	    new ( (*mTrackToJetIndices)[addAt]) TrackToJetIndex( t2j );
+
+	    //((TrackToJetIndex*)(*mTrackToJetIndices)[addAt])->setTrackIndex(muTrackIndex);
+	    //((TrackToJetIndex*)(*mTrackToJetIndices)[addAt])->setJetIndex(jetIndex);
 	}
 	if(track->particle())
 	    if( track->charge() ) {  // If charge != 0, increment the number of cp
@@ -151,6 +168,7 @@ void StJets::print()
     */
 }
 
+/*
 vector<int> StJets::jetTrackIndices(int jetIndex)
 {
   vector<int> vec;
@@ -169,6 +187,22 @@ vector<int> StJets::jetTrackIndices(int jetIndex)
   }
   return vec;
 }
+*/
+
+vector<int> StJets::jetBemcTowerIndices(int jetIndex)
+{
+    vector<int> vec;
+    int size = mTrackToJetIndices->GetLast()+1;
+        
+    for (int i=0; i<size; ++i) {
+	TrackToJetIndex* id = static_cast<TrackToJetIndex*>( (*mTrackToJetIndices)[i] );
+	StDetectorId detId = id->detectorId();
+	
+	if (detId != kBarrelEmcTowerId) continue;
+	vec.push_back(id->trackIndex());
+    }
+    return vec;
+}
 
 //right now it's a linear search, even though the JetsToTrackIndices is ordered by jetIndex
 StJets::TrackVec StJets::jetParticles(StMuDst* event, int jetIndex)
@@ -182,7 +216,14 @@ StJets::TrackVec StJets::jetParticles(StMuDst* event, int jetIndex)
     for (int i=0; i<size; ++i) {
 	TrackToJetIndex* id = static_cast<TrackToJetIndex*>( (*mTrackToJetIndices)[i] );
 	int trackIndex = id->trackIndex();
-        if (trackIndex >= maxNumTracks) continue;  // Probably an emc point
+	StDetectorId detId = id->detectorId();
+
+	if (detId != kTpcId) continue; 
+
+	if (trackIndex >= maxNumTracks) { //this should never happen!
+	    cout <<"StJets::jetParticles() ERROR:\tid==kTpcId but index out of bounds.  abort()"<<endl;
+	    abort();
+	}
 	if (id->jetIndex() == jetIndex ) {
 	    StMuTrack* track = static_cast<StMuTrack*>( tracks[trackIndex] );
 	    vec.push_back( track );
@@ -272,7 +313,7 @@ bool StJets::isSameEvent(const StMuDst* muDst)
     assert(muDst);
     StMuEvent* ev = muDst->event();
 
-    cout <<"\n\n TEST!!!\t"<<mEventId<<"\t"<<mEventNumber<<"\t"<<mRunId<<"\t"<<mRunNumber<<endl;
+    //cout <<"\n\n TEST!!!\t"<<mEventId<<"\t"<<mEventNumber<<"\t"<<mRunId<<"\t"<<mRunNumber<<endl;
 
     
     return mEventId == ev->eventId()

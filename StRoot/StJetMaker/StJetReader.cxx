@@ -8,6 +8,15 @@
 #include <algorithm>
 #include <iostream>
 
+
+//StEmc
+#include "StEmcClusterCollection.h"
+#include "StEmcPoint.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
+#include "StEmcUtil/others/emcDetectorName.h"
+#include "StEmcADCtoEMaker/StBemcData.h"
+#include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
+
 //root
 #include "TTree.h"
 #include "TFriendElement.h"
@@ -186,6 +195,14 @@ void StJetReader::exampleEventAna()
 {
     cout <<"StJetReader::exampleEventAna()"<<endl;
 
+    //Get pointers to retreive the emc info
+    StEmcGeom* geom = StEmcGeom::getEmcGeom(detname[0].Data());
+    StEmcADCtoEMaker* adc2e =dynamic_cast<StEmcADCtoEMaker*>( GetMaker("Eread") );
+    assert(adc2e);
+    StBemcData* data = adc2e->getBemcData();
+    //int numHits = data->NTowerHits;
+    //cout << "Number Hits: " << numHits;
+	
     StMuDst* muDst = 0;
     if (mDstMaker!=0) {
 	muDst = mDstMaker->muDst();
@@ -203,9 +220,12 @@ void StJetReader::exampleEventAna()
 	    
 	    //loop on jets
 	    StJet* j = static_cast<StJet*>( (*jets)[i] );
-	    cout <<"Ejet:\t"<<j->E()<<"\tPhi:\t"<<j->Phi()<<"\tEta:\t"<<j->Eta()<<endl;
-	    
-	    if (muDst) {
+	    cout <<"\nEjet:\t"<<j->E()<<"\tEta:\t"<<j->Eta()<<"\tPhi:\t"<<j->Phi()<<endl;
+
+	    if (!muDst) {
+		cout <<"StJetReader::exampleEventAna(). ERROR:\tmuDst==0"<<endl;
+	    }
+	    else {
 		typedef StJets::TrackVec TrackVec;
 		TrackVec tracks = stjets->jetParticles(muDst, i);
 		
@@ -222,6 +242,24 @@ void StJetReader::exampleEventAna()
 			 <<"\tdR:\t"<<dR<<endl;
 		    
 		    ++itrack;
+		}
+		//now get the bemc info:
+		vector<int> towerIndices = stjets->jetBemcTowerIndices(i);
+		const int maxHits = 4800;
+
+		for (vector<int>::iterator bit=towerIndices.begin(); bit!=towerIndices.end(); ++bit) {
+		    int towerIndex = (*bit);
+		    if (towerIndex>maxHits) {
+			cout <<"StJetReader::exampleEventAna(). ERROR:\ttowerIndex out of bounds. abort()"<<endl;
+			abort();
+		    }
+		    float eta, phi;
+		    geom->getEtaPhi(towerIndex, eta, phi);
+		    double e = data->TowerEnergy[towerIndex];
+		    double dphi = gDeltaPhi(j->Phi(), phi);
+		    double deta = j->Eta()-eta;
+		    double dR = sqrt( dphi*dphi  +  deta*deta );
+		    cout <<"/tE_tower:\t"<<e<<"\tEta_tower:\t"<<eta<<"\tPhi_tower:\t"<<phi<<"\tdR:\t"<<dR<<endl;
 		}
 	    }
 	}

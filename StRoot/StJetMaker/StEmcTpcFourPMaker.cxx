@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcTpcFourPMaker.cxx,v 1.3 2004/08/10 15:41:38 mmiller Exp $
+ * $Id: StEmcTpcFourPMaker.cxx,v 1.4 2004/09/10 18:13:52 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -426,13 +426,16 @@ Int_t StEmcTpcFourPMaker::Make() {
     // Add TPC tracks
     long index = 0;
     tracks.clear();
+    cout <<"binmap.moddTracks.size():\t"<<binmap.moddTracks.size()<<endl;
+    
     for(trackMap::iterator track = binmap.moddTracks.begin(); 
 	track != binmap.moddTracks.end(); ++track)
 	{
 	    trackMap::value_type &track_val = *track;
 	    StMuTrackFourVec& newTrack = tPile[index++];
 	    StProjectedTrack &pTrack = track_val.second;
-	    newTrack.Init(pTrack.getTrack(), pTrack.P(), pTrack.getIndex());
+	    newTrack.Init(pTrack.getTrack(), pTrack.P(), pTrack.getIndex(), kTpcId);
+	    //cout <<"InitTrack kTpcId"<<endl;
 	    tracks.push_back(&newTrack);
 	}  
 
@@ -497,14 +500,10 @@ Int_t StEmcTpcFourPMaker::Make() {
 	    StCorrectedEmcPoint &cPoint = point_val.second;
 	    if(cPoint.P().e() > minPointThreshold)
 		{
-		    //cout << "FourP E: " << cPoint.P().e() << endl;
-		    //cout << "FourP Phi: " << cPoint.P().phi() << endl;
-		    //cout << "FourP Eta: " << cPoint.P().pseudoRapidity() << endl;
-		    //cout << "Point/Track E: " << cPoint.E() << endl;
-		    //cout << "Point/Track Phi: " << cPoint.Phi() << endl;
-		    //cout << "Point/Track Eta: " << cPoint.Eta() << endl;
-		    newTrack.Init(NULL, cPoint.P(), cPoint.getIndex()+nTracks);
-		    tracks.push_back(&newTrack);  
+		    //newTrack.Init(NULL, cPoint.P(), cPoint.getIndex()+nTracks, kBarrelEmcTowerId);
+		    //cout <<"InitTrack kBarrelEmcTowerId"<<endl;
+		    newTrack.Init(NULL, cPoint.P(), cPoint.getIndex(), kBarrelEmcTowerId);
+		    tracks.push_back(&newTrack);
 		}
 	}  
     //stop = clock();

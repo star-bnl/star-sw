@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.2 2004/08/06 14:15:09 mmiller Exp $
+ * $Id: StJetMaker.cxx,v 1.3 2004/09/10 18:13:53 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -122,10 +122,12 @@ Int_t StJetMaker::Make()
 	}
 	
 	FourList &tracks = fourPMaker->getTracks();
+	/*
 	if (tracks.size()<2) {
 	    cout <<"\tless than 2 protoJets in event.  Skip jet clustering"<<endl;
 	    return kStOk;
 	}
+	*/
 	thisAna->setFourVec(tracks);
 	cout << "call:\t" << (*jb).first <<".findJets() with:\t" << tracks.size() << "\t protoJets"<<endl;
 	thisAna->findJets();

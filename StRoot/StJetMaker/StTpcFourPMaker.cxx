@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcFourPMaker.cxx,v 1.1 2004/07/08 15:41:04 mmiller Exp $
+ * $Id: StTpcFourPMaker.cxx,v 1.2 2004/09/10 18:13:53 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -17,6 +17,7 @@
 #include <iostream>
 
 #include "StChain.h"
+#include "StDetectorId.h"
 #include "StEventTypes.h"
 #include "StMessMgr.h"
 #include "StIOMaker/StIOMaker.h"
@@ -96,7 +97,7 @@ Int_t StTpcFourPMaker::Make() {
     //t->pidProbPion()*epi + t->pidProbKaon()*ek;
     StLorentzVectorF P(energy, mom);
     StMuTrackFourVec& track = tPile[i];
-    track.Init(t, P, i);
+    track.Init(t, P, i, kTpcId);
     tracks.push_back(&track);
   }
 
