@@ -26,6 +26,17 @@ void StMuDstMaker(const Int_t   mode=0,
 		  const Char_t  *file="st_physics_2304060_raw_0303.event.root",
 		  const Char_t* outDir="./")
 {
+  cout << "Backward compatibility method. Please, use 6 arguments ... " << endl;
+  StMuDstMaker(mode,0,nevents,path,file,outDir);
+}
+
+void StMuDstMaker(const Int_t   mode=0,
+		  const Int_t   fsti=0,
+		  const Int_t   nevents=10,
+		  const Char_t  *path="/star/data13/reco/dev/2001/10/",
+		  const Char_t  *file="st_physics_2304060_raw_0303.event.root",
+		  const Char_t* outDir="./")
+{
 
   const char *fileListQQ[]={0,0};
 
@@ -34,12 +45,12 @@ void StMuDstMaker(const Int_t   mode=0,
   } else {
     fileListQQ[0] = gSystem->ConcatFileName(path,file);
   }
-  ProcessQQ(mode,nevents,fileListQQ,outDir);
+  ProcessQQ(mode,fsti,nevents,fileListQQ,outDir);
 }
 
 
 //==========================================================================================
-void ProcessQQ(const Int_t mode, const Int_t nevents,
+void ProcessQQ(const Int_t mode, const Int_t fsti, const Int_t nevents,
 	       const Char_t **fileList, const Char_t* dirName)
 {
   cout << "Loading libraries ..." << endl;
@@ -148,6 +159,14 @@ void ProcessQQ(const Int_t mode, const Int_t nevents,
     StEmcMicroDstMaker *write = new StEmcMicroDstMaker();
     write->setOutputDir(dirName);
   }
+
+
+  if ( fsti == 1){
+    //select for Sti tracks
+    filter->addEncodedMethod(263);
+  }
+
+
 
   // This should call the Init() method in ALL makers
   chain->Init();
