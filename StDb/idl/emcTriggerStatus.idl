@@ -10,6 +10,6 @@ struct emcTriggerStatus {
 
    octet  PatchStatus[300];   /*   */
    octet  HighTowerStatus[300];   /*   */
-   octet  TowerStatus[4800];   /*   */
+   octet  TowerStatus[30][160];   /*   */
 
  };  
