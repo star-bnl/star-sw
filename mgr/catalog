@@ -52,7 +52,7 @@ foreach set ($SETS)
 cat >> html <<EOF
 
 <TR ALIGN=CENTER VALIGN=CENTER>
-<td>${set}</td>
+<td><a href="${gen_set}.catalog">${set}</a></td>
 EOF
 grep GEANT ${gen_set}.catalog | grep Objy | awk '{print "<td>"$3"</td><td>"$6"</td><td>"$10"</td><td>"$13"</td><td>"$16"</td><td>"$19"</td><td>"$23"</td></tr>\n"}' >> html
 cat >> html <<EOF
