@@ -1,9 +1,13 @@
+//$Id: St_srs_Maker.cxx,v 1.19 1999/12/23 16:38:48 caines Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_srs_Maker class for Makers                                        //
-//                                                                      //
+// Author : Anon                                                       //
 //////////////////////////////////////////////////////////////////////////
-
+//$Log: St_srs_Maker.cxx,v $
+//Revision 1.19  1999/12/23 16:38:48  caines
+//Added cvs ID strings
+//
 #include "St_srs_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
