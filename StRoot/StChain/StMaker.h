@@ -55,6 +55,7 @@ protected:
    static StMaker *fgStChain;     	//!current pointer to StChain
    static StMaker *fgFailedMaker;     	//!current pointer to failed maker
    static Int_t fgTallyMaker[kStFatal+1];//!counters
+   Int_t         fTallyMaker[kStFatal+1];//!counters
    Int_t	   m_Mode;		//!Integer mode of maker
    Int_t           m_Number;        	//!Serial event number
    Int_t           m_LastRun;        	//!Last Run number
@@ -185,7 +186,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.60 2003/05/01 16:41:05 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.61 2003/07/01 16:59:16 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
@@ -214,8 +215,11 @@ private:
 #endif
 
 
-// $Id: StMaker.h,v 1.60 2003/05/01 16:41:05 jeromel Exp $
+// $Id: StMaker.h,v 1.61 2003/07/01 16:59:16 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.61  2003/07/01 16:59:16  perev
+// error codes for Maker added
+//
 // Revision 1.60  2003/05/01 16:41:05  jeromel
 // Declaration works in new root but not in old. Transition solution added
 //

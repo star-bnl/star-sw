@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.128 2003/06/23 23:43:39 perev Exp $
+// $Id: StMaker.cxx,v 1.129 2003/07/01 16:59:16 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -78,6 +78,7 @@ StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker")
    m_Timer.Stop();
    fMemStatMake  = 0;
    fMemStatClear = 0;
+   memset(fTallyMaker,0,(kStFatal+1)*sizeof(Int_t));
 }
 
 //_____________________________________________________________________________
@@ -499,6 +500,8 @@ void StMaker::StartMaker()
 void StMaker::EndMaker(int ierr)
 {
   SetMakeReturn(ierr);
+  fgTallyMaker[ierr%10]++;
+  fTallyMaker [ierr%10]++;
   if (m_DataSet) m_DataSet->Pass(ClearDS,0);
   if (m_GarbSet) m_GarbSet->Delete();
   ::doPs(GetName(),"EndMaker");
@@ -539,27 +542,33 @@ Int_t StMaker::Finish()
    }
 
    // Print relative time
-   if (totalCpuTime && totalRealTime) {
-     Printf("\n---------------------------------------------------------------------------------");
-     Printf("QAInfo: Total: %-12s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds"
-                               ,GetName(),totalRealTime,totalCpuTime);
-     Printf("---------------------------------------------------------------------------------");
-     next.Reset();
-     while ((maker = (StMaker*)next())) {
-        Printf("QAInfo:%-20s: Real Time = %5.1f %%        Cpu Time = %5.1f %% "
-               ,maker->GetName()
-               ,100*maker->RealTime()/totalRealTime
-               ,100*maker->CpuTime()/totalCpuTime);
-     }
-     if (!GetParent()) {// Only for top maker
+   if (!totalRealTime) totalRealTime = 1;
+   if (!totalCpuTime) totalCpuTime = 1;
+   Printf("\n---------------------------------------------------------------------------------");
+   Printf("QAInfo: Total: %-12s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds"
+                             ,GetName(),totalRealTime,totalCpuTime);
+   Printf("---------------------------------------------------------------------------------");
+   next.Reset();
+   while ((maker = (StMaker*)next())) {
+      printf("QAInfo:%-20s: Real Time = %5.1f %%        Cpu Time = %5.1f %% "
+             ,maker->GetName()
+             ,100*maker->RealTime()/totalRealTime
+             ,100*maker->CpuTime()/totalCpuTime);
 
-       printf("\n--------------Error Codes-------------------------\n");
-       printf("     nStOK   nStWarn    nStEOF    nStErr  nStFatal  \n");
-       for( int i=0; i<=kStFatal; i++) printf("%10d",fgTallyMaker[i]); 
-       printf("\n--------------------------------------------------\n");
-     }  
-     Printf("=================================================================================\n");
+      static const char *ee[]={"nStOK","nStWarn","nStEOF","nStErr","nStFatal"};
+      for (int j=0;j<=kStFatal;j++) {
+        if (fTallyMaker[j]) printf(" %s=%d",ee[j],fTallyMaker[j]);}
+      printf("\n");
+
    }
+   if (!GetParent()) {// Only for top maker
+
+     printf("\n--------------Error Codes-------------------------\n");
+     printf("     nStOK   nStWarn    nStEOF    nStErr  nStFatal  \n");
+     for( int i=0; i<=kStFatal; i++) printf("%10d",fgTallyMaker[i]); 
+     printf("\n--------------------------------------------------\n");
+   }  
+   Printf("=================================================================================\n");
    
    Clear();
    if (GetParent()==0) TMemStat::Summary();
@@ -602,7 +611,6 @@ Int_t StMaker::Make()
      maker->StartMaker();
      ret = maker->Make();
      assert((ret%10)>=0 && (ret%10)<=kStFatal);     
-     fgTallyMaker[ret]++;
      maker->EndMaker(ret);
      
      if (Debug() || ret) printf("*** %s::Make() == %d ***\n",maker->ClassName(),ret);
@@ -1143,6 +1151,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.129  2003/07/01 16:59:16  perev
+// error codes for Maker added
+//
 // Revision 1.128  2003/06/23 23:43:39  perev
 // InitRun called even if no run at all
 //
