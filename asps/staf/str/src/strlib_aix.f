@@ -523,91 +523,6 @@
 	RETURN
 	END
 
-	SUBROUTINE STRTime_Get_Current_Zone( Zone, Zone_Name )
-
-	IMPLICIT NONE
-
-	INCLUDE 'str_time_inc'
-
-*  Outputs:
-	INTEGER       Zone      !Time zone offset, in {-12, 12}.
-	CHARACTER*(*) Zone_Name !Zone name (eg, "EST", "PDT", etc.)
-
-*  Brief Description: Get the time zone.
-
-*  Description:
-*	Return the current time zone, as set in str.  If not set,
-*	set str's current zone to the host's local time zone.
-
-
-	LOGICAL Initialized
-	SAVE    Initialized
-
-	DATA    Initialized / .FALSE. /
-
-
-*	Initialization of time zone may occur externally, so a gauntlet of tests is needed:
-*	(Doing it with two independent values is safe & eliminates the need for BLOCKDATAs.)
-	IF ( Initialized )                             THEN !Initialized; Skip this.
-	ELSE IF ( Current_Zone .LT. -12 )                THEN !Not initialized:
-	  Initialized = .FALSE.
-	ELSE IF ( Current_Zone .GT.  12 )                THEN !Not initialized:
-	  Initialized = .FALSE.
-	ELSE IF ( Initialized_1 .NE. Initialized_1_P ) THEN !Not initialized:
-	  Initialized = .FALSE.
-	ELSE IF ( Initialized_2 .NE. Initialized_2_P ) THEN !Not initialized:
-	  Initialized = .FALSE.
-	ELSE                                                !Initialized.
-	  Initialized = .TRUE.
-	END IF
-
-	IF ( .NOT. Initialized ) THEN !Set it to the local time zone:
-*	  Hardwire for the moment:
-	  Current_Zone      = 6
-	  Current_Zone_Name = 'EDT '
-*	  Current_Zone      = 5
-*	  Current_Zone_Name = 'EST '
-	  Initialized = .TRUE.
-	  Initialized_1 = Initialized_1_P
-	  Initialized_2 = Initialized_2_P
-	END IF
-
-	Zone      = Current_Zone
-	Zone_Name = Current_Zone_Name
-
-	RETURN
-	END
-
-
-
-
-
-	SUBROUTINE STRTime_Set_Current_Zone( Zone, Zone_Name )
-
-	IMPLICIT NONE
-
-	INCLUDE 'str_time_inc'
-
-*  Inputs:
-	INTEGER       Zone      !Time zone offset, in {-12, 12}.
-	CHARACTER*(*) Zone_Name !Zone name (eg, "EST", "PDT", etc.)
-
-*  Brief Description:  Set str's current time zone.
-
-	Current_Zone      = Zone
-	Current_Zone_Name = Zone_name
-
-*	Double zone-initialized values -- indicate it's initialized:
-	Initialized_1 = Initialized_1_P
-	Initialized_2 = Initialized_2_P
-
-	RETURN
-	END
-
-
-
-
-
 	SUBROUTINE STR_FLOAT_IEEE_TO_HOST( Ireal )
 
 	IMPLICIT NONE
