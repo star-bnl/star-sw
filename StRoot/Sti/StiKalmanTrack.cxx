@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.12 2003/03/12 17:57:29 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.13 2003/03/13 15:16:41 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.13  2003/03/13 15:16:41  pruneau
+ * fixed getPhi, getPseudoRapdity, getPhase methods
+ *
  * Revision 2.12  2003/03/12 17:57:29  pruneau
  * Elss calc updated.
  *
@@ -34,6 +37,8 @@
 #include "StiDetector.h"
 #include "StiPlacement.h"
 #include "StiMaterial.h"
+#include "StiMaker/StiMaker.h"
+StiMaker* StiKalmanTrack::maker = 0;
 
 ostream& operator<<(ostream&, const StiHit&);
 
@@ -914,10 +919,11 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
       dy=tNode->_p0- localVertex.y();
       dz=tNode->_p1- localVertex.z();
       d= sqrt(dx*dx+dy*dy+dz*dz);
-      /*cout << " dx:"<< dx
+      cout << " dx:"<< dx
 	   << " dy:"<< dy
 	   << " dz:"<< dz
-	   << " d: "<< d<<endl;*/
+	   << " d: "<< d<<endl;
+      _dca = sqrt(dy*dy+dz*dz);
       if (chi2<pars->maxChi2Vertex)
 	{
 	  myHit = StiToolkit::instance()->getHitFactory()->getInstance();
@@ -927,6 +933,7 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 	  tNode->setDetector(0);
 	 
 	  add(tNode);
+
 	  trackExtended = true;
 	}
     }
@@ -976,6 +983,8 @@ bool StiKalmanTrack::find(int direction)
     }
   reserveHits();
   setFlag(1);
+  maker->phiHist->Fill(getPhi());
+  maker->pseudoRapHist->Fill(getPseudoRapidity());
   return trackExtended;
 }
 

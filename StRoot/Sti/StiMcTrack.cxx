@@ -97,7 +97,7 @@ double  StiMcTrack::getTanL()           const
     return mom.z()/pt;
 }
 
-double  StiMcTrack::getDca(StiHit *h)  const
+double  StiMcTrack::getDca()  const
 {
   return 0;
 }

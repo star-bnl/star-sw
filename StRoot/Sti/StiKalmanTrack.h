@@ -40,8 +40,9 @@ using namespace std;
 #include "StiHit.h"
 #include "StiTrack.h"
 #include "StiKalmanTrackFinderParameters.h"
-#define TRACKMESSENGER *(Messenger::instance(MessageType::kTrackMessage))
+class StiMaker;
 
+#define TRACKMESSENGER *(Messenger::instance(MessageType::kTrackMessage))
 /*! 
   \class StiKalmanTrack
   \brief Definition of Kalman Track
@@ -149,7 +150,7 @@ class StiKalmanTrack : public StiTrack
    * @see StiHit
    * @return dca in cm.
    */
-   double  getDca(StiHit *h=0)    const;
+   double  getDca()    const;
 
   /*!
    * Returns the distance of closest approach of this track to the give track.
@@ -298,6 +299,8 @@ class StiKalmanTrack : public StiTrack
   void setFlag(long v);
   long getFlag() const;
 
+  static StiMaker* maker;
+
 protected:
     
   static StiKalmanTrackFinderParameters * pars;
@@ -312,7 +315,7 @@ protected:
   long    mFlag;         //A flag to pack w/ topo info
   double  m;             // mass hypothesis
 
-
+  double  _dca;
 };
 
 /*! Return the mass hypothesis used in the resconstruction of this track.
@@ -449,7 +452,7 @@ inline double  StiKalmanTrack::getPseudoRapidity() const
 inline double  StiKalmanTrack::getPhi()            const 
 {
   double p[3];
-  getInnerMostHitNode()->getMomentum(p,0);
+  getInnerMostHitNode()->getGlobalMomentum(p,0);
   return atan2(p[1],p[0]);
 }
 
@@ -479,9 +482,9 @@ inline double StiKalmanTrack::getSvtDedx() const
    <li>Returns 0</li>
    </ol>
 */
-inline double  StiKalmanTrack::getDca(StiHit * h)    const
+inline double  StiKalmanTrack::getDca()    const
 {
-	return 0;
+  return _dca;
 }
 
 /*! Calculate and return the distance of closest approach to given track

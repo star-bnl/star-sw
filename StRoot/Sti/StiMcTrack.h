@@ -22,7 +22,7 @@ class StiMcTrack : public StiTrack
   virtual double  getPseudoRapidity() const;   // pseudo rapidity
   virtual double  getPhi()            const;   // azimuthal angle
   virtual double  getTanL()           const;   // tan(lambda)
-  virtual double  getDca(StiHit *h)  const;   // distance of closest approach to given point/hit
+  virtual double  getDca()  const;             // distance of closest approach to given point/hit
   virtual double  getDca2(StiTrack *t) const;   // distance of closest approach to given track - 2D calc
   virtual double  getDca3(StiTrack *t) const;   // distance of closest approach to given track - 3D calc
   virtual int     getPointCount() const;
