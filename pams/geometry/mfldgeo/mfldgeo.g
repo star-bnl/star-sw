@@ -20,8 +20,8 @@ Module     MFLDGEO  is the actual GUFLD routine for GSTAR
       Bfield   =  B0       !  field value
       RmaxInn  = 264.265   !  Inner field volume radius
       ZmaxInn  = 312.500   !  Inner field volume length
-      nrp      = 100       !  number of R nodes in the map
-      nzp      = 400       !  number of Z nodes in the map
+      nrp      = 200       !  number of R nodes in the map
+      nzp      = 800       !  number of Z nodes in the map
       zm       = 800.0     !  map max length
       rm       = 400.0     !  map max radius
       BBZ      = 0         !  axial field map
@@ -188,7 +188,7 @@ end
       if (first) then
          USE MFLDGEO/MFLM/BMAP
          first = .false.
-         dz = (bmap.zz(bmap_nz)-bmap.zz(1))/bmap_nz
+         dz = (bmap.zz(bmap_nz)-bmap.zz(1))/(bmap_nz-1)
       endif
 
       BSINTER=zero
