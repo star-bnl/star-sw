@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.25 1999/11/04 17:59:59 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.26 1999/11/05 02:29:25 fine Exp $
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.26  1999/11/05 02:29:25  fine
+// helix drawing for tpt_track table improved
+//
 // Revision 1.25  1999/11/04 17:59:59  fine
-// several bugs fixed to draw table-objects
+//  several bugs fixed to draw table-objects
 //
 // Revision 1.24  1999/11/04 01:49:47  fine
 // tpt_track drawing is turned On
@@ -812,7 +815,13 @@ Int_t StEventDisplayMaker::MakeTableTracks(const St_Table *points,StVirtualEvent
            tpt_track_st &t = *track++;
            StThreeVectorD vector(t.r0*cos(t.phi0),t.r0*sin(t.phi0),t.z0);
            StHelixD *helix  = new  StHelixD(t.curvature, atan(t.tanl), t.psi,vector); 
-           StHelix3DPoints *tracksPoints  = new StHelix3DPoints(helix);
+           //-------------------------------------------------------------//
+           // Artificial length has to be replaced with the "regular" one //
+           //-------------------------------------------------------------//
+           Float_t artficialLength = 200; // cm
+           Int_t nSteps = 4*artficialLength*t.curvature + 1; 
+           Float_t step = artficialLength / nSteps;
+           StHelix3DPoints *tracksPoints  = new StHelix3DPoints(helix,step,nSteps);
            m_TrackCollector->Add(tracksPoints);    // Collect to remove  
            St_PolyLineShape *tracksShape   = new St_PolyLineShape(tracksPoints,"L");
              tracksShape->SetVisibility(1);         tracksShape->SetColorAttribute(trackColor);
