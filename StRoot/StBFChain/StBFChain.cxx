@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.45 2000/01/07 18:30:25 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.46 2000/01/10 18:03:14 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.46  2000/01/10 18:03:14  fisyak
+// Add bigbig option for 40 Mw and big for 20 Mw geant common block
+//
 // Revision 1.45  2000/01/07 18:30:25  fisyak
 // Add option big to increase NwGEANT to 40Mwords for venus events
 //
@@ -243,7 +246,8 @@ BfcItem BFC[] = {
   {"MakeDoc"     ,""  ,"",""                   ,"","","Make HTML documentation for the given Chain",kFALSE},
   {"Debug"       ,""  ,"",""                                                ,"","","Set debug flag",kFALSE},
   {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},  
-  {"big"         ,""  ,"",""                                         ,"","","Set NwGEANT =40Mwords",kFALSE},
+  {"big"         ,""  ,"",""                                         ,"","","Set NwGEANT =20Mwords",kFALSE},
+  {"bigbig"      ,""  ,"",""                                         ,"","","Set NwGEANT =40Mwords",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"MAKERS      ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
@@ -433,8 +437,9 @@ Int_t StBFChain::Instantiate()
 	      geantMk->SetActive(kFALSE);
 	    }
 	    else {
-	      if (GetOption("big")) geantMk->SetNwGEANT(40000000);
-	      else                  geantMk->SetNwGEANT(10000000);
+	      if       (GetOption("bigbig")) geantMk->SetNwGEANT(40000000);
+	      else {if (GetOption("big"))    geantMk->SetNwGEANT(20000000);
+	      else                           geantMk->SetNwGEANT(10000000);}
 	    }
 	    SetGeantOptions();
 	  }
