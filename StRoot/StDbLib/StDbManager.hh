@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbManager.hh,v 1.14 2000/02/18 16:58:09 porter Exp $
+ * $Id: StDbManager.hh,v 1.15 2000/02/24 20:30:46 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbManager.hh,v $
+ * Revision 1.15  2000/02/24 20:30:46  porter
+ * fixed padding for uchar; beginTime in mysqlAccessor;
+ * added rollback safety checkes in StDbManger
+ *
  * Revision 1.14  2000/02/18 16:58:09  porter
  * optimization of table-query, + whereClause gets timeStamp if indexed
  *  + fix to write multiple rows algorithm
@@ -162,6 +166,8 @@ public:
   virtual StDbConfigNode* initConfig(StDbType type, StDbDomain domain);
   virtual StDbConfigNode* initConfig(StDbType type, StDbDomain domain, const char* configName);
 
+
+  // message verbosity level
   virtual bool IsVerbose() const { return misVerbose;};
   virtual void setVerbose(bool isVerbose){ misVerbose=isVerbose;
                                            if(isVerbose) misQuiet=false;};
@@ -201,9 +207,9 @@ public:
   virtual bool fetchDbTable(StDbTable* table);
   virtual bool fetchDbTable(StDbTable* table, char* whereClause);
   virtual bool fetchAllTables(StDbConfigNode* node);
-  virtual bool storeDbTable(StDbTable* table);
-  virtual bool storeAllTables(StDbConfigNode* node);
-  virtual int  storeConfig(StDbConfigNode* node, int currentID=0);
+  virtual bool storeDbTable(StDbTable* table, bool commitWhenDone=true);
+  virtual bool storeAllTables(StDbConfigNode* node, bool commitWhenDone=true);
+  virtual int  storeConfig(StDbConfigNode* node, int currentID=0, bool commitWhenDone=true);
 
   // transaction methods 
   //  nodes are node entries in the "Nodes" table

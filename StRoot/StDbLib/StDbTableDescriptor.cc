@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.11 2000/02/15 20:27:45 porter Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.12 2000/02/24 20:30:47 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.12  2000/02/24 20:30:47  porter
+ * fixed padding for uchar; beginTime in mysqlAccessor;
+ * added rollback safety checkes in StDbManger
+ *
  * Revision 1.11  2000/02/15 20:27:45  porter
  * Some updates to writing to the database(s) via an ensemble (should
  * not affect read methods & haven't in my tests.
@@ -306,7 +310,7 @@ StDbTableDescriptor::fillSizeAndOffset(char* length, int elementNum){
      mcols[i].offset=offsetToNextEmptyByte;
      offsetToNextEmptyByte = mcols[i].offset+mcols[i].size;
      j = 4* ((int) floor ((float) (mcols[i].size-1)/4 ));
-     offsetToLast4Bytes = offsetToLast4Bytes+j+4;
+     offsetToLast4Bytes = offsetToLast4Bytes+j;//+4;
 
   } else if( (space>=2) && (type == Stshort || type == Stushort) ){
 
@@ -343,7 +347,7 @@ StDbTableDescriptor::fillSizeAndOffset(char* length, int elementNum){
   unsigned int onesize = getSize(mcols[i].type);
   for(j=0;j<k;j++){
     if(mcols[i].dimensionlen[j]==1 && j>0)continue;
-    for(int jj=0; jj< mcols[i].dimensionlen[j]; jj++){
+    for(int jj=0; jj< (int)mcols[i].dimensionlen[j]; jj++){
       padsize=padsize+(int)onesize;
       if(padsize>=8)padsize=padsize-8;
     }

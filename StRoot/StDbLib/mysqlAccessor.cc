@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.cc,v 1.18 2000/02/18 16:58:09 porter Exp $
+ * $Id: mysqlAccessor.cc,v 1.19 2000/02/24 20:30:49 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.cc,v $
+ * Revision 1.19  2000/02/24 20:30:49  porter
+ * fixed padding for uchar; beginTime in mysqlAccessor;
+ * added rollback safety checkes in StDbManger
+ *
  * Revision 1.18  2000/02/18 16:58:09  porter
  * optimization of table-query, + whereClause gets timeStamp if indexed
  *  + fix to write multiple rows algorithm
@@ -358,7 +362,7 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
      char qs[1024]; ostrstream queryS(qs,1024);
      queryS << " select elementID, unix_timestamp(Max(beginTime)) as mbeginTime ";
      queryS << " from dataIndex";
-     queryS << baseString <<" AND beginTime<'"<<rTime<<"' "<<elementString;
+     queryS << baseString <<" AND beginTime<='"<<rTime<<"' "<<elementString;
      queryS << " Group by elementID order by elementID DESC limit ";
      queryS <<Nrows<<ends;       
 
@@ -480,7 +484,7 @@ mysqlAccessor::QueryDb(StDbTable* table, unsigned int reqTime){
    // query Index to retrieve pointer to data
     Db << " select dataID, numRows, unix_timestamp(Max(beginTime)) as mbeginTime" ;
     Db << " from dataIndex";
-    Db << baseString <<" AND beginTime<'"<<rTime;
+    Db << baseString <<" AND beginTime<='"<<rTime;
     Db << "' Group by dataID order by beginTime DESC limit 1"<<endsql;  
  
     int dataID;

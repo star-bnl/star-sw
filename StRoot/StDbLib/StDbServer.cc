@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbServer.cc,v 1.10 2000/02/15 20:27:44 porter Exp $
+ * $Id: StDbServer.cc,v 1.11 2000/02/24 20:30:47 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbServer.cc,v $
+ * Revision 1.11  2000/02/24 20:30:47  porter
+ * fixed padding for uchar; beginTime in mysqlAccessor;
+ * added rollback safety checkes in StDbManger
+ *
  * Revision 1.10  2000/02/15 20:27:44  porter
  * Some updates to writing to the database(s) via an ensemble (should
  * not affect read methods & haven't in my tests.
@@ -120,11 +124,10 @@ if(!mconnectState){
      mconnectState = true;
      if(!StDbManager::Instance()->IsQuiet()){
        cout << "Server connecting to DB =" << mdbName ;
-       cout << " On Host = " << mhostName << endl; 
+       cout << " On Host = " << mhostName <<":"<<mportNumber<<endl; 
      }
   }
 }
-
 
 return true;
 }

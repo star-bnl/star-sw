@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManager.cc,v 1.18 2000/02/18 16:58:09 porter Exp $
+ * $Id: StDbManager.cc,v 1.19 2000/02/24 20:30:45 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbManager.cc,v $
+ * Revision 1.19  2000/02/24 20:30:45  porter
+ * fixed padding for uchar; beginTime in mysqlAccessor;
+ * added rollback safety checkes in StDbManger
+ *
  * Revision 1.18  2000/02/18 16:58:09  porter
  * optimization of table-query, + whereClause gets timeStamp if indexed
  *  + fix to write multiple rows algorithm
@@ -917,7 +921,7 @@ return (retVal && children && siblings);
 ////////////////////////////////////////////////////////////////
 
 bool
-StDbManager::storeDbTable(StDbTable* table){
+StDbManager::storeDbTable(StDbTable* table, bool commitWhenDone){
 bool retVal = false;
 
   if(!table){
@@ -937,13 +941,14 @@ bool retVal = false;
 
   }
 
+if(commitWhenDone)table->commitData();
 return true;
 }
 
 ////////////////////////////////////////////////////////////////
 
 bool
-StDbManager::storeAllTables(StDbConfigNode* node){
+StDbManager::storeAllTables(StDbConfigNode* node, bool commitWhenDone){
 
 bool retVal = false;
 
@@ -958,7 +963,7 @@ bool retVal = false;
     while(!itr->done()){
       table = itr->next();
       if(retVal){
-        retVal = (retVal && storeDbTable(table));
+        retVal = (retVal && storeDbTable(table, false));
       } else {
         if(table)table->commitData(); // prevent rollback of non-stored tables
       }
@@ -975,18 +980,20 @@ if(!retVal) {
 bool children = true;
 bool siblings = true;
 
-  if(node->hasChildren())children = storeAllTables(node->getFirstChildNode());
+  if(node->hasChildren())children = storeAllTables(node->getFirstChildNode(),false);
   if(!children){
     rollBackAllTables(node);
     return false;
   }
  
   StDbConfigNode* nextNode = 0;
-  if((nextNode=node->getNextNode()))siblings = storeAllTables(nextNode);
+  if((nextNode=node->getNextNode()))siblings = storeAllTables(nextNode,false);
   if(!siblings){
     rollBackAllTables(node);
     return false;
   }
+
+if(commitWhenDone)commitAllTables(node);
 
 return true;
 }
@@ -994,7 +1001,7 @@ return true;
 ///////////////////////////////////////////////////////////////
 
 int
-StDbManager::storeConfig(StDbConfigNode* node, int currentID){
+StDbManager::storeConfig(StDbConfigNode* node, int currentID, bool commitWhenDone){
 
 StDbServer* server=findServer(node->getDbType(),node->getDbDomain());
 bool children = true;
@@ -1006,8 +1013,8 @@ int nodeID=server->WriteDb(node,currentID);
 if(nodeID){
   retVal = true;
   node->addWrittenNode(nodeID);
-  if(node->hasChildren())children=storeConfig(node->getFirstChildNode(),nodeID);
-  if(node->getNextNode())siblings=storeConfig(node->getNextNode(),currentID);
+  if(node->hasChildren())children=storeConfig(node->getFirstChildNode(),nodeID,false);
+  if(node->getNextNode())siblings=storeConfig(node->getNextNode(),currentID,false);
  
 }
  if(! (retVal && children && siblings) ){
@@ -1020,6 +1027,7 @@ if(nodeID){
      retVal = false;
  }
 
+if(commitWhenDone) commitAllNodes(node);
 return retVal;
 }
 
