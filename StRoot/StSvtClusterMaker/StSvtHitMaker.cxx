@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.31 2004/06/14 21:27:46 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.32 2004/06/21 20:18:34 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.32  2004/06/21 20:18:34  caines
+ * Add number of anodes count to res[0] variable for use in dedx calc
+ *
  * Revision 1.31  2004/06/14 21:27:46  caines
  * Fine tuning of drift velocity using laser spots from Jana Bielcikova
  *
@@ -527,6 +530,7 @@ void StSvtHitMaker::SaveIntoTable(int numOfClusters,  int index)
       for( int j=0; j<3; j++){
 	spt->res[j]= 0;
       }
+      spt->res[0] =  mSvtBigHit->svtHitData()[i].numOfAnodesInClu;
       for( int k=0; k<2; k++){
 	spt->mom2[k]= mSvtBigHit->svtHitData()[i].mom2[k];
       }  
