@@ -108,10 +108,10 @@ C-----------------------------------------------------------------------
 #include "tpg_wire_plane_pars.inc"
 #include "tpg_wire_plane_st.inc"
 
-#include "tcl_tppixel_pars.inc"
-#include "tcl_tppixel_st.inc"
-#include "tcl_tpmcpix_pars.inc"
-#include "tcl_tpmcpix_st.inc"
+#include "tss_tppixel_pars.inc"
+#include "tss_tppixel_st.inc"
+#include "tss_tpmcpix_pars.inc"
+#include "tss_tpmcpix_st.inc"
 
 #include "tcl_tpseq_pars.inc"
 #include "tcl_tpseq_st.inc"
@@ -357,10 +357,10 @@ C-----------------------------------------------------------------------
 #include "tas_structures.inc"
 #include "tas_user_codes.inc"
 
-#include "tcl_tppixel_pars.inc"
-#include "tcl_tppixel_st.inc"
-#include "tcl_tpmcpix_pars.inc"
-#include "tcl_tpmcpix_st.inc"
+#include "tss_tppixel_pars.inc"
+#include "tss_tppixel_st.inc"
+#include "tss_tpmcpix_pars.inc"
+#include "tss_tpmcpix_st.inc"
 
 #include "tcl_tpseq_pars.inc"
 #include "tcl_tpseq_st.inc"
@@ -1164,8 +1164,8 @@ C-----------------------------------------------------------------------
 #include "tas_structures.inc"
 #include "tas_user_codes.inc"
 
-#include "tcl_tppixel_pars.inc"
-#include "tcl_tppixel_st.inc"
+#include "tss_tppixel_pars.inc"
+#include "tss_tppixel_st.inc"
 
 #include "tcl_tpseq_pars.inc"
 #include "tcl_tpseq_st.inc"
