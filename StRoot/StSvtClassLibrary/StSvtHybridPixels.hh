@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridPixels.hh,v 1.2 2000/08/23 12:48:44 munhoz Exp $
+ * $Id: StSvtHybridPixels.hh,v 1.3 2000/11/30 20:39:12 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridPixels.hh,v $
- * Revision 1.2  2000/08/23 12:48:44  munhoz
- * add reset method
+ * Revision 1.3  2000/11/30 20:39:12  caines
+ * Changed to allow us of database
  *
  * Revision 1.1.1.1  2000/03/10 14:26:21  munhoz
  * SVT Class Library
@@ -35,6 +35,9 @@ public:
   StSvtHybridPixels& operator + (StSvtHybridPixels&);
 
   Float_t getPixelContent(int anode, int time);
+  void addToPixel(int anode, int time, float x);
+  void addToPixel(int index, float x);
+
   int getNumberOfAnodes() {return mNumberOfAnodes;}
   int getNumberOfTimeBins() {return mNumberOfTimeBins;}
   int getTotalNumberOfPixels() {return mTotalNumberOfPixels;}

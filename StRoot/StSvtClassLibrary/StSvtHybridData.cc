@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridData.cc,v 1.2 2000/07/30 21:13:04 munhoz Exp $
+ * $Id: StSvtHybridData.cc,v 1.3 2000/11/30 20:39:12 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridData.cc,v $
+ * Revision 1.3  2000/11/30 20:39:12  caines
+ * Changed to allow us of database
+ *
  * Revision 1.2  2000/07/30 21:13:04  munhoz
  * adding correction for copy constructor and equal operator
  *
@@ -153,11 +156,24 @@ int StSvtHybridData::getListSequences(int listID, int& nSequence, StSequence*&  
   return 0;
 }
 
-int StSvtHybridData::SetListSequences(int listID, int& nSequence, StSequence* tempSeq)
+int StSvtHybridData::setListSequences(int listID, int& nSequence, StSequence* tempSeq)
 {  
+  if (nAnodes == 0)
+    nAnodes = 240;
+
+  if (!nSeq) {
+    nSeq = new int[nAnodes];
+    for(int i=0; i<nAnodes; i++)
+      nSeq[i] = 0;
+  }
+
+  if (!seq)
+    seq = new StSequence*[nAnodes];
+
   // Resets the sequences for a given anode 
   if(listID >= 0 && listID < nAnodes){
-    delete [] seq[listID];
+    if (seq[listID])
+      delete [] seq[listID];
     if( nSequence > 0){
       seq[listID] = new StSequence[nSequence];
       for( int i=0; i<nSequence; i++){
@@ -171,12 +187,18 @@ int StSvtHybridData::SetListSequences(int listID, int& nSequence, StSequence* te
   return 0;
 }
 
-int StSvtHybridData::SetAnodeList()
+int StSvtHybridData::setAnodeList()
 {
   // Loops over anode list and removes from the list those anodes who no longer have any sequences on them
  
   int newTot=0;
   
+  if (!anodeList) {
+    anodeList = new int[nAnodes];
+    for(int i=0; i<nAnodes; i++)
+      anodeList[i] = i+1;
+  }
+
   for(int i=0; i<nAnodes; i++){
 
     if( nSeq[i]!=0){

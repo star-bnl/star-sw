@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtHybridPixels.cc,v 1.2 2000/08/23 12:48:44 munhoz Exp $
+ * $Id: StSvtHybridPixels.cc,v 1.3 2000/11/30 20:39:12 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridPixels.cc,v $
- * Revision 1.2  2000/08/23 12:48:44  munhoz
- * add reset method
+ * Revision 1.3  2000/11/30 20:39:12  caines
+ * Changed to allow us of database
  *
  * Revision 1.1.1.1  2000/03/10 14:26:21  munhoz
  * SVT Class Library
@@ -42,7 +42,7 @@ StSvtHybridPixels::StSvtHybridPixels() :
 }
 
 StSvtHybridPixels::StSvtHybridPixels(int barrel, int ladder, int wafer, int hybrid, int size, float* x) : 
-  StSvtHybridObject(barrel, ladder, wafer, hybrid), TArrayF(size, x)
+  StSvtHybridObject(barrel, ladder, wafer, hybrid)
 {
   // The same as StSvtHybridObject.
 
@@ -51,7 +51,12 @@ StSvtHybridPixels::StSvtHybridPixels(int barrel, int ladder, int wafer, int hybr
 
   mTotalNumberOfPixels = mNumberOfAnodes*mNumberOfTimeBins;
 
-  if (!size)
+  if (size)
+    if (x)
+      Set(mTotalNumberOfPixels,x);
+    else
+      Set(size);
+  else
     Set(mTotalNumberOfPixels);
 }
 
@@ -87,6 +92,23 @@ Float_t StSvtHybridPixels::getPixelContent(int anode, int time)
   int index = getPixelIndex(anode, time);
 
   return At(index);
+}
+
+void StSvtHybridPixels::addToPixel(int anode, int time, float x)
+{
+  float x1;
+  int index = getPixelIndex(anode, time);
+
+   x1 = At(index);
+   AddAt(x+x1,index);
+}
+
+void StSvtHybridPixels::addToPixel(int index, float x)
+{
+  float x1;
+
+   x1 = At(index);
+   AddAt(x+x1,index);
 }
 
 int StSvtHybridPixels::getPixelIndex(int anode, int time)
