@@ -21,18 +21,18 @@ routines to verify data read by sample program
 */
 #define DATA_DIM 13
 typedef struct test_type_t {
-	char c;
-	double d;
-	float f;
-	long l;
-	octet o;
-	short s;
-	unsigned long ul;
-	unsigned short us;
+	DS_CHAR c;
+	DS_DOUBLE d;
+	DS_FLOAT f;
+	DS_LONG l, nl;
+	DS_OCTET o;
+	DS_SHORT s, ns;
+	DS_U_LONG ul;
+	DS_U_SHORT us;
 	struct point_t {
-		char flag;
-		float x, y, z;
-		octet data[DATA_DIM];
+		DS_CHAR flag;
+		DS_FLOAT x, y, z;
+		DS_OCTET data[DATA_DIM];
 	}point;
 }TEST_TYPE_T;
 
@@ -40,9 +40,9 @@ static char *testSpecifier = "struct test_type_t {"
 	"char c;"
 	"double d;"
 	"float f;"
-	"long l;"
+	"long l, nl;"
 	"octet o;"
-	"short s;"
+	"short s, ns;"
 	"unsigned long ul;"
 	"unsigned short us;"
 	"struct point_t {"
@@ -130,12 +130,12 @@ static int dsCheckTableR(void *pData, size_t count, DS_TYPE_T *type)
 
 	case DS_TYPE_SHORT:
 	case DS_TYPE_U_SHORT:
-		for (i= 0; i < count && p.s[i] == (short)code; i++);
+		for (i= 0; i < count && p.s[i] == (DS_SHORT)code; i++);
 		break;
 
 	case DS_TYPE_LONG:
 	case DS_TYPE_U_LONG:
-		for (i= 0; i < count && p.l[i] == (long)code; i++);
+		for (i= 0; i < count && p.l[i] == (DS_LONG)code; i++);
 		break;
 	
 	case DS_TYPE_FLOAT:
@@ -173,6 +173,21 @@ static int dsCheckTableR(void *pData, size_t count, DS_TYPE_T *type)
 }
 /******************************************************************************
 *
+* dsCheckTestNeg - make nl and ns negative
+*
+* RETURN: none
+*/
+static void dsCheckTestNeg(TEST_TYPE_T *pTest, size_t count)
+{
+	size_t i;
+
+	for (i = 0; i < count; i++, pTest++) {
+			pTest->nl = -pTest->nl;
+			pTest->ns = -pTest->ns;
+	}
+}
+/******************************************************************************
+*
 * dsCheckTest - check that alignment and values are correct
 *
 * RETURN: TRUE if OK FALSE if error
@@ -181,17 +196,23 @@ static int dsCheckTest(TEST_TYPE_T *pTest, size_t count)
 {
 	size_t i, j;
 
-	for (i = 0; i < count; i++) {
+	for (i = 0; i < count; i++, pTest++) {
 		if (
 			pTest->c != DS_TYPE_CHAR    ||
 			pTest->d != DS_TYPE_DOUBLE  ||
 			pTest->f != DS_TYPE_FLOAT   ||
 			pTest->l != DS_TYPE_LONG    ||
+			pTest->nl != -DS_TYPE_LONG  ||
 			pTest->o != DS_TYPE_OCTET   ||
 			pTest->s != DS_TYPE_SHORT   ||
+			pTest->ns != -DS_TYPE_SHORT ||
 			pTest->ul != DS_TYPE_U_LONG ||
 			pTest->us != DS_TYPE_U_SHORT) {
+			DS_LOG_ERROR(DS_E_DSCHECK_FAILUE);
 			dsErrorPrint("dsCheckTest: failed for basic types\n");
+			dsErrorPrint("%d %d %d %d %d %d %d %d %g %g\n",
+				pTest->c, pTest->o, pTest->s, pTest->ns, pTest->us,
+				pTest->l, pTest->nl, pTest->ul, pTest->f, pTest->d);
 			return FALSE;
 		}
 		for (j = 0; j < DATA_DIM; j++) {
@@ -204,6 +225,7 @@ static int dsCheckTest(TEST_TYPE_T *pTest, size_t count)
 			pTest->point.x != DS_TYPE_FLOAT   ||
 			pTest->point.y != DS_TYPE_FLOAT   ||
 			pTest->point.z != DS_TYPE_FLOAT) {
+			DS_LOG_ERROR(DS_E_DSCHECK_FAILUE);
 			dsErrorPrint("dsCheckTest: failed for complex types\n");
 			return FALSE;
 		}
@@ -323,35 +345,51 @@ static int dsSetTableR(void *pData, size_t count, DS_TYPE_T *type)
 
 	switch(code = type->code) {
 	case DS_TYPE_CHAR:
+		for (i = 0; i < count; i++) {
+			p.c[i] = (DS_CHAR)code;
+		}
+		break;
+
+
 	case DS_TYPE_OCTET:
 		for (i = 0; i < count; i++) {
-			p.c[i] = (char)code;
+			p.o[i] = (DS_OCTET)code;
 		}
 		break;
 
 	case DS_TYPE_SHORT:
+		for (i = 0; i < count; i++) {
+			p.s[i] = (DS_SHORT)code;
+		}
+		break;
+
 	case DS_TYPE_U_SHORT:
 		for (i = 0; i < count; i++) {
-			p.s[i] = (short)code;
+			p.us[i] = (DS_U_SHORT)code;
 		}
 		break;
 
 	case DS_TYPE_LONG:
+		for (i = 0; i < count; i++) {
+			p.l[i] = (DS_LONG)code;
+		}
+		break;
+
 	case DS_TYPE_U_LONG:
 		for (i = 0; i < count; i++) {
-			p.l[i] = code;
+			p.ul[i] = (DS_U_LONG)code;
 		}
 		break;
 	
 	case DS_TYPE_FLOAT:
 		for (i = 0; i < count; i++) {
-			p.f[i] = (float)code;
+			p.f[i] = (DS_FLOAT)code;
 		}
 		break;
 	
 	case DS_TYPE_DOUBLE:
 		for (i = 0; i < count; i++) {
-			p.d[i] = code;
+			p.d[i] = (DS_DOUBLE)code;
 		}
 		break;
 
@@ -367,6 +405,7 @@ static int dsSetTableR(void *pData, size_t count, DS_TYPE_T *type)
 			p.c += type->size;
 		}
 		break;
+
 	default:
 		printf("dsSetTable: invalid type->code %d\n", code);
 		return FALSE;
@@ -379,7 +418,7 @@ static int dsSetTableR(void *pData, size_t count, DS_TYPE_T *type)
 *
 * RETURN: TRUE for success else FALSE
 */
-int dsWriteTest(XDR *xdrs, size_t count)
+int dsWriteTest(XDR *xdrs, size_t count, int bigEndian)
 {
 	DS_DATASET_T *cycle, *pDataset, *pTable = NULL;
 	TEST_TYPE_T *pData = NULL;
@@ -397,20 +436,27 @@ int dsWriteTest(XDR *xdrs, size_t count)
 		pTable->elcount != count || pTable->maxcount != count
 	) {
 		if (pTable != NULL) {
-			printf("count %d, elcount %d, maxcount %d\n", 
+			dsErrorPrint("count %d, elcount %d, maxcount %d\n", 
 				count, pTable->elcount, pTable->maxcount);
 		}
 		dsPerror("dsWriteTest setup failed");
 		goto fail;
 	}
+	dsCheckTestNeg(pData, count);
 	if (!dsCheckTest(pData, count)) {
 		goto fail;
 	}
 	/* write tables */
 	for (i = 0; i < count; i++) {
 		pTable->elcount = i;
-		if (!xdr_dataset(xdrs, &pDataset)) {
-			dsPerror("writeDynamic xdr_dataset failed");
+		if (bigEndian) {
+			if (!xdr_dataset(xdrs, &pDataset)) {
+				dsPerror("writeTest xdr_dataset failed");
+				goto fail;
+			}
+		}
+		else if (!dsEncodeLittleEndian(xdrs, pDataset)) {
+			dsPerror("writeTest dsEncodeLittleEndian failed");
 			goto fail;
 		}
 	}

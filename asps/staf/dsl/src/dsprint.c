@@ -14,7 +14,7 @@ TBS ...
 */
 #include <string.h> 
 #define DS_PRIVATE
-#include "dsxdr.h"
+#include "dstype.h"
 
 /*****************************************************************************
 *
@@ -32,12 +32,12 @@ void dsPrintData(FILE *stream, DS_TYPE_T *type, unsigned count, void *data)
 	switch(type->code) {
 
 		case DS_TYPE_CHAR:
-			/* 04sep97-cet- BUG FIX
-			fprintf(stream, "\t%s", p.c);*/
-			fprintf( stream,  "\t");
-			for (i = 0; i < count; i++) {
-				fprintf( stream,  "%c", p.c[i]);
+
+ 			fprintf( stream,  "\t");
+ 			for (i = 0; i < count; i++) {
+ 				fprintf( stream,  "%c", p.c[i]);
 			}
+
 			break;
 			
 		case DS_TYPE_OCTET:
@@ -126,7 +126,7 @@ int dsPrintSpecifiers(FILE *stream, DS_DATASET_T *pDataset)
 {
 	size_t *tList = NULL;
 
-	if (!dsTypeListCreate(&tList, DS_XDR_HASH_LEN + 1)) {
+	if (!dsTypeListCreate(&tList, DS_TID_HASH_LEN + 1)) {
 		return FALSE;
 	}
 	if (!dsPrintTypes(stream, pDataset, tList) ||
@@ -143,7 +143,7 @@ fail:
 */
 int dsPrintTypes(FILE *stream, DS_DATASET_T *dataset, size_t *tList)
 {
-	const char *str;
+	char *str;
 	size_t h, i, len;
 	DS_DATASET_T *item;
 	DS_LIST_T list;
@@ -209,7 +209,7 @@ void dsPrintTableData(FILE *stream, DS_DATASET_T *table)
 */
 void dsPrintTableType(FILE *stream, DS_DATASET_T *pTable)
 {
-	const char *str;
+	char *str;
 	size_t i;
 	
 	if (!dsTypeSpecifier(&str, &i, pTable->tid)) {

@@ -463,7 +463,7 @@ int dsTargetField(char *dstColumnName, DS_FIELD_T **ppSrcField,
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsTargetTable(DS_DATASET_T **ppTable, const char *tableName, const char *typeName, 
+int dsTargetTable(DS_DATASET_T **ppTable, char *tableName, char *typeName, 
 	DS_DATASET_T *parentOne, DS_DATASET_T *parentTwo, 
 	char *aliases, char *projectList)
 {
@@ -507,7 +507,7 @@ int dsTargetTable(DS_DATASET_T **ppTable, const char *tableName, const char *typ
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsTargetTypeSpecifier(char *str, size_t maxSize, const char *typeName, 
+int dsTargetTypeSpecifier(char *str, size_t maxSize, char *typeName, 
 	size_t *tidList, char **names, char *projectList)
 {
 	char dstName[DS_NAME_DIM];

@@ -14,6 +14,7 @@ DESCRIPTION
 These routines parse struct defs defined by the CORBA IDL version 2
 */
 #include <ctype.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #define DS_PRIVATE
@@ -37,7 +38,7 @@ typedef struct {
 */
 static int dsBasicInit(void);
 static int dsFirstPass(int *pSepCount, int *map,
-	int *pMapCount, int maxMapCount, char *str);  /* str modif inside*/
+	int *pMapCount, int maxMapCount, char *str);
 static int dsFormatTypeSpecifierR(DS_BUF_T *bp,
 	DS_TYPE_T *type, int level, size_t *pNTag, DS_TYPE_T **tag);
 static int dsParseTypeR(DS_TYPE_T **pType, DS_BUF_T *bp,
@@ -49,47 +50,24 @@ static int dsSearchScope(DS_TYPE_T **ppType, char *name,
 * basicType - definition of basic types
 *
 */
-DS_MODULUS_STRUCT(1, DS_TYPE_CHAR,    char);
-DS_MODULUS_STRUCT(1, DS_TYPE_OCTET,   octet);
-DS_MODULUS_STRUCT(2, DS_TYPE_SHORT,   short);
-DS_MODULUS_STRUCT(2, DS_TYPE_U_SHORT, unsigned short);
 
-/* 12 December 1997 - fixed basicType definition for 64-bit Alpha
-                      long and ulong are 8 bytes (not 4!)
-		      John Lajoie - lajoie@iastate.edu
-*/
-#if defined(__alpha)
-DS_MODULUS_STRUCT(8, DS_TYPE_LONG,    long);
-DS_MODULUS_STRUCT(8, DS_TYPE_U_LONG,  unsigned long);
-#else
-DS_MODULUS_STRUCT(4, DS_TYPE_LONG,    long);
-DS_MODULUS_STRUCT(4, DS_TYPE_U_LONG,  unsigned long);
-#endif
-
-DS_MODULUS_STRUCT(4, DS_TYPE_FLOAT,   float);
-DS_MODULUS_STRUCT(8, DS_TYPE_DOUBLE,  double);
+/*
+ * macros to initialize basic types
+ */
+#define DS_STRUCT_MODULUS offsetof(struct t1 {char a; struct t2 {char b;}c;}, c)
+#define DS_TYPE_INIT(s, c, t, n) {#n, c, 0, sizeof(t),\
+	offsetof(struct TAG_ ## t {char x; t y;}, y), s, s, 0}
 
 static DS_TYPE_T basicType[] = {
-	DS_TYPE_INIT(1, DS_TYPE_CHAR,    char),
-	DS_TYPE_INIT(1, DS_TYPE_OCTET,   octet),
-	DS_TYPE_INIT(2, DS_TYPE_SHORT,   short),
-	DS_TYPE_INIT(2, DS_TYPE_U_SHORT, unsigned short),
+DS_TYPE_INIT(DS_LEN_CHAR,    DS_TYPE_CHAR,    DS_CHAR,    char),
+DS_TYPE_INIT(DS_LEN_OCTET,   DS_TYPE_OCTET,   DS_OCTET,   octet),
+DS_TYPE_INIT(DS_LEN_SHORT,   DS_TYPE_SHORT,   DS_SHORT,   short),
+DS_TYPE_INIT(DS_LEN_U_SHORT, DS_TYPE_U_SHORT, DS_U_SHORT, unsigned short),
+DS_TYPE_INIT(DS_LEN_LONG,    DS_TYPE_LONG,    DS_LONG,    long),
+DS_TYPE_INIT(DS_LEN_U_LONG,  DS_TYPE_U_LONG,  DS_U_LONG,  unsigned long),
+DS_TYPE_INIT(DS_LEN_FLOAT,   DS_TYPE_FLOAT,   DS_FLOAT,   float),
+DS_TYPE_INIT(DS_LEN_DOUBLE,  DS_TYPE_DOUBLE,  DS_DOUBLE,  double)};
 
-/* 12 December 1997 - fixed basicType definition for 64-bit Alpha
-                      long and ulong are 8 bytes (not 4!)
-		      John Lajoie - lajoie@iastate.edu
-*/
-#if defined(__alpha)
-	DS_TYPE_INIT(8, DS_TYPE_LONG,    long),
-	DS_TYPE_INIT(8, DS_TYPE_U_LONG,  unsigned long),
-#else
-	DS_TYPE_INIT(4, DS_TYPE_LONG,    long),
-	DS_TYPE_INIT(4, DS_TYPE_U_LONG,  unsigned long),
-#endif
-
-	DS_TYPE_INIT(4, DS_TYPE_FLOAT,   float),
-	DS_TYPE_INIT(8, DS_TYPE_DOUBLE,  double)};
-	
 static size_t nBasic = 0;
 /******************************************************************************
 *
@@ -99,6 +77,8 @@ static size_t nBasic = 0;
 */
 static int dsBasicInit()
 {
+	float floatOne = 1.0f;
+	int intOne = 1;
 	size_t i, n = sizeof(basicType)/sizeof(basicType[0]);
 	DS_TYPE_T *t;
 
@@ -109,15 +89,22 @@ static int dsBasicInit()
 	if (nBasic != 0) {
 		return dsTypeSemGive();
 	}
+	if (DS_LEN_CHAR != sizeof(DS_CHAR) || DS_LEN_OCTET != sizeof(DS_OCTET) ||
+		DS_LEN_FLOAT != sizeof(DS_FLOAT) || DS_LEN_DOUBLE != sizeof(DS_DOUBLE)) {
+		goto fail;
+	}
+	dsIsBigEndian = (((char *)&intOne)[sizeof(intOne)-1] == 1);
+	i = sizeof(float);
+	dsIsIeee = ((sizeof(int) == i && ((int *)&floatOne)[0] == DS_IEEEF_ONE) ||
+		(sizeof(short) == i && ((short *)&floatOne)[0] == DS_IEEEF_ONE));
 	for (i = 0, t = basicType; i < n; i++, t++) {
-		if (i != (size_t)t->code || t->flags != 0 || t->modulus == 0 ||
-			t->size != t->stdsize || t->size != t->stdmodulus || 
-			t->nField != 0) {
+		if (t->flags != 0 ||  t->nField != 0 ||t->modulus == 0 ||
+			t->size == 0 || t->size < t->stdsize) {
 			goto fail;		
 		}
-		if ((t->size > 1 && !DS_IS_BIG_ENDIAN) ||
-			(DS_IS_REAL(t) && !DS_IS_IEEE_FLOAT)) {
-			t->flags = DS_NOT_STD_REP;
+		if (t->size > 1) t->flags |= DS_MULTI_BYTE;
+		if (t->size != t->stdsize || (DS_IS_REAL(t) && !DS_IS_IEEE_FLOAT)) {
+			t->flags |= DS_NOT_STD_REP;
 		}
 	}
 	nBasic = n;
@@ -128,7 +115,8 @@ fail:
 		return FALSE;
 	}
 	/********** end critical section *******************************/
-	DS_ERROR(DS_E_SYSTEM_ERROR);
+
+	DS_ERROR(DS_E_TYPE_REPRESENTATION_ERROR);
 }
 /******************************************************************************
 *
@@ -192,12 +180,16 @@ int dsDumpTypes(void)
 	size_t i;
 
 	if (nBasic == 0) {
-		dsBasicInit();
+		if (!dsBasicInit()) {
+			dsPerror("initialization failed");
+			return FALSE;
+		}
 	}
 	printf("char type is %s\n", --c > 0 ? "unsigned": "signed");
 	printf("addressing is %s\n",
 		DS_IS_BIG_ENDIAN ? "BIG_ENDIAN" : "LITTLE_ENDIAN");
 	printf("floating point is %s \n", DS_IS_IEEE_FLOAT ? "IEEE" : "UNKNOWN");
+	printf("minimum struct modulus is %d\n", DS_STRUCT_MODULUS);
 	printf("code\tflags\tmod\tsize\tstdmod\tstdsize\tnField\tname\n");
 	for (i = 0; i < nBasic; i++) {
 		printf("%d\t%X\t%d\t%d\t%d\t%d\t%d\t%s\n",
@@ -213,7 +205,7 @@ int dsDumpTypes(void)
 *
 * RETURN: -1 if name collision, 0 if found or 1 if not found
 */
-int dsFindField(DS_FIELD_T **ppField, DS_TYPE_T *pType, const char *name)
+int dsFindField(DS_FIELD_T **ppField, DS_TYPE_T *pType, char *name)
 {
 	int c;
 	size_t i;
@@ -302,7 +294,7 @@ int dsFormatTypeSpecifier(char *str, size_t maxSize, DS_TYPE_T *type)
 		return FALSE;
 	}
 	if (dsPutc('\0', &bp) < 0) {
-		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+		DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 	}
 	return TRUE;
 }
@@ -320,18 +312,18 @@ static int dsFormatTypeSpecifierR(DS_BUF_T *bp,
 	DS_FIELD_T *field;
 
 	if (dsPutTabs(level, bp) < 0) {
-		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+		DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 	}
 	if (type->code != DS_TYPE_STRUCT) {
 		if (dsPuts(type->name, bp) < 0) {
-			DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+			DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 		}
 		return TRUE;
 	}
 	for (i = 0; i < *pNTag; i++) {
 		if (tag[i] == type) {
 			if (dsPuts(type->name, bp) < 0) {
-				DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+				DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 			}
 			return TRUE;
 		}
@@ -339,7 +331,7 @@ static int dsFormatTypeSpecifierR(DS_BUF_T *bp,
 	if (dsPuts("struct ", bp) < 0 ||
 		dsPuts(type->name, bp) < 0 ||
 		dsPuts(" {\n", bp) < 0) {
-		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+		DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 	}
 	if (!dsCheckDupField(type)) {
 		return FALSE;
@@ -348,7 +340,7 @@ static int dsFormatTypeSpecifierR(DS_BUF_T *bp,
 		ft = field[i].type;
 		if (ft != lastType) {
 			if (lastType && dsPuts(";\n", bp) < 0) {
-				DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+				DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 			}
 			if (!dsFormatTypeSpecifierR(bp, ft, level + 1, pNTag, tag)) {
 				return FALSE;
@@ -357,24 +349,24 @@ static int dsFormatTypeSpecifierR(DS_BUF_T *bp,
 		}
 		else {
 			if (dsPuts(", ", bp) < 0) {
-				DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+				DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 			}
 		}
 		if (dsPutc(' ', bp) < 0 || dsPuts(field[i].name, bp) < 0) {
-			DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+			DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 		}
 
 		for (j = 0; j < DS_MAX_DIMS && field[i].dim[j]; j++) {
 			if (dsPutc('[', bp) < 0 ||
 				dsPutNumber(field[i].dim[j], bp) < 0 ||
 				dsPutc(']', bp) < 0) {
-				DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+				DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 			}
 		}
 	}
 	if (dsPuts(";\n", bp) < 0|| dsPutTabs(level, bp) < 0 ||
 		dsPuts("}", bp) < 0) {
-		DS_ERROR(DS_E_ARRAY_TOO_SMALL);
+		DS_ERROR(DS_E_TYPE_STRING_TOO_LONG);
 	}
 	if (type->name[0] != '\0') {
 		if ((i = *pNTag) >= DS_MAX_STRUCT) {
@@ -391,7 +383,7 @@ static int dsFormatTypeSpecifierR(DS_BUF_T *bp,
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsParseType(DS_TYPE_T **pType, size_t *pSize, const char *str, const char **ptr)
+int dsParseType(DS_TYPE_T **pType, size_t *pSize, char *str, char **ptr)
 {
 	int map[DS_MAX_STRUCT], nMap, nSep;
 	size_t size;
@@ -403,7 +395,7 @@ int dsParseType(DS_TYPE_T **pType, size_t *pSize, const char *str, const char **
 	if (nBasic == 0  && !dsBasicInit()) {
 		return FALSE;
 	}
-	if (!dsFirstPass(&nSep, map, &nMap, DS_MAX_STRUCT, (char*)str)) {
+	if (!dsFirstPass(&nSep, map, &nMap, DS_MAX_STRUCT, str)) {
 		return FALSE;
 	}
 	if (nMap == 0) {
@@ -522,6 +514,7 @@ static int dsParseTypeR(DS_TYPE_T **pType, DS_BUF_T *bp,
 		DS_ERROR(DS_E_SYSTEM_ERROR);
 	}
 	type->code = DS_TYPE_STRUCT;
+	type->modulus = DS_STRUCT_MODULUS;
 	type->nField = nField;
 	if (level >= DS_MAX_NEST) {
 		DS_ERROR(DS_E_NESTED_TOO_DEEP);
@@ -546,6 +539,9 @@ static int dsParseTypeR(DS_TYPE_T **pType, DS_BUF_T *bp,
 			if (!DS_REP_IS_STD(fieldType) ||
 				type->size != type->stdsize) {
 				type->flags |= DS_NOT_STD_REP;
+			}
+			if (!DS_IS_MULTI_BYTE(fieldType)) {
+				type->flags |= DS_MULTI_BYTE;
 			}
 		}
 		if (dsGetName(field->name, bp) < 0) {

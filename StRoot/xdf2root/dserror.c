@@ -7,7 +7,7 @@ modification history
 --------------------
 10aug93,whg  written
 24apr95,whg  simple multi-thread version
-22jul97,cet  add dsError
+04apr98,whg  add dsError
 */
 /*
 DESCRIPTION
@@ -17,7 +17,6 @@ error code routines...
 #include <stddef.h>
 #include <string.h>
 #define DS_PRIVATE
-#include "asuAlloc.h"
 #include "dstype.h"
 /* error information struct */
 typedef struct ds_error_info_t{
@@ -30,6 +29,26 @@ typedef struct ds_error_info_t{
 }DS_ERROR_INFO_T;
 
 static DS_ERROR_INFO_T *dsErrorInfo(void);
+/******************************************************************************
+*
+* dsError - return info string about last error
+*
+* RETURNS: none
+*/
+const char * dsError(char *str)
+{
+	static char buf[512];
+	char *ptr = buf;
+	DS_ERROR_INFO_T *pInfo =dsErrorInfo();
+
+	if (str != NULL && *str != '\0') {
+		buf[100] = '\0';
+		strcat(strncpy(buf, str, 100), ": ");
+		ptr = buf + strlen(buf);
+	}
+	sprintf(ptr,"%s - %s(%d)", pInfo->msg, pInfo->file, pInfo->line);
+	return buf;
+}
 /******************************************************************************
 *
 * dsErrorCode
@@ -126,48 +145,19 @@ void dsLogError(DS_ERROR_CODE_T code, char *msg, char *file, size_t line)
 
 	pInfo = dsErrorInfo();
 	pInfo->code = code;
-	pInfo->msg = (msg == NULL) ? "<nullMsg>" : msg;
-	pInfo->file = (file == NULL) ? "<noFile>" : file;
+	pInfo->msg = msg == NULL ? "<nullMsg>" : msg;
+	pInfo->file = file == NULL ? "<noFile>" : file;
 	pInfo->line = line;
 	return;
 }
-/**********************************************************************
+/******************************************************************************
 *
 * dsPerror - print info about last error
 *
 * RETURNS: none
 */
-void dsPerror(const char *str)
+void dsPerror(char *str)
 {
-	DS_ERROR_INFO_T *pInfo;
+	dsErrorPrint("%s\n", (char *)dsError(str));
 
-	pInfo = dsErrorInfo();
-	if (str != NULL && *str != '\0') {
-		dsErrorPrint("%s: ", str); 
-	}
-	dsErrorPrint("%s - %s(%d)\n", pInfo->msg, pInfo->file, pInfo->line);
-}
-/**********************************************************************
-*
-* dsError - return info string about last error
-*
-* RETURNS: none
-*/
-const char * dsError(const char *str)
-{
-	static char b[1024];
-	char * buff=b;
-/*xxx	char * s;					*/
-	DS_ERROR_INFO_T *pInfo;
-
-	pInfo = dsErrorInfo();
-	if (str != NULL && *str != '\0') {
-		dsErrorPrint("%s: ", str); 
-	}
-	sprintf(buff,"%s - %s(%d)\n", pInfo->msg, pInfo->file
-			, pInfo->line);
-	return buff;
-/*xxx	s = (char *)MALLOC(strlen(buff)+1);		*/
-/*xxx	strcpy(s,buff);					*/
-/*xxx	return s;					*/
 }

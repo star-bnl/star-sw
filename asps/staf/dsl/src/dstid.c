@@ -86,7 +86,7 @@ static int dsTidInit()
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsTypeSpecifier(const char **ptr, size_t *pLen, size_t tid)
+int dsTypeSpecifier(char **ptr, size_t *pLen, size_t tid)
 {
 	char buf[DS_MAX_SPEC_LEN+1], *str;
 	size_t len;
@@ -171,9 +171,9 @@ int dsTidHashStats()
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsTypeId(size_t *pTid, const char *str, const char **ptr)
+int dsTypeId(size_t *pTid, char *str, char **ptr)
 {
-	const char *next;
+	char *next;
 	size_t c, i, h, n, newSize, typeSize;
 	TID_HASH_T *entry, *sptr, *new, *tptr;
 	DS_TYPE_T *type;
@@ -226,8 +226,8 @@ if(dsTidHash[h] == NULL)dsTidSlots++;
 		dsTypeFree(type, typeSize);
 		return FALSE;
 	}
-	strncpy(new->str, str, n); 
-	new->str[ n]=0; /* hjw 19Feb98 */
+	strncpy(new->str, str, n);
+	new->str[n] = '\0';
 	new->len = n;
 	tptr = (TID_HASH_T *)&dsTidHash[h];
 
@@ -341,7 +341,7 @@ int dsTypeListCreate(size_t **pList, size_t listDim)
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsTypeListEnter(size_t *list, const char *str, const char **ptr)
+int dsTypeListEnter(size_t *list, char *str, char **ptr)
 {
 	char *name;
 	size_t h, tid;

@@ -67,7 +67,7 @@ int dsGetCell(char *address, DS_DATASET_T *pTable,
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsPutCell(const char *address, DS_DATASET_T *pTable,
+int dsPutCell(char *address, DS_DATASET_T *pTable,
 	size_t rowNumber , size_t colNumber)
 {
 	char *dst;
@@ -77,7 +77,7 @@ int dsPutCell(const char *address, DS_DATASET_T *pTable,
 		!dsColumnSize(&size, pTable, colNumber)) {
 		return FALSE;
 	}
-	memcpy((char*)dst, address, size); 
+	memcpy(dst, address, size);
 	return TRUE;
 }
 /*****************************************************************************
@@ -169,7 +169,7 @@ int dsColumnField(DS_FIELD_T **ppField, DS_DATASET_T *pTable, size_t colNumber)
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsColumnName(const char **pName, DS_DATASET_T *pTable, size_t colNumber)
+int dsColumnName(char **pName, DS_DATASET_T *pTable, size_t colNumber)
 {
 	DS_FIELD_T *pField;
 
@@ -217,7 +217,7 @@ int dsColumnTypeCode(DS_TYPE_CODE_T *pCode, DS_DATASET_T *pTable, size_t colNumb
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsColumnTypeName(const char **pName, DS_DATASET_T *pTable, size_t colNumber)
+int dsColumnTypeName(char **pName, DS_DATASET_T *pTable, size_t colNumber)
 {
 	DS_FIELD_T *pField;
 
@@ -279,7 +279,7 @@ int dsDatasetMaxEntryCount(size_t *pCount, DS_DATASET_T *pDataset)
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsDatasetName(const char **pName, DS_DATASET_T *pDataset)
+int dsDatasetName(char **pName, DS_DATASET_T *pDataset)
 {
 	if (!DS_IS_DATASET(pDataset)) {
 		DS_ERROR(DS_E_INVALID_DATASET);
@@ -293,7 +293,7 @@ int dsDatasetName(const char **pName, DS_DATASET_T *pDataset)
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsFindColumn(size_t *pColNumber, DS_DATASET_T *pTable, const char *name)
+int dsFindColumn(size_t *pColNumber, DS_DATASET_T *pTable, char *name)
 {
 	DS_FIELD_T *pField;
 	DS_TYPE_T *pType;
@@ -314,7 +314,7 @@ int dsFindColumn(size_t *pColNumber, DS_DATASET_T *pTable, const char *name)
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsFindEntry(DS_DATASET_T **ppEntry, DS_DATASET_T *pDataset, const char *path)
+int dsFindEntry(DS_DATASET_T **ppEntry, DS_DATASET_T *pDataset, char *path)
 {
 	int c;
 	size_t i;
@@ -340,7 +340,7 @@ int dsFindEntry(DS_DATASET_T **ppEntry, DS_DATASET_T *pDataset, const char *path
 * RETURNS: TRUE if success else FALSE
 */
 int dsFindTable(DS_DATASET_T **ppTable,
-	DS_DATASET_T *pDataset, const char *name, const char *typeSpecifier)
+	DS_DATASET_T *pDataset, char *name, char *typeSpecifier)
 {
 	int result;
 	DS_DATASET_T *table;
@@ -361,7 +361,7 @@ int dsFindTable(DS_DATASET_T **ppTable,
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsIsDataset(bool_t *pResult, DS_DATASET_T *handle)
+int dsIsDataset(int *pResult, DS_DATASET_T *handle)
 {
 	if (!DS_IS_VALID(handle)) {
 		DS_ERROR(DS_E_INVALID_DATASET);
@@ -375,7 +375,7 @@ int dsIsDataset(bool_t *pResult, DS_DATASET_T *handle)
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsIsTable(bool_t *pResult, DS_DATASET_T *handle)
+int dsIsTable(int *pResult, DS_DATASET_T *handle)
 {
 	if (!DS_IS_VALID(handle)) {
 		DS_ERROR(DS_E_INVALID_DATASET);
@@ -389,8 +389,8 @@ int dsIsTable(bool_t *pResult, DS_DATASET_T *handle)
 * 
 * RETURNS: TRUE if success else FALSE
 */
-int dsMapTable(DS_DATASET_T *pDataset, const char *tableName,
-	const char *typeSpecifier, size_t *pCount, char **ppData)
+int dsMapTable(DS_DATASET_T *pDataset, char *tableName,
+	char *typeSpecifier, size_t *pCount, char **ppData)
 {
 	DS_DATASET_T *table;
 
@@ -445,10 +445,8 @@ int dsSetTableRowCount(DS_DATASET_T *pTable, size_t rowCount)
 	if (!DS_IS_TABLE(pTable)) {
 		DS_ERROR(DS_E_INVALID_TABLE);
 	}
- 
  	/* OK to set a table to it's current row count */
  	if (pTable->elcount == rowCount) return TRUE;
- 
 	if (rowCount > pTable->maxcount || pTable->p.data == NULL) {
 		DS_ERROR(DS_E_INVALID_ROW_COUNT);
 	}
@@ -491,7 +489,7 @@ int dsTableDataAddress(char **pAddress, DS_DATASET_T *pTable)
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsTableIsType(bool_t *pResult, DS_DATASET_T *pTable, const char *specifier)
+int dsTableIsType(int *pResult, DS_DATASET_T *pTable, char *specifier)
 {
 	size_t tid;
 
@@ -521,7 +519,7 @@ int dsTableMaxRowCount(size_t *pCount, DS_DATASET_T *pTable)
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsTableName(const char **pName, DS_DATASET_T *pTable)
+int dsTableName(char **pName, DS_DATASET_T *pTable)
 {
 	if (!DS_IS_TABLE(pTable)) {
 		DS_ERROR(DS_E_INVALID_TABLE);
@@ -578,7 +576,7 @@ int dsTableType(DS_TYPE_T **ppType, DS_DATASET_T *pTable)
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsTableTypeName(const char **pName, DS_DATASET_T *pTable)
+int dsTableTypeName(char **pName, DS_DATASET_T *pTable)
 {
 	DS_TYPE_T *pType;
 
@@ -594,7 +592,7 @@ int dsTableTypeName(const char **pName, DS_DATASET_T *pTable)
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsTableTypeSpecifier(const char **pSpecifier, DS_DATASET_T *pTable)
+int dsTableTypeSpecifier(char **pSpecifier, DS_DATASET_T *pTable)
 {
 	return dsTypeSpecifier(pSpecifier, NULL, pTable->tid);
 }
