@@ -1,8 +1,8 @@
 /***************************************************************************
  *      
- * $Id: SVTV1P0_ADCR_SR.cxx,v 1.1 2000/06/06 18:08:31 jml Exp $
+ * $Id: SVTV1P0_ADCR_SR.cxx,v 1.2 2001/04/18 19:47:25 ward Exp $
  *      
- * Author: Jeff Landgraf, M.J. LeVine and Marcelo Munhoz(for the SVT group)
+ * Author: Jeff Landgraf, M.J. LeVine, Marcelo Munhoz, J. Schambach
  *      
  ***************************************************************************
  *      
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: SVTV1P0_ADCR_SR.cxx,v $
+ * Revision 1.2  2001/04/18 19:47:25  ward
+ * StDaqLib/SVT stuff from Jo Schambach.
+ *
  * Revision 1.1  2000/06/06 18:08:31  jml
  * Initial version of SVT Readers (author: marcello munholz, helen caines)
  *
@@ -34,7 +37,7 @@ SVTV1P0_ADCR_SR::SVTV1P0_ADCR_SR(int w, SVTV1P0_Reader *det)
   detector = det;
 
   // NULLS in banks array
-  memset((char *)banks, 0, sizeof(banks));
+  banks = (classname(Bank_SVTADCR) *)NULL;
 }
 
 SVTV1P0_ADCR_SR::SVTV1P0_ADCR_SR(int b, int l, int w, SVTV1P0_Reader *det)
@@ -46,7 +49,7 @@ SVTV1P0_ADCR_SR::SVTV1P0_ADCR_SR(int b, int l, int w, SVTV1P0_Reader *det)
   detector = det;
 
   // NULLS in banks array
-  memset((char *)banks, 0, sizeof(banks));
+  banks = (classname(Bank_SVTADCR) *)NULL;
 }
 
 int SVTV1P0_ADCR_SR::initialize()
@@ -59,25 +62,51 @@ int SVTV1P0_ADCR_SR::initialize()
 
   ANODK_entry ent;
   // store pointers to the ADCR banks
-  for (int hybrid = 1; hybrid <= SVT_HYBRIDS; hybrid++)
-    {
-      if (barrel)
-	anodkr->get(barrel, ladder, wafer, hybrid, &ent);
-      else
-	anodkr->get(wafer, hybrid, &ent);
+  int hybrid = 1; // both hybrids are in same bank
+  if (barrel)
+    anodkr->get(barrel, ladder, wafer, hybrid, &ent);
+  else
+    anodkr->get(wafer, hybrid, &ent);
+  
+  hypersector = ent.hypersector;
+  rcb = ent.rb;
+  mz = ent.mz;
+  
+  /*
+    printf("SVTV1P0_ADCR_SR::wafer = %d, hybrid = %d, hypersector = %d, rcb = %d, mz = %d\n",
+    wafer,hybrid,hypersector,rcb,mz);
+  */
 
-      hypersector = ent.hypersector;
-      rcb = ent.rb;
-      mz = ent.mz;
-
-      //printf("SVTV1P0_ADCR_SR::wafer = %d, hybrid = %d, hypersector = %d, rcb = %d, mz = %d\n",wafer,hybrid,hypersector,rcb,mz);
-
-      if ((hypersector) && (rcb) && (mz))
-	banks[hybrid-1] = detector->getBankSVTADCR(hypersector-1,rcb-1,mz-1);
-      else
-	return FALSE;      
-    }
-
+  if ((hypersector) && (rcb) && (mz)) {
+    banks = detector->getBankSVTADCR(hypersector,rcb,mz);
+    
+    if (banks) {
+      // check the format number for different raw data formats:
+      if (banks->header.FormatNumber == 2) {
+	// new format of raw data, need to convert it:
+	u_char *adc_old = (u_char *)banks->ADC;
+	u_char adc_new[6][256][128];
+	for (hybrid=0; hybrid<6; hybrid++) {
+	  u_char *ptr0   = adc_old + hybrid*128*256;
+	  u_char *ptr64  = adc_old + hybrid*128*256 + 1;
+	  u_char *ptr128 = adc_old + hybrid*128*256 + 2;
+	  u_char *ptr192 = adc_old + hybrid*128*256 + 3;
+	  for (int anode=0; anode<64; anode++)
+	    for (int tb=0; tb<128; tb++) {
+	      adc_new[hybrid][anode][tb]     = *ptr0;
+	      adc_new[hybrid][anode+64][tb]  = *ptr64;
+	      adc_new[hybrid][anode+128][tb] = *ptr128;
+	      adc_new[hybrid][anode+192][tb] = *ptr192;
+	      ptr0+=4; ptr64+=4; ptr128+=4; ptr192+=4;
+	    }
+	}
+	memcpy((void *)adc_old, (const void *)adc_new, 6*256*128);
+      } // ...if (banks->header.FormatNumber == 2
+    }   // ...if (banks
+  }
+  else
+    return FALSE;
+  
   return TRUE;
 }
 
@@ -126,15 +155,16 @@ int SVTV1P0_ADCR_SR::getSequences(int hybrid, int Anode, int *nArray,
     return -1;
   }
   
-  int offset = (ent.offset * anodkr->getADCBytes() * SVT_MZANODES) + (anodkr->getADCBytes() * (Anode-1));
+  int offset = (ent.offset * anodkr->getADCBytes() * SVT_MZANODES) + 
+    (anodkr->getADCBytes() * (Anode-1));
   *nArray = anodkr->getADCBytes();
 
   //  printf("Offset = %d\n",offset);
   // printf("array coord:  rb=%d,  mz=%d\n",ent.rb,ent.mz);
 
-  if (banks[hybrid-1] != NULL) 
+  if (banks != NULL) 
     {
-      *Array = (((u_char *)banks[hybrid-1]->ADC) + offset);
+      *Array = (((u_char *)banks->ADC) + offset);
       //      cout << "SVTV1P0_ADCR_SR::Array = " << *Array << endl;
       return 1;
     }
@@ -158,7 +188,7 @@ SVTV1P0_PEDR_SR::SVTV1P0_PEDR_SR(int w, SVTV1P0_Reader *det)
   detector = det;
 
   // NULLS in banks array
-  memset((char *)banks, 0, sizeof(banks));
+  banks = (classname(Bank_SVTPEDR) *)NULL;
   numEvents = 0;
 }
 
@@ -171,7 +201,7 @@ SVTV1P0_PEDR_SR::SVTV1P0_PEDR_SR(int b, int l, int w, SVTV1P0_Reader *det)
   detector = det;
 
   // NULLS in banks array
-  memset((char *)banks, 0, sizeof(banks));
+  banks = (classname(Bank_SVTPEDR) *)NULL;
   numEvents = 0;
 }
 
@@ -184,23 +214,43 @@ int SVTV1P0_PEDR_SR::initialize()
   int hypersector, rcb, mz;
 
   ANODK_entry ent;
-  // store pointers to the ADCR banks
-  for (int hybrid = 1; hybrid <= SVT_HYBRIDS; hybrid++)
-    {
-      if (barrel)
-	anodkr->get(barrel, ladder, wafer, hybrid, &ent);
-      else
-	anodkr->get(wafer, hybrid, &ent);
+  // store pointers to the PEDR banks
+  int hybrid = 1; // both hybrids are in same bank
+  if (barrel)
+    anodkr->get(barrel, ladder, wafer, hybrid, &ent);
+  else
+    anodkr->get(wafer, hybrid, &ent);
+  
+  hypersector = ent.hypersector;
+  rcb = ent.rb;
+  mz = ent.mz;
+  
+  banks = detector->getBankSVTPEDR(hypersector,rcb,mz);    
 
-      hypersector = ent.hypersector;
-      rcb = ent.rb;
-      mz = ent.mz;
-
-      banks[hybrid-1] = detector->getBankSVTPEDR(hypersector-1,rcb-1,mz-1);    
-
-      if (banks[hybrid-1] !=NULL) 
-	numEvents = banks[hybrid-1]->NumEvents;
-    }
+  if (banks != NULL) { 
+    numEvents = banks->NumEvents;
+    // check the format number for different raw data formats:
+    if (banks->header.FormatNumber == 2) {
+      // new format of raw data, need to convert it:
+      u_char *adc_old = (u_char *)banks->pedestal;
+      u_char adc_new[6][256][128];
+      for (hybrid=0; hybrid<6; hybrid++) {
+	u_char *ptr0   = adc_old + hybrid*128*256;
+	u_char *ptr64  = adc_old + hybrid*128*256 + 1;
+	u_char *ptr128 = adc_old + hybrid*128*256 + 2;
+	u_char *ptr192 = adc_old + hybrid*128*256 + 3;
+	for (int anode=0; anode<64; anode++)
+	  for (int tb=0; tb<128; tb++) {
+	    adc_new[hybrid][anode][tb]     = *ptr0;
+	    adc_new[hybrid][anode+64][tb]  = *ptr64;
+	    adc_new[hybrid][anode+128][tb] = *ptr128;
+	    adc_new[hybrid][anode+192][tb] = *ptr192;
+	    ptr0+=4; ptr64+=4; ptr128+=4; ptr192+=4;
+	  }
+      }
+      memcpy((void *)adc_old, (const void *)adc_new, 6*256*128);
+    } // ...if (banks->header.FormatNumber == 2
+  }   // ...if (banks != NULL
 
   return TRUE;
 }
@@ -250,16 +300,16 @@ int SVTV1P0_PEDR_SR::getSequences(int hybrid, int Anode, int *nArray,
     return -1;
   }
   
-  int offset = (ent.offset * anodkr->getPEDBytes() * SVT_MZANODES) + (anodkr->getPEDBytes() * (Anode-1));
+  int offset = (ent.offset * anodkr->getPEDBytes() * SVT_MZANODES) + 
+    (anodkr->getPEDBytes() * (Anode-1));
   *nArray = anodkr->getPEDBytes();
 
-  if (banks[hybrid-1] != NULL)
-    {
-      //      printf("Offset = %d\n",offset);
-      //      printf("array coord:  rb=%d,  mz=%d\n",ent.rb,ent.mz);
-      *Array = (((u_char *)banks[hybrid-1]->pedestal) + offset);
-      return 1;
-    }
+  if (banks != NULL) {
+    //      printf("Offset = %d\n",offset);
+    //      printf("array coord:  rb=%d,  mz=%d\n",ent.rb,ent.mz);
+    *Array = (((u_char *)banks->pedestal) + offset);
+    return 1;
+  }
   return 0;
 }
 
@@ -285,7 +335,7 @@ SVTV1P0_PRMS_SR::SVTV1P0_PRMS_SR(int w, SVTV1P0_Reader *det)
   detector = det;
 
   // NULLS in banks array
-  memset((char *)banks, 0, sizeof(banks));
+  banks = (classname(Bank_SVTRMSR) *)NULL;
   numEvents = 0;
 
 }
@@ -299,7 +349,7 @@ SVTV1P0_PRMS_SR::SVTV1P0_PRMS_SR(int b, int l, int w, SVTV1P0_Reader *det)
   detector = det;
 
   // NULLS in banks array
-  memset((char *)banks, 0, sizeof(banks));
+  banks = (classname(Bank_SVTRMSR) *)NULL;
   numEvents = 0;
 }
 
@@ -313,22 +363,43 @@ int SVTV1P0_PRMS_SR::initialize()
 
   ANODK_entry ent;
   // store pointers to the ADCR banks
-  for (int hybrid = 1; hybrid <= SVT_HYBRIDS; hybrid++)
-    {
-      if (barrel)
-	anodkr->get(barrel, ladder, wafer, hybrid, &ent);
-      else
-	anodkr->get(wafer, hybrid, &ent);
+  int hybrid = 1;
+  if (barrel)
+    anodkr->get(barrel, ladder, wafer, hybrid, &ent);
+  else
+    anodkr->get(wafer, hybrid, &ent);
+  
+  hypersector = ent.hypersector;
+  rcb = ent.rb;
+  mz = ent.mz;
+  
+  banks = detector->getBankSVTRMSR(hypersector,rcb,mz);    
+  
+  if (banks != NULL) { 
+    numEvents = banks->NumEvents;
 
-      hypersector = ent.hypersector;
-      rcb = ent.rb;
-      mz = ent.mz;
-
-      banks[hybrid-1] = detector->getBankSVTRMSR(hypersector-1,rcb-1,mz-1);    
-
-      if (banks[hybrid-1] !=NULL) 
-	numEvents = banks[hybrid-1]->NumEvents;
-    }
+    // check the format number for different raw data formats:
+    if (banks->header.FormatNumber == 2) {
+      // new format of raw data, need to convert it:
+      u_char *adc_old = (u_char *)banks->pedRMSt16;
+      u_char adc_new[6][256][128];
+      for (hybrid=0; hybrid<6; hybrid++) {
+	u_char *ptr0   = adc_old + hybrid*128*256;
+	u_char *ptr64  = adc_old + hybrid*128*256 + 1;
+	u_char *ptr128 = adc_old + hybrid*128*256 + 2;
+	u_char *ptr192 = adc_old + hybrid*128*256 + 3;
+	for (int anode=0; anode<64; anode++)
+	  for (int tb=0; tb<128; tb++) {
+	    adc_new[hybrid][anode][tb]     = *ptr0;
+	    adc_new[hybrid][anode+64][tb]  = *ptr64;
+	    adc_new[hybrid][anode+128][tb] = *ptr128;
+	    adc_new[hybrid][anode+192][tb] = *ptr192;
+	    ptr0+=4; ptr64+=4; ptr128+=4; ptr192+=4;
+	  }
+      }
+      memcpy((void *)adc_old, (const void *)adc_new, 6*256*128);
+    } // ...if (banks->header.FormatNumber == 2
+  }   // ...if (banks !=NULL
 
   return TRUE;
 }
@@ -378,14 +449,15 @@ int SVTV1P0_PRMS_SR::getSequences(int hybrid, int Anode, int *nArray,
     return -1;
   }
   
-  int offset = (ent.offset * anodkr->getRMSBytes() * SVT_MZANODES) + (anodkr->getRMSBytes() * (Anode-1));
+  int offset = (ent.offset * anodkr->getRMSBytes() * SVT_MZANODES) + 
+    (anodkr->getRMSBytes() * (Anode-1));
   *nArray = anodkr->getRMSBytes();
 
-  if (banks[hybrid-1] != NULL)
+  if (banks != NULL)
     {
-//       printf("Offset = %d\n",offset);
-//       printf("array coord:  rb=%d,  mz=%d\n",ent.rb,ent.mz);
-      *Array = (((u_char *)banks[hybrid-1]->pedRMSt16) + offset);
+      // printf("Offset = %d\n",offset);
+      // printf("array coord:  rb=%d,  mz=%d\n",ent.rb,ent.mz);
+      *Array = (((u_char *)banks->pedRMSt16) + offset);
       return 1;
     }
   return 0;

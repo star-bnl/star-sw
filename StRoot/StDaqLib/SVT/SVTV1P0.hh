@@ -1,8 +1,8 @@
 /***************************************************************************
  *      
- * $Id: SVTV1P0.hh,v 1.1 2000/06/06 18:03:10 jml Exp $
+ * $Id: SVTV1P0.hh,v 1.2 2001/04/18 19:47:25 ward Exp $
  *      
- * Author: Jeff Landgraf, M.J. LeVine and Marcelo Munhoz(for the SVT group)
+ * Author: Jeff Landgraf, M.J. LeVine, Marcelo Munhoz, J. Schambach
  *      
  ***************************************************************************
  *      
@@ -11,6 +11,9 @@
  ***************************************************************************
  *      
  * $Log: SVTV1P0.hh,v $
+ * Revision 1.2  2001/04/18 19:47:25  ward
+ * StDaqLib/SVT stuff from Jo Schambach.
+ *
  * Revision 1.1  2000/06/06 18:03:10  jml
  * Initial version of SVT Reader code author (marcello munholz, helen caines)
  *
@@ -51,12 +54,13 @@ public:
 
 
 private:
-  classname(Bank_SVTADCD) *adcd_p[SVT_HYBRIDS];
-  classname(Bank_SVTADCX) *adcx_p[SVT_HYBRIDS];
-  classname(Bank_SVTSEQD) *seqd_p[SVT_HYBRIDS];
-  classname(Bank_SVTMZCLD) *cld_p[SVT_HYBRIDS];
+  classname(Bank_SVTADCD) *adcd_p;
+  classname(Bank_SVTADCX) *adcx_p;
+  classname(Bank_SVTSEQD) *seqd_p;
+  classname(Bank_SVTMZCLD) *cld_p;
   
   int barrel, ladder, wafer;
+  int hyperSector, rcb, mezz, transitionBoard;
   int nspthybrid[SVT_HYBRIDS]; // num space pts each hybrid
   SpacePt *HybridSpacePts[SVT_HYBRIDS]; // pointer to SpacePt array for each padrow 
   struct Pad Anode_array[SVT_HYBRIDS][SVT_ANODES];
@@ -88,7 +92,7 @@ private:
   SVTV1P0_ANODK_SR *anodkr;
   u_char anodelist[SVT_HYBRIDS][SVT_ANODES];
 
-  classname(Bank_SVTADCR) *banks[SVT_HYBRIDS];
+  classname(Bank_SVTADCR) *banks;
 };
 
 // Reads the Pedestal values
@@ -98,7 +102,7 @@ private:
   int barrel, ladder, wafer;
   SVTV1P0_Reader *detector;
   SVTV1P0_ANODK_SR *anodkr;
-  classname(Bank_SVTPEDR) *banks[SVT_HYBRIDS];
+  classname(Bank_SVTPEDR) *banks;
   u_char anodelist[SVT_HYBRIDS][SVT_ANODES];
   int numEvents;
 
@@ -122,7 +126,7 @@ private:
   int barrel, ladder, wafer;
   SVTV1P0_Reader *detector;
   SVTV1P0_ANODK_SR *anodkr;
-  classname(Bank_SVTRMSR) *banks[SVT_HYBRIDS];
+  classname(Bank_SVTRMSR) *banks;
   u_char anodelist[SVT_HYBRIDS][SVT_ANODES];
   int numEvents;
 

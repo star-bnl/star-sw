@@ -1,8 +1,8 @@
 /***************************************************************************
  *      
- * $Id: SVTV1P0.cxx,v 1.1 2000/06/06 18:08:31 jml Exp $
+ * $Id: SVTV1P0.cxx,v 1.2 2001/04/18 19:47:25 ward Exp $
  *      
- * Author: Jeff Landgraf, M.J. LeVine and Marcelo Munhoz(for the SVT group)
+ * Author: Jeff Landgraf, M.J. LeVine, Marcelo Munhoz, J. Schambach
  *      
  ***************************************************************************
  *      
@@ -11,8 +11,11 @@
  ***************************************************************************
  *      
  * $Log: SVTV1P0.cxx,v $
+ * Revision 1.2  2001/04/18 19:47:25  ward
+ * StDaqLib/SVT stuff from Jo Schambach.
+ *
  * Revision 1.1  2000/06/06 18:08:31  jml
- * Initial version of SVT Readers (author: marcello munholz, helen caines)
+ * Initial version of SVT Readers (author: marcello munholz, helen caines, js)
  *
  *      
  **************************************************************************/
@@ -36,11 +39,11 @@ int SVTV1P0_ANODK_SR::initialize(int maxSector)
 
   ANODK_entry ent;
 
-  for(int hypersector = 0; hypersector < maxSector; hypersector++)
+  for(int hypersector = 1; hypersector <= maxSector; hypersector++)
     {
-      for(int rcb = 0; rcb < 6; rcb++)
+      for(int rcb = 1; rcb <= 6; rcb++)
 	{
-	  for(int mz = 0; mz < 3; mz++)
+	  for(int mz = 1; mz <= 3; mz++)
 	    {
 	    
 	      classname(Bank_SVTANODK) *raw_bank = detector->getBankSVTANODK(hypersector, rcb, mz);
@@ -66,9 +69,9 @@ int SVTV1P0_ANODK_SR::initialize(int maxSector)
 		  //if((padrow == 0xFF) && (anode == 0xFF)) continue;
 		  
 		  ent.offset = i;
-		  ent.mz = mz+1;
-		  ent.rb = rcb+1;
-		  ent.hypersector = hypersector+1;
+		  ent.mz = mz;
+		  ent.rb = rcb;
+		  ent.hypersector = hypersector;
 		  
 		  place(barrel, ladder, wafer, hybrid, &ent);
 
@@ -328,7 +331,11 @@ SVTV1P0_ANODK_SR *SVTV1P0_Reader::getANODKReader()
 {
   //  cout << "GetANODKReader" << endl;
   
-  int maxSector = pBankSVTP->header.BankLength/sizeof(Pointer)*2;
+  //JS: can't do that anymore. The SVTP bank length is now 58, just like TPC
+  // so the length has no relation to the number of sectors anymore.
+  //int maxSector = pBankSVTP->header.BankLength/sizeof(Pointer)*2;
+
+  int maxSector = 4;
   SVTV1P0_ANODK_SR *p;
   p = anodk;
   if(p == NULL)
@@ -373,13 +380,13 @@ int SVTV1P0_Reader::MemUsed()
 }
 
 // -----------------------------------------------------
-// Here lie bank retrieval functions
-// ---- These NAVAGATE to the raw banks
+// Here are the bank retrieval functions
+// ---- These NAVIGATE to the raw banks
 // ----------------------------------------------------- 
 
 classname(Bank_SVTSECP) *SVTV1P0_Reader::getBankSVTSECP(int hypersector)
 {
-  if((hypersector <=0 ) || (hypersector >= 4))
+  if((hypersector < 1 ) || (hypersector > 4))
   {
     ercpy->fprintError(ERR_BAD_ARG,__FILE__,__LINE__,"SVTSECP");
     return NULL;
@@ -424,13 +431,17 @@ classname(Bank_SVTRBP) *SVTV1P0_Reader::getBankSVTRBP(int interleaved_rb,
 					   classname(Bank_SVTSECP) *secp)
 {
   int hypersector = secp->header.BankId;
-  if ((interleaved_rb < 0) || (interleaved_rb >= 12))
+  // interleaved_rb counts from 1 to 12 
+  if ((interleaved_rb < 1) || (interleaved_rb > 12))
   {
     char str0[40];
     sprintf(str0,"getBankSVTRBP(sec %d rb %d )",hypersector,interleaved_rb);
     ercpy->fprintError(ERR_BAD_ARG,__FILE__,__LINE__,str0);
     return NULL;
   }
+
+  //convert to internal representation:
+  interleaved_rb--;
 
   //printf("getBankSVTRBP RB: %d\n",interleaved_rb);
    //   secp->print();
@@ -471,14 +482,18 @@ classname(Bank_SVTRBP) *SVTV1P0_Reader::getBankSVTRBP(int interleaved_rb,
 
 classname(Bank_SVTMZP) *SVTV1P0_Reader::getBankSVTMZP(int mz, classname(Bank_SVTRBP) *rbp)
 {
+  // mezzanine counts from 1 to 3
   int rb = rbp->header.BankId;
-  if ((mz < 0) || (mz >= 3))
+  if ((mz < 1) || (mz > 3))
   {
     char str0[40];
     sprintf(str0,"getBankSVTMZP(rb %d  mz %d )",rb,mz);
     ercpy->fprintError(ERR_BAD_ARG,__FILE__,__LINE__,str0);
     return NULL;
   }
+
+  // convert to internal representation
+  mz--;
 
   if ((!rbp->Mz[mz].offset) || (!rbp->Mz[mz].length))
   { 
@@ -519,21 +534,23 @@ classname(Bank_SVTMZP) *SVTV1P0_Reader::getBankSVTMZP(int hypersector, int rb, i
 {
   //printf("getBankSVTMZP for hypersector %d, rcb %d, mz %d\n",hypersector,rb,mz);
 
-  if ((hypersector < 0) || (hypersector >= SVT_HYPERSECTORS))
+  if ((hypersector < 1) || (hypersector > SVT_HYPERSECTORS))
   {
     char str0[40];
     sprintf(str0,"getBankSVTMZP(sec %d, rb %d, mz %d )",hypersector,rb,mz);
     ercpy->fprintError(ERR_BAD_ARG,__FILE__,__LINE__,str0);
     return NULL;
   }
-  if ((rb < 0) || (rb >= 6))
+
+  if ((rb < 1) || (rb > 6))
   {
     char str0[40];
     sprintf(str0,"getBankSVTMZP(sec %d, rb %d, mz %d )",hypersector,rb,mz);
     ercpy->fprintError(ERR_BAD_ARG,__FILE__,__LINE__,str0);
     return NULL;
   }
-  if ((mz < 0) || (mz >= 3))
+
+  if ((mz < 1) || (mz > 3))
   {
     char str0[40];
     sprintf(str0,"getBankSVTMZP(sec %d, rb %d, mz %d )",hypersector,rb,mz);
@@ -544,6 +561,9 @@ classname(Bank_SVTMZP) *SVTV1P0_Reader::getBankSVTMZP(int hypersector, int rb, i
   classname(Bank_SVTSECP) *secp = getBankSVTSECP(2*(hypersector/2)+1);
   // use odd slots 1 and 3
   if(!secp) return NULL;
+
+  // convert to internal representation:
+  hypersector--;
 
   classname(Bank_SVTRBP) *rbp;
   if (hypersector%2)             // internal hypersector odd -> hypersector even -> rb = 7 to 12 

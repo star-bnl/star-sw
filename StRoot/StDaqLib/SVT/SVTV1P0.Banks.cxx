@@ -1,8 +1,8 @@
 /***************************************************************************
  *
- * $Id: SVTV1P0.Banks.cxx,v 1.2 2000/09/30 16:14:31 fisyak Exp $
+ * $Id: SVTV1P0.Banks.cxx,v 1.3 2001/04/18 19:47:24 ward Exp $
  *
- * Author: Marcelo Munhoz
+ * Author: Marcelo Munhoz, J. Schambach
  ***************************************************************************
  *
  * Description: Overrides (mostly for the swap functions, 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: SVTV1P0.Banks.cxx,v $
+ * Revision 1.3  2001/04/18 19:47:24  ward
+ * StDaqLib/SVT stuff from Jo Schambach.
+ *
  * Revision 1.2  2000/09/30 16:14:31  fisyak
  * Add hp
  *
