@@ -10,5 +10,5 @@
 struct TpcDriftDistCorr {
   float a0;  // Qudratic interpolation for correction
   float a1;  // exp(-(a0+a1*z+a2*z*z); z is distance from membrane (z = -Z for Sector > 12)
-  float a1;  // Separate correction for outer(<=24) and inner (>24)
+  float a2;  // Separate correction for outer(<=24) and inner (>24)
 };
