@@ -235,7 +235,7 @@ STAFCV_T topCut:: DoCutTable(tdmTable *tbl,char *func,
   CutsInit();
   if(!dsuDoCuts(nbytes,(char*)mask,(char*)func,dsPtr)) {
     printf("Failure, check your cuts string for syntax errors:\n");
-    printf("%s\n",func);
+    fputs(func,stdout); printf("\n");
     FREE(mask); //*VP-phenix* 
     return 0;
   }
@@ -282,7 +282,7 @@ STAFCV_T topCut:: DoFilterTable(tdmTable *src,
   CutsInit();
   if(!dsuDoCuts(nbytes,(char*)mask,(char*)func,dsPtr)) {
     printf("Failure, check your cuts string for syntax errors:\n");
-    printf("%s\n",func);
+    fputs(func,stdout); printf("\n");
     FREE(mask); //*VP-phenix*
     return 0;
   }
