@@ -133,7 +133,7 @@ my $ROOTCINT_CPPPATH = $cscanner->iflags($env2);
 #$ROOTCINT_CPPPATH .= " -I" . $env->{ENV}->{ROOTSYS} . "/root/cint/stl";
 print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n" if $param::debug;
 $cscanner= find scan::cpp($env2->{_cwd}, $STIC_CPP);
-my $STIC_CPPPATH = $cscanner->iflags($env2); print "STIC_CPPPATH  = $STIC_CPPPATH\n";
+my $STIC_CPPPATH = $cscanner->iflags($env2);# print "STIC_CPPPATH  = $STIC_CPPPATH\n";
 my $DIR = cwd(); print "DIR = $DIR\n" if $param::debug;
 my $line;
 my @Defs = ();
@@ -290,7 +290,7 @@ if ($#idlL > -1) {
 #	push @Deps, $INCLUDE . "/St_Table.h";
 #	push @Deps, $INCLUDE . "/St_DataSet.h";
 #	push @Deps, $INCLUDE . "/tableDescriptor.h";
-	Depends $env3 [$idlCintH,$idlCintC], $LinkDef;
+#	Depends $env3 [$idlCintH,$idlCintC], $LinkDef;
 	if ($STAR_SYS !~ /^intel_wnt$/) {
 	  Command $env3 [$idlCintC, $idlCintH], @Deps,  
 	  qq (rootcint.pl %>:d -f %>:f -c  "$ROOTCINT_CPPPATH -D__ROOT__" %1:f %2:f);
