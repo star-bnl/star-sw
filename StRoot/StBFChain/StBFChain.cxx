@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.467 2005/02/22 00:01:09 fine Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.468 2005/03/03 23:41:28 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -657,6 +657,7 @@ Bfc_st BFC1[] = { // standard chains
   {"HitFilt"     ,"", "","",               "StHitFilterMaker","StHitFilterMaker","Hit filter Maker",kFALSE},
   {"Tree"        ,"OutTree","","","StTreeMaker","StTreeMaker","Write requested branches into files",kFALSE},
   {"logger"      ,""  ,"",""                                  ,"","","Use log4cxx package to manage the program messages",kFALSE},
+  {"ITTF"        ,""  ,"","",                               "","","Just to keep option ITTF==false",kFALSE},
   {"NoDefault"   ,""  ,"",""                                  ,"","","No Default consistency check",kFALSE}
 };
 
