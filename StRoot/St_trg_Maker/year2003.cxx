@@ -293,7 +293,8 @@ void St_trg_Maker::BbcDaq2003(St_dst_TrgDet *dst1) {
   int i;
   dst_TrgDet_st *tt = dst1->GetTable();
   for(i=0; i < 80 ;i++) { 
-    tt->BBC[i] = gs2003->rawTriggerDet[0].BBC[i];
+    tt->BBC[i] = (unsigned short) gs2003->rawTriggerDet[0].BBC[i];
+    //printf("DEBUG >>> %2.2d %d %c\n",i,tt->BBC[i],tt->BBC[i]);
   }
 }
 
