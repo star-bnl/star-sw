@@ -1,221 +1,6 @@
-// $Id: St_Table.cxx,v 1.84 1999/10/12 16:20:41 fine Exp $ 
-// $Log: St_Table.cxx,v $
-// Revision 1.84  1999/10/12 16:20:41  fine
-// Advanced version of St_Table::GetRowClass() method
-//
-// Revision 1.83  1999/10/04 14:39:07  fine
-// the fixed header size 20 was replaced with sizeof() operator
-//
-// Revision 1.82  1999/09/13 13:13:21  fine
-// One blank has been deleted to Draw method comment in place
-//
-// Revision 1.81  1999/09/08 00:18:08  fisyak
-// Add implementation for copy ctor of StObjArray
-//
-// Revision 1.80  1999/09/07 19:30:29  fine
-// table descriptor access has been changed. All tables are affected and must be re-compiled
-//
-// Revision 1.79  1999/09/04 00:28:02  fine
-// St_Table::NaN from VP and gloabl dataset have been introduced
-//
-// Revision 1.78  1999/09/01 22:32:54  fine
-// St_Table::Fit fixed Rene\'s bug
-//
-// Revision 1.77  1999/08/30 23:15:08  fine
-// St_Table::Fit method has been introduced
-//
-// Revision 1.76  1999/08/30 00:54:54  fine
-// Working version of St_Table::Draw NO crash on either system
-//
-// Revision 1.75  1999/08/29 02:01:33  fine
-// St_Table::Draw clean up, G__Calc is activated since it works well but too slow
-//
-// Revision 1.74  1999/08/28 01:23:12  fine
-// St_Table::Draw work well under. With no bytecode works under Linux as well
-//
-// Revision 1.73  1999/08/26 04:35:46  fine
-// St_Table::Draw() works somehow for Sun but still fail for Linux
-//
-// Revision 1.72  1999/08/25 02:45:47  fine
-// StTable::Draw works under Sun and crashes under Linux
-//
-// Revision 1.71  1999/08/21 00:40:54  fine
-// GetExpressionFileName function has been introduced
-//
-// Revision 1.70  1999/08/20 13:22:24  fine
-// new method St_Table::Draw
-//
-// Revision 1.69  1999/08/13 23:27:56  fisyak
-// remove endif
-//
-// Revision 1.68  1999/08/13 21:38:48  fine
-// if endif fixed
-//
-// Revision 1.67  1999/08/13 17:42:34  fine
-// Comments clean up
-//
-// Revision 1.66  1999/08/12 18:53:48  fine
-// clash between St_tableDescriptor::GetSize and St_Table::GetSize resolved
-//
-// Revision 1.65  1999/08/12 16:41:30  fine
-// Clean up
-//
-// Revision 1.64  1999/08/12 16:39:48  fine
-// clash between St_Table::GetSize and TArray::GEtSize has been resolved
-//
-// Revision 1.63  1999/08/11 14:44:38  fine
-// name clash with ROOT over enum resolved
-//
-// Revision 1.62  1999/08/11 00:42:33  fine
-// new I/O via St_baseDescriptor table has been implemented
-//
-// Revision 1.61  1999/08/02 00:53:14  fine
-// St_Table::New - protection against of zero pointers was removed by VP demand
-//
-// Revision 1.60  1999/07/07 16:44:40  fine
-// Some print statements clean ups
-//
-// Revision 1.59  1999/07/02 21:00:31  fine
-// Browse method prints empty table now
-//
-// Revision 1.58  1999/07/01 01:45:31  fisyak
-// GetRowDescritors => GetRowDescriptors
-//
-// Revision 1.57  1999/06/27 00:46:56  fine
-// Obsolete comment deleted
-//
-// Revision 1.56  1999/06/26 01:40:56  fisyak
-// Add Valery's abstract buffer
-//
-// Revision 1.55  1999/06/25 17:29:14  fine
-// Some bugs with a new Streamer fixed
-//
-// Revision 1.54  1999/06/25 01:35:53  fine
-// New streamers for St_Tables
-//
-// Revision 1.53  1999/05/06 02:17:37  perev
-// Supress warnings in Table if <100 rows
-//
-// Revision 1.52  1999/04/02 15:48:19  fine
-// Minor casting problem for VC++ has been solved
-//
-// Revision 1.51  1999/04/01 20:17:20  fine
-//  St_Table::Browse uses GetNRows rows at most now
-//
-// Revision 1.50  1999/03/30 23:24:50  fine
-//  Some comments fixed
-//
-// Revision 1.49  1999/03/11 00:34:45  perev
-// St_base in new maker schema
-//
-// Revision 1.48  1999/03/04 01:26:03  fine
-// minor change in the comments
-//
-// Revision 1.47  1999/02/28 20:21:43  fine
-// operator = reallocates the target table to fit used rows only, not allocated as before
-//
-// Revision 1.46  1999/02/24 17:10:57  fine
-//  St_Table  New and Purge method have been introdiced, some clean up for St_module as well
-//
-// Revision 1.45  1999/02/22 23:54:37  fine
-// St_Table::New() - method has been prepared but not activated yet
-//
-// Revision 1.44  1999/02/17 22:38:23  fisyak
-// Victor fix for short print out
-//
-// Revision 1.43  1999/02/17 16:09:41  fisyak
-// Fix Adopt
-//
-// Revision 1.42  1999/02/15 14:20:33  fisyak
-// remove staf stuff
-//
-// Revision 1.41  1999/02/04 15:38:45  fine
-//  St_Table::SavePrimitive - some extra protections have been introduced. Thanks Victor Perevoztchikov
-//
-// Revision 1.40  1999/02/03 23:19:15  fine
-// St_Table:: protection for SavePrimitive has been introduced
-//
-// Revision 1.39  1999/01/31 02:03:08  fine
-// St_DataSetIter::Notify - new method + clean up
-//
-// Revision 1.38  1999/01/30 18:29:29  fine
-// Clean up
-//
-// Revision 1.37  1999/01/30 04:24:22  fine
-// St_Table: Print memory leak fixed
-//
-// Revision 1.36  1999/01/29 19:20:55  fine
-// St_Table::SavePrimitive The protection against of undefined table has been introduced
-//
-// Revision 1.35  1999/01/27 15:30:36  fine
-// ArrayIndex is renamed to ArrayLayout to reflect its function
-//
-// Revision 1.34  1998/12/30 22:30:18  fine
-// St_Table::PrintHrader method has been introduced
-//
-// Revision 1.33  1998/12/21 19:45:47  fisyak
-// Move ROOT includes to non system
-//
-// Revision 1.32  1998/12/17 16:57:56  fine
-// St_Table: some extra protections have been established (safe "strncat" have replaced the  unsafe  "strncpy")
-//
-// Revision 1.31  1998/12/17 14:36:51  fisyak
-// fix Print for empty tablea, fix copy ctor
-//
-// Revision 1.30  1998/12/09 20:55:28  fine
-// St_Table::Print() method bug has been fixed, some cosmetic improvements
-//
-// Revision 1.29  1998/12/07 20:23:11  fine
-// St_Table:: working versions of the Print() and SavePrimitive methods
-//
-// Revision 1.28  1998/12/07 03:57:42  fine
-// St_Table::SavePrimitive () method has been introduced
-//
-// Revision 1.27  1998/12/06 00:38:16  fisyak
-// Add SavePrimitive
-//
-// Revision 1.25  1998/12/04 01:54:44  fine
-// St_Table::Print(...) - The first version of the table browser has been introduced
-//
-// Revision 1.24  1998/10/31 00:20:14  fisyak
-// Add ds2ReallocTable
-//
-// Revision 1.23  1998/10/14 22:40:48  fine
-// St_Table::ReAllocate method and "plain" C interface to that has been introduced
-//
-// Revision 1.20  1998/10/04 02:20:12  fine
-// St_Table.h Some clashes with TNamed and TObject have been fixed (affected Delete() method)
-//
-// Revision 1.19  1998/09/28 01:47:48  fisyak
-// Use system includes for ROOT
-//
-// Revision 1.18  1998/09/23 20:22:24  fisyak
-// Set kIsNotOwn=23
-//
-// Revision 1.16  1998/09/21 15:43:02  fine
-// St_Table::Update bug has been fixed
-//
-// Revision 1.15  1998/09/16 22:08:52  fine
-// St_DataSetIter - big in dtor has been fixed
-// St_Table, St_DataSet - ls method has been improved
-//
-// Revision 1.14  1998/09/15 20:55:33  fisyak
-// Split St_DataSet -> St_DataSet + St_DataSetIter
-//
-// Revision 1.11  1998/09/07 19:23:39  fine
-// St_Table::Print() - malloc/free have been replaced with new [] / delete []  due a problem under Linux
-// St_DataSet::~St_DataSet has been changed to take in account the "structural" links. Some opt have been done too
-//
-// Revision 1.10  1998/08/18 14:05:07  fisyak
-// Add to bfc dst
-//
-// Revision 1.9  1998/07/23 22:12:00  fisyak
-// Recover after Correction for root 2.09
-//
-// Revision 1.8  1998/07/23 21:09:14  fisyak
-// Adjust for ROOT 2.09
-// 
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
+// $Id: St_Table.cxx,v 1.85 1999/10/17 23:19:41 fine Exp $ 
+// 
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
 //
@@ -1168,6 +953,45 @@ void St_Table::AddAt(const void *row, Int_t i)
    memcpy(s_Table+i*(*s_Size),row,*s_Size);
    *s_MaxIndex = TMath::Max((Int_t)i+1,Int_t(*s_MaxIndex));
 }
+
+#if 0
+//_______________________________________________________________________
+void St_Table::Append(St_Table *donorTable, Int_t nRows, Int_t firstRows)
+{
+ // (not tested yet )
+ // St_Table::Append copies the data from one table to this one 
+ //                  after the last used row of this table (append)
+ //  
+ //  Int_t nRows     - the number of the "donor" rows to be appended
+ //                    = 0  by defaul all "used" rows of the donor table
+ //                         will be appened
+ //  Int_t firstRows - the index of the first row of the donor table to 
+ //                    be copied into the this
+ //
+ // Note:  this St_Table must be an "owner" the current table.
+ // ----
+
+  if (!donorTable || !donorTable->GetNRows() ) return;
+  assert(!TestBit(kIsNotOwn));
+
+  // Check whether the new table has the same type 
+  if (strcmp(GetTitle(),donorTable->GetTitle()) == 0 ) 
+  {
+    // Calculate the number of the rows to copy
+    if (!nRows) nRows = donorTable->GetNRows();
+    Int_t extraRows = firstRows+nRows - donorTable->GetNRows();
+    if (extraRows > 0) nRows -= extraRows;
+    // Calculate the size to reallocate
+    Int_t reallocate = GetNRows() + nRows - GetSize();
+    if ( reallocate > 0 ) ReAllocate(reallocate);
+    ::memcpy((*this)[GetNRows()],(*donorTable)[firstRows],GetRowSize()*nRows);
+  }
+  else
+     Error("Update",
+           "This table is <%s> but the host one has a wrong type <%s>",GetTitle()
+          ,donorTable->GetTitle());
+}
+#endif
  
 //______________________________________________________________________________
 void St_Table::CopyStruct(Char_t *dest, const Char_t *src)
@@ -2816,4 +2640,223 @@ Int_t        St_Table::GetDimensions(const Char_t *columnName) const {return Get
 St_Table::EColumnType  St_Table::GetColumnType(Int_t columnIndex)  const {return GetRowDescriptors()->GetColumnType(columnIndex); }
 St_Table::EColumnType  St_Table::GetColumnType(const Char_t *columnName) const {return GetRowDescriptors()->GetColumnType(columnName); }
 
+
+// $Log: St_Table.cxx,v $
+// Revision 1.85  1999/10/17 23:19:41  fine
+// The draft os St_Table::Append has been added
+//
+// Revision 1.84  1999/10/12 16:20:41  fine
+// Advanced version of St_Table::GetRowClass() method
+//
+// Revision 1.83  1999/10/04 14:39:07  fine
+// the fixed header size 20 was replaced with sizeof() operator
+//
+// Revision 1.82  1999/09/13 13:13:21  fine
+// One blank has been deleted to Draw method comment in place
+//
+// Revision 1.81  1999/09/08 00:18:08  fisyak
+// Add implementation for copy ctor of StObjArray
+//
+// Revision 1.80  1999/09/07 19:30:29  fine
+// table descriptor access has been changed. All tables are affected and must be re-compiled
+//
+// Revision 1.79  1999/09/04 00:28:02  fine
+// St_Table::NaN from VP and gloabl dataset have been introduced
+//
+// Revision 1.78  1999/09/01 22:32:54  fine
+// St_Table::Fit fixed Rene\'s bug
+//
+// Revision 1.77  1999/08/30 23:15:08  fine
+// St_Table::Fit method has been introduced
+//
+// Revision 1.76  1999/08/30 00:54:54  fine
+// Working version of St_Table::Draw NO crash on either system
+//
+// Revision 1.75  1999/08/29 02:01:33  fine
+// St_Table::Draw clean up, G__Calc is activated since it works well but too slow
+//
+// Revision 1.74  1999/08/28 01:23:12  fine
+// St_Table::Draw work well under. With no bytecode works under Linux as well
+//
+// Revision 1.73  1999/08/26 04:35:46  fine
+// St_Table::Draw() works somehow for Sun but still fail for Linux
+//
+// Revision 1.72  1999/08/25 02:45:47  fine
+// StTable::Draw works under Sun and crashes under Linux
+//
+// Revision 1.71  1999/08/21 00:40:54  fine
+// GetExpressionFileName function has been introduced
+//
+// Revision 1.70  1999/08/20 13:22:24  fine
+// new method St_Table::Draw
+//
+// Revision 1.69  1999/08/13 23:27:56  fisyak
+// remove endif
+//
+// Revision 1.68  1999/08/13 21:38:48  fine
+// if endif fixed
+//
+// Revision 1.67  1999/08/13 17:42:34  fine
+// Comments clean up
+//
+// Revision 1.66  1999/08/12 18:53:48  fine
+// clash between St_tableDescriptor::GetSize and St_Table::GetSize resolved
+//
+// Revision 1.65  1999/08/12 16:41:30  fine
+// Clean up
+//
+// Revision 1.64  1999/08/12 16:39:48  fine
+// clash between St_Table::GetSize and TArray::GEtSize has been resolved
+//
+// Revision 1.63  1999/08/11 14:44:38  fine
+// name clash with ROOT over enum resolved
+//
+// Revision 1.62  1999/08/11 00:42:33  fine
+// new I/O via St_baseDescriptor table has been implemented
+//
+// Revision 1.61  1999/08/02 00:53:14  fine
+// St_Table::New - protection against of zero pointers was removed by VP demand
+//
+// Revision 1.60  1999/07/07 16:44:40  fine
+// Some print statements clean ups
+//
+// Revision 1.59  1999/07/02 21:00:31  fine
+// Browse method prints empty table now
+//
+// Revision 1.58  1999/07/01 01:45:31  fisyak
+// GetRowDescritors => GetRowDescriptors
+//
+// Revision 1.57  1999/06/27 00:46:56  fine
+// Obsolete comment deleted
+//
+// Revision 1.56  1999/06/26 01:40:56  fisyak
+// Add Valery's abstract buffer
+//
+// Revision 1.55  1999/06/25 17:29:14  fine
+// Some bugs with a new Streamer fixed
+//
+// Revision 1.54  1999/06/25 01:35:53  fine
+// New streamers for St_Tables
+//
+// Revision 1.53  1999/05/06 02:17:37  perev
+// Supress warnings in Table if <100 rows
+//
+// Revision 1.52  1999/04/02 15:48:19  fine
+// Minor casting problem for VC++ has been solved
+//
+// Revision 1.51  1999/04/01 20:17:20  fine
+//  St_Table::Browse uses GetNRows rows at most now
+//
+// Revision 1.50  1999/03/30 23:24:50  fine
+//  Some comments fixed
+//
+// Revision 1.49  1999/03/11 00:34:45  perev
+// St_base in new maker schema
+//
+// Revision 1.48  1999/03/04 01:26:03  fine
+// minor change in the comments
+//
+// Revision 1.47  1999/02/28 20:21:43  fine
+// operator = reallocates the target table to fit used rows only, not allocated as before
+//
+// Revision 1.46  1999/02/24 17:10:57  fine
+//  St_Table  New and Purge method have been introdiced, some clean up for St_module as well
+//
+// Revision 1.45  1999/02/22 23:54:37  fine
+// St_Table::New() - method has been prepared but not activated yet
+//
+// Revision 1.44  1999/02/17 22:38:23  fisyak
+// Victor fix for short print out
+//
+// Revision 1.43  1999/02/17 16:09:41  fisyak
+// Fix Adopt
+//
+// Revision 1.42  1999/02/15 14:20:33  fisyak
+// remove staf stuff
+//
+// Revision 1.41  1999/02/04 15:38:45  fine
+//  St_Table::SavePrimitive - some extra protections have been introduced. Thanks Victor Perevoztchikov
+//
+// Revision 1.40  1999/02/03 23:19:15  fine
+// St_Table:: protection for SavePrimitive has been introduced
+//
+// Revision 1.39  1999/01/31 02:03:08  fine
+// St_DataSetIter::Notify - new method + clean up
+//
+// Revision 1.38  1999/01/30 18:29:29  fine
+// Clean up
+//
+// Revision 1.37  1999/01/30 04:24:22  fine
+// St_Table: Print memory leak fixed
+//
+// Revision 1.36  1999/01/29 19:20:55  fine
+// St_Table::SavePrimitive The protection against of undefined table has been introduced
+//
+// Revision 1.35  1999/01/27 15:30:36  fine
+// ArrayIndex is renamed to ArrayLayout to reflect its function
+//
+// Revision 1.34  1998/12/30 22:30:18  fine
+// St_Table::PrintHrader method has been introduced
+//
+// Revision 1.33  1998/12/21 19:45:47  fisyak
+// Move ROOT includes to non system
+//
+// Revision 1.32  1998/12/17 16:57:56  fine
+// St_Table: some extra protections have been established (safe "strncat" have replaced the  unsafe  "strncpy")
+//
+// Revision 1.31  1998/12/17 14:36:51  fisyak
+// fix Print for empty tablea, fix copy ctor
+//
+// Revision 1.30  1998/12/09 20:55:28  fine
+// St_Table::Print() method bug has been fixed, some cosmetic improvements
+//
+// Revision 1.29  1998/12/07 20:23:11  fine
+// St_Table:: working versions of the Print() and SavePrimitive methods
+//
+// Revision 1.28  1998/12/07 03:57:42  fine
+// St_Table::SavePrimitive () method has been introduced
+//
+// Revision 1.27  1998/12/06 00:38:16  fisyak
+// Add SavePrimitive
+//
+// Revision 1.25  1998/12/04 01:54:44  fine
+// St_Table::Print(...) - The first version of the table browser has been introduced
+//
+// Revision 1.24  1998/10/31 00:20:14  fisyak
+// Add ds2ReallocTable
+//
+// Revision 1.23  1998/10/14 22:40:48  fine
+// St_Table::ReAllocate method and "plain" C interface to that has been introduced
+//
+// Revision 1.20  1998/10/04 02:20:12  fine
+// St_Table.h Some clashes with TNamed and TObject have been fixed (affected Delete() method)
+//
+// Revision 1.19  1998/09/28 01:47:48  fisyak
+// Use system includes for ROOT
+//
+// Revision 1.18  1998/09/23 20:22:24  fisyak
+// Set kIsNotOwn=23
+//
+// Revision 1.16  1998/09/21 15:43:02  fine
+// St_Table::Update bug has been fixed
+//
+// Revision 1.15  1998/09/16 22:08:52  fine
+// St_DataSetIter - big in dtor has been fixed
+// St_Table, St_DataSet - ls method has been improved
+//
+// Revision 1.14  1998/09/15 20:55:33  fisyak
+// Split St_DataSet -> St_DataSet + St_DataSetIter
+//
+// Revision 1.11  1998/09/07 19:23:39  fine
+// St_Table::Print() - malloc/free have been replaced with new [] / delete []  due a problem under Linux
+// St_DataSet::~St_DataSet has been changed to take in account the "structural" links. Some opt have been done too
+//
+// Revision 1.10  1998/08/18 14:05:07  fisyak
+// Add to bfc dst
+//
+// Revision 1.9  1998/07/23 22:12:00  fisyak
+// Recover after Correction for root 2.09
+//
+// Revision 1.8  1998/07/23 21:09:14  fisyak
+// Adjust for ROOT 2.09
 
