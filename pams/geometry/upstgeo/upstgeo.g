@@ -8,7 +8,8 @@ Module UPSTGEO is the geometry  of the UPSTREAM AreA.
 *
       Content  UPST,PUPD,PUPE,PUPF,DXMG,PVAD,PVAE,DCON,PUPG,DVAC,PVAG
 *
-      Structure PIPU { Version, DZ_upst, P1InnR, P1OutR, P1Leng,
+      Structure PIPU { Version,  Zposit, DZ_upst, 
+                        P1InnR,  P1OutR, P1Leng,
                         P2InnR,  P2OutR, P2Leng,
                         P3InnR,  P3OutR, P3Leng,
                         DXInnR,  DXOutR, DXLeng,
@@ -21,7 +22,8 @@ Module UPSTGEO is the geometry  of the UPSTREAM AreA.
 * -----------------------------------------------------------------------------
 *
    FILL PIPU    !  Beam Pipe data
-      version   = 1      ! geometry version  
+      version   = 1       ! geometry version  
+      Zposit    = 1131.83 ! position of the upstream part
       DZ_upst   = 385.63 ! Half length of the UPSTREAM mother volume
       P1InnR    = 6.08   ! Inner radius of Pipe in Hall
       P1OutR    = 6.35   ! Outer radius of pipe in Hall
@@ -55,8 +57,9 @@ Module UPSTGEO is the geometry  of the UPSTREAM AreA.
       Z6 = z5 + pipu_cleng                ! End of DX Cone      (283.63)
 *
       Create   UPST
-      Position UPST in CAVE z=1131.83    ! Leaves a 2 mm gap after pipegeo
-      Position UPST in CAVE z=-1131.83 ThetaZ=180
+* Leaves a 2 mm gap after pipegeo
+      Position UPST in CAVE z=pipu_Zposit  Konly='Many'  
+      Position UPST in CAVE z=-pipu_Zposit ThetaZ=180   Konly='Many'  
 *
 * -----------------------------------------------------------------------------
 Block UPST is the upstream mother volume in the STAR cave 
