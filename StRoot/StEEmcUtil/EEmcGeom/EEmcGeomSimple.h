@@ -5,7 +5,7 @@
 #ifndef EEmcGeomSimple_h
 #define EEmcGeomSimple_h
 /*********************************************************************
- * $Id: EEmcGeomSimple.h,v 1.19 2004/06/01 21:20:49 balewski Exp $
+ * $Id: EEmcGeomSimple.h,v 1.20 2004/06/03 20:59:54 zolnie Exp $
  *********************************************************************
  * Description:
  * STAR Endcap Electromagnetic Calorimeter Simple Geometry Class
@@ -13,9 +13,8 @@
  */
 
 
-
-
 #include "TObject.h"
+#include "TMath.h"
 #include "TVector3.h"
 
 
@@ -35,7 +34,6 @@ public:
 /// class EEmcGeomSimple
 class  EEmcGeomSimple : public TObject { 
 public:
-  static const double TwoPi; 
 
   /// chirality defined
   enum Chiral_t { CounterClockwise=-1, Clockwise=1, Undefined=0};
@@ -58,13 +56,26 @@ public:
   /// \return direction as TVector3
   TVector3 getDirection  (const Float_t xetaBin, const Float_t xphiBin) const;
 
-  /// gets tower ID from 'direction' vector from (0,0,0) toward a point on EEMC
-  /// \param  r - input direction
-  /// \param all the rest are output values, indexing is from zero
-  /// rPhi, rEta are fractions of the distance between center of the tower & direction   
-  void direction2tower( TVector3 r,
-			int &iSec, int &iSub, int &iEta, float &rPhi  , float &rEta );
+  /// gets tower ID given 'direction' vector r (only eta and phi are relevant, z is ignored)
+  /// \param  r   - direction vecrot
+  /// \param  sec     sector index    [0,mNumSec )
+  /// \param  sub     subsector index [0,mNumSSec)
+  /// \param  etabin  tile/eta index  [0,mNumEta )
+  /// \param  dphi    fractional distance from the tower center in units of phiHW=getPhiHalfWidth(sec,sub)
+  /// \param  deta    fractional distance from the tower center in units of etaHW=getEtaHalfWidth(etabin)
+  /// \return true    if r points toward a tower and false if does not
+  bool     getTower(const TVector3& r, int &sec, int &sub, int &etabin, Float_t &dphi, Float_t &deta) const;
 
+  /// gets tower ID given 'direction' vector r (only eta and phi are relevant, z is ignored)
+  /// \param  r   - direction vecrot
+  /// \param  sec     sector index    [0,mNumSec )
+  /// \param  sub     subsector index [0,mNumSSec)
+  /// \param  etabin  tile/eta index  [0,mNumEta )
+  /// \return true    if r points toward a tower and false if does not
+  bool     getTower(const TVector3& r, int &sec, int &sub, int &etabin) const { 
+    Float_t dphi,deta;
+    return getTower(r,sec,sub,etabin,dphi,deta);
+  };
 
   
   /// gets lower Z edge of EEMC (preshower)
@@ -96,7 +107,7 @@ public:
   /// \param sec sector index [0,mNumSec)
   inline Float_t getPhiMean(UInt_t sec) const {
     //const  double dPhi=2.0*M_PI/mNumSec;
-    const  double dPhi= TwoPi/mNumSec;
+    const  double dPhi= TMath::TwoPi()/mNumSec;
     if(mNumSec<=sec) throw EEmcGeomException("getPhiMean: invalid sector index");
     return AdjustAngle(mClock*(sec+0.5L)*dPhi+mPhi0);
   }
@@ -106,7 +117,7 @@ public:
   /// \param ssec subsector index [0,mNumSSec)
   inline Float_t getPhiMean(UInt_t sec, UInt_t ssec) const {
     //const double dPhi=2.0*M_PI/mNumSec;
-    const double dPhi=TwoPi/mNumSec;
+    const double dPhi=TMath::TwoPi()/mNumSec;
     if(mNumSec <=sec ) throw EEmcGeomException("getPhiMean: invalid sector index");
     if(mNumSSec<=ssec) throw EEmcGeomException("getPhiMean: invalid subsector index");
     return AdjustAngle(mClock*(Double_t(sec)+(ssec+0.5L)/mNumSSec)*dPhi+mPhi0);
@@ -117,7 +128,7 @@ public:
   /// \param ssec subsector index [0,mNumSSec)
   inline Float_t getPhiHalfWidth(UInt_t sec=0, UInt_t ssec=0) const {
     //const double dPhi=2.0*M_PI/mNumSec;
-    const double dPhi=TwoPi/mNumSec;
+    const double dPhi=TMath::TwoPi()/mNumSec;
     if(mNumSec <=sec ) throw EEmcGeomException("getPhiMean: invalid sector index");
     if(mNumSSec<=ssec) throw EEmcGeomException("getPhiMean: invalid subsector index");
     return (Float_t)(0.5L/mNumSSec*dPhi);
@@ -166,10 +177,10 @@ protected:
 
   void    useDefaultGeometry();
   
-  // adjust angle so it falls into [0,pi) interval
+  // adjust angle so it falls into [-pi,pi] interval
   static inline double AdjustAngle(double alpha) { 
-    while(alpha<0    ) alpha += TwoPi;
-    while(alpha>TwoPi) alpha -= TwoPi;
+    while(alpha<-TMath::Pi() ) alpha += TMath::TwoPi();
+    while(alpha> TMath::Pi() ) alpha -= TMath::TwoPi();
     return alpha;
   }
 
@@ -187,6 +198,11 @@ private:
 
 /*********************************************************************
  * $Log: EEmcGeomSimple.h,v $
+ * Revision 1.20  2004/06/03 20:59:54  zolnie
+ * - phi angle now adjusted to [-pi,pi] interval in accordace to TVecror3 convention
+ * - replaced Jan's interesting implementation of direction2tower method with
+ * a resurrected getTower (formerly getHit) method see EEmcGeomSimple.h
+ *
  * Revision 1.19  2004/06/01 21:20:49  balewski
  * direction2tower ()
  *

@@ -1,4 +1,4 @@
-// $Id: EEmcGeomSimple.cxx,v 1.21 2004/06/01 21:20:49 balewski Exp $
+// $Id: EEmcGeomSimple.cxx,v 1.22 2004/06/03 20:59:54 zolnie Exp $
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   Jan 14, 2003
 /// doxygen info here
@@ -11,6 +11,7 @@
 #include <cmath>
 #include <iostream>
 
+#include "TMath.h"
 #include "TVector3.h"
 
 #if 0
@@ -56,7 +57,6 @@ ClassImp(EEmcGeomSimple)
 EEmcGeomSimple EEmcGeomSimple::sInstance;
 
 //
-const double EEmcGeomSimple::TwoPi = 2.0L*M_PI;
 
 //
 EEmcGeomSimple::EEmcGeomSimple() 
@@ -148,18 +148,88 @@ EEmcGeomSimple::getDirection(const Float_t xetaBin, const Float_t xphiBin) const
   // note the higher etaBin the smaller eta,
   //      the larger sec/sub the smaller phi-angle
   Double_t  phi   = getPhiMean(isec,isub) - (xphiBin-iphiBin)*2*getPhiHalfWidth(isec,isub) ;
-
-  Double_t  eta   = getEtaMean(ietaBin) - (xetaBin-ietaBin)*2*getEtaHalfWidth(ietaBin);
-  //  printf("getDirection(xetaBin=%f, xphiBin=%f)--> eta=%f, phi=%f\n",xetaBin,xphiBin,eta,phi);
+  Double_t  eta   = getEtaMean(ietaBin)   - (xetaBin-ietaBin)*2*getEtaHalfWidth(ietaBin);
   if(eta<0.0) throw EEmcGeomException("invalid eta");
-    Double_t  z     = getZMean();
+  Double_t  z     = getZMean();
   Double_t  rho   = z/sinh(eta);  
 
-  //printf("getDirection(xetaBin=%f, xphiBin=%f)--> eta=%f, phi=%f, x=%f, y=%f z=%f\n",xetaBin,xphiBin,eta,phi,rho*cos(phi),rho*sin(phi),z);
-  // create vector pointing toward the center of the tower
+  // create vector pointing toward's the point in the tower
   return TVector3(rho*cos(phi),rho*sin(phi),z);
 }
 
+
+
+
+
+// =========================================================================
+// gets a hit vector r checks if inside the EEmc
+// and returns sector (0..mNumSec-1), subsector (0..mNumSSec-1) 
+// and eta(0..mNumEta)
+// =========================================================================
+bool
+EEmcGeomSimple::getTower(const TVector3& r, 
+			 int     &sec , int     &sub, int    &eta,
+			 Float_t &dphi, Float_t &deta) const
+{
+  const double dPhiSec  = 2.0*M_PI/mNumSec; // phi width of a sector
+  const double dPhiSub  = dPhiSec/mNumSSec; // phi width of a subsector
+
+  // some shorcuts
+  // double rZ  = r.Z();
+  double  rEta  = r.Eta();
+  double  rPhi  = r.Phi();
+  double  rPhi0 = r.Phi() - mPhi0;
+
+  sec=sub=eta=-1; // set invalid values
+
+  // check if inside EEMC
+  //if(rZ  <mZ1            || mZ2<rZ          ) return false; // do not check the z-depth
+  // FIXME assumes that mEtaBin[i] decreas monotonically with increasing i
+  if(rEta<mEtaBin[mNumEta] || mEtaBin[0]<rEta ) return false; 
+
+  // ------------------------------------------------------------------------  
+  // get the eta index
+  // FIXME assumes that mEtaBin[i] decreas monotonically with increasing i
+  // TODO use bisection for (slightly) faster search
+  for(eta=mNumEta;eta>=0;eta--) if(rEta<mEtaBin[eta]) break;
+#if 0 /* use bisection */
+  int ek=0;
+  int el=mNumEta;
+  eta=(ek+el)/2;
+  while(ek!=eta) {  
+    if( mEtaBin[eta]<rEta) 
+      el=eta;
+    else
+      ek=eta;
+    eta=(ek+el)/2;
+  } 
+#endif
+  
+  // ------------------------------------------------------------------------
+  // get the sector index
+  int   k = isClockwise() ? (int)floor(rPhi0/dPhiSec) : (int) ceil(rPhi0/dPhiSec);
+  sec = mClock*k;
+  while(sec<0) sec+=mNumSec;           // adjust the numbers to [0,mNumSec)
+  sec %= mNumSec; // 
+
+  // ------------------------------------------------------------------------
+  // get the subsector index
+  int   m = isClockwise() ? (int)floor(rPhi0/dPhiSub) : (int) ceil(rPhi0/dPhiSub);
+  sub = mClock*m;
+  while(sub<0) sub+=mNumSSec*mNumSec;  // adjust the numbers to [0,mNumSec)
+  sub %= mNumSSec;// 
+
+
+  // ------------------------------------------------------------------------
+  // these are (very) fast inline's
+  dphi = fmod((getPhiMean(sec,sub) - rPhi),TMath::TwoPi()) / getPhiHalfWidth(sec,sub);
+  deta =      (getEtaMean(eta)     - rEta                ) / getEtaHalfWidth(eta);
+
+  return true;
+}
+
+
+#if 0
 
 // converts direction vector 'r' to sec/sub/eta bin. All counted from zero.
 void 
@@ -169,7 +239,7 @@ EEmcGeomSimple::direction2tower( TVector3 r,
   // printf("in GetTowNo() \n");
   
   //printf("intersection at x/y/z=%f/%f/%f\n",r.x(),r.y(),r.z());
-  
+
   float eta=r.Eta();
   float phiDeg=180.*r.Phi()/3.14159;
   float phi=phiDeg -75;
@@ -192,49 +262,10 @@ EEmcGeomSimple::direction2tower( TVector3 r,
     if(i>0 && i<=12) rEta= -(dEB[i]+dEB[i-1]-2*eta)/2./(dEB[i]-dEB[i-1]);
     break;
   }
-
   // printf("  ix=%d sec=%d sub=%c  eta=%d\n",ix,iSec+1,iSub+'A',iEta+1);
+
 }
 
-
-
-#if 0
-// =========================================================================
-// gets a hit vector r checks if inside the EEmc
-// and returns sector (0..mNumSec-1), subsector (0..mNumSSec-1) 
-// and eta(0..mNumEta)
-// =========================================================================
-int 
-EEmcGeomSimple::getHit(const StThreeVectorD& point,  StEmcRawHit &hit) const
-{
-  double dPhiSec  = 2.0*M_PI/mNumSec;
-  
-  // some shorcuts
-  double  rZ    = point.z();
-  double  rEta  = point.pseudoRapidity();
-  double  rPhi  = point.phi() - mPhi0;
-
-  // check if inside 
-  if(rZ  <mZ1              || mZ2<rZ          ) return 0; 
-  if(rEta<mEtaBin[mNumEta] || mEtaBin[0]<rEta ) return 0; 
-  
-  UInt_t eta = 0;
-  for(eta=0;eta<=mNumEta;eta++) if(mEtaBin[eta]<rEta) break;
-  --eta; // step back
-
-  // ------------------------------------------------------------------------
-  // this code is a wonder code  - I do not know how it works ;) /paz/
-  // get the sector number - 1
-  int k = isClockwise() ? (int)floor(rPhi/dPhiSec) : (int)ceil(rPhi/dPhiSec);
-  // adjust to 0..(mNumSec-1)
-  UInt_t sec    = (mNumSec + mClock*k) % mNumSec; 
-  // get the subsector
-  UInt_t subsec = (int) ( ((k*dPhiSec - rPhi)/dPhiSec*mNumSSec) ) % mNumSSec;
-  // ------------------------------------------------------------------------
-
-  hit.setId(kEndcapEmcTowerId,sec,eta,subsec);
-  return 1;
-}
 
 // compute the distance of a point from the center of a tower pointed by hit
 Float_t 
@@ -297,6 +328,11 @@ EEmcGeomSimple::getTrackPoint(const StTrack& track, Double_t z) const
 
 
 // $Log: EEmcGeomSimple.cxx,v $
+// Revision 1.22  2004/06/03 20:59:54  zolnie
+// - phi angle now adjusted to [-pi,pi] interval in accordace to TVecror3 convention
+// - replaced Jan's interesting implementation of direction2tower method with
+// a resurrected getTower (formerly getHit) method see EEmcGeomSimple.h
+//
 // Revision 1.21  2004/06/01 21:20:49  balewski
 // direction2tower ()
 //
