@@ -11,6 +11,7 @@
 #include "St_DataSetIter.h"
 #include "StDAQMaker/StDAQReader.h"
 #include "StDAQMaker/StTRGReader.h"
+#include "StDAQMaker/StSSDReader.h"
 #include "tables/St_dst_L0_Trigger_Table.h" // 24dec99
 #include "tables/St_dst_L1_Trigger_Table.h" // 02feb00
 #include "tables/St_dst_L2_Trigger_Table.h" // 02feb00
@@ -128,6 +129,63 @@ Int_t St_trg_Maker::Make(){
   //    printf("EEMC crate=%3d chan=%3d ADC=%5d\n",crate,chan,steemcreader->getTowerAdc(crate,chan));
   // } }
   /////////////////// END OF EXAMPLE:  HOW TO GET THE EEMC DATA /////////////////////////
+
+  ////////////////////////  EXAMPLE:  HOW TO GET SSD DATA  //////////////////////
+  // {
+  //   static int event=0;
+  //   int data,pedestal,noise,channel,ladder; char eastWest;
+  //   St_DataSet *daq = GetDataSet("StDAQReader");                 assert(daq);
+  //   StDAQReader *fromVictor = (StDAQReader*) (daq->GetObject()); assert(fromVictor);
+  //   StSSDReader *stssdreader  = fromVictor->getSSDReader();   assert(stssdreader);
+  //   
+  //   ladder=13; eastWest='W'; channel=68; // ladder numbers from 1, channel numbers from 0.
+  //   if(stssdreader->getSsdData(ladder,eastWest,channel,data,pedestal,noise)==0) {
+  //     printf("ssd physics data\n");
+  //   } else {
+  //     printf("ssd  pedestal data\n");
+  //   }
+  //   event++;
+  //   printf("ssd event %2d, %02d%c, chan %05d, data %03d\n",event,ladder,eastWest,channel,data);
+  // }
+  //////////////////////  END OF SSD EXAMPLE  //////////////////////////////////////////
+
+  // This just sort of prints out some representative SSS data for use as a baseline during development.
+  // static int call=0;
+  // int ped,noise,channel,data,debug1,debugt,ladder; char ew;
+  // St_DataSet *daq = GetDataSet("StDAQReader");                 assert(daq);
+  // StDAQReader *fromVictor = (StDAQReader*) (daq->GetObject()); assert(fromVictor);
+  // StSSDReader *stssdreader  = fromVictor->getSSDReader();   assert(stssdreader);
+  // call++;
+  // for(debug1=0;debug1<20;debug1++) {
+  //   debugt=0;
+  //   switch(debug1) {
+  //     case  0: ladder=13; ew='W'; break;
+  //     case  1: ladder=12; ew='W'; break;
+  //     case  2: ladder=10; ew='W'; break;
+  //     case  3: ladder=11; ew='W'; break;
+  //     case  4: ladder= 9; ew='W'; break;
+  //     case  5: ladder=19; ew='W'; break;
+  //     case  6: ladder=20; ew='W'; break;
+  //     case  7: ladder= 2; ew='W'; break;
+  //     case  8: ladder= 1; ew='W'; break;
+  //     case  9: ladder= 3; ew='W'; break;
+  //     case 10: ladder=13; ew='E'; break;
+  //     case 11: ladder=12; ew='E'; break;
+  //     case 12: ladder=10; ew='E'; break;
+  //     case 13: ladder=11; ew='E'; break;
+  //     case 14: ladder= 9; ew='E'; break;
+  //     case 15: ladder=19; ew='E'; break;
+  //     case 16: ladder=20; ew='E'; break;
+  //     case 17: ladder= 2; ew='E'; break;
+  //     case 18: ladder= 1; ew='E'; break;
+  //     case 19: ladder= 3; ew='E'; break;
+  //   }
+  //   for(channel=0;channel<12288;channel++) {
+  //     assert(stssdreader->getSsdData(ladder,ew,channel,data,ped,noise)==0);
+  //     if(data&&debugt==0) { debugt=1; printf("BBB e_trg_=%02d lad=%02d%c channel=%05d data=%03d\n",call+1,ladder,ew,channel,data); }
+  //   }
+  // }
+
   
 
   St_DataSet *DAQdset = GetDataSet("StDAQReader");
@@ -992,8 +1050,11 @@ void St_trg_Maker::InitMwcArrays(void) {
 
 
 
-// $Id: St_trg_Maker.cxx,v 1.47 2004/01/03 03:32:26 jeromel Exp $
+// $Id: St_trg_Maker.cxx,v 1.48 2004/02/18 20:17:49 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.48  2004/02/18 20:17:49  ward
+// Access SSD data in makers.
+//
 // Revision 1.47  2004/01/03 03:32:26  jeromel
 // Temptative 2003-like approach
 //

@@ -143,7 +143,7 @@ int emcReader(char *m)
 
 	
 
-		LOG(DBG,"EMC %s: bytes %d, off %d",id2char(id),len,off,0,0) ;
+		// LOG(DBG,"EMC %s: bytes %d, off %d",id2char(id),len,off,0,0) ;
 
 		bytes += len  ;	// save
 
@@ -176,7 +176,7 @@ int emcReader(char *m)
 			cou = (b2h32(emcsecp->bh.length) - 10) / 2 ;	// contributions!
 
 
-			LOG(DBG,"EMC %s: instance %s: %d fibers possible",id2char(id),inst2char(instance),cou,0,0) ;
+			// LOG(DBG,"EMC %s: instance %s: %d fibers possible",id2char(id),inst2char(instance),cou,0,0) ;
 
 			for(j=0;j<cou;j++) {
 				len = b2h32(emcsecp->fiber[j].len) ;
@@ -187,7 +187,7 @@ int emcReader(char *m)
 
 				emcrbp = (struct EMCRBP *)((u_int *)emcsecp + off) ;
 
-				LOG(DBG,"EMC %s: instance %s: fiber %d: len %d, off %d",id2char(id),inst2char(instance),j+1,len,off) ;
+				// LOG(DBG,"EMC %s: instance %s: fiber %d: len %d, off %d",id2char(id),inst2char(instance),j+1,len,off) ;
 
 				if(checkBank(emcrbp->bh.bank_type,rbp) < 0) {
 					continue ;
@@ -196,7 +196,7 @@ int emcReader(char *m)
 
 				cou2 = (b2h32(emcrbp->bh.length) - 10) /2 ;
 
-				LOG(DBG,"EMC %s: instance %s: fiber %d: %d banks used",id2char(id),inst2char(instance),j+1,cou2,0) ;
+				// LOG(DBG,"EMC %s: instance %s: fiber %d: %d banks used",id2char(id),inst2char(instance),j+1,cou2,0) ;
 
 				emcadcr = emcadcd = NULL ;
 
@@ -225,14 +225,14 @@ int emcReader(char *m)
 
 						break ;
 					default :
-						LOG(ERR,"Unknown subbank %d in EMCRBP!",k,0,0,0,0) ;
+						// LOG(ERR,"Unknown subbank %d in EMCRBP!",k,0,0,0,0) ;
 						continue ;
 					}
 
 					// I currently only know about RAW data
 					if(emcadcr == NULL) {
-						LOG(WARN,"EMC %d: instance %d, format %d is not implemented yet!",
-						    id2char(id),inst2char(instance), k,0,0) ;
+						// LOG(WARN,"EMC %d: instance %d, format %d is not implemented yet!",
+						//    id2char(id),inst2char(instance), k,0,0) ;
 						continue ;
 					}
 
@@ -292,7 +292,7 @@ int emcReader(char *m)
 						local_token = thi * 256 + tlo ;
 
 						if(token != local_token) {
-							LOG(ERR,"ETOW: Token in bank %d different from token in data %d",token,local_token,0,0,0) ;
+							// LOG(ERR,"ETOW: Token in bank %d different from token in data %d",token,local_token,0,0,0) ;
 						}
 
 						data = (u_short *) ((u_int) emcadcr + 40 + 4 + 128) ; 
@@ -334,7 +334,7 @@ int emcReader(char *m)
 						local_token = thi * 256 + tlo ;
 
 						if(token != local_token) {
-							LOG(ERR,"ESMD: Token in bank %d different from token in data %d",token,local_token,0,0,0) ;
+							// LOG(ERR,"ESMD: Token in bank %d different from token in data %d",token,local_token,0,0,0) ;
 						}
 
 						data = (u_short *) ((u_int) emcadcr + 40 + 4 + 128) ; 
