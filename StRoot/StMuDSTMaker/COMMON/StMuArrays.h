@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.7 2004/04/09 22:06:35 subhasis Exp $
+ * $Id: StMuArrays.h,v 1.8 2004/04/26 00:13:28 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -28,40 +28,44 @@ enum pmdTypes {muPmd=0};
 /// @enum Tofr enumeration
 enum tofTypes {muTofHit=0, muTofData};
 
-#define __NARRAYS__ 9           ///< size of the 'regular stuff' arrays, i.e. number of TClonesArrays  
-#define __NSTRANGEARRAYS__ 12   ///< size of the strangeness arrays, i.e. number of TClonesArrays  
-#define __NEMCARRAYS__ 1        ///< size of the emc arrays, i.e. number of TClonesArrays  
-#define __NPMDARRAYS__ 1        ///< size of the pmd arrays, i.e. number of TClonesArrays  
-#define __NTOFARRAYS__ 2        ///< size of the tof arrays >
-
+enum NARRAYS {
+__NARRAYS__        =9,	///< size of the 'regular stuff' arrays, i.e. number of TClonesArrays  
+__NSTRANGEARRAYS__ =12,	///< size of the strangeness arrays, i.e. number of TClonesArrays  
+__NEMCARRAYS__     =1 ,	///< size of the emc arrays, i.e. number of TClonesArrays  
+__NPMDARRAYS__     =1 ,	///< size of the pmd arrays, i.e. number of TClonesArrays  
+__NTOFARRAYS__     =2 ,  ///< size of the tof arrays >
+__NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__
+};
 class StMuArrays {
  public:
-    static char* arrayNames[__NARRAYS__]; ///< names of the TBranches in the TTree/File                        
-    static char* arrayTypes[__NARRAYS__]; ///< names of the classes, the TClonesArrays are arrays of this type 
-    static int arraySizes[__NARRAYS__];   ///< maximum sizes of the TClonesArrays                              
-    static int arrayCounters[__NARRAYS__];///< number of entries in current event, currently not used          
-    
-    static char* strangeArrayNames[__NSTRANGEARRAYS__]; ///< names of the TBranches in the TTree/File                        
-    static char* strangeArrayTypes[__NSTRANGEARRAYS__];	///< names of the classes, the TClonesArrays are arrays of this type 
-    static int strangeArraySizes[__NSTRANGEARRAYS__];	///< maximum sizes of the TClonesArrays 
-    static int strangeArrayCounters[__NSTRANGEARRAYS__];///< number of entries in current event, currently not used 
+ StMuArrays();
+///< names of the TBranches in the TTree/File 
+    static char*         arrayNames    [__NALLARRAYS__    ];
+    static char** strangeArrayNames; //[__NSTRANGEARRAYS__]
+    static char**      emcArrayNames;//[__NEMCARRAYS__    ]
+    static char**      pmdArrayNames;//[__NPMDARRAYS__    ]
+    static char**      tofArrayNames;//[__NTOFARRAYS__    ]
 
-    static char* emcArrayNames[__NEMCARRAYS__]; ///< names of the TBranches in the TTree/File                        
-    static char* emcArrayTypes[__NEMCARRAYS__];	///< names of the classes, the TClonesArrays are arrays of this type 
-    static int emcArraySizes[__NEMCARRAYS__];	///< maximum sizes of the TClonesArrays 
-    static int emcArrayCounters[__NEMCARRAYS__];///< number of entries in current event, currently not used 
+///< names of the classes, the TClonesArrays are arrays of this type
+    static char*         arrayTypes    [__NALLARRAYS__    ];
+    static char**  strangeArrayTypes;//[__NSTRANGEARRAYS__]
+    static char**      emcArrayTypes;//[__NEMCARRAYS__    ]
+    static char**      pmdArrayTypes;//[__NPMDARRAYS__    ]
+    static char**      tofArrayTypes;//[__NTOFARRAYS__    ]
 
-    // PMD
-    static char* pmdArrayNames[__NPMDARRAYS__]; ///< names of the TBranches in the TTree/File      
-    static char* pmdArrayTypes[__NPMDARRAYS__];	///< names of the classes, the TClonesArrays are arrays of this type
-    static int pmdArraySizes[__NPMDARRAYS__];	///< maximum sizes of the TClonesArrays 
-    static int pmdArrayCounters[__NPMDARRAYS__];///< number of entries in current event, currently not used
+///< maximum sizes of the TClonesArrays
+    static int           arraySizes    [__NALLARRAYS__    ];
+    static int*   strangeArraySizes;// [__NSTRANGEARRAYS__]
+    static int*       emcArraySizes;// [__NEMCARRAYS__    ]
+    static int*       pmdArraySizes;// [__NPMDARRAYS__    ]
+    static int*       tofArraySizes;// [__NTOFARRAYS__    ]
 
-    // Tofr
-    static char* tofArrayNames[__NTOFARRAYS__]; ///< names of the TBranches in the TTree/File                        
-    static char* tofArrayTypes[__NTOFARRAYS__];	///< names of the classes, the TClonesArrays are arrays of this type 
-    static int tofArraySizes[__NTOFARRAYS__];	///< maximum sizes of the TClonesArrays 
-    static int tofArrayCounters[__NTOFARRAYS__];///< number of entries in current event, currently not used ;
+///< number of entries in current event, currently not used
+    static int        arrayCounters    [__NALLARRAYS__    ];
+    static int*strangeArrayCounters;// [__NSTRANGEARRAYS__]
+    static int*    emcArrayCounters;// [__NEMCARRAYS__    ]
+    static int*    pmdArrayCounters;// [__NPMDARRAYS__    ]
+    static int*    tofArrayCounters;// [__NTOFARRAYS__    ]
 };
 
 #endif
@@ -69,6 +73,9 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.8  2004/04/26 00:13:28  perev
+ * Cleanup+simplification
+ *
  * Revision 1.7  2004/04/09 22:06:35  subhasis
  * after tof createevent fix by Xin
  *

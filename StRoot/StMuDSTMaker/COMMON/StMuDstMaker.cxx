@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.56 2004/04/20 18:42:47 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.57 2004/04/26 00:13:28 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -126,11 +126,7 @@ StMuDstMaker::StMuDstMaker(const char* name) : StIOInterFace(name),
 
 void StMuDstMaker::zeroArrays()
 {
-  memset(mArrays       ,0,sizeof(mArrays       ));
-  memset(mStrangeArrays,0,sizeof(mStrangeArrays));
-  memset(mEmcArrays    ,0,sizeof(mEmcArrays    ));
-  memset(mPmdArrays    ,0,sizeof(mPmdArrays    ));
-  memset(mTofArrays    ,0,sizeof(mTofArrays    ));
+  memset(mArrays,0,sizeof(void*)*__NALLARRAYS__);
 }
 
 //-----------------------------------------------------------------------
@@ -180,7 +176,7 @@ StMuDstMaker::~StMuDstMaker() {
   if (mIoMode== ioRead ) closeRead();
   DEBUGMESSAGE3("after close");
   saveDelete(mChain);
-  saveDelete(mTTree);
+//VP  saveDelete(mTTree);
   DEBUGMESSAGE3("out");
 }
 //-----------------------------------------------------------------------
@@ -205,27 +201,11 @@ void  StMuDstMaker::streamerOff() {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDstMaker::createArrays() {
-  /// regular stuff
-  for ( int i=0; i<__NARRAYS__; i++) {
+  /// all stuff
+  for ( int i=0; i<__NALLARRAYS__; i++) {
     DEBUGVALUE2(mArrays[i]);
     clonesArray(mArrays[i],StMuArrays::arrayTypes[i],StMuArrays::arraySizes[i],StMuArrays::arrayCounters[i]);
     DEBUGVALUE2(mArrays[i]);
-  }
-  /// from strangeness group
-  for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
-    clonesArray(mStrangeArrays[i],StMuArrays::strangeArrayTypes[i],StMuArrays::strangeArraySizes[i],StMuArrays::strangeArrayCounters[i]);
-  }
-  /// from emcness group
-  for ( int i=0; i<__NEMCARRAYS__; i++) {
-    clonesArray(mEmcArrays[i],StMuArrays::emcArrayTypes[i],StMuArrays::emcArraySizes[i],StMuArrays::emcArrayCounters[i]);
-  }
-  /// from pmd group
-  for ( int i=0; i<__NPMDARRAYS__; i++) {
-    clonesArray(mPmdArrays[i],StMuArrays::pmdArrayTypes[i],StMuArrays::pmdArraySizes[i],StMuArrays::pmdArrayCounters[i]);
-  }
-  // from Tof group
-  for ( int i=0; i<__NTOFARRAYS__; i++) {
-    clonesArray(mTofArrays[i],StMuArrays::tofArrayTypes[i],StMuArrays::tofArraySizes[i],StMuArrays::tofArrayCounters[i]);
   }
   mStMuDst->set(this);
   // commecnted to include tof again (subhasis) 
@@ -239,20 +219,8 @@ void StMuDstMaker::clear(int del){
   /// from muDst
   int dell = 1; if (del) dell = 999;
 
-  for ( int i=0; i<__NARRAYS__; i++) {
-    clear(mArrays[i],StMuArrays::arrayCounters[i]		,dell);
-  }
-  for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
-    clear(mStrangeArrays[i],StMuArrays::strangeArrayCounters[i]	,dell);
-  }
-  for ( int i=0; i<__NEMCARRAYS__; i++) {
-    clear(mEmcArrays[i],StMuArrays::emcArrayCounters[i]		,dell);
-  }
-  for ( int i=0; i<__NPMDARRAYS__; i++) {
-    clear(mPmdArrays[i],StMuArrays::pmdArrayCounters[i]		,dell);
-  }
-  for ( int i=0; i<__NTOFARRAYS__; i++) {
-    clear(mTofArrays[i],StMuArrays::tofArrayCounters[i],         dell);
+  for ( int i=0; i<__NALLARRAYS__; i++) {
+    clear(mArrays[i],StMuArrays::arrayCounters[i],dell);
   }
   DEBUGMESSAGE2("out");
 }
@@ -362,13 +330,14 @@ int StMuDstMaker::Make(){
   }
   catch(StMuExceptionEOF e) {
     e.print();
-    return kEOF;
+    return kStEOF;
   }
   catch(StMuException e) {
     e.print();
+    return kStERR;
   }
   DEBUGVALUE2(timer.elapsedTime());
-  return 0;
+  return kStOK;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -466,48 +435,21 @@ int StMuDstMaker::Finish() {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDstMaker::setBranchAddresses(TChain* chain) {
-  // muDst stuff
-  if (chain){
-    chain->SetBranchStatus("*",0);
-    TString ts;
-    for ( int i=0; i<__NARRAYS__; i++) {
-      ts = StMuArrays::arrayNames[i]; ts +="*";
-      chain->SetBranchStatus (ts,1);
-      chain->SetBranchAddress(StMuArrays::arrayNames[i],&mArrays[i]);
-      TBranch *tb = chain->GetBranch(StMuArrays::arrayNames[i]);
-      assert(tb->GetAddress()== (char*)&mArrays[i]);
-    }
-
-    // strange stuff
-    for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
-      chain->SetBranchAddress(StMuArrays::strangeArrayNames[i],&mStrangeArrays[i]);
-      ts = StMuArrays::strangeArrayNames[i]; ts +="*";
-      chain->SetBranchStatus (ts,1);
-    }
-
-    // emc stuff
-    for ( int i=0; i<__NEMCARRAYS__; i++) {
-      chain->SetBranchAddress(StMuArrays::emcArrayNames[i],&mEmcArrays[i]);
-      ts = StMuArrays::emcArrayNames[i]; ts +="*";
-      chain->SetBranchStatus (ts,1);
-    }
-
-    // pmd stuff
-    for ( int i=0; i<__NPMDARRAYS__; i++) {
-      chain->SetBranchAddress(StMuArrays::pmdArrayNames[i],&mPmdArrays[i]);
-      ts = StMuArrays::pmdArrayNames[i]; ts +="*";
-      chain->SetBranchStatus (ts,1);
-    }
-
-    // tof stuff
-    for ( int i=0; i<__NTOFARRAYS__; i++) {
-      chain->SetBranchAddress(StMuArrays::tofArrayNames[i],&mTofArrays[i]);
-      ts = StMuArrays::tofArrayNames[i]; ts +="*";
-      chain->SetBranchStatus (ts,1);
-    }
-
-    mTTree = mChain->GetTree();
+  // all stuff
+  if (!chain) return;
+  chain->SetBranchStatus("*",0);
+  TString ts;
+  for ( int i=0; i<__NALLARRAYS__; i++) {
+    const char *bname=StMuArrays::arrayNames[i];
+    TBranch *tb = chain->GetBranch(bname);
+    if(!tb) {Warning("setBranchAddresses","Branch name %s does not exist",bname);continue;}
+    ts = bname; ts +="*";
+    chain->SetBranchStatus (ts,1);
+    chain->SetBranchAddress(bname,mArrays+i);
+    assert(tb->GetAddress() == (char*)(mArrays+i));
   }
+
+  mTTree = mChain->GetTree();
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -536,22 +478,23 @@ int StMuDstMaker::openRead() {
 void StMuDstMaker::read(){
   if (!mChain){
     DEBUGMESSAGE2("ATTENTION: No StMuChain ... results won't be exciting (nothing to do)");
-  } else {
-    DEBUGMESSAGE2("");
-    if (mChain->GetCurrentFile()) {
-      DEBUGVALUE2(mChain->GetCurrentFile()->GetName());
-    }
-    int bytes = 0;
-    while (bytes==0 ) {
-      DEBUGVALUE3(mEventCounter);
-      if ( mEventCounter >= mChain->GetEntries() ) throw StMuExceptionEOF("end of input",__PRETTYF__);
-      bytes = mChain->GetEntry(mEventCounter++);
-      DEBUGVALUE3(bytes);
-    }
-    mStMuDst->set(this);
-    //  mEventCounter++;
-    fillHddr();
+    return;
   }
+
+  DEBUGMESSAGE2("");
+  if (mChain->GetCurrentFile()) {
+    DEBUGVALUE2(mChain->GetCurrentFile()->GetName());
+  }
+  int bytes = 0;
+  while (bytes==0 ) {
+    DEBUGVALUE3(mEventCounter);
+    if ( mEventCounter >= mChain->GetEntries() ) throw StMuExceptionEOF("end of input",__PRETTYF__);
+    bytes = mChain->GetEntry(mEventCounter++);
+    DEBUGVALUE3(bytes);
+  }
+  if (GetDebug()>1) printArrays();
+  mStMuDst->set(this);
+  fillHddr();
   return;
 }
 //-----------------------------------------------------------------------
@@ -582,42 +525,12 @@ void StMuDstMaker::openWrite(string fileName) {
   int bufsize = mBufferSize;
   if (mSplit) bufsize /= 4;
 
-  //  muDst stuff
+  //  all stuff
   mTTree = new TTree("MuDst", "StMuDst",mSplit);
-  if (!mTTree) throw StMuExceptionNullPointer("can not create tree",__PRETTYF__);
   mTTree->SetAutoSave(1000000);  // autosave when 1 Mbyte written
-  DEBUGMESSAGE2("arrays");
-  for ( int i=0; i<__NARRAYS__; i++) {
-    DEBUGVALUE2(i);
+  DEBUGMESSAGE2("all arrays");
+  for ( int i=0; i<__NALLARRAYS__; i++) {
     branch = mTTree->Branch(StMuArrays::arrayNames[i],&mArrays[i], bufsize, mSplit);
-  }
-
-  // strange stuff
-  DEBUGMESSAGE2("strange arrays");
-  for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
-    DEBUGVALUE2(i);
-    branch = mTTree->Branch(StMuArrays::strangeArrayNames[i],&mStrangeArrays[i], bufsize, mSplit);
-  }
-
-  // emc stuff
-  DEBUGMESSAGE2("emc arrays");
-  for ( int i=0; i<__NEMCARRAYS__; i++) {
-    DEBUGVALUE2(i);
-    branch = mTTree->Branch(StMuArrays::emcArrayNames[i],&mEmcArrays[i], bufsize, mSplit);
-  }
-
-  // pmd stuff
-  DEBUGMESSAGE2("pmd arrays");
-  for ( int i=0; i<__NPMDARRAYS__; i++) {
-    DEBUGVALUE2(i);
-    branch = mTTree->Branch(StMuArrays::pmdArrayNames[i],&mPmdArrays[i], bufsize, mSplit);
-  }
-
-  // tof stuff
-  DEBUGMESSAGE2("tof arrays");
-  for ( int i=0; i<__NTOFARRAYS__; i++) {
-    DEBUGVALUE2(i);
-    branch = mTTree->Branch(StMuArrays::tofArrayNames[i],&mTofArrays[i], bufsize, mSplit);
   }
 
   mCurrentFileName = fileName;
@@ -1058,6 +971,21 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
     mProbabilityPidAlgorithm->readParametersFromFile(flnm.str());
 }
 //-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuDstMaker::printArrays()
+{
+// all stuff
+  TClonesArray *tcl;
+  for ( int i=0; i<__NALLARRAYS__; i++) {
+    tcl = mArrays[i];
+    printf(" Array %s\t = %s::%s(%d)\n",
+    StMuArrays::arrayNames[i],
+    tcl->ClassName(),tcl->GetName(),tcl->GetEntriesFast());
+  }
+
+}
+//-----------------------------------------------------------------------
 void StMuDstMaker::fillHddr()
 {
 
@@ -1091,6 +1019,9 @@ void StMuDstMaker::fillHddr()
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.57  2004/04/26 00:13:28  perev
+ * Cleanup+simplification
+ *
  * Revision 1.56  2004/04/20 18:42:47  perev
  * remove redundant arrays
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.32 2004/04/20 18:42:40 perev Exp $
+ * $Id: StMuDstMaker.h,v 1.33 2004/04/26 00:13:28 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -97,8 +97,9 @@ class StMuDstMaker : public StIOInterFace {
   virtual void Clear(Option_t *option="");
   virtual int Make();
   virtual int Finish();
+          void printArrays();   
 
-  /// Set the track filter used for all tracks (except the L3 tracks) when creating muDsts from StEvent and writing to disk.
+	    /// Set the track filter used for all tracks (except the L3 tracks) when creating muDsts from StEvent and writing to disk.
   void setTrackFilter(StMuCut* c);
   StMuFilter* trackFilter();
   /// Set the track filter used for L3 tracks when creating muDsts from StEvent and writing to disk.
@@ -141,7 +142,7 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.32 2004/04/20 18:42:40 perev Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.33 2004/04/26 00:13:28 perev Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -268,15 +269,11 @@ virtual   void closeRead();
   friend class StMuDst;
   friend class StMuDstFilterMaker;
     
-  TClonesArray* mArrays[__NARRAYS__];//->
-
-  TClonesArray* mStrangeArrays[__NSTRANGEARRAYS__];//->
-
-  TClonesArray* mEmcArrays[__NEMCARRAYS__];//->
-
-  TClonesArray* mPmdArrays[__NPMDARRAYS__];//->
-
-  TClonesArray* mTofArrays[__NTOFARRAYS__];//->
+  TClonesArray* mArrays       [__NARRAYS__       ];
+  TClonesArray* mStrangeArrays[__NSTRANGEARRAYS__];
+  TClonesArray* mEmcArrays    [__NEMCARRAYS__    ];
+  TClonesArray* mPmdArrays    [__NPMDARRAYS__    ];
+  TClonesArray* mTofArrays    [__NTOFARRAYS__    ];
 
   ClassDef(StMuDstMaker, 0)
 }; 
@@ -312,6 +309,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.33  2004/04/26 00:13:28  perev
+ * Cleanup+simplification
+ *
  * Revision 1.32  2004/04/20 18:42:40  perev
  * remove redundant arrays
  *
