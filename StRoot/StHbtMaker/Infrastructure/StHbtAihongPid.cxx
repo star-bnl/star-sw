@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAihongPid.cxx,v 1.1 2001/09/05 20:41:41 laue Exp $
+ * $Id: StHbtAihongPid.cxx,v 1.2 2002/01/14 16:10:58 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@bnl.gov
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StHbtAihongPid.cxx,v $
- * Revision 1.1  2001/09/05 20:41:41  laue
- * Updates of the hbtMuDstTree microDSTs
+ * Revision 1.2  2002/01/14 16:10:58  laue
+ * Location of PID table not hardwired anymore
  *
  *
  **************************************************************************/
@@ -27,19 +27,19 @@ ClassImp(StHbtAihongPid)
 
 StHbtAihongPid* StHbtAihongPid::_instance=0;
 
-StHbtAihongPid* StHbtAihongPid::Instance() {
-  if (_instance == 0 ) _instance = new StHbtAihongPid();
+StHbtAihongPid* StHbtAihongPid::Instance(const char* fileName) {
+  if (_instance == 0 ) _instance = new StHbtAihongPid(fileName);
   return _instance;
 }
 
-StHbtAihongPid::StHbtAihongPid() { 
+StHbtAihongPid::StHbtAihongPid(const char* fileName) { 
   cout << " StHbtAihongPid::StHbtAihongPid() " << endl; 
   mAihongPid = new StuProbabilityPidAlgorithm() ;
-  setPidTable();
+  setPidTable(fileName);
 }
 
 void StHbtAihongPid::setPidTable(const char* fileName) { 
-  StuProbabilityPidAlgorithm::readParametersFromFile("/afs/rhic/star/users/laue/work/PIDTable.root");
+  StuProbabilityPidAlgorithm::readParametersFromFile(fileName);
 
 }
 
