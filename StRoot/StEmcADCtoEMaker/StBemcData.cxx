@@ -46,7 +46,11 @@ Bool_t StBemcData::getTDCStatus(Int_t c)
 	if(c<0 || c>29) return kFALSE;
 	if(c<3  && EventDate<20011105) return kTRUE;
 	if(c<5  && EventDate>=20011105 && EventDate<20020301) return kTRUE;
-	if(c<15 && EventDate>=20020301) return kTRUE;
+	if(c<15 && EventDate>=20020301 && EventDate<20030701) return kTRUE;
+	if(EventDate>=20030701) // returns the status based on the event header
+	{
+		return checkTDC(c);
+	}
 	return kFALSE;
 } 
 Bool_t StBemcData::getSMDStatus(Int_t c)
@@ -54,7 +58,11 @@ Bool_t StBemcData::getSMDStatus(Int_t c)
 	if(c<0 || c>7) return kFALSE;
 	if(c<1  && EventDate<20011105) return kTRUE;
 	if(c<2  && EventDate>=20011105 && EventDate<20020301) return kTRUE;
-	if(c<4 && EventDate>=20020301) return kTRUE;
+	if(c<4  && EventDate>=20020301 && EventDate<20030701) return kTRUE;
+	if(EventDate>=20030701) // returns the status based on the event header
+	{
+		return kTRUE;
+	}
 	return kFALSE;
 } 
 Bool_t StBemcData::checkTDC(Int_t i)
@@ -63,7 +71,7 @@ Bool_t StBemcData::checkTDC(Int_t i)
 	Bool_t ok = kTRUE;
   if(!mDecoder) mDecoder = new StEmcDecoder(EventDate,EventTime);
 	Int_t crate;
-  if(!getTDCStatus(i)) return kTRUE;
+  //if(!getTDCStatus(i)) return kTRUE;
   mDecoder->GetTowerCrateFromTDC(i,crate);
   if(TDCError[i]!=0) ok = kFALSE;
 	if(TDCCrateId[i]!=crate && TDCCrateId[i]!=0) ok = kFALSE;
