@@ -13,14 +13,14 @@
 # Regression tests keep the code honest by checking for warnings
 # and "use strict" failures.
 
-# $Id: cons,v 1.1.1.19 2000/11/13 01:21:32 fisyak Exp $
+# $Id: cons,v 1.1.1.20 2000/11/19 19:33:40 fisyak Exp $
 
 use vars qw( $ver_num $ver_rev $version );
 
-$ver_num = "2.1";
-$ver_rev = ".3";
+$ver_num = "2.3";
+$ver_rev = ".0";
 $version = sprintf "This is Cons %s%s " .
-	    '($Id: cons,v 1.1.1.19 2000/11/13 01:21:32 fisyak Exp $)'. "\n",
+	    '($Id: cons,v 1.1.1.20 2000/11/19 19:33:40 fisyak Exp $)'. "\n",
 	    $ver_num, $ver_rev;
 
 # Cons: A Software Construction Tool.
@@ -585,6 +585,60 @@ sub buildtarget {
     return "none";
 }
 
+package NameSpace;
+
+# Return a hash that maps the name of symbols in a namespace to an
+# array of refs for all types for which the name has a defined value.
+# A list of symbols may be specified; default is all symbols in the
+# name space.
+sub save {
+    my $package = shift;
+    my(%namerefs, $var, $type);
+    no strict 'refs';
+    @_ = keys %{$package."::"} if ! @_;
+    foreach $var (@_) {
+	$namerefs{$var} = [];
+	my $fqvar = $package."::".$var;
+	# If the scalar for this variable name doesn't already
+	# exist, *foo{SCALAR} will autovivify the reference
+	# instead of returning undef, so unlike the other types,
+	# we have to dereference to find out if it exists.
+	push(@{$namerefs{$var}}, *{$fqvar}{SCALAR})
+		    if defined ${*{$fqvar}{SCALAR}};
+	foreach $type (qw(ARRAY HASH CODE IO)) {
+	    push(@{$namerefs{$var}}, *{$fqvar}{$type})
+			  if defined *{$fqvar}{$type};
+	}
+    }
+    return \%namerefs;
+}
+
+# Remove the specified symbols from the namespace.
+# Default is to remove all.
+sub remove {
+    my $package = shift;
+    my(%namerefs, $var);
+    no strict 'refs';
+    @_ = keys %{$package."::"} if ! @_;
+    foreach $var (@_) {
+	delete ${$package."::"}{$var};
+    }
+}
+
+# Restore values to symbols specified in a hash as returned
+# by NameSpace::save.
+sub restore {
+    my($package, $namerefs) = @_;
+    my($var, $ref);
+    no strict 'refs';
+    foreach $var (keys %$namerefs) {
+	my $fqvar = $package."::".$var;
+	foreach $ref (@{$namerefs->{$var}}) {
+	    *{$fqvar} = $ref;
+	}
+    }
+}
+
 # Support for "building" scripts, importing and exporting variables.
 # With the exception of the top-level routine here (invoked from the
 # main package by cons), these are all invoked by user scripts.
@@ -636,23 +690,12 @@ sub main::doscripts {
 	    # Save any variables defined by the Conscript file
 	    # so we can restore them later, if needed;
 	    # then delete them from the script:: namespace.
-	    my(%env_imports, $var, $type);
-	    foreach $var (grep(! $orig_script_var{$_}, keys %script::)) {
-		$env_imports{$var} = [];
-		# If the scalar for this variable name doesn't already
-		# exist, *foo{SCALAR} will autovivify the reference
-		# instead of returning undef, so unlike the other types,
-		# we have to dereference to find out if it exists.
-		no strict 'refs';
-		push @{$env_imports{$var}}, *{"script::$var"}{SCALAR}
-			       if defined ${*{"script::$var"}{SCALAR}};
-		foreach $type (qw(ARRAY HASH CODE IO)) {
-			push @{$env_imports{$var}}, *{"script::$var"}{$type}
-					 if defined *{"script::$var"}{$type};
-		}
-		delete $script::{$var};
+	    my(@del) = grep(! $orig_script_var{$_}, keys %script::);
+	    if (@del) {
+		$priv::self->{script}->{pkgvars} =
+						NameSpace::save('script', @del);
+		NameSpace::remove('script', @del);
 	    }
-	    $priv::self->{script}->{env_imports} = \%env_imports;
 	    if ($caller_dir_path) {
 		chdir($cwd);
 		$caller_dir_path = undef;
@@ -856,9 +899,9 @@ sub ConsPath {
 
 # Return the source path of the supplied path.
 sub SourcePath {
-    my($path) = @_;
-    my($file) = $dir::cwd->lookupfile($path);
-    return $file->rsrcpath;
+    wantarray
+	? map($dir::cwd->lookupfile($_)->rsrcpath, @_)
+	: $dir::cwd->lookupfile($_[0])->rsrcpath;
 }
 
 # Search up the tree for the specified cache directory, starting with
@@ -1410,20 +1453,13 @@ sub action {
 	      # in the Conscript file that defined this [perl] build,
 	      # so the code executes with the expected variables.
 	      my($package) = $self->{'package'};
-	      my($env_imports) = $tgt->{conscript}->{env_imports};
-	      my($var, $ref);
-	      foreach $var (keys %$env_imports) {
-		foreach $ref (@{$env_imports->{$var}}) {
-		    *{$package."::".$var} = $ref;
-		}
-	      }
+	      my($pkgvars) = $tgt->{conscript}->{pkgvars};
+	      NameSpace::restore($package, $pkgvars) if $pkgvars;
 	      # Actually execute the [perl] command to build the target.
 	      $status = eval "package $package; $perlcmd";
 	      # Clean up the namespace by deleting the package variables
 	      # we just restored.
-	      foreach $var (keys %$env_imports) {
-		delete ${$package."::"}{$var};
-	      }
+	      NameSpace::remove($package, keys %$pkgvars) if $pkgvars;
 	    }
 	    if (!defined($status)) {
 		warn "$0: *** Error during perl command eval: $@.\n";
@@ -3297,7 +3333,7 @@ Cons - A Software Construction System
 
 =head1 DESCRIPTION
 
-A guide and reference for version 2.1.3
+A guide and reference for version 2.3.0
 
 Copyright (c) 1996-2000 Free Software Foundation, Inc.
 
