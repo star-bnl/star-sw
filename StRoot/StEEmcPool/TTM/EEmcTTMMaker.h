@@ -1,15 +1,14 @@
 // Hey Emacs this is -*-c++-*-
-// $Id: EEmcTTMMaker.h,v 1.2 2004/01/06 21:33:51 zolnie Exp $
-
 #ifndef STAR_EETowTrackMatchMaker
 #define STAR_EETowTrackMatchMaker
+// $Id: EEmcTTMMaker.h,v 1.3 2004/01/06 22:42:56 zolnie Exp $
 
 /*!
  *                                                                     
  * \class  EETowTrackMatchMaker
  * \author Piotr A. Zolnierczuk
  * \date   2003/12/08
- * \brief  EEMC tower calibration using TPC tracks 
+ * \brief  EEMC tower to track matching
  *
  * This a MuDST based class to get tower calibration from matching TPC tracks
  * See README file for detailed info/instructions
@@ -120,20 +119,17 @@ public:
   void     SetPhiFactor(Double_t v=1.0) { mPhiFac=v;  }
   void     SetEtaFactor(Double_t v=1.0) { mEtaFac=v;  }
 
-  //
-  ostream& PrintCutSummary( ostream &out ) const ;
 
   // output file name 
   void     SetFileName( const char *string) { mFileName=TString(string); }
 
   // 
-  ULong_t  GetNMatched() const { return mNMatch; };
+  ULong_t  GetNMatched() const { return mNMatched; };
 
-
+  //
+  ostream&   Summary    ( ostream &out ) const ;
 
  protected:
-  //Int_t    mDebugLevel           ;  // debug level:  use kInfo,kWarning,etc. from TError.h
-
   // cuts
   Int_t    mMinTrackHits;        ;  // min hits/track required
   Double_t mMinTrackLength       ;  // min track length required
@@ -142,13 +138,15 @@ public:
   Double_t mPhiFac;
   Double_t mEtaFac;
 
+  void     ResetStats() { mNMatched=mNEvents=0L; };
+
   // default criterion of track acceptance
-  Bool_t  AcceptTrack( const StMuTrack *track);
+  Bool_t   AcceptTrack( const StMuTrack *track);
   // default criterion whether a track matches a tower
-  Bool_t  MatchTrack ( const double dphi,   // track hit to tower centre distance 
-		       const double deta,   // 
-		       const double phihw,  // tower half-widt in phi
-		       const double etahw); // tower half-widt in eta
+  Bool_t   MatchTrack ( const double dphi,   // track hit to tower centre distance 
+			const double deta,   // 
+			const double phihw,  // tower half-widt in phi
+			const double etahw); // tower half-widt in eta
 
   // given track and position z return TVector3 
   static  Bool_t  ExtrapolateToZ    ( const StMuTrack *track , const double  z, TVector3 &r); 
@@ -170,30 +168,38 @@ public:
   TString         mFileName;   // output file name
   TFile          *mFile;       // output file
   TTree          *mTree;       // output tree
-  ULong_t         mNMatch;     // number of matched tracks
 
   NTupleTTM_t    *mMatch;      // data in "compatible" format 
 
   map<double,TString> mZ;      // a map that hold z positions 
 
+  // stats
+  ULong_t         mNMatched;   // number of matched tracks
+  ULong_t         mNEvents;    // total number of events 
+
+
  public:
   //  StMaker jumbo mumbo
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.2 2004/01/06 21:33:51 zolnie Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]=
+      "Tag $Name:  $ $Id: EEmcTTMMaker.h,v 1.3 2004/01/06 22:42:56 zolnie Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
-
+  
   ClassDef(EETowTrackMatchMaker, 1)   // 
 };
 
-
+// for nice printing
 ostream&  operator<<(ostream &out, const EETowTrackMatchMaker& ttm); 
 
 #endif
 
 
 // $Log: EEmcTTMMaker.h,v $
+// Revision 1.3  2004/01/06 22:42:56  zolnie
+// provide summary/statistics info
+//
 // Revision 1.2  2004/01/06 21:33:51  zolnie
 // release
 //

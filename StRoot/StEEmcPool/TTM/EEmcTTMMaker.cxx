@@ -1,5 +1,8 @@
-// *-- Author : Piotr A. Zolnierczuk
-// $Id: EEmcTTMMaker.cxx,v 1.2 2004/01/06 21:33:51 zolnie Exp $
+// *-- Author : Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
+// *-- Date   : 2003/12/08 
+// $Id: EEmcTTMMaker.cxx,v 1.3 2004/01/06 22:42:55 zolnie Exp $
+// see README for Info
+
 
 #include <iostream>
 
@@ -82,6 +85,8 @@ EETowTrackMatchMaker::EETowTrackMatchMaker(
   mMatch  =NULL;
 
 
+  // InitCuts()
+
   ResetZPositionsArray();
   AddZPosition("pres",kEEmcZPRE1+0.1);
   AddZPosition("post",kEEmcZPOST-0.1);
@@ -96,7 +101,9 @@ EETowTrackMatchMaker::EETowTrackMatchMaker(
   mPhiFac = 1.0;
   mEtaFac = 1.0;
 
-  mNMatch=0;
+  //
+  ResetStats();
+
 }
 
 //_____________________________________________________________________________
@@ -111,7 +118,8 @@ EETowTrackMatchMaker::~EETowTrackMatchMaker(){
 //_____________________________________________________________________________
 Int_t 
 EETowTrackMatchMaker::Init(){
-  PrintInfo();
+
+  ResetStats();
 
   mMatch= new NTupleTTM_t;  if(!mMatch) return kStErr;
 
@@ -177,15 +185,13 @@ EETowTrackMatchMaker::Init(){
 
   mFile->cd("");
   
-
-  mNMatch=0;
   return StMaker::Init();
 }
 
 //_____________________________________________________________________________
 Int_t 
 EETowTrackMatchMaker::Make(){
-
+  mNEvents++;
 
   mMatch->Clear(); 
   int &ntrack =  mMatch->numtracks = 0; // an alias
@@ -329,7 +335,7 @@ EETowTrackMatchMaker::Make(){
   }
 
 
-  mNMatch += ntrack;
+  mNMatched += ntrack;
   if(0<ntrack && ntrack<kNTupleTTM_MaxTracks)  mTree->Fill();
   return kStOK;
 }
@@ -395,35 +401,56 @@ EETowTrackMatchMaker::ExtrapolateToZ(const StMuTrack *track, const double   z, T
   r.SetXYZ(hit.x(),hit.y(),hit.z());
   return   kTRUE;
 }
+
+
+
+
+
 //_____________________________________________________________________________
 ostream& 
-EETowTrackMatchMaker::PrintCutSummary(ostream &out ) const
+EETowTrackMatchMaker::Summary(ostream &out ) const
 {
-  TString head = TString("<EETowTrackMatchMaker::PrintCutSummary()>"); 
-  
-  out << head  << " => " << GetName() << "\n";
-  out << head  << "   tracks will be matched at the following depths:\n";
-  map<double,TString>::const_iterator zpos; 
-  for(zpos=mZ.begin(); zpos!=mZ.end() ; ++zpos) 
-    out << head  << "      ==> " << zpos->second << "\tz=" << zpos->first << endl;
-  
-  out << head  << "   minimum hits/track  required         "  << mMinTrackHits    << "\n"; 
-  out << head  << "   minimum track length required        "  << mMinTrackLength  << "\n";
-  out << head  << "   minimum transverse momentum required "  << mMinTrackPt      << "\n";
+  out << "<EETowTrackMatchMaker::Summary>\n";
+  out << " *** MakerName   : " << GetName() << "\n";
 
-  out << head  << "   tracks will be considered matched if closer to the tower center than\n";
-  out << head  << "     " << mPhiFac << " x tower half-width (in phi)\n";
-  out << head  << "     " << mEtaFac << " x tower half-width (in eta)\n";
+  out.setf(ios_base::fixed,ios_base::floatfield);
+  out.precision(2);
+
+  out << " *** Cuts Summary:\n";
+  out << "     tracks are matched at the following depths:\n";
+  map<double,TString>::const_iterator zpos; 
+  int k=0;
+  cout.precision(2);
+  for(zpos=mZ.begin(); zpos!=mZ.end() ; ++zpos) 
+    out << "      " << ++k << ". z=" << zpos->first << "   \"" << zpos->second << "\"\n";
   
+  out << "     min. hits/track  required         " << mMinTrackHits   << "\n"; 
+  out << "     min. track length required        " << mMinTrackLength << "\n";
+  out << "     min. transverse momentum required " << mMinTrackPt     << "\n";
+
+  out << "     max. track to tower center dist.  " << mPhiFac << " x tower half-width (phi)\n";
+  out << "     max. track to tower center dist.  " << mEtaFac << " x tower half-width (eta)\n";
+
+  if(mNEvents>0) { 
+    out << " *** Statistics:\n";
+    out << "     total # of events         " << mNEvents  << "\n";
+    out << "     # of matched tracks       " << mNMatched << "\n";
+    out << "     # of matched tracks/event " << float(mNMatched)/mNEvents << "\n";
+  }
+  out << "</EETowTrackMatchMaker::Summary>\n";
+  out.setf(ios_base::fmtflags(0),ios_base::floatfield);
   return out;
 }
 
 
 ostream&  operator<<(ostream &out, const EETowTrackMatchMaker& ttm)  { 
-  return ttm.PrintCutSummary(out); 
+  return ttm.Summary(out); 
 };
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.3  2004/01/06 22:42:55  zolnie
+// provide summary/statistics info
+//
 // Revision 1.2  2004/01/06 21:33:51  zolnie
 // release
 //
