@@ -1,0 +1,11 @@
+/* tofTrayConfig.idl
+ *
+ * Tables: tofTrayConfig
+ *
+ * description: // structure configuration for the trays of MRPC-TOF
+ */
+
+struct tofTrayConfig {
+  short iTray; /* number Id of the trays of MRPC-TOF */
+  short nModules; /* total number of modules in this tray */
+};
