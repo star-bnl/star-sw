@@ -49,7 +49,7 @@ void StDetectorDbClock::update(StMaker* maker){
 
 /// Default constructor
 StDetectorDbClock::StDetectorDbClock(){
-    ~gMess << "StDetectorDbClock::StDetectorDbClock" << endm;
+    ~(*gMessMgr) << "StDetectorDbClock::StDetectorDbClock" << endm;
     mStarClockOnl = 0;
     mNumRows = 0;
     mTable = 0;

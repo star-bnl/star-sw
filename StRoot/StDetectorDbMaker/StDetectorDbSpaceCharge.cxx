@@ -54,7 +54,7 @@ void StDetectorDbSpaceCharge::update(StMaker* maker){
 
 /// Default constructor
 StDetectorDbSpaceCharge::StDetectorDbSpaceCharge(){
-    ~gMess << "StDetectorDbSpaceCharge::StDetectorDbSpaceCharge" << endm;
+    ~(*gMessMgr) << "StDetectorDbSpaceCharge::StDetectorDbSpaceCharge" << endm;
     mSpaceCharge = 0;
     mTable = 0;
     sprintf(tableName,"spaceChargeCor");
@@ -188,7 +188,7 @@ StDetectorDbSpaceCharge* StDetectorDbSpaceChargeR2::instance()
 /// Default constructor
 StDetectorDbSpaceChargeR2::StDetectorDbSpaceChargeR2() :
   StDetectorDbSpaceCharge() {
-    ~gMess << "StDetectorDbSpaceCharge:: ...in R2 mode" << endm;
+    ~(*gMessMgr) << "StDetectorDbSpaceCharge:: ...in R2 mode" << endm;
     sprintf(tableName,"spaceChargeCorR2");
 }
 /// Default destructor

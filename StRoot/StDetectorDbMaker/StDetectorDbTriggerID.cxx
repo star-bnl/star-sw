@@ -87,7 +87,7 @@ void StDetectorDbTriggerID::update(StMaker* maker){
 
 /// Default constructor
 StDetectorDbTriggerID::StDetectorDbTriggerID(){
-    ~gMess << "StDetectorDbTriggerID::StDetectorDbTriggerID" << endm;
+    ~(*gMessMgr) << "StDetectorDbTriggerID::StDetectorDbTriggerID" << endm;
     mTriggerID = 0;
     mIDNumRows = 0;
     mIDTable = 0;

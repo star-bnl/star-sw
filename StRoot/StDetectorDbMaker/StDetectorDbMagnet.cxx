@@ -46,7 +46,7 @@ void StDetectorDbMagnet::update(StMaker* maker){
 
 /// Default constructor
 StDetectorDbMagnet::StDetectorDbMagnet(){
-    ~gMess << "StDetectorDbMagnet::StDetectorDbMagnet" << endm;
+    ~(*gMessMgr) << "StDetectorDbMagnet::StDetectorDbMagnet" << endm;
     mStarMagOnl = 0;
     mNumRows = 0;
     mTable = 0;

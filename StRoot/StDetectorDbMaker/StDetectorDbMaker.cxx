@@ -53,17 +53,17 @@ Int_t StDetectorDbMaker::InitRun(int runNumber){
     // Update triggerID 
     StDetectorDbTriggerID* trigger = StDetectorDbTriggerID::instance();
     trigger->update(this);
-//    ~gMess << *trigger;
+//    ~(*gMessMgr) << *trigger;
 
     // Update integratedTriggerID 
     StDetectorDbIntegratedTriggerID* inTrigger = StDetectorDbIntegratedTriggerID::instance();
     inTrigger->update(this);
-//    ~gMess << *inTrigger;
+//    ~(*gMessMgr) << *inTrigger;
 
     // Update the ftpc voltage
     StDetectorDbFTPCVoltage* ftpcVolt = StDetectorDbFTPCVoltage::instance();
     ftpcVolt->update(this);
-//    ~gMess << *ftpcVolt;
+//    ~(*gMessMgr) << *ftpcVolt;
 
     return StMaker::InitRun(runNumber);
 }
@@ -78,7 +78,7 @@ Int_t StDetectorDbMaker::Make(){
     // Update the ftpc voltage
     StDetectorDbFTPCVoltage* ftpcVolt = StDetectorDbFTPCVoltage::instance();
     ftpcVolt->update(this);
-//    ~gMess << *ftpcVolt;
+//    ~(*gMessMgr) << *ftpcVolt;
 
     // Update Rich Scalers/Voltages
     StDetectorDbRichScalers* scalers = StDetectorDbRichScalers::instance();
@@ -106,9 +106,9 @@ Int_t StDetectorDbMaker::Make(){
     
     
     // Jamie Asked for SpaceCharge to be couted every event
-    ~gMess << "Space Charge Correction = " << spaceCharge->getSpaceChargeCoulombs()
+    ~(*gMessMgr) << "Space Charge Correction = " << spaceCharge->getSpaceChargeCoulombs()
 	 << " Coulombs" << endm;
-    ~gMess << "Space Charge CorrectionR2 = " << spaceChargeR2->getSpaceChargeCoulombs()
+    ~(*gMessMgr) << "Space Charge CorrectionR2 = " << spaceChargeR2->getSpaceChargeCoulombs()
 	 << " Coulombs" << endm;
 
     return kStOK;

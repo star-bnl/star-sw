@@ -11,7 +11,7 @@
 
   #include "StDetectorDbMaker/StDetectorDbFTPCGas.h"
   StDetectorFTPCGas * gas = StDetectorDbFTPCGas::instance();
-  ~gMess << *gas << endm;
+  ~(*gMessMgr) << *gas << endm;
   gas->getWestO2ppm();
 
   or any other access methods.
@@ -69,7 +69,7 @@ void StDetectorDbFTPCGas::update(StMaker* maker){
 
 /// Default constructor
 StDetectorDbFTPCGas::StDetectorDbFTPCGas(){
-    ~gMess << "StDetectorDbFTPCGas::StDetectorDbFTPCGas" << endm;
+    ~(*gMessMgr) << "StDetectorDbFTPCGas::StDetectorDbFTPCGas" << endm;
     mGasSystem = 0;
     mGasOut = 0;
 };

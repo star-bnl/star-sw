@@ -50,7 +50,7 @@ void StDetectorDbBeamInfo::update(StMaker* maker){
 
 /// Default constructor
 StDetectorDbBeamInfo::StDetectorDbBeamInfo(){
-    ~gMess << "StDetectorDbBeamInfo::StDetectorDbBeamInfo" << endm;
+    ~(*gMessMgr) << "StDetectorDbBeamInfo::StDetectorDbBeamInfo" << endm;
     mBeamInfo = 0;
     mTable = 0;
 };
