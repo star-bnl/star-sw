@@ -20,6 +20,8 @@ class StrangeMuDstPlayer {
   void SetV0DecayLength(Float_t);
   void SetV0DcaDaughtersToPrimVertex(Float_t);
   void SetV0DcaToPrimVertex(Float_t);
+  void SetV0DcaDaughters(Float_t);
+  void SetV0NumTpcHits(unsigned int);
   void SetXiDcaDaughters(Float_t);
   void SetXiDcaV0Daughters(Float_t);
   void SetXiDcaToPrimVertex(Float_t);
@@ -37,6 +39,8 @@ class StrangeMuDstPlayer {
   float v0DecayLength;
   float v0DcaDaughtersToPrimVertex;
   float v0DcaToPrimVertex;
+  float v0DcaDaughters;
+  float v0NumTpcHits;
   float xiDcaDaughters;
   float xiDcaV0Daughters;
   float xiDcaToPrimVertex;
@@ -55,6 +59,10 @@ inline void StrangeMuDstPlayer::SetV0DcaDaughtersToPrimVertex(Float_t val)
             { v0DcaDaughtersToPrimVertex = val; }
 inline void StrangeMuDstPlayer::SetV0DcaToPrimVertex(Float_t val)
             { v0DcaToPrimVertex = val; }
+inline void StrangeMuDstPlayer::SetV0DcaDaughters(Float_t val)
+            { v0DcaDaughters = val; }
+inline void StrangeMuDstPlayer::SetV0NumTpcHits(unsigned int val)
+            { v0NumTpcHits = val; }
 inline void StrangeMuDstPlayer::SetXiDcaDaughters(Float_t val)
             { xiDcaDaughters = val; }
 inline void StrangeMuDstPlayer::SetXiDcaV0Daughters(Float_t val)
