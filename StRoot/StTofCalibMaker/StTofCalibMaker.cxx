@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.8 2004/08/11 19:35:40 dongx Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.9 2004/08/13 00:15:03 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.9  2004/08/13 00:15:03  dongx
+ * correct the nSigmaXXX calculation
+ *
  * Revision 1.8  2004/08/11 19:35:40  dongx
  * loose the ADC cut of tofp
  *
@@ -532,10 +535,10 @@ Int_t StTofCalibMaker::Make()
       float sigmap = 999.;
       float res = mTofrRes[daqId];
       if(fabs(res)>1.e-5) {
-	sigmae = (Float_t)((tof-tofe)/res);
-	sigmapi = (Float_t)((tof-tofpi)/res);
-	sigmak = (Float_t)((tof-tofk)/res);
-	sigmap = (Float_t)((tof-tofp)/res);
+	sigmae = (Float_t)((tofcorr-tofe)/res);
+	sigmapi = (Float_t)((tofcorr-tofpi)/res);
+	sigmak = (Float_t)((tofcorr-tofk)/res);
+	sigmap = (Float_t)((tofcorr-tofp)/res);
       }
       aHit->setSigmaElectron(sigmae);
       aHit->setSigmaPion(sigmapi);
@@ -610,10 +613,10 @@ Int_t StTofCalibMaker::Make()
       float sigmap = 999.;
       float res = mTofpRes[daqId];
       if(fabs(res)>1.e-5) {
-	sigmae = (Float_t)((tof-tofe)/res);
-	sigmapi = (Float_t)((tof-tofpi)/res);
-	sigmak = (Float_t)((tof-tofk)/res);
-	sigmap = (Float_t)((tof-tofp)/res);
+	sigmae = (Float_t)((tofcorr-tofe)/res);
+	sigmapi = (Float_t)((tofcorr-tofpi)/res);
+	sigmak = (Float_t)((tofcorr-tofk)/res);
+	sigmap = (Float_t)((tofcorr-tofp)/res);
       }
       aHit->setSigmaElectron(sigmae);
       aHit->setSigmaPion(sigmapi);
