@@ -1,5 +1,8 @@
-// $Id: StArray.cxx,v 1.14 1999/10/22 22:24:00 perev Exp $
+// $Id: StArray.cxx,v 1.15 1999/10/30 02:10:54 perev Exp $
 // $Log: StArray.cxx,v $
+// Revision 1.15  1999/10/30 02:10:54  perev
+// CleanUp of StArray for new StEvent
+//
 // Revision 1.14  1999/10/22 22:24:00  perev
 // Minor fixes
 //
@@ -418,6 +421,34 @@ void StRefArray::Decode()
 //______________________________________________________________________________
 ClassImp(StStrArray)
 //______________________________________________________________________________
+StStrArray::StStrArray(const Char_t *name, Int_t s):StObjArray(s)
+{ 
+  if (!name) return;
+  SetName(name); SetIDName(0); 
+}
+//______________________________________________________________________________
+StStrArray::StStrArray(const StStrArray &from )
+{ 
+  *this = from;
+}
+//______________________________________________________________________________
+ void StStrArray::operator=(const StStrArray &a)
+{
+  int n,i; TObject *sto;
+  
+  if (fArr) fArr->Delete(); delete fArr;
+  SetName(a.GetName());
+  SetIDName(0);
+  n = a.GetSize();
+  fArr = new TObjArray(n);
+  for (i=0; i<n; i++)
+  {
+    sto = a.At(i);       
+    if (sto) sto = ((StObject*)sto)->clone(); 
+    Add(sto);
+  }
+} 
+//______________________________________________________________________________
  void StStrArray::Book(TObject* obj,int idx)
  { obj->SetUniqueID(StRegistry::Ident(fIdx,idx));}
 
@@ -442,12 +473,6 @@ ClassImp(StStrArray)
  { StObjArray::AddAtAndExpand(obj,idx); Book(obj,idx);};
 //______________________________________________________________________________
 //void StStrArray::ShowMembers(TMemberInspector &, char *){}
-//______________________________________________________________________________
-StStrArray::StStrArray(const Char_t *name, Int_t s):StObjArray(s)
-{ 
-  if (!name) return;
-  SetName(name); SetIDName(0); 
-}
 //______________________________________________________________________________
 StStrArray::~StStrArray()
 {
