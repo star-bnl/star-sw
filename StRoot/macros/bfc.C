@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.158 2004/01/14 21:42:50 perev Exp $
+// $Id: bfc.C,v 1.159 2004/03/30 03:20:02 calderon Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -132,21 +132,21 @@ void bfc(const Int_t First,
   }
   if (chain->GetOption("McAss")) {
     // Define the cuts for the Associations
-    
+    cout << "Setting the Parameters for the Association Maker in bfc" << endl;
     StMcParameterDB* parameterDB = StMcParameterDB::instance();  
     // TPC
     parameterDB->setXCutTpc(.5); // 5 mm
     parameterDB->setYCutTpc(.5); // 5 mm
-    parameterDB->setZCutTpc(.2); // 2 mm
+    parameterDB->setZCutTpc(.5); // 5 mm
     parameterDB->setReqCommonHitsTpc(3); // Require 3 hits in common for tracks to be associated
     // FTPC
     parameterDB->setRCutFtpc(.3); // 3 mm
     parameterDB->setPhiCutFtpc(5*(3.1415927/180.0)); // 5 degrees
     parameterDB->setReqCommonHitsFtpc(3); // Require 3 hits in common for tracks to be associated
     // SVT
-    parameterDB->setXCutSvt(.1); // 1 mm
-    parameterDB->setYCutSvt(.1); // 1 mm
-    parameterDB->setZCutSvt(.1); // 1 mm
+    parameterDB->setXCutSvt(.08); // 800 um
+    parameterDB->setYCutSvt(.08); // 800 um
+    parameterDB->setZCutSvt(.08); // 800 um
     parameterDB->setReqCommonHitsSvt(1); // Require 1 hits in common for tracks to be associated
   }
   if (chain->GetOption("V0") && chain->GetOption("Eval")) {
