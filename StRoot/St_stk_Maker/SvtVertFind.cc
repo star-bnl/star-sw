@@ -11,6 +11,7 @@
 #include <stdlib.h> 
 #include <string.h> 
 #include "StChain.h"
+#include "StMessMgr.h"
 #include "SvtVertFind.h"
 #include "StDetectorId.h"
 #include "StVertexId.h"
@@ -55,7 +56,7 @@ long sft_main(  St_scs_spt  *scs_spt, St_dst_vertex *svt_vertex)
   long Nvtx = svt_vertex->GetNRows();
   long ok =sft_process_event ( NSpt, s_spt, sft_vertex, Nvtx);
   if( ok == 0){
-    svt_vertex->SetNRows(Nvtx++);
+    svt_vertex->SetNRows(++Nvtx);
     return 1;
   }
   else
@@ -111,7 +112,7 @@ int sft_process_event ( long Nspt,  scs_spt_st    *staf_spt,
    vertex[n_vtx].chisq[1] = 0.;
    vertex[n_vtx].vtx_id = kEventVtxId ;
    vertex[n_vtx].det_id = kSvtId;
-   vertex[n_vtx].iflag = 2;
+   vertex[n_vtx].iflag = 201;
    vertex[n_vtx].id = n_vtx+1;
    vertex[n_vtx].covar[0] = 0.;
    vertex[n_vtx].covar[1] = 0.;
@@ -119,6 +120,8 @@ int sft_process_event ( long Nspt,  scs_spt_st    *staf_spt,
    vertex[n_vtx].covar[3] = 0.;
    vertex[n_vtx].covar[4] = 0.;
    vertex[n_vtx].covar[5] = 0.;
+
+   gMessMgr->Info() << "SVT vertex found at z= " <<  vertex[n_vtx].z << endm;
    
 
   return 0;
@@ -325,9 +328,9 @@ float sft_find_vertex ()
 
      step=.1;
    iNumPoints = bracket2 (sft_vf_ntrack, bx, step, &ax, &bx, &cx, &fa, &fb, &fc);
-   printf ("point a:   % 12.5f    % 12.5f\n", ax, fa);
-   printf ("point b:   % 12.5f    % 12.5f\n", bx, fb);
-   printf ("point c:   % 12.5f    % 12.5f\n", cx, fc); 
+   /* printf ("point a:   % 12.5f    % 12.5f\n", ax, fa);
+      printf ("point b:   % 12.5f    % 12.5f\n", bx, fb);
+      printf ("point c:   % 12.5f    % 12.5f\n", cx, fc);  */
 
    /* Not sure how this works!*/
    r = (double)((bx - cx) * (fb - fa));
@@ -370,8 +373,9 @@ bracket2 ( float (*func)(double),
            fMaxPos;
    POINT   pPoints[100];
    int     iMaxPoints = 100;
+#ifdef DEBUG
    FILE    *fout;
-
+#endif
    /* start in the middle, and work our way outwards */
 
    iStep = 1;
