@@ -216,6 +216,10 @@ public:
 ClassDef(StRefArray,1)
 };
 
+//	Utilities
+void random_shuffle(StObjArrayIter &start,StObjArrayIter &end);
+
+//	Macros
 
 #ifndef __CINT__
 #define StCollectionDef(QWERTY) \
