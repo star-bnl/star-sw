@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0.cxx,v 1.4 2001/06/25 22:57:22 jcs Exp $
+ * $Id: FTPV1P0.cxx,v 1.5 2001/06/27 22:05:11 jcs Exp $
  * Author: M.J. LeVine, J.Klay, H.Huemmler
  ***************************************************************************
  * Description:  FTPV1P0 implementation
@@ -10,6 +10,9 @@
  * JLK 11-Jul-2000 Added new geometry files to correctly navigate banks
  ***************************************************************************
  * $Log: FTPV1P0.cxx,v $
+ * Revision 1.5  2001/06/27 22:05:11  jcs
+ * Comment out unsed variable rcvb
+ *
  * Revision 1.4  2001/06/25 22:57:22  jcs
  * add correction for FTPC sector handling
  *
@@ -333,7 +336,7 @@ classname(Bank_FTPAZIP) *FTPV1P0_Reader::getBankFTPAZIP(int sector,
     return NULL;
   }
   //JLK This is new 11-July-2000 - we now have geometry files
-  int rcvb = sector_map[sector-1][1];
+//  int rcvb = sector_map[sector-1][1];     //JCS - apparently unused
   int intsec = sector_map[sector-1][2];
 
   if((intsec < 0) || (intsec >= 3))
@@ -373,7 +376,7 @@ classname(Bank_FTPMZP) *FTPV1P0_Reader::getBankFTPMZP(int sector,
   }
 
   //JLK This is new 11-July-2000 - we now have geometry files
-  int rcvb = sector_map[sector-1][1];
+//  int rcvb = sector_map[sector-1][1];     //JCS - apparently unused
   int mz = sector_map[sector-1][2];  //SAME as rcvbsector
   if ((mz < 0) || (mz >= 3))
   {
