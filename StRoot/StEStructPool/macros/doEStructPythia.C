@@ -1,5 +1,5 @@
 /************************************************************************
- * $Id: doEStructPythia.C,v 1.2 2004/04/15 18:46:33 msd Exp $
+ * $Id: doEStructPythia.C,v 1.3 2004/06/25 03:14:56 porter Exp $
  *
  * Author: Jeff Porter 
  *
@@ -14,12 +14,28 @@
  *************************************************************************/
 void doEStructPythia(const char* fileListFile, const char* outputDir, const char* jobName=0, int nset=3, int maxNumEvents=0){
 
-  // input cut files presumed to be in cwd or use full path 
-  char* evtCutFile[]={"PythiaCuts01.txt","PythiaCuts02.txt","PythiaCuts03.txt"};
 
-  // data and cut directories sub to outputDir/jobName 
-  char* datadirs[]  ={"data/01","data/02","data/03"};
-  char* cutdirs[]   ={"cuts/01","cuts/02","cuts/03"}; 
+  char* evtCutFile[10];
+  char* datadirs[10];
+  char* cutdirs[10];
+
+  if(nset>9)nset=9;
+  for(int i=0;i<nset;i++){
+    TString cf("PythiaCuts0");
+    cf+=i+1;
+    cf+=".txt";
+    evtCutFile[i]=new char[strlen(cf.Data())+1];
+    strcpy(evtCutFile[i],cf.Data());
+    TString dd("data/0");
+    dd+=i+1;
+    datadirs[i]=new char[strlen(dd.Data())+1];
+    strcpy(datadirs[i],dd.Data());
+    TString cd("cuts/0");
+    cd+=i+1;
+    cutdirs[i]=new char[strlen(cd.Data())+1];
+    strcpy(cutdirs[i],cd.Data());
+  }
+ 
 
   // in this example, all cuts (event, track, pair) are in same file
   char* trackCutFile=evtCutFile[0];
@@ -35,6 +51,20 @@ void doEStructPythia(const char* fileListFile, const char* outputDir, const char
   gSystem->Load("StEStructPoolEventGenerators.so");
 
   gROOT->LoadMacro("getOutFileName.C");
+  gROOT->LoadMacro("getPythia.C");
+
+  char* jobid=gSystem->Getenv("JOBID");
+  int jobId=1;
+  if(!jobid){
+    jobId=2;
+  } else {
+    char* ptr=strstr(jobid,"_");
+    if(ptr){
+       ptr++;
+       jobId=atoi(ptr);
+    }  
+  }
+  TPythia6* pythia=getPythia(jobId);
   
   // simple (global) centrality definition ...not persistant to event file.. 
   // and not used in this particular example
@@ -49,22 +79,19 @@ void doEStructPythia(const char* fileListFile, const char* outputDir, const char
   StEStructAnalysisMaker *estructMaker = new StEStructAnalysisMaker("EStruct2Pythia");
 
   // Set up the EStruct data Readers and Writer codes
-  char* outputFile[3];
-  StEStructEventCuts* ecuts[3];
-  StEStructTrackCuts* tcuts[3];
-  StPythiaTest*  analysis[3];
-  StEStructPythia* readers[3];
+  char* outputFile[10];
+  StEStructEventCuts* ecuts[10];
+  StEStructTrackCuts* tcuts[10];
+  StPythiaTest*  analysis[10];
+  StEStructPythia* readers[10];
 
-  TPythia6* pythia=new TPythia6();
-  pythia->Initialize("CMS","p","p",200.);
 
   // only 1 reader actually reads the event, the others just pull from mem.
   // this 'skipMake' ensures this to be the case
-  bool skipMake[3];
+  bool skipMake[10];
   skipMake[0]=false;
-  skipMake[1]=true;
-  skipMake[2]=true;
-
+  for(int i=1;i<10;i++)skipMake[i]=true;
+ 
 
   //  build the 3 readers & 3 analysis objects
   //  analysis = analysis interface & contains pair-cut object (needs file)
@@ -138,6 +165,11 @@ void doEStructPythia(const char* fileListFile, const char* outputDir, const char
 /**********************************************************************
  *
  * $Log: doEStructPythia.C,v $
+ * Revision 1.3  2004/06/25 03:14:56  porter
+ * modified basic macro to take only 1 cutfile and moved some common
+ * features into a new macro=support.C.....   this cleaned up the
+ * doEStruct macro somewhat
+ *
  * Revision 1.2  2004/04/15 18:46:33  msd
  * Updated centrality variable types
  *
