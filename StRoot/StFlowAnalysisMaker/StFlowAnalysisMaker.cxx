@@ -1,15 +1,19 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.12 1999/12/21 01:19:26 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.13 2000/01/13 21:50:22 posk Exp $
 //
-// Author: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
+// Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
+//
 ////////////////////////////////////////////////////////////////////////////
 //
-// Description:  Maker to analyze Flow using the FlowTags and StFlowEvent
+// Description:  Maker to analyze Flow using the FlowTags and/or StFlowEvent
 //
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.13  2000/01/13 21:50:22  posk
+// Updates and corrections.
+//
 // Revision 1.12  1999/12/21 01:19:26  posk
 // Added more histograms.
 //
@@ -89,8 +93,8 @@ enum { nEtaBins    = 20,
 
 //-----------------------------------------------------------------------
 
-StFlowAnalysisMaker::StFlowAnalysisMaker(const Char_t* name): StMaker(name){
-  // Make Flow histograms.
+StFlowAnalysisMaker::StFlowAnalysisMaker(const Char_t* name): StMaker(name),
+  MakerName(name) {
 }
 
 //-----------------------------------------------------------------------
@@ -144,7 +148,7 @@ Int_t StFlowAnalysisMaker::Make() {
 
 void StFlowAnalysisMaker::PrintInfo() {
   cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.12 1999/12/21 01:19:26 posk Exp $"
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.13 2000/01/13 21:50:22 posk Exp $"
        << endl;
   cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
@@ -162,8 +166,8 @@ Int_t StFlowAnalysisMaker::Init() {
 
   const float chargeMin       =   -3.;
   const float chargeMax       =    3.; 
-  const float impactParMin    =    0.;
-  const float impactParMax    =    3.; 
+  const float dcaMin          =    0.;
+  const float dcaMax          =    1.; 
   const float chi2Min         =    0.;
   const float chi2Max         =    3.; 
   const float fitPtsMin       =    0.;
@@ -173,7 +177,9 @@ Int_t StFlowAnalysisMaker::Init() {
   const float fitOverMaxMin   =    0.;
   const float fitOverMaxMax   =    3.; 
   const float origMultMin     =    0.;
-  const float origMultMax     = 2000.; 
+  const float origMultMax     = 2500.; 
+  const float totalMultMin    =    0.;
+  const float totalMultMax    = 1500.; 
   const float multOverOrigMin =    0.;
   const float multOverOrigMax =    1.; 
   const float vertexZMin      = -100.;
@@ -193,12 +199,13 @@ Int_t StFlowAnalysisMaker::Init() {
   const float qMin            =    0.;
 
   enum { nChargeBins       = 50,
-	 nImpactParBins    = 50,
+	 nDcaBins          = 50,
 	 nChi2Bins         = 50,
 	 nFitPtsBins       = 50,
 	 nMaxPtsBins       = 50,
 	 nFitOverMaxBins   = 50,
 	 nOrigMultBins     = 50,
+	 nTotalMultBins    = 50,
 	 nMultOverOrigBins = 50,
 	 nVertexZBins      = 50,
 	 nVertexXYBins     = 50,
@@ -214,16 +221,16 @@ Int_t StFlowAnalysisMaker::Init() {
   mHistCharge->SetXTitle("Charge");
   mHistCharge->SetYTitle("Counts");
     
-  // ImpactPar
-  mHistImpactPar = new TH1F("Flow_ImpactPar", "Flow_ImpactPar",
-      nImpactParBins, impactParMin, impactParMax);
-  mHistImpactPar->SetXTitle("Impact Parameter");
-  mHistImpactPar->SetYTitle("Counts");
+  // Distance of closest approach
+  mHistDca = new TH1F("Flow_Dca", "Flow_Dca",
+      nDcaBins, dcaMin, dcaMax);
+  mHistDca->SetXTitle("Track dca to Vertex (cm)");
+  mHistDca->SetYTitle("Counts");
     
   // Chi2
   mHistChi2 = new TH1F("Flow_Chi2", "Flow_Chi2",
       nChi2Bins, chi2Min, chi2Max);
-  mHistChi2->SetXTitle("Chi square");
+  mHistChi2->SetXTitle("Chi square per df");
   mHistChi2->SetYTitle("Counts");
     
   // FitPts
@@ -250,6 +257,12 @@ Int_t StFlowAnalysisMaker::Init() {
   mHistOrigMult->SetXTitle("Original Mult");
   mHistOrigMult->SetYTitle("Counts");
     
+  // Mult
+  mHistMult = new TH1F("Flow_Mult", "Flow_Mult",
+      nTotalMultBins, totalMultMin, totalMultMax);
+  mHistMult->SetXTitle("Mult");
+  mHistMult->SetYTitle("Counts");
+    
   // MultOverOrig
   mHistMultOverOrig = new TH1F("Flow_MultOverOrig", "Flow_MultOverOrig",
       nMultOverOrigBins, multOverOrigMin, multOverOrigMax);
@@ -259,20 +272,20 @@ Int_t StFlowAnalysisMaker::Init() {
   // VertexZ
   mHistVertexZ = new TH1F("Flow_VertexZ", "Flow_VertexZ",
       nVertexZBins, vertexZMin, vertexZMax);
-  mHistVertexZ->SetXTitle("Vertex Z");
+  mHistVertexZ->SetXTitle("Vertex Z (cm)");
   mHistVertexZ->SetYTitle("Counts");
     
   // VertexXY
   mHistVertexXY2D = new TH2F("Flow_VertexXY2D", "Flow_VertexXY2D",
 			     nVertexXYBins, vertexXYMin, vertexXYMax,
 			     nVertexXYBins, vertexXYMin, vertexXYMax);
-  mHistVertexXY2D->SetXTitle("Vertex X");
-  mHistVertexXY2D->SetYTitle("Vertex Y");
+  mHistVertexXY2D->SetXTitle("Vertex X (cm)");
+  mHistVertexXY2D->SetYTitle("Vertex Y (cm)");
     
   // EtaSym
   mHistEtaSym = new TH1F("Flow_EtaSym", "Flow_EtaSym",
       nEtaSymBins, etaSymMin, etaSymMax);
-  mHistEtaSym->SetXTitle("Eta Symmetry");
+  mHistEtaSym->SetXTitle("Eta Symmetry Ratio");
   mHistEtaSym->SetYTitle("Counts");
     
   // EtaPtPhi
@@ -280,8 +293,8 @@ Int_t StFlowAnalysisMaker::Init() {
       nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMax, nPhi3DBins,
       phiMin, phiMax);
   mHistEtaPtPhi3D->SetXTitle("Eta");
-  mHistEtaPtPhi3D->SetYTitle("Pt");
-  mHistEtaPtPhi3D->SetZTitle("Phi");
+  mHistEtaPtPhi3D->SetYTitle("Pt (GeV)");
+  mHistEtaPtPhi3D->SetZTitle("Phi (rad)");
     
   // Yield for all particles
   mHistYieldAll2D = new TH2D("Flow_YieldAll2D", "Flow_YieldAll2D",
@@ -328,13 +341,13 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   for (int k = 0; k < nSels; k++) {
-    char countSubs[2];
-    sprintf(countSubs,"%d",k+1);
+    char countSels[2];
+    sprintf(countSels,"%d",k+1);
     // for sub-event pairs
 
     // cos(n*delta_Psi)
     histTitle = new TString("Flow_prof_Cos_Sel");
-    histTitle->Append(*countSubs);
+    histTitle->Append(*countSels);
     histFull[k].mHistCos = new TProfile(histTitle->Data(), histTitle->Data(),
       nHars, 0.5, (float)(nHars) + 0.5, -1., 1., "");
     histFull[k].mHistCos->SetXTitle("Harmonic");
@@ -343,7 +356,7 @@ Int_t StFlowAnalysisMaker::Init() {
     
     // resolution
     histTitle = new TString("Flow_Res_Sel");
-    histTitle->Append(*countSubs);
+    histTitle->Append(*countSels);
     histFull[k].mHistRes = new TH1F(histTitle->Data(), histTitle->Data(),
       nHars, 0.5, (float)(nHars) + 0.5);
     histFull[k].mHistRes->SetXTitle("Harmonic");
@@ -358,7 +371,7 @@ Int_t StFlowAnalysisMaker::Init() {
 
       // multiplicity
       histTitle = new TString("Flow_Mult_Sel");
-      histTitle->Append(*countSubs);
+      histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHistMult = new TH1F(histTitle->Data(),
@@ -369,7 +382,7 @@ Int_t StFlowAnalysisMaker::Init() {
       
       // Phi lab
       histTitle = new TString("Flow_Phi_Sel");
-      histTitle->Append(*countSubs);
+      histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHistPhi = new TH1D(histTitle->Data(),
@@ -381,7 +394,7 @@ Int_t StFlowAnalysisMaker::Init() {
       
       // PhiWgt new
       histTitle = new TString("Flow_Phi_Weight_Sel");
-      histTitle->Append(*countSubs);
+      histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHistPhiWgt =	new TH1D(histTitle->Data(),
@@ -394,7 +407,7 @@ Int_t StFlowAnalysisMaker::Init() {
       
       // Phi lab flattened
       histTitle = new TString("Flow_Phi_Flat_Sel");
-      histTitle->Append(*countSubs);
+      histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHistPhiFlat =	new TH1D(histTitle->Data(),
@@ -406,7 +419,7 @@ Int_t StFlowAnalysisMaker::Init() {
       
       // event plane
       histTitle = new TString("Flow_Psi_Sel");
-      histTitle->Append(*countSubs);
+      histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHistPsi = new TH1F(histTitle->Data(),
@@ -418,7 +431,7 @@ Int_t StFlowAnalysisMaker::Init() {
       
       // correlation of sub-event planes
       histTitle = new TString("Flow_Psi_Sub_Corr_Sel");
-      histTitle->Append(*countSubs);
+      histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHistPsiSubCorr = new TH1F(histTitle->Data(),
@@ -431,7 +444,7 @@ Int_t StFlowAnalysisMaker::Init() {
       
       // correlation of sub-event planes of different order
       histTitle = new TString("Flow_Psi_Sub_Corr_Diff_Sel");
-      histTitle->Append(*countSubs);
+      histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHistPsiSubCorrDiff = new 
@@ -445,7 +458,7 @@ Int_t StFlowAnalysisMaker::Init() {
       
       // q
       histTitle = new TString("Flow_q_Sel");
-      histTitle->Append(*countSubs);
+      histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_q = new TH1F(histTitle->Data(),
@@ -457,7 +470,7 @@ Int_t StFlowAnalysisMaker::Init() {
       
       // <p_t>
       histTitle = new TString("Flow_MeanPt_Sel");
-      histTitle->Append(*countSubs);
+      histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHistMeanPt = new TH1F(histTitle->Data(),
@@ -468,7 +481,7 @@ Int_t StFlowAnalysisMaker::Init() {
 
       // particle-plane azimuthal correlation
       histTitle = new TString("Flow_Phi_Corr_Sel");
-      histTitle->Append(*countSubs);
+      histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHistPhiCorr =	new TH1F(histTitle->Data(),
@@ -481,7 +494,7 @@ Int_t StFlowAnalysisMaker::Init() {
 
       // Sum of v
       histTitle = new TString("Flow_Sum_v2D_Sel");
-      histTitle->Append(*countSubs);
+      histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHistSum_v2D =	new TH2D(histTitle->Data(),
@@ -493,7 +506,7 @@ Int_t StFlowAnalysisMaker::Init() {
 
       // Yield
       histTitle = new TString("Flow_Yield2D_Sel");
-      histTitle->Append(*countSubs);
+      histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHistYield2D =	new TH2D(histTitle->Data(),
@@ -505,7 +518,7 @@ Int_t StFlowAnalysisMaker::Init() {
 
       // Flow observed
       histTitle = new TString("Flow_vObs2D_Sel");
-      histTitle->Append(*countSubs);
+      histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vObs2D =	new TH2F(histTitle->Data(),
@@ -517,7 +530,7 @@ Int_t StFlowAnalysisMaker::Init() {
 
       // Flow
       histTitle = new TString("Flow_v2D_Sel");
-      histTitle->Append(*countSubs);
+      histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_v2D = new TH2F(histTitle->Data(),
@@ -613,14 +626,12 @@ void StFlowAnalysisMaker::fillEventHistograms() {
   static const int& nSels = Flow::nSels;
   static const int& nSubs = Flow::nSubs;
 
-  // no selections: OrigMult, MultOverOrig, VertexZ, VertexXY
+  // no selections: OrigMult, Mult, MultOverOrig, VertexZ, VertexXY
   int origMult = pFlowEvent->OrigMult();
   mHistOrigMult->Fill((float)origMult);
-
-  if (origMult) {
-    int totalMult = pFlowEvent->TrackCollection()->size();
-    mHistMultOverOrig->Fill((float)totalMult / (float)origMult);
-  }
+  int totalMult = pFlowEvent->TrackCollection()->size();
+  mHistMult->Fill((float)totalMult);
+  if (origMult) mHistMultOverOrig->Fill((float)totalMult / (float)origMult);
 
   StThreeVectorF vertex = pFlowEvent->VertexPos();
   mHistVertexZ->Fill(vertex.z());
@@ -695,18 +706,18 @@ void StFlowAnalysisMaker::fillParticleHistograms() {
     float eta       = pFlowTrack->Eta();
     float pt        = pFlowTrack->Pt();
     int   charge    = pFlowTrack->Charge();
-    float impactPar = pFlowTrack->ImpactPar();
+    float dca       = pFlowTrack->ImpactPar();
     float chi2      = pFlowTrack->Chi2();
     int fitPts      = pFlowTrack->FitPts();
     int maxPts      = pFlowTrack->MaxPts();
 
-    // no selections: Charge, ImpactPar, Chi2, FitPts, MaxPts, FitOverMax
+    // no selections: Charge, Dca, Chi2, FitPts, MaxPts, FitOverMax
     mHistCharge->Fill((float)charge);
-    mHistImpactPar->Fill(impactPar);
+    mHistDca->Fill(dca);
     mHistChi2->Fill(chi2);
     mHistFitPts->Fill((float)fitPts);
     mHistMaxPts->Fill((float)maxPts);
-    if (maxPts) mHistFitOverMax->Fill(fitPts/maxPts);
+    if (maxPts) mHistFitOverMax->Fill((float)fitPts/(float)maxPts);
 
     // Yield3D, Yield2D, BinEta, BinPt
     mHistEtaPtPhi3D->Fill(eta, pt, phi);
@@ -745,11 +756,12 @@ void StFlowAnalysisMaker::fillParticleHistograms() {
 	histFull[k].histFullHar[j].mHistSum_v2D->Fill(eta, pt, v);
 
 	// Correlation of Phi of all particles with Psi
+	float phi_i = phi;
 	if (eta < 0 && (j+1) % 2 == 1) {
-	  phi += pi; // backward particle and odd harmonic
-	  if (phi > twopi) phi -= twopi;
+	  phi_i += pi; // backward particle and odd harmonic
+	  if (phi_i > twopi) phi_i -= twopi;
 	}
-	float dPhi = phi - psi_i;
+	float dPhi = phi_i - psi_i;
 	if (dPhi < 0.) dPhi += twopi;
 	histFull[k].histFullHar[j].mHistPhiCorr->
 	  Fill(fmod(dPhi, twopi / order));

@@ -1,6 +1,8 @@
+Maker:		StFlowTagMaker
 Files:		StFlowTagMaker.cxx
 		StFlowTagMaker.hh
-Author:		Raimond Snellings and Art Poskanzer 
+Authors		Raimond Snellings and Art Poskanzer 
+		with lots of help from Glenn Cooper 
 Date:		Dec 1999
 Description:
 

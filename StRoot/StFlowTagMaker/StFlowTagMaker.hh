@@ -1,23 +1,24 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // StFlowTagMaker.hh
-// $Id: StFlowTagMaker.hh,v 1.4 1999/12/21 21:28:34 posk Exp $
+// $Id: StFlowTagMaker.hh,v 1.5 2000/01/13 21:49:16 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
+//
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Description: 
 //  Maker to fill Tag database for flow analysis
-//
-// Environment:
-//  Software developed for the STAR Detector at LBNL
 //
 //
 //////////////////////////////////////////////////////////////////////
 //
 // History:
 // $Log: StFlowTagMaker.hh,v $
+// Revision 1.5  2000/01/13 21:49:16  posk
+// Updates and corrections.
+//
 // Revision 1.4  1999/12/21 21:28:34  posk
 // Updated the README file.
 //

@@ -1,15 +1,19 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.hh,v 1.5 1999/12/21 21:29:47 posk Exp $
+// $Id: StFlowAnalysisMaker.hh,v 1.6 2000/01/13 21:50:24 posk Exp $
 //
-// Author: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
+// Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
+//
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Description:  Maker to analyze Flow using the FlowTags and StFlowEvent
+// Description:  Maker to analyze Flow using the FlowTags and/or StFlowEvent
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.hh,v $
+// Revision 1.6  2000/01/13 21:50:24  posk
+// Updates and corrections.
+//
 // Revision 1.5  1999/12/21 21:29:47  posk
 // Updated the README file.
 //
@@ -69,8 +73,8 @@ protected:
   void     fillFromTags();
   void     fillFromFlowEvent();
 
-  StFlowEvent*  pFlowEvent; //!
-  FlowTag_st*   pFlowTag;   //!
+  StFlowEvent*  pFlowEvent; //! pointer to StFlowEvent
+  FlowTag_st*   pFlowTag;   //! pointer to StEvent
 
   TVector2 mQ[Flow::nSels][Flow::nHars];                     // flow vector
   Float_t  mPsi[Flow::nSels][Flow::nHars];                   // event plane angle
@@ -91,12 +95,13 @@ private:
 
   // for single histograms
   TH1F*     mHistCharge;        //!
-  TH1F*     mHistImpactPar;     //!
+  TH1F*     mHistDca;           //!
   TH1F*     mHistChi2;          //!
   TH1F*     mHistFitPts;        //!
   TH1F*     mHistMaxPts;        //!
   TH1F*     mHistFitOverMax;    //!
   TH1F*     mHistOrigMult;      //!
+  TH1F*     mHistMult;          //!
   TH1F*     mHistMultOverOrig;  //!
   TH1F*     mHistVertexZ;       //!
   TH2F*     mHistVertexXY2D;    //!
@@ -145,11 +150,13 @@ private:
   };
   struct histFulls histFull[Flow::nSels]; //!
 
-  static const Float_t etaMin;
+  static const Float_t etaMin;                  // histogram limits
   static const Float_t etaMax;
   static const Float_t ptMin;
   static const Float_t ptMax;
   static const Float_t qMax;
+
+  TString      MakerName;
 
   ClassDef(StFlowAnalysisMaker, 1)              // macro for rootcint
 };
