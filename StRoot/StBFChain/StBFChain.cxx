@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.146 2000/10/16 16:37:41 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.147 2000/10/27 01:18:15 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -350,16 +350,18 @@ Int_t StBFChain::Instantiate()
 	    mk = calibMk;
 	  }
 	  if (Key.CompareTo("db",TString::kIgnoreCase) == 0) {
-	    if (!GetOption("NoMySQLDb") && !GetOption("NoCintDb"))
-	    dbMk = new St_db_Maker(fBFC[i].Name,"MySQL:StarDb","$STAR/StarDb","$PWD/StarDb");
-	    else {
-	      if (GetOption("NoMySQLDb") && GetOption("NoCintDb"))
-		dbMk = new St_db_Maker(fBFC[i].Name,"$PWD/StarDb");
+            if (!dbMk) {
+	      if (!GetOption("NoMySQLDb") && !GetOption("NoCintDb"))
+		dbMk = new St_db_Maker(fBFC[i].Name,"MySQL:StarDb","$STAR/StarDb","$PWD/StarDb");
 	      else {
-		if (GetOption("NoMySQLDb")) 
+		if (GetOption("NoMySQLDb") && GetOption("NoCintDb"))
+		  dbMk = new St_db_Maker(fBFC[i].Name,"$PWD/StarDb");
+		else {
+		  if (GetOption("NoMySQLDb")) 
 		    dbMk = new St_db_Maker(fBFC[i].Name,"$STAR/StarDb","$PWD/StarDb");
-		if (GetOption("NoCintDb"))
-		  dbMk = new St_db_Maker(fBFC[i].Name,"MySQL:StarDb","$PWD/StarDb");
+		  if (GetOption("NoCintDb"))
+		    dbMk = new St_db_Maker(fBFC[i].Name,"MySQL:StarDb","$PWD/StarDb");
+		}
 	      }
 	    }
 	    mk = dbMk;
