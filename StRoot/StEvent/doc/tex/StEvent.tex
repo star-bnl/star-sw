@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.19 2000/02/17 18:16:18 ullrich Exp $
+% $Id: StEvent.tex,v 2.20 2000/02/24 13:25:12 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -21,8 +21,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 2.19  2000/02/17 18:16:18  ullrich
-% Add documentation of new SVT hit storage layout.
+% Revision 2.20  2000/02/24 13:25:12  ullrich
+% Added RICH and EMC to the reference section. Created
+% (empty) section for EMC and RICH in User Guide.
 %
 % Revision 2.33  2000/05/22 22:04:07  ullrich
 % Removed StRichPixelCollection ref section and added description
@@ -146,8 +147,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.19 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/17 18:16:18 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.20 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/24 13:25:12 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -171,8 +172,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.19 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/17 18:16:18 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.20 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/24 13:25:12 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -180,17 +181,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.19 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/17 18:16:18 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.20 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/24 13:25:12 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.19 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/17 18:16:18 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.20 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/24 13:25:12 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.19 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/17 18:16:18 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.20 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/24 13:25:12 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -205,8 +206,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.19 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/17 18:16:18 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.20 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/24 13:25:12 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
@@ -2189,6 +2190,13 @@ are what count. Take for an example a track fit. What you have to pass
 to the fitting algorithm are the points and the errors. A fitter usually
 gives a damn if the position was taken in the SVT or TPC. What counts
 are the coordinates and their weight which depends on the errors.
+To illustrate this lets assume we have a helix fitting
+algorithm implemented in a fitter class \texttt{MyOwnSimpleFitter}.
+It provides a method to add points and one to actually fit a helix to
+the points.
+\begin{verbatim}
+MyOwnSimpleFitter::addPoints(vector<StMeasuredPoint*>);
+MyOwnSimpleFitter::apply();
 \end{verbatim}
 Now we can put together a simple function which takes a track
 as argument, extract the points and the vertex, and fills them in a vector.
@@ -2366,6 +2374,163 @@ definition in the header file.
     \item[evt = 3] 3rd pre event at t = -1
     \item[evt = 4] 1st post event at t = +1
     \item[evt = 5] 2nd post event at t = +2
+    \texttt{numberOfSlots()}-1. The first half of the tray numbers are
+    for the west side, the second half for the east side (usually 0-59
+    on west end, 60-119 on east end).  Each tray has 2 slats, 0 is the
+    inner slat, closest to the central membrane, and 1 is the outer
+    slat, further from the central membrane.  The last argument
+    \texttt{evt} has  the following meaning:\\
+    0 is the triggered event, and
+    from 1 to \texttt{(npresamples+npostsamples)} are the other "events",
+    in chronological order.  For example, assuming 5 pre events and 5
+    post events:
+    \begin{description}
+    \item[evt = 0] triggered event at t = 0
+    \item[evt = 1] 1st pre event at t = -5
+    \item[evt = 2] 2nd pre event at t = -4
+    \item[evt = 4] 1st post event at t = -2
+    \item[evt = 5] 2nd post event at t = -1
+    \item[evt = 6] 2nd post event at t = +1
+    \item[evt = 7] 2nd post event at t = +2
+    \item[evt = 8] 2nd post event at t = +3
+    \item[evt = 9] 2nd post event at t = +4
+    \item[evt = 10] 2nd post event at t = +5
+    \end{description}
+    
+    \verb+Char_t time(UInt_t tray, UInt_t slot, UInt_t evt = 0) const;+\\
+    Same arguments as for \texttt{mips()} (see above).
+     
+    \verb+Float_t aux(UInt_t, UInt_t evt = 0) const;+\\
+    Argument \texttt{i} has no physical significance at present, these
+    data are simple reserved (on request of Hank Crawford) for
+    possible future use.  For the second argument (\texttt{evt}) see
+    \texttt{mips()} above.
+
+    \verb+Int_t nHits() const;+\\
+    \verb+void setTime(UInt_t, UInt_t, UInt_t, Char_t);+\\
+    \verb+void setNumberOfPreSamples(UInt_t);+\\
+    \verb+void setNumberOfPostSamples(UInt_t);+\\
+\end{Entry}
+\clearpage
+
+\subsection{StDedxPidTraits}
+\index{StDedxPidTraits|textbf}
+\label{sec:StDedxPidTraits}
+\begin{Entry}
+\item[Summary]
+\item[Synopsis]
+    \verb+class StDedxPidTraits;+\\
+\item[Description]
+\item[Related Classes]
+\item[Public\\ Constructors]
+    \verb+StDedxPidTraits();+\\
+    Default constructor.
+    
+    \verb+StDedxPidTraits(StDetectorId det, Short_t emethod,+\\
+    \verb+                UShort_t np, Float_t dedx, Float_t sig);+\\
+    Create an instance of \texttt{StDedxPidTraits} for detector
+    \texttt{det}, encoded method \texttt{emethod}, number of points
+    \texttt{np}, dE/dx mean \texttt{dedx}, and error on mean \texttt{sig}.
+    
+\item[Public Member\\ Functions]
+    \verb+UShort_t numberOfPoints() const;+\\
+    Number of points used to calculate the dE/dx value.
+    
+    \verb+Float_t mean() const;+\\
+    The derived dE/dx value.
+    
+    \verb+Float_t errorOnMean() const;+\\
+    Returns the error on the dE/dx value.
+    
+    \verb+StDedxMethod method() const;+\\    
+
+    \verb+Short_t encodedMethod() const;+\\
+\end{Entry}
+\clearpage
+
+
+\subsection{StEmcCluster}
+\index{StEmcCluster|textbf}
+\label{sec:StEmcCluster}
+\begin{Entry}
+\item[Summary]
+\item[Synopsis]
+    \verb+#include "StEmcCluster.h"+\\
+    \verb+class StEmcCluster;+\\
+\item[Description]
+\item[Related Classes]
+\item[Public\\ Constructors]
+    \verb+StEmcCluster();+\\
+\item[Public Member\\ Functions]
+    \verb+Float_t eta() const;+\\
+    \verb+Float_t phi() const;+\\
+    \verb+Float_t sigmaEta() const;+\\
+    \verb+Float_t sigmaPhi() const;+\\
+    \verb+StPtrVecEmcCluster& neighbor();+\\
+    \verb+const StPtrVecEmcCluster& neighbor() const;+\\
+    \verb+StPtrVecTrack& track();+\\
+    \verb+const StPtrVecTrack& track() const;+\\
+    \verb+void setEta(Float_t);+\\
+    \verb+void setPhi(Float_t);+\\
+    \verb+void setSigmaEta(Float_t);+\\
+    \verb+void setSigmaPhi(Float_t);+\\
+    \verb+void setEnergy(Float_t);+\\
+    \verb+void addHit(StEmcRawHit*);+\\
+    \verb+void addNeighbor(StEmcCluster*);+\\
+    \verb+void addTrack(StTrack*);+\\
+    \verb+void print(ostream& os = cout) const;+\\
+\end{Entry}
+\clearpage
+
+
+\subsection{StEmcClusterCollection}
+\index{StEmcClusterCollection|textbf}
+\label{sec:StEmcClusterCollection}
+\begin{Entry}
+\item[Summary]
+\item[Synopsis]
+    \verb+#include "StEmcClusterCollection.h"+\\
+    \verb+class StEmcClusterCollection;+\\
+\item[Description]
+\item[Related Classes]
+\item[Public\\ Constructors]
+    \verb+StEmcClusterCollection();+\\
+\item[Public Member\\ Functions]
+    \verb+StDetectorId detector() const;+\\
+    \verb+void setDetector(StDetectorId);+\\
+    \verb+Int_t numberOfClusters() const;+\\
+    \verb+StSPtrVecEmcCluster& clusters();+\\
+    \verb+const StSPtrVecEmcCluster& clusters() const;+\\
+    \verb+void addCluster(StEmcCluster*);+\\
+    \verb+Int_t clusterFinderId() const;+\\
+    \verb+Int_t clusterFinderParamVersion() const;+\\
+    \verb+void setClusterFinderId(Int_t);+\\
+    \verb+void setClusterFinderParamVersion(Int_t);+\\
+\end{Entry}
+\clearpage
+
+
+\subsection{StEmcCollection}
+\index{StEmcCollection|textbf}
+\label{sec:StEmcCollection}
+\begin{Entry}
+    \verb+const StEmcClusterCollection* cluster() const;+\\
+    \verb+void setCluster(StEmcClusterCollection*);+\\
+\end{Entry}
+\clearpage
+
+
+\subsection{StEmcModule}
+\index{StEmcModule|textbf}
+\label{sec:StEmcModule}
+\begin{Entry}
+\item[Summary]
+\item[Synopsis]
+    \verb+#include "StEmcModule.h"+\\
+    \verb+class StEmcModule;+\\
+\item[Description]
+\item[Related Classes]
+\item[Public\\ Constructors]
     \verb+StEmcModule();+\\
 \item[Public Member\\ Functions]
     \verb+UInt_t numberOfHits() const;+\\
@@ -3230,19 +3395,40 @@ definition in the header file.
 
 
 \subsection{StPrimaryVertex}
-    \verb+StRichPixel(UShort_t pad, UShort_t adc);+\\
-    \verb+StRichPixel(const dst_rch_pixel_st&);+\\
+\index{StPrimaryVertex|textbf}
 \label{sec:StPrimaryVertex}
-    \verb+UShort_t module() const;+\\
-    \verb+UShort_t channel() const;+\\
-    \verb+UShort_t adc() const;+\\
-\item[Public Member\\ Operators]
 \begin{Entry}
 \item[Summary]
+\item[Synopsis]
+    \verb+#include "StPrimaryVertex.h"+\\
+    \verb+class StPrimaryVertex;+\\
+\item[Description]
 
 \item[Related Classes]
     Inherits directly from \texttt{StVertex}.
     
+\item[Public\\ Constructors]
+    \verb+StPrimaryVertex();+\\
+    \verb+StPrimaryVertex(const dst_vertex_st&);+\\
+
+\item[Public Member\\ Functions]
+    \verb+StVertexId type() const;+\\
+    \verb+UInt_t numberOfDaughters() const;+\\
+    
+
+    \verb+Long_t flag() const;+\\
+    Inherited from StVertex. It his mentioned here since the return
+    value in the context of the \texttt{StPrimaryVertex} has a special
+    meaning.\index{flag() in StPrimaryVertex}\index{iflag}
+    
+    For primary vertices \texttt{flag()} returns the fitting iteration
+    and error reporting as follows (see also documentation for module
+    \texttt{evr\_am.F}):
+    \begin{description}             
+    \item[+yx1] for normal, successfully found primary vertex during
+        the 3rd iteration
+    \item[-yx3] for initial seed value
+    number, the second 8 bits are the row, and the next 11 bits
     are the ADC value (11th bit indicates overflow).
 
     \verb+StRichMCPixel(ULong_t packedData,+\\
@@ -3667,12 +3853,14 @@ definition in the header file.
 \item[Description]
 \item[Related Classes]
 \item[Public\\ Constructors]
-\item[Summary]
+    \verb+StSvtLadderHitCollection();+\\
+\item[Public Member\\ Functions]
     \verb+ULong_t numberOfHits() const;+\\
     \verb+UInt_t numberOfWafers() const;+\\
     \verb+StSvtWaferHitCollection* wafer(UInt_t);+\\
-\item[Description]
-\item[Related Classes]
+    \verb+const StSvtWaferHitCollection* wafer(UInt_t) const;+\\
+\end{Entry}
+\clearpage
 
 \subsection{StSvtSoftwareMonitor}
 \index{StSvtSoftwareMonitor|textbf}
@@ -3751,7 +3939,7 @@ definition in the header file.
     \texttt{kTruncatedMeanId}, i.e.~the \texttt{kTruncatedMeanId}
     method is selected in case you do not provide an argument.  See
     \ref{sec:Enumerations} for possible methods. Note that the
-\item[Summary]
+    existence of an enumeration doesn't mean that it is available or
     even implemented.
     
 \item[Public Member\\ Functions]
@@ -3770,7 +3958,7 @@ definition in the header file.
 \begin{Entry}
 \item[Summary]
 \item[Synopsis]
-\item[Summary]
+    \verb+#include "StTpcHit.h"+\\
     \verb+class StTpcHit;+\\
 \item[Description]
 \item[Related Classes]
