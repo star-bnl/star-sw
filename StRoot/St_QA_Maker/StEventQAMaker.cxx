@@ -133,8 +133,11 @@ Int_t StEventQAMaker::Make() {
           gMessMgr->Warning("StEventQAMaker::Make(): trigger word=0 !!!!!");
       }
     } else { // No trigger info or year 1 data!
-      if (!allTrigs)
+      if (allTrigs) {
+        histsSet = 2; // go with pp histos if allTrigs
+      } else {
         gMessMgr->Warning("StEventQAMaker::Make(): No trigger info...processing anyhow");
+      }
     }
     if (!doEvent) {
       gMessMgr->Message() << "StEventQAMaker::Make(): "
@@ -1907,8 +1910,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.40 2003/01/23 04:08:22 jeromel Exp $
+// $Id: StEventQAMaker.cxx,v 2.41 2003/01/23 20:53:10 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.41  2003/01/23 20:53:10  genevb
+// Additional dAu changes
+//
 // Revision 2.40  2003/01/23 04:08:22  jeromel
 // Include fixed
 //
