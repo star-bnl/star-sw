@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.56 2001/02/08 20:37:15 saulys Exp $
+// $Id: St_tpt_Maker.cxx,v 1.57 2001/04/17 16:21:00 lasiuk Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.57  2001/04/17 16:21:00  lasiuk
+// pointer check for the call to StMagUtilities
+//
 // Revision 1.56  2001/02/08 20:37:15  saulys
 // Update call to ExB
 //
@@ -338,10 +341,22 @@ Int_t St_tpt_Maker::Make(){
 	    x[0] = spc -> x;    
 	    x[1] = spc -> y;    
 	    x[2] = spc -> z;
-	    m_ExB -> UndoDistortion(x,xprime);   // input x[3], return xprime[3]
-	    spc -> x = xprime[0];
-	    spc -> y = xprime[1];
-	    spc -> z = xprime[2];
+// 	    cout << "tptbefore x: " << x[0] << '\t' << x[1] << '\t' << x[2] << endl;
+	    if(m_ExB) {
+		m_ExB -> UndoDistortion(x,xprime);   // input x[3], return xprime[3]
+		//cout << "tptafter x: " << xprime[0] << '\t' << xprime[1] << '\t' << xprime[2] << endl;
+
+		spc -> x = xprime[0];
+		spc -> y = xprime[1];
+		spc -> z = xprime[2];
+
+	    }
+	    else {
+		cout << "St_tpt_Maker::Make()\n";
+		cout << "\tstar:ptr lost\n";
+		cout << "\tExB Correction not done" << endl;
+
+	    }
 	  }
       }
 
