@@ -1,6 +1,9 @@
-* $Id: ecalgeo.g,v 1.9 2001/04/06 18:12:20 akio Exp $
+* $Id: ecalgeo.g,v 1.10 2001/04/09 14:20:24 akio Exp $
 * $Name:  $
 * $Log: ecalgeo.g,v $
+* Revision 1.10  2001/04/09 14:20:24  akio
+* set default to de, not cherenkov, for fpd
+*
 * Revision 1.9  2001/04/06 18:12:20  akio
 * Include the first version of FPD
 *
@@ -107,7 +110,7 @@ Author    Rashid Mehdiyev
 Fill  EMCG                          ! EM EndCAp Calorimeter basic data 
       Version  = 4.1                ! Geometry version 
       OnOff    = {1,2,2}            ! =0 no, =1 west, =2 east, =3 both for endcap, fpd and PbG		
-      ChkvSim  = 1                  ! = 0 de, = 1 Cherenkov simulation for PbG
+      ChkvSim  = 0                  ! = 0 de, = 1 Cherenkov simulation for PbG
 Fill  EMCS                          ! EM Ebdcap Calorimeter geometry
       Type     = 1                  ! =1 endcap, =2 fpd edcap prototype
       ZOrig    = 273.5              ! calorimeter origin in z
