@@ -1,19 +1,14 @@
 //
-// $Id: StPreEclMaker.h,v 1.2 2000/08/24 11:26:48 suaide Exp $
-//
-// Revision 1.2  2000/08/22 05:30:00  A. A. P. Suaide
-//     Full StEvent compatible
-//     Read hits from StEvent object. If it does not exist creates a new one
-//     write clusters in StEvent format and old format
-//     Do clustering on bemc, bprs, bsmde and bsmdp
-//     StBemcPreClusterCollection, StBemcPreClsuter now obsolete
-//     StBsmdePreClusterCollection, StBsmdePreClsuter now obsolete
-//     StBsmdpPreClusterCollection, StBsmdpPreClsuter now obsolete
-//     Included method SetClusterConditions 
+// $Id: StPreEclMaker.h,v 1.3 2000/08/24 19:45:37 suaide Exp $
 //
 //
 // $Log: StPreEclMaker.h,v $
+// Revision 1.3  2000/08/24 19:45:37  suaide
+// small modifications: some cout has been removed
+//
 // Revision 1.2  2000/08/24 11:26:48  suaide
+//
+//
 // by A. A. P. Suaide - 2000/08/24 07:25:00
 //
 // Notes:
