@@ -188,7 +188,9 @@
 *                   - after reading in fz file in fzin (init) do make gstar
 *                     again so that hepe_* tables get created
 *                   - fix tfc_r chain so that it uses tpc sector #'s
-*  
+* 
+* 12/10/98 K. Turner - remove "ev0j" chain - not needed anymore (use ev02 ev0d)
+*                    
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -476,7 +478,6 @@ ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
              [ebye_prior_switch] [ebye_ensemble_switch]  [ebye_analysis_switch]
             exec init_sca#init_analysis [calib_dir] [output_file] _
 	      [ebye_prior_switch] [ebye_ensemble_switch]  [ebye_analysis_switch]
-    (ev0j)  exec init_ev0join
     (sdst)  exec create_tables_strange#smdst
             exec init_smdst#init_smdst
    (sdst2)  exec create_tables_strange#smdst2
@@ -804,7 +805,6 @@ return
                  message <<< WARNING >>>  Problem with sca_runsca in event [i]
 		 goto NEXT_EVENT
                endif
-    (ev0j)     exec run_ev0join
     (sdst)     exec run_smdst#run_smdst
    (sdst2)     exec run_smdst#run_smdst2
    (dchkt)    
