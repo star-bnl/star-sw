@@ -78,7 +78,7 @@ INC_GEN_DIR := $(OUT_DIR)/inc
 
 
 #	Includes
-INCLUDES := $(addprefix -I,$(wildcard $(UPP_INP_DIR)/*/inc)) -I$(CERN)/new/src/cfortran
+INCLUDES := $(addprefix -I,$(wildcard $(UPP_INP_DIR)/*/inc)) -I$(CERN_ROOT)/include/cfortran
 
 
 BIN_DIR := $(OUT_DIR)/bin
@@ -271,20 +271,20 @@ $(SRC_GEN_DIR)/%-lex.c : $(SRM_DIR)/%.l
 
 $(DEP_DIR)/%.d: %.c 
 	$(RM) $(ALL_TAGS)
-	$(GCC)  -MM -MG $(CPPFLAGS) $(INCLUDES)  $(ALL_DEPS) | \
+	$(GCC)  -MM -MG $(CPPFLAGS) $(INCLUDES)  $(1ST_DEPS) | \
         sed -e 's/$(notdir $(STEM)).o/$(subst /,\/,$(OBJ_DIR)/$(STEM).o) $(subst /,\/,$(ALL_TAGS))/g'\
         > $(ALL_TAGS)
 
 $(DEP_DIR)/%.d: %.cc 
 	$(RM) $(ALL_TAGS)
-	$(GCC)  -MM -MG $(CPPFLAGS) $(INCLUDES)  $(ALL_DEPS) | \
+	$(GCC)  -MM -MG $(CPPFLAGS) $(INCLUDES)  $(1ST_DEPS) | \
         sed -e 's/$(notdir $(STEM)).o/$(subst /,\/,$(OBJ_DIR)/$(STEM).o) $(subst /,\/,$(ALL_TAGS))/g'\
         > $(ALL_TAGS)
 
 
 $(DEP_DIR)/%.d:  %.F
 	$(RM)  $(ALL_TAGS)
-	$(GCC)  -MM -MG $(CPPFLAGS) $(INCLUDES) $(ALL_DEPS)  | \
+	$(GCC)  -MM -MG $(CPPFLAGS) $(INCLUDES) $(1ST_DEPS)  | \
         sed -e 's/$(notdir $(STEM)).o/$(subst /,\/,$(OBJ_DIR)/$(STEM).o) $(subst /,\/,$(ALL_TAGS))/g'\
         > $(ALL_TAGS)
 
