@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMixerMaker.h,v 1.5 2000/08/09 15:07:09 pfachini Exp $
+ * $Id: StMixerMaker.h,v 1.6 2000/08/11 14:56:17 pfachini Exp $
  *
  * Author: Patricia Fachini
  *
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StMixerMaker.h,v $
- * Revision 1.5  2000/08/09 15:07:09  pfachini
- * Fixing possible memory leak...
+ * Revision 1.6  2000/08/11 14:56:17  pfachini
+ * *** empty log message ***
  *
  * Revision 1.3  2000/03/15 17:26:09  pfachini
  * Using now the Trs classes instead of having a 'local' copy
@@ -82,7 +82,6 @@ class StMixerMaker : public StMaker {
     StTrsSector               *mSector1;//!
     StTrsSector               *mSector2;//!
     StTrsDigitalSector        *mDigitalSector;//!
-    StTrsDigitalSector        *aDigitalSector;//!
 
     // I/O streams
     char*                        mOutputFileName;//!
@@ -114,7 +113,7 @@ class StMixerMaker : public StMaker {
 
     virtual const char *GetCVS() const
       {
-	static const char cvs[]="Tag $Name:  $ $Id: StMixerMaker.h,v 1.5 2000/08/09 15:07:09 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	static const char cvs[]="Tag $Name:  $ $Id: StMixerMaker.h,v 1.6 2000/08/11 14:56:17 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StMixerMaker, 1)   //StAF chain virtual base class for Makers
 };
