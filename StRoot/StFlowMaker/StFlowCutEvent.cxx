@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.33 2004/05/31 20:09:35 oldi Exp $
+// $Id: StFlowCutEvent.cxx,v 1.34 2004/07/07 22:31:06 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
@@ -267,9 +267,9 @@ Bool_t StFlowCutEvent::CheckEvent(StMuEvent* pMuEvent) {
   // they'll make it into the MuDst. Unfortunately a proper scheme to exclude those events is missing. 
   // By cutting on the vertex position we eliminated those events. 
   // THIS WILL REMOVE SIMPLE SIMULATED EVENTS AS WELL!
-  if (pMuEvent->primaryVertexPosition().x() < 1.e-5 &&
-      pMuEvent->primaryVertexPosition().y() < 1.e-5 &&
-      pMuEvent->primaryVertexPosition().z() < 1.e-5) {
+  if (TMath::Abs(pMuEvent->primaryVertexPosition().x()) < 1.e-5 &&
+      TMath::Abs(pMuEvent->primaryVertexPosition().y()) < 1.e-5 &&
+      TMath::Abs(pMuEvent->primaryVertexPosition().z()) < 1.e-5) {
     // cout << "FlowCutEvent: no Vertex " << endl;
     return kFALSE;
   }
@@ -589,6 +589,11 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.34  2004/07/07 22:31:06  oldi
+// Fix of a severe bug which threw away about 1/3 of all events by cutting on
+// vertex_x < 0 && vertex_y < 0 && vertex_z < 0 instead of fabs(...) < 0.
+// Thanks to Kirill, who found this (and suffered most).
+//
 // Revision 1.33  2004/05/31 20:09:35  oldi
 // PicoDst format changed (Version 7) to hold ZDC SMD information.
 // Trigger cut modified to comply with TriggerCollections.
