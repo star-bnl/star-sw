@@ -1,5 +1,8 @@
-* $Id: tcl_clusters_in_row.F,v 1.8 1999/07/17 00:32:04 genevb Exp $
+* $Id: tcl_clusters_in_row.F,v 1.9 1999/09/30 20:38:35 snelling Exp $
 * $Log: tcl_clusters_in_row.F,v $
+* Revision 1.9  1999/09/30 20:38:35  snelling
+* changed TDC range back from 1-512 to 0-511
+*
 * Revision 1.8  1999/07/17 00:32:04  genevb
 * Use StMessMgr
 *
@@ -259,7 +262,7 @@ CDH now loop over all pads in this row and sequences on these pads
         row_pixeloffset = raw_row(row_table).ipixel
         row_seqoffset   = raw_row(row_table).iseq
         pad_break = raw_row(row_table).PadModBreak
-         If (pad_break.lt.0) then
+         if (pad_break.lt.0) then
           pad_break = 256 + pad_break
          endif
         number_of_pads =raw_row(row_table).npad 
@@ -306,7 +309,8 @@ CIS raw_pad(pad_table).SeqOffset is unsigned short, take care of it
             if (itlo(nrowseqs).lt.0) then
               itlo(nrowseqs) = 256 + itlo(nrowseqs)
             endif
-            itlo(nrowseqs)  = itlo(nrowseqs) + 1  ! want 1-512, not 0-511
+c     want to keep 0-511
+c            itlo(nrowseqs)  = itlo(nrowseqs) + 1  ! want 1-512, not 0-511
            if (iseq.gt.sequence_break) then
             itlo(nrowseqs) = itlo(nrowseqs) + 256
            endif 
@@ -487,7 +491,7 @@ c
            tpcluster(tpcluster_h.nok).tpc_row = 100*sector + row
            tpcluster(tpcluster_h.nok).flag = 0
            do iseq=1,nseq_in_cluster
-              if (tpseq_h.nok.ge.tpseq_h.maxlen) then		!!!VP /eq/ge/
+              if (tpseq_h.nok .ge. tpseq_h.maxlen) then		!!!VP /eq/ge/
                  write(m132,*)'TPSEQ table full- abort sec,row',
      +                sector,row
                  call StError(m132)
