@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_Node.h,v 1.16 1999/07/09 01:56:38 fine Exp $
+// $Id: St_Node.h,v 1.17 1999/08/03 14:52:23 fine Exp $
 // $Log: St_Node.h,v $
+// Revision 1.17  1999/08/03 14:52:23  fine
+// make up to make Linux compiler happy
+//
 // Revision 1.16  1999/07/09 01:56:38  fine
 // New method to contrsuct sub views and manage visibilities
 //
@@ -135,7 +138,7 @@ class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill {
         virtual TList      *Nodes() const { return GetList(); }
         virtual void        Paint(Option_t *option="");
         virtual void        PaintShape(Option_t *option="");
-        virtual void        SetVisibility(ENodeSEEN vis=kBothVisible); // *MENU*
+        virtual void        SetVisibility(ENodeSEEN vis=St_Node::kBothVisible); // *MENU*
         virtual void        Sizeof3D() const;
  
         ClassDef(St_Node,1)  //Description of parameters to position a 3-D geometry object
