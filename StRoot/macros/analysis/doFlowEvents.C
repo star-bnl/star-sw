@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.56 2004/11/19 18:05:19 posk Exp $
+// $Id: doFlowEvents.C,v 1.57 2004/12/17 16:54:13 aihong Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -421,12 +421,23 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
     }
   }
 
+  TVectorD* cumulConstants = new TVectorD(30); //temporary fix for a root bug
+  TObjString* cumulMethodTag
+       = new TObjString( "cumulNew" );
+
+
   // Move the flow.cumulant.root and flow.scalar.root files into the 
   // flow.hist.root file.
   if (cumMaker) {
     TFile cumFile("flow.cumulant.root", "READ");
     if (cumFile.IsOpen()) { 
       cumFile.ReadAll();
+
+    for (int mm=0; mm<30; mm++)
+      (*cumulConstants)(mm) =
+	(*((TVectorD* )cumFile.Get("CumulConstants")))(mm);
+
+
     } else {
       cout << "### Can't find file flow.cumulant.root" << endl;
     }
@@ -445,8 +456,14 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
     TFile anaFile("flow.hist.root", "RECREATE");
   }
   if (anaFile.IsOpen()) {
-    if (cumMaker) cumFile.GetList()->Write();
+    if (cumMaker) {
+      cumFile.GetList()->Write();
+   cumulConstants->Write("CumulConstants",TObject::kOverwrite | TObject::kSingleKey);
+   cumulMethodTag->Write("CumulMethodTag",TObject::kOverwrite | TObject::kSingleKey);
+    }    
+
     if (spMaker)   spFile.GetList()->Write();
+
     //anaFile->ls();
     anaFile.Close();    
   } else {
@@ -512,6 +529,9 @@ void doFlowEvents(Int_t nevents, Bool_t phiWgtOnly) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.57  2004/12/17 16:54:13  aihong
+// temporary fix for a root bug on TVectorD
+//
 // Revision 1.56  2004/11/19 18:05:19  posk
 // A bit more like doEvents.C
 //
