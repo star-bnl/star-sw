@@ -1,6 +1,6 @@
 // *-- Author : Victor Perevoztchikov
 // 
-// $Id: StMuEEDemoMaker.cxx,v 1.1 2003/08/27 22:56:30 balewski Exp $
+// $Id: StMuEEDemoMaker.cxx,v 1.2 2003/08/28 17:52:57 balewski Exp $
 
 #include "StMuEEDemoMaker.h"
 
@@ -21,21 +21,11 @@
 
 ClassImp(StMuEEDemoMaker)
 
-//_____________________________________________________________________________
-/// TLA constructor
-/*!
-  const char *name -  the name of this constructor
-  The first comment lines after the opening bracket
-  ({) of a member function are considered as a member function description 
-  See <A HREF="http://root.cern.ch/root/Documentation.html"> ROOT HTML documentation </A>
-
- */
 StMuEEDemoMaker::StMuEEDemoMaker(const char* self ,const char* muDstMakerName) : StMaker(self){
   mMuDstMaker = (StMuDstMaker*)GetMaker(muDstMakerName);
   assert(mMuDstMaker);
   geomTw= new EEmcGeomSimple(); // tower geomtry
-  StEEmcSmdGeom *geomSmd= new StEEmcSmdGeom(); //strip geometry
-  geomSmd =  geomSmd->instance();
+  geomSmd =  StEEmcSmdGeom::instance(); //strip geometry, do NOT call new StEEmcSmdGeom()
 
   // connect to eemcDB
   eeDb = (StEEmcDbMaker*)GetMaker("eemcDb");
@@ -46,17 +36,6 @@ StMuEEDemoMaker::StMuEEDemoMaker(const char* self ,const char* muDstMakerName) :
 }
 
 
-//_____________________________________________________________________________
-/// This is TLA destructor
-/*!
-  The first comment lines after the opening bracket
-  ({) of a member function are considered as a member function description 
-  
-  The first comment lines after the opening bracket
-  ({) of a member function are considered as a member function description 
-  see: <A HREF="http://root.cern.ch/root/Documentation.html"> ROOT HTML documentation </A> 
-
- */
 StMuEEDemoMaker::~StMuEEDemoMaker(){
   //
 }
@@ -96,6 +75,7 @@ Int_t StMuEEDemoMaker::Make(){
 
   int i, nh;
  
+  printf("\nTotal %d hits in Tower\n",emc->getNEndcapTowerADC());
   nh=0;
   for (i=0; i< emc->getNEndcapTowerADC(); i++) {
     emc->getEndcapTowerADC(i,adc,isec,isub,ieta);
@@ -106,7 +86,7 @@ Int_t StMuEEDemoMaker::Make(){
     float phiCenter     =geomTw->getPhiMean(isec,isub);
     TVector3 r= geomTw-> getTowerCenter(isec, isub,ieta);
 
-    printf("Tower %2.2dT%c%2.2d  phi/deg=%6.1f eta=%5.2f x=%4.1f y=%4.1f z=%5.1f: adc=%4d\n",isec+1,isub+'A',ieta+1,phiCenter/3.14*180,etaCenter,r.x(),r.y(),r.z(),adc );
+    printf("\nTower %2.2dT%c%2.2d  phi/deg=%6.1f eta=%5.2f x=%4.1f y=%4.1f z=%5.1f: adc=%4d\n   ",isec+1,isub+'A',ieta+1,phiCenter/3.14*180,etaCenter,r.x(),r.y(),r.z(),adc );
  
     #if 0
     // more geometry info for towers, see .h
@@ -126,10 +106,10 @@ Int_t StMuEEDemoMaker::Make(){
 
   //====================== PRE/POST
   nh= emc->getNEndcapPrsHits();
-  printf("Total %d hits in pre1+2+post\n",nh);
+  printf("\nTotal %d hits in pre1+2+post\n",nh);
   for (i=0; i<nh; i++) {
     hit=emc->getEndcapPrsHit(i,isec,isub,ieta,ipre);
-    printf("pre/post(%d) %2.2d%c%c%2.2d : energy=%f  adc=%d\n",ipre+1,isec+1,ipre+'P',isub+'A',ieta+1,hit->getEnergy(),hit->getAdc());
+    printf("\n\npre/post(%d) %2.2d%c%c%2.2d : energy=%f  adc=%d\n",ipre+1,isec+1,ipre+'P',isub+'A',ieta+1,hit->getEnergy(),hit->getAdc());
     // ....... Access  DB 
     char name[20];
     sprintf(name,"%2.2d%c%c%2.2d",isec+1,ipre+'P',isub+'A',ieta+1);
@@ -144,32 +124,32 @@ Int_t StMuEEDemoMaker::Make(){
   
   //====================== SMD
   char uv='U';
-
+ 
   for(uv='U'; uv<='V'; uv++) {
     nh= emc->getNEndcapSmdHits(uv);
     printf("\nTotal %d hits in SMD-%c\n",nh,uv);
     for (i=0; i<nh; i++) {
       hit=emc->getEndcapSmdHit(uv,i,isec,istrip);
-      printf("SMD-%c  %2.2d%c%3.3d : energy=%f  adc=%d\n",uv,isec+1,uv,istrip+1,hit->getEnergy(),hit->getAdc());
+      printf("\nSMD-%c  %2.2d%c%3.3d : energy=%f  adc=%d\n",uv,isec+1,uv,istrip+1,hit->getEnergy(),hit->getAdc());
+      
+      // ... geometry
+      StructEEmcStrip st=geomSmd->EEmcStrip(1, isec+1, istrip+1);
+      
+      printf("   x1=%6.2f y1=%6.2f z1=%6.2f x2=%6.2f y2=%6.2f z2=%6.2f\n",
+      	     st.end1.x(),
+	     st.end1.y(),st.end2.x(),st.end1.z(),st.end2.y(),st.end2.z());
+      
 
       // ....... Access  DB 
       char name[20];
       sprintf(name,"%2.2d%c%3.3d",isec+1,uv,istrip+1);
-      printf("  DB: name='%s'",name);
+      printf("   DB: name='%s'",name);
       int index=EEname2Index(name);
       printf(", index=%d, ", index);
       const StEEmcDbIndexItem1 *dbItem=eeDb->getByIndex(index);
       assert(dbItem); //  fatal error in EEmcDb-maker
       dbItem->print();
  
-      continue; // tmp
-      StructEEmcStrip st=geomSmd->EEmcStrip(1, isec+1, istrip+1);
-      
-      printf("ok\n");
-      printf("      x1=%6.2f y1=%6.2f z1=%6.2f x2=%6.2f y2=%6.2f z2=%6.2f\n",
-      	     st.end1.x(),
-	     st.end1.y(),st.end2.x(),st.end1.z(),st.end2.y(),st.end2.z());
-           
     }
   }
   
@@ -199,6 +179,9 @@ Int_t StMuEEDemoMaker::Make(){
 
 
 // $Log: StMuEEDemoMaker.cxx,v $
+// Revision 1.2  2003/08/28 17:52:57  balewski
+// works for SMD, Wei-Ming fix
+//
 // Revision 1.1  2003/08/27 22:56:30  balewski
 // example of access to EEMC data+DB+geom from muDst
 //
