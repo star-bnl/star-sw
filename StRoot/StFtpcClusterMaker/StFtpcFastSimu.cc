@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.cc,v 1.27 2003/10/10 12:36:16 jcs Exp $
+// $Id: StFtpcFastSimu.cc,v 1.28 2003/10/24 13:25:35 jcs Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.28  2003/10/24 13:25:35  jcs
+// calculate azimuthal angle phi in FTPC local coordinate system
+//
 // Revision 1.27  2003/10/10 12:36:16  jcs
 // implement new FTPC geant volume id method
 // initialize counters and arrays to zero
@@ -192,7 +195,7 @@ int StFtpcFastSimu::ffs_gen_padres()
   {
     // Local Variables:
     float check1, check2;
-    float xi, yi, zi, phi, Rh, Vh, Timeb;
+    float xi, yi, zi, phi_local, Rh, Vh, Timeb;
     float sigTimeb, sigPhi, sigma_tr;
     float sigma_l, sigma_z;
     float alpha, lambda;
@@ -238,10 +241,13 @@ int StFtpcFastSimu::ffs_gen_padres()
 
 	//             calculate spatial resolution along the padrow
 
-	//       Azimuthal angle Phi (in radians)
-	phi = atan2((double) yi,(double) xi);
-	if(phi<0)
-	  phi += twopi;
+	//       Azimuthal angle Phi (in radians and in FTPC local coordinate system)
+	if (mGeant->geantPlane(mGeant->geantVolume(k)) <=10 )
+	   phi_local = atan2((double) yi,(double) -xi);
+	else
+	   phi_local = atan2((double) yi,(double) xi);
+	if(phi_local<0)
+	  phi_local += twopi;
 
 	//       Radius of Hit
 	Rh = ::sqrt(xi*xi + yi*yi);
@@ -335,7 +341,7 @@ int StFtpcFastSimu::ffs_gen_padres()
 
 	//-> Smearing
 
-	ffs_hit_smear( phi, xi, yi, zi, &xo, &yo, &zo,
+	ffs_hit_smear( phi_local, xi, yi, zi, &xo, &yo, &zo,
 		       sigma_l, sigma_tr,&sigma_z,&sigma_x,&sigma_y,
 		       &quasiRandom);
 
@@ -352,7 +358,6 @@ int StFtpcFastSimu::ffs_gen_padres()
 int StFtpcFastSimu::ffs_hit_rd()
   {
     int ih, ih_max;
-    float phi , dphi; 
     
     //-----------------------------------------------------------------------
 
@@ -373,6 +378,8 @@ int StFtpcFastSimu::ffs_hit_rd()
 	  {
 	    mGeantPoint[ih].SetPrimaryTag(-1*mGeantPoint[ih].GetPrimaryTag());
 	  }
+
+	// padrow
 	mPoint[ih].SetPadRow(mGeant->geantPlane(mGeant->geantVolume(ih)));
 
 	// Vertex-Momenta
@@ -392,12 +399,7 @@ int StFtpcFastSimu::ffs_hit_rd()
         mPoint[ih].SetZ(mGeant->z(ih));
 
 	//sector number 
-	phi = atan2((double) mGeant->y(ih),
-                    (double) mGeant->x(ih));
-	if ( phi < 0.0 ) 
-	  phi += twopi;
-	dphi = myModulo((phi-phimin+twopi), twopi);
-        mPoint[ih].SetSector( int ( dphi/phisec ) + 1);  
+        mPoint[ih].SetSector(mGeant->geantSector(mGeant->geantVolume(ih)));
 	
 	//de/dx
 	mPoint[ih].SetMaxADC(int( mParam->adcConversionFactor() * mGeant->energyLoss(ih) ));
@@ -561,7 +563,7 @@ Int_t StFtpcFastSimu::ffs_merge_tagger()
     Float_t * sigazi = new float[nPoints];
     Float_t * sigrad = new float[nPoints];
     Float_t * r1 = new float[nPoints];
-    Float_t * phi1 = new float[nPoints];
+    Float_t * phi1_local = new float[nPoints];
 
     //-----------------------------------------------------------------------
 
@@ -570,12 +572,16 @@ Int_t StFtpcFastSimu::ffs_merge_tagger()
       {
 	mPoint[i].SetFlags(0);
 	
-	// azimuthal direction
+	// azimuthal direction (in FTPC local coordinate system)
 	r1[i] = ::sqrt(sqr(mPoint[i].GetX()) + sqr(mPoint[i].GetY()));
-	phi1[i] = atan2((double) mPoint[i].GetY(),
+        if (mPoint[i].GetPadRow() <= 10 )
+        	phi1_local[i] = atan2((double) mPoint[i].GetY(),
+                        (double) -mPoint[i].GetX());
+        else
+        	phi1_local[i] = atan2((double) mPoint[i].GetY(),
                         (double) mPoint[i].GetX());
-	if ( phi1[i] < 0.0 ) 
-	  phi1[i] += twopi;
+	if ( phi1_local[i] < 0.0 ) 
+	  phi1_local[i] += twopi;
 	
 	sig_azi_1 = s_azi[0] + s_azi[1]*r1[i] + 
 	  s_azi[2]*sqr(r1[i]) + s_azi[3]*sqr(r1[i])*r1[i];
@@ -613,7 +619,7 @@ Int_t StFtpcFastSimu::ffs_merge_tagger()
  		   (mPoint[id_2].GetSector()!=mPoint[id_1].GetSector()))
  		  continue;
 		
-		delta_azi = fabs(phi1[id_1]-phi1[id_2])
+		delta_azi = fabs(phi1_local[id_1]-phi1_local[id_2])
 		  *((r1[id_1]+r1[id_2])/2);
 		delta_r = fabs(r1[id_1]-r1[id_2]);
 		
@@ -681,7 +687,7 @@ Int_t StFtpcFastSimu::ffs_merge_tagger()
       
     while(id_2 < nPoints)
       {
-	delta_azi = phi1[id_2] 
+	delta_azi = phi1_local[id_2] 
 	  -myModulo(((mPoint[id_2].GetSector()-1)*phisec+phimin),(twopi));
 	if (delta_azi<0.0) 
 	  delta_azi += twopi;
@@ -744,13 +750,14 @@ Int_t StFtpcFastSimu::ffs_merge_tagger()
 	
     nPoints = n_gepoints;
       
-    gMessMgr->Message("", "I", "OST") << "Deleted " << rem_count1 << " merged clusters." << endm;
-    gMessMgr->Message("", "I", "OST") << "Deleted " << rem_count2 << " clusters on sector limit." << endm;
+    gMessMgr->Message("", "I", "OST") << "Deleted " << rem_count1 << " merged clusters" << endm;
+    gMessMgr->Message("", "I", "OST") << "Deleted " << rem_count2 << " clusters on sector limit" << endm;
+    gMessMgr->Message("", "I", "OST") << " " << nPoints<< " clusters found" << endm;
       
     delete [] sigazi;
     delete [] sigrad;
     delete [] r1;
-    delete [] phi1;
+    delete [] phi1_local;
 
     return TRUE;
   }
