@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.53 2004/03/18 04:05:01 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.54 2004/04/03 01:17:25 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -13,6 +13,9 @@
  * Added new bad anode list and switched ON the bad anode elimination
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.54  2004/04/03 01:17:25  caines
+ * I think this time I should really have stopped valgrind complaing lets see
+ *
  * Revision 1.53  2004/03/18 04:05:01  caines
  * Remove from global scope variables used in debug mode as they shouldnt be there and caused erratic behaviour, also initialise some variables that valgrind was complaining about - didnt really need to as they are sent back from function which initialises them properly always but doesnt hurt
  *
@@ -608,7 +611,7 @@ Int_t StSvtSeqAdjMaker::Make()
 
 	      }
 	      // Here anode is index to real anode number (1-240)
-	      MakeHistogramsAdc(mHybridAdjData,index,Anode,2);
+	      MakeHistogramsAdc(mHybridRawData,index,Anode,2);
 	    }
 	  
 
@@ -1085,7 +1088,7 @@ int StSvtSeqAdjMaker::FindBlackAnodes(){
 //_____________________________________________________________________________
 void StSvtSeqAdjMaker::MakeHistogramsAdc(StSvtHybridData* hybridData, int index, int Anode, int Count){
   
-  // Cout is 1 for before CM-Noise subtraction and 2 for after CMN subtraction.
+  // Count is 1 for before CM-Noise subtraction and 2 for after CMN subtraction.
   int mSequence;
   int len,status;
   unsigned char* adc;
