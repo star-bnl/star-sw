@@ -15,54 +15,6 @@
 #ifndef ClassStMessageManager
 #define ClassStMessageManager
 
-#ifndef __CINT__
-#include "StarCallf77.h"
-#define Message_ F77_NAME(message,MESSAGE)
-#define Msg_Enable_ F77_NAME(msg_enable,MSG_ENABLE)
-#define Msg_Enabled_ F77_NAME(msg_enabled,MSG_ENABLED)
-#define Msg_Disable_ F77_NAME(msg_disable,MSG_DISABLE)
-#define StMessage_ F77_NAME(stmessage,STMESSAGE)
-#define StInfo_ F77_NAME(stinfo,STINFO)
-#define StWarning_ F77_NAME(stwarning,STWARNING)
-#define StError_ F77_NAME(sterror,STERROR)
-#define StDebug_ F77_NAME(stdebug,STDEBUG)
-#define QAInfo_ F77_NAME(qainfo,QAINFO)
-#define StInfoOpt_ F77_NAME(stinfoopt,STINFOOPT)
-#define StWarningOpt_ F77_NAME(stwarningopt,STWARNINGOPT)
-#define StErrorOpt_ F77_NAME(sterroropt,STERROROPT)
-#define StDebugOpt_ F77_NAME(stdebugopt,STDEBUGOPT)
-#define QAInfoOpt_ F77_NAME(qainfoopt,QAINFOOPT)
-#define StMessAddType_ F77_NAME(stmessaddtype,STMESSADDTYPE)
-extern "C" {
-void type_of_call Message_(const char* mess, int *lines, int *id, size_t len);
-void type_of_call Msg_Enable_(const char* mess, size_t len);
- int type_of_call Msg_Enabled_(const char* mess, int *id, size_t len);
-void type_of_call Msg_Disable_(const char* mess, size_t len);
-void type_of_call MessageOut(const char* msg);
-void type_of_call StMessage_(const char* mess, const char* type,
-                                  const char* opt, size_t len1,
-				  size_t len2, size_t len3);
-void type_of_call StInfo_(const char* mess, size_t len);
-void type_of_call StWarning_(const char* mess, size_t len);
-void type_of_call StError_(const char* mess, size_t len);
-void type_of_call StDebug_(const char* mess, size_t len);
-void type_of_call QAInfo_(const char* mess, size_t len);
-void type_of_call StInfoOpt_(const char* mess, const char* opt,
-                                  size_t len1, size_t len2);
-void type_of_call StWarningOpt_(const char* mess, const char* opt,
-                                  size_t len1, size_t len2);
-void type_of_call StErrorOpt_(const char* mess, const char* opt,
-                                  size_t len1, size_t len2);
-void type_of_call StDebugOpt_(const char* mess, const char* opt,
-                                  size_t len1, size_t len2);
-void type_of_call QAInfoOpt_(const char* mess, const char* opt,
-                                  size_t len1, size_t len2);
-void type_of_call StMessAddType_(const char* type, const char* text,
-                                  size_t len1, size_t len2);
-}
-#endif
-
-
 #include "StMessage.h"
 #include "StMessTypeList.h"
 #include "StMessageCounter.h"
@@ -98,14 +50,17 @@ class StMessageManager : public StMessMgr {
          const char* opt=0);
    virtual void IgnoreRepeats() { StMessage::IgnoreRepeats(); }
    virtual void AllowRepeats() { StMessage::AllowRepeats(); }
- 
+
+
  public:
    virtual ~StMessageManager();
    static StMessMgr* Instance();      //!
 
+   virtual std::ostream& OperatorShift(std::ostream& os, StMessage* stm);
+
 // Generic Messages:
    virtual StMessMgr& Message(const char* mess="", const char* type="",
-         const char* opt=0);
+         const char* opt=0,const char *sourceFileName=0, int lineNumber=-1);
    virtual       void Print();
    virtual        int PrintList(messVec* list);
    virtual        int PrintAll() {return PrintList(&messList); }
@@ -136,7 +91,7 @@ class StMessageManager : public StMessMgr {
    virtual        int ListTypes() {return messTypeList->ListTypes();}
 
 // Info Messages:
-   virtual StMessMgr& Info(const char* mess="", const char* opt="O")
+   virtual StMessMgr& Info(const char* mess="", const char* opt="O",const char *sourceFileName=0, int lineNumber=-1)
          { return Message(mess, "I", opt);}
    virtual        int PrintInfos() {return PrintList(messCollection[1]); }
    virtual const messVec* GetInfos() {return (messCollection[1]);}
@@ -148,8 +103,8 @@ class StMessageManager : public StMessMgr {
 	 {return FindMessageList(s1,s2,s3,s4,messCollection[1]);}
 
 // Warning Messages:
-   virtual StMessMgr& Warning(const char* mess="", const char* opt="E")
-         { return Message(mess, "W", opt);}
+   virtual StMessMgr& Warning(const char* mess="", const char* opt="E",const char *sourceFileName=0, int lineNumber=-1)
+         { return Message(mess, "W", opt,sourceFileName,lineNumber);}
    virtual        int PrintWarnings() {return PrintList(messCollection[2]); }
    virtual const messVec* GetWarnings() {return (messCollection[2]);}
    virtual StMessage* FindWarning(const char* s1, const char* s2="",
@@ -160,8 +115,8 @@ class StMessageManager : public StMessMgr {
 	 {return FindMessageList(s1,s2,s3,s4,messCollection[2]);}
 
 // Error Messages:
-   virtual StMessMgr& Error(const char* mess="", const char* opt="E")
-         { return Message(mess, "E", opt);}
+   virtual StMessMgr& Error(const char* mess="", const char* opt="E",const char *sourceFileName=0, int lineNumber=-1)
+         { return Message(mess, "E", opt,sourceFileName,lineNumber);}
    virtual        int PrintErrors() {return PrintList(messCollection[3]); }
    virtual const messVec* GetErrors() {return (messCollection[3]);}
    virtual StMessage* FindError(const char* s1, const char* s2="",
@@ -172,8 +127,8 @@ class StMessageManager : public StMessMgr {
 	 {return FindMessageList(s1,s2,s3,s4,messCollection[3]);}
 
 // Debug Messages:
-   virtual StMessMgr& Debug(const char* mess="", const char* opt="OT")
-         { return Message(mess, "D", opt);}
+   virtual StMessMgr& Debug(const char* mess="", const char* opt="OT",const char *sourceFileName=0, int lineNumber=-1)
+         { return Message(mess, "D", opt,sourceFileName,lineNumber);}
    virtual        int PrintDebug() {return PrintList(messCollection[4]); }
    virtual const messVec* GetDebugs() {return (messCollection[4]);}
    virtual StMessage* FindDebug(const char* s1, const char* s2="",
@@ -184,8 +139,8 @@ class StMessageManager : public StMessMgr {
 	 {return FindMessageList(s1,s2,s3,s4,messCollection[4]);}
 
 // QAInfo Messages:
-   virtual StMessMgr& QAInfo(const char* mess="", const char* opt="OS")
-         { return Message(mess, "Q", opt);}
+   virtual StMessMgr& QAInfo(const char* mess="", const char* opt="OS",const char *sourceFileName=0, int lineNumber=-1)
+         { return Message(mess, "Q", opt,sourceFileName,lineNumber);}
    virtual        int PrintQAInfo() {return PrintList(messCollection[5]); }
    virtual const messVec* GetQAInfos() {return (messCollection[5]);}
    virtual StMessage* FindQAInfo(const char* s1, const char* s2="",
@@ -202,6 +157,10 @@ class StMessageManager : public StMessMgr {
 	 {return Message(mess,"E","EP-");}
 
    virtual       void PrintInfo();
+// Fatal Messages:
+   virtual StMessMgr& Fatal(const char* mess="", const char* opt="E",const char *sourceFileName=0, int lineNumber=-1)
+   { return Message(mess, "E", opt,sourceFileName,lineNumber);}
+
 #ifdef __ROOT__
    ClassDef(StMessageManager,0)
 #endif
@@ -210,10 +169,10 @@ class StMessageManager : public StMessMgr {
 
 #endif
 
-// $Id: StMessageManager.h,v 1.23 2004/04/02 22:17:14 genevb Exp $
+// $Id: StMessageManager.h,v 1.24 2004/04/15 16:03:38 fine Exp $
 // $Log: StMessageManager.h,v $
-// Revision 1.23  2004/04/02 22:17:14  genevb
-// Added protected Ignore/AllowRepeats() for friend StBFChain class
+// Revision 1.24  2004/04/15 16:03:38  fine
+// move StMessMgr class to St_base and change the interface
 //
 // Revision 1.22  2004/01/28 00:09:14  genevb
 // Messages (except Debug) default to no time-date stamp
