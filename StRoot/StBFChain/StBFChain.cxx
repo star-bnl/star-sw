@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.359 2003/10/05 20:27:44 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.360 2003/10/22 14:47:58 starlib Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -155,12 +155,12 @@ Bfc_st BFC1[] = {
   // B2003 is a base-chain with tpc only for now
   {"B2003"       ,""  ,"","ry2003,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                        ,"Base chain for 2003 (tpc)",kFALSE},
-  {"dau2003"     ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
+  {"dau2003"     ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
                  ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc)",kFALSE},
-  {"dau2003a"    ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
+  {"dau2003a"    ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
            ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
 
-  {"pp2003"      , "" ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
+  {"pp2003"      , "" ,"","B2003,Corr2,ppOpt,-PreVtx,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc,trgd","",""
            ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
 
 
@@ -656,12 +656,12 @@ Bfc_st BFC2[] = {
   // B2003 is a base-chain with tpc only for now
   {"B2003"       ,""  ,"","ry2003,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                        ,"Base chain for 2003 (tpc)",kFALSE},
-  {"dau2003"     ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
+  {"dau2003"     ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
                  ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc)",kFALSE},
-  {"dau2003a"    ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
+  {"dau2003a"    ,""  ,"","B2003,Corr2,ppOpt,-PreVtx,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
                  ,"Production chain for winter 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc)",kFALSE},
 
-  {"pp2003"      , "" ,"","B2003,Corr2,ppOpt,-PreVtx,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
+  {"pp2003"      , "" ,"","B2003,Corr2,ppOpt,-PreVtx,l3onl,tofDat,emcDY2,fpd,svt_daq,SvtD,ftpc","",""
                  ,"Production chain for Spring 2003 data (+ tof, bcc/fpd, svt (no est), ftpc, emc)",kFALSE},
 
 
