@@ -17,11 +17,11 @@ my @src  = qx (
 	       find ./ -name '*.F';
 	       find ./ -name '*.f';
 	      ); 
-print "src = @src\n";
+print "src = @src\n" if $param::debug;
 my @h_files  = qx (cd StRoot/StHbtMaker; 
 		   find ./ -name '*.h' | xargs grep -l ClassDef; 
 		   find ./ -name '*.hh' | xargs grep -l ClassDef;);
-print "h_files = @h_files\n";
+print "h_files = @h_files\n" if $param::debug;
 printf ("Run Conscript  in %-30s  for %-20s\n",$Dir, $PKG) unless ($param::quiet);
 my $obj  = $ObjDir;  #print "obj = $obj\n";
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB}; #print "SO_PKG = $SO_PKG\n";
