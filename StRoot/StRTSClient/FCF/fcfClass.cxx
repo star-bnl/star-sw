@@ -5,7 +5,7 @@
 	No modifications are to be made without the express consent of
 	the author.
 
-
+	Version 5.31	12/14/2004 undef-ed FCF_NEW_ADC_ROUNDOFF
 	Version 5.30	Added ADC roundoff
 	Version 5.21	General Cleanup
 	Version 5.20	Added ADC cluster back-annotation if defined
@@ -34,9 +34,9 @@
 #include <stdarg.h>
 
 
-#define FCF_VERSION	"5.30"	
+#define FCF_VERSION	"5.31"	
 
-#define FCF_NEW_ADC_ROUNDOFF
+
 
 #include <rts.h>
 #include <rtsSystems.h>
@@ -50,6 +50,8 @@
 
 #define FCF_10BIT_ADC	// ADC data is already in 10 bits!
 #define LOG(x1,x2,x3,x4,x5,x6,x7) 
+
+//#define FCF_NEW_ADC_ROUNDOFF
 
 #else
 
