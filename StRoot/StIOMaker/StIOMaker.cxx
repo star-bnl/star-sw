@@ -108,6 +108,7 @@ Int_t StIOMaker::Open()
 //_____________________________________________________________________________
 Int_t StIOMaker::Make(){
   int iret;   
+  fNIO++;
   if (fIOMode[0]=='r')  { //Read mode
 AGAIN:
     iret = MakeRead();  
@@ -142,6 +143,7 @@ Int_t StIOMaker::Finish()
     fFmtMk[i]->Finish();
     fFmtMk[i]=0;}
   fCurrMk = 0;
+  StIOInterFace::Finish();
   return 0;
 }
 //_____________________________________________________________________________

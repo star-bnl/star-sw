@@ -132,6 +132,7 @@ Int_t StTreeMaker::Init()
 //_____________________________________________________________________________
 Int_t StTreeMaker::Make(){
    
+  fNIO++;
   if (fIOMode[0]=='r')  { //Read mode
     int iret=0,ntry=13;
     while(1999) {
@@ -274,6 +275,7 @@ Int_t StTreeMaker::Finish()
     fTree->Clear(); 
   }
   Close(); return 0;
+  StIOInterFace::Finish();
 }
 //_____________________________________________________________________________
 Int_t StTreeMaker::Save()

@@ -24,11 +24,11 @@ public:
    virtual  Int_t MakeWrite(){assert(0);return 1999;};
    virtual  Int_t Open(const char *filename=0){assert(0&&filename);return 1999;};
    virtual  void  Close(Option_t *opt=0){assert(0&&opt);};
-
+   virtual  Int_t  Finish();
    TString         fIOMode;	//!r=read,w=write,u=update
    TString         fTreeName;	//!Tree name
    TString         fFile;	//!Main file name name
-
+   Int_t           fNIO;	//!number of transactions
 
    virtual void  SetIOMode(Option_t *iomode="w") {fIOMode=tolower(iomode[0]);};
    virtual void  SetTreeName(const Char_t *treeName="bfcTree"){fTreeName=treeName;};
