@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.46 2000/05/20 01:11:07 perev Exp $
+// $Id: StMaker.h,v 1.47 2000/06/21 21:12:40 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.47  2000/06/21 21:12:40  perev
+// StMakerIter class added
+//
 // Revision 1.46  2000/05/20 01:11:07  perev
 // IventNumber and BfcStatus added
 //
@@ -281,9 +284,24 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.46 2000/05/20 01:11:07 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.47 2000/06/21 21:12:40 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   // base class to define  one step of the recontsruction chain
 };
 
+class StMakerIter 
+{
+public:
+  StMakerIter(StMaker *mk, Int_t second = 0);
+ ~StMakerIter();
+  StMaker *NextMaker();
+  StMaker *GetMaker () const {return fMaker;}
+private:
+  Int_t fState;			//!
+  Int_t fSecond;		//!
+  StMaker *fMaker;		//!
+  StMakerIter *fMakerIter;	//!
+  TDataSet *fItWas;		//!
+  TDataSetIter *fIter;		//!
+};  
 #endif

@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.95 2000/06/09 22:12:29 fisyak Exp $
+// $Id: StMaker.cxx,v 1.96 2000/06/21 21:12:39 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -987,7 +987,71 @@ Int_t StMaker::InitRun(int runumber) {return 0;}
 Int_t StMaker::FinishRun(int runumber) {return 0;}
 
 //_____________________________________________________________________________
+StMakerIter::StMakerIter(StMaker *mk,int secondary)
+{
+  fState = 0;
+  fMaker = mk;
+  fMakerIter = 0;
+  fIter  = new TDataSetIter(fMaker->Find(".make"));
+  fItWas = (TDataSet*)(-1);
+  fSecond = secondary;
+   
+}
+//_____________________________________________________________________________
+StMakerIter::~StMakerIter()
+{
+  delete fIter; 	fIter = 0; 
+  delete fMakerIter;	fMakerIter = 0;
+  fMaker=0; fState = 0;
+}
+//_____________________________________________________________________________
+StMaker  *StMakerIter::NextMaker()
+{
+  TDataSet *ds;
+  if (!fMaker)	return 0;
+
+AGAIN: switch (fState) {
+
+    case 0: 
+      ds = fIter->Next();
+      if (ds == fItWas) 	goto AGAIN;
+      fState = 2;  if (!ds) 	goto AGAIN;
+      fState = 1;
+      delete fMakerIter; 
+      fMakerIter = new StMakerIter((StMaker*)ds,1);
+      goto AGAIN;
+
+    case 1: 
+      ds = fMakerIter->NextMaker();
+      if (ds) return (StMaker*)ds;
+      fState = 0;		goto AGAIN;
+     
+    case 2:
+      delete fMakerIter; fMakerIter=0;
+      delete fIter; 	 fIter = 0;
+      fState = 3;
+      return fMaker;
+
+    case 3:
+      if (fSecond) return 0;
+      TDataSet *par = fMaker->GetParent();
+      fItWas = fMaker; fMaker = 0;
+      if (!par) 				return 0;
+      if (strcmp(".make",par->GetName()))	return 0;
+      fMaker = (StMaker*)par->GetParent();
+      if (!fMaker)				return 0;
+      fIter = new TDataSetIter(par);
+      fState = 0; goto AGAIN;
+  }
+  assert(0); return 0;
+}
+
+
+//_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.96  2000/06/21 21:12:39  perev
+// StMakerIter class added
+//
 // Revision 1.95  2000/06/09 22:12:29  fisyak
 // Reduce level of noise
 //
