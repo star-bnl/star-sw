@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.4 1999/11/17 14:22:10 perev Exp $
+// $Id: StObject.cxx,v 1.5 1999/12/13 21:40:41 perev Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.5  1999/12/13 21:40:41  perev
+// Remove warnings
+//
 // Revision 1.4  1999/11/17 14:22:10  perev
 // bug in dtor fix
 //
@@ -30,7 +33,7 @@ StObject::~StObject()
   if (!colIdx) return;
   StStrArray *ar = StRegistry::GetColl(colIdx);
   if (!ar) return;
-  int n = ar->GetSize();
+  unsigned int n = ar->GetSize();
   if (objIdx>=n)			return;
   if (ar->At(objIdx) != (TObject*)this) return;
   ar->RemoveAt(objIdx);
