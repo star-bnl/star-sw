@@ -1,9 +1,8 @@
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.24 2000/03/23 18:30:50 ullrich Exp $
+% $Id: StEvent.tex,v 2.25 2000/03/29 16:55:48 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -22,8 +21,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 2.24  2000/03/23 18:30:50  ullrich
-% Added new EMC classes to reference section.
+% Revision 2.25  2000/03/29 16:55:48  ullrich
+% Added reference section and emprt user guide page for StL3Trigger.
 %
 % Revision 2.33  2000/05/22 22:04:07  ullrich
 % Removed StRichPixelCollection ref section and added description
@@ -148,8 +147,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.24 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/23 18:30:50 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.25 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/29 16:55:48 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -173,8 +172,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.24 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/23 18:30:50 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.25 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/29 16:55:48 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -182,17 +181,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.24 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/23 18:30:50 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.25 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/29 16:55:48 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.24 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/23 18:30:50 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.25 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/29 16:55:48 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.24 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/23 18:30:50 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.25 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/29 16:55:48 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -207,8 +206,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.24 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/23 18:30:50 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.25 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/29 16:55:48 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
@@ -2216,7 +2215,34 @@ void fillPoints(vector<StMeasuredPoint*> vec, StTrack *track)
        for (int i=0; i<info->hits().size(); i++)
             vec.push_back(info->hits()[i])
 
-\clearpage
+    //
+    //   Add vertex
+    //
+    if (track->vertex()) vec.push_back(track->vertex());
+}
+\end{verbatim}
+And things become really easy:
+\begin{figure}[tb]
+    \begin{center}
+        \includegraphics[width=0.9\textwidth]{cartoon7.eps}
+        \caption{Mechanisms are the means whereby objects collaborate
+            to provide some higher level behaviour.}
+    \end{center}
+\end{figure}
+\begin{verbatim}
+vector<StMeasuredPoint*> points;
+StTrack                  *track;
+MyOwnSimpleFitter        fitter;
+
+// ... get track from somewhere ...
+
+fillPoints(points, track);
+
+// some print-out
+for (int i=0; i<points.size(); i++)
+    cout << points[i]->position() << '\t'
+... missing ...
+  mEvent = (StEvent *) GetInputDS("StRichEvent");
 
   if (!mEvent) {
     cout << "No StEvent*\n";
@@ -2725,6 +2751,9 @@ definition in the header file.
     \verb+        const dst_event_summary_st&,+\\
     \verb+        const dst_summary_param_st&);+\\
     
+    \verb+StEvent(const event_header_st&);+\\
+    
+\item[Public Member\\ Functions]
     \verb+void Browse(TBrowser*);+\\
     Overwrite inherited \texttt{Browse()} method from \texttt{St\_DataSet}.
     Method is invoked from ROOT to allow interactive browsing of \StEvent. 
@@ -2787,6 +2816,8 @@ definition in the header file.
     \verb+StL3Trigger* l3Trigger();+\\
     \verb+const StL3Trigger* l3Trigger() const;+\\
 
+    \verb+StTriggerDetectorCollection* triggerDetectorCollection();+\\
+    \verb+const StTriggerDetectorCollection* triggerDetectorCollection() const;+\\
     Returns pointer to the current trigger detector collection.
     Trigger detectors are CTB, ZDC, VPD, and MWC.
     
@@ -3314,6 +3345,38 @@ definition in the header file.
     \verb+Long_t mwcCtbDipole() const;+\\
     \verb+Long_t mwcCtbTopology() const;+\\
     \verb+Long_t mwcCtbMoment() const;+\\
+    
+    \verb+void setMwcCtbMultiplicity(Long_t);+\\
+    \verb+void setMwcCtbDipole(Long_t);+\\
+    \verb+void setMwcCtbTopology(Long_t);+\\
+    \verb+void setMwcCtbMoment(Long_t);+\\
+    \verb+void setCoarsePixelArray(UInt_t, Long_t);+\\
+\end{Entry}
+\clearpage
+
+
+\subsection{StL3SoftwareMonitor}
+\index{StL3SoftwareMonitor|textbf}
+\label{sec:StL3SoftwareMonitor}
+\begin{Entry}
+\item[Summary]
+\item[Synopsis]
+    \verb+#include "StL3SoftwareMonitor.h"+\\
+    \verb+class StL3SoftwareMonitor;+\\
+\item[Description]
+\item[Related Classes]
+\item[Public\\ Constructors]
+    \verb+StL3SoftwareMonitor();+\\
+    \verb+StL3SoftwareMonitor(const dst_mon_soft_l3_st&);+\\
+\item[Public Data\\ Member]
+    \verb+Long_t id_algorithm;+\\
+    Id of the algorithm used in global L3.
+    
+    \verb+Long_t id_hardware;+\\
+    Id of the hardware configuration.
+    
+    \verb+Short_t triggermask;+\\
+    The result of the trigger inquiry.
     
     \verb+Long_t nTotalHits ;+\\
     Total number of clusters in the event.
