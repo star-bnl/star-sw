@@ -6,7 +6,7 @@
 //:BUGS:        -- STILL IN DEVELOPMENT --
 //:HISTORY:     21jul95-v000a-cet- creation
 //:<--------------------------------------------------------------------
-#define FILE_VERSION "$Id: socClasses.cc,v 1.27 1998/07/14 01:25:00 perev Exp $"
+#define FILE_VERSION "$Id: socClasses.cc,v 1.28 1998/07/28 22:26:49 pope Exp $"
 
 //:----------------------------------------------- INCLUDES           --
 #include <sys/types.h>
@@ -43,8 +43,8 @@ extern "C" char *shortname(char *longname, size_t length);
 socObject:: socObject() {
    EML_MESSAGE("Warning -- This CTOR should never be called.");
    myPtr = 0; // This must be set in derived CTOR !!!
-   myName = new string("UNNAMED");
-   myType = new string("UNKNOWN");
+   myName = new stafString("UNNAMED");
+   myType = new stafString("UNKNOWN");
    myLock = FALSE;
    soc->signIn(this,myIdRef);
 }
@@ -53,8 +53,8 @@ socObject:: socObject() {
 socObject:: socObject(long id) {
 // EML_MESSAGE("Alert -- This CTOR called only by soc.");
    myPtr = 0; // This must be set in derived CTOR !!!
-   myName = new string("soc");
-   myType = new string("socCatalog");
+   myName = new stafString("soc");
+   myType = new stafString("socCatalog");
    myLock = TRUE;
    myIdRef = id;
 }
@@ -62,8 +62,8 @@ socObject:: socObject(long id) {
 //----------------------------------
 socObject:: socObject(const char* name) {
    myPtr = (SOC_PTR_T)this;
-   myName = new string(name);
-   myType = new string("socObject");
+   myName = new stafString(name);
+   myType = new stafString("socObject");
    myLock = FALSE;
    soc->signIn(this,myIdRef);
 }
@@ -71,8 +71,8 @@ socObject:: socObject(const char* name) {
 //----------------------------------
 socObject:: socObject(const char* name, const char* type) {
    myPtr = 0; // This must be set in derived CTOR !!!
-   myName = new string(name);
-   myType = new string(type);
+   myName = new stafString(name);
+   myType = new stafString(type);
    myLock = FALSE;
    soc->signIn(this,myIdRef);
 }
@@ -81,9 +81,9 @@ socObject:: socObject(const char* name, const char* type) {
 socObject:: socObject(long n, const char* type) {
    myPtr = 0; // This must be set in derived CTOR !!!
    char *name = id2name((char*)type,n);
-   myName = new string(name);
+   myName = new stafString(name);
    FREE(name);
-   myType = new string(type);
+   myType = new stafString(type);
    myLock = FALSE;
    soc->signIn(this,myIdRef);
 }

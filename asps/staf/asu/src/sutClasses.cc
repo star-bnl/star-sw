@@ -15,7 +15,7 @@
 
 /*
 *:>---------------------------------------------------------------------
-*:ROUTINE:     class string
+*:ROUTINE:     class stafString
 *:DESCRIPTION: character string class
 *:<---------------------------------------------------------------------
 */
@@ -24,9 +24,9 @@
 // FUNCTIONS -----------------------
 // OPERATORS -----------------------
 #ifndef hpux
-string string::operator + (string p)
+stafString stafString::operator + (stafString p)
 {
-   string temp;
+   stafString temp;
 
    temp.myStr = new char[(temp.myLen = myLen + strlen(p.myStr) +1)];
    strcpy(temp.myStr,myStr);
@@ -35,9 +35,9 @@ string string::operator + (string p)
 }
 #endif /*hpux*/
 
-string string::operator + (char* ptr)
+stafString stafString::operator + (char* ptr)
 {
-   string temp;
+   stafString temp;
 
    temp.myStr = new char[(temp.myLen = myLen + strlen(ptr) +1)];
 
@@ -46,7 +46,7 @@ string string::operator + (char* ptr)
    return temp;
 }
 
-void string::operator += (string p)
+void stafString::operator += (stafString p)
 {
    char* temp = new char[strlen(myStr) + strlen(p.myStr) +1];
    strcpy(temp, myStr);
@@ -57,14 +57,14 @@ void string::operator += (string p)
    delete temp;
 }
 
-void string::operator = (char* str)
+void stafString::operator = (char* str)
 {
    delete myStr;
    myStr = new char[ strlen(str) +1 ];
    strcpy(myStr, str);
 }
 
-char* string::operator [] (char* key)
+char* stafString::operator [] (char* key)
 {
    for(int i =0; myStr[i+strlen(key)]; i++)
       if( !strncmp(&myStr[i], key, strlen(key)) )
@@ -72,7 +72,7 @@ char* string::operator [] (char* key)
    return (char*)0;
 }
 
-int string::operator == (string p)
+int stafString::operator == (stafString p)
 {
    if( p.length() == length()
    &&  strcmp(p.show(),show()) ){
@@ -80,21 +80,21 @@ int string::operator == (string p)
    }
 }
 
-int string::operator == (char* p)
+int stafString::operator == (char* p)
 {
    if( strcmp(p,show()) ){
       return 1; } else { return 0;
    }
 }
 
-int string::operator == (const char* p)
+int stafString::operator == (const char* p)
 {
    if( strcmp(p,show()) ){
       return 1; } else { return 0;
    }
 }
 
-void string::operator << (ostream p)
+void stafString::operator << (ostream p)
 {
    p << myStr;
 }

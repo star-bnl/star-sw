@@ -17,31 +17,31 @@
 
 /*
 *:>---------------------------------------------------------------------
-*:ROUTINE:     class string
+*:ROUTINE:     class stafString
 *:DESCRIPTION: character string class
 *:<---------------------------------------------------------------------
 */
-class string
+class stafString
 {
 public:
 // CTORS & DTOR --------------------
-   string() { myLen = 0; myStr = (char*)0; }
-   string(char* s) { myStr = new char[(myLen=strlen(s))+1];
+   stafString() { myLen = 0; myStr = (char*)0; }
+   stafString(char* s) { myStr = new char[(myLen=strlen(s))+1];
 		strcpy(myStr,s); }
-   string(const char* s) { myStr = new char[(myLen=strlen(s))+1];
+   stafString(const char* s) { myStr = new char[(myLen=strlen(s))+1];
 		strcpy(myStr,s); }
-   ~string() { delete myStr; }
+   ~stafString() { delete myStr; }
 // ATTRIBUTES ----------------------
    char* show(){ return myStr; }
    int length(){ return myLen; }
 // FUNCTIONS -----------------------
 // OPERATORS -----------------------
-   string operator + (string);
-   string operator + (char*);
-   void operator += (string);
+   stafString operator + (stafString);
+   stafString operator + (char*);
+   void operator += (stafString);
    void operator = (char*);
    char* operator [] (char*);
-   int operator == (string);
+   int operator == (stafString);
    int operator == (char*);
    int operator == (const char*);
    void operator << (ostream);
