@@ -16,6 +16,7 @@ void Load()
 
 void DrawDstHist(
      const Char_t *firstHistName="*",const Char_t *lastHistName="*",
+//     const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/./psc0055_07_40evts.root",
 //     const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0067_02_40evts.root",
      const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss",
      const Char_t *psFile="QA_hist.ps")
@@ -47,7 +48,9 @@ void DrawDstHist(
    return;
   }
   Char_t *exPsFile =  gSystem->ExpandPathName(psFile);
-
+  const Char_t *excludedFiles[] = {"psc0055_07_40","psc0055_08_40","psc0059_07_40"};
+  Int_t nExcluded =  sizeof(excludedFiles)/4;
+  cout << nExcluded << " files will be excluded" << endl ;
   if (!chain) {
     chain = new StChain("bfc");
     St_io_Maker *in    = new St_io_Maker("Input","all");
@@ -64,6 +67,14 @@ void DrawDstHist(
         TString p = set->Path();
         Char_t *rootfilename = gSystem->ConcatFileName(exFileName,p.Data());
         cout << "Including file " << rootfilename << " into list of the files " << endl;
+        Int_t ie = 0;
+        Bool_t isExcluded = kFALSE;
+        while(ie < nExcluded) {
+          // exculde one "wrong" file 
+          if (strstr(rootfilename,excludedFiles[ie])) {isExcluded = kTRUE; break; }
+          ie++;
+        }
+        if (isExcluded) continue;
         in->AddFile(rootfilename);
         nFile++;
       } 
@@ -73,7 +84,7 @@ void DrawDstHist(
     }
     cout << "Total: " << nFile << " files will be analysed" << endl ;
 
-    in->SetMaxEvent(4);
+    in->SetMaxEvent(2);
     St_QA_Maker *QA   = new St_QA_Maker("QA","event/geant/Event");
     QA->SetHistsNames(firstHistName,lastHistName);
     QA->SetDraw();
