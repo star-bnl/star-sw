@@ -1,10 +1,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.40 2002/06/07 17:29:43 kirill Exp $
+// $Id: doFlowEvents.C,v 1.41 2002/06/10 22:56:40 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
-// what it does: reads dst.root or pico files to fill StFlowEvent
+// It reads dst.root, picoevent.root, or MuDst.root files to fill StFlowEvent
 //
 // Environment:
 // Software developed for the STAR Detector at Brookhaven National Laboratory
@@ -16,19 +16,19 @@
 // If 'file' ends in '.dst.root', ROOT DSTs are searched for.
 // If 'file' ends in '.event.root' a StEvent file is used.
 // If 'file' ends in 'flowpicoevent.root' a StFlowPicoEvent file is used.
-// If 'file' ends in 'MuDst.root' a common MuDST file is used.
+// If 'file' ends in 'MuDst.root' a StMuDST file is used.
 //
 //  inputs:
 //      nevents = # events to process
 //      path = a. directory you want files from
 //             b. "-" to get just the one file you want
 //      file = a. file names in directory (takes all files)
-//             b. the 1 particular full file name (with directory) you want
+//             b. the one particular full file name (with directory) you want
 //      qaflag = "off"  - doesn't do anything now
 //
 // Usage: 
 // doFlowEvents.C(nevents, "-", "some_directory/some_dst_file.root")
-// doFlowEvents.C(nevents, "some_directory", "*.dst.root/*.event.root")	
+// doFlowEvents.C(nevents, "some_directory", "*.root")	
 // doFlowEvents.C(nevents)	
 // doFlowEvents.C()                // 2 events
 //
@@ -45,9 +45,11 @@
 // Author List: Torre Wenaus, BNL  2/99
 //              Victor Perevoztchikov
 //              Art Poskanzer
+//              Raimond Snellings
+//              Kirill Filimonov
 //  
 ///////////////////////////////////////////////////////////////////////////////
-
+#include <iostream.h> // needed on Solaris
 class    StChain;
 StChain  *chain = 0;
 TBrowser *b = 0;
@@ -92,7 +94,6 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   gSystem->Load("StEvent");
   gSystem->Load("StEventUtilities");
   gSystem->Load("StMagF");
-  //gSystem->Load("StarRoot"); 
 
   gSystem->Load("StFlowMaker");
   gSystem->Load("StFlowTagMaker");
@@ -134,7 +135,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 //   flowSelect->SetFitPtsPart(20, 50);          // for parts. wrt plane
 //   flowSelect->SetFitOverMaxPtsPart(0.52, 1.); // for parts. wrt plane
 //   flowSelect->SetChiSqPart(0.1, 1.3);         // for parts. wrt plane
-//   flowSelect->SetDcaGlobalPart(0., 0.8);      // for parts. wrt plane
+//   flowSelect->SetDcaGlobalPart(0., 0.);       // for parts. wrt plane
 //   flowSelect->SetYPart(-0.5, 0.5);            // for parts. wrt plane
 
   // uncomment next line if you make a selection object
@@ -177,8 +178,8 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
     IOMk->SetIOMode("r");
     IOMk->SetBranch("*",0,"0");	//deactivate all branches
     if(!mainBranch.IsNull())	IOMk->SetBranch(mainBranch,0,"r");  
-    //IOMk->SetBranch("dstBranch",0,"r");
-    //IOMk->SetBranch("runcoBranch",0,"r");
+    IOMk->SetBranch("dstBranch",0,"r");
+    IOMk->SetBranch("runcoBranch",0,"r");
     //IOMk->SetDebug();
     
     // Maker to read events from file or database into StEvent
@@ -236,8 +237,8 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   }
 
   // Set write flages and file names
-  //  flowMaker->PicoEventWrite(kTRUE);
-  //  flowMaker->SetPicoEventDir("./");
+//  flowMaker->PicoEventWrite(kTRUE);
+//  flowMaker->SetPicoEventDir("./");
 //  flowMaker->SetPicoEventDir(*OutPicoDir);
   
   // Set Debug status
@@ -297,7 +298,6 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 //   StFlowEvent::SetEtaFtpcCut(0.05, 1., 1, 1); // harmonic 2, selection 2
 //   StFlowEvent::SetPtTpcCut(0.0, 1., 1, 1);    // harmonic 2, selection 2
 //   StFlowEvent::SetPtFtpcCut(0.0, 1., 1, 1);   // harmonic 2, selection 2
-
 //   StFlowEvent::SetDcaGlobalCut(0., 1.);       // for event plane
 
   // particles:h+, h-, pi+, pi-, pi, k+, k-, k, e-, e+, e, pr-, pr+, pr, d+, d-, and d
@@ -307,8 +307,8 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 //  StFlowEvent::SetEtaSubs();
 
   // Enable weights in the event plane calcualtion
-  StFlowEvent::SetPtWgt(kTRUE);
-  StFlowEvent::SetEtaWgt(kTRUE);
+//   StFlowEvent::SetPtWgt(kFALSE);
+//   StFlowEvent::SetEtaWgt(kFALSE);
 
   // Use Aihong's probability PID method
 //   StFlowEvent::SetProbPid();
@@ -425,57 +425,57 @@ void doFlowEvents(const Int_t nevents)
    const Char_t *filePath="-";
    const Char_t *fileExt="/afs/rhic/star/data/samples/gstar.dst.root";
 
-  // BNL
-//  Char_t* filePath="/star/rcf/scratch/posk/P00hg3";
-//  Char_t* fileExt="*.flowpicoevent.root";
-//  Char_t* fileExt="st_physics_1229055_raw_0013.dst.root.flowpicoevent.root";
-  
-//  Char_t* filePath="../Data/FtpcSim/Markus/";
-//  Char_t* fileExt="*flowpicoevent.root";
-
 //  Char_t* filePath="./";
 //  Char_t* fileExt="*.event.root";
-  
-  // LBNL
+//  Char_t* fileExt="*.flowpicoevent.root";
+//  Char_t* fileExt="*.MuDst.root";
+
+// PDSF pico files
   // 200 GeV
-  // RDO 9-3 and 21-3 bad
-//   Char_t* filePath="/auto/pdsfdv15/rhstar/kaneta/flow_pDST/reco/ProductionMinBias/DEV/2001/2266012/";
+  
+  // P02gc
+//   Char_t* filePath="/auto/stardata/starspec2/flow_pDST_production/reco/ProductionMinBias/FullField/P02gc/2001/";
 //   if (nevents < 250) {
-//     Char_t* fileExt="st_physics_2266012_raw_0001.event.root.flowpicoevent.root";
+//     Char_t* fileExt="2269018/st_physics_2269018_raw_0001.flowpicoevent.root";
+//   } else {
+//     Char_t* fileExt="*/*.flowpicoevent.root";
+//   }
+
+  // P02gd
+//   Char_t* filePath="/auto/stardata/starspec3/flow_pDST_production/reco/ProductionMinBias/ReversedFullField/P02gd/2001/2258044/";
+//   if (nevents < 250) {
+//     Char_t* fileExt="st_physics_2258044_raw_0026.flowpicoevent.root";
 //    } else {
 //      Char_t* fileExt="*.flowpicoevent.root";
 //    }
 
-//      /auto/stardata/starspec/kaneta/flow_pDST_production/reco/MinBiasVertex/ReversedHalfField/P01gk/2001/
-//      /auto/stardata/starspec/kaneta/flow_pDST_production/reco/productionCentral/ReversedFullField/P01gk/2001/
-
-  // only RDO 21-3 bad
-//   Char_t* filePath="/auto/stardata/starspec2/flow_pDST_production/reco/MinBiasVertex/ReversedFullField/P01gk/2001/"; 
-//   if (nevents < 250) {
-//     Char_t* fileExt="2230003/st_physics_2230003_raw_0001.event.root.flowpicoevent.root";
-//    } else {
-//      Char_t* fileExt="*/*.flowpicoevent.root";
-//    }
-
   // 130 GeV
-//   Char_t* filePath="/auto/pdsfdv14/starprod/kirll_flow_pDST_minbias/";
+//   Char_t* filePath="/auto/pdsfdv10/starprod/DST/kirll_flow_pDST_minbias/";
 //   if (nevents < 250) {
-//     Char_t* fileExt="st_physics_1239006_raw_0006.event.root.flowpicoevent.root";
+//     Char_t* fileExt="st_physics_1239006_raw_0017.event.root.flowpicoevent.root";
 //   } else {
 //     Char_t* fileExt="*.flowpicoevent.root";
 //   }
 
-  // miniDST
-//   Char_t* filePath="/auto/pdsfdv14/starprod/DST/P01hi/2000/09";
-//   Char_t* fileExt="*.event.root"; // needs stardev as of 1/02
+  // 22 GeV
+//   Char_t* filePath="/auto/stardata/starspec3/flow_pDST_production/reco/minBias22GeVZDC/ReversedHalfField/P02ge/2001/2329085";
+//   if (nevents < 250) {
+//     Char_t* fileExt="st_physics_2329085_raw_0001.flowpicoevent.root";
+//   } else {
+//     Char_t* fileExt="*.flowpicoevent.root";
+//   }
 
-  // 20 GeV
-  // /auto/stardata/starspec2/flow_pDST_from_fastoffline_DST/020GeV_AuAu/reco/dev/
+  // muDST files
+  // 200 GeV
+//   Char_t* filePath="/beta/starprod/MuDST/P02gc/Common/ProductionMinBias/RevFullField/";
+//   if (nevents < 250) {
+//     Char_t* fileExt="st_physics_2269002_raw_0177.MuDst.root"; 
+//   } else {
+//     Char_t* fileExt="st_physics_2269002_raw_*.MuDst.root";
+//   }
 
-  // muDST
-   //Char_t* filePath="/beta/starprod/MuDST/P02gc/Common/ProductionMinBias/RevFullField/";
-   //Char_t* fileExt="st_physics_2269002_raw_0177.MuDst.root"; 
-  // event.root
+
+  // event.root files
   // Char_t* filePath="/beta/starprod/kirill/";
   // Char_t* fileExt="st_physics_2269002_raw_0177.event.root"; 
 
@@ -485,6 +485,9 @@ void doFlowEvents(const Int_t nevents)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.41  2002/06/10 22:56:40  posk
+// pt and eta weighting now default.
+//
 // Revision 1.40  2002/06/07 17:29:43  kirill
 // Introduced MuDst reader
 //
