@@ -1,5 +1,8 @@
-* $Id: tpt_make_segment_uv.F,v 1.13 2000/03/04 00:37:08 sakrejda Exp $
+* $Id: tpt_make_segment_uv.F,v 1.14 2000/04/28 03:10:19 sakrejda Exp $
 * $Log: tpt_make_segment_uv.F,v $
+* Revision 1.14  2000/04/28 03:10:19  sakrejda
+* Added freing of hits from a track that did not survive the fitting.
+*
 * Revision 1.13  2000/03/04 00:37:08  sakrejda
 * Weigth of edge and deconvoluted hits suppressed in the fit - not quite right as
 * tfs and the hit finder are not quite consistent in how hits are flagged - needs more work.
@@ -315,10 +318,15 @@ C         succesfull search - fit a track
           tte_skip=0
           iret =
      >    tpt_fit_track(ntrk,trk,hit_h,hit,tpar_h,tpar,tte_skip,ipass)
+          if(ntrk.eq.148) write(6,*)"track ",ntrk, trk(ntrk).flag," case 1"
           if(iret.eq.STAFCV_OK) then
              tpt_make_segment_uv = STAFCV_OK
           else
+             do i=1,trk(ntrk).nhit
+                hit(trk(ntrk).ipnt(i)).track=0
+             enddo
              tpt_make_segment_uv = STAFCV_BAD
+             if(ntrk.eq.148) write(6,*)"track ",ntrk, trk(ntrk).flag," case 2"
           endif
       else
           tpt_make_segment_uv = STAFCV_BAD

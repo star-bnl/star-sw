@@ -1,5 +1,8 @@
-* $Id: tpt_make_segment.F,v 1.11 2000/02/23 21:05:52 hardtke Exp $
+* $Id: tpt_make_segment.F,v 1.12 2000/04/28 03:10:00 sakrejda Exp $
 * $Log: tpt_make_segment.F,v $
+* Revision 1.12  2000/04/28 03:10:00  sakrejda
+* Added freing of hits from a track that did not survive the fitting.
+*
 * Revision 1.11  2000/02/23 21:05:52  hardtke
 * replace tpg functions with tpc functions
 *
@@ -81,7 +84,7 @@ C______________________________________________________________________
 C_____________________________________________________________________
 C
 C     Local variables
-      INTEGER ntrk,ir1,ir2,npnt,ip2,ip3,ip4,nfound,iret
+      INTEGER ntrk,ir1,ir2,npnt,ip2,ip3,ip4,nfound,iret, i
       INTEGER isect_first, isect_trunc, isec1
       INTEGER irow_last,irow_start,irow_step,ngap
       INTEGER tpc_row_par, tpt_ptcrs
@@ -214,6 +217,10 @@ C         succesfull search - fit a track
           if(iret.eq.STAFCV_OK) then
              tpt_make_segment = STAFCV_OK
           else
+C            release hits
+             do i=1,trk(ntrk).nhit
+                hit(trk(ntrk).ipnt(i)).track=0
+             enddo
              tpt_make_segment = STAFCV_BAD
           endif
       else
