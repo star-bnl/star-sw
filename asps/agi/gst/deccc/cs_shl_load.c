@@ -1,7 +1,10 @@
 /*
- * $Id: cs_shl_load.c,v 1.2 1998/06/05 20:55:14 perev Exp $
+ * $Id: cs_shl_load.c,v 1.3 1998/06/10 00:52:24 perev Exp $
  *
  * $Log: cs_shl_load.c,v $
+ * Revision 1.3  1998/06/10 00:52:24  perev
+ * Change || to | in dlopen
+ *
  * Revision 1.2  1998/06/05 20:55:14  perev
  * AGI commit
  *
@@ -132,21 +135,18 @@ void cs_shl_get_(ns, symbol, n)
 #if defined(CERNLIB_ALPHA_OSF)
 #define  ALPHA_OSF
 #endif
-#if (defined(CERNLIB_AIX))&&(defined(CERNLIB_SHL))
-#include "dlfcn.h"
+#ifdef CERNLIB_AIX
+#include "aix_dlfcn.h"
 #else
 #include <dlfcn.h>
 #endif
 #include <string.h>
- 
 #define MAXLENFL        60
-#ifndef RTLD_NOW
-#define RTLD_NOW	2	/* immediate function call binding */
+#ifdef  RTLD_GLOBAL
+#define RTLD_NOW_CONST (RTLD_NOW | RTLD_GLOBAL)
+#else
+#define RTLD_NOW_CONST  RTLD_LAZY
 #endif
-#ifndef RTLD_GLOBAL
-#define RTLD_GLOBAL	0x100	/* allow symbols to be global */
-#endif
-#define RTLD_NOW_CONST (RTLD_NOW || RTLD_GLOBAL)
  
 /****************************************************************************/
  

@@ -1,7 +1,10 @@
 /*
-* $Id: dlfcn.h,v 1.2 1998/06/05 20:55:15 perev Exp $
+* $Id: aix_dlfcn.h,v 1.1 1998/06/10 00:52:22 perev Exp $
 *
-* $Log: dlfcn.h,v $
+* $Log: aix_dlfcn.h,v $
+* Revision 1.1  1998/06/10 00:52:22  perev
+* Change || to | in dlopen
+*
 * Revision 1.2  1998/06/05 20:55:15  perev
 * AGI commit
 *
