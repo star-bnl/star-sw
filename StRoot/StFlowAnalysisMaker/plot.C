@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.47 2003/03/11 23:04:30 posk Exp $
+// $Id: plot.C,v 1.48 2003/03/17 20:46:55 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -574,7 +574,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	gStyle->SetOptFit(111);
 	hist->Draw("E1");
       } else if (strstr(shortName[pageNumber],"_q")!=0) {   // q distibution
-	gStyle->SetOptStat(100110);
+	gStyle->SetOptStat(10);
 	gStyle->SetOptFit(111);
 	hist->Draw("E1");
 	float n_qBins = (float)hist->GetNbinsX();
@@ -590,20 +590,26 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	}
 	delete histName;
 	float mult = histMult->GetMean();
-	TF1* fit_q = new TF1("qDist", qDist, 0., max, 3); // fit q dist
-	fit_q->SetParNames("v", "mult", "area");
+	TF1* fit_q = new TF1("qDist", qDist, 0., max, 4);
+	fit_q->SetParNames("v", "mult", "area", "g");
 	float qMean = hist->GetMean();
 	float v2N = (qMean > 1.) ? qMean - 1. : 0.;
 	float vGuess = 100. * sqrt(v2N / mult);
-	fit_q->SetParameters(vGuess, mult, area); // initial values
+	fit_q->SetParameters(vGuess, mult, area, 0.5); // initial values
 	fit_q->SetParLimits(1, 1, 1);             // mult is fixed
 	fit_q->SetParLimits(2, 1, 1);             // area is fixed
 	hist->Fit("qDist", "Q");
 	fit_q->Draw("same");
-	TF1* func_q = new TF1("func_q", "[0]*2.*x*exp(-x*x)", 0., max);
-	func_q->SetParameter(0, area);
-	func_q->SetLineStyle(kDotted);
-	func_q->Draw("same");
+ 	fit_q->FixParameter(3, 0.);               // g is fixed
+	fit_q->SetLineStyle(kDotted);
+	hist->Fit("qDist", "Q+");
+	fit_q->Draw("same");
+ 	fit_q->ReleaseParameter(3);               // g is unfixed
+ 	fit_q->SetParameter(3, 0.5);              // initial value
+ 	fit_q->FixParameter(0, 0.);               // v is fixed
+	fit_q->SetLineStyle(kDashed);
+	hist->Fit("qDist", "Q+");
+	fit_q->Draw("same");
       } else if (strstr(shortName[pageNumber],"CosPhi")!=0) {  // CosPhiLab
 	TLine* lineZeroHar = new TLine(0.5, 0., nHars+0.5, 0.);
 	gStyle->SetOptStat(0);
@@ -766,11 +772,12 @@ void plotAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
 //-----------------------------------------------------------------------
 
 static Double_t qDist(double* q, double* par) {
-  // Calculates the q distribution given the parameters v, mult, area
+  // Calculates the q distribution given the parameters v, mult, area, g
 
-  double expo = par[1]*par[0]*par[0]/10000. + q[0]*q[0];
-  Double_t dNdq = par[2] * (2. * q[0] * exp(-expo) * 
-    TMath::BesselI0(2.*q[0]*par[0]/100.*sqrt(par[1])));
+  double sig2 = 0.5 * (1. + par[3]);
+  double expo = (par[1]*par[0]*par[0]/10000. + q[0]*q[0]) / (2*sig2);
+  Double_t dNdq = par[2] * (q[0]*exp(-expo)/sig2) * 
+    TMath::BesselI0(q[0]*par[0]/100.*sqrt(par[1])/sig2);
 
   return dNdq;
 }
@@ -797,6 +804,9 @@ static Double_t SubCorr(double* x, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.48  2003/03/17 20:46:55  posk
+// Improved fit to q dist.
+//
 // Revision 1.47  2003/03/11 23:04:30  posk
 // Includes scalar product hists.
 //
