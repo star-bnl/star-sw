@@ -31,6 +31,13 @@
 *                      **  ***     ***  **
 *                     **                 **
 
+	SUBROUTINE MSG_DUMMY
+*	Test the new installib business by forcing libmsg.a to change,
+*	by adding this subroutine.
+	IMPLICIT NONE
+	RETURN
+	END
+
 	SUBROUTINE MSG_CHECK(MSG,ID,ACTIVE,COUNTING)
 
 	IMPLICIT NONE
