@@ -56,7 +56,7 @@ ClassImp(StV0FinderMaker)
   StV0FinderMaker::StV0FinderMaker(const char *name):StMaker(name),
          ev0par2(0),pars(0),pars2(0),event(0),v0Vertex(0),
          prepared(kFALSE),useExistingV0s(kFALSE),dontZapV0s(kFALSE),
-         useTracker(kTrackerUseBOTH),useSVT(kUseSVT),useEventModel(kUseStEvent),
+         useTracker(kTrackerUseBOTH),useSVT(kNoSVT),useEventModel(kUseStEvent),
          useV0Language(kV0LanguageUseCpp),useXiLanguage(kXiLanguageUseCppOnCppV0),
          useLanguage(kLanguageUseRun),useLikesign(kLikesignUseStandard),
          useRotating(kRotatingUseStandard)
@@ -811,8 +811,11 @@ void StV0FinderMaker::Trim() {
                       " V0 candidates" << endm;
 }
 //_____________________________________________________________________________
-// $Id: StV0FinderMaker.cxx,v 1.19 2004/04/02 08:57:23 faivre Exp $
+// $Id: StV0FinderMaker.cxx,v 1.20 2004/04/06 14:05:16 faivre Exp $
 // $Log: StV0FinderMaker.cxx,v $
+// Revision 1.20  2004/04/06 14:05:16  faivre
+// Change default options to : do not use SVT.
+//
 // Revision 1.19  2004/04/02 08:57:23  faivre
 // Use actual TPT flag rather than "not ITTF" for TPT tracks. Minor changes.
 //
