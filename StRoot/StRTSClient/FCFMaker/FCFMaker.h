@@ -3,11 +3,14 @@
 
 /***************************************************************************
  *
- * $Id: FCFMaker.h,v 1.5 2004/01/22 18:36:11 jml Exp $
+ * $Id: FCFMaker.h,v 1.6 2004/01/26 22:46:54 jml Exp $
  *
  *--------------------------------------------------------------------------
  *
  * $Log: FCFMaker.h,v $
+ * Revision 1.6  2004/01/26 22:46:54  jml
+ * debugging to see gains/t0, only get gains/t0 once, cleaner logging
+ *
  * Revision 1.5  2004/01/22 18:36:11  jml
  * more updates to the logging
  *
@@ -125,10 +128,9 @@ class StRTSClientFCFMaker:public StMaker
   unsigned int croat_adcOff[MAX_PADS_EVER+1];
   unsigned short croat_cppOff[MAX_PADS_EVER+1];   
   
-  int t0Corr[MAX_PADS_EVER+1];
-  unsigned int gainCorr[MAX_PADS_EVER+1];
+  int t0Corr[24][45][MAX_PADS_EVER+1];
+  unsigned int gainCorr[24][45][MAX_PADS_EVER+1];
   unsigned short startFlags[MAX_PADS_EVER+1];
- 
 
   Int_t BuildCPP(int nrows, 
 		 raw_row_st *row, 
@@ -142,7 +144,7 @@ class StRTSClientFCFMaker:public StMaker
   void fillStEvent(tcl_tphit_st *hit);
   void filltphit(tcl_tphit_st *hit);
 
-  void getGainCorrections(int sector, int row);
+  void getCorrections(int sector, int row);
 
   // Need my own coordinate transformations, because
   // TPC provided transforms only work on ints.

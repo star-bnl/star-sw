@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.10 2004/01/26 19:42:25 jml Exp $
+ * $Id: FCFMaker.cxx,v 1.11 2004/01/26 22:46:54 jml Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.11  2004/01/26 22:46:54  jml
+ * debugging to see gains/t0, only get gains/t0 once, cleaner logging
+ *
  * Revision 1.10  2004/01/26 19:42:25  jml
  * blah
  *
@@ -264,10 +267,16 @@ Int_t StRTSClientFCFMaker::Init()
   fcf->maxClusters = MAX_CLUSTERS;
 
   memset(t0Corr, 0, sizeof(t0Corr));
-  for(int i=0;i<MAX_PADS_EVER+1;i++) gainCorr[i] = 64;   // == 1.0 !!
 
-  fcf->t0Corr = t0Corr;
-  fcf->gainCorr = gainCorr;
+#ifdef FCF_DEBUG_OUTPUT
+  ff = fopen("fcf.dta","w") ;
+#endif
+
+  for(int i=0;i<24;i++) {
+    for(int j=0;j<45;j++) {
+      for(int k=0;k<MAX_PADS_EVER+1;k++) gainCorr[i][j][k] = 64;   // == 1.0 !!
+    }
+  }
 
   // Tonko: added startFlags
   memset(startFlags,0,sizeof(startFlags)) ;
@@ -284,10 +293,6 @@ Int_t StRTSClientFCFMaker::Init()
   tss_tsspar_st *tsspar = m_tsspar->GetTable();
   tsspar->threshold = 1;
 
-#ifdef FCF_DEBUG_OUTPUT
-  ff = fopen("fcf.dta","w") ;
-#endif
-
   fcf_after.setVerbose(false);
   return StMaker::Init();
 }
@@ -297,16 +302,22 @@ Int_t StRTSClientFCFMaker::Init()
 
 Int_t StRTSClientFCFMaker::InitRun(int run)
 {
-	fprintf(stderr,"StRTSClientFCFMaker::InitRun called with run %u...\n",run) ;
+  fprintf(stderr,"StRTSClientFCFMaker::InitRun called with run %u...\n",run) ;
 	
-	St_DataSet *dr = GetDataSet("StDAQReader");
-        daqReader = (StDAQReader *)(dr->GetObject());
+  St_DataSet *dr = GetDataSet("StDAQReader");
+  daqReader = (StDAQReader *)(dr->GetObject());
 
-        if(daqReader == NULL) {
-          printf("FCFMaker: No daqReader available...\n");
-        }
+  if(daqReader == NULL) {
+    printf("FCFMaker: No daqReader available...\n");
+  }
 
-	return kStOK ;
+  for(int i=0;i<24;i++) {
+    for(int j=0;j<45;j++) {
+      getCorrections(i+1,j);   // sector from 1, row from 0
+    }
+  }
+
+  return kStOK ;
 }
 
 Int_t StRTSClientFCFMaker::Make()
@@ -667,22 +678,16 @@ double StRTSClientFCFMaker::lzFromTB(double timeBin, int sector, int row, int pa
   return(z - zoffset + t0zoffset);
 }
 
-
-// Tonko: this doesc both Gain _and_ T0 corrections!
-// "sector" starts from 1 whereas "row" starts from 0 (argh!)
-void StRTSClientFCFMaker::getGainCorrections(int sector, int row)
+void StRTSClientFCFMaker::getCorrections(int sector, int row)
 {
-  // copy this routine from St_tpcdaq_Maker()
   int pad;
 
-  TDataSet *tpc_calib  = GetDataBase("Calibrations/tpc"); assert(tpc_calib);
-  
+  //printf("Getting corrections %d %d\n",sector,row);
+  TDataSet *tpc_calib  = GetDataBase("Calibrations/tpc"); assert(tpc_calib); 
   St_tpcGain *gainObj = (St_tpcGain*) tpc_calib->Find("tpcGain"); assert(gainObj);
-  
-  assert(gainObj->GetNRows()==24);
-  
+
+  assert(gainObj->GetNRows()==24);  
   tpcGain_st *gains = gainObj->GetTable(); assert(gains);
-  
   assert(sector>=1&&sector<=24);
   
   static StDetectorDbTpcRDOMasks* mask=0;
@@ -724,7 +729,7 @@ void StRTSClientFCFMaker::getGainCorrections(int sector, int row)
     if(!doGainCorrections) if(gain > 0.001) gain = 1.0 ;
     
     // gainCorr starts from 1!
-    gainCorr[pad+1] = (int)(gain*64.0 + 0.5);
+    gainCorr[sector-1][row][pad+1] = (int)(gain*64.0 + 0.5);
 
     // Tonko: added T0 correction here...
     // NOTE: it seems that getT0 wants row,pad to start from 1 whereas the previous Gain
@@ -739,11 +744,16 @@ void StRTSClientFCFMaker::getGainCorrections(int sector, int row)
 // 	   sector,row,pad,po,pg,gain,t0);
 
     // t0Corr starts from 1!
-    t0Corr[pad+1] = (short)(gain*fabs(t0)*64.0 + 0.5) ;	// this is convoluted with the gain!
-    if(t0 < 0.0) t0Corr[pad+1] *= -1 ;
-  }
+    t0Corr[sector-1][row][pad+1] = (short)(gain*fabs(t0)*64.0 + 0.5) ;	// this is convoluted with the gain!
+    if(t0 < 0.0) t0Corr[sector-1][row][pad+1] *= -1 ;
 
+#ifdef FCF_DEBUG_OUTPUT
+    fprintf(ff, "%d %d %d %1.3f %1.3f\n",
+	    sector, row+1, pad+1, gain, t0);
+#endif
+  }
 }
+
 
 // Save the cluster
 //
@@ -845,49 +855,49 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
   // The origin of the raw cluster finder is at "b" because it is a simple average of the pad numbers which start at 1
   // In special, the output is  (raw_pad + .5) which places the origin at a
   // lxFromPad assumes the origin is b
-  fprintf(ff,"%d %d %f %f %d %d %d %d %d %d\n",
-	  sector,r+1,((double)cl_x)/64.0 + .5,((double)cl_t)/64.0 + .5, cl_c, cl_f, p1, p2, t1, t2) ;
+//   fprintf(ff,"%d %d %f %f %d %d %d %d %d %d\n",
+// 	  sector,r+1,((double)cl_x)/64.0 + .5,((double)cl_t)/64.0 + .5, cl_c, cl_f, p1, p2, t1, t2) ;
 
-  // tpc coords...
-  if(sector==24 || sector==12 || sector==6 || sector==18) {
-    fprintf(ff, 
- 	    "%d %d %d %d %d "
- 	    "%d %e %e %e %e "
- 	    "%e %f %e %f %e "
- 	    "%f %e %e %e %e "
- 	    "%e %d %d %d %d "
- 	    "%d %d %d %d %d\n",
- 	    hit.cluster,
- 	    hit.flag,
- 	    hit.id,
- 	    hit.id_globtrk,
- 	    hit.track,
- 	    hit.truncTag,
- 	    hit.alpha,
- 	    hit.dalpha,
- 	    hit.lambda,
- 	    hit.q,
- 	    hit.dq,
- 	    hit.x,
- 	    hit.dx,
- 	    hit.y,
- 	    hit.dy,
-	    hit.z,
- 	    hit.dz,
- 	    hit.phi,
- 	    hit.prf,
- 	    hit.zrf,
- 	    hit.dedx,
-	    hit.row/100,
- 	    hit.row%100,
- 	    hit.nseq,
- 	    hit.npads,
- 	    hit.minpad,
- 	    hit.maxpad,
- 	    hit.ntmbk,
- 	    hit.mintmbk,
- 	    hit.maxtmbk);
-  }
+//   // tpc coords...
+//   if(sector==24 || sector==12 || sector==6 || sector==18) {
+//     fprintf(ff, 
+//  	    "%d %d %d %d %d "
+//  	    "%d %e %e %e %e "
+//  	    "%e %f %e %f %e "
+//  	    "%f %e %e %e %e "
+//  	    "%e %d %d %d %d "
+//  	    "%d %d %d %d %d\n",
+//  	    hit.cluster,
+//  	    hit.flag,
+//  	    hit.id,
+//  	    hit.id_globtrk,
+//  	    hit.track,
+//  	    hit.truncTag,
+//  	    hit.alpha,
+//  	    hit.dalpha,
+//  	    hit.lambda,
+//  	    hit.q,
+//  	    hit.dq,
+//  	    hit.x,
+//  	    hit.dx,
+//  	    hit.y,
+//  	    hit.dy,
+// 	    hit.z,
+//  	    hit.dz,
+//  	    hit.phi,
+//  	    hit.prf,
+//  	    hit.zrf,
+//  	    hit.dedx,
+// 	    hit.row/100,
+//  	    hit.row%100,
+//  	    hit.nseq,
+//  	    hit.npads,
+//  	    hit.minpad,
+//  	    hit.maxpad,
+//  	    hit.ntmbk,
+//  	    hit.mintmbk,
+//  	    hit.maxtmbk);
+//   }
 #endif
 
   if(mFill_tphit)
@@ -950,9 +960,10 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
   for(int i=0;i<3;i++) result_mz_ptr[i] = NULL;
 
 
-  //  printf("s=%d r=%d\n",sector,row);
+  //printf("s=%d r=%d\n",sector,row);
   // does both Gain & T0 corrections (depending on flags)
-  getGainCorrections(sector, row);     // places corrections into fcf->gainCorr[1...lastpad]
+  fcf->t0Corr = t0Corr[sector-1][row];
+  fcf->gainCorr = gainCorr[sector-1][row];
 
 
   //cppRowStorage = &cpp[r] ;
