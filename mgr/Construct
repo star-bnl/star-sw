@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.137 2003/10/28 20:39:44 jeromel Exp $
+# $Id: Construct,v 1.138 2003/10/30 19:40:41 jeromel Exp $
 use Env;
 use lib $ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -23,14 +23,14 @@ print "Use$xx Conscript from $param::defaultConscript \n"
   unless ($param::quiet);
 print "Install includes\n" unless ($param::quiet);
 
-my $include = "include";
+my $include = "." . $STAR_HOST_SYS . "/include";
 my $build   = "." . $STAR_HOST_SYS;
 print "build for $build\n" unless ($param::quiet);
 
 if ( defined( $ARG{LinksCheck} ) ) {
     print "Clean up links. It takes a time.\n";
+    &File::Find::find( \&wanted_dead, $build )   if -d $build;
     &File::Find::find( \&wanted_dead, $include ) if -d $include;
-    &File::Find::find( \&wanted_dead, $build ) if -d $build;
 }
 my $def = {@param::defaults};
 {
@@ -158,16 +158,16 @@ if ( $STAR_HOST_SYS !~ /^intel_wnt/ ) {
     $Libraries  = $CERNLIBS . " ";
     $Libraries .= " " . $FLIBS . " " . $CLIBS . " ";
     chop($Libraries);
-}
-else {
+
+} else {
     $CPPPATH  = "";
     $FCPPPATH = "";
 
     foreach my $dir( $DirPath, @Repo ) {
-        $INCLUDE_PATH .= $main::PATH_SEPARATOR . $dir . "/include";
+        $INCLUDE_PATH .= $main::PATH_SEPARATOR . $dir . "/" . $include;
         $INCLUDE_PATH .= $main::PATH_SEPARATOR . $dir . "/StRoot";
         $INCLUDE_PATH .= $main::PATH_SEPARATOR . $dir . "/pams";
-        $INCLUDE_PATH .= $main::PATH_SEPARATOR . $dir . "/include/tables";
+        $INCLUDE_PATH .= $main::PATH_SEPARATOR . $dir . "/" . $include . "/tables";
     }
     my $ROOTSRC = $AFS_RHIC . "\\star\\ROOT\\" . $ROOT_LEVEL . "\\ROOT\\src";
     $INCLUDE_PATH .= $main::PATH_SEPARATOR . $ROOTSRC;
