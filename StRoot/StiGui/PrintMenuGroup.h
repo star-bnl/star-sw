@@ -11,6 +11,7 @@ class PrintMenuGroup : public MenuGroup
       _cmdPrintDetectors,
       _cmdPrintHits, 
       _cmdPrintTracks,
+      _cmdPrintEff,
       _cmdPrintMcTracks,
       _cmdPrintHitFilter,
       _cmdPrintTrackFilter,
@@ -26,6 +27,7 @@ class PrintMenuGroup : public MenuGroup
   void printOptions();
   void printDetectors();
   void printHits(); 
+  void printEff();
   void printTracks();
   void printMcTracks();
   void printHitFilter();

@@ -249,7 +249,7 @@ void EventDisplay::draw(StiTrackContainer * container,
   //cout << "EventDisplay::draw() -I- Started" << endl;
   if (!container) return;
   //cout << "EventDisplay::draw() -I- Processing tracks from  container:"<< container->getName()<<endl;
-  for (TrackMap::const_iterator i=container->begin();i!=container->end(); ++i) 
+  for (TrackToTrackMap::const_iterator i=container->begin();i!=container->end(); ++i) 
     {
       if (filter)
 	{
@@ -287,11 +287,11 @@ void EventDisplay::draw(StiHitContainer * container,
   if (!container) return;
   usedHits.reset();
   unusedHits.reset();
-  const hitmap& map = container->hits();
-  for (hitmap::const_iterator it=map.begin(); it!=map.end(); it++) 
+  const HitMapToVectorAndEndType& map = container->hits();
+  for (HitMapToVectorAndEndType::const_iterator it=map.begin(); it!=map.end(); it++) 
     {
-      const hitvector &hits = (*it).second.theHitVec;
-       for (hitvector::const_iterator iter=hits.begin();iter!=hits.end();iter++)
+      const HitVectorType &hits = (*it).second.theHitVec;
+       for (HitVectorType::const_iterator iter=hits.begin();iter!=hits.end();iter++)
 	 {
 	   const StiHit * hit = (*iter);
 	   if (filter && !filter->filter(hit)) continue;
