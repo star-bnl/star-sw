@@ -148,6 +148,7 @@
 
   // Make HTML docs for the "plain" text files those are not in the dictionaries
 
+  html.Convert("./XDFBrowser.C","XDF file interactive ROOT browser");
   html.Convert("./../Chain/xdf.C","STAR chain example");
   html.Convert("./../test/XDFcopy.C","How to read/write XDF file");
   html.Convert("./../test/XDFtest.C","How to read/write XDF and ROOT files");
