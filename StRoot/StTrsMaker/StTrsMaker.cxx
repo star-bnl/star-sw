@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.22 1999/03/16 02:03:46 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.23 1999/03/17 17:11:12 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.23  1999/03/17 17:11:12  lasiuk
+// comment out data set deletion for SL99d
+//
 // Revision 1.22  1999/03/16 02:03:46  lasiuk
 // Add Finish(); correct breakNumber calculation; Use C++ casts;
 // Change defaults (again) including P10;
@@ -124,7 +127,7 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.22 1999/03/16 02:03:46 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.23 1999/03/17 17:11:12 lasiuk Exp $";
 
 ClassImp(StTrsMaker)
 
@@ -697,8 +700,8 @@ Int_t StTrsMaker::Make(){
     hbookFile->saveAndClose();
 #endif    
     // Pass the decoder and data
-    if (m_DataSet) delete m_DataSet;
-    m_DataSet =  new St_DataSet(GetName());
+//     if (m_DataSet) delete m_DataSet;
+//     m_DataSet =  new St_DataSet(GetName());
     m_DataSet->Add(new St_ObjectSet("Event", mAllTheData));
     m_DataSet->Add(new St_ObjectSet("Decoder", mUnPacker));
   
@@ -731,7 +734,7 @@ Int_t StTrsMaker::Finish()
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.22 1999/03/16 02:03:46 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.23 1999/03/17 17:11:12 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
