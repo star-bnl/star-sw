@@ -20,6 +20,7 @@
 #include "StEmcUtil/StEmcGeom.h"
 #include "StEmcPosition.h"
 #include "StarClassLibrary/SystemOfUnits.h"
+#include "StuProbabilityPidAlgorithm.h"
 #include "TString.h"
 #ifndef ST_NO_NAMESPACES
 using units::tesla;
@@ -522,18 +523,24 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id)
 {
 	Float_t nSigma[4];
 	Int_t order[4];
-	return getTrackId(track,mass,id,order,nSigma);
+	Float_t dEdX;
+	Int_t npt;
+	return getTrackId(track,npt,dEdX,mass,id,order,nSigma);
 }
 //------------------------------------------------------------------------------
 /*!
 \param track is the pointer to StTrack
+\param nPoints is the number of dEdX points in the track
+\param dEdX is the dE/dX value for that track
 \param mass is the mass of idetified track
 \param id is the geant id of the identified track
+\param *idOrder is a pointer to an array with the id's in order of identification
+\param *nSigmaFinal is a pointer to an array with the number of sigma for each tested particle
 \param nSigmaFinal is the array that contains the number of sigmas for pions, protons, kaons and electrons (in this order)
 
 To the present, only pions, protons, kaons and electrons are tested. 
 */
-Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id,Int_t *idOrder,Float_t *nSigmaFinal)
+Bool_t StEmcFilter::getTrackId(StTrack *track,Int_t& nPoints,Float_t& dEdX,Float_t& mass,Int_t& id,Int_t *idOrder,Float_t *nSigmaFinal)
 {
  // dE/dx
   id=8;
@@ -542,9 +549,9 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id,Int_t *idO
   Int_t charge=track->geometry()->charge();
 	if(charge<0) id=9;
   
-  double momentum  = fabs(track->geometry()->momentum().mag());
+  Double_t momentum  = fabs(track->geometry()->momentum().mag());
   StPtrVecTrackPidTraits traits = track->pidTraits(kTpcId);
-  unsigned int size = traits.size();
+  UInt_t size = traits.size();
   if(size==0) return kFALSE;  
 
   Float_t m[4];
@@ -556,21 +563,22 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id,Int_t *idO
   
   if (size>0)
   {
-    StDedxPidTraits* pid;
-    for (unsigned int i = 0; i < traits.size(); i++)
+    StDedxPidTraits* pid=NULL;
+    for (UInt_t i = 0; i < traits.size(); i++)
     {
       pid = dynamic_cast<StDedxPidTraits*>(traits[i]);
       if (pid) if(pid->method() == kTruncatedMeanId) break;
     }
     if(!pid) return kFALSE;
 
-    double dEdX = (double)pid->mean();
+    dEdX = (Float_t)pid->mean();
     if(dEdX==0) return kFALSE;
-    double npt = (double)pid->numberOfPoints();
-    double dedx_expected;
-    double dedx_resolution = (double)pid->errorOnMean();
+    Double_t npt = (Double_t)pid->numberOfPoints();
+		nPoints=(Int_t) npt;
+    Double_t dedx_expected;
+    Double_t dedx_resolution = (Double_t)pid->errorOnMean();
     if(dedx_resolution<=0) dedx_resolution=npt > 0 ? 0.45/sqrt(npt) : 1000.;
-    double z;
+    Double_t z;
     Float_t nSigma[4],nSigmaTmp[4];
     Float_t length = (Float_t)pid->length();
 		if(length<=0) length = 60.;
@@ -578,7 +586,7 @@ Bool_t StEmcFilter::getTrackId(StTrack *track,Float_t& mass,Int_t& id,Int_t *idO
     {
       //dedx_expected=mBB(momentum/m[i])*mdEdXScale;      
 			dedx_expected = 1.0e-6*mBB.Sirrf(momentum/m[i],length,kk[i])*mdEdXScale;
-			z = log(dEdX/dedx_expected);
+			z = log((Double_t)dEdX/dedx_expected);
 			nSigmaTmp[i]=(Float_t) z/dedx_resolution;
       nSigma[i]=fabs(nSigmaTmp[i]) ;
     }
@@ -657,7 +665,7 @@ EmcStatus StEmcFilter::getEmcStatus(Int_t det, Int_t id)
       }
       else
       {
-        if ((id >= 1 && id <= 340) || (id >= 1861 && id <= 2400) ) return kGOOD;
+        if (/*(id >= 1 && id <= 340) ||*/ (id >= 1861 && id <= 2340) ) return kGOOD;
         else return kBAD;
       }
       break;
