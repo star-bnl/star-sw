@@ -1,11 +1,11 @@
-//-------------------------------------------------
-// For StTpcEvalMaker
-//-------------------------------------------------
-// author: milton toy
-// additions: manuel cbs
-//-------------------------------------------------
+// $Id: StTpcEvalHistograms.cxx,v 1.2 2000/05/25 20:38:09 snelling Exp $
+// $Log: StTpcEvalHistograms.cxx,v $
+// Revision 1.2  2000/05/25 20:38:09  snelling
+// Added TPC evaluation histograms
+//
+//-----------------------------------------------------------------------
 // class definition of StTpcEvalHistograms
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 #include <iostream.h>
 #include <stdlib.h>
 #include <string>
@@ -22,7 +22,7 @@
 
 ClassImp(StTpcEvalHistograms)
 
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 
 StTpcEvalHistograms::StTpcEvalHistograms() {
     mTrackIndex = 0;
@@ -30,11 +30,11 @@ StTpcEvalHistograms::StTpcEvalHistograms() {
 StTpcEvalHistograms::~StTpcEvalHistograms() {
 }
 
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 // for ntuple definition...
 #define TRKNT_ENUM gId,gPx,gPy,gPz,gY,gHits,gHitMatch,g2rTrackMatch,rId,rPx,rPy,rPz,rHits,rEta,rHitMatch,r2gTrackMatch,commonHits,xRes,xResRMS,zRes,zResRMS,enumLast
 #define TRKNT_VAR "gId:gPx:gPy:gPz:gY:gHits:gHitMatch:g2rTrackMatch:rId:rPx:rPy:rPz:rHits:rEta:rHitMatch:r2gTrackMatch:commonHits:xRes:xResRMS:zRes:zResRMS"
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 
 void StTpcEvalHistograms::fillTrackNtuple(MatchedTrackPair* trackPair) {
 
@@ -74,7 +74,7 @@ void StTpcEvalHistograms::fillTrackNtuple(MatchedTrackPair* trackPair) {
   
 }
 
-//-------------------------------------------------
+//-----------------------------------------------------------------------
 
 void StTpcEvalHistograms::Book() {
   int lwidth = 2;
@@ -154,10 +154,44 @@ void StTpcEvalHistograms::Book() {
   rcUnmatchedHitPositionZ->SetXTitle("z position (cm)");
   rcUnmatchedHitPositionZ->SetLineWidth(lwidth);
 
+  rcPadSepEfficiencyOuter = new TH2F("rcPadSepEff Outer","Reconstruced Pad Separation Efficiency Outer sector", 
+				      50, -1., 10., 50, -1., 10.);
+  rcPadSepEfficiencyOuter->SetXTitle("delta x (cm)");
+  rcPadSepEfficiencyOuter->SetYTitle("delta z (cm)");
+
+  mcPadSepEfficiencyOuter = new TH2F("mcPadSepEff Outer","Pad Separation Efficiency Outer sector", 
+				    50, -1., 10, 50, -1., 10);
+  mcPadSepEfficiencyOuter->SetXTitle("delta x (cm)");
+  mcPadSepEfficiencyOuter->SetYTitle("delta z (cm)");
+
+  rcPadSepEfficiencyInner = new TH2F("rcPadSepEff Inner","Reconstructed Pad Separation Efficiency Inner sector", 
+				      50, -1., 10., 50, -1., 10.);
+  rcPadSepEfficiencyInner->SetXTitle("delta x (cm)");
+  rcPadSepEfficiencyInner->SetYTitle("delta z (cm)");
+
+  mcPadSepEfficiencyInner = new TH2F("mcPadSepEff Inner","Monte Carlo Pad Separation Efficiency Inner sector", 
+				      50, -1., 10, 50, -1., 10);
+  mcPadSepEfficiencyInner->SetXTitle("delta x (cm)");
+  mcPadSepEfficiencyInner->SetYTitle("delta z (cm)");
+
+  mHitEfficiency = new TH2F("HitEfficiency","Hit Efficiency versus padrow", 
+				      45, 1., 46., 50, 0., 1.);
+  mHitEfficiency->SetXTitle("Padrow Nr");
+  mHitEfficiency->SetYTitle("Efficiency");
+  mHitEfficiency->SetMarkerColor(2);
+  mHitEfficiency->SetMarkerStyle(29);
+
+  mHitPurity = new TH2F("HitPurity","Hit Purity versus padrow", 
+				      45, 1., 46., 50, 0., 1.);
+  mHitPurity->SetXTitle("Padrow Nr");
+  mHitPurity->SetYTitle("Purity");
+  mHitPurity->SetMarkerColor(2);
+  mHitPurity->SetMarkerStyle(29);
+
   char* ntVars = TRKNT_VAR;
   trackNtuple = new TNtuple("trackNtuple","Track Pair Ntuple",ntVars);
 
   
 }
 
-//-------------------------------------------------
+//-----------------------------------------------------------------------

@@ -1,6 +1,9 @@
-//-------------------------------------------------
-// For StTpcEvalMaker
-//-------------------------------------------------
+//  $Id: StTpcEvalEvent.h,v 1.2 2000/05/25 20:38:09 snelling Exp $
+//  $Log: StTpcEvalEvent.h,v $
+//  Revision 1.2  2000/05/25 20:38:09  snelling
+//  Added TPC evaluation histograms
+//
+//
 // author: milton toy
 // additions: manuel cbs
 //-------------------------------------------------
@@ -27,40 +30,50 @@ class StMcTrack;
 class StTpcHit;
 class StGlobalTrack;
 
-//-------------------------------------------------
+//-----------------------------------------------------------------------
+
 class MatchedHitPair {
 public:
     MatchedHitPair(StTpcDb*); //!
     StThreeVectorF&   resolution(); //!
     StThreeVectorF&   resolution(const StMcTpcHit*, const StTpcHit*); //!
+    StThreeVectorF&   resolution(const StTpcHit*, const StTpcHit*); //!
+    StThreeVectorF&   resolution(const StMcTpcHit*, const StMcTpcHit*); //!
 private:
     StTpcDb*          mStTpcDb; //!
     StThreeVectorF    mResolution; //!
 };
-//-------------------------------------------------
+
+//-----------------------------------------------------------------------
+
 class TrackInfo : public TObject {
+
 public:
     TrackInfo();
     virtual ~TrackInfo();
-    Int_t       trackId();
-    UInt_t      numberOfHits();
-    UInt_t      numberOfMatchedHits();
-    UInt_t      numberOfMatchedTracks();
+    Int_t     trackId();
+    UInt_t    numberOfHits();
+    UInt_t    numberOfMatchedHits();
+    UInt_t    numberOfMatchedTracks();
     
-    void             setId(Int_t);
-    void             setHits(UInt_t);
-    void             setMatchedHits(UInt_t);
-    void             setMatchedTracks(UInt_t);
+    void      setId(Int_t);
+    void      setHits(UInt_t);
+    void      setMatchedHits(UInt_t);
+    void      setMatchedTracks(UInt_t);
+
 private:
-    Int_t      mId;
-    UInt_t     mHits;
-    UInt_t     mMatchedHits;
-    UInt_t     mMatchedTracks;
+    Int_t     mId;
+    UInt_t    mHits;
+    UInt_t    mMatchedHits;
+    UInt_t    mMatchedTracks;
 
     ClassDef(TrackInfo,1)
 };
-//-------------------------------------------------
+
+//-----------------------------------------------------------------------
+
 class rcTrackInfo : public TrackInfo {
+
 public:
     rcTrackInfo();
     virtual ~rcTrackInfo();
@@ -68,30 +81,35 @@ public:
     UInt_t           fitHits();
     void             setMomentum(StThreeVectorD);
     void             setFitHits(UInt_t);
+
 private:
     StThreeVectorD   mMomentum;
     UInt_t           mFitHits;
     
     ClassDef(rcTrackInfo,1)
 };
-//-------------------------------------------------
+
+//-----------------------------------------------------------------------
+
 class mcTrackInfo : public TrackInfo {
+
 public:
   mcTrackInfo();
   virtual ~mcTrackInfo();
   StLorentzVectorF&  fourMomentum();
   void               setFourMomentum(const StLorentzVectorF&);
+
 private:
   StLorentzVectorF mFourMomentum;
 
-    ClassDef(mcTrackInfo,1)
-
+  ClassDef(mcTrackInfo,1)
 };
 
-//-------------------------------------------------
-class MatchedTrackPair : public TObject {
-public:
+//-----------------------------------------------------------------------
 
+class MatchedTrackPair : public TObject {
+
+public:
     MatchedTrackPair();
     virtual ~MatchedTrackPair();
     //    MatchedTrackPair(const MatchedTrackPair&);
@@ -121,8 +139,11 @@ private:
     ClassDef(MatchedTrackPair,1)
 
 };
-//-------------------------------------------------
+
+//-----------------------------------------------------------------------
+
 class StTpcEvalEventHeader : public TObject {
+
 private:
     UInt_t mNumberOfGeantTracks;
     UInt_t mNumberOfGlobalTracks;
@@ -133,17 +154,17 @@ private:
 
 public:
     StTpcEvalEventHeader() : mNumberOfGeantTracks(0),
-			  mNumberOfGlobalTracks(0),
-			  mNumberOfPrimaryGeantTracks(0),
-			  mNumberOfPrimaryReconTracks(0) {}
+      mNumberOfGlobalTracks(0),
+      mNumberOfPrimaryGeantTracks(0),
+      mNumberOfPrimaryReconTracks(0) {}
     virtual ~StTpcEvalEventHeader() {};
     void setHeader(UInt_t geTrk, UInt_t globTrk, UInt_t gePTrk, UInt_t primTrk, UInt_t mcTpcH, UInt_t rcTpcH) {
-	mNumberOfGeantTracks        = geTrk;
-	mNumberOfGlobalTracks       = globTrk;
-	mNumberOfPrimaryGeantTracks = gePTrk;
-	mNumberOfPrimaryReconTracks = primTrk;
-	mNumberOfMcTpcHits          = mcTpcH;
-	mNumberOfRecTpcHits         = rcTpcH;
+      mNumberOfGeantTracks        = geTrk;
+      mNumberOfGlobalTracks       = globTrk;
+      mNumberOfPrimaryGeantTracks = gePTrk;
+      mNumberOfPrimaryReconTracks = primTrk;
+      mNumberOfMcTpcHits          = mcTpcH;
+      mNumberOfRecTpcHits         = rcTpcH;
     }
 
     UInt_t geantTracks()        const { return mNumberOfGeantTracks; }
@@ -154,9 +175,12 @@ public:
     UInt_t reconTpcHits()       const { return mNumberOfRecTpcHits; }
     
     ClassDef(StTpcEvalEventHeader,1)
-};
+      };
+
+//-----------------------------------------------------------------------
 
 class StTpcEvalEvent : public TObject {
+
 private:
     Int_t             mNumMatchedTracks;
     StTpcEvalEventHeader mHeader;
