@@ -107,54 +107,56 @@ void StiEvaluator::evaluate(const StiTrackContainer* trackStore)
 
     unsigned int iMcTrack=0;
     //cout <<"\tLoop on McToInfoPairMap"<<endl;
-    for (McMap::iterator outer_it=myMap.begin(); outer_it!=myMap.end(); ++outer_it) {
-
-	if (fmod(static_cast<double>(iMcTrack++),100)==0) {
-	    cout <<"\tChugging on track:\t"<<iMcTrack<<endl;
-	}
-	
+    for (McMap::iterator outer_it=myMap.begin(); outer_it!=myMap.end(); ++outer_it) 
+      {
+	if (fmod(static_cast<double>(iMcTrack++),5000)==0) 
+	  cout <<"\tEvaluating track#\t"<<iMcTrack<<endl;
 	mEntry->clear();
 	StMcTrack* mcTrack = (*outer_it).first;
-	
-	//cout <<"-- New McTrack: "<<mcTrack<<endl;
-	
+	if (mcTrack==0)
+	  {
+	    cout << "evaluate() - 0 ptr - abort" << endl;
+	    continue;
+	  }
+	else
+	  cout << "evaluate() - Track OK" << endl;
 	StiTrackPairInfo& testInfo = (*outer_it).second.second;
-	if ( testInfo.partnerMcTrack()==0 ) {// This McTrack was not found!
+	if ( testInfo.partnerMcTrack()==0 ) 
+	  {
+	    // This McTrack was not found!
 	    //Fill McTrack info:
-		//cout <<"Track not found, fill McTrack and Return"<<endl;
+	    cout <<"---------Track not found, fill McTrack and Return"<<endl;
 	    mEntry->clear();
 	    mEntry->setMcTrack(mcTrack, 0, false); //Dont incremnt the nFound counter
 	    mTree->Fill();
-	}
-
-	else {
-		//cout <<"Track found, find best match and fill"<<endl;
+	  }
+	else 
+	  {
+	    cout <<"Track found, find best match and fill"<<endl;
 	    //we have to choose the best ITTF trackf or this Mc Track (best common hits)
 	    //Start kludge here (should be an algorithm call)
 	    pair< McMap::iterator, McMap::iterator > range = myMap.equal_range(mcTrack);
-	    
 	    StiTrackPairInfo* bestStiPair=0;
 	    StTrackPairInfo* bestGlobalPair=0;
 	    unsigned int mostCommon=0;
-
 	    unsigned int nTimes=0;
-	    for (McMap::iterator it=range.first; it!=range.second; ++it) {
-		++nTimes;
-		
+	    for (McMap::iterator it=range.first; it!=range.second; ++it) 
+	      {
+		cout << " nTimes:" << ++nTimes;
 		StiTrackPairInfo& info = (*it).second.second;
-		
 		if (info.commonTpcHits()>mostCommon && info.commonTpcHits()>commonHitCut) { //update, remember
 		    mostCommon = info.commonTpcHits();
 		    bestGlobalPair = (*it).second.first;
 		    bestStiPair = &info;
 		}
-	    }
-	    //cout <<"\t Found this MC Track: "<<nTimes<<" times"<<endl;
+	      }
+	    cout <<"\t Found this MC Track: "<<nTimes<<" times"<<endl;
 	    //End kludge
 
 	    //Fill for best match
-	    if (bestStiPair!=0) { //Finally, we can fill!
-		
+	    if (bestStiPair!=0) 
+	      {
+		cout << "Finally, we can fill!"<<endl;
 		//Fill McTrack info:
 		mEntry->clear();
 		mEntry->setMcTrack(bestStiPair->partnerMcTrack(), 1, true);
@@ -167,50 +169,54 @@ void StiEvaluator::evaluate(const StiTrackContainer* trackStore)
 		//We already know that we're safe here
 		mEntry->setStiTrack(bestStiPair->partnerTrack());
 		mEntry->setAssociation(*bestStiPair);
-
+		cout <<" ---------  we are here ---------"<<endl;
 		const StiKalmanTrack* tkt =
 		    dynamic_cast<const StiKalmanTrack*>(bestStiPair->partnerTrack());
-		if (!tkt) {
+		if (!tkt) 
+		  {
 		    cout <<"StiEvaluator::evaluateForEvent(). ERROR:\t"
 			 <<"cast to kalman track failed."<<endl;
-		}
-		else {
+		  }
+		else 
+		  {
 		    //fillHitEntry(tkt);
-		}
+		  }
 		mTree->Fill();
-	    }
-
+	      }
+	    cout <<" ---------  we are at 2  --------" <<endl;
 	    //Fill for all other matches (split tracks!!!)
-	    for (McMap::iterator it=range.first; it!=range.second; ++it) {
+	    for (McMap::iterator it=range.first; it!=range.second; ++it) 
+	      {
 		StTrackPairInfo* globalPair = (*it).second.first;
 		StiTrackPairInfo& info = (*it).second.second;
-		if (&info!=bestStiPair && info.commonTpcHits()>commonHitCut) { //don't repeat for bestMatch
+		if (&info!=bestStiPair && info.commonTpcHits()>commonHitCut) 
+		  { //don't repeat for bestMatch
 		    //Fill McTrack info:
+		    cout << " <<<<<<<>>>>>>>>"<<endl;
 		    mEntry->clear();
 		    mEntry->setMcTrack(bestStiPair->partnerMcTrack(), 1, false);
 		    if (globalPair!=0) {
-			mEntry->setGlobalTrack(globalPair->partnerTrack());
-			mEntry->setGlobalAssoc(globalPair);
+		      mEntry->setGlobalTrack(globalPair->partnerTrack());
+		      mEntry->setGlobalAssoc(globalPair);
 		    }
 		    
 		    //We already know that we're safe here
 		    mEntry->setStiTrack(info.partnerTrack());
 		    const StiKalmanTrack* tkt =
-			dynamic_cast<const StiKalmanTrack*>(info.partnerTrack());
+		      dynamic_cast<const StiKalmanTrack*>(info.partnerTrack());
 		    if (!tkt) {
-			cout <<"StiEvaluator::evaluateForEvent(). ERROR:\t"
-			     <<"cast to kalman track failed."<<endl;
+		      cout <<"StiEvaluator::evaluateForEvent(). ERROR:\t"
+			   <<"cast to kalman track failed."<<endl;
 		    }
 		    else {
-			//fillHitEntry(tkt);
+		      //fillHitEntry(tkt);
 		    }
 		    mEntry->setAssociation(info);
 		    mTree->Fill();
-		}
+		  }
 		
-	    }
-	}
-	
+	      }
+	  }
     }
     cout <<"StiEvaluator::evaluate() - INFO - Completed"<<endl;
 }

@@ -15,6 +15,7 @@ using namespace std;
 //Sti
 #include "Sti/StiTrackContainer.h"
 #include "Sti/StiKalmanTrack.h"
+#include "Sti/StiToolkit.h"
 
 //StiEvaluator
 #include "StiTrackAssociator.h"
@@ -28,10 +29,13 @@ StiEventAssociator* StiEventAssociator::instance(StAssociationMaker* a)
 }
 
 StiEventAssociator::StiEventAssociator(StAssociationMaker* a)
-    : mAssociationMaker(a), mTrackAssociator(new StiTrackAssociator(a)),
-      mTrackStore(StiTrackContainer::instance()), mMcEvent(0)
+    : mAssociationMaker(a), 
+      mTrackAssociator(new StiTrackAssociator(a)),
+      mTrackStore(0), 
+      mMcEvent(0)
 {
     cout <<"StiEventAssociator::StiEventAssociator()"<<endl;
+    mTrackStore = StiToolkit::instance()->getTrackContainer();
     if (!mAssociationMaker) {
 	cout <<"StiEventAssociator::StiEventAssociatorr(). ERROR:\t"
 	     <<"mAssociationMaker null.  Undefined behavior"<<endl;
@@ -61,7 +65,7 @@ void StiEventAssociator::associate(StMcEvent* mc)
     
     //loopOnFoundTracks
     cout <<"\tLooping on found tracks"<<endl;
-    for (KalmanTrackMap::iterator it=mTrackStore->begin(); it!=mTrackStore->end(); ++it) {
+    for (TrackMap::iterator it=mTrackStore->begin(); it!=mTrackStore->end(); ++it) {
 	StiKalmanTrack* track = dynamic_cast<StiKalmanTrack*>( (*it).second );
 	if (track) {
 	    fillForFoundTrack(track);
