@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcRawHit.cxx,v 2.6 2004/07/15 16:36:24 ullrich Exp $
+ * $Id: StEmcRawHit.cxx,v 2.7 2004/07/20 17:07:49 perev Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcRawHit.cxx,v $
+ * Revision 2.7  2004/07/20 17:07:49  perev
+ * Pavlinov corrs for TBrowser
+ *
  * Revision 2.6  2004/07/15 16:36:24  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -30,10 +33,13 @@
  *
  **************************************************************************/
 #include "StEmcRawHit.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 
-static const char rcsid[] = "$Id: StEmcRawHit.cxx,v 2.6 2004/07/15 16:36:24 ullrich Exp $";
+static const char rcsid[] = "$Id: StEmcRawHit.cxx,v 2.7 2004/07/20 17:07:49 perev Exp $";
 
 ClassImp(StEmcRawHit)
+
+StEmcGeom* StEmcRawHit::mGeom=0;
 
 StEmcRawHit::StEmcRawHit()
 {
@@ -102,6 +108,26 @@ StEmcRawHit::module() const {return bits(13, 7);}   // bits 13-19
 unsigned int
 StEmcRawHit::eta() const {return bits( 4, 9);}  // bits 4-12
 
+unsigned int 
+StEmcRawHit::softId(int det) const
+{
+  mGeom = StEmcGeom::instance(det);
+  if(mGeom==0) return 0;
+
+  int id=0, m=0, e=0, s=0;
+  modEtaSub(m,e,s);
+  mGeom->getId(m, e, s, id);
+  return id;
+}
+
+void StEmcRawHit::modEtaSub(int &m, int &e, int &s) const
+{
+  m = module();
+  e = eta();
+  s = sub();
+  if(detector() == kBarrelSmdEtaStripIdentifier) s = 1; 
+}
+
 int
 StEmcRawHit::sub() const {
   int sub;
@@ -126,7 +152,3 @@ StEmcRawHit::setAdc(const unsigned int adc) {mAdc=adc;}
 
 void
 StEmcRawHit::setEnergy(const float energy) {mEnergy=energy;}
-
-
-
-

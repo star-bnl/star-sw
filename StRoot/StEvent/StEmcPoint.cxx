@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcPoint.cxx,v 2.8 2004/07/15 16:36:24 ullrich Exp $
+ * $Id: StEmcPoint.cxx,v 2.9 2004/07/20 17:07:49 perev Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcPoint.cxx,v $
+ * Revision 2.9  2004/07/20 17:07:49  perev
+ * Pavlinov corrs for TBrowser
+ *
  * Revision 2.8  2004/07/15 16:36:24  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -39,7 +42,7 @@
 #include "StEmcPoint.h"
 #include <Stiostream.h>
 
-static const char rcsid[] = "$Id: StEmcPoint.cxx,v 2.8 2004/07/15 16:36:24 ullrich Exp $";
+static const char rcsid[] = "$Id: StEmcPoint.cxx,v 2.9 2004/07/20 17:07:49 perev Exp $";
 
 ClassImp(StEmcPoint)
 
@@ -144,6 +147,7 @@ StEmcPoint::cluster(const StDetectorId id) const{
   
 void
 StEmcPoint::addCluster(const StDetectorId id, const StEmcCluster* c){
+  if(!c) return; // 29-oct-2003 
   int i = getDetId(id);
   if(i>=0) mCluster[i].push_back(c);
 }
@@ -173,6 +177,20 @@ const StPtrVecTrack&
 StEmcPoint::track() const {return mTracks;}
 
 void
-StEmcPoint::addTrack(StTrack* track) {mTracks.push_back(track);}
+StEmcPoint::addTrack(StTrack* track) 
+{
+  if(track) mTracks.push_back(track); // 29-oct-03 - eliminate zero pointer
+}
+
+// 11-nov-03 by PAI
+void StEmcPoint::print()
+{ // for debugging 
+  cout << "Point energy " << mEnergy << endl;
+  cout << "size         " << mSize   << endl;
+  cout << "#tracks " << mTracks.size() << endl;
+  for(int det=0; det<4; det++){
+    cout << " det " << det << " #clusters " << mCluster[det].size()<<endl;
+  }
+}
 
 

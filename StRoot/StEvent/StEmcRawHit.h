@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcRawHit.h,v 2.7 2004/07/15 16:36:24 ullrich Exp $
+ * $Id: StEmcRawHit.h,v 2.8 2004/07/20 17:07:49 perev Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEmcRawHit.h,v $
+ * Revision 2.8  2004/07/20 17:07:49  perev
+ * Pavlinov corrs for TBrowser
+ *
  * Revision 2.7  2004/07/15 16:36:24  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -43,6 +46,8 @@
 #include "StObject.h"
 #include "StEnumerations.h"
 
+class StEmcGeom;
+
 class StEmcRawHit : public StObject {
 public:
     StEmcRawHit();
@@ -53,6 +58,9 @@ public:
     ~StEmcRawHit();
     
     StDetectorId    detector() const;
+    void            modEtaSub(int &m, int &e, int &s) const;
+    unsigned int    softId(int det) const; // as in StEmcGeom;
+
     unsigned int    module() const;
     unsigned int    eta() const;
     int             sub() const;
@@ -73,8 +81,10 @@ protected:
     UInt_t    mAdc;
     Float_t   mEnergy;
     
+    static StEmcGeom* mGeom;
+
     ClassDef(StEmcRawHit,1)
-};
+}; 
 #endif
 
 

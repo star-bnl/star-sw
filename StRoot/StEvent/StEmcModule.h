@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEmcModule.h,v 2.3 2002/02/22 22:56:47 jeromel Exp $
+ * $Id: StEmcModule.h,v 2.4 2004/07/20 17:07:49 perev Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StEmcModule.h,v $
+ * Revision 2.4  2004/07/20 17:07:49  perev
+ * Pavlinov corrs for TBrowser
+ *
  * Revision 2.3  2002/02/22 22:56:47  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -38,10 +41,16 @@ public:
     // StEmcModule(const StEmcModule&);            use default
     // StEmcModule& operator=(const StEmcModule&); use default
     
-    unsigned int numberOfHits() const;
+  unsigned int numberOfHits() const;
+  void    printNumberOfHits() const;        // *MENU*
+  double  getEnergy(const int pri=0) const; // *MENU*
 
     StSPtrVecEmcRawHit&       hits();
     const StSPtrVecEmcRawHit& hits() const;
+
+  // 15-sep-2003 by PAI
+  //    virtual void  Browse(TBrowser *b);
+    virtual bool  IsFolder() const;
     
 private:
     StSPtrVecEmcRawHit mHits;
