@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.26 2000/02/02 16:35:22 kathy Exp $
+// $Id: StEventQAMaker.cxx,v 1.27 2000/02/02 17:01:49 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.27  2000/02/02 17:01:49  lansdell
+// changed range on phi; fixed psi vs phi histo
+//
 // Revision 1.26  2000/02/02 16:35:22  kathy
 // fixing some histograms - booking params
 //
@@ -222,7 +225,7 @@ void StEventQAMaker::MakeHistGlob() {
 	m_glb_chargeT->Fill(globtrk->geometry()->charge());
 
 	m_glb_r0T->Fill(globtrk->geometry()->origin().perp());
-	m_glb_phi0T->Fill(globtrk->geometry()->origin().phi()/degree);
+	m_glb_phi0T->Fill(180+globtrk->geometry()->origin().phi()/degree);
 	m_glb_z0T->Fill(globtrk->geometry()->origin().z());
 	m_glb_curvT->Fill(logCurvature);
 
@@ -268,8 +271,8 @@ void StEventQAMaker::MakeHistGlob() {
 	m_nfptonpt_etaT->Fill(eta,nfitntot);
 	// had to make psi_deg and phi_deg b/c ROOT won't compile otherwise
 	// for some strange reason... -CL
-	Float_t psi_deg = globtrk->geometry()->origin().phi()/degree;
-	Float_t phi_deg = globtrk->geometry()->psi()/degree;
+	Float_t phi_deg = 180+globtrk->geometry()->origin().phi()/degree;
+	Float_t psi_deg = globtrk->geometry()->psi()/degree;
 	m_psi_phiT->Fill(phi_deg,psi_deg);
       }
 
@@ -288,7 +291,7 @@ void StEventQAMaker::MakeHistGlob() {
 	m_glb_chargeTS->Fill(globtrk->geometry()->charge());
 
 	m_glb_r0TS->Fill(globtrk->geometry()->origin().perp());
-	m_glb_phi0TS->Fill(globtrk->geometry()->origin().phi()/degree);
+	m_glb_phi0TS->Fill(180+globtrk->geometry()->origin().phi()/degree);
 	m_glb_z0TS->Fill(globtrk->geometry()->origin().z());
 	m_glb_curvTS->Fill(logCurvature);
 
@@ -332,8 +335,8 @@ void StEventQAMaker::MakeHistGlob() {
 	m_nfptonpt_etaTS->Fill(eta,nfitntot);
 	// had to make psi_deg and phi_deg b/c ROOT won't compile otherwise
 	// for some strange reason... -CL
-	Float_t psi_deg = globtrk->geometry()->origin().phi()/degree;
-	Float_t phi_deg = globtrk->geometry()->psi()/degree;
+	Float_t phi_deg = 180+globtrk->geometry()->origin().phi()/degree;
+	Float_t psi_deg = globtrk->geometry()->psi()/degree;
 	m_psi_phiTS->Fill(phi_deg,psi_deg);
       }
 
