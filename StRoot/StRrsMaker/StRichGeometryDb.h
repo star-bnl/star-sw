@@ -1,5 +1,5 @@
 /*****************************************************************
- * $Id: StRichGeometryDb.h,v 2.0 2000/08/09 16:17:01 gans Exp $
+ * $Id: StRichGeometryDb.h,v 2.1 2001/08/22 16:42:59 lasiuk Exp $
  *
  * Description:
  *  Both have common_fill,star_fill and my_fill private
@@ -15,6 +15,9 @@
  *
  *****************************************************************
  * $Log: StRichGeometryDb.h,v $
+ * Revision 2.1  2001/08/22 16:42:59  lasiuk
+ * data base functionality to check library environment variable
+ *
  * Revision 2.0  2000/08/09 16:17:01  gans
  * Readded Files That were not added in last CVS. Cosmetic Changes, naming convention
  * for StRichDrawableT(foo)
@@ -183,7 +186,10 @@ protected:
     
 private:
     //void star_fill();           // fill from STAR DB
-    void my_fill();             // fill with my own stuff
+    void my_fill();               // fill with private DB
+    void fill2000();              // 2000 data november production
+    void fill2001he();            // 2000 data spring/summer production
+    void fill2001();              // 2001 data
     
     static StRichGeometryDb* p2Db;   // handle to only instance
 };
