@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.h,v 2.13 2004/12/01 14:02:09 pruneau Exp $
+ * $Id: StiTrackingPlots.h,v 2.14 2004/12/11 22:21:02 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.h,v $
+ * Revision 2.14  2004/12/11 22:21:02  pruneau
+ * new histos
+ *
  * Revision 2.13  2004/12/01 14:02:09  pruneau
  * svt
  *
@@ -99,8 +102,13 @@ class StiTrackingPlots : public HistogramGroup
   TH1D * _dy[NPLOTS][51];
   TH1D * _dz[NPLOTS][51];
   TH2D * _dyVsTanCA[NPLOTS][51][12];
+  TH2D * _dyVsY[NPLOTS][51][12];
+  TH2D * _dyVsZ[NPLOTS][51][12];
   TH2D * _dzVsTanL[NPLOTS][51][12];
-
+  TH2D * _dzVsY[NPLOTS][51][12];
+  TH2D * _dzVsZ[NPLOTS][51][12];
+  TH2D * _svtNhitVsNode[NPLOTS];
+  TH2D * _svtNfitVsNode[NPLOTS];
 
   //track kinematics & helix parameters
   //make all plots 3D - value,Phi,Eta - then cut 
