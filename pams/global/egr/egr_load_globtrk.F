@@ -211,8 +211,8 @@ c----------------------------------------------------------------------
       SUBROUTINE trk_length(seed,tanl,invpt,bf,length)
       IMPLICIT NONE
 C
-C#include "phys_constants.inc"
-#include "math_constants.inc"
+#include "phys_constants.inc"
+C#include "math_constants.inc"
 
 C
       REAL    seed,tanl,invpt,bf,length
