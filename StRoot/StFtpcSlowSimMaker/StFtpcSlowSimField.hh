@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimField.hh,v 1.1 2000/11/23 10:16:43 hummler Exp $
+// $Id: StFtpcSlowSimField.hh,v 1.2 2000/11/27 14:08:04 hummler Exp $
 // $Log: StFtpcSlowSimField.hh,v $
+// Revision 1.2  2000/11/27 14:08:04  hummler
+// inplement tzero and lorentz angle correction factor
+//
 // Revision 1.1  2000/11/23 10:16:43  hummler
 // New FTPC slow simulator in pure maker form
 //
@@ -48,7 +51,7 @@ public:
       iLower+=padrowIndex;
       iUpper+=padrowIndex;
       *inverseVelocity = EFieldStepInverted*((inverseDriftVelocity[iUpper])*diffDown + (inverseDriftVelocity[iLower])*diffUp);
-      *angle = EFieldStepInvConverted*((preciseLorentzAngle[iUpper])*diffDown + (preciseLorentzAngle[iLower])*diffUp);
+      *angle = EFieldStepInvConverted*((preciseLorentzAngle[iUpper])*diffDown + (preciseLorentzAngle[iLower])*diffUp)*angleFactor;
     }    
 
   float GetVelAtReadout() const { return  finalVelocity; }
@@ -85,6 +88,7 @@ private:
   float *preciseEField;
   float *inverseDriftVelocity;
   float *preciseLorentzAngle;
+  float angleFactor;
   
   struct grid_data {
     float rhit;    // hit radius in cm
