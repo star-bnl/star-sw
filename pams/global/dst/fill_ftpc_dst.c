@@ -73,7 +73,7 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
   int     ftpcy10, ftpcy11;
   int     ihit;
   
-  float   xsq, ysq;
+  float   xsq, ysq, zsq;
   /* ===========================  Begin Executable Code  =============== */
   
 
@@ -159,23 +159,22 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
 
 /*  momentum angle at start */
     dst_track[dst_track_h->nok].psi = 
-        atan2(fptrack[itrk].p[2],fptrack[itrk].p[1]);
+        atan2(fptrack[itrk].p[1],fptrack[itrk].p[0]);
     if (dst_track[dst_track_h->nok].psi < 0.0) {
        dst_track[dst_track_h->nok].psi = 
-                    dst_track[dst_track_h->nok].psi*C_2_PI;
+                    dst_track[dst_track_h->nok].psi + C_2PI;
     }
     dst_track[dst_track_h->nok].psi = 
         dst_track[dst_track_h->nok].psi * C_DEG_PER_RAD; 
 
-/*  tan(dip) = pz/pt at start  */
-    dst_track[dst_track_h->nok].tanl  = fptrack[itrk].p[2]/
-                   sqrt(fptrack[itrk].p[1]*fptrack[itrk].p[1]
-                        + fptrack[itrk].p[3]*fptrack[itrk].p[3]);
-
 /*  1/pt at start */
     dst_track[dst_track_h->nok].invpt =  
-      1./sqrt(fptrack[itrk].p[1]*fptrack[itrk].p[1]
-                +fptrack[itrk].p[2]*fptrack[itrk].p[2]);
+      1./sqrt(fptrack[itrk].p[0]*fptrack[itrk].p[0]
+                +fptrack[itrk].p[1]*fptrack[itrk].p[1]);
+
+/*  tan(dip) = pz/pt at start  */
+    dst_track[dst_track_h->nok].tanl  = fptrack[itrk].p[2]  
+                 *  dst_track[dst_track_h->nok].invpt;
 
 /*  curvature */
     dst_track[dst_track_h->nok].curvature =  fptrack[itrk].curvature;
@@ -221,7 +220,10 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
           (dst_track[dst_track_h->nok].x_last[0] - dst_track[dst_track_h->nok].x_first[0]);
     ysq = (dst_track[dst_track_h->nok].x_last[1] - dst_track[dst_track_h->nok].x_first[1]) *
           (dst_track[dst_track_h->nok].x_last[1] - dst_track[dst_track_h->nok].x_first[1]);
-    dst_track[dst_track_h->nok].length  = sqrt(xsq + ysq);
+    zsq = (dst_track[dst_track_h->nok].x_last[2] - dst_track[dst_track_h->nok].x_first[2]) *
+          (dst_track[dst_track_h->nok].x_last[2] - dst_track[dst_track_h->nok].x_first[2]);
+    dst_track[dst_track_h->nok].length  = sqrt(xsq + ysq + zsq);
+
 
     dst_track[dst_track_h->nok].impact  = 0;
 
