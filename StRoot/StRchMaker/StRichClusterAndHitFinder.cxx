@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichClusterAndHitFinder.cxx,v 1.5 2000/05/31 19:26:15 dunlop Exp $
+ * $Id: StRichClusterAndHitFinder.cxx,v 1.6 2000/06/01 21:11:16 dunlop Exp $
  *
  * Author: bl
  ***************************************************************************
@@ -11,9 +11,12 @@
  ***************************************************************************
  *
  * $Log: StRichClusterAndHitFinder.cxx,v $
- * Revision 1.5  2000/05/31 19:26:15  dunlop
- * Filling non-ctor entries in persistent hits + support for this
+ * Revision 1.6  2000/06/01 21:11:16  dunlop
+ * Filled the id associated to hit
  *
+ *
+ * Revision 2.4  2000/11/01 16:51:10  lasiuk
+ * print the number of pads in dumpHitInfo()
  *
  * Revision 2.2  2000/09/29 19:04:40  lasiuk
  * hit calculation factorized to allow
@@ -34,9 +37,14 @@
  * Revision 2.0  2000/08/09 16:22:11  gans
  * Cosmetic Changes. Naming convention for TDrawable objects
  *
-
+ * Revision 1.6  2000/06/01 21:11:16  dunlop
  * Filled the id associated to hit
  *
+ * Revision 1.5  2000/05/31 19:26:15  dunlop
+ * Filling non-ctor entries in persistent hits + support for this
+ *
+ * Revision 1.4  2000/05/23 16:55:40  lasiuk
+ * Incorporate new MC info
  * add clone() where necessary
  * Revision 1.3  2000/05/18 11:42:25  lasiuk
  * mods for pre StEvent writing
@@ -498,18 +506,78 @@ void StRichClusterAndHitFinder::dumpHitInformation(ostream& os) const
 	int jj;
 	if(makeHitFromCluster) {
 	    mAnMCHit = 0;
+		mTheHits.push_back(new StRichSimpleHit);
+	    // Fill the maps.  Need to SUM the charge for a given hitid
+		this->centerOfGravity(aVectorOfPixels, &hitInfo);
+	    typedef const int hitIDToChargeMapKey;
+	    typedef float hitIDToChargeMapValue;
+	    typedef const int hitIDToRichIDMapKey;
+	    typedef const id_type hitIDToRichIDMapValue;
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
+	    typedef map<hitIDToChargeMapKey,hitIDToChargeMapValue> 
+		hitIDToChargeMapType;
+	    typedef map<hitIDToRichIDMapKey,hitIDToRichIDMapValue>
+		hitIDToRichIDMapType;
+#else
+	    typedef map<hitIDToChargeMapKey,hitIDToChargeMapValue,
+		less<HitIDToChargeMapKey>, 
+		allocator< OS_PAIR(hitIDToChargeMapKey,hitIDToChargeMapValue) >
+		> hitIDToChargeMapType;
+	    typedef map<hitIDToRichIDMapKey,hitIDToRichIDMapValue,
+		less<HitIDToRichIDMapKey>, 
+		allocator< OS_PAIR(hitIDToRichIDMapKey,hitIDToRichIDMapValue) >
+		> hitIDToRichIDMapType;
+#endif
+	    typedef hitIDToChargeMapType::iterator hitIDToChargeMapIter;
+	    typedef hitIDToChargeMapType::const_iterator hitIDToChargeMapConstIter;
+	    typedef hitIDToChargeMapType::value_type hitIDToChargeMapValType;
+	    typedef hitIDToRichIDMapType::iterator hitIDToRichIDMapIter;
+	    typedef hitIDToRichIDMapType::iterator hitIDToRichIDMapConstIter;
+
+	    typedef hitIDToRichIDMapType::value_type hitIDToRichIDMapValType;
+	    typedef pair<hitIDToChargeMapIter,bool> hitIDToChargeMapRetType;
+	    typedef pair<hitIDToRichIDMapIter,bool> hitIDToRichIDMapRetType;
+	    
+	    hitIDToChargeMapType hitIDToCharge;
+	    hitIDToRichIDMapType hitIDToRichID;
+		    this->constructTheMatrix(theLocalMaxima[kk], &aVectorOfPixels);
 	    for(jj=firstPadOfCluster; jj<lastPadOfCluster; jj++) {
-		if(dynamic_cast<StRichSingleMCPixel*>(mThePixels[jj])) {
+		StRichSingleMCPixel* p = dynamic_cast<StRichSingleMCPixel*>(mThePixels[jj]);
+		if (p) {
 		    mAnMCHit = 1;
-		    //
-		    // Here's where it gets interesting
-		    // We can store ALL the mcInfo's from the
-		    // pixels and evaluate them to assign the
-		    // MC information to the hit, or wait until
-		    // later and loop over all the pixels in
-		    // the clusters...This will have to be studied.
-		    //
-		}
+		    { // scope for sun
+			for (const_id_iter iter=p->MCInfo().begin(); iter!=p->MCInfo().end(); ++iter) {
+			    int myHitID;
+			    if (iter->mSignalType == eFeedback) {
+				myHitID = -(iter->mHitID);
+			    }
+			    else {
+				myHitID = iter->mHitID;
+			    }
+			    hitIDToCharge[myHitID] += iter->mCharge;
+			    
+			    hitIDToRichIDMapRetType ret = 
+				hitIDToRichID.insert(
+				    hitIDToRichIDMapValType(myHitID,*iter)
+				    );
+			    if (
+				(!ret.second) 
+				&&
+				(!(*iter == hitIDToRichID[myHitID]))
+				) 
+			    {
+				cout << "StRichClusterAndHitFinder::makeSimpleHitsFromClusters(): Warning:  HitID " << myHitID << " not unique: " << endl;
+				cout << "\t\t\t G_ID: " << iter->mG_ID 
+				     << " blocked by " << hitIDToRichID[myHitID].mG_ID << endl;
+				cout << "\t\t\t HitID: " << iter->mHitID 
+				     << " blocked by " << hitIDToRichID[myHitID].mHitID << endl;
+				cout << "\t\t\t SignalType: " << static_cast<int>(iter->mSignalType) 
+				     << " blocked by " << static_cast<int>(hitIDToRichID[myHitID].mSignalType) << endl;
+			    } // if
+			} // iter over IDList
+		    } // scope
+		} // is it an mc pixel?
+	    // use only that row
 	    //
 		ivb << '\t' << *mThePixels[jj] << endl;
 		amp = mThePixels[jj]->charge();
@@ -535,12 +603,53 @@ void StRichClusterAndHitFinder::dumpHitInformation(ostream& os) const
 		// for evaluation and assignment of the
 		// MC information to the hit?
 		// Find the biggest contribution to the pixel and add it
-		//mMCInfo.push_back(dynamic_cast<StRichSingleMCPixel*>(mThePixels[jj].);
-		//
-		// Just temporary
-		//
-		dynamic_cast<StRichSimpleMCHit*>(mTheHits.back())->
-		    setMCInfo(StRichID(-1,-1,-1,-1,eUnknown));
+// 		//
+		// unroll the map.  ordered by GREATEST charge.
+		typedef const float chargeToHitIDMapKey;
+		typedef const int chargeToHitIDMapValue;
+		
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
+		typedef 
+		    multimap < chargeToHitIDMapKey,
+		    chargeToHitIDMapValue,
+		    greater<chargeToHitIDMapKey> >
+		    chargeToHitIDMapType;
+#else
+		typedef 
+		    multimap < chargeToHitIDMapKey,
+		    chargeToHitIDMapValue,
+		    greater<chargeToHitIDMapKey>,
+		    allocator< OS_PAIR(chargeToHitIDMapKey,
+				       chargeToHitIDMapValue) > >
+		    chargeToHitIDMapType;
+#endif
+		typedef chargeToHitIDMapType::iterator chargeToHitIDMapIter;
+		typedef chargeToHitIDMapType::value_type 
+		    chargeToHitIDMapValType;
+		
+		chargeToHitIDMapType chargeToHitID;
+		
+		{ // Sun scope
+		    for (hitIDToChargeMapConstIter iter
+			     =hitIDToCharge.begin(); 
+			 iter!=hitIDToCharge.end();
+			 ++iter) {
+			chargeToHitID.insert(
+			    chargeToHitIDMapValType(iter->second,iter->first));
+		    }
+		}
+		
+		// grab the first of the greatest.  Don't know what else to do (equal contributions)
+		chargeToHitIDMapIter iter = chargeToHitID.begin();
+		float topCharge=iter->first;
+		int topHitID=iter->second;
+		id_type theID = hitIDToRichID[topHitID];
+		// Overwrite its charge with the total charge
+		theID.mCharge = topCharge;
+		
+		(dynamic_cast<StRichSimpleMCHit*>(mTheHits.back()))->setMCInfo(theID);
+		
+// 		// Find the biggest contribution to the pixel and add it
 	    }
 	    else {
 		mTheHits.push_back(new StRichSimpleHit);
