@@ -1,5 +1,5 @@
 **************************************************
-MACRO run_all no_events=1 file=/star/mds/users/yepes/gst/hijing/au_200_ce svt_simul=srs svt_tracker=sgr  tpc_simul=tfs tpc_tracker=tpt tpc_svt_match=svm event_refit=egr ev0_finder=ev0
+MACRO run_all no_events=1 file=/afs/rhic/star/data/samples/event_0000050.xdf svt_simul=srs svt_tracker=sgr  tpc_simul=tfs tpc_tracker=tpt tpc_svt_match=svm event_refit=egr ev0_finder=ev0
  **************************************************
  * MACRO RUN_ALL
  *
@@ -79,7 +79,7 @@ Message 'Doing' [no_events] 'events'
  ***************************************** 
  * open input file and read header
  *****************************************
- exec [UTIL_HOME]/input_g2t_file#init [file]/event_0000001.xdf
+ exec [UTIL_HOME]/input_g2t_file#init [file]
 
  *****************************************
  * one time package initialization phase for geometry

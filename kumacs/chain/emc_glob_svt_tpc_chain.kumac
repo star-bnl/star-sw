@@ -1,6 +1,6 @@
 **************************************************
 MACRO run_all no_events=1 _
-file=/star/mds/users/yepes/gst/hijing/au_200_ce/event_0000001.xdf _
+file=/afs/rhic/star/data/samples/event_0000050.xdf _
 svt_simul=srs svt_tracker=sgr _
 tpc_simul=tfs tpc_tracker=tpt tpc_svt_match=svm _
 event_refit=egr ev0_finder=ev0
@@ -35,8 +35,7 @@ event_refit=egr ev0_finder=ev0
  SVT_HOME = [PAMS]/svt/kumac
  TPC_HOME = [PAMS]/tpc/kumac
  GLOBAL_HOME = [PAMS]/global/kumac
-* EMC_HOME = [PAMS]/emc/kumac
- EMC_HOME = [LOCAL]/pams/emc/kumac
+ EMC_HOME = [PAMS]/emc/kumac
  
  SVG_HOME = [SVT_HOME]
  SSS_HOME = [SVT_HOME]
@@ -53,11 +52,9 @@ event_refit=egr ev0_finder=ev0
  EV0_HOME = [GLOBAL_HOME]
  EMS_HOME = [EMC_HOME]
  JET_HOME = [EMC_HOME]
-
- make util
- make magnet
- make tpc
+ 
  make svt
+ make tpc
  make global
  make emc
 
@@ -80,7 +77,6 @@ v/create vsvm
 v/create vegr
 v/create vev0
 v/create vems
-v/create vele
 v/create vjet
 
  *****************************************
@@ -109,7 +105,6 @@ Message 'Doing' [no_events] 'events'
   exec [SSF_HOME]/init_ssf
  endif
  exec  [EMS_HOME]/init_ems
-* exec  [EMS_HOME]/init_elect
  exec  [JET_HOME]/init_jet
 
  *****************************************
@@ -119,7 +114,7 @@ Message 'Doing' [no_events] 'events'
  exec [TPG_HOME]/tpg_init
 
 * dio/newf output /star/mds/users/ev0out_tte.dsl w
- dio/newf output /star/mds/users/akio/test.dsl w
+ dio/newf output /star/u2a/didenko/mtest/test.dsl w
 
  cd /dui/geant
  stream/getevent G2Tfile
@@ -221,10 +216,6 @@ exec [EV0_HOME]/run_ev0#eval  [ievent] [EV0_HOME]
  exec [EMS_HOME]/run_ems_interface
  sigma vems = vems + $cptime
  
-* Electron Finder
-* exec [JET_HOME]/run_elect
-* sigma vele = vele + $cptime
-
 * Jet Finder
  exec [JET_HOME]/run_jet_egrid
  exec [JET_HOME]/run_jet_erj
@@ -240,7 +231,6 @@ v/print vsvm
 v/print vegr
 v/print vev0
 v/print vems
-v/print vele
 v/print vjet
  ls /dui/data/global
 
