@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2003.cxx,v 2.9 2004/08/03 17:22:16 ullrich Exp $
+ * $Id: StTriggerData2003.cxx,v 2.10 2004/10/20 18:56:22 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2003.cxx,v $
+ * Revision 2.10  2004/10/20 18:56:22  ullrich
+ * Add method getRawSize().
+ *
  * Revision 2.9  2004/08/03 17:22:16  ullrich
  * Major update by Akio and Marco.
  *
@@ -768,4 +771,13 @@ char* StTriggerData2003::getTriggerStructure()
 TrgDataType2003* StTriggerData2003::getTriggerStructure2003()
 {
     return mData;
+}
+
+int StTriggerData2003::getRawSize() const 
+{
+    int npre = numberOfPreXing();
+    int npost = numberOfPostXing();
+    int rawSize=sizeof(EvtDescData2003)+sizeof(TrgSumData2003)
+      + sizeof(RawTrgDet2003)*(npre+npost+1);
+    return  rawSize;
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData2004.h,v 2.5 2004/08/03 17:22:16 ullrich Exp $
+ * $Id: StTriggerData2004.h,v 2.6 2004/10/20 18:56:22 ullrich Exp $
  *
  * Author: Akio Ogawa, Feb 2004
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData2004.h,v $
+ * Revision 2.6  2004/10/20 18:56:22  ullrich
+ * Add method getRawSize().
+ *
  * Revision 2.5  2004/08/03 17:22:16  ullrich
  * Major update by Akio and Marco.
  *
@@ -129,6 +132,7 @@ public:
     // experts only
     char* getTriggerStructure();
     TrgDataType2004* getTriggerStructure2004();  
+    int getRawSize() const;
     
 protected:
     TrgDataType2004 *mData;
