@@ -568,6 +568,14 @@ char *ColName(int whichTable,int icol) {
   if(!dsColumnName(&retValue,gTablePtr[whichTable],(size_t)icol)) DERR;
   return retValue;
 }
+void ErrorCheck(FILE *ff) {
+  FF"// I am neglecting the return value of GetVal().\n");
+  FF"// This is not so bad here, since this code is automatically\n");
+  FF"// generated.  In your code, you should check that GetVal returns\n");
+  FF"// true.  It returns false in case of \n");
+  FF"// error (eg, row number out of range).\n");
+  
+}
 void PrintStuffForColumns(int itbl,FILE *ff) {
   int idim,dim,ncol,icol; char *cn; /* cn = col name */
   ncol=NumberColumns(itbl);
@@ -575,14 +583,15 @@ void PrintStuffForColumns(int itbl,FILE *ff) {
     dim=Dimensions(itbl,icol);
     cn=ColName(itbl,icol);
     if(dim==1) {                                   /* scalar column */
-      FF"    newStruct[row].%s=\n",cn);
-      FF"         event->GetVal(\"%s\",\"%s\",row);\n",gTableName[itbl],cn);
+      ErrorCheck(ff);
+      FF"    event->GetVal(&(newStruct[row].%s),\"%s\",\"%s\",row);\n",
+                 cn,gTableName[itbl],cn);
     } else if(dim>1) {                             /* vector column */
       if(dim>10) dim=10;
+      ErrorCheck(ff);
       for(idim=0;idim<dim;idim++) {
-        FF"    newStruct[row].%s[%d]=\n",cn,idim);
-        FF"         event->GetVal(\"%s\",\"%s\",row,%d);\n",
-                gTableName[itbl],cn,idim);
+        FF"   event->GetVal(&(newStruct[row].%s[%d]),\"%s\",\"%s\",row,%d);\n",
+                 cn,idim,gTableName[itbl],cn,idim);
       }
     } else ERR;
   }
@@ -682,56 +691,54 @@ void WriteEventC() {
   FF"    default: *tableName=0; break;\n");
   FF"  }\n");
   FF"}\n");
-  FF"Float_t Event::GetVal(char *table,char *col,Int_t irow) {\n");
+  FF"Int_t Event::GetVal(Float_t *val,char *table,char *col,Int_t irow) {\n");
   FF"  // Returns non-zero for error.\n");
-  FF"  Float_t val;\n");
   for(i=0;i<gNtable;i++) {
     cc=Slash2X(gTableName[i]);
     FF"  if(!strcmp(table,\"%s\")) {\n",gTableName[i]);
-    FF"    if(irow>=nRows_%s) return -1234.;  ",cc);
+    FF"    if(irow>=nRows_%s) return 0;  ",cc);
     FF"// irow out of range\n");
-    FF"    if(irow<0) return -1235.;  // irow out of range\n");
+    FF"    if(irow<0) return 0;  // irow out of range\n");
     FF"    %s *aRow = (%s*)",gTableType[i],gTableType[i]);
     FF"rows_%s->UncheckedAt(irow);\n",cc);
-    FF"    if(!aRow) return -1236.; // bug in program, or in ROOT\n");
+    FF"    if(!aRow) return 0; // bug in program, or in ROOT\n");
     ncol=NumberColumns(i);
     for(icol=0;icol<ncol;icol++) {
       if(Dimensions(i,icol)==1) { /* vectors are handled ~30 lines below */
         cn=ColName(i,icol);
-        FF"    if(!strcmp(col,\"%s\")) { val=aRow->Get_%s(); ",cn,cn);
-        FF"return val; }\n");
+        FF"    if(!strcmp(col,\"%s\")) { *val=aRow->Get_%s(); ",cn,cn);
+        FF"      return 7; }\n");
       }
     }
-    FF"    return -1237.; // non-existent column\n");
+    FF"    return 0; // non-existent column\n");
     FF"  }\n");
   }
-  FF"  return -1238.; // non-existent table\n");
+  FF"  return 0; // non-existent table\n");
   FF"}\n");
-  FF"Float_t Event::GetVal(char *table,");
+  FF"Int_t Event::GetVal(Float_t *val,char *table,");
   FF"char *col,Int_t irow,Int_t vecIndex) {\n");
   FF"  // Returns non-zero for error.\n");
-  FF"  Float_t val;\n");
   for(i=0;i<gNtable;i++) {
     cc=Slash2X(gTableName[i]);
     FF"  if(!strcmp(table,\"%s\")) {\n",gTableName[i]);
-    FF"    if(irow>=nRows_%s) return -1234.;  ",cc);
+    FF"    if(irow>=nRows_%s) return 0;  ",cc);
     FF"// irow out of range\n");
-    FF"    if(irow<0) return -1235.;  // irow out of range\n");
+    FF"    if(irow<0) return 0;  // irow out of range\n");
     FF"    %s *aRow = (%s*)",gTableType[i],gTableType[i]);
     FF"rows_%s->UncheckedAt(irow);\n",cc);
-    FF"    if(!aRow) return -1236.; // bug in program, or in ROOT\n");
+    FF"    if(!aRow) return 0; // bug in program, or in ROOT\n");
     ncol=NumberColumns(i);
     for(icol=0;icol<ncol;icol++) {
       if(Dimensions(i,icol)>1) { /* scalars handled ~30 lines above */
         cn=ColName(i,icol);
         FF"    if(!strcmp(col,\"%s\")) { ",cn);
-        FF"val=aRow->Get_%s(vecIndex); return val; }\n",cn);
+        FF"*val=aRow->Get_%s(vecIndex); return 7; }\n",cn);
       }
     }
-    FF"    return -1237.; // non-existent column\n");
+    FF"    return 0; // non-existent column\n");
     FF"  }\n");
   }
-  FF"  return -1238.; // non-existent table\n");
+  FF"  return 0; // non-existent table\n");
   FF"}\n");
   FF"Int_t Event::Nrow(char *table) {\n");
   for(i=0;i<gNtable;i++) {
@@ -751,7 +758,7 @@ void WriteEventC() {
     FF"    new(rows%d[nRows_%s++]) %s(row,tableName);\n",i,cc,gTableType[i]);
     FF"  }\n");
   }
-  FF"}\n");
+  FF"}\n"); 
   FF"void Event::Clear() {   // Does this get called?\n");
   for(i=0;i<gNtable;i++) {
     cc=Slash2X(gTableName[i]);
@@ -857,8 +864,8 @@ void WriteEventH() {
   FF"   void    AddRow(int row,char *table);\n");
   FF"   void    GetCol(char *table,char **col,char **dtype,int icol);\n");
   FF"   void    GetTableName(char **tableName,int whichTable);\n");
-  FF"   Float_t   GetVal(char *table,char *col,Int_t irow,Int_t vecIndex);\n");
-  FF"   Float_t   GetVal(char *table,char *col,Int_t irow);\n");
+  FF"Int_t GetVal(Float_t *val,char *tbl,char *col,Int_t irow,Int_t ivec);\n");
+  FF"Int_t GetVal(Float_t *val,char *tbl,char *col,Int_t irow);\n");
   FF"   Int_t   Nrow(char *table);\n");
   FF"   ClassDef(Event,1)  //Event structure\n");
   FF"};\n");
@@ -1016,12 +1023,14 @@ void WriteTestGetVal(int macroNumber) {
       ndim=Dimensions(itbl,icol);
       cn=ColName(itbl,icol);
       if(ndim==1) {
-        FF"        val=event->GetVal(\"%s\",\"%s\",row);\n",tn,cn);
+        ErrorCheck(ff);
+        FF"        event->GetVal(&val,\"%s\",\"%s\",row);\n",tn,cn);
         FF"        printf(\"%s[%%d].%s = %%g\\n\",row,val);\n",tn,cn);
       } else {
+        ErrorCheck(ff);
         for(idim=0;idim<ndim;idim++) {
           if(idim>5) { FF"        // vector elementation truncated\n");break;}
-          FF"        val=event->GetVal(\"%s\",\"%s\",row,%d);\n",tn,cn,idim);
+          FF"        event->GetVal(&val,\"%s\",\"%s\",row,%d);\n",tn,cn,idim);
           FF"        printf(\"%s[%%d].%s[%d] = %%g\\n\",row,val);\n",
                 tn,cn,idim);
         }
@@ -1193,9 +1202,10 @@ void WriteHist() {
   FF"  c1->GetFrame()->SetBorderSize(6);\n");
   FF"  c1->GetFrame()->SetBorderMode(-1);\n");
   FF"  xmax=-1e20; xmin=1e20;\n");
+  ErrorCheck(ff);
   FF"  for(ii=0;ii<nrow;ii++) {\n");
-  FF"    if(isScalar) val=event->GetVal(tableName,colName,ii);\n");
-  FF"    else         val=event->GetVal(tableName,colName,ii,vecIdx);\n");
+  FF"    if(isScalar) event->GetVal(&val,tableName,colName,ii);\n");
+  FF"    else         event->GetVal(&val,tableName,colName,ii,vecIdx);\n");
   FF"    if(xmax<val) xmax=val; if(xmin>val) xmin=val;\n");
   FF"  }\n");
   FF"  printf(\"The minimum value is %%g, ");
@@ -1207,9 +1217,10 @@ void WriteHist() {
   FF"  gRandom->SetSeed();\n");
   FF"  Float_t px;\n");
   FF"  const Int_t kUPDATE = 1000;\n");
+  ErrorCheck(ff);
   FF"  for ( Int_t i=0; i<nrow; i++) {\n");
-  FF"     if(isScalar) px=event->GetVal(tableName,colName,i);\n");
-  FF"     else         px=event->GetVal(tableName,colName,i,vecIdx);\n");
+  FF"     if(isScalar) event->GetVal(&px,tableName,colName,i);\n");
+  FF"     else         event->GetVal(&px,tableName,colName,i,vecIdx);\n");
   FF"     // printf(\"Adding %%g to the histogram.\\n\",px);\n");
   FF"     hpxpy->Fill(px);\n");
   FF"  }\n");
