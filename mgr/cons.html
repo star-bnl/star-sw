@@ -1,7 +1,7 @@
 <HTML>
 <HEAD>
 <TITLE>Cons - Software Construction System</TITLE>
-<LINK REV="made" HREF="mailto:root@porky.devel.redhat.com">
+<LINK REV="made" HREF="mailto:lionel.cons@cern.ch">
 </HEAD>
 
 </TITLE> 
@@ -3200,26 +3200,16 @@ Show products and where they are defined. No build is attempted.
 
 
 <P>
-
-<DT><STRONG><A NAME="item__q">-q
-
-</A></STRONG><DD>
-Don't be verbose about Installing and Removing targets.
-
+Make the build quiet. Multiple <CODE>-q</CODE> options may be specified.
 
 <P>
-
-<DT><STRONG><A NAME="item__wf">-wf <file>
-
-</A></STRONG><DD>
-Write all filenames considered into <EM>file</EM>.
-
+A single <CODE>-q</CODE> options suppress messages about Installing and Removing targets.
 
 <P>
+Two <CODE>-q</CODE> options suppress build command lines and target up-to-date messages.
 
-<DT><STRONG><A NAME="item__r">-r
-
-</A></STRONG><DD>
+<DT><STRONG><A NAME="item__r">-r</A></STRONG><DD>
+<P>
 Remove construction products associated with &lt;targets&gt;. No build is
 attempted.
 
@@ -3237,14 +3227,22 @@ Traverse up the directory hierarchy looking for a Construct file, if none
 exists in the current directory. Targets will be modified to be relative to
 the Construct file.
 
+<P>
+Internally, <CODE>cons</CODE> will change its working directory to the directory which contains the
+top-level <EM>Construct</EM> file and report:
+
+<P>
+<PRE>  cons: Entering directory `top-level-directory'
+</PRE>
+<P>
+This message indicates to an invoking editor (such as emacs) or build
+environment that Cons will now report all file names relative to the
+top-level directory. This message can not be suppressed with the <CODE>-q</CODE>
+option.
+
 <DT><STRONG><A NAME="item__v">-v</A></STRONG><DD>
 <P>
 Show <CODE>cons</CODE> version and continue processing.
-
-
-<P>
-
-<DT><STRONG><A NAME="item__V">-V
 
 </A></STRONG><DD>
 Show <CODE>cons</CODE> version and exit.
