@@ -70,6 +70,7 @@ Int_t StDAQMaker::Make(){
 
   int iret = fDAQReader->readEvent();  
 
+  if (iret==kStErr) return kStErr; // Herb, July 5 2000.  Skip "Token 0" events.
   if (iret) iret = kStEOF;
   if (iret) return iret;
 
