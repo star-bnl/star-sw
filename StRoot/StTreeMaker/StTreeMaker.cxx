@@ -111,7 +111,16 @@ Int_t StTreeMaker::MakeRead(){
   int iret = fTree->NextEvent();
   St_DataSetIter nextBr(fTree);
   StBranch *br ;
-  while ((br = (StBranch*)nextBr())) SetOutputAll(br);
+  while ((br = (StBranch*)nextBr())){
+   SetOutput(br);
+   TString tsBr(br->GetName());
+   if (tsBr.Contains("Branch")) {
+     TString tsName = tsBr;
+     tsName.ReplaceAll("Branch","");
+     if (!br->Find(tsName)) SetOutput(tsName,br);
+   }
+   SetOutputAll(br);
+  }
   return iret;
 }    
 //_____________________________________________________________________________
