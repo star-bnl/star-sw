@@ -1,5 +1,8 @@
-// $Id: bfcread_event_QA_outhistfile.C,v 1.5 2000/07/26 19:53:45 lansdell Exp $ 
+// $Id: bfcread_event_QA_outhistfile.C,v 1.6 2001/04/28 21:45:19 genevb Exp $ 
 // $Log: bfcread_event_QA_outhistfile.C,v $
+// Revision 1.6  2001/04/28 21:45:19  genevb
+// include libs for EMC
+//
 // Revision 1.5  2000/07/26 19:53:45  lansdell
 // made changes for creating new QA histograms
 //
@@ -87,6 +90,7 @@ void bfcread_event_QA_outhistfile(
   gSystem->Load("St_db_Maker");
   gSystem->Load("StTpcDb");
   gSystem->Load("StEvent");
+  gSystem->Load("StEmcUtil");
   gSystem->Load("St_QA_Maker"); 
   gSystem->Load("StTreeMaker");
 
