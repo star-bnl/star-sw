@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.62 2000/06/23 16:52:12 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.63 2000/07/19 16:57:34 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.63  2000/07/19 16:57:34  fisyak
+// Protection against double resetting the same run no. (Sasha)
+//
 // Revision 1.62  2000/06/23 16:52:12  fisyak
 // Add filling of Run/Event no./Type from geant
 //
@@ -425,7 +428,8 @@ Int_t St_geant_Maker::Make()
     Agnzgete(link,ide,npart,irun,ievt,cgnam,vert,iwtfl,weigh);
     geant3->Gfhead(Nwhead,Ihead,Nwbuf,Ubuf);
     if (clink->jhead) {
-      fEvtHddr->SetRunNumber(*(z_iq+clink->jhead+1));
+      if (fEvtHddr->GetRunNumber() != *(z_iq+clink->jhead+1)) 
+	fEvtHddr->SetRunNumber(*(z_iq+clink->jhead+1));
       fEvtHddr->SetEventNumber(*(z_iq+clink->jhead+2));
     }
     if (fInputFile != "") fEvtHddr->SetEventType(TString(gSystem->BaseName(fInputFile.Data()),7));
@@ -447,7 +451,8 @@ Int_t St_geant_Maker::Make()
 	Int_t east = (int)(1000.*p->phep[4]-1000.*((float)west));
 	fEvtHddr->SetAWest(west);
 	fEvtHddr->SetAEast(east);
-	fEvtHddr->SetRunNumber(p->vhep[0]);
+	if (fEvtHddr->GetRunNumber() != p->vhep[0])
+	  fEvtHddr->SetRunNumber(p->vhep[0]);
 	fEvtHddr->SetEventNumber(p->vhep[1]);
 	ULong_t  t = p->jdahep[1];
 	if (t > 99999) t = 0;
