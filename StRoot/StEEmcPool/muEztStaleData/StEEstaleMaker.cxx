@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEstaleMaker.cxx,v 1.2 2004/11/10 03:20:30 balewski Exp $
+// $Id: StEEstaleMaker.cxx,v 1.3 2004/11/12 20:10:39 balewski Exp $
 
 #include <TFile.h>
 #include <TH1.h>
@@ -108,19 +108,15 @@ Int_t StEEstaleMaker::Make(){
   EztEmcRawData* etow=mMuDstMaker->muDst()->eztETow();
   assert(etow);
 
+#if 0
   // test1(etow,0);
-   test1(mMuDstMaker->muDst()->eztESmd(),0);
- header->print();
-
+  test1(mMuDstMaker->muDst()->eztESmd(),0);
+  header->print();
   // ............. acuire TRIGGER data 
-
   unpackTrigEzt();
-
   //..........  do the job
-
-
   return kStOK;
-
+#endif
 
 
   if(past[token].tw) { // calculate chi2
@@ -220,6 +216,7 @@ void StEEstaleMaker::unpackTrigEzt(){
 }
 
 
+
 //________________________________________________
 //________________________________________________
 void StEEstaleMaker::test1(EztEmcRawData* tw, int flag){
@@ -241,6 +238,7 @@ void StEEstaleMaker::test1(EztEmcRawData* tw, int flag){
       if(chan>17) {printf(" .... etc ...\n"); break; }
       int adc=data[chan];
       printf("ib=%d ch=%d adc=%d\n",ib,chan,adc);
+      if(chan>flag) break;
     }
   }
   
@@ -249,9 +247,11 @@ void StEEstaleMaker::test1(EztEmcRawData* tw, int flag){
 }
 
 
-
 //---------------------------------------------------
 // $Log: StEEstaleMaker.cxx,v $
+// Revision 1.3  2004/11/12 20:10:39  balewski
+// *** empty log message ***
+//
 // Revision 1.2  2004/11/10 03:20:30  balewski
 // trig fixed
 //
