@@ -32,7 +32,7 @@
 *                       **   *******    **
 *                      **  ***     ***  **
 *                     **                 **
-
+*
 	SUBROUTINE MSG_Check( MSG, ID, Active, Counting )
 
 	IMPLICIT NONE
@@ -214,7 +214,7 @@
 
 	RETURN
 	END
-
+*
 	SUBROUTINE MSG_Enter( Prefix, ID )
 
 	IMPLICIT NONE
@@ -248,16 +248,19 @@
 	LOGICAL MSG_Find_Class
 
 	IF (MSG_Nprefixes.LT.MSG_Nprefixes_max_P) THEN !There's room:
+	  MSG_Sorted = .FALSE. !Inidicate that a new sort will be needed.
 	  MSG_Nprefixes=MSG_Nprefixes+1
 	  ID=MSG_Nprefixes
 	  CALL STREND(Prefix,L) !Find last non-blank.
-	  MSG_Length(ID)=L
-	  MSG_Prefix(ID)=' ' !Make sure it's blanked out first.
-	  MSG_Prefix(ID)=Prefix(1:MSG_Length(ID))
-	  MSG_Sample(ID)=' ' !Make sure it's blanked out first.
-	  MSG_Sample(ID)=Prefix(1:MSG_Length(ID)) !Initialize sample with prefix.
-	  MSG_Counts(ID)=0
-	  MSG_Lookups(ID)=0
+	  MSG_Length(    ID ) = L
+	  MSG_Prefix(    ID ) = ' ' !Make sure it's blanked out first.
+	  MSG_Prefix(    ID ) = Prefix(1:MSG_Length(ID))
+	  MSG_Sample(    ID ) = ' ' !Make sure it's blanked out first.
+	  MSG_Sample(    ID ) = Prefix(1:MSG_Length(ID)) !Initialize sample with prefix.
+	  MSG_CPU_Mark(  ID ) = 0 !CPU usage "Mark", set at call to MSG_Mark.
+	  MSG_CPU_Total( ID ) = 0 !Sum of all CPU-usages between calls to MSG_Mark and MSG_Incr.
+	  MSG_Counts(    ID ) = 0
+	  MSG_Lookups  ( ID ) = 0
 	  CALL MSG_Get_Class( MSG_Prefix(ID), Class ) !Get the class, from the prefix.
 	  IF ( MSG_Find_Class( Class, CID ) ) THEN !Found the class -- set class defaults:
 	    MSG_Active(      ID ) = MSG_Class_Default_Active(      CID )
@@ -284,7 +287,7 @@
 
 	RETURN
 	END
-
+*
 	LOGICAL FUNCTION MSG_Enter_Class( Class, ID )
 
 	IMPLICIT NONE
@@ -344,7 +347,7 @@
 
 	RETURN
 	END
-
+*
 	LOGICAL FUNCTION MSG_Find( Prefix, ID, Active, Counting )
 
 	IMPLICIT NONE
@@ -425,7 +428,7 @@
 
 	RETURN
 	END
-
+*
 	LOGICAL FUNCTION MSG_Find_Class( Class, ID )
 
 	IMPLICIT NONE
@@ -486,7 +489,7 @@
 
 	RETURN
 	END
-
+*
 	SUBROUTINE MSG_Get_Class( Prefix, Class )
 
 	IMPLICIT NONE
@@ -545,7 +548,7 @@
 
 	RETURN
 	END
-
+*
 	SUBROUTINE MSG_Get_Prefix( MSG, Prefix )
 
 	IMPLICIT NONE
@@ -623,7 +626,7 @@
 
 	RETURN
 	END
-
+*
 	SUBROUTINE MSG_Incr( ID )
 
 	IMPLICIT NONE
@@ -635,17 +638,30 @@
 
 *  Description:
 *	Increment the counter for the STAR-standard-message indexed
-*	by ID.
+*	by ID.  Also, if a CPU time for ID has been marked, take a difference
+*	from that CPU and the current, and add it to the CPU total for ID.
 
 *	Called in msglib.f .
 
 	INCLUDE 'msg_inc'
 
-	MSG_Counts(ID)=MSG_Counts(ID)+1
+	INTEGER CPU_Time(2) !2nd element is unused.
+	INTEGER Delta
+
+	MSG_Counts( ID ) = MSG_Counts( ID ) + 1
+
+	IF ( MSG_CPU_Mark( ID ) .GT. 0 ) THEN !CPU time is marked:
+	  CALL STRCPU( CPU_Time ) !Get "absolute" CPU time, since last STRCPU0 call.
+	  Delta = CPU_Time(1) - MSG_CPU_Mark( ID )
+	  MSG_CPU_Mark(ID) = 0 !Remove the mark -- needs to be marked each time.
+	  IF ( Delta .GT. 0 ) THEN
+	    MSG_CPU_Total(ID) = MSG_CPU_Total(ID) + Delta
+	  END IF
+	END IF
 
 	RETURN
 	END
-
+*
 	SUBROUTINE MSG_Parse_Prefix( Prefix, Prefix_stripped, Prefix_number)
 
 	IMPLICIT NONE
@@ -718,4 +734,4 @@
 
 	RETURN
 	END
-
+*

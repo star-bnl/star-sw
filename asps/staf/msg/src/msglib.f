@@ -32,22 +32,22 @@
 *                       **   *******    **
 *                      **  ***     ***  **
 *                     **                 **
-
-	SUBROUTINE Message( MSG, LINES, ID )
+*
+	SUBROUTINE			Message( MSG, Lines, ID )
 
 	IMPLICIT NONE
 	
 *   Inputs:
 	CHARACTER*(*) MSG(*) !1 or more line character-string message
 	                     !submitted for display.
-	INTEGER LINES  !Number of lines in MSG.
+	INTEGER       Lines  !Number of lines in MSG.
 
 *   Input/Output:
-	INTEGER ID     !STAR-standard message ID.  Set to zero by caller 
-                       !before first call, set by MESSAGE on first call by
+	INTEGER ID     !Fast-reference message ID.  Set to zero by caller 
+                       !before first call, set by Message on first call by
                        !looking up or entering the prefix contained in MSG
                        !(prefix is everything before the first space) in
-	               !the index of STAR-standard message prefixes.
+	               !the index of MSG message prefixes.
 	               !If ID is negative, ID remains unchanged, and lookup
 	               !is then always by prefix.
 
@@ -56,16 +56,16 @@
 *   Brief description:  Display and log a message.
 
 *   Description:
-*	Conditionally display a message MSG, containing LINES lines of up to
+*	Conditionally display a message MSG, containing Lines lines of up to
 *	132 characters each on the terminal and the journal, if enabled by a
-*	call to MSG_JOURNAL_ON.  The message is displayed unless disabled.
+*	call to MSG_Journal_On.  The message is displayed unless disabled.
 *	The message is counted unless counting is disabled.
 
 *   Error conditions:  none
 
 	INCLUDE 'msg_inc'
 
-	LOGICAL ACTIVE,COUNTING
+	LOGICAL Active, Counting
 
 	INTEGER LID !Local copy of ID.
 
@@ -73,14 +73,14 @@
 
 *	Check or set the ID & flags.
 *	Enter MSG's prefix in the index if needed.
-	CALL MSG_CHECK(MSG,LID,ACTIVE,COUNTING)
+	CALL MSG_Check( MSG, LID, Active, Counting )
 
-	IF (COUNTING) THEN !COUNTING is true only if found.
-	  CALL MSG_INCR(LID)
-	END IF !COUNTING
+	IF ( Counting ) THEN !COUNTING is true only if found.
+	  CALL MSG_Incr( LID )
+	END IF
 
-	IF (ACTIVE) THEN !Display it:
-	  CALL MESSAGE_OUT(MSG,LINES)
+	IF ( Active ) THEN !Display it:
+	  CALL Message_Out( MSG, Lines )
 	  CALL MSG_Abort_Check( LID ) !Check if abort limit is exceeded, and maybe abort.
 	END IF
 
@@ -88,22 +88,20 @@
 
 	RETURN
 	END
-
-	SUBROUTINE Message_Out( MSG, LINES )
+*
+	SUBROUTINE			Message_Out( MSG, Lines )
 
 	IMPLICIT NONE
 	
 *   Inputs:
 	CHARACTER*(*) MSG(*) !1 or more line character-string message
 	                     !submitted for display.
-	INTEGER LINES !Number of lines in MSG.
-
-*   Outputs:  none
+	INTEGER        Lines !Number of lines in MSG.
 
 *   Brief description:  Display and log a message, bypassing MSG accounting.
 
 *   Description:
-*	Always display a message MSG, containing LINES lines of up to
+*	Always display a message MSG, containing Lines lines of up to
 *	132 characters each on the terminal and the journal, if
 *	enabled by a call to MSG_JOURNAL_ON.  Displaying is unnaffected
 *	by calls to the MSG_DISABLE command, and the message is not
@@ -123,8 +121,8 @@
 	END IF
 	RETURN
 	END
-
-	SUBROUTINE MSG_Abort_Check( ID )
+*
+	SUBROUTINE			MSG_Abort_Check( ID )
 
 	IMPLICIT NONE
 
@@ -153,6 +151,7 @@
 	  IF (MSG_JOURNAL_ENABLE) THEN !Journal is open & enabled:
 	    CALL MSG_Get_LUN( TL, JL ) !Terminal LUN (don't care), Journal LUN.
 	    CALL MSG_Summary( JL ) !Put an msg summary on the journal file.
+	    CALL MSG_Summary_CPU( JL ) !Put an msg CPU-usage summary on the journal file.
 	    Void = MSG_Journal_Close() !Close the file, ignore return status.
 	  END IF
 
@@ -163,8 +162,8 @@
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Class_Define( Class, State, Count_Limit, Abort_Limit )
+*
+	SUBROUTINE			MSG_Class_Define( Class, State, Count_Limit, Abort_Limit )
 
 	IMPLICIT NONE
 
@@ -205,10 +204,6 @@
 
 *	These can be changed or new classes added with a call to this routine.
 
-*   Return conditions:  none
-
-*   Error conditions:  none
-
 	INCLUDE 'msg_inc'
 
 	CHARACTER*20 CAP_State
@@ -245,8 +240,8 @@
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Count( PREFIX )
+*
+	SUBROUTINE			MSG_Count( PREFIX )
 
 	IMPLICIT NONE
 
@@ -260,9 +255,6 @@
 *	recognized by PREFIX.  Has no effect if counting
 *	has not been disabled.
 
-*   Return conditions:  none
-
-*   Error conditions:  none
 
 	INCLUDE 'msg_inc'
 
@@ -302,8 +294,8 @@
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Disable( PREFIX )
+*
+	SUBROUTINE			MSG_Disable( PREFIX )
 
 	IMPLICIT NONE
 
@@ -316,9 +308,6 @@
 *	Disable displaying, but continue counting the message
 *	recognized by PREFIX.
 
-*  Return conditions:  none
-
-*  Error conditions:  none
 
 	INCLUDE 'msg_inc'
 
@@ -357,8 +346,8 @@
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Display( MSG, LINES, ID )
+*
+	SUBROUTINE			MSG_Display( MSG, LINES, ID )
 
 	IMPLICIT NONE
 	
@@ -383,8 +372,6 @@
 *   Description:
 *	Conditionally display & count a message MSG, containing LINES lines
 *	of up to 132 characters each, on the terminal.
-
-*   Return conditions: none
 
 	INCLUDE 'msg_inc'
 
@@ -411,8 +398,8 @@
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Display_Out(MSG,LINES)
+*
+	SUBROUTINE			MSG_Display_Out(MSG,LINES)
 
 	IMPLICIT NONE
 	
@@ -429,8 +416,6 @@
 *	Display a message MSG, containing LINES lines of up to
 *	132 characters each, on the terminal.
 
-*   Return conditions: none
-
 	INCLUDE 'msg_inc'
 
 *	Display message on terminal:
@@ -438,8 +423,8 @@
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Display_and_Echo( MSG, LINES, LUN, ID )
+*
+	SUBROUTINE			MSG_Display_and_Echo( MSG, LINES, LUN, ID )
 
 	IMPLICIT NONE
 	
@@ -467,8 +452,6 @@
 *	of up to 132 characters each, on the terminal, and echo the display on
 *	FORTRAN logical unit LUN.
 
-*   Return conditions: none
-
 	INCLUDE 'msg_inc'
 
 	LOGICAL ACTIVE,COUNTING
@@ -494,8 +477,8 @@
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Display_and_Echo_Out( MSG, LINES, LUN )
+*
+	SUBROUTINE			MSG_Display_and_Echo_Out( MSG, LINES, LUN )
 
 	IMPLICIT NONE
 
@@ -514,7 +497,6 @@
 *	132 characters each, on the terminal, and echo the display on
 *	FORTRAN logical unit LUN.
 
-*   Return conditions: none
 
 	INCLUDE 'msg_inc'
 
@@ -526,8 +508,8 @@
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Enable( PREFIX )
+*
+	SUBROUTINE			MSG_Enable( PREFIX )
 
 	IMPLICIT NONE
 
@@ -540,10 +522,6 @@
 *	Enable message-output for the STAR-standard message with
 *	stored prefix PREFIX.  Has no effect if message-display
 *	has not been disabled.
-
-*  Return conditions:  none
-
-*  Error conditions:  none
 
 	INCLUDE 'msg_inc'
 
@@ -591,8 +569,8 @@
 
 	RETURN
 	END
-
-	LOGICAL FUNCTION MSG_Enabled( PREFIX, ID )
+*
+	LOGICAL FUNCTION		MSG_Enabled( PREFIX, ID )
 
 	IMPLICIT NONE
 
@@ -621,8 +599,6 @@
 *	.TRUE. if the message is enabled (active),
 *	.FALSE. if the message is disabled (inactive).
 
-*  Error conditions:  none
-
 	INCLUDE 'msg_inc'
 
 	LOGICAL ACTIVE,COUNTING
@@ -649,8 +625,8 @@
 
 	RETURN
 	END
-
-	LOGICAL FUNCTION MSG_Enabled_Trace( PREFIX, ID )
+*
+	LOGICAL FUNCTION		MSG_Enabled_Trace( PREFIX, ID )
 
 	IMPLICIT NONE
 
@@ -689,8 +665,6 @@
 *   Return conditions:
 *	.TRUE. if the message is enabled (active),
 *	.FALSE. if the message is disabled (inactive).
-
-*   Error conditions:  none
 
 	INCLUDE 'msg_inc'
 
@@ -744,8 +718,8 @@
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Get_LUN( Terminal_LUN, Journal_LUN )
+*
+	SUBROUTINE			MSG_Get_LUN( Terminal_LUN, Journal_LUN )
 
 	IMPLICIT NONE
 
@@ -770,8 +744,8 @@
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Ini( Journal_LUN )
+*
+	SUBROUTINE			MSG_Ini( Journal_LUN )
 
 	IMPLICIT NONE
 
@@ -795,8 +769,10 @@
 	MSG_Nclasses        = 0
 	MSG_Total_Lookups   = 0 !Count of all prefix (character-search) lookups.
 	MSG_All_Count_Limit = 50 !Default for no-class messages.
+	MSG_TimeStamp_CPU   = .FALSE. !If true, time-stamp on changed CPU time.
 	MSG_All_Disable     = .FALSE.
 	MSG_All_Nocount     = .FALSE.
+	MSG_Sorted          = .FALSE.
 	CALL MSG_Journal_Off
 	CALL MSG_Set_LUN( Terminal_LUN, Journal_LUN )
 	CALL MSG_Name_Node( ' ' )
@@ -812,6 +788,7 @@
 	CALL MSG_Class_Define( ' ',   'Active', 50, 0 ) !Null or blank class.
 	CALL MSG_Class_Define( 'A',   'Active',  0, 1 ) !Abort message class (MSG abort).
 	CALL MSG_Class_Define( 'B',   'Active',  0, 0 ) !Bug message class.
+	CALL MSG_Class_Define( 'C', 'Counting',  0, 0 ) !Counting (CPU-measuring) class.
 	CALL MSG_Class_Define( 'D',   'Active',  0, 0 ) !Debug message class.
 	CALL MSG_Class_Define( 'E',   'Active', 20, 0 ) !Error message class.
 	CALL MSG_Class_Define( 'F',   'Active',  0, 0 ) !Fatal message class (application abort).
@@ -826,8 +803,8 @@
 	RETURN
 
 	END
-
-	LOGICAL FUNCTION MSG_Journal_Close()
+*
+	LOGICAL FUNCTION		MSG_Journal_Close()
 
 	IMPLICIT NONE
 
@@ -867,8 +844,8 @@
 	RETURN
 
 	END
-
-	SUBROUTINE MSG_Journal_Off
+*
+	SUBROUTINE			MSG_Journal_Off
 
 	IMPLICIT NONE
 
@@ -888,8 +865,8 @@
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Journal_On
+*
+	SUBROUTINE			MSG_Journal_On
 
 	IMPLICIT NONE
 
@@ -909,15 +886,13 @@
 
 	RETURN
 	END
-
-	LOGICAL FUNCTION MSG_Journal_Open( FILE_NAME )
+*
+	LOGICAL FUNCTION		MSG_Journal_Open( FILE_NAME )
 
 	IMPLICIT NONE
 
 *  Input:
 	CHARACTER*(*) FILE_NAME !The journal file-name.
-
-*  Returned value:   STAR standard return condition, see below.
 
 *  Brief description:  Open a message-logging journal file.
 
@@ -987,8 +962,8 @@
 	RETURN
 
 	END
-
-	SUBROUTINE MSG_Journal_Page
+*
+	SUBROUTINE			MSG_Journal_Page
 
 	IMPLICIT NONE
 
@@ -996,8 +971,6 @@
 	
 *  Description:
 *	Write a form-feed to the journal file, if open & enabled.
-
-*  Return conditions: none
 
 	INCLUDE 'msg_inc'
 
@@ -1010,8 +983,8 @@
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_LUN_Page( LUN )
+*
+	SUBROUTINE			MSG_LUN_Page( LUN )
 
 	IMPLICIT NONE
 
@@ -1022,8 +995,6 @@
 *  Description:
 *	Write a form-feed to the device openned on LUN.
 
-*  Return conditions: none
-
 	INCLUDE 'msg_inc'
 
 	INTEGER FF
@@ -1033,8 +1004,48 @@
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Name_Node( Node_name )
+*
+	SUBROUTINE			MSG_Mark( Prefix, ID )
+
+	IMPLICIT NONE
+	
+*  Inputs:
+	CHARACTER*(*) Prefix !MSG prefix.
+
+*  Input/Output:
+	INTEGER ID     !Fast-reference MSG ID.  Uniquely assigned on first call.
+
+	INCLUDE 'msg_inc'
+
+*  Description:
+*	Set the given Prefix's "Marked CPU time" to current.  When this prefix
+*	occurs in a call to an MSG routine which does MSG accounting (eg, Message),
+*	and when that Prefix has had its "Marked CPU time" set (ie, to non-zero),
+*	that prefix's "total CPU time" is incremented by Current CPU time, less
+*	the "Marked CPU time".  The Marked CPU time is then zeroed.
+
+	LOGICAL Active, Counting
+	INTEGER LID !Local copy of ID.
+	INTEGER CPU_Time(2)
+
+	LID = ID
+
+*	Check or set the ID & flags.
+*	Enter MSG's prefix in the index if needed.
+	CALL MSG_Check( Prefix, LID, Active, Counting )
+
+	IF ( Counting ) THEN !Counting is true only if found.
+*	  Prefix was found or defined, counting is enabled for it, and LID is now valid.
+	  CALL STRCPU( CPU_Time ) !Get "absolute" CPU time, since last STRCPU0 call.
+	  MSG_CPU_Mark( LID ) = CPU_Time(1) ! 2nd element is unused.
+	END IF !Counting
+
+	IF ( ID .EQ. 0 ) ID = LID !Ensure it's changed only if zero.
+
+	RETURN
+	END
+*
+	SUBROUTINE			MSG_Name_Node( Node_name )
 
 	IMPLICIT NONE
 
@@ -1054,8 +1065,8 @@
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_NoCount( PREFIX )
+*
+	SUBROUTINE			MSG_NoCount( PREFIX )
 
 	IMPLICIT NONE
 
@@ -1067,10 +1078,6 @@
 *  Description:
 *	Disable counting for PREFIX if displaying for PREFIX is
 *	already disabled.  Otherwise do nothing.
-
-*  Return conditions:  none
-
-*  Error conditions:  none
 
 	INCLUDE 'msg_inc'
 
@@ -1110,12 +1117,12 @@
 
 	RETURN
 	END
-
-	INTEGER FUNCTION MSG_RC_Journal_Close()
+*
+	INTEGER FUNCTION		MSG_RC_Journal_Close()
 
 	IMPLICIT NONE
 
-*  Returned value:   STAR standard return condition, see below.
+	INCLUDE 'msg_ret_inc'
 
 *  Brief description:  Return-code version of MSG_Journal_Close.
 
@@ -1125,11 +1132,9 @@
 *	This is the same as MSG_JOURNAL_CLOSE, but implemented
 *	as an integer function returning a "code".
 
-*  Return conditions:
+*  Returned value:
 *	MSG_CLOSED_RC for successful close of journal file.
 *	MSG_NOT_CLOSED_RC for close failure of journal file.
-
-	INCLUDE 'msg_ret_inc'
 
 	LOGICAL MSG_JOURNAL_CLOSE
 
@@ -1142,15 +1147,15 @@
 	RETURN
 
 	END
-
-	INTEGER FUNCTION MSG_RC_Journal_Open( FILE_NAME )
+*
+	INTEGER FUNCTION		MSG_RC_Journal_Open( FILE_NAME )
 
 	IMPLICIT NONE
 
+	INCLUDE 'msg_ret_inc'
+
 *  Input:
 	CHARACTER*(*) FILE_NAME !The journal file-name.
-
-*  Returned value:   STAR standard return condition, see below.
 
 *  Brief description:  Return-code version of MSG_Journal_Open
 
@@ -1160,11 +1165,9 @@
 *	This is the same as MSG_JOURNAL_OPEN, but implemented
 *	as an integer function returning a "code".
 
-*  Return conditions:
+*  Returned value:
 *	MSG_OPENED_RC for successful open of journal file.
 *	MSG_NOT_OPENED_RC for open failure of journal file.
-
-	INCLUDE 'msg_ret_inc'
 
 	LOGICAL MSG_JOURNAL_OPEN
 
@@ -1177,8 +1180,8 @@
 	RETURN
 
 	END
-
-	SUBROUTINE MSG_Set_Abort_Limit( Prefix, Limit )
+*
+	SUBROUTINE			MSG_Set_Abort_Limit( Prefix, Limit )
 
 	IMPLICIT NONE
 
@@ -1198,9 +1201,6 @@
 *	the count-limit after this call to obtain silent aborts -- don't
 *	do it!).
 
-*   Return conditions:  none
-
-*   Error conditions:  none
 
 	INCLUDE 'msg_inc'
 
@@ -1250,8 +1250,8 @@
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Set_By_Command( COM )
+*
+	SUBROUTINE			MSG_Set_By_Command( COM )
 
 	IMPLICIT NONE
 
@@ -1286,6 +1286,14 @@
 *	To set the number of lines per page in the summary-output:
 *	LINES line-count
 
+*	To have time-stamps occur on a changed CPU time (in addition to
+*	getting them on changed real-time or node-name):
+*	TIMESTAMP CPU
+
+*	To have time-stamps not occur on a changed CPU time (ie, only
+*	getting them on changed real-time or node-name):
+*	TIMESTAMP NOCPU
+
 *	Spacing is not critical in the command line, provided at least one
 *	or more spaces, tabs or commas separate the arguments.
 *	The "=" symbols in the LIMIT command are essential, but spaces around
@@ -1293,9 +1301,6 @@
 
 *	Wildcards are permitted in the prefix specifications.
 
-*   Return conditions: none
-
-*   Error conditions:  none
 
 	INCLUDE 'msg_inc'
 
@@ -1316,7 +1321,7 @@
 	CALL STRPARSE(COM,NARGS_max,NARGS,ARG,DARG,IARG,VDARG,VIARG)
 
 *	Convert first arg. to all-caps:
-	CALL STRCAP(1,80,ARG(1))
+	CALL STRCAPS(ARG(1))
 
 	JARG=2
 	DO WHILE (JARG.LE.NARGS)
@@ -1364,6 +1369,15 @@
 	      CALL MSG_Set_Summary_Page_Length( IARG(JARG) )
 	    END IF
 	    JARG=JARG+1
+	  ELSE IF (ARG(1).EQ.'TIMESTAMP') THEN
+	    IF (ARG(JARG).EQ.'CPU') THEN
+	      CALL MSG_Set_TimeStamp_CPU( .TRUE. )
+	    ELSE IF (ARG(2).EQ.'NOCPU') THEN
+	      CALL MSG_Set_TimeStamp_CPU( .FALSE. )
+	    ELSE
+	      ERROR=.TRUE.
+	    END IF
+	    JARG=JARG+1
 	  ELSE !Unrecognized command.
 	    ERROR=.TRUE.
 	  END IF
@@ -1378,7 +1392,7 @@
      1	        'MSG_SET_BY_COMMAND-E2 zero-length command given.',1)
 	    END IF
 	    CALL MESSAGE_OUT('    Legal commands are:'//
-     1	    ' COUNT, DISABLE, ENABLE, LIMIT, NOCOUNT, ABORT, LINES.',1)
+     1	    ' COUNT, DISABLE, ENABLE, LIMIT, NOCOUNT, ABORT, LINES, TIMESTAMP.',1)
 	    JARG=NARGS+1 !Force loop termination.
 	  END IF
 
@@ -1395,8 +1409,8 @@
 
 
 	END
-
-	SUBROUTINE MSG_Set_From_File( LUN )
+*
+	SUBROUTINE			MSG_Set_From_File( LUN )
 
 	IMPLICIT NONE
 
@@ -1427,8 +1441,8 @@
 1	CONTINUE
 	RETURN
 	END
-
-	SUBROUTINE MSG_Set_Limit( PREFIX, LIMIT )
+*
+	SUBROUTINE			MSG_Set_Limit( PREFIX, LIMIT )
 
 	IMPLICIT NONE
 
@@ -1442,10 +1456,6 @@
 *	Set the count limit for the message recognized by PREFIX;
 *	displays of the specified message are disabled once its
 *	count has exceeded LIMIT.  Wildcards are permitted.
-
-*  Return conditions:  none
-
-*  Error conditions:  none
 
 	INCLUDE 'msg_inc'
 
@@ -1495,8 +1505,8 @@
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Set_LUN( TERMINAL_LUN, JOURNAL_LUN )
+*
+	SUBROUTINE			MSG_Set_LUN( TERMINAL_LUN, JOURNAL_LUN )
 
 	IMPLICIT NONE
 
@@ -1514,8 +1524,6 @@
 *	the FORTRAN logical unit number of the terminal in
 *	TERMINAL_LUN and the journal file in JOURNAL_LUN.
 
-*  Error conditions: none
-
 	INCLUDE 'msg_inc'
 
 *	Put the LUNs into the COMMON:
@@ -1524,8 +1532,8 @@
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Set_Summary_Mode_Aborted( Mode )
+*
+	SUBROUTINE			MSG_Set_Summary_Mode_Aborted( Mode )
 
 	IMPLICIT NONE
 
@@ -1534,18 +1542,14 @@
 
 *  Brief description:  Set the MSG summary mode for "Aborted" messages.
 
-*  Return conditions:  none
-
-*  Error conditions:  none
-
 	INCLUDE 'msg_inc'
 
 	MSG_Summary_Mode_Aborted = Mode
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Set_Summary_Mode_Active( Mode )
+*
+	SUBROUTINE			MSG_Set_Summary_Mode_Active( Mode )
 
 	IMPLICIT NONE
 
@@ -1554,18 +1558,14 @@
 
 *  Brief description:  Set the MSG summary mode for "Active" messages.
 
-*  Return conditions:  none
-
-*  Error conditions:  none
-
 	INCLUDE 'msg_inc'
 
 	MSG_Summary_Mode_Active = Mode
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Set_Summary_Mode_Counting( Mode )
+*
+	SUBROUTINE			MSG_Set_Summary_Mode_Counting( Mode )
 
 	IMPLICIT NONE
 
@@ -1574,18 +1574,14 @@
 
 *  Brief description:  Set the MSG summary mode for "Counting" messages.
 
-*  Return conditions:  none
-
-*  Error conditions:  none
-
 	INCLUDE 'msg_inc'
 
 	MSG_Summary_Mode_Counting = Mode
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Set_Summary_Mode_Inactive( Mode )
+*
+	SUBROUTINE			MSG_Set_Summary_Mode_Inactive( Mode )
 
 	IMPLICIT NONE
 
@@ -1594,18 +1590,14 @@
 
 *  Brief description:  Set the MSG summary mode for "Inactive" messages.
 
-*  Return conditions:  none
-
-*  Error conditions:  none
-
 	INCLUDE 'msg_inc'
 
 	MSG_Summary_Mode_Inactive = Mode
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Set_Summary_Page_Length( Page_Length )
+*
+	SUBROUTINE			MSG_Set_Summary_Page_Length( Page_Length )
 
 	IMPLICIT NONE
 
@@ -1614,21 +1606,75 @@
 
 *  Brief description:  Set the MSG summary table page length.
 
-*  Description:
-*	Set the number of lines per page for the summary output.
-
-*  Return conditions:  none
-
-*  Error conditions:  none
-
 	INCLUDE 'msg_inc'
 
 	MSG_Summary_Page_Length = Page_Length
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Summary( LUN )
+*
+	SUBROUTINE			MSG_Set_TimeStamp_CPU( Mode )
+
+	IMPLICIT NONE
+
+*  Input:
+	LOGICAL Mode !Whether the mode is to be set TRUE or FALSE.
+
+*  Brief description:  Set the MSG time-stamp mode for stamping CPU changes.
+
+	INCLUDE 'msg_inc'
+
+	MSG_TimeStamp_CPU = Mode
+
+	RETURN
+	END
+*
+	SUBROUTINE			MSG_Sort
+
+	IMPLICIT NONE
+
+	INCLUDE 'msg_inc'
+
+*  Brief Description:  Sort the MSG prefixes, in alphabetical order.
+
+	INTEGER Prefix_number_1,Prefix_number_2
+	CHARACTER*(MSG_Prefix_length_P) Prefix_stripped_1,Prefix_stripped_2
+	INTEGER I
+	INTEGER ID
+
+
+	IF ( MSG_Sorted ) RETURN !Already sorted.
+
+	DO ID = 1, MSG_Nprefixes !Initialize the map.
+	  MSG_SID( ID ) = ID
+	END DO
+
+	DO WHILE ( .NOT. MSG_Sorted )
+	  MSG_Sorted = .TRUE.
+	  DO ID = 1, MSG_Nprefixes - 1
+	    CALL MSG_PARSE_PREFIX( MSG_Prefix( MSG_SID(ID)   ), Prefix_stripped_1, Prefix_number_1 )
+	    CALL MSG_PARSE_PREFIX( MSG_Prefix( MSG_SID(ID+1) ), Prefix_stripped_2, Prefix_number_2 )
+	    IF ( LGT( Prefix_stripped_1, Prefix_stripped_2 ) ) THEN
+	      MSG_Sorted      = .FALSE.
+	      I               = MSG_SID( ID   )
+	      MSG_SID( ID   ) = MSG_SID( ID+1 )
+	      MSG_SID( ID+1 ) = I
+	    ELSE IF ( LLT( Prefix_stripped_1, Prefix_stripped_2 ) ) THEN
+*	      Do nothing.
+	    ELSE IF ( Prefix_number_1 .GT. Prefix_number_2 ) THEN
+	      MSG_Sorted      = .FALSE.
+	      I               = MSG_SID( ID   )
+	      MSG_SID( ID   ) = MSG_SID( ID+1 )
+	      MSG_SID( ID+1 ) = I
+	    END IF !LGT( Prefix_stripped_1, Prefix_stripped_2 )
+	  END DO !ID = 1, MSG_Nprefixes - 1
+
+	END DO !WHILE ( .NOT. MSG_Sorted )
+
+	RETURN
+	END
+*
+	SUBROUTINE			MSG_Summary( LUN )
 
 	IMPLICIT NONE
 
@@ -1637,19 +1683,166 @@
 
 *  Brief description:  Generate an MSG summary table on a FORTRAN LUN.
 
-*  Description:
-*	Output a summary of the STAR-standard errors on the specified LUN.
-
-*  Return conditions:  none
-
-*  Error conditions:  none
-
-	CALL MSG_SUMMARY_EVENT(LUN,0) !No column of normalized entries.
+	CALL MSG_Summary_Event( LUN, 0 ) !"0" ==> no column of normalized entries.
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Summary_Event( LUN, EVENTS )
+*
+	SUBROUTINE			MSG_Summary_CPU( LUN )
+
+	IMPLICIT NONE
+
+*  Input:
+	INTEGER LUN !Device on which the summary is output.
+
+*  Brief description:  Generate a CPU-usage MSG-summary table.
+
+*  Description:
+*	Output a CPU-usage summary of the MSG-handled & marked messages
+*	on the specified LUN.  "Marked" messages are messages whose occurances
+*	were preceded, one-for-one, by calls to MSG_Mark, with the same
+*	MSG prefix.
+
+	INCLUDE 'msg_inc'
+
+	INTEGER MSG_Summary_width_P
+	PARAMETER (MSG_Summary_width_P=132)
+	INTEGER ID
+
+	CHARACTER*(MSG_Summary_width_P) MSG(2)
+	CHARACTER*(MSG_Summary_width_P) Ghost
+	CHARACTER*(MSG_Sample_length_P) Sample
+	CHARACTER*23 C23
+	CHARACTER*15 Cavg, Ctot
+	INTEGER I
+	INTEGER Page_line, EPT
+	REAL CPU_avg, CPU_tot, Ticks_per_Second
+	LOGICAL List_this_Message
+	INTEGER Header_Lines
+
+	INTEGER STRCPUTPS
+
+
+100	FORMAT(T14'--- CPU Usage Summary --- ('A23')'/
+     1	      'Message-Prefix & Truncated Sample of last occurance'
+     1	       T66 'Total CPU Usage' T83 '  Avg CPU Usage'
+     1	       T100 '    Counts' T111 '   Lookups' )
+
+101	FORMAT( A, T65 '|' A, T83, A, T100, I10, T111, I10 )
+
+
+
+*	For No Messages:
+102	FORMAT(T14'--- CPU Usage Summary --- ('A23')'/
+     1	      '         ---------  No Measurements  ----------')
+
+
+
+	Ticks_per_Second = FLOAT( STRCPUTPS() ) !Get platform-dependent ticks-per-second.
+
+	CALL MSG_Sort
+
+	IF (MSG_Nprefixes.EQ.0) THEN !No messages.
+	  CALL MSG_LUN_PAGE(LUN)
+	  CALL STRASCDATETIME(C23)
+	  WRITE(MSG,102) C23
+	  CALL MSG_TO_LUN_OUT(MSG,2,LUN)
+	END IF
+
+	Page_line = 0
+	DO ID = 1, MSG_Nprefixes
+
+	  IF ( Page_line .EQ. 0 ) THEN !Do the header:
+	    CALL MSG_LUN_PAGE(LUN)
+	    CALL STRASCDATETIME(C23)
+	    WRITE(MSG,100) C23
+	    Header_Lines = 2
+	    Page_line = Header_Lines
+	    CALL MSG_to_LUN_Out( MSG, Header_Lines, LUN )
+	  END IF
+
+	  Sample = MSG_Sample( MSG_SID(ID) )
+
+*	  Sometimes a \n (newline) character is embedded in a message, or even a \f, \b or \0:
+	  I = MIN( INDEX( Sample, '\n' ), INDEX( Sample, '\f' ), INDEX( Sample, '\b' ), INDEX( Sample, '\0' ) )
+	  IF      ( I .GE. 1 ) THEN !Blan out \n etc. and all after.
+	    Sample(I:) = ' '
+	  END IF
+
+	  CALL STRClean( Sample, MSG_Sample_length_P, Sample ) !Clean out any non-printables.
+
+	  CALL STREND(Sample,EPT) !Find last non-blank.
+	  IF (EPT.LT.(MSG_Sample_length_P-6)) THEN !More than 6 blanks.
+	    DO I=MSG_Sample_length_P-2,EPT+2,-2 !Append alternating dots.
+	      Sample(I:I)='.'
+	    END DO
+	  ELSE !Few or no blanks -- no adulteration necessary:
+	  END IF
+
+	  IF      ( MSG_Counts(    MSG_SID(ID) ) .LE. 0 ) THEN !This one never happened.
+	    List_this_Message = .FALSE.
+	  ELSE IF ( MSG_CPU_Total( MSG_SID(ID) ) .LE. 0 ) THEN !This one never got marked.
+	    List_this_Message = .FALSE.
+	  ELSE                                             !List this one.
+	    List_this_Message = .TRUE.
+	  END IF
+
+
+	  IF ( List_this_message ) THEN !List only those selected by the mode flags:
+
+	    CPU_tot = FLOAT( MSG_CPU_Total( MSG_SID(ID) ) ) / Ticks_per_Second
+	    CPU_avg = CPU_tot / FLOAT( MSG_Counts( MSG_SID(ID) ) )
+
+	    IF ( CPU_tot .GT. 1000000. ) THEN
+	      WRITE( Ctot, '(E15.7)' ) CPU_tot
+	    ELSE IF ( CPU_tot .LT. 0.001 ) THEN
+	      WRITE( Ctot, '(E15.7)' ) CPU_tot
+	    ELSE
+	      WRITE( Ctot, '(F15.6)' ) CPU_tot
+	    END IF
+
+	    IF ( CPU_avg .GT. 1000000. ) THEN
+	      WRITE( Cavg, '(E15.7)' ) CPU_avg
+	    ELSE IF ( CPU_avg .LT. 0.001 ) THEN
+	      WRITE( Cavg, '(E15.7)' ) CPU_avg
+	    ELSE
+	      WRITE( Cavg, '(F15.6)' ) CPU_avg
+	    END IF
+
+	    WRITE( MSG, 101 )
+     1	           Sample
+     1	         , Ctot
+     1	         , Cavg
+     1	         , MSG_Counts(    MSG_SID(ID) )
+     1	         , MSG_Lookups(   MSG_SID(ID) )
+	    CALL STREND( MSG, EPT ) !Find last non-blank.
+	    Ghost = ' '
+	    DO I=MSG_Sample_length_P,EPT-2,2 !Fill in with alternating dots.
+	      IF (MSG(1)(I-1:I+1).EQ.' ') THEN !Three blanks in a row:
+	        MSG(1)(I:I)='.'
+	        Ghost(I:I)='.'
+	      END IF
+	    END DO
+	    DO I=MSG_Sample_length_P+2,EPT-4,2 !Check for lone (inserted) dots & remove them.
+	      IF (Ghost(I-2:I+2) .EQ. '  .  ' ) THEN
+	        MSG(1)(I:I) = ' '
+	      END IF
+	    END DO
+	    CALL MSG_TO_LUN_OUT(MSG,1,LUN)
+
+	    Page_line = Page_line + 1
+	    IF ( Page_line .GE. MSG_Summary_Page_Length) THEN
+	      Page_line = 0 !Start a new page.
+	    END IF
+
+	  END IF ! List_this_message
+
+	END DO ! ID = 1, MSG_Nprefixes
+
+	RETURN
+	END
+*
+	SUBROUTINE			MSG_Summary_Event( LUN, EVENTS )
 
 	IMPLICIT NONE
 
@@ -1660,32 +1853,24 @@
 *  Brief description:  Generate an MSG summary table with a frequency column on a FORTRAN LUN.
 
 *  Description:
-*	Output a summary of the STAR-standard errors on the specified LUN.
+*	Output a summary of the MSG-handled messages on the specified LUN.
 *	Include a column of normalized occurances of each message,
 *	which consists of a column of the number of occurances of each
 *	message, divided by EVENTS.  If EVENTS is not positive, then the
 *	column is ommitted.
-
-*  Return conditions:  none
-
-*   Error conditions:  none
 
 	INCLUDE 'msg_inc'
 
 	INTEGER MSG_Summary_width_P
 	PARAMETER (MSG_Summary_width_P=132)
 	INTEGER ID
-	LOGICAL SORTED
-	INTEGER SID(MSG_Nprefixes_max_P)
 	CHARACTER*(MSG_Summary_width_P) MSG(2)
 	CHARACTER*(MSG_Summary_width_P) Ghost
-	CHARACTER*(MSG_Prefix_length_P) Prefix_stripped_1,Prefix_stripped_2
 	CHARACTER*(MSG_Sample_length_P) Sample
 	CHARACTER*23 C23
 	CHARACTER*8 State
-	INTEGER Prefix_number_1,Prefix_number_2
 	INTEGER I
-	INTEGER LINE,EPT
+	INTEGER Page_line, EPT
 	REAL Fraction
 	LOGICAL List_this_Message
 
@@ -1715,34 +1900,7 @@
 104	FORMAT( A, T65 '|' I10, T77, F12.4, T90, I10, T101, I10, T112, I11, T124, A )
 
 
-	DO ID=1,MSG_Nprefixes !Initialize the map.
-	  SID(ID)=ID
-	END DO
-
-	SORTED=.FALSE. !Assume not sorted & force initial loop entry.
-	DO WHILE (.NOT.SORTED)
-	  SORTED=.TRUE.
-	  DO ID=1,MSG_Nprefixes-1
-	    CALL MSG_PARSE_PREFIX
-     1	     (MSG_Prefix(SID(ID)  ),Prefix_stripped_1,Prefix_number_1)
-	    CALL MSG_PARSE_PREFIX
-     1	     (MSG_Prefix(SID(ID+1)),Prefix_stripped_2,Prefix_number_2)
-	    IF (LGT(Prefix_stripped_1,Prefix_stripped_2)) THEN
-	      SORTED=.FALSE.
-	      I=SID(ID)
-	      SID(ID)=SID(ID+1)
-	      SID(ID+1)=I
-	    ELSE IF (LLT(Prefix_stripped_1,Prefix_stripped_2)) THEN
-*	      Do nothing.
-	    ELSE IF (Prefix_number_1.GT.Prefix_number_2) THEN
-	      SORTED=.FALSE.
-	      I=SID(ID)
-	      SID(ID)=SID(ID+1)
-	      SID(ID+1)=I
-	    END IF !LGT(Prefix_stripped_1,Prefix_stripped_2)
-	  END DO !ID=1,MSG_Nprefixes-1
-
-	END DO !WHILE (.NOT.SORTED)
+	CALL MSG_Sort
 
 	IF (MSG_Nprefixes.EQ.0) THEN !No messages.
 	  CALL MSG_LUN_PAGE(LUN)
@@ -1751,10 +1909,10 @@
 	  CALL MSG_TO_LUN_OUT(MSG,2,LUN)
 	END IF
 
-	LINE=0
-	DO ID=1,MSG_Nprefixes
+	Page_line = 0
+	DO ID = 1, MSG_Nprefixes
 
-	  IF (LINE.EQ.0) THEN !Do the header:
+	  IF ( Page_line .EQ. 0 ) THEN !Do the header:
 	    CALL MSG_LUN_PAGE(LUN)
 	    CALL STRASCDATETIME(C23)
 	    IF (EVENTS.LE.0) THEN !No fractional occurances:
@@ -1763,12 +1921,11 @@
 	      WRITE(MSG,103) C23
 	    END IF
 	    Header_Lines = 2
-	    CALL MSG_TO_LUN_OUT( MSG, Header_Lines, LUN )
+	    Page_line = Header_Lines
+	    CALL MSG_to_LUN_Out( MSG, Header_Lines, LUN )
 	  END IF
 
-	  List_this_Message = .FALSE. !Set true if the state is selected for listing.
-
-	  Sample=MSG_Sample(SID(ID))
+	  Sample = MSG_Sample( MSG_SID(ID) )
 
 *	  Sometimes a \n (newline) character is embedded in a message, or even a \f, \b or \0:
 	  I = MIN( INDEX( Sample, '\n' ), INDEX( Sample, '\f' ), INDEX( Sample, '\b' ), INDEX( Sample, '\0' ) )
@@ -1787,9 +1944,10 @@
 	  END IF
 
 *	  Determine the state:
-	  IF (MSG_Abort_Limit( SID(ID) ).LE.0) THEN
+	  List_this_Message = .FALSE. !Set true if the state is selected for listing.
+	  IF (MSG_Abort_Limit( MSG_SID(ID) ).LE.0) THEN
 	    State = ' '
-	  ELSE IF (MSG_Counts( SID(ID) ).GE.MSG_Abort_Limit( SID(ID) ) ) THEN
+	  ELSE IF (MSG_Counts( MSG_SID(ID) ).GE.MSG_Abort_Limit( MSG_SID(ID) ) ) THEN
 *	    This message caused a program termination -- should only be one!
 	    State = ' Aborted'
 	    IF ( MSG_Summary_Mode_Aborted ) List_this_Message = .TRUE.
@@ -1798,10 +1956,10 @@
 	  END IF
 
 	  IF (State .NE. ' ') THEN !State already determined.
-	  ELSE IF ( MSG_Active( SID(ID) ) ) THEN
+	  ELSE IF ( MSG_Active( MSG_SID(ID) ) ) THEN
 	    State = '  Active'
 	    IF ( MSG_Summary_Mode_Active ) List_this_Message = .TRUE.
-	  ELSE IF ( MSG_Counting( SID(ID) ) ) THEN
+	  ELSE IF ( MSG_Counting( MSG_SID(ID) ) ) THEN
 	    State = 'Counting'
 	    IF ( MSG_Summary_Mode_Counting ) List_this_Message = .TRUE.
 	  ELSE
@@ -1814,18 +1972,18 @@
 
 	    IF (EVENTS.LE.0) THEN !No fractional occurances:
 	      WRITE(MSG,101)
-     1	            Sample,MSG_Counts(SID(ID))
-     1	           ,MSG_Count_limit(SID(ID))
-     1	           ,MSG_Lookups(SID(ID))
-     1	           ,MSG_Abort_Limit(SID(ID))
+     1	            Sample,MSG_Counts(MSG_SID(ID))
+     1	           ,MSG_Count_limit(MSG_SID(ID))
+     1	           ,MSG_Lookups(MSG_SID(ID))
+     1	           ,MSG_Abort_Limit(MSG_SID(ID))
      1	           ,State
 	    ELSE !Fractional occurances:
-	      Fraction=FLOAT(MSG_Counts(SID(ID)))/FLOAT(EVENTS)
+	      Fraction=FLOAT(MSG_Counts(MSG_SID(ID)))/FLOAT(EVENTS)
 	      WRITE(MSG,104)
-     1	            Sample,MSG_Counts(SID(ID)),Fraction
-     1	           ,MSG_Count_limit(SID(ID))
-     1	           ,MSG_Lookups(SID(ID))
-     1	           ,MSG_Abort_Limit(SID(ID))
+     1	            Sample,MSG_Counts(MSG_SID(ID)),Fraction
+     1	           ,MSG_Count_limit(MSG_SID(ID))
+     1	           ,MSG_Lookups(MSG_SID(ID))
+     1	           ,MSG_Abort_Limit(MSG_SID(ID))
      1	           ,State
 	    END IF
 	    CALL STREND(MSG,EPT) !Find last non-blank.
@@ -1843,20 +2001,19 @@
 	    END DO
 	    CALL MSG_TO_LUN_OUT(MSG,1,LUN)
 
-	    IF ( LINE + 1 + Header_Lines .GE. MSG_Summary_Page_Length) THEN
-	      LINE=0 !Start a new page.
-	    ELSE
-	      LINE=LINE+1
+	    Page_line = Page_line + 1
+	    IF ( Page_line .GE. MSG_Summary_Page_Length) THEN
+	      Page_line = 0 !Start a new page.
 	    END IF
 
 	  END IF ! List_this_message
 
-	END DO !ID=1,MSG_Nprefixes
+	END DO ! ID = 1, MSG_Nprefixes
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Time_Stamp( LUN )
+*
+	SUBROUTINE			MSG_Time_Stamp( LUN )
 
 	IMPLICIT NONE
 	INTEGER LUN
@@ -1879,58 +2036,80 @@
 *	this subroutine.  eg, a call to this routine in a tight loop will
 *	only produce an actual time-stamp once each second.
 
-*  Return conditions: none
+
 
 	INCLUDE 'msg_inc'
+
+	LOGICAL TimeStamp
+	LOGICAL NodeName
 
 	CHARACTER*(MSG_Node_name_length_P) Last_Node_name
 	SAVE Last_Node_name
 
 	CHARACTER*23 Date_time, Last_Date_time
 	CHARACTER*17 CPU_time
+	CHARACTER*17 Last_CPU_time
 	CHARACTER*18 Elapsed_time
 	SAVE Last_Date_time
+	SAVE Last_CPU_time
 
 	DATA Last_Node_name/' '/
 	DATA Last_Date_time/' '/
+	DATA Last_CPU_time /' '/
+
+
+	TimeStamp = .FALSE.
+	CALL STRASCDATETIME(Date_time)
+	CALL STRCPUASC( CPU_time )
 
 	IF (MSG_Node_name.EQ.' ') THEN !No node name:
+	  NodeName = .FALSE.
 *	  Don't bother with a time-stamp if it hasn't changed:
-	  CALL STRASCDATETIME(Date_time)
 	  IF (Date_time.EQ.Last_Date_time) THEN !No change:
 	  ELSE !It has changed:
-	    CALL STRELAASC( Elapsed_time )
-	    CALL STRCPUASC( CPU_time )
-	    CALL MSG_TO_LUN_OUT( Date_time //
-     1	                       '   Elapsed:' // Elapsed_time //
-     1	                       '   CPU time:' // CPU_time
-     1	                       , 1, LUN )
-	    Last_Date_time=Date_time
+	    TimeStamp = .TRUE.
 	  END IF
-
 	ELSE                           !Append node name:
+	  NodeName = .TRUE.
 *	  Don't bother with a time-stamp if node or time hasn't changed.
-	  CALL STRASCDATETIME(Date_time)
 	  IF ( (Date_time.EQ.Last_Date_time) .AND.
      1	       (MSG_Node_name.EQ.Last_Node_name)  ) THEN !No change:
 	  ELSE !Time or node has changed:
-	    CALL STRELAASC( Elapsed_time )
-	    CALL STRCPUASC( CPU_time )
-	    CALL MSG_TO_LUN_OUT( Date_time //
-     1	                       ' From: ' // MSG_Node_name //
-     1	                       '   Elapsed:' // Elapsed_time //
-     1	                       '   CPU time:' // CPU_time
-     1	                       , 1, LUN )
-	    Last_Date_time=Date_time
-	    Last_Node_name=MSG_Node_name
+	    TimeStamp = .TRUE.
 	  END IF
-
 	END IF !MSG_Node_name.EQ.' '
+
+	IF ( MSG_TimeStamp_CPU ) THEN !Time Stamp if CPU is different:
+	  IF ( Last_CPU_time .NE. CPU_TIME ) THEN
+	    TimeStamp = .TRUE.
+	  END IF
+	END IF
+
+	IF ( .NOT. TimeStamp ) THEN
+	ELSE IF ( .NOT. NodeName ) THEN
+	  CALL STRELAASC( Elapsed_time )
+	  CALL MSG_TO_LUN_OUT( Date_time //
+     1	                     '   Elapsed:' // Elapsed_time //
+     1	                     '   CPU time:' // CPU_time
+     1	                     , 1, LUN )
+	  Last_Date_time=Date_time
+	  Last_CPU_time=CPU_time
+	ELSE
+	  CALL STRELAASC( Elapsed_time )
+	  CALL MSG_TO_LUN_OUT( Date_time //
+     1	                     ' From: ' // MSG_Node_name //
+     1	                     '   Elapsed:' // Elapsed_time //
+     1	                     '   CPU time:' // CPU_time
+     1	                     , 1, LUN )
+	  Last_Date_time=Date_time
+	  Last_Node_name=MSG_Node_name
+	  Last_CPU_time=CPU_time
+	END IF
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_Time_Stamp_Out( LUN )
+*
+	SUBROUTINE			MSG_Time_Stamp_Out( LUN )
 
 	IMPLICIT NONE
 	INTEGER LUN
@@ -1951,7 +2130,6 @@
 
 *	Always produces output.
 
-*  Return conditions: none
 
 	INCLUDE 'msg_inc'
 
@@ -1983,8 +2161,8 @@
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_to_Journal( MSG, LINES, ID )
+*
+	SUBROUTINE			MSG_to_Journal( MSG, LINES, ID )
 
 	IMPLICIT NONE
 	
@@ -2010,7 +2188,6 @@
 *	Conditionally display & count a message MSG, containing LINES lines
 *	of up to 132 characters each, on the journal file, if open & enabled.
 
-*  Return conditions: none
 
 	INCLUDE 'msg_inc'
 
@@ -2037,8 +2214,8 @@
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_to_Journal_Out( MSG, LINES )
+*
+	SUBROUTINE			MSG_to_Journal_Out( MSG, LINES )
 
 	IMPLICIT NONE
 	
@@ -2055,7 +2232,6 @@
 *	Unconditionally display a message MSG, containing LINES lines
 *	of up to 132 characters each, on the journal file, if open & enabled.
 
-*  Return conditions: none
 
 	INCLUDE 'msg_inc'
 
@@ -2067,8 +2243,8 @@
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_to_LUN( MSG, LINES, LUN, ID )
+*
+	SUBROUTINE			MSG_to_LUN( MSG, LINES, LUN, ID )
 
 	IMPLICIT NONE
 	
@@ -2095,7 +2271,6 @@
 *	Conditionally display & count a message MSG, containing LINES lines
 *	of up to 132 characters each, on LUN.
 
-*  Return conditions: none
 
 	INCLUDE 'msg_inc'
 
@@ -2122,31 +2297,32 @@
 
 	RETURN
 	END
-
-	SUBROUTINE MSG_to_LUN_Out( MSG, LINES, LUN )
+*
+	SUBROUTINE			MSG_to_LUN_Out( msg, Nlines, LUN )
 
 	IMPLICIT NONE
-	CHARACTER*(*) MSG(*)
-	INTEGER LINES,LUN
 
 *  Inputs:
-*	MSG -- 1 or more line character-string message submitted for display.
-*	LINES -- Number of lines in MSG.
-*	LUN -- FORTRAN logical unit number for MSG to be written to.
-
-*  Outputs: none
+	CHARACTER*(*) msg(*) !1 or more line character-string message submitted for display.
+	INTEGER       Nlines !Number of lines in MSG.
+	INTEGER       LUN    !FORTRAN logical unit number for MSG to be written to.
 
 *  Brief description:  Write a message to a FORTRAN LUN;  bypass accounting.
 
 *  Description:
-*	Display a message MSG, containing LINES lines of up to
-*	132 characters each, on FORTRAN logical unit LUN.
+*	Display a message, containing one or more lines of no particular
+*	length (or length-limit), on FORTRAN logical unit LUN.
 
-*  Return conditions: none
+*	This routine ends with a call to STRFlush( LUN ), flushing the output
+*	output buffer.  This seems to be necessary to get some machines to
+*	keep the LUN file (or terminal) up-to-date;  without this, a crash
+*	leaves the last several lines of the output to LUN not in the listing
+*	file -- a terrible thing indeed for debugging:
+
 
 	INCLUDE 'msg_inc'
 
-	INTEGER LINE_LEN,I
+	INTEGER Line_len, I
 	INTEGER LastNonBlank, Line_end
 
 
@@ -2154,27 +2330,28 @@
 *2	FORMAT(A) or FORMAT(' 'A):
 	INCLUDE 'msg_native_inc' !Define a FORMAT (2) with or w/o car-cont. space.
 
-	LINE_LEN=LEN(MSG(1))
-	IF (LINE_LEN.GT.131) LINE_LEN=131
+	Line_len = LEN( msg(1) )
+
+*	IF ( Line_len .GT. 131 ) Line_len=131  !This ruins in-line new-lines -- disabled!
 
 *	Display message on LUN:
-	IF (LUN.EQ.MSG_TL) THEN !Message to terminal -- special for VMS:
-	  DO I=1,LINES
-	    CALL STREND(MSG(I),LastNonBlank) !Point at last non-blank.
-	    Line_end=MIN( LINE_LEN, LastNonBlank )
-	    WRITE(LUN,2,ERR=10) MSG(I)(1:Line_end)
+	IF ( LUN .EQ. MSG_TL ) THEN !Message to terminal -- special for VMS:
+*	  This differs from the bottom block in the FORMAT statement used,
+*	  which differs only under VMS (which still uses old FORTRAN carriage
+*	  control -- ie, 1st column does print, it is a printer command).
+	  DO I = 1, Nlines
+	    CALL STREnd( msg(I), LastNonBlank ) !Point at last non-blank.
+	    Line_end = MIN( Line_len, LastNonBlank )
+	    WRITE( LUN, 2, ERR=10 ) msg(I)(1:Line_end)
 	  END DO
+	  CALL STRFlush( LUN )
 	ELSE
-	  DO I=1,LINES
-	    CALL STREND(MSG(I),LastNonBlank) !Point at last non-blank.
-	    Line_end=MIN( LINE_LEN, LastNonBlank )
-	    WRITE(LUN,1,ERR=10) MSG(I)(1:Line_end)
+	  DO I = 1, Nlines
+	    CALL STREnd( msg(I), LastNonBlank ) !Point at last non-blank.
+	    Line_end = MIN( Line_len, LastNonBlank )
+	    WRITE( LUN, 1, ERR=10 ) msg(I)(1:Line_end)
 	  END DO
-*	  This seems to be necessary to get AIX (on the RS6000) and other
-*	  Unix machines to keep the listing or journal file up-to-date;  without
-*	  this, a crash leaves the last several lines of the listing file NOT
-*	  in the listing file -- a terrible thing indeed for debugging (yuck):
-	  CALL STRFLUSH( LUN )
+	  CALL STRFlush( LUN )
 	END IF
 
 
@@ -2182,11 +2359,11 @@
 
 10	CONTINUE
 
-	WRITE(MSG_TL,501)  MSG(1)(:LINE_LEN)
-501	FORMAT(' MSG_TO_LUN_OUT-E1  Format error, 1st line:'/
-     1	       ' 'A)
+	WRITE( MSG_TL, 501 )  msg(1)(:Line_len)
+501	FORMAT( ' MSG_to_LUN_Out-E1  Format error, 1st line:' /
+     1	        ' ' A )
 	RETURN
 
 
 	END
-
+*
