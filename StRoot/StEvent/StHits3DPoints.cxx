@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   18/05/99  (E-mail: fine@bnl.gov)
-// $Id: StHits3DPoints.cxx,v 1.4 1999/07/14 01:38:04 fine Exp $
+// $Id: StHits3DPoints.cxx,v 1.5 1999/07/14 15:25:28 fine Exp $
 // $Log: StHits3DPoints.cxx,v $
-// Revision 1.4  1999/07/14 01:38:04  fine
-// Previous version has been restored
+// Revision 1.5  1999/07/14 15:25:28  fine
+// GetLastPosition +- 1 bug fixed
+//
+// Revision 1.5  1999/07/14 15:25:28  fine
+// GetLastPosition +- 1 bug fixed
 //
 // Revision 1.4  1999/07/14 01:38:04  fine
 // Previous version has been restored
@@ -32,7 +35,7 @@ StHits3DPoints::StHits3DPoints(StObjArray *hitCollection)
 }
 //________________________________________________________________________________
 StHits3DPoints::~StHits3DPoints(){;}
-  return m_HitCollection?m_HitCollection->GetLast()+1:-1;
+ 
 //________________________________________________________________________________
 Int_t  StHits3DPoints::GetLastPosition()const {
   return m_HitCollection?m_HitCollection->GetLast():-1;
