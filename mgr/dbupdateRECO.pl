@@ -44,10 +44,13 @@ my @Sets = (
              "auau200/dtunuc/two_photon/halffield/year_1h/hadronic_on",
              "auau200/dtunuc/two_photon/none/year_1h/hadronic_on",
              "auau200/hemicosm/default/none/year_1h/hadronic_on",
+             "auau200/hijing/beamgas/hydrogen/year_1h/hadronic_on",
+             "auau200/hijing/beamgas/nitrogen/year_1h/hadronic_on", 
              "pau200/hijing/b0_7/gam15/year_1h/hadronic_on",
              "pau200/hijing/b0_7/jet15/year_1h/hadronic_on", 
              "pau200/hijing/b0_7/gam15/year_2a/hadronic_on",
              "pau200/hijing/b0_7/jet15/year_2a/hadronic_on", 
+             "pp200/pythia/default/minibias/year_2a/hadronic_on",
              "auau200/mevsim/vcascade/central/year_1h/hadronic_on",       
              "auau200/mevsim/vcascade/flow/year_1h/hadronic_on", 
              "auau200/mevsim/vcascade/fluct/year_1h/hadronic_on",
@@ -59,7 +62,7 @@ my @Sets = (
              "auau200/hijing_quark/b0_3_jetq_on/jet05/year_1h/hadronic_on",
              "auau200/hijing_antinuc/b0_3_jetq_off/jet05/year_1h/hadronic_on",
              "auau200/hijing_antinuc/b0_3_jetq_on/jet05/year_1h/hadronic_on",
-
+             "auau200/venus412/default/b0_3/year_1h/hadronic_on",
 );
 
 
@@ -166,11 +169,11 @@ my @diskRecoDirs;
 
 my $inext =scalar(@Sets); 
 
-for( $ll = 0; $ll<31; $ll++) { 
+for( $ll = 0; $ll<34; $ll++) { 
   $diskRecoDirs[$ll] = $DISK2 . "/" . $Sets[$ll] . "/tfs_6";
   print "diskRecoDir: $diskRecoDirs[$ll]\n";
 }
-for( $ii = 31; $ii< 37; $ii++) { 
+for( $ii = 34; $ii< 41; $ii++) { 
 $diskRecoDirs[$ii] = $DISK1 . "/" . $Sets[$ii] . "/tfs_6";
   print "diskRecoDir: $diskRecoDirs[$ii]\n";
 }
