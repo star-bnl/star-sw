@@ -275,7 +275,7 @@ bool StiLocalTrackSeedFinder::fit(StiKalmanTrack* track)
   _helixFitter.reset();
   _helixFitter.fit( _seedHits );
   if (_helixFitter.valid()==false ) 
-    throw logic_error("StiLocalTrackSeedFinder::fit(StiKalmanTrack* track) - FATAL - No Helix Fitter");
+    throw runtime_error("StiLocalTrackSeedFinder::fit(StiKalmanTrack* track) -W- bad data or fit");
   /*
     cout <<"origin: "<<_helixFitter.xCenter()<<" "<<_helixFitter.yCenter()<<" "
     <<_helixFitter.z0()<<" "
