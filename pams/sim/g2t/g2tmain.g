@@ -1,5 +1,8 @@
-* $Id: g2tmain.g,v 1.39 2001/04/06 18:13:12 akio Exp $
+* $Id: g2tmain.g,v 1.40 2001/07/03 23:15:57 nevski Exp $
 * $Log: g2tmain.g,v $
+* Revision 1.40  2001/07/03 23:15:57  nevski
+* forward pion detector added
+*
 * Revision 1.39  2001/04/06 18:13:12  akio
 * Modifications for FPD
 *
@@ -60,7 +63,7 @@ created   22 april 98
    first = .false.
    fill GTTC(1)           ! g2t control
      version = 1                  ! version number
-     nsys    = 24                 ! number of subsystems
+     nsys    = 26                 ! number of subsystems
      edir    = {'Even','t',' '}   ! event output directory name 
      rdir    = {'Run ',' ',' '}   ! run output directory name 
 

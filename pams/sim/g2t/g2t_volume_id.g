@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.34 2001/07/03 15:59:01 nevski Exp $
+* $Id: g2t_volume_id.g,v 1.35 2001/07/03 23:15:57 nevski Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.35  2001/07/03 23:15:57  nevski
+* forward pion detector added
+*
 * Revision 1.34  2001/07/03 15:59:01  nevski
 * phmd added
 *
@@ -584,8 +587,8 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 *15*                                 pmd,     Bedanga
       else If (Csys=='pmd') then
-        volume_id = numbv(1)*1000000+numbv(2)*100000+numbv(3)*1000+numbv(4)*10_
-                    +numv(5)
+        volume_id = numbv(1)*1000000 + numbv(2)*100000 + numbv(3)*1000 _
+                                     + numbv(4)*10     + numbv(5)
 
 *16*
       else

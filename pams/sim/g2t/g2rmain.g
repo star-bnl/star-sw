@@ -1,5 +1,8 @@
-* $Id: g2rmain.g,v 1.2 2000/01/28 00:47:13 nevsky Exp $
+* $Id: g2rmain.g,v 1.3 2001/07/03 23:15:56 nevski Exp $
 * $Log: g2rmain.g,v $
+* Revision 1.3  2001/07/03 23:15:56  nevski
+* forward pion detector added
+*
 * Revision 1.2  2000/01/28 00:47:13  nevsky
 * rich hits may contain up to 5 detectors: RCSI,RGAP,QUAR,FREO,OQUA
 *
@@ -17,6 +20,8 @@
 module    G2Rmain  is g2r converter
 author    Pavel Nevski
 created   22 april 98
+*
+* This routine is needed only to test root detector convertors.
 *
 * description: create and fill two new directories in the CWD:
 *              Run   - with tables mapped to DETM family banks
@@ -59,7 +64,7 @@ created   22 april 98
    first = .false.
    fill GTTC(1)           ! g2r control
      version = 1                  ! version number
-     nsys    = 21                 ! number of subsystems
+     nsys    = 26                 ! number of subsystems
      edir    = {'Even','t',' '}   ! event output directory name 
      rdir    = {'Run ',' ',' '}   ! run output directory name 
 
@@ -147,6 +152,10 @@ created   22 april 98
      spec  = 'emc'        ! specification type
      csys  = 'ECAL'       ! Geant Subsystem
      cdet  = 'ESCI'       ! Sensitive detector
+   fill dete       ! star subsystem
+     cdet  = 'EPCT'       ! Sensitive detector
+   fill dete       ! star subsystem
+     cdet  = 'ELGR'       ! Sensitive detector
    fill dete       ! star subsystem
      ctab  = 'esm'        ! table name
      spec  = 'emc'        ! specification type
