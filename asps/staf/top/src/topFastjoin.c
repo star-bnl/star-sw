@@ -35,10 +35,13 @@ static int topProjectFields(DS_FIELD_T **srcField, size_t *srcIndex,
 *
 */
 #define PLCOPY 100
+
+/* Unused? 
+   static char patchSL97a005[]="@(#)patchSL97a005.c topTablesNotSorted"; */
+
 int topTablesNotSorted(DS_DATASET_T *tbl1,DS_DATASET_T *tbl2,
     char *projectList,
     float **vals1,float **vals2) {
-  static char patchSL97a005[]="@(#)patchSL97a005.c topTablesNotSorted";
   char *scratch,*col1,*col2,plCopy[PLCOPY+1];
   DS_DATASET_T *tbl;
   size_t colnum,col1num,col2num,nrow1,nrow2,nrow,row;
