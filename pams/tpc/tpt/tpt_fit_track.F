@@ -1,5 +1,8 @@
-* $Id: tpt_fit_track.F,v 1.16 2000/08/18 05:22:18 snelling Exp $
+* $Id: tpt_fit_track.F,v 1.17 2001/07/27 23:53:12 hardtke Exp $
 * $Log: tpt_fit_track.F,v $
+* Revision 1.17  2001/07/27 23:53:12  hardtke
+* use tpc_local_to_global_err so that errors are transformed properly
+*
 * Revision 1.16  2000/08/18 05:22:18  snelling
 * fixed my own fix
 *
@@ -90,7 +93,7 @@ C#include "tpt_pointers.inc"
 
       INTEGER ipt, ncir,i,ntry,j,iret,ibad,ient ,ient1
       INTEGER tpt_helix_fit, tpt_find_outlier
-      INTEGER tpt_cross_fact, tte_skip,ipass, ipadrow, tpc_local_to_global
+      INTEGER tpt_cross_fact, tte_skip,ipass, ipadrow, tpc_local_to_global_err
       INTEGER n_good, ipnt_temp(mxpnt)
       LOGICAL enough, good_hit(mxpnt)
       REAL    xcir(mxpnt),ycir(mxpnt),zcir(mxpnt)
@@ -145,7 +148,7 @@ c                wcir(i)=1.0/sigx**2/cf
                 wcir(i)=1.0/sigx**2
                 wlin(i)=1.0/sigz**2
                 xlocal(1)=sigx
-                iret=tpc_local_to_global(int(hit(ient).row/100),xlocal,xglobal)
+                iret=tpc_local_to_global_err(int(hit(ient).row/100),xlocal,xglobal)
                 hit(ient).dx=abs(xglobal(1))
                 hit(ient).dy=abs(xglobal(2))
                 hit(ient).dz=abs(sigz)
