@@ -13,6 +13,7 @@ Purpose: Base classes to support user modules(makers)
     Base class for user maker class. Provide common functionality for all
     makers(modules). Allows to arrange modules in a tree, consisting of modules
     and produced datasets
+    Look on St_TLA_Maker/README for more info
 
 2)  StChain
     Specific class, derived from StMaker. Top maker for chain of makers.
