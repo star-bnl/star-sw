@@ -17,6 +17,7 @@ public:
     StMuTrackFourVec(StMuTrack* track, StLorentzVectorF P, Int_t i);
     StMuTrackFourVec(StMuTrack*);
     StMuTrackFourVec(StMuTrack*, Int_t i);
+    StMuTrackFourVec();
     virtual ~StMuTrackFourVec() {};
     
     //momenta
@@ -45,8 +46,9 @@ public:
 
     Int_t getIndex(void) { return index; };
     
+    void Init(StMuTrack* track, StLorentzVectorF P, Int_t i);
+
 protected:
-    StMuTrackFourVec(); //not implemented
     StMuTrack* mTrack;
     StLorentzVectorF mVec;
     Int_t index;
@@ -124,6 +126,7 @@ inline double StMuTrackFourVec::mass() const
 //charge
 inline double StMuTrackFourVec::charge() const
 {
+    if(!mTrack) return 0;
     return static_cast<double>( mTrack->charge() );
 }
 
