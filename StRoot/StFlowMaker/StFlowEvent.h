@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.24 2001/05/23 18:11:09 posk Exp $
+// $Id: StFlowEvent.h,v 1.25 2001/06/04 18:57:05 rcwells Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -50,7 +50,7 @@ public:
   Char_t*        Pid();
   Bool_t         EtaSubs() const;
   StFlowTrackCollection* TrackCollection() const;
- 
+
   void SetSelections();
   void SetPid(const Char_t*);
   void SetPidsDeviant();
@@ -125,12 +125,15 @@ private:
   static Float_t      mPositronCuts[2];
 
   StFlowEvent*           pFlowEvent;         //!
-  StFlowTrackCollection* pTrackCollection;   //
+  StFlowTrackCollection* pTrackCollection;   //!
 
   ClassDef(StFlowEvent,1)                    // macro for rootcint
+
 };
+
 inline StFlowTrackCollection* StFlowEvent::TrackCollection() const {
-  return pTrackCollection; }
+  return pTrackCollection;
+}
 
 inline Int_t StFlowEvent::EventID() const { return mEventID; }
 
@@ -244,6 +247,9 @@ inline void  StFlowEvent::SetEtaSubs() { mEtaSubs = kTRUE; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.25  2001/06/04 18:57:05  rcwells
+// Adding filling from HbtEvents
+//
 // Revision 1.24  2001/05/23 18:11:09  posk
 // Removed SetPids().
 //

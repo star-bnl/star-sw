@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.22 2001/05/22 20:17:46 posk Exp $
+//  $Id: StFlowMaker.h,v 1.23 2001/06/04 18:57:06 rcwells Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -31,6 +31,8 @@ class StFlowSelection;
 class StIOMaker;
 class StFileI;
 class TChain;
+class StHbtEvent; // Randy added these 2
+class StHbtTrack;
 
 class StFlowMaker : public StMaker {
 
@@ -50,9 +52,11 @@ public:
   void          PicoEventRead(Bool_t flag=kFALSE);
   void          SetPicoEventDir(const Char_t* name="./");
   void          SetPicoEventFileName(StFileI* fileList);
+  void          FillFlowEvent(StHbtEvent* hbtEvent); //rcwells added this
+  StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.22 2001/05/22 20:17:46 posk Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.23 2001/06/04 18:57:06 rcwells Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -109,11 +113,18 @@ inline void StFlowMaker::SetPicoEventFileName(StFileI* fileList) {
   pPicoFileList = fileList;
 }
 
+inline StFlowSelection* StFlowMaker::FlowSelection() {
+	return pFlowSelect;
+}
+
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.23  2001/06/04 18:57:06  rcwells
+//  Adding filling from HbtEvents
+//
 //  Revision 1.22  2001/05/22 20:17:46  posk
 //  Now can do pseudorapidity subevents.
 //
