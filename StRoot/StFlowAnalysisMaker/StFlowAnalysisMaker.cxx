@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.15 2000/01/14 01:35:52 snelling Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.16 2000/01/14 02:09:24 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.16  2000/01/14 02:09:24  snelling
+// Fixed small typo (,)
+//
 // Revision 1.15  2000/01/14 01:35:52  snelling
 // changed include path ../FlowMaker/ to FlowMaker/
 //
@@ -94,7 +97,7 @@ const Float_t StFlowAnalysisMaker::qMax      =    2.;
 
 enum { nEtaBins    = 20,
        nPtBins     = 10,
-       n_qBins     = 50,};
+       n_qBins     = 50};
 // nPhiBins is in StFlowConstants.h
 
 //-----------------------------------------------------------------------
@@ -154,7 +157,7 @@ Int_t StFlowAnalysisMaker::Make() {
 
 void StFlowAnalysisMaker::PrintInfo() {
   cout << "*************************************************************" << endl;
-  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.15 2000/01/14 01:35:52 snelling Exp $"
+  cout << "$Id: StFlowAnalysisMaker.cxx,v 1.16 2000/01/14 02:09:24 snelling Exp $"
        << endl;
   cout << "*************************************************************" << endl;
   if (Debug()) StMaker::PrintInfo();
