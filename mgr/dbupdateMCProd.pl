@@ -20,7 +20,7 @@ my $debugOn=0;
 
 
 ###Set directories to be created for jobfiles
-my $DISK1 = "/star/rcf/disk00001/star";
+my $DISK1 = "/star/rcf/prodlog";
 my $DISKD = "/star/rcf";
 
 my $prodSr = "P00hi";
@@ -29,10 +29,10 @@ my $jobFDir = "/star/u2e/starreco/" . $prodSr ."/requests/";
 my $topHpssReco  =  "/home/starreco/reco";
 
 my @SetG = (
-            "auau130/hijing/b0_3_jet05/year_1h/halffield/hadronic_on",
-            "auau130/hijing/b0_15/year_1h/halffield/hadronic_on",
+#            "auau130/hijing/b0_3_jet05/year_1h/halffield/hadronic_on",
+#            "auau130/hijing/b0_15/year_1h/halffield/hadronic_on",
             "auau130/hijing/b0_3/year_1e/halffield/hadronic_on",
-            "auau130/hijing/b3_6/year_1e/halffield/hadronic_on",
+#            "auau130/hijing/b3_6/year_1e/halffield/hadronic_on",
 );
 
 my @recoDir = ("trs_1i", "tfs_7");
@@ -214,7 +214,7 @@ foreach my $jobnm (@jobSum_set){
 
      @parts = split ("/",$msumDir);
  
-    $JOB_DIR = $jobFDir . $parts[7];
+    $JOB_DIR = $jobFDir . $parts[6];
 #   print "Job Dir = ", $JOB_DIR, "\n";
  
    $jb_news = $JOB_DIR . "/new_jobs/" . $mjobFname;
@@ -399,7 +399,7 @@ foreach my $jobnm (@jobFSum_set){
 }
 
   print "updating FileCatalogT table\n";
-  print "File = ",$mfName, " % ", $mpath," % " ,$mJobId ," % ",$mjobSt, " % ",$mdtStat, " % ",$mcomnt, "\n"; 
+  print "File = ",$mfName, " % ", $mpath," % ",$mcTime," % ",$mJobId ," % ",$mjobSt, " % ",$mdtStat, " % ",$mcomnt, "\n"; 
      &fillDbTable();
          last;
       }  else {
@@ -526,7 +526,7 @@ sub walkHpss {
         $year = $year - 1900;
       }
       
-      if( $year > 98 ) {
+      if( $year > 97 ) {
         $year = 1900 + $year;
       } else {
         $year = 2000 + $year;
