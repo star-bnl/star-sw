@@ -1,7 +1,10 @@
-* $Id: bfc.kumac,v 1.47 1998/09/14 15:11:04 kathy Exp $
+* $Id: bfc.kumac,v 1.48 1998/09/14 15:14:56 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.48  1998/09/14 15:14:56  kathy
+* clean up
+*
 * Revision 1.47  1998/09/14 15:11:04  kathy
-* removed input_data_prefix from input to macro bfc and now have directory and file read in from input_data_file
+*  removed input_data_prefix from input to macro bfc and now have directory and file read in from input_data_file
 *
 * Revision 1.46  1998/09/11 21:22:07  kathy
 *  made dout default in bfc instead of evout
@@ -177,6 +180,8 @@
 * editted 9/11/98 K. Turner - check if problem during read from 
 *                             read_table_from_file and skip out
 *                             
+* editted 9/14/98 K. Turner - removed input_data_prefix as input to macro bfc
+*                             and input put both dir + file in input_data_file
 * ******************************************************************************
 * -- DICTIONARY OF INPUTS TO BFC.KUMAC --
 * TOP        - top level directory to search for kumacs 
@@ -265,7 +270,7 @@
 * drhd  - dst run header
 * fzout - write out fz file from gstar (only works if you run gstar!)
 * evout - write event & run directories into xdf file
-*  dout - write run/dst and event/data/global/dst directories into xdf file
+* dout  - write run/dst and event/data/global/dst directories into xdf file
 *
 * 
 * 
