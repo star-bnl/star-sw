@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRun.cxx,v 1.7 1999/05/23 03:17:15 perev Exp $
+ * $Id: StRun.cxx,v 2.0 1999/10/12 18:42:29 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,46 +13,27 @@
  ***************************************************************************
  *
  * $Log: StRun.cxx,v $
- * Revision 1.7  1999/05/23 03:17:15  perev
- * mRunSummary=0 added
- *
- * Revision 1.7  1999/05/23 03:17:15  perev
- * mRunSummary=0 added
- *
- * Revision 1.6  1999/05/04 20:59:25  fisyak
- * move CVS Tag to StRun
- *
- * Revision 1.5  1999/04/30 13:16:28  fisyak
- * add StArray for StRootEvent
- *
- * Revision 1.4  1999/04/28 22:27:34  fisyak
- * New version with pointer instead referencies
- *
- * Revision 1.5  1999/02/22 19:53:52  wenaus
- * cleaner deleting
- *
- * Revision 1.4  1999/02/10 21:50:31  wenaus
- * Plug memory leaks
- *
- * Revision 1.3  1999/01/30 23:03:14  wenaus
- * table load intfc change; include ref change
- *
- * Revision 1.2  1999/01/15 22:53:49  wenaus
- * version with constructors for table-based loading
+ * Revision 2.0  1999/10/12 18:42:29  ullrich
+ * Completely Revised for New Version
  *
  * Revision 2.0  1999/10/12 18:42:29  ullrich
+ * Completely Revised for New Version
+ *
  **************************************************************************/
+#include <algorithm>
+#include <iostream.h>
+#include "StRun.h"
+#include "StRunSummary.h"
 #include "tables/run_header.h"
-static const Char_t rcsid[] = "$Id: StRun.cxx,v 1.7 1999/05/23 03:17:15 perev Exp $";
+#include "tables/dst_run_summary.h"
+#include "SystemOfUnits.h"
 
-TString StRun::mCvsTag = "$Id: StRun.cxx,v 1.7 1999/05/23 03:17:15 perev Exp $";
-static const char rcsid[] = "$Id: StRun.cxx,v 1.7 1999/05/23 03:17:15 perev Exp $";
-  StRun::StRun():
-St_DataSet("Run"),
-mCVSTag("$Name:  $")
+TString StRun::mCvsTag = "$Id: StRun.cxx,v 2.0 1999/10/12 18:42:29 ullrich Exp $";
+static const char rcsid[] = "$Id: StRun.cxx,v 2.0 1999/10/12 18:42:29 ullrich Exp $";
+
 ClassImp(StRun)
-    mType = "";
 
+StRun::StRun(): St_DataSet("StRun")
 {
     mId = 0;
     mBfcId = 0;
@@ -60,14 +41,14 @@ ClassImp(StRun)
     mCenterOfMassEnergy = 0;
     mEastA = 0;
     mEastZ = 0;
+    mWestA = 0;
     mWestZ = 0;
     mSummary = 0;
-StRun::StRun(dst_run_header_st& runHdr, dst_run_summary_st& runSum):
-St_DataSet("Run"),
-mCVSTag("$Name:  $")
+    mMagneticFieldZ = 0;
 }
-    mType = runHdr.event_type;
-    mId = runHdr.run_id;
+
+void StRun::initFromTable(const run_header_st& runHdr)
+{
     mType  = runHdr.event_type;
     mId    = runHdr.exp_run_id;
     mBfcId = runHdr.bfc_run_id;
@@ -75,65 +56,118 @@ mCVSTag("$Name:  $")
     mCenterOfMassEnergy = runHdr.sqrt_s;
     mEastA = runHdr.east_a;
     mEastZ = runHdr.east_z;
-    St_DataSet("StRun")
-{
-StRun::StRun(dst_run_header_st& runHdr)
-
-    mType = runHdr.event_type;
-    mId = runHdr.run_id;
-    mTriggerMask = runHdr.trig_mask;
-    mCenterOfMassEnergy = runHdr.sqrt_s;
-    mEastA = runHdr.east_a;
-    mEastZ = runHdr.east_z;
     mWestA = runHdr.west_a;
     mWestZ = runHdr.west_z;
     mSummary = 0;
+    mMagneticFieldZ = runHdr.field;
+}
+
+StRun::StRun(const run_header_st& runHdr) :
+    St_DataSet("StRun")
+{
+    initFromTable(runHdr);
+}
+
+StRun::StRun(const run_header_st& runHdr, const dst_run_summary_st& runSum):
+    St_DataSet("StRun")
 {
     initFromTable(runHdr);
     mSummary = new StRunSummary(runSum);
 }
-    delete mSummary; mSummary=0;
+
+StRun::~StRun()
 {
     delete mSummary;
-const StRun& StRun::operator=(const StRun&) { return *this; } // private
+    mSummary = 0;
+}
 
-StRun::StRun(const StRun&) { /* noop */ }; // private
-
-Int_t StRun::operator==(const StRun& r) const
-
-    return mId == r.mId;
+Int_t
 StRun::operator==(const StRun& r) const
 {
-Int_t StRun::operator!=(const StRun& r) const
+    return mId == r.mId && mBfcId == r.mBfcId;
+}
 
-    return !(r == *this);  // negate operator==
+Int_t
 StRun::operator!=(const StRun& r) const
 {
-void StRun::setId(Long_t val) { mId = val; }
-    
-void StRun::setType(const Char_t* val) { mType = val; }
-    
-void StRun::setTriggerMask(Long_t val) { mTriggerMask = val; }
+    return !(r == *this);
+}
 
-void StRun::setCenterOfMassEnergy(Double_t val) { mCenterOfMassEnergy = val; }
-
-void StRun::setBeamMassNumber(StBeamDirection dir, Short_t val)
+const TString&
+StRun::cvsTag() { return mCvsTag; }
 
 void
-	mEastA = val;
+StRun::setId(Long_t val) { mId = val; }
+    
+void
+StRun::setBfcId(Long_t val) { mBfcId = val; }
+    
+void
+StRun::setType(const Char_t* val) { mType = val; }
+
+void
+StRun::setTriggerMask(Long_t val) { mTriggerMask = val; }
+
+void
+StRun::setCenterOfMassEnergy(Double_t val) { mCenterOfMassEnergy = val; }
+
+void
+StRun::setBeamMassNumber(StBeamDirection dir, Short_t val)
 {
-	mWestA = val;
+    if (dir == east)
         mEastA = val;
     else
-void StRun::setBeamCharge(StBeamDirection dir, Short_t val)
+        mWestA = val;
+}
 
 void
-	mEastZ = val;
+StRun::setBeamCharge(StBeamDirection dir, Short_t val)
 {
-	mWestZ = val;
+    if (dir == east)
         mEastZ = val;
     else
-void StRun::setSummary(StRunSummary* val) { mSummary = val; }
+        mWestZ = val;
+}
+
+void
+StRun::setSummary(StRunSummary* val) { mSummary = val; }
+
+void
+StRun::setMagneticField(Double_t val) { mMagneticFieldZ = val; }
+
+Long_t
+StRun::id() const { return mId; }
+
+Long_t
+StRun::bfcId() const { return mBfcId; }
+
+const TString&
+StRun::type() const { return mType; }
+
+Long_t
+StRun::triggerMask() const { return mTriggerMask; }
+
+Double_t
+StRun::centerOfMassEnergy() const { return mCenterOfMassEnergy; }
+
+Double_t
+StRun::magneticField() const { return mMagneticFieldZ; }
+
+Short_t
+StRun::beamMassNumber(StBeamDirection dir) const
+{
+    return dir == east ? mEastA : mWestA;
+}
+
+Short_t
+StRun::beamCharge(StBeamDirection dir) const
+{
+    return dir == east ? mEastZ : mWestZ;
+}
+
+StRunSummary*
+StRun::summary() { return mSummary; }
+
 const StRunSummary*
 StRun::summary() const { return mSummary; }
 

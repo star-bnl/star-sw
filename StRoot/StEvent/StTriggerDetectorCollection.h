@@ -1,8 +1,8 @@
 /***************************************************************************
  *
- * $Id: StTriggerDetectorCollection.h,v 1.6 1999/06/24 17:33:01 fisyak Exp $
+ * $Id: StTriggerDetectorCollection.h,v 2.0 1999/10/12 18:43:20 ullrich Exp $
  *
- * Author: Thomas Ullrich, Jan 1999
+ * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
  *
  * Description:
@@ -10,70 +10,43 @@
  ***************************************************************************
  *
  * $Log: StTriggerDetectorCollection.h,v $
- * Revision 1.6  1999/06/24 17:33:01  fisyak
- * Replace Collection by value to Collection by pointer for TBrowser
- *
- * Revision 1.6  1999/06/24 17:33:01  fisyak
- * Replace Collection by value to Collection by pointer for TBrowser
- *
- * Revision 1.5  1999/04/30 13:16:30  fisyak
- * add StArray for StRootEvent
- *
- * Revision 1.4  1999/04/28 22:27:39  fisyak
- * New version with pointer instead referencies
- *
- * Revision 1.2  1999/01/15 22:54:14  wenaus
- * version with constructors for table-based loading
+ * Revision 2.0  1999/10/12 18:43:20  ullrich
+ * Completely Revised for New Version
  *
  **************************************************************************/
 #ifndef StTriggerDetectorCollection_hh
 #define StTriggerDetectorCollection_hh
 #include "StObject.h"
-#include "StZdcSummary.h"
-#include "StVpdSummary.h"
-#include "StZdcSegment.h"
-#include "StVpdCounter.h"
-#include "StMwcSector.h"
-#include "StCtbCounter.h"
-#include "StCtbCounter.h"
-#include "StMwcSector.h"
-#include "StVpdCounter.h"
-#include "StZdcSegment.h"
+#include "StCtbTriggerDetector.h"
+#include "StMwcTriggerDetector.h"
+#include "StVpdTriggerDetector.h"
+#include "StZdcTriggerDetector.h"
+
+class dst_TrgDet_st;
 
 class StTriggerDetectorCollection : public StObject {
 public:
     StTriggerDetectorCollection();
-    ~StTriggerDetectorCollection();
-    // StTriggerDetectorCollection(const StTriggerDetectorCollection&);
-    // const StTriggerDetectorCollection & operator=(const StTriggerDetectorCollection&);
+    StTriggerDetectorCollection(const dst_TrgDet_st&);
+    // StTriggerDetectorCollection(const StTriggerDetectorCollection&);            use default
+    // StTriggerDetectorCollection& operator=(const StTriggerDetectorCollection&); use default
+    virtual ~StTriggerDetectorCollection();
     
-    StVecPtrCtbCounter& ctbCounters();
-    StVecPtrMwcSector&  mwcSectors();
-    StVecPtrVpdCounter& vpdCounters();
-    StVecPtrZdcSegment& zdcSegments();
-    StZdcSummary&    zdcSummary();
-    StVpdSummary&    vpdSummary();
-
+    StCtbTriggerDetector&       ctb();
+    const StCtbTriggerDetector& ctb() const;
+    StMwcTriggerDetector&       mwc();
+    const StMwcTriggerDetector& mwc() const;
+    StVpdTriggerDetector&       vpd();
+    const StVpdTriggerDetector& vpd() const;
+    StZdcTriggerDetector&       zdc();
+    const StZdcTriggerDetector& zdc() const;
+    
 protected:
-    StVecPtrCtbCounter *mCtbCounters;
-    StVecPtrMwcSector  *mMwcSectors;
-    StVecPtrVpdCounter *mVpdCounters;
-    StVecPtrZdcSegment *mZdcSegments;
-    StVpdSummary       *mVpdSummary;
-    StZdcSummary       *mZdcSummary;
-  ClassDef(StTriggerDetectorCollection,1)  //StTriggerDetectorCollection structure
+    StCtbTriggerDetector mCtb;
+    StMwcTriggerDetector mMwc;
+    StVpdTriggerDetector mVpd;
+    StZdcTriggerDetector mZdc;
+    
+    ClassDef(StTriggerDetectorCollection,1)
 };
-
-inline StVecPtrCtbCounter& StTriggerDetectorCollection::ctbCounters() { return *mCtbCounters; }
-
-inline StVecPtrMwcSector&  StTriggerDetectorCollection::mwcSectors() { return *mMwcSectors; }
-
-inline StVecPtrVpdCounter& StTriggerDetectorCollection::vpdCounters() { return *mVpdCounters; }
-
-inline StVecPtrZdcSegment& StTriggerDetectorCollection::zdcSegments() { return *mZdcSegments; }
-
-inline StZdcSummary& StTriggerDetectorCollection::zdcSummary() { return *mZdcSummary; }
-
-inline StVpdSummary& StTriggerDetectorCollection::vpdSummary() { return *mVpdSummary; }
-
 #endif

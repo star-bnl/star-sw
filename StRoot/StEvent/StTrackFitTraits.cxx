@@ -1,11 +1,8 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.cxx,v 1.4 1999/04/28 22:27:37 fisyak Exp $
+ * $Id: StTrackFitTraits.cxx,v 2.0 1999/10/12 18:42:59 ullrich Exp $
  *
- * Author: Thomas Ullrich, Jan 1999
- *
- * History:
- * 15/01/1999 T. Wenaus  Add table-based constructor
+ * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
  *
  * Description:
@@ -13,62 +10,87 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.cxx,v $
- * Revision 1.4  1999/04/28 22:27:37  fisyak
- * New version with pointer instead referencies
- *
- * Revision 1.4  1999/04/28 22:27:37  fisyak
- * New version with pointer instead referencies
- *
- * Revision 1.2  1999/01/15 22:54:05  wenaus
- * version with constructors for table-based loading
+ * Revision 2.0  1999/10/12 18:42:59  ullrich
+ * Completely Revised for New Version
  *
  * Revision 2.4  2000/01/20 14:43:39  ullrich
+ * Fixed bug in numberOfFitPoints(). Sum was wrong.
+ *
+ * Revision 2.3  1999/12/21 15:09:18  ullrich
+ * Modified to cope with new compiler version on Sun (CC5.0).
  *
  * Revision 2.2  1999/11/01 12:45:14  ullrich
-static const Char_t rcsid[] = "$Id: StTrackFitTraits.cxx,v 1.4 1999/04/28 22:27:37 fisyak Exp $";
+ * Modified unpacking of point counter
 #include "tables/dst_track.h"
-ClassImp(StTrackFitTraits)
+ * Revision 2.1  1999/10/28 22:27:32  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.0  1999/10/12 18:42:59  ullrich
-    mCovariantMatrix = StMatrixF(5,5,0);
-    mChiSquaredInXY = 0;              
-    mChiSquaredInPlaneZ = 0;          
-    mDegreesOfFreedom = 0;            
-    mNumberOfFitPoints = 0;           
-    mNumberOfPossiblePoints = 0;      
-    mQualityBitmap = 0;                  
+ * Completely Revised for New Version
+ *
+#include "StParticleTable.hh"
+#include "tables/St_dst_track_Table.h"
 #if !defined(ST_NO_NAMESPACES)
 using std::fill_n;
-StTrackFitTraits::StTrackFitTraits(dst_track_st* trk)
+using std::copy;
 #endif
-    mDegreesOfFreedom = trk->ndegf;
-    mQualityBitmap = trk->iflag;
-    mNumberOfFitPoints = trk->n_fit_point;
-    mNumberOfPossiblePoints = trk->n_max_point;
-    mChiSquaredInXY = trk->chisq[0];
-    mChiSquaredInPlaneZ = trk->chisq[1];
-    mCovariantMatrix = StMatrixF(5,5,0);
-    Int_t i; for (i=0; i<5; i++) {
-      mCovariantMatrix[i][i] = trk->covar_diag[i];
-    }
+
+ClassImp(StTrackFitTraits)
+
+static const char rcsid[] = "$Id: StTrackFitTraits.cxx,v 2.0 1999/10/12 18:42:59 ullrich Exp $";
 
 StTrackFitTraits::StTrackFitTraits()
-StTrackFitTraits::~StTrackFitTraits() { /* noop */ }
 {
-void StTrackFitTraits::setCovariantMatrix(const StMatrixF& val) { mCovariantMatrix = val; }         
-    mNumberOfFitPoints = t.n_fit_point;
-void StTrackFitTraits::setChiSquaredInXY(Float_t val) { mChiSquaredInXY = val; }          
+    mPidHypothesis = 0;
+    mNumberOfFitPoints = 0;
+    fill_n(mChi2, 2, 0);
+    fill_n(mCovariantMatrix, 15, 0);
 }
-void StTrackFitTraits::setChiSquaredInPlaneZ(Float_t val) { mChiSquaredInPlaneZ = val; }      
+
+StTrackFitTraits::StTrackFitTraits(const dst_track_st& t)
+{
+    mPidHypothesis = t.pid;
+    mNumberOfFitPoints = t.n_fit_point;
+    copy(t.chisq+0, t.chisq+2, mChi2);
+    copy(t.covar+0, t.covar+15, mCovariantMatrix);
+}
+
+StTrackFitTraits::StTrackFitTraits(UShort_t pid, UShort_t nfp,
+                 Float_t chi[2], Float_t cov[15])
+{
+StTrackFitTraits::numberOfFitPoints() const {return mNumberOfFitPoints;}
 	return mNumberOfFitPoints;
-void StTrackFitTraits::setDegreesOfFreedom(Short_t val) { mDegreesOfFreedom = val; }        
+	break;
+    case kSsdId:
+	return mNumberOfFitPoints/10000;
+	break;
+    default:
+	return 0;
+    }    
+}
 
-void StTrackFitTraits::setNumberOfFitPoints(Short_t val) { mNumberOfFitPoints = val; }       
+StParticleDefinition*
+StTrackFitTraits::pidHypothesis() const
+{
+    return StParticleTable::instance()->findParticleByGeantId(mPidHypothesis);
+}
 
-void StTrackFitTraits::setNumberOfPossiblePoints(Short_t val) { mNumberOfPossiblePoints = val; }  
+Double_t
+StTrackFitTraits::chi2(UInt_t i) const
+{
+    if (i < 2)
+        return mChi2[i];
+    else
+        return 0;
+}
+
+StMatrixF
+StTrackFitTraits::covariantMatrix() const
+{
+    StMatrixF m;
+    m(1,1) = mCovariantMatrix[0];
+    m(1,2) = m(2,1) = mCovariantMatrix[1];
     m(1,3) = m(3,1) = mCovariantMatrix[2];
-void StTrackFitTraits::setQualityBitmap(Short_t val) { mQualityBitmap = val; }           
     m(1,4) = m(4,1) = mCovariantMatrix[3];
     m(1,5) = m(5,1) = mCovariantMatrix[4];
     m(2,2) = mCovariantMatrix[5];

@@ -1,11 +1,8 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 1.6 1999/05/05 22:36:42 fisyak Exp $
+ * $Id: StTrack.cxx,v 2.0 1999/10/12 18:42:54 ullrich Exp $
  *
- * Author: Thomas Ullrich, Jan 1999
- *
- * History:
- * 15/01/1999 T. Wenaus  Add table-based constructor
+ * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
  *
  * Description:
@@ -13,78 +10,187 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
- * Revision 1.6  1999/05/05 22:36:42  fisyak
- * restore relatedTracks
- *
- * Revision 1.6  1999/05/05 22:36:42  fisyak
- * restore relatedTracks
- *
- * Revision 1.5  1999/04/28 22:27:37  fisyak
- * New version with pointer instead referencies
- *
- * Revision 1.6  1999/03/07 15:31:38  wenaus
- * Order constructor inits to remove g+ warnings
- *
- * Revision 1.5  1999/02/24 12:48:59  ullrich
- * Added argument (h) to constructor needed to instatiate helix
- *
- * Revision 1.4  1999/02/15 16:17:03  wenaus
- * fix Double_t& -> Double_t referencing bug
- *
- * Revision 1.3  1999/02/12 02:01:19  wenaus
- * New track constructor to load helix params independently of table
- *
- * Revision 1.2  1999/01/15 22:54:02  wenaus
- * version with constructors for table-based loading
+ * Revision 2.0  1999/10/12 18:42:54  ullrich
+ * Completely Revised for New Version
  *
  * Revision 2.9  1999/12/01 15:58:08  ullrich
  * New decoding for dst_track::method. New enum added.
  *
-static const Char_t rcsid[] = "$Id: StTrack.cxx,v 1.6 1999/05/05 22:36:42 fisyak Exp $";
+ * Revision 2.8  1999/12/01 00:15:27  didenko
+ * temporary solution to compile the library
+#include "tables/dst_track.h"
+ * Revision 2.7  1999/11/29 17:32:42  ullrich
+ * Added non-const method pidTraits().
+ *
+ * Revision 2.6  1999/11/15 18:48:20  ullrich
+ * Adapted new enums for dedx and track reco methods.
+ *
+ * Revision 2.5  1999/11/09 15:44:14  ullrich
  * Removed method unlink() and all calls to it.
+ *
+ * Revision 2.4  1999/11/05 15:27:04  ullrich
+ * Added non-const versions of several methods
+ *
+ * Revision 2.3  1999/11/04 13:32:00  ullrich
+ * Added non-const versions of some methods
+ *
+ * Revision 2.2  1999/11/01 12:45:02  ullrich
+ * Modified unpacking of point counter
+ *
+ * Revision 2.1  1999/10/28 22:27:21  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
+ *
+ * Revision 2.0  1999/10/12 18:42:54  ullrich
+ * Completely Revised for New Version
+ *
+ **************************************************************************/
+#include "StTrack.h"
+#include "tables/St_dst_track_Table.h"
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.0 1999/10/12 18:42:54 ullrich Exp $";
+#include "StVertex.h"
+#include "StTrackGeometry.h"
+    mReconstructionMethod = 0;
+#include "StTrackPidTraits.h"
+#include "StTrackNode.h"
+
 ClassImp(StTrack)
-ClassImp(StTrack)
-StTrack::StTrack() : mHelix(0, 0, 0, StThreeVectorD())
-static const char rcsid[] = "$Id: StTrack.cxx,v 1.6 1999/05/05 22:36:42 fisyak Exp $";
-    mStartVertex = 0;
-    mStopVertex   = 0;
+
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.0 1999/10/12 18:42:54 ullrich Exp $";
+
+StTrack::StTrack()
+{
+    mFlag = 0;
+    mKey = 0;
+    mEncodedMethod = 0;
+    mImpactParameter = 0;
+    mReconstructionMethod = track.method;
+    mNumberOfPossiblePoints = 0;
+    mGeometry = 0;
+    mDetectorInfo = 0;
+    mNode = 0;
+        mGeometry = track.mGeometry->clone();
+
+StTrack::StTrack(const dst_track_st& track) :
     mTopologyMap(track.map), mFitTraits(track)
 {
-StTrack::StTrack(dst_track_st* trk) : 
-  mHelix(0, 0, 0, StThreeVectorD()), mFitTraits(trk), 
-  mStartVertex(0), mStopVertex(0)
+    mKey = track.id;
+    mFlag = track.iflag;
     mEncodedMethod = track.method;
+    mReconstructionMethod = track.mReconstructionMethod;
+    mLength = track.length;
+    mNumberOfPossiblePoints = track.n_max_point;
+    mGeometry = 0;                                // has to come from outside
+    mDetectorInfo = 0;                            // has to come from outside
+    mNode = 0;                                    // has to come from outside
+}
+
+StTrack::StTrack(const StTrack& track)
+{
+    mKey = track.mKey;
+    mFlag = track.mFlag;
+    mEncodedMethod = track.mEncodedMethod;
+    mImpactParameter = track.mImpactParameter;
+    mLength = track.mLength;
+    mNumberOfPossiblePoints = track.mNumberOfPossiblePoints;
+            mGeometry = track.mGeometry->clone();
+    mFitTraits = track.mFitTraits;
+    if (track.mGeometry)
+        mGeometry = track.mGeometry->copy();
+        mPidTraitsVec = track.mPidTraitsVec;
         mGeometry = 0;
     mDetectorInfo = track.mDetectorInfo;       // not owner anyhow
-StTrack::StTrack(dst_track_st* trk,
-                 Double_t curvature,
-                 Double_t dip,
-                 Double_t phase,
-                 StThreeVectorD& origin,
-		 Int_t h) : 
-  mHelix(curvature, dip, phase, origin, h), mFitTraits(trk),
-  mStartVertex(0), mStopVertex(0)
-{  
+        mReconstructionMethod = track.mReconstructionMethod;
+    mNode = 0;                                 // do not assume any context here
+}
+
+StTrack&
 StTrack::operator=(const StTrack& track)
 {
+    if (this != &track) {
+        if (mGeometry)
+            delete mGeometry;
+        mFlag = track.mFlag;
+        mKey = track.mKey;
         mEncodedMethod = track.mEncodedMethod;
-StTrack::~StTrack() { /* noop */ }
+        mImpactParameter = track.mImpactParameter;
+        mLength = track.mLength;
         mNumberOfPossiblePoints = track.mNumberOfPossiblePoints;
-Int_t StTrack::operator==(const StTrack& t) const
+        mTopologyMap = track.mTopologyMap;
+    if (mNode)
+        mNode->unlink(this);
+        mFitTraits = track.mFitTraits;
+        if (mGeometry) delete mGeometry;
+        if (track.mGeometry)
+            mGeometry = track.mGeometry->copy();
+        else
+            mGeometry = 0;
+        mDetectorInfo = track.mDetectorInfo;       // not owner anyhow
+	mPidTraitsVec = track.mPidTraitsVec;
+        mNode = 0;                                 // do not assume any context here
+    }
+StTrack::numberOfPossiblePoints() const { return mNumberOfPossiblePoints; }
+}
+
+UShort_t
+StTrack::numberOfPossiblePoints(StDetectorId det) const
+    switch (det) {
+    case kFtpcWestId:
+    case kFtpcEastId:
+    case kTpcId:
+	return mNumberOfPossiblePoints%1000;
+	break;
+    case kSvtId:
+	return (mNumberOfPossiblePoints%10000)/1000;
+	break;
+	break;
+    default:
+	return 0;
+    }
+    for (int i=0; i<mPidTraitsVec.size(); i++)
+
+const StTrackTopologyMap&
+StTrack::topologyMap() const { return mTopologyMap; }
+
 const StTrackGeometry*
-    return t.mHelix == mHelix;
+StTrack::geometry() const { return mGeometry; }
 
 StTrackGeometry*
-Int_t StTrack::operator!=(const StTrack& t) const
+StTrack::geometry() { return mGeometry; }
 
-    return !(t == *this);
+const StTrackFitTraits&
+StTrack::fitTraits() const { return mFitTraits; }
+
+const StPtrVecTrackPidTraits
+StTrack::detectorInfo() const { return mDetectorInfo; }
+
+const StSPtrVecTrackPidTraits&
+StTrack::pidTraits() const { return mPidTraitsVec; }
+
+StPtrVecTrackPidTraits
+StTrack::pidTraits(StDetectorId det) const
+{
+    StPtrVecTrackPidTraits vec;
+    for (unsigned int i=0; i<mPidTraitsVec.size(); i++)
+        if (mPidTraitsVec[i]->detector() == det)
+            vec.push_back(mPidTraitsVec[i]);
+    return vec;
+}
+
+const StParticleDefinition*
+StTrack::pidTraits(StPidAlgorithm& pid) const
 {
     return pid(*this, mPidTraitsVec);
-void StTrack::setHelix(const StPhysicalHelixD& val) { mHelix = val; }
+StTrack::setReconstructionMethod(UChar_t val) { mReconstructionMethod = val; }
+
+const StTrackNode*
+StTrack::node() const { return mNode; }
+
 StTrackNode*
-void StTrack::setStartVertex(StVertex* val) { mStartVertex = val; }
+StTrack::node() { return mNode; }
+
 void
-void StTrack::setStopVertex(StVertex* val) { mStopVertex = val; }
+StTrack::setFlag(Short_t val) { mFlag = val; }
+
 void
 StTrack::setEncodedMethod(UShort_t val) { mEncodedMethod = val; }
 

@@ -1,8 +1,8 @@
 /***************************************************************************
  *
- * $Id: StTrackPidTraits.h,v 1.6 1999/05/02 00:00:18 fisyak Exp $
+ * $Id: StTrackPidTraits.h,v 2.0 1999/10/12 18:43:07 ullrich Exp $
  *
- * Author: Thomas Ullrich, Jan 1999
+ * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
  *
  * Description:
@@ -10,48 +10,35 @@
  ***************************************************************************
  *
  * $Log: StTrackPidTraits.h,v $
- * Revision 1.6  1999/05/02 00:00:18  fisyak
- * Add default ctors
- *
- * Revision 1.6  1999/05/02 00:00:18  fisyak
- * Add default ctors
- *
- * Revision 1.5  1999/04/30 13:16:30  fisyak
- * add StArray for StRootEvent
- *
- * Revision 1.4  1999/04/28 22:27:38  fisyak
- * New version with pointer instead referencies
- *
- * Revision 1.3  1999/04/08 15:01:18  ullrich
- * Added dE/dx PID from TPC.
- *
- * Revision 1.2  1999/01/15 22:54:10  wenaus
- * version with constructors for table-based loading
+ * Revision 2.0  1999/10/12 18:43:07  ullrich
+ * Completely Revised for New Version
  *
  * Revision 2.2  1999/11/15 18:48:28  ullrich
  * Adapted new enums for dedx and track reco methods.
  *
+ * Revision 2.1  1999/10/28 22:27:52  ullrich
+ * Adapted new StArray version. First version to compile on Linux and Sun.
  *
-class StGlobalTrack;
-class StDedxPid;
+ * Revision 2.0  1999/10/12 18:43:07  ullrich
  * Completely Revised for New Version
-#include "StObject.h"
  *
  **************************************************************************/
-  StTrackPidTraits() : mTpcDedxPid() {/* noop */};
-  StTrackPidTraits(StGlobalTrack*);
-  ~StTrackPidTraits();
+#ifndef StTrackPidTraits_hh
+#define StTrackPidTraits_hh
+#include "StObject.h"
+#include "StEnumerations.h"
+
+class dst_dedx_st;
+
+class StTrackPidTraits : public StObject {
+public:
     StTrackPidTraits();
-  const StDedxPid* tpcDedxPid() const;
+    StTrackPidTraits(StDetectorId, Short_t);
+    StTrackPidTraits(const dst_dedx_st&);
+    // StTrackPidTraits(const StTrackPidTraits&);            use default
     Short_t method() const;
-private:
-  StDedxPid *mTpcDedxPid;
-  // StDedxPid *mSvtDedxPid;  
-  ClassDef(StTrackPidTraits,1)  //StTrackPidTraits structure
+    Short_t detector() const;
     StDedxMethod method() const;
-
-inline const StDedxPid* StTrackPidTraits::tpcDedxPid() const {return mTpcDedxPid;}
-
     
 
 protected:

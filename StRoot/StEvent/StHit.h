@@ -1,11 +1,8 @@
 /***************************************************************************
  *
- * $Id: StHit.h,v 1.6 1999/05/03 01:36:18 fisyak Exp $
+ * $Id: StHit.h,v 2.0 1999/10/12 18:42:21 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
- *
- * History:
- * 15/01/1999 T. Wenaus  Add table-based constructor
  ***************************************************************************
  *
  * Description:
@@ -13,80 +10,61 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
- * Revision 1.6  1999/05/03 01:36:18  fisyak
- * Add Print
- *
- * Revision 1.6  1999/05/03 01:36:18  fisyak
- * Add Print
- *
- * Revision 1.5  1999/04/30 13:16:28  fisyak
- * add StArray for StRootEvent
- *
- * Revision 1.4  1999/04/28 22:27:33  fisyak
- * New version with pointer instead referencies
- *
- * Revision 1.5  1999/04/19 20:46:06  ullrich
- * Made virtual class
- *
- * Revision 1.4  1999/03/23 21:51:47  ullrich
- * Removed table-based constructor.
- *
- * Revision 1.3  1999/01/30 23:03:13  wenaus
- * table load intfc change; include ref change
- *
- * Revision 1.2  1999/01/15 22:53:46  wenaus
- * version with constructors for table-based loading
+ * Revision 2.0  1999/10/12 18:42:21  ullrich
+ * Completely Revised for New Version
  *
  * Revision 2.2  2000/06/01 21:38:56  ullrich
  * Added member mFlag and access member flag() and setFlag().
  *
  * Revision 2.1  1999/10/28 22:25:50  ullrich
-#include "StObject.h"
-#include <iostream.h>
-#include "StThreeVectorF.hh"
+ * Adapted new StArray version. First version to compile on Linux and Sun.
+ *
+ * Revision 2.0  1999/10/12 18:42:21  ullrich
  * Completely Revised for New Version
-class StHit : public StObject {
+ *
+#include "StArray.h"
+#ifndef StHit_hh
+#define StHit_hh
 
-  StHit();
-  StHit(const StThreeVectorF&,
-	const StThreeVectorF&,
-	Float_t, UChar_t = 0);
-  // StHit(const StSvtHit&);                  use default
-  // const StHit & operator=(const StHit&);   use default
-  virtual ~StHit();
-    
-  Int_t operator==(const StHit&) const;
-  Int_t operator!=(const StHit&) const;
-    
-  virtual const StThreeVectorF& position() const;
-  virtual const StThreeVectorF& positionError() const;
-  virtual Float_t                       charge() const;
-  virtual UChar_t               trackReferenceCount() const;	
-  virtual void                   Print(Option_t *opt=""); // *MENU*
+#include "StMeasuredPoint.h"
+#include "StEnumerations.h"
+#include "StContainers.h"
+
+class StTrackNode;
+class StTrack;
+
 class StHit : public StMeasuredPoint {
-  virtual void setPosition(const StThreeVectorF&);
-  virtual void setPositionError(const StThreeVectorF&);
-  virtual void setCharge(Float_t);
-  virtual void setTrackReferenceCount(UChar_t);
+public:
+    StHit();
+    StHit(const StThreeVectorF&,
+          const StThreeVectorF&,
+          ULong_t, Float_t, UChar_t = 0);
+    // StHit(const StHit&);            use default
+    // StHit& operator=(const StHit&); use default
+    ~StHit();
+
+    Int_t operator==(const StHit&) const;
+    Int_t operator!=(const StHit&) const;
+    
+    UChar_t         trackReferenceCount() const;
+    StDetectorId    detector() const;
+    UChar_t         flag() const;
     StThreeVectorF  positionError() const;     // overwrite inherited
     
-  StThreeVectorF mPosition;
-  StThreeVectorF mPositionError;
-  Float_t                mCharge;
-  UChar_t        mTrackRefCount;    
-  ClassDef(StHit,1)  //StHit structure
+    void setCharge(Float_t);
+    void setFlag(UChar_t);
+    void setTrackReferenceCount(UChar_t);
+    void setHardwarePosition(ULong_t);
+    void setPositionError(const StThreeVectorF&);
+    
+    virtual StPtrVecTrack relatedTracks(const StSPtrVecTrackNode&, StTrackType);
+    
 protected:
     
-ostream&  operator<<(ostream& os, const StHit&);
-
-inline const StThreeVectorF& StHit::position() const { return mPosition; }
-
-inline const StThreeVectorF& StHit::positionError() const { return mPositionError; }
-
-inline Float_t StHit::charge() const { return mCharge; }
-
-inline UChar_t StHit::trackReferenceCount() const { return mTrackRefCount; }	
-
+    ULong_t        mHardwarePosition;
+    UChar_t        mTrackRefCount;
+    StThreeVectorF mPositionError;
+    UChar_t        mFlag;
 
     StObject* clone();
     ClassDef(StHit,1)
