@@ -20,6 +20,12 @@ struct trigDetSums {
    double  mult;   /*   mult rate  */
    double  L0;   /*   L0 Rate  */
    double  bbcX;   /*   BBC and Rate  */
-   double  bbcXctbTOFp;   /*   BBCAnd x ctbTOFp rate  */
+   double  bbcXctbTOFp;   /*   BBCAnd + ctbTOFp rate  */
+   double  bbcWest;   /*   --BBC West--  */
+   double  bbcEast;   /*   --BBC East--  */
+   double  bbcYellowBkg;   /*   --(BBC Eastdelayed) and (BBC West)--  */
+   double  bbcBlueBkg;   /*   --(BBC Westdelayed) and (BBC East)--  */
+   double  pvpdWest;   /*   --PVPD East--  */
+   double  pvpdEast;   /*   --PVPD West--  */
 
  };  
