@@ -53,8 +53,11 @@ StDetectorDbSpaceCharge::StDetectorDbSpaceCharge(){
     mSpaceCharge = 0;
     mTable = 0;
 };
-/// Default destructor, does nothing
-StDetectorDbSpaceCharge::~StDetectorDbSpaceCharge(){};
+/// Default destructor
+StDetectorDbSpaceCharge::~StDetectorDbSpaceCharge(){
+  delete sInstance;
+  sInstance = 0;
+};
 
 /// Returns Space Charge Correction for given field scale factor
 double StDetectorDbSpaceCharge::getSpaceChargeCorrection(double scaleFactor){

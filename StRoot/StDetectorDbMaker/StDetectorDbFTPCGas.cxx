@@ -69,8 +69,11 @@ StDetectorDbFTPCGas::StDetectorDbFTPCGas(){
     mGasOut = 0;
 };
 
-/// Default destructor. Does nothing 
-StDetectorDbFTPCGas::~StDetectorDbFTPCGas(){};
+/// Default destructor 
+StDetectorDbFTPCGas::~StDetectorDbFTPCGas(){
+  delete sInstance;
+  sInstance = 0;
+};
 
 /// West Oxygen ppm
 double StDetectorDbFTPCGas::getWestO2ppm(){
