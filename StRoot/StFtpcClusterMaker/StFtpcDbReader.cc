@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.19 2003/01/15 10:39:31 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.20 2003/02/19 14:51:46 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.20  2003/02/19 14:51:46  jcs
+// get default temperatures from database
+//
 // Revision 1.19  2003/01/15 10:39:31  jcs
 // Correct error in message
 //
@@ -210,6 +213,8 @@ cout<<"StFtpcClusterMaker: mEastIsInverted = "<<mEastIsInverted<<" mAsic2EastNot
    mBasePressure           = gasTable->basePressure;
    mPressureOffset         = gasTable->pressureOffset;
    mTemperatureDifference  = gasTable->temperatureDifference;
+   mDefaultTemperatureWest = gasTable->defaultTemperatureWest;
+   mDefaultTemperatureEast = gasTable->defaultTemperatureEast;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcGas","E");
   }
