@@ -47,10 +47,10 @@ class StLoggerManager : public StMessMgr {
 
    static StMessMgr* mInstance;       //!
    static const char *fgLevels;       //!
-   // StMessTypeList* messTypeList;      //!
-   // StMessageCounter* messCounter;     //!
-   char* fCurType;                     //!
-   char* fCurOpt;                      //!
+   // StMessTypeList* messTypeList;   //!
+   // StMessageCounter* messCounter;  //!
+   char* fCurType;                    //!
+   char* fCurOpt;                     //!
 #ifndef __CINT__
    std::vector<std::string>  fSourceFileNames;
    std::string fLastMessage;
@@ -84,8 +84,17 @@ protected:
  public:
    virtual ~StLoggerManager();
    virtual std::ostream& OperatorShift(std::ostream& os, StMessage* stm);
-   static StMessMgr* Instance();      //!
-   static StMessMgr* Instance(const char *loggerName);
+   static  StMessMgr* StarLoggerInit();                       //!
+   static  StMessMgr* StarLoggerInit(const char *loggerName); //!   
+   virtual StMessMgr* Instantiate();      //!
+   virtual StMessMgr* Instantiate(const char *loggerName);
+   
+   virtual bool isDebugEnabled()  const;
+   virtual bool isWarnEnabled()   const;
+   virtual bool isErrorEnabled()  const;
+   virtual bool isInfoEnabled()   const;
+   virtual bool isFatalEnabled()  const;
+   virtual bool isEnabledFor()    const;
 
 
 // Generic Messages:
@@ -193,4 +202,4 @@ inline int StLoggerManager::LevelIndex(char level)
 }
 #endif
 
-// $Id: StLoggerManager.h,v 1.1 2004/05/11 20:58:48 fine Exp $
+// $Id: StLoggerManager.h,v 1.2 2004/11/03 01:33:22 fine Exp $
