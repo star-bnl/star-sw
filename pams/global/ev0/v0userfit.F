@@ -62,7 +62,7 @@
       REAL           CONSB,Xb
       COMMON/FITV0C/ CONSB,Xb(30)
 
-      INTEGER   Itstp, Isw, Nxp, N1cp, Ncp, Ifail
+      INTEGER   Itstp, Nxp, N1cp, Ncp, Ifail
       INTEGER   Isw(Nxp+Ncp)
 
       REAL*8    X(*)
