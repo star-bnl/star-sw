@@ -120,7 +120,7 @@ void StrangeMuDstPlayer::Make(Int_t NEvents, StFile* input, Char_t* output) {
   
   // Do init
   Int_t istatus = chain.Init();
-  if( istatus ) { chain.Fatal(istatus,"on init"); return; }
+  if( istatus ) { chain.FatalErr(istatus,"on init"); return; }
 
   // Loop over events
   for( Int_t i=0; i<NEvents; i++ ) {
@@ -260,7 +260,7 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
 
   // Do init
   Int_t istatus = chain.Init();
-  if( istatus ) { chain.Fatal(istatus,"on init"); return; }
+  if( istatus ) { chain.FatalErr(istatus,"on init"); return; }
 
   // Loop over events
   {for( Int_t i=0; i<NEvents; i++ ) {
@@ -457,7 +457,7 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
 
   // Do init
   Int_t istatus = chain.Init();
-  if( istatus ) { chain.Fatal(istatus,"on init"); return; }
+  if( istatus ) { chain.FatalErr(istatus,"on init"); return; }
 
   // Loop over events
   for( Int_t i=0; i<NEvents; i++ ) {
