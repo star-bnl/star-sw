@@ -63,15 +63,7 @@ void    main( int argc, char*argv[] )
 	Message( "msgTest-O6  Once    #6", &ID6 );
 	Message( "msgTest-I7  Message #7", NULL );
 
-	MsgSummaryEventFile( NULL, 3 ); /* List them all, to the terminal.  */
-	MsgSummaryCPUFile(   NULL );    /* CPU usage measurements.          */
-
-	fid = MsgJournalGet();
-	MsgSummaryEventFile( fid, 3 ); /* List them all, in the journal.   */
-	MsgSummaryCPUFile(   fid );    /* CPU usage measurements.          */
-	if ( !MsgJournalClose() ) {
-	  exit(1);
-	}
+	MsgFinish( "s", 3 );
 
 	exit(0);
 }

@@ -53,7 +53,7 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 10-Oct-1996, \tcom
 #ifdef sgi
 #ifndef IRIX
 #define IRIX TRUE
-/*#error (This is not an error!)   Compiling maplun version (sgi only).  */
+/*#error (This is not an error!)   Compiling maplun version (sgi only). */
 #endif
 #endif
 
@@ -816,6 +816,40 @@ int maplun_( int *LUN );
 	L = MsgLNB( fType, N );   fType[L+1] = NULL;  /*  Find Last Non-Blank &append NULL (L is index: L<N). */
 
 	return( MsgFileOpen( f1000, fType ) );
+}
+
+
+
+
+	void 	msg_finish_( int *Nevents )
+/*  Fortran callable interface to msg;  Fortran equivalent to:
+	SUBROUTINE			MSG_Finish( Nevents )
+
+*  Input:
+	INTEGER Nevents !Caller-specified number of events, to normalize message frequencies.
+
+*  Description:  MSG package finish-up.
+*/
+{
+	MsgFinish( "", *Nevents );
+	return;
+}
+
+
+
+
+	void 	msg_finish_shared_( int *Nevents )
+/*  Fortran callable interface to msg;  Fortran equivalent to:
+	SUBROUTINE			MSG_Finish_Shared( Nevents )
+
+*  Input:
+	INTEGER Nevents !Caller-specified number of events, to normalize message frequencies.
+
+*  Description:  MSG package finish-up, with removal of this process' shared memory segment.
+*/
+{
+	MsgFinish( "s", *Nevents );
+	return;
 }
 
 

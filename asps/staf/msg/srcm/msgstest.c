@@ -63,11 +63,16 @@
 	Message( "msgTest-O6  Once    #6", &ID6 );
 	Message( "msgTest-I7  Message #7", NegOne );
 
+	i = 0;
 	while ( TRUE ) {
 	  Message( "msgTest-I8  Looping endlessly, testing shared memory", &ID8 );
 	  Message( "msgTest-T9  Tracing endlessly, testing shared memory", &ID9 );
 	  sleep( 1 );
-	  if ( MsgEnabled( "msgTest-T10  Enable this message to quit.", &ID10 ) ) exit(0);
+	  if ( MsgEnabled( "msgTest-T10  Enable this message to quit.", &ID10 ) ) {
+	    MsgFinish( "s", i );
+	    exit(0);
+	  }
+	  i++;
 	}
 
 	exit(1);

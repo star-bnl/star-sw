@@ -26,10 +26,10 @@ void main( int argc, char*argv[] )
 	  shmflg = 0660;  /*  Read/Write Owner/Group  */
 	  shmid = shmget( key, 0, shmflg );  /*  unique key, size, read/write user/group.  */
 	  if ( shmid < 0 ) {
-	    perror( "rmid-e1 system error:\n" );
+	    perror( "rmid-e1  Shared Memory Segment not found" );
 	    exit( -1 );
 	  }
-	  fprintf(stderr, "Removing shmid %d (pid %d)\n", shmid, ProcessID );
+	  fprintf(stderr, "rmid-I1  Removing Shared Memory Segment, shmid %d (pid %d)\n", shmid, ProcessID );
 	  shmctl( shmid, IPC_RMID, NULL );
 	}
 	exit(0);
