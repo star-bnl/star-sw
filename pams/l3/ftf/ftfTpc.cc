@@ -90,7 +90,7 @@ extern "C" long type_of_call ftfTpc_(
      for ( int i = 0 ; i < tphit_h->nok ; i++ ) {
         (pHit[0])[i].id  = i ;
         tphit[i].track   = 0 ;
-        (pHit[0])[i].row = (short)fmod(tphit[i].row,100)   ;
+        (pHit[0])[i].row = (short)fmod((double)tphit[i].row,100)   ;
         if ( tphit[i].row == 4600 ) (pHit[0])[i].row = 46 ;
         if ( tphit[i].row == 4600 ) tphit[i].row = 46 ;
 //      if ( (pHit[0])[i].row > 40   ) ((pHit[0])[i].row)++ ;
@@ -172,7 +172,7 @@ extern "C" long type_of_call ftfTpc_(
         tphit[i].track             = 0 ;
         (pHit[sectorIndex])[j].id  = i ;
         (pHit[sectorIndex])[j].track  = 0 ;
-        (pHit[sectorIndex])[j].row = (short)fmod(tphit[i].row,100)   ;
+        (pHit[sectorIndex])[j].row = (short)fmod((double)tphit[i].row,100)   ;
         (pHit[sectorIndex])[j].x   = tphit[i].x ;
         (pHit[sectorIndex])[j].y   = tphit[i].y ;
         (pHit[sectorIndex])[j].z   = tphit[i].z ;

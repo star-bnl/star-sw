@@ -135,7 +135,7 @@ int FtfSl3::read ( int nPoints, l3Point *point ) {
     if ( eta > para.etaMax ) continue ;
 //
     hit[counter].id       = i ;
-    hit[counter].row      = (int)fmod(row,100);
+    hit[counter].row      = (int)fmod((double)row,100.);
     hit[counter].x        = x;
     hit[counter].y        = y;
     hit[counter].z        = z;
@@ -202,7 +202,7 @@ int FtfSl3::read ( int nBytes, int* buff  ) {
       }
       if ( counter > maxHits ) break ;
       rowSize = nPads * sizeof(l3Cluster) ;
-      overflow    = fmod(rowSize,4);
+      overflow    = fmod((double)rowSize,4.);
       if ( overflow != 0 ) rowSize += 4 - overflow ;
       cP += rowSize ;
    }

@@ -61,7 +61,7 @@ int hit2Cluster ( int nHits, l3Point* hit, int maxBytes, int* buff ) {
          cP+=sizeInt;
          memcpy ( (void *)cP, (void *)cluster, clusterCounter*sizeCluster ) ;
          rowSize = clusterCounter*sizeCluster ; 
-         overflow    = fmod(rowSize,4);
+         overflow    = fmod((double)rowSize,4);
          if ( overflow != 0 ) rowSize += 4 - overflow ;
          cP += rowSize ;
 //         printf ( " row %d with %d pads \n ", lastRow, clusterCounter ) ;
@@ -86,7 +86,7 @@ int hit2Cluster ( int nHits, l3Point* hit, int maxBytes, int* buff ) {
    cP+=sizeInt;
    memcpy ( (void *)cP, (void *)cluster, clusterCounter*sizeCluster ) ;
    rowSize = clusterCounter*sizeCluster ; 
-   overflow    = fmod(rowSize,4);
+   overflow    = fmod((double)rowSize,4);
    if ( overflow != 0 ) rowSize += 4 - overflow ;
    cP += rowSize ;
 // printf ( " Row %d: %d clusters written \n ", lastRow, clusterCounter ) ;
@@ -142,7 +142,7 @@ int cluster2Hit ( int nBytes, int* buff, int maxHit, l3Point* hit  ) {
       }
       if ( counter > maxHit ) break ;
       rowSize = nPads*sizeCluster ; 
-      overflow    = fmod(rowSize,4);
+      overflow    = fmod((double)rowSize,4);
       if ( overflow != 0 ) rowSize += 4 - overflow ;
       cP+=rowSize ;
    }
