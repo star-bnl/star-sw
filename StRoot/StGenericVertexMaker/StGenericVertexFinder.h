@@ -22,7 +22,7 @@
  * is enforced.
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.4 2004/07/23 02:24:38 jeromel Exp $
+ * $Id: StGenericVertexFinder.h,v 1.5 2004/07/24 02:57:40 balewski Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -32,6 +32,7 @@
 
 
 class StEvent;
+class StMaker;
 
 class StGenericVertexFinder {
  public:
@@ -60,8 +61,11 @@ class StGenericVertexFinder {
   void                   SetFitPointsCut(int fitpoints) {mMinNumberOfFitPointsOnTrack = fitpoints;};
 
 
+  
+ protected: //................................
+  StGenericVertexFinder();
+  StMaker *mDumMaker;
 
- protected:
   bool                   mUseITTF;          // Use only tracks with ITTF encoded method
   UInt_t                 mFlagBase;         // ITTF track flag
 
@@ -87,6 +91,9 @@ class StGenericVertexFinder {
 
 
 // $Log: StGenericVertexFinder.h,v $
+// Revision 1.5  2004/07/24 02:57:40  balewski
+// clean up of ppLMV, CTB-util separated
+//
 // Revision 1.4  2004/07/23 02:24:38  jeromel
 // Oops ... Worng swithc (had twice Minuit). Now corrected.
 //

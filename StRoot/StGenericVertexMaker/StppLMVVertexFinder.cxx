@@ -1,8 +1,8 @@
 /***************************************************************************
  *
- * $Id: StppLMVVertexFinder.cxx,v 1.2 2004/07/23 01:01:33 jeromel Exp $
+ * $Id: StppLMVVertexFinder.cxx,v 1.3 2004/07/24 02:57:40 balewski Exp $
  *
- * Author: Thomas Ullrich, Feb 2002
+ * Author: Jan Balewski
  ***************************************************************************
  *
  * Description: 
@@ -21,17 +21,6 @@
 #include "StMaker.h"
 
 
-#include "tables/St_g2t_ctf_hit_Table.h"
-#include "St_trg_Maker/St_trg_Maker.h"
-#include <StTriggerData.h>
-
-// This needs cleanup of the mapping code
-extern void cts_get_ctb_indexes(long, long &, long &);
-
-/*!
- * cts_get_ctb_indexes() is defined in $STAR/pams/ctf/cts/cts.cc
- */
-
 
 #include "StppLMVVertexFinder.h"
 
@@ -48,15 +37,11 @@ StppLMVVertexFinder::StppLMVVertexFinder() {
     mStatus = 0;
     mExternalSeedPresent = false;
     mVertexConstrain = false;
-    requireCTB = false;
+    mRequireCTB = false;
     mUseITTF = false;
 
     //jan
-
-    mCtbEtaSeg=0.5;   mCtbPhiSeg=C_PI/30; // NEVER chang this two , JB
     
-    mCtbThres_ch=2 ;  //to reject slats with low ADC for real data
-    mCtbThres_mev=1; //to reject slats with low dE for M-C data, CTB clibration: 2 MeV==5 ADC
     mMaxTrkDcaRxy=3.9;
     mMinTrkPt=0.2;
     mMinNumberOfFitPointsOnTrack = 10; 
@@ -65,7 +50,7 @@ StppLMVVertexFinder::StppLMVVertexFinder() {
     mDVtxMax=4.0;  // max sigma multipl between tracks and current vertex, used for tracks rejection
     mBLequivNtr=20; // equivalent # of tracks for BeamLine
     mTotEve=0;
-    mDumMaker = new StMaker();
+    mdxdz=mdydz=mX0=mY0=0;
 
 }
 
@@ -83,6 +68,7 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
   mFitError = mFitResult = StThreeVectorD(0,0,0);
   mCtbHits.clear();
   mPrimCand.clear();
+
   n1=0,n2=0,n3=0, n4=0,n5=0,n6=0;
   mTotEve++;
   eveID=event->id();
@@ -106,30 +92,36 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
 			    <<"\n MatchCtbMax_phi="<<mMatchCtbMax_phi
     			    <<"\n BLequivNtr="<<mBLequivNtr
     			    <<"\n DVtxMax="<<mDVtxMax
-    			    <<"\n Ignored: mRequireCTB="<<mRequireCTB
-    			    <<"\n mVertexConstrain="<<mVertexConstrain
+    			    <<"\n RequireCTB="<<mRequireCTB
+    			    <<"\n VertexConstrain="<<mVertexConstrain
     			    <<"\n CtbThres_mev="<<mCtbThres_mev
     //			    <<"\n  ="<<
 			    <<endm; 
   
+  if(!mRequireCTB){
+    gMessMgr->Warning() << "StppLMVVertexFinder::fit() does not work w/o RequireCTB=true, sorry , quit" << endm;
+    mStatus = -1;
+    return false;
+  }   
 
+  
   // get CTB info, does not  work for embeding 
-  if(event->runId()<100000) 
-    collectCTBhitsMC();  // use M-C
-  else
-    collectCTBhitsData(event); // use real data
-
+  if(event->runId()<100000){
+    St_DataSet *gds=mDumMaker->GetDataSet("geant");
+    collectCTBhitsMC(gds);  // use M-C
+  }  else {
+    StTriggerData *trgD=event->triggerData ();
+    collectCTBhitsData(trgD); // use real data
+  }
 
   if(mCtbHits.size()<=0){
-    gMessMgr->Warning() << "StppLMVVertexFinder::fit: no valid CTB hits found, quit" << endm;
+    gMessMgr->Warning() << "StppLMVVertexFinder::fit() no valid CTB hits found, quit" << endm;
     mStatus = -1;
     return false;
   }   
   
-  //  collectCTBhits3(); // alterantive access to CTB for DATA
-  
   gMessMgr->Message("","I") << mCtbHits.size() << " CTB slats accepted"<<endm;
-  
+ 
   //  Loop all global tracks (TPC) and store the
   //  refering helices and their estimated DCA
   //  resolution in  vectors.
@@ -148,8 +140,7 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
   } // end of track selection
 
   //printf(", now n1=%d n2=%d n3=%d n4=%d  n6=%d\n",n1,n2,n3,n4,n6);
-  gMessMgr->Debug() << ", now n1=" << n1 << " n2=" << n2 << " n3=" << n3 << " n4=" << n4 
-		    << "n6=" << n6 << endm;
+  gMessMgr->Debug() << ", now n1=" << n1 << " n2=" << n2 << " n3=" << n3 << " n4=" << n4 << "n6=" << n6 << endm;
 
 
 
@@ -204,19 +195,9 @@ bool StppLMVVertexFinder::fit(StEvent* event) {
     printf("j=%d  sig=%f pT=%f eta=%f phi/deg=%f cur=%f p=%f charg=%d spath=%f\n",j,mPrimCand[j].sigma,p.perp(),p.pseudoRapidity(), p.phi()/C_PI*180,mPrimCand[j].helix.curvature(), p.mag(),mPrimCand[j].helix.charge(mBfield*tesla),spath);
   }
 	 
-    return true;
+  gMessMgr->Message("","I") << "Prim ppLMV Vertex at " <<  mFitResult<<endm;
+  return true;
 } 
-
-
-//StThreeVectorD
-//StppLMVVertexFinder::result() const {return mFitResult;}
-//
-//StThreeVectorD
-//StppLMVVertexFinder::error() const {return mFitError;}
-//
-//int
-//StppLMVVertexFinder::status() const {return mStatus;}
-
 
 
 //======================================================
@@ -228,14 +209,7 @@ StppLMVVertexFinder::printInfo(ostream& os) const
     os << "fitted vertex ........................ " << mFitResult << endl;
     os << "position errors ...................... " << mFitError << endl;
     os << "# of used tracks + beamL.............. " << mPrimCand.size() << endl;
-    os << "minimum found (FMIN) ................. " << mFmin << endl;
-    os << "estimated distance to minimum (FEDM) . " << mFedm << endl;
-    os << "parameter uncertainties (ERRDEF) ..... " << mErrdef << endl;
-    os << "# of parameters (NPARI) .............. " << mNpari << endl;
-    os << "# of max parameters (NPARX) .......... " << mNparx << endl;
-    os << "goodness of covariance matrix (ISTAT)  " << mStatus << endl;
     os << "min # of fit points for tracks ....... " << mMinNumberOfFitPointsOnTrack << endl;
-    os << "final potential width scale .......... " << mWidthScale << endl;
 }
 
 
@@ -268,19 +242,9 @@ void StppLMVVertexFinder::UseVertexConstraint(double x0, double y0, double dxdz,
     StThreeVectorD MomFstPt(px*GeV, py*GeV, pz*GeV);
     delete mBeamHelix;
     mBeamHelix = new StPhysicalHelixD(MomFstPt,origin,0.5*tesla,1.);
-
     mExternalSeedPresent = false;
-
-
 }
 
-//==========================================================
-//==========================================================
-
-int  StppLMVVertexFinder::NCtbMatches() 
-{ 
-  return mCtbHits.size();
-}
 
 
 
@@ -290,16 +254,19 @@ bool StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
   /* upgrade:
      - used dE/dX for strag
      - saturate sig(p)
+     - use track length  
+     - make clear()
+     - check for total energy per slat for  geant
   */
 
   sigma=0;
   const double Rctb=213.6; // (cm) radius of the CTB 
 
-  //assert(track);
-  if (!track) return false;
-  //assert(finite(track->geometry()->helix().curvature()));
+  if (!track) return false; // it should never happen
   if(!finite(track->geometry()->helix().curvature())){
-    gMessMgr->Warning() << "StppLMVVertexFinder::matchTrack2CTB: helix.curvature not finite" << endm;
+    gMessMgr->Warning() << "StppLMVVertexFinder::matchTrack2CTB: helix.curvature not finite, fix tracker, ppLMV aborting" << endm;
+    mCtbHits.clear();
+    mPrimCand.clear();    
     return false;
   }
 
@@ -313,8 +280,7 @@ bool StppLMVVertexFinder::matchTrack2CTB (StTrack* track, float & sigma) {
   StPhysicalHelixD TrkHlx=track->geometry()->helix();
 
   //           check Rxy_min condition  close to beam    
-  double xorigin = 0.0; double yorigin = 0.0;
-  double spath = TrkHlx.pathLength(xorigin, yorigin);
+  double spath = TrkHlx.pathLength(mX0, mY0 );
   StThreeVectorD posDCA = TrkHlx.at(spath);
   //  cout<<" DCA Position: "<<posDCA<<endl;
   double x_m = posDCA.x(), y_m = posDCA.y();
@@ -399,11 +365,9 @@ bool  StppLMVVertexFinder::ppLMV4() {  //  ----------  D O   F I N D    V E R T 
   gMessMgr->Debug() << "passed " << totTr << " tracks match to CTB,  BeamLine=" << mVertexConstrain << endm;
    
   double xo=0.0,yo=0.0;
-  if(mVertexConstrain) {// use the beam line as a starting point
-    xo=mX0;
-    yo=mY0;
-  }
-  
+  xo=mX0;
+  yo=mY0; 
+ 
   //Do the actual vertex fitting, continue until good
   double A11=0.0,A12=0.0,A13=0.0,A21=0.0,A22=0.0,A23=0.0;
   double A31=0.0,A32=0.0,A33=0.0; // Matrix Elements
@@ -484,17 +448,14 @@ bool  StppLMVVertexFinder::ppLMV4() {  //  ----------  D O   F I N D    V E R T 
     if(mVertexConstrain )end--; // to preserve beamL
 
     for( itehlx=mPrimCand.begin(); itehlx <end;  itehlx++) {
-
-      //    while(itehlx < mPrimCand.end()-1){
-      //if( (*itehlx).helix.curvature()<10) {itehlx++; continue;}// beamLine track
       StPhysicalHelixD hlx = (*itehlx).helix;
       double sig = (*itehlx).sigma;
       double spath = hlx.pathLength(XVertex.x(),XVertex.y()); 
       StThreeVectorD XHel = hlx.at(spath);
       double d=(XHel.x()-XVertex.x())*(XHel.x()-XVertex.x());
-         d = d+(XHel.y()-XVertex.y())*(XHel.y()-XVertex.y());
-         d = d+(XHel.z()-XVertex.z())*(XHel.z()-XVertex.z());
-         d = ::sqrt(d);
+      d = d+(XHel.y()-XVertex.y())*(XHel.y()-XVertex.y());
+      d = d+(XHel.z()-XVertex.z())*(XHel.z()-XVertex.z());
+      d = ::sqrt(d);
       chi2 = chi2 + (d*d)/(sig*sig);
       double drel = d;  // do not use sig during track rejection ??? JB
       printf(" DCA x=%f y=%f z=%f d=%f drel=%f dmax=%f sig=%f\n",XHel.x(),XHel.y(),XHel.z(),d,drel,dmax,sig);
@@ -502,11 +463,9 @@ bool  StppLMVVertexFinder::ppLMV4() {  //  ----------  D O   F I N D    V E R T 
         dmax = drel;
         ikeep = itehlx;
       }
-      //  itehlx++;
     }
 
     if( dmax > mDVtxMax ){
-      //printf("Removing a track! dmax=%f \n",dmax);
       gMessMgr->Debug() << "Removing a track! dmax=" << dmax << endm;
       mPrimCand.erase(ikeep);
       done=0;
@@ -540,7 +499,6 @@ bool  StppLMVVertexFinder::ppLMV4() {  //  ----------  D O   F I N D    V E R T 
     }
   }
   
-  //printf("end of ppLMV4\n");
   gMessMgr->Debug() << "StppLMVVertexFinder::ppLMV4() ends" << endm;
   return true;
 }
@@ -548,146 +506,16 @@ bool  StppLMVVertexFinder::ppLMV4() {  //  ----------  D O   F I N D    V E R T 
 
 //==========================================================
 //==========================================================
-void  StppLMVVertexFinder::collectCTBhitsData(StEvent* event){
-  // returns true if one or more valid CTB hits is found.  
-  gMessMgr->Info() << "StppLMVVertexFinder::fit() pick real CTB hits" << endm;
-
-  // access CTB from Akio's Maker
-  StTriggerData *trgD=event->triggerData ();
-  if(!trgD){
-    gMessMgr->Warning() << "StppLMVVertexFinder::fit() no trigData in Data" << endm;
-    return ;
-  }
-
-  //assert(trgD);
-  for (UInt_t slat = 0; slat < 2; slat++) 
-    for (UInt_t tray = 0; tray < 120; tray++) {
-      ctbHit curHit;
-      curHit.adc = trgD->ctbTraySlat(tray,slat,0);
-      if(curHit.adc<mCtbThres_ch) continue;
-      // printf("B sl=%3d tr=%3d  %4f\n",slat,tray, curHit.adc );
-      ctb_get_slat_from_data(slat,tray, curHit.phi, curHit.eta);
-      mCtbHits.push_back(curHit);
-    }
-
-  // old method , run just for cross check, delete later, JB
-
-  StTriggerDetectorCollection* trigCol = event->triggerDetectorCollection();
-  if(!trigCol){
-    gMessMgr->Warning() << "StppLMVVertexFinder::fit() no trigCol in Data" << endm;
-    return ;
-  }
-
-  StCtbTriggerDetector* ctbDet = &(trigCol->ctb());
-  for (UInt_t slat = 0; slat < ctbDet->numberOfSlats(); slat++) 
-    for (UInt_t tray = 0; tray < ctbDet->numberOfTrays(); tray++) {
-      ctbHit curHit;
-      curHit.adc = ctbDet->mips(tray,slat,0);
-      if(curHit.adc<mCtbThres_ch) continue;
-      printf("A sl=%3d tr=%3d  %4f\n",slat,tray, curHit.adc );
-    }
-  
-  for (UInt_t slat = 0; slat < ctbDet->numberOfSlats(); slat++) 
-    for (UInt_t tray = 0; tray < ctbDet->numberOfTrays(); tray++) {
-      if(trgD->ctbTraySlat(tray,slat,0)!=ctbDet->mips(tray,slat,0)) printf("JAN-ERROR %d %d \n",slat,tray);
-    }
-  
-  return ;
-}
-
-
-//==========================================================
-//==========================================================
-bool  StppLMVVertexFinder::collectCTBhitsMC(){// M-C CTB
-  // CTB clibration: 2 MeV==5 ADC
-  // RETUN: true if GEANT table with hits exist (even if empty)
-
-  St_DataSet *gds=mDumMaker->GetDataSet("geant");
-  if(gds==0) return false;
-  
-  // -------------- E X T R A C T    C T B   H I T S   --------------------
-  //access the CTB data  from GEANT
-  St_g2t_ctf_hit *g2t_ctb_hit = (St_g2t_ctf_hit *) gds->Find("g2t_ctb_hit");
-  if(g2t_ctb_hit == 0){
-    gMessMgr->Debug() << "No CTB Hits in MC table for this event" << endm;
-    gMessMgr->Debug() << "g2t_ctb_hit = " << g2t_ctb_hit << endm;
-    return false;
-  }
-  
-  gMessMgr->Message("","I") <<" use GEANT CTB hits,  ADC's  with 2 MeV=> 5 ADC, thr/MeV="<<mCtbThres_mev<<endm;
-  g2t_ctf_hit_st *ctb_hit = NULL;
-  
-  //printf("All GEANT CTB hits=%d\n",(int)g2t_ctb_hit->GetNRows());
-  
-  if (g2t_ctb_hit->GetNRows() == 0)    gMessMgr->Message("","I") <<" Empty geant/ctb data set "<<endm;
-
-  ctb_hit = g2t_ctb_hit->GetTable();
-
-  //assert(ctb_hit);
-  if (! ctb_hit){
-    gMessMgr->Warning() << "StppLMVVertexFinder::collectCTBhitsMC: no CTB hits" << endm;
-    return false;
-  }
-
-  int i;
-  for (i = 0; i < g2t_ctb_hit->GetNRows(); i++,ctb_hit++){
-    float de_mev=ctb_hit->de*1000.;
-    // printf("CTB Hit i=%d  de/MeV=%f parent=%d\n",i,de_mev ,ctb_hit->track_p);
-    if(de_mev <mCtbThres_mev)  continue; // ignore double hits per CTB slat
-
-    long iPhi,iEta;
-    cts_get_ctb_indexes(ctb_hit->volume_id,iPhi,iEta);
-    iPhi--; iEta--; // change range to [0,N-1]
-    printf("iPhi=%d,iEta=%d de/MeV=%f \n",(int)iPhi,(int)iEta,de_mev);
-    assert(iPhi >= 0 && iPhi<60 && iEta>=0 && iEta<4);
-    //printf("ctb_indexes , hit=%d, vol_id=%d, iPhi=%d, iEta=%d, de/MeV=%f\n",i,(int)ctb_hit->volume_id,(int)iPhi,(int)iEta );
-    
-    ctbHit curHit;
-    curHit.adc=(int)de_mev*2.5 ;
-    curHit.phi=iPhi*mCtbPhiSeg;
-    curHit.eta=iEta*mCtbEtaSeg -0.75;
-    mCtbHits.push_back(curHit);
-    
-  }// end of loop over CTB hits
-  
-  
-  gMessMgr->Message("","I") << mCtbHits.size() << " CTB slats accepted from M-C data"<<endm;
-  
-  return  true;
-}
-
-
-//==========================================================
-//==========================================================
-void  StppLMVVertexFinder::ctb_get_slat_from_data(int slat, int tray, float & phiRad, float &eta) {
-  float phiZero1 = 72 ; // magic lines from Pablo & Herb
-  float phiZero2 = 108 ;
-  float deltaPhi = 6 ;
-  // tray=0,1
-  // slat=0,...,119
-
-  int iz ;
-  float phi ;
-
-  if ( tray < 60 )  {
-    phi = phiZero1 - tray * deltaPhi ;
-    iz = 0 ;
-  }  else {
-    phi = phiZero2 + (tray-60) * deltaPhi ;
-    iz = 1 ;
-  }
-  if ( phi <   0. ) phi += 360 ;
-  if ( phi > 360. ) phi -= 360 ;
-
-  phiRad=phi/180*C_PI;
-  eta=(1-2*iz)*(1+2*slat)*0.25;
-  printf("CTB hit: slat=%d, tray=%d,  phiDeg=%f/deg, eta=%f\n",slat,tray,phi,eta);
-  
+int  StppLMVVertexFinder::NCtbMatches() { 
+  return mPrimCand.size();
 }
 
 
 /*
  * $Log: StppLMVVertexFinder.cxx,v $
+ * Revision 1.3  2004/07/24 02:57:40  balewski
+ * clean up of ppLMV, CTB-util separated
+ *
  * Revision 1.2  2004/07/23 01:01:33  jeromel
  * See .h + changed printf() / cout to gMessMgr + removed a ew asserts
  *

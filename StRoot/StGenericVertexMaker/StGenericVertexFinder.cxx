@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: StGenericVertexFinder.cxx,v 1.3 2004/07/23 00:57:43 jeromel Exp $
+ * $Id: StGenericVertexFinder.cxx,v 1.4 2004/07/24 02:57:40 balewski Exp $
  *
  * Author: Lee Barnby, April 2003
  *
@@ -9,8 +9,12 @@
  ***************************************************************************/
 #include "StGenericVertexFinder.h"
 #include "StMessMgr.h"
+#include "StMaker.h"
 
 
+StGenericVertexFinder::StGenericVertexFinder() {
+    mDumMaker = new StMaker();
+}
 
 /*!
   Adds the vertex to StEvent (currently as a primary)
@@ -68,6 +72,9 @@ void StGenericVertexFinder::setFlagBase()
 
 
 // $Log: StGenericVertexFinder.cxx,v $
+// Revision 1.4  2004/07/24 02:57:40  balewski
+// clean up of ppLMV, CTB-util separated
+//
 // Revision 1.3  2004/07/23 00:57:43  jeromel
 // Base class method implementation
 //
