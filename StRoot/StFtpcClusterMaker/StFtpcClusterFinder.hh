@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.hh,v 1.9 2001/04/02 12:10:16 jcs Exp $
+// $Id: StFtpcClusterFinder.hh,v 1.10 2002/02/10 21:12:32 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.hh,v $
+// Revision 1.10  2002/02/10 21:12:32  jcs
+// add deltaAirPressure to calcpadtrans call
+//
 // Revision 1.9  2001/04/02 12:10:16  jcs
 // get FTPC calibrations,geometry from MySQL database and code parameters
 // from StarDb/ftpc
@@ -125,7 +128,7 @@ class StFtpcClusterFinder
   float gauss_2d(int, int, float, float, float, float, float);//!
   float sigmax(float);//!
   float sigmat(float);//!
-  int calcpadtrans(double*, double*);//!
+  int calcpadtrans(double*, double*, double);//!
   int cucInit(TClusterUC*, int*, int*);//!
   TClusterUC *cucAlloc(TClusterUC*, int*, int*);//!
   int cucFree(TClusterUC*, int*, int*, TClusterUC*);//!
