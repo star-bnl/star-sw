@@ -339,7 +339,7 @@ float sft_find_vertex ()
      d = -999;
    }
 
-   if (fb > -15) {d=-888;}
+   if (fb > -4) {d=-888;}
      
    return (float)d;
 }
