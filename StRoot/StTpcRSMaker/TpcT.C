@@ -145,6 +145,8 @@ void TpcT::Loop(Int_t ev, Double_t tanCut, Int_t NpadCut, Double_t pMomin, Doubl
     // if (Cut(ientry) < 0) continue;
     if (fNoRcPad != 1) continue;
     if (fAdcSum < 100 || fAdcSum > 2.e3) continue;
+    // Sector 1; RDO 4;
+    if (fRcTrack_fSector[0] == 1 && fRcTrack_fRow[0] >= 22 && fRcTrack_fRow[0] <= 29) continue;
     for (int i = 0; i < fNoPixels; i++) {
       if (fPixels_mTimeBin[i] > 512) {
 	if (fPixels_mRow[i] > 13) {
@@ -264,92 +266,97 @@ void TpcT::FitSlices(const Char_t *name, const Char_t *opt, Int_t iy) {
   const double lO  = 1.95;
   if (! h) return;
   TF1 *gd = 0;
-  if (! mConvolution) MakeFunctions();
-  TF1 *ga = mConvolution;
-  ga->FixParameter(0,0);
-  ga->ReleaseParameter(2); ga->SetParLimits(2,0,10); ga->SetParameter(2,1e-5);
-  ga->FixParameter(3,K3IP);
-  ga->FixParameter(4,K3OP);
-  ga->FixParameter(5,0);
-  ga->FixParameter(6,0);
-  ga->FixParameter(7,pShaper);
-  ga->FixParameter(8,tau);
-  if (Name.Contains("InnerPad",TString::kIgnoreCase)) {
-    ga->FixParameter(9,CrossTalkInner);
-    if (Opt.Contains("Cross")) {
-      ga->FixParameter(2,0);
-      ga->ReleaseParameter(9); 
-      ga->SetParameter(9,CrossTalkInner);
-      ga->SetParLimits(9,0,0.5);
-    }
-  }
-  if (Name.Contains("OuterPad",TString::kIgnoreCase)) {
-    ga->FixParameter(9,CrossTalkOuter);
-    if (Opt.Contains("Cross")) {
-      ga->FixParameter(2,0);
-      ga->ReleaseParameter(9); 
-      ga->SetParameter(9,CrossTalkOuter);
-      ga->SetParLimits(9,0,0.5);
-    }
-  }
-  if (Name.Contains("InnerPad",TString::kIgnoreCase)) {
-    gd = new TF1("gdI",Form("([0]*[0]+[1]*[1]*(209.3-abs(x)))/(%f*%f)",pPI,pPI),-210,210); // to Ground wires
-    ga->FixParameter(0,0);
-    if (Opt.Contains("K3")) {
-      if (! Opt.Contains("K3S")) ga->FixParameter(2,0);
-      ga->SetParameter(3,K3IP); ga->SetParLimits(3,0.5*K3IP,10*K3IP);
-      ga->FixParameter(6,0);
-    }
-  }
-  if (Name.Contains("OuterPad",TString::kIgnoreCase)) {
-    gd = new TF1("gdO",Form("([0]*[0]+[1]*[1]*(209.3-abs(x)))/(%f*%f)",pPO,pPO),-210,210);
-    ga->FixParameter(0,1);
-    if (Opt.Contains("K3")) {
-      if (! Opt.Contains("K3S")) ga->FixParameter(2,0);
-      ga->SetParameter(4,K3OP); ga->SetParLimits(4,0.5*K3OP,10*K3OP);
-      ga->FixParameter(6,0);
+  if (Name.Contains("Pad",TString::kIgnoreCase)) {
+    if (Name.Contains("Inner",TString::kIgnoreCase)) 
+      gd = new TF1("gdI",Form("([0]*[0]+[1]*[1]*(209.3-abs(x)))/(%f*%f)",pPI,pPI),-210,210); // to Ground wires
+    if (Name.Contains("Outer",TString::kIgnoreCase)) 
+      gd = new TF1("gdO",Form("([0]*[0]+[1]*[1]*(209.3-abs(x)))/(%f*%f)",pPO,pPO),-210,210);
+    if (gd) {
+      gd->SetParName(0,"#sigma_{C}");
+      gd->SetParName(1,"#sigma_{D}");
+      gd->SetParLimits(0,0,10.);
+      gd->SetParLimits(1,0,10.);
     }
   }
   if (Name.Contains("Time",TString::kIgnoreCase)) {
     Double_t timeBin = 5.78602945878541108e-01;// (cm)
-    if (Name.Contains("Outer",TString::kIgnoreCase)) {
+    if (Name.Contains("Outer",TString::kIgnoreCase)) 
       gd = new TF1("gdOT",Form("([0]*[0]+[1]*[1]*(209.3-abs(x)) + %f*x*x)/(%f*%f)",lO*lO/(rO*rO)/12.,timeBin,timeBin),-210,210);
-    } else {
+    else 
       gd = new TF1("gdIT",Form("([0]*[0]+[1]*[1]*(209.3-abs(x)) + %f*x*x)/(%f*%f)",lI*lI/(rI*rI)/12.,timeBin,timeBin),-210,210);
+    if (gd) {
+      gd->SetParName(0,"#sigma_{C}");
+      gd->SetParName(1,"#sigma_{D}");
+      gd->SetParLimits(0,0,10.);
+      gd->SetParLimits(1,0,10.);
+      gd->SetParName(2,"#sigma_{B}");
     }
-    if (Opt.Contains("K3S")) ga->FixParameter(2,0);
-    ga->SetParameter(5,0);
-    ga->SetParLimits(5,-10,10);
-    ga->SetParameter(6,1.e-2);
-    ga->SetParLimits(6,0,1);
-    ga->FixParameter(7,pShaper);
-#if 0
-    ga->SetParameter(8,tau);
-    ga->SetParLimits(8,20e-9,100e-9);
-#endif
-    gd->SetParName(2,"#sigma_{B}");
-    gd->SetParLimits(2,0,10.);
   }
-  if (gd) {
-    gd->SetParName(0,"#sigma_{C}");
-    gd->SetParName(1,"#sigma_{D}");
-    gd->SetParLimits(0,0,10.);
-    gd->SetParLimits(1,0,10.);
+  if (! mConvolution) MakeFunctions();
+  TF1 *ga = mConvolution;
+  // default parameters
+  if (Name.Contains("Pad",TString::kIgnoreCase)) 
+    if (Name.Contains("Inner",TString::kIgnoreCase))         ga->FixParameter(0,0);
+    else  {if (Name.Contains("Outer", TString::kIgnoreCase)) ga->FixParameter(0,1);}
+  else                                                       ga->FixParameter(0,2); // Time
+  ga->ReleaseParameter(2); ga->SetParLimits(2,0,10); ga->SetParameter(2,1e-5);
+  ga->FixParameter(3,K3IP); 
+  ga->FixParameter(4,K3OP);
+  ga->FixParameter(5,0); // shift
+  ga->FixParameter(6,0); // noise
+  ga->FixParameter(7,pShaper);
+  ga->FixParameter(8,tau);
+  if (Name.Contains("Inner",TString::kIgnoreCase)) ga->FixParameter(9,CrossTalkInner); 
+  else                                             ga->FixParameter(9,CrossTalkOuter);
+  // Pads
+  if (Name.Contains("Pad",TString::kIgnoreCase)) {
+    // Cross Talk fit
+    if (Opt.Contains("Cross",TString::kIgnoreCase)) {
+      ga->FixParameter(2,0);
+      ga->ReleaseParameter(9); 
+      ga->SetParLimits(9,0,0.5);
+    }
+    if (Opt.Contains("K3",TString::kIgnoreCase)) {
+      Int_t k = 3;
+      if (Name.Contains("Outer",TString::kIgnoreCase)) k = 4; 
+      Double_t K3 = ga->GetParameter(k);
+      ga->SetParLimits(k,0.5*K3,10*K3);
+      if (! Opt.Contains("K3S")) ga->FixParameter(2,0);
+    }
+  }
+  if (Name.Contains("Time",TString::kIgnoreCase)) {
+    ga->ReleaseParameter(5);    ga->SetParLimits(5,-5,5); // shift
+    ga->ReleaseParameter(6);    ga->SetParLimits(6, 0,1); // noise
+    if (Opt.Contains("pShape",TString::kIgnoreCase)) {
+      ga->ReleaseParameter(7); // 
+      ga->SetParLimits(7,2,10);
+    }
+    if (Opt.Contains("Tau",TString::kIgnoreCase)) {
+      ga->SetParLimits(8,20e-9,100e-9);
+    }
   }
   Int_t Npar = ga->GetNpar();
   TH1D **out = new TH1D*[Npar+1];
   memset(out, 0, (Npar+1)*sizeof(TH1D*));
   Double_t pmin, pmax;
+  TString pName("");
+  TString pTitle("");
   for (Int_t i = 0; i <= Npar; i++) {
+    pmin = -1.;
+    pmax =  1.;
     if (i < Npar) {
       ga->GetParLimits(i,pmin,pmax);
-      if (pmin < pmax) 
-	out[i] = new TH1D(Form("%s_p%i",Name.Data(),i),
-			  Form("Fit result for %s",ga->GetParName(i)),
-			  ny,h->GetYaxis()->GetXmin(),h->GetYaxis()->GetXmax());
-    } else {
-	out[i] = new TH1D(Form("%s_Chisq",Name.Data()),
-			  "Fit chisq",
+      pName = Form("%s_p%i",Name.Data(),i);
+      pTitle = Form("Fit result for %s",ga->GetParName(i));
+    }
+    else {
+      pName = Form("%s_Chisq",Name.Data());
+      pTitle = Form("Chisq for %s",ga->GetParName(i));
+    }
+    if (pmin < pmax) { 
+      out[i] = (TH1D *) gDirectory->Get(pName.Data());
+      if (! out[i]) 
+	out[i] = new TH1D(pName.Data(),pTitle.Data(),
 			  ny,h->GetYaxis()->GetXmin(),h->GetYaxis()->GetXmax());
     }
   }
@@ -507,7 +514,7 @@ Double_t TpcT::Gatti(Double_t *x, Double_t *par) {
 //________________________________________________________________________________
 void TpcT::MakeFunctions() {
   Double_t timeBinMin = -0.5;
-  Double_t timeBinMax =  6.5;
+  Double_t timeBinMax = 10.5;
   if (! mShaperResponse) 
     mShaperResponse = new TF1("ShaperFunc",TpcT::ShaperFunc,timeBinMin,timeBinMax,3);  
   Double_t mTimeBinWidth              = 1.06580379191673078e-07;//1.e-6/gStTpcDb->Electronics()->samplingFrequency();
@@ -561,7 +568,7 @@ void TpcT::MakeFunctions() {
   mChargeFractionOuter->SetParameters(params);
   //  mChargeFractionOuter->Save(xmin,xmax,0,0,0,0);
   if (! mConvolution) 
-    mConvolution = new TF1("fConvolution",TpcT::ConvolutionF,-8,8,10);
+    mConvolution = new TF1("Convolution",TpcT::ConvolutionF,-8,8,10);
   mConvolution->SetParName(0,"icase"); mConvolution->FixParameter(0,0);
   mConvolution->SetParName(1,"Area");  mConvolution->FixParameter(1,1); mConvolution->SetParLimits(1,0,1e5);
   mConvolution->SetParName(2,"#sigma^{2}");  mConvolution->SetParLimits(2,0,10);
