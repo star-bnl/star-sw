@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.5 2000/11/27 22:47:02 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.6 2000/12/01 23:06:12 fisyak Exp $
 #include <iostream.h>
 #include "StdEdxMaker.h"
 // ROOT
@@ -229,7 +229,7 @@ Int_t StdEdxMaker::Make(){
   TTableSorter     *globtrkS   = new TTableSorter(globtrk,id);
   StDstPointChair  *pointC     = new StDstPointChair(point);
   StTrackChair     *globtrkC   = new StTrackChair(globtrk);
-
+  
   TTableSorter     *primtrkS   = 0;
   StTrackChair     *primtrkC   = 0;
   if (primtrk){
@@ -239,33 +239,39 @@ Int_t StdEdxMaker::Make(){
   StHelixD         *helix      = 0;
   StTpcCoordinateTransform transform(gStTpcDb);
   EeFit_t EeFit;
-  Int_t iprim, iglob, ipoint; 
+  Int_t iprim, jprim, iglob, ipoint; 
   Int_t nPrimaryTracks = 0;
   Double_t pTinv;
   Double_t p;
   Double_t Eta;
   Double_t Pred[NHYPS], PredBB[NHYPS];
+  dst_track_st *primTrk = 0, *globTrk = 0, *primTRK = 0;
   if (primtrk) {
-    dst_track_st *primTrk = primtrk->GetTable();
+    primTrk = primtrk->GetTable();
     for (iprim = 0; iprim < primtrk->GetNRows(); iprim++, primTrk++) 
       if (primTrk->iflag > 0) nPrimaryTracks++;
   }
   Int_t kglob = 0, kprim = 0, kpoint = 0; 
   for (; kglob < globtrkS->GetNRows();kglob++) {
     iglob = globtrkS->GetIndex(kglob); assert (iglob >= 0);
+    globTrk = globtrk->GetTable() + iglob;
+    primTrk = 0;
     iprim = 0;
-    if ((*globtrk)[iglob].iflag < 0) continue;
-    Int_t Id = (*globtrk)[iglob].id;
+    if (globTrk->iflag < 0) continue;
+    Int_t Id = globTrk->id;
     if (primtrkS && kprim < primtrkS->GetNRows()) {
       for (; kprim < primtrkS->GetNRows(); kprim++) {
-	iprim = primtrkS->GetIndex(kprim); assert(iprim >=0);
-	if ((*primtrk)[iprim].iflag < 0) continue;
-	if ((*primtrk)[iprim].id < Id) continue;
-	if ((*primtrk)[iprim].id > Id) break;
+	jprim = primtrkS->GetIndex(kprim); assert(iprim >=0);
+	primTRK = primtrk->GetTable() + jprim;
+	if (primTRK->iflag < 0) continue;
+	if (primTRK->id < Id) continue;
+	if (primTRK->id > Id) break;
+	iprim = jprim;
+	primTrk = primTRK;
 	helix  = primtrkC->MakeHelix(iprim);
 	kprim++;
 	if (m_Mode > 0) {
-	  Double_t tanl  = (*primtrk)[iprim].tanl;
+	  Double_t tanl  = primTrk->tanl;
 	  pTinv  = primtrkC->Invpt(iprim);
 	  p = 1.e6;
 	  if (pTinv > 1.e-6) p = 1./pTinv*TMath::Sqrt(1. + tanl*tanl);
@@ -276,11 +282,13 @@ Int_t StdEdxMaker::Make(){
 	    PredBB[l] = BB(p/Masses[l]);
 	  }
 	}
+	break;
       }
     }
     if (!helix) helix = globtrkC->MakeHelix(iglob);
     dst_dedx_st dedx;
     NPoints = 0;
+    Int_t NFitPoints=0;
     NdEdx = 0;
     Double_t TrackLength = 0;
     Double_t avrgZ = 0;
@@ -289,8 +297,9 @@ Int_t StdEdxMaker::Make(){
       if (pointC->TrackId(ipoint) < Id) continue;
       if (pointC->TrackId(ipoint) > Id) break;
       NPoints++;
+      if (!pointC->GetFitFlag(ipoint)) continue;
+      NFitPoints++;
       if (pointC->GetFlag(ipoint)) continue;
-      //      if (!pointC->GetFitFlag(ipoint)) continue;
       if (pointC->DetectorId(ipoint) != kTpcId) continue;
       dE = pointC->GetCharge(ipoint);
       Int_t sector = pointC->Sector(ipoint);
@@ -479,9 +488,9 @@ Int_t StdEdxMaker::Make(){
   return kStOK;
 }
 //________________________________________________________________________________
-void StdEdxMaker::SortdEdx(Double_t *dEdxS, Int_t NPoints) {
-  for (int i = 0; i< NPoints-1; i++) {
-    for (int j=i+1; j< NPoints; j++) {
+void StdEdxMaker::SortdEdx(Double_t *dEdxS, Int_t NdEdx) {
+  for (int i = 0; i< NdEdx-1; i++) {
+    for (int j=i+1; j< NdEdx; j++) {
       if (dEdxS[i] > dEdxS[j]) {
         Double_t temp = dEdxS[i];
 	dEdxS[i] = dEdxS[j];
@@ -573,13 +582,13 @@ void plotResults()
     Double_t minBin = -5, maxBin = 5;
     if (h1) delete h1;
     h1 = new TH1F("h1","de/dx of hit dist", nBin, minBin, maxBin);
-    for (int i=0; i<NPoints; i++) {h1->Fill(((dEdxN[i]-m)*sqrt(dxN[i])));}
+    for (int i=0; i<NdEdx; i++) {h1->Fill(((dEdxN[i]-m)*sqrt(dxN[i])));}
     h1->SetNormFactor(2.);
     
     fCanvas->cd();
     h1->Draw();
 //     if (fLine) delete fLine;
-//     fLine = new TLine(mean, 0., mean, NPoints/2.);
+//     fLine = new TLine(mean, 0., mean, NdEdx/2.);
 //     fLine->SetLineColor(2);
 //     fLine->SetLineStyle(2);
 //     fLine->Draw("same");
@@ -603,7 +612,7 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
   f = 0.;
   gin[0] = 0.;
   gin[1] = 0.;
-  for (int i=0;i<NPoints; i++) {
+  for (int i=0;i<NdEdx; i++) {
     //    Double_t xx = (dEdxN[i]-par[0])/par[1]*sqrt(dxN[i]);
     Double_t xx = (dEdxL[i]-par[0])*sqrt(dxN[i]*par[1]);
     Double_t ff = fGaus(xx);
@@ -626,10 +635,10 @@ void fcn(Int_t &npar, Double_t *gin, Double_t &f, Double_t *par, Int_t iflag)
 //________________________________________________________________________________
 void StdEdxMaker::DoFitZ(Double_t &chisq, Double_t &fitZ, Double_t &fitdZ)
 {
-  if (NPoints>10) {
+  if (NdEdx>10) {
     Double_t avz = 0;
-    for (int i=0;i<NPoints;i++) {dEdxL[i] = TMath::Log(dEdxN[i]); avz += dEdxL[i];}
-    avz /= NPoints;
+    for (int i=0;i<NdEdx;i++) {dEdxL[i] = TMath::Log(dEdxN[i]); avz += dEdxL[i];}
+    avz /= NdEdx;
     Double_t arglist[10];
     Int_t ierflg = 0;
     gMinuit->SetFCN(fcn);
