@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysis.cc,v 1.13 2001/08/07 20:52:15 caines Exp $
+ * $Id: StSvtAnalysis.cc,v 1.14 2002/01/04 16:05:48 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -51,6 +51,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysis.cc,v $
+ * Revision 1.14  2002/01/04 16:05:48  caines
+ * fix overstepping of array bounds
+ *
  * Revision 1.13  2001/08/07 20:52:15  caines
  * Implement better packing of svt hardware and charge values
  *
@@ -704,7 +707,7 @@ int StSvtAnalysis:: CatagorizeCluster(int iRows, int iCols, int igt3, int clu)
   fThres = -0.03*(float)m_adc_p;                        /*loop over central anode in time for undershoot*/
   iUnderBkt = 127;                                      /*if eq 0 or 61 then problem*/ 
   i = m_col_p;                                             /*NOTE SCG does not save much of the undershoot so*/
-  while (iUnderBkt==127 && i!=iCols)                    /*this is not so sensitive. Good for deconvolution*/
+  while (iUnderBkt==127 && i!=iCols-1)                    /*this is not so sensitive. Good for deconvolution*/
   {
     if ( (m_Pixels[m_row_p][i]+m_Pixels[m_row_p][i+1])/2. < fThres) iUnderBkt = i;
     i++;
@@ -786,7 +789,7 @@ POINT* StSvtAnalysis::Find_Peaks (int iRows, int iCols, int *iNumPeaks)
   int i, j, k;
   float valley;
 
-  Array = (POINT *) new POINT[(iRows+2) * (iCols+2)];  
+  Array = new POINT[(iRows+2) * (iCols+2)];  
   if (Array == NULL)
     {
       *iNumPeaks = 0;
