@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StSoftwareMonitor.h,v 2.5 2002/02/22 22:56:50 jeromel Exp $
+ * $Id: StSoftwareMonitor.h,v 2.6 2002/11/26 02:19:11 perev Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StSoftwareMonitor.h,v $
+ * Revision 2.6  2002/11/26 02:19:11  perev
+ * StEventMaker ITTF modif
+ *
  * Revision 2.5  2002/02/22 22:56:50  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -88,16 +91,25 @@ public:
     StTofSoftwareMonitor*          tof();
     const StTofSoftwareMonitor*    tof() const;
 
-    void setTpcSoftwareMonitor(StTpcSoftwareMonitor*);
-    void setSvtSoftwareMonitor(StSvtSoftwareMonitor*);
-    void setFtpcSoftwareMonitor(StFtpcSoftwareMonitor*);
-    void setEmcSoftwareMonitor(StEmcSoftwareMonitor*);
-    void setRichSoftwareMonitor(StRichSoftwareMonitor*);
-    void setCtbSoftwareMonitor(StCtbSoftwareMonitor*);
+    void setTpcSoftwareMonitor   (StTpcSoftwareMonitor*   );
+    void setSvtSoftwareMonitor   (StSvtSoftwareMonitor*   );
+    void setFtpcSoftwareMonitor  (StFtpcSoftwareMonitor*  );
+    void setEmcSoftwareMonitor   (StEmcSoftwareMonitor*   );
+    void setRichSoftwareMonitor  (StRichSoftwareMonitor*  );
+    void setCtbSoftwareMonitor   (StCtbSoftwareMonitor*   );
     void setGlobalSoftwareMonitor(StGlobalSoftwareMonitor*);
-    void setL3SoftwareMonitor(StL3SoftwareMonitor*);
-    void setTofSoftwareMonitor(StTofSoftwareMonitor*);
-    
+    void setL3SoftwareMonitor    (StL3SoftwareMonitor*    );
+    void setTofSoftwareMonitor   (StTofSoftwareMonitor*   );
+
+    void setTpcSoftwareMonitor   (dst_mon_soft_tpc_st*    );
+    void setSvtSoftwareMonitor   (dst_mon_soft_svt_st*    );
+    void setFtpcSoftwareMonitor  (dst_mon_soft_ftpc_st*   );
+    void setEmcSoftwareMonitor   (dst_mon_soft_emc_st*    );
+    void setRichSoftwareMonitor  (dst_mon_soft_rich_st*   );
+    void setCtbSoftwareMonitor   (dst_mon_soft_ctb_st*    );
+    void setGlobalSoftwareMonitor(dst_mon_soft_glob_st*   );
+    void setL3SoftwareMonitor    (dst_mon_soft_l3_st*     );
+   
 protected:
     StTpcSoftwareMonitor    *mTpcMonitor;
     StSvtSoftwareMonitor    *mSvtMonitor;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL0Trigger.cxx,v 2.6 2002/02/15 00:18:13 ullrich Exp $
+ * $Id: StL0Trigger.cxx,v 2.7 2002/11/26 02:19:11 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.cxx,v $
+ * Revision 2.7  2002/11/26 02:19:11  perev
+ * StEventMaker ITTF modif
+ *
  * Revision 2.6  2002/02/15 00:18:13  ullrich
  * Changed signature of bunchCrossingId7bit().
  *
@@ -41,7 +44,7 @@ using std::fill_n;
 using std::copy;
 #endif
 
-static const char rcsid[] = "$Id: StL0Trigger.cxx,v 2.6 2002/02/15 00:18:13 ullrich Exp $";
+static const char rcsid[] = "$Id: StL0Trigger.cxx,v 2.7 2002/11/26 02:19:11 perev Exp $";
 
 ClassImp(StL0Trigger)
 
@@ -61,42 +64,33 @@ StL0Trigger::StL0Trigger()
     fill_n(mBcDataArray, static_cast<unsigned short>(mMaxBcData), 0);
 }
 
-StL0Trigger::StL0Trigger(const dst_L0_Trigger_st& t)
+void StL0Trigger::set(const dst_L0_Trigger_st *t)
 {
-    mTriggerWord        = t.TriggerWd;
-    mTriggerActionWord  = t.TriggerActionWd;
-    mMwcCtbMultiplicity = t.MWC_CTB_mul;
-    mMwcCtbDipole       = t.MWC_CTB_dipole;
-    mMwcCtbTopology     = t.MWC_CTB_topology;
-    mMwcCtbMoment       = t.MWC_CTB_moment;
-    copy(t.CPA+0, t.CPA+mMaxPixels, mCoarsePixelArray);
-    mDsmInput = t.DSMInput;
-    mDetectorBusy = t.DetectorBusy; 
-    mTriggerToken = t.TrgToken;
-    mDsmAddress = t.DSMAddress;  
-    mAddBits = t.addBits;   
-    fill_n(mLastDsmArray, static_cast<unsigned short>(mMaxLastDsm), 0);
-    fill_n(mBcDataArray, static_cast<unsigned short>(mMaxBcData), 0);
+    if (!t)          return;
+    if (TestBit(1))  return;
+    SetBit(1);
+    mTriggerWord        = t->TriggerWd;
+    mTriggerActionWord  = t->TriggerActionWd;
+    mMwcCtbMultiplicity = t->MWC_CTB_mul;
+    mMwcCtbDipole       = t->MWC_CTB_dipole;
+    mMwcCtbTopology     = t->MWC_CTB_topology;
+    mMwcCtbMoment       = t->MWC_CTB_moment;
+    copy(t->CPA+0, t->CPA+mMaxPixels, mCoarsePixelArray);
+    mDsmInput = t->DSMInput;
+    mDetectorBusy = t->DetectorBusy; 
+    mTriggerToken = t->TrgToken;
+    mDsmAddress = t->DSMAddress;  
+    mAddBits = t->addBits;   
 }
 
-StL0Trigger::StL0Trigger(const dst_L0_Trigger_st& t, const dst_TrgDet_st& n)
+void StL0Trigger::set(const dst_TrgDet_st* n)
 {
-    // from dst_L0_Trigger_st
-    mTriggerWord        = t.TriggerWd;
-    mTriggerActionWord  = t.TriggerActionWd;
-    mMwcCtbMultiplicity = t.MWC_CTB_mul;
-    mMwcCtbDipole       = t.MWC_CTB_dipole;
-    mMwcCtbTopology     = t.MWC_CTB_topology;
-    mMwcCtbMoment       = t.MWC_CTB_moment;
-    copy(t.CPA+0, t.CPA+mMaxPixels, mCoarsePixelArray);
-    mDsmInput = t.DSMInput;
-    mDetectorBusy = t.DetectorBusy; 
-    mTriggerToken = t.TrgToken;
-    mDsmAddress = t.DSMAddress;  
-    mAddBits = t.addBits;
     // from dst_TrgDet_st
-    copy(n.lastDSM+0, n.lastDSM+mMaxLastDsm, mLastDsmArray);
-    copy(n.BCdata+0, n.BCdata+mMaxBcData, mBcDataArray);
+    if (!n)  		return;
+    if (TestBit(2))	return;
+    SetBit(2);
+    copy(n->lastDSM+0, n->lastDSM+mMaxLastDsm, mLastDsmArray);
+    copy(n->BCdata +0, n->BCdata+mMaxBcData  , mBcDataArray );
 }
 
 StL0Trigger::~StL0Trigger() { /* noop */ }

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StVertex.h,v 2.8 2002/02/22 22:56:53 jeromel Exp $
+ * $Id: StVertex.h,v 2.9 2002/11/26 02:19:11 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StVertex.h,v $
+ * Revision 2.9  2002/11/26 02:19:11  perev
+ * StEventMaker ITTF modif
+ *
  * Revision 2.8  2002/02/22 22:56:53  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -99,6 +102,6 @@ protected:
     StLink<StTrack> mParent;            
 #endif //__CINT__
 
-    ClassDef(StVertex,2)
+    ClassDef(StVertex,3)
 };
 #endif

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StL0Trigger.h,v 2.6 2002/02/22 22:56:48 jeromel Exp $
+ * $Id: StL0Trigger.h,v 2.7 2002/11/26 02:19:11 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.h,v $
+ * Revision 2.7  2002/11/26 02:19:11  perev
+ * StEventMaker ITTF modif
+ *
  * Revision 2.6  2002/02/22 22:56:48  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -46,9 +49,9 @@ class dst_TrgDet_st;
 
 class StL0Trigger : public StTrigger {
 public:
-    StL0Trigger();
-    StL0Trigger(const dst_L0_Trigger_st&);
-    StL0Trigger(const dst_L0_Trigger_st&, const dst_TrgDet_st&);
+     StL0Trigger();
+void set(const dst_L0_Trigger_st*);
+void set(const dst_TrgDet_st    *);
     // StL0Trigger(const StL0Trigger&);            use default
     // StL0Trigger& operator=(const StL0Trigger&); use default
     ~StL0Trigger();

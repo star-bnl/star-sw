@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StV0Vertex.h,v 2.5 2002/03/08 20:28:37 ullrich Exp $
+ * $Id: StV0Vertex.h,v 2.6 2002/11/26 02:19:11 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.h,v $
+ * Revision 2.6  2002/11/26 02:19:11  perev
+ * StEventMaker ITTF modif
+ *
  * Revision 2.5  2002/03/08 20:28:37  ullrich
  * Custom Streamer written.
  *
@@ -74,12 +77,11 @@ private:
     StPtrVecTrack    mDaughters;
     Float_t          mDcaDaughtersToPrimaryVertex[2];
     //    StThreeVectorF   mMomentumOfDaughters[2];
-    StThreeVectorF   mMomentumOfDaughters_0; // negative
-    StThreeVectorF   mMomentumOfDaughters_1; // positive
+    StThreeVectorF   mMomentumOfDaughters[2]; // negative/positive
     Float_t          mDcaDaughters;
     Float_t          mDcaParentToPrimaryVertex;
 
     StObject* clone() const;
-    ClassDef(StV0Vertex,2)
+    ClassDef(StV0Vertex,3)
 };
 #endif

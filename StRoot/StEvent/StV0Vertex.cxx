@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.cxx,v 2.6 2002/03/08 22:16:20 jeromel Exp $
+ * $Id: StV0Vertex.cxx,v 2.7 2002/11/26 02:19:11 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.cxx,v $
+ * Revision 2.7  2002/11/26 02:19:11  perev
+ * StEventMaker ITTF modif
+ *
  * Revision 2.6  2002/03/08 22:16:20  jeromel
  * Extra version needed to be read (Thomas)
  *
@@ -45,7 +48,7 @@ using std::copy;
 
 ClassImp(StV0Vertex)
 
-static const char rcsid[] = "$Id: StV0Vertex.cxx,v 2.6 2002/03/08 22:16:20 jeromel Exp $";
+static const char rcsid[] = "$Id: StV0Vertex.cxx,v 2.7 2002/11/26 02:19:11 perev Exp $";
 
 StV0Vertex::StV0Vertex()
 {
@@ -66,12 +69,12 @@ StV0Vertex::StV0Vertex(const dst_vertex_st& vtx, const dst_v0_vertex_st& v0vtx) 
     mDaughters[positive] = 0;
     mDcaDaughtersToPrimaryVertex[negative] = v0vtx.dcan;
     mDcaDaughtersToPrimaryVertex[positive] = v0vtx.dcap;
-    mMomentumOfDaughters_0.setX(v0vtx.neg_px);
-    mMomentumOfDaughters_0.setY(v0vtx.neg_py);
-    mMomentumOfDaughters_0.setZ(v0vtx.neg_pz);
-    mMomentumOfDaughters_1.setX(v0vtx.pos_px);
-    mMomentumOfDaughters_1.setY(v0vtx.pos_py);
-    mMomentumOfDaughters_1.setZ(v0vtx.pos_pz);
+    mMomentumOfDaughters[0].setX(v0vtx.neg_px);
+    mMomentumOfDaughters[0].setY(v0vtx.neg_py);
+    mMomentumOfDaughters[0].setZ(v0vtx.neg_pz);
+    mMomentumOfDaughters[1].setX(v0vtx.pos_px);
+    mMomentumOfDaughters[1].setY(v0vtx.pos_py);
+    mMomentumOfDaughters[1].setZ(v0vtx.pos_pz);
     mDcaDaughters = v0vtx.dcapn;
     mDcaParentToPrimaryVertex = v0vtx.dcav0;
 }
@@ -147,14 +150,14 @@ StV0Vertex::dcaDaughterToPrimaryVertex(StChargeSign sign) const
 const StThreeVectorF&
 StV0Vertex::momentumOfDaughter(StChargeSign sign) const
 {
-    return (sign == negative ? mMomentumOfDaughters_0 : mMomentumOfDaughters_1);
+    return (sign == negative ? mMomentumOfDaughters[0] : mMomentumOfDaughters[1]);
 }
 
 StThreeVectorF
 StV0Vertex::momentum() const
 {
-    return (mMomentumOfDaughters_0 +
-            mMomentumOfDaughters_1);
+    return (mMomentumOfDaughters[0] +
+            mMomentumOfDaughters[1]);
 }
 
 float
@@ -173,9 +176,9 @@ void
 StV0Vertex::setMomentumOfDaughter(StChargeSign sign, const StThreeVectorF& v)
 {
     if (sign == negative)
-	mMomentumOfDaughters_0 = v;
+	mMomentumOfDaughters[0] = v;
     else
-	mMomentumOfDaughters_1 = v;
+	mMomentumOfDaughters[1] = v;
 }
 
 void
@@ -183,7 +186,6 @@ StV0Vertex::setDcaDaughters(float val) { mDcaDaughters = val; }
 
 void
 StV0Vertex::setDcaParentToPrimaryVertex(float val) { mDcaParentToPrimaryVertex = val; }
-
 
 /// Custom streamer
 void StV0Vertex::Streamer(TBuffer &R__b)
@@ -193,7 +195,7 @@ void StV0Vertex::Streamer(TBuffer &R__b)
     if (R__b.IsReading()) {
 	UInt_t R__s, R__c;
 	Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
-	if (R__v > 1) {
+	if (R__v > 2) {
 	    Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
 	    return;
 	}
@@ -211,9 +213,9 @@ void StV0Vertex::Streamer(TBuffer &R__b)
 	// with StThreeVectorF having a custom streamer (therefore the
 	// extra version).
 	UInt_t R__s2, R__c2;
-	Version_t R__v2 = R__b.ReadVersion(&R__s2, &R__c2);
-	mMomentumOfDaughters_0.Streamer(R__b);
-	mMomentumOfDaughters_1.Streamer(R__b);
+	if (R__v==1) {Version_t R__v2 = R__b.ReadVersion(&R__s2, &R__c2);}
+	mMomentumOfDaughters[0].Streamer(R__b);
+	mMomentumOfDaughters[1].Streamer(R__b);
 
 	
 	// Come back to other data members
@@ -226,6 +228,7 @@ void StV0Vertex::Streamer(TBuffer &R__b)
 	Class()->WriteBuffer(R__b,this);
     }
 } 
+
 
 
 
