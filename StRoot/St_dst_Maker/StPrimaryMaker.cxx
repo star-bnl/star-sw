@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.62 2001/09/07 23:18:16 genevb Exp $
+// $Id: StPrimaryMaker.cxx,v 1.63 2001/11/28 23:02:58 balewski Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.63  2001/11/28 23:02:58  balewski
+// ppLMV uses only tracks matched to CTB slats
+//
 // Revision 1.62  2001/09/07 23:18:16  genevb
 // Additional vertex fixing from file capabilities
 //
@@ -213,8 +216,14 @@
 #include "St_db_Maker/St_db_Maker.h"
 #include "TH2.h"
 
+#include "CtbResponse.h" // for recon of pileup in pp
+#include "MatchedTrk.h" // for recon of pileup in pp
+
+#ifndef  gufld 
 #define gufld   gufld_
 extern "C" {void gufld(Float_t *, Float_t *);}
+#endif 
+
 long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate);
 int curEvNum=-1;
 
@@ -423,46 +432,49 @@ Int_t StPrimaryMaker::Init(){
   }
   AddRunCont(m_egr2_egrpar);
 
-  if(m_Mode==15) ppLMVuse(15.); // initialize ppLMV
+  if(m_Mode==15) { // initialize ppLMV
+    int   ppLMVparI[10]={2, 10, 0, 0, 0, 0, 0, 0, 0, 9999};
+    float ppLMVparF[10]={1., 3.9, 0.20, .02, 1., 90., 0, 0, 0, 8888};
+    ppLMVuse(ppLMVparI,ppLMVparF);
+  }
 
    // few histos for monitoring of ppLMV
-   { 
-     int i;
-     for(i=0;i<16;i++) {
-       char tt[10];
-       sprintf(tt,"zev%2.2d",i);
-       hppLMV1[i] = new TH1F(tt,"Zdca for all accepted by LMV tracks Nin this eve",200,-250.,250.);
-     }
-     hppLMV2[0] = new TH1F("ztr2","Zdca filtered",200,-250.,250.);
-     hppLMV2[1] = new TH1F("zver","Zvert averaged",200,-50.,50.);
-     hppLMV2[2] = new TH1F("delz","Zvert Geant-Rec",100,-5.,5.);
-     hppLMV2[3] = new TH1F("xver","Xvert averaged",100,-5.,5.);
-     hppLMV2[4] = new TH1F("delx","Xvert Geant-Rec",100,-5.,5.);
-     hppLMV2[5] = new TH1F("yver","Yvert averaged",100,-5.,5.);
-     hppLMV2[6] = new TH1F("dely","Yvert Geant-Rec",100,-5.,5.);
-   }//pp LMV end
-
-   // few histos for monitoring of ppLMV2
    {
-     hPiFi[0] = new TH1F("FiN","counts(1,...6)",11,-0.5,10.5);
-     hPiFi[1] = (TH1F *) new TH2F("Fi-g","Gen Tr @ CTB  phi/deg vs. eta",15,-1.5,1.5,18,0.,360.);
+     hPiFi[0] = new TH1F("Fin0","ADC spectrum for  CTB=trigBXing slats",257,-0.5,256.5);
+     hPiFi[1] = new TH1F("Fin1","No. of CTB=trigBXing slats/eve",261,-0.5,260.5);
      hPiFi[2] = (TH1F *) new TH2F("Fi-m","Match Tr @ CTB  phi/deg vs. eta",15,-1.5,1.5,18,0.,360.);
-     hPiFi[3] = new TH1F("Fi4","Match #Delta #eta",50,-1.,1.);
-     hPiFi[4] = new TH1F("Fi5","Match #Delta #phi/deg",50,-10.,10.);
-     hPiFi[5] = new TH1F("Fin5","No. of potential match tracks/eve",21,-0.5,20.5);
-     hPiFi[6] = new TH1F("Fin6","No. of match tracks/eve",21,-0.5,20.5);
+     hPiFi[3] = new TH1F("Fin3","Match #Delta #eta",50,-1.,1.);
+     hPiFi[4] = new TH1F("Fin4","Match #Delta #phi/deg",50,-10.,10.);
+     hPiFi[5] = new TH1F("Fin5","No. of track match to CTB=trigBXing tracks/eve",261,-0.5,260.5);
+     hPiFi[6] =(TH1F *) new TH2F("Fin6","Vertex Y/cm vs. X/cm found",25,-5,5,25,-5,5); 
 
-     hPiFi[7] = new TH1F("Fin7","Zdca/cm of match/eve",100,-25,25);
-     hPiFi[8] = new TH1F("Fin8","Zdca-Geant/cm of match/eve",100,-5,5);
-     hPiFi[9] = new TH1F("Fin9","Vertex Z/cm found",50,-25,25);
+     hPiFi[7] = new TH1F("Fin7","Vertex X/cm found",100,-5,5);
+     hPiFi[8] = new TH1F("Fin8","Vertex Y/cm found",100,-5,5);
+     hPiFi[9] = new TH1F("Fin9","Vertex Z/cm found",100,-100,100);
+
      hPiFi[10] = new TH1F("Fin10","Vertex Z/cm Geant-found/cm ",100,-5,5);
      hPiFi[11] = new TH1F("Fin11","Vertex X/cm Geant-found/cm ",100,-5,5);
      hPiFi[12] = new TH1F("Fin12","Vertex Y/cm Geant-found/cm ",100,-5,5);
-     hPiFi[13] = NULL;
-     hPiFi[14] = new TH1F("Fin14","starggling (a.u.) of tracks",100,.0,10.);
-     hPiFi[15] = new TH1F("Fin15","Spath (cm) of tracks",100,.0,200.);
 
-   }
+     hPiFi[13] = new TH1F("Fin13","Primary multiplicity",551,-0.5,550.5);
+     hPiFi[14] = new TH1F("Fin14","Primary (global) pT distrib",100,0.,10.);
+     hPiFi[15] = new TH1F("Fin15","Primary No. of points/track",51,-0.5,50.5);
+  }
+   {// matching to many bXing
+     
+     hctb[0] = new TH1F("Gctb0","Geant TOF of CTB hit (ns)",200,-8000.,8000.);
+     hctb[1] = new TH1F("Gctb1","Geant TOF of CTB hit (ns)",200,0.,200.);
+     hctb[2] = new TH1F("Gctb2","Geant TOF of CTB hit (ns), trig only",200,0.,200.);
+     hctb[3] = new TH1F("Gctb3","Geant TOF of CTB hit (ns)",200,-400.,400.);
+     hctb[4] = new TH1F("Gctb4","Geant CTB hit vs. bXingID",61,-0.5,60.5);
+     hctb[5] = new TH1F("Dctb1","CTB slat with ADC>Th",241,-0.5,240.5);
+     hctb[6] = new TH1F("Dctb2","CTB slat with ADC>Th matched to track",241,-0.5,240.5);
+
+     hmtr[0] = new TH1F("mtr0","counts(1,...6)",11,-0.5,10.5);
+     hmtr[1] = new TH1F("mtr1","starggling (a.u.) of tracks",100,.0,10.);
+     hmtr[2] = new TH1F("mtr2","Spath (cm) of tracks",100,.0,200.);
+
+  }
 
   return StMaker::Init();
 }
@@ -525,7 +537,11 @@ Int_t StPrimaryMaker::Make(){
   St_sgr_groups  *svt_groups  = 0;
   St_svm_evt_match *evt_match = 0;
   St_scs_spt     *scs_spt     = 0;
-  
+  //JB tmp
+  svtracks=0;
+  svthits=0;
+  //JB tmp end
+
   // Case svt tracking performed
   if (svtracks) {
     stk_track = (St_stk_track  *) svtracks->Find("EstSvtTrk");
@@ -590,11 +606,17 @@ Int_t StPrimaryMaker::Make(){
       Int_t mdate = db->GetDateTime().GetDate();
       if(Debug()) gMessMgr->Debug() << "run_lmv: calling lmv" << endm;
 
-      if(zCutppLMV>0)  
-	iRes = ppLMV3(globtrk,vertex,mdate);
-      else
+      if(zCutppLMV>0) {
+	assert( ppLMVparI[1]>0); // Do you initialized ppLMV ?!
+        CtbResponse ctbResponse(this, ppLMVparI, ppLMVparF);
+	
+        MatchedTrk maTrk(this, ppLMVparI, ppLMVparF, &ctbResponse,globtrk) ;
+        iRes = ppLMV4(maTrk,globtrk,vertex,mdate);
+
+      }  else {
 	iRes = lmv(globtrk,vertex,mdate);
-      
+      }
+
       //   ================================================
       // Do this to solve inconsistency between kSt* and kSTAFCV* return codes
       if( iRes == kStOK ){
@@ -611,8 +633,8 @@ Int_t StPrimaryMaker::Make(){
       //	 ================================================
     }
   
-  }  // end section on finding a primary vertex if not fixed
-  
+  }  // end section on finding a primary vertex if not fixe
+
   if (iRes !=kSTAFCV_OK) return kStWarn;
   
   // track_propagator
@@ -825,9 +847,12 @@ Int_t StPrimaryMaker::Make(){
   }
   nrows = n2rows;
   primtrk->SetNRows(nrows);  
- 
+  printf("%s end, nPrimTR=%d\n",GetName(),nrows);
   return iMake;
 }
 //_____________________________________________________________________________
+
+
+
 
 
