@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.177 2001/03/08 16:49:03 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.178 2001/03/08 22:27:42 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -18,6 +18,7 @@
 #include "StTreeMaker/StTreeMaker.h"
 #include "StIOMaker/StIOMaker.h"
 #include "StChallenger/StChallenger.h"
+#include "St_tcl_Maker/St_tcl_Maker.h"
 #include "StMessMgr.h"
 //_____________________________________________________________________
 Bfc_st BFC[] = {
@@ -109,6 +110,9 @@ Bfc_st BFC[] = {
   {"AllEvent"    ,""  ,"","Tree"                               ,"","","Write whole event to StTree",kFALSE},
   {"AllTables"   ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
   {"ExB"         ,""  ,"","",""                       ,"","Activate ExB correction in St_tpt_Maker",kFALSE},
+  {"EastOff"     ,""  ,"","",""                                  ,"","Disactivate East part of tpc",kFALSE},
+  {"WestOff"     ,""  ,"","",""                                  ,"","Disactivate West part of tpc",kFALSE},
+  {"AllOn"     ,""  ,"","",""                        ,"","Activate both East and West parts of tpc",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -472,6 +476,12 @@ Int_t StBFChain::Instantiate()
 	  if (maker == "St_dst_Maker" && GetOption("HitsBranch")) mk->SetMode(2); 
 	  if (maker == "StMatchMaker" && !GetOption("Kalman")) mk->SetMode(-1);
 	  if (maker == "St_tpt_Maker" && GetOption("ExB")) mk->SetMode(1); // Al Saulys request
+	  if (maker == "St_tcl_Maker") {
+	    St_tcl_Maker *tclMk = (St_tcl_Maker *) mk;
+	    if (GetOption("EastOff")) tclMk->EastOff(); 
+	    if (GetOption("WestOff")) tclMk->WestOff(); 
+	    if (GetOption("AllOn"))   tclMk->AllOn(); 
+	  }
 	  if (maker == "St_tpcdaq_Maker") {
 	    if (GetOption("Trs")) mk->SetMode(1); // trs
 	    else                  mk->SetMode(0); // daq
