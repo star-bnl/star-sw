@@ -1,7 +1,7 @@
 //#include "StHbtMaker/Infrastructure/StHbtPairResonanceInfo.hh"
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Cut/franksPairCut.h"
-#include "StarClassLibrary/SystemOfUnits.h"
+#include "SystemOfUnits.h"
 #include <string>
 #include <cstdio>
 
@@ -12,21 +12,23 @@ ClassImp(franksPairCut)
 #define __2POWER16__ 65536
 
 //__________________
-franksPairCut::franksPairCut()  /*: mResonanceInfoOn(false) */ {
+  franksPairCut::franksPairCut() /* : mResonanceInfoOn(false) */ {
   mQuality[0] = -1.; mQuality[1] = +1.;
   mKt[0] = -1e9; mKt[1]= +1e9;
   mOpeningAngle[0] = -1e9; mOpeningAngle[1]= +1e9;
   mRapidity[0] = -1e9; mRapidity[1]= +1e9;
+  mEta[0] = -1e9; mEta[1]= +1e9;
   mQinv[0] = -1e9; mQinv[1]= +1e9;
   mEntranceSeparation[0] = -1e9; mEntranceSeparation[1]= +1e9;
-  mDecayLength[0] = 0.; mDecayLength[1]= 0.;
-  mAngleToPrimaryVertex[0] = 0.; mAngleToPrimaryVertex[1]= 0.;
-  mDcaToPrimaryVertex[0] = 0.; mDcaToPrimaryVertex[1]= 0.;
+  mDecayLength[0] = -1e9; mDecayLength[1]= 1e9;
+  mAngleToPrimaryVertex[0] = -1e9; mAngleToPrimaryVertex[1]= 1e9;
+  mDcaToPrimaryVertex[0] = -1e9; mDcaToPrimaryVertex[1]= 1e9;
+  mDcaOfDaughters[0] = -1e9; mDcaOfDaughters[1]= 1e9;
   mNPairsPassed = mNPairsFailed = 0;
   mIdenticalMother =0;
 }
 //__________________
-franksPairCut::franksPairCut(const franksPairCut& c) : StHbtPairCut(c) /*,  mResonanceInfoOn(false) */ {
+franksPairCut::franksPairCut(const franksPairCut& c) : StHbtPairCut(c) /* :  ,  mResonanceInfoOn(false) */ {
 #ifdef STHBTDEBUG
   cout << " franksPairCut::franksPairCut(const franksPairCut& c) " << endl;
 #endif
@@ -42,6 +44,8 @@ franksPairCut::franksPairCut(const franksPairCut& c) : StHbtPairCut(c) /*,  mRes
   mQinv[1] = c.mQinv[1];
   mRapidity[0] = c.mRapidity[0];
   mRapidity[1] = c.mRapidity[1];
+  mEta[0] = c.mEta[0];
+  mEta[1] = c.mEta[1];
   mEntranceSeparation[0] = c.mEntranceSeparation[0];
   mEntranceSeparation[1] = c.mEntranceSeparation[1];
   mDecayLength[0] = c.mDecayLength[0];
@@ -50,6 +54,8 @@ franksPairCut::franksPairCut(const franksPairCut& c) : StHbtPairCut(c) /*,  mRes
   mAngleToPrimaryVertex[1] = c.mAngleToPrimaryVertex[1];
   mDcaToPrimaryVertex[0] = c.mDcaToPrimaryVertex[0];
   mDcaToPrimaryVertex[1] = c.mDcaToPrimaryVertex[1];
+  mDcaOfDaughters[0] = c.mDcaOfDaughters[0];
+  mDcaOfDaughters[1] = c.mDcaOfDaughters[1];
   mIdenticalMother = c.mIdenticalMother;
 }
 //__________________
@@ -58,32 +64,58 @@ franksPairCut::franksPairCut(const franksPairCut& c) : StHbtPairCut(c) /*,  mRes
 //}
 //__________________
 bool franksPairCut::Pass(const StHbtPair* pair){
-  bool temp = false;
+  if ( !(pair->quality() >= mQuality[0]  && pair->quality() <= mQuality[1] ) ) 
+    leave(false);
+  if ( !(pair->kT() >= mKt[0]  && pair->kT() <= mKt[1] ) ) 
+    leave(false);
+  if ( !(pair->OpeningAngle() >= mOpeningAngle[0]  && pair->OpeningAngle() <= mOpeningAngle[1] )  ) 
+    leave(false);
+  if ( !(pair->fourMomentumSum().rapidity() >= mRapidity[0]  && pair->fourMomentumSum().rapidity() <= mRapidity[1]) ) 
+    leave(false);
+  if ( !(pair->fourMomentumSum().pseudoRapidity() >= mEta[0]  && pair->fourMomentumSum().pseudoRapidity() <= mEta[1] )  ) 
+    leave(false);
+  if ( !(fabs(pair->qInv()) >= mQinv[0]  && fabs(pair->qInv()) <= mQinv[1])  ) 
+    leave(false);
+  if ( !(pair->NominalTpcEntranceSeparation() >= mEntranceSeparation[0]  && pair->NominalTpcEntranceSeparation() <= mEntranceSeparation[1] )
+       ) leave(false);
   
-  if ( (pair->quality() >= mQuality[0]  && pair->quality() <= mQuality[1] ) &&
-       (pair->kT() >= mKt[0]  && pair->kT() <= mKt[1] ) &&
-       (pair->OpeningAngle() >= mOpeningAngle[0]  && pair->OpeningAngle() <= mOpeningAngle[1] ) &&
-       (pair->fourMomentumSum().rapidity() >= mRapidity[0]  && pair->fourMomentumSum().rapidity() <= mRapidity[1] ) &&
-       (fabs(pair->qInv()) >= mQinv[0]  && fabs(pair->qInv()) <= mQinv[1] ) &&
-       (pair->NominalTpcEntranceSeparation() >= mEntranceSeparation[0]  && pair->NominalTpcEntranceSeparation() <= mEntranceSeparation[1] )
-       ) temp = true;
-  
-//   if (mResonanceInfoOn && temp) {
-//     cout << " fix this " << endl;
-//     //    pair->CalculateResonanceInfo(primaryVertex, 0.25*tesla);
-//     temp = temp 
-//       && (pair->ResonanceInfo()->mDecayLength >= mDecayLength[0]  && pair->ResonanceInfo()->mDecayLength <= mDecayLength[1])
-//       && (pair->ResonanceInfo()->mAngleToPrimaryVertex >= mAngleToPrimaryVertex[0]  && pair->ResonanceInfo()->mAngleToPrimaryVertex <= mAngleToPrimaryVertex[1])
-//       && (pair->ResonanceInfo()->mDcaToPrimaryVertex >= mDcaToPrimaryVertex[0]  && pair->ResonanceInfo()->mDcaToPrimaryVertex <= mDcaToPrimaryVertex[1])
-//       ;
+//   if (mResonanceInfoOn) {
+//     //    cout << " fix this " << endl; 
+//     pair->CalculateResonanceInfo(&mPrimaryVertex, 0.25*tesla);
+//     //    cout << " mDecayLength "  << pair->ResonanceInfo()->mDecayLength << endl;
+//     if ( !(pair->ResonanceInfo()->mDecayLength >= mDecayLength[0]  && 
+// 	   pair->ResonanceInfo()->mDecayLength <= mDecayLength[1]) ) 
+//       leave(false);
+//     //    cout << " mDcaOfDaughters "  << pair->ResonanceInfo()->mDcaOfDaughters << endl;
+//     if ( !(pair->ResonanceInfo()->mDcaOfDaughters >= mDcaOfDaughters[0]  && 
+// 	   pair->ResonanceInfo()->mDcaOfDaughters <= mDcaOfDaughters[1]) ) 
+//       leave(false);
+    
+//     //    cout << "mAngleToPrimaryVertex " << pair->ResonanceInfo()->mAngleToPrimaryVertex << endl;
+//     if ( !(pair->ResonanceInfo()->mAngleToPrimaryVertex >= mAngleToPrimaryVertex[0]  && 
+// 	   pair->ResonanceInfo()->mAngleToPrimaryVertex <= mAngleToPrimaryVertex[1]) ) 
+//       leave(false);
+    
+//     //    cout << "mDcaToPrimaryVertex " << pair->ResonanceInfo()->mDcaToPrimaryVertex << endl;
+//     if ( !(pair->ResonanceInfo()->mDcaToPrimaryVertex >= mDcaToPrimaryVertex[0]  && 
+// 	   pair->ResonanceInfo()->mDcaToPrimaryVertex <= mDcaToPrimaryVertex[1]) ) 
+//       leave(false);
+    
 //   }
 
   if (mIdenticalMother)
-    if(  (int)(pair->track1()->TrackId()/__2POWER16__) != (int)(pair->track2()->TrackId()/__2POWER16__) ) temp = false;
-
-   temp ? mNPairsPassed++ : mNPairsFailed++;
-  return temp;
+    if(  !((int)(pair->track1()->TrackId()/__2POWER16__) != (int)(pair->track2()->TrackId()/__2POWER16__) ) ) 
+      leave(false);
+  
+  return leave(true);
 }
+
+//__________________
+bool franksPairCut::leave(bool b){
+   b ? mNPairsPassed++ : mNPairsFailed++;
+   return b;
+}
+
 //__________________
 StHbtString franksPairCut::Report(){
   string Stemp = "Franks Pair Cut have to finish cut and report; this is just a test - \n";
@@ -99,6 +131,8 @@ StHbtString franksPairCut::Report(){
   sprintf(Ctemp,"pair qinv: %f  -- %f\n",mQinv[0],mQinv[1]);
   Stemp += Ctemp;
   sprintf(Ctemp,"pair rapidity: %f  -- %f\n",mRapidity[0],mRapidity[1]);
+  Stemp += Ctemp;
+  sprintf(Ctemp,"pair eta: %f  -- %f\n",mEta[0],mEta[1]);
   Stemp += Ctemp;
   sprintf(Ctemp,"EntranceSeparation: %f  -- %f\n",mEntranceSeparation[0],mEntranceSeparation[1]);
   Stemp += Ctemp;

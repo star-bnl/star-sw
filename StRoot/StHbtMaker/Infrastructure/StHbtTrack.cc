@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtTrack.cc,v 1.7 2001/07/17 20:40:17 laue Exp $
+ * $Id: StHbtTrack.cc,v 1.8 2001/09/05 20:41:43 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -10,6 +10,9 @@
  *
  ***************************************************************************
  * $Log: StHbtTrack.cc,v $
+ * Revision 1.8  2001/09/05 20:41:43  laue
+ * Updates of the hbtMuDstTree microDSTs
+ *
  * Revision 1.7  2001/07/17 20:40:17  laue
  * mNHitsDedx fixed
  *
@@ -44,6 +47,8 @@
 #include "StHbtMaker/Infrastructure/StHbtTTreeEvent.h" 
 #include "StHbtMaker/Infrastructure/StHbtTTreeTrack.h" 
 #include "StEvent/StEnumerations.h"
+#include "StHbtMaker/Infrastructure/StHbtAihongPid.h"
+#include "StEventUtilities/StuProbabilityPidAlgorithm.h"
 #endif
 
 StHbtTrack::StHbtTrack(const StHbtTrack& t) { // copy constructor
@@ -76,6 +81,7 @@ StHbtTrack::StHbtTrack(const StHbtTrack& t) { // copy constructor
   mMap[0] = t.mMap[0];
   mMap[1] = t.mMap[1];
   mTrackId = t.mTrackId;
+
 };
 //___________________________________________________
 #ifdef __ROOT__
@@ -90,12 +96,11 @@ StHbtTrack::StHbtTrack(const StHbtTrack& t) { // copy constructor
 
 StHbtTrack::StHbtTrack(const StTrack* ST, StHbtThreeVector PrimaryVertex)
 {
-  StTpcDedxPidAlgorithm* PidAlgorithm = new StTpcDedxPidAlgorithm();
-  if (!PidAlgorithm) cout << " StHbtTrack::StHbtTrack(StTrack*) - Whoa!! No PidAlgorithm!! " << endl;
+  StTpcDedxPidAlgorithm PidAlgorithm;
   // while getting the bestGuess, the pidAlgorithm (StTpcDedxPidAlgorithm) is set up.
   // pointers to track and pidTraits are set 
   // So, even though BestGuess will generate a "variable not used" warning, DO NOT DELETE THE NEXT LINE
-  StParticleDefinition* BestGuess = (StParticleDefinition*)ST->pidTraits(*PidAlgorithm);
+  StParticleDefinition* BestGuess = (StParticleDefinition*)ST->pidTraits(PidAlgorithm);
 
   // the following just point to particle definitions in StEvent
   StElectron* Electron = StElectron::instance();
@@ -112,12 +117,14 @@ StHbtTrack::StHbtTrack(const StTrack* ST, StHbtThreeVector PrimaryVertex)
   mNHits = ST->numberOfPossiblePoints(kTpcId);
   mNHitsDedx = ST->fitTraits().numberOfFitPoints(kTpcId);
 
-  mNSigmaElectron = PidAlgorithm->numberOfSigma(Electron);
-  mNSigmaPion = PidAlgorithm->numberOfSigma(Pion);
-  mNSigmaKaon = PidAlgorithm->numberOfSigma(Kaon);
-  mNSigmaProton = PidAlgorithm->numberOfSigma(Proton);
-  mdEdx = PidAlgorithm->traits()->mean();
-
+  mNSigmaElectron = PidAlgorithm.numberOfSigma(Electron);
+  mNSigmaPion = PidAlgorithm.numberOfSigma(Pion);
+  mNSigmaKaon = PidAlgorithm.numberOfSigma(Kaon);
+  mNSigmaProton = PidAlgorithm.numberOfSigma(Proton);
+  if ( PidAlgorithm.traits() )
+    mdEdx = PidAlgorithm.traits()->mean();
+  else 
+    cout << "StHbtTrack(const StTrack* ST, StHbtThreeVector PrimaryVertex) - no traits " << endl;
 
   mChiSqXY = ST->fitTraits().chi2(0);
   mChiSqZ = ST->fitTraits().chi2(1);
@@ -195,6 +202,23 @@ StHbtTrack::StHbtTrack(const StEvent* EV, const StTrack* ST) {
   mMap[0] = ST->topologyMap().data(0);
   mMap[1] = ST->topologyMap().data(1);
   mTrackId = ST->key();
+
+  // On the fly pid probability calculation
+  static int previousEventNumber = 0;
+  static StHbtAihongPid* hbtAihongPid = StHbtAihongPid::Instance();
+  static StuProbabilityPidAlgorithm* aihongPid = hbtAihongPid->aihongPid();
+  if( (mPidProbElectron+mPidProbPion+mPidProbKaon+mPidProbProton) <= 0.){
+    if (previousEventNumber != EV->info()->id()) {
+      hbtAihongPid->updateEvent(uncorrectedNumberOfPositivePrimaries(*EV));
+      previousEventNumber = EV->info()->id();
+    }
+    hbtAihongPid->updateTrack( (int)mCharge, mP.mag(), mP.pseudoRapidity(), mNHitsDedx, mdEdx);
+    mPidProbElectron= (mCharge>0) ? aihongPid->beingPositronProb() : aihongPid->beingElectronProb() ;
+    mPidProbPion= (mCharge>0) ? aihongPid->beingPionPlusProb() : aihongPid->beingPionMinusProb();
+    mPidProbKaon= (mCharge>0) ? aihongPid->beingKaonPlusProb() : aihongPid->beingKaonMinusProb(); 
+    mPidProbProton=  (mCharge>0) ? aihongPid->beingProtonProb() : aihongPid->beingAntiProtonProb(); 
+ }
+
 }
 
 StHbtTrack::StHbtTrack(const StHbtTTreeEvent* ev, const StHbtTTreeTrack* t) { // copy constructor
@@ -241,9 +265,25 @@ StHbtTrack::StHbtTrack(const StHbtTTreeEvent* ev, const StHbtTTreeTrack* t) { //
   mPGlobal = mHelixGlobal.momentumAt(pathlengthGlobal,ev->mMagneticField*kilogauss);
   mPtGlobal = mPGlobal.perp();
   
+
+  // On the fly pid probability calculation
+  static unsigned int previousEventNumber = 0;
+  static StHbtAihongPid* hbtAihongPid = StHbtAihongPid::Instance();
+  static StuProbabilityPidAlgorithm* aihongPid = hbtAihongPid->aihongPid();
+  if( (mPidProbElectron+mPidProbPion+mPidProbKaon+mPidProbProton) <= 0.){
+    if (previousEventNumber != ev->mEventNumber) {
+      hbtAihongPid->updateEvent((int)ev->mUncorrectedNumberOfNegativePrimaries);
+      previousEventNumber = ev->mEventNumber;
+    }
+    hbtAihongPid->updateTrack( (int)mCharge, mP.mag(), mP.pseudoRapidity(), mNHitsDedx, mdEdx);
+    mPidProbElectron= (mCharge>0) ? aihongPid->beingPositronProb() : aihongPid->beingElectronProb() ;
+    mPidProbPion= (mCharge>0) ? aihongPid->beingPionPlusProb() : aihongPid->beingPionMinusProb();
+    mPidProbKaon= (mCharge>0) ? aihongPid->beingKaonPlusProb() : aihongPid->beingKaonMinusProb(); 
+    mPidProbProton=  (mCharge>0) ? aihongPid->beingProtonProb() : aihongPid->beingAntiProtonProb(); 
+ }
 };
 
-#endif  // __ROOT__
+#endif __ROOT__
 
 void StHbtTrack::SetTrackType(const short& t){mTrackType=t;}
 void StHbtTrack::SetCharge(const short& ch){mCharge=ch;}

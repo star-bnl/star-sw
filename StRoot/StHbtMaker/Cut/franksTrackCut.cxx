@@ -24,6 +24,10 @@
 
 franksTrackCut::franksTrackCut(){
   mNTracksPassed = mNTracksFailed = 0;
+  mPidProbElectron[0] = -1e9;  mPidProbElectron[1] = +1e9;
+  mPidProbPion[0]     = -1e9;  mPidProbPion[1]     = +1e9;
+  mPidProbKaon[0]     = -1e9;  mPidProbKaon[1]     = +1e9;
+  mPidProbProton[0]   = -1e9;  mPidProbProton[1]   = +1e9;
   mNSigmaElectron[0] = -1e9;  mNSigmaElectron[1] = +1e9;
   mNSigmaPion[0]     = -1e9;  mNSigmaPion[1]     = +1e9;
   mNSigmaKaon[0]     = -1e9;  mNSigmaKaon[1]     = +1e9;
@@ -38,11 +42,21 @@ franksTrackCut::franksTrackCut(){
   mPx[0] = -1e9;  mPx[1] = +1e9;
   mPy[0] = -1e9;  mPy[1] = +1e9;
   mPz[0] = -1e9;  mPz[1] = +1e9;
+  mDCA[0] = -1e9;  mDCA[1] = +1e9;
+  mDCAGlobal[0] = -1e9;  mDCAGlobal[1] = +1e9;
 }
 //------------------------------
 franksTrackCut::franksTrackCut(franksTrackCut& c) : StHbtTrackCut(c) {
   mNTracksPassed = mNTracksFailed = 0;
   mCharge = c.mCharge;
+  mPidProbElectron[0] = c.mPidProbElectron[0];
+  mPidProbElectron[1] = c.mPidProbElectron[1];
+  mPidProbPion[0] = c.mPidProbPion[0];
+  mPidProbPion[1] = c.mPidProbPion[1];
+  mPidProbKaon[0] = c.mPidProbKaon[0];
+  mPidProbKaon[1] = c.mPidProbKaon[1];
+  mPidProbProton[0] = c.mPidProbProton[0];
+  mPidProbProton[1] = c.mPidProbProton[1];
   mNSigmaElectron[0] = c.mNSigmaElectron[0];
   mNSigmaElectron[1] = c.mNSigmaElectron[1];
   mNSigmaPion[0] = c.mNSigmaPion[0];
@@ -72,6 +86,8 @@ franksTrackCut::franksTrackCut(franksTrackCut& c) : StHbtTrackCut(c) {
   mEta[1] = c.mEta[1];
   mDCA[0] = c.mDCA[0];
   mDCA[1] = c.mDCA[1];
+  mDCAGlobal[0] = c.mDCAGlobal[0];
+  mDCAGlobal[1] = c.mDCAGlobal[1];
   mNTracksPassed=0;
   mNTracksFailed=0;
 #ifdef STHBTDEBUG
@@ -98,6 +114,7 @@ bool franksTrackCut::Pass(const StHbtTrack* track){
     track->NSigmaKaon() << " " <<
     track->NSigmaProton() << " " << 
     track->DCAxy() << " " << 
+    track->DCAxyGlobal() << " " << 
     track->NHits() << " " <<  
     track->P().mag() << " " << 
     track->Pt() << " " <<  
@@ -106,6 +123,14 @@ bool franksTrackCut::Pass(const StHbtTrack* track){
 #endif
 
    bool goodPID = (
+		   (track->PidProbElectron() >= mPidProbElectron[0]) &&
+		   (track->PidProbElectron() <= mPidProbElectron[1]) &&
+		   (track->PidProbPion()   >= mPidProbPion[0]) &&
+		   (track->PidProbPion()   <= mPidProbPion[1]) &&
+		   (track->PidProbKaon()   >= mPidProbKaon[0]) &&
+		   (track->PidProbKaon()   <= mPidProbKaon[1]) &&
+		   (track->PidProbProton() >= mPidProbProton[0]) &&
+		   (track->PidProbProton() <= mPidProbProton[1]) &&
 		   (track->NSigmaElectron() >= mNSigmaElectron[0]) &&
 		   (track->NSigmaElectron() <= mNSigmaElectron[1]) &&
 		   (track->NSigmaPion()   >= mNSigmaPion[0]) &&
@@ -133,6 +158,8 @@ bool franksTrackCut::Pass(const StHbtTrack* track){
    bool goodTrack=( true &&
      (track->DCAxy()  >= mDCA[0]) &&
      (track->DCAxy()  <= mDCA[1]) &&
+     (track->DCAxyGlobal()  >= mDCAGlobal[0]) &&
+     (track->DCAxyGlobal()  <= mDCAGlobal[1]) &&
      (track->NHits() >= mNHits[0]) &&
      (track->NHits() <= mNHits[1]) &&
       (track->P().mag() >= mP[0]) &&
@@ -176,7 +203,15 @@ StHbtString franksTrackCut::Report(){
   Stemp+=Ctemp;
   sprintf(Ctemp,"\nParticle Nsigma from proton:\t%E - %E",mNSigmaProton[0],mNSigmaProton[1]);
   Stemp+=Ctemp;
-  sprintf(Ctemp,"\nParticle Nsigma from electron:\t%E - %E",mNSigmaElectron[0],mNSigmaElectron[1]);
+  sprintf(Ctemp,"\nParticle PidProb from electron:\t%E - %E",mPidProbElectron[0],mPidProbElectron[1]);
+  Stemp+=Ctemp;
+  sprintf(Ctemp,"\nParticle PidProb from pion:\t%E - %E",mPidProbPion[0],mPidProbPion[1]);
+  Stemp+=Ctemp;
+  sprintf(Ctemp,"\nParticle PidProb from kaon:\t%E - %E",mPidProbKaon[0],mPidProbKaon[1]);
+  Stemp+=Ctemp;
+  sprintf(Ctemp,"\nParticle PidProb from proton:\t%E - %E",mPidProbProton[0],mPidProbProton[1]);
+  Stemp+=Ctemp;
+  sprintf(Ctemp,"\nParticle PidProb from electron:\t%E - %E",mPidProbElectron[0],mPidProbElectron[1]);
   Stemp+=Ctemp;
   sprintf(Ctemp,"\nParticle #hits:\t%d - %d",mNHits[0],mNHits[1]);
   Stemp+=Ctemp;
@@ -189,6 +224,8 @@ StHbtString franksTrackCut::Report(){
   sprintf(Ctemp,"\nParticle mEta:\t%E - %E",mEta[0],mEta[1]);
   Stemp+=Ctemp;
   sprintf(Ctemp,"\nParticle DCA:\t%E - %E",mDCA[0],mDCA[1]);
+  Stemp+=Ctemp;
+  sprintf(Ctemp,"\nParticle DCAGlobal:\t%E - %E",mDCAGlobal[0],mDCAGlobal[1]);
   Stemp+=Ctemp;
   sprintf(Ctemp,"\nNumber of tracks which passed:\t%ld  Number which failed:\t%ld",mNTracksPassed,mNTracksFailed);
   Stemp += Ctemp;

@@ -23,11 +23,11 @@ eventCutMonitor_ReactionPlane::eventCutMonitor_ReactionPlane(const char* title1,
   sprintf(tit1,"%s%s_Scaler",title1,title2);
   mScaler = new StHbt1DHisto(tit1, "Scaler", 100, -0.5,99.5);
   sprintf(tit1,"%s%s_VertexX",title1,title2);
-  mVertexX = new StHbt1DHisto(tit1, "VertexX", 10, -10.,10.);
+  mVertexX = new StHbt1DHisto(tit1, "VertexX", 100, -1.,1.);
   sprintf(tit1,"%s%s_VertexY",title1,title2);
-  mVertexY = new StHbt1DHisto(tit1, "VertexY", 10, -10.,10.);
+  mVertexY = new StHbt1DHisto(tit1, "VertexY", 100, -1.,1.);
   sprintf(tit1,"%s%s_VertexZ",title1,title2);
-  mVertexZ = new StHbt1DHisto(tit1, "VertexZ", 100, -300.,300.);
+  mVertexZ = new StHbt1DHisto(tit1, "VertexZ", 100, -200.,200.);
   sprintf(tit1,"%s%s_ReactionPlane",title1,title2);
   mReactionPlane = new StHbt1DHisto(tit1,"ReactionPlane", nbins, min, max);
   sprintf(tit1,"%s%s_ReactionPlaneError",title1,title2);

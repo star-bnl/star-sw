@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtMaker.h,v 1.4 2000/01/25 17:33:38 laue Exp $
+ * $Id: StHbtMaker.h,v 1.5 2001/09/05 20:40:42 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StHbtMaker.h,v $
+ * Revision 1.5  2001/09/05 20:40:42  laue
+ * Updates of the hbtMuDstTree microDSTs
+ *
  * Revision 1.4  2000/01/25 17:33:38  laue
  * I. In order to run the stand alone version of the StHbtMaker the following
  * changes have been done:
@@ -58,15 +61,17 @@ class StHbtMaker
  private:
   StHbtManager* mHbtManager;//! tells cint to skip it
 
+  int mDebug;
  public:
-
-
   StHbtMaker(const char* name = "StHbt", const char* title = "StHbtTit");
   virtual ~StHbtMaker();
   virtual void  Clear(const char* opt="");
   virtual Int_t Init();//!
   virtual Int_t Make();
   virtual Int_t Finish();//!
+
+  int Debug();
+  void SetDebug(int);
 
 #ifdef __ROOT__
   StMaker* currentChain;
@@ -76,13 +81,15 @@ class StHbtMaker
 
   
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StHbtMaker.h,v 1.4 2000/01/25 17:33:38 laue Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StHbtMaker.h,v 1.5 2001/09/05 20:40:42 laue Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 #ifdef __ROOT__
   ClassDef(StHbtMaker, 1)
 #endif
 };
 
 inline StHbtManager* StHbtMaker::HbtManager(){return mHbtManager;}
+inline  int StHbtMaker::Debug(){return mDebug;}
+inline  void StHbtMaker::SetDebug(int d){mDebug=d;}
 
 
 

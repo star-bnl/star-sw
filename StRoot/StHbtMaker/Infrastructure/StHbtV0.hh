@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StHbtV0.hh,v $
+ * Revision 1.9  2001/09/05 20:41:43  laue
+ * Updates of the hbtMuDstTree microDSTs
+ *
  * Revision 1.8  2000/10/09 21:54:23  laue
  * Helens changes to the V0s
  *
@@ -60,12 +63,16 @@
 #include "StStrangeMuDstMaker/StV0MuDst.hh"
 #endif
 
+class StHbtTTreeEvent;
+class StHbtTTreeV0;
+
 class StHbtV0 {
 public:
   StHbtV0(){/* no-op */}
   StHbtV0( const StHbtV0&); // copy constructor
 #ifdef __ROOT__
   StHbtV0( StV0MuDst&); // from strangeness V0 micro dst structure
+  StHbtV0(const StHbtTTreeEvent*, const StHbtTTreeV0*);
 #endif
   ~StHbtV0(){/* no-op */}
 
@@ -187,165 +194,178 @@ public:
   friend istream& operator>>(istream& in,  StHbtV0& v0);
 
   friend class StHbtIOBinary;
+  friend class StHbtTTreeV0;
+  friend class StHbtTTreeXi;
 
 protected:
  
-  float mdecayLengthV0;
-  StHbtThreeVector mdecayVertexV0;
-  float mdcaV0Daughters;
-  float mdcaV0ToPrimVertex;
-  float mdcaPosToPrimVertex;
-  float mdcaNegToPrimVertex;
-  StHbtThreeVector mmomPos;
-  StHbtThreeVector mmomNeg;
+  float mDecayLengthV0;
+  StHbtThreeVector mDecayVertexV0;
+  float mDcaV0Daughters;
+  float mDcaV0ToPrimVertex;
+  float mDcaPosToPrimVertex;
+  float mDcaNegToPrimVertex;
+  StHbtThreeVector mMomPos;
+  StHbtThreeVector mMomNeg;
 
   unsigned long  mTrackTopologyMapPos[2];
   unsigned long  mTrackTopologyMapNeg[2];
        
-  int   mtpcHitsPos;
-  int   mtpcHitsNeg;
+  int   mTpcHitsPos;
+  int   mTpcHitsNeg;
 
-  StHbtThreeVector mmomV0;                            
-  float malphaV0;
-  float mptArmV0;
-  float meLambda;
-  float meK0Short;
-  float mePosProton;
-  float mePosPion;
-  float meNegProton;
-  float meNegPion;
-  float mmassLambda;
-  float mmassAntiLambda;
-  float mmassK0Short;
-  float mrapLambda;
-  float mrapK0Short;
-  float mcTauLambda;
-  float mcTauK0Short;
-  float mptV0;
-  float mptotV0;
-  float mptPos;
-  float mptotPos;
-  float mptNeg;
-  float mptotNeg;
-  float mdedxNeg;
-  float mdedxPos;
-  unsigned short   midNeg;
-  unsigned short   midPos;
+  float mChi2V0;
+  float mClV0;
+  float mChi2Pos;
+  float mClPos;
+  float mChi2Neg;
+  float mClNeg;
+  float mDedxPos;
+  float mDedxNeg;
+  unsigned short mNumDedxPos;
+  unsigned short mNumDedxNeg;
+
+  // the following variables are not in the persistent version and can be calculated via UpdateV0();
+  StHbtThreeVector mMomV0;
+  float mAlphaV0;
+  float mPtArmV0;
+  float mELambda;
+  float mEK0Short;
+  float mEPosProton;
+  float mEPosPion;
+  float mENegProton;
+  float mENegPion;
+  float mMassLambda;
+  float mMassAntiLambda;
+  float mMassK0Short;
+  float mRapLambda;
+  float mRapK0Short;
+  float mCTauLambda;
+  float mCTauK0Short;
+  float mPtV0;
+  float mPtotV0;
+  float mPtPos;
+  float mPtotPos;
+  float mPtNeg;
+  float mPtotNeg;
+
+  unsigned short   mKeyNeg;
+  unsigned short   mKeyPos;
 
 };
 
 
 
-inline float StHbtV0::decayLengthV0() const { return mdecayLengthV0; }
-inline StHbtThreeVector StHbtV0::decayVertexV0() const { return mdecayVertexV0; } 
-inline float StHbtV0::decayVertexV0X() const { return mdecayVertexV0.x(); } 
-inline float StHbtV0::decayVertexV0Y() const { return mdecayVertexV0.y(); } 
-inline float StHbtV0::decayVertexV0Z() const { return mdecayVertexV0.z(); } 
-inline float StHbtV0::dcaV0Daughters() const { return mdcaV0Daughters; }
-inline float StHbtV0::dcaV0ToPrimVertex() const { return mdcaV0ToPrimVertex; }
-inline float StHbtV0::dcaPosToPrimVertex() const { return mdcaPosToPrimVertex; }
-inline float StHbtV0::dcaNegToPrimVertex() const { return mdcaNegToPrimVertex; }
-inline StHbtThreeVector StHbtV0::momPos() const { return mmomPos; }
-inline float StHbtV0::momPosX() const { return mmomPos.x(); }
-inline float StHbtV0::momPosY() const { return mmomPos.y(); }
-inline float StHbtV0::momPosZ() const { return mmomPos.z(); }
-inline StHbtThreeVector StHbtV0::momNeg() const { return mmomNeg; }
-inline float StHbtV0::momNegX() const { return mmomNeg.x(); }
-inline float StHbtV0::momNegY() const { return mmomNeg.y(); }
-inline float StHbtV0::momNegZ() const { return mmomNeg.z(); }
-inline StHbtThreeVector StHbtV0::momV0() const { return mmomV0; }
-inline float StHbtV0::momV0X() const { return mmomV0.x(); }
-inline float StHbtV0::momV0Y() const { return mmomV0.y(); }
-inline float StHbtV0::momV0Z() const { return mmomV0.z(); }
-inline float StHbtV0::alphaV0() const { return malphaV0; }
-inline float StHbtV0::ptArmV0() const {return mptArmV0;}
-inline float StHbtV0::eLambda() const {return meLambda;}
-inline float StHbtV0::eK0Short() const {return meK0Short;}
-inline float StHbtV0::ePosProton() const {return mePosProton;}
-inline float StHbtV0::ePosPion() const {return mePosPion;}
-inline float StHbtV0::eNegProton() const {return meNegProton;}
-inline float StHbtV0::eNegPion() const {return meNegPion;}
-inline float StHbtV0::massLambda() const {return mmassLambda;}
-inline float StHbtV0::massAntiLambda() const {return mmassAntiLambda;}
-inline float StHbtV0::massK0Short() const {return mmassK0Short;}
-inline float StHbtV0::rapLambda() const {return mrapLambda;}
-inline float StHbtV0::rapK0Short() const {return mrapK0Short;}
-inline float StHbtV0::cTauLambda() const {return mcTauLambda;}
-inline float StHbtV0::cTauK0Short() const {return mcTauK0Short;}
-inline float StHbtV0::ptV0() const {return mptV0;}
-inline float StHbtV0::ptotV0() const {return mptotV0;}
-inline float StHbtV0::ptPos() const {return mptPos;}
-inline float StHbtV0::ptotPos() const {return mptotPos;}
-inline float StHbtV0::ptNeg() const {return mptNeg;}
-inline float StHbtV0::ptotNeg() const {return mptotNeg;}
+inline float StHbtV0::decayLengthV0() const { return mDecayLengthV0; }
+inline StHbtThreeVector StHbtV0::decayVertexV0() const { return mDecayVertexV0; } 
+inline float StHbtV0::decayVertexV0X() const { return mDecayVertexV0.x(); } 
+inline float StHbtV0::decayVertexV0Y() const { return mDecayVertexV0.y(); } 
+inline float StHbtV0::decayVertexV0Z() const { return mDecayVertexV0.z(); } 
+inline float StHbtV0::dcaV0Daughters() const { return mDcaV0Daughters; }
+inline float StHbtV0::dcaV0ToPrimVertex() const { return mDcaV0ToPrimVertex; }
+inline float StHbtV0::dcaPosToPrimVertex() const { return mDcaPosToPrimVertex; }
+inline float StHbtV0::dcaNegToPrimVertex() const { return mDcaNegToPrimVertex; }
+inline StHbtThreeVector StHbtV0::momPos() const { return mMomPos; }
+inline float StHbtV0::momPosX() const { return mMomPos.x(); }
+inline float StHbtV0::momPosY() const { return mMomPos.y(); }
+inline float StHbtV0::momPosZ() const { return mMomPos.z(); }
+inline StHbtThreeVector StHbtV0::momNeg() const { return mMomNeg; }
+inline float StHbtV0::momNegX() const { return mMomNeg.x(); }
+inline float StHbtV0::momNegY() const { return mMomNeg.y(); }
+inline float StHbtV0::momNegZ() const { return mMomNeg.z(); }
+inline StHbtThreeVector StHbtV0::momV0() const { return mMomV0; }
+inline float StHbtV0::momV0X() const { return mMomV0.x(); }
+inline float StHbtV0::momV0Y() const { return mMomV0.y(); }
+inline float StHbtV0::momV0Z() const { return mMomV0.z(); }
+inline float StHbtV0::alphaV0() const { return mAlphaV0; }
+inline float StHbtV0::ptArmV0() const {return mPtArmV0;}
+inline float StHbtV0::eLambda() const {return mELambda;}
+inline float StHbtV0::eK0Short() const {return mEK0Short;}
+inline float StHbtV0::ePosProton() const {return mEPosProton;}
+inline float StHbtV0::ePosPion() const {return mEPosPion;}
+inline float StHbtV0::eNegProton() const {return mENegProton;}
+inline float StHbtV0::eNegPion() const {return mENegPion;}
+inline float StHbtV0::massLambda() const {return mMassLambda;}
+inline float StHbtV0::massAntiLambda() const {return mMassAntiLambda;}
+inline float StHbtV0::massK0Short() const {return mMassK0Short;}
+inline float StHbtV0::rapLambda() const {return mRapLambda;}
+inline float StHbtV0::rapK0Short() const {return mRapK0Short;}
+inline float StHbtV0::cTauLambda() const {return mCTauLambda;}
+inline float StHbtV0::cTauK0Short() const {return mCTauK0Short;}
+inline float StHbtV0::ptV0() const {return mPtV0;}
+inline float StHbtV0::ptotV0() const {return mPtotV0;}
+inline float StHbtV0::ptPos() const {return mPtPos;}
+inline float StHbtV0::ptotPos() const {return mPtotPos;}
+inline float StHbtV0::ptNeg() const {return mPtNeg;}
+inline float StHbtV0::ptotNeg() const {return mPtotNeg;}
 inline int   StHbtV0::tpcHitsPos() const
-             { return mtpcHitsPos; }
+             { return mTpcHitsPos; }
 inline int   StHbtV0::tpcHitsNeg() const
-             { return mtpcHitsNeg; }
-inline float StHbtV0::dedxNeg() const {return mdedxNeg;}
-inline float StHbtV0::dedxPos() const {return mdedxPos;}
+             { return mTpcHitsNeg; }
+inline float StHbtV0::dedxNeg() const {return mDedxNeg;}
+inline float StHbtV0::dedxPos() const {return mDedxPos;}
 
 
 inline unsigned long   StHbtV0::trackTopologyMapPos(unsigned int word) const { return mTrackTopologyMapPos[word]; }
 inline unsigned long   StHbtV0::trackTopologyMapNeg(unsigned int word) const { return mTrackTopologyMapNeg[word]; }
-inline unsigned short   StHbtV0::idNeg() const { return midNeg; }; 
-inline unsigned short   StHbtV0::keyNeg() const { return midNeg; }
-inline unsigned short   StHbtV0::idPos() const { return midPos; }; 
-inline unsigned short   StHbtV0::keyPos() const { return midPos; }
+inline unsigned short   StHbtV0::idNeg() const { return mKeyNeg; }; 
+inline unsigned short   StHbtV0::keyNeg() const { return mKeyNeg; }
+inline unsigned short   StHbtV0::idPos() const { return mKeyPos; }; 
+inline unsigned short   StHbtV0::keyPos() const { return mKeyPos; }
 
-inline void StHbtV0::SetdecayLengthV0(const float x){ mdecayLengthV0= x;}   
-inline void StHbtV0::SetdecayVertexV0X(const float x){ mdecayVertexV0.setX(x);}
-inline void StHbtV0::SetdecayVertexV0Y(const float x){ mdecayVertexV0.setY(x);}
-inline void StHbtV0::SetdecayVertexV0Z(const float x){ mdecayVertexV0.setZ(x);}
-inline void StHbtV0::SetdecayVertexV0(const StHbtThreeVector v){ mdecayVertexV0 = v; }
-inline void StHbtV0::SetdcaV0Daughters(const float x){mdcaV0Daughters= x;} 
-inline void StHbtV0::SetdcaV0ToPrimVertex(const float x){mdcaV0ToPrimVertex= x;}   
-inline void StHbtV0::SetdcaPosToPrimVertex(const float x){mdcaPosToPrimVertex = x;} 
-inline void StHbtV0::SetdcaNegToPrimVertex(const float x){mdcaNegToPrimVertex = x;} 
-inline void StHbtV0::SetmomPos(const StHbtThreeVector v){mmomPos = v; }
-inline void StHbtV0::SetmomPosX(const float x){mmomPos.setX(x);}
-inline void StHbtV0::SetmomPosY(const float x){mmomPos.setY(x);}
-inline void StHbtV0::SetmomPosZ(const float x){mmomPos.setZ(x);}
-inline void StHbtV0::SetmomNeg(const StHbtThreeVector v){mmomNeg = v; }
-inline void StHbtV0::SetmomNegX(const float x){mmomNeg.setX(x);}
-inline void StHbtV0::SetmomNegY(const float x){mmomNeg.setY(x);}
-inline void StHbtV0::SetmomNegZ(const float x){mmomNeg.setZ(x);}
+inline void StHbtV0::SetdecayLengthV0(const float x){ mDecayLengthV0= x;}   
+inline void StHbtV0::SetdecayVertexV0X(const float x){ mDecayVertexV0.setX(x);}
+inline void StHbtV0::SetdecayVertexV0Y(const float x){ mDecayVertexV0.setY(x);}
+inline void StHbtV0::SetdecayVertexV0Z(const float x){ mDecayVertexV0.setZ(x);}
+inline void StHbtV0::SetdecayVertexV0(const StHbtThreeVector v){ mDecayVertexV0 = v; }
+inline void StHbtV0::SetdcaV0Daughters(const float x){mDcaV0Daughters= x;} 
+inline void StHbtV0::SetdcaV0ToPrimVertex(const float x){mDcaV0ToPrimVertex= x;}   
+inline void StHbtV0::SetdcaPosToPrimVertex(const float x){mDcaPosToPrimVertex = x;} 
+inline void StHbtV0::SetdcaNegToPrimVertex(const float x){mDcaNegToPrimVertex = x;} 
+inline void StHbtV0::SetmomPos(const StHbtThreeVector v){mMomPos = v; }
+inline void StHbtV0::SetmomPosX(const float x){mMomPos.setX(x);}
+inline void StHbtV0::SetmomPosY(const float x){mMomPos.setY(x);}
+inline void StHbtV0::SetmomPosZ(const float x){mMomPos.setZ(x);}
+inline void StHbtV0::SetmomNeg(const StHbtThreeVector v){mMomNeg = v; }
+inline void StHbtV0::SetmomNegX(const float x){mMomNeg.setX(x);}
+inline void StHbtV0::SetmomNegY(const float x){mMomNeg.setY(x);}
+inline void StHbtV0::SetmomNegZ(const float x){mMomNeg.setZ(x);}
 inline void StHbtV0::SetTrackTopologyMapPos(unsigned int word, const unsigned long& m){mTrackTopologyMapPos[word]=m;} 
 inline void StHbtV0::SetTrackTopologyMapNeg(unsigned int word, const unsigned long& m){mTrackTopologyMapNeg[word]=m;} 
-inline void StHbtV0::SetmomV0(StHbtThreeVector v){mmomV0= v; }
-inline void StHbtV0::SetmomV0X(const float x){mmomV0.setX(x);}
-inline void StHbtV0::SetmomV0Y(const float x){mmomV0.setY(x);}
-inline void StHbtV0::SetmomV0Z(const float x){mmomV0.setZ(x);}
+inline void StHbtV0::SetmomV0(StHbtThreeVector v){mMomV0= v; }
+inline void StHbtV0::SetmomV0X(const float x){mMomV0.setX(x);}
+inline void StHbtV0::SetmomV0Y(const float x){mMomV0.setY(x);}
+inline void StHbtV0::SetmomV0Z(const float x){mMomV0.setZ(x);}
 
-inline void StHbtV0::SetalphaV0( float x){malphaV0= x;}
-inline void StHbtV0::SetptArmV0( float x){mptArmV0 = x;}
-inline void StHbtV0::SeteLambda( float x){meLambda= x;}       
-inline void StHbtV0::SeteK0Short( float x){meK0Short= x;}
-inline void StHbtV0::SetePosProton( float x){mePosProton= x;}      
-inline void StHbtV0::SetePosPion( float x){mePosPion= x;}      
-inline void StHbtV0::SeteNegProton( float x){meNegProton= x;} 
-inline void StHbtV0::SeteNegPion( float x){meNegPion= x;}       
-inline void StHbtV0::SetmassLambda( float x){mmassLambda = x;} 
-inline void StHbtV0::SetmassAntiLambda( float x){mmassAntiLambda= x;} 
-inline void StHbtV0::SetmassK0Short( float x){mmassK0Short= x;}  
-inline void StHbtV0::SetrapLambda( float x){mrapLambda= x;}
-inline void StHbtV0::SetrapK0Short( float x){mrapK0Short = x;}   
-inline void StHbtV0::SetcTauLambda( float x){mcTauLambda = x;}   
-inline void StHbtV0::SetcTauK0Short( float x){mcTauK0Short = x;}   
-inline void StHbtV0::SetptV0( float x){mptV0 = x;}          
-inline void StHbtV0::SetptotV0( float x){mptotV0 = x;}
-inline void StHbtV0::SetptPos( float x){mptPos = x;}
-inline void StHbtV0::SetptotPos( float x){mptotPos = x;}    
-inline void StHbtV0::SetptNeg( float x){ mptNeg= x;}    
-inline void StHbtV0::SetptotNeg( float x){ mptotNeg= x;}
-inline void StHbtV0::SetidNeg(const unsigned short& s){ midNeg= s;}
-inline void StHbtV0::SetidPos(const unsigned short& s){ midPos= s;}
-inline void StHbtV0::SetkeyNeg(const unsigned short& s){ midNeg= s;}
-inline void StHbtV0::SetkeyPos(const unsigned short& s){ midPos= s;}
-inline void StHbtV0::SettpcHitsPos(const int& i){mtpcHitsPos=i;} 
-inline void StHbtV0::SettpcHitsNeg(const int& i){mtpcHitsNeg=i;}
-inline void StHbtV0::SetdedxNeg(float x){mdedxNeg=x;}
-inline void StHbtV0::SetdedxPos(float x){mdedxPos=x;}
+inline void StHbtV0::SetalphaV0( float x){mAlphaV0= x;}
+inline void StHbtV0::SetptArmV0( float x){mPtArmV0 = x;}
+inline void StHbtV0::SeteLambda( float x){mELambda= x;}       
+inline void StHbtV0::SeteK0Short( float x){mEK0Short= x;}
+inline void StHbtV0::SetePosProton( float x){mEPosProton= x;}      
+inline void StHbtV0::SetePosPion( float x){mEPosPion= x;}      
+inline void StHbtV0::SeteNegProton( float x){mENegProton= x;} 
+inline void StHbtV0::SeteNegPion( float x){mENegPion= x;}       
+inline void StHbtV0::SetmassLambda( float x){mMassLambda = x;} 
+inline void StHbtV0::SetmassAntiLambda( float x){mMassAntiLambda= x;} 
+inline void StHbtV0::SetmassK0Short( float x){mMassK0Short= x;}  
+inline void StHbtV0::SetrapLambda( float x){mRapLambda= x;}
+inline void StHbtV0::SetrapK0Short( float x){mRapK0Short = x;}   
+inline void StHbtV0::SetcTauLambda( float x){mCTauLambda = x;}   
+inline void StHbtV0::SetcTauK0Short( float x){mCTauK0Short = x;}   
+inline void StHbtV0::SetptV0( float x){mPtV0 = x;}          
+inline void StHbtV0::SetptotV0( float x){mPtotV0 = x;}
+inline void StHbtV0::SetptPos( float x){mPtPos = x;}
+inline void StHbtV0::SetptotPos( float x){mPtotPos = x;}    
+inline void StHbtV0::SetptNeg( float x){ mPtNeg= x;}    
+inline void StHbtV0::SetptotNeg( float x){ mPtotNeg= x;}
+inline void StHbtV0::SetidNeg(const unsigned short& s){ mKeyNeg= s;}
+inline void StHbtV0::SetidPos(const unsigned short& s){ mKeyPos= s;}
+inline void StHbtV0::SetkeyNeg(const unsigned short& s){ mKeyNeg= s;}
+inline void StHbtV0::SetkeyPos(const unsigned short& s){ mKeyPos= s;}
+inline void StHbtV0::SettpcHitsPos(const int& i){mTpcHitsPos=i;} 
+inline void StHbtV0::SettpcHitsNeg(const int& i){mTpcHitsNeg=i;}
+inline void StHbtV0::SetdedxNeg(float x){mDedxNeg=x;}
+inline void StHbtV0::SetdedxPos(float x){mDedxPos=x;}
 
 #endif
 

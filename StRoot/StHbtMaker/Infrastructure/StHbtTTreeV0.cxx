@@ -15,27 +15,45 @@
 //----------------------------------------------------------------------------
 //----------------------------------------------------------------------------
 StHbtTTreeV0::StHbtTTreeV0(const StHbtEvent* event, const StHbtV0* v){ // copy constructor
-//   mDecayVertexV0 = StThreeVectorF(v->mDecayVertexV0X,v->mDecayVertexV0Y,v->mDecayVertexV0Z);
-//   mDcaV0Daughters = v->mDcaV0Daughters;
-//   mDcaV0ToPrimVertex = v->mDcaV0ToPrimVertex;
-//   mDcaPosToPrimVertex = v->mDcaPosToPrimVertex;
-//   mDcaNegToPrimVertex = v->mDcaNegToPrimVertex;
-//   mMomPos = StThreeVectorF(v->mMomPosX,v->mMomPosY,v->mMomPosZ);
-//   mMomNeg = StThreeVectorF(v->mMomNegX,v->mMomNegY,v->mMomNegZ);
-//   mTrackTopologyMapPos = v->mTrackTopologyMapPos;
-//   mTrackTopologyMapNeg = v->mTrackTopologyMapNeg;
-//   mKeyPos = v->mKeyPos;
-//   mKeyNeg = v->mKeyNeg;
-//   mChi2V0 = v->mChi2V0;
-//   mClV0 = v->mClV0;
-//   mChi2Pos = v->mChi2Pos;
-//   mClPos = v->mClPos;
-//   mChi2Neg = v->mChi2Neg;
-//   mClNeg = v->mClNeg;
-//   mDedxPos = v->mDedxPos;
-//   mDedxNeg = v->mDedxNeg;
-//   mNumDedxPos = v->mNumDedxPos;
-//   mNumDedxNeg = v->mNumDedxNeg;
+  mDecayVertexV0X = v->mDecayVertexV0.x();
+  mDecayVertexV0Y = v->mDecayVertexV0.y();
+  mDecayVertexV0Z = v->mDecayVertexV0.z();
+
+  mDecayLengthV0 = v->mDecayLengthV0;
+  mDcaV0Daughters = v->mDcaV0Daughters;
+  mDcaV0ToPrimVertex = v->mDcaV0ToPrimVertex;
+  mDcaPosToPrimVertex = v->mDcaPosToPrimVertex;
+  mDcaNegToPrimVertex = v->mDcaNegToPrimVertex;
+
+  mMomPosX = v->mMomPos.x();
+  mMomPosY = v->mMomPos.y();
+  mMomPosZ = v->mMomPos.z(); 
+  mMomNegX = v->mMomNeg.x();
+  mMomNegY = v->mMomNeg.y();
+  mMomNegZ = v->mMomNeg.z();
+
+  mTrackTopologyMapPos[0] = v->mTrackTopologyMapPos[0];
+  mTrackTopologyMapPos[1] = v->mTrackTopologyMapPos[1];
+  mTrackTopologyMapNeg[0] = v->mTrackTopologyMapNeg[0];
+  mTrackTopologyMapNeg[1] = v->mTrackTopologyMapNeg[1];
+
+  mKeyPos = v->mKeyPos;
+  mKeyNeg = v->mKeyNeg;
+
+  mTpcHitsPos = v->mTpcHitsPos;
+  mTpcHitsNeg = v->mTpcHitsNeg;
+
+  mChi2V0 = v->mChi2V0;
+  mClV0    = v->mClV0;
+  mChi2Pos = v->mChi2Pos;
+  mClPos   = v->mClPos;
+  mChi2Neg = v->mChi2Neg;
+  mClNeg   = v->mClNeg;
+
+  mDedxPos = v->mDedxPos;
+  mDedxNeg = v->mDedxNeg;
+  mNumDedxPos = v->mNumDedxPos;
+  mNumDedxNeg = v->mNumDedxNeg;
 }
 
 ClassImp(StHbtTTreeV0)
@@ -43,6 +61,9 @@ ClassImp(StHbtTTreeV0)
 /***********************************************************************
  *
  * $Log: StHbtTTreeV0.cxx,v $
+ * Revision 1.2  2001/09/05 20:41:42  laue
+ * Updates of the hbtMuDstTree microDSTs
+ *
  * Revision 1.1  2001/06/21 19:15:47  laue
  * Modified fiels:
  *   CTH.hh : new constructor added

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StHbtTTreeKink.cxx,v 1.1 2001/06/21 19:15:47 laue Exp $
+ * $Id: StHbtTTreeKink.cxx,v 1.2 2001/09/05 20:41:42 laue Exp $
  *
  * Author: Frank Laue, BNL;
  *
@@ -31,8 +31,8 @@ StHbtTTreeKink::StHbtTTreeKink(const StHbtEvent* e, const StHbtKink* k) {
   mDeltaEnergy[2] = k->mDeltaEnergy[2];           
   mDecayAngle = k->mDecayAngle;               
   mDecayAngleCM = k->mDecayAngleCM;           
-  StHbtTTreeTrack  mDaughter = StHbtTTreeTrack(e, &(k->mDaughter));
-  StHbtTTreeTrack  mParent = StHbtTTreeTrack(e, &(k->mParent));
+  mDaughter = StHbtTTreeTrack(e, &(k->mDaughter));
+  mParent = StHbtTTreeTrack(e, &(k->mParent));
   mPositionX = k->mPosition.x();
   mPositionY = k->mPosition.y();
   mPositionZ = k->mPosition.z();
@@ -42,6 +42,9 @@ StHbtTTreeKink::StHbtTTreeKink(const StHbtEvent* e, const StHbtKink* k) {
 
 /***********************************************************************
  * $Log: StHbtTTreeKink.cxx,v $
+ * Revision 1.2  2001/09/05 20:41:42  laue
+ * Updates of the hbtMuDstTree microDSTs
+ *
  * Revision 1.1  2001/06/21 19:15:47  laue
  * Modified fiels:
  *   CTH.hh : new constructor added

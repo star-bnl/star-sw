@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtEventReader.hh,v 1.11 2001/06/21 19:06:49 laue Exp $
+ * $Id: StHbtEventReader.hh,v 1.12 2001/09/05 20:41:00 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -18,6 +18,9 @@
  ***************************************************************************
  *
  * $Log: StHbtEventReader.hh,v $
+ * Revision 1.12  2001/09/05 20:41:00  laue
+ * Updates of the hbtMuDstTree microDSTs
+ *
  * Revision 1.11  2001/06/21 19:06:49  laue
  * Some minor structural changes (forward declarations, etc)
  *
@@ -62,6 +65,7 @@ class StHbtEvent;
 class StHbtEventCut;
 class StHbtTrackCut;
 class StHbtV0Cut;
+class StHbtXiCut;
 class StHbtKinkCut;
 
 #include "StMaker.h"
@@ -73,13 +77,14 @@ protected:
   StHbtEventCut* mEventCut;     //!
   StHbtTrackCut* mTrackCut; //!
   StHbtV0Cut* mV0Cut; //!
+  StHbtXiCut* mXiCut; //!
   StHbtKinkCut* mKinkCut; //!
   int mReaderStatus;     // 0="good"
   int mDebug;
 public:
   // even tho it's only a base class and never constructed, if you don't have an implementation,
   // you get "StHbtEventReader type_info node" upon dynamical loading
-  StHbtEventReader() : mEventCut(0), mTrackCut(0), mV0Cut(0), mKinkCut(0), mDebug(1) { /* no-op */ }
+  StHbtEventReader() : mEventCut(0), mTrackCut(0), mV0Cut(0), mXiCut(0), mKinkCut(0), mDebug(1) { /* no-op */ }
   virtual ~StHbtEventReader(){/* no-op */}
 
   virtual StHbtEvent* ReturnHbtEvent() =0;
@@ -100,10 +105,12 @@ public:
   virtual void SetEventCut(StHbtEventCut* ecut);
   virtual void SetTrackCut(StHbtTrackCut* pcut);
   virtual void SetV0Cut(StHbtV0Cut* pcut);
+  virtual void SetXiCut(StHbtXiCut* pcut);
   virtual void SetKinkCut(StHbtKinkCut* pcut);
   virtual StHbtEventCut* EventCut();
   virtual StHbtTrackCut* TrackCut();
   virtual StHbtV0Cut*    V0Cut();
+  virtual StHbtXiCut*    XiCut();
   virtual StHbtKinkCut*    KinkCut();
 
   /* control of debug informations print out, my rule is: */

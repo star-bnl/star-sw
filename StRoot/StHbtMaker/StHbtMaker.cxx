@@ -1,19 +1,19 @@
 
 /***************************************************************************
  *
- * $Id: StHbtMaker.cxx,v 1.10 2001/06/22 15:38:01 jeromel Exp $
+ * $Id: StHbtMaker.cxx,v 1.11 2001/09/05 20:40:42 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
  *
  * Description: part of STAR HBT Framework: StHbtMaker package
  *              Maker class is the interface with root4star/Maker framework
- * 
+ *
  ***************************************************************************
  *
  * $Log: StHbtMaker.cxx,v $
- * Revision 1.10  2001/06/22 15:38:01  jeromel
- * This is a test. Ignore
+ * Revision 1.11  2001/09/05 20:40:42  laue
+ * Updates of the hbtMuDstTree microDSTs
  *
  * Revision 1.9  2000/04/03 16:21:12  laue
  * some include files changed
@@ -69,9 +69,9 @@ ClassImp(StHbtMaker)
 //_____________________________________________________________________________
 
     
-StHbtMaker::StHbtMaker(const char*name, const char * title)
+StHbtMaker::StHbtMaker(const char*name, const char * title) : mDebug(0) 
 #ifdef __ROOT__
-:StMaker(name,title)
+, StMaker(name,title)
 #endif
 {
   // StHbtMaker - constructor
@@ -82,9 +82,9 @@ StHbtMaker::StHbtMaker(const char*name, const char * title)
 StHbtMaker::~StHbtMaker()
 {
   // StHbtMaker - destructor
-  cout << "Inside ReaderMaker Destructor" << endl;
+    cout << "Inside ReaderMaker Destructor" << endl;
 #ifdef __ROOT__
-  SafeDelete(mHbtManager);  //
+    SafeDelete(mHbtManager);  //
 #else
   delete mHbtManager;
 #endif
@@ -129,7 +129,7 @@ Int_t StHbtMaker::Finish()
 //_____________________________________________________________________________
 Int_t StHbtMaker::Make()
 {
-  cout << "\nStHbtMaker::Make -- processing event" << endl;
+  if (mDebug>1) cout << "\nStHbtMaker::Make -- processing event" << endl;
 #ifdef __ROOT__
   if (mHbtManager->ProcessEvent()){
     return kStEOF;    // non-zero value returned --> end of file action
@@ -138,11 +138,6 @@ Int_t StHbtMaker::Make()
     return kStOK;
   }
 #else
-  if (mHbtManager->ProcessEvent()){
-    return -1;    // non-zero value returned --> end of file action
-  }
-  else{
-    return 0;
-  }
+  return  mHbtManager->ProcessEvent();
 #endif
 }
