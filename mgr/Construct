@@ -81,7 +81,7 @@ if (/^i386_/) {
   $EXEFLAGS = $CXXFLAGS . " -Wl,-Bdynamic";
   $SOFLAGS  = "-shared";  
   $CLIBS    = "-L/usr/pgi/linux86/lib -L/usr/X11R6/lib  -lXt -lXpm -lX11  -lpgc -lm -ldl  -rdynamic";
-  if (/^i386_redhat51egcs$/) {
+  if (/^i386_redhat51egcs$/ || /^i386_redhat60egcs$/) {
     $FC       = "g77";
     $FFLAGS   = "-w -O -fno-second-underscore";
     $FCCOM    = "%FC -E -P %CPPFLAGS %DEBUG %_IFLAGS %FCPPPATH -c %< %Fout%>.g &&"; 
@@ -204,7 +204,7 @@ $MAIN    = cwd();
 $INCLUDE = "#include";
 $EXPORT = "#.share";
 $FFLAGS .= " -DCERNLIB_TYPE";
-my $FLAGS = $CPPFLAGS . " " . $OSFID . " __ROOT__";
+my $FLAGS = $CPPFLAGS . " " . $OSFID . " CERNLIB_TYPE" . " __ROOT__";
 $CPPFLAGS = "-D" . join (" -D", split (" ",$FLAGS));
 if (! $param::quiet) {
   print "STAR     = \t$STAR\n";
