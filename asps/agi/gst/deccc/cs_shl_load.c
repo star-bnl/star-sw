@@ -1,7 +1,10 @@
 /*
- * $Id: cs_shl_load.c,v 1.4 1999/01/28 17:21:36 nevski Exp $
+ * $Id: cs_shl_load.c,v 1.5 1999/02/16 15:43:02 fisyak Exp $
  *
  * $Log: cs_shl_load.c,v $
+ * Revision 1.5  1999/02/16 15:43:02  fisyak
+ * remove ;
+ *
  * Revision 1.4  1999/01/28 17:21:36  nevski
  * long names allowed
  *
@@ -22,7 +25,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <dl.h>
-#define  MAXLENFL  256;
+#define  MAXLENFL  256
  
 void perror();
 int  cs_shl_load_(path, n)
