@@ -1,5 +1,8 @@
-// $Id: makedoc.C,v 1.42 1999/09/14 15:30:40 fine Exp $
+// $Id: makedoc.C,v 1.43 1999/09/26 02:59:54 fine Exp $
 // $Log: makedoc.C,v $
+// Revision 1.43  1999/09/26 02:59:54  fine
+// html for RMath has been introduced
+//
 // Revision 1.42  1999/09/14 15:30:40  fine
 // makedocs adjusted to the new source tree
 //
@@ -173,7 +176,7 @@
 
   // Create the list of the classes defined with the loaded DLL's to be documented
 
-  Char_t *classes[] = { "St_TableSorter"
+  Char_t *classes[] = { "St_TableSorter","RMath"
                        ,"St_XDFFile",    "St_Module",       "St_Table"
                        ,"St_DataSet",    "St_DataSetIter", "St_FileSet"
                        ,"StParticleView","St_ObjectSet",    "St_Node",     "St_NodePosition"
@@ -188,7 +191,7 @@
                        ,"StEventDisplayMaker"
                        ,"St_srs_Maker",  "St_xdfin_Maker"
                       };
-  Int_t nclass = 35;
+  Int_t nclass = 36;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("$STAF/inc/table_header.h");
