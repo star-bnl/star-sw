@@ -1,4 +1,4 @@
-// $Id: rootlogon.C,v 1.31 2001/05/30 18:23:39 perev Exp $
+// $Id: rootlogon.C,v 1.32 2001/06/18 23:03:00 perev Exp $
 //
 //=======================================================================
 // owner:  Yuri Fisyak
@@ -8,8 +8,10 @@
 {
 
 #pragma optimize 0
-  //    gInterpreter->ProcessLine(".O0");
-    gROOT->ProcessLine(".O0"); 
+// 	Load StarRoot lib.
+    gSystem->Load("StarRoot");
+
+
     //    G__loadfile("iostream.h");
     TString gPrompt =  gSystem->BaseName(gROOT->GetApplication()->Argv(0));
     gPrompt += " [%d] ";
