@@ -898,6 +898,7 @@ CCC  L.Ray - 9/16/98
                write(6,998) i
 998   Format(5x,'BAD Value of globtrk(i=',I7,').invpt detected - set to -999999')
                globtrk(i).invpt = -999999.
+               globtrk(i).iflag = -999
             end if  
          end do
       end if
