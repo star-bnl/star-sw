@@ -778,7 +778,7 @@ fcfClass::fcfClass(int det, u_short *table)
 		maxTimebin = 511 ;
 		timebinLo = 0 ;
 		timebinHi = 400 ;	// should be 400 normally
-		chargeMin = 50 ;	// reasonable estimate was 50
+		chargeMin = 40 ;	// reasonable estimate was 40
 		break ;
 	case FTP_ID :
 		maxCPP = 31 ;

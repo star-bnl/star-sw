@@ -42,9 +42,11 @@ int fcfAfterburner::output(struct fcfHit *hit, char *anystruct)
 
 	// CUTS!
 	if(do_cuts) {
-		if(hit->f & (FCF_ONEPAD | FCF_ROW_EDGE | FCF_DEAD_EDGE)) ret = 0 ;
-		else if(hit->c < 50) ret = 0 ;
-		else ret = 1 ;
+		if(hit->f & (FCF_ONEPAD | FCF_ROW_EDGE | FCF_DEAD_EDGE)) ret = 0 ;	// bad flag
+		else if((hit->t2 - hit->t1) <= 3) ret = 0 ;	// short in timebin
+		else if(hit->t1 == 0) ret = 0 ;			// touches timebin 0
+		else if(hit->c < 40) ret = 0 ;			// small charge
+		else ret = 1 ;					// OK!
 	}
 	else {
 		ret = 1 ;
@@ -363,7 +365,12 @@ int fcfAfterburner::compare(u_int *p1[3], u_int *p2[3])
 	static u_char marray[2][10000] ;
 	int i ;
 	int ret = 1 ;	// assume match...
+	int save_merge, save_cuts ;
 
+	// save the original steering variables
+	save_merge = do_merge ;
+	save_cuts = do_cuts ;
+	
 	memset(marray,0,sizeof(marray)) ;
 
 	burn(p1) ;
@@ -428,5 +435,8 @@ int fcfAfterburner::compare(u_int *p1[3], u_int *p2[3])
 		i++ ;
 	}
 
+	// save the steering before exit!
+	do_cuts = save_cuts ;
+	do_merge = save_merge ;
 	return ret ;
 }
