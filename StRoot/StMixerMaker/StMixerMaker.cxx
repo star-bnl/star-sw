@@ -561,10 +561,8 @@ Int_t StMixerMaker::Make() {
 void StMixerMaker::Clear(Option_t *opt)
 {
   if (mAllTheDataMixer) mAllTheDataMixer->clear();
-  if (tdr1) delete tdr1;
-  tdr1 = 0;
-  if (tdr2) delete tdr2;
-  tdr1 = 0;
+  delete tdr1; tdr1 = 0;
+  delete tdr2; tdr2 = 0;    
   StMaker::Clear();
 }
 
