@@ -5,8 +5,11 @@
 // matrix / vector "derived" from  
 // http://wwwinfo.cern.ch/asdoc/shortwrupsdir/f110/top.html 
 //
-// $Id: TMxF110.cxx,v 1.1 1999/09/26 19:35:13 fine Exp $
+// $Id: TMxF110.cxx,v 1.2 1999/09/26 23:37:22 fine Exp $
 // $Log: TMxF110.cxx,v $
+// Revision 1.2  1999/09/26 23:37:22  fine
+// test F112 package has been introduced
+//
 // Revision 1.1  1999/09/26 19:35:13  fine
 // Micky test has been rearranged
 //
@@ -382,4 +385,5 @@ L300:
 
     RMath::mxmltr(c1c, c2c, _BLNK__1.a, 4, 3);
     StMicky::Mverif(11, _BLNK__1.a, _BLNK__1.b, 16);
+
 } /* tmxm_ */
