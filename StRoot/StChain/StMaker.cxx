@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.45 1999/06/11 21:50:47 perev Exp $
+// $Id: StMaker.cxx,v 1.46 1999/06/11 22:56:03 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.46  1999/06/11 22:56:03  perev
+// Merge 2 updates
+//
 // Revision 1.45  1999/06/11 21:50:47  perev
 // garb->Delete()
 //
@@ -124,12 +127,14 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.45 1999/06/11 21:50:47 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.46 1999/06/11 22:56:03 perev Exp $";
 return cvs;};
+static void doPs(const char *who,const char *where);
 
 //_____________________________________________________________________________
 StMaker::StMaker()
 {
+::doPs(GetName(),"constructor");
 }
 
 //_____________________________________________________________________________
@@ -148,6 +153,7 @@ StMaker::StMaker(const char *name,const char *):St_DataSet(name,".maker")
    m_Inputs  =  new St_ObjectSet(".aliases" );Add(m_Inputs);
    AddHist(0); m_Histograms = GetHistList();
    gStChain = this; //?????????????????????????????????????????????????????
+::doPs(GetName(),"constructor");
 }
 
 //_____________________________________________________________________________
@@ -451,6 +457,7 @@ Int_t StMaker::Init()
         ((TH1*)objHist)->SetDirectory(0);
         maker->AddHist((TH1*)objHist);
       }
+    ::doPs(maker->GetName(),"Init");
     }
   return kStOK; 
 }
@@ -466,24 +473,8 @@ void StMaker::StartMaker()
 //_____________________________________________________________________________
 void StMaker::EndMaker(int ierr)
 {
-  static const char *ps =0;
-  if (!ps) {
-//		execute shell      
-    ps = gSystem->Getenv("StarEndMakerShell"); 
-    if (ps) {
-      TString *ts = new TString(ps);
-      char buf[12]; sprintf(buf,"%d",gSystem->GetPid());
-      ts->ReplaceAll("$$",buf);
-      ps = ts->Data();
-    } else { ps ="";}
-  }
-  
-  if (ps[0]) { //Execute shell
-    printf("<%s(%s)::EndMakerShell> %s\n",ClassName(),GetName(),ps);
-    fflush(stdout);
-    if (gSystem->Exec(ps)) ps="";
-  }
   if (ierr){};
+  ::doPs(GetName(),"EndMaker");
   St_DataSet *dat = Find(".data");
   if (dat) dat->Pass(ClearDS,0);
   St_DataSet *gar = Find(".garb");
@@ -491,7 +482,6 @@ void StMaker::EndMaker(int ierr)
 
   if (ps[0]) gSystem->Exec(ps);
   
-
 //VP  gBenchmark->Stop(GetName());
   StopTimer();
 }
@@ -768,6 +758,27 @@ void StMaker::MakeDoc(const TString &stardir,const TString &outdir, Bool_t baseC
      while ((maker = (StMaker*)nextMaker())) 
          maker->MakeDoc(stardir,outdir,kFALSE);
    }
+}
+
+//_____________________________________________________________________________
+static void doPs(const char *who, const char *where)
+{
+  static const char *ps =0;
+  if (!ps) {
+//		execute shell      
+    ps = gSystem->Getenv("StarEndMakerShell"); 
+    if (ps) {
+      TString *ts = new TString(ps);
+      char buf[12]; sprintf(buf,"%d",gSystem->GetPid());
+      ts->ReplaceAll("$$",buf);
+      ps = ts->Data();
+    } else { ps ="";}
+  }
+  if (ps[0]) { //Execute shell
+    printf("\ndoPs for <%s.%s> shell=%s\n",who,where,ps);
+    fflush(stdout);
+    if (gSystem->Exec(ps)) ps="";
+  }
 }
 //_____________________________________________________________________________
 void StMaker::Streamer(TBuffer &b)
