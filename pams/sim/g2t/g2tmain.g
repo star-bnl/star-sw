@@ -7,6 +7,8 @@ created   22 april 98
 *              Run   - with tables mapped to DETM family banks
 *              Event - with track/vertex and hit tables
 *              One level is assumed, names can be modified by DETP command
+* Modifications 
+* PN, 98/09/23: leave NTRACK in IQUEST(100) to allow analysis in Kuip
 **:<-----------------------------------------------------------------------
 #include "geant321/gcbank.inc"
 #include "geant321/gcnum.inc"
@@ -29,6 +31,7 @@ created   22 april 98
 *
  entry  g2t 
  entry  g2t_start
+ IQUEST(100)=0
  begin 
  G2T_MAIN=0 
  if JVOLUM<=0 { print *,' G2T: no geometry loaded YET'; return; }
@@ -150,7 +153,7 @@ created   22 april 98
       edir = Cdir(1:ld)//o;  Call TDM_CLEAR_ALL(edir)
 
       IQUEST(1)=IEOTRI
-      check NVERTX>0 & IEOTRI==0
+      check NTRACK>0 & NVERTX>0 & IEOTRI==0
 *     map ghea_* headers and  hepe_* particle tables:
       call agstrut('/evnt/@HEPE',Edir)
       call agstrut('/evnt/@GHEA',Edir)
@@ -191,6 +194,7 @@ created   22 april 98
       enddo
       if (ld>0) i = DUI_CDIR('..'//o)
 *
+      IQUEST(100) = NTRACK
       G2T_MAIN = i
       END
 
