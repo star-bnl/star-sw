@@ -13,8 +13,8 @@
    tpc_sector_first=1 _
    tpc_sector_last=1 _
    gstar_settings=' field_only' _
-   domain=' geometry g2t tpc emc ctf svt global ' _
-   chain=' fzin rg2t tpg insvt tfs ems tpt tid tte_e  drhd dehd egr evr ev0 ddedx dpnt desum dmsft drsum evout ' _
+   domain=' geometry g2t tpc ctf svt global ' _
+   chain=' fzin rg2t tpg insvt tfs tpt tid tte_e  drhd dehd egr evr ev0 ddedx dpnt desum dmsft drsum evout ' _
    skip=0 _
    no_events=1 _
    input_data_file=/disk1/star/auau200/year1a/central/hijing/set0001/regular/gst/auau_ce_b0-2_1001_1050.fzd _
