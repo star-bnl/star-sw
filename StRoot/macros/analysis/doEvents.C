@@ -1,15 +1,10 @@
-///////////////////////////////////////////////////////////////////////////////
-//
-// $Id: doEvents.C,v 1.92 2004/08/10 15:50:27 perev Exp $
-//
+/////////////////////////////////////////////////////////////////////////////// $Id: doEvents.C,v 1.93 2004/08/10 19:44:19 perev Exp $
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
 // what it does: reads .dst.root or .xdf files and then runs StEventMaker
 //          to fill StEvent and StAnalysisMaker to show example of analysis
-//
 // Environment:
 // Software developed for the STAR Detector at Brookhaven National Laboratory
-//
 // Ways to run:
 // If you specify a path, all DST files below that path will be
 // found, and the first 'nEvents' events in the file set will be
@@ -17,28 +12,21 @@
 // The type of DST files searched for is taken from the 'file' parameter.
 // If 'file ends in '.dst.root', ROOT DSTs are searched for.
 // If 'file ends in '.xdf', XDF DSTs are searched for.
-//
 // If path begins with '-', 'file' will be taken to be a single file
 // to be processed.
-//
 // example invocation:
 // .x doEvents.C(10,"some_directory/some_dst_file.xdf")
-//
 // example ROOT file invocation:
 // .x doEvents.C(10,"some_directory/some_dst_file.root")
-//
 // example multi-ROOT file invocation:
 // .x doEvents.C(9999,"some_directory/*.dst.root")
-//
 // example using the Grid Collector
 // 1) process first ten events generated, request is embedded in this file
 // .x doEvents.C(10, "GC")
-//
 // 2) specify the request as a string argument (analyze the event branch of
 //    selected data from production P02gg).  First argument 0 (or smaller)
 //    indicates that all events satisfying the condition will be analyzed.
 // .x doEvents.C(0, "select event where Production=P02gg and NV0>2000")
-//
 //  The rules for constructing valid conditions are as follows
 //  a) simple conditions can be joined together with logical operator "AND",
 //     "OR", "XOR" and "!" (for NOT).
@@ -50,10 +38,7 @@
 //  c) only '==' operation is supported for string attributes, to avoid a
 //     string literal be mistaken as a name of an attribute, it can be
 //     quoted either with "" or with ''.
-//
-//////////////////////////////////////////////////////////////////////////////
-//
-// Author List: Torre Wenaus, BNL  2/99
+////////////////////////////////////////////////////////////////////////////// Author List: Torre Wenaus, BNL  2/99
 //              Victor Perevoztchikov
 //  
 //  inputs:
@@ -66,8 +51,7 @@
 //      qaflag = "display"  turn on EventDisplay
 //                 file --- set to off by default 
 //      
-///////////////////////////////////////////////////////////////////////////////
-
+/////////////////////////////////////////////////////////////////////////////
 #include "iostream.h"
 
 class     StChain;
@@ -76,8 +60,10 @@ class     St_db_Maker;
 St_db_Maker *dbMk =0;
 class StFileI;
 StFileI *setFiles =0;
+TString mainBranch;
 
-Int_t iEvt=0,istat=0,nEvents=0;
+Int_t iEvt=0;
+//______________________________________________________________________________
 void doEvents()
 {
   cout << "Usage: doEvents.C(2)  // work with default event.root file" << endl;
@@ -86,35 +72,41 @@ void doEvents()
   cout << "       doEvents.C(nEvents,\"path/file.dst.root\",\"evout\") //Write out StEvent" << endl;	
   cout << "       doEvents.C(nEvents,\"path/file.dst.root\",\"display\") //EventDispay" << endl;	
   cout << "       doEvents.C(nEvents,\"path/file.dst.root\",\"dbon\") //DB on" << endl;	
+  cout << "       doEvents.C(nEvents,\"@file.lis\") //list of files in file.lis " << endl;	
+  cout << "       doEvents.C(nEvents,\"GridCollector commands\",\"gc\") //GridCollector " << endl;	
+  cout << "       doEvents.C(nEvents,\"@GridCollector_commands.txt\",\"gc\") //GridCollector commands in file" << endl;	
 }
 
 
+//______________________________________________________________________________
 // ProtoTypes
-void doEvents(Int_t nEvents, const Char_t ** fileList, const Char_t *qaflag =0);
-void doEvents(Int_t startEvent, Int_t nEvents, const Char_t ** fileList, const Char_t *qaflag =0);
+void doEvents(Int_t nEvents, const char ** fileList, const char *qaflag =0);
+void doEvents(Int_t startEvent, Int_t nEvents, const char ** fileList, const char *qaflag =0);
 
 void doEvents(Int_t nEvents, 
-              const Char_t *file="/afs/rhic/star/data/samples/example.event.root",
-              const Char_t *qaflag = 0); 
+              const char *file="/afs/rhic/star/data/samples/example.event.root",
+              const char *qaflag = 0); 
 
 void doEvents(Int_t startEvent,Int_t nEvents, 
-              const Char_t *file="/afs/rhic/star/data/samples/example.event.root",
-              const Char_t *qaflag = 0);
+              const char *file="/afs/rhic/star/data/samples/example.event.root",
+              const char *qaflag = 0);
 
 void doEvents(Int_t nEvents, 
-              const Char_t *path,
-              const Char_t *file,
-              const Char_t *qaflag, int flag);
+              const char *path,
+              const char *file,
+              const char *qaflag, int flag);
+              
+void loadLibs(const char *opt);              
+int  gcPrep  (const char *req, char ***argv, char **argc);
+int  gcInit  (const char *request); 
               
               
-              
-              
-// ------------------ Here is the actual method -----------------------------------------
-void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const Char_t *qaflag)
+//______________________________________________________________________________
+void doEvents(Int_t startEvent, Int_t nEventsQQ, const char **fileList, const char *qaflag)
 {
 
   if (!qaflag) qaflag = "";
-  nEvents = nEventsQQ;
+  int nEvents = nEventsQQ;
   TString tflag = qaflag; tflag.ToLower();
   int eventDisplay = tflag.Contains("disp");
 
@@ -126,120 +118,31 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
   }
   cout << " doEvents -  input qaflag   = " << qaflag << endl;
  
-  //
-  // First load some shared libraries we need
-  //
-  // Load MuDst Stuff           WMZ 7/27/04
-    gROOT->LoadMacro("$STAR/StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C"); 
-    loadSharedLibraries();
-
-  gSystem->Load("libGeom");
-  gSystem->Load("libTable");
-  gSystem->Load("St_base");
-  gSystem->Load("StChain");
-  
-  gSystem->Load("libgen_Tables");
-  gSystem->Load("libsim_Tables");
-  gSystem->Load("libglobal_Tables");
-  
-  gSystem->Load("StUtilities");
-  gSystem->Load("StIOMaker");
-  gSystem->Load("StTreeMaker");
-  gSystem->Load("StarClassLibrary");
-  gSystem->Load("StBichsel");
-  gSystem->Load("StTriggerDataMaker");    
-  gSystem->Load("StEvent");
-  gSystem->Load("StEventUtilities");
-  gSystem->Load("StMagF");
-  gSystem->Load("StAnalysisMaker");
-// Load StMuAnalysysMaker                 WMZ 7/27/04
-  gSystem->Load("StMuAnalysisMaker");
+    // First load some shared libraries we need
+    // Load all libs           WMZ 7/27/04
+  loadLibs("");
 
 
   //		DB ON
-  if (tflag.Contains("dbon") || eventDisplay ) {
-    gSystem->Load("libtpc_Tables");
-    gSystem->Load("StDbLib.so");
-    gSystem->Load("StDbBroker.so");
-    gSystem->Load("libStDb_Tables.so");
-    gSystem->Load("St_db_Maker.so");
-    gSystem->Load("StTpcDb");
-    gSystem->Load("StDetectorDbMaker");
+  if (tflag.Contains("dbon")) {
+    loadLibs("dbon");
   }
 
   // Special libraries for EventDisplay
   if (eventDisplay) {//EventDisplay on
-    gSystem->Load("St_g2t");
-    gSystem->Load("geometry");
-    gSystem->Load("St_geant_Maker");
-    gSystem->Load("StTableUtilities");
-    gSystem->Load("StEventDisplayMaker");
+    loadLibs("disp");
   }
   // Four levels of debug (0, 1, 2, 3) for MuDst      WMZ 7/27/04
      StMuDebug::setLevel(0);
-  //
-  // Handling depends on whether file is a ROOT file or XDF file
-  //
-  chain  = new StChain("StChain");
-  delete setFiles; setFiles =0;
 
-    TString mainBranch;
-    if (fileList == 0 || fileList[0] == 0 || isspace(fileList[0][0])) {
-	// Grid Collector: case I -- user needs to modify Argv
-	gSystem->Load("StGridCollector");
-	StGridCollector *req = StGridCollector::Create();
-	req->SetDebug(5);
-	const char *Argv[]= {
-	    "-s","MuDst",                        // also main branch
-	    "-q","production=P03ia and NV0>2000",   // conditions on events
-        };
-	Int_t Argc = sizeof(Argv)/4;
-	Int_t ierr = req->Init(Argc, Argv);
-	if (0 != ierr) {
-	    std::cout << "doEvents.C can not initialize the Grid Collector "
-		      << "with \"";
-	    for (Int_t i=0; i < Argc; ++i)
-		std::cout << " " << Argv[i];
-	    std::cout << "\"\nError code is " << ierr << std::endl;
-	    return; // initialization failure
-	}
-	if (nEvents <= 0) {
-	    nEvents = req->GetNEvents();
-	    if (req->GetDebug() > 0)
-		std::cout << "INFO: actual number of events " << nEvents
-			  << std::endl;
-	}
-	setFiles = req;
-	mainBranch = "MuDstBranch"; // modify this match "-s" option in Argv
-    }
-    else if (strncmp(fileList[0], "GC ", 3) == 0 ||
-	     strncmp(fileList[0], "from ", 5) == 0 ||
-	     strncmp(fileList[0], "where ", 6) == 0 ||
-	     strncmp(fileList[0], "select ", 7) == 0) {
-	// Grid Collector: case II -- user has specified the options on
-	// command line
-	gSystem->Load("StGridCollector");
-	StGridCollector *req = StGridCollector::Create();
-	req->SetDebug(5);
-	Int_t ierr = req->Init(fileList[0]);
-	if (0 != ierr) { // parse the arguments
-	    std::cout << "doEvents.C can not initialize the Grid Collector "
-		      << "with argument \"" << fileList[0]
-		      << "\"\nError code is " << ierr
-		      << std::endl;
-	    return;
-	}
-	if (nEvents <= 0) {
-	    nEvents = req->GetNEvents();
-	    if (req->GetDebug() > 0)
-		std::cout << "INFO: actual number of events " << nEvents
-			  << std::endl;
-	}
-	setFiles = req;
-	mainBranch = req->GetCompName();
-	mainBranch += "Branch";
-    }
-    else {	// Normal case -- user has specified a list of files
+  chain  = new StChain("StChain");
+  setFiles =0;
+
+  if (tflag.Contains("gc")) {	//GridCollector
+    int nev = gcInit(fileList[0]); 
+    if (nev==0) return;
+    
+  } else {			// Normal case -- user has specified a list of files
 	setFiles = new StFile(fileList);
 	char line[999]; strcpy(line,fileList[0]);
 	if (*line=='@') {
@@ -288,29 +191,23 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
     dbMk = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb","StarDb");
   }
 
-  //
-  // Maker to read events from file or database into StEvent
-  //
-  if (mainBranch.Contains("dstBranch")) {
+    // Maker to read events from file or database into StEvent
+    if (mainBranch.Contains("dstBranch")) {
     gSystem->Load("StEventMaker");
     StEventMaker *readerMaker =  new StEventMaker("events","title");
   }
-  //
-  //  Sample analysis maker
-  //
-  StAnalysisMaker *analysisMaker = new StAnalysisMaker("analysis");
+    //  Sample analysis maker
+    StAnalysisMaker *analysisMaker = new StAnalysisMaker("analysis");
 //  Sample analysis maker for MuDst               WMZ 7/27/04
 //  StMuAnalysisMaker *analysisMaker = new StMuAnalysisMaker("analysis");
 
 
-  /////////////////////////////////////////////////////////////////////
-  //  IT IS THE PLACE TO ADD USER MAKERS
+  ///////////////////////////////////////////////////////////////////  //  IT IS THE PLACE TO ADD USER MAKERS
   //  LIKE:
   //  gSystem->Load("StUserMaker");
   //  StUserMaker *UserMk = new StUserMaker("UserName");
   //  UserMk->SetSome(2002);
-  /////////////////////////////////////////////////////////////////////
-
+  ///////////////////////////////////////////////////////////////////
 
   // WriteOut StEvent
   Int_t wrStEOut = tflag.Contains("evout");
@@ -341,10 +238,8 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
     displayMk->AddFilter(new StColorFilterHelper("Color schema",kFALSE));
   }
   
-  //
-  // Initialize chain
-  //
-  cout << "----------------------------------------------------------" << endl;
+    // Initialize chain
+    cout << "----------------------------------------------------------" << endl;
   cout << " doEvents - Initializing and Printing chain information   " << endl;
   Int_t iInit = chain->Init();
   if (iInit) chain->Fatal(iInit,"on init");
@@ -355,49 +250,34 @@ void doEvents(Int_t startEvent, Int_t nEventsQQ, const Char_t **fileList, const 
   // go to event startEvent
   if (startEvent > 1) IOMk->Skip(startEvent-1);
 
-
-
-  //----- added 6/20/00 by Kathy
-  TTable   *tabl=0;
-  TDataSet *obj=0;
-  TDataSet *ddb=0;
-  TDataSet *ddstBranch=0;
-  //------
-
-  //
-  // Event loop
-  //
-  istat=0,iEvt=1;
+    // Event loop
+    istat=0,iEvt=1;
   istat = chain->EventLoop(1,nEvents);    
   //VP    delete setFiles; setFiles=0;
   
 }
+//______________________________________________________________________________
 
-//--------------------------------------------------------------------------
 
-void doEvents(Int_t startEvent, Int_t nEvents, const Char_t *file, const Char_t *qaflag)
+void doEvents(Int_t startEvent, Int_t nEvents, const char *file, const char *qaflag)
 {
     if (!qaflag) qaflag="";
     printf("*file = %s\n",file);
     const char *fileListQQ[]={0,0};
-    if (strncmp(file,"GC",2)==0) {
-      fileListQQ=0;
-    } else {
-      fileListQQ[0]=file;
-    }
+    fileListQQ[0]=file;
     cout << "Calling (startEvent,nEvents,fileListQQ,qaflag)" << endl;
     doEvents(startEvent,nEvents,fileListQQ,qaflag);
 }
-//--------------------------------------------------------------------------
-void doEvents(Int_t nEvents, const Char_t *file, const Char_t *qaflag)
+//______________________________________________________________________________
+void doEvents(Int_t nEvents, const char *file, const char *qaflag)
 {
   if (!qaflag) qaflag="";
   cout << "Calling (1,nEvents,file,qaflag)" << endl;
   doEvents(1,nEvents,file,qaflag);
 }
 
-//--------------------------------------------------------------------------
-void doEvents(Int_t nEvents, const Char_t *path,const Char_t *file, const Char_t *qaflag, int flag)
+//______________________________________________________________________________
+void doEvents(Int_t nEvents, const char *path,const char *file, const char *qaflag, int flag)
 {
   if (!qaflag) qaflag="";
   TString F;
@@ -413,186 +293,268 @@ void doEvents(Int_t nEvents, const Char_t *path,const Char_t *file, const Char_t
   doEvents(1,nEvents,F.Data(),opt.Data());
 }
 
-//--------------------------------------------------------------------------
-void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
+//______________________________________________________________________________
+void doEvents(Int_t nEvents, const char **fileList, const char *qaflag)
 { 
   cout << "Calling (1,nEvents,fileList,qaflag)" << endl;
   doEvents(1,nEvents,fileList,qaflag);
 }
+//______________________________________________________________________________
+void loadLibs(const char *opt) 
+{
+// Dynamically link needed shared libs
 
-///////////////////////////////////////////////////////////////////////////////
-//
+  if (!opt[0]) { //Default set
+//	ROOT libs
+    gSystem->Load("libPhysics");
+    gSystem->Load("libTable");
+    gSystem->Load("libGeom");
+
+//	STAR libs  
+    gSystem->Load("St_base");
+    gSystem->Load("StChain");
+    gSystem->Load("St_Tables");
+    gSystem->Load("StUtilities");        // new addition 22jul99
+    gSystem->Load("StTreeMaker");
+    gSystem->Load("StIOMaker");
+    gSystem->Load("StarClassLibrary");
+    gSystem->Load("StTriggerDataMaker"); // new starting from April 2003
+    gSystem->Load("StBichsel");
+    gSystem->Load("StEvent");
+    gSystem->Load("StEventUtilities");
+    gSystem->Load("StEmcUtil");
+    gSystem->Load("StTofUtil");
+    gSystem->Load("StPmdUtil");
+    gSystem->Load("StPreEclMaker");
+    gSystem->Load("StStrangeMuDstMaker");
+    gSystem->Load("StMuDSTMaker");  
+    gSystem->Load("StMagF");
+    gSystem->Load("StAnalysisMaker");
+    cout << " loading of shared libraries done" << endl;
+    return;
+  }
+  if (strstr(opt,"dbon")) {// DB stuff
+    gSystem->Load("StDbLib.so");
+    gSystem->Load("StDbBroker.so");
+    gSystem->Load("libStDb_Tables.so");
+    gSystem->Load("St_db_Maker.so");
+    gSystem->Load("StTpcDb");
+    gSystem->Load("StDetectorDbMaker");
+  }
+
+  if (strstr(opt,"disp")) {// EventDisplay stuff
+ // gSystem->Load("St_g2t");  // is a part od St_Tables
+    gSystem->Load("geometry");
+    gSystem->Load("St_geant_Maker");
+    gSystem->Load("StTableUtilities");
+    gSystem->Load("StEventDisplayMaker");
+  }
+}
+//______________________________________________________________________________
+int gcPrep(const char *req, char ***argvP, char **argcP)
+{
+   
+   TString *full=new TString;
+   char **argv = *(argvP);
+   char  *argc = *(argcP); 
+   argv = 0; argc=0;
+   int idx = 0;
+   FILE *inp = 0;
+   char line[500],*comm;
+   if (req[0]=='@') { // get info from the file
+     inp = fopen(req+1,"r");
+     if (!inp) { // File not found
+       printf("DoEvents: ERROR. File Not Found // %s\n",req+1);
+       gSystem->Exit(13);
+     }
+     while(fgets(line,500,inp))  {
+        for (int i=0;line[i];i++){if (line[i]=='\t'||line[i]=='\n')line[i]=' ';}
+        char *fst = line + strspn(line," t");
+        if (fst[0]            == 0 ) continue;
+        if (fst[0]            =='#') continue;
+        if (strncmp(fst,"//",2)==0 ) continue;
+        comm = strstr(line,"#"  ); if (comm) comm[0]=0;
+        comm = strstr(line," //"); if (comm) comm[0]=0;
+        *(full) += fst; idx++;
+     }
+     fclose(inp);
+   } else {
+     *full = req;
+   }
+
+   if ((*full)[0]!='-') {argc = full->Data(); return idx;}
+   
+//  argv mode
+   argv = new char*[100];
+   memset(argv,0,sizeof(char*)*100);
+   idx=0; char *c = full->Data();
+   while(1) {
+     c = c+strspn(c," ");
+     if (c[0] == 0) break;
+     int n = strcspn(c," ");
+     argv[idx++]=c;
+     if (c[n]==0) break;
+     c[n]=0; c = c+n+1;
+   }
+   for (int i=0;argv[i];i++) { printf("argv[%i]=%s\n",i,argv[i]);}
+
+
+   return idx;
+}
+//______________________________________________________________________________
+int gcInit(const char *request) 
+{   
+
+  int Argc=0; char **Argv=0; char  *Sele=0;
+  Argc = gcPrep(request,&Argv,&Sele);
+  if (Argc==0) return 0;
+
+  gSystem->Load("StGridCollector");
+  StGridCollector *req = StGridCollector::Create();
+  req->SetDebug(5);
+  if (Argv) {
+    Int_t ierr = req->Init(Argc, Argv);
+    if (ierr) {
+        std::cout << "doEvents.C can not initialize the Grid Collector "
+                  << "with \"";
+        for (Int_t i=0; i < Argc; ++i)
+            std::cout << " " << Argv[i];
+        std::cout << "\"\nError code is " << ierr << std::endl;
+        return; // initialization failure
+    }
+  } else { // Grid Collector: case II -- user has specified the options on
+      // command line
+      Int_t ierr = req->Init(Sele);
+      if (0 != ierr) { // parse the arguments
+          std::cout << "doEvents.C can not initialize the Grid Collector "
+                    << "with argument \"" << Sele
+                    << "\"\nError code is " << ierr
+                    << std::endl;
+          return 0;
+      }
+  }
+
+  int nEvents =  req->GetNEvents();
+      std::cout << "INFO: actual number of events " << nEvents << std::endl;
+  setFiles = req;
+  mainBranch = req->GetCompName();
+  mainBranch += "Branch";
+  return nEvents;
+}
+//______________________________________________________________________________
+/////////////////////////////////////////////////////////////////////////////// 
 // $Log: doEvents.C,v $
-// Revision 1.92  2004/08/10 15:50:27  perev
-// Added GridCollector functionality
+// Revision 1.93  2004/08/10 19:44:19  perev
+// Cleanup+StGridCollector
 //
 // Revision 1.91  2004/07/21 17:31:12  fine
 // The default coloring filter has been added to doEvents macro and StEventHeler class
-//
 // Revision 1.90  2004/06/23 20:06:02  perev
 // const Int_t replaced by Int_t
-//
 // Revision 1.89  2004/02/24 16:45:26  fisyak
 // Add load of libGeom
-//
 // Revision 1.88  2004/02/02 03:02:41  perev
 // Defence against qaflag==0
-//
 // Revision 1.87  2004/02/01 19:11:26  jeromel
 // indent + printing
-//
 // Revision 1.86  2003/10/10 19:39:20  perev
 // Remeve delete fileset. problem for debuging. A leak is small
-//
 // Revision 1.85  2003/09/07 03:49:11  perev
 // gcc 3.2 + WarnOff
-//
 // Revision 1.84  2003/07/17 15:34:12  perev
 // delete setFiles added
-//
 // Revision 1.83  2003/05/02 23:12:53  jeromel
 // StBichsel
-//
 // Revision 1.82  2003/04/26 03:36:25  jeromel
 // Forgot to commit
-//
 // Revision 1.81  2003/02/27 17:01:06  fine
 // the secondary filter in example has been disabled by default
-//
 // Revision 1.80  2003/02/26 04:40:29  fine
 // add one extra filter to display
-//
 // Revision 1.79  2003/01/17 17:14:06  fine
 // fix: StEventMaker was not loaded properly
-//
 // Revision 1.78  2003/01/17 16:26:13  fine
 //  chnage display default parameters
-//
 // Revision 1.77  2002/11/26 02:30:29  perev
 // EventLoop added
-//
 // Revision 1.75  2002/04/14 22:27:29  perev
 // remove reading dst by default
-//
 // Revision 1.74  2002/02/23 19:25:55  perev
 // NotifyMe used
-//
 // Revision 1.73  2002/01/15 18:28:53  perev
 // @file logic added
-//
 // Revision 1.72  2001/12/22 03:47:27  perev
 // StTpcDb.so is not loaded for event.root case
-//
 // Revision 1.71  2001/09/27 00:51:34  perev
 // call StEventMaker conditionally
-//
 // Revision 1.69  2001/09/17 00:13:14  perev
 // Load StEventUtilities
-//
 // Revision 1.67  2001/09/07 18:32:28  perev
 // help restored
-//
 // Revision 1.66  2001/09/01 19:56:41  perev
 // EventDisplay option added
-//
 // Revision 1.65  2001/05/19 00:32:53  perev
 // Skip added
-//
 // Revision 1.64  2001/05/04 20:17:31  perev
 // remove St_dst_bfc_status::iterator
-//
 // Revision 1.63  2001/02/27 23:19:38  perev
 // test for filelist[0]!=0 added
-//
 // Revision 1.62  2001/02/21 23:16:19  perev
 // clean up
-//
 // Revision 1.61  2001/02/14 23:39:17  perev
 // classs TTable::iterator example introdiced
-//
 // Revision 1.60  2000/09/06 22:42:41  ullrich
 // Moved WriteOut StEvent block after the line where the analysis
 // maker gets created.
-//
 // Revision 1.59  2000/07/21 01:38:46  perev
 // GC query changed
-//
 // Revision 1.58  2000/07/16 23:04:27  perev
 // Remove redundunt Finish() call
-//
 // Revision 1.57  2000/07/03 02:08:00  perev
 // StEvent: vector<TObject*>
-//
 // Revision 1.56  2000/06/20 14:11:46  kathy
 // now unpack BfcStatus table in doEvents so people can see if maker errors exist
-//
 // Revision 1.55  2000/06/19 23:33:29  perev
 // GC for real data
-//
 // Revision 1.54  2000/05/18 17:44:54  kathy
 // turn off by default the writing of output *.event.root file - had it ON by default by accident
-//
 // Revision 1.53  2000/05/17 16:53:50  kathy
 // change flag to write out .event.root file to false by default
-//
 // Revision 1.52  2000/05/17 16:50:47  kathy
 // put Victor's code to write out .event.root file from doEvents.C in here with a flag to turn off and on - now we can get rid of doEventsOut.C ... don't have to keep up 2 sets of macros
-//
 // Revision 1.51  2000/05/17 15:58:08  kathy
 // added some print statements to beginning
-//
 // Revision 1.50  2000/05/09 19:38:17  kathy
 // update to use standard default input files and only process few events by default - to make it easy to run in automatic macro testing script
-//
 // Revision 1.49  2000/04/21 13:40:08  wenaus
 // correct the doc for nEvents in multifile mode
-//
 // Revision 1.48  2000/04/18 21:43:12  fine
 // make TurnDisplay macro available for doEvents
-//
 // Revision 1.47  2000/04/13 22:14:03  perev
 // StFile -> StFileI
-//
 // Revision 1.46  2000/04/13 21:46:34  kathy
 // remove loading of libtpc_Tables since l3Track table is now dst_track type from global
-//
 // Revision 1.45  2000/04/12 17:33:45  kathy
 // put loading of libtpc_Tables back in since Iwona is going back to original tpt_track table
-//
 // Revision 1.44  2000/04/12 15:29:05  kathy
 // comment out libtpc by default
-//
 // Revision 1.43  2000/04/12 15:06:53  kathy
 // changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables because of a mismatch with tpt_track table
-//
 // Revision 1.42  2000/04/07 15:54:26  perev
 // GC added
-//
 // Revision 1.41  2000/03/20 17:32:55  kathy
 // setbranches in all macros so that they will work with softlinks - for StIOMaker
-//
 // Revision 1.40  2000/03/17 23:10:06  kathy
 // make sure the dst branch is explicitly set in the macros using dst.root files as input - otherwise they don't work properly with soft links
-//
 // Revision 1.39  2000/01/11 18:20:20  ullrich
 // Add latests improvements from Victor.
-//
 // Revision 1.38  2000/01/10 22:06:09  kathy
 // add owner name and comments
-//
 // Revision 1.37  1999/11/17 14:34:00  ullrich
 // Added version with no arguments which prints usage info.
-//
 // Revision 1.36  1999/11/17 14:23:40  ullrich
 // Updated for new StEvent/StEventMaker.
-//
 // owner: Torre Wenaus,Victor Perevoztchikov
 // what it does: reads .dst.root or .dst.xdf file or files, fills StEvent &
 //      then runs StAnalysisMaker 
-//////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
+////////////////////////////////////////////////////////////////////////
