@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cc,v 1.8 1999/12/21 01:10:58 posk Exp $
+// $Id: StFlowEvent.cc,v 1.9 1999/12/21 17:31:50 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cc,v $
+// Revision 1.9  1999/12/21 17:31:50  posk
+// Fixed random_shuffle in making the sub events.
+//
 // Revision 1.8  1999/12/21 01:10:58  posk
 // Added more quantities to StFlowEvent.
 //
@@ -44,6 +47,9 @@
 #include <stdlib.h>
 #include <math.h>
 #include <algorithm>
+#if  defined(__sun) && ! defined(__GNUG__)
+#include <ospace/stl/src/randgen.cpp>
+#endif
 #include "StFlowEvent.hh"
 #include "StFlowTrackCollection.hh"
 #include "StFlowConstants.hh"
@@ -277,7 +283,7 @@ void StFlowEvent::MakeSubEvents() {
   int eventMult[Flow::nHars][Flow::nSels] = {{0}};
   int harN, selN, subN = 0;
 
-  //random_shuffle(TrackCollection()->begin(), TrackCollection()->end());
+  random_shuffle(TrackCollection()->begin(), TrackCollection()->end());
 
   // loop to count the total number of tracks for each selection
   for (itr = TrackCollection()->begin(); itr != TrackCollection()->end(); itr++) {
