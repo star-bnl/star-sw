@@ -1,4 +1,4 @@
-// $Id: StDefaultFilter.cxx,v 1.8 2000/09/26 17:04:46 fine Exp $
+// $Id: StDefaultFilter.cxx,v 1.9 2000/11/17 22:26:47 fine Exp $
 #include "iostream.h"
 #include "TH1.h"
 #include "StDefaultFilter.h"
@@ -180,6 +180,7 @@ Int_t StDefaultFilter::SubChannel(const TTableSorter *tableObject, Int_t index,S
 Int_t StDefaultFilter::SubChannel(St_dst_track   &track, Int_t rowNumber,Size_t &size,Style_t &style)
 {
   Int_t color = -1;
+  size = 1;
   // SubChannel to provide a selections for St_dst_track tracks.
   Double_t trackColor;
   if (mDedx) {
@@ -270,6 +271,9 @@ void StDefaultFilter::Distribution(St_dst_track *track,TH1F &de)
 }
 //_____________________________________________________________________________
 // $Log: StDefaultFilter.cxx,v $
+// Revision 1.9  2000/11/17 22:26:47  fine
+// packing factors for Ftpc adjusted
+//
 // Revision 1.8  2000/09/26 17:04:46  fine
 // Two separate Distribution methods introduced
 //
