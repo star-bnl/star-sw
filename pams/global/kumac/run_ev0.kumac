@@ -1,4 +1,28 @@
-macro ev0_am 
+*******************************************************************
+ macro ev0_am2 
+   
+  macro/global/import *
+
+
+ message 'Calling ev02...'
+
+ ami/mod/call ev0_am2 _
+        [params]/global/ev0pars/ev0par2 _
+        [dst]/globtrk _
+        [dst]/vertex _
+        [dst]/ev0out _
+        [data]/global/tracks/ev0track2
+
+ if (staf_status(1).ne.stafcv_ok) then
+  message 'Problem on return from ev0_am2'
+ endif
+
+
+RETURN
+
+***********************************************************************
+ 
+ macro ev0_am 
    
    macro/global/import *
      
