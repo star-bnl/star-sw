@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsFastChargeTransporter.cc,v 1.11 1999/07/13 17:46:44 lasiuk Exp $
+ * $Id: StTrsFastChargeTransporter.cc,v 1.12 1999/10/04 18:06:02 long Exp $
  *
  * Author: brian June 1, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTrsFastChargeTransporter.cc,v $
+ * Revision 1.12  1999/10/04 18:06:02  long
+ * output of z is not drift length any more due to the new definition of the coordinate system
+ *
  * Revision 1.11  1999/07/13 17:46:44  lasiuk
  * diffusion
  *
@@ -109,20 +112,22 @@ void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg)
     //
     double ne = sqrt(seg.charge());
     if (mTransverseDiffusion) {
-	seg.position().setX(mGaussDistribution.shoot(seg.position().x(),
-						     (mSigmaTransverse*sqrt(driftLength)/ne)));
+      	seg.position().setX(mGaussDistribution.shoot(seg.position().x(),
+      					     (mSigmaTransverse*sqrt(driftLength)/ne)));
 	seg.position().setY(mGaussDistribution.shoot(seg.position().y(),
-						     (mSigmaTransverse*sqrt(driftLength)/ne)));
+      						     (mSigmaTransverse*sqrt(driftLength)/ne)));
     } // else do not alter the position!
-    
+   
     if (mLongitudinalDiffusion) {
-	seg.position().setZ(mGaussDistribution.shoot(driftLength,
+        double oldZ=seg.position().z();
+	seg.position().setZ(oldZ+driftLength-mGaussDistribution.shoot(driftLength,
 						     (mSigmaLongitudinal*sqrt(driftLength)/ne)));
+       
     }
     else {
 	// must alter the position to reflect the drift length.  This information is
 	// needed in order to properly treat the charge distribution onto the wire plane!
-	seg.position().setZ(driftLength);
+	
     }
 
     //PR(seg.position());
