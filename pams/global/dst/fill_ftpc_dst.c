@@ -6,11 +6,12 @@
 #include "fill_ftpc_dst.h"
 #include "StDetectorId.h"
 #include "StVertexId.h"
+#include "StDedxMethod.h"
 #include "math_constants.h"
 
 #define MAXHITS    10        /* Maximum number of hits on an FTPC track */
 
-#define FTPC_FAC   2380.0    /* Multiplication fator to achieve 4 micron accuracy */
+#define FTPC_FAC   2380.0    /* Multiplication factor to achieve 4 micron accuracy */
 #define FTPC_MIN   -270.0    /* Minimum FTPC z-coordinate */
 #define FTPC_MAX    270.0    /* Maximum FTPC z-coordinate */
 
@@ -22,9 +23,9 @@
 
 long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptrack,
   TABLE_HEAD_ST  *fppoint_h,           FCL_FPPOINT_ST        *fppoint,
+  TABLE_HEAD_ST  *fdepar_h,            FDE_FDEPAR_ST         *fdepar,
   TABLE_HEAD_ST  *dst_track_h,         DST_TRACK_ST          *dst_track,
   TABLE_HEAD_ST  *dst_point_h,         DST_POINT_ST          *dst_point,
-  TABLE_HEAD_ST  *dst_vertex_h,        DST_VERTEX_ST         *dst_vertex,
   TABLE_HEAD_ST  *dst_dedx_h,          DST_DEDX_ST           *dst_dedx)
 {
   /*
@@ -43,14 +44,14 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
    *:             fptrack_h             - Header Structure for FTPC track table
    *:             fppoint               - FTPC point table
    *:             fppoint_h             - Header Structure for FTPC point table
+   *:             fdepar                - FTPC fde parameter table
+   *:             fdepar_h              - Header Structure for fde param table
    *:       INOUT:
    *:       OUT:
    *:             dst_track             - DST tracks table       
    *:             dst_track_h           - Header Structure for dst_track
    *:             dst_point             - DST points table       
    *:             dst_point_h           - Header Structure for dst_point
-   *:             dst_vertex            - DST vertex table
-   *:             dst_vertex_h          - Header Structure for dst_vertex 
    *:             dst_dedx              _ DST dedx table
    *:             dst_dedx_h            _ Header structure for dst_dedx
    *:             
@@ -66,8 +67,6 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
    */
   
   /*  ==================  Local Variables  ======================== */
-  int     i;
-  int     ivtx_prim;
   int     itrk;
   int     iPoint;
   int     ftpcx, ftpcy, ftpcz;
@@ -77,13 +76,6 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
   float   xsq, ysq;
   /* ===========================  Begin Executable Code  =============== */
   
-  /* Locate primary vertex  */
-  ivtx_prim = -1;
-  for (i=0; i<dst_vertex_h->nok; i++) {
-    if (dst_vertex[i].vtx_id == kEventVtxId  && dst_vertex[i].iflag == 1)
-       ivtx_prim = i;
-       break;
-  }
 
   /* Loop over all tracks in FTPC track table */
   for (itrk=0; itrk<fptrack_h->nok; itrk++) {
@@ -95,9 +87,6 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
 
 /*  Primary key */
     dst_track[dst_track_h->nok].id      = dst_track_h->nok + 1;
-
-/* bitmask quality information */
-    dst_track[dst_track_h->nok].iflag   = 0;
 
 
 /*  initialize map and det_id  */
@@ -145,9 +134,6 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
 /*  Number of points  */
     dst_track[dst_track_h->nok].n_point = fptrack[itrk].nrec;
 
-/*  Maximum number of points */
-    dst_track[dst_track_h->nok].n_max_point  = MAXHITS;
-
 /*  Number of points used in fit */
     dst_track[dst_track_h->nok].n_fit_point  = fptrack[itrk].nfit;
 
@@ -178,6 +164,8 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
        dst_track[dst_track_h->nok].psi = 
                     dst_track[dst_track_h->nok].psi*C_2_PI;
     }
+    dst_track[dst_track_h->nok].psi = 
+        dst_track[dst_track_h->nok].psi * C_DEG_PER_RAD; 
 
 /*  tan(dip) = pz/pt at start  */
     dst_track[dst_track_h->nok].tanl  = fptrack[itrk].p[2]/
@@ -225,6 +213,7 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
                            fppoint[iPoint].y;
            dst_track[dst_track_h->nok].x_last[2]     = 
                            fppoint[iPoint].z;
+           break;
         }
      }
 
@@ -235,6 +224,20 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
     dst_track[dst_track_h->nok].length  = sqrt(xsq + ysq);
 
     dst_track[dst_track_h->nok].impact  = 0;
+
+/*  Maximum number of points */
+    dst_track[dst_track_h->nok].n_max_point  = fptrack[itrk].nmax;
+
+/* bitmask quality information */
+    dst_track[dst_track_h->nok].iflag = 
+      700 + fptrack[itrk].flag;
+    if (fabs(dst_track[dst_track_h->nok].icharge) != 1. ) {
+        dst_track[dst_track_h->nok].iflag   =  
+             -dst_track[dst_track_h->nok].iflag + 20;
+    }
+    if (fabs(dst_track[dst_track_h->nok].invpt) >= 999999.)  {
+        dst_track[dst_track_h->nok].iflag   = -799;
+    }
 
 
 
@@ -328,7 +331,14 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
     else {
       dst_dedx[dst_dedx_h->nok].id_track = dst_track[dst_track_h->nok].id;
       dst_dedx[dst_dedx_h->nok].det_id = dst_track[dst_track_h->nok].det_id;
-      dst_dedx[dst_dedx_h->nok].method = 0;
+
+      if(fdepar->id_method == 0)
+            dst_dedx[dst_dedx_h->nok].method = kTruncatedMeanId;
+      else if (fdepar->id_method == 1)
+            dst_dedx[dst_dedx_h->nok].method = kEnsembleTruncatedMeanId;
+      else
+            dst_dedx[dst_dedx_h->nok].method = kUndefinedMethodId;
+
       dst_dedx[dst_dedx_h->nok].ndedx = fptrack[itrk].ndedx;
       dst_dedx[dst_dedx_h->nok].dedx[0] = fptrack[itrk].dedx;
       dst_dedx[dst_dedx_h->nok].dedx[1] = 0;
