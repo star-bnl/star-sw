@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.14 2001/05/21 00:49:21 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.15 2001/05/31 16:12:20 fisyak Exp $
 #include <iostream.h>
 #include "StdEdxMaker.h"
 // ROOT
@@ -342,6 +342,7 @@ Int_t StdEdxMaker::Init(){
     }
   }
   gMessMgr->SetLimit("StdEdxMaker:: mismatched Sector",20);
+  gMessMgr->SetLimit("StdEdxMaker:: pad/TimeBucket out of range:",20);
   gMessMgr->SetLimit("StdEdxMaker:: Helix Pediction",20);
   gMessMgr->SetLimit("StdEdxMaker:: Coordinates",20);
   return StMaker::Init();
@@ -499,11 +500,7 @@ Int_t StdEdxMaker::Make(){
     dEdxp.pad = Pad.pad();
     dEdxp.timeBucket = Pad.timeBucket() + 10;
     if (dEdxp.sector != Pad.sector() ||
-	dEdxp.row    != Pad.row()) continue;
-    if (dEdxp.pad    < 1             ||
-	dEdxp.pad    >= NPads        ||
-	dEdxp.timeBucket < 0         ||
-	dEdxp.timeBucket >= NTimeBins) {
+	dEdxp.row    != Pad.row()) {
       //      if (XYZbad) XYZbad->Fill(dEdxp.xyz[0],dEdxp.xyz[1],dEdxp.xyz[2]);
       gMessMgr->Warning() << "StdEdxMaker:: mismatched Sector " 
 			  << Pad.sector() << " / " << dEdxp.sector
@@ -512,6 +509,14 @@ Int_t StdEdxMaker::Make(){
 			  << " x: " << dEdxp.xyz[0] << " y: "
 			  << dEdxp.xyz[1] << " z: " << dEdxp.xyz[2] 
 			  << endm;
+      continue;
+    }
+    if (dEdxp.pad    < 1             ||
+	dEdxp.pad    >= NPads        ||
+	dEdxp.timeBucket < 0         ||
+	dEdxp.timeBucket >= NTimeBins) {
+      gMessMgr->Warning() << "StdEdxMaker:: pad/TimeBucket out of range: " 
+			  <<  dEdxp.pad << " / " << dEdxp.timeBucket << endm;
       continue;
     }
     dEdxp.sortId = dEdxp.timeBucket + 1000*(dEdxp.pad + 1000*(dEdxp.row + 100*dEdxp.sector));
