@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.15 1998/12/21 19:26:08 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.16 1998/12/21 19:41:50 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.16  1998/12/21 19:41:50  fisyak
+// Move dst 2 glb
+//
 // Revision 1.15  1998/12/21 19:26:08  fisyak
 // Make ROOT include non system
 //
@@ -37,7 +40,7 @@
 // Split St_DataSet -> St_DataSet + St_DataSetIter
 //
 // Revision 1.3  1998/09/08 22:43:10  fisyak
-// Modify St_dst_Maker to account new calling sequence
+// Modify St_glb_Maker to account new calling sequence
 //
 // Revision 1.2  1998/08/26 12:15:08  fisyak
 // Remove asu & dsl libraries
@@ -53,7 +56,7 @@
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// St_dst_Maker class for Makers (evr + egr + ev0 + ev0_eval)           //
+// St_glb_Maker class for Makers (evr + egr + ev0 + ev0_eval)           //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
@@ -61,7 +64,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "TMath.h"
-#include "St_dst_Maker.h"
+#include "St_glb_Maker.h"
 #include "St_particle_Table.h"
 #include "St_hepe_gent_Table.h"
 
@@ -86,17 +89,17 @@
 #include "global/St_dst_point_filler_Module.h"
 #include "global/St_fill_dst_event_summary_Module.h"
 
-const Int_t St_dst_Maker::nxpT = 50;
-const Int_t St_dst_Maker::nyeta = 50;
-const Float_t St_dst_Maker::xminpT = 0.0;
-const Float_t St_dst_Maker::xmaxpT = 5.0;
-const Float_t St_dst_Maker::ymineta = -2.0;
-const Float_t St_dst_Maker::ymaxeta =  2.0;
+const Int_t St_glb_Maker::nxpT = 50;
+const Int_t St_glb_Maker::nyeta = 50;
+const Float_t St_glb_Maker::xminpT = 0.0;
+const Float_t St_glb_Maker::xmaxpT = 5.0;
+const Float_t St_glb_Maker::ymineta = -2.0;
+const Float_t St_glb_Maker::ymaxeta =  2.0;
 
-ClassImp(St_dst_Maker)
+ClassImp(St_glb_Maker)
 
 //_____________________________________________________________________________
-St_dst_Maker::St_dst_Maker(const char *name, const char *title):StMaker(name,title),
+St_glb_Maker::St_glb_Maker(const char *name, const char *title):StMaker(name,title),
 m_svm_ctrl(0),
 m_evr_evrpar(0),
 m_ev0par(0),
@@ -114,10 +117,10 @@ m_particle_dst_param(0)
   m_flag      = 2;
 }
 //_____________________________________________________________________________
-St_dst_Maker::~St_dst_Maker(){
+St_glb_Maker::~St_glb_Maker(){
 }
 //_____________________________________________________________________________
-Int_t St_dst_Maker::Init(){
+Int_t St_glb_Maker::Init(){
   // Create tables
   St_DataSetIter params(gStChain->DataSet("params"));
   //svm
@@ -218,12 +221,14 @@ Int_t St_dst_Maker::Init(){
   return StMaker::Init();
 }
 //_____________________________________________________________________________
-Int_t St_dst_Maker::Make(){
+Int_t St_glb_Maker::Make(){
   //  PrintInfo();
-  St_DataSetIter dst(m_DataSet);         // data/global/dst
+  St_DataSetIter global(m_DataSet);         // data/global
+  St_DataSet  *dst_loc = global("dst");
+  if (! dst_loc) dst_loc = global.Mkdir("dst");
+  St_DataSetIter dst(dst_loc);
   St_dst_track *globtrk = (St_dst_track *) dst("globtrk");
   if (!globtrk){ //create dst
-    St_DataSetIter global(gStChain->DataSet("global")); // data/global
     St_DataSetIter tpc_tracks(gStChain->DataSet("tpc_tracks")); 
     St_DataSetIter tpc_hits(gStChain->DataSet("tpc_hits")); 
     
@@ -494,7 +499,6 @@ Int_t St_dst_Maker::Make(){
     }
   }
   // V0
-  St_DataSetIter global(gStChain->DataSet("global")); // data/global
   St_ev0_aux *ev0out = (St_ev0_aux *) global("vertices/ev0out");
   if (ev0out) {
     ev0_aux_st *ev0 = ev0out->GetTable();
@@ -505,9 +509,9 @@ Int_t St_dst_Maker::Make(){
   return kStOK;
 }
 //_____________________________________________________________________________
-void St_dst_Maker::PrintInfo(){
+void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.15 1998/12/21 19:26:08 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.16 1998/12/21 19:41:50 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
