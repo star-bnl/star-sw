@@ -1,5 +1,8 @@
-// $Id: rootlogon.C,v 1.23 2000/04/14 16:25:31 fisyak Exp $
+// $Id: rootlogon.C,v 1.24 2000/04/23 21:03:05 fisyak Exp $
 // $Log: rootlogon.C,v $
+// Revision 1.24  2000/04/23 21:03:05  fisyak
+// Add node information
+//
 // Revision 1.23  2000/04/14 16:25:31  fisyak
 // Take out libSTAR & Star2Root once again
 //
@@ -125,7 +128,10 @@ TBuffer::SetGlobalWriteParam(2003);
  TString ROOT_LEVEL("$ROOT_LEVEL");
  gSystem->ExpandPathName(STAR_LEVEL);
  gSystem->ExpandPathName(ROOT_LEVEL);
- printf("QAInfo:You are using STAR_LEVEL : %s and ROOT_LEVEL : %s \n",  STAR_LEVEL.Data(),ROOT_LEVEL.Data());
+ printf("QAInfo:You are using STAR_LEVEL : %s, ROOT_LEVEL : %s and node : %s \n",  
+	STAR_LEVEL.Data(),
+	ROOT_LEVEL.Data(),
+	gSystem->HostName());
   gSystem->Exec("echo $USER from $HOST in STAR_LEVEL=$STAR_LEVEL / STAR_VERSION=$STAR_VERSION  `date` >>  $GROUP_DIR/statistics/root4star${STAR_VERSION}");
   gSystem->SetIncludePath("-I./include -I./StRoot -I$STAR/include -I$STAR/StRoot -I$STAF/inc -I$CERN_ROOT/include -I$ROOTSYS/src");
   //  gSystem->Load("libSTAR");
