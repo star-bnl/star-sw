@@ -1,5 +1,8 @@
-// $Id: StMessageManager.h,v 1.1 1999/06/23 15:17:53 genevb Exp $
+// $Id: StMessageManager.h,v 1.2 1999/06/24 16:30:43 genevb Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.2  1999/06/24 16:30:43  genevb
+// Fixed some memory leaks
+//
 // Revision 1.1  1999/06/23 15:17:53  genevb
 // Introduction of StMessageManager
 //
@@ -81,6 +84,7 @@ class StMessageManager {
          Char_t* s3="", Char_t* s4="")
          {return RemoveMessage(FindMessage(s1,s2,s3,s4));}
    virtual       void SetLimit(Char_t* str, Int_t n=0) {messCounter->SetLimit(str,n);}
+   virtual       void ListLimits() {messCounter->ListLimits();}
    virtual       void RemoveLimit(Char_t* str) {SetLimit(str,-1);}
    virtual       void SwitchOff(Char_t* str) {SetLimit(str,0);}
    virtual       void SwitchOn(Char_t* str) {RemoveLimit(str);}

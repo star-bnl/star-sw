@@ -1,5 +1,8 @@
-// $Id: StMessageCounter.h,v 1.1 1999/06/23 15:17:50 genevb Exp $
+// $Id: StMessageCounter.h,v 1.2 1999/06/24 16:30:42 genevb Exp $
 // $Log: StMessageCounter.h,v $
+// Revision 1.2  1999/06/24 16:30:42  genevb
+// Fixed some memory leaks
+//
 // Revision 1.1  1999/06/23 15:17:50  genevb
 // Introduction of StMessageManager
 //
@@ -31,22 +34,25 @@ class StMessageCounter {
    static StMessageCounter* mInstance;
    StMessTypeList* messTypeList;
    const Char_t* limitMessage;
+   Char_t* outMessage;
 
  protected:
    StMessageCounter();
    StMessageCounter(const StMessageCounter&);
+   messIntVec limitTList;
+   messIntVec limitTCountList;
    messCharVec limitList;
    messIntVec limitNList;
    messIntVec limitNCountList;
-   messIntVec limitTList;
-   messIntVec limitTCountList;
  
  public:
    ~StMessageCounter();
     static StMessageCounter* Instance();
       void SetLimit(Char_t* str, Int_t n=0);
+      void ListLimits();
       void AddType();
-   Char_t* CheckLimit(Char_t* mess, Char_t* type);
+       int CheckLimit(Char_t* mess, Char_t* type);
+   Char_t* GetOutMessage() const {return outMessage;}
    ClassDef(StMessageCounter,0)
 };
 
