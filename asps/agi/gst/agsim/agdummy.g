@@ -11,7 +11,7 @@ Replace[LIST #;] with [ #1 _
  "minuit "   mnseti,mninit,mnstat,mnexcm,mnpout,mnparm,
  "matrix "   Rsinv,Dsinv,Rinv,Dinv,Dmmlt,
  "ffread "   ffinit,ffset,ffkey,ffget,ffgo,
- "random "   poissn,norran,rndm,rnorml,dircos,
+ "random "   poissn,norran,rndm,rnorml,dircos,rnpssn,
  "random "   binomi,rngama,gauss,proxim,
  "comis  "   csjcal,csaddr,jumpad,Jbyt,
  "interp "   fint,polint,lfit,divdif,lfitw,lvsimx,
