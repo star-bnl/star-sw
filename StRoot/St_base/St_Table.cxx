@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.62 1999/08/11 00:42:33 fine Exp $ 
+// $Id: St_Table.cxx,v 1.63 1999/08/11 14:44:38 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.63  1999/08/11 14:44:38  fine
+// name clash with ROOT over enum resolved
+//
 // Revision 1.62  1999/08/11 00:42:33  fine
 // new I/O via St_baseDescriptor table has been implemented
 //
@@ -1848,7 +1851,7 @@ Int_t        St_Table::GetTypeSize(const Char_t *columnName) const {return GetRo
 UInt_t       St_Table::GetDimensions(Int_t columnIndex)  const {return GetRowDescriptors()->GetDimensions(columnIndex); }
 Int_t        St_Table::GetDimensions(const Char_t *columnName) const {return GetRowDescriptors()->GetDimensions(columnName); }
 
-EColumnType  St_Table::GetColumnType(Int_t columnIndex)  const {return GetRowDescriptors()->GetColumnType(columnIndex); }
-EColumnType  St_Table::GetColumnType(const Char_t *columnName) const {return GetRowDescriptors()->GetColumnType(columnName); }
+St_Table::EColumnType  St_Table::GetColumnType(Int_t columnIndex)  const {return GetRowDescriptors()->GetColumnType(columnIndex); }
+St_Table::EColumnType  St_Table::GetColumnType(const Char_t *columnName) const {return GetRowDescriptors()->GetColumnType(columnName); }
 
 

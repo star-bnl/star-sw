@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.30 1999/08/11 00:42:33 fine Exp $
+// $Id: St_Table.h,v 1.31 1999/08/11 14:44:39 fine Exp $
 // $Log: St_Table.h,v $
+// Revision 1.31  1999/08/11 14:44:39  fine
+// name clash with ROOT over enum resolved
+//
 // Revision 1.30  1999/08/11 00:42:33  fine
 // new I/O via St_baseDescriptor table has been implemented
 //
@@ -131,6 +134,9 @@ protected:
    void      ReAlloc(Int_t newsize);
  
 public:
+
+   enum EColumnType {kNAN, kFloat, kInt, kLong, kShort, kDouble, kUInt
+                          ,kULong, kUShort, kUChar, kChar };
 
    Char_t    *s_Table;       // Array of (fN*s_Size) longs
  
