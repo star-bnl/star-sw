@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.7  1998/07/01 13:40:29  fisyak
+#  Nodebug mode is -O
+#
 #  Revision 1.6  1998/07/01 12:15:55  fisyak
 #  Move NODEBUG flag in Env, variable
 #
@@ -23,7 +26,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/07/01 12:15:55 $ 
+#             Last modification $Date: 1998/07/01 13:40:29 $ 
 #. default setings
 
 RM := rm -f
@@ -72,10 +75,10 @@ LEXLIB   := -ll
 
 DEBUG := -g
 ifdef NODEBUG
-  DEBUG :=
+  DEBUG := -O
 endif
 ifdef nodebug
-  DEBUG :=
+  DEBUG := -O
 endif
 
 ifneq (,$(findstring $(STAF_ARCH),intel_wnt))

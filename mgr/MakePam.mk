@@ -132,10 +132,18 @@ FILES_O  += $(addprefix $(OBJ_DIR)/, $(addsuffix .o,   $(notdir $(basename $(FIL
 NAMES_O   = $(notdir $(FILES_O))
 # *.cc moved to sl $(NAMES_CC)
 ifneq (,$(strip $(FILES_IDM) $(FILES_G) $(FILES_CDF))) 
+#ifndef NODEBUG
+#        SL_PKG  := $(LIB_DIR)/$(PKG)-nodebug.sl
+#else
         SL_PKG  := $(LIB_DIR)/$(PKG).sl
+#endif
 endif                          
 ifneq (,$(strip $(FILES_O)))
+ifndef NODEBUG
+LIB_PKG := $(LIB_DIR)/lib$(PKG)-nodebug.a
+else
 LIB_PKG := $(LIB_DIR)/lib$(PKG).a
+endif
 qwe     := $(shell test ! -f $(LIB_PKG) ||  $(AR) $(ARFLAGS) $(LIB_PKG))
 OBJS    := $(LIB_PKG)($(NAMES_O))
 endif
