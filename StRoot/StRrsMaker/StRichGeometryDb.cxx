@@ -1,10 +1,13 @@
 /*******************************************************************
- * $Id: StRichGeometryDb.cxx,v 2.1 2000/10/20 23:25:16 dunlop Exp $
+ * $Id: StRichGeometryDb.cxx,v 2.2 2000/11/21 21:40:45 dunlop Exp $
  *
  * Description:
  *
  *******************************************************************
  * $Log: StRichGeometryDb.cxx,v $
+ * Revision 2.2  2000/11/21 21:40:45  dunlop
+ * Tweak for ExB effects
+ *
  * Revision 2.1  2000/10/20 23:25:16  dunlop
  * Fine tune for P00hi
  *
@@ -129,11 +132,11 @@ void StRichGeometryDb::my_fill()
 //    mLocalOriginAngle = -59.9911296661538 * degree ; 
 //    mLocalOriginR = 240.126958857466 * centimeter ;
 //    mLocalOriginZ = -0.558878974855719 * centimeter ; 
-    // local shift of (0.25,0.23,-0.1)
-    mLocalOriginAngle = -59.9363136563707*degree;
+    // local shift of (0.25,0.17,-0.1)
+    mLocalOriginAngle = -59.9506239157014*degree;
     
-    mLocalOriginR = 240.227804122147 * centimeter;
-    mLocalOriginZ = -0.3090168 * centimeter;
+    mLocalOriginR = 240.22755151829*centimeter;
+    mLocalOriginZ = -0.3089772 * centimeter;
     
 #endif    
     // Calculate the positions of the uppermost left had
