@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.cc,v 1.21 2002/11/06 13:44:47 oldi Exp $
+// $Id: StFtpcConfMapper.cc,v 1.22 2002/11/06 14:05:35 oldi Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.22  2002/11/06 14:05:35  oldi
+// Minor (minimal) clean up.
+//
 // Revision 1.21  2002/11/06 13:44:47  oldi
 // Vertex handling simplifed.
 // Flag for clusters not to be used for tracking introduced.
@@ -404,13 +407,7 @@ void StFtpcConfMapper::MainVertexTracking()
   }
   
   Settings("main_vertex");
-  //MainVertexSettings(3, 5, 1, 2, 1, 3);    //loose cuts
-
   Cuts("main_vertex");
-  //SetTrackletCuts(0.007, kTRUE);  //Markus
-  //SetTrackletCuts(0.03, kTRUE); //loose cuts
-  //SetTrackCuts(0.007, 0.03, 30, kTRUE);  //Markus
-  //SetTrackCuts(0.07, 0.3, 50, kTRUE);  //loose cuts
 
   ClusterLoop();
  
