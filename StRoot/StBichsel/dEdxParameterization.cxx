@@ -31,7 +31,7 @@ dEdxParameterization::dEdxParameterization(const Char_t *Tag,
   TDirectory *dir = gDirectory;
   Char_t            *rootf = "BichselT.root";
   if (fTag == "pai") rootf = "PaiT.root";
-  static Char_t *path  = ".:./StarDb/global/dEdx:./StRoot/StBichsel:$STAR/StarDb/global/dEdx:$STAR/StRoot/StBichsel";
+  static Char_t *path  = ".:./StarDb/dEdxModel:./StarDb/global/dEdx:./StRoot/StBichsel:$STAR/StarDb/dEdxModel:$STAR/StarDb/global/dEdx:$STAR/StRoot/StBichsel";
   Char_t *file = gSystem->Which(path,rootf,kReadPermission);
   if (! file) Fatal("dEdxParameterization::GetFile","File %s has not been found in path %s",rootf,path);
   else        Warning("dEdxParameterization::GetFile","File %s has been found as %s",rootf,file);
