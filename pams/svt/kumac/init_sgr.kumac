@@ -22,8 +22,6 @@
 * pix_info[2] tuned to 100 MeV/c search
 * pix_info[3] tuned to 50 MeV/c search
 
-
-
 cd /dui
  
  return
@@ -31,6 +29,7 @@ cd /dui
  
  macro init
    macro/global/import *
+
  return
  
 * ***************************************************

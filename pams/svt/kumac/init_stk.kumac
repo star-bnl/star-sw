@@ -31,6 +31,7 @@
   dio/stream/getevent  stk_par
   dio/stream/close     stk_par
   
+ cell/putvalue 'stkpars/stk_stkpar[0].direct' 0 
   soc/object/oid stk_par 
   oid = staf_result(1) 
   soc/deleteoid [oid]
@@ -91,6 +92,7 @@
 * (not to be changed by casual user!)
  
  
+
 
 
 

@@ -13,6 +13,9 @@
 * ***********************************************
  
  macro read
+
+
+  MESSAGE *******************************************Here now
    
   macro/global/import *
   message ' Init_svg: read in tables '
