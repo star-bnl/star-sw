@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.278 2002/02/24 22:16:22 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.279 2002/02/25 21:19:32 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -332,7 +332,7 @@ Bfc_st BFC[] = {
                                                  ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
 
   {"point"      ,"point","globalChain","SCL,tables,tls","StPointlMaker","St_global,St_dst_Maker","",kFALSE},
-  {"Vertex"     ,"vertex","globalChain","SCL,tls"
+  {"Vertex"     ,"Vertex","globalChain","SCL,tls"
                            ,"StVertexMaker","St_svt,St_global,St_dst_Maker","Primary Vertex finder",kFALSE},
   {"Primary"    ,"primary","globalChain","SCL,globT,tls"
                                                ,"StPrimaryMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
