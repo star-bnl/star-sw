@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.14 2000/06/19 01:32:15 perev Exp $
+ * $Id: StEvent.cxx,v 2.15 2000/09/06 22:34:12 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -12,11 +12,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 2.14  2000/06/19 01:32:15  perev
- * Thomas StEvent branches added
+ * Revision 2.15  2000/09/06 22:34:12  ullrich
+ * Changed mBunchCrossingNumber from scalar to array to hold all 64 bits.
  *
  * Revision 2.16  2000/09/25 14:21:27  ullrich
- *  Thomas StEvent branches added
+ * Removed enums for content vector. Replaced by lookup function.
  *
  * Revision 2.15  2000/09/06 22:34:12  ullrich
  * Changed mBunchCrossingNumber from scalar to array to hold all 64 bits.
@@ -94,8 +94,8 @@
 using std::swap;
 #endif
 
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.14 2000/06/19 01:32:15 perev Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.14 2000/06/19 01:32:15 perev Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.15 2000/09/06 22:34:12 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.15 2000/09/06 22:34:12 ullrich Exp $";
 void
 StEvent::initToZero()
 
@@ -163,9 +163,9 @@ StEvent::~StEvent()
 }
 
     return mContent[mInfo] ? static_cast<StEventInfo*>(mContent[mInfo])->triggerMask() : 0;
-StEvent::bunchCrossingNumber() const  
+    StEventInfo* info = 0;
     _lookup(info, mContent);
-    return mContent[mInfo] ? static_cast<StEventInfo*>(mContent[mInfo])->bunchCrossingNumber() : 0;
+    return info ? info->triggerMask() : 0;
 }
 
     return mContent[mInfo] ? static_cast<StEventInfo*>(mContent[mInfo])->bunchCrossingNumber(i) : 0;
@@ -458,10 +458,10 @@ StEvent::content() { return mContent; }
 
     if (!mContent[mInfo]) mContent[mInfo] = new StEventInfo;
     static_cast<StEventInfo*>(mContent[mInfo])->setTriggerMask(val);
-StEvent::setBunchCrossingNumber(ULong_t val)
+    StEventInfo* info = 0;
     _lookupOrCreate(info, mContent);
     info->setTriggerMask(val);
-    static_cast<StEventInfo*>(mContent[mInfo])->setBunchCrossingNumber(val);
+}
 
     if (!mContent[mInfo]) mContent[mInfo] = new StEventInfo;
     static_cast<StEventInfo*>(mContent[mInfo])->setBunchCrossingNumber(val, i);
