@@ -1,5 +1,8 @@
-// $Id: StSvtSimulationMaker.h,v 1.8 2003/11/13 16:25:00 caines Exp $
+// $Id: StSvtSimulationMaker.h,v 1.9 2003/11/30 20:51:48 caines Exp $
 // $Log: StSvtSimulationMaker.h,v $
+// Revision 1.9  2003/11/30 20:51:48  caines
+// New version of embedding maker and make OnlSeqAdj a stand alone maker
+//
 // Revision 1.8  2003/11/13 16:25:00  caines
 // Further improvements to get simulator looking like reality
 //
@@ -29,7 +32,7 @@
 // StSvtSeqAdj base class                                               //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-#ifndef StMaker_H  //is it necesary?
+#ifndef StMaker_H  
 #include "StMaker.h"
 #endif
 
@@ -53,13 +56,11 @@ class StSvtConfig;
 class StSvtGeantHits;
 class StSvtHybridPixelsC;
 class StSvtHybridPixelsD;
-class StSvtHybridSimData;
 class StSvtSimulation;
 class StSvtElectronCloud;
 class StSvtAngles;
 class StSvtWaferCoordinate;
 class StSvtCoordinateTransform;
-class StSvtOnlineSeqAdjSim;
 class StSvtT0;
 
 
@@ -83,14 +84,13 @@ class StSvtSimulationMaker : public StMaker
   virtual Int_t Make();
   virtual void  Clear(const char *opt);
   virtual Int_t Finish();
-  virtual Int_t InitRun(int runumber); //caled when run number changes
+  virtual Int_t InitRun(int runumber); 
    
   void setElectronLifeTime(double tLife);
   void setTrappingConst(double trapConst);
   void setDiffusionConst(double diffConst);
 
   void  setSvtPixelData();
-  void  setSvtRawData();
   void  setGeantData();
 
   void resetPixelData();
@@ -99,10 +99,6 @@ class StSvtSimulationMaker : public StMaker
                     StSvtWaferCoordinate& waferCoord,StThreeVector<double>& VecG,
                     StThreeVector<double>& VecL, double peak);
 
-  void RawDataFromPixels();
-  void Conversion10to8bit(StSvtHybridPixelsD *from, StSvtHybridPixelsC *to);
-  void OnlineAdjusting(StSvtHybridPixelsC *from,StSvtHybridSimData *to);
-  
   Int_t getConfig();
   Int_t getSvtGeometry();
   Int_t getSvtDriftSpeeds();
@@ -112,21 +108,13 @@ class StSvtSimulationMaker : public StMaker
 
 //+++++++++++++++++++++++
   void MakePixelHistos();
-  void MakeRawDataHistos();
   void MakeGeantHitsHistos();
-
- 
-
- 
-  //Int_t getRealData();
   void CreateHistograms();
  
-
   Int_t GetNumOfHybrids(){return mNumOfHybrids;}
   //TH2D* GetHitPlusBkgrHist(int i){ return hit_plus_backgr[i];}
   //TH2D* GetGeantHitHist(int i){ return geant_hit[i];}
   TNtuple* GetNTuple(){return mNTuple;}
-  //TH2D* GetDataBeforeSeqAdjHist(int i){ return mDataBeforeSeqAdj[i];}
 
  private:
 
@@ -161,31 +149,27 @@ class StSvtSimulationMaker : public StMaker
   StSvtElectronCloud           *mElectronCloud;      //! created in Init (desctructor kills)
   StSvtSimulation              *mSvtSimulation;      //! created in Init (desctructor kills)
   StSvtCoordinateTransform     *mCoordTransform;     //! created in Init (desctructor kills)
-  StSvtOnlineSeqAdjSim         *mOnlineAdjuster;     //! created in Init (desctructor kills)
- 
   
   //data for each run
   StSvtGeometry                *mSvtGeom;            //! read for each run in InitRun(owned by SvtDbMaker - don't kill)
-  StSvtHybridCollection        *mDriftSpeedColl; 
-  StSvtT0                      *mT0;
-  StSvtHybridCollection        *mPedColl;
-  StSvtHybridCollection        *mPedRMSColl;
-  StSvtHybridCollection        *mSvtBadAnodes;
+  StSvtHybridCollection        *mDriftSpeedColl;     //!
+  StSvtT0                      *mT0;                 //!
+  StSvtHybridCollection        *mPedColl;            //!
+  StSvtHybridCollection        *mPedRMSColl;         //!
+  StSvtHybridCollection        *mSvtBadAnodes;       //!
  
-  
   //data for each event
   StSvtData                         *mSvtSimPixelColl;    //! the simulated data - created for each run InitRun{in beginAnalyses} 
   StSvtData                         *mSvt8bitPixelColl;   //! simulated final result written to 8 bits
-  StSvtData                         *mSvtSimDataColl;     //! "StSvtRawData" from simulation (output for chain)
   StSvtData                         *mSvtGeantHitColl;    //!
   
   //  TFile                        *mDebugFile;         //!
-  TFile                        *mNtFile;        //! asi taky zlikvidovat
-  TNtuple                      *mNTuple;          //! udelat lokalne
+  TFile                        *mNtFile;                //! 
+  TNtuple                      *mNTuple;                //! 
     
 
   virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.8 2003/11/13 16:25:00 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StSvtSimulationMaker.h,v 1.9 2003/11/30 20:51:48 caines Exp $ built "__DATE__" "__TIME__; return cvs;}
 
   ClassDef(StSvtSimulationMaker,3)
 
