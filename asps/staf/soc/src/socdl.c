@@ -12,8 +12,11 @@ soc_dl_load (char *pkgName)
   char *solibName;
   
   solibName = (char *) MALLOC(strlen(pkgName) + 7);
+#if defined(__hpux)
+  sprintf(solibName, "lib%s.sl", pkgName);
+#else
   sprintf(solibName, "lib%s.so", pkgName);
-
+#endif
   if (cdl_load(solibName)) {
     FREE(solibName); /*fix memory leak -akio*/
     EML_ERROR(NO_FUNCTION_LOADED);
