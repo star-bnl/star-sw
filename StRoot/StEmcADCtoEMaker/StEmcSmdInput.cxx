@@ -1,16 +1,8 @@
 /***************************************************************************
- *
- * $Id: StEmcSmdInput.cxx,v 1.1 2001/07/17 00:14:37 perev Exp $
- *
- * Author:  bl
+ * Author:  Subhasis Chattopadhyay
  ***************************************************************************
  *
- * Description: RICH offline software:
- *              StRchMaker.cxx - ROOT/STAR Maker for offline chain.
- *              Incorporation of cluster finder here
- ***************************************************************************
- *
- * See Log Comments at bottom
+ * Description: EMC Smd Handling:
  ***************************************************************************/
 
 #include <iostream.h>

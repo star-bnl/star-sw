@@ -1,12 +1,7 @@
-/***************************************************************************
- *
- * $Id: StEmcADCtoEMaker.h,v 1.1 2001/07/17 00:14:37 perev Exp $
- *
- * Author: 
+ /* Author: Subhasis Chattopadhyay, WSU 
  ***************************************************************************
  *
- * Description: RICH offline software
- *              StRchMaker.h - ROOT/STAR Maker for offline chain.
+ * Description: EMC Calibration Maker
  ***************************************************************************/
 
 #ifdef __ROOT__
@@ -17,11 +12,6 @@
 #include "StMaker.h"
 #endif
 
-//#define rCH_DEBUG 1
-//#define rCH_HISTOGRAM 1
-
-//#include "StRichDisplayActivate.h"
-
 #ifndef __CINT__
 #include <vector>
 #ifndef ST_NO_NAMESPACES
@@ -29,11 +19,6 @@ using std::vector;
 #endif
 #endif
 
-//#ifdef RCH_HISTOGRAM
-//#include "TFile.h"
-//#include "TH1.h"
-//#include "TNtuple.h"
-//#endif
 class StDAQReader;
 class StEMCReader;
 class StEvent;

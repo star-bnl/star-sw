@@ -1,12 +1,6 @@
 /***************************************************************************
- *
- * $Id: StEmcTowerInput.h,v 1.1 2001/07/17 00:14:37 perev Exp $
- *
- * Author: 
- ***************************************************************************
- *
- * Description: RICH offline software
- *              StRchMaker.h - ROOT/STAR Maker for offline chain.
+ * Author: Subhasis Chattopadhyay 
+ * Description: Handling of EMC Barrel Tower
  ***************************************************************************/
 
 #ifdef __ROOT__
