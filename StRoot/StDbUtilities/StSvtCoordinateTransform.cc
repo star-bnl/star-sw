@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.23 2003/09/02 17:57:51 perev Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.24 2004/06/14 14:49:35 caines Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -37,6 +37,7 @@ using namespace units;
 //_____________________________________________________________________________
 StSvtCoordinateTransform::StSvtCoordinateTransform() {
 
+  mDeltaDriftVelocity = 1;
 }
 
 //_____________________________________________________________________________
@@ -60,6 +61,11 @@ void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
   mconfig = config;
   mDriftVelocity = driftVeloc;
   mT0 = T0;  
+}
+//_____________________________________________________________________________
+void StSvtCoordinateTransform::setVelocityScale( double deltaV){
+ 
+  mDeltaDriftVelocity = deltaV;
 }
 //____________________________________________________________________________
 void StSvtCoordinateTransform::setParamPointers( StSvtGeometry* geom,
@@ -639,10 +645,13 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
   if (mDriftVelocity) {
     index = mDriftVelocity->getHybridIndex(barrel,ladder,wafer,hybrid);
     if (index > 0)
-      vd = ((StSvtHybridDriftVelocity*)mDriftVelocity->at(index))->getV3(1);
+      vd = ((StSvtHybridDriftVelocity*)mDriftVelocity->at(index))->getV3(1)*
+	mDeltaDriftVelocity;
   }
   if (vd < 0)
-    vd = 675000;
+    vd = 675000*mDeltaDriftVelocity;
+
+  
 
   //cout << "index = " << index << ", vd = " << vd << endl;
 
@@ -710,10 +719,11 @@ double StSvtCoordinateTransform::UnCalcDriftLength(const StSvtLocalCoordinate& a
   if (mDriftVelocity) {
     index = mDriftVelocity->getHybridIndex(barrel,a.ladder(),a.wafer(),a.hybrid());
     if (index > 0)
-      vd = ((StSvtHybridDriftVelocity*)mDriftVelocity->at(index))->getV3(1);
+      vd = ((StSvtHybridDriftVelocity*)mDriftVelocity->at(index))->getV3(1)*
+	mDeltaDriftVelocity;
   }
   if (vd < 0)
-    vd = 675000;
+    vd = 675000*mDeltaDriftVelocity;
 
   double t;
   //t = x/mparam->vd;
