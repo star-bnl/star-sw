@@ -1,13 +1,18 @@
-StAnalysisMaker
-===============
+-*- mode:outline -*-
+Time-stamp: <99/11/04 16:00:49 ullrich>
 
-Sample analysis maker using StEvent. Incorporates some of Thomas Ullrich's
-examples.
+* Package: StAnalysisMaker
 
-Author: Torre Wenaus, BNL
+* Purpose:
+Sample analysis maker using StEvent
 
-Mod history
-===========
+* Author:
+Torre Wenaus, BNL
+
+* History:
+11/04/1999 T. Ullrich
+Updated to deal with new version of StEvent.
+Code cleaned up a bit.
 
 02/11/1999 T. Wenaus
 - add sample tag DB loading: tagFiller.cc and associated maker mods.
@@ -17,3 +22,9 @@ Mod history
 02/10/1999 T. Wenaus
 - protection against null event
 - separate out event analysis into separate functions
+
+* Status:
+compiles on all platforms but functionality not fully
+tested. 
+
+

@@ -1,79 +1,61 @@
-// $Id: summarizeEvent.cc,v 1.11 1999/09/13 21:53:07 kathy Exp $
-// $Log: summarizeEvent.cc,v $
-// Revision 1.11  1999/09/13 21:53:07  kathy
-// QAInfo defaults include 'sto'
-//
-// Revision 1.10  1999/09/03 16:36:42  kathy
-// checking in Curtis' new version of summarizeEvent.cc that uses the QAInfo message manager method
-//
-// Revision 1.9  1999/08/09 21:48:10  kathy
-// fix the call to MessMgr Info method so it does not print out the time - time we checked the DST is not needed here
-//
-// Revision 1.8  1999/08/09 19:38:32  kathy
-// checkin Curtis' changes that print out the event # with each set of QAInfo stuff
-//
-// Revision 1.7  1999/08/07 19:40:58  fisyak
-// use StMessage
-//
-// Revision 1.6  1999/08/06 21:25:33  fisyak
-// Switch to StMessager
-//
-// Revision 1.5  1999/08/06 20:21:53  kathy
-// back to old version that didn't write out QA info file, but now added QAInfo tag in front of information that QA team wants in summarizeEvent.cc - will also add a few more lines of output to summarizeEvent.cc soon
-//
-// Revision 1.4  1999/07/30 22:56:02  kathy
-// added new method and input param qaflag so that if turned on, a log file will be printed out with QA information
-//
-// Revision 1.3  1999/06/25 19:20:41  fisyak
-// Merge StRootEvent and StEvent
-//
-// Revision 1.3  1999/06/24 21:56:48  wenaus
-// Version minimally changed from standard StAnalysisMaker
-//
-// Revision 1.2  1999/02/11 15:39:16  wenaus
-// cleanup
-//
-//
-///////////////////////////////////////////////////////////////////////////////
-//
-// summarizeEvent.cc
-//
-// Description: 
-//  StEvent summary printout
-//
-// Environment:
-//  Software developed for the STAR Detector at Brookhaven National Laboratory
-//
-// Author List: 
-//  Torre Wenaus, BNL  1/99
-//
-// History:
-//
-///////////////////////////////////////////////////////////////////////////////
-#include "StEvent.h"
+/***************************************************************************
  *
-static const char rcsid[] = "$Id: summarizeEvent.cc,v 1.11 1999/09/13 21:53:07 kathy Exp $";
+ * $Id: summarizeEvent.cc,v 1.12 1999/11/04 21:02:27 ullrich Exp $
+ *
+ * Author: Torre Wenaus, BNL,
+ *         Thomas Ullrich, Nov 1999
+ ***************************************************************************
+ *
+ * Description:  This is an example of a function which performs
+ *               some simple analysis using StEvent.
+ *               Use this as a template and customize it for your
+ *               studies.
+ *
+ ***************************************************************************
+ *
+ * $Log: summarizeEvent.cc,v $
+ * Revision 1.12  1999/11/04 21:02:27  ullrich
+ * Revision for new StEvent
+ *
+ * Revision 1.12  1999/11/04 21:02:27  ullrich
+ * Revision for new StEvent
+ *
  * Revision 2.1  1999/11/16 12:28:44  ullrich
-void summarizeEvent(StEvent& event, Int_t &nevents) {
+ * Corrected typo and added print-out of number of primary tracks.
  *
-  nevents++;
-  gMessMgr->QAInfo() << "StAnalysisMaker,  Reading Event: " << nevents <<
-    "  Type: " << event.type() << "  Run: " << event.runNumber() << endm;
+ * Revision 2.0  1999/11/04 16:10:11  ullrich
+ * Revision for new StEvent
+ *
+ **************************************************************************/
+#include "StEventTypes.h"
+#include "StMessMgr.h"
+
+static const char rcsid[] = "$Id: summarizeEvent.cc,v 1.12 1999/11/04 21:02:27 ullrich Exp $";
+
+void
+summarizeEvent(StEvent& event, Int_t &nevents)
+{
+    nevents++;
     gMessMgr->QAInfo() << "StAnalysisMaker,  Reading Event: " << nevents
-  gMessMgr->QAInfo() << "# tracks:         "
-                            << event.trackCollection()->size() << endm;
-  gMessMgr->QAInfo() << "# vertices:       "
-                            << event.vertexCollection()->size() << endm;
-  gMessMgr->QAInfo() << "# TPC hits:       "
-                            << event.tpcHitCollection()->size() << endm;
-  gMessMgr->QAInfo() << "# SVT hits:       "
-                            << event.svtHitCollection()->size() << endm;
-  gMessMgr->QAInfo() << "# FTPC hits:      "
-                            << event.ftpcHitCollection()->size() << endm;
-  if (event.primaryVertex()) {
-    gMessMgr->QAInfo() << "primary vertex:   "
-                              << event.primaryVertex()->position() << endm;
-  }
+		       << "  Type: " << event.type()
+		       << "  Run: " << event.runId() << endm;
+	nprimary = event.primaryVertex()->numberOfDaughters();
+    gMessMgr->QAInfo() << "# primary tracks:         "
+		       << nprimary << endm;
+    
+    gMessMgr->QAInfo() << "# V0 vertices:       "
+		       << event.v0Vertices().size() << endm;
+
+    gMessMgr->QAInfo() << "# Xi vertices:       "
+		       << event.xiVertices().size() << endm;
+    
+    gMessMgr->QAInfo() << "# Kink vertices:       "
+		       << event.kinkVertices().size() << endm;
+    
+    gMessMgr->QAInfo() << "# TPC hits:       "
+		       << (event.tpcHitCollection() ? event.tpcHitCollection()->numberOfHits() : 0) << endm;
+    
+    gMessMgr->QAInfo() << "# SVT hits:       "
 		       << (event.svtHitCollection() ? event.svtHitCollection()->numberOfHits() : 0) << endm;
     
     gMessMgr->QAInfo() << "# FTPC hits:      "
