@@ -5,13 +5,14 @@
 */
 
    struct exi_exipar {
-       long      id;         /* parent geant id to search for */
-       long      iflag;      /* controls execution flow */
-       float     dca;        /* cut on dca between the two tracks */
-       float     dcaxi;      /* cut on dca of casc. from event vertex */
-       float     dlen;       /* cut on dist. of decay from prim. vertex */
-       float     dmass;      /* mass cut around m0 if necessary. */
-       float     fit[3];     /* cut on vertex fit chi^2 */
+       long      pid;        /* logical flag to control usage of global pid */
+       float     dca_max;    /* cut on dca between the two tracks */
+       float     bxi_max;    /* cut on impact param. of xi from prim. vertex */
+       float     rv_min;     /* cut on min. dist. of decay from prim. vertex */
+       float     rv_max;     /* cut on max. dist. of decay from prim. vertex */
+       float     dmass;      /* v0 mass cut +/- [dmass] */
+       float     bsum_v0;    /* cut on sum of v0 daught. impact param. bp+bn */
+       float     pchisq;     /* cut on chi^2 probability of vertex fit*/
    } ;
-/*  Last mod. for exi_exipar: $Date: 1997/12/31 14:33:28 $ */
+/*  Last mod. for exi_exipar: $Date: 1999/02/11 14:58:35 $ */
 
