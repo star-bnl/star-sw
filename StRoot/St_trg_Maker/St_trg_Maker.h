@@ -1,6 +1,6 @@
-// $Id: St_trg_Maker.h,v 1.15 2003/01/16 13:32:26 ward Exp $
+// $Id: St_trg_Maker.h,v 1.16 2003/01/16 13:32:30 ward Exp $
 // $Log: St_trg_Maker.h,v $
-// Revision 1.15  2003/01/16 13:32:26  ward
+// Revision 1.16  2003/01/16 13:32:30  ward
 // Accomodation of the new trgStructures.h.
 //
 // Revision 1.14  2002/02/19 18:34:44  ward
@@ -85,7 +85,7 @@ class St_trg_Maker : public StMaker {
    Bool_t drawinit;
    StDAQReader *fVictorPrelim; //!
    StTRGReader *fVictor;       //!
-// static Char_t  m_VersionCVS = "$Id: St_trg_Maker.h,v 1.15 2003/01/16 13:32:26 ward Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_trg_Maker.h,v 1.16 2003/01/16 13:32:30 ward Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
    void dumpDataToScreenAndExit    ();
@@ -139,7 +139,7 @@ class St_trg_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.15 2003/01/16 13:32:26 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.16 2003/01/16 13:32:30 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_trg_Maker, 1)   //StAF chain virtual base class for Makers
 };

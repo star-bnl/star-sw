@@ -1,6 +1,6 @@
-// $Id: St_trg_Maker.cxx,v 1.38 2003/01/16 13:32:26 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.39 2003/01/16 13:32:30 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
-// Revision 1.38  2003/01/16 13:32:26  ward
+// Revision 1.39  2003/01/16 13:32:30  ward
 // Accomodation of the new trgStructures.h.
 //
 // Revision 1.37  2002/04/09 00:01:37  ward
