@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StHbtMaker.cxx,v 1.11 2001/09/05 20:40:42 laue Exp $
+ * $Id: StHbtMaker.cxx,v 1.12 2003/01/31 20:29:37 magestro Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHbtMaker.cxx,v $
+ * Revision 1.12  2003/01/31 20:29:37  magestro
+ * Small change to eliminate compiler warning
+ *
  * Revision 1.11  2001/09/05 20:40:42  laue
  * Updates of the hbtMuDstTree microDSTs
  *
@@ -69,10 +72,11 @@ ClassImp(StHbtMaker)
 //_____________________________________________________________________________
 
     
-StHbtMaker::StHbtMaker(const char*name, const char * title) : mDebug(0) 
+StHbtMaker::StHbtMaker(const char*name, const char * title) : 
 #ifdef __ROOT__
-, StMaker(name,title)
+  StMaker(name,title) ,
 #endif
+mDebug(0) 
 {
   // StHbtMaker - constructor
   mHbtManager = new StHbtManager;
