@@ -1,5 +1,8 @@
-* $Id: tpham.F,v 1.49 1998/02/09 20:11:01 sakrejda Exp $
+* $Id: tpham.F,v 1.50 1998/02/20 22:18:43 sakrejda Exp $
 * $Log: tpham.F,v $
+* Revision 1.50  1998/02/20 22:18:43  sakrejda
+* tsspar.v_drift replaced with a call to tgc_drift_velocity
+*
 * Revision 1.49  1998/02/09 20:11:01  sakrejda
 * Test mailing list
 *
@@ -168,6 +171,8 @@ C      - Change to real data approach - i.e. every pad can have a different
 C        z calibration.  For now do it by converting every pixel to z
 C        when passing the cluster time averages to tph_weighted_mean.
 C
+C     19Feb1998-IMS
+C     replaced tsspar.v_drift by a call to tgc_drift_velocity
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
@@ -239,7 +244,12 @@ c
         real mu3(max_hits_in_cluster) ! 3rd moment of hit (skewness)
         real mu4(max_hits_in_cluster) ! 4th moment of hit (kurtosis)
 	real mu5(max_hits_in_cluster) ! Number of pads for hit
-
+C-----------------------------------------------------------------------
+        real dvel                     !drift velocity
+        real dummy1                   !it is what it says
+        integer tgc_drift_velocity    !function that returns as a first
+c                                     !argument the drift velocity
+c                                     !two next arguments dummy             
 C-----------------------------------------------------------------------
         data first/.true./
         data pads_per_row
@@ -362,9 +372,17 @@ c     22jun95 mal
 c     the offset is shown to be (notebook2 p110, + files..) (n+1)*tau, where
 c     n is the (effective) number of stages in the amplifier, and tau is the
 c     (effective) time constant.  For STAR, n=2, and tau is set by tss.
+c             replace tsspar(1).v_drift by a call to
+c             tgc_drift_velocity call, should be figured out and properly
+c             fixed by having this call in the initialisation phase
+              istatus = tgc_drift_velocity(dvel,dummy1,dummy1)
               if (tclpar(1).tfit.eq.0) ! average value used
      +             invec(3) = invec(3) - 
-     +             3.0*tsspar(1).tau*tsspar(1).v_drift
+c                  the following line was commented out and replaced by
+c                  one line after that
+c                  iwona sakrejda
+c     +             3.0*tsspar(1).tau*tsspar(1).v_drift
+     +             3.0*tsspar(1).tau*dvel* 10.0e-6
               
               
               istatus = tgc_row_to_y(float(irow),
