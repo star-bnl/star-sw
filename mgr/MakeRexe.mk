@@ -1,5 +1,8 @@
-# $Id: MakeRexe.mk,v 1.13 1999/02/19 01:12:07 fisyak Exp $
+# $Id: MakeRexe.mk,v 1.14 1999/02/20 19:39:55 fisyak Exp $
 # $Log: MakeRexe.mk,v $
+# Revision 1.14  1999/02/20 19:39:55  fisyak
+# Take out ROOT New library
+#
 # Revision 1.13  1999/02/19 01:12:07  fisyak
 # Add xt
 #
@@ -90,7 +93,7 @@ endif
 
 
 #DOEXE  = $(GSC) $(GST_DIR)/main/acmain.c -o $(EXE_DIR)/$(TARGET) $(FILES_O)
-DOEXE  = $(GSC)  $(FILES_O)
+DOEXE  = $(GSC)
 
 
 ifdef STAF
@@ -109,7 +112,9 @@ endif
 
 ALL_EXE_LIBS +=	`cernlib geant321 pawlib graflib/X11 packlib mathlib kernlib`
  
-ROOTLIBS      = -L$(ROOTSYS)/lib -lRint -lNew -lBase -lCint -lClib -lCont -lFunc \
+#ROOTLIBS      = -L$(ROOTSYS)/lib -lRint -lNew -lBase -lCint -lClib -lCont -lFunc \
+#
+ROOTLIBS      = -L$(ROOTSYS)/lib -lRint  -lBase -lCint -lClib -lCont -lFunc \
                 -lGraf -lGraf3d -lHist -lHtml -lMatrix -lMeta -lMinuit -lNet \
                 -lPostscript -lProof -lTree -lUnix -lZip
 ROOTGLIBS     = -lGpad -lGui -lGX11 -lX3d
@@ -124,11 +129,12 @@ ALL_EXE_LIBS += -lXpm $(FLIBS) $(CLIBS)
 #.SILENT:
 .SUFFIXES:
 .SUFFIXES:  .o .g .f .c .cc .cxx   .F
-
-
-
+#all: Root.exe root4star 
+all: root4star 
+Root.exe: $(FILES_O) 
+	$(DOEXE) $(ALL_DEPS) $(ALL_EXE_LIBS) -o $(EXE_DIR)/$(notdir $(TARGET))  
 root4star: $(FILES_O) $(STEVENT_OBJS)
-	$(DOEXE) $(STEVENT_OBJS) $(ALL_EXE_LIBS) -o $(EXE_DIR)/$(notdir $(TARGET))  
+	$(DOEXE) $(ALL_DEPS) $(ALL_EXE_LIBS) -o $(EXE_DIR)/$(notdir $(TARGET))  
 #
 #
 #
