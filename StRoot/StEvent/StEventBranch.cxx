@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventBranch.cxx,v 2.3 2002/01/27 23:48:54 perev Exp $
+ * $Id: StEventBranch.cxx,v 2.4 2004/01/30 20:24:03 perev Exp $
  *
  * Author: Victor Perev, May 2001
  ***************************************************************************
@@ -61,7 +61,7 @@ void StEventBranch::Synchro(int toMain)
      if (toMain) {
        if (so) cnt.erase(cnt.begin()+icl);
        to = os->GetObject();
-       if(to) cnt.push_back((StObject*)to);
+       if(to) cnt.StObjArray::push_back((StObject*)to);
        os->SetObject(0,0);
      } else {
        os->SetObject(so,0);
