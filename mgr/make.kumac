@@ -1,4 +1,16 @@
-macro make pam=pams/tpc/tpt makefile=$STAR_ROOT/mgr/Makefile
+macro make 
+for pam in [*]
+  t = $word([pam],1,1,'/')
+  if $index([t],'pams')<1 then
+    p = pams/[pam]
+  else
+    p = [pam]
+  endif 
+  exec makes pam=[p]
+endfor
+return
+**************************************************
+macro makes pam=pams/tpc/tpt makefile=$STAR_ROOT/mgr/Makefile
 cut = ' \( -type d -a ! -name CVS -a ! -name idl _
                    -a ! -name exa -a ! -name inc _
                    -a ! -name "src/*" -a ! -name doc _
@@ -45,7 +57,7 @@ macro ld_standard
   sl = $fexist([slib])
   if [sl]=1 then
      message  '================ Load standard shared library:' [slib] '================'
-     gexec [slib]
+     gexec [slib]; for/call [p]_init;
   endif
 return
 **************************************************
@@ -62,10 +74,18 @@ macro ld_private
       sl = $fexist([slib])
       if [sl]=1 then
          message  '================ Load private shared library:' [slib] '================'
-         gexec [slib]
+         gexec [slib]; for/call [p]_init;
       endif
     else
          message 'No modules in ' [pam]
     endif
 return
 endkumac
+**************************************************
+macro gload
+on error exitm
+*call  csrmsl($quote([1]))
+*shell make [1].sl
+*call  [1]
+gexec [1]
+exitm

@@ -1,10 +1,13 @@
 #  $Log: star_login.csh,v $
+#  Revision 1.3  1998/01/30 12:42:16  fisyak
+#  Save changes before moving to SL97b
+#
 #  Revision 1.2  1998/01/01 03:28:13  fisyak
 #  New make.kumac
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/01/01 03:28:13 $ 
+#             Last modification $Date: 1998/01/30 12:42:16 $ 
 #!/usr/bin/csh
 # star_login.csh
 #------------------------------------------------------------------#
@@ -13,15 +16,7 @@
 #------------------------------------------------------------------#
 umask 002
 set ECHO = 1
-#if (($?STAR_LIB == 1) || ($?prompt == 0)) set ECHO = 0 
-
-#
-#       echo STAR logo 
-#
-if ($ECHO) then
-cat /afs/rhic/star/login/logo 
-endif
-
+if (($?STAR_LIB == 1) || ($?prompt == 0)) set ECHO = 0 
 #
 #       determine the processor architecture...
 #
@@ -31,13 +26,15 @@ set hostname_command = "hostname"
 # Setting some STAR variables
 #
 ########################################################################
-setenv STAR_DIR  /afs/rhic/star/packages;        if ($ECHO) echo   "Setting up STAR_DIR  = $STAR_DIR"
-setenv STAR_ROOT $STAR_DIR/dev;           if ($ECHO) echo   "Setting up STAR_ROOT = $STAR_ROOT"
+                                                  if ($ECHO) cat    /afs/rhic/star/login/logo 
+setenv STAR_DIR  /afs/rhic/star/packages;         if ($ECHO) echo   "Setting up STAR_DIR  = $STAR_DIR"
+setenv STAR_ROOT $STAR_DIR/dev;                   if ($ECHO) echo   "Setting up STAR_ROOT = $STAR_ROOT"
 source $STAR_ROOT/mgr/STAR_SYS;    
-setenv STAR_LIB $STAR_ROOT/lib/$STAR_SYS; if ($ECHO) echo   "Setting up STAR_LIB  = $STAR_LIB"
-setenv STAR_BIN $STAR_ROOT/bin/$STAR_SYS; if ($ECHO) echo   "Setting up STAR_BIN  = $STAR_BIN"
-setenv STAR_PAMS $STAR_ROOT/pams;         if ($ECHO) echo   "Setting up STAR_PAMS = $STAR_PAMS"
-setenv CVSROOT $STAR_DIR/repository;      if ($ECHO) echo   "Setting up CVSROOT   = $CVSROOT"
+setenv STAR_LIB  $STAR_ROOT/lib/${STAR_SYS_HOST}; if ($ECHO) echo   "Setting up STAR_LIB  = $STAR_LIB"
+setenv STAR_BIN  $STAR_ROOT/bin/${STAR_SYS_HOST}; if ($ECHO) echo   "Setting up STAR_BIN  = $STAR_BIN"
+setenv STAR_PAMS $STAR_ROOT/pams;                 if ($ECHO) echo   "Setting up STAR_PAMS = $STAR_PAMS"
+setenv CVSROOT   $STAR_DIR/repository;            if ($ECHO) echo   "Setting up CVSROOT   = $CVSROOT"
+setenv STAR_REF  /afs/rhic/star/starlib/ref;      if ($ECHO) echo   "Setting up STAR_REF  = $STAR_REF"
 #
 # Setting WWW STAR homepage
 #
