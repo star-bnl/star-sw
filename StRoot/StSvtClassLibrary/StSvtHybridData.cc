@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridData.cc,v 1.3 2000/11/30 20:39:12 caines Exp $
+ * $Id: StSvtHybridData.cc,v 1.4 2001/04/30 22:20:42 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridData.cc,v $
+ * Revision 1.4  2001/04/30 22:20:42  caines
+ * Add Anode to setList fn so works with ZSP data
+ *
  * Revision 1.3  2000/11/30 20:39:12  caines
  * Changed to allow us of database
  *
@@ -148,7 +151,7 @@ int StSvtHybridData::getListSequences(int listID, int& nSequence, StSequence*&  
 {
   nSequence = 0;
   sequence = NULL;
-  if(listID >= 0 && listID <= nAnodes)
+  if(listID >= 0 && listID < nAnodes)
     {
       nSequence = nSeq[listID];
       sequence = seq[listID];
@@ -156,15 +159,19 @@ int StSvtHybridData::getListSequences(int listID, int& nSequence, StSequence*&  
   return 0;
 }
 
-int StSvtHybridData::setListSequences(int listID, int& nSequence, StSequence* tempSeq)
+int StSvtHybridData::setListSequences(int listID, int Anode, int& nSequence, StSequence* tempSeq)
 {  
-  if (nAnodes == 0)
+  if (nAnodes == 0){
     nAnodes = 240;
+    anodeList = new int[nAnodes];
+  }
 
+  anodeList[listID] = Anode;
   if (!nSeq) {
     nSeq = new int[nAnodes];
     for(int i=0; i<nAnodes; i++)
       nSeq[i] = 0;
+      
   }
 
   if (!seq)
