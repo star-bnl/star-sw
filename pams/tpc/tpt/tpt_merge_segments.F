@@ -1,5 +1,8 @@
-* $Id: tpt_merge_segments.F,v 1.4 1998/04/09 23:11:36 sakrejda Exp $
+* $Id: tpt_merge_segments.F,v 1.5 1998/06/01 06:41:01 sakrejda Exp $
 * $Log: tpt_merge_segments.F,v $
+* Revision 1.5  1998/06/01 06:41:01  sakrejda
+* merging improved so it does not create ghost tracks
+*
 * Revision 1.4  1998/04/09 23:11:36  sakrejda
 * changes from Joachim Nystrand added
 *
@@ -70,21 +73,21 @@ c The array lpnt will point to each of these tracks in order.
       mpnt = mxpnt
       ltot = 0
       do i=1,track_h.nok
-         if(trk(i).flag.ge.0) then
+         if(trk(i).flag.ge.0.and.abs(trk(i).p(2)).lt.120.0) then
             ltot=ltot+1
             merge(ltot).rad=abs(trk(i).p(2))
             merge(ltot).lpnt=i
          endif
       enddo
-      iret=tls_Quick_Sort_r(track_h.nok, merge(1).rad, merge(2).rad, merge)
+      iret=tls_Quick_Sort_r(ltot, merge(1).rad, merge(2).rad, merge)
 
 
 c Minimum difference values for merging tracks 
 c (min(1)=rr,min(2)=average of acent & bcent, min(3)=ltan, min(4)=phi0):
 c Adjust these parameters to change the merging criteria.
       min(1)=0.1   ! radius ratio
-      min(2)=0.1   ! center average
-      min(3)=0.05  ! tanl
+      min(2)=0.02! center average
+      min(3)=0.02 ! tanl
       min(4)=0.5   ! phi0 (deactivated)
       min(5)=10.0  ! Cut for avoiding merging parallel tracks 
 
@@ -116,8 +119,7 @@ c            if ( (varb.lt.min(2)) .and. (qij.gt.0.) ) then
             if ( (varb.lt.min(2))) then
 c               Now compare their dip angles.
                 varc=abs(abs(trk(lxi).p(7))-abs(trk(lxj).p(7)))
-                if (abs(abs(trk(lxi).p(7))-abs(trk(lxj).p(7))).lt.
-     +          min(3)) then
+                if (abs(varc).lt.min(3)) then
 c                 For the tracks that survive, these two cuts, find 
 c                 their endpoints.
 c                 This is to make sure that two parallel tracks 
