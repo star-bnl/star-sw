@@ -18,8 +18,10 @@ class StiKalmanTrackFinder : public StiTrackFinder
     //inherited
     virtual void reset();
     virtual void findTracks();
-    virtual bool isValid(bool debug=false) const; //Check if everything is kosher    
-    virtual void doNextAction();
+    virtual bool isValid(bool debug=false) const; //Check if everything is kosher
+    
+    virtual void doTrackFit();
+    virtual void doTrackFind();
     virtual bool hasMore();
     
     virtual void setElossCalculated(bool option);
@@ -50,7 +52,6 @@ protected:
     int maxContiguousNullCount;
 
 };
-
 
 #endif
 

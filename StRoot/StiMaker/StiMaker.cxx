@@ -68,7 +68,7 @@ ClassImp(StiMaker)
   
 StiMaker::StiMaker(const Char_t *name) : StMaker(name),
 					 //flags
-					 mSimulation(false), mUseGui(true), mSeedFinderType(kUndefined),
+					 mSimulation(false), mUseGui(true), mDoTrackFit(true), mSeedFinderType(kUndefined),
 					 //Containers
 					 mhitstore(0), mdetector(0), mtrackstore(0),
 					 //Factories
@@ -347,7 +347,7 @@ Int_t StiMaker::Make()
 	//Now we can loop, if we're not using the gui
 	if (mUseGui==false) {
 	    while (mtracker->hasMore()) {
-		mtracker->doNextAction();
+		doNextAction();
 	    }
 	}
 
@@ -372,7 +372,12 @@ void StiMaker::printStatistics() const
 void StiMaker::doNextAction()
 {
     //Add call to next tracker action here
-    mtracker->doNextAction();
+    if (mDoTrackFit==true) {
+	mtracker->doTrackFit();
+    }
+    else {
+	mtracker->doTrackFind();
+    }
     return;
 }
 

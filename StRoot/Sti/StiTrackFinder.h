@@ -24,7 +24,6 @@ public:
     virtual void findTracks()=0; //Do tracking
     virtual void reset()=0; //Full internal reset
     virtual bool isValid(bool debug=false) const = 0; //Check if everything is kosher
-    virtual void doNextAction() = 0;
     
     //_accessor methods_____________________________________________
     void setTrackSeedFinder(StiSeedFinder * finder);

@@ -79,38 +79,71 @@ bool StiKalmanTrackFinder::hasMore()
     return trackSeedFinder->hasMore();
 }
 
-void StiKalmanTrackFinder::doNextAction()
+void StiKalmanTrackFinder::doTrackFit()
 {
     try {
 	StiKalmanTrack* track = 0;
 	if (trackSeedFinder->hasMore())	{ //Redundant check, but it protectes against naive calls
 	    track = trackSeedFinder->next();
 	    if (!track) {
-		cout <<"StiKalmanTrackFinder::doNextAction()\t Track==0. return "
+		cout <<"StiKalmanTrackFinder::doTrackFit()\t Track==0. Abort"
 		     <<endl;
 		return;
 	    }
 	    else {
-		cout <<"StiKalmanTrackFinder::doNextAction()\t Got Valid track"<<endl;
+		cout <<"StiKalmanTrackFinder::doTrackFit()\t Got Valid track"<<endl;
+
 		StiKalmanTrackNode * f = track->getFirstNode();
 		StiKalmanTrackNode * ccc = dynamic_cast<StiKalmanTrackNode *>(f->getFirstChild());
 		if (ccc==0) {
-		    cout <<"StiKalmanTrackFinder::doNextAction(): ERROR!\ttrack->getFirstChild() Failed! Abort"<<endl;
+		    cout <<"StiKalmanTrackFinder::doTrackFit(): ERROR!\ttrack->getFirstChild() Failed! Abort"<<endl;
 		    return;
 		}
-		fitInward(track->getFirstNode());
 		fitInward(ccc);
-		
+		//if (trackFilter->accept(track)) 
 		trackContainer->push_back(track);
 		track->update();  //This updates the track on the display
 	    }
 	}
+	
 	else {
 	    cout <<"\ttrackSeedFinder->hasMore()==false"<<endl;
 	}
     }
+    
     catch (Exception & e) {
-	cout << "StiKalmanTrackFinder::doNextAction() - Exception: " << e << endl;
+	cout << "StiKalmanTrackFinder::doTrackFit() - Exception: " << e << endl;
+    }
+}
+
+void StiKalmanTrackFinder::doTrackFind()
+{
+    try {
+	StiKalmanTrack* track = 0;
+	if (trackSeedFinder->hasMore())	{ //Redundant check, but it protectes against naive calls
+	    track = trackSeedFinder->next();
+	    if (!track) {
+		cout <<"StiKalmanTrackFinder::doTrackFind()\t Track==0. Abort"
+		     <<endl;
+		return;
+	    }
+	    else {
+		cout <<"StiKalmanTrackFinder::doTrackFind()\t Got Valid track"<<endl;
+		findTrack(track);
+		//if (trackFilter->accept(track)) 
+		trackContainer->push_back(track);
+		
+		track->update();  //This updates the track on the display
+	    }
+	}
+	
+	else {
+	    cout <<"\ttrackSeedFinder->hasMore()==false"<<endl;
+	}
+    }
+    
+    catch (Exception & e) {
+	cout << "StiKalmanTrackFinder::doTrackFind() - Exception: " << e << endl;
     }
 }
 
