@@ -8,7 +8,7 @@ use Sys::Hostname;
 my $hostname     = hostname();
 my $dir_log      = "/disk00001/star/MDC3/test";
 my $dir_sim      = "../sum";
-my $dir_archive  = "../log";   
+my $dir_archive  = "../archive";   
 my @set ;
 my @list;      
 my $job_log;
@@ -22,8 +22,8 @@ foreach my $file (@list) {
            if( $ltime > 1200){ 
              parse_log($file);
              timestamp($file);
-         $dummy = `mv $file_sum ../sum`
-#         $dummy = `mv $file ../log`;   
+         $dummy = `mv $file_sum ../sum`;
+         $dummy = `mv $file ../archive`;   
            }             
     }
 exit(0);
@@ -62,13 +62,14 @@ sub parse_log($) {
      chop $filename;
   $file_sum = $filename . $tag;
   my $input_fn;
-  my $command_option;
+  my $command_string;
   my $lib_version;  
   my $record_run_options = 0;
   my $run_option_length = 0;
   my $run_option_string;
+  my $error_flag = 0;
   my $start_line = "";
-  my $num_event;
+  my $last_event;
   my $line; 
   my $jrun = "Run not completed";
   my $segmentation_violation;
@@ -106,12 +107,14 @@ sub parse_log($) {
   foreach $line (@logfile) {
      chop $line ;
       $num_line++;
+  $error_flag = 0;
     
 
-    # get command option
-    if ( (! $command_option) && $line =~ /Processing (bfc\.C.*)/ ) {
-      $command_option = $1;
-      $command_option =~ s/\.{3}//;
+    # get command string
+    if ( (! $command_string) && $line =~ /Processing (bfc\.C.*)/ ) {
+      $command_string = $1;
+      # strip trailing ellipsis...
+      $command_string =~ s/\.{3}//;
     }
     
     # get library version
@@ -126,7 +129,7 @@ sub parse_log($) {
       $record_run_options = 0;
     }
     
-    # concatenate run options
+    # concatenate run options; skip first time through when lib_version is detected
     $record_run_options and $run_option_length and $run_option_string .= $line."\n";
     $record_run_options and $run_option_length++;
 
@@ -148,9 +151,9 @@ sub parse_log($) {
        }
       }
   
-    # get  number of events
+    # get last event number
     if ( $line =~ /Done with Event no. ([0-9]+)\W+([0-9]+)/ ) {
-      $num_event = $1;
+      $last_event = $1;
 
     } 
 
@@ -181,8 +184,8 @@ sub parse_log($) {
   print ("Library version:", $lib_version, "\n");
 
 
-  ! defined($command_option) and $command_option = $not_found_string;
-  print ("Command string:", $command_option, "\n");
+  ! defined($command_string) and $command_string = $not_found_string;
+  print ("Command string:", $command_string, "\n");
 
 
    ! defined($input_fn) and $input_fn = $not_found_string;
@@ -194,9 +197,9 @@ sub parse_log($) {
    print (">>>>>>>>>>>>  Run options: <<<<<<<<<<<< \n", $run_option_string, "\n");
    print '-' x 80, "\n";
   
-   ! defined($num_event) and $num_event = $not_found_string; 
+   ! defined($last_event) and $last_event = $not_found_string; 
  
-   print ("Number of Events Done:  ", $num_event, "\n");
+   print ("Number of Events Done:  ", $last_event, "\n");
 
    print '-' x 80, "\n"; 
 
@@ -214,7 +217,7 @@ sub parse_log($) {
 
    for ($i = 1; $i < $last_maker; $i++){
 
-   $msize_aver[$i] = $maker_size[$i]/($num_event * 1000);
+   $msize_aver[$i] = $maker_size[$i]/($last_event * 1000);
    printf("%s :       Memory size =  %10.3f  MB; \n", $maker_name[$i], $msize_aver[$i]);
    }        
 }

@@ -1,8 +1,5 @@
-* $Id: tph_fit_pulse.F,v 1.2 1999/07/17 00:32:07 genevb Exp $
+* $Id: tph_fit_pulse.F,v 1.1 1998/01/27 00:49:16 fisyak Exp $
 * $Log: tph_fit_pulse.F,v $
-* Revision 1.2  1999/07/17 00:32:07  genevb
-* Use StMessMgr
-*
 * Revision 1.1  1998/01/27 00:49:16  fisyak
 * Split sources
 *
@@ -71,6 +68,7 @@ c
 c
 	parameter(N=2)          ! for STAR
 
+        integer id                    ! Message ID
         integer imax                  ! Time bucket corresponding to peak
 	integer istart                ! First pad
 	integer npts                  ! Number of TDC values for hit
@@ -145,7 +143,10 @@ c       B = (rat)**(1.0/float(N))	! for arbitrary N
 
         return
  99     continue                ! failure...
-        call StWarning('TPH_FIT_PULSE failure; going to mean')
+        id=0
+*        call message('TPH_FIT_PULSE failure; going to mean',
+*     +       1,id)
+         write(6,*) 'TPH_FIT_PULSE failure; going to mean'
 c this should be fixed before using for real-----v
         call tph_weighted_mean(tseq, aseq,
      +       daseq, daseq,

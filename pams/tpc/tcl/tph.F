@@ -1,8 +1,5 @@
-* $Id: tph.F,v 1.15 1999/07/17 00:32:05 genevb Exp $
+* $Id: tph.F,v 1.14 1999/04/07 19:52:04 hardtke Exp $
 * $Log: tph.F,v $
-* Revision 1.15  1999/07/17 00:32:05  genevb
-* Use StMessMgr
-*
 * Revision 1.14  1999/04/07 19:52:04  hardtke
 * fix last_cluster_index setting
 *
@@ -326,8 +323,6 @@ C-----------------------------------------------------------------------
 C-----------------------------------------------------------------------
 	save first
 C-----------------------------------------------------------------------
-        character*132 m132
-C-----------------------------------------------------------------------
 c
 c       set status
 c
@@ -382,13 +377,11 @@ c ??? Check index?
      +,				    ipad_hi, itdc_lo, itdc_hi)
             endif
               if(itdc_hi.gt.512) then
-                 write(m132,*) itdc_hi,'itdc_hi'
-                 call StMessage(m132)
+                 write(6,*) itdc_hi,'itdc_hi'
                  itdc_hi=512
               endif
               if(itdc_lo.lt.1) then
-                 write(m132,*) itdc_lo,'itdc_lo'
-                 call StMessage(m132)
+                 write(6,*) itdc_lo,'itdc_lo'
                  itdc_lo=1
               endif
 
@@ -396,15 +389,13 @@ C Rai: patch from Bill Love, we might have to think of a better way
 C             skip clusters on the end pads.
               if(ipad_lo.eq.1)then
                  if(debug) then
-                    write(m132,1)irow
-                    call StMessage(m132)
+                    write(6,1)irow
                  endif
                  go to 999
  1               format(' TPH - dropping pad 1 cluster in row',i5)
               elseif(ipad_hi.eq.npads)then
                  if(debug) then
-                    write(m132,2)npads,irow
-                    call StMessage(m132)
+                    write(6,2)npads,irow
                  endif
  2               format(' TPH - drop end pad cluster, pad',i5,' row',i5)
                  go to 999
@@ -451,9 +442,8 @@ c  to cluster in TPCLUSTER table....
            DO ihit=1,nhits
               if (tphit_h.nok.ge.tphit_h.maxlen) then
 c ??? Direct write is forbidden
-                 write(m132,*)'TPHIT table full - quitting at cluster',
+                 write(6,*)'TPHIT table full - quitting at cluster',
      +                jtpcl
-                 call StWarning(m132)
                  return
               endif
               tphit_h.nok = tphit_h.nok+1

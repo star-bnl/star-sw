@@ -1,8 +1,5 @@
-* $Id: tph_fit_cluster.F,v 1.3 1999/07/17 00:32:06 genevb Exp $
+* $Id: tph_fit_cluster.F,v 1.2 1999/02/26 22:54:44 sakrejda Exp $
 * $Log: tph_fit_cluster.F,v $
-* Revision 1.3  1999/07/17 00:32:06  genevb
-* Use StMessMgr
-*
 * Revision 1.2  1999/02/26 22:54:44  sakrejda
 * protection against empty clusters added
 *
@@ -150,7 +147,7 @@ c*** skip the neural net for now..... mal 21jun95
      +           irow, isec, ipad_lo, ipad_hi, itdc_lo, itdc_hi)
 c ??? Direct write is forbidden
             if (nhits.gt.max_hits_in_cluster) 
-     +           call StError('TPHAM - array overrun! - fix this!')
+     +           write(6,*)'TPHAM - ERROR! array overrun! - fix this!'
          endif
          if (nhits.eq.0) then
             call tph_fit_isolated_cluster(tclpar, nclspix,

@@ -1,14 +1,11 @@
 
-#ifndef USING_PERSISTENT
-#include "StThreeVector.hh"
-#else
+// #include "StThreeVector.hh"
+// #include "StEvent/StTpcHit.hh"
 #include "StThreeVectorF.hh"
-
-#endif
+#include "StEvent/StTpcHit.h"
 
 #include "StSubDetector.hh"
 #include "StDevice.hh"
-#include "StEvent/StTpcHit.hh"
 #include "StMcEvent/StMcTpcHit.hh"
 
 
@@ -18,7 +15,7 @@
 
 
 
-int TpcLocalTransform(StThreeVector<float>& xgl, int& iSector, int& iPadrow, float& xlocal){
+int TpcLocalTransform(StThreeVectorF& xgl, int& iSector, int& iPadrow, float& xlocal){
     
     // this STINKS - Hopefully this is a placeholder for when we have a "real" database!
     // This tries to follow the code found in
@@ -114,7 +111,7 @@ StSubDetector::~StSubDetector(){
 void StSubDetector::addHit(const StTpcHit* hit){
     
   
-  StThreeVector<float> xglbvec = hit->position();
+  StThreeVectorF xglbvec = hit->position();
   
   int iSector;
   int iPadrow;
@@ -130,7 +127,7 @@ void StSubDetector::addHit(const StTpcHit* hit){
 
 //__________________________________
 void StSubDetector::addHit(const StMcTpcHit* hit){
-  StThreeVector<float> xglbvec = hit->position();
+  StThreeVectorF xglbvec = hit->position();
   int iSector;
   int iPadrow;
   float xLocal;

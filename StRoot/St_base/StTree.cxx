@@ -500,9 +500,11 @@ StTree *StTree::GetTree(TFile *file, const char *treeName)
 void StTree::SetBaseName(const char *baseName)
 {
   fBaseName = baseName;
-//  fBaseName = gSystem->BaseName((const char*)fBaseName);
-  int idot  = fBaseName.Index(".");
-  if (idot>0) fBaseName.Remove(idot);
+  const char *dot = strchr(baseName,'.');
+  if (!dot) return;
+  if (isdigit(dot[1])) dot = strchr(dot+1,'.');
+  if (!dot) return;
+  fBaseName.Remove(dot-baseName);
 }  
   
 //_______________________________________________________________________________

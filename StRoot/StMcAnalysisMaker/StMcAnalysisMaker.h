@@ -1,6 +1,10 @@
 /**********************************************
  *
- * StMcAnalysisMaker.h
+ * $Id: StMcAnalysisMaker.h,v 1.2 1999/07/28 20:27:30 calderon Exp $
+ * $Log: StMcAnalysisMaker.h,v $
+ * Revision 1.2  1999/07/28 20:27:30  calderon
+ * Version with SL99f libraries
+ *
  *
  * Examples to use the structures from
  * StMcEvent and StAssociationMaker
@@ -58,6 +62,9 @@ private:
     static const Float_t mMinDeltaZ;
     static const Float_t mMaxDeltaZ;
 
+    virtual const char* GetCVS() const
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcAnalysisMaker.h,v 1.2 1999/07/28 20:27:30 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StMcAnalysisMaker, 1)
 

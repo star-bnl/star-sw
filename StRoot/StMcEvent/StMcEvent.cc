@@ -1,20 +1,25 @@
 /***************************************************************************
  *
- * StMcEvent.cc
+ * $Id: StMcEvent.cc,v 1.2 1999/07/28 20:27:32 calderon Exp $
+ * $Log: StMcEvent.cc,v $
+ * Revision 1.2  1999/07/28 20:27:32  calderon
+ * Version with SL99f libraries
  *
  *
  **************************************************************************/
-#include "StThreeVector.hh"
+#include "StThreeVectorF.hh"
+
 #include "StMcEvent/StMcEvent.hh"
 #include "StMcEvent/StMcVertex.hh"
 #include "StMcEvent/StMcTrack.hh"
 #include "StMcEvent/StMcTpcHit.hh"
 #include "StMcEvent/StMcFtpcHit.hh"
 #include "StMcEvent/StMcSvtHit.hh"
+
 #include <string>
 #include <utility>
 
-// static const char rcsid[] = "$Id: StMcEvent.cc,v 1.1.1.1 1999/07/13 18:19:16 uid2620 Exp $";
+// static const char rcsid[] = "$Id: StMcEvent.cc,v 1.2 1999/07/28 20:27:32 calderon Exp $";
 
 StMcEvent::StMcEvent()
 {   cout << "Inside StMcEvent Constructor" << endl;
@@ -34,7 +39,7 @@ StMcEvent::StMcEvent(g2t_event_st& evTable) {
     mPhiReactionPlane = evTable.phi_impact;
     mTriggerTimeOffset = evTable.time_offset;
 
-    StThreeVector<double> v;
+    StThreeVectorF v;
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
     cout << "Ignore this line; required to make Sun's lousy compiler work " << v << endl;
     string dummyString;

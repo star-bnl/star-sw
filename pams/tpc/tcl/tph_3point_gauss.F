@@ -1,8 +1,5 @@
-* $Id: tph_3point_gauss.F,v 1.2 1999/07/17 00:32:06 genevb Exp $
+* $Id: tph_3point_gauss.F,v 1.1 1998/01/27 00:49:15 fisyak Exp $
 * $Log: tph_3point_gauss.F,v $
-* Revision 1.2  1999/07/17 00:32:06  genevb
-* Use StMessMgr
-*
 * Revision 1.1  1998/01/27 00:49:15  fisyak
 * Split sources
 *
@@ -78,6 +75,7 @@ c
 C-----------------------------------------------------------------------
 c local variables:
 c
+        integer id                    ! Message ID
 	integer imax                  ! Pad with largest signal
 	integer istart                ! First pad
 	integer npts                  ! Number of pads involved in hit
@@ -103,15 +101,19 @@ c Find pad with largest signal:
 	imax = lvmax(y(ipad_lo),npts) + ipad_lo - 1
         if (imax.eq.1) then             ! maximum at first point
            if (y(2).le.y(3)) then
+              id = 0
               tph_3point_gauss = -1
-              call StError('TPH_3POINT_GAUSS bad shape')
+*              call message('TPH_3POINT_GAUSS bad shape', 1,id)
+              write(6,*) 'TPH_3POINT_GAUSS bad shape'
               return
            endif
            istart = 1
 	else if (imax.eq.npads) then ! maximum at last point
            if (y(npads-1).le.y(npads-2)) then
+              id = 0
               tph_3point_gauss = -1
-              call StError('TPH_3POINT_GAUSS bad shape')
+*              call message('TPH_3POINT_GAUSS bad shape', 1,id)
+              write(6,*) 'TPH_3POINT_GAUSS bad shape'
               return
            endif
            istart = npads - 2
@@ -131,15 +133,19 @@ c Find pad with largest signal:
 C RRB: Slightly recode to avoid direct comparison of floating pt. numbers
 	delta = x(istart+1) - x(istart)
 	if (ABS(delta-1.).gt.1.E-7) then
-	  call StError('TPH_3POINT_GAUSS unexpected delta .ne. 1')
+	  id = 0
+*	  call message('TPH_3POINT_GAUSS unexpected delta .ne. 1', 1,id)
+	  write(6,*) 'TPH_3POINT_GAUSS unexpected delta .ne. 1'
           tph_3point_gauss = -1
 	  return
 	endif
 
 	r213 = log(y2*y2/(y1*y3))
         if (r213.le.0.0) then
+           id = 0
            tph_3point_gauss = -1
-           call StError('TPH_3POINT_GAUSS bad shape - r213')
+*           call message('TPH_3POINT_GAUSS bad shape - r213', 1,id)
+            write(6,*) 'TPH_3POINT_GAUSS bad shape - r213'
            return
 
 ********************** let's try to take it out....**********************

@@ -1,6 +1,10 @@
 /*************************************************
  *
- * StAssociationMaker.cxx
+ * $Id: StAssociationMaker.cxx,v 1.4 1999/07/28 20:27:23 calderon Exp $
+ * $Log: StAssociationMaker.cxx,v $
+ * Revision 1.4  1999/07/28 20:27:23  calderon
+ * Version with SL99f libraries
+ *
  * Revision 1.4  1999/07/28 20:27:23  calderon
  * Version with SL99f libraries
  *
@@ -8,17 +12,11 @@
  *************************************************/
 
 #include <iostream.h>
-//#include <cmath>
 #include <stdlib.h>
-//#include "TStyle.h"
-//#include "TCanvas.h"
-//#include "TH1.h"
-//#include "TH2.h"
 using std::string;
 using std::vector;
 #include "StTrackPairInfo.hh"
 
-//#include "StPhysicalHelixD.hh"
 #include "SystemOfUnits.h"
 #include "StChain/StChain.h"
 
@@ -33,7 +31,7 @@ using std::vector;
 #include "StTpcLocalHit_recon.hh"
 #include "StTrackPairInfo.hh"
 
-//#define USING_PERSISTENT
+#define USING_PERSISTENT
 #ifndef USING_PERSISTENT
 #include "StThreeVector.hh"
 
@@ -45,16 +43,16 @@ using std::vector;
 #include "StEvent/StVertex.hh"
 #include "StEvent/StVertexCollection.hh"
 
-#include "StEventReaderMaker/StEventReaderMaker.h"
 #else
+#include "StThreeVectorF.hh"
+#include "St_DataSetIter.h"
 #include "StEvent/StEvent.h"
 #include "StEvent/StTpcHit.h"
 #include "StEvent/StGlobalTrack.h"
 #include "StEvent/StVertex.h"
 
-#include "StEventMaker/StEventMaker.h"
+
 #endif
-#include "StThreeVectorF.hh"
 
 #include "StMcEvent/StMcEvent.hh"
 #include "StMcEvent/StMcTpcHit.hh"
@@ -64,6 +62,7 @@ using std::vector;
 #include "StMcEvent/StMcVertex.hh"
 #include "StMcEvent/StMcVertexCollection.hh"
 #include "StEventTypes.h"
+
 #include "StMcEventTypes.hh"
 
 #include "StEventMaker/StEventMaker.h"
@@ -182,7 +181,6 @@ Int_t StAssociationMaker::Finish()
 #ifndef USING_PERSISTENT
     rEvent = ((StEventReaderMaker*) gStChain->Maker("events"))->event();
 #else
-    //rEvent = ((StEventMaker*) gStChain->Maker("events"))->event();
     // Get StEvent
 #endif
     if (!rEvent) cout << "No StEvent!!! " << endl;

@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.21 1999/07/17 00:31:25 genevb Exp $
+// $Id: St_dst_Maker.cxx,v 1.22 1999/07/19 18:20:24 fisyak Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.22  1999/07/19 18:20:24  fisyak
+// Add globtrk2 to dst
+//
 // Revision 1.21  1999/07/17 00:31:25  genevb
 // Use StMessMgr
 //
@@ -64,7 +67,7 @@
 #include "St_dst_summary_param_Table.h"
 #include "St_dst_run_summary_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.21 1999/07/17 00:31:25 genevb Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.22 1999/07/19 18:20:24 fisyak Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -79,7 +82,7 @@ St_dst_Maker::~St_dst_Maker(){
 Int_t St_dst_Maker::Init(){
   static const char *todst[] = {
     "match:",  "globtrk", "globtrk_aux",
-    "primary:","primtrk", "primtrk_aux", "vertex",
+    "primary:","globtrk2", "primtrk", "primtrk_aux", "vertex",
     "v0:",     "dst_v0_vertex","ev0_eval",
     "xi:",     "dst_xi_vertex",
     "kink:",   "kinkVertex",

@@ -3,6 +3,7 @@
  * StMcTrack.cc
  *
  **************************************************************************/
+
 #include "StMcEvent/StMcTrack.hh"
 #include "StMcEvent/StMcVertex.hh"
 #include "StMcEvent/StMcVertex.hh"
@@ -13,7 +14,7 @@
 #include "StarClassLibrary/StParticleTable.hh"
 #include "StarClassLibrary/StParticleDefinition.hh"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 1.1.1.1 1999/07/13 18:15:14 uid2620 Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 1.2 1999/07/28 20:27:36 calderon Exp $";
 
 StMcTrack::StMcTrack() 
 {
@@ -83,7 +84,7 @@ int StMcTrack::operator!=(const StMcTrack& t) const
     return !(t == *this);
 }
 
-void StMcTrack::setMomentum(const StThreeVector<float>& val) { mMomentum = val; }
+void StMcTrack::setMomentum(const StThreeVectorF& val) { mMomentum = val; }
 
 void StMcTrack::setStartVertex(StMcVertex* val) { mStartVertex = val; }
 

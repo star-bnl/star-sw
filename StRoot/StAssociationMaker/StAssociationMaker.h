@@ -1,6 +1,10 @@
 /**********************************************
  *
- * StAssociationMaker.h
+ * $Id: StAssociationMaker.h,v 1.5 1999/07/28 20:27:26 calderon Exp $
+ * $Log: StAssociationMaker.h,v $
+ * Revision 1.5  1999/07/28 20:27:26  calderon
+ * Version with SL99f libraries
+ *
  *
  **********************************************/
 
@@ -108,7 +112,8 @@ private:
     
     Bool_t drawinit;
 
-
+    virtual const char* GetCVS() const
+    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.5 1999/07/28 20:27:26 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StAssociationMaker, 1)
 

@@ -10,14 +10,14 @@
 #include "tables/g2t_svt_hit.h"
 
 class StMcTrack;
-
+class StThreeVectorF;
 #if !defined(ST_NO_NAMESPACES)
 using namespace std;
 #endif
 
 class StMcSvtHit : public StMcHit {
 public:
-    StMcSvtHit(const StThreeVector<float>&,
+    StMcSvtHit(const StThreeVectorF&,
 	     const float, const float,
 	     StMcTrack*);
     StMcSvtHit(g2t_svt_hit_st*);

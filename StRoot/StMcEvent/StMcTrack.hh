@@ -5,16 +5,16 @@
  **************************************************************************/
 #ifndef StMcTrack_hh
 #define StMcTrack_hh 
-#include "StThreeVector.hh"
 #include <algorithm>
+#include "StThreeVectorF.hh"
 
 #include "StMcEvent/StMcFtpcHitCollection.hh"
 #include "StMcEvent/StMcTpcHitCollection.hh"
 #include "StMcEvent/StMcSvtHitCollection.hh"
 #include "StMcEvent/StMcVertexCollection.hh"
 
-//#include "StEvent/StParticle.hh"
 #include "tables/g2t_track.h"
+
 
 class StMcVertex;
 class StParticleDefinition;
@@ -33,7 +33,7 @@ public:
 
     void init();
   // "Get" Methods
-    StThreeVector<float>&  momentum();
+    StThreeVectorF&        momentum();
     StMcVertex*            startVertex();
     StMcVertex*            stopVertex();
     StMcVertexCollection*  intermediateVertices(); //do these need to be virtual and/or const 
@@ -46,7 +46,7 @@ public:
 
 
   // "Set" Methods
-    void setMomentum(const StThreeVector<float>&);
+    void setMomentum(const StThreeVectorF&);
     void setStartVertex(StMcVertex*);
     void setStopVertex(StMcVertex*);
     void setIntermediateVertices(StMcVertexCollection*);
@@ -65,7 +65,7 @@ public:
     virtual void removeSvtHit(StMcSvtHit*);
     
 protected:
-    StThreeVector<float>   mMomentum;
+    StThreeVectorF         mMomentum;
     StMcVertex*            mStartVertex;
     StMcVertex*            mStopVertex;
     StMcVertexCollection*  mIntermediateVertices;
@@ -77,7 +77,7 @@ protected:
     long                   mGeantId;
 };
 
-inline StThreeVector<float>& StMcTrack::momentum() { return mMomentum; }
+inline StThreeVectorF& StMcTrack::momentum() { return mMomentum; }
 
 inline StMcVertex* StMcTrack::startVertex() { return mStartVertex; }
 

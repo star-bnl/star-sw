@@ -3,9 +3,11 @@
  * StMcVertex.cc
  *
  **************************************************************************/
+#include "StThreeVectorF.hh"
+
 #include "StMcEvent/StMcVertex.hh"
 #include "StMcEvent/StMcTrack.hh"
-static const char rcsid[] = "$Id: StMcVertex.cc,v 1.1.1.1 1999/07/13 18:08:06 uid2620 Exp $";
+static const char rcsid[] = "$Id: StMcVertex.cc,v 1.2 1999/07/28 20:27:37 calderon Exp $";
 
 StMcVertex::StMcVertex()
 {
@@ -47,10 +49,7 @@ StMcVertex::StMcVertex(g2t_vertex_st* vtx)
   
   mParent = 0;
   mDaughters = 0; 
-  
-  mGeantVolume = "aaaa";
-  mTof = 0;
-  mGeantProcess = 0;
+    
   mDaughters = new StMcTrackCollection();
   
 }
@@ -76,7 +75,7 @@ int StMcVertex::operator!=(const StMcVertex& v) const
 
 void StMcVertex::setParent(StMcTrack* val) {  mParent = val; }         
 
-void StMcVertex::setPosition(const StThreeVector<float>& val) { mPosition = val; }
+void StMcVertex::setPosition(const StThreeVectorF& val) { mPosition = val; }
 
 void StMcVertex::addDaughter(StMcTrack* val) { mDaughters->push_back(val); }  
 

@@ -1,8 +1,5 @@
-* $Id: tcl_get_row_seq.F,v 1.3 1999/07/17 00:32:05 genevb Exp $
+* $Id: tcl_get_row_seq.F,v 1.2 1998/08/27 16:59:53 love Exp $
 * $Log: tcl_get_row_seq.F,v $
-* Revision 1.3  1999/07/17 00:32:05  genevb
-* Use StMessMgr
-*
 * Revision 1.2  1998/08/27 16:59:53  love
 * Check tpmcpix table before accessing
 *
@@ -216,7 +213,7 @@ c Check for overrun of the local array:
                  IF ( Nseqs+1 .GT. Nseqs_max ) THEN
 *                    CALL Message('TCL_Get_Row_Seq-E1  Nseqs_max is too '
 *     +                   //'small.',1, IDE1 )
-                    call StError('Nseqs_max is too small')
+                    write(6,*) 'Nseqs_max is too small'
                     TCL_Get_Row_Seq = .FALSE. !Fail.
                     RETURN
                  END IF

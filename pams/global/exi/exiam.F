@@ -82,7 +82,6 @@ C<----------------------------------------------------------------------
       REAL      ptotp2, ptotn2, pdotn, eprp, eprn, epip, epin
 
       LOGICAL   first
-      CHARACTER*132 m132
 
       DATA      xlocal /3*0./
 C-----------------------------------------------------------------------
@@ -102,8 +101,7 @@ c*** pgj: copy parameters
 c*** pgj: get magnetic field via call to gufld
 
       call gufld(xlocal,bfield)
-      write(m132,*) 'EXI - using a field of ',bfield(3),' KGauss'
-      call StInfo(m132)
+      write(6,*) 'EXI - using a field of ',bfield(3),' KGauss'
 
 c*** pgj: current row counts
 
@@ -142,7 +140,7 @@ c*** pgj: fast lookup for locating vertex entry
 
         k = id_v0
         if( vertex(k).id .eq. id_v0 ) GO TO 101
-        call StWarning('EXI - fast lookup for vertex entry failed')
+        write(6,*) 'EXI - Warning: fast lookup for vertex entry failed'
 
 c*** pgj: slow failsafe method for locating vertex index
 
@@ -159,7 +157,7 @@ c*** pgj: slow failsafe method for locating vertex index
      >               (xv0(2)-vmain(2))**2 + 
      >               (xv0(3)-vmain(3))**2 )
         else
-          call StError('EXI - vertex entry not found')
+          write(6,*) 'EXI - Error: vertex entry not found'
           return
         endif
 
@@ -335,14 +333,14 @@ c*** Not any more HLC 3/3/98
 c*** wkw: breakout if n_xi=maxlen
 
                 if( vertex_h.nok .ge. vertex_h.maxlen ) then
-                  call StError('EXI - vertex table overflow')
+                  write(6,*) 'EXI - Error: vertex table overflow'
                   return
                 else
                   n_v = vertex_h.nok + 1
                 endif
 
                 if( xi_vertex_h.nok .ge. xi_vertex_h.maxlen ) then
-                  call StError('EXI - exi_dst_vertex table overflow')
+                  write(6,*) 'EXI - Error: exi_dst_vertex table overflow'
                   return
                 else
                   n_xi = xi_vertex_h.nok + 1
@@ -431,8 +429,8 @@ c*** pgj: fill exiaux table if present (note: default allocation is 1)
 
                 if( exiaux_h.maxlen .eq. 1 ) then
                   if( first ) then
-                    call
-     >                StWarning('EXI - exi_aux table will not be filled')
+                    write(6,*) 
+     >                'EXI - Warning: exi_aux table will not be filled'
                     first = .false.
                   endif
                 elseif( n_xi .le. exiaux_h.maxlen ) then
@@ -472,7 +470,7 @@ c                  exiaux(n_xi).sag_b   =
 c                  exiaux(n_xi).costh   =
                 else
                   if( first ) then
-                    call StWarning('EXI - exi_aux table overflow')
+                    write(6,*) 'EXI - Warning: exi_aux table overflow'
                     first = .false.
                   endif
                 endif
@@ -491,8 +489,7 @@ c                  exiaux(n_xi).costh   =
 
  10   CONTINUE	
 
-      write(m132,*) 'EXI - found ',n_xi,' candidates'
-      call StInfo(m132)
+      write(6,*) 'EXI - found ',n_xi,' candidates'
 
 c*** return a normal success code
 
