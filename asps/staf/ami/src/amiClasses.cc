@@ -25,7 +25,7 @@ amiInvoker:: amiInvoker(const char * name, long rank
 		: socObject(name, "amiInvoker") {
    myPtr = (SOC_PTR_T)this;
    if( rank != specs._length){
-      printf("ERROR -- Wrong rank of analysis module\n");
+      EML_LOG_ERROR(BAD_MODULE_RANK);
       myRank=-1;
       return;
    }
