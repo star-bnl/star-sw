@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cc,v 1.4 1999/01/30 23:03:10 wenaus Exp $
+ * $Id: StEvent.cc,v 1.5 1999/02/10 18:58:23 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.cc,v $
- * Revision 1.4  1999/01/30 23:03:10  wenaus
- * table load intfc change; include ref change
+ * Revision 1.5  1999/02/10 18:58:23  wenaus
+ * Print 'bad compiler' line only for bad compiler
+ *
+ * Revision 1.6  1999/02/10 21:50:27  wenaus
+ * Plug memory leaks
  *
  * Revision 1.5  1999/02/10 18:58:23  wenaus
  * Print 'bad compiler' line only for bad compiler
@@ -27,13 +30,13 @@
  * Fix for Sun compiler peculiarity
  *
  * Revision 1.2  1999/01/15 22:53:39  wenaus
-static const char rcsid[] = "$Id: StEvent.cc,v 1.4 1999/01/30 23:03:10 wenaus Exp $";
+static const char rcsid[] = "$Id: StEvent.cc,v 1.5 1999/02/10 18:58:23 wenaus Exp $";
  *
 #if !defined(ST_NO_NAMESPACES)
-static const char rcsid[] = "$Id: StEvent.cc,v 1.4 1999/01/30 23:03:10 wenaus Exp $";
+static const char rcsid[] = "$Id: StEvent.cc,v 1.5 1999/02/10 18:58:23 wenaus Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEvent.cc,v 1.4 1999/01/30 23:03:10 wenaus Exp $";
+static const char rcsid[] = "$Id: StEvent.cc,v 1.5 1999/02/10 18:58:23 wenaus Exp $";
 
 StEvent::StEvent()
 {
@@ -44,7 +47,9 @@ StEvent::StEvent(StRun* run, dst_event_header_st& hdr, dst_event_summary_st& sum
     init(run);
     mType = hdr.event_type;
     mId.first = hdr.n_event[0];
+    mId.second = hdr.n_event[1];
     mRunNumber = hdr.n_run;
+    mTime = hdr.time;
     mTriggerMask = hdr.trig_mask;
     mBunchCrossingNumber = hdr.bunch_cross;
     string dummyString;
