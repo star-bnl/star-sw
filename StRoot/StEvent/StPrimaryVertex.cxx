@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryVertex.cxx,v 2.3 1999/11/04 20:36:17 ullrich Exp $
+ * $Id: StPrimaryVertex.cxx,v 2.4 1999/11/09 15:44:11 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StPrimaryVertex.cxx,v $
- * Revision 2.3  1999/11/04 20:36:17  ullrich
- * New method to obtain daughter container directly
+ * Revision 2.4  1999/11/09 15:44:11  ullrich
+ * Removed method unlink() and all calls to it.
  *
  * Revision 2.4  1999/11/09 15:44:11  ullrich
  * Removed method unlink() and all calls to it.
@@ -35,7 +35,7 @@
 
 ClassImp(StPrimaryVertex)
 
-static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.3 1999/11/04 20:36:17 ullrich Exp $";
+static const char rcsid[] = "$Id: StPrimaryVertex.cxx,v 2.4 1999/11/09 15:44:11 ullrich Exp $";
 
 StPrimaryVertex::StPrimaryVertex()
 { mType = kEventVtxId; }
@@ -97,19 +97,6 @@ StPrimaryVertex::removeDaughter(StTrack* t)
     StSPtrVecPrimaryTrackIterator iter;
     for (iter=mDaughters.begin(); iter != mDaughters.end(); iter++)
         if (*iter == t) mDaughters.erase(iter);
-StPrimaryVertex::unlink(StTrack* t)
-{
-    //
-    //  Remove a track from the daughter list but do not delete it.
-    //  This is needed in case a track gets deleted elsewhere but
-    //  is referenced/owned by the vertex.
-    //
-    StSPtrVecPrimaryTrackIterator iter;
-    for (iter=mDaughters.begin(); iter != mDaughters.end(); iter++)
-        if (*iter == t) mDaughters.clean(iter);
-}
-
-void
 }
 
 void

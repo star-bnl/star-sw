@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPrimaryTrack.cxx,v 2.2 1999/10/28 22:26:10 ullrich Exp $
+ * $Id: StPrimaryTrack.cxx,v 2.3 1999/11/09 15:44:08 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StPrimaryTrack.cxx,v $
- * Revision 2.2  1999/10/28 22:26:10  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.3  1999/11/09 15:44:08  ullrich
+ * Removed method unlink() and all calls to it.
  *
  * Revision 2.3  1999/11/09 15:44:08  ullrich
  * Removed method unlink() and all calls to it.
@@ -29,7 +29,7 @@
 
 ClassImp(StPrimaryTrack)
 
-static const char rcsid[] = "$Id: StPrimaryTrack.cxx,v 2.2 1999/10/28 22:26:10 ullrich Exp $";
+static const char rcsid[] = "$Id: StPrimaryTrack.cxx,v 2.3 1999/11/09 15:44:08 ullrich Exp $";
 
 StPrimaryTrack::StPrimaryTrack() : mVertex(0) {/* noop */}
 
@@ -49,11 +49,7 @@ StPrimaryTrack::operator=(const StPrimaryTrack& track)
         static_cast<StTrack&>(*this) = track;
         mVertex = track.mVertex;
     }
-StPrimaryTrack::~StPrimaryTrack()
-{
-    if (mVertex)
-        mVertex->unlink(this);
-}
+    return *this;
 }
 
 StPrimaryTrack::~StPrimaryTrack() {/* noop */}
