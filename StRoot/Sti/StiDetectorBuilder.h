@@ -9,11 +9,13 @@
 #include "Sti/StiTrackingParameters.h"
 #include "Sti/StiMapUtilities.h"
 #include "Sti/Base/Named.h"
+#include "Sti/Base/Loadable.h"
 #include "StThreeVector.hh"
 class StiDetector;
 class StiMaterial;
 class StiShape;
 class StMaker; 
+class TDataSet;
 class StiPlanarShape;
 class StiCylindricalShape;
 template<class Factorized>class Factory;
@@ -35,11 +37,11 @@ typedef detectorMap::value_type detectorMapValType;
   \author Ben Norman (Kent State University) Aug 1, 2001
   \author Claude Pruneau (Wayne State University) Oct 16, 2002
 */
-class StiDetectorBuilder : public Named
+class StiDetectorBuilder : public Named, public Loadable
 {
 public:
 
-  StiDetectorBuilder(const string & name,bool active);
+  StiDetectorBuilder(const string & name,bool active, const string & inputFile);
   virtual ~StiDetectorBuilder(); 
   detectorMap getDetectors(){ return mDetectorMap; }
   virtual StiMaterial * add(StiMaterial *material);
@@ -59,6 +61,10 @@ public:
   virtual StiDetector* next();
   virtual void build(StMaker&source);
   virtual void buildDetectors(StMaker&source);
+	void load(const string & userFileName, StMaker & source)
+		{
+			Loadable::load(userFileName,source);
+		}
 
   double nice(double angle) const;
   void setGroupId(int id);
@@ -80,6 +86,7 @@ public:
   vector< vector<StiDetector*> > _detectors;
   Factory<StiDetector>*_detectorFactory;
   StiTrackingParameters _trackingParameters;
+	string _inputFile;
 };
 
 ///Returns the number of active rows in the detector
@@ -190,11 +197,6 @@ inline int  StiDetectorBuilder::getGroupId() const
 }
 
 inline void StiDetectorBuilder::setTrackingParameters(const StiTrackingParameters & pars)
-{
-  _trackingParameters = pars;
-}
-
-inline void StiDetectorBuilder::setTrackingParameters(const TrackingParameters_st & pars)
 {
   _trackingParameters = pars;
 }

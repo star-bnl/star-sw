@@ -1,6 +1,6 @@
 #ifndef StiHitErrorCalculator_HH
 #define StiHitErrorCalculator_HH
-
+#include "Sti/Base/EditableParameters.h"
 /*!
   Class containing hit error parameterization and calculation
   methods. Correct use involves setting parameters relevant to
@@ -19,7 +19,7 @@
 class HitError_st;
 
 
-class StiHitErrorCalculator
+class StiHitErrorCalculator : public EditableParameters
 {
  public:
   StiHitErrorCalculator(){/*noop*/};
@@ -39,11 +39,12 @@ class StiDefaultHitErrorCalculator: public StiHitErrorCalculator
    inline void set(double intrinsicZ, double driftZ,
 									 double crossZ, double intrinsicX,
 									 double driftX, double crossX);
-   inline void set(ifstream& iFle);
+	 virtual void loadDS(TDataSet&ds);
+	 virtual void loadFS(ifstream& inFile);
+	 virtual void initialize(){};
+	 friend ostream& operator<<(ostream& os, const StiDefaultHitErrorCalculator& c);
 
-   inline void report();
-
- private:
+ protected:
    double coeff[6];              //0:intrinsicZ  1: driftZ   2: crossZ
                                  //3:intrinsicX  4: driftX   5: crossX
 };
