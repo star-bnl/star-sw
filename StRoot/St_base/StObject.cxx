@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.13 2000/09/15 15:11:58 perev Exp $
+// $Id: StObject.cxx,v 1.14 2000/09/30 17:48:27 perev Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.14  2000/09/30 17:48:27  perev
+// Zombies cons and loop for stru vector
+//
 // Revision 1.13  2000/09/15 15:11:58  perev
 // Zombie for StEvent
 //
@@ -56,9 +59,9 @@ void StObject::Browse(TBrowser *tb)
   StAutoBrowse::Browse(this,tb);
 }
 //_____________________________________________________________________________
-Bool_t StObject::IsFolder()
+Bool_t StObject::IsFolder() const
 {
-  return StAutoBrowse::Browse(this,0);
+  return StAutoBrowse::Browse((TObject*)this,0);
 }
 //______________________________________________________________________________
 void StObject::Streamer(TBuffer &R__b)
