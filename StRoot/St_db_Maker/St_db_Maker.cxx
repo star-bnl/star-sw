@@ -211,10 +211,10 @@ St_DataSet *St_db_Maker::OpenMySQL(const char *dbname)
    
    fDBBroker  = new StDbBroker();
 
-   if (fDBBroker) {
-     Warning("OpenDB","***Can not open MySQL DB %s ***");
-     return 0;
-   }
+   //if (!fDBBroker) {
+   //  Warning("OpenDB","***Can not open MySQL DB %s ***");
+   //  return 0;
+   //}
 
    TString ts(dbname); ts+="_hierarchy";
    fHierarchy = (St_tables_hierarchy*)St_Table::New((const char*)ts,"tables_hierarchy",0,0);    
