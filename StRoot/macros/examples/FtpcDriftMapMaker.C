@@ -1,5 +1,8 @@
-// $Id: FtpcDriftMapMaker.C,v 1.3 2001/03/07 15:16:49 jcs Exp $
+// $Id: FtpcDriftMapMaker.C,v 1.4 2001/05/16 18:34:18 jcs Exp $
 // $Log: FtpcDriftMapMaker.C,v $
+// Revision 1.4  2001/05/16 18:34:18  jcs
+// select timestamp
+//
 // Revision 1.3  2001/03/07 15:16:49  jcs
 // use MySQL database
 //
@@ -37,7 +40,11 @@ void FtpcDriftMapMaker(const Char_t *FieldType="FullField")
   const char *mysqlDB =  "MySQL:StarDb";
   const char *paramsDB = "$STAR/StarDb";
   StChain *chain =  new StChain();
+
   St_db_Maker *dbMk = new St_db_Maker("db",mysqlDB,paramsDB);
+  //  dbMk->SetDateTime(20001100,10000);
+  dbMk->SetDateTime("year_2b");
+
 //  StMagFMaker *magFMk = new StMagFMaker("magF");
   Float_t Scale = 1.0;
   TString FieldName("STAR full field");
