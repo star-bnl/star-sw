@@ -140,7 +140,7 @@ ami/module/call ctg /dui/constants/ctf/geometry/ctb _
 *
 if [out] .ne. 0 then
   cd /dui/constants
-  /dio/newfilestream       output_file ctb_geo.dsl w
+  /dio/newfilestream       output_file ctg_pars_ctb.dsl w
   putevent output_file ctf
 endif
  
