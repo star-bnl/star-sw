@@ -1,6 +1,6 @@
 
 *	AIX versions.
-
+*
 	REAL FUNCTION RAN(ISEED)
 
 	IMPLICIT NONE
@@ -23,7 +23,7 @@
 
 	RETURN
 	END
-
+*
 	SUBROUTINE STRCPU(TCPU)
 
 	IMPLICIT NONE
@@ -43,7 +43,7 @@
 	
 	RETURN
 	END
-
+*
 	SUBROUTINE STRCPUQ(TCPU) !Quad (64-bit) version.
 
 	IMPLICIT NONE
@@ -66,7 +66,7 @@
 	
 	RETURN
 	END
-
+*
 	SUBROUTINE STRCPU0
 
 	IMPLICIT NONE
@@ -80,7 +80,7 @@
 	NATCPU_T0=MCLOCK()
 	RETURN
 	END
-
+*
 	INTEGER FUNCTION STRCPUTPS()
 
 	IMPLICIT NONE
@@ -92,7 +92,7 @@
 
 	RETURN
 	END
-
+*
 	SUBROUTINE STRDate( Year, Month, Day )
 
 	IMPLICIT NONE
@@ -177,8 +177,7 @@
 
 
 
-
-
+*
 	SUBROUTINE STRDEC_ENDIAN(I32)
 
 	IMPLICIT NONE
@@ -205,7 +204,7 @@
 
 	RETURN
 	END
-
+*
 	SUBROUTINE STRDEC_ENDIAN_BYTE(I32)
 
 *	Swap the 4 8-bit bytes in the 32-bit (long) word I32,
@@ -235,7 +234,7 @@
 
 	RETURN
 	END
-
+*
 	SUBROUTINE STRDEC_ENDIAN_BYTES(Nwords,Block)
 
 	IMPLICIT NONE
@@ -277,7 +276,7 @@
 
 	RETURN
 	END
-
+*
 	SUBROUTINE STRDEC_ENDIAN_HALF(I32)
 
 	IMPLICIT NONE
@@ -302,7 +301,7 @@
 
 	RETURN
 	END
-
+*
 	INTEGER FUNCTION STRDEC_IBITS(DATA,BIT0,BITS)
 
 *	Do an IBITS, but make it act like DEC.
@@ -315,7 +314,7 @@
 
 	RETURN
 	END
-
+*
 	SUBROUTINE STRFLUSH( LUN )
 
 	IMPLICIT NONE
@@ -339,7 +338,7 @@
 	RETURN
 
 	END
-
+*
 	SUBROUTINE STRMOVE(COUNT,SOURCE,DEST)
 
 *	AIX interface routine to (equivalent) to LIB$MOVC3.
@@ -358,7 +357,7 @@
 
 	RETURN
 	END
-
+*
 	SUBROUTINE STRMSEC(MSECS)
 *	Standard interface routine to return milliseconds since midnight.
 	IMPLICIT NONE
@@ -369,7 +368,7 @@
 	MSECS=1000*SEC !Milliseconds since midnight (only whole secs.).
 	RETURN
 	END
-
+*
 	LOGICAL FUNCTION STRMSEC_DELAY(MSECS)
 
 *	Standard interface routine to delay the specified time in
@@ -418,7 +417,7 @@
 
 	RETURN
 	END
-
+*
 	LOGICAL FUNCTION STROPEN_NAT(LUN,FILENAME
      1	 ,STATUS_CARG,ACCESS_CARG,FORM_CARG
      2	 ,RECL_FLAG,RECL_IARG
@@ -492,7 +491,7 @@
 
 	RETURN
 	END
-
+*
 	SUBROUTINE STRTIME(HOUR,MIN,SEC)
 
 	IMPLICIT NONE
@@ -522,7 +521,7 @@
 
 	RETURN
 	END
-
+*
 	SUBROUTINE STR_FLOAT_IEEE_TO_HOST( Ireal )
 
 	IMPLICIT NONE
@@ -539,7 +538,7 @@
 
 	RETURN !No-op under AIX.
 	END
-
+*
 	SUBROUTINE STR_FLOAT_HOST_TO_IEEE( Ireal )
 
 	IMPLICIT NONE
@@ -578,7 +577,7 @@
 
 	RETURN !No-op under AIX.
 	END
-
+*
 	SUBROUTINE STR_FLOAT_HOST_TO_VAX( Ireal )
 
 	IMPLICIT NONE
@@ -653,7 +652,7 @@
 
 	RETURN
 	END
-
+*
 	SUBROUTINE STR_FLOAT_VAX_TO_HOST( Ireal )
 
 	IMPLICIT NONE
@@ -759,7 +758,7 @@
 
 	RETURN
 	END
-
+*
 	SUBROUTINE STR_Sleep( Seconds )
 
 	IMPLICIT NONE
@@ -792,7 +791,7 @@
 
 	RETURN
 	END
-
+*
 	SUBROUTINE STR_Time1970( Seconds_Since_1970 )
 	IMPLICIT NONE
 *  Output:
@@ -802,4 +801,4 @@
 	CALL TIME( Seconds_Since_1970 ) !Observed to return seconds since 1-jan-1970.
 	RETURN
 	END
-
+*

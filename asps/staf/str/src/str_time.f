@@ -8,7 +8,7 @@
 
 
 
-
+*
 	SUBROUTINE STRASCCPU( TCPU_TIME, DCPU_TIME
      1	                    , TCPU_ASC , DCPU_ASC
      1	                    ,  ASC_DATE, ASC_WEEKDAY, ASC_TIME )
@@ -649,7 +649,7 @@
 *	Make DAY the day in the month:
 	MON=1
 	DO WHILE (  (MON.LT.12)  .AND.
-     1	            ( (DAY-MONTH_DAYS(MON)) .GT. 0 )  )
+     1	            ( (DAY-MONTH_DAYS(MON)) .GE. 0 )  )
 	  DAY=DAY-MONTH_DAYS(MON)
 	  MON=MON+1
 	END DO
@@ -876,4 +876,4 @@
 	Seconds_Since_1970  = Days_Since_1970 * 24 * 3600 + Seconds_Since_Today
 	RETURN
 	END
-
+*

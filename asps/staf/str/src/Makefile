@@ -1,25 +1,30 @@
 ARCH_TAG     = _sgi
 ARFLAGS      = vqs
 FFLAGS       = -c -O -w -extend_source
+FFLAGS4      = -c -O -w -extend_source -irix4
 FFLAGS_DBG   = -c -g -w -extend_source
-CCFLAGS      = -c -O -ansi -fullwarn -v -prototypes
-CCFLAGS_DBG  = -c -g -ansi -fullwarn -v -prototypes
+CCFLAGS      = -c -O -ansi -fullwarn -prototypes
+CCFLAGS4     = -c -O -ansi -fullwarn -prototypes -irix4
+CCFLAGS_DBG  = -c -g -ansi -fullwarn -prototypes
 
 all : libstr.a libstr_dbg.a doc
+
+str4 : libstr4.a
 
 str : libstr.a
 
 dbg : libstr_dbg.a
 
 doc : strlib.f strlib$(ARCH_TAG).f strmth.f strplot.f strterm$(ARCH_TAG).f str_file.f str_parse.f str_time.f
-	cd ../doc; docfor ../src/strlib.f;    mv buttons.html strlib.html;    cd ../src
-	cd ../doc; docfor ../src/strmth.f;    mv buttons.html strmth.html;    cd ../src
-	cd ../doc; docfor ../src/strplot.f;   mv buttons.html strplot.html;   cd ../src
-	cd ../doc; docfor ../src/str_file.f;  mv buttons.html str_file.html;  cd ../src
-	cd ../doc; docfor ../src/str_parse.f; mv buttons.html str_parse.html; cd ../src
-	cd ../doc; docfor ../src/str_time.f;  mv buttons.html str_time.html;  cd ../src
-	cd ../doc; docfor ../src/strlib$(ARCH_TAG).f;  mv buttons.html strlib$(ARCH_TAG).html;  cd ../src
-	cd ../doc; docfor ../src/strterm$(ARCH_TAG).f; mv buttons.html strterm$(ARCH_TAG).html; cd ../src
+	docfor strlib.f;    mv buttons.html strlib.html
+	docfor strmth.f;    mv buttons.html strmth.html
+	docfor strplot.f;   mv buttons.html strplot.html
+	docfor str_file.f;  mv buttons.html str_file.html
+	docfor str_parse.f; mv buttons.html str_parse.html
+	docfor str_time.f;  mv buttons.html str_time.html
+	docfor strlib$(ARCH_TAG).f;  mv buttons.html strlib$(ARCH_TAG).html
+	docfor strterm$(ARCH_TAG).f; mv buttons.html strterm$(ARCH_TAG).html
+	mv *.html ../doc
 
 libstr.a : strlib.o strlib$(ARCH_TAG).o strmth.o strplot.o strterm$(ARCH_TAG).o str_file.o \
 str_parse.o str_time.o \
@@ -28,7 +33,16 @@ strbyte$(ARCH_TAG).o strtermc$(ARCH_TAG).o strlibc$(ARCH_TAG).o
 	ar $(ARFLAGS) libstr.a strlib.o strlib$(ARCH_TAG).o strmth.o strplot.o \
 	strterm$(ARCH_TAG).o str_file.o str_parse.o str_time.o \
 	strbyte$(ARCH_TAG).o strtermc$(ARCH_TAG).o strlibc$(ARCH_TAG).o
-	ranlib libstr.a
+	ar ts libstr.a
+
+libstr4.a : strlib.o4 strlib$(ARCH_TAG).o4 strmth.o4 strplot.o4 strterm$(ARCH_TAG).o4 str_file.o4 \
+str_parse.o4 str_time.o4 \
+strbyte$(ARCH_TAG).o4 strtermc$(ARCH_TAG).o4 strlibc$(ARCH_TAG).o4
+	rm -f libstr4.a
+	ar $(ARFLAGS) libstr4.a strlib.o4 strlib$(ARCH_TAG).o4 strmth.o4 strplot.o4 \
+	strterm$(ARCH_TAG).o4 str_file.o4 str_parse.o4 str_time.o4 \
+	strbyte$(ARCH_TAG).o4 strtermc$(ARCH_TAG).o4 strlibc$(ARCH_TAG).o4
+	ar ts libstr4.a
 
 libstr_dbg.a : strlib_dbg.o strlib$(ARCH_TAG)_dbg.o strmth_dbg.o strplot_dbg.o strterm$(ARCH_TAG)_dbg.o str_file_dbg.o \
 str_parse_dbg.o str_time_dbg.o \
@@ -37,8 +51,11 @@ strbyte$(ARCH_TAG)_dbg.o strtermc$(ARCH_TAG)_dbg.o strlibc$(ARCH_TAG)_dbg.o
 	ar $(ARFLAGS) libstr_dbg.a strlib_dbg.o strlib$(ARCH_TAG)_dbg.o strmth_dbg.o strplot_dbg.o \
 	strterm$(ARCH_TAG)_dbg.o str_file_dbg.o str_parse_dbg.o str_time_dbg.o \
 	strbyte$(ARCH_TAG)_dbg.o strtermc$(ARCH_TAG)_dbg.o strlibc$(ARCH_TAG)_dbg.o
-	ranlib libstr_dbg.a
+	ar ts libstr_dbg.a
 
+
+strlib.o4 : strlib.f
+	f77 $(FFLAGS4) strlib.f -o strlib.o4
 
 strlib.o : strlib.f
 	f77 $(FFLAGS) strlib.f
@@ -47,12 +64,18 @@ strlib_dbg.o : strlib.f
 	f77 $(FFLAGS_DBG) strlib.f -o strlib_dbg.o
 
 
+strlib$(ARCH_TAG).o4 : strlib$(ARCH_TAG).f str_time_inc
+	f77 $(FFLAGS4) strlib$(ARCH_TAG).f -o strlib$(ARCH_TAG).o4
+
 strlib$(ARCH_TAG).o : strlib$(ARCH_TAG).f str_time_inc
 	f77 $(FFLAGS) strlib$(ARCH_TAG).f
 
 strlib$(ARCH_TAG)_dbg.o : strlib$(ARCH_TAG).f str_time_inc
 	f77 $(FFLAGS_DBG) strlib$(ARCH_TAG).f -o strlib$(ARCH_TAG)_dbg.o
 
+
+strmth.o4 : strmth.f
+	f77 $(FFLAGS4) strmth.f -o strmth.o4
 
 strmth.o : strmth.f
 	f77 $(FFLAGS) strmth.f
@@ -61,12 +84,18 @@ strmth_dbg.o : strmth.f
 	f77 $(FFLAGS_DBG) strmth.f -o strmth_dbg.o
 
 
+strplot.o4 : strplot.f
+	f77 $(FFLAGS4) strplot.f -o strplot.o4
+
 strplot.o : strplot.f
 	f77 $(FFLAGS) strplot.f
 
 strplot_dbg.o : strplot.f
 	f77 $(FFLAGS_DBG) strplot.f -o strplot_dbg.o
 
+
+strterm$(ARCH_TAG).o4 : strterm$(ARCH_TAG).f
+	f77 $(FFLAGS4) strterm$(ARCH_TAG).f -o strterm$(ARCH_TAG).o4
 
 strterm$(ARCH_TAG).o : strterm$(ARCH_TAG).f
 	f77 $(FFLAGS) strterm$(ARCH_TAG).f
@@ -75,12 +104,18 @@ strterm$(ARCH_TAG)_dbg.o : strterm$(ARCH_TAG).f
 	f77 $(FFLAGS_DBG) strterm$(ARCH_TAG).f -o strterm$(ARCH_TAG)_dbg.o
 
 
+str_file.o4 : str_file.f str_file_inc
+	f77 $(FFLAGS4) str_file.f -o str_file.o4
+
 str_file.o : str_file.f str_file_inc
 	f77 $(FFLAGS) str_file.f
 
 str_file_dbg.o : str_file.f str_file_inc
 	f77 $(FFLAGS_DBG) str_file.f -o str_file_dbg.o
 
+
+str_parse.o4 : str_parse.f str_parse_inc
+	f77 $(FFLAGS4) str_parse.f -o str_parse.o4
 
 str_parse.o : str_parse.f str_parse_inc
 	f77 $(FFLAGS) str_parse.f
@@ -89,12 +124,18 @@ str_parse_dbg.o : str_parse.f str_parse_inc
 	f77 $(FFLAGS_DBG) str_parse.f -o str_parse_dbg.o
 
 
+str_time.o4 : str_time.f
+	f77 $(FFLAGS4) str_time.f -o str_time.o4
+
 str_time.o : str_time.f
 	f77 $(FFLAGS) str_time.f
 
 str_time_dbg.o : str_time.f
 	f77 $(FFLAGS_DBG) str_time.f -o str_time_dbg.o
 
+
+strbyte$(ARCH_TAG).o4 : strbyte$(ARCH_TAG).c
+	cc $(CCFLAGS4) strbyte$(ARCH_TAG).c -o strbyte$(ARCH_TAG).o4
 
 strbyte$(ARCH_TAG).o : strbyte$(ARCH_TAG).c
 	cc $(CCFLAGS) strbyte$(ARCH_TAG).c
@@ -103,12 +144,18 @@ strbyte$(ARCH_TAG)_dbg.o : strbyte$(ARCH_TAG).c
 	cc $(CCFLAGS_DBG) strbyte$(ARCH_TAG).c -o strbyte$(ARCH_TAG)_dbg.o
 
 
+strtermc$(ARCH_TAG).o4 : strtermc$(ARCH_TAG).c
+	cc $(CCFLAGS4) strtermc$(ARCH_TAG).c -o strtermc$(ARCH_TAG).o4
+
 strtermc$(ARCH_TAG).o : strtermc$(ARCH_TAG).c
 	cc $(CCFLAGS) strtermc$(ARCH_TAG).c
 
 strtermc$(ARCH_TAG)_dbg.o : strtermc$(ARCH_TAG).c
 	cc $(CCFLAGS_DBG) strtermc$(ARCH_TAG).c -o strtermc$(ARCH_TAG)_dbg.o
 
+
+strlibc$(ARCH_TAG).o4 : strlibc$(ARCH_TAG).c
+	cc $(CCFLAGS4) strlibc$(ARCH_TAG).c -o strlibc$(ARCH_TAG).o4
 
 strlibc$(ARCH_TAG).o : strlibc$(ARCH_TAG).c
 	cc $(CCFLAGS) strlibc$(ARCH_TAG).c
@@ -132,7 +179,6 @@ strterm_sun.f : strterm_sgi.f
 	rm -f strterm_sun.f
 	ln -s strterm_sgi.f strterm_sun.f
 
-
 strtermc_sun.c : strtermc_sgi.c
 	rm -f strtermc_sun.c
 	ln -s strtermc_sgi.c strtermc_sun.c
@@ -140,3 +186,29 @@ strtermc_sun.c : strtermc_sgi.c
 strbyte_sun.c : strbyte_sgi.c
 	rm -f strbyte_sun.c
 	ln -s strbyte_sgi.c strbyte_sun.c
+
+
+strterm_aix.f : strterm_sgi.f
+	rm -f strterm_aix.f
+	ln -s strterm_sgi.f strterm_aix.f
+
+strtermc_aix.c : strtermc_sgi.c
+	rm -f strtermc_aix.c
+	ln -s strtermc_sgi.c strtermc_aix.c
+
+strbyte_aix.c : strbyte_sgi.c
+	rm -f strbyte_aix.c
+	ln -s strbyte_sgi.c strbyte_aix.c
+
+
+strterm_hpu.f : strterm_sgi.f
+	rm -f strterm_hpu.f
+	ln -s strterm_sgi.f strterm_hpu.f
+
+strtermc_hpu.c : strtermc_sgi.c
+	rm -f strtermc_hpu.c
+	ln -s strtermc_sgi.c strtermc_hpu.c
+
+strbyte_hpu.c : strbyte_sgi.c
+	rm -f strbyte_hpu.c
+	ln -s strbyte_sgi.c strbyte_hpu.c
