@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichRingPoint.cxx,v 2.8 2003/09/02 17:58:54 perev Exp $
+ * $Id: StRichRingPoint.cxx,v 2.9 2003/11/19 18:12:33 perev Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingPoint.cxx,v $
+ *  Revision 2.9  2003/11/19 18:12:33  perev
+ *  Fix Float Point Exception
+ *
  *  Revision 2.8  2003/09/02 17:58:54  perev
  *  gcc 3.2 updates + WarnOff
  *
@@ -303,7 +306,7 @@ bool StRichRingPoint::getPoint(double psi, StThreeVectorF& point) {
 
 double StRichRingPoint::rotatedFunction(double psi) {
 
-    if (!getPoint(psi,tempPoint)) return HUGE_VAL;
+    if (!getPoint(psi,tempPoint)) return 1.e+10;
 
     tempPoint = tempPoint - mImpactPoint;
 
