@@ -35,6 +35,9 @@
 #ifndef StiCompositeLeafIterator_HH
 #define StiCompositeLeafIterator_HH
 
+#include <vector>
+using std::vector;
+
 #include "StiCompositeTreeNode.h"
 #include "StlUtilities.h"
 
@@ -64,7 +67,9 @@ public:
     void operator++();
     
     ///Define !=
-    bool operator!=(const tnode_vec::const_iterator&);
+    bool operator!=(const tnode_vec::const_iterator&) {
+	  return (mcurrentleaf != rhs);
+    }
 
     ///Returns the number of leaves found for the tree node passed in
     /// constructor.
@@ -74,16 +79,18 @@ public:
     //Safe forward Access to leaves
 
     ///Return an iterator marking the beginning of the leaf vector
-    tnode_vec::iterator begin();
+    tnode_vec::iterator begin() { return mleaves.begin();}
+
     
     ///Return an iterator marking the end of the leaf vector
-    tnode_vec::iterator end();
+    tnode_vec::iterator end() { return mleaves.end(); }
+
     
     ///Return a const_iterator marking the beginning of the leaf vector.
-    tnode_vec::const_iterator const_begin() const;
+    tnode_vec::const_iterator const_begin() const {return mleaves.begin();}
 
     ///Return a const_iterator marking the end of the leaf vector.
-    tnode_vec::const_iterator const_end() const;
+    tnode_vec::const_iterator const_end() const {return mleaves.end();}
     
 protected:
     ///This is not implemented.  One must pass a node to the constructor
@@ -174,11 +181,13 @@ inline void StiCompositeLeafIterator<T>::operator ++()
   of type StiCompositeTreeNode<T>, then one can check if that iterator is
   not equal to the current internal state of this StiCompositeLeafIterator.
  */
-template <class T>
-inline bool StiCompositeLeafIterator<T>::operator != (const tnode_vec::const_iterator& rhs) 
-{
-    return (mcurrentleaf != rhs);
-}
+/*
+  template <class T>
+  inline bool StiCompositeLeafIterator<T>::operator != (const tnode_vec::const_iterator& rhs) 
+  {
+  return (mcurrentleaf != rhs);
+  }
+*/
 
 /*! This returns the number of leaves that can be found by following
   all possible paths downward from the node passed to the constructor.
@@ -197,12 +206,14 @@ inline unsigned int StiCompositeLeafIterator<T>::getLeafCount() const
   begin() marks a valid iterator, and it points to the first entry
   in the leaf vector.
  */
-template <class T>
-inline StiCompositeLeafIterator<T>::tnode_vec::iterator //return type
-StiCompositeLeafIterator<T>::begin()
-{
-    return mleaves.begin();
-}
+/*
+  template <class T>
+  inline StiCompositeLeafIterator<T>::tnode_vec::iterator //return type
+  StiCompositeLeafIterator<T>::begin()
+  {
+  return mleaves.begin();
+  }
+*/
 
 
 /*! We provide safe forward access to the vector of leaves.  This is a
@@ -212,12 +223,14 @@ StiCompositeLeafIterator<T>::begin()
   const_begin() marks a valid iterator, and it points to the first entry
   in the leaf vector.
  */
-template <class T>
-inline StiCompositeLeafIterator<T>::tnode_vec::iterator //return type
-StiCompositeLeafIterator<T>::end()
-{
-    return mleaves.end();
-}
+/*
+  template <class T>
+  inline StiCompositeLeafIterator<T>::tnode_vec::iterator //return type
+  StiCompositeLeafIterator<T>::end()
+  {
+  return mleaves.end();
+  }
+*/
 
 /*! We provide safe forward access to the vector of leaves.  This is a
   real STL iterator (std::vector::const_iterator) and can be used
@@ -226,13 +239,14 @@ StiCompositeLeafIterator<T>::end()
   const_begin() marks a valid iterator, and it points to the first entry
   in the leaf vector.
  */
-template <class T>
-inline StiCompositeLeafIterator<T>::tnode_vec::const_iterator //return type
-StiCompositeLeafIterator<T>::const_begin() const
-{
-    return mleaves.begin();
-}
-
+/*
+  template <class T>
+  inline StiCompositeLeafIterator<T>::tnode_vec::const_iterator //return type
+  StiCompositeLeafIterator<T>::const_begin() const
+  {
+  return mleaves.begin();
+  }
+*/
 
 /*! We provide safe forward access to the vector of leaves.  This is a
   real STL iterator (std::vector::const_iterator) and can be used
@@ -241,12 +255,15 @@ StiCompositeLeafIterator<T>::const_begin() const
   const_end() marks an <b>invalid</b> iterator, and it points to one entry
   <b>past</b> the last valid entry in the leaf vector.
  */
-template <class T>
-inline StiCompositeLeafIterator<T>::tnode_vec::const_iterator //return type
-StiCompositeLeafIterator<T>::const_end() const
-{
-    return mleaves.end();
-}
+/*
+  template <class T>
+  inline StiCompositeLeafIterator<T>::tnode_vec::const_iterator //return type
+  StiCompositeLeafIterator<T>::const_end() const
+  {
+  return mleaves.end();
+  }
+
+*/
 
 template <class T>
 void StiCompositeLeafIterator<T>::findLeaves() 

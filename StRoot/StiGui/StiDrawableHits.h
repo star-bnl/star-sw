@@ -6,6 +6,7 @@
 #define StiDrawableHits_HH
 
 #include <vector>
+using std::vector;
 
 #include "StiDrawable.h"
 
@@ -13,9 +14,7 @@ class StiHit;
 class StThreeVectorD;
 
 #ifndef __CINT__
-//typedef StThreeVector<double> ThreeDimPoint_t;
 typedef double ThreeDimPoint_t; //we'll have to change this if we ever leave root
-
 typedef vector<ThreeDimPoint_t> ThreeDimPointVec_t;
 
 #else

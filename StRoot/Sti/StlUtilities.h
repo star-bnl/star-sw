@@ -7,6 +7,11 @@
 
 #include <iostream>
 
+#include <algorithm>
+using std::for_each;
+using std::find_if;
+using std::sort;
+
 #include <string>
 using std::string;
 

@@ -11,6 +11,7 @@
 #include <map>
 
 using std::map;
+using std::multimap;
 using std::string;
 
 class TCanvas;

@@ -16,6 +16,9 @@
 #ifndef StiLocalTrackSeedFinder_HH
 #define StiLocalTrackSeedFinder_HH
 
+#include <iostream>
+using std::ostream;
+
 #include <vector>
 using std::vector;
 
@@ -25,7 +28,6 @@ using std::vector;
 class StiHitContainer;
 class Sti2HitComboFilter;
 class StiDetector;
-class ostream;
 
 class StiLocalTrackSeedFinder : public StiTrackSeedFinder
 {

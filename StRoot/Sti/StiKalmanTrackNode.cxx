@@ -1,7 +1,8 @@
-//std
+//Std
+#include <iostream.h>
 #include <stdexcept>
-#include <iostream>
 #include <math.h>
+using namespace std;
 
 //Sti
 #include "StiDebug.h"

@@ -26,8 +26,10 @@
 */
 
 //Std
+#include <iostream.h>
 #include <stdexcept>
 #include <math.h>
+using namespace std;
 
 //Sti
 #include "StiIOBroker.h"
@@ -293,6 +295,7 @@ void StiKalmanTrackFinder::findTrack(StiTrack * t)
     reserveHits(track->getFirstNode());
     track->setLastNode(lastNode);
     track->setChi2(lastNode->fChi2);
+using namespace std;
     if (lastNode->fP3*StiKalmanTrackNode::getFieldConstant()>0)
 	track->setCharge(-1);
     else
