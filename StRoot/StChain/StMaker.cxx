@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.37 1999/05/07 20:51:31 perev Exp $
+// $Id: StMaker.cxx,v 1.38 1999/05/10 15:37:51 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.38  1999/05/10 15:37:51  perev
+// Save of hisogramm in StMaker::Init
+//
 // Revision 1.37  1999/05/07 20:51:31  perev
 // AddData bug fix
 //
@@ -81,6 +84,7 @@
 #include "TClass.h"
 #include "TROOT.h"
 #include "THtml.h"
+#include "TH1.h"
 
 #include "TChain.h"
 #include "TTree.h"
@@ -98,7 +102,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.37 1999/05/07 20:51:31 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.38 1999/05/10 15:37:51 perev Exp $";
 return cvs;};
 
 //_____________________________________________________________________________
@@ -186,6 +190,18 @@ St_ObjectSet *StMaker::AddObj(TObject *obj,const char *dir)
   if(!list->FindObject(obj)) list->Add(obj);
   return set;
 }
+//______________________________________________________________________________
+ void StMaker::AddHist(TH1 *h,const char *dir)
+{  
+  if (dir){/*unused*/}
+  if (!h) {AddObj(0,".hist");return;}
+  if (h->InheritsFrom(TH1::Class())) h->SetDirectory(0);
+  return AddObj(h,".hist");
+}    
+
+
+
+
 //______________________________________________________________________________
 St_DataSet *StMaker::AddData(St_DataSet *ds, const char* dir)
 { 
