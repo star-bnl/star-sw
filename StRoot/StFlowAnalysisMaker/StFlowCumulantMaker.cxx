@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCumulantMaker.cxx,v 1.8 2002/01/14 23:42:36 posk Exp $
+// $Id: StFlowCumulantMaker.cxx,v 1.9 2002/01/24 20:53:51 aihong Exp $
 //
 // Authors:  Aihong Tang, Kent State U. Oct 2001
 //           Frame adopted from Art and Raimond's StFlowAnalysisMaker.
@@ -29,6 +29,8 @@
 #include "SystemOfUnits.h"
 #include "TFile.h"
 #include "TString.h"
+#include "TObjString.h"
+#include "TVectorD.h"
 #include "TH1.h"
 #include "TH2.h"
 //#include "TH3.h"
@@ -134,7 +136,47 @@ Int_t StFlowCumulantMaker::Init() {
     for (int j = 0; j < Flow::nHars; j++) {
       char countHars[2];
       sprintf(countHars,"%d",j+1);
-      
+
+
+      histTitle = new TString("Flow_CumulMultSum_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistMultSum =
+        new TH1D(histTitle->Data(),histTitle->Data(),1,0.,1.);
+      delete histTitle;
+
+
+
+      histTitle = new TString("Flow_CumulWgtMultSumq4_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistWgtMultSum_q4 =
+        new TH1D(histTitle->Data(),histTitle->Data(),1,0.,1.);
+      delete histTitle;
+
+
+      histTitle = new TString("Flow_CumulWgtMultSumq6_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistWgtMultSum_q6 =
+        new TH1D(histTitle->Data(),histTitle->Data(),1,0.,1.);
+      delete histTitle;
+
+
+      histTitle = new TString("Flow_CumulNEvent_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistNEvent =
+        new TH1D(histTitle->Data(),histTitle->Data(),1,0.,1.);
+      delete histTitle;
+
+
+
+
       // ****  for differential flow   ****
       
       // cumulant        dp/n{k}      
@@ -325,12 +367,22 @@ Int_t StFlowCumulantMaker::Init() {
       }
       
       // ***  for integrated flow  ***
+
+    
+    histFull[k].histFullHar[j].mHistCumulIntegG0 =
+      new TH1D*[Flow::nCumulIntegOrders*Flow::nCumulInteg_qMax];
+
       for (int pq = 0; pq <  Flow::nCumulIntegOrders*Flow::nCumulInteg_qMax; pq++) {
 	int cumulIndex = (pq/Flow::nCumulInteg_qMax) + 1; // like 1,2,3. 
 	//not begining with 0. That is "p" in Eq. (B1).
         int qIndex = pq%(Flow::nCumulInteg_qMax); // like 0,1,...5 
 	//begining with 0. Just like Eq. (B3).
-	
+
+	char theCumulOrderChar[2];
+        char qIndexOrderChar[2]; // if >10, need to use char*
+	sprintf(theCumulOrderChar,"%d",cumulIndex*2); 
+        sprintf(qIndexOrderChar,"%d",qIndex);
+
 	double theTempPhi = twopi*((double)qIndex) /
 	  ((double)Flow::nCumulInteg_qMax); 
 	double theRz = r0*sqrt(cumulIndex);
@@ -339,6 +391,19 @@ Int_t StFlowCumulantMaker::Init() {
 	histFull[k].histFullHar[j].mIntegYz[pq] = theRz*sin(theTempPhi);
 	
 	histFull[k].histFullHar[j].mCumulIntegG0[pq] = 0.;
+
+  	histTitle = new TString("Flow_CumulIntegG0_Order");
+	histTitle->Append(*theCumulOrderChar);
+	histTitle->Append("_GenFunIdx");
+	histTitle->Append(*qIndexOrderChar);
+	histTitle->Append("_Sel");
+	histTitle->Append(*countSels);
+	histTitle->Append("_Har");
+	histTitle->Append(*countHars);
+	histFull[k].histFullHar[j].mHistCumulIntegG0[pq] =
+          new TH1D(histTitle->Data(),histTitle->Data(),1,0.,1.);
+        delete histTitle;   
+
       }
       
       histFull[k].histFullHar[j].mMultSum       = 0.;
@@ -348,7 +413,7 @@ Int_t StFlowCumulantMaker::Init() {
   }
   
   gMessMgr->SetLimit("##### FlowCumulantAnalysis", 2);
-  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.8 2002/01/14 23:42:36 posk Exp $");
+  gMessMgr->Info("##### FlowCumulantAnalysis: $Id: StFlowCumulantMaker.cxx,v 1.9 2002/01/24 20:53:51 aihong Exp $");
 
   return StMaker::Init();
 }
@@ -658,6 +723,16 @@ Int_t StFlowCumulantMaker::Finish() {
 	float(histFull[k].histFullHar[j].mWgtMultSum_q6)/
 	(float(histFull[k].histFullHar[j].mNEvent));
       
+
+       histFull[k].histFullHar[j].mHistMultSum->
+	 SetBinContent(1,double(histFull[k].histFullHar[j].mMultSum));
+       histFull[k].histFullHar[j].mHistWgtMultSum_q4->
+	 SetBinContent(1,double(histFull[k].histFullHar[j].mWgtMultSum_q4));
+       histFull[k].histFullHar[j].mHistWgtMultSum_q6->
+	 SetBinContent(1,double(histFull[k].histFullHar[j].mWgtMultSum_q6));
+       histFull[k].histFullHar[j].mHistNEvent->
+	 SetBinContent(1,double(histFull[k].histFullHar[j].mNEvent));
+
       double CpInteg[Flow::nCumulIntegOrders]; // Cp in (B4)
       
       for (int pq = 0; pq < Flow::nCumulIntegOrders; pq ++) CpInteg[pq] = 0.;
@@ -668,7 +743,10 @@ Int_t StFlowCumulantMaker::Finish() {
 	// begining with 0. "q" in (B3)
 	histFull[k].histFullHar[j].mCumulIntegG0[pq] /= 
 	  float(histFull[k].histFullHar[j].mNEvent);        // <Gn(z)> 
-	
+
+	histFull[k].histFullHar[j].mHistCumulIntegG0[pq]->
+          SetBinContent(1,histFull[k].histFullHar[j].mCumulIntegG0[pq]);
+
 	if (mOldMethod) {
 	  CpInteg[theCumulOrder-1] +=
 	    (log(histFull[k].histFullHar[j].mCumulIntegG0[pq]) /
@@ -889,7 +967,9 @@ Int_t StFlowCumulantMaker::Finish() {
       AddHist(histFull[k].mHist_v[ord]);
     
   }
-  
+
+
+
   // GetHistList()->ls();
   
   // Write most histograms
@@ -905,6 +985,27 @@ Int_t StFlowCumulantMaker::Finish() {
       }
     }
   }
+
+  TVectorD* cumulConstants = new TVectorD(30);
+  (*cumulConstants)(0)=double(Flow::nHars);
+  (*cumulConstants)(1)=double(Flow::nSels);
+  (*cumulConstants)(2)=double(Flow::nSubs);
+  (*cumulConstants)(3)=double(Flow::nPhiBins);
+  (*cumulConstants)(4)=double(Flow::nPhiBinsFtpc);
+  (*cumulConstants)(5)=double(Flow::nEtaBins);
+  (*cumulConstants)(6)=double(Flow::nPtBins);
+  (*cumulConstants)(7)=double(Flow::nCumulIntegOrders);
+  (*cumulConstants)(8)=double(Flow::nCumulInteg_qMax);
+  (*cumulConstants)(9)=double(Flow::nCumulDiffOrders);
+  (*cumulConstants)(10)=double(Flow::nCumulDiff_qMax);
+
+  cumulConstants->Write("CumulConstants",TObject::kOverwrite | TObject::kSingleKey);
+
+  TObjString* cumulMethodTag 
+       = new TObjString( (mOldMethod) ? "cumulOld" : "cumulNew" );
+  cumulMethodTag->Write("CumulMethodTag",TObject::kOverwrite | TObject::kSingleKey);
+
+
   hisList->Write();
   
   histFile.Close();
@@ -924,6 +1025,9 @@ Int_t StFlowCumulantMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCumulantMaker.cxx,v $
+// Revision 1.9  2002/01/24 20:53:51  aihong
+// add histograms for combining results from parallel jobs
+//
 // Revision 1.8  2002/01/14 23:42:36  posk
 // Renamed ScalerProd histograms. Moved print commands to FlowMaker::Finish().
 //
