@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackNode.cxx,v 2.4 1999/11/09 15:44:17 ullrich Exp $
+ * $Id: StTrackNode.cxx,v 2.5 1999/12/01 20:04:58 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrackNode.cxx,v $
- * Revision 2.4  1999/11/09 15:44:17  ullrich
- * Removed method unlink() and all calls to it.
+ * Revision 2.5  1999/12/01 20:04:58  ullrich
+ * Fixed bug in track() method.
  *
  * Revision 2.6  2000/03/23 13:49:31  ullrich
  * Not implemented track type 'secondary' now handled
@@ -40,7 +40,7 @@
 
 ClassImp(StTrackNode)
 
-static const char rcsid[] = "$Id: StTrackNode.cxx,v 2.4 1999/11/09 15:44:17 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackNode.cxx,v 2.5 1999/12/01 20:04:58 ullrich Exp $";
 
 StTrackNode::StTrackNode() { /* noop */ }
 
@@ -96,7 +96,7 @@ StTrackNode::entries() const
 {
     return mReferencedTracks.size() + mOwnedTracks.size();
 }
-        i =- mOwnedTracks.size();
+
 const StTrack*
 StTrackNode::track(UInt_t i) const
 {
@@ -110,7 +110,7 @@ StTrackNode::track(UInt_t i) const
             return 0;
     }
 }
-        i =- mOwnedTracks.size();
+
 StTrack*
 StTrackNode::track(UInt_t i)
 {
