@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.26 2003/01/08 19:43:10 perev Exp $
+ * $Id: StDbBroker.h,v 1.27 2004/07/14 18:46:51 perev Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.27  2004/07/14 18:46:51  perev
+ * UInt=>Int for new ROOT
+ *
  * Revision 1.26  2003/01/08 19:43:10  perev
  * CleanUp
  *
@@ -145,12 +148,12 @@ struct oldDescriptor {
     UInt_t       m_nElements;   // Number of variables in the structure
     UInt_t       m_nRows;       // number of rows in the table
 
-    UInt_t       m_DateTime[2]; // Current DateTime
+    Int_t        m_DateTime[2]; // Current DateTime
 
-    UInt_t       m_BeginDate;   // begin date: 2021 05 31
-    UInt_t       m_BeginTime;   // begin date: HH MM SS
-    UInt_t       m_EndDate;     // end date
-    UInt_t       m_EndTime;     // end time
+    Int_t        m_BeginDate;   // begin date: 2021 05 31
+    Int_t        m_BeginTime;   // begin date: HH MM SS
+    Int_t        m_EndDate;     // end date
+    Int_t        m_EndTime;     // end time
 
     UInt_t       m_beginTimeStamp; // unix beginTime
     UInt_t       m_endTimeStamp; // unix endTime
@@ -173,7 +176,7 @@ struct oldDescriptor {
 
     Bool_t         m_isZombie;
     
-    void          makeDateTime(const char* dateTime, UInt_t& iDate, UInt_t& iTime); 
+    void          makeDateTime(const char* dateTime, Int_t & iDate, Int_t & iTime); 
 
   public:
 
@@ -204,11 +207,11 @@ struct oldDescriptor {
     StDbTable* findTable(const char* databaseName);
 
     UInt_t GetNRows()                {return m_nRows;       }
-    UInt_t GetBeginDate()            {return m_BeginDate;   }
-    UInt_t GetBeginTime()            {return m_BeginTime;   }
+    Int_t  GetBeginDate()            {return m_BeginDate;   }
+    Int_t  GetBeginTime()            {return m_BeginTime;   }
 const char *GetFlavor();              
-    UInt_t GetEndDate()              {return m_EndDate;     }
-    UInt_t GetEndTime()              {return m_EndTime;     }
+    Int_t  GetEndDate()              {return m_EndDate;     }
+    Int_t  GetEndTime()              {return m_EndTime;     }
     UInt_t GetRequestTimeStamp()     {return m_requestTimeStamp; }
     UInt_t GetBeginTimeStamp()       {return m_beginTimeStamp; }
     UInt_t GetEndTimeStamp()         {return m_endTimeStamp; }
@@ -238,7 +241,7 @@ const char *GetFlavor();
 	} 
     };
 
-    void   SetDateTime(UInt_t date,UInt_t time);
+    void   SetDateTime(Int_t  date,Int_t  time);
     void   SetRunNumber(UInt_t runNumber)  {m_runNumber=runNumber;};
     void   SetDictionary(UInt_t nElements, Descriptor *D)
                                      {m_nElements=nElements; mdescriptor = D;}
@@ -263,10 +266,10 @@ const char *GetFlavor();
                                            
     void   SetStructSize(UInt_t size)     {m_sizeOfStruct=size;    };
     void   SetNRows(UInt_t nRows)         {m_nRows = nRows;        }
-    void   SetBeginDate(UInt_t BeginDate) {m_BeginDate = BeginDate;}
-    void   SetBeginTime(UInt_t BeginTime) {m_BeginTime = BeginTime;}
-    void   SetEndDate(UInt_t EndDate)     {m_EndDate = EndDate;    }
-    void   SetEndTime(UInt_t EndTime)     {m_EndTime = EndTime;    }
+    void   SetBeginDate(Int_t  BeginDate) {m_BeginDate = BeginDate;}
+    void   SetBeginTime(Int_t  BeginTime) {m_BeginTime = BeginTime;}
+    void   SetEndDate(Int_t  EndDate)     {m_EndDate = EndDate;    }
+    void   SetEndTime(Int_t  EndTime)     {m_EndTime = EndTime;    }
     void   SetRequestTimeStamp(UInt_t utime) {m_requestTimeStamp = utime; }
     void   SetBeginTimeStamp(UInt_t utime)   {m_beginTimeStamp   = utime; }
     void   SetEndTimeStamp(UInt_t utime)     {m_endTimeStamp     = utime; }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.44 2004/01/14 23:13:08 fisyak Exp $
+ * $Id: StDbBroker.cxx,v 1.45 2004/07/14 18:46:51 perev Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.45  2004/07/14 18:46:51  perev
+ * UInt=>Int for new ROOT
+ *
  * Revision 1.44  2004/01/14 23:13:08  fisyak
  * Replace ostringstream => StString
  *
@@ -265,7 +268,7 @@ void StDbBroker::Fill(void * pArray, const char **Comments)
     m_descriptor[i].fColumnName[31]='\0';
   }
   
-  UInt_t date, time;
+  Int_t  date, time;
   //VP TDatime::GetDateTime(m_DateTime, date, time);
   date = m_DateTime[0]; time = m_DateTime[1];
   uint datetime[4]={0,0,0,0};
@@ -382,7 +385,7 @@ return descriptor;
 
 //_____________________________________________________________________________
 void
-StDbBroker::SetDateTime(UInt_t date, UInt_t time)
+StDbBroker::SetDateTime(Int_t  date, Int_t  time)
 {
   // 20000127  002502
    m_DateTime[0] = date; 
@@ -489,15 +492,15 @@ return pData;
 }
 
 //_____________________________________________________________________________
-void StDbBroker::makeDateTime(const char* dateTime,UInt_t& iDate,UInt_t& iTime){
+void StDbBroker::makeDateTime(const char* dateTime,Int_t & iDate,Int_t & iTime){
 
     char* tmp1 = new char[strlen(dateTime)+1];
     char* tmp2 = new char[strlen(dateTime)+1];
     strcpy(tmp1,dateTime);
     strcpy(tmp2,tmp1); tmp1[8]='\0';tmp2+=8;
 
-    iDate = (UInt_t)atoi(tmp1);
-    iTime = (UInt_t)atoi(tmp2);
+    iDate = atoi(tmp1);
+    iTime = atoi(tmp2);
     delete [] tmp1; tmp2-=8; delete [] tmp2;
 
 }
@@ -636,7 +639,7 @@ StDbBroker::findTable(const char* databaseName){
 void * StDbBroker::Use()
 {
 //convert event datetime to date and time
-  UInt_t date, time;
+  Int_t  date, time;
 //VP TDatime::GetDateTime(m_DateTime, date, time);
   date = m_DateTime[0]; time = m_DateTime[1];
   uint datetime[4]={0,0,0,0};
@@ -699,10 +702,10 @@ void * StDbBroker::Use()
   else
     {
       SetNRows((UInt_t)nRows);
-      SetBeginDate((UInt_t)datetime[0]);
-      SetBeginTime((UInt_t)datetime[1]);
-      SetEndDate((UInt_t)datetime[2]);
-      SetEndTime((UInt_t)datetime[3]);
+      SetBeginDate(datetime[0]);
+      SetBeginTime(datetime[1]);
+      SetEndDate  (datetime[2]);
+      SetEndTime  (datetime[3]);
     }
 
   return pDbData;
