@@ -91,7 +91,7 @@ EEmcTTMatch::Add(StMuTrack *t)
 /// \param z     a z (along the beam) position where 
 /// \param r     a TVector (returned)
 /// \return boolean indicating if track crosses a plane
-static Bool_t
+Bool_t
 EEmcTTMatch::ExtrapolateToZ(const StMuTrack *track, const double   z, TVector3 &r)
 {
   const double kMinDipAngle   = 1.0e-13;
