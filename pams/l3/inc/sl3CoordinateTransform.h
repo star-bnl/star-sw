@@ -46,12 +46,12 @@ static double radialDistanceAtRow[45] = {
 
 // sector-rotation factors: 30 degree steps
 static double SectorSin[NSECTORS] = {
-     0.5,  0.866025404,
-     1.0,  0.866025404,
-     0.5,  0.,
-    -0.5, -0.866025404,
-    -1.0, -0.866025404,
-    -0.5,  0.,
+     0.5,  0.866025404, // 1-2
+     1.0,  0.866025404, // 3-4
+     0.5,  0.,          // 5-6
+    -0.5, -0.866025404, // 7-8 
+    -1.0, -0.866025404, // 9-10
+    -0.5,  0.,  
     -0.5, -0.866025404,
     -1.0, -0.866025404,
     -0.5,  0.,
@@ -61,19 +61,27 @@ static double SectorSin[NSECTORS] = {
 };
 
 static double SectorCos[NSECTORS] = {
-     0.866025404,  0.5,
-     0.,          -0.5,
-    -0.866025404, -1.0,
-    -0.866025404, -0.5,
-     0.,           0.5,
-     0.866025404,  1.0,
-    -0.866025404, -0.5,
-     0.,           0.5,
-     0.866025404,  1.0,
-     0.866025404,  0.5,
-     0.,          -0.5,
-    -0.866025404, -1.0,
+     0.866025404,  0.5, // 1-2
+     0.,          -0.5, // 3-4
+    -0.866025404, -1.0, // 5-6
+    -0.866025404, -0.5, // 7-8
+     0.,           0.5, // 9-10
+     0.866025404,  1.0, // 11-12
+     0.866025404,  0.5, // 13-14
+     0.,          -0.5, // 15-16
+    -0.866025404, -1.0, // 17-18
+    -0.866025404, -0.5, // 19-20
+     0.,           0.5, // 21-22
+     0.866025404,  1.0, // 23-24
 };
+/*
+    -0.866025404, -0.5, ! 13-14
+     0.,           0.5, ! 15-16
+     0.866025404,  1.0, ! 17-18
+     0.866025404,  0.5, ! 19-20
+     0.,          -0.5, ! 21-22
+    -0.866025404, -1.0, ! 23-24
+*/
 
 inline int rawToLocal ( int row, double pad, double tb,
 			double *xLocal, double *yLocal, double *zLocal) {
@@ -98,6 +106,19 @@ inline int rawToLocal ( int row, double pad, double tb,
   return 0;
 }
 
+inline int localToRaw ( int row, 
+			double xLocal, double yLocal, double zLocal,  
+                        double& pad, double& tb ) {
+
+  double pitch = (row<14) ?
+          innerSectorPadPitch : outerSectorPadPitch;
+
+  double pad2move = xLocal / pitch + .5 ;
+  pad             = pad2move + numberOfPadsAtRow[row-1]/2; 
+  tb              = (driftLength - zLocal) / lengthPerTb ;
+  return 0;
+}
+
 inline int localToGlobal ( int sector, double xLocal, double yLocal, double zLocal,
 			   double *x, double *y, double *z ) {
 
@@ -110,8 +131,19 @@ inline int localToGlobal ( int sector, double xLocal, double yLocal, double zLoc
   // ==> set sector to sector-12
   int eastsector = (sector>12) ? 
           sector-12 : sector;
-  *y = -1.*SectorSin[eastsector-1] *xLocal + SectorCos[eastsector-1] * yLocal;
+//*y = -1.*SectorSin[eastsector-1] *xLocal + SectorCos[eastsector-1] * yLocal;
+  *y = -1.*SectorSin[sector-1] *xLocal + SectorCos[sector-1] * yLocal;
   *z = (sector<13) ? zLocal : -zLocal ;
+  return 0;
+}
+
+inline int globalToLocal ( int sector, int row,  
+                           double xGlobal, double yGlobal, double zGlobal,
+			   double &xLocal, double &yLocal, double &zLocal ) {
+
+  xLocal = SectorCos[sector-1] * xGlobal - SectorSin[sector-1] * yGlobal ;
+  yLocal = radialDistanceAtRow[row-1];
+  zLocal = fabs(zGlobal) ;
   return 0;
 }
 

@@ -14,6 +14,7 @@
 **:                              clean extra includes    
 **:           12/06/99      ppy: method added to check whether track can be merged
 **:           01/26/00      ppy: delete rawToGlobal declaration
+**:           feb 10, 2000  ppy add xyError and zError
 **:<------------------------------------------------------------------*/
 #ifndef FTFSL3
 #define FTFSL3
@@ -48,6 +49,8 @@ public:
    
    int sectorNr; 
    short     debugLevel  ;
+   double    xyError ;
+   double    zError ;
    //
    //  Sector phase space
    //
@@ -55,6 +58,8 @@ public:
 
    FtfSl3 (  ) { 
       debugLevel = 0 ;
+      xyError    = 0.05 ;
+      zError     = 0.1 ;
    };
    ~FtfSl3 ( ) {
         if ( track != 0 ) delete []track ;
