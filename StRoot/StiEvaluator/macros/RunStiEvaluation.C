@@ -7,66 +7,119 @@
 //
 
 
-void RunStiEvaluation(const char* evalFName="TestEvaluation.root",
+void RunStiEvaluation(const char* evalFName="Evaluation.root",
 		      const char* histFName="EvalHists.root",
 		      const char* postFName="EvalHists.ps",
 		      Int_t debug = 0)
 {
   //File stuff - input/output files open and setup
   //test for existence of file
-  cout << "Opening file: " << evalFName << endl;
-  evalFile = new TFile(evalFName);
+   //get Tree Entries
+   //Reset ROOT and connect tree file
+   TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject(evalFName);
+   if (!f) {
+      f = new TFile(evalFName);
+   }
+   TTree *TestTree = (TTree*)gDirectory->Get("TestTree");
+   cout << "Opening file: " << evalFName << endl;
 
-  //create output file for histograms
-  //histFile = new TFile(histFName);
-  
 
-  //Int_t   GeantId  = 9;
 
-  //create comparison hists
-  //Pions (negative)
-  canvas1=new TCanvas("canvas1","Pi- Momentum Comparison", 100,50,800,700);
-  canvas1->Divide(3,2);
+   cout << "Create histograms" << endl;
+  //1. Px
+  hstpx= new TH1F("hstpx","StiTrack Px Distribution",100,-2,2);
+  //2. Py
+  hstpy= new TH1F("hstpy","StiTrack Py Distribution",100,-2,2);
+  //3. Pz
+  hstpz= new TH1F("hstpz","StiTrack Pz Distribution",100,-2,2);
+  //3. Pt
+  hstpt = new TH1F("hstpt","StiTrack Pt Distribution",100,0,2);
+  //Momentum Residual Hists
+  h2pz = new TH2F("h2pz","StiTrack vs. Global Pz",256,-1,1,256,-1,1);
+  h2pt = new TH2F("h2pt","StiTrack vs. Global Pt",256,0,2,256,0,2);
+  h2mpt = new TH2F("h2mpt","StiTrack vs. Monte Carlo Pt",256,0,2,256,0,2);
+  hpzGvsSt =new TH1F("hpzGvsSt","Fractional Difference, ITTF and Global Pt",256,-.2,.2);
+  hptMvsSt =new TH1F("hptMvsSt","Fractional Difference, ITTF and Monte Carlo Pt",256,-1,1);
+
+ 
+  cout << "Plotting" <<endl;
+
+  canvas1=new TCanvas("canvas1","ITTF Momentum", 100,50,800,700);
+  canvas1->Divide(2,2);
+
   canvas1->cd(1);
-  TestTree->Draw("(stiTrackPx/500):globalTrackPx");
-  htemp->SetYTitle("StiTrack Px");
-  htemp->SetXTitle("Global Track Px");
+  TestTree->Draw("stiTrackPz>>hstpz","","goff"); 
+  hstpz->SetYTitle("Counts");
+  hstpz->SetXTitle("Pz (GeV/c)");
+  hstpz->Draw();
+
   canvas1->cd(2);
-  TestTree->Draw("(stiTrackPy/500):globalTrackPy");
-  htemp->SetYTitle("StiTrack Px");
-  htemp->SetXTitle("Global Track Px");
+  TestTree->Draw("stiTrackPx>>hstpx","","goff"); 
+  hstpx->SetYTitle("Counts");
+  hstpx->SetXTitle("Px (GeV/c)");
+  hstpx->Draw();
+
   canvas1->cd(3);
-  TestTree->Draw("(stiTrackPz/500):globalTrackPz");
-  htemp->SetYTitle("StiTrack Px");
-  htemp->SetXTitle("Global Track Px");
+  TestTree->Draw("stiTrackPy>>hstpy","","goff"); 
+  hstpy->SetYTitle("Counts");
+  hstpy->SetXTitle("Py (GeV/c)");
+  hstpy->Draw();
 
   canvas1->cd(4);
-  TestTree->Draw("(stiTrackPx/500):globalTrackPx","(abs(stiTrackPx/500.)<2.)&&abs(globalTrackPx)<2.");
-  htemp->SetYTitle("StiTrack Px");
-  htemp->SetXTitle("Global Track Px");
-  canvas1->cd(5);
-  TestTree->Draw("(stiTrackPy/500):globalTrackPy","(abs(stiTrackPy/500.)<2.)&&abs(globalTrackPy)<2.");
-  htemp->SetYTitle("StiTrack Px");
-  htemp->SetXTitle("Global Track Px");
-  canvas1->cd(6);
-  TestTree->Draw("(stiTrackPz/500):globalTrackPz","(abs(stiTrackPz/500.)<2.)&&abs(globalTrackPz)<2.");
-  htemp->SetYTitle("StiTrack Px");
-  htemp->SetXTitle("Global Track Px");
+  TestTree->Draw("stiTrackPt>>hstpt","","goff"); 
+  hstpt->SetYTitle("Counts");
+  hstpt->SetXTitle("Pt (GeV/c)");
+  hstpt->Draw();
 
-
-  canvas2=new TCanvas("canvas2","Momentum Fractional Errors", 110,50,810,700);
-  canvas2->Divide(3);
+  canvas2 = new TCanvas("canvas2","Momentum Comparison", 110,60,810,710);
+  canvas2->Divide(2,2);
   canvas2->cd(1);
-  TestTree->Draw("((stiTrackPx/500)-globalTrackPx)/(stiTrackPx/500)");  
-  htemp->GetXaxis()->SetMinimum(-1.0);
-  htemp->GetXaxis()->SetMaximum(1.0);
-
+  TestTree->Draw("stiTrackPz:globalTrackPz >>h2pz","","goff");
+  h2pz->SetYTitle("ITTF Pz (GeV/c)");
+  h2pz->SetXTitle("Global Pz (GeV/c)");
+  h2pz->Draw();
   canvas2->cd(2);
-  TestTree->Draw("((stiTrackPy/500)-globalTrackPy)/(stiTrackPy/500)");  
+  TestTree->Draw("(stiTrackPz-globalTrackPz)/globalTrackPz >>hpzGvsSt","","goff");
+  hpzGvsSt->SetYTitle("Counts");
+  hpzGvsSt->SetXTitle("(ITTF-Global)/Global Pz (%)");
+  hpzGvsSt->Draw();
   canvas2->cd(3);
-  TestTree->Draw("((stiTrackPz/500)-globalTrackPz)/(stiTrackPz/500)");  
+  TestTree->Draw("stiTrackPt:mcTrackPt >>h2mpt","","goff");
+  h2mpt->SetYTitle("ITTF Pt (GeV/c)");
+  h2mpt->SetXTitle("Global Pt (GeV/c)");
+  h2mpt->Draw();
+  canvas2->cd(4);
+  TestTree->Draw("(stiTrackPt-mcTrackPt)/mcTrackPt >>hptMvsSt","","goff");
+  hptMvsSt->SetYTitle("Counts");
+  hptMvsSt->SetXTitle("(ITTF-MC)/MC Pt (%)");
+  hptMvsSt->Draw();
 
-  histFile->close();
-  evalFile->close();
+  //canvas3 = new TCanvas("canvas3","Momentum Error Vertex Dependence", 120,70,820,720);
+  //canvas3->Divide(2,2);
+  //canvas3->cd(1);
+
+  canvas4 = new TCanvas("canvas4","Track Reconstruction Charateristics", 120,70,820,720);
+  //3. Pz
+  hstc2= new TH1F("hstc2","StiTrack Chi2 Distribution",100,-1,1);
+  //3. Pt
+  hgc2 = new TH1F("hgc2","Global Track Chi2 Distribution",100,0,10);
+  canvas4->Divide(2,2);
+  canvas4->cd(1);
+  TestTree->Draw("globalTrackChi2 >> hgc2", "", "goff");
+  TestTree->Draw("stiTrackChi2 >>hstc2", "", "goff");
+  hgc2->Draw();
+  hstc2->Draw("SAME");
+
+  
+
+
+  //f->Close();
 }
+
+
+
+
+
+
+
 
