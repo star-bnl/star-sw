@@ -54,7 +54,6 @@ ClassImp(StKinkMaker)
   mGlobalTrks = 0;
   mParentTrackCandidate=0;             
   mDaughterTrackCandidate=0;
-  mDaughterTrackUnic=0;
   mUseTracker = kTrackerUseBOTH;
   event       = 0;
   kinkVertex  = 0;
@@ -187,7 +186,7 @@ Int_t StKinkMaker::Make(){//called for each event
 
 //******* sorts by the trkStartRadius2D==>the potential parent trk, with 
       //smaller radius will be ahead of the potential daughters
-  if (trackArray.GetEntries() > 0) trackArray.Sort();
+  trackArray.Sort();
   Int_t   kinkCandidate=0;
   Int_t cutPPt=0,cutPImpact=0,initial=0;
   

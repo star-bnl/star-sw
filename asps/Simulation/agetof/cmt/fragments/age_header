@@ -1,8 +1,0 @@
-
-CPP_TIME                := $(shell date +%H%M)
-CPP_DATE                := $(shell date +%y%m%d)
-##version                 := $(shell cd @srcdir@; srt show -v)
-version := $(shell cd ../; basename `pwd`)
-CPP_TITLE               := $(shell echo $(version) | sed -e 's%[-].*%%;s%^$$%Unknown%')
-CPP_VERS                := $(shell echo $(version) | sed -e 's%^[^-]*%%;s%^-%%;s%^$$%Unknown%')
- 
