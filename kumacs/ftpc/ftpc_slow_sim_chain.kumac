@@ -15,13 +15,12 @@
 
 macro ftpc_slow_sim_chain_
        input_g2t_file=/afs/rhic/star/users/jcs/public/auau_gstar_g2t.tab_
-       output_file=ftpc_slow_sim_pipealu_1.tab_
+       output_file=ftpc_slow_sim_auau_1.tab_
        padtrans_file=/afs/rhic/star/users/jcs/public/fcl_padtrans.tab_
        gas_file=/afs/rhic/star/users/jcs/public/gas.dat_
        nskip=0_
        nevents=1
 
-macro/global/import *
 *
 DEFAULT = _
 ./kumacs/util,_
@@ -50,6 +49,7 @@ $STAR/pams/trg/kumac
  
 * generic inits
   exec setup_dir
+macro/global/import *
 
   
 * create tables
@@ -65,6 +65,10 @@ $STAR/pams/trg/kumac
  exec fcl_init [padtrans_file]
  exec fpt_init
  exec fte_init
+* set for fcl data
+   cd [params]/ftpc
+   tdm/table/cell/putvalue 'ftepar[0].void2' 1
+   cd /dui
 
 * Initialize input data stream
   exec input_g2t_file#init [input_g2t_file]
@@ -107,8 +111,6 @@ enddo
 * Close output data stream
  exec write_table_to_file#close ftpc_slow_out
  
-* Remove gas.tmp
-shell rm gas.tmp
  
 message Finished processing [nevents] events
 
