@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.25 2001/07/27 01:26:30 snelling Exp $
+//  $Id: StFlowMaker.h,v 1.26 2001/07/27 20:33:45 snelling Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -21,7 +21,7 @@
 #include "TString.h"
 #include "TTree.h"
 #include "StFlowConstants.h"
-class StRun;
+class StEvtHddr;
 class StEvent;
 class StTrack;
 class StParticleDefinition;
@@ -58,7 +58,7 @@ public:
   StFlowSelection* FlowSelection();
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.25 2001/07/27 01:26:30 snelling Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.26 2001/07/27 20:33:45 snelling Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -90,7 +90,7 @@ private:
   Bool_t           FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent);
   void             CloseEventRead();          // close StEvent
   void             PrintSubeventMults();      // for testing
-  StRun*           pRun;                      //! pointer to run summary data
+  StEvtHddr*       pHeader;                   //! pointer to Event header
   StEvent*         pEvent;                    //! pointer to DST data
   StFlowEvent*     pFlowEvent;                //! pointer flow event
   StFlowPicoEvent* pPicoEvent;                // pointer to pico-DST Event
@@ -128,6 +128,9 @@ inline StFlowSelection* StFlowMaker::FlowSelection() {
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.26  2001/07/27 20:33:45  snelling
+//  switched from StRun to StEvtHddr.
+//
 //  Revision 1.25  2001/07/27 01:26:30  snelling
 //  Added and changed variables for picoEvent. Changed trackCut class to StTrack
 //
