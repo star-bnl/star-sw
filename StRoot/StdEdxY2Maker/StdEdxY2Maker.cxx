@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.27 2004/05/03 23:36:28 perev Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.28 2004/05/14 20:20:27 fisyak Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -161,7 +161,8 @@ static TH3D *Prob = 0;
 static TH2D *dx0dx = 0;
 static TH3D *dXdE  = 0, *dXdEA  = 0, *dXdEC  = 0;
 // QA histogramss
-static TH1D *fZOfBadHits = 0;
+const static Int_t  fNZOfBadHits = 12;
+static TH1D **fZOfBadHits = 0;
 static TH1D *fZOfGoodHits = 0;
 static TH1D *fPhiOfBadHits = 0;
 static TH1D *fTracklengthInTpcTotal = 0;
@@ -193,7 +194,7 @@ StdEdxY2Maker::StdEdxY2Maker(const char *name):
   m_Simulation(kFALSE), 
   m_InitDone (kFALSE), 
   m_tpcGainMonitor(0),
-  m_ClusterFinder(0),
+  m_OldClusterFinder(0),
   m_Calibration(0), 
   m_DoNotCorrectdEdx(0),
   m_Minuit(0)
@@ -216,8 +217,8 @@ Int_t StdEdxY2Maker::Init(){
   if (m_DoNotCorrectdEdx) gMessMgr->Warning() << "StdEdxY2Maker:: use 'DoNotCorrectdEdx' mode" << endm;
   if (m_Calibration) gMessMgr->Warning() << "StdEdxY2Maker:: Calibration Mode" << m_Calibration << endm;
   if (! m_Simulation)  {
-    m_ClusterFinder = (TMath::Abs(m_Mode)/10)%10;
-    if (! m_ClusterFinder) gMessMgr->Warning() << "StdEdxY2Maker:: use old Cluster Finder parameterization" << endm;
+    m_OldClusterFinder = (TMath::Abs(m_Mode)/10)%10;
+    if (m_OldClusterFinder) gMessMgr->Warning() << "StdEdxY2Maker:: use old Cluster Finder parameterization" << endm;
   }
   m_Bichsel = new Bichsel();
   
@@ -895,15 +896,15 @@ Int_t StdEdxY2Maker::Make(){
 		 << " position: " << tpcHit->position() 
 		 << " positionError: " << tpcHit->positionError() << endl;
 	  }
-	  if (! tpcHit->usedInFit()) {BadHit(tpcHit->position()); continue;}
-	  if (  tpcHit->flag()) {BadHit(tpcHit->position()); continue;}
+	  if (! tpcHit->usedInFit()) {BadHit(0,tpcHit->position()); continue;}
+	  if (  tpcHit->flag()) {BadHit(1,tpcHit->position()); continue;}
 	  Int_t sector = tpcHit->sector();
 	  Int_t row    = tpcHit->padrow();
 	  StThreeVectorD &normal = *mNormal[sector-1];
 	  const StThreeVectorD  &gMidPos = *mRowPosition[sector-1][row-1][0];
 	  // check that helix prediction is consistent with measurement
 	  Double_t s = gTrack->geometry()->helix().pathLength(gMidPos, normal);
-	  if (s > 1.e4) {BadHit(tpcHit->position()); continue;}
+	  if (s > 1.e4) {BadHit(2,tpcHit->position()); continue;}
 	  StThreeVectorD xyzOnPlane = gTrack->geometry()->helix().at(s);
 	  StGlobalCoordinate globalOnPlane(xyzOnPlane.x(),xyzOnPlane.y(),xyzOnPlane.z());
 	  StTpcPadCoordinate PadOnPlane;      transform(globalOnPlane,PadOnPlane);
@@ -952,19 +953,19 @@ Int_t StdEdxY2Maker::Make(){
 	  }
 #endif // XYZcheck
 #ifdef PadSelection
-	  if (iokCheck) {BadHit(tpcHit->position()); continue;}
+	  if (iokCheck) {BadHit(3,tpcHit->position()); continue;}
 #endif // PadSelection
 	  
 	  const StThreeVectorD  &gTopPos = *mRowPosition[sector-1][row-1][1];
 	  const StThreeVectorD  &gBotPos = *mRowPosition[sector-1][row-1][2];
 	  double s_out = gTrack->geometry()->helix().pathLength(gTopPos, normal);
-	  if (s_out > 1.e4) {BadHit(tpcHit->position()); continue;}
+	  if (s_out > 1.e4) {BadHit(4,tpcHit->position()); continue;}
 	  double s_in  = gTrack->geometry()->helix().pathLength(gBotPos, normal);
-	  if (s_in > 1.e4) {BadHit(tpcHit->position()); continue;}
+	  if (s_in > 1.e4) {BadHit(5,tpcHit->position()); continue;}
 	  Double_t dx = TMath::Abs(s_out-s_in);
 	  TrackLengthTotal += dx;
 #ifdef PadSelection
-	  if (dx < 0.5 || dx > 25.) {BadHit(tpcHit->position()); continue;}
+	  if (dx < 0.5 || dx > 25.) {BadHit(6,tpcHit->position()); continue;}
 #endif // PadSelection
 	  ESector kTpcOutIn = kTpcOuter;
 	  if (row <= 13) kTpcOutIn = kTpcInner;
@@ -1016,7 +1017,7 @@ Int_t StdEdxY2Maker::Make(){
 #endif
 	    }
 #endif // TpcSecRow
-	    if (gc < 0.0) {BadHit(tpcHit->position()); continue;}
+	    if (gc < 0.0) {BadHit(7,tpcHit->position()); continue;}
 	    dE *= gc;
 	    dES = dE;
 	    dE *= row > 13 ? PressureScaleO : PressureScaleI; 
@@ -1039,8 +1040,8 @@ Int_t StdEdxY2Maker::Make(){
 #ifdef DriftDistanceCorrection
 	    if (m_zCorrection) {
 	      tpcCorrection_st *cor = m_zCorrection->GetTable()+kTpcOutIn;
-	      if (cor->min > 0 && cor->min > CdEdx[NdEdx].ZdriftDistance) {BadHit(tpcHit->position()); continue;}
-	      if (cor->max > 0 && CdEdx[NdEdx].ZdriftDistance > cor->max) {BadHit(tpcHit->position()); continue;}
+	      if (cor->min > 0 && cor->min > CdEdx[NdEdx].ZdriftDistance) {BadHit(8,tpcHit->position()); continue;}
+	      if (cor->max > 0 && CdEdx[NdEdx].ZdriftDistance > cor->max) {BadHit(9,tpcHit->position()); continue;}
 	      dE *= TMath::Exp(-CalcCorrection(cor,CdEdx[NdEdx].ZdriftDistance));
 	    }
 #endif // DriftDistanceCorrection
@@ -1076,7 +1077,7 @@ Int_t StdEdxY2Maker::Make(){
 	  CdEdx[NdEdx].dES     = dES; // SecRow 
 	  CdEdx[NdEdx].dEZ     = dEZ; // Drift Distance
 	  CdEdx[NdEdx].dEX     = dEX; // dE correction
-	  if (dE <= 0 || dx <= 0) {BadHit(tpcHit->position()); continue;}
+	  if (dE <= 0 || dx <= 0) {BadHit(10,tpcHit->position()); continue;}
 	  TrackLength         += dx;
 	  CdEdx[NdEdx].sector  = sector;
 	  CdEdx[NdEdx].row     = row;
@@ -1159,7 +1160,7 @@ Int_t StdEdxY2Maker::Make(){
 	    D70  = CalcCorrection(cor+1,LogTrackLength);
 	    if (NRrowsTL > 6) {
 	      I70 *= TMath::Exp(-CalcCorrection(cor+6,LogTrackLength));
-	      if (NRrowsTL > 10 && ! m_ClusterFinder) 
+	      if (NRrowsTL > 10 && m_OldClusterFinder) 
 		I70 *= TMath::Exp(-CalcCorrection(cor+10,LogTrackLength));
 	      //?	    D70  = CalcCorrection(cor+7,LogTrackLength);
 	    }
@@ -1181,7 +1182,7 @@ Int_t StdEdxY2Maker::Make(){
 	}
 	if (cor) {
 	  fitZ -= CalcCorrection(cor+4,LogTrackLength);
-	  if (NRrowsTL > 12 && ! m_ClusterFinder) 
+	  if (NRrowsTL > 12 && m_OldClusterFinder) 
 	    fitZ -= CalcCorrection(cor+12,LogTrackLength);
 	  //	fitdZ = CalcCorrection(cor+5,LogTrackLength);
 	  if (cordEdx) {
@@ -1819,7 +1820,25 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
       if (chain) f = chain->GetTFile();
       if (f) f->cd();
     }
-    fZOfBadHits = new TH1D("ZOfBadHits","Z of rejected clusters",100,-210,210);                        
+    fZOfBadHits = new TH1D*[fNZOfBadHits];
+    static Char_t *BadCaseses[fNZOfBadHits] = 
+    {"it is not used in track fit",   
+       "it is flagged ",                
+       "track length is inf ",          
+       "it does not pass check ",       
+       "track sIn is inf ",             
+       "track sOut is inf ",            
+       "dx is out interval [0.5,25]",   
+       "Sector/Row gain < 0",            
+       "drift distance < min",          
+       "drift distance > max",              
+       "drift dE < 0 or dx < 0",            
+       "any of above"
+       };
+    for (Int_t i = 0; i < fNZOfBadHits; i++) 
+      fZOfBadHits[i] = new TH1D(Form("ZOfBadHits%i",i),
+				Form("Z of rejected clusters  because %s",BadCaseses[i]),
+				100,-210,210);                        
     fZOfGoodHits = new TH1D("ZOfGoodHits","Z of accepted clusters",100,-210,210);                        
     fPhiOfBadHits = new TH1D("PhiOfBadHits","Phi of rejected clusters",100, -TMath::Pi(), TMath::Pi());
     fTracklengthInTpcTotal = new TH1D("TracklengthInTpcTotal","Total track in TPC",100,0,200);         
@@ -1841,7 +1860,7 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
 			 150,-1.,2., 500,0.,2.5);
     fTdEdxP70P->SetMarkerColor(6);
     if (! f) {
-      AddHist(fZOfBadHits);           
+      for (Int_t i = 0; i < fNZOfBadHits; i++) AddHist(fZOfBadHits[i]);           
       AddHist(fPhiOfBadHits);         
       AddHist(fTracklengthInTpcTotal);
       AddHist(fTracklengthInTpc);     
@@ -1897,7 +1916,8 @@ void StdEdxY2Maker::QAPlots(StGlobalTrack* gTrack) {
   }
 }
 //________________________________________________________________________________
-void StdEdxY2Maker::BadHit(const StThreeVectorF &xyz) {
-  if (fZOfBadHits) fZOfBadHits->Fill(xyz.z());
-  if (fPhiOfBadHits) fPhiOfBadHits->Fill(TMath::ATan2(xyz.y(),xyz.x()));
+void StdEdxY2Maker::BadHit(Int_t iFlag, const StThreeVectorF &xyz) {
+  if (iFlag >= 0 && iFlag < fNZOfBadHits && fZOfBadHits[iFlag]) fZOfBadHits[iFlag]->Fill(xyz.z());
+  if (fZOfBadHits[fNZOfBadHits-1]) fZOfBadHits[fNZOfBadHits-1]->Fill(xyz.z());
+  if (fPhiOfBadHits!= 0) fPhiOfBadHits->Fill(TMath::ATan2(xyz.y(),xyz.x()));
 }
