@@ -1,5 +1,8 @@
-// $Id: EEmcGeomSimple.cxx,v 1.17 2003/09/17 22:05:33 zolnie Exp $
+// $Id: EEmcGeomSimple.cxx,v 1.18 2004/05/20 21:12:07 zolnie Exp $
 // $Log: EEmcGeomSimple.cxx,v $
+// Revision 1.18  2004/05/20 21:12:07  zolnie
+// added a static instance of EEmcGeomSimple
+//
 // Revision 1.17  2003/09/17 22:05:33  zolnie
 // delete mumbo-jumbo
 //
@@ -64,6 +67,9 @@
 // ######################################################################
 ClassImp(EEmcGeomSimple)
 
+
+// single instance of EEmcGeomSimple
+EEmcGeomSimple EEmcGeomSimple::sInstance;
 
 EEmcGeomSimple::EEmcGeomSimple() 
 {
@@ -252,4 +258,5 @@ EEmcGeomSimple::getTrackPoint(const StTrack& track, Double_t z) const
   double s  = ( z - helix.origin().z() ) / sin( helix.dipAngle())  ;
   return StThreeVectorD(helix.at(s));
 } 
+
 #endif
