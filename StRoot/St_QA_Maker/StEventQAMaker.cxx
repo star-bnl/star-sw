@@ -544,9 +544,9 @@ void StEventQAMaker::MakeHistGlob() {
 	if (event->primaryVertex() && fabs(rcircle)>0.) {
           double qwe = ::pow(firstPoint.x()-event->primaryVertex()->position().x(),2)
 		     + ::pow(firstPoint.y()-event->primaryVertex()->position().y(),2);
-          qwe = sqrt(qwe)/2*rcircle;
+          qwe = ::sqrt(qwe)/(2*rcircle);
 	  if (qwe>0.9999) qwe = 0.999;
-	  Float_t denom = 2*rcircle*asin(qwe);
+	  Float_t denom = 2*rcircle*(::asin(qwe));
 	  hists->m_tanl_zfT->Fill((firstPoint.z() -
 				   event->primaryVertex()->position().z())/denom,
 				  Float_t(TMath::Tan(geom->dipAngle())));
@@ -667,9 +667,9 @@ void StEventQAMaker::MakeHistGlob() {
 	if (event->primaryVertex()) {
           double qwe = ::pow(firstPoint.x()-event->primaryVertex()->position().x(),2)
 		     + ::pow(firstPoint.y()-event->primaryVertex()->position().y(),2);
-          qwe = sqrt(qwe)/2*rcircle;
+          qwe = ::sqrt(qwe)/(2*rcircle);
 	  if (qwe>0.9999) qwe = 0.999;
-	  Float_t denom = 2*rcircle*asin(qwe);
+	  Float_t denom = 2*rcircle*(::asin(qwe));
 	  if (radf>40) {
 	    hists->m_tanl_zfT->Fill((firstPoint.z() -
 				     event->primaryVertex()->position().z())/denom,
@@ -1114,9 +1114,9 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_ppT_eta_recT->Fill(eta,lmevpt);
           double qwe = ::pow(firstPoint.x()-event->primaryVertex()->position().x(),2)
 		     + ::pow(firstPoint.y()-event->primaryVertex()->position().y(),2);
-          qwe = sqrt(qwe)/2*rcircle;
+          qwe = ::sqrt(qwe)/(2*rcircle);
 	  if (qwe>0.9999) qwe = 0.999;
-	  Float_t denom = 2*rcircle*asin(qwe);
+	  Float_t denom = 2*rcircle*(::asin(qwe));
 	  hists->m_ptanl_zfT->Fill((firstPoint.z() -
 				    event->primaryVertex()->position().z())/denom,
 				   Float_t(TMath::Tan(geom->dipAngle())));
@@ -1213,9 +1213,9 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_ppT_eta_recTS->Fill(eta,lmevpt);
           double qwe = ::pow(firstPoint.x()-event->primaryVertex()->position().x(),2)
 		     + ::pow(firstPoint.y()-event->primaryVertex()->position().y(),2);
-          qwe = sqrt(qwe)/2*rcircle;
+          qwe = ::sqrt(qwe)/(2*rcircle);
 	  if (qwe>0.9999) qwe = 0.999;
-	  Float_t denom = 2*rcircle*asin(qwe);
+	  Float_t denom = 2*rcircle*(::asin(qwe));
 	  if (radf>40) hists->m_ptanl_zfT->
 			 Fill((firstPoint.z() - event->primaryVertex()->position().z())/denom,
 			      Float_t(TMath::Tan(geom->dipAngle())));
@@ -2050,8 +2050,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.54 2004/01/10 01:10:17 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.55 2004/02/05 19:04:30 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.55  2004/02/05 19:04:30  genevb
+// math touchup for arc length calcs
+//
 // Revision 2.54  2004/01/10 01:10:17  genevb
 // Preparations for Year 5, added some svt plots
 //
