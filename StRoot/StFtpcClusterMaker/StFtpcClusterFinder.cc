@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.24 2001/12/12 16:01:17 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.25 2002/01/21 22:09:29 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.25  2002/01/21 22:09:29  jcs
+// use average FTPC gas temperature adjusted air pressure
+//
 // Revision 1.24  2001/12/12 16:01:17  jcs
 // Remove old PhiDeflect definitions
 // PhiDeflect has correct sign, add instead of subtracting in calculation of phi angle
@@ -1845,7 +1848,10 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
   
   step_size=((float) mDb->numberOfTimebins()
 	     / (float) mParam->numberOfDriftSteps());
-  deltap=mParam->normalizedNowPressure()-mParam->standardPressure();
+
+  deltap=(mParam->adjustedAirPressureWest() + mParam->adjustedAirPressureEast())/2 - mParam->standardPressure();
+
+  gMessMgr->Info() <<"deltap = average adjustedAirPressure - standardPressure = "<<deltap<<endm;
   
 #ifdef DEBUG
   printf("integrating padtrans table...\n");
