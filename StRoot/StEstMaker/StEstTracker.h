@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.h,v 1.6 2001/03/13 08:20:38 lmartin Exp $
+ * $Id: StEstTracker.h,v 1.7 2001/03/13 19:14:36 didenko Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.h,v $
+ * Revision 1.7  2001/03/13 19:14:36  didenko
+ * check commit
+ *
  * Revision 1.6  2001/03/13 08:20:38  lmartin
  * essai
  *
@@ -194,5 +197,6 @@ class StEstTracker {
   void CleanUp();
   ClassDef(StEstTracker, 1)
 };
+
 inline long StEstTracker::GetNTrack() {return mNTrack;};
 #endif
