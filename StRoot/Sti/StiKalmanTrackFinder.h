@@ -40,7 +40,12 @@ public:
     virtual void setMCSCalculated(bool option);
     void   setMassHypothesis(double m);
     double getMassHypothesis();
-    
+		void   setField(double f);
+		void   setMinContiguousHitCount(int count);
+		void   setMaxNullCount(int count);
+		void   setMaxContiguousNullCount(int count);
+		void   setMaxChi2ForSelection(double chi);
+
     //Local
     virtual void findTrack(StiTrack * t); //throw ( Exception);
     virtual StiKalmanTrackNode * followTrackAt(StiKalmanTrackNode * node); //throw (Exception);
