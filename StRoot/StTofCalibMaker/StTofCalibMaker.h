@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.h,v 1.2 2004/07/15 18:11:22 dongx Exp $
+ * $Id: StTofCalibMaker.h,v 1.3 2004/07/16 15:06:08 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,8 +12,12 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.h,v $
+ * Revision 1.3  2004/07/16 15:06:08  dongx
+ * Z correction function separated for TOFp and TOFr.
+ * Use a new one for RunIV AuAu 200GeV runs
+ *
  * Revision 1.2  2004/07/15 18:11:22  dongx
- * -introduce two new tables in dbase: tofAdcRange & tofResolution
+ *  -introduce two new tables in dbase: tofAdcRange & tofResolution
  *  -continue update on writing StTofPidTraits
  *
  * Revision 1.1  2004/07/01 17:23:48  dongx
@@ -148,7 +152,8 @@ private:
 
     TF1*       mTofrSlewing;
     TF1*       mTofpSlewing;
-    TF1*       mZCorr;
+    TF1*       mTofrZCorr;
+    TF1*       mTofpZCorr;
     TF1*       mPVPDSlewing;
 
     StTofGeometry*    mTofpGeom; //! pointer to the TOF geometry utility class
@@ -156,7 +161,7 @@ private:
     Bool_t            mOuterGeometry;
 
     virtual const char *GetCVS() const 
-      {static const char cvs[]="Tag $Name:  $ $Id: StTofCalibMaker.h,v 1.2 2004/07/15 18:11:22 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+      {static const char cvs[]="Tag $Name:  $ $Id: StTofCalibMaker.h,v 1.3 2004/07/16 15:06:08 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
     
     ClassDef(StTofCalibMaker,2)
 };
