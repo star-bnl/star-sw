@@ -31,7 +31,7 @@
 
 //:----------------------------------------------- MACROS             --
 #define TOKENS " \n\t"
-#define LINESIZE 2000
+#define LINESIZE 5000
 #define MCIF      500  /* max cols in temp file, incs vector multiplicity */
 #define COLLIST   200
 #define NCOL      200  /* max cols in user specification */
@@ -337,7 +337,7 @@ STAFCV_T tdmTable::dumpRows(long ifirst,long nrows,char *out,char *colList) {
   long ii=rowCount(); if(ifirst<0||ii<=ifirst) EML_ERROR(INVALID_TABLE_ROW);
 
   /* Print Table Header Column Names-*/
-  fprintf(ff," ROW #");
+  fprintf(ff," ROW #"); fflush(ff);
   for( i=0;i<columnCount();i++ ){
      fprintf(ff,"\t%s",c=columnName(i)); FREE(c);
      if( DS_TYPE_CHAR == columnTypeCode(i) ) {
@@ -348,14 +348,7 @@ STAFCV_T tdmTable::dumpRows(long ifirst,long nrows,char *out,char *colList) {
 	 if( 1 < columnElcount(i) ){
 	    fprintf(ff,"[0]");
 	    for( long n=1;n<columnElcount(i);n++ ){
-	       if( (8 > n)
-	       ||  (columnElcount(i) == n)
-	       ||  (12 > columnElcount(i))
-	       ){
 		  fprintf(ff,"\t%s[%ld]",c=columnName(i),n); FREE(c);
-	       } else if( (8 == n) ) {
-		  fprintf(ff,"\t***%ld HEADERS UNPRINTED",columnElcount(i)-9);
-	       }
 	    }
 	 }
      }
@@ -384,7 +377,7 @@ STAFCV_T tdmTable::dumpRows(long ifirst,long nrows,char *out,char *colList) {
     while(fgets(line,LINESIZE,ff)) {
       if(strlen(line)>LINESIZE-5) {
         fclose(ff); if(pass==1&&strcmp(out,"screen")) fclose(gg); 
-        EML_ERROR(LINE_TOO_BIG); /* too many cols */
+        EML_ERROR(TOO_MANY_COLS_1); /* too many cols */
       }
       if(!haveSetMask) {
         haveSetMask=7;
@@ -395,7 +388,7 @@ STAFCV_T tdmTable::dumpRows(long ifirst,long nrows,char *out,char *colList) {
         while(cc) {
           if(nmask>=MCIF) {
             fclose(ff); if(pass==1&&strcmp(out,"screen")) fclose(gg); 
-            EML_ERROR(TOO_MANY_COLS);
+            EML_ERROR(TOO_MANY_COLS_2);
           }
           dd=strstr(cc,"["); if(dd) dd[0]=0;
           for(i=0;i<ncol;i++) {

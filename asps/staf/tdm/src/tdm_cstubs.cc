@@ -621,7 +621,9 @@ tdmtable_dump(char* name, long nrows, long ifirst,char *outfile,char *colList)
    if( NULL == (table = tdm->findTable(name)) ){
       EML_FAILURE(OBJECT_NOT_FOUND);
    }
-   table->dumpRows(ifirst,nrows,outfile,colList);
+   if(table->dumpRows(ifirst,nrows,outfile,colList)!=STAFCV_OK) {
+      EML_FAILURE(TABLE_NOT_DUMPED);
+   }
    EML_SUCCESS(STAFCV_OK);
 }
 
