@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.20 2001/08/07 07:51:27 lansdell Exp $
+// $Id: StQABookHist.cxx,v 2.21 2001/10/10 05:00:19 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.21  2001/10/10 05:00:19  genevb
+// Changed ftpc point/track ranges
+//
 // Revision 2.20  2001/08/07 07:51:27  lansdell
 // primvtx check for different multiplicities crashed for MC data, now fixed
 //
@@ -628,7 +631,7 @@ void StQABookHist::BookHistGlob(){
   m_globtrk_good_tot->Rebin(1,"TPC/total");
   m_globtrk_good_tot->SetStats(kFALSE);
   m_globtrk_goodTTS  = QAH::H1F("QaGtrkGoodTTS","globtrk: tot good tracks - tpc,tpc+svt",40,0.,10000.);
-  m_globtrk_goodF    = QAH::H2F("QaGtrkGoodF","globtrk: tot good tracks - ftpc",40,0.,1000.,40,0.,1000.);
+  m_globtrk_goodF    = QAH::H2F("QaGtrkGoodF","globtrk: tot good tracks - ftpc",40,0.,1000.,40,0.,4000.);
   m_globtrk_goodF->SetXTitle("FTPC East");
   m_globtrk_goodF->SetYTitle("FTPC West");
   m_globtrk_fit_prob = QAH::H1F("QaGtrkFitProb","globtrk: prob. fit is correct",100,0,1.2);
@@ -1115,7 +1118,7 @@ void StQABookHist::BookHistPrim(){
   m_primtrk_good    = QAH::H1F("QaPtrkGood",  "primtrk: tot num tracks iflag>0",50,0.,5000.);
   m_primtrk_good_sm = QAH::H1F("QaPtrkGoodsm","primtrk: tot num tracks iflag>0",50,0.,500.);
   m_primtrk_goodTTS = QAH::H1F("QaPtrkGoodTTS","primtrk: tot num tracks iflag>0, tpc,svt",50,0.,5000.);
-  m_primtrk_goodF   = QAH::H2F("QaPtrkGoodF",  "primtrk: tot num tracks iflag>0, ftpc",50,0.,1000.,50,0.,1000.);
+  m_primtrk_goodF   = QAH::H2F("QaPtrkGoodF",  "primtrk: tot num tracks iflag>0, ftpc",50,0.,3000.,50,0.,3000.);
   m_primtrk_goodF->SetXTitle("East");
   m_primtrk_goodF->SetYTitle("West");
   m_primglob_good   = QAH::H1F("QaPtrkGlob","primtrk: ratio primary/global tracks w/ iflag>0",50,0,1);
@@ -1584,13 +1587,13 @@ void StQABookHist::BookHistPoint(){
   m_pnt_svt     = QAH::H1F("QaPointSvt",  "point: # hits svt ",100, 0.,15000.);
   m_pnt_ssd     = QAH::H1F("QaPointSsd",  "point: # hits ssd ",100, 0.,5000.);
   // east and west on same plot
-  m_pnt_ftpc   = QAH::MH1F("QaPointFtpc", "point: # hits ftpc",100,0.,10000.,2);
+  m_pnt_ftpc   = QAH::MH1F("QaPointFtpc", "point: # hits ftpc",100,0.,50000.,2);
   m_pnt_ftpc->Rebin(0,"East");
   m_pnt_ftpc->Rebin(1,"West");
   m_pnt_ftpc->SetStats(kFALSE);
   // east and west on separate plots
-  m_pnt_ftpcE   = QAH::H1F("QaPointFtpcE","point: # hits ftpcE ",100, 0.,10000.);
-  m_pnt_ftpcW   = QAH::H1F("QaPointFtpcW","point: # hits ftpcW ",100, 0.,10000.);
+  m_pnt_ftpcE   = QAH::H1F("QaPointFtpcE","point: # hits ftpcE ",100, 0.,50000.);
+  m_pnt_ftpcW   = QAH::H1F("QaPointFtpcW","point: # hits ftpcW ",100, 0.,50000.);
 
   m_z_hits      = QAH::H1F("QaPointZhits","point: z distribution of hits, tpc",100,-210,210);
   m_pnt_phiT    = QAH::MH1F("QaPointPhiT","point: #phi distribution of hits, tpc",36,0,360,2);
