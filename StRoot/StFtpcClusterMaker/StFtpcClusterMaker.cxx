@@ -1,4 +1,8 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.61  2004/01/28 01:41:15  jeromel
+// Change OST to OS everywhere since defaultoption is now not to print
+// the date.
+//
 // Revision 1.60  2003/11/13 14:12:17  jcs
 // move pressure and gas corrections from StFtpcClusterMaker.cxx to StFtpcGasUtilities
 //
@@ -448,14 +452,14 @@ Int_t StFtpcClusterMaker::Make()
   daqDataset=GetDataSet("StDAQReader");
   if(daqDataset)
     {
-      gMessMgr->Message("", "I", "OST") << "Using StDAQReader to get StFTPCReader" << endm;
+      gMessMgr->Message("", "I", "OS") << "Using StDAQReader to get StFTPCReader" << endm;
       assert(daqDataset);
       daqReader=(StDAQReader *)(daqDataset->GetObject());
       assert(daqReader);
       ftpcReader=daqReader->getFTPCReader();
 
       if (!ftpcReader || !ftpcReader->checkForData()) {
-	gMessMgr->Message("", "W", "OST") << "No FTPC data available!" << endm;
+	gMessMgr->Message("", "W", "OS") << "No FTPC data available!" << endm;
         delete paramReader;
         delete dbReader;
 	return kStWarn;
@@ -518,7 +522,7 @@ Int_t StFtpcClusterMaker::Make()
       }	 
 
 
-      gMessMgr->Message("", "I", "OST") << " Using normalizedNowPressure = "<<paramReader->normalizedNowPressure()<<" gasTemperatureWest = "<<paramReader->gasTemperatureWest()<<" gasTemperatureEast = "<<paramReader->gasTemperatureEast()<<endm; 
+      gMessMgr->Message("", "I", "OS") << " Using normalizedNowPressure = "<<paramReader->normalizedNowPressure()<<" gasTemperatureWest = "<<paramReader->gasTemperatureWest()<<" gasTemperatureEast = "<<paramReader->gasTemperatureEast()<<endm; 
 
        paramReader->setAdjustedAirPressureWest(paramReader->normalizedNowPressure()*((dbReader->baseTemperature()+STP_Temperature)/(paramReader->gasTemperatureWest()+STP_Temperature)));
       gMessMgr->Info() <<" paramReader->setAdjustedAirPressureWest = "<<paramReader->adjustedAirPressureWest()<<endm;
@@ -548,12 +552,12 @@ Int_t StFtpcClusterMaker::Make()
 				  (char *) fcl_ftpcadc->GetTable(),
 				  fcl_ftpcadc->GetNRows());
 
-      gMessMgr->Message("", "I", "OST") << "created StFTPCReader from tables" << endm;
+      gMessMgr->Message("", "I", "OS") << "created StFTPCReader from tables" << endm;
       using_FTPC_slow_simulator = 1;
     }
     else {
       
-      gMessMgr->Message("", "I", "OST") <<"StFtpcClusterMaker: Tables are not found:" 
+      gMessMgr->Message("", "I", "OS") <<"StFtpcClusterMaker: Tables are not found:" 
 					<< " fcl_ftpcsqndx = " << fcl_ftpcsqndx 
 					<< " fcl_ftpcadc   = " << fcl_ftpcadc << endm;
     }
@@ -562,7 +566,7 @@ Int_t StFtpcClusterMaker::Make()
   if(ftpcReader) {
 
 
-    if(Debug()) gMessMgr->Message("", "I", "OST") << "start running StFtpcClusterFinder" << endm;
+    if(Debug()) gMessMgr->Message("", "I", "OS") << "start running StFtpcClusterFinder" << endm;
     
     StFtpcClusterFinder *fcl = new StFtpcClusterFinder(ftpcReader, 
 						       paramReader, 
@@ -596,14 +600,14 @@ Int_t StFtpcClusterMaker::Make()
 							     g2t_track,
 							     g2t_ftp_hit);
 
-      if(Debug()) gMessMgr->Message("", "I", "OST") << "NO RAW DATA AVAILABLE - start running StFtpcFastSimu" << endm;
+      if(Debug()) gMessMgr->Message("", "I", "OS") << "NO RAW DATA AVAILABLE - start running StFtpcFastSimu" << endm;
       
       StFtpcFastSimu *ffs = new StFtpcFastSimu(geantReader,
 					       paramReader,
                                                dbReader,
 					       hitarray,
 					       ghitarray);
-      if(Debug()) gMessMgr->Message("", "I" "OST") << "finished running StFtpcFastSimu" << endm;
+      if(Debug()) gMessMgr->Message("", "I" "OS") << "finished running StFtpcFastSimu" << endm;
       delete ffs;
       delete geantReader;
     }

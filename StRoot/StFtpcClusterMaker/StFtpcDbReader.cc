@@ -1,6 +1,10 @@
-// $Id: StFtpcDbReader.cc,v 1.26 2003/07/03 13:21:50 fsimon Exp $
+// $Id: StFtpcDbReader.cc,v 1.27 2004/01/28 01:41:15 jeromel Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.27  2004/01/28 01:41:15  jeromel
+// Change OST to OS everywhere since defaultoption is now not to print
+// the date.
+//
 // Revision 1.26  2003/07/03 13:21:50  fsimon
 // Added cathode offset information to constructor for SlowSimulator
 //
@@ -631,7 +635,7 @@ Float_t StFtpcDbReader::padrowZPosition(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: padrowZPosition index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcDbReader: padrowZPosition index out of range, using 0", "W", "OS");
       return mPadrowZPosition[0];
     }
 }
@@ -645,7 +649,7 @@ Float_t StFtpcDbReader::magboltzEField(Int_t i)
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: magboltzEField index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcDbReader: magboltzEField index out of range, using 0", "W", "OS");
       return mMagboltzEField[0];
     }
 }
@@ -658,7 +662,7 @@ Float_t StFtpcDbReader::magboltzVDrift(Int_t i, Int_t padrow)
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: magboltzVDrift index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcDbReader: magboltzVDrift index out of range, using 0", "W", "OS");
       return mMagboltzVDrift[0];
     }
 }
@@ -671,7 +675,7 @@ Float_t StFtpcDbReader::magboltzDeflection(Int_t i, Int_t padrow)
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: magboltzDeflection index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcDbReader: magboltzDeflection index out of range, using 0", "W", "OS");
       return mMagboltzDeflection[0];
     }
 }
@@ -684,7 +688,7 @@ Float_t StFtpcDbReader::magboltzdVDriftdP(Int_t i, Int_t padrow)
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: magboltzdVDriftdP index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcDbReader: magboltzdVDriftdP index out of range, using 0", "W", "OS");
       return mMagboltzdVDriftdP[0];
     }
 }
@@ -697,7 +701,7 @@ Float_t StFtpcDbReader::magboltzdDeflectiondP(Int_t i, Int_t padrow)
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: magboltzdDeflectiondP index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcDbReader: magboltzdDeflectiondP index out of range, using 0", "W", "OS");
       return mMagboltzdDeflectiondP[0];
     }
 }
@@ -710,7 +714,7 @@ Float_t StFtpcDbReader::amplitudeSlope(Int_t i, Int_t padrow)
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: amplitudeSlope index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcDbReader: amplitudeSlope index out of range, using 0", "W", "OS");
       return ampslopeTable[0].slope[0];
     }
 }
@@ -723,7 +727,7 @@ Float_t StFtpcDbReader::amplitudeOffset(Int_t i, Int_t padrow)
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: amplitudeOffset index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcDbReader: amplitudeOffset index out of range, using 0", "W", "OS");
       return ampoffsetTable[0].offset[0];
     }
 }
@@ -736,7 +740,7 @@ Float_t StFtpcDbReader::timeOffset(Int_t i, Int_t padrow)
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: timeOffset index out of range, using 0", "W", "OST");
+      gMessMgr->Message("StFtpcDbReader: timeOffset index out of range, using 0", "W", "OS");
       return timeoffsetTable[0].offset[0];
     }
 }
@@ -751,7 +755,7 @@ Int_t StFtpcDbReader::setMagboltzEField(Int_t i, Float_t newvalue)
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: magboltzEField index out of range, not changed", "W", "OST");
+      gMessMgr->Message("StFtpcDbReader: magboltzEField index out of range, not changed", "W", "OS");
       return 0;
     }
 }
@@ -765,7 +769,7 @@ Int_t StFtpcDbReader::setMagboltzVDrift(Int_t i, Int_t padrow, Float_t newvalue)
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: magboltzVDrift index out of range, not changed", "W", "OST");
+      gMessMgr->Message("StFtpcDbReader: magboltzVDrift index out of range, not changed", "W", "OS");
       return 0;
     }
 }
@@ -779,7 +783,7 @@ Int_t StFtpcDbReader::setMagboltzDeflection(Int_t i, Int_t padrow, Float_t newva
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: magboltzDeflection index out of range, not changed", "W", "OST");
+      gMessMgr->Message("StFtpcDbReader: magboltzDeflection index out of range, not changed", "W", "OS");
       return 0;
     }
 }
@@ -793,7 +797,7 @@ Int_t StFtpcDbReader::setMagboltzdVDriftdP(Int_t i, Int_t padrow, Float_t newval
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: magboltzdVDriftdP index out of range, not changed", "W", "OST");
+      gMessMgr->Message("StFtpcDbReader: magboltzdVDriftdP index out of range, not changed", "W", "OS");
       return 0;
     }
 }
@@ -807,7 +811,7 @@ Int_t StFtpcDbReader::setMagboltzdDeflectiondP(Int_t i, Int_t padrow, Float_t ne
     }
   else
     {
-      gMessMgr->Message("StFtpcDbReader: magboltzdDeflectiondP index out of range, not changed", "W", "OST");
+      gMessMgr->Message("StFtpcDbReader: magboltzdDeflectiondP index out of range, not changed", "W", "OS");
       return 0;
     }
 }

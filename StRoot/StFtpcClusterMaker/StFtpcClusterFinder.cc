@@ -1,6 +1,10 @@
-// $Id: StFtpcClusterFinder.cc,v 1.54 2004/01/02 10:27:38 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.55 2004/01/28 01:41:13 jeromel Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.55  2004/01/28 01:41:13  jeromel
+// Change OST to OS everywhere since defaultoption is now not to print
+// the date.
+//
 // Revision 1.54  2004/01/02 10:27:38  jcs
 // remove incorrect correction to lower limit in fastlog filling loop
 //
@@ -295,7 +299,7 @@ int StFtpcClusterFinder::search()
 
   if(pradius == 0 || pdeflection == 0)
     {
-      gMessMgr->Message("", "E", "OST") << "Padtrans memory allocation failed, exiting!" << endm;
+      gMessMgr->Message("", "E", "OS") << "Padtrans memory allocation failed, exiting!" << endm;
       return 0;
     }
 
@@ -319,14 +323,14 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
   /* integrate padtrans table from magboltz database */
   if(!calcpadtrans(pradius, pdeflection,deltaAirPressure))
     {
-      gMessMgr->Message("", "E", "OST") << "Couldn't calculate padtrans table, exiting!" << endm;
+      gMessMgr->Message("", "E", "OS") << "Couldn't calculate padtrans table, exiting!" << endm;
       return 0;
     }
 
   /* initialize CUC memory handling */
   if(!cucInit(CUCMemory, CUCMemoryArray, &CUCMemoryPtr))
     {
-      gMessMgr->Message("", "E", "OST") << "Couldn't initialize CUC memory, exiting!" << endm;
+      gMessMgr->Message("", "E", "OS") << "Couldn't initialize CUC memory, exiting!" << endm;
       return 0;
     }
 
@@ -447,7 +451,7 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 		      if(!cucFree(CUCMemory, CUCMemoryArray, 
 				  &CUCMemoryPtr, DeleteCUC))
 			{
-			  gMessMgr->Message("", "E", "OST") << "Fatal memory management error."  << endm;
+			  gMessMgr->Message("", "E", "OS") << "Fatal memory management error."  << endm;
 			  return 0;
 			}
 		    }
@@ -783,7 +787,7 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 	      if(!cucFree(CUCMemory, CUCMemoryArray, 
 			  &CUCMemoryPtr, DeleteCUC))
 		{
-		  gMessMgr->Message("", "E", "OST") << "Fatal memory management error." << endm;
+		  gMessMgr->Message("", "E", "OS") << "Fatal memory management error." << endm;
 		  return 0;
 		}
 	      LastCUC=CurrentCUC;
@@ -793,7 +797,7 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
     } // end of: for(iRow...)
 
 }  // end of: for(iftpc
-  gMessMgr->Message("", "I", "OST") << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " <<  mPoint->GetEntriesFast() << " hits." << endm;
+  gMessMgr->Message("", "I", "OS") << "StFtpcClusterFinder found "  << clusters << " clusters and processed to " <<  mPoint->GetEntriesFast() << " hits." << endm;
   
 #ifdef DEBUGFILE
   fclose(fin);
@@ -1269,7 +1273,7 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	//clfradius->Fill(Peak->Rad);
       if (Peak->x == 0. && Peak->y == 0.) {
 	// This if-statement can be deleted as soon as the slow simulator is fixed. This also occurs for FTPC DAQ data.
-	gMessMgr->Message("Hit rejected because of an error in the FTPC data. (x, y, z) = (0. ,0., z)", "W", "OST");
+	gMessMgr->Message("Hit rejected because of an error in the FTPC data. (x, y, z) = (0. ,0., z)", "W", "OS");
       }
 
 /*
@@ -1723,7 +1727,7 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	    //clfradius->Fill(Peak[iPeakIndex].Rad);
 	  if (Peak[iPeakIndex].x == 0. && Peak[iPeakIndex].y == 0.) {
 	    // This if-statement can be deleted as soon as the slow simulator is fixed. This also occurs for FTPC DAQ data.
-	    gMessMgr->Message("Hit rejected because of an error in the FTPC data. (x, y, z) = (0. ,0., z)", "W", "OST");
+	    gMessMgr->Message("Hit rejected because of an error in the FTPC data. (x, y, z) = (0. ,0., z)", "W", "OS");
 	  }
 	  
 	  /* in very complicated clusters some hits may have been unfolded
@@ -2040,7 +2044,7 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
 	    && mDb->magboltzEField(j) < e_now; j++);
       if(j<1 || j>mDb->numberOfMagboltzBins())
 	{
-	  gMessMgr->Message("", "E", "OST") << "Error 1: j=" << j << ", v_buf=" << v_buf << " e_drift=" << mDb->magboltzEField(j) << ", e_now=" << e_now << endm;
+	  gMessMgr->Message("", "E", "OS") << "Error 1: j=" << j << ", v_buf=" << v_buf << " e_drift=" << mDb->magboltzEField(j) << ", e_now=" << e_now << endm;
 	  return FALSE;
 	}
       v_buf=j-1;
@@ -2074,7 +2078,7 @@ int StFtpcClusterFinder::calcpadtrans(double *pradius,
 	  
 	  if(j<1 || j>mDb->numberOfMagboltzBins())
 	    {
-	      gMessMgr->Message("", "E", "OST") << "Error 2: j=" << j << ", v_buf=" << v_buf << " e_drift=" << mDb->magboltzEField(j) << ", e_now=" << e_now << endm;
+	      gMessMgr->Message("", "E", "OS") << "Error 2: j=" << j << ", v_buf=" << v_buf << " e_drift=" << mDb->magboltzEField(j) << ", e_now=" << e_now << endm;
 	      return FALSE;
 	    }
 	  
