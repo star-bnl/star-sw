@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.45  2000/01/12 15:43:49  ward
+// Added helpful error message when sectors are not in order in noiseElim.tpcdaq.
+//
 // Revision 1.44  1999/12/31 03:39:11  ward
 // Fixed a bug in setting SeqModBreak with noise elim on.
 //
@@ -385,7 +388,7 @@ void St_tpcdaq_Maker::SetGainCorrectionStuff(int sector) {
 #endif
 #ifdef NOISE_ELIM
 void St_tpcdaq_Maker::SetNoiseEliminationStuff(tpcdaq_noiseElim *noiseElim) {
-  int zz,sector,row; FILE *ff; char line[200],*cc,*dd,*ee;
+  int prevsector=-123,zz,sector,row; FILE *ff; char line[200],*cc,*dd,*ee;
   for(sector=0;sector<24;sector++) { noiseElim[sector].npad=0; noiseElim[sector].nbin=0; }
   ff=fopen("noiseElim.tpcdaq","r");
   if(!ff) return;
@@ -396,10 +399,23 @@ void St_tpcdaq_Maker::SetNoiseEliminationStuff(tpcdaq_noiseElim *noiseElim) {
       if((ee=strstr(line,"time bins"))) { for(zz=0;zz<9;zz++) ee[zz]=' '; }
       cc=strtok(line," ,\n"); cc=strtok(NULL," \n"); if(cc) sector=atoi(cc); else sector=0;
       if(sector>=1&&sector<=24) {
+        if(sector<=prevsector) {
+          PP"You have a format error in noiseElim.tpcdaq.  The sectors do not\n"); 
+          PP"appear in order.  For example:\n");
+          PP"Correct:\n  sector 1 time bins 1-20\n  sector 5 time bins 1-20\n  sector 6 time bins 1-20\n");
+          PP"Wrong:\n  sector 1 time bins 1-20\n  sector 6 time bins 1-20\n  sector 5 time bins 1-20\n");
+          exit(2); // See the error message above.
+        }
+        prevsector=sector;
         cc=strtok(NULL," ,\n");
         while(cc) {
+          PP"bbb sector = %3d (%3d), cc='%s'.\n",sector,sector-1,cc);
           dd=strstr(cc,"-");
-          if(!dd||noiseElim[sector-1].nbin>=BINRANGE) { PP"Error 88u tpcdaq, exiting...\n"); exit(2); }
+          if(noiseElim[sector-1].nbin>=BINRANGE) {
+            PP"noiseElim[%d].nbin = %d >= %d\n",sector-1,noiseElim[sector-1].nbin,BINRANGE);
+            PP"Error 81z tpcdaq, exiting...\n"); exit(2);
+          }
+          if(!dd) { PP"Error 82n tpcdaq (please check noiseElim.tpcdaq).  Exiting...\n"); exit(2); }
           noiseElim[sector-1].low[noiseElim[sector-1].nbin]=atoi(cc);
           noiseElim[sector-1].up[noiseElim[sector-1].nbin]=atoi(dd+1);
           (noiseElim[sector-1].nbin)++;
@@ -612,7 +628,7 @@ Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
 Int_t St_tpcdaq_Maker::Make() {
   int ii,errorCode;
   mErr=0;
-  printf("I am Eliot Ness (bang bang).\n"); 
+  printf("I am Roy Rogers.\n"); 
   errorCode=GetEventAndDecoder();
   if(gDAQ) { victor=victorPrelim->getTPCReader(); assert(victor); }
   printf("GetEventAndDecoder() = %d\n",errorCode);
