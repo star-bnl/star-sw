@@ -22,13 +22,13 @@ class StEmcMipSpectra : public StEmcSpectra
   protected:   
   public: 
 
-                   StEmcMipSpectra(const char*); ///< Default constructor 
-  virtual          ~StEmcMipSpectra();///< Default destructor 
-           void    DrawEtaBin(Int_t);///< Draw eta bin spectrum  
-           Bool_t  CalibrateEtaBin(Int_t,Int_t);///< Calibrate eta bin 
-           Bool_t  CalibrateBin(Int_t,Int_t);///< Calibrate individual bin 
-           Bool_t  CalibrateByMip(Int_t,TArrayF,Int_t,Int_t); ///< Does spectrum fit 
-           TArrayF GetEtaBinSpectra(Int_t);///< Return Eta bin spectrum 
+                   StEmcMipSpectra(const char*); //!< Default constructor 
+  virtual          ~StEmcMipSpectra();//!< Default destructor 
+           void    DrawEtaBin(Int_t);//!< Draw eta bin spectrum  
+           Bool_t  CalibrateEtaBin(Int_t,Int_t);//!< Calibrate eta bin 
+           Bool_t  CalibrateBin(Int_t,Int_t);//!< Calibrate individual bin 
+           Bool_t  CalibrateByMip(Int_t,TArrayF,Int_t,Int_t); //!< Does spectrum fit 
+           TArrayF GetEtaBinSpectra(Int_t);//!< Return Eta bin spectrum 
 
   ClassDef(StEmcMipSpectra,1)
 };

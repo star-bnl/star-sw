@@ -122,7 +122,7 @@ Int_t StEmcCalibrationMaker::Init()
   }
 
   evnumber=0;
-  //if(calibGeo) delete calibGeo;
+  if(calibGeo) delete calibGeo;
   //Geo=new StEmcGeom(detname[detnum].Data());
   calibGeo=StEmcGeom::getEmcGeom(detname[detnum].Data());
   nbins=calibGeo->NModule()*calibGeo->NEta()*calibGeo->NSub();
@@ -309,8 +309,8 @@ Int_t StEmcCalibrationMaker::Make()
   cout <<"***** Reading HITS\n";
   switch (Settings_st[0].DataType)
   {
-    case(0): kReadOk=ReadHitsStEvent();   break;
-    case(1): kReadOk=ReadHitsStEvent();   break;
+    case(0): kReadOk=ReadHitsOffline();   break;
+    case(1): kReadOk=ReadHitsOffline();   break;
   }
   
   if(!kReadOk)
@@ -470,7 +470,7 @@ void StEmcCalibrationMaker::Clear(const Option_t *option)
   return;
 }
 //_____________________________________________________________________________
-Bool_t StEmcCalibrationMaker::ReadHitsStEvent()
+Bool_t StEmcCalibrationMaker::ReadHitsOffline()
 {
 
   event=(StEvent*)GetInputDS("StEvent");
@@ -560,7 +560,7 @@ Bool_t StEmcCalibrationMaker::CalcZVertex()
   }
   
   cout<<"***** No vertex in the StEvent.  try to calculate one...\n";  
-  if(nTracks<3) return kFALSE;
+  /*if(nTracks<3) return kFALSE;
     
   zVertex=0;
   Float_t c=0;
@@ -593,7 +593,7 @@ Bool_t StEmcCalibrationMaker::CalcZVertex()
   }
   if(c<3) return kFALSE;
   zVertex/=c;
-  return kTRUE;
+  return kTRUE;*/
   return kFALSE;
 }
 //_____________________________________________________________________________

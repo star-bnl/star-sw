@@ -9,7 +9,7 @@
 //  
 /***************************************************************************
  *
- * $Id: StAnalysisMaker.h,v 2.2 2002/01/24 22:29:31 jeromel Exp $
+ * $Id: StAnalysisMaker.h,v 2.1 2000/07/12 05:23:34 ullrich Exp $
  *
  * Author: Torre Wenaus, BNL,
  *         Thomas Ullrich, Nov 1999
@@ -23,9 +23,6 @@
  ***************************************************************************
  *
  * $Log: StAnalysisMaker.h,v $
- * Revision 2.2  2002/01/24 22:29:31  jeromel
- * virtual const GetCVS()
- *
  * Revision 2.1  2000/07/12 05:23:34  ullrich
  * Updated for better use as template for actual analysis.
  *
@@ -95,10 +92,6 @@ public:
     Int_t  Init();                      // called once at the beginning of your job
     Int_t  Make();                      // invoked for every event
     Int_t  Finish();                    // called once at the end
-    virtual const char *GetCVS() {
-      static const char cvs[]="Tag $Name:  $ $Id: StAnalysisMaker.h,v 2.2 2002/01/24 22:29:31 jeromel Exp $ built "__DATE__" "__TIME__ ; 
-      return cvs;
-    }
 
 private:
     //

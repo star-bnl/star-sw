@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.260 2002/01/24 21:40:13 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.263 2002/01/30 22:34:49 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -117,12 +117,15 @@ Bfc_st BFC[] = {
   {"BPP2001"     ,""  ,"","ry2001,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                       ,"pp Base chain for 2001 (tpc+rhic, no tags)",kFALSE},
   {"pp2001"      ,""  ,"",
-   "pp,BPP2001,-PreVtx,-SpinTag,l3onl,tofDat,AlignSectors,ExB,OBmap,OClock,OPr13",
+   "pp,BPP2001,-PreVtx,-SpinTag,l3onl,tofDat,emcDY2,AlignSectors,ExB,OBmap,OClock,OPr13",
    "",""                                                                                 ,"pp 2001",kFALSE},
 
 
-  // Other chains
+  // Other chains/Calibration
   {"LaserCal",""  ,"","db,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","","", "Laser Calibration Chain",kFALSE},
+  {"VtxSeedCal","","",
+   "pp2001 -l3onl -rich -rch -RichPiD -tofDat -v0 -xi -kink FindVtxSeed NoEvent -tree -tags -QA -EventQA",
+                                                                     "","","Pass0 Vertex evaluator",kFALSE},
 
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -266,8 +269,8 @@ Bfc_st BFC[] = {
   {"Velo"        ,"","tpcChain","tpc_T,tls"                         ,"StVeloMaker","StVeloMaker","",kFALSE},
   {"TpcHitFilter","tpc_hit_filter","tpcChain",""    ,"StTpcHitFilterMaker","StTpcHitFilterMaker","",kFALSE},
   {"tpt"         ,"tpc_tracks","tpcChain","tpc_T,tls,"     ,"St_tpt_Maker","St_tpc,St_tpt_Maker","",kFALSE},
-  {"TpcT0"      ,"TpcT0","","tpc_T,svt_T,ctf_T,ftpcT,globT,tls,db,tpcDB,tpc_daq,kalman","StTpcT0Maker",
-                   "St_tpc,St_tcl_Maker,St_tpt_Maker,St_svt,St_global,St_dst_Maker,StTpcT0Maker","",kFALSE},
+  {"TpcT0"       ,"TpcT0","","tpc_T,svt_T,ctf_T,ftpcT,globT,tls,db,tpcDB,tpc_daq,kalman","StTpcT0Maker",
+              "St_tpc,St_tcl_Maker,St_tpt_Maker,St_svt,St_global,St_dst_Maker,StPass0CalibMaker","",kFALSE},
   {"ChargeStep","","","tpc_T,globT,tls,db,tpcDB,tpc_daq","StChargeStepMaker","StChargeStepMaker","",kFALSE},
   {"laser"       ,"tpc_tracks","LaserTest,tpcChain","tdaq,tpc,-tpt,-PreVtx"
                                            ,"StLaserEventMaker","StLaserEvent,StLaserEventMaker","",kFALSE},
@@ -325,6 +328,8 @@ Bfc_st BFC[] = {
 
   {"dst"         ,"dst","globalChain","dstOut,SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT,svt_T"
                                                  ,"St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"FindVtxSeed" ,"FindVtxSeed","","","StVertexSeedMaker","St_global,St_dst_Maker,StPass0CalibMaker",
+                                                                     "Performs vertex seed finding",kFALSE},
   {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil"         ,"StdEdxMaker","StdEdxMaker","",kFALSE},
   {"Event"       ,"","","StEvent,tpcDB"                           ,"StEventMaker","StEventMaker","",kFALSE},
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
@@ -1081,6 +1086,7 @@ void StBFChain::SetGeantOptions(){
   }
 }
 //_____________________________________________________________________
+/// This method treats the DbV options used for database timestamp.
 void StBFChain::SetDbOptions(){
   Int_t i;
   Int_t Idate=0, Itime=0;

@@ -1,10 +1,7 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.25 2001/08/06 17:53:23 dietel Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.24 2001/06/27 16:15:24 flierl Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
-// Revision 1.25  2001/08/06 17:53:23  dietel
-// Added missing file: RC_config.h
-//
 // Revision 1.24  2001/06/27 16:15:24  flierl
 // ommit empty padrows from raw data files
 //
@@ -118,8 +115,8 @@
 #include "St_l3banks_2_tphits.h"
 #include "TStopwatch.h"
 #include <string.h>
-#include "Stl3Util/base/St_l3_Coordinates.h"
-#include "Stl3Util/base/St_l3_Coordinate_Transformer.h"
+#include "St_l3_Coordinates.h"
+#include "St_l3_Coordinate_Transformer.h"
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
