@@ -62,7 +62,7 @@ C<----------------------------------------------------------------------
       INTEGER   id, id1, id2
       INTEGER   ierr, iflag, iflag1
       INTEGER   i, j, k, jk
-      INTEGER   id_vertex, id_v0
+      INTEGER   last_vertex, id_vertex, id_v0
       INTEGER   n_v, n_xi
       INTEGER   idet_daughter(2), idet_v0, idet_b, id_det
  
@@ -118,17 +118,17 @@ c*** pgj: loop to find main vertex and maximum key value
       vmain(2) = 0.
       vmain(3) = 0.
 
-      id_vertex = 0
+      last_vertex = 0
 
       if( vertex_h.nok .gt. 0 ) then
         do i= 1, vertex_h.nok
-          if( vertex(i).vtx_id .eq. 1 .and. vertex(i).iflag .eq. 1) then
+          if( vertex(i).vtx_id .eq. kEventVtxId .and. 
+     >        vertex(i).iflag  .eq. 1           ) then
             vmain(1) = vertex(i).x
             vmain(2) = vertex(i).y
             vmain(3) = vertex(i).z
-c          else if( vertex(i).vtx_id .eq. 2 ) then
           endif
-          id_vertex = max(id_vertex,vertex(i).id)
+          last_vertex = max(last_vertex,vertex(i).id)
         enddo
       endif
 
@@ -136,18 +136,19 @@ c*** pgj: loop over all v0 vertices
 
       DO 10 j = 1, v0_vertex_h.nok
 
-        id_v0 = v0_vertex(j).id_vertex
+        id_v0 = v0_vertex(j).id
+        id_vertex = v0_vertex(j).id_vertex
 
 c*** pgj: fast lookup for locating vertex entry
 
-        k = id_v0
-        if( vertex(k).id .eq. id_v0 ) GO TO 101
+        k = id_vertex
+        if( vertex(k).id .eq. id_vertex ) GO TO 101
         call StWarning('EXI - fast lookup for vertex entry failed')
 
 c*** pgj: slow failsafe method for locating vertex index
 
         do k = 1, vertex_h.nok
-          if( vertex(k).id .eq. id_v0 ) GO TO 101
+          if( vertex(k).id .eq. id_vertex ) GO TO 101
         enddo
 
 101     CONTINUE
@@ -353,7 +354,7 @@ c*** wkw: breakout if n_xi=maxlen
 
 c*** pgj: fill vertex table
 
-                vertex(n_v).id = id_vertex + n_xi
+                vertex(n_v).id = last_vertex + n_xi
                 vertex(n_v).det_id = 100*vertex(k).det_id+globtrk(i).det_id
                 vertex(n_v).vtx_id = kXiVtxId
                 vertex(n_v).x = xpp(1)
@@ -416,7 +417,7 @@ c                costh = cos(atan2(pper,ppar_cm))
 c*** pgj: fill auxiliary table
 
                 xi_vertex(n_xi).id    = n_xi
-                xi_vertex(n_xi).id_xi = id_vertex + n_xi
+                xi_vertex(n_xi).id_xi = last_vertex + n_xi
                 xi_vertex(n_xi).id_v0 = id_v0 
                 xi_vertex(n_xi).id_b  = globtrk(i).id
                 xi_vertex(n_xi).dca   = dca
@@ -438,10 +439,10 @@ c*** pgj: fill exiaux table if present (note: default allocation is 1)
                 elseif( n_xi .le. exiaux_h.maxlen ) then
                   exiaux_h.nok = n_xi
                   exiaux(n_xi).id      = n_xi
-                  exiaux(n_xi).id_xi   = id_vertex + n_xi
+                  exiaux(n_xi).id_xi   = last_vertex + n_xi
                   exiaux(n_xi).id_b    = globtrk(i).id
                   exiaux(n_xi).id_v0   = id_v0
-                  exiaux(n_xi).det_id  = 100*idet_b+vertex(k).det_id
+                  exiaux(n_xi).det_id  = 100*vertex(k).det_id + idet_b
 c                  exiaux(n_xi).gpid_b  =
 c                  exiaux(n_xi).ndegf   =
                   exiaux(n_xi).charge  = globtrk(i).icharge
