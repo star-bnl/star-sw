@@ -1,5 +1,8 @@
-// $Id: StarMCApplication.h,v 1.2 2004/07/13 19:14:52 potekhin Exp $
+// $Id: StarMCApplication.h,v 1.3 2004/09/02 23:29:57 potekhin Exp $
 // $Log: StarMCApplication.h,v $
+// Revision 1.3  2004/09/02 23:29:57  potekhin
+// fixed a bug in the function pointer declaration
+//
 // Revision 1.2  2004/07/13 19:14:52  potekhin
 // Added a finish event callback, event display
 // as a reference
@@ -13,6 +16,7 @@
 #include "StarDetectorConstruction.h"
 #include "StarModule.h"
 #include "StarHit.h"
+#include "StarVertex.h"
 #include "StarMCDisplay.h"
 #include "StarRootManager.h"
 
@@ -21,7 +25,7 @@ class StarStack;
 class StarGenerator;
 class StarMCDisplay;
 
-typedef void (*pfv) ();
+typedef void (*pfv) (TObjArray*);
 
 class StarMCApplication : public TVirtualMCApplication
 {
@@ -37,6 +41,7 @@ class StarMCApplication : public TVirtualMCApplication
     // methods
     void InitMC(void);
     void RunMC(Int_t nofEvents);
+    void Trig(void);
     void FinishRun();
     void ReadEvent(Int_t i);
  
@@ -62,15 +67,22 @@ class StarMCApplication : public TVirtualMCApplication
     virtual  void SetGenerator  (StarGenerator                  *generator);
     virtual  void ResetGenerator(StarGenerator                  *generator);
 
-    TObjArray*   Modules() const {return _modules;}
-    TObjArray*   Hits()    const {return _hits;}
+    TObjArray*   Modules()  const {return _modules;}
+    TObjArray*   Hits()     const {return _hits;}
+    TObjArray*   Vertices() const {return StarVertex::Vertices();}
 
     virtual void AddModule(StarModule* m_);
     virtual void AddHit   (StarHit*    h_);
 
     virtual void PrintHits(void);
+    virtual void PrintVertex  (int n_=-1);
+    virtual void PrintParticle(int n_=-1);
+    virtual void PrintKine(void);
+    virtual void SetFinishEventCB(pfv cb_) {_finishEventCB=cb_;}
 
-    virtual void SetFinishEventCB(pfv cb_) {_finishEventCB=cb_;};
+    StarStack* Stack(void) {return _stack;}
+
+    virtual void SetInterest(const char* processName_);
 
   private:
     // methods
