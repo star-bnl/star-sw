@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.3 2001/11/06 17:05:30 posk Exp $
+// $Id: StFlowEvent.h,v 1.4 2002/03/23 22:54:28 posk Exp $
 //
 // Authors: Art Poskanzer, LBNL, and Alexander Wetzler, IKF, Dec 2000
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.4  2002/03/23 22:54:28  posk
+// More 40 GeV compatability.
+//
 // Revision 1.3  2001/11/06 17:05:30  posk
 // New 40 Gev centrality bins. Using only sin terms at 40 GeV.
 //
@@ -184,7 +187,7 @@ inline void  StFlowEvent::SetPtWgt() { mPtWgt = kTRUE; }
 
 inline void  StFlowEvent::SetYWgt() { mYWgt = kTRUE; }
 
-inline void  StFlowEvent::SetSinOnly() { mYWgt = kTRUE; }
+inline void  StFlowEvent::SetSinOnly() { mSinOnly = kTRUE; }
 
 inline void  StFlowEvent::SetStripes(const Int_t stripe) { mStripes = stripe; }
 

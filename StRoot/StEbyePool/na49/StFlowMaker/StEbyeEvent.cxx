@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEbyeEvent.cxx,v 1.3 2001/11/06 17:05:26 posk Exp $
+ * $Id: StEbyeEvent.cxx,v 1.4 2002/03/23 22:54:26 posk Exp $
  *
  * Author: Jeff Reid, UW, July 2000
  +         Art Poskanzer, LBNL Nov. 2000
@@ -14,6 +14,9 @@
  **********************************************************************
  *
  * $Log: StEbyeEvent.cxx,v $
+ * Revision 1.4  2002/03/23 22:54:26  posk
+ * More 40 GeV compatability.
+ *
  * Revision 1.3  2001/11/06 17:05:26  posk
  * New 40 Gev centrality bins. Using only sin terms at 40 GeV.
  *
@@ -85,11 +88,11 @@ Float_t StEbyeEvent::Centrality() {
   else {evetoCal = 0;}
 
   //Set centrality
-  if (mEveto < ZdcDividers[0]) { centrality = 1; }
-  else if (mEveto < ZdcDividers[1]) { centrality = 2; }
-  else if (mEveto < ZdcDividers[2]) { centrality = 3; }
-  else if (mEveto < ZdcDividers[3]) { centrality = 4; }
-  else if (mEveto < ZdcDividers[4]) { centrality = 5; }
+  if (evetoCal < ZdcDividers[0]) { centrality = 1; }
+  else if (evetoCal < ZdcDividers[1]) { centrality = 2; }
+  else if (evetoCal < ZdcDividers[2]) { centrality = 3; }
+  else if (evetoCal < ZdcDividers[3]) { centrality = 4; }
+  else if (evetoCal < ZdcDividers[4]) { centrality = 5; }
   else { centrality = 6; }
 
   return centrality;
