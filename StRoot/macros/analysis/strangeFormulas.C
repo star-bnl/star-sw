@@ -1,5 +1,8 @@
-// $Id: strangeFormulas.C,v 3.1 2000/08/10 01:21:10 genevb Exp $
+// $Id: strangeFormulas.C,v 3.2 2000/08/11 17:09:05 genevb Exp $
 // $Log: strangeFormulas.C,v $
+// Revision 3.2  2000/08/11 17:09:05  genevb
+// Introduce findFormulas(), findDefinition(),  and some new formulas.
+//
 // Revision 3.1  2000/08/10 01:21:10  genevb
 // Added number of dedx points
 //
@@ -57,7 +60,7 @@
 // Should be careful to optimize formulas for number of calls to
 // other formulas. TTreeFormula/TFormula is not smart enough to save
 // values to repeat them, and calculates the full thing twice, but
-// has a limit of 200 values one can calculate (only 50 values for
+// has a limit of 100 values one can calculate (only 50 values for
 // Root 2.24/04 and earlier).
 //
 // For example, "a()+a()+a()" repeats everything necessary to find
@@ -70,16 +73,56 @@ TTree* strangeFormulas(const char* fname=0);
 TTree* strangeFormulas(TFile* fptr);
 Int_t strangeFormulas(TTree* tree);
 void formulate(const char* name, const char* formula);
+void findFormulas(const char* c0, const char* c1=0, const char* c2=0);
+void findDefinition(const char* c0);
 
 TTree* strangeTree=0;
 TSeqCollection* ListofFuncs=gROOT->GetListOfFunctions();
+Int_t max_codes=0;
+
+//-----------------------------------------------------
+
+void findFormulas(const char* c0, const char* c1, const char* c2) {
+  for (Int_t i=0; i<ListofFuncs->GetSize(); i++) {
+    TString ostr = ListofFuncs->At(i)->GetName();
+    if (ostr.Contains(c0,TString::kIgnoreCase)) {
+      if ((!c1) || (ostr.Contains(c1,TString::kIgnoreCase))) {
+        if ((!c2) || (ostr.Contains(c2,TString::kIgnoreCase))) {
+          cout << ostr.Data() << endl;
+        }
+      }
+    }
+  }
+}
+
+//-----------------------------------------------------
+    
+void findDefinition(const char* c0) {
+  for (Int_t i=0; i<ListofFuncs->GetSize(); i++) {
+    TObject* f1 = ListofFuncs->At(i);
+    if (!(strcmp(c0,f1->GetName()))) {
+      cout << "Name       : " << f1->GetName() << endl;
+      if (f1->IsA() == TTreeFormula::Class())
+        cout << "# of Codes : " << ((TTreeFormula*) f1)->GetNcodes() << endl;
+      cout << "Definition : " << f1->GetTitle() << endl;
+      i = ListofFuncs->GetSize();
+    }
+  }
+}
 
 //-----------------------------------------------------
 
 void formulate(const char* name, const char* formula) {
   TTreeFormula* f1 = new TTreeFormula(name,formula,strangeTree);
   ListofFuncs->Add(f1);
+  if (f1->GetNcodes() > max_codes) {
+    cout << "\nWARNING!!! The following formula uses " << f1->GetNcodes();
+    cout << " values,\n too many for this version of ROOT: \n";
+    cout << f1->GetName() << " = " << f1->GetTitle() << endl;
+  }
 }
+
+//-----------------------------------------------------
 
 TTree* strangeFormulas(const char* fname) {
   TFile *fptr;
@@ -92,6 +135,8 @@ TTree* strangeFormulas(const char* fname) {
   return strangeTree;
 }
 
+//-----------------------------------------------------
+
 TTree* strangeFormulas(TFile* fptr) {
   if (!fptr) return 0;
   strangeTree = (TTree*) fptr->Get("StrangeMuDst");
@@ -99,11 +144,18 @@ TTree* strangeFormulas(TFile* fptr) {
   return strangeTree;
 }
 
+//-----------------------------------------------------
+
 Int_t strangeFormulas(TTree* tree) {
   if (!tree) return 0;
   if (!(gROOT->GetClass("TTreeFormula"))) {
     gSystem->Load("libProof");
     gSystem->Load("libTreePlayer");
+  }
+  if (gROOT->GetVersionInt() < 22405) {
+    max_codes = 50;
+  } else {
+    max_codes = 100;
   }
 
   strangeTree = tree;
@@ -118,14 +170,14 @@ Int_t strangeFormulas(TTree* tree) {
   Int_t initialFormulas = ListofFuncs->GetSize();
   
   // Mass formulas
-  f0 = new TFormula("mLambda","1.11563");
-  f0 = new TFormula("mAntiLambda","1.11563");
-  f0 = new TFormula("mK0Short","0.497671");
-  f0 = new TFormula("mProton","0.938272");
-  f0 = new TFormula("mAntiProton","0.938272");
-  f0 = new TFormula("mPiPlus","0.139568");
-  f0 = new TFormula("mPiMinus","0.139568");
-  f0 = new TFormula("mKaonMinus","0.493646");
+  f0 = new TFormula("mLambda", "1.11563");
+  f0 = new TFormula("mAntiLambda", "1.11563");
+  f0 = new TFormula("mK0Short", "0.497671");
+  f0 = new TFormula("mProton", "0.938272");
+  f0 = new TFormula("mAntiProton", "0.938272");
+  f0 = new TFormula("mPiPlus", "0.139568");
+  f0 = new TFormula("mPiMinus", "0.139568");
+  f0 = new TFormula("mKaonMinus", "0.493646");
   
 
   // Event
@@ -145,7 +197,7 @@ Int_t strangeFormulas(TTree* tree) {
     // The following formula uses 6 values:
     formulate("V0.decayLengthV0()",
       "sqrt(sq(V0.mDecayVertexV0X-Event.mPrimaryVertexX)+sq(V0.mDecayVertexV0Y-Event.mPrimaryVertexY)+sq(V0.mDecayVertexV0Z-Event.mPrimaryVertexZ))");
-
+  
     // The following formulas use 1 value:
     formulate("V0.decayVertexV0X()", "V0.mDecayVertexV0X");
     formulate("V0.decayVertexV0Y()", "V0.mDecayVertexV0Y");
@@ -161,6 +213,14 @@ Int_t strangeFormulas(TTree* tree) {
     formulate("V0.momNegY()", "V0.mMomNegY");
     formulate("V0.momNegZ()", "V0.mMomNegZ");
     
+    formulate("V0.radt2V0()", "sq(V0.mDecayVertexV0X)+sq(V0.mDecayVertexV0Y)");
+    formulate("V0.radtV0()", "sqrt(V0.radt2V0())");
+    formulate("V0.radV0()", "sqrt(V0.radt2V0()+sq(V0.mDecayVertexV0Z))");
+    formulate("V0.phiV0()",
+      "atan2((V0.mDecayVertexV0Y-Event.mPrimaryVertexY),(V0.mDecayVertexV0X-Event.mPrimaryVertexX))");
+    formulate("V0.phi90V0()",
+      "atan2(-(V0.mDecayVertexV0X-Event.mPrimaryVertexX),(V0.mDecayVertexV0Y-Event.mPrimaryVertexY))");
+
     formulate("V0.Ptot2Pos()",
       "(sq(V0.mMomPosX)+sq(V0.mMomPosY)+sq(V0.mMomPosZ))");
     formulate("V0.Ptot2Neg()",
@@ -179,7 +239,7 @@ Int_t strangeFormulas(TTree* tree) {
 
     formulate("V0.alphaV0()",
     //  "((V0.MomPosAlongV0()-V0.MomNegAlongV0())/(V0.MomPosAlongV0()+V0.MomNegAlongV0()))");
-    // The above fails for exceeding 50 value limit. The following uses 30:
+    // The above is cumbersome, using 50 values. The following uses 30:
       "1.-(2./(1.+(V0.MomPosAlongV0()/V0.MomNegAlongV0())))");
     // The following formula uses 18 values:
     formulate("V0.ptArmV0()", "sqrt(V0.Ptot2Pos()-sq(V0.MomPosAlongV0()))");
@@ -222,7 +282,11 @@ Int_t strangeFormulas(TTree* tree) {
     formulate("V0.ptotNeg()", "sqrt(V0.Ptot2Neg())");
     formulate("V0.ptV0()", "sqrt(V0.Pt2V0())");
     formulate("V0.ptotV0()", "sqrt(V0.Ptot2V0())");
-    
+    formulate("V0.thetaV0()", "acos(V0.momV0Z()/V0.ptotV0())");
+    formulate("V0.pseudoRapV0()", "-log(tan(V0.thetaV0()/2.))");
+    formulate("V0.psiV0()", "atan2(V0.momV0Y(),V0.momV0X())");
+    formulate("V0.psi90V0()", "atan2(-V0.momV0X(),V0.momV0Y())");
+
     // Track topology maps, with function names like
     // "V0.topologyMapNeg.*()" and "V0.topologyMapPos.*()"
     if (tree->GetBranch("V0.mTopologyMapPos.mMap0")) {
@@ -382,8 +446,8 @@ Int_t strangeFormulas(TTree* tree) {
   if (tree->GetBranch("Xi")) {
     printf("Loading Xi formulas...\n");
 
-    f0 = new TFormula("mXiMinus","1.32133");
-    f0 = new TFormula("mOmegaMinus","1.67243");
+    f0 = new TFormula("mXiMinus", "1.32133");
+    f0 = new TFormula("mOmegaMinus", "1.67243");
 
     // First, the Xi's get all the same functions that the V0's get...
     // The following formula uses 6 values:
@@ -406,6 +470,12 @@ Int_t strangeFormulas(TTree* tree) {
     formulate("Xi.momNegY()", "Xi.mMomNegY");
     formulate("Xi.momNegZ()", "Xi.mMomNegZ");
 
+    formulate("Xi.radt2V0()", "sq(Xi.mDecayVertexV0X)+sq(Xi.mDecayVertexV0Y)");
+    formulate("Xi.radtV0()", "sqrt(Xi.radt2V0())");
+    formulate("Xi.radV0()", "sqrt(Xi.radt2V0()+sq(Xi.mDecayVertexV0Z))");
+    formulate("Xi.phiV0()",
+      "atan2((Xi.mDecayVertexV0Y-Event.mPrimaryVertexY),(Xi.mDecayVertexV0X-Event.mPrimaryVertexX))");
+
     formulate("Xi.Ptot2Pos()",
       "(sq(Xi.mMomPosX)+sq(Xi.mMomPosY)+sq(Xi.mMomPosZ))");
     formulate("Xi.Ptot2Neg()",
@@ -424,7 +494,7 @@ Int_t strangeFormulas(TTree* tree) {
 
     formulate("Xi.alphaV0()",
     //  "((Xi.MomPosAlongV0()-Xi.MomNegAlongV0())/(Xi.MomPosAlongV0()+Xi.MomNegAlongV0()))");
-    // The above fails for exceeding 50 value limit. The following uses 30:
+    // The above is cumbersome, using 50 values. The following uses 30:
       "1.-(2./(1.+(Xi.MomPosAlongV0()/Xi.MomNegAlongV0())))");
     // The following formula uses 18 values:
     formulate("Xi.ptArmV0()",
@@ -468,6 +538,9 @@ Int_t strangeFormulas(TTree* tree) {
     formulate("Xi.ptotNeg()", "sqrt(Xi.Ptot2Neg())");
     formulate("Xi.ptV0()", "sqrt(Xi.Pt2V0())");
     formulate("Xi.ptotV0()", "sqrt(Xi.Ptot2V0())");
+    formulate("Xi.thetaV0()", "acos(Xi.momV0Z()/Xi.ptotV0())");
+    formulate("Xi.pseudoRapV0()", "-log(tan(Xi.thetaV0()/2.))");
+    formulate("Xi.psiV0()", "atan2(Xi.momV0Y(),Xi.momV0X())");
 
     // The following formulas use 1 value:
     formulate("Xi.chi2V0()", "Xi.mChi2V0");
@@ -503,6 +576,12 @@ Int_t strangeFormulas(TTree* tree) {
     formulate("Xi.momXiZ()", "Xi.mMomBachelorZ+Xi.momV0Z()");
     formulate("Xi.keyBachelor()", "Xi.mKeyBachelor");
 
+    formulate("Xi.radt2Xi()", "sq(Xi.mDecayVertexXiX)+sq(Xi.mDecayVertexXiY)");
+    formulate("Xi.radtXi()", "sqrt(Xi.radt2Xi())");
+    formulate("Xi.radXi()", "sqrt(Xi.radt2Xi()+sq(Xi.mDecayVertexXiZ))");
+    formulate("Xi.phiXi()",
+      "atan2((Xi.mDecayVertexXiY-Event.mPrimaryVertexY),(Xi.mDecayVertexXiX-Event.mPrimaryVertexX))");
+
     formulate("Xi.Ptot2Bachelor()",
       "(sq(Xi.mMomBachelorX)+sq(Xi.mMomBachelorY)+sq(Xi.mMomBachelorZ))");
     formulate("Xi.Pt2Xi()", "(sq(Xi.momXiX())+sq(Xi.momXiY()))");
@@ -516,7 +595,7 @@ Int_t strangeFormulas(TTree* tree) {
 
     formulate("Xi.alphaXi()",
     //  "(Xi.mCharge*(Xi.MomBachelorAlongXi()-Xi.MomV0AlongXi())/(Xi.MomBachelorAlongXi()+Xi.MomV0AlongXi()))");
-    // The above fails for exceeding 50 value limit. The following uses 46:
+    // The above is cumbersome, using 50 values. The following uses 30:
       "Xi.mCharge*(1.-(2./(1.+(Xi.MomBachelorAlongXi()/Xi.MomV0AlongXi()))))");
     // The following formula uses 30 values:
     formulate("Xi.ptArmXi()",
@@ -555,6 +634,9 @@ Int_t strangeFormulas(TTree* tree) {
     formulate("Xi.ptotBachelor()", "sqrt(Xi.Ptot2Bachelor())");
     formulate("Xi.ptXi()", "sqrt(Xi.Pt2Xi())");
     formulate("Xi.ptotXi()", "sqrt(Xi.Ptot2Xi())");
+    formulate("Xi.thetaXi()", "acos(Xi.momXiZ()/Xi.ptotXi())");
+    formulate("Xi.pseudoRapXi()", "-log(tan(Xi.thetaXi()/2.))");
+    formulate("Xi.psiXi()", "atan2(Xi.momXiY(),Xi.momXiX())");
 
     // Track topology maps, with function names like
     // "Xi.topologyMapNeg.*()", Xi.topologyMapPos.*(),
@@ -734,4 +816,5 @@ Int_t strangeFormulas(TTree* tree) {
   
   Int_t finalFormulas = ListofFuncs->GetSize();
   return (finalFormulas-initialFormulas);
+
 }
