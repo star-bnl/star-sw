@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.9 2000/04/21 19:09:49 nystrand Exp $
+// $Id: StPeCMaker.cxx,v 1.10 2000/12/13 00:08:59 akio Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.10  2000/12/13 00:08:59  akio
+// Added trigger sim and histograms
+//
 // Revision 1.9  2000/04/21 19:09:49  nystrand
 // Update StPeCPair class, new histograms
 //
@@ -58,8 +61,16 @@
 #ifndef ST_NO_NAMESPACES
 using std::vector;
 #endif
+#include "StL0Trigger.h"
+#include "StTriggerDetectorCollection.h"
+#include "StCtbTriggerDetector.h"
+#include "StMwcTriggerDetector.h"
+#include "StVpdTriggerDetector.h"
+#include "StZdcTriggerDetector.h"
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.9 2000/04/21 19:09:49 nystrand Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.10 2000/12/13 00:08:59 akio Exp $";
+
+int l0sim(StEvent*, TH1F*);
 
 ClassImp(StPeCMaker)
 
@@ -80,16 +91,70 @@ Int_t StPeCMaker::Init() {
   m_hnvtxtrk  = new TH1F("hnvtxtrk","#Primary Vertex Tracks",50,-0.5,49.5);
   m_hsumq     = new TH1F("hsumq","Sum Q",11,-5.5,5.5);
   m_hsumpt    = new TH1F("hsumpt","Sum Pt",50,0.0,0.75);
-  m_hzvert    = new TH1F("hzvert","Z Primary Vertex (cm)",50,-60.0,60.0);
   m_hminvpi   = new TH1F("hminvpi","2-Track Evts. Minv pions",50,0.2,1.5);
   m_hminvk    = new TH1F("hminvk","2-Track Evts. Minv kaons",50,0.8,2.0);
   m_hrappi    = new TH1F("hrappi","Evt. Rapidity (pions)",50,-5.0,5.0);
   m_hrapka    = new TH1F("hrapka","Evt. Rapidity (kaons)",50,-5.0,5.0);
   m_hopnangle = new TH1F("hopnangle","Opening angle of the pairs (rad)",100,0.0,3.15);
   m_hcostheta = new TH1F("hcostheta","Cos(Theta*) (for pairs of pions) ",120,-0.1,1.1); 
-  m_hdedx     = new TH2F("hdedx","P (GeV) vs dE/dx (*10**6)",200,0.0,2.0,200,0.0,100.0);
-  m_hdedxpos  = new TH2F("hdedxpos","P (GeV) vs dE/dx (*10**6) +",200,0.0,2.0,200,0.0,100.0);
-  m_hdedxneg  = new TH2F("hdedxneg","P (GeV) vs dE/dx (*10**6) -",200,0.0,2.0,200,0.0,100.0);
+  m_hdedx     = new TH2F("hdedx","P (GeV) vs dE/dx (*10**6)",200,0.0,2.0,100,0.0,20.0);
+  m_hdedxpos  = new TH2F("hdedxpos","P (GeV) vs dE/dx (*10**6) +",200,0.0,2.0,100,0.0,20.0);
+  m_hdedxneg  = new TH2F("hdedxneg","P (GeV) vs dE/dx (*10**6) -",200,0.0,2.0,100,0.0,20.0);
+  m_hdedx1    = new TH1F("hdedx1","dE/dx (*10**6)",100,0.0,10.0);
+  m_ctbsingle = new TH1F("ctbsingle","CTB single",100,0.0,100.0);
+  m_ctbsum    = new TH1F("ctbsum","CTB sum",100,0.0,100.0);
+  m_ctbsumped = new TH1F("ctbsumped","CTB sum pedestal",50,0.0,50.0);
+  m_ctbtrg    = new TH1F("ctbtrg","CTB trigger",60,0.0,60.0);
+  m_zdcwest   = new TH1F("zdcwest","zdc adc west",100,0.0,100.0);
+  m_zdceast   = new TH1F("zdceast","zdc adc east",100,0.0,100.0);
+  m_zdcsum    = new TH1F("zdcsum","zdc adc sum",100,0.0,100.0);
+  m_ctbvstrk  = new TH2F("ctbvstrk","ctbsum vs # of global track",100,0.0,100.0,100,0.0,100.0);
+  m_ctbslat   = new TH2F("ctbslat","ctbadc vs slat #",240,0.5,240.5,39,1.0,40.0);
+
+  m_hxvert      = new TH1F("hxvert","X Primary Vertex (cm)",50,-5.0,5.0);
+  m_hyvert      = new TH1F("hyvert","Y Primary Vertex (cm)",50,-5.0,5.0);
+  m_hxyvert     = new TH2F("hxyvert","XY Primary Vertex (cm)",50,-5.0,5.0,50,-5.0,5.0);
+  m_hzvert      = new TH1F("hzvert","Z Primary Vertex (cm)",100,-500.0,500.0);
+
+  m_hnpair      = new TH1F("hnpair","Number of pair",20,0.0,20.0);
+  m_hpairsumq   = new TH1F("hpsumq","Pair sum Q",11,-5.5,5.5);
+  m_hpairoa     = new TH1F("hpoa","Opening angle of the pairs (rad)",100,0.0,3.15);
+  m_hpaircostpi = new TH1F("hpcosthetap","Cos(Theta*) (for pairs of pions) ",120,-0.1,1.1);
+  m_hpaircostk  = new TH1F("hpcosthetak","Cos(Theta*) (for pairs of kaons) ",120,-0.1,1.1);
+  m_hpairsumpt  = new TH1F("hpsumpt","Pair sum pT",50,0.0,1.0);
+  m_hpairminvpi = new TH1F("hpminvpi","Pair Minv pions",50,0.2,1.5);
+  m_hpairminvk  = new TH1F("hpminvk","Pair Minv kaons",50,0.8,2.0);
+  m_hpairdedx   = new TH2F("hpdedx","P (GeV) vs dE/dx (*10**6)",200,0.0,2.0,100,0.0,20.0);
+
+  m_hcpairsumq   = new TH1F("hcpsumq","Pair sum Q (rho0 mass)",11,-5.5,5.5);
+  m_hlpairsumq   = new TH1F("hlpsumq","Pair sum Q (low mass) ",11,-5.5,5.5);
+
+  m_hcpairsumpt  = new TH1F("hcpsumpt","Pair sum pT",50,0.0,1.0);
+  m_hcpairminvpi = new TH1F("hcpminvpi","Pair Minv pions",50,0.2,1.5);
+  m_hcpairminvk  = new TH1F("hcpminvk","Pair Minv kaons",50,0.8,2.0);
+  m_hcpairdedx   = new TH2F("hpcdedx","P (GeV) vs dE/dx (*10**6)",200,0.0,2.0,100,0.0,20.0);
+
+  m_hrhoptall    = new TH1F("hrhoptall","Rho pt",50,0.0,1.00);
+
+  m_hmass        = new TH1F("hmass","Pair Minv pions (after pt cut)",50,0.2,1.5);
+  m_hmasszdc     = new TH2F("masszdcsum","mass vs zdc ",50,0.2,1.5,100,0.0,100.0);
+
+  m_hrhonpair    = new TH1F("hrhonpair","Number of pair",20,0.0,20.0);
+  m_hrhoxvert    = new TH1F("hrhoxvert","X rho0 Vertex (cm)",50,-5.0,5.0);
+  m_hrhoyvert    = new TH1F("hrhoyvert","Y rho0 Vertex (cm)",50,-5.0,5.0);
+  m_hrhozvert    = new TH1F("hrhozvert","Z rho0 Vertex (cm)",100,-200.0,200.0);
+  m_hrhocost     = new TH1F("hrhocost","Cos(Theta*) for rho",50,-0.1,1.1);
+  m_hrhopt       = new TH1F("hrhopt","Rho0 pT",25,0.0,0.25);
+  m_hrhodedx     = new TH2F("hrhodedx","P (GeV) vs dE/dx (*10**6)",200,0.0,2.0,100,0.0,20.0);
+  m_hrhodedx1    = new TH1F("hrhodedx1","dE/dx (*10**6) rho0",100,0.0,5.0);
+  m_hrhorapidity = new TH1F("hrhorapidity","Rho0 rapidity",40,-2.0,2.0);
+  m_hrhodndpt2   = new TH1F("hrhodndpt2","Rho0 dN/dpt^2",25,.0,0.25);
+  m_hrhozdcsum   = new TH1F("rhozdcsum","zdc sum for rho0",100,0.0,100.0);
+
+  m_hlowmasspt   = new TH1F("hlowmasspt","mass<Rho0 pT",25,0.0,0.25);
+  m_hlowmasszdcsum= new TH1F("hlowmasszdcsum","zdc sum for low mass",100,0.0,100.0);
+  m_hlowmassdedx1= new TH1F("hlowmassdedx1","dE/dx (*10**6) low mass",100,0.0,5.0);
+
   cout<<"StPeCMaker: Initialization done!"<<endl;
 
   return StMaker::Init();
@@ -108,40 +173,50 @@ Int_t StPeCMaker::Make() {
     return kStOK; 
   }
 
+  // trigger simulations
+  int trig = triggerSim(event);
+
   // Do this way since call to event->summary->numberOfTracks() crashes
   StSPtrVecTrackNode& tempn = event->trackNodes();
   Int_t NTracks=tempn.size();
   if( NTracks > 15 ){
     cout<<"StPeCMaker: Number of good tracks: "<<NTracks<<endl;
     cout<<"Not a peripheral event (NTracks>15)"<<endl;
-    return kStOK;
+    //    return kStOK;
+    return kStErr; // to skip i/o for non pec evemts
   }
   if( NTracks <= 0 ){
     cout<<"StPeCMaker: Event has no tracks!"<<endl;
-    return kStOK;
+    //    return kStOK;
+    return kStErr; // to skip i/o for non pec evemts
   }
-  // Count the events with 0<Ntrk<15
-  m_hstat->Fill(1.0);
+  cout<<"StPeCMaker: This may be a peripheral event (0<NTracks<15)"<<endl;
 
   // Instantiate StPeCEvent
   StPeCEvent *pevent = new StPeCEvent;
 
-  // Fill StPeCEvent
+  // Count the events with 0<Ntrk<15
+  m_hstat->Fill(1.0);
+
+  // Fill StPeCEvent, check if primary vertex found
   Int_t ireturn;
   ireturn = FillStPeCEvent(event,pevent);
+  if(ireturn>kStWarn) return kStErr; 
 
   // Fill the PeC histograms using StPeCEvent
   ireturn = FillHistograms(pevent);
-
+  
   // Example of routine how to use StPeCEvent for analysis
   ireturn = ExampleAnalysis(pevent);
 
+  // Example of further cuts, returning kStErr for rejecting event
+  ireturn = Cuts(event, pevent);
   delete event; delete pevent;
-  return kStOK;
+  return ireturn;
 }
 
 
-Int_t StPeCMaker::FillStPeCEvent(StEvent *event, StPeCEvent *pevent) {
+Int_t StPeCMaker::FillStPeCEvent(StEvent *event, StPeCEvent *pevent){
 
   cout<<"StPeCMaker:FillStPeCEvent"<<endl;
 
@@ -150,6 +225,13 @@ Int_t StPeCMaker::FillStPeCEvent(StEvent *event, StPeCEvent *pevent) {
   pevent->setEventNumber(evno);
   Long_t runo = event->runId();
   pevent->setEventNumber(runo);
+
+  //get trigger info
+  StTriggerDetectorCollection* trg = event->triggerDetectorCollection();
+  StCtbTriggerDetector& ctb = trg->ctb();
+  StMwcTriggerDetector& mwc = trg->mwc();
+  StVpdTriggerDetector& vpd = trg->vpd();
+  StZdcTriggerDetector& zdc = trg->zdc();
 
   Int_t   NGlobal=0; 
   Int_t   NPrimaries=0; 
@@ -201,18 +283,23 @@ Int_t StPeCMaker::FillStPeCEvent(StEvent *event, StPeCEvent *pevent) {
   if(!vtx) {
     cout<<"StPeCMaker: There was no primary vertex!"<<endl;
     Float_t fdummy=-9999.9; pevent->setZVertex(fdummy);
-    return kStOK;
+    //    return kStOK;
+    return kStErr;
   }
-
   Float_t Zv = vtx->position().z();
   pevent->setZVertex(Zv);
+  m_hxvert->Fill(vtx->position().x());
+  m_hyvert->Fill(vtx->position().y());
+  m_hxyvert->Fill(vtx->position().x(),vtx->position().y());
+  cout << "StPeCMaker : primary vertex " << vtx->position().x() << " " 
+       << vtx->position().y() << " " << vtx->position().z() << endl;
 
   // Fill the pairs into StPeCPair
 #ifndef __CINT__
   Int_t NVect = ThePrimaries.size();
   if ( NPrimaries != NVect ){
     cout<<"StPeCMaker: Warning pair vector might be incorrect!"<<endl;}
-  for ( Int_t i1 = 0; i1<NPrimaries; i1++ ) {
+  for ( Int_t i1 = 0; i1<NPrimaries-1; i1++ ) {
     for( Int_t i2 = i1+1; i2<NPrimaries; i2++ ) {
       StTrack *trk1 = ThePrimaries[i1];
       StTrack *trk2 = ThePrimaries[i2];
@@ -220,6 +307,174 @@ Int_t StPeCMaker::FillStPeCEvent(StEvent *event, StPeCEvent *pevent) {
       pevent->addPeCPair(thepair);
     }
   }  
+  StPeCPairCollection *pairs= pevent->getPeCPairCollection();
+  StPeCPairIterator itr = pairs->begin();
+  m_hnpair->Fill(pairs->size());
+  while( itr != pairs->end() ){
+    StPeCPair *pair = *itr;
+    StTrackGeometry *trk1 = pair->getTrack1()->geometry();
+    StTrackGeometry *trk2 = pair->getTrack2()->geometry();
+    StSPtrVecTrackPidTraits& traits1 = pair->getTrack1()->pidTraits();
+    StSPtrVecTrackPidTraits& traits2 = pair->getTrack1()->pidTraits();
+    StDedxPidTraits *dedx1, *dedx2;
+    Int_t NTraits = traits1.size();
+    for( Int_t i=0; i<NTraits; i++) {
+      if ( traits1[i]->detector() == kTpcId ){
+	dedx1 = dynamic_cast<StDedxPidTraits*>(traits1[i]);
+        if ( dedx1 && dedx1->method() == kTruncatedMeanIdentifier )break;
+      }
+    }
+    NTraits = traits2.size();
+    for(i=0; i<NTraits; i++) {
+      if ( traits2[i]->detector() == kTpcId ){
+	dedx2 = dynamic_cast<StDedxPidTraits*>(traits2[i]);
+        if ( dedx2 && dedx2->method() == kTruncatedMeanIdentifier )break;
+      }
+    }
+    cout << "StPeCMaker : Pair : " 
+	 << "  sumQ = " << pair->sumCharge()
+	 << "  sumPt = " << pair->sumPt()
+	 << "  mInv = " << pair->mInv(pion)
+	 << "  opening angle = " << pair->openingAngle()
+	 << "  cos(theata*) = " << pair->cosThetaStar(pion) << endl;
+
+    m_hpairsumq->Fill(pair->sumCharge());
+    m_hpairoa->Fill(pair->openingAngle());
+    m_hpaircostpi->Fill(pair->cosThetaStar(pion));
+    m_hpaircostk->Fill(pair->cosThetaStar(kaon));
+    m_hpairsumpt->Fill(pair->sumPt());
+    m_hpairminvpi->Fill(pair->mInv(pion));
+    m_hpairminvk->Fill(pair->mInv(kaon));
+    m_hpairdedx->Fill(pair->mInv(kaon));    
+    m_hpairdedx->Fill(trk1->momentum().mag(),1000000.0*dedx1->mean());
+    m_hpairdedx->Fill(trk2->momentum().mag(),1000000.0*dedx2->mean());  
+    itr++;
+  }
+}
+
+Int_t StPeCMaker::Cuts(StEvent *event, StPeCEvent *pevent){
+  int flag = 0;
+
+  //get trigger info
+  StTriggerDetectorCollection* trg = event->triggerDetectorCollection();
+  StCtbTriggerDetector& ctb = trg->ctb();
+  StMwcTriggerDetector& mwc = trg->mwc();
+  StVpdTriggerDetector& vpd = trg->vpd();
+  StZdcTriggerDetector& zdc = trg->zdc();
+
+  //get vertex info
+  StPrimaryVertex* vtx = event->primaryVertex();
+
+  StPeCPairCollection *pairs= pevent->getPeCPairCollection();
+  StPeCPairIterator itr = pairs->begin();
+
+  //fill histograms
+  while( itr != pairs->end() ){
+    StPeCPair *pair = *itr;
+    StTrackGeometry *trk1 = pair->getTrack1()->geometry();
+    StTrackGeometry *trk2 = pair->getTrack2()->geometry();
+    StSPtrVecTrackPidTraits& traits1 = pair->getTrack1()->pidTraits();
+    StSPtrVecTrackPidTraits& traits2 = pair->getTrack1()->pidTraits();
+    StDedxPidTraits *dedx1, *dedx2;
+    Int_t NTraits = traits1.size();
+    for( Int_t i=0; i<NTraits; i++) {
+      if ( traits1[i]->detector() == kTpcId ){
+	dedx1 = dynamic_cast<StDedxPidTraits*>(traits1[i]);
+        if ( dedx1 && dedx1->method() == kTruncatedMeanIdentifier )break;
+      }
+    }
+    NTraits = traits2.size();
+    for(i=0; i<NTraits; i++) {
+      if ( traits2[i]->detector() == kTpcId ){
+	dedx2 = dynamic_cast<StDedxPidTraits*>(traits2[i]);
+        if ( dedx2 && dedx2->method() == kTruncatedMeanIdentifier )break;
+      }
+    }
+
+    if(
+       -1.5<vtx->position().x() && vtx->position().x()<2.5 &&
+       -1.5<vtx->position().y() && vtx->position().y()<2.5 &&
+       -200.0<vtx->position().z() && vtx->position().z()<200.0 &&
+       pair->openingAngle()<3.0 &&
+       pairs->size()==1){
+      
+      // different mass cut
+      float mmin = 0.47, mmax = 1.07;
+      //float mmin = 0.62, mmax = 0.92;
+
+      if(pair->sumPt()<0.3){
+	if(mmin<pair->mInv(pion) && pair->mInv(pion)<mmax){
+	  m_hcpairsumq->Fill(pair->sumCharge());
+	}else if(mmin>pair->mInv(pion)){
+	  m_hlpairsumq->Fill(pair->sumCharge());
+	}
+      }
+      
+      if(pair->sumCharge()==0){
+	m_hcpairsumpt->Fill(pair->sumPt());
+	m_hcpairminvpi->Fill(pair->mInv(pion));
+	m_hcpairminvk->Fill(pair->mInv(kaon));
+	m_hcpairdedx->Fill(trk1->momentum().mag(),1000000.0*dedx1->mean());
+	m_hcpairdedx->Fill(trk2->momentum().mag(),1000000.0*dedx2->mean());
+	
+	//to make smaller dst with tight cut
+	if(pair->sumPt()<0.3) flag=1;
+		
+	if(mmin<pair->mInv(pion) && pair->mInv(pion)<mmax){
+	  m_hrhoptall->Fill(pair->sumPt());
+	}
+	
+	if(pair->sumPt()<0.3){
+	  m_hmass->Fill(pair->mInv(pion));
+	  if(&zdc){
+	    m_hmasszdc->Fill(pair->mInv(pion),zdc.adcSum());
+	  }
+	  
+	  if(mmin<pair->mInv(pion) && pair->mInv(pion)<mmax){
+	    m_hrhonpair->Fill(pairs->size());
+	    m_hrhoxvert->Fill(vtx->position().x());
+	    m_hrhoyvert->Fill(vtx->position().y());
+	    m_hrhozvert->Fill(vtx->position().z());
+	    m_hrhocost->Fill(pair->cosThetaStar(pion));
+	    m_hrhopt->Fill(pair->sumPt());
+	    m_hrhodedx->Fill(trk1->momentum().mag(),1000000.0*dedx1->mean());
+	    m_hrhodedx->Fill(trk2->momentum().mag(),1000000.0*dedx2->mean());
+	    m_hrhodedx1->Fill(1000000.0*dedx1->mean());
+	    m_hrhodedx1->Fill(1000000.0*dedx2->mean());
+	    
+	    StLorentzVectorF p = pair->getPair4Momentum(pion);	    
+	    m_hrhorapidity->Fill(p.rapidity());
+	    
+	    m_hrhodndpt2->Fill(pair->sumPt(),1.0/pair->sumPt());
+	    if(&zdc){
+	      m_hrhozdcsum->Fill(zdc.adcSum());
+	    }
+	  }
+	  
+	  if(mmin>pair->mInv(pion)){
+	    m_hlowmasspt->Fill(pair->sumPt());
+	    m_hlowmassdedx1->Fill(1000000.0*dedx1->mean());
+	    m_hlowmassdedx1->Fill(1000000.0*dedx2->mean());
+	    if(&zdc){
+	      m_hlowmasszdcsum->Fill(zdc.adcSum());
+	    }
+	  }	 
+	}
+      }
+    }  
+    itr++;
+  }
+  
+  //Return kStErr if this event shouldn't go into uDST
+  if(pairs->size()!=1){
+    cout<<"StPeCMaker: Number of pairs does not match"<<endl;
+    return kStErr;
+  }    
+  if(flag==0) {
+    cout<<"StPeCMaker: No sumPt<0.3GeV pair"<<endl;
+    // return kStErr;
+  }
+  
 #endif /* __CINT__ */
 
   return kStOK;
@@ -281,12 +536,12 @@ Int_t StPeCMaker::FillHistograms(StPeCEvent *pevent) {
     // dedx now contains the dedx according to the TruncatedMean
     Float_t TrunkMean = 1000000.0*dedx->mean();
     m_hdedx->Fill(ptot,TrunkMean);
+    m_hdedx1->Fill(TrunkMean);
     Int_t QCharge = geo->charge();
     if( QCharge > 0 )m_hdedxpos->Fill(ptot,TrunkMean);
     if( QCharge < 0 )m_hdedxneg->Fill(ptot,TrunkMean);
     pprimit++;
   }
-
   return kStOK;
 }
 
@@ -301,16 +556,16 @@ Int_t StPeCMaker::ExampleAnalysis(StPeCEvent *pevent) {
   // in StPeCEvent. For example: summed QCharge for primary tracks, pT of
   // the event etc. To retrieve this information do:
   Int_t QEvent = pevent->qTot();
-  //  cout<<"Summed charged of the primaries: "<<QEvent<<endl;
+  cout << "StPeCMaker: q Total = " << QEvent << endl;
   Float_t PtEvent = pevent->pT();
-  //  cout<<"Summed event pT: "<<PtEvent<<endl;
+  cout << "StPeCMaker: pT Total = " << PtEvent << endl;
 
   // Other event quantities depend on the particle id, like invariant
   // mass and event rapidity. The member functions for these take 
   // an argument of type StPeCParticle (an enumeration), which currently
   // can be pion, kaon, proton, electron or muon
   Float_t MInvPionHypo = pevent->mInv(pion);
-  //  cout<<"Event invariant mass, assuming pion tracks: "<<MInvPionHypo<<endl;
+  cout << "StPeCMaker: Minv(pion) = " << MInvPionHypo << endl;
 
   // More generally one can obtain the four-momentum of the event 
   // (summed over all primary tracks) by getEvent4Momentum. This is 
@@ -351,28 +606,66 @@ Int_t StPeCMaker::ExampleAnalysis(StPeCEvent *pevent) {
   return kStOK;
 }
 
+Int_t StPeCMaker::triggerSim(StEvent *event){
+  int i,j,k;
+  
+  StL0Trigger* l0 = event->l0Trigger();
+  StTriggerDetectorCollection* trg = event->triggerDetectorCollection();
+  StCtbTriggerDetector& ctb = trg->ctb();
+  StMwcTriggerDetector& mwc = trg->mwc();
+  StVpdTriggerDetector& vpd = trg->vpd();
+  StZdcTriggerDetector& zdc = trg->zdc();
 
-void StPeCMaker::Clear(Option_t *opt) {
-  StMaker::Clear();
+  if(l0){
+    cout << "L0 mwcCtbMultiplicity = " << l0->mwcCtbMultiplicity() << endl;
+  }
+  if(&zdc){
+    cout << "ZDC sum " << zdc.adcSum() << endl;
+    cout << "ZDC sum west " << zdc.adcSum(west) << endl;
+    cout << "ZDC sum east " << zdc.adcSum(east) << endl;
+    m_zdcwest->Fill(zdc.adcSum(west));
+    m_zdceast->Fill(zdc.adcSum(east));
+    m_zdcsum->Fill(zdc.adcSum());
+  }
+  if(&mwc){
+    float sum = 0.0;
+    for(i=0; i<mwc.numberOfSectors(); i++){
+      for(j=0; j<mwc.numberOfSubSectors(); j++){
+	sum += mwc.mips(i,j,0);
+      }
+    }
+    cout << "mwc mips " << sum << endl;
+  }
+  if(&ctb){
+    float ctbsum=0.0;
+    for(i=0; i<120; i++){
+      for(j=0; j<2; j++){
+	ctbsum += ctb.mips(i,j,0);
+	m_ctbsingle->Fill(ctb.mips(i,j,0));
+	m_ctbslat->Fill(i+1+120*j, ctb.mips(i,j,0));
+      }
+    }
+    m_ctbsum->Fill(ctbsum);
+    StSPtrVecTrackNode& trknode = event->trackNodes();
+    int nnode=trknode.size();
+    m_ctbvstrk->Fill(ctbsum,nnode);
+    cout << "CTB MIP total sum = " << ctbsum << endl;
+  }
+
+  // L0 simulator
+  int res =  l0sim(event, m_ctbsum);
+  return res;
 }
 
-
+// void StPeCMaker::Clear(Option_t *opt) {
+// StMaker::Clear();
+// }
+  
 Int_t StPeCMaker::Finish() {
   m_outfile->Write();
   m_outfile->Close();
+  StMaker::Finish();
   return kStOK;
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 

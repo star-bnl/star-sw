@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.h,v 1.1 2000/04/21 19:12:25 nystrand Exp $
+// $Id: StPeCPair.h,v 1.2 2000/12/13 00:08:59 akio Exp $
 // $Log: StPeCPair.h,v $
+// Revision 1.2  2000/12/13 00:08:59  akio
+// Added trigger sim and histograms
+//
 // Revision 1.1  2000/04/21 19:12:25  nystrand
 // First Version
 //
@@ -43,6 +46,9 @@ public:
   StTrack*                        getTrack2();
   StLorentzVectorF                getPair4Momentum(StPeCParticle pid) const;
 #endif /*__CINT__*/
+  Int_t                           sumCharge() const;
+  Float_t                         sumPt() const;
+  Float_t                         sumPz() const;
   Float_t                         mInv(StPeCParticle pid) const;
   Float_t                         openingAngle() const;
   Float_t                         cosThetaStar(StPeCParticle pid) const;

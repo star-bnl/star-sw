@@ -1,6 +1,9 @@
-// $Id: StPeCMaker.h,v 1.7 2000/04/21 19:09:42 nystrand Exp $
+// $Id: StPeCMaker.h,v 1.8 2000/12/13 00:08:59 akio Exp $
 //
 // $Log: StPeCMaker.h,v $
+// Revision 1.8  2000/12/13 00:08:59  akio
+// Added trigger sim and histograms
+//
 // Revision 1.7  2000/04/21 19:09:42  nystrand
 // Update StPeCPair class, new histograms
 //
@@ -63,6 +66,9 @@ protected:
   TH1F *m_hnctbhts;
   TH1F *m_hsumq;
   TH1F *m_hsumpt;
+  TH1F *m_hxvert;
+  TH1F *m_hyvert;
+  TH2F *m_hxyvert;
   TH1F *m_hzvert;
   TH1F *m_hminvpi;
   TH1F *m_hminvk;
@@ -73,12 +79,63 @@ protected:
   TH2F *m_hdedx;
   TH2F *m_hdedxpos;
   TH2F *m_hdedxneg;
+  TH1F *m_ctbsingle;
+  TH1F *m_ctbsum;
+  TH1F *m_ctbsumped;
+  TH1F *m_ctbtrg;
+  TH1F *m_zdcwest;
+  TH1F *m_zdceast;
+  TH1F *m_zdcsum;
+  TH2F *m_ctbvstrk;
+  TH2F *m_ctbslat;
+
+  TH1F *m_hnpair;   
+  TH1F *m_hpairsumq;   
+  TH1F *m_hpairoa;  
+  TH1F *m_hpaircostpi; 
+  TH1F *m_hpaircostk;  
+  TH1F *m_hpairsumpt;  
+  TH1F *m_hpairminvpi; 
+  TH1F *m_hpairminvk;  
+  TH2F *m_hpairdedx;
+		
+  TH1F *m_hcpairsumq; 
+  TH1F *m_hlpairsumq; 
+
+  TH1F *m_hcpairsumpt; 
+  TH1F *m_hcpairminvpi;
+  TH1F *m_hcpairminvk; 
+  TH2F *m_hcpairdedx;
+		
+  TH1F *m_hrhoptall;  
+		      
+  TH1F *m_hmass;   
+  TH2F *m_hmasszdc;   
+		      
+  TH1F *m_hrhonpair;   
+  TH1F *m_hrhoxvert;  
+  TH1F *m_hrhoyvert;  
+  TH1F *m_hrhozvert;  
+  TH1F *m_hrhocost; 
+  TH1F *m_hrhopt;     
+  TH1F *m_hrhorapidity;     
+  TH1F *m_hrhodndpt2;     
+  TH2F *m_hrhodedx;
+  TH1F *m_hrhozdcsum;
+
+  TH1F *m_hlowmasspt;       
+  TH1F *m_hlowmasszdcsum;
+
+  TH1F *m_hdedx1;
+  TH1F *m_hrhodedx1;
+  TH1F *m_hlowmassdedx1;
+  TH1F *m_rhozdcsum;
 
 public:
 
   StPeCMaker(const Char_t *name="analysis");
   virtual ~StPeCMaker();
-  virtual void Clear(Option_t *option="");
+  //  virtual void Clear(Option_t *option="");
   virtual Int_t  Init();
   virtual Int_t  Make();
   virtual Int_t  Finish();
@@ -86,11 +143,13 @@ public:
 private:
 
   Int_t FillStPeCEvent(StEvent *event, StPeCEvent *pevent);
+  Int_t Cuts(StEvent *event, StPeCEvent *pevent);
   Int_t FillHistograms(StPeCEvent *pevent);
   Int_t ExampleAnalysis(StPeCEvent *pevent);
+  Int_t triggerSim(StEvent *);
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.7 2000/04/21 19:09:42 nystrand Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.8 2000/12/13 00:08:59 akio Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StPeCMaker, 1)
 };

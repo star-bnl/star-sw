@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCPair.cxx,v 1.1 2000/04/21 19:12:30 nystrand Exp $
+// $Id: StPeCPair.cxx,v 1.2 2000/12/13 00:08:59 akio Exp $
 // $Log: StPeCPair.cxx,v $
+// Revision 1.2  2000/12/13 00:08:59  akio
+// Added trigger sim and histograms
+//
 // Revision 1.1  2000/04/21 19:12:30  nystrand
 // First Version
 //
@@ -65,6 +68,20 @@ StLorentzVectorF StPeCPair::getPair4Momentum(StPeCParticle pid) const{
   return p4pair;
 }
 #endif /*__CINT__*/
+
+Int_t StPeCPair::sumCharge() const{
+  return Track1->geometry()->charge()+Track2->geometry()->charge();
+}
+
+Float_t StPeCPair::sumPt() const{
+  StThreeVectorF p = Track1->geometry()->momentum() + Track2->geometry()->momentum();
+  return p.perp();
+}
+
+Float_t StPeCPair::sumPz() const{
+  StThreeVectorF p = Track1->geometry()->momentum() + Track2->geometry()->momentum();
+  return p.z();
+}
 
 Float_t StPeCPair::mInv(StPeCParticle pid) const{
   StLorentzVectorF p4event = getPair4Momentum(pid);
