@@ -334,7 +334,7 @@ Int_t StEmcCalibrationMaker::Make()
     SaveTables();
     gMessMgr->Info("StEmcCalibrationMaker::Make() - starting again");
     Init();
-    //return kStERR;
+    //return kStFATAL;
   }
     
   clock.Stop();
@@ -663,6 +663,8 @@ Bool_t StEmcCalibrationMaker::FillEqual()
   #ifdef StEmcCalibrationMaker_DEBUG
   emclog <<"EQUALIZATION: Avg Nevents/bin = "<<x<<" +- "<<y<<"\n";
   emclog <<"EQUALIZATION: fraction of bins nevents > minimum = "<<z<<"\n";
+  cout   <<"EQUALIZATION: Avg Nevents/bin = "<<x<<" +- "<<y<<"\n";
+  cout   <<"EQUALIZATION: fraction of bins nevents > minimum = "<<z<<"\n";
   #endif
 
   if(z<Settings_st[0].EqMinOccupancy) return kTRUE;  // minimum occupancy not reached yed...
@@ -698,7 +700,7 @@ Bool_t StEmcCalibrationMaker::Equalize()
         for(Int_t s=1;s<EqualSpec->GetNSub()+1;s++)
         {
           Int_t id1=EqualSpec->GetID(m,e,s); 
-          if(EqualSpec->GetStatus(id1)>0 && EqualSpec->GetSum(id1)>Settings_st[0].EqEventsPerBin) 
+          if(EqualSpec->GetStatus(id1)>0 && EqualSpec->GetSum(id1)>=Settings_st[0].EqEventsPerBin) 
             numberReady++;
         }      
 
@@ -712,9 +714,11 @@ Bool_t StEmcCalibrationMaker::Equalize()
           for(Int_t s=1;s<EqualSpec->GetNSub()+1;s++)
           {
             Int_t id1=EqualSpec->GetID(m,e,s); 
-            if(EqualSpec->GetStatus(id1)>0 && EqualSpec->GetSum(id1)>Settings_st[0].EqEventsPerBin)
-              if (l1==l) ref=id1;
+            if(EqualSpec->GetStatus(id1)>0 && EqualSpec->GetSum(id1)>=Settings_st[0].EqEventsPerBin)
+            {
+              if (l1==l && ref==0) ref=id1;
               else l1++;
+            }
           }
       #ifdef StEmcCalibrationMaker_DEBUG
       emclog <<"***** Reference spectrum choice for etabin = "<<div<<"   ref = "<<ref<<"\n";
@@ -817,9 +821,12 @@ Bool_t StEmcCalibrationMaker::FillMipCalib()
   #ifdef StEmcCalibrationMaker_DEBUG
   emclog <<"CALIBRATION: Avg Nevents/(Bin or EtaBin) = "<<x<<" +- "<<y<<"\n";  
   emclog <<"CALIBRATION: fraction of bins nevents > minimum = "<<occ<<"\n";
+  cout   <<"CALIBRATION: Avg Nevents/(Bin or EtaBin) = "<<x<<" +- "<<y<<"\n";  
+  cout   <<"CALIBRATION: fraction of bins nevents > minimum = "<<occ<<"\n";
   #endif
   
   if(occ<Settings_st[0].MipMinOccupancy) return kTRUE;
+  if(Settings_st[0].UseMipEtaBin==1 && EqStatus!=2) return kTRUE;
   
   MipStatus=1;  // ready to calibrate MIP
   return kTRUE;  
@@ -843,15 +850,16 @@ Bool_t StEmcCalibrationMaker::MipCalib()
   {
     #ifdef StEmcCalibrationMaker_DEBUG
     emclog <<"***** Calibrating EtaBin "<< i<<"\n";
+    cout <<"***** Calibrating EtaBin "<< i<<"\n";
     #endif    
     gMessMgr->Info()<<"StEmcCalibrationMaker::MipCalib() - MIP Calibration for EtaBin or tower "<< i<<endm;
 
     if(Settings_st[0].UseMipEtaBin==1)
-      if(MipSpec->GetSumEtaBin(i)>Settings_st[0].MipEventsPerBin) 
+      if(MipSpec->GetSumEtaBin(i)>=Settings_st[0].MipEventsPerBin) 
         MipSpec->CalibrateEtaBin(i,Settings_st[0].MipPeakFitFuntion);
     else
       if(MipSpec->GetStatus(i)==1)
-        if(MipSpec->GetSum(i)>Settings_st[0].MipEventsPerBin)
+        if(MipSpec->GetSum(i)>=Settings_st[0].MipEventsPerBin)
           MipSpec->CalibrateBin(i,Settings_st[0].MipPeakFitFuntion);
   }
 
@@ -1072,7 +1080,7 @@ Bool_t StEmcCalibrationMaker::SaveTables()
   
   // creating histogram file ...
   
-  sprintf(histfile,"%sCalib..%08d.%06d.%08d.%06d.hist.root",
+  sprintf(histfile,"%sCalib.%08d.%06d.%08d.%06d.hist.root",
           detname[detnum].Data(),firstEventDate,firstEventTime,
           lastEventDate,lastEventTime);
           
@@ -1091,6 +1099,7 @@ Bool_t StEmcCalibrationMaker::SaveTables()
   
   if(MipTable && Settings_st[0].UseMipEtaBin==0) nb=nbins;
   else nb=Settings_st[0].NEtaBins;
+  
   
   TH1F mip0("MipPos","MIP peak position",nb,0.5,(Float_t)nb+0.5);
 
@@ -1114,7 +1123,7 @@ Bool_t StEmcCalibrationMaker::SaveTables()
     
     if(EqualSpec)
     {
-      equalocc.Fill(x,EqualSpec->GetSum(i));
+      if(EqualSpec->GetStatus(i)==1) equalocc.Fill(x,EqualSpec->GetSum(i));
       if(Equal_st[i-1].EqStatus==1)
       {
         equa0.Fill(x,Equal_st[i-1].EqSlope);
@@ -1124,21 +1133,34 @@ Bool_t StEmcCalibrationMaker::SaveTables()
       }
     }
     
-    if(MipSpec) mipocc.Fill(x,MipSpec->GetSum(i));
+    if(MipSpec) 
+      if(MipSpec->GetStatus(i)==1) mipocc.Fill(x,MipSpec->GetSum(i));
   }
+
+  if(EqualSpec) { equa0.Write(); equa1.Write(); equalocc.Write();}
   
   if(MipSpec)
+  {
     for(Int_t i=1;i<=nb;i++)
+    {
+      char name[80],title[80];
+      sprintf(name,"MipEtaBin%02d",i);
+      sprintf(title,"MIP Spectra for EtaBin %02d",i);
+      TH1F mipspecetabin(name,title,MipSpec->GetNAdcMax(),(Float_t)0,(Float_t)MipSpec->GetNAdcMax()-1);
       if(Mip_st[i-1].Status==1)
       {
         Float_t x=(Float_t)i;
         mip0.Fill(x,Mip_st[i-1].MipPeakPosition);
         mip0.SetBinError(mip0.GetBin(x),Mip_st[i-1].MipPeakPositionError);
       }
+      TArrayF spectemp=MipSpec->GetEtaBinSpectra(i);
+      for(Int_t j=0;j<MipSpec->GetNAdcMax();j++) mipspecetabin.Fill((Float_t)j,spectemp[j]);
+      mipspecetabin.Write();
+    }
+  mip0.Write(); mipocc.Write();
+  }
         
   h0.Write(); h1.Write(); h2.Write(); h3.Write(); h4.Write();
-  if(EqualSpec) { equa0.Write(); equa1.Write(); equalocc.Write();}
-  if(MipSpec) {mip0.Write(); mipocc.Write();}
   f.Close();
   
   // finished creating hist file....
@@ -1169,10 +1191,12 @@ void StEmcCalibrationMaker::SetCalibStatus()
 {
   emcCalibration_st* Calib_st=CalibTable->GetTable();  
 
-  for(Int_t i=1;i<=nbins;i++) 
-    if (i>=1861 && i<=2340) Calib_st[i-1].Status=1; // initial 2001 configuration
-    else Calib_st[i-1].Status=0;
-    
+  for(Int_t i=1;i<=nbins;i++)
+  { 
+    Calib_st[i-1].Status=0;
+    if (i>=1801 && i<=2400) Calib_st[i-1].Status=1; // initial 2001 configuration
+    if (i>=1 && i<=360)     Calib_st[i-1].Status=1; // initial 2001 configuration    
+  } 
   //for(Int_t i=1;i<=nbins;i++) Calib_st[i-1].Status=1; // FULL EMC
 }
 //_____________________________________________________________________________
@@ -1265,7 +1289,7 @@ void StEmcCalibrationMaker::CalcEtaBin(Int_t i,Float_t ebin,
   e = (Int_t)(fabs(etai)/0.05 + 1.5 );
   e1= (Int_t)(fabs(etaf)/0.05 + 0.5 );
   
-  if(etai>=0) {*mi=1;  *mf=60;}
+  if(etaf>=0) {*mi=1;  *mf=60;}
   else        {*mi=61; *mf=120;}
   
   *ei=e;  *ef=e1;
