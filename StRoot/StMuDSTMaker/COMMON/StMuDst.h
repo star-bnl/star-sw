@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.2 2002/03/08 20:04:31 laue Exp $
+ * $Id: StMuDst.h,v 1.3 2002/03/14 04:12:44 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -28,8 +28,7 @@ class StXiMc;
 class StKinkMc;
 
 class StEvent;
-class StGlobalTrack;
-class StPrimaryTrack;
+class StTrack;
 class StStrangeEvMuDst;
 
 
@@ -53,11 +52,11 @@ class StMuDst : public TObject {
 public:
   StMuDst();
   void set(StMuDstMaker* maker);
+  void set(TClonesArray**, TClonesArray**);
   void unset();
   void fixTrackIndices();
   StEvent* createStEvent();
-  StPrimaryTrack* createStPrimaryTrack(StMuTrack*);
-  StGlobalTrack* createStGlobalTrack(StMuTrack*);
+  StTrack* createStTrack(StMuTrack*);
 
  private:
   static TClonesArray* arrays[__NARRAYS__];
@@ -97,6 +96,10 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.3  2002/03/14 04:12:44  laue
+ * bug fix: StMuL3EventSummary.cxx
+ * update: StMuDst.h StMuDst.cxx
+ *
  * Revision 1.2  2002/03/08 20:04:31  laue
  * change from two trees to 1 tree per file
  *

@@ -1,12 +1,16 @@
 /***************************************************************************
  *
- * $Id: StMuL3EventSummary.cxx,v 1.1 2002/03/08 17:04:18 laue Exp $
+ * $Id: StMuL3EventSummary.cxx,v 1.2 2002/03/14 04:12:55 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
 /***************************************************************************
  *
  * $Log: StMuL3EventSummary.cxx,v $
+ * Revision 1.2  2002/03/14 04:12:55  laue
+ * bug fix: StMuL3EventSummary.cxx
+ * update: StMuDst.h StMuDst.cxx
+ *
  * Revision 1.1  2002/03/08 17:04:18  laue
  * initial revision
  *
@@ -34,7 +38,7 @@ StMuL3EventSummary::StMuL3EventSummary() : mNumberOfProcessedEvents(0), mNumberR
   clear();
 }
 
-
+ 
 
 void StMuL3EventSummary::fill(const StEvent* ev) {
   DEBUGMESSAGE("");
@@ -45,8 +49,8 @@ void StMuL3EventSummary::fill(const StEvent* ev) {
   mNumberReconstructedEvents = l3->numberOfReconstructedEvents();
   mNumberOfTracks =  l3->numberOfTracks();
   mNumberOfAlgorithms = l3->numberOfAlgorithms();
-  mFlags |= (__VERTEX__ & l3->zVertexTrigger());
-  mFlags |= (__UNBIASED__ & l3->unbiasedTrigger());
+  mFlags |= ( l3->zVertexTrigger()*__VERTEX__  );
+  mFlags |= ( l3->unbiasedTrigger()*__UNBIASED__ );
   mL0TriggerWord = l3->l0TriggerWord();
   mUnbiasedPreScale = l3->unbiasedTriggerPreScale();
   if (ev->l3Trigger()->primaryVertex()) 
@@ -79,6 +83,10 @@ void StMuL3EventSummary::clear(){
 /***************************************************************************
  *
  * $Log: StMuL3EventSummary.cxx,v $
+ * Revision 1.2  2002/03/14 04:12:55  laue
+ * bug fix: StMuL3EventSummary.cxx
+ * update: StMuDst.h StMuDst.cxx
+ *
  * Revision 1.1  2002/03/08 17:04:18  laue
  * initial revision
  *
