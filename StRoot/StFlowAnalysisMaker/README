@@ -21,12 +21,15 @@ histograms for the event plane resolution. It fits the q histogram
 with the q distribution. It calculates the PhiWgts needed to make the
 event plane isotropic in the lab and outputs them as
 flowPhiWgtNew.hist.root . To use these PhiWgts in the next analysis
-you have to copy the root file to flowPhiWgt.hist.root .
+you have to copy the root file to flowPhiWgt.hist.root . If the file
+flowPhiWgt.hist.root is missing the PhiWgts are set to 1.0 .
 
 Plot.C is a macro for plotting the histograms and their
-projections. It presents you with a menu of possible graphs. If you
-execute the macro with three arguments for a graph that has multiple
-harmonics and selections, it will plot only the selected histogram on
-that page. For better graphics you can first execute boldStyle.C or
-videoStyle.C .
+projections. It presents you with a menu of possible plots. If you
+know the plot number you want you can invoke the macro with that
+number as an argument. If you execute the macro with all three
+arguments (plot number, selection number, harmonics number) for a
+graph that has multiple harmonics and selections, it will plot only
+the selected histogram. For better graphics you can first execute
+boldStyle.C or videoStyle.C .
 
