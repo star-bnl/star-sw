@@ -1,5 +1,8 @@
-* $Id: tfs_g2t_hit_rd.F,v 1.1 1998/01/27 01:47:22 fisyak Exp $
+* $Id: tfs_g2t_hit_rd.F,v 1.2 1998/04/02 20:52:20 sakrejda Exp $
 * $Log: tfs_g2t_hit_rd.F,v $
+* Revision 1.2  1998/04/02 20:52:20  sakrejda
+* tphit.dq initialised to avoid Infinities
+*
 * Revision 1.1  1998/01/27 01:47:22  fisyak
 * Split sources
 *
@@ -120,7 +123,10 @@ C     DSW 03/13/97
             tphit(nok).flag 	  = 0 
             tphit(nok).id 	  = 0 
             tphit(nok).id_globtrk = 0 
-            tphit(nok).track	  = 0  
+            tphit(nok).track	  = 0 
+C     IMS 04/01/98
+C     Add initialisation of dq to that
+            tphit(nok).dq         = 0 
 
 
 C     code the crossing number into the quality flag
