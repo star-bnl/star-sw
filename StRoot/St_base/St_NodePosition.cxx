@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_NodePosition.cxx,v 1.17 1999/06/05 00:42:31 fine Exp $
+// $Id: St_NodePosition.cxx,v 1.18 1999/07/09 01:56:38 fine Exp $
 // $Log: St_NodePosition.cxx,v $
+// Revision 1.18  1999/07/09 01:56:38  fine
+// New method to contrsuct sub views and manage visibilities
+//
 // Revision 1.17  1999/06/05 00:42:31  fine
 // SetLineAttribute methods have been introduced
 //
@@ -245,14 +248,8 @@ void St_NodePosition::Paint(Option_t *)
 {
 //*-*-*-*-*-*-*-*-*-*-*-*Paint Referenced node with current parameters*-*-*-*
 //*-*                   ==============================================
-//*-*
-//*-*  vis = 1  (default) shape is drawn
-//*-*  vis = 0  shape is not drawn but its sons may be not drawn
-//*-*  vis = -1 shape is not drawn. Its sons are not drawn
-//*-*  vis = -2 shape is drawn. Its sons are not drawn
-//*-*
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
-
+  Error("Paint","Position can not be painted");
 }
 //_______________________________________________________________________
 void St_NodePosition::Print(Option_t *option)
@@ -340,5 +337,5 @@ void St_NodePosition::UpdatePosition(Option_t *)
 void St_NodePosition::SetVisibility(Int_t vis)
 {
  St_Node *node = GetNode();
- if (node) node->SetVisibility(vis);
+ if (node) node->SetVisibility(St_Node::ENodeSEEN(vis));
 }

@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.28 1999/06/21 22:17:35 fine Exp $
+// $Id: St_Node.cxx,v 1.29 1999/07/09 01:56:37 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.29  1999/07/09 01:56:37  fine
+// New method to contrsuct sub views and manage visibilities
+//
 // Revision 1.28  1999/06/21 22:17:35  fine
 // Identity matrix fixed
 //
@@ -155,9 +158,9 @@ St_Node::St_Node()
 //*-*-*-*-*-*-*-*-*-*-*Node default constructor*-*-*-*-*-*-*-*-*-*-*-*-*
 //*-*                  ========================
  
-   fShape       = 0;
+   fShape        = 0;
    fListOfShapes = 0;
-   fVisibility  = 1;
+   fVisibility   = kBothVisible;
 }
  
 //______________________________________________________________________________
@@ -186,7 +189,7 @@ St_Node::St_Node(const Text_t *name, const Text_t *title, const Text_t *shapenam
    Add(gGeometry->GetShape(shapename),kTRUE);
 //   fParent = gGeometry->GetCurrenSt_Node();
    fOption = option;
-   fVisibility = 1;
+   fVisibility = kBothVisible;
 
    if(!fShape) {Printf("Illegal referenced shape"); return;}
    ImportShapeAttributes();
@@ -224,7 +227,7 @@ St_Node::St_Node(const Text_t *name, const Text_t *title, TShape *shape, Option_
 
    Add(shape,kTRUE);
    fOption = option;
-   fVisibility = 1;
+   fVisibility = kBothVisible;
    SetTitle(title);
    if(!shape) {Printf("Illegal referenced shape"); return;} 
    ImportShapeAttributes();
@@ -241,13 +244,33 @@ St_Node::St_Node(const Text_t *name, const Text_t *title, TShape *shape, Option_
 
 }
 //______________________________________________________________________________
+Int_t St_Node::MapStNode2GEANTVis(ENodeSEEN  vis)
+{
+// ENodeSEEN Visibility flag  00 - everything visible, 
+//                            10 - this unvisible, but sons are visible
+//                            01 - this visible but sons
+//                            11 - neither this nor its sons are visible
+  const Int_t mapVis[4] = {1, -2, 0, -1 };
+  return mapVis[vis];
+}
+//______________________________________________________________________________
+//ENodeSEEN St_Node::MapGEANT2StNodeVis(Int_t vis)
+Int_t St_Node::MapGEANT2StNodeVis(Int_t vis)
+{
+  const Int_t mapVis[4] = {1, -2, 0, -1 };
+  Int_t i;
+//  for (i =0; i<3;i++) if (mapVis[i] == vis) return (ENodeSEEN)i;
+  for (i =0; i<3;i++) if (mapVis[i] == vis) return i;
+  return kBothVisible;
+}
+//______________________________________________________________________________
 St_Node::St_Node(TNode &rootNode):fShape(0),fListOfShapes(0)
 {
   // Convert the ROOT TNode object into STAR St_Node
 
   SetName(rootNode.GetName());
   SetTitle(rootNode.GetTitle());
-  fVisibility = rootNode.GetVisibility();
+  fVisibility = ENodeSEEN(MapGEANT2StNodeVis(rootNode.GetVisibility()));
   fOption     = rootNode.GetOption();
   Add(rootNode.GetShape(),kTRUE);
 
@@ -294,7 +317,7 @@ TNode *St_Node::CreateTNode(const St_NodePosition *position)
 //  const Char_t  *path = Path();
 //  printf("%s: %s/%s, shape=%s/%s\n",path,GetName(),GetTitle(),GetShape()->GetName(),GetShape()->ClassName());
   TNode *newNode  = new TNode(GetName(),GetTitle(),GetShape(),x,y,z,matrix,GetOption());
-  newNode->SetVisibility(GetVisibility());
+  newNode->SetVisibility(MapStNode2GEANTVis(GetVisibility()));
 
   newNode->SetLineColor(GetLineColor());
   newNode->SetLineStyle(GetLineStyle());
@@ -442,8 +465,10 @@ Int_t St_Node::DistancetoNodePrimitive(Int_t px, Int_t py,St_NodePosition *pos)
 //*-*  It is restricted by 2 levels of St_Nodes
 //*-*
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
- 
+
    const Int_t big = 9999;
+   if ( GetVisibility() == kNoneVisible )  return big;
+
    const Int_t inaxis = 7;
    const Int_t maxdist = 5;
  
@@ -466,7 +491,7 @@ Int_t St_Node::DistancetoNodePrimitive(Int_t px, Int_t py,St_NodePosition *pos)
    if (!position) position = &nullPosition;
    if (pos) position->UpdatePosition();      
    Int_t dist = big;
-   if (GetVisibility()) {
+   if ( !(GetVisibility() & kThisUnvisible ) ) {
      TShape  *shape = 0;
      TIter nextShape(fListOfShapes);
      while ((shape = (TShape *)nextShape())) {
@@ -482,7 +507,7 @@ Int_t St_Node::DistancetoNodePrimitive(Int_t px, Int_t py,St_NodePosition *pos)
     }
   }
 
-//   if ( TestBit(kSonsInvisible) ) return dist;
+  if ( (GetVisibility() & kSonUnvisible) ) return dist;
  
 //*-*- Loop on all sons
    TList *posList = GetListOfPositions();
@@ -544,7 +569,7 @@ void St_Node::DrawOnly(Option_t *option)
 //*-*-*-*-*-*-*-*-*-*Draw only Sons of this node*-*-*-*-*-*-*-*-*-*-*-*-*
 //*-*                ===========================
  
-   SetVisibility(2);
+   SetVisibility(kThisUnvisible);
    Draw(option);
 }
  
@@ -699,12 +724,14 @@ void St_Node::PaintNodePosition(Option_t *option,St_NodePosition *pos)
 //*-*  vis = -2 shape is drawn. Its sons are not drawn
 //*-*
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+  if ( GetVisibility() == kNoneVisible )  return;
+
   static St_NodePosition nullPosition;
 
 // restrict the levels for "range" option
   Int_t level = gGeometry->GeomLevel();
 //  if (option && option[0]=='r' && level > 3 && strcmp(option,"range") == 0) return;
-  if (GetVisibility() && option && option[0]=='r' && level > 3 ) return;
+  if ((!(GetVisibility() & kThisUnvisible)) && option && option[0]=='r' && level > 3 ) return;
 
   TPadView3D *view3D=gPad->GetView3D();
 
@@ -715,9 +742,10 @@ void St_Node::PaintNodePosition(Option_t *option,St_NodePosition *pos)
 
   position->UpdatePosition(option);      
 
-  PaintShape(option);  
+  if (!(GetVisibility() & kThisUnvisible))  PaintShape(option);  
   St_Node *n =  position->GetNode();
-  if ( n && n->TestBit(kSonsInvisible) ) return;
+
+  if (GetVisibility() & kSonUnvisible) return;
  
 //*-*- Paint all sons
   TList *posList = GetListOfPositions();
@@ -748,13 +776,12 @@ void St_Node::PaintShape(Option_t *option)
     TAttFill::Modify();
   }
 
-  if (!GetVisibility()) return;
+  if ( (GetVisibility() & kThisUnvisible) ) return;
 
   TIter nextShape(fListOfShapes);
   TShape *shape = 0;
   while( (shape = (TShape *)nextShape()) ) {
-    if (!shape->GetVisibility())   continue;
-    if (!rangeView) {
+    if (!rangeView) { 
       shape->SetLineColor(GetLineColor());
       shape->SetLineStyle(GetLineStyle());
       shape->SetLineWidth(GetLineWidth());
@@ -818,55 +845,17 @@ void St_Node::GetLocalRange(Float_t *min, Float_t *max)
 }
 
 //______________________________________________________________________________
-void St_Node::SetVisibility(Int_t vis)
+void St_Node::SetVisibility(ENodeSEEN vis)
 {
 //*-*-*-*-*-*-*Set visibility for this node and its sons*-*-*-*-*--*-*-*-*-*-*
 //*-*          =========================================
-//*-*  vis = 3  node is drawn and its sons are drawn
-//*-*  vis = 2  node is not drawn but its sons are drawn
-//*-*  vis = 1  (default) node is drawn
-//*-*  vis = 0  node is not drawn
-//*-*  vis = -1 node is not drawn. Its sons are not drawn
-//*-*  vis = -2 node is drawn. Its sons are not drawn
-//*-*  vis = -3 Only node leaves are drawn
-//*-*  vis = -4 Node is not drawn. Its immediate sons are drawn
+// ENodeSEEN Visibility flag  00 - everything visible, 
+//                            10 - this unvisible, but sons are visible
+//                            01 - this visible but sons
+//                            11 - neither this nor its sons are visible
 //*-*
 //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
- 
-   ResetBit(kSonsInvisible);
-   TIter  next(Nodes());
-   St_Node *node;
-   if (vis == -4 ) {         //Node is not drawn. Its immediate sons are drawn
-      fVisibility = 0;
-      if (!Nodes()) { fVisibility = 1; return;}
-      while ((node = (St_Node*)next())) { node->SetVisibility(-2); }
-   } else if (vis == -3 ) {  //Only node leaves are drawn
-      fVisibility = 0;
-      if (!Nodes()) { fVisibility = 1; return;}
-      while ((node = (St_Node*)next())) { node->SetVisibility(-3); }
- 
-   } else if (vis == -2) {  //node is drawn. Its sons are not drawn
-      fVisibility = 1; SetBit(kSonsInvisible); if (!Nodes()) return;
-      while ((node = (St_Node*)next())) { node->SetVisibility(-1); }
- 
-   } else if (vis == -1) {  //node is not drawn. Its sons are not drawn
-      fVisibility = 0; SetBit(kSonsInvisible); if (!Nodes()) return;
-      while ((node = (St_Node*)next())) { node->SetVisibility(-1); }
- 
-   } else if (vis ==  0) {  //node is not drawn
-      fVisibility = 0;
- 
-   } else if (vis ==  1) {  //node is drawn
-      fVisibility = 1;
- 
-   } else if (vis ==  2) {  //node is not drawn but its sons are drawn
-      fVisibility = 0; if (!Nodes()) return;
-      while ((node = (St_Node*)next())) { node->SetVisibility(3); }
- 
-   } else if (vis ==  3) {  //node is drawn and its sons are drawn
-      fVisibility = 1; if (!Nodes()) return;
-      while ((node = (St_Node*)next())) { node->SetVisibility(3); }
-   }
+  fVisibility = vis; 
 }
  
 //______________________________________________________________________________
@@ -875,14 +864,15 @@ void St_Node::Sizeof3D() const
 //*-*-*-*-*-*-*Return total size of this 3-D Node with its attributes*-*-*
 //*-*          ==========================================================
  
-   if (GetVisibility()) {
+   if (!(GetVisibility() & kThisUnvisible) ) {
      TIter nextShape(fListOfShapes);
      TShape *shape = 0;
-     while(shape = (TShape *)nextShape()) {
+     while( (shape = (TShape *)nextShape()) ) {
         if (shape->GetVisibility())  shape->Sizeof3D();
      }
    }
-//   if ( TestBit(kSonsInvisible) ) return;
+
+   if ( GetVisibility() & kSonUnvisible ) return;
  
    if (!Nodes()) return;
    St_Node *node;
@@ -893,4 +883,3 @@ void St_Node::Sizeof3D() const
       node->Sizeof3D();
    }
 }
-
