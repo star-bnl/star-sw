@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixD.cc,v 1.5 1999/12/22 15:14:42 ullrich Exp $
+ * $Id: StHelixD.cc,v 1.6 2000/03/06 20:24:28 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,9 +15,8 @@
  ***************************************************************************
  *
  * $Log: StHelixD.cc,v $
- * Revision 1.5  1999/12/22 15:14:42  ullrich
- * Added analytical solution for dca between two helices
- * in the case for B=0.
+ * Revision 1.6  2000/03/06 20:24:28  ullrich
+ * Parameter h for case B=0 correctly handled now.
  *
  * Revision 1.8  2000/05/22 21:38:32  ullrich
  * Add parenthesis to make Linux compiler happy.
@@ -80,6 +79,18 @@ void StHelixD::setParameters(double c, double dip, double phase,
     //  The order in which the parameters are set is important
     //  since setCurvature might have to adjust the others.
     //
+    mH = (h>=0) ? 1 : -1;    // Default is: positive particle
+                             //             positive field
+    mOrigin   = o;
+    setDipAngle(dip);
+    setPhase(phase);
+
+    //
+    // Check for singularity and correct for negative curvature.           
+    // May change mH and mPhase. Must therefore be set last.
+    //
+    setCurvature(c);         
+
     //
     // For the case B=0, h is ill defined. In the following we
     // always assume h = +1. Since phase = psi - h * pi/2
