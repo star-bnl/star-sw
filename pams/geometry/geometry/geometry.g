@@ -1,5 +1,15 @@
-* $Id: geometry.g,v 1.90 2004/05/10 21:49:38 potekhin Exp $
+* $Id: geometry.g,v 1.91 2004/06/28 22:53:45 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.91  2004/06/28 22:53:45  potekhin
+* The emergence of two new detectors, the Pixel and
+* the other dubbed MITT, necessitates the creation
+* of dedicated geometries that can be used for R&D
+* for both. The previous COMPLETE geometry was not
+* well suited for this at all, and didn't allow
+* proper versioning. Hence, the new MITT1 tag has
+* been created, on same footing as COMPLETE but
+* with a different structure.
+*
 * Revision 1.90  2004/05/10 21:49:38  potekhin
 * For consistency, the SSD config in the y2004a tag should
 * be equal 2 (even if the SSD data won't be used)
@@ -345,7 +355,7 @@
 * list of system on/off switches:
    Logical    cave,pipe,svtt,sisd,tpce,ftpc,
               btof,vpdd,magp,calb,ecal,upst,rich,
-              zcal,mfld,bbcm,fpdm,phmd,pixl
+              zcal,mfld,bbcm,fpdm,phmd,pixl,mitt
 
 * Qualifiers:  TPC        TOF         etc
    Logical    mwc,pse,ems,svtw,
@@ -365,7 +375,8 @@
               Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf,
               CorrNum, PhmdConfig,
               BtofConfig, VpddConfig, FpdmConfig,
-              SisdConfig, PipeConfig, CalbConfig
+              SisdConfig, PipeConfig, CalbConfig,
+              PixlConfig, MittConfig
 
 * configuration variables for tuning the geometry:
 *            BtofConfig  -- tof trays
@@ -374,6 +385,8 @@
 *            PipeConfig  -- beam pipe
 *            CalbConfig  -- barrel calorimeter
 *            FpdmConfig  -- fpd
+*            PixlConfig  -- pixel
+*            MittConfig  -- outer pixel
 
 * CorrNum allows us to control incremental bug fixes in a more
 * organized manner
@@ -416,6 +429,8 @@ replace[;ON#{#;] with [
    VpddConfig  = 1 ! vpd...
    CalbConfig  = 0 ! really make use of it starting in y2004
    FpdmConfig  = 0 ! 0 means the original source code
+   PixlConfig  = 0 ! 0=no, 1=inside the SVT, 2=inside CAVE
+   MittConfig  = 0 ! 0=no, >1=version
 
 * Set only flags for the main configuration (everthing on, except for tof),
 * but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
@@ -426,7 +441,7 @@ replace[;ON#{#;] with [
 * "Canonical" detectors are all ON by default,
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
 * whereas some newer stuff is considered optional:
-   {bbcm,fpdm,phmd,pixl,sisd} = off;
+   {bbcm,fpdm,phmd,pixl,mitt,sisd} = off;
 
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows              "
    {ems,rich}=off        " TimeOfFlight, EM calorimeter Sector            "
@@ -523,7 +538,7 @@ If LL>1
 
   on YEAR_2A    { old asymptotic STAR;    Itof=1; mwx=1;  bbcm=on;            }
 
-
+*************************************************************************************************************
 * Retiring this version of "complete", and replacing it with a more modern one:
 *  on COMPLETE   { Complete STAR geometry; Itof=2; bbcm=on; ecal_fill=3; ecal_config=3;  }
 
@@ -566,6 +581,46 @@ If LL>1
 * careful! Achtung!
                    pipeConfig=4;   " provisional"
                    pixl=on;    " put the pixel detector in"
+                   PixlConfig=1;
+                }
+
+*************************************************************************************************************
+  on MITT1   { New Pixel Based Tracking + correction 3 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
+
+                     svtt=off; "no SVT at all in this configuration"
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     BtofConfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                  "ecal"
+                     ecal_config=3   "both wheels"
+                     ecal_fill=3     "all sectors filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+                  "geometry correction "
+                     CorrNum = 4;
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 1;
+                  "Silicon Strip Detector Version "
+                     sisd=off;
+                     SisdConfig = 1;
+* careful! Achtung!
+                   pipeConfig=4;   " provisional"
+                   pixl=on;    " put the pixel detector in"
+                   PixlConfig=2;
+* The new MIT detector
+                   mitt=on;  "new pixel based inner tracker"
+                   MittConfig=1;
                 }
 
 
@@ -1173,8 +1228,11 @@ If LL>1
 
    if (zcal) Call zcalgeo
    if (magp) Call magpgeo
-   if (pixl) Call pixlgeo
 
+   if (pixl.and.PixlConfig==1) Call pixlgeo
+   if (pixl.and.PixlConfig==2) Call pixlgeo1
+
+   if (mitt.and.MittConfig>0)  Call mittgeo
 
 ******************************************************************
 * If PHMD is present and a non-zero version of the Photon Multiplicity Detector
