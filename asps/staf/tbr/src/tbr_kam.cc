@@ -85,7 +85,8 @@ void kam_tbr_viewdataset_()
 STAFCV_T tbr_viewdataset()
 {
    if( !tbr_MotifViewer->viewDataset(dui->rootDO()) ){
-      EML_ERROR(KAM_METHOD_FAILURE);
+      EML_CONTEXT("ERROR: This is not your fault.\n");
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }

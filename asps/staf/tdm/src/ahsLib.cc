@@ -164,9 +164,10 @@ int ahs_specSplit(const char *s
       else {
 	 nspec++;
 	 entr = (char*)MALLOC(strlen(spec) - (cc+1-spec) +1);
-	 strncpy(entr,cc+1,strlen(spec) - (cc+1-spec));
+	 strncpy(entr,cc+1,strlen(spec) - (cc+1-spec)); 
 	 c = (char*)MALLOC((cc-spec) +1);
-	 strncpy(c,spec,(cc-spec));
+	 strncpy(c,spec,(cc-spec)); 
+	 c[(cc-spec)]=0; /* hjw 19Feb98 */
 	 FREE(spec);
 	 spec = c; c = NULL;
       }

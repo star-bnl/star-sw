@@ -55,7 +55,9 @@ tntNtuple::title () {
   char *t;
 
   t = hbkCWNtitle(hid());
-  int i = strlen(t) - 1; // Strip off any trailing whitespace
+  //  int i = strlen(t) - 1; // Strip off any trailing whitespace
+  int i=strlen(t);
+  if(i > 0) i--;    /*fix read bad index -akio*/
   while( ' ' == t[i] ){
     t[i--] = 0;
   }
@@ -130,16 +132,16 @@ tntCWNtuple::tntCWNtuple(long id, tdmTable *table)
 
   // Find out longwordified size of a row and malloc a buffer
   longwordifiedSize = tntLongwordifyRowSize(table);
-  rowBuffer = (char *) malloc(longwordifiedSize);
+  rowBuffer = (char *) MALLOC(longwordifiedSize);
 
   // Calculate and store block quantities
-  _blockPtr = (char **) calloc((size_t) numBlocks, sizeof(char*));
-  chforms = (char **) calloc((size_t) numBlocks, sizeof(char *));
-  _blockName = (char **) calloc((size_t) numBlocks, sizeof(char *));
-  _blockType = (CWN_BLOCK_TYPE_T *) calloc((size_t) numBlocks,
+  _blockPtr = (char **) CALLOC((size_t) numBlocks, sizeof(char*));
+  chforms = (char **) CALLOC((size_t) numBlocks, sizeof(char *));
+  _blockName = (char **) CALLOC((size_t) numBlocks, sizeof(char *));
+  _blockType = (CWN_BLOCK_TYPE_T *) CALLOC((size_t) numBlocks,
 					   sizeof(CWN_BLOCK_TYPE_T));
   for (i = 0; i < numBlocks; i++) {
-    _blockName[i] = (char *)malloc(9);
+    _blockName[i] = (char *)MALLOC(9);
   }
 
   offset = 0;
@@ -157,7 +159,7 @@ tntCWNtuple::tntCWNtuple(long id, tdmTable *table)
     } else {
       cp = tntColumnChform(table, i);
       newlen = strlen(chforms[iBlock]) + strlen(cp) + 2;
-      chforms[iBlock] = (char *) realloc(chforms[iBlock], newlen); 
+      chforms[iBlock] = (char *) REALLOC(chforms[iBlock], newlen); 
       strcat(chforms[iBlock], ",");
       strcat(chforms[iBlock], cp);
       free(cp);
@@ -168,7 +170,9 @@ tntCWNtuple::tntCWNtuple(long id, tdmTable *table)
   myHid = id;
 
   // OK, book the CWN and describe the blocks
-  hbkCWNbook(hid(), table->dslName());
+  char *c; /*fix memory leak -akio*/
+  hbkCWNbook(hid(), c=table->dslName());
+  free(c); /*fix memory leak -akio*/
   for (i = 0; i < numBlocks; i++) {
     if (isCharBlock(i)) {
       hbkCWNcharBlock(hid(),_blockName[i],_blockPtr[i],chforms[i]);
@@ -194,11 +198,12 @@ tntCWNtuple::~tntCWNtuple() {
   int i;
   free(dslSpec);
   free(_blockPtr);
-  free(_blockName);
   free(_blockType);
   for (i = 0; i < numBlocks; i++) {
+    free(_blockName[i]); /*fix memory leak -akio*/
     free(chforms[i]);
   }
+  free(_blockName); /*fix memory leak -akio/phenix*/
 };
 
 //:----------------------------------------------- ATTRIBUTES         --
@@ -254,13 +259,19 @@ tntCWNtuple::import (tdmTable* table) {
 STAFCV_T 
 tntCWNtuple::append (tdmTable* table) {
   int i, j, k;
-  long *bufferPtr;
+  long *bufferPtr, *lPtr;
   char *c1Ptr, *c2Ptr;
+  short *sPtr;
+  unsigned char *oPtr;
+  unsigned short *usPtr;
+  unsigned long *ulPtr;
+  float *fPtr;
+  double *dPtr;
   size_t colSize, elementSize;
   TDM_CELLDATA_T data;
 
   if (!table->isType(dslSpec)) {
-    EML_ERROR(WRONG_TABLE_TYPE);	// compatable???
+    EML_ERROR(WRONG_TABLE_TYPE);	// compatable??? done
   }
   
   // Loop over the rows of the table ...
@@ -269,7 +280,7 @@ tntCWNtuple::append (tdmTable* table) {
     bufferPtr = (long *)rowBuffer;
 
     // ... and loop over the columns of each row
-    for (j = 0; j < table->columnCount(); j++) {
+    for (j = 0; j < columnCount(); j++) {
 
       // Figure out the longword aligned size
       colSize = tntLongwordifyColumnSize(table,j);
@@ -295,52 +306,58 @@ tntCWNtuple::append (tdmTable* table) {
 	// copy into the correponding longword-sized buffer.  This may
 	// involve a conversion of the type.  Perhaps there's a way to
 	// optimize this better.
+	oPtr = data.data.o;
 	for (k = 0; k < table->columnElcount(j); k++) {
-	  *bufferPtr = *(data.data.o+k);
+	  *bufferPtr = *oPtr++;
 	  bufferPtr++;
 	}
 	break;
       case DS_TYPE_SHORT:
+	sPtr = data.data.s;
 	for (k = 0; k < table->columnElcount(j); k++) {
-	  *bufferPtr = *(data.data.s+k);
+	  *bufferPtr = *sPtr++;
 	  bufferPtr++;
 	}
 	break;
       case DS_TYPE_U_SHORT:
+	usPtr = data.data.us;
 	for (k = 0; k < table->columnElcount(j); k++) {
-	  *bufferPtr = *(data.data.us+k);
+	  *bufferPtr = *usPtr++;
 	  bufferPtr++;
 	}
 	break;
       case DS_TYPE_LONG:
+	lPtr = data.data.l;
 	for (k = 0; k < table->columnElcount(j); k++) {
-	  *bufferPtr = *(data.data.l+k);
+	  *bufferPtr = *lPtr++;
 	  bufferPtr++;
 	}
 	break;
       case DS_TYPE_U_LONG:
+	ulPtr = data.data.ul;
 	for (k = 0; k < table->columnElcount(j); k++) {
-	  *bufferPtr = *(data.data.ul+k);
+	  *bufferPtr = *ulPtr++;
 	  bufferPtr++;
 	}
 	break;
       case DS_TYPE_FLOAT:
 	// Make sure the real types aren't converted to longs.
+	fPtr = data.data.f;
 	for (k = 0; k < table->columnElcount(j); k++) {
-	  *(float *)bufferPtr = *(data.data.f+k);
+	  *(float *)bufferPtr = *fPtr++;
 	  bufferPtr += sizeof(float)/sizeof(long);
 	}
 	break;
       case DS_TYPE_DOUBLE:
+	dPtr = data.data.d;
 	for (k = 0; k < table->columnElcount(j); k++) {
-	  *(double *)bufferPtr = *(data.data.d+k);
+	  *(double *)bufferPtr = *dPtr++;
 	  bufferPtr += sizeof(double)/sizeof(long);
 	}
 	break;
-      default:
-        printf("\nSEVERE ERROR DURING TABLE TO NTUPLE CONVERSION.\007\n");
       }
     }
+
     // Once the rowBuffer has been filled, call HFNT.
     hbkCWNputRow(hid());
   }
@@ -463,14 +480,16 @@ tntFactory::list () {
   // This should become a real iterator
   lc = 3;
   for (i = 0; i < soc->count(); i++) {
+    char *s=NULL;  /*fix memory leak -akio*/
     obj = soc->getObject(soc->entryID(i));
     if ((obj != NULL) &&
-	(strcmp(obj->type(),"tntCWNtuple") == 0)) {
+	(strcmp(s=obj->type(),"tntCWNtuple") == 0)) {
       l = obj->listing();
       cc = c + (80 * lc++);
       sprintf(cc,"%-79s\n",l);
-      FREE(l);
+      if(l) FREE(l); /*fix free un-init ptr -akio*/
     }
+    if(s) free(s); /*fix memory leak -akio*/
   }
 
   return c;
@@ -482,9 +501,11 @@ tntFactory::deleteCWNtuple (long hid) {
   char *name = id2name("tntCWNtuple",hid);
   
   if( !soc->deleteObject(name,"tntCWNtuple") ){
+    FREE(name);  //*VP-phenix* 
     EML_ERROR(CANT_DELETE_OBJECT);
   }
-
+  FREE(name);  //*VP-phenix*
+ 
   EML_SUCCESS(STAFCV_OK);
 }
 
@@ -498,10 +519,12 @@ tntFactory::findCWNtuple (long hid) {
   obj = soc->findObject(name,"tntCWNtuple");
   if (obj == NULL) {
     CWNtuple = NULL;
+    free(name); /*fix memory leak -akio*/
+    EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",name);
     EML_ERROR(OBJECT_NOT_FOUND);
   }
   CWNtuple = TNTCWNTUPLE(obj);
-
+  free(name); /*fix memory leak -akio*/
   return CWNtuple;
 }
 
@@ -534,6 +557,7 @@ tntFactory::newCWNtuple (long hid) {
   char *name;
 
   if (findCWNtuple(hid) != NULL) {
+    EML_CONTEXT("ERROR: You already have a CWNtuple of HID %d.'.\n",hid);
     EML_ERROR(DUPLICATE_OBJECT);
   }
   p = new tntCWNtuple(hid);
@@ -555,6 +579,7 @@ tntFactory::createCWNtuple (long hid, tdmTable *table) {
    char *name = id2name("tntCWNtuple",hid);
 
    if( soc->idObject(name,"tntCWNtuple",id) ){
+      EML_CONTEXT("ERROR: You already have a ntuple '%d'.\n",hid);
       EML_ERROR(DUPLICATE_OBJECT_NAME);
    }
 

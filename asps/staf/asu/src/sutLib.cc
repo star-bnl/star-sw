@@ -129,6 +129,10 @@ int sutMatchPrefix(char *prefix,char* string)
       FREE(s); FREE(p);
       return (int)TRUE;
    }
+ 
+   if(s) FREE(s);
+   if(p) FREE(p);
+ 
    return (int)FALSE;
 }
 
@@ -150,7 +154,8 @@ int sutStripWhitespace(char **outstring,char* string)
    s += (plen = strspn(s,whtspc));
    slen = strcspn(s,whtspc);
    o = (char*)MALLOC(slen +1);
-   strncpy(o,s,slen);
+   strncpy(o,s,slen); 
+   o[slen]=0; /* hjw 19Feb98 */
    *outstring=o;
    return (int)slen;
 }
@@ -170,7 +175,7 @@ char* strntok(const char * str,const char * del,const int n)
    d += strspn(d,del);          /* skip tokens */
    if( strcspn(d,del) > 0 ){
       w = (char*)CALLOC(1,strcspn(d,del) +1);
-      strncpy(w,d,strcspn(d,del));
+      strncpy(w,d,strcspn(d,del)); 
       return (char*)w;
    }
    return NULL;
@@ -226,7 +231,8 @@ int strbracket(const char *str, const char * od, const char * cd,
       buf = optr +1;
       if( (cptr=strstr(buf,cd)) ){
 	 aa[i] = (char*)MALLOC((cptr-buf) +1);
-	 strncpy(aa[i],buf,(cptr-buf));
+	 strncpy(aa[i],buf,(cptr-buf)); 
+	 aa[i][cptr-buf]=0; /* hjw 19Feb98 */
 	 buf = cptr +clen;
 	 i++;
       }
@@ -275,7 +281,8 @@ int sutFortran2Cindex(char ** index)
       *cc = rb;
       if(cc > c){
 	 a = (char*)malloc(cc-c);
-	 strncpy(a,c+1,cc-c);
+	 strncpy(a,c+1,cc-c); 
+	 a[cc-c]=0; /* hjw 19Feb98 */
 /*	 ccc = strpbrk(a,","); */
 	 i = atoi(a);
 	 if( 0 < i ){

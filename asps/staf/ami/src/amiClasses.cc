@@ -1,4 +1,4 @@
-static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.13 1997/12/12 19:48:15 tull Exp $";
+static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.14 1998/03/05 22:39:51 fisyak Exp $";
 //:Copyright 1995, Lawrence Berkeley National Laboratory
 //:>--------------------------------------------------------------------
 //:FILE:        amiClasses.C
@@ -10,6 +10,7 @@ static char amiClasses_what[]="@(#)$Id: amiClasses.cc,v 1.13 1997/12/12 19:48:15
 //:<--------------------------------------------------------------------
 
 //:----------------------------------------------- INCLUDES           --
+#include <stdlib.h>
 #include "asuAlloc.h"
 #include "tdmLib.h"
 #include "ami_macros.h"
@@ -39,7 +40,8 @@ amiInvoker:: amiInvoker(const char * name, long rank
       strcpy(myTblSpecs[i], specs._buffer[i]);
 //- HACK - should delete each table after creation
       dsNewTable(&pTABLE,"TABLE",myTblSpecs[i],0,pDATA);
-      pTABLE=NULL; pDATA=NULL;  //- HACK
+      if(pTABLE) free(pTABLE);  /*fix memory leak -akio*/
+      pTABLE=NULL; pDATA=NULL;  //- HACK  
    }
    myPamFtn = pam;
 }
@@ -85,7 +87,7 @@ STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
 
 //- Check number of tables in sequence.
    if( tbl._length != rank() ){
-      EML_CONTEXT("PAM = (%s) \n",name());
+      EML_CONTEXT("ERROR: PAM = (%s) \n",name());
       EML_ERROR(WRONG_PAM_RANK);
    }
 //- Create arrays of TAS-structs for tables.
@@ -98,7 +100,7 @@ STAFCV_T amiInvoker:: call (TABLE_SEQ_T& tbl) {
    for( int i=0;i<tbl._length;i++ ){
 //- Check types of tables in sequence.
       if( !((tbl._buffer[i])->isType(myTblSpecs[i])) ){
-	 EML_CONTEXT("table #%d (%s) is wrong type\n",i
+	 EML_CONTEXT("ERROR: table #%d (%s) is wrong type\n",i
 			,(tbl._buffer[i])->name());
 	 delete[] h;
 	 delete[] d;
@@ -148,7 +150,8 @@ STAFCV_T amiInvoker:: stop () {
 //----------------------------------
 char * amiInvoker:: tableSpec (long ntbl) {
 
-   char * c = new char[strlen(myTblSpecs[ntbl]) + 1];
+  //     char * c = new char[strlen(myTblSpecs[ntbl]) + 1];    /* -akio */
+   char * c = (char *)malloc(strlen(myTblSpecs[ntbl]) + 1); /* -alloc conflict */
    strcpy(c,myTblSpecs[ntbl]);
    return c;
 }
@@ -196,6 +199,7 @@ STAFCV_T amiBroker:: callInvoker (const char * name
 //- Find the correct invoker.
    amiInvoker* invoker=NULL;
    if( NULL == (invoker = findInvoker(name)) ){
+      EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",name);
       EML_ERROR(OBJECT_NOT_FOUND);
    }
 //- Check number of table names passed.
@@ -222,7 +226,8 @@ STAFCV_T amiBroker:: callInvoker (const char * name
       b = strlen(tnames._buffer[i]);
       if( cc )b = (int)(cc - c);
       table_name = (char*)MALLOC(b +1); memset(table_name,0,b+1);
-      strncpy(table_name,tnames._buffer[i],b);
+      strncpy(table_name,tnames._buffer[i],b); 
+      table_name[b]=0; /* hjw 19Feb98 */
       if( b < strlen(tnames._buffer[i]) ){
 	 table_size = atoi(tnames._buffer[i] + b + 1);
       }
@@ -248,7 +253,10 @@ STAFCV_T amiBroker:: callInvoker (const char * name
       if( table_name ){FREE(table_name); table_name = NULL;}
    }
 //- Call the actual invoker object.
-   return invoker->call(tables);
+   STAFCV_T status = invoker->call(tables);/*fix memory leak -akio*/
+   delete tables._buffer;                  /*fix memory leak -akio*/
+   return status;                          /*fix memory leak -akio*/
+//   return invoker->call(tables);
 //   EML_SUCCESS(STAFCV_OK);
 }
 
@@ -266,6 +274,7 @@ amiInvoker * amiBroker:: findInvoker (const char * name) {
    socObject* obj;
    if( NULL == (obj = soc->findObject(name,"amiInvoker")) ){
       invoker = NULL;
+      EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",name);
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    invoker = AMIINVOKER(obj);
@@ -317,6 +326,7 @@ amiInvoker * amiBroker:: newInvoker (const char * name
 		, const STRING_SEQ_T& specs) {
    IDREF_T id;
    if( soc->idObject(name,"amiInvoker",id) ){
+      EML_CONTEXT("ERROR: You already have a '%s'.\n",name);
       EML_ERROR(DUPLICATE_OBJECT_NAME);
    }
    amiInvoker* p;

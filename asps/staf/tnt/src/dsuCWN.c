@@ -108,7 +108,8 @@ dsuLongwordifyRow(DS_DATASET_T *pTable, size_t irow, char **ppData)
       src.c = pCell;
       if( DS_TYPE_CHAR == code ){
 	 memset(dest.c,' ',LONGWORDIFY(colSize));
-	 strncpy(dest.c,src.c,colSize);
+	 strncpy(dest.c,src.c,colSize); 
+	 dest.c[colSize]=0; /* hjw 19Feb98 */
 	 src.c += colSize;
 	 dest.c += LONGWORDIFY(colSize);
       }
@@ -239,7 +240,8 @@ dsuColumnChform(DS_DATASET_T *pTable, size_t icolumn)
       chform = NULL;
       return chform;
    }
-   strncpy(chname,name,8);
+   strncpy(chname,name,8); 
+   chname[8]=0; /* hjw 19Feb98 */
    if( 1 < count ){
       sprintf(chdim,"(%s)",count);
    }

@@ -22,7 +22,8 @@ extern char*  ku_appl( int* luno, int* inmacro );
 extern int    ku_bool( const char* expr );
  
 extern int    ku_close( int luno );
-extern void   ku_cmdl( const char* template );
+  /* `template' is a C++ reserved word. */
+extern void   ku_cmdl( const char* templat );
  
 extern int    ku_edit( const char* path, int use_server );
 extern char*  ku_eval( const char* expr );
@@ -55,7 +56,8 @@ extern int    ku_npar(void);
  
 extern int    ku_open( int luno, const char* path, const char* mode );
  
-extern void   ku_pad( const char* path, int delete );
+  /* `delete' is a C++ reserved word. */
+extern void   ku_pad( const char* path, int delet );
 extern char*  ku_path(void);
 extern void   ku_piaf( int socket, void(*sync)() );
 extern char*  ku_proc( const char* prompt, const char* dfault );
@@ -77,7 +79,7 @@ extern void   ku_shut(void);
 extern void   ku_spy( const char* option );
 extern int    ku_stop( int set );
  
-extern void   ku_time( time_t, clock_t );
+  /* extern void   ku_time( time_t, clock_t ); */
 extern void   ku_trap( int enable, int traceback );
  
 extern int    ku_vqaddr( const char* vname );

@@ -13,6 +13,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #ifdef irix
 #include <sys/time.h>
@@ -63,6 +64,75 @@ STAFCV_T asu_hello(char* msg)
 *:* ASU/TIME
 *:<---------------------------------------------------------------------
 */
+void kam_asu_demand_ack_() {
+  char *value = ku_gets();
+  asu_demand_ack(value);
+}
+STAFCV_T asu_demand_ack(char *value) {
+  int ii; char val[200]; strncpy(val,value,195); val[195]=0;
+  for(ii=0;val[ii];ii++) { if(val[ii]>='a'&&val[ii]<='z') val[ii]+='A'-'a'; }
+  if(!strcmp(val,"SHOW")) {
+    if(eml_demand_ack_on) printf("ASU: demand error acknowledgement is ON.\n");
+    else                  printf("ASU: demand error acknowledgement is OFF.\n");
+    EML_SUCCESS(STAFCV_OK);
+  }
+  if(!strcmp(val,"FALSE")||!strcmp(val,"OFF")) {
+    eml_demand_ack_on=0; // I use 0 for FALSE.
+    EML_SUCCESS(STAFCV_OK);
+  }
+  if(!strcmp(val,"TRUE")||!strcmp(val,"ON")) {
+    eml_demand_ack_on=7; // I use 7 for TRUE.
+    EML_SUCCESS(STAFCV_OK);
+  }
+  EML_CONTEXT("ERROR: I want 'true', 'false', 'show', or nothing.\n");
+  EML_FAILURE(INVALID_COMMAND_PARAMETER);
+}
+void kam_asu_beep_() {
+  char *value = ku_gets();
+  asu_beep(value);
+}
+STAFCV_T asu_beep(char *value) {
+  int ii; char val[200]; strncpy(val,value,195); val[195]=0;
+  for(ii=0;val[ii];ii++) { if(val[ii]>='a'&&val[ii]<='z') val[ii]+='A'-'a'; }
+  if(!strcmp(val,"SHOW")) {
+    if(eml_beep_on) printf("ASU: beep on error is ON.\n");
+    else            printf("ASU: beep on error is OFF.\n");
+    EML_SUCCESS(STAFCV_OK);
+  }
+  if(!strcmp(val,"FALSE")||!strcmp(val,"OFF")) {
+    eml_beep_on=0; // I use 0 for FALSE.
+    EML_SUCCESS(STAFCV_OK);
+  }
+  if(!strcmp(val,"TRUE")||!strcmp(val,"ON")) {
+    eml_beep_on=7; // I use 7 for TRUE.
+    EML_SUCCESS(STAFCV_OK);
+  }
+  EML_CONTEXT("ERROR: I want 'true', 'false', 'show', or nothing.\n");
+  EML_FAILURE(INVALID_COMMAND_PARAMETER);
+}
+void kam_asu_pretty_() {
+  char *value = ku_gets();
+  asu_pretty(value);
+}
+STAFCV_T asu_pretty(char *value) {
+  int ii; char val[200]; strncpy(val,value,195); val[195]=0;
+  for(ii=0;val[ii];ii++) { if(val[ii]>='a'&&val[ii]<='z') val[ii]+='A'-'a'; }
+  if(!strcmp(val,"SHOW")) {
+    if(eml_pretty_on) printf("ASU: pretty error messaging is ON.\n");
+    else              printf("ASU: pretty error messaging is OFF.\n");
+    EML_SUCCESS(STAFCV_OK);
+  }
+  if(!strcmp(val,"FALSE")||!strcmp(val,"OFF")) {
+    eml_pretty_on=0; // I use 0 for FALSE.
+    EML_SUCCESS(STAFCV_OK);
+  }
+  if(!strcmp(val,"TRUE")||!strcmp(val,"ON")) {
+    eml_pretty_on=7; // I use 7 for TRUE.
+    EML_SUCCESS(STAFCV_OK);
+  }
+  EML_CONTEXT("ERROR: I want 'true', 'false', 'show', or nothing.\n");
+  EML_FAILURE(INVALID_COMMAND_PARAMETER);
+}
 void kam_asu_time_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
@@ -170,6 +240,7 @@ void kam_asumalloc_level_()
 }
 STAFCV_T asumalloc_level(int level)
 {
+
    ASU_MALLOCLEVEL_T mLevel=ASU_MALLOC_FAST;
 
    switch(level) {

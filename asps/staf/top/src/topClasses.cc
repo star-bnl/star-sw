@@ -56,21 +56,27 @@ topProject:: topProject(const char * name, const char * spec)
 
 //:---------------------------------
 topProject:: ~topProject(){
-   FREE(mySelectSpec);
+   if(mySelectSpec) FREE(mySelectSpec);
 }
 
 //:----------------------------------------------- ATTRIBUTES         --
 char* topProject:: selectionSpecification() {
    char* c=NULL;
-   c = (char*)MALLOC(strlen(mySelectSpec) +1);
-   strcpy(c,mySelectSpec);
+   if(mySelectSpec) {
+     c = (char*)MALLOC(strlen(mySelectSpec) +1);
+     strcpy(c,mySelectSpec);
+   } else {
+     char *herb22Feb98 = "invalidSelectSpec";
+     c = (char*)MALLOC(strlen(herb22Feb98) +1);
+     strcpy(c,herb22Feb98);
+   }
    return c;
 }
 
 //----------------------------------
 void topProject:: selectionSpecification(const char* spec) {
    if( isValidSelectSpec((char*)spec) ){
-      FREE(mySelectSpec);
+      if(mySelectSpec) FREE(mySelectSpec);
       mySelectSpec = (char*)MALLOC(strlen(spec) +1);
       strcpy(mySelectSpec,spec);
    }
@@ -83,7 +89,8 @@ char * topProject::  listing () {
    char* cc = NULL;
    char* s = selectionSpecification();
    char ss[33];
-   strncpy(ss,s,32);
+   strncpy(ss,s,32); 
+   ss[32]=0; /* hjw 19Feb98 */
    cc = (char*)MALLOC(79);
    memset(cc,0,79);
    sprintf(cc,"%s %s",c,ss);
@@ -100,6 +107,7 @@ STAFCV_T topProject:: project(tdmTable * table1, tdmTable *& table2) {
       table2 = pTarget(table1, NULL);
    }
    pTbl2=table2->dslPointer();
+   if(!mySelectSpec) EML_ERROR(INVALID_SELECTION_SPEC);
    if( !dsProjectTable(pTbl2,pTbl1,mySelectSpec) ){
       EML_ERROR(PROJECTION_FAILURE);
    }
@@ -119,6 +127,7 @@ tdmTable* topProject:: pTarget(tdmTable * table1, const char * name) {
    else {
      n=(char*)name;
    }
+   if(!mySelectSpec) EML_ERROR(INVALID_SELECTION_SPEC);
    if( !dsTargetTable(&pTbl2, n, n, pTbl1, NULL, NULL, 
 	     mySelectSpec) ){
       FREE(n);
@@ -132,16 +141,19 @@ tdmTable* topProject:: pTarget(tdmTable * table1, const char * name) {
    ||  !dsTableTypeSpecifier(&s2,pTbl2) 
    ){
       EML_ERROR(CANT_CREATE_TABLE);
+      free(pTbl2); /*fix memory leak -akio*/
    }
    if( NULL == (table2 = tdm->newTable(n2,s2,0)) ){
       EML_ERROR(CANT_CREATE_TABLE);
-   }
+      free(pTbl2); /*fix memory leak -akio*/
+    }
+   free(pTbl2); /*fix memory leak -akio*/
    return table2;
 }
 
 //----------------------------------
 STAFCV_T topProject:: reset() {
-   FREE(mySelectSpec);
+   if(mySelectSpec) FREE(mySelectSpec);
    mySelectSpec = NULL;
    EML_SUCCESS(STAFCV_OK);
 }
@@ -210,8 +222,10 @@ STAFCV_T topCut:: DoCutTable(tdmTable *tbl,char *func,
   *orig=tbl->rowCount();
 
   dsPtr=tbl->dslPointer();
-  if(!dsTableRowSize(&bytesPerRow,dsPtr)) EML_ERROR(CANT_FIND_ROW_SIZE);
-  if(!dsTableDataAddress(&beginningOfTable,dsPtr)) EML_ERROR(CANT_FIND_DATA);
+  if(!dsTableRowSize(&bytesPerRow,dsPtr)) 
+      EML_ERROR(CANT_FIND_ROW_SIZE);
+  if(!dsTableDataAddress(&beginningOfTable,dsPtr)) 
+      EML_ERROR(CANT_FIND_DATA);
   bottomNewTbl=beginningOfTable;
 
   nbytes=(size_t)(((*orig)/8)+1); mask=MALLOC(nbytes);
@@ -221,6 +235,7 @@ STAFCV_T topCut:: DoCutTable(tdmTable *tbl,char *func,
   if(!dsuDoCuts(nbytes,(char*)mask,(char*)func,dsPtr)) {
     printf("Failure, check your cuts string for syntax errors:\n");
     printf("%s\n",func);
+    FREE(mask); //*VP-phenix* 
     return 0;
   }
   startRow=-10;
@@ -242,6 +257,7 @@ STAFCV_T topCut:: DoCutTable(tdmTable *tbl,char *func,
   printf("%d rows passed the cuts.\n",rowCnt);
   *percentPass=(100.0*rowCnt)/(*orig)+0.5;
   tbl->rowCount(rowCnt);
+  free(mask); /*fix memory leak -akio*/
   return 7;
 }
 STAFCV_T topCut:: DoFilterTable(tdmTable *src,
@@ -256,7 +272,8 @@ STAFCV_T topCut:: DoFilterTable(tdmTable *src,
 
   dsPtr=src->dslPointer(); // ONLY in a collocated process (CORBA)
   tgtPtr=tgt->dslPointer(); // ONLY in a collocated process (CORBA)
-  if(!dsTableRowSize(&bytesPerRow,tgtPtr)) EML_ERROR(CANT_FIND_ROW_SIZE);
+  if(!dsTableRowSize(&bytesPerRow,tgtPtr)) 
+        EML_ERROR(CANT_FIND_ROW_SIZE);
 
   nbytes=(size_t)(((*orig)/8)+1); mask=MALLOC(nbytes);
   if(!mask) { printf("Could not allocate %d bytes.\n",nbytes); return 0; }
@@ -265,6 +282,7 @@ STAFCV_T topCut:: DoFilterTable(tdmTable *src,
   if(!dsuDoCuts(nbytes,(char*)mask,(char*)func,dsPtr)) {
     printf("Failure, check your cuts string for syntax errors:\n");
     printf("%s\n",func);
+    FREE(mask); //*VP-phenix*
     return 0;
   }
   startRow=-10;
@@ -273,8 +291,10 @@ STAFCV_T topCut:: DoFilterTable(tdmTable *src,
   }
   tgt->maxRowCount(numberPass);
   tgt->rowCount((numberPass));
-  if(!dsTableDataAddress(&beginOfSrcTbl,dsPtr)) EML_ERROR(CANT_FIND_DATA);
-  if(!dsTableDataAddress(&bottomNewTbl,tgtPtr)) EML_ERROR(CANT_FIND_DATA);
+  if(!dsTableDataAddress(&beginOfSrcTbl,dsPtr)) 
+       EML_ERROR(CANT_FIND_DATA);
+  if(!dsTableDataAddress(&bottomNewTbl,tgtPtr)) 
+      EML_ERROR(CANT_FIND_DATA);
   for(row=0;row<(*orig)+1;row++) { /* The <x+1 is deliberate, to invoke the
                                    ** else clause during ending of the loop. */
     if(row<(*orig)&&dsuRowPassedCuts((char*)mask,row)) {
@@ -292,6 +312,7 @@ STAFCV_T topCut:: DoFilterTable(tdmTable *src,
   }
   printf("%d rows passed the cuts.\n",numberPass);
   *percentPass=(100.0*numberPass)/(*orig)+0.5;
+  free(mask); /*fix memory leak -akio*/
   return 7;
 }
 STAFCV_T topCut:: filter(tdmTable * tab1, tdmTable * tab2) {
@@ -423,7 +444,8 @@ STAFCV_T topSort:: SortTheTable(tdmTable *table) { // www
 
   if(!dsTableRowSize(&rowsize,dsPtr)) EML_ERROR(CANT_FIND_ROW_SIZE);
   if(!dsTableDataAddress(&dataAddr,dsPtr)) EML_ERROR(CANT_FIND_DATA);
-  if(!dsFindColumn(&colNum,dsPtr,myWhichColumn)) EML_ERROR(CANT_FIND_COLUMN);
+  if(!dsFindColumn(&colNum,dsPtr,myWhichColumn)) 
+      EML_ERROR(CANT_FIND_COLUMN);
 
   tmp=MALLOC(rowsize);
   errFlag=0;
@@ -504,10 +526,12 @@ char * topJoin::  listing () {
    char* cc = NULL;
    char* s = selectionSpecification();
    char ss[16];
-   strncpy(ss,s,15);
+   strncpy(ss,s,15); 
+   ss[15]=0; /* hjw 19Feb98 */
    char* w = whereClause();
    char ww[16];
-   strncpy(ww,w,15);
+   strncpy(ww,w,15); 
+   ww[15]=0; /* hjw 19Feb98 */
    cc = (char*)MALLOC(79);
    memset(cc,0,79);
    sprintf(cc,"%s %s#%s",c,ss,ww);
@@ -529,6 +553,7 @@ STAFCV_T topJoin:: fastjoin(tdmTable * table1, tdmTable * table2
       }
    }
    pTbl3=table3->dslPointer();
+   if(!mySelectSpec) EML_ERROR(INVALID_SELECTION_SPEC);
    if( !topFastjoin(pTbl3,pTbl1,pTbl2,NULL,myWhereClause,mySelectSpec) ){
       EML_PUSHERROR(dsError("DSL_ERROR"));
       EML_ERROR(FASTJOIN_FAILURE);
@@ -550,6 +575,7 @@ STAFCV_T topJoin:: join(tdmTable * table1, tdmTable * table2
       }
    }
    pTbl3=table3->dslPointer();
+   if(!mySelectSpec) EML_ERROR(INVALID_SELECTION_SPEC);
    if( !dsEquijoin(pTbl3,pTbl1,pTbl2,NULL,myWhereClause,mySelectSpec) ){
       EML_PUSHERROR(dsError("DSL_ERROR"));
       EML_ERROR(JOIN_FAILURE);
@@ -573,6 +599,7 @@ tdmTable * topJoin:: jTarget(tdmTable * table1, tdmTable * table2
    else {
      n=(char*)name;
    }
+   if(!mySelectSpec) EML_ERROR(INVALID_SELECTION_SPEC);
    if( !dsTargetTable(&pTbl3, n, n, pTbl1, pTbl2, NULL, 
              mySelectSpec) ){
       FREE(n);
@@ -586,10 +613,13 @@ tdmTable * topJoin:: jTarget(tdmTable * table1, tdmTable * table2
    ||  !dsTableTypeSpecifier(&s3,pTbl3) 
    ){
       EML_ERROR(CANT_CREATE_TABLE);
+      free(pTbl3); /*fix memory leak -akio*/
    }
    if( NULL == (table3 = tdm->newTable(n3,s3,0)) ){
       EML_ERROR(CANT_CREATE_TABLE);
+      free(pTbl3); /*fix memory leak -akio*/
    }
+   free(pTbl3); /*fix memory leak -akio*/
    return table3;
 }
 
@@ -691,11 +721,17 @@ STAFCV_T topFactory:: newProject (const char * name
 		, const char * spec) {
    IDREF_T id;
    if( soc->idObject(name,"topProject",id) ){
+      EML_CONTEXT("ERROR: You already have a '%s'.\n",name);
       EML_ERROR(DUPLICATE_OBJECT_NAME);
+   }
+   if( ! isValidSelectSpec((char*)spec) ) {
+      EML_CONTEXT("ERROR: Syntax error in '%s'.\n",spec);
+      EML_ERROR(INVALID_SELECT_SPEC);
    }
    static topProject* p;
    p = new topProject(name,spec);
    if( !soc->idObject(name,"topProject",id) ){
+      EML_CONTEXT("ERROR: This is not your fault, call Staf programmer.\n");
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    addEntry(id);
@@ -716,6 +752,7 @@ STAFCV_T topFactory:: findJoin (const char * name
    socObject* obj=NULL;
    if( NULL == (obj = soc->findObject(name,"topJoin")) ){
       join = NULL;   //- ???-leave as is?
+      EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",name);
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    join = TOPJOIN(obj);
@@ -731,6 +768,7 @@ STAFCV_T topFactory:: getJoin (IDREF_T id, topJoin*& join) {
    }
    if( 0 != strcmp(obj->type(),"topJoin") ){
       join = NULL;
+      EML_CONTEXT("ERROR: We getting mixed up with our object names.\n");
       EML_ERROR(WRONG_OBJECT_TYPE);
    }
    join = TOPJOIN(obj);
@@ -744,6 +782,7 @@ STAFCV_T topFactory:: findSort (const char * name
   
   if( NULL == (obj = soc->findObject(name,"topSort")) ){
     sort = NULL;   //- ???-leave as is?
+    EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",name);
     EML_ERROR(OBJECT_NOT_FOUND);
   }
   sort = TOPSORT(obj);
@@ -753,11 +792,13 @@ STAFCV_T topFactory:: findSort (const char * name
 STAFCV_T topFactory:: newSort (const char * name, const char * whichCol) {
    IDREF_T id;
    if( soc->idObject(name,"topSort",id) ){
+      EML_CONTEXT("ERROR: You already have a '%s'.\n",name);
       EML_ERROR(DUPLICATE_OBJECT_NAME);
    }
    topSort* p;
    p = new topSort(name,whichCol);
    if( !soc->idObject(name,"topSort",id) ){
+      EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",name);
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    addEntry(id);
@@ -767,11 +808,21 @@ STAFCV_T topFactory:: newJoin (const char * name, const char * spec
 		, const char * clause) {
    IDREF_T id;
    if( soc->idObject(name,"topJoin",id) ){
+      EML_CONTEXT("ERROR: You already have a '%s'.\n",name);
       EML_ERROR(DUPLICATE_OBJECT_NAME);
+   }
+   if( ! isValidWhereClause((char*)clause) ) {
+      EML_CONTEXT("ERROR: Invalid where-clause '%s'.\n",spec);
+      EML_ERROR(INVALID_WHERE_CLAUSE);
+  }
+   if( ! isValidSelectSpec((char*)spec) ) {
+      EML_CONTEXT("ERROR: Invalid selection spec '%s'.\n",spec);
+      EML_ERROR(INVALID_SELECT_SPEC);
    }
    static topJoin* p;
    p = new topJoin(name,spec,clause);
    if( !soc->idObject(name,"topJoin",id) ){
+      EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",name);
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    addEntry(id);
@@ -792,6 +843,7 @@ STAFCV_T topFactory:: findCut (const char * name
    socObject* obj=NULL;
    if( NULL == (obj = soc->findObject(name,"topCut")) ){
       cut = NULL;   //- ???-leave as is?
+      EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",name);
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    cut = TOPCUT(obj);
@@ -807,6 +859,7 @@ STAFCV_T topFactory:: getCut (IDREF_T id, topCut*& cut) {
    }
    if( 0 != strcmp(obj->type(),"topCut") ){
       cut = NULL;
+      EML_CONTEXT("ERROR: '%s' is of the wrong type.\n",obj->name());
       EML_ERROR(WRONG_OBJECT_TYPE);
    }
    cut = TOPCUT(obj);
@@ -817,11 +870,13 @@ STAFCV_T topFactory:: getCut (IDREF_T id, topCut*& cut) {
 STAFCV_T topFactory:: newCut (const char * name, const char * spec) {
    IDREF_T id;
    if( soc->idObject(name,"topCut",id) ){
+      EML_CONTEXT("ERROR: You already have a '%s'.\n",name);
       EML_ERROR(DUPLICATE_OBJECT_NAME);
    }
    static topCut* p;
    p = new topCut(name,spec);
    if( !soc->idObject(name,"topCut",id) ){
+      EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",name);
       EML_ERROR(OBJECT_NOT_FOUND);
    }
    addEntry(id);

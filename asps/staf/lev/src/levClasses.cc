@@ -43,7 +43,7 @@ extern "C" int gethostname(char *name, int namelen);
 extern CC_P void LogEnvInfo();
 void levConvertToDigits(char *xx) {
   char *junk,*month,*day,*hour,*minute,*second,*year,copy[55];
-  strncpy(copy,xx,53);
+  strncpy(copy,xx,53); 
   junk=strtok(copy," :");
   month=strtok(NULL," :");
   day=strtok(NULL," :");
@@ -72,7 +72,7 @@ void levConvertToDigits(char *xx) {
 /*---------------------------------------------- Later
 STAFCV_T levLogStopTime(DS_DATASET_T *pEnv,const char *comment) {
   char stopTime[152]; int ii,len; time_t calTime;
-  calTime=time(NULL); strncpy(stopTime,ctime(&calTime),50);
+  calTime=time(NULL); strncpy(stopTime,ctime(&calTime),50); 
   len=strlen(stopTime);
   for(ii=len-1;ii>=0;ii--) if(stopTime[ii]=='\n') stopTime[ii]='\0';
   levConvertToDigits(stopTime);
@@ -128,7 +128,7 @@ void levExeName(char *out) {
   if(!fo) { strcpy(out,"lev.c 2fail"); return; }
   strtok(NULL," \t\n"); strtok(NULL," \t\n"); cc=strtok(NULL," \t\n");
   if(cc==NULL) { strcpy(out,"lev.c 3fail"); return; }
-  strncpy(out,cc,VSIZE);
+  strncpy(out,cc,VSIZE); 
 }
 void levFactory::levUpdate() {
   socObject *obj;
@@ -148,15 +148,15 @@ STAFCV_T levFactory::levRegisterEnvironment() {
   PP"This is levRegisterEnvironment().\n");
   /******************  user name ****************************/
   cc=getenv("USER");
-  if(cc==NULL) strcpy(user,"getenv-failed"); else strncpy(user,cc,VSIZE);
+  if(cc==NULL) strcpy(user,"getenv-failed"); else strncpy(user,cc,VSIZE); 
   /******************  hostname ****************************/
   if(gethostname(hostname,VSIZE)) {
-    strncpy(hostname,"gethostname-failed-lev.c",VSIZE);
+    strncpy(hostname,"gethostname-failed-lev.c",VSIZE); 
   }
   /******************  operating system ****************************/
   uname(&osys);
   /******************  start time ****************************/
-  calTime=time(NULL); strncpy(startTime,ctime(&calTime),50);
+  calTime=time(NULL); strncpy(startTime,ctime(&calTime),50); 
   len=strlen(startTime);
   for(ii=len-1;ii>=0;ii--) if(startTime[ii]=='\n') startTime[ii]='\0';
   levConvertToDigits(startTime);
@@ -220,7 +220,8 @@ int levCellAlreadyIn(const char *table,const char *value,long col) {
   tdmTable* tab;
   TDM_CELLDATA_T cellData;
   if(NULL == (tab = tdm->findTable(table))) {
-     PP"findTable failed\n"); EML_ERROR(TABLE_NOT_FOUND);
+     EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",table);
+     EML_ERROR(TABLE_NOT_FOUND);
   }
   nrow=tab->rowCount();
   for(i=nrow-1;i>=0;i--) {
@@ -237,7 +238,8 @@ STAFCV_T levFactory:: registerVersion(const char *name,
   tdmTable* tab; long ncol,nrow;
   /*------------------------------------------- */
   if(NULL == (tab = tdm->findTable(LEV_VER_TABLE))) {
-     PP"findTable failed\n"); EML_ERROR(TABLE_NOT_FOUND);
+     EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",name);
+     EML_ERROR(TABLE_NOT_FOUND);
   }
   nrow=(long)tab->rowCount();
   if(nrow>=LEV_ENV_MAX_ROWS) EML_ERROR(TOO_MANY_ROWS);
@@ -251,9 +253,11 @@ STAFCV_T levFactory:: registerVersion(const char *name,
   tab->rowCount((long)(1+nrow));
   for(column=0;column<3;column++) {
     if(column==0) {
-      val=name; colName="name"; if(strlen(val)>31) EML_ERROR(NAME_TOO_LONG);
+      val=name; colName="name";
+      if(strlen(val)>31) EML_ERROR(NAME_TOO_LONG);
     } else if(column==1) {
-      val=type; colName="type"; if(strlen(val)>31) EML_ERROR(TYPE_TOO_LONG);
+      val=type; colName="type"; 
+      if(strlen(val)>31) EML_ERROR(TYPE_TOO_LONG);
     } else if(column==2) {
       val=version; colName="version";
       if(strlen(val)>255) EML_ERROR(VALUE_TO_LONG);
@@ -275,7 +279,7 @@ STAFCV_T levFactory:: registerVersion(const char *name,
 } /* nrow val */
 char *levFactory:: version() {
   char *c=NULL;
-  char *v="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/lev/src/Attic/levClasses.cc,v 1.5 1997/08/18 22:47:07 tull Exp $";
+  char *v="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/lev/src/Attic/levClasses.cc,v 1.6 1998/03/05 22:40:13 fisyak Exp $";
   c=(char*)malloc(strlen(v)+1);
   strcpy(c,v);
   return c;

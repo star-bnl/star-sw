@@ -33,14 +33,17 @@ char *shortname(char *longname, size_t length)
 
 	n[length] = NULL;
 	if( length < strlen(longname) ){
-		strncpy(n,longname,l1);
+		strncpy(n,longname,l1); 
+		n[l1]=0; /* hjw 19Feb98 */
 		nn = n; nn += (l1+1);
 		b = longname; b += ll;
-		strncpy(nn,b,l2);
+		strncpy(nn,b,l2); 
+		nn[l2]=0; /* hjw 19Feb98 */
 		n[l1] = '~';
 	}
 	else {
-		strncpy(n,longname,length);
+		strncpy(n,longname,length); 
+		n[length]=0; /* hjw 19Feb98 */
 	}
 	return n;
 }

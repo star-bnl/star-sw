@@ -27,6 +27,11 @@ extern CC_P int asu_stop();
 #ifndef NOKUIP
 extern CC_P void asu_def_();
 
+extern CC_P void kam_asu_pretty_();
+extern CC_P void kam_asu_beep_();
+extern CC_P void kam_asu_demand_ack_();
+extern CC_P void kam_asu_demand_err_ack_();
+extern CC_P void kam_asu_beep_();
 extern CC_P void kam_asu_hello_();
 extern CC_P void kam_asu_time_();
 extern CC_P void kam_asu_date_();
@@ -37,6 +42,9 @@ extern CC_P void kam_asumalloc_level_();
 extern CC_P void asu_kuip_init_();
 #endif /*NOKUIP*/
 
+extern CC_P STAFCV_T asu_pretty(char* newState);
+extern CC_P STAFCV_T asu_beep(char* newState);
+extern CC_P STAFCV_T asu_demand_ack(char* newState);
 extern CC_P STAFCV_T asu_hello(char* msg);
 extern CC_P STAFCV_T asu_time();
 extern CC_P STAFCV_T asu_date();

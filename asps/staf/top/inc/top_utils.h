@@ -1,6 +1,6 @@
 /* top_utils.h */
 #ifndef boolean
-typedef unsigned char boolean;
+typedef unsigned char top_bool;
 #endif
 #ifndef TRUE
 #define TRUE 1
@@ -13,5 +13,5 @@ typedef unsigned char boolean;
 #else
 #define CC_P 
 #endif
-extern CC_P boolean isValidSelectSpec(char * spec);
-extern CC_P boolean isValidWhereClause(char * clause);
+extern CC_P top_bool isValidSelectSpec(char * spec);
+extern CC_P top_bool isValidWhereClause(char * clause);

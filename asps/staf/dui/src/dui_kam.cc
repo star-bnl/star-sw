@@ -46,7 +46,7 @@ void kam_dui_cd_()
 STAFCV_T dui_cd(char* path)
 {
    if( !dui->cd(path) ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -67,7 +67,7 @@ void kam_dui_df_()
 STAFCV_T dui_df()
 {
    if( !dui->df() ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -78,21 +78,18 @@ STAFCV_T dui_df()
 *:DESCRIPTION:  KUIP Action Module to ...
 *:ARGUMENTS:    -- NONE --
 *:RETURN VALUE: -- NONE --
-*:* DUI/DU [ PATH ]
+*:* DUI/DU
 *:<---------------------------------------------------------------------
 */
 void kam_dui_du_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
-   char*  path = ku_gets();     /* path */
-   long  minsize = ku_geti();   /* min size of reported tables */
-
-        STAFCV_T status = dui_du(path,minsize);
+        STAFCV_T status = dui_du();
 }
-STAFCV_T dui_du(char* path,long minsize)
+STAFCV_T dui_du()
 {
-   if( !dui->du(path,minsize) ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+   if( !dui->du("/dui",0) ){
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -116,10 +113,16 @@ void kam_dui_ln_()
 }
 STAFCV_T dui_ln(char* fromPath, char* toPath)
 {
-   if(strstr(fromPath,".")) EML_FAILURE(DONT_USE_DOTS_IN_TABLE_NAMES);
-   if(strstr(  toPath,".")) EML_FAILURE(DONT_USE_DOTS_IN_TABLE_NAMES);
+   if(strstr(fromPath,".")) {
+     EML_CONTEXT("ERROR: don't use dots (.)\n");
+     EML_FAILURE(DONT_USE_DOTS_IN_TABLE_NAMES);
+   }
+   if(strstr(  toPath,".")) {
+     EML_CONTEXT("ERROR: don't use dots (.)\n");
+     EML_FAILURE(DONT_USE_DOTS_IN_TABLE_NAMES);
+   }
    if( !dui->ln(fromPath,toPath) ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -143,10 +146,10 @@ void kam_dui_cp_()
 }
 STAFCV_T dui_cp(char* fromPath, char* toPath)
 {
-   if(strstr(fromPath,".")) EML_FAILURE(DONT_USE_DOTS_IN_TABLE_NAMES);
-   if(strstr(  toPath,".")) EML_FAILURE(DONT_USE_DOTS_IN_TABLE_NAMES);
+   if(strstr(fromPath,".")) EML_FAILURE(DONT_USE_DOTS);
+   if(strstr(  toPath,".")) EML_FAILURE(DONT_USE_DOTS);
    if( !dui->cp(fromPath,toPath) ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -172,10 +175,10 @@ STAFCV_T dui_ls(char* path)
 {
    char *result;   // 24jul97 hjw removed malloc; result was reset a 
                    // few lines below.
-   // strncpy(result,"",1);     24jul97 hjw, must init in dui->ls() instead
+   // strncpy(result,"",1);     24jul97 hjw, must init in dui->ls() instead 
 
    if( NULL == (result = dui->ls(path)) ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    printf("DUI:\tListing = ...\n%s\n.\n",result);
    FREE(result);
@@ -201,7 +204,7 @@ void kam_dui_mkdir_()
 STAFCV_T dui_mkdir(char* path)
 {
    if( !dui->mkdir(path) ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -225,10 +228,10 @@ void kam_dui_mv_()
 }
 STAFCV_T dui_mv(char* fromPath, char* toPath)
 {
-   if(strstr(fromPath,".")) EML_FAILURE(DONT_USE_DOTS_IN_TABLE_NAMES);
-   if(strstr(  toPath,".")) EML_FAILURE(DONT_USE_DOTS_IN_TABLE_NAMES);
+   if(strstr(fromPath,".")) EML_FAILURE(DONT_USE_DOTS);
+   if(strstr(  toPath,".")) EML_FAILURE(DONT_USE_DOTS);
    if( !dui->mv(fromPath,toPath) ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -254,7 +257,7 @@ STAFCV_T dui_pwd()
    char* result=NULL;
 
    if( NULL == (result = dui->pwd()) ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    printf("DUI:\tCurrent Working Directory = (%s) \n",result);
    FREE(result);
@@ -279,9 +282,9 @@ void kam_dui_rm_()
 }
 STAFCV_T dui_rm(char* path)
 {
-   if(strstr(path,".")) EML_FAILURE(DONT_USE_DOTS_IN_TABLE_NAMES);
+   if(strstr(path,".")) EML_FAILURE(DONT_USE_DOTS);
    if( !dui->rm(path) ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }
@@ -304,9 +307,9 @@ void kam_dui_rmdir_()
 }
 STAFCV_T dui_rmdir(char* path)
 {
-   if(strstr(path,".")) EML_FAILURE(DONT_USE_DOTS_IN_TABLE_NAMES);
+   if(strstr(path,".")) EML_FAILURE(DONT_USE_DOTS);
    if( !dui->rmdir(path) ){
-      EML_FAILURE(KAM_METHOD_FAILURE);
+      EML_FAILURE(METHOD_FAILURE);
    }
    EML_SUCCESS(STAFCV_OK);
 }

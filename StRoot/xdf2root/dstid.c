@@ -226,7 +226,8 @@ if(dsTidHash[h] == NULL)dsTidSlots++;
 		dsTypeFree(type, typeSize);
 		return FALSE;
 	}
-	strncpy(new->str, str, n);
+	strncpy(new->str, str, n); 
+	new->str[ n]=0; /* hjw 19Feb98 */
 	new->len = n;
 	tptr = (TID_HASH_T *)&dsTidHash[h];
 

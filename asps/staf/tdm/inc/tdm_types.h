@@ -144,13 +144,15 @@ extern CC_P void kam_tdmtable_typename_();
 extern CC_P STAFCV_T tdm_allocstats();
 extern CC_P STAFCV_T tdm_count();
 extern CC_P STAFCV_T tdm_list();
-extern CC_P STAFCV_T tdm_newdataset(char* name);
+/*extern CC_P STAFCV_T tdm_newdataset(char* name, long dim);  -akio*/
+extern CC_P STAFCV_T tdm_newdataset(char* name); /*-akio*/
 extern CC_P STAFCV_T tdm_newtable(char* name, char* spec
 		, long rowcount);
 extern CC_P STAFCV_T tdmtypespecifiers_list(long tid);
 extern CC_P STAFCV_T tdmtypespecifiers_show(char* name);
 extern CC_P STAFCV_T tdmtypespecifiers_load(char* fname);
-extern CC_P STAFCV_T tdmdataset_adddataset(char* dsname,char* name);
+/*extern CC_P STAFCV_T tdmdataset_adddataset(char* dsname,char* name,long dim);  -akio*/
+extern CC_P STAFCV_T tdmdataset_adddataset(char* dsname,char* name); /*akio*/
 extern CC_P STAFCV_T tdmdataset_addtable(char* dsname, char* name
 		, char* spec, long rowcount);
 extern CC_P STAFCV_T tdmdataset_entrycount(char* name);

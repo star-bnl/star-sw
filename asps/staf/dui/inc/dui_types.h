@@ -63,7 +63,7 @@ extern CC_P void kam_dui_rmdir_();
 
 extern CC_P STAFCV_T dui_count_();
 extern CC_P STAFCV_T dui_list_();
-extern CC_P STAFCV_T dui_du(char* path,long minsize);
+extern CC_P STAFCV_T dui_du();
 extern CC_P STAFCV_T dui_df();
 extern CC_P STAFCV_T dui_cd(char* path);
 extern CC_P STAFCV_T dui_ln(char* fromPath, char* toPath);

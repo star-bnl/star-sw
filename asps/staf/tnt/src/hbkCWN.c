@@ -1,13 +1,26 @@
 #include <string.h>
 #include "cfortran.h"
+
+#ifdef hpux
+#include "hbook_hpux.h"
+#else
 #include "hbook.h"
+#endif
+
 #include "hbkCWN.h"
 
 /* A few extra def's not already in hbook.h */
+#ifdef hpux
+#define HNTVDEF(A1,A2,A3,A4,A5) CCALLSFSUB5(HNTVDEF_,hntvdef_,INT,INT,PSTRING,PSTRING,PINT,A1,A2,A3,A4,A5);
+#define HNTVAR(A1,A2,A3,A4,A5,A6,A7,A8) CCALLSFSUB8(HNTVAR_,hntvar_,INT,INT,PSTRING,PSTRING,PINT,PINT,PINT,PINT,A1,A2,A3,A4,A5,A6,A7,A8);
+#define HGTDIR(A1) CCALLSFSUB1(HGTDIR_,hgtdir_,PSTRING,A1);
+#define HNSIZE(A1,A2,A3) CCALLSFSUB3(HNSIZE_,hnsize_,PINT,PINT,PINT,A1,A2,A3);
+#else
 #define HNTVDEF(A1,A2,A3,A4,A5) CCALLSFSUB5(HNTVDEF,hntvdef,INT,INT,PSTRING,PSTRING,PINT,A1,A2,A3,A4,A5);
 #define HNTVAR(A1,A2,A3,A4,A5,A6,A7,A8) CCALLSFSUB8(HNTVAR,hntvar,INT,INT,PSTRING,PSTRING,PINT,PINT,PINT,PINT,A1,A2,A3,A4,A5,A6,A7,A8);
 #define HGTDIR(A1) CCALLSFSUB1(HGTDIR,hgtdir,PSTRING,A1);
 #define HNSIZE(A1,A2,A3) CCALLSFSUB3(HNSIZE,hnsize,PINT,PINT,PINT,A1,A2,A3);
+#endif
 
 /*--------------------------------------------------------------------*/
 /* A simple wrapper around HBNT. */
