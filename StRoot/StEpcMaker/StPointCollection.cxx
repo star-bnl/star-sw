@@ -3,6 +3,9 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.7  2001/04/25 17:27:44  perev
+// HPcorrs
+//
 // Revision 1.6  2001/04/24 23:06:29  subhasis
 // clusters attached to Points, QA hists are made for all category separately
 //
@@ -70,8 +73,8 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 
 // declaring cernlib routine (mathlib, H301) assndx to be used for matching.
 #define    assndx  F77_NAME(assndx,ASSNDX)
-extern "C" {void type_of_call assndx ( Int_t &, Float_t (*)[], Int_t &, Int_t &,
- Int_t &,Int_t *, Float_t &,Int_t (*)[],Int_t &); }
+extern "C" {void type_of_call assndx ( Int_t &, Float_t *, Int_t &, Int_t &,
+ Int_t &,Int_t *, Float_t &,Int_t*,Int_t &); }
 
 
 ClassImp(StPointCollection)
@@ -201,19 +204,19 @@ Int_t
      Float_t totAvg=0.;
      Float_t EmcTot;
      Float_t PrsTot;
-
+     Int_t iF;
         na=evec.size();
         ma=pvec.size();
 	UInt_t it;
   Float_t PointMember[9];
-     for (Int_t iF=0;iF<9;iF++){PointMember[iF]=0.0;}
+     for (iF=0;iF<9;iF++){PointMember[iF]=0.0;}
 
 // will be taken as track pointer later
 	Float_t TrackMom[Epc::nMaxNoOfClinBin][Epc::nMaxNoOfClinBin];
 	Float_t DeltaEta[Epc::nMaxNoOfClinBin][Epc::nMaxNoOfClinBin];
 	Float_t DeltaPhi[Epc::nMaxNoOfClinBin][Epc::nMaxNoOfClinBin];
 
-     for (Int_t iF=0;iF<Epc::nMaxNoOfClinBin;iF++){
+     for (iF=0;iF<Epc::nMaxNoOfClinBin;iF++){
        k[iF]=0;
         for (Int_t iL=0;iL<Epc::nMaxNoOfClinBin;iL++){
          TrackMom[iF][iL]=0.0;
@@ -331,11 +334,13 @@ Int_t
     }
   }
 
- assndx(mode,ep,na,ma,ida,k,smin,iw,idw);
+ assndx(mode,ep[0],na,ma,ida,k,smin,iw[0],idw);
 
+     
+     int i1;
      switch (Category) {
      case 0:
-       for(Int_t i1=0;i1<na;i1++){
+       for(i1=0;i1<na;i1++){
        if((k[i1]-1)>=0){
 	 StEmcCluster *cl1;
 	 cl1 = (StEmcCluster*)mvec[i1];
@@ -345,7 +350,7 @@ Int_t
        }
        break;
      case 1:
-       for(Int_t i1=0;i1<na;i1++){
+       for(i1=0;i1<na;i1++){
        if((k[i1]-1)>=0){
 	 StEmcCluster *cl1;
 	 cl1 = (StEmcCluster*)evec[i1];
@@ -355,7 +360,7 @@ Int_t
        }
        break;
      case 2:
-       for(Int_t i1=0;i1<na;i1++){
+       for(i1=0;i1<na;i1++){
        if((k[i1]-1)>=0){
 	 StEmcCluster *cl1;
 	 cl1 = (StEmcCluster*)mvec[i1];
@@ -365,7 +370,7 @@ Int_t
        }
        break;
      case 3:
-       for(Int_t i1=0;i1<na;i1++){
+       for(i1=0;i1<na;i1++){
        if((k[i1]-1)>=0){
 	 StEmcCluster *cl1;
 	 cl1 = (StEmcCluster*)evec[i1];
@@ -379,7 +384,7 @@ Int_t
  }
 
 
- for(Int_t i1=0;i1<na;i1++){
+ for(i1=0;i1<na;i1++){
 
   Float_t PointEnergy=0.;
   Float_t PointEta=0.;
@@ -555,9 +560,9 @@ Int_t
 
 	//Energy In Detector
 	Float_t EnergyInDetector[4];
-	for(Int_t i=0;i<4;i++){EnergyInDetector[i]=PointEnergyinDet[i];}
+	{for(Int_t i=0;i<4;i++){EnergyInDetector[i]=PointEnergyinDet[i];}}
 	Float_t SizeAtDetector[4];
-	for(Int_t i=0;i<4;i++){SizeAtDetector[i]=PointSizeinDet[i];}
+	{for(Int_t i=0;i<4;i++){SizeAtDetector[i]=PointSizeinDet[i];}}
 
 	StEmcPoint *point = new StEmcPoint();
 	point->setPosition(PointPosition);
@@ -656,10 +661,10 @@ Int_t
 
   helices.clear();
   // Create Physical Helix
-  for(unsigned int jj=0; jj < TrackToFit.size(); jj++){
-StPhysicalHelixD  Helix = TrackToFit[jj]->geometry()->helix();
-helices.push_back(Helix);
-  }
+  {for(unsigned int jj=0; jj < TrackToFit.size(); jj++){
+     StPhysicalHelixD  Helix = TrackToFit[jj]->geometry()->helix();
+     helices.push_back(Helix);
+  }}
 
   //  cout<<" HELIX FILLED ***Size **"<<helices.size()<<endl;
 

@@ -178,7 +178,7 @@ int* StScfListStrip::getListAdc(int idStrip, int sizeCluster)
 
 void StScfListStrip::setSigma(int iStrip, int iSigma, sls_ctrl_st *sls_ctrl)
 {
-  const int     NAdcChannel             = (int)pow(2,sls_ctrl[0].NBitEncoding);
+  const int     NAdcChannel             = 1<<sls_ctrl[0].NBitEncoding;
   const float   conversionFactor = (float)(NAdcChannel)/(sls_ctrl[0].ADCDynamic*sls_ctrl[0].NElectronInAMip);
   
   StScfStrip *currentStrip=this->first(); 

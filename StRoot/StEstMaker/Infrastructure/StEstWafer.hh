@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstWafer.hh,v 1.4 2001/02/23 14:19:11 lmartin Exp $
+ * $Id: StEstWafer.hh,v 1.5 2001/04/25 17:28:35 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstWafer.hh,v $
+ * Revision 1.5  2001/04/25 17:28:35  perev
+ * HPcorrs
+ *
  * Revision 1.4  2001/02/23 14:19:11  lmartin
  * cout replaced by gMessMgr.
  *
@@ -89,8 +92,8 @@ public:
     delete n;
   };
 
-  StThreeVectorD* StEstWafer::GetX();
-  StThreeVectorD* StEstWafer::GetN();
+  StThreeVectorD* GetX();
+  StThreeVectorD* GetN();
   StEstHit* GetHit(long nr);
   int AddHit(StEstHit *hit);
   int RemoveHit(StEstHit *hit);
@@ -109,10 +112,10 @@ inline int StEstWafer::AddHit(StEstHit *hit) {
   else mHits[mNHits]=hit;mNHits++; return 0;};
 inline int StEstWafer::RemoveHit(StEstHit *hit) {
   int ihit;
-  for (int i=0;i<mNHits;i++) 
-    if (mHits[i]==hit) ihit=i;
-  for (int i=ihit;i<mNHits-1;i++)
-    mHits[i]=mHits[i+1];
+  {for (int i=0;i<mNHits;i++) 
+    if (mHits[i]==hit) ihit=i;}
+  {for (int i=ihit;i<mNHits-1;i++)
+    mHits[i]=mHits[i+1];}
   mHits[mNHits-1]=0;
   mNHits--;
   return 0;
@@ -144,7 +147,7 @@ private:
 public:
   int*** nWaf; //number of wafers
   StEstWafer *****pWaf; 
-  StEstIndexGeom::StEstIndexGeom(int np, int nz) {
+  StEstIndexGeom(int np, int nz) {
 
     nphibins=np;
     nzbins=nz;
@@ -172,7 +175,7 @@ public:
     }
   }
 
-  StEstIndexGeom::~StEstIndexGeom() {
+  ~StEstIndexGeom() {
     for (int i=0;i<nphibins;i++) {
       for (int j=0;j<nzbins;j++) {
 	for (int k=0;k<4;k++) {

@@ -70,7 +70,7 @@ public:
     void global_to_local(int sector, int row, 
                          const St_l3_xyz_Coordinate &global, St_l3_xyz_Coordinate &local ) ;
     void local_to_raw(const St_l3_xyz_Coordinate &global , const St_l3_xyz_Coordinate &local , St_l3_ptrs_Coordinate &raw ) ; 
-    void St_l3_Coordinate_Transformer::local_to_raw( int row ,const St_l3_xyz_Coordinate &local ,
+    void local_to_raw( int row ,const St_l3_xyz_Coordinate &local ,
                                                               St_l3_ptrs_Coordinate &raw  ) ;
 
     //

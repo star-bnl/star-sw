@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstParams.hh,v 1.3 2001/02/01 13:02:02 lmartin Exp $
+ * $Id: StEstParams.hh,v 1.4 2001/04/25 17:30:29 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstParams.hh,v $
+ * Revision 1.4  2001/04/25 17:30:29  perev
+ * HPcorrs
+ *
  * Revision 1.3  2001/02/01 13:02:02  lmartin
  * Correction of the cvs keywords to get the log in the file header.
  *
@@ -31,8 +34,8 @@ public:
   double ptmax;
   double lrad[4][2];       //radii of the cylinders
 
-  StEstParams::StEstParams() {} 
-  StEstParams::~StEstParams() {}
+  StEstParams() {} 
+ ~StEstParams() {}
 };
 
 class StEstSegments{
@@ -42,6 +45,6 @@ public:
   int    minhits;       // minimal number of hits in segment
   double rminTPC;       // minimal r of 1st hit in TPC
   int    minTPChits;    // minimal number of TPC hits
-  StEstSegments::StEstSegments() {} 
-  StEstSegments::~StEstSegments() {}
+  StEstSegments() {} 
+ ~StEstSegments() {}
 };

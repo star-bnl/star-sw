@@ -1,5 +1,8 @@
-// $Id: StFtpcPrimaryMaker.cxx,v 1.3 2001/03/30 13:30:12 jcs Exp $
+// $Id: StFtpcPrimaryMaker.cxx,v 1.4 2001/04/25 17:23:50 perev Exp $
 // $Log: StFtpcPrimaryMaker.cxx,v $
+// Revision 1.4  2001/04/25 17:23:50  perev
+// HPcorrs
+//
 // Revision 1.3  2001/03/30 13:30:12  jcs
 // correct Id and Log
 //
@@ -170,7 +173,7 @@ Int_t StFtpcPrimaryMaker::Make(){
     ptrk->curvature = trk->curvature;
 
     Int_t i = 0;
-    for (Int_t i=0; i<15; i++) { ptrk->covar[i] = 0; }
+    for (i=0; i<15; i++) { ptrk->covar[i] = 0; }
     
     ptrk->chisq[0]  = trk->chisq[0];
     ptrk->chisq[1]  = trk->chisq[1];

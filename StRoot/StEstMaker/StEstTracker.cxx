@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.cxx,v 1.8 2001/04/25 15:06:50 lmartin Exp $ 
+ * $Id: StEstTracker.cxx,v 1.9 2001/04/25 17:33:02 perev Exp $ 
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.cxx,v $
+ * Revision 1.9  2001/04/25 17:33:02  perev
+ * HPcorrs
+ *
  * Revision 1.8  2001/04/25 15:06:50  lmartin
  * Tracking parameters set to specific values for the 2nd superpass.
  *
@@ -75,16 +78,16 @@ StEstTracker::~StEstTracker() {
 }
 
 Int_t StEstTracker::DoTracking() {
-  long TrackDeadBeforeSelection,TrackDeadAfterSelection;
-  long TrackDeadBeforeSegment,TrackDeadAfterSegment;
-  long TrackDeadBeforeBest,TrackDeadAfterBest;
-  long TrackDeadBeforeRemoveSharing,TrackDeadAfterRemoveSharing;
-  long NTrackPresented,NTrackFormed;
-  long NTrackPresentedGood;
+  int TrackDeadBeforeSelection,TrackDeadAfterSelection;
+  int TrackDeadBeforeSegment,TrackDeadAfterSegment;
+  int TrackDeadBeforeBest,TrackDeadAfterBest;
+  int TrackDeadBeforeRemoveSharing,TrackDeadAfterRemoveSharing;
+  int NTrackPresented,NTrackFormed;
+  int NTrackPresentedGood;
   int OneIsGood;
-  long i,j;
-  long ihita[4],ihitaold[4];
-  long ihitb[4],ihitbshared[4];
+  int i,j;
+  int ihita[4],ihitaold[4];
+  int ihitb[4],ihitbshared[4];
 
 
   if(mDebugLevel>0)
@@ -118,7 +121,7 @@ Int_t StEstTracker::DoTracking() {
     onoffmatrix=0;
     for (j=0;j<4;j++) 
       if (mSegments[mSuperPass]->slay[j]==2 && mParams[0]->onoff[j]!=0) 
-	onoffmatrix |= int(pow(2,j));
+	onoffmatrix |= ((1<<j));
     nminhit=mSegments[mSuperPass]->minhits;
     for (mPass=0;mPass<mNPass;mPass++) {
       gMessMgr->Info()<<"Super = "<<mSuperPass<<" Pass = "<<mPass<<endm;
@@ -338,8 +341,8 @@ void StEstTracker::BuildIdealBranches() {
   int nseg,matrix,l[4],idealnhits;
   int iret,flaglog[8];
   int fitstatus;
-  long i,j,slay,mcid,nsvthit;
-  long IsolatedTPCTracks,AssociatedTPCTracks;
+  int i,j,slay,mcid,nsvthit;
+  int IsolatedTPCTracks,AssociatedTPCTracks;
   double dist,distw,distl,sd;
   double dca;
   StEstBranch *branch;
@@ -370,7 +373,7 @@ void StEstTracker::BuildIdealBranches() {
 	l[3]=0;
 	idealnhits=0;
 	while (Eval_mchits[mcid][j]!=NULL && j<10) {
-	  matrix= matrix | int(pow(2,Eval_mchits[mcid][j]->GetWafer()->GetLayer()));
+	  matrix= matrix | ((1<<Eval_mchits[mcid][j]->GetWafer()->GetLayer()));
 	  if (l[Eval_mchits[mcid][j]->GetWafer()->GetLayer()]==0) 
 	    l[Eval_mchits[mcid][j]->GetWafer()->GetLayer()]++;
 	  j++;
@@ -384,7 +387,7 @@ void StEstTracker::BuildIdealBranches() {
 	mTrack[i]->SetIdealPattern(matrix);
 	mTrack[i]->SetIdealNHits(idealnhits);
 
-	branch = new StEstBranch(NULL, long(mParams[0]->maxsvthits));
+	branch = new StEstBranch(NULL, int(mParams[0]->maxsvthits));
 	if (branch==NULL)
 	  gMessMgr->Error()<<"ERROR StEstTracker::BuildIdealBranches branch==NULL"<<endm;
 	else { // the perfect branch has been created
@@ -469,8 +472,8 @@ void StEstTracker::BuildFindableBranches() {
   int matrix;
   int iret,flaglog[8];
   int fitstatus;
-  long i,j,slay,mcid;
-  long CorrectPass;
+  int i,j,slay,mcid;
+  int CorrectPass;
   double dist,distw,distl,sd;
   double dca;
   StEstBranch *branch;
@@ -489,7 +492,7 @@ void StEstTracker::BuildFindableBranches() {
  	  if (mTrack[i]->mTPCTrack->mPt>mParams[j]->ptmin && 
  	      mTrack[i]->mTPCTrack->mPt<mParams[j]->ptmax) CorrectPass=j;
 	mcid = Eval_id_mctrk2est_Track[mTrack[i]->mTPCTrack->GetMcId()];
-	branch = new StEstBranch(NULL, long(mParams[0]->maxsvthits));
+	branch = new StEstBranch(NULL, int(mParams[0]->maxsvthits));
 	if (branch==NULL)
 	  gMessMgr->Error()<<"ERROR StEstTracker::BuildFindableBranches branch==NULL"<<endm;
 	else { // the perfect branch has been created
@@ -567,7 +570,7 @@ void StEstTracker::BuildFindableBranches() {
 	}
 	matrix=0;
 	for (j=0;j<branch->GetNHits();j++) 
-	  matrix= matrix | int(pow(2,branch->GetHit(j)->GetWafer()->GetLayer()));
+	  matrix= matrix | ((1<<branch->GetHit(j)->GetWafer()->GetLayer()));
 	mTrack[i]->SetFindablePattern(matrix);
 	mTrack[i]->SetFindableNHits(branch->GetNHits());
       }
@@ -579,7 +582,7 @@ void StEstTracker::BuildFindableBranches() {
 
 void StEstTracker::PrintTrackDetails(int trackid) {
 
-  long i,lm,lm2;
+  int i,lm,lm2;
 
   for (i=0;i<mNTrack;i++) {
     if (mTrack[i]->mTPCTrack->mId==trackid) {
@@ -660,7 +663,7 @@ void StEstTracker::CleanUp(){
   // the Track destructor is first called which delete the TPCTrack
   // release the hits from the branch and delete the branches.
   // the IndexGeom is reset and followed by the wafer deletions.
-  long i,j,NHitStillAttached,NBranchPossessing;
+  int i,j,NHitStillAttached,NBranchPossessing;
   if (mDebugLevel>0) gMessMgr->Info()<<"StEstTracker::CleanUp : Starting"<<endm;
   if (mDebugLevel>0) gMessMgr->Info()<<" Before mNSvtHit="<<mNSvtHit<<endm;
   NHitStillAttached=0;
@@ -709,13 +712,13 @@ void StEstTracker::CleanUp(){
 
 }
 
-void StEstTracker::CumulEval(long* CumulIdealPrim,
-			     long* CumulIdealSeco,
-			     long* CumulGoodPrim,
-			     long* CumulGoodSeco,
-			     long* CumulBadPrim,
-			     long* CumulBadSeco,
-			     long* CumulEvents){
+void StEstTracker::CumulEval(int* CumulIdealPrim,
+			     int* CumulIdealSeco,
+			     int* CumulGoodPrim,
+			     int* CumulGoodSeco,
+			     int* CumulBadPrim,
+			     int* CumulBadSeco,
+			     int* CumulEvents){
   *CumulIdealPrim=*CumulIdealPrim+mNIdealPrim;
   *CumulIdealSeco=*CumulIdealSeco+mNIdealSeco;
   *CumulGoodPrim=*CumulGoodPrim+mNGoodPrim;

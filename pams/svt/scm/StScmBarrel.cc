@@ -192,7 +192,7 @@ void StScmBarrel::convertDigitToAnalog(sls_ctrl_st *sls_ctrl)
   long   NBitEncoding       = sls_ctrl[0].NBitEncoding;
   double PairCreationEnergy = sls_ctrl[0].PairCreationEnergy;
 
-  const int NAdcChannel     = (int)pow(2,NBitEncoding);
+  const int NAdcChannel     = 1<<NBitEncoding;
   const double convFactor   = (PairCreationEnergy*ADCDynamic*NElectronInAMip)/NAdcChannel;
   for (int iWaf = 0; iWaf < mNLadder*mNWaferPerLadder; iWaf++)
     mWafers[iWaf]->convertDigitToAnalog(convFactor);

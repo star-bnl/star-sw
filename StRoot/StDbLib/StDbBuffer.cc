@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.13 2001/03/30 18:48:26 porter Exp $
+ * $Id: StDbBuffer.cc,v 1.14 2001/04/25 17:18:10 perev Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.14  2001/04/25 17:18:10  perev
+ * HPcorrs
+ *
  * Revision 1.13  2001/03/30 18:48:26  porter
  * modified code to keep Insure from wigging-out on ostrstream functions.
  * moved some messaging into a StDbSql method.
@@ -82,6 +85,11 @@
 #include <string.h>
 #include <iostream.h>
 #include <strstream.h>
+
+
+#ifdef HPUX
+#define freeze(i) str()
+#endif
 
 ///////////////////////////////////////////////////////////////////////
 

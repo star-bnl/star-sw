@@ -241,7 +241,7 @@ void StSpaListNoise::substractPedestal()
 void StSpaListNoise::convertAnalogToDigit(long NElectronInAMip,long ADCDynamic,
 					  long NBitEncoding, float DAQCutValue)
 {
-  const int     NAdcChannel             = (int)pow(2,NBitEncoding);
+  const int     NAdcChannel             = 1<<NBitEncoding;
   const float   conversionFactor = (float)(NAdcChannel)/(ADCDynamic*NElectronInAMip);
 
   int localSize  = this->getSize();

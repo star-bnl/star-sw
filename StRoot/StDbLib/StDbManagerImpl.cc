@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.7 2001/04/18 19:33:37 porter Exp $
+ * $Id: StDbManagerImpl.cc,v 1.8 2001/04/25 17:18:40 perev Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.8  2001/04/25 17:18:40  perev
+ * HPcorrs
+ *
  * Revision 1.7  2001/04/18 19:33:37  porter
  * added dbRts enumeration for run-time systems domain
  *
@@ -162,6 +165,10 @@
 #include <iostream.h>
 #include <strstream.h>
 #include <string.h>
+
+#ifdef HPUX
+#define freeze(i) str()
+#endif
 
 //#include <stdio.h>
 extern char** environ;

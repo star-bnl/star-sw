@@ -82,7 +82,7 @@ public:
    ~FtfSl3 ( ) {
         if ( track != 0 ) delete []track ;
         if ( hit   != 0 ) delete []hit   ;
-	delete []sectorGeo ;
+	delete []((sectorGeometry**)sectorGeo);
    };
 //
 //  Coordinate Transformer classes

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstProjection.cxx,v 1.5 2001/03/02 16:10:26 lmartin Exp $
+ * $Id: StEstProjection.cxx,v 1.6 2001/04/25 17:31:10 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstProjection.cxx,v $
+ * Revision 1.6  2001/04/25 17:31:10  perev
+ * HPcorrs
+ *
  * Revision 1.5  2001/03/02 16:10:26  lmartin
  * geometrical cuts assigned to the layers and not to the number of hits in the segment.
  *
@@ -48,7 +51,7 @@ int StEstTracker::Preprojection(StEstBranch& branch, int slayer) {
   double    sd;      // path length
   int       phi;     // phi bin
   int       z;       // z bin
-  long      il,jl;
+  int      il,jl;
   int       ns;      
   int       ret = 0;
   int       nneighbours = mParams[mPass]->nneighbours[slayer];
@@ -77,7 +80,7 @@ int StEstTracker::Preprojection(StEstBranch& branch, int slayer) {
   default:
     ret = 4;
     gMessMgr->Error()<<"ERROR in Preprojection !!! slay<1 or slay>4 !!!"<<endm;
-    gMessMgr->Error()<<"     slay = "<<slayer<<"     branch* = "<<long(&branch)<<endm;
+    gMessMgr->Error()<<"     slay = "<<slayer<<"     branch* = "<<int(&branch)<<endm;
     return(ret);
   }
 
@@ -173,7 +176,7 @@ int StEstTracker::Preprojection(StEstBranch& branch, int slayer) {
 
 
 
-int StEstTracker::Projection(StEstBranch* branch, long slay) {
+int StEstTracker::Projection(StEstBranch* branch, int slay) {
 
 
   StEstWafer* tmpl1;
@@ -181,8 +184,8 @@ int StEstTracker::Projection(StEstBranch* branch, long slay) {
   StEstHit*   tmpl1a;
   StEstHit*   tmpl2a;
   StEstHit*   hit;
-  long il,jl, kl;
-  long realslay;
+  int il,jl, kl;
+  int realslay;
   double sd, dist, tmpd1, tmpd2, tmpd1b, tmpd2b, tmpd1c, tmpd2c;
 
   StThreeVector<double> vect1;

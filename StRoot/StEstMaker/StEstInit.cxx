@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstInit.cxx,v 1.8 2001/04/20 07:50:54 lmartin Exp $
+ * $Id: StEstInit.cxx,v 1.9 2001/04/25 17:29:23 perev Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstInit.cxx,v $
+ * Revision 1.9  2001/04/25 17:29:23  perev
+ * HPcorrs
+ *
  * Revision 1.8  2001/04/20 07:50:54  lmartin
  * Corrected vertex coordinates for the branch initialization.
  *
@@ -112,7 +115,7 @@ int StEstTracker::BranchInit(){
     else {
       if(mDebugLevel>3)
 	gMessMgr->Info()<<"New track has been created #"<<i<<endm;
-      branch = new StEstBranch(NULL, long(mParams[0]->maxsvthits));
+      branch = new StEstBranch(NULL, int(mParams[0]->maxsvthits));
       if (branch==NULL)
 	gMessMgr->Error()<<"ERROR StEstMaker::Init branch==NULL"<<endm;
       else {
@@ -163,9 +166,9 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
   if (mDebugLevel>0) 
     gMessMgr->Info()<<"SVTInit **** START ****"<<endm;  
 
-  long il, jl, kl, maxl, lay, shape;
-  long	lay2, lad, waf, maxlad, minlad, maxwaf, minwaf;
-  long zmin, zmax, pmin, pmax;
+  int il, jl, kl, maxl, lay, shape;
+  int	lay2, lad, waf, maxlad, minlad, maxwaf, minwaf;
+  int zmin, zmax, pmin, pmax;
   double phi0, dphi, r;
 
   StThreeVectorD *xx;
@@ -203,7 +206,7 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
 
   // We scan once the scs_spt table the count the number of hits in each 
   // wafer and allocate suited memory space for the hits in the wafer object.
-  long int HitPerWafer[9000]={0,}; 
+  int HitPerWafer[9000]={0,}; 
   for (il=0;il<Stscsspt->GetNRows();il++) {
     if( scsspt[il].flag < 4){
       HitPerWafer[scsspt[il].id_wafer]++; 
@@ -227,16 +230,16 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
     // fill object mIndexGeom
     lay=mIndexWaf[il]->GetLayer();
 
-    zmin = (long)floor((mIndexWaf[il]->GetX()->z() - svgshape[shape].shape[1])/mZBin) + mNZBins/2;
-    zmax = (long)floor((mIndexWaf[il]->GetX()->z() + svgshape[shape].shape[1])/mZBin) + mNZBins/2;
+    zmin = (int)floor((mIndexWaf[il]->GetX()->z() - svgshape[shape].shape[1])/mZBin) + mNZBins/2;
+    zmax = (int)floor((mIndexWaf[il]->GetX()->z() + svgshape[shape].shape[1])/mZBin) + mNZBins/2;
     phi0 = ( atan2(mIndexWaf[il]->GetX()->y(),mIndexWaf[il]->GetX()->x()) + M_PI)*C_DEG_PER_RAD;
     r = sqrt(mIndexWaf[il]->GetX()->x() * mIndexWaf[il]->GetX()->x() + 
 	     mIndexWaf[il]->GetX()->y() * mIndexWaf[il]->GetX()->y());
     dphi=atan(svgshape[shape].shape[0]/r)*C_DEG_PER_RAD;
-    pmin= (long)floor((phi0-dphi)/mPhiBin);
+    pmin= (int)floor((phi0-dphi)/mPhiBin);
     if(pmin<0)
       pmin+=mNPhiBins;
-    pmax= (long)floor((phi0+dphi)/mPhiBin);
+    pmax= (int)floor((phi0+dphi)/mPhiBin);
     if(pmax>=mNPhiBins) 
       pmax-=mNPhiBins;
     
@@ -360,7 +363,7 @@ int StEstTracker::SVTInit(St_svg_geom*   Stsvggeom,
   StThreeVectorD *xl;
   // we have to determine the maximum allowed use of a given hit
   // For a given branch it is limited to ntotbranch*max(nbranch(lay=3),nbranch(lay=2)..)
-  long ExtremeBranching=mParams[0]->nbranch[3]*mParams[0]->onoff[3];
+  int ExtremeBranching=mParams[0]->nbranch[3]*mParams[0]->onoff[3];
   for (il=2;il>=0;il--)
     if (mParams[0]->nbranch[il]*mParams[0]->onoff[il]>ExtremeBranching) 
       ExtremeBranching=mParams[0]->nbranch[il]*mParams[0]->onoff[il];
@@ -412,9 +415,9 @@ int StEstTracker::TPCInit(St_tpt_track* Sttptrack,
   if(mDebugLevel>0)
     gMessMgr->Info()<<"TPCInit *** START ***"<<endm;  
 
-  long il, jl, kl, maxl;
-  long MaxIndex, MaxTPCTrack;
-  long RowToFill;
+  int il, jl, kl, maxl;
+  int MaxIndex, MaxTPCTrack;
+  int RowToFill;
   double c,dip,phase;
   int h;
   double r0[10000];  //!!!!!
@@ -457,10 +460,10 @@ int StEstTracker::TPCInit(St_tpt_track* Sttptrack,
   
   // we allocated the memory for the index table 
   // we need +1 since the id value run from 1 to XXX
-  mTptIndex = new long[MaxIndex+1]; 
+  mTptIndex = new int[MaxIndex+1]; 
   if(!mTptIndex) {
     gMessMgr->Error()<<"ERROR!!! not enough memory"<<endm;
-    gMessMgr->Error()<<"StEstMaker::TPCInit mTptIndex = new long["<<MaxIndex<<"];"<<endm;
+    gMessMgr->Error()<<"StEstMaker::TPCInit mTptIndex = new int["<<MaxIndex<<"];"<<endm;
     return 1;
   }
 
@@ -574,10 +577,10 @@ int StEstTracker::SetupMc(St_scs_spt* Stscsspt,
   if(mDebugLevel>0) gMessMgr->Info()<<"EvalInit start"<<endm;
 
   // translation table (mcid -> est_id)
-  Eval_id_mctrk2est_Track = new long[mNTPCTrack*10];
+  Eval_id_mctrk2est_Track = new int[mNTPCTrack*10];
   if(!Eval_id_mctrk2est_Track){
     gMessMgr->Error()<<"ERROR!!! not enough memory"<<endm;
-    gMessMgr->Error()<<"StEstMaker::Init Eval_id_mctrk2est_Track = new long["<< mNTPCTrack*10<<"];"<<endm;
+    gMessMgr->Error()<<"StEstMaker::Init Eval_id_mctrk2est_Track = new int["<< mNTPCTrack*10<<"];"<<endm;
     return 1;
   }
 

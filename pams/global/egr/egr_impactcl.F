@@ -92,7 +92,7 @@ c
        if(globtrk(i).iflag.gt.0)then ! work with good tracks only
 
 C      this will only work if Kalman fit was used
-        if((globtrk(i).method.and.2**kKalmanFitId).ne.0)then
+        if(iand(globtrk(i).method,2**kKalmanFitId).ne.0)then
          globtrk(i).chisq(2) = 0.0 ! preset in case of failure
          rc = 1./globtrk(i).curvature
          ndef = 2*globtrk(i).n_fit_point-5
@@ -117,7 +117,7 @@ C --  put phi 0-2pi
 
 C --      calculate the impact parameter chisq for charged track at primary vertex
 
-            if(impfit(10,rver1,pveci,covi,bfield(3),mainv,bchis,fcov,alen))then
+            if(impfit(10,rver1,pveci,covi,bfield(3),mainv,bchis,fcov,alen).ne.0)then
               ndegf = ndef+2 ! two extra df for fit
               globtrk(i).chisq(2) = Prob_cern(globtrk(i).chisq(1)*ndef+bchis,ndegf)
               EGR_IMPACTCL =STAFCV_OK

@@ -106,7 +106,7 @@ C -- make copy as default
        primtrk(index).iflag = globtrk(i).iflag
        if(globtrk(i).iflag.gt.0)then ! work with good tracks only
 C --    this will only work if Kalman fit was used
-        if((globtrk(i).method.and.2**kKalmanFitId).ne.0)then
+        if(iand(globtrk(i).method,2**kKalmanFitId).ne.0)then
 CCC --- restore this when substituting for egr_impactcl
 CCC         globtrk(i).chisq(2) = 0.0 ! preset in case of failure
          primtrk(index).chisq(2) = 0.0 ! preset in case of failure
@@ -160,7 +160,7 @@ C -- calculate track parameters near mainv
           if(iret.eq.0)then ! successful extrapolation
 C --      calculate the impact parameter chisq for charged track at primary vertex
             primtrk(index).iflag = -20000 ! preset in case of failure
-            if(impfit(10,rver1,pveci,covi,bfield(3),mainv,bchis,covar,alen))then
+            if(impfit(10,rver1,pveci,covi,bfield(3),mainv,bchis,covar,alen).ne.0)then
               primtrk(index).iflag = globtrk(i).iflag
               
               primtrk(index).method =2**kKalmanFitId
