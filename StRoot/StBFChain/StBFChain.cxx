@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.332 2003/04/25 14:49:34 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.333 2003/04/30 20:49:36 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -27,6 +27,8 @@
 #include "St_QA_Maker/StEventQAMaker.h"
 #include "StMessMgr.h"
 #include "StiMaker/StiDefaultToolkit.h"
+#include "StiMaker/StiMakerParameters.h"
+#include "StiMaker/StiMaker.h"
 
 //_____________________________________________________________________
 Bfc_st BFC1[] = {
@@ -1227,15 +1229,15 @@ Int_t StBFChain::Instantiate()
 	  if (!geantMk) status = kStErr;
 	  continue;
 	}
-	if (maker == "StiMaker") {
-	  StiDefaultToolkit * tk = new StiDefaultToolkit();
-	  StiToolkit::setToolkit(tk);
-	  tk->setGuiEnabled(kFALSE);
-	  tk->setMcEnabled(kFALSE);
-	  if (GetOption("Simu")) tk->setMcEnabled(kTRUE);
-	}
+	
 	StMaker *mk = 0;
+
+	// Special makers already created or action which
+	// need to take place before 'maker' is created.
 	if (maker == "StTpcDbMaker") mk = GetChain()->GetMaker(fBFC[i].Name);
+	if (maker == "StiMaker")     StiToolkit::setToolkit( new StiDefaultToolkit() );
+
+	// All Makers created here
 	if (!mk) {
 	  if (strlen(fBFC[i].Name) > 0) mk = New(fBFC[i].Maker,fBFC[i].Name);
 	  else  {
@@ -1243,8 +1245,31 @@ Int_t StBFChain::Instantiate()
 	    if (mk) strcpy (fBFC[i].Name,(Char_t *) mk->GetName());
 	  }
 	}
+
+
 	// special maker options
 	if (mk) {
+	  if (maker == "StiMaker") {
+	    StiMaker   *stiMk = (StiMaker*) mk;
+
+	    
+	    StiToolkit         * tk   = stiMk->getToolkit();
+	    if (! tk)            tk   = new StiDefaultToolkit();
+
+	    StiMakerParameters * pars = stiMk->getParameters();
+	    if ( ! pars ){       pars = new StiMakerParameters(); //default Sti parameters
+	                         stiMk->setParameters(pars);
+	    }
+
+	    // ready to set options and parameters
+	    tk->setGuiEnabled(kFALSE);
+	    tk->setMcEnabled(kFALSE);
+
+	    if (GetOption("Simu")) tk->setMcEnabled(kTRUE);
+
+
+	  }
+
 	  if (GetOption("ppOpt") ) {                         // pp specific stuff
 	    if (maker == "StTrsMaker") mk->SetMode(1);       // Pile-up correction
 	    if (maker == "StVertexMaker"){
