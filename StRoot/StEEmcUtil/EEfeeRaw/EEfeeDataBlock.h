@@ -2,7 +2,7 @@
 #ifndef EEfeeDataBlock_h
 #define EEfeeDataBlock_h
 /*********************************************************************
- * $Id: EEfeeDataBlock.h,v 1.7 2004/01/27 15:13:57 balewski Exp $
+ * $Id: EEfeeDataBlock.h,v 1.8 2004/03/20 20:25:55 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw FEE Data Block
@@ -40,7 +40,7 @@ public:
   UShort_t* getHead() const { return head; };
   
   int       getDataLen() const { return MaxData; }
-  int       getValidDataLen() const;
+  int       getValidDataLen() const {return getDataLen(); } //bckwd compat.  
   int       getHeadLen() const { return MaxHead; }
 
   UShort_t  getToken()    const { return  head[TOKEN];           }
@@ -57,6 +57,9 @@ public:
 
 /*
  * $Log: EEfeeDataBlock.h,v $
+ * Revision 1.8  2004/03/20 20:25:55  balewski
+ * *** empty log message ***
+ *
  * Revision 1.7  2004/01/27 15:13:57  balewski
  * it is tricky with BTOW
  *
