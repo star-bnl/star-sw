@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.7 2001/05/02 02:07:55 caines Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.8 2001/07/22 20:31:29 caines Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.8  2001/07/22 20:31:29  caines
+// Better tuning for real data. Common mode noise calc and sub. Avoid overlapping seq. Fill histograms only in debug
+//
 // Revision 1.7  2001/05/02 02:07:55  caines
 // Fix function declaration for Solaris
 //
@@ -64,12 +67,15 @@ class StSvtSeqAdjMaker : public StMaker
   Int_t GetSvtPedestals();
   Int_t GetBadAnodes();
   Int_t GetPedOffset(){return mPedOffSet;};
+  void CommonModeNoiseCalc(int iAnode);
+  void CommonModeNoiseSub(int iAnode);
   Int_t AdjustSequences1( int iAnode, int Anode); // Find sequences  based on ASICS
   Int_t AdjustSequences2(int iAnode, int Anode); //adjust sequences base on LowInvProd
 
   Int_t CreateHist(Int_t tNuOfHyb);
   void  MakeHistogramsProb(int index,int Anode);
   void  MakeHistogramsAdc(StSvtHybridData* hybridData, int index,int Anode, int Count);
+  Int_t Reset();
 
   Int_t SetMinAdcLevels( int MinAdc1,  int MinAbove1, int MinAdc2, int MinAbove2, int PedOffset); // Set the 2 thresholds for a sequence
   Int_t SetPedestalFile(const char* PedFile);
@@ -96,7 +102,7 @@ class StSvtSeqAdjMaker : public StMaker
   TH1D** mInvProdSeqAdj;  //!
   TH1F** mRawAdc;  //!
   TH1F** mAdcAfter;  //!
-
+  TH1F* mCommonModePitch; //!
   int mNumOfSeq;
   int m_n_seq_lo;
   int m_n_seq_hi;
@@ -106,6 +112,8 @@ class StSvtSeqAdjMaker : public StMaker
   
   int mTotalNumberOfHybrids;
   int mPedOffSet;
+  int mCommonModeNoise[128];
+  int mCommonModeNoiseAn[128];
 
  private:
 
