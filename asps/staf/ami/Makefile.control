@@ -1,0 +1,11 @@
+# ami/Makefile.control
+#
+ASPS := ami dio dui tdm spx soc
+#PAMS := 
+#
+USER_LIBS := -ldsl -lasu
+#
+DEBUG := TRUE
+#SHARE := TRUE
+MOTIF := FALSE
+#
