@@ -1,8 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: fill_ftpc_dst.cc,v 1.7 2000/07/03 12:38:06 jcs Exp $
+// $Id: fill_ftpc_dst.cc,v 1.8 2000/07/12 12:03:48 jcs Exp $
 //
 // $Log: fill_ftpc_dst.cc,v $
+// Revision 1.8  2000/07/12 12:03:48  jcs
+// FTPC globtrks now contain fit values at reference point on helix
+//
 // Revision 1.7  2000/07/03 12:38:06  jcs
 // globtrk - save unconstrained fit,impact parameter and id for preVertex
 //
@@ -101,7 +104,6 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
   long    ftpcy10, ftpcy11;
   long    ihit;
   
-  float   xsq, ysq, zsq;
   // ===========================  Begin Executable Code  =============== 
   
 
@@ -117,8 +119,11 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
     dst_track[dst_track_h->nok].id      = dst_track_h->nok + 1;
 
 //  initialize map and det_id 
-//       primary vertex is always used for ftpc
-    dst_track[dst_track_h->nok].map[0]   = 1;
+//  =0 if unconstrained, =1 if vertex constraint used in track fit
+    if (fptrack[itrk].id_start_vertex > 0) {
+       dst_track[dst_track_h->nok].map[0]   = 1;
+    }
+    else {dst_track[dst_track_h->nok].map[0] = 0;}
 //       Format interpreter -  set bit 31 for FTPC
     dst_track[dst_track_h->nok].map[1]   =  (1<<31);
     dst_track[dst_track_h->nok].det_id   = 0;
@@ -251,17 +256,16 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
 
 //  radius at start of track (cm) 
     dst_track[dst_track_h->nok].r0   = 
-           sqrt(dst_track[dst_track_h->nok].x_first[0]*dst_track[dst_track_h->nok].x_first[0]
-              + dst_track[dst_track_h->nok].x_first[1]*dst_track[dst_track_h->nok].x_first[1]);
+           sqrt(fptrack[itrk].v[0]*fptrack[itrk].v[0]
+              + fptrack[itrk].v[1]*fptrack[itrk].v[1]);
 
 //  azimuthal angle at start of track (deg)
     dst_track[dst_track_h->nok].phi0 = 
-                 atan2(dst_track[dst_track_h->nok].x_first[1],
-                       dst_track[dst_track_h->nok].x_first[0])
+                 atan2(fptrack[itrk].v[1],fptrack[itrk].v[0])
                      * C_DEG_PER_RAD;
 
 //  z-coordinate at start of track 
-    dst_track[dst_track_h->nok].z0 = dst_track[dst_track_h->nok].x_first[2];
+    dst_track[dst_track_h->nok].z0 = fptrack[itrk].v[2];
 
 //  momentum angle at start 
     dst_track[dst_track_h->nok].psi = 
@@ -324,14 +328,7 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
         }
      }
 
-    xsq = (dst_track[dst_track_h->nok].x_last[0] - dst_track[dst_track_h->nok].x_first[0]) *
-          (dst_track[dst_track_h->nok].x_last[0] - dst_track[dst_track_h->nok].x_first[0]);
-    ysq = (dst_track[dst_track_h->nok].x_last[1] - dst_track[dst_track_h->nok].x_first[1]) *
-          (dst_track[dst_track_h->nok].x_last[1] - dst_track[dst_track_h->nok].x_first[1]);
-    zsq = (dst_track[dst_track_h->nok].x_last[2] - dst_track[dst_track_h->nok].x_first[2]) *
-          (dst_track[dst_track_h->nok].x_last[2] - dst_track[dst_track_h->nok].x_first[2]);
-    dst_track[dst_track_h->nok].length  = sqrt(xsq + ysq + zsq);
-
+    dst_track[dst_track_h->nok].length  = fptrack[itrk].length;
 
     dst_track[dst_track_h->nok].impact  = fptrack[itrk].impact;
 
