@@ -1,6 +1,10 @@
-* $Id: agrndm.F,v 1.1.1.1 2004/01/12 23:49:38 potekhin Exp $
+* $Id: agrndm.F,v 1.2 2004/07/13 03:28:03 perev Exp $
 * $Log: agrndm.F,v $
+* Revision 1.2  2004/07/13 03:28:03  perev
+* automatic init added for grndm
+*
 * Revision 1.1.1.1  2004/01/12 23:49:38  potekhin
+*
 *
 * Revision 1.1  2001/02/27 10:14:59  nevski
 *  first working release
@@ -32,6 +36,14 @@ C.
       COMMON / GCRNDM / JSEQ(2), ISEED(2,MAXSEQ)
 C
       ISEQ   = JSEQ(1)
+      if (ISEQ .EQ. 0) THEN
+        ISEQ   = 1
+	JSEQ(1)= 1
+	ISEED(1,ISEQ) = 9876 
+	ISEED(2,ISEQ) = 54321
+      ENDIF
+      
+      
       ISEED1 = ISEED(1,ISEQ)
       ISEED2 = ISEED(2,ISEQ)
       DO 100 I= 1, LEN
