@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "dstype.h"
 #include "dsxdr.h"
 
 #include "dscuts.h"

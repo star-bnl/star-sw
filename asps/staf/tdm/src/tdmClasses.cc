@@ -45,7 +45,6 @@
 #define EMPTY_ROW(R) (rowCount() <= R && R < maxRowCount())
 
 //:----------------------------------------------- PROTOTYPES         --
-//extern CC_P int dsTypeSpecifier(char **ptr, size_t tid);
 extern CC_P void dsuPrintData(FILE *stream , DS_TYPE_CODE_T type
 		, unsigned int count , void *data);
 extern "C" int finite(double);

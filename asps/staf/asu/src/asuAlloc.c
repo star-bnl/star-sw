@@ -103,7 +103,7 @@ int i;
 /*--------------------------------------------------------------------*/
 int asuMallocRemove(void *pv, const char* file, int line){
 
-static int NumGiveUp=50;
+static int NumGiveUp=5;
 asuAlloc_t *pa,*pnex,*pbak;
 char *pc; int size,idel,inew,i;
 
