@@ -20,13 +20,14 @@ require "/afs/rhic/star/packages/DEV00/mgr/dbDescriptorSetup.pl";
 my $debugOn=0;
 
 
-my $DISK1 = "/star/rcf/disk00001/star";
+#my $DISK1 = "/star/rcf/disk00001/star";
 
+my $DISK1 = "/star/rcf/data06/reco";
 my @DISKR = (
 #              "/star/rcf/data09/reco",
 #              "/star/rcf/data10/reco",
 #              "/star/rcf/data05/reco",
-              "/star/rcf/data07/reco",
+#              "/star/rcf/data07/reco",
               "/star/rcf/data06/reco",
 ); 
 
@@ -48,6 +49,14 @@ my @SetS = (
              "daq/2000/08",
 #             "daq/2000/09", 
 );
+
+my @EmSet = (
+              "embedding_alamhipt", 
+              "embedding_alamlopt",
+              "embedding_lamhipt",
+              "embedding_lamlopt",
+);
+              
 
 
 my $recoDir = ("daq");
@@ -184,8 +193,8 @@ my $ndbOnFiles = 0;
  &StDbOnLineDisconnect();
 
 
- for( $ll = 0; $ll<scalar(@SetD); $ll++) {
-   $hpssDstDirs[$ll] = $topHpssReco . "/" . "embeddingk-" . "/" . $prodSr . "/" . $SetD[$ll];
+ for( $ll = 0; $ll<scalar(@EmSet); $ll++) {
+   $hpssDstDirs[$ll] = $topHpssReco . "/" . "$EmSet[$ll]" . "/" . $prodSr . "/" . $SetD[0];
    print "hpssDstDir:", $hpssDstDirs[$ll], "\n";
  }
  
@@ -212,8 +221,8 @@ my $ndir = 0;
  print "\nFinding daq reco files in disk\n";
 
  for( $kk = 0; $kk<scalar(@DISKR); $kk++)  { 
- for( $ll = 0; $ll<scalar(@SetD); $ll++) {
-   $diskDstDirs[$ndir] = $DISKR[$kk] . "/" . "embeddingk-" . "/" . $prodSr . "/" . $SetD[$ll];
+ for( $ll = 0; $ll<scalar(@EmSet); $ll++) {
+   $diskDstDirs[$ndir] = $DISKR[$kk] . "/" . "$EmSet[$ll]" . "/" . $prodSr . "/" . $SetD[0];
    print "diskDstDir: $diskDstDirs[$ndir]\n";
    $ndir++;   
  }
@@ -297,7 +306,9 @@ my $ndir = 0;
 
 ##### select from JobStatus table files which should be updated
 
- $sql="SELECT prodSeries, JobID, sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobfileName like 'embeddingk%' AND jobStatus = 'n/a' ";
+ for ($ll = 0; $ll<scalar(@EmSet); $ll++) {
+
+ $sql="SELECT prodSeries, JobID, sumFileName, sumFileDir, jobfileName FROM $JobStatusT WHERE prodSeries = '$prodSr' AND jobfileName like '$EmSet[$ll]%' AND jobStatus = 'n/a' ";
 
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
@@ -325,7 +336,7 @@ my $ndir = 0;
        $jobSum_no++; 
 
  }
- 
+ }
  my $mchainOp;
  my $pr_chain;
  my $mjobFname;
@@ -400,7 +411,7 @@ my $ndir = 0;
         if ( $filename =~ /$msumFile/ ) {
       $jb_sumFile = $msumDir . "/" . $msumFile;
 
-print "SumDir: ", $jb_sumFile, "\n"; 
+ print "SumDir: ", $jb_sumFile, "\n"; 
        $mjobDg = "none";
        $mjobSt = "n\/a"; 
 
@@ -458,7 +469,7 @@ print "SumDir: ", $jb_sumFile, "\n";
  my $msite = "n\/a";
  my $mhpss = "Y";
  my $mstatus = 0;
-
+ my @epart;
 
 #####=======================================================
 ##### hpss reco daq file check
@@ -498,6 +509,7 @@ print "SumDir: ", $jb_sumFile, "\n";
 my $dfile;
 my $daqName;
 my $daqType = 0;
+my $embType;
 
   $mfName = ($$eachDstFile)->filename;
   $mpath  = ($$eachDstFile)->fpath;
@@ -505,6 +517,15 @@ my $daqType = 0;
   $mprotc = ($$eachDstFile)->faccess;
   $mowner = ($$eachDstFile)->fowner;
   $msize = ($$eachDstFile)->dsize;
+  @epart = split ("/",$mpath);
+  if( $mpath =~ /starreco/) {
+  $embType = $epart[4];
+  }
+  elsif ( $mpath =~ /data0/) {
+  $embType = $epart[5];
+  }
+
+  print "Embedding Type :", $embType, "\n";
 
  if($mfName =~ /root/) {
     $mformat = "root";
@@ -549,9 +570,9 @@ my $daqType = 0;
        $dfile = $msumFile;
        $dfile =~ s/.sum//g;
         
-    if ( ($mfName =~ /$dfile/) &&  ($mjobFname =~ /embeddingk/) ) {
+    if ( ($mfName =~ /$dfile/) &&  ($mjobFname =~ /$embType/) ) {
 
- print "File Name :", $mpath, " % ", $mfName, " % ", "Num Events, EvType: first, last, done :", $mNevtLo," % ", $mNevtHi," % ",$mNevts," % ",$mevtType, "\n";     
+ print "File Name :", $mpath, " % ", $mfName, " % ",$mjobFname, " % ", "Num Events, done :",$mNevts, "\n";     
     print "updating FileCatalogT table\n";
  
     &fillDbTable();   
@@ -575,9 +596,9 @@ my $daqType = 0;
 
 my $myRun;
 
- for ($ll = 0; $ll<scalar(@SetD); $ll++) {
+ for ($ll = 0; $ll<scalar(@EmSet); $ll++) {
 
- $DirD = "embeddingk-" . "/" . $prodSr . "/" . $SetD[$ll];
+ $DirD = $EmSet[$ll] . "/" . $prodSr . "/" . $SetD[0];
  $sql="SELECT DISTINCT runID FROM $FileCatalogT WHERE path like '%$DirD' AND dataset = 'n/a' ";
 
    $cursor =$dbh->prepare($sql)
@@ -798,7 +819,7 @@ sub fillDbTable {
   
     $sql="update $FileCatalogT set ";   
     $sql.="dataset='$mdataset'";
-    $sql.=" WHERE runID = '$mrunID'"; 
+    $sql.=" WHERE runID = '$mrunID' AND path like '%embedding_%'"; 
     print "$sql\n" if $debugOn;
     $rv = $dbh->do($sql) || die $dbh->errstr;
   
@@ -961,7 +982,7 @@ my @output = `more $jb_sum`;
              next if ($sum_line =~ /Command string/);
             if($sum_line =~ /Total: Three/ ) {             
            @word_sum = split (" ", $sum_line);
-          print "CPU = ", $sum_line, "\n";   
+#          print "CPU = ", $sum_line, "\n";   
             if($word_sum[8] =~ /Cpu/) { 
               $mCPU  = $word_sum[11];  
               $mRealT = $word_sum[6];  
