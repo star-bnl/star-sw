@@ -1,5 +1,8 @@
-// $Id: StEventMaker.cxx,v 1.6 1999/06/11 17:43:57 perev Exp $
+// $Id: StEventMaker.cxx,v 1.7 1999/06/24 17:31:22 fisyak Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.7  1999/06/24 17:31:22  fisyak
+// Add protection for hits which do not belongs to any tracks
+//
 // Revision 1.6  1999/06/11 17:43:57  perev
 // remove StRun from .const
 //
@@ -102,8 +105,11 @@
 // History:
 //
 ///////////////////////////////////////////////////////////////////////////////
-// $Id: StEventMaker.cxx,v 1.6 1999/06/11 17:43:57 perev Exp $
+// $Id: StEventMaker.cxx,v 1.7 1999/06/24 17:31:22 fisyak Exp $
 // $Log: StEventMaker.cxx,v $
+// Revision 1.7  1999/06/24 17:31:22  fisyak
+// Add protection for hits which do not belongs to any tracks
+//
 // Revision 1.6  1999/06/11 17:43:57  perev
 // remove StRun from .const
 //
@@ -217,7 +223,7 @@
 #endif
 #include "StEventMaker/StRootEventManager.hh"
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.6 1999/06/11 17:43:57 perev Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 1.7 1999/06/24 17:31:22 fisyak Exp $";
 #include "StEventManager.hh"
  * Revision 2.23  2000/05/22 21:53:41  ullrich
 const long detid_tpc = 1;
@@ -529,6 +535,7 @@ Int_t StEventMaker::Make(){
 				  phase*radian,
 				  origin, //*centimeter),
 				  h);
+          trk->setLength(dstTrack->length);
 	  currentEvent->trackCollection()->push_back(trk);
 	  // add the track to vertex
 	  unsigned long idStartVertex = dstTrack->id_start_vertex;
@@ -666,30 +673,30 @@ const static int iTab[]={1,2, 1,3, 2,3, 1,4, 2,4, 3,4, 1,5, 2,5, 3,5, 4,5, 0};
 	  thePoint = &(dstPoint[i]);
 	  long itrk = thePoint->id_track-1;
 	  StTrackCollection* theTrackCollection = currentEvent->trackCollection();
-	  StGlobalTrack* theTrack = (*theTrackCollection)[itrk];
-	  if (! theTrack) {
-	    cout << "StEventMaker: ERROR: Track find failed for ID " << itrk << endl;
-	  } else {
-	    // Handle point depending on what detector it comes from
-	    idet = thePoint->hw_position%16;
-	    if (idet == detid_tpc) {
-	      tpcHit = new StTpcHit(thePoint);
-	      currentEvent->tpcHitCollection()->push_back(tpcHit);
-	      theTrack->addTpcHit(tpcHit);
-	    }
-	    else if (idet == detid_svt) {
-	      svtHit = new StSvtHit(thePoint);
-	      currentEvent->svtHitCollection()->push_back(svtHit);
-	      theTrack->addSvtHit(svtHit);
-	    }
-	    else if (idet == detid_ftpcWest || idet == detid_ftpcEast ) {
-	      ftpcHit = new StFtpcHit(thePoint);
-	      currentEvent->ftpcHitCollection()->push_back(ftpcHit);
-	      theTrack->addFtpcHit(ftpcHit);
-	    }
-	    else {
-	      cout << "StEventMaker: ERROR: Detector ID " << idet << " not known" << endl;
-	    }
+	  StGlobalTrack* theTrack = 0;
+	  if (itrk >=0) theTrack = (*theTrackCollection)[itrk];
+	  //	  if (! theTrack) {
+	  //	      cout << "StEventMaker: ERROR: Track find failed for ID " << itrk << endl;
+	  //	  } else {
+	      // Handle point depending on what detector it comes from
+	  idet = thePoint->hw_position%16;
+	  if (idet == detid_tpc) {
+	    tpcHit = new StTpcHit(thePoint);
+	    currentEvent->tpcHitCollection()->push_back(tpcHit);
+	    if (theTrack) theTrack->addTpcHit(tpcHit);
+	  }
+	  else if (idet == detid_svt) {
+	    svtHit = new StSvtHit(thePoint);
+	    currentEvent->svtHitCollection()->push_back(svtHit);
+	    if (theTrack) theTrack->addSvtHit(svtHit);
+	  }
+	  else if (idet == detid_ftpcWest || idet == detid_ftpcEast ) {
+	    ftpcHit = new StFtpcHit(thePoint);
+	    currentEvent->ftpcHitCollection()->push_back(ftpcHit);
+	    if (theTrack) theTrack->addFtpcHit(ftpcHit);
+	  }
+	  else {
+	    cout << "StEventMaker: ERROR: Detector ID " << idet << " not known" << endl;
 	  }
 	}
       }
@@ -713,7 +720,7 @@ void StEventMaker::setEventManager(StEventManager* mgr)
 //_____________________________________________________________________________
 void StEventMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StEventMaker.cxx,v 1.6 1999/06/11 17:43:57 perev Exp $\n");
+  printf("* $Id: StEventMaker.cxx,v 1.7 1999/06/24 17:31:22 fisyak Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
