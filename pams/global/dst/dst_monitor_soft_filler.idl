@@ -18,10 +18,10 @@
 #include "ctu_cor.idl"
 #include "dst_vertex.idl"
 #include "dst_event_summary.idl"
-#include "dst_monitor_soft_ftpc.idl"
-#include "dst_monitor_soft_global.idl"
-#include "dst_monitor_soft_svt.idl"
-#include "dst_monitor_soft_tpc.idl"
+#include "dst_mon_soft_ftpc.idl"
+#include "dst_mon_soft_glob.idl"
+#include "dst_mon_soft_svt.idl"
+#include "dst_mon_soft_tpc.idl"
 
 interface dst_monitor_soft_filler : amiModule {
              STAFCV_T call
@@ -37,10 +37,10 @@ interface dst_monitor_soft_filler : amiModule {
                        in     ctu_cor           ctu_cor,
                        in     dst_vertex        dst_vertex,
                        in     dst_event_summary dst_event_summary,
-                      out     dst_monitor_soft_ftpc  dst_monitor_soft_ftpc,
-                      out     dst_monitor_soft_global  dst_monitor_soft_global,
-                      out     dst_monitor_soft_svt  dst_monitor_soft_svt,
-                      out     dst_monitor_soft_tpc dst_monitor_soft_tpc
+                      out     dst_mon_soft_ftpc dms_ftpc,
+                      out     dst_mon_soft_glob dms_global,
+                      out     dst_mon_soft_svt  dms_svt,
+                      out     dst_mon_soft_tpc  dms_tpc
              );
      };
-     /*  Last mod. for dst_monitor_soft_filler $Date: 1999/09/30 20:04:50 $ */
+     /*  Last mod. for dst_monitor_soft_filler $Date: 1999/10/05 02:49:19 $ */

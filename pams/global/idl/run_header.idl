@@ -15,8 +15,7 @@
  *  luminosity are included for the experimental run period corresponding
  *  to the events in the production run.  Quantitative values for the 
  *  specific run time and bunch crossing must be obtained from the Conditions 
- *  Data Base.  The magnetic field values used by each tracking detector
- *  in the track fitting procedure is stored here also, where this implies
+ *  Data Base.  The magnetic field value at the center of STAR is stored. This implies
  *  that only one magnet field map is allowed per BFC production run.
  */
 
@@ -30,8 +29,7 @@
   long   west_a;          /* A of west moving ion                       */
   long   west_z;          /* Z of west moving ion                       */
   float  sqrt_s;          /* CM total energy per NN pair (GeV)          */
-  float  mag_field[4];    /* Magnetic field used by TPC, SVT-SSD,       */
-                          /* FTPC-East and FTPC-West, respect. in Tesla */
+  float  field;           /* Magnetic field at (x,y,z)=(0,0,0)          */
  } ;
-/*  Last mod. for run_header:   $Date: 1999/09/27 16:54:11 $ */
+/*  Last mod. for run_header:   $Date: 1999/10/05 02:49:26 $ */
 

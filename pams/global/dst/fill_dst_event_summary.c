@@ -130,9 +130,7 @@ long  type_of_call fill_dst_event_summary_ (
   for (i=0; i<3; i++) {
     dst_eventsummary->prim_vrtx[i]          = 0.;
   }
-  for (i=0; i<4; i++) {
-    dst_eventsummary->mag_field[i]          = 0.;
-  }
+  dst_eventsummary->field         = 0.;
   if (!dst_track_h->nok){
     fprintf(stderr,"FILL_DST_EVENT_SUMMARY: Zero dst tracks...exiting.\n");
     return STAFCV_BAD;
