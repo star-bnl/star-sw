@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.hh,v 1.3 1999/01/23 18:47:22 fisyak Exp $
+ * $Id: StTrsDeDx.hh,v 1.4 1999/01/25 23:37:37 lasiuk Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,8 +13,11 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.hh,v $
- * Revision 1.3  1999/01/23 18:47:22  fisyak
- * Cleanup for SL98l
+ * Revision 1.4  1999/01/25 23:37:37  lasiuk
+ * sun string
+ *
+ * Revision 1.4  1999/01/25 23:37:37  lasiuk
+ * sun string
  *
  * Revision 1.3  1999/01/23 18:47:22  fisyak
  * Cleanup for SL98l
@@ -56,9 +59,7 @@
  * Initial Revision
  *
  ******************************************************************/
-#ifndef __sun
 #ifndef ST_TRS_DEDX_HH
-#endif
 #define ST_TRS_DEDX_HH
 
 #include <string>
@@ -77,10 +78,7 @@ public:
 	primaries,
 	secondaries,
 	total,
-    StTrsDeDx(); // should be made private!! Do not use!!
-#ifndef __sun
 	numberOfElectrons};
-#endif
     
 public:
     StTrsDeDx(const string&, double = 1.95*centimeter);
@@ -108,14 +106,11 @@ public:
 #endif
 
     // DIAGNOSTIC
+    void   print(ostream& os = cout)            const;
 
 protected:
     StTrsDeDx(); // should be made private!! Do not use!!
-#ifndef __sun
     void doInitialization();
-#else
-    char*  mGas;
-#endif
 
 protected:
     string mGas;          // Label
