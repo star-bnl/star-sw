@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuPostScript.cc,v 1.2 2002/06/25 02:43:12 ullrich Exp $
+ * $Id: StuPostScript.cc,v 1.3 2002/10/11 17:34:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, April 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StuPostScript.cc,v $
+ * Revision 1.3  2002/10/11 17:34:14  ullrich
+ * Hits on tracks drawn as circles not diamonds
+ *
  * Revision 1.2  2002/06/25 02:43:12  ullrich
  * Added drawing of hits.
  *
@@ -114,9 +117,7 @@ void StuPostScript::writeHeader(ostream &os, const char* filename) {
        << " rmoveto " << boxSize << " 0 rlineto 0 " << -boxSize
        << " rlineto " << -boxSize << " 0 rlineto closepath "
        << hitGrayLevel << " setgray 0.2 setlinewidth stroke grestore} def" << endl;
-    os << "/tHit {gsave moveto 45 rotate " << -boxSize/2 << ' ' << boxSize/2
-       << " rmoveto " << boxSize << " 0 rlineto 0 " << -boxSize
-       << " rlineto " << -boxSize << " 0 rlineto closepath "
+    os << "/tHit {gsave " << boxSize/2 << " 0 360 arc closepath "
        << hitGrayLevel << " setgray 0.2 setlinewidth stroke grestore} def" << endl;
     
     //

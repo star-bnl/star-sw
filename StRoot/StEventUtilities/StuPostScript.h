@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuPostScript.h,v 1.4 2002/06/25 02:43:24 ullrich Exp $
+ * $Id: StuPostScript.h,v 1.5 2002/10/11 17:34:15 ullrich Exp $
  *
  * Author: Thomas Ullrich, April 2002
  ***************************************************************************
@@ -52,9 +52,9 @@
  *       (<10 points) get suppressed.                                 
  * s     Plot sideview (zy)                                           
  *       Default is front view (xy)                                   
- * h     Show hits on tracks (diamonds)
- * H     Show all hits (squares & diamonds)
- *       Hits on tracks are drawn as diamonds
+ * h     Show hits on tracks (circles)
+ * H     Show all hits (squares & circles)
+ *       Hits on tracks are drawn as circles
  *       otherwise as squares
  *
  * StuPostScript writes PS without a dictionary. This makes the produced
@@ -65,6 +65,9 @@
  ***************************************************************************
  *
  * $Log: StuPostScript.h,v $
+ * Revision 1.5  2002/10/11 17:34:15  ullrich
+ * Hits on tracks drawn as circles not diamonds
+ *
  * Revision 1.4  2002/06/25 02:43:24  ullrich
  * Added drawing of hits.
  *
