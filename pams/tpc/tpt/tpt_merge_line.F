@@ -151,7 +151,7 @@ c                fill the trk struct with the new info
                  enddo
 c                call the fitting and loading
                  iret = tpt_fit_track_line(ltr1,trk,hit_h,hit,tpar_h,tpar,ipass)
-                 iret = tpt_load_track(ltr1,track_h,track,trk,hit_h,hit)
+                 iret = tpt_load_track(ltr1,track_h,track,trk,hit_h,hit,tpar_h,tpar,ipass)
 c                get rid of the second track
                  track(ltr2).flag=-77                
                  more = .false.

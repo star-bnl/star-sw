@@ -1,5 +1,8 @@
-* $Id: tpt_form_segments.F,v 1.9 1999/11/07 05:52:54 sakrejda Exp $
+* $Id: tpt_form_segments.F,v 1.10 2000/03/19 04:20:32 sakrejda Exp $
 * $Log: tpt_form_segments.F,v $
+* Revision 1.10  2000/03/19 04:20:32  sakrejda
+* An option to use straigth line to fit lasers even if the field is on.
+*
 * Revision 1.9  1999/11/07 05:52:54  sakrejda
 * calculation of the dip and crossing angle moved tp tpt_load_track
 *
@@ -209,7 +212,7 @@ c
                     trk(ntrk).p(ld) = saved_trk.p(ld)
                    end do
                  endif
-                 iret = tpt_load_track(ntrk,track_h,track,trk,hit_h,hit)
+                 iret = tpt_load_track(ntrk,track_h,track,trk,hit_h,hit,tpar_h,tpar,ipass)
                endif ! end of an if on good track (flag>0)
                endif ! end of an if on nroot>0
                endif ! end of an if on available hit

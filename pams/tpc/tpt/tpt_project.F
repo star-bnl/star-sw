@@ -1,5 +1,8 @@
-* $Id: tpt_project.F,v 1.16 2000/02/23 21:05:53 hardtke Exp $
+* $Id: tpt_project.F,v 1.17 2000/03/19 04:20:33 sakrejda Exp $
 * $Log: tpt_project.F,v $
+* Revision 1.17  2000/03/19 04:20:33  sakrejda
+* An option to use straigth line to fit lasers even if the field is on.
+*
 * Revision 1.16  2000/02/23 21:05:53  hardtke
 * replace tpg functions with tpc functions
 *
@@ -244,7 +247,7 @@ C              a hit found
                iret=tpt_fit_track(itrk,trk,hit_h,hit,tpar_h,tpar,tte_skip,ipass)
                if((iret.eq.STAFCV_OK).and.(irow.ne.irow_last)) then
                   trk(itrk).flag=save_flag
-                  iret = tpt_load_track(itrk,track_h,track,trk,hit_h,hit)
+                  iret = tpt_load_track(itrk,track_h,track,trk,hit_h,hit,tpar_h,tpar,ipass)
                   tpt_project = STAFCV_OK
                   irow_last=irow
                   irow=irow-st(mdir)
@@ -262,7 +265,7 @@ C              a hit found
       iret=tpt_fit_track(itrk,trk,hit_h,hit,tpar_h,tpar,tte_skip,ipass)
       if(iret.eq.STAFCV_OK) then
          trk(itrk).flag=save_flag
-         iret = tpt_load_track(itrk,track_h,track,trk,hit_h,hit)
+         iret = tpt_load_track(itrk,track_h,track,trk,hit_h,hit,tpar_h,tpar,ipass)
          tpt_project = STAFCV_OK
       else
          tpt_project = STAFCV_BAD

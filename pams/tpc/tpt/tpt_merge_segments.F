@@ -1,5 +1,8 @@
-* $Id: tpt_merge_segments.F,v 1.16 2000/03/10 08:15:07 sakrejda Exp $
+* $Id: tpt_merge_segments.F,v 1.17 2000/03/19 04:20:33 sakrejda Exp $
 * $Log: tpt_merge_segments.F,v $
+* Revision 1.17  2000/03/19 04:20:33  sakrejda
+* An option to use straigth line to fit lasers even if the field is on.
+*
 * Revision 1.16  2000/03/10 08:15:07  sakrejda
 * Merged tracks arranged based on order of the end-points in Z
 *
@@ -101,17 +104,14 @@ C_________________________________________________________________
       REAL    varb,varc
 
       REAL    temp,zedge(4)
-      INTEGER event, dummy
-      data    event /0/
+      INTEGER dummy
+
       CHARACTER*132 m132
       logical enough
 C______________________________________________________________________
 
 c Order the good tracks according to their helix radius.
 c The array lpnt will point to each of these tracks in order.
-      write(17,*)"****************** event ",event," ***************"
-      event = event+1
-C      if(event.eq.4) return
 
       ltot = 0
       do i=1,track_h.nok
@@ -140,8 +140,6 @@ C      if(event.eq.4) return
                merge(ltot).yclose(1)=merge(ltot).yclose(2)
                merge(ltot).yclose(2)=temp
             endif
-            write(17,*) i,merge(ltot).rad,merge(ltot).xclose(1),merge(ltot).xclose(2),
-     >                 merge(ltot).yclose(1),merge(ltot).yclose(2)
          endif
       enddo
 C      go to 999
@@ -172,26 +170,21 @@ c radd is the larger of the radii being compared.
             enough = abs(radi-radj)/radj.gt.0.1
          endif
          lxj=merge(j).lpnt
-         write(17,*)"trying to merge", lxi, lxj
          if(.not.enough.and.trk(lxj).flag.gt.0) then
-            write(17,*)"trying to merge", lxi, lxj
 c           Now compare the average of the differences of the 
 c           x and y for the closest apptoach to the origin.
             cuta = abs(merge(i).xclose(1)-merge(j).xclose(1))/merge(i).rad
             cutb = abs(merge(i).xclose(1)-merge(j).xclose(1))/merge(i).rad
             if (cuta.lt.min(2).and.cutb.lt.min(2)) then
-                write(17,*)"trying to merge", lxi, lxj
 c               Now compare their dip angles.
                 varc=abs(abs(trk(lxi).p(7))-abs(trk(lxj).p(7)))
                 if (abs(varc).lt.min(3)) then
-                   write(17,*)"merged",lxi,lxj
                    track_h.nok=track_h.nok+1
                    zedge(1)=hit(trk(lxi).ipnt(trk(lxi).nhit)).z
                    zedge(2)=hit(trk(lxi).ipnt(1)).z
                    zedge(3)=hit(trk(lxj).ipnt(trk(lxj).nhit)).z
                    zedge(4)=hit(trk(lxj).ipnt(1)).z
                    iret =lvmin(zedge,4)
-                   write(17,*)"zedge ",zedge, iret
                    if(iret.lt.3) then
                       lx1=lxi
                       lx2=lxj
@@ -238,14 +231,12 @@ C                  store hits from both tracks in a local struct
 C
                    do  k=1,trk(track_h.nok).nhit
                       hit(trk(track_h.nok).ipnt(k)).track=1000*track_h.nok+k
-                      write(17,*)hit(trk(track_h.nok).ipnt(k)).z
                    end do
 c                  refit track
 c                  call the fitting and loading
                    iret = tpt_fit_track(track_h.nok,trk,hit_h,hit,tpar_h,tpar,dummy,ipass)
-                  write(17,*)trk(track_h.nok).flag,track_h.nok, trk(track_h.nok).nhit
                    if(trk(track_h.nok).flag.gt.0)then
-                     iret = tpt_load_track(track_h.nok,track_h,track,trk,hit_h,hit)
+                     iret = tpt_load_track(track_h.nok,track_h,track,trk,hit_h,hit,tpar_h,tpar,ipass)
 C                    flag the contributing track as "admerged"
                      trk(lxj).flag=-77
                      track(lxj).flag=-77
