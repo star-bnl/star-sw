@@ -100,6 +100,8 @@ const double         mPadResponseFunctionSigmaInner;
     double timeOfSignal, chargeOfSignal;
     double t, tzero, K, sigmaLoverTau, lambda,lambdasqr;
     double mAdcConversion;
+    double landauConstant,landauMean,landauSigma,expConstant,expSlope,landauCut,
+    GausConstant[6], GausMean[6], GausSigma2[6],ExpConstant[6],ExpSlope[6],cutT[6];
     
 };
 
