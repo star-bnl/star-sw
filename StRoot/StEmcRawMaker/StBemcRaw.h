@@ -1,5 +1,10 @@
-// $Id: StBemcRaw.h,v 1.4 2004/10/21 00:01:50 suaide Exp $
+// $Id: StBemcRaw.h,v 1.5 2004/11/22 12:46:22 suaide Exp $
 // $Log: StBemcRaw.h,v $
+// Revision 1.5  2004/11/22 12:46:22  suaide
+// added new flags for hit reconstruction. Status are not checked
+// dureing production anymore in order to avoid bad status loaded in
+// DB
+//
 // Revision 1.4  2004/10/21 00:01:50  suaide
 // small changes in histogramming and messages for BEMC
 // Complete version for EEMC done by Jan Balewski
@@ -91,6 +96,7 @@ class StBemcRaw : public TObject
   void                      clearStats(Int_t); ///< Clear statistics for detector 'det'
   void                      updateStats(Int_t,Int_t,Int_t, Float_t); ///< Update statistics for detector 'det'
   void                      printStats(Int_t); ///< Print statistics for detector 'det'
+  void                      printConf(); ///< Print configuration
   
   void                      setDate(Int_t d)           { mDate = d;} ///<Set event date.
   void                      saveAllStEvent(Bool_t a)   { mSaveAllStEvent = a;} ///< Set to kTRUE if all hits are to be saved on StEvent

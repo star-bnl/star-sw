@@ -1,6 +1,11 @@
 // 
-// $Id: StBemcRaw.cxx,v 1.7 2004/11/12 21:17:56 suaide Exp $
+// $Id: StBemcRaw.cxx,v 1.8 2004/11/22 12:46:22 suaide Exp $
 // $Log: StBemcRaw.cxx,v $
+// Revision 1.8  2004/11/22 12:46:22  suaide
+// added new flags for hit reconstruction. Status are not checked
+// dureing production anymore in order to avoid bad status loaded in
+// DB
+//
 // Revision 1.7  2004/11/12 21:17:56  suaide
 // non initialization of some variables were fixed
 //
@@ -56,6 +61,8 @@ StBemcRaw::StBemcRaw():TObject()
   Float_t cut[]        = {-1, 1.5, 1.5, 1.5, -1, -1, -1, -1};
   Int_t   cutType[]    = {0, 1, 1, 1, 0, 0, 0, 0};
   Int_t   onlyCal[]    = {0, 0, 0, 0, 0, 0, 0, 0};
+  Int_t   status[]     = {0, 0, 0, 0, 0, 0, 0, 0};
+  Int_t   crate[]      = {1, 1, 1, 1, 0, 0, 0, 0};
   
   for(Int_t i=0; i<MAXDETBARREL; i++)
   {
@@ -64,6 +71,8 @@ StBemcRaw::StBemcRaw():TObject()
     mControlADCtoE->CutOff[i]=cut[i];
     mControlADCtoE->CutOffType[i]=cutType[i];
     mControlADCtoE->OnlyCalibrated[i]=onlyCal[i];
+    mControlADCtoE->CheckStatus[i]=status[i];
+    mControlADCtoE->CheckCrate[i]=crate[i];
   }
 
 }
@@ -76,6 +85,22 @@ StBemcRaw::~StBemcRaw()
   if(mTables) delete mTables;
   if(mDecoder) delete mDecoder;
   if(mControlADCtoE) delete mControlADCtoE;
+}
+void StBemcRaw::printConf()
+{ 
+  gMessMgr->Info()<<"Configuration for BEMC hit reconstruction "<<endm;
+  for(Int_t i=0;i<MAXDETBARREL;i++)
+  {
+    gMessMgr->Info() <<"  Configuration for detector "<<detname[i].Data()<<endm;
+    gMessMgr->Info() <<"     switch for deducting pedestal     = "<<mControlADCtoE->DeductPedestal[i]<<endm;
+    gMessMgr->Info() <<"     switch for calibration            = "<<mControlADCtoE->Calibration[i]<<endm;
+    gMessMgr->Info() <<"     cutoff type                       = "<<mControlADCtoE->CutOffType[i]<<endm;
+    gMessMgr->Info() <<"     cutoff value                      = "<<mControlADCtoE->CutOff[i]<<endm;
+    gMessMgr->Info() <<"     save only calibrated hits         = "<<mControlADCtoE->OnlyCalibrated[i]<<endm;
+    gMessMgr->Info() <<"     save only if status is ok         = "<<mControlADCtoE->CheckStatus[i]<<endm;
+    gMessMgr->Info() <<"     save only if crate is ok          = "<<mControlADCtoE->CheckCrate[i]<<endm;
+    gMessMgr->Info() <<"     SAVE ALL FLAG (overwrites above)  = "<<(Int_t)mSaveAllStEvent<<endm;
+  }
 }
 void StBemcRaw::createDecoder(Int_t date, Int_t time)
 {
@@ -435,16 +460,19 @@ Int_t StBemcRaw::makeHit(StEmcCollection* emc, Int_t det, Int_t id, Int_t ADC, I
 {    
   E=0;
     
-  if(CRATE>0 && CRATE<=MAXCRATES) 
+  if(CRATE>0 && CRATE<=MAXCRATES && mControlADCtoE->CheckCrate[det-1]==1) 
     if((mCrateStatus[det-1][CRATE-1]!=crateOK && 
         mCrateStatus[det-1][CRATE-1]!=crateUnknown) && 
         !mSaveAllStEvent) return kCrate;
   
   if(ADC==0 && !mSaveAllStEvent) return kZero;
   
-  Int_t STATUS;
-  mTables->getStatus(det,id,STATUS);
-  if(STATUS!=STATUS_OK && !mSaveAllStEvent) return kStatus;
+  if(mControlADCtoE->CheckStatus[det-1]==1)
+  {
+    Int_t STATUS;
+    mTables->getStatus(det,id,STATUS);
+    if(STATUS!=STATUS_OK && !mSaveAllStEvent) return kStatus;
+  }
         
   Float_t PEDESTAL = 0,RMS = 0;
   if(mControlADCtoE->DeductPedestal[det-1]>0) 
