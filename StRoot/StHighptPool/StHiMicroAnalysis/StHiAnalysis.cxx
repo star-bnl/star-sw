@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHiAnalysis.cxx,v 1.3 2002/05/31 21:58:29 jklay Exp $                                    
+ * $Id: StHiAnalysis.cxx,v 1.4 2002/06/12 01:40:31 jklay Exp $                                    
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StHiAnalysis.cxx,v $
+ * Revision 1.4  2002/06/12 01:40:31  jklay
+ * Filling of event variables after cuts
+ *
  * Revision 1.3  2002/05/31 21:58:29  jklay
  * Updated analysis code to use new cut class
  *
@@ -605,26 +608,31 @@ StHiAnalysis::trackLoop()
 void
 StHiAnalysis::fillEventHistograms()
 {
+     Float_t flowCent   = mHiMicroEvent->Centrality();
+     Float_t Nch = mHiMicroEvent->CentMult();
+     Float_t NGoodGlobals = mHiMicroEvent->NGoodGlobals();  
+     Float_t ZDCSum = mHiMicroEvent->ZDCe() + mHiMicroEvent->ZDCw();
+     Float_t CTB = mHiMicroEvent->CTB();   
+     Float_t zvtx = mHiMicroEvent->VertexZ();
+     Float_t yvtx = mHiMicroEvent->VertexY();
+     Float_t xvtx = mHiMicroEvent->VertexX();
+     
    //This comes before we make event cuts
    //Except we need to make sure and do trigger word cut!!!!
    if (CutRc::AcceptTrgWord(mHiMicroEvent)) {
-     Float_t flowCent   = mHiMicroEvent->Centrality();
-     Float_t Nch = mHiMicroEvent->CentMult();
-     Float_t NGoodGlobals = mHiMicroEvent->NGoodGlobals();
-     Float_t ZDCSum = mHiMicroEvent->ZDCe() + mHiMicroEvent->ZDCw();
-     Float_t CTB = mHiMicroEvent->CTB();
-     Float_t zvtx = mHiMicroEvent->VertexZ(); 
-     Float_t yvtx = mHiMicroEvent->VertexY(); 
-     Float_t xvtx = mHiMicroEvent->VertexX(); 
-
-     h3VertexXYZ->Fill(xvtx,yvtx,zvtx);
-     h1FlowCent->Fill(flowCent);
-     h2ZDCSumVsCTB->Fill(CTB,ZDCSum);
-
-     if (acceptEvent(mHiMicroEvent)) {
+     if(CutRc::AcceptCent(mHiMicroEvent)) { //Want uncut vertex distribution for selected trgword and centrality
+       h3VertexXYZ->Fill(xvtx,yvtx,zvtx);
+     }
+     if(CutRc::AcceptVertexZ(mHiMicroEvent) { //Want uncut centrality distributions for selected trgword and vertexZ
+      h1FlowCent->Fill(flowCent);
+      h2ZDCSumVsCTB->Fill(CTB,ZDCSum);
+     }
+     
+     if (acceptEvent(mHiMicroEvent)) {   
        h2NGoodGlobalsVsNch->Fill(Nch,NGoodGlobals);
      }
    } //Check Trigger Word
+
 }
 
 //______________________
