@@ -1,90 +1,88 @@
-// $Id: estimateVertexZ.cc,v 1.5 2000/08/08 20:28:54 wdeng Exp $
-// $Log: estimateVertexZ.cc,v $
-// Revision 1.5  2000/08/08 20:28:54  wdeng
-// Correct a mistake with constructing table iterator.
-//
-// Revision 1.4  2000/08/04 21:04:02  perev
-// Leaks + Clear() cleanup
-//
-// Revision 1.3  2000/06/20 21:30:19  wdeng
-// Memory seal.
-//
-// Revision 1.2  2000/06/20 19:24:11  wdeng
-// Take out histogram drawing.
-//
-// Revision 1.1  2000/06/15 19:02:28  wdeng
-// Estimate the z position of primary vertex by using the straight line model in x-y and r-z planes.
+//$Id: estimateVertexZ.cc,v 1.6 2000/08/23 22:06:50 wdeng Exp $
+//$Log: estimateVertexZ.cc,v $
+//Revision 1.6  2000/08/23 22:06:50  wdeng
+//Rewrite. Improve the speed by a factor of 3. This introduces a dependence: tphit table must be pre-sorted.
 //
 #include <stdlib.h>
-
-#include "TString.h"
 #include "TH1.h"
-
 #include "TTable.h"
-#include "TTableSorter.h"
-#include "TTableIter.h"
-#include "TMath.h"
 #include "tables/St_tcl_tphit_Table.h"
 
 void estimateVertexZ(St_tcl_tphit *tphit, Float_t& vertexZ, Float_t& relativeHeight) 
-{
-  TH1F*  vertexZHistogram = new TH1F("vertex_z","estimated_z_distribution",4000,-200,200);
+{  
+  TH1F*  vertexZHistogram = new TH1F("vertex_z","estimated_z_distribution",4000,-200,200); 
+
+  Int_t hitNumber = tphit->GetNRows();
+  tcl_tphit_st* tphitT = tphit->GetTable();
+  tcl_tphit_st* tphitPtr = tphitT;
+
+  Float_t* radius2D = new Float_t[hitNumber];
+  for( Int_t i=0; i<hitNumber; i++,tphitPtr++) {
+    Float_t hitX = tphitPtr->x;     
+    Float_t hitY = tphitPtr->y;     
+    radius2D[i] = sqrt( hitX*hitX + hitY*hitY );
+  }
   
-  TString sortBy("row"); 
-  TTableSorter *tphitSorter = new TTableSorter(tphit,sortBy,0,tphit->GetNRows());
+  tphitPtr = tphitT;
+  Int_t indexTableI; // index for the inner hit
+  Int_t indexTableO; // index for the outer hit
   
-  tcl_tphit_st* tphitStart = tphit->GetTable();
-  tcl_tphit_st* tphitPtr1;
-  tcl_tphit_st* tphitPtr2;
-  
-  Int_t rowNumOuterHit=-1;
-  Int_t rowNumInnerHit=-1;
+  for(Int_t i=0; i<hitNumber; i++, tphitPtr++) {
+    if( tphitPtr->row==114 ) { indexTableI=i; break; }
+  }
   
   for(Int_t sector=1; sector<=24; sector++) {
     
-    for(Int_t padrow=45; padrow>17; padrow-=2) {
+    for(Int_t padrow=14; padrow<=40; padrow+=2) {
       Short_t sectorPadrow = sector*100 + padrow;
-      TTableIter nextOuterHit(tphitSorter,sectorPadrow);
       
-      while( (rowNumOuterHit=nextOuterHit())>=0 ) {
-        tphitPtr1 = tphitStart + rowNumOuterHit;
-	Float_t outerX = tphitPtr1->x;
-	Float_t outerY = tphitPtr1->y;
-        Float_t outerZ = tphitPtr1->z;  
-	Float_t outerR = sqrt( outerX * outerX + outerY * outerY );
-        
-        for(Int_t nextPadrow=padrow-3; nextPadrow>=14; nextPadrow-=2) {
-          Short_t sectorNextPadrow = sector*100 + nextPadrow;
-          TTableIter nextInnerHit(tphitSorter,sectorNextPadrow);
-          
-          while( (rowNumInnerHit=nextInnerHit())>=0) {
-	    tphitPtr2 = tphitStart + rowNumInnerHit;
-	    Float_t innerX = tphitPtr2->x;
-	    Float_t innerY = tphitPtr2->y;
-	    Float_t innerZ = tphitPtr2->z;
+      while(1) {
+	Short_t rowI = tphitT[indexTableI++].row;
+	
+	if( rowI>sectorPadrow ) break; 
+	if( sectorPadrow == rowI ) {
+	  Float_t innerX = tphitT[indexTableI].x;
+	  Float_t innerY = tphitT[indexTableI].y;
+	  Float_t innerZ = tphitT[indexTableI].z;
+	  Float_t innerR = radius2D[indexTableI];
+	  
+	  indexTableO = indexTableI;
+	  for(Int_t nextPadrow=padrow+3; nextPadrow<=43; nextPadrow+=2) {
+	    Short_t sectorNextPadrow = sector*100 + nextPadrow;
 	    
-	    Float_t deltaX = outerX - innerX;
-	    Float_t deltaY = outerY - innerY;
-	    
-	    Float_t distanceSquare = ( innerY * deltaX - innerX * deltaY )
-		                   * ( innerY * deltaX - innerX * deltaY )
-		                   / ( deltaY * deltaY + deltaX * deltaX ); 
-	    if( distanceSquare > 1225 ) continue;
-	    
-	    Float_t innerR = sqrt( innerX * innerX + innerY * innerY );
-	    Float_t deltaR = innerR - outerR;
-	    if(TMath::Abs(deltaR) < 0.000001 ) continue;
-	    
-	    Float_t z0 = (innerR*outerZ - outerR*innerZ)/ deltaR;
-	    //  if( fabs(z0)>200 ) continue;
-	    
-	    vertexZHistogram->Fill(z0);
+	    while(1) {
+	      Short_t rowO = tphitT[indexTableO++].row;
+	      
+	      if( rowO>sectorNextPadrow ) break;
+	      if( sectorNextPadrow == rowO ) {
+		Float_t outerX = tphitT[indexTableO].x;
+		Float_t outerY = tphitT[indexTableO].y;
+		Float_t outerZ = tphitT[indexTableO].z;
+		
+		Float_t deltaX = outerX - innerX;
+		Float_t deltaY = outerY - innerY;
+		
+		Float_t distanceSquare = ( innerY * deltaX - innerX * deltaY )
+		                       * ( innerY * deltaX - innerX * deltaY )
+		                       / ( deltaY * deltaY + deltaX * deltaX ); 
+		if( distanceSquare > 1225 ) continue;
+		
+		Float_t outerR = radius2D[indexTableO];
+		Float_t deltaR = outerR - innerR;
+		if( fabs(deltaR) < 0.000001 ) continue;
+		
+		Float_t z0 = (outerR*innerZ - innerR*outerZ)/ deltaR;
+		//  if( fabs(z0)>200 ) continue;
+		
+		vertexZHistogram->Fill(z0);
+	      }
+	    }
 	  }
 	}
       }
     }
   }
-  
+
   Int_t   maximumBin = vertexZHistogram->GetMaximumBin();
   Float_t peakValue = vertexZHistogram->GetBinContent(maximumBin);
   
@@ -106,5 +104,5 @@ void estimateVertexZ(St_tcl_tphit *tphit, Float_t& vertexZ, Float_t& relativeHei
   //  vertexZHistogram->Draw();
   
   delete vertexZHistogram;
-  delete tphitSorter;
+  delete radius2D;
 }
