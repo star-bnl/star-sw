@@ -1,7 +1,11 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.19 2000/05/11 16:21:26 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.20 2000/05/11 21:57:34 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.20  2000/05/11 21:57:34  calderon
+ * Book the histograms before creating the file so that Kathy's macros
+ * can pick them up.
+ *
  * Revision 1.19  2000/05/11 16:21:26  calderon
  * Write only one V0 matched pair to supress the screen output.
  *
@@ -177,10 +181,6 @@ Int_t StMcAnalysisMaker::Init()
     
     SetZones();  // This is my method to set the zones for the canvas.
 
-    // Define the file for the Ntuple, otherwise it won't be available later.
-    
-    mNtupleFile = new TFile("TrackMapNtuple.root","RECREATE","Track Ntuple");
-
     // Book Histograms Here so they can be found and deleted by Victor's chain (I hope).
     mHitResolution = new TH2F("hitRes","Delta Z Vs Delta X for Hits",
 			     mNumDeltaX,mMinDeltaX,mMaxDeltaX,mNumDeltaZ,mMinDeltaZ,mMaxDeltaZ);
@@ -198,6 +198,9 @@ Int_t StMcAnalysisMaker::Init()
     coordMcPartner->SetXTitle("X (cm)");
     coordMcPartner->SetYTitle("Y (cm)");
 
+    // Define the file for the Ntuple, otherwise it won't be available later.
+    
+    mNtupleFile = new TFile("TrackMapNtuple.root","RECREATE","Track Ntuple");
 
     char* vars = "px:py:pz:p:pxrec:pyrec:pzrec:prec:commTpcHits:hitDiffX:hitDiffY:hitDiffZ";
     mTrackNtuple = new TNtuple("TrackNtuple","Track Pair Info",vars);
