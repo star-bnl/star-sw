@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.92 2000/02/11 15:56:05 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.93 2000/03/13 22:01:47 lansdell Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.93  2000/03/13 22:01:47  lansdell
+// changed good global tracks to include iflag=100,500
+//
 // Revision 1.92  2000/02/11 15:56:05  kathy
 // change limits on number of hits in detector histograms; fill number of hits in detector histograms
 //
@@ -620,7 +623,7 @@ void St_QA_Maker::MakeHistGlob(){
  	m_det_id->Fill(t->det_id);
 
 //  now fill all TPC histograms ------------------------------------------------
-        if (t->iflag>100 && t->iflag<200 ) {
+        if (t->iflag>=100 && t->iflag<200 ) {
 
 // these are tpc only
         m_glb_xf0->Fill(xdif);
@@ -679,7 +682,7 @@ void St_QA_Maker::MakeHistGlob(){
 
 
 //  now fill all TPC+SVT histograms ------------------------------------------------
-        if (t->iflag>500 && t->iflag<600 ) {
+        if (t->iflag>=500 && t->iflag<600 ) {
 
         m_glb_xf0TS->Fill(xdif);
         m_glb_yf0TS->Fill(ydif);
