@@ -1,7 +1,10 @@
 /*
- * $Id: acmain.cc,v 1.1 1998/06/05 20:55:21 perev Exp $
+ * $Id: acmain.cc,v 1.2 1998/06/23 00:45:19 perev Exp $
  *
  * $Log: acmain.cc,v $
+ * Revision 1.2  1998/06/23 00:45:19  perev
+ * getarg fix
+ *
  * Revision 1.1  1998/06/05 20:55:21  perev
  * AGI commit
  *
@@ -17,9 +20,14 @@
 /*****************************************************/
 #include <string.h>
 #include <math.h>
-int        __argc_save=0;
-char **    __argv_save=NULL;
+int        __argc_save=0;	// Pgf77
+char **    __argv_save=NULL;	//
 
+int xargc=0;			// g77
+char **xargv=NULL;		// g77
+
+int f77argc = 0;      		// For mips Fortran
+char **f77argv=NULL; 		//
 
 
 extern "C"  int   agmain_ ();
@@ -38,6 +46,9 @@ int main    (int argc, char *argv[])
  asuStack(NULL);
 
  __argc_save=argc;  __argv_save=argv;  k_setar(argc,argv);
+       xargc=argc;      xargv = argv;
+   f77argc = argc;    f77argv = argv;
+
 #if defined(CERNLIB_HPUX)
   FTN_INITRAP();  fpsetmask(0);
 #endif
@@ -45,7 +56,7 @@ int main    (int argc, char *argv[])
   agmain_();
 }
  
-//int getarg_ (int *k, char *args, int n)
-//{ int i=0;   if (*k<__argc_save) i=strlen(__argv_save[*k]);  if (i>n) i=n;
-//  strncpy(args,__argv_save[*k],i);   memset (args+i,' ',n-i); return 0;
-//}
+int getarg_ (int *k, char *args, int n)
+{ int i=0;   if (*k<__argc_save) i=strlen(__argv_save[*k]);  if (i>n) i=n;
+  strncpy(args,__argv_save[*k],i);   memset (args+i,' ',n-i); return 0;
+}
