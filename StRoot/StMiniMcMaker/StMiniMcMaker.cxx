@@ -1,5 +1,5 @@
 /**
- * $Id: StMiniMcMaker.cxx,v 1.16 2004/03/31 23:44:36 calderon Exp $
+ * $Id: StMiniMcMaker.cxx,v 1.17 2004/05/03 23:28:39 perev Exp $
  * \file  StMiniMcMaker.cxx
  * \brief Code to fill the StMiniMcEvent classes from StEvent, StMcEvent and StAssociationMaker
  * 
@@ -7,6 +7,9 @@
  * \author Bum Choi, Manuel Calderon de la Barca Sanchez
  * \date   March 2001
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.17  2004/05/03 23:28:39  perev
+ * double delete of TTree fixed. TFile deletes it himself
+ *
  * Revision 1.16  2004/03/31 23:44:36  calderon
  * Function to find the dominatrack, the number of hits belonging to the
  * dominatrack and the average hit quality of those hits (based on idTruth and
@@ -90,6 +93,9 @@
  * Revision 1.5  2002/06/07 02:22:00  calderon
  * Protection against empty vector in findFirstLastHit
  * $Log: StMiniMcMaker.cxx,v $
+ * Revision 1.17  2004/05/03 23:28:39  perev
+ * double delete of TTree fixed. TFile deletes it himself
+ *
  * Revision 1.16  2004/03/31 23:44:36  calderon
  * Function to find the dominatrack, the number of hits belonging to the
  * dominatrack and the average hit quality of those hits (based on idTruth and
@@ -169,7 +175,7 @@
  * in InitRun, so the emb80x string which was added to the filename was lost.
  * This was fixed by not replacing the filename in InitRun and only replacing
  * the current filename starting from st_physics.
- * and $Id: StMiniMcMaker.cxx,v 1.16 2004/03/31 23:44:36 calderon Exp $ plus header comments for the macros
+ * and $Id: StMiniMcMaker.cxx,v 1.17 2004/05/03 23:28:39 perev Exp $ plus header comments for the macros
  *
  * Revision 1.4  2002/06/06 23:22:34  calderon
  * Changes from Jenn:
@@ -349,16 +355,17 @@ StMiniMcMaker::InitRun(int runID) {
       cout << "Current File Name (StIO) " << curFileName << endl;
       cout << "Cached  File Name (MiniMcMk) " << mInFileName << endl;
   }
-  if(!mInFileName.Contains(curFileName)){
-      if(Debug()) {
-	  cout << "\tNew file found : " << curFileName << endl
-	       << "\tReplacing " << mInFileName << endl;
-      }
-      closeFile();
-      int fileBeginIndex = mInFileName.Last('/');
-      mInFileName.Remove(0,fileBeginIndex+1);
-      if (Debug()) cout << "New InFileName = " << mInFileName << endl;
+  if(mMiniMcEvent && mInFileName.Contains(curFileName)) return kStOK;
+
+  if(Debug()) {
+      cout << "\tNew file found : " << curFileName << endl
+	   << "\tReplacing " << mInFileName << endl;
   }
+  closeFile();
+  int fileBeginIndex = mInFileName.Last('/');
+  mInFileName.Remove(0,fileBeginIndex+1);
+  if (Debug()) cout << "New InFileName = " << mInFileName << endl;
+  
   
   //
   // instantiate the event object here (embedding or simulation?)
@@ -1062,10 +1069,7 @@ StMiniMcMaker::openFile()
   outFileName.Insert(indx1+1,"minimc.");
   outFileName.Prepend(mOutDir);
 
-  if (mMiniMcDST) {
-      delete mMiniMcDST;
-      mMiniMcDST = 0;
-  }
+  closeFile();
   cout << "Opening File " << outFileName << endl;
   mMiniMcDST = new TFile(outFileName.Data(),"RECREATE");
 
@@ -1080,12 +1084,7 @@ StMiniMcMaker::openFile()
   // top level tree
   //
   if(Debug()) cout << "##Creating the top level tree..." << endl;
-  if (mMiniMcTree) delete mMiniMcTree;
   mMiniMcTree = new TTree("StMiniMcTree","StMiniMcTree");
-  if(!mMiniMcTree){
-    gMessMgr->Error() << "Cannot create StMiniMcTree" << endm;
-    return kStErr;
-  }
 #if ROOT_VERSION_CODE >= ROOT_VERSION(3,01,05)
   mMiniMcTree->SetBranchStyle(0);
 #endif  
@@ -1111,8 +1110,9 @@ StMiniMcMaker::closeFile()
   if(mMiniMcDST && mMiniMcDST->IsOpen()){
     mMiniMcDST->Write();
     mMiniMcDST->Close();
+    delete mMiniMcDST; mMiniMcDST=0;
   }
-
+  mMiniMcTree=0;  //It is deleted by TFile::Close
   cout << "\t...done\n";
 
   return kStOk;
