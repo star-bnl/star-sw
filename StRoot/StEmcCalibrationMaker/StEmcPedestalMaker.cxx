@@ -208,12 +208,12 @@ void StEmcPedestalMaker::saveToDb(char* timeStamp)
 //_____________________________________________________________________________
 void StEmcPedestalMaker::saveToDb(int date,int time)
 {   
-  Int_t year  = (Int_t)(mDate/10000);
-  Int_t month = (Int_t)(mDate-year*10000)/100; 
-  Int_t day   = (Int_t)(mDate-year*10000-month*100);
-  Int_t hour  = (Int_t)(mTime/10000);
-  Int_t minute= (Int_t)(mTime-hour*10000)/100;
-  Int_t second= (Int_t)(mTime-hour*10000-minute*100);
+  Int_t year  = (Int_t)(date/10000);
+  Int_t month = (Int_t)(date-year*10000)/100; 
+  Int_t day   = (Int_t)(date-year*10000-month*100);
+  Int_t hour  = (Int_t)(time/10000);
+  Int_t minute= (Int_t)(time-hour*10000)/100;
+  Int_t second= (Int_t)(time-hour*10000-minute*100);
 	char ts[100];
 	sprintf(ts,"%04d-%02d-%02d %02d:%02d:%02d",year,month,day,hour,minute,second);
 	saveToDb(ts);
