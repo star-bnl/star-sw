@@ -1,14 +1,14 @@
-//*-- Author : David Hardtke, based on Jan Balewskis template
-// Revision 1.1.1.1  2001/01/31 14:00:07  balewski
-// First release
-//
-// Lee Barnby - modification, becomes StGenericVertexMaker
-//
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-//   Maker for minuit based vertex finder
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
+/*!
+ * \class StGenericVertexMaker
+ * \author  David Hardtke, based on Jan Balewskis template
+ *
+ * Maker for minuit based vertex finder
+ * Lee Barnby - modification, becomes StGenericVertexMaker
+ *
+ * $Id: StGenericVertexMaker.h,v 1.3 2004/07/23 00:56:58 jeromel Exp $
+ *
+ */
+
 
 #ifndef STAR_StGenericVertexMaker
 #define STAR_StGenericVertexMaker
@@ -27,17 +27,15 @@ class TNtuple;
 class StGenericVertexMaker : public StMaker 
 {
  private: 
-  // static Char_t  m_VersionCVS = "$Id: StGenericVertexMaker.h,v 1.2 2004/03/23 16:15:04 lbarnby Exp $";
-
   // control and cuts
-  Bool_t use_ITTF;
-  Bool_t usebeamline;
-  Bool_t useCTB;
-  Bool_t eval;
-  Bool_t externalFindUse; /// Finder will by called externally (by StiMaker)
-  Float_t EtaCut; ///Tracks with larger eta not considered
+  Bool_t  use_ITTF;
+  Bool_t  usebeamline;
+  Bool_t  useCTB;
+  Bool_t  eval;
+  Bool_t  externalFindUse; /// Finder will by called externally (by StiMaker)
+  Float_t EtaCut;          /// Tracks with larger eta not considered
 
-  TNtuple *mEvalNtuple; ///Ntuple for evaluation purposes
+  TNtuple *mEvalNtuple;    /// Ntuple for evaluation purposes
 
   StEvent *mEvent;
   StPrimaryVertex* primV;
@@ -71,7 +69,7 @@ class StGenericVertexMaker : public StMaker
   inline void SetDoNotUseITTF(){use_ITTF=kFALSE;};
 
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StGenericVertexMaker.h,v 1.2 2004/03/23 16:15:04 lbarnby Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StGenericVertexMaker.h,v 1.3 2004/07/23 00:56:58 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StGenericVertexMaker, 0)   //StAF chain virtual base class for Makers
 };
