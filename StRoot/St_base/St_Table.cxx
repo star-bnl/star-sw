@@ -1,5 +1,5 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
-// $Id: St_Table.cxx,v 1.101 2000/03/07 23:52:21 fine Exp $ 
+// $Id: St_Table.cxx,v 1.102 2000/03/10 23:30:31 fisyak Exp $ 
 // 
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved
@@ -157,8 +157,10 @@ void St_Table::AsString(void *buf, const char *name, Int_t width) const
 const void *St_Table::At(Int_t i) const
 {
  // Returns a pointer to the i-th row of the table
-   if (!BoundsOk("St_Table::At", i))
+   if (!BoundsOk("St_Table::At", i)) {
+       Warning("St_Table::At","%s.%s",GetName(),GetType());
       i = 0;
+   }
    return (const void *)(s_Table+i*(*s_Size));
 }
 
@@ -2779,6 +2781,9 @@ St_Table::EColumnType  St_Table::GetColumnType(const Char_t *columnName) const {
 
 
 // $Log: St_Table.cxx,v $
+// Revision 1.102  2000/03/10 23:30:31  fisyak
+// method At() Warning message has been introduced
+//
 // Revision 1.101  2000/03/07 23:52:21  fine
 // some comments improved
 //
