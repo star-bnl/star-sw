@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.h,v 1.17 2004/08/10 12:21:42 jcs Exp $
+// $Id: StFtpcTrackMaker.h,v 1.18 2004/08/10 12:42:10 jcs Exp $
 // $Log: StFtpcTrackMaker.h,v $
+// Revision 1.18  2004/08/10 12:42:10  jcs
+// move DEBUGFILE and tracking method define statements from .h to .cxx
+//
 // Revision 1.17  2004/08/10 12:21:42  jcs
 // remove histograms which are also created in St_QA_Maker
 //
@@ -79,12 +82,6 @@
 #include "StFtpcTracker.hh"
 #include "StFtpcSoftwareMonitor.h"
 
-// For cluster and laser run analysis
-//#define DEBUGFILE
-// Select tracker
-#define TWOCYCLETRACKING
-//#define LASERTRACKING
-
 class TH1F;
 class TH2F;
 class TProfile;
@@ -134,7 +131,7 @@ class StFtpcTrackMaker : public StMaker {
    virtual Int_t  Finish();                                         // final cleanup
    virtual Int_t  FinishRun(Int_t run);                             // cleanup after every run
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.17 2004/08/10 12:21:42 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.18 2004/08/10 12:42:10 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    virtual void   PrintInfo();                                      // prints information
 	   void   MakeHistograms(StFtpcTracker *tracker);           // makes histograms
 	   void   FillMonSoftFtpc(StEvent *event,StFtpcTracker *tracker,StFtpcSoftwareMonitor *ftpcMon);  // fills StEvent->StSoftwareMonitor->StFtpcSoftwareMonitor
