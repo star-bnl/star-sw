@@ -1,5 +1,8 @@
-# $Id: MakeFun.mk,v 1.1 1999/01/14 13:56:40 fisyak Exp $
+# $Id: MakeFun.mk,v 1.2 1999/01/14 23:28:25 fisyak Exp $
 # $Log: MakeFun.mk,v $
+# Revision 1.2  1999/01/14 23:28:25  fisyak
+# Add includes
+#
 # Revision 1.1  1999/01/14 13:56:40  fisyak
 # Add Victors MakeFun.mk, Add StMagF
 #
@@ -53,6 +56,32 @@ endif
 else #/* NT */
   SL_NEW := $(MY_SO)
 endif
+# 	Define internal and external includes dirs
+INC_NAMES := $(addprefix StRoot/,base StChain xdf2root) StRoot .share .share/tables pams inc 
+INC_DIRS  := $(wildcard $(SRC_DIR) $(SRC_DIR)/include)
+INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES)))) 
+ifneq ($(ROOT_DIR),$(STAR))
+INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES))))
+endif
+INC_DIRS  +=  $(STAF_UTILS_INCS) $(CERN_ROOT)/include $(ROOTSYS)/src
+
+INCINT := $(INC_DIRS)
+ifdef NT
+INC_DIRS := $(INC_DIRS) $(SUNRPC)
+endif
+INCLUDES := $(addprefix -I,$(INC_DIRS))
+INCINT   := $(addprefix -I,$(INCINT))
+
+ifdef NT
+ INCLUDES := $(addsuffix I-,$(INCLUDES))
+ INCINT   := $(addsuffix I-,$(INCINT))
+ INCLUDE :=  $(INCLUDE)$(subst  -I,;,$(INCLUDES) $(INCINT))
+ INCLUDE := $(subst  I- ;,;,$(INCLUDE))
+ INCLUDE := $(subst  I-,,$(INCLUDE))
+ INCLUDES :=
+ INCINT   :=
+endif
+
 
 #------------------------------------------------------------------------------
 FNameCint     = $(FName)Cint
@@ -87,7 +116,7 @@ $(FNameCint).$(SrcSuf): $(FName).h $(FName)LinkDef.h
 	@rootcint -f $(FNameCint).$(SrcSuf) -c $(FName).h $(FName)LinkDef.h
 
 .$(SrcSuf).$(ObjSuf):
-	$(CXX) $(CXXFLAGS) -I$(ROOTSYS)/include -c $<
+	$(CXX)  $(CPPFLAGS) $(CXXFLAGS) $(INCLUDES) -c $<
 
 
 clean:
