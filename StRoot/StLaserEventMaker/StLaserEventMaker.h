@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.h,v 1.17 2003/01/29 20:35:32 pfachini Exp $
+// $Id: StLaserEventMaker.h,v 1.18 2003/03/01 02:59:45 pfachini Exp $
 // $Log: StLaserEventMaker.h,v $
+// Revision 1.18  2003/03/01 02:59:45  pfachini
+// Lowering the minimum number of valid tracks (minValidTracks) for a good drift velocity calculation from 700 to 20
+//
 // Revision 1.17  2003/01/29 20:35:32  pfachini
 // Introducing a sanity check: table written out only if drift velocit > 5.0 cm/us
 //
@@ -67,7 +70,8 @@ class TTree;
 class StLaserEvent;
 
 enum { 
-  minValidTracks = 700,
+  //minValidTracks = 700,
+  minValidTracks = 20,
   maxNofTracks   = 8000
 };
 
@@ -149,7 +153,7 @@ public:
   double velocityWest;
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.17 2003/01/29 20:35:32 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StLaserEventMaker.h,v 1.18 2003/03/01 02:59:45 pfachini Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 ClassDef(StLaserEventMaker, 1)   //StAF chain virtual base class for Makers
 };
