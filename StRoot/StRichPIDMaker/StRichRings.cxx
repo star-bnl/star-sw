@@ -1,12 +1,13 @@
 /**********************************************************
- * $Id: StRichRings.cxx,v 2.0 2000/08/09 16:26:20 gans Exp $
+ * $Id: StRichRings.cxx,v 2.1 2000/09/29 01:35:38 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRings.cxx,v $
- *  Revision 2.0  2000/08/09 16:26:20  gans
- *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
+ *  Revision 2.1  2000/09/29 01:35:38  horsley
+ *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
+ *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
  *
  *  Revision 2.1  2000/09/29 01:35:38  horsley
  *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
@@ -30,7 +31,7 @@
 #include "TPolyLine.h"
 #include "StRichRingCalculator.h"
 #include "StRichTrack.h"
-#include "StThreeVector.hh"
+
 #include "StRichRingDefinition.h"
 
 #include "StThreeVectorD.hh"
@@ -54,45 +55,48 @@ StRichRings::StRichRings(StRichTrack* track, StParticleDefinition* particle) {
   myGeometryDb = StRichGeometryDb::getDb();
   mTrack    = track;
   mParticle = particle;
-vector<StThreeVector<double> > StRichRings::getInnerPoints(int points/* number of points*/) {
+}
 
-    StRichRingCalculator ringCalc(mTrack);  // Calculates inner points
-  ringCalc.setParticleType(mParticle);
 StRichRings::~StRichRings() {}
 
 vector<StThreeVectorF > StRichRings::getInnerPoints(int points/* number of points*/) {
-  for (int i=0; i<points; i+=1) {          // goes from 0 to 360 degrees
-    double psi = ((double) i)*2.0*M_PI/points;
-
-    StThreeVector<double> temp(0,0,0);
-    if (ringCalc.getRing(eInnerRing)->getPoint(psi,temp)) {
-      if (inBounds(temp) )
-	  mInnerPoints.push_back(temp); // put on vector
-	  if (inBounds(temp) )
-
-	    mInnerPoints.push_back(temp); // put on vector
   
+  mInnerPoints.clear();
+  mInnerPoints.resize(0);
+  
+  if (mTrack && mParticle) {
+    if (mTrack->fastEnough(mParticle) && mTrack->isGood(mParticle)) {
+      StRichRingCalculator ringCalc(mTrack);  // Calculates inner points
+      ringCalc.setParticleType(mParticle);
+      
+      for (int i=0; i<points; i+=1) {          // goes from 0 to 360 degrees
+	double psi = ((double) i)*2.0*M_PI/points;
+	StThreeVectorF temp(0,0,0);
+	if (ringCalc.getRing(eInnerRing) && ringCalc.getRing(eInnerRing)->getPoint(psi,temp)) {
+	  if (inBounds(temp) )
+	    mInnerPoints.push_back(temp); // put on vector
 	}
       }
     }
-vector<StThreeVector<double> > StRichRings::getOuterPoints(int points) {
-  
-  StRichRingCalculator ringCalc(mTrack);
-  ringCalc.setParticleType(mParticle);
+  }
   return mInnerPoints;
 }
 
-  
-  for (int i=0; i<points; i+=1) {
-    double psi = ((double) i)*2.0*M_PI/points;
+vector<StThreeVectorF > StRichRings::getOuterPoints(int points) {
 
-    StThreeVector<double> temp;
-    if (ringCalc.getRing(eOuterRing)->getPoint(psi,temp)) {
-      if (inBounds(temp) ) mOuterPoints.push_back(temp);
+  mOuterPoints.clear();
+  mOuterPoints.resize(0);
+ 
+  if (mTrack && mParticle) {
+    if (mTrack->fastEnough(mParticle) && mTrack->isGood(mParticle)) {
+      StRichRingCalculator ringCalc(mTrack);
+      ringCalc.setParticleType(mParticle);
+      
+      for (int i=0; i<points; i+=1) {
+	double psi = ((double) i)*2.0*M_PI/points;	
+	StThreeVectorF temp;
 	if (ringCalc.getRing(eOuterRing) && ringCalc.getRing(eOuterRing)->getPoint(psi,temp)) {
-
 	  if (inBounds(temp) ) mOuterPoints.push_back(temp);
-  
 	}
       }
     }
@@ -107,7 +111,7 @@ StRichTrack* StRichRings::getTrack() {
 
 StParticleDefinition* StRichRings::getParticle() {
   return mParticle;
-StRichRings::inBounds(StThreeVector<double>& xy) {
+}
 
 
 bool 

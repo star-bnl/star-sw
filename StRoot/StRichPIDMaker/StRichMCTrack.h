@@ -1,12 +1,13 @@
 /**********************************************************
- * $Id: StRichMCTrack.h,v 2.0 2000/08/09 16:26:18 gans Exp $
+ * $Id: StRichMCTrack.h,v 2.1 2000/09/29 01:35:36 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMCTrack.h,v $
- *  Revision 2.0  2000/08/09 16:26:18  gans
- *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
+ *  Revision 2.1  2000/09/29 01:35:36  horsley
+ *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
+ *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
  *
  *  Revision 1.1  2000/06/16 02:37:11  horsley
  *  many additions, added features to pad plane display (MIPS, rings, etc)
@@ -21,34 +22,41 @@
 #include "StRichTrackingControl.h"
 #include "StParticleDefinition.hh"
 #include "StRichPIDMaker/StRichTrack.h"
-#include "StThreeVector.hh"
+#include "StThreeVectorF.hh"
 #include "StMcTrack.hh"
+#include "StRichMCHit.h"
 #include <vector>
 #include "StMcEvent.hh"
 
+class StRichMCHit;
+class StSPtrVecRichHit;
+class St_g2t_track;
 
 class StRichMCTrack : public StRichTrack {
 
 public:
-
+  
   StRichMCTrack();
-    StRichMCTrack(StTrack*, double);
+  StRichMCTrack(StTrack*, double);
 #ifdef RICH_WITH_L3_TRACKS
-    StRichMCTrack(globalTrack*,double);
+  StRichMCTrack(globalTrack*,double);
 #endif
-    ~StRichMCTrack();
- 
+  ~StRichMCTrack();
+  
   // monte carlo info
-  void        setStMcTrack(StMcTrack* );
-  StMcTrack*  getStMcTrack();
+  void       setStMcTrack(StMcTrack* );
+  StMcTrack* getStMcTrack();
+  StMcTrack* getGeantTrack(StRichMCHit*, StMcEvent*, St_g2t_track*);
 
-  void  setGeantMomentumAtRadiator(StThreeVector<double>& mcMomentum);
-  void  setGeantImpactPointAtRadiator(StThreeVector<double>& mcImpactPoint);
+  void  setGeantRecoMIP(const StSPtrVecRichHit*, StMcEvent*,St_g2t_track * );
+  StRichMCHit* getGeantRecoMIP();
 
-  StThreeVector<double>&  getGeantMomentumAtRadiator();
-  StThreeVector<double>&  getGeantImpactPointAtRadiator();
-  StThreeVector<double>&  getGeantMIP();
-  StThreeVector<double>&  getGeantStopVertex();
+  void  setGeantMomentumAtRadiator(StThreeVectorF& mcMomentum);
+  void  setGeantImpactPointAtRadiator(StThreeVectorF& mcImpactPoint);
+
+  StThreeVectorF&  getGeantMomentumAtRadiator();
+  StThreeVectorF&  getGeantImpactPointAtRadiator();
+  StThreeVectorF&  getGeantMIP();
 
   double  getGeantThetaAtRadiator();
   double  getGeantPhiAtRadiator();
@@ -56,16 +64,18 @@ public:
   int     getNumberOfPartners();
   int     getNumberOfGeantHitsInRadiator();
   int     getNumberOfGeantHitsInGap();
-  vector<StThreeVector<double> > getGeantPhotons();
 
+  vector<StMcRichHit* > getGeantPhotons();
+  vector<StRichMCHit* > getRecoGeantPhotons();
 
+  void    setGeantPhoton(StRichMCHit*);
   void    setGeantThetaAtRadiator(double);
   void    setGeantPhiAtRadiator(double);
-  void    setGeantMIP(StThreeVector<double> );
+  void    setGeantMIP(StThreeVectorF );
   void    setCommonTpcHits(int);
   void    setNumberOfPartners(int);
-  void    setGeantStopVertex(StThreeVector<double>& );
-  void    setGeantPhotons(StMcEvent* mEvent);
+  void    setGeantPhotons(StMcEvent*);
+  void    setRecoGeantPhotons(const StSPtrVecRichHit*, StMcEvent*, St_g2t_track*);
 
   void    useGeantInfo();
   void    useTPCInfo();
@@ -75,14 +85,12 @@ protected:
   // monte carlo
   StMcTrack* mStMcTrack;
 
-  StThreeVector<double>  mMCImpactPoint;
-  StThreeVector<double>  mMCMomentum;
-  StThreeVector<double>  mMCMIP;
-  StThreeVector<double>  mMCStopVertex;
-  
-  StThreeVector<double>  mImpactPoint_TPC;
-  StThreeVector<double>  mMomentum_TPC;
-  StThreeVector<double>  mMIP_TPC;
+  StThreeVectorF  mMCImpactPoint;
+  StThreeVectorF  mMCMomentum;
+  StThreeVectorF  mMCMIP;
+  StThreeVectorF  mImpactPoint_TPC;
+  StThreeVectorF  mMomentum_TPC;
+  StThreeVectorF  mMIP_TPC;
 
   double mMCTheta;
   double mMCPhi;
@@ -90,8 +98,10 @@ protected:
   int     mNumberOfPartners;
   int     mRadiatorHits;
   int     mGapHits;
+  StRichMCHit*     mMCRecoMIP;
 
-  vector<StThreeVector<double> > mGeantPhotons;
+  vector<StMcRichHit* > mGeantPhotons;
+  vector<StRichMCHit* > mRecoGeantPhotons;
 };
 
 #endif

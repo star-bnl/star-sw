@@ -1,12 +1,13 @@
 /**********************************************************
- * $Id: StRichMinimization.cxx,v 2.0 2000/08/09 16:26:18 gans Exp $
+ * $Id: StRichMinimization.cxx,v 2.1 2000/09/29 01:35:37 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMinimization.cxx,v $
- *  Revision 2.0  2000/08/09 16:26:18  gans
- *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
+ *  Revision 2.1  2000/09/29 01:35:37  horsley
+ *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
+ *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
  *
  *
  *  Revision 2.2  2000/09/29 17:55:51  horsley
@@ -36,6 +37,8 @@
 #include <fstream.h>
 #include <iomanip.h>
 #include <math.h>
+
+#include <stdio.h>
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -44,36 +47,41 @@ StRichMinimization::StRichMinimization(StRichRingPoint* rp) {
   ringPoint  = rp;
 
   // should use system of units
-StThreeVector<double> StRichMinimization::rotatedMin(StThreeVector<double>& point) {
+  degree = M_PI/180;
+}
 
 StRichMinimization::~StRichMinimization() { /* nopt */ }
-  
+
+double StRichMinimization::getPsi() {
+  return returnPsi;
+}
 
 StThreeVectorF StRichMinimization::rotatedMin(StThreeVectorF& point) {
 
   StRichTrack* t =  ringPoint->getTrack();
-  StThreeVector<double> tempPoint = point - t->getImpactPoint();
+  double phi = t->getPhi();
   mMeanPathInRadiator = 0.0;
-  StThreeVector<double> rotatedPoint(mTrackCosPhi*tempPoint.x() + 
-				     mTrackSinPhi*tempPoint.y(),
-				     
-				    -mTrackSinPhi*tempPoint.x() + 
-				     mTrackCosPhi*tempPoint.y(),
-				     
-				     0.0);  
+  mMeanPathInQuartz   = 0.0;
+
+
+  // define "fast" trig functions
+  double mTrackCosPhi = cos(phi);
+  double mTrackSinPhi = sin(phi);
+
   StThreeVectorF tempPoint = point - t->getImpactPoint();
 
-
-  if (rotatedPoint.y() > 0) {
-    minDistance = brent(0.0,M_PI/2.0,M_PI,&returnPsi);}
-
-  else {
-    minDistance = brent(0.0,-M_PI/2.0,-M_PI,&returnPsi);}
-    
-  status = ringPoint->getPoint(returnPsi,returnThisPoint);
+  if (rotatedPoint.y() > 0) { minDistance = brent(0.0,M_PI/2.0,M_PI,&returnPsi);}
+  else {minDistance = brent(0.0,-M_PI/2.0,-M_PI,&returnPsi);}
+  }
+  status              = ringPoint->getPoint(returnPsi,returnThisPoint);
+  mMeanPathInRadiator = ringPoint->getMeanPathInRadiator();
+  mMeanPathInQuartz   = ringPoint->getMeanPathInQuartz();
   return returnThisPoint;
  //
  if (returnPsi>M_PI)  {returnPsi = returnPsi - 2.0*M_PI;}
+ if (returnPsi<-M_PI) {returnPsi = returnPsi + 2.0*M_PI;}
+
+ status              = ringPoint->getPoint(returnPsi,returnThisPoint);
  mMeanPathInRadiator = ringPoint->getMeanPathInRadiator();
 }
 

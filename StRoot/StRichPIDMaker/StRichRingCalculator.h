@@ -1,12 +1,13 @@
 /**********************************************************
- * $Id: StRichRingCalculator.h,v 2.0 2000/08/09 16:26:20 gans Exp $
+ * $Id: StRichRingCalculator.h,v 2.1 2000/09/29 01:35:37 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingCalculator.h,v $
- *  Revision 2.0  2000/08/09 16:26:20  gans
- *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
+ *  Revision 2.1  2000/09/29 01:35:37  horsley
+ *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
+ *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
  *
  *  Revision 2.1  2000/09/29 01:35:37  horsley
  *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
@@ -20,47 +21,45 @@
  **********************************************************/
 
 #ifndef StRichRingCalculator_h
-#include "StThreeVector.hh"
+#define StRichRingCalculator_h
 
 #include "StRichRingPoint.h"
+#include "StRichTrack.h"
 #include "StThreeVectorF.hh"
 #include "StRichMinimization.h"
 #include "StParticleDefinition.hh"
 #include "StRichRingHit.h"
 
 
+class  StRichRingCalculator {
 
 public:
-  double         calculateArea(double cut=0, bool gapCorrection=true);
-
+  StRichRingCalculator(StRichTrack* track);
+  StRichRingCalculator(StRichTrack* track, StParticleDefinition* );
   ~StRichRingCalculator();
 
-
   double         calculateArea(double , bool);
-  vector<StThreeVector<double> >& getPtsToDraw();
-
+  double         calculateConstantArea(double , bool, double&);
   double         getTotalArea();
-  
-  void setParticleType(StParticleDefinition* particle);
   double         getPadPlaneArea();
-  vector<StThreeVectorF >& getPtsToDraw();
-    
-  double getInnerDistance(StThreeVector<double>& testPoint, 
-			         double& innerAngle);
-  
-  double getOuterDistance(StThreeVector<double>& testPoint, 
-			         double& outerAngle);
-  
-  double getMeanDistance(StThreeVector<double>& testPoint, 
-			        double& meanAngle);
 
-  void clear();
+  vector<StThreeVectorF >& getPtsToDraw();
+  StRichRingPoint* getRing(StRichRingDefinition ringType);
+
+  void   setParticleType(StParticleDefinition* particle);
+  double getTotalAngle();
+  double getConstantAreaAngle();
+
+  double getInnerDistance(StThreeVectorF& testPoint, double& innerAngle);
+  double getOuterDistance(StThreeVectorF& testPoint, double& outerAngle);
   double getMeanDistance(StThreeVectorF& testPoint, double& meanAngle);
+
   double getMeanPathInRadiator();
   double getMeanPathInQuartz();
-  StThreeVector<double> getInnerRingPoint();
-  StThreeVector<double> getOuterRingPoint();
-  StThreeVector<double> getMeanRingPoint();
+
+  void   clear();
+  double getRingWidth();
+  
   StThreeVectorF getInnerRingPoint();
   StThreeVectorF getOuterRingPoint();
   StThreeVectorF getMeanRingPoint();
@@ -72,15 +71,18 @@ private:
   StRichRingPoint* mOuterRing;
   StRichRingPoint* mMeanRing;
 
-  vector<StThreeVector<double> > vectorOfPtsToDraw;
+  StRichMinimization* mInnerMinimization;
   StRichMinimization* mOuterMinimization;
-  StThreeVector<double>  closestInnerRingPoint;
-  StThreeVector<double>  closestOuterRingPoint;
-  StThreeVector<double>  closestMeanRingPoint;
+  StRichMinimization* mMeanMinimization;
+
+  vector<StThreeVectorF > vectorOfPtsToDraw;
 
   StThreeVectorF  closestInnerRingPoint;
   StThreeVectorF  closestOuterRingPoint;
   StThreeVectorF  closestMeanRingPoint;
+
+  double mTotalArea;
+  double mPadPlaneArea;
   double mTotalAngleOnPadPlane;
   double mConstantAreaAngle;
   double mMeanPathInRadiator;
