@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.37 1999/06/11 17:45:56 perev Exp $
+// $Id: StChain.cxx,v 1.38 1999/07/11 20:40:35 perev Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.38  1999/07/11 20:40:35  perev
+// Move Clear from StChain to StMaker
+//
 // Revision 1.37  1999/06/11 17:45:56  perev
 // assert StMaker::Streamer to forbid to write it
 //
@@ -259,7 +262,7 @@ StChain *fgStChain;
 ClassImp(StChain)
 //_____________________________________________________________________________
 const char  *StChain::GetCVSIdC()
-{static const char cvs[]="$Id: StChain.cxx,v 1.37 1999/06/11 17:45:56 perev Exp $";
+{static const char cvs[]="$Id: StChain.cxx,v 1.38 1999/07/11 20:40:35 perev Exp $";
  return cvs;};
 
 //_____________________________________________________________________________
@@ -290,18 +293,6 @@ StChain::~StChain()
 {
 }
 //_____________________________________________________________________________
-void StChain::Clear(Option_t *option)
-{
-//    Reset lists of event objects
-   TIter next(GetMakeList());
-   StMaker *maker;
-   while ((maker = (StMaker*)next())) {
-      maker->Clear(option);
-   }
-//   if (m_Display) m_Display->Clear();
-   return;
-}
-//_____________________________________________________________________________
 void StChain::PrintInfo()
 {
 //     Gives information about versions etc.
@@ -309,7 +300,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.37 1999/06/11 17:45:56 perev Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.38 1999/07/11 20:40:35 perev Exp $    \n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");

@@ -1,5 +1,8 @@
-// $Id: StMaker.cxx,v 1.50 1999/07/11 01:59:04 perev Exp $
+// $Id: StMaker.cxx,v 1.51 1999/07/11 20:40:35 perev Exp $
 // $Log: StMaker.cxx,v $
+// Revision 1.51  1999/07/11 20:40:35  perev
+// Move Clear from StChain to StMaker
+//
 // Revision 1.50  1999/07/11 01:59:04  perev
 // add GetCVSTag again
 //
@@ -139,7 +142,7 @@ ClassImp(StEvtHddr)
 ClassImp(StMaker)
 
 const char  *StMaker::GetCVSIdC()
-{static const char cvs[]="$Id: StMaker.cxx,v 1.50 1999/07/11 01:59:04 perev Exp $";
+{static const char cvs[]="$Id: StMaker.cxx,v 1.51 1999/07/11 20:40:35 perev Exp $";
 return cvs;};
 static void doPs(const char *who,const char *where);
 
@@ -429,6 +432,14 @@ void StMaker::Clear(Option_t *option)
 {
   if(option){};
   if (m_DataSet) m_DataSet->Delete();
+//    Reset lists of event objects
+   
+   TIter next(GetMakeList());
+   StMaker *maker;
+   while ((maker = (StMaker*)next())) {
+      maker->Clear(option);
+   }
+   return;
 
 }
 //_____________________________________________________________________________
