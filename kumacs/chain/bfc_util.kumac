@@ -96,7 +96,11 @@
 *                              ONLY if drhd or drsum is in chain
 * editted 9/10/98 K. Turner - added new chain variable: dout
 *                             which writes out run/dst and 
-*                             event/data/global/dst directories to a file 
+*                             event/data/global/dst directories to a file
+* editted 9/11/98 K. Turner - now write out run tables in bfc_finish
+*                             only if DRSUM is in chain
+*                           - in evin: check if error from read_table_from_file 
+*                             and skip out if vector is set 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -157,7 +161,15 @@ macro bfc_init _
             endif
      (evin)
           exec read_table_from_file#init inev [input_file]
+           if ($vexist(readprob).ne.0) then 
+            message ' BFC_UTIL,init: ERROR - cannot open input file - quit '
+            goto EOF
+           endif
           exec read_table_from_file#read inev
+           if ($vexist(readprob).ne.0) then 
+            message ' BFC_UTIL,init: ERROR - cannot read input file - quit '
+            goto EOF
+           endif
      (esin)
           dio/newfilestream inev [input_file] r
           cd [run]
@@ -328,7 +340,7 @@ ABEND:
 
   do i = 1, [nw]
    mod = $word([test],[i],1)
-   message ' !!! bfc_util ==> process event for chain value: ' [mod]
+   message ' !!! bfc_util#process ==> chain processing for  ' [mod]
    CASE [mod] in 
     (oldin) nextl 1
     (evgin) cd [event]; 
@@ -337,16 +349,24 @@ ABEND:
             if (staf_status(1).ne.STAFCV_OK) goto EOF
      (gtxin) nextl 1
      (evin) exec read_table_from_file#read inev
-            if (staf_status(1).ne.STAFCV_OK) goto EOF
-*            ls [run_dst]/run_summary
-*            if (staf_status(1).eq.STAFCV_OK) then
-*              rowcount [run_dst]/run_summary	    
-*	      if (staf_result(1).ne.0) then
-*	        vec/create havedstrunsum
-*	        message ' bfc_process: run_summary table exists!'
-*	        goto FINISH
-*	      endif
-*            endif
+           if ($vexist(readprob).ne.0) then 
+            message ' BFC_UTIL,process: ERROR - cannot read input file - quit '
+            goto EOF
+           endif
+            ls [run_dst]/run_summary
+            if (staf_status(2).eq.STAFCV_OK) then
+*              message ' *** BFC_PROCESS: run summary table exists! '
+              rowcount [run_dst]/run_summary	    
+	      if (staf_result(1).ne.0) then
+*                message ' *** BFC_PROCESS: run summary table has entries! '
+                tdm/table/cell/getvalue 'run/dst/run_summary[0].n_events_tot' 
+                if (staf_result(1).ne.0) then 
+	            vec/create havedstrunsum
+*	            message ' *** BFC_PROCESS: final run_summary table!'
+	            goto FINISH
+	        endif
+              endif
+            endif
      (esin) for dir in [evgen] [geantE] [raw_data] [data] [dst]
               cd [dir]; dio/stream/getevent inev 
               if (staf_status(1).ne.STAFCV_OK) goto EOF
@@ -483,13 +503,15 @@ ABEND:
  NEXT_EVENT:
  EOF:
 
- message ' in bfc_util: #events total,good = ', [nevdsttot], [nevdstgood]
- GO TO END
+ goto END
  
  FINISH:
- message ' skip out of bfc_process because run summary table exists'
+ message ' BFC_UTIL,process: skip out because got to final run summary table'
  
  END:
+
+ message ' BFC_UTIL,process: #events total,good = ', [nevdsttot], [nevdstgood]
+
 return
  
 **********************************************************************
@@ -509,8 +531,9 @@ macro bfc_finish _
     message ' !!! bfc_util ==> finish for chain value: ' [mod]
     CASE [mod] in 
      (g2tin)  exec input_g2t_file#close
+     (evin)  exec read_table_from_file#close inev 
      (rgst)  ge/rz/cd //PAWC; hi/list;  | show histograms
-     (drhd)  vec/create randst
+*     (drhd)  vec/create randst
      (drsum) exec  finish_dst#dst_run_summary
              exec  run_dst#dst_run_summary
              vec/create randst
@@ -545,6 +568,8 @@ macro bfc_finish _
 
    if (STAF_STATUS(1).ne. STAFCV_OK) goto ABEND
   enddo
+
+
   string = '---<bfc>--- total CPU to process  '//$format([nevents],i6)//'events = '//$format(totime,f12.5)
  fmessage $quote([string])    [log_file]
   message $quote([string]) 
@@ -556,6 +581,7 @@ macro bfc_finish _
   endif
 
 ABEND:
+
 return
  
 **********************************************************************
