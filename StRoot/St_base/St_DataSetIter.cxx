@@ -347,18 +347,24 @@ Int_t St_DataSetIter::Rmdir(St_DataSet *dataset,Option_t *)
 }
  
 //______________________________________________________________________________
-St_DataSet *St_DataSetIter::Next()
+St_DataSet *St_DataSetIter::Next( EDataSetPass mode)
 {
+ ////////////////////////////////////////////////////////////////////////////////
  //
  // returns the pointer the "next" St_DataSet object
  //         = 0 if all objects have been returned.
  //
-
+ //  mode = kContinue  - default normal mode
+ //         kPrune     - stop passing of the current branch but continue with the next one if any
+ //         kUp        - break passing, return to the previous level, then continue
+ //         all other  - are treated as "kContinue"
+ //
+ ////////////////////////////////////////////////////////////////////////////////
+ 
   if (fMaxDepth==1) fDataSet = fNext ? NextDataSet(*fNext) :0;
   else {
-
     // Check the whether the next level does exist 
-    if (fDataSet && (fDepth < fMaxDepth || fMaxDepth ==0) ) 
+    if (fDataSet && (fDepth < fMaxDepth || fMaxDepth ==0) && mode == kContinue ) 
     {
       // create the next level iterator, go deeper
       TList *list  = fDataSet->GetList();
@@ -375,7 +381,8 @@ St_DataSet *St_DataSetIter::Next()
     // Pick the next object of the current level
     TIter *next = fNextSet[fDepth-1];
     if (next) {
-      fDataSet = NextDataSet(*next);
+      fDataSet = 0;
+      if (mode != kUp) fDataSet = NextDataSet(*next);
 
       // Go upstair if the current one has been escaped
       if (!fDataSet) {

@@ -4,6 +4,7 @@
 
 #include "TBrowser.h"
 #include "St_NodeView.h"
+#include "St_NodeViewIter.h"
 #include "St_NodePosition.h"
 #include "TROOT.h"
 #include "TView.h"
@@ -31,22 +32,21 @@ ClassImp(St_NodeView)
 St_NodeView::St_NodeView(St_NodeView *viewNode,St_NodePosition *nodePosition)
             : St_ObjectSet(viewNode->GetName(),(TObject *)nodePosition)
 {
-  if (viewNode) {
+  if (viewNode) 
+  {
      SetTitle(viewNode->GetTitle());
-#if 0
-  St_NodeView *view = new St_NodeView(*hall);
-  St_NodeViewIter next(viewNode);
-  St_NodeView *nextView = 0;
-  while (nextView = next()){     
-     if (nextView.IsMarked()) {
-        St_Position *position = next->GetPosition();
-        St_Node *node = position->GetNode();
-        Add(new St_NodeView(nextView->GetName(),nextView->GetTitle(),position);
-        next->ResetPosition();
-     }
-  }
-
-#endif
+     EDataSetPass mode = kContinue;
+     St_NodeViewIter next(viewNode);
+     St_NodeView *nextView = 0;
+     while (nextView = (St_NodeView *)next(mode)){     
+       mode = kContinue;
+       if (nextView->IsMarked()) {
+         St_NodePosition tempPos = next[0];
+         St_NodePosition *position = new St_NodePosition(tempPos);
+         Add(new St_NodeView(nextView,position));
+         mode = kPrune;
+       }
+    }
   }
 }
 //_____________________________________________________________________________

@@ -48,7 +48,7 @@ public:
   virtual St_DataSet    *Add(St_DataSet *set, St_DataSet *dataset);
  
   virtual St_DataSet    *Cd(const Char_t *dirname);
-  virtual St_DataSet    *operator()() {return  Next();}
+  virtual St_DataSet    *operator()( EDataSetPass mode=kContinue ) {return  Next(mode);}
   virtual St_DataSet    *operator()(const Char_t *path) { return Find(path); }
   virtual St_DataSet    *operator[](const Char_t *path);
   virtual Int_t          GetDepth() const {return fDepth;}
@@ -81,7 +81,7 @@ public:
   virtual St_DataSet    *Shunt(St_DataSet *set, const Char_t *path);
   virtual St_DataSet    *Shunt(St_DataSet *set, St_DataSet *dataset);
  
-  virtual St_DataSet    *Next();
+  virtual St_DataSet    *Next( EDataSetPass mode=kContinue);
   virtual St_DataSet    *Next(const Char_t *path, St_DataSet *rootset=0,Bool_t mkdir=kFALSE){return Find(path,rootset,mkdir);}
   virtual void           Notify(St_DataSet *dataset);
   const Option_t *GetOption() const                                      { return fNext ? fNext->GetOption():0; }
