@@ -14,5 +14,6 @@ struct spaceChargeCor {
    double  halfFieldA;   /*  Postive Half " " */
    double  fullFieldA;   /*  Postive Full " " */
    double  satRate;   /* Saturation Rate Hz  */
+   float   factor;    /*  Multiplicative Factor */
 
  };  
