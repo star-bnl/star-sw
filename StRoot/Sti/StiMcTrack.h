@@ -27,9 +27,9 @@ class StiMcTrack : public StiTrack
   virtual double  getDca3(StiTrack *t) const;   // distance of closest approach to given track - 3D calc
           double  getDca(const StiHit*)const {return 0;} //WarnOff
   virtual int     getPointCount() const;
-  virtual int     getFitPointCount() const; 
+  virtual int     getFitPointCount(int detectorId=0) const; 
   virtual int     getGapCount() const;
-  virtual int     getMaxPointCount() const;
+  virtual int     getMaxPointCount(int detectorId=0) const;
   /// number of hits used to seed the track
   virtual int     getSeedHitCount() const ;
   virtual void    setSeedHitCount(int c);
