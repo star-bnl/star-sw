@@ -26,6 +26,7 @@ my @parts;
 my $num_jbfile = 0;
 my @fileArr = ();
 my $eachJob;
+my $kl = 0;
  
 open (MAILFILE, $boxfile ) or die "cannot open $boxfile: $!\n";
 
@@ -33,26 +34,25 @@ open (MAILFILE, $boxfile ) or die "cannot open $boxfile: $!\n";
 
   foreach $mail_line (@mailfile) {
      chop $mail_line ;
+#   print "Num line = ", $num_line, "Line = ", $mailfile[$num_line],  "\n";
 
    if ($mail_line =~ /Message-Id/) {
       $messg_count++;
    };
-   if ($mail_line =~ /Subjob/) {
-      my $kl = $num_line + 1;
-      $status_line = $mailfile[$kl];
+   if ($mail_line =~ /job_/) {
+      $status_line = $mail_line;
      if ( $status_line =~ /staging failed/) {
        $staging_count++;
-     $job_line = $mailfile[$num_line + 4];
-       @parts = split (":", $job_line);
+     $job_line = $mailfile[$num_line + 3];   
+       @parts = split (":", $status_line);
      $job_file = $parts[1];        
       $fileArr[$num_jbfile] = $job_file; 
      $num_jbfile++ ;
      print "Job file name when staging failed: ", $job_file, "\n";
      }
      elsif ($status_line =~ /aborted/) {
-      
        $abort_count++;
-     $job_line = $mailfile[$num_line + 4];
+     $job_line = $mailfile[$num_line + 3];
       @parts = split (":", $job_line);
      $job_file = $parts[1];        
       $fileArr[$num_jbfile] = $job_file; 
@@ -60,23 +60,33 @@ open (MAILFILE, $boxfile ) or die "cannot open $boxfile: $!\n";
      print "Job file name when aborted: ", $job_file, "\n";
      }
      
+     elsif ($status_line =~ /killed/) {
+      
+       $abort_count++;
+     $job_line = $mailfile[$num_line + 3];
+      @parts = split (":", $job_line);
+     $job_file = $parts[1];        
+      $fileArr[$num_jbfile] = $job_file; 
+     $num_jbfile++ ;      
+     print "Job file name when killed: ", $job_file, "\n";
+     }
+
      elsif ($status_line =~ /crashed/) {
       
        $crash_count++;
-     $job_line = $mailfile[$num_line + 4];
+     $job_line = $mailfile[$num_line + 3];
       @parts = split (":", $job_line);
      $job_file = $parts[1];        
            $fileArr[$num_jbfile] = $job_file; 
      $num_jbfile++ ; 
      print "Job file name when crashed: ", $job_file, "\n";
-     } else {
-     next;
-   }
+     }
 
    }
       $num_line++;
    }
 
+ 
   print "Number of emails: ", $messg_count, "\n"; 
   print "Number of jobs with staging failed: ", $staging_count, "\n";
   print "Number of jobs aborted: ", $abort_count, "\n";
