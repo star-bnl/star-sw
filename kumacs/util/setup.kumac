@@ -36,8 +36,7 @@ return
 macro set_globals
 
  macro/global/import *
-
- macro/global/create log_file ' ' 'default log message file'
+   
  macro/global/create nevents  0   'no. of events processed so far'
    
  macro/global/create nev_proc 0
