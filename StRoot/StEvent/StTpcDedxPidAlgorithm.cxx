@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.21 2003/09/02 17:58:06 perev Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.22 2003/10/21 14:23:23 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
+ * Revision 2.22  2003/10/21 14:23:23  fisyak
+ * Switch from primary to global track momentum for Nsigma calculations
+ *
  * Revision 2.21  2003/09/02 17:58:06  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -89,15 +92,17 @@
 #include <float.h>
 #include "StTpcDedxPidAlgorithm.h"
 #include "StTrack.h"
+#include "StGlobalTrack.h"
 #include "StParticleTypes.hh"
 #include "StEnumerations.h"
 #include "StDedxPidTraits.h"
+#include "StTrackNode.h"
 #include "StTrackGeometry.h"
 #include "BetheBloch.h"
 #include "StBichsel/Bichsel.h"
 //VP static Bichsel *m_Bichsel = 0;
 static BetheBloch *theBetheBloch = 0;
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.21 2003/09/02 17:58:06 perev Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.22 2003/10/21 14:23:23 fisyak Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
@@ -171,8 +176,10 @@ StTpcDedxPidAlgorithm::numberOfSigma(const StParticleDefinition* particle) const
     double dedx_resolution;
     double momentum;
     double z;
-    if (mTrack && mTraits->length() > 0) {
-      momentum  = abs(mTrack->geometry()->momentum());
+    const StGlobalTrack *gTrack = 
+      static_cast<const StGlobalTrack*>( mTrack->node()->track(global));
+    if (gTrack && mTraits->length() > 0 ) {
+      momentum  = abs(gTrack->geometry()->momentum());
 #ifndef P03ia
       dedx_expected = 1.e-6*BetheBloch::Sirrf(momentum/particle->mass(),mTraits->length(),
 					      abs(particle->pdgEncoding())==11);
