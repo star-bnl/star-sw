@@ -1,6 +1,9 @@
 
-# $Id: MakeDll.mk,v 1.74 1999/04/19 21:29:37 fisyak Exp $
+# $Id: MakeDll.mk,v 1.75 1999/04/19 21:46:09 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.75  1999/04/19 21:46:09  fisyak
+# Fix case of Multiple ClassDef in the same h-file
+#
 # Revision 1.74  1999/04/19 21:29:37  fisyak
 # Add SL_EXTRA_LIB
 #
@@ -294,7 +297,11 @@ ifdef FILES_MOD
 endif
 ifdef FILES_ORD
   ifneq (,$(strip $(FILES_H)))
-    NAMES_ORD      := $(basename $(notdir $(FILES_H)))
+#    NAMES_ORD      := $(basename $(notdir $(FILES_H)))
+define AWK
+grep ClassDef $(FILES_H) | awk -F\( '{print $$2}' | awk -F\, '{print $$1}'
+endef
+   NAMES_ORD  := $(shell $(AWK))
   endif
   LinkDef        :=$(wildcard $(SRC_DIR)/$(PKG)LinkDef.h $(SRC_DIR)/$(PKG)LinkDef.hh)
   ifneq (,$(LinkDef))
@@ -405,7 +412,7 @@ else
 endif
 $(FILES_CINT_ORD) : $(FILES_ORD_H)   
 	$(COMMON_LINKDEF)
-	@for p in $(notdir $(basename $(FILES_ORD_H))); do \
+	@for p in $(notdir $(basename $(NAMES_ORD))); do \
                                              echo "#pragma link C++ class $${p};" >> $(LINKDEF) ; \
                                              done
 	@echo "#endif"                                  >> $(LINKDEF);
