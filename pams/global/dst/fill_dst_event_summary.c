@@ -204,7 +204,7 @@ long  type_of_call fill_dst_event_summary_ (
   /* Fill pt, mt, eta & phi histograms  */
   for (itrk=0; itrk < dst_track_h->nok; itrk++) {/* begin global track loop */
     /* Calculate track multiplicities  */
-    if ( dst_track[itrk].iflag < 0 )
+    if ( dst_track[itrk].iflag <= 0 )
       continue;
     glb_trk_good++;       /*  good global tracks            */
     if ( dst_track[itrk].icharge > 0 )
