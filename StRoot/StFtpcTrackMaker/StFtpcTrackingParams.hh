@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.hh,v 1.11 2003/05/20 18:35:08 oldi Exp $
+// $Id: StFtpcTrackingParams.hh,v 1.12 2003/05/21 09:47:10 putschke Exp $
 // $Log: StFtpcTrackingParams.hh,v $
+// Revision 1.12  2003/05/21 09:47:10  putschke
+// Include rotation around y-axis for FTPC east and west
+//
 // Revision 1.11  2003/05/20 18:35:08  oldi
 // Cuts for vertex estimation introduced (globDca < 1 cm, multiplicity >= 200).
 //
@@ -147,14 +150,20 @@ private:
        StMatrixD mTpcToGlobalRotation; // (3X3)
        StMatrixD mGlobalToTpcRotation; // (3X3)
   StThreeVectorD mTpcPositionInGlobal; 
-
+  
   // internal FTPC rotation
+  StMatrixD *mFtpcRotationY[2];
+  StMatrixD *mFtpcRotationYInverse[2];
+  StMatrixD *mFtpcRotationX[2];
+  StMatrixD *mFtpcRotationXInverse[2];
   StMatrixD *mFtpcRotation[2];
   StMatrixD *mFtpcRotationInverse[2];
    Double_t  mInstallationPointY[2];
+   Double_t  mInstallationPointX[2];
    Double_t  mInstallationPointZ[2];
    Double_t  mObservedVertexOffsetY[2];
-  
+   Double_t  mObservedVertexOffsetX[2];
+
   StMagUtilities *mMagField;       // pointer to magnetic field table
         Double_t  mMagFieldFactor;
 
@@ -216,14 +225,14 @@ public:
   Int_t EtaSegments();
   
   // Tracking
-    Bool_t Laser(Int_t tracking_method);
-    Bool_t VertexConstraint(Int_t tracking_method);
-     Int_t MaxTrackletLength(Int_t tracking_method);
-     Int_t MinTrackLength(Int_t tracking_method);
-     Int_t RowScopeTracklet(Int_t tracking_method);
-     Int_t RowScopeTrack(Int_t tracking_method);
-     Int_t PhiScope(Int_t tracking_method);
-     Int_t EtaScope(Int_t tracking_method);
+  Bool_t Laser(Int_t tracking_method);
+  Bool_t VertexConstraint(Int_t tracking_method);
+  Int_t MaxTrackletLength(Int_t tracking_method);
+  Int_t MinTrackLength(Int_t tracking_method);
+  Int_t RowScopeTracklet(Int_t tracking_method);
+  Int_t RowScopeTrack(Int_t tracking_method);
+  Int_t PhiScope(Int_t tracking_method);
+  Int_t EtaScope(Int_t tracking_method);
   Double_t MaxDca(Int_t tracking_method);
 
   // Tracklets
@@ -253,19 +262,27 @@ public:
   Double_t ALargeNumber();
 
   // transformation due to rotated and displaced TPC
-       StMatrixD TpcToGlobalRotation();
-       StMatrixD GlobalToTpcRotation();
+  StMatrixD TpcToGlobalRotation();
+  StMatrixD GlobalToTpcRotation();
   StThreeVectorD TpcPositionInGlobal(); 
 
+  // internal FTPC rotation
   StMatrixD FtpcRotation(Int_t i);
   StMatrixD FtpcRotationInverse(Int_t i);
-   Double_t InstallationPointY(Int_t i);
-   Double_t InstallationPointZ(Int_t i);
-   Double_t ObservedVertexOffsetY(Int_t i);
+  StMatrixD FtpcRotationX(Int_t i);
+  StMatrixD FtpcRotationXInverse(Int_t i);
+  StMatrixD FtpcRotationY(Int_t i);
+  StMatrixD FtpcRotationYInverse(Int_t i);
+  Double_t InstallationPointX(Int_t i);
+  Double_t InstallationPointY(Int_t i);
+  Double_t InstallationPointZ(Int_t i);
+  Double_t ObservedVertexOffsetY(Int_t i);
+  Double_t ObservedVertexOffsetX(Int_t i);
+
 
   // magnetic field table
   StMagUtilities *MagField();
-        Double_t  MagFieldFactor();
+  Double_t  MagFieldFactor();
 
   ClassDef(StFtpcTrackingParams,0)  // Parameters for FTPC tracking
 };    

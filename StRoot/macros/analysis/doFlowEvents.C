@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.45 2003/05/16 20:47:33 posk Exp $
+// $Id: doFlowEvents.C,v 1.44 2003/01/14 14:12:07 oldi Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -24,7 +24,7 @@
 //             b. "-" to get just the one file you want
 //      file = a. file names in directory (takes all files)
 //             b. the one particular full file name (with directory) you want
-//      phiWgtOnly = kTRUE runs the StPhiWgtMaker only
+//      qaflag = "off"  - doesn't do anything now
 //
 // Usage: 
 // doFlowEvents.C(nevents, "-", "some_directory/some_dst_file.root")
@@ -35,8 +35,8 @@
 // Parameters, RunType and OutPicoDir, may be passed from the calling LSF shell script
 //   (see pdsf:: ~posk/doFlowEvents.csh):
 //        root4star -b << eof >& $LOG
-//        Int_t RunType = $runNo;
-//        const Char_t* OutPicoDir = "./$outPicoDir/";
+//        Int_t RunType = $runNo ;
+//        Char_t* OutPicoDir = $outPicoDir ;
 //        .L $doFile
 //        doFlowEvents.C
 //        .q
@@ -60,26 +60,22 @@ const char *dstFile = 0;
 const char *fileList[] = {dstFile, 0};
 
 //--------- Prototypes -----------
-void doFlowEvents(Int_t, const Char_t **, Bool_t phiWgtOnly = kFALSE);
+void doFlowEvents(Int_t, const Char_t **, const char *qaflag = "");
 void doFlowEvents(Int_t, const Char_t *, const Char_t *, 
-		  Bool_t phiWgtOnly = kFALSE);
-void doFlowEvents(Int_t nevents = 2, Bool_t phiWgtOnly = kFALSE);
+		  const char *qaflag = "off");
+void doFlowEvents(Int_t nevents = 2);
 
 // -------- Here is the actual method ----------
-void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
+void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 {
-  cout <<  endl << endl <<" doFlowEvents - input # events = " << nevents << endl;
+  cout <<  endl << endl <<" doFlowEvents -  input # events = " << nevents << endl;
   Int_t ilist = 0;
   while (fileList[ilist]){ 
-      cout << " doFlowEvents - input fileList = " << fileList[ilist] << endl;
+      cout << " doFlowEvents -  input fileList = " << fileList[ilist] << endl;
       ilist++; 
     }
-  if (phiWgtOnly) {
-    cout << " doFlowEvents - phiWgtOnly = kTRUE" << endl << endl << endl;
-  } else {
-    cout << " doFlowEvents - phiWgtOnly = kFALSE" << endl << endl << endl;
-  }
-
+  cout << " doFlowEvents -  input qaflag   = " << qaflag << endl << endl << endl;
+ 
   //
   // First load some shared libraries we need
   // (Do it in this order)
@@ -138,14 +134,15 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
 //   flowSelect->SetFitPtsPart(20, 50);          // for parts. wrt plane
 //   flowSelect->SetFitOverMaxPtsPart(0.52, 1.); // for parts. wrt plane
 //   flowSelect->SetChiSqPart(0.1, 1.3);         // for parts. wrt plane
-//   flowSelect->SetDcaGlobalPart(0., 2.);       // for parts. wrt plane
+//   flowSelect->SetDcaGlobalPart(0., 0.);       // for parts. wrt plane
 //   flowSelect->SetYPart(-0.5, 0.5);            // for parts. wrt plane
 
-  // Uncomment next line if you make a selection object
-//    sprintf(makerName, "Flow");
+  // uncomment next line if you make a selection object
+//   sprintf(makerName, "Flow");
 
   if (strstr(fileList[0], "MuDst.root")) {
-    // Read mu-DST
+    //Read mu-DST
+    //cout << "##### doFlowEvents: MuDST file" << endl;
     if (makerName[0]=='\0') {
       StFlowMaker* flowMaker = new StFlowMaker();
     } else {
@@ -155,7 +152,8 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
     flowMaker->SetMuEventFileName(setFiles);
     
   } else if (strstr(fileList[0], "picoevent.root")) {
-    // Read pico-DST
+    //Read pico-DST
+    //cout << "##### doFlowEvents: pico file" << endl;
     if (makerName[0]=='\0') {
       StFlowMaker* flowMaker = new StFlowMaker();
     } else {
@@ -201,26 +199,17 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
   
   //////////////
   // Flow Makers
-  //   The AnalysisMaker, CumulantMaker, and ScalarProdMaker 
-  //   may be used with a selection object.
-  if (phiWgtOnly) {
-    bool phiWgtMaker = kTRUE;
-    bool anaMaker    = kFALSE;
-    bool cumMaker    = kFALSE;
-    bool spMaker     = kFALSE;
-  } else {
-    bool phiWgtMaker = kFALSE;
-    //bool anaMaker = kFALSE;
-    bool anaMaker = kTRUE;
-    bool cumMaker = kFALSE;
-    //bool cumMaker = kTRUE;
-    bool spMaker = kFALSE;
-    //bool spMaker = kTRUE;
-  }
+  //   The AnalysisMaker, CumulantMaker, and ScalarProdMaker may be used with
+  //   a selection object.
+  //bool anaMaker = kFALSE;
+  bool anaMaker = kTRUE;
+  bool cumMaker = kFALSE;
+  //bool cumMaker = kTRUE;
+  bool spMaker = kFALSE;
+  //bool spMaker = kTRUE;
 
   Bool_t includeTpcTracks  = kTRUE;
-  //Bool_t includeFtpcTracks = kTRUE;
-  Bool_t includeFtpcTracks = kFALSE;
+  Bool_t includeFtpcTracks = kTRUE;
 
   if (makerName[0]=='\0') { // blank if there is no selection object
     if (anaMaker) {
@@ -255,21 +244,15 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
       flowScalarProdMaker->SetHistoRanges(includeFtpcTracks);
     }
   }
-  if (phiWgtMaker) {
-    StFlowPhiWgtMaker*  flowPhiWgtMaker = new StFlowPhiWgtMaker();
-  }
 
   // Set write flages and file names
-//   flowMaker->PicoEventWrite(kTRUE);
-//   cout << " doFlowEvents -  OutPicoDir = " << OutPicoDir << endl;
-//   flowMaker->SetPicoEventDir(OutPicoDir);
-//   flowMaker->SetPicoEventDir("../");
-//   flowMaker->SetPicoEventDir("./");
+//  flowMaker->PicoEventWrite(kTRUE);
+//  flowMaker->SetPicoEventDir("./");
+//  flowMaker->SetPicoEventDir(*OutPicoDir);
   
   // Set Debug status
 //  flowMaker->SetDebug();
 //  flowAnalysisMaker->SetDebug();
-//  flowPhiWgtMaker->SetDebug();
 //  flowCumulantMaker->SetDebug();
 //  flowScalarProdMaker->SetDebug();
 
@@ -288,31 +271,27 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
   //
 
   // Get centrality from RunType
-  // For centrality=0 there is no centrality selection
   if (RunType) {
     Int_t centrality = RunType % 10 ;
     StFlowCutEvent::SetCent(centrality, centrality);
   }
-  
+
   // Set the event cuts
-//     StFlowCutEvent::SetCent(5, 5);
+//   StFlowCutEvent::SetCent(3, 3);
 //   StFlowCutEvent::SetMult(0, 0);
 //   StFlowCutEvent::SetVertexX(0., 0.);
 //   StFlowCutEvent::SetVertexY(0., 0.);
-  StFlowCutEvent::SetVertexZ(-25., 25.);
+//   StFlowCutEvent::SetVertexZ(0., 0.);
 //   StFlowCutEvent::SetEtaSymTpc(0., 0.);
 //   StFlowCutEvent::SetEtaSymFtpc(0., 0.);
-  StFlowCutEvent::SetTrigger(1.);
-  if (phiWgtOnly) { // all centralities
-    StFlowCutEvent::SetCent(0, 0);
-  }
+//   StFlowCutEvent::SetTrigger(0.);
   
   // Set the track cuts
     StFlowCutTrack::IncludeTpcTracks(includeTpcTracks);
 //   StFlowCutTrack::SetFitPtsTpc(0, 0);
 //   StFlowCutTrack::SetFitOverMaxPts(0., 0.);
 //   StFlowCutTrack::SetChiSqTpc(0., 0.);
-//   StFlowCutTrack::SetPtTpc(0.15, 12.);
+//   StFlowCutTrack::SetPtTpc(0., 0.);
 //   StFlowCutTrack::SetEtaTpc(0., 0.);
 //   StFlowCutTrack::SetChgTpc(0., 0.);
   
@@ -326,7 +305,8 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
 //   StFlowCutTrack::SetChgFtpc(0, 0);
 
   // Set the event plane selections
-  // TPC
+
+  //TPC
 //   StFlowEvent::SetEtaTpcCut(0.05, 1., 0, 0);  // harmonic 1, selection 1
 //   StFlowEvent::SetEtaTpcCut(0.05, 1., 1, 0);  // harmonic 2, selection 1
 //   StFlowEvent::SetEtaTpcCut(0.05, 1., 2, 0);  // harmonic 3, selection 1
@@ -334,7 +314,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
 //   StFlowEvent::SetPtTpcCut(0.0, 1., 1, 1);    // harmonic 2, selection 2
 //   StFlowEvent::SetDcaGlobalTpcCut(0., 1.);    // for event plane
 
-  // FTPC
+  //FTPC
 //   StFlowEvent::SetEtaFtpcCut(0., 10., 0, 0);  // harmonic 1, selection 1
 //   StFlowEvent::SetEtaFtpcCut(0., 10., 1, 0);  // harmonic 2, selection 1
 //   StFlowEvent::SetEtaFtpcCut(0., 10., 2, 0);  // harmonic 3, selection 1
@@ -353,14 +333,17 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
 //   StFlowEvent::SetPid("h-");                 // for event plane
 
   // Make Eta subevents
-//     StFlowEvent::SetEtaSubs();
+//  StFlowEvent::SetEtaSubs();
 
-  // Disanable weights in the event plane calcualtion
+  // Enable weights in the event plane calcualtion
 //   StFlowEvent::SetPtWgt(kFALSE);
 //   StFlowEvent::SetEtaWgt(kFALSE);
 
   // Use Aihong's probability PID method
 //   StFlowEvent::SetProbPid();
+
+  // Have the CumulantMaker use the old method
+//   StFlowCumulantMaker::SetOldMethod(kTRUE); 
 
   // Set the PID deviant windows
 //   StFlowEvent::SetPiPlusCut(-3., 3.);
@@ -403,6 +386,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, Bool_t phiWgtOnly)
   // Chain Finish
   //
   if (nevents > 1) {
+    //chain->Clear();
     chain->Finish();
     delete chain;
   }
@@ -449,7 +433,7 @@ END:
 
 // ----------- This concatenates the path and the file name ---------------------
 void doFlowEvents(const Int_t nevents, const Char_t *path, const Char_t *file, 
-		  Bool_t phiWgtOnly)
+		  const char *qaflag)
 {
   const char *fileListQQ[] = {0,0};
   if (strncmp(path, "GC", 2) == 0) {
@@ -460,36 +444,30 @@ void doFlowEvents(const Int_t nevents, const Char_t *path, const Char_t *file,
     fileListQQ[0] = gSystem->ConcatFileName(path,file);
   }
 
-  doFlowEvents(nevents, fileListQQ, phiWgtOnly);
+  doFlowEvents(nevents, fileListQQ, qaflag);
 }
 
 // ----------- This sets default path and file names ---------------------------
-void doFlowEvents(const Int_t nevents, Bool_t phiWgtOnly) {
+void doFlowEvents(const Int_t nevents)
+{
+  // Commit to cvs with these defaults:
+   const Char_t *filePath="-";
+   const Char_t *fileExt="/afs/rhic/star/data/samples/gstar.dst.root";
 
 //  Char_t* filePath="./";
-//  Char_t* fileExt="*.flowpicoevent.root";
 //  Char_t* fileExt="*.event.root";
+//  Char_t* fileExt="*.flowpicoevent.root";
 //  Char_t* fileExt="*.MuDst.root";
 
 // PDSF pico files
   // 200 GeV
-  
-  // P02gg with FTPC
 
-  // ProductionMinBias P02gd
-  Char_t* filePath="/auto/stardata/pDST/flow_pDST_production_removed_l3_trigged_events/reco/ProductionMinBias/ReversedFullField/P02gd/2001/2258044";
-  if (nevents < 250) {
-    Char_t* fileExt="st_physics_2258044_raw_0205.flowpicoevent.root";
-   } else {
-     Char_t* fileExt="*.flowpicoevent.root";
-   }
-
-  // MinBiasVertex P02ge
-//   Char_t* filePath="/auto/stardata/starspec/flow_pDST_production_removed_l3_trigged_events/reco/MinBiasVertex/ReversedFullField/P02ge/2001/2236006";
+  // P02gcd
+//   Char_t* filePath="/auto/stardata/starspec3/flow_pDST_production_removed_l3_trigged_events/reco/ProductionMinBias/ReversedFullField/P02gc_P02gd/2001/2258044/";
 //   if (nevents < 250) {
-//     Char_t* fileExt="0001/st_physics_2236006_raw_0001.flowpicoevent.root";
+//     Char_t* fileExt="st_physics_2258044_raw_0026.flowpicoevent.root";
 //    } else {
-//      Char_t* fileExt="*/*.flowpicoevent.root";
+//      Char_t* fileExt="*.flowpicoevent.root";
 //    }
 
   // 130 GeV
@@ -509,27 +487,25 @@ void doFlowEvents(const Int_t nevents, Bool_t phiWgtOnly) {
 //   }
 
   // muDST files
-  // 200 GeV 60k events
-//   Char_t* filePath="/aztera/starprod/reco/ProductionMinBias/ReversedFullField/P02gd/2001/253";
+  // 200 GeV
+//   Char_t* filePath="/beta/starprod/MuDST/P02gc/Common/ProductionMinBias/RevFullField/";
 //   if (nevents < 250) {
-//     Char_t* fileExt="st_physics_2253050_raw_0001.MuDst.root";
+//     Char_t* fileExt="st_physics_2269002_raw_0177.MuDst.root"; 
 //   } else {
-//     Char_t* fileExt="*.MuDst.root";
+//     Char_t* fileExt="st_physics_2269002_raw_*.MuDst.root";
 //   }
 
-  // event.root files
-//   Char_t* filePath="/beta/starprod/kirill/";
-//   Char_t* fileExt="st_physics_2269002_raw_0177.event.root"; 
 
-  doFlowEvents(nevents, filePath, fileExt, phiWgtOnly);
+  // event.root files
+  // Char_t* filePath="/beta/starprod/kirill/";
+  // Char_t* fileExt="st_physics_2269002_raw_0177.event.root"; 
+
+  doFlowEvents(nevents, filePath, fileExt);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
-// Revision 1.45  2003/05/16 20:47:33  posk
-// Runs only StFlowPhiWgtMaker if called with phiWgtOnly=kTRUE.
-//
 // Revision 1.44  2003/01/14 14:12:07  oldi
 // Possibility to exclude TPC tracks completely (= FTPC only).
 //
