@@ -76,7 +76,7 @@ void StiKalmanTrackFinder::initialize()
   StiDefaultTrackFilter * trackFilter = new StiDefaultTrackFilter("FinderTrackFilter","Reconstructed Track Filter");
   trackFilter->add( new EditableParameter("nPtsUsed","Use nPts", 1., 1., 0., 1., 1.,
 					  Parameter::Boolean, StiTrack::kPointCount) );
-  trackFilter->add( new EditableParameter("nPtsMin", "Minimum nPts", 24., 24., 0., 100.,1., 
+  trackFilter->add( new EditableParameter("nPtsMin", "Minimum nPts", 10., 10., 0., 100.,1., 
 					  Parameter::Integer,StiTrack::kPointCount) );
   trackFilter->add( new EditableParameter("nPtsMax", "Maximum nPts", 60., 60., 0., 100.,1., 
 					  Parameter::Integer,StiTrack::kPointCount) );
