@@ -282,7 +282,11 @@ St_DataSet *St_db_Maker::OpenMySQL(const char *dbname)
 St_DataSet *St_db_Maker::UpdateDB(St_DataSet* ds)
 { 
   if(!ds) return 0;
+#ifdef __CC5__
+  ds->Pass(&UpdateDB,this);
+#else
   ds->Pass(UpdateDB,this);
+#endif
   return ds;
 }
 //_____________________________________________________________________________
