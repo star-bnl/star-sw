@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.hh,v 1.4 1999/01/25 23:37:37 lasiuk Exp $
+ * $Id: StTrsDeDx.hh,v 1.5 1999/07/19 21:42:37 lasiuk Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,8 +13,9 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.hh,v $
- * Revision 1.4  1999/01/25 23:37:37  lasiuk
- * sun string
+ * Revision 1.5  1999/07/19 21:42:37  lasiuk
+ * - add tss bethe-bloche parameterization for P10.  No saturation
+ *   effects are included.
  *
  * Revision 1.4  1999/01/25 23:37:37  lasiuk
  * sun string
@@ -99,6 +100,8 @@ public:
     int    primary(double bg=3)                 const;
     int    secondary(double*)                   const;
     double betheBloch(double)                   const;
+    double betheBlochTSS(double,double,double)       ;
+    
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
     void   electrons(vector<int>&, double bg=3) const;
 #else
