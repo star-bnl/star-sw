@@ -310,6 +310,174 @@ void StEmcEnergy::hadDepFromMcTrackInBtow()
   delete emcHadDE;
 }
 //------------------------------------------------------------------------------
+void StEmcEnergy::geantEmEtInBtow(Int_t option)
+{
+// Obtaining GEANT em Et - getting the tracks that can hit the EMC
+  
+  StEmcPosition* emcPosition = new StEmcPosition();
+  StSPtrVecMcTrack& tracks = mMcEvent->tracks();  
+  
+  for ( UInt_t i = 0; i < tracks.size(); i++ )
+  {
+    Float_t geantId = tracks[i]->geantId();
+
+    if (option != 1)
+    {
+      if ( geantId <=  6 && geantId != 4  
+        || geantId == 10 || geantId == 13 
+        || geantId == 16 || geantId == 25 )
+      {
+        if ( tracks[i]->startVertex() && geantId <=6 )
+        {                
+          Int_t checkStopVertex = 0;
+          if ( tracks[i]->stopVertex() )
+          {
+            Float_t stopVertexX = tracks[i]->stopVertex()->position().x();
+            Float_t stopVertexY = tracks[i]->stopVertex()->position().y();
+            Float_t radiusStopVertex = sqrt ( pow( stopVertexX ,2 ) + pow( stopVertexY, 2  ) );
+            if (radiusStopVertex < mBemcGeom->Radius()) checkStopVertex = 1;          
+          }
+        
+          if ( checkStopVertex == 0 )
+          {        
+            StThreeVectorD finalTrackPosition, finalTrackMomentum;
+            Float_t finalTowerEta, finalTowerPhi;
+            emcPosition->trackOnEmc(&finalTrackPosition, &finalTrackMomentum, tracks[i], mBfield);
+          
+            finalTowerEta = finalTrackPosition.pseudoRapidity(); 
+            finalTowerPhi = finalTrackPosition.phi();          
+         
+            Int_t module = 0, eta = 0, sub = 0, towerId = 0, towerNdx = -1;
+            mBemcGeom->getBin( finalTowerPhi, finalTowerEta, module, eta, sub );
+         
+            StThreeVectorD finalTrackPosition2, finalTrackMomentum2;
+            Float_t finalTowerEta2, finalTowerPhi2;
+            emcPosition->trackOnEmc(&finalTrackPosition, &finalTrackMomentum, tracks[i], mBfield, 247.753 );
+            finalTowerEta2 = finalTrackPosition2.pseudoRapidity(); 
+            finalTowerPhi2 = finalTrackPosition2.phi(); 
+                
+            Int_t module2 = 0, eta2 = 0, sub2 = 0, towerId2 = 0, towerNdx2 = -1;
+            mBemcGeom->getBin( finalTowerPhi2, finalTowerEta2, module2, eta2, sub2 );
+                      
+            if ( module > 0 && sub > 0 ) 
+            {
+              if ( sub < 0 )sub = 1; // This is for tracks that come between two towers        
+              mBemcGeom->getId( module, eta, sub, towerId );
+              towerNdx = towerId - 1; 
+            }
+        
+            if ( module2 > 0 && sub > 0 ) 
+            {
+              if ( sub2 < 0 )sub2 = 1; // This is for tracks that come between two towers        
+              mBemcGeom->getId( module2, eta2, sub2, towerId2 );
+              towerNdx2 = towerId2 - 1; 
+            }
+        
+            if ( towerId > 0 ) 
+            {         
+              if ( mEmcFilter->getEmcStatus( 1,towerId )==kGOOD )
+              {
+                Float_t mass = tracks[i]->fourMomentum().m();
+                Float_t theta = tracks[i]->momentum().theta();
+                Float_t energy = tracks[i]->energy();
+                Float_t T = energy - mass ;
+                Float_t particleEt = T * sin(theta);
+                mGeantEmEtInBtow[towerNdx] += particleEt;
+              }        
+            }  
+        
+            else
+            {
+              if ( towerId2 > 0 ) 
+              {   
+                if ( mEmcFilter->getEmcStatus( 1,towerId )==kGOOD )
+                {
+                  Float_t mass = tracks[i]->fourMomentum().m();
+                  Float_t theta = tracks[i]->momentum().theta();
+                  Float_t energy = tracks[i]->energy();
+                  Float_t T = energy - mass ;
+                  Float_t particleEt = T * sin(theta);
+                  mGeantEmEtInBtow[towerNdx] += particleEt;
+                }
+              }
+            }                            
+          }              
+        }
+      }
+    }
+    else
+    {
+      StPtrVecMcCalorimeterHit& bemcHits = tracks[i]->bemcHits();
+      // Obtaining event generator em Et - getting the tracks that have
+      // produced bemc hits.
+      if ( geantId <=6 && bemcHits.size() > 0  )
+      {        
+        StThreeVectorD finalTrackPosition, finalTrackMomentum;
+
+        emcPosition->trackOnEmc(&finalTrackPosition, &finalTrackMomentum, tracks[i], mBfield );
+        Float_t finalTowerEta = finalTrackPosition.pseudoRapidity(); 
+        Float_t finalTowerPhi = finalTrackPosition.phi();          
+         
+        Int_t module = 0, eta = 0, sub = 0, towerId = 0, towerNdx = -1;
+        mBemcGeom->getBin( finalTowerPhi, finalTowerEta, module, eta, sub );
+         
+        StThreeVectorD finalTrackPosition2, finalTrackMomentum2;
+
+        emcPosition->trackOnEmc(&finalTrackPosition, &finalTrackMomentum, tracks[i], mBfield, 247.753 );
+        Float_t finalTowerEta2 = finalTrackPosition2.pseudoRapidity(); 
+        Float_t finalTowerPhi2 = finalTrackPosition2.phi(); 
+                
+        Int_t module2 = 0, eta2 = 0, sub2 = 0, towerId2 = 0, towerNdx2 = -1;
+        mBemcGeom->getBin( finalTowerPhi2, finalTowerEta2, module2, eta2, sub2 );
+                      
+        if ( module > 0 ) 
+        {
+          if ( sub < 0 )sub = 1; // This is for tracks that come between two towers        
+          mBemcGeom->getId( module, eta, sub, towerId );
+          towerNdx = towerId - 1; 
+        }
+        
+        if ( module2 > 0 && sub > 0 ) 
+        {
+          if ( sub2 < 0 )sub2 = 1; // This is for tracks that come between two towers        
+          mBemcGeom->getId( module2, eta2, sub2, towerId2 );
+          towerNdx2 = towerId2 - 1; 
+        }
+        
+        if ( towerId > 0 && sub > 0 ) 
+        {         
+          if ( mEmcFilter->getEmcStatus( 1,towerId )==kGOOD )
+          {
+            Float_t mass = tracks[i]->fourMomentum().m();
+            Float_t theta = tracks[i]->momentum().theta();
+            Float_t energy = tracks[i]->energy();
+            Float_t T = energy - mass ;
+            Float_t particleEt = T * sin(theta);
+            mGeantEmEtInBtow[towerNdx] += particleEt;
+          }        
+        }  
+        
+        else
+        {
+          if ( towerId2 > 0 ) 
+          {   
+            if ( mEmcFilter->getEmcStatus( 1,towerId )==kGOOD )
+            {
+              Float_t mass = tracks[i]->fourMomentum().m();
+              Float_t theta = tracks[i]->momentum().theta();
+              Float_t energy = tracks[i]->energy();
+              Float_t T = energy - mass ;
+              Float_t particleEt = T * sin(theta);
+              mGeantEmEtInBtow[towerNdx] += particleEt;
+            }
+          }
+        }
+      }
+    }
+  }
+  delete emcPosition;
+}
+//------------------------------------------------------------------------------
 void StEmcEnergy::processEnergy()
 { 
   mBemcEnergy = 0;
