@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.63 2001/02/27 23:19:38 perev Exp $
+// $Id: doEvents.C,v 1.64 2001/05/04 20:17:31 perev Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -203,6 +203,7 @@ void doEvents(Int_t startEvent, Int_t nEvents, const Char_t **fileList, const Ch
          {cout << "Error event processed. Status = " << istat << endl;}
 
 //------------------ added 6/20/00 by Kathy to unpack BfcStatus table
+#if 0  //Temporary ignore
      if (!istat) {
          
        ddstBranch=chain->GetDataSet("dstBranch");
@@ -245,7 +246,7 @@ void doEvents(Int_t startEvent, Int_t nEvents, const Char_t **fileList, const Ch
 	 }  // while obj Next
        } // if dstBranch
      } //  if !istat
-
+#endif /*0*/
 //------------------
 
      i++;
@@ -302,6 +303,9 @@ void doEvents(Int_t nEvents, const Char_t **fileList, const Char_t *qaflag)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.64  2001/05/04 20:17:31  perev
+// remove St_dst_bfc_status::iterator
+//
 // Revision 1.63  2001/02/27 23:19:38  perev
 // test for filelist[0]!=0 added
 //
