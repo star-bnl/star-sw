@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstHit.cc,v 1.3 2001/01/26 09:49:25 lmartin Exp $
+ * $Id: StEstHit.cc,v 1.4 2001/02/23 13:27:12 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstHit.cc,v $
+ * Revision 1.4  2001/02/23 13:27:12  lmartin
+ * cout replaced by gMessMgr.
+ *
  * Revision 1.3  2001/01/26 09:49:25  lmartin
  * Minor changes. Useless data member mEvalTrack removed. Short description of the
  * data members added.
@@ -21,6 +24,7 @@
  * First CVS commit
  *
  **************************************************************************/
+#include "StMessMgr.h"
 #include "StEstHit.hh"
 #include "StEstWafer.hh"
 #include "StEstBranch.hh"
@@ -41,7 +45,7 @@ StEstHit::StEstHit(long id, StThreeVectorD *xg, StThreeVectorD *xl, long maxbran
   mDebugLevel = 0;
   mFlag       = 0;
   if(!mBranch)
-    cerr << "ERROR!!! StEstHit::StEstHit mBrach=NULL" << endl;
+    gMessMgr->Error()<<"StEstHit::StEstHit mBrach=NULL"<<endm;
 }
 
 StEstHit::~StEstHit() {
@@ -67,19 +71,17 @@ int StEstHit::JoinBranch(StEstBranch *br, StEstTrack *tr) {
   int Ok;
 
   if(mDebugLevel>0) {
-    cout<<"StEstHit::JoinBranch ****START****"<<endl;
-    cout<<" trying to join the branch br=" <<br<<" br->GetNHits()="<<br->GetNHits()<<endl;
-    cout<<" to the hit : "<<this->GetId();
-    cout<<" mNShare= "<<mNShare<<" mMaxShare= "<<mMaxShare;
-    cout<<" mNBranch= "<<mNBranch<<" mMaxBranches= "<<mMaxBranches<<endl;
-    cout<<" branches already using the hit : ";
-    for (i=0;i<mNBranch;i++) cout<<mBranch[i]<<" ";
-    cout<<endl;
+    gMessMgr->Info()<<"StEstHit::JoinBranch ****START****"<<endm;
+    gMessMgr->Info()<<" trying to join the branch br="<<br<<" br->GetNHits()="<<br->GetNHits()<<endm;
+    gMessMgr->Info()<<" to the hit : "<<this->GetId()
+		    <<" mNShare= "<<mNShare<<" mMaxShare= "<<mMaxShare
+		    <<" mNBranch= "<<mNBranch<<" mMaxBranches= "<<mMaxBranches<<endm;
+    gMessMgr->Info()<<" branches already using the hit : "<<endm;
+    for (i=0;i<mNBranch;i++) gMessMgr->Info()<<mBranch[i]<<endm;
   }
   
   if (br->CheckAvailability()) {
-    if(mDebugLevel>0) cout << " BRANCH AVAILABLE "<<endl; 
-    //    if (mNShare>0 
+    if(mDebugLevel>0) gMessMgr->Info()<<" BRANCH AVAILABLE "<<endm; 
     if(mNBranch>0 && mNBranch<mMaxBranches*mMaxShare) { 
       // the hit is already used but can there is some free space in the list.
       // we have to check if the track branch already shares the hit or can share it.
@@ -98,9 +100,9 @@ int StEstHit::JoinBranch(StEstBranch *br, StEstTrack *tr) {
 	  // the branch as a chisq better than the last we have to find the correct place in the list.
 	  for (int i=mNBranch-1;i>=0;i--) {
 	    if(mDebugLevel>1) {
-	      cout << " i=" << i<< " mBranch[i]="<<mBranch[i];
-	      cout <<" mBranch[i]->GetNHits()="<< mBranch[i]->GetNHits()<<endl;
-	      cout << " mBranch[i]->GetChiSq() = "<<mBranch[i]->GetChiSq()<<endl;
+	      gMessMgr->Info()<<" i="<< i<<" mBranch[i]="<<mBranch[i]
+			      <<" mBranch[i]->GetNHits()="<<mBranch[i]->GetNHits()<<endm;
+	      gMessMgr->Info()<<" mBranch[i]->GetChiSq()= "<<mBranch[i]->GetChiSq()<<endm;
 	    }
 	    if (mBranch[i]->GetChiSq() > br->GetChiSq()) { //one cell up
 	      mBranch[i+1] = mBranch[i];
@@ -118,25 +120,24 @@ int StEstHit::JoinBranch(StEstBranch *br, StEstTrack *tr) {
       OkBranch=1;
       OkShare=1;
     }
-    if(mDebugLevel>0) cout << "OkShare="<<OkShare<<endl;
+    if(mDebugLevel>0) gMessMgr->Info()<<"OkShare="<<OkShare<<endm;
     if (OkShare==1) {
       mNShare++;
     }
     if (OkBranch==1) {
-      if(mDebugLevel>0) cout << " mBranch[mNShare]=" << mBranch[mNShare] <<endl;
+      if(mDebugLevel>0) gMessMgr->Info()<<"mBranch[mNShare]="<<mBranch[mNShare]<<endm;
       mNBranch++;
     }
   } //if (br->CheckAvailability())
   else
-    cout << " BRANCH NOT AVALAIBLE "<<endl;
+    gMessMgr->Info()<<" BRANCH NOT AVALAIBLE "<<endm;
 
   if(mDebugLevel>0) {
-    cout<<" JoinBranch : branches using the hit : "<<this->GetId()<<" ";
-    for (i=0;i<mNBranch;i++) cout<<mBranch[i]<<" ";
-    cout<<endl;
+    gMessMgr->Info()<<" JoinBranch : branches using the hit : "<<this->GetId()<<" "<<endm;
+    for (i=0;i<mNBranch;i++) gMessMgr->Info()<<mBranch[i]<<endm;
   }
   if(mDebugLevel>0)
-    cout << "StEstHit::JoinBranch ****STOP**** OkBranch = "<<OkBranch<<" OkShare = "<<OkShare<<endl;
+    gMessMgr->Info()<<"StEstHit::JoinBranch ****STOP**** OkBranch = "<<OkBranch<<" OkShare = "<<OkShare<<endm;
   return OkBranch;
 };
 
@@ -150,25 +151,25 @@ void StEstHit::LeaveBranch(StEstBranch *br) {
   long int i,j, ok=0;
   int SharingSame;
   if(mDebugLevel>0) {
-    cout << "****StEstHit::LeaveBranch**** START"<<endl;
-    cout << " in hit : "<<this<<" id : "<<this->GetId()<<endl;
-    cout << " mNBranch : "<<mNBranch<<" mNShare : "<<mNShare<<endl;
-    cout << " br=" <<br<<endl;
-    cout << " br->GetNHits()=" << br->GetNHits() << endl;
+    gMessMgr->Info()<<"****StEstHit::LeaveBranch**** START"<<endm;
+    gMessMgr->Info()<<" in hit : "<<this<<" id : "<<this->GetId()<<endm;
+    gMessMgr->Info()<<" mNBranch : "<<mNBranch<<" mNShare : "<<mNShare<<endm;
+    gMessMgr->Info()<<" br=" <<br<<endm;
+    gMessMgr->Info()<<" br->GetNHits()="<<br->GetNHits()<<endm;
   } 
-  //  cout<<"LeaveBranch : hit_id="<<this->GetId()<<" br="<<br<<" br->GetTrack()="<<br->GetTrack()<<endl;
+
   if (mNBranch==0) 
-    cout <<"ERROR!!! StEstHit::LeaveBranch mNShare=0"<<endl;
+    gMessMgr->Error()<<"StEstHit::LeaveBranch mNShare=0"<<endm;
   else {
 
     for (i=0;i<mNBranch;i++) {
-      if(mDebugLevel>0) cout << "  i=" << i<<"   mBranch[i]="<<mBranch[i]<<endl ; //mBranch<<endl;
+      if(mDebugLevel>0) gMessMgr->Info()<<" i="<<i<<"  mBranch[i]="<<mBranch[i]<<endm;
       if (mBranch[i] == br) { 
 	ok = 1;
 	SharingSame=0;
 	for (j=0;j<mNBranch;j++) if (mBranch[j]->GetTrack()==mBranch[i]->GetTrack()&&j!=i) SharingSame=1;
-	if (mDebugLevel>0) cout<<"SharingSame= "<<SharingSame<<endl;
-	if(mDebugLevel>0) cout << "  mBranch["<<i<<"] == br <--- this branch is being removed"<<endl;
+	if (mDebugLevel>0) gMessMgr->Info()<<"SharingSame= "<<SharingSame<<endm;
+	if(mDebugLevel>0) gMessMgr->Info()<<"  mBranch["<<i<<"]==br<--- this branch is being removed"<<endm;
 	for (j=i;j<mNBranch-1;j++) mBranch[j] = mBranch[j+1];
 	break;
       }
@@ -176,24 +177,24 @@ void StEstHit::LeaveBranch(StEstBranch *br) {
     if(ok) {
       mNBranch--;
       if (SharingSame==0) mNShare--;
-      if (mDebugLevel>0) cout<<" the branch is not in the hit list anymore : mNBranch : "<<mNBranch<<" mNShare : "<<mNShare<<endl;
+      if (mDebugLevel>0) gMessMgr->Info()<<" the branch is not in the hit list anymore : mNBranch : "<<mNBranch<<" mNShare : "<<mNShare<<endm;
       br->RemoveHit(this);
     }
-    if(mDebugLevel>0) cout << "the hit is removed from branch " << br << " NHits="<< br->GetNHits() << endl;
+    if(mDebugLevel>0) gMessMgr->Info()<<"the hit is removed from branch "<<br<<" NHits="<<br->GetNHits()<<endm;
   }
 
   if (ok==0)
-    cout << "ERROR!!! StEstHit::LeaveBranch branch="<<br<<" wasn't found in hit="<<this<<" mId="<<mId<<endl;
+    gMessMgr->Error()<<"ERROR!!! StEstHit::LeaveBranch branch="<<br<<" wasn't found in hit="<<this<<" mId="<<mId<<endm;
   for (i=0;i<br->GetNHits();i++) {
-    if(mDebugLevel>0) cout << "  i=" << i << endl;
+    if(mDebugLevel>0) gMessMgr->Info()<<"  i="<<i<<endm;
     if (br->GetHit(i) == this) {
-      if(mDebugLevel>0) cout << "  br->GetHit("<<i<<") == this"<<endl;
+      if(mDebugLevel>0) gMessMgr->Info()<<"  br->GetHit("<<i<<") == this"<<endm;
       br->RemoveHit(i);
       break;
     }
   } 
   
-  if(mDebugLevel>0) cout << "****StEstHit::LeaveBranch**** STOP"<<endl; 
+  if(mDebugLevel>0) gMessMgr->Info()<< "****StEstHit::LeaveBranch**** STOP"<<endm; 
 }
 
 
