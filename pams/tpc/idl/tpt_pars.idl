@@ -37,6 +37,7 @@
        float     mxweig;     /* max # of hits/channel for the starter */
        float     prob[2];    /* probability cut */
        float     zslim;      /* limit on the msc */
+       float     lfit;      /* limit on the msc */
    };
 
 /*  Last mod. for tpt_pars:   793401970 Tue Feb 21 16:26:10 1995 */
