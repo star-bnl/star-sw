@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.7 2001/03/02 16:03:11 lmartin Exp $
+ * $Id: StEstMaker.cxx,v 1.8 2001/03/26 12:34:36 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.8  2001/03/26 12:34:36  lmartin
+ * SVT hits, TPC hits and tracks tables and datasets checked to prevent the maker from crashing.
+ *
  * Revision 1.7  2001/03/02 16:03:11  lmartin
  * Finish method written to print out the cumulated tracking performances.
  * Call to the CumulEval method.
@@ -413,6 +416,10 @@ Int_t StEstMaker::Make() {
   //Getting the SVT/SDD hit table
   St_scs_spt*   Stscsspt=0;
   svt  = GetInputDS("svt_hits");
+  if (!svt) {
+    gMessMgr->Warning("No svt_hits Dataset !");
+    return kStWarn;
+  }    
 
   Stscsspt = (St_scs_spt *)svt->Find("scs_spt");
   if (!Stscsspt) { 
@@ -423,17 +430,29 @@ Int_t StEstMaker::Make() {
   //Getting the TPC hit table
   St_tcl_tphit*   Sttphit=0;
   St_DataSet* tpc  = GetInputDS("tpc_hits");
+  if (!tpc) {
+    gMessMgr->Warning("No tpc_hits Dataset !");
+    return kStWarn;
+  }    
 
   Sttphit = (St_tcl_tphit *)tpc->Find("tphit");
-  if (!Sttphit) return kStWarn;
-
+  if (!Sttphit) {
+    gMessMgr->Warning("No TPC hits !");
+    return kStWarn;
+  }
   //Getting the TPC track table
   St_tpt_track*   Sttptrack=0;
   tpc  = GetInputDS("tpc_tracks");
+  if (!tpc) {
+    gMessMgr->Warning("No tpc_tracks dataset !");
+    return kStWarn;
+  }
 
   Sttptrack = (St_tpt_track *)tpc->Find("tptrack");
-  if (!Sttptrack) return kStWarn;
-
+  if (!Sttptrack) {
+    gMessMgr->Warning("No TPC tracks !");
+    return kStWarn;
+  }
 
   //Getting the TPC evaluation table
   St_tte_eval*   Stevaltrk=0;
