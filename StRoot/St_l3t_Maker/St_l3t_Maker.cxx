@@ -1,4 +1,4 @@
-// $Id: St_l3t_Maker.cxx,v 1.23 2000/03/28 22:29:29 yepes Exp $
+// $Id: St_l3t_Maker.cxx,v 1.24 2000/04/12 19:01:05 yepes Exp $
 //
 // Revision 1.22  2000/03/28 20:22:15  fine
 // Adjusted to ROOT 2.24
@@ -77,6 +77,7 @@
 #include "St_DataSetIter.h"
 #include "St_XDFFile.h"
 #include "tpc/St_tpt_Module.h"
+#include "tables/St_dst_track_Table.h"
 #include "FtfSl3.h"
 #include "gl3Conductor.h"
 #include "gl3GeneralHistos.h"
@@ -199,7 +200,7 @@ Int_t St_l3t_Maker::MakeOnLine(){
 //    Set parameters
 //
    tracker.setup ( 30000, 3000 ) ;
-   tracker.xyError = 0.2 ;
+   tracker.xyError = 0.1 ;
    tracker.zError  = 0.2 ;
    tracker.para.infoLevel = 10 ;
    for ( int ie = 0 ; ie < gl3.nEvents ; ie++ ) gl3.event[ie].bField = 0.5 ;
@@ -274,6 +275,8 @@ Int_t St_l3t_Maker::MakeOnLine(){
       int nBytes = tracker.fillTracks ( endTrackDataPointer-trackDataPointer,
                                         trackDataPointer,
 	                                token ) ;
+      printf ( "St_l3_Maker::MakeOnLine: nBytes %d bytes left %d\n",
+               nBytes, endTrackDataPointer-trackDataPointer ) ;
       if ( nBytes <= 0 ) continue ;
 
       sectorHeader->trackp.off = (trackDataPointer-(char *)sectorHeader)/4;
@@ -335,28 +338,26 @@ Int_t St_l3t_Maker::MakeOnLine(){
    //
    int nTracks = 1;
    if ( eventP ) nTracks = max(1,eventP->getNTracks());   
-   St_tpt_track *trackS = new St_tpt_track("l3Track",nTracks); 
+   St_dst_track *trackS = new St_dst_track("l3Track",nTracks); 
    m_DataSet->Add(trackS);
    fprintf(stderr," %s on-line found Ntracks=%d\n",GetName(),nTracks);
 
    //
-   tpt_track_st*  track  = (tpt_track_st *)trackS->GetTable(); 
+   dst_track_st*  track  = (dst_track_st *)trackS->GetTable(); 
    //
-   //   Copy gl3 to tpt_track_st table
+   //   Copy gl3 to dst_track_st table
    //
    if ( eventP ) {
       gl3Track*     gTrk ;
-      tpt_track_st* tTrk ;
+      dst_track_st* tTrk ;
       for ( int i = 0 ; i < (int)eventP->getNTracks() ; i++ ) {
          gTrk = eventP->getTrack(i);
          if ( !gTrk ) continue ;
          tTrk = &(track[i]);
          tTrk->id       = gTrk->id ;
-         tTrk->flag     = 1 ;
-         tTrk->invp     = 1./fabs(gTrk->pt);
-         tTrk->nfit     = gTrk->nHits ;
-         tTrk->nrec     = gTrk->nHits ;
-         tTrk->q        = (long)(gTrk->pt/fabs(gTrk->pt));
+         tTrk->invpt    = 1./fabs(gTrk->pt);
+         tTrk->n_point  = gTrk->nHits ;
+         tTrk->icharge  = (long)(gTrk->pt/fabs(gTrk->pt));
          tTrk->chisq[0] = gTrk->chisq[0] ;
          tTrk->chisq[1] = gTrk->chisq[1] ;
          tTrk->length   = gTrk->trackLength ;
@@ -431,26 +432,24 @@ Int_t St_l3t_Maker::MakeOffLine(){
 //   Generate output table
   
    int nTracks = max(1,tracker.nTracks);   
-   St_tpt_track *trackS = new St_tpt_track("l3Track",nTracks); 
+   St_dst_track *trackS = new St_dst_track("l3Track",nTracks); 
    m_DataSet->Add(trackS);
    fprintf(stderr," %s found Ntracks=%d\n",GetName(),nTracks);
 //
-   tpt_track_st*  track  = (tpt_track_st *)trackS->GetTable(); 
+   dst_track_st*  track  = (dst_track_st *)trackS->GetTable(); 
 //
-//   Copy ftf tracks to tpt_track_st table
+//   Copy ftf tracks to dst_track_st table
 //
    FtfTrack*     fTrk ;
-   tpt_track_st* tTrk ;
+   dst_track_st* tTrk ;
    for ( int j = 0 ; j < tracker.nTracks ; j++ ) {
       fTrk = &(tracker.track[j]);
       if ( !fTrk ) continue ;
       tTrk = &(track[j]);
-      tTrk->flag     = 1 ;
       tTrk->id       = fTrk->id ;
-      tTrk->invp     = 1./fabs(fTrk->pt);
-      tTrk->nfit     = fTrk->nHits ;
-      tTrk->nrec     = fTrk->nHits ;
-      tTrk->q        = fTrk->q;
+      tTrk->invpt    = 1./fabs(fTrk->pt);
+      tTrk->n_point  = fTrk->nHits ;
+      tTrk->icharge  = fTrk->q;
       tTrk->chisq[0] = fTrk->chi2[0] ;
       tTrk->chisq[1] = fTrk->chi2[1] ;
       tTrk->length   = fTrk->trackLength ;
@@ -480,21 +479,19 @@ Int_t St_l3t_Maker::MakeOffLine(){
 void St_l3t_Maker::MakeHistograms() {
 
 //		Get the table:
-  St_tpt_track *tpr = (St_tpt_track *)m_DataSet->Find("l3Track");
+  St_dst_track *tpr = (St_dst_track *)m_DataSet->Find("l3Track");
   if (!tpr) return;
-  tpt_track_st *r = tpr->GetTable();
+  dst_track_st *r = tpr->GetTable();
   for(Int_t i=0; i<tpr->GetNRows();i++,r++){
-    Int_t flag    = r->flag;
-    Float_t rnrec = r->nrec;
+    Float_t rnrec = r->n_point;
 
-    if(flag<=0) continue;
 
     m_l3_hits_on_track->Fill(rnrec);
     m_l3_azimuth->Fill(r->psi);
     m_l3_tan_dip->Fill(r->tanl);
     m_l3_r0->Fill(r->r0);
     m_l3_z0->Fill(r->z0);
-    m_l3_pt->Fill(1./r->invp);
+    m_l3_pt->Fill(1./r->invpt);
     m_l3_XyChi2->Fill(r->chisq[0]);
     m_l3_SzChi2->Fill(r->chisq[1]);
   }
