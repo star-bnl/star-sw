@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.87 2000/04/03 23:46:48 perev Exp $
+// $Id: StMaker.cxx,v 1.88 2000/04/05 02:45:13 fine Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -554,8 +554,7 @@ StMaker     *StMaker::GetParentChain() const
 }
 //_____________________________________________________________________________
 TDatime  StMaker::GetDateTime() const 
-{
-    
+{    
    TDatime td;    
    StEvtHddr *hd = (StEvtHddr*)GetDataSet("EvtHddr");
    if (!hd) return td;
@@ -576,9 +575,13 @@ const Char_t *StMaker::GetEventType() const
 //_____________________________________________________________________________
 void StMaker::PrintTimer(Option_t *option) 
 {
+  // Print timer information of this maker
+  // Entries counts how many times the methods:
+  //    Init(), Make() and Finish () 
+  // were called
    if(option){};
-   Printf("QAInfo:%-20s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds",GetName()
-                                         ,m_Timer.RealTime(),m_Timer.CpuTime());
+   Printf("QAInfo:%-20s: Real Time = %6.2f seconds Cpu Time = %6.2f seconds, Entries = %d",GetName()
+           ,m_Timer.RealTime(),m_Timer.CpuTime(),m_Timer.Counter());
 }
 
 //_____________________________________________________________________________
@@ -948,6 +951,9 @@ Int_t StMaker::FinishRun(int runumber) {return 0;}
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.88  2000/04/05 02:45:13  fine
+// call-counter has been added
+//
 // Revision 1.87  2000/04/03 23:46:48  perev
 // Increased error check
 //
