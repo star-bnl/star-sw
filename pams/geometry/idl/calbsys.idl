@@ -42,4 +42,6 @@
     float nsuper;       /*  - NUMBER OF READOUT SUPERLAYER            */
     float nsmd;         /*  - SMD POSITIONED AFTER SANDVICH TYPE LAYE */
     float nsublay[2];   /*  - NUMBER OF LAYERS IN A SUPERLAYER        */
+    float nmodule[2];   /*  - NUMBER OF MODULES                       */
+    float shift;        /*  - STARTING AZIMUTH OF THE FIRST MODULE    */
 };
