@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.66 1999/08/12 18:53:48 fine Exp $ 
+// $Id: St_Table.cxx,v 1.67 1999/08/13 17:42:34 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.67  1999/08/13 17:42:34  fine
+// Comments clean up
+//
 // Revision 1.66  1999/08/12 18:53:48  fine
 // clash between St_tableDescriptor::GetSize and St_Table::GetSize resolved
 //
@@ -1188,6 +1191,33 @@ int St_Table::PointerToPointer(G__DataMemberInfo &m)
    return 0;
 }
 
+#if 0
+
+//______________________________________________________________________________
+Bool_t St_Table::MakeExpression(const Char *expressions[],Int_t nExpressions)
+{
+   St_tableDescriptor *dsc = GetRowDescriptor();
+   tableDescriptor_st *descTable  = dsc->GetTable();
+   Int_t size = dsc->GetNRows();
+   // Create function
+   cout << "Float_t  Selection(const Char *expresions[],Float *results[], void *address[])" << endl;
+   cout << "{                                                          << endl;
+   cout << "  void *nextAddress[] = address;"                          << endl;
+   for (int i=0; i < dsc->GetNRows(); i++,descTable++ ) {
+     const Char_t *type = typeNames[descTable->m_Type];
+     cout << type  << " &" << descTable->m_ColumnName << " = *(" << type << "*)nextAddress++" << endl;
+   }
+   // Create expressions
+   for (int i=0; i < nExpressions; i++ ) {
+     cout << "*result["<<i<<"]=" << expressions[i] << ";"  << endl;
+     if (i == 0 ) 
+         cout  << "if (*result[0] == 0) return 0;" << endl;
+   };
+   cout << "return *result[0];}"; << endl;
+   // Create byte code and check syntax
+    return kTRUE;
+}
+#endif
 //______________________________________________________________________________
 void St_Table::MakeHeader(const Char_t *prefix,const Char_t *tablename,
                          const Char_t *suffix, FILE *fl)
