@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.28 1999/05/10 17:16:16 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.29 1999/05/10 20:03:54 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.29  1999/05/10 20:03:54  kathy
+// add new member function ExamineLogYList and RemoveFromLogYList
+//
 // Revision 1.28  1999/05/10 17:16:16  kathy
 // added new member function SetDefaultLogYList and implemented and tested
 //
@@ -194,11 +197,12 @@ ClassImp(St_QA_Maker)
   St_QA_Maker::St_QA_Maker(const char *name, const char *title):StMaker(name,title)
 {
 
-// First, zero all pointers defined in the header file
+// St_QA_Maker - constructor
+//  - zero all pointers defined in the header file
 
   m_ListOfLog = 0;
   m_QACanvas = 0;
-  
+
   // for method MakeEvSum - from table event_summary
   m_trk_tot_gd = 0;      //! number of good global tracks divided by total
   m_glb_trk_tot=0;       //! # tracks total from globtrk
@@ -330,7 +334,9 @@ ClassImp(St_QA_Maker)
 
 }
 //_____________________________________________________________________________
+
 St_QA_Maker::~St_QA_Maker(){
+// St_QA_Maker - destructor
   SafeDelete(m_QACanvas);
   if (m_ListOfLog) {
     m_ListOfLog->Delete();
@@ -338,11 +344,13 @@ St_QA_Maker::~St_QA_Maker(){
   }
 }
 //_____________________________________________________________________________
-// Method DrawHists -->
-// Plot the selected  histograms and generate the postscript file as well if any
 
 Int_t St_QA_Maker::DrawHists() 
-{  
+{
+// Method DrawHists -->
+// Plot the selected  histograms and generate the postscript file as well 
+
+  
   cout << " **** Now in St_QA_Maker::DrawHists  **** " << endl;
 
 
@@ -421,11 +429,13 @@ Int_t St_QA_Maker::DrawHists()
 }
 
 //_____________________________________________________________________________
-// Method ListHists -->
-// List of all histograms
+
 
 Int_t St_QA_Maker::ListHists() 
 {  
+// Method ListHists -->
+// List of all histograms
+
   cout << " **** Now in St_QA_Maker::ListHists **** " << endl;
 
   TObject *obj = 0;
@@ -445,21 +455,52 @@ Int_t St_QA_Maker::ListHists()
       histReadCount++;
 //  \n means newline, \" means print a quote
 //      printf(" %d. Have histogram Type %s, Name %s with Title=\"%s\"\n",histReadCount,obj->ClassName(),obj->GetName(),obj->GetTitle());
-      cout << " Hist No. " << histReadCount << ", Type: " << obj->ClassName() 
+      cout << " ListHists: Hist No. " << histReadCount << ", Type: " << obj->ClassName() 
            << ", Name: " << obj->GetName() << ", Title \"" << obj->GetTitle() << "\"  "<< endl; 
     }
   }
 
-  cout << " ****  Total No. Histograms  = " << histReadCount <<endl;
+  cout << " ListHists: Total No. Histograms  = " << histReadCount <<endl;
   return histReadCount;
 }
 
 //_____________________________________________________________________________
+
+
+Int_t St_QA_Maker::ExamineLogYList() 
+{  
+// Method ExamineLogYList
+// List of all histograms that will be drawn with logy scale
+
+  cout << " **** Now in St_QA_Maker::ExamineLogYList **** " << endl;
+
+// m_ListOfLog -  is a list of log plots
+// construct a TObject
+  TObject *obj = 0;
+// construct a TIter ==>  () is an overloaded operator in TIter
+  TIter nextObj(m_ListOfLog);
+  Int_t LogYCount = 0;
+
+// use = here instead of ==, because we are setting obj equal to nextObj and then seeing if it's T or F
+  while (obj = nextObj()) {
+
+    cout << " St_QA_Maker::ExamineLogYList has hist " <<  obj->GetName() << endl;
+    LogYCount++;
+
+  }
+
+  cout << " Now in St_QA_Maker::ExamineLogYList, No. Hist. in LogY scale = " << LogYCount <<endl;
+  return LogYCount;
+}
+
+//_____________________________________________________________________________
+
+
+Int_t St_QA_Maker::AddToLogYList(const Char_t *HistName){  
 // Method AddToLogYList
 //   making list of all histograms that we want drawn with LogY scale
 
-Int_t St_QA_Maker::AddToLogYList(const Char_t *HistName){  
-  cout << " **** Now in St_QA_Maker::AddToLogYList  **** " << endl;
+//  cout << " **** Now in St_QA_Maker::AddToLogYList  **** " << endl;
 
 // Since I'm creating a new list, must delete it in the destructor!!
 //make a new TList on heap(persistant); have already defined m_ListOfLog in header file
@@ -469,12 +510,45 @@ Int_t St_QA_Maker::AddToLogYList(const Char_t *HistName){
 // create TObjString on heap
    TObjString *HistNameObj = new TObjString(HistName);
 
-// - check if it's already on the list
-// - check if it's really a histogram
+// - check if it's already on the list - use FindObject method of TList
+    TObject *lobj = 0;
+    lobj = m_ListOfLog->FindObject(HistName);
+// now can use Add method of TList
+    if (!lobj) {
+       m_ListOfLog->Add(HistNameObj);
+       cout << " St_QA_Maker::AddToLogYList: " << HistName  <<endl;
+    }
+    else  cout << " St_QA_Maker::AddToLogYList: " << HistName << " already in list - not added" <<endl;
+ 
+// return using a method of TList (inherits GetSize from TCollection)
+ return m_ListOfLog->GetSize();
+}
 
-// now can use method of TList
-    m_ListOfLog->Add(HistNameObj);
-  
+
+//_____________________________________________________________________________
+
+
+Int_t St_QA_Maker::RemoveFromLogYList(const Char_t *HistName){  
+// Method RemoveFromLogYList
+//   remove hist from  list  that we want drawn with LogY scale
+
+//  cout << " **** Now in St_QA_Maker::RemoveFromLogYList  **** " << endl;
+
+// check if list exists:
+  if (m_ListOfLog) {
+    
+// the remove method for TList requires a TObject input  
+// - check if it's  on the list - use FindObject method of TList
+    TObject *lobj = 0;
+    lobj = m_ListOfLog->FindObject(HistName);
+// now can use Remove method of TList
+    if (lobj) {
+      m_ListOfLog->Remove(lobj);
+      cout << " RemoveLogYList: " << HistName << " has been removed from list" <<endl;
+    }
+    else  cout << " RemoveLogYList: " << HistName << " not on list - not removing" <<endl;
+
+  } 
 // return using a method of TList (inherits GetSize from TCollection)
  return m_ListOfLog->GetSize();
 }
@@ -485,6 +559,9 @@ Int_t St_QA_Maker::AddToLogYList(const Char_t *HistName){
 //    - create default list of histograms we want plotted in LogY scale
 
 void St_QA_Maker::SetDefaultLogYList(){  
+// Method SetDefaultLogYList
+//    - create default list of histograms we want plotted in LogY scale
+
   cout << " **** Now in St_QA_Maker::SetDefaultLogYList  **** " << endl;
 
   const Char_t *sdefList[] = {"QaGlobtrkPt", 
@@ -510,15 +587,18 @@ void St_QA_Maker::SetDefaultLogYList(){
 }
 
 //_____________________________________________________________________________
+
 Int_t St_QA_Maker::Finish() {
+// St_QA_Maker - Finish, Draw histograms if SetDraw true
   if (drawinit)  DrawHists();
 
   return StMaker::Finish();
 }
 //_____________________________________________________________________________
+
 Int_t St_QA_Maker::Init(){
-  
-  
+// St_QA_Maker - Init; book histograms and set defaults for member functions
+    
 //book histograms --------------
   BookHistEvSum();
   BookHistGlob();
@@ -545,8 +625,9 @@ Int_t St_QA_Maker::Init(){
   return StMaker::Init();
 }
 //_____________________________________________________________________________
+
 Int_t St_QA_Maker::Make(){
-  //  PrintInfo();
+// St_QA_Maker - Make; fill histograms
   
   // Call methods to fill histograms
   
@@ -577,9 +658,10 @@ Int_t St_QA_Maker::Make(){
   return kStOK;
 }
 //_____________________________________________________________________________
+
 void St_QA_Maker::BookHistEvSum(){
   
-  // for method MakeEvSum - from table event_summary
+ // for method MakeEvSum - from table event_summary
   m_trk_tot_gd    = new TH1F("QaEvsumGlbTrkGoodDTotal","evsum: num good track over total",
                              55,0.,1.1);
   m_trk_tot_gd->SetXTitle("number of good/total tracks");
@@ -1196,7 +1278,7 @@ void St_QA_Maker::MakeHistEmsHitsBsmd(St_DataSet *dst){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.28 1999/05/10 17:16:16 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.29 1999/05/10 20:03:54 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
