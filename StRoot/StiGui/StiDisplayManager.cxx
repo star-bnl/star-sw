@@ -75,6 +75,7 @@ void StiDisplayManager::draw()
 {
     mnode->Draw();
 
+    cout <<"StiDisplayManager::draw()"<<endl;
     for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
 	StiDrawableHits* val = dynamic_cast<StiDrawableHits*>((*it).second);
 	if (val) {
@@ -82,6 +83,7 @@ void StiDisplayManager::draw()
 	    val->draw();
 	}
     }
+    cout <<"StiDisplayManger::draw()\tDone drawing"<<endl;
     
     return;
 }
@@ -95,6 +97,18 @@ void StiDisplayManager::reset()
     }
     
 }
+
+/*
+  void StiDisplayManager::draw(StiDrawable* val)
+  {
+  stidrawablemap::iterator where = mmap.find(val->name());
+  if (where==mmap.end()) {
+  cout <<"StiDisplayManger::draw(StiDrawable*) ERROR:\tdrawable not found"<<endl;
+  return;
+  }
+  (*where)->draw();
+  }
+*/
 
 void StiDisplayManager::update()
 {

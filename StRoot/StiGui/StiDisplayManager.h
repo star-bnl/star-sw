@@ -38,6 +38,7 @@ public:
     void cd();
     void update();
     void draw();
+    //void draw(StiDrawable*); //Update just this object
 
     void setInvisible(); //All
     void setInvisible(const StiDrawable*);
