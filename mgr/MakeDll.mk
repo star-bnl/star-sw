@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.63 1999/02/12 02:50:30 fisyak Exp $
+# $Id: MakeDll.mk,v 1.64 1999/02/14 23:10:08 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.64  1999/02/14 23:10:08  fisyak
+# split tables for HP, remove duplicates for root4star
+#
 # Revision 1.63  1999/02/12 02:50:30  fisyak
 # Fix St_Tables, single module
 #
@@ -219,7 +222,7 @@ FILES_XDF  := $(wildcard $(SRC_DIR)/St_XDFFile.cxx)
 ifneq (tables,$(PGGNAME))
 FILES_HH   := $(wildcard $(SRC_DIR)/*.h $(SRC_DIR)/*.hh)
 ifneq (,$(FILES_HH))
-FILES_H    := $(shell grep -l ClassDef $(FILES_HH))
+FILES_H    := $(foreach p, $(FILES_HH), $(shell grep -l ClassDef $(p)))
 endif
 else
 FILES_H    := $(wildcard $(SRC_DIR)/St*Table.h)
@@ -310,14 +313,29 @@ else
 
 MY_SO  := $(SO_LIB)
 ifndef NT
-  QWE    := $(strip $(wildcard $(MY_SO).*))
-  SL_NEW := $(MY_SO).1000
+  QWE    :=$(strip $(wildcard $(MY_SO).*))
+  SL_NEW :=$(MY_SO).1000
 ifneq (,$(QWE))
-  NQWE := $(words $(QWE))
-  QWE  := $(word $(NQWE),$(QWE))
-  QWE  := $(subst $(MY_SO).,,$(QWE))
-  QWE  := $(shell expr $(QWE) + 1)
-  SL_NEW := $(MY_SO).$(QWE)
+  NQWE :=$(words $(QWE))
+  QWE  :=$(word $(NQWE),$(QWE))
+  QWE  :=$(subst $(MY_SO).,,$(QWE))
+  QWE  :=$(shell expr $(QWE) + 1)
+  SL_NEW :=$(MY_SO).$(QWE)
+endif
+ifneq (,$(findstring $(PKG),tables))
+ifneq (,$(findstring $(STAR_SYS),hp_ux102)) 
+  SO_LIB_CINT :=$(strip $(basename $(SO_LIB))Cint.$(SOEXT))
+  MY_SO_CINT  :=$(SO_LIB_CINT)
+  EWQ         :=$(strip $(wildcard $(MY_SO_CINT).*))
+  SL_NEW_CINT :=$(MY_SO_CINT).1000
+ifneq (,$(EWQ))
+  NEWQ :=$(words $(EWQ))
+  EWQ  :=$(word $(NEWQ),$(EWQ))
+  EWQ  :=$(subst $(MY_SO_CINT).,,$(EWQ))
+  EWQ  :=$(shell expr $(EWQ) + 1)
+  SL_NEW_CINT :=$(MY_SO_CINT).$(EWQ)
+endif
+endif
 endif
 else #/* NT */
   SL_NEW := $(MY_SO)
@@ -414,22 +432,36 @@ else
 endif
 
 
-Libraries : $(MY_SO) 
+Libraries : $(MY_SO) $(MY_SO_CINT) 
 
 
 ifndef NT
 
-$(MY_SO) : $(FILES_O) $(wildcard $(OBJ_DIR)/Templates.DB/*.$(O))  $(STAR_FILES_O)
+$(MY_SO) : $(FILES_O) $(wildcard $(OBJ_DIR)/Templates.DB/*.$(O)) $(STAR_FILES_O)
 
-ifneq ($(STAR_SYS),hp_ux102)   
-	cd $(OBJ_DIR); \
+ifeq (,$(findstring $(STAR_SYS),hp_ux102)) 
+	cd $(OBJ_DIR);  \
         $(SO) $(SOFLAGS) $(SoOUT)$(SL_NEW) $(ALL_DEPS)  $(LIBRARY); \
         $(RM) $(MY_SO); $(LN) $(SL_NEW) $(MY_SO)
-else  # hp_ux102
+else  # hp_ux102  CXXOPTS="($(notdir $(filter %Cint%, $(ALL_DEPS))))"; export CXXOPTS; 
+ifdef MY_SO_CINT
 	cd $(OBJ_DIR); \
-        $(SO) $(SOFLAGS) $(SoOUT)$(SL_NEW) *.$(O) $(LIBRARY); \
-        $(RM) $(MY_SO); $(LN) $(SL_NEW) $(MY_SO)
+	$(SO) $(SOFLAGS)  $(SoOUT)$(SL_NEW_CINT) *Cint.o $(LIBRARY);\
+        $(RM) $(MY_SO); $(LN)  $(SL_NEW_CINT) $(MY_SO_CINT)
+	cd $(OBJ_DIR); \
+	$(SO) $(SOFLAGS)  $(SoOUT)$(SL_NEW) $(filter-out %Cint.o, $(notdir $(ALL_DEPS)))  $(LIBRARY);\
+        $(RM) $(MY_SO); $(LN)  $(SL_NEW) $(MY_SO)
+else
+	cd $(OBJ_DIR); \
+	$(SO) $(SOFLAGS)  $(SoOUT)$(SL_NEW) $(notdir $(ALL_DEPS))  $(LIBRARY);\
+        $(RM) $(MY_SO); $(LN)  $(SL_NEW) $(MY_SO)
+endif
 endif # hp_ux102
+#	cd $(OBJ_DIR); $(RM) link; echo "" > link; 
+#	cd $(OBJ_DIR); for p in $(filter-out %Cint.o, $(notdir $(ALL_DEPS))); do echo $$p >> link; done; 
+#	cd $(OBJ_DIR); for p in $(filter %Cint.o, $(notdir $(ALL_DEPS))); do echo $$p >> link; done; 
+#	cd $(OBJ_DIR); $(LD) -c link $(filter-out -g,$(SOFLAGS)) $(SoOUT)$(SL_NEW) $(LIBRARY); $(RM) $(MY_SO); 
+# $(LN)
 else # NT
 ifdef MY_SO
 MY_SOLIB := $(subst /bin/,/lib/,$(MY_SO))
@@ -550,16 +582,30 @@ test:
 	@echo TMP_DIR     := $(TMP_DIR)
 	@echo SRC_DIR     := $(SRC_DIR) 
 	@echo BIN_DIR     := $(BIN_DIR) 
-	@echo DOIT        := $(DOIT)
 	@echo OUTPUT_DIRS := $(OUTPUT_DIRS)
 	@echo INPUT_DIRS  := $(INPUT_DIRS)
-	@echo FILES_SRC   := $(FILES_SRC)
-	@echo FILES_D     := $(FILES_D)
-	@echo FILES_O     := $(FILES_O)
 	@echo INCLUDES    := $(INCLUDES)
 	@echo VPATH       := $(VPATH)
 	@echo OSFID       := $(OSFID)
+	@echo SO_LIB      := $(SO_LIB)
+	@echo MY_SO       := $(MY_SO)
+	@echo SL_NEW      := $(SL_NEW)
+	@echo QWE         := "|"$(QWE)"|"
+	@echo NQWE        := $(NQWE)
+	@echo EWQ        := "|"$(EWQ)"|"
+	@echo NEWQ       := $(NEWQ)
+	@echo LIBRARY     := $(LIBRARY)
+	@echo STAR_OBJ_DIR:= $(STAR_OBJ_DIR)
+	@echo STAR_FILES_O:= $(STAR_FILES_O)
+	@echo FILES_MOD_HS:= $(FILES_MOD_HS)
+	@echo STAR_SRC    := $(STAR_SRC)
+	@echo NAMES_MOD_HS:= $(NAMES_MOD_HS)
+	@echo MY_SO_CINT := $(MY_SO_CINT)
+	@echo SL_NEW_CINT := $(SL_NEW_CINT)
 
+	@echo FILES_SRC   := $(FILES_SRC)
+	@echo FILES_D     := $(FILES_D)
+	@echo FILES_O     := $(FILES_O)
 	@echo FILES_ALL := $(FILES_ALL)
 	@echo FILES_ORD := $(FILES_ORD)
 	@echo FILES_DEF := $(FILES_DEF)
@@ -601,14 +647,4 @@ ifdef NT
 	@echo INCLUDE     := $(INCLUDE)
 
 endif #/* NT */
-	@echo SO_LIB      := $(SO_LIB)
-	@echo MY_SO       := $(MY_SO)
-	@echo SL_NEW      := $(SL_NEW)
-	@echo QWE         := "|"$(QWE)"|"
-	@echo NQWE        := $(NQWE)
-	@echo LIBRARY     := $(LIBRARY)
-	@echo STAR_OBJ_DIR:= $(STAR_OBJ_DIR)
-	@echo STAR_FILES_O:= $(STAR_FILES_O)
-	@echo FILES_MOD_HS:= $(FILES_MOD_HS)
-	@echo STAR_SRC    := $(STAR_SRC)
-	@echo NAMES_MOD_HS:= $(NAMES_MOD_HS)
+	@echo DOIT        := $(DOIT)

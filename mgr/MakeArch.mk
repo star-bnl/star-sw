@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.61  1999/02/14 23:10:07  fisyak
+#  split tables for HP, remove duplicates for root4star
+#
 #  Revision 1.60  1999/01/30 04:08:22  fisyak
 #  Add StRootEvent
 #
@@ -158,7 +161,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/01/30 04:08:22 $ 
+#             Last modification $Date: 1999/02/14 23:10:07 $ 
 #. default setings
 
 MAKE  := gmake
@@ -430,7 +433,7 @@ ifneq (,$(findstring $(STAR_SYS),hp_ux102 hp700_ux90))
 #    case "hp":
 #  ====================
   HPUX := Yess
-  OSFID := HPUX CERNLIB_HPUX CERNLIB_UNIX 
+  OSFID := HPUX CERNLIB_HPUX CERNLIB_UNIX ST_NO_NAMESPACES
   STRID := hpu
   ifdef GCC
     CXXFLAGS  := $(DEBUG) -fPIC  -I/usr/include/X11R5 -Dextname -D_HPUX_SOURCE 
@@ -453,7 +456,7 @@ endif
   OSFID += NEW_ARRAY_ON
     CXX     := aCC
     CC      := cc
-    LD      := $(CXX)
+    LD      := ld
     SO      := $(CXX)
     CXXFLAGS  := $(DEBUG) -z +Z  -Dextname  
     CFLAGS   := $(DEBUG) -Ae -z +Z -Dextname  
@@ -471,7 +474,7 @@ endif
   else
     CXX     :=  CC
     CC      := cc
-    LD      := $(CXX)
+    LD      := ld
     SO      := $(CXX)
     CXXFLAGS  := $(DEBUG) +a1 -z +Z -w -Dextname  -D_HPUX_SOURCE +DAportable
     CFLAGS   :=  $(DEBUG) -Ae -z +Z -Dextname   -D_HPUX_SOURCE +DAportable
