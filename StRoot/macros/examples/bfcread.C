@@ -1,5 +1,8 @@
-// $Id: bfcread.C,v 1.14 1999/06/17 18:26:15 kathy Exp $
+// $Id: bfcread.C,v 1.15 1999/06/22 18:09:02 kathy Exp $
 // $Log: bfcread.C,v $
+// Revision 1.15  1999/06/22 18:09:02  kathy
+// change default input file
+//
 // Revision 1.14  1999/06/17 18:26:15  kathy
 // bfcread: change default input file; Example.. fix so works if you just execute it
 //
@@ -45,7 +48,7 @@ StChain *chain;
 TBrowser *brow=0;
 
 void bfcread(Int_t nevents=1, const char
-*MainFile="/disk00000/star/test/new/tfs_Solaris/year_2a/psc0208_01_40evts.dst.root")
+*MainFile="/disk00000/star/test/dev/tfs_Linux/Thu/year_2a/psc0208_01_40evts.dst.root")
 
 {
 //
