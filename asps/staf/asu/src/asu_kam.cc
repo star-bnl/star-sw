@@ -86,7 +86,7 @@ void kam_asuallocstats_()
 }
 STAFCV_T asuallocstats()
 {
-   asuAllocStats();
+   asuMallocStats();
    EML_SUCCESS(STAFCV_OK);
 }
 
