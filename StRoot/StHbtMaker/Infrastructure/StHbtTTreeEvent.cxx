@@ -16,7 +16,7 @@
 
 ClassImp(StHbtTTreeEvent)
 
-int StHbtTTreeEvent::mDebug = 1;
+int StHbtTTreeEvent::mDebug = 0;
 TClonesArray *StHbtTTreeEvent::fgTracks = 0;
 TClonesArray *StHbtTTreeEvent::fgV0s = 0;
 TClonesArray *StHbtTTreeEvent::fgKinks = 0;
@@ -150,24 +150,6 @@ void StHbtTTreeEvent::fillEventInfo(const StHbtEvent* event){
 
   if (mDebug) cout << "StHbtTTreeEvent::fillEventInfo(StEvent* event) - leaving" << endl;
 } 
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-//-----------------------------------------------------------------------
-void StHbtTTreeEvent::remove(){
-  if (mDebug) cout << "StHbtTTreeEvent::remove(...) -  #tracks, #V0s, #Kinks " << mNtracks << ", " << mNv0s << ", " << mNkinks << endl;
-  cout << fTracks->IsOwner() << endl;
-  for (unsigned short i=0; i<mNtracks; i++) delete (StHbtTTreeTrack*)fTracks->UncheckedAt(i);
-  for (unsigned short i=0; i<mNv0s; i++) delete (StHbtTTreeV0*)fV0s->UncheckedAt(i);
-  for (unsigned short i=0; i<mNkinks; i++) delete (StHbtTTreeKink*)fKinks->UncheckedAt(i);
-  
-  fTracks->Clear("");
-  fV0s->Clear("");
-  fKinks->Clear("");
-
-  mNtracks=0;
-  mNv0s=0;
-  mNkinks=0;
-}
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------

@@ -20,13 +20,13 @@
 
 #include "StHbtMaker/Infrastructure/CTH.hh"
 
-typedef CTH1D StHbt1DHisto;
-typedef CTH2D StHbt2DHisto;
-typedef CTH3D StHbt3DHisto;
+// typedef CTH1D StHbt1DHisto;
+// typedef CTH2D StHbt2DHisto;
+// typedef CTH3D StHbt3DHisto;
 
-// typedef TH1D StHbt1DHisto;
-// typedef TH2D StHbt2DHisto;
-// typedef TH3D StHbt3DHisto;
+typedef TH1D StHbt1DHisto;
+typedef TH2D StHbt2DHisto;
+typedef TH3D StHbt3DHisto;
 typedef TF1 StHbtTF1;
 typedef TF2 StHbtTF2;
 typedef TF3 StHbtTF3;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtCheckPdgIdList.cxx,v 1.2 2000/07/16 21:38:22 laue Exp $
+ * $Id: StHbtCheckPdgIdList.cxx,v 1.3 2001/06/23 21:55:17 laue Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -8,6 +8,10 @@
  * Description: part of STAR HBT Framework: StHbtMaker package
  *
  * $Log: StHbtCheckPdgIdList.cxx,v $
+ * Revision 1.3  2001/06/23 21:55:17  laue
+ * StHbtCheckPdgIdList can take can not check for mother,particle,daughter
+ * Some output turned off
+ *
  * Revision 1.2  2000/07/16 21:38:22  laue
  * StHbtCoulomb.cxx StHbtSectoredAnalysis.cxx : updated for standalone version
  * StHbtV0.cc StHbtV0.hh : some cast to prevent compiling warnings
@@ -95,7 +99,11 @@ int StHbtCheckPdgIdList::CheckPdgIdList( pdgIdList* list, int pdgCode ){
   if (list->size()==0) return 1; // if there are no specified particles at all, accept everything
   for (pdgIdListIterator iter=list->begin(); iter!=list->end(); iter++)
     if ( (*iter)==pdgCode) return 1; // particle accepted
-  return 0; // particle refused
+  return 0; // pdgCode refused
 }
-  
-
+//__________________
+int StHbtCheckPdgIdList::CheckPdgIdList( int pdgCode, int motherPdgCode, int daughterPdgCode ){
+  return CheckPdgIdList(mAcceptedParticles,pdgCode) 
+    * CheckPdgIdList(mAcceptedMothers,motherPdgCode) 
+    * CheckPdgIdList(mAcceptedDaughters,daughterPdgCode); 
+}
