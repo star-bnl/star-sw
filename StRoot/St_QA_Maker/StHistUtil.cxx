@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.2 1999/11/05 21:51:58 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.3 1999/11/05 22:26:01 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.3  1999/11/05 22:26:01  kathy
+// now allow setting of global title from a method
+//
 // Revision 1.2  1999/11/05 21:51:58  kathy
 // write title at top of each page of histograms in DrawHists method
 //
@@ -71,6 +74,9 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
   const Char_t *psfileName = m_PsFileName.Data();
   if (!m_PsFileName.IsNull()) psf = new TPostScript((char *)psfileName);  
   
+// set global title which goes at top of each page of histograms
+  const Char_t *gtitle = m_GlobalTitle.Data();
+
 //set Style of Plots
   const Int_t numPads = m_PadColumns*m_PadRows;  
 // SetPaperSize wants width & height in cm: A4 is 20,26 & US is 20,24
@@ -96,7 +102,7 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
 
 // write title at top of canvas
 // order of PaveLabel is x1,y1,x2,y2 - fraction of pad (which is the canvas now)
-   TPaveLabel *title = new TPaveLabel(0.1,0.96,0.9,0.99," Global Title Goes Here ","br");
+   TPaveLabel *title = new TPaveLabel(0.1,0.96,0.9,0.99,(char *)gtitle,"br");
    title->SetFillColor(18);
    title->SetTextFont(32);
    title->SetTextSize(0.6);
