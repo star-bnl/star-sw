@@ -5,6 +5,9 @@
 #include "StDetectorDbMagnet.h"
 #include "StDetectorDbClock.h"
 
+#include "StEvent/StEvent.h"
+#include "StEvent/StDetectorState.h"
+
 ClassImp(StDetectorDbMaker)
 
 //_____________________________________________________________________________
@@ -46,7 +49,20 @@ Int_t StDetectorDbMaker::Make(){
     // Update Rich Scalers/Voltages
     StDetectorDbRichScalers* scalers = StDetectorDbRichScalers::instance();
     scalers->update(this);
-    
+
+
+    // Fill StEvent::StDetectorState
+    StEvent* rEvent = 0;
+    rEvent = static_cast<StEvent*>(GetInputDS("StEvent"));
+    if(rEvent){
+	StDetectorState* richState = new StDetectorState(kRichId,scalers->getRichHVStatus());
+
+	if(richState){
+	    rEvent->addDetectorState(richState);
+	}
+	
+    }
+
     return kStOK;
 }
 
