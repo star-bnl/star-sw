@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.25 2000/03/29 16:55:48 ullrich Exp $
+% $Id: StEvent.tex,v 2.26 2000/03/30 16:55:38 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -21,8 +21,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 2.25  2000/03/29 16:55:48  ullrich
-% Added reference section and emprt user guide page for StL3Trigger.
+% Revision 2.26  2000/03/30 16:55:38  ullrich
+% Modified reference section for StTrack::key().
 %
 % Revision 2.33  2000/05/22 22:04:07  ullrich
 % Removed StRichPixelCollection ref section and added description
@@ -147,8 +147,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.25 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/29 16:55:48 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.26 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/30 16:55:38 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -172,8 +172,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.25 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/29 16:55:48 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.26 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/30 16:55:38 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -181,17 +181,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.25 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/29 16:55:48 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.26 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/30 16:55:38 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.25 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/29 16:55:48 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.26 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/30 16:55:38 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.25 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/29 16:55:48 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.26 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/30 16:55:38 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -206,8 +206,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.25 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/29 16:55:48 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.26 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/30 16:55:38 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
@@ -4258,8 +4258,8 @@ definition in the header file.
     \verb+Long_t n_pts_tpc_in[24];+\\
     Total number of space points in inner TPC sectors.
     
-    This method (and the referring data member) is likely
-    to be removed in future versions.
+    \verb+Long_t n_pts_tpc_out[24];+\\
+    Total number of space points in outer TPC sectors.
     
     \verb+Long_t n_trk_tpc[2];+\\
     Total number of tracks in TPC, tan(dip angle) $< 0$ $(\ge 0)$.
