@@ -29,7 +29,7 @@ class StGlobalTrack;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.3 1999/07/14 16:59:41 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.4 1999/07/15 13:54:34 fine Exp $";
  private: 
     TList         *m_HitCollector;     //!
     TList         *m_TrackCollector;   //!
@@ -68,7 +68,7 @@ class StEventDisplayMaker : public StMaker {
    virtual void         SetMode       (Int_t   m = 0){StMaker::SetMode(m);} // *MENU*
    virtual Int_t        GetTrackFilterFlag(){ return m_TrackFilterFlag;}
    virtual Int_t        GetHitFilterFlag(){ return m_HitFilterFlag;}
-   virtual Int_t        ReDraw(){return Make();} // *MENU*
+   virtual Int_t        ReDraw(){ClearCanvas(); return Make();} // *MENU*
 
    virtual Int_t        SetTrackFilterFlag(Int_t flag=1){Int_t f = m_TrackFilterFlag; m_TrackFilterFlag=flag; return f;} // *MENU*
    virtual Int_t        SetHitFilterFlag(Int_t flag=1)  {Int_t f = m_HitFilterFlag; m_HitFilterFlag=flag; return f;}  // *MENU*
@@ -81,7 +81,7 @@ class StEventDisplayMaker : public StMaker {
 
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.3 1999/07/14 16:59:41 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.4 1999/07/15 13:54:34 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
 };
