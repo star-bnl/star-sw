@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.162 2001/01/29 23:12:06 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.163 2001/01/31 17:12:04 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -37,7 +37,8 @@ Bfc_st BFC[] = {
   {"Y1e"         ,""  ,"","db,calib"                            ,"","","Turn on Year 1e parameters",kFALSE},
   {"Y1h"         ,""  ,"","db,calib"                            ,"","","Turn on Year 1h parameters",kFALSE},
   {"RY1h"        ,""  ,"","db,calib"                        ,"","","Real data with Year1h geometry",kFALSE},
-  {"Y2a"         ,""  ,"","db,calib"                            ,"","","Turn on Year 2a parameters",kFALSE},
+  {"Y2a"         ,""  ,"","db,calib"                      ,"","","Turn on Year 2B :asymptotic STAR",kFALSE},
+  {"Y2b"         ,"" ,"","db,calib","","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
   {"NoDb"        ,""  ,"","HalfField"                               ,"","","Take out Db from Chain",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Trigger Type","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -59,6 +60,8 @@ Bfc_st BFC[] = {
   {"cy1e"        ,""  ,"","y1e,Cdefault"                                 ,"","","Turn on chain y1h",kFALSE},
   {"cy1h"        ,""  ,"","y1h,Cdefault"                                 ,"","","Turn on chain y1e",kFALSE},
   {"Cy2a"        ,""  ,"","y2a,tpc,ftpc,emc,l0,l3,Cdst,tags,Tree,svt"    ,"","","Turn on chain y2a",kFALSE},
+  {"Cy2b"        ,""  ,"","y2b,tpc,rich,Physics,ftpc,emc,svt,l0,l3,Cdst,Kalman,tags,Tree,evout"
+                                                                         ,"","","Turn on chain y2b",kFALSE},
   {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -175,7 +178,7 @@ Bfc_st BFC[] = {
                                            ,"StLaserEventMaker","StLaserEvent,StLaserEventMaker","",kFALSE},  
   {"PreVtx"     ,"","tpcChain","tpt,SCL,sim_T,tpc_T,svt_T,ftpcT,globT,ctf_T",
                                        "StPreVertexMaker","St_tpc,St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"svt"         ,"svtChain","","svt_T,srs,stk"                             ,"StMaker","StChain","",kFALSE},
+  {"svt"         ,"svtChain","","svt_T,srs,Est"                             ,"StMaker","StChain","",kFALSE},
   {"ssd"         ,"","","sls,spa,scf,scm,sce"                                             ,"","","",kFALSE},
   {"srs"         ,"svt_hits","svtChain","tls,Simu"  ,"St_srs_Maker","St_tpc,St_svt,St_srs_Maker","",kFALSE},
   {"sls"      ,"","svtChain","tls,Simu"     ,"St_sls_Maker","St_tpc,St_svt,StSsdSimulationMaker","",kFALSE},
@@ -225,6 +228,7 @@ Bfc_st BFC[] = {
   {"l3onl"       ,"","",""                      ,"Stl3RawReaderMaker","St_l3,Stl3RawReaderMaker","",kFALSE},
   {"analysis"    ,"","","Event"           ,"StAnalysisMaker","StAnalysisMaker","Exampe of Analysis",kFALSE},
   {"pec"         ,"PeC","","Event"                       ,"StPeCMaker","StPeCMaker","PCollAnalysis",kFALSE},
+  {"RichSpectra" ,"","",""                            ,"StRichSpectraMaker","StRichSpectraMaker","",kFALSE},
   {"TagsChain"   ,"TagsChain","",""                                         ,"StMaker","StChain","",kFALSE},
   {"TpcTag"      ,"","TagsChain",""                             ,"StTpcTagMaker","StTpcTagMaker","",kFALSE},
   {"Flow"        ,"","TagsChain","Event"   ,"StFlowMaker","StEvent,StEventUtilities,StFlowMaker","",kFALSE},
@@ -860,7 +864,8 @@ void StBFChain::SetGeantOptions(){
       else {if (GetOption("Y1h") || 
 		GetOption("RY1h"))   geantMk->LoadGeometry("detp geometry YEAR_1H");
       else {if (GetOption("Y2a"))    geantMk->LoadGeometry("detp geometry YEAR_2A");
-      else                           geantMk->LoadGeometry("detp geometry YEAR_2A");}}}}
+      else {if (GetOption("Y2b"))    geantMk->LoadGeometry("detp geometry YEAR_2b");
+      else                           geantMk->LoadGeometry("detp geometry YEAR_2A");}}}}}
       if (GetOption("gstar")) {
 	geantMk->Do("subevent 0;");
 	// gkine #particles partid ptrange yrange phirange vertexrange 
@@ -905,8 +910,9 @@ void StBFChain::SetDbOptions(){
   else {if (GetOption("Y1e"))  db->SetDateTime("year_1e");
   else {if (GetOption("Y1h"))  db->SetDateTime("year_1h");
   else {if (GetOption("Y2a"))  db->SetDateTime("year_2a");
+  else {if (GetOption("Y2b"))  db->SetDateTime("year_2b"); 
   else {if (GetOption("gstar"))db->SetDateTime("year_2a");
-  }}}}}}}}}}}}
+  }}}}}}}}}}}}}
 	gMessMgr->QAInfo() << db->GetName() 
 			   << " Maker set time = " 
 			   << db->GetDateTime().GetDate() 
