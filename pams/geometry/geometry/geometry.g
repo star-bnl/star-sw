@@ -1,5 +1,9 @@
-* $Id: geometry.g,v 1.95 2004/10/26 21:46:23 potekhin Exp $
+* $Id: geometry.g,v 1.96 2004/10/28 22:05:53 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.96  2004/10/28 22:05:53  potekhin
+* Changed the coding convention for the SSD geometry
+* "levels", which specify which file to load.
+*
 * Revision 1.95  2004/10/26 21:46:23  potekhin
 * 1) Cleaned out the remaining test code from Y2004B
 * 2) Created Y2005X which is same as Y2004B except for
@@ -397,6 +401,7 @@
 
    Integer    LENOCC,LL,IPRIN,Nsi,NsiMin,i,j,l,kgeom,nmod(2),nonf(3),
               ecal_config, ecal_fill,
+              sisd_level,
               Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf,
               CorrNum, PhmdConfig,
               BtofConfig, VpddConfig, FpdmConfig,
@@ -1056,7 +1061,7 @@ If LL>1
 
                   "Silicon Strip Detector Version "
                      sisd=on;
-                     SisdConfig = 20;
+                     SisdConfig = 12;
 
                 }
 
@@ -1173,7 +1178,7 @@ If LL>1
 
                   "Silicon Strip Detector Version "
                      sisd=on;
-                     SisdConfig = 20;
+                     SisdConfig = 22;
 
 
                   "FTPC Readout barrel "
@@ -1304,9 +1309,19 @@ If LL>1
   if(sisd) then
        call AgDETP new ('SISD')
        if (SisdConfig>10) then
-         SisdConfig=SisdConfig/10
+         sisd_level=SisdConfig/10
+         SisdConfig=SisdConfig-sisd_level*10
+
          call AgDETP add ('ssdp.Config=',SisdConfig ,1)
-         call sisdgeo1
+
+         if     (sisd_level.eq.1) then
+            call sisdgeo1
+         elseif (sisd_level.eq.2) then
+            call sisdgeo2
+         else
+            write(*,*) '************************* ERROR IN PARSING THE SSD GEOMETRY LEVEL! ************************'
+         endif
+
        else
          call AgDETP add ('ssdp.Config=',SisdConfig ,1)
          call sisdgeo
