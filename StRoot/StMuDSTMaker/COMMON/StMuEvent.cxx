@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StMuEvent.cxx,v 1.4 2003/02/20 15:29:42 laue Exp $
+ * $Id: StMuEvent.cxx,v 1.5 2003/07/22 19:14:41 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -13,6 +13,7 @@
 #include "StEvent/StDetectorState.h" 
 
 #include "StEventUtilities/StuRefMult.hh"
+#include "StEventUtilities/StuFtpcRefMult.hh"
 
 #include "StarClassLibrary/SystemOfUnits.h"
 #include "StarClassLibrary/StTimer.hh"
@@ -103,6 +104,8 @@ void StMuEvent::fill(const StEvent* event){
 
   mRefMultPos = uncorrectedNumberOfPositivePrimaries(*event);
   mRefMultNeg = uncorrectedNumberOfNegativePrimaries(*event); 
+  mRefMultFtpcEast = uncorrectedNumberOfFtpcEastPrimaries(*event);
+  mRefMultFtpcWest = uncorrectedNumberOfFtpcWestPrimaries(*event); 
 
 //!   mReactionPlane[0] = event->mReactionPlane[0];              
 //!   mReactionPlane[1] = event->mReactionPlane[1];              
@@ -112,6 +115,9 @@ void StMuEvent::fill(const StEvent* event){
 /***************************************************************************
  *
  * $Log: StMuEvent.cxx,v $
+ * Revision 1.5  2003/07/22 19:14:41  laue
+ * multiplicities for FTPC added
+ *
  * Revision 1.4  2003/02/20 15:29:42  laue
  * StMuTriggerIdCollection added
  *

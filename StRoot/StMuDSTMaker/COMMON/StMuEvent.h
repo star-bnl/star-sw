@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuEvent.h,v 1.7 2003/02/20 15:29:42 laue Exp $
+ * $Id: StMuEvent.h,v 1.8 2003/07/22 19:14:40 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -64,6 +64,12 @@ class StMuEvent : public TObject {
   unsigned short refMultNeg();
   /// Reference multiplicity of charged particles as defined in StEventUtilities/StuRefMult.hh
   unsigned short refMult();
+  /// Reference multiplicity of particles in the east FTPC as defined in StEventUtilities/StuFtpcRefMult.hh
+  unsigned short refMultFtpcEast();
+  /// Reference multiplicity of particles in the west FTPC as defined in StEventUtilities/StuFtpcRefMult.hh
+  unsigned short refMultFtpcWest();
+  /// Reference multiplicity of particles in the east+west FTPC as defined in StEventUtilities/StuFtpcRefMult.hh
+  unsigned short refMultFtpc();
   /// Currently not filled properly.
   double reactionPlane(unsigned short);
   void   setReactionPlane(unsigned short, double v);
@@ -95,13 +101,15 @@ class StMuEvent : public TObject {
 
   UShort_t mRefMultPos;
   UShort_t mRefMultNeg;
+  UShort_t mRefMultFtpcEast;
+  UShort_t mRefMultFtpcWest;
   Float_t mReactionPlane[2];              
   Float_t mReactionPlanePtWgt[2];              
 
   friend class StMuDst;
   friend class StMuDstMaker;
   friend class StMuL3EventSummary;
-  ClassDef(StMuEvent,3)
+  ClassDef(StMuEvent,4)
 };
 
 inline int StMuEvent::eventId() { return mEventInfo.id();}
@@ -122,6 +130,9 @@ inline StMuTriggerIdCollection& StMuEvent::triggerIdCollection(){return mTrigger
 inline unsigned short StMuEvent::refMultPos() {return mRefMultPos;}
 inline unsigned short StMuEvent::refMultNeg() {return mRefMultNeg;}
 inline unsigned short StMuEvent::refMult() {return refMultPos()+refMultNeg();}
+inline unsigned short StMuEvent::refMultFtpcEast() {return mRefMultFtpcEast;}
+inline unsigned short StMuEvent::refMultFtpcWest() {return mRefMultFtpcWest;}
+inline unsigned short StMuEvent::refMultFtpc() {return mRefMultFtpcEast+mRefMultFtpcWest;}
 inline double StMuEvent::reactionPlane(unsigned short s) {return (s==0) ? mReactionPlane[0] : mReactionPlane[1];}
 inline void StMuEvent::setReactionPlane(unsigned short s, double v) {(s==0) ? mReactionPlane[0]=v : mReactionPlane[1]=v;}
 inline double StMuEvent::reactionPlanePtWgt(unsigned short s) {return (s==0) ? mReactionPlanePtWgt[0] : mReactionPlanePtWgt[1];}
@@ -144,6 +155,9 @@ inline StThreeVectorF StMuEvent::primaryVertexPosition() { return mEventSummary.
 /***************************************************************************
  *
  * $Log: StMuEvent.h,v $
+ * Revision 1.8  2003/07/22 19:14:40  laue
+ * multiplicities for FTPC added
+ *
  * Revision 1.7  2003/02/20 15:29:42  laue
  * StMuTriggerIdCollection added
  *
