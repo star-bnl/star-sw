@@ -10,6 +10,7 @@
 #include "TH3.h"
 #include "TProfile2D.h"
 #include "TString.h"
+//#include "Bichsel.h"
 
 class dEdxParameterization {
  private: 
@@ -30,11 +31,11 @@ class dEdxParameterization {
   Double_t     fI70Shift;            //!
   Double_t     fI60Shift;            //!
  public :
-  dEdxParameterization(const Char_t *Tag="bich",
-		       const Double_t MostProbableZShift = 0,
-		       const Double_t AverageZShift      = 0,
-		       const Double_t I70Shift           = 1,
-		       const Double_t I60Shift           = 1);
+    dEdxParameterization(const Char_t *Tag="p10", Int_t keep3D = 0,
+			 const Double_t MostProbableZShift = 0,
+			 const Double_t AverageZShift      = 0,
+			 const Double_t I70Shift           = 1,
+			 const Double_t I60Shift           = 1);
   virtual ~dEdxParameterization();
   Double_t    Interpolation(Int_t Narg, TH1 *hist, Double_t *XYZ, Int_t kase = 0);
   Double_t    Interpolation(TH3 *hist, Double_t X, Double_t Y, Double_t Z, Int_t kase = 0);
