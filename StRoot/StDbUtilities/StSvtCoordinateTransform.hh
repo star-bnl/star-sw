@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.hh,v 1.10 2002/02/20 17:08:08 caines Exp $
+ * $Id: StSvtCoordinateTransform.hh,v 1.11 2003/04/14 18:30:09 munhoz Exp $
  *
  * Author: Helen Caines made this on  April 14 2000
  *
@@ -41,6 +41,7 @@ class StSvtWaferCoordinate;
 class StSvtConfig;
 class StSvtGeometry;
 class StSvtHybridCollection;
+class StSvtT0;
 class svg_geom_st;
 class svg_shape_st;
 class srs_srspar_st;
@@ -65,8 +66,8 @@ public:
   // Svt Local <--> Global
   void  operator()(const StSvtLocalCoordinate&, StGlobalCoordinate&);
   void  operator()(const  StGlobalCoordinate& ,StSvtLocalCoordinate&);
-  void  setParamPointers( srs_srspar_st* srspar, svg_geom_st* geom, svg_shape_st* shape, StSvtConfig* config, StSvtHybridCollection* driftVeloc=NULL);
-  void  setParamPointers( StSvtGeometry* geom, StSvtConfig* config, StSvtHybridCollection* driftVeloc=NULL);
+  void  setParamPointers( srs_srspar_st* srspar, svg_geom_st* geom, svg_shape_st* shape, StSvtConfig* config, StSvtHybridCollection* driftVeloc=NULL, StSvtT0* T0=NULL);
+  void  setParamPointers( StSvtGeometry* geom, StSvtConfig* config, StSvtHybridCollection* driftVeloc=NULL, StSvtT0* T0=NULL);
   int  LocaltoGlobal(const StSvtLocalCoordinate&,   StThreeVector<double>& x, int Index);
   int  GlobaltoLocal(const StThreeVector<double>& x , StSvtLocalCoordinate&, int HardWarePos, int Index );
   double CalcDriftLength(const StSvtWaferCoordinate&, double x);
@@ -82,6 +83,7 @@ private:
   StSvtConfig *mconfig;
   StSvtGeometry* mgeom;
   StSvtHybridCollection* mDriftVelocity;
+  StSvtT0* mT0;
 
 };
 

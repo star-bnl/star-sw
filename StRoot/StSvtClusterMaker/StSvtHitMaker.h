@@ -1,5 +1,8 @@
-// $Id: StSvtHitMaker.h,v 1.12 2003/01/28 20:29:02 munhoz Exp $
+// $Id: StSvtHitMaker.h,v 1.13 2003/04/14 18:33:54 munhoz Exp $
 // $Log: StSvtHitMaker.h,v $
+// Revision 1.13  2003/04/14 18:33:54  munhoz
+// reading t0 from DB
+//
 // Revision 1.12  2003/01/28 20:29:02  munhoz
 // new filters for clusters
 //
@@ -59,6 +62,7 @@ class StSvtHybridCollection;
 class StSvtAnalysedHybridClusters;
 class StSvtData;
 class StSvtGeantHits;
+class StSvtT0;
  
 class StSvtHitMaker : public StMaker
 {
@@ -76,6 +80,7 @@ class StSvtHitMaker : public StMaker
   Int_t GetSvtClusterData();
   Int_t GetSvtGeometry();
   Int_t GetSvtDriftVelocity();
+  Int_t GetSvtT0();
   void TransformIntoSpacePoint();
   void SaveIntoTable(int numOfCluster, int index);
   void SaveIntoNtuple(int numOfCluster, int index);
@@ -83,7 +88,7 @@ class StSvtHitMaker : public StMaker
   void SetFileNames(char* name1="/dev/null", char* name2="/dev/null");
   Int_t Eval();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.12 2003/01/28 20:29:02 munhoz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.13 2003/04/14 18:33:54 munhoz Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  protected:
@@ -94,6 +99,7 @@ class StSvtHitMaker : public StMaker
   StSvtHybridCollection *mSvtCluColl; //!
   StSvtHybridCollection *mSvtGeantHitColl; //!
   StSvtHybridCollection *m_driftVeloc; //!
+  StSvtT0 *m_t0; //!
 
   StSvtAnalysedHybridClusters  *mSvtBigHit;  //!
   

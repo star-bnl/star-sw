@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.20 2003/02/11 23:37:26 caines Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.21 2003/04/14 18:30:00 munhoz Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -25,6 +25,7 @@
 #include "StSvtClassLibrary/StSvtWaferGeometry.hh"
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClassLibrary/StSvtHybridDriftVelocity.hh"
+#include "StSvtClassLibrary/StSvtT0.hh"
 #include <unistd.h>
 #include "TString.h"
 
@@ -53,19 +54,25 @@ void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
 						 svg_geom_st* geom, 
 						 svg_shape_st* shape,
 						 StSvtConfig* config,
-						 StSvtHybridCollection* driftVeloc){
+						 StSvtHybridCollection* driftVeloc,
+						 StSvtT0* T0){
   mgeom = new StSvtGeometry(param, geom, shape);
   mconfig = config;
   mDriftVelocity = driftVeloc;
-  
-};
+  mT0 = T0;  
+}
 //____________________________________________________________________________
 void StSvtCoordinateTransform::setParamPointers( StSvtGeometry* geom,
 						 StSvtConfig* config,
-						 StSvtHybridCollection* driftVeloc){
+						 StSvtHybridCollection* driftVeloc,
+						 StSvtT0* T0){
   mgeom = geom;
   mconfig = config;
   mDriftVelocity = driftVeloc;
+  mT0 = T0;
+
+  cout << "StSvtCoordinateTransform::t0 = " << mT0->getT0() << ", fsca = " << mT0->getFsca() << endl;
+endl;
 }
 
 //_____________________________________________________________________________
@@ -105,7 +112,8 @@ void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StSvtLo
 
 {
 
-  double t0=11;
+  double t0=mT0->getT0();
+  cout << "operator::t0 = " << t0 << endl;
 
   b.setLayer(a.layer());
   b.setLadder(a.ladder());
@@ -151,7 +159,9 @@ void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StSvtLo
 void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StSvtWaferCoordinate& b)
 {
 
-  double t0=11;
+  double t0=mT0->getT0();
+
+  cout << "operator::t0 = " << t0 << endl;
 
   StThreeVector<double> pos(0,0,0);
 
@@ -608,7 +618,9 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
   
   // hard wired for the time being (07/29/2001) MM
   //float vd = 675000;
-  float fsca = 25000000;
+  //float fsca = 25000000;
+
+  float fsca = mT0->getFsca();
 
   int barrel;
   if ((a.layer()==1) || (a.layer()==2)) barrel = 1;
@@ -676,7 +688,9 @@ double StSvtCoordinateTransform::UnCalcDriftLength(const StSvtLocalCoordinate& a
 
   // hard wired for the time being (07/29/2001) MM
   //float vd = 675000;
-  float fsca = 25000000;
+  //float fsca = 25000000;
+
+  float fsca = mT0->getFsca();
 
   int barrel;
   if ((a.layer()==1) || (a.layer()==2)) barrel = 1;
