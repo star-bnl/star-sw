@@ -26,6 +26,7 @@ class  StSVTReader
 
   StSVTReader(StDAQReader *rd);
   virtual ~StSVTReader();
+  virtual int close();
 
   virtual int getAnodeList(int Barrel, int Ladder, int Wafer, int Hybrid, unsigned char *&anodeList);
       // Fills (*anodeList[]) with the list of anode numbers containing hits
@@ -91,9 +92,9 @@ class  StSVTReader
 
   int getSCAZero(){return mSCAZero;}
   int getTimeZero(){return mTimeZero;}
-
-protected:
   virtual void Update();
+protected:
+
   virtual int setWafer(int Barrel, int Ladder, int Wafer);
   int getWaferIndex(int Barrel, int Ladder, int Wafer); 
 

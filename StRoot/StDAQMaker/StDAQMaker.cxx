@@ -24,9 +24,9 @@ ClassImp(StDAQMaker)
 //_____________________________________________________________________________
 StDAQMaker::~StDAQMaker()
 {
-delete fDAQReader;
-delete fEvtHddr;
-delete fDAQReaderSet;
+  delete fDAQReader;
+  //delete fEvtHddr;	Better small leak than crash
+  delete fDAQReaderSet;
 }
 //_____________________________________________________________________________
 Int_t StDAQMaker::Init()
@@ -59,6 +59,7 @@ Int_t StDAQMaker::Open(const char*)
 void StDAQMaker::Close(Option_t *)
 {
   Clear();
+  delete fDAQReaderSet; fDAQReaderSet = 0; //Helen added ???
   fDAQReader->close();
 }
 //_____________________________________________________________________________
