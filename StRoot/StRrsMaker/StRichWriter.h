@@ -1,5 +1,5 @@
 /*********************************************************Writer.h**\
- * $Id: StRichWriter.h,v 1.5 2000/03/12 23:56:34 lasiuk Exp $
+ * $Id: StRichWriter.h,v 1.6 2000/04/05 16:07:46 lasiuk Exp $
  *
  * Description:
  *   Writer is the output module for  
@@ -10,9 +10,8 @@
  *
  ********************************************************************
  * $Log: StRichWriter.h,v $
- * Revision 1.5  2000/03/12 23:56:34  lasiuk
- * new coordinate system
- * exchange MyRound with inline templated funtion
+ * Revision 1.6  2000/04/05 16:07:46  lasiuk
+ * add to coded list of info
  *
  * Revision 1.5  2000/03/12 23:56:34  lasiuk
  * new coordinate system
@@ -46,7 +45,7 @@
 #include "StRichRrsMacros.h"
 #include "StRichPadPlane.h"
 #include "StRichPhysicsDb.h"
-
+#include "StRichEnumeratedTypes.h"
 
 class StRichWriter {
 public:
@@ -57,7 +56,7 @@ public:
     ~StRichWriter();
     
     //void initStorage(int rows, int cols) { mStorage->resize(rows,cols); }
-    void putSignal(int row, int col, double s, int id, int track_p);
+    void putSignal(int row, int col, double s, int id, int gid, int track_p, StRichSignalType signal=eUnknown);
     
     pad_type& getSignal(int row, int col);
     
@@ -66,9 +65,12 @@ public:
     
     int rows() const;
     int cols() const;
-    void clear();
+    int pads() const;
     int getADC(int row, int col) const;
-    
+
+    void clear();
+    void cleanUpMCInfo();
+
 protected:
     StRichWriter();
     StRichWriter(StRichPadPlane*);
@@ -87,6 +89,9 @@ StRichWriter::rows() const { return mStorage->row_size(); }
 
 inline int
 StRichWriter::cols() const { return mStorage->col_size(); }
+
+inline int
+StRichWriter::pads() const { return mStorage->col_size(); }
 
 inline void
 StRichWriter::clear()  { mStorage->clear(); }
