@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.hh,v 1.2 2000/08/25 17:19:09 caines Exp $
+ * $Id: StSvtCoordinateTransform.hh,v 1.3 2000/08/26 20:37:59 caines Exp $
  *
  * Author: Helen Caines made this on  April 14 2000
  *
@@ -33,7 +33,7 @@ using std::vector;
 #include "tables/St_svg_geom_Table.h"
 #include "tables/St_svg_shape_Table.h"
 #include "tables/St_srs_srspar_Table.h"
-#include "StSvtClassLibrary/StSvtData.hh"
+#include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StThreeVector.hh"
 
 
@@ -64,7 +64,7 @@ public:
   void  operator()(const StSvtLocalCoordinate&, StGlobalCoordinate&);
   void  operator()(const  StGlobalCoordinate& ,StSvtLocalCoordinate&);
   void  setParamPointers( srs_srspar_st* srspar, svg_geom_st* geom, 
-			  svg_shape_st* shape, StSvtData* config );
+			  svg_shape_st* shape, StSvtHybridCollection* config );
   void  LocaltoGlobal(const StSvtLocalCoordinate&,   StThreeVector<double>& x);
   void  GlobaltoLocal(const StThreeVector<double>& x , StSvtLocalCoordinate&, int Index );
   double CalcDriftLength(double x);
@@ -78,14 +78,14 @@ private:
   svg_geom_st *mgeom;
   svg_shape_st *mshape;
   srs_srspar_st *mparam;
-  StSvtData  *mconfig;
+  StSvtHybridCollection *mconfig;
 
 };
 
 inline void StSvtCoordinateTransform::setParamPointers( srs_srspar_st* param,
 							svg_geom_st* geom, 
 							svg_shape_st* shape,
-							StSvtData* config){
+							StSvtHybridCollection* config){
   mparam = param;
   mgeom = geom;
   mconfig = config;

@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.2 2000/08/25 17:19:09 caines Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.3 2000/08/26 20:37:59 caines Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -58,14 +58,23 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a, StSvtWafe
 
 //      Raw Data          -->  SVT Local  Coordinate
 void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StSvtLocalCoordinate& b)
+
 {
-  b.position().setX(CalcDriftLength(a.timebucket()));
-  b.position().setY(CalcTransLength(a.anode()));
-  b.position().setZ(0.015);
+
+  double t0=0;
+
   b.setLayer(a.layer());
   b.setLadder(a.ladder());
   b.setWafer(a.wafer());
   b.setHybrid(a.hybrid());
+
+
+  double t = a.timebucket() - t0;
+
+  b.position().setX(CalcDriftLength(t));
+  b.position().setY(CalcTransLength(a.anode()));
+  b.position().setZ(0.015);
+
   
   int idShape = 0;
   
@@ -96,6 +105,8 @@ void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StSvtLo
 void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StSvtWaferCoordinate& b)
 {
 
+  double t0=0;
+
   StThreeVector<double> pos(0,0,0);
 
   b.setLayer(a.layer());
@@ -122,7 +133,10 @@ void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StSvtWa
     pos.setY( mshape[idShape].shape[1] - a.position().y());
   }
   
-  b.setTimeBucket(UnCalcDriftLength(pos.x()));
+
+
+  double t = UnCalcDriftLength(pos.x()) + t0;
+  b.setTimeBucket(t);
   b.setAnode(UnCalcTransLength(pos.y()));
 
   return;
@@ -440,7 +454,42 @@ double StSvtCoordinateTransform::CalcDriftLength(double x){
 
   //Gives drift distance of spt in cm in local coords from timebuckets
 
-      return (x/mparam->fsca)*mparam->vd;
+
+  // There is a smaller drift velocity in the focusing region 
+  //  This has to be used when having only the average drift velocity across 
+  //  the all detector 
+       
+  //  mparam->vd = average velocity from y=0 to y=3cm
+  //   v2 = velocity in drift region ( y > ofoc cm)
+  //   v1 = velocity in focusing region ( y < ofoc cm)
+  //     a,b = parameters from Sanjeev's fit 
+
+  double aa,bb,cc,v2,v1,t,distance;
+  
+  double a=1.80;
+  double b=240000;
+  double d=0.27;
+  double l=mshape[0].shape[0];
+
+
+
+  aa=l/mparam->vd;
+  bb=(b*l/mparam->vd-l-a*d+d);
+  cc=(d*b-b*l);
+  v2=(-bb+sqrt(pow(bb,2)-4*aa*cc))/(2*aa);
+  v1=(v2+b)/a; /* using Sanjeev's fit from the bench */
+  
+  v1=v1*0.8;  
+  
+  t=x/mparam->fsca;
+  
+  
+  distance= (v1*t);
+    
+  if (distance>d) distance=d+v2*(t-d/v1);
+  
+  return distance;
+  
 }
 //_____________________________________________________________________________
 
@@ -448,7 +497,41 @@ double StSvtCoordinateTransform::UnCalcDriftLength(double x){
 
   //Gives drift distance of spt in timebuckets from cm in local coords
 
-      return (x/mparam->vd)*mparam->fsca;
+
+
+  // There is a smaller drift velocity in the focusing region 
+  //  This has to be used when having only the average drift velocity across 
+  //  the all detector 
+       
+  //  mparam->vd = average velocity from y=0 to y=3cm
+  //   v2 = velocity in drift region ( y > ofoc cm)
+  //   v1 = velocity in focusing region ( y < ofoc cm)
+  //     a,b = parameters from Sanjeev's fit 
+
+  double aa,bb,cc,v2,v1,t,distance;
+  
+  double a=1.80;
+  double b=240000;
+  double d=0.27;
+  double l=mshape[0].shape[0];
+
+
+
+  aa=l/mparam->vd;
+  bb=(b*l/mparam->vd-l-a*d+d);
+  cc=(d*b-b*l);
+  v2=(-bb+sqrt(pow(bb,2)-4*aa*cc))/(2*aa);
+  v1=(v2+b)/a; /* using Sanjeev's fit from the bench */
+  
+  v1=v1*0.8;  
+  
+  t=x*mparam->fsca;
+  t /=v1;
+
+  if (x>d) t = (x-d)/v2 + d/v1;
+  
+  return (t*mparam->fsca);
+
 }
 //_____________________________________________________________________________
 
