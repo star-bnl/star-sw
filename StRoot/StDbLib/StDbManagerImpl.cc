@@ -1,6 +1,6 @@
 /***************************************************************************
  *   
- * $Id: StDbManagerImpl.cc,v 1.9 2001/10/24 04:05:20 porter Exp $
+ * $Id: StDbManagerImpl.cc,v 1.10 2001/12/21 04:54:45 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbManagerImpl.cc,v $
+ * Revision 1.10  2001/12/21 04:54:45  porter
+ * sped up table definition for emc and changed some ostrstream usage for
+ * insure tests
+ *
  * Revision 1.9  2001/10/24 04:05:20  porter
  * added long long type to I/O and got rid of obsolete dataIndex table
  *
@@ -453,7 +457,7 @@ mhasServerList = true;
 void
 StDbManagerImpl::findServersXml(ifstream& is){
 
-  char* stardatabase;
+  char* stardatabase=0;
 
   while(!is.eof()){
 
@@ -502,6 +506,7 @@ StDbManagerImpl::findServersXml(ifstream& is){
    if(dbNames)delete [] dbNames;
   }
   if(stardatabase)delete [] stardatabase;
+  stardatabase=0;
   }
 }
 

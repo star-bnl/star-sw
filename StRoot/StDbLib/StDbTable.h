@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.h,v 1.17 2001/10/24 04:05:20 porter Exp $
+ * $Id: StDbTable.h,v 1.18 2001/12/21 04:54:46 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTable.h,v $
+ * Revision 1.18  2001/12/21 04:54:46  porter
+ * sped up table definition for emc and changed some ostrstream usage for
+ * insure tests
+ *
  * Revision 1.17  2001/10/24 04:05:20  porter
  * added long long type to I/O and got rid of obsolete dataIndex table
  *
@@ -267,6 +271,7 @@ public:
   virtual void        setRowLimit(int nrows);
   virtual void        addNRows(int nrows);
   virtual void        addNElements(int* elements, int nrows);
+  virtual void        resizeNumRows(int nrows);
 
   // methods for reading & writing to Db & to file
   virtual void StreamAccessor(typeAcceptor* accept, bool isReading);

@@ -86,7 +86,7 @@ endif
 endif
 
 ifeq (Linux,$(SYSTYPE))
-#  CXX = insure
+# CXX = insure
 
 AR       := /usr/bin/ar -rvu
 

@@ -55,23 +55,24 @@ StDbDefaults::getFileName(const char* fileName){
   char* nullReturn=0;
   if(!fileName) return nullReturn;
 
+ 
   ostrstream fn;
+
   if(strcmp(fileName,"HOME")==0){
     fn<<getenv("HOME")<<"/"<<mdbServerFile<<ends;
-    return fn.str();
-  } 
-
-  if(strcmp(fileName,"STAR")==0){
+  } else if(strcmp(fileName,"STAR")==0){
     fn<<getenv("STAR")<<"/"<<"StDb/servers/"<<mdbServerFile<<ends;
-    return fn.str();
+  } else {
+    char* fname=getenv(fileName);
+    if(!fname)return nullReturn;
+    fn<<fname;
+    if(opendir(fname))fn<<"/"<<mdbServerFile;  
+    fn<<ends;
   }
 
-  char* fname=getenv(fileName);
-  if(!fname)return nullReturn;
+  char* retVal= new char[strlen(fn.str())+1];
+  strcpy(retVal,fn.str());
+  fn.freeze(0);
 
-  fn<<fname;
-  if(opendir(fname))fn<<"/"<<mdbServerFile;  
-  fn<<ends;
-  
-  return fn.str();
+  return retVal;
 }
