@@ -3,7 +3,7 @@
 *  Table type:dst_run_summary.idl 
 *  Module    : fill_dst_run_summary
 *
-*  Fill DST event summary table.
+*  Fill DST run summary table.
 *
 */
 #include "PAM.idl"
