@@ -62,6 +62,7 @@ ClassImp(MainFrame)
 
 MainFrame::MainFrame(const TGWindow *p, UInt_t w, UInt_t h)
   : TGMainFrame(p, w, h),
+		_toolkit(StiToolkit::instance()),
     mchain(0), mIoMaker(0)
 {
   s_instance = this;
@@ -276,11 +277,10 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 	  else if (parm1 == M_Tracking_ResetEvent) 
 	    {
 	      setCurrentDetectorToDefault();
-	      StiToolkit * toolkit = StiToolkit::instance();
-	      toolkit->getTrackFinder()->reset();
-	      toolkit->getDisplayManager()->reset();
-	      toolkit->getDisplayManager()->draw();
-	      toolkit->getDisplayManager()->update();
+	      _toolkit->getTrackFinder()->reloadEvent();
+	      _toolkit->getDisplayManager()->reset();
+	      _toolkit->getDisplayManager()->draw();
+	      _toolkit->getDisplayManager()->update();
 	      showCurrentDetector();
 	    }
 	  else if (parm1 == M_Tracking_EventStep) stepToNextEvent();
@@ -310,7 +310,7 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 	      case M_SeedFinderOptions:
 		{
 		  /*
-		    StiLocalTrackSeedFinder * seedFinder = StiToolkit::instance()->getTrackSeedFinder();
+		    StiLocalTrackSeedFinder * seedFinder = _toolkit->getTrackSeedFinder();
 		    if (seedFinder)
 		    new StiOptionFrame(fClient->GetRoot(), this, seedFinder);
 		    else
@@ -319,7 +319,7 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 		}
 	      case M_TrackFinderOptions:
 		{
-		  EditableParameters * pars = dynamic_cast<EditableParameters *>(StiToolkit::instance()->getTrackFinder()->getParameters());
+		  EditableParameters * pars = dynamic_cast<EditableParameters *>(_toolkit->getTrackFinder()->getParameters());
 		  if (pars)
 		    new StiOptionFrame(fClient->GetRoot(), this, pars);
 		  else
@@ -329,7 +329,7 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 	      case M_McTrackFilterOptions: 
 		{
 		  StiDefaultTrackFilter * mcFilter;
-		  Filter<StiTrack> * filter = StiToolkit::instance()->getTrackFinder()->getGuiMcTrackFilter();
+		  Filter<StiTrack> * filter = _toolkit->getTrackFinder()->getGuiMcTrackFilter();
 		  mcFilter = dynamic_cast<StiDefaultTrackFilter*>(filter);
 		  if (mcFilter)
 		      new StiOptionFrame(fClient->GetRoot(), this, mcFilter);
@@ -340,7 +340,7 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 	      case M_TrackFilterOptions: 
 		{
 		  StiDefaultTrackFilter * filter;
-		  filter = static_cast<StiDefaultTrackFilter *>(StiToolkit::instance()->getTrackFinder()->getGuiTrackFilter());
+		  filter = static_cast<StiDefaultTrackFilter *>(_toolkit->getTrackFinder()->getGuiTrackFilter());
 		  new StiOptionFrame(fClient->GetRoot(), this, filter);
 		  break;
 		}
@@ -390,7 +390,7 @@ void MainFrame::setView(StiView* view)
 void MainFrame::doNextTrackStep()
 {
   setCurrentDetectorToDefault();
-  StiToolkit::instance()->getTrackFinder()->findNextTrackSegment();
+  _toolkit->getTrackFinder()->findNextTrackSegment();
   showCurrentDetector();
 }
 
@@ -398,7 +398,7 @@ void MainFrame::finishTrack()
 {
   // cout <<"MainFrame::finishTrack()"<<endl;
   setCurrentDetectorToDefault();
-  StiToolkit::instance()->getTrackFinder()->findNextTrack();
+  _toolkit->getTrackFinder()->findNextTrack();
   showCurrentDetector();
   // cout <<"\tMainFrame::finishTrack() done"<<endl;
 }
@@ -407,7 +407,7 @@ void MainFrame::finishEvent()
 {
   cout<<"MainFrame::finishEvent() - INFO - Started"<<endl;
   setCurrentDetectorToDefault();
-  StiToolkit::instance()->getTrackFinder()->findTracks();
+  _toolkit->getTrackFinder()->findTracks();
   showCurrentDetector();
   cout<<"MainFrame::finishEvent() - INFO - Done"<<endl;
 }
@@ -440,7 +440,7 @@ void MainFrame::stepThroughNEvents()
 
 void MainFrame::printFactorySize()
 {
-  //StiToolkit::instance()->printStatistics();
+  //_toolkit->printStatistics();
 }
 
 void MainFrame::setAllVisible()
@@ -580,7 +580,7 @@ void MainFrame::setLayer()
     double position;
     cin >>position;
     cout <<"Setting to  position:\t"<<position<<endl;
-    StiDetectorContainer*rdet = StiToolkit::instance()->getDetectorContainer();
+    StiDetectorContainer*rdet = _toolkit->getDetectorContainer();
     rdet->setToDetector(position);
     StiDetector* layer = **rdet;
     if (!layer) {
@@ -603,7 +603,7 @@ void MainFrame::setLayerAndAngle()
     double angle;
     cin >> angle;
     cout <<"Setting to  position:\t"<<position<<"\tangle:\t"<<angle<<endl;
-    StiDetectorContainer*rdet = StiToolkit::instance()->getDetectorContainer();
+    StiDetectorContainer*rdet = _toolkit->getDetectorContainer();
     rdet->setToDetector(position, angle);
     StiDetector* layer = **rdet;
     if (!layer) {
@@ -619,7 +619,7 @@ void MainFrame::moveOut()
     //cout <<"Function Not Currently Implemented"<<endl;
     //cout <<"MainFrame::moveOut()"<<endl;
     setCurrentDetectorToDefault();
-    StiDetectorContainer*rdet = StiToolkit::instance()->getDetectorContainer();
+    StiDetectorContainer*rdet = _toolkit->getDetectorContainer();
     cout <<"\t DetectorContainer returned: "<<rdet->moveOut()<<endl;
     showCurrentDetector();
     //cout <<"\t Leaving MainFrame::moveOut()"<<endl;
@@ -663,7 +663,7 @@ void MainFrame::printHitContainerForDetector()
     StiDetector* layer = *rdet;
     if (!layer)
       throw runtime_error("MainFrame::printHitContainerForDetector() - FATAL - Failed to get detector");
-    cout << StiToolkit::instance()->getHitContainer()->hits( layer->getPlacement()->getCenterRefAngle(),
+    cout << _toolkit->getHitContainer()->hits( layer->getPlacement()->getCenterRefAngle(),
 							     layer->getPlacement()->getCenterRadius() )
 	 <<endl;
 }
@@ -700,7 +700,7 @@ void MainFrame::setCurrentDetectorToDefault()
 
 void MainFrame::printHits()
 {
-  cout <<*(StiToolkit::instance()->getHitContainer())<<endl;
+  cout <<*(_toolkit->getHitContainer())<<endl;
 }
 
 void MainFrame::toggleFitFind()
@@ -721,7 +721,7 @@ void MainFrame::toggleFitFind()
 
 void MainFrame::printVertices()
 {
-  cout <<StiToolkit::instance()->getHitContainer()->vertices()<<endl;
+  cout <<_toolkit->getHitContainer()->vertices()<<endl;
 }
 
 

@@ -47,6 +47,7 @@ using std::string;
 #include <TEnv.h>
 #include "StChain.h"
 class StiView;
+class StiToolkit;
 
 enum ETestCommandIdentifiers 
   {
@@ -194,7 +195,9 @@ private:
   void printFactorySize();
   
   void toggleFitFind();
-  
+
+  StiToolkit * _toolkit;
+	
  private:
   
   MainFrame(); ///Not implemented
