@@ -1,7 +1,7 @@
 # Sample Makefile.control - You should customize this file.
 #
 # Specify the ASPs and PAMs upon which this package depends.
-#ASPS := nio tbr ami dio dui tdm spx soc
+#ASPS := tbr ami dio dui tdm spx soc
 #PAMS := pam
 #
 # Specify special user libraries against which to link.

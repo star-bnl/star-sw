@@ -27,7 +27,9 @@ int eml_init()
 // eml_def_();
 
 /*- Initialize STAF vectors. -*/
+/* 23OCT96 ---- TEMPORARY DEBUG HACK ----
    eml_kuvec_init_();
+-- 23OCT96 ---- TEMPORARY DEBUG HACK --*/
 
    return TRUE;
 }

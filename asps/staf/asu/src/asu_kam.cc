@@ -34,12 +34,15 @@
 *:* ASU/HELLO [ MESSAGE ]
 *:<---------------------------------------------------------------------
 */
-void kam_asu_hello_(){kam_asu_hello();}
-int kam_asu_hello()
+void kam_asu_hello_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
    char*  msg = ku_gets();	/* message */
 
+	STAFCV_T status = asu_hello(msg);
+}
+STAFCV_T asu_hello(char* msg)
+{
    printf("ASU:\tHello, %s \n",msg);
    EML_SUCCESS(STAFCV_OK);
 }
@@ -53,10 +56,14 @@ int kam_asu_hello()
 *:* ASU/TIME
 *:<---------------------------------------------------------------------
 */
-void kam_asu_time_(){kam_asu_time();}
-int kam_asu_time()
+void kam_asu_time_()
 {
    long npars = ku_npar();      /* number of KUIP parameters */
+
+	STAFCV_T status = asu_time();
+}
+STAFCV_T asu_time()
+{
    time_t it,*pt=&it;
 
    *pt = time(0);
@@ -73,8 +80,11 @@ int kam_asu_time()
 *:* ASU/TIME
 *:<---------------------------------------------------------------------
 */
-void kam_asuallocstats_(){kam_asuallocstats();}
-int kam_asuallocstats()
+void kam_asuallocstats_()
+{
+	STAFCV_T status = asuallocstats();
+}
+STAFCV_T asuallocstats()
 {
    asuAllocStats();
    EML_SUCCESS(STAFCV_OK);
