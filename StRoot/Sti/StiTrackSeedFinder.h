@@ -1,11 +1,11 @@
-//StiHitSeedFinder.h
+//StiTrackSeedFinder.h
 //M.L. Miller (Yale Software)
 //03/01
 
 //Abstract base class for track seed finding for the tracker
 
-#ifndef StiHitSeedFinder_HH
-#define StiHitSeedFinder_HH
+#ifndef StiTrackSeedFinder_HH
+#define StiTrackSeedFinder_HH
 
 #include <vector>
 #include "StiSeedFinder.h"
@@ -13,38 +13,36 @@
 #include "StiHitContainer.h" //Include temp., so that we can use typedefs
 #include "CombinationIterator.h"
 
-class StiDummyTrack;
+class StiTrack;
 class StTrack;
 
-class StiHitSeedFinder : public StiSeedFinder
+class StiTrackSeedFinder : public StiSeedFinder
 {
     typedef CombinationIterator<StiHit*> combo_iterator;
     typedef combo_iterator::tvector tvector;
 
 public:
-    StiHitSeedFinder(); //Not Implemented
-    StiHitSeedFinder(StiHitContainer*);
-    StiHitSeedFinder(const StiHitSeedFinder&); //Not Implemented
-    virtual ~StiHitSeedFinder();
+    StiTrackSeedFinder(); //Not Implemented
+    StiTrackSeedFinder(StiHitContainer*);
+    StiTrackSeedFinder(const StiTrackSeedFinder&); //Not Implemented
+    virtual ~StiTrackSeedFinder();
     
     //Enforced User interface
     virtual bool hasMore();
-    virtual sti_track_pair* next();
+    virtual StiTrack* next();
     
-    void addLayer(int sector, int padrow);
+    void addLayer(double refangle, double position);
     virtual void clear();
     virtual void init();
-  
+    
     virtual void print() const; //Print contents of iterator
     int numberOfLayers() const;
     
 protected:
-    virtual StiDummyTrack* makeTrack(const tvector&) const;
+    virtual StiTrack* makeTrack(const tvector&) const;
     const StiHitContainer* mhitstore;
     combo_iterator* miterator;
     int mnlayers;
-    //Temp (4/13/01)
-    sti_track_pair* mtrackpair;
 };
 
 #endif

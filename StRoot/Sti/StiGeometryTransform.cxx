@@ -1,22 +1,41 @@
 //  17 may 01
 //  ben norman
 
+//Std
 #include <math.h>
+
+//SCL
 #include "StThreeVector.hh"
 
+//StDb
 #include "StDbUtilities/StTpcCoordinateTransform.hh"
+#include "StDbUtilities/StTpcLocalSectorCoordinate.hh"
+#include "StDbUtilities/StGlobalCoordinate.hh"
 #include "StTpcDb/StTpcDb.h"
+
+//Svt Tables
 #include "tables/St_svg_geom_Table.h"
 #include "tables/St_svg_config_Table.h"
 #include "tables/St_svg_shape_Table.h"
 
+//StEvent
+#include "StEventTypes.h"
+
+//StiMaker
 #include "StiMaker/StiMaker.h"
 
+//Sti
+#include "StiHit.h"
 #include "StiGeometryTransform.h"
 
-StiGeometryTransform::StiGeometryTransform(){
-    
+StiGeometryTransform* StiGeometryTransform::sinstance = 0;
+
+StiGeometryTransform::StiGeometryTransform()
+{
+    cout <<"StiGeometryTransform::StiGeometryTransform()"<<endl;
+
     // read in svt geometry tables
+    cout <<"Read in svt geometry tables"<<endl;
     St_DataSetIter local(StiMaker::instance()->GetInputDB("svt"));
     
     svgConfig = 
@@ -25,12 +44,29 @@ StiGeometryTransform::StiGeometryTransform(){
     aSvgShape = dynamic_cast<St_svg_shape *>(local("svgpars/shape"))->GetTable();
     
     // instantiate TPC coord x-form
+    cout <<"instantiate TPC coord x-form"<<endl;
     tpcTransform = new StTpcCoordinateTransform(gStTpcDb);
-    
+
+    sinstance = this;
+    cout <<"\tLeaving StiGeometryTransform::StiGeometryTransform()"<<endl;
 } // StiGeometryTransform()
 
-StiGeometryTransform::~StiGeometryTransform(){
+StiGeometryTransform::~StiGeometryTransform()
+{
 } // ~StiGeometryTransform
+
+StiGeometryTransform* StiGeometryTransform::instance()
+{
+    return (sinstance) ? sinstance : new StiGeometryTransform();
+}
+
+void StiGeometryTransform::kill()
+{
+    if (sinstance) {
+	delete sinstance;
+	sinstance = 0;
+    }
+}
 
 // returns the reference angle for the given sector number (out of the 
 // given total).  This assumes the star convention where the highest
@@ -165,3 +201,22 @@ double StiGeometryTransform::phiForSector(int iSector, int nSectors)
     return phi;
 }
 
+//Hit Translation routines
+void StiGeometryTransform::operator() (const StTpcHit* tpchit, StiHit* stihit)
+{
+    //Change if we change numbering scheme
+    stihit->setRefangle( static_cast<double>( tpchit->sector() ));
+    stihit->setPosition( static_cast<double>( tpchit->padrow() ));
+    
+    StGlobalCoordinate gHit( tpchit->position() );
+    StTpcLocalSectorCoordinate lsHit;
+    tpcTransform->operator()(gHit, lsHit);
+    stihit->setX( lsHit.position().x() );
+    stihit->setY( lsHit.position().y() );
+    stihit->setZ( lsHit.position().z() );
+    cout <<"TpcHit: "<<tpchit->sector()<<" "<<tpchit->padrow()<<" "<<tpchit->position();
+    cout <<" GlobHit: "<<gHit.position();
+    cout <<" LSHit: "<<lsHit.position()<<endl;
+    
+    return;
+}

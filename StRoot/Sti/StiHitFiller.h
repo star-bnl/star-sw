@@ -13,7 +13,7 @@
 
 class ostream;
 class StiHitContainer;
-class StiHitTranslator;
+class StiGeometryTransform;
 class StEvent;
 
 class StiHitFiller
@@ -28,6 +28,7 @@ public:
     void setEvent(StEvent* val) {mevent=val;}
     void fillHits(StiHitContainer*, StiHitFactory*) const;
 
+    void setTranslator();
     friend ostream& operator<<(ostream&, const StiHitFiller&);
 
 private:
@@ -35,7 +36,7 @@ private:
     void fillSvtHits(StiHitContainer*, StiHitFactory*) const;
     
 private:
-    StiHitTranslator* mtranslator;
+    StiGeometryTransform* mtranslator;
     StEvent* mevent;
     det_id_vector mvec;
     

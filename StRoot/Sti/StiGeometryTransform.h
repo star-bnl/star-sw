@@ -5,14 +5,25 @@
 #define STI_GEOMETRY_TRANSFORM_HH
 
 #include "StThreeVector.hh"
+#include "tables/St_svg_config_Table.h"
+
+class StTpcHit;
+class StSvtHit;
+class StiHit;
+class StTpcCoordinateTransform;
+class svg_geom_st;
+class svg_shape_st;
 
 class StiGeometryTransform{
     
 public:
     
-    StiGeometryTransform();
     virtual ~StiGeometryTransform();
-    
+
+    //Global access
+    static StiGeometryTransform* instance();
+    static void kill();
+
     // xform routines
 
     //Local to global
@@ -34,11 +45,20 @@ public:
     double phiForWestSector(int iSector, int nSectors);
     double phiForEastSector(int iSector, int nSectors);
     double phiForSector(int iSector, int nSectors);
-
     int westSectorForPhi(double phi, int nSectors);
     int eastSectorForPhi(double phi, int nSectors);
 
+public:
+    //Hit Transform Functors (Transfrom from first argument to second argument)
+    void operator() (const StTpcHit*, StiHit*); //From Tpc -> Sti
+    void operator() (const StiHit*, StTpcHit*); //From Sti -> Tpc
+    
+    void operator() (const StSvtHit*, StiHit*); //From Svt -> Sti
+    void operator() (const StiHit, StSvtHit*);  //From Sti -> Svt
+    
 protected: 
+    StiGeometryTransform();
+    static StiGeometryTransform* sinstance;
 
     // SVT & SSD database tables
     svg_config_st  svgConfig;
