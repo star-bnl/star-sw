@@ -1,24 +1,22 @@
 ############################################################################
 #
-# $Id: GNUmakefile.common,v 1.1 1998/11/12 22:48:09 lasiuk Exp $
+# $Id: GNUmakefile.common,v 1.2 1998/11/12 23:04:54 lasiuk Exp $
 #
 # Author: Thomas Ullrich, Mar 25 1998
 # --------------------------------------------------------------------------
 # These are Makefiles that are supplied for the building of
 # shared libraries away from BNL.
 # For installation
-# Place in the ../../StRoot directory to compile the shared library
-# in standalone mode:
-#
-# cp GNUMakefile* ../..
-# cd ../..
-# // Buile libraries
-# gmake 
-# archived library will be built in order to test example program!
+# TYPE:
+#   gmake 
+# to build an archived library in order to test example program!
 #
 # --------------------------------------------------------------------------
 #
 # $Log: GNUmakefile.common,v $
+# Revision 1.2  1998/11/12 23:04:54  lasiuk
+# automate the makefiles
+#
 # Revision 1.1  1998/11/12 22:48:09  lasiuk
 # Standalone Makefiles
 #

@@ -1,6 +1,6 @@
 ############################################################################
 #
-# $Id: GNUmakefile,v 1.1 1998/11/12 22:48:08 lasiuk Exp $
+# $Id: GNUmakefile,v 1.2 1998/11/12 23:04:54 lasiuk Exp $
 #
 # Author: Thomas Ullrich, Mar 25 1998
 # --------------------------------------------------------------------------
@@ -11,18 +11,19 @@
 # --------------------------------------------------------------------------
 #
 # $Log: GNUmakefile,v $
+# Revision 1.2  1998/11/12 23:04:54  lasiuk
+# automate the makefiles
+#
 # Revision 1.1  1998/11/12 22:48:08  lasiuk
 # Standalone Makefiles
 #
 # Revision 1.1  1998/11/10 17:11:56  fisyak
 # Put Brian trs versin into StRoot
 #
-# Revision 1.1.1.1  1998/05/19 22:33:43  lasiuk
-# Initial Revision
 #
 ############################################################################
 
-SUBDIRS = St_trs_Maker
+SUBDIRS = ..
 
 all:
 	@for dir in $(SUBDIRS); do (cd $$dir; $(MAKE)); done
