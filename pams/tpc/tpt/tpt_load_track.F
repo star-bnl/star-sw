@@ -1,5 +1,8 @@
-* $Id: tpt_load_track.F,v 1.14 1999/11/08 00:51:39 fisyak Exp $
+* $Id: tpt_load_track.F,v 1.15 2000/02/23 04:07:08 sakrejda Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.15  2000/02/23 04:07:08  sakrejda
+* Cleard id_globtrk - requested by Helen Caines - in the track table
+*
 * Revision 1.14  1999/11/08 00:51:39  fisyak
 * Add atand description for g77
 *
@@ -99,6 +102,7 @@ C     REAL     xlocal(3), bfield(3)                  !ALREADY EXISTS
 C___________________________________________________________________
 
       track(ipt).flag= trk(ipt).flag   ! good momentum fit
+      track(ipt).id_globtrk=0 ! clear the globtrk id
 C
 C     number of points to fit
       track(ipt).nfit = trk(ipt).nfit
