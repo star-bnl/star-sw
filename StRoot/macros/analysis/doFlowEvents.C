@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.21 2000/09/05 16:29:43 snelling Exp $
+// $Id: doFlowEvents.C,v 1.22 2000/09/15 01:22:27 snelling Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -44,6 +44,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.22  2000/09/15 01:22:27  snelling
+// Added the new selection options to the macro
+//
 // Revision 1.21  2000/09/05 16:29:43  snelling
 // Added cuts for new particles
 //
@@ -195,8 +198,13 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
   //particles  pi+, pi-, pi, k+, k-, e-, e+, pbar, proton, d and dbar
   //flowSelect->SetPid("pi"); 
   //flowSelect->SetPidPart("pi"); 
-  //flowSelect->SetPtPart(1., 3.); // pt selection for parts. wrt plane
+  //flowSelect->SetPtPart(0.15, 5.); // pt selection for parts. wrt plane
   //flowSelect->SetEtaPart(0., 0.); // eta selection for parts. wrt plane
+  //flowSelect->SetFitPtsPart(20, 50); // for parts. wrt plane
+  //flowSelect->SetFitOverMaxPtsPart(0.52, 1.); // for parts. wrt plane
+  //flowSelect->SetChiSqPart(0.1, 1.3); // for parts. wrt plane
+  //flowSelect->SetDcaPart(0., 0.8); // for parts. wrt plane
+  //flowSelect->SetYPart(-0.5, 0.5); // for parts. wrt plane
 
   // uncomment next line if you make a selection object
   //sprintf(makerName, "Flow%s", flowSelect->Number());
