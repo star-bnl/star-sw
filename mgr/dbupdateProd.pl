@@ -174,9 +174,8 @@ my $inext =scalar(@SetG);
 #  print "diskRecoDir: $diskRecoDirs[$ll]\n" if $debugOn;
 #}
 for( $ll = 0; $ll<scalar(@SetG); $ll++) { 
-  $diskRecoDirs[$inext] = $DISK2 . "/" . $SetG[$ll] . "/tfs_6";
-  print "diskRecoDir: $diskRecoDirs[$inext]\n" if $debugOn;
-   $inext++;
+  $diskRecoDirs[$ll] = $DISK2 . "/" . $SetG[$ll] . "/tfs_6";
+  print "diskRecoDir: $diskRecoDirs[$ll]\n" if $debugOn;
 }
 $diskRecoDirs[$inext] = $DISK1 . "/" . $SetG[2] . "/tfs_6";
  $inext++;
@@ -187,7 +186,7 @@ $diskRecoDirs[$inext] = $DISK1 . "/" . $SetG[4] . "/tfs_6";
 print "\nFinding reco files in disk\n";
  
 foreach $diskDir (@diskRecoDirs) {
-  if (-d $diskDir) {
+#  if (-d $diskDir) {
   opendir(DIR, $diskDir) or die "can't open $diskDir\n";
   while( defined($flname = readdir(DIR)) ) {
      next if $flname =~ /^\.\.?$/;
@@ -231,7 +230,7 @@ foreach $diskDir (@diskRecoDirs) {
    $nDiskFiles++;
   }
 closedir DIR;
-}
+#}
 }
 print "Total reco files: $nDiskFiles\n";
 
