@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofGeometry.h,v 1.1 2001/09/28 19:09:40 llope Exp $
+ * $Id: StTofGeometry.h,v 1.2 2002/01/22 04:57:03 geurts Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofGeometry.h,v $
+ * Revision 1.2  2002/01/22 04:57:03  geurts
+ * STAR dBase access routine, bugfixes and doxygenized
+ *
  * Revision 1.1  2001/09/28 19:09:40  llope
  * first version
  *
@@ -18,13 +21,15 @@
 #define STTOFGEOMETRY_H
 #include "StThreeVectorD.hh"
 #include "StPhysicalHelixD.hh"
+#include "tofSlatGeom.h"
 
 #include <vector>
 #ifndef ST_NO_NAMESPACES
 using std::vector;
 #endif
 
-#define NTOFSLATS 48    //wjl
+class StMaker;
+
 
 struct StructTofSlatEta{
   int ieta;
@@ -38,6 +43,7 @@ struct StructTofSlatEta{
   float z_max;
 };
 
+
 struct StructTofSlatPhi{
   int iphi;
   float phi;
@@ -45,36 +51,6 @@ struct StructTofSlatPhi{
   float phi_min;
 };
 
-struct StructSlatGeom {
-  int ieta;
-  float z, z_min, z_max, cosang,r;
-  float eta_min, eta_max, eta;
-  int iphi;
-  float phi, phi_min, phi_max;
-  //Int_t            trayId; 
-  int            trayId; 
-};
-
-
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-typedef vector<StructSlatGeom> slatGeomVector;
-typedef vector<StructTofSlatEta> tofSlatEtaVector;  
-typedef vector<StructTofSlatPhi> tofSlatPhiVector;  
-#else
-typedef vector<StructSlatGeom, allocator<StructSlatGeom> > slatGeomVector;
-typedef vector<StructTofSlatEta, allocator<StructTofSlatEta> > tofSlatEtaVector; 
-typedef vector<StructTofSlatPhi, allocator<StructTofSlatPhi> > tofSlatPhiVector; 
-#endif   
-typedef slatGeomVector::iterator slatGeomIter;
-
-
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-typedef vector<Int_t>  idVector;  
-typedef idVector::iterator idVectorIter;
-#else
-typedef vector<Int_t, allocator<Int_t> >  idVector; 
-typedef idVector::iterator idVectorIter;
-#endif   
 
 struct StructTofParam {
   //int detector;
@@ -87,71 +63,94 @@ struct StructTofParam {
   float tray_height, tray_width, tray_length, tray_phi_zero;
 };
 
+#ifndef ST_NO_TEMPLATE_DEF_ARGS
+typedef vector<Int_t> idVector;  
+typedef idVector::iterator idVectorIter;
+#else
+typedef vector<Int_t,allocator<Int_t>> idVector; 
+typedef idVector::iterator idVectorIter;
+#endif
+
+
 struct StructSlatHit {
   Int_t             slatIndex;   
   StThreeVectorD    hitPosition;
   idVector          trackIdVec;
 };
 
-#ifndef ST_NO_TEMPLATE_DEF_ARGS
-typedef vector<StructSlatHit>  tofSlatHitVector; 
-#else
-typedef vector<SructSlatHit, allocator<StructSlatHit> >  tofSlatHitVector;
-#endif   
-typedef vector<StructSlatHit>::iterator tofSlatHitVectorIter; 
 
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
-typedef vector<StructSlatHit>  tofSlatHitVector; 
+typedef vector<tofSlatGeom_st> slatGeomVector;
+typedef vector<StructTofSlatEta> tofSlatEtaVector;  
+typedef vector<StructTofSlatPhi> tofSlatPhiVector;  
+typedef vector<StructSlatHit> tofSlatHitVector; 
+typedef vector<StructSlatHit> tofSlatHitVector; 
 #else
-typedef vector<SructSlatHit, allocator<StructSlatHit> >  tofSlatHitVector;
+typedef vector<tofSlatGeom_st,allocator<tofSlatGeom_st>> slatGeomVector;
+typedef vector<StructTofSlatEta,allocator<StructTofSlatEta>> tofSlatEtaVector; 
+typedef vector<StructTofSlatPhi,allocator<StructTofSlatPhi>> tofSlatPhiVector; 
+typedef vector<SructSlatHit,allocator<StructSlatHit>> tofSlatHitVector;
+typedef vector<SructSlatHit,allocator<StructSlatHit>> tofSlatHitVector;
 #endif   
+typedef slatGeomVector::iterator slatGeomIter;
 typedef vector<StructSlatHit>::iterator tofSlatHitVectorIter; 
+typedef vector<StructSlatHit>::iterator tofSlatHitVectorIter; 
+
 
 
 class StTofGeometry{
  private:
-  StructTofParam     mTofParam;           //! global geometry variables
-  tofSlatEtaVector   mTofSlatEtaVec;      //! vector with eta-dependent variables.
-  tofSlatPhiVector   mTofSlatPhiVec;      //! vector with phi settings
-  slatGeomVector     mTofSlatVec;         //! combined geometry structure
-  unsigned short mTofDaqMap[NTOFSLATS];              //! daq-to-slat-id map
-  int calcSlatId(int iphi, int ieta) const; 
-  void initGeomFromXdf();
+  StructTofParam     mTofParam;      //! global geometry variables
+  tofSlatEtaVector   mTofSlatEtaVec; //! vector with eta-dependent variables.
+  tofSlatPhiVector   mTofSlatPhiVec; //! vector with phi settings
+  slatGeomVector     mTofSlatVec;    //! combined geometry structure
+  unsigned short mTofDaqMap[48];     //! daq-to-slatId map
+  unsigned short mTofSlatMap[42];    //! slatId-to-daq map (derived from mTofDaqMap)
+
+  int calcSlatId(const int iphi, const int ieta) const;
+  void initGeomFromXdf(const Char_t* = 
+		       "/afs/rhic/star/users/geurts/public/dbase/ctg_pars.xdf");
+  void initGeomFromDbase(StMaker*);
   void initDaqMap();
+
  public:
   StTofGeometry();
   ~StTofGeometry();
 
-  void init(); // init the dbase and get the data from it
-  StructTofParam   tofParam()      const;    // geometry access member
-  //slatGeomVector   tofSlatVec()    const; 
+  void init();         // init the dbase and get the data from it
+  void init(StMaker*); // init the dbase and get the data from it
+  StructTofParam tofParam() const; // geometry access member
 
   // return slat geometry of slatId
-  StructSlatGeom  tofSlat(Int_t slatId)  const;
+  tofSlatGeom_st  tofSlat(const Int_t slatId) const;
 
   // function to calculate the normal vector to a slat 
-  StThreeVectorD tofSlatNormPoint(Int_t slatId) const;
+  StThreeVectorD tofSlatNormPoint(const Int_t slatId) const;
 
   // function to calculate the normal vector to a slats-plane 
-  StThreeVectorD tofPlaneNormPoint(Int_t slatId) const;
+  StThreeVectorD tofPlaneNormPoint(const Int_t slatId) const;
 
   // print out stuff
-  void printGeo(ostream& os = cout)                const;
-  void printSlat(Int_t slatId, ostream& os = cout) const;
+  void printGeo(ostream& os = cout) const;
+  void printSlat(const Int_t slatId, ostream& os = cout) const;
 
   // tofCross members (note return value of tofSlatCross changed from Bool_t)
-  int tofSlatCross(StThreeVectorD& point, StructSlatGeom tofSlat) const;
-  int tofSlatCrossId(StThreeVectorD& point) const;
-  int tofSlatCrossId(int volumeId) const;
+  int tofSlatCross(const StThreeVectorD& point, const tofSlatGeom_st tofSlat) const;
+  int tofSlatCrossId(const StThreeVectorD& point) const;
+  int tofSlatCrossId(const int volumeId) const;
 
+  tofSlatHitVector tofHelixToArray(const StPhysicalHelixD& helix,
+				   idVector slatIdVec);
 
-  tofSlatHitVector tofHelixToArray(StPhysicalHelixD& helix,
-                          idVector slatIdVec);
-
-  unsigned short daqToSlatId(int) const;
+  unsigned short daqToSlatId(const int) const;
+  int slatIdToDaq(const Int_t) const;
 };
 
-inline StructTofParam StTofGeometry::tofParam()          const {return mTofParam;}
-inline unsigned short StTofGeometry::daqToSlatId(int i) const {return mTofDaqMap[i];}
+inline StructTofParam StTofGeometry::tofParam()
+     const {return mTofParam;}
+inline unsigned short StTofGeometry::daqToSlatId(const int daqId)
+     const {return mTofDaqMap[daqId];}
+inline int StTofGeometry::slatIdToDaq(const Int_t slatId)
+     const {return mTofSlatMap[slatId];}
 
 #endif
