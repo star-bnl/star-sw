@@ -1,6 +1,9 @@
 //-----------------------------------------------------------------------
-// * $Id: StTpcEvalMaker.cxx,v 1.6 2001/04/25 19:08:04 perev Exp $
+// * $Id: StTpcEvalMaker.cxx,v 1.7 2001/06/19 12:49:37 flierl Exp $
 // * $Log: StTpcEvalMaker.cxx,v $
+// * Revision 1.7  2001/06/19 12:49:37  flierl
+// * add l3 option
+// *
 // * Revision 1.6  2001/04/25 19:08:04  perev
 // * HPcorrs
 // *
@@ -72,7 +75,7 @@ using std::distance;
 #include "StTpcEvalEvent.h"
 #include "StTpcEvalHistograms.h"
 
-static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.6 2001/04/25 19:08:04 perev Exp $";
+static const char rcsid[] = "$Id: StTpcEvalMaker.cxx,v 1.7 2001/06/19 12:49:37 flierl Exp $";
 ClassImp(StTpcEvalMaker)
 
 //-------------------------------------------------
@@ -85,7 +88,7 @@ ClassImp(StTpcEvalMaker)
 //-----------------------------------------------------------------------
 StTpcEvalMaker::StTpcEvalMaker(const char *name, const char *title):StMaker(name,title)
 {
-  // empty
+  mL3TriggerOn = false ;
 }
 //-----------------------------------------------------------------------
 StTpcEvalMaker::~StTpcEvalMaker()
@@ -154,6 +157,17 @@ Int_t StTpcEvalMaker::Make()
 	    cout<<" NO EVENT DATA FOUND!!!"<<endl;
 	    return kStWarn;
 	}
+
+    // l3
+    if(mL3TriggerOn)
+	{
+	    ml3TriggerEvent = mStEvent->l3Trigger() ;
+	    if (!(ml3TriggerEvent)) {
+		cout<<" NO l3 DATA FOUND!!!"<<endl;
+		return kStWarn;
+	    }
+	}  
+    
     // StAssociationMaker multimaps
     StAssociationMaker* assoc =  (StAssociationMaker*) GetMaker("StAssociationMaker");
     if (!assoc) 
@@ -174,8 +188,6 @@ Int_t StTpcEvalMaker::Make()
     /////
     // fill the matching information
     ////
-    // prepare StTpcEvalEvent object
-    fillHeader();
     // fill matched hit info
     if (mHitIteration) HitIteration();
     // fill distance to remaining hits
@@ -184,7 +196,10 @@ Int_t StTpcEvalMaker::Make()
     mcTrackIteration();
     // fill matched track info with Rc hits as key
     //rcTrackIteration();
+
+
     // fill tree with StTpcEvalEvent
+    //fillHeader();
     //mTrackPairTree->Fill();
     //mTpcEvalEvent->Clear();
     
@@ -278,7 +293,7 @@ void StTpcEvalMaker::HitIteration()
 			    for (mcTpcHitMapIter mapIter = mapBounds.first; mapIter != mapBounds.second; mapIter++)
 				{
 				    // count number of associated hits per padrow
-				    nAssociatedHits[irow]++;
+				    if (nMatches==0) nAssociatedHits[irow]++ ;
 				    // count number of matches per hit
 				    nMatches++;
 				    // calculate (pos of mc) - (pos of matched rc) 
@@ -306,7 +321,7 @@ void StTpcEvalMaker::HitIteration()
     // loop over rc hits    
     ////
     // get rc hits
-    StTpcHitCollection* rcTpcHitCollection =  mStEvent->tpcHitCollection();
+    StTpcHitCollection* rcTpcHitCollection = (!mL3TriggerOn) ? mStEvent->tpcHitCollection() : ml3TriggerEvent->tpcHitCollection() ;
     if (!rcTpcHitCollection) 
 	{
 	    cout << "--> StTpcEvalMaker warning: no StRcTpcHits found!" << endl;
@@ -368,15 +383,18 @@ void StTpcEvalMaker::HitIteration()
     float HitEfficiency = 0 ;
     float HitPurity = 0 ;
 
-    {for (unsigned int i = 0; i < 45; i++) 
+    for (unsigned int i = 0; i < 45; i++) 
 	{
 	    // calculate efficiency and purity per padrow
 	    HitEfficiency = (float)nAssociatedHits[i] / (float)nGeneratedHits[i];
 	    HitPurity = (float)nAssociatedHits[i] / (float)nReconstructedHits[i];
 	    // fill histos
-	    histograms.mHitEfficiency->Fill((float)i+1, HitEfficiency);
+	    if (  HitEfficiency <1.2 &&  HitEfficiency>0.1 )
+	      {
+		histograms.mHitEfficiency->Fill((float)i+1, HitEfficiency);
+	      } ;
 	    histograms.mHitPurity->Fill((float) i+1, HitPurity);
-	}}
+	}
 }
 //-----------------------------------------------------------------------
 void StTpcEvalMaker::mcTrackIteration() 
@@ -466,7 +484,8 @@ void StTpcEvalMaker::rcTrackIteration()
     cout << "_ StGlobalTrack iteration ___________________" << endl;
     
     // get rc tracks
-    StSPtrVecTrackNode& rcTrackNodes = mStEvent->trackNodes();
+    StSPtrVecTrackNode& rcTrackNodes = (!mL3TriggerOn) ? mStEvent->trackNodes() : ml3TriggerEvent->trackNodes() ;
+
     // fill histo
     histograms.mRcMultiplicity = rcTrackNodes.size();
     
@@ -676,7 +695,8 @@ void StTpcEvalMaker::HitSeparation()
     //  rc hits
     ////
     // get rc hits
-    StTpcHitCollection* rcTpcHitCollection =  mStEvent->tpcHitCollection();
+    StTpcHitCollection* rcTpcHitCollection = (!mL3TriggerOn) ? mStEvent->tpcHitCollection() : ml3TriggerEvent->tpcHitCollection() ;
+  
     if (!rcTpcHitCollection) 
 	{
 	    cout << "--> StTpcEvalMaker warning: no StRcTpcHits found!" << endl;
