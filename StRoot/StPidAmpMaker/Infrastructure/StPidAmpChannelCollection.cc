@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannelCollection.cc,v 1.6 2000/05/05 19:20:44 aihong Exp $
+ * $Id: StPidAmpChannelCollection.cc,v 1.7 2000/07/06 01:55:14 perev Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannelCollection.cc,v $
+ * Revision 1.7  2000/07/06 01:55:14  perev
+ * fix related to ROOT float -> double
+ *
  * Revision 1.6  2000/05/05 19:20:44  aihong
  * let StPidAmpNetOut::Get*ParArray() returns pointer instead of obj.
  *
@@ -623,7 +626,7 @@ void StPidAmpChannelCollection::outputBGBand4Debug(){
   of.open("BGBand4Debug.txt",ios::app);
 
   int i;
-  float x,y;
+  double x,y;
 
   for (i=0; i<mBGNet->bandGraph()->GetN(); i++){
 
