@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.320 2003/01/29 03:06:19 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.321 2003/01/31 22:02:05 lbarnby Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -26,6 +26,8 @@
 #include "StDbUtilities/StMagUtilities.h"
 #include "St_QA_Maker/StEventQAMaker.h"
 #include "StMessMgr.h"
+#include "StiMaker/StiDefaultToolkit.h"
+
 //_____________________________________________________________________
 Bfc_st BFC1[] = {
   {"Key"         ,"Name"       ,"Chain"      ,"Opts"                      ,"Maker","Libs","Comment",kFALSE},
@@ -865,6 +867,8 @@ Bfc_st BFC2[] = {
 
   {"Event"       ,"","","StEvent,tpcDB","StEventMaker","StDetectorDbMaker,StEventMaker",
                                                                                "<StEvent creation>",kFALSE},
+  {"Sti"         ,"Sti","","SCL,StEvent,tables","StiMaker",
+              "StSvtDbMaker,StTpcDb,Sti,StiGui,libGui,StiMaker,StiTpc,StiSvt,StiEmc","ITTF tracker",kFALSE},
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StBichsel,StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
@@ -1181,6 +1185,13 @@ Int_t StBFChain::Instantiate()
 	  }
 	  if (!geantMk) status = kStErr;
 	  continue;
+	}
+	if (maker == "StiMaker") {
+	  StiDefaultToolkit * tk = new StiDefaultToolkit();
+	  StiToolkit::setToolkit(tk);
+	  tk->setGuiEnabled(kFALSE);
+	  tk->setMcEnabled(kFALSE);
+	  if (GetOption("Simu")) tk->setMcEnabled(kTRUE);
 	}
 	StMaker *mk = 0;
 	if (maker == "StTpcDbMaker") mk = GetChain()->GetMaker(fBFC[i].Name);
