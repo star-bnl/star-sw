@@ -1,5 +1,12 @@
-// $Id: StFtpcTrackingParams.cc,v 1.4 2002/06/07 06:00:39 oldi Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.5 2002/08/02 11:19:32 oldi Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.5  2002/08/02 11:19:32  oldi
+// MaxDCA is set to 100 cm now. Therefore 'every' track is fitted with the
+// primary vertex in addition to the global fit, which is perfpormed anyway.
+// The cut, which was set to 2.5 cm before, has to be applied during the
+// analysis, now.
+// The y-offest of FTPC east changed slightly due to the 'new' t0 of 2.96 mus.
+//
 // Revision 1.4  2002/06/07 06:00:39  oldi
 // New value for rotation angle of FTPC east after temperature offset was corrected.
 //
@@ -166,10 +173,10 @@ Int_t StFtpcTrackingParams::InitFromFile() {
   mEtaScope[2] =  3;
   mEtaScope[3] = 15;
 
-  mMaxDca[0] = 2.5 * centimeter;
-  mMaxDca[1] = 2.5 * centimeter;
-  mMaxDca[2] = 1.0 * centimeter;
-  mMaxDca[3] = 1.0 * centimeter;
+  mMaxDca[0] = 100.0 * centimeter;
+  mMaxDca[1] = 100.0 * centimeter;
+  mMaxDca[2] = 100.0 * centimeter;
+  mMaxDca[3] = 100.0 * centimeter;
 
   // Tracklets
   mMaxAngleTracklet[0] = 0.015 * radian;
@@ -257,7 +264,7 @@ Int_t StFtpcTrackingParams::InitFromFile() {
   
    // internal FTPC rotation (East only) [has do be done before local -> global]
    mInstallationPointZ    = -235.8855 * centimeter;
-   mObservedVertexOffsetY =    0.2694 * centimeter;
+   mObservedVertexOffsetY =    0.3427 * centimeter;
  
    // define rotation angle alpha=atan(y_vertex_offset cm/z_installation cm)
    Double_t alpha = TMath::ATan(mObservedVertexOffsetY / TMath::Abs(mInstallationPointZ)); // radians and > 0
