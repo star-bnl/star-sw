@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.17 2003/06/10 13:15:12 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.18 2003/07/03 13:25:47 fsimon Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.18  2003/07/03 13:25:47  fsimon
+// Added database access for cathode offset information.
+//
 // Revision 1.17  2003/06/10 13:15:12  jcs
 // get min,max gas temperature and pressure limits from database
 //
@@ -120,7 +123,8 @@ StMaker(name),
     m_timeoffset(0),
     m_driftfield(0),
     m_gas(0),
-    m_electronics(0)
+    m_electronics(0),
+    m_cathode(0)
 {
 }
 //_____________________________________________________________________________
@@ -182,6 +186,8 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
 
   m_dimensions = (St_ftpcDimensions *)dblocal_geometry("ftpcDimensions");
   m_asicmap   = (St_ftpcAsicMap *)dblocal_geometry("ftpcAsicMap");
+
+  m_cathode      = (St_ftpcInnerCathode *)dblocal_geometry("ftpcInnerCathode");
 
   St_DataSet *ftpc_calibrations_db = GetDataBase("Calibrations/ftpc");
   if ( !ftpc_calibrations_db ){
@@ -281,7 +287,8 @@ Int_t StFtpcSlowSimMaker::Make(){
                                                 m_electronics,
 						m_ampslope,
                                                 m_ampoffset,
-                                                m_timeoffset);
+                                                m_timeoffset,
+						m_cathode);
 
 
     //cout << "create parameter reader\n";
@@ -304,6 +311,13 @@ Int_t StFtpcSlowSimMaker::Make(){
        cout<<"          magboltzVDrift(0,0)       = "<<dbReader->magboltzVDrift(0,0)<<endl;
        cout<<"          magboltzDeflection(0,0)   = "<<dbReader->magboltzDeflection(0,0)<<endl;
     }
+
+    // check db values for cathode offset and angle
+    cout << "StFtpcSlowSimulator with cathode offset, using the following parameters:"<<endl;
+    cout << "                    offsetCathodeWest  = " << dbReader->offsetCathodeWest() << endl;
+    cout << "                    angleOffsetWest    = " << dbReader->angleOffsetWest() << endl;
+    cout << "                    offsetCathodeEast  = " << dbReader->offsetCathodeEast() << endl;
+    cout << "                    angleOffsetEast    = " << dbReader->angleOffsetEast() << endl;
 
   // get temperatures from offline db, used for embedding!
   // as long as there is no daq data, standard temperatures are used!
