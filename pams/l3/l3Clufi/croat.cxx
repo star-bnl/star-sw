@@ -378,6 +378,9 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 					    // we'll "add" the new and the old
 					    
 					    // make a temp. copy to on-CPU RAM (rr)
+					    // just make sure rr points where it should       
+					    rr = &rr_local ;
+
 					    // memcpy7(destination,source)
 					    memcpy7((UInt_t *)rr,(UInt_t *)rr_tmp) ;
 
