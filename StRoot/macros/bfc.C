@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.98 1999/07/18 23:52:18 fisyak Exp $
+// $Id: bfc.C,v 1.99 1999/07/27 21:24:20 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TBrowser.h"
@@ -14,7 +14,7 @@
 #include "StRoot/StChain/StChain.h"
 #include "StRoot/xdf2root/St_XDFFile.h"
 #include "StRoot/StMagF/StMagF.h"
-#include "StRoot/St_xdfin_Maker/St_xdfin_Maker.h"
+#include "StRoot/StIOMaker/StIOMaker.h"
 #include "StRoot/St_db_Maker/St_db_Maker.h"
 #include "StRoot/St_geant_Maker/St_geant_Maker.h"
 #include "StRoot/StMinidaqMaker/StMinidaqMaker.h"
@@ -34,7 +34,7 @@ class StChain;
 StChain  *chain=0;
 class StEvent;
 StEvent *Event;
-class St_xdfin_Maker; St_xdfin_Maker *xdfMk=0;     
+class StIOMaker; StIOMaker *inpMk=0;     
 class St_XDFFile;     St_XDFFile     *xdf_out = 0; 
 class St_geant_Maker; St_geant_Maker *geant   = 0;   
 class St_db_Maker;    St_db_Maker    *dbMk    = 0; St_db_Maker *calibMk = 0;
@@ -262,6 +262,7 @@ void SetOption(int k){// set all OFF
     }
     break;
   case kTDAQ:
+    SetOption(kXIN);
     SetOption(kER99);
     break;
   case  kY1b:
@@ -309,11 +310,13 @@ void SetOption(int k){// set all OFF
     }
     break;
   case kGSTAR:
+    SetOption(kGEANT);
+  case FZIN:
+  case kXIN:
     if (!ChainFlags[kDEFAULT]) {
       printf ("QAInfo:no setup defined ==> use Y2a\n");
       SetOption(kY2a);
     }
-    SetOption(kGEANT);
     break;
   default:
     break;
@@ -465,7 +468,7 @@ void Load(){
   if (ChainFlags[kFieldOff] || ChainFlags[kFieldOn] || ChainFlags[kHalfField])
        gSystem->Load("StMagF");
   else gSystem->Load("geometry");
-  if (ChainFlags[kXIN]) gSystem->Load("St_xdfin_Maker");
+  if (ChainFlags[kXIN]) gSystem->Load("StIOMaker");
   if (ChainFlags[kGEANT])  {
     gSystem->Load("St_g2r"); 
     gSystem->Load("St_geant_Maker");
@@ -648,9 +651,10 @@ void bfc(const Int_t First,
   if (ChainFlags[kFieldOn])  field   = new StMagFC("field","STAR Normal field",1.);
   if (ChainFlags[kHalfField])field   = new StMagFC("field","STAR Half field",0.5);
   if (ChainFlags[kXIN]) {
-    xdfMk = new St_xdfin_Maker("xdfin",InFile->Data());
-    if (xdfMk && ChainFlags[kDEBUG]) xdfMk->SetDebug();
-    chain->SetInput("geant",".make/xdfin/.data/event/geant/Event");
+    inpMk = new StIOMaker("inputStream","r",InFile->Data());
+    chain->SetInput("StDAQReader",".make/inputStream/.make/inputStream_DAQ/.const/StDAQReader");
+    if (inpMk && ChainFlags[kDEBUG]) inpMk->SetDebug();
+//VP    chain->SetInput("geant",".make/xdfin/.data/event/geant/Event");
   }
   if (ChainFlags[kGEANT])  {
     geant = new St_geant_Maker("geant");
@@ -701,17 +705,17 @@ void bfc(const Int_t First,
   
   if (ChainFlags[kMINIDAQ]) {
     // defined for ChainFlags[kMINIDAQ]
-    chain->SetInput("BEGIN_RUN",".make/xdfin/.const/BEGIN_RUN");
-    chain->SetInput("TPC_DATA",".make/xdfin/.data/TPC_DATA");
+//VP    chain->SetInput("BEGIN_RUN",".make/xdfin/.const/BEGIN_RUN");
+//VP    chain->SetInput("TPC_DATA",".make/xdfin/.data/TPC_DATA");
     StMinidaqMaker *tpc_raw = new StMinidaqMaker("tpc_raw");
   }
   else {
     //  S I M U L A T I O N  or D A Q
-    if (ChainFlags[kTDAQ])  St_tpcdaq_Maker *tpc_raw = new St_tpcdaq_Maker("tpc_raw",InFile->Data());
+    if (ChainFlags[kTDAQ])  St_tpcdaq_Maker *tpc_raw = new St_tpcdaq_Maker("tpc_raw","daq");
     else {
       if (ChainFlags[kTRS]) {//		trs
 	trs = new StTrsMaker;
-	tpc_raw = new St_tpcdaq_Maker("tpc_raw",0);
+	tpc_raw = new St_tpcdaq_Maker("tpc_raw","trs");
       }
       else { 
 	if (ChainFlags[kTSS]) {//		tss
@@ -889,13 +893,13 @@ void bfc(const Int_t First,
   if (iInit) chain->Fatal(iInit,"on init");
   if (ChainFlags[kXOUT] && FileOut) {
     XdfFile = new TString(FileOut->Data());
-    XdfFile->ReplaceAll(".root","_dst.xdf");
+    XdfFile->ReplaceAll(".root",".dst.xdf");
     xdf_out = new St_XDFFile(XdfFile->Data(),"wb"); 
     printf ("Open output xdf file  = %s \n ++++++++++++++++++++++\n",XdfFile->Data());
   }
   // skip if any
   if (geant && First > 0) geant->Skip(First-1);
-  if (xdfMk && First > 1) xdfMk->Skip(First-1);
+  if (inpMk && First > 1) inpMk->Skip(First-1);
   Int_t iMake = 0;
   TBenchmark evnt;
   for (Int_t i = First; i <= NoEvents; i++){
