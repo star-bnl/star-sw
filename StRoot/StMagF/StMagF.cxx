@@ -18,8 +18,8 @@ static StMagF *gMagfield = 0;
 //________________________________________
 void type_of_call agufld_(Float_t *x, Float_t *b)
 {
-  if (gMagfield) gMagfield->Agufld(x,y);
-  else fprintf(stderr,"No instanse of <StMagF> class has been defined yet !\n");
+  if (!gMagfield) gMagfield = new StMagFCM(" Star Full Field","/afs/rhic/star/packages/dev/StDb/StMagF/bfp112.map",kConMesh,1.0);
+  gMagfield->Field(x,b);
 }
 
 ClassImp(StMagF)
@@ -36,17 +36,16 @@ StMagF::StMagF(const char *name, const char *title, const EField map,
 void StMagF::Agufld(Float_t *x, Float_t *b)
 {
   b[0]=b[1]=b[2]=0;
-  if(!fMagfield){
+  if(!gMagfield){
     if(!fMap){
       printf("Undefined MagF Field called, returning 0\n");
-      fType = Undef;
     }
-    else if(fMap==Const){
-       gMagfield = new StMagFC("Uniform Field","Fixed",Const,1.0);
+    else if(fMap==kConst){
+       gMagfield = new StMagFC("Uniform Field","Fixed",kConst,1.0);
        gMagfield->Field(x,b);
     }
-    else if(fMap==ConMesh){
-       gMagfield = new StMagFCM(" Star Full Field","bfp112.map",ConMesh,1.0);
+    else if(fMap==kConMesh){
+       gMagfield = new StMagFCM(" Star Full Field","/afs/rhic/star/packages/dev/StDb/StMagF/bfp112.map",kConMesh,1.0);
        gMagfield->Field(x,b);
     }
   }
@@ -57,25 +56,22 @@ void StMagF::Field(Float_t *x, Float_t *b)
 {
   printf("Undefined MagF Field called, returning 0\n");
   b[0]=b[1]=b[2]=0;
-  fType = Undef;
 }
       
 ClassImp(StMagFC)
 
 //________________________________________
-StMagFC::StMagFC(const char *name, const char *title, const Field_t map, 
-		 const Float_t factor)
-  : StMagF(name,title,map,factor)
+StMagFC::StMagFC(const char *name, const char *title,const Float_t factor)
+  : StMagF(name,title,kConst,factor)
 {
-  printf("Constant Field %s created: map= %d, factor= %f\n",fName.Data(),map,factor);
-  fType = Const;
+  printf("Constant Field %s created: map= %d, factor= %f\n",fName.Data(),fMap,fFactor);
 }
 
 //________________________________________
 void StMagFC::Field(Float_t *x, Float_t *b)
 {
   b[0]=b[1]=b[2]=0;
-  if(fMap==Const) {
+  if(fMap==kConst) {
     if(TMath::Abs(x[2])<280 && x[0]*x[0]+x[1]*x[1] < 240*240) 
       b[2]=5.0;
   } else {
@@ -87,12 +83,11 @@ void StMagFC::Field(Float_t *x, Float_t *b)
 ClassImp(StMagFCM)
 
 //________________________________________
-StMagFCM::StMagFCM(const char *name, const char *title, const Field_t map, 
+StMagFCM::StMagFCM(const char *name, const char *title, const EField map, 
 		 const Float_t factor)
   : StMagF(name,title,map,factor)
 {
-  fType = ConMesh;
-  printf("Constant Mesh Field %s created: map= %d, factor= %f, file= %s\n",fName.Data(),map,factor,fTitle.Data());
+  printf("Constant Mesh Field %s created: map= %d, factor= %f, file= %s\n",fName.Data(),fMap,fFactor,fTitle.Data());
 }
 
 //________________________________________
@@ -134,7 +129,7 @@ void StMagFCM::Field(Float_t *x, Float_t *b)
     ratz=hiz-int(hiz);
     iz=int(hiz);
     
-    if(fMap==ConMesh) {
+    if(fMap==kConMesh) {
       // ... simple interpolation
       ratp1=one-ratp;
       ratr1=one-ratr;
