@@ -193,10 +193,7 @@ bool compare(emcPed_st* t1, emcPed_st* t2)
   bool equal = true;  
   for(int i = 0; i<4800;i++) 
   { 
-    if(t1->AdcPedestal[i]!=t2->AdcPedestal[i])
-{
-cout << " t1->AdcPedestal[i] = " << t1->AdcPedestal[i] << " and t2->AdcPedestal[i] = " << 
-t2->AdcPedestal[i] << endl; equal = false;}
+    if(t1->AdcPedestal[i]!=t2->AdcPedestal[i]) equal = false;
     if(t1->AdcPedestalRMS[i]!=t2->AdcPedestalRMS[i]) equal = false;
     if(t1->Status[i]!=t2->Status[i]) equal = false;
   }
