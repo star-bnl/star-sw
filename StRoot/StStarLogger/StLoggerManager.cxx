@@ -130,12 +130,20 @@ StLoggerManager::~StLoggerManager() {
 }
 log4cxx::LoggerPtr StLoggerManager::fgQALogger;      //!  Logger to server QA stream
 //_____________________________________________________________________________
-StMessMgr* StLoggerManager::Instance(const char *loggerName) 
+StMessMgr* StLoggerManager::Instantiate() 
+{return StLoggerManager::StarLoggerInit(); }
+
+//_____________________________________________________________________________
+StMessMgr* StLoggerManager::Instantiate(const char *loggerName)
+{return StLoggerManager::StarLoggerInit(loggerName); }
+
+//_____________________________________________________________________________
+StMessMgr* StLoggerManager::StarLoggerInit(const char *loggerName) 
 {
    return  new StLoggerManager(loggerName);
 }
 //_____________________________________________________________________________
-StMessMgr* StLoggerManager::Instance() {
+StMessMgr* StLoggerManager::StarLoggerInit() {
 //
 // Allows anyone to get a pointer to the single message manager:
 //   StLoggerManager::Instance()->(member function)
@@ -165,6 +173,18 @@ StMessMgr* StLoggerManager::Instance() {
   }
   return mInstance;
 }
+//______________________________________________________________________________
+bool  StLoggerManager::isDebugEnabled()  const{ return fLogger->isDebugEnabled(); }
+//______________________________________________________________________________
+bool  StLoggerManager::isWarnEnabled()   const{ return fLogger->isWarnEnabled(); }
+//______________________________________________________________________________
+bool  StLoggerManager::isErrorEnabled()  const{ return fLogger->isErrorEnabled(); }
+//______________________________________________________________________________
+bool  StLoggerManager::isInfoEnabled()   const{ return fLogger->isInfoEnabled(); }
+//______________________________________________________________________________
+bool  StLoggerManager::isFatalEnabled()  const{ return fLogger->isFatalEnabled(); }
+//______________________________________________________________________________
+bool  StLoggerManager::isEnabledFor()    const{ return true; /*fLogger->isEnabledFor();*/ }
 //_____________________________________________________________________________
 StMessMgr& StLoggerManager::Message(const char* mess, const char* type,
   const char* opt,const char *sourceFileName,int lineNumber) {
@@ -353,7 +373,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.5 2004/09/16 00:13:05 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.6 2004/11/03 01:33:22 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -659,8 +679,11 @@ _NO_IMPLEMENTATION_;   return 5;
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.5 2004/09/16 00:13:05 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.6 2004/11/03 01:33:22 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.6  2004/11/03 01:33:22  fine
+// add the implemantions of the new based methods and clean up
+//
 // Revision 1.5  2004/09/16 00:13:05  fine
 // remove the implict StStarLogger object. We should give log4cxx a chance to complete the intialization
 //
