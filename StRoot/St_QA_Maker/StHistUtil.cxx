@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.4 1999/11/18 18:18:17 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.5 1999/11/22 22:46:41 lansdell Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.5  1999/11/22 22:46:41  lansdell
+// update to identify histogram method used (StEvent or DST tables) by Gene; StEventQAMaker code partially completed (run bfcread_dst_EventQAhist.C)
+//
 // Revision 1.4  1999/11/18 18:18:17  kathy
 // adding default logY hist list for EventQA histogram set
 //
@@ -246,7 +249,9 @@ TList* StHistUtil::FindHists(Char_t *dirName)
 
   St_DataSet *hist=0;
   hist = m_PntrToMaker->GetDataSet("hist");
-  hist->ls(9);
+  if (hist) {
+
+    hist->ls(9);
 
 // must look in dirNameHist 
 // use TString to append "Hist" to the dirName
@@ -256,12 +261,14 @@ TList* StHistUtil::FindHists(Char_t *dirName)
     hBN += "Hist";
     
 //find particular branch
-  St_DataSet *QAH = hist->Find(hBN.Data());
+    St_DataSet *QAH = hist->Find(hBN.Data());
 
 // or can create iterator and look over all branches
 
 //now get the list of histograms
-   dList = (TList *)QAH->GetObject();
+    dList = (TList *)QAH->GetObject();
+
+  }
 
 // now have we found them?
   if (dList){ 
