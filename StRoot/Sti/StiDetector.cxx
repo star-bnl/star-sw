@@ -23,8 +23,11 @@ void StiDetector::build(const char* buildfile)
     StGetConfigValue(buildfile, "discreteScatterer", discreteScatterer);
     StGetConfigValue(buildfile, "density",density);
     StGetConfigValue(buildfile,"thickness",thickness);
-    StGetConfigValue(buildfile,"halfWidth",halfWidth);
-    StGetConfigValue(buildfile,"zcenter",zcenter);
+    StGetConfigValue(buildfile,"activePosition",activePosition);
+    //StGetConfigValue(buildfile,"halfWidth",halfWidth);
+    StGetConfigValue(buildfile,"yMax",yMax);
+    StGetConfigValue(buildfile,"yMin",yMin);
+    StGetConfigValue(buildfile,"zCenter",zCenter);
     StGetConfigValue(buildfile,"halfDepth",halfDepth);
     StGetConfigValue(buildfile,"radLength",radLength);
     StGetConfigValue(buildfile,"position",position);
@@ -46,7 +49,7 @@ void StiDetector::build(const char* buildfile)
 ostream& operator<<(ostream& os, const StiDetector& d)
 {
     return os <<d.isActive()<<" "<<d.isContinuousMedium()<<" "<<d.isDiscreteScatterer()<<" "
-	      <<d.getDensity()<<" "<<d.getThickness()<<" "<<d.getHalfWidth()<<" "<<d.getHalfDepth()<<" "
+	      <<d.getDensity()<<" "<<d.getThickness()<<" "<<d.getActivePosition()<<" "<<d.getYmax()<<" "<<d.getYmin()<<" "<<d.getHalfDepth()<<" "
 	      <<d.getZCenter()<<" "<<d.getMaterialRadLength()<<" "<<d.getRadLengthThickness()<<" "
 	      <<d.getPosition()<<" "<<d.getRefAngle()<<" "<<d.getShapeCode()<<" "
 	      <<d.getSector()<<" "<<d.getPadrow()<<" "<<d.getName();

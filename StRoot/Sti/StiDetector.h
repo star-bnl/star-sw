@@ -27,9 +27,12 @@ public:
     Bool_t isDiscreteScatterer() const { return discreteScatterer; }
     double getDensity() const { return density; }
     double getThickness() const { return thickness; }
-    double getHalfWidth() const { return halfWidth; }
+    double getActivePosition() const {return activePosition; }
+    //double getHalfWidth() const { return halfWidth; }
+    double getYmax() const { return yMax; }
+    double getYmin() const { return yMin; }
     double getHalfDepth() const { return halfDepth; }
-    double getZCenter() const {return zcenter;}
+    double getZCenter() const {return zCenter;}
     double getMaterialRadLength() const { return radLength; }
     double getRadLengthThickness() const { return thickness/radLength; }
     double getPosition() const { return position; }
@@ -47,8 +50,11 @@ public:
     void setIsDiscreteScatterer(bool val) {discreteScatterer = val;}
     void setDensity(double val) {density = val;}
     void setThickness(double val) {thickness = val;}
-    void setHalfWidth(double val) {halfWidth = val;}
-    void setZCenter(double val) {zcenter = val;}
+    void setActivePosition(double val) {activePosition = val;}
+    //void setHalfWidth(double val) {halfWidth = val;}
+    void setYmax(double val) {yMax = val;}
+    void setYmin(double val) {yMin = val;}
+    void setZCenter(double val) {zCenter = val;}
     void setHalfDepth(double val) {halfDepth = val;}
     void setRadLength(double val) {radLength = val;}
     void setPosition(double val) {position = val;}
@@ -69,9 +75,14 @@ protected:
     Bool_t continuousMedium;    // is this a continuous scatterer?
     Bool_t discreteScatterer;   // is this a discrete scatterer?
     double density;            // g/cm^3 [STAR units]
-    double thickness;          // extent in local x (global r) in cm
-    double halfWidth;          // 1/2 extent in local y (global phi) in cm
-    double zcenter;                 // center of detector in z (global) projection in cm
+    double thickness;          // scatterer extent in local x (global r) in cm
+    double activePosition;     // detector plane location in local x (cm)
+    // No longer assume that object is centered on the local y axis, provide
+    // maximum and minimum values indicating the position.
+    //double halfWidth;          // 1/2 extent in local y (global phi) in cm
+    double yMax;
+    double yMin;
+    double zCenter;              // center of detector in z (global) projection in cm
     double halfDepth;          // 1/2 extent in z in cm
     double radLength;          // cm
     double position;           // perpendicular distance to global origin
