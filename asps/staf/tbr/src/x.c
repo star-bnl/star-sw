@@ -40,7 +40,7 @@
 extern int gNDs;
 int gCallBackData,gNVisDump,gOutType,gTruncateStrings=7;
 FILE *gDump;
-int gLastWhWin=-10,gDone2,gDone;
+int gLastWhWin=-10,gDone2,gDone1;
 myBool gBlurb2,gBlurb1;
 char *gColor;
 char *gBlurb7="Click on the abbreviation (to\n\
@@ -417,7 +417,7 @@ void FinishThisMenu(Widget mbar,Widget mpane,char *menuName) {
   XtManageChild(cas);
 }
 void QuitCB(Widget w,caddr_t cld,caddr_t cad) {
-  gDone=7;
+  gDone1=7;
 }
 void Complain5(void) {
  Say("\
@@ -503,7 +503,7 @@ myBool UserMod(char *tableName,char *xx) {
   gDone2=0;
   for(;;) { /* un-main loop */
     XtAppNextEvent(gAppCon,&event); XtDispatchEvent(&event);
-    if(gDone||gDone2) break;
+    if(gDone1||gDone2) break;
   }
   XtPopdown(gCutsPopup);
   if(gDone2>10) return FALSE; /* User cancelled. */
@@ -727,7 +727,7 @@ void RunHistFill(size_t row) {
   if(hist>=HIST||hist<0) {
     PP"Table browser fatal error 711p.\n");
     PP"hist=%d, HIST=%d, gMax=%e, gMin=%e\n",hist,HIST,gMax,gMin);
-    gDone=7; return;
+    gDone1=7; return;
   }
   gHist[hist]++;
 }
@@ -808,7 +808,7 @@ void RunValue(size_t row) {
     sprintf(buf,"%s%6d",gSumCol,row+1);
     if(strlen(buf)!=EXT) {
       PP"Table browser fatal error 611p.\n");
-      PP"buf=%s, len should be %d.\n",buf,EXT); gDone=7; return;
+      PP"buf=%s, len should be %d.\n",buf,EXT); gDone1=7; return;
     }
   }
   if(!gTruncateStrings) strcat(buf," ");
@@ -1349,7 +1349,7 @@ void SetHilite(int control,int whWin,int lineNum) {
       if(strlen(tmp)+strlen(buf)>WIDE*MCOL+EXT) {
         PP"Table browser fatal error 712p.\n");
         PP"This is error 91P. %d + %d > %d, MCOL = %d.\n",
-        strlen(tmp),strlen(buf),WIDE*MCOL+EXT,MCOL); gDone=7; return;
+        strlen(tmp),strlen(buf),WIDE*MCOL+EXT,MCOL); gDone1=7; return;
       } strcat(buf,tmp);
     } /* loop over hlLstIx */
     if(doReturn) return; gWin[whWin]->textOutput[0]='\0';
@@ -1694,7 +1694,7 @@ void DoXStuff(void) {
   if(!gDisplay) {
     PP"STAR Table Browser is an X-windows program.\n");
     PP"I can't open a display.\n");
-    PP"Have you set your DISPLAY env var?\n"); gDone=7; return;
+    PP"Have you set your DISPLAY env var?\n"); gDone1=7; return;
   }
   nn=0;
   PP"XtAppCreateShell()\n");
@@ -1720,6 +1720,6 @@ void DoXStuff(void) {
       }
     }
     XtDispatchEvent(&event);    /* Vol1 p509 */
-    if(gDone) break;
+    if(gDone1) break;
   }
 }
