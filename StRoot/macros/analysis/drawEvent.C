@@ -1,62 +1,14 @@
-// $Id: drawEvent.C,v 1.1 1999/07/13 00:54:53 fine Exp $
+// $Id: drawEvent.C,v 1.2 1999/07/13 00:57:57 fine Exp $
 // $Log: drawEvent.C,v $
+// Revision 1.2  1999/07/13 00:57:57  fine
+// replace the author\'s name
+//
+//*-- Author :  Valeri Fine (fine@bnl.gov)
 // Revision 1.1  1999/07/13 00:54:53  fine
-// New macro based on doEvent but with 3D graphics
-//
-// Revision 1.22  1999/07/02 22:45:47  perev
-// Remove 2 events limit
-//
-// Revision 1.21  1999/06/27 22:45:33  fisyak
-// Merge StRootEvent and StEvent
-//
-// Revision 1.2  1999/05/24 19:02:03  kathy
-// put owner back into do*Events.C so it's standardized with all other macros
-//
-// Revision 1.1  1999/05/22 19:38:12  perev
-// temporary macro for RootEvents
-//
-// Revision 1.13  1999/04/15 18:03:14  wenaus
-// clean out duplicate/conflicting declarations
-//
-// Revision 1.12  1999/04/01 23:39:47  fisyak
-// Cleanup old macros
-//
-// Revision 1.11  1999/03/10 14:28:17  fisyak
-// Clean up for SL99c
-//
-// Revision 1.10  1999/03/02 03:34:43  fisyak
-// Set LD_LIBRARY_PATH to Root.DynamicPath
-//
-// Revision 1.9  1999/02/28 00:08:18  wenaus
-// add multi-file handling for .root files. But, using multiple files doesn't work for ROOT files yet.
-//
-// Revision 1.8  1999/02/25 23:10:41  wenaus
-// fix multi-file bug
-//
-// Revision 1.7  1999/02/25 02:51:42  wenaus
-// make sure default file is a working one
-//
-// Revision 1.6  1999/02/25 02:42:58  wenaus
-// input file options
-//
-// Revision 1.5  1999/02/24 23:21:19  wenaus
-// add ROOT file handling
-//
-// Revision 1.4  1999/02/20 05:39:24  wenaus
-// turn off TBrowser (gives bus errors) and don't count run header as an event
-//
-// Revision 1.3  1999/02/16 18:15:48  fisyak
-// Check in the latest updates to fix them
-//
-// Revision 1.2  1999/02/11 16:22:51  wenaus
-// load StEvent for Linux
-//
-// Revision 1.1  1999/02/11 15:44:28  wenaus
-// macro to read DSTs into StEvent and analyze
-//
+//  New macro based on doEvent but with 3D graphics
 //
 //=======================================================================
-// owner: Victor Perevoztchikov
+// owner: Valeri Fine (fine@bnl.gov)
 // what it does: 
 //=======================================================================
 ///////////////////////////////////////////////////////////////////////////////
