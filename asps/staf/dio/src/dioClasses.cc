@@ -46,8 +46,10 @@ extern "C" void signal_reaper();
 //:----------------------------------------------- CTORS & DTOR       --
 dioStream:: dioStream()
 		: socObject() {
+   memset(&myXDR,0,sizeof(XDR));
    myMode = DIO_UNKNOWN_MODE;
    myState = DIO_UNKNOWN_STATE;
+   memset(&myXDR,0,sizeof(XDR));
 }
 
 //----------------------------------
@@ -105,23 +107,19 @@ unsigned char dioStream :: implementsInterface (const char * iface) {
 //----------------------------------
 STAFCV_T dioStream:: close () {
 
-   if( !(DIO_CLOSE_STATE != myState) ){
-      EML_CONTEXT("ERROR: This stream is already closed.\n");
-      EML_ERROR(BAD_MODE_OR_STATE);
+   if( DIO_CLOSE_STATE == myState ){
+      EML_CONTEXT("Remark: This stream is already closed.\n");
+      EML_SUCCESS(STAFCV_OK);
    }
 
-   DIO_STATE_T saveState=myState;
-   myState = DIO_UNKNOWN_STATE;
 
 /*- Destroy xdr. -*/
-   if( saveState != DIO_UNKNOWN_STATE ) { // hjw June 17 1998.  I did this
-     XDR_DESTROY(&myXDR);     // to prevent crash due to un-initialized
+   if( myState != DIO_UNKNOWN_STATE ) { // hjw June 17 1998.  I did this
+//VP temporary skip     XDR_DESTROY(&myXDR);     // to prevent crash due to un-initialized
                               // myXDR when client socketStream is refused
    }                          // by server.
 
-   if( DIO_OPEN_STATE == saveState ){
-      saveState = DIO_CLOSE_STATE;
-   }
+   myState = DIO_CLOSE_STATE;
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -251,16 +249,15 @@ unsigned char dioFileStream:: implementsInterface (const char * iface) {
 //----------------------------------
 STAFCV_T dioFileStream:: close () {
 
-   DIO_STATE_T saveState=myState;
-   myState = DIO_UNKNOWN_STATE;
+   if (myState == DIO_CLOSE_STATE)  {
+     EML_SUCCESS(STAFCV_OK);}
+      
 
 /*- Close file and destroy xdr. -*/
    dioStream::close();
    fclose(myFile);
 
-   if( DIO_OPEN_STATE == saveState ){
-      myState = DIO_CLOSE_STATE;
-   }
+   myState = DIO_CLOSE_STATE;
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -295,7 +292,7 @@ STAFCV_T dioFileStream:: open (DIO_MODE_T mode) {
 
 //- Create XDR pointer. -**
    xdrstdio_create(&myXDR, myFile, xdr_mode);
-//-? if( myXDR == NULL ) EML_ERROR(BAD_XDR); -??
+   if( ! myXDR.x_ops  ) EML_ERROR(BAD_XDR); 
 
    myMode = mode;
    myState = DIO_OPEN_STATE;
@@ -489,16 +486,11 @@ STAFCV_T dioSockStream:: requestAcknowledge() {
 //----------------------------------
 STAFCV_T dioSockStream:: close () {
 
-   DIO_STATE_T saveState=myState;
-   myState = DIO_UNKNOWN_STATE;
-
 /*- Close socket and destroy xdr. -*/
    dioStream::close();
 /*-klose(mySocket);	HACK-This needs to be a message to server-*/
 
-   if( DIO_OPEN_STATE == saveState ){
-      myState = DIO_CLOSE_STATE;
-   }
+   myState = DIO_CLOSE_STATE;
    EML_SUCCESS(STAFCV_OK);
 }
 
