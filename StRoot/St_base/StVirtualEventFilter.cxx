@@ -2,13 +2,21 @@
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// StVirtualEventFilter virtual base class to create the variuous       //
-// user-defined fikters for StEventDiplayMaker's objects                //
-// $Id: StVirtualEventFilter.cxx,v 1.8 2000/01/12 18:07:22 fine Exp $
-// This class defines the intreface to define a graphics attribute:     //
-// like: color, size and style                                          //
-// At the same time colr = 0 means the event supplied did not pass      //
-// filter and should not be drawn at all                                //
+// StVirtualEventFilter virtual base class is to create the variuous    //
+// user-defined filters                                                 //
+//                                                                      //
+// $Id: StVirtualEventFilter.cxx,v 1.9 2000/01/24 20:57:22 fine Exp $   //
+//                                                                      //
+// This class defines the intreface to define                           //
+// a graphics attribute:                                                //
+//   for example: size and style. The value the Channel methods return  //
+//                could be used a color index for grapgics filtering    //
+//                                                                      //
+// and a trivial selection as well                                      //
+//  to reply whether the object does satisfy some user                  //
+//  defined conditions.                                                 //                                                                      //
+//  For that the return value = 0 means the event supplied              //
+//  did not pass the filter and should not be drawn at all              //
 //                                                                      //
 // 1. StGlobalTrack  *globTrack                                         //
 // 2. StObjArray     *hitCollection                                     //
@@ -52,8 +60,11 @@ Int_t StVirtualEventFilter::Channel(const St_Table *,Int_t rowNumber,Size_t &,St
 
 //_____________________________________________________________________________
 // $Log: StVirtualEventFilter.cxx,v $
+// Revision 1.9  2000/01/24 20:57:22  fine
+// new comments
+//
 // Revision 1.8  2000/01/12 18:07:22  fine
-// cvs symbols have been added and copyright class introduced
+//  cvs symbols have been added and copyright class introduced
 //
 //_____________________________________________________________________________
 
