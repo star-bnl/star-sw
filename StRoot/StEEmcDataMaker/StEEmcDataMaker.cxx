@@ -1,4 +1,4 @@
-// $Id: StEEmcDataMaker.cxx,v 1.14 2004/04/03 06:32:45 balewski Exp $
+// $Id: StEEmcDataMaker.cxx,v 1.15 2004/04/04 06:10:28 balewski Exp $
 
 #include <Stiostream.h>
 #include <math.h>
@@ -13,8 +13,7 @@
 #include "StDAQMaker/StEEMCReader.h"
 
 #include "StEEmcDbMaker/StEEmcDbMaker.h"
-#include "StEEmcDbMaker/StEEmcDbIndexItem1.h"
-
+#include "StEEmcDbMaker/EEmcDbItem.h"
 #include "StEEmcDbMaker/EEmcDbCrate.h"
 
 #include "StEEmcUtil/EEfeeRaw/EEfeeDataBlock.h" 
@@ -68,7 +67,8 @@ Int_t StEEmcDataMaker::InitRun  (int runNumber){
     printf("\n\nWARN %s::InitRun()  found \"eeDb-maker\", but without any DB data, all EEMC data will be ignored\n\n", GetName());
     mDb=0;
   } else {
-    mDb->print(0);
+
+    //mDb->exportAscii();
   }
   return kStOK;
 }
@@ -129,16 +129,16 @@ int   StEEmcDataMaker::copyRawData(StEvent* mEvent) {
   
   StEmcRawData *raw=new  StEmcRawData;  
   emcC->setEemcRawData(raw);
-  printf("%s::copy %d EEMC raw data blocks eveID=%d\n",GetName(),mDb->getNCrate(),mEvent->id());
+  printf("%s::copy %d EEMC raw data blocks eveID=%d\n",GetName(),mDb->getNFiber(),mEvent->id());
 
-  for(icr=0;icr<mDb->getNCrate();icr++) {
-    const EEmcDbCrate *crate=mDb-> getCrate(icr);
-    // printf("copy EEMC raw: ");crate->print();
-    raw->createBank(icr,crate->nHead,crate->nCh);
-    //  printf("aa=%p bb=%p\n",eeReader->getEemcHeadBlock(crate->fiber,crate->type),eeReader->getEemcDataBlock(crate->fiber,crate->type));
+  for(icr=0;icr<mDb->getNFiber();icr++) {
+    const EEmcDbCrate *fiber=mDb-> getFiber(icr);
+    // printf("copy EEMC raw: ");fiber->print();
+    raw->createBank(icr,fiber->nHead,fiber->nCh);
+    //  printf("aa=%p bb=%p\n",eeReader->getEemcHeadBlock(fiber->fiber,fiber->type),eeReader->getEemcDataBlock(fiber->fiber,fiber->type));
 
-    raw->setHeader(icr,eeReader->getEemcHeadBlock(crate->fiber,crate->type));
-    raw->setData(icr,eeReader->getEemcDataBlock(crate->fiber,crate->type));
+    raw->setHeader(icr,eeReader->getEemcHeadBlock(fiber->fiber,fiber->type));
+    raw->setData(icr,eeReader->getEemcDataBlock(fiber->fiber,fiber->type));
   }
   return true;
 }
@@ -165,27 +165,27 @@ int  StEEmcDataMaker::headersAreSick(StEvent* mEvent) {
 
   int sick=false;
   int icr;
-  for(icr=0;icr<mDb->getNCrate();icr++) {
-    const EEmcDbCrate *crate=mDb-> getCrate(icr);
-    if(!crate->useIt) continue; // drop masked out crates
-    //printf(" EEMC raw-->pix crID=%d type=%c \n",crate->crID,crate->type);
+  for(icr=0;icr<mDb->getNFiber();icr++) {
+    const EEmcDbCrate *fiber=mDb-> getFiber(icr);
+    if(!fiber->useIt) continue; // drop masked out crates
+    //printf(" EEMC raw-->pix crID=%d type=%c \n",fiber->crID,fiber->type);
     const  UShort_t* head=raw->header(icr);
     assert(head);
     block.clear();
     block.setHead(raw->header(icr));
 
-    int lenCount=crate->nCh+crate->nHead;
+    int lenCount=fiber->nCh+fiber->nHead;
     int errFlag=0;
-    switch(crate->type) {
+    switch(fiber->type) {
     case 'T': lenCount+=32; break; // one more board exist in harware
     case 'S':  errFlag=0x28; break; // sth is set wrong in the boxes
     default:;
     }
 
     int trigCommand=4; // physics, 9=laser/LED, 8=??
-    int valid=block.isHeadValid(token,crate->crIDswitch,lenCount,trigCommand,errFlag);
+    int valid=block.isHeadValid(token,fiber->crIDswitch,lenCount,trigCommand,errFlag);
  
-    printf("valid=%d ",valid); crate->print();
+    printf("valid=%d ",valid); fiber->print();
 
     if(valid) continue;
     sick=true;
@@ -202,7 +202,6 @@ int  StEEmcDataMaker::headersAreSick(StEvent* mEvent) {
 //____________________________________________________
 int  StEEmcDataMaker::towerDataAreSick(StEvent* mEvent) {
 
-
   StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection();
 
   assert(emcC);
@@ -212,10 +211,10 @@ int  StEEmcDataMaker::towerDataAreSick(StEvent* mEvent) {
 
   int nGhost=0, n256=0;
   int icr;
-  for(icr=0;icr<mDb->getNCrate();icr++) {
-    const EEmcDbCrate *crate=mDb-> getCrate(icr);
-    if(!crate->useIt) continue; // drop masked out crates
-    if(crate->type!='T') continue;
+  for(icr=0;icr<mDb->getNFiber();icr++) {
+    const EEmcDbCrate *fiber=mDb-> getFiber(icr);
+    if(!fiber->useIt) continue; // drop masked out crates
+    if(fiber->type!='T') continue;
     const  UShort_t* data=raw->data(icr);
     assert(data);
     int i;
@@ -264,20 +263,22 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
     emcC->setDetector(emcDet[det]);
   }
 
+
+#if 1
   // store data from raw blocks to StEvent
   int nDrop=0;
   int nMap=0;
   int nTow=0;
   int icr;
-  for(icr=0;icr<mDb->getNCrate();icr++) {
-    const EEmcDbCrate *crate=mDb-> getCrate(icr);
-    if(!crate->useIt) continue; // drop masked out crates
+  for(icr=0;icr<mDb->getNFiber();icr++) {
+    const EEmcDbCrate *fiber=mDb-> getFiber(icr);
+    if(!fiber->useIt) continue; // drop masked out crates
     
     const  UShort_t* data=raw->data(icr);
     assert(data);
 
     for(int chan=0;chan<raw->sizeData(icr);chan++) {
-      const  StEEmcDbIndexItem1  *x=mDb->get(crate->crID,chan);
+      const  EEmcDbItem  *x=mDb->getByCrate(fiber->crID,chan);
       if(x==0) {
 	//printf("No EEMC mapping for crate=%3d chan=%3d\n",crate,chan);
 	nDrop++;
@@ -317,8 +318,8 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
 	continue;
       }
 
-      if(det==0) continue; // tmp
-      //printf("EEMC crate=%3d chan=%3d  ADC: raw=%4d pedSub=%+.1f energy=%+10g  -->   %2.2dT%c%2.2d\n",crate,chan,rawAdc,adc,energy,x->sec,x->sub,x->eta);
+      assert(det);
+      if(type=='T') printf("EEMC crate=%3d chan=%3d  ADC: raw=%4d  energy=%+10g  -->   %2.2dT%c%2.2d\n",fiber->crID,chan,rawAdc,energy,x->sec,x->sub,x->eta);
       
       StEmcRawHit* h = new StEmcRawHit(emcId[det],isec,ieta,isub,rawAdc,energy);
       emcDet[det]->addHit(h);
@@ -330,6 +331,22 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
     
   printf("%s event finished nDrop=%d nMap=%d nTow=%d\n",GetName(), nDrop,nMap,nTow);
 
+#endif
+
+
+#if 0
+  int jeta;
+  int isub;
+  int isec=10;
+  for(isec=0;isec<12;isec++)
+  for(isub=0;isub<5;isub++)
+  for(jeta=0;jeta<12;jeta++) {
+    int adc=1000+ jeta + isub*12 +isec*60;
+    float ener=777;
+    StEmcRawHit* h = new StEmcRawHit(emcId[det],isec,jeta,isub,adc,ener);
+    emcDet[det]->addHit(h);
+  }
+#endif
 
   for(det = kEndcapEmcTowerId; det<= kEndcapSmdVStripId; det++){
    StEmcDetector* emcDetX= emcC->detector( StDetectorId(det));
@@ -343,6 +360,9 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
  
 
 // $Log: StEEmcDataMaker.cxx,v $
+// Revision 1.15  2004/04/04 06:10:28  balewski
+// towards full access to DB
+//
 // Revision 1.14  2004/04/03 06:32:45  balewski
 // firts attempt to store EEMC hits in StEvent & muDst,
 // Implemented useIt for fibers in Db
