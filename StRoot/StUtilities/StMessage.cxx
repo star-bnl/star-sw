@@ -1,5 +1,8 @@
-// $Id: StMessage.cxx,v 1.16 1999/09/14 15:42:03 genevb Exp $
+// $Id: StMessage.cxx,v 1.17 1999/09/16 15:50:25 genevb Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.17  1999/09/16 15:50:25  genevb
+// Fixed a bug in over-writing memory when calling from FORTRAN, use char=0 instead of strcpy
+//
 // Revision 1.16  1999/09/14 15:42:03  genevb
 // Some bug fixes, workaround for nulls in strings
 //
@@ -94,7 +97,7 @@ messTime() {
   while (mess[--len] == space) {}     // remove trailing spaces
   message = new char[(++len + 1)];
   strncpy(message,mess,len);
-  strcpy(&(message[len]),"");
+  message[len]=0;
   Print(0);
 }
 //_____________________________________________________________________________
@@ -156,7 +159,7 @@ int StMessage::Print(int nChars) {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.16 1999/09/14 15:42:03 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.17 1999/09/16 15:50:25 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
