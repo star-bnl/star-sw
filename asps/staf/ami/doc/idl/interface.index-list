@@ -1,6 +1,6 @@
 amiBroker_i
 amiInvoker_i
-duiDispatcher_i
+amiModule
 socCatalog_i
 socFactory_i
 socObject_i
