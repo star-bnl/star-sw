@@ -7,6 +7,9 @@
 //
 //
 // $Log: StiMaker.cxx,v $
+// Revision 1.106  2002/10/04 01:54:48  pruneau
+// DefaultToolkit now uses the StiHitLoader scheme rahter than the StiHitFiller.
+//
 // Revision 1.105  2002/09/27 19:19:01  mmiller
 // Changed program flow to once again allow for track by track gui.
 //
@@ -73,35 +76,32 @@
 #include "StMcEventMaker/StMcEventMaker.h"
 
 // Sti
+#include "Sti/Messenger.h"
 #include "Sti/StiIOBroker.h"
-#include "Sti/StiFactoryTypes.h"
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiHit.h"
-#include "Sti/StiDetector.h"
-#include "Sti/StiPlacement.h"
 #include "Sti/StiHitFiller.h"
-#include "Sti/StiDetectorContainer.h"
+//#include "Sti/StiDetector.h"
+//#include "Sti/StiDetectorContainer.h"
+//#include "Sti/StiDetectorFinder.h"
 #include "Sti/StiTrackContainer.h"
 #include "Sti/StiCompositeSeedFinder.h"
 #include "Sti/StiSeedFinder.h"
 #include "Sti/StiLocalTrackSeedFinder.h"
 #include "Sti/StiTrackSeedFinder.h"
 #include "Sti/StiEvaluableTrackSeedFinder.h"
-#include "StiGui/StiRDLocalTrackSeedFinder.h"
-#include "Sti/StiDetectorFinder.h"
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiKalmanTrackFinder.h"
-#include "Sti/StiTrackMerger.h"
-#include "Sti/StiLocalTrackMerger.h"
-#include "Sti/Messenger.h"
-#include "Sti/StiSimpleTrackFilter.h"
+//#include "Sti/StiTrackMerger.h"
+//#include "Sti/StiLocalTrackMerger.h"
+#include "Sti/StiDefaultTrackFilter.h"
 
 //StiGui
-#include "StiGui/StiGuiFactoryTypes.h"
-#include "StiGui/StiDrawableHits.h"
-#include "StiGui/StiRootDrawableHits.h"
-#include "StiGui/StiRootDrawableLine.h"
-#include "StiGui/StiRootDrawableHitContainer.h"
+//#include "StiGui/StiDrawableHits.h"
+//#include "StiGui/StiRDLocalTrackSeedFinder.h"
+//#include "StiGui/StiRootDrawableHits.h"
+//#include "StiGui/StiRootDrawableLine.h"
+//#include "StiGui/StiRootDrawableHitContainer.h"
 #include "StiGui/StiRootDisplayManager.h"
 
 //StiEvaluator
@@ -112,11 +112,8 @@
 #include "StiDefaultToolkit.h"
 #include "StiStEventFiller.h"
 #include "StiMaker.h"
-#include "StiMaker/StiRootSimpleTrackFilter.h"
 
 StiMaker* StiMaker::sinstance = 0;
-
-ostream& operator<<(ostream&, const StiHit&);
 
 ClassImp(StiMaker)
   
@@ -135,7 +132,9 @@ ClassImp(StiMaker)
 {
   cout <<"StiMaker::StiMaker()"<<endl;
   sinstance = this;
-  toolkit = StiDefaultToolkit::instance();
+  StiToolkit::setToolkit(new StiDefaultToolkit());
+  // local cache
+  toolkit = StiToolkit::instance();
 }
 
 StiMaker* StiMaker::instance()
@@ -269,7 +268,7 @@ Int_t StiMaker::Make()
 
 void StiMaker::printStatistics() const
 {
-  cout <<"HitFactory Size:\t"<<toolkit->getHitFactory()->getCurrentSize()<<endl;
+  //cout <<"HitFactory Size:\t"<<toolkit->getHitFactory()->getCurrentSize()<<endl;
   cout <<"HitContainer size:\t"<<toolkit->getHitContainer()->size()<<endl;
   cout <<"Number of Primary Vertices:\t"<<toolkit->getHitContainer()->numberOfVertices()<<endl;
 }
@@ -282,7 +281,6 @@ void StiMaker::finishEvent()
   StTimer clockPrimaryFinder;
   StTimer clockAssociator;
   StTimer clockEvaluator;
-  StTimer clockPlot;
   
   if (eventIsFinished)
     {
@@ -303,7 +301,7 @@ void StiMaker::finishEvent()
   if (mevent->primaryVertex()) 
     {
       clockPrimaryFinder.start();
-      StiHit * vertex = toolkit->getHitFactory()->getObject();
+      StiHit * vertex = toolkit->getHitFactory()->getInstance();
       const StThreeVectorF& vp = mevent->primaryVertex()->position();
       const StThreeVectorF& ve = mevent->primaryVertex()->positionError();
       vertex->set(0.,0.,vp.x(),vp.y(),vp.z(),ve.x(),0.,0.,ve.y(),0.,ve.z());
@@ -330,9 +328,7 @@ void StiMaker::finishEvent()
   if (ioBroker->useGui()==true) 
     {
       tracker->update();
-      StiRootSimpleTrackFilter * f = 0;
-      //static_cast<StiRootSimpleTrackFilter *>(tracker->getGuiTrackFilter());
-        // check of the quality of the track based on the track map
+      StiDefaultTrackFilter * f = 0;
       if (f)
 	{
 	  f->getParameter("Chi2Used")->setValue(true);

@@ -52,28 +52,4 @@ inline void RootEditableParameter::setCheckButton(TGCheckButton* checkButton)
   _checkButton = checkButton;
 }
 
-/*! ConstrainedParameter factory
- */
-class RootEditableParameterFactory : public EditableParameterFactory
-{
- public:
-  ///This is the only constructor available.
-  RootEditableParameterFactory(const string& newName, 
-			int original=-1, int 
-			incremental=-1, 
-			int maxInc=-1);
-  ///Default destructor.
-  virtual ~RootEditableParameterFactory();
-  
- protected:
-  ///Return a pointer to a new Parameter object on the heap.
-  virtual void* makeNewObject() const
-    {
-      return new RootEditableParameter();
-    }
-    
-private:
-    RootEditableParameterFactory(); // no imp
-};
-
 #endif

@@ -25,49 +25,50 @@ class StiDefaultToolkit : public StiToolkit
 {
 public:
   
-  virtual StiObjectFactoryInterface<StiHit> * getHitFactory();
-  virtual StiObjectFactoryInterface<StiKalmanTrack> * getTrackFactory();
-  virtual StiObjectFactoryInterface<StiMcTrack> * getMcTrackFactory();
-  virtual StiObjectFactoryInterface<StiDetector>  * getDetectorFactory();
-  virtual StiObjectFactoryInterface<StiDetectorNode>  * getDetectorNodeFactory();
-  virtual StiObjectFactoryInterface<StiKalmanTrackNode> * getTrackNodeFactory();
-  virtual StiObjectFactoryInterface<Parameter>  * getParameterFactory();
-  virtual StiObjectFactoryInterface<StiTrackFilter>  * getTrackFilterFactory();
+  StiDefaultToolkit() ;
+  virtual Factory<StiHit> * getHitFactory();
+  virtual Factory<StiKalmanTrack> * getTrackFactory();
+  virtual Factory<StiMcTrack> * getMcTrackFactory();
+  virtual Factory<StiDetector>  * getDetectorFactory();
+  virtual Factory< StiCompositeTreeNode<StiDetector> >  * getDetectorNodeFactory();
+  virtual Factory<StiKalmanTrackNode> * getTrackNodeFactory();
+  virtual Factory<Parameter>  * getParameterFactory();
+  virtual Factory< Filter<StiTrack>  >  * getTrackFilterFactory();
 
   // common object containers
-	virtual StiDetectorContainer  * getDetectorContainer();
-	virtual StiHitContainer       * getHitContainer();
-	virtual StiTrackContainer     * getTrackContainer();
-	virtual StiTrackContainer     * getMcTrackContainer();
-
-	// service and convenience class objects.
-	virtual StiGeometryTransform * getGeometryTransform();
-	virtual StiCoordinateTransform * getCoordinateTransform();
-	virtual StiDetectorFinder    * getDetectorFinder();
-	virtual StiSeedFinder        * getTrackSeedFinder();
-	virtual StiTrackFinder       * getTrackFinder();
-	virtual StiTrackFitter       * getTrackFitter();
-	virtual StiTrackMerger       * getTrackMerger();
-	virtual StiDisplayManager    * getDisplayManager();
-	//virtual StiEvaluator         * getEvaluator(const string& file);
-	//virtual StiEvaluator         * getEvaluator();
-	//virtual StiEventAssociator   * getEventAssociator();
-	virtual StiIOBroker * getIOBroker();
-	virtual StiHitFiller * getHitFiller();
-	virtual StAssociationMaker * getAssociationMaker();
-	virtual void setAssociationMaker(StAssociationMaker * a);
-	
-	virtual StiHitErrorCalculator * getHitErrorCalculator();
-	
-protected:
-
-	friend class StiToolkit;
-
+  virtual StiDetectorContainer  * getDetectorContainer();
+  virtual StiHitContainer       * getHitContainer();
+  virtual StiTrackContainer     * getTrackContainer();
+  virtual StiTrackContainer     * getMcTrackContainer();
+  
+  // service and convenience class objects.
+  virtual StiGeometryTransform * getGeometryTransform();
+  virtual StiCoordinateTransform * getCoordinateTransform();
+  virtual StiDetectorFinder    * getDetectorFinder();
+  virtual StiSeedFinder        * getTrackSeedFinder();
+  virtual StiTrackFinder       * getTrackFinder();
+  virtual StiTrackFitter       * getTrackFitter();
+  virtual StiTrackMerger       * getTrackMerger();
+  virtual StiDisplayManager    * getDisplayManager();
+  //virtual StiEvaluator         * getEvaluator(const string& file);
+  //virtual StiEvaluator         * getEvaluator();
+  //virtual StiEventAssociator   * getEventAssociator();
+  virtual StiIOBroker * getIOBroker();
+  virtual StiHitFiller * getHitFiller();
+  virtual StiHitLoader<StEvent,StiGeometryTransform> * getHitLoader();
+  virtual StAssociationMaker * getAssociationMaker();
+  virtual void setAssociationMaker(StAssociationMaker * a);
+  
+  virtual StiHitErrorCalculator * getHitErrorCalculator();
+  
+ protected:
+  
+  //friend class StiToolkit;
+  
   /** 
    * Protected ctor
    */
-  StiDefaultToolkit() ;
-
+  
   /** 
    * Dtor. Must delete all objects currently allocated.
    */
@@ -75,14 +76,14 @@ protected:
   
   
   // small object factories
-  StiObjectFactoryInterface<StiTrackFilter>     * trackFilterFactory;
-  StiObjectFactoryInterface<Parameter>          * parameterFactory;
-  StiObjectFactoryInterface<StiHit>             * hitFactory;
-  StiObjectFactoryInterface<StiKalmanTrack>     * trackFactory;
-  StiObjectFactoryInterface<StiMcTrack>         * mcTrackFactory;
-  StiObjectFactoryInterface<StiDetector>        * detectorFactory;
-  StiObjectFactoryInterface<StiDetectorNode>    * detectorNodeFactory;
-  StiObjectFactoryInterface<StiKalmanTrackNode> * trackNodeFactory;
+  Factory< Filter<StiTrack>  > * trackFilterFactory;
+  Factory<Parameter>           * parameterFactory;
+  Factory<StiHit>              * hitFactory;
+  Factory<StiKalmanTrack>      * trackFactory;
+  Factory<StiMcTrack>          * mcTrackFactory;
+  Factory<StiDetector>         * detectorFactory;
+  Factory< StiCompositeTreeNode<StiDetector> >     * detectorNodeFactory;
+  Factory<StiKalmanTrackNode>  * trackNodeFactory;
   
   // common object containers
   StiDetectorContainer      * detectorContainer;
@@ -103,6 +104,7 @@ protected:
   //StiEventAssociator    * eventAssociator;
   StiIOBroker * ioBroker;
   StiHitFiller * hitFiller;
+  StiHitLoader<StEvent,StiGeometryTransform> * hitLoader;
   StAssociationMaker * associationMaker; 
   StiHitErrorCalculator * hitErrorCalculator;
   

@@ -26,19 +26,3 @@ RootEditableParameter::~RootEditableParameter()
   delete _checkButton;
 }
 
-RootEditableParameterFactory::RootEditableParameterFactory(const string& newName,
-							   int original,
-							   int incremental, 
-							   int maxInc)
-  : EditableParameterFactory(newName, 
-			     original, 
-			     incremental, 
-			     maxInc)
-{
-  initialize();
-}
-
-RootEditableParameterFactory::~RootEditableParameterFactory()
-{
-  // cout <<"RootEditableParameterFactory::~RootEditableParameterFactory()"<<endl;
-}

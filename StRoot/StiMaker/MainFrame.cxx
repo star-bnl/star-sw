@@ -21,6 +21,8 @@ using std::find_if;
 #include "StMemoryInfo.hh"
 
 //Sti
+#include "Sti/StiCompositeTreeNode.h"
+#include "Sti/StlUtilities.h"
 #include "Sti/StiToolkit.h"
 #include "Sti/StiIOBroker.h"
 #include "Sti/Messenger.h"
@@ -29,9 +31,6 @@ using std::find_if;
 #include "Sti/StiDetectorContainer.h"
 #include "Sti/StiHitContainer.h"
 #include "Sti/StiKalmanTrackFinder.h"
-#include "Sti/StiCompositeTreeNode.h"
-#include "Sti/StiFactoryTypes.h"
-#include "Sti/StlUtilities.h"
 
 //StiGui
 #include "StiGui/StiRootDrawableDetector.h"
@@ -43,7 +42,7 @@ using std::find_if;
 #include "StiMaker.h"
 #include "MainFrame.h"
 #include "StiOptionFrame.h"
-#include "StiRootSimpleTrackFilter.h"
+#include "Sti/StiDefaultTrackFilter.h"
 
 MainFrame* MainFrame::s_instance = 0;
 
@@ -432,9 +431,9 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 	      case M_TrackFinderOptions:new KalmanTrackFinderIO(fClient->GetRoot(), this);break;
 	      case M_McTrackFilterOptions: 
 		{
-		  StiRootSimpleTrackFilter * mcFilter;
-		  StiTrackFilter * filter = StiToolkit::instance()->getTrackFinder()->getGuiMcTrackFilter();
-		  mcFilter = dynamic_cast<StiRootSimpleTrackFilter *>(filter);
+		  StiDefaultTrackFilter * mcFilter;
+		  Filter<StiTrack> * filter = StiToolkit::instance()->getTrackFinder()->getGuiMcTrackFilter();
+		  mcFilter = dynamic_cast<StiDefaultTrackFilter*>(filter);
 		  if (mcFilter)
 		      new StiOptionFrame(fClient->GetRoot(), this, mcFilter);
 		  else
@@ -442,8 +441,8 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 		  break;
 		}
 	      case M_TrackFilterOptions: 
-		StiRootSimpleTrackFilter * filter;
-		filter = static_cast<StiRootSimpleTrackFilter *>(StiToolkit::instance()->getTrackFinder()->getGuiTrackFilter());
+		StiDefaultTrackFilter * filter;
+		filter = static_cast<StiDefaultTrackFilter *>(StiToolkit::instance()->getTrackFinder()->getGuiTrackFilter());
 		new StiOptionFrame(fClient->GetRoot(), this, filter);
 		break;
 	      case M_LocalSeedFinderOptions: new LocalSeedFinderIO(fClient->GetRoot(), this);break;
@@ -1290,11 +1289,11 @@ DetectorActivator::DetectorActivator(const TGWindow *p, const TGWindow *main,
 			    2, 2, 2, 2);
     fL4 = new TGLayoutHints(kLHintsTop | kLHintsLeft,
 			    0, 0, 5, 0);
-    
+    const  StiCompositeTreeNode<StiDetector>   foo;
     //Build Dynamically from Detector Tree:
     StiDetectorContainer* detStore = StiDetectorContainer::instance();
-    const data_node* root = detStore->root();
-    const data_node* midRapidity = *(root->begin());
+    const  StiCompositeTreeNode<StiDetector>  * root = detStore->root();
+    const  StiCompositeTreeNode<StiDetector>  * midRapidity = *(root->begin());
     if (midRapidity->getName()!="midrapidity") {
 	cout <<"DetectorActivator::DetectorActivator() ERROR:\t"
 	     <<"Did not find midrapidity region.  Undefined behavior"<<endl;
@@ -1302,7 +1301,7 @@ DetectorActivator::DetectorActivator(const TGWindow *p, const TGWindow *main,
     
     //cout <<"Loop on radii"<<endl;
     //Now loop on radii:
-    typedef data_node::vec_type vecType;
+    typedef  StiCompositeTreeNode<StiDetector>  ::vec_type vecType;
     for (vecType::const_iterator it=midRapidity->begin(); it!=midRapidity->end(); ++it) {
 	string tempName = (*it)->getName();
 	
@@ -1441,14 +1440,14 @@ void DetectorActivator::updateDetectors()
 void DetectorActivator::activateLayer(const string& name, bool on)
 {
     StiDetectorContainer* detStore = StiDetectorContainer::instance();
-    const data_node* root = detStore->root();
-    const data_node* midRapidity = *(root->begin());
+    const  StiCompositeTreeNode<StiDetector>  * root = detStore->root();
+    const  StiCompositeTreeNode<StiDetector>  * midRapidity = *(root->begin());
     if (midRapidity->getName()!="midrapidity") {
 	cout <<"DetectorActivator::activateNode() ERROR:\t"
 	     <<"Did not find midrapidity region.  Undefined behavior"<<endl;
     }
     
-    typedef data_node::vec_type vecType;
+    typedef  StiCompositeTreeNode<StiDetector>::vec_type vecType;
 
     //find this radial layer
     //SameNodeName<StiDetector> mySameName(name);
