@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.82 2005/02/15 16:57:48 jeromel Exp $
+# $Id: ConsDefs.pm,v 1.83 2005/03/09 18:59:41 perev Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -102,7 +102,9 @@
     $EXTRA_FCPATH = "";
     $FFLAGS        = $G77FLAGS;
     $FEXTEND       = $G77EXTEND;
-    $FPPFLAGS      = "-DCERNLIB_TYPE";
+    $CPPCERN       = " -DCERNLIB_TYPE -DCERNLIB_DOUBLE -DCERNLIB_NOQUAD -DCERNLIB_LINUX ";
+    $FPPFLAGS      = $CPPCERN;
+    $CXXFLAGS     .= $CPPCERN;
     $EXTRA_FFLAGS  = "";
 
     $CPP           = $FC . " -E -P";
@@ -425,12 +427,22 @@
     if ($OSFCFID) {$FPPFLAGS  .= " -D" . join ( " -D", split ( " ", $OSFCFID ) );}
 
     $ROOTSRC = $ROOTSYS . "/include";
+
+    $CERNINO = "";
+    if (! $ENV{MINICERN}) {
+      $CERNINO = $CERN_ROOT . "/include";
+    } else {
+      $CERNINO = "#StarVMC/minicern" . $main::PATH_SEPARATOR . "#StarVMC/StGeant321";
+    }
+
     $CPPPATH = "#StRoot" .  $main::PATH_SEPARATOR . $INCLUDE . $main::PATH_SEPARATOR . $ROOTSRC;# . $main::PATH_SEPARATOR . "#";
+    $CPPPATH .= $main::PATH_SEPARATOR . $CERNINO;
+
     my $pwd = cwd();
     my $path2bin = $pwd . "/." . $STAR_HOST_SYS . "/bin";
     if ($PATH !~ /$STAR_BIN/) {$PATH = $STAR_BIN . ":" . $PATH;}
     $PATH = $path2bin .":". $PATH;  #print "PATH = $PATH\n";
-    $FCPATH = $INCLUDE . $main::PATH_SEPARATOR . $CERN_ROOT . "/include";
+    $FCPATH = $INCLUDE . $main::PATH_SEPARATOR . $CERNINO;
 
 
     # ------- packages -------
