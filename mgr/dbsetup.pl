@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl -w
 #
-# $Id: dbsetup.pl,v 1.3 1999/07/21 09:19:08 wenaus Exp $
+# $Id: dbsetup.pl,v 1.4 1999/07/25 16:12:43 wenaus Exp $
 #
 # $Log: dbsetup.pl,v $
+# Revision 1.4  1999/07/25 16:12:43  wenaus
+# Allow for remote DB access
+#
 # Revision 1.3  1999/07/21 09:19:08  wenaus
 # Add STAR environment variables
 #
@@ -65,12 +68,12 @@ $LD_LIBRARY_PATH.=":/usr/ccs/lib:/opt/star/lib";
 
 ## Database setup
 $dbuser="root";
-$dbpass="octopus3";
+$dbpass="";
 $dbname="";
 if ($dbuser eq 'root') {
-    $dbname="system_data";
+    $dbname="system_data:duvall.star.bnl.gov";
 } else {
-    $dbname=$dbuser."_data";
+    $dbname="".$dbuser."_data:duvall.star.bnl.gov";
 }
 
 # DAQ format info:
