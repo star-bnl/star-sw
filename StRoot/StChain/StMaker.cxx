@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.105 2000/08/07 22:41:37 perev Exp $
+// $Id: StMaker.cxx,v 1.106 2000/11/25 18:59:48 fisyak Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -393,7 +393,10 @@ Int_t StMaker::Init()
 
       maker->StartTimer();
       if (GetDebug()) printf("\n*** Call %s::Init() ***\n\n",maker->ClassName());
-      if ( maker->Init()) return kStErr;
+      if ( maker->Init()) {
+	printf("   Maker %s failed in Init\n", maker->GetName());
+	return kStErr;
+      }
       maker->StopTimer();
 
 // 		Add the Maker histograms in the Maker histograms list
@@ -1071,6 +1074,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.106  2000/11/25 18:59:48  fisyak
+// Add warning for failed Initialization
+//
 // Revision 1.105  2000/08/07 22:41:37  perev
 // remove redundant print in case of error
 //
