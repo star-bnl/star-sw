@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: Q3invCorrFctn.h,v 1.4 2000/08/08 23:39:21 laue Exp $
+ * $Id: Q3invCorrFctn.h,v 1.5 2001/06/03 21:05:31 willson Exp $
  *
  * Author: Robert Willson, Ohio State, willson@bnl.gov 
  ***************************************************************************
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: Q3invCorrFctn.h,v $
- * Revision 1.4  2000/08/08 23:39:21  laue
- * Updated for standalone version
+ * Revision 1.5  2001/06/03 21:05:31  willson
+ * Bins in entrance separation
  *
  * Revision 1.3  2000/05/11 21:17:30  willson
  * Modified CorrFctn class
@@ -28,37 +28,44 @@
 #define Q3invCorrFctn_hh
 
 #include "StHbtMaker/Base/StHbtCorrFctn.hh"
+#include "StHbtMaker/Infrastructure/StHbtCoulomb.h"
+//#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 
 class Q3invCorrFctn : public StHbtCorrFctn {
 public:
-  Q3invCorrFctn(char* title, const int& nbins, const float& QinvLo, const float& QinvHi);
+  Q3invCorrFctn(char* title, const int& nbinsQ, const float& QinvLo, const float& QinvHi, const int& nbinsMerge, const float& MergeLo, const float& MergeHi, const float& Split);
   virtual ~Q3invCorrFctn();
 
   virtual StHbtString Report();
   virtual void AddRealTriplet(const StHbtTriplet*);
   virtual void AddMixedTriplet(const StHbtTriplet*);
 
+  void AddCorrection(StHbtCoulomb*);
+  void AddPHisto(TH1D*);
+
   virtual void Finish();
 
-  StHbt1DHisto* Numerator();
-  StHbt1DHisto* Denominator();
-  StHbt1DHisto* Ratio();
-
+  StHbt2DHisto* Numerator();
+  StHbt2DHisto* Denominator();
+  StHbt2DHisto* Ratio();
+  
 private:
-  StHbt1DHisto* mNumerator;
-  StHbt1DHisto* mDenominator;
-  StHbt1DHisto* mRatio;
+  StHbt2DHisto* mNumerator;
+  StHbt2DHisto* mDenominator;
+  StHbt2DHisto* mRatio;
+  TH1D* mPHist;
 
-#ifdef __ROOT__
   ClassDef(Q3invCorrFctn, 1)
-#endif
+
+  float mSplit;
+  StHbtCoulomb mCorrection;
 
 };
 
-inline  StHbt1DHisto* Q3invCorrFctn::Numerator(){return mNumerator;}
-inline  StHbt1DHisto* Q3invCorrFctn::Denominator(){return mDenominator;}
-inline  StHbt1DHisto* Q3invCorrFctn::Ratio(){return mRatio;}
-
+inline  StHbt2DHisto* Q3invCorrFctn::Numerator(){return mNumerator;}
+inline  StHbt2DHisto* Q3invCorrFctn::Denominator(){return mDenominator;}
+inline  StHbt2DHisto* Q3invCorrFctn::Ratio(){return mRatio;}
+inline  void Q3invCorrFctn::AddPHisto(TH1D *x){mPHist = x;}
 
 #endif
 
