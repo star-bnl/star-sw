@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMCSlat.h,v 2.1 2001/04/26 01:07:42 ullrich Exp $
+ * $Id: StTofMCSlat.h,v 2.2 2001/04/26 15:19:10 ullrich Exp $
  *
  * Author: Wei-Ming Zhang, April 2001 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofMCSlat.h,v $
+ * Revision 2.2  2001/04/26 15:19:10  ullrich
+ * Added ClassDef and ClassImp macros.
+ *
  * Revision 2.1  2001/04/26 01:07:42  ullrich
  * Initial Revision.
  *
@@ -51,6 +54,8 @@ struct StructTofMCInfo {
     Float_t mTime;
     Float_t mMTime;
     Float_t mMTimeL;
+    
+    ClassDef(StructTofMCInfo,1)
 };
 
 inline int StructTofMCInfo::operator==(const StructTofMCInfo& MCInfo) const
