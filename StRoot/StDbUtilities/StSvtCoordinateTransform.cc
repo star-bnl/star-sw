@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.1 2000/08/21 16:17:27 calderon Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.2 2000/08/25 17:19:09 caines Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -67,7 +67,7 @@ void StSvtCoordinateTransform::operator()(const StSvtWaferCoordinate& a, StSvtLo
   b.setWafer(a.wafer());
   b.setHybrid(a.hybrid());
   
-  int idShape = (int)mconfig[0].layer_shape[a.layer()-1]-1;
+  int idShape = 0;
   
   
   // Shift position because it is the North hybrid. Place relative to the center of the wafer, hybrid=1, anode 1=East
@@ -103,7 +103,7 @@ void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StSvtWa
   b.setWafer(a.wafer());
   b.setHybrid(a.hybrid());
   
-  int idShape = (int)mconfig[0].layer_shape[a.layer()-1]-1;
+  int idShape = 0;
   
   
   // Shift position because it is the North hybrid. Local coords are placed relative to the center of the wafer, hybrid=1, anode 1=East so undo this
@@ -151,8 +151,8 @@ void StSvtCoordinateTransform::operator()(const StSvtLocalCoordinate& a, StGloba
 void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLocalCoordinate& b)
 {
 
-  int index, barrel, HardWarePos, Found;
-  int iladder, ilayer, ibarrel, NWafer;
+  int barrel, HardWarePos, Found;
+  int iladder, ibarrel, NWafer;
   int ladderRangeLo, ladderRangeHi, ladderMax;
 
 
@@ -166,13 +166,17 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
   else barrel = 1;
 
 
+  //Exception for year1 ladder Only one ladder which is wrongly labelled as barrel 3
+  //even though its at r=10.4
 
+  if( mgeom[0].id > 5000) barrel = 3;
+      
 
   // Find out what wafer hit is on
 
      HardWarePos = 1000*(2*barrel)+1;
 
-     for( NWafer=1; NWafer<= mconfig[0].n_wafer[2*barrel]; NWafer++){
+     for( NWafer=1; NWafer<= mconfig->getNumberOfWafers(barrel); NWafer++){
 
        if ( IsOnWaferZ(a.position(),HardWarePos+100*NWafer)) break;
      }
@@ -182,7 +186,7 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
 
   switch (barrel){
     
-  case '1':
+  case 1:
       
       if( a.position().x() > 0 && a.position().y() > 0){
 	ladderRangeLo = 1;
@@ -207,8 +211,8 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
     
     
     break;
-    
-  case '2':
+   
+  case 2:
       
     if( a.position().x() > 0 && a.position().y() > 0){
       ladderRangeLo = 1;
@@ -234,7 +238,7 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
     
     break;
     
-  case '3':
+  case 3:
    if( a.position().x() > 0 && a.position().y() > 0){
       ladderRangeLo = 1;
       ladderRangeHi = 4;
@@ -259,9 +263,15 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
       break;
   }
     
-    
+  //Exception for year1 ladder Only one ladder which is wrongly labelled as barrel 3
+  // ladder 1even though its at r=10.4 at 12 0'Clock
   
-  for( ibarrel=(barrel*2)-1; ibarrel<=barrel*2; ibarrel++){
+  if( mgeom[0].id > 5000) ladderRangeLo = 1; 
+
+  Found = 0;
+  ibarrel = (barrel*2)-2;
+  while(ibarrel<barrel*2 && Found == 0){
+    ibarrel++;
     for( iladder=ladderRangeLo; iladder<=ladderRangeHi; iladder++){
       HardWarePos = 1000*ibarrel+100*b.wafer()+iladder;
       if( IsOnWaferR(a.position(),HardWarePos)) {
@@ -299,6 +309,8 @@ void StSvtCoordinateTransform::operator()(const StGlobalCoordinate& a,  StSvtLoc
     
     GlobaltoLocal( a.position(), b, HardWarePos);
 
+    b.setHybrid(2);
+    if( b.position().x() < 0) b.setHybrid(1);
   }
 
 }
@@ -322,7 +334,7 @@ void  StSvtCoordinateTransform::LocaltoGlobal(const StSvtLocalCoordinate& a, StT
   //   Output Arguments:
   //    x     : global coordinate
 
-  //   Functional Description: 
+  //   Functional Description:  
   //   Make a local to global mapping by using the origin of the wafer coordinate and the
   //  3 vectors defining the normal to the plane, the drift direction, and the transverse direction.
   //     xp[0]  : component in the drift direction
@@ -332,10 +344,21 @@ void  StSvtCoordinateTransform::LocaltoGlobal(const StSvtLocalCoordinate& a, StT
   //     Error Conditions: none
 
   float xl[3];
-  int index;
+  int index, HardWarePos, Gotit=0;
 
-  for( index=0; index< 200; index++){
-    if( mgeom[index].id == 1000*a.layer()+100*a.wafer()+a.ladder() ) break;
+  HardWarePos = 1000*a.layer()+100*a.wafer()+a.ladder();
+  for( index=0; index< 216; index++){
+    if( mgeom[index].id ==  HardWarePos) {
+      Gotit++;
+      break;
+    }
+  }
+  
+  if( !Gotit) {
+    x.setX(-999);
+    x.setY(-999);
+    x.setZ(-999);
+    return;
   }
   
   
@@ -351,7 +374,7 @@ void  StSvtCoordinateTransform::LocaltoGlobal(const StSvtLocalCoordinate& a, StT
 
 //___________________________________________________________________________
 
-void StSvtCoordinateTransform::GlobaltoLocal( const StThreeVector<double>& x, StSvtLocalCoordinate& b , int index  )
+void StSvtCoordinateTransform::GlobaltoLocal( const StThreeVector<double>& x, StSvtLocalCoordinate& b , int HardWarePos  )
 {
 
 /*     DESCRIPTION:   global to local mapping for svt points
@@ -378,20 +401,37 @@ void StSvtCoordinateTransform::GlobaltoLocal( const StThreeVector<double>& x, St
        c
 */
 
-      float  xl[3];
+  int index, Gotit=0;
+  float  xl[3];
+  
+  //     Executable Code
+  //     ===============
+  
 
-//     Executable Code
-//     ===============
+  for( index=0; index< 216; index++){
+    if( mgeom[index].id == HardWarePos ) {
+      Gotit++;
+      break;
+    }
+  }
+  
 
-      
-      xl[0] = x.x() - mgeom[index].x[0];
-      xl[1] = x.y() - mgeom[index].x[1];
-      xl[2] = x.z() - mgeom[index].x[2];
-      
-      b.position().setX(xl[0]*mgeom[index].d[0] + xl[1]*mgeom[index].d[1] + xl[2]*mgeom[index].d[2]);
-      b.position().setY(xl[0]*mgeom[index].t[0] + xl[1]*mgeom[index].t[1] + xl[2]*mgeom[index].t[2]);
-      b.position().setZ(xl[0]*mgeom[index].n[0] + xl[1]*mgeom[index].n[1] + xl[2]*mgeom[index].n[2]); 
+  if( !Gotit) {
+    b.position().setX(-999);
+    b.position().setY(-999);
+    b.position().setZ(-999);
+    return;
+  }
 
+  
+  xl[0] = x.x() - mgeom[index].x[0];
+  xl[1] = x.y() - mgeom[index].x[1];
+  xl[2] = x.z() - mgeom[index].x[2];
+  
+  b.position().setX(xl[0]*mgeom[index].d[0] + xl[1]*mgeom[index].d[1] + xl[2]*mgeom[index].d[2]);
+  b.position().setY(xl[0]*mgeom[index].t[0] + xl[1]*mgeom[index].t[1] + xl[2]*mgeom[index].t[2]);
+  b.position().setZ(xl[0]*mgeom[index].n[0] + xl[1]*mgeom[index].n[1] + xl[2]*mgeom[index].n[2]); 
+  
 }
 
 //_____________________________________________________________________________
@@ -408,7 +448,7 @@ double StSvtCoordinateTransform::UnCalcDriftLength(double x){
 
   //Gives drift distance of spt in timebuckets from cm in local coords
 
-      return (x/mparam->vd)/mparam->fsca;
+      return (x/mparam->vd)*mparam->fsca;
 }
 //_____________________________________________________________________________
 
@@ -429,20 +469,15 @@ double StSvtCoordinateTransform::UnCalcTransLength(double x){
 
 //_____________________________________________________________________________
 
-int StSvtCoordinateTransform::IsOnWaferZ(   const StThreeVector<double>& GlobalPosition, int HardWarePos){
+int StSvtCoordinateTransform::IsOnWaferZ(   const StThreeVector<double>& GlobalPosition,
+					    int HardWarePos){
 
   //Find out for a given z coord and Hardware pos is it on the wafer
 
-  int index;
-
   StSvtLocalCoordinate LocalPosition;
 
-  for( index=0; index< 200; index++){
-    if( mgeom[index].id == HardWarePos ) break;
-  }
-  
 
-  GlobaltoLocal(GlobalPosition, LocalPosition, index);
+  GlobaltoLocal(GlobalPosition, LocalPosition, HardWarePos);
 
   if( LocalPosition.position().y() > -3. && LocalPosition.position().y() < 3.)
     return 1;
@@ -452,20 +487,14 @@ int StSvtCoordinateTransform::IsOnWaferZ(   const StThreeVector<double>& GlobalP
 
 //_____________________________________________________________________________
 
-int StSvtCoordinateTransform::IsOnWaferR(   const StThreeVector<double>& GlobalPosition, int HardWarePos){
+int StSvtCoordinateTransform::IsOnWaferR(   const StThreeVector<double>& GlobalPosition,
+					    int HardWarePos){
 
   //Find out for a given z coord and Hardware pos is it on the wafer
 
-  int index;
-
   StSvtLocalCoordinate LocalPosition;
 
-  for( index=0; index< 200; index++){
-    if( mgeom[index].id == HardWarePos ) break;
-  }
-  
-
-  GlobaltoLocal(GlobalPosition, LocalPosition, index);
+  GlobaltoLocal(GlobalPosition, LocalPosition, HardWarePos);
 
   if( LocalPosition.position().x() > -3. && LocalPosition.position().x() < 3.)
     return 1;
