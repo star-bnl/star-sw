@@ -1,5 +1,8 @@
-* $Id: g2t_volume_id.g,v 1.49 2004/09/13 23:14:00 potekhin Exp $
+* $Id: g2t_volume_id.g,v 1.50 2005/03/23 21:59:23 potekhin Exp $
 * $Log: g2t_volume_id.g,v $
+* Revision 1.50  2005/03/23 21:59:23  potekhin
+* Added the numbering for the IST and FST, based on Lai's code
+*
 * Revision 1.49  2004/09/13 23:14:00  potekhin
 * New material to support SSD, by Kai
 *
@@ -567,11 +570,16 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *        
 *       BBC has 4 levels: west/east, annulus, triple module, single module
         volume_id = numbv(1)*1000 + numbv(2)*100 + numbv(3)*10 + numbv(4)    
-*17*
+*17*                                 Kai Schweda
       else If (Csys=='pix') then
         volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
+*18*                                 Kai Schweda
+      else If (Csys=='ist') then
+        volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
+*19*                                 Kai Schweda
+      else If (Csys=='fst') then
+        volume_id = numbv(1)*1000000 + numbv(2)*10000 + numbv(3)*100  + numbv(4)
       else
-
         print *,' G2T warning: volume  ',Csys,'  not found '  
       endif
 
