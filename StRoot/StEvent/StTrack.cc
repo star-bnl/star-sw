@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cc,v 1.6 1999/03/07 15:31:38 wenaus Exp $
+ * $Id: StTrack.cc,v 1.7 1999/05/22 18:34:09 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cc,v $
+ * Revision 1.7  1999/05/22 18:34:09  perev
+ * Non initialized pointers in StTrack fixed
+ *
  * Revision 1.6  1999/03/07 15:31:38  wenaus
  * Order constructor inits to remove g+ warnings
  *
@@ -31,7 +34,7 @@
  **************************************************************************/
 #include "StEvent/StTrack.hh"
 
-static const char rcsid[] = "$Id: StTrack.cc,v 1.6 1999/03/07 15:31:38 wenaus Exp $";
+static const char rcsid[] = "$Id: StTrack.cc,v 1.7 1999/05/22 18:34:09 perev Exp $";
 
 StTrack::StTrack() : mHelix(0, 0, 0, StThreeVector<double>())
 {
@@ -54,6 +57,8 @@ StTrack::StTrack(dst_track_st* trk,
 		 int h) : 
   mHelix(curvature, dip, phase, origin, h), mFitTraits(trk)
 {  
+    mStartVertex = 0;
+    mStopVertex   = 0;
 }
 
 
