@@ -97,6 +97,28 @@ from the current working directory.
 For detail usage, go to tutorial section of:
 StRoot/StPidAmpMaker/doc/index.html
 
+** StuFixTopoMap: Used to fix the MDC3 files with a wrong topology map
+------------------------------------------
+Files:       StuFixTopoMap
+Author:      Thomas Ullrich, Mike Miller
+Date:        June 14, 2000
+Description:
+Some of the MDC3 files have a wrong topology map
+for primary tracks.  This implements a fix of the
+topology map after the fact.  Note that it can only
+use information at the StEvent level, so it is essentially
+a map of the of points NOT of the FIT
+points (which is the one that primary tracks have 
+by default).
+
+There is no header file, for this function, so
+one needs to define a prototype when one wants 
+to use the function
+
+bool StuFixTopoMap(StTrack* track);
+
+and then load the StEventUtilities shared library
+to get it in your analysis session.
 
 
 <next entry comes here>
@@ -112,3 +134,4 @@ Author:      <authorsName>
 Date:        <checkindate>
 Description:
 <your detailed description goes here ...>>>>>>>> 1.2
+
