@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.26 2000/01/13 22:10:03 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.27 2000/01/27 22:02:12 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.27  2000/01/27 22:02:12  kathy
+// changed titles of some hist to make clearer
+//
 // Revision 1.26  2000/01/13 22:10:03  kathy
 // change histogram scales for angles so they can be used for DST tables & StEvent
 //
@@ -559,11 +562,11 @@ void StQABookHist::BookHistGlob(){
 
 // 1D general
 
-  m_globtrk_tot   = QAH1F("QaGtrkTot",  "globtrk: tot # tracks",40,0.,10000.);
-  m_globtrk_iflag = QAH1F("QaGtrkFlag", "globtrk: iflag ",160,-799.,801.);
+  m_globtrk_tot   = QAH1F("QaGtrkTot",  "globtrk: tot num tracks - all",40,0.,10000.);
+  m_globtrk_iflag = QAH1F("QaGtrkFlag", "globtrk: iflag - all ",160,-799.,801.);
 
-  m_globtrk_good  = QAH1F("QaGtrkGood", "globtrk: tot # good tracks",40,0.,10000.);  
-  m_det_id        = QAH1F("QaGtrkDetId",   "globtrk: Detector ID for tracks",25,0.,25.);
+  m_globtrk_good  = QAH1F("QaGtrkGood", "globtrk: tot good tracks - all",40,0.,10000.);  
+  m_det_id        = QAH1F("QaGtrkDetId","globtrk: Detector ID good tracks - all",25,0.,25.);
 
 
 // 1D tpc
@@ -706,7 +709,7 @@ void StQABookHist::BookHistGlob(){
   m_momTS        = QAH1F("QaGtrkPTS",      "globtrk: momentum, tpc+svt",50,0.,5.);
   m_chisq0TS     = QAH1F("QaGtrkChisq0TS", "globtrk: chisq0 - xy, tpc+svt", 50, 0.,15.);
   m_chisq1TS     = QAH1F("QaGtrkChisq1TS", "globtrk: chisq1 - z, tpc+svt", 50, 0.,15.);
-  m_glb_impactTS = QAH1F("QaGtrkImpactTS", "globtrk: impact param from prim vtx, tpc+svt", 100,0.,500.);
+  m_glb_impactTS = QAH1F("QaGtrkImpactTS", "globtrk: impact param from prim vtx, tpc+svt", 100,0.,50.);
 
 
 // 2D - tpc + silicon (svt + ssd)
@@ -874,11 +877,12 @@ void StQABookHist::BookHistPrim(){
 // for method MakeHistPrim - from table primtrk
 
 // 1D
-  m_primtrk_tot   = QAH1F("QaPtrkTot",  "primtrk: tot num tracks",100,0.,5000.);
-  m_primtrk_iflag = QAH1F("QaPtrkFlag", "primtrk: iflag ",160,-799.,801.);
+  m_primtrk_tot   = QAH1F("QaPtrkTot",  "primtrk: tot num tracks - all",100,0.,5000.);
+  m_primtrk_iflag = QAH1F("QaPtrkFlag", "primtrk: iflag - all",160,-799.,801.);
 
-  m_primtrk_good  = QAH1F("QaPtrkGood",  "primtrk: tot num good tracks",50,0.,2500.);  
-  m_pdet_id     = QAH1F("QaPtrkDetId",   "primtrk: Detector ID for tracks",25,0.,25.);
+  m_primtrk_good  = QAH1F("QaPtrkGood",  "primtrk: tot num good tracks - all",50,0.,2500.);  
+  m_pdet_id     = QAH1F("QaPtrkDetId",   "primtrk: Detector ID good tracks - all",25,0.,25.);
+
   m_ppoint      = QAH1F("QaPtrkNPnt",    "primtrk: N points on track",     60, 0.,60.);
   m_pmax_point  = QAH1F("QaPtrkNPntMax", "primtrk: N max points on track", 50, 0.,100.);
   m_pfit_point  = QAH1F("QaPtrkNPntFit", "primtrk: N fit points on track", 60, 0.,60.);
@@ -900,7 +904,7 @@ void StQABookHist::BookHistPrim(){
   m_pchisq0     = QAH1F("QaPtrkChisq0",  "primtrk: chisq0 - xy", 50, 0.,5.);
   m_pchisq1     = QAH1F("QaPtrkChisq1",  "primtrk: chisq1 - z", 50, 0.,5.);
   m_plength     = QAH1F("QaPtrkLength",  "primtrk: track length", 50,0.,300.);
-  m_prim_impact = QAH1F("QaPtrkImpact",  "primtrk: impact param from prim vtx ", 100,0.,2.0);
+  m_prim_impact = QAH1F("QaPtrkImpact",  "primtrk: impact param from prim vtx ", 100,0.,0.5);
 
 
 // 2D
