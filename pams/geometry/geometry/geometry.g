@@ -1,5 +1,11 @@
-* $Id: geometry.g,v 1.86 2004/04/14 19:02:12 potekhin Exp $
+* $Id: geometry.g,v 1.87 2004/04/14 20:54:27 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.87  2004/04/14 20:54:27  potekhin
+* Changed the Y2004A to Y2004X to emphasize the fact
+* that this is a variation of asymptotic geometry
+* and not a corecction of the actual one. This
+* complies with the naming scheme we used in 2003.
+*
 * Revision 1.86  2004/04/14 19:02:12  potekhin
 * Introducing the geometry Y2004A, which is same as
 * Y2004 but with full Barrel Calorimeter, a-la Y2003X,
@@ -749,12 +755,12 @@ If LL>1
                 }
 
 ****************************************************************************************
-* NOTE:  this geometry, y2004a, should logically follow the baseline y2004,
+* NOTE:  this geometry, y2004x, should logically follow the baseline y2004,
 * however the parser we used isn't too good and it grabs the y2004 and then
 * stumbles, hence the order of tags is sometimes important and we have to list
-* the y2004a prior to y2004
+* the y2004x prior to y2004
 
-  on Y2004A    { hypothetical 2004 geometry: full barrel;
+  on Y2004X    { hypothetical 2004 geometry: full barrel;
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
