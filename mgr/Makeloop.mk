@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.33  1998/12/02 20:01:51  fisyak
+#  More NT
+#
 #  Revision 1.32  1998/12/01 01:53:29  fisyak
 #  Merge with NT
 #
@@ -175,7 +178,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/12/01 01:53:29 $ 
+#           Last modification $Date: 1998/12/02 20:01:51 $ 
 #  default setings
 # Current Working Directory
 #
@@ -250,7 +253,11 @@ else
 #	SUBDIRS := $(foreach dir, $(DIRS), $(shell test -d $(dir) && echo $(dir))) 
 	SUBDIRS := $(filter-out inc idl doc CVS wrk src exa kumac html, $(DIRS))
 	SUBDIRS := $(strip    $(sort $(SUBDIRS)))
+ifndef NT
         SUBDIRS := $(filter-out util, $(SUBDIRS))
+else
+	SUBDIRS := $(filter-out strange, $(SUBDIRS))
+endif
 ifneq (,$(findstring sim, $(SUBDIRS)))
         SUBDIRS := $(filter-out sim, $(SUBDIRS))
         DIRS    := $(subst /.,,$(strip $(wildcard sim/*/.)))
@@ -268,6 +275,8 @@ endif
 ifdef NT
 SUBDIRS := $(filter-out db, $(SUBDIRS)) 
 endif
+SUBDIRS := $(filter-out global, $(SUBDIRS)) $(filter global, $(SUBDIRS))
+SUBDIRS := $(filter util, $(SUBDIRS)) $(filter-out util, $(SUBDIRS)) 
 SUBDIRS := $(filter-out l3, $(SUBDIRS)) $(filter l3, $(SUBDIRS))
 ifneq (,$(findstring $(STAR_SYS),hp_ux102 ))
          SUBDIRS := $(filter-out tcc, $(SUBDIRS))
