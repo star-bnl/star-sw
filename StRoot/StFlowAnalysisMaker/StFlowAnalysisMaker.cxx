@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.90 2004/12/20 19:41:24 aihong Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.91 2005/02/08 22:37:53 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -105,7 +105,7 @@ Int_t StFlowAnalysisMaker::Init() {
   xLabel = "Pseudorapidity";
   if (strlen(pFlowSelect->PidPart()) != 0) { xLabel = "Rapidity"; }
 
-  const float triggerMin      =   0.5;
+  const float triggerMin      =  -0.5;
   const float triggerMax      =  10.5;
   const float chargeMin       =  -2.5;
   const float chargeMax       =   2.5; 
@@ -158,7 +158,7 @@ Int_t StFlowAnalysisMaker::Init() {
   const float dEdxMax       = 0.00004;
   const float qMax             =  3.5;
 
-  enum { nTriggerBins      = 10,
+  enum { nTriggerBins      = 11,
 	 nChargeBins       = 50,
 	 nDcaBins          = 60,
 	 nChi2Bins         = 50,
@@ -188,7 +188,7 @@ Int_t StFlowAnalysisMaker::Init() {
   // Trigger
   mHistTrigger = new TH1F("Flow_Trigger", "Flow_Trigger",
       nTriggerBins, triggerMin, triggerMax);
-  mHistTrigger->SetXTitle("Trigger: 1 minbias, 2 central, 3 laser, 10 other");
+  mHistTrigger->SetXTitle("Trigger: 0 mb+cen 1 minbias, 2 central, 3 laser, 10 other");
   mHistTrigger->SetYTitle("Counts");
 
   // Charge
@@ -1179,7 +1179,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.90 2004/12/20 19:41:24 aihong Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.91 2005/02/08 22:37:53 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1222,28 +1222,9 @@ Bool_t StFlowAnalysisMaker::FillFromFlowEvent() {
 void StFlowAnalysisMaker::FillEventHistograms() {
   // Fill histograms with event quantities
 
+  // trigger
   unsigned int triggerWord = pFlowEvent->L0TriggerWord();
-  float trigger;
-
-  if (pFlowEvent->CenterOfMassEnergy() > 60. && pFlowEvent->CenterOfMassEnergy() < 65. ) { // 62 GeV
-    if (!( (triggerWord == 35004 || triggerWord == 35007) ||
-	  ((triggerWord == 35001 || triggerWord == 35009) && pFlowEvent->CTB() > 15) )) {
-      trigger = 10.; // no clue
-    } else {
-      trigger = 1.; // minbias
-    }
-  } 
-
-  else {
-    switch (triggerWord) {
-    case 4096:  trigger = 1.;  break; // minbias
-    case 4352:  trigger = 2.;  break; // central
-    case 61952: trigger = 3.;  break; // laser
-    default:    trigger = 10.; break; // no clue
-    }
-  }
-
-  mHistTrigger->Fill(trigger);
+  mHistTrigger->Fill(triggerWord);
 
   // no selections: OrigMult, Centrality, Mult, MultOverOrig, VertexZ, VertexXY
   int origMult  = pFlowEvent->OrigMult();
@@ -2338,6 +2319,9 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.91  2005/02/08 22:37:53  posk
+// Fixed trigger histogram for year=4.
+//
 // Revision 1.90  2004/12/20 19:41:24  aihong
 // crashes when run without ZDCSMD. bug fixed
 //
