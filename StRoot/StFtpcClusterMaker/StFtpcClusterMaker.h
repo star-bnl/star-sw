@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.h,v 1.11 2001/07/12 07:45:53 jcs Exp $
+// $Id: StFtpcClusterMaker.h,v 1.12 2001/10/12 14:33:08 jcs Exp $
 // $Log: StFtpcClusterMaker.h,v $
+// Revision 1.12  2001/10/12 14:33:08  jcs
+// create and fill charge step histograms for FTPC East and West
+//
 // Revision 1.11  2001/07/12 07:45:53  jcs
 // define radial position of clusters histogram
 //
@@ -71,7 +74,7 @@ class St_ftpcDriftField;
 class StFtpcClusterMaker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.11 2001/07/12 07:45:53 jcs Exp $";
+// static Char_t  m_VersionCVS = "$Id: StFtpcClusterMaker.h,v 1.12 2001/10/12 14:33:08 jcs Exp $";
    St_ftpcClusterPars   *m_clusterpars;           //!
    St_ftpcFastSimGas    *m_fastsimgas;            //!
    St_ftpcFastSimPars   *m_fastsimpars;           //!
@@ -90,6 +93,8 @@ class StFtpcClusterMaker : public StMaker {
  
  protected:
    TH1F            *m_cluster_radial; //! radial position of clusters
+   TH1F            *m_chargestep_West; //! FTPC West charge step
+   TH1F            *m_chargestep_East; //! FTPC East charge step
    TH1F            *m_flags;       //! quality control flags
    TH1F            *m_row;         //! rows
    TH1F            *m_sector;      //! sectors
@@ -105,7 +110,7 @@ class StFtpcClusterMaker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.11 2001/07/12 07:45:53 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcClusterMaker.h,v 1.12 2001/10/12 14:33:08 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StFtpcClusterMaker, 1)   //StAF chain virtual base class for Makers
 };

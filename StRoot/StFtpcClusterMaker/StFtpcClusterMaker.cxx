@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.26 2001/07/26 13:53:19 oldi Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.27 2001/10/12 14:33:08 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.27  2001/10/12 14:33:08  jcs
+// create and fill charge step histograms for FTPC East and West
+//
 // Revision 1.26  2001/07/26 13:53:19  oldi
 // Check if FTPC data is available.
 //
@@ -184,6 +187,8 @@ Int_t StFtpcClusterMaker::Init(){
 
 // 		Create Histograms
 m_csteps      = new TH2F("fcl_csteps"	,"FTPC charge steps by sector"	,60,-0.5,59.5, 260, -0.5, 259.5);
+m_chargestep_West = new TH1F("fcl_chargestepW","FTPC West chargestep",260, -0.5, 259.5);
+m_chargestep_East = new TH1F("fcl_chargestepE","FTPC East chargestep",260, -0.5, 259.5);
 //m_flags      = new TH1F("fcl_flags"	,"FTPC cluster finder flags"	,7,0.,8.);
 //m_row        = new TH1F("fcl_row"	,"FTPC rows"			,20,1.,21.);
 //m_sector     = new TH1F("fcl_sector"	,"FTPC sectors"			,6,1.,7.);
@@ -274,6 +279,8 @@ Int_t StFtpcClusterMaker::Make()
 
   if(ftpcReader) {
     StFtpcChargeStep *step = new StFtpcChargeStep(m_csteps,
+                                                  m_chargestep_West,
+                                                  m_chargestep_East,
 						  ftpcReader, 
 						  paramReader, 
                                                   dbReader);
@@ -378,6 +385,7 @@ void StFtpcClusterMaker::MakeHistograms()
 {
 
  // cout<<"*** NOW MAKING HISTOGRAMS FOR fcl ***"<<endl;
+
 
   // Create an iterator
   St_DataSetIter fcl_points(m_DataSet);

@@ -1,6 +1,9 @@
-// $Id: StFtpcChargeStep.hh,v 1.2 2001/03/06 23:33:34 jcs Exp $
+// $Id: StFtpcChargeStep.hh,v 1.3 2001/10/12 14:33:08 jcs Exp $
 //
 // $Log: StFtpcChargeStep.hh,v $
+// Revision 1.3  2001/10/12 14:33:08  jcs
+// create and fill charge step histograms for FTPC East and West
+//
 // Revision 1.2  2001/03/06 23:33:34  jcs
 // use database instead of params
 //
@@ -21,6 +24,7 @@
 #include "StFtpcParamReader.hh"
 #include "StFtpcDbReader.hh"
 #include "TH2.h"
+#include "TH1.h"
 
 class StFtpcChargeStep
 {
@@ -30,11 +34,15 @@ class StFtpcChargeStep
   StFtpcParamReader *mParam;
   StFtpcDbReader *mDb;
   TH2F *mHisto;
+  TH1F *mHistoW;
+  TH1F *mHistoE;
   int mClear;
   double *pRadius;
 
  public:
   StFtpcChargeStep(TH2F *histo,
+                   TH1F *histoW,
+                   TH1F *histoE,
 		   StFTPCReader *reader, 
 		   StFtpcParamReader *paramReader,
                    StFtpcDbReader *dbReader);

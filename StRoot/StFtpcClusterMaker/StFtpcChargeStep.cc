@@ -1,6 +1,9 @@
-// $Id: StFtpcChargeStep.cc,v 1.12 2001/08/20 00:35:59 jcs Exp $
+// $Id: StFtpcChargeStep.cc,v 1.13 2001/10/12 14:33:09 jcs Exp $
 //
 // $Log: StFtpcChargeStep.cc,v $
+// Revision 1.13  2001/10/12 14:33:09  jcs
+// create and fill charge step histograms for FTPC East and West
+//
 // Revision 1.12  2001/08/20 00:35:59  jcs
 // check index (j) before using it
 //
@@ -55,12 +58,16 @@
 #include "StFtpcChargeStep.hh"
 
 StFtpcChargeStep::StFtpcChargeStep(TH2F *histo,
+                                   TH1F *histoW,
+                                   TH1F *histoE,
 				   StFTPCReader *reader,  
 				   StFtpcParamReader *paramReader,
                                    StFtpcDbReader *dbReader)
 {
   //   cout << "StFtpcChargeStep constructed" << endl;  
   mHisto=histo;
+  mHistoW=histoW;
+  mHistoE=histoE;
   mClear=0;
   mReader = reader;
   mParam = paramReader; 
@@ -156,6 +163,14 @@ int StFtpcChargeStep::histogram(int setPressure)
 		      mHisto->Fill(iHardSec-1, // sector
 				   entry+sequences[iSeqIndex].startTimeBin, //bin
 				   sequences[iSeqIndex].FirstAdc[entry]); // weight
+                      if (iHardSec >= 1 && iHardSec <= 30 ) { 
+		         mHistoW->Fill( entry+sequences[iSeqIndex].startTimeBin, //bin
+				   sequences[iSeqIndex].FirstAdc[entry]); // weight
+                      }
+                      if (iHardSec >= 31 && iHardSec <= 60 ) {
+		         mHistoE->Fill( entry+sequences[iSeqIndex].startTimeBin, //bin
+				   sequences[iSeqIndex].FirstAdc[entry]); // weight
+                      }
 		    }
 		}
 	    }
