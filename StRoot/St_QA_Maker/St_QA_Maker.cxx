@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 2.10 2002/02/12 18:42:00 genevb Exp $
+// $Id: St_QA_Maker.cxx,v 2.11 2002/05/29 13:54:30 genevb Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.11  2002/05/29 13:54:30  genevb
+// Some changes to FTPC chisq histos
+//
 // Revision 2.10  2002/02/12 18:42:00  genevb
 // Additional FTPC histograms
 //
@@ -968,6 +971,7 @@ void St_QA_Maker::MakeHistPrim(){
         hists->m_pmomF->Fill(gmom,0.);
         hists->m_plengthF->Fill(t->length,0.);
         hists->m_pchisq0F->Fill(chisq0,0.);
+        hists->m_pchisq1F->Fill(chisq1,0.);
 	// east and west in separate plots
         hists->m_ppointFE->Fill(trkpnt);
         hists->m_pmax_pointFE->Fill(trkmpnt);
@@ -983,6 +987,7 @@ void St_QA_Maker::MakeHistPrim(){
         hists->m_pmomFE->Fill(gmom);
         hists->m_plengthFE->Fill(t->length);
         hists->m_pchisq0FE->Fill(chisq0);
+        hists->m_pchisq1FE->Fill(chisq1);
 	
 // these are for tpc & ftpc
         hists->m_ppT_eta_recFE->Fill(eta,lmevpt);
@@ -1010,6 +1015,7 @@ void St_QA_Maker::MakeHistPrim(){
         hists->m_pmomF->Fill(gmom,1.);
         hists->m_plengthF->Fill(t->length,1.);
         hists->m_pchisq0F->Fill(chisq0,1.);
+        hists->m_pchisq1F->Fill(chisq1,1.);
 	// east and west in separate plots
         hists->m_ppointFW->Fill(trkpnt);
         hists->m_pmax_pointFW->Fill(trkmpnt);
@@ -1025,6 +1031,7 @@ void St_QA_Maker::MakeHistPrim(){
         hists->m_pmomFW->Fill(gmom);
         hists->m_plengthFW->Fill(t->length);
         hists->m_pchisq0FW->Fill(chisq0);
+        hists->m_pchisq1FW->Fill(chisq1);
 	
 // these are for tpc & ftpc
         hists->m_ppT_eta_recFW->Fill(eta,lmevpt);
