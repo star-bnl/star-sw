@@ -170,7 +170,7 @@ bool StppJetAnalyzer::acceptJet(StProtoJet &pj)
 
 void StppJetAnalyzer::fillLists(FourList &tracks)
 {
-    //cout <<"fillList"<<endl;
+    cout <<"StppJetAnalyzer::fillList()";
     int nTracks=0;
     int nAcceptedTracks=0;
     int nAcceptedProtoJets=0;
@@ -187,8 +187,8 @@ void StppJetAnalyzer::fillLists(FourList &tracks)
 	    //}
 	}
     }
-    //cout <<"nTracks:\t"<<nTracks<<"\tnAcceptedTracks:\t"<<nAcceptedTracks
-    // <<"\tnAcceptedProtoJets:\t"<<nAcceptedProtoJets<<endl;
+    cout <<"\tnTracks:\t"<<nTracks<<"\tnAcceptedTracks:\t"<<nAcceptedTracks
+	 <<"\tnAcceptedProtoJets:\t"<<nAcceptedProtoJets<<endl;
 }
 
 void StppJetAnalyzer::setFourVec(FourList &tracks)
@@ -201,6 +201,7 @@ void StppJetAnalyzer::setFourVec(FourList &tracks)
 
 void StppJetAnalyzer::findJets()
 {
+    cout <<"StppJetAnalyzer::findJets().  Clustering will begin with:\t"<<mProtoJets.size()<<"\tprotoJets"<<endl;
     clock_t start = clock();
     mFinder->findJets(mProtoJets);
     clock_t stop = clock();
@@ -212,9 +213,5 @@ void StppJetAnalyzer::findJets()
 void StppJetAnalyzer::addBranch(const char *name, void *stppudst) 
 {
     TTree* ppuDst = (TTree *) stppudst;
-    ppuDst->Branch (name, "StJets", &muDstJets, 64000, 99);   
+    ppuDst->Branch (name, "StJets", &muDstJets, 64000, 99);
 }
-
-
-
-
