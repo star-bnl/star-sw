@@ -1,7 +1,21 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.cc,v 2.13 2000/06/22 23:52:27 calderon Exp $
+ * $Id: StMcTrack.cc,v 2.14 2003/02/19 03:16:05 calderon Exp $
  * $Log: StMcTrack.cc,v $
+ * Revision 2.14  2003/02/19 03:16:05  calderon
+ * Introduction of Ctb Hit Class and Ctb Hit Collection class, modified
+ * StMcTrack, and StMcEvent accordingly.  Clearing of hits in StMcSvtWaferHitCollection.
+ *
+ * Revision 2.2  2003/02/18 00:00:00  gans
+ * Introduction of Ctb classes.  Modified several classes
+ * accordingly.
+
+ * $Id: StMcTrack.cc,v 2.14 2003/02/19 03:16:05 calderon Exp $
+ * $Log: StMcTrack.cc,v $
+ * Revision 2.14  2003/02/19 03:16:05  calderon
+ * Introduction of Ctb Hit Class and Ctb Hit Collection class, modified
+ * StMcTrack, and StMcEvent accordingly.  Clearing of hits in StMcSvtWaferHitCollection.
+ *
  * Revision 2.13  2000/06/22 23:52:27  calderon
  * Alexei fixed typo in ostream<< for Bsdme
  *
@@ -74,7 +88,7 @@ using std::find;
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_particle_Table.h"
 
-static const char rcsid[] = "$Id: StMcTrack.cc,v 2.13 2000/06/22 23:52:27 calderon Exp $";
+static const char rcsid[] = "$Id: StMcTrack.cc,v 2.14 2003/02/19 03:16:05 calderon Exp $";
 
 StMcTrack::StMcTrack() 
 {
@@ -164,6 +178,7 @@ ostream&  operator<<(ostream& os, const StMcTrack& t)
     os << "No. Svt   Hits: " << t.svtHits().size()   << endl;
     os << "No. Ftpc  Hits: " << t.ftpcHits().size()  << endl;
     os << "No. Rich  Hits: " << t.richHits().size()  << endl;
+    os << "No. Ctb   Hits: " << t.ctbHits().size()  << endl;
     os << "No. Bemc  Hits: " << t.bemcHits().size()  << endl;
     os << "No. Bprs  Hits: " << t.bprsHits().size()  << endl;
     os << "No. Bsmde Hits: " << t.bsmdeHits().size() << endl;
@@ -233,6 +248,11 @@ void StMcTrack::addRichHit(StMcRichHit* hit)
   mRichHits.push_back(hit);
 }
 
+void StMcTrack::addCtbHit(StMcCtbHit* hit)
+{
+  mCtbHits.push_back(hit);
+}
+
 void StMcTrack::addBemcHit(StMcCalorimeterHit* hit)
 {
   mBemcHits.push_back(hit);
@@ -286,6 +306,15 @@ void StMcTrack::removeRichHit(StMcRichHit* hit)
 	mRichHits.erase(iter);
     }
 }
+
+void StMcTrack::removeCtbHit(StMcCtbHit* hit)
+{
+    StMcCtbHitIterator iter = find(mCtbHits.begin(), mCtbHits.end(), hit);
+    if (iter != mCtbHits.end()){
+	mCtbHits.erase(iter);
+    }
+}
+
 void StMcTrack::removeCalorimeterHit(StPtrVecMcCalorimeterHit& vch, StMcCalorimeterHit* hit)
 {
     StMcCalorimeterHitIterator iter = find(vch.begin(), vch.end(), hit);

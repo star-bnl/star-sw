@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcEventTypes.hh,v 2.4 2000/06/06 02:58:41 calderon Exp $
+ * $Id: StMcEventTypes.hh,v 2.5 2003/02/19 03:16:05 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StMcEventTypes.hh,v $
+ * Revision 2.5  2003/02/19 03:16:05  calderon
+ * Introduction of Ctb Hit Class and Ctb Hit Collection class, modified
+ * StMcTrack, and StMcEvent accordingly.  Clearing of hits in StMcSvtWaferHitCollection.
+ *
  * Revision 2.4  2000/06/06 02:58:41  calderon
  * Introduction of Calorimeter classes.  Modified several classes
  * accordingly.
@@ -33,6 +37,8 @@
 
 #include "StMcContainers.hh"
 #include "StMcCalorimeterHit.hh"
+#include "StMcCtbHit.hh"
+#include "StMcCtbHitCollection.hh"
 #include "StMcEmcModuleHitCollection.hh"
 #include "StMcEmcHitCollection.hh"
 #include "StMcEvent.hh"

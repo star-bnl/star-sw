@@ -1,7 +1,21 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.8 2000/06/06 02:58:42 calderon Exp $
+ * $Id: StMcTrack.hh,v 2.9 2003/02/19 03:16:05 calderon Exp $
  * $Log: StMcTrack.hh,v $
+ * Revision 2.9  2003/02/19 03:16:05  calderon
+ * Introduction of Ctb Hit Class and Ctb Hit Collection class, modified
+ * StMcTrack, and StMcEvent accordingly.  Clearing of hits in StMcSvtWaferHitCollection.
+ *
+ * Revision 2.9  2003/02/18 00:00:00  gans
+ * Introduction of Ctb classes.  Modified several classes
+ * accordingly.
+ *
+ * $Id: StMcTrack.hh,v 2.9 2003/02/19 03:16:05 calderon Exp $
+ * $Log: StMcTrack.hh,v $
+ * Revision 2.9  2003/02/19 03:16:05  calderon
+ * Introduction of Ctb Hit Class and Ctb Hit Collection class, modified
+ * StMcTrack, and StMcEvent accordingly.  Clearing of hits in StMcSvtWaferHitCollection.
+ *
  * Revision 2.8  2000/06/06 02:58:42  calderon
  * Introduction of Calorimeter classes.  Modified several classes
  * accordingly.
@@ -95,6 +109,8 @@ public:
     const StPtrVecMcFtpcHit&        ftpcHits() const; //!
     StPtrVecMcRichHit&              richHits(); //!
     const StPtrVecMcRichHit&        richHits() const; //!
+    StPtrVecMcCtbHit&              ctbHits(); //!
+    const StPtrVecMcCtbHit&        ctbHits() const; //!
     StPtrVecMcCalorimeterHit&       bemcHits(); //!
     const StPtrVecMcCalorimeterHit& bemcHits() const; //!
     StPtrVecMcCalorimeterHit&       bprsHits(); //!
@@ -120,6 +136,7 @@ public:
     void setSvtHits(StPtrVecMcSvtHit&); //!
     void setFtpcHits(StPtrVecMcFtpcHit&); //!
     void setRichHits(StPtrVecMcRichHit&); //!
+    void setCtbHits(StPtrVecMcCtbHit&); //!
     void setBemcHits(StPtrVecMcCalorimeterHit&); //!
     void setBprsHits(StPtrVecMcCalorimeterHit&); //!
     void setBsmdeHits(StPtrVecMcCalorimeterHit&); //!
@@ -136,6 +153,7 @@ public:
     void addSvtHit(StMcSvtHit*); //!
     void addFtpcHit(StMcFtpcHit*); //!
     void addRichHit(StMcRichHit*); //!
+    void addCtbHit(StMcCtbHit*); //!
     void addBemcHit(StMcCalorimeterHit*); //!
     void addBprsHit(StMcCalorimeterHit*); //!
     void addBsmdeHit(StMcCalorimeterHit*); //!
@@ -144,6 +162,7 @@ public:
     void removeSvtHit(StMcSvtHit*); //!
     void removeFtpcHit(StMcFtpcHit*); //!
     void removeRichHit(StMcRichHit*); //!
+    void removeCtbHit(StMcCtbHit*); //!
     void removeCalorimeterHit(StPtrVecMcCalorimeterHit&, StMcCalorimeterHit*); //!
     void removeBemcHit(StMcCalorimeterHit*); //!
     void removeBprsHit(StMcCalorimeterHit*); //!
@@ -161,6 +180,7 @@ protected:
     StPtrVecMcSvtHit         mSvtHits; //!
     StPtrVecMcFtpcHit        mFtpcHits; //!
     StPtrVecMcRichHit        mRichHits; //!
+    StPtrVecMcCtbHit        mCtbHits; //!
     StPtrVecMcCalorimeterHit mBemcHits; //!
     StPtrVecMcCalorimeterHit mBprsHits; //!
     StPtrVecMcCalorimeterHit mBsmdeHits; //!
@@ -220,6 +240,10 @@ inline const StPtrVecMcFtpcHit& StMcTrack::ftpcHits() const { return mFtpcHits; 
 inline StPtrVecMcRichHit& StMcTrack::richHits() { return mRichHits; }
 
 inline const StPtrVecMcRichHit& StMcTrack::richHits() const { return mRichHits; }
+
+inline StPtrVecMcCtbHit& StMcTrack::ctbHits() { return mCtbHits; }
+
+inline const StPtrVecMcCtbHit& StMcTrack::ctbHits() const { return mCtbHits; }
 
 inline StPtrVecMcCalorimeterHit& StMcTrack::bemcHits() { return mBemcHits; }
 
