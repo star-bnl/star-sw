@@ -834,6 +834,10 @@ my $Anflag = 0;
         $num_line++; 
 #   get ROOT_LEVEL and node
 
+   if ($line =~ /StMessageManager message summary/) {
+      $Anflag = 1;
+    }
+
        if ($line =~ /QAInfo:You are using STAR_LEVEL/) {
          @part = split (" ", $line);
          $rootL = $part[8];
@@ -841,14 +845,22 @@ my $Anflag = 0;
        }
 #   get library version
       if ( $line =~ /={3} You are in (\w+)/ ) {
+        if( $Anflag == 0) {
         $libV = $1;
-      }
+      }else{
+       next;
+       }
+    }
 #   get chain option
 
        if ( $line =~ /QAInfo: Requested chain bfc is/)  {
+         if( $Anflag == 0 ) {
          @part = split /:/, $line ;
          $mchain = $part[2]; 
          $mchain =~ s/ /_/g;  
+     }else{
+       next;
+        }
        }
 #   get  number of events
       if ( $line =~ /QAInfo: Done with Event/ ) {
@@ -862,19 +874,18 @@ my $Anflag = 0;
 
           $mymaker = $size_line[3];
         if( $mymaker eq "tree:"){
-	  if( $plt_form eq "tfs_redhat61") {
+	  if( $plt_form eq "tfs_redhat61" or $plt_form eq "trs_redhat61" ) {
          $maker_size[$no_event + 1] = $size_line[9]/1000;
       }elsif( $plt_form eq "tfs_Solaris_CC5")  {
          $maker_size[$no_event + 1] = $size_line[12]/1000; 
+        }elsif ($plt_form eq "trs_Solaris") {
+          $maker_size[$no_event + 1] = $size_line[12]/1000;
         }
        }
       }
     }
 # get number of tracks and vertices
 
-    if ($line =~ /StMessageManager message summary/) {
-      $Anflag = 1;
-    }
       if ($line =~ /QAInfo: StAnalysisMaker/ && $Anflag == 0 ) {
             my  $string = $logfile[$num_line];
               @word_tr = split /:/,$string;
