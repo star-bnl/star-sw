@@ -83,7 +83,7 @@ int EMC_Reader::NTowerHits()
   if(TowerPresent)
   {
   if(strncmp(mTheTowerAdcR.BankType,"TOWRADCR",8)) {
-    cout<<" error in header name**"<<endl;return 0;
+  cout<<" error in header name**"<<endl;return 0;
   }
    int nhits=mTheTowerAdcR.NTowerHits;
    return nhits;}
