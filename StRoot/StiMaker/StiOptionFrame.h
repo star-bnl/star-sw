@@ -55,7 +55,7 @@ class LabelVec;
 class  StiOptionFrame : public TGTransientFrame
 {    
  public:
-    StiOptionFrame(const TGWindow *p, const TGWindow *main, EditableParameters * p );
+    StiOptionFrame(const TGWindow *p, const TGWindow *main, EditableParameters * params);
     virtual ~StiOptionFrame();
     virtual void closeWindow();
     virtual void apply();
