@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.21 1999/09/29 18:56:39 wdeng Exp $
+// $Id: StKinkMaker.cxx,v 1.22 1999/09/30 13:34:27 wdeng Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.22  1999/09/30 13:34:27  wdeng
+// Diminish the degree or radian bug
+//
 // Revision 1.21  1999/09/29 18:56:39  wdeng
 // Accommodated to dst_track and dst_vertex change
 //
@@ -215,8 +218,8 @@ Int_t StKinkMaker::Make(){
 	Float_t phase = dstTrackPtr->psi*degree-h*pi/2;
 	Float_t pt    = (1./dstTrackPtr->invpt)*GeV;
 	Float_t curvature = dstTrackPtr->curvature;
-	Float_t x0 = dstTrackPtr->r0 * cos(dstTrackPtr->phi0);
-	Float_t y0 = dstTrackPtr->r0 * sin(dstTrackPtr->phi0);
+	Float_t x0 = dstTrackPtr->r0 * cos(dstTrackPtr->phi0 * degToRad);
+	Float_t y0 = dstTrackPtr->r0 * sin(dstTrackPtr->phi0 * degToRad);
 	Float_t z0 = dstTrackPtr->z0;
 	StThreeVectorD origin(x0, y0, z0);  
 	

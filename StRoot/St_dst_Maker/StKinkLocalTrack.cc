@@ -1,5 +1,8 @@
-// $Id: StKinkLocalTrack.cc,v 1.4 1999/09/29 18:56:36 wdeng Exp $
+// $Id: StKinkLocalTrack.cc,v 1.5 1999/09/30 13:34:24 wdeng Exp $
 // $Log: StKinkLocalTrack.cc,v $
+// Revision 1.5  1999/09/30 13:34:24  wdeng
+// Diminish the degree or radian bug
+//
 // Revision 1.4  1999/09/29 18:56:36  wdeng
 // Accommodated to dst_track and dst_vertex change
 //
@@ -8,6 +11,11 @@
 //
 
 #include "StKinkLocalTrack.hh"
+#include "math_constants.h"
+
+#define radToDeg     C_DEG_PER_RAD
+#define degToRad     C_RAD_PER_DEG               
+  
 
 StKinkLocalTrack::StKinkLocalTrack():
   mHelix(0, 0, 0, StThreeVectorD()) 
@@ -36,8 +44,8 @@ StKinkLocalTrack::StKinkLocalTrack(dst_track_st* trk, Float_t curvature, Float_t
   mNumOfHits = trk->n_fit_point;
   mCharge = trk->icharge;
   mPt = 1./trk->invpt;  
-  mStartPoint[0] = trk->r0 * cos(trk->phi0);
-  mStartPoint[1] = trk->r0 * sin(trk->phi0);
+  mStartPoint[0] = trk->r0 * cos(trk->phi0 * degToRad);
+  mStartPoint[1] = trk->r0 * sin(trk->phi0 * degToRad);
   mStartPoint[2] = trk->z0;
   mLastPoint[0] = trk->x_last[0];
   mLastPoint[1] = trk->x_last[1];
