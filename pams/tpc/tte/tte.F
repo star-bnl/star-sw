@@ -1,5 +1,8 @@
-* $Id: tte.F,v 1.19 1999/01/09 21:15:03 sakrejda Exp $
+* $Id: tte.F,v 1.20 1999/01/22 17:33:42 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.20  1999/01/22 17:33:42  sakrejda
+* local array increased to accomodate pointers to hits from a Vini event
+*
 * Revision 1.19  1999/01/09 21:15:03  sakrejda
 * local arrays increased to hold Venus event
 *
@@ -126,7 +129,7 @@ c                                              reconstructed hits
 c                                              there are always less 
 c                                              reconstructed hits so it saves
 c                                              some space
-      parameter (hit_size=500000)
+      parameter (hit_size=600000)
       integer   list_hits(hit_size)           !rec. hits address in hit
       integer   loc_hit(hit_size)             !list of hits ordered by track
 c                                              number
