@@ -13,6 +13,7 @@
 
 class TFile;
 class TTree;
+class TChain;
 class StStrangeEvMuDst;
 class StV0MuDst;
 class StXiMuDst;
@@ -32,13 +33,12 @@ class StStrangeMuDstMaker : public StMaker {
  public: 
   StStrangeMuDstMaker(const char *name="strangeMuDst");
   virtual ~StStrangeMuDstMaker();
-  void SetRead (char* eFile=0, char* vFile=0, char* xFile=0, char* kFile=0);
-  void SetRead (StFile* eFiles, StFile* vFiles=0,
-                StFile* xFiles=0, StFile* kFiles=0);
-  void SetWrite(char* eFile=0, char* vFile=0, char* xFile=0, char* kFile=0);
+  void SetRead (const char* eFile=0, char* treeName=0);
+  void SetRead (StFile* eFiles, char* treeName=0);
+  void SetWrite(const char* eFile=0);
   void SetNoKeep();
   StrangeEnum GetMode();
-  char* GetFile(Int_t dstType) const;
+  char* GetFile() const;
   void DoT0JitterAbort(Bool_t doIt=kTRUE);
 
   void DoV0(Bool_t doIt=kTRUE);
@@ -94,10 +94,10 @@ class StStrangeMuDstMaker : public StMaker {
   StStrangeAssoc* GetKinkAssoc(Int_t i=0)  { return kink->GetAssoc(i); }
 
   TTree* GetTree();
-  StStrangeCuts& Cuts();  virtual Int_t Init();
-  
+  StStrangeCuts& Cuts();
+
+  virtual Int_t Init();
   virtual Int_t Make();
-  virtual Int_t IMake(int number);
   virtual void  Clear(Option_t *option="");
   virtual Int_t Finish();
   
@@ -134,24 +134,23 @@ class StStrangeMuDstMaker : public StMaker {
   virtual Int_t MakeCreateMcDst();
   virtual Int_t MakeCreateSubDst();
   
-  void SetFiles(char* eFile, char* vFile, char* xFile, char* kFile);
-  void SetStFiles();
+  void SetFile(const char* eFile);
+  void SetTreeName(const char* treeName);
+  void SkipChainFile(Int_t curTree);
   Int_t OpenFile();
   Int_t CloseFile();
-  Int_t NextReadFile();
   void CheckFile();
 
   Int_t MatchName(const char* name) const;
 
   TTree* tree;                   //!
+  TChain* chain;                 //!
   StStrangeCuts* cuts;           //!
-  char* file[strDstT];           //!
-  StFile* files[strDstT];        //!
+  char* file;                    //!
   TFile* muDst;                  //!
 
   Bool_t abortEvent;
   Bool_t firstEvent;
-  Bool_t iMake;
   Int_t evNumber;
   Int_t outFileNum;
 
@@ -225,22 +224,20 @@ inline StStrangeControllerBase* StStrangeMuDstMaker::Get(Int_t dstType) const
             { return cont[dstType]; }
 inline StStrangeControllerBase* StStrangeMuDstMaker::Get(const char* name) const
             { return cont[MatchName(name)]; }
-inline char* StStrangeMuDstMaker::GetFile(Int_t dstType) const
-            { return file[dstType]; }
 inline Int_t StStrangeMuDstMaker::MatchName(const char* name) const
             { for (Int_t i=1; i<strDstT; i++)
 	        if (!(strcmp(name,strTypeNames[i]))) return i;
               return 0; }
-inline Int_t StStrangeMuDstMaker::IMake(int number)
-            { iMake = kTRUE; Int_t res = StMaker::IMake(number);
-              iMake = kFALSE; return res; }
 
 #endif
 
 //____________________________________________________________________
 //
-// $Id: StStrangeMuDstMaker.h,v 3.10 2002/06/21 02:44:10 genevb Exp $
+// $Id: StStrangeMuDstMaker.h,v 3.11 2003/02/10 16:02:24 genevb Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 3.11  2003/02/10 16:02:24  genevb
+// Now read files using TChains; no splitting of MuDst file
+//
 // Revision 3.10  2002/06/21 02:44:10  genevb
 // handle events without primary vertex better
 //

@@ -5,7 +5,7 @@
 //////////////////////////////////////////////////////////////////////////
 #include "StStrangeMuDstMaker.h"
 #include "TFile.h"
-#include "TTree.h"
+#include "TChain.h"
 #include "StTree.h"
 #include "StEvent/StEvent.h"
 #include "StMcEventMaker/StMcEventMaker.h"
@@ -26,7 +26,13 @@
 
 #define EachController(proc) EachDoT(cont[i]->proc);
 
-Int_t thisRun,thisEvent,lastRun,lastEvent;
+// Defaults file and tree names;
+static char* defFileName = "evMuDst.root";
+static char* defName = "StrangeMuDst";
+static char* altName = "MuDst";
+static char* defTitle = "Strangeness Micro-DST";
+
+Int_t thisRun,thisEvent,lastRun,lastEvent,readEventNumber;
 
 ClassImp(StStrangeMuDstMaker)
 //_____________________________________________________________________________
@@ -34,6 +40,7 @@ StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
 
   muDst = 0;
   tree = 0;
+  chain = 0;
   evClonesArray = 0;
   evMcArray = 0;
   cutsArray = 0;
@@ -42,24 +49,14 @@ StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
   SetNumber(-2);
   outFileNum = 1;
   doT0JitterAbort = kFALSE;
-  iMake = kFALSE;
 
-  TString suffix = "MuDst.root";
   for (Int_t i=0; i<strDstT; i++) {
     doT[i] = kFALSE;
     cont[i] = 0;
-    files[i] = 0;
     bsize[i] = 0;
-    
-    // Defaults file names: evMuDst.root, v0MuDst.root, etc.
-    TString prefix = strTypeNames[i];
-    prefix.ToLower();
-    prefix.Append(suffix);
-    size_t len = prefix.Length();
-    file[i] = new char[len + 1];
-    strncpy(file[i],prefix.Data(),len);
-    (file[i])[len] = 0;
   }
+
+  file = defFileName;
 
   doMc = kFALSE;
   rw = StrangeNoFile;
@@ -89,8 +86,7 @@ Int_t StStrangeMuDstMaker::Init() {
   firstEvent = kTRUE;
   if (Debug()) gMessMgr->Debug() << "In StStrangeMuDstMaker::Init() ... "
                                << GetName() << endm; 
-  
-  if (OpenFile() == kStErr) return kStErr;
+  if ((rw == StrangeWrite) && (OpenFile() == kStErr)) return kStErr;
   if (!dstMaker) {
     evClonesArray = new TClonesArray("StStrangeEvMuDst",1);
     if (doMc) evMcArray = new TClonesArray("StStrangeEvMuDst",1);
@@ -126,11 +122,9 @@ Int_t StStrangeMuDstMaker::Init() {
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::InitReadDst() {
   
-  tree = (TTree*) muDst->Get("StrangeMuDst");
-  if (!tree) tree = (TTree*) muDst->Get("MuDst");
-  if (!tree) {
-    gMessMgr->Error() << "StStrangeMuDstMaker: no StrangeMuDst or MuDst tree"
-                      << " in file " << file[evT] << endm;
+  if (!((tree) && (muDst))) {
+    gMessMgr->Error(
+      "StStrangeMuDstMaker: no appropriate tree in input file(s)!");
     return;
   }
 
@@ -168,7 +162,7 @@ void StStrangeMuDstMaker::InitReadDst() {
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::InitCreateDst() {
   
-  tree = new TTree("StrangeMuDst","Strangeness Micro-DST");
+  tree = new TTree(defName,defTitle);
   tree->SetDirectory(muDst);
   EachController(InitCreateDst());
 
@@ -180,6 +174,8 @@ void StStrangeMuDstMaker::InitCreateDst() {
       branch = tree->Branch("McEvent",&evMcArray,bsize[evT],split);
     }
   }
+
+  if (firstEvent) cuts->Init();
 }
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::InitCreateSubDst() {
@@ -216,45 +212,56 @@ Int_t StStrangeMuDstMaker::Make() {
 //_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::MakeReadDst() {
 
-  if (!tree) return kStErr;
-  Int_t event_number = GetNumber();
-  if (event_number == -2) {        // If event numbers aren't supplied,
-    event_number = 0;              // start at 0 and increment ourselves.
+  if (!((tree) && (muDst))) return kStErr;
+  Int_t makerEventNumber = GetNumber();
+  if (makerEventNumber == -2) {    // If event numbers aren't supplied,
+    readEventNumber = 0;           // start at 0 and increment ourselves.
     SetNumber(-1);                 // Use m_Number = -1 to indicate this.
-  } else if (event_number == -1) {
-    event_number = tree->GetReadEvent() + 1;
-  } else if (files[evT]) {
-    event_number -= evNumber;
+  } else if (makerEventNumber == -1) {
+    readEventNumber++;
+  } else {
+    readEventNumber = makerEventNumber;
   }
-  Int_t tree_size = (Int_t) tree->GetEntries();
-  while (event_number >= tree_size) {
-    if (files[evT]) {                                  // If reading from multi-
-      if (NextReadFile() == kStErr) return kStErr;     // tiple files, advance
-      InitReadDst();                                   // and subtract total
-      evNumber += tree_size;                           // events from old file
-      event_number -= tree_size;                       // from current event #.
-      tree_size = (Int_t) tree->GetEntries();
-    } else {
-      return kStErr;
-    }
+
+  // LoadTree() returns -4 if no tree is found in the file
+  // Identify and skip those files
+  Int_t curTree = chain->GetTreeNumber() + 1;
+  Bool_t skippingFile = kFALSE;
+  for (; curTree < chain->GetNtrees(); curTree++) {
+    if ((chain->LoadTree(readEventNumber)) != -4) break;
+    skippingFile = kTRUE;
+    SkipChainFile(curTree);
   }
-  if ((tree->GetEvent(event_number)) <= 0) return kStErr;   // Read the event
-  if (cutsArray->GetEntriesFast()) cuts->Reset(cutsArray);
+
+  if (((skippingFile) && (curTree == chain->GetNtrees())) ||
+      (tree->GetEvent(readEventNumber) <= 0)) return kStErr; // Read the event
 
   // Overcome a bug where event wasn't meant to be recorded into 
   // a muDst, but was anyhow (with the previous event's info)
   thisRun = GetEvent()->run();
   thisEvent = GetEvent()->event();
   if ((thisRun == lastRun) && (thisEvent == lastEvent)) {
-    // Skip to next event (which should be fine)
-    if (iMake) {
-      // If user is using IMake(int), they must skip to next event themselves
-      gMessMgr->Warning("StStrangeMuDstMaker: file has bad event info - skip");
-      return kStSkip;
-    } else return MakeReadDst();
+    if (makerEventNumber < 0 ) {
+      // User is calling Make() (not asking for a specific event).
+      // Automatically skip to next event.
+      return MakeReadDst();
+    } else {
+      // User is calling Make(i) (asking for a specific event i).
+      // Return a "cleared" event.
+      gMessMgr->Warning() <<
+        "StStrangeMuDstMaker: event on file has bad event info\n" <<
+        "    and should be skipped!" << endm;
+      GetEvent()->Clear();
+      EachController(Clear());
+      return kStOK;
+      //return kStSkip;
+    }
+  } else {
+    lastRun = thisRun;
+    lastEvent = thisEvent;
   }
-  lastRun = thisRun;
-  lastEvent = thisEvent;
+
+  if (cutsArray->GetEntriesFast()) cuts->Reset(cutsArray);
 
   EachController(MakeReadDst());
  
@@ -423,8 +430,8 @@ void StStrangeMuDstMaker::Clear(Option_t *option) {
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::ClearForReal(Option_t *option) {
 
-  if (Debug()) gMessMgr->Debug() << "In StStrangeMuDstMaker::ClearForReal() ... "
-                               << GetName() << endm; 
+  if (Debug()) gMessMgr->Debug() <<
+    "In StStrangeMuDstMaker::ClearForReal() ... " << GetName() << endm; 
 
   if (tree) {
     if (dstMaker) {                                   // Making a subDST
@@ -447,116 +454,115 @@ Int_t StStrangeMuDstMaker::Finish() {
 
   if (Debug()) gMessMgr->Debug() << "In StStrangeMuDstMaker::Finish() ... "
                                << GetName() << endm; 
-  CloseFile();
+  if (rw==StrangeWrite) CloseFile();
   EachController(Finish());
 
   return kStOK;
 }
 //_____________________________________________________________________________
-void StStrangeMuDstMaker::SetWrite(char* eFile, char* vFile,
-                                   char* xFile, char* kFile) {
+void StStrangeMuDstMaker::SetWrite(const char* eFile) {
   rw = StrangeWrite;
-  SetFiles(eFile,vFile,xFile,kFile);
+  SetFile(eFile);
 }
 //_____________________________________________________________________________
-void StStrangeMuDstMaker::SetRead (char* eFile, char* vFile,
-                                   char* xFile, char* kFile) {
+void StStrangeMuDstMaker::SetRead(const char* eFile, char* treeName) {
   rw = StrangeRead;
-  SetFiles(eFile,vFile,xFile,kFile);
+  if (!eFile) eFile = defFileName;
+
+  if (tree) {
+    treeName = const_cast<char*> (tree->GetName());
+  } else {
+    if (!treeName) treeName = defName;
+    tree = (TTree*) (chain = new TChain(treeName,defTitle));
+  }
+
+  Int_t nFiles = chain->GetNtrees();
+  chain->Add(eFile);
+  cuts->ForceUpdateArray();
+
+  if (muDst) return;
+
+  // Have not yet found an appropriate TTree - attempting to find one
+  for (Int_t curTree=nFiles; curTree<chain->GetNtrees(); curTree++) {
+    Int_t loadResult = chain->LoadTree(0);
+    if (loadResult == -2) break;
+    muDst = chain->GetFile();
+    if (!(loadResult)) return;
+    if (strcmp(treeName,defName)) {
+      SetTreeName(defName);
+      loadResult = chain->LoadTree(0);
+      muDst = chain->GetFile();
+      if (!(loadResult)) return;
+    }
+    if (strcmp(treeName,altName)) {
+      SetTreeName(altName);
+      loadResult = chain->LoadTree(0);
+      muDst = chain->GetFile();
+      if (!(loadResult)) return;
+    }
+
+    // Unable to find tree of name treeName, defName, or altName in file,
+    // try with next file...
+    SkipChainFile(curTree);
+    SetTreeName(treeName);
+  }
+
+  // Appropriate tree not found in any files so far
+  muDst = 0;
 }
 //_____________________________________________________________________________
-void StStrangeMuDstMaker::SetRead (StFile* eFiles, StFile* vFiles,
-                                   StFile* xFiles, StFile* kFiles) {
-  rw = StrangeRead;
-  files[evT] = eFiles;
-  files[v0T] = vFiles;
-  files[xiT] = xFiles;
-  files[kinkT] = kFiles;
-  evNumber = 0;
-  SetStFiles();
+void StStrangeMuDstMaker::SetRead(StFile* eFiles, char* treeName) {
+  while (!(eFiles->GetNextBundle()))
+    SetRead(eFiles->GetFileName(0),treeName);
 }
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::SetNoKeep() {
   rw = StrangeNoKeep;
 }
 //_____________________________________________________________________________
-void StStrangeMuDstMaker::SetFiles (char* eFile, char* vFile,
-                                    char* xFile, char* kFile) {
-  if (eFile) file[evT] = eFile;
-  if (vFile) file[v0T] = vFile;
-  if (xFile) file[xiT] = xFile;
-  if (kFile) file[kinkT] = kFile;
+void StStrangeMuDstMaker::SetFile(const char* eFile) {
+  if (eFile) file = const_cast<char*> (eFile);
 }
 //_____________________________________________________________________________
-void StStrangeMuDstMaker::SetStFiles () {
-  for (Int_t i=0; i<strDstT; i++) {
-    if (files[i]) {
-      files[i]->GetNextBundle();
-      file[i] = const_cast<char*> (files[i]->GetFileName(0));
-    }
+void StStrangeMuDstMaker::SetTreeName(const char* treeName) {
+  if ((treeName) && (strcmp(treeName,tree->GetName()))) {
+    tree->SetName(treeName);
+    TObjArray* chainElems = chain->GetListOfFiles();
+    for (Int_t i=0; i<chainElems->GetEntriesFast(); i++)
+      ((TNamed*) (chainElems->At(i)))->SetName(treeName);
   }
+}
+//_____________________________________________________________________________
+void StStrangeMuDstMaker::SkipChainFile(Int_t curTree) {
+  Int_t* listOfOffsets = chain->GetTreeOffset();
+  TNamed* chainElem = (TNamed*) (chain->GetListOfFiles()->At(curTree));
+  gMessMgr->Warning() <<
+    "StStrangeMuDstMaker: Skipped event file (no appropriate TTree):\n  "
+    << chainElem->GetTitle() << endm;
+  listOfOffsets[curTree+1] = listOfOffsets[curTree];
 }
 //_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::OpenFile() {
-  char option[16];
-  char inout[16];
-  if (rw == StrangeRead) {
-    sprintf(option,"READ");
-    sprintf(inout,"reading");
-  } else if (rw == StrangeWrite) {
-    sprintf(option,"RECREATE");
-    sprintf(inout,"writing");
-  } else
-    return kStOk;
-    
-  if( ! (muDst = new TFile(file[evT],option)) ) {
+  if( ! (muDst = new TFile(file,"RECREATE")) ) {
     gMessMgr->Error() << "StStrangeMuDstMaker: Error opening event file:\n  "
-                      << file[evT] << endm;
+                      << file << endm;
     return kStErr;
   }
 
-  // 5/28/02 - GVB & CS
-  // Protected against improperly closed files by looking at keys first
-  if (rw == StrangeRead) {
-    TList* listOfKeys = muDst->GetListOfKeys();
-    if (!((listOfKeys->FindObject("StrangeMuDst")) ||
-          (listOfKeys->FindObject("MuDst")))) {
-      gMessMgr->Warning() <<
-        "StStrangeMuDstMaker: Skipped event file (no appropriate TTree):\n  "
-        << file[evT] << endm;
-      return NextReadFile();
-    }
-  }
-
-  // 4/26/01 - GVB
-  // The following line became outdated with switching to Root I/O instead
-  // of STAR I/O as of Root version 3.
-  //if (rw == StrangeWrite) muDst->SetFormat(1);   // Necessary to read MuDst in plain root
-  gMessMgr->Info() << "StStrangeMuDstMaker: Opened event file for " << inout
-                   << ":\n  " << file[evT] << endm;     
+  gMessMgr->Info() << "StStrangeMuDstMaker: Opened file for writing:\n"
+                   << file << endm;     
   cuts->ForceUpdateArray();
   return kStOk;
 }
 //_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::CloseFile() {
   if (muDst) {
-    if (rw == StrangeWrite) {
-      muDst->Write();
-      muDst->cd();
-      // No longer necessary to store cuts as they are now a branch
-      // cuts->Store();
-    }
+    muDst->Write();
+    muDst->cd();
     muDst->Close();
     tree = 0;
   }
   return kStOk;
-}
-//_____________________________________________________________________________
-Int_t StStrangeMuDstMaker::NextReadFile() {
-  SetStFiles();
-  if (!file[evT]) return kStErr;
-  CloseFile();
-  return OpenFile();
 }
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::CheckFile() {
@@ -564,15 +570,14 @@ void StStrangeMuDstMaker::CheckFile() {
     if (muDst->GetBytesWritten() > MAXFILESIZE) {
       gMessMgr->Warning() << "StStrangeMuDstMaker: File size limit "
 			  << MAXFILESIZE << " exceeded!\n"
-			  << "           Closing file " << file[evT] << endm;
+			  << "           Closing file " << file << endm;
       CloseFile();
       char buf_[10];
       sprintf(buf_,"_%d",(++outFileNum));
-      for (Int_t i=0; i<strDstT; i++) {
-	TString fixer = file[i];
+	TString fixer = file;
 	size_t len = fixer.Length();
 	if (outFileNum>2) {
-	  TString suffix = strrchr(file[i],'.');
+	  TString suffix = strrchr(file,'.');
 	  size_t last_ = fixer.Last('_');
 	  size_t len_ = len - last_;
 	  fixer.Remove(last_,len_).Append(buf_).Append(suffix);
@@ -581,11 +586,10 @@ void StStrangeMuDstMaker::CheckFile() {
 	  size_t lastdot = fixer.Last('.');
 	  fixer.Insert(lastdot,buf_);
 	  len = fixer.Length();
-	  file[i] = new char[len + 5];
+	  file = new char[len + 5];
 	}
-	strncpy(file[i],fixer.Data(),len);
-	(file[i])[len] = 0;
-      }
+	strncpy(file,fixer.Data(),len);
+	(file)[len] = 0;
       OpenFile();
       InitCreateDst();
       if (dstMaker) InitCreateSubDst();
@@ -614,10 +618,21 @@ void StStrangeMuDstMaker::SetCorrectionFile(char* fname) {
 void StStrangeMuDstMaker::SetFractionFile(char* fname) {
   StStrangeEvMuDst::SetFractionFile(fname);
 }
+//_____________________________________________________________________________
+char* StStrangeMuDstMaker::GetFile() const {
+  if (chain) {
+    TFile* fptr = chain->GetFile();
+    if (fptr) return const_cast<char*> (fptr->GetName());
+  }
+  return file; 
+}       
 
 //_____________________________________________________________________________
-// $Id: StStrangeMuDstMaker.cxx,v 3.21 2003/01/16 20:38:36 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.22 2003/02/10 16:02:24 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.22  2003/02/10 16:02:24  genevb
+// Now read files using TChains; no splitting of MuDst file
+//
 // Revision 3.21  2003/01/16 20:38:36  genevb
 // Reduce buffer size for NoKeep option
 //

@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerBase.cxx,v 3.11 2002/05/20 21:37:12 genevb Exp $
+// $Id: StStrangeControllerBase.cxx,v 3.12 2003/02/10 16:02:24 genevb Exp $
 // $Log: StStrangeControllerBase.cxx,v $
+// Revision 3.12  2003/02/10 16:02:24  genevb
+// Now read files using TChains; no splitting of MuDst file
+//
 // Revision 3.11  2002/05/20 21:37:12  genevb
 // Fixed problem with file names for branches
 //
@@ -149,8 +152,7 @@ void StStrangeControllerBase::InitReadDst() {
 //_____________________________________________________________________________
 void StStrangeControllerBase::InitCreateDst() {
   tree = masterMaker->GetTree();
-//  file = masterMaker->GetFile(dstType);
-  file = masterMaker->GetFile(0);
+  file = masterMaker->GetFile();
   AssignBranch(GetName(),&dataArray);
   if (doMc && !(dstMaker)) {
     AssignBranch(GetMcName(),&mcArray);
