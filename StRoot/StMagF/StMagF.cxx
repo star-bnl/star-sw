@@ -11,7 +11,7 @@
 #include "StMagF.h"
 #include <stdlib.h>
 #include <stdio.h>
-
+#include "TSystem.h"
 
 
 static StMagF *gMagfield = 0;
@@ -20,7 +20,7 @@ void type_of_call agufld_(Float_t *x, Float_t *b)
 {
   if (!gMagfield) 
     gMagfield = new StMagFCM("Star Full Field",
-			     "/afs/rhic/star/packages/dev/StDb/StMagF/bfp112.map",
+			     "$STAR/StDb/StMagF/bfp112.map",
 			     kConMesh,1.0);
   gMagfield->Field(x,b);
 }
@@ -48,7 +48,7 @@ void StMagF::Agufld(Float_t *x, Float_t *b)
        gMagfield->Field(x,b);
     }
     else if(fMap==kConMesh){
-       gMagfield = new StMagFCM(" Star Full Field","/afs/rhic/star/packages/dev/StDb/StMagF/bfp112.map",kConMesh,1.0);
+       gMagfield = new StMagFCM(" Star Full Field","$STAR/StDb/StMagF/bfp112.map",kConMesh,1.0);
        gMagfield->Field(x,b);
     }
   }
@@ -188,7 +188,9 @@ void StMagFCM::ReadField()
   Int_t iphi, ir, iz, ipphi, ipr, ipz;
   Float_t bphi, br, bz;
   printf("Reading Magnetic Field %s from file %s \n",fName.Data(),fTitle.Data());
-  magfile=fopen(fTitle.Data(),"r");
+  TString exfile = fTitle;
+  gSystem->ExpandPathName(exfile);
+  magfile=fopen(exfile.Data(),"r");
   if (magfile) {
     fscanf(magfile," %d %f %f %d %f %f  %d %f %f",&fZn,&fZbeg,&fZdel,&fRn,&fRbeg,&fRdel,&fPn,&fPbeg,&fPdel);
     printf("fPn %d, fRn %d, fZn %d, fPdel %f, fRdel %f, fZdel %f, fPbeg %f, fRbeg %f, fZbeg %f\n",
