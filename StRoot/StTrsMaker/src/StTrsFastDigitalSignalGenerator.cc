@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.3 1998/11/16 14:48:45 lasiuk Exp $
+ * $Id: StTrsFastDigitalSignalGenerator.cc,v 1.4 1999/01/18 10:25:23 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrsFastDigitalSignalGenerator.cc,v $
- * Revision 1.3  1998/11/16 14:48:45  lasiuk
- * use typedefs from StTrsSector
+ * Revision 1.4  1999/01/18 10:25:23  lasiuk
+ * add conversion code for StTrsDigitalSector
  *
  * Revision 1.7  1999/01/23 02:32:22  lasiuk
  * sun friendly
@@ -38,8 +38,8 @@
  * allocator for SUN
  *
  * Revision 1.2  1998/11/04 18:51:27  lasiuk
-StTrsFastDigitalSignalGenerator::StTrsFastDigitalSignalGenerator(StTpcElectronics* el, StTrsSector* sec)
-    : StTrsDigitalSignalGenerator(el, sec)
+ * initialization in base class
+ * incorporate electronics db
  * Initial Revision
  *
  **************************************************************************/
@@ -62,10 +62,10 @@ StTrsDigitalSignalGenerator*
 StTrsFastDigitalSignalGenerator::instance()
 {
     if(!mInstance) {
-StTrsFastDigitalSignalGenerator::instance(StTpcElectronics* el, StTrsSector* sec)
+#ifndef ST_NO_EXCEPTIONS
 	throw range_error("StTrsFastDigitalSignalGenerator::instance() Must Supply a File name");
 #else
-	mInstance = new StTrsFastDigitalSignalGenerator(el, sec);
+	cerr << "StTrsFastDigitalSignalGenerator::instance() Must Supply a File name" << endl;
 	cerr << "Exitting..." << endl;
 	exit(1);
 StTrsFastDigitalSignalGenerator::instance(StTpcElectronics* el, StTrsSector* sec, StTrsDigitalSector* digiSec)
@@ -75,24 +75,56 @@ StTrsFastDigitalSignalGenerator::instance(StTpcElectronics* el, StTrsSector* sec
 
 StTrsDigitalSignalGenerator*
 StTrsFastDigitalSignalGenerator::instance(StTpcElectronics* el, StTrsSector* sec)
+{
     if(!mInstance) {
     cout << "digitize here " << endl;
     PR(mSimpleConversion);
     // Loop over the sector
     // else  do nothing
-    for(int irow=0; irow<mSector->numberOfRows(); irow++) {
-	for(int ipad=0; ipad<mSector->padsOfRow(irow).size(); ipad++) {
+    cout << "Got to StTrsFastDigitalSignalGenerator::digitizeSignal()" << endl;
+    return mInstance;
+}
+    cout << "StTrsFastDigitalSignalGenerator::digitizeSignal()" << endl;
+    //PR(mSimpleConversion);
 void StTrsFastDigitalSignalGenerator::digitizeSignal()
     for(int irow=25; irow<+mSector->numberOfRows(); irow++) {
+    vector<short> digitalPad;
+
+    vector<unsigned char> digitalPadZeros;
+	    // should use an STL operation here
+	    PR(currentPad.size());
+	    if(!currentPad.size()) continue;
+    vector<unsigned char, allocator<unsigned char> > digitalPadZeros;
 #endif
 	    PR(digitalPad.size());
 	    cout << "r/p " << irow << '/' << ipad << endl;
     for(int irow=1; irow<=mSector->numberOfRows(); irow++) {
-		mTimeSequenceIterator->scaleAmplitude(1./mSimpleConversion);
+	    digitalPad.clear();
+	    currentPad = mSector->timeBinsOfRowAndPad(irow,ipad);
+	    if(!currentPad.size()) continue;
+// 	    cout << "dig() r/p " << irow << '/' << ipad << endl;
+	    // Make sure the digital Pad is clear!
+	    digitalPadData.clear();
+	    digitalPadZeros.clear();
+		mTimeSequenceIterator++) {
+		    static_cast<short>(mTimeSequenceIterator->amplitude()/mSimpleConversion);
+
+		// TRS calculates on a linear scale and then must
+		    digitalPad.push_back(static_cast<short>(digitalAmplitude));
+		    digitalPadZeros.push_back(static_cast<unsigned char>(0));
+		else if(digitalPad.size() == 0) {
+		    digitalPad.push_back(static_cast<short>(-1));
 			digitalPadData.push_back(static_cast<unsigned char>(0));
-	    //put 'em back
-	    mSector->assignTimeBins(irow,ipad,currentPad);
+		else if(digitalPad.back() > 0) {
+		    digitalPad.push_back(static_cast<short>(-1));
+			digitalPadZeros.back()++;
+		else
+		    digitalPad.back()--;
+	    }
+
+		}
 	    PR(digitalPad.size());
+	    for(int ii=0; ii<digitalPad.size(); ii++) {
 		cout << (ii) << '\t' << (static_cast<short>(digitalPad[ii])) << endl;
 	    }
 	    cout << endl;
