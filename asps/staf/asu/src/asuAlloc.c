@@ -178,7 +178,6 @@ void *asuMalloc(size_t size, const char* file, int line)
    asuMallocAdd(p,size,file,line);
    if (!p) return NULL;
    p = (void*)((char*)p+sizeof(asuAlloc_t));
-   if ((long)p&3) asuWau();
    return p;
 }
 
@@ -211,7 +210,8 @@ int ierr;
   if(!p) return;
   ierr = asuMallocRemove(p,file,line);
   if (ierr==2) return;
-  free(p); 
+  if (ierr==1) free(p);
+  if (ierr==0) free((char*)p-sizeof(asuAlloc_t)); 
 }
 
 /*--------------------------------------------------------------------*/
