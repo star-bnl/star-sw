@@ -9,19 +9,10 @@ macro init
 cd /dui
 
 cd /dui/DummyTables
-tdm/newtable type      tcl_tpc_index_type 1
+tdm/newtable type    tcl_tpc_index_type 1
 
 cd  /dui/Switches
-tdm/newtable tclpar tcl_tclpar 1
-
-cd /dui
-tdm/newtable ProducedData/Clusters/tpcluster tcl_tpcluster 20000
-tdm/newtable ProducedData/Clusters/tpseq tcl_tpseq 100000
-
-cd /dui
-cd ProducedData/Hits
-tdm/newtable tphit     tcl_tphit     20000
-tdm/newtable tphitau   tcl_tphit_aux 20000
+tdm/newtable tclpar  tcl_tclpar 1
 
 
 cd /dui/DummyTables
