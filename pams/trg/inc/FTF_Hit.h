@@ -42,3 +42,4 @@
        float        q    ;      // total charge assigned to this point 
    } ;
 #endif
+
