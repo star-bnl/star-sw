@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.87 2003/01/17 01:49:41 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.88 2003/01/17 02:19:40 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -202,7 +202,7 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
 #ifdef R__QT
   // redefine the default application font
   QFont  myFont = QApplication::font();
-  int myFontSize = myFont. pointSize ();
+  // int myFontSize = myFont. pointSize ();
   myFont.setPointSize(8);
   QApplication::setFont(myFont);
 #include "starIcon.xpm"
@@ -471,7 +471,8 @@ TVirtualPad *StEventDisplayMaker::CreateCanvas()
 Int_t StEventDisplayMaker::Make()
 {
 
-AGAIN: fgEventLoop = -1;
+// AGAIN:
+   fgEventLoop = -1;
 
 
 //  const Int_t maxTrackCounter = 9;
@@ -710,6 +711,7 @@ Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
    static const Style_t TrakSty = 1; static const Size_t TrakSiz = 1.00; static const Color_t TrakCol= 0;
    static const Style_t VertSty = 5; static const Size_t VertSiz = 0.90; static const Color_t VertCol= 0;
 
+   if (VertCol){} // to supress the compilation warning
    enum QWERTY {kTRK=1,kHIT=2,kUSE=4,kUNU=8};
 
 
@@ -1107,6 +1109,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.88  2003/01/17 02:19:40  fine
+// Some clean up
+//
 // Revision 1.87  2003/01/17 01:49:41  fine
 // add right  named class StPadControlPanel
 //
