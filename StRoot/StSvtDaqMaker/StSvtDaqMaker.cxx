@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDaqMaker.cxx,v 1.4 2000/07/04 02:36:53 perev Exp $
+ * $Id: StSvtDaqMaker.cxx,v 1.5 2000/08/04 21:03:51 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDaqMaker.cxx,v $
+ * Revision 1.5  2000/08/04 21:03:51  perev
+ * Leaks + Clear() cleanup
+ *
  * Revision 1.4  2000/07/04 02:36:53  perev
  * formal corrections, gStChain removed
  *
@@ -170,7 +173,7 @@ void StSvtDaqMaker::PrintEventInfo()
 }
 
 //_____________________________________________________________________________
-Int_t StSvtDaqMaker::Clear()
+void StSvtDaqMaker::Clear(const char*)
 {
   if (Debug()) gMessMgr->Debug() << "StSvtDaqMaker::Clear" << endm;
 
@@ -184,7 +187,7 @@ Int_t StSvtDaqMaker::Clear()
     fData = NULL;
   }
 
-  return kStOK;
+  StMaker::Clear();
 }
 
 //_____________________________________________________________________________
@@ -220,7 +223,7 @@ Int_t StSvtDaqMaker::Finish()
 void StSvtDaqMaker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: StSvtDaqMaker.cxx,v 1.4 2000/07/04 02:36:53 perev Exp $\n");
+  printf("* $Id: StSvtDaqMaker.cxx,v 1.5 2000/08/04 21:03:51 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

@@ -1,5 +1,8 @@
-// $Id: StChargeStepMaker.cxx,v 1.4 2000/07/28 18:31:54 hardtke Exp $
+// $Id: StChargeStepMaker.cxx,v 1.5 2000/08/04 21:03:40 perev Exp $
 // $Log: StChargeStepMaker.cxx,v $
+// Revision 1.5  2000/08/04 21:03:40  perev
+// Leaks + Clear() cleanup
+//
 // Revision 1.4  2000/07/28 18:31:54  hardtke
 // print out tpcDriftVelocity table
 //
@@ -307,7 +310,7 @@ Int_t StChargeStepMaker::Make() {
 
 void StChargeStepMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StChargeStepMaker.cxx,v 1.4 2000/07/28 18:31:54 hardtke Exp $\n");
+  printf("* $Id: StChargeStepMaker.cxx,v 1.5 2000/08/04 21:03:40 perev Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -321,7 +324,7 @@ void StChargeStepMaker::Clear(const char *opt) {
     step[i]->Reset();
     derivative[i]->Reset();
   } 
-
+  StMaker::Clear();
 
 }
 //-----------------------------------------------------------------------

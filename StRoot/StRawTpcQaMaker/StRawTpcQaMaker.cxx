@@ -1,5 +1,8 @@
-//! $Id: StRawTpcQaMaker.cxx,v 1.5 2000/06/20 20:02:20 kathy Exp $
+//! $Id: StRawTpcQaMaker.cxx,v 1.6 2000/08/04 21:03:47 perev Exp $
 //! $Log: StRawTpcQaMaker.cxx,v $
+//! Revision 1.6  2000/08/04 21:03:47  perev
+//! Leaks + Clear() cleanup
+//!
 //! Revision 1.5  2000/06/20 20:02:20  kathy
 //! commented out the SetDirectory for histograms that Sergei put in - otherwise histograms go to never-never land
 //!
@@ -163,7 +166,7 @@ Int_t StRawTpcQaMaker::Make(){
 //_____________________________________________________________________________
 void StRawTpcQaMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StRawTpcQaMaker.cxx,v 1.5 2000/06/20 20:02:20 kathy Exp $\n");
+  printf("* $Id: StRawTpcQaMaker.cxx,v 1.6 2000/08/04 21:03:47 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -175,10 +178,6 @@ Int_t StRawTpcQaMaker::Finish(){
 cout<<" StRawTpcQaMaker::Finish " << endl;
 
   return kStOK;
-}
-//_____________________________________________________________________________
-Int_t StRawTpcQaMaker::Clear(){
-   return kStOK;
 }
 
 

@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.105 2000/07/31 19:29:49 lansdell Exp $
+// $Id: St_QA_Maker.cxx,v 1.106 2000/08/04 21:04:00 perev Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.106  2000/08/04 21:04:00  perev
+// Leaks + Clear() cleanup
+//
 // Revision 1.105  2000/07/31 19:29:49  lansdell
 // primary vertex check histogram now contains entries for events with or without a primary vertex (with = 1, without = -1)
 //
@@ -418,7 +421,7 @@ Int_t St_QA_Maker::Make(){
   }
   else {
     cout << "Error in St_QA_Maker::Make(): no dst dataset found!" << endl;
-    return kStErr;
+    return kStWarn;
   }
 }
 //_____________________________________________________________________________

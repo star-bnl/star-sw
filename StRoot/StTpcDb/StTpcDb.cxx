@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.22 2000/05/12 20:31:38 fisyak Exp $
+ * $Id: StTpcDb.cxx,v 1.23 2000/08/04 21:03:55 perev Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.23  2000/08/04 21:03:55  perev
+ * Leaks + Clear() cleanup
+ *
  * Revision 1.22  2000/05/12 20:31:38  fisyak
  * Add ClassImp for abstract classes, new rootcint requires them
  *
@@ -81,11 +84,12 @@ StTpcDb::StTpcDb(St_DataSet* input) {
    const Char_t *bases[] = {"Calibrations","Geometry","Conditions"};
    int lBases = sizeof(bases)/sizeof(Char_t *);
    St_DataSetIter dataBase(input);
-   for (int i = 0;i<lBases;i++,dataBase.Cd("/") )
+   int i;
+   for (i = 0;i<lBases;i++,dataBase.Cd("/") )
      if ( !(tpc[i] = dataBase.Cd(bases[i]) ? dataBase("tpc") : 0 ) ){
        gMessMgr->Warning() << "StTpcDb::Error Getting TPC database: " << bases[i]       << endm;
      }
-   for (int i = 2;i<lBases;i++,dataBase.Cd("/") )   //only need conditions for trg
+   for (i = 2;i<lBases;i++,dataBase.Cd("/") )   //only need conditions for trg
      if ( !(trg[i] = dataBase.Cd(bases[i]) ? dataBase("trg") : 0 ) ){
        gMessMgr->Warning() << "StTpcDb::Error Getting trigger database: " << bases[i]       << endm;
      }
@@ -111,7 +115,8 @@ void StTpcDb::GetDataBase(StMaker* maker) {
  if (maker){
    const Char_t *bases[] = {"Calibrations/","Geometry/","Conditions/"};
    int lBases = sizeof(bases)/sizeof(Char_t *);
-   for (int i = 0;i<lBases;i++) {
+   int i;
+   for (i = 0;i<lBases;i++) {
      TString dbFullPath = "StDb/";
      TString dbPath = bases[i];
      dbPath += "tpc";
@@ -120,7 +125,7 @@ void StTpcDb::GetDataBase(StMaker* maker) {
           ( tpc[i] = maker->GetDataBase(dbFullPath)) ) continue;
      gMessMgr->Warning() << "StTpcDb::Error Getting TPC database: " << bases[i] << "   " << endm;
    }
-   for (int i = 2;i<lBases;i++) {
+   for (i = 2;i<lBases;i++) {
      TString dbFullPath = "StDb/";
      TString dbPath = bases[i];
      dbPath += "trg";

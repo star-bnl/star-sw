@@ -1,5 +1,8 @@
-// $Id: StTpcFEEGainCalibMaker.cxx,v 1.4 1999/10/11 08:04:17 fretiere Exp $
+// $Id: StTpcFEEGainCalibMaker.cxx,v 1.5 2000/08/04 21:03:53 perev Exp $
 // $Log: StTpcFEEGainCalibMaker.cxx,v $
+// Revision 1.5  2000/08/04 21:03:53  perev
+// Leaks + Clear() cleanup
+//
 // Revision 1.4  1999/10/11 08:04:17  fretiere
 // Fix bugg + add README, LOG and ID
 //
@@ -131,7 +134,7 @@ Int_t StTpcFEEGainCalibMaker::Make(){
 //_____________________________________________________________________________
 void StTpcFEEGainCalibMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTpcFEEGainCalibMaker.cxx,v 1.4 1999/10/11 08:04:17 fretiere Exp $\n");
+  printf("* $Id: StTpcFEEGainCalibMaker.cxx,v 1.5 2000/08/04 21:03:53 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -174,10 +177,6 @@ Int_t StTpcFEEGainCalibMaker::Finish(){
   tHFile->Close();
   tCalibFile->close();
   return kStOK;
-}
-//_____________________________________________________________________________
-Int_t StTpcFEEGainCalibMaker::Clear(){
-   return kStOK;
 }
 
 

@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.103 2000/07/30 01:39:04 perev Exp $
+// $Id: StMaker.cxx,v 1.104 2000/08/04 21:03:38 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -356,9 +356,19 @@ void StMaker::Clear(Option_t *option)
    TIter next(GetMakeList());
    StMaker *maker;
    while ((maker = (StMaker*)next())) {
+      if (maker->GetDebug()>1) {
+        printf("\n*** %s(%s)::Clear() called, mem = ", maker->ClassName(),maker->GetName());
+        StMem::Print(0);
+        printf("\n");
+      }  
       maker->StartTimer();
       maker->Clear(option);
       maker->StopTimer();
+      if (maker->GetDebug()>1) {
+        printf("\n*** %s(%s)::Clear() ended,  mem = ", maker->ClassName(),maker->GetName());
+        StMem::Print(0);
+        printf("\n");
+      }  
    }
    return;
 
@@ -412,7 +422,7 @@ void StMaker::StartMaker()
     if (!m_DataSet) {m_DataSet = new TObjectSet(".data"); Add(m_DataSet);}
   }
   if (GetDebug()>1) {
-    printf("\n*** Call %s(%s)::Make() mem = ", ClassName(),GetName());
+    printf("\n*** %s(%s)::Make() called, mem = ", ClassName(),GetName());
     StMem::Print(0);
     printf("\n");
   }
@@ -428,7 +438,7 @@ void StMaker::EndMaker(int ierr)
   ::doPs(GetName(),"EndMaker");
   
   if (GetDebug()>1) {
-    printf("\n*** End %s(%s)::Make() mem = ", ClassName(),GetName());
+    printf("\n*** %s(%s)::Make() ended. mem =", ClassName(),GetName());
     StMem::Print(0);
     printf("\n");
   }
@@ -1061,6 +1071,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.104  2000/08/04 21:03:38  perev
+// Leaks + Clear() cleanup
+//
 // Revision 1.103  2000/07/30 01:39:04  perev
 // StMem::Print added
 //
