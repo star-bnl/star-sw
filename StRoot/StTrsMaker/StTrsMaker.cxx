@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.23 1999/03/17 17:11:12 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.24 1999/03/19 13:27:11 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.24  1999/03/19 13:27:11  lasiuk
+// change sectors to process 1 ONLY!
+//
 // Revision 1.23  1999/03/17 17:11:12  lasiuk
 // comment out data set deletion for SL99d
 //
@@ -127,7 +130,7 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.23 1999/03/17 17:11:12 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.24 1999/03/19 13:27:11 lasiuk Exp $";
 
 ClassImp(StTrsMaker)
 
@@ -250,7 +253,7 @@ Int_t StTrsMaker::Init()
 	 setElectronicSampler(StTrsSlowAnalogSignalGenerator::symmetricGaussianApproximation);
    mAnalogSignalGenerator->setDeltaRow(0);
    mAnalogSignalGenerator->setDeltaPad(2);
-   mAnalogSignalGenerator->setSignalThreshold(1.*millivolt);
+   mAnalogSignalGenerator->setSignalThreshold(.1*millivolt);
    mAnalogSignalGenerator->setSuppressEmptyTimeBins(true);
    mAnalogSignalGenerator->addNoise(false);
    mAnalogSignalGenerator->generateNoiseUnderSignalOnly(false);
@@ -272,7 +275,7 @@ Int_t StTrsMaker::Init()
    // Maker Initialization
    //
    mFirstSectorToProcess = 1;
-   mLastSectorToProcess  = 24;
+   mLastSectorToProcess  = 1;
 
    // This should really be a boolean
    mProcessPseudoPadRows = 0;  // 0 is no!
@@ -734,7 +737,7 @@ Int_t StTrsMaker::Finish()
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.23 1999/03/17 17:11:12 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.24 1999/03/19 13:27:11 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
