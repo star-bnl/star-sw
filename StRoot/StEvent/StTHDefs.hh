@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTHDefs.hh,v 1.2 1999/01/15 22:53:57 wenaus Exp $
+ * $Id: StTHDefs.hh,v 1.3 1999/03/04 15:57:03 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,13 +10,17 @@
  ***************************************************************************
  *
  * $Log: StTHDefs.hh,v $
- * Revision 1.2  1999/01/15 22:53:57  wenaus
- * version with constructors for table-based loading
+ * Revision 1.3  1999/03/04 15:57:03  wenaus
+ * add std namespace for Sun CC5 compatibility
+ *
+ * Revision 1.3  1999/03/04 15:57:03  wenaus
+ * add std namespace for Sun CC5 compatibility
  *
  * Revision 1.2  1999/01/15 22:53:57  wenaus
  * version with constructors for table-based loading
  *
  **************************************************************************/
+#ifndef StTHDefs_hh
 #define StTHDefs_hh
 
 using namespace std;

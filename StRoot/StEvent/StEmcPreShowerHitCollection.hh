@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcPreShowerHitCollection.hh,v 1.1 1999/02/23 15:45:50 ullrich Exp $
+ * $Id: StEmcPreShowerHitCollection.hh,v 1.2 1999/03/04 15:56:55 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,12 +10,16 @@
  ***************************************************************************
  *
  * $Log: StEmcPreShowerHitCollection.hh,v $
- * Revision 1.1  1999/02/23 15:45:50  ullrich
- * Initial Revision
+ * Revision 1.2  1999/03/04 15:56:55  wenaus
+ * add std namespace for Sun CC5 compatibility
+ *
+ * Revision 1.2  1999/03/04 15:56:55  wenaus
+ * add std namespace for Sun CC5 compatibility
  *
  * Revision 1.1  1999/02/23 15:45:50  ullrich
  * Initial Revision
  *
+ **************************************************************************/
 #ifndef StEmcPreShowerHitCollection_hh
 #define StEmcPreShowerHitCollection_hh
 using namespace std;

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVecPtrGlobalTrack.hh,v 1.2 1999/01/15 22:54:18 wenaus Exp $
+ * $Id: StVecPtrGlobalTrack.hh,v 1.3 1999/03/04 15:57:08 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,13 +10,16 @@
  ***************************************************************************
  *
  * $Log: StVecPtrGlobalTrack.hh,v $
- * Revision 1.2  1999/01/15 22:54:18  wenaus
- * version with constructors for table-based loading
+ * Revision 1.3  1999/03/04 15:57:08  wenaus
+ * add std namespace for Sun CC5 compatibility
+ *
+ * Revision 1.5  1999/03/10 12:12:15  ullrich
+ * Added iterators
  *
  * Revision 1.4  1999/03/04 18:17:38  ullrich
  * Namespace std not used if ST_NO_NAMESPACES defined
  *
-
+ * Revision 1.3  1999/03/04 15:57:08  wenaus
  * add std namespace for Sun CC5 compatibility
  *
  *
