@@ -84,7 +84,7 @@ void StMuEmcUtil::fillMuEmc(StMuEmcCollection *muEmc,StEmcCollection *emccol)
                 {
                   if(getEndcapId(EmcDet,m,e,s,rid)) continue;// on error
                 }
-                if(rid > 0 && rid < __EMC_HITS_ID_DIM__) HitsId[rid-1] = HitIndex;
+                if(rid > 0 && rid <= __EMC_HITS_ID_DIM__) HitsId[rid-1] = HitIndex;
 		else  gMessMgr->Error() << "StMuEmcUtil::fillMuEmc (1) index out of range" << endm;
                 HitIndex++;
               
@@ -152,7 +152,7 @@ void StMuEmcUtil::fillMuEmc(StMuEmcCollection *muEmc,StEmcCollection *emccol)
                 if(getEndcapId(EmcDet,m,e,s,rid)) continue;// on error
               }
 	      Int_t index=-1;
-	      if(rid > 0 && rid < __EMC_HITS_ID_DIM__) index = HitsId[rid-1];
+	      if(rid > 0 && rid <= __EMC_HITS_ID_DIM__) index = HitsId[rid-1];
 	      else  gMessMgr->Error() << "StMuEmcUtil::fillMuEmc (2) index out of range" << endm;
 
               if(EmcDet==1||EmcDet==5) index=rid;
