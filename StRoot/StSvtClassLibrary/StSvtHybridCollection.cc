@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridCollection.cc,v 1.2 2000/07/03 02:07:53 perev Exp $
+ * $Id: StSvtHybridCollection.cc,v 1.3 2000/07/30 21:18:32 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridCollection.cc,v $
+ * Revision 1.3  2000/07/30 21:18:32  munhoz
+ * correction for getObject method and allow year 1 east side reading
+ *
  * Revision 1.2  2000/07/03 02:07:53  perev
  * StEvent: vector<TObject*>
  *
@@ -177,12 +180,12 @@ int StSvtHybridCollection::getHybridIndex(int barrelID, int ladderID, int waferI
     else index = -1;
   }
   else if ( !strncmp(fConfig, "Y1L", strlen("Y1L")) ) {
-    if      ((barrelID == 3) && (ladderID == 1) && (waferID == 1) && (hybridID == 1)) index = 0;
-    else if ((barrelID == 3) && (ladderID == 1) && (waferID == 1) && (hybridID == 2)) index = 1;
-    else if ((barrelID == 3) && (ladderID == 1) && (waferID == 2) && (hybridID == 1)) index = 2;
-    else if ((barrelID == 3) && (ladderID == 1) && (waferID == 2) && (hybridID == 2)) index = 3;
-    else if ((barrelID == 3) && (ladderID == 1) && (waferID == 3) && (hybridID == 1)) index = 4;
-    else if ((barrelID == 3) && (ladderID == 1) && (waferID == 3) && (hybridID == 2)) index = 5;
+    if      ((barrelID == 3) && (ladderID == 2) && (waferID == 1) && (hybridID == 1)) index = 0;
+    else if ((barrelID == 3) && (ladderID == 2) && (waferID == 1) && (hybridID == 2)) index = 1;
+    else if ((barrelID == 3) && (ladderID == 2) && (waferID == 2) && (hybridID == 1)) index = 2;
+    else if ((barrelID == 3) && (ladderID == 2) && (waferID == 2) && (hybridID == 2)) index = 3;
+    else if ((barrelID == 3) && (ladderID == 2) && (waferID == 3) && (hybridID == 1)) index = 4;
+    else if ((barrelID == 3) && (ladderID == 2) && (waferID == 3) && (hybridID == 2)) index = 5;
     else if ((barrelID == 3) && (ladderID == 1) && (waferID == 4) && (hybridID == 1)) index = 6;
     else if ((barrelID == 3) && (ladderID == 1) && (waferID == 4) && (hybridID == 2)) index = 7;    
     else if ((barrelID == 3) && (ladderID == 1) && (waferID == 5) && (hybridID == 1)) index = 8;
@@ -198,11 +201,11 @@ int StSvtHybridCollection::getHybridIndex(int barrelID, int ladderID, int waferI
   return index;
 }
 
-StHybridObject* StSvtHybridCollection::getObject(int barrelID, int ladderID, int waferID, int hybridID)
+StSvtHybridObject* StSvtHybridCollection::getObject(int barrelID, int ladderID, int waferID, int hybridID)
 {
-  // Method to retrieve an object (StHybridObject) of the collection using the barrel, ladder, wafer and hybrid numbers.
+  // Method to retrieve an object (StSvtHybridObject) of the collection using the barrel, ladder, wafer and hybrid numbers.
 
   int index = getHybridIndex(barrelID, ladderID, waferID, hybridID);
 
-  return (StHybridObject*)(*this)[index];
+  return (StSvtHybridObject*)(*this)[index];
 }
