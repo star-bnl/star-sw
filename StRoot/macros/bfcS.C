@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfcS.C,v 1.3 2001/04/13 13:41:57 didenko Exp $
+// $Id: bfcS.C,v 1.4 2001/04/13 21:54:28 didenko Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -96,6 +96,7 @@ void bfcS(const Int_t First,
   }
   StTpcHitFilterMaker* filter = (StTpcHitFilterMaker*)myMk;
   filter->RidiculousErrorsInner();
+  filter->DoNotDeleteHits();
 
 #ifdef __CINT__      
   if (chain->GetOption("TCL") && chain->GetOption("Eval")) {
@@ -213,7 +214,7 @@ void bfcS(const Int_t First,
   }
 }
 //_____________________________________________________________________
-void bfcS(const Int_t Last, 
+void bfcS (const Int_t Last, 
 	  const Char_t *Chain="gstar Cy2b tfs evout -NoHits",
 	  const Char_t *infile=0, 
 	  const Char_t *outfile=0, 
