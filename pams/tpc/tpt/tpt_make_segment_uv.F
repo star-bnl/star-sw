@@ -1,10 +1,12 @@
-* $Id: tpt_make_segment_uv.F,v 1.2 1998/01/27 00:35:50 fisyak Exp $
+* $Id: tpt_make_segment_uv.F,v 1.3 1998/03/23 18:26:02 sakrejda Exp $
 * $Log: tpt_make_segment_uv.F,v $
+* Revision 1.3  1998/03/23 18:26:02  sakrejda
+* tpg_pad-plane removed from the tpt module, it was not used there anyway
+*
 * Revision 1.2  1998/01/27 00:35:50  fisyak
 * Split sources
 *
-      INTEGER FUNCTION TPT_MAKE_SEGMENT_UV(ntrk,hit_h,hit,tpar_h,tpar,
-     >                          pad_pl_h,pad_pl,trk,
+      INTEGER FUNCTION TPT_MAKE_SEGMENT_UV(ntrk,hit_h,hit,tpar_h,tpar,trk,
      >                          next_hit,slice_loc,slice_pnt,ipass )
 C>---------------------------------------------------------------------
 C
@@ -18,8 +20,6 @@ C
 C INPUT PARAMETERS:
 C  tpar_h    - header for the tptpar (tracking parameters) table
 C  tpar     - tracking parameters table
-C  pad_pl_h  - header for the pad_plane (pad_plane geometry) table
-C  pad_pl   - pad_plane geometry table
 C  hit_h     - header for the tphit (tpc hits) table
 C  hit      - rows of the tphit table
 C  loc_hit  - pointers to the tphit table sorted according to the 
@@ -42,8 +42,6 @@ C
 
 #include "tcl_tphit.inc"
 #include "tpt_pars.inc"
-#include "tpg_pad_plane.inc"
-
 #include "tpt_mxdim.inc"
 #include "tpt_const.inc"
 #include "tpt_pointers.inc"
@@ -55,8 +53,6 @@ C______________________________________________________________________
       RECORD /tpt_pars_st/      tpar(*)
       RECORD /table_head_st/    hit_h
       RECORD /tcl_tphit_st/     hit(*)
-      RECORD /table_head_st/    pad_pl_h
-      RECORD /tpg_pad_plane_st/     pad_pl
 
       RECORD /track_pointers/   trk(*)
 C______________________________________________________________________

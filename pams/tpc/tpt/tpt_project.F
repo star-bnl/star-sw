@@ -1,10 +1,13 @@
-* $Id: tpt_project.F,v 1.2 1998/01/27 00:35:50 fisyak Exp $
+* $Id: tpt_project.F,v 1.3 1998/03/23 18:26:03 sakrejda Exp $
 * $Log: tpt_project.F,v $
+* Revision 1.3  1998/03/23 18:26:03  sakrejda
+* tpg_pad-plane removed from the tpt module, it was not used there anyway
+*
 * Revision 1.2  1998/01/27 00:35:50  fisyak
 * Split sources
 *
       INTEGER FUNCTION TPT_PROJECT(itrk,hit_h,hit,track_h,track,
-     >                 tpar_h,tpar,pad_pl_h,pad_pl,trk,next_hit,
+     >                 tpar_h,tpar,trk,next_hit,
      >                 slice_loc,slice_pnt,ipass)
 C>--------------------------------------------------------------------
 C
@@ -22,8 +25,6 @@ C  track_h   - header for the tptrack (reconstructed tracks) table
 C  track    - rows of the tptrack table
 C  tpar_h    - header for the tptpar (tracking parameters) table
 C  tpar     - tracking parameters table
-C  pad_pl_h  - header for the pad_plane (pad_plane geometry) table
-C  pad_pl   - pad_plane geometry table
 C  loc_hit  - pointers to the tphit table sorted according to the row/sec field
 C  tpstart  - pointers to first hits in every row/sector
 C  tpcount  - count of hits for every row/sector
@@ -44,7 +45,6 @@ C
 #include "tpt_pars.inc"
 #include "tpt_track.inc"
 #include "tcl_tphit.inc"
-#include "tpg_pad_plane.inc"
 #include "tpt_pointers.inc"
 #include "tpt_mxdim.inc"
 #include "tpt_mxhit.inc"
@@ -56,8 +56,6 @@ C______________________________________________________________________
       RECORD /tpt_track_st/     track(*)
       RECORD /table_head_st/    hit_h
       RECORD /tcl_tphit_st/     hit(*)
-      RECORD /table_head_st/    pad_pl_h
-      RECORD /tpg_pad_plane_st/     pad_pl
       RECORD /track_pointers/   trk(*)
 C_____________________________________________________________________
 C
@@ -110,7 +108,7 @@ C        loop over rows
          if(irow.lt.1.or.irow.gt.45) more=.false.
          do while(more)
 C          find predictions for this row
-           iret = tpt_helix_pred(itrk,pad_pl_h,pad_pl,trk,isect,
+           iret = tpt_helix_pred(itrk,trk,isect,
      >            irow,tpar_h,tpar,np,xp,yp,ipass)
 C
            if(np.ne.0) then

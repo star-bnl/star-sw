@@ -1,12 +1,14 @@
-* $Id: tpt_form_segments.F,v 1.2 1998/01/27 00:35:47 fisyak Exp $
+* $Id: tpt_form_segments.F,v 1.3 1998/03/23 18:25:58 sakrejda Exp $
 * $Log: tpt_form_segments.F,v $
+* Revision 1.3  1998/03/23 18:25:58  sakrejda
+* tpg_pad-plane removed from the tpt module, it was not used there anyway
+*
 * Revision 1.2  1998/01/27 00:35:47  fisyak
 * Split sources
 *
       INTEGER FUNCTION TPT_FORM_SEGMENTS(hit_h,hit,
      >                                   track_h,track,
      >                                   tpar_h,tpar,
-     >                                   pad_pl_h,pad_pl,
      >                                   loc_hit,tpstart,tpcount,trk,
      >                                   next_hit,slice_loc,slice_pnt,
      >	                                 ipass,what)
@@ -26,8 +28,6 @@ C
 C INPUT ARGUMENTS:
 C  tpar_h    - header for the tptpar (tracking parameters) table
 C  tpar     - tracking parameters table
-C  pad_pl_h  - header for the pad_plane (pad_plane geometry) table
-C  pad_pl   - pad_plane geometry table
 C  hit_h     - header for the tphit (tpc hits) table
 C  hit      - rows of the tphit table
 C  loc_hit  - pointers to the tphit table sorted according to the 
@@ -52,8 +52,6 @@ C
 #include "tpt_pars.inc"
 #include "tpt_track.inc"
 #include "tcl_tphit.inc"
-#include "tpg_pad_plane.inc"
-
 #include "tpt_pointers.inc"
 #include "tpt_mxdim.inc"
 #include "tpt_root.inc"
@@ -66,8 +64,6 @@ C______________________________________________________________________
       RECORD /tpt_track_st/     track(*)
       RECORD /table_head_st/    hit_h
       RECORD /tcl_tphit_st/     hit(*)
-      RECORD /table_head_st/    pad_pl_h
-      RECORD /tpg_pad_plane_st/ pad_pl
 
       RECORD /track_pointers/   trk(*)
 C______________________________________________________________________
@@ -94,7 +90,7 @@ C______________________________________________________________________
                if(hit(k).track.lt.1) then
 C              find all the possible 3-hit links starting from this point
                iret=tpt_find_root(k,hit_h,hit,tpar_h,tpar,
-     >                            pad_pl_h,pad_pl,nroot,root,
+     >                            nroot,root,
      >                            next_hit,slice_loc,slice_pnt,ipass)
 C
 C              no saved tracks yet....
@@ -112,11 +108,11 @@ C                   look for a track starting from this root
 C                   start track segment from each root
                     if(what.gt.0.) then
                     iret = tpt_make_segment_uv(ntrk,hit_h,hit,tpar_h,
-     >                     tpar,pad_pl_h,pad_pl,trk,
+     >                     tpar,trk,
      >                     next_hit,slice_loc,slice_pnt,ipass)
                     else
                     iret = tpt_make_segment(ntrk,hit_h,hit,tpar_h,
-     >                     tpar,pad_pl_h,pad_pl,trk,
+     >                     tpar,trk,
      >                     next_hit,slice_loc,slice_pnt,ipass)
                     endif
 C                   check whether a track was successfully fitted
