@@ -90,32 +90,88 @@ macro svm
   cd /dui
 
  return
-* ---------------------------------------------------------------
 
+*------------------------------------------------------------------*
+ macro dst_dedx_filler
 
- macro dst 
+ macro/global/import *
 
-  macro/global/import *
-
-  cd [dst]
+ cd [dst]
 
   tdm/newtable dst_dedx      dst_dedx 100000
-  tdm/newtable event_summary dst_event_summary 1
-  tdm/newtable monitor_soft  dst_monitor_soft  1
-  tdm/newtable event_header  dst_event_header  1
-  tdm/newtable tof           dst_tof        2000
-  tdm/newtable point         dst_point      200000
-  
 
-  cd [run_dst]
+ cd /dui
+ 
+ return
+ 
+*------------------------------------------------------------------*
+ macro dst_monitor_soft_filler
+
+ macro/global/import *
+
+ cd [dst]
+
+  tdm/newtable monitor_soft  dst_monitor_soft  1
+
+ cd /dui
+
+ return
+ 
+*------------------------------------------------------------------*
+ macro dst_point_filler
+
+ macro/global/import *
+
+ cd [dst]
+
+  tdm/newtable point         dst_point      200000
+
+ cd /dui
+
+ return
+ 
+*------------------------------------------------------------------*
+ macro dst_point_unpack
+
+ macro/global/import *
+
+ cd [dst]
+
+ cd /dui
+
+ return
+ 
+*------------------------------------------------------------------*
+ macro fill_dst_event_summary
+
+ macro/global/import *
+
+ cd [dst]
+
+  tdm/newtable event_summary dst_event_summary 1
+
+ cd /dui
+
+ return
+ 
+*------------------------------------------------------------------*
+ macro fill_dst_run_summary
+
+ macro/global/import *
+
+ cd [dst]
+
+   tdm/newtable tof           dst_tof        2000
+
+ cd [run_dst]
+
   tdm/newtable run_summary   dst_run_summary   1
   tdm/newtable run_header    dst_run_header    1
 
-
-  cd /dui
+ cd /dui
 
  return
-
+ 
 *------------------------------------------------------------------*
 
  macro particle_dst_filler
