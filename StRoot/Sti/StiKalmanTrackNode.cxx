@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.45 2004/12/05 00:39:07 fisyak Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.46 2004/12/08 16:56:16 fisyak Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.46  2004/12/08 16:56:16  fisyak
+ * Fix sign in dE/dx; move from upper to lower triangular matrix convention (StEvent) for px,py,pz
+ *
  * Revision 2.45  2004/12/05 00:39:07  fisyak
  * Add test suit for matrix manipulation debugging under overall CPPFLAGS=-DSti_DEBUG
  *
@@ -376,10 +379,11 @@ void StiKalmanTrackNode::getMomentum(double p[3], double e[6]) const
   //d20 = c20*a00+c21*a01+c22*a02;
   //d21 = c20*a10+c21*a11+c22*a12;
   d22 = c20*a20+c21*a21+c22*a22;
+  // switch to lower triangular matrix convention
   e[0] = d00;  // px-px
   e[1] = d01;  // px-py
-  e[2] = d02;  // px-pz
-  e[3] = d11;  // py-py
+  e[2] = d11;  // py-py
+  e[3] = d02;  // px-pz
   e[4] = d12;  // py-pz
   e[5] = d22;  // pz-pz
 #ifdef Sti_DEBUG
@@ -412,12 +416,14 @@ double StiKalmanTrackNode::getPsi() const
 /// p[0] = px
 /// p[1] = py
 /// p[2] = pz
+/// Use lower triangular matrix
 /// e[0] = px-px
 /// e[1] = px-py
-/// e[2] = px-pz
-/// e[3] = py-py
+/// e[2] = py-py
+/// e[3] = px-pz
 /// e[4] = py-pz
 /// e[5] = pz-pz
+
 void StiKalmanTrackNode::getGlobalMomentum(double p[3], double e[6]) const
 {	
   // first get p & e in the local ref frame
@@ -484,11 +490,11 @@ void StiKalmanTrackNode::getGlobalMomentum(double p[3], double e[6]) const
   //d20 = c20*a00+c21*a01+c22*a02;
   //d21 = c20*a10+c21*a11+c22*a12;
   d22 = c20*a20+c21*a21+c22*a22;
-    
+  // Lower triangular matrix (before it was upper one)
   e[0] = d00;  // px-px
   e[1] = d01;  // px-py
-  e[2] = d02;  // px-pz
-  e[3] = d11;  // py-py
+  e[2] = d11;  // py-py
+  e[3] = d02;  // px-pz
   e[4] = d12;  // py-pz
   e[5] = d22;  // pz-pz
 #ifdef Sti_DEBUG
@@ -977,7 +983,7 @@ void StiKalmanTrackNode::propagateMCS(StiKalmanTrackNode * previousNode, const S
     {
       double cc=_p3;
       double correction;
-      correction =1.- ::sqrt(e2)*dE/p2;
+      correction =1. + ::sqrt(e2)*dE/p2;
       if (correction>1.1) correction = 1.1;
       else if (correction<0.9) correction = 0.9;
       _p3 = _p3 *correction;
