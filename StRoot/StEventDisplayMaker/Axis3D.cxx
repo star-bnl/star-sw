@@ -1,6 +1,6 @@
 //*CMZ :          28/11/99  01.06.19  by  Valery Fine(fine@bnl.gov)
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/11/99
-// $Id: Axis3D.cxx,v 1.4 1999/11/30 03:01:02 fine Exp $ 
+// $Id: Axis3D.cxx,v 1.5 1999/11/30 20:09:53 fine Exp $ 
 #include <iostream.h>
 #include <ctype.h>
 #include <assert.h>
@@ -10,6 +10,8 @@
 #include "TPad.h"
 #include "TGaxis.h"
 #include "TView.h" 
+#include "TVirtualPad.h"
+
 //______________________________________________________________________________
 //   The 3D axis painter class
 //   ==========================
@@ -29,7 +31,17 @@ ClassImp(TAxis3D)
 Hoption_t Hopt;
  
 //______________________________________________________________________________
-TAxis3D::TAxis3D(Option_t *option)
+TAxis3D::TAxis3D() : TNamed("axis3druler","ruler"){
+  InitSet();
+}
+//______________________________________________________________________________
+TAxis3D::TAxis3D(Option_t *option): TNamed("axis3druler","ruler")
+{
+  InitSet();
+}
+ 
+//______________________________________________________________________________
+void TAxis3D::InitSet()
 {
  
   fAxis[0].SetName("xaxis");
@@ -43,7 +55,6 @@ TAxis3D::TAxis3D(Option_t *option)
   fAxis[2].Set(1,0.,1.);
   UseCurrentStyle(); 
 }
- 
 //______________________________________________________________________________
 void TAxis3D::Copy(TObject &obj)
 {
@@ -394,8 +405,38 @@ void TAxis3D::SetTitleOffset(Float_t offset, Option_t *axis)
    Int_t ax = AxisChoice(axis);
    fAxis[ax].SetTitleOffset(offset);
 }
+//_______________________________________________________________________________________
+void TAxis3D::ToggleRulers(TVirtualPad *pad)
+{
+  // Turn ON / OFF the "Ruler", TAxis3D object attached
+  // to the current pad
+  TVirtualPad *thisPad=pad;
+  if (!thisPad) thisPad = gPad;
+  if (thisPad) {
+    // Find axis in the current thisPad 
+    TList *l = thisPad->GetListOfPrimitives();
+    TObject *o = l->FindObject("axis3druler");
+    l->Remove(o);
+    if (o)  delete o; 
+    else {
+      TAxis3D *axis = new TAxis3D;
+      axis->SetBit(kCanDelete);
+      axis->Draw();
+    }          
+    thisPad->Modified();
+    thisPad->Update();
+  }
+}
+
+//_______________________________________________________________________________________
+//
+//   Axis3D.cxx history
+//_______________________________________________________________________________________
 
 // $Log: Axis3D.cxx,v $
+// Revision 1.5  1999/11/30 20:09:53  fine
+// new static method to present rulers
+//
 // Revision 1.4  1999/11/30 03:01:02  fine
 // clean ups
 //

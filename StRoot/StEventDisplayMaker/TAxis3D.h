@@ -4,7 +4,7 @@
 #ifndef ROOT_TAxis3D
 #define ROOT_TAxis3D
 
-// $Id: TAxis3D.h,v 1.2 1999/11/30 01:44:23 fine Exp $ 
+// $Id: TAxis3D.h,v 1.3 1999/11/30 20:09:53 fine Exp $ 
 //+SEQ,CopyRight,T=NOINCLUDE.
  
 //////////////////////////////////////////////////////////////////////////
@@ -48,6 +48,7 @@
 class TF1;
 class TBrowser;
 class TGaxis;
+class TVirtualPad;
  
 class TAxis3D : public TNamed  {
  
@@ -62,9 +63,10 @@ private:
  
 protected:
     virtual void    Copy(TObject &hnew);
+            void    InitSet();
  
 public:
-    TAxis3D(){;}
+    TAxis3D();
     TAxis3D(Option_t *option);
 //    TAxis3D(const Text_t *name,const Text_t *title,Int_t nbinsx,Axis_t xlow,Axis_t xup);
 //    TAxis3D(const Text_t *name,const Text_t *title,Int_t nbinsx,Axis_t *xbins);
@@ -119,12 +121,16 @@ public:
     virtual void     SetXTitle(Text_t *title) {fAxis[0].SetTitle(title);}
     virtual void     SetYTitle(Text_t *title) {fAxis[1].SetTitle(title);}
     virtual void     SetZTitle(Text_t *title) {fAxis[2].SetTitle(title);}
+    static  void     ToggleRulers(TVirtualPad *pad=0);
     void             UseCurrentStyle();
  
-    ClassDef(TAxis3D,1)  //1-Dim histogram base class
+    ClassDef(TAxis3D,1)  //3-D ruler painting class
 };
  
 // $Log: TAxis3D.h,v $
+// Revision 1.3  1999/11/30 20:09:53  fine
+// new static method to present rulers
+//
 // Revision 1.2  1999/11/30 01:44:23  fine
 // Z axis fixed
 //
