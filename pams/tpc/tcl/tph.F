@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.2 1998/07/08 02:47:55 sakrejda Exp $
+* $Id: tph.F,v 1.3 1998/07/12 05:25:01 sakrejda Exp $
 * $Log: tph.F,v $
+* Revision 1.3  1998/07/12 05:25:01  sakrejda
+* id_globtrk,dalpha,dlambda,dq - initialized
+*
 * Revision 1.2  1998/07/08 02:47:55  sakrejda
 * z errors patched up, it's neither final nor absolutely correct, but better - offset added (based on aleph)
 *
@@ -401,6 +404,11 @@ c ??? Direct write is forbidden
               tphit(tphit_h.nok).phi   = phi(ihit)
               tphit(tphit_h.nok).track = track(ihit)
               tphit(tphit_h.nok).flag  = fflagg
+              tphit(tphit_h.nok).id_globtrk=0
+              tphit(tphit_h.nok).dalpha=0
+              tphit(tphit_h.nok).dlambda=0
+              tphit(tphit_h.nok).dq=0
+
               
 c     
 c     finally, transform everything to global coordinates !
