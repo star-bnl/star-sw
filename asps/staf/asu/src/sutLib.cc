@@ -81,6 +81,57 @@ int sutMatchReg(char *pattern,char* string)
    return isMatch;
 }
 
+/*
+*:>---------------------------------------------------------------------
+*:ROUTINE:      int sutMatchPrefix
+*:DESCRIPTION:  Matches a prefix string to a string (ignores whitespc)
+*:ARGUMENTS:    
+*:RETURN VALUE: TRUE or FALSE
+*:<---------------------------------------------------------------------
+*/
+int sutMatchPrefix(char *prefix,char* string)
+{
+   char *s=NULL; 
+   char *p=NULL;
+
+   if( string == strstr(string, prefix) ){
+      return TRUE;
+   }
+   if( 0== sutStripWhitespace(&s,string)
+   ||  0== sutStripWhitespace(&p,prefix)
+   ){
+      ASUFREE(s); ASUFREE(p);
+      return FALSE;
+   }
+   if( string == strstr(s, p) ){
+      ASUFREE(s); ASUFREE(p);
+      return TRUE;
+   }
+}
+
+/*
+*:>---------------------------------------------------------------------
+*:ROUTINE:      int sutStripWhitespace
+*:DESCRIPTION:  Removes whitespace from a string
+*:ARGUMENTS:    
+*:RETURN VALUE: Length of resultant string
+*:<---------------------------------------------------------------------
+*/
+int sutStripWhitespace(char **outstring,char* string)
+{
+   char *whtspc=" 	\0\n";
+   size_t plen=0;
+   size_t slen=0;
+   char *s=string;
+   char *o=NULL;
+   s += (plen = strspn(s,whtspc));
+   slen = strcspn(s,whtspc);
+   o = (char*)ASUALLOC(slen +1);
+   strncpy(o,s,slen);
+   *outstring=o;
+   return (int)slen;
+}
+
 /*--------------------------------------------------------------------*/
 /*- Return the N-th token of a delimited string. -*/
 char* strntok(const char * str,const char * del,const int n)

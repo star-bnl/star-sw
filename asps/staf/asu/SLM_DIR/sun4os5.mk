@@ -56,7 +56,7 @@ export ARFLAGS := srv
 export RANLIB := /bin/true
 #
 # OS Libraries
-export OS_LIBS := -lm -ldl -lPW
+export OS_LIBS := -lm -ldl
 #
 # Fortran Libraries
 SUNLIBDIR1 := /opt/SUNWspro/lib 
