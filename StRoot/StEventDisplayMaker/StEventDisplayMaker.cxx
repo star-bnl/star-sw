@@ -63,8 +63,8 @@ StEventDisplayMaker::StEventDisplayMaker(const char *name):StMaker(name)
   Int_t i; 
   for (i =0;i<kEndOfEventList;i++) m_FilterArray->AddAt(&hitsOffFilter,i);
 
-  m_FilterArray->AddAt(&hitsOnFilter,kGlobalTracks);
-  m_FilterArray->AddAt(&hitsOnFilter,kTrack);
+  m_FilterArray->AddAt(0,kGlobalTracks);
+  m_FilterArray->AddAt(0,kTrack);
 
   gROOT->GetListOfBrowsables()->Add(this,GetName());
 }
@@ -263,24 +263,24 @@ Int_t StEventDisplayMaker::MakeGlobalTracks()
         if (filter && (filter->IsOff() || ( filter->Filter(globTrack,size,style)==0 ) ) ) continue;
         // ------------------------   Tracks   ------------------------- //
         filter = (StVirtualEventFilter *)m_FilterArray->At(kTrack);
-        if (!filter && filter->IsOn() ) 
+        if (!filter || filter->IsOn() ) 
               trackCounter +=  MakeTracks(globTrack,filter);
 
         // ------------------------   Hits   ------------------------- //
         filter = (StVirtualEventFilter *)m_FilterArray->At(kTrackTpcHits);
-        if (!filter && filter->IsOn() ) {
+        if (!filter || filter->IsOn() ) {
            const StVecPtrTpcHit &hits   = globTrack->tpcHits();
            hitCounter += MakeHits(&hits,filter);
         }
 
         filter = (StVirtualEventFilter *)m_FilterArray->At(kTrackSvtHits);
-        if (!filter && filter->IsOn() ) {
+        if (!filter || filter->IsOn() ) {
            const StVecPtrSvtHit &hits   = globTrack->svtHits();
            hitCounter += MakeHits(&hits,filter);
         }
 
         filter = (StVirtualEventFilter *)m_FilterArray->At(kTrackFtpcHits);
-        if (!filter && filter->IsOn() ) {
+        if (!filter || filter->IsOn() ) {
            const StVecPtrFtpcHit &hits   = globTrack->ftpcHits();
            hitCounter += MakeHits(&hits,filter);
         }
@@ -312,43 +312,43 @@ Int_t StEventDisplayMaker::Make()
 
      StVirtualEventFilter *filter = 0;
      filter = (StVirtualEventFilter *)m_FilterArray->At(kTpcHit);
-     if (!filter && filter->IsOn() ) {
+     if (!filter || filter->IsOn() ) {
         StTpcHitCollection *hits   = m_Event->tpcHitCollection();
         total += MakeHits(hits,filter);
      }
 
      filter = (StVirtualEventFilter *)m_FilterArray->At(kFtpcHit);
-     if (!filter && filter->IsOn() ) {
+     if (!filter || filter->IsOn() ) {
         StFtpcHitCollection *hits   = m_Event->ftpcHitCollection();
         total += MakeHits(hits,filter);
      }
 
      filter = (StVirtualEventFilter *)m_FilterArray->At(kSvtHit);
-     if (!filter && filter->IsOn() ) {
+     if (!filter || filter->IsOn() ) {
         StSvtHitCollection *hits   = m_Event->svtHitCollection();
         total += MakeHits(hits,filter);
      }
 
      filter = (StVirtualEventFilter *)m_FilterArray->At(kEmcTowerHit);
-     if (!filter && filter->IsOn() ) {
+     if (!filter || filter->IsOn() ) {
         StEmcTowerHitCollection *hits   = m_Event->emcTowerHitCollection();
         total += MakeHits(hits,filter);
      }
 
      filter = (StVirtualEventFilter *)m_FilterArray->At(kEmcPreShowerHit);
-     if (!filter && filter->IsOn() ) {
+     if (!filter || filter->IsOn() ) {
         StEmcPreShowerHitCollection *hits   = m_Event->emcPreShowerHitCollection();
         total += MakeHits(hits,filter);
      }
 
      filter = (StVirtualEventFilter *)m_FilterArray->At(kSmdPhiHit);
-     if (!filter && filter->IsOn() ) {
+     if (!filter || filter->IsOn() ) {
         StSmdPhiHitCollection *hits   = m_Event->smdPhiHitCollection();
         total += MakeHits(hits,filter);
      }
 
      filter = (StVirtualEventFilter *)m_FilterArray->At(kSmdEtaHit);
-     if (!filter && filter->IsOn() ) {
+     if (!filter || filter->IsOn() ) {
         StSmdEtaHitCollection *hits   = m_Event->smdEtaHitCollection();
         total += MakeHits(hits,filter);
      }
