@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StHbtV0.hh,v $
+ * Revision 1.10  2002/02/09 19:25:36  laue
+ * updates (dedx length)
+ *
  * Revision 1.9  2001/09/05 20:41:43  laue
  * Updates of the hbtMuDstTree microDSTs
  *
@@ -124,10 +127,28 @@ public:
   float ptPos() const ;               // Transverse momentum of pos. daughter
   float ptotPos() const ;             // Total momentum of pos. daughter
   float dedxPos() const;              // dedx of Positive track
+  float numdedxPos() const;
+// number of hits in dE/dX track of pos. daughter--Gael04Fev 2002
+  float errdedxPos() const;              
+// error on dedx of Positive track--Gael04Fev 2002
+  float lendedxPos() const;              
+// Length of dE/dX track of pos. daughter--Gael04Fev 2002
+  float pseudoRapPos() const;              
+// Length of dE/dX track of neg. daughter--Gael04Fev 2002
+
   float ptNeg() const ;               // Transverse momentum of neg. daughter
   float ptotNeg() const ;             // Total momentum of neg. daughter
   float dedxNeg() const;              // dedx of Negative track
-  unsigned short   idNeg() const;               // Id of negative track
+  float numdedxNeg() const;
+// number of hits in dE/dX track of neg. daughter--Gael04Fev 2002
+  float errdedxNeg() const;              
+// error on dedx of Negative track--Gael04Fev 2002
+  float lendedxNeg() const;              
+// Length of dE/dX track of neg. daughter--Gael04Fev 2002
+  float pseudoRapNeg() const;              
+// Length of dE/dX track of neg. daughter--Gael04Fev 2002
+
+  unsigned short     idNeg() const;               // Id of negative track
   unsigned short   idPos() const;               // Id of positive track
   unsigned short   keyNeg() const;               // Id of negative track
   unsigned short   keyPos() const;               // Id of positive track
@@ -185,7 +206,13 @@ public:
   void SetidNeg(const unsigned short&);
   void SetidPos(const unsigned short&);
   void SetdedxNeg(float);
+  void SeterrdedxNeg(float x);//Gael 04Fev2002
+  void SetlendedxNeg(float x);//Gael 04Fev2002
+  void SetpseudoRapNeg(float x);//Gael 04Fev2002
   void SetdedxPos(float);
+  void SeterrdedxPos(float x);//Gael 04Fev2002
+  void SetlendedxPos(float x);//Gael 04Fev2002
+  void SetpseudoRapPos(float x);//Gael 04Fev2002
   void SetkeyNeg(const unsigned short&);
   void SetkeyPos(const unsigned short&);
      
@@ -220,10 +247,20 @@ protected:
   float mClPos;
   float mChi2Neg;
   float mClNeg;
+
   float mDedxPos;
+  float mErrDedxPos;
+  float mLenDedxPos;
+  
   float mDedxNeg;
+  float mErrDedxNeg;
+  float mLenDedxNeg;
+
   unsigned short mNumDedxPos;
   unsigned short mNumDedxNeg;
+
+  //Get PidProb and NSigma of Neg and Pos Track -- Gael 01 Feb 02
+  //float mPidProbPion;  
 
   // the following variables are not in the persistent version and can be calculated via UpdateV0();
   StHbtThreeVector mMomV0;
@@ -303,14 +340,22 @@ inline int   StHbtV0::tpcHitsPos() const
 inline int   StHbtV0::tpcHitsNeg() const
              { return mTpcHitsNeg; }
 inline float StHbtV0::dedxNeg() const {return mDedxNeg;}
+inline float StHbtV0::numdedxNeg() const {return mNumDedxNeg;} //Gael 04Fev2002
+inline float StHbtV0::errdedxNeg() const {return mErrDedxNeg;} //Gael 04Fev2002
+inline float StHbtV0::lendedxNeg() const {return mLenDedxNeg;} //Gael 04Fev2002
+inline float StHbtV0::pseudoRapNeg() const {return mMomNeg.pseudoRapidity();} //Gael 04Fev2002
 inline float StHbtV0::dedxPos() const {return mDedxPos;}
+inline float StHbtV0::numdedxPos() const {return mNumDedxPos;} //Gael 04Fev2002
+inline float StHbtV0::errdedxPos() const {return mErrDedxPos;} //Gael 04Fev2002
+inline float StHbtV0::lendedxPos() const {return mLenDedxPos;} //Gael 04Fev2002
+inline float StHbtV0::pseudoRapPos() const {return mMomPos.pseudoRapidity();} //Gael 04Fev2002
 
 
 inline unsigned long   StHbtV0::trackTopologyMapPos(unsigned int word) const { return mTrackTopologyMapPos[word]; }
 inline unsigned long   StHbtV0::trackTopologyMapNeg(unsigned int word) const { return mTrackTopologyMapNeg[word]; }
-inline unsigned short   StHbtV0::idNeg() const { return mKeyNeg; }; 
+inline unsigned short   StHbtV0::idNeg() const { return mKeyNeg; } 
 inline unsigned short   StHbtV0::keyNeg() const { return mKeyNeg; }
-inline unsigned short   StHbtV0::idPos() const { return mKeyPos; }; 
+inline unsigned short   StHbtV0::idPos() const { return mKeyPos; } 
 inline unsigned short   StHbtV0::keyPos() const { return mKeyPos; }
 
 inline void StHbtV0::SetdecayLengthV0(const float x){ mDecayLengthV0= x;}   
@@ -365,7 +410,11 @@ inline void StHbtV0::SetkeyPos(const unsigned short& s){ mKeyPos= s;}
 inline void StHbtV0::SettpcHitsPos(const int& i){mTpcHitsPos=i;} 
 inline void StHbtV0::SettpcHitsNeg(const int& i){mTpcHitsNeg=i;}
 inline void StHbtV0::SetdedxNeg(float x){mDedxNeg=x;}
+inline void StHbtV0::SeterrdedxNeg(float x){mErrDedxNeg=x;}//Gael 04Fev2002
+inline void StHbtV0::SetlendedxNeg(float x){mLenDedxNeg=x;}//Gael 04Fev2002
 inline void StHbtV0::SetdedxPos(float x){mDedxPos=x;}
+inline void StHbtV0::SeterrdedxPos(float x){mErrDedxPos=x;}//Gael 04Fev2002
+inline void StHbtV0::SetlendedxPos(float x){mLenDedxPos=x;}//Gael 04Fev2002
 
 #endif
 

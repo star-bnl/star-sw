@@ -53,12 +53,17 @@ protected:
   float mChi2Neg;
   float mClNeg;
   float mDedxPos;
+  float mErrDedxPos;//Gael 04Fev2002
+  float mLenDedxPos;//Gael 04Fev2002
   float mDedxNeg;
+  float mErrDedxNeg;//Gael 04Fev2002
+  float mLenDedxNeg;//Gael 04Fev2002
+
   unsigned short mNumDedxPos;
   unsigned short mNumDedxNeg;
   unsigned short mTpcHitsPos;
   unsigned short mTpcHitsNeg;
-  ClassDef(StHbtTTreeV0,2)
+  ClassDef(StHbtTTreeV0,3)
 };
 
 #endif
@@ -66,6 +71,9 @@ protected:
 /***********************************************************************
  *
  * $Log: StHbtTTreeV0.h,v $
+ * Revision 1.3  2002/02/09 19:25:36  laue
+ * updates (dedx length)
+ *
  * Revision 1.2  2001/09/05 20:41:43  laue
  * Updates of the hbtMuDstTree microDSTs
  *

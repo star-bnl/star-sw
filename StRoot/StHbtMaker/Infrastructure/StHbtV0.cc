@@ -31,12 +31,16 @@ StHbtV0::StHbtV0(const StHbtV0& v){ // copy constructor
   mChi2Neg = v.mChi2Neg;
   mClNeg = v.mClNeg;
   mDedxPos = v.mDedxPos;
+  mErrDedxPos = v.mErrDedxPos;//Gael 04Fev2002
+  mLenDedxPos = v.mLenDedxPos;//Gael 04Fev2002
   mDedxNeg = v.mDedxNeg;
+  mErrDedxNeg = v.mErrDedxNeg;//Gael 04Fev2002
+  mLenDedxNeg = v.mLenDedxNeg;//Gael 04Fev2002
+
   mNumDedxPos = v.mNumDedxPos;
   mNumDedxNeg = v.mNumDedxNeg;
 
   UpdateV0();
-
 }
 // -----------------------------------------------------------------------
 void StHbtV0::UpdateV0(){
@@ -106,7 +110,11 @@ StHbtV0::StHbtV0( StV0MuDst& v){ // from strangess micro dst structure
   mChi2Neg = v.chi2Neg();
   mClNeg = v.clNeg();
   mDedxPos = v.dedxPos();
+  mErrDedxPos = v.errDedxPos();//Gael 04Fev2002
+  mLenDedxPos = v.lenDedxPos();//Gael 04Fev2002
   mDedxNeg = v.dedxNeg();
+  mErrDedxNeg = v.errDedxNeg();//Gael 04Fev2002
+  mLenDedxNeg = v.lenDedxNeg();//Gael 04Fev2002
   mNumDedxPos = v.numDedxPos();
   mNumDedxNeg = v.numDedxNeg();
 
@@ -180,10 +188,15 @@ StHbtV0::StHbtV0(const StHbtTTreeEvent* ev, const StHbtTTreeV0* v) {
   mClNeg = v->mClNeg;
 
   mDedxPos = v->mDedxPos;
+  mErrDedxPos = v->mErrDedxPos;//Gael 04Fev2002
+  mLenDedxPos = v->mLenDedxPos;//Gael 04Fev2002
   mDedxNeg = v->mDedxNeg;
+  mErrDedxNeg = v->mErrDedxNeg;//Gael 04Fev2002
+  mLenDedxNeg = v->mLenDedxNeg;//Gael 04Fev2002
+
   mNumDedxPos = v->mNumDedxPos;
   mNumDedxNeg = v->mNumDedxNeg;
-  
+
   UpdateV0();
 }
 
