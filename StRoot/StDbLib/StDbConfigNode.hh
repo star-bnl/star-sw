@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.hh,v 1.10 2000/01/10 20:37:53 porter Exp $
+ * $Id: StDbConfigNode.hh,v 1.11 2000/01/14 14:50:52 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.hh,v $
+ * Revision 1.11  2000/01/14 14:50:52  porter
+ * expanded use of verbose mode & fixed inconsistency in
+ * StDbNodeInfo::getElementID
+ *
  * Revision 1.10  2000/01/10 20:37:53  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -133,7 +137,8 @@ public:
   // check container
   virtual bool hasChildren();
   virtual bool hasData();
-  virtual void printTree();
+  virtual void printTree(int depth);
+  virtual void printTables(int depth);
 
   // Table operations
   virtual StDbTable* addDbTable(const char* tableName, 

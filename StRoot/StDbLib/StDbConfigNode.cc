@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.cc,v 1.11 2000/01/10 20:37:53 porter Exp $
+ * $Id: StDbConfigNode.cc,v 1.12 2000/01/14 14:50:52 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.cc,v $
+ * Revision 1.12  2000/01/14 14:50:52  porter
+ * expanded use of verbose mode & fixed inconsistency in
+ * StDbNodeInfo::getElementID
+ *
  * Revision 1.11  2000/01/10 20:37:53  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -35,6 +39,7 @@
  *
  **************************************************************************/
 #include <iostream.h>
+#include <strstream.h>
 #include <strings.h>
 
 #include "StDbConfigNode.hh"
@@ -84,8 +89,10 @@ StDbConfigNode::StDbConfigNode(StDbConfigNode* parent, StDbNodeInfo* node): StDb
 
   if(mnode.dbType==dbStDb){
     mnode.dbType=StDbManager::Instance()->getDbType(mnode.name);
+    misConfigured = false;
   } else if(mnode.dbDomain==dbStar) {
     mnode.dbDomain=StDbManager::Instance()->getDbDomain(mnode.name);
+    misConfigured = false;
   }
 
 }
@@ -146,13 +153,40 @@ StDbConfigNode::buildTree(){
 /////////////////////////////////////////////////////////////////
 
 void
-StDbConfigNode::printTree(){
+StDbConfigNode::printTree(int depth){
 
-if(StDbManager::Instance()->IsVerbose())
+  if(StDbManager::Instance()->IsVerbose()){
+    for(int k=0;k<depth;k++)cout<<" ";
     cout<<"Node=" << mnode.name <<" VersionKey = " << mnode.versionKey <<endl;
+   if(mhasData) {
+     int depth2 = depth+4;
+     printTables(depth2);
+   }
+  }
+ int depth3=depth+4;
+ if(mfirstChildNode)mfirstChildNode->printTree(depth3);
+ if(mnextNode)mnextNode->printTree(depth);
 
- if(mfirstChildNode)mfirstChildNode->printTree();
- if(mnextNode)mnextNode->printTree();
+}
+
+/////////////////////////////////////////////////////////////////
+
+void
+StDbConfigNode::printTables(int depth){
+
+  if(StDbManager::Instance()->IsVerbose()){
+
+    char* pdepth = new char[depth+1];
+    ostrstream os(pdepth,depth+1);
+    for(int k=0;k<depth;k++)os<<" ";
+    os<<ends;
+
+    TableList::iterator itr;
+    for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
+      cout <<pdepth<<"Table="<<(*itr)->getMyName();
+      cout <<" VersionKey = "<<(*itr)->getVersion() << endl;
+    }
+ }
 
 }
 
@@ -208,8 +242,10 @@ StDbConfigNode::addTable(StDbNodeInfo* node){
   resolveNodeInfo(node);
 
   if(table){
+     if(node->versionKey) table->setVersion(node->versionKey);
      table->setNodeInfo(node);
      mTables.push_back(table);
+     if(!mhasData) mhasData = true;
   } else {
     cout << " Could not Find table " << mnode.name << endl;
   }

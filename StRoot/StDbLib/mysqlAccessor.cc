@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.cc,v 1.12 2000/01/10 20:37:55 porter Exp $
+ * $Id: mysqlAccessor.cc,v 1.13 2000/01/14 14:50:52 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.cc,v $
+ * Revision 1.13  2000/01/14 14:50:52  porter
+ * expanded use of verbose mode & fixed inconsistency in
+ * StDbNodeInfo::getElementID
+ *
  * Revision 1.12  2000/01/10 20:37:55  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -40,6 +44,7 @@
 #include "mysqlAccessor.hh"
 #include "StDbTableDescriptor.h"
 #include "TableIter.hh"
+#include "StDbManager.hh"
 #include <strings.h>
 
 ////////////////////////////////////////////////////////////////
@@ -91,9 +96,24 @@ StDbNodeInfo currentNode;
 int NodeID;
 
  if(!node->IsConfigured()){//  1st node only has name & key 
-    if(!prepareNode(node,&currentNode)) return 0;
+    if(!prepareNode(node,&currentNode)) {
+      if(StDbManager::Instance()->IsVerbose()){
+        cout << " Node "<< node->getName() << " & ";
+        cout << node->getVersion() <<"  not found in DB " << endl;
+      }
+      return 0;
+    }
   }
     NodeID=node->getNodeID(); // all I need here is NodeID.
+
+    char* tmpName;
+    if(!(tmpName=node->getDbName())){
+      node->setDbName(mdbName);
+    } else {
+      delete [] tmpName;
+    }
+    if(!currentNode.dbName)currentNode.mstrCpy(currentNode.dbName,mdbName);
+  
 
    char thisNode[100];
    ostrstream os(thisNode,100); os<<NodeID<<ends;
@@ -117,15 +137,33 @@ int NodeID;
   while(Db.Output(&buff)){
 
      buff.SetClientMode();
+     if(currentNode.name) delete [] currentNode.name;
+     if(currentNode.versionKey) delete currentNode.versionKey;
+     if(!buff.ReadScalar(currentNode.name,"name"))return 0;
+     if(!buff.ReadScalar(currentNode.versionKey,"versionKey"))return 0;
+
      if(!readNodeInfo(&currentNode))cerr<< "read-err"<<endl; // just read this node
 
      if(strcmp(currentNode.nodeType,"table")!=0){ // it is a node
 
+       if(StDbManager::Instance()->IsVerbose()){
+         cout << "tableQuery:: Found node " << currentNode.name;
+         cout << " of version = " << currentNode.versionKey <<endl;
+         cout << " Parent = " << node->getName();
+         cout << " of version = " << node->getVersion()<< endl;;
+       }
       new StDbConfigNode(node,&currentNode);
 
      } else { // it is a table
 
+       if(StDbManager::Instance()->IsVerbose()){
+         cout << "tableQuery:: Found Table " << currentNode.name;
+         cout << " of version = " << currentNode.versionKey <<endl;
+         cout << " Parent = " << node->getName();
+         cout << " of version = " << node->getVersion()<< endl;;
+       }
       node->addTable(&currentNode);
+    
 
      }  // isNode check
 
@@ -532,13 +570,20 @@ mysqlAccessor::prepareNode(StDbNode* dbNode, StDbNodeInfo* node){
 
    if(!version || !nodeName )return false;
 
-   node->mstrCpy(node->name,nodeName);
-   node->mstrCpy(node->versionKey,version);
-   delete [] nodeName;
-   delete [] version; 
+   if(node->name) delete [] node->name;
+   if(node->versionKey) delete [] node->versionKey;
+   node->name = nodeName;
+   node->versionKey = version;
+   //   node->mstrCpy(node->name,nodeName);
+   //   node->mstrCpy(node->versionKey,version);
+   //   delete [] nodeName;
+   //   delete [] version; 
 
    if(queryNodeInfo(node)){
 
+      if(node->dbName) {
+        delete [] node->dbName; node->dbName = 0;
+      }      
       node->mstrCpy(node->dbName,mdbName);
       node->dbType = mdbType;
       node->dbDomain = mdbDomain;
@@ -581,14 +626,12 @@ bool
 mysqlAccessor::readNodeInfo(StDbNodeInfo* node){
 
     node->deleteInfoPointers(); // deletes (if needed) all strings loaded here
-
-    if(!buff.ReadScalar(node->name,"name"))return 0;
-    if(!buff.ReadScalar(node->versionKey,"versionKey"))return 0;
+    //    node->mstrDup(node->dbName,mdbName);
     if(!buff.ReadScalar(node->structName,"structName"))return 0;
     if(!buff.ReadScalar(node->nodeID,"ID")) return 0;
     if(!buff.ReadScalar(node->nodeType,"nodeType"))return 0;
     if(!buff.ReadScalar(node->elementID,"elementID"))return 0;
-  
+
     char* tmpString;
     if(buff.ReadScalar(tmpString,"baseLine")){
        if(strstr(tmpString,"Y"))node->IsBaseLine=true;
