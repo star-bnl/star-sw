@@ -21,7 +21,6 @@ MinvCorrFctn.o \
 MinvCorrFctnArmenteros.o \
 MinvCorrFctnM_vs_Pt.o \
 Q3invCorrFctn.o \
-hbtExitSepCorrFctn.o \
 ParityCorrFctn.o \
 MinvCorrFctnY_vs_Pt.o \
 QinvCorrFctn.o \
