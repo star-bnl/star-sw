@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.cc,v 1.4 2001/04/04 17:08:42 jcs Exp $
+// $Id: StFtpcDbReader.cc,v 1.5 2001/07/11 21:18:02 jcs Exp $
 //
 // $Log: StFtpcDbReader.cc,v $
+// Revision 1.5  2001/07/11 21:18:02  jcs
+// changes for new FTPC database structures
+//
 // Revision 1.4  2001/04/04 17:08:42  jcs
 // remove references to StFtpcParamReader from StFtpcDbReader
 //
@@ -68,7 +71,6 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   //  just copy EField table start to pointer
   ftpcEField_st* efieldTable = (ftpcEField_st*)efield->GetTable();
   if(efieldTable){
-    mNumberOfMagboltzBins = efieldTable->numberOfEFieldBins;
    mMagboltzEField = (Float_t *)efieldTable->e;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcEField","E");
@@ -127,13 +129,20 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   //  just copy driftfield table start to pointer
   ftpcDriftField_st* driftfieldTable = (ftpcDriftField_st*)driftfield->GetTable();
   if(driftfieldTable){
-    mTZero              = driftfieldTable->tZero;
+    mNumberOfMagboltzBins = driftfieldTable->numberOfEFieldBinsUsed;
+    mMaximumNumberOfMagboltzBins = driftfieldTable->maximumNumberOfEFieldBins;
+    mDriftCathodeVoltage = driftfieldTable->driftCathodeVoltage;
     mMinimumDriftField  = driftfieldTable->minimumDriftField;
     mStepSizeDriftField = driftfieldTable->stepSizeDriftField;
     mRadiusTimesField   = driftfieldTable->radiusTimesField;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcDriftField","E");
   }
+
+//  mTZero              = 0.0;
+//  mTZero              = 0.934;
+//  mTZero              = 1.5;
+    mTZero              = 1.385;
 
 //   cout << "StFtpcDbReader constructed" << endl;  
 }
@@ -185,7 +194,6 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   //  just copy EField table start to pointer
   ftpcEField_st* efieldTable = (ftpcEField_st*)efield->GetTable();
   if(efieldTable){
-    mNumberOfMagboltzBins = efieldTable->numberOfEFieldBins;
    mMagboltzEField = (Float_t *)efieldTable->e;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcEField","E");
@@ -233,6 +241,9 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
    mGasGain                = gasTable->gasGain;
    mGasAttenuation         = gasTable->gasAttenuation;
    mGasIonizationPotential = gasTable->gasIonizationPotential;
+   mBaseTemperature        = gasTable->baseTemperature;
+   mBasePressure           = gasTable->basePressure;
+   mPressureOffset         =gasTable->pressureOffset;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcGas","E");
   }
@@ -240,13 +251,20 @@ StFtpcDbReader::StFtpcDbReader(St_ftpcDimensions    *dimensions,
   //  just copy driftfield table start to pointer
   ftpcDriftField_st* driftfieldTable = (ftpcDriftField_st*)driftfield->GetTable();
   if(driftfieldTable){
-    mTZero              = driftfieldTable->tZero;
+    mNumberOfMagboltzBins = driftfieldTable->numberOfEFieldBinsUsed;
+    mMaximumNumberOfMagboltzBins = driftfieldTable->maximumNumberOfEFieldBins;
+    mDriftCathodeVoltage = driftfieldTable->driftCathodeVoltage;
     mMinimumDriftField  = driftfieldTable->minimumDriftField;
     mStepSizeDriftField = driftfieldTable->stepSizeDriftField;
     mRadiusTimesField   = driftfieldTable->radiusTimesField;
   } else {
     gMessMgr->Message( " No data in table class St_ftpcDriftField","E");
   }
+
+//  mTZero              = 0.0;
+//  mTZero              = 0.934;
+//  mTZero              = 1.5;
+    mTZero              = 1.385;
 
 //   cout << "StFtpcDbReader constructed" << endl;  
 }

@@ -1,6 +1,9 @@
-// $Id: StFtpcDbReader.hh,v 1.4 2001/04/04 17:08:42 jcs Exp $
+// $Id: StFtpcDbReader.hh,v 1.5 2001/07/11 21:18:01 jcs Exp $
 //
 // $Log: StFtpcDbReader.hh,v $
+// Revision 1.5  2001/07/11 21:18:01  jcs
+// changes for new FTPC database structures
+//
 // Revision 1.4  2001/04/04 17:08:42  jcs
 // remove references to StFtpcParamReader from StFtpcDbReader
 //
@@ -61,6 +64,7 @@ protected:
   Float_t *mPadrowZPosition;
 
   Int_t   mNumberOfMagboltzBins;
+  Int_t   mMaximumNumberOfMagboltzBins;
   Float_t *mMagboltzEField;
   Float_t *mMagboltzVDrift;
   Float_t *mMagboltzDeflection;
@@ -74,11 +78,16 @@ protected:
   Float_t mGasGain;
   Float_t mGasAttenuation;
   Float_t mGasIonizationPotential;
+  Float_t mBaseTemperature;
+  Float_t mBasePressure;
+  Float_t mPressureOffset;
 
   Float_t mTZero;
+  Float_t mDriftCathodeVoltage;
   Float_t mMinimumDriftField;
   Float_t mStepSizeDriftField;
   Float_t mRadiusTimesField;
+
   ftpcAmpSlope_st   *ampslopeTable;
   ftpcAmpOffset_st  *ampoffsetTable;
   ftpcTimeOffset_st *timeoffsetTable;
@@ -142,6 +151,7 @@ public:
   Int_t numberOfTimebins() {return mNumberOfTimebins;}
 
   Int_t numberOfMagboltzBins() {return mNumberOfMagboltzBins;}
+  Int_t maximumNumberOfMagboltzBins() {return mMaximumNumberOfMagboltzBins;}
 
   Float_t phiOrigin()    {return mPhiOrigin;}
   Float_t phiPerSector() {return mPhiPerSector;}
@@ -161,6 +171,9 @@ public:
   Float_t gasGain() {return mGasGain;}
   Float_t gasAttenuation() {return mGasAttenuation;}
   Float_t gasIonizationPotential() {return mGasIonizationPotential;}
+  Float_t baseTemperature() {return mBaseTemperature;}
+  Float_t basePressure() {return mBasePressure;}
+  Float_t pressureOffset() {return mPressureOffset;}
 
   Float_t tZero() {return mTZero;}
   Float_t minimumDriftField() {return mMinimumDriftField;}
