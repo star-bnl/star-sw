@@ -2,6 +2,11 @@
 //                                                                      //
 // StXiMaker class                                                    //
 //                                                                      //
+// $Id: StXiMaker.cxx,v 1.3 1999/07/08 19:09:53 fisyak Exp $
+// $Log: StXiMaker.cxx,v $
+// Revision 1.3  1999/07/08 19:09:53  fisyak
+// Add tabs, remove St_glb_Maker
+//
 //////////////////////////////////////////////////////////////////////////
 
 #include <iostream.h>
@@ -140,7 +145,7 @@ Int_t StXiMaker::Make(){
 //_____________________________________________________________________________
 void StXiMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StXiMaker.cxx,v 1.2 1999/07/01 17:30:46 fisyak Exp $\n");
+  printf("* $Id: StXiMaker.cxx,v 1.3 1999/07/08 19:09:53 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();

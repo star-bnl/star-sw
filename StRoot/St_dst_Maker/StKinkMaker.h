@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.h,v 1.4 1999/07/07 15:47:36 wdeng Exp $
+// $Id: StKinkMaker.h,v 1.5 1999/07/08 19:09:51 fisyak Exp $
 // $Log: StKinkMaker.h,v $
+// Revision 1.5  1999/07/08 19:09:51  fisyak
+// Add tabs, remove St_glb_Maker
+//
 // Revision 1.4  1999/07/07 15:47:36  wdeng
 // add Id and Log at the first two lines for the purpose of version maintainance
 //
@@ -53,19 +56,19 @@ using namespace std;
 #endif
 
 class StKinkMaker : public StMaker {
-private:
+ private:
   Bool_t m_kinkEvalOn;   //switch for the evaluation
-// static Char_t  m_VersionCVS = "$Id: StKinkMaker.h,v 1.4 1999/07/07 15:47:36 wdeng Exp $";
+  // static Char_t  m_VersionCVS = "$Id: StKinkMaker.h,v 1.5 1999/07/08 19:09:51 fisyak Exp $";
   St_tkf_tkfpar    *m_tkfpar;          //!
   StKinkLocalTrack *mKinkLocalTrack;   //!
-protected:
+ protected:
   Int_t    meetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& helix1, 
-		    const StPhysicalHelixD& helix2, Float_t xCoordinates[2], 
-		    Float_t yCoordinates[2]);
+			    const StPhysicalHelixD& helix2, Float_t xCoordinates[2], 
+			    Float_t yCoordinates[2]);
   Float_t  dcaTwoLines(Float_t xn1[3], Float_t xn2[3], Float_t sxz1, Float_t syz1, 
-		     Float_t sxz2, Float_t syz2, Float_t point1AtDca[3], Float_t point2AtDca[3]);
-
-public: 
+		       Float_t sxz2, Float_t syz2, Float_t point1AtDca[3], Float_t point2AtDca[3]);
+  
+ public: 
   StKinkMaker(const char *name="kink");
   virtual  ~StKinkMaker(); 
   virtual  Int_t  Init();
@@ -74,8 +77,9 @@ public:
   virtual  void   kinkEval(Bool_t flag=kTRUE){m_kinkEvalOn=flag;} // *MENU*
   virtual  void   kinkEvalOn() {kinkEval();} 
   virtual  void   kinkEvalOff(){kinkEval(kFALSE);}      
-ClassDef(StKinkMaker, 1)   //StAF chain virtual base class for Makers
+  ClassDef(StKinkMaker, 1)   //StAF chain virtual base class for Makers
 };
-
+    
 #endif
-
+    
+  

@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.6 1999/07/08 18:40:30 fisyak Exp $
+// $Id: StKinkMaker.cxx,v 1.7 1999/07/08 19:09:51 fisyak Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.7  1999/07/08 19:09:51  fisyak
+// Add tabs, remove St_glb_Maker
+//
 // Revision 1.6  1999/07/08 18:40:30  fisyak
 // Wensheng Deng global chain
 //
@@ -31,14 +34,14 @@
 #include "SystemOfUnits.h"
 
 ClassImp(StKinkMaker)
-
+  
 #define MAXNUMOFTRACKS 10000
-
-//_____________________________________________________________________________
-StKinkMaker::StKinkMaker(const char *name):
-  StMaker(name),
-  m_tkfpar(0),
-  mKinkLocalTrack(0)
+  
+  //_____________________________________________________________________________
+  StKinkMaker::StKinkMaker(const char *name):
+    StMaker(name),
+    m_tkfpar(0),
+    mKinkLocalTrack(0)
 {
   m_kinkEvalOn = kTRUE;
 }
@@ -58,7 +61,7 @@ Int_t StKinkMaker::Init(){
     m_tkfpar->SetNRows(1);
   }
   tkf_tkfpar_st parRow;  
-
+  
   parRow.dcaParentDaughterMax      =  0.5;
   parRow.parentPtMin               =  0.2;   
   parRow.vertexRMax2D              =  179.;  
@@ -84,40 +87,40 @@ Int_t StKinkMaker::Make(){
   //PrintInfo();
   St_DataSet *match = GetDataSet("match"); 
   St_DataSetIter matchI(match);         
-    
+  
   St_dst_track  *globtrk = (St_dst_track *) matchI("globtrk");
-
+  
   St_DataSet     *primary = GetDataSet("primary"); 
   St_DataSetIter primaryI(primary);         
   St_dst_vertex  *vertex   = (St_dst_vertex *) primaryI("vertex");
   
   St_dst_tkf_vertex *kinkVertex  = (St_dst_tkf_vertex *) matchI("kinkVertex");
-
+  
   Int_t numOfGlbtrk = globtrk->GetNRows();
   Int_t tkf_limit = numOfGlbtrk/10;
-
+  
   if(!kinkVertex) {
     kinkVertex = new St_dst_tkf_vertex("kinkVertex", tkf_limit);
     AddData(kinkVertex);
   }
-
+  
   vertex->ReAllocate( vertex->GetNRows()+ tkf_limit); 
-
+  
   tkf_tkfpar_st *tkfpar = m_tkfpar->GetTable();
   dst_vertex_st *dstVertexStart = vertex->GetTable(); 
   dst_track_st  *dstTrackStart  = globtrk->GetTable();
   
   dst_tkf_vertex_st kinkVtxRow;
   dst_vertex_st     dstVtxRow;
-
+  
   Int_t  dstVtxIndex  = vertex->GetNRows();
   Int_t  kinkVtxIndex = 0;
-
+  
   StKinkLocalTrack* tempTrack;
   TObjArray* trackArray = new TObjArray(MAXNUMOFTRACKS);
-
+  
   const Float_t B = 0.5*tesla;
-
+  
   Int_t i, j;
   
   for (i=0; i<numOfGlbtrk ; i++) {
@@ -154,17 +157,17 @@ Int_t StKinkMaker::Make(){
   }
   
   trackArray->Sort();
-
+  
   StThreeVectorD parentMom, daughterMom; 
   StThreeVectorD mKinkVertex; 
-    
+  
   Int_t   kinkCandidate=0;
   Float_t dca;
   Float_t parentImpact, daughterImpact;
   Float_t decayAngle;
   Float_t xCoordinates[2], yCoordinates[2];
   Float_t xtarget, ytarget;
-
+  
   for( i = 0; i < trackArray->GetLast(); i++)
     {
       StKinkLocalTrack* myTrack1 = (StKinkLocalTrack*)trackArray->At(i);
@@ -308,7 +311,7 @@ Int_t StKinkMaker::Make(){
 	  
 	  if( distanceKinkParentZ > tkfpar->distanceKinkParentZ ) continue; 
 	  if( distanceKinkDaughterZ > tkfpar->distanceKinkDaughterZ ) continue; 
-
+	  
 	  StThreeVectorD pMomMinusDMom = parentMom - daughterMom;
 	  
 	  Float_t  deltaKaonMuon = fabs(sqrt(parentMom.mag2() + kaonMass*kaonMass)   -
@@ -320,7 +323,7 @@ Int_t StKinkMaker::Make(){
           Float_t  deltaPionMuon = fabs(sqrt(parentMom.mag2() + pionMass*pionMass)   -
 					sqrt(daughterMom.mag2() + muonMass*muonMass) - 
 					pMomMinusDMom.mag());  
-
+	  
 	  if( (deltaKaonPion < deltaKaonMuon) && (deltaKaonPion < deltaPionMuon) )
 	    {
 	      kinkVtxRow.theta_cm = radToDeg*asin((daughterMom.mag()/kaonToPionQ)*sin(decayAngle*degToRad));
@@ -354,7 +357,7 @@ Int_t StKinkMaker::Make(){
 		    kinkVtxRow.pidp = 9;
 		  }   
 	      }
-	
+	  
 	  kinkVtxRow.id = kinkVtxIndex + 1;  
 	  kinkVtxRow.id_vertex = dstVtxIndex + 1;
 	  kinkVtxRow.idd  = myTrack2->getId();
@@ -381,10 +384,10 @@ Int_t StKinkMaker::Make(){
 	  kinkVtxRow.pd[0] = daughterMom.x();
 	  kinkVtxRow.pd[1] = daughterMom.y();
 	  kinkVtxRow.pd[2] = daughterMom.z();
-	  	  
+	  
 	  kinkVtxRow.theta = decayAngle;
-
-
+	  
+	  
 	  dstVtxRow.id       = dstVtxIndex + 1;
 	  dstVtxRow.det_id   = 100*myTrack1->getDetId() + myTrack2->getDetId();
 	  dstVtxRow.x        = mKinkVertex.x();
@@ -395,128 +398,128 @@ Int_t StKinkMaker::Make(){
 	  dstVtxRow.sigma[2] = 0.;
 	  dstVtxRow.pchi2    = 0.;
 	  dstVtxRow.id_aux_ent = kinkVtxIndex + 1;
-
+	  
 	  kinkCandidate++;		  
-//==========================================================================
+	  //==========================================================================
 	  if(m_kinkEvalOn) {
 	    St_DataSet *tpcTracks = GetDataSet("tpc_tracks"); 
 	    if (tpcTracks) {
-	    St_DataSetIter tpcI(tpcTracks);  
-	    
-	    St_tpt_track  *tptTrack = (St_tpt_track *) tpcI["tptrack"];
-	    St_tte_eval   *tteEval  = (St_tte_eval *)  tpcI["evaltrk"];
-	    if (tptTrack && tteEval) {
-	    tpt_track_st* tptPtr  = tptTrack->GetTable();
-	    tte_eval_st*  tteEPtr = tteEval->GetTable(); 
-	    
-	    Int_t daughterMcId;
-	    
-	    for(Int_t m=0; m<tptTrack->GetNRows(); m++)
-	      {
-		if(tptPtr->id_globtrk == myTrack2->getId())
+	      St_DataSetIter tpcI(tpcTracks);  
+	      
+	      St_tpt_track  *tptTrack = (St_tpt_track *) tpcI["tptrack"];
+	      St_tte_eval   *tteEval  = (St_tte_eval *)  tpcI["evaltrk"];
+	      if (tptTrack && tteEval) {
+		tpt_track_st* tptPtr  = tptTrack->GetTable();
+		tte_eval_st*  tteEPtr = tteEval->GetTable(); 
+		
+		Int_t daughterMcId;
+		
+		for(Int_t m=0; m<tptTrack->GetNRows(); m++)
 		  {
-		    for(Int_t n=0; n<tteEval->GetNRows(); n++)
+		    if(tptPtr->id_globtrk == myTrack2->getId())
 		      {
-			if(tteEPtr->rtrk == tptPtr->id)
+			for(Int_t n=0; n<tteEval->GetNRows(); n++)
 			  {
-			    daughterMcId = tteEPtr->mtrk;
-			    break;		
+			    if(tteEPtr->rtrk == tptPtr->id)
+			      {
+				daughterMcId = tteEPtr->mtrk;
+				break;		
+			      }
+			    tteEPtr++;
 			  }
-			tteEPtr++;
 		      }
+		    tptPtr++;
 		  }
-		tptPtr++;
-	      }
-	    
-//==============================================================
-	    tpt_track_st* tptPtr1  = tptTrack->GetTable();
-	    tte_eval_st*  tteEPtr1 = tteEval->GetTable();
-	    
-	    Int_t parentMcId;
-	    Int_t parentPid;
-	    
-	    for(Int_t x=0; x<tptTrack->GetNRows(); x++)
-	      {
-		if(tptPtr1->id_globtrk == myTrack1->getId())
+		
+		//==============================================================
+		tpt_track_st* tptPtr1  = tptTrack->GetTable();
+		tte_eval_st*  tteEPtr1 = tteEval->GetTable();
+		
+		Int_t parentMcId;
+		Int_t parentPid;
+		
+		for(Int_t x=0; x<tptTrack->GetNRows(); x++)
 		  {
-		    for(Int_t y=0; y<tteEval->GetNRows(); y++)
+		    if(tptPtr1->id_globtrk == myTrack1->getId())
 		      {
-			if(tteEPtr1->rtrk == tptPtr1->id)
+			for(Int_t y=0; y<tteEval->GetNRows(); y++)
 			  {
-			    parentMcId = tteEPtr1->mtrk;
-			    parentPid = tteEPtr1->pid;		  
-			    break;		
+			    if(tteEPtr1->rtrk == tptPtr1->id)
+			      {
+				parentMcId = tteEPtr1->mtrk;
+				parentPid = tteEPtr1->pid;		  
+				break;		
+			      }
+			    tteEPtr1++;
 			  }
-			tteEPtr1++;
 		      }
+		    tptPtr1++;
 		  }
-		tptPtr1++;
+		
+		//=====================================================================
+		Int_t stopIdParent;
+		Int_t startIdDaughter;	
+		Int_t vertexGeProc; 
+		
+		St_DataSet *geant = GetDataSet("geant"); 
+		St_DataSetIter geantI(geant);         
+		
+		St_g2t_track  *g2tTrack  = (St_g2t_track *)  geantI["g2t_track"];
+		St_g2t_vertex *g2tVertex = (St_g2t_vertex *) geantI["g2t_vertex"];
+		
+		g2t_track_st*   g2tTrackStart  = g2tTrack->GetTable();
+		g2t_vertex_st*  g2tVertexStart = g2tVertex->GetTable();
+		
+		g2t_track_st*  g2tTrackPtr;
+		g2t_vertex_st* g2tVertexPtr;
+		
+		if( daughterMcId>g2tTrack->GetNRows() || daughterMcId<1  ) {
+		  goto WRONGFILL; 	    
+		}
+		if( parentMcId>g2tTrack->GetNRows() || parentMcId<1 ) {
+		  goto WRONGFILL; 	    
+		}
+		
+		g2tTrackPtr = g2tTrackStart + (parentMcId -1);
+		
+		stopIdParent = g2tTrackPtr->stop_vertex_p;
+		//=====================================================================
+		g2tTrackPtr = g2tTrackStart + (daughterMcId -1);
+		
+		startIdDaughter = g2tTrackPtr->start_vertex_p;
+		
+		if( stopIdParent>g2tVertex->GetNRows() || stopIdParent<1 )  {
+		  goto WRONGFILL; 	    
+		}
+		if( startIdDaughter>g2tVertex->GetNRows() || startIdDaughter<1 ) {
+		  goto WRONGFILL; 
+		}
+		
+		g2tVertexPtr = g2tVertexStart + (startIdDaughter -1);
+		
+		vertexGeProc = g2tVertexPtr->ge_proc;
+		
+		if( stopIdParent==startIdDaughter  && ( parentPid==11 || parentPid==12 ) && vertexGeProc==5 )
+		  {
+		    dstVtxRow.iflag       = 1;
+		    dstVtxRow.vtx_id      = kKinkVtxId;
+		    dstVtxRow.n_daughters = 1; 
+		  } else {
+		    dstVtxRow.iflag       = 0;
+		    dstVtxRow.vtx_id      = kOtherVtxId;
+		    dstVtxRow.n_daughters = 9999;                  //????????????
+		  }
+		goto PROPERFILL;
 	      }
-	    
-  //=====================================================================
-	    Int_t stopIdParent;
-	    Int_t startIdDaughter;	
-	    Int_t vertexGeProc; 
-	    
-	    St_DataSet *geant = GetDataSet("geant"); 
-	    St_DataSetIter geantI(geant);         
-	    
-	    St_g2t_track  *g2tTrack  = (St_g2t_track *)  geantI["g2t_track"];
-	    St_g2t_vertex *g2tVertex = (St_g2t_vertex *) geantI["g2t_vertex"];
-	    
-	    g2t_track_st*   g2tTrackStart  = g2tTrack->GetTable();
-	    g2t_vertex_st*  g2tVertexStart = g2tVertex->GetTable();
-	    
-	    g2t_track_st*  g2tTrackPtr;
-	    g2t_vertex_st* g2tVertexPtr;
-	    
-	    if( daughterMcId>g2tTrack->GetNRows() || daughterMcId<1  ) {
-	      goto WRONGFILL; 	    
-	    }
-	    if( parentMcId>g2tTrack->GetNRows() || parentMcId<1 ) {
-	      goto WRONGFILL; 	    
-	    }
-	    
-	    g2tTrackPtr = g2tTrackStart + (parentMcId -1);
-
-	    stopIdParent = g2tTrackPtr->stop_vertex_p;
- //=====================================================================
-	    g2tTrackPtr = g2tTrackStart + (daughterMcId -1);
-
-	    startIdDaughter = g2tTrackPtr->start_vertex_p;
-	    
-	    if( stopIdParent>g2tVertex->GetNRows() || stopIdParent<1 )  {
-	      goto WRONGFILL; 	    
-	    }
-	    if( startIdDaughter>g2tVertex->GetNRows() || startIdDaughter<1 ) {
-	      goto WRONGFILL; 
-	    }
-	    
-	    g2tVertexPtr = g2tVertexStart + (startIdDaughter -1);
-	    
-	    vertexGeProc = g2tVertexPtr->ge_proc;
-	    
-	    if( stopIdParent==startIdDaughter  && ( parentPid==11 || parentPid==12 ) && vertexGeProc==5 )
-	      {
-		dstVtxRow.iflag       = 1;
-		dstVtxRow.vtx_id      = kKinkVtxId;
-		dstVtxRow.n_daughters = 1; 
-	      } else {
-		dstVtxRow.iflag       = 0;
-		dstVtxRow.vtx_id      = kOtherVtxId;
-		dstVtxRow.n_daughters = 9999;                  //????????????
-	      }
-	    goto PROPERFILL;
-	  }
 	    }
 	  }
-//================================================================================ 
-WRONGFILL:
+	  //================================================================================ 
+	WRONGFILL:
 	  cout << "filling dst_vertex.iflag with 2. \n" << endl; 
 	  dstVtxRow.iflag       = 2;
 	  dstVtxRow.vtx_id      = 0;
 	  dstVtxRow.n_daughters = 0; 
-PROPERFILL:	  
+	PROPERFILL:	  
 	  kinkVertex->AddAt(&kinkVtxRow, kinkVtxIndex);
 	  vertex->AddAt(&dstVtxRow, dstVtxIndex);
 	  
@@ -533,26 +536,26 @@ PROPERFILL:
 //_____________________________________________________________________________
 void StKinkMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StKinkMaker.cxx,v 1.6 1999/07/08 18:40:30 fisyak Exp $\n");
-//  printf("* %s    *\n",m_VersionCVS);
+  printf("* $Id: StKinkMaker.cxx,v 1.7 1999/07/08 19:09:51 fisyak Exp $\n");
+  //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
 
 //_____________________________________________________________________________
 Int_t StKinkMaker::meetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& helix1, 
-				   const StPhysicalHelixD& helix2, Float_t xCoordinates[2], 
-				   Float_t yCoordinates[2])
+				    const StPhysicalHelixD& helix2, Float_t xCoordinates[2], 
+				    Float_t yCoordinates[2])
 {       
-
+  
   Float_t om1, om2, ph1, ph2;
   Float_t a, b, c, d, dia, dtouch;
   Float_t xc1[2], xc2[2], r1, r2;  
   Int_t    flag;
-    
+  
   xc1[0] = helix1.xcenter();
   xc1[1] = helix1.ycenter();
-          
+  
   xc2[0] = helix2.xcenter();
   xc2[1] = helix2.ycenter();
   
@@ -609,7 +612,7 @@ Int_t StKinkMaker::meetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& h
           ph1 = sqrt(r1*r1-om1*om1);
           ph2 = -ph1;
 	  if ( fabs(TMath::Power((ph1+a), 2)+TMath::Power((om1+b), 2)-r2*r2) 
-              <= fabs(TMath::Power((ph2+a), 2) + TMath::Power((om1+b), 2) - r2*r2) )
+	       <= fabs(TMath::Power((ph2+a), 2) + TMath::Power((om1+b), 2) - r2*r2) )
             {
 	      xCoordinates[0] = ph1+xc1[0];
             }
@@ -627,7 +630,7 @@ Int_t StKinkMaker::meetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& h
           ph1 = sqrt(r1*r1-om2*om2);
           ph2 = -ph1;
           if ( fabs(TMath::Power((ph1+a), 2) + TMath::Power((om2+b), 2) - r2*r2)
-              <= fabs(TMath::Power((ph2+a), 2) + TMath::Power((om2+b), 2) - r2*r2) )
+	       <= fabs(TMath::Power((ph2+a), 2) + TMath::Power((om2+b), 2) - r2*r2) )
             {
               xCoordinates[1] = ph1 + xc1[0];
             }
@@ -643,7 +646,7 @@ Int_t StKinkMaker::meetTwoHelices2D(const Float_t cut, const StPhysicalHelixD& h
 
 //_____________________________________________________________________________
 Float_t StKinkMaker::dcaTwoLines(Float_t xn1[3], Float_t xn2[3], Float_t sxz1, Float_t syz1, 
-		     Float_t sxz2, Float_t syz2, Float_t point1AtDca[3], Float_t point2AtDca[3])
+				 Float_t sxz2, Float_t syz2, Float_t point1AtDca[3], Float_t point2AtDca[3])
 {
   Float_t        x1, x2, y1, y2, z1, z2;
   Float_t        dx, dy, dz;
@@ -683,13 +686,13 @@ Float_t StKinkMaker::dcaTwoLines(Float_t xn1[3], Float_t xn2[3], Float_t sxz1, F
       
       point2AtDca[1] = (A*F - Cc*D)/(D*Bb - A*E);
       point1AtDca[1] = (Bb*F - Cc*E)/(D*Bb - A*E); 
-        
+      
       point2AtDca[2] = point2AtDca[1]/syz2 - v;
       point1AtDca[2] = point1AtDca[1]/syz1 - l;
-        
+      
       point2AtDca[0] = b*point2AtDca[1] - m;
       point1AtDca[0] = c*point1AtDca[1]  - k;
-  
+      
     }
   else
     {
@@ -698,4 +701,4 @@ Float_t StKinkMaker::dcaTwoLines(Float_t xn1[3], Float_t xn2[3], Float_t sxz1, F
   
   return mdca;
 }
-  
+

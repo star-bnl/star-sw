@@ -1,5 +1,10 @@
 #ifndef StKinkLocalTrack_hh
 #define StKinkLocalTrack_hh
+// $Id: StKinkLocalTrack.hh,v 1.3 1999/07/08 19:09:51 fisyak Exp $
+// $Log: StKinkLocalTrack.hh,v $
+// Revision 1.3  1999/07/08 19:09:51  fisyak
+// Add tabs, remove St_glb_Maker
+//
 
 #include <iostream.h>
 #include "TMath.h"
@@ -16,15 +21,15 @@ class StKinkLocalTrack:public TObject {
 public:
   StKinkLocalTrack();
   StKinkLocalTrack(dst_track_st* trk, Float_t curvature, Float_t dip, Float_t phase,
-	       StThreeVectorD origin, Int_t h);
+		   StThreeVectorD origin, Int_t h);
   ~StKinkLocalTrack();
   // StKinkLocalTrack(const StKinkLocalTrack&);                  use default
   // const StKinkLocalTrack& operator=(const StKinkLocalTrack&); use default
-
+  
   Int_t  Compare(TObject *obj);
   Bool_t IsSortable() const { return 1; }
   Bool_t IsEqual(TObject *obj);
-
+  
   StPhysicalHelixD& helix();
   Int_t getId() const;
   Int_t getDetId() const;
@@ -35,7 +40,7 @@ public:
   Float_t getLastPoint(Int_t i) const;  
   Float_t getEndRadius2D() const;
   Float_t getStartRadius2D() const;
-
+  
 protected:
   StPhysicalHelixD mHelix;  
   Int_t mId;
@@ -47,7 +52,7 @@ protected:
   Float_t mLastPoint[3];  
   Float_t mEndRadius2D;
   Float_t mStartRadius2D;
-
+  
 private:
 };
 
