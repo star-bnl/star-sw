@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.16 2000/06/12 15:04:02 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.17 2000/06/27 23:56:47 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.17  2000/06/27 23:56:47  perev
+ * Helen DAQ SVT update
+ *
  * Revision 1.16  2000/06/12 15:04:02  perev
  * SVT + cleanup
  *
@@ -84,6 +87,7 @@ StDAQReader::StDAQReader(const char *file)
   fEventReader = 0;
   fTPCReader = 0;
   fRICHReader = 0;
+  fSVTReader = 0;
   fOffset = 0;
   fFile = 0;
   fEventInfo = new DAQEventInfo;
@@ -120,6 +124,7 @@ int StDAQReader::close()
   delete fEventReader;	fEventReader 	= 0;  
 
   if(fTPCReader) 	fTPCReader ->close();  
+  if(fSVTReader) 	fSVTReader ->close();  
 //if (fRICHReader) 	fRICHReader->close();  
   fOffset = -1;
   return 0;
@@ -143,10 +148,10 @@ int StDAQReader::readEvent()
   fOffset = fEventReader->NextEventOffset();
   *fEventInfo = fEventReader->getEventInfo();
 
-  if (fTPCReader) fTPCReader->Update();
-  if (fFTPCReader) fFTPCReader->Update();
-  if (fTRGReader) fTRGReader->Update();
-
+  if (fTPCReader) 	fTPCReader ->Update();
+  if (fFTPCReader)	fFTPCReader->Update();
+  if (fTRGReader) 	fTRGReader ->Update();
+  if (fSVTReader) 	fSVTReader ->Update();
   return 0;
 }
 //_____________________________________________________________________________

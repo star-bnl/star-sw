@@ -49,8 +49,23 @@ void StSVTReader::Update()
 //_____________________________________________________________________________
 StSVTReader::~StSVTReader()
 {
-  delete fSVTImpReader;
+  close();
 }
+//_____________________________________________________________________________
+int StSVTReader::close()
+{
+  fWafer = -1999;
+
+  delete fSVTImpReader;		fSVTImpReader		=0;
+  delete fZeroSuppressedReader;	fZeroSuppressedReader	=0;
+  delete fADCRawReader;        	fADCRawReader		=0;
+  delete fPedestalReader;   	fPedestalReader		=0;  
+  delete fPedestalRMSReader;	fPedestalRMSReader 	=0; 
+  delete fGainReader ;      	fGainReader    		=0;
+  delete fCPPReader ;		fCPPReader    		=0;       
+  delete fBadChannelReader;	fBadChannelReader 	=0;   
+  return 0;
+ }
 //_____________________________________________________________________________
 int StSVTReader::setWafer(int barrel, int ladder, int wafer)
 {
@@ -58,13 +73,13 @@ int StSVTReader::setWafer(int barrel, int ladder, int wafer)
 
   if (waferIndex == fWafer) return waferIndex;
 
-  delete fZeroSuppressedReader;
-  delete fADCRawReader ;
-  delete fPedestalReader ;
-  delete fPedestalRMSReader;
-  delete fGainReader;
-  delete fCPPReader;
-  delete fBadChannelReader;
+  delete fZeroSuppressedReader;	fZeroSuppressedReader	=0;
+  delete fADCRawReader;        	fADCRawReader		=0;
+  delete fPedestalReader;   	fPedestalReader		=0;  
+  delete fPedestalRMSReader;	fPedestalRMSReader 	=0; 
+  delete fGainReader ;      	fGainReader    		=0;
+  delete fCPPReader ;		fCPPReader    		=0;       
+  delete fBadChannelReader;	fBadChannelReader 	=0;   
 
   if ((barrel == -1) && (ladder == -1) && (wafer == -1)) {
    delete fSVTImpReader;
@@ -72,13 +87,6 @@ int StSVTReader::setWafer(int barrel, int ladder, int wafer)
    fWafer = -1999;
   }
 
-  fZeroSuppressedReader = 0;
-  fADCRawReader 	= 0;
-  fPedestalReader 	= 0;
-  fPedestalRMSReader 	= 0;
-  fGainReader 		= 0;
-  fCPPReader 		= 0;
-  fBadChannelReader 	= 0;
   if ((barrel == -1) && (ladder == -1) && (wafer == -1)) return -1;
 
   fWafer = waferIndex;
