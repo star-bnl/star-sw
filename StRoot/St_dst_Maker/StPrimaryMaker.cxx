@@ -2,8 +2,11 @@
 //                                                                      //
 // StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
-// $Id: StPrimaryMaker.cxx,v 1.18 1999/11/12 01:45:02 nystrand Exp $
+// $Id: StPrimaryMaker.cxx,v 1.19 1999/11/16 20:58:42 wdeng Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.19  1999/11/16 20:58:42  wdeng
+// Spiros's temporary solution to id_start_vertex puzzle
+//
 // Revision 1.18  1999/11/12 01:45:02  nystrand
 // Added call to St_db_Maker->GetDateTime to determine geometry
 //
@@ -307,6 +310,19 @@ Int_t StPrimaryMaker::Make(){
         gMessMgr->Debug() <<" finished calling egr_fitter - second time" << endm;
     }
   }
+
+  // copy id_start_vertex from globtrk to primtrk for all rows
+  const dst_track_st* globtrkStart = globtrk->GetTable();
+  const dst_track_st* primtrkStart = primtrk->GetTable();  
+  dst_track_st* globtrkPtr;
+  dst_track_st* primtrkPtr;
+  for( Int_t i=0; i<primtrk->GetNRows(); i++) {
+    globtrkPtr = globtrkStart + i;
+    primtrkPtr = primtrkStart + i;
+    primtrkPtr->id_start_vertex = globtrkPtr->id_start_vertex;
+  } 
+ 
+
   return iMake;
 }
 //_____________________________________________________________________________
