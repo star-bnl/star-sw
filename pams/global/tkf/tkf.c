@@ -8,7 +8,7 @@
 /* ------- STAF generated includes ------- */
 
 #include "tkf.h"
-#include "/afs/rhic/star/starlib/ref/ana/tkf/inc/tkf_utilities.h"
+#include "tkf_utilities.h"
 
 #define		kaonMass		.493677		/*	Kaon (+ or -) mass in GeV	*/
 #define		pionMass		.139569		/*	Pi (+ or -) mass in GeV		*/
