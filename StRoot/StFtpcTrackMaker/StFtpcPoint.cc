@@ -1,5 +1,14 @@
-// $Id: StFtpcPoint.cc,v 1.11 2002/10/31 13:39:09 oldi Exp $
+// $Id: StFtpcPoint.cc,v 1.12 2002/11/19 12:45:07 oldi Exp $
 // $Log: StFtpcPoint.cc,v $
+// Revision 1.12  2002/11/19 12:45:07  oldi
+// A new database entry (installationPointY[east/west]) was introduced. Now
+// the rotation of FTPC east is done around the correct axis, which isn't
+// measured but comes from the drawings. The measurements used before were true
+// measurements but had nothing to do with the rotation axis, unfortunately.
+// Anyway, the difference is rather small since a typical cluster is rotated
+// by less than 0.1mm.
+// Some code cleanup done.
+//
 // Revision 1.11  2002/10/31 13:39:09  oldi
 // InstallationPointZ() changed to InstallationPointZ(i) where i specifies FTPC east or west.
 //
@@ -261,12 +270,14 @@ void StFtpcPoint::TransformFtpc2Global()
       // check if hit is in FTPC east
       
       // first tranformation to new origin (FTPC installation point)
+      org.setY(org.y() - StFtpcTrackingParams::Instance()->InstallationPointY(0));
       org.setZ(org.z() - StFtpcTrackingParams::Instance()->InstallationPointZ(0));
       
       // actual rotation
       org = StFtpcTrackingParams::Instance()->FtpcRotation() * org;
       
       // set z-position back to original value
+      org.setY(org.y() + StFtpcTrackingParams::Instance()->InstallationPointY(0));      
       org.setZ(org.z() + StFtpcTrackingParams::Instance()->InstallationPointZ(0));
     }
     
@@ -306,12 +317,14 @@ void StFtpcPoint::TransformGlobal2Ftpc()
       // check if hit is in FTPC east
       
       // first tranformation to new origin (FTPC installation point)
+      transform.setY(transform.y() - StFtpcTrackingParams::Instance()->InstallationPointY(0));
       transform.setZ(transform.z() - StFtpcTrackingParams::Instance()->InstallationPointZ(0));
       
       // actual rotation
       transform = StFtpcTrackingParams::Instance()->FtpcRotationInverse() * transform;
       
       // set z-position back to original value
+      transform.setY(transform.y() + StFtpcTrackingParams::Instance()->InstallationPointY(0));
       transform.setZ(transform.z() + StFtpcTrackingParams::Instance()->InstallationPointZ(0));
     }
     

@@ -1,5 +1,14 @@
-// $Id: StFtpcTrackingParams.hh,v 1.7 2002/11/06 13:47:40 oldi Exp $
+// $Id: StFtpcTrackingParams.hh,v 1.8 2002/11/19 12:45:11 oldi Exp $
 // $Log: StFtpcTrackingParams.hh,v $
+// Revision 1.8  2002/11/19 12:45:11  oldi
+// A new database entry (installationPointY[east/west]) was introduced. Now
+// the rotation of FTPC east is done around the correct axis, which isn't
+// measured but comes from the drawings. The measurements used before were true
+// measurements but had nothing to do with the rotation axis, unfortunately.
+// Anyway, the difference is rather small since a typical cluster is rotated
+// by less than 0.1mm.
+// Some code cleanup done.
+//
 // Revision 1.7  2002/11/06 13:47:40  oldi
 // All current database values hardcoded (for stand alone usage).
 // Code clean ups.
@@ -123,6 +132,7 @@ private:
   // internal FTPC rotation (East only)
   StMatrixD mFtpcRotation;
   StMatrixD mFtpcRotationInverse;
+   Double_t mInstallationPointY[2];
    Double_t mInstallationPointZ[2];
    Double_t mObservedVertexOffsetY[2];
   
@@ -228,6 +238,7 @@ public:
 
   StMatrixD FtpcRotation();
   StMatrixD FtpcRotationInverse();
+   Double_t InstallationPointY(Int_t i);
    Double_t InstallationPointZ(Int_t i);
    Double_t ObservedVertexOffsetY(Int_t i);
 
