@@ -1,15 +1,9 @@
 CWD := $(shell pwd)
-MAKESTAFLOGON :=$(CWD)/makestaflogon.mk
-ifndef INPUT_DIR
-  ifMAKESTAFLOGON := $(strip $(wildcard $(MAKESTAFLOGON)))
-  ifdef ifMAKESTAFLOGON
-    include $(MAKESTAFLOGON)
-  endif
-endif
 
 #
 ifndef STAF_MAKE_HOME
   STAF_MAKE_HOME := $(STAR)/mgr
+  export STAF_MAKE_HOME
 endif
 
 
@@ -137,7 +131,7 @@ ASPSEXE := $(sort $(addsuffix _EXE,$(ASPSEXE)))
 
 .PHONY : all setup libs exes incs setup $(ASPS) $(ASPSLIB) $(ASPSEXE)
 
-all : incs libs exes
+all : setup incs libs exes
 
 libs : $(ASPSLIB)
 $(ASPSLIB): %_LIB:
@@ -157,15 +151,6 @@ $(ALL_INC_INST): $(OUT_DIR)/inc/%  : %
 
 
 setup : $(ALL_GEN_DIRS) $(ALL_LNK_DIRS)
-	@echo MakeStaf.setup create $(MAKESTAFLOGON) file
-	@$(RM) $(MAKESTAFLOGON);
-	@echo STAF_MAKE_HOME:=$(STAF_MAKE_HOME)   > $(MAKESTAFLOGON);
-	@echo INP_DIR:=$(INP_DIR)                >> $(MAKESTAFLOGON);
-	@echo OUT_DIR:=$(OUT_DIR)                >> $(MAKESTAFLOGON);
-	@echo  STAF_SYS:=$(STAF_SYS)             >> $(MAKESTAFLOGON);
-	@echo  STAF_SYS_INCS:=$(STAF_SYS_INCS)   >> $(MAKESTAFLOGON);
-	@echo  STAF_ANA:=$(STAF_ANA)             >> $(MAKESTAFLOGON);
-	@echo  STAF_ANA_INCS:=$(STAF_ANA_INCS)   >> $(MAKESTAFLOGON);
 
 $(ALL_GEN_DIRS) :
 	$(MKDIR) $(TARGET)

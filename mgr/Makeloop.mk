@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.34  1998/12/02 20:42:37  perev
+#  cleanup
+#
 #  Revision 1.33  1998/12/02 20:01:51  fisyak
 #  More NT
 #
@@ -178,7 +181,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/12/02 20:01:51 $ 
+#           Last modification $Date: 1998/12/02 20:42:37 $ 
 #  default setings
 # Current Working Directory
 #
@@ -202,33 +205,22 @@ THREE      :=3
 FOUR       :=4
 FIVE       :=5
 
+ifndef STAF_MAKE_HOME
+  STAF_MAKE_HOME := $(STAR)/mgr
+endif
+
 ifndef MakePam
-  MakePam :=$(strip $(wildcard $(CWD)/mgr/MakePam.mk))
+  MakePam := $(STAF_MAKE_HOME)/MakePam.mk
 endif
-ifndef MakePam
-  MakePam :=$(strip $(wildcard $(STAF_MAKE_HOME)/MakePam.mk))
-endif
-ifndef MakePam
-  MakePam :=$(strip $(wildcard $(STAR)/mgr/MakePam.mk))
-endif
+
 ifndef MakeDll
-  MakeDll :=$(strip $(wildcard $(CWD)/mgr/MakeDll.mk))
+MakeDll :=$(STAF_MAKE_HOME)/MakeDll.mk
 endif
-ifndef MakeDll
-  MakeDll :=$(strip $(wildcard $(STAF_MAKE_HOME)/MakeDll.mk))
-endif
-ifndef MakeDll
-  MakeDll :=$(strip $(wildcard $(STAR)/mgr/MakeDll.mk))
-endif
+
 ifndef Makeloop
-  Makeloop :=$(strip $(wildcard $(CWD)/mgr/Makeloop.mk))
+Makeloop :=$(STAF_MAKE_HOME)/Makeloop.mk
 endif
-ifndef Makeloop
-  Makeloop :=$(strip $(wildcard $(STAF_MAKE_HOME)/Makeloop.mk))
-endif
-ifndef Makeloop
-  Makeloop :=$(strip $(wildcard $(STAR)/mgr/Makeloop.mk))
-endif
+
 export Makeloop
 export MakeDll
 export MakePam

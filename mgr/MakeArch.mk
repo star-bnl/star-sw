@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.47  1998/12/02 20:42:10  perev
+#  cleanup
+#
 #  Revision 1.46  1998/12/01 01:52:47  fisyak
 #  Merge with NT
 #
@@ -119,7 +122,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/12/01 01:52:47 $ 
+#             Last modification $Date: 1998/12/02 20:42:10 $ 
 #. default setings
 
 PWD   := pwd
@@ -181,11 +184,11 @@ A        :=a
 Cxx   :=cc
 CLIBS    :=
 FLIBS    :=
-STIC       := $(STAR_BIN)/stic
 
+CPPFLAGS := $(UNAMES) $(STAF_ARCH) $(TULL_ARCH) QUIET_ASP DS_ADVANCED
+STIC       := $(STAR_BIN)/stic
 GEANT3     := $(STAR_BIN)/geant3
 
-CPPFLAGS := $(STAR_SYS) $(TULL_ARCH) QUIET_ASP 
 ifndef ASU_MALLOC_OFF
   CPPFLAGS += ASU_MALLOC_ON
 endif
@@ -311,6 +314,7 @@ endif
 ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50))
 #    case linux
 #  ====================
+ifndef EGCS_ON
   MOTIF :=
   LINUX :=YESS
   MOTIF :=
@@ -336,6 +340,40 @@ ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50))
   YACCLIB  := 
   LEX      := flex
   LEXLIB   := -lfl
+
+else 
+#   	EGCS compiler
+
+  EGCS := /afs/rhic/asis/i386_linux2/usr.local/egcs
+  CC  :=$(EGCS)/bin/gcc 
+  CXX :=$(EGCS)/bin/g++ 
+
+  MOTIF :=
+  LINUX :=YESS
+  MOTIF :=
+  CERN_LEVEL :=pgf98
+  OSFID    := lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX NEW_ARRAY_ON
+  STRID    := lnx
+  FC       := /usr/pgi/linux86/bin/pgf77
+  LD       := $(CXX)
+  SO	   := $(CXX)
+  CXXFLAGS := $(DEBUG) -fPIC
+  CFLAGS   := $(DEBUG) -fPIC
+  CPPFLAGS += f2cFortran
+  LDFLAGS  := $(DEBUG) -Wl,-Bstatic
+  EXEFLAGS := $(DEBUG) -Wl,-Bdynamic -Wl,-noinhibit-exec   
+  SOFLAGS  := $(DEBUG) -shared  
+##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lg++ -lpgc -lm -ldl -rdynamic
+  CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib -L/usr/lib -lXt -lXpm -lX11 -lcrypt -lg++ -lpgc -lm -ldl  -rdynamic
+##FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
+  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A 
+  FFLAGS   := -DPGI  $(DEBUG)
+  FEXTEND  := -Mextend
+  YACC     := bison -y
+  YACCLIB  := 
+  LEX      := flex
+  LEXLIB   := -lfl
+endif
 endif
 
 ifneq (,$(findstring $(STAR_SYS),i386_redhat51))
@@ -571,8 +609,11 @@ endif
 CPPFLAGS := $(filter-out HP-UX,$(CPPFLAGS) $(OSFID))
 CPPFLAGS := $(sort $(addprefix -D,$(CPPFLAGS)))
 # for Objy
-ifdef OBJY_HOME1
+ifdef OBJY_HOME
+OBJY_HOME := $(subst /.,,$(wildcard $(OBJY_HOME)/.))
+ifdef OBJY_HOME
   CPPFLAGS += -DOBJYBASE -I$(BFWORK)/include -I$(BFWORK)/tmp/$(BFARCH) -I$(BFDIST)/releases/$(BFCURRENT)/include -I$(OBJYBASE)/$(OBJY_ARCH)/include
+endif
 endif
 
 FOR72 := $(FC)
