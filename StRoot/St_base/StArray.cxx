@@ -1,5 +1,8 @@
-// $Id: StArray.cxx,v 1.6 1999/05/10 19:19:35 fisyak Exp $
+// $Id: StArray.cxx,v 1.7 1999/05/11 01:10:50 fine Exp $
 // $Log: StArray.cxx,v $
+// Revision 1.7  1999/05/11 01:10:50  fine
+// StArray::Browse() method jas been introduced
+//
 // Revision 1.6  1999/05/10 19:19:35  fisyak
 // Add Valery's update for Browser
 //
@@ -112,18 +115,19 @@ void StObjArray::Browse(TBrowser *b)
    // If b=0, there is no Browse call TObject::Browse(0) instead.
    //         This means TObject::Inspect() will be invoked indirectly
  
-   const maxBrowsable =  10;
+   const Int_t maxBrowsable =  10;
    TIter next(this);
    TObject *obj;
     
    if (b) {
       Int_t counter = 0;
-      Int_t totalSize = GetSize();
+      Int_t totalSize = size();
       while ((obj = next()) && ++counter <  maxBrowsable ) {
           TString browseName = obj->GetName();
-          char buffer[10];
+          char buffer[100];
           sprintf(buffer,"_%d_of_%d",counter,totalSize);
-          b->Add(obj,buffer);
+          browseName += buffer;
+          b->Add(obj,browseName.Data());
       }
    }
    else
