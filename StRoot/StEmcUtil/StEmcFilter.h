@@ -63,6 +63,7 @@ The cuts available now are:
 #include "tables/St_emcRunning_Table.h"
 #include "tables/St_smdRunning_Table.h"
 #include <iostream.h>
+#include "TArrayF.h"
 
 #define NTOWER 4800
 
@@ -123,7 +124,8 @@ class StEmcFilter: public TObject
     
     // tracks cuts
     Float_t         mDCACut;         
-    Float_t         mPtCut;          
+    Float_t         mPtCut;      
+		Float_t         mPtCutMax;    
     Float_t         mEtaMin;         
     Float_t         mEtaMax;         
     Int_t           mFitPointsCut;   
@@ -183,6 +185,7 @@ class StEmcFilter: public TObject
     EmcStatus   getEmcStatus(Int_t,Int_t);            ///< Return EMC status (kGOOD, kBAD, kOTHER) for a given detector and bin.
         
     Bool_t      getTrackId(StTrack*,Float_t&,Int_t&); ///< Return track id based on dE/dX
+    Bool_t      getTrackId(StTrack*,Float_t&,Int_t&,TArrayF); ///< Return track id based on dE/dX and nsigma for each particle
     Float_t     getEmcETotal(StEvent*);               ///< Return total energy on EMC
     
     Float_t     getFraction(Int_t,Int_t,Int_t=0);     ///< Return fraction of EMC live on a given detector and eta bin
@@ -214,6 +217,7 @@ class StEmcFilter: public TObject
     // tracks cuts
     void        setDCACut(Float_t a)              { mDCACut = a; }         ///< DCA cut on track in cm. Default is 300000.
     void        setPtCut(Float_t a)               { mPtCut = a; }          ///< transverse momentm cut (GeV/c). Default is 0.
+    void        setPtCutMax(Float_t a)            { mPtCutMax = a; }       ///< maximumum transverse momentm cut (GeV/c). Default is 1000.
     void        setEtaMin(Float_t a)              { mEtaMin = a; }         ///< minimum eta of the track (momentum). Default is -10000.
     void        setEtaMax(Float_t a)              { mEtaMax = a; }         ///< maximum eta of the track (momentum). Default is +10000.
     void        setFitPointsCut(Int_t a)          { mFitPointsCut = a; }   ///< number of fit points in the track. Default is 0.

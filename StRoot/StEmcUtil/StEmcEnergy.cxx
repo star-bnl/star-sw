@@ -88,10 +88,13 @@ void StEmcEnergy::energyInBtow()
       m = (Int_t)emcTowerHits[j]->module();
       e = (Int_t)emcTowerHits[j]->eta();
       s = emcTowerHits[j]->sub();
-      mBemcGeom->getId(m, e, s, towerId);
-      towerNdx = towerId - 1;
-      if (mEmcFilter->getEmcStatus(1,towerId)==kGOOD) 
-        mEnergyInBtow[towerNdx] = emcTowerHits[j]->energy();
+			if(abs(m)<=120)
+			{
+      	mBemcGeom->getId(m, e, s, towerId);
+      	towerNdx = towerId - 1;
+      	if (mEmcFilter->getEmcStatus(1,towerId)==kGOOD) 
+        	mEnergyInBtow[towerNdx] = emcTowerHits[j]->energy();
+			}
     }
   }  
 }

@@ -114,7 +114,10 @@ Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* mome
     Bool_t projTrackOk = projTrack( position, momentum, track, magField, emcRadius );
     if ( projTrackOk )  
     {
-      if ( fabs( position->pseudoRapidity() ) <= 1.0 ) return kTRUE;
+      Int_t m = 0, e = 0, s = 0;
+      Float_t phi = position->phi();
+      Float_t eta = position->pseudoRapidity();
+      if ( mBemcGeom->getBin(phi, eta, m, e, s) == 0  && s != -1 ) return kTRUE;      
     }
   } 
 
@@ -134,7 +137,10 @@ Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* mome
    Bool_t projTrackOk = projTrack( position, momentum, track, magField, emcRadius );
    if ( projTrackOk )  
     {
-      if ( fabs( position->pseudoRapidity() ) <= 1.0 ) return kTRUE;
+      Int_t m = 0, e = 0, s = 0;
+      Float_t phi = position->phi();
+      Float_t eta = position->pseudoRapidity();
+      if ( mBemcGeom->getBin(phi, eta, m, e, s) == 0 && s != -1 ) return kTRUE;
     }
   } 
       
@@ -152,7 +158,10 @@ Bool_t StEmcPosition::trackOnEmc( StThreeVectorD* position, StThreeVectorD* mome
     Bool_t projTrackOk = projTrack( position, momentum, track, magField, emcRadius );
     if ( projTrackOk )  
     {
-      if ( fabs( position->pseudoRapidity() ) <= 1.0 ) return kTRUE;
+      Int_t m = 0, e = 0, s = 0;
+      Float_t phi = position->phi();
+      Float_t eta = position->pseudoRapidity();
+      if ( mBemcGeom->getBin(phi, eta, m, e, s) == 0 && s != -1 ) return kTRUE;
     }
   }  
   
