@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.15 2000/08/25 19:55:16 snelling Exp $
+//  $Id: StFlowMaker.h,v 1.16 2000/08/26 21:37:02 snelling Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -13,6 +13,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.16  2000/08/26 21:37:02  snelling
+//  Removed flownanoevent, Added multiple input for pico, fixed IO bug
+//
 //  Revision 1.15  2000/08/25 19:55:16  snelling
 //  Changed naming pico files (1 pico per dst)
 //
@@ -99,11 +102,12 @@ class StEvent;
 class StPrimaryTrack;
 class StParticleDefinition;
 class StFlowEvent;
-class StFlowNanoEvent;
 class StFlowPicoTrack;
 class StFlowPicoEvent;
 class StFlowSelection;
 class StIOMaker;
+class StFileI;
+class TChain;
 
 class StFlowMaker : public StMaker {
 
@@ -119,16 +123,15 @@ public:
   Int_t         Make();
   Int_t         Finish();
   StFlowEvent*  FlowEventPointer() const;
-  void          NanoEventWrite(Bool_t flag=kFALSE);
-  void          NanoEventRead(Bool_t flag=kFALSE);
   void          PicoEventWrite(Bool_t flag=kFALSE);
   void          PicoEventRead(Bool_t flag=kFALSE);
   void          FlowEventWrite(Bool_t flag=kFALSE);
   void          FlowEventRead(Bool_t flag=kFALSE);
-  void          SetNanoEventFileName(const Char_t* name="flownanoevent.root");
   void          SetPicoEventFileName(const Char_t* name="flowpicoevent.root");
+  void          SetPicoEventFileName(StFileI* fileList);
+
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.15 2000/08/25 19:55:16 snelling Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.16 2000/08/26 21:37:02 snelling Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
@@ -136,45 +139,37 @@ protected:
   Flow::PhiWgt_t   mPhiWgt;                   //! To make event plane isotropic
 
 private:
-  Char_t           mNanoEventFileName[64];    // nano-DST file name
-  Bool_t           mNanoEventWrite;           // switch for nano-DST
-  Bool_t           mNanoEventRead;            // switch for nano-DST
-  Char_t           mPicoEventFileName[64];    // nano-DST file name
   TString          mEventFileName;            //! IO Maker file name
   TString          mEventFileNameOld;         //! IO Maker Old file name
-  Bool_t           mPicoEventWrite;           // switch for nano-DST
-  Bool_t           mPicoEventRead;            // switch for nano-DST
+  Char_t           mPicoEventFileName[64];    // Pico-DST file name
+  StFileI*         pPicoFileList;             //! Pico File List
+  Bool_t           mPicoEventWrite;           // switch for pico-DST
+  Bool_t           mPicoEventRead;            // switch for pico-DST
   Bool_t           mFlowEventWrite;           // switch for StFlowEvent
   Bool_t           mFlowEventRead;            // switch for StFlowEvent
-  UInt_t           mNanoEventCounter;         // number of Bytes in nano event
-  UInt_t           mPicoEventCounter;         // number of Bytes in nano event
+  UInt_t           mPicoEventCounter;         // number of Bytes in pico event
   StFlowSelection* pFlowSelect;               //! selection object
   Int_t            ReadPhiWgtFile();          // get the weight file
-  Int_t            InitNanoEventWrite();      // open nano-DST
-  Int_t            InitNanoEventRead();       // open nano-DST
-  Int_t            InitPicoEventWrite();      // open nano-DST
-  Int_t            InitPicoEventRead();       // open nano-DST
+  Int_t            InitPicoEventWrite();      // open pico-DST
+  Int_t            InitPicoEventRead();       // open pico-DST
   Int_t            InitEventRead();           // open StEvent
   Int_t            InitFlowEventWrite();      // open StFlowEvent
   Int_t            InitFlowEventRead();       // open StFlowEvent
   void             FillFlowEvent();           // fill the flow event
-  void             FillNanoEvent();           // fill nano-DST
-  Bool_t           FillFromNanoDST(StFlowNanoEvent* pNanoEvent);
-  void             FillPicoEvent();           // fill nano-DST
+  void             FillPicoEvent();           // fill pico-DST
   Bool_t           FillFromPicoDST(StFlowPicoEvent* pPicoEvent);
   void             WriteFlowEvent();          // write StFlowEvent
   void             CloseEventRead();          // close StEvent
   void             PrintSubeventMults();      // for testing
   StEvent*         pEvent;                    //! pointer to DST data
   StFlowEvent*     pFlowEvent;                // pointer to micro-DST data
-  StFlowNanoEvent* pNanoEvent;                // pointer to nano-DST Event
-  StFlowPicoEvent* pPicoEvent;                // pointer to nano-DST Event
+  StFlowPicoEvent* pPicoEvent;                // pointer to pico-DST Event
   StIOMaker*       pIOMaker;                  //! pointer to the IOMaker
-  TTree*           pFlowTree;                 // pointer to nano-DST Tree
+  TTree*           pFlowTree;                 // pointer to pico-DST Tree
   TTree*           pFlowMicroTree;            // pointer to the micro DST Tree
-  TFile*           pNanoDST;                  //! pointer to nano-DST File
-  TFile*           pPicoDST;                  //! pointer to nano-DST File
+  TFile*           pPicoDST;                  //! pointer to pico-DST File
   TFile*           pFlowDST;                  //! pointer to micro-DST File
+  TChain*          pPicoChain;                //! pointer to chain of pico files
 
   ClassDef(StFlowMaker, 1)                    // macro for rootcint
 };
@@ -182,30 +177,24 @@ private:
 inline StFlowEvent* StFlowMaker::FlowEventPointer() const { return pFlowEvent; }
 
 inline void StFlowMaker::FlowEventWrite(Bool_t flag) 
-          { mFlowEventWrite=flag; if (flag) mFlowEventRead=kFALSE; }
+{ mFlowEventWrite=flag; if (flag) mFlowEventRead=kFALSE; }
 
 inline void StFlowMaker::FlowEventRead(Bool_t flag) 
-          { mFlowEventRead=flag; if (flag) { mFlowEventWrite=kFALSE;
-	  mNanoEventRead=kFALSE; mPicoEventRead=kFALSE; } }
-
-inline void StFlowMaker::NanoEventWrite(Bool_t flag) 
-          { mNanoEventWrite=flag; if (flag) mNanoEventRead=kFALSE; }
+{ mFlowEventRead=flag; if (flag) { mFlowEventWrite=kFALSE;
+ mPicoEventRead=kFALSE; } }
 
 inline void StFlowMaker::PicoEventWrite(Bool_t flag) 
-          { mPicoEventWrite=flag; if (flag) mPicoEventRead=kFALSE; }
-
-inline void StFlowMaker::NanoEventRead(Bool_t flag) 
-          { mNanoEventRead=flag; if (flag) { mNanoEventWrite=kFALSE;
-	  mFlowEventRead=kFALSE; mPicoEventRead=kFALSE; } }
+{ mPicoEventWrite=flag; if (flag) mPicoEventRead=kFALSE; }
 
 inline void StFlowMaker::PicoEventRead(Bool_t flag) 
-          { mPicoEventRead=flag; if (flag) { mPicoEventWrite=kFALSE;
-	  mFlowEventRead=kFALSE; mNanoEventRead=kFALSE; }}
-
-inline void StFlowMaker::SetNanoEventFileName(const Char_t* name) {
-  strncpy(mNanoEventFileName, name, 63); mNanoEventFileName[63] = '\0'; }
+{ mPicoEventRead=flag; if (flag) { mPicoEventWrite=kFALSE;
+ mFlowEventRead=kFALSE; }}
 
 inline void StFlowMaker::SetPicoEventFileName(const Char_t* name) {
   strncpy(mPicoEventFileName, name, 63); mPicoEventFileName[63] = '\0'; }
+
+inline void StFlowMaker::SetPicoEventFileName(StFileI* fileList) {
+  pPicoFileList = fileList;
+}
 
 #endif
