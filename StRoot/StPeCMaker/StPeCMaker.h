@@ -1,6 +1,9 @@
-// $Id: StPeCMaker.h,v 1.12 2002/04/18 19:02:12 meissner Exp $
+// $Id: StPeCMaker.h,v 1.13 2002/12/19 18:09:53 yepes Exp $
 //
 // $Log: StPeCMaker.h,v $
+// Revision 1.13  2002/12/19 18:09:53  yepes
+// MuDST input added
+//
 // Revision 1.12  2002/04/18 19:02:12  meissner
 // Change Init to  InitRun
 //
@@ -58,51 +61,56 @@
 #include "TNtuple.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TString.h"
 
 class StEvent;
 class StPeCEvent;
-//-tu class StRun;
 class TH1F;
 class TH2F;
+class StMuDst;
 
-class StPeCMaker : public StMaker {
-
-protected:
-  TFile *m_outfile;
-
-  TTree   *uDstTree ;
-  TTree   *geantTree ;
-
-  StPeCEvent   *pevent ;
-  StPeCTrigger *trigger ;
-  StPeCGeant   *geant  ;
-
-  Int_t        infoLevel ;
-  Int_t        filter ; // 1==two prong, 2==four prong
-
+class StPeCMaker : public StMaker
+{
 public:
+	StPeCMaker(const Char_t *name = "analysis");
+	virtual ~StPeCMaker();
+	virtual Int_t Init();
+	virtual Int_t InitRun(Int_t runnr);
+	virtual Int_t Make();
+	virtual Int_t Finish();
 
-  StPeCMaker(const Char_t *name="analysis");
-  virtual ~StPeCMaker();
-  //  virtual void Clear(Option_t *option="");
-  virtual Int_t  Init();
-  virtual Int_t  InitRun(Int_t runnr);
-  virtual Int_t  Make();
-  virtual Int_t  Finish();
+	void setInfoLevel(Int_t in) {infoLevel = in ;};
+	void setFilter(Int_t fi) {filter = fi;};
+	void setMuDst(StMuDst* mu) {muDst = mu;};	//Accessor for muDst pointer
+	void setFileName ( TString name ) { treeFileName = name ; } ;
+	void setOutputPerRun ( Int_t in = 1 ) { outputPerRun = in ; } ;
 
-  void    setInfoLevel ( Int_t in ) { infoLevel = in ; } ;
-  void    setFilter    ( Int_t fi ) { filter    = fi ; } ;
+	TString treeFileName ;
+protected:
+	TFile* m_outfile;
 
+	TTree* uDstTree;
+	TTree* geantTree;
+
+	StPeCEvent* pevent;
+	StPeCTrigger* trigger;
+	StPeCGeant* geant;
+
+	Int_t   infoLevel;
+	Int_t   filter;	//1 == two prong, 2 == four prong
+	Int_t   outputPerRun ; // 1=output per run 0(default)=one output file
 private:
+	StMuDst* muDst;
 
-  Int_t Cuts(StEvent *event, StPeCEvent *pevent);
-  Int_t Cuts4Prong(StEvent *event, StPeCEvent *pevent);
-  Int_t triggerSim(StEvent *);
 
-  virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.12 2002/04/18 19:02:12 meissner Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	Int_t Cuts(StEvent* event, StPeCEvent* pevent);
+	Int_t Cuts4Prong(StEvent* event, StPeCEvent* pevent);
+	Int_t triggerSim(StEvent*);
 
-  ClassDef(StPeCMaker, 1)
+	virtual const char *GetCVS() const
+	{static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.13 2002/12/19 18:09:53 yepes Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+
+	ClassDef(StPeCMaker, 1)
 };
 
 #endif

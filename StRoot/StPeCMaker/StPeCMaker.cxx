@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.23 2002/06/04 17:55:02 meissner Exp $
+// $Id: StPeCMaker.cxx,v 1.24 2002/12/19 18:09:53 yepes Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.24  2002/12/19 18:09:53  yepes
+// MuDST input added
+//
 // Revision 1.23  2002/06/04 17:55:02  meissner
 // filtering: filter all  UPC triggerwords
 //
@@ -107,204 +110,256 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.23 2002/06/04 17:55:02 meissner Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.24 2002/12/19 18:09:53 yepes Exp $";
 
 ClassImp(StPeCMaker)
 
-StPeCMaker::StPeCMaker(const Char_t *name) : StMaker(name) {
-  infoLevel = 0 ;
-  filter    = 0 ;
+StPeCMaker::StPeCMaker(const Char_t *name) : StMaker(name), infoLevel(0), filter(0), outputPerRun(0), muDst(0)
+{
+   treeFileName = "StPeCMaker.tree.root" ;
+   return;
 }
 
-StPeCMaker::~StPeCMaker() {}
+
+StPeCMaker::~StPeCMaker()
+{
+   return;
+}
 
 
 Int_t StPeCMaker::Init() {
-  cout << "StPECMaker::Init,  Do nothing!";
-  return StMaker::Init();
+
+   cout << "tree output file: " << treeFileName << endl;
+
+   //Get the standard root format to be independent of Star IO   
+   m_outfile = new TFile(treeFileName, "recreate");
+   m_outfile->SetCompressionLevel(1);
+
+
+   uDstTree = new TTree("uDst", "Pcol uDst", 99);
+
+   //Instantiate StPeCEvent
+   pevent = new StPeCEvent();
+   pevent->setInfoLevel(infoLevel);
+
+   trigger = new StPeCTrigger();
+   trigger->setInfoLevel(infoLevel);
+
+   geant = new StPeCGeant();
+
+   //Add branches
+   uDstTree->Branch("Event", "StPeCEvent", &pevent, 64000, 99);
+   uDstTree->Branch("Trigger", "StPeCTrigger", &trigger, 64000, 99);
+   uDstTree->Branch("Geant", "StPeCGeant", &geant, 64000, 99);
+
+   return StMaker::Init();
 }
+
 
 Int_t StPeCMaker::InitRun(Int_t runnr) {
+   treeFileName="StPeCMaker.tree.root";
 
-  if ( infoLevel > 0 ) 
-    cout<<"StPeCMaker: Initializing run" << runnr <<endl;
-  //
-  //  Set uDst output file
-  //
-  TString uDstFileName("StPecMaker.uDst.root");    
-  StIOMaker* pIOMaker = (StIOMaker*)GetMaker("IO");
-  if ( pIOMaker) {
-     uDstFileName = pIOMaker->GetFile() ;
-     char* ccc = "/" ;
-     Ssiz_t slashPosition = uDstFileName.Last(*ccc) ;
-     if ( slashPosition != -1 &&
-          slashPosition < uDstFileName.Length() ) 
-	     uDstFileName.Remove(0,slashPosition+1);
-  }
+   if ( outputPerRun ) {
+      StIOMaker* pIOMaker = (StIOMaker*)GetMaker("IO");
+      if (pIOMaker)
+      {
+         treeFileName = pIOMaker->GetFile();
+         char* ccc = "/";
+         Ssiz_t slashPosition = treeFileName.Last(*ccc);
 
-  TString  tDst("dst");
-  TString  tEvt("event");
-  TString  tEvtSel("evtsel");
-  TString  tuDst("uDst");
-  TString  tuDstSel("uDstSel");
-  uDstFileName.ReplaceAll(tDst,tuDst);
-  uDstFileName.ReplaceAll(tEvt,tuDst);
-  uDstFileName.ReplaceAll(tEvtSel,tuDstSel);
-  cout << "StPeCMaker: uDst output file: " << uDstFileName << endl;
+         if (slashPosition != -1 && slashPosition < treeFileName.Length()) 
+	    treeFileName.Remove(0,slashPosition+1);
+      }
 
-  m_outfile   = new TFile( uDstFileName,"recreate");
-  // Get the standard root format to be independent of Star IO   
-  //  m_outfile->SetFormat(1);
-  m_outfile->SetCompressionLevel(1);
-  
-  
-  uDstTree = new TTree("uDst","Pcol uDst",99);
-//  geantTree = new TTree("geant","Pcol geant Tree");
+   //Make token replacements
+      treeFileName.ReplaceAll("dst", "tree");
+      treeFileName.ReplaceAll("event", "tree");
+      treeFileName.ReplaceAll("evtsel", "treeSel");
 
-  // Instantiate StPeCEvent
-  pevent  = new StPeCEvent();
-  pevent->setInfoLevel(infoLevel);
-  trigger = new StPeCTrigger() ;
-  trigger->setInfoLevel ( infoLevel ) ;
-  geant   = new StPeCGeant();
-  //
-  uDstTree->Branch ("Event","StPeCEvent",&pevent,64000,99);
-  uDstTree->Branch ("Trigger","StPeCTrigger",&trigger,64000,99);
-  uDstTree->Branch ("Geant","StPeCGeant",&geant,64000,99);
+      cout << "tree output file: " << treeFileName << endl;
 
-//geantTree->Branch ("AllGeant","StPeCGeant",&geant,64000,1);
+   //Get the standard root format to be independent of Star IO   
+      m_outfile = new TFile(treeFileName, "recreate");
+      m_outfile->SetCompressionLevel(1);
+   }
 
-  if ( infoLevel > 0 ) 
-     cout<<"StPeCMaker: Initialization done!"<<endl;
-
-  return StMaker::InitRun(runnr);
+   cout << "Exiting InitRun(Int_t runnr)" << endl;
+   return StMaker::InitRun(runnr);
 }
 
 
-Int_t StPeCMaker::Make() {
+Int_t StPeCMaker::Make()
+{
+   StEvent* event = 0;
+   Int_t flag = kStOk;
 
-  // Count all the events
-  if ( infoLevel > 0 ) printf ( "StPeCMaker::Make: Start \n" ) ;
 
-  StEvent* event = 0 ;
-  event = (StEvent *) GetInputDS("StEvent");
-  if (!event){
-    cout<<"StPeCMaker: There was no StEvent!  Return."<<endl;
-    return kStOK; 
-  }
-//
-// Get StMcEvent
-//
-// StMcEvent *mEvent = 0;
-// mEvent = ((StMcEventMaker *) GetMaker ("StMcEvent"))->currentMcEvent ();
-// if (!mEvent) {
-//    printf ( "!!!!!!!!!!!! no mEvent !!!!!!!!!!!!! \n" ) ;
-// }
+   Int_t NTracks = 0 ;
+   int tw        = 0 ;
+   if(muDst)
+   {
+      NTracks = muDst->globalTracks()->GetEntries();
+       
+      StL0Trigger &trig = muDst->event()->l0Trigger();
+      tw = trig.triggerWord();
 
-  TDataSet *geantBranch = 0 ;
-  geantBranch = GetInputDS("geantBranch");
-  if ( geantBranch ) {
-   //   if ( !geant2->fill ( geantBranch ) ) geantTree->Fill ( ) ;
-    cout<< "Fill Geant " << endl;
-     geant->fill ( geantBranch ) ;
-  }
+      trigger->process(muDst);
 
-  // trigger simulations
-  if ( infoLevel ) printf ( "StPeCMaker: trigger simulation \n" ) ;
-  trigger->process(event);
+   }
+   else
+   {
+      event = (StEvent *)GetInputDS("StEvent");
+      if (!event)
+      {
+	 cout << "There was no StEvent! Exiting..." << endl;
+	 return kStOK; 
+      }
+      //Process StEvent trigger simulations
+      trigger->process(event);
 
-  // Do this way since call to event->summary->numberOfTracks() crashes
-  StSPtrVecTrackNode& tempn = event->trackNodes();
-  Int_t NTracks=tempn.size();
-  cout<<"StPeCMaker: Number of  tracks: "<<NTracks<<endl;
-  
-  Int_t flag = kStOk ;
+      StSPtrVecTrackNode& tempn = event->trackNodes();
+      NTracks = tempn.size();
 
-  if( NTracks > StPeCnMaxTracks ){
-    cout<<"StPeCMaker: Number of tracks: "<<NTracks<<endl;
-    cout<<"Not a peripheral event (NTracks>15)"<<endl;
-    flag = kStErr;
-  }
-  if( NTracks <= 1 ){
-    cout<<"StPeCMaker: Event has no tracks <1!"<<endl;
-    flag = kStErr;
-  }
+      tw = event->l0Trigger()->triggerWord();
+   }
 
-  int tw = event->l0Trigger()->triggerWord();
-  cout << "Trigger word " << tw << endl;
-  // take the event anyway
-  if (tw == 0x3001 || tw==0x3002 || tw == 0x3011 || tw == 0x1001  ) {
-    cout << "UPC trigger"  << endl;
-    //    flag= kStOk;
-  }
-  
-  // Fill StPeCEvent
-  // always output for MC
-  if (geantBranch || ( flag == kStOk )) {
-    if ( infoLevel ) printf ( "StPeCMaker: Fill StPeCEvent \n" ) ;
-    pevent->fill ( event ) ;    
-    uDstTree->Fill();
-    //
-    //   Select only 4 prong candidates
-    //
-    if      ( filter == 1 ) flag = Cuts       ( event, pevent ) ; 
-    else if ( filter == 2 ) flag = Cuts4Prong ( event, pevent ) ; 
-  } else {
-    cout<<"StPeCMaker: Do Not fill  Event to Tree !"<<endl;
-  } 
 
-   
-  pevent->clear();
-  geant->clear ( ) ;
-  trigger->clear();
+   //Fill geant simulations
+   TDataSet* geantBranch = GetInputDS("geantBranch");
+   if (geantBranch)
+   {
+      geant->fill(geantBranch);
+   }
 
-  //if ( filter ) return flag ;
-  return kStOk ;
-  //return flag;
+   //  Check number of tracks
+
+
+   if(NTracks > StPeCnMaxTracks) {
+      cout << "Number of tracks: " << NTracks << endl;
+      cout << "Not a peripheral event (NTracks > 15)" << endl;
+//    flag = kStErr;
+   }
+   if(NTracks <= 1) {
+      cout << "Event has no tracks" << endl;
+      flag = kStErr;
+   }
+
+   if (tw == 0x3001 || tw==0x3002 || tw == 0x3011 || tw == 0x1001)
+      cout << "UPC trigger"  << endl;
+
+   //Fill StPeCEvent
+   if ( geantBranch || (flag == kStOk) ) {
+
+      int ok = 0 ;
+      if (event) ok = pevent->fill(event);
+      else       ok = pevent->fill(muDst);
+
+      if ( !ok ) {
+	 uDstTree->Fill();
+      }
+
+      //Select only 4 prong candidates
+      //NOTE: This does not appear to do anything because the return code isn't used
+      if (event)
+      {
+	 if (filter == 1)
+	    flag = Cuts(event, pevent);
+	 else if (filter == 2)
+	    flag = Cuts4Prong(event, pevent);
+      }
+   }
+   else
+      cout << "Do Not fill Event to Tree!" << endl;
+
+
+   //Cleanup
+   pevent->clear();
+   geant->clear();
+   trigger->clear();
+
+   cout << "Exiting StPeCMaker::Make()" << endl;
+
+
+   return kStOk;
 }
 
 
-Int_t StPeCMaker::Cuts(StEvent *event, StPeCEvent *pevent){
-  //get vertex info
-  StPrimaryVertex* vtx = event->primaryVertex();
-  if ( !vtx ) return kStErr;
-   //
-  if ( vtx->position().x() < -5. ) return kStErr ;
-  if ( vtx->position().x() >  5. ) return kStErr ;
-  if ( vtx->position().y() < -5. ) return kStErr ;
-  if ( vtx->position().y() >  5. ) return kStErr ;
-  if ( abs(vtx->position().z()) >  200. ) return kStErr ;
-  // Select interesting events
-  //
-  if ( pevent->getNPriPairs() != 1 ) return kStErr ;
-  StPeCPair *pair = pevent->getPriPair(0);
-  if ( pair->getOpeningAngle()>3.0 ) return kStErr ;
-  if ( pair->getSumCharge()  ) return kStErr ;
-      
-  return kStOK;
+Int_t StPeCMaker::Cuts(StEvent *event, StPeCEvent *pevent)
+{
+	StPrimaryVertex* vtx = event->primaryVertex();
+
+
+	cout << "Entering StPeCMaker::Cuts(StEvent *event, StPeCEvent *pevent)" << endl;
+
+	//Get vertex info
+	if (!vtx)
+		return kStErr;
+
+	if (vtx->position().x() < -5.)
+		return kStErr;
+	if (vtx->position().x() >  5.)
+		return kStErr;
+	if (vtx->position().y() < -5.)
+		return kStErr;
+	if (vtx->position().y() >  5.)
+		return kStErr;
+
+	if (fabs(vtx->position().z()) >  200.)
+		return kStErr ;
+
+	//Select interesting events
+	if (pevent->getNPriPairs() != 1)
+		return kStErr;
+
+	StPeCPair *pair = pevent->getPriPair(0);
+	if (pair->getOpeningAngle() > 3.0)
+		return kStErr;
+	if (pair->getSumCharge())
+		return kStErr;
+
+
+
+	return kStOK;
 }
 
 
+Int_t StPeCMaker::Cuts4Prong(StEvent *event, StPeCEvent *pevent)
+{
 
-Int_t StPeCMaker::Cuts4Prong(StEvent *event, StPeCEvent *pevent){
+	if (pevent->getNTot() != 4)
+		return kStErr;
+	if (fabs(pevent->getZVertex()) > 200)
+		return kStErr;
+	if (pevent->getNPriPairs() != 1)
+		return kStErr;
+	if (pevent->getNSecPairs() != 1)
+		return kStErr;
+	if (pevent->getPriPair(0)->getSumCharge())
+		return kStErr;
+	if (pevent->getSecPair(0)->getSumCharge())
+		return kStErr;
+	if (pevent->getPriPair(0)->getOpeningAngle() > 3)
+		return kStErr;
+	if (pevent->getSecPair(0)->getOpeningAngle() > 3)
+		return kStErr;
 
-  if ( pevent->getNTot     () != 4 ) return kStErr ;
-  if ( fabs(pevent->getZVertex()) > 200 ) return kStErr ;
-  if ( pevent->getNPriPairs() != 1 ) return kStErr ;
-  if ( pevent->getNSecPairs() != 1 )return kStErr ; 
-  if ( pevent->getPriPair(0)->getSumCharge() ) return kStErr ;
-  if ( pevent->getSecPair(0)->getSumCharge() ) return kStErr ;
-  if ( pevent->getPriPair(0)->getOpeningAngle() > 3 ) return kStErr ;
-  if ( pevent->getSecPair(0)->getOpeningAngle() > 3 ) return kStErr ;
-  return kStOK;
+
+
+	return kStOK;
 }
 
-Int_t StPeCMaker::Finish() {
-  cout << "StPeCMaker: Finish" << endl;
-  m_outfile->Write();
-  m_outfile->Close();
-  StMaker::Finish();
-  return kStOK;
+
+Int_t StPeCMaker::Finish()
+{
+	cout << "Entering StPeCMaker::Finish()" << endl;
+
+	m_outfile->Write();
+	m_outfile->Close();
+	StMaker::Finish();
+
+
+
+	return kStOK;
 }
 
 

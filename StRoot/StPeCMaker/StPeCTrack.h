@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrack.h,v 1.3 2001/04/23 21:44:38 meissner Exp $
+// $Id: StPeCTrack.h,v 1.4 2002/12/19 18:09:53 yepes Exp $
 // $Log: StPeCTrack.h,v $
+// Revision 1.4  2002/12/19 18:09:53  yepes
+// MuDST input added
+//
 // Revision 1.3  2001/04/23 21:44:38  meissner
 // add dEdx z variable to tree, setFormat(1) for tree, use private BetheBloch (temp solution)
 //
@@ -33,6 +36,7 @@
 #ifndef __CINT__
 #include "PhysicalConstants.h"
 #include "StEventTypes.h"
+#include "StMuDSTMaker/COMMON/StMuTrack.h"
 #endif /* __CINT__ */
 #include "SystemOfUnits.h"
 
@@ -46,8 +50,10 @@ public:
   void                            calculatePair4Momentum( ) ;
   Int_t                           fill ( ) ;
 #ifndef __CINT__
-                                  StPeCTrack ( Int_t _primary, StTrack *trk);
-  void                            set        ( Int_t _primary, StTrack* trk);
+	StPeCTrack(Int_t _primary, StMuTrack *trk);
+	void set ( Int_t _primary, StMuTrack* trk);
+        StPeCTrack ( Int_t _primary, StTrack *trk);
+        void set ( Int_t _primary, StTrack* trk);
 #endif /*__CINT__*/
   Int_t                           key ;
   Int_t                           charge ;

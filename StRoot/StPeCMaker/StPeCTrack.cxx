@@ -24,6 +24,12 @@ StPeCTrack::~StPeCTrack() {
 StPeCTrack::StPeCTrack ( Int_t _primary, StTrack* trk) {
    set ( _primary, trk ) ;
 }
+
+StPeCTrack::StPeCTrack(Int_t _primary, StMuTrack* trk)
+{
+   set (_primary, trk);
+}
+
 void StPeCTrack::set ( Int_t _primary, StTrack* trk) {
   key     = trk->key() ;
   primary = _primary ;
@@ -35,6 +41,7 @@ void StPeCTrack::set ( Int_t _primary, StTrack* trk) {
   phi0    = trk->geometry()->origin().phi(); 
   z0      = trk->geometry()->origin().z(); 
   r0      = trk->geometry()->origin().perp(); 
+
 
   //   cout << "Flag: " << trk->flag() << " primary " << _primary << endl;
   dedx   = 0. ;
@@ -64,6 +71,48 @@ void StPeCTrack::set ( Int_t _primary, StTrack* trk) {
      }
      nHits = trk->detectorInfo()->numberOfPoints() ;
   }
+//printf ( "pt psi eta r0 phi0 z0 nHits %f %f %f %f %f %f %f \n",
+//   pt, psi, eta, r0, phi0, z0, nHits ) ;
+
+
+}
+
+void StPeCTrack::set(Int_t _primary, StMuTrack* trk)
+{
+   key = trk->id();
+   primary = _primary;
+   charge = trk->charge();
+   pt = trk->momentum().perp();
+   p = trk->momentum().mag();
+   psi = trk->momentum().phi();
+   eta = -log(tan(trk->momentum().theta()/2.));
+   phi0 = trk->firstPoint().phi();
+   z0 = trk->firstPoint().z(); 
+   r0 = trk->firstPoint().perp(); 
+
+
+   dedx = 0.;
+   dedxZel = -9999.;  
+   dedxZmu = -9999.;
+   dedxZpi = -9999.;
+   dedxZk = -9999.;
+   dedxZp = -9999.;
+
+
+ 
+   dedx = trk->dEdx(); 
+   dedxZel = trk->pidProbElectron();
+   dedxZpi = trk->pidProbPion();
+   dedxZk = trk->pidProbKaon();
+   dedxZp = trk->pidProbProton();
+   nHits = trk->nHits();
+
+// printf ( "pt psi eta r0 phi0 z0 nHits %f %f %f %f %f %f %f \n",
+//pt, psi, eta, r0, phi0, z0, nHits ) ;
+
+
+
+   return;
 }
 
 // Private Helper 
