@@ -193,31 +193,36 @@ $MAIN    = "";
 $INCLUDE = ""; 
 $LIB     = "";
 $EXPORT = "#.share";
-my $build  = "." . $STAR_HOST_SYS;
+my $build  = "." . $STAR_HOST_SYS; print "build = $build\n";
 if (! -d $build) {mkdir $build, 0664;}
 $BUILD  = "#" . $build;
 $LIB    = $BUILD . "/lib";
 $BIN    = $BUILD . "/bin"; 
 $OBJ    = $BUILD . "/obj";
 my $obj = $build . "/obj";
-Link $BUILD => $DirPath; print "Link $BUILD => $DirPath\n";
+Link $OBJ => $DirPath; print "Link $BUILD => $DirPath\n";
 if (! -d "$obj")   {mkdir $obj, 0664;}
-my $Targets = "";
-if (-d "./StRoot") {
-  my $stroot = $build . "/StRoot";
-  if (! -f "$stroot") {symlink obj, $stroot; print "symlink obj, $stroot\n";}
-  $Targets .= "#" . $stroot . "/Conscript";
+my @Targets = ();
+#my @dirs = ("pams","StRoot");
+my @dirs = ("StRoot");
+for my $dir (@dirs) {
+  if (-d $dir) {
+    my $build_dir   = $build . "/" . $dir; 
+#    if (! -f $build_dir)   {symlink obj, $build_dir; print "symlink obj, $build_dir \n";}
+    my $target = $OBJ . "/" . $dir . "/Conscript";
+    push @Targets, $target; print "new taret = $target\n";
+  }
 }
-if (-d "./pams") {
-  my $pams   = $build . "/pams"; 
-  if (! -f "$pams")   {symlink obj, $pams; print "symlink obj, $pams \n";}
-  $Targets .= $pams . "/Conscript";
-}
-print "STAR_SYS  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ Targets = $Targets\n";
+#if (-d "./StRoot") {
+#  my $stroot = $build . "/StRoot";
+#  if (! -f "$stroot") {symlink obj, $stroot; print "symlink obj, $stroot\n";}
+#  $Targets .= "#" . $stroot . "/Conscript";
+#}
+print "BUILD  = $BUILD EXPORT =  $EXPORT OBJ = $OBJ Targets = @Targets\n";
 #Link $OBJ => 'StRoot'; print "Link $OBJ => StRoot\n";
 Export qw( env INCLUDE LIB BIN EXPORT BUILD OBJ MAIN);
 Default qw (   .  );
-Build  ($Targets);
+Build  @Targets;
 #Build ( "StRoot/Conscript" );
 #________________________________________________________________________________
 # Builder for a C++ module
