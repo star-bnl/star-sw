@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.h,v 1.4 2003/09/12 21:31:50 jeromel Exp $
+ * $Id: StMuIOMaker.h,v 1.5 2004/04/02 03:24:54 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuIOMaker_hh
@@ -49,6 +49,11 @@ class StStrangeCuts;
 #include "StMuEmcCollection.h"
 class StMuEmcUtil;
 
+/// pmd stuff
+//#include "StMuPmdCollection.h"
+class StMuPmdUtil;
+class StMuTofUtil;
+
 class TFile;
 class TTree;
 class TChain;
@@ -58,8 +63,10 @@ class TClonesArray;
    @class StMuIOMaker
    Class to create and read STAR's common micro dst (StMuDst)
    
-   This class is a true maker in the STAR sense. It inherits from "StMaker" and implements the functions "int Init()", "void Clear()",
-   int Make()", and "int Finish()" in order to run as part of an "StChain". Please refer to the STAR Computing Web pages in case you do not 
+   This class is a true maker in the STAR sense. It inherits from "StMaker" and 
+   implements the functions "int Init()", "void Clear()",
+   int Make()", and "int Finish()" in order to run as part of an "StChain". 
+   Please refer to the STAR Computing Web pages in case you do not 
    know what "StMaker" and "StChain" mean.
    
 */
@@ -86,12 +93,14 @@ class StMuIOMaker : public StIOInterFace {
 
   StMuDst* muDst();                             ///< return pointer the  current (last read) StMuDst
   StMuEmcUtil* muEmcUtil() { return mEmcUtil; } ///< return pointer to StMuEmcUtil;
+  StMuPmdUtil* muPmdUtil() { return mPmdUtil; } ///< return pointer to StMuPmdUtil;
+  StMuTofUtil* muTofUtil() { return mTofUtil; } ///< return pointer to StMuPmdUtil;
   int currentIndex() { return mCurrentIndex; }
   int eventCounter() { return mEventCounter; }
   int numberOfEvents() { return mNumberOfEvents; }
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuIOMaker.h,v 1.4 2003/09/12 21:31:50 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuIOMaker.h,v 1.5 2004/04/02 03:24:54 jeromel Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -99,6 +108,8 @@ class StMuIOMaker : public StIOInterFace {
 private:
   StMuDst* mStMuDst;
   StMuEmcUtil* mEmcUtil;
+  StMuPmdUtil* mPmdUtil;
+  StMuTofUtil* mTofUtil;
 
   TChain* mChain;
   int mNumberOfEvents; ///< holds the number of events in the current chain (file)
@@ -137,8 +148,14 @@ private:
   TClonesArray* emcArrays[__NEMCARRAYS__];//->
   TClonesArray* mEmcArrays[__NEMCARRAYS__];//->
 
+  TClonesArray* pmdArrays[__NPMDARRAYS__];//->
+  TClonesArray* mPmdArrays[__NPMDARRAYS__];//->
 
-  ClassDef(StMuIOMaker, 1)
+  TClonesArray* tofArrays[__NTOFARRAYS__];//->
+  TClonesArray* mTofArrays[__NTOFARRAYS__];//->
+
+
+  ClassDef(StMuIOMaker, 2)
 }; 
 
 inline StMuDst* StMuIOMaker::muDst() { return mStMuDst;}
@@ -148,6 +165,9 @@ inline StMuDst* StMuIOMaker::muDst() { return mStMuDst;}
 /***************************************************************************
  *
  * $Log: StMuIOMaker.h,v $
+ * Revision 1.5  2004/04/02 03:24:54  jeromel
+ * Changes implements PMD and TOF.  TOF is clearly incomplete.
+ *
  * Revision 1.4  2003/09/12 21:31:50  jeromel
  * No changes (ident)
  *

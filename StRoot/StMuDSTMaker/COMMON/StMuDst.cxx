@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.20 2003/10/31 19:12:56 laue Exp $
+ * $Id: StMuDst.cxx,v 1.21 2004/04/02 03:24:53 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -16,6 +16,7 @@
 #include "StMuEvent.h"
 #include "StMuDebug.h"
 #include "StMuEmcUtil.h"
+#include "StMuPmdUtil.h"
 #include "TClonesArray.h"
 #include "TTree.h"
 
@@ -26,7 +27,8 @@
 TClonesArray* StMuDst::arrays[__NARRAYS__] = {0,0,0,0,0,0,0,0,0};
 TClonesArray* StMuDst::strangeArrays[__NSTRANGEARRAYS__] = {0,0,0,0,0,0,0,0,0,0,0,0};
 TClonesArray* StMuDst::emcArrays[__NEMCARRAYS__] = {0};
-
+TClonesArray* StMuDst::pmdArrays[__NPMDARRAYS__] = {0};
+TClonesArray* StMuDst::tofArrays[__NTOFARRAYS__] = {0};
 
 StMuDst::StMuDst() {
   DEBUGMESSAGE("");
@@ -47,6 +49,12 @@ void StMuDst::unset() {
   for ( int i=0; i<__NEMCARRAYS__; i++) {
     emcArrays[i] = 0;
   }
+  for ( int i=0; i<__NPMDARRAYS__; i++) {
+    pmdArrays[i] = 0;
+  }
+  for ( int i=0; i<__NTOFARRAYS__; i++) {
+    tofArrays[i] = 0;
+  }
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -63,6 +71,12 @@ void StMuDst::set(StMuDstMaker* maker) {
   for ( int i=0; i<__NEMCARRAYS__; i++) {
     emcArrays[i] = maker->mEmcArrays[i];
   }
+  for ( int i=0; i<__NPMDARRAYS__; i++) {
+    pmdArrays[i] = maker->mPmdArrays[i];
+  }
+  for ( int i=0; i<__NTOFARRAYS__; i++) {
+    tofArrays[i] = maker->mTofArrays[i];
+  }
 
   StStrangeEvMuDst* ev = strangeEvent();
   int nV0s = v0s()->GetEntries(); for (int i=0;i<nV0s; i++) v0s(i)->SetEvent(ev); // set the pointer to the StStrangeEvMuDst which is not read from disk
@@ -73,7 +87,12 @@ void StMuDst::set(StMuDstMaker* maker) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuDst::set(TClonesArray** theArrays, TClonesArray** theStrangeArrays, TClonesArray** theEmcArrays) {
+void StMuDst::set(TClonesArray** theArrays, 
+		  TClonesArray** theStrangeArrays, 
+		  TClonesArray** theEmcArrays,
+		  TClonesArray** thePmdArrays,
+		  TClonesArray** theTofArrays) 
+{
   DEBUGMESSAGE2("");
   for ( int i=0; i<__NARRAYS__; i++) {
     arrays[i] = theArrays[i];
@@ -86,7 +105,18 @@ void StMuDst::set(TClonesArray** theArrays, TClonesArray** theStrangeArrays, TCl
       emcArrays[i] = theEmcArrays[i];
     }
   }
+  if (thePmdArrays) {
+    for ( int i=0; i<__NPMDARRAYS__; i++) {
+      pmdArrays[i] = thePmdArrays[i];
+    }
+  }
+  if (theTofArrays) {
+    for ( int i=0; i<__NTOFARRAYS__; i++) {
+      tofArrays[i] = theTofArrays[i];
+    }
+  }
 }
+
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -161,8 +191,9 @@ StEvent* StMuDst::createStEvent() {
   //   ev->setEmcCollection(StEmcCollection*);
   //   ev->setRichCollection(StRichCollection*);
   //   ev->setTofCollection(StTofCollection*);
+  //ev->setTofCollection( new StTofCollection() );
   ev->setFpdCollection( new StFpdCollection(mu->fpdCollection()) );
-  //ev->setTriggerDetectorCollection(muStTriggerDetectorCollection*);
+  // ev->setTriggerDetectorCollection(muStTriggerDetectorCollection*); <<< WE DON'T WANT THAT
   ev->setL0Trigger ( new StL0Trigger(mu->l0Trigger()) );
   //   ev->setL1Trigger ( new StL0Trigger(mu->l0Trigger()) );
   ev->setL3Trigger ( new StL3Trigger() );
@@ -221,7 +252,13 @@ StEvent* StMuDst::createStEvent() {
     StEmcCollection *EMC = mEmcUtil->getEmc(emc);
     if(EMC) ev->setEmcCollection(EMC);
   }
-
+  // now get the PMD stuff and put it in the StEvent
+  static StMuPmdUtil* mPmdUtil = new StMuPmdUtil();
+  StMuPmdCollection *pmd = pmdCollection();
+  if(pmd) { // transform to StEvent format and fill it
+    StPhmdCollection *PMD = mPmdUtil->getPmd(pmd);
+    if(PMD) ev->setPhmdCollection(PMD);
+  }
 
   // now create, fill and add new StTriggerIdCollection to the StEvent
   StTriggerIdCollection* triggerIdCollection = new StTriggerIdCollection();
@@ -298,6 +335,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.21  2004/04/02 03:24:53  jeromel
+ * Changes implements PMD and TOF.  TOF is clearly incomplete.
+ *
  * Revision 1.20  2003/10/31 19:12:56  laue
  * added filling of track id to createStTrack() function
  *

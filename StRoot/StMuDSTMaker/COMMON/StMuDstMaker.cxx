@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.49 2004/02/17 05:05:35 jeromel Exp $
+ * $Id: StMuDstMaker.cxx,v 1.50 2004/04/02 03:24:54 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -46,6 +46,11 @@
 #include "StMuChainMaker.h"
 #include "StMuEmcCollection.h"
 #include "StMuEmcUtil.h"
+#include "StMuPmdCollection.h"
+#include "StMuPmdUtil.h"
+#include "StMuTofHit.h"
+#include "StMuTofHitCollection.h"
+#include "StMuTofUtil.h"
 
 #include "StMuDstMaker.h"
 #include "StMuDst.h"
@@ -100,8 +105,11 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
   mEventCounter=0;
   mStMuDst = new StMuDst();
   mEmcUtil = new StMuEmcUtil();
-  if ( ! mStMuDst || ! mEmcUtil)
+  mPmdUtil = new StMuPmdUtil();
+  mTofUtil = new StMuTofUtil();
+  if ( ! mStMuDst || ! mEmcUtil || ! mPmdUtil || ! mTofUtil )
     throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",__PRETTYF__);
+
 
   createArrays();
 
@@ -118,9 +126,12 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
 
 void StMuDstMaker::zeroArrays()
 {
-  for ( int i=0; i<__NARRAYS__; i++) {        arrays[i] = 0;         mArrays[i] = 0;        } 
-  for ( int i=0; i<__NSTRANGEARRAYS__; i++) { strangeArrays[i] = 0;  mStrangeArrays[i] = 0; }
-  for ( int i=0; i<__NEMCARRAYS__; i++){      emcArrays[i] = 0;      mEmcArrays[i] = 0;     }
+  int i;
+  for (  i=0; i < __NARRAYS__; i++) {        arrays[i] = 0;         mArrays[i] = 0;        } 
+  for (  i=0; i < __NSTRANGEARRAYS__; i++) { strangeArrays[i] = 0;  mStrangeArrays[i] = 0; }
+  for (  i=0; i < __NEMCARRAYS__; i++){      emcArrays[i] = 0;      mEmcArrays[i] = 0;     }
+  for (  i=0; i < __NPMDARRAYS__; i++){      pmdArrays[i] = 0;      mPmdArrays[i] = 0;     }
+  for (  i=0; i < __NTOFARRAYS__; i++){      tofArrays[i] = 0;      mTofArrays[i] = 0;     }
 }
 
 //-----------------------------------------------------------------------
@@ -147,7 +158,9 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   mEventCounter=0;
   mStMuDst = new StMuDst();
   mEmcUtil = new StMuEmcUtil();
-  if ( ! mStMuDst || ! mEmcUtil)
+  mPmdUtil = new StMuPmdUtil();
+  mTofUtil = new StMuTofUtil();
+  if ( ! mStMuDst || ! mEmcUtil || ! mPmdUtil || ! mTofUtil )
     throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",__PRETTYF__);
 
   createArrays();
@@ -160,6 +173,7 @@ StMuDstMaker::~StMuDstMaker() {
   DEBUGMESSAGE1("");
   clear(999);
   delete mStMuDst;
+  delete mTofUtil;
   DEBUGMESSAGE3("after arrays");
   saveDelete(mProbabilityPidAlgorithm);
   saveDelete(mTrackFilter);
@@ -208,7 +222,15 @@ void StMuDstMaker::createArrays() {
   for ( int i=0; i<__NEMCARRAYS__; i++) {
     mEmcArrays[i]= clonesArray(emcArrays[i],StMuArrays::emcArrayTypes[i],StMuArrays::emcArraySizes[i],StMuArrays::emcArrayCounters[i]);
   }
-  mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays);
+  /// from pmd group
+  for ( int i=0; i<__NPMDARRAYS__; i++) {
+    mPmdArrays[i]= clonesArray(pmdArrays[i],StMuArrays::pmdArrayTypes[i],StMuArrays::pmdArraySizes[i],StMuArrays::pmdArrayCounters[i]);
+  }
+  // from Tof group
+  for ( int i=0; i<__NTOFARRAYS__; i++) {
+    mTofArrays[i]= clonesArray(tofArrays[i],StMuArrays::tofArrayTypes[i],StMuArrays::tofArraySizes[i],StMuArrays::tofArrayCounters[i]);
+  }
+  mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays,mTofArrays);
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -226,6 +248,12 @@ void StMuDstMaker::clear(int del){
   }
   for ( int i=0; i<__NEMCARRAYS__; i++) {
     clear(mEmcArrays[i],StMuArrays::emcArrayCounters[i]		,dell);
+  }
+  for ( int i=0; i<__NPMDARRAYS__; i++) {
+    clear(mPmdArrays[i],StMuArrays::pmdArrayCounters[i]		,dell);
+  }
+  for ( int i=0; i<__NTOFARRAYS__; i++) {
+    clear(mTofArrays[i],StMuArrays::tofArrayCounters[i],         dell);
   }
   DEBUGMESSAGE2("out");
 }
@@ -464,7 +492,21 @@ void StMuDstMaker::setBranchAddresses(TChain* chain) {
       ts = StMuArrays::emcArrayNames[i]; ts +="*";
       chain->SetBranchStatus (ts,1);
     } 
-  
+
+    // pmd stuff
+    for ( int i=0; i<__NPMDARRAYS__; i++) {
+      chain->SetBranchAddress(StMuArrays::pmdArrayNames[i],&mPmdArrays[i]);
+      ts = StMuArrays::pmdArrayNames[i]; ts +="*";
+      chain->SetBranchStatus (ts,1);
+    } 
+
+    // tof stuff
+    for ( int i=0; i<__NTOFARRAYS__; i++) {
+      chain->SetBranchAddress(StMuArrays::tofArrayNames[i],&mTofArrays[i]);   
+      ts = StMuArrays::tofArrayNames[i]; ts +="*";
+      chain->SetBranchStatus (ts,1);
+    } 
+ 
     mTTree = mChain->GetTree();
   }
 }
@@ -485,7 +527,7 @@ void StMuDstMaker::openRead() {
     DEBUGVALUE3(mChain);
     setBranchAddresses(mChain);
 
-    mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays);  
+    mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays,mTofArrays);  
   }
 
 }
@@ -564,6 +606,20 @@ void StMuDstMaker::openWrite(string fileName) {
     branch = mTTree->Branch(StMuArrays::emcArrayNames[i],&mEmcArrays[i], bufsize, mSplit);
   }
   
+  // pmd stuff
+  DEBUGMESSAGE2("pmd arrays");
+  for ( int i=0; i<__NPMDARRAYS__; i++) {
+    DEBUGVALUE2(i);
+    branch = mTTree->Branch(StMuArrays::pmdArrayNames[i],&mPmdArrays[i], bufsize, mSplit);
+  }
+
+  // tof stuff
+  DEBUGMESSAGE2("tof arrays");
+  for ( int i=0; i<__NTOFARRAYS__; i++) {
+    DEBUGVALUE2(i);
+    branch = mTTree->Branch(StMuArrays::tofArrayNames[i],&mTofArrays[i], bufsize, mSplit);
+  }
+  
   mCurrentFileName = fileName;
 }
 //-----------------------------------------------------------------------
@@ -593,6 +649,8 @@ void StMuDstMaker::fillTrees(StEvent* ev, StMuCut* cut){
     fillL3AlgorithmInfo(ev);
     fillDetectorStates(ev);
     fillEmc(ev);
+    fillPmd(ev);
+    fillTof(ev);
   }
   catch(StMuException e) {
     e.print();
@@ -658,6 +716,53 @@ void StMuDstMaker::fillEmc(StEvent* ev) {
   if (!muEmcColl) throw StMuExceptionNullPointer("no StMuEmcCollection",__PRETTYF__);
   mEmcUtil->fillMuEmc(muEmcColl,emccol);
   
+  timer.stop();
+  DEBUGVALUE2(timer.elapsedTime());
+}
+
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuDstMaker::fillPmd(StEvent* ev) {
+  DEBUGMESSAGE2("");   
+  StPhmdCollection* phmdColl=(StPhmdCollection*)ev->phmdCollection();
+  if (!phmdColl)  return; //throw StMuExceptionNullPointer("no StPhmdCollection",__PRETTYF__);
+  StTimer timer;
+  timer.start();
+  
+  TClonesArray *tca = mPmdArrays[muPmd];
+  new((*tca)[0]) StMuPmdCollection();
+  StMuPmdCollection* muPmdColl = (StMuPmdCollection*)tca->At(0);
+  if (!muPmdColl) throw StMuExceptionNullPointer("no StMuPmdCollection",__PRETTYF__);
+  mPmdUtil->fillMuPmd(phmdColl,muPmdColl);
+  
+  timer.stop();
+  DEBUGVALUE2(timer.elapsedTime());
+}
+
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuDstMaker::fillTof(StEvent* ev) {
+  DEBUGMESSAGE2("");
+  StTofCollection *tofcol = ev->tofCollection();
+  if( !ev || !tofcol || !tofcol->dataPresent() )
+    return;  //throw StMuExceptionNullPointer("no StTofDataCollection",__PRETTYF__);
+  StTimer timer;
+  timer.start();
+
+  // fill tofHit
+  StMuTofHitCollection *muTofHitColl = new StMuTofHitCollection();
+  mTofUtil->fillMuTofHit(muTofHitColl, tofcol);
+  for(size_t i=0; i < muTofHitColl->size(); i++) {
+    StMuTofHit* tofMuHit = (StMuTofHit *)muTofHitColl->getHit(i);
+    addType( mTofArrays[muTofHit], *tofMuHit );
+  }
+
+  // fill tofData
+  StSPtrVecTofData &tofData = tofcol->tofData();
+  for(size_t i=0; i < tofData.size(); i++) {
+    addType( mTofArrays[muTofData], *tofData[i] );
+  }
+
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
 }
@@ -953,6 +1058,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.50  2004/04/02 03:24:54  jeromel
+ * Changes implements PMD and TOF.  TOF is clearly incomplete.
+ *
  * Revision 1.49  2004/02/17 05:05:35  jeromel
  * One more hidden one found post-commit
  *
