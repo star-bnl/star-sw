@@ -1,13 +1,23 @@
+//////////////////////////////////////////////////////////////////////////
+// 
+// $Id: StFlowNanoEvent.h,v 1.2 2000/03/08 15:10:50 posk Exp $
+//
+// Author: Sergei Voloshin and Raimond Snellings, March 2000
+//
+// Description:  A persistent Flow nano DST
+// 
+//////////////////////////////////////////////////////////////////////////
+//
+// $Log: StFlowNanoEvent.h,v $
+// Revision 1.2  2000/03/08 15:10:50  posk
+// Added $Id$ and $Log$.
+//
+//
+// 
+//////////////////////////////////////////////////////////////////////////
 #ifndef StFlowNanoEvent__h
 #define StFlowNanoEvent__h
 
-//////////////////////////////////////////////////////////////////////////
-//                                                                      //
-// Event                                                                //
-//                                                                      //
-// Description of the event and track parameters                        //
-//                                                                      //
-//////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
 #include "TObject.h"
 #include "TClonesArray.h"
@@ -21,12 +31,12 @@ private:
    Int_t   fDate;
 
 public:
-   StFlowNanoEventHeader() : fEvtNum(0), fRun(0), fDate(0) { }
+           StFlowNanoEventHeader() : fEvtNum(0), fRun(0), fDate(0) { }
    virtual ~StFlowNanoEventHeader() { }
-   void   Set(Int_t i, Int_t r, Int_t d) { fEvtNum = i; fRun = r; fDate = d; }
-   Int_t  GetEvtNum() const { return fEvtNum; }
-   Int_t  GetRun() const { return fRun; }
-   Int_t  GetDate() const { return fDate; }
+   void    Set(Int_t i, Int_t r, Int_t d) { fEvtNum = i; fRun = r; fDate = d; }
+   Int_t   GetEvtNum() const { return fEvtNum; }
+   Int_t   GetRun() const { return fRun; }
+   Int_t   GetDate() const { return fDate; }
 
    ClassDef(StFlowNanoEventHeader,1)  //Event Header
 };
@@ -41,12 +51,11 @@ private:
    static TClonesArray    *fgTracks;
 
 public:
-   StFlowNanoEvent();
-   virtual ~StFlowNanoEvent();
+                 StFlowNanoEvent();
+   virtual       ~StFlowNanoEvent();
    void          Clear(Option_t *option ="");
    static void   Reset(Option_t *option ="");
    void          SetNtrack(Int_t n) { fNtrack = n; }
-
    void          SetHeader(Int_t i, Int_t run, Int_t date);
    void          AddTrack(Float_t pt, Float_t phi, Float_t eta );
 
@@ -61,17 +70,17 @@ public:
 class StFlowNanoTrack : public TObject {
 
 private:
-   Float_t      fPt;         
-   Float_t      fPhi;         
-   Float_t      fEta;         
+   Float_t  fPt;         
+   Float_t  fPhi;         
+   Float_t  fEta;         
 
 public:
-   StFlowNanoTrack() { }
+            StFlowNanoTrack() { }
    StFlowNanoTrack(Float_t pt, Float_t phi, Float_t eta);
-   virtual ~StFlowNanoTrack() { }
-   Float_t       GetPt() const { return fPt; }
-   Float_t       GetPhi() const { return fPhi; }
-   Float_t       GetEta() const { return fEta; }
+   virtual  ~StFlowNanoTrack() { }
+   Float_t  GetPt() const { return fPt; }
+   Float_t  GetPhi() const { return fPhi; }
+   Float_t  GetEta() const { return fEta; }
 
    ClassDef(StFlowNanoTrack,1)  //A track segment
 };
