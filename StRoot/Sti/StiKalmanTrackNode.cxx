@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.68 2005/03/18 17:35:38 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.69 2005/03/19 00:20:33 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.69  2005/03/19 00:20:33  perev
+ * Assert for zero determinant ==> print
+ *
  * Revision 2.68  2005/03/18 17:35:38  perev
  * some asserts removed
  *
@@ -1063,7 +1066,10 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   double det=r00*r11 - r01*r01;
   //if (_cYY<=0 || _cZZ<=0 || det<=0)
   //  cout << endl << "evalChi2 c00:"<<_cYY<< " c10:"<<_cZY<<" c11:"<<_cZZ<<" det:"<<det<< " eyy:"<<eyy<<" ezz:"<<ezz<<endl;
-  if (fabs(det)==0.) throw runtime_error("SKTN::evaluateChi2() Singular matrix !\n");
+  if (det<1.e-10) {
+    printf("StiKalmanTrackNode::evalChi2 *** zero determinant %g\n",det);
+    return 1e60;
+  }
   double tmp=r00; r00=r11; r11=tmp; r01=-r01;  
   double dy=hit->y()-_y;
   double dz=hit->z()-_z;
