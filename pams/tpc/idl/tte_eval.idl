@@ -21,7 +21,7 @@
        float     dpx;        /* error on reconstructed px */
        float     dpy;        /* error on reconstructed py */
        float     dpz;        /* error on reconstructed pz */
-       float     pid;        /* Particle id */
+       long      pid;        /* Particle id */
        float     prob[2];    /* Probability for a given chisq */
        float     ptg;        /* Transverse momentum at the first pnt(mc) */
        float     ptr;        /* Reconstructed pt at the first point */
