@@ -28,11 +28,10 @@ extern "C" void ami_module_register_ ()    {}
 #include "tntLib.h"
 #include "topLib.h"
 #include "dstype.h"
- 
 
 #define staf_start_          F77_NAME(staf_start,STAF_START)
 #define staf_stop_           F77_NAME(staf_stop,STAF_STOP)
-#define dui_cdir_            F77_NAME(dui_cdir,dui_cdir) 
+#define dui_cdir_            F77_NAME(dui_cdir,dui_cdir)
 #define tdm_new_table_       F77_NAME(tdm_new_table,tdm_new_table)
 #define tdm_map_table_       F77_NAME(tdm_map_table,TDM_MAP_TABLE)
 #define tdm_find_spec_       F77_NAME(tdm_find_spec,TDM_FIND_SPEC)
@@ -48,7 +47,7 @@ extern "C" void ami_module_register_ ()    {}
 #define xdf_next_record_     F77_NAME(xdf_next_record,XDF_NEXT_RECORD)
 #define xdf_get_struct_      F77_NAME(xdf_get_struct,XDF_GET_STRUCT)
 #define xdf_getev_           F77_NAME(xdf_getev,XDF_GETEV)
-#define cs_get_func_         F77_NAME(cs_get_func,CS_GET_FUNC) 
+#define cs_get_func_         F77_NAME(cs_get_func,CS_GET_FUNC)
 /*---------------------------------------------------------------------------*/
  
 typedef struct XdfLun_t
@@ -115,11 +114,11 @@ extern "C" int type_of_call tdm_map_table_
                              (char* path, char* name, char* spec, long* l,
                               char* data, int lp, int ln, int ls)
 #else
-                             (char* path, int lp, 
-                              char* name, int ln, 
-                              char* spec, int ls, 
-                              long* l,char* data) 
-#endif                             
+                             (char* path, int lp,
+                              char* name, int ln,
+                              char* spec, int ls,
+                              long* l,char* data)
+#endif
 {
   tdmDataset*       tDs = NULL; // pointer to tdm class member function
   tdmTable*         aDs = NULL; // pointer to table finder function
@@ -160,7 +159,7 @@ extern "C" int type_of_call tdm_map_table_
   return 0;
 }
  
-extern "C" int type_of_call tdm_new_table_ 
+extern "C" int type_of_call tdm_new_table_
 #ifndef CERNLIB_MSSTDCALL
                  (char* name, char* spec, int* n, int ln, int ls)
 #else
@@ -292,7 +291,7 @@ extern "C" int type_of_call ami_call_
    return status;
 }
  
-extern "C" int type_of_call ami_module_call_ 
+extern "C" int type_of_call ami_module_call_
 #ifndef CERNLIB_MSSTDCALL
   (char* name, int* n, char* tables,int ln, int lt)
 #else
