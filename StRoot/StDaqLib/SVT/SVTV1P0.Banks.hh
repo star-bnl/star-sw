@@ -1,6 +1,6 @@
 /***************************************************************************
  *      
- * $Id: SVTV1P0.Banks.hh,v 1.4 2003/10/28 20:58:30 perev Exp $
+ * $Id: SVTV1P0.Banks.hh,v 1.5 2004/03/01 18:05:47 fisyak Exp $
  *      
  * Author: Marcelo Munhoz, J. Schambach
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *      
  * $Log: SVTV1P0.Banks.hh,v $
+ * Revision 1.5  2004/03/01 18:05:47  fisyak
+ * Account for new place for rts.h, add osf
+ *
  * Revision 1.4  2003/10/28 20:58:30  perev
- * Linux ==> __linux__
+ *  Linux ==> __linux__
  *
  * Revision 1.3  2001/04/18 19:47:25  ward
  * StDaqLib/SVT stuff from Jo Schambach.
@@ -113,7 +116,7 @@ struct SVTCoordinates
   u_char ladder;
   u_char waferID;  // 4:hybrid, 4:wafer
   u_char hybridID;  // 1:not used, 2:transition board, 3:wafer, 2:hybrid
-#elif __i386__
+#elif defined(__i386__) || defined(__osf__)
   u_char hybridID;  // 1:not used, 2:transition board, 3:wafer, 2:hybrid
   u_char waferID;  // 4:hybrid, 4:wafer
   u_char ladder;

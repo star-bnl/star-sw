@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: EventReader.cxx,v 1.47 2004/02/18 20:31:14 ward Exp $
+ * $Id: EventReader.cxx,v 1.48 2004/03/01 18:05:47 fisyak Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: Event reader code common to all DAQ detectors
@@ -23,6 +23,9 @@
  *
  ***************************************************************************
  * $Log: EventReader.cxx,v $
+ * Revision 1.48  2004/03/01 18:05:47  fisyak
+ * Account for new place for rts.h, add osf
+ *
  * Revision 1.47  2004/02/18 20:31:14  ward
  * There was a big mess.  I am trying to fix it.
  *
@@ -201,7 +204,7 @@ static const char *detnams[] =
 
   char ts[128] ;
 
-  sprintf(ts,"%s",ctime((const long int*)&UnixTime)) ;
+  sprintf(ts,"%s",ctime((const time_t *)&UnixTime)) ;
   ts[24] = 0 ;
   fprintf(fd,"===============  Event # %d  =============\n",EventSeqNo);
   fprintf(fd,"Ev len (wds) %d\n",EventLength);
