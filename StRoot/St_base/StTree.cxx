@@ -300,13 +300,13 @@ Int_t StBranch::GetEvent(Int_t mode)
   Delete(); if (fList) delete fList; fList=0; 
   if(Open()) return 1; 
 
-  if (IsOption("SINGLE"){//Read singleton
+  if (IsOption("SINGLE"))	{//Read singleton
     obj = StIO::Read (fTFile,GetName(),(ULong_t)(-2));  fIOMode = 0;}
 
-  else if (mode) 	{//Read next
+  else if (mode) 		{//Read next
     obj = StIO::ReadNext(fTFile,GetName(),fUKey);
 
-  } else    		{//Read this one
+  } else    			{//Read this one
     obj = StIO::Read    (fTFile,GetName(),fUKey);
   }
 
