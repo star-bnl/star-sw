@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: dbNodes.h,v 1.4 2000/01/27 20:30:40 porter Exp $
+ * $Id: dbNodes.h,v 1.5 2001/01/22 18:40:25 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: dbNodes.h,v $
+ * Revision 1.5  2001/01/22 18:40:25  porter
+ * Added a wrapper for StMessage so one can use it in StDbLib
+ *
  * Revision 1.4  2000/01/27 20:30:40  porter
  * cleaned up dtor & error logic
  *
@@ -34,12 +37,13 @@
 #include "StDbLib/StDbNode.hh"
 
 #include <vector>
-#ifdef ST_NO_TEMPLATE_DEF_ARGS
-typedef vector<StDbNode*, allocator<StDbNode*> > nodeVec;
-#else
 #if !defined(ST_NO_NAMESPACES)
 using std::vector;
 #endif
+
+#ifdef ST_NO_TEMPLATE_DEF_ARGS
+typedef vector<StDbNode*, allocator<StDbNode*> > nodeVec;
+#else
 typedef vector<StDbNode*> nodeVec;
 #endif
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.18 2000/08/15 22:53:14 porter Exp $
+ * $Id: StDbBroker.h,v 1.19 2001/01/22 18:40:25 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.19  2001/01/22 18:40:25  porter
+ * Added a wrapper for StMessage so one can use it in StDbLib
+ *
  * Revision 1.18  2000/08/15 22:53:14  porter
  * Added 2 write methods.
  *  - 1 works once "list" is requested from database
@@ -93,7 +96,6 @@ class StDbTable;
 class TTable;
 /*this is a temporary quick-and-dirty class for db access*/
 
-
 class StDbBroker  {
   public:
       enum EColumnType {kNAN, kFloat, kInt, kLong, kShort, kDouble, kUInt
@@ -101,6 +103,7 @@ class StDbBroker  {
 
 typedef St_tableDescriptor Descriptor;
 
+//--> for Sasha's (now obsolete?) Fill & Use routines 
 struct oldDescriptor {
     char         fColumnName[32];  /* The name of this data-member: */
     unsigned int fIndexArray[3];   /* The array of the sizes for each dimen*/
@@ -110,7 +113,6 @@ struct oldDescriptor {
     unsigned int fDimensions;/* The number of the dimensions for array   */
     Int_t        fType;        /* The data type of the selected column   */
 };
-
 
   protected:
     oldDescriptor *m_descriptor;
@@ -142,8 +144,6 @@ struct oldDescriptor {
 
     char*        m_flavor;
     unsigned int m_prodTime;
-
-
     dbConfig_st*  buildConfig(int& numRows);
     int           buildNodes(StDbConfigNode* node, int pID);
 
@@ -167,10 +167,9 @@ struct oldDescriptor {
 
     //  with fullPath -> find the database from the path. Table information
     //  is requested from db but over-ridden by input options (idList).
-    //  This method will be slow for writting several tables but speed of writes
+    //  This method will be slow for writing several tables but speed of writes
     //  should not be an issue.
     Int_t WriteToDb(void* pArray, const char* fullPath, int* idList=0);
-
 
     StDbTable* findTable(const char* databaseName);
 
@@ -184,9 +183,7 @@ struct oldDescriptor {
     UInt_t GetEndTimeStamp()         {return m_endTimeStamp; }
     UInt_t GetProdTime()             {return m_prodTime;}
 
-
     StTableDescriptorI* GetTableDescriptor();
-  
 
     void loadOldDescriptor(){};
     static const Char_t * GetTypeName( EColumnType type) {
@@ -209,9 +206,7 @@ struct oldDescriptor {
 	} 
     };
 
-
     void   SetDateTime(UInt_t date,UInt_t time);
-
     void   SetDictionary(UInt_t nElements, Descriptor *D)
                                      {m_nElements=nElements; mdescriptor = D;}
     void   SetDictionary(Descriptor *D)
@@ -245,21 +240,19 @@ struct oldDescriptor {
     void   SetProdTime(UInt_t ptime);
     void   SetFlavor(const char* flavor);
 
-
-    static int DbInit(const char *);  		//dbInit
-
+    static int DbInit(const char *);  		//Sasha's dbInit 
     void   setVerbose(int isVerbose) { m_isVerbose = isVerbose; } 
+    void   printStatistics();
     void   CloseAllConnections();
 
   //-> here's all the real stuff now
-   
     dbConfig_st* InitConfig(const char* configName, int& numRows, char* versionName=0);
-
     StDbManager* mgr;
   
   ClassDef(StDbBroker,0)
 };
 
+// The old C-functions from Sasha's prototype & 1st integration
 extern "C" void DbFill(unsigned int *,         //datetime[4]
 		       const char *,  //tableName
 		       const char *,  //StructName
