@@ -1,5 +1,5 @@
 
-*	SGI versions.
+*	HPU versions.
 
 	SUBROUTINE STRCPU(TCPU)
 	INTEGER TCPU
