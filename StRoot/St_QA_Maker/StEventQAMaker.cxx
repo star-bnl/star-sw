@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.3 1999/11/23 19:00:50 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.4 1999/12/02 19:38:50 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.4  1999/12/02 19:38:50  lansdell
+// some more histograms are filled now, but still more to go!
+//
 // Revision 1.3  1999/11/23 19:00:50  lansdell
 // Reorganized Make() and include files (Gene)
 //
@@ -203,35 +206,48 @@ void StEventQAMaker::MakeHistGlob() {
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistDE() {
   // Fill histograms for dE/dx
-/*
-  St_DataSetIter dstI(dst);
-  
-  St_dst_dedx *dst_dedx = (St_dst_dedx *) dstI["dst_dedx"];
 
-  if(dst_dedx) {
+  Int_t cntrows=0;
+  StSPtrVecTrackNode &theNodes = event->trackNodes();
 
-    Int_t cntrows=0;
-    cntrows = dst_dedx->GetNRows();
-    m_ndedxr->Fill(cntrows);
+  for (UInt_t i=0; i<theNodes.size(); i++) {
+    cntrows++;
+    StTrack *theTrack = theNodes[i]->track(0);
+    if (!theTrack) continue;
+    StTrackPidTraits *trkPidTr = theTrack->pidTraits()[0];
+    if (trkPidTr) {
 
-    dst_dedx_st *d = dst_dedx->GetTable();
-    for (Int_t i = 0; i < dst_dedx->GetNRows(); i++,d++) {
-      m_ndedx->Fill(d->ndedx);
-      m_dedx0->Fill(d->dedx[0]*1e6);
-      m_dedx1->Fill(d->dedx[1]*1e6);
+      //  should use dynamic_cast, but will crash in root4star (why?) -CL
+      //StDedxPidTraits *dedxPidTr = dynamic_cast<StDedxPidTraits*>(trkPidTr);
+      StDedxPidTraits *dedxPidTr = (StDedxPidTraits*)(trkPidTr);
+      if (dedxPidTr) {
+	m_ndedx->Fill(dedxPidTr->numberOfPoints());
+	m_dedx0->Fill(dedxPidTr->mean());
+	m_dedx1->Fill(dedxPidTr->sigma());
+      }
     }
   }
-*/
+  m_ndedxr->Fill(cntrows);
 }
 
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistPrim() {
 
-  StPrimaryVertex *primVtx = event->primaryVertex();
+  Int_t cnttrk=0;
+  Int_t cnttrkg=0;
 
+  StPrimaryVertex *primVtx = event->primaryVertex();
+  UInt_t daughters=0;
+  UInt_t currentNumber=0;
+  for (UInt_t v=0; v<event->numberOfPrimaryVertices(); v++) {
+    currentNumber = event->primaryVertex(v)->numberOfDaughters();
+    if (currentNumber > daughters) {
+      daughters = currentNumber;
+      primVtx = event->primaryVertex(v);
+    }
+  }
+  
   if (primVtx) {
-    Int_t cnttrk=0;
-    Int_t cnttrkg=0;
     cnttrk = primVtx->numberOfDaughters();
     m_primtrk_tot->Fill(cnttrk);
 
@@ -323,12 +339,21 @@ void StEventQAMaker::MakeHistPrim() {
 
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistGen() {
-
 /*
   if (Debug()) cout << " *** in StEventQAMaker - filling particle histograms " << endl;
 
   // THIS IS NOT FINISHED AND WILL NOT COMPILE YET! -CL
 
+  StSPtrVecTrackNode &theNodes = event->trackNodes();
+  Int_t nchgpart = 0;
+  Int_t totpart = 0;
+
+  for (UInt_t i=0; i<theNodes.size(); i++) {
+    StParticleDefinition *theTrack = theNodes[i]->track(i);
+    if (!theTrack) continue;
+    StParticleDefinition *part = theTrack->
+*/
+/*
   St_DataSetIter dstI(dst);
   
   St_particle   *part     = (St_particle  *) dstI["particle"];
@@ -384,29 +409,28 @@ void StEventQAMaker::MakeHistV0() {
 
   if (v0vertices.size() > 0) {
     Int_t cntrows=0;
-    cntrows = v0vertices.size();  //Is there a better way of doing this? -CL
+    cntrows = v0vertices.size();   //Is there a better way of doing this? -CL
     m_v0->Fill(cntrows);
-
     Float_t m_prmass2 = proton_mass_c2*proton_mass_c2;
     Float_t m_pimass2 = (0.139567*0.139567);
 
     for (UInt_t k=0; k<v0vertices.size(); k++) {
       StV0Vertex *v0 = v0vertices[k];
-      cntrows += v0->numberOfDaughters();
-
-      Float_t e1a = abs(v0->momentumOfDaughter(positive));
-      Float_t e2 = abs(v0->momentumOfDaughter(negative));
-      Float_t e1 = e1a + m_prmass2;
-      e2 += m_pimass2;
-      e1 = TMath::Sqrt(e1);
-      e2 = TMath::Sqrt(e2);
-      Float_t p = abs(v0->momentum());
-      Float_t inv_mass_la = TMath::Sqrt((e1+e2)*(e1+e2) - p);
-      e1 = e1a + m_pimass2;
-      e1 = TMath::Sqrt(e1);
-      Float_t inv_mass_k0 = TMath::Sqrt((e1+e2)*(e1+e2) - p);
-      m_ev0_lama_hist->Fill(inv_mass_la);
-      m_ev0_k0ma_hist->Fill(inv_mass_k0);   
+      if (v0) {
+	Float_t e1a = pow(abs(v0->momentumOfDaughter(positive)),2);
+	Float_t e2 = pow(abs(v0->momentumOfDaughter(negative)),2);
+	Float_t e1 = e1a + m_prmass2;
+	e2 += m_pimass2;
+	e1 = TMath::Sqrt(e1);
+	e2 = TMath::Sqrt(e2);
+	Float_t p = pow(abs(v0->momentum()),2);
+	Float_t inv_mass_la = TMath::Sqrt((e1+e2)*(e1+e2) - p);
+	e1 = e1a + m_pimass2;
+	e1 = TMath::Sqrt(e1);
+	Float_t inv_mass_k0 = TMath::Sqrt((e1+e2)*(e1+e2) - p);
+	m_ev0_lama_hist->Fill(inv_mass_la);
+	m_ev0_k0ma_hist->Fill(inv_mass_k0);
+      }
     }
   }
 }
@@ -417,6 +441,42 @@ void StEventQAMaker::MakeHistPID() {
   if (Debug()) cout << " *** in StEventQAMaker - filling PID histograms " << endl;
   
   // THIS IS NOT FINISHED AND WILL NOT COMPILE YET! -CL
+
+  StPrimaryVertex *primVtx = event->primaryVertex();
+  UInt_t daughters=0;
+  UInt_t currentNumber=0;
+  for (UInt_t v=0; v<event->numberOfPrimaryVertices(); v++) {
+    currentNumber = event->primaryVertex(v)->numberOfDaughters();
+    if (currentNumber > daughters) {
+      daughters = currentNumber;
+      primVtx = event->primaryVertex(v);
+    }
+  }
+
+  StSPtrVecTrackNode &theNodes = event->trackNodes();
+  for (UInt_t i=0; i<theNodes.size(); i++) {
+    StTrack *theTrack = theNodes[i]->track(0);
+    if (!theTrack) continue;
+    StTrackPidTraits *trkPidTr = theTrack->pidTraits()[0];
+    if (trkPidTr) {
+      //  should use dynamic_cast, but will crash in root4star (why?) -CL
+      //StDedxPidTraits *dedxPidTr = dynamic_cast<StDedxPidTraits*>(trkPidTr);
+      StDedxPidTraits *dedxPidTr = (StDedxPidTraits*)(trkPidTr);
+      if (dedxPidTr) {
+	Float_t p = 
+      }
+    }
+  }
+
+  
+  if (primVtx) {
+    for (UInt_t i=0; i<primVtx->numberOfDaughters(); i++) {
+      StTrack *primtrk = primVtx->daughter(i);
+
+      if (primtrk->flag()>0) {
+*/
+
+/* ===== Old DST table-based code... -CL
 
   // spectra-PID diagnostic histograms
   St_dst_track      *primtrk     = (St_dst_track     *) dstI["primtrk"];
@@ -456,41 +516,108 @@ void StEventQAMaker::MakeHistPID() {
 
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistVertex() {
-/*
+
   if (Debug()) cout << " *** in StEventQAMaker - filling vertex histograms " << endl;
 
-  // THIS IS NOT FINISHED AND WILL NOT COMPILE YET! -CL
+  StPrimaryVertex *primVtx = event->primaryVertex();
+  UInt_t daughters=0;
+  UInt_t currentNumber=0;
 
-  //Which set of vertices should I look at here? Prim,V0,Xi,Kink, or ALL? -CL
-  St_dst_vertex      *vertex     = (St_dst_vertex *) dstI["vertex"];
-  
-  if (vertex) {
-
-    Int_t cntrows=0;
-    cntrows = vertex->GetNRows();
-    m_v_num->Fill(cntrows);
-
-    dst_vertex_st  *t   = vertex->GetTable();
-    for (Int_t i = 0; i < vertex->GetNRows(); i++,t++){
-      //         if (t->iflag>0) {  
-      if (i==0){                           // plot of primary vertex only
-	m_pv_detid->Fill(t->det_id); 
-	m_pv_vtxid->Fill(t->vtx_id);
-	if (!isnan(double(t->x))) m_pv_x->Fill(t->x);     
-	if (!isnan(double(t->y))) m_pv_y->Fill(t->y);     
-	if (!isnan(double(t->z))) m_pv_z->Fill(t->z);     
-	m_pv_pchi2->Fill(t->chisq[0]);
+  if (primVtx) {
+    for (UInt_t v=0; v<event->numberOfPrimaryVertices(); v++) {
+      currentNumber = event->primaryVertex(v)->numberOfDaughters();
+      if (currentNumber > daughters) {
+	daughters = currentNumber;
+	primVtx = event->primaryVertex(v);
       }
-      m_v_detid->Fill(t->det_id); 
-      m_v_vtxid->Fill(t->vtx_id);
-      if (!isnan(double(t->x))) m_v_x->Fill(t->x);     
-      if (!isnan(double(t->y))) m_v_y->Fill(t->y);     
-      if (!isnan(double(t->z))) m_v_z->Fill(t->z);     
-      m_v_pchi2->Fill(t->chisq[0]); 
-      // }
+    }
+
+    for (UInt_t j=0; j<event->numberOfPrimaryVertices(); j++) {
+      StPrimaryVertex *aPrimVtx = event->primaryVertex(j);
+      if (aPrimVtx == primVtx) {
+	//m_pv_detid->Fill(primVtx->_);
+	//m_pv_vtxid->Fill(primVtx->_);
+	if (!isnan(double(primVtx->position().x())))
+	  m_pv_x->Fill(primVtx->position().x());
+	if (!isnan(double(primVtx->position().y())))
+	  m_pv_y->Fill(primVtx->position().y());
+	if (!isnan(double(primVtx->position().z())))
+	  m_pv_z->Fill(primVtx->position().z());
+	m_pv_pchi2->Fill(primVtx->chiSquared());
+      }
+      //m_v_detid->Fill(aPrimVtx->det_id); 
+      //m_v_vtxid->Fill(aPrimVtx->vtx_id);
+      if (!isnan(double(aPrimVtx->position().x())))
+	m_v_x->Fill(aPrimVtx->position().x());     
+      if (!isnan(double(aPrimVtx->position().y())))
+	m_v_y->Fill(aPrimVtx->position().y());     
+      if (!isnan(double(aPrimVtx->position().z())))
+	m_v_z->Fill(aPrimVtx->position().z());     
+      m_v_pchi2->Fill(aPrimVtx->chiSquared()); 
     }
   }
-*/
+
+  StSPtrVecV0Vertex &v0Vtx = event->v0Vertices();
+
+  if (v0Vtx.size() > 0) {
+    for (UInt_t k=0; k<v0Vtx.size(); k++) {
+      StV0Vertex *v0 = v0Vtx[k];
+      if (v0) {
+	//m_v_detid->Fill(v0->det_id); 
+	//m_v_vtxid->Fill(v0->vtx_id);
+	if (!isnan(double(v0->position().x())))
+	  m_v_x->Fill(v0->position().x());     
+	if (!isnan(double(v0->position().y())))
+	  m_v_y->Fill(v0->position().y());     
+	if (!isnan(double(v0->position().z())))
+	  m_v_z->Fill(v0->position().z());     
+	m_v_pchi2->Fill(v0->chiSquared()); 
+      }
+    }
+  }
+
+  StSPtrVecXiVertex &xiVtx = event->xiVertices();
+
+  if (xiVtx.size() > 0) {
+    for (UInt_t l=0; l<xiVtx.size(); l++) {
+      StXiVertex *xi = xiVtx[l];
+      if (xi) {
+	//m_v_detid->Fill(xi->det_id); 
+	//m_v_vtxid->Fill(xi->vtx_id);
+	if (!isnan(double(xi->position().x())))
+	  m_v_x->Fill(xi->position().x());     
+	if (!isnan(double(xi->position().y())))
+	  m_v_y->Fill(xi->position().y());     
+	if (!isnan(double(xi->position().z())))
+	  m_v_z->Fill(xi->position().z());     
+	m_v_pchi2->Fill(xi->chiSquared()); 
+      }
+    }
+  }
+
+  StSPtrVecKinkVertex &kinkVtx = event->kinkVertices();
+
+  if (kinkVtx.size() > 0) {
+    for (UInt_t m=0; m<kinkVtx.size(); m++) {
+      StKinkVertex *kink = kinkVtx[m];
+      if (kink) {
+	//m_v_detid->Fill(kink->det_id); 
+	//m_v_vtxid->Fill(kink->vtx_id);
+	if (!isnan(double(kink->position().x())))
+	  m_v_x->Fill(kink->position().x());     
+	if (!isnan(double(kink->position().y())))
+	  m_v_y->Fill(kink->position().y());     
+	if (!isnan(double(kink->position().z())))
+	  m_v_z->Fill(kink->position().z());     
+	m_v_pchi2->Fill(kink->chiSquared()); 
+      }
+    }
+  }
+  UInt_t cntrows = 0;
+  cntrows = event->numberOfPrimaryVertices() + v0Vtx.size() +
+            xiVtx.size() + kinkVtx.size(); //this gives 3 less than the DSTs!!
+                                           //->needs to be fixed !!!
+  m_v_num->Fill(cntrows);
 }
 
 //_____________________________________________________________________________
@@ -508,20 +635,13 @@ void StEventQAMaker::MakeHistXi() {
 
 //_____________________________________________________________________________
 void StEventQAMaker::MakeHistPoint() {
-/*
+
+  // This only counts the hits from the TPC for now! -CL
   if (Debug()) cout << " *** in StEventQAMaker - filling point histograms " << endl;
 
-  // THIS IS NOT FINISHED AND WILL NOT COMPILE YET! -CL
+  StTpcHitCollection *tpcHits = event->tpcHitCollection();
 
-  St_DataSetIter dstI(dst);           
-
-  St_dst_point *pt = (St_dst_point*) dstI["point"];
-  if (pt) {
-    Int_t cntrows=0;
-    cntrows = pt->GetNRows();
-    m_pnt_tot->Fill(cntrows);
-  }
-*/
+  m_pnt_tot->Fill(tpcHits->numberOfHits());
 }
 
 //_____________________________________________________________________________
