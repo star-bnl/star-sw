@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 2.25 2001/10/24 20:11:49 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.26 2001/10/31 22:08:40 suaide Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.26  2001/10/31 22:08:40  suaide
+// fixed EMC histograms
+//
 // Revision 2.25  2001/10/24 20:11:49  genevb
 // Fixed trigger issue for year 1
 //
@@ -1682,73 +1685,94 @@ void StEventQAMaker::MakeHistEMC() {
   StPrimaryVertex* pvert = event->primaryVertex(0);
 
   UInt_t i;
+  
+  //if (Debug()) 
+  //  gMessMgr->Info(" *** in StEventQAMaker - filling EMC HITS ");
 
   for(i=0; i<4; i++){
     Int_t det = i+1;
     StDetectorId id = StEmcMath::detectorId(det);
     StEmcDetector* detector=emccol->detector(id);
-
-    Float_t energy=0.0; // Energy for whole detector
-    UInt_t  nh=0;         // Hits for whole detectors
-    if(detector==0) continue; // 2-oct-2001 
-    for(UInt_t j=1;j<121;j++){
-      StEmcModule* module = detector->module(j);
-      StSPtrVecEmcRawHit& rawHit=module->hits();
+    if(detector)
+    {
+      Float_t energy=0.0; // Energy for whole detector
+      UInt_t  nh=0;         // Hits for whole detectors
+      for(UInt_t j=1;j<121;j++){
+        StEmcModule* module = detector->module(j);
+        if(module)
+        {
+          StSPtrVecEmcRawHit& rawHit=module->hits();
         
-      Int_t m,e,s,adc;
-      Float_t eta,phi,E;
-      nh += rawHit.size();
-      for(UInt_t k=0;k<rawHit.size();k++){
-        m   = rawHit[k]->module();
-        e   = rawHit[k]->eta();
-        s   = rawHit[k]->sub();
-        if (s == -1) s = 1; // case of smde
-        adc = rawHit[k]->adc();
-        E   = rawHit[k]->energy();
-        emcGeom[i]->getEta(m, e, eta); 
-        emcGeom[i]->getPhi(m, s, phi);
-        hists->m_emc_hits[i]->Fill(eta,phi); 
-        hists->m_emc_energy2D[i]->Fill(eta,phi,E); 
-        hists->m_emc_adc[i]->Fill(float(adc)); 
-        hists->m_emc_energy[i]->Fill(E);
-        energy += E;
+          Int_t m,e,s,adc;
+          Float_t eta,phi,E;
+          nh += rawHit.size();
+          for(UInt_t k=0;k<rawHit.size();k++){
+            m   = rawHit[k]->module();
+            e   = rawHit[k]->eta();
+            s   = rawHit[k]->sub();
+            if (s == -1) s = 1; // case of smde
+            adc = rawHit[k]->adc();
+            E   = rawHit[k]->energy();
+            emcGeom[i]->getEta(m, e, eta); 
+            emcGeom[i]->getPhi(m, s, phi);
+            hists->m_emc_hits[i]->Fill(eta,phi); 
+            hists->m_emc_energy2D[i]->Fill(eta,phi,E); 
+            hists->m_emc_adc[i]->Fill(float(adc)); 
+            hists->m_emc_energy[i]->Fill(E);
+            energy += E;
+          }
        }
      }
-     if(nh)     hists->m_emc_nhit->Fill(log10(Double_t(nh)), Float_t(det));
-     if(energy) hists->m_emc_etot->Fill(log10(Double_t(energy)), Float_t(det));
+     if(nh>0)     hists->m_emc_nhit->Fill(log10(Double_t(nh)), Float_t(det));
+     if(energy>0) hists->m_emc_etot->Fill(log10(Double_t(energy)), Float_t(det));
+     }
   }
+  
+  //if (Debug()) 
+  //  gMessMgr->Info(" *** in StEventQAMaker - filling EMC Clusters ");
   
   for(i=0; i<4; i++) {  
     Int_t det = i+1, nh;
     StDetectorId id = StEmcMath::detectorId(det);
     StEmcDetector* detector = emccol->detector(id);
-    if(detector==0) continue; // 2-oct-2001 
-    StSPtrVecEmcCluster& cluster = detector->cluster()->clusters();
+    if(detector)
+    {
+      StEmcClusterCollection* clusters=detector->cluster();
+      if(clusters)
+      {
+        StSPtrVecEmcCluster& cluster = clusters->clusters();
 
-    hists->m_emc_ncl->Fill(log10(Double_t(cluster.size())),(Float_t)det);
-    Float_t Etot=0.0, eta, phi, sigEta, sigPhi, eCl;
-    for(UInt_t j=0;j<cluster.size();j++){
-      nh     = cluster[j]->nHits();
-      eCl    = cluster[j]->energy();
-      eta    = cluster[j]->eta();
-      sigEta = cluster[j]->sigmaEta();
-      phi    = cluster[j]->phi();
-      sigPhi = cluster[j]->sigmaPhi();
-      if(sigEta > 0)   hists->m_emc_sig_e->Fill(sigEta, Axis_t(det));          
-      if(sigPhi > 0.0) hists->m_emc_sig_p->Fill(sigPhi, Axis_t(det));
+        if(cluster.size()>0)
+        {
+          hists->m_emc_ncl->Fill(log10(Double_t(cluster.size())),(Float_t)det);
+          Float_t Etot=0.0, eta, phi, sigEta, sigPhi, eCl;
+          for(UInt_t j=0;j<cluster.size();j++){
+            nh     = cluster[j]->nHits();
+            eCl    = cluster[j]->energy();
+            eta    = cluster[j]->eta();
+            sigEta = cluster[j]->sigmaEta();
+            phi    = cluster[j]->phi();
+            sigPhi = cluster[j]->sigmaPhi();
+            if(sigEta > 0)   hists->m_emc_sig_e->Fill(sigEta, Axis_t(det));          
+            if(sigPhi > 0.0) hists->m_emc_sig_p->Fill(sigPhi, Axis_t(det));
 
-      hists->m_emc_cl[det-1]->Fill(Axis_t(eta), Axis_t(phi));
-      hists->m_emc_energyCl[det-1]->Fill(Axis_t(eta), Axis_t(phi), eCl);
-      hists->m_emc_HitsInCl[det-1]->Fill(Axis_t(nh));
-      hists->m_emc_EnergyCl[det-1]->Fill(Axis_t(eCl));
-      hists->m_emc_EtaInCl[det-1]->Fill(Axis_t(eta));
-      hists->m_emc_PhiInCl[det-1]->Fill(Axis_t(phi));
-      Etot  += eCl;
+            hists->m_emc_cl[det-1]->Fill(Axis_t(eta), Axis_t(phi));
+            hists->m_emc_energyCl[det-1]->Fill(Axis_t(eta), Axis_t(phi), eCl);
+            hists->m_emc_HitsInCl[det-1]->Fill(Axis_t(nh));
+            hists->m_emc_EnergyCl[det-1]->Fill(Axis_t(eCl));
+            hists->m_emc_EtaInCl[det-1]->Fill(Axis_t(eta));
+            hists->m_emc_PhiInCl[det-1]->Fill(Axis_t(phi));
+            Etot  += eCl;
+          }
+          hists->m_emc_etotCl->Fill(log10(Etot), Axis_t(det));
+        }
+      }
     }
-    hists->m_emc_etotCl->Fill(log10(Etot), Axis_t(det));
   }      
 
   // Get the hists from StEmcPoints
+  //if (Debug()) 
+  //  gMessMgr->Info(" *** in StEventQAMaker - filling EMC Points ");
 
   StSPtrVecEmcPoint& pointvec = emccol->barrelPoints();
  
@@ -1814,6 +1838,9 @@ void StEventQAMaker::MakeHistEMC() {
     }
   }
   for(i=0;i<4;i++) {hists->m_emc_points[i]->Fill(Float_t(Point_Mult[i]));}
+  
+  if (Debug()) 
+    gMessMgr->Info(" *** in StEventQAMaker - Finished filling EMC histograms ");
 
 }
 
