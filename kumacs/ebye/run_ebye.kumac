@@ -21,7 +21,7 @@
           input_data_dir=/star/u2/dhammika/data/ _
           input_data_file=DST_prodrun2_evt1-99.xdf _
           num_events=1 _
-	  calib_dir=$STAR_CALIB _
+	  calib_dir=. _
 	  prior_switch=1 _
 	  ensemble_switch=0 _
 	  analysis_switch=0 _
