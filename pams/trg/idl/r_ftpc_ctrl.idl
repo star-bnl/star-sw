@@ -1,9 +1,0 @@
-/*   r_ftpc_ctrl 
- * Control r_ftpc
- */
-   struct r_ftpc_ctrl {
-       short      which_ftpc ;       /* Selects with tpc to use. */
-   };
-
-
-

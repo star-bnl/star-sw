@@ -7,16 +7,14 @@
 **:<------------------------------------------------------------------*/
 #include "PAM.h"
 #include "r_tpc.h"
-#include "tcl_tphit.h"
-#include "tpt_track.h"
-#include "FTFinder.h"
-#include "TrackerFrame.h"
-#include "FTF_Mc_Track.h"
+#include "TTracker.hpp"
+#include "TpcTrackFrame.hpp"
+#include "_memory.hpp"
 
-extern FTFinder      tracker ;
 
 
 extern "C" long r_tpc_(
+  TABLE_HEAD_ST     *para_h,       L3T_TPC_PARA_ST    *para,
   TABLE_HEAD_ST     *tphit_h,      TCL_TPHIT_ST       *tphit,        
   TABLE_HEAD_ST     *tptrack_h,    TPT_TRACK_ST       *tptrack   )
 {
@@ -27,6 +25,8 @@ extern "C" long r_tpc_(
 **: 
 **: AUTHOR:     ppy - Pablo P. Yepes, yepes@physics.rice.edu  
 **: ARGUMENTS:
+**:    INOUT:
+**:        l3t_tpc_para   - Level 3 TPC tracking parameters
 **:       IN:
 **:        tcl_tphit      - TPC Space Points
 **:      OUT:
@@ -34,7 +34,21 @@ extern "C" long r_tpc_(
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
 
-  float Todeg = 57.29577951 ;
+  memory_manager_init init_my_memory;
+  TpcTrackFrame trackFrame;
+  TTrackerFFT Tracker;
+
+  // setup tracker
+  trackFrame.SetTracker((VTracker*)&Tracker);
+  trackFrame.Init();
+
+//
+//   Check para table
+//
+  if ( para_h->nok < 1 ) {
+     printf ( " \n rft: empty para table " ) ;
+     return STAFCV_BAD ;
+  }
 //
 //   Check there is something coming in
 //
@@ -43,70 +57,30 @@ extern "C" long r_tpc_(
      return STAFCV_BAD ;
   }
 //
-//    Check min hits per track
+// setup tracking
 //
-  if ( tracker.para->mn_hit_trk < 3 ) {
-     printf ( " \n Minimum # hits per track %d ", tracker.para->mn_hit_trk ) ;
-     return STAFCV_BAD ;
-  }
+  printf ( " \n rft: initializing " ) ;
+  trackFrame.Initialize(para);
 //
-//     Allocate memory 
-//  
-  int max_tracks     = (int)tptrack_h->maxlen ;
-  tracker.n_hits     = (int)tphit_h->nok ;
-  if ( tracker.hit   != 0 ) delete []tracker.hit ;
-  tracker.hit        = new FTF_Hit[tphit_h->nok] ;
-  if ( tracker.track != 0 ) delete []tracker.track ;
-  tracker.track      = new FTF_Track[max_tracks] ;
-  tracker.max_tracks = max_tracks ;
-
-  int i ;
-  for ( i = 0 ; i < tphit_h->nok ; i++ ) {
-     tracker.hit[i].id  = tphit[i].id ;
-     tracker.hit[i].i_r = (short)fmod(tphit[i].row,100)   ;
-     tracker.hit[i].x   = tphit[i].x ;
-     tracker.hit[i].y   = tphit[i].y ;
-     tracker.hit[i].z   = tphit[i].z ;
-     tracker.hit[i].dx  = tphit[i].dx ;
-     tracker.hit[i].dy  = tphit[i].dy ;
-     tracker.hit[i].dz  = tphit[i].dz ;
-  }
+// fill in hits (divided into s4 sectors)
 //
-//  Call tracker
+  printf ( " \n rft: filling hit structures " ) ;
+  trackFrame.FillEvent(tphit_h, tphit, para->FirstSector, para->LastSector);
 //
-  tracker.FTF ( ) ;
+// process event
 //
-//    Move info to tpt tracks
+  printf ( " \n rft: processing event...\n " ) ;
+  trackFrame.ProcessEvent();
 //
- tptrack_h->nok = tracker.n_tracks ;
-
- for ( i = 0 ; i < tracker.n_tracks ; i++ ) {
-    tptrack[i].id       = i + 1  ; 
-    tptrack[i].flag     = 1                        ; 
-    tptrack[i].nrec     = 
-    tptrack[i].nfit     = tracker.track[i].n_hits  ; 
-    tptrack[i].q        = tracker.track[i].q       ; 
-    tptrack[i].chisq[0] = tracker.track[i].chi2[0] ; 
-    tptrack[i].chisq[1] = tracker.track[i].chi2[1] ; 
-    tptrack[i].invp     = 1. / tracker.track[i].pt ; 
-    tptrack[i].phi0     = tracker.track[i].phi0 * Todeg ; 
-    tptrack[i].psi      = tracker.track[i].psi  * Todeg ; 
-    tptrack[i].r0       = tracker.track[i].r0      ; 
-    tptrack[i].tanl     = tracker.track[i].tanl    ; 
-    tptrack[i].z0       = tracker.track[i].z0      ; 
-    tptrack[i].hitid    = 0      ; 
-    tptrack[i].dedx[0]  = tracker.track[i].dedx ;
-    tptrack[i].dedx[1]  = 0.F ;
- }
+// fill result into table
 //
-//    Move hit assignment info
+  printf ( " \n rft: filling result tables " ) ;
+  trackFrame.FillResultTable(tphit_h, tphit, tptrack_h, tptrack);
 //
-   for ( i = 0 ; i < tphit_h->nok ; i++ ){
-     if ( tracker.hit[i].track != 0 )
-        tphit[i].track = 1000 * ( tracker.hit[i].track->id + 1 ) ;
-     else 
-        tphit[i].track = 0 ;
-   }
+// clear memory...
+//
+  printf ( " \n rft: exiting \n" ) ;
+  trackFrame.Done();
 
   return STAFCV_OK;
 }
