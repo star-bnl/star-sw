@@ -34,7 +34,7 @@ if( defined($ARGV[0]) ){
     $prodl = $ARGV[0];
 } else {
     # default value
-    $prodl="P01he";                                # production level
+    $prodl ="P01he";                               # production level
 }
 
 # root for a structure for an implied directory structure made of a
@@ -61,7 +61,6 @@ foreach my $int ( $mon,$mday ){
 # This script also loses Email content. Not very good for
 # debugging purposes so ...
 open(FO,">>mbox.piped");
-
 
 
 $outfile = "mail" . "_" .$thisday . "_" . "out"; 
@@ -120,11 +119,12 @@ while (<>) {
 }
 close(FO);
 
-open (OUT,">> $outfile") or die "Can't open $outfile";
-print OUT $date_line, "\n";
-print OUT "JobInfo:   %  $jbStat  %  $nodeID  %  $job_file\n"; 
-close (OUT);
-
+if( defined($date_line) ){
+    open (OUT,">> $outfile") or die "Can't open $outfile";
+    print OUT $date_line, "\n";
+    print OUT "JobInfo:   %  $jbStat  %  $nodeID  %  $job_file\n"; 
+    close (OUT);
+}
 
 if ($SFLAG == 2 && $SSUBM){
     # Now, the logic for file submission. Simple and fast ...
