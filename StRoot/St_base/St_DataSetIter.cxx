@@ -1,8 +1,11 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved 
-// $Id: St_DataSetIter.cxx,v 1.30 1999/10/28 16:24:30 fine Exp $
+// $Id: St_DataSetIter.cxx,v 1.31 1999/12/28 21:24:07 fine Exp $
 // $Log: St_DataSetIter.cxx,v $
+// Revision 1.31  1999/12/28 21:24:07  fine
+// St_DataSetIter opeartor * and operator ++ have been implemented
+//
 // Revision 1.30  1999/10/28 16:24:30  fine
 // St_DataSet major correction: it may be built with TList (default) or with TObjArray
 //
@@ -46,6 +49,8 @@
 #  define strcasecmp(arg1,arg2) stricmp(arg1,arg2)
 #endif
 
+const St_DataSet *St_DataSetIter::fNullDataSet = (St_DataSet *)(-1);
+
 ClassImp(St_DataSetIter)
  
 //////////////////////////////////////////////////////////////////////////
@@ -53,11 +58,12 @@ ClassImp(St_DataSetIter)
 // St_DataSetIter                                                       //
 //                                                                      //
 // St_DataSetIter is a class iterator to navigate St_DataSet objects    //
-// via 3 internal pointers :                                            //
+// via 4 internal pointers :                                            //
 //                                                                      //
 //  1. fRootDataSet    - "root" dataset                                 //
 //  2. fWorkingDataSet - Working dataset                                //
-//  3. fNext           - TIter for the the list of the "root" dataset   //
+//  3. fDataSet        - the last selected St_DataSet                   //
+//  4. fNext           - TIter for the the list of the "root" dataset   //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
  
@@ -66,7 +72,7 @@ ClassImp(St_DataSetIter)
  {
   fWorkingDataSet= fRootDataSet   =link;
   fMaxDepth      = fDepth         =1;
-  fDataSet=0;
+  fDataSet= fNullDataSet ;
   fNext = link ? new TIter(link->GetCollection() ,dir):0;
  }
  
@@ -76,7 +82,7 @@ ClassImp(St_DataSetIter)
   fRootDataSet = fWorkingDataSet = link; 
   fMaxDepth    = depth;
   fDepth       = 1;
-  fDataSet     = 0; 
+  fDataSet     = fNullDataSet; 
   fNext        = (link)? new TIter(link->GetCollection() ,dir):0;
 
   // Create a DataSet iterator to pass all nodes of the 
@@ -409,7 +415,8 @@ St_DataSet *St_DataSetIter::Next( EDataSetPass mode)
     // Check the whether the next level does exist 
     Bool_t mustNotify = kFALSE;
     if (fDepth==0) {fDepth = 1; mustNotify = kTRUE;}
-    if (fDataSet && (fDepth < fMaxDepth || fMaxDepth ==0) && mode == kContinue ) 
+    if (fDataSet && fDataSet != fNullDataSet && 
+        (fDepth < fMaxDepth || fMaxDepth ==0) && mode == kContinue ) 
     {
       // create the next level iterator, go deeper
       TSeqCollection *list  = fDataSet->GetCollection();
@@ -579,7 +586,7 @@ void St_DataSetIter::Reset(St_DataSet *l, int depth)
   //    depth      != 0 means the new value for the depth 
   //                    otherwise the privious one is used;
   //
-  fDataSet = 0;
+  fDataSet = fNullDataSet;
   if (fMaxDepth != 1) {
   // clean all interators
     Int_t level = fDepth;
