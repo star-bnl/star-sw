@@ -4,6 +4,12 @@
 #
 # Parses the CVS commitlog file and builds an HTML history of CVS
 # commits and a number of commit statistics.
+# Modified J.Lauret Apr 2001
+#  - secure rename instead of straight dump
+#  - added ?sort=bydate so the directory is sorted by date
+#    (more suitable)
+#  - Found a strange case where CVS: appears. Removed from
+#    final listing with regexp.
 #
 $commitlog = "/afs/rhic/star/packages/repository/CVSROOT/commitlog";
 $cvsHtml = "/star/starlib/doc/www/html/comp-nfs/cvs";
@@ -32,7 +38,7 @@ $content = <<END_BLOCK;
 <tr bgcolor=whitesmoke><td>
 This material is based on the logfile \$CVSROOT/CVSROOT/commitlog.
 Click on the username for a record of commits, and on the module
-name to browse that module's CVS area.
+name to browse that module\'s CVS area.
 </tr></td>
 </table>
 <p>
@@ -122,8 +128,10 @@ END_BLOCK
   }
 }
 
+
 $firstTime = $timeA[1];
 foreach $cuser (sort keys %commitUsers) {
+    if($cuser =~ /CVS:/ || $cuser eq ""){ next;}
 #    print "$cuser $commitUsers{$cuser}\n";
     $content = <<END_BLOCK;
     <tr bgcolor=whitesmoke>
@@ -166,7 +174,7 @@ END_BLOCK
 print USERCOMMITS $content;
 close USERCOMMITS;
 
-$commitHistory = "$cvsHtml/commitHistory.html";
+$commitHistory = "$cvsHtml/commitHistory.html-tmp";
 open (COMMITHISTORY, "> $commitHistory") or die "Can't write file $commitHistory: $!";
 $content = <<END_BLOCK;
 <html>
@@ -187,9 +195,9 @@ $content = <<END_BLOCK;
 <tr bgcolor=whitesmoke><td>
 This material is based on the logfile \$CVSROOT/CVSROOT/commitlog.
 Click on the username for a record of commits, and on the module
-name to browse that module's CVS area.
-</tr></td>
-</table>
+name to browse that module\'s CVS area.
+</tr></td> 
+</table> 
 <p>
 <table border=1 cellpadding=3 cellspacing=0>
 <tr bgcolor=lightgrey>
@@ -205,10 +213,11 @@ print COMMITHISTORY $content;
 $iFirstIndex = $iCommit - 500;
 if ($iFirstIndex < 1) { $iFirstIndex = 1; }
 for ( $i=$iCommit; $i>=$iFirstIndex; $i--) {
+    if($userA[$i] =~ /CVS:/ || $userA[$i] eq ""){ next;}
     $content = <<END_BLOCK;
     <tr bgcolor=whitesmoke>
         <td>&nbsp; <a href="user/$userA[$i]/index.html#bottom">$userA[$i]</a> &nbsp;</td>
-        <td>&nbsp; <a href="$cvsUrl/$modA[$i]">$modA[$i]</a> &nbsp;</td>
+        <td>&nbsp; <a href="$cvsUrl/$modA[$i]/?sortby=date">$modA[$i]</a> &nbsp;</td>
         <td align=center>$timeA[$i]</td>
     </tr>
 END_BLOCK
@@ -222,3 +231,5 @@ $content =<<END_BLOCK;
 END_BLOCK
 print COMMITHISTORY $content;
 close COMMITHISTORY;
+rename("$cvsHtml/commitHistory.html-tmp","$cvsHtml/commitHistory.html");
+
