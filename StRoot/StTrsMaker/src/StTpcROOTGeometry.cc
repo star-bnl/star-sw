@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTpcROOTGeometry.cc,v 1.6 2000/06/07 02:03:11 lasiuk Exp $
+ * $Id: StTpcROOTGeometry.cc,v 1.7 2001/03/30 21:23:20 jeromel Exp $
  *
  * Author: brian May March 22, 1998
  *
@@ -11,6 +11,9 @@
  *****************************************************************
  *
  * $Log: StTpcROOTGeometry.cc,v $
+ * Revision 1.7  2001/03/30 21:23:20  jeromel
+ * Fixes for Insure smooth compilation (return type)
+ *
  * Revision 1.6  2000/06/07 02:03:11  lasiuk
  * exit/abort ultimatum
  *
@@ -247,8 +250,7 @@ int StTpcROOTGeometry::numberOfPadsAtRow(int r) const
 	abort();
 #endif
     }
-    else
-	return (mPadsInRow[r-1]);  // careful indexing...
+    return (mPadsInRow[r-1]);  // careful indexing...
 }
 
 double StTpcROOTGeometry::radialDistanceAtRow(int r) const
@@ -263,9 +265,7 @@ double StTpcROOTGeometry::radialDistanceAtRow(int r) const
 	abort();
 #endif
     }
-    else {
-	return (mRadialDistanceAtRow[r-1]); // careful indexing...
-    }
+    return (mRadialDistanceAtRow[r-1]); // careful indexing...
 }
 
 double StTpcROOTGeometry::outerSectorAnodeWire(int n) const
