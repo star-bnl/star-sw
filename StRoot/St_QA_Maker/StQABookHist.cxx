@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.31 2002/05/29 13:54:30 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.32 2002/07/11 12:26:22 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.32  2002/07/11 12:26:22  genevb
+// Some FTPC histogram changes
+//
 // Revision 2.31  2002/05/29 13:54:30  genevb
 // Some changes to FTPC chisq histos
 //
@@ -1084,7 +1087,7 @@ void StQABookHist::BookHistGlob(){
   m_lengthF->Rebin(0,"East");
   m_lengthF->Rebin(1,"West");
   m_lengthF->SetStats(kFALSE);
-  m_psiF        = QAH::MH1F("QaGtrkPsiF",     "globtrk: psi, ftpc",36,0.,360.,2);
+  m_psiF        = QAH::MH1F("QaGtrkPsiF",     "globtrk: psi, ftpc",90,0.,360.,2);
   m_psiF->Rebin(0,"East");
   m_psiF->Rebin(1,"West");
   m_psiF->SetStats(kFALSE);
@@ -1135,8 +1138,8 @@ void StQABookHist::BookHistGlob(){
   m_glb_radfFW   = QAH::H1F("QaGtrkRFW",       "globtrk: radial position of first hit, ftpc west",35,0.,35.);
   m_lengthFE     = QAH::H1F("QaGtrkLengthFE",  "globtrk: track length, ftpc east", 60,0.,120.);
   m_lengthFW     = QAH::H1F("QaGtrkLengthFW",  "globtrk: track length, ftpc west", 60,0.,120.);
-  m_psiFE        = QAH::H1F("QaGtrkPsiFE",     "globtrk: psi, ftpc east", 36, 0.,360.);
-  m_psiFW        = QAH::H1F("QaGtrkPsiFW",     "globtrk: psi, ftpc west", 36, 0.,360.);
+  m_psiFE        = QAH::H1F("QaGtrkPsiFE",     "globtrk: psi, ftpc east", 90, 0.,360.);
+  m_psiFW        = QAH::H1F("QaGtrkPsiFW",     "globtrk: psi, ftpc west", 90, 0.,360.);
   m_etaFE        = QAH::H1F("QaGtrkEtaFE",     "globtrk: eta, ftpc east",80,-4.5,-2.);
   m_etaFW        = QAH::H1F("QaGtrkEtaFW",     "globtrk: eta, ftpc west",80,2.,4.5);
   m_pTFE         = QAH::H1F("QaGtrkPtFE",      "globtrk: pT, ftpc east",50,0.,10.);
@@ -1479,7 +1482,7 @@ void StQABookHist::BookHistPrim(){
   m_plengthF->Rebin(0,"East");
   m_plengthF->Rebin(1,"West");
   m_plengthF->SetStats(kFALSE);
-  m_ppsiF        = QAH::MH1F("QaPtrkPsiF",     "primtrk: psi, ftpc", 36, 0.,360.,2);
+  m_ppsiF        = QAH::MH1F("QaPtrkPsiF",     "primtrk: psi, ftpc", 90, 0.,360.,2);
   m_ppsiF->Rebin(0,"East");
   m_ppsiF->Rebin(1,"West");
   m_ppsiF->SetStats(kFALSE);
@@ -1530,8 +1533,8 @@ void StQABookHist::BookHistPrim(){
   m_prim_radfFW   = QAH::H1F("QaPtrkRFW",       "primtrk: radial position of first hit, ftpc west",35,0.,35.);
   m_plengthFE     = QAH::H1F("QaPtrkLengthFE",  "primtrk: track length, ftpc east",50,150.,300.);
   m_plengthFW     = QAH::H1F("QaPtrkLengthFW",  "primtrk: track length, ftpc west",50,150.,300.);
-  m_ppsiFE        = QAH::H1F("QaPtrkPsiFE",     "primtrk: psi, ftpc east", 36, 0.,360.);
-  m_ppsiFW        = QAH::H1F("QaPtrkPsiFW",     "primtrk: psi, ftpc west", 36, 0.,360.);
+  m_ppsiFE        = QAH::H1F("QaPtrkPsiFE",     "primtrk: psi, ftpc east", 90, 0.,360.);
+  m_ppsiFW        = QAH::H1F("QaPtrkPsiFW",     "primtrk: psi, ftpc west", 90, 0.,360.);
   m_petaFE        = QAH::H1F("QaPtrkEtaFE",     "primtrk: eta, ftpc east",80,-4.5,-2.);
   m_petaFW        = QAH::H1F("QaPtrkEtaFW",     "primtrk: eta, ftpc west",80,2.,4.5);
   m_ppTFE         = QAH::H1F("QaPtrkPtFE",      "primtrk: pT, ftpc east",50,0.,5.);
