@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mikesPairCut.h,v 1.4 2000/01/25 17:35:03 laue Exp $
+ * $Id: mikesPairCut.h,v 1.5 2000/03/23 22:57:28 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: mikesPairCut.h,v $
+ * Revision 1.5  2000/03/23 22:57:28  laue
+ * Clone() function implemented
+ *
  * Revision 1.4  2000/01/25 17:35:03  laue
  * I. In order to run the stand alone version of the StHbtMaker the following
  * changes have been done:
@@ -62,11 +65,12 @@
 class mikesPairCut : public StHbtPairCut{
 public:
   mikesPairCut();
+  mikesPairCut(const mikesPairCut&);
   //~mikesPairCut();
 
   virtual bool Pass(const StHbtPair*);
-
   virtual StHbtString Report();
+  mikesPairCut* Clone();
 
 
 private:
@@ -77,5 +81,12 @@ private:
   ClassDef(mikesPairCut, 1)
 #endif
 };
+
+inline mikesPairCut::mikesPairCut(const mikesPairCut& c) : StHbtPairCut(c) {
+  mNPairsPassed = 0;
+  mNPairsFailed = 0;
+
+}
+inline mikesPairCut* mikesPairCut::Clone() { mikesPairCut* c = new mikesPairCut(*this); return c;}
 
 #endif

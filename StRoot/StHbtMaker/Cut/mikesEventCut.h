@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mikesEventCut.h,v 1.4 2000/01/25 17:35:02 laue Exp $
+ * $Id: mikesEventCut.h,v 1.5 2000/03/23 22:57:28 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: mikesEventCut.h,v $
+ * Revision 1.5  2000/03/23 22:57:28  laue
+ * Clone() function implemented
+ *
  * Revision 1.4  2000/01/25 17:35:02  laue
  * I. In order to run the stand alone version of the StHbtMaker the following
  * changes have been done:
@@ -64,6 +67,7 @@ class mikesEventCut : public StHbtEventCut {
 public:
 
   mikesEventCut();
+  mikesEventCut(mikesEventCut&);
   //~mikesEventCut();
 
   void SetEventMult(const int& lo,const int& hi);
@@ -72,8 +76,9 @@ public:
   int NEventsFailed();
 
   virtual StHbtString Report();
-
   virtual bool Pass(const StHbtEvent*);
+
+  mikesEventCut* Clone();
 
 private:   // here are the quantities I want to cut on...
 
@@ -93,6 +98,15 @@ inline void mikesEventCut::SetEventMult(const int& lo, const int& hi){mEventMult
 inline void mikesEventCut::SetVertZPos(const float& lo, const float& hi){mVertZPos[0]=lo; mVertZPos[1]=hi;}
 inline int  mikesEventCut::NEventsPassed() {return mNEventsPassed;}
 inline int  mikesEventCut::NEventsFailed() {return mNEventsFailed;}
+inline mikesEventCut* mikesEventCut::Clone() { mikesEventCut* c = new mikesEventCut(*this); return c;}
+inline mikesEventCut::mikesEventCut(mikesEventCut& c) : StHbtEventCut(c) {
+  mEventMult[0] = c.mEventMult[0];
+  mEventMult[1] = c.mEventMult[1];
+  mVertZPos[0] = c.mVertZPos[0];
+  mVertZPos[1] = c.mVertZPos[1];
+  mNEventsPassed = 0;
+  mNEventsFailed = 0;
+}
 
 
 #endif

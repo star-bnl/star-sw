@@ -17,7 +17,7 @@ public:
   virtual bool Pass(const StHbtPair*);
   virtual void EventBegin(const StHbtEvent*);
   virtual void EventEnd(const StHbtEvent*) { /* no-op */ }
-
+  franksPairCut* Clone();
 
   virtual StHbtString Report();
 
@@ -32,6 +32,7 @@ private:
 #endif
 };
 
+inline franksPairCut* franksPairCut::Clone() { franksPairCut* c = new franksPairCut(*this); return c;}
 inline void franksPairCut::EventBegin(const StHbtEvent* ev) { mPrimaryVertex = ev->PrimVertPos(); }
 
 #endif
