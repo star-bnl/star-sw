@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackingParams.cc,v 1.20 2003/09/11 21:31:30 jeromel Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.21 2003/09/26 06:08:57 oldi Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.21  2003/09/26 06:08:57  oldi
+// Check if the magentic field was reversed 'by hand' with a chain option.
+// If yes, multiply the scaleFactor of the field with -1.
+//
 // Revision 1.20  2003/09/11 21:31:30  jeromel
 // removed inline as it would leave a few undefined reference
 //
@@ -202,14 +206,14 @@ StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug,
 }
 
 
-StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug, St_ftpcCoordTrans *ftpcCoordTrans, TDataSet *RunLog) {
+StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug, St_ftpcCoordTrans *ftpcCoordTrans, TDataSet *RunLog, StBFChain *chain) {
   // updates magnetic field, if necessary
 
   mInstance->InitCoordTransformation(ftpcCoordTrans->GetTable()); // Has to be invoked here, because it could change from run to run.
   mInstance->InitSpaceTransformation(); // Has to be invoked here, since gStTpcDb isn't set before.
   
   if (RunLog) {
-    mInstance->ResetMagField(RunLog); // Has to be invoked here, because it could change from run to run.
+    mInstance->ResetMagField(RunLog, chain); // Has to be invoked here, because it could change from run to run.
   }
   
   if (debug) {
@@ -1004,13 +1008,13 @@ Int_t StFtpcTrackingParams::InitSpaceTransformation() {
 }
 
 
-Int_t StFtpcTrackingParams::ResetMagField(TDataSet *RunLog) {
+Int_t StFtpcTrackingParams::ResetMagField(TDataSet *RunLog, StBFChain *chain) {
   // Resets magnetic field if field configuration has changed.
   
   if (RunLog) {
-    St_MagFactor *fMagFactor = (St_MagFactor *)RunLog->Find("MagFactor"); 
-    
+    St_MagFactor *fMagFactor = (St_MagFactor *)RunLog->Find("MagFactor");     
     Double_t newFactor = (*fMagFactor)[0].ScaleFactor;
+    if (chain->GetOption("ReverseField")) newFactor = -newFactor; // check if field was reversed by a chain option
     
     if (newFactor != mMagFieldFactor) { // field has changed
       
