@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTPCTrack.hh,v 1.2 2001/01/25 18:17:56 lmartin Exp $
+ * $Id: StEstTPCTrack.hh,v 1.3 2001/02/21 23:50:22 caines Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTPCTrack.hh,v $
+ * Revision 1.3  2001/02/21 23:50:22  caines
+ * Add some more info to SVT track for kalman fitting initial guess
+ *
  * Revision 1.2  2001/01/25 18:17:56  lmartin
  * Delete of mR and mdR arrays added to the destructor.
  *
@@ -176,6 +179,7 @@ public:
 
   long int GetVid() {return mVid;};
   void SetVid(long int vid) {mVid = vid;};
+  double GetPt() {return mPt;};
 
   friend class StEstTracker;
 
