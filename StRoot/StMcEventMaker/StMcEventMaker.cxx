@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.42 2003/02/19 03:17:04 calderon Exp $
+ * $Id: StMcEventMaker.cxx,v 1.43 2003/08/20 18:51:01 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.43  2003/08/20 18:51:01  calderon
+ * Filling of Tof and Pixel classes.
+ *
  * Revision 1.42  2003/02/19 03:17:04  calderon
  * Code to fill the StMcCtbHitCollection from the g2t tables by the Gansinator.
  *
@@ -184,6 +187,7 @@ using std::find;
 #include "tables/St_g2t_svt_hit_Table.h"
 #include "tables/St_g2t_tpc_hit_Table.h"
 #include "tables/St_g2t_emc_hit_Table.h"
+#include "tables/St_g2t_pix_hit_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_particle_Table.h"
@@ -198,7 +202,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.42 2003/02/19 03:17:04 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.43 2003/08/20 18:51:01 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -217,6 +221,9 @@ StMcEventMaker::StMcEventMaker(const char*name, const char * title) :
     doUseBemc        (kTRUE),
     doUseBsmd        (kTRUE),
     doUseCtb         (kTRUE),
+    doUseTofp        (kTRUE),
+    doUseTof         (kTRUE),
+    doUsePixel       (kTRUE),
     ttemp(),
     ttempParticle(),
     mCurrentMcEvent(0)
@@ -339,6 +346,9 @@ Int_t StMcEventMaker::Make()
     St_g2t_emc_hit *g2t_emc_hitTablePointer =  (St_g2t_emc_hit *) geantDstI("g2t_emc_hit");
     St_g2t_emc_hit *g2t_smd_hitTablePointer =  (St_g2t_emc_hit *) geantDstI("g2t_smd_hit");
     St_g2t_ctf_hit *g2t_ctb_hitTablePointer =  (St_g2t_ctf_hit *) geantDstI("g2t_ctb_hit"); // Added CTB Hits
+    St_g2t_ctf_hit *g2t_tof_hitTablePointer =  (St_g2t_ctf_hit *) geantDstI("g2t_tof_hit");
+    St_g2t_ctf_hit *g2t_tfr_hitTablePointer =  (St_g2t_ctf_hit *) geantDstI("g2t_tfr_hit");
+    St_g2t_pix_hit *g2t_pix_hitTablePointer =  (St_g2t_pix_hit *) geantDstI("g2t_pix_hit");
     St_particle    *particleTablePointer    =  (St_particle    *) geantDstI("particle");
 
     // For backwards compatibility, look for the rch and particle tables also in the dstBranch
@@ -355,7 +365,7 @@ Int_t StMcEventMaker::Make()
 	//
 	// g2t_event Table
 	//
-	g2t_event_st   *eventTable;
+	g2t_event_st   *eventTable = 0;
 	
 	// Check Pointer
 	if (g2t_eventTablePointer)
@@ -378,7 +388,7 @@ Int_t StMcEventMaker::Make()
 	//
 	// Tpc Hit Table (might not be there for photon events
 	//
-	g2t_tpc_hit_st *tpcHitTable;
+	g2t_tpc_hit_st *tpcHitTable = 0;
 	if (g2t_tpc_hitTablePointer)
 	    tpcHitTable = g2t_tpc_hitTablePointer->GetTable();
 	else
@@ -386,7 +396,7 @@ Int_t StMcEventMaker::Make()
 	//
 	// Ftpc Hit Table
 	//
-	g2t_ftp_hit_st *ftpHitTable;
+	g2t_ftp_hit_st *ftpHitTable = 0;
 	if (g2t_ftp_hitTablePointer)
 	    ftpHitTable = g2t_ftp_hitTablePointer->GetTable();
 	else 
@@ -395,7 +405,7 @@ Int_t StMcEventMaker::Make()
 	//
 	// Svt Hit Table
 	//
-	g2t_svt_hit_st *svtHitTable;
+	g2t_svt_hit_st *svtHitTable = 0;
 	if (g2t_svt_hitTablePointer)
 	    svtHitTable = g2t_svt_hitTablePointer->GetTable();
 	else
@@ -404,7 +414,7 @@ Int_t StMcEventMaker::Make()
 	//
 	// Rich Hit Table
 	//
-	g2t_rch_hit_st *rchHitTable;
+	g2t_rch_hit_st *rchHitTable = 0;
 	if (g2t_rch_hitTablePointer)
 	    rchHitTable = g2t_rch_hitTablePointer->GetTable();
 	else
@@ -412,16 +422,30 @@ Int_t StMcEventMaker::Make()
 	//
 	// Ctb Hit Table
 	//
-	g2t_ctf_hit_st *ctbHitTable;
+	g2t_ctf_hit_st *ctbHitTable = 0;
 	if (g2t_ctb_hitTablePointer)
 	    ctbHitTable = g2t_ctb_hitTablePointer->GetTable();
 	else
 	    cerr << "Table g2t_rch_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
 
+	// TOF Hit Tables
+	//
+	g2t_ctf_hit_st *tofHitTable = 0;
+	if (g2t_tof_hitTablePointer)
+	    tofHitTable = g2t_tof_hitTablePointer->GetTable();
+	else
+	    cerr << "Table g2t_tof_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+	
+	g2t_ctf_hit_st *tfrHitTable = 0;
+	if (g2t_tfr_hitTablePointer)
+	    tfrHitTable = g2t_tfr_hitTablePointer->GetTable();
+	else
+	    cerr << "Table g2t_tfr_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+
 	//
 	// BEMC and BPRS Hit Table
 	//
-	g2t_emc_hit_st *emcHitTable;
+	g2t_emc_hit_st *emcHitTable = 0;
 	if (g2t_emc_hitTablePointer)
 	    emcHitTable = g2t_emc_hitTablePointer->GetTable();
 	else
@@ -430,16 +454,24 @@ Int_t StMcEventMaker::Make()
 	//
 	// BSMDE and BSMDP Hit Table
 	//
-	g2t_emc_hit_st *smdHitTable;
+	g2t_emc_hit_st *smdHitTable = 0;
 	if (g2t_smd_hitTablePointer)
 	    smdHitTable = g2t_smd_hitTablePointer->GetTable();
 	else
 	    cerr << "Table g2t_smd_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
-		
+	//	
+	// Pixel Hit Table
+	//
+	g2t_pix_hit_st *pixHitTable=0;
+	if (g2t_pix_hitTablePointer)
+	    pixHitTable = g2t_pix_hitTablePointer->GetTable();
+	else 
+	    cerr << "Table g2t_pix_hit Not found in Dataset " << geantDstI.Pwd()->GetName() << endl;
+
 	//
 	// particle Table
 	//
-	particle_st *particleTable;
+	particle_st *particleTable = 0;
 	if (particleTablePointer)
 	    particleTable = particleTablePointer->GetTable();
 	else
@@ -971,6 +1003,93 @@ Int_t StMcEventMaker::Make()
 	    cout << "No Ctb Hits in this event" << endl;
 	}
 	}
+	// TOFp hits
+	long nTofpHits(0);
+	if (doUseTofp) {
+	    if (g2t_tof_hitTablePointer) {
+		StMcTofHit* ch = 0;
+		long  NHits = g2t_tof_hitTablePointer->GetNRows();
+		long  iTrkId = 0;
+		long ihit;
+		
+		for(ihit=0; ihit<NHits; ihit++) {
+		    ch = new StMcTofHit(&tofHitTable[ihit]);
+		    mCurrentMcEvent->tofHitCollection()->addHit(ch);
+		    
+		    // point hit to its parent and add it to collection
+		    // of the appropriate track
+		    
+		    iTrkId = (tofHitTable[ihit].track_p) - 1;
+		    ch->setParentTrack(ttemp[iTrkId]);
+		    ttemp[iTrkId]->addTofHit(ch);
+		}
+		nTofpHits =  mCurrentMcEvent->tofHitCollection()->numberOfHits();
+		cout << "Filled " <<nTofpHits << " TOFp Hits" << endl;
+	    }
+	    else {
+		cout << "No TOFp Hits in this event" << endl;
+	    }
+        }
+	
+	// TOFr hits
+        if (doUseTof) {
+	    if (g2t_tfr_hitTablePointer) {
+		StMcTofHit* ch = 0;
+		long  NHits = g2t_tfr_hitTablePointer->GetNRows();
+		long  iTrkId = 0;
+		long ihit;
+		
+		for(ihit=0; ihit<NHits; ihit++) {
+		    ch = new StMcTofHit(&tfrHitTable[ihit]);
+		    mCurrentMcEvent->tofHitCollection()->addHit(ch);
+		    
+		    // point hit to its parent and add it to collection
+		    // of the appropriate track
+		    
+		    iTrkId = (tfrHitTable[ihit].track_p) - 1;
+		    ch->setParentTrack(ttemp[iTrkId]);
+		    ttemp[iTrkId]->addTofHit(ch);
+		}
+		cout << "Filled " << mCurrentMcEvent->tofHitCollection()->numberOfHits() - nTofpHits
+		     << " TOFr Hits" << endl;
+	    }
+	    else {
+		cout << "No TOFr Hits in this event" << endl;
+	    }
+        }
+	
+	//
+	// Pixel Hits
+	//
+	if (doUsePixel) {
+	    if (g2t_pix_hitTablePointer) {    
+		StMcPixelHit* fh = 0;
+		long  NHits = g2t_pix_hitTablePointer->GetNRows();
+		long  iTrkId = 0;
+		long ihit;
+		for(ihit=0; ihit<NHits; ihit++) {
+		    //cout << ihit << " " << &pixHitTable[ihit] << endl;
+		    fh = new StMcPixelHit(&pixHitTable[ihit]);
+		    //cout << *fh << endl;
+		    if (!mCurrentMcEvent->pixelHitCollection()->addHit(fh)){ 
+			delete fh;
+			fh = 0;
+			continue;
+		    }
+		    // point hit to its parent and add it to collection
+		    // of the appropriate track
+		    iTrkId = (pixHitTable[ihit].track_p) - 1;
+		    fh->setParentTrack(ttemp[iTrkId]);
+		    //ttemp[iTrkId]->addPixelHit(fh);
+		}
+		cout << "Filled " << mCurrentMcEvent->pixelHitCollection()->numberOfHits() << " Pixel Hits" << endl;
+	    }
+	    else {
+		cout << "No Pixel Hits in this event" << endl;
+	    }
+	}// do use pixel
+	
+	
 	// BEMC and BPRS Hits
 	if (doUseBemc) fillBemc(g2t_emc_hitTablePointer);
 
@@ -1036,6 +1155,12 @@ StMcEventMaker::fillBemc(St_g2t_emc_hit* g2t_emc_hitTablePointer)
     for(long ihit=0; ihit<NHits; ihit++,emcHitTable++) { 
 
 	geomBemc->getVolIdBemc(emcHitTable->volume_id, module,eta,sub,detector); // Must check ??
+// 	cout << "hit       " << ihit << endl;
+// 	cout << "volume id " << emcHitTable->volume_id << endl;
+// 	cout << "module    " << module   << endl;
+// 	cout << "eta       " << eta      << endl;
+// 	cout << "sub       " << sub      << endl;
+// 	cout << "detector  " << detector << endl;
 	tr   = ttemp[emcHitTable->track_p - 1];
 	de   = emcHitTable->de;
 		    
@@ -1305,7 +1430,43 @@ StMcEventMaker::printEventInfo()
 			gotOneHit = kTRUE;
 		    }
     }
-        
+    StMcTofHitCollection *tofColl = mCurrentMcEvent->tofHitCollection();
+    cout << "---------------------------------------------------------" << endl;
+    cout << "StMcTofHitCollection at " << (void*) tofColl             << endl;
+    cout << "Dumping collection size and one hit only."                 << endl;
+    cout << "---------------------------------------------------------" << endl;
+    nhits = tofColl->numberOfHits();
+    cout << "# of hits in collection = " << nhits << endl;
+    if (tofColl &&  nhits) {
+	
+	if (tofColl->hits().size()) {
+	    cout << "Tof Hit" << endl;
+	    cout << *(tofColl->hits()[0]);
+	    cout << "Parent track of this Hit" << endl;
+	    cout << *(tofColl->hits()[0]->parentTrack()) << endl;
+	    
+	}
+    }
+    StMcPixelHitCollection *pixelColl = mCurrentMcEvent->pixelHitCollection();
+    cout << "---------------------------------------------------------" << endl;
+    cout << "StMcPixelHitCollection at " << (void*) pixelColl             << endl;
+    cout << "Dumping collection size and one hit only."                 << endl;
+    cout << "---------------------------------------------------------" << endl;
+    nhits = pixelColl->numberOfHits();
+    cout << "# of hits in collection = " << nhits << endl;
+    if (pixelColl &&  nhits) {
+	gotOneHit = kFALSE;
+	for (k=0; !gotOneHit && k<pixelColl->numberOfLayers(); k++)
+	    if (pixelColl->layer(k)->hits().size()) {
+		cout << "Pixel Hit" << endl;
+		cout << *(pixelColl->layer(k)->hits()[0]);
+		cout << "Parent track of this Hit" << endl;
+		cout << *(pixelColl->layer(k)->hits()[0]->parentTrack()) << endl;
+		gotOneHit = kTRUE;
+	    }
+	
+    }
+
     cout << endl;
 
     printEventInfoForEmc(mCurrentMcEvent->bemcHitCollection());
