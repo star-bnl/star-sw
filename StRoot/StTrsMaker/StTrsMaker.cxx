@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.30 1999/04/07 01:02:41 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.31 1999/04/23 19:18:08 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.31  1999/04/23 19:18:08  lasiuk
+// change magnetic field initialization to use gufld from GEANT
+//
 // Revision 1.30  1999/04/07 01:02:41  lasiuk
 // use gas gain from db
 //
@@ -131,11 +134,16 @@
 #include "StROOTMagneticField.hh"
 #endif
 
+#include "StSimpleMagneticField.hh"
 #ifdef ASCII_DATABASE_PARAMETERS
 #include "StTpcSimpleGeometry.hh"
 #include "StTpcSimpleSlowControl.hh"
 #include "StTpcSimpleElectronics.hh"
-#include "StSimpleMagneticField.hh"
+#endif
+#ifdef __ROOT__
+#define gufld   gufld_
+//#define gufld   GUFLD
+extern "C" {void gufld(Float_t *, Float_t *);}
 #endif
 #include "StTrsDeDx.hh"
 
@@ -170,7 +178,7 @@
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.30 1999/04/07 01:02:41 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.31 1999/04/23 19:18:08 lasiuk Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -212,12 +220,12 @@ Int_t StTrsMaker::Init()
   mSlowControlDb =
        StTpcROOTSlowControl::instance(SlowControl);
   //mSlowControlDb->print();
-   
-   mMagneticFieldDb =
-       StROOTMagneticField::instance();  // default is .5T field in z direction
 
-   mElectronicsDb =
-       StTpcROOTElectronics::instance(Electronics);
+//   mMagneticFieldDb =
+//       StROOTMagneticField::instance();  // default is .5T field in z direction
+  
+  mElectronicsDb =
+      StTpcROOTElectronics::instance(Electronics);
    //mElectronicsDb->print();
 #endif
 #ifdef ASCII_DATABASE_PARAMETERS
@@ -252,6 +260,7 @@ Int_t StTrsMaker::Init()
 	cerr << "Exitting..." << endl;
 	exit(1);
     }
+
    //
    // The DataBases
    //
@@ -263,8 +272,8 @@ Int_t StTrsMaker::Init()
        StTpcSimpleSlowControl::instance(scFile.c_str());
    //mSlowControlDb->print();
 
-   mMagneticFieldDb =
-       StSimpleMagneticField::instance(magFile.c_str());
+//    mMagneticFieldDb =
+//        StSimpleMagneticField::instance(magFile.c_str());
 
    mElectronicsDb =
        StTpcSimpleElectronics::instance(electronicsFile.c_str());
@@ -275,6 +284,16 @@ Int_t StTrsMaker::Init()
    mGasDb = new StTrsDeDx(gas);
    //mGasDb->print();
 
+
+   /////////// Magnetic Field
+   float x[3] = {0,0,0};
+   float B[3];
+   gufld(x,B);
+   StThreeVector<double> Bfield(B[0],B[1],B[2]);
+   PR(Bfield);
+   mMagneticFieldDb =
+      StSimpleMagneticField::instance(Bfield);  // default is .5T field in z direction
+   
    //
    // Containers
    //
@@ -808,7 +827,7 @@ Int_t StTrsMaker::Finish()
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.30 1999/04/07 01:02:41 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.31 1999/04/23 19:18:08 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
