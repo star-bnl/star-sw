@@ -1,12 +1,15 @@
-* $Id: tpt_rad_comp.F,v 1.2 1998/01/27 00:35:52 fisyak Exp $
+* $Id: tpt_rad_comp.F,v 1.3 1999/09/14 00:59:17 liq Exp $
 * $Log: tpt_rad_comp.F,v $
+* Revision 1.3  1999/09/14 00:59:17  liq
+* add tpt_mxdim.inc
+*
 * Revision 1.2  1998/01/27 00:35:52  fisyak
 * Split sources
 *
       INTEGER FUNCTION TPT_RAD_COMP(i,j)
       IMPLICIT NONE
 
-#include "tpt_pointers.inc"
+#include "tpt_mxdim.inc"
 
       INTEGER i,j
       REAL rad(0:mxtrack),test
