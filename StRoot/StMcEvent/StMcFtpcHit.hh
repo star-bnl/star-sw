@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcFtpcHit.hh,v 2.2 1999/12/03 00:51:52 calderon Exp $
+ * $Id: StMcFtpcHit.hh,v 2.3 1999/12/15 20:05:48 calderon Exp $
  * $Log: StMcFtpcHit.hh,v $
+ * Revision 2.3  1999/12/15 20:05:48  calderon
+ * corrected the comment on the numbering of the plane
+ *
  * Revision 2.2  1999/12/03 00:51:52  calderon
  * Tested with new StMcEventMaker.  Added messages for
  * diagnostics.
@@ -46,7 +49,7 @@ public:
     void* operator new(size_t)     { return mPool.alloc(); }
     void  operator delete(void* p) { mPool.free(p); }
 
-    unsigned long plane() const; // 0-19
+    unsigned long plane() const; // 1-20
     
 private:
     long mVolumeId;
