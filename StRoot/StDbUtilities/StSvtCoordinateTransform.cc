@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.cc,v 1.29 2004/08/07 02:44:25 perev Exp $
+ * $Id: StSvtCoordinateTransform.cc,v 1.30 2004/08/26 17:11:51 caines Exp $
  *
  * Author: Helen Caines April 2000
  *
@@ -713,7 +713,7 @@ double StSvtCoordinateTransform::CalcDriftLength(const StSvtWaferCoordinate& a, 
 	  Ratio = 3.0*10/(NewDist); // Richard stores in mm/Mus must fix that some time
 	  distance = mPoly9->Eval(x*Ratio*10e5/fsca)/10;
 	  //cout << " Full drift " << mPoly9->Eval(td*Ratio)/10 << " new distance " << distance << " original distance " <<  vd*x/fsca << endl;
-	  if( abs(distance-vd*x/fsca) > 0.03) {
+	  if( fabs(distance-vd*x/fsca) > 0.03) {
 	    //cout << " index = " << index << "Got crazy result using data drift vel " << 
 	    // distance << " " << vd*x/fsca <<  endl;
 	   
