@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.cxx,v 1.4 2001/02/22 16:33:30 lmartin Exp $ 
+ * $Id: StEstTracker.cxx,v 1.5 2001/02/23 13:46:13 lmartin Exp $ 
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.cxx,v $
+ * Revision 1.5  2001/02/23 13:46:13  lmartin
+ * Two arguments (hittmp,exclhit) of the RefitBranch method removed.
+ *
  * Revision 1.4  2001/02/22 16:33:30  lmartin
  * most of the cout replaced by gMessMgr
  *
@@ -371,7 +374,7 @@ void StEstTracker::BuildIdealBranches() {
 
 
       	  if (dca<3.) {
-   	    iret=RefitBranch(branch,NULL,-1,1.,&fitstatus);
+   	    iret=RefitBranch(branch,1.,&fitstatus);
 	    if (iret!=1)  flaglog[7]++;
 	    else {
 	      if (fitstatus==1) flaglog[0]++;
@@ -379,7 +382,7 @@ void StEstTracker::BuildIdealBranches() {
 	    }
 	  }  
     	  else {
-    	    iret=RefitBranch(branch,NULL,-1,0.,&fitstatus);
+    	    iret=RefitBranch(branch,0.,&fitstatus);
 	    if (iret!=1)  flaglog[7]++;
 	    else {
 	      if (fitstatus==1) flaglog[0]++;
@@ -414,7 +417,7 @@ void StEstTracker::BuildIdealBranches() {
 			       (Proj.z()-Eval_mchits[mcid][j]->GetGlobX()->z()));
 		    
 		    branch->AddHit(Eval_mchits[mcid][j],dist);
-		    iret=RefitBranch(branch,NULL,-1,0,&fitstatus);
+		    iret=RefitBranch(branch,0,&fitstatus);
 		    if (iret!=1)  flaglog[7]++;
 		    else {
 		      if (fitstatus==1) flaglog[0]++;
@@ -476,7 +479,7 @@ void StEstTracker::BuildFindableBranches() {
 
 
       	  if (dca<3.) {
-   	    iret=RefitBranch(branch,NULL,-1,1.,&fitstatus);
+   	    iret=RefitBranch(branch,1.,&fitstatus);
 	    if (iret!=1)  flaglog[7]++;
 	    else {
 	      if (fitstatus==1) flaglog[0]++;
@@ -484,7 +487,7 @@ void StEstTracker::BuildFindableBranches() {
 	    }
 	  }	  
     	  else {
-    	    iret=RefitBranch(branch,NULL,-1,0.,&fitstatus);
+    	    iret=RefitBranch(branch,0.,&fitstatus);
 	    if (iret!=1)  flaglog[7]++;
 	    else {
 	      if (fitstatus==1) flaglog[0]++;
@@ -521,7 +524,7 @@ void StEstTracker::BuildFindableBranches() {
 		    if (distl<mParams[CorrectPass]->geomcutl[slay] && 
 			distw<mParams[CorrectPass]->geomcutw[slay]) {
 		      branch->AddHit(Eval_mchits[mcid][j],dist);
-		      iret=RefitBranch(branch,NULL,-1,0,&fitstatus);
+		      iret=RefitBranch(branch,0,&fitstatus);
 		      if (iret!=1)  flaglog[7]++;
 		      else {
 			if (fitstatus==1) flaglog[0]++;

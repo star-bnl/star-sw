@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstInit.cxx,v 1.6 2001/02/22 16:34:09 lmartin Exp $
+ * $Id: StEstInit.cxx,v 1.7 2001/02/23 13:46:13 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstInit.cxx,v $
+ * Revision 1.7  2001/02/23 13:46:13  lmartin
+ * Two arguments (hittmp,exclhit) of the RefitBranch method removed.
+ *
  * Revision 1.6  2001/02/22 16:34:09  lmartin
  * cout replaced by gMessMgr.
  *
@@ -127,9 +130,9 @@ int StEstTracker::BranchInit(){
 	  int fitstatus;
 	  fitstatus=0;
  	  if (mTPCTrack[i]->GetHelix()->distance(a)<3.) 
-	    RefitBranch(branch,NULL,-1,1,&fitstatus);
+	    RefitBranch(branch,1,&fitstatus);
 	  else
-	    RefitBranch(branch,NULL,-1,0,&fitstatus);
+	    RefitBranch(branch,0,&fitstatus);
 	if(mDebugLevel>3)
 	  gMessMgr->Info()<<" Branch refitted"<<endm;
 	  //	  branch->mTrack->mTPCTrack->mChiSq = branch->GetChiSq();
