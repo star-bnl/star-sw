@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.51 2004/12/17 22:33:08 aihong Exp $
+// $Id: StFlowEvent.h,v 1.52 2005/02/10 21:04:57 aihong Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -74,7 +74,6 @@ public:
   Bool_t         EtaWgt() const;
   Bool_t         FirstLastPhiWgt() const;
   Bool_t         FirstLastPoints() const;
-  Bool_t         ProbPid() const;
   Bool_t	 UseZDCSMD() const;
   Char_t*        Pid();
   Bool_t         EtaSubs() const;
@@ -165,7 +164,7 @@ public:
   static void SetV2TPCDetctWgtG_Mix(Float_t val,  Int_t selN);
   static void SetV2FtpcEastDetctWgtG_Mix(Float_t val, Int_t selN);
   static void SetV2FtpcWestDetctWgtG_Mix(Float_t val,  Int_t selN);
-
+  static Bool_t ProbPid();
 
 
 private:
@@ -294,7 +293,7 @@ inline Bool_t   StFlowEvent::FirstLastPoints() const { return mFirstLastPoints; 
 
 inline Char_t*  StFlowEvent::Pid() { return mPid; }
 
-inline Bool_t   StFlowEvent::ProbPid() const { return mProbPid; }
+inline Bool_t   StFlowEvent::ProbPid() { return mProbPid; }
 
 inline Bool_t   StFlowEvent::EtaSubs() const { return mEtaSubs; }
 
@@ -485,6 +484,9 @@ inline void StFlowEvent::SetV2FtpcWestDetctWgtG_Mix(Float_t val,  Int_t selN){
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.52  2005/02/10 21:04:57  aihong
+// test mProbPid of StFlowEvent before launch calculation pid on fly
+//
 // Revision 1.51  2004/12/17 22:33:08  aihong
 // add in full Psi weight for ZDC SMD and fix a few bugs, done by Gang
 //

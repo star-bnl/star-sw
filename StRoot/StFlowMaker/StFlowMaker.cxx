@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.102 2005/02/10 17:39:40 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.103 2005/02/10 21:04:57 aihong Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -256,7 +256,7 @@ Int_t StFlowMaker::Init() {
   // init message manager
   gMessMgr->MemoryOn();
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.102 2005/02/10 17:39:40 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.103 2005/02/10 21:04:57 aihong Exp $");
 
   if (Debug()) gMessMgr->Info() << "FlowMaker: Init()" << endm;
 
@@ -1236,7 +1236,7 @@ Bool_t StFlowMaker::FillFromPicoVersion4DST(StFlowPicoEvent* pPicoEvent) {
 					       pPicoTrack->DcaGlobalZ()) );
       pFlowTrack->SetTrackLength(pPicoTrack->TrackLength());
 
-      if (StuProbabilityPidAlgorithm::isPIDTableRead()) {
+      if (StFlowEvent::ProbPid() && StuProbabilityPidAlgorithm::isPIDTableRead()) {
 
   uPid.processPIDAsFunction(uPid.getCentrality(pPicoEvent->UncorrNegMult()),
                     pPicoTrack->DcaGlobal(),
@@ -1368,7 +1368,7 @@ Bool_t StFlowMaker::FillFromPicoVersion5DST(StFlowPicoEvent* pPicoEvent) {
 					       pPicoTrack->DcaGlobalZ()) );
       pFlowTrack->SetTrackLength(pPicoTrack->TrackLength());
 
-      if (StuProbabilityPidAlgorithm::isPIDTableRead()) {
+      if (StFlowEvent::ProbPid() && StuProbabilityPidAlgorithm::isPIDTableRead()) {
 
   uPid.processPIDAsFunction(uPid.getCentrality(pPicoEvent->UncorrNegMult()),
                     pPicoTrack->DcaGlobal(),
@@ -1503,7 +1503,7 @@ Bool_t StFlowMaker::FillFromPicoVersion6DST(StFlowPicoEvent* pPicoEvent) {
 					       pPicoTrack->DcaGlobalZ()) );
       pFlowTrack->SetTrackLength(pPicoTrack->TrackLength());
 
-      if (StuProbabilityPidAlgorithm::isPIDTableRead()) {
+      if (StFlowEvent::ProbPid() && StuProbabilityPidAlgorithm::isPIDTableRead()) {
 
   uPid.processPIDAsFunction(uPid.getCentrality(pPicoEvent->UncorrNegMult()),
                     pPicoTrack->DcaGlobal(),
@@ -1647,7 +1647,7 @@ Bool_t StFlowMaker::FillFromPicoVersion7DST(StFlowPicoEvent* pPicoEvent) {
 					       pPicoTrack->DcaGlobalZ()) );
       pFlowTrack->SetTrackLength(pPicoTrack->TrackLength());
 
-      if (StuProbabilityPidAlgorithm::isPIDTableRead()) {
+      if (StFlowEvent::ProbPid() && StuProbabilityPidAlgorithm::isPIDTableRead()) {
 	uPid.processPIDAsFunction(uPid.getCentrality(pPicoEvent->UncorrNegMult()),
 				  pPicoTrack->DcaGlobal(),
 				  pPicoTrack->Charge(),
@@ -1929,7 +1929,7 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
 	}
       }
       
-      if (!mMuEventReadGC && StuProbabilityPidAlgorithm::isPIDTableRead()) { // temporary workaround
+      if (StFlowEvent::ProbPid() && StuProbabilityPidAlgorithm::isPIDTableRead()) { 
 	PR(StuProbabilityPidAlgorithm::isPIDTableRead());
 	uPid.processPIDAsFunction(uPid.getCentrality(pMuEvent->refMultNeg()),
 				  pMuTrack->dcaGlobal().mag(),
@@ -2267,6 +2267,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.103  2005/02/10 21:04:57  aihong
+// test mProbPid of StFlowEvent before launch calculation pid on fly
+//
 // Revision 1.102  2005/02/10 17:39:40  posk
 // Now also works with the Grid Collector.
 //
