@@ -138,7 +138,8 @@ int EEfeeRawEvent::maskWrongCrates( long timeStamp, unsigned headToken, HeadVer 
       sick=b->isHeadValid(headToken,list[ic],errFlag,lenCount,trigCommand);
       break;
     case  headVer3:     // miniDaq2004 ezTree header 
-      if(ic<6) errFlag=9; else errFlag=4;
+      errFlag=9; 
+      //  ??    if(ic<6) errFlag=9; else errFlag=4;
       sick=b->isHeadValid(headToken,list[ic],trigCommand,errFlag,lenCount);
       break;
     default:
@@ -191,6 +192,9 @@ UShort_t  EEfeeRawEvent::getValue(int crateID, int channel) const {
 
 /*
  * $Log: EEfeeRawEvent.cxx,v $
+ * Revision 1.18  2004/07/10 20:12:13  balewski
+ * match miniDaq
+ *
  * Revision 1.17  2004/07/09 02:38:05  balewski
  * BTOW data are not masked out any more but headres are checked as for EEMC
  *
