@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofpMatchMaker.cxx,v 1.8 2004/04/10 04:32:39 dongx Exp $
+ * $Id: StTofpMatchMaker.cxx,v 1.9 2004/06/09 21:28:05 dongx Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTofpMatchMaker.cxx,v $
+ * Revision 1.9  2004/06/09 21:28:05  dongx
+ * update matching : checking before projecting track, improve the speed by around an order of magnitude
+ *
  * Revision 1.8  2004/04/10 04:32:39  dongx
  * fix a potential crashing of filling histo w/o mHisto
  *
@@ -281,7 +284,7 @@ Int_t StTofpMatchMaker::Make(){
   }
   gMessMgr->Info("","OST") << "A: #valid slats: " << validSlatIdVec.size() << endm;
   // end of Sect.A
-
+  if(!validSlatIdVec.size()) return kStOK;
 
   //.........................................................................
   // B. loop over global tracks and determine all slat-track matches
@@ -299,6 +302,16 @@ Int_t StTofpMatchMaker::Make(){
     if (validTrack(theTrack)){
       nAllTracks++;
       StPhysicalHelixD theHelix = trackGeometry(theTrack)->helix();
+
+      IntVec projTrayVec;
+      if(!mTofGeom->projTrayVector(theHelix, projTrayVec)) continue;
+
+      Bool_t hitTofp = kFALSE;
+      for(size_t ii = 0; ii<projTrayVec.size(); ii++) {
+        if(projTrayVec[ii]==mTofpTrayId) hitTofp = kTRUE;
+      }
+      if(!hitTofp) continue;
+
       slatHitVec = mTofGeom->tofHelixToArray(theHelix, validSlatIdVec);
       if (slatHitVec.size()>0 && mHisto) hTofpSlatHitVecSize->Fill(slatHitVec.size());
 
@@ -334,7 +347,7 @@ Int_t StTofpMatchMaker::Make(){
 			   <<allSlatsHitVec.size() << "/" <<nAllTracks 
 			   << "/" << nodes.size() << endm;
   // end of Sect.B
-
+  if(!allSlatsHitVec.size()) return kStOK;
 
   //.........................................................................
   // C Neighbours -- identify crosstalk, geometry shifts (only fill histograms)
