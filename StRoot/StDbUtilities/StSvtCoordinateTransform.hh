@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StSvtCoordinateTransform.hh,v 1.4 2000/11/30 21:35:03 caines Exp $
+ * $Id: StSvtCoordinateTransform.hh,v 1.5 2001/02/12 23:42:40 caines Exp $
  *
  * Author: Helen Caines made this on  April 14 2000
  *
@@ -61,14 +61,15 @@ public:
   void  operator()(const StSvtLocalCoordinate&, StGlobalCoordinate&);
   void  operator()(const  StGlobalCoordinate& ,StSvtLocalCoordinate&);
   void  setParamPointers( srs_srspar_st* srspar, svg_geom_st* geom, svg_shape_st* shape, StSvtConfig* config);
-  void  LocaltoGlobal(const StSvtLocalCoordinate&,   StThreeVector<double>& x);
-  void  GlobaltoLocal(const StThreeVector<double>& x , StSvtLocalCoordinate&, int Index );
+  int  LocaltoGlobal(const StSvtLocalCoordinate&,   StThreeVector<double>& x, int Index);
+  int  GlobaltoLocal(const StThreeVector<double>& x , StSvtLocalCoordinate&, int HardWarePos, int Index );
   double CalcDriftLength(double x);
   double UnCalcDriftLength(double x);
   double CalcTransLength(double x);
   double UnCalcTransLength(double x);
   int IsOnWaferZ( const StThreeVector<double>& x, int HardWarePos);
   int IsOnWaferR(const StThreeVector<double>& x, int HardWarePos);
+
 private:
   
   svg_geom_st *mgeom;
