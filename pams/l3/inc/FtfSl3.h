@@ -50,22 +50,22 @@ public:
 class FtfSl3: public FtfFinder 
 {
 
-public:
    
    int sectorNr; 
    short     debugLevel  ;
    double    xyError ;
    double    zError ;
+   void*     sectorGeo ;
+public:
    int       minTimeBin ;
    int       maxTimeBin ;
    int       minClusterCharge ;
    int       maxClusterCharge ;
-   //
-   //  Sector phase space
-   //
-   sectorGeometry sectorGeo[NSECTORS] ;
 
-   FtfSl3 (  ) { 
+//
+//     Constructor
+//
+   FtfSl3 ( St_l3_Coordinate_Transformer* inTrans ) { 
       debugLevel = 0 ;
       xyError    = 0.3 ;
       zError     = 1.0 ;
@@ -75,13 +75,37 @@ public:
 //    maxTimeBin = 300 ;
       minClusterCharge = 80 ;
       maxClusterCharge = 100000 ;
+      coordinateTransformer = inTrans ; 
+      sectorGeo = new sectorGeometry[NSECTORS];
    };
    ~FtfSl3 ( ) {
         if ( track != 0 ) delete []track ;
         if ( hit   != 0 ) delete []hit   ;
+	delete []sectorGeo ;
    };
+//
+//  Coordinate Transformer classes
+//
+   St_l3_Coordinate_Transformer* getCoordinateTransformer()
+            { return (St_l3_Coordinate_Transformer*)coordinateTransformer ; } ;
+//
+//  Sector phase space
+//
+   sectorGeometry* getSectorGeometry ( int n ) {
+      if ( n < 1 && n > NSECTORS ) { 
+         printf ( "FtfSl3::getSectorGeometry: wrong sector %d, returning sector 1 \n", n ) ;
+	 n = 0 ;
+      }
+      sectorGeometry* sectorG = (sectorGeometry *)sectorGeo ;
+      return &(sectorG[n]);
+   }
+   //
    int   fillTracks      ( int maxBytes, char* buff, unsigned int token ) ;
    int   fillHits        ( unsigned int maxBytes, char* buff, unsigned int token ) ;
+   float getXyError      ( ) { return xyError ; } ;
+   float getZError       ( ) { return zError  ; } ;
+   int   getNrTracks     ( ) ;
+
    int   canItBeMerged   ( FtfTrack* thisTrack ) ;
    int   dEdx ( ) ;
    int   processSector   ( ) ;
@@ -89,14 +113,18 @@ public:
                            int MezzanninneNr, struct TPCMZCLD_local *mzcld );
    int   readSector      ( struct TPCSECLP *seclp ) ; 
    int   setParameters   ( ) ;
+   void  setCoordinateTransformer ( St_l3_Coordinate_Transformer* in )
+                                     { coordinateTransformer = (void *)in ; } ;
+   void  setDebugLevel   ( int _debugLevel ) { debugLevel = _debugLevel ; } ;
+   void  setSector       ( int _sector     ) { sectorNr   = _sector     ; } ;
+   void  setXyError      ( float _xyError  ) { xyError    = _xyError    ; } ;
+   void  setZError       ( float _zError   ) { zError     = _zError     ; } ;
    int   setup           ( int maxHitsIn=20000, int maxTracksIn=2000 ) ;
    void  Print() const{};
+private:
+   void*     coordinateTransformer ;
 
    ClassDef(FtfSl3,1)
 
 };
 #endif
-
-
-
-

@@ -63,7 +63,7 @@ public:
     inline virtual   int  done     ( ) { return currentHit != 0 ; } ;
     void       Print       ( int level ) ;
 	  
-    double     bField ; 
+    double    bField ; 
 
     int       id     ;  // primary key 
     short     flag   ;  // Primaries flag=1, Secondaries flag=0      
@@ -72,20 +72,20 @@ public:
     short     nHits  ;  // Number of points assigned to that track
     short     nDedx  ;  // Number of points used for dEdx
     short     q  ;      // charge 
-    double     chi2[2];  // chi squared of the momentum fit 
-    double     dedx;     // dE/dx information 
-    double     pt  ;     // pt (transverse momentum) at (r,phi,z) 
-    double     phi0;     // azimuthal angle of the first point 
-    double     psi ;     // azimuthal angle of the momentum at (r,.. 
-    double     r0  ;     // r (in cyl. coord.) for the first point 
-    double     tanl;     // tg of the dip angle at (r,phi,z) 
-    double     z0  ;     // z coordinate of the first point 
-    double     length ;
-    double     dpt ;
-    double     dpsi;
-    double     dz0 ;
-    double     eta ;
-    double     dtanl ;
+    double    chi2[2];  // chi squared of the momentum fit 
+    double    dedx;     // dE/dx information 
+    double    pt  ;     // pt (transverse momentum) at (r,phi,z) 
+    double    phi0;     // azimuthal angle of point where parameters are given 
+    double    psi ;     // azimuthal angle of the momentum at (r,.. 
+    double    r0  ;     // r (in cyl. coord.) for point where parameters given 
+    double    tanl;     // tg of the dip angle at (r,phi,z) 
+    double    z0  ;     // z coordinate of point where parameters are given 
+    double    length ;
+    double    dpt ;
+    double    dpsi;
+    double    dz0 ;
+    double    eta ;
+    double    dtanl ;
 
     void     *para  ;    // Parameters pointer     
     ClassDef(FtfBaseTrack,1)
