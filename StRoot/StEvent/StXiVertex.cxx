@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.cxx,v 2.1 1999/10/28 22:28:15 ullrich Exp $
+ * $Id: StXiVertex.cxx,v 2.2 1999/11/04 13:31:17 ullrich Exp $
  *
  * Author: Gene Van Buren, Feb 1999, revised Thomas Ullrich Sep 99
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.cxx,v $
- * Revision 2.1  1999/10/28 22:28:15  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.2  1999/11/04 13:31:17  ullrich
+ * Changed order of constructor arguments
  *
  * Revision 2.1  1999/10/28 22:28:15  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -28,7 +28,7 @@
 #include "tables/St_dst_vertex_Table.h"
 #include "tables/St_dst_xi_vertex_Table.h"
 
-static const char rcsid[] = "$Id: StXiVertex.cxx,v 2.1 1999/10/28 22:28:15 ullrich Exp $";
+static const char rcsid[] = "$Id: StXiVertex.cxx,v 2.2 1999/11/04 13:31:17 ullrich Exp $";
 
 ClassImp(StXiVertex)
 
@@ -42,8 +42,8 @@ StXiVertex::StXiVertex()
     mV0Vertex = 0;
 }
 
-StXiVertex::StXiVertex(const dst_xi_vertex_st& xivtx,
-                       const dst_vertex_st& vtx) :
+StXiVertex::StXiVertex(const dst_vertex_st& vtx,
+		       const dst_xi_vertex_st& xivtx) :
     StVertex(vtx)
 {
     mType = kXiVtxId;

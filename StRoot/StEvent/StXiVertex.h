@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.h,v 2.1 1999/10/28 22:28:18 ullrich Exp $
+ * $Id: StXiVertex.h,v 2.2 1999/11/04 13:31:19 ullrich Exp $
  *
  * Author: Gene Van Buren, Feb 1999, revised Thomas Ullrich Sep 99
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StXiVertex.h,v $
- * Revision 2.1  1999/10/28 22:28:18  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.2  1999/11/04 13:31:19  ullrich
+ * Changed order of constructor arguments
  *
  * Revision 2.1  1999/10/28 22:28:18  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
@@ -32,7 +32,7 @@ class StV0Vertex;
 class StXiVertex : public StVertex {
 public:
     StXiVertex();
-    StXiVertex(const dst_xi_vertex_st&, const dst_vertex_st&);
+    StXiVertex(const dst_vertex_st&, const dst_xi_vertex_st&);
     // StXiVertex(const StXiVertex&);            use default
     // StXiVertex& operator=(const StXiVertex&); use default
     ~StXiVertex();
