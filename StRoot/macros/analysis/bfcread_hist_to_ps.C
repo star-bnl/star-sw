@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_to_ps.C,v 1.20 2000/02/14 20:30:41 kathy Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.21 2000/02/29 18:25:14 kathy Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.21  2000/02/29 18:25:14  kathy
+// fix typo
+//
 // Revision 1.20  2000/02/14 20:30:41  kathy
 // removing unneeded macros; updating documentation in bfcread macros
 //
@@ -127,7 +130,7 @@ void bfcread_hist_to_ps(
        << psFile << endl;
   cout << "bfcread_hist_to_ps.C, page title for histograms = " 
        << PageTitle << endl;
-  cout << "bfcread_hist_to_pst.C, subset list name of which histograms to draw,print = "
+  cout << "bfcread_hist_to_ps.C, subset list name of which histograms to draw,print = "
        << PrintList  << endl;
 //
     gSystem->Load("St_base");
