@@ -1,6 +1,6 @@
 //:Copyright 1995, Lawrence Berkeley National Laboratory
 //:>--------------------------------------------------------------------
-//:FILE:        spxClasses.C
+//:FILE:        spxClasses.cc
 //:DESCRIPTION: Implementation classes for SPX.
 //:AUTHOR:      cet - Craig E. Tull, cetull@lbl.gov
 //:BUGS:        -- STILL IN DEVELOPMENT --
@@ -21,6 +21,9 @@
 //:<---------------------------------------------- MACROS             --
 #include "spx_macros.h"
 
+extern "C" void spx_static();		// DEBUG HACK !!!!!!!!!!!!!!!!!
+
+//:#####################################################################
 //:=============================================== CLASS              ==
 //: spxDummy
 
@@ -54,9 +57,18 @@ char * spxDummy::  listing () {
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- override socObject::implementsInterface
+unsigned char spxDummy :: implementsInterface (const char * iface) {
+   if( 0 == strcmp("spxDummy",iface)
+   ||  socObject::implementsInterface(iface)
+   ){ return TRUE; }
+   return FALSE;
+}
+
 //----------------------------------
 STAFCV_T spxDummy:: null () {
    myNCalls++;
+spx_static();			// DEBUG HACK !!!!!!!!!!!!!!!!!!!!!!!!!
    EML_SUCCESS(STAFCV_OK);
 }
 
@@ -74,6 +86,7 @@ STAFCV_T spxDummy:: getTime (char *& tim) {
 //:----------------------------------------------- PRIV FUNCTIONS     --
 //:**NONE**
 
+//:#####################################################################
 //:=============================================== CLASS              ==
 //: spxGrid
 
@@ -119,6 +132,14 @@ char * spxGrid::  listing () {
 }
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- override socObject::implementsInterface
+unsigned char spxGrid :: implementsInterface (const char * iface) {
+   if( 0 == strcmp("spxGrid",iface)
+   ||  socObject::implementsInterface(iface)
+   ){ return TRUE; }
+   return FALSE;
+}
+
 STAFCV_T spxGrid:: get (short n, short m, long& value) {
    if(n<0||n>myHeight||m<0||m>myHeight)EML_ERROR(INVALID_GRIDCELL);
    value = myGrid[n][m];
@@ -135,26 +156,35 @@ STAFCV_T spxGrid:: set (short n, short m, long value) {
 //:----------------------------------------------- PRIV FUNCTIONS     --
 //:**NONE**
 
+//:#####################################################################
 //:=============================================== CLASS              ==
-//: spxManager
+//: spxFactory
 
 //:----------------------------------------------- CTORS & DTOR       --
-spxManager:: spxManager(const char * name) 
+spxFactory:: spxFactory(const char * name) 
 		: socFactory()
-		, socObject(name,"spxManager") {
+		, socObject(name,"spxFactory") {
    myPtr = (SOC_PTR_T)this;
    lock(TRUE);
 }
 
 //----------------------------------
-spxManager:: ~spxManager() {
+spxFactory:: ~spxFactory() {
 }
 
 //:----------------------------------------------- ATTRIBUTES         --
 //**NONE**
 
 //:----------------------------------------------- PUB FUNCTIONS      --
-STAFCV_T spxManager:: deleteDummy (const char * name) {
+//- override socObject::implementsInterface
+unsigned char spxFactory :: implementsInterface (const char * iface) {
+   if( 0 == strcmp("spxFactory",iface)
+   ||  socFactory::implementsInterface(iface)
+   ){ return TRUE; }
+   return FALSE;
+}
+
+STAFCV_T spxFactory:: deleteDummy (const char * name) {
    IDREF_T id;
 
    if( !soc->idObject(name,"spxDummy",id)
@@ -167,7 +197,7 @@ STAFCV_T spxManager:: deleteDummy (const char * name) {
 }
 
 //----------------------------------
-STAFCV_T spxManager:: deleteGrid (const char * name) {
+STAFCV_T spxFactory:: deleteGrid (const char * name) {
    IDREF_T id;
 
    if( !soc->idObject(name,"spxGrid",id)
@@ -180,7 +210,7 @@ STAFCV_T spxManager:: deleteGrid (const char * name) {
 }
 
 //----------------------------------
-STAFCV_T spxManager:: findDummy (const char * name
+STAFCV_T spxFactory:: findDummy (const char * name
 		, spxDummy*& dummy) {
    socObject* obj;
    if( NULL == (obj = soc->findObject(name,"spxDummy")) ){
@@ -192,7 +222,7 @@ STAFCV_T spxManager:: findDummy (const char * name
 }
 
 //----------------------------------
-STAFCV_T spxManager:: findGrid (const char * name
+STAFCV_T spxFactory:: findGrid (const char * name
 		, spxGrid*& grid) {
    socObject* obj;
    if( NULL == (obj = soc->findObject(name,"spxGrid")) ){
@@ -204,7 +234,7 @@ STAFCV_T spxManager:: findGrid (const char * name
 }
 
 //----------------------------------
-STAFCV_T spxManager:: getDummy (IDREF_T id, spxDummy*& dummy) {
+STAFCV_T spxFactory:: getDummy (IDREF_T id, spxDummy*& dummy) {
    socObject* obj;
    if( NULL == (obj = soc->getObject(id)) ){
       dummy = NULL;
@@ -219,7 +249,7 @@ STAFCV_T spxManager:: getDummy (IDREF_T id, spxDummy*& dummy) {
 }
 
 //----------------------------------
-STAFCV_T spxManager:: getGrid (IDREF_T id, spxGrid*& grid) {
+STAFCV_T spxFactory:: getGrid (IDREF_T id, spxGrid*& grid) {
    socObject* obj;
    if( NULL == (obj = soc->getObject(id)) ){
       grid = NULL;
@@ -235,7 +265,7 @@ STAFCV_T spxManager:: getGrid (IDREF_T id, spxGrid*& grid) {
 
 //----------------------------------
 //- OVER-RIDE socFactory:: list()
-char * spxManager:: list () {
+char * spxFactory:: list () {
    char *c = socFactory::list();
 
    char *cc = (char*)MALLOC(strlen(c) +1 +162);
@@ -253,12 +283,12 @@ char * spxManager:: list () {
 }
 
 //----------------------------------
-STAFCV_T spxManager:: newDummy (const char * name) {
+STAFCV_T spxFactory:: newDummy (const char * name) {
    IDREF_T id;
    if( soc->idObject(name,"spxDummy",id) ){
       EML_ERROR(DUPLICATE_OBJECT_NAME);
    }
-   static spxDummy* p;
+   spxDummy* p;
    p = new spxDummy(name);
    if( !soc->idObject(name,"spxDummy",id) ){
       EML_ERROR(OBJECT_NOT_FOUND);
@@ -268,13 +298,13 @@ STAFCV_T spxManager:: newDummy (const char * name) {
 }
 
 //----------------------------------
-STAFCV_T spxManager:: newGrid (const char * name
+STAFCV_T spxFactory:: newGrid (const char * name
 		, short height, short width) {
    IDREF_T id;
    if( soc->idObject(name,"spxGrid",id) ){
       EML_ERROR(DUPLICATE_OBJECT_NAME);
    }
-   static spxGrid* p;
+   spxGrid* p;
    p = new spxGrid(name,height,width);
    if( !soc->idObject(name,"spxGrid",id) ){
       EML_ERROR(OBJECT_NOT_FOUND);

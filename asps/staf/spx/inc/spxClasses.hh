@@ -19,6 +19,7 @@
 #include "spx_macros.h"
 #include "spx_types.h"
 
+//:#####################################################################
 //:=============================================== CLASS              ==
 class spxDummy: public virtual socObject {
 
@@ -34,6 +35,9 @@ public:
    virtual char * listing();
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- OVERRIDE VIRTUALS
+   virtual unsigned char implementsInterface (const char * iface);
+
    virtual STAFCV_T null ();
    virtual STAFCV_T getTime (char *& tim);
 
@@ -45,6 +49,7 @@ long myNCalls;
 //:**NONE**
 };
 
+//:#####################################################################
 //:=============================================== CLASS              ==
 class spxGrid: public virtual socObject {
 
@@ -61,6 +66,9 @@ public:
    virtual char * listing();
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- OVERRIDE VIRTUALS
+   virtual unsigned char implementsInterface (const char * iface);
+
    virtual STAFCV_T get (short n, short m, long& value);
    virtual STAFCV_T set (short n, short m, long value);
 
@@ -75,19 +83,23 @@ long **myGrid;
 //:**NONE**
 };
 
+//:#####################################################################
 //:=============================================== CLASS              ==
-class spxManager: public virtual socFactory {
+class spxFactory: public virtual socFactory {
 
 public:
 //:----------------------------------------------- CTORS & DTOR       --
-   spxManager(const char * name);
-   virtual ~spxManager();
+   spxFactory(const char * name);
+   virtual ~spxFactory();
 
 //:----------------------------------------------- ATTRIBUTES         --
 //**NONE**
 
 //:----------------------------------------------- PUB FUNCTIONS      --
+//- OVERRIDE VIRTUALS
+   virtual unsigned char implementsInterface (const char * iface);
    virtual char * list ();
+
    virtual STAFCV_T deleteDummy (const char * name);
    virtual STAFCV_T deleteGrid (const char * name);
    virtual STAFCV_T findDummy (const char * name, spxDummy*& dummy);
@@ -110,7 +122,7 @@ protected:
 //:---------------------------------------------------------------------
 CORBA_TIE(spxDummy)
 CORBA_TIE(spxGrid)
-CORBA_TIE(spxManager)
+CORBA_TIE(spxFactory)
 
 #endif /* SPXCLASSES_HH */
 #endif /*__cplusplus*/
