@@ -1,5 +1,8 @@
-// $Id: St_l3t_Maker.cxx,v 1.18 2000/02/09 20:05:31 yepes Exp $
+// $Id: St_l3t_Maker.cxx,v 1.19 2000/02/23 21:39:21 yepes Exp $
 // $Log: St_l3t_Maker.cxx,v $
+// Revision 1.19  2000/02/23 21:39:21  yepes
+// fix MakeOnline for case when no Online data
+//
 // Revision 1.18  2000/02/09 20:05:31  yepes
 // modifications to accomodate new gl3 including analysis modules
 //
@@ -132,7 +135,7 @@ Int_t St_l3t_Maker::MakeOnLine(){
 // get l3 dataset
    St_DataSet* sec_bank_set = 0 ;
    sec_bank_set = GetInputDS("l3Clufi");
-   if ( !sec_bank_set ) {
+   if ( !sec_bank_set->GetListSize() ) {
       fprintf ( stderr, "St_l3t_Maker:MakeOnLine: no L3 data \n" ) ;
       return kStWarn;
    }
@@ -235,35 +238,35 @@ Int_t St_l3t_Maker::MakeOnLine(){
       gl3Header->sector[secIndex].len = nBytes ;
       gl3Header->sector[secIndex].off = trackDataPointer - buffer ;
       trackDataPointer += nBytes ;
-//
-//   Fill histos
-//
+      //
+      //   Fill histos
+      //
       m_l3_nHitsSector->Fill    ( tracker.nHits ) ;
       m_l3_nTracksSector->Fill  ( tracker.nTracks ) ;
       m_l3_cpuTimeSector->Fill  ( 1000.*tracker.cpuTime ) ;
       m_l3_realTimeSector->Fill ( 1000.*tracker.realTime ) ;
       printf ( "St_sl3Maker: %d tracks \n", tracker.nTracks ) ;
-//
-//     Fill offline hit table
-//
+      //
+      //     Fill offline hit table
+      //
       for ( int j = 0 ; j < tracker.nHits ; j++ ) {
-         hit[nHits].id    = nHits + 1 ; 
-         hit[nHits].row   = secIndex * 100 + tracker.hit[j].row ; 
-         hit[nHits].x     = tracker.hit[j].x ;
-         hit[nHits].y     = tracker.hit[j].y ;
-         hit[nHits].z     = tracker.hit[j].z ;
-         hit[nHits].dx    = tracker.hit[j].dx ;
-         hit[nHits].dy    = tracker.hit[j].dy ;
-         hit[nHits].dz    = tracker.hit[j].dz ;
-         hit[nHits].q     = tracker.hit[j].q  ;
-         hit[nHits].track = 0  ;
-         if ( tracker.hit[j].track != NULL ) {
-            hit[nHits].track = tracker.hit[j].track->id + 10000 * secIndex  ;
-         }
-         nHits++ ;
+	 hit[nHits].id    = nHits + 1 ; 
+	 hit[nHits].row   = secIndex * 100 + tracker.hit[j].row ; 
+	 hit[nHits].x     = tracker.hit[j].x ;
+	 hit[nHits].y     = tracker.hit[j].y ;
+	 hit[nHits].z     = tracker.hit[j].z ;
+	 hit[nHits].dx    = tracker.hit[j].dx ;
+	 hit[nHits].dy    = tracker.hit[j].dy ;
+	 hit[nHits].dz    = tracker.hit[j].dz ;
+	 hit[nHits].q     = tracker.hit[j].q  ;
+	 hit[nHits].track = 0  ;
+	 if ( tracker.hit[j].track != NULL ) {
+	    hit[nHits].track = tracker.hit[j].track->id + 10000 * secIndex  ;
+	 }
+	 nHits++ ;
 	 if ( nHits >= maxHits ) {
-            fprintf ( stderr, " St_l3t_Maker:MakeOnLine: %d larger than max in hit table \n", nHits ) ;
-            break ;
+	      fprintf ( stderr, " St_l3t_Maker:MakeOnLine: %d larger than max in hit table \n", nHits ) ;
+	      break ;
 	 }
       }
    }
@@ -273,42 +276,46 @@ Int_t St_l3t_Maker::MakeOnLine(){
    //
 
    gl3.processEvent ( nBytesUsed, buffer ) ;
-   gl3Event* eventP = gl3.getEvent(token);
+   gl3Event* eventP = 0 ;
+   eventP = gl3.getEvent(token);
 
    //
    //   Generate output table
    //
-   int nTracks = max(1,eventP->getNTracks());   
+   int nTracks = 1;
+   if ( eventP ) nTracks = max(1,eventP->getNTracks());   
    St_tpt_track *trackS = new St_tpt_track("l3Track",nTracks); 
    m_DataSet->Add(trackS);
-//
+   //
    tpt_track_st*  track  = (tpt_track_st *)trackS->GetTable(); 
    table_head_st* trackH = (table_head_st *)trackS->GetHeader(); 
-//
-//   Copy gl3 to tpt_track_st table
-//
-   gl3Track*     gTrk ;
-   tpt_track_st* tTrk ;
-   for ( int i = 0 ; i < (int)eventP->getNTracks() ; i++ ) {
-      gTrk = eventP->getTrack(i);
-      if ( !gTrk ) continue ;
-      tTrk = &(track[i]);
-      tTrk->id       = gTrk->id ;
-      tTrk->flag     = 1 ;
-      tTrk->invp     = 1./fabs(gTrk->pt);
-      tTrk->nfit     = gTrk->nHits ;
-      tTrk->nrec     = gTrk->nHits ;
-      tTrk->q        = (long)(gTrk->pt/fabs(gTrk->pt));
-      tTrk->chisq[0] = gTrk->chisq[0] ;
-      tTrk->chisq[1] = gTrk->chisq[1] ;
-      tTrk->length   = gTrk->trackLength ;
-      tTrk->phi0     = gTrk->phi0 * toDeg ;
-      tTrk->psi      = gTrk->psi  * toDeg ;
-      tTrk->r0       = gTrk->r0   ;
-      tTrk->tanl     = gTrk->tanl ;
-      tTrk->z0       = gTrk->z0   ;
+   //
+   //   Copy gl3 to tpt_track_st table
+   //
+   if ( eventP ) {
+      gl3Track*     gTrk ;
+      tpt_track_st* tTrk ;
+      for ( int i = 0 ; i < (int)eventP->getNTracks() ; i++ ) {
+         gTrk = eventP->getTrack(i);
+         if ( !gTrk ) continue ;
+         tTrk = &(track[i]);
+         tTrk->id       = gTrk->id ;
+         tTrk->flag     = 1 ;
+         tTrk->invp     = 1./fabs(gTrk->pt);
+         tTrk->nfit     = gTrk->nHits ;
+         tTrk->nrec     = gTrk->nHits ;
+         tTrk->q        = (long)(gTrk->pt/fabs(gTrk->pt));
+         tTrk->chisq[0] = gTrk->chisq[0] ;
+         tTrk->chisq[1] = gTrk->chisq[1] ;
+         tTrk->length   = gTrk->trackLength ;
+         tTrk->phi0     = gTrk->phi0 * toDeg ;
+         tTrk->psi      = gTrk->psi  * toDeg ;
+         tTrk->r0       = gTrk->r0   ;
+         tTrk->tanl     = gTrk->tanl ;
+         tTrk->z0       = gTrk->z0   ;
+      }
    }
-   trackH->nok = eventP->getNTracks() ;
+   trackH->nok = nTracks ;
    hitH->nok   = nHits ;
    MakeHistograms();
   
@@ -401,6 +408,14 @@ Int_t St_l3t_Maker::MakeOffLine(){
       tTrk->r0       = fTrk->r0   ;
       tTrk->tanl     = fTrk->tanl ;
       tTrk->z0       = fTrk->z0   ;
+   }
+//
+//     Store track info
+//
+   for ( int k = 0 ; k < nHits ; k++ ) {
+      if ( tracker.hit[k].track != 0 ) {
+         hit[k].track = 1000 * tracker.hit[k].track->id ;
+      }
    }
 //
    trackH->nok = tracker.nTracks ;
