@@ -1,16 +1,6 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
-// $Id: St_FileSet.cxx,v 1.7 1999/06/16 14:28:35 fisyak Exp $
-// $Log: St_FileSet.cxx,v $
-// Revision 1.7  1999/06/16 14:28:35  fisyak
-// Add protection against empty directory entry
-//
-// Revision 1.6  1999/03/11 00:34:43  perev
-// St_base in new maker schema
-//
-// Revision 1.5  1998/12/26 21:40:38  fisyak
-// Add Id and Log
-// 
+// $Id: St_FileSet.cxx,v 1.8 1999/10/27 23:21:27 fine Exp $
  
 #include "St_FileSet.h"
 #include "TBrowser.h"
@@ -58,7 +48,6 @@ St_FileSet::St_FileSet(const TString &dirname,const Char_t *setname,Bool_t expan
   //  expand   - flag whether the "dirname" must be "expanded 
   //             (kTRUE by default)
   //
-  St_FileSet *set = 0;
   Long_t id, size, flags, modtime;
   TString dirbuf = dirname;
 
@@ -82,7 +71,7 @@ St_FileSet::St_FileSet(const TString &dirname,const Char_t *setname,Bool_t expan
     }
     if (dir) {   // this is a directory
       SetTitle("directory");
-      while (name = gSystem->GetDirEntry(dir)) {
+      while ( (name = gSystem->GetDirEntry(dir)) ) {
          // skip some "special" names
          if (!name[0] || strcmp(name,"..")==0 || strcmp(name,".")==0) continue;
          Char_t *file = gSystem->ConcatFileName(dirbuf,name);
@@ -126,4 +115,18 @@ Bool_t St_FileSet::IsFolder()
  //
  return strcmp(GetTitle(),"file")!=0;
 } 
+
+// $Log: St_FileSet.cxx,v $
+// Revision 1.8  1999/10/27 23:21:27  fine
+// Clean up
+//
+// Revision 1.7  1999/06/16 14:28:35  fisyak
+// Add protection against empty directory entry
+//
+// Revision 1.6  1999/03/11 00:34:43  perev
+// St_base in new maker schema
+//
+// Revision 1.5  1998/12/26 21:40:38  fisyak
+// Add Id and Log
+// 
 
