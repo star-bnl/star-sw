@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.84 1999/02/13 01:52:09 didenko Exp $
+# $Id: MakePam.mk,v 1.85 1999/02/16 15:37:37 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.85  1999/02/16 15:37:37  fisyak
+# Clean up HP stuff
+#
 # Revision 1.84  1999/02/13 01:52:09  didenko
 # Fix bug with list of tables
 #
@@ -463,7 +466,7 @@ ifndef NT
 $(LIB_PKG)(%.o):%.g $(GEN_DIR)/geant3.def
 	cp $(1ST_DEPS) $(GEN_DIR); cd $(GEN_DIR); $(GEANT3) $(1ST_DEPS) -o  $(GEN_DIR)/$(STEM).F
 	$(FOR72)  $(CPPFLAGS) $(FFLAGS) -c $(GEN_DIR)/$(STEM).F  -o  $(OBJ_DIR)/$(STEM).o
-	$(RM) $(GEN_DIR)/$(STEM).F 
+#	$(RM) $(GEN_DIR)/$(STEM).F 
 	$(AR) $(ARFLAGS) $(LIB_PKG)  $(OBJ_DIR)/$(STEM).o
 $(FILES_OBJ) $(FILES_ORJ) $(FILES_OTJ): $(OBJ_DIR)/%.o: %.cxx
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(1ST_DEPS) -o $(OBJ_DIR)/$(STEM).o
