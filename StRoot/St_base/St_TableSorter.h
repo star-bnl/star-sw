@@ -62,11 +62,39 @@ class St_TableSorter : public TNamed {
     SEARCHMETHOD m_searchMethod;    // Function selected to serach values
     EColumnType  m_colType;         // data type of the selected column
 
+    static int CompareFloat_t     (const void **, const void **);
+    static int CompareInt_t       (const void **, const void **);
+    static int CompareLong_t      (const void **, const void **);
+    static int CompareULong_t     (const void **, const void **);
+    static int CompareUInt_t      (const void **, const void **);
+    static int CompareShort_t     (const void **, const void **);
+    static int CompareDouble_t    (const void **, const void **);
+    static int CompareUShort_t    (const void **, const void **);
+    static int CompareUChar_t     (const void **, const void **);
+    static int CompareChar_t      (const void **, const void **);
+
     Int_t  BSearch(const void *value);
+
+    Int_t BSearch(Float_t value);
+    Int_t BSearch(Int_t value);
+    Int_t BSearch(Double_t value);
+    Int_t BSearch(const Char_t *value);
+    Int_t BSearch(TString &value);
+
     void   FillIndexArray();
     void   SortArray();
     void   LearnTable();
-    Int_t  LFind(const void *){ return -1;}
+
+    static int SearchFloat_t     (const void *, const void **);
+    static int SearchInt_t       (const void *, const void **);
+    static int SearchULong_t     (const void *, const void **);
+    static int SearchLong_t      (const void *, const void **);
+    static int SearchUInt_t      (const void *, const void **);
+    static int SearchShort_t     (const void *, const void **);
+    static int SearchDouble_t    (const void *, const void **);
+    static int SearchUShort_t    (const void *, const void **);
+    static int SearchUChar_t     (const void *, const void **);
+    static int SearchChar_t      (const void *, const void **);
 
     Int_t SelectSearch(Float_t  value );
     Int_t SelectSearch(Int_t    value );
@@ -96,24 +124,7 @@ class St_TableSorter : public TNamed {
     Int_t BinarySearch(UShort_t value );
     Int_t BinarySearch(UChar_t  value );
     Int_t BinarySearch(Char_t   value );
-
-    Int_t BSearch(Float_t value);
-    Int_t BSearch(Int_t value);
-    Int_t BSearch(Double_t value);
-    Int_t BSearch(const Char_t *value);
-    Int_t BSearch(TString &value);
  
-    static int CompareFloat_t     (const void **, const void **);
-    static int CompareInt_t       (const void **, const void **);
-    static int CompareLong_t      (const void **, const void **);
-    static int CompareULong_t     (const void **, const void **);
-    static int CompareUInt_t      (const void **, const void **);
-    static int CompareShort_t     (const void **, const void **);
-    static int CompareDouble_t    (const void **, const void **);
-    static int CompareUShort_t    (const void **, const void **);
-    static int CompareUChar_t     (const void **, const void **);
-    static int CompareChar_t      (const void **, const void **);
-
     virtual       Int_t   GetIndex(UInt_t index) const;
     virtual const Text_t *GetColumnName() const { return m_colName.Data();}
     virtual const Text_t *GetTableName()  const;
@@ -121,23 +132,6 @@ class St_TableSorter : public TNamed {
     virtual const Text_t *GetTableType() const;
     virtual       Int_t   GetNRows()      const { return m_numberOfRows;}
     virtual       Int_t   GetFirstRow()   const { return m_firstRow;}
-
-    static int SearchFloat_t     (const void *, const void **);
-    static int SearchInt_t       (const void *, const void **);
-    static int SearchULong_t     (const void *, const void **);
-    static int SearchLong_t      (const void *, const void **);
-    static int SearchUInt_t      (const void *, const void **);
-    static int SearchShort_t     (const void *, const void **);
-    static int SearchDouble_t    (const void *, const void **);
-    static int SearchUShort_t    (const void *, const void **);
-    static int SearchUChar_t     (const void *, const void **);
-    static int SearchChar_t      (const void *, const void **);
-
-    Int_t  LFind(Float_t value) { return LFind(&value);}
-    Int_t  LFind(Int_t value)   { return LFind(&value);}
-    Int_t  LFind(Double_t value){ return LFind(&value);}
-    Int_t  LFind(const Char_t *value){ return LFind(&value);}
-    Int_t  LFind(TString &value){ return LFind(&value);}
 
     Int_t operator[](Int_t value)   { return BSearch(value); }
     Int_t operator[](Double_t value){ return BSearch(value); } 
