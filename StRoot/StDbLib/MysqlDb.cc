@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.29 2004/01/15 00:02:24 fisyak Exp $
+ * $Id: MysqlDb.cc,v 1.30 2004/04/28 20:28:40 deph Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.30  2004/04/28 20:28:40  deph
+ * added protection against empty string line 245
+ *
  * Revision 1.29  2004/01/15 00:02:24  fisyak
  * Replace ostringstream => StString, add option for alpha
  *
@@ -241,6 +244,15 @@ bool MysqlDb::reConnect(){
 
   if(connected){
     if(mdbServerVersion) delete [] mdbServerVersion;
+ //MPD added 4/28/04 check for valid (not Null) mData.server_version 
+    if(!mData.server_version){
+	    StString smm;
+	    smm<<" No Server version - most likely incompatable libraries \n CONTACT ADMIN";
+	    StDbManager::Instance()->printInfo((smm.str()).c_str(),dbMConnect,__LINE__,__CLASS__,__METHOD__); 
+	    assert(mData.server_version);
+    }
+  //MPD end addition
+    
     mdbServerVersion=new char[strlen(mData.server_version)+1];
     strcpy(mdbServerVersion,mData.server_version);
   }
