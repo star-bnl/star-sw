@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.31 2003/09/02 17:58:11 perev Exp $
+// $Id: StFlowCutEvent.cxx,v 1.32 2004/05/05 21:13:45 aihong Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //          MuDst enabled by Kirill Filimonov, LBNL, Jun 2002
@@ -272,6 +272,8 @@ Bool_t StFlowCutEvent::CheckEvent(StMuEvent* pMuEvent) {
     }
   } else if (pMuEvent->runInfo().centerOfMassEnergy() <= 25.){ // year=2, 22 GeV
     cent = Flow::cent22;
+  } else if(pMuEvent->runInfo().centerOfMassEnergy() >60. && pMuEvent->runInfo().centerOfMassEnergy() <65) {//62 GeV
+    cent = Flow::cent62;
   }
 
   Int_t tracks =  pMuEvent->refMultNeg() + pMuEvent->refMultPos();
@@ -525,6 +527,9 @@ void StFlowCutEvent::PrintCutList() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.32  2004/05/05 21:13:45  aihong
+// Gang's code for ZDC-SMD added
+//
 // Revision 1.31  2003/09/02 17:58:11  perev
 // gcc 3.2 updates + WarnOff
 //

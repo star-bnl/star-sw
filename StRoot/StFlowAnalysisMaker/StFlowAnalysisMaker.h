@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.43 2003/11/14 20:00:43 oldi Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.44 2004/05/05 21:13:47 aihong Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -58,7 +58,7 @@ public:
   void     SetEtaRange_for_vPt(Float_t lo, Float_t hi);
   void     SetV1Ep1Ep2(Bool_t v1Ep1Ep2 = kTRUE);
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.43 2003/11/14 20:00:43 oldi Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.44 2004/05/05 21:13:47 aihong Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -76,6 +76,8 @@ private:
   UInt_t   mMultSub[Flow::nSels*Flow::nSubs][Flow::nHars];   //! multiplicity subs
   Float_t  mRes[Flow::nSels][Flow::nHars];      //! event plane resolution
   Float_t  mResErr[Flow::nSels][Flow::nHars];   //! event plane resolution error
+  Float_t  mZDCSMD_e_PsiWgt,mZDCSMD_w_PsiWgt;   //! ZDCSMD Psi Weight
+  Float_t  mFlowWeight;				//! Weight for flow
 #endif /*__CINT__*/
   TString          xLabel;      //! label axis with rapidity or pseudorapidity 
   StFlowEvent*     pFlowEvent;  //! pointer to StFlowEvent
@@ -147,7 +149,12 @@ private:
   TH2F*     mHistMeanDedxAntiDeuteron2D;//!
   TH2F*     mHistMeanDedxPositron2D;   //!
   TH2F*     mHistMeanDedxElectron2D;   //!
-
+  TH1F*	    mZDC_SMD_west_vert;	       //!
+  TH1F*     mZDC_SMD_west_hori;	       //!
+  TH1F*     mZDC_SMD_east_vert;        //!
+  TH1F*     mZDC_SMD_east_hori;        //!
+  TH1F*	    mHistZDCSMDPsiWgtEast;	       //!
+  TH1F*     mHistZDCSMDPsiWgtWest;         //!
   
   // for each harmonic, each selection, and each sub-event
   struct histSubHars {
@@ -239,6 +246,9 @@ inline Float_t StFlowAnalysisMaker::ResErr(Int_t eventN, Int_t harN) const
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
+// Revision 1.44  2004/05/05 21:13:47  aihong
+// Gang's code for ZDC-SMD added
+//
 // Revision 1.43  2003/11/14 20:00:43  oldi
 // Implementation of v1{EP1,EP2}. This method is set to be the default for v1 now!
 // Minor code clean-ups.

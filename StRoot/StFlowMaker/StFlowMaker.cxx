@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.88 2004/04/09 15:49:01 aihong Exp $
+// $Id: StFlowMaker.cxx,v 1.89 2004/05/05 21:13:44 aihong Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -221,7 +221,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.88 2004/04/09 15:49:01 aihong Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.89 2004/05/05 21:13:44 aihong Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -392,7 +392,18 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 	  mPhiWgtFtpcFarWest[k][j][n] = (phiWgtHistFtpcFarWest) ? 
 	    phiWgtHistFtpcFarWest->GetBinContent(n+1) : 1.;
 	}
-      } else {
+	//ZDCSMD psi Wgt
+	TH1F* mZDCSMDPsiWest = (TH1F *)pPhiWgtFile->Get("Flow_ZDCSMDPsiWgtWest");
+	TH1F* mZDCSMDPsiEast = (TH1F *)pPhiWgtFile->Get("Flow_ZDCSMDPsiWgtEast");
+	Float_t mZDCSMDPsiWest_mean = (mZDCSMDPsiWest->Integral())/(mZDCSMDPsiWest->GetNbinsX());
+	Float_t mZDCSMDPsiEast_mean = (mZDCSMDPsiEast->Integral())/(mZDCSMDPsiEast->GetNbinsX());
+	for(int n = 0; n < Flow::zdcsmd_nPsiBins; n++) {
+	  mZDCSMD_PsiWgtWest[n] = ((mZDCSMDPsiWest->GetBinContent(n+1))>0.) ?
+	    mZDCSMDPsiWest_mean/(mZDCSMDPsiWest->GetBinContent(n+1)):1.;
+	  mZDCSMD_PsiWgtEast[n] = ((mZDCSMDPsiEast->GetBinContent(n+1))>0.) ? 
+	    mZDCSMDPsiEast_mean/(mZDCSMDPsiEast->GetBinContent(n+1)):1.;
+	}//zdcsmd_nPsiBins
+        } else {
 	for (int n = 0; n < Flow::nPhiBins; n++) {
 	  mPhiWgt[k][j][n]        = 1.;
 	  mPhiWgtFarEast[k][j][n] = 1.;
@@ -406,6 +417,11 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
 	  mPhiWgtFtpcEast[k][j][n] = 1.;
 	  mPhiWgtFtpcFarWest[k][j][n] = 1.;
 	}
+	for(int n=0;n < Flow::zdcsmd_nPsiBins;n++) {
+          mZDCSMD_PsiWgtWest[n] = 1.;
+          mZDCSMD_PsiWgtEast[n] = 1.;
+        }//zdcsmd_nPsiBins
+
       }
       delete histTitle;
       delete histTitleFarEast;
@@ -448,6 +464,8 @@ void StFlowMaker::FillFlowEvent() {
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
   pFlowEvent->SetPhiWeightFtpcFarWest(mPhiWgtFtpcFarWest);
   pFlowEvent->SetFirstLastPoints();
+  pFlowEvent->SetZDCSMD_PsiWeightWest(mZDCSMD_PsiWgtWest);
+  pFlowEvent->SetZDCSMD_PsiWeightEast(mZDCSMD_PsiWgtEast);
 
   // Get Trigger information
   StL0Trigger* pTrigger = pEvent->l0Trigger();
@@ -481,6 +499,10 @@ void StFlowMaker::FillFlowEvent() {
   Float_t ctb  = -1.;
   Float_t zdce = -1.;
   Float_t zdcw = -1.;
+  Float_t zdcsmdEastHorizontal=-1.;
+  Float_t zdcsmdEastVertical=-1.;
+  Float_t zdcsmdWestHorizontal=-1.;
+  Float_t zdcsmdWestVertical=-1.;
   StTriggerDetectorCollection *triggers = pEvent->triggerDetectorCollection();
   if (triggers)	{
     StCtbTriggerDetector &CTB = triggers->ctb();
@@ -494,6 +516,17 @@ void StFlowMaker::FillFlowEvent() {
     //get ZDCe and ZDCw        
     zdce = ZDC.adcSum(east);
     zdcw = ZDC.adcSum(west);
+    //get ZDCSMD pedstal-subtracted and gain-corrected
+    for(int strip=1;strip<9;strip++) {
+      zdcsmdEastHorizontal=(ZDC.zdcSmd(east,1,strip)-Flow::zdcsmdPedstal[0][1][strip-1])/Flow::zdcsmdGainFac[0][1][strip-1];
+      pFlowEvent->SetZDCSMD(0,1,strip,zdcsmdEastHorizontal);
+      zdcsmdEastVertical=(ZDC.zdcSmd(east,0,strip)-Flow::zdcsmdPedstal[0][0][strip-1])/Flow::zdcsmdGainFac[0][0][strip-1];
+      pFlowEvent->SetZDCSMD(0,0,strip,zdcsmdEastVertical);
+      zdcsmdWestHorizontal=(ZDC.zdcSmd(west,1,strip)-Flow::zdcsmdPedstal[1][1][strip-1])/Flow::zdcsmdGainFac[1][1][strip-1];
+      pFlowEvent->SetZDCSMD(1,1,strip,zdcsmdWestHorizontal);
+      zdcsmdWestVertical=(ZDC.zdcSmd(west,0,strip)-Flow::zdcsmdPedstal[1][0][strip-1])/Flow::zdcsmdGainFac[1][0][strip-1];
+      pFlowEvent->SetZDCSMD(1,0,strip,zdcsmdWestVertical);
+    }
   } 
   pFlowEvent->SetCTB(ctb);
   pFlowEvent->SetZDCe(zdce);
@@ -1394,7 +1427,8 @@ Bool_t StFlowMaker::FillFromMuDST() {
   pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
   pFlowEvent->SetPhiWeightFtpcFarWest(mPhiWgtFtpcFarWest);
   pFlowEvent->SetFirstLastPoints();  
-  
+  pFlowEvent->SetZDCSMD_PsiWeightWest(mZDCSMD_PsiWgtWest);
+  pFlowEvent->SetZDCSMD_PsiWeightEast(mZDCSMD_PsiWgtEast);
   // Check event cuts
   if (!StFlowCutEvent::CheckEvent(pMuEvent)) {  
     Int_t eventID = pMuEvent->eventId();
@@ -1449,6 +1483,22 @@ Bool_t StFlowMaker::FillFromMuVersion0DST() {
   pFlowEvent->SetCTB(pMuEvent->ctbMultiplicity());
   pFlowEvent->SetZDCe(pMuEvent->zdcAdcAttentuatedSumEast());
   pFlowEvent->SetZDCw(pMuEvent->zdcAdcAttentuatedSumWest());
+    //get ZDCSMD pedstal-subtracted and gain-corrected
+  Float_t zdcsmdEastHorizontal=-1.;
+  Float_t zdcsmdEastVertical=-1.;
+  Float_t zdcsmdWestHorizontal=-1.;
+  Float_t zdcsmdWestVertical=-1.;
+    StZdcTriggerDetector &ZDC =pMuEvent->zdcTriggerDetector();
+    for(int strip=1;strip<9;strip++) {
+      zdcsmdEastHorizontal=(ZDC.zdcSmd(east,1,strip)-Flow::zdcsmdPedstal[0][1][strip-1])/Flow::zdcsmdGainFac[0][1][strip-1];
+      pFlowEvent->SetZDCSMD(0,1,strip,zdcsmdEastHorizontal);
+      zdcsmdEastVertical=(ZDC.zdcSmd(east,0,strip)-Flow::zdcsmdPedstal[0][0][strip-1])/Flow::zdcsmdGainFac[0][0][strip-1];
+      pFlowEvent->SetZDCSMD(0,0,strip,zdcsmdEastVertical);
+      zdcsmdWestHorizontal=(ZDC.zdcSmd(west,1,strip)-Flow::zdcsmdPedstal[1][1][strip-1])/Flow::zdcsmdGainFac[1][1][strip-1];
+      pFlowEvent->SetZDCSMD(1,1,strip,zdcsmdWestHorizontal);
+      zdcsmdWestVertical=(ZDC.zdcSmd(west,0,strip)-Flow::zdcsmdPedstal[1][0][strip-1])/Flow::zdcsmdGainFac[1][0][strip-1];
+      pFlowEvent->SetZDCSMD(1,0,strip,zdcsmdWestVertical);
+    }
     UInt_t origMult = pMuEvent->eventSummary().numberOfGoodPrimaryTracks(); //???
   pFlowEvent->SetOrigMult(origMult);
   PR(origMult);
@@ -1799,6 +1849,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.89  2004/05/05 21:13:44  aihong
+// Gang's code for ZDC-SMD added
+//
 // Revision 1.88  2004/04/09 15:49:01  aihong
 // make changes to support getting PID on fly for picodst and MuDst.
 //

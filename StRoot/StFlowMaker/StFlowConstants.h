@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowConstants.h,v 1.17 2004/02/03 22:36:36 posk Exp $
+// $Id: StFlowConstants.h,v 1.18 2004/05/05 21:13:44 aihong Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings 
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -34,11 +34,13 @@ class Flow{
     nCumulInteg_qMax  =   8,
     nCumulDiffOrders  =   2,
     nCumulDiff_qMax   =   8,
-    nCents       = 9
+    nCents       = 9,
+    zdcsmd_nPsiBins   =   64
   };
 
   typedef Double_t PhiWgt_t[nSels][nHars][nPhiBins];
   typedef Double_t PhiWgtFtpc_t[nSels][nHars][nPhiBinsFtpc];
+  typedef Double_t ZDCSMD_PsiWgt_t[64];  
 
   static Float_t etaMin;
   static Float_t etaMax;
@@ -51,8 +53,12 @@ class Flow{
   static Int_t   cent200Full[nCents];
   static Int_t   cent200Half[nCents];
   static Int_t   cent130[nCents];
+  static Int_t   cent62[nCents];
   static Int_t   cent22[nCents];
 
+  static Float_t zdcsmd_wx0,zdcsmd_ex0,zdcsmd_wy0,zdcsmd_ey0;
+  static Float_t zdcsmdPedstal[2][2][8];
+  static Float_t zdcsmdGainFac[2][2][8];
   ClassDef(Flow,1)               // macro for rootcint
 };
 
@@ -61,6 +67,9 @@ class Flow{
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowConstants.h,v $
+// Revision 1.18  2004/05/05 21:13:44  aihong
+// Gang's code for ZDC-SMD added
+//
 // Revision 1.17  2004/02/03 22:36:36  posk
 // Initialzed mPtBinsPart.
 //

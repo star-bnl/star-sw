@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.46 2004/03/11 17:58:42 posk Exp $
+// $Id: StFlowEvent.h,v 1.47 2004/05/05 21:13:45 aihong Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -33,6 +33,8 @@ public:
   Double_t       PhiWeight(Int_t selN, Int_t harN, StFlowTrack* pFlowTrack) const;
   Double_t       PhiWeightRaw(Int_t selN, Int_t harN, StFlowTrack* pFlowTrack) const;
   Double_t       Weight(Int_t selN, Int_t harN, StFlowTrack* pFlowTrack) const;
+  Double_t       ZDCSMD_PsiWgtEast();
+  Double_t       ZDCSMD_PsiWgtWest();
   Int_t          EventID() const;
   Int_t          RunID() const;
   Double_t       CenterOfMassEnergy() const;
@@ -52,6 +54,10 @@ public:
   Float_t        q(StFlowSelection*);
   Float_t        MeanPt(StFlowSelection*);
   Float_t        Psi(StFlowSelection*);
+  Float_t 	 ZDCSMD_PsiCorr();
+  Float_t 	 ZDCSMD_PsiEst();
+  Float_t        ZDCSMD_PsiWst();
+  Float_t 	 ZDCSMD_GetPosition(int eastwest,int verthori,int strip);
   Double_t       G_New(StFlowSelection* pFlowSelect, Double_t Zx, Double_t Zy);
   Double_t       G_Old(StFlowSelection* pFlowSelect, Double_t Zx, Double_t Zy);
   Double_t       SumWeightSquare(StFlowSelection* pFlowSelect);
@@ -61,12 +67,14 @@ public:
   Float_t        CTB() const;
   Float_t        ZDCe() const;
   Float_t        ZDCw() const;
+  Float_t	 ZDCSMD(int eastwest,int verthori,int strip) const;
   Float_t        PtWgtSaturation() const;
   Bool_t         PtWgt() const;
   Bool_t         EtaWgt() const;
   Bool_t         FirstLastPhiWgt() const;
   Bool_t         FirstLastPoints() const;
   Bool_t         ProbPid() const;
+  Bool_t	 UseZDCSMD() const;
   Char_t*        Pid();
   Bool_t         EtaSubs() const;
   Bool_t         RanSubs() const;
@@ -95,6 +103,7 @@ public:
   void SetCTB(const Float_t ctb);
   void SetZDCe(const Float_t zdce);
   void SetZDCw(const Float_t zdcw);
+  void SetZDCSMD(int eastwest,int verthori,int strip,const Float_t zdcsmd);
 #ifndef __CINT__		
   void SetPhiWeight(const Flow::PhiWgt_t &pPhiWgt);
   void SetPhiWeightFarEast(const Flow::PhiWgt_t &pPhiWgt);
@@ -105,6 +114,8 @@ public:
   void SetPhiWeightFtpcEast(const Flow::PhiWgtFtpc_t &pPhiWgt);
   void SetPhiWeightFtpcWest(const Flow::PhiWgtFtpc_t &pPhiWgt);
   void SetPhiWeightFtpcFarWest(const Flow::PhiWgtFtpc_t &pPhiWgt);
+  void SetZDCSMD_PsiWeightWest(const Flow::ZDCSMD_PsiWgt_t&  ZDCSMD_PsiWgtWest);
+  void SetZDCSMD_PsiWeightEast(const Flow::ZDCSMD_PsiWgt_t&  ZDCSMD_PsiWgtEast); 
 #endif
   static void SetEtaTpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
   static void SetPtTpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
@@ -133,6 +144,7 @@ public:
   static void SetOnePhiWgt();
   static void SetFirstLastPhiWgt();
   static void SetFirstLastPoints();
+  static void SetUseZDCSMD(Bool_t);
 
 private:
 
@@ -153,6 +165,7 @@ private:
   Float_t             mCTB;                                      // CTB value sum
   Float_t             mZDCe;                                     // ZDC east
   Float_t             mZDCw;                                     // ZDC west
+  Float_t	      mZDCSMD[2][2][8];				 // ZDCSMD
   static Float_t      mEtaTpcCuts[2][2][Flow::nSels];            // range absolute values
   static Float_t      mEtaFtpcCuts[4][2][Flow::nSels];           // range values
   static Float_t      mPtTpcCuts[2][2][Flow::nSels];             // range
@@ -166,6 +179,9 @@ private:
   Flow::PhiWgtFtpc_t  mPhiWgtFtpcEast;                           //!flattening weights Ftpc East
   Flow::PhiWgtFtpc_t  mPhiWgtFtpcWest;                           //!flattening weights Ftpc West
   Flow::PhiWgtFtpc_t  mPhiWgtFtpcFarWest;                        //!flattening weights Ftpc FarWest
+  Flow::ZDCSMD_PsiWgt_t  mZDCSMD_PsiWgtWest;		         //! ZDCSMD west Psi
+  Flow::ZDCSMD_PsiWgt_t  mZDCSMD_PsiWgtEast;        		 //! ZDCSMD east Psi
+
   static Float_t      mPiPlusCuts[2];                            // PID cuts
   static Float_t      mPtWgtSaturation;                          // saturation value for pt weighting
   static Bool_t       mPtWgt;                                    // flag for pt weighting
@@ -177,6 +193,7 @@ private:
   static Bool_t       mOnePhiWgt;                                // flag for old phi weights
   static Bool_t       mFirstLastPhiWgt;                          // flag for using z of first and last points for reading phi weights
   static Bool_t       mFirstLastPoints;                          // flag for using z of first and last points for generating phi weights
+  static Bool_t	      mUseZDCSMD;				 // flag for using ZDC SMD for RP
   static Float_t      mPiMinusCuts[2];
   static Float_t      mProtonCuts[2];
   static Float_t      mKMinusCuts[2];
@@ -230,7 +247,9 @@ inline Float_t  StFlowEvent::CTB() const { return mCTB; }
 
 inline Float_t  StFlowEvent::ZDCe() const { return mZDCe; }
 
-inline Float_t  StFlowEvent::ZDCw() const { return mZDCw; }
+inline Float_t  StFlowEvent::ZDCw() const { return mZDCw; }  
+
+inline Float_t  StFlowEvent::ZDCSMD(int eastwest,int verthori,int strip) const {return mZDCSMD[eastwest][verthori][strip-1];}
 
 inline Float_t  StFlowEvent::PtWgtSaturation() const { return mPtWgtSaturation; }
 
@@ -249,6 +268,8 @@ inline Bool_t   StFlowEvent::ProbPid() const { return mProbPid; }
 inline Bool_t   StFlowEvent::EtaSubs() const { return mEtaSubs; }
 
 inline Bool_t   StFlowEvent::RanSubs() const { return mRanSubs; }
+
+inline Bool_t   StFlowEvent::UseZDCSMD() const { return mUseZDCSMD;}
 
 #ifndef __CINT__
 inline void StFlowEvent::SetPhiWeight(const Flow::PhiWgt_t& pPhiWgt) {
@@ -277,6 +298,10 @@ inline void StFlowEvent::SetPhiWeightFtpcWest(const Flow::PhiWgtFtpc_t& pPhiWgtF
 
 inline void StFlowEvent::SetPhiWeightFtpcFarWest(const Flow::PhiWgtFtpc_t& pPhiWgtFtpcFarWest) {
   memcpy (mPhiWgtFtpcFarWest, pPhiWgtFtpcFarWest, sizeof(Flow::PhiWgtFtpc_t)); }
+
+inline void StFlowEvent::SetZDCSMD_PsiWeightEast(const Flow::ZDCSMD_PsiWgt_t&  ZDCSMD_PsiWgtEast) { memcpy (mZDCSMD_PsiWgtEast, ZDCSMD_PsiWgtEast, sizeof(Flow::ZDCSMD_PsiWgt_t)); }
+
+inline void StFlowEvent::SetZDCSMD_PsiWeightWest(const Flow::ZDCSMD_PsiWgt_t&  ZDCSMD_PsiWgtWest) { memcpy (mZDCSMD_PsiWgtWest, ZDCSMD_PsiWgtWest, sizeof(Flow::ZDCSMD_PsiWgt_t)); }
 #endif
 
 inline void StFlowEvent::SetEtaTpcCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN)
@@ -366,6 +391,8 @@ inline void StFlowEvent::SetZDCe(const Float_t zdce) { mZDCe = zdce; }
 
 inline void StFlowEvent::SetZDCw(const Float_t zdcw) { mZDCw = zdcw; }
 
+inline void StFlowEvent::SetZDCSMD(int eastwest,int verthori,int strip,const Float_t zdcsmd) {mZDCSMD[eastwest][verthori][strip-1] = zdcsmd;}
+
 inline void StFlowEvent::SetPid(const Char_t* pid)  { 
   strncpy(mPid, pid, 9); mPid[9] = '\0'; }
 
@@ -381,6 +408,8 @@ inline void StFlowEvent::SetFirstLastPhiWgt() { mFirstLastPhiWgt = kTRUE; }
 
 inline void StFlowEvent::SetFirstLastPoints() { mFirstLastPoints = kTRUE; }
 
+inline void StFlowEvent::SetUseZDCSMD(Bool_t UseZDCSMD) { mUseZDCSMD = UseZDCSMD; }
+
 inline void StFlowEvent::SetPtWgtSaturation(Float_t PtWgtSaturation) { mPtWgtSaturation = PtWgtSaturation; }
 
 inline void StFlowEvent::SetPtWgt(Bool_t PtWgt) { mPtWgt = PtWgt; }
@@ -392,6 +421,9 @@ inline void StFlowEvent::SetEtaWgt(Bool_t EtaWgt) { mEtaWgt = EtaWgt; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.47  2004/05/05 21:13:45  aihong
+// Gang's code for ZDC-SMD added
+//
 // Revision 1.46  2004/03/11 17:58:42  posk
 // Added Random Subs analysis method.
 //

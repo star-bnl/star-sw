@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.82 2004/03/11 18:00:03 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.83 2004/05/05 21:13:47 aihong Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -631,6 +631,14 @@ Int_t StFlowAnalysisMaker::Init() {
   mHistMeanDedxPositron2D->SetXTitle("log(momentum) (GeV/c)");
   mHistMeanDedxPositron2D->SetYTitle("mean dEdx");
   
+  //ZDCSMD test
+  mZDC_SMD_west_vert = new TH1F("Flow_ZDC_SMD_west_vert","Flow_ZDC_SMD_west_vert",7,0.5,7.5);
+  mZDC_SMD_east_vert = new TH1F("Flow_ZDC_SMD_east_vert","Flow_ZDC_SMD_east_vert",7,0.5,7.5);
+  mZDC_SMD_west_hori = new TH1F("Flow_ZDC_SMD_west_hori","Flow_ZDC_SMD_west_hori",8,0.5,8.5);
+  mZDC_SMD_east_hori = new TH1F("Flow_ZDC_SMD_east_hori","Flow_ZDC_SMD_east_hori",8,0.5,8.5);
+  mHistZDCSMDPsiWgtEast  = new TH1F("Flow_ZDCSMDPsiWgtEast","Flow_ZDCSMDPsiWgtEast",Flow::zdcsmd_nPsiBins,-twopi/2.,twopi/2.);
+  mHistZDCSMDPsiWgtWest  = new TH1F("Flow_ZDCSMDPsiWgtWest","Flow_ZDCSMDPsiWgtWest",Flow::zdcsmd_nPsiBins,-twopi/2.,twopi/2.);
+
   TString* histTitle;
   for (int i = 0; i < Flow::nSels * Flow::nSubs; i++) {
 
@@ -1153,7 +1161,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.82 2004/03/11 18:00:03 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.83 2004/05/05 21:13:47 aihong Exp $");
 
   return StMaker::Init();
 }
@@ -1183,7 +1191,9 @@ Bool_t StFlowAnalysisMaker::FillFromFlowEvent() {
       if (mPsi[k][j]==0.) return kFALSE; // to eliminate psi=0
     }
   }
-
+  mZDCSMD_e_PsiWgt = pFlowEvent->ZDCSMD_PsiWgtEast();
+  mZDCSMD_w_PsiWgt = pFlowEvent->ZDCSMD_PsiWgtWest();
+  mFlowWeight  	   = (pFlowEvent->UseZDCSMD()) ? mZDCSMD_e_PsiWgt*mZDCSMD_w_PsiWgt:1.;
   return kTRUE;
 }
 
@@ -1218,6 +1228,16 @@ void StFlowAnalysisMaker::FillEventHistograms() {
 
   mHistCTBvsZDC2D->Fill(pFlowEvent->ZDCe() + pFlowEvent->ZDCe(), 
 			pFlowEvent->CTB());
+  //ZDCSMD test
+  for(int strip=1;strip<9;strip++) {
+    mZDC_SMD_west_hori->Fill(strip,pFlowEvent->ZDCSMD(1,1,strip));
+    mZDC_SMD_east_hori->Fill(strip,pFlowEvent->ZDCSMD(0,1,strip));
+    if(strip==8) continue;
+    mZDC_SMD_west_vert->Fill(strip,pFlowEvent->ZDCSMD(1,0,strip));
+    mZDC_SMD_east_vert->Fill(strip,pFlowEvent->ZDCSMD(0,0,strip));
+  }
+  mHistZDCSMDPsiWgtEast->Fill(pFlowEvent->ZDCSMD_PsiEst());
+  mHistZDCSMDPsiWgtWest->Fill(pFlowEvent->ZDCSMD_PsiWst());
 
   // sub-event Psi_Subs
   for (int i = 0; i < Flow::nSubs * Flow::nSels; i++) {
@@ -1268,7 +1288,11 @@ void StFlowAnalysisMaker::FillEventHistograms() {
       if (mPsiSub[Flow::nSels*k][j] != 0. && mPsiSub[Flow::nSels*k+1][j] != 0.) {
 
 	float psiSubCorr;
-	if (mV1Ep1Ep2 == kFALSE || order != 1) {
+
+      if(pFlowEvent->UseZDCSMD()) {
+	psiSubCorr = pFlowEvent->ZDCSMD_PsiCorr();
+      } 
+	else if (mV1Ep1Ep2 == kFALSE || order != 1) {
 	  psiSubCorr = mPsiSub[Flow::nSels*k][j] - mPsiSub[Flow::nSels*k+1][j];
 	}
 	
@@ -1276,10 +1300,10 @@ void StFlowAnalysisMaker::FillEventHistograms() {
 	  psiSubCorr = mPsiSub[Flow::nSels*k][0] + mPsiSub[Flow::nSels*k+1][0] - 2.*mPsi[k][1];
 	}
 
-	histFull[k].mHistCos->Fill(order, (float)cos(order * psiSubCorr));
+	histFull[k].mHistCos->Fill(order, (float)cos(order * psiSubCorr),mFlowWeight);
 	if (psiSubCorr < 0.) psiSubCorr += twopi / order;
 	if (psiSubCorr > twopi / order) psiSubCorr -= twopi / order; // for v1Ep1Ep2 which gives -twopi < psiSubCorr < 2.*twopi
-	histFull[k].histFullHar[j].mHistPsiSubCorr->Fill(psiSubCorr);
+	histFull[k].histFullHar[j].mHistPsiSubCorr->Fill(psiSubCorr,mFlowWeight);
       }
 
       if (j < Flow::nHars - 1) { // subevents of different harmonics
@@ -1698,7 +1722,10 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	if (pFlowSelect->SelectPart(pFlowTrack)) {
 	  corrMultN++;
 	  float v;
-	  if (mV1Ep1Ep2 == kFALSE || order != 1) {
+	if(pFlowEvent->UseZDCSMD()) {
+	  v = cos(order *(phi-mQ[k][1].Phi()))/perCent;
+	}
+	 else if (mV1Ep1Ep2 == kFALSE || order != 1) {
 	    v = cos(order * (phi - psi_i))/perCent;
 	  }
 	  else { // mV1Ep1Ep2 == kTRUE && order == 1
@@ -1708,40 +1735,40 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  if (eta < 0 && oddHar) vFlip *= -1;
 	  if (strlen(pFlowSelect->PidPart()) != 0) { // pid, fill rapidity 
 	    float rapidity = pFlowTrack->Y();
-	    histFull[k].histFullHar[j].mHist_vObs2D->Fill(rapidity, pt, v);
+	    histFull[k].histFullHar[j].mHist_vObs2D->Fill(rapidity, pt, v,mFlowWeight);
 	    
 	    if (mPtRange_for_vEta[1] > mPtRange_for_vEta[0]) { // cut is used
 	      if (pt < mPtRange_for_vEta[1] && pt >= mPtRange_for_vEta[0]) {
 		// check cut range, fill if in range
-		histFull[k].histFullHar[j].mHist_vObsEta->Fill(rapidity, v);
+		histFull[k].histFullHar[j].mHist_vObsEta->Fill(rapidity, v,mFlowWeight);
 	      }
 	    }
 	    else { // cut is not used, fill in any case
-	      histFull[k].histFullHar[j].mHist_vObsEta->Fill(rapidity, v);
+	      histFull[k].histFullHar[j].mHist_vObsEta->Fill(rapidity, v, mFlowWeight);
 	    }
 
 	  } else { // no pid, fill eta
-	    histFull[k].histFullHar[j].mHist_vObs2D->Fill(eta, pt, v);
+	    histFull[k].histFullHar[j].mHist_vObs2D->Fill(eta, pt, v,mFlowWeight);
 	   
 	    if (mPtRange_for_vEta[1] > mPtRange_for_vEta[0]) { // cut is used
 	      if (pt < mPtRange_for_vEta[1] && pt >= mPtRange_for_vEta[0]) {
 		// check cut range, fill if in range
-		histFull[k].histFullHar[j].mHist_vObsEta->Fill(eta, v);
+		histFull[k].histFullHar[j].mHist_vObsEta->Fill(eta, v, mFlowWeight);
 	      }
 	    }
 	    else { // cut is not used, fill in any case
-	      histFull[k].histFullHar[j].mHist_vObsEta->Fill(eta, v);
+	      histFull[k].histFullHar[j].mHist_vObsEta->Fill(eta, v, mFlowWeight);
 	    }
 	  }
 
 	  if (mEtaRange_for_vPt[1] > mEtaRange_for_vPt[0]) { // cut is used
 	    if (TMath::Abs(eta) < mEtaRange_for_vPt[1] && TMath::Abs(eta) >= mEtaRange_for_vPt[0]) {
 	      // check cut range, fill if in range
-	      histFull[k].histFullHar[j].mHist_vObsPt->Fill(pt, vFlip);
+	      histFull[k].histFullHar[j].mHist_vObsPt->Fill(pt, vFlip, mFlowWeight);
 	    }
 	  }
 	  else { // cut is not used, fill in any case
-	    histFull[k].histFullHar[j].mHist_vObsPt->Fill(pt, vFlip);
+	    histFull[k].histFullHar[j].mHist_vObsPt->Fill(pt, vFlip,mFlowWeight);
 	  }
 
 	  // v_
@@ -1755,7 +1782,7 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	       TMath::Abs(eta) >= mEtaRange_for_vPt[1])) {
 	    etaPtNoCut = kFALSE;
 	  }
-	  if (etaPtNoCut) histFull[k].mHist_vObs->Fill(order, vFlip);
+	  if (etaPtNoCut) histFull[k].mHist_vObs->Fill(order, vFlip,mFlowWeight);
 	  
 	  // Correlation of Phi of all particles with Psi
 	  float phi_i = phi;
@@ -1906,7 +1933,7 @@ Int_t StFlowAnalysisMaker::Finish() {
   TString* histTitle;
 
   // PhiWgt histogram collection
-  TOrdCollection* phiWgtHistNames = new TOrdCollection(Flow::nSels*Flow::nHars);
+  TOrdCollection* phiWgtHistNames = new TOrdCollection(Flow::nSels*Flow::nHars+2);
 
   cout << endl << "##### Analysis Maker:" << endl;
 
@@ -1932,6 +1959,33 @@ Int_t StFlowAnalysisMaker::Finish() {
       double order  = (double)(j+1);
       cosPair[k][j]    = histFull[k].mHistCos->GetBinContent(j+1);
       cosPairErr[k][j] = histFull[k].mHistCos->GetBinError(j+1);
+
+	if(pFlowEvent->UseZDCSMD()) {//ZDCSMD used to determine RP resolution
+	  double ZDCSMD_deltaResSub = 0.005,ZDCSMD_mResDelta=0.;
+	  double ZDCSMD_resSub = (histFull[k].mHistCos->GetBinContent(1)>0.) ? ::sqrt(histFull[k].mHistCos->GetBinContent(1)) : 0.;
+	  double ZDCSMD_resSubErr = (histFull[k].mHistCos->GetBinContent(1)>0.) ? histFull[k].mHistCos->GetBinError(1)/(2.*ZDCSMD_resSub) : 0.;
+	  double ZDCSMD_chiSub = chi(ZDCSMD_resSub);
+	  double ZDCSMD_chiSubDelta = chi((ZDCSMD_resSub+ZDCSMD_deltaResSub));
+	  if(j==0) {
+	    mRes[k][j] =resEventPlane(::sqrt(2.) * ZDCSMD_chiSub);
+	    ZDCSMD_mResDelta = resEventPlane(::sqrt(2.) * ZDCSMD_chiSubDelta);
+          }
+	  if(j==1) {
+	    mRes[k][j] =resEventPlaneK2(::sqrt(2.) * ZDCSMD_chiSub);
+	    ZDCSMD_mResDelta = resEventPlaneK2(::sqrt(2.) * ZDCSMD_chiSubDelta);
+	  }
+	  if(j==2) {
+	    mRes[k][j] =resEventPlaneK3(::sqrt(2.) * ZDCSMD_chiSub);
+	    ZDCSMD_mResDelta = resEventPlaneK3(::sqrt(2.) * ZDCSMD_chiSubDelta);
+	  }
+	  if(j==3) {
+	    mRes[k][j] =resEventPlaneK4(::sqrt(2.) * ZDCSMD_chiSub);
+	    ZDCSMD_mResDelta = resEventPlaneK4(::sqrt(2.) * ZDCSMD_chiSubDelta);
+	  }
+	  mResErr[k][j] = ZDCSMD_resSubErr * fabs ((double)mRes[k][j] - ZDCSMD_mResDelta) / ZDCSMD_deltaResSub;
+	
+	}//if(pFlowEvent->UseZDCSMD())
+	else{
       if (cosPair[k][j] > 0.) {
 	double resSub;
 	double resSubErr;
@@ -2009,6 +2063,7 @@ Int_t StFlowAnalysisMaker::Finish() {
 	mRes[k][j]    = 0.;
 	mResErr[k][j] = 0.;
       }
+      }//else :standard way if(!pFlowEvent->UseZDCSMD())
       histFull[k].mHistRes->SetBinContent(j+1, mRes[k][j]);
       histFull[k].mHistRes->SetBinError(j+1, mResErr[k][j]);
 
@@ -2152,6 +2207,8 @@ Int_t StFlowAnalysisMaker::Finish() {
       phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgtFtpcFarWest);
     }
   }
+  phiWgtHistNames->AddLast(mHistZDCSMDPsiWgtEast);
+  phiWgtHistNames->AddLast(mHistZDCSMDPsiWgtWest);
   //GetHistList()->ls();
 
   // Write all histograms
@@ -2236,6 +2293,9 @@ void StFlowAnalysisMaker::SetV1Ep1Ep2(Bool_t v1Ep1Ep2) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.83  2004/05/05 21:13:47  aihong
+// Gang's code for ZDC-SMD added
+//
 // Revision 1.82  2004/03/11 18:00:03  posk
 // Added Random Subs analysis method.
 //
