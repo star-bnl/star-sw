@@ -1,5 +1,8 @@
-// $Id: StMessage.cxx,v 1.12 1999/07/22 00:17:47 genevb Exp $
+// $Id: StMessage.cxx,v 1.13 1999/08/10 22:07:35 genevb Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.13  1999/08/10 22:07:35  genevb
+// Added QAInfo message types
+//
 // Revision 1.12  1999/07/22 00:17:47  genevb
 // make messBuffer static
 //
@@ -97,12 +100,12 @@ int StMessage::Print(int nChars) {
   }
   messBuffer.seekp(0);
   if (printIt) {
-    messBuffer << leader;
+    if (!strchr(option,'S')) messBuffer << leader;       // "No St" option
     const char* temp(StMessTypeList::Instance()->Text(type));
     if (temp) messBuffer << temp;
     messBuffer << insert1 << message;                    // ": ",message
     if (nChars<=0) {
-      if (!strchr(option,'T')) {
+      if (!strchr(option,'T')) {                         // "No time" option
         char* temp2 = strchr(messTime.AsString(),' ');
         messBuffer << insert2 << (++temp2) << insert3 ;  // " (",time,")"
       }
@@ -137,7 +140,7 @@ int StMessage::Print(int nChars) {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.12 1999/07/22 00:17:47 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.13 1999/08/10 22:07:35 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

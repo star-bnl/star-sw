@@ -1,5 +1,8 @@
-// $Id: StMessMgr.h,v 1.4 1999/07/23 16:56:39 genevb Exp $
+// $Id: StMessMgr.h,v 1.5 1999/08/10 22:07:35 genevb Exp $
 // $Log: StMessMgr.h,v $
+// Revision 1.5  1999/08/10 22:07:35  genevb
+// Added QAInfo message types
+//
 // Revision 1.4  1999/07/23 16:56:39  genevb
 // Fix extern C prototypes, default options for omitted types, Linux bug with multi-line messages
 //
@@ -39,7 +42,8 @@
 #define StWarning_ F77_NAME(stwarning,STWARNING)
 #define StError_ F77_NAME(sterror,STERROR)
 #define StDebug_ F77_NAME(stdebug,STDEBUG)
-#define StMessAddType_ F77_NAME(stmessaddtype,StMESSADDTYPE)
+#define QAInfo_ F77_NAME(qainfo,QAINFO)
+#define StMessAddType_ F77_NAME(stmessaddtype,STMESSADDTYPE)
 extern "C" {
 void type_of_call Message_(char* mess="", int *lines=0, int *id=0,
                                   size_t len=0);
@@ -59,6 +63,8 @@ void type_of_call StError_(char* mess="", char* opt="E",
                                   size_t len1=0, size_t len2=1);
 void type_of_call StDebug_(char* mess="", char* opt="O",
                                   size_t len1=0, size_t len2=1);
+void type_of_call QAInfo_(char* mess="", char* opt="OTS",
+                                  size_t len1=0, size_t len2=3);
 void type_of_call StMessAddType_(const char* type, const char* text,
                                   size_t len1=0, size_t len2=0);
 void type_of_call MessageOut(const char* msg);
@@ -142,6 +148,15 @@ class StMessMgr : public ostrstream {
    virtual StMessage* FindDebug(const char* s1, char* s2="", char* s3="",
          char* s4="") =0;
    virtual messVec* FindDebugList(const char* s1, char* s2="", char* s3="",
+         char* s4="") =0;
+
+// QAInfo Messages:
+   virtual StMessMgr& QAInfo(char* mess="", char* opt="OTS") =0;
+   virtual        int PrintQAInfo() =0;
+   virtual const messVec* GetQAInfos() =0;
+   virtual StMessage* FindQAInfo(const char* s1, char* s2="", char* s3="",
+         char* s4="") =0;
+   virtual messVec* FindQAInfoList(const char* s1, char* s2="", char* s3="",
          char* s4="") =0;
 
    virtual       void PrintInfo() =0;
