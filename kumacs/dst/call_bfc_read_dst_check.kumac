@@ -14,14 +14,14 @@
    ebye_analysis_switch=1 _
    gstar_settings=' field_only' _
    domain='  ' _
-   chain=' dstin dchkt dwntp' _
+   chain=' dstin dchkt ntup' _
    skip=0 _
-   no_events=2 _
-   input_data_file=/scr22/kathy/test28/psc079_01_46evts_year2_dst.xdf _
-   output_file=psc079 _
-   log=psc079.log _
+   no_events=90 _
+   input_data_file=/disk1/star/auau200/hijing135/default/b0_2/year1a/hadronic_off/tfs_dst/rcf011_08_87evts_h_dst.xdf _
+   output_file=rcf011_08_87evts_h_dst _
+   log=rcf011_08_87evts_h_dst.log _
    nunit=21 _
-   nfile=user.ntup _
+   nfile=rcf011_08_87evts_h_dst.ntup _
    nid=111 _
-   ntable=event/data/global/dst/globtrk
+   ntable=event/data/global/dst/event_summary
 
