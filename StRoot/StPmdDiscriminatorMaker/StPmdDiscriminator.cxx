@@ -1,6 +1,6 @@
 /****************************************************
  *
- * $Id: StPmdDiscriminator.cxx,v 1.5 2003/10/23 04:24:53 perev Exp $
+ * $Id: StPmdDiscriminator.cxx,v 1.6 2004/07/16 14:29:49 subhasis Exp $
  *
  * Author: Subhasis Chattopadhyay
  *
@@ -12,6 +12,9 @@
  ******************************************************
  *
  * $Log: StPmdDiscriminator.cxx,v $
+ * Revision 1.6  2004/07/16 14:29:49  subhasis
+ * more checks on edep Discriminate
+ *
  * Revision 1.5  2003/10/23 04:24:53  perev
  * Stiostream again
  *
@@ -82,8 +85,10 @@ void StPmdDiscriminator::getClusterPID() //! returns the ClusterId
 void StPmdDiscriminator::Discriminate() // Discrimnation through Energy cut
 {
 StPmdClusterCollection* clustersd = (StPmdClusterCollection*)m_PmdDet->cluster();
+if(clustersd){
 
          Int_t nclustd = clustersd->Nclusters();
+	 if(nclustd>0){
          TIter next(clustersd->Clusters());
 	            StPmdCluster *spmcl1d;
 		    int nedepPID=0;
@@ -99,7 +104,9 @@ StPmdClusterCollection* clustersd = (StPmdClusterCollection*)m_PmdDet->cluster()
          if(edepd<mEdepcut)ClusterPID=8;
 	 spmcl1d->setCluEdepPID(ClusterPID);
          }
-	 cout<<"NEDEP_PID****"<<nedepPID<<endl;
+	 }
+}
+
 }
 
 void StPmdDiscriminator::Print()
