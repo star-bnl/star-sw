@@ -1,5 +1,8 @@
-// $Id: St_ebye_Maker.cxx,v 1.12 1999/09/24 01:23:37 fisyak Exp $
+// $Id: St_ebye_Maker.cxx,v 1.13 1999/11/09 20:38:28 fisyak Exp $
 // $Log: St_ebye_Maker.cxx,v $
+// Revision 1.13  1999/11/09 20:38:28  fisyak
+// Change tables names
+//
 // Revision 1.12  1999/09/24 01:23:37  fisyak
 // Reduced Include Path
 //
@@ -61,12 +64,6 @@
 #include "St_DataSetIter.h"
 #include "St_XDFFile.h"
 
-//#include "tables/St_dst_run_header_Table.h"
-//#include "tables/St_dst_event_header_Table.h"
-//#include "tables/St_dst_track_Table.h"
-
-//#include "tables/St_sca_switch_Table.h"
-//#include "tables/St_sca_filter_const_Table.h"
 
 #include "ebye/St_sca_filter_Module.h"
 #include "ebye/St_sca_runsca_Module.h"
@@ -82,8 +79,8 @@ m_sca_const(0),
 m_sca_filter_const(0),
 m_sca_prior(0),
 m_sca_ensemble_ave(0),
-this_dst_run_header(0),
-this_dst_event_header(0),
+this_run_header(0),
+this_event_header(0),
 this_dst_track(0),
 this_sca_in(0),
 this_sca_out(0)
@@ -96,13 +93,13 @@ St_ebye_Maker::~St_ebye_Maker()
 //_____________________________________________________________________________
 Int_t St_ebye_Maker::Init(){
   // Get the run header
-  dst_run_header_st *run_header = 0;
+  run_header_st *run_header = 0;
   St_DataSet *runhead = GetDataSet("run_summary");
   St_DataSetIter dstrun(runhead);
   if (GetDebug()) runhead->ls("*");
-  this_dst_run_header = (St_dst_run_header *) dstrun("run_header");
-  if (this_dst_run_header) {
-    run_header = this_dst_run_header->GetTable();
+  this_run_header = (St_run_header *) dstrun("run_header");
+  if (this_run_header) {
+    run_header = this_run_header->GetTable();
     if (run_header)
       cout << " ===> <St_ebye_Maker::Init()>: DST event type = " << run_header->event_type<< endl;
     else
@@ -110,12 +107,12 @@ Int_t St_ebye_Maker::Init(){
   }
   else {
     cout << " ===> <St_ebye_Maker::Init()>: No DST run header table; create one" << endl;
-    this_dst_run_header  = new St_dst_run_header("run_header",1);
-    dstrun.Add(this_dst_run_header,"dst");
-    run_header = this_dst_run_header->GetTable();
-    run_header->run_id =       1;
-    this_dst_run_header->AddAt(&run_header,0);
-    if(GetDebug())this_dst_run_header->ls("*");
+    this_run_header  = new St_run_header("run_header",1);
+    dstrun.Add(this_run_header,"dst");
+    run_header = this_run_header->GetTable();
+    run_header->exp_run_id =       1;
+    this_run_header->AddAt(&run_header,0);
+    if(GetDebug())this_run_header->ls("*");
     cout << " ===> <St_ebye_Maker::Init()>: Created run header table" << endl;
   }
   // Create tables
@@ -131,13 +128,13 @@ Int_t St_ebye_Maker::Init(){
   // at the end of the first event. So temporarily store run_header table 
   // in params/ebye.
   //St_DataSet  *my_run_dst = local.Mkdir("ebye/run");
-  //this_dst_run_header  = new St_dst_run_header("run_header",1);
-  //local.Add(this_dst_run_header,"params/ebye/run");
-  //run_header = this_dst_run_header->GetTable();
-  //run_header->run_id =       1;
-  //this_dst_run_header->AddAt(&run_header,0);
+  //this_run_header  = new St_run_header("run_header",1);
+  //local.Add(this_run_header,"params/ebye/run");
+  //run_header = this_run_header->GetTable();
+  //run_header->exp_run_id =       1;
+  //this_run_header->AddAt(&run_header,0);
   //if(GetDebug()){
-  //  this_dst_run_header->ls("*");
+  //  this_run_header->ls("*");
   //  local.Du();
   //}
   
@@ -193,7 +190,7 @@ Int_t St_ebye_Maker::Make(){
   else
     if(GetDebug()>1)dst_set->ls("*");
   St_DataSetIter       dsttables(dst_set);
-  this_dst_event_header  = (St_dst_event_header *)  dsttables("event_header");
+  this_event_header  = (St_event_header *)  dsttables("event_header");
   //this_dst_track         = (St_dst_track *)         dsttables("globtrk");
   this_dst_track         = (St_dst_track *)dsttables.FindObject("globtrk");  
   if (!this_dst_track ){
@@ -211,8 +208,8 @@ Int_t St_ebye_Maker::Make(){
     return kStWarn;
   }
   if (GetDebug()>2) printf(" ===> <St_ebye_Maker::Make()>: Begin sca_filter \n");
-  iret = sca_filter(this_dst_run_header
-		    ,this_dst_event_header
+  iret = sca_filter(this_run_header
+		    ,this_event_header
 		    ,this_dst_track
 		    ,m_sca_filter_const
 		    ,m_sca_switch

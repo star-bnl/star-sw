@@ -1,5 +1,8 @@
-// $Id: St_ebye_Maker.h,v 1.8 1999/07/15 13:58:00 perev Exp $
+// $Id: St_ebye_Maker.h,v 1.9 1999/11/09 20:38:29 fisyak Exp $
 // $Log: St_ebye_Maker.h,v $
+// Revision 1.9  1999/11/09 20:38:29  fisyak
+// Change tables names
+//
 // Revision 1.8  1999/07/15 13:58:00  perev
 // cleanup
 //
@@ -41,8 +44,8 @@
 class St_sca_switch;
 class St_sca_filter_const;
 class St_sca_const;
-class St_dst_run_header;
-class St_dst_event_header ;
+class St_run_header;
+class St_event_header ;
 class St_dst_track ;
 class St_XDFFile;
 class St_sca_in;
@@ -55,8 +58,8 @@ class St_ebye_Maker : public StMaker {
                St_sca_filter_const        *m_sca_filter_const;     //!
                St_sca_prior               *m_sca_prior;            //!
                St_sca_out                 *m_sca_ensemble_ave;     //!
-               St_dst_run_header          *this_dst_run_header;    //!
-               St_dst_event_header        *this_dst_event_header;  //!
+               St_run_header              *this_run_header;        //!
+               St_event_header            *this_event_header;      //!
                St_dst_track               *this_dst_track;         //!
                St_sca_in                  *this_sca_in;            //!
                St_sca_out                 *this_sca_out;           //!
@@ -73,7 +76,7 @@ class St_ebye_Maker : public StMaker {
    Int_t PutPrior();                                // *MENU*
    Int_t PutEnsembleAve();                          // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_ebye_Maker.h,v 1.8 1999/07/15 13:58:00 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_ebye_Maker.h,v 1.9 1999/11/09 20:38:29 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_ebye_Maker, 1)   //StAF chain virtual base class for Makers
 };
