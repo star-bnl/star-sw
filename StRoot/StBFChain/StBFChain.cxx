@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.142 2000/09/13 15:53:17 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.143 2000/09/27 19:34:57 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -226,6 +226,7 @@ Bfc_st BFC[] = {
   {"QA"          ,"QA","","globT,SCL,global"                        ,"St_QA_Maker","St_QA_Maker","",kFALSE},
   {"EventQA"     ,"EventQA","","Event"                           ,"StEventQAMaker","St_QA_Maker","",kFALSE},
   {"QAC"         ,"CosmicsQA","globT",""                    ,"StQACosmicMaker","StQACosmicMaker","",kFALSE},
+  {"dEdxTree"    ,"dEdx","","in,globT,tpcDb,Event"          ,"StDeDxTreeMaker","StDeDxTreeMaker","",kFALSE},
   {"St_geom"     ,""  ,"",""     ,                               "St_geom_Maker","St_geom_Maker","",kFALSE},
   {"Display"     ,"","","SCL,St_geom"               ,"StEventDisplayMaker","StEventDisplayMaker","",kFALSE},
   {"Mc"          ,"McChain","","sim_T,globT,McAss,McAna"                    ,"StMaker","StChain","",kFALSE},
@@ -689,8 +690,12 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
 	ParseString((const TString )*fInFile,Files);
 	TIter next(&Files);
 	TObjString *File;
+	Bool_t daqF = kFALSE;
 	while ((File = (TObjString *) next())) {
 	  TString string = File->GetString();
+	  char *filename = string.Data();
+	  int lfilename = strlen(filename);
+	  if (!strcmp(filename+lfilename-4,".daq" )) daqF = kTRUE;
 	  if (!strstr(string.Data(),"*") &&
 	      gSystem->AccessPathName(string.Data())) {// file does not exist
 	    printf (" *** NO FILE: %s, exit!\n", string.Data());
@@ -699,6 +704,10 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
 	  else fSetFiles->AddFile(File->String().Data());
 	}
 	Files.Delete();
+	if (!daqF) {
+	  SafeDelete(m_EvtHddr);
+	  SetInput("EvtHddr","dst/RunEvent");
+	}
       }
     }
   }
