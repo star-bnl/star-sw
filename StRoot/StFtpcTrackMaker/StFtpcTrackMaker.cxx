@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.42 2003/01/16 18:04:34 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.43 2003/01/20 13:11:56 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.43  2003/01/20 13:11:56  oldi
+// Floats converted to ints to avoid warnings on linux machines.
+//
 // Revision 1.42  2003/01/16 18:04:34  oldi
 // Bugs eliminated. Now it compiles on Solaris again.
 // Split residuals for global and primary fit.
@@ -359,22 +362,22 @@ Int_t StFtpcTrackMaker::Init()
 
   m_vertex_east_x_vs_sector = new TH2F("fpt_vertex_east_x_vs_sector", 
 				       "FTPC east vertex x estimation vs. sector with resp. to TPC vertex", 
-				       6, 0.5, 6.5,  80.,  -2.,  2.);
+				       6, 0.5, 6.5,  80,  -2.,  2.);
   m_vertex_east_y_vs_sector = new TH2F("fpt_vertex_east_y_vs_sector", 
 				       "FTPC east vertex y estimation vs. sector with resp. to TPC vertex", 
-				       6, 0.5, 6.5,  80.,  -2.,  2.);
+				       6, 0.5, 6.5,  80,  -2.,  2.);
   m_vertex_east_z_vs_sector = new TH2F("fpt_vertex_east_z_vs_sector", 
 				       "FTPC east vertex z estimation vs. sector with resp. to TPC vertex", 
-				       6, 0.5, 6.5, 100., -10., 10.);
+				       6, 0.5, 6.5, 100, -10., 10.);
   m_vertex_west_x_vs_sector = new TH2F("fpt_vertex_west_x_vs_sector", 
 				       "FTPC west vertex x estimation vs. sector with resp. to TPC vertex", 
-				       6, 0.5, 6.5,  80.,  -2.,  2.);
+				       6, 0.5, 6.5,  80,  -2.,  2.);
   m_vertex_west_y_vs_sector = new TH2F("fpt_vertex_west_y_vs_sector", 
 				       "FTPC west vertex y estimation vs. sector with resp. to TPC vertex", 
-				       6, 0.5, 6.5,  80.,  -2.,  2.);
+				       6, 0.5, 6.5,  80,  -2.,  2.);
   m_vertex_west_z_vs_sector = new TH2F("fpt_vertex_west_z_vs_sector", 
 				       "FTPC west vertex z estimation vs. sector with resp. to TPC vertex", 
-				       6, 0.5, 6.5, 100., -10., 10.);
+				       6, 0.5, 6.5, 100, -10., 10.);
 
   return StMaker::Init();
 }
@@ -662,7 +665,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.42 2003/01/16 18:04:34 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.43 2003/01/20 13:11:56 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
