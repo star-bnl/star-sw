@@ -1056,6 +1056,16 @@ c         allocated to another peak.  No true deconvolution is attempted,
 c         and not all pixels will necessarily be assigned to a peak; i.e.,
 c         plenty of room for improvement, still.
 c
+c   02-DEC-1997 --- R.Bossingham
+c       * Use a less rectilinear cluster deconvolution;
+c         peaks are now divided into four sectors along "~45 deg. lines"
+c         and a search along a nominal axis now essentially searches
+c         an angular range to the extent that the hit fills it, within
+c         these 90 deg. sectors.  This deconvolutes long, angled hits better.
+c
+c         Previously, I searched a fixed range in pad or tdc number, once
+c         the search stopped in the adjacent directions.
+c
 C-----------------------------------------------------------------------
 c passed variables
 c
@@ -1140,11 +1150,26 @@ c
         integer kpad                  ! Pad index
         integer kpad_lo, kpad_hi      ! kpad limits
         integer kpad_0                ! Pad index for pixel closer to peak 
+        integer kpad_lo_lotdc         ! Lower pad for lo tdc segment
+        integer kpad_hi_lotdc         ! Upper pad for lo tdc segment
+        integer kpad_lo_hitdc         ! Lower pad for hi tdc segment
+        integer kpad_hi_hitdc         ! Upper pad for hi tdc segment
+        integer kpad_lo_lotdc_t       ! Lower pad in hit for lo tdc segment
+        integer kpad_hi_lotdc_t       ! Upper pad in hit for lo tdc segment
+        integer kpad_lo_hitdc_t       ! Lower pad in hit for hi tdc segment
+        integer kpad_hi_hitdc_t       ! Upper pad in hit for hi tdc segment
         integer ktdc                  ! Time bucket index
         integer ktdc_lo, ktdc_hi      ! ktdc limits
         integer ktdc_0                ! TDC index for pixel closer to peak 
+        integer ktdc_lo_lopad         ! Lower tdc for lo pad segment
+        integer ktdc_hi_lopad         ! Upper tdc for lo pad segment
+        integer ktdc_lo_hipad         ! Lower tdc for hi pad segment
+        integer ktdc_hi_hipad         ! Upper tdc for hi pad segment
+        integer ktdc_lo_lopad_t       ! Lower tdc in hit for lo pad segment
+        integer ktdc_hi_lopad_t       ! Upper tdc in hit for lo pad segment
+        integer ktdc_lo_hipad_t       ! Lower tdc in hit for hi pad segment
+        integer ktdc_hi_hipad_t       ! Upper tdc in hit for hi pad segment
         integer max_height(nmax_max)  ! Height of local maxima
-        integer max_sprd              ! Height of local maxima
         integer max_pad(nmax_max)     ! Pad positions of local maxima
         integer max_tdc(nmax_max)     ! TDC positions of local maxima
         integer nclspix_temp          ! Number of pixels in hit
@@ -1159,10 +1184,10 @@ c
         real slope                    ! Slope of ridge between maxima
 
         logical allowed(npads_max,nbuck_max) ! Candidate pixels for maxima
-        logical ktdc_lo_sprd          ! Peak still spreading lower in TDC
-        logical ktdc_hi_sprd          ! Peak still spreading higher in TDC
-        logical kpad_lo_sprd          ! Peak still spreading lower in pad #
-        logical kpad_hi_sprd          ! Peak still spreading higher in pad #
+        logical ktdc_lo_sprd          ! Peak spreading about - TDC axis
+        logical ktdc_hi_sprd          ! Peak spreading about + TDC axis
+        logical kpad_lo_sprd          ! Peak spreading about - pad # axis
+        logical kpad_hi_sprd          ! Peak spreading about + pad # axis
 c
 C-----------------------------------------------------------------------
         data allowed /n_allow*.true./
@@ -1388,6 +1413,7 @@ c
          jpad = max_pad(imax)
          jtdc = max_tdc(imax)
 c
+c Record current rectilinear limits to hit:
          kpad_lo = max(jpad-infl_pad,ipad_lo)
          kpad_hi = min(jpad+infl_pad,ipad_hi)
          ipad_lo_temp = kpad_lo
@@ -1398,65 +1424,36 @@ c
          itdc_lo_temp = ktdc_lo
          itdc_hi_temp = ktdc_hi
 c
-c Find max. possible steps to fully spread this hit:
-         max_sprd = max(itdc_hi - ktdc_hi,
-     +                  ktdc_lo - itdc_lo,
-     +                  ipad_hi - kpad_hi,
-     +                  kpad_lo - ipad_lo)
+c Record directions in which spreading is possible:
+         kpad_lo_sprd = (kpad_lo-1.ge.ipad_lo)
+         kpad_hi_sprd = (kpad_hi+1.le.ipad_hi)
+         ktdc_lo_sprd = (ktdc_lo-1.ge.itdc_lo)
+         ktdc_hi_sprd = (ktdc_hi+1.le.itdc_hi)
 c
-c Initially, try to spread peak in all directions:
-         kpad_lo_sprd = .true.
-         kpad_hi_sprd = .true.
-         ktdc_lo_sprd = .true.
-         ktdc_hi_sprd = .true.
+c Find endpoints of next pixel segments:
+         ktdc_lo_lopad = MAX(ktdc_lo-1,itdc_lo)
+         ktdc_hi_lopad = MIN(ktdc_hi+1,itdc_hi)
+         ktdc_lo_hipad = MAX(ktdc_lo-1,itdc_lo)
+         ktdc_hi_hipad = MIN(ktdc_hi+1,itdc_hi)
+c
+         kpad_lo_lotdc = kpad_lo
+         kpad_hi_lotdc = kpad_hi
+         kpad_lo_hitdc = kpad_lo
+         kpad_hi_hitdc = kpad_hi
 c
 c Explore successively larger one-pixel-wide frames until we have reached
 c the lowest slopes of this peak:
-         do i_sprd=1,max_sprd
+         do i_sprd=1, max(itdc_hi-ktdc_hi, ktdc_lo-itdc_lo,
+     +                    ipad_hi-kpad_hi, kpad_lo-ipad_lo)
 c
-c Check boundaries for the spreading:
-            if (kpad_lo_sprd) then
-               if (kpad_lo-1.ge.ipad_lo) then
-                  kpad_lo = kpad_lo - 1
-               else
-                  kpad_lo_sprd = .false.
-               end if
-            end if
-c
-            if (kpad_hi_sprd) then
-               if (kpad_hi+1.le.ipad_hi) then
-                  kpad_hi = kpad_hi + 1
-               else
-                  kpad_hi_sprd = .false.
-               end if
-            end if
-c
-            if (ktdc_lo_sprd) then
-               if (ktdc_lo-1.ge.itdc_lo) then
-                  ktdc_lo = ktdc_lo - 1
-               else
-                  ktdc_lo_sprd = .false.
-               end if
-            end if
-c
-            if (ktdc_hi_sprd) then
-               if (ktdc_hi+1.le.itdc_hi) then
-                  ktdc_hi = ktdc_hi + 1
-               else
-                  ktdc_hi_sprd = .false.
-               end if
-            end if
-c
-c Check a pixel layer; overlapping checks can occur at the corners,
-c but that's more-or-less OK:
-c
-c Check along lower pad edge:
+c Check one layer of pixel segments; first, check along lower pad edge:
             if (kpad_lo_sprd) then
                kpad_lo_sprd = .false.
-               kpad = kpad_lo
-               kpad_0 = kpad + 1
+               kpad_0  = kpad_lo
+               kpad    = kpad_lo - 1
+               kpad_lo = kpad
                dp = FLOAT(kpad-jpad)
-               do ktdc=ktdc_lo, ktdc_hi
+               do ktdc=ktdc_lo_lopad, ktdc_hi_lopad
                   if (assign(kpad,ktdc).eq.0) then
                      dt = FLOAT(ktdc-jtdc)
                      ktdc_0 = jtdc + NINT(dt*(FLOAT(kpad_0-jpad)/dp))
@@ -1464,20 +1461,38 @@ c Check along lower pad edge:
      &                   height(kpad,ktdc).lt.
      &                   height(kpad_0,ktdc_0)+h_tol) then
                         assign(kpad,ktdc) = imax
-                        kpad_lo_sprd = .true.
+c
+                        if (.not.kpad_lo_sprd) then
+                           kpad_lo_sprd = .true.
+                           ktdc_lo_lopad_t = ktdc
+                        end if
+                        ktdc_hi_lopad_t = ktdc
                      end if
                   end if
                end do
-               if (kpad_lo_sprd) ipad_lo_temp=kpad
+c
+c Update tdc, pad limits for hit:
+               if (kpad_lo_sprd) then
+                  ipad_lo_temp = MIN(ipad_lo_temp,kpad)
+                  itdc_lo_temp = MIN(itdc_lo_temp,ktdc_lo_lopad_t)
+                  itdc_hi_temp = MAX(itdc_hi_temp,ktdc_hi_lopad_t)
+c
+                  kpad_lo_sprd = (kpad-1.ge.ipad_lo)
+                  if (kpad_lo_sprd) then
+                     ktdc_lo_lopad = MAX(ktdc_lo_lopad_t-1,itdc_lo)
+                     ktdc_hi_lopad = MIN(ktdc_hi_lopad_t+1,itdc_hi)
+                  end if
+               end if
             end if
 c
 c Check along upper pad edge:
             if (kpad_hi_sprd) then
                kpad_hi_sprd = .false.
-               kpad = kpad_hi
-               kpad_0 = kpad - 1
+               kpad_0  = kpad_hi
+               kpad    = kpad_hi + 1
+               kpad_hi = kpad
                dp = FLOAT(kpad-jpad)
-               do ktdc=ktdc_lo, ktdc_hi
+               do ktdc=ktdc_lo_hipad, ktdc_hi_hipad
                   if (assign(kpad,ktdc).eq.0) then
                      dt = FLOAT(ktdc-jtdc)
                      ktdc_0 = jtdc + NINT(dt*(FLOAT(kpad_0-jpad)/dp))
@@ -1485,20 +1500,38 @@ c Check along upper pad edge:
      &                   height(kpad,ktdc).lt.
      &                   height(kpad_0,ktdc_0)+h_tol) then
                         assign(kpad,ktdc) = imax
-                        kpad_hi_sprd = .true.
+
+                        if (.not.kpad_hi_sprd) then
+                           kpad_hi_sprd = .true.
+                           ktdc_lo_hipad_t = ktdc
+                        end if
+                        ktdc_hi_hipad_t = ktdc
                      end if
                   end if
                end do
-               if (kpad_hi_sprd) ipad_hi_temp=kpad
+c
+c Update tdc, pad limits for hit:
+               if (kpad_hi_sprd) then
+                  ipad_hi_temp = MAX(ipad_hi_temp,kpad)
+                  itdc_lo_temp = MIN(itdc_lo_temp,ktdc_lo_hipad_t)
+                  itdc_hi_temp = MAX(itdc_hi_temp,ktdc_hi_hipad_t)
+c
+                  kpad_hi_sprd = (kpad+1.le.ipad_hi)
+                  if (kpad_hi_sprd) then
+                     ktdc_lo_hipad = MAX(ktdc_lo_hipad_t-1,itdc_lo)
+                     ktdc_hi_hipad = MIN(ktdc_hi_hipad_t+1,itdc_hi)
+                  end if
+               end if
             end if
 c
 c Check along lower edge in tdc:
             if (ktdc_lo_sprd) then
                ktdc_lo_sprd = .false.
-               ktdc = ktdc_lo
-               ktdc_0 = ktdc + 1
+               ktdc_0  = ktdc_lo
+               ktdc    = ktdc_lo - 1
+               ktdc_lo = ktdc
                dt = FLOAT(ktdc-jtdc)
-               do kpad=kpad_lo, kpad_hi
+               do kpad=kpad_lo_lotdc, kpad_hi_lotdc
                   if (assign(kpad,ktdc).eq.0) then
                      dp = FLOAT(kpad-jpad)
                      kpad_0 = jpad + NINT(dp*(FLOAT(ktdc_0-jtdc)/dt))
@@ -1506,20 +1539,38 @@ c Check along lower edge in tdc:
      &                    height(kpad,ktdc).lt.
      &                    height(kpad_0,ktdc_0)+h_tol) then
                         assign(kpad,ktdc) = imax
-                        ktdc_lo_sprd = .true.
+c
+                        if (.not.ktdc_lo_sprd) then
+                           ktdc_lo_sprd = .true.
+                           kpad_lo_lotdc_t = kpad
+                        end if
+                        kpad_hi_lotdc_t = kpad
                      end if
                   end if
                end do
-               if (ktdc_lo_sprd) itdc_lo_temp=ktdc
+c
+c Update tdc, pad limits for hit:
+               if (ktdc_lo_sprd) then
+                  itdc_lo_temp = MIN(itdc_lo_temp,ktdc)
+                  ipad_lo_temp = MIN(ipad_lo_temp,kpad_lo_lotdc_t)
+                  ipad_hi_temp = MAX(ipad_hi_temp,kpad_hi_lotdc_t)
+c
+                  ktdc_lo_sprd = (ktdc-1.ge.itdc_lo)
+                  if (ktdc_lo_sprd) then
+                     kpad_lo_lotdc = MAX(kpad_lo_lotdc_t-1,ipad_lo)
+                     kpad_hi_lotdc = MIN(kpad_hi_lotdc_t+1,ipad_hi)
+                  end if
+               end if
             end if
 c
 c Check along upper edge in tdc:
             if (ktdc_hi_sprd) then
                ktdc_hi_sprd = .false.
-               ktdc = ktdc_hi
-               ktdc_0 = ktdc - 1
+               ktdc_0  = ktdc_hi
+               ktdc    = ktdc_hi + 1
+               ktdc_hi = ktdc
                dt = FLOAT(ktdc-jtdc)
-               do kpad=kpad_lo, kpad_hi
+               do kpad=kpad_lo_hitdc, kpad_hi_hitdc
                   if (assign(kpad,ktdc).eq.0) then
                      dp = FLOAT(kpad-jpad)
                      kpad_0 = jpad + NINT(dp*(FLOAT(ktdc_0-jtdc)/dt))
@@ -1527,20 +1578,38 @@ c Check along upper edge in tdc:
      &                    height(kpad,ktdc).lt.
      &                    height(kpad_0,ktdc_0)+h_tol) then
                         assign(kpad,ktdc) = imax
-                        ktdc_hi_sprd = .true.
+c
+                        if (.not.ktdc_hi_sprd) then
+                           ktdc_hi_sprd = .true.
+                           kpad_lo_hitdc_t = kpad
+                        end if
+                        kpad_hi_hitdc_t = kpad
                      end if
                   end if
                end do
-               if (ktdc_hi_sprd) itdc_hi_temp=ktdc
+c
+c Update tdc, pad limits for hit:
+               if (ktdc_hi_sprd) then
+                  itdc_hi_temp = MAX(itdc_hi_temp,ktdc)
+                  ipad_lo_temp = MIN(ipad_lo_temp,kpad_lo_hitdc_t)
+                  ipad_hi_temp = MAX(ipad_hi_temp,kpad_hi_hitdc_t)
+c
+                  ktdc_hi_sprd = (ktdc+1.le.itdc_hi)
+                  if (ktdc_hi_sprd) then
+                     kpad_lo_hitdc = MAX(kpad_lo_hitdc_t-1,ipad_lo)
+                     kpad_hi_hitdc = MIN(kpad_hi_hitdc_t+1,ipad_hi)
+                  end if
+               end if
             end if
 c
-c If no pixels were assigned in any direction, we're done with it for now:
+c If no more pixels can be assigned in any direction,
+c we're done finding the hit:
             if (.not.(kpad_lo_sprd .or.
      &                kpad_hi_sprd .or.
      &                ktdc_lo_sprd .or.
      &                ktdc_hi_sprd)) goto 90
 c
-         end do   ! i_sprd=1,max_sprd
+         end do                 ! i_sprd=1,max()
 c
  90      continue
 c
