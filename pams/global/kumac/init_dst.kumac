@@ -63,7 +63,7 @@ macro init_rsum
 
 macro/global/import *
 
-cd [params]/global
+cd [params]/global/dstpars
 
 rowcount dst_summary_param
 if (staf_result(1).eq.0) then 
@@ -83,7 +83,7 @@ macro init_esum
 
 macro/global/import *
 
-cd [params]/global
+cd [params]/global/dstpars
 
 rowcount dst_summary_param
 if (staf_result(1).eq.0) then 
