@@ -17,7 +17,7 @@ class StiPlacement;
 //This is a little convoluted, but we need it:
 class StiDetector;
 template <class T> class StiCompositeTreeNode;
-
+class StiIsActiveFunctor;
 class StiDetector {
     
 public:
@@ -28,7 +28,8 @@ public:
     
     // accessors
     bool isOn() const {return on;}
-    bool isActive() const { return active; }
+    inline bool isActive(double dYlocal, double dZlocal) const;
+    inline bool isActive() const;
     bool isContinuousMedium() const { return continuousMedium; }
     bool isDiscreteScatterer() const { return discreteScatterer; }
 
@@ -42,7 +43,7 @@ public:
     
     // mutators
     void setIsOn(bool val) {on = val;}
-    void setIsActive(bool val) {active = val;}
+    void setIsActive(StiIsActiveFunctor *val){ isActiveFunctor = val; }
     void setIsContinuousMedium(bool val) {continuousMedium = val;}
     void setIsDiscreteScatterer(bool val) {discreteScatterer = val;}
 
@@ -68,7 +69,7 @@ protected:
     
     // logical switches
     bool on;                  // toggle this layer on/off.  (off => NOT added to detector container)
-    bool active;              // does the object provide hit information?
+    StiIsActiveFunctor *isActiveFunctor; // provides hit information?
     bool continuousMedium;    // is this a continuous scatterer?  (yes => scatterer info given by "gas" below)
     bool discreteScatterer;   // is this a discrete scatterer?    (yes => scatterer given by "material" below)
 

@@ -14,6 +14,7 @@
 #include "StiDetectorContainer.h"
 #include "StiDetector.h"
 #include "StiMapUtilities.h"
+#include "StiIsActiveFunctor.h"
 
 StiDetector::StiDetector() : gas(0), material(0), shape(0), placement(0), mNode(0)
 {
@@ -23,10 +24,18 @@ StiDetector::~StiDetector()
 {
 }
 
+bool StiDetector::isActive(double dYlocal, double dZlocal) const{
+  return (*isActiveFunctor)(dYlocal, dZlocal);
+} // isActive
+
+bool StiDetector::isActive() const {
+  return isActive(placement->getNormalYoffset(), placement->getZcenter());
+} // isActive
+
 void StiDetector::copy(StiDetector &detector){
 
   on = detector.isOn();
-  active = detector.isActive();
+  isActiveFunctor = detector.isActiveFunctor;
   continuousMedium = detector.isContinuousMedium();
   discreteScatterer = detector.isDiscreteScatterer();
 
