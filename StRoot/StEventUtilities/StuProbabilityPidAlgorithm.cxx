@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.10 2000/08/16 12:46:07 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.11 2000/08/17 13:32:13 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.11  2000/08/17 13:32:13  aihong
+ * remove edge effect
+ *
  * Revision 1.10  2000/08/16 12:46:07  aihong
  * bug killed
  *
@@ -221,12 +224,12 @@ StParticleDefinition* StuProbabilityPidAlgorithm::operator() (const StTrack& the
  
     dedx = (dedx>mDedxStart) ? dedx : mDedxStart;
     rig  = (rig >mRigStart)  ? rig  : mRigStart;
-    rig  = (rig <mRigEnd  )  ? rig  : mRigEnd;   
+    rig  = (rig <mRigEnd  )  ? rig  : mRigEnd*0.9999; //*0.9999 to remove edge effect.   
         //this has to be deal with later. 
         //if rig go to 5 in TMap, we end up with a big file
 
     pt   = (pt  >mPtStart)   ? pt   : mPtStart;
-    pt   = (pt  <mPtEnd  )   ? pt   : mPtEnd;
+    pt   = (pt  <mPtEnd  )   ? pt   : mPtEnd*0.9999;
 
 
     //----------------get all info. I want for a track. now do PID
