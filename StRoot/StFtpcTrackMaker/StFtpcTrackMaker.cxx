@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.55 2004/03/22 16:02:03 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.56 2004/04/26 09:53:45 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.56  2004/04/26 09:53:45  jcs
+// comment out delete StFtpcTrackingParams::Instance() in FinishRun as a temorary
+// fix for Bug #372
+//
 // Revision 1.55  2004/03/22 16:02:03  oldi
 // Moved destruction of the instance of StFtpcTrackingParams from Finish() to FinishRun().
 //
@@ -691,7 +695,7 @@ Int_t StFtpcTrackMaker::FinishRun(Int_t run)
 {
   // cleanup after every run
 
-  delete StFtpcTrackingParams::Instance();
+//  delete StFtpcTrackingParams::Instance();
 
   return StMaker::FinishRun(run);
 }
@@ -703,7 +707,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.55 2004/03/22 16:02:03 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.56 2004/04/26 09:53:45 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
