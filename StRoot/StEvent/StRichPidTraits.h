@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPidTraits.h,v 2.7 2001/05/30 17:45:54 perev Exp $
+ * $Id: StRichPidTraits.h,v 2.8 2002/02/19 04:24:03 lasiuk Exp $
  *
  * Author: Matt Horsley, Sep 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRichPidTraits.h,v $
+ * Revision 2.8  2002/02/19 04:24:03  lasiuk
+ * addition of StRichSpectra information for uDST purposes
+ *
  * Revision 2.7  2001/05/30 17:45:54  perev
  * StEvent branching
  *
@@ -44,6 +47,7 @@
 
 #include "StContainers.h"
 #include "StRichPid.h"
+#include "StRichSpectra.h"
 #include "StParticleTypes.hh"
 
 
@@ -64,6 +68,11 @@ public:
     
     StRichPid*              getPid(StParticleDefinition* t);
     const StRichPid*        getPid(StParticleDefinition* t)  const;
+
+    StRichSpectra*          getRichSpectra();
+    const StRichSpectra*    getRichSpectra() const;
+
+    void                    setRichSpectra(StRichSpectra*);
 
     void  setProductionVersion(int);
     void  setId(int);
@@ -102,7 +111,8 @@ private:
 
     Float_t          mSigned3dDca;
     Float_t          mSigned2dDca;
-    
+
+    StRichSpectra*   mRichSpectra;
     StObject* clone() const;
 
     ClassDef(StRichPidTraits,2)
@@ -135,6 +145,11 @@ inline const StThreeVectorF& StRichPidTraits::mipResidual() const {return mMipRe
 inline const StThreeVectorF& StRichPidTraits::refitResidual() const { return mRefitResidual;}
 inline float StRichPidTraits::signedDca2d() const { return mSigned2dDca;}
 inline float StRichPidTraits::signedDca3d() const { return mSigned3dDca;}
+
+inline StRichSpectra* StRichPidTraits::getRichSpectra() {return mRichSpectra;}
+inline const StRichSpectra* StRichPidTraits::getRichSpectra() const {return mRichSpectra;}
+
+inline void StRichPidTraits::setRichSpectra(StRichSpectra* sp) {mRichSpectra = sp;}
 
 //non-members
 ostream& operator<<(ostream& os, const StRichPidTraits& t);
