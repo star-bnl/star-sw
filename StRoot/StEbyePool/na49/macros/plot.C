@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.5 2001/08/17 22:14:57 posk Exp $
+// $Id: plot.C,v 1.6 2001/10/24 21:48:36 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -16,6 +16,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.6  2001/10/24 21:48:36  posk
+// Improved graphs.
+//
 // Revision 1.5  2001/08/17 22:14:57  posk
 // Updated to also do 40 GeV.
 //
@@ -109,6 +112,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     "Flow_Mean_Cos_Flat2D_Sel",
     "Flow_Mean_Sin_Flat2D_Sel",
     "Flow_Mul_Sel",
+    "Flow_SumPt2_Sel",
+    "Flow_PtY_Sel",
     "Flow_Yield2D_Sel",
     "Flow_Yield.Y_Sel",
     "Flow_Yield.Pt_Sel",
@@ -391,7 +396,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	char* xTitle = hist2D->GetXaxis()->GetTitle();
 	projX->SetXTitle(xTitle);
 	projX->SetYTitle("Counts");
-	gStyle->SetOptStat(0);
+	gStyle->SetOptStat(100110);
+	//gStyle->SetOptStat(0);
 	if (projX) projX->Draw("H");
 	if (!singleGraph) lineZeroY->Draw();
       } else if (strstr(shortName[pageNumber],".Pt")!=0) { // 2D Pt projection
@@ -404,7 +410,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	projY->SetXTitle("Pt (GeV)");
 	projY->SetYTitle("Counts");
 	gPad->SetLogy();
-	gStyle->SetOptStat(0);
+	gStyle->SetOptStat(100110);
+	//gStyle->SetOptStat(0);
 	if (projY) projY->Draw("H");
       } else if (strstr(shortName[pageNumber],"Corr")!=0) { // azimuthal corr.
 	float norm = (float)(hist->GetNbinsX()) / hist->Integral(); 
@@ -506,7 +513,6 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
       delete [] temp;
       delete histName;
       if (histProjName) delete histProjName;
-      //gPad->Update();
     }
   }
   for (int m = 0; m < nNames; m++) {  
