@@ -10,6 +10,8 @@
 *                        changed some names of utility kumacs
 *                        write out [run] and [event]
 * 8/10/98 - K. Turner - added nid to call to write_table_to_ntuple#close_disk
+*  editted Oct 5, 1998 - Janet Seyboth
+*                        converted to new kumac standards
 ************************************************************************
 ************************************************************************
 
@@ -100,11 +102,11 @@
     exec create_tables_ftpc#fpt_tables
     exec create_tables_ftpc#fte_tables
 
-* initialize tables
+* read in parameter tables from $STAR_PARAMS
 
-    exec ffs_init#init
-    exec fpt_init#init
-    exec fte_init#init
+    exec init_ffs#read
+    exec init_fpt#read
+    exec init_fte#read
     
 * write run directory to output table file
    exec write_table_to_file#write evout [run]
@@ -120,14 +122,14 @@
     exec input_g2t_file#read
     if STAF_STATUS(1).eq.0 goto ENDOFDATA
 * ftpc fast simulator 
-    exec ffs_run#run
+    exec run_ffs#run
       if STAF_STATUS(1).eq.0 then
         message ' problem with ffs '
       endif
 * ftpc tracking
-    exec fpt_run#run_fast_sim
+    exec run_fpt#run_fast_sim
 * ftpc track evaluation
-    exec fte_run#run_fast_sim
+    exec run_fte#run_fast_sim
 * write table to ntuple
     exec write_table_to_ntuple#write_event_disk [nid] [data]/[table]
 * write event directory to output table file
