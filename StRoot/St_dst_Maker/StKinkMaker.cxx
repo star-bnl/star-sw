@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.15 1999/08/23 22:35:38 wdeng Exp $
+// $Id: StKinkMaker.cxx,v 1.16 1999/08/24 22:37:23 wdeng Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.16  1999/08/24 22:37:23  wdeng
+// Add check of used rows against table size. Reallocate if necessary.
+//
 // Revision 1.15  1999/08/23 22:35:38  wdeng
 // Fill vtx_id always with kKinkVtxId, n_daughters with 1. Reorganize the code a little bit.
 //
@@ -166,7 +169,7 @@ Int_t StKinkMaker::Make(){
   St_dst_tkf_vertex *kinkVertex  = (St_dst_tkf_vertex *) matchI("kinkVertex");
   
   Int_t numOfGlbtrk = globtrk->GetNRows();
-  Int_t tkf_limit = numOfGlbtrk/10;
+  Int_t tkf_limit = numOfGlbtrk/10 + 100;
   
   if(!kinkVertex) {
     kinkVertex = new St_dst_tkf_vertex("kinkVertex", tkf_limit);
@@ -577,7 +580,16 @@ Int_t StKinkMaker::Make(){
 	  dstVtxRow.iflag       = 2;
 	PROPERFILL:	  
 	  dstVtxRow.vtx_id      = kKinkVtxId;
-	  dstVtxRow.n_daughters = 1; 
+	  dstVtxRow.n_daughters = 1;
+ 
+	  Int_t kvTableSize = kinkVertex->GetTableSize();
+	  Int_t dstvTableSize = vertex->GetTableSize();
+
+	  if( kinkVertex->GetNRows() == kvTableSize )
+	    kinkVertex->ReAllocate( kvTableSize + 100 );
+	  if( vertex->GetNRows() == dstvTableSize )
+	    vertex->ReAllocate( dstvTableSize + 100 );
+
 	  kinkVertex->AddAt(&kinkVtxRow, kinkVtxIndex);
 	  vertex->AddAt(&dstVtxRow, dstVtxIndex);
 	  
