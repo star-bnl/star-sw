@@ -1,5 +1,5 @@
 #!/opt/star/bin/perl
-# $Id: Construct,v 1.89 2000/02/29 01:56:37 fisyak Exp $
+# $Id: Construct,v 1.90 2000/03/07 14:38:18 fisyak Exp $
 use Env;
 #use lib qw($STAR . "/mgr"); # Modify perl include path
 use lib $STAR . "/mgr"; # Modify perl include path
@@ -88,7 +88,12 @@ foreach my $dir ("pams","StRoot"){#,"StDb") {
       if ($STAR_HOST_SYS =~ /^hp_ux102$/ &&  
 	  ($sub_dir =~ /StHbtMaker/ || $sub_dir =~ /StFlow/)) {next;}
       if ($STAR_HOST_SYS =~ /^sun4x_56$/ &&  
-	  ($sub_dir =~ /StSpectraMaker/ || $sub_dir =~ /StSpectraTagsMaker/)) {next;}
+	  ($sub_dir =~ /StHbtMaker/ || 
+	   $sub_dir =~ /StSpectraMaker/ || 
+	   $sub_dir =~ /StRrsMaker/ || 
+	   $sub_dir =~ /StAngleCorrMaker/ ||
+	   $sub_dir =~ /StSpectraTagsMaker/ 
+	  )) {next;}
       push @subdirs, $sub_DIR;# print "================== add $sub_DIR\n";
     }
   }
@@ -106,9 +111,5 @@ print "Targets = @Targets\n" if $param::debug;
 Export qw( env INCLUDE LIB BIN EXPORT BUILD OBJ MAIN);
 Default qw (   .  );
 Build  @Targets;
-#________________________________________________________________________________
-sub wanted_dead {
-  -l and not -e and print "bigus link: $File::Find::name \t--- remove it\n" and `rm $_`;
-}
 #________________________________________________________________________________
 __END__;
