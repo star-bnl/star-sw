@@ -1,5 +1,14 @@
-* $Id: geometry.g,v 1.92 2004/07/15 16:30:08 potekhin Exp $
+* $Id: geometry.g,v 1.93 2004/09/11 01:16:32 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.93  2004/09/11 01:16:32  potekhin
+* Two additions:
+* (a) Geo tag Y2004B will include the most recent enhancements
+* such as the FTPC readout cage. In this cut, this is a modified
+* geo and work in progress
+* (b) Geo tag PIX1, based on the request from the pixel group.
+* The inner layer of SVT has been removed such that it can coexist with
+* the innder pixel based tracker
+*
 * Revision 1.92  2004/07/15 16:30:08  potekhin
 * Since the "MITT" detector was updated and became ISTB,
 * this needs to be reflected in the main geometry steering.
@@ -360,7 +369,7 @@
 * list of system on/off switches:
    Logical    cave,pipe,svtt,sisd,tpce,ftpc,
               btof,vpdd,magp,calb,ecal,upst,rich,
-              zcal,mfld,bbcm,fpdm,phmd,pixl,istb
+              zcal,mfld,bbcm,fpdm,phmd,pixl,istb,ftro
 
 * Qualifiers:  TPC        TOF         etc
    Logical    mwc,pse,ems,svtw,
@@ -375,13 +384,13 @@
 
    real       Par(1000),field,dcay(5),shift(2),wdm
 
-   Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,kgeom,nmod(2),nonf(3),
+   Integer    LENOCC,LL,IPRIN,Nsi,NsiMin,i,j,l,kgeom,nmod(2),nonf(3),
               ecal_config, ecal_fill,
               Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf,
               CorrNum, PhmdConfig,
               BtofConfig, VpddConfig, FpdmConfig,
               SisdConfig, PipeConfig, CalbConfig,
-              PixlConfig, IstbConfig
+              PixlConfig, IstbConfig, FtroConfig
 
 * configuration variables for tuning the geometry:
 *            BtofConfig  -- tof trays
@@ -392,6 +401,7 @@
 *            FpdmConfig  -- fpd
 *            PixlConfig  -- pixel
 *            IstbConfig  -- outer pixel
+*            FtroConfig  -- FTPC readout barrel
 
 * CorrNum allows us to control incremental bug fixes in a more
 * organized manner
@@ -436,6 +446,7 @@ replace[;ON#{#;] with [
    FpdmConfig  = 0 ! 0 means the original source code
    PixlConfig  = 0 ! 0=no, 1=inside the SVT, 2=inside CAVE
    IstbConfig  = 0 ! 0=no, >1=version
+   FtroConfig  = 0 ! 0=no, >1=version
 
 * Set only flags for the main configuration (everthing on, except for tof),
 * but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
@@ -446,11 +457,12 @@ replace[;ON#{#;] with [
 * "Canonical" detectors are all ON by default,
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld,upst,zcal} = on;
 * whereas some newer stuff is considered optional:
-   {bbcm,fpdm,phmd,pixl,istb,sisd} = off;
+   {bbcm,fpdm,phmd,pixl,istb,sisd,ftro} = off;
 
    {mwc,pse}=on          " MultiWire Chambers, pseudopadrows              "
    {ems,rich}=off        " TimeOfFlight, EM calorimeter Sector            "
    Nsi=7; Wfr=0;  Wdm=0; " SVT+SSD, wafer number and width as in code     "
+   NsiMin=1;             " the innermost layer of SVT                     "
    svtw=on               " water+water manifold in svt, off for Y2000 only"
    mwx=2                 " for Year_1? mwx=1 limites x in mwc hits (<Y2K) "
    Itof=2                " use btofgeo2 - default starting from Y2000     "
@@ -628,6 +640,49 @@ If LL>1
                    IstbConfig=1;
                 }
 
+*************************************************************************************************************
+  on PIX1   { Modified PIX Tracking + correction 3 in 2003 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD;
+                  "svt: 3 layers ";
+                     nsi=7    " 3 bi-plane layers + ssd ";
+                     wfr=0    " numbering is in the code   ";
+                     wdm=0    " width is in the code       ";
+                     NsiMin=3 " skip the innermost layer   ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+                     BtofConfig=5;
+                  "calb" 
+                     ems=on
+                     nmod={60,60}; shift={75,105}; " 60 sectors on both sides"
+                  "ecal"
+                     ecal_config=3   "both wheels"
+                     ecal_fill=3     "all sectors filled "
+                  "beam-beam counter "
+                     bbcm=on
+                  "forward pion detector "
+                     fpdm=on
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+                  "geometry correction "
+                     CorrNum = 4;
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 1;
+                  "Silicon Strip Detector Version "
+                     sisd=off;
+                     SisdConfig = 1;
+
+* careful! Achtung!
+                   pipeConfig=4;   " provisional"
+                   pixl=on;    " put the pixel detector in"
+                   PixlConfig=2;
+* The new MIT detector
+                   istb=off;  "new pixel based inner tracker"
+                   IstbConfig=0;
+                }
 
 
 
@@ -939,6 +994,72 @@ If LL>1
                 }
 
 *
+****************************************************************************************
+  on Y2004B    { corrected 2004 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD+FTRO with standard GSTPAR in PHMD;
+                  "svt: 3 layers ";
+magp=off
+btof=off
+tpce=off
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=off " Wultiwire chambers are read-out ";
+                     pse=off " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+* note the upgrade with respect to previous years:
+                     BtofConfig=7;
+
+                  "calb" 
+                     calb=off
+                     ems=off
+                     CalbConfig = 1
+* remember that with this config, the following parameters have
+* a different meaning because we have to (unfortunately) switch
+* from divisions to copies and introduce a map, which DOES
+* control the configuration
+                     nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
+
+
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+                     ecal=off
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 1 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=4;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+                  "geometry correction "
+                     CorrNum = 3;
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 2;
+
+                  "Silicon Strip Detector Version "
+                     sisd=off;
+                     SisdConfig = 2;
+
+                  "FTPC Readout barrel "
+                     ftro=on;
+                     FtroConfig = 1;
+
+                }
+
+*
 **********************************************************************
 * Corrections and enhancements in y2004:
 *    added the Photon Multiplicity Detector (PHMD)
@@ -1095,6 +1216,7 @@ If LL>1
    If (LL>1 & svtt) then
      call AgDETP new ('SVTT')
      if (Nsi < 7)           call AgDETP add ('svtg.nlayer=',   Nsi,1)
+     if (NsiMin > 1)        call AgDETP add ('svtg.nsimin=',   NsiMin,1)
      if (pipeConfig >= 4)   call AgDETP add ('svtg.ifMany=',     1,1)
      if (Wfr > 0)           call AgDETP add ('svtl(3).nwafer=',wfr,1)
      if (wdm > 0)           call AgDETP add ('swca.WaferWid=', wdm,1)
@@ -1161,6 +1283,10 @@ If LL>1
 	else            
            Call supogeo1 ! New, corrected version
 	endif
+   endif
+
+   if (ftro) then
+	Call ftrogeo     ! FTPC readout electronics barrel
    endif
 
 * - tof system should be on (for year 2):      DETP BTOF BTOG.choice=2
