@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.hh,v 1.15 2002/08/02 11:26:41 oldi Exp $
+// $Id: StFtpcClusterFinder.hh,v 1.16 2003/04/15 11:35:51 putschke Exp $
 //
 // $Log: StFtpcClusterFinder.hh,v $
+// Revision 1.16  2003/04/15 11:35:51  putschke
+// Include corrections for inner cathode offset and move some parameter to database
+//
 // Revision 1.15  2002/08/02 11:26:41  oldi
 // Chargestep corrected (it was looping over the sequences twice).
 //
@@ -74,7 +77,7 @@ typedef struct tagClusterUC
   int                  StartPad;
   int                  EndPad;
   int                  NumSequences;
-  int                  CutOff;
+    int                  CutOff;
   TPCSequence          Sequence[MAXNUMSEQUENCES];
   int                  SequencePad[MAXNUMSEQUENCES];
   struct tagClusterUC* NextClusterUC;
@@ -103,15 +106,6 @@ typedef struct
   float z;
 } TPeak;
 
-const int mMaxPadlengthMed=30;
-const int mMaxTimelengthMed=30;
-const int mMaxPadlengthOut=10;
-const int mMaxTimelengthOut=10;
-
-// width of search window in StFtpcFindhits()
-const int DeltaTime=2;
-const int DeltaPad=2;
-
 class StFtpcClusterFinder
 {
 
@@ -133,8 +127,23 @@ class StFtpcClusterFinder
   float UNFOLDLIMIT;
   float UNFOLDFAILEDLIMIT;
   int MAXPADLENGTH;
-  int MAXTIMELENGTH;
-  int MINTIMEBIN;
+ 
+  int mMinTimeBin;
+  int mMinTimeBinMed;
+  int mMinTimeBinOut;
+
+  int mMaxPadlength;
+  int mMaxTimelength;
+  int mMaxPadlengthMed;
+  int mMaxTimelengthMed;
+  int mMaxPadlengthOut;
+  int mMaxTimelengthOut;
+
+  int DeltaTime;
+  int DeltaPad;
+
+  float mOffsetCathodeWest;
+  float mOffsetCathodeEast;
 
  public:
   StFtpcClusterFinder(StFTPCReader *reader, 

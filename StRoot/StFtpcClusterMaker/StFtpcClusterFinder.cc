@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.44 2003/01/21 09:34:31 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.45 2003/04/15 11:35:39 putschke Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.45  2003/04/15 11:35:39  putschke
+// Include corrections for inner cathode offset and move some parameter to database
+//
 // Revision 1.44  2003/01/21 09:34:31  jcs
 // initialize variables to eliminate compiler warnings for NODEBUG=yes
 //
@@ -179,9 +182,23 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
   MAXFASTLOOPS = mParam->maxFastLoops();
   UNFOLDLIMIT = mParam->unfoldLimit();
   UNFOLDFAILEDLIMIT = mParam->unfoldFailedLimit();
-  MAXPADLENGTH = mParam->maxPadLength();
-  MAXTIMELENGTH = mParam->maxTimeLength();
-  MINTIMEBIN = mParam->minTimeBin();
+
+  mMinTimeBin = mParam->minTimeBin();
+  mMinTimeBinMed = mParam->minTimeBinMed();
+  mMinTimeBinOut = mParam->minTimeBinOut();
+
+  mMaxPadlength = mParam->maxPadLength();
+  mMaxTimelength = mParam->maxTimeLength();
+  mMaxPadlengthMed = mParam->maxPadLengthMed();
+  mMaxTimelengthMed = mParam->maxTimeLengthMed();
+  mMaxPadlengthOut = mParam->maxPadLengthOut();
+  mMaxTimelengthOut = mParam->maxTimeLengthOut();
+
+  DeltaTime = mParam->deltaTime();
+  DeltaPad = mParam->deltaPad();
+
+  mOffsetCathodeWest = mParam->offsetCathodeWest();
+  mOffsetCathodeEast = mParam->offsetCathodeEast();
 
   mhpad = hpad;
   mhtime = htime;
@@ -857,11 +874,10 @@ bool StFtpcClusterFinder::geometryCut(TClusterUC *Cluster)
 	}
     }
 
-  if (minTimebin>135) return true;
-  else if ((minTimebin>50 && minTimebin<=135) && abs(Cluster->EndPad-Cluster->StartPad)<mMaxPadlengthMed 
-	   && seqlength<mMaxTimelengthMed)
+  if (minTimebin>mMinTimeBin) return true;
+  else if ((minTimebin>mMinTimeBinMed && minTimebin<=mMinTimeBin) && abs(Cluster->EndPad-Cluster->StartPad)<mMaxPadlengthMed && seqlength<mMaxTimelengthMed)
     return true;
-  else if (minTimebin>5 && minTimebin<=50 && abs(Cluster->EndPad-Cluster->StartPad)<mMaxPadlengthOut && seqlength<mMaxTimelengthOut)
+  else if (minTimebin>mMinTimeBinOut && minTimebin<=mMinTimeBinMed && abs(Cluster->EndPad-Cluster->StartPad)<mMaxPadlengthOut && seqlength<mMaxTimelengthOut)
     return true;
   else
     return false;
@@ -1809,7 +1825,7 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
 				  double *pRadius, 
 				  double *pDeflection)
 {  
-  int PadtransPerTimebin;
+ int PadtransPerTimebin;
   int PadtransLower;
   float PhiDeflect, TimeCoordinate;
 
@@ -1821,58 +1837,112 @@ int StFtpcClusterFinder::padtrans(TPeak *Peak,
   PadtransLower= (int) (TimeCoordinate*PadtransPerTimebin);
 
   if ( TimeCoordinate > mDb->numberOfTimebins() || TimeCoordinate <= 0 ) 
-  {
-         // exceeds table dimensions
-         return FALSE;
-  }
+    {
+      // exceeds table dimensions
+      return FALSE;
+    }
 
   /* linear interpolation in radius table */
-//  Peak->Rad = pRadius[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower];
+  Peak->Rad=pRadius[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower]
+    -(pRadius[iRow + mDb->numberOfPadrowsPerSide()*(PadtransLower)]
+      -pRadius[iRow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)])/2;
 
-    Peak->Rad=pRadius[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower]
-             -(pRadius[iRow + mDb->numberOfPadrowsPerSide()*(PadtransLower)]
-             -pRadius[iRow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)])/2;
-
-    if ( pRadius[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower] == 0 )
+  if ( pRadius[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower] == 0 )
     {
-        // outside FTPC sensitive region
-        return FALSE;
+      // outside FTPC sensitive region
+      return FALSE;
     }
-//  Peak->Rad = ((pRadius[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower] * 
-//		((float) (PadtransLower+1) / (float) PadtransPerTimebin - 
-//		 TimeCoordinate) + pRadius[iRow + mDb->numberOfPadrowsPerSide()
-//					   * (PadtransLower+1)] * 
-//		(TimeCoordinate - (float) PadtransLower 
-//		 / (float) PadtransPerTimebin)) / 
-//	       (((float) (PadtransLower + 1) / (float) PadtransPerTimebin - 
-//		 (float) PadtransLower / (float) PadtransPerTimebin)));
-  /* linear interpolation in deflection table */
+  
+   /* linear interpolation in deflection table */
+  PhiDeflect=pDeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower]
+    +(pDeflection[iRow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)]
+      -pDeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower])/2;
 
-    PhiDeflect=pDeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower]
-               +(pDeflection[iRow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)]
-               -pDeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower])/2;
-
-
+    
   /* calculate phi angle from pad position */
   Peak->Phi = mDb->radiansPerBoundary() / 2 
     + ((Peak->PadPosition-1) + 0.5) * mDb->radiansPerPad()
     + PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
 			   + mDb->radiansPerBoundary())+halfpi;
+    
+  /* Invert pad number (== Peak->PadPosition) for FTPC East  */
+  /* (not yet understood where and why pad numbers were inverted) */
+  if (iRow >= 10) {
+    Peak->Phi = mDb->radiansPerBoundary() / 2 
+      + (159.5 - (Peak->PadPosition-1))* mDb->radiansPerPad()
+      - PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
+			     + mDb->radiansPerBoundary())+halfpi;
+  }
 
-   /* Invert pad number (== Peak->PadPosition) for FTPC East  */
-   /* (not yet understood where and why pad numbers were inverted) */
-   if (iRow >= 10) {
-       Peak->Phi = mDb->radiansPerBoundary() / 2 
-         + (159.5 - (Peak->PadPosition-1))* mDb->radiansPerPad()
-         - PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
-         + mDb->radiansPerBoundary())+halfpi;
-   }
+  // ===================================================================
+  
+  // shift time => radius if there is an offset of the inner cathode :
 
+  if (mOffsetCathodeWest>0 || mOffsetCathodeEast>0)
+    {
+
+      if (iRow<10) // correct for west chamber
+	TimeCoordinate=(0.999997-0.09739494018294076*mOffsetCathodeWest*cos(Peak->Phi))*TimeCoordinate;
+	//TimeCoordinate=(1.0-0.09739494018294076*mOffsetCathodeWest*cos(Peak->Phi))*TimeCoordinate;
+      else // correct for east chamber
+	TimeCoordinate=(0.999997-0.09739494018294076*mOffsetCathodeEast*sin(Peak->Phi))*TimeCoordinate;
+	//TimeCoordinate=(1.0-0.09739494018294076*mOffsetCathodeEast*sin(Peak->Phi))*TimeCoordinate;
+      
+      // calculate new corrected radius and deflection angle :
+      
+      Peak->TimePosition=TimeCoordinate; // DEBUG only !
+      
+      PadtransLower= (int) (TimeCoordinate*PadtransPerTimebin);
+      
+      if ( TimeCoordinate > mDb->numberOfTimebins() || TimeCoordinate <= 0 ) 
+	{
+	  // exceeds table dimensions
+	  return FALSE;
+	}
+      
+      /* linear interpolation in radius table */
+      
+      Peak->Rad=pRadius[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower]
+	-(pRadius[iRow + mDb->numberOfPadrowsPerSide()*(PadtransLower)]
+	  -pRadius[iRow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)])/2;
+      
+      if ( pRadius[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower] == 0 )
+	{
+	  // outside FTPC sensitive region
+	  return FALSE;
+	}
+      
+      // calculate new corrected deflection angle and phi 
+      
+      /* linear interpolation in deflection table */
+      PhiDeflect=pDeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower]
+	+(pDeflection[iRow + mDb->numberOfPadrowsPerSide() * (PadtransLower+1)]
+	  -pDeflection[iRow + mDb->numberOfPadrowsPerSide() * PadtransLower])/2;
+      
+      
+      /* calculate phi angle from pad position */
+      Peak->Phi = mDb->radiansPerBoundary() / 2 
+	+ ((Peak->PadPosition-1) + 0.5) * mDb->radiansPerPad()
+	+ PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
+			       + mDb->radiansPerBoundary())+halfpi;
+    }
+  
+  /* Invert pad number (== Peak->PadPosition) for FTPC East  */
+  /* (not yet understood where and why pad numbers were inverted) */
+  if (iRow >= 10) {
+    Peak->Phi = mDb->radiansPerBoundary() / 2 
+      + (159.5 - (Peak->PadPosition-1))* mDb->radiansPerPad()
+      - PhiDeflect + iSec * (mDb->numberOfPads() * mDb->radiansPerPad()
+			     + mDb->radiansPerBoundary())+halfpi;
+  }
+
+  // ===================================================================
+    
   /* transform to cartesian */
   Peak->x = Peak->Rad*cos(Peak->Phi);
   /* Peak->x = -Peak->x to transform FTPC West into STAR global coordinate system */
   if (iRow <10) {
-     Peak->x = -Peak->x;
+    Peak->x = -Peak->x;
   }
   Peak->y = Peak->Rad*sin(Peak->Phi);
   Peak->z = mDb->padrowZPosition(iRow);

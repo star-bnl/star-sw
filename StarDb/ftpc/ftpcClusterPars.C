@@ -43,9 +43,22 @@ memset(&row,0,tableSet->GetRowSize());
     row.maxFastLoops              =        30;  // max loopnumber in fast unfolding
     row.unfoldLimit               =      0.01;  // accuracy of unfolding 
     row.unfoldFailedLimit         =      0.50;  // limit for failed unfolding
-    row.maxTimelength             =       100;  // max timelength of cluster
-    row.maxPadlength              =       100;  // max padlength of cluster
-    row.minTimebin                =         5;  // min timebin for cluster search
+                                                // cluster geometry
+    row.minTimebin                =       135;  // min timebin for cluster search inner
+    row.minTimebinMed             =        50;  // min timebin for cluster search medium
+    row.minTimebinOut             =         5;  // min timebin for cluster search medium
+    row.maxTimelength             =       100;  // max timelength of cluster inner
+    row.maxPadlength              =       100;  // max padlength of cluster inner
+    row.maxTimelengthMed          =        30;  // max timelength of cluster medium
+    row.maxPadlengthMed           =        30;  // max padlength of cluster medium
+    row.maxTimelengthOut          =        10;  // max timelength of cluster medium
+    row.maxPadlengthOut           =        10;  // max padlength of cluster medium
+    row.deltaTime                 =         2;  // width unfolding window time
+    row.deltaPad                  =         2;  // width unfolding window pad
+                                                // inner cathode shift offset (cm)
+    row.offsetCathodeWest         =     0.035;  // west
+    row.offsetCathodeEast         =      0.06;  // east
+
     row.normalizedNowPressure     =    1013.25; // normalized air pressure (in hPa) ;
     row.adjustedAirPressureWest   =    1013.25; // temperature adjusted air pressure for FTPC West 
     row.adjustedAirPressureEast   =    1013.25; // temperature adjusted air pressure for FTPC East 
