@@ -1,5 +1,8 @@
-* $Id: tpt_helix_pred.F,v 1.5 1999/07/19 19:15:55 genevb Exp $
+* $Id: tpt_helix_pred.F,v 1.6 1999/09/14 00:55:48 liq Exp $
 * $Log: tpt_helix_pred.F,v $
+* Revision 1.6  1999/09/14 00:55:48  liq
+* use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
+*
 * Revision 1.5  1999/07/19 19:15:55  genevb
 * Use StMessMgr
 *
@@ -49,12 +52,12 @@ C
       IMPLICIT NONE
 #include "PAM.inc"
 
-#include "tpt_pointers.inc"
+#include "tpt_track_pointers.inc"
 #include "tpt_pars.inc"
 
       RECORD /table_head_st/    tpar_h
       RECORD /tpt_pars_st/      tpar(*)
-      RECORD /track_pointers/   trk(*)
+      RECORD /tpt_track_pointers_st/   trk(*)
 C______________________________________________________________________
 
       INTEGER tgc_row_par,tpt_circle_pred

@@ -1,5 +1,8 @@
-* $Id: tpt_load_track.F,v 1.9 1999/09/08 19:39:43 sakrejda Exp $
+* $Id: tpt_load_track.F,v 1.10 1999/09/14 00:55:48 liq Exp $
 * $Log: tpt_load_track.F,v $
+* Revision 1.10  1999/09/14 00:55:48  liq
+* use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
+*
 * Revision 1.9  1999/09/08 19:39:43  sakrejda
 * Calculation for possible number of points on track activated again
 * Spiros fixed problems for zero field.
@@ -47,14 +50,14 @@ C<--------------------------------------------------------------------
 #include "PAM.inc"
 
 #include "tpt_track.inc"
-#include "tpt_pointers.inc"
+#include "tpt_track_pointers.inc"
 #include "phys_constants.inc"
 #include "math_constants.inc"
 
 C___________________________________________________________________
       RECORD /table_head_st/    track_h
       RECORD /tpt_track_st/     track(*)
-      RECORD /track_pointers/   trk(*)
+      RECORD /tpt_track_pointers_st/   trk(*)
 
 C___________________________________________________________________
       INTEGER ipt

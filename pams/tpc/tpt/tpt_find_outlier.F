@@ -1,5 +1,8 @@
-* $Id: tpt_find_outlier.F,v 1.4 1998/05/26 04:15:12 sakrejda Exp $
+* $Id: tpt_find_outlier.F,v 1.5 1999/09/14 00:55:46 liq Exp $
 * $Log: tpt_find_outlier.F,v $
+* Revision 1.5  1999/09/14 00:55:46  liq
+* use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
+*
 * Revision 1.4  1998/05/26 04:15:12  sakrejda
 * message type set to E to limit printing
 *
@@ -44,11 +47,11 @@ C_________________________________________________________________
 
 #include "PAM.inc"
 #include "tpt_pars.inc"
-#include "tpt_pointers.inc"
+#include "tpt_track_pointers.inc"
 #include "math_constants.inc"
 
 C__________________________________________________________________
-      RECORD /track_pointers/   trk(*)
+      RECORD /tpt_track_pointers_st/   trk(*)
       RECORD /table_head_st/    tpar_h
       RECORD /tpt_pars_st/      tpar(*)
 

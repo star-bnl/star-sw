@@ -1,5 +1,8 @@
-* $Id: tpt.F,v 1.16 1999/07/31 22:13:07 liq Exp $
+* $Id: tpt.F,v 1.17 1999/09/14 00:55:44 liq Exp $
 * $Log: tpt.F,v $
+* Revision 1.17  1999/09/14 00:55:44  liq
+* use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
+*
 * Revision 1.16  1999/07/31 22:13:07  liq
 * set switch on forming segments on UV
 *
@@ -73,7 +76,7 @@ C
 
 #include "tpt.inc"
 
-#include "tpt_pointers.inc"
+#include "tpt_track_pointers.inc"
 #include "tpt_mxdim.inc"
 
 C______________________________________________________________________
@@ -81,7 +84,7 @@ C______________________________________________________________________
       integer loc
 
 C     Local variables
-      RECORD /track_pointers/ trk(mxtrack)
+      RECORD /tpt_track_pointers_st/ trk(mxtrack)
       POINTER (p_trk,trk)
 C
 

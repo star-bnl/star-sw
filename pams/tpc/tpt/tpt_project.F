@@ -1,5 +1,8 @@
-* $Id: tpt_project.F,v 1.7 1999/05/05 21:52:22 sakrejda Exp $
+* $Id: tpt_project.F,v 1.8 1999/09/14 00:55:51 liq Exp $
 * $Log: tpt_project.F,v $
+* Revision 1.8  1999/09/14 00:55:51  liq
+* use tpt_track_pointers.inc instead of tpt_pointers.inc in order to used by C++ codes
+*
 * Revision 1.7  1999/05/05 21:52:22  sakrejda
 * local arrays converted to dynamic ones (with malloc)
 *
@@ -58,7 +61,7 @@ C
 #include "tpt_pars.inc"
 #include "tpt_track.inc"
 #include "tcl_tphit.inc"
-#include "tpt_pointers.inc"
+#include "tpt_track_pointers.inc"
 #include "tpt_mxdim.inc"
 
 C______________________________________________________________________
@@ -68,7 +71,7 @@ C______________________________________________________________________
       RECORD /tpt_track_st/     track(*)
       RECORD /table_head_st/    hit_h
       RECORD /tcl_tphit_st/     hit(*)
-      RECORD /track_pointers/   trk(*)
+      RECORD /tpt_track_pointers_st/   trk(*)
 C_____________________________________________________________________
 C
 C     Local variables
