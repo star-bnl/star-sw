@@ -1,5 +1,5 @@
 /***********************************************************************
- * $Id: StRichCoordinateTransform.cxx,v 1.2 2000/02/08 23:49:18 lasiuk Exp $
+ * $Id: StRichCoordinateTransform.cxx,v 1.3 2000/02/24 18:44:14 lasiuk Exp $
  *
  * Author: brian made this on Jan 27, 2000
  *
@@ -9,8 +9,8 @@
  ***********************************************************************
  *
  * $Log: StRichCoordinateTransform.cxx,v $
- * Revision 1.2  2000/02/08 23:49:18  lasiuk
- * rm fpad from routine which is not returned
+ * Revision 1.3  2000/02/24 18:44:14  lasiuk
+ * coerce quadrant bounds limits
  *
  *
  * Revision 1.3  2000/02/24 18:44:14  lasiuk
@@ -33,8 +33,10 @@ StRichCoordinateTransform::StRichCoordinateTransform(StRichGeometryDbInterface* 
 {
 
     mRowPitch = mGeomDb->rowPitch();
-    mXQBound = -(mNumberOfRowsInAQuadrantColumn+.5)*mRowPitch/2;
-    mZQBound = -(mNumberOfPadsInAQuadrantRow+.5)*mPadPitch/2.;
+    mXGap     = mGeomDb->quadrantGapInX();
+    mYGap     = mGeomDb->quadrantGapInY();
+     mXQBound = -(mNumberOfRowsInAQuadrantColumn)*mRowPitch/2;
+     mZQBound = -(mNumberOfPadsInAQuadrantRow)*mPadPitch/2.;
 //      mXQBound = -(mNumberOfRowsInAQuadrantColumn+1.)*mRowPitch/2;
 //      mZQBound = -(mNumberOfPadsInAQuadrantRow+1.)*mPadPitch/2.;
     mXLBound = -(mGeomDb->quadrantGapInX()/2. + (mNumberOfRowsInAQuadrantColumn+.5)*mRowPitch);
@@ -351,6 +353,10 @@ StRichCoordinateTransform::quadX2Row(double qx, int quad) const
     int rowOffset = 0;
 StRichCoordinateTransform::quadY2Row(double qx, int quad) const
 {
+	if(qx>=-mXQBound) qx = -mXQBound;
+    if(quad == 3 || quad == 4) {
+	rowOffset = mNumberOfRowsInAQuadrantColumn;
+	if(qx<=mXQBound) qx = mXQBound;
     }
     else {
     return (nearestInteger( rowOffset + ((-qx/mRowPitch - .5) + mNumberOfRowsInAQuadrantColumn/2.)) );
@@ -362,8 +368,11 @@ StRichCoordinateTransform::quadZ2Pad(double qz, int quad) const
     int padOffset = 0;
 double
 StRichCoordinateTransform::quadX2Pad(double qz, int quad) const
+	if(qz<=mZQBound) qz = mZQBound;
+    if(quad == 1 || quad == 4) {
+	padOffset = mNumberOfPadsInAQuadrantRow;
+	if(qz>=-mZQBound) qz = -mZQBound;
     }
-    
     return (nearestInteger(padOffset + ((qz/mPadPitch - .5) + mNumberOfPadsInAQuadrantRow/2.)) );
 	if(qz>=-mXQBound)
 	    qz = -mXQBound;
