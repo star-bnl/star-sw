@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_Node.h,v 1.12 1999/04/19 00:05:15 fine Exp $
+// $Id: St_Node.h,v 1.13 1999/05/13 19:57:27 fine Exp $
 // $Log: St_Node.h,v $
+// Revision 1.13  1999/05/13 19:57:27  fine
+// St_Node  the TShape list has been introduced, St_Node file format has been changed
+//
 // Revision 1.12  1999/04/19 00:05:15  fine
 // New class St_PolylineShape has been introduced
 //
@@ -71,7 +74,8 @@ class TList;
 
 class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill { 
  protected:
-   TShape         *fShape;         //Pointer to shape definition
+   TShape         *fShape;         //Pointer to "master" shape definition
+   TList          *fListOfShapes;  //Pointer to the list of the shape definitions
    TString         fOption;        //List of options if any
    Int_t           fVisibility;    //Visibility flag
 
@@ -89,6 +93,7 @@ class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill {
         virtual ~St_Node();
         virtual St_NodePosition *Add(St_Node *node, Double_t x=0, Double_t y=0, Double_t z=0, TRotMatrix *matrix=0, UInt_t id=0, Option_t *option="");
         virtual St_NodePosition *Add(St_Node *node, Double_t x, Double_t y, Double_t z,  const Text_t *matrixname,  UInt_t id=0, Option_t *option="");
+        virtual void        Add(TShape *shape, Bool_t IsMaster=kFALSE);
         virtual void        Browse(TBrowser *b);
         virtual TNode      *CreateTNode(const St_NodePosition *position=0);
         virtual void        DeletePosition(St_NodePosition *position);
@@ -100,6 +105,7 @@ class St_Node  : public St_ObjectSet, public TAttLine, public TAttFill {
         virtual Text_t     *GetObjectInfo(Int_t px, Int_t py);
         const   Option_t   *GetOption() const { return fOption.Data();}
                 TShape     *GetShape()  const {return fShape;}
+                TList      *GetListOfShapes()  const {return fListOfShapes;}
         Int_t               GetVisibility() const {return fVisibility;}
         virtual TList      *GetListOfPositions() { return (TList *)(GetObject());}
         virtual ULong_t     Hash() { return TObject::Hash();}

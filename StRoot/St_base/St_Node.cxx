@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.23 1999/05/12 15:46:00 fine Exp $
+// $Id: St_Node.cxx,v 1.24 1999/05/13 19:57:26 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.24  1999/05/13 19:57:26  fine
+// St_Node  the TShape list has been introduced, St_Node file format has been changed
+//
 // Revision 1.23  1999/05/12 15:46:00  fine
 // some cosmetic change fro Browse method
 //
@@ -141,13 +144,14 @@ St_Node::St_Node()
 //*-*-*-*-*-*-*-*-*-*-*Node default constructor*-*-*-*-*-*-*-*-*-*-*-*-*
 //*-*                  ========================
  
-   fShape  = 0;
-   fVisibility = 1;
+   fShape       = 0;
+   fListOfShapes = 0;
+   fVisibility  = 1;
 }
  
 //______________________________________________________________________________
 St_Node::St_Node(const Text_t *name, const Text_t *title, const Text_t *shapename, Option_t *option)
-       :St_ObjectSet(name),TAttLine(), TAttFill()
+       :St_ObjectSet(name),TAttLine(), TAttFill(),fListOfShapes(0),fShape(0)
 {
 //*-*-*-*-*-*-*-*-*-*-*Node normal constructor*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 //*-*                  ======================
@@ -168,7 +172,7 @@ St_Node::St_Node(const Text_t *name, const Text_t *title, const Text_t *shapenam
    counter++;
    SetTitle(title);
    if(!(counter%1000))cout<<"St_Node count="<<counter<<" name="<<name<<endl;
-   fShape  = gGeometry->GetShape(shapename);
+   Add(gGeometry->GetShape(shapename),kTRUE);
 //   fParent = gGeometry->GetCurrenSt_Node();
    fOption = option;
    fVisibility = 1;
@@ -190,7 +194,7 @@ St_Node::St_Node(const Text_t *name, const Text_t *title, const Text_t *shapenam
  
 //______________________________________________________________________________
 St_Node::St_Node(const Text_t *name, const Text_t *title, TShape *shape, Option_t *option)
-                :St_ObjectSet(name),TAttLine(),TAttFill()
+                :St_ObjectSet(name),TAttLine(),TAttFill(),fListOfShapes(0),fShape(0)
 {
 //*-*-*-*-*-*-*-*-*-*-*Node normal constructor*-*-*-*-*-*-*-*-*-*-*
 //*-*                  ================================
@@ -207,7 +211,7 @@ St_Node::St_Node(const Text_t *name, const Text_t *title, TShape *shape, Option_
    SetLineColor(lcolor);
 #endif
 
-   fShape  = shape;
+   Add(shape,kTRUE);
    fOption = option;
    fVisibility = 1;
    SetTitle(title);
@@ -226,7 +230,7 @@ St_Node::St_Node(const Text_t *name, const Text_t *title, TShape *shape, Option_
 
 }
 //______________________________________________________________________________
-St_Node::St_Node(TNode &rootNode)
+St_Node::St_Node(TNode &rootNode):fListOfShapes(0),fShape(0)
 {
   // Convert the ROOT TNode object into STAR St_Node
 
@@ -234,7 +238,7 @@ St_Node::St_Node(TNode &rootNode)
   SetTitle(rootNode.GetTitle());
   fVisibility = rootNode.GetVisibility();
   fOption     = rootNode.GetOption();
-  fShape      = rootNode.GetShape();
+  Add(rootNode.GetShape(),kTRUE);
 
   SetLineColor(rootNode.GetLineColor());
   SetLineStyle(rootNode.GetLineStyle());
@@ -253,6 +257,14 @@ St_Node::St_Node(TNode &rootNode)
   }
 }
 
+//______________________________________________________________________________
+void St_Node::Add(TShape *shape, Bool_t IsMaster)
+{
+  if (!shape) return;
+  if (!fListOfShapes) fListOfShapes = new TList;
+  fListOfShapes->Add(shape);
+  if (IsMaster) fShape = shape;
+}
 //______________________________________________________________________________
 TNode *St_Node::CreateTNode(const St_NodePosition *position)
 {
@@ -309,6 +321,7 @@ St_Node::~St_Node()
      delete GetListOfPositions();
      SetPositionsList();
    }
+   SafeDelete(fListOfShapes);
 #if 0
    if (fParent)     fParent->GetListOfNodes()->Remove(this);
    else    gGeometry->GetListOfNodes()->Remove(this);
@@ -440,21 +453,24 @@ Int_t St_Node::DistancetoNodePrimitive(Int_t px, Int_t py,St_NodePosition *pos)
    static St_NodePosition nullPosition;
    St_NodePosition *position = pos;
    if (!position) position = &nullPosition;
-   TShape  *shape = 0;
-
-   shape    = GetShape();
    if (pos) position->UpdatePosition();      
-
-//*-*- Paint Referenced shape
    Int_t dist = big;
-   if (GetVisibility() && shape && shape->GetVisibility()) {
-//         gNode = this;
-        dist = shape->DistancetoPrimitive(px,py);
-        if (dist < maxdist) {
+   if (GetVisibility()) {
+     TShape  *shape = 0;
+     TIter nextShape(fListOfShapes);
+     while (shape = (TShape *)nextShape()) {
+      //*-*- Distnance to the next referenced shape  if visible
+      if (shape->GetVisibility()) {
+        Int_t dshape = shape->DistancetoPrimitive(px,py);
+        if (dshape < maxdist) {
            gPad->SetSelected(this);
            return 0;
         }
-   }
+        if (dshape < dist) dist = dshape;
+      }
+    }
+  }
+
 //   if ( TestBit(kSonsInvisible) ) return dist;
  
 //*-*- Loop on all sons
@@ -563,8 +579,13 @@ TRotMatrix *St_Node::GetIdentity()
 Text_t *St_Node::GetObjectInfo(Int_t, Int_t)
 {
    if (!gPad) return "";
-   static char info[64];
-   sprintf(info,"%s/%s, shape=%s/%s",GetName(),GetTitle(),fShape->GetName(),fShape->ClassName());
+   static char info[512];
+   sprintf(info,"%s/%s, shape=%s/%s",GetName(),GetTitle());
+   TIter nextShape(fListOfShapes);
+   TShape *shape = 0;
+   while(shape = (TShape *)nextShape()) 
+      sprintf(&info[strlen(info)]," shape=%s/%s",shape->GetName(),shape->ClassName());
+   
    return info;
 }
  
@@ -708,9 +729,13 @@ void St_Node::PaintShape(Option_t *option)
   // To be called from the TObject::Paint method only
   TAttLine::Modify();
   TAttFill::Modify();
-  TShape *shape    = GetShape();
-  if (GetVisibility() && shape->GetVisibility()) {
-//      gNode = thisNode;
+
+  if (!GetVisibility()) return;
+
+  TIter nextShape(fListOfShapes);
+  TShape *shape = 0;
+  while(shape = (TShape *)nextShape()) {
+    if (!shape->GetVisibility())   continue;
     shape->SetLineColor(GetLineColor());
     shape->SetLineStyle(GetLineStyle());
     shape->SetLineWidth(GetLineWidth());
@@ -804,8 +829,12 @@ void St_Node::Sizeof3D() const
 //*-*-*-*-*-*-*Return total size of this 3-D Node with its attributes*-*-*
 //*-*          ==========================================================
  
-   if (fVisibility && fShape->GetVisibility()) {
-      fShape->Sizeof3D();
+   if (GetVisibility()) {
+     TIter nextShape(fListOfShapes);
+     TShape *shape = 0;
+     while(shape = (TShape *)nextShape()) {
+        if (shape->GetVisibility())  shape->Sizeof3D();
+     }
    }
 //   if ( TestBit(kSonsInvisible) ) return;
  
