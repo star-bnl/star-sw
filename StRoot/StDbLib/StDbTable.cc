@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.6 1999/10/19 14:30:39 porter Exp $
+ * $Id: StDbTable.cc,v 1.7 1999/11/19 21:58:06 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.7  1999/11/19 21:58:06  porter
+ * added method to return "malloc'd" version of table instead of new
+ * so that delete of St_Table class i done correctly
+ *
  * Revision 1.6  1999/10/19 14:30:39  porter
  * modifications relevant to use with StDbBroker and future merging with
  * "params" database structure + some docs + suppressing diagnostics messages
@@ -25,6 +29,7 @@
 #include "StDbBuffer.h"
 #include <string.h>
 #include <iostream.h>
+#include <malloc.h>
 
 
 ///////////////////////////////////////////////////////////////
@@ -108,7 +113,8 @@ StDbTable::GetTableCpy() {
 if(!mdata)return (void*)GetTable();
 
 int len = mrows*getTableSize();
-char* c = new char[len];
+//char* c = new char[len];
+char* c = (char*)calloc(mrows,getTableSize());
 memcpy(c,mdata,len);
 
 return (void*)c;
@@ -119,7 +125,10 @@ return (void*)c;
 void 
 StDbTable::SetTable(char* c, int nrows) { 
 
-if(mdata)delete [] mdata; 
+if(mdata){
+ delete [] mdata; 
+ mdata = 0;
+}
 
 createMemory(nrows);
 int len = nrows*getTableSize();

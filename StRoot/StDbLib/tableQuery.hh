@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: tableQuery.hh,v 1.3 1999/09/30 02:06:15 porter Exp $
+ * $Id: tableQuery.hh,v 1.4 1999/11/19 21:58:07 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: tableQuery.hh,v $
+ * Revision 1.4  1999/11/19 21:58:07  porter
+ * added method to return "malloc'd" version of table instead of new
+ * so that delete of St_Table class i done correctly
+ *
  * Revision 1.3  1999/09/30 02:06:15  porter
  * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
  * allow multiple rows (StDbTable), & Added the comment sections at top of
@@ -28,6 +32,7 @@ class tableQuery {
 
 public:
 
+  tableQuery() {};
   virtual ~tableQuery() {};
 
   virtual void initDbQuery(const char* dbname, const char* serverName, const char* hostName, const int portNumber) = 0;
