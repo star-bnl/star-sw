@@ -355,8 +355,7 @@ char* block_name(char *name,long n)
      sprintf(bname+7,"%d",n);
      if (n < 10) bname[6] = ' ';
    }
-   ii = 0;
-   for (i=0; bname[i]; i++) { if (bname[i] != ' ') bname[ii++] = bname[i];};
+   for (i=0,ii=0; bname[i]; i++) { if (bname[i] != ' ') bname[ii++] = bname[i];};
    bname[ii] = '\0';
    return bname;
 }
