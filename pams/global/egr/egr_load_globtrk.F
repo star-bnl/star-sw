@@ -97,7 +97,7 @@ C Adjust for ssd later
       endif
       globtrk(iglob).tanl = gtrk(igtrk).p(7)
       globtrk(iglob).invpt =1.0/(abs(C_D_CURVATURE*bfield*
-     +     gtrk(igtrk).p(2))+1.e-5)
+     +     gtrk(igtrk).p(2))+1.e-10)
       globtrk(iglob).covar(1) = 0
       globtrk(iglob).covar(2) = 0
       globtrk(iglob).covar(3) = 0
@@ -275,7 +275,7 @@ C     Now find last point on track and calculate track length.
          globtrk(iglob).length=99999.9
       endif
       globtrk(iglob).impact = 0.
-      globtrk(iglob).curvature = abs(1./(gtrk(igtrk).p(2)+1.e-5))
+      globtrk(iglob).curvature = abs(1./(gtrk(igtrk).p(2)+1.e-10))
       globtrk(iglob).method = kHelix2StepId
       globtrk(iglob).map(1) = 0
       globtrk(iglob).map(2) = 0
@@ -303,7 +303,7 @@ C
       if(bf.lt.0.01) then
          glength = gseed
       else
-         rr=1./(C_D_CURVATURE*bf*ginvpt+1.e-5)
+         rr=1./(C_D_CURVATURE*bf*ginvpt+1.e-10)
          glength=abs((2.*rr*asin(gseed/(2.*rr)))/cos(atan(gtanl)))
       endif
 
