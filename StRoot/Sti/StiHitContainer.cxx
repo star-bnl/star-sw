@@ -5,68 +5,60 @@
 //STD
 #include <iostream>
 #include <fstream>
+#include <math.h>
+
 // STL
 #include <algorithm>
 
-#include "StTpcHit.h"
+#include "StiHit.h"
 #include "StiHitContainer.h"
 
 using std::sort;
 
 StiHitContainer::StiHitContainer() 
 { 
-    mminpoint = new StHit();
-    mmaxpoint = new StHit();
+    mminpoint = new StiHit();
+    mmaxpoint = new StiHit();
 }
 
 StiHitContainer::~StiHitContainer() {};
 
-clock_t StiHitContainer::push_back(StHit* mysthit)
+void StiHitContainer::push_back(StiHit* hit)
 {
-    clock_t start = clock();
-    StTpcHit* hit = dynamic_cast<StTpcHit*>(mysthit);
-    if (!hit) return -999;
-
     mkey.sector = hit->sector();
     mkey.padrow = hit->padrow();
     mmap[mkey].push_back(hit);
-    clock_t stop = clock();
-    return (stop-start);
+    return;
 }
 
-clock_t StiHitContainer::clear()
+void StiHitContainer::clear()
 {
-    //cout <<"StiHitContainer::clear()"<<endl;
-    clock_t start = clock();
     hitmap::iterator it;
     for (it=mmap.begin(); it!=mmap.end(); it++) {
 	(*it).second.clear();
     }
-    clock_t stop = clock();
-    return (stop-start);
+    return;
 }
 
-clock_t StiHitContainer::clearAndDestroy()
+void StiHitContainer::clearAndDestroy()
 {
     //cout <<"StiHitContainer::clearAndDestroy()"<<endl;
-    clock_t start = clock();
     hitmap::iterator it;
     for (it=mmap.begin(); it!=mmap.end(); it++) {
 	hitvector& tempvec = (*it).second;
 	for (hitvector::iterator vit=tempvec.begin(); vit!=tempvec.end(); vit++) {
-	    StHit* temp = (*vit);
+	    StiHit* temp = (*vit);
 	    delete temp;
 	    temp = 0;
 	}
 	tempvec.clear();
     }
-    clock_t stop = clock();
-    return (stop-start);
+    return;
 }
 
-int StiHitContainer::size() const
+unsigned int StiHitContainer::size() const
 {
-    int thesize = 0;
+    unsigned int thesize = 0;
     hitmap::const_iterator it;
     for (it=mmap.begin(); it!=mmap.end(); it++) {
 	thesize+=(*it).second.size();
@@ -74,64 +66,32 @@ int StiHitContainer::size() const
     return thesize;
 }
 
-void StiHitContainer::print(int sector, int padrow)
+const hitvector& StiHitContainer::hits(unsigned int sector, unsigned int padrow)
 {
     mkey.sector = sector;
-    mkey.padrow = padrow;
-    const hitvector& tempvec = mmap[mkey];
-    for (hitvector::const_iterator it=tempvec.begin(); it!=tempvec.end(); it++)    {
-	//cout <<*(*it)<<endl;
-    }
-    return;
+    mkey.padrow = padrow; 
+    return mmap[mkey];
 }
 
-void StiHitContainer::print(int sector, int padrow, ofstream& myout)
-{
-    mkey.sector = sector;
-    mkey.padrow = padrow;
-    const hitvector& tempvec = mmap[mkey];
-    for (hitvector::const_iterator it=tempvec.begin(); it!=tempvec.end(); it++) {
-	//myout <<*(*it)<<endl;
-    }
-    return;
-}
- 
 bool StiHitContainer::hasMore() const
 {
     return (mcurrent!=mcandidatevec.end()) ? true : false;
 }
 
-const StHit* StiHitContainer::getHit()
+StiHit* StiHitContainer::getHit()
 {
     return (*(mcurrent++));
 }
 
-clock_t StiHitContainer::setRefPoint(StHit* mysthit)
+void StiHitContainer::setRefPoint(StiHit* ref)
 {
-    clock_t start = clock();
-
-    //To be removed in next release
-    StTpcHit* ref = dynamic_cast<StTpcHit*>(mysthit);
-    if (!ref) return -999;
-
     mcandidatevec.clear();
-
+    
     mkey.sector = ref->sector();
     mkey.padrow = ref->padrow();
-
-    mminpoint->y = ref->y -mdeltad;
-    mmaxpoint->y = ref->y +mdeltad;
-
-    findHitsNearRef(ref);
-    clock_t stop = clock();
-    return (stop-start);
-}
-
-//Must only be called from setRefPoint()!!!!!
-//Assumes that mkey, mminpoint, and mmaxpoint are set alreay
-void StiHitContainer::findHitsNearRef(StHit* ref)
-{
-    //cout <<"StiHitContainer::findHitNear()"<<endl;
+    mminpoint->setY( ref->y() -mdeltad );
+    mmaxpoint->setY( ref->y() +mdeltad );
+    
     hitvector& tempvec = mmap[mkey];
 
     //Search first by distance along pad
@@ -147,39 +107,56 @@ void StiHitContainer::findHitsNearRef(StHit* ref)
 	return;
     }
     if (mstart==mstop) {
-       mstart=tempvec.end();
-       mstop = mstart;
-       mcurrent = mcandidatevec.end();
-       return;
+	mstart=tempvec.end();
+	mstop = mstart;
+	mcurrent = mcandidatevec.end();
+	return;
     }
 
     //Now search over z
     for (hitvector::iterator cit=mstart; cit!=mstop; cit++) {
-	if (abs( (*cit)->z- ref->z ) < mdeltaz) 
-	   mcandidatevec.push_back((*cit));
+	if (fabs( (*cit)->z() - ref->z() ) < mdeltaz) 
+	    mcandidatevec.push_back((*cit));
     }
     mcurrent = mcandidatevec.begin();
     
     return;
 }
-    
-clock_t StiHitContainer::sortHits()
+
+void StiHitContainer::sortHits()
 {
-    //cout <<"StiHitContainer::sortHits()"<<endl;
-    clock_t start = clock();
     hitmap::iterator it;
-    
     for (it=mmap.begin(); it!=mmap.end(); it++) {
 	hitvector& tempvec = (*it).second;
 	sort(tempvec.begin(), tempvec.end(), StidHitLessThan());
     }
-    clock_t stop = clock();
-    return (stop-start);
+    return;
 } 
 	
+void StiHitContainer::print(unsigned int sector, unsigned int padrow)
+{
+    mkey.sector = sector;
+    mkey.padrow = padrow;
+    const hitvector& tempvec = mmap[mkey];
+    for (hitvector::const_iterator it=tempvec.begin(); it!=tempvec.end(); it++)    {
+	cout <<*(*it)<<endl;
+    }
+    return;
+}
+
+void StiHitContainer::print(unsigned int sector, unsigned int padrow, ofstream& myout)
+{
+    mkey.sector = sector;
+    mkey.padrow = padrow;
+    const hitvector& tempvec = mmap[mkey];
+    for (hitvector::const_iterator it=tempvec.begin(); it!=tempvec.end(); it++) {
+	myout <<*(*it)<<endl;
+    }
+    return;
+}
+ 
 void StiHitContainer::print() const
 {
-    cout <<"StiHitContainer::print()"<<endl;
     hitmap::const_iterator it;
     for (it=mmap.begin(); it!=mmap.end(); it++) {
 	cout <<(*it).first<<endl;
@@ -187,7 +164,7 @@ void StiHitContainer::print() const
 	const hitvector& tempvec = (*it).second;
 	hitvector::const_iterator vit;
 	for (vit=tempvec.begin(); vit!=tempvec.end(); vit++) {
-	    //cout <<*(*vit)<<endl;
+	    cout <<*(*vit)<<endl;
 	}
     }
     return;
