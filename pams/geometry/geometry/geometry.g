@@ -1,5 +1,12 @@
-* $Id: geometry.g,v 1.105 2005/03/25 17:28:24 potekhin Exp $
+* $Id: geometry.g,v 1.106 2005/04/04 22:13:37 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.106  2005/04/04 22:13:37  potekhin
+* Creating a new Y2004C per the request from Jamie and A.Wetzler.
+* It contains a better version of the SSD (unavailable back in 2004),
+* the correction for the hybrid chip assembly length in the SVT
+* and extra copper in the cones, i.e. the components that make
+* difference in conversion studies
+*
 * Revision 1.105  2005/03/25 17:28:24  potekhin
 * Added the corrected SSD ladder positions (as per Lilian's
 * communication) to the tag y2005b
@@ -1180,6 +1187,61 @@ If LL>1
                   "Silicon Strip Detector Version "
                      sisd=on;
                      SisdConfig = 12;
+
+                }
+
+****************************************************************************************
+  on Y2004C    { same as Y2004B but with the SVT chip correction+cone+better SSD
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                     ConeConfig=2 " new cable weight estimate ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+* note the upgrade with respect to previous years:
+                     BtofConfig=7;
+
+                  "calb" 
+                     CalbConfig = 1  " Please see note in Y2004A"
+                     nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
+
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 1 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=4;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+
+                     SupoConfig = 1; "FTPC Support"
+                     SvttConfig = 4; "SVTT version"
+                     DensConfig = 1; "gas density correction"
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 2;
+
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 22;
 
                 }
 
