@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixD.cc,v 1.4 1999/08/18 12:37:57 ullrich Exp $
+ * $Id: StHelixD.cc,v 1.5 1999/12/22 15:14:42 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,9 +15,9 @@
  ***************************************************************************
  *
  * $Log: StHelixD.cc,v $
- * Revision 1.4  1999/08/18 12:37:57  ullrich
- * Fixed bug in pathLength(double). Swap of first and second
- * wasn't done correctly.
+ * Revision 1.5  1999/12/22 15:14:42  ullrich
+ * Added analytical solution for dca between two helices
+ * in the case for B=0.
  *
  * Revision 1.8  2000/05/22 21:38:32  ullrich
  * Add parenthesis to make Linux compiler happy.
@@ -329,82 +329,114 @@ double StHelixD::pathLength(const StThreeVectorD& r,
 	for (i=0; i<MaxIterations; i++) {
 	    a  = t*s+mPhase;
 	    f  = A +
-pairD StHelixD::pathLengths(const StHelixD& h) const
+		 n.x()*cos(a) +
+		 n.y()*sin(a) +
 		 n.z()*mCurvature*mSinDipAngle*s;
+	    fp = -n.x()*sin(a)*t +
+		  n.y()*cos(a)*t +
 		  n.z()*mCurvature*mSinDipAngle;
-    //  First step: get dca in the xy-plane as start value
+	    s -= f/fp;
+	    if (fabs(sOld-s) < MaxPrecisionNeeded) break;
 	    sOld = s;
-    double dx = h.xcenter() - xcenter();
-    double dy = h.ycenter() - ycenter();
-    double dd = sqrt(dx*dx + dy*dy);
-    double r1 = 1/curvature();
-    double r2 = 1/h.curvature();
-	
-    double cosAlpha = (r1*r1 + dd*dd - r2*r2)/(2*r1*dd);
-    
-    double s;
-    double x, y;
-    if (fabs(cosAlpha) < 1) {           // two solutions
-	double sinAlpha = sin(acos(cosAlpha));
-	x = xcenter() + r1*(cosAlpha*dx - sinAlpha*dy)/dd;
-	y = ycenter() + r1*(sinAlpha*dx + cosAlpha*dy)/dd;
-	s = pathLength(x, y);
-	x = xcenter() + r1*(cosAlpha*dx + sinAlpha*dy)/dd;
-	y = ycenter() + r1*(cosAlpha*dy - sinAlpha*dx)/dd;
-	double a = pathLength(x, y);
-	if (h.distance(at(a)) < h.distance(at(s))) s = a;
-    }
-    else {                              // no intersection (or exactly one)
-	x = xcenter() + r1*dx/dd;
-	y = ycenter() + r1*dy/dd;
-	s = pathLength(x, y);
-	//  Analytic solution
-    
-    //
-    //   Second step: scan in decreasing intervals around seed 's'
-    // 
-    const double MinStepSize = 10*micrometer;
-    const double MinRange    = 10*centimeter;    
-    double dmin              = h.distance(at(s));
-    double range             = 2*dmin > MinRange ? 2*dmin : MinRange;
-    double s1                = s - range/2.;
-    double s2                = s + range/2.;
-    double ds                = range/10;
-    double slast, ss, d;
-    
-    while (ds > MinStepSize) {
-	for (ss=s1; ss<s2+ds; ss+=ds) {
-	    d = h.distance(at(ss));
-	    if (d < dmin) {
-		dmin = d;
-		s = ss;
-	    }
-	    slast = ss;
 	}
+	if (i == MaxIterations) s = NoSolution;
+    }
+    return s;
+}
+
+pairD
+StHelixD::pathLengths(const StHelixD& h) const
+{
+    const double NoSolution = DBL_MAX;
+
+    //
+    //	Cannot handle case where one is a helix
+    //  and the other one is a straight line.
+    //
+    if (mSingularity != h.mSingularity) 
+	return pairD(NoSolution, NoSolution);
+
+    double s1, s2;
+
+    if (mSingularity) {
+	//
+	//  Analytic solution
+	//
 	StThreeVectorD dv = h.mOrigin - mOrigin;
-	//  In the rare cases where the minimum is at the
-	//  the border of the current range we shift the range
-	//  and start all over, i.e we do not decrease 'ds'.
-	//  Else we decrease the search intervall around the
-	//  current minimum and redo the scan in smaller steps.
+	StThreeVectorD a(-mCosDipAngle*mSinPhase,
 			 mCosDipAngle*mCosPhase,
-	if (s == s1) {
-	    d = 0.8*(s2-s1);
-	    s1 -= d;
-	    s2 -= d;
+			 mSinDipAngle);
+	StThreeVectorD b(-h.mCosDipAngle*h.mSinPhase,
+			 h.mCosDipAngle*h.mCosPhase,
+			 h.mSinDipAngle);	
+	double h = a*b;
+	double g = dv*a;
+	double k = dv*b;
+	s2 = (k-h*g)/(h*h-1.);
+	s1 = g+s2*h;
+	return pairD(s1, s2);
+    }
+    else {	
+	//
+	//  First step: get dca in the xy-plane as start value
+	//
+	double dx = h.xcenter() - xcenter();
+	double dy = h.ycenter() - ycenter();
+	double dd = sqrt(dx*dx + dy*dy);
+	double r1 = 1/curvature();
 	double r2 = 1/h.curvature();
-	else if (s == slast) {
-	    d = 0.8*(s2-s1);
-	    s1 += d;
-	    s2 += d;
+	
+	double cosAlpha = (r1*r1 + dd*dd - r2*r2)/(2*r1*dd);
+	
+	double s;
 	double x, y;
-	else {           
-	    s1 = s-ds;
-	    s2 = s+ds;
-	    ds /= 10;
+	if (fabs(cosAlpha) < 1) {           // two solutions
+	    double sinAlpha = sin(acos(cosAlpha));
+	    x = xcenter() + r1*(cosAlpha*dx - sinAlpha*dy)/dd;
+	    y = ycenter() + r1*(sinAlpha*dx + cosAlpha*dy)/dd;
+	    s = pathLength(x, y);
+	    x = xcenter() + r1*(cosAlpha*dx + sinAlpha*dy)/dd;
+	    y = ycenter() + r1*(cosAlpha*dy - sinAlpha*dx)/dd;
+	    double a = pathLength(x, y);
+	    if (h.distance(at(a)) < h.distance(at(s))) s = a;
+	}
+	else {                              // no intersection (or exactly one)
+	    x = xcenter() + r1*dx/dd;
+	    y = ycenter() + r1*dy/dd;
+	    s = pathLength(x, y);
+	}
+	
+	//
+	//   Second step: scan in decreasing intervals around seed 's'
+	// 
+	const double MinStepSize = 10*micrometer;
+	const double MinRange    = 10*centimeter;    
+	double dmin              = h.distance(at(s));
+	double range             = 2*dmin > MinRange ? 2*dmin : MinRange;
+	s1                       = s - range/2.;
+	s2                       = s + range/2.;
+	double ds                = range/10;
+	double slast, ss, d;
+	
+	while (ds > MinStepSize) {
+	    for (ss=s1; ss<s2+ds; ss+=ds) {
+		d = h.distance(at(ss));
+		if (d < dmin) {
+		    dmin = d;
+		    s = ss;
+		}
+		slast = ss;
+	    }
+	    //
+	    //  In the rare cases where the minimum is at the
+	    //  the border of the current range we shift the range
+	    //  and start all over, i.e we do not decrease 'ds'.
+	    //  Else we decrease the search intervall around the
+	    //  current minimum and redo the scan in smaller steps.
+	    //
 	    if (s == s1) {
+		d = 0.8*(s2-s1);
 		s1 -= d;
-    return pairD(s, h.pathLength(at(s)));
 		s2 -= d;
 	    }
 	    else if (s == slast) {
