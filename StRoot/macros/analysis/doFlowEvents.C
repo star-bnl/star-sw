@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.35 2001/12/18 19:32:02 posk Exp $
+// $Id: doFlowEvents.C,v 1.36 2002/01/15 17:36:34 posk Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -135,77 +135,70 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 
   if (strstr(fileList[0], "picoevent.root")) {
     //Read pico-DST
-    //cout << "pico file" << endl;
+    //cout << "##### doFlowEvents: pico file" << endl;
     if (makerName[0]=='\0') {
       StFlowMaker* flowMaker = new StFlowMaker();
     } else {
       StFlowMaker* flowMaker = new StFlowMaker(makerName, flowSelect);
     }
-     flowMaker->PicoEventRead(kTRUE);
-     flowMaker->SetPicoEventFileName(setFiles);
- 
-  } else if (strstr(fileList[0], ".dst.root")) {
-    // Read raw events and make StEvent
+    flowMaker->PicoEventRead(kTRUE);
+    flowMaker->SetPicoEventFileName(setFiles);
+    
+  } else if (strstr(fileList[0], ".dst.root") ||
+	     strstr(fileList[0], ".event.root")) {
+    // Read raw events and make StEvents or read StEvents
     TString mainBranch;
-    if (fileList && fileList[0] && strstr(fileList[0],".root")) {
-      mainBranch = fileList[0];
-      mainBranch.ReplaceAll(".root","");
-      int idot = strrchr((char*)mainBranch,'.') - mainBranch.Data();
-      mainBranch.Replace(0,idot+1,"");
-      mainBranch+="Branch";
-      printf("*** mainBranch=%s ***\n",mainBranch.Data());
-    }
-    StIOMaker *IOMk = new StIOMaker("IO", "r", setFiles, "bfcTree");
+    mainBranch = fileList[0];
+    mainBranch.ReplaceAll(".root","");
+    int idot = strrchr((char*)mainBranch,'.') - mainBranch.Data();
+    mainBranch.Replace(0,idot+1,"");
+    mainBranch+="Branch";
+    printf("*** mainBranch=%s ***\n",mainBranch.Data());
+    
+    StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
     IOMk->SetIOMode("r");
-    IOMk->SetBranch("*", 0, "0");                 //deactivate all branches
-    if (!mainBranch.IsNull()) IOMk->SetBranch(mainBranch,0,"r");  
-    IOMk->SetBranch("dstBranch", 0, "r");
-    //IOMk->SetBranch("runcoBranch", 0, "r");
+    IOMk->SetBranch("*",0,"0");	//deactivate all branches
+    if(!mainBranch.IsNull())	IOMk->SetBranch(mainBranch,0,"r");  
+    //IOMk->SetBranch("dstBranch",0,"r");
+    //IOMk->SetBranch("runcoBranch",0,"r");
     //IOMk->SetDebug();
+    
+    // Maker to read events from file or database into StEvent
     if (!mainBranch.Contains("eventBranch")) {
       gSystem->Load("StEventMaker");
       StEventMaker *readerMaker =  new StEventMaker("events","title");
     }
+    
     if (makerName[0]=='\0') {
       StFlowMaker* flowMaker = new StFlowMaker();
     } else {
       StFlowMaker* flowMaker = new StFlowMaker(makerName, flowSelect);
     }
-  } else if (strstr(fileList[0], ".event.root")) {
-    // Read StEvent files
-    //cout << "StEvent file" << endl;
-    StIOMaker *IOMk = new StIOMaker("IO", "r", setFiles, "bfcTree");
-    IOMk->SetIOMode("r");
-    IOMk->SetBranch("*", 0, "0");                 //deactivate all branches
-    IOMk->SetBranch("eventBranch", 0, "r");
-    //IOMk->SetBranch("runcoBranch", 0, "r");
-    //IOMk->SetDebug();
-    if (makerName[0]=='\0') {
-      StFlowMaker* flowMaker = new StFlowMaker();
-    } else {
-      StFlowMaker* flowMaker = new StFlowMaker(makerName, flowSelect);
-    }
-
+    
   } else {
-    cout << " doFlowEvents -  unknown file name = " << fileList[0] << endl;
+    cout << "##### doFlowEvents:  unknown file name = " << fileList[0] << endl;
   }
   
   //////////////
   // Flow Makers
   //   Use of the TagMaker is optional.
-  //   The AnalysisMaker and CumulantMaker may be used with a selection object.
-  bool tagMaker = kFALSE;
-  //bool tagMaker = kTRUE;
+  //   The AnalysisMaker, CumulantMaker, and ScalarProdMaker may be used with
+  //   a selection object.
+  //bool tagMaker = kFALSE;
+  bool tagMaker = kTRUE;
   bool anaMaker = kTRUE;
   //bool anaMaker = kFALSE;
-  bool cumMaker = kTRUE;
-  //bool cumMaker = kFALSE;
+  //bool cumMaker = kTRUE;
+  bool cumMaker = kFALSE;
+  //bool spMaker = kTRUE;
+  bool spMaker = kFALSE;
 
   if (tagMaker) StFlowTagMaker* flowTagMaker = new StFlowTagMaker();
 
   if (makerName[0]=='\0') { // blank if there is no selection object
-    if (anaMaker) StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker();
-    if (cumMaker) StFlowCumulantMaker* flowCumulantMaker = new StFlowCumulantMaker();
+    if (anaMaker) StFlowAnalysisMaker*  flowAnalysisMaker = new StFlowAnalysisMaker();
+    if (cumMaker) StFlowCumulantMaker*  flowCumulantMaker = new StFlowCumulantMaker();
+    if (spMaker) StFlowScalarProdMaker* flowScalarProdMaker = new StFlowScalarProdMaker();
   } else {
     if (anaMaker) {
       sprintf(makerName, "FlowAnalysis");
@@ -217,6 +210,11 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
       StFlowCumulantMaker* flowCumulantMaker = new 
 	StFlowCumulantMaker(makerName, flowSelect);
     }
+    if (spMaker) {
+      sprintf(makerName, "FlowScalarProd");
+      StFlowScalarProdMaker* flowScalarProdMaker = new 
+	StFlowScalarProdMaker(makerName, flowSelect);
+    }
   }
 
   // Make docs
@@ -224,6 +222,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 //   flowTagMaker->MakeDoc("./StRoot/StFlowTagMaker", "./html", kFALSE);
 //   flowAnalysisMaker->MakeDoc("./StRoot/StFlowAnalysisMaker", "./html", kFALSE);
 //   flowCumulantMaker->MakeDoc("./StRoot/StFlowCumulantMaker", "./html", kFALSE);
+//   flowScalarProdMaker->MakeDoc("./StRoot/StFlowScalarProdMaker", "./html", kFALSE);
   
   // Set write flages and file names
 //  flowMaker->PicoEventWrite(kTRUE);
@@ -234,6 +233,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 //  flowTagMaker->SetDebug();
 //  flowAnalysisMaker->SetDebug();
 //  flowCumulantMaker->SetDebug();
+//  flowScalarProdMaker->SetDebug();
 
   //
   // Initialize chain
@@ -329,6 +329,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
    if (istat == 3) 
      {cout << "Error event processed. Status = " << istat << endl;}
    
+   //   gObjectTable->Print();
    i++;
    goto EventLoop;
  }
@@ -351,18 +352,36 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
     }
   }
 
-  // Move the flow.cumulant.root file into the flow.hist.root file.
-  if (anaMaker && cumMaker) {
+  // Move the flow.cumulant.root and flow.scalar.root files into the 
+  // flow.hist.root file.
+  if (cumMaker) {
     TFile cumFile("flow.cumulant.root", "READ");
-    if (!cumFile->IsOpen()) cout << "### Can't find file flow.cumulant.root" << endl; 
-    cumFile.ReadAll();
+    if (cumFile->IsOpen()) { 
+      cumFile.ReadAll();
+    } else {
+      cout << "### Can't find file flow.cumulant.root" << endl;
+    }
+  }
+  if (spMaker) {
+    TFile spFile("flow.scalar.root", "READ");
+    if (spFile->IsOpen()) { 
+      spFile.ReadAll();
+    } else {
+      cout << "### Can't find file flow.scalar.root" << endl;
+    }
+  }
+  if (anaMaker) {
     TFile anaFile("flow.hist.root", "UPDATE");
-    if (!anaFile->IsOpen()) cout << "### Can't find file flow.hist.root" << endl;
-    cumFile.GetList()->Write();
+  } else {
+    TFile anaFile("flow.hist.root", "RECREATE");
+  }
+  if (anaFile->IsOpen()) {
+    if (cumMaker) cumFile.GetList()->Write();
+    if (spMaker)   spFile.GetList()->Write();
     //anaFile->ls();
     anaFile.Close();    
-  } else if (cumMaker) {
-    gSystem->Rename("flow.cumulant.root", "flow.hist.root");      
+  } else {
+    cout << "### Can't find file flow.hist.root" << endl;
   }
 
 END:
@@ -411,16 +430,24 @@ void doFlowEvents(const Int_t nevents)
 //      Char_t* fileExt="*.flowpicoevent.root";
 //    }
 
-//   Char_t* filePath="/auto/stardata/starspec/kaneta/flow_pDST_production/reco/MinBiasVerTex/ReverseFullField/P01gk/2001/";
-//   Char_t* filePath="/auto/stardata/starspec/kaneta/flow_pDST_production/reco/MinBiasVerTex/ReverseHalfField/P01gk/2001/";
+//   Char_t* filePath="/auto/stardata/starspec/kaneta/flow_pDST_production/reco/MinBiasVertex/ReversedFullField/P01gk/2001/"; 
+//   if (nevents < 250) {
+//     Char_t* fileExt="2230003/st_physics_2230003_raw_0001.event.root.flowpicoevent.root";
+//    } else {
+//      Char_t* fileExt="*/*.flowpicoevent.root";
+//    }
 
   // 130 GeV
-//   Char_t* filePath="/auto/pdsfdv14/starprod/DST/kirll_flow_pDST_minbias/";
+//   Char_t* filePath="/auto/pdsfdv14/starprod/kirll_flow_pDST_minbias/";
 //   if (nevents < 250) {
 //     Char_t* fileExt="st_physics_1239006_raw_0006.event.root.flowpicoevent.root";
 //   } else {
 //      Char_t* fileExt="*.flowpicoevent.root";
-//    }
+//   }
+
+  // miniDST
+//   Char_t* filePath="/auto/pdsfdv14/starprod/DST/P01hi/2000/09";
+//   Char_t* fileExt="*.event.root"; // needs stardev as of 1/02
 
   // 20 GeV
 //  Char_t* filePath="/auto/stardata/starspec/kaneta/flow_pDST_production/reco/dev/2001/";
@@ -431,6 +458,9 @@ void doFlowEvents(const Int_t nevents)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.36  2002/01/15 17:36:34  posk
+// Can instantiate StFlowScalarProdMaker.
+//
 // Revision 1.35  2001/12/18 19:32:02  posk
 // "proton" and "antiproton" replaced with "pr+" and "pr-".
 //
