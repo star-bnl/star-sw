@@ -87,7 +87,7 @@ Int_t StSvtVertexFinderMaker::Finish(){
 
 
 //_____________________________________________________________________________
-Int_t StSvtVertexFinderMaker::MakeHistograms( St_dst_vertex*  vtx){
+void StSvtVertexFinderMaker::MakeHistograms( St_dst_vertex*  vtx){
   
   if (vtx) {
     float z_svt=999.;

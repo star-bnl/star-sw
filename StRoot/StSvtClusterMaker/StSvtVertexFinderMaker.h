@@ -24,7 +24,7 @@ class StSvtVertexFinderMaker : public StMaker
   virtual Int_t Init();
   virtual Int_t Make();
   virtual Int_t Finish();
-  Int_t MakeHistograms( St_dst_vertex* vtx);
+  void MakeHistograms( St_dst_vertex* vtx);
 
  protected:
 
