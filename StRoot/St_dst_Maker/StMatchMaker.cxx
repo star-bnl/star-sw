@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.17 2000/03/01 14:48:09 caines Exp $
+// $Id: StMatchMaker.cxx,v 1.18 2000/03/09 23:31:17 lbarnby Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.18  2000/03/09 23:31:17  lbarnby
+// Protection against no TPC hits when creating tpc_groups
+//
 // Revision 1.17  2000/03/01 14:48:09  caines
 // Removed references to scs_cluster
 //
@@ -525,11 +528,17 @@ Int_t StMatchMaker::Make(){
   }
   
 
-
   // Create groups table for tpc
-
-
-   St_sgr_groups *tpc_groups  = new St_sgr_groups("tpc_groups",tphit->GetNRows());    AddData(tpc_groups); 
+  St_sgr_groups *tpc_groups;
+  if (tphit->GetNRows() != 0){
+    tpc_groups  = new St_sgr_groups("tpc_groups",tphit->GetNRows());   
+    AddData(tpc_groups); 
+  }
+  else {
+    tpc_groups = new St_sgr_groups("tpc_groups",1);
+    AddGarb(tpc_groups);
+  }
+  
   // egr
 
 
