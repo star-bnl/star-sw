@@ -1,5 +1,8 @@
-// $Id: St_l3t_Maker.h,v 1.8 2000/07/21 20:12:02 yepes Exp $
+// $Id: St_l3t_Maker.h,v 1.9 2000/07/21 22:26:12 flierl Exp $
 // $Log: St_l3t_Maker.h,v $
+// Revision 1.9  2000/07/21 22:26:12  flierl
+// add fillstevent routine
+//
 // Revision 1.8  2000/07/21 20:12:02  yepes
 // *** empty log message ***
 //
@@ -34,6 +37,12 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+#include "tables/St_dst_track_Table.h"
+#include "tables/St_dst_dedx_Table.h"
+#include "tables/St_dst_point_Table.h"
+#include "tables/St_tcl_tphit_Table.h"
+
+
 class St_sl3TpcPara;
 class TH1F;
 
@@ -68,8 +77,9 @@ class St_l3t_Maker : public StMaker {
    virtual Int_t  Make();
    virtual Int_t  MakeOnLine();
    virtual Int_t  MakeOffLine();
+   virtual Int_t  fillStEvent(St_dst_track* trackS, St_dst_dedx* dedxS, St_tcl_tphit* pointS);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_l3t_Maker.h,v 1.8 2000/07/21 20:12:02 yepes Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_l3t_Maker.h,v 1.9 2000/07/21 22:26:12 flierl Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_l3t_Maker, 1)   //StAF chain virtual base class for Makers
 };

@@ -1,4 +1,4 @@
-// $Id: St_l3t_Maker.cxx,v 1.30 2000/07/21 20:12:02 yepes Exp $
+// $Id: St_l3t_Maker.cxx,v 1.31 2000/07/21 22:26:12 flierl Exp $
 //
 // Revision 1.22  2000/03/28 20:22:15  fine
 // Adjusted to ROOT 2.24
@@ -91,6 +91,8 @@
 #include "TH1.h"
 #include "tables/St_hitarray_Table.h"
 #include "St_l3_Coordinate_Transformer.h"
+#include "StEventTypes.h"
+
 ClassImp(St_l3t_Maker)
   
   //_____________________________________________________________________________
@@ -437,7 +439,10 @@ Int_t St_l3t_Maker::MakeOnLine(){
    dedxS->SetNRows(nTracksWithDedx);
    hitS->SetNRows(nHits);
    MakeHistograms();
-  
+
+   // Fill StEvent
+   fillStEvent(trackS,dedxS,hitS) ;
+
    return kStOk ;
 }
 //_____________________________________________________________________________
@@ -567,4 +572,152 @@ void St_l3t_Maker::MakeHistograms() {
   }
 }
 //_____________________________________________________________________________
+Int_t St_l3t_Maker::fillStEvent(St_dst_track* trackS, St_dst_dedx* dedxS, St_tcl_tphit* pointS) 
+{
+    // Get StEvent if not return
+    StEvent* myStEvent = (StEvent *) GetInputDS("StEvent") ;
+    if (!myStEvent)
+	{ 
+	    cout << "No StEvent\n" ;
+	    return 0 ;
+	}
+    
+    // Create Stl3Trigger and connect it
+    StL3Trigger* myStL3Trigger = new StL3Trigger() ;
+    myStEvent->setL3Trigger(myStL3Trigger) ;
 
+    /////
+    //      TRACKS
+    //////
+    // Get Track Nods
+    StSPtrVecTrackNode& myTrackNodeVector = myStL3Trigger->trackNodes() ;
+    StSPtrVecTrackDetectorInfo&  myTrackDetectorInfoVector = myStL3Trigger->trackDetectorInfo() ;
+    StGlobalTrack* Store_Track_ids[(trackS->GetNRows())+1] ;
+    
+
+    // Loop over dst tracks and fill them into StEvent
+    dst_track_st* dstTracks = trackS->GetTable();
+    for(Int_t trackindex = 0 ; trackindex<trackS->GetNRows() ;  trackindex++)
+      {
+	////
+	// spread track data into StTrack Objects
+	////
+	// detector info
+	StTrackDetectorInfo* info = new StTrackDetectorInfo(dstTracks[trackindex]) ;
+	myTrackDetectorInfoVector.push_back(info) ;
+	// track geometry
+	Double_t convert = 2*TMath::Pi()/360 ;
+	StThreeVectorF origin( dstTracks[trackindex].r0 * cos(convert*dstTracks[trackindex].phi0),
+			       dstTracks[trackindex].r0 * sin(convert*dstTracks[trackindex].phi0),
+			       dstTracks[trackindex].z0 ) ;
+	StThreeVectorF momentum( 1/dstTracks[trackindex].invpt * cos(convert*dstTracks[trackindex].psi),
+				 1/dstTracks[trackindex].invpt * sin(convert*dstTracks[trackindex].psi),
+				 1/dstTracks[trackindex].invpt * dstTracks[trackindex].tanl ) ;
+	StHelixModel* helixModel = new StHelixModel( 
+						    dstTracks[trackindex].icharge,
+						    dstTracks[trackindex].psi,
+						    0.0,
+						    dstTracks[trackindex].tanl, 
+						    origin, 
+						    momentum ) ;		
+	// global track
+	StGlobalTrack* globalTrack = new StGlobalTrack(dstTracks[trackindex]) ;
+	globalTrack->setDetectorInfo(info) ;
+	globalTrack->setGeometry(helixModel);
+
+	// fill vectors
+	StTrackNode* trackNode = new StTrackNode() ;
+	trackNode->addTrack(globalTrack) ;
+	myTrackNodeVector.push_back(trackNode) ;
+	  
+	if (dstTracks[trackindex].id > 0 && 
+		dstTracks[trackindex].id <= trackS->GetNRows())
+	      {
+		Store_Track_ids[dstTracks[trackindex].id] = globalTrack ;
+	      }
+	    else 
+	      {
+		cout << "Bad track id.\n"; 
+	      }
+      }
+    
+    //test
+    //StTrackNode* ttracknode = (StTrackNode*) myTrackNodeVector[1] ;
+    //StGlobalTrack* glo = (StGlobalTrack*) ttracknode->track(0) ;
+    //glo->key();
+
+    //////
+    //       POINTS
+    //////
+    StTpcHitCollection* myStTpcHitCollection = new StTpcHitCollection();
+    myStL3Trigger->setTpcHitCollection(myStTpcHitCollection);
+
+    // get hit table
+    tcl_tphit_st* tcl_points = pointS->GetTable() ;
+
+
+    // Loop over dst_point and fill them into StEvent and produce point-track connection
+    // via StTrackDetectorInfo
+    for(Int_t pointindex = 0 ; pointindex < pointS->GetNRows() ; pointindex++)
+       {
+	 ////
+	 // Convert to StTpcHit
+	 ////
+	 // position
+	 StThreeVectorF pos(tcl_points[pointindex].x,
+			    tcl_points[pointindex].y,
+			    tcl_points[pointindex].z) ;
+	 // position error
+	 StThreeVectorF poserror(tcl_points[pointindex].dx,
+				 tcl_points[pointindex].dy,
+				 tcl_points[pointindex].dz) ;
+	 // pack sec and row 
+	 ULong_t hw = 0 ;
+	 ULong_t row = ULong_t (tcl_points[pointindex].row%100) ;
+	 if ( row >=1 && row <=45 )  { row <<= 9 ; } else { row=0 ; } 
+   	 ULong_t sec = ULong_t ((tcl_points[pointindex].row-tcl_points[pointindex].row%100)/100) ;
+	 if ( sec >=1 && sec <=24 )  { sec <<= 4 ; } else { sec=0 ; } 
+	 hw = hw | row ;
+	 hw = hw | sec ;
+	 // charge
+	 Float_t charge = tcl_points[pointindex].q ;
+	 // track reference counter set always to 0
+	 UChar_t c = 0 ;
+
+	 // create hit
+	 StTpcHit* tpcHit = new StTpcHit(pos,poserror,hw,charge,c) ;
+	 // add to hit collection
+	 if (tpcHit) { myStTpcHitCollection->addHit(tpcHit) ;} else { delete tpcHit; return 0;}
+
+	 // Add to detectorInfo (= connect to track)
+	 Int_t id = tcl_points[pointindex].track ;
+	 if (id < trackS->GetNRows() && Store_Track_ids[id] && id>0) 
+	   {
+	     StTrackDetectorInfo* info = Store_Track_ids[id]->detectorInfo();
+	     info->addHit(tpcHit);
+	   }
+       }
+    // 	else
+    //	  {
+// 	    // clean up and bad return
+// 	    delete tpcHit ;
+// 	    return 0;        
+	 // 	  }
+    
+
+//     ///////
+//     //    DE/DX
+//     ///////
+//     dst_dedx_st* my_dst_dedx = dedxS->GetTable() ;
+//     for(Int_t dedxindex = 0 ; dedxindex<dedxS->GetNRows() ;  dedxindex++)
+//       {
+// 	if(Store_Track_ids[my_dst_dedx[dedxindex].id_track])
+// 	  {
+// 	    StDedxPidTraits* myStDedxPidTraits =  new StDedxPidTraits(my_dst_dedx[dedxindex]) ;
+// 	    Store_Track_ids[my_dst_dedx[dedxindex].id_track]->addPidTraits(myStDedxPidTraits) ;
+// 	  }
+//       }
+
+    // well done go home
+    return 1;
+}
