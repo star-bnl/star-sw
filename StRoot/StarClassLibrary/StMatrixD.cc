@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMatrixD.cc,v 1.5 2001/12/05 23:34:43 ullrich Exp $
+ * $Id: StMatrixD.cc,v 1.6 2001/12/07 00:48:06 fine Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StMatrixD.cc,v $
+ * Revision 1.6  2001/12/07 00:48:06  fine
+ * assert include placed
+ *
  * Revision 1.5  2001/12/05 23:34:43  ullrich
  * Added Victor modifications to cope with error recovery.
  *
@@ -35,6 +38,7 @@
 #include "StMatrixF.hh"
 #include "StMatrixD.hh"
 #include <math.h>
+#include <assert.h>
 
 #ifdef __ROOT__
 #include "TBuffer.h"
