@@ -35,6 +35,7 @@ C<----------------------------------------------------------------------
 
 #include "egr_impactcl.inc"
 #include "StTrackMethod.inc"
+#include "StVertexId.inc"
 #include "phys_constants.inc"
 #include "math_constants.inc"
 
@@ -70,7 +71,8 @@ C  preset in case of failure
 
 CC:  Load Primary vertex position coordinates:
          do i = 1,vertex_h.nok
-            if(vertex(i).vtx_id .eq. 1) then
+            if(vertex(i).vtx_id .eq. kEventVtxId
+     +           .and. vertex(i).iflag .eq. 1) then
                mainv(1) = vertex(i).x
                mainv(2) = vertex(i).y
                mainv(3) = vertex(i).z
