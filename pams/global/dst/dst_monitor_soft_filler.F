@@ -67,7 +67,7 @@ CC:  Local Variable Type Declarations:
 
       integer*4 i, secnum, padrow, clusterrow,zindex,ntpc_max
       integer*4 tpc_track,n_svt_trk_pad,n_svt_trk_drf
-      parameter (ntpc_max = 10000)
+      parameter (ntpc_max = 20000)
       integer*4 track_index(ntpc_max), tpc_trk_row
       integer*4 iftpc, ihit, nhits(2)
       integer*4 max_ftpc_hits
