@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 1.10 1999/03/25 14:05:41 ullrich Exp $
+% $Id: StEvent.tex,v 1.11 1999/03/25 22:10:54 ullrich Exp $
 %
 % Author: Thomas Ullrich, March 1999
 %
@@ -21,8 +21,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 1.10  1999/03/25 14:05:41  ullrich
-% Improved some explanation. More index entries.
+% Revision 1.11  1999/03/25 22:10:54  ullrich
+% Added brief introduction to UML (appendix A).
 %
 % Revision 1.16  1999/03/31 19:03:50  ullrich
 % Corrected typos in UML appendix
@@ -140,8 +140,8 @@
 % Added description of new method of StVertex.
 %
 % Revision 2.22  2000/03/02 12:40:40  ullrich
-  {\LARGE $ $Revision: 1.10 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/25 14:05:41 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.11 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/25 22:10:54 $ $}  % replaced by cvs with current revision
 % Revision 2.21  2000/02/28 19:37:26  ullrich
 % Added the hypperref package to add bookmarks and hyperlinks
 % tp pdf documents.
@@ -149,14 +149,14 @@
 % Revision 2.20  2000/02/24 13:25:12  ullrich
 % Added RICH and EMC to the reference section. Created
 % (empty) section for EMC and RICH in User Guide.
-  {\LARGE $ $Revision: 1.10 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/25 14:05:41 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.11 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/25 22:10:54 $ $}  % replaced by cvs with current revision
 %
 % Revision 2.18  2000/02/11 16:23:45  ullrich
 % Add info on order in which primary vertices are stored
   {\LARGE User Guide and Reference Manual}\\[2cm]
-  {\LARGE $ $Revision: 1.10 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/25 14:05:41 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.11 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/25 22:10:54 $ $}  % replaced by cvs with current revision
 % Added Helens description of iflag (see StTrack::flag()).
 %
 % Revision 2.16  2000/01/27 18:38:30  ullrich
@@ -198,7 +198,8 @@ sec.~\ref{sec:howto}.
 
 Although \StEvent\ benefits from the flexibility of the OO design it
 is strongly constraint by the existing DST model where the data is
-basic class diagrams using the Unified Modelling Language (UML).
+stored in flat tables and references are maintained by keys into
+referring tables.  When \StEvent\ is set up the content of the tables
 is mapped to the OO model and keys are replaced by associations
 between classes through pointer and references.
 
@@ -298,7 +299,7 @@ are not guaranteed to compile. Their only purpose is to illustrate a
 specific feature and not to provide a fully functional programming
 unit.
 
-  {\LARGE $ $Date: 1999/03/25 14:05:41 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/25 22:10:54 $ $}  % replaced by cvs with current revision
      \advance\leftmargin by \labelsep%
 \section{Further documentation}
 \label{sec:furtherdoc}
@@ -3789,6 +3790,275 @@ void printZdcAdcTdc(StEvent *event)
     
     \verb+StZdcSummary(float ae, float aw, float s);+\\
     Constructs a \name{StZdcSummary} with total ADC sum \name{s},
+    sum of all east ADCs \name{ae} and sum of all west ADCs \name{aw}. 
+    
+\item[Public Member\\ Functions]
+    \verb+float adcSum() const;+\\
+    Sum of all ADCs.
+    
+    \verb+float adcSum(StBeamDirection dir) const;+\\
+    Sum of all east/west ZDC ADCs. \name{StBeamDirection} is
+    defined in \name{StEnumerations.hh} and takes two values
+    only: \name{east} and \name{west}.
+
+    \verb+void setAdcSum(StBeamDirection, float);+\\ 
+    Sets sum of east/west ZDC ADCs.
+    
+    \verb+void setAdcSum(float); +\\    
+    Sets sum of all ADCs.
+
+\end{Entry}
+unifications of the concepts and notations used in earlier models such
+    \verb+Int_t operator!=(const StVertex&) const;+\\
+\end{Entry}
+\clearpage
+certainly not of great use for the developer and user of HENP software
+it provides one important component which gains more and more
+importance: its notation, i.e., a set of rules on how to present
+\appendix
+\label{sec:StVpdTriggerDetector}
+\begin{Entry}
+\item[Summary]
+\item[Synopsis]
+class diagrams.
+\index{class diagram}
+\index{notation}
+UNL stands for Unified Modelling Language. It is the current standard
+\item[Description]
+\item[Related Classes]
+\item[Public\\ Constructors]
+    \verb+StVpdTriggerDetector();+\\
+    \verb+StVpdTriggerDetector(const dst_TrgDet_st&);+\\
+\item[Public Member\\ Functions]
+    \verb+UInt_t numberOfVpdCounters() const;+\\
+    \verb+Float_t adc(UInt_t) const;+\\
+    \verb+Float_t time(UInt_t) const;+\\
+    \verb+Float_t minimumTime(StBeamDirection) const;+\\
+    \verb+Float_t vertexZ() const;+\\
+    \verb+void setAdc(UInt_t, Float_t);+\\
+    \verb+void setTime(UInt_t, Float_t);+\\
+    \verb+void setMinimumTime(StBeamDirection, Float_t);+\\
+    \verb+void setVertexZ(Float_t);+\\
+\end{Entry}
+\clearpage
+
+
+\subsection{StXiVertex}
+\index{StXiVertex|textbf}
+\label{sec:StXiVertex}
+\begin{Entry}
+\item[Summary]
+\item[Synopsis]
+    \verb+#include "StXiVertex.h"+\\
+    \verb+class StXiVertex;+\\
+\item[Description]
+\item[Related Classes]
+\item[Public\\ Constructors]
+    \verb+StXiVertex();+\\
+    \verb+StXiVertex(const dst_vertex_st&, const dst_xi_vertex_st&);+\\
+\item[Public Member\\ Functions]
+    \verb+StVertexId type() const;+\\
+    \verb+UInt_t numberOfDaughters() const;+\\
+    \verb+StTrack* daughter(UInt_t = 0);+\\
+    \verb+const StTrack* daughter(UInt_t = 0) const;+\\
+    \verb+StPtrVecTrack daughters(StTrackFilter&);+\\
+    \verb+Float_t dcaBachelorToPrimaryVertex() const;+\\
+    \verb+Float_t dcaV0ToPrimaryVertex() const;+\\
+    \verb+Float_t dcaDaughters() const;+\\
+    \verb+Float_t dcaParentToPrimaryVertex() const;+\\
+    \verb+const StThreeVectorF& momentumOfBachelor() const;+\\
+    \verb+StThreeVectorF momentumOfV0() const;+\\
+\item[Summary]
+    \verb+StV0Vertex* v0Vertex() const;+\\
+    \verb+StTrack* bachelor();+\\
+    \verb+Double_t chargeOfBachelor();+\\
+    \verb+void setDcaBachelorToPrimaryVertex(Float_t);+\\
+    \verb+void setMomentumOfBachelor(const StThreeVectorF&);+\\
+    \verb+void setDcaParentToPrimaryVertex(Float_t);+\\
+    \verb+void setV0Vertex(StV0Vertex*);+\\
+    \verb+void addDaughter(StTrack*);+\\
+    \verb+void removeDaughter(StTrack*);+\\
+    \verb+UInt_t numberOfZdcCounters() const;+\\
+At the beginning of each attribute and operations the visibility
+of the class is indicated through a simple tag. UML provides three
+tags:
+        \end{description}
+        \item adc[10] = zdcWestSumAtt; 
+        \item adc[13] = zdcEastSumAtt;  
+\item[--] private    
+        \item adc[15] = zdcEast1Att;     
+These abbreviations match exactly the three levels of visibility provided
+    double z();
+in C++. The class shown in Fig.~\ref{fig:umlClass} is then translated into
+C++ code as follows:
+    double mX, mY, mZ;
+    part is that we don't have enough ADC channels. However, the sum
+    is however still the sum of all 3 channels per module. The most
+    relevant are the sum channels.
+
+    \verb+Float_t tdc(UInt_t) const;+\\
+
+    \verb+Float_t adcSum(StBeamDirection) const;+\\
+    Sum for ZDC east and west.
+    
+    \verb+Float_t adcSum() const;+\\
+    Total ZDC sum.
+    
+    \verb+void setAdc(UInt_t, Float_t);+\\
+    \verb+void setTdc(UInt_t, Float_t);+\\
+    \verb+void setAdcSum(StBeamDirection, Float_t);+\\
+    \verb+void setAdcSum(Float_t);+\\
+\end{Entry}
+\clearpage
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Appendix
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+\section{Brief Introduction to UML}
+\label{sec:introUML}
+\index{UML}
+class because it is the Hit that is composed of (or has) a Position. The
+arrowhead on the other end of the relationship denotes that the
+UML stands for Unified Modelling Language. It is the current standard
+modelling language used to design object oriented software. It is a
+unification of the concepts and notations used in earlier models such
+as Booch and OMT.
+
+Although the complexity and theoretical concept behind UML is
+certainly not of great use for most of the developer and user of HENP
+software it provides one important component which is gaining more and
+more importance: its notation, i.e., a set of rules on how to present
+complex software in form of simple graphic symbols.  There is a
+notation for static elements of a design such as classes, attributes,
+and relationships and a notation for modelling the dynamic elements
+such as objects, messages, and, state machines. In this appendix we
+present only the basic aspects of the static modelling notation -- the
+class diagrams.  \index{class diagram} \index{notation}
+
+\subsection{Class diagrams}
+
+The purpose of a class diagram is to depict the classes within a
+model. In an object oriented application, classes have attributes
+(member variables), operations (member functions) and relationships
+with other classes.The fundamental element of the class diagram is an
+icon that represents a class.
+\begin{figure}[htb]
+    \begin{center}
+        \includegraphics{umlClassIcon.eps}
+        \caption{The class icon in UML.}
+        \label{fig:umlClassIcon}
+    \end{center}
+\end{figure}
+This icon is shown in Fig.~\ref{fig:umlClassIcon}.  A class icon is
+simply a rectangle divided into three compartments. The topmost
+show every attribute and operation of a class on any diagram.
+\begin{figure}[htb]
+    \begin{center}
+        \includegraphics{umlClass.eps}
+        \caption{Hit2D class. Attributes and operations are shown.}
+    \end{center}
+\end{figure}
+Fig.~\ref{fig:umlClass} shows a typical UML description of a class
+that represents a Hit (here fictitious Hit2D).  Notice that each
+operations shown in italics indicate that they are pure virtual.
+The corresponding C++ code for the Hit3D class from
+be omitted. Notice also that the return values follow the member
+functions in a similar fashion. Again, these can be omitted. Finally,
+notice that the member function arguments also have a name and type.
+Again one can omit the name or the arguments altogether.
+
+At the beginning of each attribute and operations the visibility of
+the class is indicated through a simple tag. UML provides three tags:
+\begin{description}
+\item[+] public
+\item[\#] protected
+\item[--] private
+\end{description}
+These abbreviations match exactly the three levels of visibility
+provided in C++. The class shown in Fig.~\ref{fig:umlClass} is then
+translated into C++ code as follows:
+
+{\footnotesize
+\begin{verbatim}
+class Hit2D {
+public:
+Fig.~\ref{fig:umlAggregation} shows an \emph{aggregation} relationship.
+    double distanceTo(Hit2D& h);
+private:
+    double mX, mY;
+    float  mCharge;
+};
+\end{verbatim}
+}%\footnotesize
+
+\subsection{Composition Relationships}
+
+Each instance of type Hit usually contains an instance of type
+Position. One also says the Hit \emph{has} a Position. This is a
+relationship known as composition. It can be depicted in UML using a
+class relationship.  Fig.~\ref{fig:umlComposition} shows the
+\emph{composition} relationship.
+\begin{figure}[htb]
+    \begin{center}
+        \includegraphics{umlComposition.eps}
+        \caption{Class Hit has a Position.}
+        \label{fig:umlComposition}
+    \end{center}
+\end{figure}
+The black diamond represents composition. It is placed on the Hit
+class because it is the Hit that is composed of (or has) a Position.
+The arrowhead on the other end of the relationship denotes that the
+relationship is navigable in only one direction. That is, Position
+does not know about Hit. In UML relationships are presumed to be
+bidirectional unless the arrowhead is present to restrict them.
+Composition relationships are a strong form of containment or
+aggregation. Aggregation is a whole/part relationship. In this case,
+Hit is the whole, and Position is part of Hit. However, composition is
+more than just aggregation. Composition also indicates that the
+lifetime of Position is dependent upon Hit. This means that if Hit is
+destroyed, Position will be destroyed with it.  In C++ we would
+represent this as:
+
+{\footnotesize
+\begin{verbatim}
+class Hit {
+     Position mPos;
+};
+\end{verbatim}
+}%\footnotesize
+
+In this case we have represented the composition relationship as a
+member variable. We could also have used a pointer so long as the
+destructor of Hit deleted the pointer.  A more realistic example can
+be found in \StEvent. There the \name{StHit} class has a member of
+type \name{StThreeVector} which represents a position.
+
+\subsection{Inheritance}
+
+The inheritance relationship in UML is depicted by a triangular
+arrowhead which points to the base class. One or more lines proceed
+from the base of the arrowhead connecting it to the derived classes.
+\begin{figure}[htb]
+    \begin{center}
+        \includegraphics[width=0.7\textwidth]{cartoon6.eps}
+        \caption{A subclass may inherit the structure and behaviour
+            of its superclass.}
+    \end{center}
+\end{figure}
+\begin{figure}[htb]
+    \begin{center}
+        \includegraphics{umlInheritance.eps}
+        \caption{Inheritance.}
+        \label{fig:umlInheritance}
+    \end{center}
+\end{figure}
+
+Fig.~\ref{fig:umlInheritance} shows the form of the \emph{inheritance}
+relationship.  In this diagram we see that Hit3D is derived from
 Hit2D.  If the name of a class would be shown in italics, it would
 TrackFitter class and the CalibrartionDB class. This is the \emph{dependency}
 relationship. This is often called a \emph{using} relationship.  This
