@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.h,v 2.0 1999/11/04 19:03:00 ullrich Exp $
+ * $Id: StEventMaker.h,v 2.1 1999/11/05 18:35:57 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.h,v $
- * Revision 2.0  1999/11/04 19:03:00  ullrich
- * Revised to build new StEvent version
+ * Revision 2.1  1999/11/05 18:35:57  ullrich
+ * Added methods and flags for debugging and monitoring.
  *
  * Revision 2.3  2000/05/24 15:48:20  ullrich
  * Instance of StEvent now also created if no DST dataset
@@ -26,6 +26,7 @@
  *
  * Revision 2.0  1999/11/04 19:03:00  ullrich
  * Revised to build new StEvent version
+ *
 #ifndef STAR_StEventMaker
 #define STAR_StEventMaker
 
@@ -47,14 +48,22 @@ public:
     virtual void            setEventManager(StEventManager* mgr); 
     virtual StEventManager* eventManager();
     virtual StEvent*        event();
-    Bool_t  doLoadTpcHits;
-    Bool_t  doLoadFtpcHits;
-    Bool_t  doLoadSvtHits;
+    virtual StRun*          run();
+    virtual void            Clear(const char* opt="");
+       
+    virtual const char *GetCVS() const
+    {
+	static const char cvs[]="$Id: StEventMaker.h,v 2.1 1999/11/05 18:35:57 ullrich Exp $ built "__DATE__" "__TIME__ ;
+    }
+
 public:    
     Bool_t  doLoadTpcHits;         //!
     Bool_t  doLoadFtpcHits;        //!
     Bool_t  doLoadSvtHits;         //!
     Bool_t  doLoadSsdHits;         //!
+    Bool_t  doPrintCpuInfo;        //! 
+    Bool_t  doPrintRunInfo;        //! lots of screen output
+    Bool_t  doPrintEventInfo;      //! lots of screen output
     
 protected:
     Int_t  makeRun();
