@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.20 2000/05/26 21:25:23 posk Exp $
+// $Id: plot.C,v 1.21 2000/06/30 14:51:20 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -17,6 +17,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.21  2000/06/30 14:51:20  posk
+// Using MessageMgr. Added graph for Eta Symmetry vs. Vertex Z.
+//
 // Revision 1.20  2000/05/26 21:25:23  posk
 // Use TProfile2D class and profile projection methods.
 // Correction needed for >2 subevents.
@@ -95,6 +98,8 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_VertexZ",
 			     "Flow_VertexXY2D",
 			     "Flow_EtaSym",
+			     "Flow_EtaSymVerZ2D",
+			     "Flow_EtaSymVerZ",
 			     //"Flow_EtaPtPhi3D",
 			     "Flow_EtaPtPhi2D.PhiEta",
                              "Flow_EtaPtPhi2D.PhiPt",
@@ -114,7 +119,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_Phi_Flat_Sel",
 			     "Flow_Psi_Subs",
 			     "Flow_Psi_Sel",
-			     "Flow_Mult_Sel",
+			     "Flow_Mul_Sel",
 			     "Flow_MeanPt_Sel",
 			     "Flow_q_Sel",
 			     "Flow_Psi_Sub_Corr_Sel",
@@ -130,7 +135,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_vEta_Sel",
 			     "Flow_vPt_Sel"};
   const int nNames = sizeof(baseName) / sizeof(char*);
-  const int nSingles = 26 + 1;
+  const int nSingles = 28 + 1;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -266,8 +271,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
       }
       if (selN == 0) graphPad->cd(padN);
       if (strstr(shortName[pageNumber],"2D")!=0) {          // 2D
- 	if (strcmp(shortName[pageNumber],"Flow_v2D")==0 ||
-	    strcmp(shortName[pageNumber],"Flow_vObs2D")==0) {
+ 	if (strstr(shortName[pageNumber],"_v")!=0) {
 	  hist->SetMaximum(20.);
 	  hist->SetMinimum(-20.);
 	  gStyle->SetOptStat(0);
@@ -346,6 +350,10 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	gStyle->SetOptStat(10);
 	hist->Draw("E1"); 
       } else if (strstr(shortName[pageNumber],"Eta")!=0) {    // Eta distibutions
+ 	if (strstr(shortName[pageNumber],"_v")!=0 ) {
+	  hist->SetMaximum(10.);
+	  hist->SetMinimum(-10.);
+	}
 	gStyle->SetOptStat(100110);
 	hist->Draw();
   	lineZeroEta->Draw();
@@ -488,6 +496,13 @@ TCanvas* plotSingles(char* shortName){
     projZY->SetXTitle("Pt (GeV)");
     gStyle->SetOptStat(10);
     if (projZY) projZY->Draw("COLZ");
+  } else if (strstr(shortName,"XY")!=0) {           // Vertex XY
+    TLine* lineZeroX = new TLine(-1., 0., 1., 0.);
+    TLine* lineZeroY = new TLine(0., -1., 0., 1.);
+    gStyle->SetOptStat(10);
+    hist->Draw("COLZ");
+    lineZeroX->Draw();
+    lineZeroY->Draw();
   } else if (strstr(shortName,"2D")!=0) {           // 2D
     gStyle->SetOptStat(10);
     hist->Draw("COLZ");
