@@ -124,8 +124,8 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
       }
 
 /*  Track finding and track fitting method */
-/*  (Currently undefined )                 */
-    dst_track[dst_track_h->nok].method = 0;
+ /*  (FTPC Current          11 )                 */
+     dst_track[dst_track_h->nok].method = pow(2,11);
 
 /*  Geant particle ID number for mass hypothesis used in tracking */
 /*   (Currently not set for FTPC)                                 */
