@@ -245,9 +245,10 @@ Int_t StiMaker::Init()
     mhitfiller->addDetector(kSvtId);
     cout <<"Hits used from detectors:\t"<<*mhitfiller<<endl;
 
-    //    TrackNodeTest *pTest = new TrackNodeTest();
-    //    pTest->doTest();
-
+/*
+    TrackNodeTest *pTest = new TrackNodeTest();
+    pTest->doTest();
+*/
     //StiCompositeSeedFinder
     mcompseedfinder = new StiCompositeSeedFinder();
     mcompseedfinder->setFactory(mkalmantrackfactory);
