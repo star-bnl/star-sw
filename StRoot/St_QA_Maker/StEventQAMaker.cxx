@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.23 2000/01/31 22:15:24 kathy Exp $
+// $Id: StEventQAMaker.cxx,v 1.24 2000/02/01 21:35:09 kathy Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.24  2000/02/01 21:35:09  kathy
+// fix code for xi mass in StEvent histograms; change curvature and impact param histograms so it's log of the value, plotted in linear scale
+//
 // Revision 1.23  2000/01/31 22:15:24  kathy
 // added Gene's code to make mass plot for Xi's in table and StEvent versions
 //
@@ -822,6 +825,8 @@ void StEventQAMaker::MakeHistXi()
     Float_t epi = sqrt(pP2 + m_pimass2);
     Float_t ela = sqrt(pL2 + m_lamass2);
     Float_t eXi = ela + epi;
+    Float_t inv_mass_xi = sqrt(eXi*eXi - pX2);
+    m_xi_ma_hist->Fill(inv_mass_xi);
   }
 
 }
