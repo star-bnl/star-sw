@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.h,v 1.7 2001/07/12 18:17:18 jcs Exp $
+// $Id: StFtpcDriftMapMaker.h,v 1.8 2001/10/23 07:27:48 jcs Exp $
 // $Log: StFtpcDriftMapMaker.h,v $
+// Revision 1.8  2001/10/23 07:27:48  jcs
+// implement new StFtpcDbReader constructor
+//
 // Revision 1.7  2001/07/12 18:17:18  jcs
 // remove unnecessary calls to StarDb/ftpc tables
 //
@@ -45,6 +48,7 @@ class St_ftpcdVDriftdP;
 class St_ftpcdDeflectiondP;
 class St_ftpcGas;
 class St_ftpcDriftField;
+class St_ftpcElectronics;
 
 class TH1F;
 class TH2F;
@@ -53,7 +57,7 @@ class StFtpcDriftMapMaker : public StMaker {
  private:
    char*   fTableName;      // c-structure name that is same as table in database
    char*   fOutputFileName; // file name for output
-  // static Char_t m_VersionCVS = "$Id: StFtpcDriftMapMaker.h,v 1.7 2001/07/12 18:17:18 jcs Exp $";
+  // static Char_t m_VersionCVS = "$Id: StFtpcDriftMapMaker.h,v 1.8 2001/10/23 07:27:48 jcs Exp $";
   // Int_t         m_mode;        // mode 1 = primaries;
    St_ftpcDimensions    *m_dimensions;    //!
    St_ftpcPadrowZ       *m_padrow_z;      //!
@@ -64,6 +68,7 @@ class StFtpcDriftMapMaker : public StMaker {
    St_ftpcdDeflectiondP *m_ddeflectiondp; //!
    St_ftpcGas           *m_gas;           //!
    St_ftpcDriftField    *m_driftfield;    //!
+   St_ftpcElectronics   *m_electronics;   //!
   void                  MakeHistograms();// Histograms for FTPC drift map
   
  protected:
@@ -73,7 +78,7 @@ class StFtpcDriftMapMaker : public StMaker {
 
   // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcDriftMapMaker.h,v 1.7 2001/07/12 18:17:18 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StFtpcDriftMapMaker.h,v 1.8 2001/10/23 07:27:48 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
   
   ClassDef(StFtpcDriftMapMaker, 1)  
 };
