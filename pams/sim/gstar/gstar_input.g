@@ -1,6 +1,9 @@
-* $Id: gstar_input.g,v 1.38 2003/05/14 23:00:54 potekhin Exp $
+* $Id: gstar_input.g,v 1.39 2003/07/30 03:52:49 potekhin Exp $
 *
 * $Log: gstar_input.g,v $
+* Revision 1.39  2003/07/30 03:52:49  potekhin
+* Add the rejected events scaler
+*
 * Revision 1.38  2003/05/14 23:00:54  potekhin
 * This is an adapter that reads external event
 * file. This has been upgraded to propagate event
@@ -605,8 +608,7 @@ Replace [READ[DIGIT](#)#;] with _
 
  Old Structure GENT {int IstHEP, int IdHEP, int JmoHEP(2), int JdaHEP(2),
                      PHEP(3), ENER, MASS, VHEP(3), TIME }
- structure     MPAR { int Version, int SUBPR, int Nbin,
-                      int NWE, int NWW, int Njets }
+ structure     MPAR { int Version, int SUBPR, int Nbin, int NWE, int NWW, int Njets, int NREJ }
 
      If (LkEvnt==0) Call MZBOOK(IxDIV,LKAR P2,LkEvnt, 1,'EVNT',2,2,7,2,0)
 
@@ -621,13 +623,16 @@ Replace [READ[DIGIT](#)#;] with _
         EVID = 1         !  ZEBRA IDN of event read in or generated
      endfill
 ***
+* ver: 1: just subprocess, 2: nbin and wounded, 3: rejected events
      Fill /EVNT/PASS/MPAR ! event generator parameters
-        Version = 2      ! bank format version, 1 was just subprocess
+        Version = 3      ! bank format version
         SUBPR   = 0      ! pythia subprocess
         Nbin    = 0      ! number of binary collisons
         NWE     = 0      ! number of wounded nucleons in the east nucleus
         NWW     = 0      ! number of wounded nucleons in the west nucleus
         NJETS   = 0      ! number of jets
+        NREJ    = 0      ! number of rejected events, prior to the current one
+	write(*,*) '*********************************** FILL ********************'
      endfill
 ***
      IrbDIV=IxDIV;         LKARP2=LkEvnt
