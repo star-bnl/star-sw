@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.11 2000/02/23 21:03:17 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.12 2000/02/23 22:21:09 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.12  2000/02/23 22:21:09  hardtke
+ * add tpc_global_to_local_p
+ *
  * Revision 1.11  2000/02/23 21:03:17  hardtke
  * fix tpc_row_par -- causing tpt problems
  *
@@ -41,6 +44,7 @@
 #include "StDbUtilities/StCoordinates.hh"
 #include "tables/St_tpg_pad_plane_Table.h"
 #include "tables/St_tpg_detector_Table.h"
+#include "math_constants.h"
 ClassImp(StTpcDbMaker)
 
 //
@@ -83,6 +87,21 @@ int type_of_call tpc_global_to_local_(int *isect,float *xglobal, float* xlocal){
   xlocal[0] = localSector.position().x(); 
   xlocal[1] = localSector.position().y(); 
   xlocal[2] = localSector.position().z();
+  return 1; 
+}
+int type_of_call tpc_global_to_local_p_(int *isect,float *xglobal, float* xlocal){
+  float b_rot, ff;
+  if (*isect<=12){
+    b_rot = (float)(*isect)*(C_PI_2/3.);
+    ff = -1.0;
+  }
+  else{
+    b_rot = (float)(24. - *isect)*(C_PI_2/3.);
+    ff = 1.0;
+  }
+  xlocal[0] = ff*(xglobal[0]*cos(b_rot)-xglobal[1]*sin(b_rot));  
+  xlocal[1] = xglobal[0]*sin(b_rot)+xglobal[1]*cos(b_rot)  ;
+  if (*isect<=12) xlocal[2] = -xlocal[2];
   return 1; 
 }
 int type_of_call tpc_local_to_global_(int *isect,float *xlocal, float* xglobal){
