@@ -9,7 +9,6 @@
        float     vertexRMax2D;  
        float     vertexRMin2D;  
        float     thetaMin;
-       short     numOfPadRows;  	
        float     parentDipAngleMax;	
        float     impactCut;
        float     parentLastDaughterStart2D;
@@ -19,6 +18,7 @@
        float     distanceKinkDaughter2D;
        float     distanceKinkParentZ;
        float     distanceKinkDaughterZ;
+       short     numOfPadRows;  	
  } ;
-/*  Last mod. for tkf_tkfpar:   $Date: 1999/06/21 22:21:27 $  */
+/*  Last mod. for tkf_tkfpar:   $Date: 1999/12/23 19:29:13 $  */
 

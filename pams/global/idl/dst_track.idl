@@ -196,22 +196,6 @@
  */
 
  struct dst_track  {
-  short      id;               /* Primary key (see comments)             */
-  short      iflag;            /* bitmask quality info. (see comments)   */
-  short      det_id;           /* Detector id information                */
-  short      method;           /* Track finding/fitting method, packed   */
-  short      pid;              /* Geant particle ID for assumed mass     */
-  short      n_point;          /* number of points assigned to track,    */
-                               /* SVT, TPC, FTPC component #s are packed */
-  short      n_max_point;      /* maximum number of points possible,     */
-                               /* SVT, TPC, FTPC component #s are packed */
-  short      n_fit_point;      /* number of points used in fit,          */
-                               /* SVT, TPC, FTPC component #s are packed */
-  short      icharge;          /* Particle charge in units of |e|        */
-  short      id_start_vertex;  /* Packed variable for primary vertex     */
-                               /* final fit and primary track candidates */
-  unsigned long map[2];        /* Packed track/detector occupancy map and*/
-                               /* extrap. info. (see preceeding comments)*/
   float      r0;               /* radius at start (cm)                   */
   float      phi0;             /* azimuthal angle at start (deg)         */
   float      z0;               /* z-coord. at start (cm)                 */
@@ -227,8 +211,24 @@
                                /* from first to last point (cm)          */
   float      impact;           /* impact parameter based on 3D DCA from  */
                                /* primary vertex (cm)                    */
+  unsigned long map[2];        /* Packed track/detector occupancy map and*/
+                               /* extrap. info. (see preceeding comments)*/
+  short      id;               /* Primary key (see comments)             */
+  short      iflag;            /* bitmask quality info. (see comments)   */
+  short      det_id;           /* Detector id information                */
+  short      method;           /* Track finding/fitting method, packed   */
+  short      pid;              /* Geant particle ID for assumed mass     */
+  short      n_point;          /* number of points assigned to track,    */
+                               /* SVT, TPC, FTPC component #s are packed */
+  short      n_max_point;      /* maximum number of points possible,     */
+                               /* SVT, TPC, FTPC component #s are packed */
+  short      n_fit_point;      /* number of points used in fit,          */
+                               /* SVT, TPC, FTPC component #s are packed */
+  short      icharge;          /* Particle charge in units of |e|        */
+  short      id_start_vertex;  /* Packed variable for primary vertex     */
+                               /* final fit and primary track candidates */
  } ;
-/*  Last mod. for dst_track:   $Date: 1999/12/16 19:22:26 $ */
+/*  Last mod. for dst_track:   $Date: 1999/12/23 19:29:12 $ */
 
 
 

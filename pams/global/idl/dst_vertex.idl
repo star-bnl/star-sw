@@ -60,19 +60,19 @@
  */
 
  struct dst_vertex  {
-  short     vtx_id;        /* vertex type ID, use StVertexDefinitions.h    */
-  short     n_daughters;   /* number of charged daughter tracks (see above)*/
+  float     x;             /* vertex coordinates in                        */
+  float     y;             /*   STAR (global)                              */
+  float     z;             /*   coordinate system in (cm)                  */
+  float     covar[6];      /* vertex position error covariance matrix      */
+  float     chisq[2];      /* Chi-square per degree of freedom and probab. */
+                           /* of chisq P(chi^2,ndf) of vertex fit          */
   long      id;            /* Primary key                                  */
   long      iflag;         /* bitmask of e.g. quality information, content */
                            /* varies depending on vertex type (see above)  */
   long      det_id;        /* Packed daughter track info (see above)       */
   long      id_aux_ent;    /* Foreign key into auxiliary vertex table(s)   */
-  float     x;             /* vertex coordinates in                        */
-  float     y;             /*   STAR global                                */
-  float     z;             /*   coordinate system in (cm)                  */
-  float     covar[6];      /* vertex position error covariance matrix      */
-  float     chisq[2];      /* Chi-square per degree of freedom and probab. */
-                           /* of chisq P(chi^2,ndf) of vertex fit          */
+  short     vtx_id;        /* vertex type ID, use StVertexDefinitions.h    */
+  short     n_daughters;   /* number of charged daughter tracks (see above)*/
  } ;
-/*  Last mod. for dst_vertex:   $Date: 1999/09/27 16:54:11 $ */
+/*  Last mod. for dst_vertex:   $Date: 1999/12/23 19:29:13 $ */
 

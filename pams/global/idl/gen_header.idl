@@ -1,6 +1,9 @@
-// $Id: gen_header.idl,v 1.1 1999/02/08 14:48:59 wenaus Exp $
+// $Id: gen_header.idl,v 1.2 1999/12/23 19:29:13 margetis Exp $
 //
 // $Log: gen_header.idl,v $
+// Revision 1.2  1999/12/23 19:29:13  margetis
+// following directive  ENTRIES MUST MONOTONICALLY DESCEND in LENGTH ACROSS ROW
+//
 // Revision 1.1  1999/02/08 14:48:59  wenaus
 // New tag tables
 //
@@ -8,6 +11,9 @@
 // gen_header.idl
 // 
 struct gen_header {
+  float bimp;  // b impact parameter
+  float phi;   // phi angle of impact
+  float ecms;  // energy of n n cms
   long run;    // Run number
   long event;  // Event number
   long date;   // Date
@@ -15,8 +21,5 @@ struct gen_header {
   long genid;  // Generator number
   short awest; // p=1, Au=197
   short aeast; // p=1, Au=197
-  float bimp;  // b impact parameter
-  float phi;   // phi angle of impact
-  float ecms;  // energy of n n cms
 };
 

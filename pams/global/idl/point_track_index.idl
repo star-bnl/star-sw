@@ -13,8 +13,8 @@
  */
 
  struct point_track_index  {
-  short     id_track;      /* F.key to dst_track table       */ 
   long      id_point;      /* F.key to dst_point table       */
+  short     id_track;      /* F.key to dst_track table       */ 
  } ;
-/*  Last mod. for point_track_index: $Date: 1999/10/06 03:19:43 $ */
+/*  Last mod. for point_track_index: $Date: 1999/12/23 19:29:13 $ */
 
