@@ -29,6 +29,7 @@ void FtfPara::setDefaults (void)
    hitChi2Cut      = 500.F  ;
    goodHitChi2     = 100.F ;
    trackChi2Cut    = 250.F ;
+   maxChi2Primary  = 10. ;
    segmentRowSearchRange = 1 ;
    trackRowSearchRange   = 3 ;
    dEdx              = 0     ;

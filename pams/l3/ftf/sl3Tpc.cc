@@ -32,66 +32,8 @@ extern "C" long type_of_call sl3Tpc_(
 **: RETURNS:    STAF Condition Value
 **:>------------------------------------------------------------------*/
 //
-   FtfSl3 tracker ;
-   tracker.setup();
-   sl3TpcSetParameters ( &tracker, para ) ;
-   int debugLevel = tracker.debugLevel = tracker.para.infoLevel ;
 //
 //   Decode hit buffer
 //
-   int nBytes = hitH->nok ;
-   int nHits =  tracker.readSector ( (struct TPCSECLP *)hit ) ;
-//
-//   Track sector
-//
-   tracker.processSector ( ) ;
-//
-//   Fill Track buffer
-//
-   l3TrackH->nok = tracker.fillTracks ( l3TrackH->maxlen,  (int *)l3Track ) ; 
-   if ( debugLevel > 0 ) {
-      printf ( " sl3: tracks found %d \n ", tracker.nTracks ) ;
-   }
-//
    return STAFCV_OK ;
 }
-//**************************************************************************
-//     Set parameters
-//**************************************************************************
-   void sl3TpcSetParameters ( FtfSl3* tracker, SL3TPCPARA_ST* para ) {
-
-      tracker->para.infoLevel       = para->infoLevel ;
-      tracker->para.segmentRowSearchRange = (short)para->SMaxSearchPadrowsSegment;
-      tracker->para.trackRowSearchRange   = (short)para->SMaxSearchPadrowsTrack;
-      tracker->para.mergePrimaries  = para->MergePrimaries;
-      tracker->para.minHitsPerTrack = (short)para->SMinimumHitsPerTrack;
-      tracker->para.nHitsForSegment = (short)para->SMinimumHitsPerSegment;
-      tracker->para.nEta            = (short)para->EtaSlices ;
-      tracker->para.nPhi            = (short)para->PhiSlices ;
-      tracker->para.nEtaTrack       = (short)para->NumberOfTanLSlices;
-      tracker->para.nPhiTrack       = (short)para->NumberOfPsiSlices ;
-      tracker->para.phiMin          = para->Phimin / toDeg ;
-      tracker->para.phiMax          = para->Phimax / toDeg ;
-      tracker->para.etaMin          = para->Etamin ;
-      tracker->para.etaMax          = para->Etamax ;
-      tracker->para.phiMinTrack     = para->MinSlicePsi / toDeg ;
-      tracker->para.phiMaxTrack     = para->MaxSlicePsi / toDeg ;
-      tracker->para.etaMinTrack     = para->MinSliceTanL ;
-      tracker->para.etaMaxTrack     = para->MaxSliceTanL ;
-      tracker->para.rowInnerMost    = (short)para->InnerMostRow ;
-      tracker->para.rowOuterMost    = (short)para->OuterMostRow ;
-      tracker->para.rowStart        = (short)para->startRow     ;
-      tracker->para.szFitFlag       = para->SFitSz ;
-      tracker->para.bField          = para->BField ;
-      tracker->para.hitChi2Cut      = para->SChi2Cut;
-      tracker->para.goodHitChi2     = para->SGoodChi2;
-      tracker->para.trackChi2Cut    = para->SChi2TrackCut;
-      tracker->para.deta            = para->SDEtaLimit ;
-      tracker->para.dphi            = para->SDPhiLimit ;
-      tracker->para.detaMerge       = para->SDTanlMaxMerge;
-      tracker->para.dphiMerge       = para->SDPsiMaxMerge;
-      tracker->para.szErrorScale    = para->ErrorScaleSz;
-      tracker->para.xyErrorScale    = para->ErrorScaleXy;
-
-      tracker->para.goBackwards     = 1 ;
-   }

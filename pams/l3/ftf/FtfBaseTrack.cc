@@ -462,7 +462,7 @@ int FtfBaseTrack::getErrorsCircleFit ( float a, float b, float r ) {
    double h[9] = { 0. };
    float dx, dy ;
    float h11, h22, h33 ;
-   static int i, j ;
+   static int j ;
    static float ratio, c1, s1;
    static float hyp;
 

@@ -29,8 +29,9 @@ void FtfHit::printLinks ( int point_level )
       printf ( "hit ir iphi ieta   phi   eta      x      y     z\n" ) ;
 
    if ( fmod((double)point_level,10) > 0 )
-        printf ( "%3d %2d %3d  %3d  %6.2f %5.2f  %6.2f %6.2f %6.2f \n", 
-                  id, row, phiIndex, etaIndex, phi*toDeg, eta, x, y, z ) ;
+        printf ( "%3d %3d %3d  %3d  %6.2f %5.2f  %6.2f %6.2f %6.2f \n", 
+                  (int)id, (int)row, (int)phiIndex, (int)etaIndex, 
+                   phi*toDeg, eta, x, y, z ) ;
    int vhit ;
    if ( nextVolumeHit != 0 ) vhit = nextVolumeHit->id ;
    else vhit = -1 ;

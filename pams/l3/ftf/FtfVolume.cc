@@ -18,9 +18,8 @@ void ROW::print()
             hit != 0 ;
             hit = hit->nextRowHit ) {
 
-         printf( "\n Hit nr = %i\n Ir = %i",
-                        hit->id, hit->row) ;
-         printf( "\n Next should be %i", hit->nextRowHit ) ;
+         printf( "\n Hit nr = %i\n Ir = %i", (int)hit->id, hit->row) ;
+         printf( "\n Next should be %i", (int)hit->nextRowHit ) ;
     }
     return ;
 }
@@ -34,8 +33,8 @@ void VOLUME::print(  )
        hit != 0 ;  hit = hit->nextVolumeHit ) {
 
        printf( "\n Hit nr = %i\n Ir = %i\n Iphi = %i\n Ieta=%i" ,
-               hit->id, hit->row, hit->phiIndex, hit->etaIndex ) ;
-       printf( "\n Next should be %i", hit->nextVolumeHit ) ;
+               (int)hit->id, hit->row, hit->phiIndex, hit->etaIndex ) ;
+       printf( "\n Next should be %i", (int)hit->nextVolumeHit ) ;
    }
    return ;
 }
