@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0_ZS_SR.cxx,v 1.5 2001/06/25 23:01:21 jcs Exp $
+ * $Id: FTPV1P0_ZS_SR.cxx,v 1.6 2001/06/27 22:08:15 jcs Exp $
  * Author: M.J. LeVine, H.Huemmler
  ***************************************************************************
  * Description: FTPC V1.0 Zero Suppressed Reader
@@ -11,6 +11,9 @@
  * 
  ***************************************************************************
  * $Log: FTPV1P0_ZS_SR.cxx,v $
+ * Revision 1.6  2001/06/27 22:08:15  jcs
+ * Initialize pad_seq
+ *
  * Revision 1.5  2001/06/25 23:01:21  jcs
  * reconstruct from raw data if no FTPSEQD bank
  *
@@ -154,7 +157,7 @@ int FTPV1P0_ZS_SR::initialize()
     padrow=-1; 
     pad=-1; 
     lastbin=-2; 
-    int pad_seq; 
+    int pad_seq=0; 
     oldstart = 0;
     len = seqd_p->header.BankLength - (sizeof(Bank_Header)/4);
     numseq = (4*len)/sizeof(short); // find # sequences this bank
