@@ -1,4 +1,7 @@
 #  $Log: MakePam.mk,v $
+#  Revision 1.18  1998/05/06 17:27:39  didenko
+#  makefile updated by Yuri
+#
 #  Revision 1.17  1998/05/03 18:27:41  fisyak
 #  Set fixed path to geant3
 #
@@ -79,7 +82,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/05/03 18:27:41 $ 
+#           Last modification $Date: 1998/05/06 17:27:39 $ 
 #  #. default setings
 include $(STAR)/mgr/MakeSYS.mk
 ifdef SILENT
@@ -168,11 +171,11 @@ clean_obj: $(addsuffix _clean_obj, $(SUBDIRS))
 	$(MAKE) -f $(MAKEFILE) -C $(STEM) clean 
 else # I have no subdirs
 SRC_DIR := $(INP_DIR)
-IDLS    := $(wildcard $(SRC_DIR)/*.idl $(SRC_DIR)/*/*.idl)
+IDLS    := $(wildcard $(SRC_DIR)/*.idl $(SRC_DIR)/*/*.idl $(SRC_DIR)/*/*/*.idl)
 ifneq ($(EMPTY),$(IDLS))       
 FILES_IDM := $(shell egrep -l 'interface.*:.*amiModule' $(IDLS))
 endif                          
-FILES_G  := $(wildcard $(SRC_DIR)/*.g $(SRC_DIR)/*/*.g)
+FILES_G  := $(wildcard $(SRC_DIR)/*.g $(SRC_DIR)/*/*.g $(SRC_DIR)/*/*/*.g)
 #=========================================================
 ifeq ($(LEVEL),$(FIVE))        
 .PHONY               : default
@@ -198,7 +201,7 @@ check_obj   := $(shell test -d $(OBJ_DIR) || mkdir $(OBJ_DIR))
 check_gen   := $(shell test -d $(DIR_GEN) || mkdir $(DIR_GEN))
 check_neg   := $(shell test -d $(GEN_DIR) || mkdir $(GEN_DIR))
 #.
-sources := $(strip $(sort $(dir $(wildcard $(SRC_DIR)/*.* $(SRC_DIR)/*/*.*))))
+sources := $(strip $(sort $(dir $(wildcard $(SRC_DIR)/*.* $(SRC_DIR)/*/*.* $(SRC_DIR)/*/*/*.*))))
 SRC_DIRS:= $(subst /TAIL, ,$(addsuffix TAIL, $(sources)))
 IDL_DIRS:= $(wildcard $(ROOT)/$(PAMS)/*/idl $(STAR)/$(PAMS)/*/idl)
 INC_DIRG:= $(wildcard $(STAR)/lib/share/*.gen)
@@ -252,7 +255,7 @@ FILES_O  += $(addprefix $(OBJ_DIR)/, $(addsuffix .o,   $(notdir $(basename $(FIL
 NAMES_O   = $(notdir $(FILES_O))
 ifeq ($(LEVEL),$(TWO))          # domain level: add all domain IDM
 ifneq ($(EMPTY),$(FILES_IDM))   
-IDLSD    := $(wildcard $(STAR)/$(PAMS)/$(DOMAIN)/*/*.idl $(STAR)/$(PAMS)/$(DOMAIN)/*/*/*.idl)
+IDLSD    := $(wildcard $(STAR)/$(PAMS)/$(DOMAIN)/*/*.idl $(STAR)/$(PAMS)/$(DOMAIN)/*/*/*.idl $(STAR)/$(PAMS)/$(DOMAIN)/*/*/*/*.idl)
 ifneq ($(EMPTY),$(IDLSD))      
 FILES_DD := $(shell egrep -l 'interface.*:.*amiModule' $(IDLSD))
 NAMES_IDM+= $(basename $(notdir $(FILES_DD)))
