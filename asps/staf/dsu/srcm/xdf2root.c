@@ -380,7 +380,7 @@ void WriteMakefile() {
   PP"Note to programmer:  use Root/Aix/Makefile as a template\n");
   PP"when writing"); WriteMakefile_aix(); Exit(__LINE__);
 #endif
-#ifdef sun4os5pc
+#if defined(sun)
   WriteMakefile_sun4os5pc(); ok=7;
 #endif
   if(!ok) {
@@ -1470,7 +1470,7 @@ void CheckLoadPath(char *fn,char *loadPath) {
 void SetEnvironmentalVariables() {
   char ok=0;
   char *ldl;
-#ifdef sun4os5pc
+#if defined(sun)
   ldl="LD_LIBRARY_PATH=/usr/lib:/usr/openwin/lib:/usr/dt/lib:/opt/SUNWsprob\
 /lib:/usr/local/src/root/lib";
   if(putenv(ldl)) ERR;
