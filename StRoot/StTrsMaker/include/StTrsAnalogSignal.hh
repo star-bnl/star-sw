@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsAnalogSignal.hh,v 1.2 1998/11/13 21:29:46 lasiuk Exp $
+ * $Id: StTrsAnalogSignal.hh,v 1.3 1999/01/15 11:03:14 lasiuk Exp $
  *
  * Author: brian Nov 1, 1998
  *
@@ -10,8 +10,8 @@
  *****************************************************************
  *
  * $Log: StTrsAnalogSignal.hh,v $
- * Revision 1.2  1998/11/13 21:29:46  lasiuk
- * << operator
+ * Revision 1.3  1999/01/15 11:03:14  lasiuk
+ * modify << operator for STL use
  *
  * Revision 1.2  1998/11/13 21:29:46  lasiuk
  * << operator
@@ -56,7 +56,7 @@ inline void StTrsAnalogSignal::setAmplitude(float a) { mAnalogSignal.second = a;
 inline void StTrsAnalogSignal::scaleAmplitude(float fac) {mAnalogSignal.second *= fac;}
 
 // Non-member function
-ostream& operator<<(ostream&, StTrsAnalogSignal&);
+ostream& operator<<(ostream&, const StTrsAnalogSignal&);
 
 class StTrsAnalogSignalComparator {
 public:
