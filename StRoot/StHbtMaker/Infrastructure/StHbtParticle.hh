@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.hh,v 1.13 2001/04/03 21:04:36 kisiel Exp $
+ * $Id: StHbtParticle.hh,v 1.14 2001/05/23 00:19:05 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,8 +14,13 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.hh,v $
+ * Revision 1.14  2001/05/23 00:19:05  lisa
+ * Add in Smearing classes and methods needed for momentum resolution studies and correction
+ *
  * Revision 1.13  2001/04/03 21:04:36  kisiel
- * Changes needed to make the Theoretical code
+ *
+ *
+ *   Changes needed to make the Theoretical code
  *   work. The main code is the ThCorrFctn directory.
  *   The most visible change is the addition of the
  *   HiddenInfo to StHbtPair.
@@ -110,6 +115,9 @@ public:
 
 
   StHbtThreeVector mNominalPosSample[11];  // I make this public for convenience and speed of StHbtPair()
+
+  void ResetFourMomentum(const StHbtLorentzVector& fourMomentum);
+
   // ***
   const StHbtHiddenInfo*  HiddenInfo() const;
   void SetHiddenInfo(StHbtHiddenInfo* aHiddenInfo);
@@ -146,4 +154,7 @@ inline const StHbtHiddenInfo* StHbtParticle::HiddenInfo() const
 inline void StHbtParticle::SetHiddenInfo(StHbtHiddenInfo* aHiddenInfo)
 { mHiddenInfo = aHiddenInfo;}
 // ***
+
+inline void StHbtParticle::ResetFourMomentum(const StHbtLorentzVector& vec){mFourMomentum = vec;}
+
 #endif

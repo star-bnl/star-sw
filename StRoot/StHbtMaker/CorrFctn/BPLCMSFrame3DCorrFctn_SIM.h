@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BPLCMSFrame3DCorrFctn_SIM.h,v 1.2 2000/10/05 23:08:59 lisa Exp $
+ * $Id: BPLCMSFrame3DCorrFctn_SIM.h,v 1.3 2001/05/23 00:19:05 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: BPLCMSFrame3DCorrFctn_SIM.h,v $
+ * Revision 1.3  2001/05/23 00:19:05  lisa
+ * Add in Smearing classes and methods needed for momentum resolution studies and correction
+ *
  * Revision 1.2  2000/10/05 23:08:59  lisa
  * Added kT-dependent radii to mixed-event simulator AND implemented AverageSeparation Cut and CorrFctn
  *
@@ -29,6 +32,8 @@
 #include "StHbtMaker/Base/StHbtPairCut.h"
 //#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
 
+class StHbtSmearPair;
+
 class BPLCMSFrame3DCorrFctn_SIM : public StHbtCorrFctn {
 public:
   BPLCMSFrame3DCorrFctn_SIM(char* title, const int& nbins, const float& QLo, const float& QHi);
@@ -44,6 +49,7 @@ public:
   StHbt3DHisto* Denominator();
   StHbt3DHisto* Ratio();
 
+  StHbt2DHisto* ResolutionPlot(int index);
 
   // here are get and set for the range over which the correlation function 
   // is normalized (in Qinv).  The range is set to 0.15..0.18 in the constuctor
@@ -65,6 +71,9 @@ public:
   void SetRoutAlpha(float alpha);
   void SetRsideAlpha(float alpha);
   void SetRlongAlpha(float alpha);
+
+
+  void SetSmearPair(StHbtSmearPair* smearer);
 
 private:
   StHbt3DHisto* mNumerator;
@@ -97,6 +106,9 @@ private:
   float mRlong_alpha;
 
 
+  StHbtSmearPair* mSmearPair;  // for putting in detector resolution
+
+  StHbt2DHisto* mResolutionHistos[4];
 
   bool mToggleNumDen; //!
 
@@ -104,6 +116,10 @@ private:
   ClassDef(BPLCMSFrame3DCorrFctn_SIM, 0)
 #endif
 };
+
+inline  StHbt2DHisto* BPLCMSFrame3DCorrFctn_SIM::ResolutionPlot(int index){return mResolutionHistos[index];}
+
+inline  void BPLCMSFrame3DCorrFctn_SIM::SetSmearPair(StHbtSmearPair* smearer){mSmearPair = smearer;}
 
 inline  StHbt3DHisto* BPLCMSFrame3DCorrFctn_SIM::Numerator(){return mNumerator;}
 inline  StHbt3DHisto* BPLCMSFrame3DCorrFctn_SIM::Denominator(){return mDenominator;}
@@ -123,6 +139,7 @@ inline  void BPLCMSFrame3DCorrFctn_SIM::SetRlong(float Rlong){mRlong2 = Rlong*Rl
 inline  void BPLCMSFrame3DCorrFctn_SIM::SetRoutAlpha(float alpha){mRout_alpha = alpha;}
 inline  void BPLCMSFrame3DCorrFctn_SIM::SetRsideAlpha(float alpha){mRside_alpha = alpha;}
 inline  void BPLCMSFrame3DCorrFctn_SIM::SetRlongAlpha(float alpha){mRlong_alpha = alpha;}
+
 
 
 #endif

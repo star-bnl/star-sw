@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: BPLCMSFrame3DCorrFctn_SIM.cxx,v 1.3 2000/10/08 17:11:07 lisa Exp $
+ * $Id: BPLCMSFrame3DCorrFctn_SIM.cxx,v 1.4 2001/05/23 00:19:05 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: BPLCMSFrame3DCorrFctn_SIM.cxx,v $
+ * Revision 1.4  2001/05/23 00:19:05  lisa
+ * Add in Smearing classes and methods needed for momentum resolution studies and correction
+ *
  * Revision 1.3  2000/10/08 17:11:07  lisa
  * now toggle between Num and Den at BEGINNING of BPLCMSFrame3DCorrFctn_SIM::AddMixedPair()
  *
@@ -26,8 +29,10 @@
  *
  **************************************************************************/
 
+
 #include "StHbtMaker/CorrFctn/BPLCMSFrame3DCorrFctn_SIM.h"
-//#include "StHbtMaker/Infrastructure/StHbtHisto.hh"
+#include "StHbtMaker/Infrastructure/StHbtSmearPair.h"
+
 #include <cstdio>
 
 #ifdef __ROOT__ 
@@ -72,6 +77,25 @@ BPLCMSFrame3DCorrFctn_SIM::BPLCMSFrame3DCorrFctn_SIM(char* title, const int& nbi
   mNumerator->Sumw2();
   mDenominator->Sumw2();
   mRatio->Sumw2();
+
+  // 20feb2001 - add some more histograms that are filled if there is any
+  //             momentum smearing
+  
+  char titInv[100] = "QinvRes";
+  strcat(titInv,title);
+  mResolutionHistos[0] = new StHbt2DHisto(titInv,title,10,0.0,0.1,50,-0.025,0.025);
+  //
+  char titOut[100] = "QoutRes";
+  strcat(titOut,title);
+  mResolutionHistos[1] = new StHbt2DHisto(titOut,title,10,0.0,0.1,50,-0.025,0.025);
+  //
+  char titSid[100] = "QsidRes";
+  strcat(titSid,title);
+  mResolutionHistos[2] = new StHbt2DHisto(titSid,title,10,0.0,0.1,50,-0.025,0.025);
+  //
+  char titLon[100] = "QlonRes";
+  strcat(titLon,title);
+  mResolutionHistos[3] = new StHbt2DHisto(titLon,title,10,0.0,0.1,50,-0.025,0.025);
 
 }
 
@@ -140,6 +164,10 @@ void BPLCMSFrame3DCorrFctn_SIM::AddRealPair(const StHbtPair* pair){
   return;
 
 }
+
+
+
+
 //____________________________
 void BPLCMSFrame3DCorrFctn_SIM::AddMixedPair(const StHbtPair* pair){
 
@@ -169,20 +197,54 @@ void BPLCMSFrame3DCorrFctn_SIM::AddMixedPair(const StHbtPair* pair){
   }
 
   double weight=1.0;
-  if (mCorrection)
-    {
-      weight = mCorrection->CoulombCorrect(pair);
-    }
-  //  double Qinv = fabs(pair->qInv());   // note - qInv() will be negative for identical pairs...
-  //  if ((Qinv < mQinvNormHi) && (Qinv > mQinvNormLo)) mNumMixedNorm++;
+
+  // these are the values we use to assign correlation WEIGHT
   double qOut = fabs(pair->qOutCMS());
   double qSide = fabs(pair->qSideCMS());
   double qLong = fabs(pair->qLongCMS());
 
-  if (mToggleNumDen){
-    mDenominator->Fill(qOut,qSide,qLong,weight);
+  // these are the values we BIN in - same as above if no smearing turned on...
+  double qOut_bin,qSide_bin,qLong_bin;  // scope 'em!
+  if (mSmearPair){
+    mSmearPair->SetUnsmearedPair(pair);
+    qOut_bin = fabs(mSmearPair->SmearedPair().qOutCMS());
+    qSide_bin = fabs(mSmearPair->SmearedPair().qSideCMS());
+    qLong_bin = fabs(mSmearPair->SmearedPair().qLongCMS());
+    // fill resolution histos...
+    double Qinv = fabs(pair->qInv());
+    if (Qinv < 0.1){
+      double Qinv_smear = fabs(mSmearPair->SmearedPair().qInv());
+      mResolutionHistos[0]->Fill(Qinv,Qinv_smear-Qinv);
+      mResolutionHistos[1]->Fill(qOut,qOut_bin-qOut);
+      mResolutionHistos[2]->Fill(qSide,qSide_bin-qSide);
+      mResolutionHistos[3]->Fill(qLong,qLong_bin-qLong);
+    }
   }
   else{
+    qOut_bin  = qOut;
+    qSide_bin = qSide;
+    qLong_bin = qLong;
+  }
+
+
+  // note the Coulomb bit below...
+  // for the *suppression* ("numerator" pairs), we use the TRUE momentum, as Nature would
+  // for the *correction* ("denominator" pairs), we use the SMEARED momentum, as an experimenter would
+
+  if (mToggleNumDen){
+    if (mCorrection){
+      if (mSmearPair){
+	weight = mCorrection->CoulombCorrect(&(mSmearPair->SmearedPair()));
+      }
+      else{
+	weight = mCorrection->CoulombCorrect(pair);
+      }
+    }
+    mDenominator->Fill(qOut_bin,qSide_bin,qLong_bin,weight);
+  }
+  else{
+
+    if (mCorrection) weight = mCorrection->CoulombCorrect(pair);
 
     // update 1oct2000 - now allow mT dependent evolution of Radii
 
@@ -200,15 +262,13 @@ void BPLCMSFrame3DCorrFctn_SIM::AddMixedPair(const StHbtPair* pair){
     if (mRlong_alpha!=0){Rlong2 = mRlong2*pow(mT2,mRlong_alpha);}
     else{Rlong2 = mRlong2;}
       
-
-
-
     double CorrWeight = 1.0 + 
       mLambda*exp((-qOut*qOut*Rout2 -qSide*qSide*Rside2 -qLong*qLong*Rlong2)/0.038936366329);
     CorrWeight *= weight;
-    mNumerator->Fill(qOut,qSide,qLong,CorrWeight);
+    mNumerator->Fill(qOut_bin,qSide_bin,qLong_bin,CorrWeight);
   }
 
 }
+
 
 
