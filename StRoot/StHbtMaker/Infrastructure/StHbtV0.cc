@@ -43,17 +43,7 @@ StHbtV0::StHbtV0(const StHbtV0& v){ // copy constructor
 
   mHelixPos = v.mHelixPos;// Gael 12 Sept
   mHelixNeg = v.mHelixNeg;// Gael 12 Sept
-//   cout <<"StHbtV0---mHelixPos->x==" << mHelixPos.origin().x() << endl;
-//   cout <<"StHbtV0---mHelixPos->y==" << mHelixPos.origin().y() << endl;
-//   cout <<"StHbtV0---mHelixPos->z==" << mHelixPos.origin().z() << endl;
-//   cout <<"StHbtV0---mHelixPos->xcenter==" << mHelixPos.xcenter() << endl;
-//   cout <<"StHbtV0---mHelixPos->ycenter==" << mHelixPos.ycenter() << endl;
-//   cout <<"StHbtV0---mHelixNeg->x==" << mHelixNeg.origin().x() << endl;
-//   cout <<"StHbtV0---mHelixNeg->y==" << mHelixNeg.origin().y() << endl;
-//   cout <<"StHbtV0---mHelixNeg->z==" << mHelixNeg.origin().z() << endl;
-//   cout <<"StHbtV0---mHelixNeg->xcenter==" << mHelixNeg.xcenter() << endl;
-//   cout <<"StHbtV0---mHelixNeg->ycenter==" << mHelixNeg.ycenter() << endl;
-
+  mHiddenInfo = v.mHiddenInfo? v.mHiddenInfo->clone() : 0;// GR 11 DEC 02
   UpdateV0();
 }
 // -----------------------------------------------------------------------
@@ -131,6 +121,7 @@ StHbtV0::StHbtV0( StV0MuDst& v){ // from strangess micro dst structure
   mLenDedxNeg = v.lenDedxNeg();//Gael 04Fev2002
   mNumDedxPos = v.numDedxPos();
   mNumDedxNeg = v.numDedxNeg();
+  mHiddenInfo =  0;//GR 11 DEC 02
 
 #ifdef STHBTDEBUG
   cout << " keyPos " << v.keyPos() << endl;
@@ -213,13 +204,18 @@ StHbtV0::StHbtV0(const StHbtTTreeEvent* ev, const StHbtTTreeV0* v) {
   mNumDedxPos = v->mNumDedxPos;
   mNumDedxNeg = v->mNumDedxNeg;
 
+  mHiddenInfo = 0;
+
   UpdateV0();
 }
+
 #endif // __ROOT__
 void StHbtV0::SetHelixPos(const StPhysicalHelixD& h){mHelixPos = h;}// Gael 12 Sept 02
 const StPhysicalHelixD& StHbtV0::HelixPos() const {return mHelixPos;}// Gael 12 Sept 02
 void StHbtV0::SetHelixNeg(const StPhysicalHelixD& h){mHelixNeg = h;}// Gael 12 Sept 02
 const StPhysicalHelixD& StHbtV0::HelixNeg() const {return mHelixNeg;}// Gael 12 Sept 02
 
-
+void StHbtV0::SetHiddenInfo(StHbtHiddenInfo* aHiddenInfo) {mHiddenInfo=aHiddenInfo;}
+bool StHbtV0::ValidHiddenInfo() const { if (mHiddenInfo) return true; else return false; }
+StHbtHiddenInfo* StHbtV0::getHiddenInfo() const {return mHiddenInfo;}
 
