@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.15 2001/01/30 13:31:41 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.16 2001/04/27 10:20:24 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.16  2001/04/27 10:20:24  oldi
+// Moved function calls of StFtpcTrackEvalulator to constructor of StFtpcTrackEvalulator.
+//
 // Revision 1.15  2001/01/30 13:31:41  oldi
 // New variable mTime introduced to count total time consumption.
 //
@@ -333,14 +336,6 @@ Int_t StFtpcTrackMaker::Make()
   St_DataSet *geant = GetInputDS("geant");  
   
   StFtpcTrackEvaluator *eval = new StFtpcTrackEvaluator(geant, ftpc_data, tracker->GetVertex(), tracker->GetClusters(), tracker->GetTracks(), "ftpc_evaluator.root", "RECREATE");
-  eval->Info();
-  eval->FillHitsOnTrack();
-  eval->FillParentHistos();
-  eval->FillMomentumHistos();
-  eval->FillEventHistos();
-  eval->FillCutHistos();
-  eval->DivideHistos();
-  eval->WriteHistos();
   
   // Uncomment the following line if you want to 'see' the information (split tracks, unclean tracks, ...) 
   // evaluated by the TrackEvaluator.  
@@ -391,7 +386,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.15 2001/01/30 13:31:41 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.16 2001/04/27 10:20:24 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
