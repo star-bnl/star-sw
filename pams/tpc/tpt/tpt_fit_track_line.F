@@ -1,4 +1,4 @@
-* $Id: tpt_fit_track_line.F,v 1.1 2000/03/01 22:21:33 sakrejda Exp $
+* $Id: tpt_fit_track_line.F,v 1.2 2000/03/09 20:45:30 sakrejda Exp $
 *
       INTEGER FUNCTION TPT_FIT_TRACK_LINE(ipt,trk,hit_h,hit,
      >                               tpar_h,tpar,ipass)
@@ -52,7 +52,6 @@ C#include "tpt_pointers.inc"
       REAL xold, yold, xt, yt
       LOGICAL good_hit(mxpnt), enough
 C
-      write(6,*)"I am here, fitting track ",ipt
 C     at the beginning mark all the points that belong to a track as good
       do i=1,trk(ipt).nhit
 	 good_hit(i) = .true.
