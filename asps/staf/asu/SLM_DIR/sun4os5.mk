@@ -68,7 +68,8 @@ ifndef SUNW_CRTN
 SUNW_CRTN := /vol/lic/SUNWspro-3.0/SC3.0/lib/crtn.o
 SUNW_CRTN := /opt/SUNWspro/SC4.0/lib/crtn.o
 endif
-export FOR_LIBS += $(addprefix -L,$(SUNW_LDIRS)) \
+export FOR_LIBS += \
+	$(addprefix -R,$(SUNW_LDIRS)) $(addprefix -L,$(SUNW_LDIRS)) \
 	-lM77 -lF77 -lsunmath -lm -lc \
 	-R/usr/ucblib -L/usr/ucblib -lucb \
 	$(SUNW_CRTN)
