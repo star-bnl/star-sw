@@ -1,7 +1,10 @@
 //
-// $Id: StPreEclMaker.cxx,v 1.16 2001/07/13 23:47:07 suaide Exp $
+// $Id: StPreEclMaker.cxx,v 1.17 2001/10/01 15:36:19 pavlinov Exp $
 //
 // $Log: StPreEclMaker.cxx,v $
+// Revision 1.17  2001/10/01 15:36:19  pavlinov
+// cleanup
+//
 // Revision 1.16  2001/07/13 23:47:07  suaide
 // small modification
 //
@@ -100,7 +103,7 @@
 #include "St_ems_Maker/St_ems_Maker.h"
 #include "StEmcUtil/StEmcMath.h"
 #include "tables/St_emcClusterParam_Table.h"
-
+#include "StEmcADCtoEMaker/StEmcADCtoEMaker.h"
 // added for StEvent
 
 #include "StEvent/StEvent.h" 
@@ -240,7 +243,11 @@ Int_t StPreEclMaker::Make()
     else cout<<"***** Get EmcCollection from StEvent\n";
 
     if(ecmpreecl == 0) {
-    // Try to get from calibration (will be define later)
+    // Try to get from calibration - 28-sep-2001 by PAI 
+      StEmcADCtoEMaker *adcE =(StEmcADCtoEMaker*)GetMaker("adctoe");     
+      ecmpreecl = (StEmcCollection*)adcE->getEmcCollection();
+      if(ecmpreecl) cout<<"***** Get EmcCollection from StEmcADCtoEMaker\n";
+      else          cout<<"***** => No EmcCollection from anyside\n";
     }
 
     if(ecmpreecl==0) return kStWarn;
@@ -452,7 +459,7 @@ StPreEclMaker::SetClusterConditions(char *cdet,Int_t sizeMax,
 void 
 StPreEclMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPreEclMaker.cxx,v 1.16 2001/07/13 23:47:07 suaide Exp $   \n");
+  printf("* $Id: StPreEclMaker.cxx,v 1.17 2001/10/01 15:36:19 pavlinov Exp $   \n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

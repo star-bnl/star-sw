@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StEmcPreClusterCollection.cxx,v $
+// Revision 1.14  2001/10/01 15:36:19  pavlinov
+// cleanup
+//
 // Revision 1.13  2001/09/22 00:30:09  pavlinov
 // No public constructor for StEmcGeom
 //
@@ -175,7 +178,7 @@ StEmcPreClusterCollection::Delete(Option_t *opt)
 {
    if(opt) {/*unused*/}
    mClusters.Delete();
-   if(geo) {delete geo; geo=0;} 
+   //   if(geo) {delete geo; geo=0;} 
 }
 
 Int_t StEmcPreClusterCollection::findClusters()

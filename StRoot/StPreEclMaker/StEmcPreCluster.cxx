@@ -1,6 +1,9 @@
-// $Id: StEmcPreCluster.cxx,v 1.10 2001/09/22 00:30:08 pavlinov Exp $
+// $Id: StEmcPreCluster.cxx,v 1.11 2001/10/01 15:36:19 pavlinov Exp $
 //
 // $Log: StEmcPreCluster.cxx,v $
+// Revision 1.11  2001/10/01 15:36:19  pavlinov
+// cleanup
+//
 // Revision 1.10  2001/09/22 00:30:08  pavlinov
 // No public constructor for StEmcGeom
 //
@@ -192,7 +195,7 @@ void StEmcPreCluster::calcMeanAndRms(StEmcDetector* mDet,Int_t mod)
     mPhi += phi0;                 // Rotate to STAR system
     mPhi  = StEmcMath::getPhiPlusMinusPi(mPhi);
   }
-  delete emcgeo;
+  //  delete emcgeo;
 }
 
 void 
