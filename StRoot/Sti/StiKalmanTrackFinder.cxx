@@ -34,6 +34,11 @@ using namespace std;
 #include "StiDefaultTrackFilter.h"
 #include "StiTrackFinderFilter.h"
 
+#define TIME_StiKalmanTrackFinder
+#ifdef TIME_StiKalmanTrackFinder
+#include "Sti/StiTimer.h"
+#endif
+
 int StiKalmanTrackFinder::_debug = 0;
 ostream& operator<<(ostream&, const StiTrack&);
 
@@ -294,6 +299,10 @@ void StiKalmanTrackFinder::extendTracksToVertex(StiHit* vertex)
 /// Return Ok      if operation was successful
 bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_error, logic_error
 {
+#ifdef TIME_StiKalmanTrackFinder
+  StiTimer::fgFindTimer->Start(0);
+#endif  
+
 #ifdef Sti_DEBUG
   if (t) cout << *t << endl;
 #endif  
@@ -340,6 +349,9 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
   Int_t reachThePipe = 0;
   while ( (direction==kOutsideIn)? rlayer!=_detectorContainer->rendRadial() : layer!=_detectorContainer->endRadial() )
     {
+#ifdef TIME_StiKalmanTrackFinder
+  StiTimer::fgFindTimer->Start(0);
+#endif  
       vector<StiDetectorNode*>::const_iterator sector;
       vector<StiDetector*> detectors;
       if (debug() > 2) cout << endl<<"lead node:" << *leadNode<<endl<<" lead det:"<<*leadDet;
@@ -349,6 +361,9 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
       //find all relevant detectors to visit.
       while ( (direction==kOutsideIn)? sector!=_detectorContainer->endPhi(rlayer):sector!=_detectorContainer->endPhi(layer) )
 	{
+#ifdef TIME_StiKalmanTrackFinder
+  StiTimer::fgFindTimer->Start(0);
+#endif  
 	  StiDetector * detector = (*sector)->getData();
 	  double angle  = detector->getPlacement()->getNormalRefAngle();
 	  double radius = detector->getPlacement()->getNormalRadius();
@@ -374,6 +389,9 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 	  if (nDets>1) sort(detectors.begin(),detectors.end(),CloserAngle(projAngle) );
 	  for (vector<StiDetector*>::const_iterator d=detectors.begin();d!=detectors.end();++d)
 	    {
+#ifdef TIME_StiKalmanTrackFinder
+  StiTimer::fgFindTimer->Start(0);
+#endif  
 	      tDet = *d;
 	      if (debug() > 2) {
 		cout << endl<< "target det:"<< *tDet;
@@ -397,6 +415,10 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
 		}
 	      else 
 		{
+#ifdef TIME_StiKalmanTrackFinder
+  StiTimer::fgFindTimer->Stop();
+  StiTimer::fgFindTally++;
+#endif  
 		  if (debug() > 2) cout << "position " << position << "<=kEdgeZplus";
 		  testNode.setDetector(tDet);
 		  bool active = tDet->isActive(testNode.getY(),testNode.getZ());
@@ -471,6 +493,9 @@ bool StiKalmanTrackFinder::find(StiTrack * t, int direction) // throws runtime_e
     }
   if (debug() > 2) cout << "       nAdded:"<< nAdded << endl;
   lastMove++;
+#ifdef TIME_StiKalmanTrackFinder
+  StiTimer::fgFindTimer->Stop();
+#endif  
   return nAdded>0;
 }
 
