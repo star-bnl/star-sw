@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.413 2004/05/07 18:12:08 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.414 2004/05/11 14:44:02 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -437,12 +437,9 @@ Bfc_st BFC1[] = {
   {"V0"          ,"v0","globalChain","SCL,globT,tls","StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Xi"          ,"xi","globalChain","SCL,globT,tls","StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Kink","kink","globalChain","SCL,globT,tls","StOldKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"fpt"      ,"ftpc_tracks","globalChain","SCL"
-                                          ,"StFtpcTrackMaker","StFtpcTrackMaker","FTPC Track Maker",kFALSE},
-  {"Fglobal"    ,"fglobal","globalChain","SCL,tables,tls"
-                 ,"StFtpcGlobalMaker","St_global,St_dst_Maker","FTPC track refit, fills dst_tracks",kFALSE},
-  {"Fprimary"    ,"fprimary","globalChain","SCL,tables,tls"
-                  ,"StFtpcPrimaryMaker","St_global,St_dst_Maker","FTPC track refit + dca selection",kFALSE},
+
+  {"Fglobal"     ,"","","","",""                                         ,"OBSOLETE option Fglobal",kFALSE},
+  {"Fprimary"    ,"","","","",""                                        ,"OBSOLETE option Fprimary",kFALSE},
 
   {"dst"         ,"dst","globalChain","dstOut,SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT,svt_T"
                                                  ,"St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
@@ -466,7 +463,8 @@ Bfc_st BFC1[] = {
                                     "StFtpcSlowSimMaker","StFtpcSlowSimMaker","FTPC Slow simulator",kFALSE},
   {"Fcl"       ,"ftpc_hits","ftpcChain","SCL","StFtpcClusterMaker",
                     "StDaqLib,StDAQMaker,StFtpcTrackMaker,StFtpcClusterMaker","FTPC cluster finder",kFALSE},
-
+  {"fpt"      ,"ftpc_tracks","globalChain","SCL"
+                                          ,"StFtpcTrackMaker","StFtpcTrackMaker","FTPC Track Maker",kFALSE},
 
   {"pmdRaw"    ,"pmdRaw","","PmdUtil,pmdRead,pmdClust"         ,"StMaker","StChain","PMD Raw chain",kFALSE},
   {"pmd"       ,"pmd","","geant,pmdSim,pmdClust,pmdDis","StMaker","StChain", "PMD Simulation chain",kFALSE},
@@ -996,12 +994,9 @@ Bfc_st BFC2[] = {
   {"V0"         ,"v0","globalChain","SCL,globT,tls" ,"StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Xi"         ,"xi","globalChain","SCL,globT,tls" ,"StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Kink","kink","globalChain","SCL,globT,tls","StOldKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"fpt"      ,"ftpc_tracks","globalChain","SCL"
-                                          ,"StFtpcTrackMaker","StFtpcTrackMaker","FTPC Track Maker",kFALSE},
-  {"Fglobal"    ,"fglobal","globalChain","SCL,tables,tls"
-                 ,"StFtpcGlobalMaker","St_global,St_dst_Maker","FTPC track refit, fills dst_tracks",kFALSE},
-  {"Fprimary"    ,"fprimary","globalChain","SCL,tables,tls"
-                  ,"StFtpcPrimaryMaker","St_global,St_dst_Maker","FTPC track refit + dca selection",kFALSE},
+
+  {"Fglobal"     ,"","","","",""                                         ,"OBSOLETE option Fglobal",kFALSE},
+  {"Fprimary"    ,"","","","",""                                        ,"OBSOLETE option Fprimary",kFALSE},
 
   {"dst"         ,"dst","globalChain","dstOut,SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT,svt_T"
                                                  ,"St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
@@ -1030,6 +1025,8 @@ Bfc_st BFC2[] = {
                                     "StFtpcSlowSimMaker","StFtpcSlowSimMaker","FTPC Slow simulator",kFALSE},
   {"Fcl"       ,"ftpc_hits","ftpcChain","SCL","StFtpcClusterMaker",
                     "StDaqLib,StDAQMaker,StFtpcTrackMaker,StFtpcClusterMaker","FTPC cluster finder",kFALSE},
+  {"fpt"      ,"ftpc_tracks","globalChain","SCL"
+                                          ,"StFtpcTrackMaker","StFtpcTrackMaker","FTPC Track Maker",kFALSE},
 
 
   {"pmdRaw"    ,"pmdRaw","","PmdUtil,pmdRead,pmdClust"         ,"StMaker","StChain","PMD Raw chain",kFALSE},
