@@ -22,6 +22,7 @@ class StTpcHitMover : public StMaker {
   virtual Int_t Make();
   virtual Int_t Finish();  
   virtual void  AlignHits(Bool_t flag=kFALSE){mAlignSector=flag;}
+  virtual void  FlushDB();
 
 
   void setInputDataSetName(const Char_t *inputDataSetName);
@@ -34,7 +35,7 @@ class StTpcHitMover : public StMaker {
   inline Int_t getOutputMode() const {return mOutputMode;}
 
   virtual const Char_t *GetCVS() const { 
-    static const char cvs[]="Tag $Name:  $ $Id: StTpcHitMoverMaker.h,v 1.3 2004/01/27 03:57:33 jeromel Exp $ built "__DATE__" "__TIME__; 
+    static const char cvs[]="Tag $Name:  $ $Id: StTpcHitMoverMaker.h,v 1.4 2004/01/29 23:16:40 jeromel Exp $ built "__DATE__" "__TIME__; 
     return cvs; 
   }
  protected:
