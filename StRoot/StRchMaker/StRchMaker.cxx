@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 1.10 2000/01/11 21:18:04 lasiuk Exp $
+ * $Id: StRchMaker.cxx,v 1.11 2000/01/12 16:52:58 lasiuk Exp $
  *
  * Author: Jon Gans
  ***************************************************************************
@@ -10,11 +10,14 @@
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
- * Revision 1.10  2000/01/11 21:18:04  lasiuk
- * Fills new dst_rch_pixel;
- * debug macros;
- * used in first DAQ data
+ * Revision 1.11  2000/01/12 16:52:58  lasiuk
+ * comment out assert statement
  *
+ * Revision 1.13  2000/02/21 23:20:10  lasiuk
+ * debug output formatting and reduce output to screen
+ *
+ * Revision 1.12  2000/02/14 20:50:29  lasiuk
+ * use DAQ/sim interface with a switch settable at the c'tor
  *
  * Revision 1.11  2000/01/12 16:52:58  lasiuk
  * comment out assert statement
@@ -99,8 +102,8 @@ StRchMaker::~StRchMaker() {}
 
 #ifdef RCH_DEBUG
     cout << "  is the data here assert()" << endl;
+    //assert(theRichData);
 #endif
-    assert(theRichData);
 
     //
     // get the Reader from the DAQ (mike's) Library
@@ -115,6 +118,7 @@ StRchMaker::~StRchMaker() {}
     if(!theRichDataReader) {
 	cout << "Error::StRchMaker::Make() cannot get the Rich Reader" << endl;
 	cout << "Skip Event" << endl;
+	//return kStNOTCRITICAL;
     }
     else {
 	//
@@ -200,16 +204,16 @@ StRchMaker::~StRchMaker() {}
 //     }
 	mTheRichReader = 0;
   printf("**************************************************************\n");
-  printf("* $Id: StRchMaker.cxx,v 1.10 2000/01/11 21:18:04 lasiuk Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.11 2000/01/12 16:52:58 lasiuk Exp $\n");
 	}
     AddData(new St_ObjectSet("StRichEvent", richCollection));
-  printf("* $Id: StRchMaker.cxx,v 1.10 2000/01/11 21:18:04 lasiuk Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.11 2000/01/12 16:52:58 lasiuk Exp $\n");
 }
 //-----------------------------------------------------------------
-  printf("* $Id: StRchMaker.cxx,v 1.10 2000/01/11 21:18:04 lasiuk Exp $\n");
+  printf("* $Id: StRchMaker.cxx,v 1.11 2000/01/12 16:52:58 lasiuk Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
-    printf("* $Id: StRchMaker.cxx,v 1.10 2000/01/11 21:18:04 lasiuk Exp $\n");
+    printf("* $Id: StRchMaker.cxx,v 1.11 2000/01/12 16:52:58 lasiuk Exp $\n");
     printf("**************************************************************\n");
     if (Debug()) StMaker::PrintInfo();
 
