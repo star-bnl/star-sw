@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StEStructMCReader.cxx,v 1.3 2004/03/03 23:16:00 chunhuih Exp $
+ * $Id: StEStructMCReader.cxx,v 1.4 2004/03/05 23:48:11 chunhuih Exp $
  *
  * Author: Chunhui Han
  *
@@ -13,7 +13,12 @@
  **********************************************************************
  *
  * $Log: StEStructMCReader.cxx,v $
+ * Revision 1.4  2004/03/05 23:48:11  chunhuih
+ * test the number of entries for the given chain: avoid integer overflow.
+ * use GetEntries() instead of GetEntriesFast() for TChain.
+ *
  * Revision 1.3  2004/03/03 23:16:00  chunhuih
+ *
  * removed the code in the constructor that gets the total number of events
  * to reduce initialization time.
  *
@@ -31,25 +36,22 @@
 #include "StEStructPool/AnalysisMaker/StEStructTrackCuts.h"
 #include "StEStructPool/EventMaker/StEStructEvent.h"
 #include "StEStructPool/EventMaker/StEStructTrack.h"
+#include "StMessMgr.h"
 #include "TH2.h"
 #include "TStyle.h"
 #include "TCanvas.h"
 
 ClassImp(StEStructMCReader)
 
-StEStructMCReader::StEStructMCReader(TTree *tree) : meventsToDo(0), meventCount(0), mloopIndex(0), mAmDone(false), mECuts(0), mTCuts(0), mIPMAX(1000000) {
+StEStructMCReader::StEStructMCReader(TTree *tree) : meventsToDo(0), meventCount(0), mloopIndex(0), mAmDone(false), mNentries(0), mECuts(0), mTCuts(0), mIPMAX(1000000) {
   Init(tree);
-  if(fChain != 0)
-    mNentries = int(fChain->GetEntriesFast());
 }
 
-StEStructMCReader::StEStructMCReader(int nevents, TTree *tree, StEStructEventCuts *ecuts, StEStructTrackCuts *tcuts) : meventsToDo(nevents), meventCount(0), mloopIndex(0), mAmDone(false), mECuts(ecuts), mTCuts(tcuts), mIPMAX(1000000) {
+StEStructMCReader::StEStructMCReader(int nevents, TTree *tree, StEStructEventCuts *ecuts, StEStructTrackCuts *tcuts) : meventsToDo(nevents), meventCount(0), mloopIndex(0), mAmDone(false), mNentries(0), mECuts(ecuts), mTCuts(tcuts), mIPMAX(1000000) {
   Init(tree);
-  if(fChain != 0)
-    mNentries = int(fChain->GetEntriesFast());
 }
 
-StEStructMCReader::StEStructMCReader(int nevents, char *fileListFile, StEStructEventCuts *ecuts, StEStructTrackCuts *tcuts) : meventsToDo(nevents), meventCount(0), mloopIndex(0), mAmDone(false), mECuts(ecuts), mTCuts(tcuts), mIPMAX(1000000) {
+StEStructMCReader::StEStructMCReader(int nevents, char *fileListFile, StEStructEventCuts *ecuts, StEStructTrackCuts *tcuts) : meventsToDo(nevents), meventCount(0), mloopIndex(0), mAmDone(false), mNentries(0), mECuts(ecuts), mTCuts(tcuts), mIPMAX(1000000) {
   ifstream fin(fileListFile);
   char s[256];
   TChain *chain = new TChain("h999");
@@ -57,8 +59,6 @@ StEStructMCReader::StEStructMCReader(int nevents, char *fileListFile, StEStructE
     chain->Add(s);
   }
   Init((TTree *)chain);
-  if(fChain != 0)
-    mNentries = int(fChain->GetEntriesFast());
 }
 
 Int_t StEStructMCReader::LoadTree(Int_t entry)
@@ -105,6 +105,15 @@ void StEStructMCReader::Init(TTree *tree)
    fChain->SetBranchAddress("Vxyz",Vxyz);
    fChain->SetBranchAddress("Vtime",&Vtime);
    Notify();
+
+   // get number of entries in this chain
+   if(fChain != 0) {
+    double x = fChain->GetEntries();
+    if( x > (pow(2., 8. * sizeof(int) - 1.) - 1.) )
+      gMessMgr->Message("Number of Entries causes integer overflow.", "E");
+    else
+      mNentries = int(x);
+  }
 }
 
 Bool_t StEStructMCReader::Notify()
@@ -145,7 +154,7 @@ void StEStructMCReader::Loop()
 {
   if (fChain == 0) return;
 
-  Int_t nentries = Int_t(fChain->GetEntriesFast());
+  Int_t nentries = Int_t(fChain->GetEntries());
 
   Int_t nbytes = 0, nb = 0;
   for (Int_t jentry=0; jentry<nentries;jentry++) {
@@ -164,7 +173,7 @@ StEStructMCReader::~StEStructMCReader()
 int StEStructMCReader::getTotalEventCount() {
   if (fChain == 0) return 0;
 
-  Int_t nentries = Int_t(fChain->GetEntriesFast());
+  double nentries = fChain->GetEntries();
 
   Int_t nbytes = 0, nb = 0;
   int retVal = 0;
@@ -237,7 +246,7 @@ float* StEStructMCReader::globalDCA(float* p, float* v){
 
 StEStructEvent* StEStructMCReader::next() {
   if( fChain == NULL || (meventsToDo != 0 && meventCount == meventsToDo) ||
-      mloopIndex == mNentries ) {
+      mloopIndex >= mNentries ) {
     mAmDone = true;
     return (StEStructEvent *)NULL;
   }
