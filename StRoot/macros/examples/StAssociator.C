@@ -1,5 +1,9 @@
-// $Id: StAssociator.C,v 1.27 2001/04/27 18:44:10 calderon Exp $
+// $Id: StAssociator.C,v 1.28 2001/05/30 22:48:13 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.28  2001/05/30 22:48:13  calderon
+// don't load St_emc_Maker, not needed and caused problems
+// with optimized libraries.
+//
 // Revision 1.27  2001/04/27 18:44:10  calderon
 // added comment on usage of L3Trigger switch
 //
@@ -129,7 +133,7 @@ const char *MainFile="/afs/rhic/star/data/samples/*.geant.root")
     gSystem->Load("StEvent");
     gSystem->Load("StEventMaker"); 
     gSystem->Load("StEmcUtil"); 
-    gSystem->Load("St_emc_Maker");
+//     gSystem->Load("St_emc_Maker");
     gSystem->Load("StMcEvent");
     gSystem->Load("StMcEventMaker");
     gSystem->Load("StAssociationMaker");
