@@ -10,8 +10,8 @@
 #include "Sti/StiNeverActiveFunctor.h"
 #include "Sti/Star/StiStarDetectorBuilder.h"
 
-StiStarDetectorBuilder::StiStarDetectorBuilder(bool active)
-  : StiDetectorBuilder("StarBuilder",active)
+StiStarDetectorBuilder::StiStarDetectorBuilder(bool active, const string & inputFile)
+  : StiDetectorBuilder("StarBuilder",active,inputFile)
 {}
 
 StiStarDetectorBuilder::~StiStarDetectorBuilder()
@@ -62,6 +62,5 @@ void StiStarDetectorBuilder::buildDetectors(StMaker&s)
     }
  cout << "StiStarDetectorBuilder::buildDetectors() -I- Done" << endl;
 }
-
 
 

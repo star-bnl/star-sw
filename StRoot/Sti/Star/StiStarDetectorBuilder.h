@@ -8,9 +8,9 @@
 class StiStarDetectorBuilder : public StiDetectorBuilder
 {
  public:
-  StiStarDetectorBuilder(bool active);
+  StiStarDetectorBuilder(bool active, const string & inputFile);
   virtual ~StiStarDetectorBuilder(); 
-  virtual void buildDetectors(StMaker&s);
+  virtual void buildDetectors(StMaker&s);	
  protected:
   StiMaterial         * _pipeMaterial;
   StiMaterial         * _vacuumMaterial;

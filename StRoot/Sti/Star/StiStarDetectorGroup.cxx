@@ -5,10 +5,10 @@
 #include "Sti/Star/StiStarDetectorBuilder.h"
 #include "Sti/StiHitLoader.h"
 
-StiStarDetectorGroup::StiStarDetectorGroup(bool active)
+StiStarDetectorGroup::StiStarDetectorGroup(bool active, const string & inputFile)
   : StiDetectorGroup<StEvent,StMcEvent>("STAR",
 			      0,
-			      new StiStarDetectorBuilder(active),
+			      new StiStarDetectorBuilder(active,inputFile),
 			      0,
 			      0)
 {}
