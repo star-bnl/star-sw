@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.17 2004/03/15 15:28:35 tonko Exp $
+ * $Id: FCFMaker.cxx,v 1.18 2004/03/22 16:41:11 tonko Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.18  2004/03/22 16:41:11  tonko
+ * Added output to FCFMaker if FCF_DEBUG_OUTPUT is defined
+ *
  * Revision 1.17  2004/03/15 15:28:35  tonko
  * Added TrackIDs in FCF and cleaned the includes
  *
@@ -199,6 +202,8 @@ static Hit_t *getHitInfo(int sector=1, int row=1, int track_id=1) {
 }
 
 
+// Tonko: added a static global which counts events i.e. calls to "Make"
+static int Event_counter ;
 
 static class fcfAfterburner fcf_after;
 
@@ -375,7 +380,9 @@ Int_t StRTSClientFCFMaker::Init()
 Int_t StRTSClientFCFMaker::InitRun(int run)
 {
   fprintf(stderr,"StRTSClientFCFMaker::InitRun called with run %u...\n",run) ;
-	
+  
+  Event_counter = 0 ;	// clear the count of events
+
   St_DataSet *dr = GetDataSet("StDAQReader");
   if(dr) 
     daqReader = (StDAQReader *)(dr->GetObject());
@@ -395,9 +402,13 @@ Int_t StRTSClientFCFMaker::InitRun(int run)
 
 Int_t StRTSClientFCFMaker::Make()
 {
+
+
+  Event_counter++ ;	// got one more event...
+
   PrintInfo();
 
-  printf("<FCFMaker::Make> Making event...\n");
+  printf("<FCFMaker::Make> Making event %d...\n",Event_counter);
 
   // Hack for now untill ittf is in more complete shape...
   if(mCreate_stevent)
@@ -635,6 +646,7 @@ Int_t StRTSClientFCFMaker::BuildCPP(int nrows, raw_row_st *row, raw_pad_st *pad,
       int seq_off = (row[i].iseq + pad[pad_off + j].SeqOffset);
       p = pad[pad_off + j].PadId;
 
+
       offset = (row[i].ipixel +
 		pad[pad_off + j].PadOffset);
 
@@ -856,9 +868,11 @@ void StRTSClientFCFMaker::getCorrections(int sector, int row)
     t0Corr[sector-1][row][pad+1] = (short)(gain*fabs(t0)*64.0 + 0.5) ;	// this is convoluted with the gain!
     if(t0 < 0.0) t0Corr[sector-1][row][pad+1] *= -1 ;
 
+#ifdef FCF_DEBUG_OUTPUT
 
-//    t0Corr[sector-1][row][pad+1] = 0 ;
-//    gainCorr[sector-1][row][pad+1] = 64 ;
+    t0Corr[sector-1][row][pad+1] = 0 ;
+    gainCorr[sector-1][row][pad+1] = 64 ;
+#endif
 
 #ifdef FCF_DEBUG_OUTPUT
 //     fprintf(ff, "%d %d %d %1.3f %1.3f\n",
@@ -881,7 +895,7 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
   double ly = lyFromRow(r+1);
   double lz = lzFromTB((((double)(cl_t))/64.0), sector, r+1, (cl_x+32)/64);
   lz -= 3.0 * tsspar->tau * mDriftVelocity * 1.0e-6;   // correct for convolution lagtime
-	  
+
 
   StTpcLocalSectorCoordinate local(lx,ly,lz,sector);
   StTpcLocalCoordinate global;   // tpt does the local --> global (DB adjustments?)
@@ -933,6 +947,7 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
   hit.z = global.position().z();
   hit.dz = mDt;
 
+
   if(doZeroTruncation)
   {
     if((hit.z < 0) && (sector <=12))  // sector 1..12 have positive z
@@ -964,8 +979,8 @@ void StRTSClientFCFMaker::saveCluster(int cl_x, int cl_t, int cl_f, int cl_c, in
 #ifdef FCF_DEBUG_OUTPUT
   struct Hit_t *ht = getHitInfo(hit.row/100,hit.row%100,hit.id_simtrk) ;
   
-  fprintf(ff,"%d %d %d %f %f %f %f %d ",hit.row/100, hit.row%100, hit.id_quality,
-	 hit.x,hit.y,hit.z,hit.q*1000000.0,cl_f) ;
+  fprintf(ff,"%d %d %d %d %d %f %f %f %f %d %d %d %d ",Event_counter, hit.row/100, hit.row%100, hit.id_simtrk,hit.id_quality,
+	 hit.x,hit.y,hit.z,hit.q*1000000.0,cl_f,cl_c,p2-p1+1,t2-t1+1) ;
 
   if(!ht) {
 	fprintf(ff,"0.0 0.0 0.0 0.0\n") ;
@@ -1087,6 +1102,7 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
   int total_clusters=0;
 
  //  static StDaqClfCppRow *cppRowStorage ;
+  u_int charge_on_row = 0 ;	// I added this for misc. debugging and cross checks, Tonko.
 
   for(int i=0;i<3;i++) result_mz_ptr[i] = NULL;
   for(int i=0;i<3;i++) simu_mz_ptr[i] = NULL;
@@ -1165,6 +1181,9 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
     {
       for(int ss=0;ss<FCF_MAX_SEQ;ss++)
       {
+
+//fprintf(ff,"Row %d: pp %d, ss %d: off 0x%X, len %d\n",row+1,pp,ss,cppRow->r[pp-1][ss].offset,cppRow->r[pp-1][ss].length) ;
+
 	if(cppRow->r[pp-1][ss].offset == 0xffffffff) break;
 	    
 	for(int ii=0;ii<cppRow->r[pp-1][ss].length;ii++)
@@ -1178,6 +1197,10 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
 	  // fcf requires them in 8 bits even though the 
 	  // FCF_10BIT... flag is set.  Convert back here...
 	  croat_adc[pp][time] = log10to8_table[adc[pnt]];
+
+	  charge_on_row += adc[pnt] ;
+
+//fprintf(ff,"Row %d (%d), pad %d, time %d, adc10 %d, adc8 %d, adc10 %d\n",row+1,i,pp,time,adc[pnt], croat_adc[pp][time],log8to10_table[croat_adc[pp][time]]) ;
 
 	  if(hasSim) {
 	    croat_trk[pp][time] = trk[pnt];
@@ -1271,6 +1294,11 @@ int StRTSClientFCFMaker::runClusterFinder(j_uintptr *result_mz_ptr,
 // 	 result_mz_ptr[1],
 // 	 result_mz_ptr[2],
 // 	 (u_int)result_buff);
+
+
+#ifdef FCF_DEBUG_OUTPUT
+//	fprintf(ff,"*** Row %2d: total charge (10bit): %u\n",row+1,charge_on_row) ;
+#endif
 
   return total_clusters;
 }

@@ -528,7 +528,6 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 #else
 					a = adc8to10[adc] ;  // transfer to 10 bits
 #endif
-
 					last_a = adc ;
 
 
