@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StQACosmicMaker.cxx,v 1.4 1999/08/17 18:55:54 snelling Exp $
+ * $Id: StQACosmicMaker.cxx,v 1.5 1999/08/19 00:29:57 snelling Exp $
  *
  * Author: Raimond Snellings, LBNL, Jun 1999
  * Description:  Maker to QA the Cosmic data (hitfinding, tracking etc.)
  *
  * $Log: StQACosmicMaker.cxx,v $
+ * Revision 1.5  1999/08/19 00:29:57  snelling
+ * Added Q distribution histograms and only used points on track
+ *
  * Revision 1.4  1999/08/17 18:55:54  snelling
  * Added two member funtions: setSector and setNrXbins
  *
@@ -35,54 +38,64 @@
 #include "TProfile.h"
 
 //-----------------------------------------------------------------------
+
 ClassImp(StQACosmicMaker)
 
   StQACosmicMaker::StQACosmicMaker(const char *name):
   StMaker(name), 
   bSectorSelectionOn(kFALSE), 
-  nXBins(200) {
+  nXBins(50) {
 }
 
 //-----------------------------------------------------------------------
+
 StQACosmicMaker::~StQACosmicMaker() {
 
 }
 
 //-----------------------------------------------------------------------
-Int_t StQACosmicMaker::Make() {
 
-  fillTNtuple();
-  fillHistograms();
-
-  return kStOK;
-}
-
-//-----------------------------------------------------------------------
-void StQACosmicMaker::PrintInfo() {
-  printf("**************************************************************\n");
-  printf("* $Id: StQACosmicMaker.cxx,v 1.4 1999/08/17 18:55:54 snelling Exp $\n");
-  printf("**************************************************************\n");
-  if (Debug()) StMaker::PrintInfo();
-}
-
-//-----------------------------------------------------------------------
-Int_t StQACosmicMaker::Finish() {
-
-  calcHistograms();
-  
-  return StMaker::Finish();
-}
-
-//-----------------------------------------------------------------------
 Int_t StQACosmicMaker::Init() {
   
-  initHistograms(); 
+  initResHistograms(); 
   initTNtuple();
+  initChargeHistograms(); 
 
   return StMaker::Init();
 }
 
 //-----------------------------------------------------------------------
+
+Int_t StQACosmicMaker::Make() {
+
+  fillTNtuple();
+  fillResHistograms();
+  fillChargeHistograms();
+
+  return kStOK;
+}
+
+//-----------------------------------------------------------------------
+
+void StQACosmicMaker::PrintInfo() {
+  printf("**************************************************************\n");
+  printf("* $Id: StQACosmicMaker.cxx,v 1.5 1999/08/19 00:29:57 snelling Exp $\n");
+  printf("**************************************************************\n");
+  if (Debug()) StMaker::PrintInfo();
+}
+
+//-----------------------------------------------------------------------
+
+Int_t StQACosmicMaker::Finish() {
+
+  calcResHistograms();
+  calcChargeHistograms();
+  
+  return StMaker::Finish();
+}
+
+//-----------------------------------------------------------------------
+
 Int_t StQACosmicMaker::initTNtuple() {
   
   mTNtupleTPC = new TNtuple("nttpc",
@@ -95,6 +108,7 @@ hdlamda:resy:resz:trknfit:trkcalcp");
 }
 
 //-----------------------------------------------------------------------
+
 Int_t StQACosmicMaker::fillTNtuple() {
 
   // get pointers to tpc hit table
@@ -137,38 +151,39 @@ Int_t StQACosmicMaker::fillTNtuple() {
     // track in row table is 1000*id + position on track
     Int_t irow_trk = trksorter[(Int_t)(pttphit[i].track/1000.)];
 
-    Float_t trkcalcp = sqrt((pttrk[irow_trk].tanl * pttrk[irow_trk].tanl + 1) /
-			    (pttrk[irow_trk].invp * pttrk[irow_trk].invp));
-    
-    mTNtupleTPC->Fill(
-		      (Float_t)(Int_t(pttphit[i].row/100.)),
-		      (Float_t)(pttphit[i].x),
-		      (Float_t)(pttphit[i].y),
-		      (Float_t)(pttphit[i].z),
-		      (Float_t)(pttphit[i].dx),
-		      (Float_t)(pttphit[i].dy),
-		      (Float_t)(pttphit[i].dz),
-		      (Float_t)(pttphit[i].alpha),
-		      (Float_t)(pttphit[i].lambda),
-		      (Float_t)(pttphit[i].dalpha),
-		      (Float_t)(pttphit[i].dlambda),
-		      (Float_t)(ptres[irow_res].resy),
-		      (Float_t)(ptres[irow_res].resz),
-		      (Float_t)(Float_t(pttrk[irow_trk].nfit)),
-		      (Float_t)(trkcalcp)
-		      );
-    
-    if (Debug()) {
-      cout << "dip angle " <<pttphit[i].lambda << endl;
-    }
+    if (irow_trk >= 0) {
 
+      Float_t trkcalcp = sqrt((pttrk[irow_trk].tanl * pttrk[irow_trk].tanl + 1) /
+			      (pttrk[irow_trk].invp * pttrk[irow_trk].invp));
+      
+      mTNtupleTPC->Fill(
+			(Float_t)(Int_t(pttphit[i].row/100.)),
+			(Float_t)(pttphit[i].x),
+			(Float_t)(pttphit[i].y),
+			(Float_t)(pttphit[i].z),
+			(Float_t)(pttphit[i].dx),
+			(Float_t)(pttphit[i].dy),
+			(Float_t)(pttphit[i].dz),
+			(Float_t)(pttphit[i].alpha),
+			(Float_t)(pttphit[i].lambda),
+			(Float_t)(pttphit[i].dalpha),
+			(Float_t)(pttphit[i].dlambda),
+			(Float_t)(ptres[irow_res].resy),
+			(Float_t)(ptres[irow_res].resz),
+			(Float_t)(Float_t(pttrk[irow_trk].nfit)),
+			(Float_t)(trkcalcp)
+			);
+      
+      if (Debug()) {cout << "dip angle " <<pttphit[i].lambda << endl;}
+    }
   }
 
   return kStOK;
 }
 
 //-----------------------------------------------------------------------
-Int_t StQACosmicMaker::initHistograms() {
+
+Int_t StQACosmicMaker::initResHistograms() {
 
   int i;
 
@@ -233,7 +248,8 @@ Int_t StQACosmicMaker::initHistograms() {
 }
 
 //-----------------------------------------------------------------------
-Int_t StQACosmicMaker::fillHistograms() {
+
+Int_t StQACosmicMaker::fillResHistograms() {
   
   int i;
 
@@ -281,63 +297,70 @@ Int_t StQACosmicMaker::fillHistograms() {
   if (nrows == 0) {cout << "error: residual table contains zero rows " << endl; return kStWarn;}
   colName = "id";
   St_TableSorter trksorter(*phtrk,colName,0,nrows-1);
-  
+
+  // fill histograms  
   for(i=0; i<phtcl->GetNRows(); i++) {
     Int_t irow_res = ressorter[(Int_t)(pttphit[i].id)];
-    // track in row table is 1000*id + position on track
+    // track in tphit table is 1000*id + position on track
     Int_t irow_trk = trksorter[(Int_t)(pttphit[i].track/1000.)];
+    // row in tphit table 100*sector + row
     Int_t isector = (Int_t)(pttphit[i].row/100.);
-    
-    Float_t trkcalcp = sqrt((pttrk[irow_trk].tanl * pttrk[irow_trk].tanl + 1) /
-			    (pttrk[irow_trk].invp * pttrk[irow_trk].invp));
+    Int_t irowsector = pttphit[i].row - 100 * isector;   
 
+    // global cuts and only particles belonging to track
+    if (ptres[irow_res].resy != 0. && pttphit[i].alpha != 0. && irow_trk >= 0) {
+      // calculate total momentum of the track where the hit belongs to
+      Float_t trkcalcp = sqrt((pttrk[irow_trk].tanl * pttrk[irow_trk].tanl + 1) /
+			      (pttrk[irow_trk].invp * pttrk[irow_trk].invp));
 
-    // global cuts and no specific sector selected
-    if (ptres[irow_res].resy != 0. && pttphit[i].alpha != 0. && !bSectorSelectionOn) {    
-      // inner sector
-      if (isector <= 13) {
-	if (trkcalcp >= 0.3) {
-	  ResidualHists[0].mXYResVersusAlpha->
-	    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+      //  no specific sector selected 
+      if (!bSectorSelectionOn) {
+	// inner sector
+	if (irowsector <= 13) {
+	  if (trkcalcp >= 0.3) {
+	    ResidualHists[0].mXYResVersusAlpha->
+	      Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+	  }
+	  else {
+	    ResidualHists[1].mXYResVersusAlpha->
+	      Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy));
+	  }
 	}
+	// outer sector
 	else {
-	  ResidualHists[1].mXYResVersusAlpha->
-	    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy));
+	  if (trkcalcp >= 0.3) {
+	    ResidualHists[2].mXYResVersusAlpha->
+	      Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy));
+	  }
+	  else {
+	    ResidualHists[3].mXYResVersusAlpha->
+	      Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy));
+	  }
 	}
       }
-      // outer sector
+      // fill histograms only for selected sector, low momentum in hist1 rest in hist0
       else {
-	if (trkcalcp >= 0.3) {
-	  ResidualHists[2].mXYResVersusAlpha->
-	    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy));
-	}
-	else {
-	  ResidualHists[3].mXYResVersusAlpha->
-	    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy));
-	}
-      }
-    }
-    // fill histograms only for selected sector, low momentum in hist1 rest in hist0
-    else {
-      if (isector == SelectedSector) {
-	if (trkcalcp >= 0.3) {
-	  ResidualHists[0].mXYResVersusAlpha->
-	    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
-	}
-	else {
-	  ResidualHists[1].mXYResVersusAlpha->
-	    Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy));
+	if (isector == SelectedSector) {
+	  if (trkcalcp >= 0.3) {
+	    ResidualHists[0].mXYResVersusAlpha->
+	      Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy) );
+	  }
+	  else {
+	    ResidualHists[1].mXYResVersusAlpha->
+	      Fill((Float_t)(pttphit[i].alpha),(Float_t)(ptres[irow_res].resy));
+	  }
 	}
       }
     }
+
   }
 
   return kStOK;
-
 }
+
 //-----------------------------------------------------------------------
 
-Int_t StQACosmicMaker::calcHistograms() {
+Int_t StQACosmicMaker::calcResHistograms() {
 
   int i;
 
@@ -438,6 +461,238 @@ void StQACosmicMaker::setSector(const Int_t sectorNumber) {
   else {
     cout << "error sector selected which does not exist" << endl;
   }
+
+}
+
+//-----------------------------------------------------------------------
+
+Int_t StQACosmicMaker::initChargeHistograms() {
+
+  int i;
+
+  Float_t xMin = -250.;
+  Float_t xMax = 250.;
+  Float_t yMin = 0.;
+  Float_t yMax = 0.00001;
+  Int_t nYBins = 2000;
+
+  // define the histograms for q versus x,y,z  
+  for (i = 0; i < 3; i++) {
+
+    TString *mHistTitle;
+    TString *mHistName;
+    char mCount[1];
+    sprintf(mCount,"%d",i);
+
+    mHistTitle = new TString("charge versus x,y,z");
+    mHistName  = new TString("chargevsxyz");
+    mHistName->Append(*mCount);
+    ChargeHists[i].mQdist =
+      new TH2F(mHistName->Data(), mHistTitle->Data(), nXBins, xMin, xMax, nYBins, yMin, yMax);
+    ChargeHists[i].mQdist->SetXTitle("x/y/z (cm)");
+    ChargeHists[i].mQdist->SetYTitle("Q");
+    delete mHistTitle;
+    delete mHistName;
+
+    mHistTitle = new TString("Mean charge versus x,y,z");
+    mHistName  = new TString("meanchargevsxyz");
+    mHistName->Append(*mCount);
+    ChargeHists[i].FitQHists.mQ_mean =
+      new TH1D(mHistName->Data(), mHistTitle->Data(), nXBins, xMin, xMax);
+    delete mHistTitle;
+    delete mHistName;
+
+    mHistTitle = new TString("Sigma charge versus x,y,z");
+    mHistName  = new TString("sigmachargevsxyz");
+    mHistName->Append(*mCount);
+    ChargeHists[i].FitQHists.mQ_sigma =
+      new TH1D(mHistName->Data(), mHistTitle->Data(), nXBins, xMin, xMax);
+    delete mHistTitle;
+    delete mHistName;
+
+    mHistTitle = new TString("Magnitude charge versus x,y,z");
+    mHistName  = new TString("magchargevsxyz");
+    mHistName->Append(*mCount);
+    ChargeHists[i].FitQHists.mQ_mag =
+      new TH1D(mHistName->Data(), mHistTitle->Data(), nXBins, xMin, xMax);
+    delete mHistTitle;
+    delete mHistName;
+
+    mHistTitle = new TString("ChiSquared charge versus x,y,z");
+    mHistName  = new TString("chichargevsxyz");
+    mHistName->Append(*mCount);
+    ChargeHists[i].FitQHists.mQ_chi =
+      new TH1D(mHistName->Data(), mHistTitle->Data(), nXBins, xMin, xMax);
+    delete mHistTitle;
+    delete mHistName;
+  }
+
+  return kStOK;
+
+}
+
+//-----------------------------------------------------------------------
+
+Int_t StQACosmicMaker::fillChargeHistograms() {
+  
+  int i;
+
+  // get pointers to tpc hit table
+  St_DataSetIter Itpc_hits(GetDataSet("tpc_hits"));
+  St_tcl_tphit *phtcl = 0;
+  tcl_tphit_st *pttphit = 0;
+  phtcl = (St_tcl_tphit *) Itpc_hits.Find("tphit");
+  if (phtcl) {pttphit = phtcl->GetTable();}
+  else { cout << "Warning: tphit table header does not exist " << endl; return kStWarn; }
+  if (!pttphit) { cout << "Warning: tphit table does not exist " << endl; return kStWarn; }
+  
+  // get pointers to tpc residuals table and track table
+  St_DataSetIter Itpc_trk(GetDataSet("tpc_tracks"));
+  St_tpt_track *phtrk = 0;
+  tpt_track_st *pttrk = 0;
+  phtrk = (St_tpt_track *) Itpc_trk.Find("tptrack");
+  if (phtrk) {pttrk = phtrk->GetTable();}
+  else { cout << "Warning: tptrack table header does not exist " << endl; return kStWarn; }
+  if (!pttrk) { cout << "Warning: tptrack table does not exist " << endl; return kStWarn; }
+
+  // create a sorter to get an index to a track
+  int nrows = phtrk->GetNRows();
+  if (nrows == 0) {cout << "Warning: residual table contains zero rows " << endl; return kStWarn;}
+  TString colName = "id";
+  St_TableSorter trksorter(*phtrk,colName,0,nrows-1);
+  
+  for(i=0; i<phtcl->GetNRows(); i++) {
+    // track in row table is 1000*id + position on track
+    Int_t irow_trk = trksorter[(Int_t)(pttphit[i].track/1000.)];
+    Int_t isector = (Int_t)(pttphit[i].row/100.);
+    
+    // global cuts and only particles belonging to track
+    if (pttphit[i].q != 0. && irow_trk >= 0) {
+      // calculate total momentum of the track where the hit belongs to
+      Float_t trkcalcp = sqrt((pttrk[irow_trk].tanl * pttrk[irow_trk].tanl + 1) /
+			      (pttrk[irow_trk].invp * pttrk[irow_trk].invp));
+
+      if (Debug()) {  
+	cout << "trk row nr in table: " << irow_trk << endl;
+      }
+
+      if (trkcalcp >= 0.3) {
+	//  no specific sector selected 
+	if (!bSectorSelectionOn) {
+	  ChargeHists[0].mQdist->
+	    Fill((Float_t)(pttphit[i].x),(Float_t)(pttphit[i].q) );
+	  ChargeHists[1].mQdist->
+	    Fill((Float_t)(pttphit[i].y),(Float_t)(pttphit[i].q) );
+	  ChargeHists[2].mQdist->
+	    Fill((Float_t)(pttphit[i].z),(Float_t)(pttphit[i].q) );
+	}
+	// fill histograms only for selected sector, low momentum in hist1 rest in hist0
+	else {
+	  if (isector == SelectedSector) {
+	    ChargeHists[0].mQdist->
+	      Fill((Float_t)(pttphit[i].x),(Float_t)(pttphit[i].q) );
+	    ChargeHists[1].mQdist->
+	      Fill((Float_t)(pttphit[i].y),(Float_t)(pttphit[i].q) );
+	    ChargeHists[2].mQdist->
+	      Fill((Float_t)(pttphit[i].z),(Float_t)(pttphit[i].q) );
+	  }
+	}
+      }
+    }
+  }
+
+  return kStOK;
+
+}
+
+//-----------------------------------------------------------------------
+
+Int_t StQACosmicMaker::calcChargeHistograms() {
+
+  int i;
+
+  for (i = 0; i < 3; i++) {
+
+    char *mIndexName[3]={"x","y","z"};
+    TString *mHistTitle;
+    TString *mHistName;
+    char mCount[1];
+    sprintf(mCount,"%d",i);
+
+    mHistTitle = new TString("Q distribution versus ");
+    mHistTitle->Append(mIndexName[i]);
+    ChargeHists[i].mQdist->FitSlicesY();
+    ChargeHists[i].mQdist->SetXTitle(mIndexName[i]);
+    ChargeHists[i].mQdist->SetName(mHistTitle->Data());
+    delete mHistTitle;
+    if (Debug()) {  
+      cout << "pointer to hist: " << ChargeHists[i].mQdist << endl;
+    }
+    
+    mHistTitle = new TString("Magnitude Q distribution versus ");
+    mHistName  = new TString("chargevsxyz");
+    mHistName->Append(*mCount);
+    mHistTitle->Append(mIndexName[i]);
+    mHistName->Append("_0");
+    ((TH1D *) gDirectory->Get(mHistName->Data()))->Copy(*ChargeHists[i].FitQHists.mQ_mag);
+    delete ((TH1D *) gDirectory->Get(mHistName->Data()));
+    ChargeHists[i].FitQHists.mQ_mag->SetName(mHistTitle->Data());
+    delete mHistName;
+    delete mHistTitle;
+    ChargeHists[i].FitQHists.mQ_mag->SetXTitle(mIndexName[i]);
+    ChargeHists[i].FitQHists.mQ_mag->SetYTitle("Magnitude");
+
+    mHistTitle = new TString("Mean Q distribution versus ");
+    mHistName  = new TString("chargevsxyz");
+    mHistName->Append(*mCount);
+    mHistTitle->Append(mIndexName[i]);
+    mHistName->Append("_1");
+    ((TH1D *) gDirectory->Get(mHistName->Data()))->Copy(*ChargeHists[i].FitQHists.mQ_mean);
+    delete ((TH1D *) gDirectory->Get(mHistName->Data()));
+    ChargeHists[i].FitQHists.mQ_mean->SetName(mHistTitle->Data());
+    delete mHistName;
+    delete mHistTitle;
+    ChargeHists[i].FitQHists.mQ_mean->SetXTitle(mIndexName[i]);
+    ChargeHists[i].FitQHists.mQ_mean->SetYTitle("Mean Q");
+    ChargeHists[i].FitQHists.mQ_mean->GetXaxis()->SetLabelSize(0.04);
+    ChargeHists[i].FitQHists.mQ_mean->GetYaxis()->SetLabelSize(0.04);
+    ChargeHists[i].FitQHists.mQ_mean->SetMarkerColor(kBlue);
+    ChargeHists[i].FitQHists.mQ_mean->SetMarkerStyle(20);
+
+    mHistTitle = new TString("Sigma Q distribution versus ");
+    mHistName  = new TString("chargevsxyz");
+    mHistName->Append(*mCount);
+    mHistTitle->Append(mIndexName[i]);
+    mHistName->Append("_2");
+    ((TH1D *) gDirectory->Get(mHistName->Data()))->Copy(*ChargeHists[i].FitQHists.mQ_sigma);
+    delete ((TH1D *) gDirectory->Get(mHistName->Data()));
+    ChargeHists[i].FitQHists.mQ_sigma->SetName(mHistTitle->Data());
+    delete mHistName;
+    delete mHistTitle;
+    ChargeHists[i].FitQHists.mQ_sigma->SetXTitle(mIndexName[i]);
+    ChargeHists[i].FitQHists.mQ_sigma->SetYTitle("Sigma Q");
+    
+    mHistTitle = new TString("Chi2 Q distribution versus ");
+    mHistName  = new TString("chargevsxyz");
+    mHistName->Append(*mCount);
+    mHistTitle->Append(mIndexName[i]);
+    mHistName->Append("_chi2");
+    ((TH1D *) gDirectory->Get(mHistName->Data()))->Copy(*ChargeHists[i].FitQHists.mQ_chi);
+    delete ((TH1D *) gDirectory->Get(mHistName->Data()));
+    ChargeHists[i].FitQHists.mQ_chi->SetName(mHistTitle->Data());
+    delete mHistName;
+    delete mHistTitle;
+    ChargeHists[i].FitQHists.mQ_chi->SetXTitle(mIndexName[i]);
+    ChargeHists[i].FitQHists.mQ_chi->SetYTitle("chi2 Q");
+    
+    for (int j=0; j<ChargeHists[i].FitQHists.mQ_sigma->fN; j++) { 
+      ChargeHists[i].FitQHists.mQ_sigma->fArray[j] = 
+    	fabs(ChargeHists[i].FitQHists.mQ_sigma->fArray[j]);
+    }
+
+  }
+
+  return kStOK;
 
 }
 
