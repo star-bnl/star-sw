@@ -1,3 +1,20 @@
+/*!
+ * \class StTreeMaker
+ * \author Victor Perevoztchikov (perev@bnl.gov)
+ *
+ * Purpose : Main STAR I/O Maker to  read/write ROOT based STAR data
+ *
+ * <ol>
+ * <li>Inherited from StIOInterface class
+ * <li>Creates, writes and reads STAR data components(branches)
+ * <li>Open/close of numerous input and output files
+ * <li> Provides common user interface for all ROOT based I/O data.
+ *   User maker access data via StMaker class. It does not
+ *   know anything about existence of StTreeMaker(s)
+ * </ol>
+ *
+ */
+
 #ifndef STAR_StTreeMaker
 #define STAR_StTreeMaker
 
@@ -45,7 +62,7 @@ public:
      {if(!fTree)return 0;return (StBranch*)fTree->Find(brName);};   
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTreeMaker.h,v 1.16 2002/02/23 19:14:15 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTreeMaker.h,v 1.17 2002/04/26 22:14:48 jeromel Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 private:
    StTree        *fTree;	//!
