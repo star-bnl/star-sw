@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.5  1999/03/03 20:52:16  ward
+// Fix bug.  Pad number assignment was off by 1
+//
 // Revision 1.4  1999/02/21 22:30:53  ward
 // small corrections
 //
@@ -44,7 +47,7 @@ ClassImp(St_tpcdaq_Maker)
 #define DEBUG_ACTIVE_ROW 33
 St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name, const char *title):
       StMaker(name,title) {
-  printf("This is the St_tpcdaq_Maker constructor....\n");
+  printf("St_tpcdaq_Maker constructor.\n");
   drawinit=kFALSE;
 }
 St_tpcdaq_Maker::~St_tpcdaq_Maker() {
@@ -144,7 +147,7 @@ void St_tpcdaq_Maker::PadWrite(St_raw_pad *raw_pad_gen,int padR,int padOffset,
   singlerow.SeqOffset=seqOffset;
   singlerow.nseq=nseq;
   singlerow.SeqModBreak=timeWhere;
-  singlerow.PadId=pad+1;
+  singlerow.PadId=pad;
   raw_pad_gen->AddAt(&singlerow,padR);
 }
 inline void St_tpcdaq_Maker::PixelWrite(St_type_shortdata *pixel_data_gen,
@@ -273,7 +276,8 @@ int St_tpcdaq_Maker::Output() {
           if(prevStartTimeBin> startTimeBin) { mErr=__LINE__; return 7; }
           prevStartTimeBin=startTimeBin; seqLen=listOfSequences[iseq].length;
           if(startTimeBin<=0x100) timeWhere=iseq+1; else timeOff=0x101;
-// printf("BBB startTimeBin=%3d, timeOff=%3d\n",startTimeBin,timeOff);
+// printf("BBB startTimeBin=%3d, timeOff=%3d, diff = %x\n",startTimeBin,timeOff,
+                        // startTimeBin-timeOff);
           SeqWrite(raw_seq_gen,seqR,(startTimeBin-timeOff),seqLen);
           nSeqThisPadRow++;
           pointerToAdc=listOfSequences[iseq].firstAdc;
@@ -341,7 +345,7 @@ void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
   printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.4 1999/02/21 22:30:53 ward Exp $ \n");
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.5 1999/03/03 20:52:16 ward Exp $ \n");
   // printf("* %s *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if(gStChain->Debug()) StMaker::PrintInfo();
