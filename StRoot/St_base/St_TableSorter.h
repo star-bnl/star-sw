@@ -6,7 +6,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: St_TableSorter.h,v 1.20 1999/12/01 14:03:35 fine Exp $
+//  $Id: St_TableSorter.h,v 1.21 1999/12/04 22:41:37 fine Exp $
 //
 //  St_TableSorter  - Is an "observer" class to sort the St_Table objects
 //                    The class provides an interface to the standard "C/C++"
@@ -167,10 +167,13 @@ class St_TableSorter : public TNamed {
 //    Int_t operator()(const Char_t *value) { return BinarySearch(*value); } // to be implemented
 //    Int_t operator()(TString &value)    { return *this(value.Data());  }   // to be implemented
 
-    ClassDef(St_TableSorter,0)
+    ClassDef(St_TableSorter,0) // Is an "observer" class to sort the St_Table objects
 };
 //______________________________________________________________________
 // $Log: St_TableSorter.h,v $
+// Revision 1.21  1999/12/04 22:41:37  fine
+// clean up sole const methods
+//
 // Revision 1.20  1999/12/01 14:03:35  fine
 // operator[] fixed for mixed types
 //
