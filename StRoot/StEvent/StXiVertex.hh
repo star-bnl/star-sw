@@ -1,16 +1,19 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.hh,v 1.1 1999/02/23 13:46:46 genevb Exp $
+ * $Id: StXiVertex.hh,v 1.2 1999/02/23 13:50:59 genevb Exp $
  *
- * Author: Gene Vab Buren, Feb 1999
+ * Author: Gene Van Buren, Feb 1999
  *
  ***************************************************************************
  *
- * Description:
+ * Description: Vertex class for cascades
  *
  ***************************************************************************
  *
  * $Log: StXiVertex.hh,v $
+ * Revision 1.2  1999/02/23 13:50:59  genevb
+ * Fixed some typos
+ *
  * Revision 1.1  1999/02/23 13:46:46  genevb
  * Add new StXiVertex
  *

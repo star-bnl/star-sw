@@ -1,16 +1,19 @@
 /***************************************************************************
  *
- * $Id: StXiVertex.cc,v 1.1 1999/02/23 13:46:45 genevb Exp $
+ * $Id: StXiVertex.cc,v 1.2 1999/02/23 13:50:59 genevb Exp $
  *
- * Author: Gene nab Buren, Feb 1999
+ * Author: Gene Van Buren, Feb 1999
  *
  ***************************************************************************
  *
- * Description:
+ * Description: vertex class for cascades
  *
  ***************************************************************************
  *
  * $Log: StXiVertex.cc,v $
+ * Revision 1.2  1999/02/23 13:50:59  genevb
+ * Fixed some typos
+ *
  * Revision 1.1  1999/02/23 13:46:45  genevb
  * Add new StXiVertex
  *
@@ -19,7 +22,7 @@
 #include <iostream.h>
 #include "StEvent/StXiVertex.hh"
 
-static const char rcsid[] = "$Id: StXiVertex.cc,v 1.1 1999/02/23 13:46:45 genevb Exp $";
+static const char rcsid[] = "$Id: StXiVertex.cc,v 1.2 1999/02/23 13:50:59 genevb Exp $";
 
 StXiVertex::StXiVertex() : 
  StVertex()
