@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// $Id: HitHistograms.cxx,v 1.5 2002/02/12 18:41:59 genevb Exp $
+// $Id: HitHistograms.cxx,v 1.6 2002/02/12 22:17:11 genevb Exp $
 //
 // Author: M.L. Miller, Yale
 //
@@ -10,6 +10,9 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: HitHistograms.cxx,v $
+// Revision 1.6  2002/02/12 22:17:11  genevb
+// Forgot to remove some print statements
+//
 // Revision 1.5  2002/02/12 18:41:59  genevb
 // Additional FTPC histograms
 //
@@ -39,14 +42,12 @@
 HitHistograms::HitHistograms()
 {
   /* noop */
-  printf("HHHH1 Construct Hit Histo1\n");
 }
 
 HitHistograms::HitHistograms(const char *name,const char *title,
 			     Int_t nbinsx,Axis_t xlow,Axis_t xup, Int_t nbinsy,
 			     StMaker* mk)
 {
-  printf("HHHH2 Construct Hit Histo2\n");
   // if you change these constants, be sure to change them in StQABookHist
   // for the "dE/dx for all TPC sectors" histogram (m_dedx_all_sectors)
   double xmin = 0.;
