@@ -1,5 +1,8 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.31 2001/12/12 16:05:28 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.32 2002/01/21 22:10:38 jcs Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.32  2002/01/21 22:10:38  jcs
+// calculate FTPC gas temperature adjusted air pressure using online db
+//
 // Revision 1.31  2001/12/12 16:05:28  jcs
 // Move GetDataBase.. statements from Init to Make to ensure selection of
 // correct flavor (Thank you Jeff)
@@ -125,6 +128,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TObjArray.h"
+#include "PhysicalConstants.h"
 
 #ifndef gufld
 #define gufld gufld_
@@ -139,6 +143,8 @@ extern "C" void gufld(float *, float *);
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_g2t_ftp_hit_Table.h"
 #include "tables/St_ffs_gepoint_Table.h"
+
+#include "StDetectorDbMaker/StDetectorDbFTPCGas.h"
 
 ClassImp(StFtpcClusterMaker)
 
@@ -279,26 +285,6 @@ Int_t StFtpcClusterMaker::Make()
    m_gas        = (St_ftpcGas *)dblocal_calibrations("ftpcGas");
    m_electronics = (St_ftpcElectronics *)dblocal_calibrations("ftpcElectronics");
 
-  St_DataSet *daqDataset;
-  StDAQReader *daqReader;
-  StFTPCReader *ftpcReader=NULL;
-  daqDataset=GetDataSet("StDAQReader");
-  if(daqDataset)
-    {
-      gMessMgr->Message("", "I", "OST") << "Using StDAQReader to get StFTPCReader" << endm;
-      assert(daqDataset);
-      daqReader=(StDAQReader *)(daqDataset->GetObject());
-      assert(daqReader);
-      ftpcReader=daqReader->getFTPCReader();
-      assert(ftpcReader);
-
-      if (!ftpcReader->checkForData()) {
-	gMessMgr->Message("", "W", "OST") << "No FTPC data available!" << endm;
-	return kStWarn;
-      }
-	
-    }
-
   // create parameter reader
   StFtpcParamReader *paramReader = new StFtpcParamReader(m_clusterpars,
 							 m_fastsimgas,
@@ -319,6 +305,70 @@ Int_t StFtpcClusterMaker::Make()
                                                 m_driftfield,
                                                 m_gas,
                                                 m_electronics);
+
+  St_DataSet *daqDataset;
+  StDAQReader *daqReader;
+  StFTPCReader *ftpcReader=NULL;
+  daqDataset=GetDataSet("StDAQReader");
+  if(daqDataset)
+    {
+      gMessMgr->Message("", "I", "OST") << "Using StDAQReader to get StFTPCReader" << endm;
+      assert(daqDataset);
+      daqReader=(StDAQReader *)(daqDataset->GetObject());
+      assert(daqReader);
+      ftpcReader=daqReader->getFTPCReader();
+      assert(ftpcReader);
+
+      if (!ftpcReader->checkForData()) {
+	gMessMgr->Message("", "W", "OST") << "No FTPC data available!" << endm;
+	return kStWarn;
+      }
+
+      // get pressure and gas temperature from online DB; test and use valid values
+      StDetectorDbFTPCGas * gas = StDetectorDbFTPCGas::instance();
+      if ( !gas ){
+          gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting FTPC Online database: Conditions"<<endm;
+          return kStWarn;
+      }
+      // Barometric Pressure
+      if (gas->getBarometricPressure() >= paramReader->minPressure() && gas->getBarometricPressure() <= paramReader->maxPressure() && gas->getBarometricPressure() != paramReader->normalizedNowPressure()) {
+          gMessMgr->Info() <<"Change normalizedNowPressure from "<<paramReader->normalizedNowPressure()<<" to "<<gas->getBarometricPressure()<<endm; 
+          paramReader->setNormalizedNowPressure(gas->getBarometricPressure());
+      }
+      else {
+          gMessMgr->Info() << "Invalid value ("<<gas->getBarometricPressure()<<") from online database for barometric pressure - using previous value ("<<paramReader->normalizedNowPressure()<<")"<<endm;
+      }
+
+     // valid database reading for both  Gas temperature FTPC West and FTPC East
+      if ( (gas->getGasOutWest() >= paramReader->minGasTemperature() && gas->getGasOutWest() <= paramReader->maxGasTemperature())
+         && (gas->getGasOutEast() >= paramReader->minGasTemperature() && gas->getGasOutEast() <= paramReader->maxGasTemperature()) ) {
+          gMessMgr->Info() <<"Change GasTemperatureWest from "<<paramReader->gasTemperatureWest()<<" to "<<gas->getGasOutWest()<<endm;
+          paramReader->setGasTemperatureWest(gas->getGasOutWest());
+          gMessMgr->Info() <<"Change GasTemperatureEast from "<<paramReader->gasTemperatureEast()<<" to "<<gas->getGasOutEast()<<endm;
+          paramReader->setGasTemperatureEast(gas->getGasOutEast());
+      }
+
+     // valid database reading for Gas temperature FTPC West only
+      else if (gas->getGasOutWest() >= paramReader->minGasTemperature() && gas->getGasOutWest() <= paramReader->maxGasTemperature()) {
+          gMessMgr->Info() <<"Change GasTemperatureWest from "<<paramReader->gasTemperatureWest()<<" to "<<gas->getGasOutWest()<<endm;
+          paramReader->setGasTemperatureWest(gas->getGasOutWest());
+          gMessMgr->Info() <<"Invalid value ("<<gas->getGasOutEast()<<") from online database for gasTemperatureEast - set GasTemperatureEast("<<paramReader->gasTemperatureEast()<<")  = GasTemperatureWest - ("<<dbReader->temperatureDifference()<<") = "<<paramReader->gasTemperatureWest()-dbReader->temperatureDifference()<<endm;
+           paramReader->setGasTemperatureEast(paramReader->gasTemperatureWest()-dbReader->temperatureDifference());
+      }
+
+     // valid database reading for Gas temperature FTPC East only
+      else if (gas->getGasOutEast() >= paramReader->minGasTemperature() && gas->getGasOutEast() <= paramReader->maxGasTemperature()) {
+          gMessMgr->Info() <<"Change GasTemperatureEast from "<<paramReader->gasTemperatureEast()<<" to "<<gas->getGasOutEast()<<endm;
+          paramReader->setGasTemperatureEast(gas->getGasOutEast());
+          gMessMgr->Info() <<"Invalid value ("<<gas->getGasOutWest()<<") from online database for gasTemperatureWest - set GasTemperatureWest("<<paramReader->gasTemperatureWest()<<")  = GasTemperatureEast + ("<<dbReader->temperatureDifference()<<") = "<<paramReader->gasTemperatureEast()+dbReader->temperatureDifference()<<endm;
+           paramReader->setGasTemperatureWest(paramReader->gasTemperatureEast()+dbReader->temperatureDifference());
+      }
+
+       paramReader->setAdjustedAirPressureWest(paramReader->normalizedNowPressure()*((dbReader->baseTemperature()+STP_Temperature)/(paramReader->gasTemperatureWest()+STP_Temperature)));
+      gMessMgr->Info() <<" paramReader->setAdjustedAirPressureWest = "<<paramReader->adjustedAirPressureWest()<<endm;
+      paramReader->setAdjustedAirPressureEast(paramReader->normalizedNowPressure()*((dbReader->baseTemperature()+STP_Temperature)/(paramReader->gasTemperatureEast()+STP_Temperature)));
+     gMessMgr->Info() <<" paramReader->setAdjustedAirPressureEast = "<<paramReader->adjustedAirPressureEast()<<endm;
+    }
 
   TObjArray *hitarray = new TObjArray(10000);  
 
