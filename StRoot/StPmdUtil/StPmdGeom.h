@@ -4,7 +4,7 @@
  */
 /*********************************************************
  *
- * $Id: StPmdGeom.h,v 1.8 2004/04/01 15:40:25 subhasis Exp $
+ * $Id: StPmdGeom.h,v 1.9 2005/01/04 19:31:08 subhasis Exp $
  *
  * Author: Dipak Mishra
  *
@@ -16,6 +16,9 @@
  *************************************************************
  *
  * $Log: StPmdGeom.h,v $
+ * Revision 1.9  2005/01/04 19:31:08  subhasis
+ * Mapping for year2005 Run, Code from Rashmi's area
+ *
  * Revision 1.8  2004/04/01 15:40:25  subhasis
  * zdist changed after survey result
  *
@@ -80,6 +83,7 @@ class StPmdGeom {
 
 
   Int_t ChainMapping(Int_t&,Int_t&,Int_t&,Int_t&,Int_t&,Int_t&);
+  Int_t ChainMapping(Int_t&,Int_t&,Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
 
   void chain1(int&,int&,int&,int&);
   void chain2(int&,int&,int&,int&);
@@ -98,6 +102,55 @@ class StPmdGeom {
   void chain41(int&,int&,int&,int&);
   void chain45(int&,int&,int&,int&);
   void chain46(int&,int&,int&,int&);
+// year=2005 2005 , Rashmi's routine  
+  void chain1(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain2(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain3(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain4(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain5(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain6(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain7(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain8(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain9(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain10(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain11(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain12(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain13(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain14(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain15(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain16(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain17(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain18(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain19(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain20(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain21(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain22(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain23(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain24(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain25(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain26(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain27(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain28(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain29(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain30(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain31(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain32(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain33(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain34(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain35(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain36(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain37(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain38(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain39(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain40(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain41(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain42(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain43(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain44(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain45(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain46(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain47(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
+  void chain48(Int_t&,Int_t&,Int_t&,Int_t&,Int_t);
  
  void ADC2Edep(Int_t, Float_t&); //! To convert the ADC value to Edep
  
@@ -118,6 +171,20 @@ inline void StPmdGeom::commonconstants()
   mzreal = 539.0;  // changed on 1/4/04 after survey results
 }
 #endif
+
+
+  
+
+  
+
+
+
+
+
+
+
+
+
 
 
 
