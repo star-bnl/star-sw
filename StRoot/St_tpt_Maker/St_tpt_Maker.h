@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.h,v 1.6 1999/01/12 19:50:20 sakrejda Exp $
+// $Id: St_tpt_Maker.h,v 1.7 1999/02/25 20:55:33 love Exp $
 // $Log: St_tpt_Maker.h,v $
+// Revision 1.7  1999/02/25 20:55:33  love
+// ntuple named final added
+//
 // Revision 1.6  1999/01/12 19:50:20  sakrejda
 // QA histograms added to the tpt maker
 //
@@ -37,12 +40,15 @@ class St_tte_control;
 class St_tdeparm;
 class St_tpipar;
 class TH1F;
+class TNtuple;
 
 class St_tpt_Maker : public StMaker {
  private:
                Bool_t drawinit;
 	       Bool_t m_iftte;
-//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.6 1999/01/12 19:50:20 sakrejda Exp $";
+	       Bool_t m_mkfinal;  //control flag for final ntuple production
+	       Bool_t m_mkadcxyz; //control flag for final ntuple production
+//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.7 1999/02/25 20:55:33 love Exp $";
                St_tpg_pad_plane *m_tpg_pad_plane; //! Constants that describe TPC pad plane
                St_tcl_tpc_index_type *m_type;   //!  Table of many-to-many index 
 	                                        // correlations for tpc evaluations
@@ -58,6 +64,8 @@ class St_tpt_Maker : public StMaker {
                TH1F *m_azimuth;       //!azimuthal angle
                TH1F *m_tan_dip;       //!tangent of the dip angle
                TH1F *m_r0;            //!radius for the first point
+               TH1F *m_invp;          //!inverse momentum
+               TNtuple                *m_final; //! Final track-hit Ntuple
  public: 
                   St_tpt_Maker(const char *name="tpc_tracks", const char *title="event/data/tpc/tracks");
    virtual       ~St_tpt_Maker();
@@ -65,6 +73,8 @@ class St_tpt_Maker : public StMaker {
    virtual Int_t  Make();
    virtual void   PrintInfo();
    virtual void   Set_tte(Bool_t m=kFALSE){m_iftte = m;}
+   virtual void   Set_final(Bool_t m=kFALSE){m_mkfinal = m;}
+   virtual void   Set_adcxyz(Bool_t m=kFALSE){m_mkadcxyz = m;}
    ClassDef(St_tpt_Maker, 1)   //StAF chain virtual base class for Makers
 };
 
