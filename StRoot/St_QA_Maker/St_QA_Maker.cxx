@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 2.7 2001/08/03 20:33:56 lansdell Exp $
+// $Id: St_QA_Maker.cxx,v 2.8 2001/08/03 21:32:28 lansdell Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.8  2001/08/03 21:32:28  lansdell
+// fixed primvtx check for dst table qa
+//
 // Revision 2.7  2001/08/03 20:33:56  lansdell
 // added primvtx check histos for different multiplicities; separated x-y plot of first point on track, tpc into east and west histos
 //
@@ -121,11 +124,13 @@ Int_t St_QA_Maker::Make(){
       dst_vertex_st *tt = vertex->GetTable();
       for (Int_t i=0; i<vertex->GetNRows(); i++, tt++) {
 	if (tt->iflag==1 && tt->vtx_id==kEventVtxId) {
-	  foundPrimVtx = kTRUE;
-	  mNullPrimVtx->Fill(1);
 	  St_dst_track* gtracks = (St_dst_track*) dstI["globtrk"];
 	  multiplicity = gtracks->GetNRows();
-	  return StQAMakerBase::Make();
+	  int makeStat = StQAMakerBase::Make();
+	  foundPrimVtx = kTRUE;
+	  mNullPrimVtx->Fill(1);
+	  hists->mNullPrimVtxMult->Fill(1);
+	  return makeStat;
 	}
       }
     }
@@ -133,6 +138,7 @@ Int_t St_QA_Maker::Make(){
   if (foundPrimVtx == kFALSE) {
     cout << "Error in St_QA_Maker::Make(): no primary vertex found!" << endl;
     mNullPrimVtx->Fill(-1);
+    hists->mNullPrimVtxMult->Fill(-1);
     return kStOk;
   }
   else {
