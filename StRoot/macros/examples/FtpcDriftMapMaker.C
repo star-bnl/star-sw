@@ -1,5 +1,8 @@
-// $Id: FtpcDriftMapMaker.C,v 1.1 2001/01/02 13:02:06 jcs Exp $
+// $Id: FtpcDriftMapMaker.C,v 1.2 2001/01/19 15:00:07 jcs Exp $
 // $Log: FtpcDriftMapMaker.C,v $
+// Revision 1.2  2001/01/19 15:00:07  jcs
+// replace the default option ("Normal") with "FullField"
+//
 // Revision 1.1  2001/01/02 13:02:06  jcs
 // macro to run standalone maker StFtpcDriftMapMaker
 //
@@ -10,7 +13,7 @@
 //   
 //======================================================================
 
-void FtpcDriftMapMaker(const Char_t *FieldType="Normal")
+void FtpcDriftMapMaker(const Char_t *FieldType="FullField")
 {
     if (gClassTable->GetID("TTable") < 0) gSystem->Load("libStar");
     gSystem->Load("St_base");
@@ -35,7 +38,7 @@ void FtpcDriftMapMaker(const Char_t *FieldType="Normal")
   St_db_Maker *dbMk = new St_db_Maker("db",userDB);
 //StMagFMaker *magFMk = new StMagFMaker("magF");
   Float_t Scale = 1.0;
-  TString FieldName("STAR Normal field");
+  TString FieldName("STAR full field");
   if (FieldType == "FieldOff")     {Scale = 0.00002; FieldName = "STAR no field";}
   if (FieldType == "HalfField")    {Scale = 0.5;     FieldName = "STAR Normal field";}
   if (FieldType == "ReverseField") {Scale = - Scale; FieldName += " Reverse";}
