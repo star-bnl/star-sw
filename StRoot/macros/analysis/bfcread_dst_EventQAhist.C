@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_EventQAhist.C,v 1.13 2000/01/19 16:29:50 kathy Exp $ 
+// $Id: bfcread_dst_EventQAhist.C,v 1.14 2000/01/26 19:28:15 kathy Exp $ 
 // $Log: bfcread_dst_EventQAhist.C,v $
+// Revision 1.14  2000/01/26 19:28:15  kathy
+// put in call to method SetDefaultLogXList
+//
 // Revision 1.13  2000/01/19 16:29:50  kathy
 // update macros to use default input files in /afs/rhic/star/data/samples
 //
@@ -166,6 +169,7 @@ void bfcread_dst_EventQAhist(
   HU->SetPostScriptFile(psFile);
   HU->SetZones(2,3);
   HU->SetPaperSize();
+  HU->SetDefaultLogXList(MakerHistDir);
   HU->SetDefaultLogYList(MakerHistDir);
   if (PageTitle=="") PageTitle=MainFile;
   HU->SetGlobalTitle(PageTitle);
