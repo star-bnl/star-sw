@@ -710,8 +710,9 @@ c calculate hit position along pad row: fit to gaussian.  If that does not
 c   work, do a weighted mean
 c
 	sigma = -1.0
-	if (nseq.ge.3) call tph_3point_gauss(padnum, padsum, d_padsum, nseq,
-     +					     centroid, sigma, uncertainty)
+	if (nseq.ge.3) call tph_3point_gauss(padnum, padsum,
+     +					d_padsum, nseq,
+     +					centroid, sigma, uncertainty)
 	if (sigma.le.0.0) then
 	  call tph_weighted_mean(padnum, padsum, d_padsum, nseq,
      +				 centroid, sigma, uncertainty)
@@ -726,9 +727,11 @@ c Calculate hit position along time direction from sequences with well-defined
 c  t0's
 
 	if (ngood_times.ge.1) then
-	  call tph_weighted_mean(padtime_arr, padsum_arr, d_padsum_arr, ngood_times,
+	  call tph_weighted_mean(padtime_arr, padsum_arr,
+     +				 d_padsum_arr, ngood_times,
      +				 t0, mom2,dt0)
-	  call tph_weighted_mean(padwidth_arr, padsum_arr, d_padsum_arr, ngood_times,
+	  call tph_weighted_mean(padwidth_arr, padsum_arr,
+     +				 d_padsum_arr, ngood_times,
      +				 tau, mom2,uncertainty)
 	else
 	  id = 5
@@ -1014,7 +1017,8 @@ c	  istart=npts-2
 
 	uncertainty = sqrt( (dy(istart)*(delta/2.0-x0)/y(istart))**2 +
      +			    (dy(istart+1)*(2.0*x0)/y(istart+1))**2 +
-     +			    (dy(istart+2)*(delta/2.0+x0)/y(istart+2))**2)/r213
+     +			    (dy(istart+2)*(delta/2.0+x0)/y(istart+2))**2
+     +				)/r213
 
 	return
 	end
