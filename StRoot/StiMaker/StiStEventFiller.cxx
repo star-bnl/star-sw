@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.50 2005/01/17 01:32:13 perev Exp $
+ * $Id: StiStEventFiller.cxx,v 2.51 2005/01/17 03:56:56 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.51  2005/01/17 03:56:56  pruneau
+ * change track container to vector
+ *
  * Revision 2.50  2005/01/17 01:32:13  perev
  * parameters protected
  *
@@ -483,9 +486,9 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
   int fillTrackCount2=0;
   int fillTrackCountG=0;
 
-  for (TrackToTrackMap::iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt) 
+  for (vector<StiTrack*>::iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt) 
     {
-      StiKalmanTrack* kTrack = static_cast<StiKalmanTrack*>((*trackIt).second);
+      StiKalmanTrack* kTrack = static_cast<StiKalmanTrack*>(*trackIt);
       if (!accept(kTrack)) continue; // get rid of riff-raff
       StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
       fillDetectorInfo(detInfo,kTrack,true); //3d argument used to increase/not increase the refCount. MCBS oct 04.
@@ -512,7 +515,7 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 	  //cout<<"Tester: Event Track Node Entries: "<<trackNode->entries()<<endl;
 	  mTrkNodeMap.insert(map<StiKalmanTrack*,StTrackNode*>::value_type (kTrack,trNodeVec.back()) );
 	  if (trackNode->entries(global)<1)
-	    cout << "StiStEventFiller::fillEvent() - ERROR - Track Node has no entries!! -------------------------" << endl;
+	    cout << "StiStEventFiller::fillEvent() -E- Track Node has no entries!! -------------------------" << endl;
 	  fillTrackCount2++;
           if (gTrack->numberOfPossiblePoints()<10) continue;
           if (gTrack->geometry()->momentum().mag()<0.1) continue;
@@ -528,7 +531,7 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 	}
       catch (...) 
 	{
-	  cout << "StiStEventFiller::fillEvent() - WARNING - Unknown exception filling track."<<endl;
+	  cout << "StiStEventFiller::fillEvent() -W- Unknown exception filling track."<<endl;
 	  delete trackNode;
 	  delete detInfo;
 	  delete gTrack;
@@ -583,11 +586,11 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
   int fillTrackCountG=0;
   bool testing= false;
 
-  for (TrackToTrackMap::iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt,++mTrackN) 
+  for (vector<StiTrack*>::iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt,++mTrackN) 
     {
-      kTrack = static_cast<StiKalmanTrack*>((*trackIt).second);
+      kTrack = static_cast<StiKalmanTrack*>(*trackIt);
       if (kTrack==0) 
-	throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- static_cast<StiKalmanTrack*>((*trackIt).second)==0");
+	throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- static_cast<StiKalmanTrack*>(*trackIt)==0");
       if (!accept(kTrack)) continue;
       map<StiKalmanTrack*, StTrackNode*>::iterator itKtrack = mTrkNodeMap.find(kTrack);
       if (itKtrack == mTrkNodeMap.end())  continue;
@@ -656,12 +659,12 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 		  if (ifced)  ifcOK++;
 		  if (weird || !piped || bad>4 || !ifced)
 		    {
-		      cout << "  ==";
+		      //cout << "  ==";
 		      if (weird) cout << "WEIRD/";
 		      if (!piped)cout << "NO-PIPE/";
 		      if (bad>4) cout << "BAD>4 ("<<bad<<")/";
 		      if (!ifced) cout << "no-ifc/";
-		      cout << "=="<<endl;
+		      //cout << "=="<<endl;
 		      
 		      StiKTNForwardIterator it2(leaf);
 		      StiKTNForwardIterator end2 = it2.end();

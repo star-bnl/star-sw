@@ -1,7 +1,7 @@
 //StiResidualCalculator.cxx
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.cxx,v 2.13 2005/01/17 01:31:26 perev Exp $
+ * $Id: StiResidualCalculator.cxx,v 2.14 2005/01/17 03:59:13 pruneau Exp $
  *
  * \class  StiResidualCalculator provides a utility for determining the
  *         track residuals.
@@ -9,6 +9,9 @@
  * \date   October 2002
  ***************************************************************************
  * $Log: StiResidualCalculator.cxx,v $
+ * Revision 2.14  2005/01/17 03:59:13  pruneau
+ * change track container to vector
+ *
  * Revision 2.13  2005/01/17 01:31:26  perev
  * New parameter model
  *
@@ -259,88 +262,66 @@ int StiResidualCalculator::Init()
 
 void StiResidualCalculator::calcResiduals(StiTrackContainer *tracks)
 {
-
   //Do some checking to make sure the next call isn't pointless
   if(candidates.size()<=1)
     {
       //only background hists
-      cout<<"StiResidualCalculator::trackResiduals"
+      cout<<"StiResidualCalculator::trackResiduals() -I-"
 	  <<" no detectors initialized for residuals."<<endl;
       return;
     }  
 
   //get iterator from track container
-  TrackToTrackMap::const_iterator trackIt = tracks->begin();
-  //trackIterator
-
+  vector<StiTrack*>::const_iterator trackIt = tracks->begin();
   //loop over tracks
   int check=0;
   while(trackIt!=tracks->end())
     {
-
       //this is where track cuts could be used
-      check= trackResidue((*trackIt).second);
+      check= trackResidue(*trackIt);
       trackIt++;
     }
-
-  return;
 }
 
+///Take a general StiTrack. Since this maker is written
+///specifically for StiKalmanTracks (needs handles in
+///Kalman tracks), check for castness to Kalman track.
+///If fails, exit. If success, call trackResidue(StiKalmanTrack).
 int StiResidualCalculator::trackResidue(const StiTrack *track)
 {
-  //Take a general StiTrack. Since this maker is written
-  //specifically for StiKalmanTracks (needs handles in
-  //Kalman tracks), check for castness to Kalman track.
-  //If fails, exit. If success, call trackResidue(StiKalmanTrack).
-
-
   int check;
-
   //cast to Kalman Track; if fail, end
-
-       const StiKalmanTrack* kTrack = 
-	 static_cast<const StiKalmanTrack*>(track);  
-      if(!kTrack)
-	{
-	  cout <<"Error: Could not cast to Kalman Track!"<<endl;
-	  return -10;
-	}  
-
-      //if(kTrack->getCurvature()<0) 
-      check = trackResidue(kTrack);
-     return check;
+  const StiKalmanTrack* kTrack = 
+    static_cast<const StiKalmanTrack*>(track);  
+  if(!kTrack)
+    {
+      cout <<"Error: Could not cast to Kalman Track!"<<endl;
+      return -10;
+    }  
+  
+  //if(kTrack->getCurvature()<0) 
+  check = trackResidue(kTrack);
+  return check;
 }
 
+/// Retrieves the node list for the input KalmanTrack,
+/// calls a subroutine to fill the hists with the
+/// pertinant values (fillHist).
 int StiResidualCalculator::trackResidue(const StiKalmanTrack *track)
 {
-
-  //! Retrieves the node list for the input KalmanTrack,
-  //! calls a subroutine to fill the hists with the
-  //! pertinant values (fillHist).
-
-
   double nHits =0;	
-
   vector<StiKalmanTrackNode*> trackNodes=track->getNodes(kSvtId);
   nHits=trackNodes.size();
   if (nHits<2) return 1;
-
   StiKalmanTrackNode* leaf = track->getLastNode();
   StiKTNForwardIterator iT(leaf);
   StiKTNForwardIterator end = iT.end();
-
   double pt=track->getPt();
-
   while(iT != end)
     {
-
-      
       StiKalmanTrackNode iNode = (*iT);
-      
       //if the node has no valid detector pointer, go on to next node
       if(!iNode.getDetector()) {iT++;continue;}
-
-
       //Residuals are calculated uner following conditions:
       //1.) The node's detector is *not* active
       //2.) The detector has been entered into the list of
@@ -366,7 +347,6 @@ int StiResidualCalculator::trackResidue(const StiKalmanTrack *track)
 	  double cross = iNode.crossAngle();
 	  double dip   = iNode.pitchAngle();
 	  double nodeZ = iNode.getZ();
-	  double nodeY = iNode.getY();		if(nodeY){}
 //VP	  double dy,dz;
 
 	  fillTrackHist(cross,dip,pt, nodeZ);
