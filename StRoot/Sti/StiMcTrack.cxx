@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include "StiMcTrack.h"
 #include "StMcTrack.hh"
 #include "StThreeVectorF.hh"
@@ -69,7 +70,8 @@ double  StiMcTrack::getCurvature() const
 
 double  StiMcTrack::getPt()             const
 {
-  return mcTrack->pt();
+  //cout << "StiMcTrack::getPt() -I- pt:"<<mcTrack->pt()<<endl;
+  return (mcTrack->pt());
 }
 
 double  StiMcTrack::getRapidity()       const
@@ -165,11 +167,40 @@ double  StiMcTrack::getMass() const
 
 int     StiMcTrack::getCharge() const
 {
-  const StParticleDefinition * pd = mcTrack->particleDefinition();
-  if (pd)
-    return (int) pd->charge();
+  //  const StParticleDefinition * pd = mcTrack->particleDefinition();
+  //if (pd)
+  //  return (int) pd->charge();
+  //else
+  //  throw runtime_error("StiMcTrack::getCharge() -E- StParticleDefinition * pd==0");
+  int gid = mcTrack->geantId();
+  /*
+  if (gid==2  ||
+      gid==5  ||
+      gid==8  ||
+      gid==11 ||
+      gid==14 ||
+      gid==19 )
+    return 1;
+  else if (gid==3  ||
+	   gid==6  ||
+	   gid==9  ||
+	   gid==12 ||
+	   gid==15 ||
+	   gid==21 )
+    return -1;
   else
-    return -99;
+  return 0;*/ 
+
+  if (gid==8  ||
+      gid==11 ||
+      gid==14)
+    return 1;
+  else if (gid==9  ||
+	   gid==12 ||
+	   gid==15)
+    return -1;
+  else
+    return 0;
 }
 
 

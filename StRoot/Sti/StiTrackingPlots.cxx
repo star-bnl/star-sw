@@ -1,8 +1,11 @@
 /*
- * $Id: StiTrackingPlots.cxx,v 2.5 2003/03/31 17:19:02 pruneau Exp $
+ * $Id: StiTrackingPlots.cxx,v 2.6 2003/04/04 14:44:22 pruneau Exp $
  *
  *
  * $Log: StiTrackingPlots.cxx,v $
+ * Revision 2.6  2003/04/04 14:44:22  pruneau
+ * Fix to the hit error calculator and the getCharge methods.
+ *
  * Revision 2.5  2003/03/31 17:19:02  pruneau
  * various
  *
@@ -57,15 +60,15 @@ void StiTrackingPlots::initialize()
   radLengthZ   =book("radLengthZ","Absorption Length (%) vs. Z",400,-200,200,  100,0,100);
   radLengthPhi =book("radLengthPhi","Absorption Length (%) vs. Phi",128,0,360, 256,0,1);
   radLengthEta =book("radLengthEta","Absorption Length (%) vs. Eta",128,-2,2, 256,0,1);
-  _eta    = book("eta","Track Eta",200,-2,2);
-  _etaPlus    = book("etaPlus","Track Eta +",200,-2,2);
-  _etaMinus   = book("etaMinus","Track Eta -",200,-2,2);
-  _phi        = book("phi","Track Phi",100,-3.1415927,3.1415927);
-  _phiPlus    = book("phiPlus","Track Phi+",100,-3.1415927,3.1415927);
-  _phiMinus   = book("phiMinus","Track Phi-",100,-3.1415927,3.1415927);
-  _pt         = book("pt", "pt",      250,0., 5.);
+  _eta        = book("eta",     "Track Eta",  200, -2.,2.);
+  _etaPlus    = book("etaPlus", "Track Eta +",200, -2.,2.);
+  _etaMinus   = book("etaMinus","Track Eta -",200, -2.,2.);
+  _phi        = book("phi",     "Track Phi",  100,-3.1415927,3.1415927);
+  _phiPlus    = book("phiPlus", "Track Phi+", 100,-3.1415927,3.1415927);
+  _phiMinus   = book("phiMinus","Track Phi-", 100,-3.1415927,3.1415927);
+  _pt         = book("pt",     "pt",      250,0., 5.);
   _ptPlus     = book("ptPlus", "ptPlus",  250,0., 5.);
-  _ptMinus    = book("ptMinus", "ptMinus", 250,0., 5.);
+  _ptMinus    = book("ptMinus","ptMinus", 250,0., 5.);
   // mCurv  = new TH3D("mCurv","Curvature v. Eta and Pt", 256,-100,100,128,-2,2,128,0,30));
   // mHeli  = new TH3D("mHeli","Helicity v. Eta and Pt", 3,-1,1,128,-2,2,128,0,30));
   // mMomX  = new TH3D("mMomX","Momentum (X) v. Eta and Phi",  256,0,30,128,-2,2,128,0,360));
@@ -79,19 +82,22 @@ void StiTrackingPlots::initialize()
   _dca40Plus  = book("dca40Plus","DCA N>=40 Plus", 160, 0,20);	 
   _dca40Minus = book("dca40Minus","DCA N>=40 Minus", 160, 0,20);
   
-  _nptsVsPt = book("nptsVsPt","nptsVsPt",40, 0., 4., 50, 0., 50.);
-  _nptsVsPtPlus = book("nptsVsPtPlus","nptsVsPtPlus",40, 0., 4., 50, 0., 50.);
+  _nptsVsPt      = book("nptsVsPt",     "nptsVsPt",     40, 0., 4., 50, 0., 50.);
+  _nptsVsPtPlus  = book("nptsVsPtPlus", "nptsVsPtPlus", 40, 0., 4., 50, 0., 50.);
   _nptsVsPtMinus = book("nptsVsPtMinus","nptsVsPtMinus",40, 0., 4., 50, 0., 50.);
   
-  _nptsVsEta = book("nptsVsEta","nptsVsEta",               40, -2., 2., 50, 0., 50.);
-  _nptsVsEtaPlus = book("nptsVsEtaPlus","nptsVsEtaPlus",   40, -2., 2., 50, 0., 50.);
+  _nptsVsEta      = book("nptsVsEta",     "nptsVsEta",     40, -2., 2., 50, 0., 50.);
+  _nptsVsEtaPlus  = book("nptsVsEtaPlus", "nptsVsEtaPlus", 40, -2., 2., 50, 0., 50.);
   _nptsVsEtaMinus = book("nptsVsEtaMinus","nptsVsEtaMinus",40, -2., 2., 50, 0., 50.);
   
   _nptsVsPhi = book("nptsVsPhi","nptsVsPhi",100,-3.1415927,3.1415927, 50, 0., 50.);
   _nptsVsPhiPlus = book("nptsVsPhiPlus","nptsVsPhiPlus",100,-3.1415927,3.1415927, 50, 0., 50.);
   _nptsVsPhiMinus = book("nptsVsPhiMinus","nptsVsPhiMinus",100,-3.1415927,3.1415927, 50, 0., 50.);
   
-  cout <<"StiTrackingPlots::StiTrackingPlots() -I- Done"<<endl;
+  _xLastHitVsXLastNode = book("xLastHitVsXLastNode","xLastHitVsXLastNode",200,0.,200.,200,0.,200.);
+  _xLastHitVsXLastNode1 = book("xLastHitVsXLastNode1","xLastHitVsXLastNode1",200,0.,200.,200,0.,200.);
+  _xLastHitVsXLastNode2 = book("xLastHitVsXLastNode2","xLastHitVsXLastNode2",200,0.,200.,200,0.,200.);
+  //cout <<"StiTrackingPlots::StiTrackingPlots() -I- Done"<<endl;
 }
   
 StiTrackingPlots::~StiTrackingPlots()
@@ -114,57 +120,62 @@ void StiTrackingPlots::fill(StiTrackContainer *mTrackStore)
        ++trackIt)
     {
       const StiTrack* track = (*trackIt).second;
+      const StiKalmanTrack * kTrack = dynamic_cast<const StiKalmanTrack *>(track);
       if(!track) continue; 
       double nPts = track->getPointCount();
       if(nPts<15) continue;
       double phi = track->getPhi();
       double eta = track->getPseudoRapidity();
-      double pt  = track->getPt();
+      double thePt  = track->getPt();
       double dca = track->getDca();
-      double p[3], e[3];
-      track->getMomentum(p,e);
+      //double p[3], e[3];
+      //track->getMomentum(p,e);
       
       _eta->Fill(eta);
       _phi->Fill(phi);
-      _pt->Fill(pt);
+      _pt->Fill(thePt);
       _globalDca->Fill(dca);
-      if (nPts>=40)
-	_dca40->Fill(dca); 
-      _nptsVsPt->Fill(pt,nPts);
+      if (nPts>=40) _dca40->Fill(dca); 
+      _nptsVsPt->Fill(thePt,nPts);
       _nptsVsEta->Fill(eta,nPts);
       _nptsVsPhi->Fill(phi,nPts);
 
-      //radLengthPhi->Fill(track->getTrackRadLength(),phi);
-      //radLengthEta->Fill(track->getTrackRadLength(),eta);
-
-      //mCurv->Fill(track->getCurvature(), eta, pt);
-      //mHeli->Fill(track->getHelicity(), eta, pt);
-      //mMomX->Fill(p[0],eta,phi);
-      //mMomY->Fill(p[1],eta,phi);
-      //mMomZ->Fill(p[2],eta,phi);
-      //mPhase->Fill(track->);
+      if (kTrack)
+	{
+	  //cout << "StiTrackPlots::fill() -I- kTrack OK";
+	  double x1 = kTrack->getInnerMostNode()->_x;
+	  //cout << " x1:"<<x1;
+	  double x2 = kTrack->getInnerMostHitNode()->_x;
+	  //cout << " x2:"<<x2;
+	  _xLastHitVsXLastNode->Fill(x1,x2);
+	  if (fabs(eta)<0.4)
+	    _xLastHitVsXLastNode1->Fill(x1,x2);
+	  else if (fabs(eta)<0.8 && fabs(eta)>0.5 )
+	    _xLastHitVsXLastNode2->Fill(x1,x2);
+	  //cout << " - Filled OK";
+	}
+      //else
+	//cout << "StiTrackPlots::fill() -W- kTrack==0"<<endl;
 
       if (track->getCharge()>0) 
 	{
-	  _etaPlus->Fill(track->getPseudoRapidity());
-	  _phiPlus->Fill(track->getPhi());
-	  _ptPlus->Fill(track->getPt());
-	  _globalDcaPlus->Fill(track->getDca());
-	  if (nPts>=40)
-	    _dca40Plus->Fill(dca);
-	  _nptsVsPtPlus->Fill(pt,nPts);
+	  _etaPlus->Fill(eta);
+	  _phiPlus->Fill(phi);
+	  _ptPlus->Fill(thePt);
+	  _globalDcaPlus->Fill(dca);
+	  if (nPts>=40) _dca40Plus->Fill(dca);
+	  _nptsVsPtPlus->Fill(thePt,nPts);
 	  _nptsVsEtaPlus->Fill(eta,nPts);
 	  _nptsVsPhiPlus->Fill(phi,nPts);
 	}
       else
 	{
-	  _etaMinus->Fill(track->getPseudoRapidity());
-	  _phiMinus->Fill(track->getPhi());
-	  _ptMinus->Fill(track->getPt());
-	  _globalDcaMinus->Fill(track->getDca());
-	  if (nPts>=40)
-	    _dca40Minus->Fill(dca);
-	  _nptsVsPtMinus->Fill(pt,nPts);
+	  _etaMinus->Fill(eta);
+	  _phiMinus->Fill(phi);
+	  _ptMinus->Fill(thePt);
+	  _globalDcaMinus->Fill(dca);
+	  if (nPts>=40) _dca40Minus->Fill(dca);
+	  _nptsVsPtMinus->Fill(thePt,nPts);
 	  _nptsVsEtaMinus->Fill(eta,nPts);
 	  _nptsVsPhiMinus->Fill(phi,nPts);
 	}

@@ -56,7 +56,7 @@ void StiKalmanTrackFinderParameters::initialize()
   add(f->getInstance()->set("maxNullCount",     
                             "maxNullCount", 
                             &maxNullCount, 
-                            12, 
+                            15, 
                             0, 
                             30, 
                             1, 
@@ -64,7 +64,7 @@ void StiKalmanTrackFinderParameters::initialize()
   add(f->getInstance()->set("maxContiguousNullCount",  
                             "maxContiguousNullCount",  
                             &maxContiguousNullCount,   
-                            8, 
+                            13, 
                             0, 
                             20, 
                             1, 
@@ -83,12 +83,12 @@ void StiKalmanTrackFinderParameters::initialize()
                             1.5, 0.5, 20., 0.1, 0)); 
   add(f->getInstance()->set("maxSearchWindow", 
                             "maxSearchWindow", 
-                            &maxSearchWindow,   
+                            &maxSearchWindow,         
                             4.5, 0.5, 20., 0.1, 0)); 
   add(f->getInstance()->set("searchWindowScale", 
                             "searchWindowScale",  
                             &searchWindowScale, 
-                            1.5, 0.5, 20., 0.1, 0)); 
+                            2.5, 0.5, 20., 0.1, 0)); 
   add(f->getInstance()->set("maxChi2ForSelection",  
                             "maxChi2ForSelection",   
                             &maxChi2ForSelection, 
