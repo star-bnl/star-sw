@@ -122,6 +122,11 @@ char * amiInvoker:: tableSpec (long ntbl) {
    return c;
 }
 
+//----------------------------------
+AMI_IO_MODE_T amiInvoker:: tableMode (long ntbl) {
+   return AMI_UPDATE_MODE; //HACK - This is temporary
+}
+
 //:----------------------------------------------- PRIV FUNCTIONS     --
 // **NONE**
 
@@ -146,37 +151,41 @@ amiBroker:: ~amiBroker() {
 
 //:----------------------------------------------- PUB FUNCTIONS      --
 STAFCV_T amiBroker:: callInvoker (const char * name
-		, const STRING_SEQ_T& tables) {
+		, const STRING_SEQ_T& tnames) {
 
 //- Find the correct invoker.
    amiInvoker* invoker=NULL;
    if( !findInvoker(name, invoker) ){
       EML_ERROR(OBJECT_NOT_FOUND);
    }
-//- Check number of tables passed.
-   if( tables._length > AMI_MAX_TABLES ){
+//- Check number of table names passed.
+   if( tnames._length > AMI_MAX_TABLES ){
       EML_ERROR(TOO_MANY_TABLES);
    }
 //- Find tables and marshal into sequence.
 //- (or create tables when they do not exist)
-   TABLE_SEQ_T tbls;
-   tbls._length = tables._length;
-   tbls._maximum = tables._maximum;
-   tbls._buffer = new tdmTable* [tables._maximum];
+   TABLE_SEQ_T tables;
+   tables._length = tnames._length;
+   tables._maximum = tnames._maximum;
+   tables._buffer = new tdmTable* [tnames._maximum];
 
-   for( int i=0;i<tables._length;i++ ){
-      if( !tdm->findTable(tables._buffer[i]
-			,tbls._buffer[i])
-      &&  !(tdm->newTable(tables._buffer[i]
-			,invoker->tableSpec(i),0)
-            &&tdm->findTable(tables._buffer[i]
-			,tbls._buffer[i]))
-      ){
-	 EML_ERROR(OBJECT_NOT_FOUND);
+   for( int i=0;i<tnames._length;i++ ){
+      if( !tdm->findTable(tnames._buffer[i] ,tables._buffer[i]) ){
+	 if( AMI_INPUT_MODE == invoker->tableMode(i) ){
+	    EML_ERROR(OBJECT_NOT_FOUND);
+	 }
+	 else {
+	    if( !tdm->newTable(tnames._buffer[i], invoker->tableSpec(i)
+			, 0)
+	    ||  !tdm->findTable(tnames._buffer[i], tables._buffer[i])
+	    ){
+	       EML_MESSAGE(TABLE_CREATED_IGNORE_ERRORS);
+	    }
+	 }
       }
    }
 //- Call the actual invoker object.
-   invoker->call(tbls);
+   invoker->call(tables);
    EML_SUCCESS(STAFCV_OK);
 }
 

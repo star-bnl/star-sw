@@ -69,6 +69,8 @@ c     WRITE(*,*) VECTORS_SPEC
       ENDDO
       WRITE(*,*) '###  checked ',T2_H.NOK,' rows'
 
+!BUG  call ds2realloctable(t2_h,t2_p,222)
+
       PAMF=STAFCV_OK
       RETURN
       END

@@ -21,6 +21,7 @@ extern CC_P int dsPrintDatasetSpecifier(FILE *stream
 		, DS_DATASET_T *pDataset);
 extern CC_P void dsPrintTableData(FILE *stream, DS_DATASET_T *table);
 
+//:####################################################################
 //:=============================================== CLASS              ==
 // tbrMotifViewer
 
@@ -65,60 +66,7 @@ STAFCV_T tbrMotifViewer:: viewTable ( tdmTable * table) {
 //:----------------------------------------------- PRIV FUNCTIONS     --
 // **NONE**
 
-//:=============================================== CLASS              ==
-// tbrAsciiViewer
-
-//:----------------------------------------------- CTORS & DTOR       --
-tbrAsciiViewer:: tbrAsciiViewer(const char * name)
-		: socObject(name, "tbrAsciiViewer") {
-   myPtr = (SOC_PTR_T)this;
-}
-
-//----------------------------------
-tbrAsciiViewer:: ~tbrAsciiViewer() { }
-
-//:----------------------------------------------- ATTRIBUTES         --
-//:**NONE**
-//:----------------------------------------------- PUB FUNCTIONS      --
-STAFCV_T tbrAsciiViewer:: getValue (const char * variable
-		, char *& value) {
-   EML_ERROR(NOT_YET_IMPLEMENTED);
-}
-
-//----------------------------------
-STAFCV_T tbrAsciiViewer:: setValue (const char * variable
-		, const char * value) {
-   EML_ERROR(NOT_YET_IMPLEMENTED);
-}
-
-//----------------------------------
-STAFCV_T tbrAsciiViewer:: printDataset (tdmDataset * dataset) {
-
-   DS_DATASET_T *pDataset=NULL;
-   long ptr;
-
-   dataset->cvtDslPointer(ptr);
-   pDataset = (DS_DATASET_T*)ptr;
-
-   return dsPrintDatasetSpecifier(stdout,pDataset);
-}
-
-//----------------------------------
-STAFCV_T tbrAsciiViewer:: printTable (tdmTable * table) {
-
-   DS_DATASET_T *pTable=NULL;
-   long ptr;
-
-   table->cvtDslPointer(ptr);
-   pTable = (DS_DATASET_T*)ptr;
-
-   dsPrintTableData(stdout,pTable);
-   EML_SUCCESS(STAFCV_OK);
-}
-
-//:----------------------------------------------- PRIV FUNCTIONS     --
-// **NONE**
-
+//:####################################################################
 //:=============================================== CLASS              ==
 // tbrFactory
 //:----------------------------------------------- CTORS & DTOR       --
@@ -133,42 +81,23 @@ tbrFactory:: ~tbrFactory() { }
 //:----------------------------------------------- ATTRIBUTES         --
 //:**NONE**
 //:----------------------------------------------- PUB FUNCTIONS      --
-char * tbrFactory:: list () {
-   return ""; // TEMPORARY HACK
-}
-
-STAFCV_T tbrFactory:: deleteAsciiViewer (const char * name) {
-   EML_ERROR(NOT_YET_IMPLEMENTED);
-}
-
-STAFCV_T tbrFactory:: findAsciiViewer (const char * name
-		, tbrAsciiViewer*& viewer) {
-   EML_ERROR(NOT_YET_IMPLEMENTED);
-}
-
-STAFCV_T tbrFactory:: getAsciiViewer (IDREF_T id
-		, tbrAsciiViewer*& viewer) {
-   EML_ERROR(NOT_YET_IMPLEMENTED);
-}
-
-STAFCV_T tbrFactory:: newAsciiViewer (const char * name) {
-   EML_ERROR(NOT_YET_IMPLEMENTED);
-}
-
 STAFCV_T tbrFactory:: deleteMotifViewer (const char * name) {
    EML_ERROR(NOT_YET_IMPLEMENTED);
 }
 
+//----------------------------------
 STAFCV_T tbrFactory:: findMotifViewer (IDREF_T id
 		, tbrMotifViewer*& viewer) {
    EML_ERROR(NOT_YET_IMPLEMENTED);
 }
 
+//----------------------------------
 STAFCV_T tbrFactory:: getMotifViewer (const char * name
 		, tbrMotifViewer*& viewer) {
    EML_ERROR(NOT_YET_IMPLEMENTED);
 }
 
+//----------------------------------
 STAFCV_T tbrFactory:: newMotifViewer (const char * name) {
    EML_ERROR(NOT_YET_IMPLEMENTED);
 }

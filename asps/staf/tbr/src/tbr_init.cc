@@ -16,6 +16,7 @@
 #include <X11/Intrinsic.h>
 
 tbrFactory *tbr;
+tbrMotifViewer *tbr_MotifViewer;	/* HACK */
 
 //:>--------------------------------------------------------------------
 //:ROUTINE:	int tbr_init()

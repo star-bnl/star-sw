@@ -16,6 +16,8 @@
 
 #include "kuip.h"
 
+#include "asuAlloc.h"
+
 #include "ami_macros.h"
 #include "ami_types.h"
 #include "ami_globals.h"
@@ -140,8 +142,13 @@ int kam_amiinvoker_show()
    if( !ami->findInvoker(name, pam) ){
       EML_ERROR(KAM_OBJECT_NOT_FOUND);
    }
-   char *c = pam->tableSpec(-1);
-   printf("AMI:\tTable Specification = \n%s \n",c);
+   int rank = pam->rank();
+   char *c;
+   for( int i=0;i<rank;i++ ){
+      printf("AMI:\tTable Specification = ...\n%s .\n"
+		,c = pam->tableSpec(i));
+      ASUFREE(c);
+   }
    EML_SUCCESS(STAFCV_OK);
 }
 

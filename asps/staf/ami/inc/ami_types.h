@@ -40,6 +40,13 @@ typedef struct table_seq_t {
 
 typedef long FNC_PTR_T;
 
+typedef enum ami_io_mode_t {
+        AMI_INPUT_MODE,
+        AMI_OUTPUT_MODE,
+        AMI_UPDATE_MODE
+}AMI_IO_MODE_T;
+
+
 /*-------------------------------------------- GLOBALS              --*/
 /*-------------------------------------------- PROTOTYPES           --*/
 extern CC_P int ami_init();

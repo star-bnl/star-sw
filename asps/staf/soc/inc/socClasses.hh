@@ -66,6 +66,7 @@ public:
    socFactory(long maxCount=OBJ_MAX_COUNT);
    socFactory(const char * name, const char * type);
    virtual ~socFactory();
+
 //:----------------------------------------------- ATTRIBUTES         --
    virtual long count ();
    virtual long maxCount ();
