@@ -43,7 +43,7 @@ private:
   TDatime     fDBTime;		//! Own DB time stamp
   Int_t       fUpdateMode;	//! 
 
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.8 2000/01/28 21:57:52 perev Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.9 2000/02/26 01:44:17 fine Exp $";
  protected:
  public: 
                    St_db_Maker(const char *name,const char *maindir,const char *userdir=0);
@@ -76,7 +76,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.8 2000/01/28 21:57:52 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.9 2000/02/26 01:44:17 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)   //StAF chain virtual base class for Makers
 };
@@ -92,7 +92,7 @@ public:
   St_dbConfig(Text_t *name) : St_Table(name,sizeof(dbConfig_st)) {SetType("dbConfig");}          
   St_dbConfig(Int_t n): St_Table("dbConfig",n,sizeof(dbConfig_st)) {SetType("dbConfig");}   
   St_dbConfig(Text_t *name,Int_t n): St_Table(name,n,sizeof(dbConfig_st)) {SetType("dbConfig");} 
-  dbConfig_st *GetTable(){ return (dbConfig_st *)s_Table;}                                            
+  dbConfig_st *GetTable(){ return (dbConfig_st *)GetArray();}                                            
                                            
   ClassDef(St_dbConfig,0) //  
 };                                                            
