@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: RecHeaderFormats.hh,v 1.3 1999/07/02 04:37:42 levine Exp $
+ * $Id: RecHeaderFormats.hh,v 1.4 2000/01/19 16:20:22 levine Exp $
  * Author: M.W. Schulz, Jeff Landgraf, M.J. LeVine
  ***************************************************************************
  * Description: Bank header formats common to all detectors in STAR:
@@ -11,6 +11,9 @@
  *
  ***************************************************************************
  * $Log: RecHeaderFormats.hh,v $
+ * Revision 1.4  2000/01/19 16:20:22  levine
+ * #define FTP_MZPADS suppiled in this version
+ *
  * Revision 1.3  1999/07/02 04:37:42  levine
  * Many changes - see change logs in individual programs
  *
@@ -31,6 +34,13 @@ typedef short INT16;  // SHORT according to data format
 #define TPC_MAXPADS 182
 #define TPC_MZPADS 384
 #define TPC_MXSEQUENCE 31
+
+#define FTP_SECTORS 60
+#define FTP_TIMEBINS 512
+#define FTP_PADROWS 2
+#define FTP_MAXPADS 160
+#define FTP_MZPADS 320
+#define FTP_MXSEQUENCE 31
 
 char *name2str(char *type);
 void dump_data(char *buffer, int size, int width = 8);
