@@ -25,7 +25,7 @@ void Load()
 //fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0064_07_40evts.root
 
 void DrawDstHist(
-     Int_t nevproc=2,
+     Int_t nevproc=50,
      const Char_t *firstHistName="*",const Char_t *lastHistName="*",
 //     const Char_t *fileName="/disk1/star/test/hijing135/jetq_on/b0_3/year_1b/tfs_dst/set0016_01_51evts.dst.root",
      const Char_t *fileName="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0064_07_40evts.root",
@@ -35,7 +35,7 @@ void DrawDstHist(
 // print out stuff:
     cout << endl   
          << " Usage:  DrawDstHist( " << endl
-         << "                        Int_t nevproc=\"" << nevproc << "\","   << endl
+         << "                        Int_t nevproc= " << nevproc    << endl
          << "                        const Char_t *firstHistName=\"" << firstHistName << "\","   << endl
          << "                        const Char_t *lastHistName=\""  << lastHistName  << "\""    << endl
          << "                        const Char_t *fileName =\""     << fileName      << "\","   << endl
@@ -104,8 +104,8 @@ void DrawDstHist(
     }
     cout << "Total: " << nFile << " files will be analysed" << endl ;
 
-// set max # events to read from each file (0 = all) 
-    input->SetMaxEvent(1);
+// set max # events to read from each file ()=default value of 10 million 
+    input->SetMaxEvent();
     input->SetDebug();
 
 // now setup the rest of the Makers in the chain 
@@ -120,7 +120,8 @@ void DrawDstHist(
   chain->Init();
   chain->PrintInfo();
   int i;
-  for (i=1;i<99999; i++)  {   
+  for (i=1;i<=nevproc; i++)  { 
+    cout <<  " !!! processing event !!! " << i << endl ;
     if (!chain->Make(i))  chain->Clear();
     else break;
   }
@@ -135,3 +136,5 @@ void DrawDstHist(
   delete [] exPsFile;
   cout <<  " !!! This is last line of macro" << endl ;
 }
+
+
