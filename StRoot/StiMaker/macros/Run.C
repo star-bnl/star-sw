@@ -35,11 +35,12 @@ void loadLibrairies(bool doProfile)
 		 "StMcEvent","StMcEventMaker","StAssociationMaker","StDaqLib","StDAQMaker",
 		 "StDetectorDbMaker", "StSvtClassLibrary","StSvtDaqMaker",
 		 "StSvtSimulationMaker","StSvtCalibMaker", "StSvtSeqAdjMaker",
-		 "StSvtClusterMaker","Sti","StiGui", "StiEvaluator",
+		 "StSvtClusterMaker","StMiniMcEvent","StMiniMcMaker",
+		 "Sti","StiGui", "StiEvaluator",
 		 "StiPixel",
 		 "StiMaker",
 		 "StFtpcClusterMaker",
-		 "StiTpc","StiSvt","StiEmc","StiFtpc","StMiniMcEvent","StMiniMcMaker","last"};
+		 "StiTpc","StiSvt","StiEmc","StiFtpc","last"};
 
   int i=0;  
   cout <<"Run.C::loadLibrairies() - INFO - Started"<<endl;
