@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.h,v 1.9 2000/05/01 20:22:50 dunlop Exp $
+ * $Id: StRchMaker.h,v 1.10 2000/05/18 21:57:19 lasiuk Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,8 +9,11 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRchMaker.h,v $
- * Revision 1.9  2000/05/01 20:22:50  dunlop
- * Added in SetMode
+ * Revision 1.10  2000/05/18 21:57:19  lasiuk
+ * dev patch
+ *
+ * Revision 1.11  2000/05/23 16:49:55  lasiuk
+ * writing to StEvent/StRichCollection
  *
  * Revision 1.10  2000/05/18 21:57:19  lasiuk
  * dev patch
@@ -48,7 +51,7 @@ using std::vector;
 // forward StEvent declaration
 class StEvent;
 class StRichCollection;
-class StRichSingleHitCollection;
+
 class StDAQReader;
 class StRichReaderInterface;
 class StRichClusterAndHitFinder;
@@ -83,7 +86,7 @@ protected:
     int mDaq;  // looking for DAQ data or not?
     int mPads;  // number of pads
     int mRows;
-    StRichSingleHitCollection*  mSingleHitCollection;//!
+    int mWithDstPixels;
     
     
     StRichClusterAndHitFinder*  mClusterFinder;//!
@@ -106,10 +109,10 @@ protected:
     TH1F* mpad;//!
     TH1F* mqpad;//!
     TH1F* mcratio;//!
-	static const char cvs[]="Tag $Name:  $ $Id: StRchMaker.h,v 1.9 2000/05/01 20:22:50 dunlop Exp $ built "__DATE__" "__TIME__ ;
+    // hits
     TH1F* mhc;//!
     TH1F* mhmc;//!
-	static const char cvs[]="Tag $Name:  $ $Id: StRchMaker.h,v 1.9 2000/05/01 20:22:50 dunlop Exp $ built "__DATE__" "__TIME__ ;
+	static const char cvs[]="Tag $Name:  $ $Id: StRchMaker.h,v 1.10 2000/05/18 21:57:19 lasiuk Exp $ built "__DATE__" "__TIME__ ;
 #endif
     virtual const char *GetCVS() const	{
     
