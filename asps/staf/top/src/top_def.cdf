@@ -154,7 +154,7 @@ The identifiers 'pid' and 'invpt' are column names.
 
 To apply this cut use either TOP/CUTAGENT/FILTER or TOP/CUTAGENT/CUT.
 .
->ACTION KAM_TOP_NEWFILTER
+>ACTION KAM_TOP_NEWCUT
 
 ** ---------------------------------------------------------------------
 ** TOP/NEWSORT AGENT [ SORTFUNC ]

@@ -425,6 +425,7 @@ void kam_topcut_cut_()
    char *table1 = ku_gets(); /* first input table */
    char *func = ku_gets(); /* cut function */
 
+  
         STAFCV_T status = topcut_cut(agent, table1, func);
 }
 STAFCV_T topcut_cut(char* agent, char* table1,

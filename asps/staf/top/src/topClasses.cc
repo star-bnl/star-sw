@@ -14,8 +14,7 @@
 #include "tdmClasses.hh"
 #include "top_utils.h"
 extern "C" void CutsInit(void);
-extern "C" int dsuDoCuts(size_t nBytes,char *ba,
-    char *cuts,DS_DATASET_T *pTable);
+extern "C" int dsuDoCuts(size_t bytes,char *ba,char *cut,DS_DATASET_T *pTab);
 extern "C" int dsuRowPassedCuts(char *ba,long row);
 extern "C" int IsValidCutFunc(char*);
 //:----------------------------------------------- MACROS             --
@@ -179,7 +178,7 @@ STAFCV_T topCut:: DoCutTable(tdmTable *tbl,char *func,
   colCnt=tbl->columnCount();
   *orig=tbl->rowCount();
 
-  dsPtr=tbl->dslPointer(); // ONLY in a collocated process (CORBA)
+  dsPtr=tbl->dslPointer();
   if(!dsTableRowSize(&bytesPerRow,dsPtr)) EML_ERROR(CANT_FIND_ROW_SIZE);
   if(!dsTableDataAddress(&beginningOfTable,dsPtr)) EML_ERROR(CANT_FIND_DATA);
   bottomNewTbl=beginningOfTable;
