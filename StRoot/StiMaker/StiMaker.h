@@ -40,7 +40,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.24 2001/09/18 17:29:51 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.25 2001/09/18 19:29:53 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -52,6 +52,7 @@ public:
     void setMcEventMaker(StMcEventMaker*);
     void setAssociationMaker(StAssociationMaker*);
     void setSimulation(bool);
+    void setGui(bool); // true->gui version.  Defaults to true
     void setSeedFinderType(SeedFinderType);
 
     void printStatistics() const;
@@ -66,7 +67,7 @@ private:
 
     //flags
     bool mSimulation;//! true->m.c.
-    bool mUseGui; //! true->gui version.  Defaults to true
+    bool mUseGui; //!
     SeedFinderType mSeedFinderType;
     
     //Containers
@@ -118,8 +119,14 @@ inline void StiMaker::setAssociationMaker(StAssociationMaker* val)
     mAssociationMaker = val;
 }
 
-inline void StiMaker::setSimulation(bool val) {
+inline void StiMaker::setSimulation(bool val)
+{
     mSimulation=val;
+}
+
+inline void StiMaker::setGui(bool val)
+{
+    mUseGui=val;
 }
 
 #endif
