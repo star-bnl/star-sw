@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.h,v 2.4 1999/11/29 17:07:27 ullrich Exp $
+ * $Id: StDedxPidTraits.h,v 2.5 2000/01/05 16:04:14 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.h,v $
- * Revision 2.4  1999/11/29 17:07:27  ullrich
- * Moved method() from StTrackPidTraits to StDedxPidTraits.cxx
+ * Revision 2.5  2000/01/05 16:04:14  ullrich
+ * Changed method name sigma() to errorOnMean().
  *
  * Revision 2.4  1999/11/29 17:07:27  ullrich
  * Moved method() from StTrackPidTraits to StDedxPidTraits.cxx
@@ -44,7 +44,7 @@ public:
     Short_t      encodedMethod() const;
     UShort_t     numberOfPoints() const;
     Float_t      mean() const;
-    Float_t      sigma() const;
+    Float_t      errorOnMean() const;
     
 protected:
     UShort_t mNumberOfPoints;
