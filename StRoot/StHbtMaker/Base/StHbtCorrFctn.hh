@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtCorrFctn.hh,v 1.8 2000/06/15 18:51:32 willson Exp $
+ * $Id: StHbtCorrFctn.hh,v 1.9 2000/06/29 23:01:10 finch Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtCorrFctn.hh,v $
+ * Revision 1.9  2000/06/29 23:01:10  finch
+ * added an extra base class for Parity Computations
+ *
  * Revision 1.8  2000/06/15 18:51:32  willson
  * Cuts and Correlation function information moved from StBaseAnalysis
  * to the derived analysis classes.  Global functions installed in
@@ -47,6 +50,7 @@
 #define StHbtCorrFctn_hh
 
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
+#include "StHbtMaker/Infrastructure/StParityTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtPair.hh"
 #include "StHbtMaker/Infrastructure/StHbtTriplet.hh"
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
@@ -59,6 +63,8 @@ public:
   virtual ~StHbtCorrFctn(){/* no-op */};
 
   virtual StHbtString Report() = 0;
+
+  virtual void ParityCompute(ParityBuff*, ParityBuff*, int);
 
   virtual void AddRealPair(const StHbtPair*);
   virtual void AddMixedPair(const StHbtPair*);
@@ -84,6 +90,7 @@ private:
 
 };
 
+inline void StHbtCorrFctn::ParityCompute(ParityBuff*, ParityBuff*, int) { cout << "Not implemented" << endl; }
 inline void StHbtCorrFctn::AddRealPair(const StHbtPair*) { cout << "Not implemented" << endl; }
 inline void StHbtCorrFctn::AddMixedPair(const StHbtPair*) { cout << "Not implemented" << endl; }
 inline void StHbtCorrFctn::AddRealTriplet(const StHbtTriplet*) { cout << "Not implemented" << endl; }
