@@ -13,6 +13,8 @@
 //:             27jan2000 ppy refHit replaced by xRefHit and yRefHit
 //:             28jan2000 ppy track id from 1 to N
 //:              1feb2000 ppy track id starting at 1
+//:             11feb2000 ppy timeout added, variables initialCpuTime and
+//:                           initialRealTime added
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
 //: CLASS:       FtfFinder, steers track finding
@@ -65,8 +67,8 @@ double FtfFinder::process (  ) {
         return 1 ;
     }
 //
-    CpuTime ( );
-    RealTime ( );
+    initialCpuTime  = CpuTime ( );
+    initialRealTime = RealTime ( );
 //
 //        General initialization 
 //
@@ -93,8 +95,8 @@ double FtfFinder::process (  ) {
 
 //   if ( para.dEdx ) dEdx ( ) ;
 
-   cpuTime  = CpuTime ( ) ;
-   realTime = RealTime ( ) ;
+   cpuTime  = CpuTime  ( ) - initialCpuTime  ;
+   realTime = RealTime ( ) - initialRealTime ;
 #ifdef DEBUG
    if ( para.infoLevel > 0 )
       fprintf ( stderr, "FtfFinder::process: cpu %7.3f real %f7.2 \n", 
@@ -191,12 +193,19 @@ int FtfFinder::getTracks ( ) {
             thisTrack->deleteCandidate ( ) ;
 	    nTracks-- ;
        }
-//    
-//       End loop over hits inside row               
-//
+       //    
+       //       End loop over hits inside row               
+       //
       }
-//       End loop over rows                           
-//
+      //       End loop over rows                           
+      //
+      //    Check time
+      //
+      if ( CpuTime() - initialCpuTime > para.maxTime ) {
+	 fprintf ( stderr, "FtfFinder::getTracks: tracker time out after %f\n", 
+	       CpuTime() - initialCpuTime ) ;
+	 break ;
+      }
    }
 //
    para.nHitsForSegment = nHitsSegment ;  
@@ -529,28 +538,18 @@ int FtfFinder::setPointers ( )
 #include <stdlib.h>
 #include <time.h>
 
-static clock_t last_time ;
 double FtfFinder::CpuTime( void )
 {
-   clock_t now ;
-   double  duration;
-
-   now = clock();
-   duration = (double)(now - last_time) / CLOCKS_PER_SEC;
-   last_time = now ;
-
-   return (double)duration ;
+   return (double)(clock()) / CLOCKS_PER_SEC;
 }
 
 //
 #ifdef LINUX
-static unsigned long lastRealTime ;
 double FtfFinder::RealTime (void) {
   const long nClicks = 400000000 ;
   unsigned long eax, edx;
   asm volatile("rdtsc":"=a" (eax), "=d" (edx));
-  double realTime = (double)(eax-lastRealTime)/ nClicks;
-  lastRealTime = eax ;
+  double realTime = (double)(eax)/ nClicks;
   return realTime;
 }
 #else
