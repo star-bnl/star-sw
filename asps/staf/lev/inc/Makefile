@@ -9,7 +9,7 @@ endif
 #
 .PHONY: all clean test install help
 #
-VERSION := "$Id: Makefile,v 1.3 1997/05/12 20:40:26 tull Exp $"
+VERSION := "$Id: Makefile,v 1.4 1997/08/18 22:46:51 tull Exp $"
 # 
 all:
 clean:
@@ -31,7 +31,8 @@ ifneq ($(EMPTY),$(strip $(wildcard *.h *.hh *.inc *.idl)))
 	@echo "########################################################"
 	@echo "###          Installing include & IDL files.         ###"
 	@echo "########################################################"
-	-$(INSTALL) *.h *.hh *.inc *.idl $(STAR_LIB)/dev/$(BRANCH_NAME)/inc
+	-$(INSTALL) $(strip $(wildcard *.h *.hh *.inc *.idl)) \
+		$(STAR_LIB)/$(STAR_SYS_LEVEL)/$(BRANCH_NAME)/inc
 else
 	@echo "########################################################"
 	@echo "###           No include files to install.           ###"
@@ -41,7 +42,7 @@ endif
 #
 #?make help        - Show help for SLMakefile targets.
 help:
-	@$(SLM_DIR)/help $(SLM_DIR)
+	@$(SLM_DIR)/slm_help $(SLM_DIR)
 #
 Makefile: $(SLM_DIR)/SLMakefile.inc
 	cp $< $@

@@ -5,3 +5,6 @@
 mytarget:
 	@echo "Put any special make targets in this file."
 #
+# HACK -- by-pass failure on rpro*
+so_locations: 
+	cat "/* TOTAL HACK - CREATED BY SLM - CETull 18may97 */" > $@

@@ -9,7 +9,7 @@ endif
 #
 .PHONY: all clean test help install default
 #
-VERSION                 := "$Id: Makefile,v 1.3 1997/05/12 20:40:23 tull Exp $"
+VERSION                 := "$Id: Makefile,v 1.4 1997/08/18 22:46:45 tull Exp $"
 #
 default: all
 #
@@ -23,7 +23,7 @@ test:
 install:
 #
 help:
-	@$(SLM_DIR)/help $(SLM_DIR)
+	@$(SLM_DIR)/slm_help $(SLM_DIR)
 #
 Makefile: $(SLM_DIR)/SLMakefile.doc
 	cp $< $@
