@@ -39,7 +39,7 @@ public:
   virtual ~StHbtTagMaker();
 
   Int_t        Init();
-  Int_t        Clear();
+  void         Clear(Option_t* opt="");
   Int_t        Make();
   void            PrintInfo();
   void            SetTagWriter(const StHbtTagWriter* tagWriter);
