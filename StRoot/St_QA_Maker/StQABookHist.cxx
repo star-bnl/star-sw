@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.44 2004/02/12 05:03:10 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.45 2004/04/23 23:15:29 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.45  2004/04/23 23:15:29  genevb
+// Added signedDCA (Impact) plots for globals
+//
 // Revision 2.44  2004/02/12 05:03:10  genevb
 // Year 4 AuAu changes. New SVT histos.
 //
@@ -326,6 +329,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_chisq1T=0;
   m_chisq1TTS=0;
   m_glb_impactT=0; 
+  m_glb_simpactT=0; 
   m_glb_impactrT=0; 
   m_glb_impactTTS=0; 
   m_glb_impactrTTS=0; 
@@ -363,6 +367,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_chisq0TS=0;       
   m_chisq1TS=0;       
   m_glb_impactTS=0;   
+  m_glb_simpactTS=0;   
   m_glb_impactrTS=0;   
 
   m_pT_eta_recT = 0;
@@ -860,11 +865,18 @@ void StQABookHist::BookHistGlob(){
   m_momT        = QAH::H1F("QaGtrkPT",      "globtrk: momentum, tpc",50,0.,10.);
   m_chisq0T     = QAH::H1F("QaGtrkChisq0T", "globtrk: chisq0, tpc", 50, 0.,5.);
   m_chisq1T     = QAH::H1F("QaGtrkChisq1T", "globtrk: chisq1, tpc", 50, 0.,1.2);
-  m_glb_impactT = QAH::MH1F("QaGtrkImpactT", "globtrk: log10 impact param from prim vtx, tpc",120,-3.0,3.0,3);
+  m_glb_impactT = QAH::MH1F("QaGtrkImpactT", "globtrk: log10 impact param from prim vtx, tpc",
+                            120,-3.0,3.0,3);
   m_glb_impactT->Rebin(0,"East");
   m_glb_impactT->Rebin(1,"West");
   m_glb_impactT->Rebin(2,"All");
   m_glb_impactT->SetStats(kFALSE);
+  m_glb_simpactT = QAH::MH1F("QaGtrkSImpactT", "globtrk: signed impact param from prim vtx, tpc",
+                            50,-0.8,0.8,3);
+  m_glb_simpactT->Rebin(0,"East");
+  m_glb_simpactT->Rebin(1,"West");
+  m_glb_simpactT->Rebin(2,"All");
+  m_glb_simpactT->SetStats(kFALSE);
   m_glb_impactrT = QAH::H1F("QaGtrkImpactrT", "globtrk: impact param from prim vtx, tpc",100,0.,300.);
 
 
@@ -1002,8 +1014,18 @@ void StQABookHist::BookHistGlob(){
   m_momTS        = QAH::H1F("QaGtrkPTS",      "globtrk: momentum, tpc+svt",50,0.,10.);
   m_chisq0TS     = QAH::H1F("QaGtrkChisq0TS", "globtrk: chisq0, tpc+svt", 50, 0.,5.);
   m_chisq1TS     = QAH::H1F("QaGtrkChisq1TS", "globtrk: chisq1, tpc+svt", 50, 0.,1.2);
-  m_glb_impactTS = QAH::H1F("QaGtrkImpactTS", "globtrk: log10 impact param from prim vtx, tpc+svt",
-                            120,-3.0,3.0);
+  m_glb_impactTS = QAH::MH1F("QaGtrkImpactTS", "globtrk: log10 impact param from prim vtx, tpc+svt",
+                            120,-3.0,3.0,3);
+  m_glb_impactTS->Rebin(0,"East");
+  m_glb_impactTS->Rebin(1,"West");
+  m_glb_impactTS->Rebin(2,"All");
+  m_glb_impactTS->SetStats(kFALSE);
+  m_glb_simpactTS = QAH::MH1F("QaGtrkSImpactTS", "globtrk: signed impact param from prim vtx, tpc+svt",
+                            50,-0.8,0.8,3);
+  m_glb_simpactTS->Rebin(0,"East");
+  m_glb_simpactTS->Rebin(1,"West");
+  m_glb_simpactTS->Rebin(2,"All");
+  m_glb_simpactTS->SetStats(kFALSE);
   m_glb_impactrTS = QAH::H1F("QaGtrkImpactrTS", "globtrk: impact param from prim vtx, tpc+svt",
                             100,0.,30.);
 

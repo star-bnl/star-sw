@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.23 2004/03/17 00:35:14 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.24 2004/04/23 23:15:29 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.24  2004/04/23 23:15:29  genevb
+// Added signedDCA (Impact) plots for globals
+//
 // Revision 2.23  2004/03/17 00:35:14  genevb
 // Left Mult off hist names in previous commit
 //
@@ -130,6 +133,7 @@
   "StEQaGtrkGoodTTS",
   "StEQaGtrkGoodF",
   "StEQaGtrkFitPntLTTS",
+  "StEQaGtrkSImpactT",
   "StEQaGtrkImpactTTS",
   "StEQaGtrkImpactrTTS",
   "StEQaGtrkImpactrF",
@@ -280,6 +284,7 @@
   "StELMQaGtrkGoodTTS",
   "StELMQaGtrkGoodF",
   "StELMQaGtrkFitPntLTTS",
+  "StELMQaGtrkSImpactT",
   "StELMQaGtrkImpactTTS",
   "StELMQaGtrkImpactrTTS",
   "StELMQaGtrkImpactrF",
@@ -425,6 +430,7 @@
   "StEMMQaGtrkGoodTTS",
   "StEMMQaGtrkGoodF",
   "StEMMQaGtrkFitPntLTTS",
+  "StEMMQaGtrkSImpactT",
   "StEMMQaGtrkImpactTTS",
   "StEMMQaGtrkImpactrTTS",
   "StEMMQaGtrkImpactrF",
@@ -570,6 +576,7 @@
   "StEHMQaGtrkGoodTTS",
   "StEHMQaGtrkGoodF",
   "StEHMQaGtrkFitPntLTTS",
+  "StEHMQaGtrkSImpactT",
   "StEHMQaGtrkImpactTTS",
   "StEHMQaGtrkImpactrTTS",
   "StEHMQaGtrkImpactrF",
@@ -715,6 +722,7 @@
   "StECLQaGtrkGoodTTS",
   "StECLQaGtrkGoodF",
   "StECLQaGtrkFitPntLTTS",
+  "StECLQaGtrkSImpactT",
   "StECLQaGtrkImpactTTS",
   "StECLQaGtrkImpactrTTS",
   "StECLQaGtrkImpactrF",
@@ -860,6 +868,7 @@
   "StEHTQaGtrkGoodTTS",
   "StEHTQaGtrkGoodF",
   "StEHTQaGtrkFitPntLTTS",
+  "StEHTQaGtrkSImpactT",
   "StEHTQaGtrkImpactTTS",
   "StEHTQaGtrkImpactrTTS",
   "StEHTQaGtrkImpactrF",
@@ -1005,6 +1014,7 @@
   "StEMBQaGtrkGoodTTS",
   "StEMBQaGtrkGoodF",
   "StEMBQaGtrkFitPntLTTS",
+  "StEMBQaGtrkSImpactT",
   "StEMBQaGtrkImpactTTS",
   "StEMBQaGtrkImpactrTTS",
   "StEMBQaGtrkImpactrF",
