@@ -189,7 +189,9 @@ created   22 april 98
       i = TDM_NEW_TABLE('g2t_vertex'//o,G2T_VERTEX_SPEC//o,NVERTX)
       i = TDM_NEW_TABLE('g2t_track'//o, G2T_TRACK_SPEC//o, NTRACK)
 
-*  order of calls IS importrant:
+*  NOTE:
+*  order of calls IS importrant to proper fill vertex-track-hit references:
+*  STAF ami-calls return 1 as OK flag, 0 as ERROR
 
       names(1)='g2t_vertex'//o
       names(2)='g2t_track'//o
