@@ -69,9 +69,9 @@ c -----	TPG function calls
 	  write (6,*) 'XYZ: ntime        = ', tsspar(1).ntime
 	  write (6,*) 'XYZ: v_drift      = ', tsspar(1).v_drift
 	  write (6,'(1x,a,f5.2,a)') 'XYZ: This implies '//
-	2	'an SCA clock frequency of ', (1/time_bin), ' MHz'
+	2	'an SCA clock frequency of ', (1/time_bin), '(x2) MHz'
 	  write (6,*) '           '//
-	2	'(as of 11/96, SysTest uses a ~10 MHz clock)'
+	2	'(as of 11/96, SysTest uses a ~9(x2) MHz clock)'
 
 	  seq_fact = 2**20
 	  buck_fact = 2**10
@@ -118,6 +118,7 @@ c -----	Unpack the Pad/Pixel Tables
 	    nbuck = tppixel(tppad(i).jpix+offset).datum / seq_fact
 	    do k = 1, nbuck
 	      inok = inok + 1
+	      adcxyz_h.nok = inok
 	      if (inok.gt.adcxyz_h.maxlen) then
 	        write (6,*) 'XYZ: !!! too many pixels !!!'
 	        goto 999
@@ -155,8 +156,6 @@ c -----	Translate to cartesian coordinates
 	    end do	! bucket loop
 	  end do	! sequence loop
 	end do		! pad loop
-
-	adcxyz_h.nok = inok
 
 c -----	Successful completion of analysis module...
 998	XYZ = STAFCV_OK
