@@ -1,11 +1,10 @@
-//Z,+PATCH,//ROOT/HISTPAINTER.
 //Z,+KEEP,TAxis3D,T=C++..
 //*CMZ :          28/11/99  00.18.25  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine(fine@bnl.gov)   27/11/99
 #ifndef ROOT_TAxis3D
 #define ROOT_TAxis3D
 
-// $Id: TAxis3D.h,v 1.1 1999/11/29 19:49:57 fine Exp $ 
+// $Id: TAxis3D.h,v 1.2 1999/11/30 01:44:23 fine Exp $ 
 //+SEQ,CopyRight,T=NOINCLUDE.
  
 //////////////////////////////////////////////////////////////////////////
@@ -126,6 +125,9 @@ public:
 };
  
 // $Log: TAxis3D.h,v $
+// Revision 1.2  1999/11/30 01:44:23  fine
+// Z axis fixed
+//
 // Revision 1.1  1999/11/29 19:49:57  fine
 // ROOT class: TAxis3D. To be moved to ROOT later
 //
