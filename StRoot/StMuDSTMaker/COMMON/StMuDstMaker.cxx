@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.14 2002/05/20 17:23:31 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.15 2002/05/20 18:57:18 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -358,6 +358,7 @@ void StMuDstMaker::read(){
     bytes = mChain->GetEntry(mEventCounter++);
     DEBUGVALUE3(bytes);
   }
+  mStMuDst->set(this);
   //  mEventCounter++;
   
   return;
@@ -740,6 +741,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.15  2002/05/20 18:57:18  laue
+ * update for Christof
+ *
  * Revision 1.14  2002/05/20 17:23:31  laue
  * StStrangeCuts added
  *
