@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.45 2001/03/21 23:06:13 didenko Exp $
+// $Id: St_db_Maker.cxx,v 1.46 2001/04/13 01:28:42 perev Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.46  2001/04/13 01:28:42  perev
+// Small bug fixed (fine found)
+//
 // Revision 1.45  2001/03/21 23:06:13  didenko
 // Set time for year to 20000614.175430 instead of 20000501.0
 //
@@ -515,6 +518,7 @@ TDataSet *St_db_Maker::FindLeft(St_ValiSet *val, TDatime vals[2])
 //_____________________________________________________________________________
 TDataSet *St_db_Maker::LoadTable(TDataSet* left)
 {
+  char *cc;
   TFile *tf =0;
   TObject *to =0;
   TString command;  
@@ -524,7 +528,8 @@ TDataSet *St_db_Maker::LoadTable(TDataSet* left)
 
   TDataSet *ds = left->GetParent();
   ds = ds->GetParent();
-  dbfile += strchr(strstr(ds->Path(),"/.data/")+7,'/');
+  cc = strchr(strstr(ds->Path(),"/.data/")+7,'/');
+  if (cc) dbfile += cc;
   dbfile += "/"; dbfile += left->GetName();
   gSystem->ExpandPathName(dbfile);
   
