@@ -1,5 +1,8 @@
-// $Id: StarMCDisplay.cxx,v 1.1 2004/07/13 19:03:51 potekhin Exp $
+// $Id: StarMCDisplay.cxx,v 1.2 2004/07/16 22:52:35 potekhin Exp $
 // $Log: StarMCDisplay.cxx,v $
+// Revision 1.2  2004/07/16 22:52:35  potekhin
+// Incremental changes
+//
 // Revision 1.1  2004/07/13 19:03:51  potekhin
 // Initial check in
 //
@@ -19,6 +22,7 @@ ClassImp(StarMCDisplay)
 //_____________________________________________________________________________
   StarMCDisplay::StarMCDisplay(): _c("StarMC","Test")
 {
+  _c.SetTheta(90.0);
 }
 
 //_____________________________________________________________________________
@@ -28,10 +32,15 @@ void StarMCDisplay::DrawVolume(void) {
 }
 
 //_____________________________________________________________________________
+void StarMCDisplay::Update(void) {
+  _c.Update();
+}
+
+//_____________________________________________________________________________
 void StarMCDisplay::DrawHits(TObjArray* h_) const {
 
   TPolyMarker3D* pm = new TPolyMarker3D(1000,20);
-  //  pm->SetMarkerSize(1);
+  pm->SetMarkerSize(1);
   pm->SetMarkerColor(2);
 
   // Now do individual hits

@@ -1,7 +1,7 @@
 #ifndef STARKINEGENERATOR_H
 #define STARKINEGENERATOR_H
 
-/* $Id: StarKineGenerator.h,v 1.1 2004/07/12 20:35:59 potekhin Exp $ */
+/* $Id: StarKineGenerator.h,v 1.2 2004/07/16 22:52:53 potekhin Exp $ */
 
 ///////////////////////////////////////////////////////////
 //                                                       //
@@ -33,6 +33,7 @@ class StarKineGenerator : public StarGenerator
     virtual ~StarKineGenerator();
 
     virtual void Generate(void);
+    virtual void Init(void);
 
  protected:
 

@@ -1,4 +1,4 @@
-// $Id: StarParticle.h,v 1.1 2004/07/12 20:35:59 potekhin Exp $
+// $Id: StarParticle.h,v 1.2 2004/07/16 22:52:53 potekhin Exp $
 
 #ifndef STARPARTICLE_H
 #define STARPARTICLE_H
@@ -23,18 +23,20 @@ class StarParticle : public TObject
     void PrintDaughters() const;
 
     // get methods  
-    Int_t         GetID() const;
-    TParticle*    GetParticle() const;
-    StarParticle* GetMother() const;
-    Int_t         GetNofDaughters() const;
+    Int_t         GetID()              const;
+    TParticle*    GetParticle()        const;
+    StarParticle* GetMother()          const;
+    Int_t         GetNofDaughters()    const;
     StarParticle* GetDaughter(Int_t i) const;
     
   private:
-    // data members
-    Int_t       fID;
-    TParticle*  fParticle;
-    TRef        fMother;
-    TRefArray   fDaughters;
+
+    Int_t       _ID;
+    TParticle*  _particle;
+    TRef        _mother;
+    TRefArray   _daughters;
+    Bool_t      _keep;
+
     
     ClassDef(StarParticle,1) // Extended TParticle
 };

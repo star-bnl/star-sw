@@ -1,4 +1,4 @@
-// $Id: StarDetectorConstruction.cxx,v 1.1 2004/07/12 20:36:38 potekhin Exp $
+// $Id: StarDetectorConstruction.cxx,v 1.2 2004/07/16 22:52:35 potekhin Exp $
 //
  
 #include <iostream.h>
@@ -115,10 +115,11 @@ void StarDetectorConstruction::ConstructMaterials()
   Double_t deemax = -.3;     // Maximum fractional energy loss, DLS 
   Double_t stmin  = -.8;
 
-  StarMedium::Medium("Air",  "Air",   0, ifield, fieldm, tmaxfd, stemax, deemax, epsil, stmin);
-  StarMedium::Medium("P10",  "P10",   StarMedium::Sensitive, ifield, fieldm, tmaxfd, stemax, deemax, epsil, stmin);
-  StarMedium::Medium("Mylar","Mylar", 0, ifield, fieldm, tmaxfd, stemax, deemax, epsil, stmin);
-  StarMedium::Medium("Al",   "Al",    0, ifield, fieldm, tmaxfd, stemax, deemax, epsil, stmin);
+  StarMedium::Medium("Air",  "Air",   StarMedium::Insensitive, ifield, fieldm, tmaxfd, stemax, deemax, epsil, stmin);
+  StarMedium::Medium("P10",  "P10",   StarMedium::Sensitive,   ifield, fieldm, tmaxfd, stemax, deemax, epsil, stmin);
+  StarMedium::Medium("Mylar","Mylar", StarMedium::Insensitive, ifield, fieldm, tmaxfd, stemax, deemax, epsil, stmin);
+  StarMedium::Medium("Al",   "Al",    StarMedium::Insensitive, ifield, fieldm, tmaxfd, stemax, deemax, epsil, stmin);
+  StarMedium::Medium("Pb",   "Pb",    StarMedium::Sensitive,   ifield, fieldm, tmaxfd, stemax, deemax, epsil, stmin);
 
   //  gMC->Medium(fImedXe, "XenonGas", imatXe, 0, ifield, fieldm, tmaxfd, stemax, deemax, epsil, stmin, ubuf, 0); 
 

@@ -1,5 +1,8 @@
-// $Id: StarMCApplication.cxx,v 1.3 2004/07/13 19:10:59 potekhin Exp $
+// $Id: StarMCApplication.cxx,v 1.4 2004/07/16 22:52:35 potekhin Exp $
 // $Log: StarMCApplication.cxx,v $
+// Revision 1.4  2004/07/16 22:52:35  potekhin
+// Incremental changes
+//
 // Revision 1.3  2004/07/13 19:10:59  potekhin
 // Added a log tag
 //
@@ -50,6 +53,9 @@ ClassImp(StarMCApplication)
 
   _generator = new StarKineGenerator();
   _generator->SetStack(_stack);
+  _generator->SetSeed(StarConfiguration::getSeed());
+
+  _generator->Init();
 
   // Constant magnetic field (in kiloGauss)
   fFieldB = new Double_t[3];
@@ -207,9 +213,6 @@ void StarMCApplication::InitMC(void) {
 
   }
 
-  //  geant3->SetDEBU(1,2,1);
-  //  geant3->SetSWIT(2,2);
-
   gMC->SetStack(_stack);
   gMC->Init();
   gMC->BuildPhysics(); 
@@ -300,6 +303,10 @@ void StarMCApplication::Stepping() { // User actions at each step
     exit(-1);
   }
 
+  if(_display) { // prepare tracks to be shown
+  }
+
+
   if (! sv->IsSensitive()) return;       //  cout<<"volume id: "<<id<<" name "<<sv->GetName()<<endl;
 
   Double_t edep = gMC->Edep();
@@ -309,7 +316,7 @@ void StarMCApplication::Stepping() { // User actions at each step
   StarHit* newHit = new StarHit(); // = AddHit();
 
   newHit->SetTrackID (gMC->GetStack()->GetCurrentTrackNumber());
-  newHit->SetVolumeID(copyNo);
+  newHit->SetVolumeID(id);
   newHit->SetEdep    (edep);
 
   // Position
@@ -352,6 +359,7 @@ void StarMCApplication::FinishEvent()
   // User actions after finishing of an event
   // ---
   
+  // ??? obsolete ???
   if (TString(gMC->GetName()) == "TGeant3") { gMC->Gdraw("WRLD", 90., 180.);
   }  
  
@@ -364,6 +372,11 @@ void StarMCApplication::FinishEvent()
   if(_display) {
     _display->DrawVolume();
     _display->DrawHits(Hits());
+    _display->Update();
+    cout<<"Continue";
+    TString foo;
+    cin>>foo;
+
   }
 
   if(_finishEventCB) _finishEventCB();
@@ -373,6 +386,14 @@ void StarMCApplication::FinishEvent()
 
   //  _stack->Print();  
   _stack->Reset();
+
+  if(_display) {
+
+    //    _display->DrawVolume();
+    //    _display->DrawHits(Hits());
+    //    _display->Update();
+  }
+
 } 
 
 //_____________________________________________________________________________
@@ -420,6 +441,8 @@ void StarMCApplication::AddModule(StarModule* m_) {
 //_____________________________________________________________________________
 void StarMCApplication::AddHit(StarHit* h_) {
   if (h_ == 0x0) return;
+
+  //  cout<<"Hits for track "<<h_->GetTrackID()<<endl;
   _hits->Add(h_);
 }
 

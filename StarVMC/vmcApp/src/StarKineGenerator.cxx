@@ -1,4 +1,4 @@
-/* $Id: StarKineGenerator.cxx,v 1.1 2004/07/12 20:36:39 potekhin Exp $ */
+/* $Id: StarKineGenerator.cxx,v 1.2 2004/07/16 22:52:35 potekhin Exp $ */
 
 #include <iostream.h>
 #include <TGenerator.h>
@@ -14,7 +14,12 @@ StarKineGenerator::StarKineGenerator(Int_t npart):StarGenerator(npart) {}
 StarKineGenerator::StarKineGenerator(const StarGenerator &gen): StarGenerator(gen) {}
 
 StarKineGenerator::~StarKineGenerator() {}
-//********************************************************************
+//_______________________________________________________________________
+void StarKineGenerator::Init(void) {
+  cout<<"Initializing with seed: "<<_seed<<endl;
+  srand48(_seed);
+}
+//_______________________________________________________________________
 void StarKineGenerator::Generate(void) { // Fill the user stack (derived from TVirtualMCStack) with primary particles.
 
     Int_t ntr;   // Track ID (filled by stack)
@@ -51,7 +56,7 @@ void StarKineGenerator::Generate(void) { // Fill the user stack (derived from TV
   //   py = 0.; 
   //   pz = sqrt(e*e - mass*mass); 
 
-  for (int i=0;i<5;i++) {
+  for (int i=0;i<1;i++) {
 
     float phi   = drand48()*2*3.1415926;
     float eta   = drand48()*2*1.0;

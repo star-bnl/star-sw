@@ -1,5 +1,8 @@
-// $Id: vmcAppLinkDef.h,v 1.2 2004/07/13 19:13:37 potekhin Exp $
+// $Id: vmcAppLinkDef.h,v 1.3 2004/07/16 22:52:53 potekhin Exp $
 // $Log: vmcAppLinkDef.h,v $
+// Revision 1.3  2004/07/16 22:52:53  potekhin
+// Incremental changes
+//
 // Revision 1.2  2004/07/13 19:13:37  potekhin
 // removed tpc classes, added log tag
 //
@@ -31,6 +34,7 @@
 #pragma link C++ class StarCaveGeometry+;
 #pragma link C++ class StarTpcGeometry+;
 #pragma link C++ class StarMCDisplay+;
+#pragma link C++ class StarMCEvent+;
 
 #pragma link C++ enum   FileMode;
 

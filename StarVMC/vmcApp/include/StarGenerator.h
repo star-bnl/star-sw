@@ -1,7 +1,7 @@
 #ifndef STARGENERATOR_H
 #define STARGENERATOR_H
 
-/* $Id: StarGenerator.h,v 1.1 2004/07/12 20:35:58 potekhin Exp $ */
+/* $Id: StarGenerator.h,v 1.2 2004/07/16 22:52:53 potekhin Exp $ */
 
 ///////////////////////////////////////////////////////////
 //                                                       //
@@ -41,10 +41,14 @@ class StarGenerator : public TNamed  // , public StarRndm
     virtual void Generate()=0;
 
     // Stack 
-    void SetStack (StarStack *stack) {_stack = stack;}
+    void SetStack (StarStack *stack_) {_stack = stack_;}
     StarStack* GetStack(){return _stack;}
 
-    /*    virtual void Init();
+    void SetSeed (int s_) {_seed = s_;}
+
+    virtual void Init(void);
+
+    /*
     void Copy(TObject &gen) const;
     virtual void SetOrigin(Float_t ox, Float_t oy, Float_t oz);
     virtual void SetOrigin(const TLorentzVector &o);
@@ -105,6 +109,7 @@ class StarGenerator : public TNamed  // , public StarRndm
 
  protected:
     StarStack*   _stack;      // stack handle
+    int          _seed;       // seed
 
     /*    TGenerator* fMCEvGen;      //!Pointer to the generator
     Float_t     fThetaMin;     //Minimum theta of generation in radians

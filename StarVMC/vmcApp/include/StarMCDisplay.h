@@ -1,5 +1,8 @@
-// $Id: StarMCDisplay.h,v 1.1 2004/07/13 19:03:22 potekhin Exp $
+// $Id: StarMCDisplay.h,v 1.2 2004/07/16 22:52:53 potekhin Exp $
 // $Log: StarMCDisplay.h,v $
+// Revision 1.2  2004/07/16 22:52:53  potekhin
+// Incremental changes
+//
 // Revision 1.1  2004/07/13 19:03:22  potekhin
 // Initial check in
 //
@@ -17,6 +20,7 @@ class StarMCDisplay
   virtual ~StarMCDisplay() {};
 
   virtual void DrawVolume(void);
+  virtual void Update(void);
   virtual void DrawHits  (TObjArray* h_) const ;
   
  private:

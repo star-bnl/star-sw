@@ -1,4 +1,4 @@
-// $Id: StarConfiguration.h,v 1.1 2004/07/12 20:35:58 potekhin Exp $
+// $Id: StarConfiguration.h,v 1.2 2004/07/16 22:52:53 potekhin Exp $
 
 #ifndef STARCONFIGURATION_H
 #define STARCONFIGURATION_H
@@ -20,6 +20,9 @@ class StarConfiguration
   static void     setTriggers(int n_);
   static int      getTriggers(void);
 
+  static void     setSeed(int s_);
+  static int      getSeed(void);
+
   static void     setExternal(void);
   static int      isExternal(void);
 
@@ -28,6 +31,7 @@ class StarConfiguration
   static TString _conFile;
   static TString _geoFile;
   static int     _triggers;
+  static int     _seed;
   static int     _external;
 };
 

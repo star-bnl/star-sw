@@ -1,4 +1,4 @@
-/* $Id: StarVolume.cxx,v 1.1 2004/07/12 20:36:39 potekhin Exp $ */
+/* $Id: StarVolume.cxx,v 1.2 2004/07/16 22:52:35 potekhin Exp $ */
 
 #include <TVirtualMC.h>
 #include <iostream.h>
@@ -33,6 +33,11 @@ void StarVolume::Volume(const char* name_,   const char* shape_,  const char* me
 
   // Determine the required medium and its properties:
   StarMedium* sm = StarMedium::FindMedium(medium_);
+  if(!sm) {
+    cout<<"StarMedium fatal error: "<<medium_<<" not found in the dictionary"<<endl;
+    exit(-1);
+  }
+
   Int_t imed=sm->GetNumber();
   Int_t sens=sm->IsSensitive();
 
