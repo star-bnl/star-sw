@@ -1,5 +1,6 @@
 #include "cdl.h"
-  
+#include "fortranc.h"  
+#include "dlfcn.h"   /*added by VP*/
 /* I not understand why typedef for strdup is needed */
 
 extern char *strdup(const char *);
@@ -471,7 +472,6 @@ int cdl_load(char *lib_name)
 #else
     /* hjw, for porting to low-version irix int flags=RTLD_NOW|RTLD_GLOBAL; */
     int flags=RTLD_NOW;
-
     file_handle = dlopen(lib_name, flags);
     if (file_handle ==  NULL) {
        printf(" Could not load shared library: %s\n",lib_name);
@@ -543,21 +543,14 @@ int cdl_unload_(char *lib_name, int n)
 
 void *cdl_get_func_lib(char *func_name, FilesPtr *fp)
 {
+   void  *addr;
 #ifdef HPUX
    shl_t handle;
-   void  *addr;
 #endif
 #ifdef SUN
-   int *addr;
-#endif
-#ifdef AIX
-   void *addr;
-#endif
-#ifdef SGI
-   void *addr;
+/*VP*   int *addr;*/
 #endif
 #ifdef ALPHA_OSF
-   void   *addr;
    int jumpad_();
    unsigned long ptr = (unsigned long)jumpad_;
 #endif

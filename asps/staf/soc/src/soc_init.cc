@@ -15,6 +15,11 @@
 #include "soc_types.h"
 #include "soc_globals.h"
 
+#include "fortranc.h"   /* The definition of the Fortran/C interface */
+
+#define soc_def_ F77_NAME(soc_def,SOC_DEF)
+extern "C" void type_of_call soc_def_();
+
 socCatalog *soc;
 
 //:>--------------------------------------------------------------------
