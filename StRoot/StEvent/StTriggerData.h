@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTriggerData.h,v 2.4 2003/12/23 21:58:28 ullrich Exp $
+ * $Id: StTriggerData.h,v 2.5 2004/01/28 00:29:49 ullrich Exp $
  *
  * Author: Akio Ogawa & Mirko Planinic, Feb 2003
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTriggerData.h,v $
+ * Revision 2.5  2004/01/28 00:29:49  ullrich
+ * Methods to retrieve ZDC data added.
+ *
  * Revision 2.4  2003/12/23 21:58:28  ullrich
  * Modifications to handle StTruggerData2004.
  *
@@ -76,6 +79,8 @@ virtual ~StTriggerData();
     virtual unsigned short mwc(int sector, int prepost=0) const;
 
     // ZDC  east=0, west=1
+    virtual unsigned short zdcAtChannel(int channel, int prepost=0) const;
+    virtual unsigned short zdcAtAddress(int address, int prepost=0) const;
     virtual unsigned short zdcUnAttenuated(int eastwest, int prepost=0) const;
     virtual unsigned short zdcAttenuated(int eastwest, int prepost=0) const;
     virtual unsigned short zdcADC(int eastwest, int pmt, int prepost=0) const;
@@ -139,6 +144,8 @@ inline unsigned short StTriggerData::emcLayer2DSM(int channel) const {return 0;}
 inline unsigned short StTriggerData::fpdLayer2DSM(int channel) const {return 0;}
 inline unsigned short StTriggerData::ctb(int pmt, int prepost) const {return 0;}
 inline unsigned short StTriggerData::mwc(int sector, int prepost) const {return 0;}
+inline unsigned short StTriggerData::zdcAtChannel(int channel, int prepost) const {return 0;}
+inline unsigned short StTriggerData::zdcAtAddress(int address, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcUnAttenuated(int eastwest, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcAttenuated(int eastwest, int prepost) const {return 0;}
 inline unsigned short StTriggerData::zdcADC(int eastwest, int pmt, int prepost) const {return 0;}
