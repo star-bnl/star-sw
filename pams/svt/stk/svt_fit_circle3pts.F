@@ -27,7 +27,7 @@ c     =========
 
 c     local declarations
 c     ==================
-      real*8 r1sq,r2sq,r3sq
+      real*8 r1sq,r2sq,r3sq,xc1,yc1,rc1
       real*8 check1,check2
  
 
@@ -44,25 +44,29 @@ c     assume success
 
 c     calculate circle center coordinates 
 
-      xc=(r2sq-r1sq)*(y(3)-y(2))+(r3sq-r2sq)*(y(1)-y(2))
-      xc=0.5*xc/( (x(2)-x(1))*(y(3)-y(2))- (x(2)-x(3))*(y(1)-y(2)) )
+      xc1=(r2sq-r1sq)*(y(3)-y(2))+(r3sq-r2sq)*(y(1)-y(2))
+      xc1=0.5*xc1/( (x(2)-x(1))*(y(3)-y(2))- (x(2)-x(3))*(y(1)-y(2)) )
       
-      yc=r3sq-r2sq+2.0*xc*(x(2)-x(3))
-      yc=yc/(2.0*(y(3)-y(2)))
+      yc1=r3sq-r2sq+2.0*xc1*(x(2)-x(3))
+      yc1=yc1/(2.0*(y(3)-y(2)))
 
 c     calculate radius
 
-      rc=sqrt((x(1)-xc)**2.0+(y(1)-yc)**2.0)
+      rc1=sqrt((x(1)-xc1)**2.0+(y(1)-yc1)**2.0)
 
 c     check consistency
 
-      check1=sqrt((x(2)-xc)**2.0+(y(2)-yc)**2.0)-rc
-      check2=sqrt((x(3)-xc)**2.0+(y(3)-yc)**2.0)-rc
+      check1=sqrt((x(2)-xc1)**2.0+(y(2)-yc1)**2.0)-rc1
+      check2=sqrt((x(3)-xc1)**2.0+(y(3)-yc1)**2.0)-rc1
       
       if ((check1.gt.1e-3).or.(check2.gt.1e-3)) then
-         call StError(' svt_fit_circle3pts_bchk-e : 3pts fit failed')
+         call StWarning(' svt_fit_circle3pts_bchk-e : 3pts fit failed')
          svt_fit_circle3pts = 1
       endif
+
+      xc = xc1
+      yc = yc1
+      rc = rc1
       
       return
       end
