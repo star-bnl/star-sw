@@ -1,5 +1,8 @@
-// $Id: StSmdstMaker.cxx,v 1.3 1999/04/14 22:05:06 genevb Exp $
+// $Id: StSmdstMaker.cxx,v 1.4 1999/06/22 15:11:50 genevb Exp $
 // $Log: StSmdstMaker.cxx,v $
+// Revision 1.4  1999/06/22 15:11:50  genevb
+// Added hook for no vertex collection warning
+//
 // Revision 1.3  1999/04/14 22:05:06  genevb
 // Comply with momentumOfV0 call
 //
@@ -197,7 +200,7 @@ Int_t StSmdstMaker::FillV0Table() {
    StEvent *ev = evMaker->event();
    if (!ev) return kStOK;
    StVertexIterator vertices = ev->vertexCollection()->begin();
-   if ((*vertices)==0) {
+   if ((*v(!vertices) || ertices)==0) {
      printf("StSmdstMaker: Warning - no vertices in event.\n");
      return kStOK;
    }
@@ -481,7 +484,7 @@ void StSmdstMaker::PrintInfo() {
 // PrintInfo() prints information about the class to standard output.
 //
   printf("**************************************************************\n");
-  printf("* $Id: StSmdstMaker.cxx,v 1.3 1999/04/14 22:05:06 genevb Exp $\n");
+  printf("* $Id: StSmdstMaker.cxx,v 1.4 1999/06/22 15:11:50 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   if (draw_histos) printf("* Strangeness Histograms are active\n");
   printf("**************************************************************\n");
