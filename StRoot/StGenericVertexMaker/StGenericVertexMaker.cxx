@@ -149,12 +149,12 @@ Bool_t StGenericVertexMaker::DoFit(){
 //_____________________________________________________________________________
 Int_t StGenericVertexMaker::Make()
 {
-
   nEvTotal++;
   primV=NULL;
   mEvent=NULL;
   mEvent = (StEvent *)GetInputDS("StEvent"); 
-
+  cout << "StGenericVertexMaker : StEvent pointer " << mEvent << endl;
+  cout << "StGenericVertexMaker : external find use " << externalFindUse << endl;
   if(!externalFindUse){
     DoFit();
   } 
