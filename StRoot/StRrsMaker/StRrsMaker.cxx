@@ -1,9 +1,12 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 2.1 2000/08/31 06:21:53 dunlop Exp $
+ * $Id: StRrsMaker.cxx,v 2.2 2001/08/22 16:42:07 lasiuk Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
+ * Revision 2.2  2001/08/22 16:42:07  lasiuk
+ * flags turned off for production
+ *
  * Revision 2.1  2000/08/31 06:21:53  dunlop
  * Put mPadPlane to 0 after delete, in case finish is called twice (.dev right now)
  *
@@ -81,7 +84,7 @@
 
 // SWITCHES
 #define rICH_DIAGNOSTIC 1
-#define RICH_DECODE_DATA 1
+#define rICH_DECODE_DATA 1
 
 #include "StRichDisplayActivate.h"
 //#define RICH_WITH_PAD_MONITOR 1
