@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.hh,v 1.3 1999/01/22 20:59:36 fisyak Exp $
+ * $Id: StTrsChargeSegment.hh,v 1.4 1999/02/10 18:02:09 lasiuk Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -11,8 +11,11 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.hh,v $
- * Revision 1.3  1999/01/22 20:59:36  fisyak
- * remove iostream from private list
+ * Revision 1.4  1999/02/10 18:02:09  lasiuk
+ * ostream (const)
+ *
+ * Revision 1.5  1999/02/18 21:18:43  lasiuk
+ * rotate() mods to StTpcCoordinateTranform
  *
  * Revision 1.4  1999/02/10 18:02:09  lasiuk
  * ostream (const)
@@ -114,7 +117,7 @@ private:
 };
 inline const StThreeVector<double>& StTrsChargeSegment::position() const {return mPosition;}
 inline const StThreeVector<double>& StTrsChargeSegment::momentum() const {return mMomentum;}
-ostream& operator<<(ostream&, StTrsChargeSegment&);
+inline double StTrsChargeSegment::dE() const {return mDE;}
 inline double StTrsChargeSegment::ds() const {return mDs;}
 inline int StTrsChargeSegment::pid() const {return mPid;}
 inline float StTrsChargeSegment::numberOfElectrons() const {return mDs;}
