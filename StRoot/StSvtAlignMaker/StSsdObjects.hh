@@ -19,17 +19,6 @@ struct track {
   int flag;
 };
 
-// use in simulation
-struct goodtrack {
-  //globalPoint p[4];
-  //globalPoint a,b;
-  int waferID[16];
-  int pointID[16];
-  //double chi2_1, chi2_2;
-  int numberOfHits;
-  int flag;
-};
-
 const int maxNumberOfEvents = 41;
 
 #endif

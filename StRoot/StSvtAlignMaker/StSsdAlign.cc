@@ -1,13 +1,21 @@
 /***************************************************************************
  *
- *  StSsdAlign.cc
+ * $Id: StSsdAlign.cc,v 1.2 2001/05/09 16:33:02 gaudiche Exp $
  *
  * Author: Ludovic Gaudichet
  ***************************************************************************
  *
  * Description : SVT & SSD alignment code
  *
+ ***************************************************************************
+ *
+ * $Log: StSsdAlign.cc,v $
+ * Revision 1.2  2001/05/09 16:33:02  gaudiche
+ * bug on Solaris fixed - cleanup
+ *
+ *
  ***************************************************************************/
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,13 +27,13 @@
 #include "StDbUtilities/StSvtCoordinateTransform.hh"
 #include "StDbUtilities/StSvtLocalCoordinate.hh"
 #include "StDbUtilities/StGlobalCoordinate.hh"
-
 #include "StMessMgr.h"
 
 
 StSsdLadder::StSsdLadder(const int nWaf) {
   mWafer = nWaf;
 }
+
 
 StSsdLadder::~StSsdLadder() {
 };
@@ -43,7 +51,6 @@ StSsdLayer::~StSsdLayer() {
   for ( int i = 0; i < mLadder; i++ )
     delete ladders[i];
 };
-
 
 
 StSsdAlign::StSsdAlign() {
@@ -93,7 +100,8 @@ void StSsdAlign::init(svg_geom_st* geom, StSvtConfig* config, int NumberOfEvents
       int barrelId = (geom[i].layer+1)/2;
       int WaferId = config->getHybridIndex(barrelId,geom[i].ladder, geom[i].num_chip,1)/2;
 
-      layers[ ( geom[i].layer-1) ]->ladders[ (geom[i].ladder-1) ]->wafers[ (geom[i].num_chip-1) ] = &mWafer[WaferId];
+      layers[ ( geom[i].layer-1) ]->ladders[ (geom[i].ladder-1) ]->wafers[ (geom[i].num_chip-1) ] =
+	&mWafer[WaferId];
       mWafer[WaferId].init( x2, d2, t2, n2, geom[i].layer-1, geom[i].ladder-1, geom[i].num_chip-1, 3., 3. );
     };
 
@@ -108,8 +116,40 @@ void StSsdAlign::init(svg_geom_st* geom, StSvtConfig* config, int NumberOfEvents
 	  n2[j] = (double)geom[i].n[j];
 	};
 
-      layers[ ( geom[i].layer-1) ]->ladders[ (geom[i].ladder-1) ]->wafers[ (geom[i].num_chip-1) ] = &mWafer[i];
+      layers[ ( geom[i].layer-1) ]->ladders[ (geom[i].ladder-1) ]->wafers[ (geom[i].num_chip-1) ] =
+	&mWafer[i];
       mWafer[i].init( x2, d2, t2, n2, geom[i].layer-1, geom[i].ladder-1, geom[i].num_chip-1, 3.75, 2.1 );
+    };
+};
+
+
+void StSsdAlign::updateGeom(svg_geom_st* geom, StSvtConfig* config)
+{ 
+  // SVT :
+  for ( int i=0 ; i<216 ; i++ )
+    {
+      int barrelId = (geom[i].layer+1)/2;
+      int WaferId = config->getHybridIndex(barrelId,geom[i].ladder, geom[i].num_chip,1)/2;
+      
+      for (int j =0; j<3; j++)
+	{
+	  geom[i].x[j] = mWafer[WaferId].x(j);
+	  geom[i].d[j] = mWafer[WaferId].d(j);
+	  geom[i].t[j] = mWafer[WaferId].t(j);
+	  geom[i].n[j] = mWafer[WaferId].n(j);
+	};
+    };
+  
+  //SSD :
+  for ( int i=216 ; i<536 ; i++ )
+    {
+      for (int j =0; j<3; j++)
+	{
+	  geom[i].x[j] = mWafer[i].x(j);
+	  geom[i].d[j] = mWafer[i].d(j);
+	  geom[i].t[j] = mWafer[i].t(j);
+	  geom[i].n[j] = mWafer[i].n(j);
+	};
     };
 };
 
@@ -132,8 +172,7 @@ int StSsdAlign::addNewHit( const double x, const double y, const double z )
      
       if(badOne)
 	gMessMgr->Warning("trying to add a hit to a wafer far away or off !");
-// 	printf("%d:%f, %f,%f , identity %d %d %d", i, local.X, local.Y ,local.Z, mWafer[i].layerID(),
-// 	       mWafer[i].ladderID(), mWafer[i].waferID() );
+	//printf("trying to add a hit to a wafer far away or off !");
       
        if (badOne) break;
     };
@@ -224,33 +263,6 @@ double StSsdAlign::totalChi2()
   for (int ev=0; ev<mNumberOfEvents; ev++)
     val += mEvents[ev]->processTracks();
 
-//****************** Tracking evaluation ***************************************************
-  int hey=0, beurk=0;
-  for (int ev=0; ev<mNumberOfEvents; ev++)
-    for (int j=0; j< mNumberOfGoodTracks[ev] ; j++)
-      {     
-	beurk = 0;
-	for (int i=0; i<mEvents[ev]->numberOfTracks(); i++)	  	    
-	    if ( (mEvents[ev]->getTrack(i)->flag)&& 
-		 (mGoodTracks[ev][j].waferID[0] == mEvents[ev]->getTrack(i)->waferID[0])&&
-		 (mGoodTracks[ev][j].pointID[0] == mEvents[ev]->getTrack(i)->pointID[0])&&
-		 (mGoodTracks[ev][j].waferID[1] == mEvents[ev]->getTrack(i)->waferID[1])&&
-		 (mGoodTracks[ev][j].pointID[1] == mEvents[ev]->getTrack(i)->pointID[1])&&
-		 (mGoodTracks[ev][j].waferID[2] == mEvents[ev]->getTrack(i)->waferID[2])&&
-		 (mGoodTracks[ev][j].pointID[2] == mEvents[ev]->getTrack(i)->pointID[2]) )
-	      beurk++;
-
-	if (beurk>0) hey++;
-      };
-  
-  int selected = 0;
-  for (int ev=0; ev<mNumberOfEvents; ev++)
-    for (int i=0; i<mEvents[ev]->numberOfTracks(); i++)
-      if (mEvents[ev]->getTrack(i)->flag) selected++;
-
-  gMessMgr->Info()<<" StSsdAlign : "<< selected << " selected tracks, "<< hey << " good one." << endm; 
-  //printf("  -totalChi %d selected tracks, %d good one\n",selected, hey );
-//*****************************************************************************************
  return ( val/mNumberOfEvents );
 };
 
@@ -321,11 +333,19 @@ void StSsdAlign::makeAlign( int iMax )
 
 void StSsdAlign::makeAlign2( int iMax )
 {
-  gMessMgr->Info()<<"SVT & SSD Au-Au alignment (primary vertex constraint)."<< endm;
   double step =	1.; 
   double chi0 = totalChi2();
   double derm;
- 
+  
+  gMessMgr->Info()<<"SVT & SSD cosmic alignment (primary vertex constraint)."<< endm;
+  int nTotTracks = 0;
+  for (int ev=0; ev<mNumberOfEvents; ev++)
+    for (int tr=0; tr<mEvents[ev]->numberOfTracks(); tr++)
+      if (mEvents[ev]->isTrackSelected(tr))
+	nTotTracks++;
+  //cout <<nTotTracks<<" tracks"<< endl;
+  printf("   %d tracks\n", nTotTracks); 
+
   for (int i=0; i<iMax; i++)
     { 
       if ( 9./(double)i < step ) step = 9./(double)i;
@@ -337,14 +357,14 @@ void StSsdAlign::makeAlign2( int iMax )
       
       gMessMgr->Info()<<"  i = "<<i<<", alignment constant = "<<step<<",     chi2 = "
 		      << chi0 <<endm; 
-      //printf("\n\nMakeAlign(): N %d, step=%.2f, chi2=%G\n", i, step, chi0);
+      //printf("\nMakeAlign(): N %d, step=%.2f, chi2=%G\n", i, step, chi0);
     }
 }
 
 
 globalPoint StSsdAlign::findVertex(int ev)
 {
-  float distTreshold = 0.3;//0.07
+  float distTreshold = 0.1;//0.07
   float chi2_max = 0.1;
   float vertex_width = 1.;
   float vertex_length = 12.1;
@@ -354,7 +374,7 @@ globalPoint StSsdAlign::findVertex(int ev)
   int barrel0, barrel1, barrel2;
   int hits0, hits2;
   float lambda;
-  track eventTracks[400];
+  track eventTracks[2000];
   globalPoint a,b;
   int num_track;
 
@@ -404,7 +424,8 @@ globalPoint StSsdAlign::findVertex(int ev)
 			      eventTracks[num_track].b = b;
 			      eventTracks[num_track].chi2_1 = 
 				( pEvent->chi2ab_Np( eventTracks[num_track].a, eventTracks[num_track].b,
-						     &(eventTracks[num_track].p[0]), 3, eventTracks[num_track].p[0], 0) )/3.;
+						     &(eventTracks[num_track].p[0]), 3,
+						     eventTracks[num_track].p[0], 0) )/3.;
 			      num_track++;
 			    };		    
 			};
@@ -444,7 +465,6 @@ int StSsdAlign::areWafersCloth( int inner, int outer, float distance2 )
   x1 = *(mWafer[inner].center() );
   y1 = *(mWafer[inner].center() + 1 );
   z1 = *(mWafer[inner].center() + 2 );
-
   x2 = *(mWafer[outer].center() );
   y2 = *(mWafer[outer].center() + 1 );
   z2 = *(mWafer[outer].center() + 2 );
@@ -479,12 +499,11 @@ int StSsdAlign::areWafersAligned( int inner, int middle, int outer )
 };
 
 
-//***********************************************************************************
-//  Tracking (primary vertex mode): at least 3 or 4 hits on one straight track
-//***********************************************************************************
+//  Tracking (Au-Au event): at least 3 or 4 hits on one straight track
+//********************************************************************
 int StSsdAlign::tracking()
 {
-  float distTreshold = 0.07;
+  float distTreshold = 0.1;
   float chi2_max = 0.1;
   float dca2max = 0.09*0.09;
 
@@ -493,16 +512,16 @@ int StSsdAlign::tracking()
   float lambda;
 
   double dca2;
-  track eventTracks[400];
+  track eventTracks[2000];
   globalPoint a,b;
   int num_track;
 
   for (int ev=0; ev<mNumberOfEvents; ev++)
     {
       globalPoint vtx;
+
       vtx = findVertex(ev);
-      mEvents[ev] = new StSsdEvent;
-      
+      //mEvents[ev] = new StSsdEvent;
       //***********************************************
       // search tracks (0,1,2), (0,1,3) and (0,1,2,3) :
       //***********************************************
@@ -787,49 +806,10 @@ int StSsdAlign::tracking()
 		if (eventTracks[i].chi2_1<chi2_max)
 		  mEvents[ev]->addTrack( eventTracks[i] );
 	    };
-
-      // tracking test **********************************************************************
-      printf("tracking : %d tracks (event %d)\n", mEvents[ev]->numberOfTracks(),ev);
-      int hey=0, beurk=0;
-      
-      for (int j=0; j< mNumberOfGoodTracks[ev] ; j++)
-	{
-	  beurk = 0;
-	  for (int i=0; i<mEvents[ev]->numberOfTracks(); i++)
-	    {
-	      if ( (mGoodTracks[ev][j].waferID[0] == mEvents[ev]->getTrack(i)->waferID[0])&&
-		   (mGoodTracks[ev][j].pointID[0] == mEvents[ev]->getTrack(i)->pointID[0])&&
-		   (mGoodTracks[ev][j].waferID[1] == mEvents[ev]->getTrack(i)->waferID[1])&&
-		   (mGoodTracks[ev][j].pointID[1] == mEvents[ev]->getTrack(i)->pointID[1])&&
-		   (mGoodTracks[ev][j].waferID[2] == mEvents[ev]->getTrack(i)->waferID[2])&&
-		   (mGoodTracks[ev][j].pointID[2] == mEvents[ev]->getTrack(i)->pointID[2]) )
-		beurk++;
-	    };
-	  if (beurk>0) hey++;
-	  //printf("traces : %d\n", beurk);
-	};
-      printf("tracking : %d good associations\n",hey);
-      
     }; // end event
   
   return 1;
 };
-
-
-
-// ********* pour l'utiliser, remplacer la structure goodtrack (allegee) par track ****
-//*************************************************************************************
-// void StSsdAlign::trackingGoodTRacks()
-// {
-//   for (int ev=0; ev<mNumberOfEvents; ev++)
-//     {
-//       mEvents[ev] = new StSsdEvent;
-      
-//       for (int j=0; j< mNumberOfGoodTracks[ev] ; j++)	
-// 	mEvents[ev]->addTrack( mGoodTracks[ev][j] );
-      
-//     };
-// };
 
 
 void StSsdAlign::saveTrackedEvents()
@@ -840,10 +820,6 @@ void StSsdAlign::saveTrackedEvents()
  fwrite( &mNumberOfEvents , sizeof(int), 1, tracked);
  for (int ev=0; ev<mNumberOfEvents; ev++)
    {
-//      fwrite( &mNumberOfGoodTracks[ev] , sizeof(int), 1, tracked);
-//      for (int i=0; i < mNumberOfGoodTracks[ev]; i++)
-//        fwrite( &mGoodTracks[ev][i] , sizeof(track), 1, tracked);
-
      int nboftr = mEvents[ev]->numberOfTracks();     
      fwrite( &nboftr  , sizeof(int), 1, tracked);
      for (int i=0; i < mEvents[ev]->numberOfTracks() ; i++)
@@ -956,23 +932,22 @@ int StSsdAlign::simulUnAlignment(double transW, double rotW,double transL, doubl
 };
 
 
-int  StSsdAlign::simulEvents(int ev,int numberOfTracks ,int level)
+int  StSsdAlign::simulEvents(int ev, int numberOfTracks ,int level)
 {
   //setRanlux( 4, 0, 0, 0);
   gMessMgr->Info()<<"SVT & SSD Au-Au alignment : event "<<ev<<" simulation :"<< endm;
   gMessMgr->Info()<<numberOfTracks<<" generated tracks."<< endm;
 
-  int ntracks, nTrackHit;
+  int ntracks=0, nTrackHit;
+  CreateEvent(ev);
     
-  mNumberOfGoodTracks[ev] = 0;
-  int nbofhits[536] = {0};
-  ntracks = 0;
+  //int nbofhits[536] = {0};
   globalPoint vertex;
   vertex.x = monrandom(2.)- 1.;
   vertex.y = monrandom(2.)- 1.;
   vertex.z = monrandom(20.) - 10.;
   gMessMgr->Info()<<"  vertex at ("<<vertex.x<<","<<vertex.y<<","<<vertex.z<<")." << endm;
-  //printf("evenements simules %d : vertex : %f %f %f\n", ev+1, vertex.x, vertex.y, vertex.z );
+  //printf("    vertex %d at : (%f, %f, %f)\n", ev+1, vertex.x, vertex.y, vertex.z );
   do
     { //***
       double teta, n, phi;
@@ -1015,62 +990,46 @@ int  StSsdAlign::simulEvents(int ev,int numberOfTracks ,int level)
       //printf("simu :nTrackHit=%d\n",nTrackHit);
       if ( (nTrackHit<5)&&(nTrackHit>2) ) 
 	{
-	  {
-	    for (int i = 0; i<nTrackHit; i++)
-	      {
-		mWafer[ ilP[i] ].addNewHit( &lP[i] );
-		nbofhits[ ilP[i] ]++;	
-		mWafer[ ilP[i] ].local2Global( &lP[i], &pOnWaf );
-		//a remettre si on veut : trackingGoodtrack
-		//mGoodTracks[ev][ mNumberOfGoodTracks[ev] ].p[i] = pOnWaf;
-		mGoodTracks[ev][ mNumberOfGoodTracks[ev] ].waferID[i] = ilP[i] ;
-		mGoodTracks[ev][ mNumberOfGoodTracks[ev] ].pointID[i] = nbofhits[ ilP[i] ] - 1;
-	      };
-	    mGoodTracks[ev][ mNumberOfGoodTracks[ev] ].flag = ev;
-	    mGoodTracks[ev][ mNumberOfGoodTracks[ev] ].numberOfHits = nTrackHit;
-	    //printf("simu wafer %d point %d\n",ilP[i], nbofhits[ ilP[i] ] - 1);
-	  };
+	  for (int i = 0; i<nTrackHit; i++)
+	    {
+	      mWafer[ ilP[i] ].addNewHit( &lP[i] );
+	      nbofhits[ ilP[i] ]++;	
+	      //printf("simu wafer %d point %d\n",ilP[i], nbofhits[ ilP[i] ] - 1);
+	    };
 	  ntracks++;
-	  mNumberOfGoodTracks[ev]++;
-	  //printf("nombre de hits dans la trace =%d\n",nTrackHit);
 	};
-      
+      //printf("nombre de hits dans la trace =%d\n",nTrackHit);
     } while (ntracks < numberOfTracks);
-
-  if (level>=2) // background
-    {
-      localPoint P;
-      P.Z = 0.;
-      int j;
+//   if (level>=2) // background
+//     {
+//       localPoint P;
+//       P.Z = 0.;
+//       int j;
       
-      for (int i=0; i<(int) (numberOfTracks*20./100.); i++)
-	{
-	  j = (int)monrandom(32.);
-	  P.X = (monrandom(2.)-1.)*mWafer[j].localXsize();
-	  P.Y = (monrandom(2.)-1.)*mWafer[j].localYsize();
-	  mWafer[j].addNewHit( &P );
-	  
-	  j = 32 + (int)monrandom(72.);
-	  P.X = (monrandom(2.)-1.)*mWafer[j].localXsize();
-	  P.Y = (monrandom(2.)-1.)*mWafer[j].localYsize();
-	  mWafer[j].addNewHit( &P );
-	  
-	  j = 104 + (int)monrandom(112.);
-	  P.X = (monrandom(2.)-1.)*mWafer[j].localXsize();
-	  P.Y = (monrandom(2.)-1.)*mWafer[j].localYsize();
-	  mWafer[j].addNewHit( &P );
-	};
-      for (int i=0; i<(int) (numberOfTracks*1.39/100.); i++)//1.39
-	{
-	  j = 216 + (int)monrandom(320.);
-	  P.X = (monrandom(2.)-1.)*mWafer[j].localXsize();
-	  P.Y = (monrandom(2.)-1.)*mWafer[j].localYsize();
-	  mWafer[j].addNewHit( &P );
-	};
-    };
-  
+//       for (int i=0; i<(int) (numberOfTracks*20./100.); i++)
+// 	{
+// 	  j = (int)monrandom(32.);
+// 	  P.X = (monrandom(2.)-1.)*mWafer[j].localXsize();
+// 	  P.Y = (monrandom(2.)-1.)*mWafer[j].localYsize();
+// 	  mWafer[j].addNewHit( &P );
+// 	  j = 32 + (int)monrandom(72.);
+// 	  P.X = (monrandom(2.)-1.)*mWafer[j].localXsize();
+// 	  P.Y = (monrandom(2.)-1.)*mWafer[j].localYsize();
+// 	  mWafer[j].addNewHit( &P );
+// 	  j = 104 + (int)monrandom(112.);
+// 	  P.X = (monrandom(2.)-1.)*mWafer[j].localXsize();
+// 	  P.Y = (monrandom(2.)-1.)*mWafer[j].localYsize();
+// 	  mWafer[j].addNewHit( &P );
+// 	};
+//       for (int i=0; i<(int) (numberOfTracks*1.39/100.); i++)//1.39
+// 	{
+// 	  j = 216 + (int)monrandom(320.);
+// 	  P.X = (monrandom(2.)-1.)*mWafer[j].localXsize();
+// 	  P.Y = (monrandom(2.)-1.)*mWafer[j].localYsize();
+// 	  mWafer[j].addNewHit( &P );
+// 	};
+//     };
   recordEventHits();
-  
   return 1;
 };
 
@@ -1085,11 +1044,9 @@ void StSsdAlign::simulCosmics(int ev, int numberOfTracks ,int level)
   gMessMgr->Info()<<"SVT & SSD cosmic alignment : event "<<ev<<" simulation :"<< endm;
   gMessMgr->Info()<<numberOfTracks<<" generated cosmic rays."<< endm;
 
-  int ntracks, nTrackHit;
-
+  int ntracks=0, nTrackHit;
   CreateEvent(ev);
 
-  ntracks = 0;
   do {
     globalPoint p1;
     p1.x = monrandom(80) - 40;
@@ -1214,8 +1171,7 @@ void StSsdAlign::cosmicAlign2( int iMax )
   for (int ev=0; ev<mNumberOfEvents; ev++)
     nTotTracks+=mEvents[ev]->numberOfTracks();
   cout <<nTotTracks<<" tracks"<< endl;
-
-
+  //printf("   %d tracks\n", nTotTracks);
 
   double step =	1.; 
   double chi0 = totalCosmicChi2();
@@ -1229,8 +1185,8 @@ void StSsdAlign::cosmicAlign2( int iMax )
       shiftParams( -step/derm);
       for (int ev=0; ev<mNumberOfEvents; ev++) updateGlobalPoints(ev);      
       chi0 = totalCosmicChi2();
-      cout <<"  i = "<<i<<", alignment constant = "<<step<<",     chi2 = "
-	   << chi0 <<endl; 
+      //cout <<"  i = "<<i<<", alignment constant = "<<step<<",     chi2 = "<< chi0 <<endl; 
+      printf("  i = %d, alignment constant = %f, chi2 = %f\n",i,step,chi0);
     }
 }
 
@@ -1304,8 +1260,8 @@ void StSsdAlign::FillTrack(int ev, int TrackNumber, int nTrackHit,
 			   globalPoint* gP, int *ilP)
 {
   // ilP Records which wafer hit is on
-  StSvtLocalCoordinate Local;
-  StGlobalCoordinate Global;
+  //StSvtLocalCoordinate Local;
+  //StGlobalCoordinate Global;
   localPoint lP;
     
   if ( (nTrackHit<17)&&(nTrackHit>2) ) 
@@ -1333,3 +1289,72 @@ void StSsdAlign::CreateEvent(int ev){
   mEvents[ev] = new StSsdEvent;
   for(int i=0; i<536; i++) nbofhits[i]=0;
 }
+
+
+void StSsdAlign::tetaDistri(int &nval, double *teta)
+{
+  int compt = 0, itrack = 0;
+  int ev = 0;
+
+  while ((compt<nval)&&(ev<mNumberOfEvents))
+    {
+      if (mEvents[ev]->numberOfTracks() == itrack)
+	{ ev++; itrack=0; }
+      else
+	{
+	  teta[compt] =
+	    atan( sqrt( mEvents[ev]->getTrack(itrack)->b.x*mEvents[ev]->getTrack(itrack)->b.x +
+			mEvents[ev]->getTrack(itrack)->b.z*mEvents[ev]->getTrack(itrack)->b.z )/
+		  fabs(mEvents[ev]->getTrack(itrack)->b.y) );
+	  itrack++;
+	  compt++;
+	};
+    };
+  nval = compt-1;
+};
+
+
+void StSsdAlign::nHitsPerTrackDistri(int &nval, int *number)
+{
+  int compt = 0, itrack = 0;
+  int ev = 0;
+
+  while ((compt<nval)&&(ev<mNumberOfEvents))
+    {
+      if (mEvents[ev]->numberOfTracks() == itrack)
+	{ ev++; itrack=0; }
+      else
+	{
+	  number[compt] = mEvents[ev]->getTrack(itrack)->numberOfHits;
+	  itrack++;
+	  compt++;
+	};
+    };
+  nval = compt-1;
+};
+
+
+void StSsdAlign::chi2Distri(int &nval, double *chi2)
+{
+  int compt = 0, itrack = 0;
+  int ev = 0;
+
+  for (int i = 0; i<mNumberOfEvents; i++)
+    mEvents[ev]->processCosmics();
+
+  while ((compt<nval)&&(ev<mNumberOfEvents))
+    {
+      if (mEvents[ev]->numberOfTracks() == itrack)
+	{ ev++; itrack=0; }
+      else
+	{
+	  chi2[compt] = mEvents[ev]->getTrack(itrack)->chi2_1;
+	  // dans processCosmics, remplacer val par mTracks[i]->chi2_1
+	  // et voir si ca marche bien
+	  itrack++;
+	  compt++;
+	};
+    };
+  nval = compt-1;
+};
+

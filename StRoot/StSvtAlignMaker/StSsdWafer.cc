@@ -1,15 +1,15 @@
 // StSsdWafer.cc
 // Ludovic Gaudichet
 
-
 # include <stdio.h>
 # include "StSsdWafer.hh"
+# include <math.h>
 
 StSsdWafer::StSsdWafer()
 {
   maxNumHits = 1; mCurrentHit = 0;
   mHits = new localPoint*[maxNumHits];
-  event = 0; mCurrentEvent = 0;
+  mCurrentEvent = 0;
   mIsOn = 1;
  
   mDx = 0.; mDy = 0.; mDz = 0.;
@@ -125,12 +125,12 @@ void StSsdWafer::calculN()
 };
 
 
-
 int StSsdWafer::addNewHit( localPoint *local )
 {
   if  ((mCurrentHit == maxNumHits)&&(mIsOn))
     {      
-      localPoint *newPt[maxNumHits];
+      //localPoint *newPt[maxNumHits];
+      localPoint **newPt = new localPoint *[maxNumHits];
       
       for (int i=0; i<maxNumHits; i++)
 	newPt[i] = mHits[i];
@@ -152,7 +152,7 @@ int StSsdWafer::addNewHit( localPoint *local )
 	  if (mEventFirstHit[j] == &newPt[i]) mEventFirstHit[j] = &mHits[i];
       
       maxNumHits+=10;
-      
+      delete[] newPt;
     };
 
   if ( mIsOn )
@@ -260,8 +260,7 @@ return touched;
 
 int  StSsdWafer::recordEvent()
 {
- int exit = (mCurrentEvent<maxNumberOfEvents);
-  // de plus : verifier que le nbr de pts n'est pas 0 pour cet evt
+  int exit = (mCurrentEvent<maxNumberOfEvents);
   if (exit)
     {
       mCurrentEvent++;
@@ -280,6 +279,7 @@ const globalPoint StSsdWafer::hit(int event, int nhit)
     };
   return p;
 };
+
 
 void StSsdWafer::speedHit(int event, int nhit, globalPoint *p)
 {
@@ -322,7 +322,7 @@ int StSsdWafer::clotherHit( int event, globalPoint* p1, globalPoint* p2, float t
 
 void StSsdWafer::printState()
 {
-  printf("wafer (barrel, ladder, wafer) = (%d,%d, %d)\n", mLayerID, mLadderID, mLayerID);
+  printf("wafer (barrel, ladder, wafer) = (%d,%d, %d)\n", mLayerID, mLadderID, mWaferID);
   printf("lx=%f ly=%f\n",mLX, mLY);
   printf("Number of event(s) : %d\n",mCurrentEvent);
   printf("Number of hit(s)   : %d\n\n",mCurrentHit);

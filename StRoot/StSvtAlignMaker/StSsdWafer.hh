@@ -3,18 +3,13 @@
 
 #ifndef  STAR_StSsdWafer_hh
 #define  STAR_StSsdWafer_hh
-
-
-//#include "StGlobals.hh"
-//#include  <Rtypes.h>
 #include "StSsdObjects.hh"
 
 
 class StSsdWafer
 {
 public :
-  
- 
+
   StSsdWafer();
   ~StSsdWafer();
 
@@ -32,8 +27,13 @@ public :
   const double beta()   const;
   const double gamma()  const;
   const double param(int par) const;
-  const double localXsize()  const;
-  const double localYsize()  const;
+  const double* center() const;
+  const double localXsize() const;
+  const double localYsize() const;
+  const double x(int i) const;
+  const double d(int i) const;
+  const double t(int i) const;
+  const double n(int i) const;
 
   void switchOff();
   void switchOn();
@@ -45,8 +45,6 @@ public :
   void setBeta(double beta);
   void setGamma(double gamma);
   void shiftParam(int param, double val);
-
-  const double* center() const;
 
   int addNewHit( localPoint *local ); // local coordinates
   int addNewHit( globalPoint *global ); // global coordinates
@@ -69,20 +67,17 @@ public :
   void printState();
   
 protected :
-
 private :
 
   void calculD();
   void calculT();
   void calculN();
 
-
   int mIsOn;
   int mWaferID;
   int mLadderID;
   int mLayerID;
-  
-  int event;
+
   localPoint **mEventFirstHit[maxNumberOfEvents+1];
 
   int mCurrentHit;
@@ -99,35 +94,16 @@ private :
   double mDx, mDy, mDz, mAlpha, mBeta, mGamma;
 
   // in svg_geom :
-  double mx0[3]; // wafer center
-  double md0[3]; // drift direction
-  double mt0[3]; // transverse to drift
-  double mn0[3]; // normal to wafer
-
-
+  double mx0[3]; // initial wafer center
+  double md0[3]; // initial drift direction
+  double mt0[3]; // initial transverse to drift
+  double mn0[3]; // initial normal to wafer
 
   double mx[3]; // wafer center
   double md[3]; // drift direction
   double mt[3]; // transverse to drift
   double mn[3]; // normal to wafer
-
 };
-
-const inline int StSsdWafer::waferID() const { return mWaferID; }
-const inline int StSsdWafer::ladderID() const { return mLadderID; }
-const inline int StSsdWafer::layerID() const { return mLayerID; }
-
-inline void StSsdWafer::switchOff() { mIsOn = 0; };
-inline void StSsdWafer::switchOn() { mIsOn = 1; };
-const inline int StSsdWafer::isOn() const { return mIsOn ; };
-
-const inline int StSsdWafer::numberOfHits(int event) const
-{  return ( mEventFirstHit[event+1] - mEventFirstHit[event] ); };
-
-const inline int StSsdWafer::numberOfHits() const
-{ return mCurrentHit; };
-
-const inline double* StSsdWafer::center() const { return mx; };
 
 const inline double StSsdWafer::dx() const {return mDx;};
 const inline double StSsdWafer::dy() const {return mDy;};
@@ -135,8 +111,28 @@ const inline double StSsdWafer::dz() const {return mDz;};
 const inline double StSsdWafer::alpha() const {return mAlpha;};
 const inline double StSsdWafer::beta() const {return mBeta;};
 const inline double StSsdWafer::gamma() const {return mGamma;};
+const inline double StSsdWafer::localXsize() const{return mLX;};
+const inline double StSsdWafer::localYsize() const{return mLY;};
 
-const inline double StSsdWafer::localXsize()  const{return mLX;};
-const inline double StSsdWafer::localYsize()  const{return mLY;};
+const inline double* StSsdWafer::center() const { return mx; };
+const inline double StSsdWafer::x(int i) const{return mx[i];};
+const inline double StSsdWafer::d(int i) const{return md[i];};
+const inline double StSsdWafer::t(int i) const{return mt[i];};
+const inline double StSsdWafer::n(int i) const{return mn[i];};
+const inline int StSsdWafer::waferID() const { return mWaferID; }
+const inline int StSsdWafer::ladderID() const { return mLadderID; }
+const inline int StSsdWafer::layerID() const { return mLayerID; }
+
+inline void StSsdWafer::switchOff() { mIsOn = 0; };
+inline void StSsdWafer::switchOn() { mIsOn = 1; };
+const inline int StSsdWafer::isOn() const { return mIsOn; };
+
+const inline int StSsdWafer::numberOfHits(int event) const
+{  return ( mEventFirstHit[event+1] - mEventFirstHit[event] ); };
+
+const inline int StSsdWafer::numberOfHits() const
+{ return mCurrentHit; };
+
+
 
 #endif
