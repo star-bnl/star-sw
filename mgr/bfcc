@@ -75,12 +75,6 @@ if ($input_file =~ /evts/){
 my $inFile = $input_file;
   $inFile =~ s/daq/log/g;
 
-symlink "/star/data03/reco/StarDb", "StarDb";
-#my $cmd = " root4star -q -b 'bfc.C(200,\"in TpcT0\",\"" . $input_file . "\")\' >& /star/data03/reco/StarDb/log/" . $inFile;
-#system 'echo "Start calibration job execution at" `date` " on " `hostname`'; 
-#print "$cmd\n";
-#system $cmd;
-#system 'echo "Finished calibration job execution at" `date` " on " `hostname`'; 
 $cmd = " root4star -b -q 'bfc.C(" . $NofEvents . ",\"" . $Chain . "\",\"" . $input_file . "\")\'";
 print $cmd,"\n";
 system $cmd;
