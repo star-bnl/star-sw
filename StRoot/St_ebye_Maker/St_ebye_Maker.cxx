@@ -1,5 +1,8 @@
-// $Id: St_ebye_Maker.cxx,v 1.16 2003/09/11 05:49:24 perev Exp $
+// $Id: St_ebye_Maker.cxx,v 1.17 2003/09/13 00:42:33 perev Exp $
 // $Log: St_ebye_Maker.cxx,v $
+// Revision 1.17  2003/09/13 00:42:33  perev
+// XDF obsolete + small fixes
+//
 // Revision 1.16  2003/09/11 05:49:24  perev
 // ansi corrs
 //
@@ -66,12 +69,12 @@
 // St_ebye_Maker class for Makers                                        //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
-
+#include <assert.h>
 #include <Stiostream.h>
 #include "St_ebye_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
-#include "St_XDFFile.h"
+//VP#include "St_XDFFile.h"
 
 
 #include "ebye/St_sca_filter_Module.h"
@@ -165,7 +168,7 @@ Int_t St_ebye_Maker::Init(){
   if(GetDebug()>1)m_sca_const->ls("*");
   
   if (GetDebug()>2) printf (" ===> <St_ebye_Maker::Init()>: \n \t m_sca_switch       = %p, \n \t m_sca_const        = %p, \n \t m_sca_filter_const = %p \n", 
-		     m_sca_switch,m_sca_const,(void*)m_sca_filter_const);
+		     (void*)m_sca_switch,(void*)m_sca_const,(void*)m_sca_filter_const);
   // Set switches to make propir
   sca_switch_st *sca_switch   = m_sca_switch->GetTable();
   sca_switch->makePrior       = 0;
@@ -277,7 +280,7 @@ Int_t St_ebye_Maker::SetmakeEnsembleAve(Bool_t flag){
   if (! ebye) ebye = local.Mkdir("ebye");
   //Char_t *sca_prior = "${STAR_CALIB}/ebye/sca_prior_dir.xdf";
   Char_t *sca_prior = "/star/u2/dhammika/newupdate/calib/ebye/sca_prior_dir.xdf";
-  St_XDFFile::GetXdFile(sca_prior,ebye);
+  assert(0);//VP  St_XDFFile::GetXdFile(sca_prior,ebye);
   St_DataSet *scaprior = local("ebye/sca_prior_dir");
   if (!scaprior) { 
     printf(" ===> <St_ebye_Maker::SetmakeEnsembleAve()>: <<< ERROR >>>  the file \"%s\" has no \"sca_prior_dir\" dataset\n",sca_prior);
@@ -323,10 +326,10 @@ Int_t St_ebye_Maker::SetdoAnalysis(Bool_t flag){
   }
   //Char_t *sca_prior = "${STAR_CALIB}/ebye/sca_prior_dir.xdf";
   Char_t *sca_prior = "/star/u2/dhammika/newupdate/calib/ebye/sca_prior_dir.xdf";
-  St_XDFFile::GetXdFile(sca_prior,ebye);
+  assert(0);//VP  St_XDFFile::GetXdFile(sca_prior,ebye);
   //Char_t *sca_ensmave = "${STAR_CALIB}/ebye/sca_ensemble_dir.xdf";
   Char_t *sca_ensmave = "/star/u2/dhammika/newupdate/calib/ebye/sca_ensemble_dir.xdf";
-  St_XDFFile::GetXdFile(sca_ensmave,ebye);
+  assert(0);//VP St_XDFFile::GetXdFile(sca_ensmave,ebye);
   St_DataSet *scaprior = local("ebye/sca_prior_dir");
   if (!scaprior) { 
     printf(" ===> <St_ebye_Maker::SetdoAnalysis()>: <<< ERROR >>> the file \"%s\" has no \"sca_prior_dir\" dataset\n",sca_prior);

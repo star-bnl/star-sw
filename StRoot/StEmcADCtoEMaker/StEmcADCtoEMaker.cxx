@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.51 2003/09/12 22:03:54 jeromel Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.52 2003/09/13 00:42:28 perev Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.52  2003/09/13 00:42:28  perev
+// XDF obsolete + small fixes
+//
 // Revision 1.51  2003/09/12 22:03:54  jeromel
 // Bug fix : data member not zeroed (later delete)
 //
@@ -121,7 +124,7 @@
 #include "StBemcData.h"
 
 #define STATUS_OK 1
-#define MAXDET 4
+//VP #define MAXDET 4  //already defined
 #define CAP1 124
 #define CAP2 125
 

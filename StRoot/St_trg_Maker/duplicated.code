@@ -98,7 +98,7 @@ void St_trg_Maker::SWITCH(Emc)(St_dst_TrgDet *dst1) {
   } else {
     NUMDSM = 7;
   }   
-  byte dsmval[NUMDSM][BYTESPERDSM];
+  byte dsmval[100][BYTESPERDSM];
   byte val[BYTESPERDSM];
   byte hi_tower,tower_sum;
   int i,j,k,index,nt,patch,sort;

@@ -28,8 +28,9 @@ StKonstJetFinder::StKonstJetFinder(StKonstJetFinderPars& pars)
     eta = new Float_t[MAXTRACKS_KJF];
     phi = new Float_t[MAXTRACKS_KJF];
     mass = new Float_t[MAXTRACKS_KJF];
-    tracks = new (StProtoJet*)[MAXTRACKS_KJF];
-    jets = new (StProtoJet)[MAXJETS_KJF];
+    typedef StProtoJet* StProtoJetP;
+    tracks = new StProtoJetP[MAXTRACKS_KJF];
+    jets =   new StProtoJet [MAXJETS_KJF];
 }
 
 StKonstJetFinder::~StKonstJetFinder()

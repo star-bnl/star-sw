@@ -1,5 +1,8 @@
-// $Id: StChargeStepMaker.cxx,v 1.12 2003/09/02 17:55:30 perev Exp $
+// $Id: StChargeStepMaker.cxx,v 1.13 2003/09/13 00:42:27 perev Exp $
 // $Log: StChargeStepMaker.cxx,v $
+// Revision 1.13  2003/09/13 00:42:27  perev
+// XDF obsolete + small fixes
+//
 // Revision 1.12  2003/09/02 17:55:30  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -47,9 +50,9 @@
 #include <math.h>
 #include "StChargeStepMaker.h"
 #include "StChain.h"
-#include "St_DataSet.h"
-#include "St_DataSetIter.h"
-#include "St_XDFFile.h"
+#include "TDataSet.h"
+#include "TDataSetIter.h"
+//VP#include "St_XDFFile.h"
 #include "StMessMgr.h"
 #include "tables/St_type_shortdata_Table.h"
 #include "tables/St_tpcDriftVelocity_Table.h"
@@ -333,7 +336,7 @@ Int_t StChargeStepMaker::Make() {
 
 void StChargeStepMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StChargeStepMaker.cxx,v 1.12 2003/09/02 17:55:30 perev Exp $\n");
+  printf("* $Id: StChargeStepMaker.cxx,v 1.13 2003/09/13 00:42:27 perev Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();

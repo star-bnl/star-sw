@@ -1,8 +1,11 @@
 //*CMZ :          23/02/99  18.27.27  by Gene Van Buren ( genevb@bnl.gov)
 //*-- Author :    Gene Van Buren ( genevb@bnl.gov)   23/02/99
 //
-// $Id: St_TableNtuple.cxx,v 1.3 2003/09/02 17:55:26 perev Exp $
+// $Id: St_TableNtuple.cxx,v 1.4 2003/09/13 00:42:26 perev Exp $
 // $Log: St_TableNtuple.cxx,v $
+// Revision 1.4  2003/09/13 00:42:26  perev
+// XDF obsolete + small fixes
+//
 // Revision 1.3  2003/09/02 17:55:26  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -120,7 +123,7 @@
 #include "TDataMember.h"
 #include "TDataType.h"
 #include "TFile.h"
-#include "St_XDFFile.h"
+//VP #include "St_XDFFile.h"
 #include "TKey.h"
 #include "TBranch.h"
 #include "St_DataSet.h"
@@ -231,9 +234,9 @@ Int_t St_TableNtuple::AddXDFFile(const Char_t *file, Char_t *dataset, Char_t *tn
 //               -1 events (default) means read the entire file
 // Number of events actually read is returned
 //
-  St_XDFFile f(file);
-  return AddXDFFile(f,dataset,tname,firstEvent,nEvents);
-  delete &f;
+//VP  St_XDFFile f(file);
+//VP  return AddXDFFile(f,dataset,tname,firstEvent,nEvents);
+  return 0;
 }
 //_____________________________________________________________________________
 Int_t St_TableNtuple::AddXDFFile(St_XDFFile &f, Char_t *dataset, Char_t *tname, Int_t firstEvent, Int_t nEvents) {
@@ -248,6 +251,8 @@ Int_t St_TableNtuple::AddXDFFile(St_XDFFile &f, Char_t *dataset, Char_t *tname, 
 //               -1 events (default) means read the entire file
 // Number of events actually read is returned
 //
+  return 0;
+#if 0
   if (!(strcmp(tname,"same"))) tname = dataset;
   St_DataSet *event=0;
   
@@ -279,6 +284,7 @@ Int_t St_TableNtuple::AddXDFFile(St_XDFFile &f, Char_t *dataset, Char_t *tname, 
   }
 
   return j;
+#endif //0
 }
 //_____________________________________________________________________________
 void St_TableNtuple::Browse(TBrowser *b) {
@@ -478,7 +484,7 @@ void St_TableNtuple::LearnTable(const St_Table &table, Bool_t buildTree, Int_t b
 //_____________________________________________________________________________
 void St_TableNtuple::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_TableNtuple.cxx,v 1.3 2003/09/02 17:55:26 perev Exp $\n");
+  printf("* $Id: St_TableNtuple.cxx,v 1.4 2003/09/13 00:42:26 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("* Using %d columns from table with:\n",mNvar);
   printf("*   Name: %s\n",GetName());
