@@ -1,7 +1,11 @@
+#include "Messenger.h"
 #include "StiDetector.h"
 #include "StiDetectorBuilder.h"
 
-StiDetectorBuilder::StiDetectorBuilder(){
+StiDetectorBuilder::StiDetectorBuilder():
+        m_messenger(*Messenger::instance(kDetectorMessage)){
+  Messenger::setMessageOstream(kDetectorMessage, 
+                               new ofstream("DetectorMessageFile"));
 }
 
 StiDetectorBuilder::~StiDetectorBuilder(){

@@ -44,6 +44,7 @@
 //#include "Sti/TrackNodeTest.h"
 #include "Sti/StiCompositeSeedFinder.h"
 #include "Sti/StiKalmanTrackFinder.h"
+#include "Sti/Messenger.h"
 
 //StiGui
 #include "StiGui/StiGuiFactoryTypes.h"
@@ -151,6 +152,8 @@ StiMaker::~StiMaker()
     StiDetectorFinder::kill();
 
     StiEvaluator::kill();
+
+    Messenger::kill();
 }
 
 void StiMaker::Clear(const char*)
@@ -184,6 +187,8 @@ Int_t StiMaker::Finish()
 
 Int_t StiMaker::Init()
 {
+    Messenger::init();
+
     //The Display
     mdisplay = StiDisplayManager::instance();
     //Must come before anything that you want to be drawn

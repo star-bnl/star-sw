@@ -13,6 +13,7 @@
 class StiDetector;
 class StiMaterial;
 class StiShape;
+class Messenger;
 
 // Set up stl maps for by-name lookup of shapes and materials.
 // Not used for placements because they are unique to each detector.
@@ -59,6 +60,7 @@ protected:
     detectorMap         mDetectorMap;
     detectorIterator    mDetectorIterator;
 
+    Messenger&          m_messenger;
 };
 
 #endif // ifndef STI_DETECTOR_BUILDER_H
