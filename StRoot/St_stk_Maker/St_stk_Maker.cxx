@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.cxx,v 1.9 1999/02/16 18:15:46 fisyak Exp $
+// $Id: St_stk_Maker.cxx,v 1.10 1999/02/16 21:17:54 caines Exp $
 // $Log: St_stk_Maker.cxx,v $
+// Revision 1.10  1999/02/16 21:17:54  caines
+// Added QA histograms
+//
 // Revision 1.9  1999/02/16 18:15:46  fisyak
 // Check in the latest updates to fix them
 //
@@ -41,6 +44,7 @@
 
 #include <iostream.h>
 #include <stdlib.h>
+#include "TMath.h"
 #include "St_stk_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -50,10 +54,11 @@
 #include "svt/St_stk_am_init_Module.h"
 #include "svt/St_sgr_am_Module.h"
 #include "svt/St_spr_svt_Module.h"
-
+#include "TH1.h"
+#include "TH2.h"
 ClassImp(St_stk_Maker)
   
-  //_____________________________________________________________________________
+//_____________________________________________________________________________
   St_stk_Maker::St_stk_Maker(const char *name, const char *title):
     StMaker(name,title),
     m_stk_stkpar(0),
@@ -63,7 +68,13 @@ ClassImp(St_stk_Maker)
     m_stk_filler(0),
     m_config(0),
     m_geom(0),
-    m_sprpar(0)
+    m_sprpar(0),
+    m_q_pt(0),
+    m_frac_used(0),
+    m_azimuth(0),
+    m_tan_dip(0),
+    m_dedx(0),
+    m_gededx(0)
 {
   drawinit=kFALSE;
   m_mode = 2;
@@ -116,6 +127,7 @@ Int_t St_stk_Maker::Init(){
   stk_stkpar->nitermax = m_nitermax;
   stk_stkpar->niternull = m_niternull;
   stk_stkpar->sec_factor = m_sec_factor;
+  stk_stkpar->nlayers = 4;
   
   m_stk_vtx        = (St_stk_vtx *)        local("global/vertices/stk_vtx");
   m_stk_vtx_direct = (St_stk_vtx_direct *) local("global/vertices/stk_vtx_direct");
@@ -126,7 +138,14 @@ Int_t St_stk_Maker::Init(){
   m_pix_info       = (St_sgr_pixmap *)     local("svt/sgrpars/pix_info");
   
   m_sprpar         = (St_spr_sprpar *)     local("svt/sprpars/sprpar");
-  // Create Histograms    
+  // Create Histograms
+  m_q_pt = new TH1F("svt_charge_over_pt","Charge/pt of reconstructed svt tracks",100,-20.,20.);
+  m_frac_used   = new TH1F("svt_hits_used","Fraction of hits used on svt tracks",100,0.,1.2);
+  m_azimuth       = new TH1F("svt_azimuth","Azimuthal distribution of svt tracks",60,0.,360.0);
+  m_tan_dip       = new TH1F("svt_tan_dip","Distribution of the svt dip angle",100,-1.5,1.5);
+  m_dedx          = new TH2F("svt_dedx","svt de/dx distribution",100,0.,2.0,100,0.,0.01);
+  m_gededx          = new TH2F("svt_gededx","svt ge de/dx distribution",100,0.,2.0,100,0.,0.01);
+
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -222,20 +241,95 @@ Int_t St_stk_Maker::Make(){
 			       ste_teval,ste_teff);
 	
 	if (Res_ste != kSTAFCV_OK) {cout << "Problem on return from STE_AM" << endl;}
-	Int_t Res_spr_svt = spr_svt(m_sprpar, stk_kine,
+#endif
+		Int_t Res_spr_svt = spr_svt(m_sprpar, stk_kine,
 				    m_geom, scs_spt,
 				    groups, stk_track);
 	if (Res_spr_svt != kSTAFCV_OK) {cout << "Problem on return from SPR_SVT"<< endl;}
-#endif
+
       }
     }	  
   } 
+  MakeHistograms(); //tracking histograms
   return kStOK;
 }
+// --------------------------------------------------------------------------
+void St_stk_Maker::MakeHistograms() {
+  // Create an iterator
+  St_DataSetIter svt_tracks(m_DataSet);
+  // Create iterator for space points
+
+  St_DataSetIter data(gStChain->DataSet("svt_hits"));
+
+
+  //Get the table:
+  St_stk_track *spr = 0;
+  St_sgr_groups *gpr = 0;
+  St_scs_spt *spc = 0;
+  
+  spr               = (St_stk_track *) svt_tracks.Find("stk_track");  
+  gpr               = (St_sgr_groups *) svt_tracks.Find("groups");  
+  spc               = (St_scs_spt *) data.Find("scs_spt");
+
+  cout << "Filling SVT track histograms" << endl;
+
+  if (gpr && spc) {
+    m_frac_used->Fill((float)gpr->GetNRows()/(float)spc->GetNRows());
+  }
+  if (spr) {
+    stk_track_st *r = spr->GetTable();
+    
+    for(Int_t i=0; i<spr->GetNRows();i++,r++){
+      Int_t flag    = r->flag;
+      
+      
+      if(flag>0) {
+	m_q_pt->Fill(r->invpt);
+	m_azimuth->Fill(r->psi);
+	m_tan_dip->Fill(r->tanl); 
+	
+	// Fill dedx
+
+	Float_t pt = 1./r->invpt;
+	Float_t pz = r->tanl/r->invpt;
+	Float_t p = TMath::Sqrt(pt*pt+pz*pz);
+	
+	m_dedx->Fill(p,r->dedx[0]);
+
+      }         
+    }
+
+  }
+
+
+  // Fill the geant dedx hist
+
+  St_DataSetIter gedata(gStChain->DataSet("geant"));
+
+  //Get the table:
+  St_g2t_svt_hit *g2tspc = 0;
+ 
+  g2tspc              = (St_g2t_svt_hit *) gedata.Find("g2t_svt_hit");
+
+  if( g2tspc){
+    g2t_svt_hit_st *gmc = g2tspc->GetTable();
+    
+    for( Int_t i=0; i<g2tspc->GetNRows(); i++,gmc++){
+      
+      Float_t p = TMath::Sqrt(gmc->p[0]*gmc->p[0]+gmc->p[1]*gmc->p[1]+
+			      gmc->p[2]*gmc->p[2]);
+      Float_t chr = gmc->de/(float)gmc->ds;
+      
+      m_gededx->Fill(p,chr);
+    }
+  }
+}
+
+
 //_____________________________________________________________________________
 void St_stk_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_stk_Maker.cxx,v 1.9 1999/02/16 18:15:46 fisyak Exp $\n");
+  printf("* $Id: St_stk_Maker.cxx,v 1.10 1999/02/16 21:17:54 caines Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
