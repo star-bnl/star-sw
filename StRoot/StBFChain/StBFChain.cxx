@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.140 2000/09/05 21:56:58 didenko Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.141 2000/09/09 18:09:19 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -186,12 +186,16 @@ Bfc_st BFC[] = {
   {"emc"    ,"emcChain","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl"      ,"StMaker","StChain","",kFALSE},
   {"ems"    ,"emc_raw","emcChain","geant,emc_T"    ,"St_ems_Maker","StEvent,St_emc,St_ems_Maker","",kFALSE},
   {"emh"    ,"emc_hits","emcChain","geant,emc_T,tpc_T"     ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
-  {"global"      ,"globalChain","","globT,Match,primary,v0,xi,kink,dst,SCL"
+  {"global"      ,"globalChain","","globT,Match,fglobal,primary,fprimary,v0,xi,kink,dst,SCL"
                                                               ,"StMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","globalChain","SCL,tpc_T,svt_T,globT,tls"
                                                  ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"Fglobal"    ,"fglobal","globalChain","SCL,tables,tls"
+                                                 ,"StFtpcGlobalMaker","St_global,St_dst_Maker","",kFALSE},
   {"Primary"     ,"primary","globalChain","SCL,globT,tls"
                                                ,"StPrimaryMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"Fprimary"    ,"fprimary","globalChain","SCL,tables,tls"
+                                               ,"StFtpcPrimaryMaker","St_global,St_dst_Maker","",kFALSE},
   {"V0"          ,"v0","globalChain","SCL,globT,tls","StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Xi"          ,"xi","globalChain","SCL,globT,tls","StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Kink"   ,"kink","globalChain","SCL,globT,tls","StKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},

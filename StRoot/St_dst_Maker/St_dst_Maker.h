@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.h,v 1.11 1999/11/29 20:20:30 fisyak Exp $
+// $Id: St_dst_Maker.h,v 1.12 2000/09/09 18:09:21 fisyak Exp $
 // $Log: St_dst_Maker.h,v $
+// Revision 1.12  2000/09/09 18:09:21  fisyak
+// Janet Seyboth corrections
+//
 // Revision 1.11  1999/11/29 20:20:30  fisyak
 // Janet changes due to ftpc
 //
@@ -63,7 +66,6 @@
 #include "StMaker.h"
 
 class St_dst_summary_param;
-class St_fde_fdepar;
 
 class St_dst_Maker : public StMaker {
  private:
@@ -71,7 +73,6 @@ class St_dst_Maker : public StMaker {
   Char_t collectionName[256];
 
   St_dst_summary_param *m_dst_summary_param; //!
-  St_fde_fdepar        *m_fdepar;            //!
 
  protected:
  public: 
@@ -84,7 +85,7 @@ class St_dst_Maker : public StMaker {
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_dst_Maker.h,v 1.11 1999/11/29 20:20:30 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_dst_Maker.h,v 1.12 2000/09/09 18:09:21 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
    ClassDef(St_dst_Maker, 1)   //StAF chain virtual base class for Makers
