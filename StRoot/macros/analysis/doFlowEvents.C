@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.6 2000/04/13 21:46:34 kathy Exp $
+// $Id: doFlowEvents.C,v 1.7 2000/04/24 20:25:45 posk Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -12,7 +12,7 @@
 //
 // Ways to run:
 // If you specify a path, all DST files below that path will be
-// found, and 'nevents' events from each will be analyzed.
+// found, and 'nevents' events will be analyzed.
 // The type of DST files searched for is taken from the 'file' parameter.
 // If 'file ends in '.xdf', XDF DSTs are searched for.
 // If 'file ends in '.dst.root', ROOT DSTs are searched for.
@@ -36,6 +36,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.7  2000/04/24 20:25:45  posk
+// Added doEvents.C updates.
+//
 // Revision 1.6  2000/04/13 21:46:34  kathy
 // remove loading of libtpc_Tables since l3Track table is now dst_track type from global
 //
@@ -77,9 +80,11 @@ void doFlowEvents()
     cout << "       doFlowEvents.C(nevents,\"-\",\"some_directory/some_dst_file.root\")" << endl;
     cout << "       doFlowEvents.C(nevents,\"some_directory\",\"*.dst.root\")" << endl;	
 }
+
 void doFlowEvents(Int_t,const Char_t **,const char *qaflag = "");
 void doFlowEvents(Int_t nevents=999, const Char_t *path, const Char_t *file,
               const char *qaflag = "off");
+void doFlowEvents(Int_t);
 
 
 void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
@@ -115,7 +120,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
       { setFiles->AddFile(fileList[ifil]);}
     StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
     IOMk->SetBranch("runcoBranch",0,"r");
-    IOMk->SetDebug();
+    //IOMk->SetDebug();
 
     //
     // Maker to read events from file or database into StEvent
@@ -216,19 +221,28 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
     }
 }
 
-void doFlowEvents(const Int_t nevents, const Char_t *path="/afs/rhic/star/ebye/flow/fixed10/", const Char_t *file="*.xdf")
+void doFlowEvents(const Int_t nevents, const Char_t *path, const Char_t *file,const char *qaflag)
 {
-  //path="/afs/rhic/star/ebye/flow/random10/";
     const char *fileListQQ[]={0,0};
     if (path[0]=='-') {
 	fileListQQ[0]=file;
     } else {
 	fileListQQ[0] = gSystem->ConcatFileName(path,file);
     }
-    doFlowEvents(nevents,fileListQQ);
+    doFlowEvents(nevents,fileListQQ,qaflag);
 }
 
+void doFlowEvents(const Int_t nevents)
+{
+  //path="/afs/rhic/star/ebye/flow/fixed10/";
+  //path="/afs/rhic/star/ebye/flow/random10/";
+  //file="*.xdf";
 
+  filePath="/data06/snelling/flow/";
+  fileExt="*.dst.root";
+
+  doFlowEvents(nevents, filePath, fileExt);
+}
 
 
 
