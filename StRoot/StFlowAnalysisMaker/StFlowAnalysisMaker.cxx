@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.35 2000/08/09 21:38:59 snelling Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.36 2000/08/12 20:20:13 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.36  2000/08/12 20:20:13  posk
+// More centrality bins.
+//
 // Revision 1.35  2000/08/09 21:38:59  snelling
 // Added monitor histograms
 //
@@ -136,14 +139,14 @@ extern "C" float besi1_(const float&);
 
 ClassImp(StFlowAnalysisMaker)
 
-const Float_t StFlowAnalysisMaker::etaMin = -2.;
-const Float_t StFlowAnalysisMaker::etaMax =  2.;
+const Float_t StFlowAnalysisMaker::etaMin = -1.5;
+const Float_t StFlowAnalysisMaker::etaMax =  1.5;
 const Float_t StFlowAnalysisMaker::ptMin  =  0.;
-const Float_t StFlowAnalysisMaker::ptMax  =  10.;
-const Float_t StFlowAnalysisMaker::qMax   = 3.5;
+const Float_t StFlowAnalysisMaker::ptMax  =  2.;
+const Float_t StFlowAnalysisMaker::qMax   =  3.5;
 
 enum { nEtaBins = 20,
-       nPtBins  = 50,
+       nPtBins  = 40,
        n_qBins  = 50};
 // nPhiBins is in StFlowConstants.h
 
@@ -186,7 +189,7 @@ Int_t StFlowAnalysisMaker::Make() {
   pFlowMaker = (StFlowMaker*)GetMaker(makerName->Data());
   delete makerName;
   if (pFlowMaker) pFlowEvent = pFlowMaker->FlowEventPointer();
-  if (pFlowSelect->Select(pFlowEvent)) {     // event selected
+  if (pFlowEvent && pFlowSelect->Select(pFlowEvent)) {     // event selected
 
     // Event quantities
     if (pFlowTag) {
@@ -217,7 +220,7 @@ Int_t StFlowAnalysisMaker::Init() {
   const float chargeMin       =  -2.5;
   const float chargeMax       =   2.5; 
   const float dcaMin          =    0.;
-  const float dcaMax          =    1.; 
+  const float dcaMax          =   1.2; 
   const float chi2Min         =    0.;
   const float chi2Max         =    5.; 
   const float fitPtsMin       =    0.;
@@ -257,11 +260,11 @@ Int_t StFlowAnalysisMaker::Init() {
   const float qMin            =    0.;
   const float pidMin          =  -10.;
   const float pidMax          =   10.;
-  const float centMin         =   0.5;
-  const float centMax         =   7.5;
+  const float centMin         =  -0.5;
+  const float centMax         =   9.5;
 
   enum { nChargeBins       = 50,
-	 nDcaBins          = 50,
+	 nDcaBins          = 60,
 	 nChi2Bins         = 50,
 	 nFitPtsBins       = 60,
 	 nMaxPtsBins       = 60,
@@ -272,7 +275,7 @@ Int_t StFlowAnalysisMaker::Init() {
 	 nTotalMultBins    = 40,
 	 nMultOverOrigBins = 50,
 	 nCorrMultBins     = 40,
-	 nVertexZBins      = 30,
+	 nVertexZBins      = 60,
 	 nVertexXYBins     = 50,
 	 nEtaSymBins       = 50,
 	 nPhi3DBins        = 18,
@@ -280,7 +283,7 @@ Int_t StFlowAnalysisMaker::Init() {
 	 nMultBins         = 40,
 	 nMeanPtBins       = 50,
 	 nPidBins          = 50,
-         nCentBins         =  7 };
+         nCentBins         = 10 };
   
   // Charge
   mHistCharge = new TH1F("Flow_Charge", "Flow_Charge",
@@ -735,7 +738,6 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHist_vObs2D =	new TProfile2D(histTitle->Data(),
         histTitle->Data(), nEtaBins, etaMin, etaMax, nPtBins, ptMin, ptMax,
 							       -100., 100., "");
-      //histFull[k].histFullHar[j].mHist_vObs2D->Sumw2();
       histFull[k].histFullHar[j].mHist_vObs2D->SetXTitle("Pseudorapidity");
       histFull[k].histFullHar[j].mHist_vObs2D->SetYTitle("Pt (GeV)");
       delete histTitle;
@@ -746,7 +748,7 @@ Int_t StFlowAnalysisMaker::Init() {
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vObsEta = new TProfile(histTitle->Data(),
-        histTitle->Data(), 2*nEtaBins, etaMin, etaMax, -100., 100., "");
+        histTitle->Data(), nEtaBins, etaMin, etaMax, -100., 100., "");
       histFull[k].histFullHar[j].mHist_vObsEta->SetXTitle("Pseudorapidity");
       histFull[k].histFullHar[j].mHist_vObsEta->SetYTitle("Flow (%)");
       delete histTitle;
@@ -756,7 +758,7 @@ Int_t StFlowAnalysisMaker::Init() {
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
       histFull[k].histFullHar[j].mHist_vObsPt = new TProfile(histTitle->Data(),
-        histTitle->Data(), 2*nPtBins, ptMin, ptMax, -100., 100., "");
+        histTitle->Data(), nPtBins, ptMin, ptMax, -100., 100., "");
       histFull[k].histFullHar[j].mHist_vObsPt->SetXTitle("Pt (GeV)");
       histFull[k].histFullHar[j].mHist_vObsPt->SetYTitle("Flow (%)");
       delete histTitle;
@@ -765,7 +767,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.35 2000/08/09 21:38:59 snelling Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.36 2000/08/12 20:20:13 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1252,6 +1254,8 @@ Int_t StFlowAnalysisMaker::Finish() {
 	histFull[k].mHist_v->SetBinContent(j+1, content / mRes[k][j]);
 	error = histFull[k].mHist_v->GetBinError(j+1);
 	histFull[k].mHist_v->SetBinError(j+1, error / mRes[k][j]);
+	cout << "##### v= (" << content/mRes[k][j] << " +/- " << error/mRes[k][j] 
+	     << ") %" << endl;
       } else {
 	cout << "##### Resolution of the " << j+1 << "th harmonic was zero."
 	     << endl;
