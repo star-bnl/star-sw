@@ -20,8 +20,8 @@ int type_of_call numberOfPadsAtRow_(int *row);
 #endif
 #include "StMessMgr.h"
 #include "StMaker.h"
-#include "StDbLib/StDbTableI.h"
-#include "StDbLib/StDbDataSet.h"
+#include "StDbTableI.h"
+#include "StDbDataSet.h"
 #include "StRTpcPadPlane.h"
 #include "StRTpcWirePlane.h"
 #include "StRTpcDimensions.h"
