@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.142 2004/04/07 18:16:10 perev Exp $
+// $Id: StMaker.cxx,v 1.143 2004/04/08 21:32:41 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -430,14 +430,15 @@ void StMaker::Clear(Option_t *option)
       StMkDeb::SetCurrent(maker,3);
       maker->SetBit(kCleaBeg);
       maker->StartTimer();
-      if (maker->fMemStatClear) maker->fMemStatClear->Start();
+      if (maker->fMemStatClear && GetNumber()>20) maker->fMemStatClear->Start();
       maker->Clear(option);
-      if (maker->fMemStatClear) maker->fMemStatClear->Stop();
+      if (maker->fMemStatClear && GetNumber()>20) maker->fMemStatClear->Stop();
       maker->StopTimer();
       maker->ResetBit(kCleaBeg);
       StMkDeb::SetCurrent(curr);
    }
    TCollection::EmptyGarbageCollection();
+   ::doPs(maker->GetName(),"Clear");
    return;
 
 }
@@ -506,7 +507,7 @@ void StMaker::StartMaker()
     if (!m_DataSet) {m_DataSet = new TObjectSet(".data"); Add(m_DataSet);}
   }
   /*if (GetNumber()>3)*/ 
-  if (fMemStatMake) fMemStatMake->Start();
+  if (fMemStatMake && GetNumber()>20) fMemStatMake->Start();
   else              printf("StMaker::StartMaker : cannot use TMemStat (no Init()) in [%s]\n",GetName());
 
   
@@ -524,7 +525,7 @@ void StMaker::EndMaker(int ierr)
   ::doPs(GetName(),"EndMaker");
   
   /*if (GetNumber()>3)*/ 
-  if (fMemStatMake) fMemStatMake->Stop();
+  if (fMemStatMake && GetNumber()>20) fMemStatMake->Stop();
   else              printf("StMaker::EndMaker : cannot use TMemStat (no Init()) in [%s]\n",GetName());
 
 
@@ -1227,6 +1228,9 @@ AGAIN: switch (fState) {
 }
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.143  2004/04/08 21:32:41  perev
+// MemStat improving
+//
 // Revision 1.142  2004/04/07 18:16:10  perev
 // MemStat for Make bug fixed
 //

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TMemStat.cxx,v 1.9 2004/04/07 18:14:22 perev Exp $
+ * $Id: TMemStat.cxx,v 1.10 2004/04/08 21:36:45 perev Exp $
  *
  ***************************************************************************
  *
@@ -95,9 +95,7 @@ void TMemStat::Summary()
   TListIter next(fgList); 
   TMemStat  *m;
   while((m = (TMemStat*)next())){
-    if(m->fTally<3)	continue;
-    m->fAver -= m->fMin + m->fMax;
-    m->fTally-=2;
+    if(!m->fTally)	continue;
     m->Print();
     dtally++;
     if (m->fMin < dmin) dmin=m->fMin;
