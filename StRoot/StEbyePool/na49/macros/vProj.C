@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: vProj.C,v 1.5 2001/08/17 22:15:16 posk Exp $
+// $Id: vProj.C,v 1.6 2001/10/24 21:46:36 posk Exp $
 //
 // Author:       Art Poskanzer, May 2000
 // Description:  Projects v(y,pt) on the y and Pt axes
@@ -12,13 +12,14 @@
 //               Centrality = 0 is min. bias
 //               Centralites 7, 8, and 9 are the 
 //                 combined 1-2, 3-4, and 5-6 centralities.
+//               Makes momentum conserevation correction if pCons non-zero.
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: vProj.C,v $
-// Revision 1.5  2001/08/17 22:15:16  posk
-// Updated to also do 40 GeV.
+// Revision 1.6  2001/10/24 21:46:36  posk
+// Added conservation of momentum correction. Calculate triply integrated v values.
 //
 // Revision 1.4  2001/05/14 23:20:29  posk
 // Uses cross section weighting for all projections.
@@ -27,8 +28,8 @@
 // plotGraphs.C makes the final graphs.
 //
 // $Log: vProj.C,v $
-// Revision 1.5  2001/08/17 22:15:16  posk
-// Updated to also do 40 GeV.
+// Revision 1.6  2001/10/24 21:46:36  posk
+// Added conservation of momentum correction. Calculate triply integrated v values.
 //
 // Revision 1.4  2001/05/14 23:20:29  posk
 // Uses cross section weighting for all projections.
@@ -41,8 +42,8 @@
 // NA49 version of STAR software.
 //
 ///////////////////////////////////////////////////////////////////////////////
-
 #include <iostream.h>
+#include "TString.h"
 
 TCanvas*  can;
 char      runName[6];
@@ -56,8 +57,8 @@ void vProj(char* part = "pion") {
   //int       eBeam = 40;  //select 40Gev beam energy
   bool      pion = kFALSE;
   if (strcmp(part, "pion")==0) pion = kTRUE;
-  //bool   crossSection = kTRUE;
-  bool   crossSection = kFALSE;     // use yield weighting
+  bool   crossSection = kTRUE;
+  //bool   crossSection = kFALSE;     // use yield weighting
 
   const int nPlots = 1 + nCens + nCens/2;
   const int nHars = 2;
@@ -66,12 +67,27 @@ void vProj(char* part = "pion") {
   float     yLowY = 2.;               // for y proj.
   float     yUp   = 5.;               // for both projs.
   float     ptUp  = 2.;               // for both projs.
+  //float     pCons = 0.;               // no p cons. correction
+  float     pCons = 1.;               // adjustable constant for p cons.
+  float     pConsErr = 0.1;           // error in adjustable constant
+  float     sumPt2All[nCens] = {773.,623.,455.,305.,203.,122.}; // from Glenn
+  float     meanMul[nCens] = {135.,184.,152.,108.,75.,46.}; // for har 1
+  float     meanPt[nCens] = {0.166,0.255,0.288,0.282,0.279,0.275}; // for har 1
+  double    frac[nCens];
+  double    sqrtPiOver2 = 0.886;      // sqrt(pi) / 2
+  double    sqrt2 = 1.414;
+  double    res;
+  double    chiSV;
+  double    chiFact;
   TFile*    anaFile[nCens];
   TH2*      v2D[nCens][nHars];
+  TH2*      vObs2D[nCens][nHars];
+  TH1*      resHist[nCens];
   TH2*      yieldPartHist[nCens];
   TH1F*     vY[nPlots][nHars];
   TH1F*     vPt[nPlots][nHars];
   TH1F*     vCen[nHars];
+  TH1F*     vMB;
   TH1F*     yieldCen;
   TH1F*     yieldY[nPlots];
   TH1F*     yieldPt[nPlots];
@@ -81,11 +97,17 @@ void vProj(char* part = "pion") {
   int       firstRunNumber = 0;
   char      fileName[30];
   int       cent;
+  TAxis*    xAxis;
+  TAxis*    yAxis;
+  int       xBins;
+  int       yBins;
   double    y;
   double    pt;
   double    yield;
   double    yieldSum;
   double    v;
+  double    vErr;
+  double    deltaV;
   double    vSum;
   double    err2Sum;
   float     content;
@@ -99,14 +121,14 @@ void vProj(char* part = "pion") {
   float     vPtMin = -10.;
  
   if (eBeam == 40) {
-    yLow  = 2.24;             // for pt proj.
-    yLowY = 1.;               // for y proj.
-    yUp   = 4.5;              // for both projs.
-    ptUp  = 2.;               // for both projs.
-    yCM = 2.24;
-    vYMax  = 5.;
+    yLow   =  2.24;             // for pt proj.
+    yLowY  =  1.;               // for y proj.
+    yUp    =  4.5;              // for both projs.
+    ptUp   =  2.;               // for both projs.
+    yCM    =  2.24;
+    vYMax  =  5.;
     vYMin  = -5.;
-    vPtMax = 5.;
+    vPtMax =  5.;
     vPtMin = -5.;
   }
    
@@ -120,7 +142,7 @@ void vProj(char* part = "pion") {
     gROOT->LoadMacro("dNdydPt.C");
   }
 
-  // Convert integer to text
+  // convert integer to text
   sprintf(selText, "%d", sel);
 
   // input the first run number
@@ -132,12 +154,22 @@ void vProj(char* part = "pion") {
     cout << " first run name = " << runName << endl;
   }
 
+  // construct out file name
+  TString* outName = new TString(part);
+  if (pCons != 0.) outName->Append("Pcons");
+  if (!crossSection) outName->Append("Yield");
+  outName->Append(".root");
+  char outFile[255] = outName->Data();
+  cout << " out file = " << outFile << endl;
+  delete outName;
+
   for (int n = 0; n < nCens; n++) {
     int runNumber = firstRunNumber + n;
-    
+    cout << "Cent " << n+1 << endl;
+
     // open the files
     sprintf(fileName, "ana%d.root", runNumber);
-    cout << " file name = " << fileName << endl;
+    cout << " file name= " << fileName << endl;
     anaFile[n] = new TFile(fileName);
     if (!anaFile[n]) {
       cout << "### Can't find file " << fileName << endl;
@@ -148,9 +180,26 @@ void vProj(char* part = "pion") {
       cout << " Not valid centrality = " << cent << endl;
       return;
     }
-    cout << " Centrality = " << cent << endl;
     sprintf(cenText, "%d", cent);
     
+    // calculate frac[n] for Olli's momentum conservation correction
+    if (pCons != 0.) {
+      frac[n] = meanMul[n] * meanPt[n] * meanPt[n] / sumPt2All[n];
+      cout << " fraction= " << frac[n] << endl;
+    }
+    
+    //get the resolutions
+    if (pCons != 0.) {
+      histName = new TString("Flow_Res_Sel");
+      histName->Append(*selText);
+      resHist[n] = dynamic_cast<TH1*>(anaFile[n]->Get(histName->Data()));
+      if (!resHist[n]) {
+	cout << "### Can't find histogram " << histName->Data() << endl;
+	return;
+      }
+      delete histName;
+    }      
+
     // get the 2D v histograms
     for (int j = 0; j < nHars; j++) {
       sprintf(harText, "%d", j+1);
@@ -163,9 +212,54 @@ void vProj(char* part = "pion") {
 	cout << "### Can't find histogram " << histName->Data() << endl;
 	return;
       }
+      delete histName;
+      if (n==0 && j==0) {
+	yAxis = v2D[0][0]->GetYaxis();
+	yBins = yAxis->GetNbins();
+	xAxis = v2D[0][0]->GetXaxis();
+	xBins = xAxis->GetNbins();
+      }
+      res = resHist[n]->GetBinContent(j+1);
+      if (pCons !=0. && j==0) {        // conservation of momentum correction
+	histName = new TString("Flow_vObs2D_Sel");
+	histName->Append(*selText);
+	histName->Append("_Har");
+	histName->Append(*harText);
+	vObs2D[n][j] = dynamic_cast<TH2*>(anaFile[n]->Get(histName->Data()));
+	if (!vObs2D[n][j]) {
+	  cout << "### Can't find histogram " << histName->Data() << endl;
+	  return;
+	}
+	delete histName;
+	v2D[n][j]->Reset();
+	chiSV = chi(res);
+	chiFact = F(chiSV/1.414);
+	cout << " ChiSV= " << chiSV << endl;
+	cout << " F= " << chiFact << endl;
+	for (int yBin=1; yBin<=yBins; yBin++) {
+	  pt = yAxis->GetBinCenter(yBin);
+	  for (int xBin=1; xBin<=xBins; xBin++) {
+	    v = vObs2D[n][j]->GetCellContent(xBin, yBin);
+	    vErr = vObs2D[n][j]->GetCellError(xBin, yBin);
+	    //deltaV = pCons * 100. * sqrtPiOver2 * (1. - res) * pt * sqrt(frac[n]/(1.-frac[n])) /  sqrt(sumPt2All[n]);
+	    //deltaV = pCons * 100. * (sqrtPiOver2 - chiSV/sqrt2) * pt * sqrt(frac[n]/(1.-frac[n])) / sqrt(sumPt2All[n]);
+	    deltaV = pCons * 100. * chiFact * pt * sqrt(frac[n]/(1.-frac[n])) / 
+	      sqrt(sumPt2All[n]);
+	    v += deltaV;
+	    v2D[n][j]->SetCellContent(xBin, yBin, v);
+	    vErr = sqrt(vErr*vErr + pConsErr*deltaV*pConsErr*deltaV);
+	    v2D[n][j]->SetCellError(xBin, yBin, vErr);
+	  }
+	}
+	if (res != 0.) {
+	  v2D[n][j]->Scale(1. / res);
+	} else {
+	  cout << "resolution of the " << j+1 << "th harmonic was zero." << endl;
+	  v2D[n][j]->Reset();
+	}
+      }
       v2D[n][j]->SetMaximum(20.);
       v2D[n][j]->SetMinimum(-20.);
-      delete histName;
     }
 
     // Get the 2D yield histograms
@@ -178,12 +272,8 @@ void vProj(char* part = "pion") {
   }
   
   // Get the axes properties
-  TAxis* xAxis = v2D[0][0]->GetXaxis();
-  int    xBins = xAxis->GetNbins();
   float  xMin  = xAxis->GetXmin();
   float  xMax  = xAxis->GetXmax();
-  TAxis* yAxis = v2D[0][0]->GetYaxis();
-  int    yBins = yAxis->GetNbins();
   float  yMin  = yAxis->GetXmin();
   float  yMax  = yAxis->GetXmax();
  
@@ -266,7 +356,17 @@ void vProj(char* part = "pion") {
       delete histName;
   }
 
-
+  // Create the histogram for the triply integrated v
+  histName = new TString("Flow_vMB_Sel");
+  histName->Append(*selText);
+  vMB = new TH1F(histName->Data(), histName->Data(), nHars, 0.5, 
+		 nHars+0.5);
+  vMB->SetXTitle("Harmonic");
+  vMB->SetYTitle("Flow (%)");
+  vMB->SetMaximum(3.);
+  vMB->SetMinimum(-2.);
+  delete histName;
+  
   for (int n = 1; n <= nCens; n++) {
     for (int j = 0; j < nHars; j++) {
       
@@ -488,20 +588,37 @@ void vProj(char* part = "pion") {
     }
   }
   
-  // save Histograms to file
-  strcpy(temp, part);
-  if (crossSection) {
-    char outFile[255] = strcat(temp, ".root");
-  } else {
-    char outFile[255] = strcat(temp, "Yield.root");
+  // fill the triply integrated histogram ---------------------------
+  for (int j = 0; j < nHars; j++) {
+    yieldSum = 0.;
+    vSum     = 0.;
+    err2Sum  = 0.;
+    content  = 0.;
+    error    = 0.;
+    for (int n = 1; n <= nCens; n++) {
+      v     = vCen[j] ->GetBinContent(n);
+      yield = yieldCen->GetBinContent(n);
+      if(v != 0.0) {
+	yieldSum += yield;
+	vSum     += yield * v;
+	err2Sum  += pow(yield * vCen[j]->GetBinError(n), 2.);
+      }
+    }
+    if (yieldSum) {
+      content = vSum / yieldSum;
+      error   = sqrt(err2Sum) / yieldSum;
+    }
+    cout<<" Min Bias v"<<j+1<<" = "<<content<<" +/- "<<error<<endl<<endl;
+    vMB->SetBinContent(j+1, content);
+    vMB->SetBinError(j+1, error);
   }
-  cout << "out file = " << outFile << endl;
   
+  // save Histograms to file  
   TFile *file = new TFile(outFile,"RECREATE");
   file->cd();
   for (int j = 0; j < nHars; j++) {
     for (int n = 0; n < nPlots; n++) {
-      vY[n][j]->Write();
+      vY[n][j] ->Write();
       vPt[n][j]->Write();
     }
     vCen[j]->Write();
@@ -515,6 +632,7 @@ void vProj(char* part = "pion") {
   TLine* lineZeroY   = new TLine(xMin, 0., xMax, 0.);
   TLine* lineZeroPt  = new TLine(yMin, 0., yMax, 0.);
   TLine* lineZeroCen = new TLine(0.5, 0., nCens+0.5, 0.);
+  TLine* lineZeroHar = new TLine(0.5, 0., nHars+0.5, 0.);
   TLine* lineYcm     = new TLine(yCM, vYMin, yCM, vYMax);
   
   const char* tmp;
@@ -660,6 +778,12 @@ void vProj(char* part = "pion") {
     if (!Pause()) return;
   }
   
+  // triply integrated plot
+  NewCanvas(vMB->GetName());
+  vMB->Draw();
+  lineZeroHar->Draw();
+  if (!Pause()) return;
+  
 }
 
 
@@ -698,3 +822,48 @@ bool Pause() {
 
   return kTRUE;
 }
+
+//-----------------------------------------------------------------------
+
+static Double_t resEventPlane(double chi) {
+  // Calculates the event plane resolution as a function of chi
+
+  double con = 0.626657;                   // sqrt(pi/2)/2
+  double arg = chi * chi / 4.;
+
+  Double_t res = con * chi * exp(-arg) * (TMath::BesselI0(arg) + 
+					  TMath::BesselI1(arg)); 
+
+  return res;
+}
+
+//-----------------------------------------------------------------------
+
+static Double_t chi(double res) {
+  // Calculates chi from the event plane resolution
+
+  double chi   = 2.0;
+  double delta = 1.0;
+
+  for (int i = 0; i < 15; i++) {
+    chi = (resEventPlane(chi) < res) ? chi + delta : chi - delta;
+    delta = delta / 2.;
+  }
+
+  return chi;
+}
+
+//-----------------------------------------------------------------------
+
+static Double_t F(double chi) {
+  // Calculates the F function for momentum conservation as a function of chi_JYO
+
+  double sqrtPiOver2 = 0.886;      // sqrt(pi) / 2
+  double chi2 = chi * chi;
+
+  Double_t F = sqrtPiOver2 * exp(-chi2/2.) * ((1. + chi2) * TMath::BesselI0(chi2/2.) + chi2 * TMath::BesselI1(chi2/2.)) - chi; 
+
+  return F;
+}
+
+//-----------------------------------------------------------------------
