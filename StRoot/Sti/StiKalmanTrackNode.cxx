@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.66 2005/03/17 06:24:52 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.67 2005/03/18 17:13:07 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.67  2005/03/18 17:13:07  perev
+ * assert in rotate fix
+ *
  * Revision 2.66  2005/03/17 06:24:52  perev
  * A lot of changes. _eta now is Psi
  *
@@ -1467,6 +1470,8 @@ int StiKalmanTrackNode::rotate (double alpha) //throw ( Exception)
   _sinCA /= nor;
 
   _eta= nice(_eta-alpha); /*VP*/
+  _sinCA = sin(_eta);
+  _cosCA = cos(_eta);
 #ifdef Sti_DEBUG  
   TRSymMatrix C(kNPars,&_cXX);
   if (debug() & 4) {PrPP(rotate,C);}
