@@ -20,7 +20,7 @@
 #include "StiTpcIsActiveFunctor.h"
 
 StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active)
-  : StiDetectorBuilder("TpcBuilder",active)
+  : StiDetectorBuilder("Tpc",active)
 {
   _innerCalc = new StiDefaultHitErrorCalculator();
   _innerCalc->set(.04, 1.2e-04, 0.004,
@@ -34,6 +34,11 @@ StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active)
   //_outerCalc->set(8.158e-03,5.69582e-05,4.48440e-02,
   //8.02775e-03,3.55219e-05,6.45610e-02);
   //2.02775e-04,3.55219e-05,6.45610e-02);  //original C.P. 5/1/03
+  StiTrackingParameters * trackingPars = getTrackingParameters();
+  trackingPars->setMaxChi2ForSelection(8.);
+  trackingPars->setMinSearchWindow(1.5);
+  trackingPars->setMaxSearchWindow(7.);
+  trackingPars->setSearchWindowScaling(10.);
 }
 
 StiTpcDetectorBuilder::~StiTpcDetectorBuilder()
