@@ -81,25 +81,44 @@ tbrFactory:: ~tbrFactory() { }
 //:----------------------------------------------- ATTRIBUTES         --
 //:**NONE**
 //:----------------------------------------------- PUB FUNCTIONS      --
-STAFCV_T tbrFactory:: deleteMotifViewer (const char * name) {
+STAFCV_T 
+tbrFactory::deleteMotifViewer (const char * name) {
+  // Just to hush pedantic compilers
+  static void *pn = &name;
+
+  EML_ERROR(NOT_YET_IMPLEMENTED);
+}
+
+//----------------------------------
+STAFCV_T 
+tbrFactory::findMotifViewer (IDREF_T id, tbrMotifViewer*& viewer) 
+{
+  // Just to hush pedantic compilers
+  static void *pi = &id;
+  static void *pv = &viewer;
+  
    EML_ERROR(NOT_YET_IMPLEMENTED);
 }
 
 //----------------------------------
-STAFCV_T tbrFactory:: findMotifViewer (IDREF_T id
-		, tbrMotifViewer*& viewer) {
-   EML_ERROR(NOT_YET_IMPLEMENTED);
+STAFCV_T 
+tbrFactory::getMotifViewer (const char * name, tbrMotifViewer*& viewer) 
+{
+  // Just to hush pedantic compilers
+  static void *pn = &name;
+  static void *pv = &viewer;
+
+  EML_ERROR(NOT_YET_IMPLEMENTED);
 }
 
 //----------------------------------
-STAFCV_T tbrFactory:: getMotifViewer (const char * name
-		, tbrMotifViewer*& viewer) {
-   EML_ERROR(NOT_YET_IMPLEMENTED);
-}
+STAFCV_T 
+tbrFactory::newMotifViewer (const char * name) 
+{
+  // Just to hush pedantic compilers
+  static void *pn = &name;
 
-//----------------------------------
-STAFCV_T tbrFactory:: newMotifViewer (const char * name) {
-   EML_ERROR(NOT_YET_IMPLEMENTED);
+  EML_ERROR(NOT_YET_IMPLEMENTED);
 }
 
 //:----------------------------------------------- PRIV FUNCTIONS     --
