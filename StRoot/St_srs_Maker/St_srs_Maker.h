@@ -20,7 +20,6 @@ class St_srs_direct;
 
 class St_srs_Maker : public StMaker {
  private:
-               Bool_t drawinit;
                St_svg_config  *m_config;//!
                St_svg_shape   *m_shape; //!
                St_svg_geom    *m_geom;  //!
@@ -30,9 +29,9 @@ class St_srs_Maker : public StMaker {
  protected:
 	       TH2F     *m_x_vs_y;  //! x vs y of Si points
  public: 
-                  St_srs_Maker(const char *name="svt_hits", const char *title="event/data/svt/hits");
+                  St_srs_Maker(const char *name="svt_hits");
    virtual       ~St_srs_Maker();
-   virtual Int_t Init();
+   virtual Int_t  Init();
    virtual Int_t  Make();
    virtual void   PrintInfo();
    ClassDef(St_srs_Maker, 1)   //StAF chain virtual base class for Makers
