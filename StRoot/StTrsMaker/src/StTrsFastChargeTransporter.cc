@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsFastChargeTransporter.cc,v 1.6 1999/02/12 01:26:37 lasiuk Exp $
+ * $Id: StTrsFastChargeTransporter.cc,v 1.7 1999/02/14 20:46:06 lasiuk Exp $
  *
  * Author: brian June 1, 1998
  *
@@ -11,8 +11,8 @@
  **********************************************************************
  *
  * $Log: StTrsFastChargeTransporter.cc,v $
- * Revision 1.6  1999/02/12 01:26:37  lasiuk
- * Limit debug output
+ * Revision 1.7  1999/02/14 20:46:06  lasiuk
+ * debug info
  *
  * Revision 1.6  1999/02/12 01:26:37  lasiuk
  * Limit debug output
@@ -79,8 +79,8 @@ void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg)
 
 //     PR(driftLength);
     if (driftLength<0) {// PROBLEMS
-	cerr << "ERROR: StTrsFastChargeTransporter::transportToWire()" << endl;
-	cerr << "ERROR: Drift distance < 0" << endl;
+	cout << "ERROR: StTrsFastChargeTransporter::transportToWire()" << endl;
+	cout << "ERROR: Drift distance < 0" << endl;
 	//continue; // Do something!!!
     }
     //
