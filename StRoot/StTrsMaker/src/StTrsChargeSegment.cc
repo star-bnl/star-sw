@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.13 1999/07/19 21:37:42 lasiuk Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.14 1999/07/20 02:18:06 lasiuk Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.14  1999/07/20 02:18:06  lasiuk
+ * remove CVS merge conflicts
+ *
  * Revision 1.13  1999/07/19 21:37:42  lasiuk
  * - constructor arguments reordered for increased speed
  * - tssSplit() and associated parameterizations from
@@ -495,7 +498,7 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 }
 
 // Add member functions necessary for tssSplit
-double StTrsChargeSegment::sigmaParameter(double& l, double& derelave, double& xmip, int& index) const
+double StTrsChargeSegment::sigmaParameter(double l, double derelave, double xmip, int index) const
 {
     double beta[2]  = {1.0, 2.0};
     double b[2]     = {0.0, -0.02};
@@ -509,7 +512,7 @@ double StTrsChargeSegment::sigmaParameter(double& l, double& derelave, double& x
     return (pow(l,alpha)+a);
 }
 
-double StTrsChargeSegment::meanParameter(double& l, double& derelave, double& xmip, int& index) const
+double StTrsChargeSegment::meanParameter(double l, double derelave, double xmip, int index) const
 {
     double a[2]     = {0.367, 0.267};
     double alpha[2] = {.05, .1};
@@ -519,7 +522,7 @@ double StTrsChargeSegment::meanParameter(double& l, double& derelave, double& xm
     return ( (a[index]*pow(l,gamma[index])*pow(xmip,alpha[index]))/(pow(derelave,beta[index])) );
 }
 
-double StTrsChargeSegment::xReflectedGauss(double& x0, double& sig) const
+double StTrsChargeSegment::xReflectedGauss(double x0, double sig) const
 {
     double granularity = .001;
     double root2Sigma  = M_SQRT2*sig;
@@ -547,7 +550,7 @@ double StTrsChargeSegment::xReflectedGauss(double& x0, double& sig) const
     } while(true);
 }
 
-double StTrsChargeSegment::xReflectedLandau(double& x0, double& sig) const
+double StTrsChargeSegment::xReflectedLandau(double x0, double sig) const
 {
     // uses dstlan_() from CERNLIB
     double granularity = .001;
@@ -582,7 +585,7 @@ double StTrsChargeSegment::xReflectedLandau(double& x0, double& sig) const
     } while(true);
 }
 
-double StTrsChargeSegment::binaryPartition(double l, double& derelave, double& xmip) const
+double StTrsChargeSegment::binaryPartition(double l, double derelave, double xmip) const
 {
     int index;
     if(derelave<1.)

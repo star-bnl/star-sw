@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.hh,v 1.6 1999/07/19 21:37:59 lasiuk Exp $
+ * $Id: StTrsChargeSegment.hh,v 1.7 1999/07/20 02:17:51 lasiuk Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.hh,v $
+ * Revision 1.7  1999/07/20 02:17:51  lasiuk
+ * remove CVS merge conflicts
+ *
  * Revision 1.6  1999/07/19 21:37:59  lasiuk
  * - tssSplit() and associated parameterizations from
  *   tss are included (requires linking with cernlib)
@@ -109,11 +112,13 @@ public:
 
 public:
     // TSS segment splitting functions
-    double sigmaParameter(double&, double&, double&, int&) const;
-    double meanParameter(double&, double&, double&, int&)  const;
-    double xReflectedGauss(double&, double&)               const;
-    double xReflectedLandau(double&, double&)              const;
-    double binaryPartition(double, double&, double&)      const;
+    double sigmaParameter(double, double, double, int) const;
+    double meanParameter(double,double, double, int)   const;
+    double xReflectedGauss(double, double)             const;
+    double xReflectedLandau(double, double)            const;
+    double binaryPartition(double, double, double)     const;
+
+    
 
 private:
     void whichGEANTParticle(double&, int&);
