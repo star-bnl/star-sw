@@ -1,13 +1,15 @@
 *
-* $Id: flufin.F,v 1.2 1998/04/16 16:59:29 fisyak Exp $
+* $Id: flufin.F,v 1.3 1998/10/24 04:52:16 nevski Exp $
 *
 * $Log: flufin.F,v $
+* Revision 1.3  1998/10/24 04:52:16  nevski
+* corrections from Federico Carminati
+*
 * Revision 1.2  1998/04/16 16:59:29  fisyak
 * 2nd pass with gstar
 *
 *
 #include "geant321/pilot.h"
-#if defined(CERNLIB_HADRON)
 *CMZ :          29/01/98  13.12.38  by  Pavel Nevski
 *CMZ :  3.21/02 19/05/94  13.35.12  by  S.Ravndal
 *-- Author :
@@ -290,10 +292,13 @@
      +26,16,21, 19,20, 7, 7*0, 27, 28, 29, 22, 30, 23, 31, 24, 32/
       DATA IHVTOG /13,14,45,46,49,47/
 *
-#include "gst/atcdes/agchadr.inc"
+*KEEP,agchadr.
+* sequence to let hadronic package produce more then MXGKIN secondaries
+*     geant  message - NDONE positive
+*     guhadr message - NREST positive
 *
-C     geant  message - NDONE positive
-C     guhadr message - NREST positive
+      INTEGER          NDONE,NREST
+      COMMON /AGCHADR/ NDONE,NREST
 *
       IF (NDONE.GT.0 .AND. NREST.GT.0)  GO TO 81
       NDONE  = 0
@@ -304,6 +309,7 @@ C     guhadr message - NREST positive
 *    Stopped particles:
 *    o Neutral particles are sent to GHSTOP
 *    o pi+ and K+/K- are forced to decay
+*    o also xi- are forced to decay, mod by fca on 13/10/98
 *    o pi-, antiprotons and antineutrons are sent to FLUKA
 *      for annihilation (not here but later in this routine)
       IF ((IGF.EQ.1).OR.
@@ -312,7 +318,7 @@ C     guhadr message - NREST positive
          IGF = 0
          GOTO 999
       ELSE IF (GEKIN.EQ.0..AND.
-     +        (IPART.EQ.8.OR.IPART.EQ.12.OR.IPART.EQ.11)) THEN
+     +   (IPART.EQ.8.OR.IPART.EQ.12.OR.IPART.EQ.11.OR.IPART.EQ.23)) THEN
          CALL GDECAY
          NMEC=NMEC+1
          LMEC(NMEC)=5
@@ -368,6 +374,8 @@ C     guhadr message - NREST positive
          EKE = 1E-9
          POO=SQRT(EKE*(EKE+2*AM(IJ)))
          CALL EVENTV(IJ,POO,EKE,TXI,TYI,TZI,WE,1)
+         NMEC=NMEC+1
+         LMEC(NMEC)=17
          GOTO 80
       ELSE IF (GEKIN.LE.CUTHAD .AND. ITRTYP.EQ.4) THEN
          DESTEP = DESTEP + GEKIN
@@ -381,8 +389,12 @@ C     guhadr message - NREST positive
 *
       CALL GRNDM(RNDM,1)
       RNDEVT=RNDM(1)
-      IF ( RNDEVT .GE. SINE/FSIG) THEN
- 
+      IF (FSIG.LE.0.) THEN
+         SRAT = 1.E7
+      ELSE
+         SRAT = SINE/FSIG
+      ENDIF
+      IF ( RNDEVT .GE. SRAT) THEN
          IF (GEKIN .GT. 0.02) THEN
             POO=SQRT(EKE*(EKE+2*AM(IJ)))
          ELSE
@@ -500,7 +512,7 @@ C     guhadr message - NREST positive
             GPOS(2,NGKINE) = VECT(2)
             GPOS(3,NGKINE) = VECT(3)
   100    CONTINUE
-*
+*     END IF
   105  KCASE=NAMEC(12)
  
   110 CONTINUE
@@ -510,4 +522,3 @@ C     guhadr message - NREST positive
  
   999 END
  
-#endif
