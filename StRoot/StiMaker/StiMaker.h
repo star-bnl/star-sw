@@ -27,6 +27,8 @@ class StiTrackSeedFinder;
 class StiTrackFinder;
 class StiKalmanTrackFinder;
 class StiCompositeSeedFinder;
+class StMcEventMaker;
+class StAssociationMaker;
 
 class StiMaker : public StMaker {
  public:
@@ -40,7 +42,7 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.18 2001/08/30 18:26:54 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.19 2001/09/04 19:40:29 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
@@ -52,6 +54,8 @@ public:
     void setMaterialBuildPath(char* val);
     void setDetectorBuildPath(char* val);
     void setDrawableStTrackType(StTrackType);
+    void setMcEventMaker(StMcEventMaker*);
+    void setAssociationMaker(StAssociationMaker*);
 
     void printStatistics() const;
     
@@ -101,6 +105,8 @@ private:
 
 private:
     StEvent* mevent; //!
+    StMcEventMaker* mMcEventMaker; //!
+    StAssociationMaker* mAssociationMaker; //!
     ClassDef(StiMaker, 1)
 
 };
@@ -112,8 +118,14 @@ inline void StiMaker::setDrawableStTrackType(StTrackType val)
     mStTrackType = val;
 }
 
+inline void StiMaker::setMcEventMaker(StMcEventMaker* val)
+{
+    mMcEventMaker = val;
+}
+
+inline void StiMaker::setAssociationMaker(StAssociationMaker* val)
+{
+    mAssociationMaker = val;
+}
+
 #endif
-
-
-
-

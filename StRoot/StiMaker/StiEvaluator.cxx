@@ -14,6 +14,9 @@
 //StEvent
 #include "StEventTypes.h"
 
+//Association
+#include "StAssociationMaker/StTrackPairInfo.hh"
+
 //Sti includes
 #include "Sti/StiTrackContainer.h"
 #include "Sti/StiEvaluableTrack.h"
@@ -52,25 +55,27 @@ void StiEvaluator::kill()
 
 void StiEvaluator::build()
 {
+    cout <<"StiEvaluator::build().\tOpening Root file, building TTree(s)"<<endl;
     //Must open TFile first if you want ntuple to disk
     mFile = new TFile("TestEvaluation.root","RECREATE");
     mNtuple = new TNtuple("ntuple","This is the ntuple","a:b:c");
 
-    cout <<"Make TTree, here goes nothin'"<<endl;
+    //cout <<"Make TTree, here goes nothin'"<<endl;
 
-    cout <<"\tMake Entry"<<endl;
+    //cout <<"\tMake Entry"<<endl;
     mEntry = new TreeEntry();
 
-    cout <<"\tDeclare Tree"<<endl;
+    //cout <<"\tDeclare Tree"<<endl;
     mTree = new TTree("TestTree","The Test Tree");
 
     Int_t buffsize = 64000;
     Int_t splitlevel = 1;
 
-    cout <<"\tMake Branch, maybe seg-fault?"<<endl;
+    //cout <<"\tMake Branch, maybe seg-fault?"<<endl;
     mTree->Branch("TestBranch","TreeEntry",&mEntry, buffsize, splitlevel);
 
-    cout <<"\tSo far so good"<<endl;
+    //cout <<"\tSo far so good"<<endl;
+    cout <<"\tdone"<<endl;
     
 }
 
@@ -99,12 +104,11 @@ void StiEvaluator::evaluateForEvent(const StiTrackContainer* trackStore)
 	}
 
 	//Now we have an StiEvaluableTrack
-	StTrack* stTrack = track->stTrack();
-	//Check for null, abort if null pointer, stream error message
-	
-	//In the future, get MC track, too
-	//StMcTrack* mcTrack = track->stMcTrack();
-
+	StTrackPairInfo* associatedPair = track->stTrackPairInfo();
+	if (!associatedPair) {
+	    cout <<"StiEvaluator::evaluateForEvent(). ERROR!\t.Associated Pair==0.  Abort"<<endl;
+	    return;
+	}
 	//Call some function to actuall fill TTree object(s)
     }
 }

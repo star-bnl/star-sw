@@ -524,7 +524,7 @@ pair<double, double> StiGeometryTransform::angleAndPosition(
 } // angleAndPosition
 
 
-void StiGeometryTransform::operator() (const StTrack* st, StiKalmanTrack* sti)
+void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* sti)
 {
     //cout <<"StiEvaluableTrackSeedFinder::operator()(StTrack*, StiKalmanTrack*, StiDetector*)"<<endl;
     //now get hits

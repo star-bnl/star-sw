@@ -4,14 +4,22 @@
 
 //Std
 #include <iostream>
+#include <algorithm>
+using std::for_each;
+
 #include <math.h>
 #include <map>
+#include <utility>
 
 //StEvent
 #include "StEventTypes.h"
 
 //StMcEvent
 #include "StMcEventTypes.hh"
+
+//Association
+#include "StAssociationMaker/StTrackPairInfo.hh"
+#include "StAssociationMaker/StAssociationMaker.h"
 
 //Sti
 #include "StiPlacement.h"
@@ -26,31 +34,32 @@
 
 ostream& operator<<(ostream&, const StiHit&);
 
-StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder() : mevent(0), mmcevent(0)
+StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder(StAssociationMaker* assoc)
+    : mAssociationMaker(assoc), mevent(0), mMcEvent(0)
 {
     cout <<"StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder()"<<endl;
+    if (!assoc) {
+	cout <<"\tERROR:\tAssociationMaker==0.  Undefined Behavior"<<endl;
+    }
 }
 
 StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder()
 {
     cout <<"StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder()"<<endl;
-    mevent = 0;
-    mmcevent = 0;
 }
 
 void StiEvaluableTrackSeedFinder::setEvent(StEvent* evt, StMcEvent* mcevt) 
 {
     mevent = evt;
-    mmcevent = mcevt;
-
-    //Get StTracks from StEvent
-    StSPtrVecTrackNode& trackNode = mevent->trackNodes();
-    mbegin = trackNode.begin();
-    mend = trackNode.end();
-    mcurrent = trackNode.begin();
+    mMcEvent = mcevt;
 
     if (mcevt!=0) {
-	//Get StMcTrack from StMcEvent
+	//Get StMcTrack list from StMcEvent
+	cout <<"StiEvaluableTrackSeedFinder::setEvent().  GetMcTrackContainer"<<endl;
+	StSPtrVecMcTrack& tracks = mMcEvent->tracks();
+	mBeginMc = tracks.begin();
+	mEndMc = tracks.end();
+	mCurrentMc = mBeginMc;
     }
     
     return;
@@ -70,36 +79,66 @@ void StiEvaluableTrackSeedFinder::setStTrackType(StTrackType thetype)
 
 bool StiEvaluableTrackSeedFinder::hasMore()
 {
-    return (mcurrent!=mend);
+    return (mCurrentMc!=mEndMc);
 }
 
 StiKalmanTrack* StiEvaluableTrackSeedFinder::next()
 {
-    bool go=true;
-    StTrack* track = 0;
-    StiEvaluableTrack* returntrack = 0;
-
-    while (go && mcurrent!=mend) {
-	track = (*mcurrent)->track(mtype);
-	if (track && track->flag()>=0) {
-	    go=false;	    //mtrackpair->second = track;
-	    ++mcurrent;
-	    returntrack = makeTrack(track);
-	}
-	else ++mcurrent;
-    }
-    return returntrack;
+    return makeTrack(*(mCurrentMc++));
 }
 
-StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StTrack* sttrack)
+StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
 {
     StiEvaluableTrack* track = mfactory->getObject();
     track->reset();
-    track->setStTrack(sttrack);
+  
+    mcTrackMapType* mcToStTrackMap = mAssociationMaker->mcTrackMap();
+    if (!mcToStTrackMap) {
+	cout <<"StiEvaluableTrackSeedFinder::makeTrack(StMcTrack*).  ERROR:\tMcTrackMap==0"<<endl;
+	return track;
+    }
 
+    pair<mcTrackMapType::iterator, mcTrackMapType::iterator> range = mcToStTrackMap->equal_range(mcTrack);
+    /*
+      if (range.first==mcToStTrackMap->end()) {
+      cout <<"McTrack not found in map?"<<endl;
+      }
+      if ( (*(range.first)).first != mcTrack) {
+      cout <<"equal_range.first != mcTrack???"<<endl;
+      }
+    */
+    
+    //Find bestTrack from association (linear search)
+    //cout <<"New Track"<<endl;
+    BestCommonHits theBest = for_each(range.first, range.second, BestCommonHits());
+    StTrackPairInfo* bestPair = theBest.pair();
+    
+    if (!bestPair) {
+	//cout <<"StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack) ERROR:\t";
+	//cout <<"BestPair==0.  Abort"<<endl;
+	return 0;
+    }
+    else {
+	cout <<"Match Found, commonTpcHits:\t"<<bestPair->commonTpcHits()<<endl;
+    }
+    track->setStTrackPairInfo(bestPair);
     //ATTENTION CLAUDE: Uncomment the following to seed KalmanTrack and investigate problems!
-    StiGeometryTransform::instance()->operator()(sttrack, track);
+    StiGeometryTransform::instance()->operator()(bestPair->partnerTrack(), track);
     
     return track;
+}
+
+BestCommonHits::BestCommonHits() : mMostCommon(0), mPair(0)
+{
+}
+
+void BestCommonHits::operator()(const McToStPair_t& rhs)
+{
+    //cout <<"\t"<<rhs.second->commonTpcHits()<<"\t"<<mMostCommon<<endl;
+    if (rhs.second->commonTpcHits()>mMostCommon) { //update, remember
+	mMostCommon = rhs.second->commonTpcHits();
+	mPair = rhs.second;
+	//cout <<"\t\t\tBetter, remember"<<endl;
+    }
 }
 

@@ -8,6 +8,9 @@
 //StEvent
 #include "StEventTypes.h"
 
+//Association
+#include "StAssociationMaker/StTrackPairInfo.hh"
+
 //Sti
 #include "Sti/StiMapUtilities.h"
 
@@ -35,27 +38,34 @@ void StiRootDrawableStiEvaluableTrack::reset()
 
 void StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()
 {
+    if (!mPair) {
+	cout <<"StiRootDrawableStiEvaluableTrack::fillHitsForDrawing() Error! mPair==0"<<endl;
+	return;
+    }
+
+    StGlobalTrack* stTrack = mPair->partnerTrack();
     mline->SetPolyLine(0);
     mline->SetLineColor(mcolor);
     mline->ResetBit(kCanDelete);
 
-    if (!msttrack) {
-	cout <<"StiRootDrawableStiEvaluableTrack::fillHitsForDrawing() Error! msttrack==0"<<endl;
+    if (!stTrack) {
+	cout <<"StiRootDrawableStiEvaluableTrack::fillHitsForDrawing() Error! stTrack==0"<<endl;
 	return;
     }
 
-    //cout <<"Momentum:\t"<<msttrack->geometry()->momentum().mag()<<endl;
+    //cout <<"Momentum:\t"<<stTrack->geometry()->momentum().mag()<<endl;
 
+    //This is a relic, will have to be changed
    //Draw primary vertex if this track belongs to one
-   StPrimaryTrack* temp = dynamic_cast<StPrimaryTrack*>(msttrack);
+   StPrimaryTrack* temp = dynamic_cast<StPrimaryTrack*>(stTrack);
    if (temp) { //She's a primary!
        const StThreeVectorF& pos = temp->vertex()->position();
        mline->SetNextPoint( pos.x(), pos.y(), pos.z() );
        //Find s at dca to vertex
-       StPhysicalHelixD helix = msttrack->geometry()->helix();
+       StPhysicalHelixD helix = stTrack->geometry()->helix();
        double sAtVertex = helix.pathLength( pos );
        //Now find last point
-       double sAtEnd = helix.pathLength( msttrack->detectorInfo()->lastPoint() );
+       double sAtEnd = helix.pathLength( stTrack->detectorInfo()->lastPoint() );
        //Now step from first hit to last hit
        if (sAtVertex>sAtEnd) {
 	   cout <<"StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()\tsAtVertex>sAtEnd.  ABORT"<<endl;
@@ -69,14 +79,14 @@ void StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()
    }
    
    //Else draw as a global track
-   StGlobalTrack* temp2 = dynamic_cast<StGlobalTrack*>(msttrack);
+   StGlobalTrack* temp2 = dynamic_cast<StGlobalTrack*>(stTrack);
    if (temp2) { //She's a global!
        
        //Find s at dca to first point
-       StPhysicalHelixD helix = msttrack->geometry()->helix();
-       double sAtStart = helix.pathLength( msttrack->detectorInfo()->firstPoint() );
+       StPhysicalHelixD helix = stTrack->geometry()->helix();
+       double sAtStart = helix.pathLength( stTrack->detectorInfo()->firstPoint() );
        //Now find last point
-       double sAtEnd = helix.pathLength( msttrack->detectorInfo()->lastPoint() );
+       double sAtEnd = helix.pathLength( stTrack->detectorInfo()->lastPoint() );
        //Now step from first hit to last hit
        if (sAtStart>sAtEnd) {
 	   cout <<"StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()\tsAtStart>sAtEnd.  ABORT"<<endl;

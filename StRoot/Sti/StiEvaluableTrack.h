@@ -8,30 +8,40 @@
 #include "StiKalmanTrack.h"
 #include "StiObjectFactory.h"
 
-class StTrack;
-class StMcTrack;
+class StTrackPairInfo;
 
 class StiEvaluableTrack : public StiKalmanTrack
 {
- public:
-  StiEvaluableTrack();
-  virtual ~StiEvaluableTrack();
-  
-  void setStTrack(StTrack*);
-  void setStMcTrack(StMcTrack*);
-  
-  StTrack* stTrack() const;
-  StMcTrack* stMcTrack() const;
-  
-  virtual void reset();
-  
- protected:
-  StTrack* msttrack;
-  StMcTrack* mstmctrack;
-  
- private:
+public:
+    StiEvaluableTrack();
+    virtual ~StiEvaluableTrack();
+
+    //set
+    void setStTrackPairInfo(StTrackPairInfo*);
+
+    //get
+    StTrackPairInfo* stTrackPairInfo() const;
+
+    //action
+    virtual void reset();
+    
+protected:
+    StTrackPairInfo* mPair;
+    
+private:
 };
 
 //typedef StiObjectFactory<StiEvaluableTrack> StiEvaluableTrackFactory;
+
+inline void StiEvaluableTrack::setStTrackPairInfo(StTrackPairInfo* val)
+{
+    mPair = val;
+}
+
+inline StTrackPairInfo* StiEvaluableTrack::stTrackPairInfo() const
+{
+    return mPair;
+}
+
 
 #endif
