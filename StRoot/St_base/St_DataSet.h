@@ -45,7 +45,8 @@ class St_DataSet : public TNamed
     TList       *fList;   // List of the the the objects included into this dataset
     virtual void SetParent(St_DataSet *parent=0);
     virtual void SetMother(TObject *mother) {fMother = mother;}
-    St_DataSet(const Char_t *name,const Char_t *title) : TNamed(name,title){} // to support TDictionary
+    St_DataSet(const Char_t *name,const Char_t *title):
+    TNamed(name,title),fMother(0),fList(0){} // to support TDictionary
  
  public:
  
