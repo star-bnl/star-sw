@@ -1,4 +1,4 @@
-// $Id: bfc_tfs.C,v 1.2 1999/02/24 19:45:45 fisyak Exp $
+// $Id: bfc_tfs.C,v 1.3 1999/02/26 00:43:13 fine Exp $
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
@@ -57,7 +57,7 @@ bfc_tfs(const Int_t Nevents=1000,
   Int_t NoEvents = atoi(strrchr(InFile.Data(),'_')+1);
   if (NoEvents <=0) {NoEvents = Nevents;}  
   if (NoEvents > Nevents) {NoEvents = Nevents;}  
-  printf("Input file name = %s with No.Events to process = %d\n",InFile.Data(),NoEvents);
+  cout << "Input file name = "<< InFile.Data() <<"  with No.Events to process = " << NoEvents << endl;
   // Dynamically link some shared libs
   if (gClassTable->GetID("StChain") < 0) Load();
   if (!FileOut){
@@ -68,6 +68,12 @@ bfc_tfs(const Int_t Nevents=1000,
   }
   cout << "File for chain " << FileOut.Data() << endl;
   TFile       *root_out  =  new TFile(FileOut->Data(),"RECREATE");
+  St_XDFFile  *xdf_out = 0;
+  TString *XdfFile = new TString(FileOut->Data());
+  XdfFile->ReplaceAll(".root","_dst.xdf");
+  xdf_out = new St_XDFFile(XdfFile->Data(),"wb"); 
+  cout << "Open xdf file  = " << XdfFile->Data() << endl;
+  cout << "+++++++++++++++++++++++++++++++++++++++++++++++" << endl;
   // Create the main chain object
   if (chain) delete chain;
   chain = new StChain("bfc");
@@ -87,11 +93,11 @@ bfc_tfs(const Int_t Nevents=1000,
   St_emc_Maker         *emc_hits = new St_emc_Maker("emc_hits","event/data/emc/hits");
   St_tcl_Maker         *tpc_hits = new St_tcl_Maker("tpc_hits","event/data/tpc/hits");
   St_srs_Maker         *svt_hits = new St_srs_Maker("svt_hits","event/data/svt/hits");
-  St_fcl_Maker         *fcl_hits = new St_fcl_Maker("ftpc_hits","event/data/ftpc/hits");
+  //  St_fcl_Maker         *fcl_hits = new St_fcl_Maker("ftpc_hits","event/data/ftpc/hits");
   StRchMaker           *rch      = new StRchMaker("rch","event/raw_data/rch");
   St_tpt_Maker         *tpc_tracks = new St_tpt_Maker("tpc_tracks","event/data/tpc/tracks");
   St_stk_Maker         *stk_tracks = new St_stk_Maker("svt_tracks","event/data/svt/tracks");
-  St_fpt_Maker         *ftpc_tracks = new St_fpt_Maker("ftpc_tracks","event/data/ftpc/tracks");
+  //  St_fpt_Maker         *ftpc_tracks = new St_fpt_Maker("ftpc_tracks","event/data/ftpc/tracks");
   St_glb_Maker         *global = new St_glb_Maker("global","event/data/global");
 
   St_ctf_Maker         *ctf      = new St_ctf_Maker("ctf","event/data/ctf");
@@ -126,6 +132,12 @@ bfc_tfs(const Int_t Nevents=1000,
   Int_t i=0;
   for (Int_t i =1; i <= NoEvents; i++){
     if (chain->Make(i)) break;
+    if (xdf_out){
+      St_DataSet *dstSet = chain.DataSet("dst");
+      St_DataSet *hits = dstSet->Find("hits");
+      if (hits) delete hits;
+      xdf_out->NextEventPut(dstSet); // xdf output
+    }
     if (i != NoEvents) chain->Clear();
     printf ("===========================================\n");
     printf ("=========================================== Done with Event no. %d\n",i);
@@ -140,6 +152,7 @@ bfc_tfs(const Int_t Nevents=1000,
       delete root_out;
       gBenchmark->Print("root i/o");
     }
+    if (xdf_out){ delete xdf_out;}
     gBenchmark->Print("bfc");
   }
   else {if (!b)   b = new TBrowser;}
