@@ -2,8 +2,11 @@
 //                                                                      //
 // StXiMaker class                                                    //
 //                                                                      //
-// $Id: StXiMaker.cxx,v 1.17 2001/03/02 04:37:16 genevb Exp $
+// $Id: StXiMaker.cxx,v 1.18 2001/03/05 17:16:17 genevb Exp $
 // $Log: StXiMaker.cxx,v $
+// Revision 1.18  2001/03/05 17:16:17  genevb
+// Reduce vertex table buffer size slightly
+//
 // Revision 1.17  2001/03/02 04:37:16  genevb
 // Tightened some DCA cuts
 //
@@ -157,7 +160,7 @@ Int_t StXiMaker::Make(){
   // below is executed, and a "break;" gets out of the for-loop. If no
   // primary vertex is found, the loop just ends normally, doing nothing.
   if (vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1) {
-    Int_t xi_limit = 2*dst_v0_vertex->GetNRows();
+    Int_t xi_limit = dst_v0_vertex->GetNRows();
     if (xi_limit < 250) xi_limit=250;
     dst_xi_vertex = new St_dst_xi_vertex("dst_xi_vertex",xi_limit);
     AddData(dst_xi_vertex);
