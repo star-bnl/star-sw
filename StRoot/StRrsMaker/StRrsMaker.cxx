@@ -1,12 +1,18 @@
 /******************************************************
- * $Id: StRrsMaker.cxx,v 1.8 2000/02/12 21:54:25 lasiuk Exp $
+ * $Id: StRrsMaker.cxx,v 1.9 2000/02/14 01:08:02 lasiuk Exp $
  * Description:
  *  Implementation of the Maker main module.
  *
  * $Log: StRrsMaker.cxx,v $
- * Revision 1.8  2000/02/12 21:54:25  lasiuk
- * Introduce provisions to read in local coordinates
+ * Revision 1.9  2000/02/14 01:08:02  lasiuk
+ * write the data set
+ * add two member functions for pedestal and noise switches
+ * add coordinate conditional and StCoordinateTransform
+ * incorporate track_p into GHit
  *
+ *
+ * Revision 1.10  2000/02/15 18:07:20  lasiuk
+ * check if pointer exists.  If not, return a warning status.
  *
  * Revision 1.9  2000/02/14 01:08:02  lasiuk
  * write the data set
@@ -22,6 +28,11 @@
  *
  * Revision 1.6  2000/02/08 16:36:49  lasiuk
  * Bring into line with HP
+ *
+ * Revision 1.5  2000/01/28 20:35:08  lasiuk
+ * namespace std is NOT in!
+ *
+ * Revision 1.4  2000/01/27 17:10:03  lasiuk
  *
  ******************************************************/
 #ifdef __ROOT__
@@ -47,19 +58,17 @@
 #include "StRichPhysicsDb.h"
 #include "StRichMomentumTransform.h"
 #include "StRichGeantReader.h"
-#define rICH_WITH_PADMONITOR 1
 #include "StRichPadPlane.h"
 #include "StRichWriter.h"
 #endif
+// #include "StRichRingDefinition.h"
+// #include "StRichTrack.h"
+// #include "StRichRingPoint.h"
 // #include "StRichRingCalculator.h"
 // #include "StParticleDefinition.hh"
 // #include "StParticleTypes.hh"
 // #endif
 //////
-#define rICH_DECODE_DATA 1
-#ifdef RICH_DECODE_DATA
-#include "StRrsReader.h"
-#endif
 
 
 #ifdef RICH_DECODE_DATA
@@ -69,8 +78,6 @@
 #include "StThreeVector.hh"
 #endif
 
-extern "C" int agfhit0_ (char*, char*, int, int);
-extern "C" int agfhit1_ (int*, int*, int*, float*);
 #ifdef  RICH_WITH_VIEWER
 #include "StRichViewer.h"              // view class
 #endif
@@ -82,7 +89,7 @@ extern "C" int agfhit1_ (int*, int*, int*, float*);
 #include "tables/St_g2t_track_Table.h"
 
 
-    : StMaker(name), mUseLocalCoordinate(0)
+// Magnetic Field
 #ifdef __ROOT__
 #define gufld   gufld_
 //#define gufld   GUFLD
@@ -107,10 +114,23 @@ int StRrsMaker::readFile(char* file)
     return kStOK;
 }
 
-void StRrsMaker::setUseLocalCoordinate(int b)
+int StRrsMaker::writeFile(char* file, int numEvents)
+{
+    mOutputFileName = file;
+    mNumberOfEvents = numEvents;
     mWriteToFile = 1;
     PR(mNumberOfEvents);
     PR(mOutputFileName);
+    return kStOK;
+}
+
+//
+// Flags that are macro settable
+// Inital value is 0!
+void StRrsMaker::useLocalCoordinate(int b)
+{
+    mUseLocalCoordinate = b;
+}
 
 void StRrsMaker::addPedestal(int b)
 {
@@ -140,7 +160,7 @@ void StRrsMaker::addElectricNoise(int b)
     //mPhysicsDb->print();
 
     
-    mADC.setAddPedestal(0);
+    // GEANT Table
     // ADC
     mCoordinateTransform = StRichCoordinateTransform::getTransform(mGeometryDb);
     // adds a DC level to each pad
@@ -155,7 +175,12 @@ void StRrsMaker::addElectricNoise(int b)
 
     mPadPlane =
 	new StRichPadPlane(mGeometryDb->numberOfRowsInAColumn(),
-        
+			   mGeometryDb->numberOfPadsInARow());
+    AddConst(new St_ObjectSet("richPixels", mPadPlane));
+
+    mWriter = StRichWriter::getInstance(mPadPlane);
+    //AddData(mPadPlane);
+
     // Construct constant data set.  This is what is passed downstream
     // The processors
     AddConst(new St_ObjectSet("richPixels", mPadPlane));
@@ -207,9 +232,9 @@ int StRrsMaker::whichVolume(int val, string* vName)
 	break;	
     default:
 	*vName = string("");
-#define RICH_DIAGNOSTIC 0
+    return volumeNumber;
 //     cout << "-- Press return to continue -- ";
-    ofstream raw("/afs/rhic/star/users/lasiuk/junk/rrs.txt");
+    ofstream raw("/afs/rhic/star/users/lasiuk/data/rrs.txt");
 //       char c = cin.get();
 #ifdef USE_MEMORY_INFO
     StMemoryInfo* info = StMemoryInfo::instance();
@@ -268,6 +293,11 @@ int StRrsMaker::whichVolume(int val, string* vName)
 		    StGlobalCoordinate global(rch_hit->x[0], rch_hit->x[1], rch_hit->x[2]);
 		    tmpTform(global,local);
 		//
+		    //
+		    StGlobalCoordinate global(rch_hit->x[0]*centimeter,
+		    StRichQuadrantCoordinate quad(rch_hit->x[0],rch_hit->x[1],rch_hit->x[2],quadrant);
+		    tmpTform(quad,local);
+		// and x-> -x, y-> -y
 		else {
 		    local.position().setX(rch_hit->x[0]);
 		    local.position().setY(rch_hit->x[1]);
@@ -275,19 +305,18 @@ int StRrsMaker::whichVolume(int val, string* vName)
 		    // z-component okay
 		}
 		hit.fill(local.position().x(), local.position().y(), local.position().z(),
-			 rch_hit->id,
+		    local.position().setZ(rch_hit->x[2]*centimeter);
 			 (momentum.x()/abs(momentum))*GeV,
 			 (momentum.y()/abs(momentum))*GeV,
 			 (momentum.z()/abs(momentum))*GeV,
 		
 		    (!mTable->findParticleByGeantId((track[(rch_hit->track_p)-1].ge_pid))) ?
-			 rch_hit->volume_id,
+		    0. : mTable->findParticleByGeantId((track[(rch_hit->track_p)-1].ge_pid))->mass();
 		    
 		hit.fill(local.position(),
 		    gTrackMomentum.setZ(track[(rch_hit->track_p)-1].p[2]*GeV);
 		    mMomentumTransform->localMomentum(gTrackMomentum,lTrackMomentum);
 		raw << "volumeName= " << volumeName.c_str() << endl;
-		raw << "quadrant= "   << quadrant           << endl;
 		raw << "volume_id= "  << rch_hit->volume_id << endl;
 		raw << "hit= "        << hit                << endl;
 		raw << "p= "          << abs(momentum)
@@ -320,11 +349,12 @@ int StRrsMaker::whichVolume(int val, string* vName)
     } //else
 		iter != theList.end();
 		wireNumber = mWireSelector.whichWire(*iter);
-    cout << "Try Write" << endl;
+		chargeMultiplied = mAmplification.avalanche(*iter, wireNumber, theList);
 		mAnalogSignalGenerator->induceSignal(*iter,chargeMultiplied);
 
+	    }
 	    
-	    //mWriter->getSignal(i,j).signal +=  mNoiseSimulator();
+	}  // if (m_DataSet)
 
     } //else process from stream
 
@@ -373,12 +403,14 @@ int StRrsMaker::whichVolume(int val, string* vName)
 		    iter++) {
 #ifdef __SUNPRO_CC
 		    raw << ">>* MCinfo.G_ID= "
-			<< (*iter).G_ID << "MCinfo.amount= "
-			<< (*iter).amount << endl;
+			<< (*iter).mG_ID << "MCinfo.trackp= "
+			<< (*iter).mTrackp << "MCinfo.amount= "
+			<< (*iter).mAmount << endl;
 #else
 		    raw << ">>* MCinfo.G_ID= "
-			<< iter->G_ID << "MCinfo.amount= "
-			<< iter->amount << endl;
+			<< iter->mG_ID << "MCinfo.trackp= "
+			<< iter->mTrackp << "MCinfo.amount= "
+			<< iter->mAmount << endl;
 #endif
 		}
 #endif

@@ -1,5 +1,5 @@
 /**********************************************************
- * $Id: StRrsMaker.h,v 1.7 2000/02/12 21:54:25 lasiuk Exp $
+ * $Id: StRrsMaker.h,v 1.8 2000/02/14 01:08:02 lasiuk Exp $
  *
  * Description:
  *  StRrsMaker is the main module
@@ -15,8 +15,14 @@
  *  memory.
  ***********************************************************
  *  $Log: StRrsMaker.h,v $
- *  Revision 1.7  2000/02/12 21:54:25  lasiuk
- *  Introduce provisions to read in local coordinates
+ *  Revision 1.8  2000/02/14 01:08:02  lasiuk
+ *  write the data set
+ *  add two member functions for pedestal and noise switches
+ *  add coordinate conditional and StCoordinateTransform
+ *  incorporate track_p into GHit
+ *
+ *  add coordinate conditional and StCoordinateTransform
+ *  incorporate track_p into GHit
  *
  *  Revision 1.7  2000/02/12 21:54:25  lasiuk
  *  Introduce provisions to read in local coordinates
@@ -100,7 +106,9 @@ public:
     Int_t Init(int histograms);
     Int_t Make();
     Int_t Finish();
-    void setUseLocalCoordinate(int);
+    Int_t Clear();
+    
+public:
     void useLocalCoordinate(int);
     void addPedestal(int);
     void addElectricNoise(int);
@@ -153,12 +161,14 @@ private:
     
     //   Flags settable at macro level!
     int       mWriteToFile;
+    int       mReadFromFile;
 
+    int       mUseLocalCoordinate;
     int       mAddPedestal;
-    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.7 2000/02/12 21:54:25 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
+    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.8 2000/02/14 01:08:02 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
     
     virtual const char *GetCVS() const
-    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.7 2000/02/12 21:54:25 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
+    {static const char cvs[]= "Tag $Name:  $ $Id: StRrsMaker.h,v 1.8 2000/02/14 01:08:02 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
 
     ClassDef(StRrsMaker, 1)            // StAF chain
 };
