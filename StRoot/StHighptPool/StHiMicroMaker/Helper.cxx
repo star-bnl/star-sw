@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: Helper.cxx,v 1.2 2002/04/03 00:37:41 jklay Exp $                                      
+ * $Id: Helper.cxx,v 1.3 2002/05/31 22:11:11 jklay Exp $                                      
  *
  * Author: Bum Choi, UT Austin, Apr 2002
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: Helper.cxx,v $
+ * Revision 1.3  2002/05/31 22:11:11  jklay
+ * Fixed a small bug
+ *
  * Revision 1.2  2002/04/03 00:37:41  jklay
  * Fixed some bugs, added new version of dcaz
  *
@@ -324,9 +327,9 @@ helixCrossingAngle(const StPhysicalHelixD& helix,
   double s = propagateToPadrow(helix, hit);
 
   // to suppress warning messages
-  //StPhysicalHelixD helixTemp(helix);
+  StPhysicalHelixD helixTemp(helix);
   
-  StThreeVectorD p(helix.momentumAt(s, bField));
+  StThreeVectorD p(helixTemp.momentumAt(s, bField));
 
   // calculate the cosine of the angle between the radially outward normal
   // to the padrow (i.e. the local Y unit vector) and the track tangent.
