@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.10 2002/04/17 21:04:16 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.11 2002/04/23 21:35:32 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -186,7 +186,7 @@ int StMuDstMaker::Init(){
   DEBUGMESSAGE2("");
   mIOMaker = (StIOMaker*)GetMaker("IOMaker");
   mTreeMaker = (StTreeMaker*)GetMaker("outputStream");
-  mStStrangeMuDstMaker = (StStrangeMuDstMaker*)GetMaker("StrangeMaker");
+  mStStrangeMuDstMaker = (StStrangeMuDstMaker*)GetMaker("strangeMuDst");
   return 0;
 }
 //-----------------------------------------------------------------------
@@ -293,6 +293,7 @@ void StMuDstMaker::write(){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 int StMuDstMaker::Finish() {
+  cout << __PRETTY_FUNCTION__ << endl;
   if (mFinish) {
     for ( int i=0; i<10; i++) {
       cout << "why are you calling the Finish() again  ???????" << endl;
@@ -343,18 +344,18 @@ void StMuDstMaker::openRead() {
 //-----------------------------------------------------------------------
 void StMuDstMaker::read(){
   DEBUGMESSAGE2("");
-   if (mChain->GetCurrentFile()) {
-     cout << mChain->GetCurrentFile()->GetName() << endl;
-   } 
-   int bytes = 0;
-   while (bytes==0 ) {
-     DEBUGVALUE3(mEventCounter);
-     if ( mEventCounter >= mChain->GetEntries() ) throw StMuExceptionEOF("end of input",PF);
-     bytes = mChain->GetEntry(mEventCounter++);
-     DEBUGVALUE3(bytes);
-   }
-   //  mEventCounter++;
-   
+  if (mChain->GetCurrentFile()) {
+    DEBUGVALUE2(mChain->GetCurrentFile()->GetName());
+  } 
+  int bytes = 0;
+  while (bytes==0 ) {
+    DEBUGVALUE3(mEventCounter);
+    if ( mEventCounter >= mChain->GetEntries() ) throw StMuExceptionEOF("end of input",PF);
+    bytes = mChain->GetEntry(mEventCounter++);
+    DEBUGVALUE3(bytes);
+  }
+  //  mEventCounter++;
+  
   return;
 }
 //-----------------------------------------------------------------------
@@ -405,7 +406,9 @@ void StMuDstMaker::openWrite(string fileName) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 void StMuDstMaker::closeWrite(){
+  cout << __PRETTY_FUNCTION__ << endl;
   if (mTTree && mCurrentFile) {
+    cout << " ##### " << __PRETTY_FUNCTION__ << endl;
     cout << " ##### File=" << mCurrentFile->GetName() << " ";
     cout << " NumberOfEvents= " << mTTree->GetEntries() << " ";
     cout << " ##### " << endl;
@@ -726,8 +729,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
- * Revision 1.10  2002/04/17 21:04:16  laue
- * minor updates
+ * Revision 1.11  2002/04/23 21:35:32  laue
+ * Changed name of StStraMuDstMaker to 'strangeMuDst' so that it can get picked
+ * from the bfc.
  *
  * Revision 1.9  2002/04/11 14:19:30  laue
  * - update for RH 7.2
