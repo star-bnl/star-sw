@@ -883,6 +883,7 @@ void StEventQAMaker::MakeHistPrim() {
 
     for (UInt_t i=0; i<primVtx->numberOfDaughters(); i++) {
       StTrack *primtrk = primVtx->daughter(i);
+      if (!primtrk || primtrk->bad()) continue;
       hists->m_primtrk_iflag->Fill(primtrk->flag());
 
       if (primtrk->flag()>0) {
@@ -896,6 +897,7 @@ void StEventQAMaker::MakeHistPrim() {
         const StTrackTopologyMap& map=primtrk->topologyMap();
 
 	StTrack *gtrack = primtrk->node()->track(global);
+        if (!gtrack || gtrack->bad()) continue;
 	StTrackFitTraits& gfTraits = gtrack->fitTraits();
 	Int_t nhit_prim_fit = fTraits.numberOfFitPoints();
 	Int_t nhit_glob_fit = gfTraits.numberOfFitPoints();
@@ -914,9 +916,9 @@ void StEventQAMaker::MakeHistPrim() {
 	Float_t chisq0 = fTraits.chi2(0);
 	Float_t chisq1 = fTraits.chi2(1);
 	Float_t nfitnmax = (Float_t(fTraits.numberOfFitPoints())) /
-	                   (Float_t(primtrk->numberOfPossiblePoints()));
+	                   (Float_t(primtrk->numberOfPossiblePoints())+1.e-10);
         Float_t nfitntot = (Float_t(fTraits.numberOfFitPoints()))/
-	                   (Float_t(detInfo->numberOfPoints()));
+	                   (Float_t(detInfo->numberOfPoints())+1.e-10);
 	Float_t logImpact = TMath::Log10(primtrk->impactParameter());
 	Float_t logCurvature = TMath::Log10(geom->curvature());
 
@@ -2013,8 +2015,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.51 2003/11/20 03:13:55 perev Exp $
+// $Id: StEventQAMaker.cxx,v 2.52 2003/11/25 04:19:38 perev Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.52  2003/11/25 04:19:38  perev
+// FPE protection
+//
 // Revision 2.51  2003/11/20 03:13:55  perev
 // Fix FPE
 //
