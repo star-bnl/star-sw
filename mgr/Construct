@@ -63,6 +63,7 @@ my $CERNLIBS = "";
 my $OSFID    = "";
 my $ROOTCINTD= "";
 my $LINKMODULECOM = "%SO %DEBUG %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS";
+my $LINKCOM = "%LINK %DEBUG %EXEFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
 my $FCCOM    = "%FC %FFLAGS %CPPFLAGS %DEBUG %FEXTEND %_IFLAGS %FCPPPATH -c %< %Fout%>";
 my $GEANT3COM= "%GEANT3 %< -o %<:.F; %FC %FFLAGS %CPPFLAGS %DEBUG %_IFLAGS %FCPPPATH -c %<.F -o %>";
 my $INCLUDE_PATH  = $INCLUDE;
@@ -132,7 +133,42 @@ elsif (/^hp_ux102/) {
   $FEXTEND   = "+es";
   print "SHLIB_PATH = $SHLIB_PATH\n";
 }
-elsif (/^sun4x_55/ ||  /^sun4x_56/) {
+elsif (/^sun4x_56_CC5$/) {
+  $ROOTCINTD = "-DSOLARIS";
+  $CPPFLAGS  =~ s/SunOS//g;
+  $CPPFLAGS .= " __CC5__";
+  $OSFID     = "CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS ";
+  $OSFID    .= "ST_NO_EXCEPTIONS ST_NO_MEMBER_TEMPLATES ST_NO_NAMESPACES ";
+  $OSFID    .= "ST_NO_NUMERIC_LIMITS ST_NO_TEMPLATE_DEF_ARGS SUN Solaris sun sun4os5 sun4x_56";
+  $CC        = "/opt/WS5.0/bin/cc";
+  $CXX       = "/opt/WS5.0/bin/CC";
+  $FC        = "/opt/WS5.0/bin/f77";
+  $CXXFLAGS  = "-KPIC +w  -compat=4";
+  $CLIBS     = "-lm -ltermcap -ldl -lnsl -lsocket -lgen -L/usr/ucblib -lucb -L/usr/ccs/lib -lgen";
+  $FLIBS     = "-lM77 -lF77 -lsunmath";
+  $FFLAGS    = "-KPIC -w";
+  $FEXTEND   = "-e";
+  $CFLAGS    = "-KPIC";
+  $LD        = $CXX;
+#  $LDFLAGS   = "-Bstatic"; 
+  $LDFLAGS   = $DEBUG . " -compat=4";
+#  $EXEFLAGS  = "-z muldefs -Bdynamic -t";
+  $EXEFLAGS  = $LDFLAGS;
+  $SO        = $CXX;
+  $SOFLAGS   = "-G";
+#  my $STDHOME= "/afs/rhic/star/packages/ObjectSpace/2.0m";
+#  $CXXEXTRA.= " -I" . $STDHOME . " -I" . $STDHOME . "/ospace/std"; 
+#  $CXXEXTRA.= " -I" . $STDHOME . "/ospace/stl  -I" . $STDHOME . "/ospace"; 
+#  $CXXEXTRA.= " -I/usr/openwin/include -I/usr/local/include";
+#  $LINKMODULECOM = "test -d %>:d/Templates.DB &&";
+#  $LINKMODULECOM.= "%SO %DEBUG %SOFLAGS %SoOUT%> %< %>:d/Templates.DB/*.o %_LDIRS %LIBS ||";
+#  $LINKMODULECOM.= "%SO %DEBUG %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS ";
+#  $LINKCOM       = "test -d %>:d/Templates.DB &&";
+#  $LINKCOM      .= "%LINK %DEBUG %EXEFLAGS %< %_LDIRS %LIBS %Libraries %Lout%> ";
+#  $LINKCOM      .= "%>:d/Templates.DB/*.o $ROOTSYS/obj/Templates.DB/*.o ||";  
+#  $LINKCOM      .= "%LINK %DEBUG %EXEFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
+}
+elsif (/^sun4x_55$/ ||  /^sun4x_56$/) {
   $ROOTCINTD = "-DSOLARIS";
   $CPPFLAGS  =~ s/SunOS//g;
   $OSFID     = "CERNLIB_SOLARIS CERNLIB_SUN CERNLIB_UNIX DS_ADVANCED QUIET_ASP SOLARIS ";
@@ -159,6 +195,10 @@ elsif (/^sun4x_55/ ||  /^sun4x_56/) {
   $LINKMODULECOM = "test -d %>:d/Templates.DB &&";
   $LINKMODULECOM.= "%SO %DEBUG %SOFLAGS %SoOUT%> %< %>:d/Templates.DB/*.o %_LDIRS %LIBS ||";
   $LINKMODULECOM.= "%SO %DEBUG %SOFLAGS %SoOUT%> %< %_LDIRS %LIBS ";
+  $LINKCOM       = "test -d %>:d/Templates.DB &&";
+  $LINKCOM      .= "%LINK %DEBUG %EXEFLAGS %< %_LDIRS %LIBS %Libraries %Lout%> ";
+  $LINKCOM      .= "%>:d/Templates.DB/*.o $ROOTSYS/obj/Templates.DB/*.o ||";  
+  $LINKCOM      .= "%LINK %DEBUG %EXEFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
 }
 elsif (/^intel_wnt/) {
 #  $DEBUG    = "-Zi";
@@ -311,7 +351,7 @@ $env = new cons(
 		'LDFLAGS'      => $LDFLAGS,
 		'EXEFLAGS'     => $EXEFLAGS,
 		'LIBPATH'      => $LIBPATH,
-		'LINKCOM'      => '%LINK %DEBUG %EXEFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>',
+		'LINKCOM'      => $LINKCOM,
 		'SO'           => $SO,
 		'SOFLAGS'      => $SOFLAGS, 
 		'SoOUT'        => $SoOUT,
