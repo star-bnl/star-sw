@@ -17,41 +17,39 @@ class FTFinder {
 
 public:
     FTFinder( ) ;
-    int    FTFinder::FTF ( ) ;
+    int    FTF ( ) ;
     friend FTF_Track ;
 	
-	void   dEdx                      ( ) ;
-	int    Event_Reset               ( ) ;
+    void   dEdx                      ( ) ;
+    int    Event_Reset               ( ) ;
 
-	void   Get_Tracks                ( ) ;
-	void   Merge_Primary_Tracks      ( ) ;
-	int    Reset                     ( ) ;
-	int    Set_Conformal_Coordinates ( ) ;
-	int    Set_Pointers              ( ) ;
-	float  Time                      ( ) ;
+    void   Get_Tracks                ( ) ;
+    void   Merge_Primary_Tracks      ( ) ;
+    int    Reset                     ( ) ;
+    int    Set_Conformal_Coordinates ( ) ;
+    int    Set_Pointers              ( ) ;
+    float  Time                      ( ) ;
 
 
     void		print_vols ( ) ;
-	void		print_rows ( ) ;
-
+    void		print_rows ( ) ;
 //
-	int           n_hits  ;  
-	FTF_Hit       *hit    ;  
-	int           n_tracks; 
-	FTF_Track     *track  ;  
-	FTF_Para      *para   ;
-	int           max_tracks ;
-        int           n_mc_tracks ;
-	FTF_Mc_Track  *mc_track ;
+    int           n_hits  ;  
+    FTF_Hit       *hit    ;  
+    int           n_tracks; 
+    FTF_Track     *track  ;  
+    FTF_Para      *para   ;
+    int           max_tracks ;
+    int           n_mc_tracks ;
+    FTF_Mc_Track  *mc_track ;
 
-	VOLUME        *volume     ;
-        ROW           *rowk       ;
-        AREA          *track_area ;
+    VOLUME        *volume     ;
+    ROW           *rowk       ;
+    AREA          *track_area ;
 
-	float init_time, load_time, trak_time, dedx_time, total_time ;
+    float init_time, load_time, trak_time, dedx_time, total_time ;
 private: 
-
-	FTF_Track *current_track ;
+    FTF_Track *current_track ;
     
 } ;
 #endif
