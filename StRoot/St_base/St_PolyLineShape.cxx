@@ -87,7 +87,8 @@ St_PolyLineShape::St_PolyLineShape()
 //______________________________________________________________________________
 St_PolyLineShape::St_PolyLineShape(TPoints3DABC  *points,Option_t* option)
 {
-   m_Shape       = new TTUBE("tube","tube","void",0.5,0.5);
+  //  m_Shape       = new TTUBE("tube","tube","void",0.5,0.5);
+    m_Shape      = 0;
    m_ShapeType   = kNULL;
    m_Smooth      = kFALSE;
    m_Connection  = 0;
@@ -464,10 +465,9 @@ void  St_PolyLineShape::PaintPoints(Int_t n, Float_t *, Option_t *)
    TAttLine::Modify();  //Change line attributes only if necessary
  
 //*-*- Loop on each individual line
- 
    for (Int_t i=1;i<n;i++) {
       Float_t xyz[6];
-      m_Points->GetXYZ(xyz,i-1,2);
+      m_Points->GetXYZ(&xyz[0],i-1,2);
       gPad->PaintLine3D(xyz, &xyz[3]);
    }
 }
