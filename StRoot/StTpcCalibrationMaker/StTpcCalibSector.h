@@ -1,5 +1,8 @@
-// $Id: StTpcCalibSector.h,v 1.7 1999/11/09 20:36:13 fisyak Exp $
+// $Id: StTpcCalibSector.h,v 1.8 2001/02/17 20:16:09 perev Exp $
 // $Log: StTpcCalibSector.h,v $
+// Revision 1.8  2001/02/17 20:16:09  perev
+// add defence against Solaris typedef in iostream
+//
 // Revision 1.7  1999/11/09 20:36:13  fisyak
 // Add protection for rootcint
 //
@@ -18,8 +21,14 @@ class StTPCReader;
 class TH1F;
 class TH2F;
 class TH2S;
+
+#ifndef __STD_ISTREAM__   	// defence against Solaris typedef (VP)
 class ifstream;
+#endif
+#ifndef __STD_OSTREAM__  	// defence against Solaris typedef (VP)
 class ofstream;
+#endif
+
 class StTpcCalibSector {
 private :
   int mSectorId; //!
