@@ -112,10 +112,12 @@ macro bfc_init _
     (evgin) newfile hij_in [input_file] r; 
             user/input u [evgen]/particle.staf
     (gtxin) user/input dummy [input_file]
-     (fzin) gfile pz [input_file]; cd [geantR];
-            detp g2tm dete(cdet=SFSD).onoff=0
-            for/call g2t
-     (g2tin) exec input_g2t_file#init [input_file]
+     (fzin)  
+            gfile pz [input_file]
+            tables ' ' [geant_Run]
+            detp g2tm dete(cdet=SFSD).onoff=0 gttc.rdir=0
+    (g2tin) 
+	    exec input_g2t_file#init [input_file]
             if (STAF_STATUS(1).ne. STAFCV_OK) then
               message 'problem opening input file '
               goto EOF 
@@ -135,21 +137,25 @@ macro bfc_init _
           dio/newfilestream inev [input_file] r
           cd [run]
           dio/stream/getevent inev
-     (rgst) 
-     (rg2t) 
-     (svg) 
+* (rgst) 
+* (rg2t) 
+      (svg) 	  
 *          exec init_svg#read
            exec init_svg#svg_am
+           exec init_svg#init
       (tpg) 
 *          exec tpg_init#read
            exec tpg_init#init
            exec tpg_init#tpg_main
       (sss)
-* 	   exec init_sss
-*          exec init_ssf
+ 	   exec init_sss#read
+           exec init_ssf#read
+	   exec init_sss#init
+	   exec init_ssf#init
       (srs) 
-            exec create_tables_svt#srs
-*        exec init_srs		| SVT initialization - fast simulation
+           exec create_tables_svt#srs
+*          exec init_srs#read		| SVT initialization - fast simulation
+	   exec init_srs#init
       (tfs) 
          exec create_tables_tpc#tcl_fast
          exec tcl_init#init
@@ -183,17 +189,22 @@ macro bfc_init _
       (stk)
 	 exec create_tables_svt#sgr
          exec create_tables_svt#stk
-*        exec init_sgr
-*        exec init_stk#init
+*        exec init_sgr#read
+*        exec init_stk#read
          exec init_stk#vtx
+	 exec init_sgr#init
+	 exec init_stk#init
       (sgr) 
 	 exec create_tables_svt#sgr
          exec create_tables_svt#stk
-*        exec init_sgr
-*        exec init_stk#init
+*        exec init_sgr#read
+*        exec init_stk#read
          exec init_stk#vtx
+         exec init_sgr#init
+	 exec init_stk#init 
       (spr) 
-*        exec init_spr
+*        exec init_spr#read
+         exec init_spr#init
       (ffs) 
 	    exec create_tables_ftpc#ffs_tables
 	    exec ffs_init#init
