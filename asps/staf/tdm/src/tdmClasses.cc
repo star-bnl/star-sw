@@ -282,7 +282,7 @@ char * tdmTable::  listing () {
    memset(cc,0,100);        /*fix write bad -akio*/
    /* cc = (char*)MALLOC(79);*/
    /* memset(cc,0,79);       */
-   sprintf(cc,"%s %d/%d rows; %d bytes",c,rowCount()
+   sprintf(cc,"%s %ld/%ld rows; %ld bytes",c,rowCount()
 		,maxRowCount() ,rowSize());
    FREE(c);
    return cc;
@@ -311,7 +311,7 @@ unsigned char tdmTable:: isType (const char * aType) {
 //----------------------------------
 STAFCV_T tdmTable:: printRows (long ifirst, long nrows) {
 
-   size_t i,j;
+   long i;
    DS_TYPE_T *dstype;
    char *pCellData;
    char *c=NULL;
@@ -343,11 +343,11 @@ STAFCV_T tdmTable:: printRows (long ifirst, long nrows) {
 	       ||  (columnElcount(i) == n)
 	       ||  (12 > columnElcount(i))
 	       ){
-		  fprintf(stdout,"\t%s[%d]",c=columnName(i),n);
+		  fprintf(stdout,"\t%s[%ld]",c=columnName(i),n);
 		  FREE(c);
 	       }
 	       else if( (8 == n) ){
-		  fprintf(stdout,"\t***%d HEADERS UNPRINTED***"
+		  fprintf(stdout,"\t***%ld HEADERS UNPRINTED***"
 			   ,columnElcount(i)-9);
 	       }
 	    }
@@ -359,7 +359,7 @@ STAFCV_T tdmTable:: printRows (long ifirst, long nrows) {
    pCellData = (char*)pDSthis->p.data;
    pCellData += ifirst*rowSize();
    for( i=ifirst;i<MIN(ii,ifirst+nrows);i++){
-      fprintf(stdout,"%6d:",i);
+      fprintf(stdout,"%6ld:",i);
 /*REPLACE *** dsPrintData with dsuPrintData ***
       dsPrintData(stdout, dstype
 		, 1 
@@ -591,13 +591,13 @@ void * tdmTable:: cellAddress(long nrow, long ncol) {
    ||  !dsTableRowCount(&rCount,pDSthis)
    ||  !dsTableColumnCount(&cCount,pDSthis)
    ||  !dsTableRowSize(&rSize,pDSthis)
-   ||  !(0 <= nrow && nrow <= rMax)
-   ||  !(0 <= ncol && ncol <= cCount)
+   ||  !(0 <= nrow && nrow <= (long) rMax)
+   ||  !(0 <= ncol && ncol <= (long) cCount)
    ){
       return NULL;
    }
 
-   if( nrow < rCount ){
+   if( nrow < (long) rCount ){
       if( !dsCellAddress(&pData, pDSthis, nrow, ncol) ){
 	 return NULL;
       }
@@ -715,7 +715,7 @@ char * tdmDataset::  listing () {
    char* cc = NULL;
    cc = (char*)MALLOC(79);
    memset(cc,0,79);
-   sprintf(cc,"%s %d ent.s",c,entryCount());
+   sprintf(cc,"%s %ld ent.s",c,entryCount());
    FREE(c);
    return cc;
 }
@@ -971,7 +971,7 @@ tdmTable* tdmFactory:: createTable (const char * name
 STAFCV_T tdmFactory:: getTypeName (long tid, char *& name) {
    char *spec=NULL;	size_t lspec=0;
    char *pre=NULL;	size_t lpre=0;
-   char *post=NULL;	size_t lpost=0;
+   char *post=NULL;
    char *buff=NULL;	size_t lbuff=0;
 
    if( !dsTypeSpecifier(&spec,&lspec,(size_t)tid)
@@ -1013,9 +1013,7 @@ STAFCV_T tdmFactory:: getTypeSpecification (long tid, char *& spec) {
 //----------------------------------
 STAFCV_T tdmFactory:: findTypeSpecification (const char * name
 		, char *& spec) {
-   size_t lname=strlen(name);
    char *nm=NULL;
-   size_t lnm=0;
 
    for(int i=1;;i++){
       if( !getTypeName(i,nm) ){
