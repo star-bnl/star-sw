@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.47 2000/12/06 15:38:46 oldi Exp $
+// $Id: StFlowMaker.cxx,v 1.48 2000/12/08 17:03:38 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.48  2000/12/08 17:03:38  oldi
+// Phi weights for both FTPCs included.
+//
 // Revision 1.47  2000/12/06 15:38:46  oldi
 // Including FTPC.
 //
@@ -199,7 +202,7 @@ Int_t StFlowMaker::Init() {
   if (mFlowEventRead)  kRETURN += InitFlowEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.47 2000/12/06 15:38:46 oldi Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.48 2000/12/08 17:03:38 oldi Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -268,19 +271,44 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
     for (int j = 0; j < Flow::nHars; j++) {
       char countHars[2];
       sprintf(countHars,"%d",j+1);
+      // Tpc
       TString* histTitle = new TString("Flow_Phi_Weight_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
+      // Ftpc (east)
+      TString* histTitleFtpcEast = new TString("Flow_Phi_Weight_FtpcEast_Sel");
+      histTitleFtpcEast->Append(*countSels);
+      histTitleFtpcEast->Append("_Har");
+      histTitleFtpcEast->Append(*countHars);
+      // Ftpc (west)
+      TString* histTitleFtpcWest = new TString("Flow_Phi_Weight_FtpcWest_Sel");
+      histTitleFtpcWest->Append(*countSels);
+      histTitleFtpcWest->Append("_Har");
+      histTitleFtpcWest->Append(*countHars);
       if (pPhiWgtFile->IsOpen()) {
 	TH1* phiWgtHist = (TH1*)pPhiWgtFile->Get(histTitle->Data());
+	TH1* phiWgtHistFtpcEast = (TH1*)pPhiWgtFile->Get(histTitleFtpcEast->Data());
+	TH1* phiWgtHistFtpcWest = (TH1*)pPhiWgtFile->Get(histTitleFtpcWest->Data());
 	for (int n = 0; n < Flow::nPhiBins; n++) {
 	  mPhiWgt[k][j][n] = (phiWgtHist) ? phiWgtHist->GetBinContent(n+1) : 1.;
 	}
-      } else {
-	for (int n = 0; n < Flow::nPhiBins; n++) mPhiWgt[k][j][n] = 1.;
+	for (int n = 0; n < Flow::nPhiBinsFtpc; n++) {
+	  mPhiWgtFtpcEast[k][j][n] = (phiWgtHistFtpcEast) ? phiWgtHistFtpcEast->GetBinContent(n+1) : 1.;
+	  mPhiWgtFtpcWest[k][j][n] = (phiWgtHistFtpcWest) ? phiWgtHistFtpcWest->GetBinContent(n+1) : 1.;
+	}      } 
+      else {
+	  for (int n = 0; n < Flow::nPhiBins; n++) {
+	      mPhiWgt[k][j][n] = 1.;
+	  }
+	  for (int n = 0; n < Flow::nPhiBinsFtpc; n++) {
+	      mPhiWgtFtpcEast[k][j][n] = 1.;
+	      mPhiWgtFtpcWest[k][j][n] = 1.;
+	  }
       }
       delete histTitle;
+      delete histTitleFtpcEast;
+      delete histTitleFtpcWest;
     }
   }
 
@@ -299,6 +327,8 @@ void StFlowMaker::FillFlowEvent() {
 
   // Fill PhiWgt array
   pFlowEvent->SetPhiWeight(mPhiWgt);
+  pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
+  pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
 
   // Get event id 
   pFlowEvent->SetEventID((Int_t)(pEvent->id()));
@@ -535,6 +565,8 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
   
   // Fill FlowEvent
   pFlowEvent->SetPhiWeight(mPhiWgt);
+  pFlowEvent->SetPhiWeightFtpcEast(mPhiWgtFtpcEast);
+  pFlowEvent->SetPhiWeightFtpcWest(mPhiWgtFtpcWest);
 
   if (!pPicoEvent->Version()) {
     FillFromPicoVersion0DST(pPicoEvent);

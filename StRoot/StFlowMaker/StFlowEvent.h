@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.18 2000/10/12 22:46:36 snelling Exp $
+// $Id: StFlowEvent.h,v 1.19 2000/12/08 17:03:38 oldi Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.19  2000/12/08 17:03:38  oldi
+// Phi weights for both FTPCs included.
+//
 // Revision 1.18  2000/10/12 22:46:36  snelling
 // Added support for the new pDST's and the probability pid method
 //
@@ -109,6 +112,7 @@
 #include "StObject.h"
 #include "StFlowTrackCollection.h"
 #include "StThreeVectorF.hh"
+#include "StEnumerations.h"
 #include "Rtypes.h"
 #include "TVector2.h"
 class StFlowSelection;
@@ -121,7 +125,7 @@ public:
   StFlowEvent();
   virtual        ~StFlowEvent();
 
-  Double_t       PhiWeight(Float_t mPhi, Int_t selN, Int_t harN) const;
+  Double_t       PhiWeight(Float_t mPhi, Int_t selN, Int_t harN, Int_t detId = kTpcId) const;
   Int_t          EventID() const;
   Int_t          RunID() const;
   UInt_t         OrigMult() const;
@@ -158,6 +162,8 @@ public:
   void SetZDCw(const Float_t zdcw);
 #ifndef __CINT__		
   void SetPhiWeight(const Flow::PhiWgt_t &pPhiWgt);
+  void SetPhiWeightFtpcEast(const Flow::PhiWgtFtpc_t &pPhiWgt);
+  void SetPhiWeightFtpcWest(const Flow::PhiWgtFtpc_t &pPhiWgt);
 #endif
   static void SetEtaCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
   static void SetPtCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN);
@@ -176,30 +182,34 @@ public:
 
 private:
 
-  Int_t           mEventID;                             // ID of the event
-  Int_t           mRunID;                               // ID of the run
-  UInt_t          mOrigMult;                            // number of tracks
-  UInt_t          mMultEta; // number of tracks with pos. flag in 1.5 unit of eta
-  UInt_t          mCentrality;                          // centrality bin
-  StThreeVectorF  mVertexPos;                           // primary vertex position
-  Float_t         mCTB;                                 // CTB value sum
-  Float_t         mZDCe;                                // ZDC east
-  Float_t         mZDCw;                                // ZDC west
-  static Float_t  mEtaCuts[2][Flow::nHars][Flow::nSels];// range absolute values
-  static Float_t  mPtCuts[2][Flow::nHars][Flow::nSels]; // range
-  Flow::PhiWgt_t  mPhiWgt;                              //!flattening weights
-  static Float_t  mPiPlusCuts[2];                       // PID cuts
-  static Bool_t   mPtWgt;                               // flag for pt weighting
-  static Bool_t   mProbPid;                              // flag for probability pid
-  static Float_t  mPiMinusCuts[2];
-  static Float_t  mProtonCuts[2];
-  static Float_t  mKMinusCuts[2];
-  static Float_t  mKPlusCuts[2];
-  static Float_t  mAntiProtonCuts[2];
-  static Float_t  mDeuteronCuts[2];
-  static Float_t  mAntiDeuteronCuts[2];
-  static Float_t  mElectronCuts[2];
-  static Float_t  mPositronCuts[2];
+  Int_t               mEventID;                                  // ID of the event
+  Int_t               mRunID;                                    // ID of the run
+  UInt_t              mOrigMult;                                 // number of tracks
+  UInt_t              mMultEta;                                  // number of tracks with pos. flag in 1.5 unit of eta
+  UInt_t              mCentrality;                               // centrality bin
+  StThreeVectorF      mVertexPos;                                // primary vertex position
+  Float_t             mCTB;                                      // CTB value sum
+  Float_t             mZDCe;                                     // ZDC east
+  Float_t             mZDCw;                                     // ZDC west
+  static Float_t      mEtaCuts[2][Flow::nHars][Flow::nSels];     // range absolute values
+  static Float_t      mEtaFtpcCuts[2][Flow::nHars][Flow::nSels]; // range absolute values
+  static Float_t      mPtCuts[2][Flow::nHars][Flow::nSels];      // range
+  static Float_t      mPtFtpcCuts[2][Flow::nHars][Flow::nSels];  // range
+  Flow::PhiWgt_t      mPhiWgt;                                   //!flattening weights (all)
+  Flow::PhiWgtFtpc_t  mPhiWgtFtpcEast;                           //!flattening weights (Ftpc east)
+  Flow::PhiWgtFtpc_t  mPhiWgtFtpcWest;                           //!flattening weights (Ftpc west)
+  static Float_t      mPiPlusCuts[2];                            // PID cuts
+  static Bool_t       mPtWgt;                                    // flag for pt weighting
+  static Bool_t       mProbPid;                                  // flag for probability pid
+  static Float_t      mPiMinusCuts[2];
+  static Float_t      mProtonCuts[2];
+  static Float_t      mKMinusCuts[2];
+  static Float_t      mKPlusCuts[2];
+  static Float_t      mAntiProtonCuts[2];
+  static Float_t      mDeuteronCuts[2];
+  static Float_t      mAntiDeuteronCuts[2];
+  static Float_t      mElectronCuts[2];
+  static Float_t      mPositronCuts[2];
 
   StFlowEvent*           pFlowEvent;         //!
   StFlowTrackCollection* pTrackCollection;   //
@@ -236,6 +246,10 @@ inline Bool_t   StFlowEvent::ProbPid() const { return mProbPid; }
 #ifndef __CINT__
 inline void StFlowEvent::SetPhiWeight(const Flow::PhiWgt_t& pPhiWgt) {
   memcpy (mPhiWgt, pPhiWgt, sizeof(Flow::PhiWgt_t)); }
+inline void StFlowEvent::SetPhiWeightFtpcEast(const Flow::PhiWgtFtpc_t& pPhiWgtFtpcEast) {
+  memcpy (mPhiWgtFtpcEast, pPhiWgtFtpcEast, sizeof(Flow::PhiWgtFtpc_t)); }
+inline void StFlowEvent::SetPhiWeightFtpcWest(const Flow::PhiWgtFtpc_t& pPhiWgtFtpcWest) {
+  memcpy (mPhiWgtFtpcWest, pPhiWgtFtpcWest, sizeof(Flow::PhiWgtFtpc_t)); }
 #endif
 
 inline void StFlowEvent::SetEtaCut(Float_t lo, Float_t hi, Int_t harN, Int_t selN)

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.19 2000/10/12 22:46:38 snelling Exp $
+//  $Id: StFlowMaker.h,v 1.20 2000/12/08 17:03:39 oldi Exp $
 //
 // Author List: 
 //  Raimond Snellings, Art Poskanzer, and Sergei Voloshin 6/99
@@ -13,6 +13,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.20  2000/12/08 17:03:39  oldi
+//  Phi weights for both FTPCs included.
+//
 //  Revision 1.19  2000/10/12 22:46:38  snelling
 //  Added support for the new pDST's and the probability pid method
 //
@@ -142,12 +145,14 @@ public:
   void          SetPicoEventFileName(StFileI* fileList);
 
   virtual const char *GetCVS() const { static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.19 2000/10/12 22:46:38 snelling Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowMaker.h,v 1.20 2000/12/08 17:03:39 oldi Exp $ built "__DATE__" "__TIME__ ;
     return cvs; }
   
 protected:
 
-  Flow::PhiWgt_t   mPhiWgt;                   //! To make event plane isotropic
+  Flow::PhiWgt_t       mPhiWgt;                   //! To make event plane isotropic
+  Flow::PhiWgtFtpc_t   mPhiWgtFtpcEast;           //! To make event plane isotropic
+  Flow::PhiWgtFtpc_t   mPhiWgtFtpcWest;           //! To make event plane isotropic
 
 private:
   TString          mEventFileName;            //! IO Maker file name

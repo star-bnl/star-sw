@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCen.C,v 1.5 2000/09/29 22:53:19 posk Exp $
+// $Id: plotCen.C,v 1.6 2000/12/08 17:04:09 oldi Exp $
 //
 // Author:       Art Poskanzer, LBNL, July 2000
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -17,6 +17,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCen.C,v $
+// Revision 1.6  2000/12/08 17:04:09  oldi
+// Phi weights for both FTPCs included.
+//
 // Revision 1.5  2000/09/29 22:53:19  posk
 // More histograms.
 //
@@ -60,12 +63,18 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2){
   // also projections of some of these histograms
   const char* baseName[] = { "Flow_Res_Sel",
 			     "Flow_Charge",
-			     "Flow_Dca",
-			     "Flow_DcaGlobal",
-			     "Flow_Chi2",
-			     "Flow_FitPts",
-			     "Flow_MaxPts",
-			     "Flow_FitOverMax",
+			     "Flow_Dca_Tpc",
+			     "Flow_Dca_Ftpc",
+			     "Flow_DcaGlobal_Tpc",
+			     "Flow_DcaGlobal_Ftpc",
+			     "Flow_Chi2_Tpc",
+			     "Flow_Chi2_Ftpc",
+			     "Flow_FitPts_Tpc",
+			     "Flow_FitPts_Ftpc",
+			     "Flow_MaxPts_Tpc",
+			     "Flow_MaxPts_Ftpc",
+			     "Flow_FitOverMax_Tpc",
+			     "Flow_FitOverMax_Ftpc",
 			     "Flow_Mult",
 			     "Flow_OrigMult",
 			     "Flow_MultOverOrig",
@@ -78,8 +87,8 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2){
 			     "Flow_CTBvsZDC2D",
 			     "Flow_MeanDedx2D",
 			     //"Flow_EtaPtPhi3D",
-			     "Flow_EtaPtPhi2D.PhiEta",
-                             "Flow_EtaPtPhi2D.PhiPt",
+			     //"Flow_EtaPtPhi2D.PhiEta",
+                             //"Flow_EtaPtPhi2D.PhiPt",
   			     "Flow_YieldAll2D",
   			     "Flow_YieldAll.Eta",
   			     "Flow_YieldAll.Pt",
@@ -102,8 +111,14 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2){
    			     //"Flow_Bin_Pt",
                              "Flow_CosPhiLab",
 			     "Flow_Phi_Sel",
-			     "Flow_Phi_Weight_Sel",
 			     "Flow_Phi_Flat_Sel",
+			     "Flow_Phi_Weight_Sel",
+			     "Flow_Phi_FtpcEast_Sel",
+			     "Flow_Phi_Flat_FtpcEast_Sel",
+			     "Flow_Phi_Weight_FtpcEast_Sel",
+			     "Flow_Phi_FtpcWest_Sel",
+			     "Flow_Phi_Flat_FtpcWest_Sel",
+			     "Flow_Phi_Weight_FtpcWest_Sel",
 			     "Flow_Psi_Subs",
 			     "Flow_Psi_Sel",
 			     "Flow_Mul_Sel",
@@ -122,7 +137,7 @@ TCanvas* plotCen(Int_t pageNumber=0, Int_t selN=1, Int_t harN=2){
 			     "Flow_vEta_Sel",
 			     "Flow_vPt_Sel"};
   const int nNames = sizeof(baseName) / sizeof(char*);
-  const int nSingles = 39 + 1;
+  const int nSingles = 43 + 1;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -492,9 +507,10 @@ void plotCenAll(Int_t nNames, Int_t selN, Int_t harN, Int_t first = 1) {
   for (int i =  first; i < nNames + 1; i++) {
     TCanvas* c = plotCen(i, selN, harN);
     c->Update();
-    cout << "save? y/[n]" << endl;
+    cout << "save? y/[n], quit? q" << endl;
     fgets(temp, sizeof(temp), stdin);
     if (strstr(temp,"y")!=0) c->Print(".ps");
+    else if (strstr(temp,"q")!=0) return;
     c->Delete();
   }
   cout << "  Done" << endl;

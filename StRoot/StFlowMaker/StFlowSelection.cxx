@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.cxx,v 1.11 2000/09/22 22:03:00 posk Exp $
+// $Id: StFlowSelection.cxx,v 1.12 2000/12/08 17:03:39 oldi Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.cxx,v $
+// Revision 1.12  2000/12/08 17:03:39  oldi
+// Phi weights for both FTPCs included.
+//
 // Revision 1.11  2000/09/22 22:03:00  posk
 // Clean up.
 //
@@ -113,10 +116,8 @@ Bool_t StFlowSelection::Select(StFlowTrack* pFlowTrack) {
     const Char_t* pid = pFlowTrack->Pid();
     if (strstr(pid, mPid)==0) return kFALSE;
   }
-  
   // Selected for event plane
   if (!pFlowTrack->Select(mHarmonic, mSelection, mSubevent)) return kFALSE;
-  
   return kTRUE;
 }
 

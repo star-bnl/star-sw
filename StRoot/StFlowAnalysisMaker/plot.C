@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.30 2000/12/06 15:37:18 oldi Exp $
+// $Id: plot.C,v 1.31 2000/12/08 17:04:09 oldi Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 // Description:  Macro to plot histograms made by StFlowAnalysisMaker.
@@ -16,8 +16,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
-// Revision 1.30  2000/12/06 15:37:18  oldi
-// Including FTPC.
+// Revision 1.31  2000/12/08 17:04:09  oldi
+// Phi weights for both FTPCs included.
 //
 // Revision 1.29  2000/10/12 21:01:32  posk
 // Minor update.
@@ -115,9 +115,12 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   // also projections of some of these histograms
   const char* baseName[] = { "Flow_Res_Sel",
 			     "Flow_Charge",
-			     "Flow_Dca",
-			     "Flow_DcaGlobal",
-			     "Flow_Chi2",
+			     "Flow_Dca_Tpc",
+			     "Flow_Dca_Ftpc",
+			     "Flow_DcaGlobal_Tpc",
+			     "Flow_DcaGlobal_Ftpc",
+			     "Flow_Chi2_Tpc",
+			     "Flow_Chi2_Ftpc",
 			     "Flow_FitPts_Tpc",
 			     "Flow_FitPts_Ftpc",
 			     "Flow_MaxPts_Tpc",
@@ -160,8 +163,14 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
    			     //"Flow_Bin_Pt",
                              "Flow_CosPhiLab",
 			     "Flow_Phi_Sel",
-			     "Flow_Phi_Weight_Sel",
 			     "Flow_Phi_Flat_Sel",
+			     "Flow_Phi_Weight_Sel",
+			     "Flow_Phi_FtpcEast_Sel",
+			     "Flow_Phi_Flat_FtpcEast_Sel",
+			     "Flow_Phi_Weight_FtpcEast_Sel",
+			     "Flow_Phi_FtpcWest_Sel",
+			     "Flow_Phi_Flat_FtpcWest_Sel",
+			     "Flow_Phi_Weight_FtpcWest_Sel",
 			     "Flow_Psi_Subs",
 			     "Flow_Psi_Sel",
 			     "Flow_Mul_Sel",
@@ -180,7 +189,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 			     "Flow_vEta_Sel",
 			     "Flow_vPt_Sel"};
   const int nNames = sizeof(baseName) / sizeof(char*);
-  const int nSingles = 42 + 1;
+  const int nSingles = 45 + 1;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -205,7 +214,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
     cin >> fileNumber;
     if (strlen(fileNumber) == 1 && strstr(fileNumber,"0")) {
       sprintf(fileName, "flow.hist.root");
-    } else { 
+    } else {
       sprintf(fileName, "ana%s.root", fileNumber);       // insert
     }
     cout << " file name = " << fileName << endl;

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.h,v 1.26 2000/12/06 15:37:18 oldi Exp $
+// $Id: StFlowAnalysisMaker.h,v 1.27 2000/12/08 17:04:09 oldi Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -11,8 +11,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.h,v $
-// Revision 1.26  2000/12/06 15:37:18  oldi
-// Including FTPC.
+// Revision 1.27  2000/12/08 17:04:09  oldi
+// Phi weights for both FTPCs included.
 //
 // Revision 1.25  2000/09/29 22:53:16  posk
 // More histograms.
@@ -133,7 +133,7 @@ public:
   Float_t  ResErr(Int_t eventN, Int_t harN) const;
   Int_t    DetId(Float_t eta) const;
   virtual  const char *GetCVS() const {static const char cvs[]=
-    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.26 2000/12/06 15:37:18 oldi Exp $ built "__DATE__" "__TIME__ ;
+    "Tag $Name:  $ $Id: StFlowAnalysisMaker.h,v 1.27 2000/12/08 17:04:09 oldi Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 private:
@@ -161,9 +161,12 @@ private:
 
   // for single histograms
   TH1F*     mHistCharge;               //!
-  TH1F*     mHistDca;                  //!
-  TH1F*     mHistDcaGlobal;            //!
-  TH1F*     mHistChi2;                 //!
+  TH1F*     mHistDcaTpc;               //!
+  TH1F*     mHistDcaFtpc;              //!
+  TH1F*     mHistDcaGlobalTpc;         //!
+  TH1F*     mHistDcaGlobalFtpc;        //!
+  TH1F*     mHistChi2Tpc;              //!
+  TH1F*     mHistChi2Ftpc;             //!
   TH1F*     mHistFitPtsTpc;            //!
   TH1F*     mHistMaxPtsTpc;            //!
   TH1F*     mHistFitOverMaxTpc;        //!
@@ -236,8 +239,14 @@ private:
   // for each harmonic and each selection
   struct histFullHars {
     TH1D*       mHistPhi;
+    TH1D*       mHistPhiFtpcEast;
+    TH1D*       mHistPhiFtpcWest;
     TH1D*       mHistPhiWgt;
+    TH1D*       mHistPhiWgtFtpcEast;
+    TH1D*       mHistPhiWgtFtpcWest;
     TH1D*       mHistPhiFlat;
+    TH1D*       mHistPhiFlatFtpcEast;
+    TH1D*       mHistPhiFlatFtpcWest;
     TH1F*       mHistPhiCorr;
     TH1F*       mHistPsiSubCorr;
     TH1F*       mHistPsiSubCorrDiff;

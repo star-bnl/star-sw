@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.46 2000/12/06 15:37:18 oldi Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.47 2000/12/08 17:04:09 oldi Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //
@@ -11,8 +11,8 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
-// Revision 1.46  2000/12/06 15:37:18  oldi
-// Including FTPC.
+// Revision 1.47  2000/12/08 17:04:09  oldi
+// Phi weights for both FTPCs included.
 //
 // Revision 1.45  2000/10/12 21:01:30  posk
 // Minor update.
@@ -250,8 +250,8 @@ Int_t StFlowAnalysisMaker::Init() {
   // Commit with these values.
   const float etaMin          =  -1.5;
   const float etaMax          =   1.5;
-  //  const float etaMin          =  -4.5;
-  //  const float etaMax          =   4.5;
+  //const float etaMin          =  -4.5;
+  //const float etaMax          =   4.5;
   const float ptMin           =    0.;
   const float ptMax           =    2.;
   const float chargeMin       =  -2.5;
@@ -336,57 +336,91 @@ Int_t StFlowAnalysisMaker::Init() {
   mHistCharge->SetXTitle("Charge");
   mHistCharge->SetYTitle("Counts");
     
+
   // Distance of closest approach
-  mHistDca = new TH1F("Flow_Dca", "Flow_Dca",
+  // Tpc
+  mHistDcaTpc = new TH1F("Flow_Dca_Tpc", "Flow_Dca_Tpc",
       nDcaBins, dcaMin, dcaMax);
-  mHistDca->SetXTitle("Track dca to Vertex (cm)");
-  mHistDca->SetYTitle("Counts");
+  mHistDcaTpc->SetXTitle("Track dca to Vertex (cm)");
+  mHistDcaTpc->SetYTitle("Counts");
     
-  // Distance of closest approach fro global tracks
-  mHistDcaGlobal = new TH1F("Flow_DcaGlobal", "Flow_DcaGlobal",
+  // Ftpc
+  mHistDcaFtpc = new TH1F("Flow_Dca_Ftpc", "Flow_Dca_Ftpc",
+      nDcaBins, dcaMin, dcaMax);
+  mHistDcaFtpc->SetXTitle("Track dca to Vertex (cm)");
+  mHistDcaFtpc->SetYTitle("Counts");
+    
+
+  // Distance of closest approach for global tracks
+  // Tpc
+  mHistDcaGlobalTpc = new TH1F("Flow_DcaGlobal_Tpc", "Flow_DcaGlobal_Tpc",
       nDcaBins, dcaMin, glDcaMax);
-  mHistDcaGlobal->SetXTitle("Global Track dca (cm)");
-  mHistDcaGlobal->SetYTitle("Counts");
+  mHistDcaGlobalTpc->SetXTitle("Global Track dca (cm)");
+  mHistDcaGlobalTpc->SetYTitle("Counts");
+
+  // Ftpc
+  mHistDcaGlobalFtpc = new TH1F("Flow_DcaGlobal_Ftpc", "Flow_DcaGlobal_Ftpc",
+      nDcaBins, dcaMin, glDcaMax);
+  mHistDcaGlobalFtpc->SetXTitle("Global Track dca (cm)");
+  mHistDcaGlobalFtpc->SetYTitle("Counts");
+
     
   // Chi2
-  mHistChi2 = new TH1F("Flow_Chi2", "Flow_Chi2",
+  // Tpc
+  mHistChi2Tpc = new TH1F("Flow_Chi2_Tpc", "Flow_Chi2_Tpc",
       nChi2Bins, chi2Min, chi2Max);
-  mHistChi2->SetXTitle("Chi square per df");
-  mHistChi2->SetYTitle("Counts");
-    
+  mHistChi2Tpc->SetXTitle("Chi square per df");
+  mHistChi2Tpc->SetYTitle("Counts");
+  
+  // Ftpc
+  mHistChi2Ftpc = new TH1F("Flow_Chi2_Ftpc", "Flow_Chi2_Ftpc",
+      nChi2Bins, chi2Min, chi2Max);
+  mHistChi2Ftpc->SetXTitle("Chi square per df");
+  mHistChi2Ftpc->SetYTitle("Counts");
+  
+  
   // FitPts
+  // Tpc
   mHistFitPtsTpc = new TH1F("Flow_FitPts_Tpc", "Flow_FitPts_Tpc",
       nFitPtsBinsTpc, fitPtsMinTpc, fitPtsMaxTpc);
   mHistFitPtsTpc->SetXTitle("Fit Points");
   mHistFitPtsTpc->SetYTitle("Counts");
 
+  // Ftpc
   mHistFitPtsFtpc = new TH1F("Flow_FitPts_Ftpc", "Flow_FitPts_Ftpc",
       nFitPtsBinsFtpc, fitPtsMinFtpc, fitPtsMaxFtpc);
   mHistFitPtsFtpc->SetXTitle("Fit Points");
   mHistFitPtsFtpc->SetYTitle("Counts");
     
+
   // MaxPts
+  // Tpc
   mHistMaxPtsTpc = new TH1F("Flow_MaxPts_Tpc ", "Flow_MaxPts_Tpc ",
       nMaxPtsBinsTpc , maxPtsMinTpc , maxPtsMaxTpc );
   mHistMaxPtsTpc ->SetXTitle("Max Points");
   mHistMaxPtsTpc ->SetYTitle("Counts");
-
+  
+  // Ftpc
   mHistMaxPtsFtpc = new TH1F("Flow_MaxPts_Ftpc", "Flow_MaxPts_Ftpc",
       nMaxPtsBinsFtpc, maxPtsMinFtpc, maxPtsMaxFtpc);
   mHistMaxPtsFtpc->SetXTitle("Max Points");
   mHistMaxPtsFtpc->SetYTitle("Counts");
     
+
   // FitOverMax
+  // Tpc
   mHistFitOverMaxTpc = new TH1F("Flow_FitOverMax_Tpc", "Flow_FitOverMax_Tpc",
       nFitOverMaxBins, fitOverMaxMin, fitOverMaxMax);
   mHistFitOverMaxTpc->SetXTitle("Fit Points / Max Points");
   mHistFitOverMaxTpc->SetYTitle("Counts");
     
+  // Ftpc
   mHistFitOverMaxFtpc = new TH1F("Flow_FitOverMax_Ftpc", "Flow_FitOverMax_Ftpc",
       nFitOverMaxBins, fitOverMaxMin, fitOverMaxMax);
   mHistFitOverMaxFtpc->SetXTitle("Fit Points / Max Points");
   mHistFitOverMaxFtpc->SetYTitle("Counts");
     
+
   // OrigMult
   mHistOrigMult = new TH1F("Flow_OrigMult", "Flow_OrigMult",
       nOrigMultBins, origMultMin, origMultMax);
@@ -792,8 +826,10 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHistMult->SetXTitle("Multiplicity");
       histFull[k].histFullHar[j].mHistMult->SetYTitle("Counts");
       delete histTitle;
-      
+
+
       // Phi lab
+      // Tpc
       histTitle = new TString("Flow_Phi_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
@@ -805,12 +841,38 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHistPhi->SetYTitle("Counts");
       delete histTitle;
       
+      // Ftpc (east)
+      histTitle = new TString("Flow_Phi_FtpcEast_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistPhiFtpcEast = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
+      histFull[k].histFullHar[j].mHistPhiFtpcEast->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histFullHar[j].mHistPhiFtpcEast->SetYTitle("Counts");
+      delete histTitle;
+      
+      // Ftpc (west)
+      histTitle = new TString("Flow_Phi_FtpcWest_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistPhiFtpcWest = new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
+      histFull[k].histFullHar[j].mHistPhiFtpcWest->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histFullHar[j].mHistPhiFtpcEast->SetYTitle("Counts");
+      delete histTitle;
+      
+
       // PhiWgt new
+      // Tpc
       histTitle = new TString("Flow_Phi_Weight_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
       histTitle->Append(*countHars);
-      histFull[k].histFullHar[j].mHistPhiWgt =	new TH1D(histTitle->Data(),
+      histFull[k].histFullHar[j].mHistPhiWgt =  new TH1D(histTitle->Data(),
         histTitle->Data(), Flow::nPhiBins, phiMin, phiMax);
       histFull[k].histFullHar[j].mHistPhiWgt->Sumw2();
       histFull[k].histFullHar[j].mHistPhiWgt->SetXTitle
@@ -818,7 +880,35 @@ Int_t StFlowAnalysisMaker::Init() {
       histFull[k].histFullHar[j].mHistPhiWgt->SetYTitle("PhiWgt");
       delete histTitle;
       
+      // Ftpc (east)
+      histTitle = new TString("Flow_Phi_Weight_FtpcEast_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistPhiWgtFtpcEast =  new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
+      histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->Sumw2();
+      histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->SetYTitle("PhiWgt");
+      delete histTitle;
+      
+      // Ftpc (west)
+      histTitle = new TString("Flow_Phi_Weight_FtpcWest_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistPhiWgtFtpcWest =  new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
+      histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->Sumw2();
+      histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->SetYTitle("PhiWgt");
+      delete histTitle;
+      
+
       // Phi lab flattened
+      // Tpc
       histTitle = new TString("Flow_Phi_Flat_Sel");
       histTitle->Append(*countSels);
       histTitle->Append("_Har");
@@ -829,7 +919,32 @@ Int_t StFlowAnalysisMaker::Init() {
 	("Azimuthal Angles (rad)");
       histFull[k].histFullHar[j].mHistPhiFlat->SetYTitle("Counts");
       delete histTitle;
+
+      // Ftpc (east)
+      histTitle = new TString("Flow_Phi_Flat_FtpcEast_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistPhiFlatFtpcEast =	new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
+      histFull[k].histFullHar[j].mHistPhiFlatFtpcEast->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histFullHar[j].mHistPhiFlatFtpcEast->SetYTitle("Counts");
+      delete histTitle;
       
+      // Ftpc (west)
+      histTitle = new TString("Flow_Phi_Flat_FtpcWest_Sel");
+      histTitle->Append(*countSels);
+      histTitle->Append("_Har");
+      histTitle->Append(*countHars);
+      histFull[k].histFullHar[j].mHistPhiFlatFtpcWest =	new TH1D(histTitle->Data(),
+        histTitle->Data(), Flow::nPhiBinsFtpc, phiMin, phiMax);
+      histFull[k].histFullHar[j].mHistPhiFlatFtpcWest->SetXTitle
+	("Azimuthal Angles (rad)");
+      histFull[k].histFullHar[j].mHistPhiFlatFtpcWest->SetYTitle("Counts");
+      delete histTitle;
+      
+
       // event plane
       histTitle = new TString("Flow_Psi_Sel");
       histTitle->Append(*countSels);
@@ -954,7 +1069,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.46 2000/12/06 15:37:18 oldi Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.47 2000/12/08 17:04:09 oldi Exp $");
 
   return StMaker::Init();
 }
@@ -1063,10 +1178,14 @@ void StFlowAnalysisMaker::FillEventHistograms() {
     for (int j = 0; j < Flow::nHars; j++) {
       float order  = (float)(j+1);
       histFull[k].histFullHar[j].mHistPsi->Fill(mPsi[k][j]);
-      float psiSubCorr = mPsiSub[Flow::nSels*k][j] - mPsiSub[Flow::nSels*k+1][j];
-      histFull[k].mHistCos->Fill(order, (float)cos(order * psiSubCorr));    
-      if (psiSubCorr < 0.) psiSubCorr += twopi / order;
-      histFull[k].histFullHar[j].mHistPsiSubCorr->Fill(psiSubCorr);
+      
+      if (mPsiSub[Flow::nSels*k][j] != 0. && mPsiSub[Flow::nSels*k+1][j] != 0.) {
+	float psiSubCorr = mPsiSub[Flow::nSels*k][j] - mPsiSub[Flow::nSels*k+1][j];
+	histFull[k].mHistCos->Fill(order, (float)cos(order * psiSubCorr));    
+	if (psiSubCorr < 0.) psiSubCorr += twopi / order;
+	histFull[k].histFullHar[j].mHistPsiSubCorr->Fill(psiSubCorr);
+      }
+
       if (j < Flow::nHars - 1) { // subevents of different harmonics
 	int j1, j2;
 	float psiSubCorrDiff;
@@ -1136,25 +1255,26 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
     float chi2      = pFlowTrack->Chi2();
     int   fitPts    = pFlowTrack->FitPts();
     int   maxPts    = pFlowTrack->MaxPts();
+    int   detId     = DetId(eta);
     Char_t pid[10];
     strcpy(pid, pFlowTrack->Pid());
     float totalp    = pFlowTrack->P();
 
     // no selections: Charge, Dca, Chi2, FitPts, MaxPts, FitOverMax, PID
     mHistCharge->Fill((float)charge);
-    mHistDca->Fill(dca);
-    mHistDcaGlobal->Fill(dcaGlobal);
-    mHistChi2->Fill(chi2);
 
     // distinguish between Tpc and Ftpc
 
-    if (DetId(eta) == kFtpcWestId || DetId(eta) == kFtpcEastId) {
+    if (detId == kFtpcWestId || detId == kFtpcEastId) {
+	mHistDcaFtpc->Fill(dca);
+	mHistDcaGlobalFtpc->Fill(dcaGlobal);
+	mHistChi2Ftpc->Fill(chi2);
 	mHistFitPtsFtpc->Fill((float)fitPts);
 	mHistMaxPtsFtpc->Fill((float)maxPts);
 	if (maxPts) mHistFitOverMaxFtpc->Fill((float)fitPts/(float)maxPts);
     }
 
-    else if (DetId(eta) == kTpcId) {
+    else { // (detId == kTpcId) or otherwise!!!
 
 	// For PID multiplicites
 	if (strcmp(pid, "pi+")    == 0)  piPlusN++;
@@ -1168,6 +1288,9 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	if (strcmp(pid, "e-")     == 0)  electronN++;
 	if (strcmp(pid, "e+")     == 0)  positronN++;
 
+	mHistDcaTpc->Fill(dca);
+	mHistDcaGlobalTpc->Fill(dcaGlobal);
+	mHistChi2Tpc->Fill(chi2);
 	mHistFitPtsTpc->Fill((float)fitPts);
 	mHistMaxPtsTpc->Fill((float)maxPts);
 	if (maxPts) mHistFitOverMaxTpc->Fill((float)fitPts/(float)maxPts);
@@ -1282,11 +1405,25 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 // 	  //psi_i = mQSub[i][j].Phi() / order;
 // 	  psi_i = mPsiSub[i][j];
 // 	}
+
 	if (pFlowSelect->Select(pFlowTrack)) {
 	  // Remove autocorrelations
 	  TVector2 Q_i;
-	  double phiWgt = pFlowEvent->PhiWeight(phi, k, j);
-	  histFull[k].histFullHar[j].mHistPhiFlat->Fill(phi, phiWgt);
+	  Int_t detId = pFlowTrack->DetId();
+	  double phiWgt = pFlowEvent->PhiWeight(phi, k, j, detId);
+
+	  if (detId == kFtpcEastId) {
+	      histFull[k].histFullHar[j].mHistPhiFlatFtpcEast->Fill(phi, phiWgt);
+	  }
+
+	  else if (detId == kFtpcWestId) {
+	      histFull[k].histFullHar[j].mHistPhiFlatFtpcWest->Fill(phi, phiWgt);
+	  }
+
+	  else { // (detId == kTpcId) or otherwise !!!
+	      histFull[k].histFullHar[j].mHistPhiFlat->Fill(phi, phiWgt);
+	  }
+
 	  // for no autocorrelations remove, comment out the next 5 lines
 	  if (eta < 0 && (j+1) % 2 == 1) phiWgt *= -1.;
 	  if (pFlowEvent->PtWgt()) {
@@ -1296,8 +1433,20 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  TVector2 mQ_i = mQ[k][j] - Q_i;
 	  psi_i = mQ_i.Phi() / order;
 	  if (psi_i < 0.) psi_i += twopi / order;
+	  
 	  // Fill histograms with selections
-	  histFull[k].histFullHar[j].mHistPhi->Fill(phi);
+	  if (detId == kFtpcEastId) {
+	      histFull[k].histFullHar[j].mHistPhiFtpcEast->Fill(phi);
+	  }
+
+	  else if (detId == kFtpcWestId) {
+	      histFull[k].histFullHar[j].mHistPhiFtpcWest->Fill(phi);
+	  }
+	  
+	  else { // (detId == kTpcId) or otherwise !!!
+	      histFull[k].histFullHar[j].mHistPhi->Fill(phi);
+	  }
+	  
 	  histFull[k].histFullHar[j].mHistYield2D->Fill(eta, pt);
 	}
 
@@ -1572,13 +1721,35 @@ Int_t StFlowAnalysisMaker::Finish() {
       // Calculate PhiWgt
       double mean = histFull[k].histFullHar[j].mHistPhi->Integral() 
 	/ (double)Flow::nPhiBins;
+      double meanFtpcEast = histFull[k].histFullHar[j].mHistPhiFtpcEast->Integral() 
+	/ (double)Flow::nPhiBinsFtpc;
+      double meanFtpcWest = histFull[k].histFullHar[j].mHistPhiFtpcWest->Integral() 
+	/ (double)Flow::nPhiBinsFtpc;
       for (int i = 0; i < Flow::nPhiBins; i++) {
+	// Tpc
 	histFull[k].histFullHar[j].mHistPhiWgt->SetBinContent(i+1, mean);
 	histFull[k].histFullHar[j].mHistPhiWgt->SetBinError(i+1, 0.);
       }
+      for (int i = 0; i < Flow::nPhiBinsFtpc; i++) {
+	// Ftpc (east)
+	histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->SetBinContent(i+1, meanFtpcEast);
+	histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->SetBinError(i+1, 0.);
+	// Ftpc (west)
+	histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->SetBinContent(i+1, meanFtpcWest);
+	histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->SetBinError(i+1, 0.);
+      }
+      // Tpc
       histFull[k].histFullHar[j].mHistPhiWgt->
 	Divide(histFull[k].histFullHar[j].mHistPhi);
       phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgt);
+      // Ftpc (east)
+      histFull[k].histFullHar[j].mHistPhiWgtFtpcEast->
+	Divide(histFull[k].histFullHar[j].mHistPhiFtpcEast);
+      phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgtFtpcEast);
+      // Ftpc (west)
+      histFull[k].histFullHar[j].mHistPhiWgtFtpcWest->
+	Divide(histFull[k].histFullHar[j].mHistPhiFtpcWest);
+      phiWgtHistNames->AddLast(histFull[k].histFullHar[j].mHistPhiWgtFtpcWest);
     }
   }
   //GetHistList()->ls();

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.28 2000/12/06 15:51:17 oldi Exp $
+// $Id: doFlowEvents.C,v 1.29 2000/12/08 17:04:36 oldi Exp $
 //
 // Description: 
 // Chain to read events from files into StFlowEvent and analyze.
@@ -44,8 +44,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
-// Revision 1.28  2000/12/06 15:51:17  oldi
-// Including FTPC.
+// Revision 1.29  2000/12/08 17:04:36  oldi
+// Phi weights for both FTPCs included.
 //
 // Revision 1.27  2000/11/15 14:41:51  posk
 // Protected against running Finish() twice.
@@ -340,11 +340,14 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag,
 //   StFlowCutTrack::SetFitPtsTpc(0, 0);
 //   StFlowCutTrack::SetFitPtsFtpc(0, 0);
 //   StFlowCutTrack::SetFitOverMaxPts(0., 0.);
-//   StFlowCutTrack::SetChiSq(0., 0.);
-//   StFlowCutTrack::SetDca(0., 0.);
-//   StFlowCutTrack::SetPt(0., 0.);
+//   StFlowCutTrack::SetChiSqTpc(0., 0.);
+//   StFlowCutTrack::SetChiSqFtpc(0., 0.);
+//   StFlowCutTrack::SetDcaTpc(0., 0.);
+//   StFlowCutTrack::SetDcaFtpc(0., 0.);
+//   StFlowCutTrack::SetPtTpc(0., 0.);
+//   StFlowCutTrack::SetPtFtpc(0., 0.);
 //   StFlowCutTrack::SetEtaTpc(0., 0.);
-//   StFlowCutTrack::SetEtaFtpc(0., 0.);
+//   StFlowCutTrack::SetEtaFtpc(0., 0., 0., 0.);
 
   
   // Set the event plane selections
@@ -475,7 +478,7 @@ void doFlowEvents(const Int_t nevents)
   //Char_t* fileExt="st_physics_1229055_raw_0013.dst.root.flowpicoevent.root";
   
   //Char_t* filePath="../Data/FtpcSim/Markus/";
-  //Char_t* fileExt="*.flowpicoevent.root";
+  //Char_t* fileExt="*flowpicoevent.root";
 
   //Char_t* filePath="/streisand/data1/FlowReco/"; // data
   //Char_t* fileExt="*100_220evts.dst.root";
