@@ -75,7 +75,7 @@ c
          integer iquest(100)
 
          integer nquota,nvar,icycle,nvar2
-         character*4 chtags(8),chtags2(11)
+         character*4 chtags(9),chtags2(11)
 C-----------------------------------------------------------------------
          logical lstat,first
 
@@ -92,8 +92,8 @@ C-----------------------------------------------------------------------
          integer nmctrk,nhitrk,itrk
 
 C-----------------------------------------------------------------------
-         data nvar/8/,nvar2/11/
-         data chtags/'itrk','itcl','nrow','x','y','z','prf','zrf'/
+         data nvar/9/,nvar2/11/
+         data chtags/'itrk','itcl','nrow','x','y','z','prf','zrf','q'/
          data chtags2/'itrk','mcx ','mcy ','mcz ','tpx ','tpy ','tpz '
      +,              'delx','dely','delz','nrow'/
          data first/.true./
@@ -133,6 +133,7 @@ c
             vec(6)=tphit(indx).z
             vec(7)=tphit(indx).prf
             vec(8)=tphit(indx).zrf
+            vec(9)=tphit(indx).q
 
             call hfn(102,vec)
          enddo
