@@ -26,7 +26,7 @@ subroutine pawbrk;       print *,' dummy pawbrk called ';       end
 subroutine pawcs;        print *,' dummy pawcs  called ';       end
 subroutine pgexi;        print *,' dummy pgexi  called ';       end
 *yf subroutine gkfort;       print *,' dummy gkfort called ';       end
-subroutine gpdcay;       print *,' dummy gpdcay called ';       end
+*yf subroutine gpdcay;       print *,' dummy gpdcay called ';       end
 subroutine csrmsl;       print *,' dummy csrmsl called ';       end
 *yf subroutine csjcal;       print *,' dummy csjcal called ';       end
 *yf subroutine csaddr;       print *,' dummy csaddr called ';       end
