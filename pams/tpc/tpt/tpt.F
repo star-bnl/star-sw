@@ -1,7 +1,7 @@
-* $Id: tpt.F,v 1.4 1998/02/09 19:18:11 love Exp $
+* $Id: tpt.F,v 1.5 1998/02/11 19:32:55 sakrejda Exp $
 * $Log: tpt.F,v $
-* Revision 1.4  1998/02/09 19:18:11  love
-* This is a test
+* Revision 1.5  1998/02/11 19:32:55  sakrejda
+* tpt protected agains overflows, tpt_find_slic.F,tpt_row_sect_pnt.F simplified (and tested)
 *
 * Revision 1.3  1998/02/06 22:03:14  fisyak
 * Remove tgc_cross_and_dip.F
@@ -37,7 +37,7 @@ C
 C<---------------------------------------------------------------------
 C
 C Modified: 13-NOV-1997 by R.Bossingham
-C           Eliminate unused variable.  (I wonder which ones?)
+C           Eliminate unused variable.
 C
       IMPLICIT NONE
 
@@ -61,6 +61,7 @@ C             tpcount -# of hits in a given row/sector
       INTEGER tls_Index_Sort_i
 C            sort hits in the TPC table according to row/sec field
       INTEGER tpt_row_sect_pnt 
+      INTEGER tgc_sec24_to_sec12
       INTEGER tpt_form_segments
       INTEGER tpt_extend_segments
       INTEGER tpt_merge_segments
@@ -71,8 +72,12 @@ C            sort hits in the TPC table according to row/sec field
       REAL    time_now,time_all
       COMMON /CPUTIM/ time_all
       REAL    time_sort,time_seguv,time_seg,time_ext,time_merge
-      real    xglobal(3), xlocal(3)
-      integer tgc_global_to_local,isect
+      real    xglobal(3)
+      integer tgc_global_to_sector
+      integer idI1, isec2, isec3, isect
+      character*132 m132  ! And some message-generating space.
+      data idI1 /0/
+      save idI1
 C______________________________________________________________________
 C     initialize timing counters
       time_sort = 0
@@ -94,24 +99,36 @@ C     preset all the hit(i).track to 0
         hit(i).track=0
       end do
       if(hit_h.nok.eq.0) go to 888
+      call Msg_Enable( 'TPT-I1' )
 c
 c     make sure that there is enough space in local arrays
 c     if not, truncate number of hits to track...
       if(hit_h.nok.gt.tpt_mxhit) then
-        write(6,*) ' tpt local araays not big enough',hit_h.nok,tpt_mxhit
+        write(m132,*) ' TPT-I1 tpt local araays not big enough',
+     >                  hit_h.nok,tpt_mxhit
+        call Message( m132, 1, idI1 )
         hit_h.nok=tpt_mxhit
       endif
 
 C     Sort the TPC hits according to row/sector field
+C     Check whether the right sector was assigned to a hit
+c     This check could go away at some point
+C     Hits are divided into 12 volumes so that crossing through the central
+C     membrane is less painful
       call timed(time_now)
       time_all = time_all + time_now
       do i=1,hit_h.nok
          xglobal(1)=hit(i).x
          xglobal(2)=hit(i).y
-         xglobal(3)=10.0
-         iret=tgc_global_to_local(isect,xglobal,xlocal)
-         if(isect.gt.12) isect=24-isect
-         if(isect.eq.0) isect=12
+         xglobal(3)=hit(i).z
+         iret=tgc_global_to_sector(isec2,xglobal)
+         isec3=int(hit(i).row/100)
+         if(isec3.ne.isec2) then
+           write(m132,*) 'TPT-I1 sector missmatch',isec3,isec2,xglobal
+           call message(m132,1,idI1)
+           isec2=isect
+         endif
+         iret=tgc_sec24_to_sec12(isec3,isect)
          hit(i).row=isect*100+mod(hit(i).row,100)
       end do
 c
