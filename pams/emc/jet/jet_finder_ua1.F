@@ -196,6 +196,8 @@ c*-recalculate energy sum excluding used cells.
          enddo
 c*-if background level changes more than prec_bg, go next iteration!!!
 c*-after 10 iteration, stop working and finish
+         write(*,*) njet,' jet with ',n_iter,' iteration(s) : ',
+     +     et_sum,et_sum/float(ncell_tot-nc)
          if(abs(et_sum-et_sum_old)/et_sum .gt. prec_bg .and.
      +      n_iter .le. 10)then
             et_ave=et_sum/float(ncell_tot-nc)
@@ -213,7 +215,7 @@ c*-Watch out!!! Here is a big jump!!!
          write(*,*)'UA1:Done:No jet found!'
       else
          write(*,*)
-     +'UA1:Done:Found ',njet,' jet(s) after ',n_iter,' iteration(s)!'
+     +'UA1:Done:Found ',njet,' jet(s)'
       end if
       return
       end
