@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcRawHit.cxx,v 2.2 2000/05/22 19:21:54 akio Exp $
+ * $Id: StEmcRawHit.cxx,v 2.3 2000/07/28 19:49:28 akio Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcRawHit.cxx,v $
+ * Revision 2.3  2000/07/28 19:49:28  akio
+ * Change in Detector Id for Endcap SMD
+ *
  * Revision 2.2  2000/05/22 19:21:54  akio
  * Bug fix, add delta into EMcPoint, wider bits for Eta in RawHit
  *
@@ -19,7 +22,7 @@
  **************************************************************************/
 #include "StEmcRawHit.h"
 
-static const char rcsid[] = "$Id: StEmcRawHit.cxx,v 2.2 2000/05/22 19:21:54 akio Exp $";
+static const char rcsid[] = "$Id: StEmcRawHit.cxx,v 2.3 2000/07/28 19:49:28 akio Exp $";
 
 ClassImp(StEmcRawHit)
 
@@ -44,12 +47,26 @@ StEmcRawHit::StEmcRawHit(StDetectorId d, UInt_t m, UInt_t e, UInt_t s, UInt_t a,
     setEnergy(ene);
 }
 
+StEmcRawHit::StEmcRawHit(const StEmcRawHit& h) : StObject(h){
+  mId = h.mId;
+  mAdc = h.mAdc;        
+  mEnergy = h.mEnergy;
+}
+
 StEmcRawHit::~StEmcRawHit() {/* noop */}
 
 UInt_t
 StEmcRawHit::bits(UInt_t bit, UInt_t nbits) const
 {
     return (mId>>bit) & ~(~0UL<<nbits);
+}
+
+void
+StEmcRawHit::setCalibrationType(UInt_t t){
+  if(t<256){
+    mId = mId & 0xffffff;
+    mId += t << 24;
+  }
 }
 
 void
@@ -60,6 +77,9 @@ StEmcRawHit::setId(StDetectorId d, UInt_t m, UInt_t e, UInt_t s)
     mId += e << 4;
     mId += s;
 }
+
+UInt_t
+StEmcRawHit::calibrationType() const {return bits(24, 8);} // bits 24-31
 
 StDetectorId
 StEmcRawHit::detector() const
@@ -77,8 +97,8 @@ Int_t
 StEmcRawHit::sub() const {
   Int_t sub;
   switch(detector()){
-  case kBarrelSmdEtaStripId:                         // irrelevant case return negative
-  case kEndcapSmdEtaStripId: case kEndcapSmdPhiStripId: 
+  case kBarrelSmdEtaStripId:                  // irrelevant case return negative
+  case kEndcapSmdUStripId: case kEndcapSmdVStripId:
     sub = -1; break;
   default:
     sub = bits(0, 4);                         // bits 0-3

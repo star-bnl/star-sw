@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcPoint.cxx,v 2.2 2000/05/22 19:21:53 akio Exp $
+ * $Id: StEmcPoint.cxx,v 2.3 2000/07/28 19:49:27 akio Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcPoint.cxx,v $
+ * Revision 2.3  2000/07/28 19:49:27  akio
+ * Change in Detector Id for Endcap SMD
+ *
  * Revision 2.2  2000/05/22 19:21:53  akio
  * Bug fix, add delta into EMcPoint, wider bits for Eta in RawHit
  *
@@ -21,7 +24,7 @@
 #include "StEmcPoint.h"
 #include <iostream.h>
 
-static const char rcsid[] = "$Id: StEmcPoint.cxx,v 2.2 2000/05/22 19:21:53 akio Exp $";
+static const char rcsid[] = "$Id: StEmcPoint.cxx,v 2.3 2000/07/28 19:49:27 akio Exp $";
 
 ClassImp(StEmcPoint)
 
@@ -60,7 +63,7 @@ Int_t
 StEmcPoint::getDetId(const StDetectorId id) const{
   if(id>=kBarrelEmcTowerId && id<=kBarrelSmdPhiStripId){
     return id-kBarrelEmcTowerId;
-  }else if(id>=kEndcapEmcTowerId && id<=kEndcapSmdPhiStripId){
+  }else if(id>=kEndcapEmcTowerId && id<=kEndcapSmdVStripId){
     return id-kEndcapEmcTowerId;
   }else{
     cout<<"***Error at StEmcPoint:::getDetId, Invalid  StDetectorId"<<endl;
