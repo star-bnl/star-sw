@@ -1,5 +1,8 @@
-// $Id: StFtpcDriftMapMaker.cxx,v 1.10 2001/07/12 20:43:28 jcs Exp $
+// $Id: StFtpcDriftMapMaker.cxx,v 1.11 2001/08/10 15:34:40 jcs Exp $
 // $Log: StFtpcDriftMapMaker.cxx,v $
+// Revision 1.11  2001/08/10 15:34:40  jcs
+// correct mistake - close ftpcDriftField
+//
 // Revision 1.10  2001/07/12 20:43:28  jcs
 // remove tzero from ftpcDriftField
 //
@@ -321,7 +324,7 @@ StFtpcDriftMapMaker::StFtpcDriftMapMaker(const EBField map,const Float_t factor)
   strcpy(fOutputFileName,"./ftpcDriftField.C");
   ofstream ofs_ftpcDriftField(fOutputFileName);  // Open a file
   table -> SavePrimitive(ofs_ftpcDriftField,0);  // Write information of c-structure from object of TTable to the file
-  ofs_ftpcEField.close();                    // Close the file
+  ofs_ftpcDriftField.close();                    // Close the file
 
 //-------------------------------------------------------------------
   delete dbReader;
