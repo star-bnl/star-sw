@@ -13,7 +13,7 @@ class GtHash : public THashTable
   Int_t GetNParams();
   const void *GetParams();
  protected:
-  GtCradle    *fFound;	       // Cradle pointer
-  GtCradle    *fPoka;	       // Cradle pointer
-  void 	      *fPointer;       // user pointer
+  GtCradle    *fPoka;	       //! Cradle pointer
+  GtCradle    *fFound;	       //! Cradle pointer
+  void 	      *fPointer;       //! user pointer
 };
