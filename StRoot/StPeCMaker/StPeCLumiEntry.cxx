@@ -90,8 +90,8 @@ Int_t StPeCLumiEntry::fill ( StMuDst *muDst) {
    }
   
 
-   nGlobal = muDst->numberOfGlobalTracks ();
-   nPrimary = muDst->numberOfPrimaryTracks(); 
+   nGlobal = muDst->globalTracks()->GetEntries();
+   nPrimary = muDst->primaryTracks()->GetEntries(); 
 
    StThreeVectorF vtx = MuEvent->primaryVertexPosition();
 
