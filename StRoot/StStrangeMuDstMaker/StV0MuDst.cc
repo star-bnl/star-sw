@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MuDst.cc,v 1.1 2000/03/29 03:10:08 genevb Exp $
+ * $Id: StV0MuDst.cc,v 1.2 2000/03/29 20:52:13 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 04-Jun-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StV0MuDst.cc,v $
+ * Revision 1.2  2000/03/29 20:52:13  genevb
+ * Added StKinkMuDst, replaced arrays
+ *
  * Revision 1.1  2000/03/29 03:10:08  genevb
  * Introduction of Strangeness Micro DST package
  *
@@ -32,19 +35,19 @@ void StV0MuDst::Fill(StV0Vertex* v0Vertex,
                        StStrangeEvMuDst* event) {
   mEvent = event;
   
-  mDecayVertexV0[0] = v0Vertex->position().x();
-  mDecayVertexV0[1] = v0Vertex->position().y();
-  mDecayVertexV0[2] = v0Vertex->position().z();
+  mDecayVertexV0X = v0Vertex->position().x();
+  mDecayVertexV0Y = v0Vertex->position().y();
+  mDecayVertexV0Z = v0Vertex->position().z();
   mDcaV0Daughters = v0Vertex->dcaDaughters();
   mDcaV0ToPrimVertex = v0Vertex->dcaParentToPrimaryVertex();
   mDcaPosToPrimVertex = v0Vertex->dcaDaughterToPrimaryVertex(positive);
   mDcaNegToPrimVertex = v0Vertex->dcaDaughterToPrimaryVertex(negative);
-  mMomNeg[0] = v0Vertex->momentumOfDaughter(negative).x();
-  mMomNeg[1] = v0Vertex->momentumOfDaughter(negative).y();
-  mMomNeg[2] = v0Vertex->momentumOfDaughter(negative).z();
-  mMomPos[0] = v0Vertex->momentumOfDaughter(positive).x();
-  mMomPos[1] = v0Vertex->momentumOfDaughter(positive).y();
-  mMomPos[2] = v0Vertex->momentumOfDaughter(positive).z();
+  mMomNegX = v0Vertex->momentumOfDaughter(negative).x();
+  mMomNegY = v0Vertex->momentumOfDaughter(negative).y();
+  mMomNegZ = v0Vertex->momentumOfDaughter(negative).z();
+  mMomPosX = v0Vertex->momentumOfDaughter(positive).x();
+  mMomPosY = v0Vertex->momentumOfDaughter(positive).y();
+  mMomPosZ = v0Vertex->momentumOfDaughter(positive).z();
 
   mTpcHitsPos =
     v0Vertex->daughter(positive)->fitTraits().numberOfFitPoints(kTpcId);
@@ -59,56 +62,80 @@ void StV0MuDst::Clear() {
 StV0MuDst::~StV0MuDst() {
 }
 
+Float_t StV0MuDst::decayVertexV0(Int_t n) {
+  switch (n) {
+    case (2): return mDecayVertexV0Z;
+    case (1): return mDecayVertexV0Y;
+    default : return mDecayVertexV0X;
+  }
+}
+
+Float_t StV0MuDst::momPos(Int_t n) {
+  switch (n) {
+    case (2): return mMomPosZ;
+    case (1): return mMomPosY;
+    default : return mMomPosX;
+  }
+}
+
+Float_t StV0MuDst::momNeg(Int_t n) {
+  switch (n) {
+    case (2): return mMomNegZ;
+    case (1): return mMomNegY;
+    default : return mMomNegX;
+  }
+}
+
 Float_t StV0MuDst::decayLengthV0() {
      if (mEvent)
-       return sqrt(pow(mDecayVertexV0[0] - mEvent->primaryVertex()[0],2) +
-                   pow(mDecayVertexV0[1] - mEvent->primaryVertex()[1],2) +
-                   pow(mDecayVertexV0[2] - mEvent->primaryVertex()[2],2));
+       return sqrt(pow(mDecayVertexV0X - mEvent->primaryVertex(0),2) +
+                   pow(mDecayVertexV0Y - mEvent->primaryVertex(1),2) +
+                   pow(mDecayVertexV0Z - mEvent->primaryVertex(2),2));
      return 0.;
 }
 
 Float_t StV0MuDst::Ptot2Pos() {
-     return (mMomPos[0]*mMomPos[0] +
-	     mMomPos[1]*mMomPos[1] +
-	     mMomPos[2]*mMomPos[2]);
+     return (mMomPosX*mMomPosX +
+	     mMomPosY*mMomPosY +
+	     mMomPosZ*mMomPosZ);
 }
 
 Float_t StV0MuDst::Ptot2Neg() {
-     return (mMomNeg[0]*mMomNeg[0] +
-             mMomNeg[1]*mMomNeg[1] +
-             mMomNeg[2]*mMomNeg[2]);
+     return (mMomNegX*mMomNegX +
+             mMomNegY*mMomNegY +
+             mMomNegZ*mMomNegZ);
 }
 
-Float_t StV0MuDst::MomV0(int n) {
-     return (mMomPos[n] + mMomNeg[n]);
+Float_t StV0MuDst::momV0(Int_t n) {
+     return (momPos(n) + momNeg(n));
 }
 
 Float_t StV0MuDst::Pt2V0() {
-     Float_t mMomV0_0 = MomV0(0);
-     Float_t mMomV0_1 = MomV0(1);
+     Float_t mMomV0_0 = momV0(0);
+     Float_t mMomV0_1 = momV0(1);
      return (mMomV0_0*mMomV0_0 + mMomV0_1*mMomV0_1);
 }
 
 Float_t StV0MuDst::Ptot2V0() {
-     Float_t mMomV0_2 = MomV0(2);
+     Float_t mMomV0_2 = momV0(2);
      return (Pt2V0() + mMomV0_2*mMomV0_2);
 }
 
 Float_t StV0MuDst::MomPosAlongV0() {
      Float_t mPtot2V0 = Ptot2V0();
      if (mPtot2V0)
-       return (mMomPos[0]*MomV0(0) + 
-               mMomPos[1]*MomV0(1) +
-               mMomPos[2]*MomV0(2)) / sqrt(mPtot2V0);
+       return (mMomPosX*momV0(0) + 
+               mMomPosY*momV0(1) +
+               mMomPosZ*momV0(2)) / sqrt(mPtot2V0);
      return 0.;
 }
 
 Float_t StV0MuDst::MomNegAlongV0() {
      Float_t mPtot2V0 = Ptot2V0();
      if (mPtot2V0)
-       return (mMomNeg[0]*MomV0(0) + 
-               mMomNeg[1]*MomV0(1) +
-               mMomNeg[2]*MomV0(2)) / sqrt(mPtot2V0);
+       return (mMomNegX*momV0(0) + 
+               mMomNegY*momV0(1) +
+               mMomNegZ*momV0(2)) / sqrt(mPtot2V0);
      return 0.;
 }
 
@@ -162,13 +189,13 @@ Float_t StV0MuDst::massK0Short() {
 
 Float_t StV0MuDst::rapLambda() {
   Float_t ela = eLambda();
-  Float_t mMomV0_2 = MomV0(2);
+  Float_t mMomV0_2 = momV0(2);
   return 0.5*log((ela+mMomV0_2)/(ela-mMomV0_2));
 }
 
 Float_t StV0MuDst::rapK0Short() {
   Float_t ek0 = eK0Short();
-  Float_t mMomV0_2 = MomV0(2);
+  Float_t mMomV0_2 = momV0(2);
   return 0.5*log((ek0+mMomV0_2)/(ek0-mMomV0_2));
 }
 
@@ -181,7 +208,7 @@ Float_t StV0MuDst::cTauK0Short() {
 }
 
 Float_t StV0MuDst::ptPos() {
-  return sqrt(Ptot2Pos()-mMomPos[2]*mMomPos[2]);
+  return sqrt(Ptot2Pos()-mMomPosZ*mMomPosZ);
 }
 
 Float_t StV0MuDst::ptotPos() {
@@ -189,7 +216,7 @@ Float_t StV0MuDst::ptotPos() {
 }
 
 Float_t StV0MuDst::ptNeg() {
-  return sqrt(Ptot2Neg()-mMomNeg[2]*mMomNeg[2]);
+  return sqrt(Ptot2Neg()-mMomNegZ*mMomNegZ);
 }
 
 Float_t StV0MuDst::ptotNeg() {

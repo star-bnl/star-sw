@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 1.1 2000/03/29 03:10:07 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 1.2 2000/03/29 20:52:13 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 1.2  2000/03/29 20:52:13  genevb
+// Added StKinkMuDst, replaced arrays
+//
 // Revision 1.1  2000/03/29 03:10:07  genevb
 // Introduction of Strangeness Micro DST package
 //
@@ -17,32 +20,39 @@
 #include "StPrimaryVertex.h"
 #include "StV0Vertex.h"
 #include "StXiVertex.h"
+#include "StKinkVertex.h"
 #include "StStrangeEvMuDst.hh"
 #include "StV0MuDst.hh"
 #include "StXiMuDst.hh"
+#include "StKinkMuDst.hh"
 #include "StStrangeMuDstMaker.h"
 #include "StMessMgr.h"
 #include "TClonesArray.h"
 #include "TBranch.h"
 
 #define MXENT 5000
+#define MXKINK 500
 int nV0Entries = 0;
 int nXiEntries = 0;
+int nKinkEntries = 0;
 
 //_____________________________________________________________________________
 StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name){
   doV0 = kFALSE;
   doXi = kFALSE;
+  doKink = kFALSE;
   muDst = 0;
   tree = 0;
   evClonesArray = 0;
   v0ClonesArray = 0;
   xiClonesArray = 0;
+  kinkClonesArray = 0;
   rw = StrangeNoFile;
   SetNumber(-2);
   evFile="evMuDst.root";
   v0File="v0MuDst.root";
   xiFile="xiMuDst.root";
+  kinkFile="kinkMuDst.root";
 }
 //_____________________________________________________________________________
 StStrangeMuDstMaker::~StStrangeMuDstMaker(){
@@ -71,6 +81,10 @@ Int_t StStrangeMuDstMaker::Init(){
       xiClonesArray = new TClonesArray("StXiMuDst",MXENT);
       tree->SetBranchAddress("Xi",&xiClonesArray);
     }
+    if (doKink) {
+      xiClonesArray = new TClonesArray("StKinkMuDst",MXKINK);
+      tree->SetBranchAddress("Kink",&kinkClonesArray);
+    }
 
   } else {                           // CREATING the Micro Dst
     Int_t split=1;
@@ -88,9 +102,15 @@ Int_t StStrangeMuDstMaker::Init(){
       branch = tree->Branch("Xi",&xiClonesArray,bsize,split);
       if (rw == StrangeWrite) branch->SetFile(xiFile);
     }
+    if (doXi) {
+      kinkClonesArray = new TClonesArray("StKinkMuDst",MXKINK);
+      branch = tree->Branch("Kink",&kinkClonesArray,bsize,split);
+      if (rw == StrangeWrite) branch->SetFile(kinkFile);
+    }
   }
   nV0Entries = 0;
   nXiEntries = 0;
+  nKinkEntries = 0;
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -152,8 +172,10 @@ Int_t StStrangeMuDstMaker::Make(){
 
     StV0Vertex *v0Vertex = 0;
     StXiVertex *xiVertex = 0;
+    StKinkVertex *kinkVertex = 0;
     Int_t v0Entries = 0;
     Int_t xiEntries = 0;
+    Int_t kinkEntries = 0;
   
     // Second, loop over vertices to build linked list of xi/v0 candidates
     size_t i;
@@ -189,6 +211,17 @@ Int_t StStrangeMuDstMaker::Make(){
                                     << "with missing V0 vertices" << endm;
       nXiEntries += entries;
     }
+    if (doKink) {
+      StSPtrVecKinkVertex& kinkVertices = event.kinkVertices();
+      entries = kinkVertices.size();
+      for (i=0; i<entries; i++) {
+        kinkVertex = kinkVertices[i];
+        new((*kinkClonesArray)[kinkEntries++]) StKinkMuDst(kinkVertex);
+      }
+      gMessMgr->Info() << "StStrangeMuDstMaker: found " << entries
+                       << " Kink candidates" << endm;
+      nKinkEntries += entries;
+    }
     tree->Fill();
   }
   return kStOK;
@@ -198,6 +231,7 @@ void StStrangeMuDstMaker::Clear(Option_t *option){
   if (evClonesArray) evClonesArray->Clear();
   if (doV0 && v0ClonesArray) v0ClonesArray->Clear();
   if (doXi && xiClonesArray) xiClonesArray->Clear();
+  if (doKink && kinkClonesArray) kinkClonesArray->Clear();
   StMaker::Clear(option);
 }
 //_____________________________________________________________________________
@@ -220,25 +254,35 @@ Int_t StStrangeMuDstMaker::Finish(){
     delete xiClonesArray;
     xiClonesArray = 0;
   }
+  if (doXi) {
+    gMessMgr->Info() << "StStrangeMuDstMaker: "
+	             << nKinkEntries << " Kink Entries" << endm;
+    delete kinkClonesArray;
+    kinkClonesArray = 0;
+  }
   delete evClonesArray;
   evClonesArray = 0;
   return kStOK;
 }
 //_____________________________________________________________________________
-void StStrangeMuDstMaker::SetWrite(char* eFile, char* vFile, char* xFile) {
+void StStrangeMuDstMaker::SetWrite(char* eFile, char* vFile,
+                                   char* xFile, char* kFile) {
   rw = StrangeWrite;
-  SetFiles(eFile,vFile,xFile);
+  SetFiles(eFile,vFile,xFile,kFile);
 }
 //_____________________________________________________________________________
-void StStrangeMuDstMaker::SetRead (char* eFile, char* vFile, char* xFile) {
+void StStrangeMuDstMaker::SetRead (char* eFile, char* vFile,
+                                   char* xFile, char* kFile) {
   rw = StrangeRead;
-  SetFiles(eFile,vFile,xFile);
+  SetFiles(eFile,vFile,xFile,kFile);
 }
 //_____________________________________________________________________________
-void StStrangeMuDstMaker::SetFiles (char* eFile, char* vFile, char* xFile) {
+void StStrangeMuDstMaker::SetFiles (char* eFile, char* vFile,
+                                    char* xFile, char* kFile) {
   if (eFile) evFile = eFile;
   if (vFile) v0File = vFile;
-  if (xFile) xiFile = xFile;				   
+  if (xFile) xiFile = xFile;
+  if (kFile) kinkFile = kFile;
 }
 //_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::OpenFile() {
@@ -273,6 +317,11 @@ Int_t StStrangeMuDstMaker::GetNXi() {
   return 0;
 }
 //_____________________________________________________________________________
+Int_t StStrangeMuDstMaker::GetNKink() {
+  if (kinkClonesArray) return kinkClonesArray->GetEntriesFast();
+  return 0;
+}
+//_____________________________________________________________________________
 StV0MuDst* StStrangeMuDstMaker::GetV0(Int_t i) {
   if (v0ClonesArray) return (StV0MuDst*) (*v0ClonesArray)[i];
   return 0;
@@ -280,6 +329,11 @@ StV0MuDst* StStrangeMuDstMaker::GetV0(Int_t i) {
 //_____________________________________________________________________________
 StXiMuDst* StStrangeMuDstMaker::GetXi(Int_t i) {
   if (xiClonesArray) return (StXiMuDst*) (*xiClonesArray)[i];
+  return 0;
+}
+//_____________________________________________________________________________
+StKinkMuDst* StStrangeMuDstMaker::GetKink(Int_t i) {
+  if (kinkClonesArray) return (StKinkMuDst*) (*kinkClonesArray)[i];
   return 0;
 }
 //_____________________________________________________________________________

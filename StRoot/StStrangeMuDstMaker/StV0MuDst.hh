@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MuDst.hh,v 1.2 2000/03/29 14:42:40 genevb Exp $
+ * $Id: StV0MuDst.hh,v 1.3 2000/03/29 20:52:13 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 04-Jun-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StV0MuDst.hh,v $
+ * Revision 1.3  2000/03/29 20:52:13  genevb
+ * Added StKinkMuDst, replaced arrays
+ *
  * Revision 1.2  2000/03/29 14:42:40  genevb
  * Removed StV0MiniMiniDst
  *
@@ -40,18 +43,18 @@ public:
   StStrangeEvMuDst *event();           // Pointer to event information
 
   Float_t decayLengthV0();             // 3-d decay distance
-  Float_t *decayVertexV0();            // Coordinates of decay vertex
+  Float_t decayVertexV0(Int_t n);      // Coordinates of decay vertex
   Float_t dcaV0Daughters() const;      // DCA of v0 daughters at decay vertex
   Float_t dcaV0ToPrimVertex() const;   // DCA of v0 to primary vertex
   Float_t dcaPosToPrimVertex() const;  // DCA of pos v0 daughter to pri vertex
   Float_t dcaNegToPrimVertex() const;  // DCA of neg v0 daughter to pri vertex
-  Float_t *momPos();                   // Momentum components of pos. daughter
-  Float_t *momNeg();                   // Momentum components of neg. daughter
+  Float_t momPos(Int_t n);             // Momentum components of pos. daughter
+  Float_t momNeg(Int_t n);             // Momentum components of neg. daughter
 
   Int_t   tpcHitsPos() const;          // Number of TPC hits on pos. daughter
   Int_t   tpcHitsNeg() const;          // Number of TPC hits on neg. daughter
 
-  Float_t *momV0();               // Momentum components of V0
+  Float_t momV0(Int_t n);         // Momentum components of V0
   Float_t alphaV0();              // Armenteros-Podolanski variable
   Float_t ptArmV0();              // Armenteros-Podolanski variable
   Float_t eLambda();              // Energy assuming lambda hypothesis
@@ -77,18 +80,23 @@ public:
 protected:
   StStrangeEvMuDst *mEvent;           //!
 
-  Float_t mDecayVertexV0[3];          // These are written out
+  Float_t mDecayVertexV0X;            // These are written out
+  Float_t mDecayVertexV0Y;            // These are written out
+  Float_t mDecayVertexV0Z;            // These are written out
   Float_t mDcaV0Daughters;
   Float_t mDcaV0ToPrimVertex;
   Float_t mDcaPosToPrimVertex;
   Float_t mDcaNegToPrimVertex;
-  Float_t mMomPos[3];
-  Float_t mMomNeg[3];
+  Float_t mMomPosX;
+  Float_t mMomPosY;
+  Float_t mMomPosZ;
+  Float_t mMomNegX;
+  Float_t mMomNegY;
+  Float_t mMomNegZ;
 
   Int_t   mTpcHitsPos;
   Int_t   mTpcHitsNeg;
 
-  Float_t MomV0(int n);             
   Float_t Ptot2Pos();          
   Float_t Ptot2Neg();             
   Float_t Ptot2V0();            
@@ -105,8 +113,6 @@ inline void StV0MuDst::SetEvent(StStrangeEvMuDst* ev)
              { mEvent = ev; }
 inline StStrangeEvMuDst *StV0MuDst::event()
              { return mEvent; }
-inline Float_t *StV0MuDst::decayVertexV0()
-             { return mDecayVertexV0; } 
 inline Float_t StV0MuDst::dcaV0Daughters() const 
              { return mDcaV0Daughters; }
 inline Float_t StV0MuDst::dcaV0ToPrimVertex() const 
@@ -115,13 +121,6 @@ inline Float_t StV0MuDst::dcaPosToPrimVertex() const
              { return mDcaPosToPrimVertex; }
 inline Float_t StV0MuDst::dcaNegToPrimVertex() const 
              { return mDcaNegToPrimVertex; }
-inline Float_t *StV0MuDst::momPos()
-             { return mMomPos; }
-inline Float_t *StV0MuDst::momNeg()
-             { return mMomNeg; }
-inline Float_t *StV0MuDst::momV0()
-             { Float_t a[3] = {MomV0(0),MomV0(1),MomV0(2)}; return a; }
-
 inline Int_t   StV0MuDst::tpcHitsPos() const
              { return mTpcHitsPos; }
 inline Int_t   StV0MuDst::tpcHitsNeg() const
