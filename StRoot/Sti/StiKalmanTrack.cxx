@@ -18,8 +18,20 @@ ostream& operator<<(ostream&, const StiHit&);
 
 StiObjectFactoryInterface<StiKalmanTrackNode>* StiKalmanTrack::trackNodeFactory = 0;
 
+/*! 
+   Reset the class members to their default state.
+   This method is called by the ctor of the class to initialize the
+   members of the class to an "empty" or null track state. The
+   method must also be called everytime an instance of this class is
+   retrieved from its factory in order to set the first and last
+   nodes to "null" thus guaranteeing that the track object is empty
+   i.e. does not represent any track and is thus ready for a new
+   search and reconstruction.  It is guaranteed that a call to
+   reset() fully propogates up the inheritance tree.
+ */
 void StiKalmanTrack::reset()
 {
+	StiTrack::reset();
   firstNode = 0;
 	lastNode = 0;
   trackingDirection = kOutsideIn;
@@ -31,38 +43,71 @@ void StiKalmanTrack::update()
   //cout<<"void StiKalmanTrack::update()"<<endl;
   return;
 }
+ 
 
+/*! 
+	Set the factory used for the creation of kalman track nodes.
+	\see StiKalmanTrackNodeFactory
+*/
 void StiKalmanTrack::setKalmanTrackNodeFactory(StiObjectFactoryInterface<StiKalmanTrackNode>* val)
 {
   trackNodeFactory = val;
 }
 
+/*! 
+   Calculates and returns the momentum and error of the track 
+	 <p>
+   This method calculates and returns in the two arrays provided as arguments the 
+   3-momentum and error of the track in Star global coordinates. The 3-momentum 
+   is calculated at the inner most point associated with the track. The inner-most 
+   point may or may not be the main vertex of the event. Care should thus be exercised 
+   while using this method. 
+	 <p>
+   The error is calculated (and returned) only if a non null array is passed as a second
+   argument. It is thus possible to get the momentum without a lengthy calculation 
+   of the error matrix. The error error matrix corresponds to a full covariance matrix.
+   The definition of the error matrix is described in the introduction of this class
+   definition. Note that the actual calculation of the momentum and associated error 
+   is delegated to the track node class and uses the inner most node of the track.
+ */
 void StiKalmanTrack::getMomentum(double p[3], double e[6]) const
 {
-    // return the momentum of the track at the inner most node held by this track
+	// return the momentum of the track at the inner most node held by this track
     // which may (or not) be the primary vertex. 
     // this will need to be refined...
     getInnerMostHitNode()->getMomentum(p,e);
 }
 
-double  StiKalmanTrack::getPt()             const
+/*!
+   Calculates and returns the transverse momentum of the track at the inner most node 
+   held by this track which may or (or not) be the primary vertex. 
+*/
+double  StiKalmanTrack::getPt() const
 {
-    // returns the transverse momentum of the track at the inner most node held by this track
-    // which may (or not) be the primary vertex. 
-    // this will need to be refined...
-    
     return getInnerMostHitNode()->getPt();
 }
 
-double StiKalmanTrack::getCurvature()             const
+/*!
+   Calculates and returns the track curvature at the inner most node held by this track.
+	 <p>
+	 Obtains the curvature from the inner most hit node associated with this track.
+*/
+double StiKalmanTrack::getCurvature() const
 {
-  // returns the curvature of the track at the inner most node held by this track
-  // which may (or not) be the primary vertex. 
-  // this will need to be refined...
   return getInnerMostHitNode()->fP3;
 }
 
-
+/*!
+	Returns the rapidity of the track if the mass is known.
+	<p>
+	<ol>
+  <li>Obtains the momentum from the inner most hit node associated with the track.</li>
+  <li>Obtains the mass of this track using the getMass() method. If the mass returned
+	is negative, throws a runtime_error exception.</li>
+	</ol>
+	\throws runtime_error
+	\return rapidity
+ */
 double  StiKalmanTrack::getRapidity()       const 
 {
   // returns the rapidity of the particle at the inner most node held by this track
@@ -79,6 +124,15 @@ double  StiKalmanTrack::getRapidity()       const
 	return 0.5*log(e+p[2]/e-p[2]);
 }
 
+/*!
+	Returns the pseudo-rapidity of the track.
+	<p>
+	<ol>
+  <li>Obtains the helix pitch angle from the inner most hit node associated with the track.</li>
+  <li>Calculate/return the pseudo-rapidity using the pitch angle.</li>
+	</ol>
+	\return pseudo-rapidity
+ */
 double  StiKalmanTrack::getPseudoRapidity() const
 {
   // Return pseudo rapidity of the particle at the inner most node held by this track
@@ -86,35 +140,45 @@ double  StiKalmanTrack::getPseudoRapidity() const
   return -log(tan(M_PI/4.-(getInnerMostHitNode()->getTanL()/2.)));
 }
 
+/*! 
+	Returns the azimuthal angle of the track determined at the inner most point of the track
+	hich may or may not be a vertex.
+	\return phi in radian
+*/
 double  StiKalmanTrack::getPhi()            const 
 {
-  // Return the azimuthal angle of the particle at the inner most node held by this track
-  // which may (or not) be the primary vertex. 
-  // this will need to be refined...
   double p[3];
   getInnerMostHitNode()->getMomentum(p,0);
   return atan2(p[1],p[0]);
 }
 
+/*!
+	Return tan(lambda) of the particle at the inner most node held by this track
+	which may (or not) be the primary vertex. 
+	\return tan(lambda)
+*/
 double  StiKalmanTrack::getTanL()           const 
 {
-  // Return tan(lambda) of the particle at the inner most node held by this track
-  // which may (or not) be the primary vertex. 
-  // this will need to be refined...
   return getInnerMostHitNode()->getTanL();
 }
 
 
-
+/*!
+	Add a hit to this track.
+	<p>
+  If the current lastNode is non null, 
+	<ol>
+	<li>Insert the given hit in a StiKalmanTrackNode instance.</li>
+	<li>Add the new node as a child to the current last node.</li>
+	<li>Make the new node the last node of this track.</li>
+	</ol>
+	else
+	<ol>
+	<li>Insert the given hit in a StiKalmanTrackNode instance.</li>
+	</ol>
+*/
 StiKalmanTrackNode * StiKalmanTrack::addHit(StiHit *h)
 {
-  // Add a hit to this track
-  // If the current lastNode is non null
-  //   Insert the given hit in a StiKalmanTrackNode instance
-  //   Add the new node as a child to the current last node
-  //   Make the new node the last node of this track
-  // Else 
-  //   Insert the given hit in a StiKalmanTrackNode instance
   if (lastNode!=0)
     {
       StiKalmanTrackNode * n = trackNodeFactory->getObject();
@@ -134,7 +198,6 @@ StiKalmanTrackNode * StiKalmanTrack::addHit(StiHit *h)
 			lastNode = firstNode;
       return firstNode;
     }
-    
 }
 
 double StiKalmanTrack::getTpcDedx() const
@@ -583,12 +646,14 @@ double  StiKalmanTrack::getDca3(StiTrack *t)   const
     return 0;
 }
 
-/*! Calculate and return the number of hits on this track. 
+/*! 
+	Calculate and return the number of hits on this track. 
    <h3>Notes</h3> 
    <ol>
    <li>Iterate through all nodes of this track.</li>
    <li>Count number of hits.</li>
    </ol>
+	 \return number of hits.
 */
 int StiKalmanTrack::getPointCount() const
 {
@@ -613,6 +678,7 @@ int StiKalmanTrack::getPointCount() const
    <li>Use the (y,z) position of the node to determine whether point is on
        active region of the detector i.e. RDO were functional.</li>
    </ol>
+	 \return maximum number of points
 */
 int StiKalmanTrack::getMaxPointCount() const
 {
@@ -638,6 +704,7 @@ int StiKalmanTrack::getMaxPointCount() const
        passes.</li>
    <li>There can be gaps on the inside or the outside of the track if no hits are found there.</li>
    </ol>
+	 \returns number of gaps.
 */
 int    StiKalmanTrack::getGapCount()    const  
 {
@@ -676,24 +743,32 @@ int    StiKalmanTrack::getGapCount()    const
        on the track.</li>
    <li>Call "getPointCount()" to get the count.</li>
    </ol>
+	 \return number of hits on this track.
 */
 int StiKalmanTrack::getFitPointCount()    const  
 {
-	//  
 	return getPointCount();
 }
 
 /*! Convenience method used to return a track node iterator initialized to the track first node.
+	\return Bidirectional Itertator of KalmanTrackNodes 
+	\throws runtime_error 	
 */
 StiKTNBidirectionalIterator StiKalmanTrack::begin() const 
 {
+	if (!firstNode)
+		throw runtime_error("StiKalmanTrack::begin() - ERROR - firstNode==0");
   return StiKTNBidirectionalIterator(firstNode);
 }
 
 /*! Convenience method used to return a track node iterator initialized to the track last node.
+	\return Bidirectional Itertator of KalmanTrackNodes 
+	\throws runtime_error 	
 */
 StiKTNBidirectionalIterator StiKalmanTrack::end() const 
 {
+	if (!firstNode)
+		throw runtime_error("StiKalmanTrack::end() - ERROR - firstNode==0");
 	return StiKTNBidirectionalIterator(lastNode);
 }
 
@@ -702,9 +777,9 @@ StiKTNBidirectionalIterator StiKalmanTrack::end() const
    <ol>
    <li>Using helix track model in global reference frame.</li>
    <li>Using only inner most and outer most hits associated with this track.</li>
-   <li>First node reference frame used for this calculation: local geometry transform
-       done on 2nd point as needed to use the same reference frame. </li>  
    </ol>
+	 \return tracklength
+	 \throws runtime_error
 */
 double StiKalmanTrack::getTrackLength() const
 {
@@ -820,6 +895,7 @@ double StiKalmanTrack::getPrimaryDca() const
    <li>Return firstNode if tracking was done outside-in, lastNode otherwise.</li>
    <li>No check done to determine whether returned value is non null.</li>
    </ol>
+	 \return outer most node on this track
 */
 StiKalmanTrackNode * StiKalmanTrack::getOuterMostNode()  const 
 { 
@@ -836,6 +912,7 @@ StiKalmanTrackNode * StiKalmanTrack::getOuterMostNode()  const
    <li>Return firstNode if tracking was done inside-out, lastNode otherwise.</li>
    <li>No check done to determine whether returned value is non null.</li>
    </ol>
+	 \return outer most node on this track
 */
 StiKalmanTrackNode * StiKalmanTrack::getInnerMostNode()   const 
 { 
@@ -852,6 +929,8 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostNode()   const
    <li>Loop through all nodes from end() to begin() (or vice versa if tracking 
        direction is outside-in) and search for node with hit. Return first hit found.</li>
    </ol>
+	 \return inner most hit node on this track
+	 \throws logic_error
 */
 StiKalmanTrackNode * StiKalmanTrack::getOuterMostHitNode()  const
 {
@@ -886,6 +965,7 @@ StiKalmanTrackNode * StiKalmanTrack::getOuterMostHitNode()  const
    <li>Loop through all nodes from begin() to end() (or vice versa if tracking 
        direction is outside-in) and search for node with hit. Return first hit found.</li>
    </ol>
+	 \return outer most hit node on this track
 */
 StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode()   const
 {
@@ -918,6 +998,7 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode()   const
    <li>Find the inner most hit node associated with this tracks.</li>
    <li>Return true if "x" of inner most hit is less than 2 cm.
    </ol>
+	 \return true if "x" of inner most hit is less than 2 cm.
 */
 bool  StiKalmanTrack::isPrimary() const
 {
