@@ -3,6 +3,7 @@ CC: FILE:       mws.F
 CC: HISTORY:
 CC:               feb97-v000a-jpw- First version for STAF
 CC:               jan98-v001a-ppy- Call to geometry module eliminated
+CC:               jan99-v002a-der- ROOT ready/change params
 CC: 
 CC:<--------------------------------------------------------------------
 
@@ -23,6 +24,7 @@ CC:              and charge integration can be performed.
 CC:  
 CC:             Please edit comments and code.
 CC: AUTHOR:     jpw - James Whitfield whitfield@cmchem.chem.cmu.edu
+CC:             der - Dan Russ dan.russ@cmu.edu
 CC: ARGUMENTS:
 CC:          IN:
 CC:       INOUT:
@@ -40,9 +42,9 @@ CC:>------------------------------------------------------------------
       INTEGER Ihit, Isec, Id, ieta        
       INTEGER Ir, Iphi, Index, Num_hits
       INTEGER Nsignal, Nhit(Mwc_raw_len)
-      INTEGER num_wires_sect, num_wires_count, num_counts_out
+      INTEGER num_wires_sect, num_wires_count, num_counts_sect, num_counts_out
       INTEGER icell, cell_num, cell_hit(7680)
-      INTEGER se_hit(384), overload_slat
+      INTEGER se_hit(384), overload_slat, num_below_thresh
       INTEGER hit_index, tot_cell_hit(384), ee_correct
       INTEGER isect, iosect, i, j, wire_hit(7680), ipie
       REAL    Tolerance, Pi, se_de(384)
@@ -52,6 +54,8 @@ CC:>------------------------------------------------------------------
       REAL    outsect_ir, insect_ir, wire_step
       REAL    phicent, phicos, sector_ir
       REAL    local_hit, local_step, cell_de(7680)
+      REAL    thresh,elect_noise
+      REAL    g2
       LOGICAL First, wires_set
       SAVE    Tolerance
       SAVE    First      
@@ -60,6 +64,17 @@ CC:>------------------------------------------------------------------
       DATA    Tolerance / -0.1 /
       DATA    First     / .true. /
       DATA    Pi        / 3.141592654 /
+*--
+*--
+*-- Dan's testing
+
+      write (6,*) '================ MWS NEW PARAMETERS'
+      write (6,*) 'de_thresh in:',mpar(1).de_thresh_in,' out:'
+     +,mpar(1).de_thresh_out
+      write (6,*) 'Width of gaussian:',mpar(1).el_noise_width
+      write (6,*) 'Min. Ionization:',mpar(1).min_ion
+      write (6,*) 'number of hits:',mhit_h.nok
+      write (6,*) '========================================='
 *--
       if ( First ) then
          First   = .false.
@@ -87,19 +102,21 @@ CC:>------------------------------------------------------------------
          Scale = 2.5e5*gain
 *--
 *--      Let's set some constants !!!
-*--      outsect_ir   :  outer sector radius
-*--      insect_ir    :  inner sector radius
-*--      wire_step    : distance between wires in cm
-*--      num_wires_sect : Number of wires per sector (inner/outer)
+*--      outsect_ir     :  outer sector radius
+*--      insect_ir      :  inner sector radius
+*--      wire_step      : distance between wires in cm
+*--      num_wires_sect : Number of wires per sector (inner or outer)
 *--      num_counts_out : Number of count values for MWC
 *--      num_wires_count: Number of wires used per count
-*--     
-         outsect_ir     = Geom(1).r2min
-         insect_ir      = Geom(1).r1min
-         wire_step      = 0.4
-         num_wires_sect = 160
+*--      num_counts_sect: Number of count values per sector (inner or outer)
+*--
+         outsect_ir       = Geom(1).r2min
+         insect_ir        = Geom(1).r1min
+         wire_step        = 0.4
+         num_wires_sect   = 160
          num_counts_out   = Mpar(1).num_counts_out
          num_wires_count  = Mpar(1).num_wires_count
+         num_counts_sect  = num_wires_sect/num_wires_count
 *--
 *--    Check that the endcap wire segments have been set correctly
 *--
@@ -137,6 +154,7 @@ CC:>------------------------------------------------------------------
 *--
       Mevent(1).no_hits = 0
       overload_slat = 0
+      num_below_thresh = 0
 
       do j = 1,num_counts_out*num_wires_count
          cell_hit(j) = 0
@@ -206,15 +224,27 @@ CC:>------------------------------------------------------------------
                icell      = int(local_hit/local_step) + 1
                cell_num = (((isect-1)*(2*num_wires_sect))
      1                    +((iosect-1)*num_wires_sect)+icell)
-          if (mhit(ihit).x(3) .gt. 0.0) then 
-            cell_num = cell_num +(num_wires_sect*24)
-          endif
+               if (mhit(ihit).x(3) .gt. 0.0) then 
+                  cell_num = cell_num +(num_wires_sect*24)
+               endif
+*--
+*--    Determine electronic noise
+*--    if width=0 then do not include noise (noise=0)
+*--
+          
+               if (mpar(1).el_noise_width .gt. 0.0) then
+                  elect_noise = g2(0.0,mpar(1).el_noise_width)
+               else
+                  elect_noise = 0.0
+               endif
+
 *--            
 *--     Get the number of hits in a cell and the total energy
 *--     deposition in the cell
 *--
                cell_hit(cell_num) = cell_hit(cell_num) + 1
-               cell_de(cell_num)  = cell_de(cell_num) + mhit(ihit).de
+               cell_de(cell_num)  = cell_de(cell_num) + mhit(ihit).de +
+     1         elect_noise
             else
                write (6,*) 'MWS : Wrong geometry '
                write (6,*) mhit(ihit).x(1), mhit(ihit).x(2), mhit(ihit).x(3)
@@ -222,16 +252,33 @@ CC:>------------------------------------------------------------------
 *--    end loop over hits
          enddo
 *--
-*--
 *--    Get wire hit information
 *--
        do i = 1, (num_wires_sect * 24 * 2)
-        if (cell_de(i) .ge. mpar(1).de_thresh) then
-         if (cell_hit(i) .ge. 1) then
-            wire_hit(i) = 1
+*--
+*--    do we have an inner or outer sector?
+*--    if mpar.min_ion = 0 then use the value of de_thresh_in/out as the
+*--    de threshold.  Otherwise the threshold is mpar(1).min_ion * 
+*--    mpar.de_thresh.  Why?  This allows you to set the threshold to
+*--    0.03*min_ion or set the threshold to a value.  You pick
+*--                                                    d.e. russ 11/28/98
+         if ( mod(i-1,320) .lt. 160) then
+            iosect = 1
+            thresh = mpar(1).de_thresh_in
+          else
+            iosect = 2
+            thresh = mpar(1).de_thresh_out
          endif
-        endif
-       enddo 
+         if (mpar(1).min_ion .ne. 0) thresh = thresh * mpar(1).min_ion
+         
+         if (cell_de(i) .ge. thresh) then
+            if (cell_hit(i) .ge. 1) then
+               wire_hit(i) = 1
+            endif
+         else
+            num_below_thresh = num_below_thresh + 1
+         endif
+      enddo 
 *--
 *--
 *--
@@ -254,11 +301,24 @@ CC:>------------------------------------------------------------------
              se_de(isec)   = se_de(isec)  + cell_de(hit_index)
            enddo
 *--
-             iphi = int((float(isec)/16.0)-0.01) +  1
-             ieta = isec - ((iphi-1) * 16)
-             if (iphi .gt. 12) iphi = iphi - 12
+*--   Changed the number of eta segments to 2*num_counts_sect (# of sets of
+*--   wires in an outer AND inner sector) from 16.  16 is the value only if 
+*--   we look at the wires in sets of 20.  Also, subtracting 1 from the 
+*--   sector number so that (1 through 4) become (0 through 3) and goto phi=1.
+*--   I think it's neater than subtracting 0.01 so that (3.99/4)=0 
+*--                                              -d.e. russ 1/27/99
 *--
-             if (se_hit(Isec) .gt. 0.) then
+*--             iphi = int((float(isec)/16.0)-0.01) +  1
+*--             ieta = isec - ((iphi-1) * 16)
+*--
+*--             if (iphi .gt. 12) iphi = iphi - 12
+*--
+           
+           iphi = int ( (float(isec-1)) / (2*num_counts_sect) ) + 1
+           ieta = isec - ((iphi - 1) * ( 2*num_counts_sect ) )
+           
+
+           if (se_hit(Isec) .gt. 0.) then
                nsignal = nsignal + 1
 *--
                sector(nsignal).iphi    = iphi
@@ -271,17 +331,24 @@ CC:>------------------------------------------------------------------
                raw(nsignal).sector = isec
                if (wires_set .eq. .true.) then
                  raw(nsignal).count = se_hit(isec)
+*--  Legacy code from the old days when STAR did not wire count
+*--  This code will be deleted soon - d.e. russ 1/27/99
                else
-                 raw(nsignal).count = se_de(isec)*Scale
+                  write (6,*) 'Warning you are NOT wire counting'
+                  write (6,*) 'This code will be deleted soon...'
+                  write (6,*) '                 1/27/99 d.e russ'
+                  raw(nsignal).count = se_de(isec)*Scale
                   if (raw(nsignal).count .gt. 32) then
                      raw(nsignal).count = 32
                      overload_slat = overload_slat + 1
                      write (6,*) 'Slat Number ', nsignal,' Count Value Overflow'
                      write (6,*) 'Total Overflow Slats = ', overload_slat
                   endif
+*--  End of legacy code
                endif
            endif
          enddo
+         write (6,*) 'Number below threshold: ',num_below_thresh
 *--
 *--    Define the number of slats with raw data
 *--
@@ -296,3 +363,28 @@ CC:>------------------------------------------------------------------
 *--
   990 continue
       end
+
+      real function g2(mean,sigma)
+
+*--   
+*--  Return a value selected from a gaussian distribution
+*--  Distribution clipped at mean +/- 3 sigma
+*--
+
+       integer seed/11787/
+       real mean,sigma,rval1,rval2,prob,ret_val,pi,t
+       logical next
+
+       pi=3.141592654
+       next=.true.
+       do while (next)
+          rval1=3.0*(2.0*ran(seed)-1.0)   ! random number -3 -> +3
+          rval2=ran(seed)                 ! probablity
+          ret_val=mean+rval1*sigma
+          t=(ret_val-mean)/sigma
+          prob=( 1./(sigma*sqrt(2.0*pi)) )*exp(-0.5*t*t) ! normalized gaussian
+          if (rval2.lt.prob) next=.false.
+       enddo
+       g2=ret_val
+       return
+       end
