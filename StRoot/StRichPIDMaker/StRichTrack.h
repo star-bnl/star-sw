@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichTrack.h,v 2.11 2001/02/07 16:00:14 lasiuk Exp $
+ * $Id: StRichTrack.h,v 2.12 2001/02/22 21:06:30 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.h,v $
+ *  Revision 2.12  2001/02/22 21:06:30  lasiuk
+ *  momentumLoss calcuation called when momentum of track is set
+ *
  *  Revision 2.11  2001/02/07 16:00:14  lasiuk
  *  inline functions made.  Data members are set directly.
  *  residual cut is a data member
@@ -148,6 +151,7 @@ public:
     StThreeVectorF& getMomentum();
     StThreeVectorF& getMomentumAtPadPlane();
 
+    void    calculateMomentumLoss();
     void    setMomentumLoss();
     void    setCorrectedMomentum(StThreeVectorF);
     
@@ -227,6 +231,7 @@ protected:
     //
     // take into account the energy loss of the particles
     // mEnergyLoss is the mean (currently used)
+    bool   mDoMomentumLoss;
     double mEnergyLoss;
     double mPiondPdx;
     double mKaondPdx;

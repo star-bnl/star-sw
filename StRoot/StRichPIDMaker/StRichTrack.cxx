@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichTrack.cxx,v 2.20 2001/02/07 16:00:14 lasiuk Exp $
+ * $Id: StRichTrack.cxx,v 2.21 2001/02/22 21:06:30 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichTrack.cxx,v $
+ *  Revision 2.21  2001/02/22 21:06:30  lasiuk
+ *  momentumLoss calcuation called when momentum of track is set
+ *
  *  Revision 2.20  2001/02/07 16:00:14  lasiuk
  *  inline functions made.  Data members are set directly.
  *  residual cut is a data member
@@ -464,7 +467,7 @@ StRichTrack::StRichTrack(StTrack* tpcTrack, double magField)
 
 StRichTrack::~StRichTrack() {
 
-    clearHits();
+    this->clearHits();
 }
 
 double StRichTrack::xCorrection() const {
@@ -500,6 +503,8 @@ void StRichTrack::init()
     coordinateTransformation = StRichCoordinateTransform::getTransform(myGeometryDb);
     momentumTransformation   = StRichMomentumTransform::getTransform(myGeometryDb);  
 
+    mDoMomentumLoss = false;
+    
     mResidualCut=3.0*centimeter;
     
     mRichNormal.setX(myGeometryDb->normalVectorToPadPlane().x());
@@ -513,8 +518,8 @@ void StRichTrack::init()
     mRefit = 0;
 }
 
-void StRichTrack::setMomentumLoss() {
 
+void StRichTrack::calculateMomentumLoss() {
     //
     // N. Smirnov simulation (Feb 6, 2001)
     //
@@ -529,6 +534,24 @@ void StRichTrack::setMomentumLoss() {
 // 	 << mProtondEdx/GeV << " " << endl;
 }
 
+void StRichTrack::setMomentumLoss() {
+
+    mDoMomentumLoss = true;
+    
+//     //
+//     // N. Smirnov simulation (Feb 6, 2001)
+//     //
+
+//     double p = abs(mMomentum)/GeV;
+//     mPiondPdx   = (exp(5.5979-14.35*p)+16.642-1.077*p+.2146*p*p)*MeV;
+//     mKaondPdx   = (exp(5.985-5.6296*p)+17.343-.5007*p)*MeV;
+//     mProtondPdx = (exp(6.281-3.5417*p)+20.766-1.1245*p)*MeV;
+
+// //     cout << mPiondEdx/GeV << " "
+// // 	 << mKaondEdx/GeV << " "
+// // 	 << mProtondEdx/GeV << " " << endl;
+}
+
 double StRichTrack::getMomentumLoss(StParticleDefinition* part) const
 {
     //
@@ -537,6 +560,10 @@ double StRichTrack::getMomentumLoss(StParticleDefinition* part) const
     
     double momentumLoss = 0;
 
+    if(!mDoMomentumLoss) {
+	return momentumLoss;
+    }
+    
     if( (part ==  StPionMinus::instance()) || (part == StPionPlus::instance()) ) {
 	momentumLoss = mPiondPdx; 
     }
@@ -546,7 +573,11 @@ double StRichTrack::getMomentumLoss(StParticleDefinition* part) const
     else if( (part ==  StProton::instance()) || (part == StAntiProton::instance()) ) {
 	momentumLoss = mProtondPdx; 
     }
-
+    else {
+	cout << "StRichTrack::getMomentumLoss()\n";
+	cout << "\tUNKNOWN PARTICLE TYPE (" << part->pdgEncoding() << ")" << endl;
+    }
+    
     return momentumLoss;
 }
 
@@ -952,6 +983,8 @@ void StRichTrack::setMomentum(StThreeVectorF& momentum) {
 	//setPhi(momentum.phi());
 	mPhi = momentum.phi();
     }
+
+    this->calculateMomentumLoss();
 }
 
 bool StRichTrack::isGood(StParticleDefinition* particle) {   
