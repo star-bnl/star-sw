@@ -66,6 +66,7 @@ C<----------------------------------------------------------------------
 #include "egr_fitter.inc"
 #include "egr_track_pointers.inc"
 #include "math_constants.inc"
+#include "phys_constants.inc"
 #include "StDetectorId.inc"
 #include "StTrackMethod.inc"
 
@@ -511,18 +512,28 @@ CSM
 
                endif            ! End of what type of tpc copying to do
                
+
                if( ipriv .eq. 0) then
                   do ient = 1, gtrk(itrk).ntpc
-                     if( ient .le .mxpnt_tpc) then
-                        ithit = gtrk(itrk).ipnt(ient)
-                        if (ithit.ne.-999 .and. ithit .ne. 0) then
-                           tphit(ithit).id_globtrk 
-     +                       = globtrk_h.nok
+                     if( gtrk(itrk).pos(ient) .lt. 0) then
+                        tpc_group(ithit).ident = -1
+                     else
+                        if( ient .le .mxpnt_tpc) then
+                           ithit = gtrk(itrk).ipnt(ient)
+                           if (ithit.ne.-999 .and. ithit .ne. 0) then
+                              tphit(ithit).id_globtrk 
+     +                             = globtrk_h.nok
+                           endif
                         endif
                      endif
                   enddo
                   tptrack(itrk).id_globtrk = globtrk_h.nok
                else
+                  do ient = 1, gtrk(itrk).ntpc
+                     if( gtrk(itrk).pos(ient) .lt. 0) then
+                        tpc_group(ithit).ident = -1
+                     endif
+                  enddo
                   tptrack(itrk).id_globtrk = -1*tptrack(itrk).id_globtrk 
                endif
             endif               ! End of test if good tpc track
@@ -649,7 +660,8 @@ C---<<<<<<<
                   endif
                     globtrk(iglob).impact = 0
 CSM                    globtrk(iglob).id_start_vertex = 0
-                    globtrk(iglob).curvature = 0
+                    globtrk(iglob).curvature = abs(C_D_CURVATURE*bfield(3)*
+     +                   globtrk(iglob).invpt)
                     globtrk(iglob).method = 2**kHelix2StepId+2**7
                     globtrk(iglob).map(1) = 0
                     globtrk(iglob).map(2) = 0
