@@ -110,10 +110,15 @@ Block VRAD  is Cerenkov Radiator layer
      Medium    sensitive   IsVol=1
      Attribute VRAD   seen=1   Colo=3
      Shape     TUBE   dz=vpdg_RadiThk/2
-     HITS      VRAD   xx:16:H(-25,25)    yy:16:(-25,25)    zz:32:(-1000,1000),
-                      px:16:(-100,100)   py:16:(-100,100)  pz:16:(-100,100),
-                      Slen:16:(0,1.e4)   Tof:16:(0,1.e-6)  Step:16:(0,100),
-                      ETOT:16:(0,100)    Eloss:32:(0,1)
+*
+     HITS      VRAD   x:.1:   y:.1:   z:.1:   cx:10:   cy:10:   cz:10:,
+                      Step:.01:          Slen:.1:(0,500)   Ptot:18:(0,100),
+                      Tof:16:(0,1.e-6)   Eloss:16:(0,.01)
+*
+*    HITS      VRAD   xx:16:H(-25,25)    yy:16:(-25,25)    zz:32:(-1000,1000),
+*                     px:16:(-100,100)   py:16:(-100,100)  pz:16:(-100,100),
+*                     Slen:16:(0,1.e4)   Tof:16:(0,1.e-6)  Step:16:(0,100),
+*                     ETOT:16:(0,100)    Eloss:32:(0,1)
 EndBlock
 *
 Block VPMT is the PMT inner volume

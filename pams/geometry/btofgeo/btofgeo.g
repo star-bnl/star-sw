@@ -223,11 +223,7 @@ Block BMTC  is  the Main Tray Cavity filled with MANY details for CTB
 *---- inner slab + readout
       zpos  =  (tray_length-ctbb_Slab1Len)/2-tray_WallThk-ctbb_Wrap
       xpos  =  -tray_Height/2+ctbb_Slab1x
-      Create and Position BXSA           dx=ctbb_SlabThck/2,
-                                         dy=ctbb_SlabWid/2,
-                                         dz=ctbb_Slab1Len/2,
-                                         X=xpos,
-                                         Z=zpos
+      Create and Position BXSA  X=xpos  Z=zpos
       zpos = zpos - (ctbb_Slab1Len + ctbb_ConvLen)/2
       Create and Position BCCV  X=xpos  Z=zpos,
                      Dx1=ctbb_SlabThck/2  Dx2=ctbb_SlabThck/2,
@@ -261,6 +257,7 @@ Block BMTC  is  the Main Tray Cavity filled with MANY details for CTB
                      Rmin=ctbb_BaseMinR  Rmax=ctbb_BaseMaxR   Dz=ctbb_BaseLen/2
                  Position BZEL  X=xpos  Z=-zpos dx=ctbb_ElecThck/2,  
                                 dy=ctbb_BaseMinR-0.1  dz=ctbb_BaseLen/2
+
 EndBlock
 *
 *-------------------------------------------------------------------------------
@@ -280,12 +277,14 @@ Block BTTC  is  the Main Tray Cavity filled with MANY details for TOF
        Position BFEE X=toff_ElecX Z=zpfee
        zpfee    = zpfee - toff_ElecDz
       Enddo
+   if (1>2) then
       Create and Position  BCOO X=0 Y=0 dx=0 dy=0 dz=0
+   endif
       Create and Position  BMTM   
 EndBlock
 *
 *------------------------------------------------------------------------------
-*           BMTM has the identical size as BTTC and exists to allow the division 
+*           BMTM has the identical size as BTTC and exists to allow the division
 *           of BTTC into 5 strips in phi while BTTC is also containing other 
 *           stuff. 
 *
@@ -302,6 +301,7 @@ EndBlock
 Block BMTD is a phi column of TOF Scintillators
       Attribute BMTD      seen=1   colo=1
       Shape     division  Iaxis=2  Ndiv=5  
+
       Create    BASS
       zpbass    = toff_Slat1z
       Do i      = 1,9
@@ -318,8 +318,7 @@ Block BASS is a single TOF Slat Assembly (slat+PMT+base)
                 dy=(tray_Width/2-tray_WallThk)/5.,
                 dz=totlen/2.
       zpos = -(totlen-toff_Slat1Len)/2
-      Create and Position BCSB  dx=toff_SlatThck/2 dy=toff_SlatWid/2,
-                                dz=toff_Slat1Len/2 X=0 Z=zpos
+      Create and Position BCSB  Z=zpos
       zpos = zpos + (toff_Slat1Len+toff_PmtLen)/2
       Create and Position BCPM  X=0                Z=zpos,
                                 Rmin=toff_PmtMinR  Rmax=toff_PmtMaxR,  
@@ -341,15 +340,17 @@ Block BXSA  is  the active trigger scintillator SLAB for ctb
       Attribute BXSA      seen=1   colo=3
       Material polystyren
       Medium   sensitive    IsVol=1
-      Shape   BOX     dx=0 dy=0 dz=0
+      Shape   BOX    dx=ctbb_SlabThck/2,
+                     dy=ctbb_SlabWid/2,
+                     dz=ctbb_Slab1Len/2
 *
 *   hit options: H - put in GEANT hit field (instead of PseudoVolumes)
 *                S - Single step
 *
-      HITS    BXSA   XX:16:HS(-250,250)   YY:16:(-250,250)    ZZ:16:(-250,250),
-                     px:16:(-100,100)     py:16:(-100,100)    pz:16:(-100,100),
-                     Sleng:16:(0,1.e4)    ToF:16:(0,1.e-6)    Step:16:(0,100),
-                     ShtN:16:             Eloss:32:(0,1) 
+      HITS    BXSA   X:.01:S   Y:.01:   Z:.01:,
+                     Ptot:18:(0,100)    cx:10:   cy:10:   cz:10:,
+                     Sleng:.1:(0,500)   ToF:16:(0,1.e-6) Step:.01:,      
+                     Eloss:16:(0,0.01) 
 EndBlock
 *
 *------------------------------------------------------------------------------
@@ -357,15 +358,15 @@ Block BCSB  is  the active trigger scintillator SLAB for tof
       Attribute BCSB      seen=1   colo=4
       Material polystyren
       Medium   sensitive    IsVol=1
-      Shape   BOX     dx=0 dy=0 dz=0
+      Shape   BOX    dx=toff_SlatThck/2  dy=toff_SlatWid/2  dz=toff_Slat1Len/2 
 *
 *   hit options: H - put in GEANT hit field (instead of PseudoVolumes)
 *                S - Single step
 *
-      HITS    BCSB   XX:16:HS(-250,250)   YY:16:(-250,250)    ZZ:16:(-250,250),
-                     px:16:(-100,100)     py:16:(-100,100)    pz:16:(-100,100),
-                     Sleng:16:(0,1.e4)    ToF:16:(0,1.e-6)    Step:16:(0,100),
-                     ShtN:16:             Eloss:32:(0,1) 
+      HITS    BCSB   X:.01:S   Y:.01:   Z:.01:,
+                     Ptot:18:(0,100)    cx:10:   cy:10:   cz:10:,
+                     Sleng:.1:(0,500)   ToF:16:(0,1.e-6)  Step:.01:,
+                     Eloss:16:(0,0.01) 
 EndBlock
 *
 *------------------------------------------------------------------------------

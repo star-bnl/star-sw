@@ -271,11 +271,11 @@ Block CSCI a scintillator layer.
       Call GSTPAR (ag_imed,'BIRK2',RKB2sc)
       Call GSTPAR (ag_imed,'BIRK3',RKB3sc)
 *
-      HITS   CSUP  eta:0.05:(0,1)        y:1:(-13,13),
-                   xx:16:H(-300,300)     yy:16:(-300,300)   zz:16:(-350,350),
-                   px:16:(-100,100)      py:16:(-100,100)   pz:16:(-100,100),
-                   Slen:16:(0,1.e4)      Tof:16:(0,1.e-6)   Step:16:(0,100),
-                   none:16:              Birk:0:(0,10)
+      HITS   CSUP  eta:0.05:(0,1)        y:1:(-13,13)       Birk:0:(0,10)
+*                  xx:16:H(-300,300)     yy:16:(-300,300)   zz:16:(-350,350),
+*                  px:16:(-100,100)      py:16:(-100,100)   pz:16:(-100,100),
+*                  Slen:16:(0,1.e4)      Tof:16:(0,1.e-6)   Step:16:(0,100),
+*                  none:16:            
 *
 EndBlock
 * 
@@ -465,24 +465,24 @@ Block CSHI is a sensiteve Ar/CO2 box
       Component Ar A=39.95   Z=18.   W=0.9
       Component C  A=12.01   Z=6.    W=0.1*1*12.01/44.01
       Component O  A=16.     Z=8.    W=0.1*2*16./44.01
-      Mixture   sens_gas Dens=0.0018015 Isvol=1        
+      Mixture   sens_gas  Dens=0.0018015  Isvol=1        
       attribute CSHI      seen=1   colo=4
       if(i.eq.1) then
-        Shape BOX dx = calg_SmGasThk,
-                  dy = calg_SmGasWdh
+        Shape BOX  dx = calg_SmGasThk,
+                   dy = calg_SmGasWdh
       else
         Shape TUBS Rmin = 0  Rmax = calg_SmGasRad,
                    Dx = calg_SmGasWdh,
                    Phi1 = 270 phi2 = 450
       endif
-      Call GSTPAR (ag_imed,'CUTGAM',0.00001)
-      Call GSTPAR (ag_imed,'CUTELE',0.00001)    
+* PN: 100 KeV is a reasonable cut
+      Call GSTPAR (ag_imed,'CUTGAM',0.0001)
+      Call GSTPAR (ag_imed,'CUTELE',0.0001)    
       Call GSTPAR (ag_imed,'CUTNEU',0.001)
       Call GSTPAR (ag_imed,'CUTHAD',0.001)
       Call GSTPAR (ag_imed,'CUTMUO',0.001)
-      CAll GSTPAR (ag_imed,'LOSS',1.0)
-      CAll GSTPAR (ag_imed,'DRAY',1.0)
       CAll GSTPAR (ag_imed,'STRA',1.0)
+
       h_eta1=2.*(calg_Seta1Wdh+calg_Set12Wdh)
       sh_eta1=calg_Netfirst*h_eta1
       h_eta2=2.*(calg_Seta2Wdh+calg_Set12Wdh) 
@@ -492,29 +492,27 @@ Block CSHI is a sensiteve Ar/CO2 box
       sh_phi1=calg_NPhistr*h_phi1
       sh_phi2=sh_phi1
 *
-      HITS   CSDA    type=1:2:       eta:0.1:(0,1)   etsp:h_eta1:(0,sh_eta1),
-                     xx:16:SHX(-300,300)  yy:16:(-300,300)   zz:16:(-350,350),
-                     px:16:(-100,100)     py:16:(-100,100)   pz:16:(-100,100),
-                     Slen:16:(0,1.e4)     Tof:16:(0,1.e-6)   Step:16:(0,100),
-                     Eloss:0:(0,1)
+      HITS  CSDA type=1:2: eta:0.1:(0,1) etsp:h_eta1:(0,sh_eta1) Eloss:0:(0,1)
+*                   xx:16:SHX(-300,300)  yy:16:(-300,300)   zz:16:(-350,350),
+*                   px:16:(-100,100)     py:16:(-100,100)   pz:16:(-100,100),
+*                   Slen:16:(0,1.e4)     Tof:16:(0,1.e-6)   Step:16:(0,100)
+
+      HITS  CSDA type=2:2: eta:0.1:(0,1) etsp:h_eta2:(0,sh_eta2) Eloss:0:(0,1)
+*                   xx:16:SHX(-300,300)  yy:16:(-300,300)   zz:16:(-350,350),
+*                   px:16:(-100,100)     py:16:(-100,100)   pz:16:(-100,100),
+*                   Slen:16:(0,1.e4)     Tof:16:(0,1.e-6)   Step:16:(0,100)
+
+      HITS  CSDA type=3:2: eta:0.1:(0,1) etsp:h_phi1:(0,sh_phi1) Eloss:0:(0,1)
+*                   xx:16:SHX(-300,300)  yy:16:(-300,300)   zz:16:(-350,350),
+*                   px:16:(-100,100)     py:16:(-100,100)   pz:16:(-100,100),
+*                   Slen:16:(0,1.e4)     Tof:16:(0,1.e-6)   Step:16:(0,100)
+
 *
-      HITS   CSDA    type=2:2:       eta:0.1:(0,1)   etsp:h_eta2:(0,sh_eta2),
-                     xx:16:SHX(-300,300)  yy:16:(-300,300)   zz:16:(-350,350),
-                     px:16:(-100,100)     py:16:(-100,100)   pz:16:(-100,100),
-                     Slen:16:(0,1.e4)     Tof:16:(0,1.e-6)   Step:16:(0,100),
-                     Eloss:0:(0,1)
-*
-      HITS   CSDA    type=3:2:       eta:0.1:(0,1)   etsp:h_phi1:(0,sh_phi1),
-                     xx:16:SHX(-300,300)  yy:16:(-300,300)   zz:16:(-350,350),
-                     px:16:(-100,100)     py:16:(-100,100)   pz:16:(-100,100),
-                     Slen:16:(0,1.e4)     Tof:16:(0,1.e-6)   Step:16:(0,100),
-                     Eloss:0:(0,1)
-*
-      HITS   CSDA    type=4:2:       eta:0.1:(0,1)   etsp:h_phi2:(0,sh_phi2),
-                     xx:16:SHX(-300,300)  yy:16:(-300,300)   zz:16:(-350,350),
-                     px:16:(-100,100)     py:16:(-100,100)   pz:16:(-100,100),
-                     Slen:16:(0,1.e4)     Tof:16:(0,1.e-6)   Step:16:(0,100),
-                     Eloss:0:(0,1)
+      HITS  CSDA type=4:2: eta:0.1:(0,1) etsp:h_phi2:(0,sh_phi2) Eloss:0:(0,1)
+*                   xx:16:SHX(-300,300)  yy:16:(-300,300)   zz:16:(-350,350),
+*                   px:16:(-100,100)     py:16:(-100,100)   pz:16:(-100,100),
+*                   Slen:16:(0,1.e4)     Tof:16:(0,1.e-6)   Step:16:(0,100)
+
 *
 EndBlock
 *

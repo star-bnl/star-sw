@@ -41,7 +41,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
 *******************************************************************************
 *
    Fill  TPCG             !  TPC basic dimensions
-      version    = 1        ! current version
+      version    = 2        ! current version
       rmin       = 46.107   ! TPC inner radius 
       rmax       = 207.750  ! TPC outer radius
       length     = 459.37   ! TPC full length
@@ -150,7 +150,7 @@ External  TPADSTEP,TPAISTEP,TPAOSTEP,TPCELASER
       dzex = { 4.00, 7.05,  7.05,  7.05,  7.05  }     ! z-thickness
 *     - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 *
-      Use  TPCG  version=1
+      Use  TPCG  
 *
 *  TPC basic dimensions are the full system size, the gas volume length
 *  and inner radius are derived from them and from material thicknesses.
@@ -270,15 +270,15 @@ Block  TPSS is a division of gas volume corresponding to a supersectors
 
 *        position within supersector (this assumes rectangular padrows)
          do i_row = 1,nint(tprs_nRow)
+            If (nint(tprs_super)==3 | i_row==1)  then
+               Create and Position TPAD  x=tprs_Rpads(i_row)-tprs_width  
+            endif
             If (nint(tprs_super)>0)  then
                create and position TPAD  x=tprs_Rpads(i_row) dx=tprs_width/2,
                                          dy=tprs_npads(i_row)*tprs_pitch/2
             endif
-            If (nint(tprs_super)==3 | i_row==1)  then
-               Create and Position TPAI  x=tprs_Rpads(i_row)-tprs_width  
-            endif
             If (nint(tprs_super)==3 | i_row==nint(tprs_nRow))  then
-               Create and Position TPAO  x=tprs_Rpads(i_row)+tprs_width  
+               Create and Position TPAD  x=tprs_Rpads(i_row)+tprs_width  
             endif
          enddo
       enddo
@@ -299,33 +299,16 @@ block TPAD is a real padrow with dimensions defined at positioning time
       SHAPE    BOX   dx=0   dy=0   dz=0    
       Call     GSTPAR(ag_imed,'STRA',1.)
 *
-      HITS     TPAD  xx:16:SHX(-250,250)   yy:16:(-250,250)   zz:32:(-250,250),
-                     px:20:(-100,100)      py:20:(-100,100)   pz:20:(-100,100),
-                     Slen:16:(0,1.e4)      Tof:16:(0,1.e-6)   Step:16:(0,10),
-                     LGAM:16:(-2,2)        USER:32:(-0.1,0.1) 
-endblock
+*     The following is the corrected hits definition: 25-dec-98 (PN)
+      HITS    TPAD   Z:.0005:  Y:.0005:  X:.0005:   cx:10:   cy:10:   cz:10:,
+                     Ptot:18:(0,100)     Sleng:.1:(0,500),
+                     ToF:16:(0,1.e-6)    LGAM:16:(-2,2),    
+                     Step:11:(0,10)      USER:21:(-0.1,0.1) 
 *
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-block TPAI is an additional pseudo-padrow below the real one
-      attribute TPAI seen=0 colo=3
-      material sensitive_gas
-      medium   sensitive_gas
-      SHAPE    BOX   dx=0   dy=0   dz=0
-      HITS     TPAI  xx:16:SHX(-250,250)   yy:16:(-250,250)   zz:32:(-250,250),
-                     px:20:(-100,100)      py:20:(-100,100)   pz:20:(-100,100),
-                     Slen:16:(0,1.e4)      Tof:16:(0,1.e-6)   Step:16:(0,10),
-                     LGAM:16:(-2,2)        USER:32:(-0.1,0.1) 
-endblock
-* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
-block TPAO is an additional pseudo-padrow on top of the real one
-      attribute TPAO seen=0 colo=4
-      material sensitive_gas
-      medium   sensitive_gas
-      SHAPE    BOX   dx=0   dy=0   dz=0
-      HITS     TPAO  xx:16:SHX(-250,250)   yy:16:(-250,250)   zz:32:(-250,250),
-                     px:20:(-100,100)      py:20:(-100,100)   pz:20:(-100,100),
-                     Slen:16:(0,1.e4)      Tof:16:(0,1.e-6)   Step:16:(0,10),
-                     LGAM:16:(-2,2)        USER:32:(-0.1,0.1) 
+*     HITS     TPAD  xx:16:SHX(-250,250)   yy:16:(-250,250)   zz:32:(-250,250),
+*                    px:20:(-100,100)      py:20:(-100,100)   pz:20:(-100,100),
+*                    Slen:16:(0,1.e4)      Tof:16:(0,1.e-6)   Step:16:(0,10),
+*                    LGAM:16:(-2,2)        USER:32:(-0.1,0.1) 
 endblock
 *
 ********************************************************************************
@@ -529,10 +512,15 @@ Block TMSE  is a single sensitive volume
 
 *WJL shape definition was Iaxis=2 Ndiv=2
       SHAPE     division  Iaxis=3 Ndiv=160
-      HITS      TMSE  xx:16:SHX(-250,250) yy:16:(-250,250)   zz:16:(-250,250),
-                      px:16:(-100,100)    py:16:(-100,100)   pz:16:(-100,100),
-                      Slen:16:(0,1.e4)    Tof:16:(0,1.e-6)   Step:16:(0,100),
-                      LGAM:16:(-2,2)      Elos:32:(0,1)   
+      HITS    TMSE   Z:.01:   Y:.01:   X:.01:    Sleng:0.1:(0,500),  
+                     cx:10:   cy:10:   cz:10:    Step:.01:,  
+                     ToF:16:(0,1.e-6)  Ptot:16:(0,100), 
+                     LGAM:16:(-2,2)    Elos:16:(0,0.01) 
+
+*     HITS      TMSE  xx:16:SHX(-250,250) yy:16:(-250,250)   zz:16:(-250,250),
+*                     px:16:(-100,100)    py:16:(-100,100)   pz:16:(-100,100),
+*                     Slen:16:(0,1.e4)    Tof:16:(0,1.e-6)   Step:16:(0,100),
+*                     LGAM:16:(-2,2)      Elos:32:(0,1)   
 endblock
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 Block TIAG is an air gap in inner sector aluminum structure

@@ -86,8 +86,8 @@ Block PLAT is the End Plate of the large dia. Pipe
        Shape     TUBE      Rmin=0  Rmax=calp_pltOutR,
                            Dz=calp_pltdz
        Create PLVA
-       Position PLVA x=11.10   y=0.0 z=0.0
-       Position PLVA x=-11.10  y=0.0 z=0.0
+       Position PLVA x=11.10  
+       Position PLVA x=-11.10 
 EndBlock
 *
 Block PLVA is the Vacuum Volume of the beam pipe holes in the end plate
@@ -111,7 +111,8 @@ EndBlock
 
 Block QCAL is the Zero degree calorimeter
         Material Lead
-        Attribute Qcal seen =1 colo = 4
+        Material dirty_lead   Isvol=0
+        Attribute Qcal seen=1 colo = 4
         SHAPE BOX dx=calp_qcdx dy=calp_qcdy dz=calp_qcdz
         Call GSTPAR (ag_imed,'CUTGAM',0.0005)
         Call GSTPAR (ag_imed,'CUTELE',0.00015)
@@ -127,13 +128,14 @@ endblock
 *
 Block QSCI is a sensitive Fiber layer
         Material Polystyren
-        Medium scin isvol=1
+        Material scintillator isvol=1
         Attribute QSCI seen=1 colo=3
         Shape BOX dz=calp_scdz
         Call GSTPAR (ag_imed,'CUTGAM',0.0005)
         Call GSTPAR (ag_imed,'CUTELE',0.00015)
-        HITS QSCI x:0.01: y:0.01: z:0.01: cx:10: cy:10: cz:10:  _
-                  lgam:16:(0,5) Etot:16:(0,1000) Eloss:16:(0,1) 
+*       HITS QSCI x:0.01: y:0.01: z:0.01: cx:10: cy:10: cz:10:  _
+*                 lgam:16:(0,5) Etot:16:(0,1000) Eloss:0:(0,1) 
+        HITS QSCI Eloss:0:(0,10) 
 endblock
 *-------------------------------------------------------------------
 END
