@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.h,v 2.7 2000/04/18 17:31:28 perev Exp $
+ * $Id: StEvent.h,v 2.8 2000/04/26 20:33:26 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.h,v $
- * Revision 2.7  2000/04/18 17:31:28  perev
- * StEvent::Browse overload of TDataSet:;One
+ * Revision 2.8  2000/04/26 20:33:26  ullrich
+ * Removed redundant virtual keywords.
  *
  * Revision 2.11  2000/05/24 15:46:10  ullrich
  * Added setSummary() method.
@@ -73,7 +73,8 @@ class StSsdHitCollection;
 class StEmcCollection;
 class StRichCollection;
 class StTriggerDetectorCollection;
-    virtual void Browse(TBrowser* b);
+class StL0Trigger;
+class StL3Trigger;
 class StPrimaryVertex;
 class StV0Vertex;
 class StXiVertex;

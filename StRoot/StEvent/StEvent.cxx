@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 2.9 2000/04/20 14:27:29 perev Exp $
+ * $Id: StEvent.cxx,v 2.10 2000/04/26 20:33:24 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 2.9  2000/04/20 14:27:29  perev
- * Add Dataset browser to StEvent browser
+ * Revision 2.10  2000/04/26 20:33:24  ullrich
+ * Removed redundant virtual keywords.
  *
  * Revision 2.14  2000/06/19 01:32:15  perev
  * Thomas StEvent branches added
@@ -66,8 +66,8 @@
 #include "StEventSummary.h"
 #include "StSoftwareMonitor.h"
 #include "StTpcHitCollection.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.9 2000/04/20 14:27:29 perev Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.9 2000/04/20 14:27:29 perev Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.10 2000/04/26 20:33:24 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.10 2000/04/26 20:33:24 ullrich Exp $";
 #include "StFtpcHitCollection.h"
 #include "StEmcCollection.h"
 #include "StRichCollection.h"
@@ -75,8 +75,8 @@ static const char rcsid[] = "$Id: StEvent.cxx,v 2.9 2000/04/20 14:27:29 perev Ex
 #include "StTriggerDetectorCollection.h"
 #include "StPrimaryVertex.h"
 #include "StL0Trigger.h"
-TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.9 2000/04/20 14:27:29 perev Exp $";
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.9 2000/04/20 14:27:29 perev Exp $";
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.10 2000/04/26 20:33:24 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.10 2000/04/26 20:33:24 ullrich Exp $";
 #include "tables/St_dst_event_summary_Table.h"
 #include "tables/St_dst_summary_param_Table.h"
 #include "StAutoBrowse.h"
@@ -99,7 +99,7 @@ using std::swap;
     mV0Vertices = 0;
     mXiVertices = 0;
     mKinkVertices = 0;
-static const char rcsid[] = "$Id: StEvent.cxx,v 2.9 2000/04/20 14:27:29 perev Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.10 2000/04/26 20:33:24 ullrich Exp $";
 void
 StEvent::initToZero()
 
@@ -387,7 +387,10 @@ StEvent::setRichPixelCollection(StRichPixelCollection* val)
 	    static_cast<StSPtrVecPrimaryVertex*>(mContent[mPrimaryVertices]);
     if (vertex) {
         for (int i=mPrimaryVertices->size()-1; i>0; i--) {
-{StAutoBrowse::Browse(this,b);TDataSet::Browse(b);}
+            if ((*mPrimaryVertices)[i]->numberOfDaughters() > (*mPrimaryVertices)[i-1]->numberOfDaughters())
+                swap((*mPrimaryVertices)[i], (*mPrimaryVertices)[i-1]);
+        //
+        //  Sort new entry.
         //  Vertices are ordered according to number
         //  of daughter tracks in descending order.
         //
