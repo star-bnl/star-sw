@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.h,v 1.14 2000/06/30 01:57:02 porter Exp $
+ * $Id: StDbTable.h,v 1.15 2001/01/22 18:38:00 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,22 @@
  ***************************************************************************
  *
  * $Log: StDbTable.h,v $
+ * Revision 1.15  2001/01/22 18:38:00  porter
+ * Update of code needed in next year running. This update has little
+ * effect on the interface (only 1 method has been changed in the interface).
+ * Code also preserves backwards compatibility so that old versions of
+ * StDbLib can read new table structures.
+ *  -Important features:
+ *    a. more efficient low-level table structure (see StDbSql.cc)
+ *    b. more flexible indexing for new systems (see StDbElememtIndex.cc)
+ *    c. environment variable override KEYS for each database
+ *    d. StMessage support & clock-time logging diagnostics
+ *  -Cosmetic features
+ *    e. hid stl behind interfaces (see new *Impl.* files) to again allow rootcint access
+ *    f. removed codes that have been obsolete for awhile (e.g. db factories)
+ *       & renamed some classes for clarity (e.g. tableQuery became StDataBaseI
+ *       and mysqlAccessor became StDbSql)
+ *
  * Revision 1.14  2000/06/30 01:57:02  porter
  * fixed a delete bug & small memory leak found by Akio via Insure++ ,
  * updated SetTable() method for containing idList, corrected enumeration
@@ -77,10 +93,15 @@
 #include "typeAcceptor.hh"
 #include "StTableDescriptorI.h"
 #include "StDbBufferI.h"
+#include "StDbStoreInfo.hh"
 #include <string.h>
 #include <iostream.h>
 
 class StDbBuffer;
+
+#ifdef __ROOT__
+#include "TROOT.h"
+#endif
 
 class StDbTable : public StDbNode {
 
@@ -93,14 +114,21 @@ unsigned int mprodTime;
 //! validity interval
 StDbTime mbeginTime;
 StDbTime mendTime;
+StDbTime mendStoreTime; // for writing null endTimes
+
+// DB storage information
+char*    mstructName;
+char*    melementName;
+bool     mIsBaseLine;
+bool     mIsBinary;
+bool     mIsIndexed;
+char*    mdataTable;
 
 int      mschemaID;
 int*     melementID;
 
-//! these are for rolling back stores
-int*     mdataIDs;
-int      mdataRows;
-int      mMaxRows;
+//! for rolling back stores
+ StDbStoreInfo mstoredData;
 
 //! c-struct descriptor information                      
 bool     mhasDescriptor;//!
@@ -111,7 +139,8 @@ char*    mdata;//!
 int      mrows;
 int      mrowNumber;
 bool     mhasData;
-bool     mstoreMode;
+int      mrowsRequested; // for query by where clause
+unsigned int* mtimeVals;
 
   virtual void ReadElement(char*& ptr, char* name, int length, StTypeE type, StDbBuffer* buff);
   virtual void WriteElement(char* ptr, char* name, int length, StTypeE type, StDbBuffer* buff);
@@ -122,8 +151,7 @@ bool     mstoreMode;
   bool createMemory();
   bool createMemory(int nrows);
   char* duplicateData();
-  void checkDescriptor();
-
+  void  init();
 
 public:
 
@@ -134,18 +162,29 @@ public:
   virtual ~StDbTable(){         if(melementID) delete [] melementID;
                                 if(mdescriptor)delete mdescriptor; 
                                 if(mdata) delete [] mdata; 
-                                if(mdataIDs) delete [] mdataIDs; };
+                                if(mdataTable) delete [] mdataTable;
+                                if(mstructName) delete []  mstructName;
+                                if(melementName) delete [] melementName;};
 
-  virtual void setNodeInfo(StDbNodeInfo* node);
-
+  virtual bool         IsTable() const;
+  virtual void         setNodeInfo(StDbNode* node);
   virtual unsigned int getTableSize() const;
+  virtual char*        getCstructName();
+  virtual char*        printCstructName();
+  virtual void         setCstructName(const char* name);
+  virtual void         setDataTable(const char* name);
+  virtual char*        getDataTable();
+  virtual char*        printDataTable();
 
   // flavor is "ofl", "onl", "sim", .... it is an char[16] array.
   // 16 char is enough to later have "ofl|onl" type syntax
+
   virtual char*        getFlavor();
+  virtual char*        printFlavor();
   virtual void         setFlavor(const char* flavor);
   virtual bool         defaultFlavor() const;
   virtual void         setDefaultFlavor();
+
   virtual unsigned int getProdTime();
   virtual void         setProdTime(unsigned int ptime);
 
@@ -154,30 +193,51 @@ public:
   virtual void         setEndTime(unsigned int time);
   virtual void         setEndTime(const char* time);
 
-  virtual char*        getBeginDateTime();
   virtual unsigned int getBeginTime() const  ;
+  virtual char*        getBeginDateTime();
   virtual void         setBeginTime(unsigned int time) ;
   virtual void         setBeginTime(const char* time);
 
+  virtual unsigned int getEndStoreTime() const;
+  virtual char*        getEndStoreDateTime();
+  virtual void         setEndStoreTime(unsigned int time);
+  virtual void         setEndStoreTime(const char* time);
+  
   virtual int*         getElementID(int& nrows);
   virtual int          getRowID(int rowNumber) const ;
-  virtual void         setElementID(int* elements, int nrows=1) ; 
+  virtual char*        getElementName();
+  virtual char*        printElementName();
+  virtual void         setElementName(const char* ename);
+  virtual void         setElementID(int* elements, int nrows); 
+  
+  virtual void         setBaseLine(bool baseLine);
+  virtual void         setIndexed(bool indexed);
+  virtual void         setBinary(bool abinary);
+  virtual bool         IsBaseLine() const;
+  virtual bool         IsIndexed() const;
+  virtual bool         IsBinary() const;
 
   virtual int          getSchemaID() const ; 
   virtual void         setSchemaID(int id) ; 
 
-  virtual void         addWrittenRow(int dataID);
-  virtual int*         getWrittenRows(int* numrows);
-  virtual void         commitData();
+  // storage of dataIDs
+  virtual void  addWrittenRows(int* dataID,int numRows,bool canRollBack=false);
+  virtual int*  getWrittenRows(int& numRows);
+  virtual void  commitData();
+  virtual void  clearStoreInfo();
+  virtual unsigned int* getTimeValues();
+  virtual unsigned int  getMaxTime();
+  virtual void          setTimeValues(unsigned int* timeValues);
 
-  // c-struct descriptort & schema 
+  // c-struct descriptor & schema 
   // set by 1st call to db
 
   virtual StTableDescriptorI* getDescriptorCpy() const;
+  virtual StTableDescriptorI* getDescriptor();
   virtual void                setDescriptor(StTableDescriptorI* descriptor);
   virtual bool                hasDescriptor() const;
+  void                        checkDescriptor();
 
-  //
   // access to date via this table or c-struct
 
   virtual StDbTable*  Clone();
@@ -185,146 +245,85 @@ public:
   virtual void*       GetTableCpy(); //! calloc'd version of data for StRoot
   virtual void        SetTable(char* data, int nrows, int* idList=0);
   virtual void        AddRows(char* data, int nrows);
+  //  virtual void        AddRowsAt(int rowNumber, char* data, int nrows);
   virtual int         GetNRows() const;
-  virtual void        SetNRows(int nrows);
   virtual void        setRowNumber(int row=0);
   virtual bool        hasData() const;
-  
-  // store mode is automatic with 'SetTable' but not for either
-  // indexing to 'NullEntry' or retimestamping just read data
-  virtual void        setStoreMode(bool mode);
-  virtual bool        IsStoreMode() const;
- 
-  // methods for reading & writing to Db & to file
+  virtual void*       getDataValue(const char* name,int rowNumber=0);
 
+  // memory management for query by where clause
+  virtual int         getRowLimit() const;
+  virtual void        setRowLimit(int nrows);
+  virtual void        addNRows(int nrows);
+  virtual void        addNElements(int* elements, int nrows);
+
+  // methods for reading & writing to Db & to file
   virtual void StreamAccessor(typeAcceptor* accept, bool isReading);
   virtual void dbStreamer(typeAcceptor* accept, bool isReading);
-
   virtual void StreamAccessor(StDbBufferI* buff, bool isReading);
   virtual void dbStreamer(StDbBufferI* buff, bool isReading);
   virtual void dbTableStreamer(StDbBufferI* buff, const char* name, bool isReading);
-
-  //ClassDef(StDbTable,1)
+#ifdef __ROOT__
+ ClassDef(StDbTable,0)
+#endif
 };
 
-
-inline 
-unsigned int
-StDbTable::getTableSize() const { if(mhasDescriptor) return mdescriptor->getTotalSizeInBytes();
+inline bool  StDbTable::IsTable() const { return true; };
+inline unsigned int StDbTable::getTableSize() const { 
+if(mhasDescriptor) return mdescriptor->getTotalSizeInBytes();
 return 0;
 }
+inline char* StDbTable::printCstructName() { return mstructName; }
+inline char* StDbTable::printDataTable() { return mdataTable; }
+inline char* StDbTable::getFlavor() { return mflavor; }
+inline char* StDbTable::printFlavor() { return mflavor; }
+inline bool StDbTable::defaultFlavor() const {return mdefaultFlavor;}
+inline void StDbTable::setProdTime(unsigned int ptime) { mprodTime=ptime; }
+inline unsigned int StDbTable::getProdTime() { return mprodTime; }
+inline unsigned int StDbTable::getEndTime() const {return mendTime.munixTime; }
+inline char* StDbTable::getEndDateTime() { return mendTime.mdateTime; }
+inline void StDbTable::setEndTime(unsigned int time){ mendTime.munixTime=time;}
+inline void StDbTable::setEndTime(const char* time){mendTime.setDateTime(time);}
+inline unsigned int StDbTable::getBeginTime() const {return mbeginTime.munixTime; }
+inline char* StDbTable::getBeginDateTime() {return mbeginTime.mdateTime; }
+inline void StDbTable::setBeginTime(unsigned int time){mbeginTime.munixTime = time; }
+inline void StDbTable::setBeginTime(const char* time){ mbeginTime.setDateTime(time); }
+inline unsigned int StDbTable::getEndStoreTime() const { return mendStoreTime.munixTime; }
+inline char* StDbTable::getEndStoreDateTime() { return mendStoreTime.mdateTime; }
+inline void StDbTable::setEndStoreTime(unsigned int time) {mendStoreTime.munixTime = time; }
+inline void StDbTable::setEndStoreTime(const char* time){ mendStoreTime.setDateTime(time); }
+inline int* StDbTable::getElementID(int& nrows) { nrows = mrows; return melementID; }
 
-inline 
-char* StDbTable::getFlavor() { return mflavor; }
-
-inline
-bool StDbTable::defaultFlavor() const {return mdefaultFlavor;}
-
-inline
-void StDbTable::setProdTime(unsigned int ptime) { mprodTime=ptime; }
-
-inline
-unsigned int StDbTable::getProdTime() { return mprodTime; }
-
-inline 
-unsigned int StDbTable::getEndTime() const { 
-return mendTime.munixTime; }
-
-inline 
-char* StDbTable::getEndDateTime() { 
-return mendTime.mdateTime; }
-
-inline 
-void StDbTable::setEndTime(unsigned int time) {
-mendTime.munixTime = time; }
-
-inline 
-void StDbTable::setEndTime(const char* time){ 
-mendTime.setDateTime(time); }
-
-inline 
-unsigned int StDbTable::getBeginTime() const  { 
-return mbeginTime.munixTime; }
-
-inline 
-char* StDbTable::getBeginDateTime() { 
-return mbeginTime.mdateTime; }
-
-inline 
-void StDbTable::setBeginTime(unsigned int time) {
-mbeginTime.munixTime = time; }
-
-inline 
-void StDbTable::setBeginTime(const char* time){ 
-mbeginTime.setDateTime(time); }
-
-inline 
-int* StDbTable::getElementID(int& nrows) { nrows = mrows; 
-return melementID; }
-
-inline
-int StDbTable::getRowID(int rowNumber) const { 
+inline int StDbTable::getRowID(int rowNumber) const { 
   if(rowNumber<mrows)return melementID[rowNumber];
-return 0;
+  return 0;
 }
-
-inline 
-int StDbTable::getSchemaID() const { return mschemaID; }
-
-inline 
-void StDbTable::setSchemaID(int id) {mschemaID = id; }
-
-inline
-int* StDbTable::getWrittenRows(int* nrows){
-*nrows=mdataRows;
-return mdataIDs;
+inline unsigned int* StDbTable::getTimeValues(){ return mtimeVals; }
+inline void          StDbTable::setTimeValues(unsigned int* timeValues){ 
+  if(mtimeVals) delete [] mtimeVals;
+  mtimeVals=timeValues;
 }
-
-inline
-void StDbTable::commitData() { 
-mdataRows = 0;
-mMaxRows  = 500;
-if(mdataIDs) delete [] mdataIDs;
-mdataIDs = 0;
-
+inline unsigned int  StDbTable::getMaxTime() {
+  unsigned int retVal=0;
+  for(int i=0; i<mrows;i++)if(mtimeVals[i]>retVal)retVal=mtimeVals[i];
+  return retVal;
 }
-
-inline
-bool StDbTable::hasDescriptor() const { return mhasDescriptor; }
-
-inline 
-StDbTable* StDbTable::Clone() {return (new StDbTable(*this));}
-
-inline 
-int StDbTable::GetNRows() const { return mrows; }
-
-inline
-void StDbTable::SetNRows(int nrows) { createMemory(nrows); }; 
-
-inline 
-void StDbTable::setRowNumber(int row){
-if(row < mrows)mrowNumber = row;
-}
-
-inline
-bool StDbTable::hasData() const { return mhasData; };
-
-inline
-void StDbTable::setStoreMode(bool mode) { mstoreMode = mode; }
-
-inline
-bool StDbTable::IsStoreMode() const { return mstoreMode; }
-
+inline char* StDbTable::printElementName() { return melementName; }
+inline int StDbTable::getSchemaID() const { return mschemaID; }
+inline void StDbTable::setSchemaID(int id) {mschemaID = id; }
+inline StTableDescriptorI* StDbTable::getDescriptor() { return mdescriptor; }
+inline bool StDbTable::hasDescriptor() const { return mhasDescriptor; }
+inline StDbTable* StDbTable::Clone() {return (new StDbTable(*this));}
+inline int StDbTable::GetNRows() const { return mrows; }
+inline void StDbTable::setRowLimit(int nrows) { mrowsRequested=nrows; }; 
+inline int  StDbTable::getRowLimit() const { return mrowsRequested; }; 
+inline void StDbTable::setRowNumber(int row){if(row < mrows)mrowNumber = row;}
+inline bool StDbTable::hasData() const { return mhasData; };
+inline void StDbTable::setBinary(bool abinary) { mIsBinary=abinary; }
+inline void StDbTable::setBaseLine(bool baseLine)  { mIsBaseLine=baseLine; }
+inline void StDbTable::setIndexed(bool indexed)  { mIsIndexed=indexed; }
+inline bool StDbTable::IsBinary() const { return mIsBinary; }
+inline bool StDbTable::IsBaseLine() const { return mIsBaseLine; }
+inline bool StDbTable::IsIndexed() const { return mIsIndexed; }
 
 #endif
-
-
-
-
-
-
-
-
-
-
-

@@ -1,15 +1,32 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.hh,v 1.15 2000/04/25 18:26:02 porter Exp $
+ * $Id: StDbConfigNode.hh,v 1.16 2001/01/22 18:37:52 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
  *
- * Description:  Node (directory) to hold list of dbtables
- *
+ * Description:  Node (directory) & db handle to hold list of dbtables
+ *               Now (Dec2000) pure-virtual for hiding db & table (stl) part
+ *              
  ***************************************************************************
  *
  * $Log: StDbConfigNode.hh,v $
+ * Revision 1.16  2001/01/22 18:37:52  porter
+ * Update of code needed in next year running. This update has little
+ * effect on the interface (only 1 method has been changed in the interface).
+ * Code also preserves backwards compatibility so that old versions of
+ * StDbLib can read new table structures.
+ *  -Important features:
+ *    a. more efficient low-level table structure (see StDbSql.cc)
+ *    b. more flexible indexing for new systems (see StDbElememtIndex.cc)
+ *    c. environment variable override KEYS for each database
+ *    d. StMessage support & clock-time logging diagnostics
+ *  -Cosmetic features
+ *    e. hid stl behind interfaces (see new *Impl.* files) to again allow rootcint access
+ *    f. removed codes that have been obsolete for awhile (e.g. db factories)
+ *       & renamed some classes for clarity (e.g. tableQuery became StDataBaseI
+ *       and mysqlAccessor became StDbSql)
+ *
  * Revision 1.15  2000/04/25 18:26:02  porter
  * added flavor & production time as settable query fields in
  * table &/or node. Associated SQL updated in mysqlAccessor.
@@ -69,161 +86,114 @@
 #define STDBCONFIGNODE_HH
 
 #include "StDbNode.hh"
+#include "StDbTableIter.hh"
 
+class dbEnvList;
+class StDbElementIndex;
 class StDbTable;
-class StDbFactoryI;
-class StDbTableIter;
 
-
-#ifndef __CINT__
-#include <list>
-
-
-#ifdef ST_NO_TEMPLATE_DEF_ARGS
-typedef list<StDbTable*, allocator<StDbTable*> > TableList;
-#else
-#if !defined(ST_NO_NAMESPACES)
-using std::list;
+#ifdef __ROOT_
+#include "TROOT.h"
 #endif
-typedef list<StDbTable*> TableList;
-#endif
-#endif
-#ifdef __CINT__
-class TableList;
-#endif
-
-class StDbTableIter;
 
 class StDbConfigNode : public StDbNode {
 
- friend class StDbTableIter;
-
-private:
+protected:
 
  StDbConfigNode* mfirstChildNode;
  StDbConfigNode* mnextNode;
  StDbConfigNode* mparentNode;
-
-protected:
-
-  void zeroNodes(){
-    mfirstChildNode = 0;
-    mnextNode = 0;
-    mparentNode = 0;
-    mhasData = false;
-    mfactory = 0;
-  };
-
-
- StDbFactoryI* mfactory;
- TableList     mTables;
- bool          mhasData;
-
- void deleteTables();
- bool compareTables(StDbTable* tab1, StDbTable* tab2);
+  
+ bool            mhasData;
+ int             mbranchID;
+ bool            misDbNode;
+ void            zeroNodes();
 
 public:
 
-  //  StDbConfigNode() { zeroNodes();};
-  StDbConfigNode( StDbType type, 
-                  StDbDomain domain, 
-                  const char* nodeName, 
-                  const char* configName="none");
-
-  StDbConfigNode( StDbConfigNode* parent, 
-                  const char* nodeName, 
-                  const char* configName);
-
-  StDbConfigNode( StDbConfigNode* parent, 
-                  StDbNodeInfo* node);
-
+   StDbConfigNode( StDbConfigNode* parent, 
+                   const char* nodeName, const char* configName);
+   StDbConfigNode( StDbConfigNode* parent, StDbNode& node); 
+   StDbConfigNode( StDbType type,  StDbDomain domain,  
+                   const char* nodeName, const char* configName="none");
+   virtual ~StDbConfigNode(); 
   
+  // node & tree operations
+   void            setNextNode(StDbConfigNode* node); 
+   void            setParentNode(StDbConfigNode* node); 
+   void            setFirstChildNode(StDbConfigNode* node); 
+   virtual void    setChildNode(StDbConfigNode* node); 
+   void            appendNode(StDbConfigNode* node); 
+   StDbConfigNode* getNextNode();
+   StDbConfigNode* getParentNode(); 
+   StDbConfigNode* getFirstChildNode(); 
+   void            deleteTree();
+   virtual void    addChildren(dbEnvList* elist) = 0;
+   void            deleteChildren();
 
-  virtual ~StDbConfigNode(); 
+  // check container status
+   bool   hasChildren();
+   bool   hasData();
+   int    getBranchID();
+   void   setBranchID(int branchID);
+   void   setIsDbNode(bool isDbNode);
+   bool   isDbNode();
+   void   printTree(int depth);
 
-  virtual void resetConfig(const char* configName);
-  
-  // set & get node relations
-  virtual void setNextNode(StDbConfigNode* node) { mnextNode = node;}; 
-  virtual void setParentNode(StDbConfigNode* node); 
-  virtual void setFirstChildNode(StDbConfigNode* node); 
-  virtual void appendNode(StDbConfigNode* node); 
+  // DB & Table Index operations
+   virtual void  resetConfig(const char* config, int opt=0)                 =0;
+   virtual int   buildTree(int opt=0)                                       =0;
+   virtual StDbElementIndex*  getElementIndex()                             =0;
+   virtual void  setElementIndexInfo(const char* indexName, int indexID)    =0;
+   virtual void  getElementIndexInfo(char*& indexname, int& indexID)        =0;
+   virtual int   getNumIndeces() const                                      =0;
 
-  virtual StDbConfigNode* getNextNode() const { return mnextNode;} ;
-  virtual StDbConfigNode* getParentNode() const {return mparentNode;}; 
-  virtual StDbConfigNode* getFirstChildNode() const {return mfirstChildNode;}; 
-
-  // Tree operations
-  virtual void resolveNodeInfo(StDbNodeInfo* childNode); 
-  virtual void deleteTree();
-  virtual void buildTree(int opt=0);//0=get tableDescriptors from db
-  virtual void deleteChildren();
-
-  // check container
-  virtual bool hasChildren();
-  virtual bool hasData();
-  virtual void printTree(int depth);
-  virtual void printTables(int depth);
-
-  // Table operations
-  virtual StDbTable* addDbTable(const char* tableName, 
-                                const char* version="default");
-  virtual StDbTable* addTable(const char* tableName, 
-                              const char* version="default");
-
-  virtual StDbTable* addTable(StDbNodeInfo* node);
-
-
-  virtual StDbTable* findTable(const char* name, const char* subPath="/");
-  virtual StDbTable* findLocalTable(const char* name);
-  virtual void removeTable(StDbTable* table);
+  // Table operations --> pure virtual for db & stl dependencies 
+   virtual StDbTable*     addDbTable(const char* tableName, 
+                                     const char* version="default")         =0;
+   virtual StDbTable*     addTable  (const char* tableName, 
+                                     const char* version="default")         =0;
+   virtual StDbTable*     addTable(StDbNode* node)                          =0;
+   virtual StDbTable*     findTable(const char* name, const char* sPath="/")=0;
+   virtual StDbTable*     findLocalTable(const char* name)                  =0;
+   virtual void           removeTable(StDbTable* table)                     =0;
+   virtual StDbTableIter* getStDbTableIter()                                =0;
+   virtual bool           compareTables(StDbTable* tab1, StDbTable* tab2)   =0;
+   virtual void           printTables(int depth)                            =0;
+   virtual void           printNumberStats()                                =0;
+   virtual void getNumberStats(unsigned int& nNodes, 
+                               unsigned int& ntables, 
+                               unsigned int& numBytes)                      =0;
 
   // set the table flavors in full sub-tree or local list
-  virtual void setFlavor(const char* flavor);
-  virtual void setLocalFlavor(const char* flavor);
-  virtual void setProdTime(unsigned int ptime);
-  virtual void setLocalProdTime(unsigned int ptime);
-  virtual StDbTableIter* getStDbTableIter();
+   virtual void           setTablesFlavor(const char* flavor)               =0;
+   virtual void           setTablesProdTime(unsigned int ptime)             =0;
+   void  setFlavor(const char* flavor);
+   void  setProdTime(unsigned int ptime);
 
-  // node operations
-  virtual StDbConfigNode* findConfigNode(StDbType type, 
-                                         StDbDomain domain, 
-                                         const char* subPath);
-
-  virtual StDbConfigNode* findConfigNode(StDbType type, 
-                                         StDbDomain domain);
-
-  virtual StDbConfigNode* findConfigNode(const char* subPath);
-
-  virtual bool isNode(StDbType type, StDbDomain domain);
-
-  // For Offline Root CLI
-  //ClassDef(StDbConfigNode,0)
+  // More node operations
+   StDbConfigNode* findConfigNode(StDbType t, StDbDomain d, const char* sPath);
+   StDbConfigNode* findConfigNode(StDbType t, StDbDomain d);
+   StDbConfigNode* findConfigNode(const char* sPath);
+   StDbConfigNode* findChildConfigNode(const char* nodeName);
+#ifdef __ROOT__
+  ClassDef(StDbConfigNode,0)
+#endif
 
 }; 
 
-inline
-bool StDbConfigNode::isNode(StDbType type, StDbDomain domain){
-if(mnode.dbDomain == domain && mnode.dbType == type)return  true;
-return false;
-}
-
-inline
-bool StDbConfigNode::hasData(){ return mhasData;};
-
-inline
-bool StDbConfigNode::hasChildren(){ if(mfirstChildNode)return true;
-return false;
-};
-
+inline void StDbConfigNode::setNextNode(StDbConfigNode* node){ mnextNode=node;}
+inline StDbConfigNode* StDbConfigNode::getNextNode()   { return mnextNode; };
+inline StDbConfigNode* StDbConfigNode::getParentNode() { return mparentNode; };
+inline StDbConfigNode* StDbConfigNode::getFirstChildNode(){ return mfirstChildNode; };
+inline bool StDbConfigNode::hasData(){ return mhasData;};
+inline int  StDbConfigNode::getBranchID() { return mbranchID; };
+inline void StDbConfigNode::setBranchID(int branchID) { mbranchID=branchID; };
+inline void StDbConfigNode::setIsDbNode(bool isDbNode){misDbNode=isDbNode; };
+inline bool StDbConfigNode::isDbNode() { return misDbNode; };
+inline bool StDbConfigNode::hasChildren(){return (mfirstChildNode) ? true : false; };
 
 #endif
-
-
-
-
-
-
 
 
 

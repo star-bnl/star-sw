@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.cc,v 1.11 2000/06/30 01:57:00 porter Exp $
+ * $Id: StDbBuffer.cc,v 1.12 2001/01/22 18:37:50 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,22 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.cc,v $
+ * Revision 1.12  2001/01/22 18:37:50  porter
+ * Update of code needed in next year running. This update has little
+ * effect on the interface (only 1 method has been changed in the interface).
+ * Code also preserves backwards compatibility so that old versions of
+ * StDbLib can read new table structures.
+ *  -Important features:
+ *    a. more efficient low-level table structure (see StDbSql.cc)
+ *    b. more flexible indexing for new systems (see StDbElememtIndex.cc)
+ *    c. environment variable override KEYS for each database
+ *    d. StMessage support & clock-time logging diagnostics
+ *  -Cosmetic features
+ *    e. hid stl behind interfaces (see new *Impl.* files) to again allow rootcint access
+ *    f. removed codes that have been obsolete for awhile (e.g. db factories)
+ *       & renamed some classes for clarity (e.g. tableQuery became StDataBaseI
+ *       and mysqlAccessor became StDbSql)
+ *
  * Revision 1.11  2000/06/30 01:57:00  porter
  * fixed a delete bug & small memory leak found by Akio via Insure++ ,
  * updated SetTable() method for containing idList, corrected enumeration
@@ -62,9 +78,8 @@
 #include <string.h>
 #include <iostream.h>
 #include <strstream.h>
-//#include <algorithm>
 
-
+///////////////////////////////////////////////////////////////////////
 
 void StDbBuffer::Print(){
   if (mCol) {
@@ -85,8 +100,8 @@ void StDbBuffer::Print(){
   };  
 };
 
-void
-StDbBuffer::zeroColumn(int istart, int iend) {
+///////////////////////////////////////////////////////////////////////
+void StDbBuffer::zeroColumn(int istart, int iend) {
   for(int i=istart;i<iend+1;i++){
      mCol[i].name = 0;
      mCol[i].val  = 0;
@@ -94,29 +109,35 @@ StDbBuffer::zeroColumn(int istart, int iend) {
 }
 
 
+///////////////////////////////////////////////////////////////////////
 void StDbBuffer::Raz(){
+
   int i;
   for (i=0;i<=mLast;i++) {
     if (mCol[i].val)  {
       if (mCol[i].type>=_ascii){
-	char ** tTextVal= (char**)mCol[i].val;
-	int j;
-	for(j=0;j<(int)mCol[i].length;j++) {
-	  if (tTextVal[j]) delete [] tTextVal[j];
-	};
-	delete [] tTextVal ; mCol[i].val=0;
+	      char ** tTextVal= (char**)mCol[i].val;
+	      int j;
+	      for(j=0;j<(int)mCol[i].length;j++) {
+
+	          if (tTextVal[j]) delete [] tTextVal[j];
+	      };
+	      delete [] tTextVal; 
       } else {
-      delete [] mCol[i].val ;mCol[i].val=0; 
+          delete [] mCol[i].val ;
       };
     };
-    if (mCol[i].name) delete []  mCol[i].name;mCol[i].name=0;
-    //mCol[i].type=0;
+    if (mCol[i].name) delete []  mCol[i].name;
+    mCol[i].val=0; 
+    mCol[i].name=0;
+    mCol[i].type=_char;
     mCol[i].length=0; 
   };
   mCur=0;
   mLast=-1;
 }
 
+///////////////////////////////////////////////////////////////////////
 char **StDbBuffer::WhatsIn(){  
   char **tIn;
   tIn=new char*[mLast+2];
@@ -128,9 +149,7 @@ char **StDbBuffer::WhatsIn(){
   return tIn;
 }
 
-     
-    
-
+///////////////////////////////////////////////////////////////////////
 bool StDbBuffer::Find_Col (const   char *aName){
   int tCount=0;
 
@@ -147,6 +166,7 @@ bool StDbBuffer::Find_Col (const   char *aName){
 }
 
 
+///////////////////////////////////////////////////////////////////////
 void StDbBuffer::AddField(const char *aName, const myctype aTpe,const void* aVal,const int aLen) {
   /*  when the field aName doesn't exist int the buffer, this function is call
       to initialise a new field. if needed, it increase the array mCol.
@@ -169,6 +189,7 @@ void StDbBuffer::AddField(const char *aName, const myctype aTpe,const void* aVal
   ChangeField(aTpe,aVal,aLen);
 };
 
+///////////////////////////////////////////////////////////////////////
 void StDbBuffer::ChangeField(const myctype aTpe,const void* aVal,const int aLen) {
   if (mCol[mCur].val){
    if(mCol[mCur].type>=_ascii){
@@ -196,12 +217,12 @@ void StDbBuffer::ChangeField(const myctype aTpe,const void* aVal,const int aLen)
       } else {
 	tStoreVal[i]=new char[strlen(tVal[i])+1];
 	strcpy(tStoreVal[i],tVal[i]);
-	
       };
     };
   };
 };
 
+///////////////////////////////////////////////////////////////////////
 void StDbBuffer::MemSwapCpy(char* where,char* from,int len,int swaplen,BuffMode mode) {
   if (mode==Auto) mode=mMode;
   if (swaplen<=1||mode==Storage) {
@@ -226,8 +247,7 @@ void StDbBuffer::MemSwapCpy(char* where,char* from,int len,int swaplen,BuffMode 
 };
 
  
-
-
+///////////////////////////////////////////////////////////////////////
 void StDbBuffer::StrConv(char* aVal,char &s){s=aVal[0];};
 void StDbBuffer::StrConv(char* aVal,unsigned char &s){s=(unsigned char)atoi(aVal);};
 void StDbBuffer::StrConv(char* aVal,short &s){s=(short)atoi(aVal);};
@@ -239,7 +259,6 @@ void StDbBuffer::StrConv(char* aVal,unsigned long &s){s=atol(aVal);};
 void StDbBuffer::StrConv(char* aVal,float &s){s=(float) atof(aVal);};
 void StDbBuffer::StrConv(char* aVal,double &s){s=atof(aVal);};
 void StDbBuffer::StrConv(char* aVal,char* &s){s=new char[strlen(aVal)+1];strcpy(s,aVal);};
-
 
 #define castcase(typelist,casttype,tpe) case typelist: {casttype *tVal=(casttype*)aVal;casttype tValSwap;MemSwapCpy((char*)&tValSwap,(char*)tVal,mycsize[typelist],mycswapl[typelist],Client);*s=(tpe)tValSwap;};break;
 
@@ -299,8 +318,6 @@ bool StDbBuffer::WriteMem( char **s,void* aVal, myctype type) {
   return tRetVal;\
 }   
 
-			   
-
 #define Rscal(tpe) \
 bool  StDbBuffer::ReadScalar(tpe s,const char *aName) \
 {bool tRetVal=false; \
@@ -336,8 +353,6 @@ bool StDbBuffer::WriteScalar(const tpe s,const char *aName) \
 return true;\
 }
 
-
-
 Wscal(char,_char,1);
 Wscal(unsigned char,_uchar,1);
 Wscal(short,_short ,1);
@@ -350,13 +365,15 @@ Wscal(float ,_float,1);
 Wscal(double,_double,1);
 //Wscal(char*,_string,1);
 
-
-
+///////////////////////////////////////////////////////////////////////
 bool StDbBuffer::WriteScalar(const char* s,const char *aName)
 {
   if(!s) return false;
+//  cout<< "Createin pointerstring "<<endl;
   char** tVal=new char*[1];
+//  cout<< "Creatin storag string "<<endl;
   tVal[0]=new char[strlen(s)+1];
+//  cout<< "Copy storag string "<<endl;
   strcpy(tVal[0],s);
  if (Find_Col(aName))
    //  { ChangeField(_string,(void*)&tVal,1);}
@@ -366,9 +383,7 @@ bool StDbBuffer::WriteScalar(const char* s,const char *aName)
 return true;
 }
 
-
-
-
+///////////////////////////////////////////////////////////////////////
 #define Rarray(tpe,tpelist) \
 bool  StDbBuffer::ReadArray(tpe* &s, int &len,const char *aName)\
 { bool tRetVal=false; \
@@ -391,9 +406,6 @@ bool  StDbBuffer::ReadArray(tpe* &s, int &len,const char *aName)\
  return tRetVal;\
 }
 
-//tRetVal=true;} else {cout<<i<<" & "<<(int)mCol[mCur].length<<endl;};}}
-// if(!tRetVal && newCheck) cout<<"WARNING::field "<<aName<<" is has memory"<<endl;
-//else {cerr<<"WARNING::field "<<aName<<" is not in this Buffer"<<endl;}
 
 //Rarray(char,_char);
 Rarray(unsigned char,_uchar);
@@ -442,15 +454,3 @@ Warray(unsigned long,_ulong );
 Warray(float,_float );
 Warray(double,_double);
 Warray(char*,_string);
-
-
-
-
-
-
-
-
-
-
-
-

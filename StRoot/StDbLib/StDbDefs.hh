@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbDefs.hh,v 1.13 2000/08/15 22:51:51 porter Exp $
+ * $Id: StDbDefs.hh,v 1.14 2001/01/22 18:37:53 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -13,6 +13,22 @@
  ***************************************************************************
  *
  * $Log: StDbDefs.hh,v $
+ * Revision 1.14  2001/01/22 18:37:53  porter
+ * Update of code needed in next year running. This update has little
+ * effect on the interface (only 1 method has been changed in the interface).
+ * Code also preserves backwards compatibility so that old versions of
+ * StDbLib can read new table structures.
+ *  -Important features:
+ *    a. more efficient low-level table structure (see StDbSql.cc)
+ *    b. more flexible indexing for new systems (see StDbElememtIndex.cc)
+ *    c. environment variable override KEYS for each database
+ *    d. StMessage support & clock-time logging diagnostics
+ *  -Cosmetic features
+ *    e. hid stl behind interfaces (see new *Impl.* files) to again allow rootcint access
+ *    f. removed codes that have been obsolete for awhile (e.g. db factories)
+ *       & renamed some classes for clarity (e.g. tableQuery became StDataBaseI
+ *       and mysqlAccessor became StDbSql)
+ *
  * Revision 1.13  2000/08/15 22:51:51  porter
  * Added Root2DB class from Masashi Kaneta
  * + made code more robust against requesting data from non-existent databases
@@ -73,79 +89,15 @@
 #define STDBDEFS_HH
 
 // enumerated standard set of database types
-
-enum StDbType { dbStDb=0, dbServer, dbRunLog, dbConfigurations, dbConditions, dbCalibrations, dbGeometry, dbRunCatalog, dbRunParams, dbTestScheme, dbUser};
+enum StDbType { dbStDb=0, dbServer, dbRunLog, dbConfigurations, dbConditions, dbCalibrations, dbGeometry, dbRunCatalog, dbRunParams, dbTestScheme, dbTUser1, dbTUser2, dbTUser3, dbTEnd};
 
 // enumerated standard set of database domains
+enum StDbDomain {dbDomainUnknown=0, dbStar, dbTpc, dbEmc, dbFtpc, dbSvt, dbCtb, dbTrg, dbDaq, dbScaler, dbGlobal, dbL3, dbOnl, dbRich, dbMwc, dbRhic, dbSsd, dbDUser1, dbDUser2, dbDUser3, dbDEnd };
 
-enum StDbDomain {dbDomainUnknown=0, dbStar, dbTpc, dbEmc, dbFtpc, dbSvt, dbCtb, dbTrg, dbDaq, dbScaler, dbGlobal, dbL3, dbOnl, dbRich, dbMwc, dbRhic, dbSsd };
+// enumerated sets of storage models (different sql content)
+enum StDbStoreType { dbV00=0 };
 
-#include "dbstl.h"
-#include <string.h>
-
-class StDbDefaults {
-
-private:
- 
-  char mversion[64];
-  char mflavor[16];
-  unsigned int mprodTime;
-
-  StDbDefaults() {
-                    strncpy(mversion,"default",sizeof(mversion));
-                    strncpy(mflavor,"ofl",sizeof(mflavor));
-                    mprodTime = 0;
-                 };
- 
-static StDbDefaults* mInstance;
-
-public:
-
-  static StDbDefaults* Instance(){
-    if(!mInstance){
-      mInstance = new StDbDefaults;
-    }
-   return mInstance;
-  }
-
-  virtual ~StDbDefaults() {};
-
-  virtual bool IsDefaultVersion(const char* version);
-  virtual bool IsDefaultFlavor(const char* flavor);
-  virtual char* getVersion() const;
-  virtual char* getFlavor() const;
-  virtual unsigned int getProdTime() const;
-
-};
-
-inline
-bool StDbDefaults::IsDefaultVersion(const char* version){
-if(strcmp(version,mversion)==0)return true;
-return false;
-}
-
-inline
-bool StDbDefaults::IsDefaultFlavor(const char* flavor){
-if(strcmp(flavor,mflavor)==0)return true;
-return false;
-}
-
-inline
-char* StDbDefaults::getVersion() const {
- char* retVal = new char[strlen(mversion)+1];
- strcpy(retVal,mversion);
- return retVal;
-}
-
-inline
-char* StDbDefaults::getFlavor() const {
- char* retVal = new char[strlen(mflavor)+1];
- strcpy(retVal,mflavor);
- return retVal;
-}
-
-inline
-unsigned int StDbDefaults::getProdTime() const { return mprodTime; }
+enum dbFindServerMode { userHome=0, serverEnvVar, starDefault };
 
 #endif
 

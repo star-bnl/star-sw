@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.h,v 1.6 2000/03/28 17:03:19 porter Exp $
+ * $Id: StDbTableDescriptor.h,v 1.7 2001/01/22 18:38:00 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,22 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.h,v $
+ * Revision 1.7  2001/01/22 18:38:00  porter
+ * Update of code needed in next year running. This update has little
+ * effect on the interface (only 1 method has been changed in the interface).
+ * Code also preserves backwards compatibility so that old versions of
+ * StDbLib can read new table structures.
+ *  -Important features:
+ *    a. more efficient low-level table structure (see StDbSql.cc)
+ *    b. more flexible indexing for new systems (see StDbElememtIndex.cc)
+ *    c. environment variable override KEYS for each database
+ *    d. StMessage support & clock-time logging diagnostics
+ *  -Cosmetic features
+ *    e. hid stl behind interfaces (see new *Impl.* files) to again allow rootcint access
+ *    f. removed codes that have been obsolete for awhile (e.g. db factories)
+ *       & renamed some classes for clarity (e.g. tableQuery became StDataBaseI
+ *       and mysqlAccessor became StDbSql)
+ *
  * Revision 1.6  2000/03/28 17:03:19  porter
  * Several upgrades:
  * 1. configuration by timestamp for Conditions
@@ -65,7 +81,12 @@ protected:
  int mMax;
  int mCur;
 
+ // db unique ids
+ int mstructID;
+ int mschemaID;
+ bool misValid;  // schema has been filled
 
+  void init();
   virtual void reSize();
   virtual void fillSizeAndOffset(char* length, int elementNum);
   virtual void fillLengths(char* length, int elementNum);
@@ -75,7 +96,7 @@ protected:
 public:
 
   StDbTableDescriptor();
-  //  StDbTableDescriptor(_Descriptor* d, unsigned int numElements, unsigned int sizeOfStruct); // descriptor from StDbBroker
+  StDbTableDescriptor(int structID, int schemaID);
   StDbTableDescriptor(StDbTableDescriptor& d);
   virtual ~StDbTableDescriptor() {if(mcols) delete [] mcols; }
   virtual void fillElement(StDbBuffer* buff, int tableID);
@@ -93,6 +114,12 @@ public:
   virtual unsigned int getElementNumDimensions(int elementNum) const;
   virtual unsigned int getElementIndexLength(int elementNum, int dimensionNum) const;
 
+  int getSchemaID() const;
+  int getStructID() const;
+  void setSchemaID(int id);
+  void setStructID(int id);
+  bool IsValid() const;
+  int getCurrentInternalSize();
 };
 
 inline unsigned int
@@ -113,32 +140,28 @@ StDbTableDescriptor::getElementOffset(int elementNum) const {
 return mcols[elementNum].offset;
 }
 
-inline unsigned int
-StDbTableDescriptor::getElementSize(int elementNum) const { 
+inline unsigned int StDbTableDescriptor::getElementSize(int elementNum) const{ 
 return mcols[elementNum].size;
 }
 
-inline StTypeE
-StDbTableDescriptor::getElementType(int elementNum) const { 
+inline StTypeE StDbTableDescriptor::getElementType(int elementNum) const { 
 return mcols[elementNum].type;
 }
 
-inline unsigned int*
+inline unsigned int* 
 StDbTableDescriptor::getElementDimensions(int elementNum) const { 
 return &mcols[elementNum].dimensionlen[0];
 }
 
 ///////////////////////////////////////////////////////////////
 
-inline unsigned int
+inline unsigned int 
 StDbTableDescriptor::getElementLength(int elementNum) const { 
 
 int retVal=1;
 int j;
-
   int k= (int)(sizeof(mcols[elementNum].dimensionlen)/sizeof(j));
   for(j=0;j<k;j++)retVal *= mcols[elementNum].dimensionlen[j]; 
-
 return retVal;
 }
 
@@ -148,12 +171,10 @@ inline unsigned int
 StDbTableDescriptor::getElementNumDimensions(int elementNum) const { 
 int retVal=1;
 int j;
-
   int k= (int)(sizeof(mcols[elementNum].dimensionlen)/sizeof(j));
   for(j=0;j<k;j++){
     if(mcols[elementNum].dimensionlen[j]>1)retVal=j+1;  // last dimension >1
   }
-
 return retVal;
 }
 
@@ -162,11 +183,16 @@ StDbTableDescriptor::getElementIndexLength(int elementNum, int dimensionNum) con
 return mcols[elementNum].dimensionlen[dimensionNum];
 }
 
-inline unsigned int
-StDbTableDescriptor::getSize(StTypeE type){ return mycsize[type];}
-
+inline unsigned int StDbTableDescriptor::getSize(StTypeE type){ return mycsize[type];}
+inline int  StDbTableDescriptor::getSchemaID() const { return mschemaID; }
+inline int  StDbTableDescriptor::getStructID() const { return mstructID; }
+inline void StDbTableDescriptor::setSchemaID(int id) { mschemaID=id; }
+inline void StDbTableDescriptor::setStructID(int id) { mstructID=id; }
+inline bool StDbTableDescriptor::IsValid() const { return misValid; }
+inline int  StDbTableDescriptor::getCurrentInternalSize() { return mMax; };
 
 #endif
+
 
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbConfigNode.cc,v 1.19 2000/06/30 01:57:01 porter Exp $
+ * $Id: StDbConfigNode.cc,v 1.20 2001/01/22 18:37:52 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,22 @@
  ***************************************************************************
  *
  * $Log: StDbConfigNode.cc,v $
+ * Revision 1.20  2001/01/22 18:37:52  porter
+ * Update of code needed in next year running. This update has little
+ * effect on the interface (only 1 method has been changed in the interface).
+ * Code also preserves backwards compatibility so that old versions of
+ * StDbLib can read new table structures.
+ *  -Important features:
+ *    a. more efficient low-level table structure (see StDbSql.cc)
+ *    b. more flexible indexing for new systems (see StDbElememtIndex.cc)
+ *    c. environment variable override KEYS for each database
+ *    d. StMessage support & clock-time logging diagnostics
+ *  -Cosmetic features
+ *    e. hid stl behind interfaces (see new *Impl.* files) to again allow rootcint access
+ *    f. removed codes that have been obsolete for awhile (e.g. db factories)
+ *       & renamed some classes for clarity (e.g. tableQuery became StDataBaseI
+ *       and mysqlAccessor became StDbSql)
+ *
  * Revision 1.19  2000/06/30 01:57:01  porter
  * fixed a delete bug & small memory leak found by Akio via Insure++ ,
  * updated SetTable() method for containing idList, corrected enumeration
@@ -82,507 +98,99 @@
  **************************************************************************/
 #include <iostream.h>
 #include <strstream.h>
-#include <strings.h>
+#include <string.h>
 
 #include "StDbConfigNode.hh"
 #include "StDbManager.hh"
-#include "StDbFactories.hh"
-#include "StDbTableIter.hh"
 #include "StDbTable.h"
-#include "StDbServer.hh"
+
+#ifdef __ROOT__
+ClassImp(StDbConfigNode)
+#endif
+
+#define __CLASS__ "StDbConfigNode"
 
 ////////////////////////////////////////////////////////////////
 
 StDbConfigNode::StDbConfigNode(StDbConfigNode* parent, const char* nodeName, const char* configName): StDbNode(nodeName,configName) {
 
   zeroNodes();
-  //  mnode.dbType = parent->getDbType();
-  //  mnode.dbDomain = parent->getDbDomain();
-  misNode=true;
   setParentNode(parent);
-  parent->resolveNodeInfo(&mnode);  
-
-  // If StarDb Type, then name holds map to real Db type
-  // while the domain may still be StarDb
-  // Else if StarDb domain, then name holds map to real domain type
-  // Else both type & domain are that of parent
-
-  if(mnode.dbType==dbStDb){
-    mnode.dbType=StDbManager::Instance()->getDbType(mnode.name);
-    misConfigured = false; 
-  } else if(mnode.dbDomain==dbStar){
-    mnode.dbDomain=StDbManager::Instance()->getDbDomain(mnode.name);
-    misConfigured = false;
-  }
-
+  setDbName(parent->printDbName());
+  setDbType(parent->getDbType());
+  setDbDomain(parent->getDbDomain());
 }
 
 ////////////////////////////////////////////////////////////////
-
-StDbConfigNode::StDbConfigNode(StDbConfigNode* parent, StDbNodeInfo* node): StDbNode(node) {
-
+StDbConfigNode::StDbConfigNode(StDbConfigNode* parent, StDbNode& node): StDbNode(node) {
   zeroNodes();
   setParentNode(parent);
-  parent->resolveNodeInfo(&mnode);  
-
-  // If StarDb Type, then name holds map to real Db type
-  // while the domain may still be StarDb
-  // Else if StarDb domain, then name holds map to real domain type
-  // Else both type & domain are that of parent (which maybe User defined)
-
-  if(strcmp(mnode.nodeType,"DB")==0)mnode.mstrCpy(mnode.nodeType,"Config");
-
-  if(mnode.dbType==dbStDb){
-    mnode.dbType=StDbManager::Instance()->getDbType(mnode.name);
-    misConfigured = false;
-  } else if(mnode.dbDomain==dbStar) {
-    mnode.dbDomain=StDbManager::Instance()->getDbDomain(mnode.name);
-    misConfigured = false;
-  }
-
 }
 
 ////////////////////////////////////////////////////////////////
-
 StDbConfigNode::StDbConfigNode(StDbType type, StDbDomain domain, const char* nodeName, const char* configName): StDbNode(nodeName,configName) {
 
   zeroNodes();
-  mnode.dbType = type;
-  mnode.dbDomain = domain;
-  //  setName(nodeName);
-  //  setVersion(configName);
-
+  mdbType = type;
+  mdbDomain = domain;
 }
 
 ////////////////////////////////////////////////////////////////
+StDbConfigNode::~StDbConfigNode(){ deleteChildren();};
 
-StDbConfigNode::~StDbConfigNode(){
-
-deleteTables();
-deleteChildren();
-
+///////////////////////////////////////////////////////////////
+void StDbConfigNode::zeroNodes() {
+  mfirstChildNode=0;
+  mnextNode=0;
+  mparentNode=0;
+  mhasData=false;
+  mbranchID=0;
+  misDbNode=false;
 };
 
 
 ////////////////////////////////////////////////////////////////
-
-void
-StDbConfigNode::buildTree(int opt){
-
- StDbServer* server=0;
- StDbTableIter* itr=0;
- StDbTable* table=0;
-
- server = StDbManager::Instance()->findServer(mnode.dbType, mnode.dbDomain);
- if(server){
-   char* dbName = server->getDbName();
-   if(!dbName){
-     cerr<<" No database specified in Server " << endl;
-     return;
-   }
-   setDbName(dbName); delete [] dbName;
-   if(!server->QueryDb(this)){
-     if(StDbManager::Instance()->IsVerbose())
-       cout<<"Node "<<mnode.name<<"::"<<mnode.versionKey<<" has no children or tables "<<endl;
-     return;
-   }
- }
-
- if(!opt){
-  if(mhasData){
-   itr = getStDbTableIter();
-   while(!itr->done()){
-    table = itr->next();
-    server->QueryDescriptor(table);
-   }
-  if(itr)delete itr;
-  }
- }
-
- if(mfirstChildNode)mfirstChildNode->buildTree(opt);
- if(mnextNode)mnextNode->buildTree(opt);
-
-}
-
-/////////////////////////////////////////////////////////////////
-
-void
-StDbConfigNode::printTree(int depth){
-
-  if(!depth){
-    cout<<endl;
-    cout<<"************* Node Structure ****************" <<endl;
-    cout<<endl;
-  }
-
-  if(StDbManager::Instance()->IsVerbose()){
-    for(int k=0;k<depth;k++)cout<<" ";
-    cout<<"Node=" << mnode.name <<" VersionKey = " << mnode.versionKey <<endl;
-   if(mhasData) {
-     int depth2 = depth+4;
-     printTables(depth2);
-   }
-  }
- int depth3=depth+4;
- if(mfirstChildNode)mfirstChildNode->printTree(depth3);
- if(mnextNode)mnextNode->printTree(depth);
-
- if(!depth){
-   cout<<endl;
-   cout<<"*********************************************" << endl;
- }
-
-}
-
-/////////////////////////////////////////////////////////////////
-
-void
-StDbConfigNode::printTables(int depth){
-
-  if(StDbManager::Instance()->IsVerbose()){
-
-    char* pdepth = new char[depth+1];
-    ostrstream os(pdepth,depth+1);
-    for(int k=0;k<depth;k++)os<<" ";
-    os<<ends;
-
-    TableList::iterator itr;
-    for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
-      cout <<pdepth<<"Table="<<(*itr)->getMyName();
-      cout <<", VersionKey="<<(*itr)->getVersion();
-      cout <<", number of Rows="<< (*itr)->GetNRows();
-      StDbNode* node=(StDbNode*)(*itr);
-      char* tmp=node->getElementID();
-      if(strcmp(tmp,"None")==0){
-        cout <<", ElementList=0"<<endl;
-      } else {
-        cout <<", ElementList="<<tmp<<endl;
-      }
-      delete [] tmp;
-    }
-  }
-
-}
-
-
-////////////////////////////////////////////////////////////////////////
-
-StDbTable*
-StDbConfigNode::addDbTable(const char* tableName, const char* version){
-  // just like addTable but also loads the descriptor from the database
-
-  StDbTable* table = addTable(tableName,version);
-  StDbServer* server = StDbManager::Instance()->findServer(mnode.dbType, mnode.dbDomain);
-  if(server)server->QueryDescriptor(table);
-
-  return table;
-}
-
-////////////////////////////////////////////////////////////////////////
-
-StDbTable*
-StDbConfigNode::addTable(const char* tableName, const char* version){
-
-  if(!mfactory)mfactory = StDbFactories::Instance()->getFactory(mnode.dbType);
-
-  StDbTable* table = 0;
-  if(!mfactory){
-    cout << "Error:: No Factory for table in dbType" << endl;
-    return table;
-  }
-
-  table = mfactory->getDbTable(tableName,0);
-
-  StDbServer* server;
-
-  if(table){
-    table->setVersion((char*)version);
-    server = StDbManager::Instance()->findServer(mnode.dbType, mnode.dbDomain);
-    if(server)server->QueryDb((StDbNode*)table);
-    mTables.push_back(table);
-    if(!mhasData)mhasData=true;
-
-  } else {
-    cout << " Could not Find table " << tableName << endl;
-  }
-
-
-return table;
-}
-
-////////////////////////////////////////////////////////////////
-StDbTable*
-StDbConfigNode::addTable(StDbNodeInfo* node){
-
-  if(!mfactory)mfactory = StDbFactories::Instance()->getFactory(mnode.dbType);
-
-  if(!mfactory) cout << " No Factory " << endl;
-  StDbTable* table = 0;
-  table = mfactory->getDbTable(node->name,0);
-
-  resolveNodeInfo(node);
-
-  if(table){
-     if(node->versionKey) table->setVersion(node->versionKey);
-     table->setNodeInfo(node);
-     //table->setDbName(mnode.dbName);
-     mTables.push_back(table);
-     if(!mhasData) mhasData = true;
-  } else {
-    cout << " Could not Find table " << mnode.name << endl;
-  }
-
-return table;
-}
-
- 
-////////////////////////////////////////////////////////////////
-
-StDbTable*
-StDbConfigNode::findTable(const char* name, const char* subPath){
-
-if(subPath && (strcmp(subPath,"/")==0))return findLocalTable(name);
-
-StDbConfigNode* node = findConfigNode(subPath);
-if(node)return node->findLocalTable(name);
-
-// if we got here then we can't find it
-StDbTable* table=0;
-return table;
-}
-
-////////////////////////////////////////////////////////////////
-
-StDbTable*
-StDbConfigNode::findLocalTable(const char* name){
-
-  TableList::iterator itr;
-  StDbTable* table=0;
-    for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
-      if((*itr)->checkName(name)){
-	table=*itr;
-        break;
-      }
-    }
-
-return table;
-}
-
-
-////////////////////////////////////////////////////////////////
-
-void
-StDbConfigNode::removeTable(StDbTable* table){
- 
-  if(!table)return;
-
-
-  TableList::iterator itr;
-  StDbTable* myTable=0;
-
-  do {
-    for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
-        myTable=*itr;
-        if(myTable && compareTables(myTable,table)){
-                 mTables.erase(itr);
-                 break;
-        }
-        myTable=0;
-    }
-  } while (mTables.begin() != mTables.end());
-
-
-}
-
-
-////////////////////////////////////////////////////////////////
-
 void
 StDbConfigNode::setFlavor(const char* flavor){
 
-  setLocalFlavor(flavor);
+  setTablesFlavor(flavor);
   if(mfirstChildNode)mfirstChildNode->setFlavor(flavor);
   if(mnextNode)mnextNode->setFlavor(flavor);
 
 }
 
 ////////////////////////////////////////////////////////////////
-
-void
-StDbConfigNode::setLocalFlavor(const char* flavor){
-
-  TableList::iterator itr;
-    for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
-      if((*itr))(*itr)->setFlavor(flavor);
-   }
-
-}
-
-////////////////////////////////////////////////////////////////
-
 void
 StDbConfigNode::setProdTime(unsigned int ptime){
-
-  setLocalProdTime(ptime);
+  setTablesProdTime(ptime);
   if(mfirstChildNode)mfirstChildNode->setProdTime(ptime);
   if(mnextNode)mnextNode->setProdTime(ptime);
-
 }
 
-////////////////////////////////////////////////////////////////
-
-void
-StDbConfigNode::setLocalProdTime(unsigned int ptime){
-
-  TableList::iterator itr;
-    for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
-      if((*itr))(*itr)->setProdTime(ptime);
-   }
-
-}
-
-////////////////////////////////////////////////////////////////
-
-bool
-StDbConfigNode::compareTables(StDbTable* tab1, StDbTable* tab2){
-
-bool retVal=false;
-// compare name & version
-    char* name1=tab1->getName();
-    char* version1 = tab1->getVersion();
-    char* name2=tab2->getName();
-    char* version2 = tab2->getVersion();
-
-    if(!(strcmp(name1,name2)==0) || !(strcmp(version1,version2)==0)){
-      delete [] name1; delete [] name2; delete [] version1; delete [] version2;
-      return retVal;
-    }
-
-    // compare each row identifier
-    int nRows1; int nRows2;
-    int* elements1 = tab1->getElementID(nRows1);
-    int* elements2 = tab2->getElementID(nRows2);
-    if(nRows1 != nRows2) return retVal;
-    bool check=true;
-    for(int i=0;i<nRows1;i++){
-      if(elements1[i] != elements2[i]){
-        check = false;
-        break;
-      }
-    }
-    if(check)retVal=true;
-
-return retVal;
-}
-
-
-////////////////////////////////////////////////////////////////
-
-void
-StDbConfigNode::resolveNodeInfo(StDbNodeInfo* node){
-  //
-  // used to restrict a some of a table's node Information 
-  // to that of the parent node's... 
-  // currently baseline & elementID attributes
-  // 
-
-  node->IsBaseLine=mnode.IsBaseLine;
-
-  // if elementID="None" then Table-Node's elementID is used
-  // else it is from this parent Object.
-  if(!node->elementID){
-    mnode.mstrCpy(node->elementID,mnode.elementID);
-    return;
-  }
-
-  if((strstr(mnode.elementID,"None")) || (strstr(node->elementID,"None")))
-    return; // nothing to do
-
-  // Ok now filter child-list by parent-list
-
-    int prows,crows,slen;
-    slen = strlen(node->elementID)+1;
-    int* pelements = mnode.getElementID(mnode.elementID,prows);
-    int* celements = node->getElementID(node->elementID,crows);
-    char* tmpElements = new char[slen];
-    ostrstream es(tmpElements,slen);
-
-    int ip;
-    for(ip=0;ip<prows-1;ip++){
-      for(int ic=0;ic<crows;ic++){
-        if(celements[ic]==pelements[ip]){
-          es<<pelements[ip]<<",";
-          break;
-        }
-      }
-    }
-
-    ip=prows-1;
-    int ifound=0;
-    for(int ic=0;ic<crows;ic++){
-      if(celements[ic]==pelements[ip]){
-        es<<pelements[ip];
-        ifound=1;
-        break;
-      }
-    }
-    es<<ends;
-
-    if(!ifound){ // then last element has ',' to be removed
-       char* id = strstr(tmpElements,"\0");
-       id--;
-       if(*id==',')*id='\0';
-    }
-     
-    if(node->elementID) delete [] node->elementID;
-    node->elementID = tmpElements;
-       if(pelements)delete [] pelements;
-       if(celements)delete [] celements;
-
-}
-
-
-////////////////////////////////////////////////////////////////
-
-StDbTableIter*
-StDbConfigNode::getStDbTableIter(){
-
-  StDbTableIter* itr = new StDbTableIter();
-  itr->init(this);
-
-return itr;
-}
 
 ////////////////////////////////////////////////////////////////
 
 void
 StDbConfigNode::deleteTree(){
 
-if(hasChildren())getFirstChildNode()->deleteTree();
-if(mnextNode)mnextNode->deleteTree();
-if(mnextNode)delete mnextNode;
-if(mfirstChildNode)delete mfirstChildNode;
-
+ if(mfirstChildNode)delete mfirstChildNode;
+ if(mnextNode){
+   mnextNode->deleteTree();
+   delete mnextNode;
+ }
 }
 
-
 ////////////////////////////////////////////////////////////////
-
 void
 StDbConfigNode::deleteChildren(){
 
-  if(mfirstChildNode){
-    StDbConfigNode* nextChild = mfirstChildNode->getNextNode();
-    delete mfirstChildNode; mfirstChildNode=0;
-    StDbConfigNode* node = 0;
-    while(nextChild){
-        node=nextChild->getNextNode();
-        delete nextChild;
-        nextChild = node;
-    }          
-
-  }        
-
+  StDbConfigNode* nextChild = mfirstChildNode;
+  while(nextChild){
+    StDbConfigNode* node=nextChild->getNextNode();
+    delete nextChild;
+    nextChild=node;
+  }
+  mfirstChildNode=0; 
 }
 
 ////////////////////////////////////////////////////////////////
@@ -598,7 +206,6 @@ return node->findConfigNode(subPath);
 StDbConfigNode*
 StDbConfigNode::findConfigNode(StDbType type, StDbDomain domain){
 
-  //
   // Searches for the "highest" node of type & domain
   // e.g. if request Calibrations , tpc & node is of that
   // type & domain it checks parent 1st and if it is also
@@ -607,13 +214,16 @@ StDbConfigNode::findConfigNode(StDbType type, StDbDomain domain){
 
 StDbConfigNode* node = 0;
 
-  if(type == mnode.dbType && domain == mnode.dbDomain){
-    if(mparentNode && mparentNode->isNode(type,domain))return mparentNode->findConfigNode(type,domain);
+// search parent & this 
+ if(isNode(type,domain)){
+    if(mparentNode && mparentNode->isNode(type,domain))
+      return mparentNode->findConfigNode(type,domain);
     return this;
-    }
+ }
+
+// search children & sibs
    if(hasChildren())node=mfirstChildNode->findConfigNode(type,domain);
-   if(node)return node;
-   if(mnextNode)node = mnextNode->findConfigNode(type,domain);
+   if(!node && mnextNode)node = mnextNode->findConfigNode(type,domain);
 
 return node;
 }
@@ -628,23 +238,18 @@ StDbConfigNode::findConfigNode(const char* subPath){
   // 
   // returns null pointer if not found
 
-  char* path = new char[strlen(subPath)+1];
-  strcpy(path,subPath);
+  StDbConfigNode* node=0;
+  if(!subPath) return node;
+  char* path = mstrDup(subPath); 
 
 if(path[0]=='/')path++;
 char* id=strstr(path,"/");
-if(id){
-  *id='\0';
-   id++;
-}
+if(id){  *id='\0';   id++; }
+char* nextNodeName=mstrDup(path);   
+node=getFirstChildNode();
 
-char* nextNodeName=new char[strlen(path)+1];
-strcpy(nextNodeName,path);
-
-StDbConfigNode* node=getFirstChildNode();
-bool found = false;
-
- if(!node) found = true;
+if(node){
+ bool found = false;
  while(!found){
    if(!node->checkName(nextNodeName)){
        node=node->getNextNode();
@@ -653,8 +258,8 @@ bool found = false;
        found=true;
    }
  }
-    
 
+}
 if(node && id) node=findConfigNode(id);
 
 delete [] path;
@@ -664,84 +269,73 @@ return node;
 }
 
 ////////////////////////////////////////////////////////////////
+StDbConfigNode*
+StDbConfigNode::findChildConfigNode(const char* name){
 
-void
-StDbConfigNode::resetConfig(const char* configName){
-
-if(mfirstChildNode)mfirstChildNode->deleteTree();
-if(mhasData)deleteTables();
-setVersion(configName);
-buildTree();
-
-}
-
-////////////////////////////////////////////////////////////////
-
-void StDbConfigNode::setParentNode(StDbConfigNode* parent){
-
-mparentNode = parent;
- if(parent->hasChildren()){
-   StDbConfigNode* sib = parent->getFirstChildNode();
-   sib->appendNode(this);
-  } else {
-  parent->setFirstChildNode(this);
+  StDbConfigNode* retVal=0;
+  if(!name) return retVal;
+  retVal=getFirstChildNode();
+  while(retVal){
+    if(retVal->checkName(name)) break;
+    retVal=retVal->getNextNode();
   }
-
+  return retVal;
 }
 
 ////////////////////////////////////////////////////////////////
+void StDbConfigNode::setParentNode(StDbConfigNode* parent){
+mparentNode = parent;
+parent->setChildNode(this);
+}
 
+////////////////////////////////////////////////////////////////
 void StDbConfigNode::appendNode(StDbConfigNode* node){
-
   if(mnextNode){
      mnextNode->appendNode(node);
   } else {
      mnextNode = node;
   }
-
 }
   
 ////////////////////////////////////////////////////////////////
+void 
+StDbConfigNode::setChildNode(StDbConfigNode* node){
+  if(mfirstChildNode) {
+    mfirstChildNode->appendNode(node);
+  } else {
+    mfirstChildNode = node;
+  }
+} 
 
+////////////////////////////////////////////////////////////////
 void 
 StDbConfigNode::setFirstChildNode(StDbConfigNode* node){
-  mfirstChildNode = node;
-  
+  if(mfirstChildNode)node->appendNode(mfirstChildNode);
+  mfirstChildNode = 0;
+  setChildNode(node);
 } 
 
 
-////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
 
 void
-StDbConfigNode::deleteTables(){
+StDbConfigNode::printTree(int depth){
 
-  TableList::iterator itr;
-  StDbTable* table;
+if(!depth)cout<<endl<<"************* Node Structure ****************" <<endl<<endl;
+ 
+  if(StDbManager::Instance()->IsVerbose()){
+    for(int k=0;k<depth;k++)cout<<" ";
+    cout<<"Node=" << mname <<" VersionKey = " << mversion <<endl;
+   if(mhasData) {
+     int depth2 = depth+4;
+     printTables(depth2);
+   }
+  }
+ int depth3=depth+4;
+ if(mfirstChildNode)mfirstChildNode->printTree(depth3);
+ if(mnextNode)mnextNode->printTree(depth);
 
-  do {
-    for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
-        table=*itr;
-        mTables.erase(itr);
-        delete table;
-        break;
-    }
-  } while (mTables.begin() != mTables.end());
+ if(!depth)cout<<endl<<"*********************************************" << endl;
 
 }
-
-
-////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#undef __CLASS__

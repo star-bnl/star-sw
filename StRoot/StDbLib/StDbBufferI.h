@@ -1,7 +1,7 @@
 
 /***************************************************************************
  *
- * $Id: StDbBufferI.h,v 1.5 2000/03/28 17:03:18 porter Exp $
+ * $Id: StDbBufferI.h,v 1.6 2001/01/22 18:37:51 porter Exp $
  *
  * Author: Laurent Conin & Jeff Porter
  ***************************************************************************
@@ -11,6 +11,22 @@
  ***************************************************************************
  *
  * $Log: StDbBufferI.h,v $
+ * Revision 1.6  2001/01/22 18:37:51  porter
+ * Update of code needed in next year running. This update has little
+ * effect on the interface (only 1 method has been changed in the interface).
+ * Code also preserves backwards compatibility so that old versions of
+ * StDbLib can read new table structures.
+ *  -Important features:
+ *    a. more efficient low-level table structure (see StDbSql.cc)
+ *    b. more flexible indexing for new systems (see StDbElememtIndex.cc)
+ *    c. environment variable override KEYS for each database
+ *    d. StMessage support & clock-time logging diagnostics
+ *  -Cosmetic features
+ *    e. hid stl behind interfaces (see new *Impl.* files) to again allow rootcint access
+ *    f. removed codes that have been obsolete for awhile (e.g. db factories)
+ *       & renamed some classes for clarity (e.g. tableQuery became StDataBaseI
+ *       and mysqlAccessor became StDbSql)
+ *
  * Revision 1.5  2000/03/28 17:03:18  porter
  * Several upgrades:
  * 1. configuration by timestamp for Conditions
@@ -36,10 +52,7 @@
 #ifndef STDBBUFFERI_H
 #define STDBBUFFERI_H
 
-#include "dbstl.h"
-
 class StDbBufferI  { 
-
 
 public: 
  
@@ -96,16 +109,5 @@ public:
   virtual bool     WriteArray(float   *c, int len, const char *) = 0;
   virtual bool     WriteArray(double  *c, int len, const char *) = 0;
   virtual bool     WriteArray(char **c, int len, const char *) = 0;
-
-
 };
-
-
-
 #endif
-
-
-
-
-
-

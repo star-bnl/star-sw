@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: MysqlDb.cc,v 1.11 2000/08/15 22:51:51 porter Exp $
+ * $Id: MysqlDb.cc,v 1.12 2001/01/22 18:37:49 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,22 @@
  ***************************************************************************
  *
  * $Log: MysqlDb.cc,v $
+ * Revision 1.12  2001/01/22 18:37:49  porter
+ * Update of code needed in next year running. This update has little
+ * effect on the interface (only 1 method has been changed in the interface).
+ * Code also preserves backwards compatibility so that old versions of
+ * StDbLib can read new table structures.
+ *  -Important features:
+ *    a. more efficient low-level table structure (see StDbSql.cc)
+ *    b. more flexible indexing for new systems (see StDbElememtIndex.cc)
+ *    c. environment variable override KEYS for each database
+ *    d. StMessage support & clock-time logging diagnostics
+ *  -Cosmetic features
+ *    e. hid stl behind interfaces (see new *Impl.* files) to again allow rootcint access
+ *    f. removed codes that have been obsolete for awhile (e.g. db factories)
+ *       & renamed some classes for clarity (e.g. tableQuery became StDataBaseI
+ *       and mysqlAccessor became StDbSql)
+ *
  * Revision 1.11  2000/08/15 22:51:51  porter
  * Added Root2DB class from Masashi Kaneta
  * + made code more robust against requesting data from non-existent databases
@@ -67,6 +83,8 @@
  *
  **************************************************************************/
 #include "MysqlDb.h"
+#include "StDbManager.hh" // for now & only for getting the message service
+#include "strstream.h"
 
 //#include "errmsg.h"
 
@@ -92,9 +110,11 @@
 #define CR_NAMEDPIPEOPEN_ERROR 2017
 #define CR_NAMEDPIPESETSTATE_ERROR 2018
 
+#define __CLASS__ "MysqlDb"
+
 ////////////////////////////////////////////////////////////////////////
 
-MysqlDb::MysqlDb(): mdbhost(0), mdbName(0), mdbuser(0), mdbpw(0), mdbPort(0) {
+MysqlDb::MysqlDb(): mdbhost(0), mdbName(0), mdbuser(0), mdbpw(0), mdbPort(0),mlogTime(false) {
 
 mhasConnected=false;
 mQuery=0;
@@ -102,7 +122,6 @@ mQueryMess=0;
 mQueryLast=0;
 RazQuery();
 RazQuery();
-//if (mRes) delete mRes;
 mRes= new MysqlResult;
 }
 //////////////////////////////////////////////////////////////////////
@@ -114,7 +133,6 @@ if(mQueryLast) delete [] mQueryLast;
 Release();
 if(mRes) delete mRes;
 if(mhasConnected)mysql_close(&mData);
-
 if(mdbhost) delete [] mdbhost;
 if(mdbuser) delete [] mdbuser;
 if(mdbpw) delete [] mdbpw;
@@ -122,53 +140,65 @@ if(mdbName) delete [] mdbName;
 
 }
 
-
 //////////////////////////////////////////////////////////////////////// 
 bool MysqlDb::reConnect(){
+#define __METHOD__ "reConnect()"
 
-bool tRetVal=false;
-if(mysql_real_connect(&mData,mdbhost,mdbuser,mdbpw,mdbName,mdbPort,NULL,0)){ 
-    tRetVal=true;
-  } else {
-    cerr << "Error Making Connection to DataBase = " << mdbName << endl;
-    cerr << " MySQL returned error " << mysql_error(&mData) << endl;
-  }
+if(mysql_real_connect(&mData,mdbhost,mdbuser,mdbpw,mdbName,mdbPort,NULL,0))
+    return true;
 
-return tRetVal;
+char myMessage[256]; ostrstream mm(myMessage,256);
+mm<<" Upon re-connecting to DB "<<mdbName<<" MySQL returns error"<<ends;
+
+return (bool) StDbManager::Instance()->printInfo(myMessage,mysql_error(&mData),dbMErr,__LINE__,__CLASS__,__METHOD__);
+
+#undef __METHOD__
 }
 
 //////////////////////////////////////////////////////////////////////// 
 bool MysqlDb::Connect(const char *aHost, const char *aUser, const char *aPasswd,  const char *aDb, const int aPort){
-  
+#define __METHOD__ "Connect(host,user,pw,database,port)"
 
   if(mdbhost) delete [] mdbhost;
   mdbhost  = new char[strlen(aHost)+1];   strcpy(mdbhost,aHost);
-  if(mdbuser) delete [] mdbuser;
-  mdbuser  = new char[strlen(aUser)+1];   strcpy(mdbuser,aUser);
+  if(aUser){
+   if(mdbuser) delete [] mdbuser;
+   mdbuser  = new char[strlen(aUser)+1];   strcpy(mdbuser,aUser);
+   }
+  if(aPasswd){
   if(mdbpw) delete [] mdbpw;
-  mdbpw    = new char[strlen(aPasswd)+1]; strcpy(mdbpw,aPasswd);
+    mdbpw    = new char[strlen(aPasswd)+1]; strcpy(mdbpw,aPasswd);
+  }
   mdbPort  = aPort;
 
   if(mdbName) delete [] mdbName;
   mdbName  = new char[strlen(aDb)+1];     strcpy(mdbName,aDb);
 
-  //  if(mhasConnected)mysql_close(&mData);
   bool tRetVal = false;
-  if (!mysql_init(&mData)) {
-    cout << &mData <<endl;
-    cout << "Init Error : " << mysql_error(&mData) << endl;
-  } else {
-    if(mysql_real_connect(&mData,aHost,aUser,aPasswd,aDb,aPort,NULL,0)){ 
-      // cout << "connected on " << aDb <<mysql_error(&mData) << 
-      //	mysql_ping(&mData) <<endl;
+  double t0=mqueryLog.wallTime();
+  if(mlogTime)mconnectLog.start();
+  if (!mysql_init(&mData))
+    return (bool) StDbManager::Instance()->printInfo("Mysql Init Error=",mysql_error(&mData),dbMErr,__LINE__,__CLASS__,__METHOD__);
+
+  char connString[256]; ostrstream cs(connString,256);
+  if(mysql_real_connect(&mData,aHost,aUser,aPasswd,aDb,aPort,NULL,0)){ 
+       t0=mqueryLog.wallTime()-t0;
+       cs<< "Server Connecting: DB=" << aDb ;
+       cs<< " , Host=" << aHost <<":"<<aPort<<endl;
+       cs<< " --> Connection Time="<<t0<<" sec"<<ends;
+        StDbManager::Instance()->printInfo(connString,dbMConnect,__LINE__,__CLASS__,__METHOD__);
       tRetVal=true;
-    } else {
-      cerr << "Error Making Connection to DataBase = " << aDb << endl;
-      cerr << " MySQL returned error " << mysql_error(&mData) << endl;
-    }
+  } else {
+      cs << "Making Connection to DataBase = " << aDb;
+      cs << " On Host = " << aHost <<":"<<aPort;
+      cs << " MySQL returned error " << mysql_error(&mData) << ends;
+      StDbManager::Instance()->printInfo(connString,dbMConnect,__LINE__,__CLASS__,__METHOD__);
   }
+
+  if(mlogTime)mconnectLog.end();
   mhasConnected = tRetVal;
   return tRetVal;
+#undef __METHOD__
 }
 ////////////////////////////////////////////////////////////////////////
 
@@ -185,37 +215,47 @@ void MysqlDb::RazQuery() {
   
 }
 
+bool MysqlDb::checkForTable(const char* tableName){
+
+   mRes->Release();
+   mRes->mRes=mysql_list_tables(&mData,tableName);
+   if(mRes->mRes==NULL) return false;
+   mRes->Release();
+
+return true;
+};
+
 ////////////////////////////////////////////////////////////////////////
 
 bool MysqlDb::ExecQuery(){
+#define __METHOD__ "ExecQuery()"
 
 bool tOk=false;
 unsigned int mysqlError;
 
-
+  if(mlogTime)mqueryLog.start();
   if(!mysql_real_query(&mData,mQuery,mQueryLen)){ // no errors? ok store-&-return
-
+     if(mlogTime)mqueryLog.end();
      mRes->Release();
+     if(mlogTime)msocketLog.start();
      mRes->mRes=mysql_store_result(&mData);
+     if(mlogTime)msocketLog.end();
      tOk=true;
      mqueryState=true;
      return tOk;
-
   } else {
-
     mysqlError = mysql_errno(&mData);
     if(mysqlError==CR_SERVER_GONE_ERROR || mysqlError==CR_SERVER_LOST){
 
+       StDbManager::Instance()->printInfo(mysql_error(&mData)," Lost server, will try to reconnect",dbMDebug,__LINE__,__CLASS__,__METHOD__); 
      reConnect();  
 
      if(mysql_real_query(&mData,mQuery,mQueryLen)){        
-
-       cout << "Query Failed on DB="<<mData.db<< mQueryMess << endl;
-       cout << "Returned Error : " << mysql_error(&mData) << endl;
- 
+        
+       StDbManager::Instance()->printInfo(" Query failed with MySQL error",mysql_error(&mData),dbMErr,__LINE__,__CLASS__,__METHOD__); 
        mqueryState=false;
 
-     } else {
+      } else {
 
        mRes->Release();
        mRes->mRes=mysql_store_result(&mData);
@@ -225,16 +265,10 @@ unsigned int mysqlError;
 
     } else {
 
-      //         cout << " Query Error Number = " << mysqlError << endl;
-      //           cout << "Query Failed : " << mQueryMess << endl;
-      cout << "Query Failed on DB="<<mData.db<< mQueryMess << endl;
-             cout << "Returned Error : " << mysql_error(&mData) << endl;
-            mqueryState=false;
+       StDbManager::Instance()->printInfo(" Query failed with MySQL error",mysql_error(&mData),dbMErr,__LINE__,__CLASS__,__METHOD__); 
+       mqueryState=false;
     }
-
   }
-
-
   return tOk;
 }
 
@@ -270,7 +304,6 @@ MysqlDb &MysqlDb::operator<<( const char *aQuery){
 
 MysqlDb &MysqlDb::operator<<( const MysqlBin *aBin ){
 
-  
   const char *tMess="#BIN#";
   char *tQuery = new char[mQueryLen+aBin->mLen+1];
   char *tQueryMess = new char[strlen(mQueryMess)+strlen(tMess)+1];
@@ -294,6 +327,7 @@ bool MysqlDb::Input(const char *table,StDbBuffer *aBuff){
   bool tRetVal=false;
   bool change=aBuff->IsClientMode();
   if (change) aBuff->SetStorageMode();
+  aBuff->SetStorageMode();
   if (aBuff) {
     *this << "select * from " << table << " where null"<< endsql;
     *this << "insert into " << table << " set ";
@@ -353,14 +387,14 @@ bool MysqlDb::Input(const char *table,StDbBuffer *aBuff){
     };
     if (tFirst) { 
       RazQuery();
-      cout << " Mysql : no matching field in Buffer" << endl;
     } else {
       *this << endsql;
       if(mqueryState)tRetVal=true;
     };
   };
-  if (!tRetVal) cout << "insert Failed"<< endl;
+  //  if (!tRetVal) cout << "insert Failed"<< endl;
   if (change) aBuff->SetClientMode();
+  aBuff->SetClientMode();
   return tRetVal;
 }; 
 
@@ -368,16 +402,18 @@ bool MysqlDb::Input(const char *table,StDbBuffer *aBuff){
 
 bool  MysqlDb::Output(StDbBuffer *aBuff){
 
-
+  if(mlogTime)msocketLog.start();
   MYSQL_ROW tRow=mysql_fetch_row(mRes->mRes);
   if(!tRow) return false;
   unsigned long * lengths=mysql_fetch_lengths(mRes->mRes);
   unsigned tNbFields=NbFields();
+  if(mlogTime)msocketLog.end();
   int i;
   bool tRetVal=false;
   bool change=aBuff->IsClientMode();
   if (change) aBuff->SetStorageMode();
-  //  if (tRow) {
+  aBuff->SetStorageMode();
+
   for (i=0;i<(int)tNbFields;i++){
     if(tRow[i]){
 
@@ -398,10 +434,11 @@ bool  MysqlDb::Output(StDbBuffer *aBuff){
            // char arrays for comment structures - so write'em both
            // to the buffer. 
 
-           char commentName[1024];
-           ostrstream cn(commentName,1024);
+           //char commentName[1024];
+           ostrstream cn;
            cn<<mRes->mRes->fields[i].name<<".text"<<ends;
-	       aBuff->WriteScalar((char*)tRow[i],commentName);
+	       aBuff->WriteScalar((char*)tRow[i],cn.str());
+               delete [] cn.str();
 	    };
       } else {
 	       aBuff->WriteScalar((char*)tRow[i],mRes->mRes->fields[i].name);
@@ -410,6 +447,7 @@ bool  MysqlDb::Output(StDbBuffer *aBuff){
     tRetVal=true;
   };
   if (change) aBuff->SetClientMode();
+  aBuff->SetClientMode();
   return tRetVal;
 }
 
@@ -417,9 +455,8 @@ bool  MysqlDb::Output(StDbBuffer *aBuff){
 
 char** MysqlDb::DecodeStrArray(char* strinput , int &aLen){
   
-
   if(!strinput){ // shouldn't happen - should have checked before here
-    cout<< "null input string from mysql " << endl;
+    //   cout<< "null input string from mysql " << endl;
     char** tmparr = new char*[1];
     aLen = 1;
     tmparr[0] = new char[2];
@@ -542,9 +579,7 @@ unsigned int mysqlError;
     }
  } else {
    tOk=true;
-
  }
-
 
 return tOk;
 }
@@ -560,6 +595,6 @@ MysqlBin *Binary(const unsigned long int aLen,const float *aBin){
   return tBin;
 }
 
-
+#undef __CLASS__
 
 

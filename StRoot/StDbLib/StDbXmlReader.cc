@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlReader.cc,v 1.7 2000/01/10 20:37:55 porter Exp $
+ * $Id: StDbXmlReader.cc,v 1.8 2001/01/22 18:38:02 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,22 @@
  ***************************************************************************
  *
  * $Log: StDbXmlReader.cc,v $
+ * Revision 1.8  2001/01/22 18:38:02  porter
+ * Update of code needed in next year running. This update has little
+ * effect on the interface (only 1 method has been changed in the interface).
+ * Code also preserves backwards compatibility so that old versions of
+ * StDbLib can read new table structures.
+ *  -Important features:
+ *    a. more efficient low-level table structure (see StDbSql.cc)
+ *    b. more flexible indexing for new systems (see StDbElememtIndex.cc)
+ *    c. environment variable override KEYS for each database
+ *    d. StMessage support & clock-time logging diagnostics
+ *  -Cosmetic features
+ *    e. hid stl behind interfaces (see new *Impl.* files) to again allow rootcint access
+ *    f. removed codes that have been obsolete for awhile (e.g. db factories)
+ *       & renamed some classes for clarity (e.g. tableQuery became StDataBaseI
+ *       and mysqlAccessor became StDbSql)
+ *
  * Revision 1.7  2000/01/10 20:37:55  porter
  * expanded functionality based on planned additions or feedback from Online work.
  * update includes:
@@ -33,7 +49,7 @@
  **************************************************************************/
 #include "StDbXmlReader.h"
 #include <iostream.h>
-#include <strings.h>
+#include <string.h>
 #include <fstream.h>
 #include <strstream.h>
 #include "dbStruct.hh"

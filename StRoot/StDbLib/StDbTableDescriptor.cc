@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.15 2000/03/28 17:03:19 porter Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.16 2001/01/22 18:38:00 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,22 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.16  2001/01/22 18:38:00  porter
+ * Update of code needed in next year running. This update has little
+ * effect on the interface (only 1 method has been changed in the interface).
+ * Code also preserves backwards compatibility so that old versions of
+ * StDbLib can read new table structures.
+ *  -Important features:
+ *    a. more efficient low-level table structure (see StDbSql.cc)
+ *    b. more flexible indexing for new systems (see StDbElememtIndex.cc)
+ *    c. environment variable override KEYS for each database
+ *    d. StMessage support & clock-time logging diagnostics
+ *  -Cosmetic features
+ *    e. hid stl behind interfaces (see new *Impl.* files) to again allow rootcint access
+ *    f. removed codes that have been obsolete for awhile (e.g. db factories)
+ *       & renamed some classes for clarity (e.g. tableQuery became StDataBaseI
+ *       and mysqlAccessor became StDbSql)
+ *
  * Revision 1.15  2000/03/28 17:03:19  porter
  * Several upgrades:
  * 1. configuration by timestamp for Conditions
@@ -86,7 +102,22 @@
 
 /////////////////////////////////////////////////////////////////////////
 
-StDbTableDescriptor::StDbTableDescriptor(){
+StDbTableDescriptor::StDbTableDescriptor(){  init(); }
+
+/////////////////////////////////////////////////////////////////////////
+
+StDbTableDescriptor::StDbTableDescriptor(int structID, int schemaID){
+
+  init();
+  mstructID=structID;
+  mschemaID=schemaID;
+
+};
+
+/////////////////////////////////////////////////////////////////////////
+
+void
+StDbTableDescriptor::init(){
 
 mCur = 0;
 mMax = 100;
@@ -95,106 +126,27 @@ offsetToLast4Bytes = -4;
 mnumElements = 0;
 lastType=Stdouble;
 padsize = 0;
-mcols = new tableDescriptor[mMax+1];
+mcols = new tableDescriptor[mMax];
+memset(mcols,0,mMax*sizeof(tableDescriptor));
+mschemaID=mstructID=0;
+misValid=false;
 
 }
-
-///////////////////////////////////////////////////////////////////////
-
-/*
-StDbTableDescriptor::StDbTableDescriptor(_Descriptor* d, unsigned int numElements, unsigned int sizeOfStruct){
-
-mnumElements = numElements;
-mCur = mnumElements-1;
-mtableSize = sizeOfStruct;
-mcols = new tableDescriptor[mnumElements];
- for(int i=0;i<(int)mnumElements;i++){
-  strcpy(mcols[i].name,d[i].name);
-  mcols[i].size = (unsigned int)d[i].typeSize;
-  mcols[i].offset = (unsigned int)d[i].offset;
-
-  int k,j;
-  // sets all in my struct to 1
-  k= (int)(sizeof(mcols[i].dimensionlen)/sizeof(int));
-  for(j=0;j<k;j++)mcols[i].dimensionlen[j]=1;
-  // sets all that input struct defines to its value
-  k= (int)(sizeof(d[i].DimensionList)/sizeof(int));
-  for(j=0;j<k;j++)mcols[i].dimensionlen[j]=d[i].DimensionList[j];
-  
-  
-  switch (d[i].type) {
-  case kFloat:
-    {
-      mcols[i].type=Stfloat;
-      break;
-    }
-  case kInt:
-    {
-      mcols[i].type=Stint;
-      break;
-    }
-  case kLong:
-    {
-      mcols[i].type=Stlong;
-      break;
-    }
-  case kShort:
-    {
-      mcols[i].type=Stshort;
-      break;
-    }
-  case kDouble:
-    {
-      mcols[i].type=Stdouble;
-      break;
-    }
-  case kUInt:
-    {
-      mcols[i].type=Stuint;
-      break;
-    }
-  case kULong:
-    {
-      mcols[i].type=Stulong;
-      break;
-    }
-  case kUShort:
-    {
-      mcols[i].type=Stushort;
-      break;
-    }
-  case kUChar:
-    {
-      mcols[i].type=Stuchar;
-      break;
-    }
-  case kChar:
-    {
-      mcols[i].type=Stchar;
-      break;
-    }
-  default:
-    {
-      break;
-    }
-  }
-
- }
-
-}
-*/
 
 /////////////////////////////////////////////////////////////////////////
 
 StDbTableDescriptor::StDbTableDescriptor(StDbTableDescriptor& d){
 
 mCur = (int)d.getNumElements()-1;
-mMax = 0;
+mMax = d.getCurrentInternalSize();
 offsetToNextEmptyByte = 0;
 offsetToLast4Bytes = 0;
 mcols = d.getTableDescriptor();
 mnumElements=d.getNumElements();
 mtableSize = d.getTotalSizeInBytes();
+mschemaID=d.getSchemaID();
+mstructID=d.getStructID();
+misValid=d.IsValid();
 
 }
 
@@ -203,8 +155,9 @@ mtableSize = d.getTotalSizeInBytes();
 tableDescriptor*
 StDbTableDescriptor::getTableDescriptor() const {
 
-     tableDescriptor* dScr = new tableDescriptor[mMax+1];
-     memcpy(dScr,mcols,(mMax+1)*sizeof(tableDescriptor));
+  tableDescriptor* dScr = new tableDescriptor[mMax];
+  memset(dScr,0,(mMax)*sizeof(tableDescriptor));
+  memcpy(dScr,mcols,(mMax)*sizeof(tableDescriptor));
 
 return dScr;
 }
@@ -217,15 +170,13 @@ StTableDescriptorI* dScr = new StDbTableDescriptor(*this);
 return dScr;
 
 }
-
-
 /////////////////////////////////////////////////////////////////////////
 
 void
 StDbTableDescriptor::fillElement(StDbBuffer* buff, int tableID){
 
-bool ClientMode;
-  if(!(ClientMode=buff->IsClientMode()))buff->SetClientMode();
+  //bool ClientMode;
+//  if(!(ClientMode=buff->IsClientMode()))buff->SetClientMode();
   int schemaID;
   if(tableID){  // mask off elements if tableID is non-zero
    if(!(buff->ReadScalar(schemaID,"schemaID") && (schemaID==tableID)) ){  
@@ -258,7 +209,10 @@ bool ClientMode;
 
    mtableSize = offsetToNextEmptyByte+rowpad;
 
- if(!ClientMode)buff->SetStorageMode();  // reset to StorageMode
+   //if(!ClientMode)buff->SetStorageMode();  // reset to StorageMode
+
+ misValid=true; 
+
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -269,14 +223,14 @@ StDbTableDescriptor::reSize(){
 
   // simply add 10 elements
 
-  if(mCur>mMax){
-     int newMax = mMax+10+1;
-     tableDescriptor* dScr = new tableDescriptor[newMax];
-     memcpy(dScr,mcols,(mMax+1)*sizeof(tableDescriptor));
-     if(mcols)delete [] mcols;
-     mcols=dScr;
-     mMax=newMax-1;
-  }
+  if(mCur<mMax) return;
+
+  int newMax = mMax+10;
+  tableDescriptor* dScr = new tableDescriptor[newMax];
+  memcpy(dScr,mcols,(mMax)*sizeof(tableDescriptor));
+  if(mcols)delete [] mcols;
+  mcols=dScr;
+  mMax=newMax;
 
 }
 
@@ -380,7 +334,7 @@ StDbTableDescriptor::fillSizeAndOffset(char* length, int elementNum){
   unsigned int onesize = getSize(mcols[i].type);
   for(j=0;j<k;j++){
     if(mcols[i].dimensionlen[j]==1 && j>0)continue;
-    for(int jj=0; jj< (int)mcols[i].dimensionlen[j]; jj++){
+    for(int jk=0; jk< (int)mcols[i].dimensionlen[j]; jk++){
       padsize=padsize+(int)onesize;
       if(padsize>=8)padsize=padsize-8;
     }
@@ -408,6 +362,8 @@ const char* typenames[] = {"char","uchar","short","ushort","int","uint","long","
 
 return retVal;
 }
+
+
 
 
 

@@ -1,15 +1,38 @@
 /***************************************************************************
  *
- * $Id: StDbServer.hh,v 1.11 2000/08/15 22:51:52 porter Exp $
+ * $Id: StDbServer.hh,v 1.12 2001/01/22 18:37:59 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
  *
- * Description: Server class for DB-access
+ * Description: Interface Base class of Server for DB-access
+ *
+ *              A Server is specified in this base class by :
+ *                name, host, unix-socket, port-number
+ *              When the default server flag is set, all databases that
+ *                are not mapped to a specific server are accessed via
+ *                the default server. This is implemented in the manager.
+ *
  *
  ***************************************************************************
  *
  * $Log: StDbServer.hh,v $
+ * Revision 1.12  2001/01/22 18:37:59  porter
+ * Update of code needed in next year running. This update has little
+ * effect on the interface (only 1 method has been changed in the interface).
+ * Code also preserves backwards compatibility so that old versions of
+ * StDbLib can read new table structures.
+ *  -Important features:
+ *    a. more efficient low-level table structure (see StDbSql.cc)
+ *    b. more flexible indexing for new systems (see StDbElememtIndex.cc)
+ *    c. environment variable override KEYS for each database
+ *    d. StMessage support & clock-time logging diagnostics
+ *  -Cosmetic features
+ *    e. hid stl behind interfaces (see new *Impl.* files) to again allow rootcint access
+ *    f. removed codes that have been obsolete for awhile (e.g. db factories)
+ *       & renamed some classes for clarity (e.g. tableQuery became StDataBaseI
+ *       and mysqlAccessor became StDbSql)
+ *
  * Revision 1.11  2000/08/15 22:51:52  porter
  * Added Root2DB class from Masashi Kaneta
  * + made code more robust against requesting data from non-existent databases
@@ -57,165 +80,74 @@
 #define STDBSERVER_HH
 
 #include "StDbDefs.hh"    // enumeration of type & domain
-#include <iostream.h>
-
-class StDbNode;
-class StDbTable;
-class StDbConfigNode;
-
-#include "tableQuery.hh" // includes the query
+#include "StDataBaseI.hh"
 
 class StDbServer {
 
-private:
+protected:
   
   char* mserverName;
   char* mhostName;
   char* munixSocket;
+  char* muserName;
+  char* mpword;
   int   mportNumber;
-  char* mdbName;
-
-  StDbType mdbType;
-  StDbDomain mdbDomain;
-  char* mdomainName;
-  char* mtypeName;
-  bool  mconnectState;
   bool  misDefault;
 
- 
-protected:
-
-  virtual bool initServer();
   char* mstringDup(const char * str) const;
 
 public:
 
-  tableQuery* mdatabase; // low level query access of DataBase
-
   // constructors & dtor
-  StDbServer(): mserverName(0), mhostName(0), munixSocket(0), mdbName(0),  
-                mdbType(dbStDb), mdbDomain(dbDomainUnknown), mdomainName(0), 
-                mtypeName(0), mconnectState(false), 
-                misDefault(false), mdatabase(0) {};
-
+  StDbServer();
+  StDbServer(const char* name, const char* host, const char* sock, int port);
   StDbServer(StDbServer& server);
-  StDbServer(StDbType type, StDbDomain domain);
-  StDbServer(StDbType type, StDbDomain domain, 
-             const char* typeName, const char* domainName);
-
   virtual ~StDbServer();
 
-
-  // set methods for identifiers
-  virtual void setDbName(const char* dbName);
-  virtual void setDataBase(StDbType type, StDbDomain domain, 
-                           const char* typeName, const char* domainName);
   virtual void setHostName(const char* name);
   virtual void setUnixSocket(const char* name);
-  virtual void setDomainName(const char* name);
-  virtual void setTypeName(const char* name);
-  virtual void setPortNumber(int port){ mportNumber = port;}
-  virtual void setDbType(StDbType type) { mdbType = type;}
-  virtual void setDbDomain(StDbDomain domain) { mdbDomain=domain;}
+  virtual void setPortNumber(int port);
   virtual void setServerName(const char* name);
-  virtual void setIsDefaultServer() {misDefault=true;};
+  virtual void setUser(const char* name, const char* pword=0);
 
   // get methods for identifiers
-  virtual char*      getDbName() const;
-  virtual StDbType   getDbType() const { return mdbType; };
-  virtual StDbDomain getDbDomain() const { return mdbDomain; };
-  virtual char*      getServerName() const ;
-  virtual char*      getHostName() const ;
+  virtual char*      getServerName() const;
+  virtual char*      getHostName()   const;
   virtual char*      getUnixSocket() const;
-  virtual int        getPortNumber() const { return mportNumber;} ;
-  virtual char*      getTypeName() const ;
-  virtual char*      getDomainName() const ;
+  virtual int        getPortNumber() const;
+  virtual char*      printServerName();
+  virtual char*      printHostName();
+  virtual char*      printUnixSocket();
+  virtual char*      printUser();
+  virtual char*      printPword();
 
+  virtual void       setIsDefaultServer();
+  virtual bool       isDefault() const ;
+
+  // set methods for identifiers
+  virtual void addDataBase(StDbType type, StDbDomain domain)             =0; 
+  virtual void addDataBase(const char* typeName, const char* domName)    =0;
+  virtual StDataBaseI* useDb(StDbType type, StDbDomain domain)           =0;
+  virtual StDataBaseI* useDb(const char* typeName, const char* domName)  =0;
+  virtual StDataBaseI* useDb()                                           =0;
   // connection & check connections
-  virtual void  init() { initServer(); };
-  virtual bool  isConnected();
-  virtual bool  hasConnected() const { return mconnectState; }
-  virtual bool  isDefault() const { return misDefault; };
-  virtual bool  reConnect();
-  virtual void  closeConnection();
+  virtual bool  isConnected()                                            =0;
+  virtual void  closeConnection()                                        =0;
+  virtual void  setTimeLogging(bool isTimeLogged)                        =0;
+  virtual double getQueryTimes()                                         =0;
+  virtual double getSocketTimes()                                        =0;
+  virtual double getConnectTimes()                                        =0;
 
-  // timestamp translation
-  virtual unsigned int getUnixTime(const char* dateTime);
-  virtual char*        getDateTime(unsigned int time);
-  
-  // Query access to the DataBase
-  virtual bool QueryDb(StDbTable* table, unsigned int reqTime);
-  virtual bool QueryDb(StDbTable* table, const char* whereClause);
-  virtual int  WriteDb(StDbConfigNode* node, int currentID);
-
-  virtual bool QueryDb(StDbConfigNode* node);
-  virtual bool QueryDb(StDbNode* node);
-  virtual bool WriteDb(StDbTable* table, unsigned int storeTime);
-
-  virtual bool rollBack(StDbNode* node);
-  virtual bool rollBack(StDbTable* table);
-  virtual bool QueryDescriptor(StDbTable* table);
-  virtual bool selectDb();
-
-  // provide direct SQL access
-  virtual tableQuery* getQueryObject();
-  virtual void setQueryObject(tableQuery* queryObject);
-
-  virtual void connectError();
- 
 };
 
-
-inline
-bool
-StDbServer::isConnected() {
-
-if(!mconnectState)return false; // never connected
-return mdatabase->IsConnected();
-
-}
- 
-////////////////////////////////////////////////////////////////
-
-inline
-void
-StDbServer::closeConnection(){ 
- mdatabase->close();
- mconnectState=false;
-}
-
-
-////////////////////////////////////////////////////////////////
-
-inline
-bool StDbServer::selectDb(){
-  if(!mdatabase->IsConnected()) initServer();
-  return mdatabase->selectDb(mdbName,mdbType,mdbDomain);
-}
-
-////////////////////////////////////////////////////////////////
-
-inline
-tableQuery* 
-StDbServer::getQueryObject(){ return mdatabase;}
-
-////////////////////////////////////////////////////////////////
-
-inline
-void 
-StDbServer::setQueryObject(tableQuery* queryObject){ 
-mdatabase=queryObject;
-mconnectState=mdatabase->IsConnected();
-}
-
-inline
-void StDbServer::connectError() {
-cerr<<"ERROR:: No Connection to Database =";
-if(!mdbName){  
-   cerr<<"name-unknown"<<endl; } else {
-   cerr<<mdbName<< endl;
-}
-}
+inline void  StDbServer::setPortNumber(int port){ mportNumber = port;}
+inline int   StDbServer::getPortNumber() const  { return mportNumber; }
+inline char* StDbServer::printServerName()      { return mserverName; }
+inline char* StDbServer::printHostName()        { return mhostName; }
+inline char* StDbServer::printUnixSocket()      { return munixSocket; }
+inline char* StDbServer::printUser()            { return muserName; }
+inline char* StDbServer::printPword()           { return mpword; }
+inline void  StDbServer::setIsDefaultServer()   { misDefault=true; }
+inline bool  StDbServer::isDefault() const      { return misDefault; }
 
 #endif
-

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.20 2000/08/15 22:51:52 porter Exp $
+ * $Id: StDbTable.cc,v 1.21 2001/01/22 18:38:00 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,22 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.21  2001/01/22 18:38:00  porter
+ * Update of code needed in next year running. This update has little
+ * effect on the interface (only 1 method has been changed in the interface).
+ * Code also preserves backwards compatibility so that old versions of
+ * StDbLib can read new table structures.
+ *  -Important features:
+ *    a. more efficient low-level table structure (see StDbSql.cc)
+ *    b. more flexible indexing for new systems (see StDbElememtIndex.cc)
+ *    c. environment variable override KEYS for each database
+ *    d. StMessage support & clock-time logging diagnostics
+ *  -Cosmetic features
+ *    e. hid stl behind interfaces (see new *Impl.* files) to again allow rootcint access
+ *    f. removed codes that have been obsolete for awhile (e.g. db factories)
+ *       & renamed some classes for clarity (e.g. tableQuery became StDataBaseI
+ *       and mysqlAccessor became StDbSql)
+ *
  * Revision 1.20  2000/08/15 22:51:52  porter
  * Added Root2DB class from Masashi Kaneta
  * + made code more robust against requesting data from non-existent databases
@@ -86,6 +102,22 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.21  2001/01/22 18:38:00  porter
+ * Update of code needed in next year running. This update has little
+ * effect on the interface (only 1 method has been changed in the interface).
+ * Code also preserves backwards compatibility so that old versions of
+ * StDbLib can read new table structures.
+ *  -Important features:
+ *    a. more efficient low-level table structure (see StDbSql.cc)
+ *    b. more flexible indexing for new systems (see StDbElememtIndex.cc)
+ *    c. environment variable override KEYS for each database
+ *    d. StMessage support & clock-time logging diagnostics
+ *  -Cosmetic features
+ *    e. hid stl behind interfaces (see new *Impl.* files) to again allow rootcint access
+ *    f. removed codes that have been obsolete for awhile (e.g. db factories)
+ *       & renamed some classes for clarity (e.g. tableQuery became StDataBaseI
+ *       and mysqlAccessor became StDbSql)
+ *
  * Revision 1.20  2000/08/15 22:51:52  porter
  * Added Root2DB class from Masashi Kaneta
  * + made code more robust against requesting data from non-existent databases
@@ -165,75 +197,35 @@
  **************************************************************************/
 #include "StDbTable.h"
 #include "StDbBuffer.h"
+#include "StDbDefaults.hh"
 #include <string.h>
 #include <iostream.h>
 #include <strstream.h>
 #include <malloc.h>
+#ifdef __ROOT__
+ClassImp(StDbTable)
+#endif
 
-
-///////////////////////////////////////////////////////////////
-
-StDbTable::StDbTable(const char* tableName): StDbNode(tableName), mhasDescriptor(false), mdescriptor(0), mdata(0), mhasData(false), mstoreMode(false) { 
-
- mschemaID=0;
- mendTime.munixTime=0;
- mrows=0; 
- mrowNumber=0;
- melementID = 0;
- mdataIDs = 0;
- mdataRows = 0;
- mMaxRows = 500;
-
- setDefaultFlavor();
- mprodTime = StDbDefaults::Instance()->getProdTime();
-
-}
+#define __CLASS__ "StDbTable"
 
 ///////////////////////////////////////////////////////////////
+StDbTable::StDbTable(const char* tableName): StDbNode(tableName) { init();};
 
-StDbTable::StDbTable(const char* tableName, int schemaID): StDbNode(tableName), mhasDescriptor(false), mdescriptor(0), mdata(0), mhasData(false), mstoreMode(false) { 
+StDbTable::StDbTable(const char* tableName, int schemaID): StDbNode(tableName) {  mschemaID=schemaID; }
 
-mendTime.munixTime=0;
-mschemaID=schemaID;
-mrows=0;
-mrowNumber=0;
-melementID = 0;
- mdataIDs = 0;
- mdataRows = 0;
- mMaxRows = 500;
 
- setDefaultFlavor();
- mprodTime = StDbDefaults::Instance()->getProdTime();
+StDbTable::StDbTable(StDbTable& table): StDbNode(table) {
 
-}
-
-///////////////////////////////////////////////////////////////
-
-StDbTable::StDbTable(StDbTable& table): StDbNode(table){
-
-melementID=0;
-
+ init();
  strncpy(mflavor,table.getFlavor(),sizeof(mflavor));
  mdefaultFlavor = table.defaultFlavor();
  mprodTime = table.getProdTime();
 
- StDbNodeInfo mnode;
- table.getNodeInfo(&mnode);
- setNodeInfo(&mnode);
  mschemaID = table.getSchemaID();
- mstoreMode = table.IsStoreMode();
- mdescriptor=0;
- mdata = 0;
- mhasData = false;
- mrowNumber = 0;
  mrows = table.GetNRows();
  mhasDescriptor=table.hasDescriptor();
  mdescriptor=table.getDescriptorCpy();
  
- mdataIDs = 0;
- mdataRows = 0;
- mMaxRows = 500;
-
  mbeginTime.setDateTime(table.getBeginDateTime());
  mbeginTime.setUnixTime(table.getBeginTime());
  mendTime.setDateTime(table.getEndDateTime());
@@ -248,50 +240,86 @@ melementID=0;
    mhasData = true;
  }
 
+ setCstructName(table.printCstructName());
+ setDataTable(table.printDataTable());
 
 }
+
+void StDbTable::init() {
+ mstructName        = 0; 
+ melementName       = 0;
+ mdataTable         = 0; 
+ melementID         = 0;
+ mhasDescriptor     = false;
+ mdescriptor        = 0; 
+ mdata              = 0; 
+ mhasData           = false; 
+ mrowsRequested     = 0;
+ mtimeVals          = 0;
+ mendTime.munixTime = 0;
+ mrows              = 0;
+ mrowNumber         = 0;
+ mprodTime          = StDbDefaults::Instance()->getProdTime();
+ setDefaultFlavor();
+
+}
+
+////////////////////////////////////////////////////////////////////
+void StDbTable::setNodeInfo(StDbNode* node){
+
+    mdbType=node->getDbType();
+    mdbDomain=node->getDbDomain();
+    setDbName(node->printDbName());
+    setVersion(node->printVersion());
+    setNodeType(node->printNodeType());
+    mnodeID=node->getNodeID();
+};
+
+/////////////////////////////////////////////////////////////////////
+void StDbTable::setCstructName(const char* name){ mstructName=mstrDup(name); }
+
+/////////////////////////////////////////////////////////////////////
+char* StDbTable::getCstructName() { return mstrDup(mstructName); }
+
+/////////////////////////////////////////////////////////////////////
+void StDbTable::setDataTable(const char* name){ mdataTable=mstrDup(name); }
+
+/////////////////////////////////////////////////////////////////////
+char* StDbTable::getDataTable() { return mstrDup(mdataTable); }
 
 /////////////////////////////////////////////////////////////////////
 void
-StDbTable::setNodeInfo(StDbNodeInfo* node){
-
-  StDbNode::setNodeInfo(node);
-  if(melementID) delete [] melementID;
-  melementID = mnode.getElementID((const char*)mnode.elementID,mrows);
-    
+StDbTable::setDefaultFlavor(){ setFlavor(StDbDefaults::Instance()->printFlavor());
 }
 
 /////////////////////////////////////////////////////////////////////
-
-void
-StDbTable::setDefaultFlavor(){
-
-  char* flavor = StDbDefaults::Instance()->getFlavor();
-  strncpy(mflavor,flavor,sizeof(mflavor));
-  delete [] flavor;
-  mdefaultFlavor = true;
-
-}
-
-/////////////////////////////////////////////////////////////////////
-
 void 
 StDbTable::setFlavor(const char* flavor) { 
- if(flavor){
-   strncpy(mflavor,flavor,sizeof(mflavor)); 
-   mdefaultFlavor = StDbDefaults::Instance()->IsDefaultFlavor(mflavor);
- }
+  if(flavor) strcpy(mflavor,flavor);  
+  mdefaultFlavor = StDbDefaults::Instance()->IsDefaultFlavor(mflavor);
 }
 
 /////////////////////////////////////////////////////////////////////
+void
+StDbTable::addWrittenRows(int* dataID, int numRows, bool canRollBack){
 
+  for(int i=0; i<numRows; i++) mstoredData.addWrittenRow(dataID[i]);
+  if(canRollBack)mcanRollBack=true;
+
+}
+
+int*  
+StDbTable::getWrittenRows(int& nRows){ 
+       return mstoredData.getDataIDs(nRows); 
+}
+void StDbTable::commitData()         { mstoredData.commit(); }
+void StDbTable::clearStoreInfo()     { mstoredData.resetStoreInfo(); }
+
+/////////////////////////////////////////////////////////////////////
 StTableDescriptorI*
-StDbTable::getDescriptorCpy() const {
-return mdescriptor->getCpy();
-}
+StDbTable::getDescriptorCpy() const { return mdescriptor->getCpy(); }
 
 /////////////////////////////////////////////////////////////////////
-
 void 
 StDbTable::setDescriptor(StTableDescriptorI* descriptor){ 
 
@@ -303,29 +331,23 @@ StDbTable::setDescriptor(StTableDescriptorI* descriptor){
 
 };
 
+/////////////////////////////////////////////////////////////////////
+char* StDbTable::GetTable() { if(!mdata)createMemory(); return mdata;};
 
 /////////////////////////////////////////////////////////////////////
-
-char* 
-StDbTable::GetTable() { if(!mdata)createMemory(); return mdata;};
-
-/////////////////////////////////////////////////////////////////////
-
 void* 
 StDbTable::GetTableCpy() { 
 
 if(!mdata)return (void*)GetTable();
 
  int len =  mrows*getTableSize();
-//char* c = new char[len];
-char* c = (char*)calloc(mrows,getTableSize());
-memcpy(c,mdata,len);
+ char* c = (char*)calloc(mrows,getTableSize());
+ memcpy(c,mdata,len);
 
 return (void*)c;
 };
 
 /////////////////////////////////////////////////////////////////////
-
 void 
 StDbTable::SetTable(char* c, int nrows, int* idList) { 
 
@@ -341,12 +363,10 @@ if(mdata){
 int len = nrows*getTableSize();
 memcpy(mdata,c,len);
 mhasData=true;
-mstoreMode=true;
 
 }
 
 /////////////////////////////////////////////////////////////////////
-
 void 
 StDbTable::AddRows(char* c, int nrows) { 
 
@@ -371,19 +391,44 @@ delete [] tmpData;
 mhasData=true;
 
 }
-/////////////////////////////////////////////////////////////////////
 
+/////////////////////////////////////////////////////////////////////
+void*
+StDbTable::getDataValue(const char* name, int rowNumber){
+
+  void* retVal=0;
+  int saveRowNum=mrowNumber;
+  mrowNumber=rowNumber;
+  int max = mdescriptor->getNumElements();
+  char* ename=0;
+  StTypeE type;
+  unsigned int length;
+  char * ptr;
+
+  for(int i=0;i<max;i++){ 
+    getElementSpecs(i,ptr,ename,length,type);
+    if(strcmp(name,ename)==0)break;
+    if(ename) delete [] ename;
+    ename=0;
+  }
+
+  mrowNumber=saveRowNum;
+  if(!ename) return retVal;
+
+  delete [] ename;
+  return (void*)ptr;
+}
+
+/////////////////////////////////////////////////////////////////////
 char*
 StDbTable::duplicateData() { 
 
-char* dup=0;
-
+ char* dup=0;
  int len1 = mrows*getTableSize();
  if(len1 !=0){
   dup=new char[len1];
   memcpy(dup,mdata,len1);
  }
-
 return dup;
 }
 
@@ -415,7 +460,7 @@ StDbTable::createMemory(int nrows) {
        delete [] name;
      }
   } else {
-    if(!mnode.name){mnode.mstrCpy(mnode.name,"Unknown");}
+    if(!mname){mname=mstrDup("Unknown");}
     retVal = false;
   }
 
@@ -423,93 +468,91 @@ return retVal;
 }
 
 /////////////////////////////////////////////////////////////////////
-
 bool
 StDbTable::createMemory() {
-
   if(mdata)return true;
   if(mrows==0) mrows=1;
   return createMemory(mrows);
 }
     
 //////////////////////////////////////////////////////////////////////
+char*
+StDbTable::getElementName() { return mstrDup(melementName); };
 
 void
+StDbTable::setElementName(const char* name) { melementName=mstrDup(name);};
+
+void 
 StDbTable::setElementID(int* elements, int nrows) { 
 
    createMemory(nrows);
    // set up & fill char* will element list
-   if(mnode.elementID) delete [] mnode.elementID;
-   mnode.elementID = new char[4*nrows];
-   ostrstream os(mnode.elementID,4*nrows);
-
-   for(int i=0;i<nrows-1;i++){
-     os<<elements[i]<<",";
-   }
-   os<<elements[nrows-1]<<ends;
-
-   //set up & fill int* with element list
    if(melementID) delete [] melementID;
    melementID = new int[nrows];
-   memcpy(melementID,elements,nrows*sizeof(int));
-
+   memcpy(melementID, elements, nrows*sizeof(int));
 }
 
 //////////////////////////////////////////////////////////////////////
-
 void
-StDbTable::addWrittenRow(int dataID){
+StDbTable::addNRows(int numRows){
 
-  if(mdataRows==mMaxRows){
-    int newMax = 2*mMaxRows;
-    int* tmp= new int[newMax];
-    memcpy(tmp,mdataIDs,mMaxRows*(sizeof(int)));
-    delete [] mdataIDs;
-    mdataIDs = tmp;
-    mMaxRows = newMax;
-  } else if( mdataRows == 0){
-   mdataIDs = new int[mMaxRows];
-   mcanRollBack = true;
+  if(!mdescriptor) return;
+
+  int newRows = numRows+mrows;
+  unsigned int rowsize=mdescriptor->getTotalSizeInBytes();
+  unsigned int len = newRows*rowsize;
+  char* newData = new char[len]; 
+  if(mdata)memcpy(newData,mdata,mrows*rowsize);
+  char* p1 = newData;
+  p1+=mrows*rowsize;
+  memset(p1,0,numRows*rowsize);
+  delete [] mdata;
+  mdata=newData;
+  mrows = newRows;
+
+};
+
+//////////////////////////////////////////////////////////////////////
+void
+StDbTable::addNElements(int* elements, int numRows){
+
+  if(!melementID) {
+    setElementID(elements,numRows);
+    return;
   }
 
-  mdataIDs[mdataRows] = dataID;
-  mdataRows++;
+  int* newData = new int[mrows+numRows];
+  memcpy(newData,melementID,(mrows)*sizeof(int));
+  memcpy(&newData[mrows],elements,(numRows)*sizeof(int));
+  delete [] melementID;
+  melementID = newData;
+  //  mrows+=numRows;
 
-}
+}  
   
 //////////////////////////////////////////////////////////////////////
-
 void
 StDbTable::StreamAccessor(typeAcceptor* accept, bool isReading){
 
    int len = 1;
-
    accept->pass((char*)"schemaID",mschemaID,len);
 
    if(isReading){
-
-   if(mbeginTime.mdateTime) delete [] mbeginTime.mdateTime;
-   if(mnode.versionKey)delete [] mnode.versionKey;
-   if(mnode.elementID)delete [] mnode.elementID;
-   if(melementID)delete [] melementID;
-
+     if(mbeginTime.mdateTime) delete [] mbeginTime.mdateTime;
+     if(mversion)delete [] mversion;
+     if(melementID)delete [] melementID;
    } else {
-
      if(!melementID){
        melementID = new int[mrows];
        for(int i=0;i<mrows;i++)melementID[i]=i;
      }
-
    }
-
    accept->pass((char*)"beginTime",mbeginTime.mdateTime,len);
-   accept->pass((char*)"version",mnode.versionKey,len);
+   accept->pass((char*)"version",mversion,len);
    accept->pass((char*)"elementID",melementID, mrows);
- 
 }
 
 //////////////////////////////////////////////////////////////////////
-
 void
 StDbTable::StreamAccessor(StDbBufferI* buff, bool isReading){
 
@@ -517,11 +560,10 @@ StDbTable::StreamAccessor(StDbBufferI* buff, bool isReading){
   if(!(ClientMode=buff->IsClientMode()))buff->SetClientMode();
 
   int rowID;
-
-   if(!melementID){
+  if(!melementID){
      melementID = new int[mrows];
      for(int i=0;i<mrows;i++)melementID[i]=i;
-   }
+  }
 
   if(isReading){
     buff->ReadScalar(rowID,"elementID");
@@ -529,10 +571,8 @@ StDbTable::StreamAccessor(StDbBufferI* buff, bool isReading){
 
     if(mrowNumber==0){
      buff->ReadScalar(mschemaID,"schemaID");
-     char* version = 0;
-     buff->ReadScalar(version,"version");
-     if(version)mnode.mstrCpy(mnode.versionKey,version);
-     if(version)delete [] version;
+     if(mversion) delete [] mversion;
+     buff->ReadScalar(mversion,"version");
     } else {
       unsigned int bTime;// , eTime;
       buff->ReadScalar(bTime,"beginTime"); 
@@ -543,10 +583,9 @@ StDbTable::StreamAccessor(StDbBufferI* buff, bool isReading){
 
    buff->WriteScalar(mschemaID,"schemaID");
    buff->WriteScalar(mbeginTime.munixTime,"beginTime");
-   buff->WriteScalar(mnode.versionKey,"version");
+   if(mversion)buff->WriteScalar(mversion,"version");
    rowID = melementID[mrowNumber];   
    buff->WriteScalar(rowID,"elementID");
-
   }
 
  if(!ClientMode)buff->SetStorageMode();  // reset to StorageMode
@@ -554,11 +593,11 @@ StDbTable::StreamAccessor(StDbBufferI* buff, bool isReading){
 }
 
 ///////////////////////////////////////////////////////////////////////
-
 void
 StDbTable::getElementSpecs(int elementNum, char*& c, char*& name, unsigned int& length,StTypeE& type){
 
-    int rowIndex = mrowNumber*mdescriptor->getTotalSizeInBytes();
+    unsigned int tSize=mdescriptor->getTotalSizeInBytes();
+    unsigned int rowIndex = ((unsigned int)mrowNumber)*tSize;
     int i = elementNum;
     c = &mdata[rowIndex];
     int current = mdescriptor->getElementOffset(i);
@@ -571,7 +610,6 @@ return;
 }
 
 ///////////////////////////////////////////////////////////////////////
-
 void
 StDbTable::dbStreamer(StDbBufferI* buff, bool isReading){
 
@@ -596,13 +634,12 @@ char* ptr;
    delete [] name;
  }
 
- mrowNumber++;
- if(isReading)mhasData=true;
+  mrowNumber++;
+  if(isReading)mhasData=true;
 
  } else {
    cerr << "dbStreamer:: more rows delivered than allocated " << endl;
  }
-
  if(!ClientMode)buff->SetStorageMode();  // reset to StorageMode
 }
 
@@ -627,17 +664,12 @@ char* ptr;
    //    getElementSpecs(i,ptr,name,length,type);
    if(isReading){
      ReadElement(ptr,(char *) name,length,type,(StDbBuffer*)buff);
-     } else {
+   } else {
      WriteElement(ptr,(char *) name,length,type,(StDbBuffer*)buff);
-    }       
- mrowNumber=mrows;
-
- if(isReading) mhasData=true;
- } else {
-   cerr << "dbTableStreamer:: more rows delivered than allocated " << endl;
-   cerr << " #of rows= "<<mrows<< " current row= "<<mrowNumber << endl;
+   }       
+  mrowNumber=mrows;
+  if(isReading) mhasData=true;
  }
-
 
  if(!ClientMode)buff->SetStorageMode();  // reset to StorageMode
 }
@@ -659,30 +691,22 @@ char* ptr;
    if(isReading){
      for(int i=0; i<max; i++){
       getElementSpecs(i,ptr,name,length,type);
-      // cout << "Acceptor offset is " << ptr-mdata << endl;
       PassInElement(ptr,name,length,type,accept);
       delete [] name;
      }
      mhasData=true;
-     mstoreMode=true; // For Reading from Xml-into database
    } else {
      for(int i=0; i<max; i++){
       getElementSpecs(i,ptr,name,length,type);
-      // cout << "Acceptor offset is " << ptr-mdata << endl;
       PassOutElement(ptr,name,length,type,accept);
       delete [] name;
      }
    }
 
  mrowNumber++;
-
-
- } else {
-   cerr << "Cannot Stream Data" << endl;
  }
 
 }
-
 
 ///////////////////////////////////////////////////////////////////////
 
@@ -696,23 +720,18 @@ float* mfloat; double* mdouble;
   switch (type) {
   case Stchar:
     {
-           char commentName[1024];
-           ostrstream cn(commentName,1024);
-           cn<<name<<".text"<<ends;
-           //      buff->ReadScalar(mchar,name);
-           mchar = 0;
-           if(!buff->ReadScalar(mchar,commentName))
-                buff->ReadScalar(mchar,name);              
-           if(mchar){
+        char commentName[1024];
+        ostrstream cn(commentName,1024);
+        cn<<name<<".text"<<ends;
+        mchar = 0;
+        if(!buff->ReadScalar(mchar,commentName))buff->ReadScalar(mchar,name);
+        if(mchar){
              unsigned int len1=strlen(mchar);
              strncpy(ptr,mchar,len1);
              delete [] mchar;
-           } else {
+        } else {
              *ptr='\0';
-           }
-      //    buff->ReadArray(mchar,len,name);
-      //    cout << "In ReadArray " << len << " & " << mchar << endl;
-      //    memcpy(ptr,mchar,len);
+        }
 
     break;
     }
@@ -726,7 +745,6 @@ float* mfloat; double* mdouble;
     }
   case Stshort:
     {
- 
       if(buff->ReadArray(mshort,len,name)){
         memcpy(ptr,mshort,len*sizeof(short));
         delete [] mshort;
@@ -873,7 +891,6 @@ StDbTable::WriteElement(char* ptr, char* name, int len, StTypeE type, StDbBuffer
 }
 
 ///////////////////////////////////////////////////////////////////////
-
 void
 StDbTable::PassInElement(char* ptr, char* name, int len, StTypeE type, typeAcceptor* accept){
 
@@ -897,89 +914,69 @@ StDbTable::PassInElement(char* ptr, char* name, int len, StTypeE type, typeAccep
     }
   case Stshort:
     {
-
      short* data; 
      accept->pass(name,data,len);
      memcpy(ptr,data,len*sizeof(short));
      delete [] data;
      break;
-
     }
   case Stushort:
     {
-
      unsigned short* data; 
      accept->pass(name,data,len);
      memcpy(ptr,data,len*sizeof(short));
      delete [] data;
      break;
-
     }
   case Stint:
     {
-
      int* data; 
      accept->pass(name,data,len);
      memcpy(ptr,data,len*sizeof(int));
      delete [] data;
      break;
-
     }
   case Stuint:
     {
-
      unsigned int* data; 
      accept->pass(name,data,len);
      memcpy(ptr,data,len*sizeof(int));
      delete [] data;
      break;
-
     }
   case Stlong:
     {
-
      long* data; 
      accept->pass(name,data,len);
      memcpy(ptr,data,len*sizeof(long));
      delete [] data;
      break;
-
-   }
+    }
   case Stulong:
     {
-
      unsigned long* data; 
      accept->pass(name,data,len);
      memcpy(ptr,data,len*sizeof(long));
      delete [] data;
      break;
-
     }
   case Stfloat:
     {
-
      float* data; 
-     //     cout << "1st = " << len << endl; 
      accept->pass(name,data,len);
-     //     cout << "2st = " << len << " & " << *data << endl;
      memcpy(ptr,data,len*sizeof(float));
      delete [] data;
      break;
-
     }
   case Stdouble:
     {
-
      double* data; 
      accept->pass(name,data,len);
      memcpy(ptr,data,len*sizeof(double));
      delete [] data;
      break;
-
     }
-
   }
-
 }
 
 ///////////////////////////////////////////////////////////////////////
@@ -1080,31 +1077,21 @@ StDbTable::PassOutElement(char* ptr, char* name, int len, StTypeE type, typeAcce
     break;
     }
   }
-
 }
 
 /////////////////////////////////////////////////////////////////
-
-
 void
 StDbTable::checkDescriptor(){
 
 int i = mdescriptor->getNumElements();
 unsigned int size = mdescriptor->getTotalSizeInBytes();
-
- cout <<"Descriptor for Table = " << mnode.name<<endl;
+ cout <<"Descriptor for Table = " << mname<<endl;
  cout <<" number of elements = "<<i<< " with size = " << size << endl;
-
  for(int k=0; k<i;k++){
    cout <<"Name = " << mdescriptor->getElementName(k);
    cout <<" size = " << mdescriptor->getElementSize(k);
    cout <<" offset = " <<mdescriptor->getElementOffset(k);
    cout <<" type = " <<(int)mdescriptor->getElementType(k)<<endl;
  }
-
-
 }
-
-
-
-
+#undef __CLASS__

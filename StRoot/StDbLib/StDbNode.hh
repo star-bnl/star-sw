@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbNode.hh,v 1.4 2000/04/25 18:26:03 porter Exp $
+ * $Id: StDbNode.hh,v 1.5 2001/01/22 18:37:58 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,22 @@
  ***************************************************************************
  *
  * $Log: StDbNode.hh,v $
+ * Revision 1.5  2001/01/22 18:37:58  porter
+ * Update of code needed in next year running. This update has little
+ * effect on the interface (only 1 method has been changed in the interface).
+ * Code also preserves backwards compatibility so that old versions of
+ * StDbLib can read new table structures.
+ *  -Important features:
+ *    a. more efficient low-level table structure (see StDbSql.cc)
+ *    b. more flexible indexing for new systems (see StDbElememtIndex.cc)
+ *    c. environment variable override KEYS for each database
+ *    d. StMessage support & clock-time logging diagnostics
+ *  -Cosmetic features
+ *    e. hid stl behind interfaces (see new *Impl.* files) to again allow rootcint access
+ *    f. removed codes that have been obsolete for awhile (e.g. db factories)
+ *       & renamed some classes for clarity (e.g. tableQuery became StDataBaseI
+ *       and mysqlAccessor became StDbSql)
+ *
  * Revision 1.4  2000/04/25 18:26:03  porter
  * added flavor & production time as settable query fields in
  * table &/or node. Associated SQL updated in mysqlAccessor.
@@ -42,154 +58,112 @@
 #define STDBNODE_HH
 
 #include "StDbDefs.hh"
-#include "StDbNodeInfo.hh"
 #include <string.h>
+#ifdef __ROOT__
+#include "TROOT.h"
+#endif
 
 class StDbNode {
 
 protected:
 
-StDbNodeInfo mnode;
-bool misConfigured;
-bool misNode;
-bool mcanRollBack;
+  // unique node identfier
+  char * mname;
+  char * mversion;
+  char * mdbName;
+  StDbType mdbType;
+  StDbDomain mdbDomain;
 
-StDbDefaults* defaults;
-bool mdefaultVersion;
+  // from db
+  int   mnodeID;
+  char* mnodeType;
+
+  bool misConfigured;
+  bool mcanRollBack;
 
 public:
 
-   StDbNode(StDbNodeInfo* node);
+   StDbNode() : mname(0), mversion(0), mdbName(0), mnodeID(0), mnodeType(0) {};
    StDbNode(const char* name, const char* versionKey);
    StDbNode(const char* name);
    StDbNode(StDbNode& node);
 
-   virtual ~StDbNode() {};
+   virtual ~StDbNode();
 
-   virtual void  setNodeInfo(StDbNodeInfo* node);
-   virtual void  getNodeInfo(StDbNodeInfo* node);
-   
-   virtual char* getName() ;
-   virtual char* getMyName() ;
-   virtual char* getVersion() ;
-   virtual char* getDbName() ;
-   virtual char* getCstrName();
-   virtual StDbType getDbType() const;
-   virtual StDbDomain getDbDomain() const;
-   virtual int getNodeID() const;
-   
-   virtual void  setName(const char* nodeName);
-   virtual void  setVersion(const char* nodeVersion);
-   virtual void  setDbName(const char* nodeDbName);
-   virtual void  setDbType(StDbType type);
-   virtual void  setDbDomain(StDbDomain domain);
-   virtual void  setNodeID(int id);
-   virtual void  setElementID(const char* elementID);
-   virtual char* getElementID() ;
-   virtual int*  getElementID(int& nrows) ;
+   char* getName() ;
+   char* printName() ;
+   char* getMyName() ;
+   char* getVersion() ;
+   char* printVersion() ;
+   char* getDbName() ;
+   char* printDbName();
+   StDbType getDbType() const;
+   StDbDomain getDbDomain() const;
+   int getNodeID() const;
+   char* getNodeType() ;
+   char* printNodeType();
+  
+   void  setName(const char* nodeName);
+   void  setVersion(const char* nodeVersion);
+   void  setDbName(const char* nodeDbName);
+   void  setDbType(StDbType type);
+   void  setDbDomain(StDbDomain domain);
+   void  setNodeID(int id);
+   void  setNodeType(const char* nodeType);
 
+  // write transactions
+   bool  canRollBack() const;
+   void  addWrittenNode(int dataID);
+   void  commit();
 
-   virtual bool  defaultVersion() const { return mdefaultVersion; }
-   virtual void  setConfigured(bool isConfigured);
-   virtual bool  IsConfigured() const ;
-   virtual void  setAsNode(bool isNode);
-   virtual bool  IsNode() const;
-   virtual bool  canRollBack() const;
-   virtual void  addWrittenNode(int dataID);
-   virtual void  commit();
-
-   virtual bool  checkName(const char* nodeName) const;
-   virtual bool  checkVersion(const char* nodeVersion) const;
-   virtual bool  checkNode(const char* nodeName, const char* nodeVersion) const;
-
-   virtual bool IsBaseLine() const;
-   virtual bool IsIndexed() const;
-   virtual bool IsBinary() const;
-   
-};
-
-inline
-char* StDbNode::getMyName() { return mnode.name; }
-
-inline 
-char* StDbNode::getCstrName() { return mnode.structName; }
-
-inline
-StDbType StDbNode::getDbType() const { return mnode.dbType;}
-
-inline
-StDbDomain StDbNode::getDbDomain() const { return mnode.dbDomain; }
-
-inline
-void StDbNode::setDbType(StDbType type) { mnode.dbType=type;}
-
-inline
-void StDbNode::setDbDomain(StDbDomain domain) { mnode.dbDomain=domain; }
-
-inline
-int StDbNode::getNodeID() const { return mnode.nodeID; }
-
-inline
-void StDbNode::setNodeID(int id ) {mnode.nodeID = id; }
-
-inline
-void StDbNode::setConfigured(bool isConfigured){ misConfigured=isConfigured; }
-
-inline
-bool StDbNode::IsConfigured() const { return misConfigured; }
-
-inline
-void StDbNode::setAsNode(bool isNode){ misNode=isNode; }
-
-inline
-bool StDbNode::IsNode() const { return misNode; }
-
-inline
-bool StDbNode::canRollBack() const { return mcanRollBack; }
-
-inline
-void StDbNode::addWrittenNode(int dataID){
- mcanRollBack=true;
- mnode.nodeID=dataID;
-}
-
-inline
-void StDbNode::commit() { mcanRollBack = false; }
-
-inline
-bool StDbNode::checkName(const char* nodeName) const {
-if(mnode.name && strcmp(mnode.name,nodeName)==0)return true;
-return false;
-}
-
-inline
-bool StDbNode::checkVersion(const char* nodeVersion) const {
-if(mnode.versionKey && strcmp(mnode.versionKey,nodeVersion)==0)return true;
-return false;
-}
-
-inline
-bool StDbNode::checkNode(const char* nodeName, const char* nodeVersion) const {
-return (checkName(nodeName) && checkVersion(nodeVersion));
-}
-
-inline
-bool StDbNode::IsBinary() const { return mnode.IsBinary; }
-
-inline
-bool StDbNode::IsBaseLine() const { return mnode.IsBaseLine; }
-
-inline
-bool StDbNode::IsIndexed() const { return mnode.IsIndexed; }
-
+  // string comparisons
+   bool  checkName(const char* nodeName) const;
+   bool  checkVersion(const char* nodeVersion) const;
+   bool  checkNode(const char* nodeName, const char* nodeVersion) const;
+   bool  IsConfigured() const;
+   void  setConfigured(bool isConfigured);
+   bool  isNode(StDbType type, StDbDomain domain);
+   virtual bool IsTable() const;
+ 
+  // helper functions 
+   char* mstrDup(const char* s2) ;  // strdup isn't ANSI
+   int*  decodeElementID(const char* elementID, int& numRows) ;
+   char* getNextID(char*& currentElement) const;
+#ifdef __ROOT__
+  ClassDef(StDbNode,0)
 #endif
 
-
-
-
-
-
-
-
-
-
+};
+inline char* StDbNode::printName()     { return mname; };
+inline char* StDbNode::printDbName()   { return mdbName; };
+inline char* StDbNode::printNodeType() { return mnodeType; };
+inline char* StDbNode::printVersion()  { return mversion; };
+inline char* StDbNode::getMyName()     { return printName(); }
+inline StDbType   StDbNode::getDbType() const   { return mdbType;}
+inline StDbDomain StDbNode::getDbDomain() const { return mdbDomain; }
+inline void StDbNode::setDbType(StDbType type)       { mdbType=type;}
+inline void StDbNode::setDbDomain(StDbDomain domain) { mdbDomain=domain; }
+inline int  StDbNode::getNodeID() const  { return mnodeID; }
+inline void StDbNode::setNodeID(int id ) {mnodeID = id; }
+inline void StDbNode::setConfigured(bool isC){ misConfigured=isC; }
+inline bool StDbNode::IsConfigured() const { return misConfigured; }
+inline bool StDbNode::isNode(StDbType type, StDbDomain domain){
+  return ( (type==mdbType) && (domain==mdbDomain) ) ? true : false;
+}
+inline bool StDbNode::canRollBack() const { return mcanRollBack; }
+inline void StDbNode::addWrittenNode(int dataID){
+ mcanRollBack=true;
+ mnodeID=dataID;
+}
+inline void StDbNode::commit() { mcanRollBack = false; }
+inline bool StDbNode::checkName(const char* nodeName) const {
+return (mname && (strcmp(mname,nodeName)==0)) ? true : false;
+}
+inline bool StDbNode::checkVersion(const char* nodeVersion) const {
+return (mversion && (strcmp(mversion,nodeVersion)==0)) ? true : false;
+}
+inline bool StDbNode::checkNode(const char* name, const char* version) const {
+return (checkName(name) && checkVersion(version)) ? true : false;
+}
+inline bool StDbNode::IsTable() const { return false; }
+#endif
