@@ -1,3 +1,9 @@
+// History of modifications
+// 06/11/99
+//Loop index changed from l to ll to compensate for the problems this
+//compiler has with the scope ov variables that are in parentheses
+//Place in the code marked with the above comment.
+
 #include <stdio.h>
 #include <assert.h>
 #include <sys/types.h>
@@ -62,7 +68,9 @@ void dump_data(char* buffer,int size,int width = 8 )
     }
   if(left_over)
     {
-      for(int l = 0 ; l < (width - left_over) ; l++) printf("           ") ;
+      //Loop index changed from l to ll to compensate for the problems this
+      //compiler has with the scope ov variables that are in parentheses
+      for(int ll = 0 ; ll < (width - left_over) ; ll++) printf("           ") ;
       printf(" || ") ;
       data_char = (char*)(&data[size - left_over ] ) ;
       for(int l = 0 ; l < left_over*4 ; l++)
