@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.34 2003/09/28 21:10:59 jeromel Exp $
+ * $Id: StMuDstMaker.cxx,v 1.35 2003/10/03 15:26:07 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -93,9 +93,9 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
   mDirName="./";
   mFileName="";
   streamerOff();
+  zeroArrays();
   if (mIoMode==ioRead) openRead();
   if (mIoMode==ioWrite) mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm();
-
 
   mEventCounter=0;
   mStMuDst = new StMuDst();
@@ -103,7 +103,6 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
   if ( ! mStMuDst || ! mEmcUtil)
     throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",PF);
 
-  zeroArrays();
   createArrays();
 
 
@@ -119,9 +118,9 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
 
 void StMuDstMaker::zeroArrays()
 {
-  for ( int i=0; i<__NARRAYS__; i++) {  arrays[i]=0;} 
-  for ( int i=0; i<__NSTRANGEARRAYS__; i++) { strangeArrays[i]=0;}
-  for ( int i=0; i<__NEMCARRAYS__; i++){ emcArrays[i] = 0;}
+  for ( int i=0; i<__NARRAYS__; i++) {        arrays[i] = 0;         mArrays[i] = 0;        } 
+  for ( int i=0; i<__NSTRANGEARRAYS__; i++) { strangeArrays[i] = 0;  mStrangeArrays[i] = 0; }
+  for ( int i=0; i<__NEMCARRAYS__; i++){      emcArrays[i] = 0;      mEmcArrays[i] = 0;     }
 }
 
 //-----------------------------------------------------------------------
@@ -139,6 +138,7 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   mProbabilityPidAlgorithm(0)  
 {
   streamerOff();
+  zeroArrays();
   if (mIoMode==ioRead) openRead();
   if (mIoMode==ioWrite) mProbabilityPidAlgorithm = new StuProbabilityPidAlgorithm();
   
@@ -150,8 +150,6 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
   if ( ! mStMuDst || ! mEmcUtil)
     throw StMuExceptionNullPointer("StMuDstMaker:: constructor. Something went horribly wrong, cannot allocate pointers",PF);
 
-  
-  zeroArrays();
   createArrays();
   
 }
@@ -916,6 +914,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.35  2003/10/03 15:26:07  laue
+ * some moe arrays initialized
+ *
  * Revision 1.34  2003/09/28 21:10:59  jeromel
  * More data members zeroed (would cause a crash on exit)
  *
