@@ -1,4 +1,4 @@
-/*CMZ :          06/06/98  19.02.33  by  Pavel Nevski*/
+/*CMZ :          17/06/98  21.50.49  by  Pavel Nevski*/
 /*-- Author :    Pavel Nevski   28/11/97*/
 /*****************************************************/
 /*               S T A F   i n t e r f a c e         */
@@ -8,8 +8,8 @@
 extern "C" void staf_start_    () {}
 extern "C" void staf_stop_     () {}
 extern "C" int  tdm_map_table_ () {return 0;}
-extern "C" void ami_module_register_ ()    {}
 extern "C" int  tdm_clear_all_ () {return 0;}
+extern "C" void ami_module_register_ ()    {}
  
 #else
 #include <stdio.h>
@@ -81,7 +81,11 @@ extern "C" void staf_stop_ ()
  
 /*---------------------------------------------------------------------------*/
  
-extern "C" int dui_cdir_ (char* path,int lp) { return dui->cd(path); }
+extern "C" int dui_cdir_ (char* path,int lp)
+{  if (!dui) return 0;
+   if (path[0]!='.') dui->mkdir(path);
+   return dui->cd(path);
+}
  
 /*---------------------------------------------------------------------------*/
  
@@ -210,8 +214,8 @@ extern "C" int  tdm_clear_all_  (char* path, int lp)
      for (j=mm[l]+1; j< ds->elcount; j++)
      {
        if (!(dt=ds->p.link[j])) continue;
-       if (! dt->tid)       { mm[l]=j; du=dt; break; }
-       dt->elcount=0; printf(" clearing table %20s \n",dt->name);
+       if (!(dt->tid)) { mm[l]=j; du=dt; break; }
+       dt->elcount=0;  printf(" clearing table %20s \n",dt->name);
      }
      /* new dataset found  - and selected */
      if (du)  { /* going  up  the tree */  l+=1; ds=du; mm[l]=-1; dd[l]=ds; }
@@ -231,7 +235,8 @@ extern "C" int ami_call_(char* name,int* n, char* tables, int ln, int lt)
   char*          d[40];
   int            i,status;
  
-  if (!(invoker=ami->findInvoker(name))) return 0;
+  if (!ami || !tdm || !(invoker=ami->findInvoker(name))) return 0;
+ 
   myRank   = invoker->rank();
   myPamFtn = invoker->pFunction();
   for (i=0;i<*n;i++)
@@ -284,13 +289,11 @@ extern "C" void ami_module_register_ (char* name, int n)
 /****************************************************************************/
  
  
-int xdf_open(XdfLun_t **Lun, char *FileName,char *mode) {
- 
+int xdf_open(XdfLun_t **Lun, char *FileName,char *mode)
+{
   XdfLun_t *lun;
  
-  if (*Lun) { /* error, must be NULL*/
-    printf("xdf_open. Error, lun is non zero %d\n",*lun);
-    return 1;}
+  if (*Lun) { printf("xdf_open. Error, lun is non zero %d\n",*lun); return 1;}
  
   lun = (XdfLun_t*)malloc(sizeof(XdfLun_t));
  
@@ -309,7 +312,9 @@ int xdf_open(XdfLun_t **Lun, char *FileName,char *mode) {
                                                         lun->fName,lun->fType);
     free (lun); lun = NULL; return 2;}
  
-   xdrstdio_create(lun->fStream, lun->fFile, XDR_DECODE);
+    lun->fStream=(XDR*)malloc(sizeof(XDR));
+ 
+    xdrstdio_create(lun->fStream, lun->fFile, XDR_DECODE);
  
    *Lun = lun; return 0;
 }
@@ -353,44 +358,89 @@ int xdf_close(XdfLun_t **Lun) {
      printf("xdf_close: Error, empty file handler\n"); return 13;}
  
   ians = fclose((*Lun)->fFile);
+  free ((*Lun)->fStream);
   free ((*Lun)->fDataSet);
   free ((*Lun)); *Lun=NULL;
   return ians;
 }
+ 
 /***********************fortran interface to xdf************************/
  
-void xdf_open_(unsigned long *Lun, char *FileName,char *mode,int *ians,
-              int l77FileName, int l77mode) {
-  char FileNameBuf[512],modeBuf[8];
+extern "C" void xdf_open_(unsigned long *Lun, char *File, char *Mode,
+                          int *ier, int lFile, int lMode)
+{
+  char file[512], mode[8];
   int l;
-  for(l=l77FileName; l && FileName[l-1]!=' ';l--) {};
-  FileNameBuf[0]=0; strncat(FileNameBuf,FileName,l);
-  for(l=l77mode; l && mode[l-1]!=' ';l--) {};
-  modeBuf[0]=0; strncat(modeBuf,mode,l);
  
-  *ians = xdf_open((XdfLun_t **)Lun, FileNameBuf,modeBuf);
+  for (l=lFile; l&&File[l-1]==' '; l--);  file[0]=0; strncat(file,File,l);
+  for (l=lMode; l&&Mode[l-1]==' '; l--);  mode[0]=0; strncat(mode,Mode,l);
+ 
+  *ier = xdf_open((XdfLun_t **)Lun, file,mode);
 }
  
-void xdf_next_record_(unsigned long *Lun, int *ians) {
-  *ians = xdf_next_record((XdfLun_t*) *Lun);
+ 
+extern "C" void xdf_close_(unsigned long *Lun,int *ier)
+{
+  *ier = xdf_close((XdfLun_t **)Lun);
 }
  
-void xdf_get_struct_(unsigned long *Lun, char *name,
-     unsigned long *Entry,unsigned long *Data, size_t *nrows,int *ierr,
-     int l77name) {
-  char nameBuf[512];
+/*-------------------------------------------------------------------------*/
+ 
+extern "C" void xdf_next_record_(unsigned long *Lun, int *ier)
+{
+  *ier = xdf_next_record((XdfLun_t*) *Lun);
+}
+ 
+ 
+extern "C" void xdf_get_struct_(unsigned long *Lun, char *Name,
+     unsigned long *Entry, unsigned long *Data, size_t *nrows, int *ier,
+     int lName)
+{
+  char name[512];
   int l;
-  for(l=l77name; l && name[l-1]!=' ';l--) {};
-  nameBuf[0]=0; strncat(nameBuf,name,l);
  
-*ierr = xdf_get_struct((XdfLun_t*) *Lun, nameBuf,
-     (DS_DATASET_T **)Entry,(void **)Data, nrows);
+  for (l=lName; l&&Name[l-1]==' '; l--);  name[0]=0; strncat(name,Name,l);
+ 
+  *ier = xdf_get_struct((XdfLun_t*) *Lun, name,
+                         (DS_DATASET_T **)Entry,(void **)Data, nrows);
 }
  
-void xdf_close_(unsigned long *Lun,int *ierr) {
-  *ierr = xdf_close((XdfLun_t **)Lun);
+/*-------------------------------------------------------------------------*/
+ 
+extern "C" void xdf_getev_ (unsigned long* Lun, char* dir, int* ier, int ld)
+{
+   tdmDataset    *d;
+   DSL_PTR_T     ddd;
+   DS_DATASET_T  *pDS,*pDD;
+   bool_t        result;
+   XdfLun_t      *lun;
+   XDR           *myXDR;
+   char          dirc[512];
+   int           l;
+ 
+#define DO(A) ier+=1; if (!(A)) \
+        { printf(" xdf_getev error: "#A" fails \n"); return; }
+ 
+   for (l=ld; l&&dir[l-1]==' ';l--); dirc[0]=0; strncat(dirc,dir,l);
+ 
+   ier=0;
+   DO (tdm)
+   DO (d=tdm->findDataset(dirc));
+   DO (d->cvtDslPointer ((DSL_PTR_T &)pDD));
+ 
+   DO (lun=(XdfLun_t*)*Lun);
+   DO (myXDR=lun->fStream);
+   DO (xdr_dataset_type (myXDR, &pDS));
+   DO (pDS);
+   DO (dsIsDataset (&result, pDS));
+   DO (result);
+ 
+   DO (dio_mapHierarchy (pDD, pDS));
+   DO (dsAllocTables (pDS));
+   DO (xdr_dataset_data (myXDR, pDS));
+   DO (dsFreeDataset (pDS));
+   ier=0;
 }
  
+/**************************************************************************/
 #endif
- 
- 
