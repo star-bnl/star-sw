@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.hh,v 1.3 1999/01/30 23:03:13 wenaus Exp $
+ * $Id: StHit.hh,v 1.4 1999/03/23 21:51:47 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StHit.hh,v $
- * Revision 1.3  1999/01/30 23:03:13  wenaus
- * table load intfc change; include ref change
+ * Revision 1.4  1999/03/23 21:51:47  ullrich
+ * Removed table-based constructor.
  *
  * Revision 1.3  1999/01/30 23:03:13  wenaus
  * table load intfc change; include ref change
@@ -28,7 +28,6 @@
 
 #include <iostream.h>
 #include "StThreeVector.hh"
-#include "tables/dst_point.h"
 
 class StHit {
 public:
@@ -36,7 +35,6 @@ public:
     StHit(const StThreeVector<float>&,
 	  const StThreeVector<float>&,
 	  float, unsigned char = 0);
-    StHit(dst_point_st*);
     // StHit(const StSvtHit&);                  use default
     // const StHit & operator=(const StHit&);   use default
     ~StHit();
