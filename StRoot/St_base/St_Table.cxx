@@ -1,7 +1,10 @@
-// $Id: St_Table.cxx,v 1.64 1999/08/12 16:39:48 fine Exp $ 
+// $Id: St_Table.cxx,v 1.65 1999/08/12 16:41:30 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.65  1999/08/12 16:41:30  fine
+// Clean up
+//
 // Revision 1.64  1999/08/12 16:39:48  fine
-// class between St_Table::GetSize and TArray::GEtSize has been resolved
+// clash between St_Table::GetSize and TArray::GEtSize has been resolved
 //
 // Revision 1.63  1999/08/11 14:44:38  fine
 // name clash with ROOT over enum resolved
