@@ -39,7 +39,7 @@ void StiPlacement::setNormalRep(float refAngle_, float radius_,
 
   // the checking above makes these values within bounds, also
   centerRadius = sqrt(normalRadius*normalRadius + normalYoffset*normalYoffset);
-  centerOrientation = atan(normalYoffset/normalRadius);
+  centerOrientation = atan2(normalYoffset,normalRadius);
   centerRefAngle = normalRefAngle - centerOrientation;
   while(centerRefAngle <  -M_PI){ centerRefAngle += 2.*M_PI; }
   while(centerRefAngle >=  M_PI){ centerRefAngle -= 2.*M_PI; }

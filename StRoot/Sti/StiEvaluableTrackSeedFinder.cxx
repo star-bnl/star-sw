@@ -24,13 +24,13 @@ using std::pair;
 //#include "StAssociationMaker/StAssociationMaker.h"
 
 //Sti
+#include "Sti/Base/Messenger.h"
 #include "StiIOBroker.h"
 #include "StiPlacement.h"
 #include "StiDetector.h"
 #include "StiDetectorContainer.h"
 #include "StiHitContainer.h"
 #include "StiEvaluableTrack.h"
-#include "StiGeometryTransform.h"
 #include "StiKalmanTrack.h"
 #include "StiKalmanTrackNode.h"
 #include "StiMapUtilities.h"
@@ -42,35 +42,36 @@ ostream& operator<<(ostream&, const StiHit&);
   types are excplicity prohibited.  It is assumed, however, that the StAssociationMaker
   object is owned by some other scope.
 */
-StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder(StAssociationMaker* assoc, StiHitContainer* hc)
+StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder(const string& name,
+							 Factory<StiKalmanTrack>* trackFactory,
+							 StiHitContainer      * hitContainer,
+							 StiDetectorContainer * detectorContainer,
+							 StAssociationMaker   * assoc)
     : Observer(StiIOBroker::instance()),
-      StiSeedFinder(hc),
+      StiSeedFinder(name,trackFactory,hitContainer,detectorContainer),
       mAssociationMaker(assoc), mMcEvent(0), mTpcHitFilter(0),
       mIOBroker(StiIOBroker::instance()),
       mLowerBound(0), mMaxHits(0)
 {
-    cout <<"StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder()"<<endl;
-    if (!assoc) {
-	cout <<"\tERROR:\tAssociationMaker==0.  Undefined Behavior"<<endl;
-    }
-
-    mSubject->attach(this);
-    mTpcHitFilter = new StTpcPadrowHitFilter();
-    getNewState();
-
+  cout <<"StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder() - INFO - Started"<<endl;
+  if (!assoc) 
+    throw runtime_error("StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder() - FATAL - assoc==0");
+  mSubject->attach(this);
+  mTpcHitFilter = new StTpcPadrowHitFilter();
+  getNewState();
+  cout <<"StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder() - INFO - Done"<<endl;
 }
 
 StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder()
 {
-    cout <<"StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder()"<<endl;
-    if (mTpcHitFilter) {
-	delete mTpcHitFilter;
-	mTpcHitFilter=0;
-    }
-
-    if (mSubject) {
-	mSubject->detach(this);
-    }
+  cout <<"StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder() - INFO - Started"<<endl;
+  if (mTpcHitFilter) {
+    delete mTpcHitFilter;
+    mTpcHitFilter=0;
+  }
+  if (mSubject) 
+    mSubject->detach(this);
+  cout <<"StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder() - INFO - Done"<<endl;
 }
 
 /*! This call is inherited from StiSeedFinder but does not make much sense in the context
@@ -78,8 +79,7 @@ StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder()
   setEvent().
 */
 void StiEvaluableTrackSeedFinder::reset()
-{
-}
+{}
 
 /*! This should be called once per event.  The call to setEVent internally initializes
   the seed finder for the event.  Without this call, the behavior of hasMore() and next()
@@ -87,32 +87,32 @@ void StiEvaluableTrackSeedFinder::reset()
 */
 void StiEvaluableTrackSeedFinder::setEvent(StMcEvent* mcevt) 
 {
-    mMcEvent = mcevt;
-    if (mcevt==0) {
-	cout <<"StiEvaluableTrackSeedFinder::setEvent(). ERROR:\tmcEvent==0"<<endl;
-	return;
-    }
-
-    //Get StMcTrack list from StMcEvent
-    mMessenger <<"StiEvaluableTrackSeedFinder::setEvent().  GetMcTrackContainer"<<endl;
-    StSPtrVecMcTrack& tracks = mMcEvent->tracks();
-    mBeginMc = tracks.begin();
-    mEndMc = tracks.end();
-    mCurrentMc = mBeginMc;
-    
+  mMcEvent = mcevt;
+  if (mcevt==0) {
+    cout <<"StiEvaluableTrackSeedFinder::setEvent(). ERROR:\tmcEvent==0"<<endl;
     return;
+  }
+  
+  //Get StMcTrack list from StMcEvent
+  _messenger <<"StiEvaluableTrackSeedFinder::setEvent().  GetMcTrackContainer"<<endl;
+  StSPtrVecMcTrack& tracks = mMcEvent->tracks();
+  mBeginMc = tracks.begin();
+  mEndMc = tracks.end();
+  mCurrentMc = mBeginMc;
+  
+  return;
 }
 
 void StiEvaluableTrackSeedFinder::getNewState()
 {
-    //cout <<"StiEvaluableTrackSeedFinder::getNewState()"<<endl;
-    //cout <<"\n\n ------------------- StiIOBroker ----------------------- \n\n"<<*mIOBroker<<endl;
-
-    mLowerBound = mIOBroker->etsfLowerBound();
-    mMaxHits = mIOBroker->etsfMaxHits();
-    mLowerBound = mIOBroker->etsfLowerBound();
-    //cout <<"maxHits: "<<mMaxHits<<"\tlowerBound: "<<mLowerBound<<endl;
-    mTpcHitFilter->getNewState();
+  //cout <<"StiEvaluableTrackSeedFinder::getNewState()"<<endl;
+  //cout <<"\n\n ------------------- StiIOBroker ----------------------- \n\n"<<*mIOBroker<<endl;
+  
+  mLowerBound = mIOBroker->etsfLowerBound();
+  mMaxHits = mIOBroker->etsfMaxHits();
+  mLowerBound = mIOBroker->etsfLowerBound();
+  //cout <<"maxHits: "<<mMaxHits<<"\tlowerBound: "<<mLowerBound<<endl;
+  mTpcHitFilter->getNewState();
 }
 
 /*! A call to hasMore() simply checks if there are more seeds to be generated.
@@ -143,93 +143,69 @@ StiKalmanTrack* StiEvaluableTrackSeedFinder::next()
 */
 StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
 {
-    StiEvaluableTrack* track = dynamic_cast<StiEvaluableTrack*>(mFactory->getInstance());
-    if (!track) return 0;
-    
-    track->reset();
-    
-    mcTrackMapType* mcToStTrackMap = mAssociationMaker->mcTrackMap();
-    if (!mcToStTrackMap) {
-	mMessenger <<"StiEvaluableTrackSeedFinder::makeTrack(StMcTrack*).  ERROR:\t";
-	mMessenger <<"McTrackMap==0"<<endl;
-	return 0;
+  StiEvaluableTrack* track = dynamic_cast<StiEvaluableTrack*>(_trackFactory->getInstance());
+  if (!track) 
+    throw runtime_error("StiEvaluableTrackSeedFinder::makeTrack() - FATAL - StiEvaluableTrack* track==0");
+  track->reset();
+  mcTrackMapType* mcToStTrackMap = mAssociationMaker->mcTrackMap();
+  if (!mcToStTrackMap) 
+    throw runtime_error("StiEvaluableTrackSeedFinder::makeTrack() - FATAL - mcToStTrackMap==0");
+  pair<mcTrackMapType::iterator, mcTrackMapType::iterator> range = mcToStTrackMap->equal_range(mcTrack);
+  if (range.first==range.second) 
+    {
+      //These return values are now caught before exiting the seedFinder control
+      //_messenger <<"StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack() Error:\t";
+      //_messenger <<"No valid range found.  Abort"<<endl;
+      return 0;
     }
-    
-    pair<mcTrackMapType::iterator, mcTrackMapType::iterator> range =
-	mcToStTrackMap->equal_range(mcTrack);
-    if (range.first==range.second) {
-	//These return values are now caught before exiting the seedFinder control
-	//mMessenger <<"StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack() Error:\t";
-	//mMessenger <<"No valid range found.  Abort"<<endl;
-	return 0;
+  
+  //Find bestTrack from association (linear search)
+  //_messenger <<"New Track"<<endl;
+  mBestCommon.reset();
+  mBestCommon.setLowerBound(mLowerBound);
+  
+  //Temp (MLM) replace with a loop
+  // BestCommonHits theBest = for_each(range.first, range.second, mBestCommon );    
+  // StTrackPairInfo* bestPair = theBest.pair();
+  
+  //Start kludge here
+  //mcTrackMapType::iterator first = range.first;
+  //mcTrackMapType::iterator second = range.second;    
+  //mcTrackMapType::iterator end = second++;    
+  StTrackPairInfo* bestPair=0;
+  unsigned int mostCommon=mLowerBound;
+  
+  //for (mcTrackMapType::iterator it=first; it!=end; ++it) {	
+  for (mcTrackMapType::iterator it=range.first; it!=range.second; ++it) {	
+    StTrackPairInfo* info = (*it).second;
+    if (info->commonTpcHits()>mostCommon) { //update, remember
+      mostCommon = info->commonTpcHits();
+      bestPair = info;
     }
-    
-    //Find bestTrack from association (linear search)
-    //mMessenger <<"New Track"<<endl;
-    mBestCommon.reset();
-    mBestCommon.setLowerBound(mLowerBound);
-
-    //Temp (MLM) replace with a loop
-    // BestCommonHits theBest = for_each(range.first, range.second, mBestCommon );    
-    // StTrackPairInfo* bestPair = theBest.pair();
-
-    //Start kludge here
-    //mcTrackMapType::iterator first = range.first;
-    //mcTrackMapType::iterator second = range.second;    
-    //mcTrackMapType::iterator end = second++;    
-    StTrackPairInfo* bestPair=0;
-    unsigned int mostCommon=mLowerBound;
-
-    //for (mcTrackMapType::iterator it=first; it!=end; ++it) {	
-    for (mcTrackMapType::iterator it=range.first; it!=range.second; ++it) {	
-	StTrackPairInfo* info = (*it).second;
-	if (info->commonTpcHits()>mostCommon) { //update, remember
-	    mostCommon = info->commonTpcHits();
-	    bestPair = info;
-	}
-    }
-    //End kludge here;
-    
-    if (!bestPair) {
-	//These return values are now caught before exiting the seedFinder control
-	//mMessenger <<"StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack) ERROR:\t";
-	//mMessenger <<"BestPair==0.  Abort"<<endl;
-	return 0;
-    }
-    else {
-	mMessenger <<"Match Found, commonTpcHits:\t"<<bestPair->commonTpcHits()<<endl;
-    }
-    track->setStTrackPairInfo(bestPair);
-
-    //fitlered
-    StiGeometryTransform::instance()->operator()(mHitStore, bestPair->partnerTrack(),
-						 track, mMaxHits, mTpcHitFilter);
-
-    //Set StiDetectorContainer to layer corresponding to
-    //the innermost point on the track seed
-    StiKalmanTrackNode* node = track->getInnerMostNode(); //Should return innermost
-    if (!node) {
-	mMessenger <<"StiEvaluableTrackSeedFinder::makeTrack(). ERROR:\t";
-	mMessenger <<"node==0.  return;"<<endl;
-	return 0;
-    }
-    else {
-	StiDetector* layer = node->getHit()->detector();
-	StiDetectorContainer::instance()->setToDetector(layer);
-    }
-    
-    return track;
+  }
+  //End kludge here;
+  
+  if (!bestPair) 
+    throw runtime_error("StiEvaluableTrackSeedFinder::makeTrack() - FATAL - bestPair==0");
+  _messenger <<"Match Found, commonTpcHits:\t"<<bestPair->commonTpcHits()<<endl;
+  track->setStTrackPairInfo(bestPair);
+  //Set StiDetectorContainer to layer corresponding to
+  //the innermost point on the track seed
+  StiKalmanTrackNode* node = track->getInnerMostNode(); //Should return innermost
+  if (!node) 
+    throw runtime_error("StiEvaluableTrackSeedFinder::makeTrack() - FATAL - node==0");
+  _detectorContainer->setToDetector(node->getHit()->detector());
+  return track;
 }
 
 BestCommonHits::BestCommonHits() : mMostCommon(10), mPair(0)
-{
-}
+{}
 
 void BestCommonHits::operator()(const McToStPair_t& rhs)
 {
-    if (rhs.second->commonTpcHits()>mMostCommon) { //update, remember
-	mMostCommon = rhs.second->commonTpcHits();
-	mPair = rhs.second;
-    }
+  if (rhs.second->commonTpcHits()>mMostCommon) { //update, remember
+    mMostCommon = rhs.second->commonTpcHits();
+    mPair = rhs.second;
+  }
 }
 

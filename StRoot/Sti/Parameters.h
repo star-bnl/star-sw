@@ -8,8 +8,8 @@
 #include <vector>
 using namespace std;
 
-#include "Parameter.h"
-#include "Factory.h"
+#include "Sti/Base/Parameter.h"
+#include "Sti/Base/Factory.h"
 
 typedef vector<Parameter*> ParameterVector;
 typedef ParameterVector::iterator ParameterIterator;

@@ -83,9 +83,9 @@ bool StiLocalTrackMerger::configureMaxTrack(StiKalmanTrack* lowerTrack)
     }
     
     StiKalmanTrackNode* lowerNode = lowerTrack->getLastNode();
-    if (lowerNode->fP3==0.) {
+    if (lowerNode->getCurvature()==0.) {
 	cout <<"StiLocalTrackMerger::configureMaxTrack(). ERROR:\t"
-	     <<"lowerNode->fP3==0.  Skip this track"<<endl;
+	     <<"lowerNode->getCurvature()==0.  Skip this track"<<endl;
 	return false;
     }
     
@@ -96,7 +96,7 @@ bool StiLocalTrackMerger::configureMaxTrack(StiKalmanTrack* lowerTrack)
     mMaxTrack.reset();
     mMaxTrackNode.reset();
     
-    double radius = 1./lowerNode->fP3;  //Careful, this number is signed
+    double radius = 1./lowerNode->getCurvature();  //Careful, this number is signed
     double maxRadius=0.;
     double dR = radius*mDeltaR;
     if (radius<0) {
@@ -106,12 +106,7 @@ bool StiLocalTrackMerger::configureMaxTrack(StiKalmanTrack* lowerTrack)
 	maxRadius = radius+dR;
     }
     cout <<"radius: "<<radius<<" dR: "<<dR<<" maxRadius: "<<maxRadius<<endl;
-    
-    mMaxTrackNode.fP3 = 1./maxRadius;
-    ///////mMaxTrack.setLastNode(&mMaxTrackNode); <<< error
-    //StiKalmanTrackNode* temp = mMaxTrack.getLastNode();
-    //cout <<"maxRadius: "<<1./temp->fP3<<endl;
-    
+    mMaxTrackNode.setCurvature(1./maxRadius);
     return true;
 }
 

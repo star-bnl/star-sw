@@ -3,8 +3,8 @@
 #include <stdexcept>
 #include <string>
 using std::string;
-#include "Sti/Parameter.h"
-#include "Sti/EditableParameter.h"
+#include "Sti/Base/Parameter.h"
+#include "Sti/Base/EditableParameter.h"
 #include "Sti/StiTrack.h"
 #include "StiDefaultTrackFilter.h"
 

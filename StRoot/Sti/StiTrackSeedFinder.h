@@ -10,9 +10,9 @@
 #include <string>
 using std::string;
 
-#include "SubjectObserver.h"
-#include "StiHit.h"
-#include "StiSeedFinder.h"
+#include "Sti/Base/SubjectObserver.h"
+#include "Sti/StiHit.h"
+#include "Sti/StiSeedFinder.h"
 
 class StiKalmanTrack;
 class Sti2HitComboFilter;
@@ -25,8 +25,10 @@ class Messenger;
 class StiTrackSeedFinder : public Observer, public StiSeedFinder
 {
 public:
-
-    StiTrackSeedFinder(StiDetectorContainer*, StiHitContainer*);
+    StiTrackSeedFinder(const string& name,
+		       Factory<StiKalmanTrack> * trackFactory,
+		       StiHitContainer         * hitContainer,
+		       StiDetectorContainer    * detectorContainer);
     virtual ~StiTrackSeedFinder();
     
     //Inherited User interface
@@ -42,11 +44,6 @@ public:
     virtual void getNewState() = 0;
     
 protected:
-    
-    //Shallow members
-    StiDetectorContainer* mDetStore;
-    //StiHitContainer* mHitStore;
-
 private:
     //The following are not implemented
     StiTrackSeedFinder();

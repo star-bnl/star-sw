@@ -16,9 +16,6 @@ using std::sort;
 using std::string;
 
 #include "StiCompositeTreeNode.h"
-#include "StiDetector.h"
-
-ostream& operator<<(ostream&, const StiDetector&);
 
 template <class T>
 struct StreamNodeName

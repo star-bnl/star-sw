@@ -1,14 +1,6 @@
-//StiHit.h
-//M.L. Miller (Yale Software)
-//04/01
-
-//Hit class to be used for the ITTF tracker
-
-// Ignore me
-
 /*! \class StiHit
   StiHit is a simple class that encapsulates a three dimensional position
-  measurement in the STAR detector.  The measurement is represented in a frame
+  measurement.  The measurement is represented in a frame
   that is 'local' to the detector plane from which it arose.
   <p>
   It is assumed
@@ -37,7 +29,7 @@
   depends only on hit location (track finding).
   <p>
   StiHit stores information that represents a full error matrix.  For efficiency
-  purposes this is stored as a collection of discreet doubles instead of a
+  purposes this is stored as a collection of discreet floats instead of a
   matrix.  Because the error matrix is always symmetric, we must store only six
   values.  These are denoted by s_ij, where s_ij corresponds to the (i,j)
   component of the matrix.
@@ -51,13 +43,11 @@
 
 #ifndef StiHit_HH
 #define StiHit_HH
-
-class StMeasuredPoint;
-class StHit;
-class StThreeVectorD;
-class StThreeVectorF;
+#include "StiDetector.h"
+#include "StiPlacement.h"
+#include "StMeasuredPoint.h"
+#include "StThreeVectorF.hh"
 class StMatrixF;
-class StiDetector;
 
 class StiHit 
 {
@@ -68,38 +58,39 @@ public:
     ///Default destructor.
     ~StiHit();
 
-    //Gets
     ///Return the local x value.
-    double x() const;
+    float x() const;
     ///Return the local y value.
-    double y() const;
-    ///Return the global z value.
-    double z() const;
+    float y() const;
+    ///Return the local/global z value.
+    float z() const;
+    ///Return the local x value.
+    float x_g() const;
+    ///Return the local y value.
+    float y_g() const;
+    ///Return the local/global z value.
+    float z_g() const;
     ///Return the (x,x) component of the error matrix.
-    double sxx() const;
+    float sxx() const;
     ///Return the (y,y) component of the error matrix.
-    double syy() const;
+    float syy() const;
     ///Return the (z,z) component of the error matrix.
-    double szz() const;
+    float szz() const;
     ///Return the (x,y) component of the error matrix.
-    double sxy() const;
+    float sxy() const;
     ///Return the (x,z) component of the error matrix.
-    double sxz() const;
+    float sxz() const;
     ///Return the (y,z) component of the error matrix.
-    double syz() const;
-
-    double getEloss();
-
+    float syz() const;
+    ///Return the energy deposition associated with this point 
+    float getEloss();
     ///Return the refAngle of the detector plane from which the hit arose.
-    double refangle() const;
+    float refangle() const;
     ///Return the position of the detector plane from whcih the hit arose.
-    double position() const;
-
+    float position() const;
     ///Return a const pointer to the StiDetector object from which the hit
     ///arose.
     const StiDetector* detector() const;
-    ///Return a pointer to the StiDetector object from which the hit arose.
-    StiDetector* detector();
 
     ///Return a const pointer to the StHit object corresponding to this StiHit
     ///instance
@@ -121,205 +112,173 @@ public:
     ///of the hit in global STAR coordinates.
     const StThreeVectorF& globalPosition() const;
 
-    //Sets
+    void set(float position,  float angle, float y, float z);
 
-    ///Set the position and error in one function call
-    void set(double refAngle, double position,double x, double y, double z, 
-	     double sxx, double sxy, double sxz, double syy, double syz, 
-             double szz);
-    ///Set the position in one function call
-    void set(double refAngle, double position,double x, double y, double z);
-
-    ///Set the local x value.
-    void setX(double);
-    ///Set the local y value.
-    void setY(double);
-    ///Set the global z value.
-    void setZ(double);
-    ///Set the refAngle of the detector plane from the hit arose.
-    void setRefangle(double);
-    ///Set the position of the detector plane from the hit arose.
-    void setPosition(double);
-
-    ///Set the error-matrix components one by one:
-    void setSxx(double);
-    void setSyy(double);
-    void setSzz(double);
-    void setSxy(double);
-    void setSxz(double);
-    void setSyz(double);
+    ///Set the local position and error in one function call
+    void set(const StiDetector * detector,
+	     const StMeasuredPoint * stHit,
+	     float energy,
+	     float x, float y, float z, 
+	     float sxx=1, float sxy=1, float sxz=1, float syy=1, float syz=1, float szz=1);
+    ///Set the global position and error in one function call 
+    ///A transformation is performed internally from global to local coordinates
+    ///according to the detector information.
+    void setGlobal(const StiDetector * detector,
+		   const StMeasuredPoint * stHit,
+		   float x, float y, float z,
+		   float energy);
     
     ///Set the position error matrix for the measurement from an StMatrixF
     ///object.
     void setError(const StMatrixF&);
-    ///Scale the error arbitrarily
-    void scaleError(double);
+    ///Scale all errors by the given factor
+    void scaleError(float);
     ///Set the pointer to the StiDetector from which the hit arose.
-    void setDetector(StiDetector*);
+    void setDetector(const StiDetector*det) {mdetector=det;};
     ///Set the pointer to the corresponding StHit object.
-    //void setStHit(StHit*);
-    void setStHit(StMeasuredPoint*);
-    
-    ///Set a boolean that marks whether or not this hit is assigned to a track.
-    //void setUsed(bool);
-
+    void setStHit(const StMeasuredPoint*hit){msthit=hit;}
     ///Set the number of times used
     void setTimesUsed(unsigned int);
-
-    //Operators
-
-    //Action
     void reset();
     
+    friend ostream& operator<<(ostream& os, const StiHit& h);
 private:
-  
-    double mrefangle;
-    double mposition;
-    double mx;
-    double my;
-    double mz; 
-    double msxx;
-    double msyy;
-    double mszz;
-    double msxy;
-    double msxz;
-    double msyz;
+    float mrefangle;
+    float mposition;
+    float mx;
+    float my;
+    float mz; 
+    float msxx;
+    float msyy;
+    float mszz;
+    float msxy;
+    float msxz;
+    float msyz;
     unsigned int mTimesUsed;
-    StiDetector* mdetector;
-    //StHit* msthit;
-		StMeasuredPoint * msthit;
+    const StiDetector* mdetector;
+    const StMeasuredPoint * msthit;
+    float _energy;
 };
 
-//Inlines-----------------------------------------------------------
+//inline ostream& operator<<(ostream& os, const StiHit& h)
+//{
+//  os << "HIT a:"<<h.mrefangle<<" x:"<<h.mx<<" y:"<<h.my<<" z:"<<h.mz<<endl;
+//  return os;
+//}
 
-inline void StiHit::setSxx(double val)
-{
-    msxx=val;
-}
-
-inline void StiHit::setSyy(double val)
-{
-    msyy=val;
-}
-
-inline void StiHit::setSzz(double val)
-{
-    mszz=val;
-}
-
-inline void StiHit::setSxy(double val)
-{
-    msxy=val;
-}
-
-inline void StiHit::setSxz(double val)
-{
-    msxz=val;
-}
-
-inline void StiHit::setSyz(double val)
-{
-    msyz=val;
-}
 
 inline void StiHit::reset()
 {
-    mrefangle = mposition = mx = my = mz = msxx = msyy = mszz = msxy = msxz = msyz = 0.;
-    //mused = false;
-    mTimesUsed=0;
-    mdetector = 0;
-    msthit = 0;
+  mrefangle = mposition = 0;
+  mx = my = mz = msxx = msyy = mszz = msxy = msxz = msyz = 0.;
+  mTimesUsed=0;
+  mdetector = 0;
+  msthit = 0;
+  _energy = 0;
 }
 
-inline void StiHit::scaleError(double scale)
+inline void StiHit::scaleError(float scale)
 {
-    msxx*=scale;
-    msyy*=scale;
-    mszz*=scale;
-    msxy*=scale;
-    msxz*=scale;
-    msyz*=scale;
+  msxx*=scale;
+  msyy*=scale;
+  mszz*=scale;
+  msxy*=scale;
+  msxz*=scale;
+  msyz*=scale;
 }
-
-inline double StiHit::x() const {return mx;}
-
-inline double StiHit::y() const {return my;}
-
-inline double StiHit::z() const {return mz;}
-
-inline double StiHit::sxx() const {return msxx;}
-
-inline double StiHit::syy() const {return msyy;}
-
-inline double StiHit::szz() const {return mszz;}
-
-inline double StiHit::sxy() const {return msxy;}
-
-inline double StiHit::sxz() const {return msxz;}
-
-inline double StiHit::syz() const {return msyz;}
-
-inline double StiHit::refangle() const {return mrefangle;}
-
-inline double StiHit::position() const {return mposition;}
-
-//inline const StHit* StiHit::stHit() const {return msthit;}
+inline float StiHit::x() const {return mx;}
+inline float StiHit::y() const {return my;}
+inline float StiHit::z() const {return mz;}
+inline float StiHit::x_g() const {return msthit->position().x();}
+inline float StiHit::y_g() const {return msthit->position().y();}
+inline float StiHit::z_g() const {return msthit->position().z();}
+inline float StiHit::sxx() const {return msxx;}
+inline float StiHit::syy() const {return msyy;}
+inline float StiHit::szz() const {return mszz;}
+inline float StiHit::sxy() const {return msxy;}
+inline float StiHit::sxz() const {return msxz;}
+inline float StiHit::syz() const {return msyz;}
+inline float StiHit::refangle() const {return mrefangle;}
+inline float StiHit::position() const {return mposition;}
 inline const StMeasuredPoint* StiHit::stHit() const {return msthit;}
-
 inline const StiDetector* StiHit::detector() const {return mdetector;}
-
-inline StiDetector* StiHit::detector() {return mdetector;}
-
-//inline bool   StiHit::isUsed() const { return mused;}
-
 inline unsigned int StiHit::timesUsed() const { return mTimesUsed;}
 
-inline void StiHit::set(double refAngle, double position, double x, double y, double z, 
-			double sxx, double sxy, double sxz, double syy, double syz, double szz) 
+inline void StiHit::set(float position,  float angle, float y, float z)
 {
-    mrefangle = refAngle;
-    mposition = position;
-    mx = x;
-    my = y;
-    mz = z;
-    msxx = sxx;
-    msyy = syy;
-    mszz = szz;
-    msxy = sxy;
-    msxz = sxz;
-    msyz = syz;  
-    //mused = false;
-}
-inline void StiHit::set(double refAngle, double position, 
-                        double x, double y, double z){
-    mrefangle = refAngle;
-    mposition = position;
-    mx = x;
-    my = y;
-    mz = z;
-    //mused = false;
+  mrefangle = angle;
+  mposition = position;
+  mx = position;
+  my = y;
+  mz = z;
+  msxx = msyy = mszz = msxy = msxz = msyz = 0.;
+  mTimesUsed=0;
+  mdetector = 0;
+  msthit = 0;
+  _energy = 0;
 }
 
-inline void StiHit::setX(double val) {mx=val;}
+inline void StiHit::setGlobal(const StiDetector * detector,
+			      const StMeasuredPoint * stHit,
+			      float gx, float gy, float gz,
+			      float energy)
+{
+  StiPlacement * placement = detector->getPlacement();
+  mrefangle = placement->getNormalRefAngle();
+  mposition = placement->getLayerRadius();
+  mx =  detector->_cos*gx + detector->_sin*gy;
+  my = -detector->_sin*gx + detector->_cos*gy;
+  mz = gz;
+  msxx = 1.;//sxx;
+  msyy = 1.;//syy;
+  mszz = 1.;//szz;
+  msxy = 0.;//sxy;
+  msxz = 0.;//sxz;
+  msyz = 0.;//syz;  
+  mTimesUsed = 0;
+  mdetector = detector;  msthit = stHit;
+  _energy = energy;
+}
 
-inline void StiHit::setY(double val) {my=val;}
 
-inline void StiHit::setZ(double val) {mz=val;}
-
-inline void StiHit::setRefangle(double val) {mrefangle=val;}
-
-inline void StiHit::setPosition(double val) {mposition=val;}
-
-inline void StiHit::setDetector(StiDetector* det) {mdetector=det;}
-
-//inline void StiHit::setStHit(StHit* val) {msthit=val;}
-inline void StiHit::setStHit(StMeasuredPoint * val) {msthit=val;}
+inline void StiHit::set(const StiDetector * detector,
+		 const StMeasuredPoint * stHit,
+		 float energy,
+		 float x, float y, float z, 
+		 float sxx, float sxy, float sxz, float syy, float syz, float szz)
+{
+  StiPlacement * placement = detector->getPlacement();
+  mrefangle = placement->getNormalRefAngle();
+  mposition = placement->getLayerRadius();
+  mx = x;
+  my = y;
+  mz = z;
+  msxx = sxx;
+  msyy = syy;
+  mszz = szz;
+  msxy = sxy;
+  msxz = sxz;
+  msyz = syz;  
+  mTimesUsed = 0;
+  mdetector = detector;
+  msthit = stHit;
+  _energy = energy;
+}
 
 inline void StiHit::setTimesUsed(unsigned int val)
 {
     mTimesUsed=val;
 }
 
-//inline void StiHit::setUsed(bool val) { mused = val;}
+inline float StiHit::getEloss()
+{
+  return _energy;
+}
+
+inline const StThreeVectorF& StiHit::globalPosition() const
+{
+  return msthit->position();
+}
+
 
 #endif

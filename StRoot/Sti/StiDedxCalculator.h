@@ -34,6 +34,7 @@ using std::vector;
 
 class StiTrackNode;
 class StiKalmanTrackNode;
+class StiKalmanTrack;
 class StiTrack;
 
 class StiDedxCalculator 

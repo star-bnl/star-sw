@@ -15,60 +15,30 @@
   02.10.2002   ver 2.0  Encapsulated version
   02.17.2002   ver 2.1  IOBroker hooks added
 */
+
 class StiHitErrorCalculator
 {
  public:
-  //default constructor
-  StiHitErrorCalculator();
-
-  //Destructor
-  virtual ~StiHitErrorCalculator();
-
-  //Get errors
-  virtual pair<double,double> getHitError(StiHit*, double, double) = 0;   //input hit, cross and dip angle
-
- private:
-   StiIOBroker* mIOBroker;
+  StiHitErrorCalculator(){/*noop*/};
+  virtual ~StiHitErrorCalculator(){/*noop*/};
+  virtual void calculateError(StiKalmanTrackNode &) const= 0; 
 };
 
-class StiHitErrorDefault: public StiHitErrorCalculator
+class StiDefaultHitErrorCalculator: public StiHitErrorCalculator
 {
  public:
-
-   //sets default parameters
-   StiHitErrorDefault();
-   ~StiHitErrorDefault();
-
-   //init routine reads parameters from IOBroker
-   void Init();
-   
-   pair<double, double> getHitError(StiHit*, double, double);   //input z, cross and dip angle
-   int querySource(StiHit*);
-
-   void SetTpcInnerParam(double, double, double, double, double, double); //input integral cross, drift cross,
-                                                                              //dip cross, integral dip, drift 
-   void SetTpcOuterParam(double, double, double, double, double, double); //same as Inner Param
-   void SetSvtParam(double, double, double, double, double, double);
-   void SetFtpcParam(double, double, double, double, double, double);
+   StiDefaultHitErrorCalculator();
+   ~StiDefaultHitErrorCalculator();
+   inline void calculateError(StiKalmanTrackNode &node) const;   //input StiKalmanTrackNode
+   inline void set(double intrinsicZ, double driftZ,
+		   double crossZ, double intrinsicX,
+		   double driftX, double crossX);
 
  private:
-   void SetTpcSource(int);           
-   void SetSvtSource(int);
-   void SetFtpcSource(int);
-
-   int   fTpcSource;                 //-1=error, 0=Default, 1=IOBroker, 2=User Defined 
-   int   fSvtSource;                 //-1=error, 0=Default, 1=IOBroker, 2=User Defined 
-   int   fFtpcSource;                //-1=error, 0=Default, 1=IOBroker, 2=User Defined
-
-   pair<double, double> TpcInnerHitError(StiHit*, double, double);
-   pair<double, double> TpcOuterHitError(StiHit*, double, double);
-   pair<double, double> SvtHitError(StiHit*, double, double);
-   pair<double, double> FtpcHitError(StiHit*, double, double);
-
-   double TpcInnerErrorParam[6];   //set of function parameters for Tpc
-   double TpcOuterErrorParam[6];   //set of function parameters for Tpc
-   double SvtErrorParam[6];        //set of function parameters for Tpc
-   double FtpcErrorParam[6];       //set of function parameters for Tpc
+   void  SetSource(int);           
+   int   Source;                 //-1=error, 0=Default, 1=IOBroker, 2=User Defined 
+   double coeff[6];              //0:intrinsicZ  1: driftZ   2: crossZ
+                                 //3:intrinsicX  4: driftX   5: crossX
 };
 
 #endif

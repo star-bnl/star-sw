@@ -5,68 +5,74 @@
 #include <stdlib.h>
 
 #include "StiDefaultMutableTreeNode.h"
-#include "Messenger.h"
-
-class StiHit;
+#include "StiHit.h"
 class StiDetector;
 
 class StiTrackNode : public StiDefaultMutableTreeNode
-{
+{ 
 public:
     
-	void reset();
-	void set(StiHit * h);
-	void setAsCopyOf(const StiTrackNode * node);
-	void setHit(StiHit * h); 
-	StiHit * getHit() const;
-	
-	const StiDetector *getDetector() const;
-	void setDetector(const StiDetector *pDetector);
-	
-	virtual void addChild(StiTrackNode * newChild);
-	
-	//void setDedx(double e) {dedx=e;}
-	//double getDedx() const {return dedx;}
+  ~StiTrackNode(){};    
+  void reset();
+  void setAsCopyOf(const StiTrackNode * node);
+  StiHit * getHit() const;
+  void setHit(StiHit* hit);
+  void add(StiTrackNode * node);
+  const StiDetector *getDetector() const; 
+  void setDetector(const StiDetector *detector);
 
-	friend ostream& operator<<(ostream& os, const StiTrackNode& n);
-
+  //friend ostream& operator<<(ostream& os, const StiTrackNode& n);
  protected:   
-	
-	StiTrackNode();    
-	double   dedx;
-	StiHit * hit;  
-	const StiDetector * detector;
+  StiTrackNode();    
+  StiHit * _hit; 
+  const StiDetector * _detector; 
 };
 
-inline StiTrackNode::StiTrackNode(): hit(0), detector(0)
-{
-}
+inline StiTrackNode::StiTrackNode()
+  :  _hit(0),
+     _detector(0)
+{}
 	
 inline StiHit * StiTrackNode::getHit() const 
 {
-  return hit;
+  return _hit;
 }
 
-inline void StiTrackNode::setHit(StiHit * h)  
-{  
-	hit = h;  
-	if(hit!=0)
-		detector = 0;
-}
-
-inline void StiTrackNode::set(StiHit * h)
+inline void StiTrackNode::setHit(StiHit* hit)
 {
-	hit = h;
-	if(hit!=0)
-		detector = 0;
+  _hit = hit;
 }
 
 inline void StiTrackNode::setAsCopyOf(const StiTrackNode * node)
 {
-	StiDefaultMutableTreeNode::setAsCopyOf(node);
-	hit = node->hit;
-	detector = node->detector;
+  StiDefaultMutableTreeNode::setAsCopyOf(node);
+  _hit = node->_hit;
 }
+
+
+inline void StiTrackNode::reset()
+{ 
+  StiDefaultMutableTreeNode::reset();
+  _hit      = 0;
+  _detector = 0;
+}
+
+inline void StiTrackNode::add(StiTrackNode * node)
+{	
+  node->setParent(this);
+  children.push_back(node);
+}
+
+inline const StiDetector * StiTrackNode::getDetector() const
+{
+  return( _hit==0 ? _detector : _hit->detector() );
+}
+
+inline void StiTrackNode::setDetector(const StiDetector *detector)
+{
+  _detector = detector; 
+}
+
 #endif
 
 

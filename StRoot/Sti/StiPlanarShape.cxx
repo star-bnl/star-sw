@@ -1,13 +1,12 @@
 #include "StiPlanarShape.h"
 
-StiPlanarShape::StiPlanarShape(float halfDepth_,
-                               float thickness_, float halfWidth_):
-        StiShape(halfDepth_, thickness_){
-  
-  setHalfWidth(halfWidth_);
-
-}// StiPlanarShape()
+StiPlanarShape::StiPlanarShape(const string &name,
+			       float halfDepth,
+                               float thickness, float halfWidth)
+  : StiShape(name,halfDepth, thickness),
+    _halfWidth(halfWidth)
+{}// StiPlanarShape()
 
 void StiPlanarShape::setHalfWidth(float val){
-  if(val >= 0.){ halfWidth = val; }
+  if(val >= 0.){ _halfWidth = val; }
 }// setHalfWidth()

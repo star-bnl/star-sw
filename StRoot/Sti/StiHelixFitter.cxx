@@ -51,8 +51,7 @@ bool StiHelixFitter::fit(const StiHitVector& hits)
     //Do circle fit in x-yOrder doesn't matter for circle fit
     
     for (StiHitVector::const_iterator it=hits.begin(); it!=hits.end(); ++it) {
-	mCircleFitter.addPoint( (*it)->globalPosition().x(),
-				(*it)->globalPosition().y() );
+	mCircleFitter.addPoint( (*it)->x_g(),(*it)->y_g() );
     }
     bool circle_rc = mCircleFitter.fit();
 
@@ -77,7 +76,7 @@ bool StiHelixFitter::fit(const StiHitVector& hits)
     
     for (StiHitVector::const_reverse_iterator it=hits.rbegin();
 	 it!=hits.rend(); ++it) {
-	
+      StThreeVectorF hit;
 	double s2d = g2dPathlength(mCircleFitter.radius(), mCircleFitter.xcenter(),
 				   mCircleFitter.ycenter(), firsthit,
 				   (*it)->globalPosition());

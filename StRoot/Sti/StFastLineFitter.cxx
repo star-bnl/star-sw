@@ -4,8 +4,8 @@
 
 #include <math.h>
 #include <iostream>
-#include "Messenger.h"
-#include "MessageType.h"
+#include "Sti/Base/Messenger.h"
+#include "Sti/Base/MessageType.h"
 #include "StFastLineFitter.h"
 
 using std::cout;

@@ -12,16 +12,19 @@ class StiConicalShape: public StiShape
 public:
     
     // constructor
-    StiConicalShape(): StiShape(), outerRadiusEast(0.), outerRadiusWest(0.),
-                       openingAngle(0.){}
-    StiConicalShape(float halfDepth_, float thickness_,
-                    float outerRadiusEast_, float outerRadiusWest_,
-                    float openingAngle_);
+    StiConicalShape(): StiShape(), _outerRadiusEast(0.), _outerRadiusWest(0.),
+                       _openingAngle(0.){}
+    StiConicalShape(const string &name,
+		    float halfDepth, 
+		    float thickness,
+                    float outerRadiusEast, 
+		    float outerRadiusWest,
+                    float openingAngle);
     
     // accessors
-    float getOuterRadiusEast() const { return outerRadiusEast; }
-    float getOuterRadiusWest() const { return outerRadiusWest; }
-    float getOpeningAngle() const { return openingAngle; }
+    float getOuterRadiusEast() const { return _outerRadiusEast; }
+    float getOuterRadiusWest() const { return _outerRadiusWest; }
+    float getOpeningAngle() const { return _openingAngle; }
     StiShapeCode getShapeCode() const { return kConical; };
 
     // mutators
@@ -31,9 +34,9 @@ public:
 
 protected:
     
-    float outerRadiusEast;  // >= 0
-    float outerRadiusWest;  // >= 0
-    float openingAngle; // azimuthal extent of cylinder in [0, 2pi]
+    float _outerRadiusEast;  // >= 0
+    float _outerRadiusWest;  // >= 0
+    float _openingAngle; // azimuthal extent of cylinder in [0, 2pi]
     
 };
 

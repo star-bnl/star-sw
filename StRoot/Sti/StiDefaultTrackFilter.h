@@ -4,8 +4,6 @@
 #include "StiTrack.h"
 #include "EditableFilter.h"
 
-typedef Filter<StiTrack> TrackFilter;
-
 class StiDefaultTrackFilter : public EditableFilter<StiTrack>
 {
  public:
@@ -32,12 +30,12 @@ inline bool StiDefaultTrackFilter::accept(const StiTrack * t) const
       parHi  = *iter; iter++;
       if (parUse&&parLow&&parHi)
 	{
-	  if (parUse->getValue())
+	  if (parUse->getBoolValue())
 	    {
 	      //cout << "/"<<count++;
 	      v = t->getValue(parUse->getKey());
-	      low = parLow->getValue();
-	      high = parHi->getValue();
+	      low = parLow->getDoubleValue();
+	      high = parHi->getDoubleValue();
 	      if (v<low || v>high)
 		{
 		  //cout<<"/false"<<endl;
@@ -56,8 +54,7 @@ inline bool StiDefaultTrackFilter::accept(const StiTrack * t) const
 
 
 inline void StiDefaultTrackFilter::setDefaults()
-{
-}
+{}
 
 
 #endif

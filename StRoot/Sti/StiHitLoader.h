@@ -1,10 +1,11 @@
 #ifndef StiHitLoader_H
 #define StiHitLoader_H
 
-#include "Messenger.h"
-#include "StiDetectorFinder.h"
-
-template<class Factorized>class Factory;
+#include "Sti/Base/Factory.h"
+#include "Sti/Base/Messenger.h"
+#include "Sti/Base/Named.h"
+#include "Sti/StiDetectorFinder.h"
+#include "Sti/StiToolkit.h"
 class StiHit;
 class StiHitContainer;
 
@@ -26,73 +27,81 @@ class StiHitContainer;
   
   \author Claude A Pruneau (Wayne) and M.L. Miller (Yale Software)
 */
-;
-template <class Source, class Transform>
-class StiHitLoader
+
+template <class Source, class Detector>
+class StiHitLoader : public Named
 {
  public:
   
-  StiHitLoader();
-  StiHitLoader(StiHitContainer* hitContainer,
+  StiHitLoader(const string & name);
+  StiHitLoader(const string & name,
+	       StiHitContainer* hitContainer,
 	       Factory<StiHit>*hitFactory,
-	       Transform*transform);
+	       Detector * detector);
   virtual ~StiHitLoader();
   virtual void loadHits(Source *source)=0;
   virtual void setHitContainer(StiHitContainer* hitContainer);
   virtual void setHitFactory(Factory<StiHit>*hitFactory);
-  virtual void setGeometryTransform(Transform*transform);
-  
+  virtual void setDetector(Detector*detector);
+  virtual Detector* getDetector();
  protected:
-  Transform         * _transform;
   StiHitContainer   * _hitContainer;
   Factory<StiHit>   * _hitFactory;
+  Detector          * _detector;
   StiDetectorFinder * _detectorFinder;
   Messenger &         _messenger;
   
 };
 
-template<class Source,class Transform>
-StiHitLoader<Source,Transform>::StiHitLoader()
-  :  _transform(0),
-     _hitContainer(0),
-     _hitFactory(0),
+template<class Source, class Detector>
+StiHitLoader<Source,Detector>::StiHitLoader(const string & name)
+  :  Named(name),
+     _hitContainer(StiToolkit::instance()->getHitContainer()),
+     _hitFactory(StiToolkit::instance()->getHitFactory()),
+     _detector(0),
      _detectorFinder(StiDetectorFinder::instance()),
      _messenger(*(Messenger::instance(MessageType::kHitMessage)))
 {}
     
-template<class Source,class Transform>
-StiHitLoader<Source,Transform>::StiHitLoader(StiHitContainer* hitContainer,
-					     Factory<StiHit>*hitFactory,
-					     Transform*transform)
-  :  _transform(transform),
+template<class Source, class Detector>
+StiHitLoader<Source,Detector>::StiHitLoader(const string & name,
+					    StiHitContainer* hitContainer,
+					    Factory<StiHit>*hitFactory,
+					    Detector * detector)
+  :  Named(name),
      _hitContainer(hitContainer),
      _hitFactory(hitFactory),
+     _detector(detector),
      _detectorFinder(StiDetectorFinder::instance()),
      _messenger( *(Messenger::instance(MessageType::kHitMessage)) )
 {}
 
-template<class Source,class Transform>
-StiHitLoader<Source,Transform>::~StiHitLoader()
+template<class Source, class Detector>
+StiHitLoader<Source,Detector>::~StiHitLoader()
 {}
 
-template<class Source,class Transform>
-void StiHitLoader<Source,Transform>::setHitContainer(StiHitContainer* hitContainer)
+template<class Source, class Detector>
+void StiHitLoader<Source,Detector>::setHitContainer(StiHitContainer* hitContainer)
 {
   _hitContainer = hitContainer;
 }
     
-template<class Source,class Transform>
-void StiHitLoader<Source,Transform>::setHitFactory(Factory<StiHit>*hitFactory)
+template<class Source, class Detector>
+void StiHitLoader<Source,Detector>::setHitFactory(Factory<StiHit>*hitFactory)
 {
   _hitFactory = hitFactory;
 }
 
-template<class Source,class Transform>
-void StiHitLoader<Source,Transform>::setGeometryTransform(Transform*transform)
+template<class Source, class Detector>
+void StiHitLoader<Source,Detector>::setDetector(Detector *detector)
 {
-  _transform = transform;
+  _detector = detector;
 }
 
-
+template<class Source, class Detector>
+Detector* StiHitLoader<Source,Detector>::getDetector()
+{
+  return _detector;
+}
 
 #endif

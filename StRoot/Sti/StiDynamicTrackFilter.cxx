@@ -9,10 +9,9 @@ using namespace std;
 #include <vector>
 
 //Sti
+#include "Sti/Base/SubjectObserver.h"
 #include "StiTrack.h"
-#include "SubjectObserver.h"
 #include "StiIOBroker.h"
-//#include "StiTrackFilters.h"
 #include "StiDynamicTrackFilter.h"
 
 StiDynamicTrackFilter::StiDynamicTrackFilter(StiIOBroker* b) : Observer(b), mBroker(b)

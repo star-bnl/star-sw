@@ -31,7 +31,7 @@ using namespace std;
 #include "StDetectorId.h"
 
 //Sti
-#include "Factory.h"
+#include "Sti/Base/Factory.h"
 #include "StiKalmanTrackNode.h"
 #include "StiHitContainer.h"
 #include "StiKTNIterator.h"
@@ -237,30 +237,19 @@ class StiKalmanTrack : public StiTrack
    void setFittingDirection(StiDirection direction) { fittingDirection = direction;}
    
    /// Method used to add a hit to this track
-   /*! Method used to add an arbitrary hit to a track. A track node
-       is first obtained from the KalmantrackNode factory. The hit is added to
-       the node and the node is added to the track as a child to the last node 
-       of the track.
-   */
-   StiKalmanTrackNode * addHit(StiHit *h);
-  
-  /// Method to insert a hit in this track
-  StiKalmanTrackNode * insertHit(StiHit *hInserted, StiHit * targetParent);
-  
+   StiKalmanTrackNode * add(StiHit *h,double alpha, double eta, double curvature, double tanl);
+   
   /// Remove given hit from this track
   void removeHit(StiHit *h);
-  
-  /// Remove all hits and nodes currently associated with this track.
-  void removeAllHits();
   
   /// Work method used to find the node containing the given hit.
   StiKalmanTrackNode * findHit(StiHit * h);
   
   /// Convenience method to initialize a track based on seed information 
   void initialize(double curvature,
-									double tanl,
-									const StThreeVectorD& origin,
-									const hitvector &);
+		  double tanl,
+		  const StThreeVectorD& origin,
+		  const hitvector &);
   
   /// Work method returns the node closest to the given position.
   /*! Work method returns the node closest to the given position. 
@@ -396,7 +385,7 @@ inline double  StiKalmanTrack::getPt() const
 */
 inline double StiKalmanTrack::getCurvature() const
 {
-  return getInnerMostHitNode()->fP3;
+  return getInnerMostHitNode()->getCurvature();
 }
 
 /*!

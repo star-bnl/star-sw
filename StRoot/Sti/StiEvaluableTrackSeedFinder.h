@@ -41,7 +41,7 @@ using std::pair;
 #include "StAssociationMaker/StTrackPairInfo.hh"
 #include "StAssociationMaker/StAssociationMaker.h"
 
-#include "SubjectObserver.h"
+#include "Sti/Base/SubjectObserver.h"
 #include "StiSeedFinder.h"
 
 class StiKalmanTrack;
@@ -84,7 +84,11 @@ class StiEvaluableTrackSeedFinder : public Observer, public StiSeedFinder
 {
 public:
     ///This is the only constructor available.
-    StiEvaluableTrackSeedFinder(StAssociationMaker*, StiHitContainer*);
+    StiEvaluableTrackSeedFinder(const string& name,
+				Factory<StiKalmanTrack>* trackFactory,
+				StiHitContainer      * hitContainer,
+				StiDetectorContainer * detectorContainer,
+				StAssociationMaker   *);
 
     ///Default destructor.
     virtual ~StiEvaluableTrackSeedFinder();

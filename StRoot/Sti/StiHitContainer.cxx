@@ -14,7 +14,7 @@
 //#include "StiGui/StiRootDrawableHitContainer.h"
 
 //Sti
-#include "Messenger.h"
+#include "Sti/Base/Messenger.h"
 #include "StiHit.h"
 #include "StiPlacement.h"
 #include "StiDetector.h"
@@ -223,16 +223,11 @@ hitvector::iterator StiHitContainer::hitsEnd(const StiDetector* layer)
 void StiHitContainer::setRefPoint(double position, double refAngle,
 				  double y, double z)
 {
-    //mMessenger <<"\nStiHitContainer::setRefPoint(double, double, double, double)"<<endl;
-    //mMessenger <<"\tposition: "<<position<<"\trefAngle: "<<refAngle<<"\t";
-    //mMessenger <<"y: "<<y<<"\tz: "<<z<<endl;
-    
-    mUtilityHit.reset();
-    mUtilityHit.setPosition(position);
-    mUtilityHit.setRefangle(refAngle);
-    mUtilityHit.setY(y);
-    mUtilityHit.setZ(z);
-    setRefPoint(&mUtilityHit);
+  mMessenger <<"\nStiHitContainer::setRefPoint(double, double, double, double)"<<endl;
+  mMessenger <<"\tposition: "<<position<<"\trefAngle: "<<refAngle<<"\t";
+  mMessenger <<"y: "<<y<<"\tz: "<<z<<endl;
+  mUtilityHit.set(position,refAngle,y,z);
+  setRefPoint(&mUtilityHit);
 }
 
 /*! The sub-volume is identified by the following algorithm:\n
@@ -269,13 +264,12 @@ void StiHitContainer::setRefPoint(StiHit* ref)
     mkey.position = ref->position();
     //mminpoint->setY( ref->y() -mdeltad );
     //mmaxpoint->setY( ref->y() +mdeltad );
-    mminpoint->setZ( ref->z() -mdeltaz );
-    mmaxpoint->setZ( ref->z() +mdeltaz );
-    
-    //hitvector& tempvec = mmap[mkey];
+    //cp//mminpoint->setZ( ref->z() -mdeltaz );
+    //cp//mmaxpoint->setZ( ref->z() +mdeltaz );
+    mminpoint->set(ref->position(),ref->refangle(),ref->y(),ref->z()-mdeltaz );
+    mmaxpoint->set(ref->position(),ref->refangle(),ref->y(),ref->z()+mdeltaz );
     hitvector& tempvec = mmap[mkey].theHitVec;
     hitvector::iterator& tempend = mmap[mkey].theEffectiveEnd;
-
     //Search first by distance along z
     mstart = lower_bound(tempvec.begin(), tempend, mminpoint, StizHitLessThan());
     

@@ -10,9 +10,9 @@ using namespace std;
 #include <iostream>
 using namespace std;
 
-#include "SubjectObserver.h"
+#include "Sti/Base/Filter.h"
+#include "Sti/Base/SubjectObserver.h"
 #include "StiAbstractFilter.h"
-#include "Filter.h"
 
 class ostream;
 class StiTrack;

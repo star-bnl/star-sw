@@ -1,23 +1,35 @@
 //StiSeedFinder.cxx
 //M.L. Miller (Yale Software)
 //03/01
-
-//std
+#include <stdexcept>
 #include <iostream.h>
-
-//sti
 #include "StiSeedFinder.h"
+#include "Sti/Base/MessageType.h"
+#include "Sti/Base/Messenger.h"
 
-StiSeedFinder::StiSeedFinder(StiHitContainer* hc)
-    : mFactory(0), mMessenger(*(Messenger::instance(MessageType::kSeedFinderMessage))),
-      mHitStore(hc)
+StiSeedFinder::StiSeedFinder(const string& name,
+			     Factory<StiKalmanTrack>* trackFactory,
+			     StiHitContainer* hitContainer,
+			     StiDetectorContainer* detectorContainer)
+  : Named(name),
+    _trackFactory(trackFactory), 
+    _hitContainer(hitContainer),
+    _detectorContainer(detectorContainer),
+    _messenger(*(Messenger::instance(MessageType::kSeedFinderMessage)) )
 {
-    mMessenger <<"StiSeedFinder::StiSeedFinder()"<<endl;
+  _messenger <<"StiSeedFinder::StiSeedFinder() - INFO - Started"<<endl;
+  _messenger <<"StiSeedFinder::StiSeedFinder() - INFO - Constructing SeedFinder:"<<_name<<endl; 
+  if(!_trackFactory)
+    throw runtime_error("StiSeedFinder::StiSeedFinder(...) - FATAL - _trackFactory==0");
+  if(!_hitContainer)
+    throw runtime_error("StiSeedFinder::StiSeedFinder(...) - FATAL - _hitContainer==0");
+  if(!_detectorContainer)
+    throw runtime_error("StiSeedFinder::StiSeedFinder(...) - FATAL - _detectorContainer==0");
 }
 
 StiSeedFinder::~StiSeedFinder()
 {
-    mMessenger <<"StiSeedFinder::~StiSeedFinder()"<<endl;
+  _messenger <<"StiSeedFinder::~StiSeedFinder() - INFO - Destroying SeedFinder:"<<_name<<endl;
 }
 
 

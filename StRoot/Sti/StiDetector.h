@@ -12,6 +12,7 @@ class StiMaterial;
 class StiShape;
 class StiIsActiveFunctor;
 template<class T> class StiCompositeTreeNode;
+class StiHitErrorCalculator;
 
 /*!
    StiDetector represents a detector for the purposes of ITTF tracking.
@@ -69,6 +70,9 @@ public:
     void setTreeNode( StiCompositeTreeNode<StiDetector> * val) {mNode=val;}
     StiCompositeTreeNode<StiDetector> * getTreeNode() const {return mNode;}
     
+    void setHitErrorCalculator(const StiHitErrorCalculator * calculator);
+    const StiHitErrorCalculator * getHitErrorCalculator() const;
+
     friend ostream& operator<<(ostream&os, const StiDetector & det);
  protected:
     
@@ -87,6 +91,9 @@ public:
     /// thin scatterer (e.g. a Si wafer). If true, scatter information provided
     /// by the material.
     bool discreteScatterer;   // is this a discrete scatterer?    (yes => scatterer given by "material" below)
+
+    /// Hit Error Calculator for this detector
+    const StiHitErrorCalculator * _hitErrorCalculator;
     
     /// Continuous scatter attributes.
     StiMaterial *gas;         
@@ -105,5 +112,15 @@ public:
     /// Convenience storage of sin(refAngle)
     double _sin;
 };
+
+inline void StiDetector::setHitErrorCalculator(const StiHitErrorCalculator * calculator)
+{
+  _hitErrorCalculator = calculator;
+}
+
+inline const StiHitErrorCalculator * StiDetector::getHitErrorCalculator() const
+{
+  return _hitErrorCalculator;
+}
 
 #endif

@@ -15,7 +15,7 @@ using std::cout;
 using std::endl;
 using std::ostream;
 
-#include "SubjectObserver.h"
+#include "Sti/Base/SubjectObserver.h"
 
 class StiIOBroker : public Subject
 {

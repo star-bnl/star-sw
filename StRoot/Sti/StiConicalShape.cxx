@@ -1,28 +1,27 @@
 #include <math.h>
-
 #include "StiConicalShape.h"
 
-StiConicalShape::StiConicalShape(float halfDepth_,
-                                 float thickness_, float outerRadiusEast_,
-                                 float outerRadiusWest_, float openingAngle_):
-        StiShape(halfDepth_, thickness_){
-  
-  setOuterRadiusEast(outerRadiusEast_);
-  setOuterRadiusWest(outerRadiusWest_);
-  setOpeningAngle(openingAngle_);
- 
-}// StiConicalShape()
+StiConicalShape::StiConicalShape(const string &name,
+				 float halfDepth,
+                                 float thickness, 
+				 float outerRadiusEast,
+                                 float outerRadiusWest, 
+				 float openingAngle)
+  : StiShape(name,halfDepth, thickness),
+    _outerRadiusEast(outerRadiusEast),
+    _outerRadiusWest(outerRadiusWest),
+    _openingAngle(nice(openingAngle))
+{}// StiConicalShape()
 
 void StiConicalShape::setOuterRadiusEast(float val){
-  if (val >= 0.){ outerRadiusEast = val; }
+  if (val >= 0.){ _outerRadiusEast = val; }
 }// setOuterRadiusEast()
 
 void StiConicalShape::setOuterRadiusWest(float val){
-  if (val >= 0.){ outerRadiusWest = val; }
+  if (val >= 0.){ _outerRadiusWest = val; }
 }// setOuterRadiusWest()
 
-void StiConicalShape::setOpeningAngle(float val){
-  while (val <      0.){ val += 2*M_PI; }
-  while (val > 2.*M_PI){ val -= 2*M_PI; }
-  openingAngle = val;
+void StiConicalShape::setOpeningAngle(float val)
+{
+  _openingAngle = nice(val);
 }// setOpeningAngle()
