@@ -10,12 +10,10 @@
    gSystem->Load("St_Tables.so");
    gSystem->Load("libmsg.so");
    gSystem->Load("libtls.so");
-   gSystem->Load("tpc.sl"); 
    gSystem->Load("St_tpc.so");
    gSystem->Load("St_tss_Maker.so");
    gSystem->Load("St_tcl_Maker.so");
    gSystem->Load("St_tpt_Maker.so");
-   gSystem->Load("svt.sl");
    gSystem->Load("St_svt.so");
    gSystem->Load("St_srs_Maker.so");
    gSystem->Load("St_stk_Maker.so");
@@ -34,7 +32,7 @@
 
 //gSystem.Exec("rm *.log");
 //  Char_t *filename = "/afs/rhic/star/data/samples/auau_central_hijing.xdf";
-  Char_t *filename = "/disk1/star/auau200/year1a/central/hijing/set0001/regular/gst/auau_ce_b0-2_1001_1050.xdf";
+  Char_t *filename = "/afs/rhic/star/data/samples/hijet-g2t.xdf";
   St_XDFFile *xdf_in   = new St_XDFFile(filename,"r");
 //  St_XDFFile *xdf_out  = new St_XDFFile("auau_central_hijing.xdf","w");
 //  TFile      *root_out=  new TFile("auau_central_hijing.root","RECREATE");

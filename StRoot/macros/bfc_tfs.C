@@ -1,10 +1,4 @@
-// $Id: bfz.C,v 1.2 1999/02/22 23:28:13 fisyak Exp $
-//#define gtrack
-#define fast
-//#define trs
-//#define ftpc
-//#define emc
-#define ctf
+// $Id: bfc_tfs.C,v 1.1 1999/02/22 23:28:12 fisyak Exp $
 TBrowser *b = 0;
 class StChain;
 StChain  *chain=0;
@@ -25,33 +19,14 @@ void Load(){
     gSystem->Load("St_geant_Maker");
     gSystem->Load("St_TLA_Maker");
     gSystem->Load("St_tpc");
-#ifdef ftpc
     gSystem->Load("St_ftpc");
-#endif
-#ifndef fast
-#ifndef trs
-    gSystem->Load("St_tss_Maker");
-#else
-    gSystem->Load("StSclRoot");
-    gSystem->Load("StTrsMaker");
-    gSystem->Load("St_tpcdaq_Maker");
-#endif
-#ifdef ftpc
-    gSystem->Load("St_fss_Maker");
-#endif
-#endif
     gSystem->Load("St_tcl_Maker");
     gSystem->Load("St_tpt_Maker");
-#ifdef ftpc
     gSystem->Load("St_fcl_Maker");
     gSystem->Load("St_fpt_Maker");
-#endif
-#ifdef emc
     gSystem->Load("St_emc");
     gSystem->Load("St_ems_Maker");
     gSystem->Load("St_emc_Maker");
-#endif
-#ifdef ctf
     gSystem->Load("St_ctf");
     gSystem->Load("St_ctf_Maker");
     gSystem->Load("St_mwc");
@@ -60,9 +35,7 @@ void Load(){
     gSystem->Load("St_trg_Maker");
     gSystem->Load("St_l3");
     gSystem->Load("St_l3t_Maker");
-#endif
     gSystem->Load("StRchMaker");
-
     gSystem->Load("St_svt");
     gSystem->Load("St_srs_Maker");
     gSystem->Load("St_stk_Maker");
@@ -74,7 +47,7 @@ void Load(){
     gSystem->Load("St_io_Maker");
 }
 
-bfz(const Int_t Nevents=1,
+bfc_tfs(const Int_t Nevents=1,
      const Char_t *fzfile ="/disk1/star/test/psc0049_08_40evts.fzd",
      TString* FileOut=0)
 {                              
@@ -86,6 +59,7 @@ bfz(const Int_t Nevents=1,
     FileOut->ReplaceAll(".fz",".root");
     FileOut->Strip();
   }
+  cout << "File for chain " << FileOut.Data() << endl;
   TFile       *root_out  =  new TFile(FileOut->Data(),"RECREATE");
 
   // Create the main chain object
@@ -98,64 +72,25 @@ bfz(const Int_t Nevents=1,
   geant = new St_geant_Maker("geant","event/geant/Event");
   geant->SetNwGEANT(40 000 000);
   //  geant->SetNwPAW(1000000);
-#ifdef gtrack
-  geant->SetIwtype(1);
-  geant->Do("debug on;");
-  //  geant->LoadGeometry("detp geometry field_only");
-  geant->LoadGeometry("detp geometry year_1b");
-  geant->Do("subevent 0;");
-  geant->Do("gkine 10 6 1. 1. -1. 1. 0 6.28  -1. 1.;");
-  geant->Do("mode g2tm prin 1;");
-  //  geant->Do("next;");
-  //  geant->Do("dcut cave z 1 10 10 0.03 0.03;");
-  geant->Do("debug on;");
-  geant->Do("swit 2 3;");
-#else
   TString cmd("gfile p ");
   cmd += fzfile;
   geant->Do(cmd.Data());
-#endif
   //  geant->Do("mode tpce prin 1 digi 2");   // make tpc_hit in local coordinates
   St_calib_Maker       *calib = new St_calib_Maker("calib","calib"); 
-  //  St_evg_Maker     *evgen = new St_evg_Maker("evgen","event/evgen");
-#ifndef fast
-#ifdef  ftpc
-  St_fss_Maker         *ftpc_raw = new St_fss_Maker("ftpc_raw","event/raw_data/ftpc");
-#endif
-#ifndef trs
-  St_tss_Maker         *tpc_raw = new St_tss_Maker("tpc_raw","event/raw_data/tpc");
-  // Set parameters
-  //  tpc_raw->adcxyzon();
-#else
-  StTrsMaker           *trs = new StTrsMaker;
-  St_tpcdaq_Maker      *tpc_raw = new St_tpcdaq_Maker;
-#endif
-#endif
-#ifdef emc
   St_ems_Maker         *emc_raw = new St_ems_Maker("emc_raw","event/raw_data/emc");
   St_emc_Maker         *emc_hits = new St_emc_Maker("emc_hits","event/data/emc/hits");
-#endif
-#if 1
   St_tcl_Maker         *tpc_hits = new St_tcl_Maker("tpc_hits","event/data/tpc/hits");
   St_srs_Maker         *svt_hits = new St_srs_Maker("svt_hits","event/data/svt/hits");
-#ifdef ftpc
   St_fcl_Maker         *fcl_hits = new St_fcl_Maker("ftpc_hits","event/data/ftpc/hits");
-#endif
-  StRchMaker           *rch      = new StRchMaker("rch","event/raw_data/rch");
-  St_stk_Maker         *stk_tracks = new St_stk_Maker("svt_tracks","event/data/svt/tracks");
-  St_tpt_Maker         *tpc_tracks = new St_tpt_Maker("tpc_tracks","event/data/tpc/tracks");
-#ifdef ftpc
-  St_fpt_Maker         *ftpc_tracks = new St_fpt_Maker("ftpc_tracks","event/data/ftpc/tracks");
-#endif
-  St_glb_Maker         *global = new St_glb_Maker("global","event/data/global");
-#ifdef ctf
   St_ctf_Maker         *ctf      = new St_ctf_Maker("ctf","event/data/ctf");
   St_mwc_Maker         *mwc      = new St_mwc_Maker("mwc","event/data/mwc");
   St_trg_Maker         *trg      = new St_trg_Maker("trg","event/data/trg");
-#endif
-#ifdef ctf
+  StRchMaker           *rch      = new StRchMaker("rch","event/raw_data/rch");
+  St_tpt_Maker         *tpc_tracks = new St_tpt_Maker("tpc_tracks","event/data/tpc/tracks");
   St_l3t_Maker         *l3Tracks   = new St_l3t_Maker("l3Tracks","event/data/l3/tracks");
-#endif
+  St_stk_Maker         *stk_tracks = new St_stk_Maker("svt_tracks","event/data/svt/tracks");
+  St_fpt_Maker         *ftpc_tracks = new St_fpt_Maker("ftpc_tracks","event/data/ftpc/tracks");
+  St_glb_Maker         *global = new St_glb_Maker("global","event/data/global");
   St_run_summary_Maker *summary = new St_run_summary_Maker("run_summary","run/dst");
   St_dst_Maker         *dst     = new St_dst_Maker("dst","dst");
   //  dst_Maker->Save();
@@ -174,9 +109,11 @@ bfz(const Int_t Nevents=1,
   //  chain->MakeTree("StChainTree","Title");
   //  chain->SetBranches();
   // Prepare TCanvas to show some histograms created by makers
-  out->Add(dst->GetName(),"dst_branch.root");
+  
+  FileOut->ReplaceAll(".root","_dst.root");
+  cout << "File for dst " << FileOut.Data() << endl;
+  out->Add(dst->GetName(),FileOut.Data());
   if (root_out) {chain->Write();}
-
   gBenchmark->Start("bfc");
   Int_t i=0;
   for (Int_t i =1; i <= Nevents; i++){
@@ -198,5 +135,6 @@ bfz(const Int_t Nevents=1,
     gBenchmark->Print("bfc");
   }
   else {if (!b)   b = new TBrowser;}
+  cout << "Run completed ";
+  gSystem->Exec("date");
 }
-
