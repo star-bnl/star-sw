@@ -1,7 +1,11 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.13 2000/03/06 21:47:56 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.14 2000/03/28 02:28:04 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.14  2000/03/28 02:28:04  calderon
+ * Return to calculating momentum at the origin, instead of taking the
+ * momentum from the first point.
+ *
  * Revision 1.13  2000/03/06 21:47:56  calderon
  * Add Lee's V0 example
  *
@@ -213,7 +217,7 @@ Int_t StMcAnalysisMaker::Make()
     //          tracking will not be good if primary vertex was not well placed.
 
     // First check whether the Primary Vertex is there at all.
-    StThreeVectorF VertexPos(0,0,0);
+    StThreeVectorD VertexPos(0,0,0);
     if (rEvent->primaryVertex()) {
 	VertexPos = rEvent->primaryVertex()->position();
 	cout << "Position of Primary Vertex from StEvent:" << endl;
@@ -316,13 +320,23 @@ Int_t StMcAnalysisMaker::Make()
     StSPtrVecTrackNode& rcTrackNodes = rEvent->trackNodes();
     StTrackNode*        firstTrackNode = *(rcTrackNodes.begin());
     StGlobalTrack*      firstTrack = dynamic_cast<StGlobalTrack*>(firstTrackNode->track(global));
+    double B = rEvent->summary()->magneticField();
     if (firstTrack) {
 	pair<rcTrackMapIter,rcTrackMapIter> trackBounds = theTrackMap->equal_range(firstTrack);
-	StThreeVectorF recMom = firstTrack->geometry()->momentum();
+
 	
 	cout << "MC Tracks associated with first Track in collection: " << theTrackMap->count(firstTrack) << endl;
 	cout << "Momentum of First Track and of first Associated Track:" << endl;
 	// Calculate the momentum of the track at the start vertex and compare it to MC Track
+	StPhysicalHelixD trkHelix = firstTrack->geometry()->helix();
+	double s = 0;
+	if (firstTrack->vertex())
+	    s = trkHelix.pathLength(firstTrack->vertex()->position());
+	else
+	    s = trkHelix.pathLength(VertexPos);
+	
+	StThreeVectorD recMom(trkHelix.momentumAt(s,B));
+	
 	cout << "[" << abs(recMom) << ", ";
 	cout << abs((*trackBounds.first).second->partnerMcTrack()->momentum()) << "]" << endl;
 	cout << "These tracks have : \n";
@@ -339,8 +353,8 @@ Int_t StMcAnalysisMaker::Make()
     //          Make an Ntuple with rec & monte carlo mom, mean hit difference, and # of common hits
     StGlobalTrack* recTrack;
     StMcTrack*     mcTrack;
-    StThreeVectorF p;
-    StThreeVectorF pmc;
+    StThreeVectorD p;
+    StThreeVectorD pmc;
     float diff =0;
 
     float* values = new float[12];
@@ -356,7 +370,14 @@ Int_t StMcAnalysisMaker::Make()
 	for (int k=0; k<3; k++) values[k] = pmc[k];
 	values[3]=pmc.mag();
 	
-	p = recTrack->geometry()->momentum();
+	double s = 0;
+	StPhysicalHelixD trkHelix = recTrack->geometry()->helix();
+	if (recTrack->vertex())
+	    s = trkHelix.pathLength(recTrack->vertex()->position());
+	else
+	    s = trkHelix.pathLength(VertexPos);
+	
+	p = trkHelix.momentumAt(s,B);
 	for (int j=0; j<3; j++) values[j+4] = p[j];
 	values[7]=p.mag();
 	values[8]=(*tIter).second->commonTpcHits();
