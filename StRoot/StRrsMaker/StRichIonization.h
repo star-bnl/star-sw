@@ -1,5 +1,5 @@
 /***********************************************************************
- *  $Id: StRichIonization.h,v 1.2 2000/01/25 22:02:21 lasiuk Exp $
+ *  $Id: StRichIonization.h,v 1.3 2000/02/08 16:27:36 lasiuk Exp $
  *
  * Description:
  *   StRichIonization function object contains ionization algorithm
@@ -14,8 +14,9 @@
  *
  ***************************************************************************
  * $Log: StRichIonization.h,v $
- * Revision 1.2  2000/01/25 22:02:21  lasiuk
- * Second Revision
+ * Revision 1.3  2000/02/08 16:27:36  lasiuk
+ * change to class.  Put dbs and random generators into
+ * class as data members
  *
  * Revision 1.4  2000/02/12 00:38:29  lasiuk
  * rename probability (max)
@@ -34,7 +35,7 @@
  *     - 7/21/1999 created the struct,        Alexandre Nevski.
  *     - 7/27/1999 updated operator() to void. results 
  *         returned by reference,             Alexandre Nevski.
-#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+ *     - 8/10/1999 main implementation                   C & A.
  *
  ****************************************************************************/
 #include <functional>
@@ -44,10 +45,26 @@ using std::unary_function;
 #ifndef ST_NO_NAMESPACES
 #ifndef ST_NO_NAMESPACES
 //namespace StRichRawData {
+#endif
+using std::list;
+#include "StRichPhysicsDb.h"
+#endif
+#include "StRichRrsMacros.h"    
+#include "StRichMiniHit.h"
+class StRichIonization : public unary_function<StRichGHit,void> {
+class StRichPhysicsDb;
 
-    struct StRichIonization : public unary_function<StRichGHit,void> {
-	void operator()( const StRichGHit& );
-    };
+class StRichIonization {
+public:
+    StRichIonization();
+    ~StRichIonization();
+
+    MyRound          mRound;
+    void operator()( const StRichGHit& );
+
+    void splitSegment(const StRichGHit*, list<StRichMiniHit*>&) const;
+    double           mMaximumElectronEnergy;
+    
 
     StRichPhysicsDb* mPhysicsDb;
     Randoms          mRandom;
