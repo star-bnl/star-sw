@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.132 2000/08/27 00:27:56 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.133 2000/08/27 20:28:47 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -46,6 +46,7 @@ Bfc_st BFC[] = {
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"mdc3"        ,""  ,"","cy1h,GeantOut"                               ,"","","MDC3 default chain",kFALSE},
   {"doEvents"    ,""  ,"","xin,event,analysis"                                            ,"","","",kFALSE},
+  {"drawDst"     ,""  ,"","xin,ry1h,globT,SCL,geant,display"                              ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis,EventQA"                          ,"","","",kFALSE},
   {"Cdefault"    ,""  ,"","tpc,ftpc,rrs,rich,l0,l3,Cdst,Kalman,tags,Tree"    ,"","","Default chain",kFALSE}, 
   {"Cy1a"        ,""  ,"","y1a,Cdefault"                                 ,"","","Turn on chain y1a",kFALSE},
@@ -414,7 +415,6 @@ Int_t StBFChain::Instantiate()
 	if (mk) {
 	  if (maker == "StTpcDbMaker") tpcDBMk = mk;
 	  if (maker == "St_dst_Maker" && GetOption("HitsBranch")) mk->SetMode(2); 
-	  SetInput("dst",".make/dst/.data/dst");
 	  if (maker == "StMatchMaker" && !GetOption("Kalman")) mk->SetMode(-1);
 	  if (maker == "St_tpcdaq_Maker") {
 	    if (GetOption("Trs")) mk->SetMode(1); // trs
