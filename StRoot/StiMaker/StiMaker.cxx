@@ -371,7 +371,7 @@ void StiMaker::finishEvent()
     StiEvaluator::instance()->evaluateForEvent(mtrackstore);
 }
 
-void StiMaker::doNextAction()
+void StiMaker::finishTrack()
 {
     //Add call to next tracker action here
     if (mDoTrackFit==true) {
@@ -381,6 +381,11 @@ void StiMaker::doNextAction()
 	mtracker->doTrackFind();
     }
     return;
+}
+
+void StiMaker::doNextTrackStep()
+{
+    mtracker->doNextTrackStep();
 }
 
 void StiMaker::setSeedFinderType(SeedFinderType val)

@@ -68,6 +68,7 @@ enum ETestCommandIdentifiers {
     M_DetView_IfcInvisible,
 
     M_Tracking_ToggleFitFind,
+    M_Tracking_DoTrackStep,
     M_Tracking_FinishTrack,
     M_Tracking_FinishEvent,
     M_Tracking_EventStep,
@@ -122,8 +123,12 @@ private:
 
     void testDraw();
     
-    //do next action within this event
-    void doNextStiGuiAction();
+    //Finish one track at a time
+    void finishTrack();
+
+    //Make the next step in the current track
+    void doNextTrackStep();
+    
     //fit/find the entire event
     void finishEvent(); 
     //step to the next event
@@ -191,6 +196,7 @@ private:
     StIOMaker* mIoMaker;
     
     TGCompositeFrame* fTrackingFrame;
+    TGTextButton* fDoTrackStepButton;
     TGTextButton* fFinishTrackButton;
     TGTextButton* fFinishEventButton;
     TGTextButton* fNextEventButton;
