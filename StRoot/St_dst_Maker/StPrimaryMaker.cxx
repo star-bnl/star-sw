@@ -456,7 +456,7 @@ Int_t StPrimaryMaker::Make(){
 	    globtrkPtr->id_start_vertex = 0;
 	    primtrkPtr->id_start_vertex = globtrkPtr->id_start_vertex;
 	    if( globtrkPtr->impact < 3.){
-	      primtrkPtr->id_start_vertex =10;
+	      primtrkPtr->id_start_vertex = myvrtx->id*10+1;
 	      }
 	    //          if(primtrkPtr->id_start_vertex != 0)
 	    //  keep_vrtx_id=primtrkPtr->id_start_vertex;
@@ -498,23 +498,27 @@ Int_t StPrimaryMaker::Make(){
   printf("%s end, nPrimTR=%d\n",GetName(),nrows);
   
   
-  // if( EstPrimary){
+   if( EstPrimary){
     
-//     nrows = EstPrimary->GetNRows();
-//     dst_track_st *squeezePtr = EstPrimary->GetTable();
-//     n2rows = 0;
-//     for (Int_t irow=0;irow<nrows;irow++){
-//       if(squeezePtr[irow].id_start_vertex == 0) continue;
-//       squeezePtr[n2rows++]= squeezePtr[irow];    
-//     }
-//     EstPrimary->SetNRows(n2rows);  
-//   }
+    nrows = EstPrimary->GetNRows();
+     dst_track_st *squeezePtr = EstPrimary->GetTable();
+     n2rows = 0;
+     for (Int_t irow=0;irow<nrows;irow++){
+       if(squeezePtr[irow].id_start_vertex == 0) continue;
+       squeezePtr[n2rows++]= squeezePtr[irow];    
+     }
+     EstPrimary->SetNRows(n2rows); 
+     cout << nrows << " Initial primary rows and " << n2rows << " good rows" << endl;  
+   }
   
  return iMake;
   }
 //_____________________________________________________________________________
-// $Id: StPrimaryMaker.cxx,v 1.75 2002/04/17 23:56:43 jeromel Exp $
+// $Id: StPrimaryMaker.cxx,v 1.76 2002/04/24 21:15:20 caines Exp $
 // $Log: StPrimaryMaker.cxx,v $
+// Revision 1.76  2002/04/24 21:15:20  caines
+// Fix EstPrimary.id_start_vertex flagging so the tracks get saved to the primary vertex in StEvent and it doesnt crash
+//
 // Revision 1.75  2002/04/17 23:56:43  jeromel
 // Changes by Helen for the SVT in egr implementation.
 //
