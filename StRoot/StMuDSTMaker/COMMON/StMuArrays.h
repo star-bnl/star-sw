@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.6 2004/04/09 03:36:14 jeromel Exp $
+ * $Id: StMuArrays.h,v 1.7 2004/04/09 22:06:35 subhasis Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -26,13 +26,13 @@ enum muDstTypes {muEvent=0, muPrimary, muGlobal, muOther, muL3, muRich, muState,
 enum pmdTypes {muPmd=0}; 
 
 /// @enum Tofr enumeration
-//enum tofTypes {muTofHit=0, muTofData};
+enum tofTypes {muTofHit=0, muTofData};
 
 #define __NARRAYS__ 9           ///< size of the 'regular stuff' arrays, i.e. number of TClonesArrays  
 #define __NSTRANGEARRAYS__ 12   ///< size of the strangeness arrays, i.e. number of TClonesArrays  
 #define __NEMCARRAYS__ 1        ///< size of the emc arrays, i.e. number of TClonesArrays  
 #define __NPMDARRAYS__ 1        ///< size of the pmd arrays, i.e. number of TClonesArrays  
-//#define __NTOFARRAYS__ 2        ///< size of the tof arrays >
+#define __NTOFARRAYS__ 2        ///< size of the tof arrays >
 
 class StMuArrays {
  public:
@@ -58,10 +58,10 @@ class StMuArrays {
     static int pmdArrayCounters[__NPMDARRAYS__];///< number of entries in current event, currently not used
 
     // Tofr
-    //static char* tofArrayNames[__NTOFARRAYS__]; ///< names of the TBranches in the TTree/File                        
-    //static char* tofArrayTypes[__NTOFARRAYS__];	///< names of the classes, the TClonesArrays are arrays of this type 
-    //static int tofArraySizes[__NTOFARRAYS__];	///< maximum sizes of the TClonesArrays 
-    //static int tofArrayCounters[__NTOFARRAYS__];///< number of entries in current event, currently not used ;
+    static char* tofArrayNames[__NTOFARRAYS__]; ///< names of the TBranches in the TTree/File                        
+    static char* tofArrayTypes[__NTOFARRAYS__];	///< names of the classes, the TClonesArrays are arrays of this type 
+    static int tofArraySizes[__NTOFARRAYS__];	///< maximum sizes of the TClonesArrays 
+    static int tofArrayCounters[__NTOFARRAYS__];///< number of entries in current event, currently not used ;
 };
 
 #endif
@@ -69,6 +69,9 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.7  2004/04/09 22:06:35  subhasis
+ * after tof createevent fix by Xin
+ *
  * Revision 1.6  2004/04/09 03:36:14  jeromel
  * Removed TOF support entirely for now as we need a working version ... Will
  * revisit later.

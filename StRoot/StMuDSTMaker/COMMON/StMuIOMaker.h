@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.h,v 1.6 2004/04/09 03:36:15 jeromel Exp $
+ * $Id: StMuIOMaker.h,v 1.7 2004/04/09 22:02:50 subhasis Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuIOMaker_hh
@@ -52,7 +52,7 @@ class StMuEmcUtil;
 /// pmd stuff
 //#include "StMuPmdCollection.h"
 class StMuPmdUtil;
-//class StMuTofUtil;
+class StMuTofUtil;
 
 class TFile;
 class TTree;
@@ -100,7 +100,7 @@ class StMuIOMaker : public StIOInterFace {
   int numberOfEvents() { return mNumberOfEvents; }
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuIOMaker.h,v 1.6 2004/04/09 03:36:15 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuIOMaker.h,v 1.7 2004/04/09 22:02:50 subhasis Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -151,8 +151,8 @@ private:
   TClonesArray* pmdArrays[__NPMDARRAYS__];//->
   TClonesArray* mPmdArrays[__NPMDARRAYS__];//->
 
-  //TClonesArray* tofArrays[__NTOFARRAYS__];//->
-  //TClonesArray* mTofArrays[__NTOFARRAYS__];//->
+  TClonesArray* tofArrays[__NTOFARRAYS__];//->
+  TClonesArray* mTofArrays[__NTOFARRAYS__];//->
 
 
   ClassDef(StMuIOMaker, 2)
@@ -165,6 +165,9 @@ inline StMuDst* StMuIOMaker::muDst() { return mStMuDst;}
 /***************************************************************************
  *
  * $Log: StMuIOMaker.h,v $
+ * Revision 1.7  2004/04/09 22:02:50  subhasis
+ * after tof createevent fix by Xin
+ *
  * Revision 1.6  2004/04/09 03:36:15  jeromel
  * Removed TOF support entirely for now as we need a working version ... Will
  * revisit later.

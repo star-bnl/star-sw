@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.cxx,v 1.7 2004/04/09 03:36:15 jeromel Exp $
+ * $Id: StMuIOMaker.cxx,v 1.8 2004/04/09 22:02:53 subhasis Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -56,7 +56,7 @@ StMuIOMaker::~StMuIOMaker() {
   for (  i=0; i<__NSTRANGEARRAYS__; i++) { delete strangeArrays[i];strangeArrays[i]=0;}
   for (  i=0; i<__NEMCARRAYS__; i++) { delete emcArrays[i]; emcArrays[i]=0;}
   for (  i=0; i<__NPMDARRAYS__; i++) { delete pmdArrays[i]; pmdArrays[i]=0;}
-  //for (  i=0; i<__NTOFARRAYS__; i++) { delete tofArrays[i]; tofArrays[i]=0;}
+  for (  i=0; i<__NTOFARRAYS__; i++) { delete tofArrays[i]; tofArrays[i]=0;}
   DEBUGMESSAGE3("after arrays");
   closeRead();
   DEBUGMESSAGE3("after close");
@@ -90,12 +90,12 @@ void StMuIOMaker::createArrays() {
     mPmdArrays[i]= clonesArray(pmdArrays[i],StMuArrays::pmdArrayTypes[i],StMuArrays::pmdArraySizes[i],StMuArrays::pmdArrayCounters[i]);
   }
   // added for Xin since was not there in the first place
-  //for ( int i=0; i<__NTOFARRAYS__; i++) {
-  //  mTofArrays[i]= clonesArray(tofArrays[i],StMuArrays::tofArrayTypes[i],StMuArrays::tofArraySizes[i],StMuArrays::tofArrayCounters[i]);
-  //}
+  for ( int i=0; i<__NTOFARRAYS__; i++) {
+    mTofArrays[i]= clonesArray(tofArrays[i],StMuArrays::tofArrayTypes[i],StMuArrays::tofArraySizes[i],StMuArrays::tofArrayCounters[i]);
+  }
 
-  //mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays,mTofArrays);
-  mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays);
+  mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays,mTofArrays);
+  //mStMuDst->set(mArrays,mStrangeArrays,mEmcArrays,mPmdArrays);
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -115,9 +115,9 @@ void StMuIOMaker::clear(){
   for ( int i=0; i<__NPMDARRAYS__; i++) {
     del(mPmdArrays[i],StMuArrays::pmdArrayCounters[i]);
   }
-  //for ( int i=0; i<__NTOFARRAYS__; i++) {
-  //  del(mTofArrays[i],StMuArrays::tofArrayCounters[i]);
-  //}
+  for ( int i=0; i<__NTOFARRAYS__; i++) {
+    del(mTofArrays[i],StMuArrays::tofArrayCounters[i]);
+  }
   DEBUGMESSAGE2("out");
 }
 //-----------------------------------------------------------------------
@@ -216,9 +216,9 @@ void StMuIOMaker::setBranchAddresses(TChain* chain) {
   } 
 
   // added for Xin since it did not 
-  //for ( int i=0; i<__NTOFARRAYS__; i++) {
-  //    chain->SetBranchAddress(StMuArrays::tofArrayNames[i],&mTofArrays[i]);
-  //} 
+  for ( int i=0; i<__NTOFARRAYS__; i++) {
+      chain->SetBranchAddress(StMuArrays::tofArrayNames[i],&mTofArrays[i]);
+  } 
  
   TTree *tree;
   tree = mChain->GetTree();
@@ -367,6 +367,9 @@ void  StMuIOMaker::SetFile(const char *fileName)    {
 /***************************************************************************
  *
  * $Log: StMuIOMaker.cxx,v $
+ * Revision 1.8  2004/04/09 22:02:53  subhasis
+ * after tof createevent fix by Xin
+ *
  * Revision 1.7  2004/04/09 03:36:15  jeromel
  * Removed TOF support entirely for now as we need a working version ... Will
  * revisit later.
