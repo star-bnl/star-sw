@@ -46,7 +46,7 @@ tracker.plotHits()
 tracker.plotTracks()    plots hits in tracks connected by line
 tracker.plotFits()      plots helices
 
-The hits and tracks are accesible fromi root for inspection or
+The hits and tracks are accesible from root for inspection or
 filling histograms or ntuples.
 
 
