@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofrMatchMaker.cxx,v 1.10 2004/08/10 19:25:13 dongx Exp $
+ * $Id: StTofrMatchMaker.cxx,v 1.11 2004/08/11 18:57:44 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -12,6 +12,9 @@
  *****************************************************************
  *
  * $Log: StTofrMatchMaker.cxx,v $
+ * Revision 1.11  2004/08/11 18:57:44  dongx
+ * deltay quality cut applied
+ *
  * Revision 1.10  2004/08/10 19:25:13  dongx
  * updated to be compatible with RunII data
  *
@@ -835,7 +838,8 @@ Int_t StTofrMatchMaker::Make(){
     Int_t module = FinalMatchedCellsVec[ii].module;
     Int_t cell = FinalMatchedCellsVec[ii].cell;
 
-
+    Float_t ycenter = (cell-1-2.5)*mWidthPad;
+    Float_t dy = FinalMatchedCellsVec[ii].yhit - ycenter;
     if (FinalMatchedCellsVec[ii].trackIdVec.size()!=1)
       gMessMgr->Info("","OS") << "F: WHAT!?!  mult.matched cell in single cell list " << daqId << endm;
 
@@ -848,7 +852,7 @@ Int_t StTofrMatchMaker::Make(){
     StTrack *globalTrack = nodes[trackNode]->track(global);
 
     // 2. continue only if the (primary) track exists
-    if (validTofTrack(theTrack)){
+    if (validTofTrack(theTrack) && fabs(dy)<1.9 ){
       nValidSinglePrimHitCells++;
 
       //--- store number of hits per track
