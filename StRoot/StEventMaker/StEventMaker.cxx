@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventMaker.cxx,v 2.49 2002/05/02 03:07:18 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.50 2002/11/26 02:19:48 perev Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.50  2002/11/26 02:19:48  perev
+ * StEventMaker ITTF modif
+ *
  * Revision 2.49  2002/05/02 03:07:18  ullrich
  * Changed mechanism to reject EST tracks without SVT hits.
  *
@@ -206,7 +209,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.49 2002/05/02 03:07:18 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.50 2002/11/26 02:19:48 perev Exp $";
 
 ClassImp(StEventMaker)
   
@@ -394,22 +397,22 @@ StEventMaker::makeEvent()
     event_header_st* dstEventHeader = mEventManager->returnTable_event_header(nrows);
     dst_event_summary_st* dstEventSummary = mEventManager->returnTable_dst_event_summary(nrows);
 
-    if (!dstEventHeader) 
-        gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot load dst_event_header_st, "
-                            << "will create incomplete instance of StEvent." << endm;
+//VP    if (!dstEventHeader) 
+//VP        gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot load dst_event_header_st, "
+//VP                            << "will create incomplete instance of StEvent." << endm;
     
     //
     //  Create instance of StEvent, using whatever we got so far.
     //
     mCurrentEvent = getStEventInstance();
-    if (dstEventHeader)
+    if (dstEventHeader  && !mCurrentEvent->info())
 	mCurrentEvent->setInfo(new StEventInfo(*dstEventHeader));
-    if (dstEventSummary)
+    if (dstEventSummary && !mCurrentEvent->summary())
 	mCurrentEvent->setSummary(new StEventSummary(*dstEventSummary));
-    else {
-        gMessMgr->Error() << "StEventMaker::makeEvent(): no event summary and hence no magnetic field info. Bad event.";
-	return kStErr;
-    }
+//VP    else {
+//VP        gMessMgr->Error() << "StEventMaker::makeEvent(): no event summary and hence no magnetic field info. Bad event.";
+//VP	return kStErr;
+//VP    }
 	
     
     //
@@ -424,14 +427,16 @@ StEventMaker::makeEvent()
     dst_mon_soft_svt_st*  dstSoftMonSvt    = mEventManager->returnTable_dst_mon_soft_svt(nrows);
     dst_mon_soft_tpc_st*  dstSoftMonTpc    = mEventManager->returnTable_dst_mon_soft_tpc(nrows);
     
-    mCurrentEvent->setSoftwareMonitor(new StSoftwareMonitor(dstSoftMonTpc,
-                                                            dstSoftMonSvt,
-                                                            dstSoftMonFtpc,
-                                                            dstSoftMonEmc,
-                                                            dstSoftMonCtb,
-                                                            dstSoftMonRich,
-                                                            dstSoftMonGlobal,
-                                                            dstSoftMonL3));
+    StSoftwareMonitor *mon = mCurrentEvent->softwareMonitor();
+    if (!mon) mCurrentEvent->setSoftwareMonitor(mon = new StSoftwareMonitor());
+    mon->setTpcSoftwareMonitor   (dstSoftMonTpc   );
+    mon->setSvtSoftwareMonitor   (dstSoftMonSvt   );
+    mon->setFtpcSoftwareMonitor  (dstSoftMonFtpc  );
+    mon->setEmcSoftwareMonitor   (dstSoftMonEmc   );
+    mon->setCtbSoftwareMonitor   (dstSoftMonCtb   );
+    mon->setRichSoftwareMonitor  (dstSoftMonRich  );
+    mon->setGlobalSoftwareMonitor(dstSoftMonGlobal);
+    mon->setL3SoftwareMonitor    (dstSoftMonL3    );
     
     //
     //        Load trigger & trigger detector data
@@ -439,13 +444,16 @@ StEventMaker::makeEvent()
     dst_TrgDet_st* dstTriggerDetectors = mEventManager->returnTable_dst_TrgDet(nrows);
     dst_L0_Trigger_st* dstL0Trigger    = mEventManager->returnTable_dst_L0_Trigger(nrows);
     dst_L1_Trigger_st* dstL1Trigger    = mEventManager->returnTable_dst_L1_Trigger(nrows);
-    if (dstTriggerDetectors)
+
+    if (dstTriggerDetectors && !mCurrentEvent->triggerDetectorCollection())
         mCurrentEvent->setTriggerDetectorCollection(new StTriggerDetectorCollection(*dstTriggerDetectors));
-    if (dstL0Trigger && dstTriggerDetectors)
-        mCurrentEvent->setL0Trigger(new StL0Trigger(*dstL0Trigger, *dstTriggerDetectors));
-    else if (dstL0Trigger)
-        mCurrentEvent->setL0Trigger(new StL0Trigger(*dstL0Trigger));
-    if (dstL0Trigger && dstL1Trigger)
+    
+    StL0Trigger *l0t = mCurrentEvent->l0Trigger();
+    if (!l0t) mCurrentEvent->setL0Trigger((l0t = new StL0Trigger()));
+    l0t->set(dstL0Trigger       );
+    l0t->set(dstTriggerDetectors);
+
+    if (dstL0Trigger && dstL1Trigger && !mCurrentEvent->l1Trigger())
 	mCurrentEvent->setL1Trigger(new StL1Trigger(*dstL0Trigger, *dstL1Trigger));
 
     //
@@ -478,6 +486,8 @@ StEventMaker::makeEvent()
     //  (vecGlobalTracks) sorted according to their dst_track::id.
     //  This makes things a lot easier.
     //
+    if (trackNodes.size())  return kStOK;
+    
     StGlobalTrack *gtrack = 0;
     dst_track_st *dstGlobalTracks = mEventManager->returnTable_dst_globtrk(nrows);
     if (!dstGlobalTracks) nrows = 0;

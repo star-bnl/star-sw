@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHelixModel.h,v 2.6 2002/02/22 22:56:48 jeromel Exp $
+ * $Id: StHelixModel.h,v 2.7 2002/11/26 02:19:11 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHelixModel.h,v $
+ * Revision 2.7  2002/11/26 02:19:11  perev
+ * StEventMaker ITTF modif
+ *
  * Revision 2.6  2002/02/22 22:56:48  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -81,7 +84,7 @@ private:
     StThreeVectorF mMomentum;
     Short_t        mHelicity;
     
-    ClassDef(StHelixModel,2)
+    ClassDef(StHelixModel,3)
 };
 
 #endif

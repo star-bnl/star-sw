@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSoftwareMonitor.cxx,v 2.5 2001/04/05 04:00:54 ullrich Exp $
+ * $Id: StSoftwareMonitor.cxx,v 2.6 2002/11/26 02:19:11 perev Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSoftwareMonitor.cxx,v $
+ * Revision 2.6  2002/11/26 02:19:11  perev
+ * StEventMaker ITTF modif
+ *
  * Revision 2.5  2001/04/05 04:00:54  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -45,7 +48,7 @@
 #include "tables/St_dst_mon_soft_glob_Table.h"
 #include "tables/St_dst_mon_soft_l3_Table.h"
 
-static const char rcsid[] = "$Id: StSoftwareMonitor.cxx,v 2.5 2001/04/05 04:00:54 ullrich Exp $";
+static const char rcsid[] = "$Id: StSoftwareMonitor.cxx,v 2.6 2002/11/26 02:19:11 perev Exp $";
 
 ClassImp(StSoftwareMonitor)
 
@@ -113,6 +116,22 @@ StSoftwareMonitor::StSoftwareMonitor(const dst_mon_soft_tpc_st* tpcMon,
     else
         mL3Monitor = 0;
 }
+void StSoftwareMonitor::setTpcSoftwareMonitor   (dst_mon_soft_tpc_st  *tab)
+{if (tab) mTpcMonitor    = new StTpcSoftwareMonitor                  (*tab);}
+void StSoftwareMonitor::setSvtSoftwareMonitor   (dst_mon_soft_svt_st  *tab)
+{if (tab) mSvtMonitor    = new StSvtSoftwareMonitor                  (*tab);}
+void StSoftwareMonitor::setFtpcSoftwareMonitor  (dst_mon_soft_ftpc_st *tab)
+{if (tab) mFtpcMonitor   = new StFtpcSoftwareMonitor                 (*tab);}
+void StSoftwareMonitor::setEmcSoftwareMonitor   (dst_mon_soft_emc_st  *tab)
+{if (tab) mEmcMonitor    = new StEmcSoftwareMonitor                  (*tab);}
+void StSoftwareMonitor::setRichSoftwareMonitor  (dst_mon_soft_rich_st *tab)
+{if (tab) mRichMonitor   = new StRichSoftwareMonitor                 (*tab);}
+void StSoftwareMonitor::setCtbSoftwareMonitor   (dst_mon_soft_ctb_st  *tab)
+{if (tab) mCtbMonitor    = new StCtbSoftwareMonitor                  (*tab);}
+void StSoftwareMonitor::setGlobalSoftwareMonitor(dst_mon_soft_glob_st *tab)
+{if (tab) mGlobalMonitor = new StGlobalSoftwareMonitor               (*tab);}
+void StSoftwareMonitor::setL3SoftwareMonitor    (dst_mon_soft_l3_st   *tab)
+{if (tab) mL3Monitor     = new StL3SoftwareMonitor                   (*tab);}
 
 StSoftwareMonitor::~StSoftwareMonitor()
 {
