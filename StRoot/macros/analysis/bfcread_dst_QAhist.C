@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.24 2000/01/31 21:20:14 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.25 2000/02/07 19:46:36 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.25  2000/02/07 19:46:36  kathy
+// add read from geant Branch so that geant table histograms can be filled in St_QA_Maker
+//
 // Revision 1.24  2000/01/31 21:20:14  kathy
 // fixed up printouts - some printed wrong macro name; also moved finish method after drawhists method
 //
@@ -159,8 +162,11 @@ void bfcread_dst_QAhist(
   chain = new StChain("bfc");
   chain->SetDebug();
    
-// Input File Maker
+// Input File Maker 
+//  - turn geant Branch on - dstBranch already on from input file
     StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
+     IOMk->SetDebug();
+     IOMk->SetBranch("geantBranch",0,"r"); //activate geant Branch
 
 // constructor for other class  (not a Maker so not used in chain)
    StHistUtil   *HU  = new StHistUtil;
