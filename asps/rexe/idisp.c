@@ -7,6 +7,6 @@ int iponter_(a,b)   int   *a,**b;    { return (*b-a);  }
 
 #ifdef PrivateMalloc
 #include <stdlib.h>
-int malloc_(int **size){return (int) malloc((size_t) *size);}
-void  free_(int **ptr) {             free  (*ptr);}
+int malloc_(int  *size){return (int) malloc((size_t) *size);}
+void  free_(int  *ptr) { int i = *ptr;  free  ((char *)i);}
 #endif
