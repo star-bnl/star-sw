@@ -20,8 +20,10 @@ St_l3_Coordinate_Transformer::St_l3_Coordinate_Transformer()
     xyz_global = new Double_t[3];
 
     // initialize transformations
-    this->Use_transformation_provided_by_db() ;
-    //this->Print_parameters() ;    
+    Use_transformation_provided_by_db() ;
+    //Get_parameters_from_db() ;
+    //Set_parameters_by_hand() ;
+    this->Print_parameters() ;    
 }
 //______________________________
 St_l3_Coordinate_Transformer::~St_l3_Coordinate_Transformer()
@@ -133,11 +135,11 @@ void St_l3_Coordinate_Transformer::local_to_global(const St_l3_ptrs_Coordinate &
 void St_l3_Coordinate_Transformer::Set_parameters_by_hand()
 {
     // Set the parameters straight forward
-    lengthPerTb = 0.5738;
+    lengthPerTb = 0.5779;
     drift_length_inner_east = 200.448;
     drift_length_outer_east = 200.918;
-    drift_length_inner_west = 200.094;
-    drift_length_outer_west = 200.564;
+    drift_length_inner_west = 201.138;
+    drift_length_outer_west = 201.138;
 
     cout << "Constants for transformation set by hand." << endl;
 }
