@@ -3,6 +3,4 @@ struct g2t_smd_hit {
         long track_p;
         long volume_id;
         float de;
-        float p[3];
-        float x[3];
 };
