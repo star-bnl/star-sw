@@ -72,6 +72,8 @@ public:
 			  unsigned int nSectors) const;
   double phiForEastSector(unsigned int iSector, 
 			  unsigned int nSectors) const;
+  void setGroupId(int id);
+  int  getGroupId() const;
   
  protected:
   
@@ -84,7 +86,7 @@ public:
   vector< vector<StiDetector*> > _detectors;
   Factory<StiDetector>*_detectorFactory;
   Messenger&           _messenger;
-
+  int                  _groupId;
 
 };
 
@@ -232,5 +234,17 @@ inline double StiDetectorBuilder::phiForEastSector(unsigned int iSector,
   double dPhi = (static_cast<int>(iSector+1) - offset)*deltaPhi;
   return nice(dPhi);  
 } // phiForEastSector
+
+
+inline void StiDetectorBuilder::setGroupId(int id)
+{
+  _groupId = id;
+}
+
+inline int  StiDetectorBuilder::getGroupId() const
+{
+  return _groupId;
+}
+
 
 #endif // ifndef STI_DETECTOR_BUILDER_H

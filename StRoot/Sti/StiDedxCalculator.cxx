@@ -30,10 +30,7 @@ void StiDedxCalculator::getDedx(const StiKalmanTrack* track,
 				double &nPointsUsed)
 {
   mVector.clear();
-  //hopefully this can be a reference to a vec
-  //We assume that the vector contains only nodes with hits!!!!!
-  vector<StiKalmanTrackNode*> nodes = track->getNodes(mDetector); //Claude t.b.d.
-  
+  vector<StiKalmanTrackNode*> nodes = track->getNodes(mDetector); 
   if(nodes.size()==0)
     {
       nPointsUsed=0.;
@@ -80,7 +77,7 @@ void StiDedxCalculator::getDedx(const StiKalmanTrack* track,
 double NodeDedxCalculator::operator()(const StiKalmanTrackNode *mNode)
 {
   double dedx = mNode->getDedx();
-  if(dedx<0.)
+  if(false && dedx<0.)
     {
       cout <<"Eloss: " << mNode->getHit()->getEloss()<<endl;
       cout <<"sinCrossAngle: "<<mNode->sinCrossAngle()<<endl;

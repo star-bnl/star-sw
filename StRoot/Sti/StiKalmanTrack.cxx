@@ -1,10 +1,15 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.17 2003/03/14 19:02:20 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.18 2003/03/14 20:50:29 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.18  2003/03/14 20:50:29  pruneau
+ * Added groupId member and accessor functions to StiDetector, StiDetectorGroup, StiDetectorBuilder,
+ * and modified getNodes of the StiKalmanTrack class to use it. This eliminates explicit
+ * references to Tpc and Svt within StiKalmanTrack...
+ *
  * Revision 2.17  2003/03/14 19:02:20  pruneau
  * various minor updates
  *
@@ -34,7 +39,6 @@
 #include <stdexcept>
 #include <math.h>
 
-#include "StDetectorId.h"
 #include "StHit.h"
 
 //Sti
@@ -744,31 +748,23 @@ void StiKalmanTrack::swap()
 
 
 ///return vector of nodes with hits
-vector<StiKalmanTrackNode*> StiKalmanTrack::getNodes(StDetectorId detectorId) const
+vector<StiKalmanTrackNode*> StiKalmanTrack::getNodes(int detectorId) const
 {
   StiKalmanTrackNode* leaf = getLastNode();
   StiKTNForwardIterator it(leaf);
   StiKTNForwardIterator end = it.end();
-  //vector<StHit*> hits;
   vector<StiKalmanTrackNode*> nodeVec;
   while (it!=end) 
     {
       const StiKalmanTrackNode& node = *it;
       StiHit* hit = node.getHit();
-      //if((&node)->getHit()!=hit) TRACKMESSENGER <<"Danger, Will Robinson! Danger!"<<endl;
-      if (hit && hit->detector() != NULL && node.getDedx()>0.) {
-	if(detectorId==kTpcId && strstr(hit->detector()->getName().c_str(), "Tpc")!=NULL)
-	  {//Tpc Hit requested and found
-	    nodeVec.push_back(const_cast<StiKalmanTrackNode*>(&node));
-	  }
-	else if (detectorId==kSvtId && strstr(hit->detector()->getName().c_str(), "Svt")!=NULL)
-	  {//Svt hit requested and found
-	    nodeVec.push_back(const_cast<StiKalmanTrackNode*>(&node));
-	  }
-      }
-    ++it;
-  }
-  
+      if (hit && 
+	  hit->detector() && 
+	  node.getDedx()>0. &&  
+	  detectorId==hit->detector()->getGroupId() ) 
+	nodeVec.push_back(const_cast<StiKalmanTrackNode*>(&node));
+      ++it;
+    }
   return nodeVec;
 }
 
@@ -786,7 +782,7 @@ vector<StMeasuredPoint*> StiKalmanTrack::stHits() const
     if (hit) {
       StMeasuredPoint * stHit = const_cast<StMeasuredPoint*>( hit->stHit() );
       if (stHit)
-				hits.push_back(stHit);
+	hits.push_back(stHit);
     }
     ++it;
   }
