@@ -2,7 +2,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: PadControlPanel.C,v 1.14 1999/11/30 20:09:52 fine Exp $
+// $Id: PadControlPanel.C,v 1.15 1999/12/09 20:42:47 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -101,6 +101,7 @@ static TControlBar *PadControlPanel(TControlBar *bar=0){
    bar->AddSeparator();
    bar->AddButton("Add Axes","StPadControlPanel::AddAxes();","Add 3D axes to the current TPad view");
    bar->AddButton("Rulers","StPadControlPanel::ToggleRulers();","Turn 3D ruler ON / OFF (a new ruler popes up with new attributes)");
+   bar->AddButton("Zoom","StPadControlPanel::ToggleZoom();","Turn ZOOM ON");
    bar->AddSeparator();
 
    bar->AddButton("Next event","chain->MakeEvent();","Make next event and draw it");
@@ -180,6 +181,12 @@ static void TopView(TVirtualPad *pad=0){
 static void ToggleRulers(TVirtualPad *pad=0)
 {
   TAxis3D::ToggleRulers(pad);
+}
+
+//_______________________________________________________________________________________
+static void ToggleZoom(TVirtualPad *pad=0)
+{
+  TAxis3D::ToggleZoom(pad);
 }
 
 //_______________________________________________________________________________________
@@ -359,6 +366,9 @@ StPadControlPanel __aa__;
 void PadControlPanel(){}
 
 // $Log: PadControlPanel.C,v $
+// Revision 1.15  1999/12/09 20:42:47  fine
+// Zoom
+//
 // Revision 1.14  1999/11/30 20:09:52  fine
 // new static method to present rulers
 //
