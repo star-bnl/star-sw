@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.22 2001/09/19 20:58:40 jcs Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.23 2002/02/05 13:53:09 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.23  2002/02/05 13:53:09  jcs
+// remove code for ZDC and Holm's primary vertex calculation methods
+// if no preVertex available, stop FTPC tracking
+//
 // Revision 1.22  2001/09/19 20:58:40  jcs
 // Use TPC preVertex if it exists, if not use ZDC vertex(slew correction hardwired)
 //
@@ -234,94 +238,8 @@ Int_t StFtpcTrackMaker::Make()
     gMessMgr->Message("", "I", "OST") << "Tpc vertex estimation (" << primary_vertex_x << ", " << primary_vertex_y << ", " << primary_vertex_z <<  ") used for Ftpc tracking." << endm;
   }
   else {
-    // Otherwise use ZDC Vertex
- 
-    // Find St_dst_TrgDet
- 
-    St_dst_TrgDet *TrgDet = (St_dst_TrgDet *)GetDataSet("TrgDet");
-    if (TrgDet) {
-       dst_TrgDet_st *tt = (dst_TrgDet_st *) TrgDet->GetTable();
-   
-       Float_t EAP0 = 128.926;
-       Float_t EAP1 = 0.933384;
-       Float_t EAP2 = -0.0252811;
-       Float_t EAP3 = 0.000225592;
-       Float_t WAP0 = 113.291;
-       Float_t WAP1 = 0.491553;
-       Float_t WAP2 = -0.0143863;
-       Float_t WAP3 = 0.000148314;
-       Float_t VPAR = 3.32254;
-       Float_t  OFF = 4.58784;
-
-       Float_t adcE = tt->adcZDC[15];
-       Float_t adcW = tt->adcZDC[12];
-       Float_t tdcE = tt->adcZDC[8];
-       Float_t tdcW = tt->adcZDC[9];
- 
-       primary_vertex_x = 0.0;
-       primary_vertex_y = 0.0;
-       primary_vertex_z = 
-        ((tdcW-(WAP0+(WAP1*adcW)+(WAP2*pow(adcW,2))+(WAP3*pow(adcW,3))))
-          - (tdcE-(EAP0+(EAP1*adcE)+(EAP2*pow(adcE,2))+(EAP3*pow(adcE,3)))))
-        *(VPAR) + (OFF);
-       // ZDC  vertex used
-       gMessMgr->Message("", "I", "OST") << "ZDC vertex estimation (" << primary_vertex_x << ", " << primary_vertex_y << ", " << primary_vertex_z <<  ") used for Ftpc tracking." << endm;
-    }
-    else {
- 
-      // compute Holm's vertex (FTPC vertex estimation)
-      StFtpcVertex *vertex = new StFtpcVertex(fcl_fppoint->GetTable(), fcl_fppoint->GetNRows(), m_vtx_pos);
-
-      //pointer to preVertex dataset
-      St_DataSet *preVertex = GetDataSet("preVertex"); 
-  
-      //iterator
-      St_DataSetIter preVertexI(preVertex);
-  
-      //pointer to preVertex
-      St_dst_vertex  *preVtx  = (St_dst_vertex *)preVertexI("preVertex");
-      dst_vertex_st *preVtxPtr = 0;
-
-      if (isnan(vertex->GetZ())) { 
-         // handles problem if there are not enough tracks and therefore a vertex cannot be found
-         gMessMgr->Message("", "W", "OST") << "Ftpc vertex estimation failed!" << endm;
-         delete vertex;
-         // No Tracking
-         return kStWarn;
-       }
-
-       if (preVtx) {
-         // add a row to preVertex
-          Int_t numRowPreVtx = preVtx->GetNRows(); 
-          preVtx->ReAllocate(numRowPreVtx+1);
-         preVtx->SetNRows(numRowPreVtx+1);
-       }
-       else {
-         // no preVertex table exists
-         // create preVertex table with 1 row
-         preVtx = new St_dst_vertex("preVertex", 1);
-         preVtx->SetNRows(1);
-         AddData(preVtx);
-       }
-
-       preVtxPtr = preVtx->GetTable();
-       preVtxPtr = preVtxPtr + preVtx->GetNRows() - 1;
-
-       // save results in preVertex    
-       preVtxPtr->x = 0.0;
-       preVtxPtr->y = 0.0;
-       preVtxPtr->z = vertex->GetZ();
-       preVtxPtr->iflag = 301;
-       preVtxPtr->det_id = 4;
-       preVtxPtr->id = preVtx->GetNRows();
-       preVtxPtr->vtx_id = kEventVtxId;  
-
-       // FTPC vertex used
-        primary_vertex_z = vertex->GetZ();
-        gMessMgr->Message("", "I", "OST") << "Ftpc vertex estimation (" << primary_vertex_x << ", " << primary_vertex_y << ", " << primary_vertex_z << ") used for Ftpc tracking." << endm;
-
-        delete vertex;
-      }    // end of Holm's loop
+    gMessMgr->Warning() << "StFtpcTrackMaker::Make() - no vertex found" << endm;
+    return kStWarn;
   }   // end of no TPC preVertex found loop
 
   // check for the position of the main vertex
@@ -451,7 +369,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
 
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.22 2001/09/19 20:58:40 jcs Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.23 2002/02/05 13:53:09 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {
