@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcTrack.hh,v 2.13 2003/12/04 05:56:47 calderon Exp $
+ * $Id: StMcTrack.hh,v 2.14 2004/01/13 21:03:34 fisyak Exp $
  * $Log: StMcTrack.hh,v $
+ * Revision 2.14  2004/01/13 21:03:34  fisyak
+ * Replace iostream by Stiostream.h (for icc)
+ *
  * Revision 2.13  2003/12/04 05:56:47  calderon
  * Inclusion of Endcap EMC hit collection in StMcEvent and
  * of the Endcap hit vector in StMcTrack.
@@ -30,8 +33,11 @@
  * Introduction of Ctb classes.  Modified several classes
  * accordingly.
  *
- * $Id: StMcTrack.hh,v 2.13 2003/12/04 05:56:47 calderon Exp $
+ * $Id: StMcTrack.hh,v 2.14 2004/01/13 21:03:34 fisyak Exp $
  * $Log: StMcTrack.hh,v $
+ * Revision 2.14  2004/01/13 21:03:34  fisyak
+ * Replace iostream by Stiostream.h (for icc)
+ *
  * Revision 2.13  2003/12/04 05:56:47  calderon
  * Inclusion of Endcap EMC hit collection in StMcEvent and
  * of the Endcap hit vector in StMcTrack.
@@ -103,11 +109,7 @@
  **************************************************************************/
 #ifndef StMcTrack_hh
 #define StMcTrack_hh 
-#include <iostream>
-#ifndef ST_NO_NAMESPACES
-using std::ostream;
-using std::cout;
-#endif
+#include "Stiostream.h"
 #include "StLorentzVectorF.hh"
 #include "StMcContainers.hh"
 //#include "StTrackTopologyMap.h"
