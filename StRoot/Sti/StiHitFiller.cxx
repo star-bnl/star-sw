@@ -26,11 +26,9 @@
 
 ostream& operator<<(ostream&, const StiDetector&);
 
-//StiHitFiller::StiHitFiller() : mtranslator(0), mtpctransformer( new StTpcCoordinateTransform(gStTpcDb) )
 StiHitFiller::StiHitFiller() : mtranslator(StiGeometryTransform::instance())
 {
     cout <<"\nStiHitFiller::StiHitFiller()\n"<<endl;
-
 }
 
 StiHitFiller::~StiHitFiller()
@@ -38,6 +36,11 @@ StiHitFiller::~StiHitFiller()
     cout <<"\nStiHitFiller::~StiHitFiller()\n"<<endl;
 }
 
+/*! The enumeration StDetectorId is defined in
+  /pams/global/inc/StDetectorId.h".  Only hits that come from a detector
+  whose enumearation has been added via a call to addDetector() will be
+  added to the StiHitContainer.
+ */
 void StiHitFiller::addDetector(StDetectorId det)
 {
     mvec.push_back(det);
@@ -56,7 +59,8 @@ void StiHitFiller::fillHits(StiHitContainer* store, StiObjectFactoryInterface<St
     return;
 }
 
-void StiHitFiller::fillTpcHits(StiHitContainer* store, StiObjectFactoryInterface<StiHit>* factory)
+void StiHitFiller::fillTpcHits(StiHitContainer* store,
+			       StiObjectFactoryInterface<StiHit>* factory)
 {
     cout <<"StiHitFiller::fillTpcHits()"<<endl;
     mtimer.reset();
@@ -70,7 +74,8 @@ void StiHitFiller::fillTpcHits(StiHitContainer* store, StiObjectFactoryInterface
 	const StTpcSectorHitCollection* secHits = tpcHits->sector(sector-1);
 	//Loop over padrows
 	for (int prow=1; prow<=45; prow++) {
-	    const StTpcPadrowHitCollection* padrowHits = secHits->padrow(prow-1);
+	    const StTpcPadrowHitCollection* padrowHits
+		= secHits->padrow(prow-1);
 	    const StSPtrVecTpcHit& hitvec = padrowHits->hits();
 
 	    //Find the detector for this set of hits:
@@ -79,17 +84,21 @@ void StiHitFiller::fillTpcHits(StiHitContainer* store, StiObjectFactoryInterface
 	    if (sector>12) {
 		iIttfSector = 12 - (sector-12)%12;
 	    }	    
-	    sprintf(szBuf, "Tpc/Padrow_%d/Sector_%d", static_cast<int>(prow), static_cast<int>(iIttfSector));
-	    StiDetector* layer = StiDetectorFinder::instance()->findDetector(szBuf);
+	    sprintf(szBuf, "Tpc/Padrow_%d/Sector_%d",
+		    static_cast<int>(prow), static_cast<int>(iIttfSector));
+	    StiDetector* layer =
+		StiDetectorFinder::instance()->findDetector(szBuf);
 	    if (!layer) {
-		cout <<"StiHitFiller::fillTpcHits(). ERROR:\t Detector for (sector,padrow): (";
+		cout <<"StiHitFiller::fillTpcHits(). ERROR:\t";
+		cout <<"Detector for (sector,padrow): (";
 		cout <<sector<<","<<prow<<") not found.  Abort"<<endl;
 		mtimer.stop();
 		return;
 	    }
 	    
 	    //Loop over hits   
-	    for (vector<StTpcHit*>::const_iterator iter = hitvec.begin(); iter != hitvec.end(); iter++) {
+	    for (vector<StTpcHit*>::const_iterator iter = hitvec.begin();
+		 iter != hitvec.end(); iter++) {
 		//Now we have the hit
 		StiHit* stihit = factory->getObject();
 		stihit->reset();
@@ -106,7 +115,7 @@ void StiHitFiller::fillTpcHits(StiHitContainer* store, StiObjectFactoryInterface
 	    }
 	}	    
     }
-
+    
     mtimer.stop();
     cout <<"Time to fill TPC Hits: "<<mtimer.elapsedTime()<<endl;
     return;
