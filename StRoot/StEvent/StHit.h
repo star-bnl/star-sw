@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.2 2000/06/01 21:38:56 ullrich Exp $
+ * $Id: StHit.h,v 2.3 2000/06/07 09:43:21 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
- * Revision 2.2  2000/06/01 21:38:56  ullrich
- * Added member mFlag and access member flag() and setFlag().
+ * Revision 2.3  2000/06/07 09:43:21  ullrich
+ * Changed return type of flag() to UInt_t
  *
  * Revision 2.2  2000/06/01 21:38:56  ullrich
  * Added member mFlag and access member flag() and setFlag().
@@ -47,9 +47,9 @@ public:
     Int_t operator!=(const StHit&) const;
     
     Float_t         charge() const;
-    UChar_t         trackReferenceCount() const;
+    UInt_t          trackReferenceCount() const;
     StDetectorId    detector() const;
-    UChar_t         flag() const;
+    UInt_t          flag() const;
     StThreeVectorF  positionError() const;     // overwrite inherited
     StMatrixF       covariantMatrix() const;   // overwrite inherited
     

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.3 2000/06/01 21:38:53 ullrich Exp $
+ * $Id: StHit.cxx,v 2.4 2000/06/07 09:43:17 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
- * Revision 2.3  2000/06/01 21:38:53  ullrich
- * Added member mFlag and access member flag() and setFlag().
+ * Revision 2.4  2000/06/07 09:43:17  ullrich
+ * Changed return type of flag() to UInt_t
  *
  * Revision 2.3  2000/06/01 21:38:53  ullrich
  * Added member mFlag and access member flag() and setFlag().
@@ -31,7 +31,7 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.3 2000/06/01 21:38:53 ullrich Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.4 2000/06/07 09:43:17 ullrich Exp $";
 
 ClassImp(StHit)
 
@@ -91,11 +91,11 @@ StHit::setPositionError(const StThreeVectorF& e) { mPositionError = e; }
 Float_t
 StHit::charge() const { return mCharge; }
 
-UChar_t
-StHit::flag() const { return mFlag; }
+UInt_t
+StHit::flag() const { return static_cast<UInt_t>(mFlag); }
 
-UChar_t
-StHit::trackReferenceCount() const { return mTrackRefCount; }
+UInt_t
+StHit::trackReferenceCount() const { return static_cast<UInt_t>(mTrackRefCount); }
 
 StDetectorId
 StHit::detector() const
