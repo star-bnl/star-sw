@@ -94,6 +94,9 @@
 * editted 9/1/98 K. Turner - implemented drsum in bfc_finish
 * editted 9/9/98 K. Turner - now writes out run tables in bfc_finish
 *                              ONLY if drhd or drsum is in chain
+* editted 9/10/98 K. Turner - added new chain variable: dout
+*                             which writes out run/dst and 
+*                             event/data/global/dst directories to a file 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -276,6 +279,17 @@ macro bfc_init _
               endif
               exec write_table_to_file#write outfile [run]         
             endif
+    (dout)  
+            if output_dst_file="" then
+              message "empty dst output file"
+            else
+	      exec write_table_to_file#init dstout [output_dst_file]
+              if (STAF_STATUS(1).ne. STAFCV_OK) then
+                message "Cannot open dst output file"
+                goto eof
+              endif
+              exec write_table_to_file#write dstout [run_dst]         
+            endif
     (esout)
             if output_xdf_file="" then
               message "empty output file"
@@ -324,6 +338,15 @@ ABEND:
      (gtxin) nextl 1
      (evin) exec read_table_from_file#read inev
             if (staf_status(1).ne.STAFCV_OK) goto EOF
+*            ls [run_dst]/run_summary
+*            if (staf_status(1).eq.STAFCV_OK) then
+*              rowcount [run_dst]/run_summary	    
+*	      if (staf_result(1).ne.0) then
+*	        vec/create havedstrunsum
+*	        message ' bfc_process: run_summary table exists!'
+*	        goto FINISH
+*	      endif
+*            endif
      (esin) for dir in [evgen] [geantE] [raw_data] [data] [dst]
               cd [dir]; dio/stream/getevent inev 
               if (staf_status(1).ne.STAFCV_OK) goto EOF
@@ -422,8 +445,14 @@ ABEND:
                  message "Empty output file"
                else
 		 exec write_table_to_file#write outfile [event]
-	       endif
-      if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
+*                 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
+              endif
+    (dout)    if [output_dst_file]="" then
+                 message "Empty dst output file"
+               else
+		 exec write_table_to_file#write dstout [dst]
+*                 if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT	
+               endif
     (esout)    if [output_xdf_file]="" then
                  message "Empty output file"
                else
@@ -431,9 +460,11 @@ ABEND:
                    cd [dir];  dio/stream/putevent outfile
                  endfor
 	       endif
-        (*)    message " !!! bfc_util: No process stage for package " [mod]
+      (*)      message " !!! bfc_util: No process stage for package " [mod]
       if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
    ENDCASE
+
+
    if (STAF_STATUS(1).ne. STAFCV_OK) goto ABEND
 	     
    sigma v[mod] = v[mod] + abs($cptime)
@@ -453,7 +484,12 @@ ABEND:
  EOF:
 
  message ' in bfc_util: #events total,good = ', [nevdsttot], [nevdstgood]
+ GO TO END
  
+ FINISH:
+ message ' skip out of bfc_process because run summary table exists'
+ 
+ END:
 return
  
 **********************************************************************
@@ -486,6 +522,15 @@ macro bfc_finish _
 	        exec write_table_to_file#write outfile [run]
               endif
               exec write_table_to_file#close outfile;
+            endif
+      (dout) 
+            if [output_dst_file]="" then
+                 message "Empty dst output file"
+            else
+              if ($vexist(randst).ne.0) then
+	        exec write_table_to_file#write dstout [run_dst]
+              endif
+              exec write_table_to_file#close dstout;
             endif
       (*) message " !!! bfc_util#bfc_finish No final stage for package " [mod]
     ENDCASE
