@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.75 2004/09/17 20:31:21 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.76 2004/09/17 21:07:44 jeromel Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -204,7 +204,7 @@
        $kernl = "kernlib";
    }
    
-   $CERNLIBS .= " " . `cernlib pawlib packlib graflib/X11 packlib mathlib kernlib`;
+   $CERNLIBS .= " " . `$cernlib pawlib packlib graflib/X11 packlib mathlib kernlib`;
    $CERNLIBS =~ s/packlib\./$packl\./g;
    $CERNLIBS =~ s/kernlib\./$kernl\./g;
    $CERNLIBS =~ s/$strip//g if ($strip ne "");
