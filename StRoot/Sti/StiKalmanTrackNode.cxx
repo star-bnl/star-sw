@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.51 2004/12/13 20:01:38 perev Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.52 2004/12/13 22:52:23 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.52  2004/12/13 22:52:23  perev
+ * Off testError
+ *
  * Revision 2.51  2004/12/13 20:01:38  perev
  * old version of testError temporary activated
  *
@@ -1617,6 +1620,7 @@ static const double MyChi2 = 1.18179;
   printf("BOT OHO: %g %p\n",chi2,(void*)getHit());
 }
 #endif 
+#if 1
 //______________________________________________________________________________
 int StiKalmanTrackNode::testError(double *emx)
 {
@@ -1626,6 +1630,7 @@ int StiKalmanTrackNode::testError(double *emx)
        ,kC22, kC30, kC31, kC32, kC33
        ,kC40, kC41, kC42, kC43, kC44};
 
+  return 0;
   int ians;
   ians=1; if (emx[kC00]<0) goto RETN;
   ians=2; if (emx[kC11]<0) goto RETN;
@@ -1664,6 +1669,7 @@ RETN:
 
   return ians;
 }
+#endif//0
 #if 0
 //______________________________________________________________________________
 int StiKalmanTrackNode::testError(double *emx)
@@ -1676,6 +1682,7 @@ int StiKalmanTrackNode::testError(double *emx)
   static const double dia[5] = { 10000., 10000.,100.,3.,10000.};
   static const int    idx[5][5] = 
   {{0,1,3,6,10},{1,2,4,7,11},{3,4,5,8,12},{6,7,8,9,13},{10,11,12,13,14}};
+return 0;
   int ians=0,j1,j2,jj;
   for (j1=0; j1<5;j1++){
     jj = idx[j1][j1];
@@ -1685,8 +1692,7 @@ int StiKalmanTrackNode::testError(double *emx)
     for (j2=0; j2<5;j2++){if (j1!=j2) emx[idx[j1][j2]]=0;}
   }
   for (j1=0; j1< 5;j1++){
-  for (j2=0; j2< 5;j2++){
-    if (j1==j2) continue;
+  for (j2=0; j2<j1;j2++){
     jj = idx[j1][j2];
 //    assert(finite(emx[jj]));
     if (emx[jj]*emx[jj]<0.9*emx[idx[j1][j1]]*emx[idx[j2][j2]]) continue;
@@ -1694,7 +1700,7 @@ int StiKalmanTrackNode::testError(double *emx)
   }}
   return ians;
 }
-#endif //0
+#endif//0
 //______________________________________________________________________________
 void StiKalmanTrackNode::numeDeriv(double val,int kind,int shape,int dir)
 {
