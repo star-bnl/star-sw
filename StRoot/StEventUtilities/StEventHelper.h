@@ -23,6 +23,8 @@ class TExMap;
 class TObjArray;
 class StRefArray;
 
+class BetheBloch;
+
 class StEventHelper : public TNamed{
 
 protected:
@@ -190,8 +192,42 @@ private:
 
 ClassDef(StFilterDef,0)
 };
+//______________________________________________________________________________
 
+class StMuDstFilterHelper : public StFilterABC { // An example of default filter
+public:
+   		StMuDstFilterHelper(const char *name);
+               ~StMuDstFilterHelper();
+virtual float        *GetPars() const {return (float*)(&fpCutHigh+1);}
+virtual const float  *GetDefs() const;
+virtual const char  **GetNams() const;
+virtual Int_t   Accept(StPoints3DABC *pnt) ;
 
+protected:
+  Int_t Accept(const StTrack *track); // proxy for /StMuDSTMaker/COMMON/StMStMuL3Filter
+
+protected:
+  BetheBloch* mBB;
+
+private:
+  float fFirst; 
+
+  float fpCutHigh;       // high momentum cut for RICH/Upsilon candidates 
+  float fnHitsCutHighP;  // nHits cut for all tracks
+
+  // following cuts apply only for tracks with pCutLow < p <pHigh
+  float fpCutLow;             // low momentum cut
+  float fnHitsCutLowP;    
+  float fchargeForLowP;       // charge for tracks with pCutLow < p < pCutHigh, set to 0 for all tracks
+  float fdEdxMassCutHigh;     // cut below BetheBloch(p/dEdxMassCutHigh), e.g. proton-band
+  float fdEdxFractionCutHigh; // cut fraction of dEdx-band, i.e. dEdxFractionCut * BetheBloch(p/dEdxMassCut)
+  float fdEdxMassCutLow;      // cut above BetheBloch(p/dEdxMassCutLow), e.g. kaon-band
+  float fdEdxFractionCutLow;
+
+  float fLast;
+
+  ClassDef(StMuDstFilterHelper,0)
+};
 
 
 
