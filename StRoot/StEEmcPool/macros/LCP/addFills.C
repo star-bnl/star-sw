@@ -1,8 +1,7 @@
 TFile *outH;
 const int mxR=3;
-const int mxC=1;// was 16
-char *cutL[mxC]={"All"};
-//char *cutL[mxC]={"All",  "Pt1",  "Pt2",  "Pt3",  "Pt4",  "Pt5",  "Pt6",  "PtL",  "PtM",  "PtH",  "EtaBB",  "EtaBc",  "EtaFc",  "EtaFF",  "Qpos",  "Qneg"};
+const int mxC=16;// was 16
+char *cutL[mxC]={"All",  "Pt1",  "Pt2",  "Pt3",  "Pt4",  "Pt5",  "Pt6",  "PtL",  "PtM",  "PtH",  "EtaBB",  "EtaBc",  "EtaFc",  "EtaFF",  "Qpos",  "Qneg"};
 
 const int mxAmp=9;
 char *ampL[mxAmp]={"a1:P",  "-b1:Q",  "c0:PQ",  "c2:PQ",  "a0",  "a2",  "b0",  "b2",  "c1"};
@@ -16,7 +15,7 @@ float minPol=0.07; // was 0.07
 float minPol2=0.01; // was 0.01
 
 
-addFills( TString outPath="varPhase-H/") {
+addFills( TString outPath="defaultB-H/") {
   TString inpDir="/star/data04/sim/balewski/LcpRun2/maxEta1.0/";
   
   char *fillL="  F2258  F2266 F2161 ";
@@ -56,7 +55,7 @@ addFills( TString outPath="varPhase-H/") {
   int icut;
   for(icut=0;icut<mxC;icut++) {     
       char *cut=cutL[icut];
-    plotTG(cut,1,"final/"+outPath);
+    plotTG(cut,3,"final/"+outPath);
   }
   
   // save histo+TGraph's
