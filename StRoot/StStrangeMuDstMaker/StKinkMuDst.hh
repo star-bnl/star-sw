@@ -97,7 +97,7 @@ private:
   void     findTransverseMassPion();
   void     findRapidityKaon();
   void     findRapidityPion();
-  ClassDef(StKinkMuDst,7)
+  ClassDef(StKinkMuDst,8)
 };
 
 inline Float_t StKinkMuDst::dcaParentDaughter() const
@@ -155,8 +155,11 @@ inline UShort_t StKinkMuDst::keyDaughter() const { return mKeyDaughter; }
 
 
 /***********************************************************************
- * $Id: StKinkMuDst.hh,v 3.8 2004/02/03 03:49:27 genevb Exp $
+ * $Id: StKinkMuDst.hh,v 3.9 2004/02/03 20:09:07 genevb Exp $
  * $Log: StKinkMuDst.hh,v $
+ * Revision 3.9  2004/02/03 20:09:07  genevb
+ * Update ClassDef version for added data members
+ *
  * Revision 3.8  2004/02/03 03:49:27  genevb
  * Added keys (IDs) for Kink parent and daughter
  *
