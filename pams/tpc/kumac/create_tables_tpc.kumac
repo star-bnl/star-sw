@@ -59,7 +59,12 @@ macro/global/import *
   cd [raw_data]/tpc/pixels
   
   tdm/newtable adcxyz  tfc_adcxyz   900000
-
+    
+  cd [params]/tpc
+  mkdir tfcpars
+  cd tfcpars
+  tdm/newtable tfc_sector_index tcl_sector_index 1 
+  
   cd /dui
 
 return
@@ -84,8 +89,8 @@ macro/global/import *
   cd [params]/tpc
   mkdir tclpars
   cd tclpars
-  
-    tdm/newtable tcl_sector_index tcl_sector_index 1  
+ 
+     tdm/newtable tcl_sector_index tcl_sector_index 1  
       
   cd /dui
 

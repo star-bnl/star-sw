@@ -80,11 +80,13 @@
 
 * tpc slow sim init
     exec create_tables_tpc#tss [tpc_sector_first] [tpc_sector_last]
+    exec tss_init#init [tpc_sector_first] [tpc_sector_last] 
+    
+* tpc unpack raw init
     if [adcxyzon].eq.1 then
       exec create_tables_tpc#tfc
     endif
-    exec tss_init#init [tpc_sector_first] [tpc_sector_last] 
-       
+    
 * tpc cluster init
    exec create_tables_tpc#tcl_slow
    exec tcl_init#init  
@@ -110,6 +112,7 @@
     if STAF_STATUS(1).eq.0 goto ENDOFDATA
 * slow simulator
     exec tss_run#run [tpc_sector_first] [tpc_sector_last]
+* unpack raw data for diagnostics
     if [adcxyzon].eq.1 then
       exec tfc_run#run_newtab [tpc_sector_first] [tpc_sector_last]
     endif
