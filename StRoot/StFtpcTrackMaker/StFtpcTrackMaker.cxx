@@ -1,5 +1,10 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.2 2000/05/11 15:14:52 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.3 2000/05/12 12:59:16 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.3  2000/05/12 12:59:16  oldi
+// removed delete operator for mSegment in StFtpcConfMapper (mSegment was deleted twice),
+// add two new constructors for StFtpcTracker to be able to refit already existing tracks,
+// minor cosmetics
+//
 // Revision 1.2  2000/05/11 15:14:52  oldi
 // Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
 //
@@ -204,7 +209,7 @@ Int_t StFtpcTrackMaker::Make()
   if (fpt_fptrack) delete fpt_fptrack;
   fpt_fptrack = new St_fpt_fptrack("fpt_fptrack", 20000);
   m_DataSet->Add(fpt_fptrack);
-  tracker->Write(fpt_fptrack);
+  tracker->FitAndWrite(fpt_fptrack);
   
   // dE/dx calculation
   if (Debug()) {
@@ -295,7 +300,7 @@ void StFtpcTrackMaker::PrintInfo()
   // prints some information
 
   cout << "******************************************************************" << endl;
-  cout << "* $Id: StFtpcTrackMaker.cxx,v 1.2 2000/05/11 15:14:52 oldi Exp $ *" << endl;
+  cout << "* $Id: StFtpcTrackMaker.cxx,v 1.3 2000/05/12 12:59:16 oldi Exp $ *" << endl;
   cout << "******************************************************************" << endl;
   
   if (Debug()) {

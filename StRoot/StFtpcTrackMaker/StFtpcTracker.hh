@@ -1,5 +1,10 @@
-// $Id: StFtpcTracker.hh,v 1.1 2000/05/10 13:39:33 oldi Exp $
+// $Id: StFtpcTracker.hh,v 1.2 2000/05/12 12:59:18 oldi Exp $
 // $Log: StFtpcTracker.hh,v $
+// Revision 1.2  2000/05/12 12:59:18  oldi
+// removed delete operator for mSegment in StFtpcConfMapper (mSegment was deleted twice),
+// add two new constructors for StFtpcTracker to be able to refit already existing tracks,
+// minor cosmetics
+//
 // Revision 1.1  2000/05/10 13:39:33  oldi
 // Initial version of StFtpcTrackMaker
 //
@@ -24,19 +29,22 @@ class StFtpcTracker : public TObject {
 
 protected:
 
-            StFtpcVertex   *mVertex;    // pointer to the vertex
-            TClonesArray   *mHit;       // ClonesArray of clusters
-            TClonesArray   *mTrack;     // ClonesArray of tracks
-                Double_t    mMaxDca;    // cut value for momentum fit
+            StFtpcVertex   *mVertex;      // pointer to the vertex
+            TClonesArray   *mHit;         // ClonesArray of clusters
+            TClonesArray   *mTrack;       // ClonesArray of tracks
+                  Bool_t    mHitsCreated; // indicator if this class created the mHit ClonesArray
+                Double_t    mMaxDca;      // cut value for momentum fit
 
 public:
 
             StFtpcTracker();  // default constructor
-            StFtpcTracker(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[3] = NULL, Double_t max_Dca = 100.);  // real constructor
+            StFtpcTracker(St_fcl_fppoint *fcl_fppoint, Double_t vertexPos[3] = NULL, Double_t max_Dca = 100.);             // real constructor
+            StFtpcTracker(StFtpcVertex *vertex, TClonesArray *hit, TClonesArray *track, Double_t dca);                    // constructor if everything is already there
+            StFtpcTracker(StFtpcVertex *vertex, St_fcl_fppoint *fcl_fppoint, St_fpt_fptrack *fpt_fptrack, Double_t dca);  // sonstructor do do refitting
 
   virtual  ~StFtpcTracker();  // destructor
 
-    Int_t   Write(St_fpt_fptrack *trackTable);          // writes tracks to STAF table
+    Int_t   FitAndWrite(St_fpt_fptrack *trackTable);    // does momentum fit and writes tracks to STAF table
     Int_t   Write();                                    // writes tracks and clusters in ROOT file
 
   // getter

@@ -1,5 +1,10 @@
-// $Id: StFtpcTrack.cc,v 1.2 2000/05/11 15:14:50 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.3 2000/05/12 12:59:15 oldi Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.3  2000/05/12 12:59:15  oldi
+// removed delete operator for mSegment in StFtpcConfMapper (mSegment was deleted twice),
+// add two new constructors for StFtpcTracker to be able to refit already existing tracks,
+// minor cosmetics
+//
 // Revision 1.2  2000/05/11 15:14:50  oldi
 // Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
 //
@@ -53,7 +58,7 @@ StFtpcTrack::StFtpcTrack()
   mV.setY(0.);
   mV.setZ(0.);
 
-  mQ = 0.;
+  mQ = 0;
   mChiSq[0] = 0.;
   mChiSq[1] = 0.;
   mTheta = 0.;
