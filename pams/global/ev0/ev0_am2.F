@@ -128,9 +128,10 @@ c
            return
         endif
 
-        IF( ev0par(1).iflag.eq.1) THEN
-           CALL V0_CLEAN(ev0out_h,ev0out)
-        ENDIF
+C V0_CLEAN does nothing??? - gvb (2/25/99)
+C       IF( ev0par(1).iflag.eq.1) THEN
+C          CALL V0_CLEAN(ev0out_h,ev0out)
+C       ENDIF
         
 
         trak_h.nok = 0
