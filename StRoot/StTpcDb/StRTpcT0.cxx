@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRTpcT0.cxx,v 1.7 2000/01/24 15:31:31 hardtke Exp $
+ * $Id: StRTpcT0.cxx,v 1.8 2004/08/26 21:30:00 genevb Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRTpcT0.cxx,v $
+ * Revision 1.8  2004/08/26 21:30:00  genevb
+ * Reduce redundant function calls to improve speed
+ *
  * Revision 1.7  2000/01/24 15:31:31  hardtke
  * change to use new gain and t0 tables
  *
@@ -23,11 +26,12 @@ ClassImp(StRTpcT0)
 //_____________________________________________________________________________
 float StRTpcT0::getT0(int row, int pad)   const {
   float padT0 = 0;
-  if (row > 0 && padplane->indexForRowPad(row,pad)>=0) {
+  int index = padplane->indexForRowPad(row,pad);
+  if (row > 0 && index>=0) {
     if (row<=padplane->numberOfInnerRows())
-      padT0 =  (*mT0IS)[0].offset[padplane->indexForRowPad(row,pad)];
-   else if (row>padplane->numberOfInnerRows()&&row<=padplane->numberOfRows())
-      padT0 =  (*mT0OS)[0].offset[padplane->indexForRowPad(row,pad)];
+      padT0 =  (*mT0IS)[0].offset[index];
+    else if (row<=padplane->numberOfRows())
+      padT0 =  (*mT0OS)[0].offset[index];
   }
   return padT0;
 } 
