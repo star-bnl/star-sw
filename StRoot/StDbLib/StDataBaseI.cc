@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDataBaseI.cc,v 1.1 2001/01/22 18:37:50 porter Exp $
+ * $Id: StDataBaseI.cc,v 1.2 2001/10/26 20:59:45 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDataBaseI.cc,v $
+ * Revision 1.2  2001/10/26 20:59:45  porter
+ * fixed new endtime flag from previous checkin. made StDataBaseI available
+ * at root-cli.
+ *
  * Revision 1.1  2001/01/22 18:37:50  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -32,6 +36,9 @@
 #include "StDbManager.hh"
 #include <string.h>
 
+#ifdef __ROOT__
+ClassImp(StDataBaseI)
+#endif
 //////////////////////////////////////////////////////////////////
 
 StDataBaseI::StDataBaseI() : mdbType(dbStDb), mdbDomain(dbDomainUnknown), mdbName(0), mtypeName(0), mdomainName(0), mdbStore(dbV00) { };
