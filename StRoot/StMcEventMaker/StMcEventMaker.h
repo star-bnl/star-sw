@@ -1,7 +1,11 @@
 /**********************************************
  *
- * $Id: StMcEventMaker.h,v 1.7 2000/06/22 23:53:31 calderon Exp $
+ * $Id: StMcEventMaker.h,v 1.8 2001/05/13 21:14:49 calderon Exp $
  * $Log: StMcEventMaker.h,v $
+ * Revision 1.8  2001/05/13 21:14:49  calderon
+ * Modifications from Aleksei : StMcEmcHitCollections changed, added
+ * method for printing Emc information of the event
+ *
  * Revision 1.7  2000/06/22 23:53:31  calderon
  * Changes from Aleksei for filling of emc hits.
  * ttemp and ttempParticle are now data members.
@@ -59,7 +63,7 @@ public:
     StMcEvent* currentMcEvent() { return mCurrentMcEvent;}; 
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.7 2000/06/22 23:53:31 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StMcEventMaker.h,v 1.8 2001/05/13 21:14:49 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     
 public:
 
@@ -72,13 +76,15 @@ public:
     Bool_t  doUseRich;             //!
     Bool_t  doUseBemc;             //!
     Bool_t  doUseBsmd;             //!
+
+    void   printEventInfo();                               // *MENU* 
+    void   printEventInfoForEmcDet(unsigned int det=1);    // *MENU* 
 protected:
     void   fillBemc(St_g2t_emc_hit*);
     void   fillBsmd(St_g2t_emc_hit*);
 
-    void   printEventInfo();
     void   printTrackInfo(StMcTrack*);
-    void   printEventInfoForEmc(StMcEmcHitCollection*);
+    void   printEventInfoForEmc(StMcEmcHitCollection*); 
 
 private:
 #ifndef ST_NO_TEMPLATE_DEF_ARGS	  

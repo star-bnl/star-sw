@@ -1,7 +1,11 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.38 2001/04/25 18:10:50 perev Exp $
+ * $Id: StMcEventMaker.cxx,v 1.39 2001/05/13 21:14:49 calderon Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.39  2001/05/13 21:14:49  calderon
+ * Modifications from Aleksei : StMcEmcHitCollections changed, added
+ * method for printing Emc information of the event
+ *
  * Revision 1.38  2001/04/25 18:10:50  perev
  * HPcorrs
  *
@@ -184,7 +188,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.38 2001/04/25 18:10:50 perev Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.39 2001/05/13 21:14:49 calderon Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -1245,14 +1249,15 @@ StMcEventMaker::printEventInfo()
     printEventInfoForEmc(mCurrentMcEvent->bsmdpHitCollection());
     
 }  
+
 void
 StMcEventMaker::printEventInfoForEmc(StMcEmcHitCollection *emcColl)
 {
     bool gotOneHit;
-    unsigned int m;
+    unsigned int i, m;
     
     if(emcColl==0){
-	cout<<"<W> In StMcEventMaker::printEventInfoForEmc emcColl undefined\n";
+	cout<<"<W> In StMcEventMaker::printEventInfoForEmc emcColl undefined" << endl;
 	return;
     }
     cout << "---------------------------------------------------------" << endl;
@@ -1265,7 +1270,8 @@ StMcEventMaker::printEventInfoForEmc(StMcEmcHitCollection *emcColl)
     
     if (emcColl && nhits) {
 	gotOneHit = kFALSE;
-	for (m=0; !gotOneHit && m<emcColl->numberOfModules(); m++){
+	for (i=0; !gotOneHit && i<emcColl->numberOfModules(); i++){
+	  m = i + 1; // module number
 	    if (emcColl->module(m)->hits().size()){
 		cout << *(emcColl->module(m)->hits()[0]);
 		cout << "Parent track of this Hit" << endl;
@@ -1277,5 +1283,18 @@ StMcEventMaker::printEventInfoForEmc(StMcEmcHitCollection *emcColl)
     }
 }
 
-    
+void
+StMcEventMaker::printEventInfoForEmcDet(unsigned int det)
+{
+  StMcEmcHitCollection* emcCol =  mCurrentMcEvent->bemcHitCollection();
+
+  switch (det){
+  case 1: emcCol = mCurrentMcEvent->bemcHitCollection();  break;
+  case 2: emcCol = mCurrentMcEvent->bprsHitCollection();  break;
+  case 3: emcCol = mCurrentMcEvent->bsmdeHitCollection(); break;
+  case 4: emcCol = mCurrentMcEvent->bsmdpHitCollection(); break;
+  }
+
+  printEventInfoForEmc(emcCol);
+}   
     
