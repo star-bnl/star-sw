@@ -32,15 +32,15 @@
  
  // Open the original XDF file to read the events
  
- St_XDFFile  xdf_in("/star/sol/users/fisyak/auau_ce_b0-2_4801_5000.xdf");
+ St_XDFFile  xdf_in("/star/sol/users/fisyak/auau_ce_b0-2_0001_0020.xdf");
  
  // Open a new XDF file to write the events
  
- St_XDFFile  xdf_out("/scr20/fine/copy.xdf","w");
+ St_XDFFile  xdf_out("copy.xdf","w");
  
  // Create a new ROOT file to write the events
  
- TFile       root_out("/scr20/fine/copy.root","RECREATE");
+ TFile       root_out("copy.root","RECREATE");
  St_DataSet *set = 0;
 
  while ( set = xdf_in.NextEventGet()) { // read next event from XDF file

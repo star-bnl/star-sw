@@ -31,7 +31,7 @@ void XDFtest(const Char_t *infile=0, const Char_t *outfile=0, const Char_t mode 
      printf("\t\t default = ROOT I/O output, no XDF output\n");
      printf("\t\t maxcount= 0 - read the input file till \"end_of_file\"\n");
      printf("\t\t         > 0 - the number of events to read\n");
-     printf("\t\t compress= 0 - compression factor for ROOT I/O  (=0 - no compression)n");
+     printf("\t\t compress= 0 - compression factor for ROOT I/O  (=0 - no compression)\n");
      return;
    }
    // STAF base class ROOT dictionary
