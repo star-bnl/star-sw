@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.h,v 2.2 1999/11/09 19:35:27 ullrich Exp $
+ * $Id: StTpcHit.h,v 2.3 1999/11/11 10:19:55 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.h,v $
- * Revision 2.2  1999/11/09 19:35:27  ullrich
- * Memory now allocated using StMemoryPool via overloaded new/delete
+ * Revision 2.3  1999/11/11 10:19:55  ullrich
+ * Inlined sector() and padrow().
  *
  * Revision 2.4  1999/12/01 15:56:31  ullrich
  * Renamed xxxInCluster() methods to xxxInHit()
@@ -54,6 +54,19 @@ public:
     ULong_t   padrow() const;          // 0-44
     ULong_t   padsInHit() const;
     ULong_t   pixelsInHit() const;
+
+protected:
+    static StMemoryPool mPool;  //!
+    StObject* clone();
+    ClassDef(StTpcHit,1)  
+};
+
+inline ULong_t
+StTpcHit::sector() const
+{
+    return bits(4, 5)-1;   // bits 4-8, sector=[0,23]
+}
+
 inline ULong_t
 StTpcHit::padrow() const
 {

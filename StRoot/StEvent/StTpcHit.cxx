@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcHit.cxx,v 2.3 1999/11/09 19:35:25 ullrich Exp $
+ * $Id: StTpcHit.cxx,v 2.4 1999/11/11 10:19:52 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcHit.cxx,v $
- * Revision 2.3  1999/11/09 19:35:25  ullrich
- * Memory now allocated using StMemoryPool via overloaded new/delete
+ * Revision 2.4  1999/11/11 10:19:52  ullrich
+ * Inlined sector() and padrow().
  *
  * Revision 2.5  1999/12/01 15:56:28  ullrich
  * Renamed xxxInCluster() methods to xxxInHit()
@@ -36,7 +36,7 @@
 #include "StTrack.h"
 #include "tables/St_dst_point_Table.h"
 
-static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.3 1999/11/09 19:35:25 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcHit.cxx,v 2.4 1999/11/11 10:19:52 ullrich Exp $";
 
 StMemoryPool StTpcHit::mPool(sizeof(StTpcHit));
 
@@ -94,18 +94,6 @@ StTpcHit::StTpcHit(const dst_point_st& pt)
     mHardwarePosition = pt.hw_position;
 }
 
-StTpcHit::sector() const
-{
-    return bits(4, 5)-1;   // bits 4-8
-}
-
-ULong_t
-StTpcHit::padrow() const
-{
-    return bits(9, 6)-1;   // bits 9-14
-}
-
-ULong_t
 StTpcHit::~StTpcHit() {/* noop */}
 
 StObject*
