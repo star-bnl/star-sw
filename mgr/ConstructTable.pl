@@ -22,28 +22,13 @@ elsif ($file =~ /LinkDef\.h/) {
 #________________________________________________________________________________
 sub tableH ($) {
   my $stem = $_[0];
+  my $vers = 2;
   my $h = '
 class St_' . $stem . ' : public TTable
 {
-protected:
-  static TTableDescriptor *fgColDescriptors;
-  virtual TTableDescriptor *GetDescriptorPointer() const { return fgColDescriptors;}
-  virtual void SetDescriptorPointer(TTableDescriptor *list) const { fgColDescriptors = list;}
-public:
-  St_' . $stem . '() : TTable("' . $stem . '",sizeof(' . $stem . '_st)) {SetType("' . $stem . '");}
-  St_' . $stem . '(Text_t *name) : TTable(name,sizeof(' . $stem . '_st)) {SetType("' . $stem . '");}
-  St_' . $stem . '(Int_t n): TTable("' . $stem . '",n,sizeof(' . $stem . '_st)) {SetType("' . $stem . '");}
-  St_' . $stem . '(Text_t *name,Int_t n): TTable(name,n,sizeof(' . $stem . '_st)) {SetType("' . $stem . '");}
-  ' . $stem . '_st *GetTable(Int_t i=0) const { return ((' . $stem . '_st *)GetArray())+i;}
-  ' . $stem . '_st &operator[](Int_t i){ assert(i>=0 && i < GetNRows()); return *GetTable(i); }
-  const ' . $stem . '_st &operator[](Int_t i) const { assert(i>=0 && i < GetNRows()); 
-						      return *((const ' . $stem . '_st *)(GetTable(i))); }
-';
-  print OUT $h;
-  my $vers = 2;
- 
-  $h = '
-    ClassDef(St_' . $stem . ',' . $vers . ') //C++ wrapper for <' . $stem . '> StAF table
+ public:
+   ClassDefTable(St_' . $stem . ',' . $stem . '_st)
+   ClassDef(St_' . $stem . ',' . $vers . ') //C++ wrapper for <' . $stem . '> StAF table
 };
 #endif
 ';
