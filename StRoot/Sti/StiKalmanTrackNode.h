@@ -218,6 +218,7 @@ public:
   short int nullCount;
   short int contiguousHitCount;
   short int contiguousNullCount;
+  static StiKalmanTrackFinderParameters * pars;
 
  protected:   
   static const StiElossCalculator * _elossCalculator;
@@ -225,7 +226,6 @@ public:
   static Messenger &  _messenger;
 
   static bool  recurse;
-  static StiKalmanTrackFinderParameters * pars;
   static int   shapeCode;
   static const StiDetector * det;
   static const StiPlanarShape * planarShape;
@@ -349,9 +349,9 @@ inline double StiKalmanTrackNode::getPt() const
   double curvature;
   curvature = fabs(_p3);
   if (curvature<1e-12) 
-    return 0.003e12*pars->field;
+    return 0.003e12*fabs(pars->field);
   else
-    return 0.003*pars->field/curvature;
+    return 0.003*fabs(pars->field/curvature);
 }
 
 /*! Calculate/return the track momentum

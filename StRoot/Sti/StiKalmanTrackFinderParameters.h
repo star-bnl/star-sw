@@ -31,6 +31,9 @@ public:
   double getMaxSearchWindow() const;
   double getSearchWindowScale() const;
   double getMassHypothesis() const;
+  double getOuterScaling() const;
+  double getInnerScaling() const;
+
   void   initialize();
   friend StiKalmanTrackFinder;
   friend StiKalmanTrack;
@@ -51,10 +54,19 @@ public:
   double maxChi2ForSelection;
   double maxChi2Vertex;
   double massHypothesis;
+  double outerScaling;
+  double innerScaling;
 };
 
+inline  double StiKalmanTrackFinderParameters::getOuterScaling() const
+{
+  return outerScaling;
+}
 
-
+inline double StiKalmanTrackFinderParameters::getInnerScaling() const
+{
+  return innerScaling;
+}
   
 inline   void StiKalmanTrackFinderParameters::setUseTrackFilter(bool option)
 {

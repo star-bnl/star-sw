@@ -17,6 +17,7 @@
 */
 void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (Exception)
 {
+  //cout << "SKTFitter::fit() -I- Started:"<<endl;
   StiKalmanTrack * track = dynamic_cast<StiKalmanTrack * >(stiTrack);
   if (track==0) 
     throw runtime_error("StiKalmanTrack::fit() - ERROR:\t Dynamic cast to StiKalmanTrack failed");
@@ -81,6 +82,7 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	  source--;//cout<<"!="<<endl;
 	}
     }
+  //cout << "SKTFitter::fit() -I- Done:"<<endl;
 }
 
 
