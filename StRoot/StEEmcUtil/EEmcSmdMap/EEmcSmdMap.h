@@ -44,7 +44,7 @@
 
 #include <vector>
 
-#include "EEmcGeom/EEmcGeomDefs.h"
+#include "StEEmcUtil/EEmcGeom/EEmcGeomDefs.h"
 
 //-- Structure to map strip ranges to towers --
 struct EEmcStripMapItem {
