@@ -13,7 +13,6 @@
  **************************************************************************/
 class StEstParams{  
 public:
-  int   debug;          //debuging level 0=only critical errors 1=
   int	onoff[4]; 	//tracking for layer 1= tracking on for layer 0=off
   int	nneighbours[4];	//number of neighbours
   int	nbranch[4];	//number of branches for layer 0=no limit ??? 1=one branch ...
@@ -28,10 +27,6 @@ public:
   double ptmin;
   double ptmax;
   double lrad[4][2];       //radii of the cylinders
-  double phibin;
-  int    nphibins;
-  double zbin; 
-  int    nzbins; 
 
   StEstParams::StEstParams() {} 
   StEstParams::~StEstParams() {}
