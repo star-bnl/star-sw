@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.22 2000/04/29 19:57:22 caines Exp $
+// $Id: StMatchMaker.cxx,v 1.23 2000/04/29 21:33:28 caines Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.23  2000/04/29 21:33:28  caines
+// More protection for flagged tpc hits on tracks
+//
 // Revision 1.22  2000/04/29 19:57:22  caines
 // Protection for zero global tracks and tpc hits not on tpc tracks
 //
@@ -617,10 +620,15 @@ Int_t StMatchMaker::Make(){
   
   for( i=0; i<tpc_groups->GetNRows(); i++, tgroup++){
 
-    if( tgroup->id1 != 0){
+    if( tgroup->id1 != 0 && tgroup->ident==0){
       spt_id = tgroup->id2-1;
       row = spc[spt_id].row/100;
       row = spc[spt_id].row - row*100;
+
+      if(  spc[spt_id].id_globtrk-1 < 0){
+	cout << spt_id << " " << spc[spt_id].id_globtrk<< " " << endl;
+	assert(0);
+      }
 
       if( row < 25){
 	  isset = track[spc[spt_id].id_globtrk-1].map[0] & 1UL<<(row+7);
