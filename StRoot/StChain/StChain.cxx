@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.17 1998/10/07 18:43:57 perev Exp $
+// $Id: StChain.cxx,v 1.18 1998/10/31 00:21:30 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.18  1998/10/31 00:21:30  fisyak
+// Makers take care about branches
+//
 // Revision 1.17  1998/10/07 18:43:57  perev
 // Add Spy classes for Farm Monitor
 //
@@ -218,6 +221,7 @@
 #include <TBrowser.h>
 #include <TClonesArray.h>
 #include <TBenchmark.h>
+#include <TSystem.h>
 #include "St_XDFFile.h"
 #include "St_DataSetIter.h"
 #include "St_FileSet.h"
@@ -271,71 +275,6 @@ StChain::~StChain()
 //   m_Makers->Delete();
 //   delete m_Makers;
 }
-
-
-//______________________________________________________________________________
-St_DataSet *StChain::GetRun(){
-//  Return pointer to run. If run does exist then it will be creates
-  St_DataSetIter local(m_DataSet);
-  local.Cd(GetName());
-  St_DataSet *run = local("run");
-  if (run == 0) {local.Mkdir("run"); run = local("run");}
-  return run;
-}
-//______________________________________________________________________________
-St_DataSet *StChain::GetParams(){
-//  Return pointer to params. If run/params does exist then it will be creates
-  St_DataSetIter local(m_DataSet);
-  local.Cd(GetName());
-  St_DataSet *run = local("run/params");
-  if (run == 0) {local.Mkdir("run/params"); run = local("run/params");}
-  return run;
-}
-//______________________________________________________________________________
-St_DataSet *StChain::GetGeometry(){
-//  Return pointer to params. If run/params does exist then it will be creates
-  St_DataSetIter local(m_DataSet);
-  local.Cd(GetName());
-  St_DataSet *run = local("run/params");
-  if (run == 0) {local.Mkdir("run/params"); run = local("run/params");}
-  return run;
-}
-//______________________________________________________________________________
-St_DataSet *StChain::GetCalib(){
-//  Return pointer to calib. If run/calib does exist then it will be creates
-  St_DataSetIter local(m_DataSet);
-  local.Cd(GetName());
-  St_DataSet *run = local("run/calib");
-  if (run == 0) {local.Mkdir("run/calib"); run = local("run/calib");}
-  return run;
-}
-//______________________________________________________________________________
-St_DataSet *StChain::GetRawData(){
-//  Return pointer to raw data. If event/raw_data does exist then it will be creates
-  St_DataSetIter local(m_DataSet);
-  local.Cd(GetName());
-  St_DataSet *run = local("event/raw_data");
-  if (run == 0) {local.Mkdir("event/raw_data"); run = local("event/raw_data");}
-  return run;
-}
-//______________________________________________________________________________
-St_DataSet *StChain::GetData(){
-//  Return pointer to raw data. If event/data does exist then it will be creates
-  St_DataSetIter local(m_DataSet);
-  local.Cd(GetName());
-  St_DataSet *run = local("event/data");
-  if (run == 0) {local.Mkdir("event/data"); run = local("event/data");}
-  return run;
-}
-//______________________________________________________________________________
-St_DataSet *StChain::GetGeant(){
-//  Return pointer to GEANT data. If event/geant does exist then it will be creates
-  St_DataSetIter local(m_DataSet);
-  local.Cd(GetName());
-  St_DataSet *run = local("event/geant");
-  if (run == 0) {local.Mkdir("event/geant"); run = local("event/geant");}
-  return run;
-}
 //______________________________________________________________________________
 void StChain::Browse(TBrowser *b)
 {
@@ -387,9 +326,9 @@ St_DataSet *StChain::DataSet(Char_t *makername)
   set = 0;
   if (m_Makers) {
      TIter next(m_Makers);
-     StMaker *xdfin;
-     while (xdfin = (StMaker*) next()){if (!strcmp(xdfin->GetName(),makername)) break;}
-     if (xdfin) set = xdfin->DataSet(); 
+     StMaker *maker;
+     while (maker = (StMaker*) next()){if (!strcmp(maker->GetName(),makername)) break;}
+     if (maker) set = maker->DataSet(); 
    }
  }
  return set;
@@ -424,11 +363,6 @@ Int_t StChain::GetEvent(Int_t event)
 Int_t StChain::Init()
 {// Initialize Chain
    if (! m_DataSet) m_DataSet = new St_DataSet(GetName()); 
-   if (! m_RunSet) {//
-     m_RunSet = new St_DataSet("run"); 
-     St_DataSetIter local(m_DataSet);
-     local.Add(m_RunSet);
-   }
 //    Initialise makers
    TIter next(m_Makers);
    StMaker *maker;
@@ -440,6 +374,13 @@ Int_t StChain::Init()
 
      // Initialise maker
       gBenchmark->Start((const char *) maker->GetName());
+      St_DataSet *makerset = maker->DataSet();
+      if (!makerset){
+        const Char_t *makertype = maker->GetTitle();
+        const Char_t *name = gSystem->BaseName(makertype);
+        makerset = new St_DataSet(name);
+        maker->SetDataSet(makerset);
+      }
       if ( maker->Init()) return kStErr;
       gBenchmark->Stop((const char *) maker->GetName());
      // Add the Maker histograms in the Maker histograms list
@@ -477,7 +418,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.17 1998/10/07 18:43:57 perev Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.18 1998/10/31 00:21:30 fisyak Exp $    \n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");
@@ -566,11 +507,11 @@ Int_t StChain::Make(Int_t i)
 {
    m_Event = i;
 // Create event 
-   St_DataSetIter nextDataSet(m_DataSet);
-   nextDataSet.Cd(gStChain->GetName());
-   m_EventSet = nextDataSet("event");
-   SafeDelete(m_EventSet);
-   m_EventSet = nextDataSet.Mkdir("event");
+   //   St_DataSetIter nextDataSet(m_DataSet);
+   //   nextDataSet.Cd(gStChain->GetName());
+   //   m_EventSet = nextDataSet("event");
+   //   SafeDelete(m_EventSet);
+   //   m_EventSet = nextDataSet.Mkdir("event");
 //   Loop on all makers
    Int_t ret;
    TIter nextMaker(m_Makers);
@@ -579,13 +520,13 @@ Int_t StChain::Make(Int_t i)
      // Create the new DataSet for each new type of the maker if any
      const Char_t *makertype = maker->GetTitle();
      // Test the special case
-     St_DataSet *makerset = 0;
-     if (makertype && strlen(makertype))
-         makerset = nextDataSet.Mkdir(maker->GetTitle());
-     else
-         makerset = m_EventSet;
+     St_DataSet *makerset = maker->DataSet();
+     if (!makerset){
+       const Char_t *name = gSystem->BaseName(makertype);
+       makerset = new St_DataSet(name);
+       maker->SetDataSet(makerset);
+     }
   // Call Maker
-     maker->SetDataSet(makerset);
      StartMaker(maker);
      ret = maker->Make();
      EndMaker(maker,ret);

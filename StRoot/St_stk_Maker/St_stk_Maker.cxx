@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.cxx,v 1.6 1998/10/06 18:00:46 perev Exp $
+// $Id: St_stk_Maker.cxx,v 1.7 1998/10/31 00:26:21 fisyak Exp $
 // $Log: St_stk_Maker.cxx,v $
+// Revision 1.7  1998/10/31 00:26:21  fisyak
+// Makers take care about branches
+//
 // Revision 1.6  1998/10/06 18:00:46  perev
 // cleanup
 //
@@ -44,37 +47,8 @@
 ClassImp(St_stk_Maker)
 
 //_____________________________________________________________________________
-St_stk_Maker::St_stk_Maker():
-m_stk_stkpar(0),
-m_pix_info(0),
-m_stk_vtx(0),
-m_stk_vtx_direct(0),
-m_stk_filler(0),
-m_config(0),
-m_geom(0)
-{
-   drawinit=kFALSE;
-   m_mode = 2;
-   m_method = 2;
-   m_fill = 1;
-   m_direct = 1;
-   m_nlayers = 3;
-   m_c1norm[0] = 3.47; m_c1norm[1] =   280.; m_c1norm[2] = -13.7 ;
-   m_c2norm[0] = 45.5; m_c2norm[1] = 14200.; m_c2norm[2] = -17.5;
-   m_vertex = 0;
-   m_chicut[0] = 1e9; m_chicut[1] = 1e9;
-   m_chi_filter = 1;
-   m_spt_mark = 1;
-   m_long_tracks = 1;
-   m_th_init = .5;
-   m_th_max = 10.0;
-   m_nitermax = 7;
-   m_niternull = 1000;
-   m_sec_factor = 6.0;
-   m_ifstk = kFALSE;
-}
-//_____________________________________________________________________________
-St_stk_Maker::St_stk_Maker(const char *name, const char *title):StMaker(name,title),
+  St_stk_Maker::St_stk_Maker(const char *name, const char *title):
+StMaker(name,title),
 m_stk_stkpar(0),
 m_pix_info(0),
 m_stk_vtx(0),
@@ -109,7 +83,7 @@ St_stk_Maker::~St_stk_Maker(){
 //_____________________________________________________________________________
 Int_t St_stk_Maker::Init(){
 // Create tables
-   St_DataSetIter       local(gStChain->GetParams());
+   St_DataSetIter       local(gStChain->DataSet("params"));
    m_stk_stkpar = (St_stk_stkpar *) local("svt/stkpars/stk_stkpar");
    stk_stkpar_st *stk_stkpar = m_stk_stkpar->GetTable();
    stk_stkpar->mode = m_mode;
@@ -148,36 +122,34 @@ Int_t St_stk_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_stk_Maker::Make(){
   //  PrintInfo();
-  if (!m_DataSet->GetList()){  
-     St_DataSetIter geant(gStChain->GetGeant());
-     St_g2t_track   *g2t_track    = (St_g2t_track  *) geant("Event/g2t_track");
-     St_g2t_event   *g2t_event    = (St_g2t_event  *) geant("Event/g2t_event");
-     St_g2t_vertex  *g2t_vertex   = (St_g2t_vertex *) geant("Event/g2t_vertex");
-     St_g2t_svt_hit *g2t_svt_hit  = (St_g2t_svt_hit *)geant("Event/g2t_svt_hit");
+  if (!m_DataSet->GetList()){  // event/data/svt/tracks
+     St_DataSetIter geant(gStChain->DataSet("geant"));
+     St_g2t_track   *g2t_track    = (St_g2t_track  *) geant("g2t_track");
+     St_g2t_event   *g2t_event    = (St_g2t_event  *) geant("g2t_event");
+     St_g2t_vertex  *g2t_vertex   = (St_g2t_vertex *) geant("g2t_vertex");
+     St_g2t_svt_hit *g2t_svt_hit  = (St_g2t_svt_hit *)geant("g2t_svt_hit");
      if (g2t_track && g2t_event && g2t_vertex && g2t_svt_hit) {
-       St_DataSetIter local(m_DataSet);// event/data/svt/tracks
        St_sgr_groups *candidate_groups = new St_sgr_groups("candidate_groups",30000);
-          local.Add(candidate_groups);
-       St_sgr_groups *groups      = new St_sgr_groups("groups",30000); local.Add(groups);
-       St_sgr_groups *mcgroups    = new St_sgr_groups("mcgroups",30000); local.Add(mcgroups);
-       St_stk_track  *stk_track   = new St_stk_track("stk_track",6000); local.Add(stk_track);
-       St_stk_kine   *stk_kine    = new St_stk_kine("stk_kine",6000); local.Add(stk_kine);
-       St_stk_track  *stk_mctrack = new St_stk_track("stk_mctrack",6000); local.Add(stk_mctrack);
-       St_stk_kine   *stk_mckine  = new St_stk_kine("stk_mckine",6000); local.Add(stk_mckine);
-       St_ste_teval  *ste_teval   = new St_ste_teval("ste_teval",10000); local.Add(ste_teval);
-       St_ste_teff   *ste_teff    = new St_ste_teff("ste_teff",1); local.Add(ste_teff);
-
+                                                                          m_DataSet->Add(candidate_groups);
+       St_sgr_groups *groups      = new St_sgr_groups("groups",30000);    m_DataSet->Add(groups);
+       St_sgr_groups *mcgroups    = new St_sgr_groups("mcgroups",30000);  m_DataSet->Add(mcgroups);
+       St_stk_track  *stk_track   = new St_stk_track("stk_track",6000);   m_DataSet->Add(stk_track);
+       St_stk_kine   *stk_kine    = new St_stk_kine("stk_kine",6000);     m_DataSet->Add(stk_kine);
+       St_stk_track  *stk_mctrack = new St_stk_track("stk_mctrack",6000); m_DataSet->Add(stk_mctrack);
+       St_stk_kine   *stk_mckine  = new St_stk_kine("stk_mckine",6000);   m_DataSet->Add(stk_mckine);
+       St_ste_teval  *ste_teval   = new St_ste_teval("ste_teval",10000);  m_DataSet->Add(ste_teval);
+       St_ste_teff   *ste_teff    = new St_ste_teff("ste_teff",1);        m_DataSet->Add(ste_teff);
      //
-       St_DataSetIter run(gStChain->GetRun());
-       St_g2t_gepart *g2t_gepart  = (St_g2t_gepart *) run("geant/Run/g2t_gepart");
+       St_DataSet    *geom = gStChain->DataSet("geom");
+       St_DataSetIter run(geom);
+       St_g2t_gepart *g2t_gepart  = (St_g2t_gepart *) run("g2t_gepart");
        if (!g2t_gepart){
          g2t_gepart   = new St_g2t_gepart("g2t_gepart",1);
-         St_DataSetIter loc(run("geant/Run"));
-        loc.Add(g2t_gepart);
+         run.Add(g2t_gepart);
        }
      //
-       St_DataSetIter data(gStChain->GetData());
-       St_scs_spt    *scs_spt      = (St_scs_spt *) data("svt/hits/scs_spt");
+       St_DataSetIter data(gStChain->DataSet("svt_hits"));
+       St_scs_spt    *scs_spt      = (St_scs_spt *) data("scs_spt");
 				      // exec run_stk  
        if (m_ifstk){
          Int_t Res_stk = stk_am(m_stk_stkpar,
@@ -222,12 +194,12 @@ Int_t St_stk_Maker::Make(){
        }
      }	  
    } 
-return kStOK;
+  return kStOK;
 }
 //_____________________________________________________________________________
 void St_stk_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_stk_Maker.cxx,v 1.6 1998/10/06 18:00:46 perev Exp $\n");
+  printf("* $Id: St_stk_Maker.cxx,v 1.7 1998/10/31 00:26:21 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

@@ -37,6 +37,9 @@ CPP := $(CXX)   $(CXXFLAGS) $(CPPFLAGS)
 CC  := $(CC)    $(CFLAGS)   $(CPPFLAGS)   
 FSL := $(FOR72) $(FFLAGS)   $(CPPFLAGS)   $(SOFLAGS)
 
+
+MOTIF := YESsss
+
 CMDS  := atlsim starsim gstar staf staf+ staf++ Staf
 
 #	OUT dirs

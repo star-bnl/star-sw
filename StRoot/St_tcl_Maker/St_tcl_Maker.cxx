@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.10 1998/10/06 18:00:48 perev Exp $
+// $Id: St_tcl_Maker.cxx,v 1.11 1998/10/31 00:26:22 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.11  1998/10/31 00:26:22  fisyak
+// Makers take care about branches
+//
 // Revision 1.10  1998/10/06 18:00:48  perev
 // cleanup
 //
@@ -52,11 +55,8 @@
 ClassImp(St_tcl_Maker)
 
 //_____________________________________________________________________________
-St_tcl_Maker::St_tcl_Maker(){
-   drawinit=kFALSE;
-}
-//_____________________________________________________________________________
-St_tcl_Maker::St_tcl_Maker(const char *name, const char *title):StMaker(name,title){
+  St_tcl_Maker::St_tcl_Maker(const char *name, const char *title):
+StMaker(name,title){
    drawinit=kFALSE;
 }
 //_____________________________________________________________________________
@@ -65,7 +65,7 @@ St_tcl_Maker::~St_tcl_Maker(){
 //_____________________________________________________________________________
 Int_t St_tcl_Maker::Init(){
 // Create tables
-   St_DataSetIter       local(gStChain->GetParams());
+   St_DataSetIter       local(gStChain->DataSet("params"));
 // geometry parameters
    St_DataSet *tpc = local("tpc");
    if (! tpc)  tpc = local.Mkdir("tpc");
@@ -74,20 +74,15 @@ Int_t St_tcl_Maker::Init(){
      St_DataSetIter partable(tpgpar);
      m_tpg_pad_plane = (St_tpg_pad_plane *) partable("tpg_pad_plane");
      m_tpg_detector  = (St_tpg_detector  *) partable("tpg_detector");
-     m_tpg_pad       = (St_tpg_pad       *) partable("tpg_pad");
      if (!(m_tpg_pad_plane && m_tpg_detector)) {
-       cout << " St_run_Maker:tpg_pad_plane or tpg_detector do not exist" << endl;
-     }
-     else {
-       if (!m_tpg_pad) {
-         m_tpg_pad       = new St_tpg_pad("tpg_pad",1); partable.Add(m_tpg_pad); 
-         Int_t res = tpg_main(m_tpg_pad_plane,m_tpg_detector,m_tpg_pad); 
-       }
-     }
-     if (!(m_tpg_pad_plane && m_tpg_detector && m_tpg_pad)){ 
        cout << "TPC geometry parameter tables are incomplete."<< endl;
        SafeDelete(tpgpar);
      }
+     m_tpg_pad       = (St_tpg_pad       *) partable("tpg_pad");
+     if (!m_tpg_pad) {
+       m_tpg_pad       = new St_tpg_pad("tpg_pad",1); partable.Add(m_tpg_pad);
+     }
+     Int_t res = tpg_main(m_tpg_pad_plane,m_tpg_detector,m_tpg_pad); 
    }
 // tss parameters ?
    St_DataSet *tsspars = local("tpc/tsspars");
@@ -122,20 +117,14 @@ Int_t St_tcl_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_tcl_Maker::Make(){
   //  PrintInfo();
-   St_DataSetIter tpc_data(m_DataSet);
+   const Int_t max_hit = 400000;
    if (!m_DataSet->GetList()) {// If DataSet list empty then create it
-     St_tcl_tphit  *tphit = (St_tcl_tphit *) tpc_data("tphit");
-     if (!tphit) {tphit = new St_tcl_tphit("tphit",400000); tpc_data.Add(tphit);}
-     St_tcl_tphit_aux  *tphitau = (St_tcl_tphit_aux *) tpc_data("tphitau");
-     if (!tphitau) {tphitau = new St_tcl_tphit_aux("tphitau",200000); tpc_data.Add(tphitau);}
-     St_tcl_tpcluster  *tpcluster = (St_tcl_tpcluster *) tpc_data("tpcluster");
-     if (!tpcluster) {tpcluster = new St_tcl_tpcluster("tpcluster",200000); tpc_data.Add(tpcluster);}
-     St_tcl_tp_seq  *tpseq = (St_tcl_tp_seq *) tpc_data("tpseq");
-     if (!tpseq) {tpseq = new St_tcl_tp_seq("tpseq",2000000); tpc_data.Add(tpseq);}
-     St_DataSet   *sector;
-//   St_DataSet *raw_data_tpc =  gStChain->Maker("tss_Maker")->DataSet();
-     St_DataSetIter raw_data(gStChain->GetRawData());
-     St_DataSet *raw_data_tpc = raw_data("tpc"); 
+     St_tcl_tphit     *tphit     = new St_tcl_tphit("tphit",max_hit);         m_DataSet->Add(tphit);
+     St_tcl_tphit_aux *tphitau   = new St_tcl_tphit_aux("tphitau",max_hit);   m_DataSet->Add(tphitau);
+     St_tcl_tpcluster *tpcluster = new St_tcl_tpcluster("tpcluster",max_hit); m_DataSet->Add(tpcluster);
+     St_tcl_tp_seq    *tpseq     = new St_tcl_tp_seq("tpseq",5*max_hit);      m_DataSet->Add(tpseq);
+     St_DataSet       *sector;
+     St_DataSet       *raw_data_tpc = gStChain->DataSet("tpc_raw");
      Int_t sector_tot = 0;
      if (raw_data_tpc){// Row data exits -> make clustering
        St_DataSetIter next(raw_data_tpc);
@@ -174,13 +163,11 @@ Int_t St_tcl_Maker::Make(){
                                 tpseq,tpcluster,tphit,tphitau);
 	 }
        }
-       if (sector_tot) {//slow simulation exist
+       if (sector_tot) { //slow simulation exist
          cout << "start run_tte_hit_match" << endl;
-         St_tcl_tpc_index  *index = (St_tcl_tpc_index *) tpc_data("index");
-         if (!index) {index = new St_tcl_tpc_index("index",200000); tpc_data.Add(index);}
-         St_DataSetIter geant(gStChain->GetGeant());
-         St_DataSetIter g2t(geant("Event"));
-         St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("Event/g2t_tpc_hit");
+         St_tcl_tpc_index  *index = new St_tcl_tpc_index("index",max_hit); m_DataSet->Add(index);
+         St_DataSetIter geant(gStChain->DataSet("geant"));
+         St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("g2t_tpc_hit");
 
          Int_t Res_tte =  tte_hit_match(g2t_tpc_hit,index,m_type,tphit); 
          if (Res_tte !=  kSTAFCV_OK)  cout << "Problem with tte_hit_match.." << endl;
@@ -189,12 +176,11 @@ Int_t St_tcl_Maker::Make(){
      }
 // Row data does not exit, check GEANT. if it does then use fast cluster simulation
      if (!raw_data_tpc || !sector_tot){
-       St_DataSetIter geant(gStChain->GetGeant());
-       St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("Event/g2t_tpc_hit");
-       St_g2t_track   *g2t_track   = (St_g2t_track *) geant("Event/g2t_track");
+       St_DataSetIter geant(gStChain->DataSet("geant"));
+       St_g2t_tpc_hit *g2t_tpc_hit = (St_g2t_tpc_hit *) geant("g2t_tpc_hit");
+       St_g2t_track   *g2t_track   = (St_g2t_track   *) geant("g2t_track");
        if (g2t_tpc_hit && g2t_track){
-         St_tcl_tpc_index  *index = (St_tcl_tpc_index *) tpc_data("index");
-         if (!index) {index = new St_tcl_tpc_index("index",700000); tpc_data.Add(index);}
+         St_tcl_tpc_index  *index = new St_tcl_tpc_index("index",5*max_hit); m_DataSet->Add(index);
 	 cout << "start tfs_run" << endl;
 
          Int_t Res_tfs_g2t =   tfs_g2t(g2t_tpc_hit, g2t_track,
@@ -218,7 +204,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.10 1998/10/06 18:00:48 perev Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.11 1998/10/31 00:26:22 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.9 1998/10/06 18:00:50 perev Exp $
+// $Id: St_tpt_Maker.cxx,v 1.10 1998/10/31 00:26:23 fisyak Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.10  1998/10/31 00:26:23  fisyak
+// Makers take care about branches
+//
 // Revision 1.9  1998/10/06 18:00:50  perev
 // cleanup
 //
@@ -41,20 +44,8 @@
 ClassImp(St_tpt_Maker)
 
 //_____________________________________________________________________________
-St_tpt_Maker::St_tpt_Maker():
-m_tpg_pad_plane(0),
-m_type(0),
-m_tpt_pars(0),
-m_tpt_spars(0),
-m_tte_control(0),
-m_tdeparm(0),
-m_tpipar(0)
-{
-   drawinit=kFALSE;
-   m_iftte =kFALSE;
-}
-//_____________________________________________________________________________
-St_tpt_Maker::St_tpt_Maker(const char *name, const char *title):StMaker(name,title),
+  St_tpt_Maker::St_tpt_Maker(const char *name, const char *title):
+StMaker(name,title),
 m_tpg_pad_plane(0),
 m_type(0),
 m_tpt_pars(0),
@@ -72,7 +63,7 @@ St_tpt_Maker::~St_tpt_Maker(){
 //_____________________________________________________________________________
 Int_t St_tpt_Maker::Init(){
 // Create tables
-   St_DataSetIter       local(gStChain->GetParams());
+   St_DataSetIter       local(gStChain->DataSet("params"));
    St_DataSet *tpc = local("tpc");
    if (! tpc)  tpc = local.Mkdir("tpc");
 // tpg parameters
@@ -127,24 +118,21 @@ Int_t St_tpt_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_tpt_Maker::Make(){
   //  PrintInfo();
-   St_DataSetIter tpc_tracks(m_DataSet);
    if (!m_DataSet->GetList()) {// If DataSet list empty then create it
-     St_DataSetIter data(gStChain->GetData());
-     St_DataSet *tpc_data =  data("tpc/hits");
+     St_DataSet *tpc_data =  gStChain->DataSet("tpc_hits");
      if (tpc_data) {// Clusters exist -> do tracking
        St_DataSetIter next(tpc_data);
-       St_tcl_tphit  *tphit = (St_tcl_tphit *) next("tphit");
-       St_tpt_track  *tptrack = (St_tpt_track *) tpc_tracks("tptrack");
-       St_tte_mctrk  *mctrk = new St_tte_mctrk("mctrk",20000); tpc_tracks.Add(mctrk);
-       St_tte_eval *evaltrk = new St_tte_eval("evaltrk",20000); tpc_tracks.Add(evaltrk);
-       St_tte_res      *res = new St_tte_res("res",1); tpc_tracks.Add(res);
-       St_DataSetIter data_tpc(tpc_data);
-       St_tcl_tpc_index  *index = (St_tcl_tpc_index *) data_tpc("index");
-       if (!index) {index = new St_tcl_tpc_index("index",200000); data_tpc.Add(index);}
-       St_DataSetIter geant(gStChain->GetGeant());
-       St_g2t_track   *g2t_track    = (St_g2t_track  *) geant("Event/g2t_track");
-       St_g2t_tpc_hit *g2t_tpc_hit  = (St_g2t_tpc_hit *)geant("Event/g2t_tpc_hit");
-       if (!tptrack) {tptrack = new St_tpt_track("tptrack",20000); tpc_tracks.Add(tptrack);}
+       St_tcl_tphit      *tphit = (St_tcl_tphit     *) next("tphit");
+       St_tcl_tpc_index  *index = (St_tcl_tpc_index *) next("index");
+       if (!index) {index = new St_tcl_tpc_index("index",200000); next.Add(index);}
+
+       St_tpt_track  *tptrack = new St_tpt_track("tptrack",20000); m_DataSet->Add(tptrack);
+       St_tte_mctrk  *mctrk   = new St_tte_mctrk("mctrk",20000);   m_DataSet->Add(mctrk);
+       St_tte_eval *evaltrk   = new St_tte_eval("evaltrk",20000);  m_DataSet->Add(evaltrk);
+       St_tte_res      *res   = new St_tte_res("res",1);           m_DataSet->Add(res);
+       St_DataSetIter geant(gStChain->DataSet("geant"));
+       St_g2t_track   *g2t_track    = (St_g2t_track  *) geant("g2t_track");
+       St_g2t_tpc_hit *g2t_tpc_hit  = (St_g2t_tpc_hit *)geant("g2t_tpc_hit");
 	 //tpt
        if (!m_iftte) Int_t Res_tpt = tpt(m_tpt_pars,tphit,tptrack);
 	 //tte_track
@@ -166,7 +154,7 @@ Int_t St_tpt_Maker::Make(){
 //_____________________________________________________________________________
 void St_tpt_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tpt_Maker.cxx,v 1.9 1998/10/06 18:00:50 perev Exp $\n");
+  printf("* $Id: St_tpt_Maker.cxx,v 1.10 1998/10/31 00:26:23 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.h,v 1.4 1998/10/06 18:00:46 perev Exp $
+// $Id: St_stk_Maker.h,v 1.5 1998/10/31 00:26:21 fisyak Exp $
 // $Log: St_stk_Maker.h,v $
+// Revision 1.5  1998/10/31 00:26:21  fisyak
+// Makers take care about branches
+//
 // Revision 1.4  1998/10/06 18:00:46  perev
 // cleanup
 //
@@ -40,7 +43,7 @@ class St_svg_geom;
 class St_stk_Maker : public StMaker {
  private:
                Bool_t drawinit;
-// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.4 1998/10/06 18:00:46 perev Exp $";
+// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.5 1998/10/31 00:26:21 fisyak Exp $";
                Int_t  m_mode;      // mode 1 = primaries;
 	                           // mode 2 = secondaries;
 	                           // mode 3 = primaries to secondaries 
@@ -87,8 +90,7 @@ class St_stk_Maker : public StMaker {
                
  protected:
  public: 
-                  St_stk_Maker();
-                  St_stk_Maker(const char *name, const char *title);
+                  St_stk_Maker(const char *name="svt_tracks", const char *title="event/data/svt/tracks");
    virtual       ~St_stk_Maker();
    virtual Int_t Init();
    virtual Int_t  Make();

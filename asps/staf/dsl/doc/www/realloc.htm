@@ -1,0 +1,48 @@
+<!doctype html public "-//IETF//DTD HTML//EN">
+<HTML>
+
+<HEAD>
+
+<META NAME="BUILD" CONTENT="Feb 10 1995">
+<META NAME="BUILD" CONTENT="Feb 10 1995">
+<META NAME="BUILD" CONTENT="Feb 10 1995">
+<META NAM >
+<META NAME="GENERATOR" CONTENT="Internet Assistant for Word 1.00">
+<META NAME="AUTHOR" CONTENT="bill">
+<META NAME="DOCCOMM" CONTENT="r                                      ">
+</HEAD>
+
+<BODY>
+
+<H2>dsReallocTable</H2>
+
+<P>
+The <B>dsReallocTable</B> function changes the size of a dynamic
+table.
+<P>
+<B>int dsReallocTable(DS_DATASET_T</B> *<I>pTable</I><B>, size_t</B>
+<I>maxRows</I><B>);</B> 
+<H3>Parameters </H3>
+
+<DL>
+<DT><I>pTable</I> 
+<DD>Handle for table
+<DT><I>maxRows</I> 
+<DD>New value for maximum row count
+</DL>
+
+<H3>Return Value</H3>
+
+<P>
+If the function succeeds, the return value is TRUE.
+<P>
+If the function fails, the return value is FALSE. To get extended
+error information, call <A HREF="dserror.htm">dsErrorCode</A>
+. To print error information call <A HREF="dsperr.htm">dsPerror</A>.
+<H3>Remarks</H3>
+
+<P>
+The location of the table's data may be moved. 
+</BODY>
+
+</HTML>

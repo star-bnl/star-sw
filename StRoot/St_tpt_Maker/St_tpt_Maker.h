@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.h,v 1.3 1998/10/06 18:00:51 perev Exp $
+// $Id: St_tpt_Maker.h,v 1.4 1998/10/31 00:26:24 fisyak Exp $
 // $Log: St_tpt_Maker.h,v $
+// Revision 1.4  1998/10/31 00:26:24  fisyak
+// Makers take care about branches
+//
 // Revision 1.3  1998/10/06 18:00:51  perev
 // cleanup
 //
@@ -32,7 +35,7 @@ class St_tpt_Maker : public StMaker {
  private:
                Bool_t drawinit;
 	       Bool_t m_iftte;
-//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.3 1998/10/06 18:00:51 perev Exp $";
+//static Char_t m_VersionCVS = "$Id: St_tpt_Maker.h,v 1.4 1998/10/31 00:26:24 fisyak Exp $";
                St_tpg_pad_plane *m_tpg_pad_plane; //! Constants that describe TPC pad plane
                St_tcl_tpc_index_type *m_type;   //!  Table of many-to-many index 
 	                                        // correlations for tpc evaluations
@@ -43,8 +46,7 @@ class St_tpt_Maker : public StMaker {
                St_tpipar    *m_tpipar;    //! parameter file for tpi package
  protected:
  public: 
-                  St_tpt_Maker();
-                  St_tpt_Maker(const char *name, const char *title);
+                  St_tpt_Maker(const char *name="tpc_tracks", const char *title="event/data/tpc/tracks");
    virtual       ~St_tpt_Maker();
    virtual Int_t Init();
    virtual Int_t  Make();

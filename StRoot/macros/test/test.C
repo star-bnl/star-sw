@@ -1,5 +1,5 @@
 {
-  gSystem.Load("St_base.so");
+  gSystem.Load("St_base");
   Int_t first = 111;
   Int_t second = 222;
   St_Module defmodule;

@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.1 1998/10/12 14:34:18 fisyak Exp $
+// $Id: St_geant_Maker.cxx,v 1.2 1998/10/31 00:26:17 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.2  1998/10/31 00:26:17  fisyak
+// Makers take care about branches
+//
 // Revision 1.1  1998/10/12 14:34:18  fisyak
 // new geant Maker
 //
@@ -22,13 +25,9 @@
 #include "StChain.h"
 #include "St_DataSetIter.h"
 ClassImp(St_geant_Maker)
-
 //_____________________________________________________________________________
-St_geant_Maker::St_geant_Maker(){
-   drawinit=kFALSE;
-}
-//_____________________________________________________________________________
-St_geant_Maker::St_geant_Maker(const char *name, const char *title):StMaker(name,title){
+  St_geant_Maker::St_geant_Maker(const char *name, const char *title):
+StMaker(name,title){
    drawinit=kFALSE;
 }
 //_____________________________________________________________________________
@@ -48,7 +47,7 @@ Int_t St_geant_Maker::Finish(){
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Init(){
 // Create tables
-   St_DataSetIter       local(gStChain->GetParams());
+   St_DataSetIter       local(gStChain->DataSet("params"));
 // Create Histograms    
    StMaker::Init();
    return kStOK;
@@ -58,12 +57,12 @@ Int_t St_geant_Maker::Make(){
 //  PrintInfo();
   if (!m_DataSet->GetList())  {//if DataSet is empty fill it
 }
- return kSTAFCV_OK;
+ return kStOK;
 }
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("***************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.1 1998/10/12 14:34:18 fisyak Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.2 1998/10/31 00:26:17 fisyak Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("***************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

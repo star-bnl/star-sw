@@ -27,8 +27,7 @@ class St_srs_Maker : public StMaker {
                St_srs_direct  *m_srs_direct; //!
  protected:
  public: 
-                  St_srs_Maker();
-                  St_srs_Maker(const char *name, const char *title);
+                  St_srs_Maker(const char *name="svt_hits", const char *title="event/data/svt/hits");
    virtual       ~St_srs_Maker();
    virtual Int_t Init();
    virtual Int_t  Make();

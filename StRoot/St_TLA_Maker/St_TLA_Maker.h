@@ -1,5 +1,8 @@
-// $Id: St_TLA_Maker.h,v 1.6 1998/10/06 18:00:31 perev Exp $
+// $Id: St_TLA_Maker.h,v 1.7 1998/10/31 00:25:45 fisyak Exp $
 // $Log: St_TLA_Maker.h,v $
+// Revision 1.7  1998/10/31 00:25:45  fisyak
+// Makers take care about branches
+//
 // Revision 1.6  1998/10/06 18:00:31  perev
 // cleanup
 //
@@ -30,14 +33,13 @@
 class St_TLA_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t  m_VersionCVS = "$Id: St_TLA_Maker.h,v 1.6 1998/10/06 18:00:31 perev Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_TLA_Maker.h,v 1.7 1998/10/31 00:25:45 fisyak Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
  
  protected:
  public: 
-                  St_TLA_Maker();
-                  St_TLA_Maker(const char *name, const char *title);
+                  St_TLA_Maker(const char *name="TLA", const char *title="TLA_something");
    virtual       ~St_TLA_Maker();
    virtual Int_t Init();
    virtual Int_t  Make();
