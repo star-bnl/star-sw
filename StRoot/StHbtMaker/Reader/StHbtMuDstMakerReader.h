@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtMuDstMakerReader.h,v 1.2 2003/09/07 03:49:02 perev Exp $
+ * $Id: StHbtMuDstMakerReader.h,v 1.3 2004/02/19 21:41:16 magestro Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StHbtMuDstMakerReader_hh
@@ -30,8 +30,6 @@ class StDetectorState;
 class StL3AlgorithmInfo;
 
 class StuProbabilityPidAlgorithm;
-
-class StIOMaker;
 
 /// strangeness group stuff
 class StStrangeEvMuDst;
@@ -76,7 +74,6 @@ class StHbtMuDstMakerReader : public StHbtEventReader {
   unsigned int trackType(); 
   StMuDst* muDst();
 
-  StIOMaker ioMaker();
   StStrangeMuDstMaker* stStrangeMuDstMaker();
   StFlowMaker* flowMaker();
 
@@ -143,6 +140,9 @@ inline void StHbtMuDstMakerReader::setReadKinks(bool b) { mReadKinks=b;}
 /***************************************************************************
  *
  * $Log: StHbtMuDstMakerReader.h,v $
+ * Revision 1.3  2004/02/19 21:41:16  magestro
+ * Removed class StIOMaker declaration
+ *
  * Revision 1.2  2003/09/07 03:49:02  perev
  * gcc 3.2 + WarnOff
  *
