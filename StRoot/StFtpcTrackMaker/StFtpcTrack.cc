@@ -1,5 +1,12 @@
-// $Id: StFtpcTrack.cc,v 1.3 2000/05/12 12:59:15 oldi Exp $
+// $Id: StFtpcTrack.cc,v 1.4 2000/06/07 11:48:56 oldi Exp $
 // $Log: StFtpcTrack.cc,v $
+// Revision 1.4  2000/06/07 11:48:56  oldi
+// Added function GetEta().
+// In SetProperties(Bool_t usage, Int_t tracknumber): calculation of
+// mRowsWithPoints added.
+// CalculateNMax() changed. It calculates now the (arbitrary) angle and radius
+// in the inner and outer padrow.
+//
 // Revision 1.3  2000/05/12 12:59:15  oldi
 // removed delete operator for mSegment in StFtpcConfMapper (mSegment was deleted twice),
 // add two new constructors for StFtpcTracker to be able to refit already existing tracks,
@@ -13,7 +20,7 @@
 //
 
 //----------Author:        Holm G. H&uuml;mmler, Markus D. Oldenburg
-//----------Last Modified: 11.05.2000
+//----------Last Modified: 22.05.2000
 //----------Copyright:     &copy MDO Production 1999
 
 #include "StFtpcTrack.hh"
@@ -146,6 +153,14 @@ Double_t StFtpcTrack::GetPseudoRapidity() const
 }
 
 
+Double_t StFtpcTrack::GetEta() const
+{
+  // This function returns the value of GetPseudoRapidity().
+  
+  return GetPseudoRapidity();
+}
+
+
 Double_t StFtpcTrack::GetRapidity() const
 {
   // Returns the rapidity of the particle with the assumption that the particle is a pion (+/-).
@@ -163,21 +178,27 @@ void StFtpcTrack::SetProperties(Bool_t usage, Int_t tracknumber)
   // sets the track number of all points belonging to this track to the value of fTrackNumber.
 
   for (Int_t i = 0; i < mPoints->GetEntriesFast(); i++) {    
-    
-    if (i != 0) {
+    StFtpcConfMapPoint *p = (StFtpcConfMapPoint *)mPoints->At(i);
+
+    if (usage == true) {
       
-      if (usage == true) {
-	((StFtpcConfMapPoint *)mPoints->At(i))->SetNextHitNumber(((StFtpcConfMapPoint *)mPoints->At(i-1))->GetHitNumber());
+      mRowsWithPoints += (Int_t)TMath::Power(2, ((p->GetPadRow()-1)%10)+1);
+
+      if (i != 0) {
+	p->SetNextHitNumber(((StFtpcConfMapPoint *)mPoints->At(i-1))->GetHitNumber());
       }
 
       else {
-	((StFtpcConfMapPoint *)mPoints->At(i))->SetNextHitNumber(-1);
+	p->SetNextHitNumber(-1);
       }
+    }    
+
+    else {
+      p->SetNextHitNumber(-1);
     }
     
-
-    ((StFtpcConfMapPoint *)mPoints->At(i))->SetUsage(usage);
-    ((StFtpcConfMapPoint *)mPoints->At(i))->SetTrackNumber(tracknumber);
+    p->SetUsage(usage);
+    p->SetTrackNumber(tracknumber);
   }
 
   return;
@@ -189,6 +210,9 @@ void StFtpcTrack::CalculateNMax()
   // Calculates the max. possible number of points on this track.
   // Up to now this is only a approximation. The calculated value would be right if:
   //   - the track would be a straight line
+  //
+  // In addition this funtion calculates the radius and the angle of a potential 
+  // track point in the first (inner) and the last (outer) pad row.
 
   // This should be read from the appropriate table, of course.
   Double_t z_row[] = {162.75, 171.25, 184.05, 192.55, 205.35, 213.85, 226.65, 235.15, 247.95, 256.45};
@@ -199,33 +223,32 @@ void StFtpcTrack::CalculateNMax()
   
   Double_t z2 = firstpoint->GetZ();
   Double_t z1 = lastpoint->GetZ();
+  Double_t x2 = firstpoint->GetX();
+  Double_t x1 = lastpoint->GetX();
   Double_t r2 = TMath::Sqrt((firstpoint->GetX() * firstpoint->GetX()) + (firstpoint->GetY() * firstpoint->GetY())); 
   Double_t r1 = TMath::Sqrt((lastpoint->GetX() * lastpoint->GetX()) + (lastpoint->GetY() * lastpoint->GetY())); 
 
   // These values should go into an .idl file.
   Double_t outer_radius =  30.00;
   Double_t inner_radius =   8.00;
-  Double_t r;
-
-  if (z1>0.) {
+  Double_t r, x;
     
-    for (Int_t i = 0; i < 10; i++) {
-      r = (r2 - r1) / (z2 - z1) * (z_row[i] - z1) + r1;
-      
-      if (r < outer_radius && r > inner_radius) {
-	nmax++;
-      }
+  for (Int_t i = 0; i < 10; i++) {
+    r = (r2 - r1) / (z2 - z1) * (TMath::Sign(z_row[i], z1) - z1) + r1;
+    x = (x2 - x1) / (z2 - z1) * (TMath::Sign(z_row[i], z1) - z1) + x1;
+    
+    if (i == 0) {
+      mRFirst = r;
+      mAlphaFirst = TMath::ACos(x/r);
     }
-  }
-
-  else {
+   
+    if (i == 9) {
+      mRLast = r;
+      mAlphaLast = TMath::ACos(x/r);
+    }
     
-    for (Int_t i = 0; i < 10; i++) {
-      r = (r2 - r1) / (z2 - z1) * (-z_row[i] - z1) + r1;
-      
-      if (r < outer_radius && r > inner_radius) {
-	nmax++;
-      }
+    if (r < outer_radius && r > inner_radius) {
+      nmax++;
     }
   }
   
