@@ -1,4 +1,4 @@
-// $Id: EEsoloPi0.cxx,v 1.7 2004/09/03 04:50:52 balewski Exp $
+// $Id: EEsoloPi0.cxx,v 1.8 2004/09/29 18:04:44 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -238,7 +238,7 @@ int  EEsoloPi0:: findTowerClust() {
   for(k=0;k<MxTw;k++) {
     float ene=soloMip[k].e;
     if(ene<=0) continue;
-    // printf("ispir=%d, e=%f\n",k,soloMip[k].e);
+    // printf("irad=%d, e=%f\n",k,soloMip[k].e);
     hA[0]->Fill(ene);
     totEner+=ene;
   }
@@ -255,14 +255,14 @@ int  EEsoloPi0:: findTowerClust() {
       maxE=soloMip[k0].e;
     }
     if(k1<0) break; // no cluster found
-    //  printf("iCl=%d, ispir=%d energy=%f\n",nClust,k1,soloMip[k1].e);
+    //  printf("iCl=%d, irad=%d energy=%f\n",nClust,k1,soloMip[k1].e);
     clust[nClust].k1=k1;
     clust[nClust].eH=soloMip[k1].e;
     nClust++;
     soloMip[k1].id=nClust;
     tagCluster(k1);     
   }
-  // printf("nClust=%d\n",nClust);
+  //printf("nClust=%d\n",nClust);
   //if(nClust<2) return ;
   
   //............  sum energy of clusters, find centroid
@@ -540,6 +540,9 @@ int EEsoloPi0::findInvM(Cluster *c1, Cluster *c2, TH1F **h){
 
 /*****************************************************************
  * $Log: EEsoloPi0.cxx,v $
+ * Revision 1.8  2004/09/29 18:04:44  balewski
+ * now it runs on M-C as well
+ *
  * Revision 1.7  2004/09/03 04:50:52  balewski
  * big clenup
  *
