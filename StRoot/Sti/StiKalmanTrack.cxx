@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.34 2004/08/06 02:28:53 andrewar Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.35 2004/08/17 20:55:42 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.35  2004/08/17 20:55:42  perev
+ * memory cleanup heap==>stack
+ *
  * Revision 2.34  2004/08/06 02:28:53  andrewar
  * Added getMaxPointCount(int detectorId)< where detectorId corresponds to the
  * StDetectorId value.
@@ -1146,14 +1149,13 @@ double  StiKalmanTrack::getDca(const StiHit * vertex)    const
     node = lastNode;
   StThreeVectorD originD(node->getX(),node->getY(),node->getZ());
   StThreeVectorD vxDD(vertex->x_g(), vertex->y_g(),vertex->z_g());
-  StPhysicalHelixD * physicalHelix = new StPhysicalHelixD(0.,0.,0.,originD,-1);
+  StPhysicalHelixD physicalHelix(0.,0.,0.,originD,-1);
   originD.rotateZ(node->getRefAngle());
-  physicalHelix->setParameters(fabs(node->getCurvature()),
+  physicalHelix.setParameters(fabs(node->getCurvature()),
 			       node->getDipAngle(),
 			       node->getPhase()-node->getHelicity()*M_PI/2.,
 			       originD,
 			       node->getHelicity());
-  double dca = physicalHelix->distance(vxDD);
-  delete physicalHelix;
+  double dca = physicalHelix.distance(vxDD);
   return dca;
 }
