@@ -1,6 +1,10 @@
-* $Id: tpt_row_sect_pnt.F,v 1.17 2000/02/13 22:45:50 sakrejda Exp $
+* $Id: tpt_row_sect_pnt.F,v 1.18 2000/02/15 02:51:59 sakrejda Exp $
 * $Log: tpt_row_sect_pnt.F,v $
+* Revision 1.18  2000/02/15 02:51:59  sakrejda
+* Remove elimination of hits with bad flags, will be handled differently
+*
 * Revision 1.17  2000/02/13 22:45:50  sakrejda
+*
 * CVo ----------------------------------------------------------------------
 * nly truly edge pads left out
 * 
@@ -185,7 +189,8 @@ C     set up information about the slices
 C       loop through row-sorted list
         ipnt = loc_hit(i)
 c        if(hit(ipnt).track.le.0.and.hit(ipnt).flag.le.1) then
-        if(hit(ipnt).track.le.0.and.hit(ipnt).flag.lt.14) then
+c        if(hit(ipnt).track.le.0.and.hit(ipnt).flag.lt.14) then
+        if(hit(ipnt).track.le.0) then
           isect = rhit(ipnt)/100
           irow = mod(rhit(ipnt),100)
           if( isect.lt.1 .or. isect.gt.mxsector .or. irow.lt.1 .or.
@@ -216,7 +221,8 @@ c        if(hit(ipnt).track.le.0.and.hit(ipnt).flag.le.1) then
             do while (k.lt.ic)
 *              check whether this hit is available 
 *              want to eliminate used hits in subsequent passes
-               if(hit(loc_hit(ipnt+kc)).track.le.0.and.hit(loc_hit(ipnt+kc)).flag.lt.14) then
+C               if(hit(loc_hit(ipnt+kc)).track.le.0.and.hit(loc_hit(ipnt+kc)).flag.lt.14) then
+               if(hit(loc_hit(ipnt+kc)).track.le.0) then
                   k=k+1
 *
 *                 tpsort(k).ipnt is a location of the hit in the hit table
