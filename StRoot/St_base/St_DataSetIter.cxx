@@ -1,10 +1,13 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved 
-// $Id: St_DataSetIter.cxx,v 1.25 1999/04/15 19:44:45 fine Exp $
+// $Id: St_DataSetIter.cxx,v 1.26 1999/04/16 16:35:35 perev Exp $
 // $Log: St_DataSetIter.cxx,v $
+// Revision 1.26  1999/04/16 16:35:35  perev
+// last tips for StTree and St_DataSetIter
+//
 // Revision 1.25  1999/04/15 19:44:45  fine
-// St_DataSetIter::FindObject bug has been fixed. aliases FindByName and FindByPath  introduced
+//  St_DataSetIter::FindObject bug has been fixed. aliases FindByName and FindByPath  introduced
 //
 // Revision 1.24  1999/04/08 16:44:08  fine
 // Working version of the NodeView family
@@ -244,10 +247,10 @@ St_DataSet *St_DataSetIter::FindObject(const Char_t *name,const Char_t *path,Opt
 
   St_DataSetIter next(startset,0);
   St_DataSet *set = 0;
-  while ((set = next())){
-     if (opti && strcasecmp(set->GetName(),name) == 0 )    break;
-     else if (strcmp(set->GetName(),name) == 0)            break;
-  }
+  while ((set = next()))
+     if ( (opti && strcasecmp(set->GetName(),name) == 0 ) ||  
+          (strcmp(set->GetName(),name) == 0) )           break;
+  
   return set;
 }
 
