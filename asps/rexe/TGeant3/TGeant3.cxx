@@ -15,6 +15,9 @@
 
 /*
 $Log: TGeant3.cxx,v $
+Revision 1.10  2001/03/30 21:26:19  jeromel
+Return type fix for Insure smooth compilation
+
 Revision 1.9  2001/03/27 15:08:28  fisyak
 make return char static
 
@@ -1024,14 +1027,14 @@ Int_t TGeant3::NofVolumes() const
 }
 
 //_____________________________________________________________________________
+static const char nullname[5]="NULL";
 const char* TGeant3::VolName(Int_t id) const
 {
   //
   // Return the volume name given the volume identifier
   //
-  const static char name[5]="NULL";
   if(id<1 || id > fGcnum->nvolum || fGclink->jvolum<=0) 
-    return name;
+    return nullname;
   else
     return fVolNames[id-1];
 }
