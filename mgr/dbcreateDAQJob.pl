@@ -17,17 +17,18 @@ use File::Find;
 use Net::FTP;
 
 require "/afs/rhic/star/packages/DEV00/mgr/dbCpProdSetup.pl";
+require "/afs/rhic/star/packages/DEV00/mgr/dbDescriptorSetup.pl";
 
 my $debugOn=0;
 
 my @SetD = (
              "daq/2000/06",
              "daq/2000/07", 
-             "daq/2000/08", 
+             "daq/2000/08",               
 );
 
-my $prodPeriod = "P00he"; 
-my @chName = ("p00h4", "p00h1");              
+my $prodPeriod = "P00hf"; 
+my @chName = ("p00h5", "p00h1");              
 my $chainDir = "daq";
 
 ###Set directories to be created for jobfiles
@@ -60,9 +61,36 @@ struct OptAttr => {
  my @jobDOpt;
  my $njobDOpt = 0;
 
-###  connect to the DB
-  &StDbProdConnect();
+#####  connect to RunLog DB
 
+ &StDbDescriptorConnect();
+
+my $myRun;
+my @runSet;
+my $nrunSet = 0;
+
+ $sql="SELECT runNumber FROM $runDescriptorT WHERE category = 'physics'";
+
+   $cursor =$dbh->prepare($sql)
+    || die "Cannot prepare statement: $DBI::errstr\n";
+   $cursor->execute;
+ 
+    while(@fields = $cursor->fetchrow) {
+      my $cols=$cursor->{NUM_OF_FIELDS};
+
+        for($i=0;$i<$cols;$i++) {
+           my $fvalue=$fields[$i];
+           my $fname=$cursor->{NAME}->[$i];
+#        print "$fname = $fvalue\n" ;
+       
+         $myRun = $fvalue     if( $fname eq 'runNumber'); 
+	 }
+        $runSet[$nrunSet] = $myRun;
+        $nrunSet++;
+ }
+
+ &StDbDescriptorDisconnect();         
+ 
  my $jb_news;
  my $jb_archive;
  my $jb_jobfile;
@@ -94,6 +122,8 @@ struct OptAttr => {
 
  my $filename;
 
+###  connect to the Production DB
+ &StDbProdConnect();
 
 ##### insert first line to JobStatusT table get last ID 
 
@@ -172,8 +202,12 @@ struct OptAttr => {
 
  }
 
+
+
 #####  start loop over input files
 my $jbset;
+my @flsplit;
+my $mrunId;
 
   foreach my $jobDnm (@jobDIn_set){
       my $jpath = ($$jobDnm)->pathN;
@@ -182,7 +216,18 @@ my $jbset;
        next if ($flname =~ /st_pedestal/);
        next if ($flname =~ /st_test/);       
        $jfile =~ s/.daq//g;
+      if($jfile =~ /^st_physics/ ) {       
+       @flsplit = split ("_",$jfile);  
+       $mrunId =  $flsplit[2];
+#      print "Run ID : ", $mrunId, "\n"; 
+     }else {
+       $mrunId = 0;
+     }
 
+      foreach my $runNum (@runSet) {
+         
+        if ( $mrunId eq $runNum) {      
+#      print "Run ID : ", $mrunId, "\n";
         foreach my $optDchain (@jobDOpt) {
          my $mchain   = ($$optDchain)->chaOpt;
          my $mlibVer  = ($$optDchain)->libVer; 
@@ -227,7 +272,12 @@ my $jbset;
        print "filling jobRelations table\n";
         &fillJRelTable();
 
-       }
+	}
+        }
+      last;
+       }else{
+       next;
+     }
       }  
    }
 
@@ -314,7 +364,7 @@ my $jbset;
       my $hpss_dst_file2 = $gfile . ".tags.root";
       my $hpss_dst_file3 = $gfile . ".runco.root";
       my $hpss_dst_file4 = $gfile . ".event.root";
-      my $executable     = "/afs/rhic/star/packages/" . $jlibVer . "/mgr/bfc.csh";
+      my $executable     = "/afs/rhic/star/packages/" . $jlibVer . "/mgr/bfcc.csh";
       my $executableargs = $fchain;
       my $log_dir       = $logDir;
       my $log_name      = $gfile . ".log";
