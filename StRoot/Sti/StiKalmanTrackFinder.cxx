@@ -242,6 +242,7 @@ StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) throw (Exception)
 	  // update counters.
 	  tNode->updateNode();
 	  sNode->add(tNode);
+	  sNode = tNode;  // the new source node
 	  hitCount++;
 	  contiguousHitCount++;
 	  if (contiguousHitCount>minContiguousHitCountForNullReset)
@@ -266,6 +267,7 @@ StiKalmanTrackFinder::followTrackAt(StiKalmanTrackNode * node) throw (Exception)
 	  trackDone = true;
 	}
     }
+  return sNode;
 }
 
 void StiKalmanTrackFinder::fitInward(StiKalmanTrackNode * node) throw (Exception)
