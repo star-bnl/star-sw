@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMinuitVertexFinder.cxx,v 1.10 2004/07/23 00:59:10 jeromel Exp $
+ * $Id: StMinuitVertexFinder.cxx,v 1.11 2004/07/23 01:28:55 jeromel Exp $
  *
  * Author: Thomas Ullrich, Feb 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMinuitVertexFinder.cxx,v $
+ * Revision 1.11  2004/07/23 01:28:55  jeromel
+ * Typo corrected
+ *
  * Revision 1.10  2004/07/23 00:59:10  jeromel
  * Removed methods (moved in base class). Changed setFlagBase().
  *
@@ -63,7 +66,7 @@ bool                     StMinuitVertexFinder::requireCTB;
 int                      StMinuitVertexFinder::nCTBHits;
 
 StMinuitVertexFinder::StMinuitVertexFinder() {
-  gMessMgr->Info() << "StppLMVVertexFinder::StMinuitVertexFinder is in use." << endm;
+  gMessMgr->Info() << "StMinuitVertexFinder::StMinuitVertexFinder is in use." << endm;
   mBeamHelix =0;
   mStatus    = 0;
   mMinNumberOfFitPointsOnTrack = 10; 
