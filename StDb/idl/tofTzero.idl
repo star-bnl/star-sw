@@ -8,7 +8,7 @@
 
 struct tofTzero {
   long entries;
-  short daqChannel[26000]; /* pVPD:0-5(11), TOFp:0-41, TOFr:0-71(119)... */
-  short tdcChan[26000]; /* CAMAC TDC# 0-119(184)... */
-  float Tzero[26000]; /* Time offset of each daq channel */
+  short daqChannel[200]; /* pVPD:0-5(11), TOFp:0-41, TOFr:0-71(119)... */
+  short tdcChan[200]; /* CAMAC TDC# 0-119(184)... */
+  float Tzero[200]; /* Time offset of each daq channel */
 };
