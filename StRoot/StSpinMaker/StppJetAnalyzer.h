@@ -19,6 +19,7 @@ class StKtCluJetFinder;
 class StConeJetFinder;
 //class AbstractFourVec;
 //class StProtoJet;
+class StMuTrackFourVec;
 class StppEvent;
 class TH1;
 class TFile;
@@ -76,6 +77,7 @@ public:
 
     //action
     virtual void setEvent(StppEvent* e);
+    virtual void setFourVec(StMuTrackFourVec* tracks, int numTracks);
     virtual void print();
     virtual void findJets();
     virtual void fillHists();
@@ -107,10 +109,12 @@ public:
 
 protected:
     bool accept(StMuTrack*);
+    bool accept(StMuTrackFourVec*);
     bool accept(const StProtoJet& pj);
     void acceptJets(void);
     bool acceptJet(StProtoJet &pj);
     void fillLists();
+    void fillLists(StMuTrackFourVec* tracks, int numTracks);
     void bookHists();
     
     //new
