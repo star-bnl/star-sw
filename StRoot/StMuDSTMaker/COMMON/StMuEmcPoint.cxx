@@ -11,7 +11,7 @@ ClassImp(StMuEmcPoint)
 
 StMuEmcPoint::StMuEmcPoint()
 {
-  for(Int_t i=0;i<4;i++) mEmc[i] = new TObjArray();
+  for(Int_t i=0;i<4;i++) mEmc[i] = NULL;
 }
 StMuEmcPoint::StMuEmcPoint(StMuEmcPoint *point)
 {
@@ -25,15 +25,9 @@ StMuEmcPoint::StMuEmcPoint(StMuEmcPoint *point)
   for(Int_t d=0;d<4;d++)
   {
     Int_t EmcDet=d+1;
-    Int_t nc=point->getNClusters(EmcDet);
-    for(Int_t cl=0;cl<nc;cl++) 
-    {
-      StMuEmcCluster *cluster=new StMuEmcCluster(point->getCluster(EmcDet,cl));
-      addCluster(EmcDet,cluster);
-    }
+    setCluster(EmcDet,point->getCluster(EmcDet));
   }
 }
 StMuEmcPoint::~StMuEmcPoint()
 {
-  for(Int_t i=0;i<4;i++) delete mEmc[i];
 }

@@ -22,6 +22,8 @@ class StMuEmcUtil : public TObject
                        ~StMuEmcUtil();
     StMuEmcCollection* getMuEmc(StEmcCollection*);
     StEmcCollection*   getEmc(StMuEmcCollection*);
+    void               fillMuEmc(StMuEmcCollection*,StEmcCollection*);
+    void               fillEmc(StEmcCollection*,StMuEmcCollection*);
               
   ClassDef(StMuEmcUtil,1)
 };
