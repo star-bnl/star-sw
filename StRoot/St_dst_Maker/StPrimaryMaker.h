@@ -5,6 +5,11 @@
 //                                                                      //
 // StPrimaryMaker virtual base class for Maker                          //
 //                                                                      //
+// $Id: StPrimaryMaker.h,v 1.3 1999/07/08 19:09:52 fisyak Exp $
+// $Log: StPrimaryMaker.h,v $
+// Revision 1.3  1999/07/08 19:09:52  fisyak
+// Add tabs, remove St_glb_Maker
+//
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
 #include "StMaker.h"
@@ -24,7 +29,7 @@ class St_srs_activea;
 class St_srs_srspar;
 
 class StPrimaryMaker : public StMaker {
-
+  
  private:
   Int_t            m_flag;       //
   St_evr_privert *m_evr_privert; //!  
@@ -34,7 +39,7 @@ class StPrimaryMaker : public StMaker {
   St_egr_egrpar  *m_egr2_egrpar; //!
   
  protected:
-
+  
   
  public: 
   StPrimaryMaker(const char *name="primary");
@@ -44,5 +49,6 @@ class StPrimaryMaker : public StMaker {
   virtual void   PrintInfo();
   ClassDef(StPrimaryMaker, 1)   //StAF chain virtual base class for Makers
     };
-
+    
 #endif
+    

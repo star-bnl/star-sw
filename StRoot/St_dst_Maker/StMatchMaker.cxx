@@ -2,6 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + est + egr )                               //
 //                                                                      //
+// $Id: StMatchMaker.cxx,v 1.4 1999/07/08 19:09:51 fisyak Exp $
+// $Log: StMatchMaker.cxx,v $
+// Revision 1.4  1999/07/08 19:09:51  fisyak
+// Add tabs, remove St_glb_Maker
+//
 //////////////////////////////////////////////////////////////////////////
 
 #include <iostream.h>
@@ -98,7 +103,7 @@ Int_t StMatchMaker::Init(){
   m_svt_geom       = (St_svg_geom    *) svtpars("svgpars/geom");
   m_srs_activea    = (St_srs_activea *) svtpars("srspars/srs_activea");
   m_srspar         = (St_srs_srspar  *) svtpars("srspars/srs_srspar");
-
+  
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -110,14 +115,14 @@ Int_t StMatchMaker::Make(){
   
   St_dst_track     *globtrk     = new St_dst_track("globtrk",20000);  
   AddData(globtrk);
-
+  
   St_dst_track_aux *globtrk_aux = new St_dst_track_aux("globtrk_aux",20000);
   AddData(globtrk_aux);
-
+  
   St_dst_vertex *vertex = new St_dst_vertex("vertex",1); 
   AddGarb(vertex);   
   
-St_DataSet    *tpctracks = GetInputDS("tpc_tracks");
+  St_DataSet    *tpctracks = GetInputDS("tpc_tracks");
   St_tpt_track  *tptrack   = 0;
   St_tte_eval   *evaltrk   = 0;
   St_tte_mctrk  *mctrk     = 0;
@@ -179,7 +184,7 @@ St_DataSet    *tpctracks = GetInputDS("tpc_tracks");
     ctb_cor = (St_ctu_cor *)ctf->Find("ctb_cor"); 
     if (! ctb_cor) {ctb_cor = new St_ctu_cor("ctb_cor",1); AddGarb(ctb_cor);}
   }
-
+  
   St_svm_evt_match *evt_match  = new St_svm_evt_match("evt_match",3000);    AddData(evt_match);
   
   if (tptrack && svtracks) {
@@ -223,7 +228,7 @@ St_DataSet    *tpctracks = GetInputDS("tpc_tracks");
     if (iRes !=kSTAFCV_OK) iMake = kStWarn;
 #endif
   }
-
+  
   
   // egr
   
@@ -235,17 +240,17 @@ St_DataSet    *tpctracks = GetInputDS("tpc_tracks");
   if (iRes !=kSTAFCV_OK) iMake = kStWarn;
   if (iRes !=kSTAFCV_OK) {cout << "Problem on return from EGR_FITTER" << endl;}
   if(Debug()) cout << " finished calling egr_fitter" << endl;
-
+  
   return iMake;
 }
 
 //_____________________________________________________________________________
 void StMatchMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StMatchMaker.cxx,v 1.3 1999/07/08 18:40:30 fisyak Exp $\n");
+  printf("* $Id: StMatchMaker.cxx,v 1.4 1999/07/08 19:09:51 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
-
+  
 }
 

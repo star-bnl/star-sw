@@ -1,7 +1,12 @@
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// StPrimaryMaker class ( est + evr + egr )                               //
+// StPrimaryMaker class ( est + evr + egr )                             //
 //                                                                      //
+// $Id: StPrimaryMaker.cxx,v 1.3 1999/07/08 19:09:52 fisyak Exp $
+// $Log: StPrimaryMaker.cxx,v $
+// Revision 1.3  1999/07/08 19:09:52  fisyak
+// Add tabs, remove St_glb_Maker
+//
 //////////////////////////////////////////////////////////////////////////
 
 #include <iostream.h>
@@ -40,7 +45,7 @@ Int_t StPrimaryMaker::Init(){
   St_DataSet *globalParams = GetInputDB("params/global");
   assert (globalParams);
   St_DataSetIter params(globalParams);
-
+  
   //egr 
   m_egr_egrpar = (St_egr_egrpar *) params("egrpars/egr_egrpar");  
   if( !m_egr_egrpar ) {
@@ -107,8 +112,8 @@ Int_t StPrimaryMaker::Make(){
   St_dst_track_aux *primtrk_aux = 0;   
   St_dst_vertex *vertex = new St_dst_vertex("vertex",1); 
   AddData(vertex);   
-
-
+  
+  
   St_DataSet    *tpctracks = GetInputDS("tpc_tracks");
   St_tpt_track  *tptrack   = 0;
   St_tte_eval   *evaltrk   = 0;
@@ -130,7 +135,7 @@ Int_t StPrimaryMaker::Make(){
   St_stk_track   *stk_track   = 0;
   St_sgr_groups  *groups      = 0;
   St_scs_spt     *scs_spt     = 0;
-
+  
   // Case svt tracking performed
   if (svtracks) {
     stk_track = (St_stk_track  *) svtracks->Find("stk_track");
@@ -227,10 +232,10 @@ Int_t StPrimaryMaker::Make(){
 //_____________________________________________________________________________
 void StPrimaryMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StPrimaryMaker.cxx,v 1.2 1999/07/01 17:30:46 fisyak Exp $\n");
+  printf("* $Id: StPrimaryMaker.cxx,v 1.3 1999/07/08 19:09:52 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
-
+  
 }
 
