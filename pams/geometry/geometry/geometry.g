@@ -1,5 +1,11 @@
-* $Id: geometry.g,v 1.96 2004/10/28 22:05:53 potekhin Exp $
+* $Id: geometry.g,v 1.97 2004/11/02 19:00:55 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.97  2004/11/02 19:00:55  potekhin
+* Added the Y2005 tag which we need for testing and
+* for general consistency. It will be subject to possible
+* changes, and for the time being is same as the latest
+* cut of the year 2004 (Y2004B).
+*
 * Revision 1.96  2004/10/28 22:05:53  potekhin
 * Changed the coding convention for the SSD geometry
 * "levels", which specify which file to load.
@@ -1131,7 +1137,7 @@ If LL>1
                 }
 
 ****************************************************************************************
-  on Y2005X    { first cut if full CALB 2005 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD_FTRO;
+  on Y2005X    { first cut of full CALB 2005 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD_FTRO;
                   "svt: 3 layers ";
                      nsi=6  " 3 bi-plane layers, nsi<=7 ";
                      wfr=0  " numbering is in the code   ";
@@ -1150,6 +1156,68 @@ If LL>1
                   "calb" 
                      ems=on ;
                      nmod={60,60}; shift={75,105}; " 60 sectors on both sides" 
+
+                  "ecal"
+                     ecal_config=1   " one ecal patch, west "
+                     ecal_fill=3     " all sectors filled "
+
+                  "beam-beam counter "
+                     bbcm=on
+
+                  "forward pion detector "
+                     fpdm=on
+                     FpdmConfig  = 1 "switch to a different lead glass source code"
+
+                  "pseudo Vertex Position Detector"
+                     vpdd=on;
+                     VpddConfig=4;
+
+                  "field version "
+                     Mf=4;      "tabulated field, with correction "
+
+                  "geometry correction "
+                     CorrNum = 3;
+
+                  "Photon Multiplicity Detector Version "
+                     phmd=on;
+                     PhmdConfig = 2;
+
+                  "Silicon Strip Detector Version "
+                     sisd=on;
+                     SisdConfig = 22;
+
+
+                  "FTPC Readout barrel "
+                     ftro=on;
+                     FtroConfig = 1;
+
+                }
+
+
+****************************************************************************************
+  on Y2005    { first cut of 2005 geometry: TPC+CTB+FTPC+CaloPatch2+SVT3+BBC+FPD+ECAL+PHMD_FTRO;
+                  "svt: 3 layers ";
+                     nsi=6  " 3 bi-plane layers, nsi<=7 ";
+                     wfr=0  " numbering is in the code   ";
+                     wdm=0  " width is in the code      ";
+
+                  "tpc: standard, i.e.  "
+                     mwc=on " Wultiwire chambers are read-out ";
+                     pse=on " inner sector has pseudo padrows ";
+
+                  "ctb: central trigger barrer             ";
+                     Itof=2 " call btofgeo2 ";
+* note the upgrade with respect to previous years:
+                     BtofConfig=7;
+
+                  "calb" 
+                     ems=on
+                     CalbConfig = 1
+* remember that with this config, the following parameters have
+* a different meaning because we have to (unfortunately) switch
+* from divisions to copies and introduce a map, which DOES
+* control the configuration
+                     nmod={60,60}; shift={75,105}; " 60 sectors West plus 30 East split between 2 halves"
 
                   "ecal"
                      ecal_config=1   " one ecal patch, west "
