@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.hh,v 1.3 1999/09/01 19:04:54 lisa Exp $
+ * $Id: StHbtParticle.hh,v 1.4 1999/09/17 22:38:02 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.hh,v $
+ * Revision 1.4  1999/09/17 22:38:02  lisa
+ * first full integration of V0s into StHbt framework
+ *
  * Revision 1.3  1999/09/01 19:04:54  lisa
  * update Particle class AND add parity cf and Randys Coulomb correction
  *
@@ -30,12 +33,14 @@
 
 #include "StHbtMaker/Infrastructure/StHbtTypes.hh"
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
+#include "StHbtMaker/Infrastructure/StHbtV0.hh"
 #include "StPhysicalHelixD.hh"
 
 class StHbtParticle{
 public:
   StHbtParticle();
-  StHbtParticle(const StHbtTrack* hbtTrack, const double& mass);
+  StHbtParticle(const StHbtTrack* const hbtTrack, const double& mass);
+  StHbtParticle(const StHbtV0* const hbtV0, const double& mass);
   ~StHbtParticle();
 
   StHbtLorentzVector FourMomentum() const;

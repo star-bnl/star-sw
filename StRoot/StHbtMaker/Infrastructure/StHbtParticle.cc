@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.4 1999/09/01 19:04:53 lisa Exp $
+ * $Id: StHbtParticle.cc,v 1.5 1999/09/17 22:38:02 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
+ * Revision 1.5  1999/09/17 22:38:02  lisa
+ * first full integration of V0s into StHbt framework
+ *
  * Revision 1.4  1999/09/01 19:04:53  lisa
  * update Particle class AND add parity cf and Randys Coulomb correction
  *
@@ -39,7 +42,7 @@ StHbtParticle::~StHbtParticle(){
   /* no-op */
 }
 //_____________________
-StHbtParticle::StHbtParticle(const StHbtTrack* hbtTrack,const double& mass){
+StHbtParticle::StHbtParticle(const StHbtTrack* const hbtTrack,const double& mass){
   // I know there is a better way to do this...
   StHbtThreeVector temp = hbtTrack->P();
   mFourMomentum.setVect(temp);
@@ -47,5 +50,15 @@ StHbtParticle::StHbtParticle(const StHbtTrack* hbtTrack,const double& mass){
   mFourMomentum.setE(ener);
 
   mHelix = hbtTrack->Helix();
+}
+//_____________________
+StHbtParticle::StHbtParticle(const StHbtV0* const hbtV0,const double& mass){
+  // I know there is a better way to do this...
+  StHbtThreeVector temp = hbtV0->momV0();
+  mFourMomentum.setVect(temp);
+  double ener = sqrt(temp.mag2()+mass*mass);
+  mFourMomentum.setE(ener);
+
+  //  mHelix = hbtTrack->Helix(); ?? what to do with mHelix for a Particle coming from a V0?
 }
 //_____________________

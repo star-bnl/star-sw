@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtManager.cxx,v 1.9 1999/09/08 04:15:52 lisa Exp $
+ * $Id: StHbtManager.cxx,v 1.10 1999/09/17 22:38:02 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtManager.cxx,v $
+ * Revision 1.10  1999/09/17 22:38:02  lisa
+ * first full integration of V0s into StHbt framework
+ *
  * Revision 1.9  1999/09/08 04:15:52  lisa
  * persistent microDST implementation tweaked to please fickle solaris details
  *
@@ -44,9 +47,59 @@
 
 #include "StHbtMaker/Infrastructure/StHbtManager.h"
 #include "StHbtMaker/Infrastructure/StHbtParticleCollection.hh"
+#include "StHbtMaker/Base/StHbtTrackCut.hh"
+#include "StHbtMaker/Base/StHbtV0Cut.hh"
 #include <cstdio>
 
 ClassImp(StHbtManager)
+
+
+// this little function used to apply ParticleCuts (TrackCuts or V0Cuts) and fill ParticleCollections of picoEvent
+//  it is called from StHbtManager::ProcessEvent()
+void FillHbtParticleCollection(StHbtParticleCut*         partCut,
+			       StHbtEvent*               hbtEvent,
+			       StHbtParticleCollection*  partCollection)
+{
+  switch (partCut->Type()) {
+  case hbtTrack:       // cut is cutting on Tracks
+    {
+      StHbtTrackCut* pCut = (StHbtTrackCut*) partCut;
+      StHbtTrack* pParticle;
+      StHbtTrackIterator pIter;
+      StHbtTrackIterator startLoop = hbtEvent->TrackCollection()->begin();
+      StHbtTrackIterator endLoop   = hbtEvent->TrackCollection()->end();
+      for (pIter=startLoop;pIter!=endLoop;pIter++){
+	pParticle = *pIter;    
+	if (pCut->Pass(pParticle)){
+	  StHbtParticle* particle = new StHbtParticle(pParticle,pCut->Mass());
+	  partCollection->push_back(particle);
+	}
+      }
+      break;
+    }
+  case hbtV0:          // cut is cutting on V0s
+    {
+      StHbtV0Cut* pCut = (StHbtV0Cut*) partCut;
+      StHbtV0* pParticle;
+      StHbtV0Iterator pIter;
+      StHbtV0Iterator startLoop = hbtEvent->V0Collection()->begin();
+      StHbtV0Iterator endLoop   = hbtEvent->V0Collection()->end();
+      // this following "for" loop is identical to the one above, but because of scoping, I can's see how to avoid repitition...
+      for (pIter=startLoop;pIter!=endLoop;pIter++){
+	pParticle = *pIter;    
+	if (pCut->Pass(pParticle)){
+	  StHbtParticle* particle = new StHbtParticle(pParticle,partCut->Mass());
+	  partCollection->push_back(particle);
+	}
+      }
+      break;
+    }
+  default:
+    cout << "FillHbtParticleCollection function (in StHbtManager.cxx) - undefined Particle Cut type!!! \n";
+  }
+}
+
+
 
 //____________________________
 StHbtManager::StHbtManager(){
@@ -144,30 +197,9 @@ int StHbtManager::ProcessEvent(){
 	currentHbtEvent->TrackCollection()->size() << " tracks in TrackCollection" << endl;
       // OK, analysis likes the event-- build a pico event from it, using tracks the analysis likes...
       StHbtPicoEvent* picoEvent = new StHbtPicoEvent;       // this is what we will make pairs from and put in Mixing Buffer
-      StHbtTrackIterator TrkIter;
-      StHbtTrack* currentTrk;
-      if (currentAnalysis->AnalyzeIdenticalParticles()){
-	for (TrkIter=currentHbtEvent->TrackCollection()->begin();TrkIter!=currentHbtEvent->TrackCollection()->end();TrkIter++){
-	  currentTrk = *TrkIter;
-	  if (currentAnalysis->FirstParticleCut()->Pass(currentTrk)){
-	    StHbtParticle* particle = new StHbtParticle(currentTrk,currentAnalysis->FirstParticleCut()->Mass());
-	    picoEvent->FirstParticleCollection()->push_back(particle);
-	  }
-	}
-      }
-      else{      // non-identical particles...
-	for (TrkIter=currentHbtEvent->TrackCollection()->begin();TrkIter!=currentHbtEvent->TrackCollection()->end();TrkIter++){
-	  currentTrk = *TrkIter;
-	  if (currentAnalysis->FirstParticleCut()->Pass(currentTrk)){
-	    StHbtParticle* particle = new StHbtParticle(currentTrk,currentAnalysis->FirstParticleCut()->Mass());
-	    picoEvent->FirstParticleCollection()->push_back(particle);
-	  }
-	  if (currentAnalysis->SecondParticleCut()->Pass(currentTrk)){
-	    StHbtParticle* particle = new StHbtParticle(currentTrk,currentAnalysis->SecondParticleCut()->Mass());
-	    picoEvent->SecondParticleCollection()->push_back(particle);
-	  }
-	}
-      }
+      FillHbtParticleCollection(currentAnalysis->FirstParticleCut(),currentHbtEvent,picoEvent->FirstParticleCollection());
+      if ( !(currentAnalysis->AnalyzeIdenticalParticles()) )
+	FillHbtParticleCollection(currentAnalysis->SecondParticleCut(),currentHbtEvent,picoEvent->SecondParticleCollection());
       cout <<"StHbtManager::ProcessEvent - #particles in First, Second Collections: " <<
 	picoEvent->FirstParticleCollection()->size() << " " <<
 	picoEvent->SecondParticleCollection()->size() << endl;
@@ -203,7 +235,6 @@ int StHbtManager::ProcessEvent(){
 	ThePair->SetTrack1(*PartIter1);
 	for (PartIter2 = StartInnerLoop; PartIter2!=EndInnerLoop;PartIter2++){
 	  ThePair->SetTrack2(*PartIter2);
-	  //	  OBSOLETE StHbtPair* pair = new StHbtPair(*PartIter1,*PartIter2);
 	  if (currentAnalysis->PairCut()->Pass(ThePair)){
 	    for (CorrFctnIter=currentAnalysis->CorrFctnCollection()->begin();
 		 CorrFctnIter!=currentAnalysis->CorrFctnCollection()->end();CorrFctnIter++){
@@ -211,7 +242,6 @@ int StHbtManager::ProcessEvent(){
 	      CorrFctn->AddRealPair(ThePair);
 	    }
 	  }  // if passed pair cut
-	  // OBSOLETE	  delete pair;
 	}    // loop over second particle
       }      // loop over first particle
       
@@ -242,7 +272,6 @@ int StHbtManager::ProcessEvent(){
 	  for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
 	    ThePair->SetTrack1(*PartIter1);
 	    for (PartIter2=StartInnerLoop;PartIter2!=EndInnerLoop;PartIter2++){
-	      // OBSOLETE	      StHbtPair* pair = new StHbtPair(*PartIter1,*PartIter2);
 	      ThePair->SetTrack2(*PartIter2);
 	      // testing...	      cout << "ThePair defined... going to pair cut... ";
 	      if (currentAnalysis->PairCut()->Pass(ThePair)){
@@ -254,7 +283,6 @@ int StHbtManager::ProcessEvent(){
 		  // testing...cout << " ThePair has been added to MixedPair method " << endl;
 		}
 	      }  // if passed pair cut
-	      // OBSOLETE	      delete pair;
 	    }    // loop over second particle
 	  }      // loop over first particle
 	}        // loop over pico-events stored in Mixing buffer

@@ -1,9 +1,25 @@
 
 // for each little section here, do your own "ifndef....endif"
+// the reason for that is because this file may be processed more
+// than once (by cint "preprocessor" and by C++ preprocessor)
+
+
+/*------------------------------
+ * Enumerations                */
+#ifndef HBT_Enumarations
+#define HBT_Enumarations
+#ifdef __CINT__
+#pragma link C++ enum StHbtParticleType;
+#endif
+enum StHbtParticleType {hbtUndefined, hbtTrack, hbtV0};
+#endif
 
 /*------------------------------------
  * Histograms
  */
+#ifndef StHbt_Histos
+#define StHbt_Histos
+
 #ifndef ROOT_TH1
 #include "TH1.h"
 #endif
@@ -18,7 +34,7 @@ typedef TH1D StHbt1DHisto;
 typedef TH2D StHbt2DHisto;
 typedef TH3D StHbt3DHisto;
 
-
+#endif
 
 
 /*----------------------------------------------------------------

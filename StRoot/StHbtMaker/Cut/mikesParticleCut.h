@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mikesParticleCut.h,v 1.2 1999/07/06 22:33:21 lisa Exp $
+ * $Id: mikesParticleCut.h,v 1.3 1999/09/17 22:38:01 lisa Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: mikesParticleCut.h,v $
+ * Revision 1.3  1999/09/17 22:38:01  lisa
+ * first full integration of V0s into StHbt framework
+ *
  * Revision 1.2  1999/07/06 22:33:21  lisa
  * Adjusted all to work in pro and new - dev itself is broken
  *
@@ -26,9 +29,9 @@
 #include "StMaker.h"
 #endif
 
-#include "StHbtMaker/Base/StHbtParticleCut.hh"
+#include "StHbtMaker/Base/StHbtTrackCut.hh"
 
-class mikesParticleCut : public StHbtParticleCut {
+class mikesParticleCut : public StHbtTrackCut {
 
 public:
 
