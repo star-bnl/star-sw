@@ -12,17 +12,19 @@ use Sys::Hostname;
 
 my $hostname     = hostname();
 my @dir_log      = (
-                    "/star/rcf/data06/reco/embedding_alamhipt/P00hg/log/daq",
-                    "/star/rcf/data06/reco/embedding_alamlopt/P00hg/log/daq",
-                    "/star/rcf/data06/reco/embedding_lamhipt/P00hg/log/daq",
-                    "/star/rcf/data06/reco/embedding_lamlopt/P00hg/log/daq",
+#                    "/star/rcf/data06/reco/embedding_alamhipt/P00hg/log/daq",
+#                    "/star/rcf/data06/reco/embedding_alamlopt/P00hg/log/daq",
+#                    "/star/rcf/data06/reco/embedding_lamhipt/P00hg/log/daq",
+#                    "/star/rcf/data06/reco/embedding_lamlopt/P00hg/log/daq",
+                    "/star/rcf/data07/reco/embedding_pbar/P00hg/log/daq",
 );
 
 my @dir_sum      = (
-                     "/star/rcf/data06/reco/embedding_alamhipt/P00hg/sum/daq",
-                     "/star/rcf/data06/reco/embedding_alamlopt/P00hg/sum/daq",
-                     "/star/rcf/data06/reco/embedding_lamhipt/P00hg/sum/daq",
-                     "/star/rcf/data06/reco/embedding_lamlopt/P00hg/sum/daq",
+#                     "/star/rcf/data06/reco/embedding_alamhipt/P00hg/sum/daq",
+#                     "/star/rcf/data06/reco/embedding_alamlopt/P00hg/sum/daq",
+#                     "/star/rcf/data06/reco/embedding_lamhipt/P00hg/sum/daq",
+#                     "/star/rcf/data06/reco/embedding_lamlopt/P00hg/sum/daq",
+                     "/star/rcf/data07/reco/embedding_pbar/P00hg/sum/daq",
 );   
 my @set ;
 my @list;
@@ -90,6 +92,7 @@ foreach my $logFile (@list) {
               $file_sum =~ s/.log//g;
               $file_sum = $file_sum . ".sum";
         chdir $dir_sum[$ii];
+
         if(-f $file_sum ) {
              my $stime = `mod_time $file_sum`;
         if( $ltime < $stime) {

@@ -24,7 +24,7 @@ my $DISK1 = "/star/rcf/disk00001/star";
 
 my @DISKR = (
               "/star/rcf/data03/reco",
-              "/star/rcf/disk00001/star/reco",
+#              "/star/rcf/disk00001/star/reco",
 #              "/star/rcf/data09/reco",
 #              "/star/rcf/data10/reco",
 #              "/star/rcf/data05/reco",

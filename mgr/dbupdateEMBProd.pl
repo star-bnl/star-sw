@@ -27,8 +27,8 @@ my @DISKR = (
 #              "/star/rcf/data09/reco",
 #              "/star/rcf/data10/reco",
 #              "/star/rcf/data05/reco",
-#              "/star/rcf/data07/reco",
-              "/star/rcf/data06/reco",
+              "/star/rcf/data07/reco",
+#              "/star/rcf/data06/reco",
 ); 
 
 my $prodSr = "P00hg";
@@ -51,10 +51,11 @@ my @SetS = (
 );
 
 my @EmSet = (
-              "embedding_alamhipt", 
-              "embedding_alamlopt",
-              "embedding_lamhipt",
-              "embedding_lamlopt",
+#              "embedding_alamhipt", 
+#              "embedding_alamlopt",
+#              "embedding_lamhipt",
+#              "embedding_lamlopt",
+              "embedding_pbar",
 );
               
 
@@ -525,7 +526,6 @@ my $embType;
   $embType = $epart[5];
   }
 
-  print "Embedding Type :", $embType, "\n";
 
  if($mfName =~ /root/) {
     $mformat = "root";
@@ -819,7 +819,7 @@ sub fillDbTable {
   
     $sql="update $FileCatalogT set ";   
     $sql.="dataset='$mdataset'";
-    $sql.=" WHERE runID = '$mrunID' AND path like '%embedding_%'"; 
+    $sql.=" WHERE runID = '$mrunID' AND path like '%embedding_pbar%'"; 
     print "$sql\n" if $debugOn;
     $rv = $dbh->do($sql) || die $dbh->errstr;
   
