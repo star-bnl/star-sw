@@ -1,9 +1,18 @@
 //
-// $Id: TestEvalIT.C,v 1.2 2002/06/04 18:13:26 andrewar Exp $
+// $Id: TestEvalIT.C,v 1.3 2002/06/05 20:45:27 calderon Exp $
 //
 //
 // $Log: TestEvalIT.C,v $
+// Revision 1.3  2002/06/05 20:45:27  calderon
+// -Make sure that StMcEventMaker and StAssociationMaker are loaded, the last
+// commit had these commented out for some reason (?)
+// -Remove any extraneous reference to the (private code) StItTestMaker to
+// avoid confusion.
+// -Make sure all branches are deactivated in the IO maker first, then turn
+// on only the ones we need, event, geant, etc.
+//
 // Revision 1.2  2002/06/04 18:13:26  andrewar
+//
 // ----------------------------------------------------------------------
 //
 // Committing in StRoot/StiMaker/macros
@@ -136,10 +145,9 @@ void TestEvalIT(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, co
     gSystem->Load("StSvtClusterMaker");
 
     //cout <<"Loading StMcEventMaker"<<endl;
-    //gSystem->Load("StMcEventMaker");
-
+    gSystem->Load("StMcEventMaker");
     //cout <<"Loading AssociationMaker"<<endl;
-    //gSystem->Load("StAssociationMaker");
+    gSystem->Load("StAssociationMaker");
 
     cout <<"Loading Sti"<<endl;
     gSystem->Load("Sti");
@@ -156,9 +164,6 @@ void TestEvalIT(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, co
     
     cout <<"Loading StiMaker"<<endl;
     gSystem->Load("StiMaker");
-
-    cout <<"Loading StItTestMaker"<<endl;
-    gSystem->Load("StItTestMaker");
 
     cout <<"Loading StMiniMcEvent"<<endl;
     gSystem->Load("StMiniMcEvent");
@@ -193,7 +198,7 @@ void TestEvalIT(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, co
     }
 
     StIOMaker *IOMk = new StIOMaker("IO","r",setFiles); //StMiniMcMaker wants this name
-    //IOMk->SetBranch("*",0,"0");	//deactivate all branches
+    IOMk->SetBranch("*",0,"0");	//deactivate all branches
     //IOMk->SetBranch("dstBranch",0,"r");
     //IOMk->SetBranch("runcoBranch",0,"r");
     IOMk->SetBranch("eventBranch",0,"r");
@@ -394,12 +399,10 @@ void TestEvalIT(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, co
 	assocMakerIt->SetDebug();
     }
 
-    //StItTestMaker* ittest = new StItTestMaker();
-    
     StMiniMcMaker* minimcMaker = new StMiniMcMaker;
     minimcMaker->setDebug();
     minimcMaker->setOutDir(".");
-    minimcMaker->setFileName("testEval.root");
+    minimcMaker->setFileName("EvalItTest.root");
     
     /*
       dbaseMk->Init();
