@@ -1,5 +1,12 @@
-// $Id: StFtpcClusterMaker.cxx,v 1.21 2001/04/04 17:08:42 jcs Exp $
+// $Id: StFtpcClusterMaker.cxx,v 1.22 2001/04/23 19:57:51 oldi Exp $
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.22  2001/04/23 19:57:51  oldi
+// The chargestep histogram is only filled but the evaluated value of the
+// normalized pressure is not used for a correction. This was done due to the
+// fact that StFtpcChargeStep is not stable enough to determine the actual
+// charge step.
+// Output is sent to StMessMgr now.
+//
 // Revision 1.21  2001/04/04 17:08:42  jcs
 // remove references to StFtpcParamReader from StFtpcDbReader
 //
@@ -186,7 +193,7 @@ Int_t StFtpcClusterMaker::Make()
   daqDataset=GetDataSet("StDaqReader");
   if(daqDataset)
     {
-      cout << "Using StDAQReader to get StFTPCReader" << endl;
+      gMessMgr->Message("", "I", "OST") << "Using StDAQReader to get StFTPCReader" << endm;
       assert(daqDataset);
       daqReader=(StDAQReader *)(daqDataset->GetObject());
       assert(daqReader);
@@ -232,13 +239,13 @@ Int_t StFtpcClusterMaker::Make()
 				  (char *) fcl_ftpcadc->GetTable(),
 				  fcl_ftpcadc->GetNRows());
 
-      cout << "created StFTPCReader from tables" << endl;
+      gMessMgr->Message("", "I", "OST") << "created StFTPCReader from tables" << endm;
     }
     else {
       
-      cout <<"StFtpcClusterMaker: Tables are not found:" 
-	   << " fcl_ftpcsqndx = " << fcl_ftpcsqndx 
-	   << " fcl_ftpcadc   = " << fcl_ftpcadc << endl;
+      gMessMgr->Message("", "I", "OST") <<"StFtpcClusterMaker: Tables are not found:" 
+					<< " fcl_ftpcsqndx = " << fcl_ftpcsqndx 
+					<< " fcl_ftpcadc   = " << fcl_ftpcadc << endm;
     }
   }
 
@@ -248,11 +255,11 @@ Int_t StFtpcClusterMaker::Make()
 						  paramReader, 
                                                   dbReader);
     // uncomment to recalculate normalized pressure from charge step:
-    step->histogram(1);
+    // step->histogram(1); // This can give wrong values if the decline of the charge step is too steep!
     // uncomment to fill charge step histogram only:
-    //      step->histogram(0);
+    step->histogram(0);
     
-    if(Debug()) cout<<"start running StFtpcClusterFinder"<<endl;
+    if(Debug()) gMessMgr->Message("", "I", "OST") << "start running StFtpcClusterFinder" << endm;
     
     StFtpcClusterFinder *fcl = new StFtpcClusterFinder(ftpcReader, 
 						       paramReader, 
@@ -282,14 +289,14 @@ Int_t StFtpcClusterMaker::Make()
 							     g2t_track,
 							     g2t_ftp_hit);
 
-      if(Debug()) cout<<"NO RAW DATA AVAILABLE - start running StFtpcFastSimu"<<endl;
+      if(Debug()) gMessMgr->Message("", "I", "OST") << "NO RAW DATA AVAILABLE - start running StFtpcFastSimu" << endm;
       
       StFtpcFastSimu *ffs = new StFtpcFastSimu(geantReader,
 					       paramReader,
                                                dbReader,
 					       hitarray,
 					       ghitarray);
-      if(Debug())cout<<"finished running StFtpcFastSimu"<<endl;
+      if(Debug()) gMessMgr->Message("", "I" "OST") << "finished running StFtpcFastSimu" << endm;
       delete ffs;
       delete geantReader;
     }
