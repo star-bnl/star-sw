@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.36 2003/10/08 21:17:15 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.38 2003/10/15 17:34:16 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -915,6 +915,16 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.38  2003/10/15 17:34:16  laue
+ * StMuDstMaker:  Reading fixed. Delete() changed back to Clear()
+ * StMuEmcCollection: Re-implemented the DeleteThis() function,
+ *                    This hoopefully fixed the memory leak when
+ *                    writing MuDst again.
+ * StMuTimer: ClassDef/ClassImp
+ *
+ * Revision 1.37  2003/10/12 03:43:56  perev
+ * LeakOff TClonesArray::Clear replaced to Delete
+ *
  * Revision 1.36  2003/10/08 21:17:15  laue
  * StMuEmcUtil updates from Alex Suaide
  * StMuDst and StMuDstMaker fixes to take the double inheritance of the

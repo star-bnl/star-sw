@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.hh,v 1.25 2003/06/11 11:10:15 jcs Exp $
+// $Id: StFtpcParamReader.hh,v 1.26 2003/10/10 12:37:14 jcs Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.26  2003/10/10 12:37:14  jcs
+// remove parameters used to calculate the FTPC geant volume id using the obsolete method
+//
 // Revision 1.25  2003/06/11 11:10:15  jcs
 // remove inner cathode and cluster geometry parameters from ftpcClusterPars
 //
@@ -135,8 +138,6 @@ protected:
   Float_t *mSigmaAzimuthalEstimates;
   Float_t *mErrorRadialEstimates;
   Float_t *mErrorAzimuthalEstimates;
-  Int_t mFtpcWestGeantVolumeId;
-  Int_t mFtpcEastGeantVolumeId;
   Int_t mUnfoldedClusterFlag;
   Int_t mBadShapeClusterFlag;
   Int_t mMergedClusterFlag;
@@ -231,8 +232,6 @@ public:
   Float_t threePadWeightedError() {return m3PadWeightedError;}
   Float_t threePadGaussError() {return m3PadGaussError;}
   Float_t zDirectionError() {return mZDirectionError;}
-  Int_t ftpcWestGeantVolumeId() {return mFtpcWestGeantVolumeId;}
-  Int_t ftpcEastGeantVolumeId() {return mFtpcEastGeantVolumeId;}
   Int_t unfoldedClusterFlag() {return mUnfoldedClusterFlag;}
   Int_t badShapeClusterFlag() {return mBadShapeClusterFlag;}
   Int_t mergedClusterFlag() {return mMergedClusterFlag;}

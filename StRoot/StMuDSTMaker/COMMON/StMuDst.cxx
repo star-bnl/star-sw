@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.15 2003/08/04 14:38:10 laue Exp $
+ * $Id: StMuDst.cxx,v 1.16 2003/10/14 14:35:53 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -146,8 +146,9 @@ StEvent* StMuDst::createStEvent() {
   StTimer timer;
   timer.start();
 
-  StEvent* ev = new StEvent();
   StMuEvent* mu = event(); 
+  if(!mu) return NULL;
+  StEvent* ev = new StEvent();
 
   ev->setInfo( new StEventInfo(mu->eventInfo()) );
   ev->setRunInfo( new StRunInfo(mu->runInfo()) );
@@ -175,7 +176,7 @@ StEvent* StMuDst::createStEvent() {
   for (int i=0; i<StMuArrays::arraySizes[muGlobal]; i++) nodes[i]=0;   // there must be an better way
   // add global tracks to tracknodes
   int nGlobals = arrays[muGlobal]->GetEntries();
-  for (int i=0; i<nGlobals; i++) {
+  for (int i=0; i<nGlobals; i++) if(globalTracks(i)) {
     int id = globalTracks(i)->id();
     if (nodes[id]==0) nodes[id] = new StTrackNode();
     nodes[id]->addTrack( createStTrack(globalTracks(i)) );
@@ -183,14 +184,13 @@ StEvent* StMuDst::createStEvent() {
 
   /// add primary tracks to tracknodes and primary vertex
   int nPrimaries = arrays[muPrimary]->GetEntries();
-  for (int i=0; i<nPrimaries; i++) {
+  for (int i=0; i<nPrimaries; i++) if(primaryTracks(i)) {
     int id = primaryTracks(i)->id();
     if (nodes[id]==0) nodes[id] = new StTrackNode();
     StTrack* t = createStTrack(primaryTracks(i));
     nodes[id]->addTrack( t );
     vp->addDaughter( t );
   }
-
 
   /// add all tracknodes to the event
   for (int i=0; i<StMuArrays::arraySizes[muGlobal]; i++) {
@@ -230,8 +230,7 @@ StEvent* StMuDst::createStEvent() {
   triggerId = mu->triggerIdCollection().nominal();
   if ( !StMuTriggerIdCollection::isEmpty( triggerId ) ) triggerIdCollection->setNominal( new StTriggerId( triggerId ) );
   ev->setTriggerIdCollection( triggerIdCollection );
-  
-  
+    
   
   DEBUGVALUE2(timer.elapsedTime());
   return ev;
@@ -277,6 +276,9 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.16  2003/10/14 14:35:53  laue
+ * Alex Suaide EMC updates
+ *
  * Revision 1.15  2003/08/04 14:38:10  laue
  * Alex Suaide's updated for the EMC. Now EEMC is included.
  *

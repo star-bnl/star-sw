@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTimer.h,v 1.2 2003/09/09 18:16:54 laue Exp $
+ * $Id: StMuTimer.h,v 1.3 2003/10/15 17:34:17 laue Exp $
  *
  * Author: Thomas Ullrich, April 1999
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StMuTimer.h,v $
+ * Revision 1.3  2003/10/15 17:34:17  laue
+ * StMuDstMaker:  Reading fixed. Delete() changed back to Clear()
+ * StMuEmcCollection: Re-implemented the DeleteThis() function,
+ *                    This hoopefully fixed the memory leak when
+ *                    writing MuDst again.
+ * StMuTimer: ClassDef/ClassImp
+ *
  * Revision 1.2  2003/09/09 18:16:54  laue
  * StMuIOMaker: embedded documentation added
  * StMuTimer: name of define changed (was same as StTimer)
@@ -43,7 +50,7 @@ private:
     
     static double absoluteTime();
 
-//    ClassDef(StMuTimer,0)
+    ClassDef(StMuTimer,0)
 };
 
 #endif

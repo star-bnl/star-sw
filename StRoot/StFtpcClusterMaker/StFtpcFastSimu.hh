@@ -1,6 +1,11 @@
-// $Id: StFtpcFastSimu.hh,v 1.14 2002/09/16 12:43:22 jcs Exp $
+// $Id: StFtpcFastSimu.hh,v 1.15 2003/10/10 12:36:15 jcs Exp $
 //
 // $Log: StFtpcFastSimu.hh,v $
+// Revision 1.15  2003/10/10 12:36:15  jcs
+// implement new FTPC geant volume id method
+// initialize counters and arrays to zero
+// replace many int,float's wiht Int_t,Float_t
+//
 // Revision 1.14  2002/09/16 12:43:22  jcs
 // replace large statically dimensioned arrays with dynamically dimensioned arrays
 //
@@ -71,24 +76,30 @@ class StFtpcFastSimu
   StFtpcGeantReader *mGeant;
   StFtpcReducedPoint *mPoint;
   StFtpcGeantPoint *mGeantPoint;
-  int nPoints;
-  int nPadrows;
-  int * nrowmax;
-  int * nrow;
 
-  float Va;
-  float Vhm[4];
-  float Tbm[4];
-  float s_rad[4];
-  float s_azi[4];
-  float err_rad[4];
-  float err_azi[4];
-  float ri;
-  float ra;
-  float phimin;
-  float phisec;
-  float sector_phi_min;
-  float sector_phi_max;
+  Char_t mStart;  //  start of simple variables
+  
+  Int_t nPoints;
+  Int_t nPadrows;
+  Int_t * nrowmax;
+  Int_t * nrow;
+
+  Float_t Va;
+  Float_t Vhm[4];
+  Float_t Tbm[4];
+  Float_t s_rad[4];
+  Float_t s_azi[4];
+  Float_t err_rad[4];
+  Float_t err_azi[4];
+  Float_t ri;
+  Float_t ra;
+  Float_t phimin;
+  Float_t phisec;
+  Float_t sector_phi_min;
+  Float_t sector_phi_max;
+
+  Char_t mEnd; //End of simple variables
+
   double myModulo(double x1, double x2)
     {
       return x1-(double)(int)(x1/x2)*x2;

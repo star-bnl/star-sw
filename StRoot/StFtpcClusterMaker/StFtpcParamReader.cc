@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.cc,v 1.25 2003/06/11 11:10:15 jcs Exp $
+// $Id: StFtpcParamReader.cc,v 1.26 2003/10/10 12:37:14 jcs Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.26  2003/10/10 12:37:14  jcs
+// remove parameters used to calculate the FTPC geant volume id using the obsolete method
+//
 // Revision 1.25  2003/06/11 11:10:15  jcs
 // remove inner cathode and cluster geometry parameters from ftpcClusterPars
 //
@@ -136,8 +139,6 @@ StFtpcParamReader::StFtpcParamReader(St_ftpcClusterPars *det,
   // ftpcFastSimPars table exists only once, just copy
   ftpcFastSimPars_st *paramTable = param->GetTable();
   if(paramTable){
-     mFtpcWestGeantVolumeId         = paramTable->ftpcWestGeantVolumeId;
-     mFtpcEastGeantVolumeId         = paramTable->ftpcEastGeantVolumeId; 
      mUnfoldedClusterFlag           = paramTable->unfoldedClusterFlag;
      mBadShapeClusterFlag           = paramTable->badShapeClusterFlag;
      mMergedClusterFlag             = paramTable->mergedClusterFlag;

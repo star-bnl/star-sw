@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapper.cc,v 1.27 2003/10/08 12:48:25 jcs Exp $
+// $Id: StFtpcConfMapper.cc,v 1.28 2003/10/12 04:15:20 perev Exp $
 // $Log: StFtpcConfMapper.cc,v $
+// Revision 1.28  2003/10/12 04:15:20  perev
+// few bugs fixed. division by zero disappeared
+//
 // Revision 1.27  2003/10/08 12:48:25  jcs
 // initialize mNumMainVertexTracks which I overlooked the first time
 //
@@ -1131,11 +1134,18 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
     trackpoint = (StFtpcConfMapPoint *)trackpoints->At(i);
     asin_arg = StFormulary::CheckASinArg((trackpoint->GetYv() - track->GetCenterY()) / track->GetRadius());
  
-    s = TMath::Sqrt(TMath::Power(track->GetRadius() * angle_diff, 2.) 
-		    + TMath::Power(trackpoint->GetZv() , 2.));
-
-    chi2circle += TMath::Power(trackpoint->GetYprime() - a[0]*trackpoint->GetXprime()+a[1], 2.) / (a[0]*trackpoint->GetXprime()+a[1]);    
-    chi2length += TMath::Power(s - a[2]*trackpoint->GetZv()+a[3], 2.) / (a[2]*trackpoint->GetZv()+a[3]);
+//VP    s = TMath::Sqrt(TMath::Power(track->GetRadius() * angle_diff, 2.) 
+//VP		    + TMath::Power(trackpoint->GetZv() , 2.));
+//VP
+//VP    chi2circle += TMath::Power(trackpoint->GetYprime() - a[0]*trackpoint->GetXprime()+a[1], 2.) / (a[0]*trackpoint->GetXprime()+a[1]);    
+//VP    chi2length += TMath::Power(s - a[2]*trackpoint->GetZv()+a[3], 2.) / (a[2]*trackpoint->GetZv()+a[3]);
+     double x = trackpoint->GetXprime();
+     double y = trackpoint->GetYprime();
+     double z = trackpoint->GetZv();
+     double yf = a[0]*x + a[1];
+     double sf = a[2]*z + a[3];
+     chi2circle += TMath::Power((y - yf)/yf,2);
+     chi2length += TMath::Power((s - sf)/sf,2);
   }}
 
 
@@ -1143,7 +1153,8 @@ void StFtpcConfMapper::StraightLineFit(StFtpcTrack *track, Double_t *a, Int_t n)
     n++;
   } 
 
-  a[4] = chi2circle/(n-3.);
+//VP  a[4] = chi2circle/(n-3.);//-3 is wrong. only 2 values were fitted a[0] & a[1]
+  a[4] = chi2circle/(n-2.);  
   a[5] = chi2length/(n-2.);
 
   //track->SetChi2Circle(chi2circle/(n-2.));

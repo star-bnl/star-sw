@@ -290,22 +290,28 @@ void StMuEmcUtil::fillEmc(StEmcCollection* emc,StMuEmcCollection* muEmc)
       if(det==2 || det ==6) //prs
       {
         StMuEmcHit* hit=muEmc->getPrsHit(j,det);
-        rid=hit->getId();
-        if(det==2) mGeo[det-1]->getBin(rid,m,e,s);
-        else getEndcapBin(det,rid,m,e,s);
-        a=hit->getAdc();
-        cal=hit->getCalType();
-        energy=hit->getEnergy();
+        if(hit)
+        {
+          rid=hit->getId();
+          if(det==2) mGeo[det-1]->getBin(rid,m,e,s);
+          else getEndcapBin(det,rid,m,e,s);
+          a=hit->getAdc();
+          cal=hit->getCalType();
+          energy=hit->getEnergy();
+        } else save = kFALSE;
       }
       if(det==3 || det==4 || det==7 || det==8) //smd
       {
         StMuEmcHit* hit=muEmc->getSmdHit(j,det);
-        rid=hit->getId();
-        if(det<5) mGeo[det-1]->getBin(rid,m,e,s);
-        else getEndcapBin(det,rid,m,e,s);
-        a=hit->getAdc();
-        cal=hit->getCalType();
-        energy=hit->getEnergy();
+        if(hit)
+        {
+          rid=hit->getId();
+          if(det<5) mGeo[det-1]->getBin(rid,m,e,s);
+          else getEndcapBin(det,rid,m,e,s);
+          a=hit->getAdc();
+          cal=hit->getCalType();
+          energy=hit->getEnergy();
+        } else save = kFALSE;
       }
       if(save)
       {
@@ -326,54 +332,63 @@ void StMuEmcUtil::fillEmc(StEmcCollection* emc,StMuEmcCollection* muEmc)
       for(Int_t j=0;j<nc;j++)
       {
         StMuEmcCluster* cl=muEmc->getCluster(j,det);
-        StEmcCluster* cluster=new StEmcCluster();
-        Float_t eta=cl->getEta();
-        Float_t seta=cl->getSigmaEta();
-        Float_t phi=cl->getPhi();
-        Float_t sphi=cl->getSigmaPhi();
-        Float_t e=cl->getEnergy();
-        cluster->setEta(eta);
-        cluster->setPhi(phi);
-        cluster->setSigmaEta(seta);
-        cluster->setSigmaPhi(sphi);
-        cluster->setEnergy(e);
-        //cout <<"Number of hits = "<<cl->getNHits()<<endl;
-        for(Int_t k=0;k<cl->getNHits();k++)
+        if(cl)
         {
-          Int_t hid = cl->getHitId(k);
-          //cout <<"hid = "<<cl->getHitId(k)<<endl;
-          Int_t m,e,s,rid;
-          if(det==1 || det==5) // towers
+          StEmcCluster* cluster=new StEmcCluster();
+          Float_t eta=cl->getEta();
+          Float_t seta=cl->getSigmaEta();
+          Float_t phi=cl->getPhi();
+          Float_t sphi=cl->getSigmaPhi();
+          Float_t e=cl->getEnergy();
+          cluster->setEta(eta);
+          cluster->setPhi(phi);
+          cluster->setSigmaEta(seta);
+          cluster->setSigmaPhi(sphi);
+          cluster->setEnergy(e);
+          //cout <<"Number of hits = "<<cl->getNHits()<<endl;
+          for(Int_t k=0;k<cl->getNHits();k++)
           {
-            rid = hid;
-            //cout <<det<<"  hit id = "<<rid<<endl;
-          }          
-          if(det==2 || det==6) //prs
-          {
-            StMuEmcHit *hit=muEmc->getPrsHit(hid,det);
-            rid = hit->getId();
-            //cout <<det<<"  hit id = "<<rid<<endl;
-          }
-          if(det==3||det==4||det==7||det==8)
-          {
-            StMuEmcHit *hit=muEmc->getSmdHit(hid,det);
-            rid = hit->getId();
-          }
-          if(det<5) mGeo[det-1]->getBin(rid,m,e,s);
-          else getEndcapBin(det,rid,m,e,s);
-          StEmcModule *module = detector->module(m);
-          StSPtrVecEmcRawHit& rawhits=module->hits();
-          //cout <<"Cl = "<<j<<"  m = "<<m<<"  e = "<<e<<"  s = "<<s<<"  eta = "<<eta<<"  phi = "<<phi<<"  E = "<<e<<"  nhits = "<<cl->getNHits()<<endl;
-          for(Int_t l=0;l<(Int_t)rawhits.size();l++)
-          {
-            if(rawhits[l])
+            Int_t hid = cl->getHitId(k);
+            //cout <<"hid = "<<cl->getHitId(k)<<endl;
+            Int_t m,e,s,rid=-1;
+            if(det==1 || det==5) // towers
             {
-              if(m==(Int_t)rawhits[l]->module() && e==(Int_t)rawhits[l]->eta() && s==(Int_t)abs(rawhits[l]->sub()))
-                cluster->addHit(rawhits[l]);
+              rid = hid;
+              //cout <<det<<"  hit id = "<<rid<<endl;
+            }        
+            if(det==2 || det==6) //prs
+            {
+              StMuEmcHit *hit=muEmc->getPrsHit(hid,det);
+              if(hit) rid = hit->getId();
+            //cout <<det<<"  hit id = "<<rid<<endl;
+            }
+            if(det==3||det==4||det==7||det==8)
+            {
+              StMuEmcHit *hit=muEmc->getSmdHit(hid,det);
+              if(hit) rid = hit->getId();
+            }
+            if(rid!=-1)
+            {
+              if(det<5) mGeo[det-1]->getBin(rid,m,e,s);
+              else getEndcapBin(det,rid,m,e,s);
+              StEmcModule *module = detector->module(m);
+              if(module)
+              {
+                StSPtrVecEmcRawHit& rawhits=module->hits();
+                //cout <<"Cl = "<<j<<"  m = "<<m<<"  e = "<<e<<"  s = "<<s<<"  eta = "<<eta<<"  phi = "<<phi<<"  E = "<<e<<"  nhits = "<<cl->getNHits()<<endl;
+                for(Int_t l=0;l<(Int_t)rawhits.size();l++)
+                {
+                  if(rawhits[l])
+                  {
+                    if(m==(Int_t)rawhits[l]->module() && e==(Int_t)rawhits[l]->eta() && s==(Int_t)abs(rawhits[l]->sub()))
+                      cluster->addHit(rawhits[l]);
+                  }
+                }
+              }
             }
           }
+          clusters->addCluster(cluster);
         }
-        clusters->addCluster(cluster);
       }
     }
   }
@@ -382,92 +397,114 @@ void StMuEmcUtil::fillEmc(StEmcCollection* emc,StMuEmcCollection* muEmc)
   for(Int_t i=0; i<muEmc->getNPoints();i++)
   {
     StMuEmcPoint *point=muEmc->getPoint(i);
-    Float_t eta=point->getEta();
-    Float_t deta=point->getDeltaEta();
-    Float_t phi=point->getPhi();
-    Float_t dphi=point->getDeltaPhi();
-    Float_t en=point->getEnergy();
-    Float_t chi=point->getChiSquare();
-    Float_t theta=2*atan(exp(-eta));
-    Float_t mag = point->getRadius();
-    if(mag==0) mag = 225.40;
-    //cout <<"Po = "<<i<<" eta = "<<eta<<" phi = "<<phi<<" E = "<<en<<" chi = "<<chi<<endl;
-    Float_t x,y,z;
-    //AAPSUAIDE BUG POINT RADIUS CORRECTED 20030612
-    x = mag*cos(phi);
-    y = mag*sin(phi);
-    z = mag/tan(theta);
-    ///////////////////////////////////////////////
-    StThreeVectorF p(x,y,z);
-    StEmcPoint *pt=new StEmcPoint();
-    pt->setEnergy(en);
-    pt->setChiSquare(chi);
-    pt->setDeltaEta(deta);
-    pt->setDeltaPhi(dphi);
-    pt->setPosition(p);
-    for(Int_t j=0;j<4;j++) // looking for clusters
+    if(point)
     {
-      Int_t det = j+1;
-      StMuEmcCluster *cl=point->getCluster(det);
-      if(cl)
+      Float_t eta=point->getEta();
+      Float_t deta=point->getDeltaEta();
+      Float_t phi=point->getPhi();
+      Float_t dphi=point->getDeltaPhi();
+      Float_t en=point->getEnergy();
+      Float_t chi=point->getChiSquare();
+      Float_t theta=2*atan(exp(-eta));
+      Float_t mag = point->getRadius();
+      if(mag==0) mag = 225.40;
+      //cout <<"Po = "<<i<<" eta = "<<eta<<" phi = "<<phi<<" E = "<<en<<" chi = "<<chi<<endl;
+      Float_t x,y,z;
+      //AAPSUAIDE BUG POINT RADIUS CORRECTED 20030612
+      x = mag*cos(phi);
+      y = mag*sin(phi);
+      z = mag/tan(theta);
+      ///////////////////////////////////////////////
+      StThreeVectorF p(x,y,z);
+      StEmcPoint *pt=new StEmcPoint();
+      pt->setEnergy(en);
+      pt->setChiSquare(chi);
+      pt->setDeltaEta(deta);
+      pt->setDeltaPhi(dphi);
+      pt->setPosition(p);
+      for(Int_t j=0;j<4;j++) // looking for clusters
       {
-        Float_t eta=cl->getEta();
-        Float_t phi=cl->getPhi();
-        Float_t e=cl->getEnergy();
-        StDetectorId id = static_cast<StDetectorId>(j+kBarrelEmcTowerId);
-        StEmcDetector *detector=emc->detector(id);
-        StSPtrVecEmcCluster& clusters=detector->cluster()->clusters();
-        for(Int_t k=0;k<(Int_t)clusters.size();k++)
-          if(eta==clusters[k]->eta() && phi==clusters[k]->phi() && e==clusters[k]->energy())
-            pt->addCluster(id,clusters[k]);
+        Int_t det = j+1;
+        StMuEmcCluster *cl=point->getCluster(det);
+        if(cl)
+        {
+          Float_t eta=cl->getEta();
+          Float_t phi=cl->getPhi();
+          Float_t e=cl->getEnergy();
+          StDetectorId id = static_cast<StDetectorId>(j+kBarrelEmcTowerId);
+          StEmcDetector *detector=emc->detector(id);
+          if(detector)
+          {
+            if(detector->cluster())
+            {
+              StSPtrVecEmcCluster& clusters=detector->cluster()->clusters();
+              for(Int_t k=0;k<(Int_t)clusters.size();k++) if(clusters[k])
+              {
+                if(eta==clusters[k]->eta() && phi==clusters[k]->phi() && e==clusters[k]->energy())
+                   pt->addCluster(id,clusters[k]);
+              }
+            }
+          }
+        }
       }
+      emc->addBarrelPoint(pt);
     }
-    emc->addBarrelPoint(pt);
   }
   // ENDCAP points
   for(Int_t i=0; i<muEmc->getNEndcapPoints();i++)
   {
     StMuEmcPoint *point=muEmc->getEndcapPoint(i);
-    Float_t eta=point->getEta();
-    Float_t deta=point->getDeltaEta();
-    Float_t phi=point->getPhi();
-    Float_t dphi=point->getDeltaPhi();
-    Float_t en=point->getEnergy();
-    Float_t chi=point->getChiSquare();
-    Float_t theta=2*atan(exp(-eta));
-    Float_t mag = point->getRadius();
-    //cout <<"Po = "<<i<<" eta = "<<eta<<" phi = "<<phi<<" E = "<<en<<" chi = "<<chi<<endl;
-    Float_t x,y,z;
-    //AAPSUAIDE BUG POINT RADIUS CORRECTED 20030612
-    x = mag*cos(phi);
-    y = mag*sin(phi);
-    z = mag/tan(theta);
-    ///////////////////////////////////////////////
-    StThreeVectorF p(x,y,z);
-    StEmcPoint *pt=new StEmcPoint();
-    pt->setEnergy(en);
-    pt->setChiSquare(chi);
-    pt->setDeltaEta(deta);
-    pt->setDeltaPhi(dphi);
-    pt->setPosition(p);
-    for(Int_t j=4;j<8;j++) // looking for clusters
+    if(point)
     {
-      Int_t det = j+1;
-      StMuEmcCluster *cl=point->getCluster(det);
-      if(cl)
+      Float_t eta=point->getEta();
+      Float_t deta=point->getDeltaEta();
+      Float_t phi=point->getPhi();
+      Float_t dphi=point->getDeltaPhi();
+      Float_t en=point->getEnergy();
+      Float_t chi=point->getChiSquare();
+      Float_t theta=2*atan(exp(-eta));
+      Float_t mag = point->getRadius();
+      //cout <<"Po = "<<i<<" eta = "<<eta<<" phi = "<<phi<<" E = "<<en<<" chi = "<<chi<<endl;
+      Float_t x,y,z;
+      //AAPSUAIDE BUG POINT RADIUS CORRECTED 20030612
+      x = mag*cos(phi);
+      y = mag*sin(phi);
+      z = mag/tan(theta);
+      ///////////////////////////////////////////////
+      StThreeVectorF p(x,y,z);
+      StEmcPoint *pt=new StEmcPoint();
+      pt->setEnergy(en);
+      pt->setChiSquare(chi);
+      pt->setDeltaEta(deta);
+      pt->setDeltaPhi(dphi);
+      pt->setPosition(p);
+      for(Int_t j=4;j<8;j++) // looking for clusters
       {
-        Float_t eta=cl->getEta();
-        Float_t phi=cl->getPhi();
-        Float_t e=cl->getEnergy();
-        StDetectorId id = static_cast<StDetectorId>(j+kBarrelEmcTowerId);
-        StEmcDetector *detector=emc->detector(id);
-        StSPtrVecEmcCluster& clusters=detector->cluster()->clusters();
-        for(Int_t k=0;k<(Int_t)clusters.size();k++)
-          if(eta==clusters[k]->eta() && phi==clusters[k]->phi() && e==clusters[k]->energy())
-            pt->addCluster(id,clusters[k]);
+        Int_t det = j+1;
+        StMuEmcCluster *cl=point->getCluster(det);
+        if(cl)
+        {
+          Float_t eta=cl->getEta();
+          Float_t phi=cl->getPhi();
+          Float_t e=cl->getEnergy();
+          StDetectorId id = static_cast<StDetectorId>(j+kBarrelEmcTowerId);
+          StEmcDetector *detector=emc->detector(id);
+          if(detector)
+          {
+            if(detector->cluster())
+            {
+              StSPtrVecEmcCluster& clusters=detector->cluster()->clusters();
+              for(Int_t k=0;k<(Int_t)clusters.size();k++) if(clusters[k])
+              {
+                if(eta==clusters[k]->eta() && phi==clusters[k]->phi() && e==clusters[k]->energy())
+                  pt->addCluster(id,clusters[k]);
+              }
+            }
+          }
+        }
       }
+      emc->addEndcapPoint(pt);
     }
-    emc->addEndcapPoint(pt);
   }
   // set emc collection
   
