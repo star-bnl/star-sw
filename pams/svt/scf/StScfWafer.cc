@@ -16,48 +16,32 @@ StScfWafer::~StScfWafer()
 }
 
 
-
 StScfListCluster* StScfWafer::getClusterP()
-{
-  return mClusterP;
-}   
+{ return mClusterP; }   
 
 StScfListCluster* StScfWafer::getClusterN()
-{
-  return mClusterN;
-}   
+{ return mClusterN; }   
+
 StScfListStrip* StScfWafer::getStripP()
-{
-  return mStripP;
-}   
+{ return mStripP; }   
 
 StScfListStrip* StScfWafer::getStripN()
-{
-  return mStripN;
-}   
+{ return mStripN; }   
 
 void StScfWafer::addStrip(StScfStrip *ptr, int iSide)
 {
   if (iSide)
-    {
-      (this->mStripN)->addNewStrip(ptr);
-    }
+    { (this->mStripN)->addNewStrip(ptr); }
   else
-    {
-      (this->mStripP)->addNewStrip(ptr); 
-    }
+    { (this->mStripP)->addNewStrip(ptr); }
 }
 
 void StScfWafer::setSigmaStrip(int iStrip, int iSide, int iSigma, sls_ctrl_st *sls_ctrl)
 {
   if (iSide)
-    {
-      (this->mStripN)->setSigma(iStrip, iSigma, sls_ctrl);
-    }
+    { (this->mStripN)->setSigma(iStrip, iSigma, sls_ctrl); }
   else
-    {
-      (this->mStripP)->setSigma(iStrip, iSigma, sls_ctrl); 
-    }
+    { (this->mStripP)->setSigma(iStrip, iSigma, sls_ctrl); }
 }
 
  
@@ -93,8 +77,8 @@ int StScfWafer::doFindCluster(sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl, int 
     case 0:
      CurrentListStrip   =  this->mStripP;
      CurrentListCluster =  this->mClusterP;
-     
      break;
+
     case 1:
      CurrentListStrip   =  this->mStripN;
      CurrentListCluster =  this->mClusterN;
@@ -110,9 +94,7 @@ int StScfWafer::doFindCluster(sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl, int 
   StScfStrip *LastScanStrip = 0;
   StScfStrip *tmpStrip = CurrentListStrip->first();
   for(int i = 0; i<CurrentListStrip->getSize(); i++)
-    {
-      tmpStrip = CurrentListStrip->next(tmpStrip);
-    }
+    { tmpStrip = CurrentListStrip->next(tmpStrip); }
   
   while(CurrentStrip) 
     {
@@ -131,9 +113,7 @@ int StScfWafer::doFindCluster(sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl, int 
 		ScanStrip = CurrentListStrip->prev(ScanStrip);
 		}
 	      else
-	      {
-		ScanStrip = 0;
-	      }
+	      {	ScanStrip = 0; }
 	    }
 	  ScanStrip = CurrentListStrip->next(CurrentStrip);  	  
 	  while(ScanStrip)
@@ -147,35 +127,25 @@ int StScfWafer::doFindCluster(sls_ctrl_st *sls_ctrl, scf_ctrl_st *scf_ctrl, int 
 	      else
 		{
 		  LastScanStrip = ScanStrip;
-		  ScanStrip = 0;
+		  ScanStrip     = 0;
 		}
 	    }
 	  CurrentListCluster->addNewCluster(newCluster);
 	  if(LastScanStrip)
-	    {
-	      CurrentStrip = LastScanStrip;
-	    }
+	    { CurrentStrip = LastScanStrip; }
 	  else
 	    {
 	      if (atTheEnd)
-		{
-		  CurrentStrip = 0;
-		}
+		{ CurrentStrip = 0; }
 	      else
-		{
-		  CurrentStrip = CurrentListStrip->next(CurrentStrip); 
-		}
+		{ CurrentStrip = CurrentListStrip->next(CurrentStrip); }
 	    }
 	}
       else
-	{
-	  CurrentStrip = CurrentListStrip->next(CurrentStrip); 
-	}
+	{ CurrentStrip = CurrentListStrip->next(CurrentStrip); }
     }
   return nCluster;
 }
-
-
 
 int StScfWafer::doClusterSplitting(scf_ctrl_st *scf_ctrl, int iSide)
 {

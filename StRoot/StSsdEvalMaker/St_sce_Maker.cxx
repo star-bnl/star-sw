@@ -175,13 +175,13 @@ void St_sce_Maker::showScfStats()
   printf("***  ghost \t\t%d  \t%d \t      ***\n",statCluster[1][0],statCluster[1][1]);
   printf("***  total \t\t%d  \t%d \t      ***\n",statCluster[0][0]+statCluster[2][0],statCluster[0][1]+statCluster[2][1]);
   printf("*************************************************\n");
-  Float_t p_effica = 100*float(statCluster[0][0])/(statCluster[0][0]+statCluster[2][0]);
-  Float_t p_purete = 100*float(statCluster[0][0])/(statCluster[0][0]+statCluster[1][0]);
-  Float_t n_effica = 100*float(statCluster[0][1])/(statCluster[0][1]+statCluster[2][1]);
-  Float_t n_purete = 100*float(statCluster[0][1])/(statCluster[0][1]+statCluster[1][1]);
+  Float_t p_effi = 100*float(statCluster[0][0])/(statCluster[0][0]+statCluster[2][0]);
+  Float_t p_pure = 100*float(statCluster[0][0])/(statCluster[0][0]+statCluster[1][0]);
+  Float_t n_effi = 100*float(statCluster[0][1])/(statCluster[0][1]+statCluster[2][1]);
+  Float_t n_pure = 100*float(statCluster[0][1])/(statCluster[0][1]+statCluster[1][1]);
   printf("*************************************************\n");
-  printf("***  efficacite: \t%.2f%s  %.2f%s \t      ***\n",p_effica,"%",n_effica,"%");
-  printf("***  purete:     \t%.2f%s  %.2f%s \t      ***\n",p_purete,"%",n_purete,"%");
+  printf("***  efficiency: \t%.2f%s  %.2f%s \t      ***\n",p_effi,"%",n_effi,"%");
+  printf("***  purity:     \t%.2f%s  %.2f%s \t      ***\n",p_pure,"%",n_pure,"%");
   printf("*************************************************\n");
 	
 }
@@ -228,18 +228,6 @@ void St_sce_Maker::makeScmStats()
 //_____________________________________________________________________________
 void St_sce_Maker::showScmStats()
 {
-//   printf("\n");
-//   printf("*************************************************\n");
-//   printf("*************** Stats Space Point ***************\n");
-//   printf("*************************************************\n");
-//   printf("***      \tTrue\tGhost\tLost\t      ***\n");
-//   printf("*************************************************\n");
-//   printf("***  11:\t%d \t%d \t%d \t      ***\n",statSpt[0][0],statSpt[1][0],statSpt[2][0]);
-//   printf("***  12:\t%d \t%d \t%d \t      ***\n",statSpt[0][1],statSpt[1][1],statSpt[2][1]);
-//   printf("***  22:\t%d \t%d \t%d \t      ***\n",statSpt[0][2],statSpt[1][2],statSpt[2][2]);
-//   printf("***  23:\t%d \t%d \t%d \t      ***\n",statSpt[0][3],statSpt[1][3],statSpt[2][3]);
-//   printf("***  33:\t%d \t%d \t%d \t      ***\n",statSpt[0][4],statSpt[1][4],statSpt[2][4]);
-//   printf("*************************************************\n");
   printf("\n");
   printf("*************************************************\n");
   printf("*************** Stats Space Point ***************\n");
@@ -260,14 +248,10 @@ void St_sce_Maker::showScmStats()
     {totTrueSim =statCluster[0][0]+statCluster[2][0];}
   else
     {totTrueSim =statCluster[0][1]+statCluster[2][1];}
-  Float_t efficacite = 100*float(totTrueScm)/totTrueSim;
-  Float_t purete     = 100*float(totTrueScm)/(totTrueScm+totGhostScm);
-  printf("***  Global:\t%d \t%d \t%d \t%.2f%s \t%.2f%s ***\n",statSpt[0][0]+statSpt[0][1]+statSpt[0][2]+statSpt[0][3]+statSpt[0][4],statSpt[1][0]+statSpt[1][1]+statSpt[1][2]+statSpt[1][3]+statSpt[1][4],statSpt[2][0]+statSpt[2][1]+statSpt[2][2]+statSpt[2][3]+statSpt[2][4],efficacite,"%",purete,"%");
+  Float_t effi = 100*float(totTrueScm)/totTrueSim;
+  Float_t pure = 100*float(totTrueScm)/(totTrueScm+totGhostScm);
+  printf("***  Global:\t%d \t%d \t%d \t%.2f%s \t%.2f%s ***\n",statSpt[0][0]+statSpt[0][1]+statSpt[0][2]+statSpt[0][3]+statSpt[0][4],statSpt[1][0]+statSpt[1][1]+statSpt[1][2]+statSpt[1][3]+statSpt[1][4],statSpt[2][0]+statSpt[2][1]+statSpt[2][2]+statSpt[2][3]+statSpt[2][4],effi,"%",pure,"%");
   printf("*************************************************\n");
-//   printf("*************************************************\n");
-//   printf("***  efficacite: \t%.2f%s  \t      ***\n",efficacite,"%");
-//   printf("***  purete:     \t%.2f%s  \t      ***\n",purete,"%");
-//   printf("*************************************************\n");
 }
 //_____________________________________________________________________________
 void St_sce_Maker::makeScmHistograms()
@@ -307,7 +291,7 @@ void St_sce_Maker::writeScmHistograms()
 void St_sce_Maker::PrintInfo()
 {
   printf("**************************************************************\n");
-  printf("* $Id: St_sce_Maker.cxx,v 1.1 2000/07/21 15:08:55 hippolyt Exp $\n");
+  printf("* $Id: St_sce_Maker.cxx,v 1.2 2000/07/24 19:56:32 hippolyt Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }

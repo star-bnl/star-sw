@@ -15,20 +15,20 @@ class StSpaListStrip
   StSpaListStrip();
   ~StSpaListStrip();
 
-  StSpaStrip* next(StSpaStrip *ptr);
-  StSpaStrip* prev(StSpaStrip *ptr);
-  StSpaStrip* first();
-  StSpaStrip* last();
-  int        addNewStrip(StSpaStrip *ptr);
+  StSpaStrip*     next(StSpaStrip *ptr);
+  StSpaStrip*     prev(StSpaStrip *ptr);
+  StSpaStrip*     first();
+  StSpaStrip*     last();
+  int             addNewStrip(StSpaStrip *ptr);
   StSpaListStrip* addListStrip(StSpaListStrip *list);
-  void       exchangeTwoStrips(StSpaStrip *ptr1, StSpaStrip *ptr2);
-  void       sortStrip();
-  int        removeStrip(StSpaStrip *ptr);
-  int        getSize();
-  void       updateListStrip(StSpaListNoise *ptr);
+  void            exchangeTwoStrips(StSpaStrip *ptr1, StSpaStrip *ptr2);
+  void            sortStrip();
+  int             removeStrip(StSpaStrip *ptr);
+  int             getSize();
+  void            updateListStrip(StSpaListNoise *ptr);
 
 private:
-  int        mListLength;
+  int         mListLength;
   StSpaStrip *mFirstS;
   StSpaStrip *mLastS;
 };

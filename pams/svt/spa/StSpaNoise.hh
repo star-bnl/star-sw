@@ -26,11 +26,11 @@ class StSpaNoise
   StSpaNoise* giveCopy();
 
 private:
-  int        mNStrip;
-  int        mPedestal;
-  int        mSigma;
-  int        mNoiseValue;
-  int        mIsActive;
+  int         mNStrip;
+  int         mPedestal;
+  int         mSigma;
+  int         mNoiseValue;
+  int         mIsActive;
   StSpaNoise *mPrevNoise;
   StSpaNoise *mNextNoise;
 

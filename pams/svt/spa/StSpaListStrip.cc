@@ -2,8 +2,8 @@
 StSpaListStrip::StSpaListStrip()
 {
   mListLength = 0;
-  mFirstS=0;
-  mLastS=0;
+  mFirstS     = 0;
+  mLastS      = 0;
 }
 
 StSpaListStrip::~StSpaListStrip()
@@ -24,31 +24,19 @@ StSpaListStrip::~StSpaListStrip()
 
 
 StSpaStrip* StSpaListStrip::next(StSpaStrip *ptr)
-{
-  return ptr->getNextStrip();
-}
+{ return ptr->getNextStrip(); }
 
 StSpaStrip* StSpaListStrip::prev(StSpaStrip *ptr)
-{
-  return ptr->getPrevStrip();
-}
+{ return ptr->getPrevStrip(); }
 
 StSpaStrip* StSpaListStrip::first()
-{
-  return mFirstS;
-}
+{ return mFirstS; }
 
 StSpaStrip* StSpaListStrip::last()
-{
-  return mLastS;
-}
+{ return mLastS; }
 
 int StSpaListStrip::getSize()
-{
-  return mListLength;
-}
-
-
+{  return mListLength; }
 
 int StSpaListStrip::addNewStrip(StSpaStrip *ptr)
 {
@@ -81,7 +69,6 @@ int StSpaListStrip::removeStrip(StSpaStrip *ptr)
     {
       if (ptAfter== 0)
 	{
-	  // taille = 1
 	  this->mFirstS =     0;
 	  this->mLastS  =     0;
 	  this->mListLength = 0;
@@ -116,9 +103,7 @@ int StSpaListStrip::removeStrip(StSpaStrip *ptr)
 	  return 1;
 	}
     }
-
 }
-
 
 StSpaListStrip* StSpaListStrip::addListStrip(StSpaListStrip *list)
 {
@@ -135,7 +120,6 @@ StSpaListStrip* StSpaListStrip::addListStrip(StSpaListStrip *list)
     }
   return this;  
 }
-
 
 void StSpaListStrip::exchangeTwoStrips(StSpaStrip *ptr1,StSpaStrip *ptr2)
 {
@@ -184,11 +168,9 @@ void StSpaListStrip::sortStrip()
 	    }
 	}
       ptCurr = this->next(ptCurr);
-      
     }
   return;
 }
-
 
 void StSpaListStrip::updateListStrip(StSpaListNoise *ptr)
 {
@@ -234,4 +216,3 @@ void StSpaListStrip::updateListStrip(StSpaListNoise *ptr)
  	}
     }
 }
-

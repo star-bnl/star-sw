@@ -15,52 +15,34 @@ StSpaWafer::~StSpaWafer()
   delete    mNoiseN;
 }
 
-
-
 StSpaListStrip* StSpaWafer::getStripP()
-{
-  return mStripP;
-}   
+{ return mStripP; }   
 
 StSpaListStrip* StSpaWafer::getStripN()
-{
-  return mStripN;
-}   
+{ return mStripN; }   
 
 void StSpaWafer::addStrip(StSpaStrip *ptr, int iSide)
 {
   if (iSide)
-    {
-      (this->mStripN)->addNewStrip(ptr);
-    }
+    { (this->mStripN)->addNewStrip(ptr); }
   else
-    {
-      (this->mStripP)->addNewStrip(ptr); 
-    }
+    { (this->mStripP)->addNewStrip(ptr); }
 }
 
 void StSpaWafer::addNoise(StSpaNoise *ptr, int iSide)
 {
   if (iSide)
-    {
-      (this->mNoiseN)->addNewNoise(ptr);
-    }
+    { (this->mNoiseN)->addNewNoise(ptr); }
   else
-    {
-      (this->mNoiseP)->addNewNoise(ptr); 
-    }
+    { (this->mNoiseP)->addNewNoise(ptr); }
 }
 
 void StSpaWafer::setIsActive(int rIsActive, int iSide, int rNStrip)
 {
   if (iSide)
-    {
-      (this->mNoiseN)->setIsActive(rIsActive, rNStrip);
-    }
+    { (this->mNoiseN)->setIsActive(rIsActive, rNStrip); }
   else
-    {
-      (this->mNoiseP)->setIsActive(rIsActive, rNStrip);
-    }
+    { (this->mNoiseP)->setIsActive(rIsActive, rNStrip); }
 }
 
  
@@ -110,4 +92,3 @@ void StSpaWafer::updateListStrip()
   (this->mStripP)->updateListStrip(this->mNoiseP); 
   (this->mStripN)->updateListStrip(this->mNoiseN); 
 }
-

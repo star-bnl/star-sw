@@ -23,30 +23,19 @@ StSpaListNoise::~StSpaListNoise()
 }
 
 StSpaNoise* StSpaListNoise::next(StSpaNoise *ptr)
-{
-  return ptr->getNextNoise();
-}
+{ return ptr->getNextNoise(); }
 
 StSpaNoise* StSpaListNoise::prev(StSpaNoise *ptr)
-{
-  return ptr->getPrevNoise();
-}
+{ return ptr->getPrevNoise(); }
 
 StSpaNoise* StSpaListNoise::first()
-{
-  return mFirstS;
-}
+{ return mFirstS; }
 
 int StSpaListNoise::getSize()
-{
-  return mListLength;
-}
+{ return mListLength; }
 
 StSpaNoise* StSpaListNoise::last()
-{
-  return mLastS;
-}
-
+{ return mLastS; }
 
 int StSpaListNoise::addNewNoise(StSpaNoise *ptr)
 {
@@ -77,11 +66,9 @@ void StSpaListNoise::setIsActive(int rIsActive, int rNStrip)
     {
       ptr = this->next(ptr);
     }
-
   if (ptr) ptr->setIsActive(rIsActive);
   
 }
-
 
 int StSpaListNoise::removeNoise(StSpaNoise *ptr)
 {
@@ -93,7 +80,6 @@ int StSpaListNoise::removeNoise(StSpaNoise *ptr)
     {
       if (ptAfter == 0)
 	{
-	  // taille = 1
 	  this->mFirstS =     0;
 	  this->mLastS  =     0;
 	  this->mListLength = 0;
@@ -128,9 +114,7 @@ int StSpaListNoise::removeNoise(StSpaNoise *ptr)
 	  return 1;
 	}
     }
-
 }
-
 
 StSpaListNoise* StSpaListNoise::addListNoise(StSpaListNoise *list)
 {
@@ -148,10 +132,8 @@ StSpaListNoise* StSpaListNoise::addListNoise(StSpaListNoise *list)
   return this;  
 }
 
-
 void StSpaListNoise::exchangeTwoNoise(StSpaNoise *ptr1,StSpaNoise *ptr2)
 {
-  
   StSpaNoise *ptrTmp = ptr1->giveCopy();
 
   ptr1->setNStrip(ptr2->getNStrip());
@@ -165,7 +147,6 @@ void StSpaListNoise::exchangeTwoNoise(StSpaNoise *ptr1,StSpaNoise *ptr2)
   ptr2->setSigma(ptrTmp->getSigma());
   ptr2->setNoiseValue(ptrTmp->getNoiseValue());
   ptr2->setIsActive(ptrTmp->getIsActive());
-
 }
 
 void StSpaListNoise::sortStrip()
@@ -176,7 +157,6 @@ void StSpaListNoise::sortStrip()
   StSpaNoise *ptCurr = this->first();
   ptCurr = this->next(ptCurr);
   for ( ; ptCurr!=0 ; )
-    
     {
       StSpaNoise *ptB1 = ptCurr;
       StSpaNoise *ptB2;
@@ -195,7 +175,6 @@ void StSpaListNoise::sortStrip()
 	    }
 	}
       ptCurr = this->next(ptCurr);
-      
     }
   return;
 }
@@ -224,7 +203,7 @@ void StSpaListNoise::addSignal(StSpaListStrip *ptr,
 	}
       else
 	{
-	  cout<<" I cannot match signal and noise"<<endl;
+	  cout<<"signal and noise not matched !"<<endl;
 	}
     }
   
@@ -244,7 +223,6 @@ void StSpaListNoise::addSignal(StSpaListStrip *ptr,
       ptr1->setNoiseValue(ptr1->getPedestal() + tmpNoiseValue);
       ptr1 = this->next(ptr1);
     }
-
 }
 
 void StSpaListNoise::substractPedestal()
@@ -265,7 +243,6 @@ void StSpaListNoise::convertAnalogToDigit(long NElectronInAMip,long ADCDynamic,
 {
   const int     NAdcChannel             = (int)pow(2,NBitEncoding);
   const float   conversionFactor = (float)(NAdcChannel)/(ADCDynamic*NElectronInAMip);
-  
 
   int localSize  = this->getSize();
   if (!localSize) return;
@@ -290,14 +267,11 @@ void StSpaListNoise::zeroSubstraction()
   StSpaNoise *ptr = this->first();
   StSpaNoise *tmp = 0;
 
-
   while(ptr)
     {
       tmp = ptr;
       ptr = this->next(ptr);
       if (tmp->getNoiseValue()<= tmp->getSigma())
-	{
-	  this->removeNoise(tmp);
-	}
+	{ this->removeNoise(tmp); }
     }
 }

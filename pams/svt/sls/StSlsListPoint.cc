@@ -69,7 +69,6 @@ int StSlsListPoint::removePoint(StSlsPoint *ptr)
     {
       if (PtAfter == 0)
 	{
-	  // taille = 1
 	  this->mFirstP =     0;
 	  this->mLastP  =     0;
 	  this->mListLength = 0;

@@ -1851,8 +1851,7 @@ int StScmWafer::doSolvePackage(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl)
 
           nSolved++;
   	}
-
-      else cout<<" CAS NON SOLVABLE ("<<currentKind<<")\n";// other cases
+      else cout<<" Warning unsolved case ("<<currentKind<<")\n";// other cases
       delete [] Adc;
       currentPackage=mPackage->next(currentPackage);
     }

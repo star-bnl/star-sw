@@ -90,7 +90,6 @@ int StSlsWafer::convertLocalToUFrame(float ActiveLargeEdge, float ActiveSmallEdg
   StSlsPoint *temp = (this->mPoint)->first();
   for (int i = 0; i < localSize; i++)
 
-    //peut etre un pb avec gard ring surtout pour le check....?
     {
       temp->setUpos((temp->getXl(0)+(ActiveLargeEdge/2.))-(temp->getXl(1)+(ActiveSmallEdge/2.))*tan(Theta), 0);
       temp->setUpos((temp->getXl(0)+(ActiveLargeEdge/2.))+(temp->getXl(1)-(ActiveSmallEdge/2.))*tan(Theta), 1); 
@@ -216,7 +215,7 @@ double StSlsWafer::myErf(double x)
                a7 = -1.13520398,   a8 = 1.48851587,
                a9 = -0.82215223,  a10 = 0.17087277;
   
-  double v = 1.; // The return value
+  double v = 1.;
   double z = ((x) < 0. ? -(x) : (x));
   
   if (z <= 0) return (1.-v); // erfc(0)=1
@@ -286,13 +285,12 @@ void StSlsWafer::convertHitToStrip(float Pitch,
 		    case 1:
 		      (this->mStripN)->updateStrip(newStrip);
 		      break;
-		    }//end of switch
-		  
-		} //end of if 0<tabInd<769
-	    } //end of loop over hitten strips
-	} // end of loop over side
+		    }
+		}
+	    }
+	}
       ptr = (this->mPoint)->next(ptr);
-    }// end of for-loop over hits
+    }
   delete [] tabInd;
   delete [] tabDe;
 }
@@ -320,9 +318,7 @@ void StSlsWafer::convertAnalogToDigit(double PairCreationEnergy)
 
 float* StSlsWafer::findAngle(float *p, float *alpha)
 {
-
   int i = 0;
-
   float pT[3],pN[3],pD[3];
 
   float spT = 0.;

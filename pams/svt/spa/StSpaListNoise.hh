@@ -12,10 +12,10 @@ class StSpaListNoise
  public:
   StSpaListNoise();
   ~StSpaListNoise();
-  StSpaNoise*      next(StSpaNoise *ptr);
-  StSpaNoise*      prev(StSpaNoise *ptr);
-  StSpaNoise*      first();
-  StSpaNoise*      last();
+  StSpaNoise*     next(StSpaNoise *ptr);
+  StSpaNoise*     prev(StSpaNoise *ptr);
+  StSpaNoise*     first();
+  StSpaNoise*     last();
   int             addNewNoise(StSpaNoise *ptr);
   void            setIsActive(int rIsActive, int rNStrip);
   StSpaListNoise* addListNoise(StSpaListNoise *list);
@@ -31,7 +31,7 @@ class StSpaListNoise
   void            zeroSubstraction();
 
 private:
-  int        mListLength;
+  int         mListLength;
   StSpaNoise *mFirstS;
   StSpaNoise *mLastS;
 };

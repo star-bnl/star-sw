@@ -6,15 +6,6 @@ StSlsBarrel::StSlsBarrel(sdm_geom_par_st *geom_par)
 {
   this->setSsdParameters(geom_par);
 
-  //
-  // Staf for testing MySQL connection
- 
-//   StSSDdcs *dcs = new StSSDdcs();
-//   for (int i=1; i<=320; i++)
-//     printf("Module nb: %4d  dead: %5d \n", i, dcs->GetNDead(i)); 
-//   delete dcs;
-  //
-  //
   int nWafer  = mNLadder*mNWaferPerLadder; 
   int idWaf   = 0;
 
@@ -29,9 +20,7 @@ StSlsBarrel::StSlsBarrel(sdm_geom_par_st *geom_par)
 StSlsBarrel::~StSlsBarrel()
 {
   for (int iWaf = 0; iWaf < mNLadder*mNWaferPerLadder; iWaf++)
-    {
-      delete mWafers[iWaf];
-    }
+    { delete mWafers[iWaf]; }
 }
 
 void StSlsBarrel::setSsdParameters(sdm_geom_par_st *geom_par)
@@ -316,7 +305,6 @@ int StSlsBarrel::writeStripToTable(table_head_st *strip_h, sls_strip_st *strip)
 int StSlsBarrel::idWaferToWaferNumb(int idWafer)
 {
   // idwafer = layer*1000+waf*100+ladder
-
   int iW = (int)((idWafer - mSsdLayer*1000)/100);
   int iL = idWafer - mSsdLayer*1000 - iW*100;
   return ((iL-1)*mNWaferPerLadder + iW -1);

@@ -96,7 +96,7 @@ void          StScmPackage::takeMatcheds(StScmPackage *ptr)
 	{  this->mMatcheds[i] = ptr->mMatcheds[i]; }
     }
   else
-    cout<<"probleme de taille\n";
+    cout<<"Not able to take matcheds!!\n";
 }
 
 void          StScmPackage::setNPackage(int rNPackage)

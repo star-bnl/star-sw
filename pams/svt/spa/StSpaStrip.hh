@@ -28,10 +28,10 @@ class StSpaStrip
   StSpaStrip* giveCopy();
   
 private:
-  int        mNStrip;
-  int        mMcStrip;
-  int        mDigitSig;
-  float      mAnalogSig;
+  int         mNStrip;
+  int         mMcStrip;
+  int         mDigitSig;
+  float       mAnalogSig;
   int        *mIdMcHit;
   StSpaStrip *mPrevStrip;
   StSpaStrip *mNextStrip;
