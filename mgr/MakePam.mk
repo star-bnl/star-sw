@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.66 1998/11/17 02:27:04 fisyak Exp $
+# $Id: MakePam.mk,v 1.67 1998/11/25 21:51:07 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.67  1998/11/25 21:51:07  fisyak
+# remove tcc trg and l3 from directories list for hp_ux102
+#
 # Revision 1.66  1998/11/17 02:27:04  fisyak
 # Add log
 #
@@ -166,12 +169,12 @@ endif #/* NT */
     endif
     FILES_G  := $(wildcard $(SRC_DIR)/*.g $(SRC_DIR)/*/*.g)
 #_________________________________________________________________________
-SUFFIXES := .c .cc .C .cxx .f .F .g .h .hpp .inc .idl
+SUFFIXES := .c .cc .C .cxx .f .F .g .h .hh .hpp .inc .idl
 sources := $(strip $(sort $(dir $(foreach s, $(SUFFIXES), $(wildcard $(SRC_DIR)/*$(s) $(SRC_DIR)/*/*$(s) $(SRC_DIR)/*/*/*$(s))))))
 SRC_DIRS:= $(subst /TAIL, ,$(addsuffix TAIL, $(sources)))
 IDL_DIRS:= $(wildcard $(OUT_DIR)/pams/*/idl $(STAR)/pams/*/idl)
 INC_DIRS:= $(wildcard $(OUT_DIR)/pams/*/inc $(STAR)/pams/*/inc)
-VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_DIR) $(GEN_TAB) $(OBJ_DIR) $(IDL_DIRS)
+VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_DIR) $(GEN_TAB) $(OBJ_DIR) $(IDL_DIRS) $(INC_DIRS)
 #-------------------------------includes----------------------------
 STICFLAGS =  $(addprefix -I,  $(STAR)/inc $(SRC_DIR) $(IDL_DIRS))
 ifndef NT
