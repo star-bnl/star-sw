@@ -1,6 +1,15 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98 
-// $Id: StDbDataSet.cxx,v 1.3 1999/12/03 22:24:01 porter Exp $
+// $Id: StDbDataSet.cxx,v 1.4 2000/01/10 20:37:53 porter Exp $
 // $Log: StDbDataSet.cxx,v $
+// Revision 1.4  2000/01/10 20:37:53  porter
+// expanded functionality based on planned additions or feedback from Online work.
+// update includes:
+// 	1. basis for real transaction model with roll-back
+// 	2. limited SQL access via the manager for run-log & tagDb
+// 	3. balance obtained between enumerated & string access to databases
+// 	4. 3-levels of diagnostic output: Quiet, Normal, Verbose
+// 	5. restructured Node model for better XML support
+//
 // Revision 1.3  1999/12/03 22:24:01  porter
 // expanded functionality used by online, fixed bug in
 // mysqlAccessor::getElementID(char*), & update StDbDataSet to
@@ -25,7 +34,7 @@
 #include <iostream.h>
 #include "StDbDataSet.h"
 #include "TBrowser.h"
-#include "StDbTableI.h"
+#include "StDbTable.h"
 #include "StDbXmlWriter.h"
 
 ClassImp(StDbDataSet)
@@ -33,21 +42,21 @@ ClassImp(StDbDataSet)
 //                                                                                  //
 //  StDbDataSet  - is a container St_DataSet                                       //
 //                  This means this object has an extra pointer to an embedded      //
-//                  StDbTableI.                                                        //
-//  Terminology:    This St_OvjectSet may be an OWNER of the embeded StDbTableI        //
+//                  StDbTable.                                                        //
+//  Terminology:    This St_OvjectSet may be an OWNER of the embeded StDbTable        //
 //                  If the container is the owner it can delete the embeded object  //
 //                  otherwsie it leaves that object "as is"                         //
 //                                                                                  //
 //////////////////////////////////////////////////////////////////////////////////////
 
 //_____________________________________________________________________________
-StDbDataSet::StDbDataSet(const Char_t *name, StDbTableI *obj, Bool_t makeOwner):St_DataSet(name)
+StDbDataSet::StDbDataSet(const Char_t *name, StDbTable *obj, Bool_t makeOwner):St_DataSet(name)
 { 
   SetTitle("StDbDataSet");
   SetObject(obj,makeOwner);
 }
 //_____________________________________________________________________________
-StDbDataSet::StDbDataSet(StDbTableI *obj,Bool_t makeOwner) : St_DataSet("unknown","StDbDataSet")
+StDbDataSet::StDbDataSet(StDbTable *obj,Bool_t makeOwner) : St_DataSet("unknown","StDbDataSet")
 {
   SetObject(obj,makeOwner);
 }
@@ -65,7 +74,7 @@ void StDbDataSet::Delete(Option_t *opt)
    St_DataSet::Delete();
 }
 
-//______________________________________________________________________________
+//_____________________________________________________________________________
 void StDbDataSet::Browse(TBrowser *b)
 {
   // Browse this dataset (called by TBrowser).
@@ -78,7 +87,7 @@ void StDbDataSet::Browse(TBrowser *b)
     StDbXmlWriter* acc = new StDbXmlWriter(cout);
     char* name;
     //acc->streamHeader("dummy"); // this is for DataBase Name
-    name = fObj->getTableName();
+    name = fObj->getName();
     acc->streamTableName(name); delete [] name;
     acc->streamAccessor();
     fObj->StreamAccessor((typeAcceptor*)acc,false);
@@ -92,21 +101,21 @@ void StDbDataSet::Browse(TBrowser *b)
 }
 
 //______________________________________________________________________________
-StDbTableI *StDbDataSet::SetObject(StDbTableI *obj,Bool_t makeOwner)
+StDbTable *StDbDataSet::SetObject(StDbTable *obj,Bool_t makeOwner)
 { 
   //
   // - Replace the embedded object with a new supplied 
   // - Destroy the preivous embedded object if this is its owner
   // - Return the previous embedded object if any
   //
-   StDbTableI *oldObject = fObj;
+   StDbTable *oldObject = fObj;
    if (IsOwner()) { delete oldObject; oldObject = 0;} // the object has been killed
    fObj = obj;  
    DoOwner(makeOwner);
    return oldObject;
 }
 //______________________________________________________________________________
-StDbTableI *StDbDataSet::AddObject(StDbTableI *obj,Bool_t makeOwner)
+StDbTable *StDbDataSet::AddObject(StDbTable *obj,Bool_t makeOwner)
 { 
   // Aliase for SetObject method
  return SetObject(obj,makeOwner);

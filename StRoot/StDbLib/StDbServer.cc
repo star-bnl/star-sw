@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbServer.cc,v 1.6 1999/12/03 22:24:01 porter Exp $
+ * $Id: StDbServer.cc,v 1.7 2000/01/10 20:37:54 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,15 @@
  ***************************************************************************
  *
  * $Log: StDbServer.cc,v $
+ * Revision 1.7  2000/01/10 20:37:54  porter
+ * expanded functionality based on planned additions or feedback from Online work.
+ * update includes:
+ * 	1. basis for real transaction model with roll-back
+ * 	2. limited SQL access via the manager for run-log & tagDb
+ * 	3. balance obtained between enumerated & string access to databases
+ * 	4. 3-levels of diagnostic output: Quiet, Normal, Verbose
+ * 	5. restructured Node model for better XML support
+ *
  * Revision 1.6  1999/12/03 22:24:01  porter
  * expanded functionality used by online, fixed bug in
  * mysqlAccessor::getElementID(char*), & update StDbDataSet to
@@ -75,25 +84,42 @@ StDbServer::StDbServer(StDbType type, StDbDomain domain){
 
 ////////////////////////////////////////////////////////////////
 
-void
+bool
 StDbServer::initServer(){
 
+
   if(!mdbName){
+
     cerr << "StDbServer:: DataBase not Identified" << endl;
+    cerr << "port = "<< mportNumber;
+    cerr << " type = " << (int)mdbType <<" domain = " << (int)mdbDomain << endl;
+    if(mserverName) cerr << " server = " << mserverName;
+    if(mhostName) cerr << " host = " << mhostName;
+    cerr<<endl;
+    return false;
+
   } else {
 
-cout << "Server connecting to database " << mdbName ;
-cout << " on host = " << mhostName << endl;
+    if(!StDbManager::Instance()->IsQuiet()){
+       cout << "Server connecting to DB =" << mdbName ;
+       cout << " On Host = " << mhostName << endl;
+    }
 
-    mdatabase = new mysqlAccessor();
-    //    mdatabase->initDbQuery(mdbName,"dummy","duvall.star.bnl.gov", 0);
-    mdatabase->initDbQuery(mdbName,mserverName,mhostName,mportNumber);
-    mconnectState = true;
+    if(!mdatabase)mdatabase = new mysqlAccessor(mdbType, mdbDomain);
 
+    if(mdatabase->initDbQuery(mdbName,mserverName,mhostName,mportNumber)){    
+      mconnectState = true;
+    }
   }
+
+return true;
 }
 
 ////////////////////////////////////////////////////////////////
+bool
+StDbServer::reConnect(){ return initServer();}
+
+
 ////////////////////////////////////////////////////////////////
 
 StDbServer::~StDbServer(){
@@ -143,9 +169,6 @@ char* id = strstr(mdbName,"_");
 
  mdbType = StDbManager::Instance()->getDbType(mtypeName);
  mdbDomain = StDbManager::Instance()->getDbDomain(mdomainName);
- //cout << "Type = "<<mtypeName<<" & Domain = "<<mdomainName<<endl;
- //cout << "Type = "<<mdbType<<" & Domain = "<<mdbDomain<<endl;
- 
   
 }
 
@@ -177,8 +200,15 @@ StDbServer::setDataBase(StDbType type, StDbDomain domain, const char* typeName, 
 
   ost << mtypeName;
   if(mdomainName && strcmp(mdomainName,"Star") != 0) ost << "_" << mdomainName;
-
   ost << ends;
+  
+  //StDbManager::Instance()->setVerbose(true);
+
+  if(StDbManager::Instance()->IsVerbose()) {
+   cout << "New Server to db " << mdbName;
+   cout << " DB Type   = "<<mtypeName;
+   cout <<"  DB Domain = "<< mdomainName<<endl;
+  }
 
 }
 
@@ -310,103 +340,104 @@ char*
 StDbServer::getServerName() const {
 
 char* name = 0;
-if(mserverName) {
-name = new char[strlen(mserverName)+1];
-strcpy(name,mserverName);
-//name = mstringDup(mserverName);
-}
+if(mserverName) name = mstringDup(mserverName);
 
 return name;
 }
 
-unsigned int StDbServer::getUnixTime(const char* time){ 
-  return mdatabase->getUnixTime(time);}
+////////////////////////////////////////////////////////////////
+
+unsigned int 
+StDbServer::getUnixTime(const char* time) { 
+return mdatabase->getUnixTime(time);
+}
+
+////////////////////////////////////////////////////////////////
 
 char* 
 StDbServer::getDateTime(unsigned int time){
-  return mdatabase->getDateTime(time);}
+return mdatabase->getDateTime(time);
+}
 
 
 ////////////////////////////////////////////////////////////////
 
-void 
+bool
 StDbServer::QueryDb(StDbTable* table, unsigned int reqTime) { 
 
-char* name=0;
+
   if(!mdatabase->QueryDb(table,reqTime)){
-    if(table){
-      if((name = table->getTableName())){
-        cout << "table ["<<name<<"] ";
-       delete [] name;
-      }
-    cout << "Table is not Updated" << endl;
-    }
+    cerr<<"WARNING:: ";
+    if(table) cerr << "table ["<<table->getMyName()<<"] "; 
+    cerr<< " Table is Not Updated " << endl;
+    return false;
   }
 
+return true;
 }
 
 ////////////////////////////////////////////////////////////////
 
-void 
-StDbServer::QueryDb(StDbTable* table, const char* reqTime) { 
+bool 
+StDbServer::QueryDb(StDbTable* table, const char* whereClause) { 
 
-char* name=0;
-  if(!mdatabase->QueryDb(table,reqTime)){
-    if(table){
-      if((name = table->getTableName())){
-        cout << "table ["<<name<<"] ";
-       delete [] name;
-      }
-    cout << "Table is not Updated" << endl;
-    }
+  if(!mdatabase->QueryDb(table,whereClause)){
+    cerr<<"WARNING:: ";
+    if(table) cerr << "table ["<<table->getMyName()<<"] "; 
+    cerr<< " Table is Not Updated " << endl;
+    return false;
   }
 
+return true;
 }
 
 ////////////////////////////////////////////////////////////////
 
-void 
+bool 
 StDbServer::WriteDb(StDbTable* table, unsigned int storeTime) { 
 
-  if(!mdatabase->WriteDb(table, storeTime)){
-    if(table) cout << "Wrote table ["<<table->getTableName()<<"] ";
+bool retVal = false;
+ 
+ if(!mdatabase->WriteDb(table, storeTime)){
+    if(table) cout << "Wrote table ["<<table->getName()<<"] ";
     cout << "Table is not Updated" << endl;
+    return retVal;
   }
-}
 
-////////////////////////////////////////////////////////////////
-
-void 
-StDbServer::WriteDb(StDbTable* table,const char* storeTime) { 
-
-  if(!mdatabase->WriteDb(table, storeTime)){
-    if(table) cout << "Wrote table ["<<table->getTableName()<<"] ";
-    cout << "Table is not Updated" << endl;
-  }
-}
-
-
-
-////////////////////////////////////////////////////////////////
-
-void 
-StDbServer::QueryDescriptor(StDbTable* table) { 
-
-  if(!mdatabase->QueryDescriptor(table)){
-    if(table) cout << "table ["<<table->getTableName()<<"] ";
-    cout << "Table Descriptor is not found " << endl;
-  }
+return true;
 }
 
 
 ///////////////////////////////////////////////////////////////////////
 
-void 
+bool
 StDbServer::QueryDb(StDbConfigNode* node) { 
 
-  // simple call to database navigation
-  mdatabase->QueryDb(node);
+  if(!mdatabase->QueryDb(node))return false;
 
+return true;
+}
+
+////////////////////////////////////////////////////////////////
+
+int
+StDbServer::WriteDb(StDbConfigNode* node,int currentID) { 
+
+return mdatabase->WriteDb(node,currentID);
+
+}
+
+////////////////////////////////////////////////////////////////
+
+bool
+StDbServer::QueryDescriptor(StDbTable* table) { 
+
+  if(!mdatabase->QueryDescriptor(table)){
+    if(table) cout << "table ["<<table->getName()<<"] ";
+    cout << "Table Descriptor is not found " << endl;
+    return false;
+  }
+return true;
 }
 
 /////////////////////////////////////////////////////////////////////

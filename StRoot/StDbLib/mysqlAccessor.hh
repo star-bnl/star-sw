@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: mysqlAccessor.hh,v 1.5 1999/12/03 22:24:01 porter Exp $
+ * $Id: mysqlAccessor.hh,v 1.6 2000/01/10 20:37:55 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,15 @@
  ***************************************************************************
  *
  * $Log: mysqlAccessor.hh,v $
+ * Revision 1.6  2000/01/10 20:37:55  porter
+ * expanded functionality based on planned additions or feedback from Online work.
+ * update includes:
+ * 	1. basis for real transaction model with roll-back
+ * 	2. limited SQL access via the manager for run-log & tagDb
+ * 	3. balance obtained between enumerated & string access to databases
+ * 	4. 3-levels of diagnostic output: Quiet, Normal, Verbose
+ * 	5. restructured Node model for better XML support
+ *
  * Revision 1.5  1999/12/03 22:24:01  porter
  * expanded functionality used by online, fixed bug in
  * mysqlAccessor::getElementID(char*), & update StDbDataSet to
@@ -40,43 +49,51 @@ class mysqlAccessor : public tableQuery {
 
   // MySQL Specific functions 
 
-MysqlDb Db;
-StDbBuffer buff;
 unsigned int theEndTime;
+
+char* mdbName;
+StDbType mdbType;
+StDbDomain mdbDomain;
 
 public:
 
-  mysqlAccessor():theEndTime(2145934799){ };
-   ~mysqlAccessor(){};
+MysqlDb Db;
+StDbBuffer buff;
+
+  mysqlAccessor(StDbType type, StDbDomain domain):theEndTime(2145934799), mdbName(0), mdbType(type), mdbDomain(domain) { };
+   ~mysqlAccessor();
     
-  virtual void initDbQuery(const char* dbname, const char* serverName, const char* host, const int portNumber){ Db.Connect(host,"","",dbname,portNumber);};
+  virtual int initDbQuery(const char* dbname, 
+                          const char* serverName, 
+                          const char* host, 
+                          const int portNumber);
 
   // tableQuery Interface;
 
   virtual int QueryDb(StDbTable* table, unsigned int reqTime);
-  virtual int QueryDb(StDbTable* table, const char* reqTime);
+  virtual int QueryDb(StDbTable* table, const char* whereClause);
   virtual int WriteDb(StDbTable* table, unsigned int storeTime);
-  virtual int WriteDb(StDbTable* table, const char* storeTime);
+  virtual int WriteDb(StDbConfigNode* node, int currentID);
   virtual int QueryDb(StDbConfigNode* node);
   virtual int QueryDescriptor(StDbTable* table);
 
   virtual StDbBuffer* getBuffer(){return (StDbBuffer*) &buff;}; 
 
-  virtual void freeQuery() { }; // nothing yet ... 
-  virtual bool execute(const char* name);
+  // DB & timestamp helper methods
+
   virtual unsigned int getUnixTime(const char* time);
   virtual char* getDateTime(unsigned int time);
+  virtual char* getDbName() const;
 
 
 protected:
 
-  virtual bool isConfig(const char* name);  // has "Keys"
-  virtual char* getKeyName(const char* nodeName); // add "Keys"
-  virtual char* getNodeName(const char* keyName); // strip "Keys"
-  virtual int*  getElementID(char* nodeName, int& numRows);
-  virtual bool  isBaseLine(const char* baseline);
-  virtual char* getBoolString(bool baseline);
-  virtual char* getNextID(char*& currentElement);
+  virtual void  deleteRows(const char* tableName, int* rowID, int nrows);
+  virtual bool  queryNodeInfo(StDbNodeInfo* node);
+  virtual bool  readNodeInfo(StDbNodeInfo* node);
+  virtual bool  storeNodeInfo(StDbNodeInfo* node);
+  virtual bool  prepareNode(StDbNode* dbNode, StDbNodeInfo* node);
+
   virtual char* getEndDateTime() {return getDateTime(theEndTime);};
   virtual unsigned int getEndTime(){return theEndTime; };
 

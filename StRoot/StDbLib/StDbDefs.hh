@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbDefs.hh,v 1.6 1999/12/29 13:49:35 porter Exp $
+ * $Id: StDbDefs.hh,v 1.7 2000/01/10 20:37:53 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,15 @@
  ***************************************************************************
  *
  * $Log: StDbDefs.hh,v $
+ * Revision 1.7  2000/01/10 20:37:53  porter
+ * expanded functionality based on planned additions or feedback from Online work.
+ * update includes:
+ * 	1. basis for real transaction model with roll-back
+ * 	2. limited SQL access via the manager for run-log & tagDb
+ * 	3. balance obtained between enumerated & string access to databases
+ * 	4. 3-levels of diagnostic output: Quiet, Normal, Verbose
+ * 	5. restructured Node model for better XML support
+ *
  * Revision 1.6  1999/12/29 13:49:35  porter
  * fix for Solaris-CC4.2 within StRoot make (cons)...
  * replaced #include <config.h> with #include <ospace/config.h>
@@ -27,23 +36,16 @@
 #ifndef STDBDEFS_HH
 #define STDBDEFS_HH
 
-enum StDbType {StarDb=0, DbServer, RunLog, Configurations, Conditions, Calibrations, Geometry, RunCatalog, RunParams, TestScheme };
+enum StDbType { dbStDb=0, dbServer, dbRunLog, dbConfigurations, dbConditions, dbCalibrations, dbGeometry, dbRunCatalog, dbRunParams, dbTestScheme, dbUser};
 
-enum StDbDomain {Unknown=0, Star, Tpc, Emc, Ftpc, Svt, Ctb, Trg, Daq, Scaler, Global, L3 };
+enum StDbDomain {dbDomainUnknown=0, dbStar, dbTpc, dbEmc, dbFtpc, dbSvt, dbCtb, dbTrg, dbDaq, dbScaler, dbGlobal, dbL3 };
+
 
 
 #ifdef ST_NO_TEMPLATE_DEF_ARGS
+// to get bool from object-space
 #include <ospace/config.h>
 #endif
-//#ifdef SOLARIS
-//# ifndef false
-//typedef int bool;
-//#define false 0
-//#define true 1
-//# endif
-//#endif
-
-
 
 #endif
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbXmlReader.h,v 1.3 1999/12/03 17:03:24 porter Exp $
+ * $Id: StDbXmlReader.h,v 1.4 2000/01/10 20:37:55 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,15 @@
  ***************************************************************************
  *
  * $Log: StDbXmlReader.h,v $
+ * Revision 1.4  2000/01/10 20:37:55  porter
+ * expanded functionality based on planned additions or feedback from Online work.
+ * update includes:
+ * 	1. basis for real transaction model with roll-back
+ * 	2. limited SQL access via the manager for run-log & tagDb
+ * 	3. balance obtained between enumerated & string access to databases
+ * 	4. 3-levels of diagnostic output: Quiet, Normal, Verbose
+ * 	5. restructured Node model for better XML support
+ *
  * Revision 1.3  1999/12/03 17:03:24  porter
  * added multi-row support for the Xml reader & writer
  *
@@ -40,7 +49,7 @@ protected:
 
   //  ofstream* os;//!
 
-  char* loca[256];//!
+  char* loca[20024];//!
   dbTable* tab;//!
   int maxlines;
 
@@ -57,26 +66,26 @@ public:
 
   void readTable(ifstream &is);
 
-  virtual void pass(char* name, short& i, int len=0) ;  
-  virtual void pass(char* name, int& i, int len=0);  
-  virtual void pass(char* name, long& i, int len=0);  
-  virtual void pass(char* name, unsigned short& i, int len=0) ;  
-  virtual void pass(char* name, unsigned int& i, int len=0) ;  
-  virtual void pass(char* name, unsigned long& i, int len=0) ;  
+  virtual void pass(char* name, short& i, int& len) ;  
+  virtual void pass(char* name, int& i, int& len);  
+  virtual void pass(char* name, long& i, int& len);  
+  virtual void pass(char* name, unsigned short& i, int& len) ;  
+  virtual void pass(char* name, unsigned int& i, int& len) ;  
+  virtual void pass(char* name, unsigned long& i, int& len) ;  
 
-  virtual void pass(char* name, float& i, int len=0);
-  virtual void pass(char* name, double& i, int len=0);
-  virtual void pass(char* name, char*& i, int len);
-  virtual void pass(char* name, unsigned char& i, int len) ;
-  virtual void pass(char* name, unsigned char*& i, int len) ;
-  virtual void pass(char* name, short*& i, int len) ;  
-  virtual void pass(char* name, int*& i, int len);  
-  virtual void pass(char* name, long*& i, int len);  
-  virtual void pass(char* name, unsigned short*& i, int len) ;  
-  virtual void pass(char* name, unsigned int*& i, int len) ;  
-  virtual void pass(char* name, unsigned long*& i, int len) ;  
-  virtual void pass(char* name, float*& i, int len);
-  virtual void pass(char* name, double*& i, int len);
+  virtual void pass(char* name, float& i, int& len);
+  virtual void pass(char* name, double& i, int& len);
+  virtual void pass(char* name, char*& i, int& len);
+  virtual void pass(char* name, unsigned char& i, int& len) ;
+  virtual void pass(char* name, unsigned char*& i, int& len) ;
+  virtual void pass(char* name, short*& i, int& len) ;  
+  virtual void pass(char* name, int*& i, int& len);  
+  virtual void pass(char* name, long*& i, int& len);  
+  virtual void pass(char* name, unsigned short*& i, int& len) ;  
+  virtual void pass(char* name, unsigned int*& i, int& len) ;  
+  virtual void pass(char* name, unsigned long*& i, int& len) ;  
+  virtual void pass(char* name, float*& i, int& len);
+  virtual void pass(char* name, double*& i, int& len);
 
   //ClassDef(StDbXmlReader,1)
 

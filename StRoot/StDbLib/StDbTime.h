@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTime.h,v 1.1 1999/09/30 02:06:11 porter Exp $
+ * $Id: StDbTime.h,v 1.2 2000/01/10 20:37:55 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,15 @@
  ***************************************************************************
  *
  * $Log: StDbTime.h,v $
+ * Revision 1.2  2000/01/10 20:37:55  porter
+ * expanded functionality based on planned additions or feedback from Online work.
+ * update includes:
+ * 	1. basis for real transaction model with roll-back
+ * 	2. limited SQL access via the manager for run-log & tagDb
+ * 	3. balance obtained between enumerated & string access to databases
+ * 	4. 3-levels of diagnostic output: Quiet, Normal, Verbose
+ * 	5. restructured Node model for better XML support
+ *
  * Revision 1.1  1999/09/30 02:06:11  porter
  * add StDbTime to better handle timestamps, modify SQL content (mysqlAccessor)
  * allow multiple rows (StDbTable), & Added the comment sections at top of
@@ -35,6 +44,7 @@ char* mdateTime;
   StDbTime(const char* dtime): munixTime(0) { 
                                          mdateTime=new char[strlen(dtime)+1]; 
                                          strcpy(mdateTime,dtime);};
+
 
   virtual ~StDbTime() { if(mdateTime) delete [] mdateTime; }
 

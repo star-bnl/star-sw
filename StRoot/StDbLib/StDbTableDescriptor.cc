@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTableDescriptor.cc,v 1.7 1999/12/07 21:25:25 porter Exp $
+ * $Id: StDbTableDescriptor.cc,v 1.8 2000/01/10 20:37:55 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,15 @@
  ***************************************************************************
  *
  * $Log: StDbTableDescriptor.cc,v $
+ * Revision 1.8  2000/01/10 20:37:55  porter
+ * expanded functionality based on planned additions or feedback from Online work.
+ * update includes:
+ * 	1. basis for real transaction model with roll-back
+ * 	2. limited SQL access via the manager for run-log & tagDb
+ * 	3. balance obtained between enumerated & string access to databases
+ * 	4. 3-levels of diagnostic output: Quiet, Normal, Verbose
+ * 	5. restructured Node model for better XML support
+ *
  * Revision 1.7  1999/12/07 21:25:25  porter
  * some fixes for linux warnings
  *
@@ -168,10 +177,10 @@ StDbTableDescriptor::fillElement(StDbBuffer* buff, int tableID){
 
 bool ClientMode;
   if(!(ClientMode=buff->IsClientMode()))buff->SetClientMode();
-  int mask;
+  int schemaID;
   if(tableID){  // mask off elements if tableID is non-zero
-   if(!(buff->ReadScalar(mask,"mask") && (mask & tableID)) ){  
-       // don't include this element
+   if(!(buff->ReadScalar(schemaID,"schemaID") && (schemaID==tableID)) ){  
+       // skip this one
        return;
    }
   }
@@ -192,7 +201,7 @@ bool ClientMode;
    //  cout << " name = " << mcols[i].name << " type = " << mcols[i].type << "    //   size = " << mcols[i].size << " offset = " << mcols[i].offset << endl;
    mCur++;
    mnumElements++;
-   mtableSize = offsetToNextEmptyByte;
+   mtableSize = offsetToNextEmptyByte+(4 - offsetToNextEmptyByte%4);
 
  if(!ClientMode)buff->SetStorageMode();  // reset to StorageMode
 }
