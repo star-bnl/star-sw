@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.cxx,v 1.30 2004/10/19 01:45:26 mvl Exp $
+ * $Id: StMuDst.cxx,v 1.31 2004/10/21 02:56:35 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -29,8 +29,11 @@ TClonesArray** StMuDst::strangeArrays= 0;
 TClonesArray** StMuDst::emcArrays    = 0;
 TClonesArray** StMuDst::pmdArrays    = 0;
 TClonesArray** StMuDst::tofArrays    = 0;
-StMuEmcCollection *StMuDst::mEmcCollection =0;
-StMuPmdCollection *StMuDst::mPmdCollection =0;
+TClonesArray *StMuDst::mMuEmcCollectionArray = 0;
+StMuEmcCollection *StMuDst::mMuEmcCollection = 0;
+TClonesArray *StMuDst::mMuPmdCollectionArray = 0;
+StMuPmdCollection *StMuDst::mMuPmdCollection = 0;
+StEmcCollection *StMuDst::mEmcCollection = 0;
 
 StMuDst::StMuDst() {
   DEBUGMESSAGE("");
@@ -60,8 +63,10 @@ void StMuDst::set(StMuDstMaker* maker) {
   emcArrays     = maker->mEmcArrays;
   pmdArrays     = maker->mPmdArrays;
   tofArrays     = maker->mTofArrays;
-  mEmcCollection = maker->mEmcCollection;
-  mPmdCollection = maker->mPmdCollection;
+  mMuEmcCollectionArray = maker->mEmcCollectionArray;
+  mMuEmcCollection      = maker->mEmcCollection;
+  mMuPmdCollectionArray = maker->mPmdCollectionArray;
+  mMuPmdCollection = maker->mPmdCollection;
 
   StStrangeEvMuDst* ev = strangeEvent();
   int nV0s = v0s()->GetEntries(); for (int i=0;i<nV0s; i++) v0s(i)->SetEvent(ev); // set the pointer to the StStrangeEvMuDst which is not read from disk
@@ -77,7 +82,9 @@ void StMuDst::set(TClonesArray** theArrays,
 		  TClonesArray** theEmcArrays,
 		  TClonesArray** thePmdArrays,
                   TClonesArray** theTofArrays,
+                  TClonesArray* emc_arr,
 		  StMuEmcCollection *emc,
+                  TClonesArray* pmd_arr,
 		  StMuPmdCollection *pmd) 
 {
   // I don't understand why this method is still needed,
@@ -88,8 +95,10 @@ void StMuDst::set(TClonesArray** theArrays,
   emcArrays     = theEmcArrays;
   pmdArrays     = thePmdArrays;
   tofArrays     = theTofArrays;
-  mEmcCollection = emc;  
-  mPmdCollection = pmd;
+  mMuEmcCollectionArray = emc_arr;  
+  mMuEmcCollection = emc;  
+  mMuPmdCollectionArray = pmd_arr;
+  mMuPmdCollection = pmd;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -244,7 +253,7 @@ StEvent* StMuDst::createStEvent() {
 
   // now get the EMC stuff and put it in the StEvent
   static StMuEmcUtil* mEmcUtil = new StMuEmcUtil();
-  StMuEmcCollection *emc = emcCollection();
+  StMuEmcCollection *emc = muEmcCollection();
   if(emc) { // transform to StEvent format and fill it
     StEmcCollection *EMC = mEmcUtil->getEmc(emc);
     if(EMC) ev->setEmcCollection(EMC);
@@ -367,6 +376,11 @@ ClassImp(StMuDst)
 /***************************************************************************
  *
  * $Log: StMuDst.cxx,v $
+ * Revision 1.31  2004/10/21 02:56:35  mvl
+ * Added pointer to StEmcColleciton for Emc clustering etc.
+ * Also made some technical changes for backward compatibility mode with
+ * StMuIOMaker (pointers to TClonesArray for StMuEmcCollection)
+ *
  * Revision 1.30  2004/10/19 01:45:26  mvl
  * Changes to split Emc and Pmd collections. Minor change to track copying logic
  *

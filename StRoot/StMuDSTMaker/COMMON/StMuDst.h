@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDst.h,v 1.21 2004/10/19 01:45:26 mvl Exp $
+ * $Id: StMuDst.h,v 1.22 2004/10/21 02:56:35 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  ***************************************************************************/
@@ -34,6 +34,7 @@ class StMuPmdCollection;
 class StEvent;
 class StTrack;
 class StTrackGeometry;
+class StEmcCollection;
 
 class StMuTofHit;
 class StTofData;
@@ -66,7 +67,9 @@ public:
   /// set the pointers to the TClonesArrays
   void set(StMuDstMaker* maker);
   /// set the pointers to the TClonesArrays
-  void set(TClonesArray**, TClonesArray**, TClonesArray** emc=0, TClonesArray** pmd=0, TClonesArray** tof=0, StMuEmcCollection *emc=0, StMuPmdCollection *pmd=0);
+  void set(TClonesArray**, TClonesArray**, TClonesArray** emc=0, TClonesArray** pmd=0, TClonesArray** tof=0, TClonesArray *emc_arr=0, StMuEmcCollection *emc=0, TClonesArray *pmd_arr=0, StMuPmdCollection *pmd=0);
+  /// set pointer to current StEmcCollection
+  static void setEmcCollection(StEmcCollection *emc_coll) { mEmcCollection=emc_coll; }
   
   /// resets the pointers to the TClonesArrays to 0
   void unset();
@@ -92,10 +95,16 @@ public:
   static TClonesArray** pmdArrays;
   /// array of TClonesArrays for the stuff inherited from the TOF
   static TClonesArray** tofArrays;
+  // pointer to array with MuEmcCollection (for backward compatible mode)
+  static TClonesArray *mMuEmcCollectionArray;
   /// pointer to EmcCollection (manages the EmcArrays)
-  static StMuEmcCollection *mEmcCollection;
+  static StMuEmcCollection *mMuEmcCollection;
+  // pointer to array with MuPmdCollection (for backward compatible mode)
+  static TClonesArray *mMuPmdCollectionArray;
   /// pointer to PmdCollection (manages the PmdArrays)
-  static StMuPmdCollection *mPmdCollection;
+  static StMuPmdCollection *mMuPmdCollection;
+  /// pointer to EmcCollecion (for Emc clusterfinding etc)
+  static StEmcCollection *mEmcCollection;
 
 public:
   /// returns pointer to the n-th TClonesArray 
@@ -185,9 +194,11 @@ public:
   static TCut* strangeCuts(int i) { return (TCut*)strangeArrays[smuCut]->UncheckedAt(i); }
 
   /// returns pointer to current StMuEmcCollection
-  static StMuEmcCollection* emcCollection() { return mEmcCollection; }
+  static StMuEmcCollection* muEmcCollection() { if (mMuEmcCollectionArray) return (StMuEmcCollection*) mMuEmcCollectionArray->UncheckedAt(0); else return mMuEmcCollection; }
   /// returns pointer to current StMuPmdCollection
-  static StMuPmdCollection* pmdCollection() { return mPmdCollection; }
+  static StMuPmdCollection* pmdCollection() { if (mMuPmdCollectionArray)  return (StMuPmdCollection*) mMuPmdCollectionArray->UncheckedAt(0); else return mMuPmdCollection; }
+  /// returns pointer to current StEmcCollection
+  static StEmcCollection* emcCollection() {  return mEmcCollection; }
 
   /// returns pointer to the i-th muTofHit
   static StMuTofHit* tofHit(int i) { return (StMuTofHit*)tofArrays[muTofHit]->UncheckedAt(i); }
@@ -247,6 +258,11 @@ public:
 /***************************************************************************
  *
  * $Log: StMuDst.h,v $
+ * Revision 1.22  2004/10/21 02:56:35  mvl
+ * Added pointer to StEmcColleciton for Emc clustering etc.
+ * Also made some technical changes for backward compatibility mode with
+ * StMuIOMaker (pointers to TClonesArray for StMuEmcCollection)
+ *
  * Revision 1.21  2004/10/19 01:45:26  mvl
  * Changes to split Emc and Pmd collections. Minor change to track copying logic
  *
