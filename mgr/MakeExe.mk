@@ -1,5 +1,5 @@
 #  Make STAF (STAR) executable
-
+STAF_ARCHIVE_LIBS :=
 ifndef STAF_MAKE_HOME
   STAF_MAKE_HOME := $(STAR)/mgr
 endif
@@ -82,11 +82,11 @@ endif
 
 ifdef STAF
   ASPs := msg tdm spx  asu top tnt ami dio dui dsl dsu tls soc
-  ifdef STAF_ARCHIVE_LIBS
-    ALL_EXE_LIBS += $(addsuffix .a,$(addprefix $(STAF_SYS_LIB)/lib,$(ASPs)))
-  else
-    ALL_EXE_LIBS +=    -L$(STAF_SYS_LIB) $(addprefix -l,$(ASPs))
+  ASPsLib := $(addprefix -l,$(ASPs))
+  ifdef HPUX
+    ASPsLib := $(subst -lsoc,$(STAF_SYS_LIB)/libsoc.a,$(ASPsLib))
   endif
+  ALL_EXE_LIBS +=    -L$(STAF_SYS_LIB) $(ASPsLib)
 endif
 
 ALL_EXE_LIBS +=	`cernlib geant321 pawlib

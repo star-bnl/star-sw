@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.16  1998/07/20 20:15:24  perev
+#  *.mk small impovement
+#
 #  Revision 1.15  1998/07/14 01:22:17  perev
 #  static EXE for sgi_64
 #
@@ -26,7 +29,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/07/14 01:22:17 $ 
+#             Last modification $Date: 1998/07/20 20:15:24 $ 
 #. default setings
 
 RM := rm -f
@@ -152,6 +155,7 @@ endif
 ifneq (,$(findstring $(STAF_ARCH),i386_linux2 i386_redhat50))
 #    case linux
 #  ====================
+  LINUX :=YESS
   MOTIF :=
   CERN_LEVEL :=pgf98
   OSFID    := lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX
@@ -162,12 +166,13 @@ ifneq (,$(findstring $(STAF_ARCH),i386_linux2 i386_redhat50))
   CXXFLAGS := $(DEBUG) -fPIC
   CFLAGS   := $(DEBUG) -fPIC
   CPPFLAGS += f2cFortran
-  LDFLAGS  := -Wl,-Bstatic
-  EXEFLAGS := -Wl,-Bdynamic  
-  SOFLAGS  := -shared  
+  LDFLAGS  := $(DEBUG) -Wl,-Bstatic
+  EXEFLAGS := $(DEBUG) -Wl,-Bdynamic  
+  SOFLAGS  := $(DEBUG) -shared  
 ##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lg++ -lpgc -lm -ldl -rdynamic
   CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib -L/usr/lib -lXt -lXpm -lX11 -lcrypt -lg++ -lpgc -lm -ldl  -rdynamic
-  FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
+##FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
+  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A 
   FFLAGS   := -DPGI  $(DEBUG)
   FEXTEND  := -Mextend
   YACC     := bison -y
@@ -193,16 +198,16 @@ ifneq (,$(findstring $(STAF_ARCH),alpha_osf1 alpha_osf32c alpha_dux40))
     CC     :=cc
     LD     :=$(CXX)
     SO     :=$(CXX)
-    CXXFLAGS := -w -D__osf__ -D__alpha -Dcxxbug -DALPHACXX 
+    CXXFLAGS := $(DEBUG) -w -D__osf__ -D__alpha -Dcxxbug -DALPHACXX 
     CFLAGS  := $(DEBUG) -w  
-    LDFLAGS  := 
-    SOFLAGS  :=  -call_shared -expect_unresolved '*'
+    LDFLAGS  := $(DEBUG) 
+    SOFLAGS  := $(DEBUG)  -call_shared -expect_unresolved '*'
     CLIBS  :=  -lXm -lXt -lX11 -lm -lPW -lm -lm_4sqrt -lots -lc
  
   endif
 
   FLIBS    :=  -lUfor -lfor -lFutil 
-  FFLAGS   :=  -pic  -static -fpe2 
+  FFLAGS   := $(DEBUG)  -pic  -static -fpe2 
   FEXTEND  :=  -extend_source 
 endif
 
@@ -231,7 +236,7 @@ ifneq (,$(findstring $(STAF_ARCH),hp_ux102 hp700_ux90))
     CXXFLAGS  := $(DEBUG) -z +Z  -Dextname  
     CFLAGS   := $(DEBUG) -Ae -z +Z -Dextname  
     LDFLAGS   := $(DEBUG)  -z -Wl,+s -Wl,-E 
-    STAF_ARCHIVE_LIBS := ON
+    EXEFLAGS  := $(LDFLAGS) -Wl,-N
     SOFLAGS   := $(DEBUG)  -b -z  
     CLIBS   :=   -lXm -lXt -lX11 -lm -lPW -ldld
 
@@ -258,19 +263,19 @@ endif
 
 ifneq (,$(findstring $(STAF_ARCH),sgi_52 sgi_53))
 #  ====================
-  OSF SGI irix IRIX CERNLIB_SGI CERNLIB_UNIX
+  OSFID := SGI IRIX CERNLIB_SGI CERNLIB_UNIX
   STRID := sgi
   FFLAGS    :=  -Nn20000 -static -trapuv  
   FEXTEND   :=  -extend_source
   CC        :=    cc
-  CFLAGS    :=   -signed -fullwarn
+  CFLAGS    :=   $(DEBUG) -signed -fullwarn
   CXX       :=   CC
-  CXXFLAGS  :=   -signed  -fullwarn
+  CXXFLAGS  :=   $(DEBUG) -signed  -fullwarn
   ARFLAGS   :=   slrvu
   LD        :=   $(CXX)
-  LDFLAGS   :=
+  LDFLAGS   :=$(DEBUG) 
   SO        :=   $(CXX)
-  SOFLAGS   :=  -shared
+  SOFLAGS   :=  $(DEBUG) -shared
   CLIBS     := -lsun -lmalloc  -lm -lc -lPW -lXext
   FLIBS     :=   -lftn 
 
@@ -278,19 +283,19 @@ endif
 
 ifneq (,$(findstring $(STAF_ARCH),sgi_64 ))
 
+  SGI64 := Yess
   OSFID :=  irix64 sgi64 SGI64 IRIX64 CERNLIB_QMIRIX64 CERNLIB_SGI CERNLIB_UNIX
   STRID := sgi
-  FFLAGS    :=  -n32  -static -trapuv 
+  FFLAGS    :=  $(DEBUG) -n32  -static -trapuv 
   FEXTEND   :=  -extend_source
   CC        :=    cc
-  CFLAGS    :=  -n32  -fullwarn	
+  CFLAGS    :=  $(DEBUG) -n32  -fullwarn	
   CXX       :=    CC
-  CXXFLAGS  :=  -n32 -fullwarn
+  CXXFLAGS  := $(DEBUG)  -n32 -fullwarn
   LD        :=   $(CXX)
-  LDFLAGS   :=  -n32 -multigot
-  STAF_ARCHIVE_LIBS := ON
+  LDFLAGS   := $(DEBUG)  -n32 -multigot
   SO        :=   $(CXX)
-  SOFLAGS   :=  -n32 -shared -multigot
+  SOFLAGS   := $(DEBUG)  -n32 -shared -multigot
   CLIBS     :=  -lsun  -lm -lc -lPW -lXext -lmalloc
   FLIBS     :=  -lftn 
 
@@ -298,7 +303,7 @@ endif
 
 
 ifneq (,$(findstring $(STAF_ARCH),sun4x_55 sun4x_56))
-
+  CERN_LEVEL := old
   CPPFLAGS := $(filter-out SunOS,$(CPPFLAGS))
   OSFID :=  sun SUN SOLARIS Solaris CERNLIB_UNIX CERNLIB_SUN
   STRID :=  sun
