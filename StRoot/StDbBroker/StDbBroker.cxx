@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.39 2002/02/25 19:21:51 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.40 2003/01/08 19:43:10 perev Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.40  2003/01/08 19:43:10  perev
+ * CleanUp
+ *
  * Revision 1.39  2002/02/25 19:21:51  porter
  * removed <<ends from  prodTime protection on run queries
  *
@@ -200,6 +203,7 @@ char **StDbBroker::GetComments(St_Table *parentTable)
 StDbBroker::StDbBroker(): m_structName(0), m_tableName(0), m_requestTimeStamp(0), m_tableVersion(0), m_database(0), m_ParentType(0), m_isVerbose(0), m_Nodes(0), m_Tree(0), m_flavor(0), m_prodTime(0) {
 
   m_runNumber=0;
+  m_node = 0;
   mgr=StDbManager::Instance();
   StDbMessService* ms=new StDbWrappedMessenger();
   mgr->setMessenger(ms);
@@ -260,6 +264,12 @@ void StDbBroker::Fill(void * pArray, const char **Comments)
   
   delete [] Comments;
 }  
+
+//_____________________________________________________________________________
+const char *StDbBroker::GetFlavor()
+{
+  return (m_node)? m_node->getFlavor():0;
+}
 
 //_____________________________________________________________________________
 StTableDescriptorI*
@@ -439,36 +449,36 @@ void * StDbBroker::Use(int tabID, int parID)
   SetZombie(false);
 
   StDbNode* anode = m_Nodes->getNode(tabID);
-  StDbTable* node=dynamic_cast<StDbTable*>(anode);
+  m_node=dynamic_cast<StDbTable*>(anode);
 
-  if(!node) return pData;
-  if(!node->hasDescriptor())node->setDescriptor(GetTableDescriptor());
+  if(!m_node) return pData;
+  if(!m_node->hasDescriptor())m_node->setDescriptor(GetTableDescriptor());
 
   // I would do this in a separate function but this would require
   // redoing it all with
 
   bool fetchStatus;
-  if(node->getDbType()==dbRunLog && 
-     node->getDbDomain() != dbStar && 
+  if(m_node->getDbType()==dbRunLog && 
+     m_node->getDbDomain() != dbStar && 
      m_runNumber>1000000 ){
-     fetchStatus=UseRunLog(node);   
+     fetchStatus=UseRunLog(m_node);   
   } else {
-    fetchStatus=mgr->fetchDbTable(node);
+    fetchStatus=mgr->fetchDbTable(m_node);
   }
 
   // success or failure yields an endtime ... so get it.
   char* thisTime;
-  m_endTimeStamp = node->getEndTime();
-  thisTime = node->getEndDateTime();
+  m_endTimeStamp = m_node->getEndTime();
+  thisTime = m_node->getEndDateTime();
   makeDateTime(thisTime,m_EndDate,m_EndTime);
 
   if(fetchStatus){  
 
-    m_nRows= node->GetNRows();
-    pData  = node->GetTableCpy(); // gives the "malloc'd version"
+    m_nRows= m_node->GetNRows();
+    pData  = m_node->GetTableCpy(); // gives the "malloc'd version"
 
-    m_beginTimeStamp = node->getBeginTime();
-    thisTime = node->getBeginDateTime();
+    m_beginTimeStamp = m_node->getBeginTime();
+    thisTime = m_node->getBeginDateTime();
     makeDateTime(thisTime,m_BeginDate,m_BeginTime);
 
   } else {

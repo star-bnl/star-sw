@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.25 2002/01/15 17:15:36 porter Exp $
+ * $Id: StDbBroker.h,v 1.26 2003/01/08 19:43:10 perev Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.26  2003/01/08 19:43:10  perev
+ * CleanUp
+ *
  * Revision 1.25  2002/01/15 17:15:36  porter
  * moved timestamp translation to a separate method
  *
@@ -133,6 +136,7 @@ struct oldDescriptor {
 };
 
   protected:
+    StDbTable*   m_node;
     oldDescriptor *m_descriptor;
     Descriptor  *mdescriptor;
     Char_t *     m_structName;  //name of the struct type used in this TTable
@@ -202,6 +206,7 @@ struct oldDescriptor {
     UInt_t GetNRows()                {return m_nRows;       }
     UInt_t GetBeginDate()            {return m_BeginDate;   }
     UInt_t GetBeginTime()            {return m_BeginTime;   }
+const char *GetFlavor();              
     UInt_t GetEndDate()              {return m_EndDate;     }
     UInt_t GetEndTime()              {return m_EndTime;     }
     UInt_t GetRequestTimeStamp()     {return m_requestTimeStamp; }

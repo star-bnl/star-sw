@@ -1,6 +1,8 @@
 void DbSave(){
 
   // Baseline shared libraries
+  gSystem->Load("libTable");
+  gSystem->Load("StUtilities.so");
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("St_Tables");
@@ -14,19 +16,29 @@ void DbSave(){
   // create makers connecting to databases RunParams & Geometry
 
   St_db_Maker *dbMk = new St_db_Maker("StarDb","MySQL:StarDb");
-
+//  dbMk->SetFlavor("sim+ofl");
+  dbMk->SetFlavor("sim");
+//  dbMk->SetFlavor("ofl");
  
   dbMk->Init();
 
   // Make reaquests for data
 
   // choose timestamp 
-  dbMk->SetDateTime(19990101,10000);
+  TDataSet *db = dbMk->Find(".data/StarDb");
+//  db->ls(2);
 
-  p = dbMk->GetDataBase("Calibrations/tpc");
-  p->ls(99);
-  dbMk->Save("Calibrations/tpc");
-  
+  dbMk->SetDateTime(19990101,10000); 	//Request Time
+  TDatime newTime(20020101,0); 		//Replace Time
+
+
+  TDataSetIter next(db,1);
+  TDataSet *ds=0,*p=0;
+  while ((ds=next())) 
+  { 
+    printf("NAME: %s\n",ds->GetName());
+    dbMk->Save(ds->GetName(),&newTime);
+  }
 
 }
 
