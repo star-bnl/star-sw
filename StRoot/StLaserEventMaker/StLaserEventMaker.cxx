@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.cxx,v 1.26 2003/03/01 17:46:08 pfachini Exp $
+// $Id: StLaserEventMaker.cxx,v 1.27 2003/05/15 15:31:31 perev Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.27  2003/05/15 15:31:31  perev
+// tpc oriented off
+//
 // Revision 1.26  2003/03/01 17:46:08  pfachini
 // Fixing the error message (writing numberTracks->GetMean() instead of numberTracks->GetRMS()).
 //
@@ -177,12 +180,12 @@ Int_t StLaserEventMaker::Make(){
   if (time==0) {time = GetTime();cout << "time = " << time << endl;}
 
   TDataSet *tpc_data =  GetInputDS("tpc_hits");
-  if (!tpc_data) return 0;
+  if (!tpc_data) return kStWarn;
 
   // 		Clusters exist -> do tracking
   TDataSetIter gime(tpc_data);
   St_tcl_tphit     *tphit = (St_tcl_tphit     *) gime("tphit");
-
+  if (!tphit) return kStWarn;
 
   // Move the hits according to the ExB corrections. We have a flag.
 
@@ -760,7 +763,7 @@ Int_t StLaserEventMaker::Finish() {
 /// Print CVS commit information
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.26 2003/03/01 17:46:08 pfachini Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.27 2003/05/15 15:31:31 perev Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
