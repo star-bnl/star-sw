@@ -2,8 +2,11 @@
 //                                                                      //
 // StMatchMaker class ( svm + egr )                                     //
 //                                                                      //
-// $Id: StMatchMaker.cxx,v 1.40 2002/04/17 23:58:05 jeromel Exp $
+// $Id: StMatchMaker.cxx,v 1.41 2002/05/16 01:59:19 caines Exp $
 // $Log: StMatchMaker.cxx,v $
+// Revision 1.41  2002/05/16 01:59:19  caines
+// Send in differnt group tables for the TPC and est refit so flagging of hits correct
+//
 // Revision 1.40  2002/04/17 23:58:05  jeromel
 // Changes by Helen for the SVT in egr implementation.
 //
@@ -339,47 +342,61 @@ Int_t StMatchMaker::Make(){
   
   
  
-  // Create groups table for tpc
+  // Create groups table for tpc, need two copies as call egr twice
   St_sgr_groups *tpc_groups;
+  St_sgr_groups *tpc_groupsEst;
   if (tphit->GetNRows() != 0){
-    tpc_groups  = new St_sgr_groups("tpc_groups",tphit->GetNRows());   
+    tpc_groups  = new St_sgr_groups("tpc_groups",tphit->GetNRows());  
+    tpc_groupsEst  = new St_sgr_groups("tpc_groupsEst",tphit->GetNRows()); 
     AddData(tpc_groups); 
+    AddData(tpc_groupsEst);
   }
   else {
     tpc_groups = new St_sgr_groups("tpc_groups",1);
+    tpc_groupsEst = new St_sgr_groups("tpc_groupsEst",1);
     AddGarb(tpc_groups);
+    AddGarb(tpc_groupsEst);
   }
   
   // egr
 
    tcl_tphit_st  *spc   = tphit->GetTable();
    sgr_groups_st *tgroup = tpc_groups->GetTable();
+   sgr_groups_st *tgroupEst = tpc_groupsEst->GetTable();
    tpt_track_st  *ttrack = tptrack->GetTable();
    int count = 0;
 
    for( i=0; i<tphit->GetNRows(); i++, spc++){
      
-       tgroup->id1 = spc->track;
+       tgroup->id1 = spc->track;      
        tgroup->id2 = i+1;
+       tgroupEst->id1 = spc->track;      
+       tgroupEst->id2 = i+1;
        //if( spc->flag !=0) {
        // tgroup->ident = -1;
        // }
        if( tgroup->id1 !=0){
 	 if( ttrack[((int)tgroup->id1/1000)-1].flag < 0){
 	 tgroup->ident = -10;
+	 tgroupEst->ident = -10;
 	 }
 	 else{
 	   tgroup->ident = 0;
+	   tgroupEst->ident = 0;
 	 }
        }
        else{
 	 tgroup->ident = 0;
+	 tgroupEst->ident = 0;
        }
+
        count++;
        tgroup++;
+       tgroupEst++;
    }
    
    tpc_groups->SetNRows(count);
+   tpc_groupsEst->SetNRows(count);
    egr_egrpar_st *egr_egrpar = m_egr_egrpar->GetTable();
    int usetpc = egr_egrpar->usetpc;
    int usesvt = egr_egrpar->usesvt;
@@ -549,7 +566,7 @@ Int_t StMatchMaker::Make(){
        
        //  Now call egr for real
        
-       iRes = egr_fitter (tphit,    vertex,      tptrack , tpc_groups,
+       iRes = egr_fitter (tphit,    vertex,      tptrack , tpc_groupsEst,
 			  scs_spt,m_egr_egrpar,stk_track, svt_groups,
 			  evt_match,EstGlobal);
        //	 ======================================================
@@ -603,6 +620,7 @@ Int_t StMatchMaker::Make(){
        // Fill bit map in EstGlobal
        
        spc   = tphit->GetTable();
+       tgroupEst = tpc_groupsEst->GetTable();
        tgroup = tpc_groups->GetTable();
        track  = EstGlobal->GetTable();
        
@@ -610,10 +628,12 @@ Int_t StMatchMaker::Make(){
        int row = 0;
        bool isset;
        
-       for( i=0; i<tpc_groups->GetNRows(); i++, tgroup++){
+       for( i=0; i<tpc_groupsEst->GetNRows(); i++, tgroupEst++, tgroup++){
 	 
-	 if( tgroup->id1 != 0 && tgroup->ident > -5){
-	   spt_id = tgroup->id2-1;
+	 if( tgroupEst->ident != tgroup->ident)
+	 cout << tgroupEst->ident << " " << tgroup->ident << endl;
+	 if( tgroupEst->id1 != 0 && tgroupEst->ident > -5){
+	   spt_id = tgroupEst->id2-1;
 	   row = spc[spt_id].row/100;
 	   row = spc[spt_id].row - row*100;
 	   
