@@ -50,7 +50,7 @@ C---------------
       INTEGER i,j,k,l
  
       REAL	rd_cut,rv_cut,rmin_cut,dmass,mass_id(4)
-      REAL      lmass_check,mass_error
+      REAL      mass_error
 
       INTEGER 	maxtr,matchl,npid1,npid2,ok
       PARAMETER	(maxtr=5000)
@@ -106,32 +106,30 @@ C---------------
         id2=26
         index=3
       ENDIF
-	rd_cut=exipar(1).dca
-	rv_cut=exipar(1).dlen
-	rmin_cut=exipar(1).dcaxi
-        mass_error=exipar(1).dmass ! wkw cut for lambda mass
+      rd_cut=exipar(1).dca
+      rv_cut=exipar(1).dlen
+      rmin_cut=exipar(1).dcaxi
+      mass_error=exipar(1).dmass ! wkw cut for lambda mass
 *
-c        mainv(1) = privert(1).x
-c        mainv(2) = privert(1).y
-c        mainv(3) = privert(1).z
-        mainv(1) = 0.
-        mainv(2) = 0.
-        mainv(3) = 0.
+c       mainv(1) = privert(1).x
+c       mainv(2) = privert(1).y
+c       mainv(3) = privert(1).z
+      mainv(1) = 0.
+      mainv(2) = 0.
+      mainv(3) = 0.
 *
 *-----steering routine------------------------------------------------
 *
-
-        ok=0
+      ok=0
 
       DO 10 i=1,nok
-
 *
 *decide here if dE/dx,TOF can say anything about PID
 *if yes .and. it is a pion/proton pair proceed if not
 *take GEANT ID or a (hypothetical) mass will be assigned
 *
         IF(id.ne.0) THEN
-	IF(idd(i).ne.id1) GOTO 10
+          IF(idd(i).ne.id1) GOTO 10
         ENDIF
 
         trki(1)=trak(i).r
@@ -145,63 +143,68 @@ c test for xi...must be a negative
 
 	DO 20 j=1,ev0out_h.nok
 
-        IF(id.ne.0) THEN
-	IF(ev0out(j).inv_mass(index).eq.0.0) GOTO 20
-c	IF( abs(ev0out(j).inv_mass(index)-1.11563) ! put in elsewhere by wkw
-c     +      .gt.0.020 ) GOTO 20
-        ENDIF
+c*** pgj: moved back wkw's mass check to start of loop
+          IF( abs(ev0out(j).inv_mass(2)-1.11563).gt.mass_error ) GOTO 20
 
-        trkj(1)=ev0out(j).p(1)
-        trkj(2)=ev0out(j).p(2)
-        trkj(3)=ev0out(j).p(3)
-        trkj(4)=0.
-        trkj(5)=0.
-        trkj(6)=0.
-        pv0(1) =ev0out(j).p(1)
-        pv0(2) =ev0out(j).p(2)
-        pv0(3) =ev0out(j).p(3)
-        xv0(1) =ev0out(j).x(1)
-        xv0(2) =ev0out(j).x(2)
-        xv0(3) =ev0out(j).x(3)
+c*** pgj: don't use tracks already used in the v0
+          IF( ev0out(j).idneg .eq. trak(i).id .or.
+     >        ev0out(j).idpos .eq. trak(i).id ) GOTO 20
 
-		call circle_param(trki,xc1,r1)
+          IF(id.ne.0) THEN
+	    IF( ev0out(j).inv_mass(index) .eq. 0.0 ) GOTO 20
+c	     IF( abs(ev0out(j).inv_mass(index)-1.11563) ! put elsewhere by wkw
+c     +          .gt.0.020 ) GOTO 20
+          ENDIF
 
-	 	CALL VZERO(xcom,2)
-	 	CALL VZERO(ycom,2)
-		iflag1=0
-		call casc_geom(rd_cut,pv0,xv0,xc1,r1,xcom,ycom,zcom,iflag1)
-		IF(iflag1.eq.5) GOTO 20
+          trkj(1)=ev0out(j).p(1)
+          trkj(2)=ev0out(j).p(2)
+          trkj(3)=ev0out(j).p(3)
+          trkj(4)=0.
+          trkj(5)=0.
+          trkj(6)=0.
+          pv0(1) =ev0out(j).p(1)
+          pv0(2) =ev0out(j).p(2)
+          pv0(3) =ev0out(j).p(3)
+          xv0(1) =ev0out(j).x(1)
+          xv0(2) =ev0out(j).x(2)
+          xv0(3) =ev0out(j).x(3)
+
+          CALL circle_param(trki,xc1,r1)
+
+          CALL VZERO(xcom,2)
+          CALL VZERO(ycom,2)
+          iflag1=0
+          CALL casc_geom(rd_cut,pv0,xv0,xc1,r1,xcom,ycom,zcom,iflag1)
+          IF(iflag1.eq.5) GOTO 20
 
 C----two possible intersection points ---------------------------
 
-			DO jk=1,2
-		xp(1)=xcom(jk)
-		xp(2)=ycom(jk)
-111		call exi_project_track(xc1,r1,xp,xn1)
-		call update_track_param(xc1,r1,xn1,trki,trk1)
-		rd=sqrt( (xn1(1)-xp(1))**2 + (xn1(2)-xp(2))**2
-     +			+(trk1(3)-zcom(jk))**2 )
+          DO jk=1,2
+            xp(1)=xcom(jk)
+            xp(2)=ycom(jk)
+111            CALL exi_project_track(xc1,r1,xp,xn1)
+            CALL update_track_param(xc1,r1,xn1,trki,trk1)
+            rd=sqrt( (xn1(1)-xp(1))**2 + (xn1(2)-xp(2))**2 +
+     >               (trk1(3)-zcom(jk))**2 )
 
-		xpp(1)=(xn1(1)+xp(1))/2.
-		xpp(2)=(xn1(2)+xp(2))/2.
-		xpp(3)=(trk1(3)+zcom(jk))/2.
-		rv=sqrt(xpp(1)**2+xpp(2)**2+xpp(3)**2)
+            xpp(1)=(xn1(1)+xp(1))/2.
+            xpp(2)=(xn1(2)+xp(2))/2.
+            xpp(3)=(trk1(3)+zcom(jk))/2.
+            rv=sqrt(xpp(1)**2+xpp(2)**2+xpp(3)**2)
 *
-*---decide here if it is a good candidate
+*---decide here if it is a good candidate (pgj: removed lambda mass check)
 *
-                lmass_check=abs(ev0out(j).inv_mass(2)-1.11563) ! wkw
-		IF( (rd.le.rd_cut).and.(rv.gt.rv_cut).and.(rv.lt.30.).and.
-     &               lmass_check.lt.mass_error) THEN 
-		massl(1)=0.139
-		massl(2)=1.11563
-		call inv_mass(trk1,trkj,massl,pp,invms,8)
+            IF( (rd.le.rd_cut).and.(rv.gt.rv_cut).and.(rv.lt.30.) ) THEN 
+              massl(1)=0.139
+              massl(2)=1.11563
+              CALL inv_mass(trk1,trkj,massl,pp,invms,8)
 * be careful. Impact parameter needs main vertex at (0,0,0)
-		call casc_impact_param(mainv,xpp,pp,rmin,iflag)
-                IF((rmin.le.rmin_cut).and.(iflag.ne.2)) THEN
+              CALL casc_impact_param(mainv,xpp,pp,rmin,iflag)
+              IF((rmin.le.rmin_cut).and.(iflag.ne.2)) THEN
 
 c               wkw: breakout if ok=maxlen
                 if (ok.eq.exiout_h.maxlen) then
-                   return
+                  return
                 endif
 
                 ok=ok+1
@@ -232,15 +235,12 @@ C--calculate Armenteros variables---
                 exiout(ok).pt=pper
                 exiout(ok).alpha=(ppar-npar)/(ppar+npar)
 C--calculate impact parameters--- wkw
-		xp(1)=0.
-		xp(2)=0.
+                xp(1)=0.
+                xp(2)=0.
 c               negative track
-		call exi_project_track(xc1,r1,xp,xn1)
-c		call ev0_update_track_param(xc1,r1,xn1,trki,trk1)
+                CALL exi_project_track(xc1,r1,xp,xn1)
+c		 CALL ev0_update_track_param(xc1,r1,xn1,trki,trk1)
                 exiout(ok).chi2=sqrt(xn1(1)**2.+xn1(2)**2.)
-
-
-
 
 c     put some ev0 info in exiout cov and unused variables (wkw)
                 exiout(ok).cov(1)=ev0out(j).dcapn
@@ -252,52 +252,50 @@ c     put some ev0 info in exiout cov and unused variables (wkw)
                 exiout(ok).inv_mass(2)=ev0out(j).cos_th_cm(1)
                 exiout(ok).inv_mass(3)=ev0out(j).dcap
                 exiout(ok).inv_mass(4)=ev0out(j).dcan
-                
-                
 
 *
 *---if blind run test all mass hypothesis
 *
-        IF(rmin.le.3000.) GOTO 41       !go out here for now
+                IF(rmin.le.3000.) GOTO 41       !go out here for now
                 DO ll=1,4
-c                IF(id.eq.0) THEN
-                massl(1)=mass1(ll)
-                massl(2)=mass2(ll)
-c                ELSE
-c		massl(1)=masst(id1)
-c		massl(2)=masst(id2)
-c                ENDIF
-		call inv_mass(trk1,trk2,massl,pp,invms,8)
-
-                exiout(ok).inv_mass(ll)=invms
+c                  IF(id.eq.0) THEN
+                  massl(1)=mass1(ll)
+                  massl(2)=mass2(ll)
+c                  ELSE
+c		     massl(1)=masst(id1)
+c		     massl(2)=masst(id2)
+c                  ENDIF
+                  CALL inv_mass(trk1,trk2,massl,pp,invms,8)
+                  exiout(ok).inv_mass(ll)=invms
 
 C--calculate proper lifetime assuming that particle originated at main vertex
-                exiout(ok).tau(ll)=invms*rv/pxi     
-                exiout(ok).tmin(ll)=invms*rv_cut/pxi
-c--calculate cos(theta_c.m.)
-c                env0 = sqrt(pv0*pv0+invms*invms)
-c                bv0  =pv0/env0
-c                gv0  =env0/invms
-c                ep   =sqrt(pst1(1)*pst1(1)+pst1(2)*pst1(2)+
-c     +                     pst1(3)*pst1(3)+massl(1)*massl(1))
-c                ppar_cm=gv0*(ppar-bv0*ep)
-c                exiout(ok).cos_th_cm(ll)=cos(atan2(pper,ppar_cm))
+                  exiout(ok).tau(ll)=invms*rv/pxi     
+                  exiout(ok).tmin(ll)=invms*rv_cut/pxi
+
+C--calculate cos(theta_c.m.)
+c                  env0 = sqrt(pv0*pv0+invms*invms)
+c                  bv0  =pv0/env0
+c                  gv0  =env0/invms
+c                  ep   =sqrt(pst1(1)*pst1(1)+pst1(2)*pst1(2)+
+c     +                       pst1(3)*pst1(3)+massl(1)*massl(1))
+c                  ppar_cm=gv0*(ppar-bv0*ep)
+c                  exiout(ok).cos_th_cm(ll)=cos(atan2(pper,ppar_cm))
 c
-                 IF(id.ne.0) GOTO 30            !blind or not?
+                   IF(id.ne.0) GOTO 30		!blind or not?
                 ENDDO
 
-41			GOTO 30			!next j
-		 ENDIF				!rmin and iflag check
+41              GOTO 30				!next j
+              ENDIF				!rmin and iflag check
 
-		ENDIF				!rd.and.rv check
+            ENDIF				!rd.and.rv check
 
-		IF(iflag1.eq.3) GOTO 30		!touching circles-loop once
+            IF(iflag1.eq.3) GOTO 30		!touching circles-loop once
 
-			ENDDO			!jk=1,2
+          ENDDO					!jk=1,2
 
- 30	CONTINUE
+ 30	  CONTINUE
 
- 20	CONTINUE
+ 20     CONTINUE
 
  10   CONTINUE	
 

@@ -73,7 +73,7 @@ C---------------
 *
         iv1=g2t_track(exiout(i).idba).start_vertex_p
         iv2=g2t_track(exiout(i).idv0).start_vertex_p
-        IF( (iv1.eq.iv2).and.(iv1.ne.1).and.(iv2.ne.1) ) THEN
+        IF( (iv1.eq.iv2).and.(iv1.gt.1) ) THEN
          exiout(i).itrue=1
          exiout(i).x_true(1)=g2t_vertex(iv1).ge_x(1)
          exiout(i).x_true(2)=g2t_vertex(iv1).ge_x(2)
