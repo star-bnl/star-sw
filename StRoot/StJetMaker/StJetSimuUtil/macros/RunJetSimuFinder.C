@@ -85,7 +85,7 @@ void RunJetSimuFinder(int nevents = 10,
     //StMuDst2StEventMaker - make StEvent from StMuDst
     StMuDst2StEventMaker* eventMaker = new StMuDst2StEventMaker("MuDst2StEvent");
   
-    //get BEMC calibration 
+    //get BEMC calibration
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
   
     //Instantiate Maker with Pythia event record etc for simulation
@@ -107,7 +107,7 @@ void RunJetSimuFinder(int nevents = 10,
     //set the analysis cuts: (see StJetMaker/StppJetAnalyzer.h -> class StppAnaPars )
     StppAnaPars* anapars = new StppAnaPars();
     anapars->setFlagMin(0); //track->flag() > 0
-    anapars->setNhits(15); //track->nHitsFit()>15    
+    anapars->setNhits(15); //track->nHitsFit()>15
     anapars->setCutPtMin(0.2); //track->pt() > 0.2
     anapars->setAbsEtaMax(1.6); //abs(track->eta())<1.6
     anapars->setJetPtMin(5.0);
