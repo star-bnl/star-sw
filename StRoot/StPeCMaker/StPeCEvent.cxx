@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.cxx,v 1.11 2003/02/05 17:14:05 yepes Exp $
+// $Id: StPeCEvent.cxx,v 1.12 2003/02/11 20:45:39 yepes Exp $
 // $Log: StPeCEvent.cxx,v $
+// Revision 1.12  2003/02/11 20:45:39  yepes
+// Events without a vertex in MuDst should vertex parameters to -9999
+//
 // Revision 1.11  2003/02/05 17:14:05  yepes
 // Adding bField and pPairs.psi to tree
 //
@@ -258,32 +261,39 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
 
 Int_t StPeCEvent::fill(StMuDst *mudst) {
    //cout << "Entering StPeCEvent::fill(StMuDst *mudst)" << endl;
-  Int_t nGlobals = 0, SumQ = 0; 
-  Float_t SumPx = 0.0, SumPy = 0.0;  
-  float px, py;
-  TClonesArray* muTracks = 0;
-  StMuEvent* event = 0;
-  StMuTrack *tp = 0;
+   Int_t nGlobals = 0, SumQ = 0; 
+   Float_t SumPx = 0.0, SumPy = 0.0;  
+   float px, py;
+   TClonesArray* muTracks = 0;
+   StMuEvent* event = 0;
+   StMuTrack *tp = 0;
 
    //Save the event reference
-  muDst = mudst;
-  event = muDst->event();
+   muDst = mudst;
+   event = muDst->event();
 
    //Set Run and Event Number
-  eventN = event->eventInfo().id();
+   eventN = event->eventInfo().id();
 
-  runN = event->eventInfo().runId(); 
-  cout << "Event Run ID: " << runN << endl;
-  cout << "Event ID: " << eventN << endl;
+   runN = event->eventInfo().runId(); 
+   cout << "Event Run ID: " << runN << endl;
+   cout << "Event ID: " << eventN << endl;
 
-  bField = event->eventSummary().magneticField();
-  StThreeVectorF vtx = event->primaryVertexPosition();
+   bField = event->eventSummary().magneticField();
 
-  xVertex = vtx.x();
-  yVertex = vtx.y();
-  zVertex = vtx.z();
-  rVertex = sqrt(xVertex*xVertex + yVertex*yVertex);
-    
+   if ( event->eventSummary().numberOfVertices() ) {
+      StThreeVectorF vtx = event->primaryVertexPosition();
+      xVertex = vtx.x();
+      yVertex = vtx.y();
+      zVertex = vtx.z();
+      rVertex = sqrt(xVertex*xVertex + yVertex*yVertex);
+   }
+   else {
+      xVertex = -9999.;
+      yVertex = -9999.;
+      zVertex = -9999.;
+      rVertex = -9999.;
+   }
  
    //Retrieve the primary tracks
    muTracks = muDst->primaryTracks();
