@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMcSvtLadderHitCollection.cc,v 2.3 2000/03/06 18:05:22 calderon Exp $
+ * $Id: StMcSvtLadderHitCollection.cc,v 2.4 2000/04/19 14:34:48 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Oct 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMcSvtLadderHitCollection.cc,v $
+ * Revision 2.4  2000/04/19 14:34:48  calderon
+ * More corrections for the SSD, thanks Helen
+ *
  * Revision 2.3  2000/03/06 18:05:22  calderon
  * 1) Modified SVT Hits storage scheme from layer-ladder-wafer to
  * barrel-ladder-wafer.
@@ -29,7 +32,7 @@
  **************************************************************************/
 #include "StMcSvtLadderHitCollection.hh"
 
-static const char rcsid[] = "$Id: StMcSvtLadderHitCollection.cc,v 2.3 2000/03/06 18:05:22 calderon Exp $";
+static const char rcsid[] = "$Id: StMcSvtLadderHitCollection.cc,v 2.4 2000/04/19 14:34:48 calderon Exp $";
 
 StMcSvtLadderHitCollection::StMcSvtLadderHitCollection()
 {
@@ -57,6 +60,9 @@ StMcSvtLadderHitCollection::numberOfWafers() const
     case 2:
         return 7;
         break;
+    case 3:  // SSD
+	return 16;
+	break;
     default:
         return 0;
     }

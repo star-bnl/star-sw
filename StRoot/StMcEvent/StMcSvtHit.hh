@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcSvtHit.hh,v 2.6 2000/04/18 23:46:12 calderon Exp $
+ * $Id: StMcSvtHit.hh,v 2.7 2000/04/19 14:34:48 calderon Exp $
  * $Log: StMcSvtHit.hh,v $
+ * Revision 2.7  2000/04/19 14:34:48  calderon
+ * More corrections for the SSD, thanks Helen
+ *
  * Revision 2.6  2000/04/18 23:46:12  calderon
  * Fix bug in reurning barrel number
  * Enumerations for the Max barrels, ladders & wafers modified for
@@ -92,7 +95,11 @@ inline unsigned long
 StMcSvtHit::wafer() const
 {
     // Volume Id: 1000*layer + 100*wafer + ladder (Helen, Nov 99)
-    return ((mVolumeId)%1000)/100;
+
+    if (mVolumeId < 7101) // SVT
+	return ((mVolumeId)%1000)/100;
+    else // SSD
+	return ((mVolumeId/100)-70);
 }
 
 inline unsigned long
