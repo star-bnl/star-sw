@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.27 1999/01/21 20:55:07 fine Exp $ 
+// $Id: St_XDFFile.cxx,v 1.28 1999/02/20 22:15:40 fine Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.28  1999/02/20 22:15:40  fine
+// Clean up to avoid g++ compilation warnings
+//
 // Revision 1.27  1999/01/21 20:55:07  fine
 // Some comments have been added fro the new Browse method
 //
@@ -186,7 +189,7 @@ void St_XDFFile::Delete(DS_DATASET_T *ds)
   }
   else
     for (UInt_t j=0; j< ds->elcount; j++)
-      if (dt=ds->p.link[j]) { 
+      if ( (dt=ds->p.link[j]) ) { 
             Delete(dt);
             ds->p.link[j] = dt;
       }
@@ -453,7 +456,8 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
         cl = table->GetRowClass();
         UInt_t cCount=0;;
         dsTableColumnCount(&cCount, ds);
-        if (cl->GetNdata() == cCount) {
+        if (UInt_t(cl->GetNdata()) == cCount)
+        {
           table->SetTablePointer(data);
           table->SetName(name);
           table->SetfN(nrows);
@@ -496,7 +500,7 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
   else {
     dataset = new St_DataSet(ds->name);
     for (UInt_t j=0; j< ds->elcount; j++)
-      if (dt=ds->p.link[j]) 
+      if ( (dt=ds->p.link[j]) )
           dataset->Add(MakeDataSet(dt));
   }
   return dataset;
@@ -538,7 +542,7 @@ DS_DATASET_T *St_XDFFile::MakeDataSet(St_DataSet *dataset)
     ds->elcount  = dataset->GetListSize();      // the number of the links = dataset->GetListSize();
     ds->maxcount = ds->elcount;                 // the maximum number of rows for a table
     ds->p.link   = (ds_dataset_t **)malloc(sizeof(void *)*ds->elcount);
-    while( set = next())
+    while( (set = next()) )
           ds->p.link[i++] = MakeDataSet(set);
   }
   return ds;
@@ -593,9 +597,9 @@ Int_t St_XDFFile::dir(const Char_t *filename, UInt_t firstRecord, UInt_t numberO
   if (xdf.OpenXDF(filename) == 0)
   {
     St_DataSet *set = 0;
-    while ( (set = xdf.NextEventGet()) && (!numberOfRecords || counter < firstRecord+numberOfRecords) ) 
+    while ( (set = xdf.NextEventGet()) && (!numberOfRecords || counter < Int_t (firstRecord+numberOfRecords) ) ) 
     {
-      if (!firstRecord || (counter >= firstRecord-1)) // Skip first "firstRecords" records
+      if (!firstRecord || (counter >= Int_t (firstRecord-1)))  // Skip first "firstRecords" records
       {
         St_DataSetIter dir(set);
         dir.Du();
