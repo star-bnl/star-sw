@@ -5,12 +5,12 @@
 class StChain;
 StChain *chain=0;
 
-void RunStiMaker(Int_t nevents=5,
+void RunStiMaker(Int_t nevents=1,
 		 
 		 bool simulated=true, /*!sim or data?*/
 		 
-		 //bool draw=true, /*! use gui, click your way around */
-		 bool draw=false, /*! console version, run through nevents */
+		 bool draw=true, /*! use gui, click your way around */
+		 //bool draw=false, /*! console version, run through nevents */
 		 
 		 bool doFit=true, /*! true->fit track only */
 		 //bool doFit=false, /*! false->find track only */
@@ -23,10 +23,12 @@ void RunStiMaker(Int_t nevents=5,
 
                  //This file points to 110 events from mevsim (homebrew had. cocktail)
                  const char* MainFile="/star/data17/ITTF/data/mevsim/10_9_01/*.event.root")
+
+//This file points to a nightly low density hadronic cocktail reconstruction.
+//const char* MainFile="/star/rcf/test/dev/trs_redhat61/Tue/year_2001/hc_lowdensity/*.event.root")
     
 {    
     // Dynamically link needed shared libs
-    
     cout <<"Loading St_base"<<endl;
     gSystem->Load("St_base");
     
