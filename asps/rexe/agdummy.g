@@ -48,7 +48,7 @@ Replace[LIST #;] with [ #1 _
              hlimap,
  "somesg "   rm48,rm48in,rsfact,rsfinv,rsfeqn,dsfact,rfft,cfft,
  " math  "   sortrq,dgmlt1,dgmlt2,eisrs1,dsfeqn,mxuty,rseqn,
-             dzddiv,rlsqp2,
+             dzddiv,rlsqp2,assndx,
              ERF,ERFC,GAMMA,cgamma,
  "higz"      iuwk,igend,iscan,hfnov,hddir,
  "spare  "   ie3tos,ie3fos,pkbyt,upkbyt,ucocop,vbias,vline,vdist2,vmaxa,
