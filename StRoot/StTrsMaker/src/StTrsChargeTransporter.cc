@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsChargeTransporter.cc,v 1.7 2003/09/02 17:59:19 perev Exp $
+ * $Id: StTrsChargeTransporter.cc,v 1.8 2003/09/08 02:13:27 perev Exp $
  *
  * Author: brian Nov 1, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTrsChargeTransporter.cc,v $
+ * Revision 1.8  2003/09/08 02:13:27  perev
+ * fabs instead abs
+ *
  * Revision 1.7  2003/09/02 17:59:19  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -110,7 +113,7 @@ double StTrsChargeTransporter::maximumTransparency()
 
 void StTrsChargeTransporter::sigmaGC()
 {
-    mSGC = abs(4*pi*mGateWireRadius*epsilon0*mDriftVoltage/mDriftDistance/mGatePitch);
+    mSGC = ::fabs(4*pi*mGateWireRadius*epsilon0*mDriftVoltage/mDriftDistance/mGatePitch);
 //     PR(mSGC);
 }
 
@@ -190,7 +193,7 @@ double StTrsChargeTransporter::transparencyCalculation()
 	trans = 1.;
     }
     else if(mGateVoltage > maximumTransparency() && mGateVoltage < transitionVoltage()) {
-	double sigmaP = abs(epsilon0*mDriftVoltage/mDriftDistance);
+	double sigmaP = ::fabs(epsilon0*mDriftVoltage/mDriftDistance);
 	trans = (1-(sigmaGPlus()/sigmaP));
     }
     else if(mGateVoltage >=transitionVoltage()) {
