@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL3EventSummary.cxx,v 2.3 2001/11/14 23:29:35 struck Exp $
+ * $Id: StL3EventSummary.cxx,v 2.4 2004/03/26 20:59:28 dietel Exp $
  *
  * Author: Christof Struck, July 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StL3EventSummary.cxx,v $
+ * Revision 2.4  2004/03/26 20:59:28  dietel
+ * Check pointer to L3_SUMD in constructor
+ *
  * Revision 2.3  2001/11/14 23:29:35  struck
  * minor changes in 'unbiasedTrigger' function, trigger word added for debugging purposes
  *
@@ -25,8 +28,9 @@
 #include "StL3EventSummary.h"
 #include "StL3AlgorithmInfo.h"
 
+#include "StMessMgr.h"
 
-static const char rcsid[] = "$Id: StL3EventSummary.cxx,v 2.3 2001/11/14 23:29:35 struck Exp $";
+static const char rcsid[] = "$Id: StL3EventSummary.cxx,v 2.4 2004/03/26 20:59:28 dietel Exp $";
 
 ClassImp(StL3EventSummary)
 
@@ -45,13 +49,27 @@ StL3EventSummary::StL3EventSummary()
 
 StL3EventSummary::StL3EventSummary(Bank_L3_SUMD *raw)
 {
-  mNumberOfProcessedEvents = raw->nProcessed;
-  mNumberReconstructedEvents = raw->nReconstructed;
-  mNumberOfTracks = 0;
-  mNumberOfAlgorithms = raw->nAlg;
-  mZVertexTrigger = false;
-  mUnbiasedTrigger = false;
-  mUnbiasedPreScale = 0;
+  if(raw == NULL && 0) {
+
+    gMessMgr->Warning() << "No L3_SUMD bank" << endm;
+
+    mNumberOfProcessedEvents = -1;
+    mNumberReconstructedEvents = -1;
+    mNumberOfTracks = 0;
+    mNumberOfAlgorithms = 0;
+    mZVertexTrigger = false;
+    mUnbiasedTrigger = true;
+    mUnbiasedPreScale = 0;
+
+  } else {
+    mNumberOfProcessedEvents = raw->nProcessed;
+    mNumberReconstructedEvents = raw->nReconstructed;
+    mNumberOfTracks = 0;
+    mNumberOfAlgorithms = raw->nAlg;
+    mZVertexTrigger = false;
+    mUnbiasedTrigger = false;
+    mUnbiasedPreScale = 0;
+  }
 }
 
 
