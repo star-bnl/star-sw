@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: FCFMaker.cxx,v 1.1 2003/09/17 18:22:26 tonko Exp $
+ * $Id: FCFMaker.cxx,v 1.2 2003/09/17 19:03:59 tonko Exp $
  *
  * Author: Jeff Landgraf, BNL Feb 2002
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: FCFMaker.cxx,v $
+ * Revision 1.2  2003/09/17 19:03:59  tonko
+ * Fixed a small warning in BuildCPP
+ *
  * Revision 1.1  2003/09/17 18:22:26  tonko
  * First seemingly working set
  *
@@ -499,6 +502,7 @@ Int_t StDaqClfMaker::BuildCPP(int nrows, raw_row_st *row, raw_pad_st *pad, raw_s
   int r,p,s;
   int offset;
 
+  offset = -1 ;
   for(i=0;i<nrows;i++) {
     int pad_off = row[i].ipad;
     r = row[i].RowId;
@@ -532,6 +536,10 @@ Int_t StDaqClfMaker::BuildCPP(int nrows, raw_row_st *row, raw_pad_st *pad, raw_s
 	offset += n+1;
       } 
     }
+  }
+
+  if(offset == -1) {	// Huh?
+	  	gMessMgr->Error() << "Offset not updated???" << endm ;
   }
 
   return offset;
