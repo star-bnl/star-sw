@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.55 2003/08/26 21:10:13 posk Exp $
+// $Id: plot.C,v 1.56 2004/03/01 22:43:43 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -21,8 +21,7 @@
 #include "TMath.h" 
 #include <iostream.h>
 
-//const    Int_t nHars    = 8;
-const    Int_t nHars    = 2;
+const    Int_t nHars    = 4;
 const    Int_t nSels    = 2;
 const    Int_t nSubs    = 2;
 Int_t    runNumber      = 0;
@@ -333,7 +332,7 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
   TPaveLabel* run = new TPaveLabel(0.1,0.01,0.2,0.03,runName);  
   run->Draw();
   TDatime now;
-  TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now->AsString());
+  TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now.AsString());
   date->Draw();
   TPad* graphPad = new TPad("Graphs","Graphs",0.01,0.05,0.97,0.95);
   graphPad->Draw();
@@ -680,7 +679,7 @@ TCanvas* plotResolution(){
   TPaveLabel* run = new TPaveLabel(0.1,0.01,0.2,0.03,runName);  
   run->Draw();
   TDatime now;
-  TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now->AsString());
+  TPaveLabel* date = new TPaveLabel(0.7,0.01,0.9,0.03,now.AsString());
   date->Draw();
   TLine* lineZeroHar = new TLine(0.5, 0., nHars+0.5, 0.);
   TPad* graphPad = new TPad("Graphs","Graphs",0.01,0.05,0.97,0.99);
@@ -872,6 +871,9 @@ static Double_t StruveL0(Double_t x)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.56  2004/03/01 22:43:43  posk
+// Changed some "->" to ".".
+//
 // Revision 1.55  2003/08/26 21:10:13  posk
 // Calculates v8 if nHars=8.
 //
