@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 3.12 2001/08/23 13:20:55 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.13 2001/09/14 21:39:02 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.13  2001/09/14 21:39:02  genevb
+// Adjustments to not depend on order in which maker Clear() is called
+//
 // Revision 3.12  2001/08/23 13:20:55  genevb
 // Many bug workarounds...
 //
@@ -394,6 +397,20 @@ void StStrangeMuDstMaker::Clear(Option_t *option) {
   if (Debug()) gMessMgr->Debug() << "In StStrangeMuDstMaker::Clear() ... "
                                << GetName() << endm; 
 
+  for (Int_t i=0; i<subMakers.GetEntries(); i++) {
+    StStrangeMuDstMaker* subMaker = (StStrangeMuDstMaker*) (subMakers[i]);
+    subMaker->ClearForReal(option);
+  }
+  if (!dstMaker) {
+    ClearForReal(option);
+  }
+}
+//_____________________________________________________________________________
+void StStrangeMuDstMaker::ClearForReal(Option_t *option) {
+
+  if (Debug()) gMessMgr->Debug() << "In StStrangeMuDstMaker::ClearForReal() ... "
+                               << GetName() << endm; 
+
   if (tree) {
     if (dstMaker) {                                   // Making a subDST
       MakeCreateSubDst();
@@ -493,14 +510,6 @@ Int_t StStrangeMuDstMaker::OpenFile() {
 Int_t StStrangeMuDstMaker::CloseFile() {
   if (muDst) {
     if (rw == StrangeWrite) {
-
-      // This section is to overcome a bug in Root which prevents the
-      // MC class TStreamerInfo from being written in filter mode
-      if (doMc) {
-        muDst->cd();
-        EachController(GetMcClass()->GetStreamerInfo()->ForceWriteInfo());
-      }
-
       muDst->Write();
       muDst->cd();
       cuts->Store();
@@ -551,6 +560,12 @@ void StStrangeMuDstMaker::SelectEvent() {
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::UnselectEvent() {
   EachController(Unselect(-1));
+}
+//_____________________________________________________________________________
+void StStrangeMuDstMaker::SubDst(StStrangeMuDstMaker* maker) {
+  dstMaker = maker;
+  if (!(maker->subMakers.FindObject((TObject*) this)))
+    maker->subMakers.Add(this);
 }
 //_____________________________________________________________________________
 void StStrangeMuDstMaker::SetCorrectionFile(char* fname) {
