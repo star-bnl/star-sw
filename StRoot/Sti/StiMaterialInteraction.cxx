@@ -15,7 +15,7 @@
 #include <float.h>
 #include <string>
 
-static void StiMaterialInteraction::nameForIntersection(
+void StiMaterialInteraction::nameForIntersection(
     StiIntersection &intersection, string &name){
   switch(intersection){
     case kFailed: name = "failed"; break;
@@ -119,8 +119,8 @@ StiIntersection StiMaterialInteraction::findPlanarIntersection(
   dDensity = (pGas->getDensity()*dPathLengthGap +
               pMaterial->getDensity()*dPathLengthDetector)/dPathLength;
 
-  dThickness = (dPathLengthGap/dPathLength/pGas->getRadLength() +
-                dPathLengthDetector/dPathLength/pMaterial->getRadLength());
+  dThickness = (dPathLengthGap/pGas->getRadLength() +
+                dPathLengthDetector/pMaterial->getRadLength());
 
   //--------------------------------
   // rotate to local and determine 
