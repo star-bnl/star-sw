@@ -8,6 +8,7 @@ endif
 .SUFFIXES:
 
 include $(STAF_HOME)/MakeEnv.mk
+include $(STAF_HOME)/MakeArch.mk
 
 #
 #	INP_DIR & OUT_DIR could be declared in invoking
@@ -82,10 +83,10 @@ show:
 	@echo INP_DIR     := $(INP_DIR) 
 	@echo OUT_DIR     := $(OUT_DIR) 
 	@echo ASPS        := $(ASPS)
-	@echo ASPSEXE       := $(ASPSEXE)
-	@echo ALL_INC_DIRS       := $(ALL_INC_DIRS)
-	@echo ALL_INC_INST       := $(ALL_INC_INST)
-	@echo INC_GEN_DIR       := $(INC_GEN_DIR)
+	@echo ASPSEXE     := $(ASPSEXE)
+	@echo ALL_INC_DIRS:= $(ALL_INC_DIRS)
+	@echo ALL_INC_INST:= $(ALL_INC_INST)
+	@echo INC_GEN_DIR := $(INC_GEN_DIR)
 	@echo ASPSLIB     := $(ASPSLIB)
 	@echo INC_GEN_DIR := $(INC_GEN_DIR)
-
+	@echo GREP        := $(GREP)
