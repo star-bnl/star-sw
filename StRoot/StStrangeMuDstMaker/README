@@ -9,6 +9,12 @@ readStrangeMuDst.C respectively. There is an additional macro called
 filterStrangeMuDst.C which is an example for using this package to
 filter a muDST.
 
+StStrangeMuDstPlayer is a new front-end to StStrangeMuDstPlayer.
+It puts most of the macro makeStrangeMuDst.C into compiled code
+and provides the user with a simplified interface to Make(),
+Filter() or Play() (equivalent to Make() and Filter() in one step).
+More detailed information can be found in the doc directory.
+
 ____________________________________________________________
 Authors:
 Gene Van Buren, UCLA
@@ -21,6 +27,7 @@ History:
 280300 GVB Rewritten from StV0MiniDstMaker and committed to STAR library
 290300 GVB Added Wensheng's StKinkMuDst, replaced arrays
 020600 GVB Addition of MC classes, version 2 of software
+121200 PGJ Added StStrangeMuDstPlayer front-end
 
 ____________________________________________________________
 Files:
@@ -32,3 +39,4 @@ St*MuDst.*                : Classes for real data components of muDST
 St*Mc.*                   : Classes for Monte Carlo components of muDST
 StDecayMode.*             : Singleton for determining decay mode of MC vertices
 StStrangeCuts.*           : Handling of cuts collection stored with muDST
+StStrangeMuDstPlayer.*    : New Maker front-end to StStrangeMuDstMaker
