@@ -61,7 +61,7 @@ public:
   int bytesRead();
 
   
-  char* parseDirFile(const char*, const char*, const char*);
+  const char* parseDirFile(const char*, const char*, const char*);
 
   void wait(int n, const char* c) { 
     for (int i = 0; i< 1e6*n; i++) {
