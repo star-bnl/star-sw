@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.33 2000/06/02 20:25:37 lansdell Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.34 2000/06/05 17:25:03 lansdell Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.34  2000/06/05 17:25:03  lansdell
+// StTpcDb no longer loaded
+//
 // Revision 1.33  2000/06/02 20:25:37  lansdell
 // added check on Make() return codes
 //
@@ -191,7 +194,7 @@ void bfcread_dst_QAhist(
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("StDbUtilities");
-  gSystem->Load("StTpcDb");
+
   gSystem->Load("St_QA_Maker");
   gSystem->Load("tls");
   gSystem->Load("St_tpc");
