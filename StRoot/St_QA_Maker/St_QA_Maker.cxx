@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.47 1999/07/23 17:26:36 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.48 1999/09/02 21:47:23 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.48  1999/09/02 21:47:23  kathy
+// changed code so that it uses TMath functions so will compile on HP
+//
 // Revision 1.47  1999/07/23 17:26:36  kathy
 // changes to histogram limits
 //
@@ -1244,22 +1247,23 @@ void St_QA_Maker::MakeHistGlob(St_DataSet *dst){
         cnttrkg++;
 	Float_t pT = -999.;
 	pT = 1./TMath::Abs(t->invpt);
-        Float_t lmevpt = log10(pT*1000.0);
-	Float_t theta = asin(1.) - atan(t->tanl);
-	Float_t eta   =-log(tan(theta/2.));
-	Float_t gmom  = pT/sin(theta);
-        Float_t lmevmom = log10(gmom*1000.0); 
+        Float_t lmevpt = TMath::Log10(pT*1000.0);
+	Float_t theta = TMath::ASin(1.) - TMath::ATan(t->tanl);
+	Float_t eta   =-TMath::Log(TMath::Tan(theta/2.));
+	Float_t gmom  = pT/TMath::Sin(theta);
+        Float_t lmevmom = TMath::Log10(gmom*1000.0); 
 	Float_t chisq0 = t->chisq[0];
 	Float_t chisq1 = t->chisq[1]; 
 	Float_t degoffree = t->n_fit_point;
 	Float_t chisq0_p = chisq0/(degoffree-3);
 	Float_t chisq1_p = chisq1/(degoffree-2);
-        Float_t nfitntot = (float(t->n_fit_point))/(float(t->n_point));
+        Float_t nfitntot = (Float_t(t->n_fit_point))/(Float_t(t->n_point));
         Float_t xdif =  (t->x_first[0])-(t->x0);
         Float_t ydif =  (t->x_first[1])-(t->y0);
         Float_t zdif =  (t->x_first[2])-(t->z0);
-        Float_t radf = pow((t->x_first[0]),2) + pow((t->x_first[1]),2);
-                radf = sqrt(radf); 
+        Float_t radf = TMath::Power((t->x_first[0]),2) + 
+                       TMath::Power((t->x_first[1]),2);
+                radf = TMath::Sqrt(radf); 
 
 // from Lanny on 2 Jul 1999 9:56:03
 //1. x0,y0,z0 are coordinates on the helix at the starting point, which
@@ -1299,8 +1303,8 @@ void St_QA_Maker::MakeHistGlob(St_DataSet *dst){
         m_tanl_zf->Fill(t->x_first[2],t->tanl);
 	m_mom_trklength->Fill(t->length,lmevmom);
         m_eta_trklength->Fill(eta,t->length);
-	m_npoint_length->Fill(t->length,float(t->n_point));
-	m_fpoint_length->Fill(t->length,float(t->n_fit_point));
+	m_npoint_length->Fill(t->length,Float_t(t->n_point));
+	m_fpoint_length->Fill(t->length,Float_t(t->n_fit_point));
 	m_chisq0_mom->Fill(lmevmom,chisq0  );
 	m_chisq1_mom->Fill(lmevmom,chisq1  );
 	m_chisq0_eta->Fill(eta,chisq0  );
@@ -1361,22 +1365,23 @@ void St_QA_Maker::MakeHistPrim(St_DataSet *dst){
         cnttrkg++;
 	Float_t pT = -999.;
 	pT = 1./TMath::Abs(t->invpt);
-        Float_t lmevpt = log10(pT*1000.0);
-	Float_t theta = asin(1.) - atan(t->tanl);
-	Float_t eta   =-log(tan(theta/2.));
-	Float_t gmom  = pT/sin(theta);
-        Float_t lmevmom = log10(gmom*1000.0); 
+        Float_t lmevpt = TMath::Log10(pT*1000.0);
+	Float_t theta = TMath::ASin(1.) - TMath::ATan(t->tanl);
+	Float_t eta   =-TMath::Log(TMath::Tan(theta/2.));
+	Float_t gmom  = pT/TMath::Sin(theta);
+        Float_t lmevmom = TMath::Log10(gmom*1000.0); 
 	Float_t chisq0 = t->chisq[0];
 	Float_t chisq1 = t->chisq[1]; 
 	Float_t degoffree = t->n_fit_point;
 	Float_t chisq0_p = chisq0/(degoffree-3);
 	Float_t chisq1_p = chisq1/(degoffree-2);
-        Float_t nfitntot = (float(t->n_fit_point))/(float(t->n_point));
+        Float_t nfitntot = (Float_t(t->n_fit_point))/(Float_t(t->n_point));
         Float_t xdif = (t->x_first[0]) - (t->x0);
         Float_t ydif = (t->x_first[1]) - (t->y0);
         Float_t zdif = (t->x_first[2]) - (t->z0);
-        Float_t radf = pow((t->x_first[0]),2) + pow((t->x_first[1]),2);
-                radf = sqrt(radf); 
+        Float_t radf = TMath::Power((t->x_first[0]),2) + 
+                       TMath::Power((t->x_first[1]),2);
+                radf = TMath::Sqrt(radf); 
 
  	m_pdet_id->Fill(t->det_id);
 	m_ppoint->Fill(t->n_point);
@@ -1408,8 +1413,8 @@ void St_QA_Maker::MakeHistPrim(St_DataSet *dst){
         m_ptanl_zf->Fill(t->x_first[2],t->tanl);
 	m_pmom_trklength->Fill(t->length,lmevmom);
         m_peta_trklength->Fill(eta,t->length);
-	m_pnpoint_length->Fill(t->length,float(t->n_point));
-	m_pfpoint_length->Fill(t->length,float(t->n_fit_point));
+	m_pnpoint_length->Fill(t->length,Float_t(t->n_point));
+	m_pfpoint_length->Fill(t->length,Float_t(t->n_fit_point));
 	m_pchisq0_mom->Fill(lmevmom,chisq0);
 	m_pchisq1_mom->Fill(lmevmom,chisq1);
 	m_pchisq0_eta->Fill(eta,chisq0);
@@ -1449,19 +1454,18 @@ void St_QA_Maker::MakeHistGen(St_DataSet *dst){
       if(l!=0){                        // first row of table is header, so skip it!
 	if (p->isthep == 1) {            // select good status only
 	  totpart++;
-	  if (abs(p->idhep) == 11   ||       // electrons
-	      abs(p->idhep) == 13   ||       // muon
-	      abs(p->idhep) == 211  ||       // pion
-	      abs(p->idhep) == 321  ||       // kaon
-	      abs(p->idhep) == 2212) {       // proton/
+	  if (TMath::Abs(p->idhep) == 11   ||       // electrons
+	      TMath::Abs(p->idhep) == 13   ||       // muon
+	      TMath::Abs(p->idhep) == 211  ||       // pion
+	      TMath::Abs(p->idhep) == 321  ||       // kaon
+	      TMath::Abs(p->idhep) == 2212) {       // proton/
 	    
 	    nchgpart++;	    
 	    Double_t px = p->phep[0];
 	    Double_t py = p->phep[1];
 	    Double_t pz = p->phep[2];
 	    Double_t pT    =  TMath::Sqrt(px*px+py*py);
-	    Double_t theta =  TMath::ATan2 ( pT, pz );
-	    //        Double_t theta =  atan2 ( pT, pz );
+	    Double_t theta =  TMath::ATan2( pT, pz );
 	    Float_t  eta  = -TMath::Log(TMath::Tan(theta/2.));
 	    m_H_pT_eta_gen->Fill(eta, (Float_t) pT);
 	    m_H_pT_gen->Fill((Float_t) pT);
@@ -1541,11 +1545,9 @@ void St_QA_Maker::MakeHistPID(St_DataSet *dst){
 	  Float_t pT = 9999.;
 	  if (invpt) pT = 1./TMath::Abs(invpt);
 	  Float_t pz = pT*t->tanl;
-	  Float_t  p = sqrt(pT*pT+pz*pz);
-	  //     Float_t z0 = abs(t->x_first[2]);
+	  Float_t  p = TMath::Sqrt(pT*pT+pz*pz);
 	  Float_t x0 = t->x_first[0];
 	  Float_t y0 = t->x_first[1];
-	  //     Float_t r0 = sqrt(x0*x0+y0*y0);
 	  
 	  if (d->det_id==1 && d->ndedx >15 ) { 
 	    m_p_dedx_rec->Fill(p,(float)(dedx_m*1e6)); // change from GeV/cm to keV/cm
