@@ -41,7 +41,7 @@ typedef enum {
 class StiKalmanTrackNode : public StiTrackNode 
 {
 public:
-  //StiKalmanTrackNode();
+  StiKalmanTrackNode(){reset();}
   //~StiKalmanTrackNode();
   const StiKalmanTrackNode& operator=(const StiKalmanTrackNode&node);  
   
@@ -159,6 +159,7 @@ public:
   double getField()  const;
   int    getHelicity()  const;
   double getPhase()   const;
+  double getPsi()     const;
   double getWindowY();
   double getWindowZ();
   double pitchAngle() const;
@@ -252,7 +253,8 @@ inline void StiKalmanTrackNode::reset()
   _c00=_c11=_c22=_c33=_c44=1.;
   // off diagonal set to zero
   _c10=_c20=_c21=_c30=_c31=_c32=_c40=_c41=_c42=_c43=0.;
-  _chi2=eyy=ezz=0.;
+  eyy=ezz=0.;
+  _chi2=1e55;
   hitCount=nullCount=contiguousHitCount=contiguousNullCount = 0;
 	_detector = 0;
 }
@@ -290,14 +292,14 @@ inline StThreeVector<double> StiKalmanTrackNode::getGlobalMomentum() const
 {
   StThreeVector<double> p = getMomentum();
   p.rotateZ(_alpha);
-  return StThreeVector<double>(p);
+  return p;
 }
 
 inline StThreeVectorF StiKalmanTrackNode::getGlobalMomentumF() const
 {
   StThreeVectorF p = getMomentumF();
   p.rotateZ(_alpha);
-  return StThreeVectorF(p);
+  return p;
 }
 
 inline int StiKalmanTrackNode::getCharge() const

@@ -1,10 +1,14 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.36 2004/10/25 14:15:49 pruneau Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.37 2004/10/26 06:45:37 perev Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.37 2004/10/26 06:45:37 perev Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.37  2004/10/26 06:45:37  perev
+ * version V2V
+ *
  * Revision 2.36  2004/10/25 14:15:49  pruneau
  * various changes to improve track quality.
  *
@@ -122,6 +126,7 @@
 #include "StThreeVector.hh"
 #include "StThreeVectorF.hh"
 #include "StThreeVectorD.hh"
+#include "StPhysicalHelixD.hh"
 
 #include "StHit.h"
 
@@ -671,31 +676,17 @@ int StiKalmanTrack::getFitPointCount()    const
 double StiKalmanTrack::getTrackLength() const
 {
   StiKalmanTrackNode * inNode = getInnerMostHitNode();
-  const StThreeVectorF &in  = inNode->getHit()->globalPosition();
-  const StThreeVectorF &out = getOuterMostHitNode()->getHit()->globalPosition();
-  double dx=out.x()-in.x();
-  double dy=out.y()-in.y();
-  double dz=out.z()-in.z();
-  double curvature = inNode->getCurvature();
-  double s = 2*asin(::sqrt(dx*dx+dy*dy)*fabs(curvature)/2.)/fabs(curvature);
-  if (!finite(sqrt(dz*dz+s*s))) {
-      double lengthSum = 0;
-      if (firstNode) {
-	  StiKTNBidirectionalIterator node1,node2;
-	  node1=begin();
-	  node2=node1;
-	  node2++; //now node2 is just after node1.
-	  for (;node2!=end();node2++,node1++) {
-	      lengthSum += (*node2).pathLToNode(&(*node1));
-	  }
-      }
-      if (!finite(lengthSum)) {
-	  cout << "I give up!! Length sum is not finite" << endl;
-	  return -9999;
-      }
-      return -fabs(lengthSum);
-  }
-  return ::sqrt(dz*dz+s*s);
+  StThreeVectorD in(inNode->getX(),inNode->getY(),inNode->getZ());
+  in.rotateZ(inNode->getRefAngle());
+  StiKalmanTrackNode * otNode = getOuterMostHitNode();
+  StThreeVectorD ot(otNode->getX(),otNode->getY(),otNode->getZ());
+  ot.rotateZ(otNode->getRefAngle());
+  StPhysicalHelixD hlx(fabs(inNode->getCurvature()),
+		            inNode->getDipAngle(),
+		            inNode->getPhase(),
+		            in,
+		            inNode->getHelicity());
+  return hlx.pathLength(ot);
 }
 
 
@@ -798,21 +789,26 @@ StiKalmanTrackNode * StiKalmanTrack::getOuterMostHitNode()  const
 		}
   StiKTNBidirectionalIterator it;
   
+  StiKalmanTrackNode *node;
   if (trackingDirection==kOutsideIn)
     {
       for (it=begin();it!=end();it++)
 				{
-					if ((*it).getHit())
-						return &*it;
+	  node = &*it;
+	  if (!node->getHit()) 		continue;
+          if (node->getChi2()>10000.) 	continue;
+	  return node;
 				}
     }
   else
     {	
       for (it=end();it!=begin();it--)
-				{
-					if ((*it).getHit())
-						return &*it;
-				}
+      {
+	  node = &*it;
+	  if (!node->getHit()) 		continue;
+          if (node->getChi2()>10000.) 	continue;
+	  return node;
+      }
     }
   //cout << "StiKalmanTrack::getOuterMostHitNode() -E- Track has no hit" << endl;
   throw runtime_error("StiKalmanTrack::getOuterMostHitNode() -E- Track has no hit");
@@ -838,18 +834,25 @@ StiKalmanTrackNode * StiKalmanTrack::getInnerMostHitNode()   const
     }
   StiKTNBidirectionalIterator it;
   
+  StiKalmanTrackNode *node;
   if (trackingDirection==kInsideOut)
     {
       for (it=begin();it!=end();it++)
 	{
-	  if ((*it).getHit()) return &*it;
+	  node = &*it;
+	  if (!node->getHit()) 		continue;
+          if (node->getChi2()>10000.) 	continue;
+	  return node;
 	}
     }
   else
     {	
       for (it=end();it!=begin();it--)
 	{
-	  if ((*it).getHit()) return &*it;
+	  node = &*it;
+	  if (!node->getHit()) 		continue;
+          if (node->getChi2()>10000.) 	continue;
+	  return node;
 	}
     }
   //cout << "StiKalmanTrack::getInnerMostHitNode() - ERROR - Track has no hit" << endl;
@@ -947,17 +950,15 @@ vector<StMeasuredPoint*> StiKalmanTrack::stHits() const
   StiKalmanTrackNode* leaf = getLastNode();
   StiKTNForwardIterator it(leaf);
   StiKTNForwardIterator end = it.end();
-  //vector<StHit*> hits;
   vector<StMeasuredPoint*> hits;
-  while (it!=end) {
+  for (;it!=end;++it) {
     const StiKalmanTrackNode& node = *it;
+    if (node.getChi2()>10000.) continue;
     StiHit* hit = node.getHit();
-    if (hit) {
-      StMeasuredPoint * stHit = const_cast<StMeasuredPoint*>( hit->stHit() );
-      if (stHit)
-	hits.push_back(stHit);
-    }
-    ++it;
+    if (!hit) 			continue;
+    StHit *stHit = (StHit*)dynamic_cast<const StHit*>(hit->stHit());
+    if (!stHit) 		continue;
+    hits.push_back(stHit);
   }
   return hits;
 }
@@ -1056,10 +1057,10 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 	<< " dy:"<< dy
 	<< " dz:"<< dz
 	<< " d: "<< d<<endl;*/
-	_dca = ::sqrt(dy*dy+dz*dz);
 
       if (chi2<pars->maxChi2Vertex)
 	{
+	  _dca = ::sqrt(dy*dy+dz*dz);
 	  myHit = StiToolkit::instance()->getHitFactory()->getInstance();
 	  *myHit = localVertex;
 	  tNode->setHit(myHit);
@@ -1151,12 +1152,12 @@ vector<StiHit*> StiKalmanTrack::getHits()
   StiKalmanTrackNode* leaf = getLastNode();
   StiKTNForwardIterator it(leaf);
   StiKTNForwardIterator end = it.end();
-  while (it!=end) 
+  for (;it!=end;++it) 
     {
       const StiKalmanTrackNode& node = *it;
+      if (node.getChi2()>10000.) continue;
       StiHit* hit = node.getHit();
       if (hit) hits.push_back(hit);
-      ++it;
     }
   return hits;
 }
@@ -1178,7 +1179,7 @@ double  StiKalmanTrack::getDca(const StiHit * vertex)    const
   originD.rotateZ(node->getRefAngle());
   physicalHelix.setParameters(fabs(node->getCurvature()),
 			       node->getDipAngle(),
-			       node->getPhase()-node->getHelicity()*M_PI/2.,
+			       node->getPhase(),
 			       originD,
 			       node->getHelicity());
   double dca = physicalHelix.distance(vxDD);

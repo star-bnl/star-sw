@@ -1,12 +1,15 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.11 2004/10/14 02:21:35 calderon Exp $
+ * $Id: StiStEventFiller.h,v 2.12 2004/10/26 06:45:41 perev Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.12  2004/10/26 06:45:41  perev
+ * version V2V
+ *
  * Revision 2.11  2004/10/14 02:21:35  calderon
  * Updated code in StTrackDetectorInfo, now only increment the reference count
  * for globals, not for primaries.  So fillTrackDetectorInfo changed to reflect
@@ -149,8 +152,7 @@ public:
     void filldEdxInfo(StiDedxCalculator&, StTrack* track, StiKalmanTrack* kTrack);
     void fillTrack(StTrack* track, StiKalmanTrack* kTrack);
     void fillFlags(StTrack* track);
-    unsigned short stEventPoints(StiKalmanTrack* kTrack,StDetectorId id); 
-    unsigned short stEventFitPoints(StiKalmanTrack* kTrack, StDetectorId id); 
+    void stEventFitPoints(StiKalmanTrack* kTrack, int *nFitPoints); 
     float impactParameter(StiKalmanTrack* kTrack);
     float impactParameter(StTrack* track);
 private:
