@@ -234,10 +234,6 @@ $(GEN_DIR)/St_%_ModuleCint.cxx : $(GEN_DIR)/St_%_Module.h $(STAR)/StRoot/base/St
 	cd $(GEN_DIR);\
         rootcint -f $(notdir $(ALL_TAGS)) -c -DROOT_CINT $(INCLUDES) $(notdir $(1ST_DEPS)) $(notdir $(LINKDEF));
 #  $(INCLUDES)
-#_________________dependencies_____________________________
-ifneq (, $(strip $(FILES_D))) 
-include $(FILES_D)
-endif                               #
 
 Libraries : $(MY_SO) 
 
@@ -258,6 +254,10 @@ else
 endif
 endif
 
+#_________________dependencies_____________________________
+ifneq (, $(strip $(FILES_D))) 
+include $(FILES_D)
+endif                               #
 
 $(OBJ_DIR)/%.o : %.c
 	$(CC)  -c $(CPPFLAGS) $(CFLAGS)    $(INCLUDES) $(INCL) $(1ST_DEPS) -o $(ALL_TAGS)
@@ -267,11 +267,16 @@ $(OBJ_DIR)/%.o : %.cxx
 
 $(DEP_DIR)/%.d: %.c 
 	$(RM) $(ALL_TAGS)
-	$(GCC) $(MKDEPFLAGS) $(CPPFLAGS) $(INCLUDES) $(INCL)  $(ALL_DEPS) > $(ALL_TAGS)
+	$(GCC) $(MKDEPFLAGS) $(CPPFLAGS) $(INCLUDES) $(INCL)  $(1ST_DEPS) | sed -e \
+'s/$(notdir $(STEM))\.o/$(subst .,\.,$(subst /,\/,$(OBJ_DIR)/$(STEM).o)) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
+        > $(ALL_TAGS)
 
 $(DEP_DIR)/%.d: %.cxx
 	$(RM) $(ALL_TAGS)
-	$(GCC) $(MKDEPFLAGS) $(CPPFLAGS) $(INCLUDES) $(INCL)  $(ALL_DEPS) > $(ALL_TAGS)
+	$(GCC) $(MKDEPFLAGS) $(CPPFLAGS) $(INCLUDES) $(INCL)  $(1ST_DEPS) | sed -e \
+'s/$(notdir $(STEM))\.o/$(subst .,\.,$(subst /,\/,$(OBJ_DIR)/$(STEM).o)) $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
+        > $(ALL_TAGS)
+
 
 
 endif
@@ -284,7 +289,7 @@ clean :
 
 endif # end of DoIt
 
-show: 
+test: 
 	@echo MAKE        := $(MAKE)
 	@echo MAKEFLAGS   := $(MAKEFLAGS)
 	@echo MAKEFILES   := $(MAKEFILES)
