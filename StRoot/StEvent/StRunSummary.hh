@@ -1,8 +1,11 @@
 /***************************************************************************
  *
- * $Id: StRunSummary.hh,v 1.1 1999/01/15 20:39:59 wenaus Exp $
+ * $Id: StRunSummary.hh,v 1.2 1999/01/15 22:53:51 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
+ *
+ * History:
+ * 15/01/1999 T. Wenaus  Add table-based constructor
  ***************************************************************************
  *
  * Description:
@@ -10,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StRunSummary.hh,v $
- * Revision 1.1  1999/01/15 20:39:59  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:53:51  wenaus
+ * version with constructors for table-based loading
  *
  * Revision 1.2  1999/01/15 22:53:51  wenaus
  * version with constructors for table-based loading
@@ -19,12 +22,14 @@
 
 #ifndef StRunSummary_hh
 #define StRunSummary_hh
-#include "StTHDefs.hh"
+using namespace std;
+#include "StTables/dst_run_summary.h"
 #include <time.h>
 #include "StEvent/StTHDefs.hh"
 #include "tables/dst_run_summary.h"
 
 class StRunSummary {
+public:
     StRunSummary();
     ~StRunSummary();
     StRunSummary(dst_run_summary_st*);

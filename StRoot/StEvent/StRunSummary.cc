@@ -1,8 +1,11 @@
 /***************************************************************************
  *
- * $Id: StRunSummary.cc,v 1.1 1999/01/15 20:39:58 wenaus Exp $
+ * $Id: StRunSummary.cc,v 1.2 1999/01/15 22:53:51 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
+ *
+ * History:
+ * 15/01/1999 T. Wenaus  Add table-based constructor
  ***************************************************************************
  *
  * Description:
@@ -10,11 +13,13 @@
  ***************************************************************************
  *
  * $Log: StRunSummary.cc,v $
- * Revision 1.1  1999/01/15 20:39:58  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:53:51  wenaus
+ * version with constructors for table-based loading
  *
  **************************************************************************/
-#include "StRunSummary.hh"
+#include "StEvent/StRunSummary.hh"
+
+static const char rcsid[] = "$Id: StRunSummary.cc,v 1.2 1999/01/15 22:53:51 wenaus Exp $";
 
 StRunSummary::StRunSummary()
 {
@@ -23,6 +28,16 @@ StRunSummary::StRunSummary()
     mStartTime = 0;                
     mStopTime = 0;                 
     mCpuSeconds = 0;               
+}
+
+StRunSummary::StRunSummary(dst_run_summary_st* runSum)
+{
+  mVersion = runSum->version;
+  mNumberOfEvents = runSum->n_events_good;
+  mNumberOfProcessedEvents = runSum->n_events_tot;
+  mStartTime = runSum->time[0];
+  mStopTime = runSum->time[1];
+  mCpuSeconds = runSum->cpu_total;
 }
 
 StRunSummary::~StRunSummary() { /* noop */ }

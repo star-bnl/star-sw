@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVpdCounter.hh,v 1.1 1999/01/15 20:40:29 wenaus Exp $
+ * $Id: StVpdCounter.hh,v 1.2 1999/01/15 22:54:25 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVpdCounter.hh,v $
- * Revision 1.1  1999/01/15 20:40:29  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:54:25  wenaus
+ * version with constructors for table-based loading
  *
  **************************************************************************/
 #ifndef StVpdCounter_hh

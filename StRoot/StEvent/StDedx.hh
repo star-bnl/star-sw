@@ -1,8 +1,12 @@
 /***************************************************************************
  *
- * $Id: StDedx.hh,v 1.1 1999/01/15 20:39:40 wenaus Exp $
+ * $Id: StDedx.hh,v 1.2 1999/01/15 22:53:32 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
+ *
+ * History:
+ * 14/01/1999 T. Wenaus  Add table-based constructor
+ *
  ***************************************************************************
  *
  * Description:
@@ -10,17 +14,20 @@
  ***************************************************************************
  *
  * $Log: StDedx.hh,v $
- * Revision 1.1  1999/01/15 20:39:40  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:53:32  wenaus
+ * version with constructors for table-based loading
  *
  **************************************************************************/
 #ifndef StDedx_hh
 #define StDedx_hh
 
+#include "StTables/dst_dedx.h"
+
 class StDedx {
 public:
     StDedx();
     ~StDedx();
+    StDedx(dst_dedx_st*);
     // StDedx(const StDedx &right);      use default
     // const StDedx & operator=(const StDedx &right);
     

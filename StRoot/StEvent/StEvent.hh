@@ -1,8 +1,12 @@
 /***************************************************************************
  *
- * $Id: StEvent.hh,v 1.1 1999/01/15 20:39:44 wenaus Exp $
+ * $Id: StEvent.hh,v 1.2 1999/01/15 22:53:40 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
+ *
+ * History:
+ * 15/01/1999 T. Wenaus  Add table-based constructor
+ *
  ***************************************************************************
  *
  * Description:
@@ -10,8 +14,8 @@
  ***************************************************************************
  *
  * $Log: StEvent.hh,v $
- * Revision 1.1  1999/01/15 20:39:44  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:53:40  wenaus
+ * version with constructors for table-based loading
  *
  * Revision 1.3  1999/01/30 23:03:11  wenaus
  * table load intfc change; include ref change
@@ -21,27 +25,31 @@
  *
 using namespace std;
 #ifndef StEvent_hh
-#include "StEventSummary.hh"
-#include "StRun.hh"
-#include "StTrackCollection.hh"
-#include "StFtpcHitCollection.hh"
-#include "StVertexCollection.hh"
-#include "StSvtHitCollection.hh"
-#include "StTpcHitCollection.hh"
-#include "StEmcHitCollection.hh"
-#include "StSmdHitCollection.hh"
-#include "StL0Trigger.hh"
-#include "StTriggerDetectorCollection.hh"
-#include "StEnumerations.hh"
+#define StEvent_hh
+
+#include <iostream.h>
+#include <utility>
+#include <string>
+#include <time.h>
+#include "StEvent/StDstEventSummary.hh"
+#include "StEvent/StEmcHitCollection.hh"
+#include "StEvent/StSmdHitCollection.hh"
+#include "StEvent/StSvtHitCollection.hh"
+#include "StEvent/StTpcHitCollection.hh"
+#include "StEvent/StEmcTowerHitCollection.hh"
+#include "StTables/dst_event_header.h"
+#include "StTables/dst_event_summary.h"
 #include "StEvent/StSmdEtaHitCollection.hh"
 #include "StEvent/StL0Trigger.hh"
 #include "StEvent/StTriggerDetectorCollection.hh"
 #if !defined(ST_NO_NAMESPACES)
+    StEvent(StRun*, dst_event_header_st*, dst_event_summary_st*);
 #endif
 
 class StEvent {
 public:
     StEvent();
+    StEvent(StRun*, dst_event_header_st&, dst_event_summary_st&);
     virtual ~StEvent();
     
     int operator==(const StEvent &right) const;
@@ -51,7 +59,7 @@ public:
     const string&                type() const;
     pair<long, long>             id() const;
     time_t                       time() const;
-    StEventSummary*              summary();
+    unsigned long                runNumber() const;              
     unsigned long                triggerMask() const;
     unsigned long                bunchCrossingNumber() const;
     double                       luminosity() const;
@@ -72,7 +80,7 @@ public:
     void setType(const char*);
     void setId(const pair<long, long>&);
     void setTime(time_t);
-    void setSummary(StEventSummary*);                        
+    void setRunNumber(unsigned long);                
     void setTriggerMask(unsigned long);              
     void setBunchCrossingNumber(unsigned long);      
     void setLuminosity(double);               
@@ -92,7 +100,7 @@ public:
 
 protected:
     string                       mType;
-    StEventSummary*              mSummary;
+    pair<long, long>             mId;                      
     unsigned long                mRunNumber;
     time_t                       mTime;
     unsigned long                mTriggerMask;
@@ -132,7 +140,7 @@ inline unsigned long StEvent::triggerMask() const { return mTriggerMask;}
 
 inline unsigned long StEvent::bunchCrossingNumber() const { return mBunchCrossingNumber;}
 
-inline StEventSummary* StEvent::summary() { return mSummary;}
+inline double StEvent::luminosity() const { return mLuminosity;}
 
 inline StRun* StEvent::run() { return mRun;}
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcHit.hh,v 1.1 1999/01/15 20:39:41 wenaus Exp $
+ * $Id: StEmcHit.hh,v 1.2 1999/01/15 22:53:36 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEmcHit.hh,v $
- * Revision 1.1  1999/01/15 20:39:41  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:53:36  wenaus
+ * version with constructors for table-based loading
  *
  * Revision 1.2  1999/01/15 22:53:36  wenaus
  * version with constructors for table-based loading

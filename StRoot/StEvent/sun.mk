@@ -7,6 +7,8 @@ CPPFLAGS     += -DST_NO_NAMESPACES
 CPPFLAGS     += -I/afs/rhic/star/ROOT/2.20/root/include
 CPPFLAGS     += -I/afs/rhic/star/packages
 CPPFLAGS     += -I/afs/rhic/star/packages/dev/inc
+CPPFLAGS     += -I$(BFWORK)/include
+CPPFLAGS     += -I..
 CXXFLAGS     := -pic -Qoption ld -t
 LD	     := $(CXX)
 LDFLAGS      := -G
@@ -15,7 +17,7 @@ LIBRARY      = libtdm.sl
 OBJS	      = StCtbCounter.o \
 		StDedx.o \
 		StEvent.o \
-		StEventSummary.o \
+		StDstEventSummary.o \
 		StFtpcHit.o \
 		StGlobalTrack.o \
 		StHit.o \

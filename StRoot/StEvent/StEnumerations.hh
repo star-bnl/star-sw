@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEnumerations.hh,v 1.1 1999/01/15 20:39:42 wenaus Exp $
+ * $Id: StEnumerations.hh,v 1.2 1999/01/15 22:53:38 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.hh,v $
- * Revision 1.1  1999/01/15 20:39:42  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:53:38  wenaus
+ * version with constructors for table-based loading
  *
  * Add Xi vertex type
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVecVpdCounter.hh,v 1.1 1999/01/15 20:40:25 wenaus Exp $
+ * $Id: StVecVpdCounter.hh,v 1.2 1999/01/15 22:54:21 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StVecVpdCounter.hh,v $
- * Revision 1.1  1999/01/15 20:40:25  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:54:21  wenaus
+ * version with constructors for table-based loading
  *
  * Revision 1.3  1999/03/04 15:57:10  wenaus
  * add std namespace for Sun CC5 compatibility

@@ -1,8 +1,11 @@
 /***************************************************************************
  *
- * $Id: StV0Vertex.hh,v 1.1 1999/01/15 20:40:19 wenaus Exp $
+ * $Id: StV0Vertex.hh,v 1.2 1999/01/15 22:54:16 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
+ *
+ * History:
+ * 15/01/1999 T. Wenaus  Add table-based constructor
  ***************************************************************************
  *
  * Description:
@@ -10,19 +13,21 @@
  ***************************************************************************
  *
  * $Log: StV0Vertex.hh,v $
- * Revision 1.1  1999/01/15 20:40:19  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:54:16  wenaus
+ * version with constructors for table-based loading
  *
  * table load intfc change; include ref change
  *
  * Revision 1.3  1999/01/27 13:04:50  ullrich
-#include "StVertex.hh"
+ * Renamed data member and access functions: xxxToV0 into xxxToPrimaryVertex.
+ * This is the right meaning according to P. Jones.
  *
  * Revision 1.2  1999/01/15 22:54:16  wenaus
 #include "StTables/dst_v0_vertex.h"
  *
  **************************************************************************/
 #include "StEvent/StVertex.hh"
+#include "StEvent/StEnumerations.hh"
 #include "tables/dst_vertex.h"
 #include "tables/dst_v0_vertex.h"
 #include <float.h>

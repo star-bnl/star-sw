@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVpdCounter.cc,v 1.1 1999/01/15 20:40:28 wenaus Exp $
+ * $Id: StVpdCounter.cc,v 1.2 1999/01/15 22:54:24 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,11 +10,13 @@
  ***************************************************************************
  *
  * $Log: StVpdCounter.cc,v $
- * Revision 1.1  1999/01/15 20:40:28  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:54:24  wenaus
+ * version with constructors for table-based loading
  *
  **************************************************************************/
-#include "StVpdCounter.hh"
+#include "StEvent/StVpdCounter.hh"
+
+static const char rcsid[] = "$Id: StVpdCounter.cc,v 1.2 1999/01/15 22:54:24 wenaus Exp $";
 
 StVpdCounter::StVpdCounter()
 {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StVpdSummary.hh,v 1.1 1999/01/15 20:40:30 wenaus Exp $
+ * $Id: StVpdSummary.hh,v 1.2 1999/01/15 22:54:26 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,13 +10,13 @@
  ***************************************************************************
  *
  * $Log: StVpdSummary.hh,v $
- * Revision 1.1  1999/01/15 20:40:30  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:54:26  wenaus
+ * version with constructors for table-based loading
  *
  * Revision 1.2  1999/01/15 22:54:26  wenaus
  * version with constructors for table-based loading
  *
-#include "StEnumerations.hh"
+ **************************************************************************/
 #ifndef StVpdSummary_hh
 #define StVpdSummary_hh
 #include "StEvent/StEnumerations.hh"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMwcSector.hh,v 1.1 1999/01/15 20:39:56 wenaus Exp $
+ * $Id: StMwcSector.hh,v 1.2 1999/01/15 22:53:48 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StMwcSector.hh,v $
- * Revision 1.1  1999/01/15 20:39:56  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:53:48  wenaus
+ * version with constructors for table-based loading
  *
  **************************************************************************/
 #ifndef StMwcSector_hh

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcSummary.cc,v 1.1 1999/01/15 20:40:32 wenaus Exp $
+ * $Id: StZdcSummary.cc,v 1.2 1999/01/15 22:54:29 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,11 +10,13 @@
  ***************************************************************************
  *
  * $Log: StZdcSummary.cc,v $
- * Revision 1.1  1999/01/15 20:40:32  wenaus
- * Commit Thomas' original code
+ * Revision 1.2  1999/01/15 22:54:29  wenaus
+ * version with constructors for table-based loading
  *
  **************************************************************************/
-#include "StZdcSummary.hh"
+#include "StEvent/StZdcSummary.hh"
+
+static const char rcsid[] = "$Id: StZdcSummary.cc,v 1.2 1999/01/15 22:54:29 wenaus Exp $";
 
 StZdcSummary::StZdcSummary()
 {
