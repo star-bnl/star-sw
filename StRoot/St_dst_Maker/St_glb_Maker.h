@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.h,v 1.8 1998/12/21 19:26:09 fisyak Exp $
+// $Id: St_glb_Maker.h,v 1.9 1998/12/21 19:41:51 fisyak Exp $
 // $Log: St_glb_Maker.h,v $
+// Revision 1.9  1998/12/21 19:41:51  fisyak
+// Move dst 2 glb
+//
 // Revision 1.8  1998/12/21 19:26:09  fisyak
 // Make ROOT include non system
 //
@@ -19,7 +22,7 @@
 // cleanup
 //
 // Revision 1.2  1998/09/08 22:43:11  fisyak
-// Modify St_dst_Maker to account new calling sequence
+// Modify St_glb_Maker to account new calling sequence
 //
 // Revision 1.1  1998/08/18 14:06:07  fisyak
 // Add to bfc dst
@@ -30,12 +33,12 @@
 // Revision 1.2  1998/07/20 15:08:15  fisyak
 // Add tcl and tpt
 //
-#ifndef STAR_St_dst_Maker
-#define STAR_St_dst_Maker
+#ifndef STAR_St_glb_Maker
+#define STAR_St_glb_Maker
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// St_dst_Maker virtual base class for Maker                            //
+// St_glb_Maker virtual base class for Maker                            //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #ifndef StMaker_H
@@ -57,10 +60,10 @@ class St_ev0_ev0par;
 class St_ev0_ev0par2;
 class St_mft_control; 
 class St_particle_dst_param;
-class St_dst_Maker : public StMaker {
+class St_glb_Maker : public StMaker {
  private:
   Bool_t drawinit;
-  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.8 1998/12/21 19:26:09 fisyak Exp $";
+  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.9 1998/12/21 19:41:51 fisyak Exp $";
   // egr
   Int_t         m_scenario;   
   //#1: Real TPC Stand-Alone Tracking: Use this when running the TPC only.  
@@ -135,8 +138,8 @@ class St_dst_Maker : public StMaker {
   TH1F     *m_chi2yd;      //! y chisq/degf
   TH1F     *m_lameffm;     //! Lambda effective mass
  public: 
-  St_dst_Maker(const char *name="dst", const char *title="event/data/global/dst");
-  virtual       ~St_dst_Maker();
+  St_glb_Maker(const char *name="global", const char *title="event/data/global");
+  virtual       ~St_glb_Maker();
   virtual Int_t Init();
   virtual Int_t  Make();
   virtual void   PrintInfo();
@@ -147,7 +150,7 @@ class St_dst_Maker : public StMaker {
   virtual void   Set_usetpc   (Int_t m = 1){m_usetpc    = m;} // *MENU*
   virtual void   Set_usevert  (Int_t m = 0){m_usevert   = m;} // *MENU*
   virtual void   Set_flag     (Int_t m = 0){m_flag = m;}      // *MENU*
-  ClassDef(St_dst_Maker, 1)   //StAF chain virtual base class for Makers
+  ClassDef(St_glb_Maker, 1)   //StAF chain virtual base class for Makers
     };
 
 #endif
