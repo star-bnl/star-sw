@@ -91,7 +91,7 @@ char gPn[PROTOTYPES][ISIZE+2];
 char gArgName[PROTOTYPES][ARGS][ISIZE+2];
 char gColType[COL][TSIZE+2];
 char gDataType[PROTOTYPES][ARGS][TSIZE+2];
-char *gCvsVersionRaw="$Id: idl.y,v 1.26 2001/04/09 19:26:08 fisyak Exp $";
+char *gCvsVersionRaw="$Id: idl.y,v 1.27 2001/05/28 03:15:35 fine Exp $";
 char gCvsVersion[CVSVERSION+1];
 char gFncType[PROTOTYPES][TSIZE+2];
 FILE *gFpH,*gFpInc,*gFile;
@@ -332,8 +332,7 @@ void DotHFileTbl(void) {
   FH"#define %s_SPEC \\\n",Up(gTable));
   FH"\"struct %s { \\\n",gTable);
   for(ii=0;ii<gNColNames;ii++) {
-    IdlToCOrCpp(colType,gColType[ii]);
-    FH"\t%s %s; \\\n",colType,gColName[ii]);
+    FH"\t%s %s; \\\n",gColType[ii],gColName[ii]);
   }
   FH"};\"\n");
   FH"typedef struct %s_st {\n",gTable);
