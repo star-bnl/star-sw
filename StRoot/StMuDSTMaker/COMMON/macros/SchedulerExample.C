@@ -30,7 +30,7 @@ void load() {
 void SchedulerExample(const char* fileList, const char* outFile="SchedulerExample.root") {
   load();
 
-  // create the chain
+  // create the chain"
   StChain * chain = new StChain("StChain"); 
   chain->SetDebug(0);
 
