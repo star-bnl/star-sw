@@ -5,6 +5,7 @@
 **:  
 **:<------------------------------------------------------------------*/
 #include "trg_fillDst.h"
+#include <assert.h>
 
 
 extern "C" long type_of_call trg_fillDst_(
@@ -27,7 +28,8 @@ extern "C" long type_of_call trg_fillDst_(
    for ( i = 0 ; i < 240 ; i++ ) dst->nCtb[i] = 0 ; 
    if ( ctu_cor_h->nok > 0 ) {
       for ( i = 0 ; i < ctu_cor_h->nok ; i++ ) {
-         index = 4 * ctu_cor[i].i_phi-1 + ctu_cor[i].i_eta- 1 ;
+         index = 4 * ( ctu_cor[i].i_phi-1 ) + ctu_cor[i].i_eta- 1 ;
+         assert(index>=  0); assert(index< 240);
          dst->nCtb[index]    = ctu_cor[i].n ;
          dst->timeCtb[index] = ctu_cor[i].time ;
       }
