@@ -1,7 +1,7 @@
-// $Id: StPeCMaker.cxx,v 1.22 2002/06/03 23:07:46 meissner Exp $
+// $Id: StPeCMaker.cxx,v 1.23 2002/06/04 17:55:02 meissner Exp $
 // $Log: StPeCMaker.cxx,v $
-// Revision 1.22  2002/06/03 23:07:46  meissner
-// return flag of Make() for filtering
+// Revision 1.23  2002/06/04 17:55:02  meissner
+// filtering: filter all  UPC triggerwords
 //
 // Revision 1.21  2002/04/18 19:02:11  meissner
 // Change Init to  InitRun
@@ -107,7 +107,7 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.22 2002/06/03 23:07:46 meissner Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.23 2002/06/04 17:55:02 meissner Exp $";
 
 ClassImp(StPeCMaker)
 
