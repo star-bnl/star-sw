@@ -1,7 +1,10 @@
-// $Id: makedoc.C,v 1.39 1999/07/10 22:59:55 fine Exp $
+// $Id: makedoc.C,v 1.40 1999/08/07 18:36:33 fine Exp $
 // $Log: makedoc.C,v $
+// Revision 1.40  1999/08/07 18:36:33  fine
+// StDisplayMaker has been included into makedoc
+//
 // Revision 1.39  1999/07/10 22:59:55  fine
-// St_TLA_Maker docs was introduced
+//   St_TLA_Maker docs was introduced
 //
 // Revision 1.38  1999/06/30 16:29:04  fine
 // New scheme to create gif directories. St_geom_Maker introduced
@@ -78,9 +81,10 @@
      gSystem->Load("St_xdfin_Maker");
      gSystem->Load("St_evg_Maker");
      gSystem->Load("StarClassLibrary");
-     gSystem->Load("StRootEvent");
+     gSystem->Load("StEvent");
      gSystem->Load("StPadDisplayMaker");
      gSystem->Load("St_geom_Maker");
+     gSystem->Load("StEventDisplayMaker");
 
 //     gSystem->Load("St_ebye_Maker");
 //     gSystem->Load("St_laser_Maker");
@@ -106,7 +110,7 @@
     sourcedir += STAR;
     sourcedir += "/inc:";
     sourcedir += STAR;
-    sourcedir += "/StRoot/StRootEvent:";
+    sourcedir += "/StRoot/StEvent:";
     sourcedir += STAR;
     sourcedir += "/StRoot/St_TLA_Maker:";
     sourcedir += STAR;
@@ -114,8 +118,9 @@
     sourcedir += STAR;
     sourcedir += "/StRoot/StarClassLibrary:";
     sourcedir += STAR;
-    sourcedir += "/StRoot/St_geom_Maker";
-  }
+    sourcedir += "/StRoot/St_geom_Maker:";
+    sourcedir += STAR;
+    sourcedir += "/StRoot/StEventDisplayMaker";  }
 
   TString lookup ;
   if (NT) {
@@ -142,7 +147,9 @@
     lookup += STAR;
     lookup += "/StRoot/StPadDisplayMaker:";
     lookup += STAR;
-    lookup += "/StRoot/StRootEvent";
+    lookup += "/StRoot/StEventDisplayMaker:";
+    lookup += STAR;
+    lookup += "/StRoot/StEvent";
     lookup += ":";
     lookup += STAR;
     lookup += "/StRoot/StarClassLibrary";
@@ -170,9 +177,10 @@
                        ,"StObjArray",    "StHit",            "StHelixD"
                        ,"StTrack",       "St_TableElementDescriptor"
                        ,"St_geom_Maker", "StPadDisplayMaker", "St_TLA_Maker"
+                       ,"StEventDisplayMaker"
                        ,"St_srs_Maker",  "St_xdfin_Maker"
                       };
-  Int_t nclass = 35;
+  Int_t nclass = 36;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("//sol/afs_rhic/star/packages/dev/inc/table_header.h");
