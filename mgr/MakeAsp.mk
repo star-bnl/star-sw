@@ -93,13 +93,8 @@ INC_GEN_DIR := $(OUT_DIR)/inc
 
 
 #	Includes
-#INCLUDES := $(addprefix -I,$(wildcard $(UPP_INP_DIR)/*/inc))
-#INCLUDES := $(wildcard $(UPP_INP_DIR)/*/inc)
-INCLUDES := $(SRC_DIR)
+INCLUDES := $(SRC_DIR) $(INC_DIR)
 INCLUDES += $(INC_GEN_DIR)
-ifndef SYSTEM_DOMAIN
-  INCLUDES += $(STAF_ANA_INCS)
-endif
 INCLUDES += $(STAF_SYS_INCS)
 INCLUDES += $(STAF_CERN_INCS)
 INCLUDES += $(STAF_UTILS_INCS)
