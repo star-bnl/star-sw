@@ -1,19 +1,22 @@
 /***********************************************************************
  *
- * $Id: StDecayAngle.hh,v 3.2 2001/11/28 17:19:42 genevb Exp $
+ * $Id: StDecayAngle.hh,v 3.3 2001/11/28 17:54:29 genevb Exp $
  *
  * Author: Gene Van Buren, BNL, 26-Nov-2001
  *
  ***********************************************************************
  *
  * Description: class for returning decay angle characteristics
- *              Particle 1 is the StDecayAngleParent of the decay
+ *              Particle 1 is the parent of the decay
  *              Particle 2 is the daughter of interest of the decay
  *              px, py, pz, and m are their momemta and mass
  *
  ***********************************************************************
  *
  * $Log: StDecayAngle.hh,v $
+ * Revision 3.3  2001/11/28 17:54:29  genevb
+ * Some errors/omissions in last check-in
+ *
  * Revision 3.2  2001/11/28 17:19:42  genevb
  * Some interface improvements to decay angle formulae
  *
@@ -73,6 +76,14 @@ inline void StDecayAngle::setBeam(Float_t x, Float_t y, Float_t z) {
   StDecayAngleBeam.SetXYZ(x,y,z);
 }
 
+inline Float_t StDecayAngle::decayTheta(
+    Float_t px1, Float_t py1, Float_t pz1, Float_t m1,
+    Float_t px2, Float_t py2, Float_t pz2, Float_t m2) {
+  setParentDaughter(px1,py1,pz1,m1,px2,py2,pz2,m2);
+  shiftToRest();
+  return decayTheta();
+}
+
 inline Float_t StDecayAngle::decayCosTheta(
     Float_t px1, Float_t py1, Float_t pz1, Float_t m1,
     Float_t px2, Float_t py2, Float_t pz2, Float_t m2) {
@@ -81,11 +92,26 @@ inline Float_t StDecayAngle::decayCosTheta(
   return decayCosTheta();
 }
 
+inline Float_t StDecayAngle::decayThetaLab(
+    Float_t px1, Float_t py1, Float_t pz1, Float_t m1,
+    Float_t px2, Float_t py2, Float_t pz2, Float_t m2) {
+  setParentDaughter(px1,py1,pz1,m1,px2,py2,pz2,m2);
+  return decayTheta();
+}
+
 inline Float_t StDecayAngle::decayCosThetaLab(
     Float_t px1, Float_t py1, Float_t pz1, Float_t m1,
     Float_t px2, Float_t py2, Float_t pz2, Float_t m2) {
   setParentDaughter(px1,py1,pz1,m1,px2,py2,pz2,m2);
   return decayCosTheta();
+}
+
+inline Float_t StDecayAngle::polarityTheta(
+    Float_t px1, Float_t py1, Float_t pz1, Float_t m1,
+    Float_t px2, Float_t py2, Float_t pz2, Float_t m2) {
+  setParentDaughter(px1,py1,pz1,m1,px2,py2,pz2,m2);
+  shiftToRest();
+  return polarityTheta();
 }
 
 inline Float_t StDecayAngle::polarityCosTheta(
