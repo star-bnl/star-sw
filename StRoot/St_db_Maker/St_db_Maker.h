@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.19 2001/10/27 21:48:32 perev Exp $
+// $Id: St_db_Maker.h,v 1.20 2002/11/26 02:24:45 perev Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.20  2002/11/26 02:24:45  perev
+// new ROOT adoptation
+//
 // Revision 1.19  2001/10/27 21:48:32  perev
 // SetRunNumber added
 //
@@ -70,7 +73,7 @@ private:
   TDatime     fDBTime;		//! Own DB time stamp
   Int_t       fUpdateMode;	//! 
   UInt_t      fMaxEntryTime;    //! MaxEntryTime accepted from DB
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.19 2001/10/27 21:48:32 perev Exp $";
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.20 2002/11/26 02:24:45 perev Exp $";
  protected:
  public: 
                    St_db_Maker(const char *name
@@ -109,11 +112,12 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.19 2001/10/27 21:48:32 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.20 2002/11/26 02:24:45 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)   //StAF chain virtual base class for Makers
 };
 
+#if 0
 class St_dbConfig : public TTable   
 {                                          
 protected:                                 
@@ -129,6 +133,12 @@ public:
   dbConfig_st *GetTable(){ return (dbConfig_st *)GetArray();}                                            
                                            
   ClassDef(St_dbConfig,0) //  
+};                                                            
+#endif
+class St_dbConfig : public TTable   
+{                                          
+  ClassDefTable(St_dbConfig,dbConfig_st)   
+  ClassDef(St_dbConfig,2)   
 };                                                            
                                            
 #endif

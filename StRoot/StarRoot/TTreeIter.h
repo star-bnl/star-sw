@@ -66,7 +66,9 @@ protected:
     Int_t         fUnits;		//!  current number of units
     Int_t         fNErr;		//|
     Int_t         fCint;		//|
-TTreeIterCast   fCast;		//!
+    Int_t         fNFiles;		//|
+
+TTreeIterCast   fCast;		        //!
 public:
 
     TTreeIter(TTree *tree);

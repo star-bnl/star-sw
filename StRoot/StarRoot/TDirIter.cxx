@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TDirIter.cxx,v 1.2 2002/01/11 22:01:34 perev Exp $
+ * $Id: TDirIter.cxx,v 1.3 2002/11/26 02:26:35 perev Exp $
  *
  ***************************************************************************
  *
@@ -13,6 +13,7 @@
 #include <string.h>
 #include <assert.h>
 #include "TSystem.h"
+#include "TObjArray.h"
 
 #include "TDirIter.h"
 
@@ -21,11 +22,21 @@
 //______________________________________________________________________________
 TDirIter::TDirIter(const char *path,Int_t maxlev):fRegx("",0)
 {
+  fArr = new TObjArray;
   Reset(path,maxlev);
+}
+//______________________________________________________________________________
+TDirIter::~TDirIter()
+{
+   fArr->Delete();
+   delete fArr;
+   fArr=0;
 }
 //______________________________________________________________________________
 void TDirIter::Reset(const char *path,Int_t maxlev)
 {
+  fIter = -1;
+  fArr->Delete();
   fFull = "";
   fMaxLev = maxlev;
   if (*path == '@') { //read path's from file
@@ -86,6 +97,19 @@ void TDirIter::ResetQQ(const char *path)
 //______________________________________________________________________________
 const char *TDirIter::NextFile()
 {
+   if (fIter == -1) {
+     const char *name=0;
+     while((name=NextFileQ())) {fArr->Add(new TNamed(name,""));}
+     fArr->Sort();
+   }
+   fIter++;
+   if (fIter > fArr->GetLast()) return 0;
+   return fArr->At(fIter)->GetName();
+}
+
+//______________________________________________________________________________
+const char *TDirIter::NextFileQ()
+{
   const char *name = NextFileQQ();
   if (name) return name;
   const char *full = fFull.Data();
@@ -96,7 +120,7 @@ const char *TDirIter::NextFile()
   if (full[fSkip]==0) return 0;
 
   ResetQQ(full+fSkip);
-  return NextFile();
+  return NextFileQ();
 }
 //______________________________________________________________________________
 const char *TDirIter::NextFileQQ()
@@ -123,7 +147,7 @@ const char *TDirIter::NextFileQQ()
       gSystem->FreeDirectory(fEntrStk[fLevel]);
       if (fLevel<=0) 		return 0;
       fLevel--; fState=0; 
-      return NextFile();
+      return NextFileQ();
     }
 
     fFile.Remove(fLengStk[fLevel],999);

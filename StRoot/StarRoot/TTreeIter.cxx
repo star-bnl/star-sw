@@ -64,6 +64,7 @@
 #include "TSystem.h"
 #include "TRegexp.h"
 #include "TError.h"
+#include "TDirIter.h"
 
 enum ETTI { kUnknown=0,
       kChar   =  1,  kShort   =  2,  kInt     =  3,  kLong    =  4,  kFloat = 5, kDouble  =  8,
@@ -208,7 +209,8 @@ ClassImp(TTreeIter)
 
 TTreeIter::TTreeIter(TTree *tree):fCast(&fNErr)
 {
-  fTree  = tree;
+  fTree   = tree;
+  fNFiles = 0;
   Init();
 }
 //______________________________________________________________________________
@@ -216,6 +218,7 @@ TTreeIter::TTreeIter(TTree *tree):fCast(&fNErr)
 TTreeIter::TTreeIter(const char *treeName):fCast(&fNErr)
 {
   fTree = 0;
+  fNFiles = 0;
   if (treeName && treeName[0] && treeName[0]!=' ') fTree  = new TChain(treeName);
   Init();
 }
@@ -228,7 +231,7 @@ void TTreeIter::Init()
   fEntry = 0;
   fUnits = 0;
   fChain = 0;
-  fTreeNumb = 0;
+  fTreeNumb = -2002;
   if (fTree==0) return;
   if (fTree->IsA()==TChain::Class()) fChain=(TChain*)fTree;
 #ifndef __OLDROOT__
@@ -386,9 +389,9 @@ TTreeIterCast &TTreeIter::operator() (const char *varname)
      mem = new TTreeIterMem(br->GetName(),tyCode,fUnits);
      fMemList.Add(mem);
      pddr = mem->GetMem();
-     fTree->SetBranchAddress(br->GetName(),*pddr);
      br->ResetBit  (kDoNotProcess);
      br->SetBit(1);
+     fTree->SetBranchAddress(br->GetName(),*pddr);
      fBraList.Add(br);
    } else {
      pddr = mem->GetMem();
@@ -454,13 +457,14 @@ Bool_t TTreeIter::Notify()
     TBranch *b = fTree->GetBranch(t->GetName());
     Assert(b);
     b->ResetBit  (kDoNotProcess);
-    Assert(!b->TestBit(1));
+//    Assert(!b->TestBit(1));
     b->SetBit(1);
     GetInfo(b,tyName,units,add,brType);
-    if (units > t->fUnits) {
-      void **pddr = t->Alloc(units);
-      fTree->SetBranchAddress(b->GetName(),*pddr);
+    void **pddr = t->GetMem();
+      if (units > t->fUnits) {
+      pddr = t->Alloc(units);
     }
+    b->SetAddress(*pddr);
     fBraList.Add(b);
   }
   fTreeNumb = fChain->GetTreeNumber();
@@ -576,46 +580,16 @@ void TTreeIter::Streamer(TBuffer &) {Assert(0);}
 //_____________________________________________________________________________
 Int_t TTreeIter::AddFile(const Char_t *file)
 {
-  Int_t num = 0;
-  TString tfile,tdir,tname,tbase,fullname;
-  const char *name; char *cc;
-
-
-  tfile = file;
-  tdir  = gSystem->DirName(tfile);
-  tbase = gSystem->BaseName(tfile);
-  gSystem->ExpandPathName(tdir);
-
-
-  void *dir = gSystem->OpenDirectory(tdir);
-  if (!dir) {
-    Warning("AddFile","*** IGNORED Directory %s does NOT exist ***\n",
-    (const Char_t *)tdir);
-    return 0;}
-
-  while ((name = gSystem->GetDirEntry(dir))) {
-//              skip some "special" names
-    if (strcmp(name,"..")==0 || strcmp(name,".")==0) continue;
-    tname = name;
-
-    cc = gSystem->ConcatFileName(tdir,name);
-    fullname = cc; delete [] cc;
-
-    Long_t idqwe,sizeqwe,flags,modtimeqwe;
-    gSystem->GetPathInfo(fullname,&idqwe,&sizeqwe,&flags,&modtimeqwe);
-    if (flags&2 || !flags&4) continue;
-
-//              prepare simple regular expression
-    TRegexp rexp(tbase,kTRUE);
-    int len=0;
-    if (rexp.Index(tname,&len)!=0)      continue;
-    if (len!=tname.Length())            continue;
-    num++;
-    printf("%02d -  TTreeIter::AddFile %s\n",num,fullname.Data());
-    if (fChain == 0) WhichTree(fullname);
-    fChain->Add(fullname);
-  }
-  gSystem->FreeDirectory(dir);
+   const char* fullname;
+   int num = 0;
+   TDirIter dirIter(file);
+   while((fullname=dirIter.NextFile())) { 
+     fNFiles++; num++;
+     printf("%04d -  TTreeIter::AddFile %s\n",fNFiles,fullname);
+     if (fChain == 0) WhichTree(fullname);
+     fChain->Add(fullname);
+   }
+   
   Init();
   return num;
 }

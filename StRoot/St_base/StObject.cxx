@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.16 2002/01/27 23:46:49 perev Exp $
+// $Id: StObject.cxx,v 1.17 2002/11/26 02:23:38 perev Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.17  2002/11/26 02:23:38  perev
+// new ROOT adoptation
+//
 // Revision 1.16  2002/01/27 23:46:49  perev
 // Zombie test added
 //
@@ -109,6 +112,8 @@ UInt_t StObject::Ztreamer(TBuffer &R__b)
    R__b << udx;
    return udx;
 }
+
+ClassImp(StUUId)
 //_____________________________________________________________________________
 StUUId::StUUId()
 {
@@ -131,7 +136,7 @@ void StUUId::Generate()
 }
 
 //_____________________________________________________________________________
-inline void StUUId::Streamer(TBuffer &R__b)
+void StUUId::Streamer(TBuffer &R__b)
 { 
   if (R__b.IsReading()) {
      R__b.ReadFastArray (fID,4);
