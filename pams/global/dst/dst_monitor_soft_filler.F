@@ -15,15 +15,12 @@ CC:<--------------------------------------------------------------------
      1     tcl_tpcluster_h,     tcl_tpcluster ,
      3         tcl_tphit_h,         tcl_tphit ,
      4           scs_spt_h,           scs_spt ,
-     4       fcl_fppoint_h,       fcl_fppoint ,
      5         tpt_track_h,         tpt_track ,
      6         stk_track_h,         stk_track ,
-     6       fpt_fptrack_h,       fpt_fptrack ,
      7     svm_evt_match_h,     svm_evt_match ,
      8           ctu_cor_h,           ctu_cor ,
      9        dst_vertex_h,        dst_vertex ,
      9   dst_event_summary_h, dst_event_summary ,
-     9   dms_ftpc_h,          dms_ftpc , 
      9   dms_global_h,        dms_global , 
      9   dms_svt_h,           dms_svt , 
      9   dms_tpc_h,           dms_tpc )
@@ -44,14 +41,10 @@ CC:        tcl_tphit     - TPC reconstructed space points
 CC:      tcl_tphit_h     - Header Structure for tcl_tphit
 CC:          scs_spt     - SVT reconstructed space points
 CC:        scs_spt_h     - Header Structure for scs_spt
-CC:      fcl_fppoint     - FTPC reconstructed space points
-CC:    fcl_fppoint_h     - Header Structure for fcl_fppoint
 CC:        tpt_track     - TPC reconstructed tracks
 CC:      tpt_track_h     - Header Structure for tpt_track
 CC:        stk_track     - SVT reconstructed tracks
 CC:      stk_track_h     - Header Structure for stk_track
-CC:      fpt_fptrack     - FTPC reconstructed tracks
-CC:    fpt_fptrack_h     - Header Structure for fpt_fptrack
 CC:    svm_evt_match     - SVT-TPC track-track match list
 CC:  svm_evt_match_h     - Header Structure for svm_evt_match
 CC:          ctu_cor     - CTB hits
@@ -62,8 +55,6 @@ CC:  dst_event_summary   - DST event summary
 CC:  dst_event_summary_h - Header Structure for dst_event_summary
 CC:       INOUT:
 CC:         OUT:
-CC:  dms_ftpc    - DST reconstruction software monitor info.
-CC:  dms_ftpc_h   - Header Structure for dms_ftpc
 CC:  dms_global  - DST reconstruction software monitor info.
 CC:  dms_global_h - Header Structure for dms_global
 CC:  dms_svt     - DST reconstruction software monitor info.
@@ -80,10 +71,6 @@ CC:  Local Variable Type Declarations:
       integer*4 tpc_track,n_svt_trk_pad,n_svt_trk_drf,layer
       parameter (ntpc_max = 20000)
       integer*4 track_index(ntpc_max), tpc_trk_row
-      integer*4 iftpc, ihit, nhits(2)
-      integer*4 max_ftpc_hits
-      integer*4 nqwe
-      parameter (max_ftpc_hits = 10)
 
       real*4  zbin(11), zstep, zmin
       parameter (zmin = -200.0)
@@ -91,7 +78,6 @@ CC:  Local Variable Type Declarations:
 
 CC:  Set (all) dms_***_h.nok to 1 row:
 
-      dms_ftpc_h.nok = 1
       dms_global_h.nok = 1
       dms_svt_h.nok = 1
       dms_tpc_h.nok = 1
@@ -127,9 +113,6 @@ CC:      dms_l3(1).nTotalPrimaryTracks = 0
 CC:      dms_l3(1).triggermask = 0 
 CC:  RICH
 CC:      dms_rich(1).mult_rich_tot = 0
-CC:  Unsed FTPC
-      dms_ftpc(1).n_clus_ftpc(1)          = 0
-      dms_ftpc(1).n_clus_ftpc(2)          = 0
 
 
 CC:  Fill TPC cluster summary information:
@@ -511,139 +494,6 @@ CC:  Fraction of SVT hits used in SVT tracks
          end do
       end if
 
-CC:  Fill FTPC monitor information
-
-      dms_ftpc(1).n_pts_ftpc(1)           = 0
-      dms_ftpc(1).n_pts_ftpc(2)           = 0
-      dms_ftpc(1).chrg_ftpc_tot(1)        = 0.0
-      dms_ftpc(1).chrg_ftpc_tot(2)        = 0.0
-      dms_ftpc(1).n_trk_ftpc(1)           = 0
-      dms_ftpc(1).n_trk_ftpc(2)           = 0
-      dms_ftpc(1).hit_frac_ftpc(1)        = 0.0
-      dms_ftpc(1).hit_frac_ftpc(2)        = 0.0
-      dms_ftpc(1).avg_trkL_ftpc(1)        = 0.0
-      dms_ftpc(1).avg_trkL_ftpc(2)        = 0.0
-      dms_ftpc(1).res_pad_ftpc(1)         = 0.0
-      dms_ftpc(1).res_pad_ftpc(2)         = 0.0
-      dms_ftpc(1).res_drf_ftpc(1)         = 0.0
-      dms_ftpc(1).res_drf_ftpc(2)         = 0.0
-
-CC:   Loop over FTPC space points
-    
-      if(fcl_fppoint_h.nok .gt. 0) then
-         do i = 1,fcl_fppoint_h.nok
-CC:         Determine if space point is in FTPC West
-            if (fcl_fppoint(i).row.ge.1 .and. 
-     1              fcl_fppoint(i).row.le.10) then 
-               iftpc = 1 
-CC:         or in FTPC East
-            else if (fcl_fppoint(i).row.ge.11 .and. 
-     1              fcl_fppoint(i).row.le.20) then
-               iftpc = 2
-            end if
-CC:         Count total number of space points in FTPC West and in FTPC East
-            dms_ftpc(1).n_pts_ftpc(iftpc) =
-     1         dms_ftpc(1).n_pts_ftpc(iftpc) + 1
-CC:         Accumulate total charge deposition in FTPC West and in FTPC East
-            dms_ftpc(1).chrg_ftpc_tot(iftpc) =
-     1         dms_ftpc(1).chrg_ftpc_tot(iftpc) +
-     2                                   fcl_fppoint(i).charge
-         end do
-      end if
-
-
-CC:   Loop over FTPC reconstructed tracks
-
-      if(fpt_fptrack_h.nok .gt. 0) then
-         nhits(1) = 0
-         nhits(2) = 0
-         do i = 1,fpt_fptrack_h.nok
-CC:        Determine if track is in FTPC West
-           do ihit = 1,max_ftpc_hits
-            if (fpt_fptrack(i).hitid(ihit) .gt. -1 ) then
-              if (fcl_fppoint(fpt_fptrack(i).hitid(ihit)).row .ge. 1 .and.
-     1          fcl_fppoint(fpt_fptrack(i).hitid(ihit)).row .le. 10) then
-                iftpc = 1
-CC:        or in FTPC East
-              else if (fcl_fppoint(fpt_fptrack(i).hitid(ihit)).row .ge. 11
-     1         .and. fcl_fppoint(fpt_fptrack(i).hitid(ihit)).row .le. 20) then
-                  iftpc = 2
-              end if
-            end if
-           end do
-
-CC:        Count total number of reconstructed tracks in FTPC West and East
-
-           dms_ftpc(1).n_trk_ftpc(iftpc) =
-     1         dms_ftpc(1).n_trk_ftpc(iftpc) + 1
-
-CC:        Count number of hits used in FTPC West and East
-
-           nhits(iftpc) = nhits(iftpc) + fpt_fptrack(i).nrec
-
-CC:        Accumulate residual, pad direction for FTPC West and East
-
-           dms_ftpc(1).res_pad_ftpc(iftpc) =
-     1        dms_ftpc(1).res_pad_ftpc(iftpc) +
-     2                                fpt_fptrack(i).chisq(1)
-
-CC:        Accumulate residual, drift direction for FTPC West and East
-
-           dms_ftpc(1).res_drf_ftpc(iftpc) =
-     1        dms_ftpc(1).res_drf_ftpc(iftpc) +
-     2                                fpt_fptrack(i).chisq(2)
-
-         end do 
- 
-CC:      Compute fraction of space points used in FTPC West and East
-
-         nqwe = dms_ftpc(1).n_pts_ftpc(1)
-         dms_ftpc(1).hit_frac_ftpc(1) = 0
-         if (nqwe.ne.0) 
-     1   dms_ftpc(1).hit_frac_ftpc(1) = float(nhits(1))/float(nqwe)
-         nqwe = dms_ftpc(1).n_pts_ftpc(2)
-         dms_ftpc(1).hit_frac_ftpc(2) = 0
-         if (nqwe.ne.0)
-     1   dms_ftpc(1).hit_frac_ftpc(2) = float(nhits(2))/float(nqwe)
-
-CC:      Compute average number of space points per reconstructed track
-CC:      used in FTPC West and East
-
-         dms_ftpc(1).avg_trkL_ftpc(1) = 0
-         nqwe = dms_ftpc(1).n_trk_ftpc(1)
-         if (nqwe.ne.0)
-     1   dms_ftpc(1).avg_trkL_ftpc(1) = float(nhits(1))/float(nqwe)
-
-         dms_ftpc(1).avg_trkL_ftpc(2) = 0
-         nqwe = dms_ftpc(1).n_trk_ftpc(2)
-         if (nqwe.ne.0)
-     1   dms_ftpc(1).avg_trkL_ftpc(2) = float(nhits(2))/float(nqwe)
-
-CC:      Compute average residual, pad direction for FTPC West and East
-
-         dms_ftpc(1).res_pad_ftpc(1) = 0
-         nqwe = dms_ftpc(1).n_trk_ftpc(1)
-         if (nqwe.ne.0) 
-     1   dms_ftpc(1).res_pad_ftpc(1) = dms_ftpc(1).res_pad_ftpc(1)/nqwe
-
-         dms_ftpc(1).res_pad_ftpc(2) = 0
-         nqwe = dms_ftpc(1).n_trk_ftpc(2)
-         if (nqwe.ne.0)
-     1   dms_ftpc(1).res_pad_ftpc(2) = dms_ftpc(1).res_pad_ftpc(2)/nqwe
-
-CC:      Compute average residual, drift direction for FTPC West and East
-
-         dms_ftpc(1).res_drf_ftpc(1) = 0
-         nqwe = dms_ftpc(1).n_trk_ftpc(1)
-         if (nqwe.ne.0) 
-     1   dms_ftpc(1).res_drf_ftpc(1) = dms_ftpc(1).res_drf_ftpc(1)/nqwe
-
-         dms_ftpc(1).res_drf_ftpc(2) = 0
-         nqwe = dms_ftpc(1).n_trk_ftpc(2)
-         if (nqwe.ne.0)
-     1   dms_ftpc(1).res_drf_ftpc(2) = dms_ftpc(1).res_drf_ftpc(2)/nqwe
-
-      end if
  
 
 CC:  Fill primary vertex monitor information
