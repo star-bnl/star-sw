@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.99 2004/12/21 17:06:12 aihong Exp $
+// $Id: StFlowMaker.cxx,v 1.100 2004/12/22 15:15:16 aihong Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -190,6 +190,33 @@ Int_t StFlowMaker::Make() {
 	beamEnergy << " GeV/A " << beamMassE << "+" << beamMassW << 
 	", B= " << magneticField << endm;
       mRunID = runID;
+      if(pFlowEvent->UseZDCSMD()) {
+	Float_t RawZDCSMD[2][2][8];
+	Float_t ex,ey,wx,wy;
+	for (int strip=1;strip<9;strip++) {
+	  RawZDCSMD[0][1][strip-1] = (pFlowEvent->ZDCSMD(0,1,strip))*Flow::zdcsmdGainFac[0][1][strip-1] + mZDCSMDPed[0][1][strip-1];
+	  RawZDCSMD[0][0][strip-1] = (pFlowEvent->ZDCSMD(0,0,strip))*Flow::zdcsmdGainFac[0][0][strip-1] + mZDCSMDPed[0][0][strip-1];
+          RawZDCSMD[1][1][strip-1] = (pFlowEvent->ZDCSMD(1,1,strip))*Flow::zdcsmdGainFac[1][1][strip-1] + mZDCSMDPed[1][1][strip-1];
+          RawZDCSMD[1][0][strip-1] = (pFlowEvent->ZDCSMD(1,0,strip))*Flow::zdcsmdGainFac[1][0][strip-1] + mZDCSMDPed[1][0][strip-1];
+        }
+	ReadZDCSMDFile();
+	for (int strip=1;strip<9;strip++) {
+	  ey = (RawZDCSMD[0][1][strip-1] - mZDCSMDPed[0][1][strip-1])/Flow::zdcsmdGainFac[0][1][strip-1];
+	  ex = (RawZDCSMD[0][0][strip-1] - mZDCSMDPed[0][0][strip-1])/Flow::zdcsmdGainFac[0][0][strip-1];
+	  wy = (RawZDCSMD[1][1][strip-1] - mZDCSMDPed[1][1][strip-1])/Flow::zdcsmdGainFac[1][1][strip-1];
+          wx = (RawZDCSMD[1][0][strip-1] - mZDCSMDPed[1][0][strip-1])/Flow::zdcsmdGainFac[1][0][strip-1];
+	  if(!mPicoEventRead) {
+            pFlowEvent->SetZDCSMD(0,1,strip,ey);
+            pFlowEvent->SetZDCSMD(0,0,strip,ex);
+            pFlowEvent->SetZDCSMD(1,0,strip,wx);
+            pFlowEvent->SetZDCSMD(1,1,strip,wy);
+	  }
+        }
+	pFlowEvent->SetZDCSMD_BeamCenter(mZDCSMDCenterEx,mZDCSMDCenterEy,mZDCSMDCenterWx,mZDCSMDCenterWy);
+	if (mPicoEventWrite) 
+  	  for (int i=0; i<2; i++) for (int j=0; j<2; j++) for (int k=1; k<9; k++)
+        	pPicoEvent->SetZDCSMD(i,j,k,pFlowEvent->ZDCSMD(i,j,k));
+      } //if(pFlowEvent->UseZDCSMD())
     }
   }
 
@@ -205,7 +232,6 @@ Int_t StFlowMaker::Init() {
 
   // Open PhiWgt file
   ReadPhiWgtFile();
-
   Int_t kRETURN = kStOK;
 
   if (!mPicoEventRead || !mMuEventRead) {
@@ -222,7 +248,7 @@ Int_t StFlowMaker::Init() {
   if (mMuEventRead)    kRETURN += InitMuEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.99 2004/12/21 17:06:12 aihong Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.100 2004/12/22 15:15:16 aihong Exp $");
 
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
   return kRETURN;
@@ -442,16 +468,80 @@ Int_t StFlowMaker::ReadPhiWgtFile() {
     } 
   // Close PhiWgt file
   if (pPhiWgtFile->IsOpen()) pPhiWgtFile->Close();
-  //Read the ZDCSMD constants file
+  return kStOK;
+}
+
+//-----------------------------------------------------------------------
+Int_t StFlowMaker::ReadZDCSMDFile() {
+  // Read the ZDCSMD constants root file
+
+  if (Debug()) gMessMgr->Info() << "FlowMaker: ReadZDCSMDFile()" << endm;
+
+  TDirectory* dirSave = gDirectory;
+  TFile* pZDCSMDConstFile = new TFile("zdcsmdConstants.root", "READ");
+  if (!pZDCSMDConstFile->IsOpen()) {
+    gMessMgr->Info("##### FlowMaker: No ZDCSMD constant file. Will use default.");
+  } else { gMessMgr->Info("##### FlowMaker: ZDCSMD constant file read.");	}
+  gDirectory = dirSave;
+    int mRealRunID = mRunID;
+    Double_t HistTest = 0.;
+  if (pZDCSMDConstFile->IsOpen()) {
+    TH2* mZDCSMDBeamCenter2D = (TH2D *)pZDCSMDConstFile->Get("ZDCSMDBeamCenter");
+    while(HistTest < 1.) {
+      HistTest = mZDCSMDBeamCenter2D->GetBinContent(1,mRealRunID-5050000);
+      if(HistTest > 1.) break;
+      mRealRunID -= 1;
+      if(mRealRunID < 5050000) break;
+    }
+    if(mRealRunID < 5050000) {
         mZDCSMDCenterEx = Flow::zdcsmd_ex0;
         mZDCSMDCenterEy = Flow::zdcsmd_ey0;
         mZDCSMDCenterWx = Flow::zdcsmd_wx0;
         mZDCSMDCenterWy = Flow::zdcsmd_wy0;
-
+    } else {
+        mZDCSMDCenterEx = HistTest;
+        mZDCSMDCenterEy = mZDCSMDBeamCenter2D->GetBinContent(2,mRealRunID-5050000);
+        mZDCSMDCenterWx = mZDCSMDBeamCenter2D->GetBinContent(3,mRealRunID-5050000);
+        mZDCSMDCenterWy = mZDCSMDBeamCenter2D->GetBinContent(4,mRealRunID-5050000);
+      }
+  } else {
+        mZDCSMDCenterEx = Flow::zdcsmd_ex0;
+        mZDCSMDCenterEy = Flow::zdcsmd_ey0;
+        mZDCSMDCenterWx = Flow::zdcsmd_wx0;
+        mZDCSMDCenterWy = Flow::zdcsmd_wy0;
+    }
+  if (pZDCSMDConstFile->IsOpen()) {
+    mRealRunID = mRunID;
+    HistTest = 0.;
+    TH2* mZDCSMDPed2D = (TH2D *)pZDCSMDConstFile->Get("ZDCSMDPedestal");
+    while(HistTest < .1) {
+      HistTest = mZDCSMDPed2D->GetBinContent(1,mRealRunID-5050000);
+      if(HistTest > .1) break;
+      mRealRunID -= 1;
+      if(mRealRunID < 5050000) break;
+    }
+    if(mRealRunID < 5050000) {
+      for(int i=0;i<2;i++) {for(int j=0;j<2;j++){for(int k=0;k<8;k++){
+        mZDCSMDPed[i][j][k] = Flow::zdcsmdPedstal[i][j][k];
+       }}}//for
+    } else {
+        int zdcsmd_map[2][2][8] ={
+        { { 7, 6, 5, 4, 3, 2, 1, 11} ,
+          { 0,15,14,13,12,8,10, 9} } ,
+        { {23,22,21,20,19,18,17,24} ,
+          {16,31,30,29,28,27,26,25} }
+        };
+        for(int i=0;i<2;i++) {for(int j=0;j<2;j++){for(int k=0;k<8;k++){
+          mZDCSMDPed[i][j][k] = mZDCSMDPed2D->GetBinContent(zdcsmd_map[i][j][k]+1,mRealRunID-5050000);
+        }}}//for
+      }
+  } else {
      for(int i=0;i<2;i++) {for(int j=0;j<2;j++){for(int k=0;k<8;k++){
        mZDCSMDPed[i][j][k] = Flow::zdcsmdPedstal[i][j][k];
      }}}//for
- 
+    }//else
+  // Close ZDCSMD constants file
+  if (pZDCSMDConstFile->IsOpen()) pZDCSMDConstFile->Close();
   return kStOK;
 }
 
@@ -922,7 +1012,6 @@ void StFlowMaker::FillPicoEvent() {
     for (int j=0; j<2; j++)
       for (int k=1; k<9; k++)
 	pPicoEvent->SetZDCSMD(i,j,k,pFlowEvent->ZDCSMD(i,j,k));
-
 
   StFlowTrackIterator itr;
   StFlowTrackCollection* pFlowTracks = pFlowEvent->TrackCollection();
@@ -1494,7 +1583,10 @@ Bool_t StFlowMaker::FillFromPicoVersion7DST(StFlowPicoEvent* pPicoEvent) {
     for (int j=0; j<2; j++)
       for (int k=1; k<9; k++)
 	pFlowEvent->SetZDCSMD(i,j,k,pPicoEvent->ZDCSMD(i,j,k));
-  
+  pFlowEvent->SetZDCSMD_PsiWeightWest(mZDCSMD_PsiWgtWest);
+  pFlowEvent->SetZDCSMD_PsiWeightEast(mZDCSMD_PsiWgtEast);
+  pFlowEvent->SetZDCSMD_PsiWeightFull(mZDCSMD_PsiWgtFull);
+  pFlowEvent->SetZDCSMD_BeamCenter(mZDCSMDCenterEx,mZDCSMDCenterEy,mZDCSMDCenterWx,mZDCSMDCenterWy);
   int goodTracks = 0;
   // Fill FlowTracks
   for (Int_t nt=0; nt < pPicoEvent->GetNtrack(); nt++) {
@@ -2151,6 +2243,9 @@ Float_t StFlowMaker::CalcDcaSigned(const StThreeVectorF vertex,
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.100  2004/12/22 15:15:16  aihong
+// Read run-by-run beam shifts and SMD pedestal. Done by Gang
+//
 // Revision 1.99  2004/12/21 17:06:12  aihong
 // check corrupted files for MuDst and picoDst
 //
