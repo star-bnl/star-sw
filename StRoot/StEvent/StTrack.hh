@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.hh,v 1.8 1999/04/08 14:58:38 ullrich Exp $
+ * $Id: StTrack.hh,v 1.9 1999/05/22 19:30:10 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.hh,v $
+ * Revision 1.9  1999/05/22 19:30:10  perev
+ * length & methods added
+ *
  * Revision 1.8  1999/04/08 14:58:38  ullrich
  * Moved PID traits from StTrack to StGlobalTrack.
  *
@@ -67,12 +70,15 @@ public:
     virtual void setHelix(const StPhysicalHelix&);
     virtual void setStartVertex(StVertex*);
     virtual void setStopVertex(StVertex*);
+    virtual void setLength(float length){mLength=length;};
+    virtual float length(){return mLength;};
     
 protected:
     StPhysicalHelix  mHelix;
     StVertex*        mStartVertex;
     StVertex*        mStopVertex;
     StTrackFitTraits mFitTraits;
+    float            mLength;
 };
 
 inline StPhysicalHelix& StTrack::helix() { return mHelix; }

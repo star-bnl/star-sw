@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cc,v 1.7 1999/05/22 18:34:09 perev Exp $
+ * $Id: StTrack.cc,v 1.8 1999/05/22 19:30:10 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cc,v $
+ * Revision 1.8  1999/05/22 19:30:10  perev
+ * length & methods added
+ *
  * Revision 1.7  1999/05/22 18:34:09  perev
  * Non initialized pointers in StTrack fixed
  *
@@ -34,19 +37,21 @@
  **************************************************************************/
 #include "StEvent/StTrack.hh"
 
-static const char rcsid[] = "$Id: StTrack.cc,v 1.7 1999/05/22 18:34:09 perev Exp $";
+static const char rcsid[] = "$Id: StTrack.cc,v 1.8 1999/05/22 19:30:10 perev Exp $";
 
 StTrack::StTrack() : mHelix(0, 0, 0, StThreeVector<double>())
 {
     mStartVertex = 0;
-    mStopVertex   = 0;
+    mStopVertex  = 0;
+    mLength      = 0;
 }
 
 StTrack::StTrack(dst_track_st* trk) : 
   mHelix(0, 0, 0, StThreeVector<double>()), mFitTraits(trk)
 {
     mStartVertex = 0;
-    mStopVertex   = 0;
+    mStopVertex  = 0;
+    mLength      = 0;
 }
 
 StTrack::StTrack(dst_track_st* trk,
@@ -58,7 +63,8 @@ StTrack::StTrack(dst_track_st* trk,
   mHelix(curvature, dip, phase, origin, h), mFitTraits(trk)
 {  
     mStartVertex = 0;
-    mStopVertex   = 0;
+    mStopVertex  = 0;
+    mLength      = 0;
 }
 
 
