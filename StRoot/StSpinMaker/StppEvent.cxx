@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StppEvent.cxx,v 1.1 2002/01/16 20:22:53 akio Exp $
+// $Id: StppEvent.cxx,v 1.2 2002/01/17 02:06:13 akio Exp $
 // $Log: StppEvent.cxx,v $
+// Revision 1.2  2002/01/17 02:06:13  akio
+// fixed bug in L3 weighted phi
+//
 // Revision 1.1  2002/01/16 20:22:53  akio
 // First version
 //
@@ -129,7 +132,7 @@ Int_t StppEvent::fill(StEvent *event){
 	}
 	sumPt+=t->pt;
 	sumPx+=t->pt * cos(t->phi0);
-	sumPt+=t->pt * sin(t->phi0);
+	sumPy+=t->pt * sin(t->phi0);
 	weightedEta += t->pt * t->eta;
 	nGoodTrack++;
       }
@@ -187,15 +190,18 @@ Int_t StppEvent::fill(StEvent *event){
       UInt_t nprimL3 = exnodeL3[in]->entries(global);
       if(nprimL3==1){
 	StppTrack *t = new((*pTracksL3)[nPrimTrackL3]) StppTrack(exnodeL3[in]->track(global));
-	if(t->nHits>23) nGoodTrackL3++;
-	if(t->pt > maxptL3){
-	  maxptL3 = t->pt;
-	  LCPL3 = nPrimTrackL3;
+	if(t->flag>0 && t->nHits>23 && t->pt>0.2 && fabs(t->eta)<1.4){
+	  nGoodTrackL3++;
+	  if(t->pt > maxptL3){
+	    maxptL3 = t->pt;
+	    LCPL3 = nPrimTrackL3;
+	  }
+	  sumPtL3 += t->pt;
+	  sumPxL3+=t->pt * cos(t->phi0);
+	  sumPyL3+=t->pt * sin(t->phi0);
+	  weightedEtaL3 += t->pt * t->eta;
+	  nGoodTrackL3++;
 	}
-	sumPtL3 += t->pt;
-	sumPxL3+=t->pt * cos(t->phi0);
-	sumPtL3+=t->pt * sin(t->phi0);
-	weightedEtaL3 += t->pt * t->eta;
 	nPrimTrackL3++;
       }
     }
