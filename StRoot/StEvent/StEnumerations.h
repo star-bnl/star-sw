@@ -8,7 +8,7 @@
  */
 /***************************************************************************
  *
- * $Id: StEnumerations.h,v 2.15 2002/02/25 19:32:03 ullrich Exp $
+ * $Id: StEnumerations.h,v 2.16 2002/02/27 18:56:27 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -21,6 +21,9 @@
  ***************************************************************************
  *
  * $Log: StEnumerations.h,v $
+ * Revision 2.16  2002/02/27 18:56:27  ullrich
+ * Added enum for l3 track finder.
+ *
  * Revision 2.15  2002/02/25 19:32:03  ullrich
  * Added enums for RHIC ring to StBeamDirection.
  *
@@ -110,9 +113,16 @@ enum StTrackFinderMethod { svtGrouper = 4,                             /**< enum
                            tpcStandard,                                /**< enum value tpcStandard */
                            tpcOther,                                   /**< enum value tpcOther */
                            ftpcConformal,                              /**< enum value ftpcConformal */
+                           ftpcCurrent,                                /**< enum value ftpcCurrent */
                            svtTpcSvm,                                  /**< enum value svtTpcSvm */
                            svtTpcEst,                                  /**< enum value svtTpcEst */
-                           svtTpcPattern };
+                           svtTpcPattern,
+                           l3Standard};
+
+//
+// The fitter methods are defined in
+// StTrackMethod.h & StTrackDefinitions.h
+//
 
 /*!
  * \enum StRichPidFlag 
