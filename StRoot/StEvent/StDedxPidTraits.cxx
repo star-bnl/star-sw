@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDedxPidTraits.cxx,v 2.6 2000/01/05 16:04:11 ullrich Exp $
+ * $Id: StDedxPidTraits.cxx,v 2.7 2000/12/18 17:25:13 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDedxPidTraits.cxx,v $
+ * Revision 2.7  2000/12/18 17:25:13  fisyak
+ * Add track length used in dE/dx calculations
+ *
  * Revision 2.6  2000/01/05 16:04:11  ullrich
  * Changed method name sigma() to errorOnMean().
  *
@@ -34,7 +37,7 @@
 
 ClassImp(StDedxPidTraits)
 
-static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.6 2000/01/05 16:04:11 ullrich Exp $";
+static const char rcsid[] = "$Id: StDedxPidTraits.cxx,v 2.7 2000/12/18 17:25:13 fisyak Exp $";
 
 StDedxPidTraits::StDedxPidTraits() :
     mNumberOfPoints(0), mDedx(0), mSigma(0), mMethod(0) { /* noop */ }
@@ -52,7 +55,9 @@ StDedxPidTraits::StDedxPidTraits(const dst_dedx_st& t) :
 StDedxPidTraits::~StDedxPidTraits() { /* noop */ }
 
 UShort_t
-StDedxPidTraits::numberOfPoints() const { return mNumberOfPoints; }
+StDedxPidTraits::numberOfPoints() const { return mNumberOfPoints%100; }
+Float_t
+StDedxPidTraits::length() const { return (mNumberOfPoints/100); }
 
 Float_t
 StDedxPidTraits::mean() const { return mDedx; }
