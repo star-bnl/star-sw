@@ -290,16 +290,19 @@ my $jbset;
 
  my $Jsetd;
  my $Jsetr;
+ my $Jsetn;
  my $inFile;
  my $logDir;
  my @pts;
 
    $fchain =~ s/_/,/g;
  
-    $Jsetd = $Jset;
-    $Jsetd =~ s/_/\//g;
+    $Jsetn = $Jset;
+#    $Jsetn =~ s/_/\//g;
+
     @pts = split ("_",$Jset);
-    $Jsetr = $pts[1] . "/" .$pts[2];      
+    $Jsetr = $pts[2] . "/" .$pts[3]; 
+    $Jsetd = $prodPeriod . "/" . $Jsetr;     
     $inFile =  $gfile . ".daq";
     $logDir = $JOB_LOG[0];   
 
