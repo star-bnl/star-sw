@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.81 2002/01/16 04:01:52 perev Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.82 2002/04/14 21:58:15 perev Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -104,6 +104,9 @@ StDefaultFilter StEventDisplayMaker::m_DefaultFilters[StEventDisplayMaker::kEndO
 
 Int_t               StEventDisplayMaker::fgEventLoop = 0;
 StEventDisplayInfo *StEventDisplayMaker::fgInfo      = 0;
+
+
+
 
 ClassImp(StEventDisplayInfo)
 
@@ -672,7 +675,7 @@ Int_t StEventDisplayMaker::MakeTable(const char **positions)
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::MakeEvent(const TObject *event, const char** pos)
 {
-   static const Style_t UHitSty = 4; static const Size_t UHitSiz = 0.35; static const Color_t UHitCol= 0;
+   static const Style_t UHitSty = 4; static const Size_t UHitSiz = 3.5; static const Color_t UHitCol= 0;
    static const Style_t NHitSty = 1; static const Size_t NHitSiz = 1.00; static const Color_t NHitCol=18;
    static const Style_t TrakSty = 1; static const Size_t TrakSiz = 1.00; static const Color_t TrakCol= 0;
    static const Style_t VertSty = 5; static const Size_t VertSiz = 0.90; static const Color_t VertCol= 0;
@@ -1072,6 +1075,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.82  2002/04/14 21:58:15  perev
+// Increase size of hit 10 times
+//
 // Revision 1.81  2002/01/16 04:01:52  perev
 // L3 tracks removed
 //
