@@ -1,5 +1,8 @@
-# $Id: MakeAsp.mk,v 1.18 1999/06/16 12:37:01 fisyak Exp $
+# $Id: MakeAsp.mk,v 1.19 1999/09/20 17:55:54 fisyak Exp $
 # $Log: MakeAsp.mk,v $
+# Revision 1.19  1999/09/20 17:55:54  fisyak
+# Add /usr/include
+#
 # Revision 1.18  1999/06/16 12:37:01  fisyak
 # Changes for egcs-1.1.2 on Solaris
 #
@@ -109,6 +112,7 @@ INCLUDES += $(INC_GEN_DIR)
 INCLUDES += $(STAF_SYS_INCS)
 INCLUDES += $(CERN_ROOT_INCS)
 INCLUDES += $(STAF_UTILS_INCS)
+INCLUDES += /usr/include
 
 INCLUDES := $(addprefix -I,$(INCLUDES))
 
