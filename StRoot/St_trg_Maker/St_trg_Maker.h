@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.h,v 1.11 2001/07/25 19:10:53 ward Exp $
+// $Id: St_trg_Maker.h,v 1.12 2001/09/03 19:09:40 ward Exp $
 // $Log: St_trg_Maker.h,v $
+// Revision 1.12  2001/09/03 19:09:40  ward
+// Runtime selection of 2000 or 2001 trigger data format.
+//
 // Revision 1.11  2001/07/25 19:10:53  ward
 // New function InitCtbArrays2001 for ctb_dsm_2001.map.
 //
@@ -73,14 +76,17 @@ class St_trg_Maker : public StMaker {
    Bool_t drawinit;
    StDAQReader *fVictorPrelim; //!
    StTRGReader *fVictor;       //!
-// static Char_t  m_VersionCVS = "$Id: St_trg_Maker.h,v 1.11 2001/07/25 19:10:53 ward Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_trg_Maker.h,v 1.12 2001/09/03 19:09:40 ward Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
-   void dumpDataToScreenAndExit();
+   void dumpDataToScreenAndExit    ();
+   void dumpDataToScreenAndExit2000();
    void InitMwcArrays();
    void InitCtbArrays();
+   char St_trg_Maker::IsYear2000Data(St_DataSet *herb);
    void InitCtbArrays2001(); // For data taken 2001 and (?) after. 
-   Int_t SanityCheck();
+   Int_t SanityCheck    ();
+   Int_t SanityCheck2000();
    int auxctbmap[16],ctbmap[120][2];  // Hardcoded from ctb_dsm.map.
    int auxmwcmap[32],mwcmap[24][4];  // Hardcoded from mwc_dsm.map.
  
@@ -90,16 +96,22 @@ class St_trg_Maker : public StMaker {
    int HandleCtu(St_ctu_raw *ctu_raw,St_dst_TrgDet *dst1);
    int HandleMwc(St_mwc_raw *mwc_raw,St_dst_TrgDet *dst1);
    void Vladimir2Herbert(int,int*,int*);
-   void CtbMwcDaq(St_dst_TrgDet *dst1);
+   void CtbMwcDaq    (St_dst_TrgDet *dst1);
+   void CtbMwcDaq2000(St_dst_TrgDet *dst1);
    void SecondDstSim(St_dst_L0_Trigger *dst2);
-   void TakeCareOfL1andL2Daq(St_dst_L1_Trigger*,St_dst_L2_Trigger*);
+   void TakeCareOfL1andL2Daq    (St_dst_L1_Trigger*,St_dst_L2_Trigger*);
+   void TakeCareOfL1andL2Daq2000(St_dst_L1_Trigger*,St_dst_L2_Trigger*);
    void TakeCareOfL1andL2Sim(St_dst_L1_Trigger*,St_dst_L2_Trigger*);
-   void SecondDstDaq(St_dst_L0_Trigger *dst2);
+   void SecondDstDaq    (St_dst_L0_Trigger *dst2);
+   void SecondDstDaq2000(St_dst_L0_Trigger *dst2);
    void VpdSim(St_dst_TrgDet *dst);
    void ZdcSim(St_dst_TrgDet *dst);
-   void VpdDaq(St_dst_TrgDet *dst);
-   void ZdcDaq(St_dst_TrgDet *dst);
-   int Daq(St_DataSet*,St_dst_TrgDet*,St_dst_L0_Trigger*,St_dst_L1_Trigger*,St_dst_L2_Trigger*);
+   void VpdDaq    (St_dst_TrgDet *dst);
+   void VpdDaq2000(St_dst_TrgDet *dst);
+   void ZdcDaq    (St_dst_TrgDet *dst);
+   void ZdcDaq2000(St_dst_TrgDet *dst);
+   int Daq    (St_DataSet*,St_dst_TrgDet*,St_dst_L0_Trigger*,St_dst_L1_Trigger*,St_dst_L2_Trigger*);
+   int Daq2000(St_DataSet*,St_dst_TrgDet*,St_dst_L0_Trigger*,St_dst_L1_Trigger*,St_dst_L2_Trigger*);
    int Sim(            St_dst_TrgDet*,St_dst_L0_Trigger*,St_dst_L1_Trigger*,St_dst_L2_Trigger*);
                   St_trg_Maker(const char *name="trg");
    virtual       ~St_trg_Maker();
@@ -107,7 +119,7 @@ class St_trg_Maker : public StMaker {
    virtual Int_t  Make();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.11 2001/07/25 19:10:53 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_trg_Maker.h,v 1.12 2001/09/03 19:09:40 ward Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_trg_Maker, 1)   //StAF chain virtual base class for Makers
 };

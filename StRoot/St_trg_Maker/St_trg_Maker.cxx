@@ -1,5 +1,8 @@
-// $Id: St_trg_Maker.cxx,v 1.29 2001/08/22 15:16:30 ward Exp $
+// $Id: St_trg_Maker.cxx,v 1.30 2001/09/03 19:09:39 ward Exp $
 // $Log: St_trg_Maker.cxx,v $
+// Revision 1.30  2001/09/03 19:09:39  ward
+// Runtime selection of 2000 or 2001 trigger data format.
+//
 // Revision 1.29  2001/08/22 15:16:30  ward
 // Changed the laser flag from x9001 to x9009.
 //
@@ -127,17 +130,23 @@
 #include "tables/St_ctu_raw_Table.h"
 #include "tables/St_mwc_raw_Table.h"
 #include "tables/St_dst_TrgDet_Table.h"
-#include "trgStructures.h" // From the STAR trigger group, and may need occasional updating.
-// The structure MarilynMonroe_t is like the trigger group's TrgDataType, except that
-// it does not include TrgEvtHeader, which they don't pass to DAQ.
 #define PREPOST 11 // CAUTION:  this number is also in dst_TrgDet.idl
+
+#include "trgStructures.h"
 typedef struct {
   EvtDescData    EvtDesc;  /* L1 Event Descriptor Data */  
   TrgSumData     TrgSum;   /* summary data */
   RawTrgDet      RAW[PREPOST];      /* For simplicity, I assume that you don't want pre and post history. */
-} MarilynMonroe_t;
-MarilynMonroe_t *GraceSlick;
+} MarilynMonroe;
+MarilynMonroe *gs;
 
+#include "trgStructures2000.h"
+typedef struct {
+  EvtDescData2000    EvtDesc;  /* L1 Event Descriptor Data */  
+  TrgSumData2000     TrgSum;   /* summary data */
+  RawTrgDet2000      RAW[PREPOST];      /* For simplicity, I assume that you don't want pre and post history. */
+} MarilynMonroe2000;
+MarilynMonroe2000 *gs2000;
 
 ClassImp(St_trg_Maker)
 #define PP printf(
@@ -156,26 +165,20 @@ Int_t St_trg_Maker::Init(){
 // Create tables
 // Create Histograms    
   InitMwcArrays();
-  InitCtbArrays2001();
   return StMaker::Init();
 }
-//_____________________________________________________________________________
-void St_trg_Maker::SecondDstDaq(St_dst_L0_Trigger *dst2) {
-  int i;
-  dst_L0_Trigger_st *tt = dst2->GetTable();
-  tt->TrgToken         = GraceSlick->EvtDesc.TCU1.FIFO1.TrgToken; // Jul 18 2001 A St_dst_L0_Trigger
-  tt->TriggerActionWd  = GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd;
-  tt->DSMInput         = GraceSlick->EvtDesc.TCU2.FIFO2.DSMInput;        // Oct 2 2000
-  tt->DSMAddress       = GraceSlick->EvtDesc.TCU2.FIFO2.DSMAddress;      // Jul 18 2001 B St_dst_L0_Trigger
-  tt->TriggerWd        = GraceSlick->EvtDesc.TCU3.FIFO3.TriggerWd;
-  tt->DetectorBusy     = GraceSlick->EvtDesc.TCU3.FIFO3.DetectorBusy;    // Oct 2 2000
-  tt->addBits          = GraceSlick->EvtDesc.TCU3.FIFO3.addBits;    // Jul 18 2001 C St_dst_L0_Trigger
-  for(i=0;i<32;i++) tt->CPA[i]=GraceSlick->TrgSum.DSM.CPA[i];
-  tt->MWC_CTB_mul      = GraceSlick->TrgSum.DSM.lastDSM[2]; // Per Hank Crawford, Jan 6 2000.
-  tt->MWC_CTB_dipole   = 0;
-  tt->MWC_CTB_topology = 0;
-  tt->MWC_CTB_moment   = 0;
-}
+
+////////////////////////////////////////////////////////////////////////////////////////
+// This section of code causes the functions in the file duplicated.code to appear twice
+// in this code file.  The second time is for trigger data in the year 2000 format.
+// The first time is for year 2001 format.
+#define SWITCH(x) x
+#include "duplicated.code"
+#undef SWITCH
+#define SWITCH(x) x ## 2000
+#include "duplicated.code"
+////////////////////////////////////////////////////////////////////////////////////////
+
 void St_trg_Maker::SecondDstSim(St_dst_L0_Trigger *dst2) {
   int i;
   dst_L0_Trigger_st *tt = dst2->GetTable();
@@ -187,8 +190,20 @@ void St_trg_Maker::SecondDstSim(St_dst_L0_Trigger *dst2) {
   tt->MWC_CTB_topology = 0;
   tt->MWC_CTB_moment   = 0;
 }
+char St_trg_Maker::IsYear2000Data(St_DataSet *herb) {
+  unsigned char *data;
+  StDAQReader *fromVictor = (StDAQReader*) (herb->GetObject()); assert(fromVictor);
+  StTRGReader *trgReader = fromVictor->getTRGReader(); assert(trgReader);
+  assert(trgReader->thereIsTriggerData());
+  data=(char*)(trgReader->fTRGImpReader->pBankTRGD);
+  data+=40; // Skip the 10 word DAQ bank header
+  data+=sizeof(unsigned short)+sizeof(char); // Skip the first two data.
+  if(*data==0x12) return 7; // TRUE
+  if(*data==0x13) return 0; // FALSE
+  assert(0);  // Should not be here.  Eto nehoroshoe mesto etogo fajla.
+}
 Int_t St_trg_Maker::Make(){
-
+  static char initializationDone=0;
   St_dst_TrgDet     *dst1 = new St_dst_TrgDet("TrgDet",1);         if(!dst1) return kStWarn; dst1->SetNRows(1);
   St_dst_L0_Trigger *dst2 = new St_dst_L0_Trigger("L0_Trigger",1); if(!dst2) return kStWarn; dst2->SetNRows(1);
   St_dst_L1_Trigger *dst3 = new St_dst_L1_Trigger("L1_Trigger",1); if(!dst3) return kStWarn; dst3->SetNRows(1);
@@ -199,96 +214,19 @@ Int_t St_trg_Maker::Make(){
   m_DataSet->Add(dst4);
 
   St_DataSet *herb = GetDataSet("StDAQReader");
-  if(herb) return Daq(herb,dst1,dst2,dst3,dst4); else return Sim(dst1,dst2,dst3,dst4);
-
-}
-void St_trg_Maker::CtbMwcDaq(St_dst_TrgDet *dst1) { // For sim data, use output of trg_fillDst module.
-  int npre,npost,pp,i,tray,slat,subsector,sector;
-  dst_TrgDet_st *tt = dst1->GetTable();
-
-  npre=GraceSlick->EvtDesc.npre;
-  npost=GraceSlick->EvtDesc.npost;
-  tt->npre=npre;
-  tt->npost=npost;
-  for(pp=0;pp<1+npre+npost;pp++) {
-    assert(pp<PREPOST);
-    for(slat=0;slat<2;slat++) {
-      for(tray=0;tray<120;tray++) {
-        tt->nCtb[tray][slat][pp]=GraceSlick->RAW[pp].CTB[ctbmap[tray][slat]];
-        tt->timeCtb[tray][slat][pp]=0;  // May be settable in some events from the LS bit, consult Hank.
-      }
+  if(herb) {
+    if(IsYear2000Data(herb)) {
+      PP"This is St_trg_Maker, analyzing year 2000 trigger data.\n");
+      if(!initializationDone) { InitCtbArrays(); initializationDone=7; }
+      return Daq2000(herb,dst1,dst2,dst3,dst4);
+    } else {
+      PP"This is St_trg_Maker, analyzing year 2001 trigger data.\n");
+      if(!initializationDone) { InitCtbArrays2001(); initializationDone=7; }
+      return     Daq(herb,dst1,dst2,dst3,dst4);
     }
-    for(sector=0;sector<24;sector++) {
-      for(subsector=0;subsector<4;subsector++) {
-        tt->nMwc[sector][subsector][pp]=GraceSlick->RAW[pp].MWC[mwcmap[sector][subsector]];
-      }
-    }
-    for(i=0;i<16;i++) tt->ctbaux[i][pp]=GraceSlick->RAW[pp].CTB[auxctbmap[i]];
-    for(i=0;i<32;i++) tt->mwcaux[i][pp]=GraceSlick->RAW[pp].MWC[auxmwcmap[i]];
-  }
-}
-Int_t St_trg_Maker::SanityCheck() {
-  int pp,lim;
-  lim=1+GraceSlick->EvtDesc.npre+GraceSlick->EvtDesc.npost;
-  for(pp=0;pp<lim;pp++) {
-    SANITYCheck(GraceSlick->RAW[pp].RawDetHeader[0] ,'R')
-    SANITYCheck(GraceSlick->RAW[pp].RawDetHeader[1] ,'D')
-    SANITYCheck(GraceSlick->RAW[pp].CTBdataHeader[0],'C')
-    SANITYCheck(GraceSlick->RAW[pp].CTBdataHeader[1],'T')
-    SANITYCheck(GraceSlick->RAW[pp].MWCdataHeader[0],'M')
-    SANITYCheck(GraceSlick->RAW[pp].MWCdataHeader[1],'W')
-    SANITYCheck(GraceSlick->RAW[pp].EMCdataHeader[0],'E')
-    SANITYCheck(GraceSlick->RAW[pp].EMCdataHeader[1],'M')  
-  }
-  return kStOK;
-}
-int St_trg_Maker::Daq(St_DataSet *herb,St_dst_TrgDet *dst1,St_dst_L0_Trigger *dst2,
-      St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
-
-  char *oo,*ptr,isLaser=0,isPhysics=0,isPulser=0,thisEventOk=0;
-  fVictorPrelim=(StDAQReader*)(herb->GetObject()); assert(fVictorPrelim);
-  fVictor=fVictorPrelim->getTRGReader(); assert(fVictor);
-  assert(fVictor->thereIsTriggerData()); // We had bfc.C(" l0 "), but we have no TRG bank in
-                                          // .daq file.
-              // StTRGReader *St_trg_Maker::fVictor;
-              // TRG_Reader  *StTRGReader::fTRGImpReader;
-              // Bank_TRGD   *TRG_Reader::pBankTRGD;
-  ptr=(char*)(fVictor->fTRGImpReader->pBankTRGD);
-  assert(ptr);
-  ptr+=40; /* skip header */
-  GraceSlick=(MarilynMonroe_t*)ptr;
-  Int_t Iret = SanityCheck();
-  if (Iret !=  kStOK) return Iret;
-  if(GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd==0x9009) isLaser=7;
-  if(GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd>>12==4) isPhysics=7;
-  if(GraceSlick->EvtDesc.TCU3.FIFO3.TriggerWd==0xf101) isPulser=7;
-  if((m_Mode&1)&&isPhysics) thisEventOk=7;
-  if((m_Mode&2)&&isLaser)   thisEventOk=7;
-  if((m_Mode&4)&&isPulser)  thisEventOk=7;
-  if (!thisEventOk) {
-    oo="";
-    if(isPhysics) oo="Physics"; if(isLaser) oo="Laser"; if(isPulser) oo="Pulser";
-    printf("St_trg_Maker.  %s event.  TrgActionWd=0x%x.  TriggerWd=0x%0x. Returning kStErr.\n",
-        oo,GraceSlick->EvtDesc.TCU1.FIFO1.TrgActionWd,
-        GraceSlick->EvtDesc.TCU3.FIFO3.TriggerWd);
-    return kStErr; // Skip this event.
-  }
-  // dumpDataToScreenAndExit();
-  VpdDaq(dst1);       // The function
-  ZdcDaq(dst1);       // St_trg_Maker::Sim
-  CtbMwcDaq(dst1);    // has four lines
-  SecondDstDaq(dst2); // which are analogous to these four.
-  TakeCareOfL1andL2Daq(dst3,dst4);
-
-  return kStOK;
-}
-void St_trg_Maker::TakeCareOfL1andL2Daq(St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
-  int i;
-  dst_L1_Trigger_st *tt1 = dst3->GetTable();
-  dst_L2_Trigger_st *tt2 = dst4->GetTable();
-  for(i=0;i<32;i++) {
-    tt1->L1_result[i] = GraceSlick->TrgSum.L1Result[i];
-    tt2->L2_result[i] = GraceSlick->TrgSum.L2Result[i];
+  } else {
+    if(!initializationDone) { InitCtbArrays2001(); initializationDone=7; }
+    return Sim(dst1,dst2,dst3,dst4);
   }
 }
 void St_trg_Maker::TakeCareOfL1andL2Sim(St_dst_L1_Trigger *dst3,St_dst_L2_Trigger *dst4) {
@@ -418,31 +356,6 @@ int St_trg_Maker::Sim(St_dst_TrgDet *dst1,St_dst_L0_Trigger *dst2,St_dst_L1_Trig
 
   return rv;
 }
-void St_trg_Maker::VpdDaq(St_dst_TrgDet *dst1) {
-  int i;
-  dst_TrgDet_st *tt = dst1->GetTable();
-  for(i=0;i<48;i++) { 
-    tt->adcVPD[i]=0;
-    tt->timeVPD[i]=0;
-  }
-  tt->TimeEastVpd=0;
-  tt->TimeWestVpd=0;
-  tt->vertexZ=0;
-}
-void St_trg_Maker::ZdcDaq(St_dst_TrgDet *dst1) {
-  int i;
-  dst_TrgDet_st *tt = dst1->GetTable();
-  for(i=0;i<8;i++) tt->lastDSM[i]=GraceSlick->TrgSum.DSM.lastDSM[i]; // Jul 18 2001 D   St_dst_TrgDet   This is 
-                                                                     // partially redundant with St_dst_L0_Trigger.
-  for(i=0;i<16;i++) { 
-    tt->adcZDC[i]=GraceSlick->TrgSum.DSM.ZDC[i];
-    tt->tdcZDC[i]=0;
-    tt->BCdata[i]=GraceSlick->TrgSum.DSM.BCdata[i]; // Jul 18 2001 E     St_dst_TrgDet
-  }
-  tt->adcZDCEast=GraceSlick->TrgSum.DSM.ZDC[13];
-  tt->adcZDCWest=GraceSlick->TrgSum.DSM.ZDC[10];
-  tt->adcZDCsum=GraceSlick->TrgSum.DSM.ZDC[13]+GraceSlick->TrgSum.DSM.ZDC[10];
-}
 void St_trg_Maker::VpdSim(St_dst_TrgDet *dst1) {
   int i;
   dst_TrgDet_st *tt = dst1->GetTable();
@@ -464,44 +377,6 @@ void St_trg_Maker::ZdcSim(St_dst_TrgDet *dst1) {
   tt->adcZDCEast=0;
   tt->adcZDCWest=0;
   tt->adcZDCsum=0;
-}
-//_____________________________________________________________________________
-void St_trg_Maker::dumpDataToScreenAndExit() {
-  int i;
-  char *TrgSumHeader=(char*)&(GraceSlick->TrgSum.TrgSumHeader);
-  char *L0SumHeader=(char*)&(GraceSlick->TrgSum.L0SumHeader);
-  char *L1SumHeader=(char*)&(GraceSlick->TrgSum.L1SumHeader);
-  char *L2SumHeader=(char*)&(GraceSlick->TrgSum.L2SumHeader);
-                   printf("%15s      = %d\n","TCUdataBytes",GraceSlick->EvtDesc.TCUdataBytes);
-                   printf("%15s      = %d\n","TCUEvtDesc",GraceSlick->EvtDesc.TCUEvtDesc);
-                   printf("%15s      = %d\n","TrgDataFmtVer",GraceSlick->EvtDesc.TrgDataFmtVer);
-                   printf("%15s      = %d\n","bunchXing_hi",GraceSlick->EvtDesc.bunchXing_hi);
-                   printf("%15s      = %d\n","bunchXing_lo",GraceSlick->EvtDesc.bunchXing_lo);
-                   printf("%15s      = %d\n","npre",GraceSlick->EvtDesc.npre);
-                   printf("%15s      = %d\n","npost",GraceSlick->EvtDesc.npost);
-                   printf("%15s      = %d\n","TrgSumBytes",GraceSlick->TrgSum.TrgSumBytes);
-for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","TrgSumHeader",i,TrgSumHeader[i]);
-for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","L1Sum",i,GraceSlick->TrgSum.L1Sum[i]);
-for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","L2Sum",i,GraceSlick->TrgSum.L2Sum[i]);
-                   printf("%15s    = %d\n","L0SumBytes",GraceSlick->TrgSum.L0SumBytes);
-for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","L0SumHeader",i,L0SumHeader[i]);
-                   printf("%15s      = %d\n","L1SumBytes",GraceSlick->TrgSum.L1SumBytes);
-for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","L1SumHeader",i,L1SumHeader[i]);
-for(i=0;i< 32;i++) printf("%15s[%3d] = %d\n","L1Result",i,GraceSlick->TrgSum.L1Result[i]);
-                   printf("%15s      = %d\n","L2SumBytes",GraceSlick->TrgSum.L2SumBytes);
-for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","L2SumHeader",i,L2SumHeader[i]);
-for(i=0;i< 32;i++) printf("%15s[%3d] = %d\n","L2Result",i,GraceSlick->TrgSum.L2Result[i]);
-                   printf("%15s      = %d\n","RawDetBytes",GraceSlick->RAW[0].RawDetBytes);
-for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","RawDetHeader",i,GraceSlick->RAW[0].RawDetHeader[i]);
-                   printf("%15s      = %d\n","CTBdataBytes",GraceSlick->RAW[0].CTBdataBytes);
-for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","CTBdataHeader",i,GraceSlick->RAW[0].CTBdataHeader[i]);
-for(i=0;i<256;i++) printf("%15s[%3d] = %d\n","CTB",i,GraceSlick->RAW[0].CTB[i]);
-                   printf("%15s      = %d\n","MWCdataBytes",GraceSlick->RAW[0].MWCdataBytes);
-for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","MWCdataHeader",i,GraceSlick->RAW[0].MWCdataHeader[i]);
-for(i=0;i<128;i++) printf("%15s[%3d] = %d\n","MWC",i,GraceSlick->RAW[0].MWC[i]);
-                   printf("%15s      = %d\n","EMCdataBytes",GraceSlick->RAW[0].EMCdataBytes);
-for(i=0;i<  2;i++) printf("%15s[%3d] = %d\n","EMCdataHeader",i,GraceSlick->RAW[0].EMCdataHeader[i]);
-exit(2);
 }
 void St_trg_Maker::InitCtbArrays2001(void) { // from ctb_dsm_2001.map, see also ::InitCtbArrays().
 static int call=0;
