@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.26 2000/08/07 04:07:12 snelling Exp $
+* $Id: tph.F,v 1.27 2000/08/10 03:50:20 snelling Exp $
 * $Log: tph.F,v $
+* Revision 1.27  2000/08/10 03:50:20  snelling
+* removed verbose output of drift velocity
+*
 * Revision 1.26  2000/08/07 04:07:12  snelling
 * Added StInfo line with the drift velocity on popular demand
 *
@@ -193,8 +196,8 @@ c     noise that comes through shaper
 
 c     get drift velocity
       istatus = tpc_drift_velocity(dvel)
-      write(m132,*) 'TPH - Drift Velocity used is: ', dvel
-      call StInfo(m132)
+c      write(m132,*) 'TPH - Drift Velocity used is: ', dvel
+c      call StInfo(m132)
 
 
       if (tcl_sector_index(1).CurrentSector .lt. 0) then
