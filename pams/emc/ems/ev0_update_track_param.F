@@ -1,5 +1,12 @@
       SUBROUTINE ev0_update_track_param(xc,r,x,trk1,trk2)
 c:>------------------------------------------------------------------
+C:FILE:         ems_ev0_routines.F
+C:DESCRIPTION:  Service routines for EMC Analysis Module, package ems, STAF compliant.
+c:AUTHOR:       Spiros Margetis?
+C:BUGS:         None known.
+C:HISTORY:      05dec95-v1.0-wjl- Creation.
+c:>------------------------------------------------------------------
+c:>------------------------------------------------------------------
 C:ROUTINE:      ev0_update_track_param
 C:DESCRIPTION:  extrapolate helix and calculate new track parameters at another point
 C:ARGUMENTS:    see code

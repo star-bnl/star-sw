@@ -1,5 +1,12 @@
       subroutine UA1(sum_down,cone_rad,et_seed,ej_min,et_min,ierror)
 c:>------------------------------------------------------------------
+C:FILE:         subroutine part of ems_erj.F
+C:DESCRIPTION:  EMC Analysis Module, package ems, STAF compliant.
+c:AUTHOR:       W.J. Llope, Rice University (TAS Version by B. Christie)
+C:BUGS:         None known.
+C:HISTORY:      31jul96-v1.0-wjl- Creation.
+c:>------------------------------------------------------------------
+c:>------------------------------------------------------------------
 C:ROUTINE:      subroutine UA1
 C:DESCRIPTION:  UA1 jet algorithm from LUND JETSET called from ems_erj
 C:ARGUMENTS:    sum_down,cone_rad,et_seed,ej_min,et_min,ierror

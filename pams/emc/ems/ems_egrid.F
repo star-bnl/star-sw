@@ -1,3 +1,8 @@
+      INTEGER*4 FUNCTION EMS_EGRID(
+     1     ems_hits_bemc_h,     ems_hits_bemc ,
+     2       egr_globtrk_h,       egr_globtrk ,
+     3       ems_control_h,       ems_control ,
+     4        ems_emecor_h,        ems_emecor ) 
 c:>------------------------------------------------------------------
 C:FILE:         ems_egrid.F
 C:DESCRIPTION:  EMC Analysis Module, package ems, STAF compliant.
@@ -7,11 +12,6 @@ C:HISTORY:      31jul96-v1.0-wjl- Creation.
 C:              30oct96 T. LeCompte added some bounds checking
 C:              15feb97 WJL, fixed 72 column overflows in lecompte's bounds checks
 c:>------------------------------------------------------------------
-      INTEGER*4 FUNCTION EMS_EGRID(
-     1     ems_hits_bemc_h,     ems_hits_bemc ,
-     2       egr_globtrk_h,       egr_globtrk ,
-     3       ems_control_h,       ems_control ,
-     4        ems_emecor_h,        ems_emecor ) 
 c:>------------------------------------------------------------------
 C:ROUTINE:      INTEGER*4 EMS_EGRID
 C:DESCRIPTION:  charged and neutral energy in (eta,phi) grids...
@@ -269,4 +269,3 @@ cWJL
       EMS_EGRID=STAFCV_OK
 999   RETURN
       END
-

@@ -1,3 +1,9 @@
+      INTEGER*4 FUNCTION EMS_LVL0(
+     1       ems_control_h,       ems_control ,
+     2     ems_hits_bemc_h,     ems_hits_bemc ,
+     3    ems_lvl0_thres_h,    ems_lvl0_thres ,
+     4     ems_lvl0_adcs_h,     ems_lvl0_adcs ,
+     5     ems_lvl0_bits_h,     ems_lvl0_bits ) 
 c:>------------------------------------------------------------------
 C:FILE:         ems_lvl0.F
 C:DESCRIPTION:  EMC Analysis Module, package ems, STAF compliant.
@@ -5,12 +11,6 @@ c:AUTHOR:       W.J. Llope, Rice University (TAS Version by B. Christie)
 C:BUGS:         None known.
 C:HISTORY:      31jul96-v1.0-wjl- Creation.
 c:>------------------------------------------------------------------
-      INTEGER*4 FUNCTION EMS_LVL0(
-     1       ems_control_h,       ems_control ,
-     2     ems_hits_bemc_h,     ems_hits_bemc ,
-     3    ems_lvl0_thres_h,    ems_lvl0_thres ,
-     4     ems_lvl0_adcs_h,     ems_lvl0_adcs ,
-     5     ems_lvl0_bits_h,     ems_lvl0_bits ) 
 c:>------------------------------------------------------------------
 C:ROUTINE:      INTEGER*4 EMS_LVL0
 C:DESCRIPTION:  calculates trigger ADCs and bit patterns from EMC...
@@ -436,4 +436,3 @@ C    what system is being studied (pp, pA, or AA).
 998   EMS_LVL0=STAFCV_OK
 999   RETURN
       END
-

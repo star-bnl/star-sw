@@ -4,6 +4,13 @@
      3        ems_jetpar_h,        ems_jetpar ,
      4       ems_jetlist_h,       ems_jetlist ) 
 c:>------------------------------------------------------------------
+C:FILE:         ems_erj.F
+C:DESCRIPTION:  EMC Analysis Module, package ems, STAF compliant.
+c:AUTHOR:       W.J. Llope, Rice University (TAS Version by B. Christie)
+C:BUGS:         None known.
+C:HISTORY:      31jul96-v1.0-wjl- Creation.
+c:>------------------------------------------------------------------
+c:>------------------------------------------------------------------
 C:ROUTINE:      INTEGER*4 EMS_ERJ
 C:DESCRIPTION:  Jet-finder, applies UA1-like algorithm from LUND JETSET.
 C:ARGUMENTS:    ems_control ems_emecor ems_jetpar
