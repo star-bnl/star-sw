@@ -1,5 +1,8 @@
-* $Id: tpt.F,v 1.14 1999/05/21 02:46:02 sakrejda Exp $
+* $Id: tpt.F,v 1.15 1999/06/01 22:09:18 sakrejda Exp $
 * $Log: tpt.F,v $
+* Revision 1.15  1999/06/01 22:09:18  sakrejda
+* dynamic allocation for the local trk record array
+*
 * Revision 1.14  1999/05/21 02:46:02  sakrejda
 * pointers for malloc initialised - were causing crashes in peripheral events
 *
@@ -72,9 +75,11 @@ C
 
 C______________________________________________________________________
       integer malloc
+      integer loc
 
 C     Local variables
       RECORD /track_pointers/ trk(mxtrack)
+      POINTER (p_trk,trk)
 C
 
       INTEGER tpstart(mxrow,mxsector)
@@ -127,6 +132,7 @@ c
 c     initialize pointers
       p_loc_hit  = 0
       p_next_hit = 0
+      p_trk = 0
 c
       if(tpar(ipass).debug(1).eq.1) then
           call Msg_Enable( 'TPTI1-E1' )
@@ -180,6 +186,9 @@ c     Set up tables so that hit could be found within rows and sectors.
          write(m132,*) 'TPTI2-E1 pointers set, iret: ',iret
          call message(m132, 1,id I2)
       endif
+
+c     allocate temporary storage for tracks
+      p_trk = malloc(mxtrack*abs(loc(trk(1))-loc(trk(2))))
 C
 C     end of initialisation
 C
@@ -303,4 +312,5 @@ C        extend track segments crossing the sector boundries
 999   continue
       call free(p_next_hit)
       call free(p_loc_hit)
+      call free(p_trk)
       end
