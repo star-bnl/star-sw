@@ -149,6 +149,7 @@ foreach $diskDir (@diskRecoDirs) {
   while( defined($flname = readdir(DIR)) ) {
      next if $flname =~ /^\.\.?$/;
      next if $flname =~ /geant.root/;
+     next if $flname =~ /hold/;
 
 #        @fields = split(/\s+/, $diskDir);
         $maccess = "-rw-r--r--"; 
@@ -400,11 +401,20 @@ my $newset;
    $mowner = ($$eachRecoFile)->fowner;
    $msize = ($$eachRecoFile)->dsize;
    $mName = $mfName;
+  if($mfName =~ /rcf150_p/ and $mfName =~ /_2000evts/) {
+   $mrunId = 150;
+   @prtFS = split("_",$mfName);
+   $mfileSeq = $prtFS[2];
+ }
+  elsif($mfName =~ /rcf150_p/ and $mfName =~ /_100000evts/) {
+   $mrunId = 150;
+   $mfileSeq = 0;  
+ }else { 
    $mName =~ m/(^[a-z0-9]+)_([0-9]+)_([0-9]+)/;  
    $mfileSeq = $2 ; 
    $mrun = $1;
    $mrunId = substr($1,3) + 0;    
-
+ }
    if($mfName =~ /dst.xdf/ ) {
      $mformat = "xdf";
      $mcomp = "dst";
