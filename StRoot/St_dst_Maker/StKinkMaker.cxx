@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.13 1999/08/02 18:41:05 wdeng Exp $
+// $Id: StKinkMaker.cxx,v 1.14 1999/08/20 16:02:45 wdeng Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.14  1999/08/20 16:02:45  wdeng
+// Add a word Exit into the warning messages
+//
 // Revision 1.13  1999/08/02 18:41:05  wdeng
 // Change if{ } range. Use new loop-variable name.
 //
@@ -125,25 +128,25 @@ Int_t StKinkMaker::Make(){
 
   St_DataSet *match = GetDataSet("match"); 
   if (!match) {
-    gMessMgr->Warning() << " StKinkMaker: match is missing" << endm;
+    gMessMgr->Warning() << " StKinkMaker: match is missing. Exit!" << endm;
     return kStWarn;
   }  
   St_DataSetIter matchI(match);         
   St_dst_track  *globtrk = (St_dst_track *) matchI("globtrk");
   if (!globtrk) {
-    gMessMgr->Warning() << " StKinkMaker: globtrk is missing" << endm;
+    gMessMgr->Warning() << " StKinkMaker: globtrk is missing. Exit!" << endm;
     return kStWarn;
   }
 
   St_DataSet     *primary = GetDataSet("primary"); 
   if (!primary) {
-    gMessMgr->Warning() << " StKinkMaker: primary is missing" << endm;
+    gMessMgr->Warning() << " StKinkMaker: primary is missing. Exit!" << endm;
     return kStWarn;
   }
   St_DataSetIter primaryI(primary);         
   St_dst_vertex  *vertex   = (St_dst_vertex *) primaryI("vertex");
   if (!vertex) {
-    gMessMgr->Warning() << " StKinkMaker: vertex is missing" << endm;
+    gMessMgr->Warning() << " StKinkMaker: vertex is missing. Exit!" << endm;
     return kStWarn;
   }
   
@@ -153,7 +156,7 @@ Int_t StKinkMaker::Make(){
     if( vrtx->vtx_id == kEventVtxId && vrtx->iflag == 1 ) break;
   }
   if( whichRow == vertex->GetNRows() ) {
-    gMessMgr->Warning() << " StKinkMaker: no primary vertex." << endm;
+    gMessMgr->Warning() << " StKinkMaker: no primary vertex. Exit!" << endm;
     return kStWarn;
   }
 
