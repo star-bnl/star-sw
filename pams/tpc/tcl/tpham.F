@@ -244,7 +244,8 @@ c
               tphith.nok = tphith.nok + 1
 	      tphit(tphith.nok).id = tphith.nok		! mal 17jan95
               tphit(tphith.nok).cluster = jtpcl
-              tphit(tphith.nok).row = krow
+c              tphit(tphith.nok).row = krow
+              tphit(tphith.nok).row = 100*((isec+1)/2)+krow	! mal 19jan95
               tphit(tphith.nok).track = itrk   ! for now this is MC info
 
 	      call tph_fit_cluster(nseq, nclspix, npix_pad,
