@@ -11,11 +11,12 @@
 
  exec $STAR/kumacs/chain/bfc _
    TOP=$STAR _
+   calib_dir=$STAR_CALIB/ebye _  
    tpc_sector_first=1 _
-   tpc_sector_last=24 _
+   tpc_sector_last=1 _
    gstar_settings=' field_only' _
-   domain=' geometry tpc svt global' _
-   chain='  g2tin tpg svg tfs srs tpt tid tte_e sgr svm egr evr ev0 ntup' _
+   domain=' geometry g2t tpc svt global' _
+   chain=' g2tin tpg svg tfs srs tpt tid tte_e sgr svm egr evr ev0 ntup ' _
    skip=0 _
    no_events=1000 _
    input_data_file=/afs/rhic/star/data/samples/hijet-g2t.xdf _
@@ -29,16 +30,16 @@
 *
 * ---------------------------------------------------------------
 * Now read in ntuple and make plot
-  hi/file 31 hijet_test_v0.ntup 0
-  opt stat
-  set stat 111111
-  nt/list
-  for/file 40 hijet_test_v0.ps
-  meta 40 -111
-  title_global ' V0s'
-  nt/plot 121.inv_mass_la (inv_mass_la>1.1).and.(inv_mass_la<1.14)
-  title_global ' V0 invariant mass'
-  close 40
+ hi/file 31 hijet_test_v0.ntup 0
+ opt stat
+ set stat 111111
+ nt/list
+ for/file 40 hijet_test_v0.ps
+ meta 40 -111
+ title_global ' V0s'
+ nt/plot 121.inv_mass_la (inv_mass_la>1.1).and.(inv_mass_la<1.14)
+ title_global ' V0 invariant mass'
+ close 40
 * 
 
 
