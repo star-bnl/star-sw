@@ -1,5 +1,8 @@
-// $Id: trs.C,v 1.4 1999/02/05 16:31:43 fine Exp $
+// $Id: trs.C,v 1.5 1999/02/10 20:54:15 lasiuk Exp $
 // $Log: trs.C,v $
+// Revision 1.5  1999/02/10 20:54:15  lasiuk
+// change file
+//
 // Revision 1.4  1999/02/05 16:31:43  fine
 // StarGeom.C macro has been improved
 //
@@ -108,7 +111,9 @@ void trs(const Int_t Nevents=1)
   geant->SetNwGEANT(20 000 000);
   //  geant->SetNwPAW(1000000);
   geant->SetIwtype(1);
-  geant->Do("gfile p /disk1/star/test/psc0049_08_40evts.fzd");
+  //geant->Do("gfile p /disk1/star/test/psc0049_08_40evts.fzd");
+  geant->Do("gfile p /star/u2b/lasiuk/onemuon.fz");
+  //geant->Do("gfile p /star/u2b/lasiuk/msector.fz");
   //  geant->LoadGeometry("detp geometry field_only");
   StTrsMaker    *tpc_raw = new StTrsMaker("tpc_raw","event/raw_data/tpc");
   //  chain->PrintInfo();
