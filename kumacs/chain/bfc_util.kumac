@@ -37,8 +37,16 @@
 *                                    mwc       mws,mwu
 *                                    trg       l3cl,ftf_tpc - won't work yet
 * 
+* editted 8/12/98 K. Turner - added new module to chain: 
+*                               ==> chain name/module
+*                                     ffs - ftpc fast sim
+*                                     fss - ftpc slow sim
+*                                     fcl - ftpc clustering
+*                                     fpt - ftpc tracking
+*                                     fte - ftpc track evaluator
+*                                    
 * 
-*************************************************************
+* ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
 ******************************************************************
@@ -140,6 +148,21 @@ macro bfc_init _
             exec init_sgr
             exec init_stk#init
 	    exec init_stk#vtx
+      (ffs) 
+	    exec create_tables_ftpc#ffs_tables
+	    exec ffs_init#init
+      (fss) 
+	    exec create_tables_ftpc#fss_tables
+	    exec fss_init#init
+      (fcl) 
+	    exec create_tables_ftpc#fcl_tables
+	    exec fcl_init#init
+      (fpt)
+	    exec create_tables_ftpc#fpt_tables
+	    exec fpt_init#init
+      (fte)
+	    exec create_tables_ftpc#fte_tables
+            exec fte_init#init
       (svm) 
             exec create_tables_global#svm
             exec init_svm
@@ -264,6 +287,11 @@ EOF:
                  message ' problem with tpc_tracker_tpt'
                endif
     (tte_e)    exec tte_run#run_tte
+      (ffs) exec ffs_run#run 
+      (fss) exec fss_run#run
+      (fcl) exec fcl_run#run
+      (fpt) exec fpt_run#run_slow_sim
+      (fte) exec fte_run#run_slow_sim
       (svm)    exec run_svm#run_svm 	     |  TPC to SVT Matching 
       (evr)    exec run_evr
       (egr)    exec run_egr#egr	|  Event Global Refit

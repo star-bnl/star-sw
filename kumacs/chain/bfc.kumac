@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.31 1998/08/12 22:27:09 kathy Exp $
+* $Id: bfc.kumac,v 1.32 1998/08/12 23:08:39 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.32  1998/08/12 23:08:39  kathy
+* now have all ftpc modules in bfc
+*
 * Revision 1.31  1998/08/12 22:27:09  kathy
 * added new chain values to bfc_util:  evr,ddedx,dmsft,dmhrd,desum,drsum,emc,jet,ctf,mwc,trg
 *
@@ -107,6 +110,14 @@
 *                                    ctf       cts,ctu
 *                                    mwc       mws,mwu
 *                                    trg       l3cl,ftf_tpc - won't work yet
+* 
+* editted 8/12/98 K. Turner - added new module to chain: 
+*                               ==> chain name/module
+*                                     ffs - ftpc fast sim
+*                                     fss - ftpc slow sim
+*                                     fcl - ftpc clustering
+*                                     fpt - ftpc tracking
+*                                     fte - ftpc track evaluator
 * 
 * 
 * ******************************************************************************
