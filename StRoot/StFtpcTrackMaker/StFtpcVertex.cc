@@ -1,5 +1,11 @@
-// $Id: StFtpcVertex.cc,v 1.1 2000/05/10 13:39:34 oldi Exp $
+// $Id: StFtpcVertex.cc,v 1.2 2000/05/15 14:28:15 oldi Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.2  2000/05/15 14:28:15  oldi
+// problem of preVertex solved: if no main vertex is found (z = NaN) StFtpcTrackMaker stops with kStWarn,
+// refitting procedure completed and included in StFtpcTrackMaker (commented),
+// new constructor of StFtpcVertex due to refitting procedure,
+// minor cosmetic changes
+//
 // Revision 1.1  2000/05/10 13:39:34  oldi
 // Initial version of StFtpcTrackMaker
 //
@@ -177,11 +183,19 @@ StFtpcVertex::StFtpcVertex(Double_t pos[3])
 }  
 
 
+StFtpcVertex::StFtpcVertex(Double_t x, Double_t y, Double_t z)
+{
+  // constructor from Doubles
+  
+  SetX(x);
+  SetY(y);
+  SetZ(z);
+}  
+
+
 StFtpcVertex::~StFtpcVertex() 
 {
   // Destructor.
   // Does nothing except destruct.
-//   delete fCoord;
-//   delete fError;
 }
 

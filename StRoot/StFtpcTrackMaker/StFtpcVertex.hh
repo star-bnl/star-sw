@@ -1,5 +1,11 @@
-// $Id: StFtpcVertex.hh,v 1.2 2000/05/11 15:14:54 oldi Exp $
+// $Id: StFtpcVertex.hh,v 1.3 2000/05/15 14:28:16 oldi Exp $
 // $Log: StFtpcVertex.hh,v $
+// Revision 1.3  2000/05/15 14:28:16  oldi
+// problem of preVertex solved: if no main vertex is found (z = NaN) StFtpcTrackMaker stops with kStWarn,
+// refitting procedure completed and included in StFtpcTrackMaker (commented),
+// new constructor of StFtpcVertex due to refitting procedure,
+// minor cosmetic changes
+//
 // Revision 1.2  2000/05/11 15:14:54  oldi
 // Changed class names *Hit.* due to already existing class StFtpcHit.cxx in StEvent
 //
@@ -31,11 +37,12 @@ private:
 
 public:
 
-  StFtpcVertex();   // default constructor
-  StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints); // constructor from points        
-  StFtpcVertex(St_DataSet *const geant);  // constructor from geant
-  StFtpcVertex(Double_t pos[3]);          // constructor from Doubles
-  virtual  ~StFtpcVertex();
+  StFtpcVertex();                                                 // default constructor
+  StFtpcVertex(fcl_fppoint_st *thisFppoint, Int_t numFppoints);   // constructor from points        
+  StFtpcVertex(St_DataSet *const geant);                          // constructor from geant
+  StFtpcVertex(Double_t pos[3]);                                  // constructor from array of doubles
+  StFtpcVertex(Double_t x, Double_t y, Double_t z);               // constructor from doubles
+  virtual  ~StFtpcVertex();                                       // destructor
 
   // getter
   Double_t GetX()    const { return mCoord.x(); }

@@ -1,5 +1,11 @@
-// $Id: StFtpcDisplay.cc,v 1.3 2000/05/12 12:59:13 oldi Exp $
+// $Id: StFtpcDisplay.cc,v 1.4 2000/05/15 14:28:09 oldi Exp $
 // $Log: StFtpcDisplay.cc,v $
+// Revision 1.4  2000/05/15 14:28:09  oldi
+// problem of preVertex solved: if no main vertex is found (z = NaN) StFtpcTrackMaker stops with kStWarn,
+// refitting procedure completed and included in StFtpcTrackMaker (commented),
+// new constructor of StFtpcVertex due to refitting procedure,
+// minor cosmetic changes
+//
 // Revision 1.3  2000/05/12 12:59:13  oldi
 // removed delete operator for mSegment in StFtpcConfMapper (mSegment was deleted twice),
 // add two new constructors for StFtpcTracker to be able to refit already existing tracks,
@@ -846,9 +852,9 @@ void StFtpcDisplay::ShowTracks(Int_t trackanz, Int_t trackarray[])
     Int_t cluster_anz = mHit->GetEntriesFast();
 
     // coordinates of clusters (=, -, both)
-    Float_t *value_plus = new Float_t[3*cluster_anz];
-    Float_t *value_minus = new Float_t[3*cluster_anz];
-    Float_t *value = new Float_t[3*cluster_anz];
+    value_plus = new Float_t[3*cluster_anz];
+    value_minus = new Float_t[3*cluster_anz];
+    value = new Float_t[3*cluster_anz];
     
     StFtpcConfMapPoint *h;
     Int_t cl_plus = 0;
@@ -1522,6 +1528,7 @@ void StFtpcDisplay::FillFound(Bool_t good_found, MIntArray *split, MIntArray *un
 
 void StFtpcDisplay::OnOff(Bool_t on)
 {
+  // Prints "On" or "Off".
 
   if (on) {
     cout << "On" << endl;
