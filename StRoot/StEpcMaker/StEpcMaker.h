@@ -1,7 +1,10 @@
 //
-// $Id: StEpcMaker.h,v 1.1 2000/05/15 21:18:32 subhasis Exp $
+// $Id: StEpcMaker.h,v 1.2 2000/08/29 20:12:44 subhasis Exp $
 //
 // $Log: StEpcMaker.h,v $
+// Revision 1.2  2000/08/29 20:12:44  subhasis
+// Modified to accept StEvent input and writing out StEvent output for Emc
+//
 // Revision 1.1  2000/05/15 21:18:32  subhasis
 // initial version
 //
@@ -10,7 +13,6 @@
 //
 // Authors: Subhasis Chattopadhyay.
 //    
-
 #ifndef STAR_StEpcMaker
 #define STAR_StEpcMaker
 
@@ -35,20 +37,22 @@ typedef vector<Float_t> FloatVector;
 
 #include <TH1.h>
 #include <TH2.h>
-#include "StPreEclMaker/StEmcPreClusterCollection.h"
-#include "StPreEclMaker/StBemcPreClusterCollection.h"
-#include "StPreEclMaker/StBsmdePreClusterCollection.h"
-#include "StPreEclMaker/StBsmdpPreClusterCollection.h"
-#include "St_emc_Maker/StEmcHitCollection.h"
 #include "emc_def.h"
-#include "tables/St_tpt_track_Table.h"
-#include "tables/St_dst_track_Table.h"
-#include "tables/St_dst_vertex_Table.h"
-typedef StVector(StEmcPreCluster*) StMatchVec;
-typedef StVector(StEmcPreCluster*)::iterator StMatchVecIter;
+
+class StEvent;
+class StEmcCollection;
+// Taking Tracks from StEvent
+class StTrack;
+typedef StVector(StTrack*) StTrackVec;
+typedef StVector(StTrack*)::iterator StTrackVecIter;
+
+
 
 class StEpcMaker : public StMaker {
 private:
+  StEvent*                    mEvent;//!
+  StEmcCollection*           mTheEmcCollection;//!
+  bool accept(StTrack*);   // This is used to select tracks
   void MakeHistograms();   // Filling QA Histograms
 
 protected:
@@ -70,6 +74,8 @@ protected:
   TH1F *m_point_trmom;
   //Point Flag spectra
   TH1F *m_point_flag;
+  //Emc Point multiplicity
+  TH1F *m_emc_points;
 
 public: 
   StEpcMaker(const char *name="epc");
@@ -78,9 +84,10 @@ public:
   virtual Int_t Make();
   virtual Int_t Finish();
   virtual Int_t fillStEvent();
+
   
   virtual const char *GetCVS()
-  {static const char cvs[]="Tag $Name:  $ $Id: StEpcMaker.h,v 1.1 2000/05/15 21:18:32 subhasis Exp $ built "__DATE__" "__TIME__ ; return cvs;}  
+  {static const char cvs[]="Tag $Name:  $ $Id: StEpcMaker.h,v 1.2 2000/08/29 20:12:44 subhasis Exp $ built "__DATE__" "__TIME__ ; return cvs;}  
 
   ClassDef(StEpcMaker, 1)// EMC-Track match maker
 };
