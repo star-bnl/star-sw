@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.116 2001/06/01 02:47:31 perev Exp $
+// $Id: StMaker.cxx,v 1.117 2001/06/05 22:04:47 perev Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -496,7 +496,7 @@ Int_t StMaker::Finish()
    }
    
    Clear();
-   TMemStat::Summary();
+   if (GetParent()==0) TMemStat::Summary();
    return nerr;
 }
 
@@ -1053,6 +1053,9 @@ AGAIN: switch (fState) {
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.117  2001/06/05 22:04:47  perev
+// Summary only on top
+//
 // Revision 1.116  2001/06/01 02:47:31  perev
 // Memory consumption measurement added
 //
