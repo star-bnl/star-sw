@@ -9,10 +9,15 @@
  *  tofCollection->tofData() and will store the matches in
  *  tofCollection->tofSlats().
  *
- * $Id: StTofpMatchMaker.h,v 1.4 2003/09/15 22:38:11 geurts Exp $
+ * $Id: StTofpMatchMaker.h,v 1.5 2004/03/11 22:29:32 dongx Exp $
  */    
 /*  -------------------------------------------------------------------------
  * $Log: StTofpMatchMaker.h,v $
+ * Revision 1.5  2004/03/11 22:29:32  dongx
+ * -remove assert()
+ * -add member mYear4
+ * -use m_Mode to control the output root file
+ *
  * Revision 1.4  2003/09/15 22:38:11  geurts
  * dBase updates:
  *  - removed initLocalDb option
@@ -103,6 +108,7 @@ private:
   //Bool_t mInitLocalDb; //! initialize from local (true) dbase or STAR dbase (false)
   Bool_t mYear2; //! STAR year2: TOFp+pVPD
   Bool_t mYear3; //! STAR year3: TOFp+pVPD+TOFr
+  Bool_t mYear4; //! STAR year4: TOFp+pVPD+TOFr'
   Bool_t mOuterTrackGeometry; //! use outer track geometry (true) for extrapolation
   string mHistoFileName; //! name of histogram file, if empty no write-out
 
@@ -172,7 +178,7 @@ private:
   TH2D *hTofpMatchNoHit[NTOFP]; //!
 
   virtual const char *GetCVS() const 
-    {static const char cvs[]="Tag $Name:  $ $Id: StTofpMatchMaker.h,v 1.4 2003/09/15 22:38:11 geurts Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+    {static const char cvs[]="Tag $Name:  $ $Id: StTofpMatchMaker.h,v 1.5 2004/03/11 22:29:32 dongx Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StTofpMatchMaker,0)
 };

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofpMatchMaker.cxx,v 1.6 2003/12/05 08:17:27 geurts Exp $
+ * $Id: StTofpMatchMaker.cxx,v 1.7 2004/03/11 22:29:32 dongx Exp $
  *
  * Author: Frank Geurts
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTofpMatchMaker.cxx,v $
+ * Revision 1.7  2004/03/11 22:29:32  dongx
+ * -remove assert()
+ * -add member mYear4
+ * -use m_Mode to control the output root file
+ *
  * Revision 1.6  2003/12/05 08:17:27  geurts
  * changed default TDC and ADC ranges
  *
@@ -71,8 +76,6 @@ StTofpMatchMaker::StTofpMatchMaker(const Char_t *name): StMaker(name){
   mTofGeom = 0;
 
   // set default values
-  setHistoFileName("");
-  //setHistoFileName("tofana.root");
   setValidAdcRange(0,1024);
   setValidTdcRange(30,1200);
   setOuterTrackGeometry();
@@ -101,6 +104,11 @@ Int_t StTofpMatchMaker::Init(){
   if (!mOuterTrackGeometry)
     gMessMgr->Warning("Warning: using standard trackgeometry()","OST");
 
+  if(m_Mode) {
+    setHistoFileName("tofana.root");
+  } else {
+    setHistoFileName("");
+  }
 
   if (mHisto){
     bookHistograms();
@@ -132,12 +140,14 @@ Int_t StTofpMatchMaker::InitRun(int runnumber){
   TDataSet *mDbDataSet = GetDataBase("Calibrations/tof");
   if (!mDbDataSet){
     gMessMgr->Error("unable to get TOF run parameters","OS");
-    assert(mDbDataSet);
+    //    assert(mDbDataSet);
+    return kStErr;
   }
   St_pvpdStrobeDef* pvpdStrobeDef = static_cast<St_pvpdStrobeDef*>(mDbDataSet->Find("pvpdStrobeDef"));
   if (!pvpdStrobeDef){
     gMessMgr->Error("unable to find TOF run param table","OS");
-    assert(pvpdStrobeDef);
+    //    assert(pvpdStrobeDef);
+    return kStErr;
   }
   pvpdStrobeDef_st *strobeDef = static_cast<pvpdStrobeDef_st*>(pvpdStrobeDef->GetArray());
   int numRows = pvpdStrobeDef->GetNRows();
@@ -903,7 +913,7 @@ Int_t StTofpMatchMaker::getTofData(StTofCollection* tofCollection){
   for (int i=0;i<NPVPD;i++){
     mPvpdAdc[i] = tofData[42+i]->adc(); 
     mPvpdTdc[i] = tofData[42+i]->tdc(); 
-    if (mYear3)
+    if (mYear3||mYear4)
       mPvpdAdcLoRes[i] = tofData[54+i]->adc();
   }
 
@@ -1082,8 +1092,8 @@ bool StTofpMatchMaker::validEvent(StEvent *event){
 
   // determine TOF configuration from run#
   mYear2 = (event->runId()<4000000);
-  mYear3 = (event->runId()>4000000);
-
+  mYear3 = (event->runId()>4000000&&event->runId()<5000000);
+  mYear4 = (event->runId()>5000000);
 
   // 4. must be a TOF beam event, i.e. a non-strobe event
   StSPtrVecTofData  &tofData = event->tofCollection()->tofData();
