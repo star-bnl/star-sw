@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: DetectorReader.cxx,v 1.10 2001/07/10 18:12:47 jeromel Exp $
+ * $Id: DetectorReader.cxx,v 1.11 2002/01/17 17:29:26 jeromel Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description:  Detector Factory
@@ -12,6 +12,10 @@
  *
  ***************************************************************************
  * $Log: DetectorReader.cxx,v $
+ * Revision 1.11  2002/01/17 17:29:26  jeromel
+ * Files:  CVS: DetectorReader.cxx EventReader.cxx EventReader.hh CVS: RecHeaderFormats.hh CVS: ----------------------------------------------------------------------
+ * Modifications for FPD support
+ *
  * Revision 1.10  2001/07/10 18:12:47  jeromel
  * Changes commited for Frank Geurts (TOF) after approval from Herb Ward
  * on Tue, 10 Jul 2001 11:19:48 and review by Victor.
@@ -65,6 +69,7 @@
 #include "FTPC/FTPV1P0_Reader.hh"
 #include "L3/L3_Reader.hh"
 #include "TOF/TOF_Reader.hh"
+#include "FPD/FPD_Reader.hh"
 
 DetectorReader *getDetectorReader(EventReader *er, string det)
 {
@@ -200,6 +205,21 @@ TOF_Reader *getTOFReader(EventReader *er)
                                       __FILE__,__LINE__) ;
     pTOFP->header.CRC = 0;
     return new TOF_Reader(er,pTOFP);
+  }
+  return FALSE;
+}
+
+FPD_Reader *getFPDReader(EventReader *er)
+{
+  Bank_FPDP *pFPDP;
+  pFPDP = (Bank_FPDP *)er->findBank("FPDP");
+  if (pFPDP)  {
+    if (!pFPDP->test_CRC())  printf("CRC error in FPDP: %s %d\n",
+                                      __FILE__,__LINE__) ;
+    if (pFPDP->swap() < 0)   printf("swap error in FPDP: %s %d\n",
+                                      __FILE__,__LINE__) ;
+    pFPDP->header.CRC = 0;
+    return new FPD_Reader(er,pFPDP);
   }
   return FALSE;
 }

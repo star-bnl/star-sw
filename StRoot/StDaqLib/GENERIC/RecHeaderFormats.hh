@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: RecHeaderFormats.hh,v 1.5 2001/06/26 17:01:42 jcs Exp $
+ * $Id: RecHeaderFormats.hh,v 1.6 2002/01/17 17:29:26 jeromel Exp $
  * Author: M.W. Schulz, Jeff Landgraf, M.J. LeVine
  ***************************************************************************
  * Description: Bank header formats common to all detectors in STAR:
@@ -11,6 +11,10 @@
  *
  ***************************************************************************
  * $Log: RecHeaderFormats.hh,v $
+ * Revision 1.6  2002/01/17 17:29:26  jeromel
+ * Files:  CVS: DetectorReader.cxx EventReader.cxx EventReader.hh CVS: RecHeaderFormats.hh CVS: ----------------------------------------------------------------------
+ * Modifications for FPD support
+ *
  * Revision 1.5  2001/06/26 17:01:42  jcs
  * set FTP_TIMEBINS to correct number of FTPC timebins
  *
@@ -128,16 +132,17 @@ struct Bank_DATAP : public Bank
   INT32 EventNumber;    // unique within run
   INT32 TriggerWord;
   INT32 TriggerInWord;
-  INT32 DetectorPresence;  // 0-TPC, 1-SVT, 2-TOF, 3-EMC, 4-Shower Max
-                           // 5-FTPC, 6-reserved, 7-reserved, 8-Trig
+  INT32 DetectorPresence;  // 0-TPC, 1-SVT, 2-TOF, 3-EMC, 4-FPD
+                           // 5-FTPC, 6-PMD, 7-RICH, 8-Trig
                            // 9-L3
   Pointer TPC;             // Offsets from first word of DATAP
   Pointer SVT;
   Pointer TOF;
   Pointer EMC;
-  Pointer ShowerMax;
+  //  Pointer ShowerMax;
+  Pointer FPD;
   Pointer FTPC;
-  Pointer reserved_det;
+  Pointer PMD;
   Pointer RICH;
   Pointer TRG;
   Pointer L3;
