@@ -221,6 +221,7 @@ void StBranch::Close(const char *)
 { 
   if (!fIOMode) return;
   if (!fTFile) 	return;
+  if (strcmp(".none",GetFile())) return;
   TFile *tf = fTFile;
   fTFile = 0;
   TString ts(tf->GetTitle());
@@ -233,7 +234,7 @@ void StBranch::Close(const char *)
   printf("** <StBranch::Close> Branch=%s \tFile=%s \tClosed **\n"
         ,GetName(),(const char*)fFile); 
   delete tf;
-  fIOMode=0;
+  SetFile(".none");
 }
 //_______________________________________________________________________________
 const char *StBranch::GetFile()
@@ -254,6 +255,7 @@ Int_t StBranch::Open()
 {
   if (!fIOMode) return 0;
   if (fTFile)   return 0;
+  if (strcmp(".none",GetFile())==0) return 1;
   OpenTFile();
   return 0;
 }  
@@ -265,7 +267,8 @@ Int_t StBranch::WriteEvent(ULong_t ukey)
   SetUKey(ukey);
   if (!fList) 		return kStWarn;	//empty
   if (!fList->First()) 	return kStWarn;	//empty
-  Open(); fNEvents++;
+  if(Open()) return 1; 
+  fNEvents++;
   
   TList *savList = new TList;
   SetParAll(0,savList);
@@ -279,7 +282,7 @@ Int_t StBranch::GetEvent(Int_t mode)
 {
   if (!(fIOMode&1)) return 0;
   Delete(); if (fList) delete fList; fList=0; 
-  Open(); 
+  if(Open()) return 1; 
   if (mode) { fList = (TList*)StIO::ReadNext(fTFile,GetName(),fUKey);
   } else    { fList = (TList*)StIO::Read    (fTFile,GetName(),fUKey);}
   SetParAll(this,0);
