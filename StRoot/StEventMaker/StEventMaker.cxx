@@ -1,6 +1,6 @@
 /*************************************************************************** 
  *
- * $Id: StEventMaker.cxx,v 2.18 2000/02/11 16:12:33 ullrich Exp $
+ * $Id: StEventMaker.cxx,v 2.19 2000/02/17 18:19:05 ullrich Exp $
  *
  * Author: Original version by T. Wenaus, BNL
  *         Revised version for new StEvent by T. Ullrich, Yale
@@ -11,8 +11,8 @@
  ***************************************************************************
  *
  * $Log: StEventMaker.cxx,v $
- * Revision 2.18  2000/02/11 16:12:33  ullrich
- * Modified check for valid primary vertices.
+ * Revision 2.19  2000/02/17 18:19:05  ullrich
+ * Adapted new SVT hit storage layout. Barrels instead of layers.
  *
  * Revision 2.28  2000/08/17 00:38:48  ullrich
  * Allow loading of tpt tracks.
@@ -132,10 +132,10 @@
 #if defined(ST_NO_TEMPLATE_DEF_ARGS)
 #define StVector(T) vector<T, allocator<T> >
 #else
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.18 2000/02/11 16:12:33 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.19 2000/02/17 18:19:05 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.18 2000/02/11 16:12:33 ullrich Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.19 2000/02/17 18:19:05 ullrich Exp $";
 
 ClassImp(StEventMaker)
     doPrintEventInfo  = kFALSE;
@@ -1106,11 +1106,11 @@ StEventMaker::printRunInfo()
         nhits = tpcColl->numberOfHits();
         cout << "# of hits in collection = " << nhits << endl;
         gotOneHit = kFALSE;
-	for (k=0; !gotOneHit && k<svtColl->numberOfLayers(); k++)
-	    for (j=0; !gotOneHit && j<svtColl->layer(k)->numberOfLadders(); j++)
-		for (i=0; !gotOneHit && i<svtColl->layer(k)->ladder(j)->numberOfWafers(); i++)
-		    if (svtColl->layer(k)->ladder(j)->wafer(i)->hits().size()) {
-			svtColl->layer(k)->ladder(j)->wafer(i)->hits()[0]->Dump();
+        for (k=0; !gotOneHit && k<tpcColl->numberOfSectors(); k++)
+            for (j=0; !gotOneHit && j<tpcColl->sector(k)->numberOfPadrows(); j++)
+                if (tpcColl->sector(k)->padrow(j)->hits().size()) {
+	nhits = svtColl->numberOfHits();
+	cout << "# of hits in collection = " << nhits << endl;
 	gotOneHit = kFALSE;
 	for (k=0; !gotOneHit && k<svtColl->numberOfBarrels(); k++)
 	    for (j=0; !gotOneHit && j<svtColl->barrel(k)->numberOfLadders(); j++)
