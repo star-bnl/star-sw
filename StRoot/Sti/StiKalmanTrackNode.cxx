@@ -5,6 +5,7 @@
 #include "StiPlacement.h"
 #include "StiShape.h"
 #include "StiKalmanTrackNode.h"
+#include "StiMaterialInteraction.h"
 
 //_____________________________________________________________________________
 // Local Track Model
@@ -384,8 +385,9 @@ int StiKalmanTrackNode::propagate(StiDetector * tDet)	throw (Exception)
   double dAlpha = tAlpha - fAlpha;
   if (dAlpha>1e-2)   // perform rotation if needed
     rotate(dAlpha);
-  
-  propagate(tPlace->getNormalRadius(), 0., 0.);
+  double x, x0, rho;
+  position = StiMaterialInteraction::findIntersection(this,tDet,x,x0,rho);
+  propagate(x,x0,rho);
   return position;
 }
 
