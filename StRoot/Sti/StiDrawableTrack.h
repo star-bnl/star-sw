@@ -1,13 +1,28 @@
+//StiDrawableTrack.h
+/***********************************************************************
+ *
+ * $Id: StiDrawableTrack.h,v 2.1 2002/12/18 16:15:00 andrewar Exp $
+ *
+ * \class StiDrawableTrack
+ *   Abstract base class used to define the interface to drawable tracks
+ *
+ * \author Claude A Pruneau
+ *
+ ***********************************************************************
+ *
+ * $Log: StiDrawableTrack.h,v $
+ * Revision 2.1  2002/12/18 16:15:00  andrewar
+ * Fixed reference to SubjectObserver.h to adhere to new directory structure.
+ *
+ *
+ */
+
 #ifndef StiDrawableTrack_HH
 #define StiDrawableTrack_HH 1
-#include "Sti/SubjectObserver.h"
+#include "Sti/Base/SubjectObserver.h"
 
 class StiGuiIOBroker;
 
-/*! \class StiDrawableTrack
-  Abstract base class used to define the interface to drawable tracks
-  \author Claude A Pruneau
-*/
 class StiDrawableTrack : public Observer
 {
 public:
