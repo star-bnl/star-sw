@@ -109,11 +109,11 @@ void MiniChain::setupDatabase()
   cout <<"MiniChain::setupDatabase() -I- Started" <<endl;
   St_db_Maker * dbaseMk  = new St_db_Maker("db","MySQL:StarDb","$STAR/StarDb");
   if (_pars->doSimulation) 
-  dbaseMk->SetDateTime(20010102,000000);  // << trouble here
+		dbaseMk->SetDateTime("year2003"); //20010102,000000);  // << trouble here
   cout <<"MiniChain: I - Date Set: "
        <<dbaseMk->GetDateTime().AsString()
        <<endl;
-  dbaseMk->SetDebug();
+  dbaseMk->SetDebug(1);
 
   if (_pars->useTpc) new StTpcDbMaker("tpcDb");
   if (_pars->useSvt) new StSvtDbMaker("svtDb");
