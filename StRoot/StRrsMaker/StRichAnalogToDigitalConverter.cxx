@@ -1,5 +1,5 @@
 /********************************************************
- * $Id: StRichAnalogToDigitalConverter.cxx,v 1.4 2000/03/12 23:56:33 lasiuk Exp $
+ * $Id: StRichAnalogToDigitalConverter.cxx,v 1.5 2000/05/17 22:26:24 lasiuk Exp $
  *
  * Description:
  *  StRichAnalogToDigitalConverter takes an analog signal
@@ -11,6 +11,9 @@
  *
  ******************************************************
  * $Log: StRichAnalogToDigitalConverter.cxx,v $
+ * Revision 1.5  2000/05/17 22:26:24  lasiuk
+ * charge is float (cast to avoid warnings)
+ *
  * Revision 1.4  2000/03/12 23:56:33  lasiuk
  * new coordinate system
  * exchange MyRound with inline templated funtion
@@ -65,7 +68,7 @@ int StRichAnalogToDigitalConverter::operator()(double signal) const
     //    
     // signal is in [electrons], e_charge in [fC] and adc_factor in [fC/channel]
 
-    int Q = floor( signal  /  mAdcConversion );
+    int Q = static_cast<int>(floor( signal  /  mAdcConversion ));
     if(mAddPedestal)
 	Q += mPedestal;
     
