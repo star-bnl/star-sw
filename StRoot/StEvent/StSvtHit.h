@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHit.h,v 2.1 1999/10/28 22:26:44 ullrich Exp $
+ * $Id: StSvtHit.h,v 2.2 1999/11/04 21:40:57 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StSvtHit.h,v $
- * Revision 2.1  1999/10/28 22:26:44  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.2  1999/11/04 21:40:57  ullrich
+ * Added missing default constructor
  *
  * Revision 2.4  1999/11/11 11:03:57  ullrich
  * Inlined layer(), sector() and ladder().
@@ -40,6 +40,8 @@ public:
     StSvtHit();
     StSvtHit(const StThreeVectorF&,
              const StThreeVectorF&,
+    // StSvtHit& operator=(const StSvtHit&); use default
+    ~StSvtHit();
 
     ULong_t layer() const;
     ULong_t ladder() const;

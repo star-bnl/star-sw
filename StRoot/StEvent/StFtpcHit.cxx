@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFtpcHit.cxx,v 2.1 1999/10/28 22:25:16 ullrich Exp $
+ * $Id: StFtpcHit.cxx,v 2.2 1999/11/04 21:40:49 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StFtpcHit.cxx,v $
- * Revision 2.1  1999/10/28 22:25:16  ullrich
- * Adapted new StArray version. First version to compile on Linux and Sun.
+ * Revision 2.2  1999/11/04 21:40:49  ullrich
+ * Added missing default constructor
  *
  * Revision 2.5  1999/12/13 20:16:12  ullrich
  * Changed numbering scheme for hw_position unpack methods (STAR conventions).
@@ -28,11 +28,13 @@
  * Revision 2.1  1999/10/28 22:25:16  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
+ * Revision 2.0  1999/10/12 18:42:02  ullrich
+ **************************************************************************/
 #include "StFtpcHit.h"
 #include "tables/St_dst_point_Table.h"
 #include "StTrack.h"
 
-static const char rcsid[] = "$Id: StFtpcHit.cxx,v 2.1 1999/10/28 22:25:16 ullrich Exp $";
+static const char rcsid[] = "$Id: StFtpcHit.cxx,v 2.2 1999/11/04 21:40:49 ullrich Exp $";
 
 StMemoryPool StFtpcHit::mPool(sizeof(StFtpcHit));
 
