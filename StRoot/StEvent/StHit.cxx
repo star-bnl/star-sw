@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.15 2004/08/06 15:37:09 fisyak Exp $
+ * $Id: StHit.cxx,v 2.16 2004/10/13 16:10:52 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.16  2004/10/13 16:10:52  ullrich
+ * Fixed bug in operator==
+ *
  * Revision 2.15  2004/08/06 15:37:09  fisyak
  * Add clster id
  *
@@ -67,7 +70,7 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.15 2004/08/06 15:37:09 fisyak Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.16 2004/10/13 16:10:52 ullrich Exp $";
 
 ClassImp(StHit)
 
@@ -104,7 +107,7 @@ StHit::operator==(const StHit& h) const
            h.mFlag             == mFlag &&
            h.mIdTruth          == mIdTruth &&
            h.mQuality          == mQuality &&
-           h.mId               == mId;
+           h.mId               == mId &&
            h.mNextHit          == mNextHit;
 }
 
