@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.354 2003/09/13 00:42:26 perev Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.355 2003/09/22 00:47:15 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -302,7 +302,7 @@ Bfc_st BFC1[] = {
   {"dbutil"      ,""     ,"","SCL"            ,"","StSvtDbMaker,StDbUtilities","Load StDbUtilities",kFALSE},
   {"calib"       ,"calib","","xdf2root"          ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"detDb"       ,""     ,"",""   ,"StDetectorDbMaker","StDetectorDbMaker","Load StDetectorDbMaker",kFALSE},
-  {"eemcDb"      ,"eeDb" ,"","db",                                "StEEmcDbMaker","StEEmcDbMaker","",kFALSE},
+  {"eemcDb"      ,"eeDb" ,"","db",                               "StEEmcDbMaker","StEEmcDbMaker","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Valid Db    ","Versions   ","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -340,6 +340,8 @@ Bfc_st BFC1[] = {
   {"tfs"         ,"","tpcChain","Simu"                             ,"","","use tfs (no StTrsMaker)",kFALSE},
   {"ZDCVtx"      ,"","tpcChain","db"                      ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls"        ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
+  {"fcf"         ,"","tcpChain","",
+            "StRTSClientFCFMaker","StRTSClientFCF,StRTSClientFCFMaker","Offline FCF Cluster finder",kFALSE},
   {"daqclf"      ,"","tpcChain","","StDaqClfMaker","StDaqClfMaker",    "Offline DAQ Cluster finder",kFALSE},
 
 
@@ -408,8 +410,8 @@ Bfc_st BFC1[] = {
                            ,"StVertexMaker","St_svt,St_global,St_dst_Maker","Primary Vertex finder",kFALSE},
   {"Primary"    ,"primary","globalChain","SCL,globT,tls"
                                                ,"StPrimaryMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"V0"         ,"v0","globalChain","SCL,globT,tls","StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"Xi"         ,"xi","globalChain","SCL,globT,tls","StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"V0"          ,"v0","globalChain","SCL,globT,tls","StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"Xi"          ,"xi","globalChain","SCL,globT,tls","StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Kink"   ,"kink","globalChain","SCL,globT,tls","StKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
   {"fpt"      ,"ftpc_tracks","globalChain","SCL"
                                           ,"StFtpcTrackMaker","StFtpcTrackMaker","FTPC Track Maker",kFALSE},
@@ -803,7 +805,7 @@ Bfc_st BFC2[] = {
   {"dbutil"      ,""     ,"","SCL"            ,"","StSvtDbMaker,StDbUtilities","Load StDbUtilities",kFALSE},
   {"calib"       ,"calib","","xdf2root"          ,"St_db_Maker","StDbLib,StDbBroker,St_db_Maker","",kFALSE},
   {"detDb"       ,""     ,"",""   ,"StDetectorDbMaker","StDetectorDbMaker","Load StDetectorDbMaker",kFALSE},
-  {"eemcDb"      ,"eeDb" ,"","db",                              "StEEmcDbMaker","StEEmcDbMaker","",kFALSE},
+  {"eemcDb"      ,"eeDb" ,"","db",                               "StEEmcDbMaker","StEEmcDbMaker","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Valid Db    ","Versions   ","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -841,6 +843,8 @@ Bfc_st BFC2[] = {
   {"tfs"         ,"","tpcChain","Simu"                             ,"","","use tfs (no StTrsMaker)",kFALSE},
   {"ZDCVtx"      ,"","tpcChain","db"                      ,"StZdcVertexMaker","StZdcVertexMaker","",kFALSE},
   {"tcl"         ,"tpc_hits","tpcChain","tpc_T,tls"        ,"St_tcl_Maker","St_tpc,St_tcl_Maker","",kFALSE},
+  {"fcf"         ,"","tcpChain","",
+            "StRTSClientFCFMaker","StRTSClientFCF,StRTSClientFCFMaker","Offline FCF Cluster finder",kFALSE},
   {"daqclf"      ,"","tpcChain","","StDaqClfMaker","StDaqClfMaker",    "Offline DAQ Cluster finder",kFALSE},
 
 
@@ -1311,9 +1315,11 @@ Int_t StBFChain::Instantiate()
 	  }
 
 	  if (GetOption("ppOpt") ) {                         // pp specific stuff
-	    cout << "QAInfo: ppOpt (pp mode) is turned ON" << endl;
-	    if (maker == "StTrsMaker") mk->SetMode(1);       // Pile-up correction
+	    if (maker == "StTrsMaker"){
+	      mk->SetMode(1);       // Pile-up correction
+	    }
 	    if (maker == "StVertexMaker"){
+	      cout << "QAInfo: ppOpt (pp mode) is turned ON" << endl;
 	      if( GetOption("SvtMatchVtx")) mk->SetMode(4); // Switch vertex finder to ppLMV using EST
 	      else                          mk->SetMode(1); // Switch vertex finder to ppLMV
 	      StVertexMaker *pMk = (StVertexMaker*) mk;
