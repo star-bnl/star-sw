@@ -268,7 +268,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.5 2002/03/20 19:22:59 genevb Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.6 2002/03/20 21:09:10 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -313,7 +313,7 @@ St_vertexSeed* StVertexSeedMaker::VertexSeedTable(){
 //_____________________________________________________________________________
 void StVertexSeedMaker::WriteHistFile(){
   char filename[80]; 
-  sprintf(filename,"%s/vertexSeed.%08d.%06d.C",defDir,date,time);
+  sprintf(filename,"%s/vertexseedhist.%08d.%06d.C",defDir,date,time);
   gMessMgr->Info() << "StVertexSeedMaker: Writing new histograms to:\n  "
     << filename << endm;
   TFile out(filename,"RECREATE");
@@ -546,8 +546,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.5 2002/03/20 19:22:59 genevb Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.6 2002/03/20 21:09:10 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.6  2002/03/20 21:09:10  genevb
+// Oops...introduced a typo last time
+//
 // Revision 1.5  2002/03/20 19:22:59  genevb
 // changed output directory of histogram files
 //
