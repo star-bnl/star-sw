@@ -1,4 +1,4 @@
-void XDFtest(const Char_t *infile=0, const Char_t *outfile=0, const Char_t mode ='r', const Int_t maxcount=0)
+void XDFtest(const Char_t *infile=0, const Char_t *outfile=0, const Char_t mode ='r', const Int_t maxcount=0, const Int_t compress=0)
 {
   ////////////////////////////////////////////////////////////////////////////////////
   //                                                                                //
@@ -17,6 +17,8 @@ void XDFtest(const Char_t *infile=0, const Char_t *outfile=0, const Char_t mode 
   //         default = ROOT I/O output, no XDF output                               //
   //  maxcount    = 0 - read the input file till "end_of_file"                      //
   //              > 0 - the number of events to read                                //
+  //  compress        - compression factor for ROOT I/O  (=0 - no compression)      //
+  //                                                                                //
   //                                                                                //
   ////////////////////////////////////////////////////////////////////////////////////
   
@@ -29,16 +31,15 @@ void XDFtest(const Char_t *infile=0, const Char_t *outfile=0, const Char_t mode 
      printf("\t\t default = ROOT I/O output, no XDF output\n");
      printf("\t\t maxcount= 0 - read the input file till \"end_of_file\"\n");
      printf("\t\t         > 0 - the number of events to read\n");
+     printf("\t\t compress= 0 - compression factor for ROOT I/O  (=0 - no compression)n");
      return;
    }
    // STAF base class ROOT dictionary
    
    gSystem->Load("St_base.so");
     // Load the extra share libraries:
-    
-   gSystem->Load("xdf2root.so"); 
-  
- 
+   gSystem->Load("xdf2root.so");
+   
    // The "wrapper" classes for the STAF tables ROOT dictionary
    gSystem->Load("St_Tables.so");
   
@@ -66,7 +67,7 @@ void XDFtest(const Char_t *infile=0, const Char_t *outfile=0, const Char_t mode 
  TFile       *root_out = 0;
  if (outfile && (mode != 'x') ) {
     root_out = new TFile (outfile,"RECREATE"); 
-    root_out->SetCompressionLevel(0);
+    root_out->SetCompressionLevel(compress);
  }
  
  St_DataSet *set = 0;
@@ -111,9 +112,9 @@ void XDFtest(const Char_t *infile=0, const Char_t *outfile=0, const Char_t mode 
     
 // printf("    Real Time Cpu Time  Os    CPU      RAM     input   output       size         name\n");
 //  printf("      sec       sec                    Mb      file     file \n");
-  printf("*** %d events XDF->",count);
-  if (xdf_out) printf("XDF");
-  else printf("ROOT");
+  printf("*** %d events XDF",count);
+  if (xdf_out) printf("->XDF");
+  else if (root_out) printf("->ROOT");
   printf(": \n");
   gBenchmark->Show("XDF2ROOT");
   printf(" input file: %d %s;", in_size,infile);
