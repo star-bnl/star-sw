@@ -1,5 +1,10 @@
-* $Id: tpt_project.F,v 1.12 1999/12/17 16:30:53 sakrejda Exp $
+* $Id: tpt_project.F,v 1.13 2000/02/13 22:45:49 sakrejda Exp $
 * $Log: tpt_project.F,v $
+* Revision 1.13  2000/02/13 22:45:49  sakrejda
+* CVo ----------------------------------------------------------------------
+* nly truly edge pads left out
+* 
+*
 * Revision 1.12  1999/12/17 16:30:53  sakrejda
 * Introduced additional integer to avit having mod(short,int).
 * It was not harmful, but confusing and debuggers complained about it.
@@ -90,7 +95,7 @@ C
 C     Local variables
       INTEGER next_hit(*),slice_loc(mxsector,mxrow,mxslic)
       INTEGER slice_pnt(2,mxsector*mxrow*mxslic)
-      INTEGER itrk,irow,ient,isect,isect_full,is(3),i,np,ixpnt
+      INTEGER itrk,irow,ient,isect,isect_full,is(2),i,np,ixpnt
       INTEGER iret, tpt_helix_pred ,l,ip_in,ip_out,row_in,row_out,llc
       INTEGER row_start(2),row_end(2),st(2),mdir,ip(2)
       INTEGER nf,lk,imem,ib,tpt_fit_track,tpt_cross_fact
@@ -98,53 +103,74 @@ C     Local variables
       INTEGER islic,is_pnt,ipass,tte_skip
       INTEGER tpt_find_slic, irets,save_flag
       INTEGER tgc_sec24_to_sec12
-      INTEGER longrow
+      INTEGER longrow, irow_last
 
       LOGICAL more
       REAL    xp(2),yp(2),devsum0,dist,dc,alpha,devsum
-      REAL    xold,yold,cf,zp
+      REAL    xold,yold,cf,zp, row_fact
       real    atand
 C_____________________________________________________________________
 C
 
-      ient       = trk(itrk).ipnt(1)
-      isect_full = hit(ient).row/100
-      iret       = tgc_sec24_to_sec12(isect_full,isect)
-      is(1)      = isect
-      is(2)      = isect-1
-      if(is(2).eq.0) is(2)=12
-      is(3)      = mod(isect+1,12)
+c      ient     = trk(itrk).ipnt(1)
+c      isect_full = hit(ient).row/100
+c      iret       = tgc_sec24_to_sec12(isect_full,isect)
+c      is(1)      = isect
+c      ient     = trk(itrk).ipnt()
+c      is(2)      = isect-1
+c      if(is(2).eq.0) is(2)=12
+c      is(3)      = isect+1
+c      if(is(3).gt.12) is(3)=1
 C
-      do i=1,3
-         isect = is(i)
-         ixpnt = trk(itrk).nhit
-         ip_in = trk(itrk).ipnt(ixpnt)
-         longrow = hit(ip_in).row
-         row_in = mod(longrow,100)
-         ip_out = trk(itrk).ipnt(1)
-         longrow = hit(ip_out).row
-         row_out =  mod(longrow,100)
-         row_start(1) = row_in-1
-         row_start(2) = row_out+1
-         row_end(1) = 1
-         row_end(2) = mxrow
-         st(1)=-1
-         st(2)=1
-         ip(1) = ip_in
-         ip(2) = ip_out
+      ixpnt = trk(itrk).nhit
+      ip_in = trk(itrk).ipnt(ixpnt)
+      longrow = hit(ip_in).row
+      row_in = mod(longrow,100)
+      isect_full = hit(ip_in).row/100
+      iret       = tgc_sec24_to_sec12(isect_full,isect)
+      is(1)=isect
+      ip_out = trk(itrk).ipnt(1)
+      longrow = hit(ip_out).row
+      row_out =  mod(longrow,100)
+      isect_full = hit(ip_out).row/100
+      iret       = tgc_sec24_to_sec12(isect_full,isect)
+      is(2)=isect
+      row_start(1) = row_in-1
+      row_start(2) = row_out+1
+      row_end(1) = 1
+      row_end(2) = mxrow
+      st(1)=-1
+      st(2)=1
+      ip(1) = ip_in
+      ip(2) = ip_out
 
-C        extend toward inner-row and then toward outer-row
-         do mdir = 1,2
-
+C     extend toward inner-row and then toward outer-row
+      do mdir = 1,2
+         irow_last=0
 C        loop over rows
          irow =row_start(mdir)
          more=.true.
          if(irow.lt.1.or.irow.gt.45) more=.false.
+         isect = is(mdir)
          do while(more)
+           row_fact=1.0
+           if(irow.lt.14)row_fact=1.5
 C          find predictions for this row
            iret = tpt_helix_pred(itrk,trk,isect,
      >            irow,tpar_h,tpar,np,xp,yp,ipass)
 C
+           if(np.eq.0) then
+              isect = is(mdir)+1
+              if(isect.eq.13) isect=1
+              iret = tpt_helix_pred(itrk,trk,isect,
+     >               irow,tpar_h,tpar,np,xp,yp,ipass)
+              if(np.eq.0) then
+                 isect = is(mdir)-1
+                 if(isect.eq.0) isect=1
+                 iret = tpt_helix_pred(itrk,trk,isect,
+     >                  irow,tpar_h,tpar,np,xp,yp,ipass)
+              endif
+           endif
            if(np.ne.0) then
              nf=0
              devsum0=10000000000.0
@@ -164,7 +190,7 @@ C              loop over all hits within a z-slice
                do llc=1,slice_pnt(2,is_pnt)
                  if(hit(l).track.lt.1) then
                    dist = (hit(l).x-xp(lk))**2+(hit(l).y-yp(lk))**2
-                   if(dist.lt.(tpar(ipass).drstr*hit(l).prf)**2) then
+                   if(dist.lt.row_fact*(tpar(ipass).drstr*hit(l).prf)**2) then
 C                    check z
                      if(abs(zp-hit(l).z).lt.sqrt(hit(l).zrf**2+
      >               hit(ip(mdir)).zrf**2)*tpar(ipass).dzstr) then
@@ -195,11 +221,20 @@ C              a hit found
                   trk(itrk).ipnt(ixpnt) = imem
                endif
                trk(itrk).nhit = trk(itrk).nhit + 1
+             else if(slice_pnt(2,is_pnt).gt.0) then
+               save_flag=trk(itrk).flag
+               iret=tpt_fit_track(itrk,trk,hit_h,hit,tpar_h,tpar,tte_skip,ipass)
+               if((iret.eq.STAFCV_OK).and.(irow.ne.irow_last)) then
+                  trk(itrk).flag=save_flag
+                  iret = tpt_load_track(itrk,track_h,track,trk,hit_h,hit)
+                  tpt_project = STAFCV_OK
+                  irow_last=irow
+                  irow=irow-st(mdir)
+               endif
              endif
            endif
            irow=irow+st(mdir)
            if(irow.lt.1.or.irow.gt.45) more=.false.
-         end do
          end do
       end do
       tte_skip=0
