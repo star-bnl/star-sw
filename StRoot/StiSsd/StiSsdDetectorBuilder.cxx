@@ -260,6 +260,7 @@ void StiSsdDetectorBuilder::setDefaults()
 }
 //________________________________________________________________________________
 void StiSsdDetectorBuilder::useVMCGeometry() {
+#ifndef __SsdInChain__
   cout << "StiSsdDetectorBuilder::buildDetectors() -I- Use VMC geometry" << endl;
   SetCurrentDetectorBuilder(this);
   struct Material_t {
@@ -310,4 +311,5 @@ void StiSsdDetectorBuilder::useVMCGeometry() {
     if (! nodeT) continue;;
     StiVMCToolKit::LoopOverNodes(nodeT, path, SsdVolumes[i].name, MakeAverageVolume);
   }
+#endif
 }
