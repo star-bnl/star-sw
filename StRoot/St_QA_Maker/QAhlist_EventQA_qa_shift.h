@@ -1,5 +1,8 @@
-// $Id: QAhlist_EventQA_qa_shift.h,v 2.16 2002/04/23 01:59:55 genevb Exp $
+// $Id: QAhlist_EventQA_qa_shift.h,v 2.17 2002/05/29 13:54:30 genevb Exp $
 // $Log: QAhlist_EventQA_qa_shift.h,v $
+// Revision 2.17  2002/05/29 13:54:30  genevb
+// Some changes to FTPC chisq histos
+//
 // Revision 2.16  2002/04/23 01:59:55  genevb
 // Addition of BBC/FPD histos
 //
@@ -128,6 +131,7 @@
   "StEQaPtrkGoodF",
   "StEQaPtrkChisq0TTS",
   "StEQaPtrkChisq1TTS",
+  "StEQaPtrkChisq0F",
   "StEQaPtrkChisq1F",
   "StEQaPtrkFlag",
   "StEQaPtrkImpactTTS",
@@ -275,6 +279,7 @@
   "StELMQaPtrkGoodF",
   "StELMQaPtrkChisq0TTS",
   "StELMQaPtrkChisq1TTS",
+  "StELMQaPtrkChisq0F",
   "StELMQaPtrkChisq1F",
   "StELMQaPtrkFlag",
   "StELMQaPtrkImpactTTS",
@@ -417,6 +422,7 @@
   "StEMMQaPtrkGoodF",
   "StEMMQaPtrkChisq0TTS",
   "StEMMQaPtrkChisq1TTS",
+  "StEMMQaPtrkChisq0F",
   "StEMMQaPtrkChisq1F",
   "StEMMQaPtrkFlag",
   "StEMMQaPtrkImpactTTS",
@@ -559,6 +565,7 @@
   "StEHMQaPtrkGoodF",
   "StEHMQaPtrkChisq0TTS",
   "StEHMQaPtrkChisq1TTS",
+  "StEHMQaPtrkChisq0F",
   "StEHMQaPtrkChisq1F",
   "StEHMQaPtrkFlag",
   "StEHMQaPtrkImpactTTS",

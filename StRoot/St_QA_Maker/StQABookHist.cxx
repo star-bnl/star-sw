@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.30 2002/04/23 01:59:56 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.31 2002/05/29 13:54:30 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.31  2002/05/29 13:54:30  genevb
+// Some changes to FTPC chisq histos
+//
 // Revision 2.30  2002/04/23 01:59:56  genevb
 // Addition of BBC/FPD histos
 //
@@ -1097,11 +1100,11 @@ void StQABookHist::BookHistGlob(){
   m_momF->Rebin(0,"East");
   m_momF->Rebin(1,"West");
   m_momF->SetStats(kFALSE);
-  m_chisq0F     = QAH::MH1F("QaGtrkChisq0F",  "globtrk: residuals, ftpc",50,0.,5.,2);
+  m_chisq0F     = QAH::MH1F("QaGtrkChisq0F",  "globtrk: residuals-xy projection, ftpc",50,0.,5.,2);
   m_chisq0F->Rebin(0,"East");
   m_chisq0F->Rebin(1,"West");
   m_chisq0F->SetStats(kFALSE);
-  m_chisq1F     = QAH::MH1F("QaGtrkChisq1F",  "globtrk: probabiliy, ftpc",50,0.,5.,2);
+  m_chisq1F     = QAH::MH1F("QaGtrkChisq1F",  "globtrk: residuals-rz projection, ftpc",50,0.,5.,2);
   m_chisq1F->Rebin(0,"East");
   m_chisq1F->Rebin(1,"West");
   m_chisq1F->SetStats(kFALSE);
@@ -1140,10 +1143,10 @@ void StQABookHist::BookHistGlob(){
   m_pTFW         = QAH::H1F("QaGtrkPtFW",      "globtrk: pT, ftpc west",50,0.,10.);
   m_momFE        = QAH::H1F("QaGtrkPFE",       "globtrk: momentum, ftpc east ",50,0.,5.);
   m_momFW        = QAH::H1F("QaGtrkPFW",       "globtrk: momentum, ftpc west ",50,0.,5.);
-  m_chisq0FE     = QAH::H1F("QaGtrkChisq0FE",  "globtrk: residuals, ftpc east", 50, 0.,5.);
-  m_chisq0FW     = QAH::H1F("QaGtrkChisq0FW",  "globtrk: residuals, ftpc west", 50, 0.,5.);
-  m_chisq1FE     = QAH::H1F("QaGtrkChisq1FE",  "globtrk: probability, ftpc east", 50, 0.,5.);
-  m_chisq1FW     = QAH::H1F("QaGtrkChisq1FW",  "globtrk: probability, ftpc west", 50, 0.,5.);
+  m_chisq0FE     = QAH::H1F("QaGtrkChisq0FE",  "globtrk: residuals-xy projection, ftpc east", 50, 0.,5.);
+  m_chisq0FW     = QAH::H1F("QaGtrkChisq0FW",  "globtrk: residuals-xy projection, ftpc west", 50, 0.,5.);
+  m_chisq1FE     = QAH::H1F("QaGtrkChisq1FE",  "globtrk: residuals-rz projection, ftpc east", 50, 0.,5.);
+  m_chisq1FW     = QAH::H1F("QaGtrkChisq1FW",  "globtrk: residuals-rz projection, ftpc west", 50, 0.,5.);
 
 // 2D - ftpc
 
@@ -1492,11 +1495,11 @@ void StQABookHist::BookHistPrim(){
   m_pmomF->Rebin(0,"East");
   m_pmomF->Rebin(1,"West");
   m_pmomF->SetStats(kFALSE);
-  m_pchisq0F     = QAH::MH1F("QaPtrkChisq0F",  "primtrk: chisq0, ftpc",50,0.,5.,2);
+  m_pchisq0F     = QAH::MH1F("QaPtrkChisq0F",  "primtrk: residuals-xy projection, ftpc",50,0.,5.,2);
   m_pchisq0F->Rebin(0,"East");
   m_pchisq0F->Rebin(1,"West");
   m_pchisq0F->SetStats(kFALSE);
-  m_pchisq1F     = QAH::MH1F("QaPtrkChisq1F",  "primtrk: probability, ftpc",50,0.,5.,2);
+  m_pchisq1F     = QAH::MH1F("QaPtrkChisq1F",  "primtrk: residuals-rz projection, ftpc",50,0.,5.,2);
   m_pchisq1F->Rebin(0,"East");
   m_pchisq1F->Rebin(1,"West");
   m_pchisq1F->SetStats(kFALSE);
@@ -1535,10 +1538,10 @@ void StQABookHist::BookHistPrim(){
   m_ppTFW         = QAH::H1F("QaPtrkPtFW",      "primtrk: pT, ftpc west",50,0.,5.);
   m_pmomFE        = QAH::H1F("QaPtrkPFE",       "primtrk: momentum, ftpc east ",50,0.,5.);
   m_pmomFW        = QAH::H1F("QaPtrkPFW",       "primtrk: momentum, ftpc west ",50,0.,5.);
-  m_pchisq0FE     = QAH::H1F("QaPtrkChisq0FE",  "primtrk: chisq0, ftpc east", 50, 0.,5.);
-  m_pchisq0FW     = QAH::H1F("QaPtrkChisq0FW",  "primtrk: chisq0, ftpc west", 50, 0.,5.);
-  m_pchisq1FE     = QAH::H1F("QaPtrkChisq1FE",  "primtrk: probability, ftpc east", 50, 0.,5.);
-  m_pchisq1FW     = QAH::H1F("QaPtrkChisq1FW",  "primtrk: probability, ftpc west", 50, 0.,5.);
+  m_pchisq0FE     = QAH::H1F("QaPtrkChisq0FE",  "primtrk: residuals-xy projection, ftpc east", 50, 0.,5.);
+  m_pchisq0FW     = QAH::H1F("QaPtrkChisq0FW",  "primtrk: residuals-xy projection, ftpc west", 50, 0.,5.);
+  m_pchisq1FE     = QAH::H1F("QaPtrkChisq1FE",  "primtrk: residuals-rz projection, ftpc east", 50, 0.,5.);
+  m_pchisq1FW     = QAH::H1F("QaPtrkChisq1FW",  "primtrk: residuals-rz projection, ftpc west", 50, 0.,5.);
 
 // 2D - ftpc
   m_ppT_eta_recFE = QAH::H2F("QaPtrkPtVsEtaFE","primtrk: log pT vs eta, ftpcE",20,-4.5,-2.,40,1.,4.);

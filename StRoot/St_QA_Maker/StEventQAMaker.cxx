@@ -1145,6 +1145,7 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_pmomF->Fill(gmom,0.);
 	  hists->m_plengthF->Fill(primtrk->length(),0.);
 	  hists->m_pchisq0F->Fill(chisq0,0.);	
+          hists->m_pchisq1F->Fill(chisq1,0.);
 	  hists->m_prim_impactF->Fill(logImpact,0.);
 	  hists->m_prim_impactrF->Fill(primtrk->impactParameter(),0.);
 	  // east and west in separate histograms
@@ -1162,6 +1163,7 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_pmomFE->Fill(gmom);
 	  hists->m_plengthFE->Fill(primtrk->length());
 	  hists->m_pchisq0FE->Fill(chisq0);
+          hists->m_pchisq1FE->Fill(chisq1);
 
 // these are for TPC & FTPC
 	  hists->m_ppT_eta_recFE->Fill(eta,lmevpt);
@@ -1197,6 +1199,7 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_pmomF->Fill(gmom,1.);
 	  hists->m_plengthF->Fill(primtrk->length(),1.);
 	  hists->m_pchisq0F->Fill(chisq0,1.);
+          hists->m_pchisq1F->Fill(chisq1,1.);
 	  hists->m_prim_impactF->Fill(logImpact,1.);
 	  hists->m_prim_impactrF->Fill(primtrk->impactParameter(),1.);
 	  // east and west in separate histograms
@@ -1214,6 +1217,7 @@ void StEventQAMaker::MakeHistPrim() {
 	  hists->m_pmomFW->Fill(gmom);
 	  hists->m_plengthFW->Fill(primtrk->length());
 	  hists->m_pchisq0FW->Fill(chisq0);
+          hists->m_pchisq1FW->Fill(chisq1);
 
 // these are for TPC & FTPC
 	  hists->m_ppT_eta_recFW->Fill(eta,lmevpt);
@@ -1902,8 +1906,11 @@ void StEventQAMaker::MakeHistFPD() {
 }
 
 //_____________________________________________________________________________
-// $Id: StEventQAMaker.cxx,v 2.37 2002/04/23 01:59:55 genevb Exp $
+// $Id: StEventQAMaker.cxx,v 2.38 2002/05/29 13:54:30 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.38  2002/05/29 13:54:30  genevb
+// Some changes to FTPC chisq histos
+//
 // Revision 2.37  2002/04/23 01:59:55  genevb
 // Addition of BBC/FPD histos
 //
