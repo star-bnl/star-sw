@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.5 1999/11/09 15:44:14 ullrich Exp $
+ * $Id: StTrack.cxx,v 2.6 1999/11/15 18:48:20 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
- * Revision 2.5  1999/11/09 15:44:14  ullrich
- * Removed method unlink() and all calls to it.
+ * Revision 2.6  1999/11/15 18:48:20  ullrich
+ * Adapted new enums for dedx and track reco methods.
  *
  * Revision 2.9  1999/12/01 15:58:08  ullrich
  * New decoding for dst_track::method. New enum added.
@@ -46,16 +46,16 @@
  **************************************************************************/
 #include "StTrack.h"
 #include "tables/St_dst_track_Table.h"
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.5 1999/11/09 15:44:14 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.6 1999/11/15 18:48:20 ullrich Exp $";
 #include "StVertex.h"
 #include "StTrackGeometry.h"
-    mReconstructionMethod = 0;
+#include "StTrackDetectorInfo.h"
 #include "StTrackPidTraits.h"
 #include "StTrackNode.h"
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.5 1999/11/09 15:44:14 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.6 1999/11/15 18:48:20 ullrich Exp $";
 
 StTrack::StTrack()
 {
@@ -63,7 +63,7 @@ StTrack::StTrack()
     mKey = 0;
     mEncodedMethod = 0;
     mImpactParameter = 0;
-    mReconstructionMethod = track.method;
+    mLength = 0;
     mNumberOfPossiblePoints = 0;
     mGeometry = 0;
     mDetectorInfo = 0;
@@ -76,7 +76,7 @@ StTrack::StTrack(const dst_track_st& track) :
     mKey = track.id;
     mFlag = track.iflag;
     mEncodedMethod = track.method;
-    mReconstructionMethod = track.mReconstructionMethod;
+    mImpactParameter = track.impact;
     mLength = track.length;
     mNumberOfPossiblePoints = track.n_max_point;
     mGeometry = 0;                                // has to come from outside
@@ -99,7 +99,7 @@ StTrack::StTrack(const StTrack& track)
     else
         mGeometry = 0;
     mDetectorInfo = track.mDetectorInfo;       // not owner anyhow
-        mReconstructionMethod = track.mReconstructionMethod;
+    mPidTraitsVec = track.mPidTraitsVec;
     mNode = 0;                                 // do not assume any context here
 }
 
@@ -128,8 +128,83 @@ StTrack::operator=(const StTrack& track)
     }
     return *this;
 }
-UChar_t
-StTrack::reconstructionMethod() const { return mReconstructionMethod; }
+
+StTrack::~StTrack()
+{
+    delete mGeometry;
+}
+
+Short_t
+StTrack::flag() const { return mFlag; }
+#if 0
+StTrackFindingMethod           
+StTrack::findingMethod() const
+
+    switch(mEncodedMethod%10) {
+    case kSvtGrouperId:
+	return kSvtGrouperId;
+	break;
+    case kSvtStkId:
+	return kSvtStkId;
+	break;
+    case kTpcStandardId:
+	return kTpcStandardId;
+	break;
+    case kSvtTpcSvmId:
+	return kSvtTpcSvmId;
+	break;
+    case kSvtTpcEstId:
+	return kSvtTpcEstId;
+	break;
+    default:
+    case kUndefinedFinderId:
+	return kUndefinedFinderId;
+	break;
+    }
+StTrack::encodedMethod() const { return mEncodedMethod; }
+
+StTrackQualityScheme           
+StTrack::qualityScheme() const
+{
+    switch((mEncodedMethod%100)/10) {
+    case kGrouperPassId:
+	return kGrouperPassId;
+	break;
+    case kStkPassId:
+	return kStkPassId;
+	break;
+    case kSvmPassId:
+	return kSvmPassId;
+	break;
+    case kEstPassId:
+	return kEstPassId;
+	break;
+    default:
+    case kUndefinedQualityId:
+	return kUndefinedQualityId;
+
+    }
+}
+#endif
+Bool_t
+StTrack::finderMethod(StTrackFinderMethod bit) const
+{
+    switch((mEncodedMethod%1000)/100) {
+
+StTrackFittingMethod           
+StTrack::fittingMethod() const
+{
+    int method = mEncodedMethod & 0xf;
+    switch(method) {
+    case kHelix2StepId:
+	return kHelix2StepId;
+	break;
+    case kHelix3DId:
+	return kHelix3DId;
+	break;
+    case kKalmanFitId:
+	return kKalmanFitId;
+	break;
     case kLine2StepId:
 	return kLine2StepId;
 	break;
@@ -216,7 +291,7 @@ const StParticleDefinition*
 StTrack::pidTraits(StPidAlgorithm& pid) const
 {
     return pid(*this, mPidTraitsVec);
-StTrack::setReconstructionMethod(UChar_t val) { mReconstructionMethod = val; }
+}
 
 const StTrackNode*
 StTrack::node() const { return mNode; }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.h,v 2.4 1999/11/05 15:27:07 ullrich Exp $
+ * $Id: StTrack.h,v 2.5 1999/11/15 18:48:22 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
- * Revision 2.4  1999/11/05 15:27:07  ullrich
- * Added non-const versions of several methods
+ * Revision 2.5  1999/11/15 18:48:22  ullrich
+ * Adapted new enums for dedx and track reco methods.
  *
  * Revision 2.6  1999/11/29 17:32:45  ullrich
  * Added non-const method pidTraits().
@@ -58,7 +58,10 @@ public:
     StTrack(const dst_track_st&);
     StTrack(const StTrack&);
     StTrack & operator=(const StTrack&);
-    UChar_t                        reconstructionMethod() const;
+    virtual ~StTrack();
+
+    virtual StTrackType            type() const = 0;
+    virtual const StVertex*        vertex() const = 0;
     StTrackFindingMethod           findingMethod() const;
     StTrackQualityScheme           qualityScheme() const;
     UShort_t                       encodedMethod() const;
@@ -76,7 +79,7 @@ public:
     const StPtrVecTrackPidTraits   pidTraits(StDetectorId) const;
     const StSPtrVecTrackPidTraits& pidTraits() const;
     StSPtrVecTrackPidTraits&       pidTraits();
-    void         setReconstructionMethod(UChar_t);
+    StPtrVecTrackPidTraits         pidTraits(StDetectorId) const;
     const StParticleDefinition*    pidTraits(StPidAlgorithm&) const;
     StTrackNode*                   node();
     const StTrackNode*             node() const;
@@ -89,7 +92,7 @@ public:
     void         setGeometry(StTrackGeometry*);
     void         setFitTraits(const StTrackFitTraits&);
     void         addPidTraits(StTrackPidTraits*);
-    UChar_t                 mReconstructionMethod;
+    void         setDetectorInfo(StTrackDetectorInfo*);
     void         setNode(StTrackNode*);
     
 protected:
