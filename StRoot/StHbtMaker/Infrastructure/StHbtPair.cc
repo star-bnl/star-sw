@@ -19,6 +19,10 @@
  * corrected calculation of opening angle 
  **
  * $Log: StHbtPair.cc,v $
+ * Revision 1.25  2003/01/14 09:44:08  renault
+ * corrections on average separation calculation for tracks which doesn't cross
+ * all 45 padrows.
+ *
  * Revision 1.24  2002/11/19 23:33:10  renault
  * Enable average separation calculation for all combinaisons of
  * V0 daughters and tracks
@@ -96,10 +100,10 @@
 
 #include "StHbtMaker/Infrastructure/StHbtPair.hh"
 
-double StHbtPair::mMaxDuInner = 3;
-double StHbtPair::mMaxDzInner = 4.;
-double StHbtPair::mMaxDuOuter = 4.;
-double StHbtPair::mMaxDzOuter = 6.;
+double StHbtPair::mMaxDuInner = .8;
+double StHbtPair::mMaxDzInner = 3.;
+double StHbtPair::mMaxDuOuter = 1.4;
+double StHbtPair::mMaxDzOuter = 3.2;
 
 
 StHbtPair::StHbtPair(){
@@ -485,12 +489,24 @@ double StHbtPair::NominalTpcEntranceSeparation() const {
 double StHbtPair::NominalTpcAverageSeparation() const {
   StHbtThreeVector diff;
   double AveSep = 0.0;
-  for (int ipt=0; ipt<11; ipt++){
+  int ipt = 0;
+  if (mTrack1->mNominalPosSample && mTrack2->mNominalPosSample){
+  while (fabs(mTrack1->mNominalPosSample[ipt].x())<9999. &&
+	 fabs(mTrack1->mNominalPosSample[ipt].y())<9999. && 
+	 fabs(mTrack1->mNominalPosSample[ipt].z())<9999. &&
+	 fabs(mTrack2->mNominalPosSample[ipt].x())<9999. &&
+	 fabs(mTrack2->mNominalPosSample[ipt].y())<9999. && 
+	 fabs(mTrack2->mNominalPosSample[ipt].z())<9999. &&
+	 ipt<11
+	 ){
+    //  for (int ipt=0; ipt<11; ipt++){
     diff = mTrack1->mNominalPosSample[ipt] - mTrack2->mNominalPosSample[ipt];
+    ipt++;
     AveSep += diff.mag();
   }
-  AveSep = AveSep/11.0;
-  return (AveSep);
+  AveSep = AveSep/(ipt+1.);
+  return (AveSep);}
+  else return -1;
 }
 
 double StHbtPair::OpeningAngle() const {
@@ -813,12 +829,23 @@ double StHbtPair::TpcEntranceSeparationTrackV0Pos() const {
 double StHbtPair::TpcAverageSeparationTrackV0Pos() const {
   StHbtThreeVector diff;
   double AveSep = 0.0;
-  for (int ipt=0; ipt<9; ipt++){// change tpy<11 by ipt<9 
-    diff = mTrack1->mNominalPosSample[ipt] - mTrack2->mTpcV0PosPosSample[ipt];
+  int ipt = 0;
+  if (mTrack1->mNominalPosSample && mTrack2->mNominalPosSample){
+  while (fabs(mTrack1->mNominalPosSample[ipt].x())<9999. &&
+	 fabs(mTrack1->mNominalPosSample[ipt].y())<9999. && 
+	 fabs(mTrack1->mNominalPosSample[ipt].z())<9999. &&
+	 fabs(mTrack2->mNominalPosSample[ipt].x())<9999. &&
+	 fabs(mTrack2->mNominalPosSample[ipt].y())<9999. && 
+	 fabs(mTrack2->mNominalPosSample[ipt].z())<9999. &&
+	 (ipt<11)
+	 ){
+    diff = mTrack1->mNominalPosSample[ipt] - mTrack2->mNominalPosSample[ipt];
+    ipt++;
     AveSep += diff.mag();
   }
-  AveSep = AveSep/9.0;
-  return (AveSep);
+  AveSep = AveSep/(ipt+1.);
+  return (AveSep);}
+  else return -1;
 }
 //_______1st part is a track 2nd is a V0 considering Neg daughter
 double StHbtPair::TpcExitSeparationTrackV0Neg() const {
@@ -833,14 +860,26 @@ double StHbtPair::TpcEntranceSeparationTrackV0Neg() const {
 
 double StHbtPair::TpcAverageSeparationTrackV0Neg() const {
   StHbtThreeVector diff;
-  double AveSep = 0.0;// change ipt<11 by ipt <9 because TpcV0NegPosSample[ipt]=nan
-  for (int ipt=0; ipt<9; ipt++){
+  double AveSep = 0.0;
+  int ipt = 0;
+  if (mTrack1->mNominalPosSample && mTrack2->mTpcV0NegPosSample){
+  while (fabs(mTrack1->mNominalPosSample[ipt].x())<9999. &&
+	 fabs(mTrack1->mNominalPosSample[ipt].y())<9999. && 
+	 fabs(mTrack1->mNominalPosSample[ipt].z())<9999. &&
+	 fabs(mTrack2->mTpcV0NegPosSample[ipt].x())<9999. &&
+	 fabs(mTrack2->mTpcV0NegPosSample[ipt].y())<9999. && 
+	 fabs(mTrack2->mTpcV0NegPosSample[ipt].z())<9999. &&
+	 (ipt<11)
+	 ){
     diff = mTrack1->mNominalPosSample[ipt] - mTrack2->mTpcV0NegPosSample[ipt];
+    ipt++;
     AveSep += diff.mag();
   }
-  AveSep = AveSep/9.0;
-  return (AveSep);
+  AveSep = AveSep/(ipt+1.);
+  return (AveSep);}
+  else return -1;
 }
+
 //_______1st part is a V0 considering Pos daughter 2nd is a V0 considering Pos daughter
 double StHbtPair::TpcExitSeparationV0PosV0Pos() const {
   StHbtThreeVector diff = mTrack1->TpcV0PosExitPoint() - mTrack2->TpcV0PosExitPoint();
@@ -851,17 +890,28 @@ double StHbtPair::TpcEntranceSeparationV0PosV0Pos() const {
   StHbtThreeVector diff = mTrack1->TpcV0PosEntrancePoint() - mTrack2->TpcV0PosEntrancePoint();
   return (diff.mag());
 }
-
 double StHbtPair::TpcAverageSeparationV0PosV0Pos() const {
   StHbtThreeVector diff;
   double AveSep = 0.0;
-  for (int ipt=0; ipt<9; ipt++){
-    diff = mTrack1->mTpcV0PosPosSample[ipt] - mTrack2->mTpcV0PosPosSample[ipt];
-    AveSep += diff.mag();
-  }
-  AveSep = AveSep/9.0;
-  return (AveSep);
+  int ipt=0;
+  if (mTrack1->mNominalPosSample && (mTrack2->mNominalPosSample)){
+    while ((fabs(mTrack1->mNominalPosSample[ipt].x())<9999.) &&
+	(fabs(mTrack1->mNominalPosSample[ipt].y())<9999.) &&
+	(fabs(mTrack1->mNominalPosSample[ipt].z())<9999.) &&
+	(fabs(mTrack2->mNominalPosSample[ipt].x())<9999.) &&
+	(fabs(mTrack2->mNominalPosSample[ipt].y())<9999.) &&
+	(fabs(mTrack2->mNominalPosSample[ipt].z())<9999.) &&
+	 (ipt<11)  
+	){
+      diff = mTrack1->mNominalPosSample[ipt] - mTrack2->mNominalPosSample[ipt];
+      ipt++;
+      AveSep += diff.mag();
+    }
+    AveSep = AveSep/(ipt+1);
+    return (AveSep);}
+  else return -1;
 }
+
 //_______1st part is a V0 considering Pos daughter 2nd is a V0 considering Neg daughter
 double StHbtPair::TpcExitSeparationV0PosV0Neg() const {
   StHbtThreeVector diff = mTrack1->TpcV0PosExitPoint() - mTrack2->TpcV0NegExitPoint();
@@ -872,17 +922,26 @@ double StHbtPair::TpcEntranceSeparationV0PosV0Neg() const {
   StHbtThreeVector diff = mTrack1->TpcV0PosEntrancePoint() - mTrack2->TpcV0NegEntrancePoint();
   return (diff.mag());
 }
-
 double StHbtPair::TpcAverageSeparationV0PosV0Neg() const {
   StHbtThreeVector diff;
   double AveSep = 0.0;
-  for (int ipt=0; ipt<9; ipt++){
-    //    cout <<"" << << endl;
-    diff = mTrack1->mTpcV0PosPosSample[ipt] - mTrack2->mTpcV0NegPosSample[ipt];
+  int ipt = 0;
+  if (mTrack1->mNominalPosSample && mTrack2->mTpcV0NegPosSample){
+  while (fabs(mTrack1->mNominalPosSample[ipt].x())<9999. &&
+	 fabs(mTrack1->mNominalPosSample[ipt].y())<9999. && 
+	 fabs(mTrack1->mNominalPosSample[ipt].z())<9999. &&
+	 fabs(mTrack2->mTpcV0NegPosSample[ipt].x())<9999. &&
+	 fabs(mTrack2->mTpcV0NegPosSample[ipt].y())<9999. && 
+	 fabs(mTrack2->mTpcV0NegPosSample[ipt].z())<9999. &&
+	 (ipt<11)
+	 ){
+    diff = mTrack1->mNominalPosSample[ipt] - mTrack2->mTpcV0NegPosSample[ipt];
+    ipt++;
     AveSep += diff.mag();
   }
-  AveSep = AveSep/9.0;
-  return (AveSep);
+  AveSep = AveSep/(ipt+1.);
+  return (AveSep);}
+  else return -1; 
 }
 //_______1st part is a V0 considering Neg daughter 2nd is a V0 considering Pos daughter
 // this is to check the upper case
@@ -895,16 +954,26 @@ double StHbtPair::TpcEntranceSeparationV0NegV0Pos() const {
   StHbtThreeVector diff = mTrack1->TpcV0NegEntrancePoint() - mTrack2->TpcV0PosEntrancePoint();
   return (diff.mag());
 }
-
 double StHbtPair::TpcAverageSeparationV0NegV0Pos() const {
-  StHbtThreeVector diff;
-  double AveSep = 0.0;
-  for (int ipt=0; ipt<9; ipt++){
-    diff = mTrack1->mTpcV0NegPosSample[ipt] - mTrack2->mTpcV0PosPosSample[ipt];
-    AveSep += diff.mag();
-  }
-  AveSep = AveSep/9.0;
-  return (AveSep);
+   StHbtThreeVector diff;
+   double AveSep = 0.0;
+   int ipt = 0;
+   if ( mTrack1->mTpcV0NegPosSample &&  mTrack2->mNominalPosSample){
+     while (fabs(mTrack1->mTpcV0NegPosSample[ipt].x())<9999. &&
+	    fabs(mTrack1->mTpcV0NegPosSample[ipt].y())<9999. && 
+	    fabs(mTrack1->mTpcV0NegPosSample[ipt].z())<9999. &&
+	    fabs(mTrack2->mNominalPosSample[ipt].x())<9999. &&
+	    fabs(mTrack2->mNominalPosSample[ipt].y())<9999. && 
+	    fabs(mTrack2->mNominalPosSample[ipt].z())<9999. &&
+	    (ipt<11)
+	    ){
+       diff = mTrack1->mTpcV0NegPosSample[ipt] - mTrack2->mNominalPosSample[ipt];
+       ipt++;
+       AveSep += diff.mag();
+     }
+     AveSep = AveSep/(ipt+1);
+     return (AveSep);}
+     else return -1;
 }
 //_______1st part is a V0 considering Neg daughter 2nd is a V0 considering Neg daughter
 double StHbtPair::TpcExitSeparationV0NegV0Neg() const {
@@ -916,15 +985,73 @@ double StHbtPair::TpcEntranceSeparationV0NegV0Neg() const {
   StHbtThreeVector diff = mTrack1->TpcV0NegEntrancePoint() - mTrack2->TpcV0NegEntrancePoint();
   return (diff.mag());
 }
-
 double StHbtPair::TpcAverageSeparationV0NegV0Neg() const {
-  StHbtThreeVector diff;
-  double AveSep = 0.0;
-  for (int ipt=0; ipt<9; ipt++){
-    diff = mTrack1->mTpcV0NegPosSample[ipt] - mTrack2->mTpcV0NegPosSample[ipt];
-    AveSep += diff.mag();
-  }
-  AveSep = AveSep/9.0;
-  return (AveSep);
+   StHbtThreeVector diff;
+   double AveSep = 0.0;
+   int ipt=0;
+   if (mTrack1->mTpcV0NegPosSample && mTrack2->mTpcV0NegPosSample){
+     while (fabs(mTrack1->mTpcV0NegPosSample[ipt].x())<9999. &&
+	    fabs(mTrack1->mTpcV0NegPosSample[ipt].y())<9999. && 
+	    fabs(mTrack1->mTpcV0NegPosSample[ipt].z())<9999. &&
+	    fabs(mTrack2->mTpcV0NegPosSample[ipt].x())<9999. &&
+	    fabs(mTrack2->mTpcV0NegPosSample[ipt].y())<9999. && 
+	    fabs(mTrack2->mTpcV0NegPosSample[ipt].z())<9999. &&
+	    (ipt<11)
+	    ){
+       diff = mTrack1->mTpcV0NegPosSample[ipt] - mTrack2->mTpcV0NegPosSample[ipt];
+       ipt++;
+       AveSep += diff.mag();
+     }
+     AveSep = AveSep/(ipt+1);
+     return (AveSep);}
+   else return -1;
 }
+
 //________________end V0 daughters exit/entrance/average separation calc.
+void StHbtPair::CalcMergingParFctn(short* tmpMergingParNotCalculatedFctn,
+				   float* tmpZ1,float* tmpU1,
+				   float* tmpZ2,float* tmpU2,
+				   int *tmpSect1,int *tmpSect2,
+				   double* tmpFracOfMergedRow,
+				   double* tmpClosestRowAtDCA
+				   ) const{
+  tmpMergingParNotCalculatedFctn=0;
+  double tDu, tDz;
+  int tN = 0;
+  *tmpFracOfMergedRow = 0.;
+  *tmpClosestRowAtDCA = 0.;
+  double tDist;
+  double tDistMax = 100000000.;
+  for(int ti=0 ; ti<45 ; ti++){
+    if(tmpSect1[ti]==tmpSect2[ti] && tmpSect1[ti]!=-1){
+	tDu = fabs(tmpU1[ti]-tmpU2[ti]);
+	tDz = fabs(tmpZ1[ti]-tmpZ2[ti]);
+	tN++;
+      if(ti<13){
+	*tmpFracOfMergedRow += (tDu<mMaxDuInner && tDz<mMaxDzInner);
+	tDist = sqrt(tDu*tDu/mMaxDuInner/mMaxDuInner+
+		     tDz*tDz/mMaxDzInner/mMaxDzInner);
+      }
+      else{
+	*tmpFracOfMergedRow += (tDu<mMaxDuOuter && tDz<mMaxDzOuter);
+	tDist = sqrt(tDu*tDu/mMaxDuOuter/mMaxDuOuter+
+		     tDz*tDz/mMaxDzOuter/mMaxDzOuter);
+	}
+      if(tDist<tDistMax){
+	mClosestRowAtDCA = ti+1;
+	tDistMax = tDist;
+      }
+      //mWeightedAvSep += tDist; // now, wrong but not used
+    }	
+  }
+  if(tN>0){
+    //mWeightedAvSep /= tN;
+    *tmpFracOfMergedRow /= tN;
+  }
+  else{
+    *tmpClosestRowAtDCA = -1;
+    *tmpFracOfMergedRow = -1.;
+    //mWeightedAvSep = -1.;
+  }
+}
+
