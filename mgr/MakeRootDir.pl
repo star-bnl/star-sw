@@ -44,18 +44,18 @@ my $bin  = "bin";
 # Loop over 2 possibilities
 for ( my $iter=0; $iter < 2; $iter++ ) {
    # First task, don't do it twice ...
-   if( ! -d ".$SYS/$root"){
-       mkdir(".$SYS/$root",0775);
-       if( ! -d ".$SYS/$root"){
-	   die ".$SYS/$root does not exists. Could not create it\n";
-       }
-
-       # Finally, we can go ahead
-       print "Creating directory structure for .$SYS/$root\n";
-       system("cd .$SYS/$root && $LNDIR $PWD/root ");
-   } else {
+   if(  -d ".$SYS/$root"){
        print "The directory structure already exists for $SYS\n";
+   } else {
+       mkdir(".$SYS/$root",0775);
    }
+   if( ! -d ".$SYS/$root"){
+       die ".$SYS/$root does not exists. Could not create it\n";
+   }
+
+   # Finally, we can go ahead
+   print "Creating directory structure for .$SYS/$root\n";
+   system("cd .$SYS/$root && $LNDIR $PWD/root ");
 
 
    # Second task, fix up a bunch of required soft-links for
@@ -63,11 +63,16 @@ for ( my $iter=0; $iter < 2; $iter++ ) {
    if( ! -l "$lib")   { symlink("$ANFS/$root/lib","$lib" );}
    if( ! -l "$bin")   { symlink("$ANFS/$root/bin","$bin" );}
    if( $iter == 0){
-       if( ! -l "etc")    { symlink("$ANFS/$root/etc","etc"  );}
-       if( ! -l "icons")  { symlink("$ANFS/$root/icons","icons");}
-       if( ! -l "include"){ symlink("$ANFS/$root/include","include");}
-       if( ! -l "cint")   { symlink("$ANFS/$root/cint","cint");}
+       if( ! -l "etc")      { symlink("$ANFS/$root/etc","etc"  );}
+       if( ! -l "cint")     { symlink("$ANFS/$root/cint","cint");}
+       if( ! -l "icons")    { symlink("$ANFS/$root/icons","icons");}
+       if( ! -l "include")  { symlink("$ANFS/$root/include","include");}
+       if( ! -l "tutorials"){ symlink("$ANFS/$root/tutorials","tutorials");}
+       if( ! -l "test")     { symlink("$ANFS/$root/test","test");}
    }
+   # Backward support for old scripts
+   if( ! -l "$lib/libStar.so")   { symlink("libTable.so","$lib/libStar.so" );}
+
 
    if( ! $FLINK ){
        print 
