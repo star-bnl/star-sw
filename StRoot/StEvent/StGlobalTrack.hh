@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.hh,v 1.3 1999/01/30 23:03:12 wenaus Exp $
+ * $Id: StGlobalTrack.hh,v 1.4 1999/02/12 02:01:18 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.hh,v $
- * Revision 1.3  1999/01/30 23:03:12  wenaus
- * table load intfc change; include ref change
+ * Revision 1.4  1999/02/12 02:01:18  wenaus
+ * New track constructor to load helix params independently of table
+ *
+ * Revision 1.8  1999/03/04 15:56:58  wenaus
+ * add std namespace for Sun CC5 compatibility
  *
  * Revision 1.7  1999/02/24 12:49:06  ullrich
  * Added argument (h) to constructor needed to instatiate helix
@@ -39,7 +42,11 @@ using namespace std;
 #ifndef StGlobalTrack_hh
 #define StGlobalTrack_hh
 
-    StGlobalTrack(dst_track_st*);
+#include <vector>
+                  double& curvature,
+                  double& dip,
+                  double& phase,
+#include "StEvent/StTrackPidTraits.hh"
 #include "tables/dst_track.h"
 
                   StThreeVector<double>& origin);

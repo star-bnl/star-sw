@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.hh,v 1.3 1999/01/30 23:03:16 wenaus Exp $
+ * $Id: StTrack.hh,v 1.4 1999/02/12 02:01:20 wenaus Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StTrack.hh,v $
- * Revision 1.3  1999/01/30 23:03:16  wenaus
- * table load intfc change; include ref change
+ * Revision 1.4  1999/02/12 02:01:20  wenaus
+ * New track constructor to load helix params independently of table
+ *
+ * Revision 1.6  1999/02/24 12:49:01  ullrich
+ * Added argument (h) to constructor needed to instatiate helix
  *
  * Revision 1.5  1999/02/15 16:17:04  wenaus
  * fix double& -> double referencing bug
@@ -33,6 +36,11 @@
 #define StTrack_hh 
 #include "StPhysicalHelix.hh"
 #include "StEvent/StTrackPidTraits.hh"
+#include "StEvent/StTrackFitTraits.hh"
+            double& curvature,
+            double& dip,
+            double& phase,
+class StTrack {
 public:
     StTrack();
             StThreeVector<double>& origin);

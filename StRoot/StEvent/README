@@ -6,6 +6,10 @@ Package coordinator: Thomas Ullrich
 Modification history
 ====================
 
+
+02/11/1999 T. Wenaus
+  - new track constructor to accept helix parameters separately from
+    track table
 02/10/1999 T. Wenaus
   - fix setPrimaryVertex in StEvent to set the vertex type to primary
   - print the required 'lousy compiler' line only for the lousy (Sun)
