@@ -13,12 +13,14 @@
 **:                              variable sectorGeo added
 **:                              clean extra includes    
 **:           12/06/99      ppy: method added to check whether track can be merged
+**:           01/26/00      ppy: delete rawToGlobal declaration
 **:<------------------------------------------------------------------*/
 #ifndef FTFSL3
 #define FTFSL3
 
 #include "FtfFinder.h"
 //#include <SECTOR/daqFormats.h>
+#include "l3GeneralHeaders.h"
 #include "daqFormats.h"
 #include "sl3CoordinateTransform.h"
 
@@ -29,11 +31,6 @@
 #else
 #define ClassDef(a,b)
 #endif
-
-#define NSECTORS 24
-
-int rawToGlobal ( int sector, int row, double pad, double tb,
-		  double &x, double &y, double &z);
 
 class sectorGeometry {
 public:

@@ -9,6 +9,7 @@
 //:                           secondary search.
 //:             23aug1999 ppy ClassImp added with ROOT flag
 //:             21dec1999 ppy printf replaced by fprintf(stderr,...
+//:             26jan2000 ppy malloc replaced with new, destructor function added
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
 //: CLASS:       FtfFinder, steers track finding
@@ -36,6 +37,17 @@ FtfFinder::FtfFinder ( )
     rowk       = 0 ;
     trackArea  = 0 ;
     nHitsOutOfRange = 0 ;
+}
+//*********************************************************************
+//      Initializes the package
+//*********************************************************************
+FtfFinder::~FtfFinder ( ) 
+{
+//
+    if ( mcTrack ) delete[] mcTrack ;
+    if ( volume  ) delete[] volume  ;
+    if ( rowk    ) delete[] rowk ;
+    if ( trackArea ) delete[] trackArea ;
 }
 //*********************************************************************
 //      Steers the tracking 
@@ -241,50 +253,52 @@ int FtfFinder::reset (void)
 //
 //-->    Allocate volume memory
 //
-   if (volume != NULL) free ( (void *) volume ) ; 
+// if (volume != NULL) free ( (void *) volume ) ; 
+   if (volume != NULL) delete []volume; 
 #ifdef TRDEBUG
    fprintf(stderr,"Allocating %d bytes of memory for volume\n",
                para.nRowsPlusOne*
                para.nPhiPlusOne*
                para.nEtaPlusOne*sizeof(VOLUME));
 #endif
-   volume = (VOLUME *)malloc(para.nRowsPlusOne*
-                             para.nPhiPlusOne *
-                             para.nEtaPlusOne*sizeof(VOLUME));
-   if(volume == (VOLUME *)NULL) {
-     fprintf ( stderr, "Problem with malloc... exiting\n" ) ;
+   int nVolumes = para.nRowsPlusOne*para.nPhiPlusOne *
+                  para.nEtaPlusOne ;
+   volume = new VOLUME[nVolumes];
+   if(volume == NULL) {
+     fprintf ( stderr, "Problem with memory allocation... exiting\n" ) ;
      return 1 ;
    }
-/*
- *-->   Allocate row memory
- */
-   if (rowk != NULL) free ( (void *) rowk ) ;
+// 
+//      Allocate row memory
+//
+   if ( rowk != NULL ) delete[] rowk ;
 #ifdef TRDEBUG
    fprintf( stderr, "Allocating %d bytes of memory for rowk\n",
                               para.nRowsPlusOne*sizeof(ROW));
 #endif
-   rowk = (ROW *)malloc(para.nRowsPlusOne*sizeof(ROW));
-   if ( rowk == ( ROW *)NULL) {
-     fprintf ( stderr, "Problem with malloc... exiting\n" ) ;
+   rowk = new ROW[para.nRowsPlusOne];
+   if ( rowk == NULL) {
+     fprintf ( stderr, "Problem with memory allocation... exiting\n" ) ;
      exit(0);
    }
-/*
- *-->    Allocate track area memory
- */
+//
+//       Allocate track area memory
+//
    if ( para.mergePrimaries ) {
-      if (trackArea != NULL) free ( (void *) trackArea ) ;
+      if (trackArea != NULL) delete []trackArea  ;
 #ifdef TRDEBUG
          fprintf(stderr, "Allocating %d bytes of memory for track_area\n",
                        para.nPhiTrackPlusOne*
                        para.nEtaTrackPlusOne*sizeof(AREA));
 #endif
-         trackArea = (AREA *)malloc(para.nPhiTrackPlusOne*
-                                    para.nEtaTrackPlusOne*sizeof(AREA));
-         if(trackArea == (AREA *)NULL) {
-         fprintf ( stderr, "Problem with malloc... exiting\n" ) ;
-         return 1 ;
-      }
-      else{
+         int nTrackVolumes = para.nPhiTrackPlusOne*
+                             para.nEtaTrackPlusOne ;
+         trackArea = new AREA[nTrackVolumes];
+         if(trackArea == NULL) {
+	    fprintf ( stderr, "Problem with memory allocation... exiting\n" ) ;
+	    return 1 ;
+	 }
+	 else{
 //
 //   Check there is some memory allocated
 //

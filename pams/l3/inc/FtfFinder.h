@@ -3,6 +3,7 @@
 //: HISTORY:
 //:             28oct1996 version 1.00
 //:             23aug1999 ppy printVols and printRows deleted
+//:             26jan2000 ppy destructor added
 //:<------------------------------------------------------------------
 
 #ifndef FTFFINDER
@@ -27,6 +28,7 @@ class FtfFinder {
 
 public:
    FtfFinder( ) ;
+   ~FtfFinder( ) ;
    friend class FtfTrack ;
 	
    void    dEdx                    ( ) ;
