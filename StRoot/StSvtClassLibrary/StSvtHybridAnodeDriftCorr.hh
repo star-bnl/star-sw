@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridAnodeDriftCorr.hh,v 1.1 2004/07/31 00:46:59 munhoz Exp $
+ * $Id: StSvtHybridAnodeDriftCorr.hh,v 1.2 2004/08/02 17:15:01 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  *
@@ -25,7 +25,7 @@ public:
    ~StSvtHybridAnodeDriftCorr();
 
   void setValue(int anode, float value){mDriftCorr[anode-1]=value;}
-  void getValue(int anode){return mDriftCorr[anode-1];}
+  float getValue(int anode){return mDriftCorr[anode-1];}
   
 protected:
  
