@@ -39,6 +39,9 @@ StDetectorDbInterpolator<T>::StDetectorDbInterpolator(unsigned int numEntries,un
 template<class T>
 T StDetectorDbInterpolator<T>::interpolate(unsigned int time){
 
+    if( mNumEntries == 0)
+	return 0;
+    
     if(time <= mTimes[0])
 	return mArray[0];
     if(time >= mTimes[mNumEntries-1])
@@ -62,6 +65,9 @@ T StDetectorDbInterpolator<T>::interpolate(unsigned int time){
 template<class T>
 T StDetectorDbInterpolator<T>::getLowerValue(unsigned int time){
 
+    if( mNumEntries == 0)
+	return 0;
+    
     if(time <= mTimes[0])
 	return mArray[0];
     if(time >= mTimes[mNumEntries-1])
