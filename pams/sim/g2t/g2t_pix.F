@@ -23,10 +23,10 @@
       g2t_pix_hit_h.nok = 0
 
 
-      call G2R_GET_SYS ('PIPE','PLSS',Iprin,Idigi)
+      call G2R_GET_SYS ('PIXL','PLAC',Iprin,Idigi)
        if (Iprin.lt.0) go to 99
-*       Local  = Idigi.ge.2
-*
+       Local  = Idigi.ge.2
+
        Do While (G2R_GET_HIT('pix') .eq. 0)
           print *,i,id,trac,next,volume,
      >            x(1),x(2),x(3),xx(1),xx(2),xx(3),c(1),c(2),c(3),
@@ -60,9 +60,9 @@
 *
 *                  add to track linked list 
 *
-         g2t_pix_hit(i).next_tr_hit_p = g2t_track(trac).hit_svt_p
-         g2t_track(trac).hit_svt_p    = i
-         g2t_track(trac).n_svt_hit    = g2t_track(trac).n_svt_hit + 1
+         g2t_pix_hit(i).next_tr_hit_p = g2t_track(trac).hit_pix_p
+         g2t_track(trac).hit_pix_p    = i
+         g2t_track(trac).n_pix_hit    = g2t_track(trac).n_pix_hit + 1
        enddo    
     
  99   RETURN
