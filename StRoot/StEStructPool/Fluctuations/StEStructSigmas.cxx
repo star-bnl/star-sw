@@ -155,6 +155,10 @@ void StEStructSigmas::NHistograms() {
                         nDSp += sqrt(hfUnique->GetBinContent(iPhi,iEta));
                         psigSq = sigSq;
                     }
+                } else {
+                    for (int jStat=0;jStat<5;jStat++) {
+                        NP[jStat] = 0;
+                    }
                 }
 
                 msigSq = 0;
@@ -171,15 +175,23 @@ void StEStructSigmas::NHistograms() {
                         nDSm += sqrt(hfUnique->GetBinContent(iPhi,iEta));
                         msigSq = sigSq;
                     }
+                } else {
+                    for (int jStat=0;jStat<5;jStat++) {
+                        NM[jStat] = 0;
+                    }
                 }
 
+// Accumulation of hNPlusMinus required (n+ > 0) && (n- > 0)
+// I think this is wrong. Instead if I require (n+ > 0) || (n- > 0)
+// I can retrieve appropriate terms from NP and NM, at least for the
+// phiPt case.
                 plusMinusEvents = hTotEvents[0]->GetBinContent(iBin);
                 if (plusMinusEvents > 0) {
                     for (int jStat=0;jStat<8;jStat++) {
                         NC[jStat] = hNPlusMinus[jStat]->GetBinContent(iBin) / plusMinusEvents;
                     }
-                    if (NC[0]*NC[1] > 0) {
-                        sigSq = (NC[2] - NC[0]*NC[1])/sqrt(NC[0]*NC[1]);
+                    if (NP[0]*NM[0] > 0) {
+                        sigSq = (NC[2] - NP[0]*NM[0])/sqrt(NP[0]*NM[0]);
                         Sc   += sigSq;
                         nSc  += 1;
                         DSc  += (psigSq + msigSq) / plusMinusEvents +
@@ -187,6 +199,20 @@ void StEStructSigmas::NHistograms() {
                         nDSc += sqrt(hfUnique->GetBinContent(iPhi,iEta));
                     }
                 }
+//                plusMinusEvents = hTotEvents[0]->GetBinContent(iBin);
+//                if (plusMinusEvents > 0) {
+//                    for (int jStat=0;jStat<8;jStat++) {
+//                        NC[jStat] = hNPlusMinus[jStat]->GetBinContent(iBin) / plusMinusEvents;
+//                    }
+//                    if (NC[0]*NC[1] > 0) {
+//                        sigSq = (NC[2] - NC[0]*NC[1])/sqrt(NC[0]*NC[1]);
+//                        Sc   += sigSq;
+//                        nSc  += 1;
+//                        DSc  += (psigSq + msigSq) / plusMinusEvents +
+//                                    (1/NC[0]+1/NC[1])*sigSq*sigSq/4;
+//                        nDSc += sqrt(hfUnique->GetBinContent(iPhi,iEta));
+//                    }
+//                }
             }
 
             if (nSs > 0) {
@@ -416,9 +442,8 @@ void StEStructSigmas::PHistograms() {
                 }
 
                 plusEvents = hTotEvents[2]->GetBinContent(iBin);
+                pHat[1] = 0;
                 if (plusEvents > 0) {
-                    double r = plusEvents / totEvents;
-                    r = 1;
                     for (int jStat=0;jStat<5;jStat++) {
                         NP[jStat] = hNPlus[jStat]->GetBinContent(iBin) / plusEvents;
                     }
@@ -438,19 +463,25 @@ void StEStructSigmas::PHistograms() {
                         sigSq    = PP[4] - 2*pHat[1]*PP[2] + pHat2[1]*NP[1];
                         Sp[1]   += sigSq/NP[0] - sigHat;
                         sigSq    = PP[6] - 2*pHat[1]*PP[3] + pHat2[1];
-                        Sp[2]   += NP[0] * (sigSq - sigHat*NP[4]) * r;
+                        Sp[2]   += NP[0] * (sigSq - sigHat*NP[4]);
                         nSp     += 1;
 
                         DSp     += (PP[8] - 4*pHat[1]*PP[7] + 6*pHat2[1]*PP[5]
                                           - 4*pHat[1]*pHat2[1]*PP[1] + pHat2[1]*pHat2[1]*NP[0]) *NP[0]/plusEvents;
                         nDSp    += sqrt(hfUnique->GetBinContent(iPhi,iEta));
                     }
+                } else {
+                    for (int jStat=0;jStat<5;jStat++) {
+                        NP[jStat] = 0;
+                    }
+                    for (int jStat=0;jStat<11;jStat++) {
+                        PP[jStat] = 0;
+                    }
                 }
 
                 minusEvents = hTotEvents[3]->GetBinContent(iBin);
+                pHat[2] = 0;
                 if (minusEvents > 0) {
-                    double r = minusEvents / sumEvents;
-                    r = 1;
                     for (int jStat=0;jStat<5;jStat++) {
                         NM[jStat] = hNMinus[jStat]->GetBinContent(iBin) / minusEvents;
                     }
@@ -470,16 +501,27 @@ void StEStructSigmas::PHistograms() {
                         sigSq    = PM[4] - 2*pHat[2]*PM[2] + pHat2[2]*NM[1];
                         Sm[1]   += sigSq/NM[0] - sigHat;
                         sigSq    = PM[6] - 2*pHat[2]*PM[3] + pHat2[2];
-                        Sm[2]   += NM[0] * (sigSq - sigHat*NM[4]) * r;
+                        Sm[2]   += NM[0] * (sigSq - sigHat*NM[4]);
                         nSm     += 1;
 
                         DSm     += (PM[8] - 4*pHat[2]*PM[7] + 6*pHat2[2]*PM[5]
                                           - 4*pHat[2]*pHat2[2]*PM[1] + pHat2[2]*pHat2[2]*NM[0]) * NM[0] / minusEvents;
                         nDSm    += sqrt(hfUnique->GetBinContent(iPhi,iEta));
                     }
+                } else {
+                    for (int jStat=0;jStat<5;jStat++) {
+                        NM[jStat] = 0;
+                    }
+                    for (int jStat=0;jStat<11;jStat++) {
+                        PM[jStat] = 0;
+                    }
                 }
 
-                plusMinusEvents = sumEvents;
+// Accumulation of hNPlusMinus required (n+ > 0) && (n- > 0)
+// I think this is wrong. Instead if I require (n+ > 0) || (n- > 0)
+// I can retrieve appropriate terms from NP and NM, at least for the
+// phiPt case.
+                plusMinusEvents = hTotEvents[1]->GetBinContent(iBin);
                 if (plusMinusEvents > 0) {
                     for (int jStat=0;jStat<8;jStat++) {
                         NC[jStat] = hNPlusMinus[jStat]->GetBinContent(iBin) / plusMinusEvents;
@@ -487,25 +529,45 @@ void StEStructSigmas::PHistograms() {
                     for (int jStat=0;jStat<17;jStat++) {
                         PC[jStat] = hPPlusMinus[jStat]->GetBinContent(iBin) / plusMinusEvents;
                     }
-                    if (NC[0] > 0) {
-                        pHat[1] = PC[0] / NC[0];
-                    } else {
-                        pHat[1] = 0;
-                    }
-                    if (NC[1] > 0) {
-                        pHat[2] = PC[1] / NC[1];
-                    } else {
-                        pHat[2] = 0;
-                    }
+
                     sigSq   = PC[16] - pHat[2]*PC[10] - pHat[1]*PC[11] + pHat[1]*pHat[2]*NC[5];
                     Sc[0]  += sigSq;
-                    sigSq   = PC[14] - pHat[2]*PC[5]  - pHat[1]*PC[4]  + pHat[1]*pHat[2]*NC[2];
-                    Sc[1]  += sigSq/sqrt(NC[0]*NC[1]);
+                    if (NP[0]*NM[0] > 0) {
+                        sigSq   = PC[14] - pHat[2]*PC[5]  - pHat[1]*PC[4]  + pHat[1]*pHat[2]*NC[2];
+                        Sc[1]  += sigSq/sqrt(NP[0]*NM[0]);
+                    }
                     sigSq   = PC[15] - pHat[2]*PC[2]  - pHat[1]*PC[3]  + pHat[1]*pHat[2];
-                    Sc[2]  += sigSq*sqrt(NC[0]*NC[1]);
+                    Sc[2]  += sigSq*sqrt(NP[0]*NM[0]);
                     nSc    += 1;
                     nDSc    += sqrt(hfUnique->GetBinContent(iPhi,iEta));
                 }
+//                plusMinusEvents = hTotEvents[1]->GetBinContent(iBin);
+//                if (plusMinusEvents > 0) {
+//                    for (int jStat=0;jStat<8;jStat++) {
+//                        NC[jStat] = hNPlusMinus[jStat]->GetBinContent(iBin) / plusMinusEvents;
+//                    }
+//                    for (int jStat=0;jStat<17;jStat++) {
+//                        PC[jStat] = hPPlusMinus[jStat]->GetBinContent(iBin) / plusMinusEvents;
+//                    }
+//                    if (NC[0] > 0) {
+//                        pHat[1] = PC[0] / NC[0];
+//                    } else {
+//                        pHat[1] = 0;
+//                    }
+//                    if (NC[1] > 0) {
+//                        pHat[2] = PC[1] / NC[1];
+//                    } else {
+//                        pHat[2] = 0;
+//                    }
+//                    sigSq   = PC[16] - pHat[2]*PC[10] - pHat[1]*PC[11] + pHat[1]*pHat[2]*NC[5];
+//                    Sc[0]  += sigSq;
+//                    sigSq   = PC[14] - pHat[2]*PC[5]  - pHat[1]*PC[4]  + pHat[1]*pHat[2]*NC[2];
+//                    Sc[1]  += sigSq/sqrt(NC[0]*NC[1]);
+//                    sigSq   = PC[15] - pHat[2]*PC[2]  - pHat[1]*PC[3]  + pHat[1]*pHat[2];
+//                    Sc[2]  += sigSq*sqrt(NC[0]*NC[1]);
+//                    nSc    += 1;
+//                    nDSc    += sqrt(hfUnique->GetBinContent(iPhi,iEta));
+//                }
             }
 
             if (nSs > 0) {
@@ -731,6 +793,7 @@ void StEStructSigmas::PNHistograms() {
                 }
 
                 plusEvents = hTotEvents[2]->GetBinContent(iBin);
+                pHat[1] = 0;
                 if (plusEvents > 0) {
                     for (int jStat=0;jStat<5;jStat++) {
                         NP[jStat] = hNPlus[jStat]->GetBinContent(iBin) / plusEvents;
@@ -749,9 +812,17 @@ void StEStructSigmas::PNHistograms() {
                         Sp[2]  += sigSq;
                         nSp    += 1;
                     }
+                } else {
+                    for (int jStat=0;jStat<5;jStat++) {
+                        NP[jStat] = 0;
+                    }
+                    for (int jStat=0;jStat<11;jStat++) {
+                        PP[jStat] = 0;
+                    }
                 }
 
                 minusEvents = hTotEvents[3]->GetBinContent(iBin);
+                pHat[2] = 0;
                 if (minusEvents > 0) {
                     for (int jStat=0;jStat<5;jStat++) {
                         NM[jStat] = hNMinus[jStat]->GetBinContent(iBin) / minusEvents;
@@ -770,9 +841,20 @@ void StEStructSigmas::PNHistograms() {
                         Sm[2]  += sigSq;
                         nSm    += 1;
                     }
+                } else {
+                    for (int jStat=0;jStat<5;jStat++) {
+                        NM[jStat] = 0;
+                    }
+                    for (int jStat=0;jStat<11;jStat++) {
+                        PM[jStat] = 0;
+                    }
                 }
 
-                plusMinusEvents = hTotEvents[4]->GetBinContent(iBin);
+// Accumulation of hNPlusMinus required (n+ > 0) && (n- > 0)
+// I think this is wrong. Instead if I require (n+ > 0) || (n- > 0)
+// I can retrieve appropriate terms from NP and NM, at least for the
+// phiPt case.
+                plusMinusEvents = hTotEvents[1]->GetBinContent(iBin);
                 if (plusMinusEvents > 0) {
                     for (int jStat=0;jStat<8;jStat++) {
                         NC[jStat] = hNPlusMinus[jStat]->GetBinContent(iBin) / plusMinusEvents;
@@ -780,37 +862,75 @@ void StEStructSigmas::PNHistograms() {
                     for (int jStat=0;jStat<17;jStat++) {
                         PC[jStat] = hPPlusMinus[jStat]->GetBinContent(iBin) / plusMinusEvents;
                     }
-                    if (NC[0] > 0) {
-                        pHat[1] = PC[0] / NC[0];
-                    } else {
-                        pHat[1] = 0;
+                    if (NM[0] > 0) {
+                        sigSq = (PC[12] - NC[1]*PC[6]
+                                  - pHat[1]*NC[6] + pHat[1]*NC[1]*NC[3]) / sqrt(NM[0]);
+                        Sc1[0] += sigSq;
                     }
-                    if (NC[1] > 0) {
-                        pHat[2] = PC[1] / NC[1];
-                    } else {
-                        pHat[2] = 0;
+                    if (NP[0]*NM[0] > 0) {
+                        sigSq = (PC[5] - pHat[1]*NC[2]) / sqrt(NP[0]*NM[0]);
+                        Sc1[1] += sigSq;
                     }
-
-                    sigSq = (PC[12] - NC[1]*PC[6]
-                              - pHat[1]*NC[6] + pHat[1]*NC[1]*NC[3]) / sqrt(NC[1]);
-                    Sc1[0] += sigSq;
-                    sigSq = (PC[5] - NC[1]*PC[0]
-                              - pHat[1]*NC[2] + PC[0]*NC[1]) / sqrt(NC[0]*NC[1]);
-                    Sc1[1] += sigSq;
-                    sigSq = (PC[8] - NC[1]*PC[2]) * sqrt(NC[0]/NC[1]);
-                    Sc1[2] += sigSq;
+                    if (NM[0] > 0) {
+                        sigSq = (PC[8] - NC[1]*PC[2]) * sqrt(NP[0]/NM[0]);
+                        Sc1[2] += sigSq;
+                    }
                     nSc1 += 1;
 
-                    sigSq = (PC[13] - NC[0]*PC[7]
-                              - pHat[2]*NC[7] + pHat[2]*NC[0]*NC[4]) / sqrt(NC[0]);
-                    Sc2[0] += sigSq;
-                    sigSq = (PC[4] - NC[0]*PC[1]
-                              - pHat[2]*NC[2] + PC[1]*NC[0]) / sqrt(NC[0]*NC[1]);
-                    Sc2[1] += sigSq;
-                    sigSq = (PC[9] - NC[0]*PC[3]) * sqrt(NC[1]/NC[0]);
-                    Sc2[2] += sigSq;
+                    if (NP[0] > 0) {
+                        sigSq = (PC[13] - NC[0]*PC[7]
+                                  - pHat[2]*NC[7] + pHat[2]*NC[0]*NC[4]) / sqrt(NP[0]);
+                        Sc2[0] += sigSq;
+                    }
+                    if (NP[0]*NM[0] > 0) {
+                        sigSq = (PC[4] - pHat[2]*NC[2]) / sqrt(NP[0]*NM[0]);
+                        Sc2[1] += sigSq;
+                    }
+                    if (NP[0] > 0) {
+                        sigSq = (PC[9] - NC[0]*PC[3]) * sqrt(NM[0]/NP[0]);
+                        Sc2[2] += sigSq;
+                    }
                     nSc2 += 1;
                 }
+//                plusMinusEvents = hTotEvents[4]->GetBinContent(iBin);
+//                if (plusMinusEvents > 0) {
+//                    for (int jStat=0;jStat<8;jStat++) {
+//                        NC[jStat] = hNPlusMinus[jStat]->GetBinContent(iBin) / plusMinusEvents;
+//                    }
+//                    for (int jStat=0;jStat<17;jStat++) {
+//                        PC[jStat] = hPPlusMinus[jStat]->GetBinContent(iBin) / plusMinusEvents;
+//                    }
+//                    if (NC[0] > 0) {
+//                        pHat[1] = PC[0] / NC[0];
+//                    } else {
+//                        pHat[1] = 0;
+//                    }
+//                    if (NC[1] > 0) {
+//                        pHat[2] = PC[1] / NC[1];
+//                    } else {
+//                        pHat[2] = 0;
+//                    }
+//
+//                    sigSq = (PC[12] - NC[1]*PC[6]
+//                              - pHat[1]*NC[6] + pHat[1]*NC[1]*NC[3]) / sqrt(NC[1]);
+//                    Sc1[0] += sigSq;
+//                    sigSq = (PC[5] - NC[1]*PC[0]
+//                              - pHat[1]*NC[2] + PC[0]*NC[1]) / sqrt(NC[0]*NC[1]);
+//                    Sc1[1] += sigSq;
+//                    sigSq = (PC[8] - NC[1]*PC[2]) * sqrt(NC[0]/NC[1]);
+//                    Sc1[2] += sigSq;
+//                    nSc1 += 1;
+//
+//                    sigSq = (PC[13] - NC[0]*PC[7]
+//                              - pHat[2]*NC[7] + pHat[2]*NC[0]*NC[4]) / sqrt(NC[0]);
+//                    Sc2[0] += sigSq;
+//                    sigSq = (PC[4] - NC[0]*PC[1]
+//                              - pHat[2]*NC[2] + PC[1]*NC[0]) / sqrt(NC[0]*NC[1]);
+//                    Sc2[1] += sigSq;
+//                    sigSq = (PC[9] - NC[0]*PC[3]) * sqrt(NC[1]/NC[0]);
+//                    Sc2[2] += sigSq;
+//                    nSc2 += 1;
+//                }
             }
 
             if (nSs > 0) {

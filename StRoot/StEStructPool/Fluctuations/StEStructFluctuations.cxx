@@ -15,11 +15,15 @@
 ClassImp(StEStructFluct)
 
 //--------------------------------------------------------------------------
-StEStructFluct::StEStructFluct( char *key, int totBins, float EtaMin, float EtaMax ) {
+StEStructFluct::StEStructFluct( char *key, int totBins,
+                                float EtaMin, float EtaMax,
+                                float PtMin,  float PtMax ) {
     mKey     = strdup(key);
     mTotBins = totBins;
     mEtaMin  = EtaMin;
     mEtaMax  = EtaMax;
+    mPtMin   = PtMin;
+    mPtMax   = PtMax;
     initArrays();
 }
 
@@ -163,7 +167,7 @@ void StEStructFluct::AddToBin( int    iBin,
         PMinus[10][jBin] += Ptminus*sqm;
     }
 
-    if ((Nplus > 0) && (Nminus > 0)) {
+    if ((Nplus > 0) || (Nminus > 0)) {
         TotEvents[4][jBin]++;
 
         NPlusMinus[0][jBin] += Nplus;
@@ -177,21 +181,27 @@ void StEStructFluct::AddToBin( int    iBin,
 
         PPlusMinus[0][jBin] += Ptplus;
         PPlusMinus[1][jBin] += Ptminus;
-        PPlusMinus[2][jBin] += Ptplus/Nplus;
-        PPlusMinus[3][jBin] += Ptminus/Nminus;
         PPlusMinus[4][jBin] += Nplus*Ptminus;
         PPlusMinus[5][jBin] += Nminus*Ptplus;
-        PPlusMinus[6][jBin] += Ptplus/sqp;
-        PPlusMinus[7][jBin] += Ptminus/sqm;
-        PPlusMinus[8][jBin] += Ptplus*Nminus/Nplus;
-        PPlusMinus[9][jBin] += Ptminus*Nplus/Nminus;
-        PPlusMinus[10][jBin] += Ptplus*sqm/sqp;
-        PPlusMinus[11][jBin] += Ptminus*sqp/sqm;
-        PPlusMinus[12][jBin] += Ptplus*Nminus/sqp;
-        PPlusMinus[13][jBin] += Ptminus*Nplus/sqm;
         PPlusMinus[14][jBin] += Ptplus*Ptminus;
-        PPlusMinus[15][jBin] += Ptplus*Ptminus/(Nplus*Nminus);
-        PPlusMinus[16][jBin] += Ptplus*Ptminus/(sqp*sqm);
+        if (Nplus > 0) {
+            PPlusMinus[2][jBin] += Ptplus/Nplus;
+            PPlusMinus[6][jBin] += Ptplus/sqp;
+            PPlusMinus[8][jBin] += Ptplus*Nminus/Nplus;
+            PPlusMinus[10][jBin] += Ptplus*sqm/sqp;
+            PPlusMinus[12][jBin] += Ptplus*Nminus/sqp;
+        }
+        if (Nplus > 0) {
+            PPlusMinus[3][jBin] += Ptminus/Nminus;
+            PPlusMinus[7][jBin] += Ptminus/sqm;
+            PPlusMinus[9][jBin] += Ptminus*Nplus/Nminus;
+            PPlusMinus[11][jBin] += Ptminus*sqp/sqm;
+            PPlusMinus[13][jBin] += Ptminus*Nplus/sqm;
+        }
+        if ((Nplus > 0) && (Nminus > 0)) {
+            PPlusMinus[15][jBin] += Ptplus*Ptminus/(Nplus*Nminus);
+            PPlusMinus[16][jBin] += Ptplus*Ptminus/(sqp*sqm);
+        }
     }
 }
 void StEStructFluct::fillOccupancies( double dPhi,  double dEta,
@@ -238,6 +248,15 @@ void StEStructFluct::fillEtaZ( float z, float eta,
     EtaZNFitPoints->Fill(z,eta,nFitPoints);
     InnerRow->Fill(z,eta,iF);
     OuterRow->Fill(z,eta,iL);
+}
+void StEStructFluct::fillPtHist( double Pt, int sign ) {
+    ptAll->Fill(Pt);
+    if (sign > 0) {
+        ptPlus->Fill(Pt);
+    }
+    if (sign < 0) {
+        ptMinus->Fill(Pt);
+    }
 }
 //--------------------------------------------------------------------------
 //
@@ -361,6 +380,9 @@ void StEStructFluct::writeQAHistograms() {
     multPPlus->Write();
     multPMinus->Write();
     multPDiff->Write();
+    ptAll->Write();
+    ptPlus->Write();
+    ptMinus->Write();
 }
 
 //--------------------------------------------------------------------------
@@ -422,6 +444,13 @@ void StEStructFluct::initArrays() {
     multPMinus = new TH1F(line,line,100,0,1000);
     sprintf( line, "multPDiff_%s", mKey );
     multPDiff = new TH1F(line,line,100,-200,200);
+
+    sprintf( line, "ptAll_%s", mKey );
+    ptAll = new TH1F(line,line,100,mPtMin,mPtMax);
+    sprintf( line, "ptPlus_%s", mKey );
+    ptPlus = new TH1F(line,line,100,mPtMin,mPtMax);
+    sprintf( line, "ptMinus_%s", mKey );
+    ptMinus = new TH1F(line,line,100,mPtMin,mPtMax);
 
 cout << "Allocating arrays to store info." << endl;
     for (int jStat=0;jStat<5;jStat++) {
@@ -497,6 +526,9 @@ cout << "Deleting occupancy histograms." << endl;
     delete multPPlus;
     delete multPMinus;
     delete multPDiff;
+    delete ptAll;
+    delete ptPlus;
+    delete ptMinus;
 
 cout << "freeing Arrays." << endl;
     for (int jStat=0;jStat<5;jStat++) {
