@@ -1,4 +1,7 @@
 #  $Log: MakePam.mk,v $
+#  Revision 1.17  1998/05/03 18:27:41  fisyak
+#  Set fixed path to geant3
+#
 #  Revision 1.16  1998/04/28 16:36:48  fisyak
 #  remove or merger from stic -M
 #
@@ -76,7 +79,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/04/28 16:36:48 $ 
+#           Last modification $Date: 1998/05/03 18:27:41 $ 
 #  #. default setings
 include $(STAR)/mgr/MakeSYS.mk
 ifdef SILENT
@@ -373,7 +376,7 @@ $(GEN_DIR)/geant3.def: $(STAR)/asps/agi/gst/geant3.def
 	test -h $(GEN_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(GEN_DIR)/geant3.def 
 $(OBJ_DIR)/%.o:%.g $(GEN_DIR)/geant3.def
 #	test -h $(GEN_DIR)/geant3.def || ln -s $(STAR)/asps/agi/gst/geant3.def  $(GEN_DIR)/geant3.def
-	cp $(FIRST_DEP) $(GEN_DIR); cd $(GEN_DIR); geant3 $(FIRST_DEP) -o  $(GEN_DIR)/$(STEM).F
+	cp $(FIRST_DEP) $(GEN_DIR); cd $(GEN_DIR); $(GEANT3) $(FIRST_DEP) -o  $(GEN_DIR)/$(STEM).F
 	$(FC)  $(CPPFLAGS) $(FFLAGS) -c $(GEN_DIR)/$(STEM).F  -o  $(ALL_TAGS)
 $(OBJ_DIR)/%.o: %.F
 	$(FC)  $(CPPFLAGS) $(FFLAGS) $(F_EXTENDED)   -c $(FIRST_DEP) -o $(OBJ_DIR)/$(STEM).o
