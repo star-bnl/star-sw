@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.cxx,v 1.22 2001/04/22 21:12:16 caines Exp $
+// $Id: St_stk_Maker.cxx,v 1.23 2001/06/27 20:40:13 jeromel Exp $
 // $Log: St_stk_Maker.cxx,v $
+// Revision 1.23  2001/06/27 20:40:13  jeromel
+// Commented obsolete include
+//
 // Revision 1.22  2001/04/22 21:12:16  caines
 // Removed Vertex finding code, moved to StSvtClusterMaker as own maker
 //
@@ -90,7 +93,7 @@
 #include "svt/St_stk_am_Module.h"
 #include "svt/St_stk_am_init_Module.h"
 #include "svt/St_sgr_am_Module.h"
-#include "svt/St_spr_svt_Module.h"
+// #include "svt/St_spr_svt_Module.h"
 #include "tables/St_dst_vertex_Table.h"
 #include "TH1.h"
 #include "TH2.h"
