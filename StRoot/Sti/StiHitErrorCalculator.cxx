@@ -1,5 +1,5 @@
 /*!
- * $Id: StiHitErrorCalculator.cxx,v 2.9 2003/06/26 20:22:18 andrewar Exp $  
+ * $Id: StiHitErrorCalculator.cxx,v 2.10 2003/07/07 17:22:53 pruneau Exp $  
  *
  * Author: A. Rose, WSU, Jan 2002
  *
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StiHitErrorCalculator.cxx,v $
+ * Revision 2.10  2003/07/07 17:22:53  pruneau
+ * Commented out a cout message to flag occurrences of large errors.
+ *
  * Revision 2.9  2003/06/26 20:22:18  andrewar
  * Fixed error in drift calc.
  *
@@ -85,14 +88,17 @@ void StiDefaultHitErrorCalculator::calculateError(StiKalmanTrackNode * node) con
   double tanDip=node->getTanL();
   double cosDipInv2=1+tanDip*tanDip;
   double edip=coeff[3]+coeff[4]*dz*cosDipInv2+coeff[5]*tanDip*tanDip;
-  if (ecross>50) ecross = 50.; 
-  if (edip>50) edip = 50.; 
-  double scaling;
-  if (node->_x>120)
-    scaling = StiKalmanTrackNode::pars->getOuterScaling();
-  else
-    scaling = StiKalmanTrackNode::pars->getInnerScaling();
-  node->eyy = ecross*scaling*scaling; // in cm^2
-  node->ezz = edip*scaling*scaling;
+  if (ecross>50) 
+    {
+      //cout << "StiDefaultHitErrorCalculator::calculateError(...) -I- Set ecross to max==50"<<endl;
+      ecross = 50.; 
+    }
+  if (edip>50) 
+    {
+      //cout << "StiDefaultHitErrorCalculator::calculateError(...) -I- Set ecross to max==50"<<endl;
+      edip = 50.; 
+    }
+  node->eyy = ecross;
+  node->ezz = edip;
 }
 
