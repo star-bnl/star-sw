@@ -80,7 +80,7 @@ void MiniChain::run(int first,
 	  _toolkit->setGuiEnabled(true);
 	  setupGui();
 	}
-      setupOutput(filePrefix,fileList[0]);
+      setupOutput(filePrefix,outfile);
       eventLoop(first, first+nEvents);
     }
   catch (runtime_error & rte)
@@ -200,14 +200,16 @@ void MiniChain::setupOutput(const char * filePrefix,
   //Now clip prefix and 'event.root' from filename
   TString templateFile = fileTemplate;
   int fileBeginIndex = templateFile.Index(filePrefix,0);
-  templateFile.Remove(0,fileBeginIndex);
+
+  if(fileBeginIndex==-1) templateFile.Append(".event.root");
+  //templateFile.Remove(0,fileBeginIndex);
 
   
   templateFile.ReplaceAll("geant","event"); //replace "geant" if it's there
   TString eventName = templateFile.ReplaceAll(".event.root","_sti.event.root");
   //.event.root now replaced with _sti.event.root
   
-  TString dstName = templateFile.ReplaceAll(".event.root",".mudst.root");
+  TString dstName = templateFile.ReplaceAll(".event.root",".MuDst.root");
   //_sti.event.root now replaced with _sti.mudst.root
   
   TString miniMcName = templateFile.ReplaceAll(".mudst.root",".minimc.root");
