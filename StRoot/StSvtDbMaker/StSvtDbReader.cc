@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtDbReader.cc,v 1.1 2001/10/29 18:53:13 munhoz Exp $
+ * $Id: StSvtDbReader.cc,v 1.2 2001/11/07 16:49:48 caines Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtDbReader.cc,v $
+ * Revision 1.2  2001/11/07 16:49:48  caines
+ * Add _st s added by stic for our comfort and convenience
+ *
  * Revision 1.1  2001/10/29 18:53:13  munhoz
  * starting SVT Data base
  *
@@ -17,7 +20,6 @@
  **************************************************************************/
 
 #include "StSvtDbReader.hh"
-
 #include "StMessMgr.h"
 
 #include "StSvtClassLibrary/StSvtConfig.hh"
@@ -31,11 +33,11 @@
 #include "StDbLib/StDbConfigNode.hh"                   //
 #include "StDbLib/StDbTable.h"                         //
 
-#include "../StDb/include/Calibrations/svtPedestals.h"
-#include "../StDb/include/Calibrations/svtDriftVelocity.h"
-#include "../StDb/include/Geometry/svtConfiguration.h"
-#include "../StDb/include/Geometry/svtWafersPosition.h"
-#include "../StDb/include/Geometry/svtDimensions.h"
+#include "svtPedestals.h"
+#include "svtDriftVelocity.h"
+#include "svtConfiguration.h"
+#include "svtWafersPosition.h"
+#include "svtDimensions.h"
 
 #ifdef __ROOT__
 ClassImp(StSvtDbReader)
@@ -116,8 +118,8 @@ StSvtConfig* StSvtDbReader::getConfiguration()
   //
   mDbMgr->fetchDbTable(svtConfigTable);
 
-  svtConfiguration *config  = (svtConfiguration*) svtConfigTable->GetTable() ;
-
+  svtConfiguration_st *config  = (svtConfiguration_st*) svtConfigTable->GetTable() ;
+  
   cout << config->numberOfBarrels << endl;
   cout << config->numberOfLadders << endl;
   cout << config->numberOfWafers << endl;
@@ -130,11 +132,11 @@ StSvtConfig* StSvtDbReader::getConfiguration()
   cout << config->numberOfWafersPerLadder[1] << endl;
   cout << config->numberOfWafersPerLadder[2] << endl;
   cout << config->numberOfHybridsPerWafer << endl;
-
+  
   mSvtConfig = new StSvtConfig();
-
+  
   mSvtConfig->setNumberOfBarrels(config->numberOfBarrels);
-
+  
   for (int i=0; i<config->numberOfBarrels; i++) {
     mSvtConfig->setNumberOfLadders(i+1,config->numberOfLaddersPerBarrel[i]);
     mSvtConfig->setNumberOfWafers(i+1, config->numberOfWafersPerLadder[i]);
@@ -194,7 +196,7 @@ StSvtHybridCollection* StSvtDbReader::getDriftVelocity()
   svtDriftVelocTable->setElementID(indexHybrid,numberOfHybrids); // set element ID to hybridIndex
   mDbMgr->fetchDbTable(svtDriftVelocTable);
 
-  svtDriftVelocity *driftVeloc  = (svtDriftVelocity*)svtDriftVelocTable -> GetTable() ;
+  svtDriftVelocity_st *driftVeloc  = (svtDriftVelocity_st*)svtDriftVelocTable -> GetTable() ;
 
   // Create all drift velocity objects
   StSvtHybridCollection* svtDriftVeloc = new StSvtHybridCollection(mSvtConfig);
@@ -273,7 +275,7 @@ StSvtHybridCollection* StSvtDbReader::getPedestals()
   mDbMgr->fetchDbTable(svtPedTable);
   mDbMgr->setVerbose(false);
 
-  svtPedestals *pedestals  = (svtPedestals*)svtPedTable->GetTable() ;
+  svtPedestals_st *pedestals  = (svtPedestals_st*)svtPedTable->GetTable() ;
 
   // Create all pedestal objects
   StSvtHybridCollection* svtPed = new StSvtHybridCollection(mSvtConfig);
@@ -356,7 +358,7 @@ StSvtGeometry* StSvtDbReader::getGeometry()
   mDbMgr->fetchDbTable(svtGeomTable);
   mDbMgr->setVerbose(false);
 
-  svtWafersPosition *position  = (svtWafersPosition*)svtGeomTable->GetTable() ;
+  svtWafersPosition_st *position  = (svtWafersPosition_st*)svtGeomTable->GetTable() ;
 
   svtGeomTable = mConfigGeom -> addDbTable("svtDimensions");
   if (svtGeomTable == 0 )
@@ -373,7 +375,7 @@ StSvtGeometry* StSvtDbReader::getGeometry()
   mDbMgr->fetchDbTable(svtGeomTable);
   mDbMgr->setVerbose(false);
 
-  svtDimensions *dimension  = (svtDimensions*)svtGeomTable->GetTable() ;
+  svtDimensions_st *dimension  = (svtDimensions_st*)svtGeomTable->GetTable() ;
 
   // Create all geometry objects
   StSvtGeometry* svtGeom = new StSvtGeometry(mSvtConfig);
