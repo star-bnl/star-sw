@@ -16,7 +16,9 @@ TableIter::next(){
 StDbTableI* ret = 0;
 if(!done()) { 
  ret = *itr;
- cout << "Table [" << (*itr)->getTableName()<<"] is available" << endl;
+ char* tableName = (*itr)->getTableName();
+ cout << "Table [" << tableName <<"] is available" << endl;
+ delete [] tableName;
  itr++;
 }
 return ret;

@@ -33,13 +33,13 @@ StDbXmlWriter::streamTail(){
 
 void
 StDbXmlWriter::streamTableName(const char* name){
-  *os << "<dbTable>"<<name << endl;
+  *os << "<StDbTable>"<<name << endl;
 }
 //----------------------------------------------------
 
 void
 StDbXmlWriter::streamEndTableName(){
-  *os << "</dbTable>"<< endl;
+  *os << "</StDbTable>"<< endl;
 }
 
 //----------------------------------------------------

@@ -154,6 +154,80 @@ return table;
 
 ////////////////////////////////////////////////////////////////
 
+void
+StDbConfigNode::removeTable(StDbTable* table){
+ 
+  if(!table)return;
+
+    char* tableName=table->getTableName();
+    char* version = table->getVersion();
+    int elementID = table->getElementID();
+
+  TableList::iterator itr;
+  StDbTable* myTable=0;
+  char* mtableName=0;
+  char* mversion=0;
+  int meID;
+
+  do {
+    for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
+        myTable=*itr;
+        if(myTable){
+          mtableName=myTable->getTableName();
+          mversion=myTable->getVersion();
+          meID=myTable->getElementID();
+          if(strcmp(tableName,mtableName)==0 &&
+           strcmp(version,mversion)==0 && elementID==meID){
+            mTables.erase(itr);
+            break;
+          } else { delete [] mtableName; delete [] mversion;}
+        }
+        myTable=0;
+    }
+  } while (mTables.begin() != mTables.end());
+
+if(mtableName)delete [] mtableName;
+if(mversion)delete [] mversion;
+delete [] tableName; delete [] version;
+
+}
+
+
+////////////////////////////////////////////////////////////////
+StDbTable*
+StDbConfigNode::findTable(const char* tableName, const char* version, int elementID){
+
+  TableList::iterator itr;
+  StDbTable* table=0;
+  char* mtableName=0;
+  char* mversion=0;
+  int meID;
+
+  do {
+    for(itr = mTables.begin(); itr!=mTables.end(); ++itr){
+        table=*itr;
+        if(table){
+          mtableName=table->getTableName();
+          mversion=table->getVersion();
+          meID=table->getElementID();
+          if(strcmp(tableName,mtableName)==0 &&
+           strcmp(version,mversion)==0 && elementID==meID){
+            break;
+          } else { delete [] mtableName; delete [] mversion;}
+        }
+        table=0;
+    }
+  } while (mTables.begin() != mTables.end());
+
+if(mtableName)delete [] mtableName;
+if(mversion)delete [] mversion;
+
+return table;
+}
+
+
+////////////////////////////////////////////////////////////////
+
 TableIter*
 StDbConfigNode::getTableIter(){
 
