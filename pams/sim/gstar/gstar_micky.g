@@ -1,17 +1,12 @@
 **********************************************************************
-module  agukine is the pseudo physics event generator
+module  micky is the pseudo physics event generator
 author  Pavel Nevski
 Created August,14 1997
 **********************************************************************
 +CDE,GCONST,GCUNIT,GCFLAG.
+    Integer   Iprin,i
 *
     structure MIKY { version, np, code(10), mult(10), slope(10), dy(10) }
-    Integer   LENOCC,Ip,Ivert,I,Ipart,Mult,Ier,Nu,ItrTyp,Itr,Iprin
-    Real      RNDM,GAMMA2,Zero(4)/0,0,0,0/,UB(100),PLAB(3),
-              Amass,Charge,Tlife,a,b,pt,y,phi,dummy
-    Character Cname*20
-*
-    gamma2(dummy)=-alog(Rndm(1)*Rndm(2))
 *
     Begin
     If (first) then
@@ -27,8 +22,30 @@ Created August,14 1997
     endif
 *
     Use   MIKY
+    Check Iprin>1
+    <w>;
+    (' === micky-mouse events will be generated with folling parameters ==='/,
+     5x,' (a negative multiplicity means no fluctuations) '/,
+     5x,' geant_code   multiplicity   pt_slope(c/GeV)   rapidity_width ')
+    do i=1,miky_np
+       <w> miky_code(i),miky_mult(i),miky_slope(i),miky_dy(i)
+           (F15.0,3F15.3)
+    enddo 
+    end
 *
+*
+    subroutine agukine
++CDE,GCONST,GCUNIT,GCFLAG.
+    structure MIKY { version, np, code(10), mult(10), slope(10), dy(10) }
+    Integer   LENOCC,Ip,Ivert,I,Ipart,Mult,Ier,Nu,ItrTyp,Itr,Iprin
+    Real      RNDM,GAMMA2,Zero(4)/0,0,0,0/,UB(100),PLAB(3),
+              Amass,Charge,Tlife,a,b,pt,y,phi,dummy
+    Character Cname*20
+    gamma2(dummy)=-alog(Rndm(1)*Rndm(2))
+*
+    Iprin=ISLFLAG('MICK','PRIN')
     prin1; (' *** generating an event with micky-mouse generator ***')
+    
     Call AgSVERT(Zero,0,0,Ub,0,Ivert)
     do Ip=1,nint(miky_NP) 
        Ipart=miky_code(Ip)
@@ -51,3 +68,9 @@ Created August,14 1997
     enddo
 * 
 END
+*
+*
+subroutine gstar_micky
+    print *,' *** GSTAR micky-mouse event generator activated ***'
+    call micky
+end
