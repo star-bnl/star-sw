@@ -13,7 +13,7 @@
       Integer          innout,sector,sub_sector,volume_id,i,n/0/
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
       Integer          endcap,zslice,innour,lnumber,wafer,phi_30d
-      Integer          section,tpgv,tpss,tpad,sector,isdet,ladder
+      Integer          section,tpgv,tpss,tpad,isdet,ladder
 *
 *    this is an internal agfhit/digi information - need a better access.
       integer          idigi
