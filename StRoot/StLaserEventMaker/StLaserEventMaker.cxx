@@ -1,6 +1,6 @@
-// $Id: StLaserEventMaker.cxx,v 1.16 2001/12/18 20:33:35 pfachini Exp $
+// $Id: StLaserEventMaker.cxx,v 1.17 2001/12/18 21:50:37 pfachini Exp $
 // $Log: StLaserEventMaker.cxx,v $
-// Revision 1.16  2001/12/18 20:33:35  pfachini
+// Revision 1.17  2001/12/18 21:50:37  pfachini
 // Since the laserhist.*.*.root file cannot be written to the database directory (it makes the whole thing crash), I am adding the date and time stamp to Bill's tree
 //
 // Revision 1.14  2001/12/14 17:30:16  pfachini
@@ -684,7 +684,7 @@ Int_t StLaserEventMaker::Finish() {
 //_____________________________________________________________________________
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.16 2001/12/18 20:33:35 pfachini Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.17 2001/12/18 21:50:37 pfachini Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
