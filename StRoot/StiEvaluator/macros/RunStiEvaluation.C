@@ -6,7 +6,11 @@
 //Compares momentum components for Pi- (GEANTID=9
 //
 
-#include <iostream.h> //So that Mike can run on windows...
+
+void SetResiduals()
+{
+}
+
 
 void RunStiEvaluation(const char* evalFName="Evaluation.root",
 		      const char* histFName="EvalHists.root",
@@ -114,17 +118,45 @@ void RunStiEvaluation(const char* evalFName="Evaluation.root",
   canvas5 = new TCanvas("canvas5", "Track Residuals", 130,80,830,720);
   canvas5->Divide(2,2);
   canvas5->cd(1);
-  hresx=new TH1F("hresx","StiTrack Residual in X",256,-10,10);
-  TestTree->Draw("stiTrackResX >> hresx","","goff");
+  hresx=new TH1F("hresx","StiTrack Residual in X",256,-.2,.2);
+  TestTree->Draw("nodeLocalX-hitLocalX >> hresx","abs(nodeLocalX-hitLocalX)<.2 && nodeHasHit==1","goff");
   hresx->Draw();
-  hresy=new TH1F("hresy","StiTrack Residual in Y",256,-10,10);
-  TestTree->Draw("stiTrackResY >> hresy","","goff");
+
+  canvas5->cd(2);
+  hresy=new TH1F("hresy","StiTrack Residual in Y",256,-.2,.2);
+  TestTree->Draw("nodeLocalY-hitLocalY >> hresy","abs(nodeLocalY-hitLocalY)<.2 && nodeHasHit==1","goff");
   hresy->Draw();
-  hresz=new TH1F("hresx","StiTrack Residual in Z",256,-10,10);
-  TestTree->Draw("stiTrackResZ >> hresZ","","goff");
+
+  canvas5->cd(3);
+  hresz=new TH1F("hresz","StiTrack Residual in Z",256,-.2,.2);
+  TestTree->Draw("nodeLocalZ-hitLocalZ >> hresz","abs(nodeLocalZ-hitLocalZ)<.2 && nodeHasHit==1","goff");
   hresz->Draw();
 
+  canvas5->cd(4);
+  hresr=new TH1F("hresr","StiTrack Residual",256,-.2,.2);
+  TestTree->Draw("sqrt((nodeLocalX-hitLocalX)*(nodeLocalX-hitLocalX))>> hresr","nodeHasHit==1","goff");
+  hresr->Draw();
+  
+  canvas6 = new TCanvas("canvas6","Hit and Node Characteristics", 135,85,835,725);
+  //canvas6->Divide(1,2);
+  //canvas6->cd(1);
+  missedHitRZ= new TH2F("missedHitRZ","Position of Nodes without Associated Hit", 256, -100,100,256,0,200);
+  TestTree->Draw("sqrt(nodeLocalX*nodeLocalX+nodeLocalY*nodeLocalY):nodeLocalZ >> missedHitRZ","nodeHasHit==0","goff");
+  missedHitRZ->SetMarkerColor(4);
+  missedHitRZ->SetMarkerStyle(20);
+  missedHitRZ->SetMarkerSize(.5);
+  missedHitRZ->Draw("p");
+  gotHitRZ = new TH2F("gotHitRZ","Position of Nodes Associated with a Hit", 256, -100,100,256,0,200);
+  TestTree->Draw("sqrt(nodeLocalX*nodeLocalX+nodeLocalY*nodeLocalY):nodeLocalZ >> gotHitRZ","nodeHasHit==1","goff");
+  gotHitRZ->SetMarkerColor(3);
+  gotHitRZ->SetMarkerStyle(19);
+  gotHitRZ->SetMarkerSize(.5);
+  gotHitRZ->Draw("Same,p");
 
+  //missedHitXY = new TH2F("missedHitXY","Missed Node Position", 256, -100,100,256,-100,100);
+  //TestTree->Draw("nodeLocalX:nodeLocalY >> missedHitXY","nodeHasHit==0","goff");
+  //canvas6->cd(2);
+  //missedHitXY->Draw();
   //f->Close();
 }
 
