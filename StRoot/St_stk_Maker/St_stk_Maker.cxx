@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.cxx,v 1.23 2001/06/27 20:40:13 jeromel Exp $
+// $Id: St_stk_Maker.cxx,v 1.24 2001/06/28 14:06:17 caines Exp $
 // $Log: St_stk_Maker.cxx,v $
+// Revision 1.24  2001/06/28 14:06:17  caines
+// Remove references to dedx module spr now its own maker
+//
 // Revision 1.23  2001/06/27 20:40:13  jeromel
 // Commented obsolete include
 //
@@ -93,7 +96,6 @@
 #include "svt/St_stk_am_Module.h"
 #include "svt/St_stk_am_init_Module.h"
 #include "svt/St_sgr_am_Module.h"
-// #include "svt/St_spr_svt_Module.h"
 #include "tables/St_dst_vertex_Table.h"
 #include "TH1.h"
 #include "TH2.h"
@@ -111,14 +113,12 @@ ClassImp(St_stk_Maker)
     m_stk_filler(0),
     m_config(0),
     m_geom(0),
-    m_sprpar(0),
     m_q_pt(0),
     m_frac_used(0),
     m_x0y0(0),
     m_z0(0),
     m_azimuth(0),
-    m_tan_dip(0),
-    m_dedx(0) 
+    m_tan_dip(0)
 {
   m_mode = 2;
   m_method = 2;
@@ -154,7 +154,6 @@ Int_t St_stk_Maker::Init(){
   m_config         = (St_svg_config *)     gime("svgpars/config");
   m_geom           = (St_svg_geom *)       gime("svgpars/geom");
   m_pix_info       = (St_sgr_pixmap *)     gime("sgrpars/pix_info");
-  m_sprpar         = (St_spr_sprpar *)     gime("sprpars/sprpar");
   m_stk_stkpar     = (St_stk_stkpar *)     gime("stkpars/stk_stkpar");
   m_stk_filler     = (St_stk_filler *)     gime("stkpars/stk_filler");
   m_stk_stkpar     = new St_stk_stkpar("stk_stkpar",1);
@@ -197,7 +196,7 @@ Int_t St_stk_Maker::Init(){
    m_z0 = new TH1F("StkZ0"    ,"Z0 of svt tracks"  ,100,-25.,25.);
   m_azimuth   = new TH1F("StkAzimuth"     ,"Azimuthal distribution of svt tracks" ,60,0.,360.0);
   m_tan_dip   = new TH1F("StkTanDip"      ,"Distribution of the svt dip angle"    ,100,-1.5,1.5);
-  m_dedx      = new TH2F("StkDedx"        ,"Svt dE/dx distribution"               ,100,0.,2.0,100,0.,0.01);
+
 
   return StMaker::Init();
 }
@@ -296,11 +295,7 @@ Int_t St_stk_Maker::Make()
   if (Res_stk !=  kSTAFCV_OK) {cout << " Problem on return from STK_AM" << endl;}
 
 
-  Int_t Res_spr_svt = spr_svt(m_sprpar, stk_kine,
-			      m_geom, scs_spt,
-			      groups, stk_track);
-  if (Res_spr_svt != kSTAFCV_OK) {cout << "Problem on return from SPR_SVT"<< endl;}
-  
+ 
   MakeHistograms(); //tracking histograms
 
   return kStOK;
@@ -340,12 +335,6 @@ void St_stk_Maker::MakeHistograms() {
       m_x0y0->Fill((float)(r->r0*cos(r->phi0*C_RAD_PER_DEG)),(float)(r->r0*sin(r->phi0*C_RAD_PER_DEG)));
       m_z0->Fill(r->z0); 
       
-      // Fill dedx
-      Float_t pt = 1./r->invpt;
-      Float_t pz = r->tanl/r->invpt;
-      Float_t p = sqrt(pt*pt+pz*pz);
-      
-      m_dedx->Fill(p,r->dedx[0]);
     }
   }
 
