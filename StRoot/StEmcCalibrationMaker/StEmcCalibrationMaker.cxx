@@ -1169,11 +1169,11 @@ void StEmcCalibrationMaker::SetCalibStatus()
 {
   emcCalibration_st* Calib_st=CalibTable->GetTable();  
 
-  //for(Int_t i=1;i<=nbins;i++) 
-  //  if (i>=1861 && i<=2340) Calib_st[i-1].Status=1; // initial 2001 configuration
-  //  else Calib_st[i-1].Status=0;
+  for(Int_t i=1;i<=nbins;i++) 
+    if (i>=1861 && i<=2340) Calib_st[i-1].Status=1; // initial 2001 configuration
+    else Calib_st[i-1].Status=0;
     
-  for(Int_t i=1;i<=nbins;i++) Calib_st[i-1].Status=1; // FULL EMC
+  //for(Int_t i=1;i<=nbins;i++) Calib_st[i-1].Status=1; // FULL EMC
 }
 //_____________________________________________________________________________
 void StEmcCalibrationMaker::ClearEqualTable()
