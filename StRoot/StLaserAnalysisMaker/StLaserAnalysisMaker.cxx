@@ -1,5 +1,8 @@
-// $Id: StLaserAnalysisMaker.cxx,v 1.7 2004/01/14 22:46:01 fisyak Exp $
+// $Id: StLaserAnalysisMaker.cxx,v 1.8 2005/02/07 21:40:00 fisyak Exp $
 // $Log: StLaserAnalysisMaker.cxx,v $
+// Revision 1.8  2005/02/07 21:40:00  fisyak
+// rename antique TGeant3 to TGiant3
+//
 // Revision 1.7  2004/01/14 22:46:01  fisyak
 // clean up
 //
@@ -36,7 +39,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TMath.h"
-#include "TGeant3.h"
+#include "TGiant3.h"
 #include "StLaserAnalysisMaker.h"
 #include "StBFChain.h"
 #include "St_DataSetIter.h"
@@ -49,7 +52,7 @@
 #include "tables/St_tpg_detector_Table.h"
 #define g2t_volume_id F77_NAME(g2t_volume_id,G2T_VOLUME_ID)
 extern "C" {Int_t g2t_volume_id(char*, int*, int);}
-static TGeant3 *geant3 = 0;
+static TGiant3 *geant3 = 0;
 ClassImp(StLaserAnalysisMaker)
   
 LaserTrack_st LaserTracks[] = {
@@ -93,7 +96,7 @@ Int_t StLaserAnalysisMaker::Init(){
   // Create tables
   // Create Histograms    
   Int_t i,j;
-  geant3 = TGeant3::Geant3();
+  geant3 = TGiant3::Geant3();
   if (geant3) {
     cquest = (Quest_t  *) geant3->Quest();
     clink  = (Gclink_t *) geant3->Gclink();
