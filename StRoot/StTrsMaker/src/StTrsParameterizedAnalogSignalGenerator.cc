@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.7 1999/11/09 19:31:33 calderon Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.8 1999/11/10 15:46:25 calderon Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.8  1999/11/10 15:46:25  calderon
+ * Made changes to reduce timing, including:
+ * Made coordinate transfrom a data member of StTrsAnalogSignalGenerator
+ * Added upper-lower bound instead of symmetric cut.
+ * Revived checking if signal is above threshold.
+ *
  * Revision 1.7  1999/11/09 19:31:33  calderon
  * Modified loop over ContinuosAnalogTimeSequence to make it
  * more efficient.
@@ -60,7 +66,7 @@
 
 static const double sigmaL = .037*centimeter/sqrt(centimeter);
 static const double sigmaT = .0633*centimeter/sqrt(centimeter);
-
+static const double sqrtTwoPi = sqrt(twopi);
 StTrsAnalogSignalGenerator* StTrsParameterizedAnalogSignalGenerator::mInstance = 0; 
 // static data member
 
@@ -163,7 +169,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
 {
     //
     // This should probably be made a data member at some point!
-    StTpcCoordinateTransform transformer(mGeomDb, mSCDb, mElectronicsDb);
+//     StTpcCoordinateTransform transformer(mGeomDb, mSCDb, mElectronicsDb);
     PR(wireHistogram->minWire());
     PR(wireHistogram->maxWire());
     if(wireHistogram->minWire()<0) {
@@ -394,55 +400,57 @@ double StTrsParameterizedAnalogSignalGenerator::realShaperResponse(double tbin, 
     // time bin, and multiply it by the width of the bin!
     // charge = F(t) dt
     double value=0.0;
-
+    
     // Use mDriftVelocity...
     //double driftVelocity = mSCDb->driftVelocity();
-
+    
     // use mTau
     //double tau = mSigma1;
-
+    
     // Oh darn! Why do we need gas parmeters here...it is because
     // we convolute the response of the electronics with the diffusion
     // DON'T DO THAT!!!!
     //double sigmaL = .05*centimeter/sqrt(centimeter);
     // double t = mTimeBinWidth*(tbin+.5);//started from the center of time bin
-    double t = mTimeBinWidth*(tbin);//  started from the edge of time bin ,HL
+    //double t = mTimeBinWidth*(tbin);//  started from the edge of time bin ,HL
+    double t = tbin; //passed it directly.
     // Remember centroid is at 2tau+10ns
     // should be calculated via the extremem...but this
     // can only be found numerically...There is a routine
     // that will do this, but I won't incorporate it yet.
     // For now use the approximation:
     //  double tzero = sig.time() - 2.*mTau+10.*nanosecond;
-     double tzero = sig.time() ;// Hui Long,8/26/99
+    double tzero = sig.time() ;// Hui Long,8/26/99
     
     //double K = sigmaL*sqrt(sig.time())/(tau*sqrt(driftVelocity));
-     double K = sigmaL/mTau*sqrt((tzero- mTimeShiftOfSignalCentroid)/mDriftVelocity);//retrieve the real drift length,HL,8/31/99
+    double K = sigmaL/mTau*sqrt((tzero- mTimeShiftOfSignalCentroid)/mDriftVelocity);//retrieve the real drift length,HL,8/31/99
     //UNITS:   sigmaL:  cm/sqrt(cm)
     //         mTau:    second
     //         tzero:  second
     //          mTimeBinwidth : second
     //         <mDriftVelocity  :cm/second
-    //double lambda =  (sig.time() - t)/(K*tau) + K;
-    double lambda =  (tzero - t)/(K*mTau) + K;
-   
-    // Corrected From SN197
-    value = 1./(2.*mTau)*sqr(K)*exp(K*(lambda-.5*K))*
-	( .5*(1+sqr(lambda))*(1-erf_fast(lambda/M_SQRT2)) -
 
-	  lambda/(sqrt(2*M_PI))*exp(-sqr(lambda)/2));
-   
-    value=value* mTimeBinWidth;
-   
+    double lambda =  (tzero - t)/(K*mTau) + K;
+    double lambdasqr = lambda*lambda;
+    // Corrected From SN197
+    value = .5/(mTau)*sqr(K)*exp(K*(lambda-.5*K))*
+	( .5*(1+lambdasqr)*(1-erf_fast(lambda/M_SQRT2)) -
+	  
+	  lambda/sqrtTwoPi*exp(-.5*lambdasqr));
+    
+    value=value*mTimeBinWidth;
+    
     mFractionSampled=1.0;//HL,8/31/99
- 
+    
     value *= mFractionSampled*mGain*sig.amplitude();
-  
-   
+    
+
     // Amount of Charge in the bin
-  
-   
-    //  cout<<value<<endl;
- 
+//     PR(sig.amplitude());
+//     PR(t/nanosecond);
+//     PR(tzero/nanosecond);
+//     PR((tzero-t)/nanosecond);
+//     PR(value);
     //    cout << "gain/volt " << (s.amplitude()*mGain/(.001*volt)) << " mV" << endl;
     return value;
 
@@ -478,12 +486,22 @@ void StTrsParameterizedAnalogSignalGenerator::sampleAnalogSignal()
 #endif
     //double freq = mElectronicsDb->samplingFrequency();
     //PR(freq);
-    double timeBinCut = 10.;
+    double timeBinUpperLimit = 6.;
+    double timeBinLowerLimit = 3.;
+
+//     double sortTime = 0;
+//     time_t sortBegin;
+//     time_t sortEnd;
+//     double timeBinTime = 0;
+//     time_t timeBinBegin;
+//     time_t timeBinEnd;
+//     double seqIterTime = 0;
+//     time_t seqIterBegin;
+//     time_t seqIterEnd;
+//     double samplerTime = 0;
+//     time_t samplerBegin;
+//     time_t samplerEnd;
     
-    double sortTime = 0;
-    double timeBinTime = 0;
-    double seqIterTime = 0;
-    double noiseTime = 0;
     for(int irow=1; irow<=mSector->numberOfRows(); irow++) {
 	for(int ipad=1; ipad<=mSector->numberOfPadsInRow(irow); ipad++) {
 	    continuousAnalogTimeSequence = mSector->timeBinsOfRowAndPad(irow,ipad);
@@ -493,10 +511,10 @@ void StTrsParameterizedAnalogSignalGenerator::sampleAnalogSignal()
 	    // Make sure it is not empty
            
 	    if(!continuousAnalogTimeSequence.size()) continue; 
-	    time_t sortBegin = time(0);
+// 	    sortBegin = time(0);
 	    sort(continuousAnalogTimeSequence.begin(),continuousAnalogTimeSequence.end(), StTrsAnalogSignalComparator());
-	    time_t sortEnd = time(0);
-	    sortTime += difftime(sortEnd, sortBegin);
+// 	    sortEnd = time(0);
+// 	    sortTime += difftime(sortEnd, sortBegin);
 	    double maxTime = continuousAnalogTimeSequence.back().time();
 
 // 	    PR(maxTime/nanosecond);
@@ -522,93 +540,88 @@ void StTrsParameterizedAnalogSignalGenerator::sampleAnalogSignal()
 	    // Loop over all the time bins:
 
 	    double timeBinT = 0;
-	    time_t timeBinBegin = time(0);
+// 	    timeBinBegin = time(0);
 	    lowerBound = continuousAnalogTimeSequence.begin();
 	    for(int itbin=0; itbin<mGeomDb->numberOfTimeBuckets(); itbin++) {
+		timeBinT = itbin*mTimeBinWidth;
+
 // 		int d;
 // 		cin >> d;
 // 		cout << itbin << ", ";
-// 		timeBinT = itbin*mTimeBinWidth;
 //  		PR(timeBinT/nanosecond);
-
-		int underSignal = 0;
+// 		PR(maxTime/nanosecond);
 		double pulseHeight = 0.0;
 		
-		if (timeBinT-maxTime < timeBinCut*mTimeBinWidth) {
-
-		    time_t seqIterBegin = time(0);
-
+		if (timeBinT-maxTime < timeBinUpperLimit*mTimeBinWidth &&
+		    lowerBound->time()-timeBinT < timeBinLowerLimit*mTimeBinWidth) {
+		    //Not gone beyond max time & 
+		    //reached at least the lowerBound time.
+// 		    seqIterBegin = time(0);
+		    
 		    for(mTimeSequenceIterator =lowerBound;
 			mTimeSequenceIterator!=continuousAnalogTimeSequence.end();
 			mTimeSequenceIterator++) {
+// 			PR(mTimeSequenceIterator->time()/nanosecond);
 
 			//
 			// The current time bin will be filled with
 			// charge from any signal that is within
-			// 10 time bins.  This should be a settable
+			// timeBinCut time bins.  This should be a settable
 			// parameter.
 			//
 			
-			if( mTimeSequenceIterator->time()-timeBinT> timeBinCut*mTimeBinWidth) break;
+			if( mTimeSequenceIterator->time()-timeBinT> timeBinUpperLimit*mTimeBinWidth) break;
 
-			if (timeBinT-mTimeSequenceIterator->time()> timeBinCut*mTimeBinWidth) {
-			    lowerBound = mTimeSequenceIterator;
+			if (timeBinT-mTimeSequenceIterator->time()> timeBinLowerLimit*mTimeBinWidth) {
+			    lowerBound++;
 			    continue;
 			}
-			
-// 		    if( timeBinT-mTimeSequenceIterator->time() < -3.*mTimeBinWidth ||
-// 		      timeBinT-mTimeSequenceIterator->time() >  6.*mTimeBinWidth)
-// 		      continue; 
-
-			underSignal = 1;
-
+// 			samplerBegin = time(0);
 			pulseHeight +=
-			    signalSampler(itbin, *mTimeSequenceIterator);
-			    
+ 			    signalSampler(timeBinT, *mTimeSequenceIterator);
+// 			samplerEnd = time(0);
+// 			samplerTime += difftime(samplerEnd,samplerBegin);
+
 // 			cout << " tb " << itbin << " "
 // 			     << mTimeSequenceIterator->time()/nanosecond << " "
 // 			     << (*mTimeSequenceIterator) << " "
 // 			     << "pulseHeight "<< pulseHeight << endl;
 		    }
-		    time_t seqIterEnd = time(0);
-		    seqIterTime += difftime(seqIterEnd, seqIterBegin);
+// 		    seqIterEnd = time(0);
+// 		    seqIterTime += difftime(seqIterEnd, seqIterBegin);
 		//
 		// DIAGNOSTIC
 		// Print out the pulse height in each time bin
-// 		if (pulseHeight)
+		    
+
 // 		    cout << itbin << " pulse Height: " << pulseHeight << '\t' << (pulseHeight/(.001*volt)) << " mV" << endl;
-		}
-		
+		} // if itbin is beyond maxTime
+
+		if (!mAddNoise && timeBinT-maxTime > timeBinUpperLimit*mTimeBinWidth) break;
 		//
 		// Add noise here 
 		//
-		// : Everywhere
-		time_t noiseBegin = time(0);
 		if(mAddNoise) {
 		    if (!mAddNoiseUnderSignalOnly)
-			pulseHeight += generateNoise(); // noise;
-		    if(mAddNoiseUnderSignalOnly && underSignal){
-			pulseHeight += generateNoise(); //noise;
-			underSignal = 0;
+			pulseHeight += generateNoise(); // noise everywhere;
+		    if(mAddNoiseUnderSignalOnly && pulseHeight){
+			pulseHeight += generateNoise(); //noise only under signal;
 		    }
 			
 		}
-		time_t noiseEnd = time(0);
-		noiseTime = difftime(noiseEnd, noiseBegin);
 
 		//Do not store analog Signal if it is not above a
 		// minimal threshold (should read value from database) rowN
-// 	        *********************************************************
-  		//if(pulseHeight < mSignalThreshold) continue;
-// 	        *********************************************************
+  		if(pulseHeight < mSignalThreshold) continue;
 
 		mElectronicSignal.setTime(itbin);
 		mElectronicSignal.setAmplitude(pulseHeight);
 		mDiscreteAnalogTimeSequence.push_back(mElectronicSignal);
 
 	    } // loop over time bins
-	    time_t timeBinEnd = time(0);
-	    timeBinTime += difftime(timeBinEnd, timeBinBegin);
+// 	    timeBinEnd = time(0);
+// 	    timeBinTime += difftime(timeBinEnd, timeBinBegin);
+
 	    mSector->assignTimeBins(irow,ipad,mDiscreteAnalogTimeSequence);
 	    
 	} // loop over pads
@@ -616,9 +629,8 @@ void StTrsParameterizedAnalogSignalGenerator::sampleAnalogSignal()
     } // loop over rows
     
 //     cout << "Time to sort Analog Sequence: " << sortTime << " sec\n\n";
-//     cout << "Time to loop over Time bins : " << timeBinTime << " sec\n\n";
-//     cout << "\tSeq Iter T : " << seqIterTime << " sec\n\n";
-//     cout << "\tNoise Time : " << noiseTime << " sec\n\n";
-    
+//     cout << "Time to loop over Time bins : " << timeBinTime << " sec\n";
+//     cout << "\tSeq Iter T : " << seqIterTime << " sec\n";
+//     cout << "\t Sampler T : " << samplerTime << " sec\n";
 }
 

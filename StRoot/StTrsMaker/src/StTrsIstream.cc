@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsIstream.cc,v 1.5 1999/11/09 19:30:48 calderon Exp $
+ * $Id: StTrsIstream.cc,v 1.6 1999/11/10 15:46:25 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StTrsIstream.cc,v $
+ * Revision 1.6  1999/11/10 15:46:25  calderon
+ * Made changes to reduce timing, including:
+ * Made coordinate transfrom a data member of StTrsAnalogSignalGenerator
+ * Added upper-lower bound instead of symmetric cut.
+ * Revived checking if signal is above threshold.
+ *
  * Revision 1.5  1999/11/09 19:30:48  calderon
  * Added istream& >> string& definition explicitly
  * when using solaris-Root.
