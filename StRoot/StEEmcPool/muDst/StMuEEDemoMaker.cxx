@@ -1,6 +1,6 @@
 // *-- Author : Victor Perevoztchikov
 // 
-// $Id: StMuEEDemoMaker.cxx,v 1.5 2003/11/08 00:35:44 balewski Exp $
+// $Id: StMuEEDemoMaker.cxx,v 1.6 2004/02/03 22:59:47 jwebb Exp $
 
 #include "StMuEEDemoMaker.h"
 
@@ -135,8 +135,13 @@ Int_t StMuEEDemoMaker::Make(){
       // ... geometry
       int iuv=uv-'U';
       StructEEmcStrip *st=geomSmd->getStripPtr(istrip,iuv,isec);
-      StThreeVectorD end1 = st->end1;
-      StThreeVectorD end2 = st->end2;
+      // StEEmcSmdGeom changed, now stores TVector3 in StructEEmcStrip...
+      // besides, you really shouldn't be accessing these directly
+      // anyway.
+      //StThreeVectorD end1 = st->end1;
+      //StThreeVectorD end2 = st->end2;
+      StThreeVectorD end1 = geomSmd -> getstripEnd( *st, 0 );
+      StThreeVectorD end2 = geomSmd -> getstripEnd( *st, 1 );
       
       printf("   x1=%6.2f y1=%6.2f z1=%6.2f x2=%6.2f y2=%6.2f z2=%6.2f\n",
              end1.x(),end1.y(),end1.z(),end2.x(),end2.y(),end2.z());
@@ -183,6 +188,9 @@ Int_t StMuEEDemoMaker::Make(){
 
 
 // $Log: StMuEEDemoMaker.cxx,v $
+// Revision 1.6  2004/02/03 22:59:47  jwebb
+// *** empty log message ***
+//
 // Revision 1.5  2003/11/08 00:35:44  balewski
 // change order of arguments
 //
