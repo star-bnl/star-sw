@@ -10,7 +10,45 @@ ClassImp(StMiniMcEvent)
 
 //___________________
 
-StMiniMcEvent::StMiniMcEvent()
+StMiniMcEvent::StMiniMcEvent() :
+    mEventId(0),
+    mRunId(0),
+    mOriginMult(0),
+    mCentralMult(0),
+    mCentrality(0),
+    mNUncorrectedNegativePrimaries(0),
+    mNUncorrectedPrimaries(0),
+    mNFtpcWUncorrectedPrimaries(0),
+    mNFtpcEUncorrectedPrimaries(0),
+    mMcMult(0),
+    mNMcNch(0),      
+    mNMcFtpcWNch(0),
+    mNMcFtpcENch(0),
+    mNMcHminus(0),
+    mNMcGlobal(0),
+    mNMcGoodGlobal20(0),
+    mNRcGlobal(0),
+    mNRcGoodGlobal20(0),
+    mVertexX(999),
+    mVertexY(999),
+    mVertexZ(999),
+    mMcVertexX(999),
+    mMcVertexY(999),
+    mMcVertexZ(999),
+    mMagField(0),
+    mCenterOfMassEnergy(0),
+    mBackgroundRate(0),
+    mBeamMassNumberEast(0),
+    mBeamMassNumberWest(0),
+    mCtb(0),
+    mZdcE(0),
+    mZdcW(0),
+    mNMcTrack(0),
+    mNMatchedPair(0),
+    mNMergedPair(0),
+    mNSplitPair(0),
+    mNGhostPair(0),
+    mNContamPair(0)
 {
   cout << "###StMiniMcEvent::StMiniMcEvent()" << endl;
   //
@@ -43,8 +81,6 @@ StMiniMcEvent::StMiniMcEvent()
 
   mSFirst = 0; // flag so we dont create any more arrays;
 
-  mNMcTrack=mNMatchedPair=mNMergedPair=mNSplitPair=mNGhostPair=mNContamPair=0;
-
 }
 
 //__________________
@@ -74,7 +110,6 @@ StMiniMcEvent::addTrackPair(StMiniMcPair* pair,Category category)
   // downcast..
   //
   StContamPair* contamPair = 0;
- 
   switch(category){
 
   case MATCHED:
@@ -150,25 +185,10 @@ StMiniMcEvent::Clear(Option_t *option)
 
   mNMcTrack = mNMatchedPair = mNMergedPair 
     = mNSplitPair = mNGhostPair = mNContamPair = 0;
+  
 }
 
 //__________________
-
-void
-StMiniMcEvent::setCentrality(Int_t nTrack)
-{//               0   1   2   3   4   5   6   7  8 
-  Int_t cent[] = {20,100,180,270,360,460,560,660,870};
-  if (nTrack < cent[0])       { mCentrality = 0; }
-  else if (nTrack < cent[1])  { mCentrality = 1; }
-  else if (nTrack < cent[2])  { mCentrality = 2; }
-  else if (nTrack < cent[3])  { mCentrality = 3; }
-  else if (nTrack < cent[4])  { mCentrality = 4; }
-  else if (nTrack < cent[5])  { mCentrality = 5; }
-  else if (nTrack < cent[6])  { mCentrality = 6; }
-  else if (nTrack < cent[7])  { mCentrality = 7; }
-  else if (nTrack < cent[8])  { mCentrality = 8; }
-  else                        { mCentrality = 9; }  
-}
 
 
   
