@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StStrangeEvMuDst.hh,v 3.5 2002/04/30 16:02:48 genevb Exp $
+ * $Id: StStrangeEvMuDst.hh,v 3.6 2002/05/17 14:05:28 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 19-Aug-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StStrangeEvMuDst.hh,v $
+ * Revision 3.6  2002/05/17 14:05:28  genevb
+ * Added L3 unbiased trigger info
+ *
  * Revision 3.5  2002/04/30 16:02:48  genevb
  * Common muDst, improved MC code, better kinks, StrangeCuts now a branch
  *
@@ -50,6 +53,7 @@
 #ifndef StStrangeEvMuDst_hh
 #define StStrangeEvMuDst_hh
 #include "StStrangeMuDst.hh"
+#include "TMath.h"
 
 class StEvent;
 class StMcEvent;
@@ -69,6 +73,7 @@ public:
 
   Int_t   run() const;            // Run number
   Int_t   event() const;          // Event number
+  Bool_t  unbiasedTrigger() const;// Trigger bias
   UInt_t  l0TriggerWord() const;  // L0 trigger word
   Float_t primaryVertexX() const; // Primary Vertex Position coordinates
   Float_t primaryVertexY() const;
@@ -93,7 +98,7 @@ protected:
   Float_t mMagneticField;
   UInt_t  mL0TriggerWord;
 
-  ClassDef(StStrangeEvMuDst,7)
+  ClassDef(StStrangeEvMuDst,8)
 };
 
 inline         StStrangeEvMuDst::StStrangeEvMuDst(StEvent& event)
@@ -103,7 +108,9 @@ inline         StStrangeEvMuDst::StStrangeEvMuDst(StMcEvent& event)
 inline Int_t   StStrangeEvMuDst::run() const
                { return mRun; }
 inline Int_t   StStrangeEvMuDst::event() const
-               { return mEvent; }
+               { return TMath::Abs(mEvent); }
+inline Bool_t  StStrangeEvMuDst::unbiasedTrigger() const
+               { return (mEvent > 0 ? kTRUE : kFALSE); }
 inline UInt_t  StStrangeEvMuDst::l0TriggerWord() const
                { return mL0TriggerWord; }
 inline Float_t StStrangeEvMuDst::primaryVertexX() const 
