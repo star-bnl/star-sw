@@ -1,5 +1,8 @@
-//$Id: estimateVertexZ.cc,v 1.7 2000/08/24 00:56:18 wdeng Exp $
+//$Id: estimateVertexZ.cc,v 1.8 2000/08/24 19:59:08 wdeng Exp $
 //$Log: estimateVertexZ.cc,v $
+//Revision 1.8  2000/08/24 19:59:08  wdeng
+//Initialize both index variables to zero.
+//
 //Revision 1.7  2000/08/24 00:56:18  wdeng
 //Add protection.
 //
@@ -27,8 +30,8 @@ void estimateVertexZ(St_tcl_tphit *tphit, Float_t& vertexZ, Float_t& relativeHei
   }
   
   tphitPtr = tphitT;
-  Int_t indexTableI; // index for the inner hit
-  Int_t indexTableO; // index for the outer hit
+  Int_t indexTableI=0; // index for the inner hit
+  Int_t indexTableO=0; // index for the outer hit
   
   for(Int_t i=0; i<hitNumber; i++, tphitPtr++) {
     if( tphitPtr->row==114 ) { indexTableI=i; break; }
