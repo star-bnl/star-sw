@@ -1,4 +1,4 @@
-// $Id: EEsmdCal.cxx,v 1.11 2004/09/22 00:45:40 balewski Exp $
+// $Id: EEsmdCal.cxx,v 1.12 2004/10/08 14:34:34 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -52,7 +52,7 @@ EEsmdCal::EEsmdCal(){
   twMipRelEneLow=-3; twMipRelEneHigh=-4;
   offCenter=0.7;
   
-  maxStripAdc=150; // suppress large jump in ped or sticky bits
+  maxStripAdc=120; // suppress large jump in ped or sticky bits
 
   // chose which stat bits are fatal
   killStat=EEMCSTAT_ONLPED  | EEMCSTAT_HOTSTR ;
@@ -81,7 +81,6 @@ void EEsmdCal::init( ){
  
   initSmdHist('a',"inclusive ADC");
   initSmdHist('b',"ADC, tag: best MIP",kBlue);
-  initSmdEneHist('d',"Energy (K): best MIP",kMagenta);
   initSmdEneHist('e',"Energy (K)+(K+1)*tgh(eta): best MIP",kBlack);
 
   //.................... initialize MIP finding algo for SMD
@@ -170,6 +169,8 @@ void EEsmdCal::clear(){ // called for every event
     memset(smdAdc,0,sizeof(smdAdc));
     memset(smdEne,0,sizeof(smdEne));
 
+    memset(killT,true,sizeof(killT));// default is dead
+
     int i;
     for(i=0;i<MaxSmdPlains;i++) {
     smdHitPl[i].clear();
@@ -249,14 +250,13 @@ void EEsmdCal::calibAllwithMip(int iStrU, int iStrV){
   //................ auxuiliary variables 
   // logical conditions:
   // to recover few tiles mark all faild towers as with ADC>thres
-  bool thrP= tileThr[kP][iEtaX][iPhiX] || dbT[kP][iEtaX][iPhiX]->fail;
-  bool thrQ= tileThr[kQ][iEtaX][iPhiX] || dbT[kQ][iEtaX][iPhiX]->fail;
-  bool thrR= tileThr[kR][iEtaX][iPhiX] || dbT[kR][iEtaX][iPhiX]->fail;
-
+  bool thrP= tileThr[kP][iEtaX][iPhiX] || killT[kP][iEtaX][iPhiX];
+  bool thrQ= tileThr[kQ][iEtaX][iPhiX] || killT[kQ][iEtaX][iPhiX];
+  bool thrR= tileThr[kR][iEtaX][iPhiX] || killT[kR][iEtaX][iPhiX];
   // check MIP upper/lower limits
   float RelTwEne=tileEne[kT][iEtaX][iPhiX]/towerMipE[iEtaX];
   bool mipT=  RelTwEne>twMipRelEneLow &&  RelTwEne<twMipRelEneHigh;
-  mipT=  mipT ||  dbT[kT][iEtaX][iPhiX]->fail; // recover dead tower
+  mipT=  mipT || killT[kT][iEtaX][iPhiX]; // recover dead tower
  
   // ped corrected adc
   float adcT=tileAdc[kT][iEtaX][iPhiX];
@@ -320,7 +320,6 @@ float eneR=tileEne[kR][iEtaX][iPhiX]*1000; // MeV
 	e12+=ene; // sum pairs
 	// re-calibratiop  of strips
 	hSs['b'-'a'][iuv][istrip]->Fill(adc);
-	hSs['d'-'a'][iuv][istrip]->Fill(ene);
       }// end of loop over one plain
       eUV+=e12;
       // SMD energy for pairs

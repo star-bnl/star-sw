@@ -1,4 +1,4 @@
-// $Id: SmdGains.cxx,v 1.3 2004/09/22 00:45:52 balewski Exp $
+// $Id: SmdGains.cxx,v 1.4 2004/10/08 14:34:50 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -37,7 +37,7 @@ SmdGains::SmdGains(){
   adcMin=40;  adcMax=100; // SMD
    minSum=50;
   maxRelEr=0.4; // maximal relative error at any stage of calculations
-  minMipEne=0.3;// (MeV) lower/upper thres for Landau Ene fit
+  minMipEne=0.4;// (MeV) lower/upper thres for Landau Ene fit
   maxMipEne=4;
 }
 
@@ -55,8 +55,6 @@ void SmdGains::init(){
   hA[0]=new TH1F("sum"+plCore,plCore+" Integral from raw spectra; strip ID; total counts",290,0.5,290.5);
    hA[1]=new TH1F("Lm"+plCore,plCore+" Mean of Landau fit to average MIP ene (2strip); MPV (MeV)",30,.5,2);
   hA[2]=new TH1F("Lw"+plCore,plCore+" Width of Landau fit to average MIP ene (2strip); Width=sigma (MeV)",20,0,1);
-  hA[3]=new TH1F("fgc"+plCore,plCore+" Final Gain Correction",100,0.5,1.5);
-  hA[4]=new TH1F("fegc"+plCore,plCore+" Error of Final Gain Correction",50,0.,0.5);
 
  
   for(i=0;i<mxH;i++) 
@@ -75,18 +73,14 @@ void SmdGains::init(){
   gr->SetTitle(plCore+ " MPV of Landau fit to N 2-strips; strip ID; MIP energy (MeV)");
   grA[1]=gr;
 
-  gr=new TGraphErrors;  gr->SetMarkerStyle(5);
-  gr->SetName("mpvS"+plCore); // MPV of Landau fit
-  gr->SetTitle(plCore+ " MPV of Landau fit to single strips; strip ID; MIP energy (MeV)");
-  grA[2]=gr;
 
   for(i=0;i<mxH;i++) 
     if(grA[i]) HList->Add(grA[i]);
   
   //............... other initializations ...........
   printf("cuts for %s : adcMin=%d ,adcMax=%d minSum=%d maxRelEr=%f\n",plCore.Data(),adcMin,adcMax,minSum, maxRelEr);
-  //c1=new TCanvas("aa","aa",300,400);// small
-    c1=new TCanvas("aa","aa",800,700);// big
+  c1=new TCanvas("aa","aa",300,400);// small
+  //c1=new TCanvas("aa","aa",800,700);// big
 
   for(i=0;i<mxS;i++) str[i].id=i+1;
 
@@ -104,219 +98,42 @@ TFile* SmdGains::open(TString fn) {
 
 //-------------------------------------------------
 //-------------------------------------------------
-void SmdGains::doGainCorr(int str1, int str2, int ns){
+void SmdGains::doGainCorr(int str1, int str2, int ns, int pl){
 
   TGraphErrors  *gr= grA[1];
-  printf("doGainCorr() for %s, average over %d-strips\n",gr->GetName(),ns);
+  printf("doGainCorr() for %s, average over %d-strips pl=%d\n",gr->GetName(),ns,pl);
   TString nn=gr->GetName();
-  nn="C"+nn;
 
-  c2=new TCanvas(nn,nn,300,400);
-  c2->Divide(4,4);
+  if(pl==0) 
+    c2=new TCanvas(nn,nn,300,400);
+  else
+    c2=new TCanvas(nn,nn,600,700);
+
+  c2->Divide(4,5);
   int i,k;
   for(i=str1,k=1; i<mxS; i+=ns,k++) {
     if(i>=str2) break;
     c2->cd(k);
-    avrRelNGain(i,ns);
+     avrMipNEne(i,ns);
   }
-  c2->cd(15);  hA[1]->Draw();
-  c2->cd(16);  hA[2]->Draw();
+  c2->cd(19);  hA[1]->Draw();
+  c2->cd(20);  hA[2]->Draw();
 
-
-}
-
-//-----------------------------------------
-//-----------------------------------------
-void SmdGains::doOneStripEne(int str1, int str2,char *shpFunc){
-  char tit[100];
-  int ns=str2-str1+1;
-  assert(str1>0 && ns>0);
-  sprintf(tit,"%02d%c%03d+%d",sectID,planeUV,str1,ns);
-  printf("doOneStripEne() for %s\n",tit);
-
-  int i;
-  int nOK=0, nTot=0;
-  for(i=str1;i<=str2;i++) {
-    float rerr=oneStripEne(i);
-    nTot++;
-    if(fabs(rerr)< maxRelEr) nOK++;
-  }
-  printf("doOneMipEne summary nOK=%d of nTot=%d\n",nOK,nTot);  
-  // return;
-  TGraphErrors  *gr= grA[2];
-  c1->Divide(1,1);
-
-  TString nn=gr->GetName();
-  nn="C"+nn;
-  c1->SetName(nn);  c1->SetTitle(nn); 
-  c1->cd(1);
-  gr->Draw("AP");
-  
-  gr->Fit(shpFunc);
-  TList *Lx=gr->GetListOfFunctions();    assert(Lx);
-  TF1* f=gr->GetFunction(shpFunc); assert(f);
-  f->SetLineColor(kGreen);
-  f ->SetLineWidth(2);
-  
-  TLine *ln=new TLine(1,idealMipEne/2., mxS,idealMipEne/2.); 
-  ln->SetLineColor(kBlue); Lx->Add(ln);
-  
-}
-
-
-//-----------------------------------------
-//-----------------------------------------
-float SmdGains:: oneStripEne( int str1, int pl){
-  //  MIP ene from one strip
-  // save only of error not too large
-  char tit[100];
-  assert(str1>0 && str1<=mxS);
-  sprintf(tit,"d%s%03d",plCore.Data(),str1);
-  TH1F* hs= (TH1F*)fdIn->Get(tit); assert(hs);
-
-   HList->Add(hs);
-   // hs->Draw();
-   
-  float sum=hs->Integral();
-  printf("%s --> sum=%.1f ",hs->GetName(),sum );
-
-  if(sum<50) {printf(" ignored-1\n"); return 999;}
-  if(sum>200)
-    hs->Rebin(2);//was 4
-  else
-    hs->Rebin(3);//was 6
-  hs->Fit("landau","RQ","", minMipEne/2., maxMipEne);
-  TF1* f=hs->GetFunction("landau");  assert(f);
-  f->SetLineColor(kRed);
-  f->SetLineWidth(2);
-
-  double *par=f->GetParameters();
-  double *epar=f->GetParErrors();
-  float rerr=0;
-  if(par[1]>0) rerr=fabs(epar[1]/par[1]);
-  hs->SetAxisRange(0,1.2* maxMipEne);
-
-  printf("MPV=%.2f +/- %.2f (%.1f%c) \n",par[1],epar[1],rerr*100.,37);
-
-  StripG *s=&str[str1-1];
-  if(rerr>maxRelEr || par[1]<0 ||rerr<0.01) {
-    printf("    ignored-2\n");
-    s->flag+=16;
-    return 888;
-  }
-  s->mpv1=par[1];
-  s->empv1=epar[1];
-  //s->print();
-
-  TGraphErrors*  gr=grA[2];
-  int n=gr->GetN();
-  gr->SetPoint(n,str1,par[1]);
-  gr->SetPointError(n,0.,epar[1]);
-
-  if(pl) {
-   TString nn=tit; nn="C"+nn;  c1=new TCanvas(nn,nn,400,300);  c1->Clear();
-   hs->Draw();
-  }
-
-  return rerr;
-}
-
-
-//-----------------------------------------
-//-----------------------------------------
-void SmdGains:: avrRelNGain( int str1,int ns){
-  // sum MIP ene (from 2 strips) of ns strips
-
-  assert(str1>0 && ns>0);
-
-  int i;
-  TGraphErrors  *grg= grA[0];
-  TGraphErrors  *gr= grA[2];
-
-  //........... find abs gain
-  float mpEne, empEne;
-  avrMipNEne( str1,ns,mpEne, empEne);
-
-  //.......... calc average single-strip energy
-  float sw=0,syw=0;
-  for(i=str1;i<str1+ns;i++) {
-    if(i>mxS) break;    
-    StripG *s=&str[i-1];
-    //s->print();
-    if(s->empv1 <=0) continue;
-    float w=1/s->empv1/s->empv1;
-    sw+=w;
-    syw+=w*s->mpv1;
-  }
-  
-  float avr1Ene=1;
-  if(sw<=0) {
-    printf("WARN : str1=%d +%d no single-strip peaks for the group, set to 1\n",str1,ns);
-  } else {
-    avr1Ene=syw/sw;
-  }
-  printf("str1=%d ns=%d  avr1Ene=%f  avrMipEne=%f +/- %f\n",str1,ns,avr1Ene,mpEne,empEne);
-
-  TList *Lx=gr->GetListOfFunctions();    assert(Lx);
-  TLine * ln=new TLine(str1,avr1Ene,str1+ns,avr1Ene);
-  ln->SetLineColor(kRed); 
-  ln->SetLineWidth(2); 
-  Lx->Add(ln);
-
-
-  //.......... use both to predict total gain correction
-
-  for(i=str1;i<str1+ns;i++) {
-    if(i>mxS) break;    
-    StripG *s=&str[i-1];
-    //    s->print();
-    float agc= mpEne/idealMipEne;
-    float er2=empEne/mpEne/agc;
-    if(agc<=0) {
-      agc=1;
-      er2=0;
-    }
-
-    float rgc=1;
-    float er1=maxRelEr;
-    //tmp
-    if(0&&s->empv1>0) {
-      rgc=s->mpv1/avr1Ene;
-      er1=s->empv1/s->mpv1/rgc;
-    }
-
-    float gc=agc*rgc;
-    // error caclulation
-    float egc=gc*sqrt(er1*er1+ er2*er2);
-    char tag=' ';
-    if(fabs(1-gc) <egc) tag='*';
-
-    s->gc=gc;
-    s->egc=egc; 
-    float rer=100.*s->egc/s->gc;
-    
-    int n=grg->GetN();
-    grg->SetPoint(n,s->id,s->gc);
-    grg->SetPointError(n,0,s->egc);
-    
-    hA[3]->Fill(s->gc);
-    hA[4]->Fill(s->egc);
-
-    printf("%s%d agc=%.2f rgc=%.3f -->gc=%.3f +/- %.3f (%.1f%c) %c\n",plCore.Data(),i,agc, rgc,gc,egc,rer,37,tag);
-    // printf("#2 %s%03d %.3f %.3f (%.1f%c) %c \n",plCore.Data(),s->id,s->gc,s->egc,rer,37,tag);
-  }
+  if( pl&1) c2->Print(nn+".ps");
+  if( pl&2) c2->Print(nn+".gif");
 
 }
 
 
+
+
 //-----------------------------------------
 //-----------------------------------------
-void SmdGains:: avrMipNEne( int str1,int ns, float &mpv, float &empv){
+void SmdGains:: avrMipNEne( int str1,int ns){
   // sum MIP ene (from 2 strips) of ns strips
   char tit[100];
   assert(str1>0 && ns>0);
   int i;
-  mpv=empv=0; // clear output
 
   TH1F *hs=0;
   for(i=str1;i<str1+ns;i++) {
@@ -340,21 +157,21 @@ void SmdGains:: avrMipNEne( int str1,int ns, float &mpv, float &empv){
   hs->Draw();
   HList->Add(hs);
   float sum=hs->Integral();
-  //  hs->Rebin();
+  hs->Rebin(3);
   if(sum<150)  hs->Rebin();
 
-  //printf("%s --> sum=%.1f\n",hs->GetName(),sum );
+  // printf("%s --> sum=%.1f\n",hs->GetName(),sum );
   if(sum<50) return ;
 
   hs->Fit("landau","RQ","", minMipEne, maxMipEne);
   TF1* f=hs->GetFunction("landau");
   assert(f);
   f->SetLineColor(kRed);
-  f->SetLineWidth(2);
+  f->SetLineWidth(1);
   double *par=f->GetParameters();
   double *epar=f->GetParErrors();
-  mpv=par[1];
-  empv=epar[1];
+  float   mpv=par[1];
+  float   empv=epar[1];
   float rerr=0;
   
   hA[1]->Fill(mpv) ;
@@ -362,8 +179,8 @@ void SmdGains:: avrMipNEne( int str1,int ns, float &mpv, float &empv){
 
   if(par[1]>0) rerr=empv/mpv;
   hs->SetAxisRange(0,5.);
-  float mean=hs->GetMean();
-  printf("%s MPV=%.2f +/- %.2f (%.1f%c) r=%.2f m=%.2f \n",hs->GetName(),mpv,empv,rerr*100.,37,mean/mpv,mean);
+ 
+  printf("%s MPV=%.2f +/- %.2f (%.1f%c) \n",hs->GetName(),mpv,empv,rerr*100.,37);
   
   if(rerr>maxRelEr)  {
     for(i=str1;i<str1+ns;i++) {
@@ -384,17 +201,19 @@ void SmdGains:: avrMipNEne( int str1,int ns, float &mpv, float &empv){
 
 //-----------------------------------------
 //-----------------------------------------
-void SmdGains:: plTGraph( char *shpFunc,int ig){
+void SmdGains:: plTGraph( char *shpFunc,int ig, int pl){
   // sum MIP ene (from 2 strips) of k strips
 
   TGraphErrors  *gr= grA[ig];
   assert(gr);
   printf("plot %s\n",gr->GetName());
   TString nn=gr->GetName();
-  nn="CC"+nn;  
+  nn="C"+nn;  
   c2=new TCanvas(nn,nn,300,400);
   gr->Draw("AP");
   gr->Fit(shpFunc);
+  gr->SetMinimum(0.9);
+  gr->SetMaximum(1.7);
 
   gnCorFn=gr->GetFunction(shpFunc); assert(gnCorFn);
   gnCorFn->SetLineColor(kRed);
@@ -405,6 +224,11 @@ void SmdGains:: plTGraph( char *shpFunc,int ig){
     Lx=gr->GetListOfFunctions();    assert(Lx);
     ln=new TLine(1,idealMipEne, mxS,idealMipEne); ln->SetLineColor(kBlue); Lx->Add(ln);
   }
+
+
+  if( pl&1) c2->Print(nn+".ps");
+  if( pl&2) c2->Print(nn+".gif");
+
  }
   
 //-----------------------------------------
@@ -656,6 +480,9 @@ void StripG::print(){
 
 /*****************************************************************
  * $Log: SmdGains.cxx,v $
+ * Revision 1.4  2004/10/08 14:34:50  balewski
+ * as used for PQRUV calib for pp200, 2004
+ *
  * Revision 1.3  2004/09/22 00:45:52  balewski
  * ready for calib of smd
  *

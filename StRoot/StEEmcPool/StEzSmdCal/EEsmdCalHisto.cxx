@@ -1,4 +1,4 @@
-// $Id: EEsmdCalHisto.cxx,v 1.11 2004/09/22 00:45:50 balewski Exp $
+// $Id: EEsmdCalHisto.cxx,v 1.12 2004/10/08 14:34:43 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -306,6 +306,7 @@ void EEsmdCal::histoGains(){
 	// if(x->fail) continue;  // use any non-zero gain
 	if(x->gain<=0) continue;
 	// dig out the MAPMT pixel
+	assert(x->sec==sectID);
 	const char *tube=x->tube+2;
 	assert(tube[0]=='P');
 	int pmt=atoi(tube+3);
@@ -313,6 +314,20 @@ void EEsmdCal::histoGains(){
 	int xx=(pmt-1)*16+pix;
 	hA[5+3]->Fill(xx,x->gain);
       }
+
+
+  //.............. Towers
+  iT=0;
+  for(iEta=0;iEta<MaxEtaBins;iEta++)
+    for(iPhi=0;iPhi<MaxPhiBins;iPhi++){
+      const EEmcDbItem *x=dbT[iT][iEta][iPhi];
+      if(x==0) continue;	
+      if(x->gain<=0) continue;
+      assert(x->sec==sectID);
+      int ispir=(x->eta-1)*MaxSubSec +  x->sub-'A';
+      hA[4]->Fill(ispir,x->gain);
+    }
+
 }
 
 
@@ -327,14 +342,21 @@ void EEsmdCal::initAuxHisto(){
   TH1F *h;
   TH2F *h2;
 
-  for(i=0;i<4;i++) {// gains vs. MAPMT box/pmt/ch, histo 5,6,7,8    
+  // tower gains
+  sprintf(tt1,"ug%02dT",sectID);
+  sprintf(tt2,"used tower gains sec=%d ; x=spiral=(eta-1)*5+subs-A; gain [ch/GeV]",sectID);
+  h=new TH1F(tt1,tt2, 60,0.5,60.5);
+  hA[4]=h;    
+
+  for(i=0;i<4;i++) {
+    // gains vs. MAPMT box/pmt/ch, histo 5,6,7,8    
     if(i<3) { 
       sprintf(tt0,"%02d_S%d",sectID,i+1);
     } else {
       sprintf(tt0,"%02d_P1",sectID);
     }
     sprintf(tt1,"ug%s",tt0);
-    sprintf(tt2,"used gains MAPMT box %s ; chann=(pmt ID-1)*16+pix ; gain [GeV/ch]",tt0);
+    sprintf(tt2,"used gains MAPMT box %s ; chann=(pmt ID-1)*16+pix ; gain [ch/GeV]",tt0);
 
     h=new TH1F(tt1,tt2, MaxMapmtCrateCh,0.5, MaxMapmtCrateCh+0.5);
     hA[5+i]=h;    
@@ -360,7 +382,7 @@ void EEsmdCal::initAuxHisto(){
     hA[14+i]=h;
     
     sprintf(tt1,"ug%02d%c",sectID,i+'U');
-    sprintf(tt2,"used gains for plane %02d%c; strip ID; gain [GeV/ch]",sectID,i+'U');
+    sprintf(tt2,"used gains for plane %02d%c; strip ID; gain [ch/GeV]",sectID,i+'U');
     h=new TH1F(tt1,tt2,MaxSmdStrips,0.5,MaxSmdStrips+0.5);
     hA[16+i]=h;    
   }

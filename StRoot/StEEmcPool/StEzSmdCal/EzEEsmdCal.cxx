@@ -1,4 +1,4 @@
-// $Id: EzEEsmdCal.cxx,v 1.9 2004/09/22 00:45:51 balewski Exp $
+// $Id: EzEEsmdCal.cxx,v 1.10 2004/10/08 14:34:47 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -93,10 +93,10 @@ void EzEEsmdCal:: unpackEzTail(){
       const  EEmcDbItem  *x=eeDb->getByCrate(crateID,chan);
       if(x==0) continue; 
       if(x->isSMD()) break; // abort pre/post crates
-      // (assuming pre/post/tw is not mixed with SMD pixels) 
-     
+      // (assuming pre/post/tw is not mixed with SMD pixels)      
       if(x->fail ) continue; // drop broken channels
-      if(x->stat & killStat) continue; // drop masked chan      
+      if(x->stat & killStat) continue; // drop masked chan 
+
       // accept this hit
       int iphi=(x->sec-1)*MaxSubSec+(x->sub-'A');
       int ieta=x->eta-1;
@@ -115,7 +115,7 @@ void EzEEsmdCal:: unpackEzTail(){
       float adc=rawAdc-x->ped;
       tileAdc[iT][ieta][iphi]=adc; 
       tileThr[iT][ieta][iphi]=rawAdc>x->thr;
-
+      killT[iT][ieta][iphi]=false;
       if(x->gain<=0) continue;
       // ........ only elements with valid gains are processed below
       tileEne[iT][ieta][iphi]=adc/x->gain; 

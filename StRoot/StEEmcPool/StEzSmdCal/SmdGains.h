@@ -4,7 +4,7 @@
 #ifndef SmdGains_h
 #define SmdGains_h
 /*******************************************************
- * $Id: SmdGains.h,v 1.3 2004/09/22 00:45:52 balewski Exp $
+ * $Id: SmdGains.h,v 1.4 2004/10/08 14:34:50 balewski Exp $
  *******************************************************
  This code should run only on histogram files, not on events, JB
  *
@@ -64,15 +64,12 @@ class SmdGains :public TObject{
   SmdGains();
   virtual ~SmdGains(){};
   void set( TObjArray * hL, int se, char uv){ HList=hL; sectID=se, planeUV=uv;}; 
-  void plTGraph(char *shpFunc="pol1",int ig=1); // plot & fit tGraphs
+  void plTGraph(char *shpFunc="pol1",int ig=1, int pl=0); // plot & fit tGraphs
   void plFGC();
 
-  void doOneStripEne(int str1, int str2,char *shpFunc="pol0"); // average MIP peak in plane 
-  void doGainCorr(int str1, int str2, int ns=20);
+  void doGainCorr(int str1, int str2, int ns=20, int pl=0);
 
-  float oneStripEne(int str1, int pl=0); //  MIP ene from one strip
-  void avrRelNGain( int str1,int ns);
-  void avrMipNEne(int str1,int ns, float &mpv, float &empv); // sum MIP ene (from 2 strips) of ns strips
+   void avrMipNEne(int str1,int ns); // sum MIP ene (from 2 strips) of ns strips
 
   TFile* open(TString);
   void init();
@@ -91,6 +88,9 @@ class SmdGains :public TObject{
 
 /*****************************************************************
  * $Log: SmdGains.h,v $
+ * Revision 1.4  2004/10/08 14:34:50  balewski
+ * as used for PQRUV calib for pp200, 2004
+ *
  * Revision 1.3  2004/09/22 00:45:52  balewski
  * ready for calib of smd
  *
