@@ -2,6 +2,7 @@ struct g2t_track {          /* G2t_track */
 /* revised 961204, ge, changed ctf to ctb and added tof */
 /* revised 961219, ge, added  end cap cal:(eem & esm) */
 /* added photon multiplicity detector PMD:(pgc & psc) */
+/* --max -- added the pixel */
 
        long      eg_label;   /* generator track label (0 if GEANT track) */
        long      eg_pid;     /* event generator particle id */
@@ -16,6 +17,7 @@ struct g2t_track {          /* G2t_track */
        long      hit_pmd_p;  /* Id of first psc hit on track linked list */
        long      hit_smd_p;  /* pointer to first SHM linked list hit */
        long      hit_svt_p;  /* Id of first svt hit on track linked list */
+       long      hit_pix_p;  /* Id of first pix hit on track linked list */
        long      hit_tof_p;  /* Id of first tof hit on track linked list */
        long      hit_tpc_p;  /* Id of first tpc hit on track linked list */
        long      hit_vpd_p;  /* Id of first vpd hit on track linked list */
@@ -32,6 +34,7 @@ struct g2t_track {          /* G2t_track */
        long      n_pmd_hit;  /* Nhits in pmd (PMD) */
        long      n_smd_hit;  /* number of hits in shower max */
        long      n_svt_hit;  /* Nhits in svt */
+       long      n_pix_hit;  /* Nhits in pix */
        long      n_tof_hit;  /* Nhits in tof */
        long      n_tpc_hit;  /* Nhits in tpc */
        long      n_vpd_hit;  /* Nhits in vpd */
