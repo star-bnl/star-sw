@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: fee_pin.h,v 1.4 1999/12/09 02:50:41 levine Exp $
+ * $Id: fee_pin.h,v 1.5 2002/11/19 04:49:21 jeromel Exp $
  * Author: M.J. LeVine
  ***************************************************************************
  * Description: TPC sector readout hardware configuration
@@ -10,6 +10,9 @@
  *
  ***************************************************************************
  * $Log: fee_pin.h,v $
+ * Revision 1.5  2002/11/19 04:49:21  jeromel
+ * idef-ed 2 large structures (unused). Will remove later eventually.
+ *
  * Revision 1.4  1999/12/09 02:50:41  levine
  * #define changed to get rid of unused fee array defs for TPCv?P0_ZS_SR.cxx
  * only
@@ -3312,6 +3315,7 @@ static unsigned short rdo_vs_fee[182][32] = {
 },
 };
 
+#ifdef DEFINE_MEZZ_N_OFFSET_VS_FEE
 static unsigned short mezz_vs_fee[182][32] = {
 /* fee 0 */ 
 {0, 0, 0, 0, 0, 0, 0, 0, 
@@ -5501,4 +5505,7 @@ static unsigned short offset_vs_fee[182][32] = {
 354, 358, 362, 366, 370, 374, 378, 382, 
 },
 };
+
+#endif
+
 #endif
