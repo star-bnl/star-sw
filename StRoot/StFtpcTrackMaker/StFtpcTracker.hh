@@ -1,5 +1,8 @@
-// $Id: StFtpcTracker.hh,v 1.16 2002/11/06 13:47:15 oldi Exp $
+// $Id: StFtpcTracker.hh,v 1.17 2003/05/20 18:35:02 oldi Exp $
 // $Log: StFtpcTracker.hh,v $
+// Revision 1.17  2003/05/20 18:35:02  oldi
+// Cuts for vertex estimation introduced (globDca < 1 cm, multiplicity >= 200).
+//
 // Revision 1.16  2002/11/06 13:47:15  oldi
 // Vertex handling simplifed.
 // Global/primary fit handling simplified.
@@ -142,7 +145,7 @@ public:
 
   virtual  ~StFtpcTracker();  // destructor
 
-  void    EstimateVertex(StFtpcVertex *vertex, UChar_t iterations = 1);     // vertex estimation with fit tracks for FTPC east amd west
+  void    EstimateVertex(StFtpcVertex *vertex, UChar_t iterations = 1);  // vertex estimation with fit tracks for FTPC east amd west
   void    EstimateVertex(StFtpcVertex *vertex, Char_t hemispshere, UChar_t iterations);  // vertex estimation with fit tracks
   StFtpcVertex EstimateVertex(StFtpcVertex *vertex, Char_t hemisphere, 
 			      Char_t sector, UChar_t iterations = 1);  // vertex estimation with fit tracks

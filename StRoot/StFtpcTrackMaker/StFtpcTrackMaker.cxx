@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.44 2003/02/21 01:14:03 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.45 2003/05/20 18:34:57 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.45  2003/05/20 18:34:57  oldi
+// Cuts for vertex estimation introduced (globDca < 1 cm, multiplicity >= 200).
+//
 // Revision 1.44  2003/02/21 01:14:03  oldi
 // Unnecessary call of database "Geometry/tpc" removed.
 //
@@ -493,7 +496,7 @@ Int_t StFtpcTrackMaker::Make()
   
   tracker->GlobalFitAnddEdxAndWrite(fpt_fptrack);
   
-  if (tracker->GetNumberOfTracks() > 0) { // makes only sense if some tracks found
+  if (tracker->GetNumberOfTracks() >= StFtpcTrackingParams::Instance()->MinNumTracks()) {
     tracker->EstimateVertex(tracker->GetVertex(), 1);
   }
   
@@ -567,29 +570,32 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
     // vertex estimation for different sectors
     StFtpcVertex vertex;
     
-    for (Int_t i = 1; i <= 6; i++) { // east
-      vertex = tracker->EstimateVertex(tracker->GetVertex(), -1, i, 1);
-      m_vertex_east_x_vs_sector->Fill((Float_t)i, vertex.GetX()-tracker->GetVertex()->GetX());
-      m_vertex_east_y_vs_sector->Fill((Float_t)i, vertex.GetY()-tracker->GetVertex()->GetY());
-      m_vertex_east_z_vs_sector->Fill((Float_t)i, vertex.GetZ()-tracker->GetVertex()->GetZ());
+    if (tracker->GetNumberOfTracks() >= StFtpcTrackingParams::Instance()->MinNumTracks()) {
+      
+      for (Int_t i = 1; i <= 6; i++) { // east
+	vertex = tracker->EstimateVertex(tracker->GetVertex(), -1, i, 1);
+	m_vertex_east_x_vs_sector->Fill((Float_t)i, vertex.GetX()-tracker->GetVertex()->GetX());
+	m_vertex_east_y_vs_sector->Fill((Float_t)i, vertex.GetY()-tracker->GetVertex()->GetY());
+	m_vertex_east_z_vs_sector->Fill((Float_t)i, vertex.GetZ()-tracker->GetVertex()->GetZ());
+      }
+      
+      for (Int_t i = 1; i <= 6; i++) { // west
+	vertex = tracker->EstimateVertex(tracker->GetVertex(), +1, i, 1);
+	m_vertex_west_x_vs_sector->Fill((Float_t)i, vertex.GetX()-tracker->GetVertex()->GetX());
+	m_vertex_west_y_vs_sector->Fill((Float_t)i, vertex.GetY()-tracker->GetVertex()->GetY());
+	m_vertex_west_z_vs_sector->Fill((Float_t)i, vertex.GetZ()-tracker->GetVertex()->GetZ());
+      }
+      
+      // vertex estimation for both FTPCs (using all tracks)
+      m_vertex_east_xy->Fill(tracker->GetVertexEast()->GetX()-tracker->GetVertex()->GetX(),
+			     tracker->GetVertexEast()->GetY()-tracker->GetVertex()->GetY());
+      m_vertex_east_z->Fill(tracker->GetVertexEast()->GetZ()-tracker->GetVertex()->GetZ());
+      m_vertex_west_xy->Fill(tracker->GetVertexWest()->GetX()-tracker->GetVertex()->GetX(),
+			     tracker->GetVertexWest()->GetY()-tracker->GetVertex()->GetY());
+      m_vertex_west_z->Fill(tracker->GetVertexWest()->GetZ()-tracker->GetVertex()->GetZ());    
     }
-    
-    for (Int_t i = 1; i <= 6; i++) { // west
-      vertex = tracker->EstimateVertex(tracker->GetVertex(), +1, i, 1);
-      m_vertex_west_x_vs_sector->Fill((Float_t)i, vertex.GetX()-tracker->GetVertex()->GetX());
-      m_vertex_west_y_vs_sector->Fill((Float_t)i, vertex.GetY()-tracker->GetVertex()->GetY());
-      m_vertex_west_z_vs_sector->Fill((Float_t)i, vertex.GetZ()-tracker->GetVertex()->GetZ());
-    }
-    
-    // vertex estimation for both FTPCs (using all tracks)
-    m_vertex_east_xy->Fill(tracker->GetVertexEast()->GetX()-tracker->GetVertex()->GetX(),
-			   tracker->GetVertexEast()->GetY()-tracker->GetVertex()->GetY());
-    m_vertex_east_z->Fill(tracker->GetVertexEast()->GetZ()-tracker->GetVertex()->GetZ());
-    m_vertex_west_xy->Fill(tracker->GetVertexWest()->GetX()-tracker->GetVertex()->GetX(),
-			   tracker->GetVertexWest()->GetY()-tracker->GetVertex()->GetY());
-    m_vertex_west_z->Fill(tracker->GetVertexWest()->GetZ()-tracker->GetVertex()->GetZ());    
-  }
-  
+  }    
+
   for (Int_t t_counter = 0; t_counter < tracker->GetTracks()->GetEntriesFast(); t_counter++) {
     
     StFtpcTrack *track = (StFtpcTrack*) tracker->GetTracks()->At(t_counter);
@@ -656,7 +662,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.44 2003/02/21 01:14:03 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OST") << "* $Id: StFtpcTrackMaker.cxx,v 1.45 2003/05/20 18:34:57 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OST") << "******************************************************************" << endm;
   
   if (Debug()) {

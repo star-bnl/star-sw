@@ -1,5 +1,8 @@
-// $Id: StFtpcVertex.cc,v 1.14 2003/01/13 18:09:26 perev Exp $
+// $Id: StFtpcVertex.cc,v 1.15 2003/05/20 18:35:10 oldi Exp $
 // $Log: StFtpcVertex.cc,v $
+// Revision 1.15  2003/05/20 18:35:10  oldi
+// Cuts for vertex estimation introduced (globDca < 1 cm, multiplicity >= 200).
+//
 // Revision 1.14  2003/01/13 18:09:26  perev
 // remove Clear of histogram. It is TNamed method.
 //
@@ -413,10 +416,6 @@ StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t hemis
   TH1F y_hist("y_hist", "y position of estimated vertex", 200, -10., 10.);
   TH1F z_hist("z_hist", "z position of estimated vertex", 200, -75., 75.);
 
-//VP    x_hist.Clear();
-//VP  y_hist.Clear();
-//VP  z_hist.Clear();
-
   TF1 gauss_x("gauss_x", "gaus", -10., 10.);
   TF1 gauss_y("gauss_y", "gaus", -10., 10.);
   TF1 gauss_z("gauss_z", "gaus", -75., 75.);
@@ -436,7 +435,7 @@ StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t hemis
 
     StFtpcTrack *track = (StFtpcTrack*)tracks->At(i);
 
-    if (track->GetHemisphere() == hemisphere) {
+    if (track->GetHemisphere() == hemisphere && track->GetDca() < StFtpcTrackingParams::Instance()->MaxDcaVertex()) {
       z_hist.Fill(track->z(track->pathLength(v.GetX(), v.GetY())));
     }
   }
@@ -451,7 +450,7 @@ StFtpcVertex::StFtpcVertex(TObjArray *tracks, StFtpcVertex *vertex, Char_t hemis
 
     StFtpcTrack *track = (StFtpcTrack*)tracks->At(i);
     
-    if (track->GetHemisphere() == hemisphere) {
+    if (track->GetHemisphere() == hemisphere && track->GetDca() < StFtpcTrackingParams::Instance()->MaxDcaVertex()) {
       StThreeVector<Double_t> rv(0, 0, GetZ());
       StThreeVector<Double_t> nv(0,0,1);
       Double_t pl = track->pathLength(rv, nv);

@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.hh,v 1.10 2003/01/16 18:04:35 oldi Exp $
+// $Id: StFtpcTrackingParams.hh,v 1.11 2003/05/20 18:35:08 oldi Exp $
 // $Log: StFtpcTrackingParams.hh,v $
+// Revision 1.11  2003/05/20 18:35:08  oldi
+// Cuts for vertex estimation introduced (globDca < 1 cm, multiplicity >= 200).
+//
 // Revision 1.10  2003/01/16 18:04:35  oldi
 // Bugs eliminated. Now it compiles on Solaris again.
 // Split residuals for global and primary fit.
@@ -95,6 +98,8 @@ private:
      Int_t mHistoBins;
   Double_t mHistoMin;
   Double_t mHistoMax;
+  Double_t mMaxDcaVertex;
+     Int_t mMinNumTracks;
 
   // Tracker
   Int_t mRowSegments;
@@ -202,6 +207,8 @@ public:
      Int_t HistoBins();
   Double_t HistoMin();
   Double_t HistoMax();
+  Double_t MaxDcaVertex();
+     Int_t MinNumTracks();
 
   // Tracker
   Int_t RowSegments();
