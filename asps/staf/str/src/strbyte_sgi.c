@@ -49,16 +49,85 @@ FILE *fpr, *fpw;
 
 
 /*	Define procedures ("c-callable-only functions"):     */
-void strfc(
+
+void strcf(
 /*  Inputs:   */
 
-	 char *ftext        /*  Text-string, from a FORTRAN routine.          */
-	,int ftext_length   /*  Text-string-length -- from a FORTRAN routine. */
+	 char *ctext        /*  Text-string, from a C routine.                  */
+	,int ctext_length   /*  Text-string-length -- from a C routine.         */
+	,int ftext_length   /*  Text-string-length -- to a FORTRAN routine. */
     
 /*  Outputs:  */
 
+	,char *ftext        /*  Text-string, to a FORTRAN routine.          */
+	,int *ftext_lnb     /*  Last non-blank in ftext, c-index.           */
+
+	        )
+
+/*  Description:
+
+	Take a text-string, defined in a C routine and to be passed into
+a FORTRAN routine, and copy it into a text-string defined in that C routine.
+All characters in the text for the FORTRAN routine from the null to the
+end of ftext are replaced with blanks.
+
+*/
+{
+	static int i;
+	static int length;
+	static int do_blanks;
+
+/*	Check for nonsense:    */
+	if ( ftext_length < 1 )
+	{
+	  printf("strcf-E1 FORTRAN text length: [%d] is nonsense.\n", ftext_length );
+	  *ftext_lnb=0;
+	  return;
+	}
+
+	if ( ctext_length < 1 )
+	{
+	  printf("strcf-E2 C text length: [%d] is nonsense.\n", ctext_length );
+	  *ftext_lnb=0;
+	  return;
+	}
+
+/*	Find the null, then replace it and everything afterwards with blanks. */
+	do_blanks = FALSE;
+	length    = 0;
+	for ( i = 0; i < ctext_length; ++i )
+	{
+	  if     ( i > ftext_length )
+	  { /* FORTRAN string isn't big enough */
+	    printf("strcf-E3 C text: [%s] is too long.\n", ctext);
+	    *ftext_lnb=0;
+	    return;
+	  }
+	  else if ( do_blanks        ) { ftext[i] = ' '; }
+	  else if ( ctext[i] == '\0' ) { ftext[i] = ' '; do_blanks = TRUE; }
+	  else                         { ftext[i] = ctext[i]; length = i+1; }
+	}
+
+/*	Find the end of the specified text (this is a FORTRAN routine!!): */
+	strend_( ftext, &length, ftext_length );
+
+	*ftext_lnb=length-1;  /* subtract one -- FORTRAN runs 1 to N, C does 0 to N-1. */
+
+	return;
+}
+
+
+
+void strfc(
+/*  Inputs:   */
+	 char *ftext        /*  Text-string, from a FORTRAN routine.          */
+	,int ftext_length   /*  Text-string-length -- from a FORTRAN routine. */
+    
+/*  Output:  */
 	,char *ctext        /*  Text-string, to a C routine.                  */
+/*  Input:   */
 	,int ctext_length   /*  Text-string-length -- to a C routine.         */
+/*  Output:  */
 	,int *ctext_lnb     /*  Last non-blank in resulting ctext.            */
 
 	        )
@@ -105,6 +174,7 @@ A null is appended to the string.
 
 	return;
 }
+
 
 
 

@@ -14,7 +14,7 @@
 *	or libstr(UNIX) on December 11, 1992 (R. Hackenburg)
 
 
-
+*
 	SUBROUTINE strbyte_openw( Filename )
 
 *  Input:
@@ -93,7 +93,7 @@
 
 
 
-
+*
 	SUBROUTINE strbyte_openr( Filename )
 
 *  Input:
@@ -154,7 +154,7 @@
 
 
 
-
+*
 	SUBROUTINE strbyte_write( Nbytes, buffer )
 
 	IMPLICIT NONE
@@ -206,7 +206,7 @@
 
 
 
-
+*
 	SUBROUTINE strbyte_read( Nbytes, buffer )
 
 	IMPLICIT NONE
@@ -258,7 +258,7 @@
 
 
 
-
+*
 	SUBROUTINE strbyte_closer
 
 	IMPLICIT NONE
@@ -278,7 +278,7 @@
 
 
 
-
+*
 	SUBROUTINE strbyte_closew
 
 	IMPLICIT NONE

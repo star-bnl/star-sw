@@ -1,4 +1,4 @@
-
+*
 	SUBROUTINE STRCONCAT(ARG,JARG,NARGS,COM)
 
 	IMPLICIT NONE
@@ -39,7 +39,7 @@
 
 	RETURN
 	END
-
+*
 	LOGICAL FUNCTION STRDBL(S,RADIX,D_MIN,D_MAX,D,ERRMSG)
 
 	IMPLICIT NONE
@@ -103,7 +103,7 @@
 	D=UNREAL
 	RETURN
 	END
-
+*
 	LOGICAL FUNCTION STRINT(S,RADIX,I_MIN,I_MAX,I,ERRMSG)
 
 	IMPLICIT NONE
@@ -168,7 +168,7 @@
 	I=UNINT
 	RETURN
 	END
-
+*
 	SUBROUTINE STRPARSE(S,NARGS_max,NARGS,ARG,DARG,IARG,VDARG,VIARG)
 
 	IMPLICIT NONE
@@ -213,7 +213,7 @@
 
 	RETURN
 	END
-
+*
 	SUBROUTINE STRPARSE_RADIX
      1	          (S,NARGS_max,RADIX,NARGS,ARG,DARG,IARG,VDARG,VIARG)
 
@@ -284,7 +284,7 @@
 
 	RETURN
 	END
-
+*
 	SUBROUTINE STRPARSEF(CIN,CDEF,COUT)
 
 	IMPLICIT NONE
@@ -366,7 +366,7 @@
 	RETURN
 
 	END
-
+*
 	LOGICAL FUNCTION STRPARSEN(S,SPT,D)
 
 	IMPLICIT NONE
@@ -418,8 +418,8 @@
 *	Might be already positioned, or might need to skip several sep. chars.:
 	SEP_FL=.TRUE. !Force initial loop entry.
 	DO WHILE (SEP_FL.AND.(SPT.LE.SLEN))
-*	  Space,tab,comma:
-	  IF (INDEX(' 	,',S(SPT:SPT)).LE.0) THEN
+*	  Space,tab,comma,newline:
+	  IF (INDEX(' 	,\n',S(SPT:SPT)).LE.0) THEN
 *	    SPT not pointing at separator (exit this loop):
 	    SEP_FL=.FALSE.
 	  ELSE !Points at a separator (continue this loop):
@@ -455,8 +455,8 @@
 	    QUOTE_CHAR=S(SPT:SPT) !Use this to look for matching end-quote.
 	    SPT=SPT+1 !Skip, don't copy the quote.
 
-*	  Space,tab,comma:
-	  ELSE IF (INDEX(' 	,',S(SPT:SPT)).GT.0) THEN !SPT points at a separator:
+*	  Space,tab,comma,newline:
+	  ELSE IF (INDEX(' 	,\n',S(SPT:SPT)).GT.0) THEN !SPT points at a separator:
 	    SEP_FL=.TRUE.
 	  ELSE IF (S(SPT:SPT).EQ.'=') THEN !Self-separating character "=".
 	    SEP_FL=.TRUE.
@@ -469,7 +469,7 @@
 	END DO
 	RETURN	
 	END
-
+*
 	INTEGER FUNCTION STRUNCODE(S,REQRAD,UNINT,UNREAL)
 
 	IMPLICIT NONE
@@ -655,7 +655,7 @@
 	STRUNCODE=-1
 	RETURN
 	END
-
+*
 	INTEGER FUNCTION STR_NEXTARG(ARG,NARGS,JARG)
 
 	IMPLICIT NONE
@@ -685,7 +685,7 @@
 
 	RETURN
 	END
-
+*
 	INTEGER FUNCTION STR_NEXTARG_ALLOWEQ(ARG,NARGS,JARG)
 
 	IMPLICIT NONE
@@ -720,7 +720,7 @@
 
 	RETURN
 	END
-
+*
 	INTEGER FUNCTION STR_NEXTARG_REQEQ(ARG,NARGS,JARG)
 
 	IMPLICIT NONE
@@ -757,7 +757,7 @@
 
 	RETURN
 	END
-
+*
 	LOGICAL FUNCTION STR_NUMARG(ARG,RADIX)
 
 	IMPLICIT NONE
@@ -826,4 +826,4 @@
 	STR_NUMARG=.TRUE.
 	RETURN
 	END
-
+*

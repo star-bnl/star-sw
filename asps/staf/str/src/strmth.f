@@ -1,4 +1,3 @@
-
 	DOUBLE PRECISION FUNCTION STR_Gran(Seed)
 
 	IMPLICIT NONE
@@ -20,8 +19,9 @@
 	END
 *
 	SUBROUTINE STRFIT( GENERAL_ERRORS, COUNTING_ERRORS, TRACE_LUN
-     1	              , Niter_max
-     1	              , FITF, NPTS, NPAR, X, Y, WY, DA, A, FLAMDA, SA, CHI2 )
+     1	                 , Niter_max
+     1	                 , FITF, NPTS, NPAR, X, Y, WY, DA, A
+     1	                 , FLAMDA, SA, CHI2 )
 
 	IMPLICIT NONE
 
@@ -176,7 +176,8 @@
 	RETURN
 	END
 *
-	SUBROUTINE STRFIT_ITER( FITF, X, Y, WY, NPTS, NPAR, A, DA, SA, FLAMDA, CHISQR )
+	SUBROUTINE STRFIT_ITER( FITF, X, Y, WY, NPTS, NPAR, A, DA, SA
+     1	                      , FLAMDA, CHISQR )
 
 *  Brief description:  Perform one iteration for general fit routine.
 *	This is a FORTRAN-77 (and modified) version of the subroutine
@@ -498,4 +499,3 @@
 
 	RETURN
 	END
-*

@@ -50,6 +50,82 @@ FILE *fpr, *fpw, *fopen();
 
 
 
+void strcf(
+/*  Inputs:   */
+
+	 char *ctext        /*  Text-string, from a C routine.                  */
+	,int ctext_length   /*  Text-string-length -- from a C routine.         */
+	,int dummy          /* This is the length on Unix -- unused on VMS      */
+    
+/*  Outputs:  */
+	,struct dsc$descriptor_s *ftext_descriptor   /*  ASCII ftext descriptor;  Fortran CHARACTER*(n).  */
+
+/*	  This consists of:             */
+/*	  unsigned short	dsc$w_length;	*/ /* length of data item in bytes,
+					     or if dsc$b_dtype is DSC$K_DTYPE_V, bits,
+					     or if dsc$b_dtype is DSC$K_DTYPE_P, digits (4 bits each) */
+/*	  unsigned char	dsc$b_dtype;	*/ /* data type code */
+/*	  unsigned char	dsc$b_class;	*/ /* descriptor class code = DSC$K_CLASS_D */
+/*	  char		*dsc$a_pointer;	*/ /* address of first byte of data storage */
+
+	,int *ftext_lnb     /*  Last non-blank in ftext.                    */
+
+	        )
+
+/*  Description:
+
+	Take a text-string, defined in a C routine and to be passed into
+a FORTRAN routine, and copy it into a text-string defined in that C routine.
+All characters in the text for the FORTRAN routine from the null to the
+end of ftext are replaced with blanks.
+
+*/
+{
+	static int i;
+	static int length;
+	static int do_blanks;
+
+/*	Check for nonsense:    */
+	if ( ctext_length < 1 )
+	{
+	  printf("strcf-E2 C text length: [%d] is nonsense.\n", ctext_length );
+	  *ftext_lnb=0;
+	  return;
+	}
+
+	if ( ftext_descriptor->dsc$w_length < 1 )
+	{
+	  printf("strcf-E1 FORTRAN text length: [%d] is nonsense.\n", ftext_descriptor->dsc$w_length );
+	  *ftext_lnb=0;
+	  return;
+	}
+
+/*	Find the null, then replace it and everything afterwards with blanks. */
+	do_blanks = FALSE;
+	length    = 0;
+	for ( i = 0; i < ctext_length; ++i )
+	{
+	  if     ( i > ftext_descriptor->dsc$w_length )
+	  { /* FORTRAN string isn't big enough */
+	    printf("strcf-E3 C text: [%s] is too long.\n", ctext);
+	    *ftext_lnb=0;
+	    return;
+	  }
+	  else if ( do_blanks    ) { ftext_descriptor->dsc$a_pointer[i] = ' '; }
+	  else if ( ctext[i] = 0 ) { ftext_descriptor->dsc$a_pointer[i] = ' '; do_blanks = TRUE; }
+	  else                     { ftext_descriptor->dsc$a_pointer[i] = ctext[i]; length = i+1; }
+	}
+
+/*	Find the end of the specified text (this is a FORTRAN routine!!): */
+	strend( ftext_descriptor, &length );
+
+	*ftext_lnb=length;
+
+	return;
+}
+
+
+
 void strfc(
 
 /*  Inputs:   */
@@ -91,6 +167,14 @@ void strfc(
 */
 
 /*	Check for nonsense:  */
+
+	if ( ftext_descriptor->dsc$w_length < 1 )
+	{
+	  printf("strfc-E1 FORTRAN text length: [%d] is nonsense.\n", ftext_descriptor->dsc$w_length );
+	  *ftext_lnb=0;
+	  return;
+	}
+
 	if ( ctext_length < 1 )
 	{
 	  printf("strfc-E2 C text length: [%d] is nonsense.\n", ctext_length );

@@ -11,7 +11,7 @@
 	INTEGER Nticks
 	INTEGER Iscale !The tens-exponent of the scaled range.
 
-*  Functional Description:
+*  Description:
 *	Automatically determine the number (and spacing) of ticks to 
 *	use on a scale with range (Amin, Amax).  The range may be slightly
 *	extended, if necessary.  Iscale is a power of ten which, when applied
@@ -39,7 +39,6 @@
 	  Amax=Amax+EXTEND
 	  DIFF=0.010
 	END IF
-
 
 	AS=LOG10(DIFF) !Orders-of-magnitude spanned.
 	IS=INT(AS)     !Integer orders-of-magnitude (scale).
