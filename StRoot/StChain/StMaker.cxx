@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.151 2004/08/03 00:49:03 perev Exp $
+// $Id: StMaker.cxx,v 1.152 2004/09/01 22:09:51 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -38,7 +38,6 @@
 #include "StChain.h"
 #include "TTable.h"
 
-#include "StMem.h"
 #include "TMemStat.h"
 #include "StMkDeb.h"
 
@@ -82,6 +81,7 @@ StMaker::StMaker(const char *name,const char *):TDataSet(name,".maker")
 {
    SetActive();
    SetMode();
+   m_Attr.SetOwner();
    m_DebugLevel=0;
    m_MakeReturn=0;
    m_Number=0;        	
@@ -122,8 +122,20 @@ StMaker::~StMaker()
   if (fgStChain == this) fgStChain = 0;
   delete fMemStatMake;	fMemStatMake  = 0;
   delete fMemStatClear;	fMemStatClear = 0;
-  Cleanup(this);
+  TDataSet *ds = this;
+  Cleanup(ds);
   StMkDeb::Cancel(this);
+}
+//_____________________________________________________________________________
+const char *StMaker::GetName() const
+{
+  static int occ = 0;
+  const char *name = TNamed::GetName();
+  if (name && *name ) return name;
+  TString ts(ClassName());
+  ts+="#"; ts+=(occ++);		
+  ((TNamed*)this)->SetName(ts.Data());		
+  return GetName();
 }
 //______________________________________________________________________________
 void StMaker::SetNumber(Int_t number)
@@ -392,7 +404,7 @@ UP: if (uppMk) return 0;
 
 //		Not FOUND
 NOTFOUND:
-  if (!dowMk && GetDebug()) //Print Warning message
+  if (!dowMk && GetDebug()>1) //Print Warning message
     if ((MaxWarnings--) > 0) Warning("GetDataSet"," \"%s\" Not Found ***\n",(const char*)actInput);
   return 0;
 
@@ -535,7 +547,7 @@ void StMaker::StartMaker()
     if (!m_DataSet) {m_DataSet = new TObjectSet(".data"); Add(m_DataSet);}
   }
   /*if (GetNumber()>3)*/ 
-  if (fMemStatMake && GetNumber()>20) fMemStatMake->Start();
+  if (fMemStatMake) if (GetNumber()>20) fMemStatMake->Start();
   else              
     if (GetDebug()) printf("StMaker::StartMaker : cannot use TMemStat (no Init()) in [%s]\n",GetName());
 
@@ -554,7 +566,7 @@ void StMaker::EndMaker(int ierr)
   ::doPs(GetName(),"EndMaker");
   
   /*if (GetNumber()>3)*/ 
-  if (fMemStatMake && GetNumber()>20) fMemStatMake->Stop();
+  if (fMemStatMake) if (GetNumber()>20) fMemStatMake->Stop();
   else               
     if (GetDebug()) printf("StMaker::EndMaker : cannot use TMemStat (no Init()) in [%s]\n",GetName());
 
@@ -690,9 +702,13 @@ Int_t StMaker::Make()
 
      maker->ResetBit(kMakeBeg);
      StMkDeb::SetCurrent(curr);
-     if ((ret%10)>kStWarn) { 
+     if ((ret%10)>kStWarn) { //something unusual
+       if ((ret%10) != kStERR) 		return ret;
+///	check privilege to skip event
        fgFailedMaker = maker;
-       return ret;}
+       if (maker->IAttr(".Privilege"))	return ret;
+       continue;
+     }
      
    }
    return kStOK;
@@ -1109,7 +1125,7 @@ static void doPs(const char *who, const char *where)
   }
   if (!ps[0]) return;
   printf("QAInfo: doPs for %20s:%12s \t",who,where);
-  StMem::Print(0);
+  TMemStat::PrintMem(0);
   printf("\n");
 }
 
@@ -1151,21 +1167,120 @@ void StMaker::SetDEBUG(Int_t l)
    while ((maker = (StMaker*)nextMaker())) maker->SetDEBUG(l);
 }
 //_____________________________________________________________________________
-Int_t StMaker::InitRun(int runumber) {return 0;}
+/// SetAttr(const char *key, const char *val, const char *to)
+/// key is a keyname, val is a value
+/// key is any character string. Spaces and case are ignored
+/// The "." at the beginning is reserved for the frame work only
+/// Like ".privilege" makes maker to be priveleged, i.e to skip event
+/// by return of kStERR or kStSKIP.
+/// attribute  always inserted at the begining of existing list
+/// so the last key value overwrites the previous one for the same key
+/// to =="" or == 0 means  THIS maker
+/// to =="*" means for all makers down of the first
+/// to =="name" means for maker with this name only
+int StMaker::SetAttr(const char *key, const char *val, const char *to)
+{
+
+   int count = 0;
+   TString tk(key);tk.ToLower();tk.ReplaceAll(" ","");tk.ReplaceAll("\t","");
+   if (!val) val ="";
+   TString tv(val);tv = tv.Strip(TString::kBoth)     ;tv.ReplaceAll("\t","");
+   if (!to || !to[0]) to  =".";
+   TString tt(to );             tt.ReplaceAll(" ","");tt.ReplaceAll("\t","");
+   TString tn(tt),tc("*");
+   int idx = tt.Index("::");
+   if (idx>=0) {//Case with class name
+     tn.Replace(0  ,idx+2,""); if (!tn.Length()) tn = "*";
+     tc=tt;
+     tc.Replace(idx,999  ,""); if (!tc.Length()) tc = "*";
+   }  
+   int act=0;
+        if (tn==".") 			{act = 1;}
+   else if (tn=="*") 			{act = 5;}
+   else if (tn==GetName()) 		{act = 1;}
+   else                  		{act = 4;}
+
+        if (tc=="*")               	{act |=2;}
+   else if (InheritsFrom(tc.Data()))	{act |=2;}
+
+   TString fullName(ClassName()); fullName+="::"; fullName+=GetName();
+
+   if ((act&3)==3) { // this attribute is for this maker 
+     count++;
+     if (tv == ".remove") {
+       TObject *t = m_Attr.FindObject(tk.Data());
+       if(t){
+       Info("RemAttr","(\"%s\",\"%s\")",tk.Data(),fullName.Data());
+       m_Attr.Remove(t); delete t;}}
+     else if (tk == ".call") {
+         TString command("(("); command += ClassName(); command+="*)";
+         char buf[20]; sprintf(buf,"%p",(void*)this);
+	 command +=buf; command +=")->"; command+=tv;command+=";";
+	 gROOT->ProcessLineFast(command.Data(),0);}
+     else {
+       m_Attr.AddFirst(new TNamed(tk.Data(),tv.Data()));
+       Info("SetAttr","(\"%s\",\"%s\",\"%s\")",tk.Data(),tv.Data(),fullName.Data());}
+   }
+   if (!(act&4)) return count;
+
+//   Loop on all makers
+   TList *tl = GetMakeList();
+   if (!tl) return count;
+   
+   TIter nextMaker(tl);
+   StMaker *maker;
+   while ((maker = (StMaker*)nextMaker())) count += maker->SetAttr(tk.Data(),tv.Data(),to);
+   return count;
+}
+//_____________________________________________________________________________
+int StMaker::SetAttr(const char *key, int val, const char *to)
+{
+   TString ts; ts+=val; return SetAttr(key, ts.Data(), to);
+}
+//_____________________________________________________________________________
+int StMaker::SetAttr(const char *key, double val, const char *to)
+{
+   TString ts; ts+=val; return SetAttr(key, ts.Data(), to);
+}
+
+//_____________________________________________________________________________
+const char *StMaker::SAttr(const char *key) const
+{
+   TString ret,tey(key);
+   tey.ToLower(); tey.ReplaceAll(" ",""); tey.ReplaceAll("\t","");
+   TObject *att = m_Attr.FindObject(tey.Data());
+   return (att)? att->GetTitle():0;
+}   
+//_____________________________________________________________________________
+int StMaker::IAttr(const char *key) const
+{
+   const char *val = SAttr(key);
+   if (!val) 	return 0;
+   if (!val[0]) return 1;
+   return atoi(val);
+}
+//_____________________________________________________________________________
+double StMaker::DAttr(const char *key) const
+{
+   const char *val = SAttr(key);
+   if (!val) return 0;
+   if (!val[0]) return 1;
+   return atof(val);
+}
+
+//_____________________________________________________________________________
+Int_t StMaker::InitRun  (int runumber) {return 0;}
 //_____________________________________________________________________________
 Int_t StMaker::FinishRun(int runumber) {return 0;}
 
 //_____________________________________________________________________________
-int StMaker::Cleanup(TDataSet *ds) 
+int StMaker::Cleanup(TDataSet *&ds) 
 {
 
-   if (!ds->TestBit(TObject::kNotDeleted))	return 0;	
+   if (!ds->TObject::TestBit(TObject::kNotDeleted)) {ds=0;return 0;}	
    TSeqCollection *list = ds->TDataSet::GetCollection();
    if (!list)                        		return 0;
-   if (list->IsA()!=TList::Class() && list->IsA()!=TObjArray::Class()) {
-     Error("Cleanup","object %p Wrong fList = %p Flist ignored",ds,list);
-     						return 0;
-   }
+   assert(list->IsA()==TList::Class() || list->IsA()==TObjArray::Class()); 
 
    int kount = 0;
    TIter iter(list);
@@ -1174,21 +1289,20 @@ int StMaker::Cleanup(TDataSet *ds)
    for (int i=0; i<num; i++) {
      son = (TDataSet*)iter.Next();
      if (!son) continue;
-     if (!son->TestBit(TObject::kNotDeleted)) 	{list->Remove(son); continue;}
+     if (!son->TObject::TestBit(TObject::kNotDeleted)) 	{list->Remove(son); continue;}
      TDataSet* par = son->TDataSet::GetParent();
      if ( par != ds)				{list->Remove(son); continue;}
-     if (!son->InheritsFrom(TDataSet::Class())) {
-       Error("Cleanup","child object %p in %p is not a TDataSet",son,ds);
-       list->Remove(son); continue;}
-     if (!son->InheritsFrom(StMaker::Class())) 	continue;//Delay cleanup
+     assert (son->InheritsFrom(TDataSet::Class()));
+     if (son->InheritsFrom(StMaker::Class())) 	continue;//Delay cleanup
      kount = Cleanup(son) + 1;
    }     
    if (!ds->InheritsFrom(TObjectSet::Class()))  return kount;
    TObjectSet *os = (TObjectSet*)ds;
-   if (!os->IsOwner())				return kount;
    TObject *to = os->GetObject();
    if (!to)					return kount;
-   if (!to->TestBit(TObject::kNotDeleted))	return kount;	
+   if (!to->TObject::TestBit(TObject::kNotDeleted)) {
+     os->DoOwner(0); os->SetObject(0); 		return kount+1;}
+   if (!os->IsOwner()) {os->SetObject(0);	return kount;}
    if (!to->InheritsFrom(TDataSet::Class()))	return kount;	
    return kount + Cleanup((TDataSet*)to);   
 }
@@ -1328,6 +1442,9 @@ void StTestMaker::Print(const char *) const
 
 //_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.152  2004/09/01 22:09:51  perev
+// new methods SetAttr and IAttr,DAttr,SAttr added
+//
 // Revision 1.151  2004/08/03 00:49:03  perev
 // bug fix, wrong maker for dops name
 //

@@ -61,6 +61,7 @@ class StMessMgr;
 #endif 
 class StTestMaker;
 class StMaker : public TDataSet{
+
 public:
    typedef  enum {kNormal, kDebug} EDebugLevel;
    enum {kSTAFCV_BAD, kSTAFCV_OK, kSTAFCV_ERR=2, kSTAFCV_FATAL=3} EModule_return_Status;
@@ -115,6 +116,8 @@ public:
    virtual void         EndMaker  (int ierr);
    virtual Int_t        Finish();
    virtual Int_t        FinishRun(int oldrunumber);
+
+   
    virtual void         FatalErr(int Ierr, const char *Com);  
    virtual void         PrintInfo();
    virtual void         NotifyMe(const char *about,const void *ptr){;}
@@ -210,6 +213,8 @@ public:
    virtual void         StopTimer(){m_Timer.Stop();}
    virtual void         PrintTimer(Option_t *option="");
    virtual void         PrintTotalTime(){}
+///  special overload
+   virtual const char  *GetName() const;
 
    /// Static functions
    static  StMaker     *GetMaker(const TDataSet *ds)  ;
@@ -222,15 +227,28 @@ public:
 TObject        *GetDirObj(const char *dir) const;
 void            SetDirObj(TObject *obj,const char *dir);
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.67 2004/07/23 17:06:18 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.68 2004/09/01 22:09:56 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 protected:
    virtual TDataSet  *FindDataSet (const char* logInput,
                                     const StMaker *uppMk=0,
                                     const StMaker *dowMk=0) const ;
 
 public:
-   int Cleanup(TDataSet *ds);
+static int Cleanup(TDataSet *&ds);
 
+private:
+  TList m_Attr;		
+///< SetAttr(const char *opt,const char *for) 
+///< sets value of m_Option data member
+public:
+int         SetAttr(const char *key,const char* val,const char *to=".");
+int         SetAttr(const char *key,int         val,const char *to=".");
+int         SetAttr(const char *key,double      val,const char *to=".");
+int         RemAttr(const char *key,                const char *to=".")
+            {return SetAttr(key,".remove",to);}
+int         IAttr(const char *key) const;
+double      DAttr(const char *key) const;
+const char *SAttr(const char *key) const;
    ClassDef(StMaker, 0)   // base class to define  one step of the recontsruction chain
 };
 
@@ -267,8 +285,11 @@ ClassDef(StTestMaker,0)
 #endif
 
 
-// $Id: StMaker.h,v 1.67 2004/07/23 17:06:18 perev Exp $
+// $Id: StMaker.h,v 1.68 2004/09/01 22:09:56 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.68  2004/09/01 22:09:56  perev
+// new methods SetAttr and IAttr,DAttr,SAttr added
+//
 // Revision 1.67  2004/07/23 17:06:18  perev
 // AliasDate & AliasTime moved fro db maker to StMaker
 //
