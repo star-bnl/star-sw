@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.18 1999/08/07 20:31:22 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.19 1999/08/09 01:36:47 fine Exp $
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.19  1999/08/09 01:36:47  fine
+// MakeTable methods have been activated
+//
 // Revision 1.18  1999/08/07 20:31:22  fine
 // MakeVertex method has been introduced
 //
@@ -71,7 +74,8 @@
 #include "StHits3DPoints.h"
 #include "StVertices3DPoints.h"
 #include "StHelix3DPoints.h"
-#include "StVirtualEventFilter.h"
+#include "St_Table3Points.h"
+#include "StEvent/StVirtualEventFilter.h"
 #include "St_Table.h"
 #include "St_TableSorter.h"
 
@@ -206,6 +210,7 @@ Int_t StEventDisplayMaker::BuildGeometry()
   m_FullView = new St_NodeView(*m_Hall); 
   // Create the "open" sub-structure from the full one
   m_Sensible = new St_NodeView(m_FullView);
+  delete m_FullView; m_FullView = 0;
   printf(" drawing the STAR geometry sensible volumes and hits \n");
 
 //  Begin_Html <P ALIGN=CENTER> <IMG SRC="gif/HitsDrawFullView.gif"> </P> End_Html // 
@@ -249,6 +254,7 @@ Int_t StEventDisplayMaker::BuildGeometry()
   //_______________________________________
   printf(" Creating a new structure simplified structure\n");
   m_ShortView = new St_NodeView(m_Sensible);
+  delete m_Sensible; m_Sensible = 0;
 
   //_______________________________________
   //
@@ -408,10 +414,10 @@ Int_t StEventDisplayMaker::Make()
           continue;
         }
         if (event->InheritsFrom("St_Table") && type == 5) {
-             //  ----- Draw "table" events ----- //
-               m_Table = (St_Table *)event;      //
-               totalCounter += MakeTable();      //
-             //  ------------------------------- //
+             //  ----- Draw "table" events -------------------------- //
+               m_Table = (St_Table *)event;                           //
+               totalCounter += MakeTable((const Char_t **)positions); //
+             //  ---------------------------------------------------- //
         }
         else if (event->InheritsFrom("StEvent") && type == 1) {
              //  ---- Draw "StEvent" events ---- //
@@ -419,7 +425,7 @@ Int_t StEventDisplayMaker::Make()
                totalCounter += MakeEvent();      //
              //  ------------------------------- //
         }
-        else if (Debug()) Warning("Make","Can not draw object \"%s\"",nextObjectName); 
+        else if (Debug()) Warning("Make","Can not draw the object \"%s\"",nextObjectName); 
         delete [] nextObjectName;
      }
    }
@@ -476,7 +482,6 @@ Int_t StEventDisplayMaker::ParseName(Char_t *inName, Char_t *positions[])
          if (!positions[i]) Error("ParseName","%s",errorMessages[i-1]);
       if (nParsed < lenExpr) nParsed = 0;
     }
-
   }
   return nParsed;
 }
@@ -497,7 +502,7 @@ Int_t StEventDisplayMaker::MakeEvent()
   if (!filter || filter->IsOn() ) {
   StTpcHitCollection *hits   = m_Event->tpcHitCollection();
      hitCounter = MakeHits(hits,filter);
-     if (Debug()) printf(" TpcHitCollection: %d \n", hitCounter);
+     if (Debug()) printf(" TpcHitCollection: %d hits\n", hitCounter);
      total += hitCounter;
   }
 
@@ -505,7 +510,7 @@ Int_t StEventDisplayMaker::MakeEvent()
   if (!filter || filter->IsOn() ) {
      StFtpcHitCollection *hits   = m_Event->ftpcHitCollection();
      hitCounter = MakeHits(hits,filter);
-     if (Debug()) printf(" FtpcHitCollection: %d \n", hitCounter);
+     if (Debug()) printf(" FtpcHitCollection: %d hits\n", hitCounter);
      total += hitCounter;
   }
 
@@ -513,7 +518,7 @@ Int_t StEventDisplayMaker::MakeEvent()
   if (!filter || filter->IsOn() ) {
      StSvtHitCollection *hits   = m_Event->svtHitCollection();
      hitCounter = MakeHits(hits,filter);
-     if (Debug()) printf(" SvtHitCollection: %d \n", hitCounter);
+     if (Debug()) printf(" SvtHitCollection: %d hits\n", hitCounter);
      total += hitCounter;
   }
 
@@ -521,7 +526,7 @@ Int_t StEventDisplayMaker::MakeEvent()
   if (!filter || filter->IsOn() ) {
     StEmcTowerHitCollection *hits   = m_Event->emcTowerHitCollection();
     hitCounter = MakeHits(hits,filter);
-    if (Debug()) printf(" EmcTowerHitCollection: %d \n", hitCounter);
+    if (Debug()) printf(" EmcTowerHitCollection: %d hits\n", hitCounter);
     total += hitCounter;
   }
 
@@ -529,7 +534,7 @@ Int_t StEventDisplayMaker::MakeEvent()
   if (!filter || filter->IsOn() ) {
     StEmcPreShowerHitCollection *hits   = m_Event->emcPreShowerHitCollection();
     hitCounter = MakeHits(hits,filter);
-    if (Debug()) printf(" EmcPreShowerHitCollection: %d \n", hitCounter);
+    if (Debug()) printf(" EmcPreShowerHitCollection: %d hits\n", hitCounter);
     total += hitCounter;
   } 
 
@@ -537,7 +542,7 @@ Int_t StEventDisplayMaker::MakeEvent()
   if (!filter || filter->IsOn() ) {
     StSmdPhiHitCollection *hits   = m_Event->smdPhiHitCollection();
     hitCounter = MakeHits(hits,filter);
-    if (Debug()) printf(" SmdPhiHitCollection: %d \n", hitCounter);
+    if (Debug()) printf(" SmdPhiHitCollection: %d hits\n", hitCounter);
     total += hitCounter;
   }
 
@@ -545,7 +550,7 @@ Int_t StEventDisplayMaker::MakeEvent()
   if (!filter || filter->IsOn() ) {
     StSmdEtaHitCollection *hits   = m_Event->smdEtaHitCollection();
     hitCounter = MakeHits(hits,filter);
-    if (Debug()) printf(" SmdEtaHitCollection: %d \n", hitCounter);
+    if (Debug()) printf(" SmdEtaHitCollection: %d hits\n", hitCounter);
     total += hitCounter;
   }
 
@@ -553,7 +558,7 @@ Int_t StEventDisplayMaker::MakeEvent()
   if (!filter || filter->IsOn() ) {
     StVertexCollection *vertices   = m_Event->vertexCollection();
     hitCounter =  MakeVertices(vertices,filter);
-    if (Debug()) printf(" VertexCollection: %d \n", hitCounter);
+    if (Debug()) printf(" VertexCollection: %d vertices\n", hitCounter);
     total += hitCounter;
   }
 
@@ -561,7 +566,7 @@ Int_t StEventDisplayMaker::MakeEvent()
   if (!filter || filter->IsOn() ) {
     StVertex  *vertex   = m_Event->primaryVertex();
     hitCounter =  MakeVertex(vertex,filter);
-    if (Debug()) printf(" Primary Vertex: %d \n", hitCounter);
+    if (Debug()) printf(" Primary Vertex: %d vertex\n", hitCounter);
     total += hitCounter;
   }
 
@@ -709,67 +714,65 @@ Int_t StEventDisplayMaker::MakeTracks( StGlobalTrack *globTrack,StVirtualEventFi
 }
 
 //_____________________________________________________________________________
-Int_t StEventDisplayMaker::MakeTable()
+Int_t StEventDisplayMaker::MakeTable(const Char_t **positions)
 {
   StVirtualEventFilter *filter = 0;
   Int_t tableCounter = 0;
 
   filter = (StVirtualEventFilter *)m_FilterArray->At(kTable);
   if (!filter || filter->IsOn() ) {
-     tableCounter = MakeTableHits(m_Table,filter);
+     tableCounter = MakeTableHits(m_Table,filter,positions[0],&positions[1]);
      if (Debug()) printf(" St_Table: %d \n", tableCounter);
   }
   return tableCounter;
 }
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::MakeTableHits(const St_Table *points,StVirtualEventFilter *filter
-   // ,const Char_t *keyColumn,const Char_t *keyPositions[]
+                                        ,const Char_t *keyColumn,const Char_t *keyPositions[]
 )
 {
-#if 0
+  Int_t totalHits = 0;
+#if 1
   St_Table &ttt = *((St_Table *)points);
-  TString tr;
-  tr = keyColumn(); 
-  ULong_t keyOffset = GetKeyOffset();
-//  g2t_tpc_hit_st *p = points->GetTable();
-   const Char_t *p = points->GetArray();
+  TString tr = keyColumn; 
   if (ttt.GetNRows() ) {
     St_TableSorter *track2Line = new St_TableSorter (ttt,tr);
     m_TableCollector->Add(track2Line);    // Collect to remove  
-
     Int_t   hitCounter = 0;
     Color_t hitColor = kGreen;
     Style_t hitStyle = 1;
     Width_t hitSize  = 2;
-
-    // -------------------------- hits filter ---------------------------- //
-    if (filter) hitColor =  filter->Filter(track2Line,i,hitSize,hitStyle); //
-    // ------------------------------------------------------------------- //
-    if (hitColor > 0) {
-        g2t_tpc_hit_st *hitPoint = 0;
-        hitPoint = p + (points->GetRowSize())*track2Line->GetIndex(i);
-        long newId = hitPoint + keyOffset;
-        St_Table3Points *hitsPoints =  new St_Table3Points(track2Line,
-                                            (const void *)&newId,
-                                            keyPositions[0],keyPositions[1],keyPositions[2]);
-
-        m_HitCollector->Add(hitsPoints);    // Collect to remove  
+    Int_t i = 0;
+    Int_t nextKeyIndx = 0;
+    for (i=0;i<track2Line->CountKeys();i++) 
+    {
+       const void *newID = track2Line->GetKeyAddress(nextKeyIndx);
+       nextKeyIndx       = track2Line->CountKey(newID,nextKeyIndx,kFALSE); 
+       // -------------------------- hits filter ---------------------------- //
+       if (filter) hitColor =  filter->Filter(track2Line,i,hitSize,hitStyle); //
+       // ------------------------------------------------------------------- //
+       if (hitColor > 0) {
+           St_Table3Points *hitsPoints =  new St_Table3Points(track2Line,
+                                             newID,
+                                             keyPositions[0],keyPositions[1],keyPositions[2]);
+         m_HitCollector->Add(hitsPoints);    // Collect to remove  
          St_PolyLineShape *hitsShape   = new St_PolyLineShape(hitsPoints);
-         hitsShape->SetVisibility(1);        hitsShape->SetLineColor(hitColor);
-         hitsShape->SetMakerStyle(hitStyle);  hitsShape->SetLineWidth(hitSize);
-       // Create a node to hold it
-       St_Node *thisHit = new St_Node("hits",points->GetName(),hitsShape);
-         thisHit->Mark();
-         thisHit->SetVisibility();
-       St_NodePosition *pp = m_EventsNode->Add(thisHit); 
-       if (!pp && hitCounter) {
-          printf(" no track position %d\n",hitCounter);
+         hitsShape->SetVisibility(1);            hitsShape->SetColorAttribute(hitColor);
+         hitsShape->SetStyleAttribute(hitStyle); hitsShape->SetSizeAttribute(hitSize);
+         // Create a node to hold it
+         St_Node *thisHit = new St_Node("tableHits",points->GetName(),hitsShape);
+           thisHit->Mark();
+           thisHit->SetVisibility();
+         St_NodePosition *pp = m_EventsNode->Add(thisHit); 
+         if (!pp && hitCounter) {
+           printf(" no track position %d\n",hitCounter);
+         }
+         totalHits += nextKeyIndx;
        }
-       return hitColor;
-    }
-  }
+     }
+   }
 #endif
-  return 0;
+   return totalHits;
 }
 
 //________________________________
