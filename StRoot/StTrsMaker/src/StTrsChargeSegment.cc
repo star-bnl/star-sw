@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.21 2000/01/10 23:14:30 lasiuk Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.22 2000/01/31 20:38:33 lasiuk Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.22  2000/01/31 20:38:33  lasiuk
+ * namespace for HP (random_shuffle)
+ *
  * Revision 1.21  2000/01/10 23:14:30  lasiuk
  * Include MACROS for compatiblity with SUN CC5
  *
@@ -91,7 +94,9 @@
 #include <algorithm>
 #if  defined(__SUNPRO_CC) && __SUNPRO_CC < 0x500
 #include <ospace/stl/src/randgen.cpp>
-#else
+#endif
+
+#ifndef ST_NO_NAMESPACES
 using std::random_shuffle;
 #endif
 
