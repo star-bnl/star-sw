@@ -1,5 +1,8 @@
-* $Id: tcl_get_row_seq.F,v 1.4 1999/07/19 16:28:00 genevb Exp $
+* $Id: tcl_get_row_seq.F,v 1.5 1999/10/05 00:47:04 snelling Exp $
 * $Log: tcl_get_row_seq.F,v $
+* Revision 1.5  1999/10/05 00:47:04  snelling
+* the tdc range saga continues
+*
 * Revision 1.4  1999/07/19 16:28:00  genevb
 * Edited some messages
 *
@@ -146,6 +149,9 @@ c
 	INTEGER PAD
 	INTEGER TDC
 
+c message call related variables
+        character*132 m132
+
 C----------------------------------------------------------------------
 c Hypothetical functions:
 c	INTEGER TPG_Nrows_in_Sector
@@ -210,7 +216,9 @@ c
 c
 c Check for overrun of the local array:
                  IF ( Nseqs+1 .GT. Nseqs_max ) THEN
-                    call StError('TCL_GET_ROW_SEQ - Nseqs_max is too small')
+                    write(132,*) 
+     &                   'TCL_GET_ROW_SEQ - Nseqs_max is too small'
+                    call StError(132)
                     TCL_Get_Row_Seq = .FALSE. !Fail.
                     RETURN
                  END IF

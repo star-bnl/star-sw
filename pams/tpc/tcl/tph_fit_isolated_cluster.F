@@ -1,5 +1,8 @@
-* $Id: tph_fit_isolated_cluster.F,v 1.16 1999/10/01 03:16:57 snelling Exp $
+* $Id: tph_fit_isolated_cluster.F,v 1.17 1999/10/05 00:47:10 snelling Exp $
 * $Log: tph_fit_isolated_cluster.F,v $
+* Revision 1.17  1999/10/05 00:47:10  snelling
+* the tdc range saga continues
+*
 * Revision 1.16  1999/10/01 03:16:57  snelling
 * changed range for TDC from 1-512 to 0-511 (itdc_lo, itdc_hi) also in comments
 *
@@ -185,51 +188,53 @@ c passed outputs
 C-----------------------------------------------------------------------
 c local variables:
 c 
-        integer nbuck_max             ! Total number of time buckets
-        integer nmc_tracks_max        ! Max. number of MC tracks
-        integer npads_max             ! Largest number of pads in any row
+        integer nbuck_max       ! Max range of time buckets
+        integer nbuck           ! Total number of time buckets
+        integer nmc_tracks_max  ! Max. number of MC tracks
+        integer npads_max       ! Largest number of pads in any row
 c
-        parameter(nbuck_max=512)
-        parameter(nmc_tracks_max=2000)
-        parameter(npads_max=182)
+        parameter(nbuck_max = 511)
+        parameter(nbuck = 512)
+        parameter(nmc_tracks_max = 2000)
+        parameter(npads_max = 182)
 c
-        integer imax                  ! Index for local maxima found
-        integer imc_track(nmc_tracks_max)   ! List of MC track ID's
-        integer indx                  ! General index
-        integer ipad_ipix             ! Pad for pixel
-        integer ipad_range            ! Number of pads in cluster
-        integer ipix                  ! Cluster pixel index
-        integer ir                    ! Index of cluster moments
-        integer iret                  ! general return status indication
-        integer itdc_ipix             ! Time bucket for pixel
-        integer ktrk                  ! Temp. MC track number 
-        integer mtrk                  ! Index for nocc_track array
-        integer nmc_tracks            ! Number of MC tracks
-        integer nocc_track(nmc_tracks_max)  ! Number of pixels on MC track
-        integer pad_n                 ! Pad index
+        integer imax            ! Index for local maxima found
+        integer imc_track(nmc_tracks_max) ! List of MC track ID's
+        integer indx            ! General index
+        integer ipad_ipix       ! Pad for pixel
+        integer ipad_range      ! Number of pads in cluster
+        integer ipix            ! Cluster pixel index
+        integer ir              ! Index of cluster moments
+        integer iret            ! general return status indication
+        integer itdc_ipix       ! Time bucket for pixel
+        integer ktrk            ! Temp. MC track number 
+        integer mtrk            ! Index for nocc_track array
+        integer nmc_tracks      ! Number of MC tracks
+        integer nocc_track(nmc_tracks_max) ! Number of pixels on MC track
+        integer pad_n           ! Pad index
 c
-        real adc_ipix                 ! ADC for pixel
-        real adc_sum                  ! ADC sum in cluster
-        real b                        ! Intercept of linear fit
-        real badness                  ! "Badness" of linear fit
-        real d_rvec(nbuck_max)        ! temp array
-        real d_rvec_cor(nbuck_max)    ! SCA noise
-        real d_rvec_uncor(nbuck_max)  ! SAS noise
-        real diff(4)                  ! Temp. values for effic.
-        real identity_vector(npads_max)  ! useful for x-axis of proj.
-        real numpix_pad_proj(npads_max)  ! Sum of pixels used in proj.
-        real z_vector(nbuck_max)      ! Z's for every time bin in cluster.
-        real zdummy                   ! Local debug aid
-        real pad_proj(npads_max)      ! Pad projection of cluster
-        real rmu(4)                   ! Cluster moments
-        real rvec(nbuck_max)          ! temp array
-        real slope                    ! Slope of linear fit
-        real tdc_x_adc(npads_max)     ! Sum of tdc*adc of cluster
-        real bucket_length_in         ! length (cm) of inner sector time bucket
-        real bucket_length_out        ! length (cm) of outer sector time bucket
-c
-        logical first                 ! .T. iff first call
-        logical lookat_mc             ! Look at Monte Carlo info.
+        real adc_ipix           ! ADC for pixel
+        real adc_sum            ! ADC sum in cluster
+        real b                  ! Intercept of linear fit
+        real badness            ! "Badness" of linear fit
+        real d_rvec(nbuck)      ! temp array
+        real d_rvec_cor(nbuck)  ! SCA noise
+        real d_rvec_uncor(nbuck) ! SAS noise
+        real z_vector(nbuck)    ! Z's for every time bin in cluster.
+        real rvec(nbuck)        ! temp array
+        real diff(4)            ! Temp. values for effic.
+        real identity_vector(npads_max) ! useful for x-axis of proj.
+        real numpix_pad_proj(npads_max) ! Sum of pixels used in proj.
+        real zdummy             ! Local debug aid
+        real pad_proj(npads_max) ! Pad projection of cluster
+        real rmu(4)             ! Cluster moments
+        real slope              ! Slope of linear fit
+        real tdc_x_adc(npads_max) ! Sum of tdc*adc of cluster
+        real bucket_length_in   ! length (cm) of inner sector time bucket
+        real bucket_length_out  ! length (cm) of outer sector time bucket
+c     
+        logical first           ! .T. iff first call
+        logical lookat_mc       ! Look at Monte Carlo info.
 
 C-----------------------------------------------------------------------
 c functions:
@@ -263,7 +268,7 @@ c set up the identity vector for x (pad) calculation
               identity_vector(indx) = float(indx)
            enddo
 cliq           lookat_mc = (tclpar(1).mc.eq.1)
-           lookat_mc = (tclpar(1).mc.ge.1)
+           lookat_mc = (tclpar(1).mc .ge. 1)
 c get difference in z-positions for two randomly selected pixels:
            iret=tgc_time_to_z(50,50,5,5,zdummy) 
            if(iret.eq.1)bucket_length_in = zdummy
@@ -291,7 +296,7 @@ c
         end do
 c
         adc_sum = 0.
-        do ipix=1,nclspix
+        do ipix = 1,nclspix
            adc_ipix = FLOAT(iadc(ipix))
            adc_sum = adc_sum + adc_ipix
            ipad_ipix = ipad(ipix)
@@ -303,23 +308,19 @@ C pad direction projection
      +                          + FLOAT(itdc_ipix)*adc_ipix
            numpix_pad_proj(ipad_ipix)  = numpix_pad_proj(ipad_ipix)+1.
 C time direction no longer a projection - WAL 13 Feb 98
-           if(ipix.le.nbuck_max) then
-             iret=tgc_time_to_z(itdc_ipix,ipad_ipix,irow,isec,zdummy) 
-             z_vector(ipix) = 0.0
-             if(iret.eq.1)z_vector(ipix) = zdummy
+           if(ipix .le. nbuck) then
+              iret=tgc_time_to_z(itdc_ipix,ipad_ipix,irow,isec,zdummy) 
+              z_vector(ipix) = 0.0
+              if(iret .eq. 1) z_vector(ipix) = zdummy
            endif
         enddo
-	if (adc_sum.eq.0.) then
+	if (adc_sum .eq. 0.) then
 c        changed StError Message to limit both lines with one call
-         write(m132(1),*)'TPHAM - Hey -- ADCSUM=0!!!!'
-         write(m132(2),*) 'number of pixels in cluster = ',nclspix
-         call Message(m132,2,-1)
-cIS 08/07 commented the following two lines as a potential source of
-c         writting past the array boundary
-c         write(m132,*) 'ADC vaulues = ',(iadc(ir),ir=1,nclspix)
-c         call StError(m132)
-         ierr = 1
-         return
+           write(m132(1),*)'TPHAM - Hey -- ADCSUM=0!!!!'
+           write(m132(2),*) 'number of pixels in cluster = ',nclspix
+           call Message(m132,2,-1)
+           ierr = 1
+           return
         endif
 c mal 30aug97 - maybe a problem with decon=0 running - does this 
 c screw up for very wide clusters??????????
@@ -359,20 +360,10 @@ C
           mu4(1) = rmu(4)/rmu(2)**2 - 3.
         endif
         mu5(1) = float(ipad_range)
-C------------------------------------------------------------------
-c mal 30aug97 - just put the damn things to zero-- they seem to be randomly
-c assigned if not!!
-c	mu1(1) = 0.0
-c	mu2(1) = 0.0
-c	mu3(1) = 0.0
-c	mu4(1) = 0.0
-c	mu5(1) = 0.0
-
-c     q:
         qq(1) = adc_sum
 
 c x,dx,prf: - try 3-point gauss... if does not work, do weighted mean
-        do indx=ipad_lo,ipad_hi
+        do indx = ipad_lo,ipad_hi
            rvec(indx) = pad_proj(indx)
            if (pad_proj(indx).ne.0.) then
               d_rvec(indx) = numpix_pad_proj(indx)
@@ -401,9 +392,8 @@ cmal     +       call tph_weighted_mean(identity_vector, rvec,
 c z,dz,zrf: - do weighted mean
 c  for uncertainties, see notebook2 p113
 c
-        loop_over_z=nclspix
-        if(loop_over_z.gt. nbuck_max)
-     +  loop_over_z=nbuck_max
+        loop_over_z = nclspix
+        if(loop_over_z .gt. nbuck) loop_over_z=nbuck
         do indx=1,loop_over_z
            rvec(indx) = float(iadc(indx))
            d_rvec_cor(indx) = filtered_noise
@@ -411,7 +401,7 @@ c
         enddo
         call tph_weighted_mean(z_vector, rvec,
      +       d_rvec_cor, d_rvec_uncor,
-     +       1, loop_over_z, nbuck_max,
+     +       1, loop_over_z, nbuck,
      +       centroid, sigma, uncertainty)
 c
         z(1) = centroid
@@ -447,10 +437,6 @@ c track: - who contributed the most pixels (MC data)
 c this following is only useful for MC data-- turn it off with 
 c  switch if interested in real data (or real data performance)
         if (lookat_mc) then
-c
-c RRB: Replace this, initializing, then clearing the used space afterwards:
-c          call vzero(imc_track,nmc_tracks_max)
-c          call vzero(nocc_track,nmc_tracks_max)
            nmc_tracks = 0
            do ipix=1,nclspix
               ktrk=itrk(ipix)
@@ -461,7 +447,8 @@ c          call vzero(nocc_track,nmc_tracks_max)
                     imc_track(nmc_tracks) = ktrk
                     nocc_track(nmc_tracks) = 1
                  else           ! too many contributing tracks... forget it
-                    call StMessage('TPHAM-I-2MANY, ntrk.gt.max')
+                    write(m132,*) 'TPHAM-I-2MANY, ntrk.gt.max'
+                    call StMessage(m132)
                  endif
               else
                  nocc_track(mtrk) = nocc_track(mtrk)+1

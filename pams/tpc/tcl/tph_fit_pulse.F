@@ -1,5 +1,8 @@
-* $Id: tph_fit_pulse.F,v 1.2 1999/07/17 00:32:07 genevb Exp $
+* $Id: tph_fit_pulse.F,v 1.3 1999/10/05 00:47:13 snelling Exp $
 * $Log: tph_fit_pulse.F,v $
+* Revision 1.3  1999/10/05 00:47:13  snelling
+* the tdc range saga continues
+*
 * Revision 1.2  1999/07/17 00:32:07  genevb
 * Use StMessMgr
 *
@@ -84,6 +87,10 @@ c
 	real y1, y2, y3
 
         logical retry                 ! .T. iff first try at solution
+
+c message call related variables
+        CHARACTER*132 m132
+
 C-----------------------------------------------------------------------
 c functions:
 c
@@ -145,7 +152,8 @@ c       B = (rat)**(1.0/float(N))	! for arbitrary N
 
         return
  99     continue                ! failure...
-        call StWarning('TPH_FIT_PULSE failure; going to mean')
+	write(m132,*) 'TPH_FIT_PULSE failure; going to mean'
+        call StWarning(m132)
 c this should be fixed before using for real-----v
         call tph_weighted_mean(tseq, aseq,
      +       daseq, daseq,

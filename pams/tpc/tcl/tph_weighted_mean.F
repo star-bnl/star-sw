@@ -1,5 +1,8 @@
-* $Id: tph_weighted_mean.F,v 1.2 1998/07/22 23:15:33 hardtke Exp $
+* $Id: tph_weighted_mean.F,v 1.3 1999/10/05 00:47:15 snelling Exp $
 * $Log: tph_weighted_mean.F,v $
+* Revision 1.3  1999/10/05 00:47:15  snelling
+* the tdc range saga continues
+*
 * Revision 1.2  1998/07/22 23:15:33  hardtke
 * fix NaN bug in tphit table
 *
@@ -111,3 +114,4 @@ c  is estimated below...
 
 	return
 	end
+

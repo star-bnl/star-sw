@@ -1,5 +1,8 @@
-* $Id: tgc_z_to_time.F,v 1.6 1999/07/27 15:27:02 sakrejda Exp $
+* $Id: tgc_z_to_time.F,v 1.7 1999/10/05 00:48:17 snelling Exp $
 * $Log: tgc_z_to_time.F,v $
+* Revision 1.7  1999/10/05 00:48:17  snelling
+* the tdc range saga continues
+*
 * Revision 1.6  1999/07/27 15:27:02  sakrejda
 * time to z and z to time changed to match Tom's notation, easier to follow, phase forced to 0, it has to be added to the tpg_detector table
 *
@@ -59,7 +62,7 @@ C     time - time bucket number
       zoff=0
       if(padrow.lt.14)zoff=z_offset
 c      time=((z+zoff)/vdrift + t0_offset)*clock_local+1.0
-       time=int(z*clock_local/vdrift - t0_offset*clock_local)+1 ! HL,IS 7/25/99
+       time=int(z*clock_local/vdrift - t0_offset*clock_local) ! HL,IS 7/25/99
 
       tgc_z_to_time = STAFCV_OK      
 

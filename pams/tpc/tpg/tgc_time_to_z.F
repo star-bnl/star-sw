@@ -1,5 +1,8 @@
-* $Id: tgc_time_to_z.F,v 1.6 1999/07/27 15:27:00 sakrejda Exp $
+* $Id: tgc_time_to_z.F,v 1.7 1999/10/05 00:48:17 snelling Exp $
 * $Log: tgc_time_to_z.F,v $
+* Revision 1.7  1999/10/05 00:48:17  snelling
+* the tdc range saga continues
+*
 * Revision 1.6  1999/07/27 15:27:00  sakrejda
 * time to z and z to time changed to match Tom's notation, easier to follow, phase forced to 0, it has to be added to the tpg_detector table
 *
@@ -37,12 +40,12 @@ C     z - z coodinate in the local coordinate system
       integer tgc_z_inner_offset
       integer tgc_trigger_offset
       integer iret, pad, padrow, sector, time
-
+      
       real dummy1, dvel, clock, z
       real dvel_local, clock_local, t0_offset, trigger_offset
       real z_inner_offset, z_offset, zoff
       save
-
+      
       if (flag.eq.1) then
          flag=0
          iret = tgc_drift_velocity(dvel, dummy1, dummy1)
@@ -56,13 +59,14 @@ C     z - z coodinate in the local coordinate system
          t0_offset    = trigger_offset
       endif
 *     iret = tgc_t0(t0, pad, padrow, sector, dummy1, dummy1)
-
-
+      
+      
       zoff=0
       if(padrow.lt.14)zoff=z_offset
 c     t0_offset has to be a multiple of a time-bin duration.      
-      z = dvel_local*float(time-1.0)/clock_local + t0_offset*dvel_local - zoff
-
+      z = dvel_local*float(time) / clock_local + 
+     &     t0_offset*dvel_local - zoff
+      
       tgc_time_to_z = STAFCV_OK      
 
       end

@@ -1,5 +1,8 @@
-* $Id: tph_get_cluster_data.F,v 1.5 1999/10/01 03:16:57 snelling Exp $
+* $Id: tph_get_cluster_data.F,v 1.6 1999/10/05 00:47:14 snelling Exp $
 * $Log: tph_get_cluster_data.F,v $
+* Revision 1.6  1999/10/05 00:47:14  snelling
+* the tdc range saga continues
+*
 * Revision 1.5  1999/10/01 03:16:57  snelling
 * changed range for TDC from 1-512 to 0-511 (itdc_lo, itdc_hi) also in comments
 *
@@ -125,7 +128,7 @@ c
 	integer numseq_factor         ! Decoding constant for tppixel
 	integer tdc_factor            ! Decoding constant for tppixel
 c
-        parameter (nbuck_max=512)
+        parameter (nbuck_max=511)
         parameter (npads_max=182)
 	parameter (numseq_factor='100000'X)
 	parameter (tdc_factor='400'X)
@@ -141,6 +144,10 @@ C
         integer nclpix_max            ! Max. pixels in cluster
         integer local_tdc_low
         integer local_tdc_high
+
+c message call related variables
+        character*132 m132
+
 c
 c 24mar95 -now data is packed in a new way in tppixel
 C-----------------------------------------------------------------------
@@ -150,7 +157,7 @@ C-----------------------------------------------------------------------
         ipad_lo = npads_max
         ipad_hi = 1
         itdc_lo = nbuck_max
-        itdc_hi = 1
+        itdc_hi = 0
         do kseq = jseq, jseq+nseq-1
            jpix = tpseq(kseq).jpix
            local_tdc_low=tpseq(kseq).tdc_low
@@ -159,9 +166,10 @@ C-----------------------------------------------------------------------
            
            iclspix = iclspix + 1
 
-	   if (iclspix.gt.nclpix_max) then
-	     call StError('TPHAM-!-TMP too many pixels!')
-	     return
+	   if (iclspix .gt. nclpix_max) then
+              write(132,*) 'TPHAM-!-TMP too many pixels!'
+              call StError(132)
+              return
 	   endif
 
            ldatum = pixel_data(jpix).data
@@ -170,11 +178,11 @@ c          for MC data!
 c
            itrk(iclspix) = 0
 c new way to unpack data
-*           kseqpix = tpseq(kseq).tdc_hi - tpseq(kseq).tdc_low
+c           kseqpix = tpseq(kseq).tdc_hi - tpseq(kseq).tdc_low
 CDH           kseqpix = local_tdc_high -local_tdc_low
            kseqpix = local_tdc_high -local_tdc_low + 1
          
-*           itdc(iclspix) = tpseq(kseq).tdc_low
+c           itdc(iclspix) = tpseq(kseq).tdc_low
            itdc(iclspix) = local_tdc_low
            iadc(iclspix) = ldatum
 c
@@ -191,9 +199,10 @@ C
 C Step through one sequence on one pad:
            do indx = jpix+1, jpix+kseqpix-1
               iclspix = iclspix + 1
-	      if (iclspix.gt.nclpix_max) then
-	        call StError('TPHAM-!-TMP too many pixels!')
-	        return
+	      if (iclspix .gt. nclpix_max) then
+                 write(132,*) 'TPHAM-!-TMP too many pixels!'
+                 call StError(132)
+                 return
 	      endif
               ldatum = pixel_data(indx).data
               itdc(iclspix) = itdc(iclspix-1)+1

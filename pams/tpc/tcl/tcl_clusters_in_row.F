@@ -1,5 +1,8 @@
-* $Id: tcl_clusters_in_row.F,v 1.9 1999/09/30 20:38:35 snelling Exp $
+* $Id: tcl_clusters_in_row.F,v 1.10 1999/10/05 00:47:03 snelling Exp $
 * $Log: tcl_clusters_in_row.F,v $
+* Revision 1.10  1999/10/05 00:47:03  snelling
+* the tdc range saga continues
+*
 * Revision 1.9  1999/09/30 20:38:35  snelling
 * changed TDC range back from 1-512 to 0-511
 *
@@ -195,11 +198,11 @@ c
         integer npixel_pad, number_of_pads, number_of_sequences
         integer iipad, sequence_break, length_of_sequence
         integer pad_break
+
 c message call related variables
         integer IDE2
         data    IDE2 /0/
         save    IDE2
-
         character*132 m132
 
 c These are returned by tcl_get_row_seq describing seq. on this padrow:
@@ -237,13 +240,16 @@ c
 
 c see if it is worth it first...
         if (tpcluster_h.nok.ge.tpcluster_h.maxlen) then		!!!VP /eq/ge/
-           write(m132,*)'TPCLUSTER table full - not searching sec,row',sector,row
+           write(m132,*)
+     &          'TPCLUSTER table full - not searching sec,row'
+     &          ,sector,row
            call StWarning(m132)
            return
         endif
 
         if (tpseq_h.nok.ge.tpseq_h.maxlen) then			!!!VP /eq/ge/
-           write(m132,*)'TPSEQ table full - not searching sec,row',sector,row
+           write(m132,*)
+     &          'TPSEQ table full - not searching sec,row',sector,row
            call StError(m132)
            return
         endif
@@ -272,7 +278,8 @@ CDH now loop over all pads in this row and sequences on these pads
 CIS raw_row(row_table).ipad is unsigned short but it can be at most
 C   3941, sth must be very wrong...
         if(raw_row(row_table).ipad.lt.0) then
-           write(m132,*) "Bad value for raw_row.ipad",raw_row(row_table).ipad
+           write(m132,*) "Bad value for raw_row.ipad",
+     &          raw_row(row_table).ipad
            call StError(m132)
            stop
         endif
@@ -437,7 +444,7 @@ c look to right of seed, unless this is already the right-hand limit:
 		  nseq_in_cluster = nseq_in_cluster+1
                   if (nseq_in_cluster.gt.max_nseq_in_cluster) then
                      nseq_in_cluster = max_nseq_in_cluster
-                     write(m132,*)'TCL_Get_Row_Seq-E2 '
+                     write(m132,*) 'TCL_Get_Row_Seq-E2 '
      +                    //'too many connected sequences - '
      +                    //'breaking into >1 cluster'
                      call Message(m132,1, IDE2 )
@@ -464,7 +471,9 @@ c ok, at this point, all sequences in cluster have had their chance to be seed.
 c  The cluster is finished... store it...
 
 	if (nseq_in_cluster.eq.0) then	! should not happen!
-	  call StError('Hey--- ERROR in clustering algorithm! do not ignore!')
+           write(m132,*) 
+     &          'ERROR in clustering algorithm! do not ignore!'
+	  call StError(m132)
 	endif
 
 	if (nseq_in_cluster.ge.2) then	! do not store 1-sequence "clusters"
