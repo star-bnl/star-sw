@@ -1,5 +1,8 @@
-* $Id: bfc.kumac,v 1.37 1998/08/24 23:36:43 kathy Exp $
+* $Id: bfc.kumac,v 1.38 1998/08/25 00:20:16 kathy Exp $
 * $Log: bfc.kumac,v $
+* Revision 1.38  1998/08/25 00:20:16  kathy
+* put in Lanny's changes: now have dpnt, desum working
+*
 * Revision 1.37  1998/08/24 23:36:43  kathy
 * cleaned up
 *
@@ -134,6 +137,11 @@
 *                                     fpt - ftpc tracking
 *                                     fte - ftpc track evaluator
 * 
+* 
+* editted 8/24/98 K. Turner - put in changes from Lanny:
+*                               ==> chain name/module
+*                                   dpnt  - dst point filler
+*                                   desum - dst event summary - now works
 * 
 * ******************************************************************************
 * -- DICTIONARY OF INPUTS TO BFC.KUMAC --

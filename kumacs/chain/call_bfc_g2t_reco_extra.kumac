@@ -14,14 +14,17 @@
 * - not yet added in:
 *    fss,fcl,dmhrd,desum,drsum,trg
 * 
+* 8/24/98 L. Ray
+* - added dpnt, desum and removed emc and jet which are not yet working
 * 
+* ***********************************************************************
  exec $STAR/kumacs/chain/bfc _
    TOP=$STAR _
    tpc_sector_first=1 _
    tpc_sector_last=24 _
    gstar_settings=' field_only' _
    domain=' geometry sim/g2t tpc svt ftpc mwc ctf emc global ' _
-   chain='  fzin rg2t svg tpg tss tcl srs sgr tpt tte_e tid ffs fpt fte ctf mwc emc evr svm egr ev0 jet ddedx dmsft evout' _
+   chain='  fzin rg2t svg tpg tss tcl srs sgr tpt tte_e tid ffs fpt fte ctf mwc evr svm egr ev0 ddedx dpnt desum dmsft evout' _
    first=1 _
    no_events=1 _
    input_data_prefix=/star/mds/data/SD98/auau200/bfc/central/hijing/set0001/regular/tss/ _
