@@ -5,8 +5,8 @@
 * This is a general EMCSpectra class
 ***********************************************************************/
 #include "StEmcSpectra.h"
-#include <iostream.h>
-#include <math.h>
+#include "iostream.h"
+#include "math.h"
 #include "emc_def.h"
 #include "TCanvas.h"
 #include "TH1.h"
@@ -388,7 +388,9 @@ TArrayF StEmcSpectra::ReBin(Int_t position,Float_t a,Float_t b)
           {
             temp[ici]+=((Float_t)(ici+1)-ci)*adcvalue/a;
             temp[icf]+=(cf-(Float_t)icf)*adcvalue/a;
-            if(abs(icf-ici)>1)
+            Int_t tmp = icf-ici;
+            if(tmp<0) tmp=ici-icf;
+            if(tmp>1)
               for(Int_t j=ici+1;j<=icf-1;j++)
                 temp[j]+=adcvalue/a;
           }
