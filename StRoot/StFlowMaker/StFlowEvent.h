@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.h,v 1.37 2002/02/13 22:29:28 posk Exp $
+// $Id: StFlowEvent.h,v 1.38 2002/03/14 18:51:50 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -85,6 +85,8 @@ public:
   void SetUncorrNegMult(const UInt_t&);
   void SetMultEta(const UInt_t&);
   void SetCentrality(const UInt_t&);
+  void SetCentralityYear2AuAuFull(const UInt_t&);
+  void SetCentralityYear2AuAuHalf(const UInt_t&);
   void SetVertexPos(const StThreeVectorF&);
   void SetCTB(const Float_t ctb);
   void SetZDCe(const Float_t zdce);
@@ -343,6 +345,9 @@ inline void StFlowEvent::SetEtaWgt(Bool_t EtaWgt) { mEtaWgt = EtaWgt; }
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.h,v $
+// Revision 1.38  2002/03/14 18:51:50  snelling
+// Added new centralities
+//
 // Revision 1.37  2002/02/13 22:29:28  posk
 // Pt Weight now also weights Phi Weights. Added Eta Weight, default=FALSE.
 //

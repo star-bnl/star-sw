@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.30 2002/02/13 22:29:21 posk Exp $
+// $Id: StFlowEvent.cxx,v 1.31 2002/03/14 18:51:49 snelling Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -775,6 +775,44 @@ void StFlowEvent::SetCentrality(const UInt_t& tracks) {
 
 //-----------------------------------------------------------------------
 
+void StFlowEvent::SetCentralityYear2AuAuFull(const UInt_t& tracks) {
+  // Centrality for year=2, Au+Au and Full Field 
+
+  UInt_t cent[] = {14,33,59,98,150,221,311,428,500};
+  if (tracks < cent[0])       { mCentrality = 0; }
+  else if (tracks < cent[1])  { mCentrality = 1; }
+  else if (tracks < cent[2])  { mCentrality = 2; }
+  else if (tracks < cent[3])  { mCentrality = 3; }
+  else if (tracks < cent[4])  { mCentrality = 4; }
+  else if (tracks < cent[5])  { mCentrality = 5; }
+  else if (tracks < cent[6])  { mCentrality = 6; }
+  else if (tracks < cent[7])  { mCentrality = 7; }
+  else if (tracks < cent[8])  { mCentrality = 8; }
+  else                        { mCentrality = 9; }
+
+}
+
+//-----------------------------------------------------------------------
+
+void StFlowEvent::SetCentralityYear2AuAuHalf(const UInt_t& tracks) {
+  // Centrality for year=2, Au+Au and Half Field
+
+  UInt_t cent[] = {14,32,59,98,149,216,302,409,474};
+  if (tracks < cent[0])       { mCentrality = 0; }
+  else if (tracks < cent[1])  { mCentrality = 1; }
+  else if (tracks < cent[2])  { mCentrality = 2; }
+  else if (tracks < cent[3])  { mCentrality = 3; }
+  else if (tracks < cent[4])  { mCentrality = 4; }
+  else if (tracks < cent[5])  { mCentrality = 5; }
+  else if (tracks < cent[6])  { mCentrality = 6; }
+  else if (tracks < cent[7])  { mCentrality = 7; }
+  else if (tracks < cent[8])  { mCentrality = 8; }
+  else                        { mCentrality = 9; }
+
+}
+
+//-----------------------------------------------------------------------
+
 void StFlowEvent::PrintSelectionList() {
   // Prints the list of selection cuts
   // Call in Finish
@@ -844,6 +882,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.31  2002/03/14 18:51:49  snelling
+// Added new centralities
+//
 // Revision 1.30  2002/02/13 22:29:21  posk
 // Pt Weight now also weights Phi Weights. Added Eta Weight, default=FALSE.
 //
