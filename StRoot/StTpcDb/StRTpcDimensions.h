@@ -1,7 +1,7 @@
 #ifndef __STRTPCDIMENSIONS__
 #define __STRTPCDIMENTIONS__
 #include "StTpcDimensionsI.h"
-#include "StDbLib/Geometry/tpcDimensions.h"
+#include "Geometry/tpcDimensions.h"
 
 class StRTpcDimensions : public StTpcDimensionsI {
 

@@ -1,7 +1,7 @@
 #ifndef __STRTPCT0__
 #define __STRTPCT0__
 #include "StTpcT0I.h"
-#include "StDbLib/Calibrations/tpcTimeOffsets.h"
+#include "Calibrations/tpcTimeOffsets.h"
 
 class StRTpcT0 : public StTpcT0I {
 
