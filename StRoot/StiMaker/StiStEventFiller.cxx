@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.25 2003/11/26 04:02:53 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 2.26 2003/12/11 03:44:29 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.26  2003/12/11 03:44:29  calderon
+ * set the length right again, it had dissappeared from the code...
+ *
  * Revision 2.25  2003/11/26 04:02:53  calderon
  * track->getChi2() returns the sum of chi2 for all sti nodes.  In StEvent,
  * chi2(0) should be chi2/dof, so we need to divide by dof=track->getPointCount()-5;
@@ -721,6 +724,7 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, StiKalmanTrack* track)
   double impactParam = impactParameter(track);
 
   gTrack->setImpactParameter(impactParam );
+  gTrack->setLength(track->getTrackLength());// someone removed this, grrrr!!!!
   int maxPoints = track->getMaxPointCount();
   gTrack->setNumberOfPossiblePoints(static_cast<unsigned short>(maxPoints));
   fillGeometry(gTrack, track, false); // inner geometry
