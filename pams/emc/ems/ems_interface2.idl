@@ -5,7 +5,7 @@
 #include "g2t_vertex.idl"
 #include "g2t_track.idl"
 #include "g2t_emc_hit.idl"
-#include "calbsys.idl"
+#include "calb_calg.idl"
 
 #include "ems_control.idl"
 #include "ems_hits_bemc.idl"
