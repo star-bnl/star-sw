@@ -1,11 +1,14 @@
 /*************************************************
  *
- * $Id: StAssociationMaker.cxx,v 1.8 1999/09/23 21:25:18 calderon Exp $
+ * $Id: StAssociationMaker.cxx,v 1.9 1999/09/28 14:35:00 fisyak Exp $
  * $Log: StAssociationMaker.cxx,v $
- * Revision 1.8  1999/09/23 21:25:18  calderon
- * Added Log & Id
- * Modified includes according to Yuri
+ * Revision 1.9  1999/09/28 14:35:00  fisyak
+ * Remove cons dependence on non existing headers
  *
+ * Revision 1.9  1999/09/28 14:35:00  fisyak
+ * Remove cons dependence on non existing headers
+ *
+ * Revision 1.8  1999/09/23 21:25:18  calderon
  * Added Log & Id
  * Modified includes according to Yuri
  *
@@ -61,13 +64,13 @@ using std::vector;
 #ifndef USING_PERSISTENT
 #include "StThreeVector.hh"
 
-#include "StEvent.hh"
-#include "StTpcHit.hh"
-#include "StVecPtrTpcHit.hh"
-#include "StGlobalTrack.hh"
-#include "StTrackCollection.hh"
-#include "StVertex.hh"
-#include "StVertexCollection.hh"
+#include <StEvent.hh>
+#include <StTpcHit.hh>
+#include <StVecPtrTpcHit.hh>
+#include <StGlobalTrack.hh>
+#include <StTrackCollection.hh>
+#include <StVertex.hh>
+#include <StVertexCollection.hh>
 
 #else
 #include "StThreeVectorF.hh"
