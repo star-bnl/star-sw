@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRunInfo.cxx,v 2.2 2001/12/02 19:27:12 ullrich Exp $
+ * $Id: StRunInfo.cxx,v 2.3 2002/01/31 23:42:36 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRunInfo.cxx,v $
+ * Revision 2.3  2002/01/31 23:42:36  ullrich
+ * Added member to hold BBC coincidence rate.
+ *
  * Revision 2.2  2001/12/02 19:27:12  ullrich
  * Added new member and methods.
  *
@@ -19,7 +22,7 @@
  **************************************************************************/
 #include "StRunInfo.h"
 
-static const char rcsid[] = "$Id: StRunInfo.cxx,v 2.2 2001/12/02 19:27:12 ullrich Exp $";
+static const char rcsid[] = "$Id: StRunInfo.cxx,v 2.3 2002/01/31 23:42:36 ullrich Exp $";
 
 ClassImp(StRunInfo)
 
@@ -39,6 +42,7 @@ StRunInfo::StRunInfo()
     mZdcEastRate = 0;
     mZdcWestRate = 0;
     mZdcCoincidenceRate = 0;
+    mBbcCoincidenceRate = 0;
     mBackgroundRate = 0;
     mL0RateToRich = 0;
 }
@@ -90,6 +94,10 @@ StRunInfo::zdcCoincidenceRate() const
 {return mZdcCoincidenceRate;}
 
 double
+StRunInfo::bbcCoincidenceRate() const
+{return mBbcCoincidenceRate;}
+
+double
 StRunInfo::backgroundRate() const
 {return mBackgroundRate;}
 
@@ -139,6 +147,10 @@ StRunInfo::setZdcEastRate(double val)
 void
 StRunInfo::setZdcCoincidenceRate(double val)
 {mZdcCoincidenceRate = val;}
+
+void
+StRunInfo::setBbcCoincidenceRate(double val)
+{mBbcCoincidenceRate = val;}
 
 void
 StRunInfo::setBackgroundRate(double val)
