@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.cc,v 2.14 2003/12/04 05:56:47 calderon Exp $
+ * $Id: StMcEvent.cc,v 2.15 2004/09/14 05:00:29 calderon Exp $
  * $Log: StMcEvent.cc,v $
+ * Revision 2.15  2004/09/14 05:00:29  calderon
+ * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
+ *
  * Revision 2.14  2003/12/04 05:56:47  calderon
  * Inclusion of Endcap EMC hit collection in StMcEvent and
  * of the Endcap hit vector in StMcTrack.
@@ -77,9 +80,11 @@
 #include "StMcRichHitCollection.hh"
 #include "StMcCtbHitCollection.hh"
 #include "StMcSvtHitCollection.hh"
+#include "StMcSsdHitCollection.hh"
 #include "StMcEmcHitCollection.hh"
 #include "StMcTofHitCollection.hh"
 #include "StMcPixelHitCollection.hh"
+#include "StMcIstHitCollection.hh"
 #include "StMcContainers.hh" 
 #include "StMcVertex.hh"
 #include "StMcTrack.hh"
@@ -87,15 +92,17 @@
 #include "StMcFtpcHit.hh"
 #include "StMcRichHit.hh"
 #include "StMcSvtHit.hh"
+#include "StMcSsdHit.hh"
 #include "StMcCalorimeterHit.hh"
 #include "StMcTofHit.hh"
 #include "StMcPixelHit.hh"
+#include "StMcIstHit.hh"
 #include "tables/St_g2t_event_Table.h"
 
 
 
-TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.14 2003/12/04 05:56:47 calderon Exp $";
-static const char rcsid[] = "$Id: StMcEvent.cc,v 2.14 2003/12/04 05:56:47 calderon Exp $";
+TString StMcEvent::mCvsTag = "$Id: StMcEvent.cc,v 2.15 2004/09/14 05:00:29 calderon Exp $";
+static const char rcsid[] = "$Id: StMcEvent.cc,v 2.15 2004/09/14 05:00:29 calderon Exp $";
 
 void StMcEvent::initToZero()
 {
@@ -103,17 +110,20 @@ void StMcEvent::initToZero()
     mPrimaryVertex = 0;       
     mTpcHits = 0;             
     mSvtHits = 0;             
+    mSsdHits = 0;       
     mFtpcHits = 0;            
     mRichHits = 0;            
     mCtbHits = 0;
     mTofHits = 0;
     mEemcHits = 0;
     mPixelHits = 0;
+    mIstHits = 0;
 
     // Create the collections
     
     mTpcHits  = new StMcTpcHitCollection();
     mSvtHits  = new StMcSvtHitCollection();
+    mSsdHits  = new StMcSsdHitCollection();
     mFtpcHits = new StMcFtpcHitCollection();
     mRichHits = new StMcRichHitCollection();
     mCtbHits = new StMcCtbHitCollection();
@@ -125,7 +135,7 @@ void StMcEvent::initToZero()
     mTofHits = new StMcTofHitCollection();
     mEemcHits = new StMcEmcHitCollection();
     mPixelHits = new StMcPixelHitCollection();
-
+    mIstHits = new StMcIstHitCollection();
 
 }
 
@@ -184,6 +194,9 @@ StMcEvent::~StMcEvent()
     if (mSvtHits) delete mSvtHits;
     mSvtHits=0;
 
+    if (mSsdHits) delete mSsdHits;
+    mSsdHits=0;
+
     if (mFtpcHits) delete mFtpcHits;
     mFtpcHits=0;
 
@@ -213,6 +226,9 @@ StMcEvent::~StMcEvent()
 
     if (mPixelHits) delete mPixelHits;
     mPixelHits=0;
+
+    if (mIstHits) delete mIstHits;
+    mIstHits=0;
 
     for(StMcTrackIterator it=mTracks.begin();
 	it != mTracks.end(); it++)
@@ -311,6 +327,12 @@ void StMcEvent::setSvtHitCollection(StMcSvtHitCollection* val)
     mSvtHits = val;
 }               
 
+void StMcEvent::setSsdHitCollection(StMcSsdHitCollection* val)
+{
+    if (mSsdHits && mSsdHits!= val) delete mSsdHits;
+    mSsdHits = val;
+}               
+
 void StMcEvent::setFtpcHitCollection(StMcFtpcHitCollection* val)
 {
     if (mFtpcHits && mFtpcHits!= val) delete mFtpcHits;
@@ -363,4 +385,10 @@ void StMcEvent::setPixelHitCollection(StMcPixelHitCollection* val)
 {
     if (mPixelHits && mPixelHits!= val) delete mPixelHits;
     mPixelHits = val;
+}   
+
+void StMcEvent::setIstHitCollection(StMcIstHitCollection* val)
+{
+    if (mIstHits && mIstHits!= val) delete mIstHits;
+    mIstHits = val;
 }   

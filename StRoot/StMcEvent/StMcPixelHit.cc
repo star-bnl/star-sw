@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcPixelHit.cc,v 2.2 2003/12/02 21:22:03 calderon Exp $
+ * $Id: StMcPixelHit.cc,v 2.3 2004/09/14 05:00:30 calderon Exp $
  * $Log: StMcPixelHit.cc,v $
+ * Revision 2.3  2004/09/14 05:00:30  calderon
+ * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
+ *
  * Revision 2.2  2003/12/02 21:22:03  calderon
  * remove unnecessary #include "StMcTrack.hh"
  *
@@ -17,7 +20,7 @@
 #include "StMcPixelHit.hh"
 #include "tables/St_g2t_pix_hit_Table.h" 
 
-static const char rcsid[] = "$Id: StMcPixelHit.cc,v 2.2 2003/12/02 21:22:03 calderon Exp $";
+static const char rcsid[] = "$Id: StMcPixelHit.cc,v 2.3 2004/09/14 05:00:30 calderon Exp $";
 
 StMemoryPool StMcPixelHit::mPool(sizeof(StMcPixelHit));
 
@@ -50,8 +53,39 @@ ostream&  operator<<(ostream& os, const StMcPixelHit& h)
 unsigned long
 StMcPixelHit::layer() const
 {
-    //volume_id = 101 to 110 are the first PIXEL (1-10 in StEvent)
-    //volume_id = 201 to 210 are the second PIXEL (11-20 in StEvent)
-    //return (mVolumeId/100 - 1)*10 + mVolumeId%100;
-  return mPosition.perp()>3.? 2 : 1; // cludge for the time being. I haven't paid attention to the volume id.
+  // 6 modules of 4 ladders each; 3 outer and 1 inner ladder per module
+  // layer 1 : ladder 1 -  6
+  // layer 2 : ladder 1 - 18
+  unsigned long iLadder = (mVolumeId%1000000)/10000;
+  unsigned long iLayer = 0;
+  if (iLadder<4)
+    {
+      iLayer = 2;
+    }
+  else
+    {
+      iLayer = 1;
+    }
+
+  return iLayer;
+}
+
+unsigned long
+StMcPixelHit::ladder() const
+{
+  // 6 modules of 4 ladders each; 3 outer and 1 inner ladder per module
+  // layer 1 : ladder 1 -  6
+  // layer 2 : ladder 1 - 18
+ unsigned long iModule = mVolumeId/1000000;
+  unsigned long iLadder = (mVolumeId%1000000)/10000;
+  if (iLadder<4)
+    {
+      iLadder = (iModule-1)*3 + (iLadder);
+    }
+  else
+    {
+      iLadder = (iModule);
+    }
+
+  return iLadder;
 }

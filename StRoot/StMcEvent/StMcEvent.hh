@@ -1,7 +1,10 @@
 /***************************************************************************
  *
- * $Id: StMcEvent.hh,v 2.14 2004/01/13 21:03:34 fisyak Exp $
+ * $Id: StMcEvent.hh,v 2.15 2004/09/14 05:00:29 calderon Exp $
  * $Log: StMcEvent.hh,v $
+ * Revision 2.15  2004/09/14 05:00:29  calderon
+ * Added support for Ist, Ssd and changes to Pixel, from "El Kai".
+ *
  * Revision 2.14  2004/01/13 21:03:34  fisyak
  * Replace iostream by Stiostream.h (for icc)
  *
@@ -88,9 +91,11 @@ class StMcFtpcHitCollection;
 class StMcRichHitCollection;
 class StMcCtbHitCollection;
 class StMcSvtHitCollection;
+class StMcSsdHitCollection;
 class StMcEmcHitCollection;
 class StMcTofHitCollection;
 class StMcPixelHitCollection;
+class StMcIstHitCollection;
 class StMcVertex;
 class g2t_event_st;
 
@@ -142,6 +147,8 @@ public:
     const StMcTpcHitCollection*    tpcHitCollection()const;
     StMcSvtHitCollection*          svtHitCollection();
     const StMcSvtHitCollection*    svtHitCollection() const;
+    StMcSsdHitCollection*          ssdHitCollection();
+    const StMcSsdHitCollection*    ssdHitCollection() const;
     StMcFtpcHitCollection*         ftpcHitCollection();
     const StMcFtpcHitCollection*   ftpcHitCollection() const;
     StMcRichHitCollection*         richHitCollection();
@@ -165,6 +172,8 @@ public:
     const StMcEmcHitCollection*    eemcHitCollection() const;
     StMcPixelHitCollection*        pixelHitCollection();
     const StMcPixelHitCollection*  pixelHitCollection() const;
+    StMcIstHitCollection*          istHitCollection();
+    const StMcIstHitCollection*    istHitCollection() const;
     
     // "Set" Methods
     
@@ -188,6 +197,7 @@ public:
     void setPrimaryVertex(StMcVertex*);  
     void setTpcHitCollection(StMcTpcHitCollection*);               
     void setSvtHitCollection(StMcSvtHitCollection*);               
+    void setSsdHitCollection(StMcSsdHitCollection*);               
     void setFtpcHitCollection(StMcFtpcHitCollection*);              
     void setRichHitCollection(StMcRichHitCollection*);
     void setCtbHitCollection(StMcCtbHitCollection*);              
@@ -198,6 +208,8 @@ public:
     void setTofHitCollection(StMcTofHitCollection*);
     void setEemcHitCollection(StMcEmcHitCollection*);              
     void setPixelHitCollection(StMcPixelHitCollection*);       
+    void setIstHitCollection(StMcIstHitCollection*);       
+
 
 protected:
     unsigned long                  mEventGeneratorEventLabel;
@@ -223,6 +235,7 @@ protected:
     StSPtrVecMcTrack               mTracks;
     StMcTpcHitCollection*          mTpcHits;
     StMcSvtHitCollection*          mSvtHits;
+    StMcSsdHitCollection*          mSsdHits;
     StMcFtpcHitCollection*         mFtpcHits;
     StMcRichHitCollection*         mRichHits;
     StMcCtbHitCollection*          mCtbHits;
@@ -233,6 +246,7 @@ protected:
     StMcTofHitCollection*          mTofHits;
     StMcEmcHitCollection*          mEemcHits;
     StMcPixelHitCollection*        mPixelHits;
+    StMcIstHitCollection*          mIstHits;
     static TString                 mCvsTag;
 private:
     const StMcEvent& operator=(const StMcEvent&);
@@ -300,6 +314,10 @@ inline StMcSvtHitCollection* StMcEvent::svtHitCollection() { return mSvtHits;}
 
 inline const StMcSvtHitCollection* StMcEvent::svtHitCollection() const { return mSvtHits;}
 
+inline StMcSsdHitCollection* StMcEvent::ssdHitCollection() { return mSsdHits;}
+
+inline const StMcSsdHitCollection* StMcEvent::ssdHitCollection() const { return mSsdHits;}
+
 inline StMcFtpcHitCollection* StMcEvent::ftpcHitCollection() { return mFtpcHits;}
 
 inline const StMcFtpcHitCollection* StMcEvent::ftpcHitCollection() const { return mFtpcHits;}
@@ -339,6 +357,10 @@ inline const StMcEmcHitCollection* StMcEvent::eemcHitCollection() const {return 
 inline StMcPixelHitCollection* StMcEvent::pixelHitCollection() { return mPixelHits;}
 
 inline const StMcPixelHitCollection* StMcEvent::pixelHitCollection() const { return mPixelHits;}
+
+inline StMcIstHitCollection* StMcEvent::istHitCollection() { return mIstHits;}
+
+inline const StMcIstHitCollection* StMcEvent::istHitCollection() const { return mIstHits;}
 
 #endif
 
