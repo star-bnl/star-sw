@@ -1003,7 +1003,8 @@ CCC   Load the out-of-range seed value into table privert:
               evr_am = STAFCV_BAD
               Return
            end if
-           write(6,*) 'EVR: Vertex seed is outside detector range'
+           write(6,*) 'EVR: Vertex seed zv :', zv 
+     &     ,' is outside detector range:', zrange
            evr_am = STAFCV_BAD
            Return
         else   ! Proceed with vertex finding and fitting  
