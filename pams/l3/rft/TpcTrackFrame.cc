@@ -60,7 +60,7 @@ TpcTrackFrame::~TpcTrackFrame()
 // Initialize the frame
 void TpcTrackFrame::Init()
 {
-  // set default values for static members in THit, TTrack and TTrackerFFT
+  // set default values for static members in THit, TTrack and TTrackerFTF
   // THit:
   THit::SetErrorScaleSz(3.0);
   THit::SetErrorScaleXy(5.0);
@@ -71,34 +71,34 @@ void TpcTrackFrame::Init()
   // TTrack:
   TTrack::SetBField(0.5);
   //TTracker:
-  TTrackerFFT::SetSFitSz(FALSE);	// TRUE
-  TTrackerFFT::SetSPhiClosed(FALSE);
-  TTrackerFFT::SetSDPhiLimit(0.1);	// 0.1
-  TTrackerFFT::SetSDEtaLimit(0.1);	// 0.1
+  TTrackerFTF::SetSFitSz(FALSE);	// TRUE
+  TTrackerFTF::SetSPhiClosed(FALSE);
+  TTrackerFTF::SetSDPhiLimit(0.1);	// 0.1
+  TTrackerFTF::SetSDEtaLimit(0.1);	// 0.1
   // chi2_hit_cut
-  TTrackerFFT::SetSChi2Cut(150.0);	// 150
+  TTrackerFTF::SetSChi2Cut(150.0);	// 150
   // chi2_hit_good
-  TTrackerFFT::SetSGoodChi2(50.0);
+  TTrackerFTF::SetSGoodChi2(50.0);
   //good_distance
-  TTrackerFFT::SetSGoodDistance(2.0);
+  TTrackerFTF::SetSGoodDistance(2.0);
   // not a constant
-//  TTrackerFFT::SetStrack(0.0);
+//  TTrackerFTF::SetStrack(0.0);
   // chi2_track_cut
-  TTrackerFFT::SetSChi2TrackCut(150.0);	// 150
+  TTrackerFTF::SetSChi2TrackCut(150.0);	// 150
   // n_hit_segm
-  TTrackerFFT::SetSMinimumHitsPerSegment(3);
+  TTrackerFTF::SetSMinimumHitsPerSegment(3);
   // mn_hit_trk
-  TTrackerFFT::SetSMinimumHitsPerTrack(5);
+  TTrackerFTF::SetSMinimumHitsPerTrack(5);
   // dr_track
-  TTrackerFFT::SetSMaxSearchPadrowsTrack(4);
+  TTrackerFTF::SetSMaxSearchPadrowsTrack(4);
   // dr_segm
-  TTrackerFFT::SetSMaxSearchPadrowsSegment(2);
+  TTrackerFTF::SetSMaxSearchPadrowsSegment(2);
 }
 
 // Initialize the frame via an parameter struct
 void TpcTrackFrame::Initialize(L3T_TPC_PARA_ST* params)
 {
-  // set default values for static members in THit, TTrack and TTrackerFFT
+  // set default values for static members in THit, TTrack and TTrackerFTF
   // THit:
   THit::SetErrorScaleSz(params->ErrorScaleSz);
   THit::SetErrorScaleXy(params->ErrorScaleXy);
@@ -106,36 +106,37 @@ void TpcTrackFrame::Initialize(L3T_TPC_PARA_ST* params)
   THit::SetPhiParameters(params->Phimin/To_deg, params->Phimax/To_deg, params->PhiSlices);
   // etamin, etamax, etasclices
   THit::SetEtaParameters(params->Etamin, params->Etamax, params->EtaSlices);
-  // TVolume: obsolete moved into TTrackerFFT
+  // TVolume: obsolete moved into TTrackerFTF
   // etaslices, phislices, phimin, phimax, etamin, etamax
-  TTrackerFFT::SetStatics((short)params->EtaSlices, (short)params->PhiSlices, 
+  TTrackerFTF::SetStatics((short)params->EtaSlices, (short)params->PhiSlices, 
 			  params->Phimin/To_deg, params->Phimax/To_deg, 
 			  params->Etamin, params->Etamax);
   // TTrack:
   TTrack::SetBField(params->BField);
   //TTracker:
-  TTrackerFFT::SetSFitSz(params->SFitSz);
-  TTrackerFFT::SetSPhiClosed(params->SPhiClosed);
-  TTrackerFFT::SetSDPhiLimit(params->SDPhiLimit);
-  TTrackerFFT::SetSDEtaLimit(params->SDEtaLimit);
+
+  TTrackerFTF::SetSFitSz(params->SFitSz);
+  TTrackerFTF::SetSPhiClosed(params->SPhiClosed);
+  TTrackerFTF::SetSDPhiLimit(params->SDPhiLimit);
+  TTrackerFTF::SetSDEtaLimit(params->SDEtaLimit);
   // chi2_hit_cut
-  TTrackerFFT::SetSChi2Cut(params->SChi2Cut);
+  TTrackerFTF::SetSChi2Cut(params->SChi2Cut);
   // chi2_hit_good
-  TTrackerFFT::SetSGoodChi2(params->SGoodChi2);
+  TTrackerFTF::SetSGoodChi2(params->SGoodChi2);
   //good_distance
-  TTrackerFFT::SetSGoodDistance(params->SGoodDistance);
+  TTrackerFTF::SetSGoodDistance(params->SGoodDistance);
   // chi2_track_cut
-  TTrackerFFT::SetSChi2TrackCut(params->SChi2TrackCut);
+  TTrackerFTF::SetSChi2TrackCut(params->SChi2TrackCut);
   // n_hit_segm
-  TTrackerFFT::SetSMinimumHitsPerSegment(params->SMinimumHitsPerSegment);
+  TTrackerFTF::SetSMinimumHitsPerSegment(params->SMinimumHitsPerSegment);
   // mn_hit_trk
-  TTrackerFFT::SetSMinimumHitsPerTrack(params->SMinimumHitsPerTrack);
+  TTrackerFTF::SetSMinimumHitsPerTrack(params->SMinimumHitsPerTrack);
   // dr_track
-  TTrackerFFT::SetSMaxSearchPadrowsTrack(params->SMaxSearchPadrowsTrack);
+  TTrackerFTF::SetSMaxSearchPadrowsTrack(params->SMaxSearchPadrowsTrack);
   // dr_segm
-  TTrackerFFT::SetSMaxSearchPadrowsSegment(params->SMaxSearchPadrowsSegment);
+  TTrackerFTF::SetSMaxSearchPadrowsSegment(params->SMaxSearchPadrowsSegment);
   // merge primaries?
-  TTrackerFFT::SetMergePrimaries(params->MergePrimaries);
+  TTrackerFTF::SetMergePrimaries(params->MergePrimaries);
   // TMerger:
   
   TMerger::NumberOfPsiSlices = params->NumberOfPsiSlices;
@@ -146,7 +147,7 @@ void TpcTrackFrame::Initialize(L3T_TPC_PARA_ST* params)
   TMerger::MinSliceTanL = params->MinSliceTanL;
   TMerger::MaxSliceTanL = params->MaxSliceTanL;
   // maximum distance to merge primaries
-  TMerger::FSMinDistMerge = params->SMinDistMerge;
+  TMerger::FSMinDistMerge = params->SDPsiMaxMerge;
 }
 
 // Set the tracking algorithm

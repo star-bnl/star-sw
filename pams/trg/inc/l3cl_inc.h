@@ -29,6 +29,7 @@
 //#define MAX_CLUSTERSUC 32  /* maximal 32 cluster under construction at the same time */
 #define MAX_CLUSTERSUC 256
 #define MAX_SEQUENCES_PER_NODE 6 /* maximum number of sequences per clusteruc node (don't change) */
+#define MAXCLUSTERS 30000
 
 #define NewPad(padno) (PSequence) cluster_seq[(padno)]
 
@@ -102,6 +103,7 @@ void init_phys_map();
 void init_pointers();
 void init_table();
 void init_other();
+void reset_other();
 TSS_TPPAD_ST* init_clusters( int                sector,
                              TSS_TPPAD_ST       *pad_pointer, 
 		                     TABLE_HEAD_ST      *tppad_h,      

@@ -130,25 +130,21 @@ void TTrack::FinishPrimaryTrack(float vertexx, float vertexy, float vertexr, flo
 
 	// Get track parameters
 	angle_vertex  = atan2 ( -ycp, -xcp ) ;
-	if ( angle_vertex < 0. ) 
-		angle_vertex += 2. * Pi ;
+	if ( angle_vertex < 0. ) angle_vertex += 2. * Pi ;
 
 	dx_last    = FHits.tail()->GetX() - xc ;
 	dy_last    = FHits.tail()->GetY() - yc ;
 	angle_last = atan2 ( dy_last, dx_last ) ;
-	if ( angle_last < 0. ) 
-		angle_last = angle_last + 2. * Pi;
+	if ( angle_last < 0. ) angle_last = angle_last + 2. * Pi;
 
-	// Get the rotation
+// Get the rotation
 	d_angle = angle_last - angle_vertex;
 
-	if ( d_angle >  Pi ) 
-		d_angle =   d_angle - 2 * Pi;
-	if ( d_angle < -Pi ) 
-		d_angle =   d_angle + 2 * Pi;
-	// positiv or negativ charge?
+	if ( d_angle >  Pi ) d_angle =   d_angle - 2 * Pi;
+	if ( d_angle < -Pi ) d_angle =   d_angle + 2 * Pi;
+// positive or negative charge?
 	FCharge = ( ( d_angle < 0 ) ? 1 : -1 );
-	// first point of a primary track is vertex
+// first point of a primary track is vertex
 	FR0   = vertexr;
 	FPhi0 = vertexphi;
 	FPsi  = (angle_vertex - FCharge * 0.5F * Pi);
@@ -157,28 +153,32 @@ void TTrack::FinishPrimaryTrack(float vertexx, float vertexy, float vertexr, flo
 	if ( FPsi > 2. * Pi) 
 		FPsi = (FPsi - 2.F * Pi );
 	rc = sqrt ( Fit.a2_xy * Fit.a2_xy + 1.0 ) / ( 2.0 * fabs(Fit.a1_xy) );
-	// momentum
+// momentum
 	FPt = (2.9979e-3 * FSBField * rc );
 
-	// Get z parameters if needed       
+// Get z parameters if needed       
 	if ( dofitsz ) 
 	{
-		FTanL = - Fit.a2_sz ;
-		FZ0 = (Fit.a1_sz + Fit.a2_sz * ( Fit.strack - rc * d_angle * FCharge ) );
+           FTanL = - Fit.a2_sz ;
+           FZ0 = (Fit.a1_sz + Fit.a2_sz * ( FSTrack - rc * d_angle * FCharge ) );
 	}
 	else
 	{
 		FTanL = FHits.head()->GetZ() /
-			(float)sqrt ( FHits.head()->GetX()*FHits.head()->GetX() + FHits.head()->GetY()*FHits.head()->GetY()) ;
+			(float)sqrt ( FHits.head()->GetX()*FHits.head()->GetX() + 
+                          FHits.head()->GetY()*FHits.head()->GetY()) ;
 		FZ0 = 0.F ;
 	}
-
-	// Store some more track info
+//
+// Store some more track info
+//
 	FEta = seta(FPt,(FPt*FTanL));
 
 }
-
-// finish secondary track; calculates track-parameters from intermediate parameters (was fill_secondary)
+//***************************************************************
+// finish secondary track; calculates track-parameters 
+// from intermediate parameters (was fill_secondary)
+//***************************************************************
 void TTrack::FinishSecondaryTrack(BOOL dofitsz)
 {
 	double xc, yc, rc, dx1, dy1, dx2, dy2 ; 
@@ -188,29 +188,30 @@ void TTrack::FinishSecondaryTrack(BOOL dofitsz)
 	xc = - Fit.a2_xy / ( 2. * Fit.a1_xy ) + FHits.head()->GetX() ;
 	yc = - 1.   /  ( 2. * Fit.a1_xy ) + FHits.head()->GetY() ;
 	rc = sqrt ( Fit.a2_xy * Fit.a2_xy + 1 ) / ( 2 * fabs(Fit.a1_xy) ) ;
-
-	// Get angles for initial and final point
-	// first hit
+//
+// Get angles for initial and final point
+// first hit
+//
 	dx1 = FHits.head()->GetX() - xc ;
 	dy1 = FHits.head()->GetY() - yc ;
 	angle1 = atan2 ( dy1, dx1 ) ;
 	if ( angle1 < 0. ) 
 		angle1 = angle1 + 2. * Pi ;
-	// last hit
+// last hit
 	dx2 = FHits.tail()->GetX() - xc ;
 	dy2 = FHits.tail()->GetY() - yc ;
 	angle2 = atan2 ( dy2, dx2 ) ;
 	if ( angle2 < 0. ) 
 		angle2 = angle2 + 2. * Pi ;
-	// Get the rotation
+// Get the rotation
 	dangle = angle2 - angle1 ;
 	if ( dangle >  Pi ) 
 		dangle =   dangle - 2. * Pi  ;
 	if ( dangle < -Pi ) 
 		dangle =   dangle + 2. * Pi  ;
-	// positiv or negativ charged particle?
+// positive or negative charged particle?
 	FCharge = ( ( dangle < 0 ) ? 1 : -1 ) ;
-	// cylinder coordinates (of last hit)
+// cylinder coordinates (of last hit)
 	FR0 = (float)sqrt ( square(FHits.tail()->GetX()) +
 						square(FHits.tail()->GetY()) ) ;
 	FPhi0 = FHits.tail()->GetPhi() ;
@@ -218,20 +219,18 @@ void TTrack::FinishSecondaryTrack(BOOL dofitsz)
 	if ( FPsi < 0 ) 
 		FPsi = (FPsi + 2 * Pi );
 	rc = sqrt ( Fit.a2_xy * Fit.a2_xy + 1 ) / ( 2 * fabs(Fit.a1_xy) ) ;
-	// momentum
+// momentum
 	FPt  = 2.9979e-3 * FSBField * rc;
 
-	// Store information in local table
+// Store information in local table
 	if (dofitsz)
-	{
 		FTanL = - Fit.a2_sz ;
-	}
 	else
-	{
 		FTanL = FHits.head()->GetZ() /
 			(float)sqrt(square(FHits.head()->GetX()) + square(FHits.head()->GetY()));
-	}
-	// z-coordinate of last point
+//
+// z-coordinate of last point
+//
 	FZ0 = FHits.tail()->GetZ();
 }
 

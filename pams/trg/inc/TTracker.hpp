@@ -62,7 +62,7 @@ inline double sqr(double val) {return(val*val);};
 #include "TMerger.hpp"          	// include TMerger
 // class declaration
 
-class TTrackerFFT : public VTracker
+class TTrackerFTF : public VTracker
 {
 private:
 // private data members
@@ -92,15 +92,19 @@ private:
 // minimum and maximum of phi- and eta-slices
    static double FSPhiMin, FSPhiMax;
    static double FSEtaMin, FSEtaMax;
+   static int    FNPrimaryLoops ;
+   static int    FNSecondaryLoops;
+   static int    FInnerMostRow;
+   static int    FOuterMostRow;
 public:
 // public types
    enum TTrackType {ttPrimaries, ttSecondaries, ttBooster}; 
 // public methods
 // constructors
 // stupid constructor
-   TTrackerFFT() : VTracker() { FVolume = 0;};
+   TTrackerFTF() : VTracker() { FVolume = 0;};
 // destructor
-   virtual ~TTrackerFFT() { if (FVolume != 0) delete FVolume; };
+   virtual ~TTrackerFTF() { if (FVolume != 0) delete FVolume; };
 // public methods
 // set tracking defaults
    void SetDefaults();
@@ -172,36 +176,7 @@ public:
 // needs the free-point-list and a track-list as input. It creates
 // new tracks and new point-lists if needed and puts them into the
 // tracklist.
-   virtual void BuildAllTracks( THitList* freepoints, TTrackList* tracklist)
-   {
-      THit* temp;
-//
-// create volume
-//
-      CreateVolume();
-//
-// build volume from hitlist
-//
-      forall(temp, *freepoints) AddHitToVolume(temp);
-//
-// get primaries
-//
-      GetTracks( tracklist, ttPrimaries);
-//
-// merge primaries?
-//
-      if (FMergePrimaries)
-      {
-// yes, done by TMerger object
-         TMerger merge(tracklist, FSPhiClosed);
-      }
-// get secondaries
-      GetTracks ( tracklist, ttSecondaries);
-// destroy volume
-      DestroyVolume();
-      FVolume = 0;
-   };
-//
+   virtual void BuildAllTracks( THitList* freepoints, TTrackList* tracklist);
 // create an instance of TVolume and assign it to FVolume
    void CreateVolume() 
    { 
@@ -290,7 +265,7 @@ public:
 //	TRUE		- track was merged and isn't valid any longer
 //	FALSE		- track couldn't be merged, you should add it to the tracklist
 
-inline BOOL TTrackerFFT::CombineTracks(TTrackList* tracklist, TTrack* NewValue)
+inline BOOL TTrackerFTF::CombineTracks(TTrackList* tracklist, TTrack* NewValue)
 {
 /*
 	// scan all tracks and calculate minimum distance in (pt phi tanl)-space
