@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.23 2003/10/07 14:04:07 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.24 2003/11/13 14:41:48 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.24  2003/11/13 14:41:48  jcs
+// use StFtpcGasUtilities to obtain current pressure and FTPC gas temperature
+//
 // Revision 1.23  2003/10/07 14:04:07  jcs
 // remove previous magnetic field fix
 //
@@ -98,6 +101,7 @@
 #include "StFtpcClusterMaker/StFtpcParamReader.hh"
 #include "StFtpcClusterMaker/StFtpcDbReader.hh"
 #include "StFtpcClusterMaker/StFtpcGeantReader.hh"
+#include "StFtpcClusterMaker/StFtpcGasUtilities.hh"
 
 // include for Detector Rotations
 #include "StFtpcTrackMaker/StFtpcTrackingParams.hh" 
@@ -310,7 +314,7 @@ Int_t StFtpcSlowSimMaker::Make(){
     StFtpcGeantReader *geantReader = new StFtpcGeantReader(g2t_vertex,
 							   g2t_track,
 							   g2t_ftp_hit);
-    // cout << "create FTPC database reader\n";
+     //cout << "create FTPC database reader\n";
     //create FTPC database reader
     StFtpcDbReader *dbReader = new StFtpcDbReader(m_dimensions,
 		                                m_asicmap,
@@ -365,7 +369,7 @@ Int_t StFtpcSlowSimMaker::Make(){
   daqDataset=GetDataSet("StDAQReader");
   if(daqDataset)
     {
-      gMessMgr->Message("", "I", "OST") << "Using StDAQReader to get StFTPCReader" << endm;
+      gMessMgr->Message("", "I", "OST") << "Using StDAQReader to get StFTPCReader in StFtpcSlowSimMaker for embedding" << endm;
       assert(daqDataset);
       daqReader=(StDAQReader *)(daqDataset->GetObject());
       assert(daqReader);
@@ -378,149 +382,69 @@ Int_t StFtpcSlowSimMaker::Make(){
 	return kStWarn;
       }
 
-      // get pressure and gas temperature from offline DB; test and use valid values
+      // test if pressure and gas temperature available from offline DB
+
       StDetectorDbFTPCGas * gas = StDetectorDbFTPCGas::instance();
       if ( !gas ){
-          gMessMgr->Warning() << "StFtpcClusterMaker::Error Getting FTPC Online database: Conditions"<<endm;
+          gMessMgr->Warning() << "StFtpcSlowSimMaker::Error Getting FTPC Online database: Conditions"<<endm;
           delete paramReader;
           delete dbReader;
           return kStWarn;
       }
-      // Barometric Pressure
-      if (gas->getBarometricPressure() >= dbReader->minPressure() && gas->getBarometricPressure() <= dbReader->maxPressure()) {
-          gMessMgr->Info() <<"Change normalizedNowPressure from "<<paramReader->normalizedNowPressure()<<" to "<<gas->getBarometricPressure()<<endm;
-          paramReader->setNormalizedNowPressure(gas->getBarometricPressure());
-      }
-      else {
-          gMessMgr->Info() << "Invalid value ("<<gas->getBarometricPressure()<<") from offline database for barometric pressure - using previous value ("<<paramReader->normalizedNowPressure()<<")"<<endm;
-      }
+
+      Int_t  returnCode;
+
+      // use available pressure and gas temperature from offline DB to adjust 
+      // the barometric pressure depending on the FTPC gas temperature
+
+
+      StFtpcGasUtilities *gasUtils = new StFtpcGasUtilities(paramReader,
+                                                            dbReader,
+				                            gas);
+
+      returnCode = gasUtils->barometricPressure();
 
       // Calculate FTPC gas temperature from body temperatures
-      // default values change depending on SVT high voltage on/off
-      // currently using daqReader->SVTPresent() to test but may need
-      // access to Conditions_svt/svtInterLocks
 
-      // calculate average body temperature west
+      Int_t dbDate = mDbMaker->GetDateTime().GetDate();
 
-         Int_t numberBodyTemperaturesWest = 0;
-         Float_t averageBodyTemperatureWest = 0.0;
-	  
-	 if (gas->getBody1West() >= dbReader->minGasTemperature() && gas->getBody1West()<= dbReader->maxGasTemperature() ) {
-		 averageBodyTemperatureWest = averageBodyTemperatureWest + gas->getBody1West();
-		 numberBodyTemperaturesWest++;
-		 cout<<"gas->getBody1West() = "<<gas->getBody1West()<<" numberBodyTemperaturesWest = "<<numberBodyTemperaturesWest<<" averageBodyTemperatureWest = "<<averageBodyTemperatureWest<<endl;
-         }		 
-	 if (gas->getBody2West() >= dbReader->minGasTemperature() && gas->getBody2West()<= dbReader->maxGasTemperature() ) {
-		 averageBodyTemperatureWest = averageBodyTemperatureWest + gas->getBody2West();
-		 numberBodyTemperaturesWest++;
-		 cout<<"gas->getBody2West() = "<<gas->getBody2West()<<" numberBodyTemperaturesWest = "<<numberBodyTemperaturesWest<<" averageBodyTemperatureWest = "<<averageBodyTemperatureWest<<endl;
-         }		 
-	 if (gas->getBody3West() >= dbReader->minGasTemperature() && gas->getBody3West()<= dbReader->maxGasTemperature() ) {
-		 averageBodyTemperatureWest = averageBodyTemperatureWest + gas->getBody3West();
-		 numberBodyTemperaturesWest++;
-		 cout<<"gas->getBody3West() = "<<gas->getBody3West()<<" numberBodyTemperaturesWest = "<<numberBodyTemperaturesWest<<" averageBodyTemperatureWest = "<<averageBodyTemperatureWest<<endl;
-         }		 
-	 if (gas->getBody4West() >= dbReader->minGasTemperature() && gas->getBody4West()<= dbReader->maxGasTemperature() ) {
-		 averageBodyTemperatureWest = averageBodyTemperatureWest + gas->getBody4West();
-		 numberBodyTemperaturesWest++;
-		 cout<<"gas->getBody4West() = "<<gas->getBody4West()<<" numberBodyTemperaturesWest = "<<numberBodyTemperaturesWest<<" averageBodyTemperatureWest = "<<averageBodyTemperatureWest<<endl;
-         }		 
-		 
-	 averageBodyTemperatureWest = averageBodyTemperatureWest/numberBodyTemperaturesWest;
-	 if (averageBodyTemperatureWest >= dbReader->minGasTemperature() && averageBodyTemperatureWest <= dbReader->maxGasTemperature()) {
-            paramReader->setGasTemperatureWest(averageBodyTemperatureWest);
-	    cout<<"Set paramReader->setGasTemperatureWest = averageBodyTemperatureWest = "<<averageBodyTemperatureWest<<endl;
-         }
-	 else if (paramReader->gasTemperatureWest() == 0 ) {
-            // initialize FTPC gas temperatures to default values 
-	    // if no value found in Calibrations_ftpc/ftpcGasOut for first event
-            if ( !daqReader->SVTPresent()) {
-               paramReader->setGasTemperatureWest(dbReader->defaultTemperatureWest());
-	       cout<<"No valid body temperatures available for FTPC West; Initialize paramReader->gasTemperatureWest() to dbReader->defaultTemperatureWest() = "<<paramReader->gasTemperatureWest()<<" - !daqReader->SVTPresent()"<<endl;
-	    }   
-            if (daqReader->SVTPresent()) {
-               mDbMaker     = (St_db_Maker*)GetMaker("db");
-               Int_t dbDate = mDbMaker->GetDateTime().GetDate();
-               cout<<"For dbDate = "<<dbDate<<endl;
-               if (dbDate < 20021105) { 
-	          // for year 2001 data (AuAu,pp) FTPC west gas temperature is higher when SVT on
-                  paramReader->setGasTemperatureWest(dbReader->defaultTemperatureWest() + dbReader->temperatureDifference());
-	          cout<<"No valid body temperatures available for FTPC West; Initialize paramReader->gasTemperatureWest() to dbReader->defaultTemperatureWest() = "<<paramReader->gasTemperatureWest()<<") + dbReader->temperatureDifference() = "<<dbReader->temperatureDifference()<<" - daqReader->SVTPresent() - year 2001 data"<<endl;
-	       }
-               if (dbDate >= 20021105) { 
-                  paramReader->setGasTemperatureWest(dbReader->defaultTemperatureWest());
-	          cout<<"No valid body temperatures available for FTPC West; Initialize paramReader->gasTemperatureWest() to dbReader->defaultTemperatureWest() = "<<paramReader->gasTemperatureWest()<<" - daqReader->SVTPresent() - year 2003 data"<<endl;
-	       }
-	    }   
-	 }	 
-         else {
-	    cout<<"No valid body temperatures available for FTPC West; leave gasTemperatureWest  = "<<paramReader->gasTemperatureWest()<<endl; 
-	 }   
+      // For FTPC West
+      
+      returnCode = gasUtils->averageTemperatureWest(dbDate);
 
-      // calculate average body temperature east
+     // test if averageBodyTemperature for FTPC West found for first event
+     if (paramReader->gasTemperatureWest() == 0) {
+	   // no value found in Calibrations_ftpc/ftpcGasOut for first event
+	   // initialize FTPC gas temperatures to default values   
+              // default values change depending on SVT high voltage on/off
+	      // currently using daqReader->SVTPresent() to test but may need
+	      // access to Conditions_svt/svtInterLocks
+	  cout<<"daqReader->SVTPresent() = "<<daqReader->SVTPresent()<<endl;
+	  returnCode = gasUtils->defaultTemperatureWest(dbDate,daqReader->SVTPresent());
+     }
 
-         Int_t numberBodyTemperaturesEast = 0;
-         Float_t averageBodyTemperatureEast = 0.0;
-	  
-	 if (gas->getBody1East() >= dbReader->minGasTemperature() && gas->getBody1East()<= dbReader->maxGasTemperature() ) {
-		 averageBodyTemperatureEast = averageBodyTemperatureEast + gas->getBody1East();
-		 numberBodyTemperaturesEast++;
-		 cout<<"gas->getBody1East() = "<<gas->getBody1East()<<" numberBodyTemperaturesEast = "<<numberBodyTemperaturesEast<<" averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<endl;
-         }		 
-	 if (gas->getBody2East() >= dbReader->minGasTemperature() && gas->getBody2East()<= dbReader->maxGasTemperature() ) {
-		 averageBodyTemperatureEast = averageBodyTemperatureEast + gas->getBody2East();
-		 numberBodyTemperaturesEast++;
-		 cout<<"gas->getBody2East() = "<<gas->getBody2East()<<" numberBodyTemperaturesEast = "<<numberBodyTemperaturesEast<<" averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<endl;
-         }		 
-	 if (gas->getBody3East() >= dbReader->minGasTemperature() && gas->getBody3East()<= dbReader->maxGasTemperature() ) {
-		 averageBodyTemperatureEast = averageBodyTemperatureEast + gas->getBody3East();
-		 numberBodyTemperaturesEast++;
-		 cout<<"gas->getBody3East() = "<<gas->getBody3East()<<" numberBodyTemperaturesEast = "<<numberBodyTemperaturesEast<<" averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<endl;
-         }		 
-	 if (gas->getBody4East() >= dbReader->minGasTemperature() && gas->getBody4East()<= dbReader->maxGasTemperature() ) {
-		 averageBodyTemperatureEast = averageBodyTemperatureEast + gas->getBody4East();
-		 numberBodyTemperaturesEast++;
-		 cout<<"gas->getBody4East() = "<<gas->getBody4East()<<" numberBodyTemperaturesEast = "<<numberBodyTemperaturesEast<<" averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<endl;
-         }		 
-		 
-	 averageBodyTemperatureEast = averageBodyTemperatureEast/numberBodyTemperaturesEast;
-	 if (averageBodyTemperatureEast >= dbReader->minGasTemperature() && averageBodyTemperatureEast <= dbReader->maxGasTemperature()) {
-             paramReader->setGasTemperatureEast(averageBodyTemperatureEast);
-	     cout<<"Set paramReader->setGasTemperatureEast = averageBodyTemperatureEast = "<<averageBodyTemperatureEast<<endl;
-         }
-	 else if (paramReader->gasTemperatureEast() == 0 ) {
-            // initialize FTPC East gas temperature to default value 
-	    // if no value found in Calibrations_ftpc/ftpcGasOut for first event
-            if ( !daqReader->SVTPresent()) {
-               paramReader->setGasTemperatureEast(dbReader->defaultTemperatureEast());
-	       cout<<"No valid body temperatures available for FTPC East; Initialize paramReader->gasTemperatureEast() to dbReader->defaultTemperatureEast() = "<<paramReader->gasTemperatureEast()<<" - !daqReader->SVTPresent()"<<endl;
-	    }   
-            if (daqReader->SVTPresent()) {
-               mDbMaker     = (St_db_Maker*)GetMaker("db");
-               Int_t dbDate = mDbMaker->GetDateTime().GetDate();
-               cout<<"For dbDate = "<<dbDate<<endl;
-               if (dbDate < 20021105) { 
-                  paramReader->setGasTemperatureEast(dbReader->defaultTemperatureEast());
-	          cout<<"No valid body temperatures available for FTPC East; Initialize paramReader->gasTemperatureEast() to dbReader->defaultTemperatureEast() = "<<paramReader->gasTemperatureEast()<<" - daqReader->SVTPresent() - year 2001 data"<<endl;
-	       }
-               if (dbDate >= 20021105) { 
-	          // for year 2003 data (dAu) FTPC east gas temperature is higher when SVT on
-                  paramReader->setGasTemperatureEast(dbReader->defaultTemperatureEast() + dbReader->temperatureDifference());
-	          cout<<"No valid body temperatures available for FTPC East; Initialize paramReader->gasTemperatureEast() to dbReader->defaultTemperatureEast() = "<<paramReader->gasTemperatureEast()<<" + dbReader->temperatureDifference() = "<<dbReader->temperatureDifference()<<" - daqReader->SVTPresent()  - year 2003 data"<<endl;
-	       }
-	    }   
-	 }	 
-         else {
-	    cout<<"No valid body temperatures available for FTPC East; leave gasTemperatureEast  = "<<paramReader->gasTemperatureEast()<<endl;
-         }	 
-
-
-      gMessMgr->Message("", "I", "OST") << " Using normalizedNowPressure = "<<paramReader->normalizedNowPressure()<<" gasTemperatureWest = "<<paramReader->gasTemperatureWest()<<" gasTemperatureEast = "<<paramReader->gasTemperatureEast()<<endm; 
-
+     // For FTPC East
+     
+     returnCode = gasUtils->averageTemperatureEast(dbDate);
+    
+     // test if averageBodyTemperature for FTPC East found for first event
+     if (paramReader->gasTemperatureEast() == 0 ) {
+        // no value found in Calibrations_ftpc/ftpcGasOut for first event
+        // initialize FTPC gas temperatures to default values 
+           // default values change depending on SVT high voltage on/off
+           // currently using daqReader->SVTPresent() to test but may need
+           // access to Conditions_svt/svtInterLocks
+        cout<<"daqReader->SVTPresent() = "<<daqReader->SVTPresent()<<endl;
+        returnCode = gasUtils->defaultTemperatureEast(dbDate,daqReader->SVTPresent());
+     }
+     
+       gMessMgr->Message("", "I", "OST") << " Using normalizedNowPressure = "<<paramReader->normalizedNowPressure()<<" gasTemperatureWest = "<<paramReader->gasTemperatureWest()<<" gasTemperatureEast = "<<paramReader->gasTemperatureEast()<<endm;
        paramReader->setAdjustedAirPressureWest(paramReader->normalizedNowPressure()*((dbReader->baseTemperature()+STP_Temperature)/(paramReader->gasTemperatureWest()+STP_Temperature)));
       gMessMgr->Info() <<" paramReader->setAdjustedAirPressureWest = "<<paramReader->adjustedAirPressureWest()<<endm;
       paramReader->setAdjustedAirPressureEast(paramReader->normalizedNowPressure()*((dbReader->baseTemperature()+STP_Temperature)/(paramReader->gasTemperatureEast()+STP_Temperature)));
      gMessMgr->Info() <<" paramReader->setAdjustedAirPressureEast = "<<paramReader->adjustedAirPressureEast()<<endm;
+
+     delete gasUtils;
     }
 
 
