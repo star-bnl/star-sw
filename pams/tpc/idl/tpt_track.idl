@@ -22,6 +22,7 @@
        float     dedx[2];    /* dE/dx information */
        float     invp;       /* 1/pt (transverse momentum) at (r,phi,z) */
        float     curvature;  /* 1/radius */
+       float     length;     /* track length */
        float     phi0;       /* azimuthal angle of the first point */
        float     psi;        /* azimuthal angle of the momentum at (r,.. */
        float     r0;         /* r (in cyl. coord.) for the first point */
