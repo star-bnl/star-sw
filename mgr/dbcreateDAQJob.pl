@@ -221,9 +221,9 @@ my $mrunId;
      }else {
        $mrunId = 0;
      }
-#        if ( $mrunId > 1177000 ) {
+        if ( $mrunId > 1177000 ) {
         if ( $mrunId < 1223003 || $mrunId > 1228003 ) {   
-      if ( $mrunId == 1241030 ) {
+#      if ( $mrunId == 1241030 ) {
       foreach my $runNum (@runSet) {
 
         if ( $mrunId eq $runNum) {      
