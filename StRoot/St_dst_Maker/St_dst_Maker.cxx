@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.38 1999/11/29 20:20:29 fisyak Exp $
+// $Id: St_dst_Maker.cxx,v 1.39 1999/12/02 23:10:03 lbarnby Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.39  1999/12/02 23:10:03  lbarnby
+// put summary_param into runco branch
+//
 // Revision 1.38  1999/11/29 20:20:29  fisyak
 // Janet changes due to ftpc
 //
@@ -117,7 +120,7 @@
 #include "tables/St_dst_mon_soft_l3_Table.h"
 #include "tables/St_dst_mon_soft_rich_Table.h"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.38 1999/11/29 20:20:29 fisyak Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.39 1999/12/02 23:10:03 lbarnby Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -149,7 +152,7 @@ Int_t St_dst_Maker::Init(){
   
  // Run summary
   m_dst_summary_param = new St_dst_summary_param("summary_param",1);
-  AddConst(m_dst_summary_param);
+  AddRunco(m_dst_summary_param);
   dst_summary_param_st dst_summary_param;
   //  dst_summary_param.bfc_run_id =  0;
   dst_summary_param.eta_bins[0] = -2.;
