@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.39 1999/04/29 19:29:27 nevski Exp $
+// $Id: St_geant_Maker.cxx,v 1.40 1999/04/30 15:17:03 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.40  1999/04/30 15:17:03  perev
+// SetOutput added to announce Geometry exists
+//
 // Revision 1.39  1999/04/29 19:29:27  nevski
 // SetInputFile returns status
 //
@@ -260,8 +263,9 @@ StMaker(name){
   iwtype  =       0;
   fgGeom = new St_DataSet("geom");  
   m_ConstSet->Add(fgGeom);
-
+  SetOutput(fgGeom);	//Declare this "geom" for output
   fEvtHddr = new StEvtHddr(m_ConstSet);
+  SetOutput(fEvtHddr);	//Declare this "EvtHddr" for output
 }
 
 //_____________________________________________________________________________
@@ -467,7 +471,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.39 1999/04/29 19:29:27 nevski Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.40 1999/04/30 15:17:03 perev Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
