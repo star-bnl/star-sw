@@ -1,5 +1,10 @@
-// $Id: StLaserEventMaker.cxx,v 1.30 2003/09/13 00:42:30 perev Exp $
+// $Id: StLaserEventMaker.cxx,v 1.31 2004/03/09 20:32:21 pfachini Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.31  2004/03/09 20:32:21  pfachini
+// Lowering the number of tracks threshold from 250 to 225 if the west side is down.
+// The east side has the sector 20 problem which will reduce the numbers of tracks.
+// This change is for run in 2004.
+//
 // Revision 1.30  2003/09/13 00:42:30  perev
 // XDF obsolete + small fixes
 //
@@ -768,7 +773,8 @@ Int_t StLaserEventMaker::Finish() {
       
       if (fzlIntegralWestHigh() < 100. || fzlIntegralWestLow() < 100.) {//in case west laser was down
 	gMessMgr->Warning() << "StLaserEventMaker:: no west laser events. Drift Velocity east and west will be the same!!! " << endm;
-	if (numberTracks->GetMean() >= minValidTracks/2.) {
+	//if (numberTracks->GetMean() >= minValidTracks/2.) {
+	if (numberTracks->GetMean() >= 225.) {//Lowering from 250 to 225 - The east side has the sector 20 problem which will reduce the numbers of tracks. This change is for run in 2004.
 	  velocityEast = 147.199*driftVelocityReco/fabs(fzlAverageEastHigh()-fzlAverageEastLow());
 	  velocityWest = velocityEast;
 	  //Now correcting for the clock...
@@ -818,7 +824,7 @@ Int_t StLaserEventMaker::Finish() {
 /// Print CVS commit information
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.30 2003/09/13 00:42:30 perev Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.31 2004/03/09 20:32:21 pfachini Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
