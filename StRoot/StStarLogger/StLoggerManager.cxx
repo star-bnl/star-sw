@@ -54,7 +54,7 @@ std::ostream& StLoggerManager::OperatorShift(std::ostream& os, StMessage* stm) {
   if (((&os) == (std::ostream*) StMessMgr::CurrentMessager()) && (stm == endm)) {
     // There was a StMessage terminator
     *this << ends;
-    StMessMgr::Instance()->Print();                
+    StMessMgr::CurrentMessager()->Print();
   } else {
     // fprintf(stderr,"StLoggerManager::OperatorShift os  %p StMessMgr = %Lp, stm = %Lp endm = %Lp\n",
     //       &os, (std::ostream*) StMessMgr::Instance(), stm, endm);
@@ -145,7 +145,7 @@ StMessMgr* StLoggerManager::StarLoggerInit(const char *loggerName)
 //_____________________________________________________________________________
 StMessMgr* StLoggerManager::StarLoggerInit() {
 //
-// Allows anyone to get a pointer to the single message manager:
+//   Allows anyone to get a pointer to the single message manager:
 //   StLoggerManager::Instance()->(member function)
 //
   if (!mInstance) {
@@ -172,7 +172,7 @@ StMessMgr* StLoggerManager::StarLoggerInit() {
     fgQALogger = Logger::getLogger("QA");
     NDC::push(_T(":"));
 
-    mInstance = (StMessMgr*) new StLoggerManager;
+    mInstance = StarLoggerInit("BFC");
    ((StLoggerManager *)mInstance)->SetStarOptionFilter(filter);
     // if (gMessMgr) delete gMessMgr; gMessMgr = 0;
     gMessMgr  = mInstance;
@@ -381,7 +381,7 @@ int StLoggerManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StLoggerManager::PrintInfo() {
    fLogger->info("**************************************************************\n");
-   fLogger->info("* $Id: StLoggerManager.cxx,v 1.11 2004/11/15 17:25:59 fine Exp $\n");
+   fLogger->info("* $Id: StLoggerManager.cxx,v 1.12 2005/03/07 23:17:09 fine Exp $\n");
    //  printf("* %s    *\n",m_VersionCVS);
    fLogger->info("**************************************************************\n");
 }
@@ -703,8 +703,11 @@ _NO_IMPLEMENTATION_;   return 5;
 // StMessMgr& gMess = *(StMessMgr *)StLoggerManager::Instance();
 
 //_____________________________________________________________________________
-// $Id: StLoggerManager.cxx,v 1.11 2004/11/15 17:25:59 fine Exp $
+// $Id: StLoggerManager.cxx,v 1.12 2005/03/07 23:17:09 fine Exp $
 // $Log: StLoggerManager.cxx,v $
+// Revision 1.12  2005/03/07 23:17:09  fine
+// Fix a bug to allow mnay logger insatnces to print out without any mess
+//
 // Revision 1.11  2004/11/15 17:25:59  fine
 // Make Star filer workign properly
 //
