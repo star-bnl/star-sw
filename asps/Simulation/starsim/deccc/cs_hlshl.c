@@ -1,7 +1,11 @@
 /*
-* $Id: cs_hlshl.c,v 1.1.1.1 2004/01/12 23:49:39 potekhin Exp $
+* $Id: cs_hlshl.c,v 1.2 2004/06/26 00:10:43 potekhin Exp $
 * $Log: cs_hlshl.c,v $
+* Revision 1.2  2004/06/26 00:10:43  potekhin
+* Removed an unused integer and added stdlib where appropriate.
+*
 * Revision 1.1.1.1  2004/01/12 23:49:39  potekhin
+*
 *
 * Revision 1.7  2001/11/25 15:36:24  nevski
 * dlfch is for hp only
@@ -22,8 +26,9 @@
 #define  MAXLENFL  256
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
-strNcpy (lib,path,n)
+void strNcpy (lib,path,n)
    char *lib,*path;
    int n;
 {  int i;
@@ -33,7 +38,6 @@ strNcpy (lib,path,n)
 }
 
 #if defined(CERNLIB_HPUX)
-#include <stdlib.h>
 #include <dl.h>
 void perror();
 int  cs_shl_load_(path, n)
@@ -212,7 +216,6 @@ int  cs_shl_load_(path, n)
    struct files *f;
    void*  file_handle;
    char   lib_name[MAXLENFL];
-   int    i;
 
    strNcpy(lib_name, path, n);
 
