@@ -9,7 +9,7 @@
 using namespace std;
 #endif
 
-#ifndef __PRETTY_FUNCTION__ 
+#ifndef GNU_GCC
 #define __PRETTY_FUNCTION__ "NoScopeIdentifierAvailable"
 #endif
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.21 2003/01/29 03:04:57 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.22 2003/02/05 22:00:59 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -156,7 +156,7 @@ StMuDstMaker::~StMuDstMaker() {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-/** Switch of the TObject part of some streamers, so that only the datamenbers of the derived classes are written to disk, but not the data 
+/** Switch of the TObject part of some streamers, so that only the datTClonesamenbers of the derived classes are written to disk, but not the data 
     members of the base class TObject
 */ 
 void  StMuDstMaker::streamerOff() {
@@ -195,7 +195,6 @@ void StMuDstMaker::createArrays() {
 //-----------------------------------------------------------------------
 void StMuDstMaker::clear(){
   DEBUGMESSAGE2("");
-  
   /// from muDst
   for ( int i=0; i<__NARRAYS__; i++) {
     clear(mArrays[i],StMuArrays::arrayCounters[i]);
@@ -586,9 +585,14 @@ void StMuDstMaker::fillEmc(StEvent* ev) {
   if (!emccol)  return; //throw StMuExceptionNullPointer("no StEmcCollection",PF);
   StTimer timer;
   timer.start();
-  StMuEmcCollection* muEmcColl = mEmcUtil->getMuEmc(emccol);
+  /* This next line is actually creating new instance of StMuEmcCollection,
+   * which is then copied into the TClonesArray. We have to delete this new 
+   * instance after it is copied.
+   */
+  StMuEmcCollection* muEmcColl = mEmcUtil->getMuEmc(emccol); 
   if (!muEmcColl) throw StMuExceptionNullPointer("no StMuEmcCollection",PF);
   addType( mEmcArrays[muEmc], *muEmcColl );
+  delete muEmcColl;
   timer.stop();
   DEBUGVALUE2(timer.elapsedTime());
 }
@@ -866,6 +870,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.22  2003/02/05 22:00:59  laue
+ * bug fix
+ *
  * Revision 1.21  2003/01/29 03:04:57  laue
  * !!DIRTY FIX FOR StMuEmcCollection
  * !! Was memor leaking. Leak fixed, but slow and dirty.
