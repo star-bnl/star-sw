@@ -135,7 +135,7 @@ ostream& operator<<(ostream& os, StDetectorDbClock& v){
     if( v.getNumRows() > 1 ){
 	os << "RHIC Clock Frequency Changes Drastically Durring Run" << endl;
 	for(unsigned int i = 0; i < v.getNumRows(); i++){
-	    os << "Time: " << v.getTimeEntry(i) << "  Current: " << v.getFrequencyEntry(i) << endl;
+	    os << "Time: " << v.getTimeEntry(i) << "  Frequency: " << v.getFrequencyEntry(i) << endl;
 	}
     }
     return os;
