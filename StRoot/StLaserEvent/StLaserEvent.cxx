@@ -1,6 +1,9 @@
 // 
 // ROOT Tree for Laser Events tracking by tpt. -- Bill Love
 //$Log: StLaserEvent.cxx,v $
+//Revision 1.5  2000/04/24 14:28:03  love
+//Added clock, drivel and tZero to event Header
+//
 //Revision 1.4  2000/02/01 16:06:30  love
 //Added track invp and nfit to Hit object
 //
@@ -13,6 +16,7 @@
 //Revision 1.1  1999/09/27 21:44:27  love
 //LSEvent -> StLaserEvent
 //
+
 //* adapted from Laser straight track code 27/9/99 by Bill Love
 
 ////////////////////////////////////////////////////////////////////////
@@ -191,6 +195,16 @@ void StLaserEvent::SetHeader(Int_t i, Int_t run, Int_t date)
    fNhit = 0;
    fNpixel = 0;
    fEvtHdr.Set(i, run, date);
+}
+//______________________________________________________________________________
+void StLaserEvent::SetHeader(Int_t i, Int_t run, Int_t date,
+     Float_t tzero, Float_t drivel, Float_t clock)
+{
+   fNtrack = 0;
+   fNhit = 0;
+   fNpixel = 0;
+   fEvtHdr.Set(i, run, date);
+   fEvtHdr.SetE(tzero, drivel, clock);
 }
 
 //______________________________________________________________________________
