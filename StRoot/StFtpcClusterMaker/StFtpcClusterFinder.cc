@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.cc,v 1.59 2004/05/24 13:38:47 jcs Exp $
+// $Id: StFtpcClusterFinder.cc,v 1.60 2004/06/18 09:04:39 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.cc,v $
+// Revision 1.60  2004/06/18 09:04:39  jcs
+// replace obsolete DEBUGFILE code with code to write out a root file for cluster/laser analysis
+//
 // Revision 1.59  2004/05/24 13:38:47  jcs
 // save number of clusters found in StFtpcSoftwareMonitor
 //
@@ -200,6 +203,8 @@
 
 //TH1F *clfradius;
 
+#ifndef  DEBUGFILE
+
 StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,  
 					 StFtpcParamReader *paramReader,
                                          StFtpcDbReader *dbReader,
@@ -210,6 +215,22 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
                                          TH2F *histo,
                                          TH1F *histoW,
                                          TH1F *histoE)
+#elif DEBUGFILE
+
+int iHardSec, iHardRow;
+
+StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,  
+					 StFtpcParamReader *paramReader,
+                                         StFtpcDbReader *dbReader,
+					 StFtpcSoftwareMonitor *ftpcMon,
+					 TObjArray *pointarray,
+					 TH2F *hpad,
+					 TH2F *htime,
+                                         TH2F *histo,
+                                         TH1F *histoW,
+                                         TH1F *histoE,
+					 StFtpcClusterDebug *cldebug)
+#endif
 {
 //   cout << "StFtpcClusterFinder constructed" << endl;  
   mReader = reader;
@@ -220,6 +241,10 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
   mHisto=histo;
   mHistoW=histoW;
   mHistoE=histoE;
+
+#ifdef DEBUGFILE
+  mcldebug = cldebug;
+#endif  
 
   MAXSEQPEAKS = mParam->maxNumSeqPeaks();
   MAXPEAKS = mParam->maxNumPeaks();
@@ -249,6 +274,22 @@ StFtpcClusterFinder::StFtpcClusterFinder(StFTPCReader *reader,
   mAngleOffsetWest = mDb->angleOffsetWest();
   mAngleOffsetEast = mDb->angleOffsetEast();
 
+#ifdef DEBUGFILE 
+// Set ftpcClusterPars
+  MAXPEAKS = 160;  
+
+// Set FTPC Cluster Geometry values for cluster/laser analysis
+  mMinChargeWindow = 30;
+  mMaxPadlengthOut = 30; 
+  mMaxTimelengthOut = 30;
+
+// Set FTPC inner cathode offsets = 0  
+  mOffsetCathodeWest = 0.0;
+  mOffsetCathodeEast = 0.0;
+  mAngleOffsetWest =   0.0;
+  mAngleOffsetEast =   0.0;
+#endif  
+
   mhpad = hpad;
   mhtime = htime;
 
@@ -265,7 +306,11 @@ int StFtpcClusterFinder::search()
 
   Double_t  *pradius = 0;
   Double_t  *pdeflection = 0;
+#ifndef DEBUGFILE  
   int iRow, iSec, iPad, iPadBuf, iHardSec, iHardRow;
+#elif DEBUGFILE
+  int iRow, iSec, iPad, iPadBuf;
+#endif
   int iRowBuf, iSecBuf;
   int firstPadrowToSearch;
   int bNewSec;
@@ -287,21 +332,6 @@ int StFtpcClusterFinder::search()
   TClusterUC CUCMemory[MAXNUMCUC];
   int CUCMemoryArray[MAXNUMCUC];
   int CUCMemoryPtr;
-
-#ifdef DEBUGFILE
-  FILE *fin, *fpoints;
-  char finname[100], fpointsname[100];
-  TPeak testpeak;
-  int iBin, iHeight;
-  int xLower, xUpper, yLower, yUpper, xNow, yNow;
-  int *maparray;
-  char getstring[100];
-  float xwrite, ywrite;
-
-  maparray= (int *)malloc(4000000*sizeof(int));
-#endif
-
-//   cout << "maxpads: " << mReader->getMaxPad(1) << endl;
 
   /* allocate memory for padtrans table */
   pradius = new Double_t[mParam->numberOfDriftSteps()
@@ -363,11 +393,6 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
   LastCUC = 0;
   iOldSeqNumber = 0;
   iNewSeqIndex = 0;
-
-#ifdef DEBUGFILE
-  fin=fopen("test00", "w");
-  fpoints=fopen("points00", "w");
-#endif
 
   /* loop over raw data sequences */
   iNowSeqIndex = 0;
@@ -474,18 +499,6 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 	      iRowBuf=iRow;
 	      iSecBuf=iSec;
 
-#ifdef DEBUGFILE
-	      if(bNewSec)
-		{
-		  fclose(fin);
-		  fclose(fpoints);
-		  sprintf(finname,"test%d%d", iRow,iSec); 
-		  sprintf(fpointsname,"points%d%d", iRow,iSec); 
-		  fin=fopen(finname, "w");
-		  fpoints=fopen(fpointsname, "w");
-		}
-#endif
-
 	      // initialize sequence lists: 
 	      // new-array is moved to old 
 	      // and first element initialized 
@@ -511,6 +524,12 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
 	      for(iNewSeqIndex=0; iNewSeqIndex < iNewSeqNumber; 
 		  iNewSeqIndex++)
 		{
+#ifdef DEBUGFILE			
+		  if (mcldebug->drawclhisto!=0)
+		  {
+		     mcldebug->drawhisto(iHardSec,iHardRow,iPad,NewSequences[iNewSeqIndex]);
+	             mcldebug->drawgainhisto(iHardSec,iHardRow,iPad,((float)(mDb->amplitudeSlope((iSec*mDb->numberOfPads()+iPad),iRow))),NewSequences[iNewSeqIndex]);              }
+#endif	   	     
 //+++++++++++++++++++ fill charge step histograms +++++++++++++++
 		  // This loop is running already, but the running variable is called iNewSeqIndex instead of iSeqIndex .
 		  //int iSeqIndex;
@@ -820,84 +839,6 @@ for ( int iftpc=0; iftpc<2; iftpc++) {
   }
 }  // end of: for(iftpc
   
-#ifdef DEBUGFILE
-  fclose(fin);
-  fclose(fpoints);
-  
-  for(iRow=0; iRow<mDb->numberOfPadrows(); iRow++)
-    {
-      for(iSec=0; iSec<mDb->numberOfSectors(); iSec++)
-	{
-	  sprintf(finname, "test%d%d", iRow, iSec);
-	  sprintf(fpointsname, "charge%d%d", iRow, iSec);
-	  fin=fopen(finname, "r");
-	  fpoints=fopen(fpointsname, "w");
-	  for(xNow=0; xNow<2000; xNow++)
-	    {
-	      for(yNow=0; yNow<2000; yNow++)
-		{
-		  maparray[xNow+2000*yNow]=0;
-		}
-	    }
-
-	  sprintf(getstring, "\0");
-	  fgets(getstring, sizeof(getstring), fin);
-	  while(strlen(getstring)>3)
-	    {
-	      sscanf(getstring, "%d %d %d", &iPad, &iBin, &iHeight);
-	      
-	      testpeak.PadPosition=iPad-0.5;
-	      testpeak.TimePosition=iBin-0.5;
-	      padtrans(&testpeak, iRow, iSec, pradius, pdeflection);
-	      xLower=(int) ((1000 / 31) * testpeak.x + 1000);
-	      yLower=(int) ((1000 / 31) * testpeak.y + 1000);
-
-	      testpeak.PadPosition=iPad+0.5;
-	      testpeak.TimePosition=iBin+0.5;
-	      padtrans(&testpeak, iRow, iSec, pradius, pdeflection);
-	      xUpper=(int) ((1000 / 31) * testpeak.x + 1000);
-	      yUpper=(int) ((1000 / 31) * testpeak.y + 1000);
-
-	      for(xNow=0; xNow<abs(xUpper-xLower); xNow++)
-		{
-		  for(yNow=0; yNow<abs(yUpper-yLower); yNow++)
-		    {
-		      if(xUpper<xLower)
-			maparray[(xUpper+xNow)+2000*(yUpper+yNow)]=iHeight;
-		      else
-			maparray[(xLower+xNow)+2000*(yLower+yNow)]=iHeight;
-		    }
-		}
-
-	      sprintf(getstring, "\0");
-	      fgets(getstring, sizeof(getstring), fin);
-
-	    }
-	  
-	  for(xNow=0; xNow<2000; xNow++)
-	    {
-	      for(yNow=0; yNow<2000; yNow++)
-		{
-		  if(maparray[xNow+2000*yNow]!=0)
-		    {
-		      xwrite= ((float) xNow-1000)*31/1000;
-		      ywrite= ((float) yNow-1000)*31/1000;
-
-
-		      fprintf(fpoints, "%f %f %d\n", xwrite, ywrite, maparray[xNow+2000*yNow]);
-
-		    }
-		}
-	    }
-	  fclose (fin);
-	  fclose (fpoints);
-	}
-    }
-  
-  free(maparray);
-  
-#endif
-  
   delete[] pradius;        // release the pradius array
   delete[] pdeflection;   // release the pdeflection array
   
@@ -932,6 +873,7 @@ bool StFtpcClusterFinder::geometryCut(TClusterUC *Cluster)
 	}
     }
 
+#ifndef DEBUGFILE  
   if (minTimebin>mMinTimeBin) return true;
   else if ((minTimebin>mMinTimeBinMed && minTimebin<=mMinTimeBin) && abs(Cluster->EndPad-Cluster->StartPad)<mMaxPadlengthMed && seqlength<mMaxTimelengthMed)
     return true;
@@ -939,6 +881,13 @@ bool StFtpcClusterFinder::geometryCut(TClusterUC *Cluster)
     return true;
   else
     return false;
+#elif DEBUGFILE
+   if (abs(Cluster->EndPad-Cluster->StartPad)<mMaxPadlengthOut && seqlength<mMaxTimelengthOut)
+      return true;
+   else
+      return false;
+#endif
+
 }
 
 int StFtpcClusterFinder::findHits(TClusterUC *Cluster, 
@@ -1041,7 +990,6 @@ int StFtpcClusterFinder::findHits(TClusterUC *Cluster,
 		  // ================================
 
 		   if (PeakFound && cl_charge>mMinChargeWindow && iNumPeaks<MAXPEAKS)
-		   //if (PeakFound && cl_charge>30 && iNumPeaks<160)
 		    {
 		      
 		      if (iNumPeaks>0)
@@ -1081,16 +1029,6 @@ int StFtpcClusterFinder::findHits(TClusterUC *Cluster,
       return FALSE;
     }
   
-#ifdef DEBUGFILE
-  for(iOldPeakLoop=0; iOldPeakLoop<iNumPeaks; iOldPeakLoop++)
-    {
-      if(Peaks[iOldPeakLoop].PadPosition>0 && Peaks[iOldPeakLoop].TimePosition>0)
-	{
-	  fprintf(fpoints, "%f %f %f %f\n", 
-		  Peaks[iOldPeakLoop].PadPosition, Peaks[iOldPeakLoop].TimePosition, Peaks[iOldPeakLoop].x, Peaks[iOldPeakLoop].y);
-	}
-    }
-#endif
   delete[] Peaks;
   return TRUE;
 }
@@ -1390,6 +1328,10 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	  fRadError *= (pRadius[10*PadtransBin]-pRadius[10*PadtransBin+10])
 	    / (pRadius[10]-pRadius[20]);
 
+#ifdef DEBUGFILE
+          mcldebug->fillclustertree(Peak,Cluster,ChargeSum,iHardSec,iHardRow,fRadError,fPhiError,0,0,iNumPeaks);
+#endif	  
+
 	  thispoint->SetXerr(::sqrt(fRadError*cos(Peak->Phi)
 				  *fRadError*cos(Peak->Phi) 
 				  + fPhiError*sin(Peak->Phi)
@@ -1399,6 +1341,13 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 				  + fPhiError*cos(Peak->Phi)
 				  *fPhiError*cos(Peak->Phi)));
 	  thispoint->SetZerr(mParam->zDirectionError());
+#ifdef DEBUGFILE	  
+	  thispoint->SetPadPos(Peak->PadPosition);
+	  thispoint->SetTimePos(Peak->TimePosition);
+	  thispoint->SetPadPosSigma(Peak->PadSigma);
+	  thispoint->SetTimePosSigma(Peak->TimeSigma);
+#endif
+
 	}
       else
 	{
@@ -1864,6 +1813,10 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 	      fRadError *= (pRadius[10*PadtransBin]-pRadius[10*PadtransBin+10])
 		/ (pRadius[10]-pRadius[20]);
 
+#ifdef DEBUGFILE
+              mcldebug->fillclustertree(Peak[iPeakIndex],Cluster,ChargeSum*Peak[iPeakIndex].PeakHeight/PeakHeightSum,iHardSec,iHardRow,fRadError,fPhiError,10,0,iNumPeaks);
+#endif	      
+
 	      thispoint->SetXerr(::sqrt(fRadError*cos(Peak[iPeakIndex].Phi)
 				      *fRadError*cos(Peak[iPeakIndex].Phi) 
 				      + fPhiError*sin(Peak[iPeakIndex].Phi)
@@ -1873,6 +1826,13 @@ int StFtpcClusterFinder::fitPoints(TClusterUC* Cluster,
 				      + fPhiError*cos(Peak[iPeakIndex].Phi)
 				      *fPhiError*cos(Peak[iPeakIndex].Phi)));
 	      thispoint->SetZerr(mParam->zDirectionError());
+
+#ifdef DEBUGFILE
+              thispoint->SetPadPos(Peak[iPeakIndex].PadPosition);
+              thispoint->SetTimePos(Peak[iPeakIndex].TimePosition);
+              thispoint->SetPadPosSigma(Peak[iPeakIndex].PadSigma);
+              thispoint->SetTimePosSigma(Peak[iPeakIndex].TimeSigma);
+#endif	      
 	    }
          }
             else

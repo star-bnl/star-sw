@@ -1,4 +1,7 @@
 // $Log: StFtpcClusterMaker.cxx,v $
+// Revision 1.69  2004/06/18 09:04:40  jcs
+// replace obsolete DEBUGFILE code with code to write out a root file for cluster/laser analysis
+//
 // Revision 1.68  2004/05/25 07:10:04  jcs
 // initialize StFtpcSoftwareMonitor*ftpcMon
 //
@@ -353,6 +356,9 @@ Int_t StFtpcClusterMaker::InitRun(int runnumber){
 //_____________________________________________________________________________
 Int_t StFtpcClusterMaker::Init(){
 
+#ifdef DEBUGFILE
+  gMessMgr->Info() << "StFtpcClusterMaker running with cluster/laser analysis turned on"<<endm;
+#endif  
 
   St_DataSet *ftpc = GetDataBase("ftpc");
   assert(ftpc);
@@ -616,6 +622,7 @@ Int_t StFtpcClusterMaker::Make()
 
     if(Debug()) gMessMgr->Message("", "I", "OS") << "start running StFtpcClusterFinder" << endm;
     
+#ifndef DEBUGFILE    
     StFtpcClusterFinder *fcl = new StFtpcClusterFinder(ftpcReader, 
 						       paramReader, 
                                                        dbReader,
@@ -626,6 +633,21 @@ Int_t StFtpcClusterMaker::Make()
                                                        m_csteps,
                                                        m_chargestep_West,
                                                        m_chargestep_East);
+#elif DEBUGFILE
+    StFtpcClusterDebug *cldebug=new StFtpcClusterDebug((int) GetRunNumber(),(int) GetEventNumber());
+
+    StFtpcClusterFinder *fcl = new StFtpcClusterFinder(ftpcReader, 
+						       paramReader, 
+                                                       dbReader,
+						       ftpcMon,
+						       mHitArray,
+						       m_hitsvspad,
+						       m_hitsvstime,
+                                                       m_csteps,
+                                                       m_chargestep_West,
+                                                       m_chargestep_East,
+						       cldebug);
+#endif    
     
     int searchresult=fcl->search();
     
@@ -635,6 +657,10 @@ Int_t StFtpcClusterMaker::Make()
       }
 	
     delete fcl;
+#ifdef DEBUGFILE
+    delete cldebug;
+#endif    
+
     if (using_FTPC_slow_simulator) delete ftpcReader;
   }
   else {     

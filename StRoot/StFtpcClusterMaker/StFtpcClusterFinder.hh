@@ -1,6 +1,9 @@
-// $Id: StFtpcClusterFinder.hh,v 1.18 2004/05/24 13:37:57 jcs Exp $
+// $Id: StFtpcClusterFinder.hh,v 1.19 2004/06/18 09:04:40 jcs Exp $
 //
 // $Log: StFtpcClusterFinder.hh,v $
+// Revision 1.19  2004/06/18 09:04:40  jcs
+// replace obsolete DEBUGFILE code with code to write out a root file for cluster/laser analysis
+//
 // Revision 1.18  2004/05/24 13:37:57  jcs
 // save number of clusters found in StFtpcSoftwareMonitor
 //
@@ -55,8 +58,8 @@
 #ifndef STAR_StFtpcClusterFinder
 #define STAR_StFtpcClusterFinder
 // #define DEBUG 1
-/*#define DEBUGFILE 1*/
-
+// For cluster and laser run analysis
+//#define DEBUGFILE
 
 
 #include <sys/types.h>
@@ -72,10 +75,15 @@
 #include "TH1.h"
 #include "TH2.h"
 
+#ifdef DEBUGFILE
+#include "StFtpcClusterDebug.hh"
+#endif
 
 #define TRUE 1
 #define FALSE 0
 #define sqr(x) ((x)*(x))
+
+#ifndef DEBUGFILE
 #define MAXNUMSEQUENCES 160
 #define MAXNUMCUC 128
 
@@ -112,6 +120,8 @@ typedef struct
   float y;
   float z;
 } TPeak;
+#endif
+
 
 class StFtpcClusterFinder
 {
@@ -127,6 +137,10 @@ class StFtpcClusterFinder
   TH1F *mHistoE;
   TH2F *mHisto;
   TH2F *mhpad, *mhtime;
+
+#ifdef DEBUGFILE
+  StFtpcClusterDebug *mcldebug;
+#endif  
 
   int MAXSEQPEAKS;
   int MAXPEAKS;
@@ -159,6 +173,7 @@ class StFtpcClusterFinder
   float mMinChargeWindow;
 
  public:
+#ifndef DEBUGFILE  
   StFtpcClusterFinder(StFTPCReader *reader, 
 		      StFtpcParamReader *paramReader, 
                       StFtpcDbReader    *dbReader,
@@ -169,6 +184,19 @@ class StFtpcClusterFinder
                       TH2F *histo,
                       TH1F *histoW,
                       TH1F *histoE);
+#elif DEBUGFILE
+  StFtpcClusterFinder(StFTPCReader *reader, 
+		      StFtpcParamReader *paramReader, 
+                      StFtpcDbReader    *dbReader,
+		      StFtpcSoftwareMonitor *ftpcMon,
+		      TObjArray *pointarray,
+		      TH2F *hpad,
+		      TH2F *htime,
+                      TH2F *histo,
+                      TH1F *histoW,
+                      TH1F *histoE,
+		      StFtpcClusterDebug *cldebug);
+#endif  
 
   ~StFtpcClusterFinder();
   int search();
