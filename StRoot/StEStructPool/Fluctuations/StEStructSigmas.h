@@ -45,10 +45,12 @@ class StEStructSigmas {
     TH2D *NMinus[NSCENTBINS];
     TH2D *NPlusMinus[NSCENTBINS];
     TH2D *PSig[NSCENTBINS];
+    TH2D *PDel[NSCENTBINS];
     TH2D *PPlus[NSCENTBINS];
     TH2D *PMinus[NSCENTBINS];
     TH2D *PPlusMinus[NSCENTBINS];
     TH2D *PNSig[NSCENTBINS];
+    TH2D *PNDel[NSCENTBINS];
     TH2D *PNPlus[NSCENTBINS];
     TH2D *PNMinus[NSCENTBINS];
     TH2D *PNPlusMinus[NSCENTBINS];
@@ -67,10 +69,12 @@ class StEStructSigmas {
     TH2D *ptNMinus[NPTSCENTBINS][NPTBINS];
     TH2D *ptNPlusMinus[NPTSCENTBINS][NPTBINS];
     TH2D *ptPSig[NPTSCENTBINS][NPTBINS];
+    TH2D *ptPDel[NPTSCENTBINS][NPTBINS];
     TH2D *ptPPlus[NPTSCENTBINS][NPTBINS];
     TH2D *ptPMinus[NPTSCENTBINS][NPTBINS];
     TH2D *ptPPlusMinus[NPTSCENTBINS][NPTBINS];
     TH2D *ptPNSig[NPTSCENTBINS][NPTBINS];
+    TH2D *ptPNDel[NPTSCENTBINS][NPTBINS];
     TH2D *ptPNPlus[NPTSCENTBINS][NPTBINS];
     TH2D *ptPNMinus[NPTSCENTBINS][NPTBINS];
     TH2D *ptPNPlusMinus[NPTSCENTBINS][NPTBINS];
@@ -89,14 +93,20 @@ class StEStructSigmas {
     TH2D *NMinusErrors[NSCENTBINS];
     TH2D *NPlusMinusErrors[NSCENTBINS];
     TH2D *PSigErrors[NSCENTBINS];
+    TH2D *PDelErrors[NSCENTBINS];
     TH2D *PPlusErrors[NSCENTBINS];
     TH2D *PMinusErrors[NSCENTBINS];
     TH2D *PPlusMinusErrors[NSCENTBINS];
     TH2D *PNSigErrors[NSCENTBINS];
+    TH2D *PNDelErrors[NSCENTBINS];
     TH2D *PNPlusErrors[NSCENTBINS];
     TH2D *PNMinusErrors[NSCENTBINS];
     TH2D *PNPlusMinusErrors[NSCENTBINS];
     TH2D *PNMinusPlusErrors[NSCENTBINS];
+
+    TH2D *sigSPtHatErrors[NSCENTBINS];
+    TH2D *sigPPtHatErrors[NSCENTBINS];
+    TH2D *sigMPtHatErrors[NSCENTBINS];
 
     TH2D *ptNSigErrors[NPTSCENTBINS][NPTBINS];
     TH2D *ptNDelErrors[NPTSCENTBINS][NPTBINS];
@@ -104,15 +114,20 @@ class StEStructSigmas {
     TH2D *ptNMinusErrors[NPTSCENTBINS][NPTBINS];
     TH2D *ptNPlusMinusErrors[NPTSCENTBINS][NPTBINS];
     TH2D *ptPSigErrors[NPTSCENTBINS][NPTBINS];
+    TH2D *ptPDelErrors[NPTSCENTBINS][NPTBINS];
     TH2D *ptPPlusErrors[NPTSCENTBINS][NPTBINS];
     TH2D *ptPMinusErrors[NPTSCENTBINS][NPTBINS];
     TH2D *ptPPlusMinusErrors[NPTSCENTBINS][NPTBINS];
     TH2D *ptPNSigErrors[NPTSCENTBINS][NPTBINS];
+    TH2D *ptPNDelErrors[NPTSCENTBINS][NPTBINS];
     TH2D *ptPNPlusErrors[NPTSCENTBINS][NPTBINS];
     TH2D *ptPNMinusErrors[NPTSCENTBINS][NPTBINS];
     TH2D *ptPNPlusMinusErrors[NPTSCENTBINS][NPTBINS];
     TH2D *ptPNMinusPlusErrors[NPTSCENTBINS][NPTBINS];
 
+    TH2D *ptsigSPtHatErrors[NPTSCENTBINS][NPTBINS];
+    TH2D *ptsigPPtHatErrors[NPTSCENTBINS][NPTBINS];
+    TH2D *ptsigMPtHatErrors[NPTSCENTBINS][NPTBINS];
 
     void  initArraysAndHistograms();
     void  deleteArraysAndHistograms();
