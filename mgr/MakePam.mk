@@ -1,4 +1,7 @@
 #  $Log: MakePam.mk,v $
+#  Revision 1.12  1998/04/20 15:06:47  fisyak
+#  user CERNLIN include
+#
 #  Revision 1.11  1998/04/13 16:03:48  fisyak
 #  Correct HPUX flags
 #
@@ -61,7 +64,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/04/13 16:03:48 $ 
+#           Last modification $Date: 1998/04/20 15:06:47 $ 
 #  #. default setings
 include $(STAR)/mgr/MakeSYS.mk
 ifdef SILENT
@@ -258,11 +261,11 @@ ifneq ($(STAR_SYS),hp_ux102)
 CPPFLAGS += -D$(STAR_SYS) $(strip -D$(shell uname)) 
 endif                          
 CPPFLAGS += -I. -I../ -I/usr/include -I$(STAR)/asps/staf/inc \
-             $(addprefix -I, $(SRC_DIR) $(GEN_DIR) $(INC_DIRS)) -I$(CERN_ROOT)/src -I$(CERN_ROOT)/src/cfortran
+             $(addprefix -I, $(SRC_DIR) $(GEN_DIR) $(INC_DIRS)) -I$(CERN_ROOT)/src -I$(CERN_ROOT)/include/cfortran
 ifneq ($(ROOT),$(STAR))        
 CPPFLAGG :=  $(addprefix -I, $(INC_DIRG))
 endif                          
-FFLAGS   += -DCERNLIB_TYPE -I$(CERN_ROOT)/src/geant321 -I$(CERN_ROOT)/src/packlib/zebra -I$(CERN_ROOT)/src/pawlib/sigma -I$(CERN_ROOT)/src/graflib/dzdoc
+FFLAGS   += -DCERNLIB_TYPE -I$(CERN_ROOT)/src/geant321 
 ifndef NODEBUG                 
 FFLAGS   += -g
 CFLAGS   += -g
