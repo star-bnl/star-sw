@@ -1,5 +1,5 @@
 // Hey Emacs this is -*-c++-*-
-// $Id: EEmcTower.cxx,v 1.1 2004/05/05 22:04:17 zolnie Exp $
+// $Id: EEmcTower.cxx,v 1.2 2004/05/05 23:00:57 zolnie Exp $
 
 /**
  * \class  EEmcTower
@@ -13,6 +13,9 @@
  * \author Piotr A. Zolnierczuk
  * \date   2004/04/30
 
+ * \bug  implicitly assumed that labels are no longer than kMaxLabelLen (16 characters)
+
+ * \todo implement EEmcTower::ParseLabel
  */
 
 
@@ -28,7 +31,8 @@ using std::ostream;
 
 ClassImp(EEmcTower);
 
-static const int kMaxLabelLen = 16; 	// FIXME - assumed max tower label length
+
+static const int kMaxLabelLen = 16;  /// FIXME - assumed max tower label length
 
 
 

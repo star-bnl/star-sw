@@ -1,6 +1,6 @@
 /// \author Piotr A. Zolnierczuk, Indiana University Cyclotron Facility
 /// \date   2003/12/08 
-// $Id: EEmcTTMMaker.cxx,v 1.20 2004/05/05 22:04:16 zolnie Exp $
+// $Id: EEmcTTMMaker.cxx,v 1.21 2004/05/05 23:00:51 zolnie Exp $
 // doxygen info here
 /** 
  * \class  EEmcTTMMaker
@@ -15,91 +15,22 @@
  * \date   2003/12/08
  *
 
- */
-
-/*!
-    \mainpage TTM - an endcap Tower to Track Match maker 
-
-    \section intro Introduction
-    This a MuDST based class to get tower calibration from matching TPC tracks
-  
-
-
-    \section algorithm Algorithm
-
-    1. Events with CTB sum greater than MaxCTBsum (EEmcTTMMaker::SetMaxCTBSum) are rejected.
-    
-    2. First build a list of good TPC tracks/event (using EEmcTTMMaker::AcceptTrack)
-     - tpc tracks only
-     - type() == primary (see StEvent manual for information)
-     - flag() > 0        (see StEvent manual for information)
-     - hits/track      >= MinTrackHits   (changeable via EEmcTTMMaker::SetMinTrackHits)
-     - track  length   >= MinTrackLength (changeable via EEmcTTMMaker::SetMinTrackLength)
-     - transverse momentum >= MinTrackPt     (changeable via EEmcTTMMaker::SetMinTrackPt)
-     - MinTrackEta <= track eta <= MaxTrackEta 
-(changeable via EEmcTTMMaker::SetMinTrackEta and EEmcTTMMaker::SetMaxTrackEta)
-
-     3. loop over all EEMC tower hits (with adc>ped)
-     for each track check if it matches a tower at a set of preselected positions (z1,z2,..)
-         - extrapolate track to a mZ with EEmcTTMatch::ExtrapolateToZ() to get track intersection with a plane z=z1,z2
-         - match is established with EEmcTTMMaker::MatchTrack()    	     
-	 - if the distance from the intersection to tower center in eta and phi is smaller than predefined fraction (expressed in tower half-widths), cf. EEmcTTMMaker::SetDeltaPhiCut and EEmcTTMMaker::SetDeltaEtaCut)
-	 
-    4. If a match is established add a tower with a list of matched track to the list of matches.
-    The list is accessible with EEmcTTMMaker::GetMatchList.
-
-    \section params Parameters
-    Here are the defaults. Each parameter is changeable via corresponding Set method.
-
-    For general event selection:
-    - CTB sum is no greater than EEmcTTMMaker::kDefMaxCTBsum
-
-    For track selection
-    - track has at least EEmcTTMMaker::kDefMinTrackHits hist
-    - track is at least  EEmcTTMMaker::kDefMinTrackLength cm long
-    - track pt is at least EEmcTTMMaker::kDefMinTrackPt GeV
-    - track pseudorapidity at the origin is at least EEmcTTMMaker::kDefMinTrackEta
-    - track pseudorapidity at the origin is no greater than EEmcTTMMaker::kDefMaxTrackEta
-
-    For track match
-    - track must be no further than EEmcTTMMaker::kDefDeltaPhiCut x tower phi-half-width 
-from the tower center
-    - track must be no further than EEmcTTMMaker::kDefDeltaEtaCut x tower eta-half-width 
-the tower center
-    - tracks are matched at the following depths (cf. StRoot/StEEmcUtil/EEmcGeom/EEmcGeomDefs.h)
-      - pres=kEEmcZPRE1+0.1cm
-      - post=kEEmcZPOST-0.1cm 
-      - smd=kEEmcZSMD
-
-     \section example Example
-     \include ttmexample.C
-
-     See also:
-      - StRoot/StEEmcPool/macros/TTM/ttmexample.C an example how to use EEmcTTMMaker
-      - StRoot/StEEmcPool/macros/TTM/show.C       an example how to display MuDST track and towers
-
-     \section displat Display matches
-     Here are some examples of matched tracks (from Run2003)
-        \image html  snapshot.jpg "Screen Shot"
-        \image html  eemc.gif     "Two track event"
-        \image latex eemc.eps     "Two track event" width=10cm
-     
-
-     \todo    
+ * \todo    
      - write additional makers that would produce electron and MIP calibrations
      - more documentation?
 
-     \bug     
+ * \bug     
      - The matching algorithm assumes that z depths at which matching is performed
      are in fact inside the EEMC, i.e. it is only phi and eta that are checked
      at given z. So it is up to the user to ensure that z depths are really inside EEMC.
      And the defaults are.
-
      - Since cint in root/root4star does not allow to pass function pointers 
     (that would be ideal for user defineable EEmcTTMMaker::AcceptTrack and 
     EEmcTTMMaker::MatchTrack) we're stuck with FORTRAN++
 
+
  */
+
 
 #include <iostream>
 #include <sstream>
@@ -169,15 +100,11 @@ const Double_t EEmcTTMMaker::kDefDeltaPhiCut    =  0.7;
 const Double_t EEmcTTMMaker::kDefDeltaEtaCut    =  0.7;
 
 //_____________________________________________________________________________
-//! the TTM constructor
-/// \param self     this maker name (const char*)
-/// \param mumaker a pointer to a StMuDstMaker 
-/// \param dbmaker a pointer to a StEEmcDbMaker 
 EEmcTTMMaker::EEmcTTMMaker(
-					   const char* self      , // this maker name
-					   StMuDstMaker  *mumaker,
-					   StEEmcDbMaker *dbmaker
-					   ) 
+			   const char* self      , // this maker name
+			   StMuDstMaker  *mumaker,
+			   StEEmcDbMaker *dbmaker
+			   ) 
   : StMaker(self),mMuDstMaker(mumaker),mEEmcDb(dbmaker) {
 
   if( mMuDstMaker == NULL )  
@@ -441,8 +368,8 @@ EEmcTTMMaker::Finish () {
 
 
 //_____________________________________________________________________________
-//! default criterion of track acceptance
-//! \param track a pointer to a current StMuTrack
+/// default criterion of track acceptance
+/// \param track a pointer to a current StMuTrack
 Bool_t 
 EEmcTTMMaker::AcceptTrack(const StMuTrack *track) {
   if(! track->topologyMap().trackTpcOnly()  ) return kFALSE;
@@ -457,7 +384,7 @@ EEmcTTMMaker::AcceptTrack(const StMuTrack *track) {
 }
 
 //_____________________________________________________________________________
-//! default criterion whether a track matches a tower or not
+/// default criterion whether a track matches a tower or not
 /// \param dphi  a distance from track hit to tower centre in phi
 /// \param deta  a distance from track hit to tower centre in eta
 /// \param phihw a tower half-width in phi
@@ -483,7 +410,6 @@ EEmcTTMMaker::MatchTrack(
 
 
 //_____________________________________________________________________________
-/// prints matching cuts and statistics summary
 /// \param out an ostream to print to 
 /// \return ostream 
 ostream& 
@@ -536,6 +462,9 @@ ostream&  operator<<(ostream &out, const EEmcTTMMaker &ttm)  {
 
 
 // $Log: EEmcTTMMaker.cxx,v $
+// Revision 1.21  2004/05/05 23:00:51  zolnie
+// more docs
+//
 // Revision 1.20  2004/05/05 22:04:16  zolnie
 // forgor about EEmcTower
 //
