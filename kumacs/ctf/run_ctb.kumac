@@ -64,16 +64,18 @@
    
 * --------------------- initialization ----------------------------*
   
+  exec create_tables_ctf#init
+  
 * load geometry
   if [writegeom].eq.1 then
-    exec ctg_init#write
+    exec ctg_init#init
+    exec ctg_init#write  
   else 
     exec ctg_init#read
   endif
-    
+       
   exec cts_init
   
-  exec create_tables_ctf#init
   
 * ------------------- process events ------------------------------*
 
