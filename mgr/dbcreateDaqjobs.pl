@@ -12,6 +12,7 @@ use Class::Struct;
 use CGI;
 
 require "/afs/rhic/star/packages/SL99h/mgr/dbDaqOperaSetup.pl";
+#require "dbDaqOperaSetup.pl";
 
 my $debugOn=0;
 
@@ -100,13 +101,15 @@ exit();
  my $executableargs;
 
  $job_set = $Jset;
+ my $Jsetd = $Jset;
+ $Jsetd =~ s/dst\/prod4/daq/g;  
  $job_set =~ s/\//_/g;
 
 # print $job_set, "\n";
  
  my $jb_new = $JOB_DIR . $process . "/new_jobs/" .  $job_set . "_" . $gfile;
  
-       my $hpss_raw_dir  = $TOPHPSS_SINK . "/" . $Jset;
+       my $hpss_raw_dir  = $TOPHPSS_SINK . "/" . $Jsetd;
        my $hpss_raw_file = $gfile . ".daq";
        my $hpss_dst_dir  = $TOPHPSS_RECO . "/" . $Jset;
        my $hpss_dst_file0 = $gfile . ".event.root";
