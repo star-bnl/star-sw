@@ -15,7 +15,7 @@
 >GUIDANCE
 Table_and_Dataset_Memory commands.
 .
- #(@)$Id: tdm_def.cdf,v 1.14 1998/07/09 11:29:16 ward Exp $
+ #(@)$Id: tdm_def.cdf,v 1.15 1998/07/17 15:45:45 ward Exp $
  Edited by Bill Love on 23-24 Feb 1998
 .
 TDM is an Analysis Service Package (ASP) for the Standard Analysis
@@ -984,7 +984,7 @@ BUGS:
 >ACTION kam_tdmtable_typename_%C
 **
 ** ---------------------------------------------------------------------
-** TDM/TABLE/DUMP SOREF [ NROWS IFIRST ]
+** TDM/TABLE/DUMP SOREF NROWS IFIRST NAMEOFFILE COLUMNLIST
 >COMMAND DUMP
 >PARAMETERS
 SOREF 'name of table' C
@@ -1000,10 +1000,13 @@ The IFIRST parameter counts from zero _UNLIKE_ Fortran.
 If you want all the rows, use a large number for NROWS, and zero
 for IFIRST.
 .
+If you want output to the screen instead of a file,
+write 'screen' for the filename.
+.
 The COLUMNLIST parameter is used
 to select a subset of the columns.  In the COLUMNLIST parameter, separate the 
 column names with carets (^).  See the example below.
-Instead of a list of columns, you can type allColumns.
+If you want all the columns, type 'allColumns'.
 .
 EXAMPLE: 
 This example writes columns id, offset, and pedestal of
