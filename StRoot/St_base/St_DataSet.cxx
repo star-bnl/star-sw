@@ -139,6 +139,12 @@ void St_DataSet::Delete(Option_t *opt){
   fList = 0;
 }
 //______________________________________________________________________________
+St_DataSet  *St_DataSet::FindByPath(const Char_t *path) const 
+{  
+  // Aliase for St_DataSet::Find(const Char_t *path) method
+   return Find(path);
+}
+//______________________________________________________________________________
 St_DataSet *St_DataSet::Find(const Char_t *path) const
 {
   //
@@ -151,7 +157,14 @@ St_DataSet *St_DataSet::Find(const Char_t *path) const
   //
   St_DataSetIter next((St_DataSet*)this);
   return next.Find(path);
+} 
+//______________________________________________________________________________
+St_DataSet  *St_DataSet::FindByName(const Char_t *name,const Char_t *path,Option_t *opt) const
+{ 
+  // Aliase for St_DataSet::FindObject(const Char_t *name,const Char_t *path,Option_t *opt) method
+  return FindObject(name,path,opt);
 }
+
 //______________________________________________________________________________
 St_DataSet *St_DataSet::FindObject(const Char_t *name,const Char_t *path,Option_t *opt) const
 {
