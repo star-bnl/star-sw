@@ -1,53 +1,34 @@
-// example macro to use  EETowTrackMatchMaker
+// example macro to use  EEmcTTMMaker
 // Author: Piotr A. Zolnierczuk
+class TGeoNode;
+class TGeoVolume;
 
+class StPhysicalHelixD;
+class StThreeVectorD;
 
 class StChain;
 class StMuTrack;
 class EEmcTower;
-class EETowDisplay;
-class StPhysicalHelixD;
-class StThreeVectorD;
-
-class TGeoNode;
-class TGeoVolume;
-
-StChain *chain=0;
+class EEmcTTDisplay;
+class EEmcTTMMaker;
 
 
-void printNodeTree(TObjArray *nodeList, Int_t level=0) 
-{
-  TIter nextNode(nodeList);
-  TGeoNode *node;
-  while( (node=(TGeoNode *)nextNode())!=NULL ) {
-    for(int k=0;k<level;k++) cerr << "\t";
-    cerr << node->GetVolume()->GetName() << endl;
-    printNodeTree(node->GetNodes(),level+1);
-  }
-}
+StChain       *chain=0;
+EEmcTTDisplay *eemc =0;
+EEmcTTMMaker  *ttm  =0;
 
-
-
-TGeoNode *findNode(TObjArray *nodeList,const char *name)
-{
-  TIter nextNode(nodeList);
-  TGeoNode *node;
-  while( (node=(TGeoNode *)nextNode())!=NULL ) {
-    if(strcmp(node->GetVolume()->GetName(),name)==0)     return node;
-    if( (node=findNode(node->GetNodes(),name))!= NULL ) return node;
-  }
-  return NULL;
-}
+void      printNodeTree(TObjArray *nodeList, Int_t level=0);
+TGeoNode *findNode     (TObjArray *nodeList,const char *name);
 
 
 void
 show
 (
- char* inpDir  = "/star/2003/mudst/",                        // MuDST directory
- char* inpFile = "",// "st_physics_4145010_raw_0010001.MuDst.root",  // MuDST file(s)
- char* outFile = "R4145010.root",
- Int_t nFiles  = 1,                                            // # of MuDST file(s)
- Int_t nEvents = -1
+ char* inpDir  = "/star/2003/mudst/",  // MuDST directory
+ char* inpFile = "",                   // MuDST file(s);                      
+ char* outFile = "R4145010.root",      // output tree file
+ Int_t nFiles  = 1,                    // # of MuDST file(s)
+ Int_t nEvents = -1                    // # of ebents
  )
 { 
   gErrorIgnoreLevel=1999;
@@ -70,13 +51,14 @@ show
   // create the chain    
   chain = new StChain("StChain"); 
   //
-  TCanvas  *c1 = new TCanvas("eemc","eemc",0,0,1000,1000);
 
-  //
-  TGeoManager     *gm   = new TGeoManager("eemc", "eemc tower display");
-  TGeoVolume      *top  = gm->MakeBox("star",0, 350., 350., 350.);
-  TGeoVolume      *smbox = gm->MakeBox("smbox1",0, 10., 20., 30.);
-  EETowDisplay    *eemc = new EETowDisplay();
+  // for display
+  TCanvas      *c1    = new TCanvas("eemc","eemc",10,10,1000,1000);
+  TGeoManager  *gm    = new TGeoManager("eemc", "eemc tower display");
+  TGeoVolume   *top   = gm->MakeBox("star",0, 200., 200., 350.);
+  TGeoVolume   *smbox = gm->MakeBox("smbox1",0, 1., 1., 1.);
+  // eemc 
+  eemc  = new EEmcTTDisplay();
  
   TGeoTranslation *etra = new TGeoTranslation(0.0,0.0,0.5*(eemc->getZ1()+eemc->getZ2()));
   top->AddNode(smbox, 1,NULL);
@@ -86,24 +68,15 @@ show
   gm->SetVisLevel(4);
   gm->SetVisOption(0);
 
-  //printNodeTree(gm->GetListOfNodes());
-  //TGeoNode *gf = findNode(gm->GetListOfNodes(),"05TA07");
-  //if( gf!=NULL )  cerr << "VOLUME FOUND " << gf->GetVolume()->GetName() << endl;
-
   c1->SetTheta(90);
   c1->SetPhi(0);
-
   top->Draw();
-  //gPad->GetView()->ShowAxis();
- 
-
   
   // now we add Makers to the chain...  some of that is black magic :) 
   muDstMaker       = new StMuDstMaker(0,0,inpDir,inpFile,"MuDst.root",nFiles);  // muDST main chain
   StMuDbReader* db = StMuDbReader::instance();                                  // need the database
   StEEmcDbMaker  *eemcDbMaker=new StEEmcDbMaker("eemcDb");                      // need EEMC database  
   St_db_Maker *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");                // need the database (???)
-
 
   // now comment in/out/change the below if you want it your way
   eemcDbMaker->setSectors(5,8);            // request EEMC DB for sectors you need (dafault:1-12)
@@ -112,43 +85,46 @@ show
   // eemcDbMaker->setPreferedFlavor("set430","eemcPMTcal");   // request alternative flavor of DB table (if needed)
 
   // finally after so many lines we arrive at the good stuff
-  EETowTrackMatchMaker *mm = new  EETowTrackMatchMaker ("TTM",muDstMaker,eemcDbMaker);
-  mm->SetFileName(outFile);
-  mm->Summary(cout);    // 
+  ttm = new  EEmcTTMMaker ("TTM",muDstMaker,eemcDbMaker);
+  ttm->SetFileName(outFile);
+  ttm->Summary(cout);    // 
 
   StMuDebug::setLevel(0);
 
   chain->Init();
   chain->ls(3);
 
+  //---------------------------------------------------
+  run(2);
+}
 
 
- //---------------------------------------------------
+
+void 
+run(int nEvents=-1)
+{
   int stat=0;
- 
-  
   for(int counter=0; nEvents<0 || counter<nEvents ; ++counter) {
     if( (stat = chain->Make()) != 0 ) break;
-    //cerr << "analyzed " << counter << " events" << endl;
-    TIter  nextTower(mm->GetTowers());
-    TIter  nextMatch(mm->GetMatch()->GetTable());
+ 
+    TIter  nextTower(ttm->GetTowers());
+    TIter  nextMatch(ttm->GetMatch()->GetTable());
     
     EEmcTower *tower;
     StMuTrack *track;
     TPair     *mapPair;
-    if(mm->GetMatch()->GetTable()->IsEmpty()) continue;
+    if(ttm->GetMatch()->GetTable()->IsEmpty()) continue;
 
     eemc->Clear();
     cerr << "<Event>\n";
     while ((mapPair = (TPair*) nextMatch())) {
-
       tower = (EEmcTower *)mapPair->Key();
       track = (StMuTrack *)mapPair->Value();
       eemc->towerHit(*tower);
       eemc->trackHit(*track);
       eemc->Out(cerr,*track,*tower);
+#if FOR_DEBUGG
       StPhysicalHelixD helix = track->helix();
-
       Float_t zPos[] = { 270.290, 279.542 , 306.058 , -1.0 };
       for(int i=0; zPos[i]>0.0; i++) {
 	double             dipAng = helix.dipAngle();
@@ -162,28 +138,42 @@ show
 	if(gnode!=NULL) cerr << gnode->GetVolume()->GetName() << endl;
 	else cerr << "node not found " << endl;
       }
-
+#endif
     }
     cerr << "</Event>" << endl;
     eemc->DrawHits();
-
-#if 0
-    int nhits=0;
-    while( (tower=(EEmcTower *)nextTower()) != NULL ) { 
-      if(tower->edep>20 && tower->edep<100 ) {
-	nhits++;
-      }
-    }
-    if(nhits<20) eemc->DrawHits();
-#endif    
-
     gPad->Update();
-    char c;
-    cout << "enter a single character " << endl;
-    cin >> c;
-    if(c=='q') break;
-    if(counter%1000==0) cerr << "analyzed " << counter << " events" << endl;
   }
+  ttm->Summary(cerr);
+}
 
-  mm->Summary(cout);    // 
+
+
+
+
+
+
+void printNodeTree(TObjArray *nodeList, Int_t level) 
+{
+  TIter nextNode(nodeList);
+  TGeoNode *node;
+  while( (node=(TGeoNode *)nextNode())!=NULL ) {
+    for(int k=0;k<level;k++) cerr << "\t";
+    cerr << node->GetVolume()->GetName() << endl;
+    printNodeTree(node->GetNodes(),level+1);
+  }
+}
+
+
+
+TGeoNode *
+findNode(TObjArray *nodeList,const char *name)
+{
+  TIter nextNode(nodeList);
+  TGeoNode *node;
+  while( (node=(TGeoNode *)nextNode())!=NULL ) {
+    if(strcmp(node->GetVolume()->GetName(),name)==0)     return node;
+    if( (node=findNode(node->GetNodes(),name))!= NULL ) return node;
+  }
+  return NULL;
 }

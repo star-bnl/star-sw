@@ -65,24 +65,6 @@ ttm
   for(int counter=0; nEvents<0 || counter<nEvents ; ++counter) {
     if( (stat = chain->Make()) != 0 ) break;
     if(counter%1000==0) cout << "analyzed " << counter << " events" << endl;
-
-    TIter  nextTower(mm->GetTowers());
-    TIter  nextMatch(mm->GetMatch()->GetTable());
-    
-    EEmcTower *tower;
-    StMuTrack *track;
-    TPair     *mapPair;
- 
-    if(mm->GetMatch()->GetTable()->IsEmpty()) continue;
-
-    cerr << "<Event>\n";
-    while ((mapPair = (TPair*) nextMatch())) {
-      tower = (EEmcTower *)mapPair->Key();
-      track = (StMuTrack *)mapPair->Value();
-      towerHit->Out(cerr);
-    }
-    cerr << "</Event>" << endl;
-    //while( (tower=(EEmcTower *)nextTower()) != NULL ) tower->Out(cout);
   }
   mm->Summary(cerr);    // 
 }
