@@ -1,5 +1,4 @@
-STR = ${HOME}/star/str
-MSG = ${HOME}/star/msg
+MSG = ../msg
 
 ARFLAGS      = vqs
 FFLAGS       = -c -O -w
@@ -7,17 +6,11 @@ FFLAGS_DBG   = -c -g -w
 CCFLAGS      = -c -O -w
 CCFLAGS_DBG  = -c -g -w
 
-#	strnorm is an executable which puts the terminal into "normal"
-#	mode, as defined by strterm_norm, and is primarily used after
-#	other strterm routines have been called to change the mode of
-#	the terminal, and when program execution was terminated before
-#	the terminal was reset.
+all : libstr.a libstr_dbg.a
 
-all : libstr.a libstr_dbg.a strnorm
+str : libstr.a
 
-str : libstr.a strnorm
-
-dbg : libstr_dbg.a strnorm
+dbg : libstr_dbg.a
 
 
 libstr.a : strlib.o strlib_sgi.o strmth.o strplot.o strterm_sgi.o str_nextarg.o
@@ -26,6 +19,7 @@ libstr.a : strbyte_sgi.o strtermc_sgi.o
 	ar $(ARFLAGS) libstr.a strlib.o strlib_sgi.o strmth.o strplot.o \
 	strterm_sgi.o str_nextarg.o \
 	strbyte_sgi.o strtermc_sgi.o
+	ranlib libstr.a
 
 libstr_dbg.a : strlib_dbg.o strlib_sgi_dbg.o strmth_dbg.o strplot_dbg.o strterm_sgi_dbg.o str_nextarg_dbg.o
 libstr_dbg.a : strbyte_sgi_dbg.o strtermc_sgi_dbg.o
@@ -33,6 +27,7 @@ libstr_dbg.a : strbyte_sgi_dbg.o strtermc_sgi_dbg.o
 	ar $(ARFLAGS) libstr_dbg.a strlib_dbg.o strlib_sgi_dbg.o strmth_dbg.o strplot_dbg.o \
 	strterm_sgi_dbg.o str_nextarg_dbg.o \
 	strbyte_sgi_dbg.o strtermc_sgi_dbg.o
+	ranlib libstr_dbg.a
 
 
 strlib.o : strlib.f strlib_inc
@@ -92,8 +87,14 @@ strtermc_sgi_dbg.o : strtermc_sgi.c
 
 
 
+#	strnorm is an executable which puts the terminal into "normal"
+#	mode, as defined by strterm_norm, and is primarily used after
+#	other strterm routines have been called to change the mode of
+#	the terminal, and when program execution was terminated before
+#	the terminal was reset.
+
 strnorm : strnorm.o ${STR}/libstr.a ${MSG}/libmsg.a
-	f77 -o strnorm strnorm.o -L${STR} -L${MSG} -lstr -lmsg -lstr
+	f77 -o strnorm strnorm.o -L. -L${MSG} -lstr -lmsg -lstr
 
 strnorm.o : strnorm.f
 	f77 $(FFLAGS) strnorm.f
