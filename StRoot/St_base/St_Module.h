@@ -1,8 +1,11 @@
 //*-- Author : Valeri Fine (Faine); E-mail: fine@bnl.gov, fine@mail.cern.ch
 //*CMZ : 23/03/98
 // Copyright (C) FineSoft, Valery Fine at Brookhaven National Laboratory (fine@bnl.gov)
-// $Id: St_Module.h,v 1.8 2000/03/24 20:35:22 fine Exp $
+// $Id: St_Module.h,v 1.9 2000/03/26 01:59:23 fine Exp $
 // $Log: St_Module.h,v $
+// Revision 1.9  2000/03/26 01:59:23  fine
+// new version of St_Module. Works for STAF module only
+//
 // Revision 1.8  2000/03/24 20:35:22  fine
 // adjusted to ROOT 2.24. Doesn't work yet. Under development
 //
@@ -73,6 +76,7 @@ private:
         char       *fName;        // Name of the module for the dynamic loading
         Int_t       fIndex;       // The index pof the current element
 protected:
+                 void ClearParams();
         virtual  void SetParameter(TTable *f);
         virtual  void SetAllParameters(
                              TTable *f1,TTable *f2,TTable *f3,TTable *f4
@@ -102,9 +106,9 @@ public:
                             ,TTable *f37=0, TTable *f38=0
                 ); 
 
-      St_Module(Char_t *name,TTable *f1=0, TTable *f2=0, TTable *f3=0, TTable *f4=0
-                             ,TTable *f5=0, TTable *f6=0, TTable *f7=0, TTable *f8=0
-                             ,TTable *f9=0, TTable *f10=0, TTable *f11=0, TTable *f12=0
+      St_Module(Char_t *name, TTable *f1=0,  TTable *f2=0,  TTable *f3=0,  TTable *f4=0
+                             ,TTable *f5=0,  TTable *f6=0,  TTable *f7=0,  TTable *f8=0
+                             ,TTable *f9=0,  TTable *f10=0, TTable *f11=0, TTable *f12=0
                              ,TTable *f13=0, TTable *f14=0, TTable *f15=0, TTable *f16=0
                              ,TTable *f17=0, TTable *f18=0, TTable *f19=0, TTable *f20=0
                              ,TTable *f21=0, TTable *f22=0, TTable *f23=0, TTable *f24=0
@@ -125,11 +129,12 @@ public:
 
   table_head_st *GetHeader(Int_t i) const {return ((St_table_header *)fHeaders->At(i))->GetTable();}
   TTable *GetTable(Int_t i) const {return (TTable *)fParams->At(i);}
+  void *GetStruct(Int_t i) const {return ((TTable *)fParams->At(i))->GetArray();}
 
   virtual Int_t  operator()() { return ExecuteModule(); }
-  virtual Int_t  ExecuteModule(TTable *f1,   TTable *f2=0, TTable *f3=0, TTable *f4=0
-                              ,TTable *f5=0, TTable *f6=0, TTable *f7=0, TTable *f8=0
-                              ,TTable *f9=0, TTable *f10=0, TTable *f11=0, TTable *f12=0
+  virtual Int_t  ExecuteModule(TTable *f1,    TTable *f2=0,  TTable *f3=0,  TTable *f4=0
+                              ,TTable *f5=0,  TTable *f6=0,  TTable *f7=0,  TTable *f8=0
+                              ,TTable *f9=0,  TTable *f10=0, TTable *f11=0, TTable *f12=0
                               ,TTable *f13=0, TTable *f14=0, TTable *f15=0, TTable *f16=0
                               ,TTable *f17=0, TTable *f18=0, TTable *f19=0, TTable *f20=0
                               ,TTable *f21=0, TTable *f22=0, TTable *f23=0, TTable *f24=0
