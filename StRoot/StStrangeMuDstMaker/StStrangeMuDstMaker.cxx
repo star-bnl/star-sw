@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 3.3 2000/08/10 01:14:17 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.4 2000/09/07 02:22:09 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.4  2000/09/07 02:22:09  genevb
+// Added AbortEvent() functionality
+//
 // Revision 3.3  2000/08/10 01:14:17  genevb
 // Upped basket size of event branch; Set old file format
 //
@@ -99,6 +102,7 @@ StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
 
   doMc = kFALSE;
   rw = StrangeNoFile;
+  abortEvent = kFALSE;
 
 }
 //_____________________________________________________________________________
@@ -112,6 +116,7 @@ StStrangeMuDstMaker::~StStrangeMuDstMaker() {
 //_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::Init() {
 
+  abortEvent = kFALSE;
   firstEvent = kTRUE;
   if (Debug()) gMessMgr->Debug() << "In StStrangeMuDstMaker::Init() ... "
                                << GetName() << endm; 
@@ -235,6 +240,8 @@ Int_t StStrangeMuDstMaker::MakeReadDst() {
 //_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::MakeCreateDst() {
 
+  if (abortEvent) return kStOK;
+
   // Get the cut parameters and fill StrangeCuts on the first event
   if (firstEvent) {
     Int_t iSize = cuts->GetCollection()->GetSize();
@@ -327,6 +334,8 @@ Int_t StStrangeMuDstMaker::MakeCreateMcDst() {
 //_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::MakeCreateSubDst() {
 
+  if (abortEvent) return kStOK;
+
   EachController(MakeCreateSubDst());
   tree->Fill();
 
@@ -347,6 +356,7 @@ void StStrangeMuDstMaker::Clear(Option_t *option) {
     if (rw == StrangeNoKeep) tree->Reset();
   }
 
+  abortEvent = kFALSE;
   StMaker::Clear(option);
 }
 //_____________________________________________________________________________
