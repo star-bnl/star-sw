@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: FTPV1P0_ZS_SR.cxx,v 1.8 2002/03/11 16:40:24 jcs Exp $
+ * $Id: FTPV1P0_ZS_SR.cxx,v 1.9 2002/05/24 14:35:30 jcs Exp $
  * Author: M.J. LeVine, H.Huemmler
  ***************************************************************************
  * Description: FTPC V1.0 Zero Suppressed Reader
@@ -11,6 +11,9 @@
  * 
  ***************************************************************************
  * $Log: FTPV1P0_ZS_SR.cxx,v $
+ * Revision 1.9  2002/05/24 14:35:30  jcs
+ * Use index pad_seq-1 when current sequence adjacent to previous sequence
+ *
  * Revision 1.8  2002/03/11 16:40:24  jcs
  * return false if no FTPADCD bank or no FTPADCX bank found for requested sector
  *
@@ -200,7 +203,7 @@ int FTPV1P0_ZS_SR::initialize()
 	    pad_seq++;
 	  }
 	  else { // yes: just update the length
-	    Pad_array[padrow-1][pad-1].seq[pad_seq].Length += len;
+	    Pad_array[padrow-1][pad-1].seq[pad_seq-1].Length += len;
 	    adc_locn +=len;
 	  }
 	  lastbin = start+len-1;
