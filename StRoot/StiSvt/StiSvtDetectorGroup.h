@@ -13,7 +13,7 @@ class StiDetectorBuilder;
 class StiSvtDetectorGroup : public StiDetectorGroup<StEvent,StMcEvent>
 {
   public:
-  StiSvtDetectorGroup(bool active);
+  StiSvtDetectorGroup(bool active, char* baseName);
   ~StiSvtDetectorGroup();
 };
 
