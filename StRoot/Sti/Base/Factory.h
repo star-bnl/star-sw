@@ -21,6 +21,7 @@ class Factory : public Named
   
   virtual void initialize()=0;
   virtual void reset()=0;
+  virtual void clear()=0;
   virtual Factorized * getInstance()=0;
 };
 
