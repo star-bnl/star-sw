@@ -1,4 +1,4 @@
-//*-- Author : David Hardtke, based on Jan Balewski
+// *-- Author : David Hardtke, based on Jan Balewski
 // Revision 1.1.1.1  2001/01/31 14:00:07  balewski
 // First release
 //
@@ -41,7 +41,7 @@ using namespace units;
 
 
 ClassImp(StGenericVertexMaker)
-//_____________________________________________________________________________
+//___________________________________________________________
 StGenericVertexMaker::StGenericVertexMaker(const char *name):StMaker(name)
 {
   usebeamline = kFALSE;
@@ -50,6 +50,7 @@ StGenericVertexMaker::StGenericVertexMaker(const char *name):StMaker(name)
   nEvTotal=nEvGood=0;
   externalFindUse=kTRUE; ///Default means that no finding actually done
   use_ITTF=kTRUE;
+  m_Mode2=0;
 }
 //_____________________________________________________________________________
 StGenericVertexMaker::~StGenericVertexMaker()
@@ -81,7 +82,7 @@ Int_t StGenericVertexMaker::Init()
   // setup params
   EtaCut=1.4; // Sensible default cut
 
-  gMessMgr->Info() << "StGenericVertexMaker::Init: m_Mode=" <<  m_Mode << endm;
+  gMessMgr->Info() << "StGenericVertexMaker::Init: m_Mode=" <<  m_Mode <<"m_Mode2=" <<  m_Mode2 <<  endm;
   if ( m_Mode & 0x1){
     theFinder= new StMinuitVertexFinder();
   } else if ( m_Mode & 0x2){
