@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.290 2002/03/22 21:50:19 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.291 2002/03/22 23:45:45 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -128,7 +128,7 @@ Bfc_st BFC1[] = {
                                                                           "Laser Calibration Chain",kFALSE},
   {"L3Counter","" ,"","db,detDb,xin,l3count","","",                    "L3 Counter extraction pass",kFALSE},
   {"VtxSeedCal","","",
-   "ppOpt,ry2001,in,tpc_daq,tpc,Physics,-PreVtx,FindVtxSeed,NoEvent,Corr2",
+   "ppOpt,ry2001,in,tpc_daq,tpc,global,-v0,-xi,-kink,-Tree,Physics,-PreVtx,FindVtxSeed,NoEvent,Corr2",
                                                                      "","","Pass0 Vertex evaluator",kFALSE},
 
 
