@@ -1,13 +1,13 @@
 /**********************************************************
- * $Id: StRichPIDMaker.h,v 2.8 2000/11/21 19:50:35 lasiuk Exp $
+ * $Id: StRichPIDMaker.h,v 2.9 2000/11/25 11:55:14 lasiuk Exp $
  *
  * Description:
  *  StRrsMaker is the main module
  *  StRichRawData. It has the standard Maker functions:
  *
  *  $Log: StRichPIDMaker.h,v $
- *  Revision 2.8  2000/11/21 19:50:35  lasiuk
- *  add stthreevectorf
+ *  Revision 2.9  2000/11/25 11:55:14  lasiuk
+ *  add reprocess Traits
  *
  *  Revision 2.8  2000/11/21 19:50:35  lasiuk
  *  add stthreevectorf
@@ -104,6 +104,7 @@ class StRichPadMonitor;
 
 // StEvent
 class StEvent;
+class StRichPidTraits;
 class StSPtrVecRichHit;
 class StSPtrVecRichPixel;
 class StSPtrVecRichCluster;
@@ -358,6 +359,7 @@ public:
 
     // StEvent
     void fillPIDTraits(StRichRingCalculator*);
+    bool reprocessTheTraits(StRichPidTraits*);
     void fillRichSoftwareMonitor(StEvent*);
 
 #ifdef  myRICH_WITH_MC
