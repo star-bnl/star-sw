@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.h,v 1.7 1998/12/16 22:22:41 fisyak Exp $
+// $Id: St_glb_Maker.h,v 1.8 1998/12/21 19:26:09 fisyak Exp $
 // $Log: St_glb_Maker.h,v $
+// Revision 1.8  1998/12/21 19:26:09  fisyak
+// Make ROOT include non system
+//
 // Revision 1.7  1998/12/16 22:22:41  fisyak
 // New global from Spiros
 //
@@ -39,10 +42,10 @@
 #include "StMaker.h"
 #endif
 #ifndef ROOT_TH1
-#include <TH1.h>
+#include "TH1.h"
 #endif
 #ifndef ROOT_TH2
-#include <TH2.h>
+#include "TH2.h"
 #endif
 
 class St_svm_ctrl;
@@ -57,7 +60,7 @@ class St_particle_dst_param;
 class St_dst_Maker : public StMaker {
  private:
   Bool_t drawinit;
-  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.7 1998/12/16 22:22:41 fisyak Exp $";
+  // static Char_t m_VersionCVS = "$Id: St_glb_Maker.h,v 1.8 1998/12/21 19:26:09 fisyak Exp $";
   // egr
   Int_t         m_scenario;   
   //#1: Real TPC Stand-Alone Tracking: Use this when running the TPC only.  

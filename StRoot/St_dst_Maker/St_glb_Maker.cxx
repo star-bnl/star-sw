@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.14 1998/12/17 14:37:19 fisyak Exp $
+// $Id: St_glb_Maker.cxx,v 1.15 1998/12/21 19:26:08 fisyak Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.15  1998/12/21 19:26:08  fisyak
+// Make ROOT include non system
+//
 // Revision 1.14  1998/12/17 14:37:19  fisyak
 // Fix tp_param
 //
@@ -57,7 +60,7 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include <string.h>
-#include <TMath.h>
+#include "TMath.h"
 #include "St_dst_Maker.h"
 #include "St_particle_Table.h"
 #include "St_hepe_gent_Table.h"
@@ -504,7 +507,7 @@ Int_t St_dst_Maker::Make(){
 //_____________________________________________________________________________
 void St_dst_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.14 1998/12/17 14:37:19 fisyak Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.15 1998/12/21 19:26:08 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
