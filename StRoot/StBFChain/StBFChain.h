@@ -1,5 +1,8 @@
-// $Id: StBFChain.h,v 1.18 2001/03/03 03:04:23 perev Exp $
+// $Id: StBFChain.h,v 1.19 2001/04/10 22:33:01 perev Exp $
 // $Log: StBFChain.h,v $
+// Revision 1.19  2001/04/10 22:33:01  perev
+// Overload clean
+//
 // Revision 1.18  2001/03/03 03:04:23  perev
 // StVeloMaker added
 //
@@ -103,8 +106,8 @@ class StBFChain : public StChain {
  public:
                        StBFChain(const char *name="bfc");
    virtual            ~StBFChain();
-   virtual Int_t       Make(int number){ SetIventNumber(number); return StMaker::Make(number);};
-   virtual Int_t       Make(){return StMaker::Make();};
+   virtual Int_t       Make(int number){ SetIventNumber(number); return StChain::Make(number);};
+   virtual Int_t       Make(){return StChain::Make();};
    virtual Int_t       Load();      // *MENU*
    virtual Int_t       Instantiate();      // *MENU*
    virtual Int_t       AddAB (const Char_t *after="",const StMaker *maker=0,const Int_t Opt=1); 
@@ -135,11 +138,12 @@ class StBFChain : public StChain {
    virtual Int_t       Finish();
    virtual TFile      *GetTFile() {return fTFile;}
    virtual St_XDFFile *GetXdfOut() {return fXdfOut;}
-   virtual Bool_t      GetOption(const Int_t k = 0);
-   virtual Bool_t      GetOption(const TString *Opt) {return GetOption(kOpt(Opt));}
-   virtual Bool_t      GetOption(const Char_t *Opt)  {return GetOption(kOpt(Opt));}
+   virtual Option_t*   GetOption() const{return TObject::GetOption();}
+   virtual Bool_t      GetOption(const Int_t k)  const;
+   virtual Bool_t      GetOption(const TString *Opt) const {return GetOption(kOpt(Opt));}
+   virtual Bool_t      GetOption(const Char_t  *Opt) const {return GetOption(kOpt(Opt));}
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.18 2001/03/03 03:04:23 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.19 2001/04/10 22:33:01 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StBFChain, 0)   //StBFChain control class
 };
 #endif
