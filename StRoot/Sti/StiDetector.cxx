@@ -37,7 +37,7 @@ void StiDetector::copy(StiDetector &detector){
 
   setName(detector.getName());
 }
-
+ 
 ostream& operator<<(ostream& os, const StiDetector& d){
 
     os << d.getName()
@@ -46,3 +46,4 @@ ostream& operator<<(ostream& os, const StiDetector& d){
     return os;
     
 } // operator<<
+
