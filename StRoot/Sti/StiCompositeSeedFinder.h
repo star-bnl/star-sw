@@ -6,10 +6,14 @@
 #ifndef StiCompositeSeedFinder_HH
 #define StiCompositeSeedFinder_HH
 
+#include <vector>
+using std::vector;
+
 #include "StiSeedFinder.h"
 
 class StiKalmanTrack;
 class StTrack;
+class StiTrackSeedFinder;
 
 class StiCompositeSeedFinder : public StiSeedFinder
 {
@@ -26,6 +30,12 @@ public:
 protected:
     
 private:
+    typedef vector<StiTrackSeedFinder*> SeedFinderVec;
+
+    //The seedvec holds pointers to objects on the heap, owned by mSeedVec
+    SeedFinderVec mSeedVec;
+    SeedFinderVec::iterator mCurrent;
+    
 };
 
 

@@ -10,10 +10,12 @@
 #include <string>
 using std::string;
 
+#include "Messenger.h"
 #include "StiObjectFactoryInterface.h"
 
 class StiKalmanTrack;
 class StTrack;
+class Messenger;
 
 class StiSeedFinder
 {
@@ -35,8 +37,9 @@ public:
     
 protected:
     StiObjectFactoryInterface<StiKalmanTrack>* mFactory;
-    bool mBuilt;
     string mBuildPath;
+    bool mBuilt;
+    Messenger& mMessenger;
     
 private:
 };

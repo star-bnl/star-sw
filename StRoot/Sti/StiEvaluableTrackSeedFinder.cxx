@@ -44,15 +44,15 @@ StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder(StAssociationMaker* ass
       mAssociationMaker(assoc), mMcEvent(0), mTpcHitFilter(0),
       mLowerBound(0), mMaxHits(0)
 {
-    cout <<"StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder()"<<endl;
+    mMessenger <<"StiEvaluableTrackSeedFinder::StiEvaluableTrackSeedFinder()"<<endl;
     if (!assoc) {
-	cout <<"\tERROR:\tAssociationMaker==0.  Undefined Behavior"<<endl;
+	mMessenger <<"\tERROR:\tAssociationMaker==0.  Undefined Behavior"<<endl;
     }
 }
 
 StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder()
 {
-    cout <<"StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder()"<<endl;
+    mMessenger <<"StiEvaluableTrackSeedFinder::~StiEvaluableTrackSeedFinder()"<<endl;
     if (mTpcHitFilter) {
 	delete mTpcHitFilter;
 	mTpcHitFilter=0;
@@ -75,12 +75,12 @@ void StiEvaluableTrackSeedFinder::setEvent(StMcEvent* mcevt)
 {
     mMcEvent = mcevt;
     if (mcevt==0) {
-	cout <<"StiEvaluableTrackSeedFinder::setEvent(). ERROR:\tmcEvent==0"<<endl;
+	mMessenger <<"StiEvaluableTrackSeedFinder::setEvent(). ERROR:\tmcEvent==0"<<endl;
 	return;
     }
 
     //Get StMcTrack list from StMcEvent
-    cout <<"StiEvaluableTrackSeedFinder::setEvent().  GetMcTrackContainer"<<endl;
+    mMessenger <<"StiEvaluableTrackSeedFinder::setEvent().  GetMcTrackContainer"<<endl;
     StSPtrVecMcTrack& tracks = mMcEvent->tracks();
     mBeginMc = tracks.begin();
     mEndMc = tracks.end();
@@ -95,50 +95,50 @@ void StiEvaluableTrackSeedFinder::setEvent(StMcEvent* mcevt)
 */    
 void StiEvaluableTrackSeedFinder::build()
 {
-    cout <<"StiEvalaubleTrackSeedFinder::build()"<<endl;
+    mMessenger <<"StiEvalaubleTrackSeedFinder::build()"<<endl;
     if (mBuildPath=="empty") {
-	cout <<"StiEvalaubleTrackSeedFinder::build(). ERROR:\tmBuildPath==empty.  ABORT"<<endl;
+	mMessenger <<"StiEvalaubleTrackSeedFinder::build(). ERROR:\tmBuildPath==empty.  ABORT"<<endl;
 	return;
     }
 
     if (mBuilt) {
-	cout <<"StiEvalaubleTrackSeedFinder::build(). ERROR:\talready built!.  ABORT"<<endl;
+	mMessenger <<"StiEvalaubleTrackSeedFinder::build(). ERROR:\talready built!.  ABORT"<<endl;
 	return;
     }
 
-    cout <<"StiEvalaubleTrackSeedFinder::build().  Build from:\t"<<mBuildPath<<endl;
+    mMessenger <<"StiEvalaubleTrackSeedFinder::build().  Build from:\t"<<mBuildPath<<endl;
 
     StGetConfigValue(mBuildPath.c_str(), "lowerBound", mLowerBound);
     if (mLowerBound==0) {
-	cout <<"StiEvalaubleTrackSeedFinder::build(). ERROR:\t";
-	cout <<"lowerBound==0.  ABORT"<<endl;
+	mMessenger <<"StiEvalaubleTrackSeedFinder::build(). ERROR:\t";
+	mMessenger <<"lowerBound==0.  ABORT"<<endl;
 	return;
     }
 
     StGetConfigValue(mBuildPath.c_str(), "mMaxHits", mMaxHits);
     if (mMaxHits==0) {
-	cout <<"StiEvaluableTrackSeedFinder::build(). ERROR:\t";
-	cout <<"maxHits==0 Abort"<<endl;
+	mMessenger <<"StiEvaluableTrackSeedFinder::build(). ERROR:\t";
+	mMessenger <<"maxHits==0 Abort"<<endl;
 	return;
     }
 
     string hitFilterType="empty";
     StGetConfigValue(mBuildPath.c_str(), "hitFilterType", hitFilterType);
     if (hitFilterType=="empty") {
-	cout <<"StiEvalaubleTrackSeedFinder::build(). ERROR:\tmhitFilterType==empty.  ABORT"<<endl;
+	mMessenger <<"StiEvalaubleTrackSeedFinder::build(). ERROR:\tmhitFilterType==empty.  ABORT"<<endl;
 	return;
     }
     else if (hitFilterType=="StTpcPadrowHitFilter") {
 	mTpcHitFilter = new StTpcPadrowHitFilter();
     }
     else {
-	cout <<"StiEvalaubleTrackSeedFinder::build(). ERROR:t";
-	cout <<"unkown hitfilter type: "<<hitFilterType<<".  ABORT"<<endl;
+	mMessenger <<"StiEvalaubleTrackSeedFinder::build(). ERROR:t";
+	mMessenger <<"unkown hitfilter type: "<<hitFilterType<<".  ABORT"<<endl;
 	return;
     }
     mTpcHitFilter->build(mBuildPath);
 
-    cout <<"lowerBound:\t"<<mLowerBound<<"\tmaxHits:\t"<<mMaxHits<<endl;
+    mMessenger <<"lowerBound:\t"<<mLowerBound<<"\tmaxHits:\t"<<mMaxHits<<endl;
     mBuilt=true;
 }
 
@@ -177,8 +177,8 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
     
     mcTrackMapType* mcToStTrackMap = mAssociationMaker->mcTrackMap();
     if (!mcToStTrackMap) {
-	cout <<"StiEvaluableTrackSeedFinder::makeTrack(StMcTrack*).  ERROR:\t";
-	cout <<"McTrackMap==0"<<endl;
+	mMessenger <<"StiEvaluableTrackSeedFinder::makeTrack(StMcTrack*).  ERROR:\t";
+	mMessenger <<"McTrackMap==0"<<endl;
 	return 0;
     }
     
@@ -186,13 +186,13 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
 	mcToStTrackMap->equal_range(mcTrack);
     if (range.first==mcToStTrackMap->end()) {
 	//These return values are now caught before exiting the seedFinder control
-	//cout <<"StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack() Error:\t";
-	//cout <<"No valid range found.  Abort"<<endl;
+	//mMessenger <<"StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack() Error:\t";
+	//mMessenger <<"No valid range found.  Abort"<<endl;
 	return 0;
     }
     
     //Find bestTrack from association (linear search)
-    //cout <<"New Track"<<endl;
+    //mMessenger <<"New Track"<<endl;
     mBestCommon.reset();
     mBestCommon.setLowerBound(mLowerBound);
     
@@ -202,12 +202,12 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
     
     if (!bestPair) {
 	//These return values are now caught before exiting the seedFinder control
-	//cout <<"StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack) ERROR:\t";
-	//cout <<"BestPair==0.  Abort"<<endl;
+	//mMessenger <<"StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack) ERROR:\t";
+	//mMessenger <<"BestPair==0.  Abort"<<endl;
 	return 0;
     }
     else {
-	cout <<"Match Found, commonTpcHits:\t"<<bestPair->commonTpcHits()<<endl;
+	mMessenger <<"Match Found, commonTpcHits:\t"<<bestPair->commonTpcHits()<<endl;
     }
     track->setStTrackPairInfo(bestPair);
 
@@ -219,8 +219,8 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
     //the innermost point on the track seed
     StiKalmanTrackNode* node = track->getLastNode(); //Should return innermost
     if (!node) {
-	cout <<"StiEvaluableTrackSeedFinder::makeTrack(). ERROR:\t";
-	cout <<"node==0.  return;"<<endl;
+	mMessenger <<"StiEvaluableTrackSeedFinder::makeTrack(). ERROR:\t";
+	mMessenger <<"node==0.  return;"<<endl;
 	return 0;
     }
     else {
@@ -237,11 +237,9 @@ BestCommonHits::BestCommonHits() : mMostCommon(10), mPair(0)
 
 void BestCommonHits::operator()(const McToStPair_t& rhs)
 {
-    //cout <<"\t"<<rhs.second->commonTpcHits()<<"\t"<<mMostCommon<<endl;
     if (rhs.second->commonTpcHits()>mMostCommon) { //update, remember
 	mMostCommon = rhs.second->commonTpcHits();
 	mPair = rhs.second;
-	//cout <<"\t\t\tBetter, remember"<<endl;
     }
 }
 

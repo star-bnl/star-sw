@@ -33,14 +33,16 @@ StiDisplayManager::StiDisplayManager(TCanvas* c)
 	cout <<"Canvas null.  Seg-fault"<<endl;
     }
 
-    mcanvas->cd();
-
-    mnode = new TVolume();
-    mnode->SetName("mainnode");
-    mnode->SetTitle("mainnode");
-    //mnode = new TVolume("mainnode","mainnode", mzone);
-    //mnode->SetVisibility(TVolume::kThisUnvisible);
-
+    else {
+	mcanvas->cd();
+	
+	mnode = new TVolume();
+	mnode->SetName("mainnode");
+	mnode->SetTitle("mainnode");
+	//mnode = new TVolume("mainnode","mainnode", mzone);
+	//mnode->SetVisibility(TVolume::kThisUnvisible);
+    }
+    
     cout <<"Leaving StiDisplayManager::StiDisplayManager()"<<endl;
     sinstance = this;
 }

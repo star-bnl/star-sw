@@ -65,7 +65,7 @@ T gCovarianceRotation(const T& Error, double theta)
     enum Labels {x=1, y=2, z=3};
     
     if ( (Error.numRow()!=3) || (Error.numCol()!=3) ) {
-	cout <<"gCovarianceRotation()\t Error!: not 3 by 3 matrix.  Undefined Errors"<<endl;
+	*(Messenger::instance(kGeometryMessage)) <<"gCovarianceRotation()\t Error!: not 3 by 3 matrix.  Undefined Errors"<<endl;
     }
 
     //Make the rotation matrix
@@ -92,28 +92,28 @@ T gCovarianceRotation(const T& Error, double theta)
 
 StiGeometryTransform::StiGeometryTransform()
 {
-    cout <<"StiGeometryTransform::StiGeometryTransform()"<<endl;
+    *(Messenger::instance(kGeometryMessage)) <<"StiGeometryTransform::StiGeometryTransform()"<<endl;
 
     // read in svt geometry tables
-    //cout <<"Read in svt geometry tables: preparing to seg-fualt"<<endl;
+    //*(Messenger::instance(kGeometryMessage)) <<"Read in svt geometry tables: preparing to seg-fualt"<<endl;
 
     St_DataSetIter local(StiMaker::instance()->GetInputDB("svt"));
-    //cout <<"Instantiated local"<<endl;
+    //*(Messenger::instance(kGeometryMessage)) <<"Instantiated local"<<endl;
 
     svgConfig = 
 	dynamic_cast<St_svg_config *>(local("svgpars/config"))->GetTable()[0];
-    //cout <<"Instantiated svgConfig"<<endl;
+    //*(Messenger::instance(kGeometryMessage)) <<"Instantiated svgConfig"<<endl;
 
     aSvgGeom = dynamic_cast<St_svg_geom *>(local("svgpars/geom"))->GetTable();
-    //cout <<"Instantiated aSvgGeom"<<endl;
+    //*(Messenger::instance(kGeometryMessage)) <<"Instantiated aSvgGeom"<<endl;
 
     aSvgShape = dynamic_cast<St_svg_shape *>(local("svgpars/shape"))->GetTable();
-    //cout <<"Instantiated aSvgShape"<<endl;
+    //*(Messenger::instance(kGeometryMessage)) <<"Instantiated aSvgShape"<<endl;
     
-    //cout <<"instantiate TPC coord x-form"<<endl;
+    //*(Messenger::instance(kGeometryMessage)) <<"instantiate TPC coord x-form"<<endl;
     tpcTransform = new StTpcCoordinateTransform(gStTpcDb);
 
-    cout <<"Generating Padrow Radius Map"<<endl;
+    *(Messenger::instance(kGeometryMessage)) <<"Generating Padrow Radius Map"<<endl;
 
     // store svt + ssd as padrows 1-7
     for (unsigned int padrow=1; padrow<=7; ++padrow){
@@ -129,20 +129,20 @@ StiGeometryTransform::StiGeometryTransform()
         mpadrowradiusmap.insert( padrow_radius_map_ValType( padrow + 100, center ) );	
     }
 
-    cout <<"\nPadrow\tRadius"<<endl;
+    *(Messenger::instance(kGeometryMessage)) <<"\nPadrow\tRadius"<<endl;
     
     //for (padrow_radius_map::const_iterator it=mpadrowradiusmap.begin();
     // it!=mpadrowradiusmap.end(); ++it) {
-    //cout <<(*it).first<<"\t"<<(*it).second<<endl;
+    //*(Messenger::instance(kGeometryMessage)) <<(*it).first<<"\t"<<(*it).second<<endl;
     //}
 
     sinstance = this;
-    //cout <<"\tLeaving StiGeometryTransform::StiGeometryTransform()"<<endl;
+    //*(Messenger::instance(kGeometryMessage)) <<"\tLeaving StiGeometryTransform::StiGeometryTransform()"<<endl;
 } // StiGeometryTransform()
 
 StiGeometryTransform::~StiGeometryTransform()
 {
-    cout <<"StiGeometryTransform::~StiGeometryTransform()"<<endl;
+    *(Messenger::instance(kGeometryMessage)) <<"StiGeometryTransform::~StiGeometryTransform()"<<endl;
     delete tpcTransform;
     tpcTransform = 0;
 } // ~StiGeometryTransform
@@ -372,7 +372,7 @@ void StiGeometryTransform::operator() (const StTpcHit* tpchit, StiHit* stihit)
       sprintf(szBuf, "Tpc/Padrow_%d/Sector_%d", (int) tpchit->padrow(), iIttfSector);
       StiDetector* layer = pFinder->findDetector(szBuf);
       if (!layer) {
-      cout <<" Error, no layer for sector: "<<tpchit->sector()<<"\tpadrow: "<<tpchit->padrow()<<endl;
+      *(Messenger::instance(kGeometryMessage)) <<" Error, no layer for sector: "<<tpchit->sector()<<"\tpadrow: "<<tpchit->padrow()<<endl;
       }
       else {
       stihit->setDetector( layer );
@@ -416,7 +416,7 @@ void StiGeometryTransform::operator() (const StSvtHit* svthit, StiHit* stihit){
           (int) (svthit->ladder() + 1)/2);
   StiDetector* layer = StiDetectorFinder::instance()->findDetector(szBuf);
   if (!layer) {
-      cout <<"Error, no detector for layer "<<svthit->layer()<<"\tladder: "<<svthit->ladder()<<"\tABORT"<<endl;
+      *(Messenger::instance(kGeometryMessage)) <<"Error, no detector for layer "<<svthit->layer()<<"\tladder: "<<svthit->ladder()<<"\tABORT"<<endl;
       return;
   }
   stihit->setDetector( layer );
@@ -459,7 +459,7 @@ void StiGeometryTransform::operator() (const StiHit* stihit, StSsdHit* ssdhit){
 void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
                                        StHelix *pHelix){
 	/*
-  cout << "StiKalmanTrackNode: x=" << pTrackNode->fX 
+  *(Messenger::instance(kGeometryMessage)) << "StiKalmanTrackNode: x=" << pTrackNode->fX 
        << ", alpha=" << pTrackNode->fAlpha
        << ", y=" << pTrackNode->fP0
        << ", z=" << pTrackNode->fP1
@@ -470,20 +470,20 @@ void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
   // first, calculate the helix origin in global coords
   StThreeVector<double> origin(pTrackNode->fX, pTrackNode->fP0,
                                pTrackNode->fP1);
-  /*cout << "Before rotation: x=" << origin.x()
+  /**(Messenger::instance(kGeometryMessage)) << "Before rotation: x=" << origin.x()
        << ", y=" << origin.y()
        << ", z=" << origin.z() << endl;
 	*/
   origin.rotateZ(pTrackNode->fAlpha);
   
-	/*cout << "After rotation: x=" << origin.x()
+	/**(Messenger::instance(kGeometryMessage)) << "After rotation: x=" << origin.x()
        << ", y=" << origin.y()
        << ", z=" << origin.z() << endl;
 	*/
   // dip angle & curvature easy
-  cout << "tanDip=" << pTrackNode->fP4 << endl;
+  *(Messenger::instance(kGeometryMessage)) << "tanDip=" << pTrackNode->fP4 << endl;
   double dDip = atan(pTrackNode->fP4);
-  cout << "dip=" << dDip << endl;
+  *(Messenger::instance(kGeometryMessage)) << "dip=" << dDip << endl;
   double dCurvature = pTrackNode->fP3;
 
   // now calculate azimuthal angle of the helix origin wrt the helix axis
@@ -491,13 +491,13 @@ void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
   double dDeltaX = pTrackNode->fX - pTrackNode->fP2/dCurvature;
   double dDeltaY = sqrt(1./(dCurvature*dCurvature) - dDeltaX*dDeltaX) *
       (dCurvature>0 ? -1 : 1); // sign(curvature) == -sign(Y-Y0)
-  //cout << "deltaX=" << dDeltaX << ", deltaY=" << dDeltaY << endl;
+  //*(Messenger::instance(kGeometryMessage)) << "deltaX=" << dDeltaX << ", deltaY=" << dDeltaY << endl;
   double dPhi = atan2( dDeltaY, dDeltaX); // in [0,2pi]
   // now change to global coords
   dPhi -= pTrackNode->fAlpha;
   while(dPhi<0.){      dPhi += 2.*M_PI; };
   while(dPhi>2.*M_PI){ dPhi -= 2.*M_PI; };
-  //cout << "phi=" << dPhi << endl;
+  //*(Messenger::instance(kGeometryMessage)) << "phi=" << dPhi << endl;
 
   // finally, need the sense of rotation.  Here we need the fact that
   // the track model assumes outward tracks (positive local x coord of mtm).
@@ -506,7 +506,7 @@ void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
   pHelix->setParameters( fabs(dCurvature), dDip, dPhi, origin, iH );
 
 	/*
-  cout << "StHelix: x0=" << pHelix->x(0)
+  *(Messenger::instance(kGeometryMessage)) << "StHelix: x0=" << pHelix->x(0)
        << ", y0=" << pHelix->y(0)
        << ", z0=" << pHelix->z(0)
        << ", c=" << pHelix->curvature()
@@ -520,7 +520,7 @@ double StiGeometryTransform::positionForTpcPadrow(int padrow) const{
 
   padrow_radius_map::const_iterator where = mpadrowradiusmap.find(padrow+100);
   if (where==mpadrowradiusmap.end()) {
-    cout <<"StiGeometryTransform::angleAndPosition(). " <<
+    *(Messenger::instance(kGeometryMessage)) <<"StiGeometryTransform::angleAndPosition(). " <<
         "ERROR:\tpadrow not found"<<endl;
   }
 
@@ -540,7 +540,7 @@ pair<double, double> StiGeometryTransform::angleAndPosition(const StTpcHit *pHit
 void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* sti,
 				       unsigned int maxHits, const StTpcHitFilter* filter) const
 {
-    cout <<"\n\n\nmaxHits:\t"<<maxHits<<"\tfilter"<<filter<<endl;
+    *(Messenger::instance(kGeometryMessage)) <<"\n\n\nmaxHits:\t"<<maxHits<<"\tfilter"<<filter<<endl;
     
     //now get hits
     StPtrVecHit hits = st->detectorInfo()->hits(kTpcId);
@@ -552,8 +552,8 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
 	 it!=hits.end() && hitvec.size()<=maxHits; ++it) {
 	StTpcHit* hit = dynamic_cast<StTpcHit*>(*it);
 	if (!hit) {
-	    cout <<"StiGeometryTransform::operator(GlobalTrack->KalmanTrack). Error:\t";
-	    cout <<"StHit->StTpcHit cast failed.  Skip this point."<<endl;
+	    *(Messenger::instance(kGeometryMessage)) <<"StiGeometryTransform::operator(GlobalTrack->KalmanTrack). Error:\t";
+	    *(Messenger::instance(kGeometryMessage)) <<"StHit->StTpcHit cast failed.  Skip this point."<<endl;
 	}
 	else  {
 	    //Find StiHit for this StHit
@@ -569,7 +569,7 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
 		
 		const hitvector& stiHits = StiHitContainer::instance()->hits(refAngle, position);
 		if (stiHits.size()==0) 	{
-		    cout <<"Error, no StiHits for this sector, padrow"<<endl;
+		    *(Messenger::instance(kGeometryMessage)) <<"Error, no StiHits for this sector, padrow"<<endl;
 		    sti=0;
 		    return;
 		}
@@ -578,7 +578,7 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
 		hitvector::const_iterator where = find_if(stiHits.begin(), stiHits.end(),
 							  mySameStHit);
 		if (where==stiHits.end()) {
-		    cout <<"Error, no StiHit with this StHit was found"<<endl;
+		    *(Messenger::instance(kGeometryMessage)) <<"Error, no StiHit with this StHit was found"<<endl;
 		    sti=0;
 		    return;
 		}
@@ -590,9 +590,9 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
     }
 
     
-    //cout <<"Filled Hits: "<<endl;
+    //*(Messenger::instance(kGeometryMessage)) <<"Filled Hits: "<<endl;
     //for (hitvector::const_iterator it=hitvec.begin(); it!=hitvec.end(); ++it) {
-    //cout <<(*(*it))<<endl;
+    //*(Messenger::instance(kGeometryMessage)) <<(*(*it))<<endl;
     //}
     
     //Now get the helix
@@ -606,15 +606,17 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
     double curvature = sthelix.curvature();
     if (sthelix.h()<0) 
 	curvature=-curvature;
-    cout <<"StiGeometryTransform:  curvature: "<<curvature<<endl;
+    //*(Messenger::instance(kGeometryMessage)) <<"StiGeometryTransform:  curvature: "<<curvature<<endl;
     
     double tanLambda = tan(sthelix.dipAngle());
-    //cout <<"tanLambda: "<<tanLambda<<endl;
+    //*(Messenger::instance(kGeometryMessage)) <<"tanLambda: "<<tanLambda<<endl;
 
     //Test transform:
-    bool worked = StiHelixFitter::instance()->fit(hitvec);
-    cout <<*(StiHelixFitter::instance())<<endl;
-    cout <<"\t"<<stiGlobalOrigin<<" curvature: "<<curvature<<" tanLambda: "<<tanLambda<<endl;
+    //bool worked = StiHelixFitter::instance()->fit(hitvec);
+    //*(Messenger::instance(kGeometryMessage)) <<*(StiHelixFitter::instance())<<endl;
+	//*(Messenger::instance(kGeometryMessage)) <<"\t";
+	//*(Messenger::instance(kGeometryMessage)) <<stiGlobalOrigin<<" curvature: "<<curvature;
+	//*(Messenger::instance(kGeometryMessage)) <<" tanLambda: "<<tanLambda<<endl;
     
     sti->initialize(curvature, tanLambda, stiGlobalOrigin, hitvec);
     //StiHelixFitter* fitter = StiHelixFitter::instance();
@@ -622,12 +624,12 @@ void StiGeometryTransform::operator() (const StGlobalTrack* st, StiKalmanTrack* 
     //sti->initialize(fitter->curvature(), fitter->tanLambda(), fitOrigin, hitvec);
 
     //Test track!
-    //cout <<"Test the track:"<<endl;
+    //*(Messenger::instance(kGeometryMessage)) <<"Test the track:"<<endl;
     //for (double xLocal=hitvec.back()->x(); xLocal<=hitvec.front()->x(); xLocal+=10.) {
     //for (double xLocal=0.; xLocal<=190.; xLocal+=10.) 
     //	{
     //for (doublee xLocal=hitvec.front()->x(); xLocal<=hitvec.back()->x(); xLocal+=10.) {
     //		StThreeVector<double> pos = sti->getGlobalPointNear(xLocal);
-    //cout <<"\tx: "<<xLocal<<"\tpos: "<<pos<<endl;
+    //*(Messenger::instance(kGeometryMessage)) <<"\tx: "<<xLocal<<"\tpos: "<<pos<<endl;
     //	}
 }

@@ -74,6 +74,7 @@ using std::map;
 
 class StiDetector;
 class StiMaterial;
+class Messenger;
 
 class StiDetectorContainer
 {
@@ -145,6 +146,9 @@ private:
     ///An iterator over the leaves of the detector tree.
     /// It is declared on heap for size concerns.
     StiCompositeLeafIterator<data_t>* mLeafIt; 
+
+    //A message stream
+    Messenger& mMessenger;
     
     ///An iterator representing the current radial position.
     data_node_vec::const_iterator mradial_it;
@@ -161,7 +165,7 @@ private:
     
 
 private:
-    
+
     //Singleton Management
 
     ///Private destructor: implementation of singleton pattern.
