@@ -4,12 +4,12 @@
 
 	IMPLICIT NONE
 
-*  Input/Output argument:
+*  Input/Output:
 	INTEGER TCPU_TIME(2) !Total "absolute" CPU time since last
 	                     !call to STRCPU0.  Input value is used
 	                     !to get DCPU_TIME.
 
-*  Output arguments:
+*  Outputs:
 	INTEGER DCPU_TIME(2) !CPU time-difference between input and
 	                     !output values of TCPU_TIME.
 	CHARACTER*17 TCPU_ASC !ASCII representation of TCPU_TIME.
@@ -18,7 +18,7 @@
 	CHARACTER*9 ASC_WEEKDAY !ASCII representation of weekday.
 	CHARACTER*8 ASC_TIME  !ASCII representation of real time.
 
-*  Functional Description:
+*  Description:
 *	Return absolute (since last STRCPU0 call) and delta CPU
 *	times, and 9 character ASCII date, 8 character ASCII time,
 *	and 9 character ASCII weekday.
@@ -107,10 +107,10 @@
 
 	IMPLICIT NONE
 
-*  Output argument:
+*  Output:
 	CHARACTER*9 C9 !9-character ASCII date:  dd-mmm-yy
 
-*  Functional Description:
+*  Description:
 *	Return 9-character ASCII date.
 
 	INTEGER YEAR,MONTH,DAY,IM
@@ -133,11 +133,11 @@
 
 	IMPLICIT NONE
 
-*  Output argument:
+*  Output:
 	CHARACTER*23 TIM_ASC !Standard time & date: dd-mmm-yy hh:mm:ss bbbb
 *                             (Last five characters are blank.)
 
-*  Functional Description:
+*  Description:
 *	Return standard 23 character ASCII years, months, days,
 *	hours, minutes and seconds.
 
@@ -169,12 +169,12 @@
 
 	IMPLICIT NONE
 
-*  Input/Output argument:
+*  Input/Output:
 	INTEGER TELA_TIME(2) !Total "absolute" elapsed time since last
 	                     !call to STRELA0.  Input value is used
 	                     !to get DELA_TIME.
 
-*  Output arguments:
+*  Outputs:
 	INTEGER DELA_TIME(2) !ELA time-difference between input and
 	                     !output values of TELA_TIME.
 	CHARACTER*17 TELA_ASC !ASCII representation of TELA_TIME.
@@ -183,7 +183,7 @@
 	CHARACTER*9 ASC_WEEKDAY !ASCII representation of weekday.
 	CHARACTER*8 ASC_TIME  !ASCII representation of real time.
 
-*  Functional Description:
+*  Description:
 *	Return absolute (since last STRELA0 call) and delta ELA
 *	times, and 9 character ASCII date, 8 character ASCII time,
 *	and 9 character ASCII weekday.
@@ -232,10 +232,10 @@
 
 	IMPLICIT NONE
 
-*  Output argument:
+*  Output:
 	CHARACTER*8 C8 !8-character ASCII time:  hh:mm:ss
 
-*  Functional Description:
+*  Description:
 *	Return 8-character ASCII time.
 
 	INTEGER HOUR,MIN,SEC
@@ -249,13 +249,13 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	INTEGER BPT,EPT !Range in string C in which conversion is requested.
 
-*  Input/output argument:
+*  Input/output:
 	CHARACTER*(*) C !String to be converted to all capitals.
 
-*  Functional Description:
+*  Description:
 *	Convert a specified range in a character string to all caps.
 *	Provided for back compatibility.  Preferred usage is STRCAPS.
 
@@ -268,10 +268,10 @@
 
 	IMPLICIT NONE
 
-*  Input/output argument:
+*  Input/output:
 	CHARACTER*(*) C !String to be converted to all capitals.
 
-*  Functional Description:
+*  Description:
 *	Convert a character string to all caps.
 
 	CHARACTER*1 NULL
@@ -293,13 +293,13 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) TEXT !The character string to be cleaned-up.
 	INTEGER LENGTH     !The length of TEXT to be cleaned-up.
-*  Output argument:
+*  Output:
 	CHARACTER*(*) CTEXT !The cleaned-up text.
 
-*  Functional Description:
+*  Description:
 *	Copy all or as much as will fit of specified input text to an
 *	output character string, and replace any non-printable characters in
 *	with blanks (clean text).  Terminate the copying if input string has
@@ -310,7 +310,7 @@
 	DATA NULL/'000'O/
 
 	L=LEN(TEXT) !The length of the specified argument.
-	K=MIN(LENGTH,LEN(CTEXT)) !The output argument length.
+	K=MIN(LENGTH,LEN(CTEXT)) !The output length.
 
 	DO I=1,K
 	  IF (I.GT.L) THEN !Input exhausted - pad with blanks:
@@ -337,12 +337,12 @@
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	INTEGER CPU_TIME(2) !CPU clock ticks of some caller-timed-interval.
-*  Output argument:
+*  Output:
 	CHARACTER*(*) CPU_ASC !ddddd_hh:mm:ss.tt (ASCII cpu time; "_" = blank)
 
-*  Functional description:
+*  Description:
 *	Convert specified CPU time to 17 character ASCII days, hours, minutes,
 *	seconds and ticks.
 *	If the passed string isn't long enough, a truncation is performed, and
@@ -398,10 +398,10 @@
 
 	IMPLICIT NONE
 
-*  Output argument:
+*  Output:
 	CHARACTER*17 CPU_ASC !ddddd_hh:mm:ss.tt (ASCII cpu time; "_" = blank)
 
-*  Functional description:
+*  Description:
 *	Return CPU time, since last STRCPU0 call, as a 17 character ASCII days,
 *	hours, minutes, seconds and ticks string.
 
@@ -417,13 +417,13 @@
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	CHARACTER*(*) TEXT !Line of text, truncated if > 80 chars.
 
-*  Output argument:
+*  Output:
 	CHARACTER*(*) LINE_OUT !Contains TEXT, appended with CPU info.
 
-*  Functional Description:
+*  Description:
 *	Return a character string (LINE_OUT) consisting of a line of
 *	input text, with CPU time-usage info appended.
 
@@ -461,13 +461,13 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	INTEGER YEAR_NEW,MONTH_NEW,DAY_NEW,YEAR_OLD,MONTH_OLD,DAY_OLD
 
-*  Output argument:
+*  Output:
 	INTEGER DAYSINCE
 
-*  Functional Description:
+*  Description:
 *	Return the total days from the "new" date since the "old" date.
 
 	INTEGER I,LEAPS,IYEAR
@@ -513,24 +513,24 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) S !String containing a numerical argument.
 	INTEGER RADIX   !RADIX, base 2,8,10 or 16, for the conversion.
 	DOUBLE PRECISION D_MIN,D_MAX !Min. and Max. for acceptable result.
 
-*  Input/Output argument:
+*  Input/Output:
 	DOUBLE PRECISION D    !Decoded floating value, from char. rep.
 *                              May be specified at call time to be a default
 *                              value, used in case of error.
 
-*  Output argument:
+*  Output:
 	CHARACTER*(*) ERRMSG  !Possible error message, if fail.
 
 *  Return values:
 *	.TRUE. if a successful conversion occurred,
 *	.FALSE. if not.
 
-*  Functional Description:
+*  Description:
 *	"Read" a double precision number from the character string S.
 *	Convert according to the radix indicated in S by
 *	one of the (prefix) radix indicators:
@@ -577,10 +577,10 @@
 
 	IMPLICIT NONE
 
-*  Output argument:
+*  Output:
 	INTEGER TELA(2) !(1) is msecs, (2) is days.
 
-*  Functional description:
+*  Description:
 *	Return the elapsed time, in days and msecs, since STRELA0 was called.
 
 	INTEGER NATELA_T0
@@ -609,13 +609,13 @@
 
 	IMPLICIT NONE
 
-*  Input/Output argument:
+*  Input/Output:
 	INTEGER TELA(2) !(1) is msecs, (2) is days -- since STRELA0.
 
-*  Output argument:
+*  Output:
 	INTEGER DELA(2) !(1) is msecs, (2) is days -- since given TELA.
 
-*  Functional description:
+*  Description:
 *	Return the elapsed time, in days and msecs, since STRELA0 was called,
 *	in TELA.  Return the elapsed time since TELA was previously set in
 *	DELA.
@@ -648,10 +648,10 @@
 
 	IMPLICIT NONE
 
-*  Output argument (should be CHARACTER*18 or more):
+*  Output (should be CHARACTER*18 or more):
 	CHARACTER*(*) ELA_ASC !ddddd_hh:mm:ss.mmm (ASCII elapsed time; "_" = blank)
 
-*  Functional description:
+*  Description:
 *	Return the elapsed time (since STRELA0 was last called) as a 17 character
 *	ASCII days, hours, minutes, seconds and milliseconds string.
 
@@ -667,12 +667,12 @@
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	INTEGER ELA_TIME(2) !Elapsed time, msecs & days.
-*  Output argument (should be CHARACTER*18 or more):
+*  Output (should be CHARACTER*18 or more):
 	CHARACTER*(*) ELA_ASC !ddddd_hh:mm:ss.mmm (ASCII elapsed time; "_" = blank)
 
-*  Functional description:
+*  Description:
 *	Convert specified elapsed time to 18 character ASCII days, hours, minutes,
 *	seconds and milliseconds.
 *	If the passed string isn't long enough, a truncation is performed, and
@@ -715,7 +715,7 @@
 
 	IMPLICIT NONE
 
-*	Initialize elapsed real time counter.
+*  Brief description: Initialize elapsed real time counter.
 
 	INTEGER NATELA_T0
 	COMMON/NATELA/NATELA_T0(2)
@@ -736,12 +736,12 @@
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	CHARACTER*(*) S
-*  Output argument:
+*  Output:
 	INTEGER EPT !Index to the last non-blank character in S.
 
-*  Functional Description:
+*  Description:
 *	Find the string-end -- set EPT to point at the last non-blank in S,
 *	or 0 if all blanks.  Tabs are regarded as blanks.
 *	No null is appended.
@@ -766,14 +766,14 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	INTEGER LONG !Contains a long-word (4 bytes) -- the "source".
 	INTEGER SEL  !A number, 1 to 4, indicating one of LONG's 4 bytes.
-*  Output argument:
+*  Output:
 	CHARACTER*1 CHR !Contains the character-representation of the selected
 *                        byte from LONG.
 
-*  Functional Description:
+*  Description:
 *	Get a character out of LONG, a 32 bit word.  The character
 *	is the SELth byte of LONG, and goes into CHR.  The selection
 *	is made in a machine-independent fashion.
@@ -803,15 +803,15 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	INTEGER Buffer(*) !Longword-buffer from which CHRS is copied.
 	INTEGER Nchrs !Number of characters to copy.
 
-*  Output arguments:
+*  Outputs:
 	INTEGER Nwords !Number of longwords copied from Buffer.
 	CHARACTER*(*) CHRS !Character-string to be copied from Buffer.
 
-*  Functional Description:
+*  Description:
 *	Copy Nchrs characters from Buffer into CHRS.
 *	Return the number of longwords accessed in Buffer; should
 *	be (Nchrs+3)/4 .
@@ -844,10 +844,10 @@
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	INTEGER FUNIT !FORTRAN logical unit from which to command-lines.
 
-*  Output arguments:
+*  Outputs:
 	CHARACTER*(*) S !If successfull, contains the first non-blank command
 *                        line read from FUNIT.  STRGETCOM keeps reading lines
 *                        from FUNIT until it gets one that is not a blank or
@@ -859,7 +859,7 @@
 *	.true.  ==> command line successfully read in.
 *	.false. ==> EOF encountered on logical unit FUNIT.
 
-*  Functional Description:
+*  Description:
 *	Get first non-comment, non-blank line, from logical unit FUNIT, and
 *	put it in S.  Remove comments and set EPT to point at the last
 *	non-blank character. Return the FUNCTION value as .true. for success,
@@ -891,10 +891,10 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) SOURCE !Source string.
 	INTEGER START,END    !Index-range in SOURCE to be copied.
-*  Output arguments:
+*  Outputs:
 	CHARACTER*(*) DEST   !Destination string.
 	INTEGER DPT          !Starting index in DEST -- SOURCE is copied to
 *                             to DEST starting at DEST(DPT:DPT), and continues
@@ -905,7 +905,7 @@
 *                             unless DEST ran out of room, in which case
 *                             DPT is set to zero.
 
-*  Functional Description:
+*  Description:
 *	Insert characters in SOURCE (from START to END)
 *	to DEST (from DPT to .LE. LEN(DEST). Set DPT to point after
 *	the last character inserted.
@@ -933,24 +933,24 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) S !String containing a numerical argument.
 	INTEGER RADIX   !RADIX, base 2,8,10 or 16, for the conversion.
 	INTEGER I_MIN,I_MAX  !Min. and Max. for acceptable result.
 
-*  Input/Output argument:
+*  Input/Output:
 	INTEGER I       !Decoded integer value, from char. representation.
 *                        May be specified at call time to be a default
 *                        value, used in case of error.
 
-*  Output argument:
+*  Output:
 	CHARACTER*(*) ERRMSG  !Possible error message, if fail.
 
 *  Return values:
 *	.TRUE. if a successful conversion occurred,
 *	.FALSE. if not.
 
-*  Functional Description:
+*  Description:
 *	"Read" an integer number from the character string S.
 *	Convert according to the radix indicated in S by
 *	one of the (prefix) radix indicators:
@@ -998,15 +998,15 @@
 
 	IMPLICIT NONE
 
-*  Input/output argument:
+*  Input/output:
 	CHARACTER*(*) S  !Character string containing possible trailing
 *                         blanks and comments (comments indicated by "!").
 *                         S is returned with trailing comments blanked out.
-*  Output argument:
+*  Output:
 	INTEGER EPT      !Index to the last non-blank character in S, after
 *                         comments have been removed.
 
-*  Functional Description:
+*  Description:
 *	Routine to strip off comments (and trailing blanks) at the end
 *	of "command" lines, where comments are denoted by the usual
 *	exclamation mark (!).  Leave EPT pointing at last non-blank.
@@ -1028,12 +1028,12 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) MSG(*) !Character string to be output.
 	INTEGER LINES !Number of lines in MSG to output.
 	INTEGER LUN !Logical unit on which to output (terminal).
 
-*  Functional desctiption:
+*  Description:
 *	Output a one-or-more-line message on a terminal-emulating
 *	listing-file with machine-independent carriage-control as if
 *	on a terminal.
@@ -1056,11 +1056,11 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) MSG !Character string to be output.
 	INTEGER LUN !Logical unit on which to output (terminal).
 
-*  Functional desctiption:
+*  Description:
 *	Emulate output of a one-line message without a following
 *	carriage return on a terminal-emulating listing-file.
 *	Actual outputing is deferred until a STRLIST_NOLF
@@ -1083,11 +1083,11 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) MSG !Character string to be output.
 	INTEGER LUN !Logical unit on which to output (terminal).
 
-*  Functional desctiption:
+*  Description:
 *	Output a one-line message without a preceding line feed
 *	on a terminal-emulating listing file.  MSG is appended
 *	to any previously specified output from a call to either
@@ -1124,11 +1124,11 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) MSG !Character string to be output.
 	INTEGER LUN !Logical unit on which to output (terminal).
 
-*  Functional desctiption:
+*  Description:
 *	Output a one-line message without a preceding line feed
 *	or a following carriage-return on a terminal-emulating
 *	listing-file.
@@ -1169,7 +1169,7 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	INTEGER LUN !Logical unit on which to open file.
 	CHARACTER*(*) FILENAME !Name of file.
 	CHARACTER*(*) COMMANDS !Command line, through which
@@ -1180,7 +1180,7 @@
 *	.FALSE. for a failed open.
 
 
-*  Functional description:
+*  Description:
 *	Attempts to open the specified file in a machine-independent fashion
 *	using the OPEN parameters specified in COMMANDS.  COMMANDS is a
 *	character string containing all the "usual" OPEN parameters, except
@@ -1394,7 +1394,7 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	INTEGER LUN !Logical unit on which to open file.
 	CHARACTER*(*) FILENAME !Name of file.
 	CHARACTER*(*) COMMANDS !Command line, through which
@@ -1406,7 +1406,7 @@
 	CHARACTER*1 VCHAR !One-character version-field delimiter, caller
                           !specified.  eg, ";".
 
-*  Output arguments:
+*  Outputs:
 	INTEGER VERSION !The version number of a successfully opened file.
 
 	CHARACTER*(*) FILE_NAME_OUT !Same as FILENAME, but with a version
@@ -1422,7 +1422,7 @@
 *	.FALSE. for a failed open.
 
 
-*  Functional description:
+*  Description:
 *	Combines the functions of STRVER and STROPEN, providing a simple
 *	way to open version-appended files in a machine-independent fashion,
 *	using the OPEN parameters specified in COMMANDS.  COMMANDS is a
@@ -1465,12 +1465,12 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) S !Character string containing one or more "arguments"
 *                        separated from one another by "separators".
 	INTEGER NARGS_max !Maximum number of arguments available to be filled.
 
-*  Output arguments:
+*  Outputs:
 	INTEGER NARGS !Number of arguments filled;  .le. NARGS_max.
 	CHARACTER*(*) ARG(*) !Filled with NARGS char. arguments from S.
 	DOUBLE PRECISION DARG(*) !ARGs translated as D.P. numbers, if possible.
@@ -1478,7 +1478,7 @@
 	LOGICAL VDARG(*) !Set true for each ARG with valid D.P. number.
 	LOGICAL VIARG(*) !Set true for each ARG with valid integer number.
 
-*  Functional Description:
+*  Description:
 *	Parse out up to NARGS_max argument from S and into ARG, DARG and IARG.
 *	Argument separators are:
 *	space, tab, comma, and equal-sign.  The equal-sign is a special
@@ -1510,13 +1510,13 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) S !Character string containing one or more "arguments"
 	                !separated from one another by "separators".
 	INTEGER NARGS_max !Maximum number of arguments available to be filled.
 	INTEGER RADIX   !Default radix of integers appearing in arguments.
 
-*  Output arguments:
+*  Outputs:
 	INTEGER NARGS !Number of arguments filled;  .le. NARGS_max.
 	CHARACTER*(*) ARG(*) !Filled with NARGS char. arguments from S.
 	DOUBLE PRECISION DARG(*) !ARGs translated as D.P. numbers, if possible.
@@ -1524,7 +1524,7 @@
 	LOGICAL VDARG(*) !Set true for each ARG with valid D.P. number.
 	LOGICAL VIARG(*) !Set true for each ARG with valid integer number.
 
-*  Functional Description:
+*  Description:
 *	Parse out up to NARGS_max argument from S and into ARG, DARG and IARG.
 *	Argument separators are:
 *	space, tab, comma, and equal-sign.  The equal-sign is a special
@@ -1579,7 +1579,7 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) CIN !Character string containing a file name, which
 *                          may or may not include a file "type" field.
 *                          A "type" field are those characters following
@@ -1587,12 +1587,12 @@
 *                          periods inside VMS-style directory-specifications.
 	CHARACTER*(*) CDEF !Character string containing a specified default
 *                           file "type" field.  The period is not included.
-*  Output argument:
+*  Output:
 	CHARACTER*(*) COUT !If CIN contains a "type" field, then COUT is just
 *                           a copy of CIN.  Otherwise, COUT is CIN, appended
 *                           with a period and then with CDEF.
 
-*  Functional Description:
+*  Description:
 *	Parse out a file name from CIN and put it in COUT.  If no
 *	file type is specified, append the default file type, CDEF.
 *	If there is an error with the lengths, (ie, not enough space
@@ -1661,22 +1661,22 @@
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	CHARACTER*(*) S !Character string containing one or more "arguments"
 *                        separated from one another by "separators".
 
-*  Input/Output argument:
+*  Input/Output:
 	INTEGER SPT     !Index to a starting point in S, advanced to the next
 *                        starting point after each call to STRPARSEN.
 
-*  Output argument:
+*  Output:
 	CHARACTER*(*) D !Returned with the single argument from S, indexed by
 *                        SPT upon the call to STRPARSEN.
 
 *  Return values:
 *	Return .TRUE. if a next (now, this) argument exists, .FALSE. otherwise.
 
-*  Functional Description:
+*  Description:
 *	Parse the next argument out of S and into D.
 *	Leave SPT pointing at the space after the argument parsed,
 *	or at SMAX.  Call STRPARSEN in a loop until it returns false,
@@ -1763,15 +1763,15 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*1 CHR !Contains the character-representation of the selected
 *                        byte to be inserted into LONG.
 	INTEGER SEL  !A number, 1 to 4, indicating one of LONG's 4 bytes.
 
-*  Output argument:
+*  Output:
 	INTEGER LONG !Contains a long-word (4 bytes) -- the "sink".
 
-*  Functional Description:
+*  Description:
 *	Put a character into LONG, a 32 bit word.  The character becomes
 *	is the SELth byte of LONG, and from CHR.  The selection
 *	is made in a machine-independent fashion.
@@ -1800,16 +1800,16 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) CHRS !Character-string to be copied to Buffer.
 	INTEGER Nchrs !The number of characters from CHRS to copy.
 	INTEGER Buffer_size !Size, in 32-bit words, of Buffer.
 
-*  Output arguments:
+*  Outputs:
 	INTEGER Nwords !Number of longwords in Buffer, from the copy.
 	INTEGER Buffer(*) !Longword-buffer into which CHRS is copied.
 
-*  Functional Description:
+*  Description:
 *	Copy Nchrs characters from CHRS into Buffer;  pad 0, 1, 2 or 3
 *	bytes in the last word in Buffer with spaces, if the Nchrs is
 *	not a multiple of 4.
@@ -1849,15 +1849,15 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) Q,D !Question & default answer.
 	INTEGER INLUN !FORTRAN logical unit from which input is taken.
 	INTEGER OUTLUN !FORTRAN logical unit to which the questions are put.
 
-*  Output argument:
+*  Output:
 	CHARACTER*(*) A !Answer to the question.
 
-*  Functional Description:
+*  Description:
 *	Ask the operator, found on INLUN and OUTLUN, for the answer to the
 *	.le. 80 character question Q.  The default .le. 80 character answer
 *	is specified by the calling program in D.  The answer is returned
@@ -1916,15 +1916,15 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) Q,D !Question & default answer.
 	INTEGER INLUN !FORTRAN logical unit from which input is taken.
 	INTEGER OUTLUN !FORTRAN logical unit to which the questions are put.
 
-*  Output argument:
+*  Output:
 	CHARACTER*(*) A !Answer to the question.
 
-*  Functional Description:
+*  Description:
 *	Ask the operator, found on INLUN and OUTLUN, for the answer to the
 *	.le. 80 character question Q.  The default .le. 80 character answer
 *	is specified by the calling program in D.  The answer is returned
@@ -1996,13 +1996,13 @@
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	INTEGER TIME(2) !64-bit integer, seconds since midnight, 1-jan-1970.
-*  Output argument:
+*  Output:
 	CHARACTER*23 ASC !ASCII representation of TIME: dd-mmm-yy_hh:mm:ss_____
                          !("_" = "blank" -- last five characters are blank.)
 
-*  Functional description:
+*  Description:
 *	Convert TIME to 23 character ASCII years, months, days,
 *	hours, minutes and seconds.
 
@@ -2052,15 +2052,13 @@
 
 	IMPLICIT NONE
 
-*  Input argument:
+*  Input:
 	CHARACTER*(*) TEXT !Line of text, truncated if > 80 chars.
 
-*  Output argument:
+*  Output:
 	CHARACTER*(*) LINE_OUT !Contains TEXT, appended with date/time info.
 
-*  Functional Description:
-
-*  Functional Description:
+*  Description:
 *	Return a character string (LINE_OUT) consisting of a line of
 *	input text, with date, weekday and time info appended.
 
@@ -2112,15 +2110,15 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	CHARACTER*(*) S         !Character string containing representation.
 	INTEGER REQRAD          !Requested radix for conversion - 2,8,10,16.
 
-*  Output arguments:
+*  Outputs:
 	INTEGER UNINT           !Result as an integer, if possible.
 	DOUBLE PRECISION UNREAL !Result as a floating value, unless error.
 
-*  Functional Description:
+*  Description:
 *	Decode the character string in S as a number.
 *	Put the result in UNREAL and UNINT, if possible.
 *	Return STRUNCODE = :
@@ -2299,7 +2297,7 @@
 
 	IMPLICIT NONE
 
-*	Input arguments:
+*	Inputs:
 
 	CHARACTER*(*) FILE_NAME_IN !Unadulterated file name.  Terminated
 	                           !with a space or specified in quotes.
@@ -2310,11 +2308,11 @@
 	CHARACTER*1 VCHAR !One-character version-field delimiter, caller
 *                          specified.  eg, ";".
 
-*  Input/Output argument:
+*  Input/Output:
 	INTEGER VNEXT !The next version number.  Initialized by caller,
 	              !incremented by STRVER each call.
 
-*  Output argument:
+*  Output:
 	CHARACTER*(*) FILE_NAME_OUT !Same as FILE_NAME_IN, but with a version
 	                            !number appended after an underscore.
 	                            !Returns blank if an error occurs.
@@ -2327,7 +2325,7 @@
 *	           is specified as negative, or if VNEXT exceeds VLIMIT, or
 *	           if FILE_NAME_IN is blank.
 
-*  Functional Description:
+*  Description:
 *	Make file "version" numbers & append it to the file name.
 *	The file name constructed is "hypothetical", that is, it may
 *	or may not work.  It is intended to be used in a FORTRAN OPEN
@@ -2431,13 +2429,13 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	INTEGER YEAR,MONTH,DAY
 
-*  Output argument:
+*  Output:
 	CHARACTER*9 ASC_WEEKDAY !ASCII representation of weekday.
 
-*  Functional Description:
+*  Description:
 *	Return 9 character ASCII weekday corresponding to the specified
 *	year/month/day.
 
@@ -2469,15 +2467,15 @@
 
 	IMPLICIT NONE
 
-*  Input arguments:
+*  Inputs:
 	INTEGER BEG   !Index to S -- make a gap in S starting here.
 	INTEGER WIDTH !Width of gap to make in S.
 	INTEGER END   !Effective end-of-string in S (can't use LEN(S)).
 
-*  Input/Output argument:
+*  Input/Output:
 	CHARACTER*(*) S !String to be "widenned".
 
-*  Functional Description:
+*  Description:
 *	Move everything in S, from and including BEG to END, up by WIDTH.
 *	Effectively widen or create a gap in S. WIDTH is not negative.
 *	BEG is left to point at the first position of the new gap.

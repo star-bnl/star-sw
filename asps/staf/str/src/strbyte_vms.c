@@ -106,7 +106,7 @@ void strfc(
 
 	strncpy( ctext, ftext_descriptor->dsc$a_pointer, length);
 
-	ctext[length+1] = 0; /*  Append the c-required null.   */
+	ctext[length] = 0; /*  Append the c-required null.   */
 	*ctext_lnb=length;
 
 
