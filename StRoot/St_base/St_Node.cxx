@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.27 1999/06/14 08:45:19 fine Exp $
+// $Id: St_Node.cxx,v 1.28 1999/06/21 22:17:35 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.28  1999/06/21 22:17:35  fine
+// Identity matrix fixed
+//
 // Revision 1.27  1999/06/14 08:45:19  fine
 // List of the shapes have been introduced for St_NodeView
 //
@@ -574,6 +577,11 @@ TRotMatrix *St_Node::GetIdentity()
          gIdentity->SetName("Identity");
          gIdentity->SetTitle("Identity matrix");
          gIdentity->SetMatrix(IdentityMatrix);
+         gIdentity->SetMatrix(IdentityMatrix);
+         IdentityMatrix = gIdentity->GetMatrix();
+                                *IdentityMatrix = 1;
+         IdentityMatrix += 4;   *IdentityMatrix = 1;
+         IdentityMatrix += 4;   *IdentityMatrix = 1;
          gGeometry->GetListOfMatrices()->AddFirst(gIdentity);
       }
  }
