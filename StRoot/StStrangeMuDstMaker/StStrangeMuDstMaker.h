@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.h,v 1.3 2000/04/05 20:23:53 genevb Exp $
+// $Id: StStrangeMuDstMaker.h,v 1.4 2000/04/06 14:51:11 genevb Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 1.4  2000/04/06 14:51:11  genevb
+// Fixed bug with storing event info when making subDST
+//
 // Revision 1.3  2000/04/05 20:23:53  genevb
 // Introduce creating sub-Micro DSTs, dynamic expansion of clones arrays as needed, SetNoKeep() function
 //
@@ -66,9 +69,10 @@ class StStrangeMuDstMaker : public StMaker {
  protected:
   virtual void InitReadDst();
   virtual void InitCreateDst();
+  virtual void InitCreateSubDst();
   virtual Int_t MakeReadDst();
   virtual Int_t MakeCreateDst();
-  virtual void CreateSubDst();
+  virtual Int_t MakeCreateSubDst();
   void SetFiles(char* eFile, char* vFile, char* xFile, char* kFile);
   Int_t OpenFile();
   TTree* tree;                   //!
