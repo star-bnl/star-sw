@@ -2,7 +2,7 @@
 /***********************************************************  INCLUDES  **/
 #include <stdio.h>
 #include <math.h>
-#ifndef sun
+#if !defined(sun) && !defined(WIN32)
 #include <strings.h>
 #else
 #include <string.h>
