@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.h,v 1.3 2003/05/15 17:48:27 thenry Exp $
+// $Id: StJets.h,v 1.4 2003/05/20 20:22:45 thenry Exp $
 // $Log: StJets.h,v $
+// Revision 1.4  2003/05/20 20:22:45  thenry
+// Moved body of jetTrackIndices to cxx.
+//
 // Revision 1.3  2003/05/15 17:48:27  thenry
 // Previous versions of StJets expected only primary TPC tracks to be used by
 // the jet maker.  That changed with the introduction of EMC points.
@@ -103,20 +106,7 @@ public:
     ///Access to a container of the charged-tracks associated with a jet
     TrackVec jetParticles(StppEvent* event, int jetIndex);
 
-    vector<int> jetTrackIndices(int jetIndex)
-      {
-	vector<int> vec;
-	int size = mTrackToJetIndices->GetLast()+1;
-	
-	for (int i=0; i<size; ++i) {
-	  TrackToJetIndex* id = static_cast<TrackToJetIndex*>
-	    ( (*mTrackToJetIndices)[i] );
-	  int trackIndex = id->trackIndex();
-          vec.push_back( trackIndex );
-	}
-	
-	return vec;
-      };
+    vector<int> jetTrackIndices(int jetIndex);
 
 public:
     ///User Interface as per Thomas H's request.  Access jet kinematics based on index:
