@@ -1,7 +1,7 @@
 // TTracker
 //
 //	This class is inherited from the VTracker base-class.
-//	It implements pablo's fast tracker FFT
+//	It implements pablo's fast tracker FTF
 //	The virtual methods from VTracker are fully implemented.
 //
 //	Functionality:
@@ -57,6 +57,7 @@
 #include "TTrack.hpp"
 #include "Common.h"
 #include "types.h"
+#include <stdio.h>
 
 #undef max
 #define min(a,b)        ( ( (a) < (b) ) ? (a) : (b) )
@@ -64,12 +65,70 @@
 
 #define N_LOOP 9 
 
+extern "C" float rftTimer ( ) ;
+
+//********************************************************************************
+// Do the tracking once. This function needs the free-point-list and
+// an empty track as Input.
+// It removes used points from this list, if fRemovedUsedPoints is true.
+// A returned value of FALSE means "no track found", TRUE means "track found".
+// virtual BOOL  BuildOneTrack(THitList* freepoints, TTrack *track);
+// Do the tracking repeatedly until no more tracks are found. This function
+// needs the free-point-list and a track-list as input. It creates
+// new tracks and new point-lists if needed and puts them into the
+// tracklist.
+//********************************************************************************
+void TTrackerFTF::BuildAllTracks( THitList* freepoints, TTrackList* tracklist) {
+      THit* temp;
+//
+// create volume
+//
+      CreateVolume();
+//
+// build volume from hitlist
+//
+      float timeBefore = rftTimer ( ) ;
+      forall(temp, *freepoints) AddHitToVolume(temp);
+      float timeAdding = rftTimer ( ) ;
+//
+// get primaries
+//
+      for ( int i = 0 ; i < FNPrimaryLoops ; i++ )
+         GetTracks( tracklist, ttPrimaries);
+      float timePrimaries = rftTimer ( ) ;
+//
+//    Merge primaries if requested
+//
+      if (FMergePrimaries){
+         TMerger merge(tracklist, FSPhiClosed);
+      }
+      float timeMerging = rftTimer ( ) ;
+//
+// get secondaries
+//
+      for ( int j = 0 ; j < FNSecondaryLoops ; j++ )
+         GetTracks ( tracklist, ttSecondaries);
+
+      float timeSecondaries = rftTimer ( ) ;
+
+      float timeTotal = timeAdding + timePrimaries + timeMerging + timeSecondaries ;
+      printf ( " \n Times: adding %5.2f, Primaries %5.2f, Merging %5.2f, Secondaries %5.2f ",
+                 timeAdding, timePrimaries, timeMerging, timeSecondaries ) ;
+      printf ( " \n Total time = %5.2f ", timeTotal ) ;
+//
+// destroy volume
+//
+      DestroyVolume();
+      FVolume = 0;
+   };
+//****************************************************************************************
 // segmenter; builds a starting track-segment for the track-follower
 // Paramters:
 //	currenttrack			- track under construction. to this track, segmenter-hits should be added
 //	maxsearchpadrow			- maximum number of padrows that will be searched one hit
 //	secondaries				- find secondaries
-THit* TTrackerFFT::Segment(TTrack* currenttrack, int maxsearchpadrows, BOOL secondaries)
+//****************************************************************************************
+THit* TTrackerFTF::Segment(TTrack* currenttrack, int maxsearchpadrows, BOOL secondaries)
 {
    int loop_eta[N_LOOP] = { 0, 0, 0, 1, 1, 1,-1,-1,-1 }; // neighbors in eta and phi
    int loop_phi[N_LOOP] = { 0,-1, 1, 0,-1, 1, 0,-1, 1 };
@@ -214,9 +273,9 @@ THit* TTrackerFFT::Segment(TTrack* currenttrack, int maxsearchpadrows, BOOL seco
 #ifdef TRKDEB
    if ( theTracker->track_debug && para->debug_level >= 2 ) {
       if ( selected_hit != 0 )
-         printf ( " \n fft_segment: Search succesful, hit %d selected ",selected_hit->id );
+         printf ( " \n FTF_segment: Search succesful, hit %d selected ",selected_hit->id );
       else
-         printf ( " \n fft_segment: Search unsuccesful " );
+         printf ( " \n FTF_segment: Search unsuccesful " );
       theTracker->debug_ask () ;
 	}
 #endif
@@ -263,7 +322,7 @@ THit* TTrackerFFT::Segment(TTrack* currenttrack, int maxsearchpadrows, BOOL seco
 //	maxsearchpadrow	- maximum number of padrows that will be searched one hit
 //	secondaries	- find secondaries
 //*****************************************************************************************
-THit* TTrackerFFT::Follow(TTrack* currenttrack, int maxsearchpadrows, BOOL secondaries)
+THit* TTrackerFTF::Follow(TTrack* currenttrack, int maxsearchpadrows, BOOL secondaries)
 {
 #define N_LOOP  9
    int loop_eta[N_LOOP] = { 0, 0, 0, 1, 1, 1,-1,-1,-1 }; // neighbors in eta and phi
@@ -447,10 +506,10 @@ THit* TTrackerFFT::Follow(TTrack* currenttrack, int maxsearchpadrows, BOOL secon
    if ( theTracker->track_debug && para->debug_level >= 2 )
    {
       if ( selected_hit != 0 )
-         printf ( " fft_follow_2: Search succesful, hit selected %d ",selected_hit->id );
+         printf ( " FTF_follow_2: Search succesful, hit selected %d ",selected_hit->id );
       else
       {
-         printf ( " fft_follow_2: Search unsuccesful " );
+         printf ( " FTF_follow_2: Search unsuccesful " );
          if ( chi2_min > para->chi2_hit_cut )
             printf ( " hit chi2 %f larger than cut %f ", chi2_min, para->chi2_hit_cut ) ;
       }
@@ -475,26 +534,23 @@ THit* TTrackerFFT::Follow(TTrack* currenttrack, int maxsearchpadrows, BOOL secon
 //	tracklist   - list of tracks (filled by this method)
 //	tracktype   - determines, which kind of track are to be found (primaries, secondaries,  ?)
 //***************************************************************************************************
-void TTrackerFFT::GetTracks( TTrackList* tracklist, TTrackType tracktype)
+void TTrackerFTF::GetTracks( TTrackList* tracklist, TTrackType tracktype)
 {
-   THit*	nexthit;		// the next hit on my track
-   TTrack* currenttrack;		// a new track
+   THit*	nexthit;		               // the next hit on my track
+   TTrack* currenttrack;		      // a new track
    int	MinimumHitsPerSegment;		// minimum required hits for one starting segment
    int	MinimumNumberOfHitsForFit;	// minimum required hits for fit
 //
-// Set conformal coordinates if we are working with primaries (this is done in the calling function!)
 // set some parameters
 //
    switch (tracktype) {
       case ttPrimaries:	// look for primaries
-// Set_Conformal_Coordinates ( ) ; // in caller-function
-// min_n_hits_for_fit = 1 ;
-	 MinimumNumberOfHitsForFit = 1;		// minimum required hits for a fit
+         MinimumNumberOfHitsForFit = 1;		// minimum required hits for a fit
          MinimumHitsPerSegment = FSMinimumHitsPerSegment;
-	 break;
+	      break;
       case ttSecondaries:	// look for secondaries
          MinimumNumberOfHitsForFit = 2;		// minimum required hits for a fit
-	 MinimumHitsPerSegment = max(FSMinimumHitsPerSegment,3) ;// we need at least 3 hits for secondaries
+	      MinimumHitsPerSegment = max(FSMinimumHitsPerSegment,3) ;// we need at least 3 hits for secondaries
          break;
    }
 //
@@ -521,9 +577,9 @@ void TTrackerFFT::GetTracks( TTrackList* tracklist, TTrackType tracktype)
 // Go into hit looking loop
          while (nexthit != NULL) 
          {
-		// add this hit to the track and update fit-parameters
+// add this hit to the track and update fit-parameters
             currenttrack->AddHit(nexthit, MinimumNumberOfHitsForFit, FSFitSz); 
-		// Check this is not last row to be considered
+// Check this is not last row to be considered
             if (nexthit->GetPadrow() <= LOW_PADROW) break;	// it is, exit
 //
             if (currenttrack->GetHits()->size() < MinimumHitsPerSegment )
