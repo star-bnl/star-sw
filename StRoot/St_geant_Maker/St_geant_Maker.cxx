@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.78 2002/11/28 02:35:53 jeromel Exp $
+// $Id: St_geant_Maker.cxx,v 1.79 2003/04/18 15:53:26 geurts Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.79  2003/04/18 15:53:26  geurts
+// Code added for TOFr (tfr) tables.
+//
 // Revision 1.78  2002/11/28 02:35:53  jeromel
 // Minor correction
 //
@@ -297,6 +300,7 @@
 #include "g2t/St_g2t_ftp_Module.h"
 #include "g2t/St_g2t_ctb_Module.h"
 #include "g2t/St_g2t_tof_Module.h"
+#include "g2t/St_g2t_tfr_Module.h" 
 #include "g2t/St_g2t_rch_Module.h"
 #include "g2t/St_g2t_emc_Module.h"
 #include "g2t/St_g2t_smd_Module.h"
@@ -573,6 +577,14 @@ Int_t St_geant_Maker::Make()
       St_g2t_ctf_hit *g2t_tof_hit = new St_g2t_ctf_hit("g2t_tof_hit",nhits);
       m_DataSet->Add(g2t_tof_hit);
       iRes = g2t_tof(g2t_track,g2t_tof_hit);
+//           ==============================
+    }
+
+    geant3->Gfnhit("BTOH","BRSG", nhits);
+    if (nhits>0) {
+      St_g2t_ctf_hit *g2t_tfr_hit = new St_g2t_ctf_hit("g2t_tfr_hit",nhits);
+      m_DataSet->Add(g2t_tfr_hit);
+      iRes = g2t_tfr(g2t_track,g2t_tfr_hit); 
 //           ==============================
     }
 
