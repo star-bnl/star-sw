@@ -1,5 +1,10 @@
-* $Id: istbgeo.g,v 1.4 2005/01/06 02:02:23 potekhin Exp $
+* $Id: istbgeo.g,v 1.5 2005/01/18 17:38:10 potekhin Exp $
 * $Log: istbgeo.g,v $
+* Revision 1.5  2005/01/18 17:38:10  potekhin
+* Removed the separate Active and Passive layers,
+* as the sensor is apparently all active. Tested
+* the hits structure.
+*
 * Revision 1.4  2005/01/06 02:02:23  potekhin
 * Large addition to the code along the lines
 * of Gerrit's design. Segmented silicon, AlN,
@@ -30,7 +35,7 @@ Module ISTBGEO is the geometry of the outer barrel pixel detector
       real    angle, anglePos, angleCorr, trueR, raddeg
       integer nl,    ly,       nu
 
-      Content   IBMO, IBLM, IBAM, IBSS, IBAL, IBPL, ISTP, ISSC
+      Content   IBMO, IBLM, IBAM, IBSS, ISTP, ISSC
 *
 
       Structure ISMG {Version, Rin, Rout, TotalLength}
@@ -69,10 +74,7 @@ Module ISTBGEO is the geometry of the outer barrel pixel detector
 
       SensorWidth=  4.0        ! Sensor Width
       SensorLngth=  4.0        ! Sensor Length
-      SensorThk  =  0.0300     ! Total thickness, includes passive and active Si
-
-      PassiveThk =  0.0100     ! Passive silicon Thickness
-      ActiveThk  =  0.0200     ! Active  silicon Thickness
+      SensorThk  =  0.0300     ! Sensor Thickness
 
       r          =  7.0        ! 1st ladder nominal radius
       a          =  0.0        ! 1st ladder nominal position angle
@@ -168,7 +170,7 @@ Block IBMO is the mother of the ISTB detector
 endblock
 * -----------------------------------------------------------------------------
 Block IBAM is the mother of the whole long ladder
-      Attribute IBAM  Seen=1  colo=6
+      Attribute IBAM  Seen=0  colo=6
 
       Shape BOX dx=ISBG_LadderWidth/2.0 dy=ISBG_LadderThk/2.0 dz=ISBG_Length/2.0
 
@@ -218,34 +220,18 @@ Block IBLM is the mother of the sensor assmebly
 endblock
 *
 * -----------------------------------------------------------------------------
-Block IBSS is the Silicon Sensor mother (passive+active)
-      Attribute IBSM  Seen=0  colo=5
+Block IBSS is the Silicon Sensor
+      Material  Silicon
+      Material  Sensitive  Isvol=1
+
+      Attribute IBSS  Seen=1  colo=5
 
       Shape BOX dX=ISBG_SensorWidth/2.0 dY=ISBG_SensorThk/2.0 dz=ISBG_SensorLngth/2.0
 
-      Create and Position IBAL y=-(ISBG_SensorThk-ISBG_ActiveThk)/2.0
-      Create and Position IBPL y=+(ISBG_SensorThk-ISBG_PassiveThk)/2.0
-endblock
-* -----------------------------------------------------------------------------
-Block IBAL is the active layer of the ladder
-      Material  Silicon
-      Material  Sensitive  Isvol=1
-      Attribute IBAL   Seen=1  colo=4
-
-      Shape BOX dX=ISBG_SensorWidth/2.0 dY=ISBG_ActiveThk/2.0 Dz=ISBG_SensorLngth/2.0
-
-      call      GSTPAR (%Imed,'STRA',1.)
-
-      HITS    IBAL   Z:.001:S  Y:.001:   X:.001:     Ptot:16:(0,100),
+      HITS    IBSS   Z:.001:S  Y:.001:   X:.001:     Ptot:16:(0,100),
                      cx:10:    cy:10:    cz:10:      Sleng:16:(0,500),
                      ToF:16:(0,1.e-6)    Step:.01:   Eloss:16:(0,0.001) 
-endblock
-* -----------------------------------------------------------------------------
-Block IBPL is the passive layer of the ladder
-      Material  Silicon
-      Attribute IBPL   Seen=1  colo=2
 
-      Shape BOX dX=ISBG_SensorWidth/2.0 dY=ISBG_PassiveThk/2.0 Dz=ISBG_SensorLngth/2.0
 endblock
 * -----------------------------------------------------------------------------
 Block ISTP is the AlN Thermal Plate
