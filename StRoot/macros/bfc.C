@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.65 1999/06/17 19:53:58 didenko Exp $
+// $Id: bfc.C,v 1.66 1999/06/20 08:49:23 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.66  1999/06/20 08:49:23  fisyak
+// Put back dst alias
+//
 // Revision 1.65  1999/06/17 19:53:58  didenko
 // switch off CTF
 //
@@ -699,7 +702,7 @@ void bfc (const Int_t Nevents=1, const Char_t *Chain="gstar tfs",Char_t *infile=
     }
     else if (glbMk) {
       //  treeMk->SetBranch("globalBranch",FileOut.Data());
-      treeMk->IntoBranch("globalBranch","global/.data/dst");
+      treeMk->IntoBranch("globalBranch","global/.data");
     }
     if (evMk){
       //  treeMk->SetBranch("EventBranch",FileOut.Data());
