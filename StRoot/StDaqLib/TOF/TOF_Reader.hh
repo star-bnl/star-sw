@@ -1,10 +1,15 @@
 /***************************************************************************
-* $Id: TOF_Reader.hh,v 1.3 2001/09/28 18:45:43 llope Exp $
+* $Id: TOF_Reader.hh,v 2.0 2003/01/29 05:27:25 geurts Exp $
 * Author: Frank Geurts
 ***************************************************************************
 * Description:  TOF Event Reader
 ***************************************************************************
 * $Log: TOF_Reader.hh,v $
+* Revision 2.0  2003/01/29 05:27:25  geurts
+* New TOF reader capable of reading TOF year3 data (pVPD, TOFp and TOFr).
+* - Added dedicated retrieval methods for different parts of the data.
+* - Reader is still capable of dealing year2 (pVPD and TOFp) data.
+*
 * Revision 1.3  2001/09/28 18:45:43  llope
 * modified for compatibility w/ updated StTofMaker
 *
@@ -22,10 +27,14 @@
 #include "StDaqLib/GENERIC/RecHeaderFormats.hh"
 
 // Number of channels for each bank
-#define TOFP_NUM_ADC_CHANNELS 48
-#define TOFP_NUM_TDC_CHANNELS 48
-#define TOFP_NUM_A2D_CHANNELS 32
-#define TOFP_NUM_SCA_CHANNELS 12
+// - Year2 Maxima
+//#define TOFP_NUM_ADC_CHANNELS 48
+//#define TOFP_NUM_TDC_CHANNELS 48
+// - Year3 Maxima
+#define TOF_MAX_ADC_CHANNELS (48+12+72)
+#define TOF_MAX_TDC_CHANNELS (48+72)
+#define TOF_MAX_A2D_CHANNELS 32
+#define TOF_MAX_SCA_CHANNELS 12
 
 // unsigned typedefs from /RTS/include/daqFormats.h
 #ifndef _DAQ_FORMATS_H
@@ -129,22 +138,26 @@ struct TofDATA {
   char * BankType;
   unsigned int ByteSwapped ; // Should be 0x04030201
   unsigned int EventNumber; //Token number
-  unsigned short AdcData[TOFP_NUM_ADC_CHANNELS];
-  unsigned short TdcData[TOFP_NUM_TDC_CHANNELS];
-           short A2dData[TOFP_NUM_A2D_CHANNELS];
-  unsigned short ScaData[TOFP_NUM_SCA_CHANNELS];
+  unsigned short AdcData[TOF_MAX_ADC_CHANNELS];
+  unsigned short TdcData[TOF_MAX_TDC_CHANNELS];
+  	   short A2dData[TOF_MAX_A2D_CHANNELS];
+  unsigned short ScaData[TOF_MAX_SCA_CHANNELS];
 };
 
 
 class StTofReaderInterface {
 public:
   virtual ~StTofReaderInterface(){}
+  // old virtual access members
   virtual unsigned short GetAdcFromSlat(int)=0;
   virtual unsigned short GetTdcFromSlat(int)=0;
   virtual          short GetTc(int)=0;
   virtual unsigned short GetSc(int)=0;
   virtual unsigned int GetEventNumber()=0;
-  // virtual void printRawData();
+  virtual unsigned short GetTofpAdc(int)=0;
+  virtual unsigned short GetTofpTdc(int)=0;
+  virtual unsigned short GetTofrAdc(int)=0;
+  virtual unsigned short GetTofrTdc(int)=0;
 };
 
 
@@ -152,14 +165,31 @@ class TOF_Reader : public StTofReaderInterface {
 private:
   void ProcessEvent(const Bank_TOFP * TofPTR);
   TofDATA mTheTofArray;
+  int mTofRawDataVersion;
+  int mMaxAdcChannels, mMaxTdcChannels;
+  int mMaxA2dChannels, mMaxScaChannels;
 protected:
   EventReader *ercpy; // copy of EventReader pointer
   struct Bank_TOFP *pBankTOFP;  // Bank Pointers
 public:
   TOF_Reader(EventReader *er, Bank_TOFP *pTOFP);
   ~TOF_Reader(){};
+  // old access member
   unsigned short GetAdcFromSlat(int slatId);
   unsigned short GetTdcFromSlat(int slatId);
+  // new access members
+  unsigned short GetAdc(int id);
+  unsigned short GetTdc(int id);
+  unsigned short GetTofrAdc(int padId);
+  unsigned short GetTofrTdc(int padId);
+  unsigned short GetTofpAdc(int SlatId);
+  unsigned short GetTofpTdc(int SlatId);
+  unsigned short GetPvpdAdcHigh(int id);
+  unsigned short GetPvpdAdc(int id);
+  unsigned short GetPvpdTdc(int id);
+  unsigned short GetClockAdc();
+  bool year2Data();
+  bool year3Data();
            short GetTc(int chanId);
   unsigned short GetSc(int chanId);
   unsigned int   GetEventNumber();  

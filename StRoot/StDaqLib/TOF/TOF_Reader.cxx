@@ -1,10 +1,15 @@
 /***************************************************************************
-* $Id: TOF_Reader.cxx,v 1.2 2001/09/28 18:45:43 llope Exp $
+* $Id: TOF_Reader.cxx,v 2.0 2003/01/29 05:27:24 geurts Exp $
 * Author: Frank Geurts
 ***************************************************************************
 * Description:  TOF Event Reader
 ***************************************************************************
 * $Log: TOF_Reader.cxx,v $
+* Revision 2.0  2003/01/29 05:27:24  geurts
+* New TOF reader capable of reading TOF year3 data (pVPD, TOFp and TOFr).
+* - Added dedicated retrieval methods for different parts of the data.
+* - Reader is still capable of dealing year2 (pVPD and TOFp) data.
+*
 * Revision 1.2  2001/09/28 18:45:43  llope
 * modified for compatibility w/ updated StTofMaker
 *
@@ -14,6 +19,9 @@
 *
 **************************************************************************/
 #include "TOF_Reader.hh"
+
+bool TOF_Reader::year2Data(){return (mTofRawDataVersion==1);}
+bool TOF_Reader::year3Data(){return (mTofRawDataVersion==2);}
 
 void TOF_Reader::ProcessEvent(const Bank_TOFP * TofPTR) {
   unsigned short numberOfDataWords, slot, channel;
@@ -27,6 +35,13 @@ void TOF_Reader::ProcessEvent(const Bank_TOFP * TofPTR) {
   mTheTofArray.EventNumber = Token;
   mTheTofArray.ByteSwapped = 0x04030201;
 
+  int tofRawDataVersion = TofPTR->header.FormatNumber;
+  if ((tofRawDataVersion <1) || (tofRawDataVersion >2)){
+    cout << "TOF_Reader: ERROR unknown raw data version " << tofRawDataVersion << endl;
+    return;
+  }
+  //fg 1. introduce rawdata consistency checks below ...
+
   //Read ADC Bank
   TOFADCD * TofAdcD;
   if (TofPTR->AdcPTR.length>0) {
@@ -39,9 +54,9 @@ void TOF_Reader::ProcessEvent(const Bank_TOFP * TofPTR) {
       mTheTofArray.EventNumber=0;
     }
     numberOfDataWords=TofAdcD->header.BankLength - (INT32)sizeof(TofAdcD->header)/4;
-    if (numberOfDataWords!=TOFP_NUM_ADC_CHANNELS){
+    if (numberOfDataWords!=mMaxAdcChannels){
       cout << "TOF_Reader: ADCD #channels mismatch " << numberOfDataWords  << endl;
-      if (numberOfDataWords>TOFP_NUM_ADC_CHANNELS) numberOfDataWords=TOFP_NUM_ADC_CHANNELS;
+      if (numberOfDataWords>mMaxAdcChannels) numberOfDataWords=mMaxAdcChannels;
     }
     // decode and fill data structure
     for (dataDWord=0; dataDWord < numberOfDataWords; dataDWord++) {
@@ -67,9 +82,9 @@ void TOF_Reader::ProcessEvent(const Bank_TOFP * TofPTR) {
       mTheTofArray.EventNumber=0;
     }
     numberOfDataWords=TofTdcD->header.BankLength - (INT32)sizeof(TofTdcD->header)/4;
-    if (numberOfDataWords!=TOFP_NUM_TDC_CHANNELS){
+    if (numberOfDataWords!=mMaxTdcChannels){
       cout << "TOF_Reader: TDCD #channels mismatch " << numberOfDataWords  << endl;
-      if (numberOfDataWords>TOFP_NUM_TDC_CHANNELS) numberOfDataWords=TOFP_NUM_TDC_CHANNELS;
+      if (numberOfDataWords>mMaxTdcChannels) numberOfDataWords=mMaxTdcChannels;
     }
     // decode and fill data structure
     for (dataDWord=0; dataDWord < numberOfDataWords; dataDWord++) {
@@ -95,9 +110,9 @@ void TOF_Reader::ProcessEvent(const Bank_TOFP * TofPTR) {
       mTheTofArray.EventNumber=0;
     }
     numberOfDataWords=TofA2dD->header.BankLength - (INT32)sizeof(TofA2dD->header)/4;
-    if (numberOfDataWords!=TOFP_NUM_A2D_CHANNELS){
+    if (numberOfDataWords!=mMaxA2dChannels){
       cout << "TOF_Reader: A2DD #channels mismatch " << numberOfDataWords  << endl;
-      if (numberOfDataWords>TOFP_NUM_A2D_CHANNELS) numberOfDataWords=TOFP_NUM_A2D_CHANNELS;
+      if (numberOfDataWords>mMaxA2dChannels) numberOfDataWords=mMaxA2dChannels;
     }
     // decode and fill data structure
     for (dataDWord=0; dataDWord < numberOfDataWords; dataDWord++) {
@@ -123,9 +138,9 @@ void TOF_Reader::ProcessEvent(const Bank_TOFP * TofPTR) {
       mTheTofArray.EventNumber=0;
     }
     numberOfDataWords=TofScaD->header.BankLength - (INT32)sizeof(TofScaD->header)/4;
-    if (numberOfDataWords!=TOFP_NUM_SCA_CHANNELS){
+    if (numberOfDataWords!=mMaxScaChannels){
       cout << "TOF_Reader: SCAD #channels mismatch " << numberOfDataWords  << endl;
-      if (numberOfDataWords>TOFP_NUM_SCA_CHANNELS) numberOfDataWords=TOFP_NUM_SCA_CHANNELS;
+      if (numberOfDataWords>mMaxScaChannels) numberOfDataWords=mMaxScaChannels;
     }
     // decode and fill data structure
     for (dataDWord=0; dataDWord < numberOfDataWords; dataDWord++) {
@@ -157,29 +172,123 @@ TOF_Reader::TOF_Reader(EventReader *er, Bank_TOFP *pTOFP)
     printf("Token mismatch between global %d and TOF %d\n",dp->header.Token,Token);
   }
 
+  mTofRawDataVersion = pBankTOFP->header.FormatNumber;
+
+  // Year2: pVPD+TOFp; Year3:pVPD+TOFp+TOFr
+  if (year2Data()){
+    mMaxAdcChannels=48;
+    mMaxTdcChannels=48;
+  }
+  else {
+    mMaxAdcChannels=TOF_MAX_ADC_CHANNELS;
+    mMaxTdcChannels=TOF_MAX_TDC_CHANNELS;
+  }
+  mMaxScaChannels = TOF_MAX_SCA_CHANNELS;
+  mMaxA2dChannels = TOF_MAX_A2D_CHANNELS;
+
   ProcessEvent(pBankTOFP);
 }
 
 
-unsigned short TOF_Reader::GetAdcFromSlat(int slatId){
-  if ((slatId<0) || (slatId>TOFP_NUM_ADC_CHANNELS-1)){
-    cout << "TOF_Reader::GetAdcFromSlat slatId out of range " << slatId << endl;
+unsigned short TOF_Reader::GetAdc(int daqId){
+  if ((daqId<0) || (daqId>mMaxAdcChannels-1)){
+    cout << "TOF_Reader::GetAdc slatId out of range " << daqId << endl;
+    return 0;
+  }
+  return mTheTofArray.AdcData[daqId];
+}
+unsigned short TOF_Reader::GetAdcFromSlat(int slatId){return GetAdc(slatId);}
+
+
+unsigned short TOF_Reader::GetTdc(int daqId){
+  if ((daqId<0) || (daqId>mMaxTdcChannels-1)){
+    cout << "TOF_Reader::GetTdc daqId out of range " << daqId << endl;
+    return 0;
+  }
+  return mTheTofArray.TdcData[daqId];
+}
+unsigned short TOF_Reader::GetTdcFromSlat(int slatId){return GetTdc(slatId);}
+
+
+unsigned short TOF_Reader::GetTofpAdc(int slatId){
+  if ((slatId<0) || (slatId>41)){
+    cout << "TOF_Reader::GetTofpAdc slatId out of range " << slatId << endl;
     return 0;
   }
   return mTheTofArray.AdcData[slatId];
 }
 
 
-unsigned short TOF_Reader::GetTdcFromSlat(int slatId){
-  if ((slatId<0) || (slatId>TOFP_NUM_TDC_CHANNELS-1)){
-    cout << "TOF_Reader::GetTdcFromSlat slatId out of range " << slatId << endl;
+unsigned short TOF_Reader::GetTofpTdc(int slatId){
+  if ((slatId<0) || (slatId>41)){
+    cout << "TOF_Reader::GetTofpTdc slatId out of range " << slatId << endl;
     return 0;
   }
   return mTheTofArray.TdcData[slatId];
 }
 
+
+unsigned short TOF_Reader::GetTofrAdc(int padId){
+  if (year2Data()){
+    cout << "TOF_Reader: TOFr ADC data not available for year2 data" << endl;
+    return 0;
+  }
+  if ((padId<0) || (padId>71)){
+    cout << "TOF_Reader::GetTofrAdc padId out of range " << padId << endl;
+    return 0;
+  }
+  return mTheTofArray.AdcData[60+padId];
+}
+
+
+unsigned short TOF_Reader::GetTofrTdc(int padId){
+  if (year2Data()){
+    cout << "TOF_Reader: TOFr TDC data not available for year2 data" << endl;
+    return 0;
+  }
+  if ((padId<0) || (padId>71)){
+    cout << "TOF_Reader::GetTofrTdc padId out of range " << padId << endl;
+    return 0;
+  }
+  return mTheTofArray.TdcData[48+padId];
+}
+
+
+unsigned short TOF_Reader::GetPvpdAdc(int pvpdId){
+  if ((pvpdId<0) || (pvpdId>5)){
+    cout << "TOF_Reader::GetPvpdAdc pvpdId out of range " << pvpdId << endl;
+    return 0;
+  }
+  return mTheTofArray.AdcData[43+pvpdId];
+}
+
+
+unsigned short TOF_Reader::GetPvpdAdcHigh(int pvpdId){
+  if (year2Data()){
+    cout << "TOF_Reader: pVPD high gain data not available for year2 data" << endl;
+    return 0;
+  }
+  if ((pvpdId<0) || (pvpdId>5)){
+    cout << "TOF_Reader::GetPvpdAdcHigh pvpdId out of range " << pvpdId << endl;
+    return 0;
+  }
+  return mTheTofArray.TdcData[54+pvpdId];
+}
+
+unsigned short TOF_Reader::GetPvpdTdc(int pvpdId){
+  if ((pvpdId<0) || (pvpdId>5)){
+    cout << "TOF_Reader::GetPvpdTdc pvpdId out of range " << pvpdId << endl;
+    return 0;
+  }
+  return mTheTofArray.TdcData[43+pvpdId];
+}
+
+
+unsigned short TOF_Reader::GetClockAdc(){return mTheTofArray.AdcData[42];}
+
+
 short TOF_Reader::GetTc(int chanId){
-  if ((chanId<0) || (chanId>TOFP_NUM_A2D_CHANNELS-1)){
+  if ((chanId<0) || (chanId>mMaxA2dChannels-1)){
     cout << "TOF_Reader::GetTc chanId out of range " << chanId << endl;
     return 0;
   }
@@ -188,7 +297,7 @@ short TOF_Reader::GetTc(int chanId){
 
 
 unsigned short TOF_Reader::GetSc(int chanId){
-  if ((chanId<0) || (chanId>TOFP_NUM_SCA_CHANNELS-1)){
+  if ((chanId<0) || (chanId>mMaxScaChannels-1)){
     cout << "TOF_Reader::GetSc chanId out of range " << chanId << endl;
     return 0;
   }
@@ -203,13 +312,13 @@ unsigned int TOF_Reader::GetEventNumber(){
 void TOF_Reader::printRawData(){
   cout << "StDaqLib/TOF/TOF_Reader  Printing Raw Data...";
   cout << "\n --- ADCD: ";
-  for (int i=0;i<TOFP_NUM_ADC_CHANNELS;i++) cout << " " << mTheTofArray.AdcData[i];
+  for (int i=0;i<mMaxAdcChannels;i++) cout << " " << mTheTofArray.AdcData[i];
   cout << "\n --- TDCD: ";
-  for (int i=0;i<TOFP_NUM_TDC_CHANNELS;i++) cout << " " << mTheTofArray.TdcData[i];
+  for (int i=0;i<mMaxTdcChannels;i++) cout << " " << mTheTofArray.TdcData[i];
   cout << "\n --- A2DD: ";
-  for (int i=0;i<TOFP_NUM_A2D_CHANNELS;i++) cout << " " << mTheTofArray.A2dData[i];
+  for (int i=0;i<mMaxA2dChannels;i++) cout << " " << mTheTofArray.A2dData[i];
   cout << "\n --- SCAD: ";
-  for (int i=0;i<TOFP_NUM_SCA_CHANNELS;i++) cout << " " << mTheTofArray.ScaData[i];
+  for (int i=0;i<mMaxScaChannels;i++) cout << " " << mTheTofArray.ScaData[i];
   cout << "\nStDaqLib/TOF/TOF_Reader  Done Printing Raw Data..." << endl;
 }
 
