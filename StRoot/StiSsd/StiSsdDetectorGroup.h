@@ -8,7 +8,7 @@ class StiDetectorBuilder;
 
 /*! Convenience class defining the SSD detector group
   <p>
-  \author Claude A Pruneau, Wayne State University
+  \author Christelle Roy, Subatech
 */
 class StiSsdDetectorGroup : public StiDetectorGroup<StEvent,StMcEvent>
 {
