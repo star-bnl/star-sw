@@ -12,7 +12,7 @@ Replace[LIST #;] with [ #1 _
  "matrix "   Rsinv,Dsinv,Rinv,Dinv,Dmmlt,
  "ffread "   ffinit,ffset,ffkey,ffget,ffgo,
  "random "   poissn,norran,rndm,rnorml,dircos,rnpssn,
- "random "   binomi,rngama,gauss,proxim,
+ "random "   binomi,rngama,gauss,proxim,rnhpre,rnhran,
  "comis  "   csjcal,csaddr,jumpad,Jbyt,msbit,
  "interp "   fint,polint,lfit,divdif,lfitw,lvsimx,lvmaxa,lzlong,
  "zebra  "   mzvolm,mzdred,zverif,
@@ -23,13 +23,16 @@ Replace[LIST #;] with [ #1 _
  " epio  "   epinit,epread,epsetw,epdefu
  "tr-prop    trprfn,trprop,trscsp,trspsc,trscsd,trsdsc,Ssmt5t,Xmm55 "
  ]
++CDE,GCBANK.
 +CDE,GCFLAG.
   Integer  SystemF,Ix/0/;  Real x/0.0/;  Double Precision d/0.D0/
   list external;
+  Integer JATTF;
+  JATTF(Jj) = Jj+int(Q(Jj+5))+6
 * make sure that real calls will never be done even if this routine is called
   Ix = Ix+1;  if (Ix<=0) Return;
   Ix = Ix+1;  if (Ix>=0) Return;
-  ix = SystemF(' ')
+  ix = SystemF(' ')+JattF(ix);
   x  = sind(x)+asind(x)+cosd(x)+acosd(x)+tand(x)+atand(x)+atan2d(x,x)
   d  = dsind(d)+dasind(d)+dcosd(d)+dacosd(d)+dtand(d)+datand(d)+datan2d(d,d)
   x  = mod(Ix,ix+1)+amod(x,x+1)+dmod(d,d+1.)

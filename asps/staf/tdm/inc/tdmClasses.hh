@@ -17,7 +17,6 @@
 #define TDMCLASSES_HH
 
 //:----------------------------------------------- INCLUDES           --
-#define DS_ADVANCED
 #include "dstype.h"
 #include "asu_macros.h"
 #include "asu_types.h"

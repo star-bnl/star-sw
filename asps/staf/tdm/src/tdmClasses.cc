@@ -1173,7 +1173,12 @@ STAFCV_T tdmFactory:: getTypeName (long tid, char *& name) {
    const char 	*post=NULL;
    const char 	*buff=NULL;	size_t lbuff=0;
 
+#ifdef DSL98TULL
    if( !dsTypeSpecifier(&spec,(size_t)tid)
+#else
+   size_t pLen;
+   if( !dsTypeSpecifier(&spec,&pLen,(size_t)tid)
+#endif
    ||  (0 == (pre = strstr(spec,"struct")))
    ||  (0 == (post = strstr(spec,"{")))
    ||  (0 >= (post - pre))
@@ -1197,7 +1202,12 @@ STAFCV_T tdmFactory:: getTypeSpecification (long tid, char *& spec) {
    const char *c;
    size_t l;
 
+#ifdef DSL98TULL
    if( !dsTypeSpecifier(&c,(size_t)tid) ){
+#else
+   if( !dsTypeSpecifier(&c,&l,(size_t)tid) ){
+#endif
+
 /*-   spec = NULL;				14jul97 BUGFIX -*/
       spec = (char*)MALLOC(9); strcpy(spec,"**NONE**");
       EML_ERROR(INVALID_TYPE_ID);

@@ -41,7 +41,11 @@ dsuPrintDataset(DS_DATASET_T *pDataset)
       }
    }else{
       printf(" ---------------------------------------- \n");
+#ifdef DSL98TULL
       dsTypeSpecifier(&typeSpec,pDataset->tid);
+#else
+      dsTypeSpecifier(&typeSpec,&iclen,pDataset->tid);
+#endif
       printf("%s ",typeSpec);
       printf("%s",pDataset->name);
       printf("[%d%%%d];\n",pDataset->elcount,pDataset->maxcount);

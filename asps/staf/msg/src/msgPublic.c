@@ -35,8 +35,11 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 3/8/98 03:34:14, \
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#ifndef WIN32
 #include <unistd.h>
+#endif
 #include <stdlib.h>
+#ifndef WIN32
 #include <sys/types.h>
 #include <sys/times.h>
 #include <sys/time.h>
@@ -45,7 +48,7 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 3/8/98 03:34:14, \
 #if !defined(_AIX) && !defined(Linux) && !defined(HPUX)
 #include <sys/systeminfo.h>
 #endif
-
+#endif
 #include <errno.h>
 #include <msg.h>
 #include <msgData.h>

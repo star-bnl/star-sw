@@ -68,7 +68,7 @@ DIO_STATE_T dioStream::  state () {
 
 //----------------------------------
 char * dioStream::  location () {
-   char * c="unknown";
+   const char *c="unknown";
    char * cc;
    cc = (char*)MALLOC(strlen(c) +1);
    strcpy(cc,c);

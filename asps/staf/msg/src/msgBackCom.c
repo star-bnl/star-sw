@@ -44,22 +44,9 @@ static const char sccsid[] = "@(#)"__FILE__"\t\t1.55\tCreated 3/8/98 03:34:03, \
 
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/times.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <sys/stat.h>
-
-#include <sys/ipc.h>  /*  Interprocess Communications  -- needed for Shared Memory.  */
-#include <sys/shm.h>  /*  Shared Memory.  */
-
-#include <errno.h>
 #include <msg.h>
 #include <msgData.h>
 #include <msgf.h>
-
 #define MAX_FILE_VERSIONS 999
 
 extern msgData_t msg;
@@ -73,7 +60,6 @@ extern int ELAtime0;
 
 extern funcPoint MsgAlarmRoutine;
 
-
 	void	MsgGetLUN(
 
 /*  Outputs:                                                                          */
@@ -94,7 +80,6 @@ extern funcPoint MsgAlarmRoutine;
 
 
 
-
 	void	MsgDisplayAndEcho(
 
 /*   Inputs:                                                                               */
@@ -130,7 +115,6 @@ extern funcPoint MsgAlarmRoutine;
 
 
 
-
 	void	MsgDisplayAndEchoOut(
 
 /*   Inputs:                                                                               */
@@ -157,7 +141,6 @@ extern funcPoint MsgAlarmRoutine;
 
 
 
-
 	void	MsgIni(
 
 /*  Input:                                        */
@@ -171,7 +154,6 @@ extern funcPoint MsgAlarmRoutine;
 }
 
 
-
 	void	MsgLUNPage(
 
 /*  Input:                                        */
@@ -187,7 +169,6 @@ extern funcPoint MsgAlarmRoutine;
 
 
 
-
 	void	MsgNameNode(
 
 /*  Input:                  */
@@ -202,7 +183,6 @@ extern funcPoint MsgAlarmRoutine;
 
 
 
-
 	void	MsgSetLUN(
 
 /*  Inputs: */
@@ -223,7 +203,6 @@ extern funcPoint MsgAlarmRoutine;
 
 
 
-
 	void	MsgSummary(
 
 /*  Input: */
@@ -244,7 +223,6 @@ extern funcPoint MsgAlarmRoutine;
 
 
 
-
 	void	MsgSummaryCPU(
 
 /*  Input:  */
@@ -270,7 +248,6 @@ extern funcPoint MsgAlarmRoutine;
 
 
 
-
 	void	MsgSummaryEvent(
 
 /*  Inputs:   */
@@ -296,7 +273,6 @@ extern funcPoint MsgAlarmRoutine;
 }
 
 
-
 	void	MsgTimeStamp(
 
 /*  Inputs:  */
@@ -344,7 +320,6 @@ extern funcPoint MsgAlarmRoutine;
 
 
 
-
 	void	MsgToLUN(
 	
 /*  Inputs:                                                                                    */
@@ -379,7 +354,6 @@ extern funcPoint MsgAlarmRoutine;
 
 
 
-
 	void	MsgToLUNOut(
 	
 /*  Inputs:                                                                              */
@@ -411,4 +385,3 @@ extern funcPoint MsgAlarmRoutine;
 
 
 
-
