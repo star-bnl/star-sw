@@ -83,6 +83,7 @@ strcpy(mnodeName,name);
 void 
 StDbConfigNode::setConfigName(const char* name){ 
 
+if(!name)return;
 if(mconfigName) delete [] mconfigName;
 mconfigName = new char[strlen(name)+1];
 strcpy(mconfigName,name);
@@ -331,12 +332,25 @@ StDbConfigNode::setFirstChildNode(StDbConfigNode* node){
 ////////////////////////////////////////////////////////////////
 
 char * 
-StDbConfigNode::getName() const { return strdup(mnodeName); } 
+StDbConfigNode::getName() const { 
+if(!mnodeName)return mnodeName;
+
+char* retString = new char[strlen(mnodeName)+1];
+strcpy(retString,mnodeName);
+return retString;
+}
 
 ////////////////////////////////////////////////////////////////
 
 char * 
-StDbConfigNode::getConfigName() const { return strdup(mconfigName); } 
+StDbConfigNode::getConfigName() const { 
+
+if(!mconfigName)return mconfigName;
+
+char* retString = new char[strlen(mconfigName)+1];
+strcpy(retString,mconfigName);
+return retString;
+}
 
 ////////////////////////////////////////////////////////////////
 

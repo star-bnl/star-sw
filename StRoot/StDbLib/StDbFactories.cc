@@ -2,6 +2,7 @@
 #include "StDbCalibFactory.hh"
 #include "StDbGeomFactory.hh"
 #include "StDbCondFactory.hh"
+#include "StDbRunParamsFactory.hh"
 
 StDbFactories* StDbFactories::mInstance=0;
 
@@ -28,6 +29,7 @@ StDbFactories::initList(){
 mfactories.push_back(StDbCalibFactory::Instance());
 mfactories.push_back(StDbCondFactory::Instance());
 mfactories.push_back(StDbGeomFactory::Instance());
+mfactories.push_back(StDbRunParamsFactory::Instance());
 
 }
 

@@ -23,38 +23,65 @@ private:
   char* mdomainName;
   char* mtypeName;
   bool  mconnectState;
+  bool  misDefault;
 
   tableQuery* mdatabase; // low level query access of DataBase
 
 protected:
 
-  void setUnixSocket(); //unixSocket is derived from name,host, & port 
   virtual void initServer();
+  char* mstringDup(const char * str) const;
+
 
 public:
 
+  StDbServer(): mserverName(0), mhostName(0), munixSocket(0), mdbName(0), mconnectState(false), mdatabase(0), misDefault(false), mdomainName(0), mtypeName(0) {};
   StDbServer(StDbType type, StDbDomain domain);
   StDbServer(StDbType type, StDbDomain domain, const char* typeName, const char* domainName);
-  StDbServer(const char* filename) : mserverName(0), mhostName(0), munixSocket(0), mdbName(0), mconnectState(false), mdatabase(0){}; // XML catalog file not yet implemented
-  StDbServer(const char* server, const char* hostname, int port);
+  //  StDbServer(const char* server, const char* hostname, int port);
   virtual ~StDbServer();
 
-  virtual StDbType getDbType() { return mdbType; };
-  virtual StDbDomain getDbDomain() { return mdbDomain; };
+  StDbServer(StDbServer& server);
+  //  virtual StDbServer* getServer(const char* dbName);
+
+  virtual void setDbName(const char* dbName);
+  virtual void setDataBase(StDbType type, StDbDomain domain, const char* typeName, const char* domainName);
+
+
+  virtual void setHostName(const char* name);
+  virtual void setUnixSocket(const char* name);
+  virtual void setDomainName(const char* name);
+  virtual void setTypeName(const char* name);
+  virtual void setPortNumber(int port){ mportNumber = port;}
+  virtual void setDbType(StDbType type) { mdbType = type;}
+  virtual void setDbDomain(StDbDomain domain) { mdbDomain=domain;}
+  virtual void setServerName(const char* name);
+  virtual void setIsDefaultServer() {misDefault=true;};
+
+  virtual char* getDbName() const;
+  virtual StDbType getDbType() const { return mdbType; };
+  virtual StDbDomain getDbDomain() const { return mdbDomain; };
  
   virtual char* getServerName() const ;
   virtual char* getHostName() const ;
-  virtual int   getPortNumber() const ;
+  virtual char* getUnixSocket() const;
+  virtual int   getPortNumber() const { return mportNumber;} ;
+  virtual char* getTypeName() const ;
+  virtual char* getDomainName() const ;
+
   virtual void  init() { initServer(); };
-  virtual bool  isconnected() { return mconnectState;};
+  virtual bool  isconnected() const { return mconnectState;};
+  virtual bool  isDefault() const { return misDefault; };
   
+//Here's the real work of the server -> providing Query access to the DataBase
+
   virtual void QueryDb(StDbTable* table);
   virtual void QueryDb(StDbConfigNode* node);
   virtual void QueryDescriptor(StDbTable* table);
   virtual void WriteDb(StDbTable* table);
 
-};
 
+};
 
 #endif
 

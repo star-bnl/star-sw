@@ -99,6 +99,8 @@ public:
 
   virtual bool isNode(StDbType type, StDbDomain domain);
 
+  //ClassDef(StDbConfigNode,0)
+
 }; 
 
 inline

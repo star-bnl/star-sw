@@ -1,12 +1,18 @@
 #ifndef TABLEITR_HH
 #define TABLEITR_HH
 
+#ifndef __CINT__
 #include "StDbConfigNode.hh" // also includes StDbTable.h
+typedef TableList::iterator ListIter;
+#else
+class ListIter;
+#endif
+
 #include "StDbTableI.h"
 
 class TableIter {
 
-  TableList::iterator itr;
+  ListIter itr;
   StDbConfigNode* mnode;
 
 public:
@@ -23,6 +29,8 @@ public:
 
   // will also want a method nextAndRelease() which does the
   // same as next() but removes the table from the StDbConfigNode
+
+  //ClassDef(TableIter,0)
 
 };
 

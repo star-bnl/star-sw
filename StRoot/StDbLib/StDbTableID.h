@@ -19,7 +19,7 @@ public:
   ~StDbTableID() { if(mname) delete [] mname; }
 
   void setName(const char* name);
-  char* getName() const { return strdup(mname); } 
+  char* getName() const; 
   bool checkName(const char* name); 
   void setID(int tableID) {mtableID=tableID;}
   int getID() const { return mtableID; }
@@ -32,6 +32,14 @@ void StDbTableID::setName(const char* name){
   if(mname) delete [] mname;
   mname = new char[strlen(name)+1];
   strcpy(mname,name);
+}
+
+inline
+char* StDbTableID::getName() const { 
+if(!mname)return mname;
+char* retString = new char[strlen(mname)+1];
+strcpy(retString,mname);
+return retString;
 }
 
 
