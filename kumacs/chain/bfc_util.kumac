@@ -78,14 +78,16 @@
 * editted 8/31/98 K. Turner - changes:
 *                           ==> chain name/module
 *                           - added new module into chain:
-*                                     dehd - dst event header table (dummy)
+*                                     dehd - dst event header table 
 *                           - got module working:
 *                                     drsum - fill_dst_run_summary
 *                           - modified recently:
 *                                     dmsft - dst_monitor_soft_filler
 *                                     desum - fill_dst_event_summary
 * editted 8/31/98 K. Turner - write out run directories at finish
-*
+* editted 8/31/98 K. Turner - broke up event and run summary and header kumacs
+*                             and now add new module to chain:
+*                                 drhd - dst run header table
 *
 * ************************************************************
 *                     BFC_UTIL.KUMAC
@@ -271,6 +273,8 @@ macro bfc_init _
     (dmhrd) 
     (desum) exec create_tables_global#fill_dst_event_summary
     (drsum) exec create_tables_global#fill_dst_run_summary
+     (dehd) exec create_tables_global#fill_dst_event_head
+     (drhd) exec create_tables_global#fill_dst_run_head
 	    exec init_dst#init_rhead
     (fzout) user/output o [output_fzd_file]
     (evout)
@@ -421,7 +425,7 @@ ABEND:
      (dpnt)    exec run_dst#point_filler
     (dmsft)    exec run_dst#dst_mon_soft
     (dmhrd)    nextl 1
-    (desum)    exec run_dst#event_summary
+    (desum)    exec run_dst#dst_event_summary
     (drsum)    exec run_dst#dst_run_summary
     (evout)    if [output_xdf_file]="" then
                  message "Empty output file"
