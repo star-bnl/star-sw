@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.38 2004/09/16 02:09:27 perev Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.39 2004/09/25 01:25:20 perev Exp $
 //#define dChargeCorrection
 #define SpaceChargeQdZ
 #define CompareWithToF
@@ -553,15 +553,15 @@ Int_t StdEdxY2Maker::Make(){
 
 #ifdef SpaceChargeQdZ
 	// next hit
-	StTpcHit *currentTpcHit = tpcHit;
-	StTpcHit *NextTpcHit = 0;
-	StTpcHit *next = 0;
+	const StTpcHit *currentTpcHit = tpcHit;
+	const StTpcHit *NextTpcHit = 0;
+	const StTpcHit *next = 0;
 	//                            I    O
 	Int_t PadDif = row <= 13 ? 5 : 3;
 	StTpcLocalSectorCoordinate lNext;
 	Double_t PreviousCharge = 0;
 	while (currentTpcHit) {
-	  next = dynamic_cast<StTpcHit*>(currentTpcHit->nextHit());
+	  next = static_cast<const StTpcHit*>(currentTpcHit->nextHit());
 	  if (! next) break;
 	  StGlobalCoordinate gNext(next->position());
 	  if (TESTBIT(m_Mode, kAlignment)) {
