@@ -1,4 +1,4 @@
-// $Id: bfcread_histBranch.C,v 1.1 2000/03/13 17:50:17 kathy Exp $
+// $Id: bfcread_histBranch.C,v 1.2 2000/03/20 17:50:41 kathy Exp $
 // $Log $
 
 //======================================================================
@@ -20,7 +20,7 @@ StChain *chain;
 void bfcread_histBranch(
  Int_t nevents=1, 
  const char *MainFile=
-"/star/rcf/test/new/tfs_redhat61/year_1h/hc_standard/hc_standard.40_evts.dst.root")
+ "/afs/rhic/star/data/samples/gstar.dst.root")
 {
 //
     gSystem->Load("St_base");
@@ -36,7 +36,7 @@ void bfcread_histBranch(
   IOMk->SetDebug();
   IOMk->SetIOMode("r");
   IOMk->SetBranch("*",0,"0");                 //deactivate all branches
-  IOMk->SetBranch("runcoBranch",0,"r"); //activate runco Branch
+  IOMk->SetBranch("histBranch",0,"r"); //activate runco Branch
 
 // --- now execute chain member functions
   chain->Init();

@@ -1,5 +1,8 @@
-// $Id: bfcread_dstBranch.C,v 1.3 2000/03/13 17:50:17 kathy Exp $
+// $Id: bfcread_dstBranch.C,v 1.4 2000/03/20 17:50:40 kathy Exp $
 // $Log: bfcread_dstBranch.C,v $
+// Revision 1.4  2000/03/20 17:50:40  kathy
+// fix all macros so that they set all branches on that are needed - otherwise won't work with soft links
+//
 // Revision 1.3  2000/03/13 17:50:17  kathy
 // putting in example macro to show how to read and navigate through each type of bfc DST production output files - still working on tags.root
 //
@@ -26,7 +29,7 @@ StChain *chain;
 void bfcread_dstBranch(
  Int_t nevents=2, 
  const char *MainFile=
-"/star/rcf/test/new/tfs_redhat61/year_1h/hc_standard/hc_standard.40_evts.dst.root")
+ "/afs/rhic/star/data/samples/gstar.dst.root")
 {
 //
     gSystem->Load("St_base");

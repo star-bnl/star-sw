@@ -1,5 +1,8 @@
-// $Id: bfcread.C,v 1.21 2000/01/19 15:46:05 kathy Exp $
+// $Id: bfcread.C,v 1.22 2000/03/20 17:50:40 kathy Exp $
 // $Log: bfcread.C,v $
+// Revision 1.22  2000/03/20 17:50:40  kathy
+// fix all macros so that they set all branches on that are needed - otherwise won't work with soft links
+//
 // Revision 1.21  2000/01/19 15:46:05  kathy
 // change default input files to point to ones in /afs/rhic/star/data/samples
 //
@@ -66,10 +69,6 @@ St_DataSet *Event;
 StChain *chain;
 TBrowser *brow=0;
 
-// 9/13/99:
-// locations of some files:
-// "/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on/tfsr/set0043_04_56evts.geant.root")
-
 void bfcread(
  Int_t nevents=1, 
  const char *MainFile=
@@ -90,8 +89,6 @@ void bfcread(
   IOMk->SetDebug();
   IOMk->SetIOMode("r");
   IOMk->SetBranch("*",0,"0");                 //deactivate all branches
-//  IOMk->SetBranch("tpc_tracks",0,"r"); //activate tpc_tracks Branch
-//  IOMk->SetBranch("geantBranch",0,"r"); //activate geant Branch
   IOMk->SetBranch("dstBranch",0,"r"); //activate dst Branch
 
 

@@ -1,4 +1,4 @@
-// $Id: bfcread_geantBranch.C,v 1.1 2000/03/13 17:50:17 kathy Exp $
+// $Id: bfcread_geantBranch.C,v 1.2 2000/03/20 17:50:41 kathy Exp $
 // $Log $
 
 //======================================================================
@@ -16,7 +16,7 @@ StChain *chain;
 void bfcread_geantBranch(
  Int_t nevents=2, 
  const char *MainFile=
-"/star/rcf/test/new/tfs_redhat61/year_1h/hc_standard/hc_standard.40_evts.dst.root")
+ "/afs/rhic/star/data/samples/gstar.dst.root")
 {
 //
     gSystem->Load("St_base");
