@@ -1,5 +1,8 @@
-// $Id: StFtpcConfMapPoint.cc,v 1.4 2000/11/10 18:34:31 oldi Exp $
+// $Id: StFtpcConfMapPoint.cc,v 1.5 2001/04/19 11:29:39 oldi Exp $
 // $Log: StFtpcConfMapPoint.cc,v $
+// Revision 1.5  2001/04/19 11:29:39  oldi
+// Text of warning in SetAngles() changend.
+//
 // Revision 1.4  2000/11/10 18:34:31  oldi
 // New constructor added.
 //
@@ -247,7 +250,7 @@ void StFtpcConfMapPoint::SetAngles()
   if (r2dim == 0.) {
   // If r2dim == 0 the pseudorapidity eta cannot be calculated (division by zero)!
   // This can only happen if the point is lying on the z-axis and this should never be possible.
-    gMessMgr->Message("The pseudorapidity eta cannot be calculated (division by zero)! Set to 1.e-10.", "W", "OST");
+    gMessMgr->Message("The pseudorapidity cannot be calculated! (2-dim radius is zero and set to 1.e-10.)", "W", "OST");
     r2dim = 1.e-10;
   }
   
