@@ -13,11 +13,11 @@ class StiHitFactory;
 class StiHitFiller;
 class StiDisplayManager;
 class StiDetectorLayerContainer;
+class StiTrackContainer;
 
 class StiMaker : public StMaker {
  public:
     
-    StiMaker(const char* name = "StiMaker");
     virtual ~StiMaker();
 
     virtual void  Clear(const char* opt="");
@@ -26,11 +26,11 @@ class StiMaker : public StMaker {
     virtual Int_t Finish();
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.2 2001/05/02 19:04:38 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StiMaker.h,v 1.3 2001/05/17 14:22:05 mmiller Exp $ built "__DATE__" "__TIME__; return cvs;}	
 
 public:
 
-    //Static access
+    //Singleton access
     static StiMaker* instance();
     static void kill();
     
@@ -39,6 +39,9 @@ public:
     static bool hasMore();
     static void doNextAction();
     
+protected:
+    StiMaker(const char* name = "StiMaker");
+
 private:
 
     static StiMaker* sinstance; //!
@@ -50,6 +53,7 @@ private:
     StiHitFiller* mhitfiller; //!
     StiDisplayManager* mdisplay; //!
     StiDetectorLayerContainer* mdetector; //!
+    StiTrackContainer* mtrackstore; //!
     
 private:
     StEvent* mevent; //!
