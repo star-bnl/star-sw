@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstMaker.cxx,v 1.8 2001/03/26 12:34:36 lmartin Exp $
+ * $Id: StEstMaker.cxx,v 1.9 2001/04/20 07:52:46 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StEstMaker.cxx,v $
+ * Revision 1.9  2001/04/20 07:52:46  lmartin
+ * Looking for the geantBranch dataset when the geant dataset is absent in case
+ * of a chain done in two steps.
+ *
  * Revision 1.8  2001/03/26 12:34:36  lmartin
  * SVT hits, TPC hits and tracks tables and datasets checked to prevent the maker from crashing.
  *
@@ -461,8 +465,16 @@ Int_t StEstMaker::Make() {
   if (mIdealTracking==1) {
     Stevaltrk = (St_tte_eval *)tpc->Find("evaltrk");
     St_DataSet *geant  = GetInputDS("geant");
-    Stg2ttrack = (St_g2t_track *)geant->Find("g2t_track");
-    Stg2tvertex = (St_g2t_vertex *)geant->Find("g2t_vertex");
+    if (geant) {
+      Stg2ttrack = (St_g2t_track *)geant->Find("g2t_track");
+      Stg2tvertex = (St_g2t_vertex *)geant->Find("g2t_vertex");
+    }
+    else {
+      gMessMgr->Warning("The geant dataset does not exist, looking for the geantBranch DataSet...");
+      St_DataSet *geant2  = GetInputDS("geantBranch");
+      Stg2ttrack = (St_g2t_track *)geant2->Find("g2t_track");
+      Stg2tvertex = (St_g2t_vertex *)geant2->Find("g2t_vertex");
+    }
   }
   if ((!Stevaltrk||!Stg2ttrack||!Stg2tvertex)&&mIdealTracking==1) {
     gMessMgr->Warning("Evaluation table(s) not found ! IdealTracking reset to 0");
