@@ -1,5 +1,8 @@
-// $Id: St_glb_Maker.cxx,v 1.32 1999/02/19 15:29:25 caines Exp $
+// $Id: St_glb_Maker.cxx,v 1.33 1999/02/20 00:24:51 kathy Exp $
 // $Log: St_glb_Maker.cxx,v $
+// Revision 1.33  1999/02/20 00:24:51  kathy
+// fixed some of the histograms
+//
 // Revision 1.32  1999/02/19 15:29:25  caines
 // Corrected so egr now runs for year1
 //
@@ -324,22 +327,24 @@ Int_t St_glb_Maker::Init(){
   exipar++;
   
   // Create Histograms    
-  m_pT_eta_rec = new TH2F("pT_eta_rec","pT versus eta (reconstructed)",
+  m_pT_eta_rec = new TH2F("glb_primtrk_pT_eta_rec","glb/primtrk: pT versus eta (reconstructed)",
 			  nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
-  m_pT_eta_rec->SetXTitle("eta");
-  m_pT_eta_rec->SetYTitle("pT (GeV)");
+    m_pT_eta_rec->SetXTitle("eta");
+    m_pT_eta_rec->SetYTitle("pT (GeV)");
   m_pT_eta_gen = new TH2F("pT_eta_gen","pT versus eta (generated)",
 			  nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
-  m_pT_eta_gen->SetXTitle("eta");
-  m_pT_eta_gen->SetYTitle("pT (GeV)");
-  m_pT   = new TH1F("pT","pT distribution",nxpT,xminpT,xmaxpT);
-  m_eta  = new TH1F("eta","eta distribution",nyeta,ymineta,ymaxeta);
+    m_pT_eta_gen->SetXTitle("eta");
+    m_pT_eta_gen->SetYTitle("pT (GeV)");
+  m_pT   = new TH1F("glb_primtrk_pT","glb/primtrk: pT distribution",nxpT,xminpT,xmaxpT);
+  m_eta  = new TH1F("glb_primtrk_eta","glb/primtrk: eta distribution",nyeta,ymineta,ymaxeta);
+
   // Al Saulys histograms
-  m_tlength = new TH1F("tlenght","dst track length",100,0.,200.);
-  m_chi2xd  = new TH1F("chi2xd","x chisq/degf",100,0.,10.);
-  m_chi2yd  = new TH1F("chi2yd","y chisq/degf",100,0.,10.);
-  m_ev0_lama_hist  = new TH1F("ev0_lama_hist","Lambda mass",50,1.05,1.25);
-  m_ev0_k0ma_hist  = new TH1F("ev0_k0ma_hist","k0 mass",50,.4,.6);
+  m_tlength = new TH1F("glb_primtrk_tlength","glb/primtrk: track length",100,0.,200.);
+  m_chi2xd  = new TH1F("glb_primtrk_chi2xd","glb/primtrk: - x chisq/degf",100,0.,10.);
+  m_chi2yd  = new TH1F("glb_primtrk_chi2yd","glb/primtrk: - y chisq/degf",100,0.,10.);
+  m_ev0_lama_hist  = new TH1F("glb_ev0_lama","glb/dst_v0_vertex: Lambda mass",50,1.05,1.25);
+  m_ev0_k0ma_hist  = new TH1F("glb_ev0_k0ma","glb/dst_v0_vertex: k0 mass",50,.4,.6);
+
   // Spectra/pid histograms. C.Ogilvie
   Int_t np = 100;
   Int_t ndedx = 100;
@@ -347,10 +352,11 @@ Int_t St_glb_Maker::Init(){
   Float_t maxp = 2.0;
   Float_t mindedx = 0.0;
   Float_t maxdedx =  0.1e-04;
-  m_p_dedx_rec = new TH2F("p_dedx_rec","p versus dedx (reconstructed)",
+  m_p_dedx_rec = new TH2F("glb_p_dedx_rec","glb/primtrk-dst_dedx: p versus dedx (reconstructed)",
                            np,minp,maxp,ndedx,mindedx,maxdedx);
-  m_p_dedx_rec->SetYTitle("dedx");
-  m_p_dedx_rec->SetXTitle("p (GeV)");
+    m_p_dedx_rec->SetYTitle("dedx");
+    m_p_dedx_rec->SetXTitle("p (GeV)");
+
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -368,13 +374,14 @@ Int_t St_glb_Maker::Make(){
   St_dst_track      *primtrk     = (St_dst_track     *) dst("primtrk");
   St_dst_track_aux  *primtrk_aux = (St_dst_track_aux *) dst("primtrk_aux");
   St_dst_vertex     *vertex      = (St_dst_vertex    *) dst("vertex");
-  St_dst_v0_vertex  *dst_v0_vertex = (St_dst_v0_vertex    *) dst("dst_v0_vertex"); 
-   St_dst_xi_vertex  *dst_xi_vertex = (St_dst_xi_vertex    *) dst("dst_xi_vertex");
+  St_dst_v0_vertex  *dst_v0_vertex = (St_dst_v0_vertex *) dst("dst_v0_vertex"); 
+  St_dst_xi_vertex  *dst_xi_vertex = (St_dst_xi_vertex *) dst("dst_xi_vertex");
   St_dst_dedx       *dst_dedx    = (St_dst_dedx      *) dst("dst_dedx");
   St_dst_point      *point       = (St_dst_point     *) dst("point");
   St_dst_event_header  *event_header  = (St_dst_event_header  *) dst("event_header");
   St_dst_event_summary *event_summary = (St_dst_event_summary *) dst("event_summary");
   St_dst_monitor_soft  *monitor_soft  = (St_dst_monitor_soft  *) dst("monitor_soft");
+
   if (! event_header) {
     event_header  = new St_dst_event_header("event_header",1);
     dst.Add(event_header);
@@ -699,8 +706,10 @@ Int_t St_glb_Maker::Make(){
 
 //_____________________________________________________________________________
 void St_glb_Maker::Histograms(){
+   cout << " *** in St_glb_Maker - filling histograms " << endl;
   St_DataSetIter global(m_DataSet);         // data/global
   St_dst_track      *primtrk     = (St_dst_track     *) global("dst/primtrk");
+
   if (primtrk) {
     table_head_st *trk_h = primtrk->GetHeader();
     dst_track_st  *trk   = primtrk->GetTable();
@@ -821,7 +830,7 @@ void St_glb_Maker::Histograms(){
 //_____________________________________________________________________________
 void St_glb_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_glb_Maker.cxx,v 1.32 1999/02/19 15:29:25 caines Exp $\n");
+  printf("* $Id: St_glb_Maker.cxx,v 1.33 1999/02/20 00:24:51 kathy Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();

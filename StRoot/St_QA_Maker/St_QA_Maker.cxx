@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.1 1999/02/08 19:28:23 didenko Exp $
+// $Id: St_QA_Maker.cxx,v 1.2 1999/02/20 00:24:48 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.2  1999/02/20 00:24:48  kathy
+// fixed some of the histograms
+//
 // Revision 1.1  1999/02/08 19:28:23  didenko
 // fixed directory level
 //
@@ -28,7 +31,7 @@
 #include "St_particle_Table.h"
 #include "St_hepe_gent_Table.h"
 #include "St_dst_track_Table.h"
-#include "St_ev0_aux_Table.h"
+#include "St_dst_v0_vertex_Table.h"
 #include "St_dst_dedx_Table.h"
 #include "St_dst_event_summary_Table.h"
 
@@ -36,8 +39,8 @@
 #include "St_DataSetIter.h"
 
 
-   const Int_t St_QA_Maker::nxpT = 50;
-   const Int_t St_QA_Maker::nyeta = 50;
+   const Int_t   St_QA_Maker::nxpT = 50;
+   const Int_t   St_QA_Maker::nyeta = 50;
    const Float_t St_QA_Maker::xminpT = 0.0;
    const Float_t St_QA_Maker::xmaxpT = 5.0;
    const Float_t St_QA_Maker::ymineta = -2.0;
@@ -59,64 +62,67 @@ Int_t St_QA_Maker::Init(){
 // Create Histograms 
 
     const Int_t nchisq = 50;
-    const Int_t nmass = 40;
-    const Int_t ntau = 40;
-    const Int_t ndedx = 50;
-    const Int_t npnt = 50;
-    const Int_t nleng = 50;
-    const Int_t npsi = 36;
-    const Int_t ntrk = 100;
-    const Int_t nvrt = 100;
-    const Int_t nmnpt = 50;
+    const Int_t nmass  = 40;
+    const Int_t ntau   = 40;
+    const Int_t ndedx  = 50;
+    const Int_t npnt   = 50;
+    const Int_t nleng  = 50;
+    const Int_t npsi   = 36;
+    const Int_t ntrk   = 100;
+    const Int_t nvrt   = 100;
+    const Int_t nmnpt  = 50;
     const Int_t nmneta = 40;
-    const Int_t nxyz = 50;
+    const Int_t nxyz   = 50;
     
 
-    const Float_t minpsi = 0.0;
-    const Float_t maxpsi = 360.0;
-    const Float_t minchisq =  0.;
-    const Float_t maxchisq =  50.0;
-    const Float_t minmass =  0.0;
-    const Float_t maxmass =  2.0;
-    const Float_t mindedx =  0.0000001;
-    const Float_t maxdedx =  0.0001;
-    const Float_t minpnt = 0.0;
-    const Float_t maxpnt = 50.0;
-    const Float_t minleng = 0.0;
-    const Float_t maxleng = 150.0;
-    const Float_t mintau = 0.0;
-    const Float_t maxtau = 20.0;
-    const Float_t mintrk = 0.0;
-    const Float_t maxtrk = 10000.0;
-    const Float_t minvrt = 0.0;
-    const Float_t maxvrt = 100.0;
-    const Float_t minmpt = 0.0;
-    const Float_t maxmpt = 5.0;
-    const Float_t minmeta = -1.0;
-    const Float_t maxmeta = 1.0;
-    const Float_t minxyz = 0.0;
-    const Float_t maxxyz = 50.0;
-      
+    const Float_t minpsi   = 0.0;
+    const Float_t maxpsi   = 360.0;
+    const Float_t minchisq = 0.;
+    const Float_t maxchisq = 50.0;
+    const Float_t minmass  = 0.0;
+    const Float_t maxmass  = 2.0;
+    const Float_t mindedx  = 0.0000001;
+    const Float_t maxdedx  = 0.0001;
+    const Float_t minpnt   = 0.0;
+    const Float_t maxpnt   = 50.0;
+    const Float_t minleng  = 0.0;
+    const Float_t maxleng  = 150.0;
+    const Float_t mintau   = 0.0;
+    const Float_t maxtau   = 20.0;
+    const Float_t mintrk   = 0.0;
+    const Float_t maxtrk   = 10000.0;
+    const Float_t minvrt   = 0.0;
+    const Float_t maxvrt   = 100.0;
+    const Float_t minmpt   = 0.0;
+    const Float_t maxmpt   = 5.0;
+    const Float_t minmeta  = -1.0;
+    const Float_t maxmeta  = 1.0;
+    const Float_t minxyz   = 0.0;
+    const Float_t maxxyz   = 50.0;
+    
+
+ //book histograms --------------
+  
    m_pT_eta_rec = new TH2F("pT_eta_rec","pT versus eta (reconstructed)",
                            nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
-   m_pT_eta_rec->SetXTitle("eta");
-   m_pT_eta_rec->SetYTitle("pT (GeV)");
+     m_pT_eta_rec->SetXTitle("eta");
+     m_pT_eta_rec->SetYTitle("pT (GeV)");
    m_pT_eta_gen = new TH2F("pT_eta_gen","pT versus eta (generated)",
                            nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
-   m_pT_eta_gen->SetXTitle("eta");
-   m_pT_eta_gen->SetYTitle("pT (GeV)");
+     m_pT_eta_gen->SetXTitle("eta");
+     m_pT_eta_gen->SetYTitle("pT (GeV)");
    m_trk_tot_gd = new TH2F("glb_trk","number of good track versus total",
                              ntrk, mintrk, maxtrk, ntrk, mintrk, maxtrk);
-   m_trk_tot_gd->SetXTitle("total number of tracks");
-   m_trk_tot_gd->SetYTitle("number of good tracks");
-   m_trk_pls_mns = new TH2F("trk_pls_mns", "number of (+) tracks versusof (-)",  
+     m_trk_tot_gd->SetXTitle("total number of tracks");
+     m_trk_tot_gd->SetYTitle("number of good tracks");
+   m_trk_pls_mns = new TH2F("trk_pls_mns", "number of (+) vs (-) trks",  
                                   ntrk, mintrk, maxtrk, ntrk, mintrk, maxtrk);
-   m_trk_pls_mns->SetXTitle("number of (+) tracks");
-   m_trk_pls_mns->SetYTitle("number of (-) tracks");
+     m_trk_pls_mns->SetXTitle("number of (+) tracks");
+     m_trk_pls_mns->SetYTitle("number of (-) tracks");
       
-   m_pT   = new TH1F("pT_rec","pT distribution",nxpT,xminpT,xmaxpT);
-   m_eta  = new TH1F("eta_rec","eta distribution",nyeta,ymineta,ymaxeta);
-   m_psi  = new TH1F("phi_rec","azimutal distribution", npsi, minpsi,maxpsi);
+   m_pT    = new TH1F("pT_rec","pT distribution",nxpT,xminpT,xmaxpT);
+   m_eta   = new TH1F("eta_rec","eta distribution",nyeta,ymineta,ymaxeta);
+   m_psi   = new TH1F("phi_rec","azimutal distribution", npsi, minpsi,maxpsi);
    m_pTv   = new TH1F("pTV_rec","V0 pT distribution",nxpT,xminpT,xmaxpT);
    m_etav  = new TH1F("etaV_rec","V0 eta distribution",nyeta,ymineta,ymaxeta);
    m_pTK_gen   = new TH1F("pTK_gen","K0 pT distribution generated", 
@@ -134,22 +140,22 @@ Int_t St_QA_Maker::Init(){
    m_point = new TH1F("npoint","N points on track", npnt, minpnt, maxpnt);
    m_fit_point = new TH1F("n_fit_point","N fit points on track", npnt,
                                                           minpnt, maxpnt);
-   m_length = new TH1F("length","Length of track", nleng,minleng,maxleng);
-   m_chisq0 = new TH1F("chisq0_p","chisg[0]", nchisq, minchisq, maxchisq);
-   m_chisq1 = new TH1F("chisq1_p","chisq[1]", nchisq, minchisq, maxchisq);
+   m_length  = new TH1F("length","Length of track", nleng,minleng,maxleng);
+   m_chisq0  = new TH1F("chisq0_p","chisq[0]", nchisq, minchisq, maxchisq);
+   m_chisq1  = new TH1F("chisq1_p","chisq[1]", nchisq, minchisq, maxchisq);
    m_mass_la = new TH1F("mass_la","inv_mas_La", nmass, minmass, maxmass);
    m_mass_lb = new TH1F("mass_lb","inv_mas_Lb", nmass, minmass, maxmass);
    m_mass_k0 = new TH1F("mass_k0","inv_mas_k0", nmass, minmass, maxmass);
-   m_tau_la = new TH1F("tau_la","time of life for La candidate", ntau,
+   m_tau_la  = new TH1F("tau_la","time of life for La candidate", ntau,
                                                           mintau, maxtau);
-   m_tau_lb = new TH1F("tau_lb","time of life for Lb candidate", ntau,
+   m_tau_lb  = new TH1F("tau_lb","time of life for Lb candidate", ntau,
                                                           mintau, maxtau);
-   m_tau_k0 = new TH1F("tau_k0","time of life for_k0 candidate", ntau,
+   m_tau_k0  = new TH1F("tau_k0","time of life for_k0 candidate", ntau,
                                                           mintau, maxtau);   
-   m_ndedx  = new TH1F("ndedx", "number of point to define dE/dx", npnt,
+   m_ndedx   = new TH1F("ndedx", "number of point to define dE/dx", npnt,
                                                           minpnt, maxpnt);  
-   m_dedx0 = new TH1F("dedx0","dE/dx[0]", ndedx, mindedx, maxdedx);
-   m_dedx1 = new TH1F("dedx1","dE/dx[1]", ndedx, mindedx, maxdedx);
+   m_dedx0   = new TH1F("dedx0","dE/dx[0]", ndedx, mindedx, maxdedx);
+   m_dedx1   = new TH1F("dedx1","dE/dx[1]", ndedx, mindedx, maxdedx);
    m_glb_trk_plus = new TH1F("plus_trk", "number of positive tracks",
                                                      ntrk, mintrk, maxtrk);   
    m_glb_trk_minus = new TH1F("minus_trk", "number of negative tracks",
@@ -176,11 +182,12 @@ Int_t St_QA_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_QA_Maker::Make(){
   //  PrintInfo();
+
   // Fill histograms for global tracks
   St_DataSet *global = gStChain->DataSet("global");
   St_DataSetIter dst(global);         // data/global/dst
   dst.Cd("dst");
-  St_dst_track *globtrk = (St_dst_track *) dst("globtrk");
+  St_dst_track *globtrk = (St_dst_track *) dst["globtrk"];
   if (globtrk) {
     table_head_st *trk_h = globtrk->GetHeader();
     dst_track_st  *trk   = globtrk->GetTable();
@@ -216,11 +223,11 @@ Int_t St_QA_Maker::Make(){
 void St_QA_Maker::MakeEvSum(){
  //  PrintInfo();
  // Fill histograms for event summary
-  St_DataSet *global = gStChain->DataSet("run_summary");
+  St_DataSet *global = gStChain->DataSet("global");
   St_DataSetIter dst(global);         // data/global/dst
   dst.Cd("dst");
    
-  St_dst_event_summary *event_summary = (St_dst_event_summary *) dst("event_summary");
+  St_dst_event_summary *event_summary = (St_dst_event_summary *) dst["event_summary"];
   if (event_summary) {
       dst_event_summary_st  *it_m = event_summary->GetTable();
       for (Int_t j = 0; j < event_summary->GetNRows(); j++) {
@@ -255,24 +262,24 @@ void St_QA_Maker::MakeV0(){
   St_DataSetIter dst(global);         // data/global/dst
   dst.Cd("dst");
 
-   St_ev0_aux *ev0out = (St_ev0_aux *) dst("ev0out");
+  St_dst_v0_vertex *ev0out = (St_dst_v0_vertex *) dst["dst_v0_vertex"];
    if(ev0out) {
-       ev0_aux_st *evopat = ev0out->GetTable();
+       dst_v0_vertex_st *evopat = ev0out->GetTable();
        for (Int_t i = 0; i < ev0out->GetNRows(); i++){
-       ev0_aux_st *ev = evopat + i;
-       Float_t pvx = ev->px;
-       Float_t pvy = ev->py;
-       Float_t thetav = ev->theta;
-       Float_t pTv = sqrt(pvx*pvx + pvy*pvy);
-       Float_t etav = -log(tan(thetav/2.));
-       m_pTv->Fill(pTv);
-       m_etav->Fill(etav);
-       m_mass_la->Fill(ev->inv_mass_la) ;
-       m_mass_lb->Fill(ev->inv_mass_lb) ;
-       m_mass_k0->Fill(ev->inv_mass_k0) ;
-       m_tau_la->Fill(ev->tau_la);
-       m_tau_lb->Fill(ev->tau_lb);
-       m_tau_k0->Fill(ev->tau_k0); 
+       dst_v0_vertex_st *ev = evopat + i;
+       //Float_t pvx = ev->px;
+       //Float_t pvy = ev->py;
+       //Float_t thetav = ev->theta;
+       //Float_t pTv = sqrt(pvx*pvx + pvy*pvy);
+       //Float_t etav = -log(tan(thetav/2.));
+       //     m_pTv->Fill(pTv);
+       //m_etav->Fill(etav);
+       //m_mass_la->Fill(ev->inv_mass_la) ;
+       //m_mass_lb->Fill(ev->inv_mass_lb) ;
+       //m_mass_k0->Fill(ev->inv_mass_k0) ;
+       //m_tau_la->Fill(ev->tau_la);
+       //m_tau_lb->Fill(ev->tau_lb);
+       //m_tau_k0->Fill(ev->tau_k0); 
      }       
   }
 }
@@ -284,7 +291,7 @@ void St_QA_Maker::MakeV0(){
   St_DataSetIter dst(global);         // data/global/dst
   dst.Cd("dst");
   
-   St_dst_dedx *dst_dedx = (St_dst_dedx *) dst("dst_dedx");
+   St_dst_dedx *dst_dedx = (St_dst_dedx *) dst["dst_dedx"];
    if(dst_dedx) {
       dst_dedx_st *dedx = dst_dedx->GetTable();
       for (Int_t i = 0; i < dst_dedx->GetNRows(); i++) {
@@ -304,7 +311,7 @@ void St_QA_Maker::MakeGen() {
   St_DataSetIter dst(global);         // data/global/dst
   dst.Cd("dst");
 
-   St_hepe_gent *hepev = (St_hepe_gent *) dst("hepe_gent");
+   St_hepe_gent *hepev = (St_hepe_gent *) dst["hepe_gent"];
     if (hepev) {
       table_head_st *t1_h = hepev->GetHeader();
       hepe_gent_st *particle = hepev->GetTable();
@@ -341,10 +348,11 @@ void St_QA_Maker::MakeGen() {
       }
   }
    else {
-     St_DataSet *evgen = gStChain->DataSet("evgen");
+     St_DataSet *evgen = gStChain->DataSet("geant");
       if (evgen) {
       St_DataSetIter local(evgen);
-      St_particle *pa = (St_particle *) local("particle");
+      local.Cd("Event");
+      St_particle *pa = (St_particle *) local["particle"];
       if (pa){
         particle_st *particle = pa->GetTable();
         for (Int_t l=0; l < pa->GetNRows(); l++){
@@ -367,7 +375,7 @@ void St_QA_Maker::MakeGen() {
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.1 1999/02/08 19:28:23 didenko Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.2 1999/02/20 00:24:48 kathy Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
