@@ -1,5 +1,8 @@
-// $Id: Example_plotTable.C,v 1.9 2000/04/18 20:37:24 kathy Exp $
+// $Id: Example_plotTable.C,v 1.10 2000/05/09 20:15:42 kathy Exp $
 // $Log: Example_plotTable.C,v $
+// Revision 1.10  2000/05/09 20:15:42  kathy
+// transfer obsolete macros to /macros/obsolete;  update other macros so that they use standard default inputs plus only few events by default so they'll be easy to run in autoQA macro testing
+//
 // Revision 1.9  2000/04/18 20:37:24  kathy
 // St_DataSet,St_DataSetIter,St_Table classes are nowchanged to TDataSet,TDataSetIter,TTable
 //
@@ -36,7 +39,7 @@ gSystem->Load("xdf2root");
 gSystem->Load("StUtilities");
 gSystem->Load("StAnalysisUtilities");
 St_TableNtuple myNtuple((TTable&) St_dst_v0_vertex());
-myNtuple.AddXDFFile("/star/rcf/test/dev/tfs_Linux/Mon/year_1b/hc_lowdensity/gstar.dst.xdf",
+myNtuple.AddXDFFile("/afs/rhic/star/data/samples/gstar.dst.root",
 "dst","dst_v0_vertex");
 myNtuple.Draw("pos_py:pos_px");
 }

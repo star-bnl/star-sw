@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_geant_Branch.C,v 1.4 2000/05/03 18:25:46 kathy Exp $
+// $Id: bfcread_dst_geant_Branch.C,v 1.5 2000/05/09 20:15:44 kathy Exp $
 // $Log: bfcread_dst_geant_Branch.C,v $
+// Revision 1.5  2000/05/09 20:15:44  kathy
+// transfer obsolete macros to /macros/obsolete;  update other macros so that they use standard default inputs plus only few events by default so they'll be easy to run in autoQA macro testing
+//
 // Revision 1.4  2000/05/03 18:25:46  kathy
 // update to make consistent with other macros of same type
 //
@@ -26,7 +29,7 @@ class StChain;
 StChain *chain;
 
 void bfcread_dst_geant_Branch(
- Int_t nevents=50, 
+ Int_t nevents=2, 
  const char *MainFile=
  "/afs/rhic/star/data/samples/gstar.dst.root",
  const char *fname="qa_dst_geant.out")
