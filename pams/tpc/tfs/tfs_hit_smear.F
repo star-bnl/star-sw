@@ -1,5 +1,8 @@
-* $Id: tfs_hit_smear.F,v 1.3 1999/11/10 15:43:00 nevski Exp $
+* $Id: tfs_hit_smear.F,v 1.4 2000/02/22 20:06:27 hardtke Exp $
 * $Log: tfs_hit_smear.F,v $
+* Revision 1.4  2000/02/22 20:06:27  hardtke
+* replace tgc functions with tpc functions
+*
 * Revision 1.3  1999/11/10 15:43:00  nevski
 * more efficient use of rannor
 *
@@ -52,6 +55,7 @@ C                            in hit smearing.
 C     Jun 18, 1997           Modified by Dhammika W. to fix a bug in 
 C                            z-coordinate  smearing.
 C     Mar 2, 1998    DH      Remove list of unused constants
+C     Feb 17, 2000   DH      replace tgc functions with tpc functions
 C
 C-----------------------------------------------------------------------
 
@@ -68,7 +72,7 @@ C-----------------------------------------------------------------------
       REAL      PHI
       real      xlocal(3),xglobal(3)
       integer   iret
-      integer   tgc_local_to_global, tgc_global_to_local
+      integer   tpc_local_to_global, tpc_global_to_local
       REAL      SMEARA,SMEARB           !Random no. gaussian distrib. unit sigma
 
 C=========================== Begin Executable Code =======================
@@ -80,9 +84,9 @@ c PN: Rannor produces TWO independent random numbers at a single call:
         xglobal(1)=xi
         xglobal(2)=yi
         xglobal(3)=zi
-        iret=tgc_global_to_local(sect,xglobal,xlocal)
+        iret=tpc_global_to_local(sect,xglobal,xlocal)
         xlocal(1)=xlocal(1)+err_pad
-        iret=tgc_local_to_global(sect,xlocal,xglobal)
+        iret=tpc_local_to_global(sect,xlocal,xglobal)
         xo=xglobal(1)
         yo=xglobal(2)
         zo=zi+err_drft
@@ -98,7 +102,7 @@ C     --- DSW Jun 18, 1997  ---
         xlocal(1)=st_dev_xy
         xlocal(2)=0
         xlocal(3)=0
-        iret=tgc_local_to_global(sect,xlocal,xglobal)
+        iret=tpc_local_to_global(sect,xlocal,xglobal)
         ST_DEV_X = abs(xglobal(1))
         ST_DEV_Y = abs(xglobal(2))
 	RETURN

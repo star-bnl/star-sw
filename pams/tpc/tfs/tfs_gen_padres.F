@@ -1,5 +1,8 @@
-* $Id: tfs_gen_padres.F,v 1.13 1999/11/23 00:39:52 sakrejda Exp $
+* $Id: tfs_gen_padres.F,v 1.14 2000/02/22 20:06:26 hardtke Exp $
 * $Log: tfs_gen_padres.F,v $
+* Revision 1.14  2000/02/22 20:06:26  hardtke
+* replace tgc functions with tpc functions
+*
 * Revision 1.13  1999/11/23 00:39:52  sakrejda
 * Flag for hits from kEv tracks set to 3 (haven't seen any)
 *
@@ -143,13 +146,13 @@ C
       real AA, BB, CC
       real xlocal(3),Bfield(3)
       real xlength, dummy
-      integer tgc_drift_volume_length
+      integer tpc_drift_volume_length
       DATA xlocal /3*0/
       Real atand
 
 C=========================== Begin Executable Code =======================
 c     get the TPC length
-      iret = tgc_drift_volume_length(xlength, dummy, dummy)
+      iret = tpc_drift_volume_length(xlength)
 C     loop over sector-rows
 
       do i = 1, par(1).nsect

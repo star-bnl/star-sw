@@ -18,7 +18,7 @@
       integer ret
       integer longrow
 
-      integer tgc_global_to_local,tgc_x_to_pad,tgc_z_to_time
+      integer tpc_global_to_local,tpc_x_to_pad,tpc_z_to_time
       real xglobal(3),xlocal(3)
       real sigma_x,sigma_z
 
@@ -36,12 +36,12 @@ c calculate the pads used by this hit
           longrow=tphit(ihit).row
           irow=mod(longrow,100)
 
-          ret=tgc_global_to_local(jsect,xglobal,xlocal)
+          ret=tpc_global_to_local(jsect,xglobal,xlocal)
 
 c          if(jsect.ne.isect) 
 c     >   print *,'wrong sector number,isect=',isect,'jsect=',jsect
           row=irow
-          ret=tgc_x_to_pad(row,xlocal(1),pad,pad_plane_h,pad_plane)
+          ret=tpc_x_to_pad(row,xlocal(1),pad)
           
 c the following conventions:
 c http://www.star.bnl.gov/STAR/html/starsas_mail_l/0010.html
@@ -57,10 +57,8 @@ c     >  ',old flag=',tphit(ihit).flag
  
           sigma_x=tphit(ihit).prf
 
-          ret=tgc_x_to_pad(row,xlocal(1)+sigma_x*1.5,pad_min,
-     *        pad_plane_h,pad_plane)
-          ret=tgc_x_to_pad(row,xlocal(1)-sigma_x*1.5,pad_max,
-     *        pad_plane_h,pad_plane)
+          ret=tpc_x_to_pad(row,xlocal(1)+sigma_x*1.5,pad_min)
+          ret=tpc_x_to_pad(row,xlocal(1)-sigma_x*1.5,pad_max)
 
           min_pad=int(pad_min+0.5)
           max_pad=int(pad_max+0.5)
@@ -90,12 +88,12 @@ c     >   ',ihit=',ihit,',old flag=',tphit(ihit).flag
 
 c calculate the tmbks used by this hit
 
-          ret=tgc_z_to_time(xlocal(3),ipad,irow,isect,itmbk)
+          ret=tpc_z_to_time(xlocal(3),ipad,irow,isect,itmbk)
 
           sigma_z=tphit(ihit).zrf
-          ret=tgc_z_to_time(xlocal(3)-1.5*sigma_z,ipad,
+          ret=tpc_z_to_time(xlocal(3)-1.5*sigma_z,ipad,
      *        irow,isect,min_tmbk)
-          ret=tgc_z_to_time(xlocal(3)+1.5*sigma_z,ipad,
+          ret=tpc_z_to_time(xlocal(3)+1.5*sigma_z,ipad,
      *        irow,isect,max_tmbk)
 
           ntmbk=max_tmbk-min_tmbk+1
