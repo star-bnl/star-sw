@@ -1,7 +1,7 @@
 #ifndef STARVOLUME_H
 #define STARVOLUME_H
 
-/* $Id: StarVolume.h,v 1.2 2004/09/02 23:27:15 potekhin Exp $ */
+/* $Id: StarVolume.h,v 1.3 2004/09/03 00:03:33 potekhin Exp $ */
 
 ////////////////////////////////////////////////////////
 //                                                    //
@@ -48,7 +48,7 @@ class StarVolume: public TNamed {
   static Int_t  _nVolumes;
   static TList  _volumes;
 
-  THashTable    _lkp;
+  THashTable*   _lkp;
 
   ClassDef(StarVolume,0)
     };
