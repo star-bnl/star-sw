@@ -9,8 +9,9 @@
 
 
 // steering - watch it!
-//#define FCF_DEBUG_OUTPUT
-//#define FCF_ANNOTATE_CLUSTERS
+#define FCF_ANNOTATE_CLUSTERS
+
+
 
 // flag definitions - NEVER CHANGE
 #define FCF_ONEPAD		1
@@ -79,12 +80,24 @@ struct FcfSimOutput {   // this is just the payload definition.
 
 
 #ifdef FCF_ANNOTATE_CLUSTERS
-extern struct fcfPixAnnotate fcfPixA[24][45][182][512] ;	// a biiiig one!
+#ifndef FCF_SIM_ON
+#define FCF_SIM_ON
 #endif
 
-#ifdef FCF_DEBUG_OUTPUT
-//extern FILE *fcf_annotate_f ;
+#ifndef __ROOT__
+
+extern struct fcfPixAnnotate fcfPixA[45][182][512] ;	// a biiiig one!
+
+#else
+
+#include "tables/St_fcfPixel_Table.h"
+extern TDataSet *fcfPixATop;
+extern St_fcfPixel *fcfPixA;
+
 #endif
+
+#endif
+
 
 class fcfClass {
 public:

@@ -1,4 +1,13 @@
 /*
+	This code is property of Brookhaven National Laboratory, USA.	
+	Authored by Tonko Ljubicic.
+
+	No modifications are to be made without the express consent of
+	the author.
+
+
+	
+	Version 5.21	General Cleanup
 	Version 5.20	Added ADC cluster back-annotation if defined
 	Version 5.12	Added track ID
 	Version 5.11	Production for FY04
@@ -25,7 +34,7 @@
 #include <stdarg.h>
 
 
-#define FCF_VERSION	"5.20"	
+#define FCF_VERSION	"5.21"	
 
 
 #include <rts.h>
@@ -33,14 +42,14 @@
 #include <fcfClass.hh>
 
 
-// need to define "ROOT" for use in offline
-#ifdef __ROOT__
+
+#ifdef __ROOT__	// STAR Offline
 
 #include "StDaqLib/TPC/trans_table.hh"
-#define FCF_10BIT_ADC	// ADC data is already in 10 bits!
-//#define FCF_DONT_USE_LOG
 
+#define FCF_10BIT_ADC	// ADC data is already in 10 bits!
 #define LOG(x1,x2,x3,x4,x5,x6,x7) 
+
 	
 #endif
 
@@ -69,12 +78,11 @@ struct fcfResx {	// 5 words or 7 if EXTENTS are defined...
 
 	u_short	 t1, t2, p1, p2 ;	// extents
 
-#ifdef FCF_SIM_ON
+#if defined(FCF_SIM_ON) || defined(FCF_ANNOTATE_CLUSTERS)
 	// new - test only...
 	u_int pix ;		// pixel count
 	u_int adc_max ;		// maximum adc
 
-	short quality ;		// sim. quality
 	short id ;		// sim. id
 	u_short cl_id ;		// global cluster id!
 #endif
@@ -106,35 +114,26 @@ struct fcfResx {	// 5 words or 7 if EXTENTS are defined...
 // simulation global
 #ifdef FCF_SIM_ON
 static u_int *simout ;
-
 static struct fcfPixAnnotate pixStruct[183][512] ;
-
 #endif
 
 
-#ifdef FCF_DEBUG_OUTPUT
-//FILE *fcf_annotate_f ; // used for the annotation dump - GLOBAL
-#endif
-
-#ifdef FCF_ANNOTATE_CLUSTERS 
+#ifdef FCF_ANNOTATE_CLUSTERS
 // annotation data - GLOBAL!
-struct fcfPixAnnotate fcfPixA[24][45][182][512] ;
+
+#ifndef __ROOT__
+struct fcfPixAnnotate fcfPixA[45][182][512] ;
+#else
+St_fcfPixel *fcfPixA = 0;
+TDataSet    *fcfPixATop = 0;
 #endif
 
-extern __inline volatile void mstore(struct fcfResx *rr, int av, int ch, u_int mean, u_int flags)
-{
+#endif
 
-	rr->t = av ;
-	rr->charge = rr->scharge = ch ;
-
-	rr->flags = flags ;
-	rr->mean = mean ;
-
-	return ;
-}
 
 
 #else	// I960
+
 
 #include "mzGlobal.h"
 #include "mzInlines.h"
@@ -149,6 +148,11 @@ extern __inline volatile void mstore(struct fcfResx *rr, int av, int ch, u_int m
 #define FCF_960_R11	asm ("r11") 
 #define FCF_960_R13	asm ("r13") 
 
+
+
+#endif	// UNIX
+
+
 extern __inline volatile void mstore(struct fcfResx *rr, int av, int ch, u_int mean, u_int flags)
 {
 
@@ -160,26 +164,6 @@ extern __inline volatile void mstore(struct fcfResx *rr, int av, int ch, u_int m
 
 	return ;
 }
-
-#ifdef TONKO_OPTIMIZATION
-extern __inline volatile void mstore(struct fcfResx *r, int av, int ch, u_int mean, u_int flags)
-{
-	__asm__ volatile (" \
-	\n \
-	shlo 16, r11, r11 \n \
-	lda (r9), r10 \n \
-	or r11, %5, r11 \n \
-	stq r8, (%0) \n \
-	" \
-	: "r=" (r) : "0" (r), "r" (av), "r" (ch), "r" (mean), "r" (flags) : "r10") ;
-
-	return ;
-}
-#endif
-
-#endif	// UNIX
-
-
 
 	
 	
@@ -211,7 +195,6 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 	*cl_found_pointer = 0 ;
 	*row_pointer = row ;
 
-	simout = NULL ;
 
 #ifdef FCF_SIM_ON
 	u_int *sim_found_ptr, *sim_row_ptr ;
@@ -233,7 +216,9 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 
 	u_short cl_id = 1 ;	// start global cluster id with 1
 	memset(pixStruct,0,sizeof(pixStruct)) ;
+
 #endif
+
 
 	new_res_ix = 0 ;
 	new_res_cou = old_res_cou = 0 ;
@@ -243,8 +228,6 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 	next_pad = 0 ;
 
 //	memset(delta,0,sizeof(delta)) ;
-
-
 
 
 
@@ -398,18 +381,6 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 		new_res_cou = 0 ;		// start from scratch for the expected guys
 
 
-#ifdef OLD_CODE
-		// assign flags
-		start_flags = 0 ;
-	
-		if((pad == 1) || (pad == padMax)) start_flags = FCF_ROW_EDGE ;
-		else if((pad == padStart) || (pad == padStop)) start_flags = FCF_BROKEN_EDGE ;
-		// super special cases - 2 rows like this
-		if(padStart == padStop) start_flags = FCF_ROW_EDGE | FCF_BROKEN_EDGE ;
-#endif
-
-
-
 //		delta[0] = mzFastTimerDelta(mark) ;
 
 
@@ -463,8 +434,6 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 				sim_p = 0 ;
 				sim_id = 0 ;
 			}
-
-			short sim_quality = 100 ;	// assume 100%
 #endif
 
 			register int flags = FCF_ONEPAD | start_flags ; 
@@ -541,18 +510,6 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 					last_a = adc ;
 
 
-
-#ifdef FCF_SIM_ON
-					if(max_sim != sim_id) {
-						sim_quality = 2 ;
-					}
-
-					pixStruct[pad][start].adc = a ;
-					pixStruct[pad][start].cl_id = cl_id ;
-					pixStruct[pad][start].id_simtrk = sim_id ;
-#endif
-
-
 					av += start * a ;
 
 					charge += a ;
@@ -561,6 +518,10 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 
 					adc = *adc_p++ ;	// advance here!
 #ifdef FCF_SIM_ON
+					pixStruct[pad][start].adc = a ;
+					pixStruct[pad][start].cl_id = cl_id ;
+					pixStruct[pad][start].id_simtrk = sim_id ;
+
 					if(simout) {
 						sim_id = *sim_p++ ;
 					}
@@ -613,10 +574,7 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 				rn->pix = start-stop ;
 				rn->adc_max = max_a ;
 				rn->id = max_sim ;
-				rn->quality = sim_quality ;
 				rn->cl_id = cl_id++ ;		// global cluster id...
-
-
 #endif				
 
 				//if(((u_int)adc_p & 0xF)==0) preburst4(adc_p) ;
@@ -760,12 +718,6 @@ int fcfClass::finder(u_char *adcin, u_short *cppin, u_int *outres)
 #ifdef FCF_SIM_ON
 					nresx->pix += rr->pix ;
 
-					if(nresx->id != rr->id) {
-						nresx->quality = 1 ;	// differ, thus dirty
-					}
-					else if((nresx->quality != 100) || (rr->quality != 100)) {
-						nresx->quality = 50 ;
-					}
 
 					if(rr->adc_max > nresx->adc_max) {
 						nresx->adc_max = rr->adc_max ;
@@ -1145,6 +1097,7 @@ inline int fcfClass::saveRes(struct fcfResx *res_p[], int cou, u_int *output)
 		*output++ = (cha << 16) | fl ;
 
 #ifdef FCF_SIM_ON
+
 		{
 		int i, j ;
 
@@ -1184,39 +1137,51 @@ inline int fcfClass::saveRes(struct fcfResx *res_p[], int cou, u_int *output)
 
 			simout += sizeof(struct FcfSimOutput)/4 ;	// advance here
 		
-
-
 		}
 
-		fla &= (~FCF_FALLING) ;
-
+#ifdef FCF_ANNOTATE_CLUSTERS
+#ifdef __ROOT_
+		fcfPixA = 0;
+                if (fcfPixATop) {
+                  fcfPixA = (St_fcfPixel *) fcfPixATop->Find(Form("fcfPixA%i_%i",sb,row));
+                  if (! fcfPixA) {
+                    fcfPixA = new St_fcfPixel(Form("fcfPixA%i_%i",sb,row),1000);
+                    fcfPixATop->Add(fcfPixA);
+		  }
+		}
+#endif
 		for(i=1;i<=182;i++) {
 			for(j=0;j<512;j++) {
-#ifdef FCF_ANNOTATE_CLUSTERS
 				if(pixStruct[i][j].adc) {
-					fcfPixA[sb-1][row-1][i-1][j] = pixStruct[i][j] ;
-				}
-#endif
+#ifndef __ROOT__
+					fcfPixA[row-1][i-1][j] = pixStruct[i][j] ;
+#else
+					if(fcfPixA) {
+					fcfPixel_st pix;
 
-#ifdef FCF_DEBUG_OUTPUT2
-				// dump only clean clusters!
-				if((fla==0) && (pixStruct[i][j].cl_id == rr->cl_id)) {
-					fprintf(fcf_annotate_f,"%d %d %d %d %d %d %d %d\n",sb,this->row,rr->cl_id,quality,i,j,
-						pixStruct[i][j].adc,pixStruct[i][j].id_simtrk) ;
-				}
+					pix.pad = i;
+					pix.tbin = j;
+					pix.adc  = pixStruct[i][j].adc;
+					pix.cl_id = pixStruct[i][j].cl_id;
+					pix.id_simtrk = pixStruct[i][j].id_simtrk;
+					fcfPixA->AddAt(&pix);
+
+					}
+
 #endif
+				}
 			}
 		}
-#ifdef FCF_DEBUG_OUTPUT2
-		// mark the end of cluster...
-		if(fla==0) fprintf(fcf_annotate_f,"-1 -1 -1 -1 -1 -1 -1 -1\n") ;
-#endif
 
+#endif
 
 
 		}
 
 #endif	// FCF_SIM_ON!
+
+
+
 
 		//LOG(WARN,"time 0x%02X, pad 0x%02X, cha 0x%02X, fla 0x%02X",
 		//   time_c, pad_c, cha, fl,0) ;
