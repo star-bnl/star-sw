@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackMaker.h,v 1.1 2000/05/10 13:39:30 oldi Exp $
+// $Id: StFtpcTrackMaker.h,v 1.2 2000/07/03 12:45:23 jcs Exp $
 // $Log: StFtpcTrackMaker.h,v $
+// Revision 1.2  2000/07/03 12:45:23  jcs
+// get (pre)Vertex coordinates directly from (pre)Vertex table instead of from
+// fptpars
+//
 // Revision 1.1  2000/05/10 13:39:30  oldi
 // Initial version of StFtpcTrackMaker
 //
@@ -18,14 +22,13 @@
 class TH1F;
 class TH2F;
 class TProfile;
-class St_fpt_fptpar;
 class St_fde_fdepar;
  
 class StFtpcTrackMaker : public StMaker {
 
  private:
   virtual const char *GetCVS()
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.1 2000/05/10 13:39:30 oldi Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.2 2000/07/03 12:45:23 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   protected:
        TH1F          *m_q;          //! charge
@@ -35,7 +38,6 @@ class StFtpcTrackMaker : public StMaker {
        TH1F          *m_track;      //! # tracks found   
        TH2F          *m_nrec_track; //! # points found per track vs. # tracks found
 
-   St_fpt_fptpar   *m_fptpar;   //!
    St_fde_fdepar   *m_fdepar;   //!
 
  public: 
