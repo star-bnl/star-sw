@@ -526,14 +526,22 @@ void StiGeometryTransform::operator() (const StiKalmanTrackNode *pTrackNode,
   }
 */
 
+double StiGeometryTransform::positionForTpcPadrow(int padrow) const{
+
+  padrow_radius_map::const_iterator where = mpadrowradiusmap.find(padrow+100);
+  if (where==mpadrowradiusmap.end()) {
+    cout <<"StiGeometryTransform::angleAndPosition(). " <<
+        "ERROR:\tpadrow not found"<<endl;
+  }
+
+  return (*where).second;
+
+} // positionForTpcPadrow
+
 pair<double, double> StiGeometryTransform::angleAndPosition(const StTpcHit *pHit) const
 {
-  double dRefAngle = phiForSector( pHit->sector(), 12 );
-  padrow_radius_map::const_iterator where = mpadrowradiusmap.find(pHit->padrow()+100);
-  if (where==mpadrowradiusmap.end()) {
-      cout <<"StiGeometryTransform::angleAndPosition(). ERROR:\tpadrow not found"<<endl;
-  }
-  double dPosition = (*where).second;
+  double dRefAngle = phiForTpcSector( pHit->sector() );
+  double dPosition = positionForTpcPadrow( pHit->padrow() );
 
   return pair<double, double>(dRefAngle, dPosition);
 } // angleAndPosition
