@@ -43,7 +43,7 @@ Just to remind (initial version only),
 New Modifications (08/24/2000) by A. A. P. Suaide
 -----------------
      
-     This Maker is now modificated to take the emc hits from StEvent object
+     This Maker is now modified to take the emc hits from StEvent object
    and should run after St_emc_Maker and StEventMaker. If there is no emc
    hits in StEvent this maker creates a new StEmcCollection and fill it with
    emc hits taken from St_emc_Maker. The clusters are stored in the StEvent
