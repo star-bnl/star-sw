@@ -1,5 +1,5 @@
 #!/usr/bin/env perl
-# $Id: Construct,v 1.142 2004/01/15 21:19:59 jeromel Exp $
+# $Id: Construct,v 1.143 2004/01/15 23:29:56 jeromel Exp $
 use Env;
 use lib $ENV{ConstructLocation};           # Modify perl include path
 use ConsDefs;
@@ -263,8 +263,8 @@ foreach my $dir( "pams", "StRoot" ,"StPiD") {
 		    #print "=== Skipping $subsub_dir in $subsub_DIR\n";
                     next;
 		}
-		if (   $sub_dir =~ /Pool$/                                       && 
-		     ( ! $param::include or  $subsub_dir !~ /$param::include/o )    ) {
+		#if (   $sub_dir =~ /Pool$/                                       && 
+		#     ( ! $param::include or  $subsub_dir !~ /$param::include/o )    ) {
 		    #if (! $param::include ) {
 		    #	print  "skip ";
 		    #	printf("%40s","$sub_dir/$subsub_dir");
@@ -272,7 +272,7 @@ foreach my $dir( "pams", "StRoot" ,"StPiD") {
 		    #	print  " in cons command line\n";
 		    #}
 		    #next;
-                }
+                #}
 
                 if ( ( $sub_dir =~ /^sim$/    || 
 		       $sub_dir =~ /^gen$/    ||
@@ -315,13 +315,6 @@ if ( $STAR_HOST_SYS !~ /^alpha_dux/) {
     push @sysdirlist, "asps/Jprof";
 }
 
-
-
-
-# Platform dependent targets
-if ( $STAR_HOST_SYS !~ /^alpha_dux/) {
-    push @sysdirlist, "asps/Jprof";
-}
 
 
 foreach $dir(@sysdirlist , @subdirs ) {
