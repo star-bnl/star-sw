@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.52 2001/05/22 20:10:55 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.53 2001/08/02 17:41:49 snelling Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -116,10 +116,10 @@ Int_t StFlowAnalysisMaker::Init() {
   if (strlen(pFlowSelect->PidPart()) != 0) { xLabel = "Rapidity"; }
 
   // Commit with these values.
+  const float triggerMin      =    0.;
+  const float triggerMax      =   10.;
   const float etaMin          =  -4.5;
   const float etaMax          =   4.5;
-  //const float etaMin          =  -1.5;
-  //const float etaMax          =   1.5;
   const float ptMin           =    0.;
   const float ptMax           =    2.;
   const float chargeMin       =  -2.5;
@@ -174,6 +174,7 @@ Int_t StFlowAnalysisMaker::Init() {
 
 
   enum { // commit with this value
+	 nTriggerBins      = 11,
 	 nEtaBins          = 90,
          //nEtaBins          = 30,
 	 nPtBins           = 40,
@@ -202,6 +203,12 @@ Int_t StFlowAnalysisMaker::Init() {
 	 nMomenBins       = 200
   };
   
+  // Trigger
+  mHistTrigger = new TH1F("Flow_Charge", "Flow_Charge",
+      nTriggerBins, triggerMin, triggerMax);
+  mHistTrigger->SetXTitle("Trigger: 1 minbias, 2 central, 3 laser, 10 other");
+  mHistTrigger->SetYTitle("Counts");
+
   // Charge
   mHistCharge = new TH1F("Flow_Charge", "Flow_Charge",
       nChargeBins, chargeMin, chargeMax);
@@ -940,7 +947,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.52 2001/05/22 20:10:55 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.53 2001/08/02 17:41:49 snelling Exp $");
 
   return StMaker::Init();
 }
@@ -1012,6 +1019,16 @@ void StFlowAnalysisMaker::FillFromFlowEvent() {
 
 void StFlowAnalysisMaker::FillEventHistograms() {
   // Fill histograms with event quantities
+
+  unsigned int triggerWord = pFlowEvent->L0TriggerWord();
+  float trigger;
+  switch (triggerWord) {
+  case 4096: trigger = 1.; break; // minbias
+  case 4352: trigger = 2.; break; // central
+  case 61952: trigger = 3.; break; // laser
+  default: trigger = 10.; break; // no clue
+  }
+  mHistTrigger->Fill(trigger);
 
   // no selections: OrigMult, Centrality, Mult, MultOverOrig, VertexZ, VertexXY
   int origMult  = pFlowEvent->OrigMult();
@@ -1636,6 +1653,9 @@ Int_t StFlowAnalysisMaker::Finish() {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.53  2001/08/02 17:41:49  snelling
+// Added trigger histogram
+//
 // Revision 1.52  2001/05/22 20:10:55  posk
 // Changed dEdx graphs.
 //
