@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichGasGain.cxx,v 2.2 2002/04/12 19:49:13 lasiuk Exp $
+ * $Id: StRichGasGain.cxx,v 2.3 2003/06/13 22:30:41 hippolyt Exp $
  *
  * Description:
  *  StRichGasGain computes an amplification factor of an
@@ -35,6 +35,9 @@
  *
  ****************************************************************
  * $Log: StRichGasGain.cxx,v $
+ * Revision 2.3  2003/06/13 22:30:41  hippolyt
+ * Changing gain for charged particle: 2. -> 5.
+ *
  * Revision 2.2  2002/04/12 19:49:13  lasiuk
  * gain to 2
  *
@@ -125,7 +128,7 @@ double StRichGasGain::avalanche(StRichMiniHit* hit, double wirePos, list<StRichM
     q = mGasGainAmplification * p;
     // addition to alter character of MIP/photon amplification
     if(hit->process()==eCharged) {
-      q *= 2.;
+      q *= 5.;
     }
 
 
