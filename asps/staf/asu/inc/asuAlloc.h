@@ -2,7 +2,7 @@
 #define ASU_ALLOC_H 1
 #include <stdlib.h>
 #ifdef __ROOT__
-#undefine ASU_MALLOC_ON 
+#undef ASU_MALLOC_ON 
 #endif /**__ROOT__**/
 
 #ifdef ASU_MALLOC_ON
