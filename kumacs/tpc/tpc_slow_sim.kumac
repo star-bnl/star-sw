@@ -1,4 +1,4 @@
-M************************************************************************
+************************************************************************
 ************************************************************************
 macro tpc_slow_sim__
           INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
@@ -72,18 +72,12 @@ $STAR/pams/trg/kumac
  message 'Define default kumac search path as' def
  
 
-* global macros
-  exec setup_global_macros
-  macro/global/import PARAMS_TPC 
-
-
 *  LOAD LIBRARIES
  
  if $vexist(make_done)=0 then
    make tpc 
    vec/cre make_done
  endif
-
 
 * generic inits
   exec setup_dir
@@ -143,9 +137,6 @@ macro initialize_
 
   message ' Initializing for tpc slow simulator '
 
-  macro/global/import _ 
-     PARAMS_TPC 
-
 
 *
 *  create tables
@@ -166,8 +157,6 @@ macro initialize_
 
 macro process_event  nev adcxyzon
 
-   macro/global/import _
-      PARAMS_TPC 
 
    message ' TPC slow sim: Processing Event # ' [nev]
 
