@@ -89,7 +89,7 @@ $STAR/pams/trg/kumac
   exec tpg_init#init
 
 * tpc slow sim init
-  exec initialize [tpc_sector_first] [tpc_sector_last]  [magfield] 
+  exec initialize [tpc_sector_first] [tpc_sector_last] [magfield] [adcxyzon]
 
 * init to write table from tpc fast sim to ntuple
    exec write_table_to_ntuple#init_disk _
@@ -145,6 +145,7 @@ macro initialize_
       exec create_tables_tpc_slow_sim#tfc
     endif
     exec create_tables_tpc_slow_sim#tcl
+
 
 *   initialization for tpc slow simulator
     exec tss_init#init _
