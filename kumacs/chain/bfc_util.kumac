@@ -190,7 +190,11 @@
 *                   - fix tfc_r chain so that it uses tpc sector #'s
 * 
 * 12/10/98 K. Turner - remove "ev0j" chain - not needed anymore (use ev02 ev0d)
-*                    
+* 12/14/98 K. Turner - check that input file exists when using "fzin"
+*                    - new chain "egout" to write out event generator files
+*                      with proper directory structure - so that gstar can
+*                      be run subsequently
+* 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -262,17 +266,13 @@ macro bfc_init _
             exec init_hij#init
     (oldin) user/input dummy [input_file]
     (evgin) newfile hij_in [input_file] r; 
-            user/input u [evgen]/particle.staf
-    (gtxin) user/input dummy [input_file]
+            user/input u [evgen]/particle.staf	    
+   (gtxin) user/input dummy [input_file]
     (fzin)  
-           gfile p [input_file]      | PN: p is a generic format
-           if ($iquest(1) <>0) then
-             message ' CANNOT OPEN INPUT FILE - EXIT! '
-	     goto EOF
-	   endif
-	   tables ' ' [geant_Run]
-           detp g2tm dete(cdet=SFSD).onoff=0 gttc.rdir=0
-	   make gstar
+            gfile p [input_file]      | PN: p is a generic format
+            tables ' ' [geant_Run]
+            detp g2tm dete(cdet=SFSD).onoff=0 gttc.rdir=0
+	    make gstar
     (g2tin) 
 	    exec input_g2t_file#init [input_file]
             if (STAF_STATUS(1).ne. STAFCV_OK) then
@@ -503,6 +503,16 @@ ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
               endif
               exec write_table_to_file#write outfile [run]         
             endif
+   (egout)
+            if output_gen_file="" then
+              message "empty output file"
+            else
+	      exec write_table_to_file#init genfile [output_gen_file]
+              if (STAF_STATUS(1).ne. STAFCV_OK) then
+                message "Cannot open output file"
+                goto EOF
+              endif
+            endif
     (dout)  
             if output_dst_file="" then
               message "empty dst output file"
@@ -566,6 +576,7 @@ return
     (oldin) nextl 1
     (evgin) cd [event]; 
             getev hij_in
+            cd /dui
      (g2tin) exec input_g2t_file#read
              if (staf_status(1).ne.STAFCV_OK) then
 	       nev_proc = [nev_proc] - 1 
@@ -693,7 +704,7 @@ return
 * first must allocate a large table because copy doesn't take care of 
 *   extending row count if needed
 	    if ([nev_proc].eq.1) then
-	      tdm/newtable [dst]/hepe_gent hepe_gent 20000
+	      tdm/newtable [dst]/hepe_gent hepe_gent 30000
 	    endif
           cp event/geant/Event/hepe_gent [dst]
       (svg)    nextl 1
@@ -822,7 +833,13 @@ return
                  message "Empty output file"
                else
 		 exec write_table_to_file#write outfile [event]
-              endif
+	       endif
+   (egout)
+	       if [output_gen_file]="" then
+                 message "Empty generator output file"
+               else
+		 exec write_table_to_file#write genfile [event]/evgen
+	       endif
     (dout)    if [output_dst_file]="" then
                  message "Empty dst output file"
               else
@@ -926,7 +943,13 @@ macro bfc_finish _
               endif
               exec write_table_to_file#close outfile;
             endif
-      (dout) 
+   (egout)	    
+	    if [output_gen_file]="" then
+              message "Empty generator output file"
+            else
+              exec write_table_to_file#close genfile;
+            endif    
+     (dout) 
             if [output_dst_file]="" then
                  message "Empty dst output file"
             else

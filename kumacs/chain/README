@@ -135,6 +135,7 @@
 * ntup2 - add 2nd ntuple to output ntuple file (must also use ntup chain!)
 * fzout - write out fz file from gstar (only works if you run gstar!)
 * evout - write event & run directories into xdf file
+* egout - write out event generator tables (used after hijing: "rhij")
 * dout  - write run/dst and event/data/global/dst directories into xdf file
 * obout - write out to objectivity database
 *
