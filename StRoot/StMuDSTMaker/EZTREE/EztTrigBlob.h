@@ -1,10 +1,10 @@
 #ifndef EztTrigBlob_h
 #define EztTrigBlob_h
-/*********************************************************************
- * $Id: EztTrigBlob.h,v 1.1 2004/10/28 00:10:19 mvl Exp $
- *********************************************************************
- * container for FULL STAR trigger data, requires Akio's calss to unpack it
- */
+/******************************************************************
+ * $Id: EztTrigBlob.h,v 1.2 2004/11/29 15:55:07 mvl Exp $
+ ******************************************************************
+ container for FULL STAR trigger data, requires StTriggerDataMother  to unpack it
+*/
 
 #include <TObject.h>
 
@@ -15,17 +15,17 @@ class EztTrigBlob : public TObject {
   // data containers
   TArrayC *trgd;  //  trgData  bank
   TArrayC *trgid; //  trgId bank
-  time_t   unixTimeStamp; // to chose year-dependent decoder
+  UChar_t version; // version for unpacking
 
   // methods
   EztTrigBlob();
   ~EztTrigBlob();
   void     print(int k=0, FILE *fd=stdout) const;
   void     clear();
-  time_t   getTimeStamp() const{ return unixTimeStamp;}
-  void     setTimeStamp ( time_t  t) { unixTimeStamp  = t;  }
+  UChar_t  getVersion() const{ return version;}
+  void     setVersion( UChar_t  v) { version=v;  }
 
-  ClassDef(EztTrigBlob,1) 
+  ClassDef(EztTrigBlob,2) 
 
 };
 #endif
@@ -33,6 +33,9 @@ class EztTrigBlob : public TObject {
 
 /*
  * $Log: EztTrigBlob.h,v $
+ * Revision 1.2  2004/11/29 15:55:07  mvl
+ * Additions by Jan for Fpd ezTree
+ *
  * Revision 1.1  2004/10/28 00:10:19  mvl
  * Initial revision of ezTree classes (for EEmc raw data)
  *

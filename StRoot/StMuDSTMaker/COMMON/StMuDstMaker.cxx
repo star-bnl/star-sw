@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.66 2004/11/15 18:20:25 mvl Exp $
+ * $Id: StMuDstMaker.cxx,v 1.67 2004/11/29 15:53:22 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -59,6 +59,7 @@
 #include "EztEventHeader.h"
 #include "EztEmcRawData.h"
 #include "EztTrigBlob.h"
+#include "EztFpdBlob.h"
 
 #include "StMuDstMaker.h"
 #include "StMuDst.h"
@@ -311,6 +312,7 @@ void  StMuDstMaker::streamerOff() {
   StMuPmdCluster::Class()->IgnoreTObjectStreamer();
   EztEventHeader::Class()->IgnoreTObjectStreamer();
   EztTrigBlob::Class()->IgnoreTObjectStreamer();
+  EztFpdBlob::Class()->IgnoreTObjectStreamer();
   EztEmcRawData::Class()->IgnoreTObjectStreamer();
 }
 //-----------------------------------------------------------------------
@@ -817,13 +819,18 @@ void StMuDstMaker::fillEzt(StEvent* ev) {
 				      __NEMCARRAYS__+__NPMDARRAYS__+
 				      __NTOFARRAYS__];
   if(eztArrayStatus[muEztHead]){
-    EztEventHeader* header = mEzTree->getHeader(ev);
+    EztEventHeader* header = mEzTree->copyHeader(ev);
     addType(mEztArrays[muEztHead], *header);
   }
 
   if(eztArrayStatus[muEztTrig]) {
-    EztTrigBlob* trig = mEzTree->getTrig(ev);
+    EztTrigBlob* trig = mEzTree->copyTrig(ev);
     addType(mEztArrays[muEztTrig], *trig);
+  }
+
+  if(eztArrayStatus[muEztFpd]) {
+    EztFpdBlob* fpd = mEzTree->copyFpd(ev);
+    addType(mEztArrays[muEztFpd], *fpd);
   }
 
   if(eztArrayStatus[muEztETow] || eztArrayStatus[muEztESmd]) {
@@ -1204,6 +1211,9 @@ void StMuDstMaker::connectPmdCollection() {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.67  2004/11/29 15:53:22  mvl
+ * Additions by Jan for Fpd ezTree
+ *
  * Revision 1.66  2004/11/15 18:20:25  mvl
  * Added call to StMuDst::set() for V0-event-pointers in read()
  *

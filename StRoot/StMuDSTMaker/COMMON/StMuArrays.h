@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuArrays.h,v 1.12 2004/10/28 00:11:33 mvl Exp $
+ * $Id: StMuArrays.h,v 1.13 2004/11/29 15:53:22 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** 
@@ -30,7 +30,7 @@ enum pmdTypes {muPmdHit=0, muCpvHit, muPmdCluster, muCpvCluster};
 enum tofTypes {muTofHit=0, muTofData};
 
 /// @enum eztTypes enumeration to to index the eztArrays (IUCF-ezTree)
-enum eztTypes {muEztHead=0, muEztTrig, muEztETow, muEztESmd};
+enum eztTypes {muEztHead=0, muEztTrig, muEztETow, muEztESmd,muEztFpd};
 
 enum NARRAYS {
 __NARRAYS__        =9,	///< size of the 'regular stuff' arrays, i.e. number of TClonesArrays  
@@ -38,7 +38,7 @@ __NSTRANGEARRAYS__ =12,	///< size of the strangeness arrays, i.e. number of TClo
 __NEMCARRAYS__     =7 ,	///< size of the emc arrays, i.e. number of TClonesArrays  
 __NPMDARRAYS__     =4 ,	///< size of the pmd arrays, i.e. number of TClonesArrays  
 __NTOFARRAYS__     =2 ,  ///< size of the tof arrays >
-__NEZTARRAYS__     =4 ,  ///< size of the ez arrays >
+__NEZTARRAYS__     =5 ,  ///< size of the ez arrays >
 __NALLARRAYS__     =  __NARRAYS__+__NSTRANGEARRAYS__+__NEMCARRAYS__+__NPMDARRAYS__+__NTOFARRAYS__+__NEZTARRAYS__
 };
 class StMuArrays {
@@ -82,6 +82,9 @@ class StMuArrays {
 /***************************************************************************
  *
  * $Log: StMuArrays.h,v $
+ * Revision 1.13  2004/11/29 15:53:22  mvl
+ * Additions by Jan for Fpd ezTree
+ *
  * Revision 1.12  2004/10/28 00:11:33  mvl
  * Added stuff to support ezTree mode of MuDstMaker.
  * This is a special mode for fast-online processing of fast-detector data.
