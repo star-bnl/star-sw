@@ -1,5 +1,12 @@
-* $Id: geometry.g,v 1.71 2003/11/12 18:45:09 potekhin Exp $
+* $Id: geometry.g,v 1.72 2003/11/13 00:21:42 potekhin Exp $
 * $Log: geometry.g,v $
+* Revision 1.72  2003/11/13 00:21:42  potekhin
+* The modification flag we introduced earlier
+* to reflect variations in the dimensions of
+* certain support structured of SVT takes a borader
+* meaning than just the shield, hence we rename
+* the variable to SupportVer
+*
 * Revision 1.71  2003/11/12 18:45:09  potekhin
 * As per Fabrice, change the number of layer in the
 * SVT to 7 to ensure that the ssd in its current
@@ -765,7 +772,8 @@ If LL>1
               elseif(CorrNum==2) then
                  call svttgeo2
               elseif(CorrNum==3) then
-                 call AgDETP add ('svtg.ShieldVer=',2 ,1)  ! switch to a larger inner shield
+* switch to a larger inner shield, AND smaller beampipe support
+                 call AgDETP add ('svtg.SupportVer=',2 ,1)
                  call svttgeo2
               endif
            endif
