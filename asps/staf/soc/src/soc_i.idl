@@ -30,7 +30,7 @@ attribute boolean locked;
 //:----------------------------------------------- FUNCTIONS          --
 STAFCV_T attach();
 STAFCV_T release();
-//--TODO--boolean implementsInterface(in string iface);
+boolean implementsInterface(in string iface);
 
 };
 
@@ -56,16 +56,12 @@ interface socCatalog_i : socFactory_i {
 //:----------------------------------------------- FUNCTIONS          --
 STAFCV_T deleteID(in IDREF_T id);
 STAFCV_T deleteObject(in string name, in string type);
-STAFCV_T findObject(in string name, in string type, 
-		out socObject_i obj);
-STAFCV_T getObject(in IDREF_T id,
-		out socObject_i obj);
-STAFCV_T idObject(in string name, in string type, 
-		out IDREF_T id);
-STAFCV_T newObject(in string name);
-STAFCV_T signIn(in socObject_i obj, 
-		out IDREF_T id);
-STAFCV_T signOut(in IDREF_T idRef);
+socObject_i findObject(in string name, in string type);
+socObject_i getObject(in IDREF_T id);
+IDREF_T idObject(in string name, in string type);
+socObject_i newObject(in string name);
+IDREF_T signIn(in socObject_i obj);
+IDREF_T signOut(in IDREF_T idRef);
 
 };
 
