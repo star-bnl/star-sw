@@ -1,4 +1,4 @@
-// $Id: StEEmcDataMaker.cxx,v 1.18 2004/07/23 02:04:13 jeromel Exp $
+// $Id: StEEmcDataMaker.cxx,v 1.19 2004/07/24 02:58:07 balewski Exp $
 
 #include <Stiostream.h>
 #include <math.h>
@@ -121,8 +121,21 @@ Int_t StEEmcDataMaker::Make(){
 //____________________________________________________
 int   StEEmcDataMaker::copyRawData(StEvent* mEvent) {
   
-  St_DataSet *daq = GetDataSet("StDAQReader");                 assert(daq);
-  StDAQReader *fromVictor = (StDAQReader*) (daq->GetObject()); assert(fromVictor);
+  St_DataSet *daq = GetDataSet("StDAQReader");
+  //assert(daq);
+  
+  if (! daq) {
+    gMessMgr->Message("","W") << "StEEmcDataMaker::copyRawData() , StDAQReader not  available" << endm;
+    return false;
+  }
+  
+  StDAQReader *fromVictor = (StDAQReader*) (daq->GetObject()); 
+  //assert(fromVictor);
+    if (!fromVictor ) {
+      gMessMgr->Message("","W") << "StEEmcDataMaker::copyRawData() , daq->GetObject() failed" << endm;
+      return false;
+  }
+
   StEEMCReader *eeReader  = fromVictor->getEEMCReader();  
   if(!eeReader) return false ;
 
@@ -167,9 +180,20 @@ int  StEEmcDataMaker::headersAreSick(StEvent* mEvent) {
   }
 
   StEmcRawData* raw=emcC->eemcRawData();
-  assert(raw);
+  // assert(raw);
+  if (! raw) {
+    gMessMgr->Message("","W") << "StEEmcDataMaker::headersAreSick() no EEMC raw data" << endm;
+    return true;
+  }
+
   
-  StL0Trigger* trg=mEvent->l0Trigger(); assert(trg);
+  StL0Trigger* trg=mEvent->l0Trigger();
+  //assert(trg);
+  if (! trg) {
+    gMessMgr->Message("","W") << "StEEmcDataMaker::headersAreSick() no l0Trigger data, EEMC not verified, abort all EEMC" << endm;
+    return true;
+  }
+
   int token=trg->triggerToken();
 
   EEfeeDataBlock block; // use utility class as the work horse
@@ -181,8 +205,8 @@ int  StEEmcDataMaker::headersAreSick(StEvent* mEvent) {
     const EEmcDbCrate *fiber=mDb-> getFiber(icr);
     if(!fiber->useIt) continue; // drop masked out crates
     //printf(" EEMC raw-->pix crID=%d type=%c \n",fiber->crID,fiber->type);
-    const  UShort_t* head=raw->header(icr);
-    assert(head);
+    //    const  UShort_t* head=raw->header(icr);
+    //assert(head);
     block.clear();
     block.setHead(raw->header(icr));
 
@@ -225,11 +249,18 @@ int  StEEmcDataMaker::towerDataAreSick(StEvent* mEvent) {
   const int mxN256tot=20;
 
   StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection();
-
-  assert(emcC);
+  //assert(emcC);
+  if(emcC==0) {
+    gMessMgr->Message("","W") << GetName()<<"::towerDataAreAreSick() no emc collection, skip"<<endm;
+    return true;
+  }
   
   StEmcRawData* raw=emcC->eemcRawData();
-  assert(raw);
+  // assert(raw);
+  if (! raw) {
+    gMessMgr->Message("","W") << "StEEmcDataMaker::towerDataAreSick() no EEMC raw data" << endm;
+    return true;
+  }
 
   int nGhostTot=0, n256Tot=0;
   int icr;
@@ -238,7 +269,7 @@ int  StEEmcDataMaker::towerDataAreSick(StEvent* mEvent) {
     if(!fiber->useIt) continue; // drop masked out crates
     if(fiber->type!='T') continue;
     const  UShort_t* data=raw->data(icr);
-    assert(data);
+    //assert(data);
     int i;
     int nGhost=0, n256=0;
     for(i=0;i<raw->sizeData(icr);i++) {
@@ -276,11 +307,18 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
 
   StEmcCollection* emcC =(StEmcCollection*)mEvent->emcCollection();
 
-  assert(emcC);
-  
+  //  assert(emcC);
+  if(emcC==0) {
+    gMessMgr->Message("","W") << GetName()<<"::raw2pixels() no emc collection, skip"<<endm;
+    return ;
+  }
+ 
   StEmcRawData* raw=emcC->eemcRawData();
-  assert(raw);
-
+  // assert(raw);
+ if (! raw) {
+    gMessMgr->Message("","W") << "StEEmcDataMaker::raw2pixels() no EEMC raw data" << endm;
+    return;
+  }
   int mxSector = 12;
 
   // initialize tower/prePost /U/V in StEvent
@@ -308,7 +346,7 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
     if(!fiber->useIt) continue; // drop masked out crates
     
     const  UShort_t* data=raw->data(icr);
-    assert(data);
+    //assert(data);
 
     for(int chan=0;chan<raw->sizeData(icr);chan++) {
       const  EEmcDbItem  *x=mDb->getByCrate(fiber->crID,chan);
@@ -351,7 +389,12 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
 	continue;
       }
 
-      assert(det);
+      //assert(det);
+      if (! det) {
+	gMessMgr->Message("","W") << "StEEmcDataMaker::raw2pixels(), logic error2, skip" << endm;
+    return;
+  }
+
       // if(type=='T') printf("EEMC crate=%3d chan=%3d  ADC: raw=%4d  energy=%+10g  -->   %2.2dT%c%2.2d\n",fiber->crID,chan,rawAdc,energy,x->sec,x->sub,x->eta);
       
       StEmcRawHit* h = new StEmcRawHit(emcId[det],sec,eta,sub,rawAdc,energy);
@@ -416,7 +459,7 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
 
  for(det = kEndcapEmcTowerId; det<= kEndcapSmdVStripId; det++){
    StEmcDetector* emcDetX= emcC->detector( StDetectorId(det));
-   assert(emcDetX);
+   // assert(emcDetX);
    gMessMgr->Message("","I") <<" StEmcDetectorID="<< StDetectorId(det)<<"  nHits="<<emcDetX->numberOfHits()<<endm;
  }
 
@@ -430,6 +473,9 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
  
 
 // $Log: StEEmcDataMaker.cxx,v $
+// Revision 1.19  2004/07/24 02:58:07  balewski
+// all assert() deactivated
+//
 // Revision 1.18  2004/07/23 02:04:13  jeromel
 // Remove one assert(). Really exhaustive use of it without message though
 //
