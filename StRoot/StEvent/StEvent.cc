@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cc,v 1.9 1999/02/22 20:48:52 wenaus Exp $
+ * $Id: StEvent.cc,v 1.10 1999/02/23 21:20:22 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.cc,v $
- * Revision 1.9  1999/02/22 20:48:52  wenaus
- * more delete cleanup
+ * Revision 1.10  1999/02/23 21:20:22  ullrich
+ * Modified EMC hit collections.
+ *
+ * Revision 1.11  1999/03/04 18:11:41  ullrich
+ * Mods to cope with CC5
  *
  * Revision 1.10  1999/02/23 21:20:22  ullrich
  * Modified EMC hit collections.
@@ -42,13 +45,13 @@
  * Fix for Sun compiler peculiarity
  *
  * Revision 1.2  1999/01/15 22:53:39  wenaus
-static const char rcsid[] = "$Id: StEvent.cc,v 1.9 1999/02/22 20:48:52 wenaus Exp $";
+ * version with constructors for table-based loading
  *
 #if !defined(ST_NO_NAMESPACES)
-static const char rcsid[] = "$Id: StEvent.cc,v 1.9 1999/02/22 20:48:52 wenaus Exp $";
+static const char rcsid[] = "$Id: StEvent.cc,v 1.10 1999/02/23 21:20:22 ullrich Exp $";
 #endif
 
-static const char rcsid[] = "$Id: StEvent.cc,v 1.9 1999/02/22 20:48:52 wenaus Exp $";
+static const char rcsid[] = "$Id: StEvent.cc,v 1.10 1999/02/23 21:20:22 ullrich Exp $";
 
 StEvent::StEvent()
 {
@@ -86,10 +89,10 @@ StEvent::~StEvent()
     delete mVertices; mVertices=0;
     if (mTpcHits) for(StTpcHitIterator iht=mTpcHits->begin(); iht != mTpcHits->end(); iht++) delete *iht;
     delete mTpcHits; mTpcHits=0;
-    if (mEmcHits) for(StEmcHitIterator ihe=mEmcHits->begin(); ihe != mEmcHits->end(); ihe++) delete *ihe;
-    delete mEmcHits; mEmcHits=0;
-    if (mSmdHits) for(StSmdHitIterator ihd=mSmdHits->begin(); ihd != mSmdHits->end(); ihd++) delete *ihd;
-    delete mSmdHits; mSmdHits=0;
+    if (mSvtHits) for(StSvtHitIterator ihs=mSvtHits->begin(); ihs != mSvtHits->end(); ihs++) delete *ihs;
+    delete mSvtHits; mSvtHits=0;
+    if (mFtpcHits) for(StFtpcHitIterator ihf=mFtpcHits->begin(); ihf != mFtpcHits->end(); ihf++) delete *ihf;
+    delete mFtpcHits; mFtpcHits=0;
     delete mTriggerDetectors; mTriggerDetectors=0;
     delete mL0Trigger; mL0Trigger=0;
     delete mEmcTowerHits; mEmcTowerHits=0;   // collection contains hits by value, this kills them all
@@ -107,8 +110,10 @@ void StEvent::init(StRun* run)
     mBunchCrossingNumber = 0; 
     mLuminosity = 0;          
     mPrimaryVertex = 0;       
-    mEmcHits = 0;            
-    mSmdHits = 0;            
+    mSummary = 0;             
+    mTracks = 0;              
+    mVertices = 0;            
+    mTpcHits = 0;             
     mSvtHits = 0;             
     mFtpcHits = 0;            
     mEmcTowerHits = 0;            
@@ -122,10 +127,18 @@ void StEvent::init(StRun* run)
 	mBeamPolarizationWest[i] = 0;
     }
     // Create the collections
-    mEmcHits = new StEmcHitCollection();
-    mSmdHits = new StSmdHitCollection();
     mSummary = new StDstEventSummary();
     mTracks = new StTrackCollection();
+    mVertices = new StVertexCollection();
+    mTpcHits = new StTpcHitCollection();
+    mSvtHits = new StSvtHitCollection();
+    mFtpcHits = new StFtpcHitCollection();
+    mTriggerDetectors = new StTriggerDetectorCollection();
+    mL0Trigger = new StL0Trigger();
+
+    //
+    // Attention it would be more (CPU) efficient if we
+    // would allocate the EMC related collections
     // with a given size.  tu
     //
     mEmcTowerHits = new StEmcTowerHitCollection();        
@@ -191,9 +204,13 @@ void StEvent::setSvtHitCollection(StSvtHitCollection* val) { mSvtHits = val; }
 
 void StEvent::setFtpcHitCollection(StFtpcHitCollection* val) { mFtpcHits = val; }              
 
-void StEvent::setEmcHitCollection(StEmcHitCollection* val) { mEmcHits = val; }               
+void StEvent::setVertexCollection(StVertexCollection* val) { mVertices = val; }               
 
-void StEvent::setSmdHitCollection(StSmdHitCollection* val) { mSmdHits = val; }                
+void StEvent::setTriggerDetectorCollection(StTriggerDetectorCollection* val) { mTriggerDetectors = val; }      
+
+void StEvent::setL0Trigger(StL0Trigger* val) { mL0Trigger = val; }
+
+void StEvent::setEmcTowerHitCollection(StEmcTowerHitCollection* val) { mEmcTowerHits = val; }               
 
 void StEvent::setEmcPreShowerHitCollection(StEmcPreShowerHitCollection* val) { mEmcPreShowerHits = val; }               
 
