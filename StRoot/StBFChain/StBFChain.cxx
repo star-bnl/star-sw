@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.214 2001/07/20 12:15:55 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.215 2001/07/20 21:28:14 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -88,11 +88,15 @@ Bfc_st BFC[] = {
   {"SvtD"        ,""  ,"","SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit,SvtVtx", "", "",
                                                                               "SVT makers for Data",kFALSE}, 
 
-  {"P2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""
-                                                           ,"Production chain for summer 2001 data (current)",kFALSE},
 
-  {"P2001a"      ,""  ,"","ry2001,in,tpc_daq,tpc,svt_daq,SvtD,emcY2,rich,ftpc,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
-                                                           ,"Production chain for summer 2001 data (full)",kFALSE},
+  // Physics,Cdst,... Physics was removed since trg reads the wrong format
+  {"P2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,Cdst,Kalman,tags,Tree,evout,ExB","",""
+                                              ,"Production chain for summer 2001 data (tpc, no trg)",kFALSE},
+  {"P2001a"      ,""  ,"","ry2001,in,tpc_daq,tpc,svt_daq,SvtD,emcY2,rich,ftpc,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
+                                              ,"Production chain for summer 2001 data (full no trg)",kFALSE},
+  {"P2001b"      ,""  ,"","ry2001,in,tpc_daq,tpc,svt_daq,SvtD,emcY2,rich,ftpc,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
+                                            ,"Production chain for summer 2001 data (full with trg)",kFALSE},
+
 
 
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
