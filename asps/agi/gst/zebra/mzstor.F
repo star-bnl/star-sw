@@ -1,7 +1,10 @@
 *
-* $Id: mzstor.F,v 1.4 1998/06/05 20:55:40 perev Exp $
+* $Id: mzstor.F,v 1.5 1999/10/18 16:46:03 nevski Exp $
 *
 * $Log: mzstor.F,v $
+* Revision 1.5  1999/10/18 16:46:03  nevski
+* pgf->g77
+*
 * Revision 1.4  1998/06/05 20:55:40  perev
 * AGI commit
 *
@@ -33,7 +36,7 @@ C--------------    End CDE                             --------------
 #endif
 #if (defined(CERNLIB_QTRHOLL))&&(!defined(CERNLIB_A6M))
       DIMENSION    NAMESR(2)
-      DATA  NAMESR / 4HMZST, 4HOR   /
+      DATA  NAMESR / 4HMZST, 4HOR .  /
 #endif
 #if (defined(CERNLIB_QTRHOLL))&&(defined(CERNLIB_A6M))
       DATA  NAMESR / 6HMZSTOR /
@@ -44,8 +47,8 @@ C--------------    End CDE                             --------------
 #endif
 #if defined(CERNLIB_QHOLL)
       DATA  MMSYSL / 4HSYSL,0,0,101,2/
-      DATA  NAMELA / 4Hsyst, 4Hem   /
-      DATA  NAMESY / 4Hsyst, 4Hem   /
+      DATA  NAMELA / 4Hsyst, 4Hem .  /
+      DATA  NAMESY / 4Hsyst, 4Hem .  /
       DATA  NAMWSP / 4Hqwsp /
       DATA  NAMEDV / 4HQDIV /
 #endif

@@ -1,7 +1,10 @@
 *
-* $Id: mzlink.F,v 1.4 1998/06/05 20:55:35 perev Exp $
+* $Id: mzlink.F,v 1.5 1999/10/18 16:46:01 nevski Exp $
 *
 * $Log: mzlink.F,v $
+* Revision 1.5  1999/10/18 16:46:01  nevski
+* pgf->g77
+*
 * Revision 1.4  1998/06/05 20:55:35  perev
 * AGI commit
 *
@@ -25,7 +28,7 @@ C--------------    End CDE                             --------------
       CHARACTER    *(*) CHNAME
 #if (defined(CERNLIB_QTRHOLL))&&(!defined(CERNLIB_A6M))
       DIMENSION    NAMESR(2)
-      DATA  NAMESR / 4HMZLI, 4HNK   /
+      DATA  NAMESR / 4HMZLI, 4HNK . /
 #endif
 #if (defined(CERNLIB_QTRHOLL))&&(defined(CERNLIB_A6M))
       DATA  NAMESR / 6HMZLINK /

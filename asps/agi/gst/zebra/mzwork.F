@@ -1,7 +1,10 @@
 *
-* $Id: mzwork.F,v 1.4 1998/06/05 20:55:40 perev Exp $
+* $Id: mzwork.F,v 1.5 1999/10/18 16:46:04 nevski Exp $
 *
 * $Log: mzwork.F,v $
+* Revision 1.5  1999/10/18 16:46:04  nevski
+* pgf->g77
+*
 * Revision 1.4  1998/06/05 20:55:40  perev
 * AGI commit
 *
@@ -32,7 +35,7 @@ C--------------    End CDE                             --------------
       INTEGER      DFIRST(9), DLAST(9), IFLAGP(9)
 #if (defined(CERNLIB_QTRHOLL))&&(!defined(CERNLIB_A6M))
       DIMENSION    NAMESR(2)
-      DATA  NAMESR / 4HMZWO, 4HRK   /
+      DATA  NAMESR / 4HMZWO, 4HRK . /
 #endif
 #if (defined(CERNLIB_QTRHOLL))&&(defined(CERNLIB_A6M))
       DATA  NAMESR / 6HMZWORK /
