@@ -1,5 +1,9 @@
-* $Id: pixlgeo1.g,v 1.2 2004/06/28 22:51:02 potekhin Exp $
+* $Id: pixlgeo1.g,v 1.3 2004/07/15 16:28:40 potekhin Exp $
 * $Log: pixlgeo1.g,v $
+* Revision 1.3  2004/07/15 16:28:40  potekhin
+* Changes the outer radius of the mother volume to a more
+* reasonable value
+*
 * Revision 1.2  2004/06/28 22:51:02  potekhin
 * Cleaned out the extra ladders which were moved to
 * the MIT detector. Based on the original pixel but
@@ -23,7 +27,7 @@ Module PIXLGEO1 is the geometry of the STAR pixel detector
 
       Content  PXMO, PSEC, PLMO, PLAC, PLPS
 *
-      Structure PIXG {Ladder, Rin, Rout, Rout1, TotalLength,
+      Structure PIXG {Ladder, Rin, Rout, TotalLength,
                       LadderWidth,LadderThk,PassiveThk,ActiveThk,
                       r,a,pOffset,aOffset}
 *
@@ -33,7 +37,6 @@ Module PIXLGEO1 is the geometry of the STAR pixel detector
       Ladder     =  1          ! ladder index
       Rin        =  1.45       ! Inner radius
       Rout       =  5.65       ! Outer radius
-      Rout1      =  25.65      ! Outer radius
       TotalLength=  16.0       ! Overal length of the detector
 *
       LadderWidth=  2.00       ! Ladder Width
@@ -81,7 +84,7 @@ Block PXMO is the mother of the pixel detector volumes
       Material  Air
       Attribute PXMO  Seen=1  colo=6
 
-      Shape TUBE Rmin=PIXG_Rin Rmax=PIXG_Rout1 Dz=PIXG_TotalLength/2.0
+      Shape TUBE Rmin=PIXG_Rin Rmax=PIXG_Rout Dz=PIXG_TotalLength/2.0
 
 * The "sector" is defined as a group of 4 ladders, we
 * have a total of 6 overlapping sectors placed with rotational symmetry
