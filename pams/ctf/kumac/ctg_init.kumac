@@ -1,5 +1,6 @@
 **************************************************************
 * revised WJL 1/13/99 to add all TOF-related stuff...
+*   and for mdc2
 **************************************************************
 
 **************************************************************
@@ -56,6 +57,7 @@ RETURN
 macro read 
 macro/global/import *
   cd [params]/ctf
+*TEST  exec read_table_from_file#init infile ./params/ctf/ctg_pars.xdf
   exec read_table_from_file#init infile $STAR/params/ctf/ctg_pars.xdf
   exec read_table_from_file#read infile [params]/ctf 
   exec read_table_from_file#close infile
