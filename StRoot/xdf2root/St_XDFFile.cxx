@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   27/04/98
-// $Id: St_XDFFile.cxx,v 1.32 1999/03/15 00:10:14 perev Exp $ 
+// $Id: St_XDFFile.cxx,v 1.33 2000/03/22 23:52:06 fine Exp $ 
 // $Log: St_XDFFile.cxx,v $
+// Revision 1.33  2000/03/22 23:52:06  fine
+// Adjusted to libSTAR for ROOT 2.24
+//
 // Revision 1.32  1999/03/15 00:10:14  perev
 // For new Maker schema
 //
@@ -54,7 +57,7 @@
 // New method to read XDF file has been introduced
 //
 // Revision 1.14  1998/09/15 20:55:37  fisyak
-// Split St_DataSet -> St_DataSet + St_DataSetIter
+// Split TDataSet -> TDataSet + TDataSetIter
 //
 // Revision 1.13  1998/08/28 21:55:10  fine
 // TSocket data-memebr and "socket" methods have been introduced to accept the XDF file
@@ -97,9 +100,9 @@
 #include "TSocket.h"
 #include "TBrowser.h"
 #include "St_XDFFile.h"
-#include "St_DataSetIter.h"
-#include "St_DataSet.h"
-#include "St_Table.h"
+#include "TDataSetIter.h"
+#include "TDataSet.h"
+#include <TTable.h>
 
 ClassImp(St_XDFFile)
 
@@ -300,15 +303,15 @@ Int_t St_XDFFile::CreateXDFStream(){
   return 0;
 } 
 //______________________________________________________________________________
-Int_t St_XDFFile::WriteEvent(St_DataSet *dataset)
+Int_t St_XDFFile::WriteEvent(TDataSet *dataset)
 {
  // 
- //  WriteEvent(St_DataSet *dataset)
+ //  WriteEvent(TDataSet *dataset)
  // 
- // The WriteEvent writes the St_DataSet objected defined with the dataset
+ // The WriteEvent writes the TDataSet objected defined with the dataset
  // pointer as XDR dataset
  //
- //  dataset - the pointer to the St_DataSet object to be saved with XDF file
+ //  dataset - the pointer to the TDataSet object to be saved with XDF file
  //            recursively
  //
  // Note: 
@@ -337,12 +340,12 @@ Int_t St_XDFFile::WriteEvent(St_DataSet *dataset)
 }
 
 //______________________________________________________________________________
-St_DataSet *St_XDFFile::ReadEvent()
+TDataSet *St_XDFFile::ReadEvent()
 {
  // 
  //  ReadEvent()
  // 
- //  The ReadEvent reads the next XDR events and creats St_DataSet object
+ //  The ReadEvent reads the next XDR events and creats TDataSet object
  //  and returns its pointer.
  //
  //  It returns ZERO if failed.
@@ -366,21 +369,21 @@ St_DataSet *St_XDFFile::ReadEvent()
    };
    fRecordCount++;
     if (fDebug) printf("%s from %s record %d \n",fMethodName,fName,fRecordCount);
-   St_DataSet *set = MakeDataSet(fDataSet);
+   TDataSet *set = MakeDataSet(fDataSet);
    Delete(fDataSet);
    return set;
  } else 
    return 0;
 }
 //______________________________________________________________________________
-St_DataSet *St_XDFFile::NextEventList()
+TDataSet *St_XDFFile::NextEventList()
 {
  //   STILL UNDER CONSTRUCTION !!!!
  //   This method requires a special version of dsl library
  //   -----------------------------------------------------
  //  NextEventList()
  // 
- //  The NextEventGet reads the next XDR events and creats St_DataSet object
+ //  The NextEventGet reads the next XDR events and creats TDataSet object
  //  and returns its pointer.
  //
  //  It returns ZERO if failed.
@@ -408,7 +411,7 @@ St_DataSet *St_XDFFile::NextEventList()
    };
    fRecordCount++;
     printf("%s from %s record %d \n",fMethodName,fName,fRecordCount);
-   St_DataSet *set = MakeDataSet(fDataSet);
+   TDataSet *set = MakeDataSet(fDataSet);
    Delete(fDataSet);
    return set;
  } else 
@@ -416,25 +419,25 @@ St_DataSet *St_XDFFile::NextEventList()
 #endif // 0
 }
 //______________________________________________________________________________
-St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
+TDataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
 {
  //
  //  MakeDataSet(DS_DATASET_T *ds)
  //
- //  Convert: DS_DATASET_T -> St_DataSet.   
+ //  Convert: DS_DATASET_T -> TDataSet.   
  //
- //  Create and return the pointer to the St_DataSet object 
+ //  Create and return the pointer to the TDataSet object 
  //  from DS_DATASET_T *ds C-structure
  //
  // This method moves the pointers of the STAF tables from 
- // DS_DATASET_T *ds into St_Table objects it is creating. 
+ // DS_DATASET_T *ds into TTable objects it is creating. 
  // So NO real copy of the C-structure is performed. 
  // This means the original DS_DATASET_T *ds can not be used 
  // for the second time since it has no useful information anymore.
  //
 
   DS_DATASET_T *dt;
-  St_DataSet *dataset = 0;
+  TDataSet *dataset = 0;
 
   //   printf (" dir: ds=0x%x  \n", ds);
   //   printf ("      tid  - %d     \n", ds->tid);
@@ -457,13 +460,13 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
       if (!dsTableTypeName(&type, ds)){/* fErrorCode = 6; */ return 0; }
 
       Char_t *classname = new Char_t[strlen(type)+extralen];
-      St_Table *table = 0;
+      TTable *table = 0;
       strcpy(classname,classprefix);
       strcat(classname,type);
 
       TClass *cl = gROOT->GetClass(classname);
       if (cl) {
-        table = (St_Table *)cl->New();
+        table = (TTable *)cl->New();
         // check the real table size against of the "dictionary" size
         cl = table->GetRowClass();
         UInt_t cCount=0;;
@@ -495,7 +498,7 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
       }
       else 
       {
-        table = new St_Table((char *)name,(char *)type, nrows, data, rsize);
+        table = new TTable((char *)name,(char *)type, nrows, data, rsize);
         Printf(" Warning: MakeDataSet the share lib /DLL for the table <%s> was not loaded\n",type);
         SafeDelete(table);
       }
@@ -510,7 +513,7 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
       ds->maxcount = 0;
   }
   else {
-    dataset = new St_DataSet(ds->name);
+    dataset = new TDataSet(ds->name);
     for (UInt_t j=0; j< ds->elcount; j++)
       if ( (dt=ds->p.link[j]) )
           dataset->Add(MakeDataSet(dt));
@@ -518,22 +521,22 @@ St_DataSet *St_XDFFile::MakeDataSet(DS_DATASET_T *ds)
   return dataset;
  }
 //______________________________________________________________________________
-DS_DATASET_T *St_XDFFile::MakeDataSet(St_DataSet *dataset)
+DS_DATASET_T *St_XDFFile::MakeDataSet(TDataSet *dataset)
 {
  //
- //  MakeDataSet(St_DataSet *dataset)
+ //  MakeDataSet(TDataSet *dataset)
  //
- //  Convert: St_DataSet -> DS_DATASET_T
+ //  Convert: TDataSet -> DS_DATASET_T
  //
  //  Allocate and return the pointer to the DS_DATASET_T C-structure
- //  from St_DataSet *dataset object
+ //  from TDataSet *dataset object
  //
- // So NO real copy of the C-structure kept within St_Table's is 
+ // So NO real copy of the C-structure kept within TTable's is 
  // performed. 
  //
   if (!dataset) return 0;
   DS_DATASET_T *ds=0;
-  St_Table *ta = (St_Table *)dataset;
+  TTable *ta = (TTable *)dataset;
   if (dataset->HasData()) {
     Char_t tablespec[2000];
     if(!dsNewTable(&ds,(Char_t *)ta->GetName(),ta->Print(tablespec,2000), 
@@ -547,9 +550,9 @@ DS_DATASET_T *St_XDFFile::MakeDataSet(St_DataSet *dataset)
       printf("xdf_open. Error, can not create data set for dataset \"%s\"\n",dataset->GetName());
       return 0;
     }
-    St_DataSetIter next(dataset);
+    TDataSetIter next(dataset);
     Int_t i = 0;
-    St_DataSet *set = 0;
+    TDataSet *set = 0;
     ds->tid      = 0;                           // tid - a table row type
     ds->elcount  = dataset->GetListSize();      // the number of the links = dataset->GetListSize();
     ds->maxcount = ds->elcount;                 // the maximum number of rows for a table
@@ -577,13 +580,13 @@ Int_t St_XDFFile::CloseXDF()
   return ians;
 }
 //______________________________________________________________________________
-void St_XDFFile::GetXdFile(const Char_t *filename, St_DataSet *dataset)
+void St_XDFFile::GetXdFile(const Char_t *filename, TDataSet *dataset)
 {
   if (!(dataset && filename && strlen(filename))) return;
   St_XDFFile xdf;
   if(xdf.GetDebug()) printf(" GetXdfFile: read from %s to DataSet %s \n",filename,dataset->GetName());
   if (xdf.OpenXDF(filename) == 0){
-    St_DataSet *set = xdf.ReadEvent();
+    TDataSet *set = xdf.ReadEvent();
     if (set) dataset->Add(set);
   }
 }
@@ -608,12 +611,12 @@ Int_t St_XDFFile::dir(const Char_t *filename, UInt_t firstRecord, UInt_t numberO
   Int_t counter=1;
   if (xdf.OpenXDF(filename) == 0)
   {
-    St_DataSet *set = 0;
+    TDataSet *set = 0;
     while ( (set = xdf.NextEventGet()) && (!numberOfRecords || counter < Int_t (firstRecord+numberOfRecords) ) ) 
     {
       if (!firstRecord || (counter >= Int_t (firstRecord-1)))  // Skip first "firstRecords" records
       {
-        St_DataSetIter dir(set);
+        TDataSetIter dir(set);
         dir.Du();
       }
        counter++;
@@ -627,9 +630,9 @@ Int_t St_XDFFile::dir(const Char_t *filename, UInt_t firstRecord, UInt_t numberO
 }
 
 //______________________________________________________________________________
-St_DataSet *St_XDFFile::GetXdFile(const Char_t *filename)
+TDataSet *St_XDFFile::GetXdFile(const Char_t *filename)
 {
-  St_DataSet *set = 0;
+  TDataSet *set = 0;
   if (filename && strlen(filename)) {
     St_XDFFile xdf;
     if(xdf.GetDebug()) printf("GetXdfFile: read from %s\n",filename);
