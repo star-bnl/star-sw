@@ -1,7 +1,10 @@
 //*-- Author : David Hardtke
 // 
-// $Id: StTpcT0Maker.cxx,v 1.6 2004/03/16 22:23:53 jecc Exp $
+// $Id: StTpcT0Maker.cxx,v 1.7 2004/03/17 02:29:58 jecc Exp $
 // $Log: StTpcT0Maker.cxx,v $
+// Revision 1.7  2004/03/17 02:29:58  jecc
+// Oups... remove useless StPreVertexMaker
+//
 // Revision 1.6  2004/03/16 22:23:53  jecc
 // Now call also StPreVertexMaker and StVertexMaker, to avoidseg. violation as primary vertex was not in table
 //
@@ -91,7 +94,6 @@ StTpcT0Maker::StTpcT0Maker(const char *name):StMaker(name){
   StMaker *saveMk = cd();
   New("St_tcl_Maker","tpc_hits");
   New("St_tpt_Maker","tpc_tracks");
-  New("StPreVertexMaker","PreVtx");
   New("StMatchMaker","match");
   New("StVertexMaker","vertex"); 
   New("StPrimaryMaker","primary");
@@ -162,7 +164,7 @@ Int_t StTpcT0Maker::Make(){
 //   }
   t0guess = length_assumed/dvel_assumed - trigger_assumed;
   gMessMgr->Info() << "StTpcT0Maker::t0 guess = " << t0guess << " micro seconds" << endm; 
-  if (!GetMaker("tpc_hits")||!GetMaker("tpc_tracks")||!GetMaker("PreVtx")||!GetMaker("match")||!GetMaker("vertex")||!GetMaker("primary")||!GetMaker("dst")) {
+  if (!GetMaker("tpc_hits")||!GetMaker("tpc_tracks")||!GetMaker("match")||!GetMaker("vertex")||!GetMaker("primary")||!GetMaker("dst")) {
     gMessMgr->Error() << "StTpcT0Maker::Missing Another Maker, check chain options " << endm;
       return kStFatal;
   }
@@ -171,7 +173,6 @@ Int_t StTpcT0Maker::Make(){
   GetMaker("tpc_tracks")->InitRun(0);
   tcl->Clear();
   GetMaker("tpc_tracks")->Clear();
-  GetMaker("PreVtx")->Clear(); 
   GetMaker("match")->Clear();
   GetMaker("vertex")->Clear();
   GetMaker("primary")->Clear();
@@ -180,7 +181,6 @@ Int_t StTpcT0Maker::Make(){
   tcl->EastOff();
   tcl->Make();  
   GetMaker("tpc_tracks")->Make();
-  GetMaker("PreVtx")->Make();
   //  GetMaker("match")->InitRun(0);
   GetMaker("match")->Make();
   GetMaker("vertex")->Make();
@@ -204,7 +204,6 @@ Int_t StTpcT0Maker::Make(){
 
   tcl->Clear();
   GetMaker("tpc_tracks")->Clear();
-  GetMaker("PreVtx")->Clear();
   GetMaker("match")->Clear();
   GetMaker("vertex")->Clear(); 
   GetMaker("primary")->Clear();
@@ -223,7 +222,6 @@ Int_t StTpcT0Maker::Make(){
   tcl->WestOff();
   tcl->Make();  
   GetMaker("tpc_tracks")->Make();
-  GetMaker("PreVtx")->Make();
   GetMaker("match")->Make();
   GetMaker("vertex")->Make();
   GetMaker("primary")->Make();
@@ -269,7 +267,6 @@ Int_t StTpcT0Maker::Make(){
     }
   tcl->Clear();
   GetMaker("tpc_tracks")->Clear();
-  GetMaker("PreVtx")->Clear();
   GetMaker("match")->Clear();
   GetMaker("vertex")->Clear(); 
   GetMaker("primary")->Clear();
@@ -315,7 +312,7 @@ Int_t StTpcT0Maker::Finish() {
 
 void StTpcT0Maker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StTpcT0Maker.cxx,v 1.6 2004/03/16 22:23:53 jecc Exp $\n");
+  printf("* $Id: StTpcT0Maker.cxx,v 1.7 2004/03/17 02:29:58 jecc Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
