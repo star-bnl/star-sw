@@ -10,6 +10,7 @@
 #include "TVolume.h"
 #include "TBRIK.h"
 #include "TPolyMarker3D.h"
+#include "StiTPolyMarker3D.h"
 
 //SCL
 #include "StThreeVector.hh"
@@ -28,25 +29,27 @@ StiDisplayManager::StiDisplayManager()
     //mcanvas->Draw();
     //mzone = new TBRIK("zone","BRIK","void", kdx, kdy, kdz);
     //mzone->SetLineColor(0);
-    
-    mnode = new TVolume("mainnode","mainnode", mzone);
+
+    mnode = new TVolume();
+    mnode->SetName("mainnode");
+    mnode->SetTitle("mainnode");
+    //mnode = new TVolume("mainnode","mainnode", mzone);
     //mnode->SetVisibility(TVolume::kThisUnvisible);
     cd();
 
     //Temp test of TPolyMarker3D
-    /*
-      cout <<"Starting Loop To Fill Array"<<endl;
-      int n=90;
-      double* px = new double[n];
-      double val=10.;
-      for (int i=0; i<n; ++i) {
-      px[i]=val++;
-      }
-      cout <<"Instantiate Poly"<<endl;
-      poly = new TPolyMarker3D(n, px, 8);
-      cout <<"Reset Bit"<<endl;
-      poly->ResetBit(kCanDelete);
-    */
+    cout <<"Starting Loop To Fill Array"<<endl;
+    int n=90;
+    double* px = new double[n];
+    double val=10.;
+    for (int i=0; i<n; ++i) {
+	px[i]=val++;
+    }
+    cout <<"Instantiate Poly"<<endl;
+    poly = new StiTPolyMarker3D(n, px, 8);
+    cout <<"Reset Bit"<<endl;
+    poly->ResetBit(kCanDelete);
+    
     cout <<"Leaving StiDisplayManager::StiDisplayManager()"<<endl;
     sinstance = this;
 }
@@ -85,10 +88,12 @@ void StiDisplayManager::cd()
 void StiDisplayManager::draw()
 {
     mnode->Draw();
+    
     //Temp patch
-    //cout <<"Drawing Poly"<<endl;
-    //poly->Draw();
-    //cout <<"Done Drawing Poly"<<endl;
+    cout <<"Drawing Poly"<<endl;
+    poly->Draw();
+    cout <<"Done Drawing Poly"<<endl;
+
     return;
 }
 

@@ -18,12 +18,13 @@ class TShape;
 class TVolume;
 class StiDrawable;
 class TPolyMarker3D;
+class StiTPolyMarker3D;
 
 class StiDisplayManager
 {
 public:
 
-    typedef map<string, StiDrawable*> stidrawablemap;
+	typedef map<string, StiDrawable*> stidrawablemap;
     typedef stidrawablemap::value_type stiDrawableMapValType;
     
     virtual ~StiDisplayManager();
@@ -70,7 +71,7 @@ private:
     TCanvas* mcanvas;
     TShape* mzone;
     TVolume* mnode;
-    TPolyMarker3D* poly;
+    StiTPolyMarker3D* poly;
 
 };
 
