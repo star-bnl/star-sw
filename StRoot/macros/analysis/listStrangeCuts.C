@@ -36,17 +36,27 @@ void listStrangeCuts(const char* fileName) {
   treePtr->SetBranchStatus("*",0);
   treePtr->SetBranchStatus("StrangeCuts.*",1);
   treePtr->SetBranchAddress("StrangeCuts",&cutArray);
-  treePtr->GetEvent();
-  cout << "Found cuts branch with " << cutArray->GetEntriesFast()
-       << " cuts." << endl;
-  cout << "_______________________________________________" << endl;
-  cutArray->Print();
+  int ncuts=0;
+  for (int i=0; i<treePtr->GetEntries(); i++) {
+    treePtr->GetEvent(i);
+    ncuts = cutArray->GetEntriesFast();
+    if (ncuts) {
+      cout << "Found cuts branch with " << ncuts << " cuts." << endl;
+      cout << "_______________________________________________" << endl;
+      cutArray->Print();
+      break;
+    }
+  }
+  if (!ncuts) cout << "Found cuts branch, but NO entries!!!" << endl;
   cout << "_______________________________________________" << endl;
 }
 
 //_____________________________________________________________
-// $Id: listStrangeCuts.C,v 3.2 2002/05/10 20:59:31 genevb Exp $
+// $Id: listStrangeCuts.C,v 3.3 2002/05/23 02:58:36 genevb Exp $
 // $Log: listStrangeCuts.C,v $
+// Revision 3.3  2002/05/23 02:58:36  genevb
+// Better search for cuts
+//
 // Revision 3.2  2002/05/10 20:59:31  genevb
 // Fixed bug with branch status and changed cuts split level
 //
