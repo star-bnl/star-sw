@@ -3,6 +3,10 @@
 /// \author M.L. Miller 5/00
 /// \author C Pruneau 3/02
 // $Log: StiMaker.cxx,v $
+// Revision 1.143  2004/08/04 21:06:17  pruneau
+// Added an "if" statement predicated on m_Mode to clear the memory used by the
+// factories at the end of StiMaker::Make().
+//
 // Revision 1.142  2004/04/15 00:43:22  pruneau
 // Added Ssd to the list of possible detectors...
 //
@@ -240,7 +244,9 @@ StiMaker::~StiMaker()
 void StiMaker::Clear(const char*)
 {
   if (_initialized) 
+    {
       _tracker->clear();
+    }
   StMaker::Clear();
 }
 
@@ -480,6 +486,14 @@ Int_t StiMaker::Make()
       if (_residualCalculator) _residualCalculator->calcResiduals(_toolkit->getTrackContainer() );
     }
   //cout<< "StiMaker::Make() -I- Done"<<endl;
+
+  if (m_Mode)
+    {
+    cout << "StiMaker -I- Perform Yuri's clear... ;-)" << endl;
+      _toolkit->getHitFactory()->clear();
+      _toolkit->getTrackNodeFactory()->clear();
+      _toolkit->getTrackFactory()->clear();
+    }
   return kStOK;
 }
 
