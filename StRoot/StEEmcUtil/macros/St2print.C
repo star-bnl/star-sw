@@ -122,7 +122,7 @@ data banks
   int tot=0;
 
 //for the headers
- for(int i = 1; i<NBANK;i++) {
+ for(int i = 0; i<NBANK;i++) {
    if(raw->header(i))  {
      int size = raw->sizeHeader(i);
      printf("\n======\nBANK=%d header size=%d\n",i,size);
