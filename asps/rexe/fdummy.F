@@ -135,7 +135,157 @@ C Check IX>=0
       CALL SORTRQ                                                       
       CALL DGMLT1                                                       
       CALL DGMLT2                                                       
-C SIND,COSD                                                             
+      CALL iucomp
+      CALL lvmaxa
+      CALL lvmax 
+      CALL lvmina
+      CALL lvmin 
+      CALL lvsmi 
+      CALL lvsmx 
+      CALL lvsdmi
+      CALL lvsdmx
+      CALL lvsimi
+      CALL lvsimx
+      
 *
 1     CONTINUE                                                          
       END                                                               
+*-- Author :    Pavel Nevski
+******************************************************************
+*                                                                *
+                Function    R N D M (x)
+*                                                                *
+******************************************************************
+      logical first/.true./
+*
+        if (first) 
+     &  print *,' *******  RNDM substituted by GRNDM  *******'
+        first=.false.
+        call GRNDM(r,1)
+        rndm=r
+      return
+      entry IRNDM
+        if (first) 
+     &  print *,' *******  RNDM substituted by GRNDM  *******'
+        first=.false.
+        call GRNDM(i,1)
+        irndm=i
+        return
+      END
+*
+      subroutine NORRAN (a)
+      real    a,b/99999/
+      logical first/.true./
+       if (first) 
+     &  print *,' *******  NORRAN substituted by RANNOR  *******'
+       if (b .eq. 99999) then 
+         call rannor(a,b)
+         first=.false. 
+       else 
+         a=b
+         b=99999 
+       endif
+      end
+*
+      function  RANF (a)
+      real      RANF,a,b
+      logical   first/.true./
+       if (first) 
+     &  print *,' *******  RANF substituted by GRNDM  *******'
+       first=.false.
+       Call GRNDM(b,1)
+       RANF=b
+      end
+*
+      function  RN32(a)
+      real      RN32,a,b
+      logical   first/.true./
+       if (first) 
+     &  print *,' *******  RN32 substituted by GRNDM  *******'
+       first=.false.
+       Call GRNDM(b,1)
+       RN32=b
+      end
+*
+      function  RG32(d)
+      real      RG32,d,a,b/99999/
+      logical   first/.true./
+       if (first) 
+     &  print *,' *******  RG32 substituted by RANNOR  *******'
+       if (b .eq. 99999) then
+         call rannor(a,b)
+         first=.false. 
+        else 
+          a=b
+          b=99999 
+       endif
+       RG32=a
+      end
+*
+      Subroutine RDMIN
+      entry      RDMOUT
+        print 
+     &  *,' RNDM substituted by GRNDM, set seed using G/CONT/RNDM'
+      end
+*
+      Subroutine RN32IN
+      entry      RN32OT
+        print 
+     &  *,' RN32 substituted by GRNDM, set seed using G/CONT/RNDM'
+      end
+*
+      Subroutine RG32IN
+      entry      RG32OT
+        print 
+     &  *,' RG32 substituted by RANNOR, set seed using G/CONT/RNDM'
+      end
+*
+      subroutine gufld  (x,b)
+      real x(3), b(3)
+      b(1) = 0.0
+      b(2) = 0.0
+      b(3) = 5.0
+      end 
+ 
+      function hdummy()
+      data N/13/
+      save N
+
+      entry    ihdummy
+      entry hbook1
+      entry hbook2
+      entry hbookn
+      entry hdelet
+      entry hexist
+      entry hf1
+      entry hfill
+      entry hfitga
+      entry hfith
+      entry hfitv
+      entry hfn
+      entry hi
+      entry hie
+      entry hif
+      entry hij
+      entry hmax
+      entry hmin
+      entry hrend
+      entry hreset
+      entry hrndm1
+      entry hropen
+      entry hrout
+      entry hspfun
+      entry hstati
+      entry hsum
+      entry hx
+      entry hxe
+      entry hxy
+      entry kuvcre
+      entry kuvect
+      hdummy = 0.0
+      ihdummy = 0
+      if (N.lt.0) return
+      N = N-1
+      write (*,*) 'HDUMMY. Dummy HBOOK call'
+      end
+ 
