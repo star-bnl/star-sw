@@ -1,5 +1,8 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.2 2000/07/16 22:32:23 caines Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.3 2000/08/21 12:57:31 caines Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.3  2000/08/21 12:57:31  caines
+// Now opens and reads in ped using CalibMaker
+//
 // Revision 1.2  2000/07/16 22:32:23  caines
 // Now also saves RAW data
 //
@@ -30,6 +33,7 @@ class StSvtInverseProducts;
 class StSvtPedSub;
 class TObjectSet;
 class StSvtHybridCollection;
+class StSvtBadAnode;
 
 
 class StSvtSeqAdjMaker : public StMaker
@@ -46,6 +50,9 @@ class StSvtSeqAdjMaker : public StMaker
 
   Int_t SetSvtRawEvent();
   Int_t GetSvtToBeAdjEvent();
+  Int_t GetSvtPedestals();
+  Int_t GetBadAnodes();
+  Int_t GetPedOffset(){return mPedOffSet;};
   Int_t SetInputFiles(char* table, char* PedFile,int PedOffset);
   Int_t CreateHist(Int_t tNuOfHyb);
   void  MakeHistograms(int index,int Anode);
@@ -56,14 +63,17 @@ class StSvtSeqAdjMaker : public StMaker
     
  protected:
   St_ObjectSet* mRawEventSet;             //!
+  St_ObjectSet* mSvtBadAnodeSet;             //!
   StSvtData* mSvtToBeAdjEvent;            //!
   StSvtHybridCollection* mSvtRawEvent;    //!
+  StSvtHybridCollection* mSvtBadAnodes;    //!
   StSvtHybridData* mHybridRawData ;       //!
   StSvtHybridData* mHybridToBeAdjData ;   //!
   StSvtInverseProducts* mInvProd;         //!
   StSvtPedSub* mSvtPedSub;                //!
   StSequence* tempSeq1;                   //!
   char* mPedFile;
+  char* mProbFile;
 
   TH1D** mInvProdSeqAdj;  //!
 

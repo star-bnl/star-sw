@@ -1,15 +1,17 @@
 /***************************************************************************
  *
- * $Id: StSvtSeqAdjMaker.cxx,v 1.6 2000/08/09 02:05:08 caines Exp $
+ * $Id: StSvtSeqAdjMaker.cxx,v 1.7 2000/08/21 12:57:31 caines Exp $
  *
  * Author: 
  ***************************************************************************
  *
- * Description: Sequence Adjuster Maker class
- *
- ***************************************************************************
+ * Description: Sequence
+ **************************************************************************
  *
  * $Log: StSvtSeqAdjMaker.cxx,v $
+ * Revision 1.7  2000/08/21 12:57:31  caines
+ * Now opens and reads in ped using CalibMaker
+ *
  * Revision 1.6  2000/08/09 02:05:08  caines
  * Only add pixels in the ASIC-like sequence adjusting
  *
@@ -38,7 +40,9 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtInverseProducts.hh"
 #include "StSvtPedSub.h"
+#include "StSvtBadAnode.hh"
 #include "StSvtSeqAdjMaker.h"
+#include "StSvtCalibMaker/StSvtPedMaker.h"
 #include "StMessMgr.h"
 
 #include "St_DataSetIter.h"
@@ -48,8 +52,6 @@
 #include <fstream.h>
 
 int* anolist; 
-ifstream inseqfile;
-fstream data;
 
 //___________________________________________________________________________________________
 StSvtSeqAdjMaker::StSvtSeqAdjMaker(const char *name) : StMaker(name)
@@ -78,9 +80,8 @@ Int_t StSvtSeqAdjMaker::SetInputFiles(char* table,
 {
   if(Debug()) gMessMgr->Debug() << "opening file called " << table << " " 
                                << GetName() << endm;  
-  
-  inseqfile.open(table,ios::in);
 
+  mProbFile = table;
   mPedFile = pedFile;
 
   mPedOffSet = PedOffset;
@@ -96,6 +97,7 @@ Int_t StSvtSeqAdjMaker::Init()
                                << GetName() << endm; 
 
   int ok;
+  ifstream inseqfile;
 
   ok = GetSvtToBeAdjEvent();
   
@@ -105,14 +107,18 @@ Int_t StSvtSeqAdjMaker::Init()
   CreateHist(mTotalNumberOfHybrids);	    
 
   mInvProd = new StSvtInverseProducts();
+
+  inseqfile.open(mProbFile,ios::in);
+
   mInvProd->FillProbTable(inseqfile);
 
-  
-  mSvtPedSub = new StSvtPedSub();
-  ok = mSvtPedSub->ReadFromFile( mPedFile, mSvtToBeAdjEvent);
+  inseqfile.close();
 
-  mSvtToBeAdjEvent->setPedOffset(mPedOffSet);
-  return  StMaker::Init();
+  GetSvtPedestals();
+
+  GetBadAnodes();
+  
+return  StMaker::Init();
   
 
 }
@@ -133,11 +139,38 @@ Int_t StSvtSeqAdjMaker::GetSvtToBeAdjEvent()
 }
 
 //__________________________________________________________________________________________________
+
+
+Int_t StSvtSeqAdjMaker::GetSvtPedestals()
+{
+
+  StSvtPedMaker* sdaq = (StSvtPedMaker*)GetMaker("SvtPed");
+
+  if( sdaq){
+    sdaq->ReadFromFile( mPedFile);
+    St_DataSet *dataSet;
+    
+    dataSet = GetDataSet("StSvtPedestal");
+    assert(dataSet); 
+
+    // Get pointer to actual pedestals
+
+    mSvtPedSub = new StSvtPedSub((StSvtHybridCollection*)(dataSet->GetObject()));
+
+    //Set offset
+    mSvtToBeAdjEvent->setPedOffset(mPedOffSet);
+  }
+    
+  return kStOK;
+}
+
+//__________________________________________________________________________________________________
+
+
 Int_t  StSvtSeqAdjMaker::SetSvtRawEvent()
 {
   mRawEventSet = new St_ObjectSet("StSvtHybRawData");
-  AddConst(mRawEventSet);  
-  SetOutput(mRawEventSet); //Declare for output
+  AddData(mRawEventSet);  
 
   mSvtRawEvent = new StSvtHybridCollection(mSvtToBeAdjEvent->getConfiguration());
   //cout<<"mSvtRawEvent  = "<<mSvtRawEvent<<endl;
@@ -165,6 +198,83 @@ Int_t StSvtSeqAdjMaker::SetMinAdcLevels( int MinAdc1,  int MinAbove1,
 Int_t StSvtSeqAdjMaker::SetLowInvProd(int LowInvProd)
 {
   m_inv_prod_lo = LowInvProd;
+  
+  return kStOK; 
+}
+//_____________________________________________________________________________
+
+Int_t StSvtSeqAdjMaker::GetBadAnodes()
+{
+
+  int index;
+  StSvtBadAnode* mHybridBadAnodeData;
+
+  mSvtBadAnodeSet = new St_ObjectSet("SvtBadAnodeSet");
+  AddData(mSvtBadAnodeSet);  
+
+  mSvtBadAnodes = new StSvtHybridCollection(mSvtToBeAdjEvent->getConfiguration());
+
+  mSvtBadAnodeSet->SetObject((TObject*)mSvtBadAnodes); 
+  assert(mSvtBadAnodes);
+
+
+
+  //Put in bad Anodes by hand
+
+  // Wafer 2 Hybrid 2
+
+  index = 3;
+  mHybridBadAnodeData = new StSvtBadAnode();
+  (*mSvtBadAnodes)[index] = mHybridBadAnodeData;
+  for( int i=80; i<159; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);
+
+  // Wafer 3 Hybrid 2
+
+  index = 5;
+  mHybridBadAnodeData = new StSvtBadAnode();
+  (*mSvtBadAnodes)[index] = mHybridBadAnodeData;
+  for( int i=80; i<159; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);
+
+ // Wafer 4 Hybrid 1
+
+  index = 6;
+  mHybridBadAnodeData = new StSvtBadAnode();
+  (*mSvtBadAnodes)[index] = mHybridBadAnodeData;
+  for( int i=165; i<167; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);
+  for( int i=171; i<174; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);
+
+
+  // Wafer 4 Hybrid 2
+
+  index = 7;
+  mHybridBadAnodeData = new StSvtBadAnode();
+  (*mSvtBadAnodes)[index] = mHybridBadAnodeData;
+  for( int i=38; i<80; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);
+  for( int i=94; i<95; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);
+  for( int i=102; i<160; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);
+
+ // Wafer 5 Hybrid 2
+
+  index = 9;
+  mHybridBadAnodeData = new StSvtBadAnode();
+  (*mSvtBadAnodes)[index] = mHybridBadAnodeData;
+  for( int i=208; i<240; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);
+
+ // Wafer 6 Hybrid 1
+
+  index = 10;
+  mHybridBadAnodeData = new StSvtBadAnode();
+  (*mSvtBadAnodes)[index] = mHybridBadAnodeData;
+  for( int i=69;  i<73;  i++)  mHybridBadAnodeData->SetBadAnode(i,1);
+  for( int i=189; i<192; i++)  mHybridBadAnodeData->SetBadAnode(i,1);
+  for( int i=224; i<240; i++)  mHybridBadAnodeData->SetBadAnode(i,1);
+
+ // Wafer 6 Hybrid 2
+
+  index = 11;
+  mHybridBadAnodeData = new StSvtBadAnode();
+  (*mSvtBadAnodes)[index] = mHybridBadAnodeData;
+  for( int i=0; i<240; i++)  mHybridBadAnodeData->SetBadAnode(i, 1);
   
   return kStOK; 
 }
@@ -204,6 +314,8 @@ Int_t StSvtSeqAdjMaker::CreateHist(Int_t tNuOfHyb)
 Int_t StSvtSeqAdjMaker::Make()
 {
 
+  StSvtBadAnode* BadAnode;
+
   // data.open("data.dat",ios::out);
 
 
@@ -224,42 +336,58 @@ Int_t StSvtSeqAdjMaker::Make()
           mHybridToBeAdjData = (StSvtHybridData *)mSvtToBeAdjEvent->getObject(Barrel,Ladder,Wafer,Hybrid);
 	  if( !mHybridToBeAdjData) continue;
 
-	  mSvtPedSub->SubtractPed(mHybridToBeAdjData, index, mPedOffSet);
 
+	  if( mSvtPedSub){
+	    mSvtPedSub->SubtractPed(mHybridToBeAdjData, index, mPedOffSet);
+	  }
 
           //****** sequence adjusting has not begun yet, making copy of 
 	  // data for cluster fitter
 
+
+	  mHybridRawData = (StSvtHybridData *)mSvtRawEvent->at(index);
+	  if( mHybridRawData){
+	    delete mHybridRawData;
+	  }
 	  mHybridRawData = new StSvtHybridData(*mHybridToBeAdjData);
-          (*mSvtRawEvent)[index] = mHybridRawData;
-
+	  (*mSvtRawEvent)[index] = mHybridRawData;
           mInvProd->SetHybridPointer(mHybridToBeAdjData);
-
-
+	  BadAnode = (StSvtBadAnode*)mSvtBadAnodes->at(index);
+	  
 	  for( int Anode= 0; Anode<mHybridToBeAdjData->getAnodeList(anolist); Anode++)
             {
-
+	      
+	      if( BadAnode){
+		if( BadAnode->IsBadAnode(anolist[Anode]-1)){
+		  
+		  // If anode is bad set sequences to zero
+		  int nSequence = 0;
+		  StSequence* seq = NULL;
+		  mHybridToBeAdjData->SetListSequences(Anode, nSequence, 
+						       seq);
+		  continue;
+		}
+		
+	      }
 	      //Perform Asic like zero suppression
 	      AdjustSequences1(Anode);
 	      
 	      //Perform E896 type zero-suppresion (look for non-noise like signals
 	      if(m_inv_prod_lo){
 		mInvProd->FindInvProducts(mPedOffSet,Anode);
-	        AdjustSequences2(Anode);
+		AdjustSequences2(Anode);
 		MakeHistograms(index,Anode);
 	      }
-            }
+	    }
 	  
 	  mHybridToBeAdjData->SetAnodeList();
-	  
-	  
-          mInvProd->ResetBuffer();
 	}
+		
+	mInvProd->ResetBuffer();
       }
     }
   }
-  
-  
+
   return kStOK;
   
 }
@@ -327,12 +455,12 @@ Int_t StSvtSeqAdjMaker::AdjustSequences1(int Anode){
    
   mNumOfSeq = nSeqNow;
 
-    mHybridToBeAdjData->SetListSequences(Anode, mNumOfSeq, tempSeq1);
-
+  mHybridToBeAdjData->SetListSequences(Anode, mNumOfSeq, tempSeq1);
+  
   // cout << "For Anode=" << Anode << " Number sequnces was=" << nSeqOrig << " Number now=" << nSeqMax+nSeqOrig << endl;
-
-    //  data << endl;
-
+  
+  //  data << endl;
+  
   return kStOK;
 }
 
@@ -349,61 +477,62 @@ Int_t StSvtSeqAdjMaker::AdjustSequences2(int Anode){
   unsigned char* adc;
   int ExtraBefore=0;
   int ExtraAfter=0;
- 
-
+  
+  
   double tempBuffer = 0;
- 
-
-      nSeqNow = 0;
-
-      status = mHybridToBeAdjData->getListSequences(Anode,nSeqBefore,Sequence);
+  
+  
+  nSeqNow = 0;
+  
+  status = mHybridToBeAdjData->getListSequences(Anode,nSeqBefore,Sequence);
+  
+  for(int Seq = 0; Seq < nSeqBefore; Seq++) 
+    {
+      startTimeBin =Sequence[Seq].startTimeBin; 
+      len = Sequence[Seq].length;
+      adc = Sequence[Seq].firstAdc;
       
-      for(int Seq = 0; Seq < nSeqBefore; Seq++) 
-         {
-          startTimeBin =Sequence[Seq].startTimeBin; 
-          len = Sequence[Seq].length;
-          adc = Sequence[Seq].firstAdc;
-
-	  int j=0;
-            while( j < len)
-	      { 
-                count = 0;
-                tempBuffer = mInvProd->GetBuffer(startTimeBin + j);
-
-                while(tempBuffer > m_inv_prod_lo && j < len)
-		  {
-                    ++count;
-                    ++j;
-                    tempBuffer = mInvProd->GetBuffer(startTimeBin + j);
-                    if(count > 0  && (tempBuffer < m_inv_prod_lo || j == len))
-		      {
-			tempSeq1[nSeqNow].firstAdc=&adc[j- count - ExtraBefore];
-			tempSeq1[nSeqNow].startTimeBin = startTimeBin + j - count - ExtraBefore;
-			if( (startTimeBin + j - count - ExtraBefore) < 0){
-			  tempSeq1[nSeqNow].startTimeBin=0;
-			  tempSeq1[nSeqNow].firstAdc=&adc[0];
-			}
-			tempSeq1[nSeqNow].length=count+ExtraAfter+ExtraBefore;
-			if( tempSeq1[nSeqNow].length + 
-			    tempSeq1[nSeqNow].startTimeBin>128)
-			  tempSeq1[nSeqNow].length=128-
-			    tempSeq1[nSeqNow].startTimeBin;
-			nSeqNow++;
-                      }
+      int j=0;
+      while( j < len)
+	{ 
+	  count = 0;
+	  tempBuffer = mInvProd->GetBuffer(startTimeBin + j);
+	  
+	  while(tempBuffer > m_inv_prod_lo && j < len)
+	    {
+	      ++count;
+	      ++j;
+	      tempBuffer = mInvProd->GetBuffer(startTimeBin + j);
+	      if(count > 0  && (tempBuffer < m_inv_prod_lo || j == len))
+		{
+		  tempSeq1[nSeqNow].firstAdc=&adc[j- count - ExtraBefore];
+		  tempSeq1[nSeqNow].startTimeBin = startTimeBin + j - count - ExtraBefore;
+		  if( (startTimeBin + j - count - ExtraBefore) < 0){
+		    tempSeq1[nSeqNow].startTimeBin=0;
+		    tempSeq1[nSeqNow].firstAdc=&adc[0];
 		  }
-	       j++;
-              }
-
-	  } // Sequence loop
-
-        mNumOfSeq = nSeqNow;
-    
-	if( nSeqBefore >0){
-	  mHybridToBeAdjData->SetListSequences(Anode, mNumOfSeq, tempSeq1);
+		  tempSeq1[nSeqNow].length=count+ExtraAfter+ExtraBefore;
+		  if( tempSeq1[nSeqNow].length + 
+		      tempSeq1[nSeqNow].startTimeBin>128)
+		    tempSeq1[nSeqNow].length=128-
+		      tempSeq1[nSeqNow].startTimeBin;
+		  nSeqNow++;
+		}
+	    }
+	  j++;
 	}
-	// cout << "For Anode=" << Anode << " Number of sequnces was=" << nSeqBefore << " Number now=" << nSeqNow << endl;
-
- return kStOK;
+      
+    } // Sequence loop
+  
+  mNumOfSeq = nSeqNow;
+  
+  if( nSeqBefore >0){
+    mHybridToBeAdjData->SetListSequences(Anode, mNumOfSeq, tempSeq1);
+  }
+  // cout << "For Anode=" << Anode << " Number of sequnces was=" << nSeqBefore << " Number now=" << nSeqNow << endl;
+  
+  return kStOK;
+  
 }
 
 
@@ -441,8 +570,6 @@ void StSvtSeqAdjMaker::MakeHistograms(int index,int Anode){
 Int_t StSvtSeqAdjMaker::Finish(){
   
   
-  mSvtPedSub->Clear();
-
   if (Debug()) gMessMgr->Debug() << "In StSvtSeqAdjMaker::Finish() "
 				 << GetName() << endm; 
  
