@@ -1,7 +1,10 @@
 
-// $Id: StSpectraMaker.h,v 1.8 2000/03/10 19:54:07 ogilvie Exp $
+// $Id: StSpectraMaker.h,v 1.9 2000/03/12 19:28:29 ogilvie Exp $
 //
 // $Log: StSpectraMaker.h,v $
+// Revision 1.9  2000/03/12 19:28:29  ogilvie
+// added new analysis class, StNoPidSpectraAnalysis, for inclusive spectra
+//
 // Revision 1.8  2000/03/10 19:54:07  ogilvie
 // bug fix in name of histograms
 //
@@ -53,6 +56,8 @@
 using std::vector;
 #endif
 
+enum StSpectraAnalysisType {kTpcDeviant, kTpcDedx, kV0, kNoPid};
+
 class StSpectraAnalysis;
 
 class StSpectraMaker : public StMaker {
@@ -79,7 +84,7 @@ public:
   virtual Int_t  Finish();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSpectraMaker.h,v 1.8 2000/03/10 19:54:07 ogilvie Exp $ built "__DATE__" "__TIME__ ; return cvs;};
+  {static const char cvs[]="Tag $Name:  $ $Id: StSpectraMaker.h,v 1.9 2000/03/12 19:28:29 ogilvie Exp $ built "__DATE__" "__TIME__ ; return cvs;};
 
   ClassDef(StSpectraMaker,1)
 

@@ -1,5 +1,8 @@
-// $Id: StSpectraMaker.cxx,v 1.9 2000/03/10 19:54:07 ogilvie Exp $
+// $Id: StSpectraMaker.cxx,v 1.10 2000/03/12 19:28:28 ogilvie Exp $
 // $Log: StSpectraMaker.cxx,v $
+// Revision 1.10  2000/03/12 19:28:28  ogilvie
+// added new analysis class, StNoPidSpectraAnalysis, for inclusive spectra
+//
 // Revision 1.9  2000/03/10 19:54:07  ogilvie
 // bug fix in name of histograms
 //
@@ -38,6 +41,7 @@
 #include "StEventTypes.h"
 #include "StSpectraAnalysis.h"
 #include "StTpcDeviantSpectraAnalysis.h"
+#include "StNoPidSpectraAnalysis.h"
 #include "StMessMgr.h"
 #include "StEfficiency.h"
 #include "StSpectraAxesEnumeration.h"
@@ -56,7 +60,7 @@ string readString(ifstream& ifs) {
   return line;
 }
 
-static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.9 2000/03/10 19:54:07 ogilvie Exp $";
+static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.10 2000/03/12 19:28:28 ogilvie Exp $";
 
 StSpectraMaker::StSpectraMaker(const Char_t *name) : StMaker(name) {
 }
@@ -72,7 +76,22 @@ Int_t StSpectraMaker::Init() {
 
   ifstream from("StRoot/StSpectraMaker/analysis.dat");
   while (!from.eof()) {
+    //
+    // deviant as safety default
+    StSpectraAnalysisType analysisType = kTpcDeviant;
 
+    string analysisSType = readString(from);
+    if (analysisSType == "TpcDeviant") {
+      analysisType= kTpcDeviant;
+    } else if (analysisSType == "TpcDedx") {
+      analysisType= kTpcDedx;
+    } else if (analysisSType == "V0") {
+      analysisType= kV0;
+    } else if (analysisSType == "NoPid") {
+      analysisType= kNoPid;
+    } else {
+      // protection?
+    }
     cout << "particle name " ;
     string particleName = readString(from);
     string analysisTitle = readString(from); 
@@ -99,8 +118,16 @@ Int_t StSpectraMaker::Init() {
     cout <<"ordinate range and bins "<< lbinOrdinate << " "
 	 << ubinOrdinate << " " 
 	 << nbinOrdinate << endl; 
-
-    StTpcDeviantSpectraAnalysis* anal = new StTpcDeviantSpectraAnalysis;
+    StSpectraAnalysis* anal;
+    if (analysisType == kTpcDeviant) {       
+       StTpcDeviantSpectraAnalysis* local_anal = new StTpcDeviantSpectraAnalysis;
+       anal = local_anal;
+    } else if (analysisType == kNoPid) {       
+       StNoPidSpectraAnalysis* local_anal = new StNoPidSpectraAnalysis;
+       anal = local_anal;
+    } else {
+      continue;
+    }
     anal->setParticle(particleName);
     anal->setTitle(analysisTitle);
     anal->setEfficiency(effic);   

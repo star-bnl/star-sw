@@ -7,7 +7,6 @@ void StSpectraAnalysis::setParticle(string particle) {
 
  mParticle = StParticleTable::instance()->findParticle(particle) ;
  if (mParticle) {
-   cout << "found particle, mass " << mParticle->mass() << endl;
  }
  else {
    cout << "particle not found: " << particle.c_str() << endl;

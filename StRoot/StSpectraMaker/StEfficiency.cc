@@ -37,46 +37,33 @@ StEfficiency::StEfficiency(char* efficFile) {
   //
   cout << histRootFileName << endl;
   TFile histRootFile(histRootFileName);
-  // how do I check that this was successful ?
+  //
+  // how do I check that this was successful use isOpen()
   //
   // check which histograms are there
   //
   bool efficHistogramFound = false ;
 
-  mEfficHistogram = *((TH2D*)histRootFile.Get("efficYPt"));
-  if (&mEfficHistogram != 0 ){
+  TObject* fromFile = histRootFile.Get("efficYPt");
+  if (fromFile != 0 ){
+    mEfficHistogram = *((TH2D*)fromFile);
     efficHistogramFound = true; 
     mAbscissa = kRapidity;
     mOrdinate = kPperp;
   } 
+
   if (efficHistogramFound == false) {
-    mEfficHistogram = *((TH2D*)histRootFile.Get("efficEtaPt"));
-    if (&mEfficHistogram != 0 ){
+    fromFile = histRootFile.Get("efficEtaPt");
+    if (fromFile != 0 ){
+      mEfficHistogram = *((TH2D*)fromFile);
       efficHistogramFound = true; 
-      cout << "found" << endl;
-      mAbscissa = kPseudoRapidity;
-      mOrdinate = kPperp;
-    } 
-  }  if (efficHistogramFound == false) {
-    mEfficHistogram = *((TH2D*)histRootFile.Get("efficEtaPt"));
-    if (&mEfficHistogram != 0 ){
-      efficHistogramFound = true; 
-      cout << "found" << endl;
       mAbscissa = kPseudoRapidity;
       mOrdinate = kPperp;
     } 
   }
   if (efficHistogramFound == false) {
-    mEfficHistogram = *((TH2D*)histRootFile.Get("efficYMt"));
-    if (&mEfficHistogram != 0 ){
-      efficHistogramFound = true; 
-      cout << "found" << endl;
-      mOrdinate = kTransverseMass;
-      mAbscissa = kRapidity;
-    } else {
-      cout << "not found" << endl; 
+      cout << "efficiency histto not found" << endl; 
     // set failure mode of constructor
-    }
   }
  //
   histRootFile.Close();
