@@ -4,6 +4,10 @@
 #include "St_FileSet.h"
 #include "TBrowser.h"
 #include "TSystem.h"
+
+#ifndef WIN32
+#include <errno.h>
+#endif
  
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -55,8 +59,15 @@ St_FileSet::St_FileSet(const TString &dirname,const Char_t *setname,Bool_t expan
 
     // Check if "dirname" is a directory.
     void *dir = 0;
-    if (flags & 2 ) 
+    if (flags & 2 ) {
        dir = gSystem->OpenDirectory(name);
+#ifndef WIN32       
+       if (!dir) { 
+        perror("can not be open due error\n");
+	fprintf(stderr, " directory: %s",name);
+	}
+#endif	
+    }
     if (dir) {   // this is a directory
       SetTitle("directory");
       while (name = gSystem->GetDirEntry(dir)) {
@@ -68,6 +79,7 @@ St_FileSet::St_FileSet(const TString &dirname,const Char_t *setname,Bool_t expan
            Add(new St_FileSet(nextdir,name,kFALSE));
          }
       }
+      gSystem->FreeDirectory(dir);
     }
     else 
        SetTitle("file");
