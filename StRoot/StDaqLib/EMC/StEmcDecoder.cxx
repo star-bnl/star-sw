@@ -296,7 +296,7 @@ int StEmcDecoder::Getjose_towerEast(int start,int crate_seq)
   int channel_seq=card_seq/4;
   int channel=card_seq-(channel_seq*4)+1;
   int jose_tower=start+channel_seq*20+card*4+(5-channel);
-  if(jose_tower<2400)jose_tower+=2400;
+  if(jose_tower<=2400)jose_tower+=2400;
   return jose_tower;
 }
 //--------------------------------------------------------
