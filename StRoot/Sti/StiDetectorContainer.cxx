@@ -11,6 +11,7 @@
 
 #include <algorithm>
 using std::find_if;
+using std::for_each;
 
 //Sti
 #include "StiMapUtilities.h"
@@ -281,11 +282,19 @@ StiDetectorContainer::buildDetectors(StiObjectFactoryInterface<StiDetectorNode>*
     mregion = (*where);
     reset();
 
+    print();
+    
     return;
 }
 
 void StiDetectorContainer::print() const
 {
+    cout <<"\nStiDetectorContainer::print()  Det"<<endl;
+    cout <<"--- Leaves ----"<<endl;
+
+    //StreamNodeData<data_node> myStreamer;
+    //for_each(mLeafIt->const_begin(), mLeafIt->const_end(),
+    //myStreamer);
 }
 
 //We assume that the node is a leaf in phi
@@ -295,14 +304,16 @@ void StiDetectorContainer::setToLeaf(data_node* node)
     data_node* parent_in_phi = node->getParent();
     mphi_it = find(parent_in_phi->begin(), parent_in_phi->end(), node);
     if (mphi_it == parent_in_phi->end() ) {
-	cout <<"StiDetectorContainer::setToLeaf()\tError!\t parent in phi iterator not found"<<endl;
+	cout <<"StiDetectorContainer::setToLeaf()\tError!\t";
+	cout <<"parent in phi iterator not found"<<endl;
 	return;
     }
     //Find where we are in radial ordering
     data_node* parent_in_radius = parent_in_phi->getParent();
     mradial_it = find(parent_in_radius->begin(), parent_in_radius->end(), parent_in_phi);
     if (mradial_it == parent_in_radius->end() ) {
-	cout <<"StiDetectorContainer::setToLeaf()\tError!\t parent in radius iterator not found"<<endl;
+	cout <<"StiDetectorContainer::setToLeaf()\tError!\t";
+	cout <<"parent in radius iterator not found"<<endl;
 	return;
     }
 }
