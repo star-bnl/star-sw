@@ -233,8 +233,9 @@ Block CPHI corresponds to a single module
 EndBlock
 *-----------------------------------------------------------------------------
 Block CSUP  is a super layer with few layers inside
-      future_depth=current_depth+(calg_NsubLay(super)-super+1)*layer_width(super)*2+
-                 (smd_width+calg_scintThk(super)+2.*calg_AbPapThk)*2.*(super-1)
+      future_depth=current_depth+
+                 (calg_NsubLay(super)-super+1)*layer_width(super)*2+
+                 (smd_width+calg_scintThk(super)+2.*calg_AbPapThk)*2*(super-1)
 *Cellulose C6H10O5
       Component C  A=12.01   Z=6.    W=6./21.
       Component H  A=1.      Z=1.    W=10./21.
