@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackNode.cxx,v 2.12 2003/09/02 17:58:06 perev Exp $
+ * $Id: StTrackNode.cxx,v 2.13 2003/11/25 04:10:47 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackNode.cxx,v $
+ * Revision 2.13  2003/11/25 04:10:47  perev
+ * bug in erase fixed
+ *
  * Revision 2.12  2003/09/02 17:58:06  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -55,7 +58,7 @@
 
 ClassImp(StTrackNode)
 
-static const char rcsid[] = "$Id: StTrackNode.cxx,v 2.12 2003/09/02 17:58:06 perev Exp $";
+static const char rcsid[] = "$Id: StTrackNode.cxx,v 2.13 2003/11/25 04:10:47 perev Exp $";
 
 StTrackNode::StTrackNode() { /* noop */ }
 
@@ -96,7 +99,7 @@ StTrackNode::removeTrack(StTrack* track)
         switch (track->type()) {
         case primary:
         case estPrimary:
-            for (iter = mReferencedTracks.begin(); iter != mReferencedTracks.end(); iter++)
+            for (iter = mReferencedTracks.begin(); iter < mReferencedTracks.end(); iter++)
                 if (*iter == track) mReferencedTracks.erase(iter);
             break;
         case secondary:                // not implemented yet
@@ -105,7 +108,7 @@ StTrackNode::removeTrack(StTrack* track)
         case tpt:
         case global:
         case estGlobal:
-            for (iterS = mOwnedTracks.begin(); iterS != mOwnedTracks.end(); iterS++)
+            for (iterS = mOwnedTracks.begin(); iterS < mOwnedTracks.end(); iterS++)
                 if (*iterS == track) mOwnedTracks.erase(iterS);
             break;
         default:

@@ -29,6 +29,7 @@
 #include "StDetectorDbMaker/StDetectorDbTriggerID.h"
 #include "StDAQMaker/StDAQReader.h"
 #include "StPrompt.hh"
+#include "StMath.hh"
 #include <typeinfo>
 
 #if !defined(ST_NO_NAMESPACES)
@@ -43,10 +44,65 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.59 2003/10/13 04:38:35 perev Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.62 2003/12/04 03:54:13 perev Exp $";
 
+//______________________________________________________________________________
+static int badDstTrack(dst_track_st *t)
+{
+static int r0Len = 0;
+static int r0outLen = 0;
+   if (!r0Len) {
+     r0Len    = &(t->impact  ) - &(t->r0   ) + 1;
+     r0outLen = &(t->invptout) - &(t->r0out) + 1;
+   }
+   if (t->iflag < 0)       			return 1;
+   if ( StMath::tooBig(&(t->r0   ),r0Len   )) 	return 2; 
+// if ( StMath::tooBig(&(t->r0out),r0outLen)) 	return 3; 
+   if ( StMath::tooBig(&(t->r0out),r0outLen))   {//fill by senseless but not carzy
+     for (int i=0;i<r0outLen;i++) {(&(t->r0out))[i]=1.e+5;}}
+   return 0;
+}
+
+//______________________________________________________________________________
+static int badDstVertex(dst_vertex_st *t)
+{
+static int xLen = 0;
+   if (!xLen) { xLen    = &(t->chisq[1]) - &(t->x) + 1;}
+   if (t->iflag <= 0)       			return 1;
+   if ( StMath::tooBig(&(t->x   ),xLen   )) 	return 2; 
+   if (t->chisq[0] < 0.)			return 3;
+   if (t->chisq[1] < 0.)			return 4;
+   return 0;
+}
+//______________________________________________________________________________
+static int badDstV0Vertex(dst_v0_vertex_st *t)
+{
+static int dcanLen = 0;
+   if (!dcanLen) { dcanLen = &(t->pos_pz) - &(t->dcan) + 1;}
+   if ( StMath::tooBig(&(t->dcan),dcanLen)) 	return 1; 
+   return 0;
+}
+//______________________________________________________________________________
+static int badDstXiVertex(dst_xi_vertex_st *t)
+{
+static int dcaLen = 0;
+   if (!dcaLen) { dcaLen = &(t->pz_b) - &(t->dca) + 1;}
+   if ( StMath::tooBig(&(t->dca),dcaLen)) 	return 1; 
+   return 0;
+}
+//______________________________________________________________________________
+static int badDstTkfVertex(dst_tkf_vertex_st *t)
+{
+static int dcaLen = 0;
+   if (!dcaLen) { dcaLen = &(t->theta_cm) - &(t->dca) + 1;}
+   if ( StMath::tooBig(&(t->dca),dcaLen)) 	return 1; 
+   return 0;
+}
+
+//______________________________________________________________________________
 ClassImp(StEventMaker)
-  
+//______________________________________________________________________________
+
 StEventMaker::StEventMaker(const char *name, const char *title) : StMaker(name)
 {
     if(title) SetTitle(title);
@@ -235,9 +291,6 @@ StEventMaker::makeEvent()
     event_header_st* dstEventHeader = mEventManager->returnTable_event_header(nrows);
     dst_event_summary_st* dstEventSummary = mEventManager->returnTable_dst_event_summary(nrows);
 
-//VP    if (!dstEventHeader) 
-//VP        gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot load dst_event_header_st, "
-//VP                            << "will create incomplete instance of StEvent." << endm;
     
     //
     //  Create instance of StEvent, using whatever we got so far.
@@ -247,10 +300,6 @@ StEventMaker::makeEvent()
 	mCurrentEvent->setInfo(new StEventInfo(*dstEventHeader));
     if (dstEventSummary && !mCurrentEvent->summary())
 	mCurrentEvent->setSummary(new StEventSummary(*dstEventSummary));
-//VP    else {
-//VP        gMessMgr->Error() << "StEventMaker::makeEvent(): no event summary and hence no magnetic field info. Bad event.";
-//VP	return kStErr;
-//VP    }
 	
     
     //
@@ -402,15 +451,15 @@ StEventMaker::makeEvent()
     //
     if (trackNodes.size())  return kStOK;
     
-    StGlobalTrack *gtrack = 0;
     dst_track_st *dstGlobalTracks = mEventManager->returnTable_dst_globtrk(nrows);
     if (!dstGlobalTracks) nrows = 0;
     int maxId=0,mxId=0;
     maxId = dstGlobalTracks && nrows>0 ? max((long)dstGlobalTracks[nrows-1].id, nrows) : 0;
-    StVector(StGlobalTrack*) vecGlobalTracks(maxId+1, gtrack);
+    StGlobalTrack *gtrack = 0;
+    StVector(StGlobalTrack*) vecGlobalTracks(maxId+101, gtrack);
     
     for (i=0; i<nrows; i++) {
-        if (dstGlobalTracks[i].iflag <0) continue;
+        if (badDstTrack(dstGlobalTracks+i)) continue;
         gtrack = new StGlobalTrack(dstGlobalTracks[i]);
         vecGlobalTracks[dstGlobalTracks[i].id] = gtrack;
         gtrack->setGeometry(new StHelixModel(dstGlobalTracks[i]));
@@ -423,6 +472,7 @@ StEventMaker::makeEvent()
         node = new StTrackNode();
         node->addTrack(gtrack);          // node<->track association
         trackNodes.push_back(node);
+
     }
 
     //
@@ -453,11 +503,11 @@ StEventMaker::makeEvent()
     mxId = dstPrimaryTracks && nrows>0 ? max((long) dstPrimaryTracks[nrows-1].id, nrows) : 0;
     if(mxId>maxId) maxId=mxId;
     StVector(StPrimaryTrack*) vecPrimaryTracks(maxId+1, ptrack);
-    StVector(unsigned int)    vecPrimaryVertexId(maxId+1, 0U);
+    StVector(unsigned int)    vecPrimaryVertexId(maxId+101, 0U);
     nfailed = 0;
     
     for (i=0; i<nrows; i++) {
-        if (dstPrimaryTracks[i].iflag <0) {nfailed++; continue;}
+        if (badDstTrack(dstPrimaryTracks+i)) {nfailed++; continue;}
         idvtx = dstPrimaryTracks[i].id_start_vertex ? dstPrimaryTracks[i].id_start_vertex/10 : 0;
         if (!idvtx) {
             nfailed++;
@@ -472,7 +522,8 @@ StEventMaker::makeEvent()
 	fillOuterTrackGeometry(ptrack, dstPrimaryTracks[i]);
         id = ptrack->key();
         if (id < vecGlobalTracks.size() && vecGlobalTracks[id]) {
-            info = vecGlobalTracks[id]->detectorInfo();
+            gtrack = vecGlobalTracks[id];
+            info = gtrack->detectorInfo();
             //
             //  Check if the existing detector info is still ok for the
             //  primary track. If not we have to create a new one.
@@ -485,7 +536,8 @@ StEventMaker::makeEvent()
                 detectorInfo.push_back(info);
             }
             ptrack->setDetectorInfo(info);
-            vecGlobalTracks[id]->node()->addTrack(ptrack);
+            node = gtrack->node();
+            node->addTrack(ptrack);
         }
         else {
            info = new StTrackDetectorInfo(dstPrimaryTracks[i]);
@@ -493,6 +545,7 @@ StEventMaker::makeEvent()
            detectorInfo.push_back(info);
            node = new StTrackNode();
            node->addTrack(ptrack);          // node<->track association
+           assert(node->track(primary) == ptrack);
            trackNodes.push_back(node);
         }
     }
@@ -513,10 +566,10 @@ StEventMaker::makeEvent()
     if (!dstTptTracks) nrows = 0;
     mxId = dstTptTracks && nrows>0 ? max((long) dstTptTracks[nrows-1].id, nrows) : 0;
     if (mxId>maxId) maxId = mxId;
-    StVector(StTptTrack*) vecTptTracks(maxId+1, ttrack);
+    StVector(StTptTrack*) vecTptTracks(maxId+101, ttrack);
 	
     for (i=0; i<nrows; i++) {
-        if (dstTptTracks[i].iflag <0) {nfailed++; continue;}
+        if (badDstTrack(dstTptTracks+i)) {nfailed++; continue;}
 	ttrack = new StTptTrack(dstTptTracks[i]);
 	vecTptTracks[dstTptTracks[i].id] = ttrack;
 	ttrack->setGeometry(new StHelixModel(dstTptTracks[i]));
@@ -573,12 +626,12 @@ StEventMaker::makeEvent()
     if (!dstEstGlobalTracks) nrows = 0;
     mxId = dstEstGlobalTracks && nrows>0 ? max((long) dstEstGlobalTracks[nrows-1].id, nrows) : 0;
     if (mxId>maxId) maxId = mxId;
-    StVector(StEstGlobalTrack*) vecEstGlobalTracks(maxId+1, egtrack);	
+    StVector(StEstGlobalTrack*) vecEstGlobalTracks(maxId+101, egtrack);	
     nfailed = 0;
     nfailed2 = 0;
     
     for (i=0; i<nrows; i++) {
-        if (dstEstGlobalTracks[i].iflag <0) {nfailed++; continue;}
+        if (badDstTrack(dstEstGlobalTracks+i)) {nfailed++; continue;}
 	//
 	//   For each EST global track there must be already a node
 	//   since EST doesn't create new tracks.
@@ -640,6 +693,7 @@ StEventMaker::makeEvent()
     nfailed = 0;
     
     for (i=0; i<nrows; i++) {
+        if (badDstTrack(dstEstPrimaryTracks+i)) {nfailed++;continue;}
 	//
 	//  Check for valid primary vertex
 	//
@@ -748,6 +802,8 @@ StEventMaker::makeEvent()
     StVector(StEstPrimaryTrack*) vecEstPrimaryTracksCopy = vecEstPrimaryTracks;
 
     for (i=0; i<nVertices; i++) {
+        if (dstVertices[i].iflag <=0) 	 continue;
+        if (badDstVertex(dstVertices+i)) {dstVertices[i].iflag = -abs(dstVertices[i].iflag);continue;}
         if (dstVertices[i].iflag < 100 && dstVertices[i].iflag%10 == 1 &&
 	    dstVertices[i].vtx_id == kEventVtxId ) {
             StPrimaryVertex *pvtx = new StPrimaryVertex(dstVertices[i]);
@@ -773,24 +829,30 @@ StEventMaker::makeEvent()
 	}
     }
     nfailed = 0;
-    for (k=0; k<vecPrimaryTracksCopy.size(); k++) 
-        if (vecPrimaryTracksCopy[k]) {
-	    nfailed++;
-	    delete vecPrimaryTracksCopy[k];
-	    vecPrimaryTracksCopy[k] = 0;
-	    vecPrimaryTracks[k] = 0;
+    for (k=0; k<vecPrimaryTracksCopy.size(); k++) {
+        ptrack = vecPrimaryTracksCopy[k];
+        if (!ptrack) continue;
+	nfailed++;
+        node = ptrack->node();    
+        if (node) node->removeTrack(ptrack);
+	delete ptrack;
+	vecPrimaryTracksCopy[k] = 0;
+	vecPrimaryTracks[k]     = 0;
 	}
     if (nfailed)
         gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot assign " << nfailed
                             << " primary tracks, no corresponding primary vertex found." << endm;
     nfailed = 0;
-    for (k=0; k<vecEstPrimaryTracksCopy.size(); k++)
-	if (vecEstPrimaryTracksCopy[k]) {
-	    nfailed++;
-	    delete vecEstPrimaryTracksCopy[k];
-	    vecEstPrimaryTracksCopy[k] = 0;
-	    vecEstPrimaryTracks[k] = 0;
-	}
+    for (k=0; k<vecEstPrimaryTracksCopy.size(); k++){
+        eptrack = vecEstPrimaryTracksCopy[k];
+	if (!eptrack) continue;
+	nfailed++;
+        node = eptrack->node();
+	if (node) node->removeTrack(eptrack);
+        delete eptrack;
+	vecEstPrimaryTracksCopy[k] = 0;
+	vecEstPrimaryTracks[k] = 0;
+    }
     if (nfailed)
         gMessMgr->Warning() << "StEventMaker::makeEvent(): cannot assign " << nfailed
                             << " EST primary tracks, no corresponding primary vertex found." << endm;
@@ -803,8 +865,10 @@ StEventMaker::makeEvent()
 
     nfailed = 0;
     for (i=0; i<nV0Vertices; i++) {
+        if(badDstV0Vertex(dstV0Vertices+i)) {nfailed++;continue;}
         id = dstV0Vertices[i].id_vertex - 1;
-        if (id < static_cast<unsigned long>(nVertices)) {
+        if (dstVertices[id].iflag > 0
+        && (id < static_cast<unsigned long>(nVertices))) {
             StV0Vertex *v0 = new StV0Vertex(dstVertices[id], dstV0Vertices[i]);
             id = dstV0Vertices[i].idneg;
             if (id < vecGlobalTracks.size()) v0->addDaughter(vecGlobalTracks[id]);
@@ -827,8 +891,10 @@ StEventMaker::makeEvent()
     
     nfailed = 0;
     for (i=0; i<nXiVertices; i++) {
+        if (badDstXiVertex(dstXiVertices+i)) {nfailed++;continue;}
         id    = dstXiVertices[i].id_xi - 1;
-        if (id < static_cast<unsigned long>(nVertices)) {
+        if (dstVertices[id].iflag > 0
+        && (id < static_cast<unsigned long>(nVertices))) {
             StXiVertex *xi = new StXiVertex(dstVertices[id], dstXiVertices[i]);
             id = dstXiVertices[i].id_v0 - 1;
             if (id < v0Vertices.size()) xi->setV0Vertex(v0Vertices[id]);
@@ -851,8 +917,10 @@ StEventMaker::makeEvent()
 
     nfailed = 0;
     for (i=0; i<nKinkVertices; i++) {
+        if (badDstTkfVertex(dstKinkVertices+i)) {nfailed++;continue;}
         id = dstKinkVertices[i].id_vertex - 1;
-        if (id < static_cast<unsigned long>(nVertices)) {
+        if (dstVertices[id].iflag > 0
+        && (id < static_cast<unsigned long>(nVertices))) {
             StKinkVertex *kink = new StKinkVertex(dstVertices[id], dstKinkVertices[i]);
             id = dstKinkVertices[i].idd;
             if (id < vecGlobalTracks.size()) kink->addDaughter(vecGlobalTracks[id]);
@@ -896,7 +964,7 @@ StEventMaker::makeEvent()
         mxId = allNodes.size();
         if (mxId>maxId) maxId = mxId;
 	vector<vector<StTrackDetectorInfo*> > infomap(maxId+1);
-	for (k=0; k<=(int)maxId; k++) {
+	for (k=0; k<=(unsigned int)maxId; k++) {
            if (k<vecTptTracks.size()        && vecTptTracks[k]           ) 
               infomap[k].push_back(vecTptTracks[k]->detectorInfo()       );
            if (k<vecGlobalTracks.size()     && vecGlobalTracks[k]        )
@@ -1520,8 +1588,17 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.59 2003/10/13 04:38:35 perev Exp $
+ * $Id: StEventMaker.cxx,v 2.62 2003/12/04 03:54:13 perev Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.62  2003/12/04 03:54:13  perev
+ * Set empty, instead of crazy outer geometry
+ *
+ * Revision 2.61  2003/12/01 18:22:31  perev
+ * Fix bug in bad track filter. Thanks to Helen
+ *
+ * Revision 2.60  2003/11/25 04:13:25  perev
+ * FPE protection
+ *
  * Revision 2.59  2003/10/13 04:38:35  perev
  * Bug with different collection lenth fixed
  *

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.43 2003/10/30 20:08:13 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.47 2003/11/17 22:16:55 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -57,7 +57,7 @@
 #include "TStreamerInfo.h"
 #include "TClonesArray.h"
 
-
+#include "THack.h"
 ClassImp(StMuDstMaker)
 
 #if !(ST_NO_NAMESPACES)
@@ -158,11 +158,8 @@ StMuDstMaker::StMuDstMaker(int mode, int nameMode, const char* dirName, const ch
 //-----------------------------------------------------------------------
 StMuDstMaker::~StMuDstMaker() {
   DEBUGMESSAGE1("");
-  clear();
+  clear(999);
   delete mStMuDst;
-  for ( int i=0; i<__NARRAYS__; i++) { delete arrays[i]; arrays[i]=0;} 
-  for ( int i=0; i<__NSTRANGEARRAYS__; i++) { delete strangeArrays[i];strangeArrays[i]=0;}
-  for ( int i=0; i<__NEMCARRAYS__; i++) { delete emcArrays[i]; emcArrays[i]=0;}
   DEBUGMESSAGE3("after arrays");
   saveDelete(mProbabilityPidAlgorithm);
   saveDelete(mTrackFilter);
@@ -216,37 +213,65 @@ void StMuDstMaker::createArrays() {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuDstMaker::clear(){
+void StMuDstMaker::clear(int del){
   DEBUGMESSAGE2("");
   /// from muDst
+  int dell = 1; if (del) dell = 999;
 
   for ( int i=0; i<__NARRAYS__; i++) {
-    clear(mArrays[i],StMuArrays::arrayCounters[i]);
+    clear(mArrays[i],StMuArrays::arrayCounters[i]		,dell);
   }
   for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
-    clear(mStrangeArrays[i],StMuArrays::strangeArrayCounters[i]);
+    clear(mStrangeArrays[i],StMuArrays::strangeArrayCounters[i]	,dell);
   }
   for ( int i=0; i<__NEMCARRAYS__; i++) {
-    clear(mEmcArrays[i],StMuArrays::emcArrayCounters[i]);
+    clear(mEmcArrays[i],StMuArrays::emcArrayCounters[i]		,dell);
   }
   DEBUGMESSAGE2("out");
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuDstMaker::clear(TClonesArray* t, int& counter,int del){
+void StMuDstMaker::clear(TClonesArray* &t, int& counter,int del)
+{
+//	del == 0 : objects are flat, standard Clear()
+//	del == 1 : objects are complex, destructor must be called
+//      del >  1 : all objects(hidden too)  must be destroed
+//  complexity of this clear related to complexity of using TClonesArray
+//  in TTree. Othervice leak as a punishment.
+
+  enum { kRea=0, kWrt=1,kDel=2,kDtr=4};
   DEBUGMESSAGE3("");
-  if (!t)  return;
-  int num = t->GetLast()+1;
-  if(!num) return;
-  if (del) t->Delete(); else t->Clear();
-  for (int i=0;i<num; i++) {
-    TObject *to = (*t)[i];
-    if (!to) 				continue;
-    if (to->TestBit(kNotDeleted)) 	continue;
-    t->New(i);
-  }
   counter=0;
+  if (!t)  	      return;
+  int kase = 0;
+  if (mIoMode==ioWrite) kase |= kWrt;
+  if (del    ==1      ) kase |= kDel;
+  if (del     >1      ) kase |= kDtr;
+
+  switch (kase) {
+
+  case 0: 
+       t->Clear();    break;
+
+  case kWrt: 
+  case kWrt|kDel:
+       t->Delete();   break;
+
+  case kWrt|kDtr:
+       delete t; t=0; break;
+
+  case kRea|kDel:
+       THack::ClearClonesArray(t);
+       break;
+  
+  case kRea|kDtr:
+       THack::DeleteClonesArray(t);
+       t = 0;
+       break;
+  default: assert(0);
+  }
+
   DEBUGMESSAGE3("out");
 }
 //-----------------------------------------------------------------------
@@ -921,6 +946,18 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.47  2003/11/17 22:16:55  perev
+ * THack::DeleteClonesArray used for deleting, to avoid ROOT bad features
+ *
+ * Revision 1.46  2003/11/10 04:07:47  perev
+ * again clear improved to avoid leaks
+ *
+ * Revision 1.45  2003/11/09 01:02:59  perev
+ * more sofisticated clear() to fix leaks
+ *
+ * Revision 1.44  2003/11/03 22:24:45  perev
+ * TClones::Clear added into StMuDstMaker::clear to avoid empty ebjects writing
+ *
  * Revision 1.43  2003/10/30 20:08:13  perev
  * Check of quality added
  *

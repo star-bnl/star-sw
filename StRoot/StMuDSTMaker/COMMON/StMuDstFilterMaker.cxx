@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstFilterMaker.cxx,v 1.3 2003/09/07 03:49:03 perev Exp $
+ * $Id: StMuDstFilterMaker.cxx,v 1.4 2003/11/24 23:36:36 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #include "StMuDstFilterMaker.h"
@@ -137,7 +137,7 @@ int StMuDstFilterMaker::Make(){  ///< create a StEvent from the muDst and put it
     // the emc collection
     StMuEmcCollection* emc = muDst->emcCollection();
     if ( filter(emc) ) {
-	addType( mEmcArrays[0], *emc );
+	//addType( mEmcArrays[0], *emc ); this doesn't work since the StMuEmcCollection is not cloneable
     }
     
     // write the event only if it has at least one primary track
@@ -181,17 +181,20 @@ void StMuDstFilterMaker::createArrays() {
   /// regular stuff
     int dummy;
     for ( int i=0; i<__NARRAYS__; i++) {
-	DEBUGVALUE2(arrays[i]);
-	mArrays[i]= mMuDstMaker->clonesArray(arrays[i],StMuArrays::arrayTypes[i],StMuArrays::arraySizes[i],dummy);
-	DEBUGVALUE2(arrays[i]);
+	mArrays[i] = 0;
+	DEBUGVALUE2(mArrays[i]);
+	mArrays[i]= mMuDstMaker->clonesArray(mArrays[i],StMuArrays::arrayTypes[i],StMuArrays::arraySizes[i],dummy);
+	DEBUGVALUE2(mArrays[i]);
     }
     /// from strangeness group
     for ( int i=0; i<__NSTRANGEARRAYS__; i++) {
-	mStrangeArrays[i]= mMuDstMaker->clonesArray(strangeArrays[i],StMuArrays::strangeArrayTypes[i],StMuArrays::strangeArraySizes[i],dummy);
+	mStrangeArrays[i] = 0;
+	mStrangeArrays[i]= mMuDstMaker->clonesArray(mStrangeArrays[i],StMuArrays::strangeArrayTypes[i],StMuArrays::strangeArraySizes[i],dummy);
     }
     /// from emc group
     for ( int i=0; i<__NEMCARRAYS__; i++) {
-	mEmcArrays[i]= mMuDstMaker->clonesArray(emcArrays[i],StMuArrays::emcArrayTypes[i],StMuArrays::emcArraySizes[i],dummy);
+	mEmcArrays[i] = 0;
+	mEmcArrays[i]= mMuDstMaker->clonesArray(mEmcArrays[i],StMuArrays::emcArrayTypes[i],StMuArrays::emcArraySizes[i],dummy);
   }
 }
 
@@ -211,6 +214,9 @@ ClassImp(StMuDstFilterMaker)
 /***************************************************************************
  *
  * $Log: StMuDstFilterMaker.cxx,v $
+ * Revision 1.4  2003/11/24 23:36:36  laue
+ * commented the StMuEmcCollection out
+ *
  * Revision 1.3  2003/09/07 03:49:03  perev
  * gcc 3.2 + WarnOff
  *

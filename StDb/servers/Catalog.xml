@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<?xml version="1.0" encoding="ASCII" standalone="yes"?>
 <!DOCTYPE SCATALOG [
    <!ELEMENT SCATALOG (SITE*)>
        <!ATTLIST SCATALOG VERSION CDATA #REQUIRED>
@@ -44,11 +44,4 @@
 			</HOST>
 		</SERVER>
 	</SITE>
-        <SITE name="LBL">
-               <SERVER SCOPE="User">
-                        <HOST NAME="pdsfdv16.nersc.gov" DBNAME="FileCatalog_LBL" PORT="">
-                                <ACCESS USER="FC_user" PASS="FCatalogPDSFLBNL"/>
-                        </HOST>
-               </SERVER>
-        </SITE>
 </SCATALOG>
