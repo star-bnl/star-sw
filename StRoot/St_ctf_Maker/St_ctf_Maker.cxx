@@ -1,5 +1,8 @@
-// $Id: St_ctf_Maker.cxx,v 1.11 1999/03/02 00:11:49 llope Exp $
+// $Id: St_ctf_Maker.cxx,v 1.12 1999/03/11 03:55:06 perev Exp $
 // $Log: St_ctf_Maker.cxx,v $
+// Revision 1.12  1999/03/11 03:55:06  perev
+// new schema
+//
 // Revision 1.11  1999/03/02 00:11:49  llope
 // reduced table maxlen's for mdc2
 //
@@ -71,7 +74,7 @@
 ClassImp(St_ctf_Maker)
 
 //_____________________________________________________________________________
-St_ctf_Maker::St_ctf_Maker(const char *name, const char *title):StMaker(name,title),
+St_ctf_Maker::St_ctf_Maker(const char *name):StMaker(name),
 m_ctb(0),
 m_ctb_slat_phi(0),
 m_ctb_slat_eta(0),
@@ -90,22 +93,29 @@ St_ctf_Maker::~St_ctf_Maker(){
 }
 //_____________________________________________________________________________
 Int_t St_ctf_Maker::Init(){
-  // Create tables
-  St_DataSetIter       params(gStChain->DataSet("params"));
-  m_ctb          = (St_ctg_geo      *) params("ctf/ctg/ctb");
-  m_ctb_slat_phi = (St_ctg_slat_phi *) params("ctf/ctg/ctb_slat_phi");
-  m_ctb_slat_eta = (St_ctg_slat_eta *) params("ctf/ctg/ctb_slat_eta");
-  m_ctb_slat     = (St_ctg_slat     *) params("ctf/ctg/ctb_slat");
+  int iInit=0;
+
+// Create tables
+  St_DataSet *ctfpars = GetInputDB("params/ctf");
+  assert (ctfpars);
+  St_DataSetIter       gime(ctfpars);
+  m_ctb          = (St_ctg_geo      *) gime("ctg/ctb");
+  m_ctb_slat_phi = (St_ctg_slat_phi *) gime("ctg/ctb_slat_phi");
+  m_ctb_slat_eta = (St_ctg_slat_eta *) gime("ctg/ctb_slat_eta");
+  m_ctb_slat     = (St_ctg_slat     *) gime("ctg/ctb_slat");
+
   Int_t Res_ctg_ctb  =  ctg (m_ctb,m_ctb_slat_phi,m_ctb_slat_eta,m_ctb_slat);
-  m_tof          = (St_ctg_geo      *) params("ctf/ctg/tof");
-  m_tof_slat_phi = (St_ctg_slat_phi *) params("ctf/ctg/tof_slat_phi");
-  m_tof_slat_eta = (St_ctg_slat_eta *) params("ctf/ctg/tof_slat_eta");
-  m_tof_slat     = (St_ctg_slat     *) params("ctf/ctg/tof_slat");
+  if (Res_ctg_ctb!=kSTAFCV_OK) iInit = kStWarn;
+  m_tof          = (St_ctg_geo      *) gime("ctg/tof");
+  m_tof_slat_phi = (St_ctg_slat_phi *) gime("ctg/tof_slat_phi");
+  m_tof_slat_eta = (St_ctg_slat_eta *) gime("ctg/tof_slat_eta");
+  m_tof_slat     = (St_ctg_slat     *) gime("ctg/tof_slat");
+
   Int_t Res_ctg_tof  =  ctg (m_tof,m_tof_slat_phi,m_tof_slat_eta,m_tof_slat);
   // Special treatment for double names
   //  m_cts          = (St_cts_mpara    *) params("ctf/cts")->GetList()->FindObject("cts");
-  m_cts_ctb          = (St_cts_mpara    *) params("ctf/cts/cts_ctb");
-  m_cts_tof          = (St_cts_mpara    *) params("ctf/cts/cts_tof");
+  m_cts_ctb          = (St_cts_mpara    *) gime("ctf/cts/cts_ctb");
+  m_cts_tof          = (St_cts_mpara    *) gime("ctf/cts/cts_tof");
   // Create Histograms  
   m_adcc  = new TH1F("CtfCtbrawAdc","CTB ADCs",128,0.,1024.);
   m_adct  = new TH1F("CtfTofrawAdc","TOF ADCs",128,0.,2048.);
@@ -120,8 +130,12 @@ Int_t St_ctf_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_ctf_Maker::Make(){
 //  PrintInfo();
-  if (!m_DataSet->GetList())  {//if DataSet is empty fill it
-    St_DataSetIter geant(gStChain->DataSet("geant"));
+
+  int iMake=kStOK;
+  
+  St_DataSet *gea = GetInputDS("geant");
+  if (gea) {//		Geant input exists
+    St_DataSetIter geant(gea);
     St_g2t_track   *g2t_track   = (St_g2t_track *)   geant("g2t_track");
     St_g2t_ctf_hit *g2t_ctb_hit = (St_g2t_ctf_hit *) geant("g2t_ctb_hit");
     if (g2t_ctb_hit) {
@@ -138,6 +152,7 @@ Int_t St_ctf_Maker::Make(){
         m_adcc->Fill((Float_t) raw->adc);
       }
     }
+
     St_g2t_ctf_hit *g2t_tof_hit = (St_g2t_ctf_hit *) geant("g2t_tof_hit");
     if (g2t_tof_hit) {
       St_cts_mslat *tof_mslat = new  St_cts_mslat("tof_mslat",500); m_DataSet->Add(tof_mslat); //safe factor of 5 for mdc2
@@ -147,7 +162,7 @@ Int_t St_ctf_Maker::Make(){
       Int_t Res_cts_tof = cts(g2t_tof_hit, g2t_track,
 			      m_tof,  m_tof_slat, m_tof_slat_phi, m_tof_slat_eta, m_cts_tof,
 			      tof_event, tof_mslat, tof_raw);
-      St_DataSet *tpc_tracks = gStChain->DataSet("tpc_tracks");
+      St_DataSet *tpc_tracks = GetDataSet("tpc_tracks");
       St_tpt_track  *tptrack = 0;
       St_tte_mctrk  *mctrk   = 0;
       if (tpc_tracks) {
@@ -155,7 +170,7 @@ Int_t St_ctf_Maker::Make(){
          tptrack = (St_tpt_track *) tpcI["tptrack"];
          mctrk   = (St_tte_mctrk *) tpcI["mctrk"];
       }
-      St_DataSet *global = gStChain->DataSet("global");
+      St_DataSet *global = GetDataSet("global");
       St_dst_vertex     *vertex      = 0;
       if (global) {
          St_DataSetIter globalI(global);
@@ -187,14 +202,15 @@ Int_t St_ctf_Maker::Make(){
       }
     }
   }
-  return kStOK;
+  return iMake;
+  
 }
 //_____________________________________________________________________________
 void St_ctf_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_ctf_Maker.cxx,v 1.11 1999/03/02 00:11:49 llope Exp $\n");
+  printf("* $Id: St_ctf_Maker.cxx,v 1.12 1999/03/11 03:55:06 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
+  if (Debug()) StMaker::PrintInfo();
 }
 
