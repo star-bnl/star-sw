@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.131 2000/04/20 22:46:04 fisyak Exp $
+// $Id: bfc.C,v 1.132 2000/05/17 20:54:48 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StMaker;        
@@ -44,11 +44,14 @@ void bfc(const Int_t First,
   
   chain->SetFlags(Chain);
   if (TreeFile) chain->SetTFile(new TFile(TreeFile,"RECREATE"));
-  if (chain->GetOption("LAna") && !chain->GetTFile()) chain->SetTFile(new TFile("Laser.root","RECREATE"));
+  if (chain->GetOption("LAna") && !chain->GetTFile()) 
+    chain->SetTFile(new TFile("Laser.root","RECREATE"));
   printf ("QAInfo:Process [First=%6i/Last=%6i/Total=%6i] Events\n",First,Last,Last-First+1);
   chain->Set_IO_Files(infile,outfile);
-  chain->Load();
-  chain->Instantiate();
+  if (chain->Load() > kStOk) 
+    {printf("Error:Problems with loading of shared library(ies)\n"); gSystem->Exit(1);}
+  if (chain->Instantiate() > kStOk) 
+    {printf("Error:Problems with instantiation of Maker(s)\n"); gSystem->Exit(1);}
   if (chain->GetOption("DISPLAY")) dsMk = (StEventDisplayMaker *) chain->GetMaker("EventDisplay");
 #if 0
   // Insert your maker before "tpc_hits"
