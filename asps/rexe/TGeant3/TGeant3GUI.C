@@ -1,5 +1,5 @@
 {
-gui=new AliGeant3GeometryGUI();
+gui=new StarGeant3GeometryGUI();
 }
 
 

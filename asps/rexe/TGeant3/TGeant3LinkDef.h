@@ -2,21 +2,21 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGeant3LinkDef.h,v 1.1.1.1 2000/04/23 18:21:15 fisyak Exp $ */
+/* $Id: TGeant3LinkDef.h,v 1.2 2000/04/23 19:18:14 fisyak Exp $ */
 
 #pragma link off all globals;
 #pragma link off all classes;
 #pragma link off all functions;
  
-#pragma link C++ class  AliGeant3;
+#pragma link C++ class  StarGeant3;
 #pragma link C++ class  TGeant3-;
 #pragma link C++ class  THIGZ;
 #pragma link C++ class  TPaveTree;
-#pragma link C++ class  AliGuiGeomMain-;
-#pragma link C++ class  AliDrawVolume-;
-#pragma link C++ class  AliGeant3GeometryGUI-;
-#pragma link C++ class  AliGUIMaterial-;
-#pragma link C++ class  AliGUIMedium-;
+#pragma link C++ class  StarGuiGeomMain-;
+#pragma link C++ class  StarDrawVolume-;
+#pragma link C++ class  StarGeant3GeometryGUI-;
+#pragma link C++ class  StarGUIMaterial-;
+#pragma link C++ class  StarGUIMedium-;
 
 
 #pragma link C++ class Quest_t; 

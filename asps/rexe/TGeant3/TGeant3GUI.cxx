@@ -15,6 +15,9 @@
 
 /*
 $Log: TGeant3GUI.cxx,v $
+Revision 1.2  2000/04/23 19:18:13  fisyak
+Merge with Alice V3.03
+
 Revision 1.1.1.1  2000/04/23 18:21:15  fisyak
 New version from ALICE
 
@@ -45,8 +48,10 @@ The new geometry viewer from A.Morsch
  **************************************************************************/
 #include <stdlib.h>
 #include <TROOT.h>
-#include <AliRun.h>
-#include <AliMC.h>
+#if 0
+#include <StarRun.h>
+#endif
+#include <StarMC.h>
 #include <TGeant3.h>
 #include <THIGZ.h>
 #include <TApplication.h>
@@ -79,21 +84,21 @@ The new geometry viewer from A.Morsch
 
 #include "TGeant3GUI.h"
 
-static AliDrawVolume  *gCurrentVolume   = new AliDrawVolume("NULL");
-static AliGUIMaterial *gCurrentMaterial = new AliGUIMaterial();
-static AliGUIMedium   *gCurrentMedium   = new AliGUIMedium();
+static StarDrawVolume  *gCurrentVolume   = new StarDrawVolume("NULL");
+static StarGUIMaterial *gCurrentMaterial = new StarGUIMaterial();
+static StarGUIMedium   *gCurrentMedium   = new StarGUIMedium();
 static Int_t           gCurrentParticle = 1;
 static Int_t           gCurrentProcess  = 1;
 
-ClassImp(AliGeant3GeometryGUI)
+ClassImp(StarGeant3GeometryGUI)
 
-    AliGeant3GeometryGUI::AliGeant3GeometryGUI()
+    StarGeant3GeometryGUI::StarGeant3GeometryGUI()
 {
-    fPanel  =   new AliGuiGeomMain(gClient->GetRoot(), 500, 500);
+    fPanel  =   new StarGuiGeomMain(gClient->GetRoot(), 500, 500);
     fNstack = 0;
-    fVolumes =   new TClonesArray("AliDrawVolume",1000);
-    fMaterials = new TClonesArray("AliGUIMaterial",1000);
-    fMedia =     new TClonesArray("AliGUIMedium",1000);
+    fVolumes =   new TClonesArray("StarDrawVolume",1000);
+    fMaterials = new TClonesArray("StarGUIMaterial",1000);
+    fMedia =     new TClonesArray("StarGUIMedium",1000);
 //  Store local copy of zebra bank entries
     TGeant3 *geant3 = (TGeant3*) gMC;
     if (geant3) {
@@ -107,13 +112,13 @@ ClassImp(AliGeant3GeometryGUI)
 	ReadMaterials();
     }
 }
-void AliGeant3GeometryGUI::Streamer(TBuffer &)
+void StarGeant3GeometryGUI::Streamer(TBuffer &)
 {
 ;
 }
 
 
-void AliGeant3GeometryGUI::ReadGeometryTree()
+void StarGeant3GeometryGUI::ReadGeometryTree()
 {
 //
 // Copy zebra volume tree into ROOT LisTree
@@ -129,13 +134,13 @@ void AliGeant3GeometryGUI::ReadGeometryTree()
 //  Empty object
     const TGPicture* Document   = gClient->GetPicture("doc_t.xpm");
 
-    AliDrawVolume  *volume;
+    StarDrawVolume  *volume;
 
     Int_t nst=0;
     Int_t nlevel=1;
     Int_t newlevel=nlevel;
 
-    volume = new AliDrawVolume("ALIC");
+    volume = new StarDrawVolume("ALIC");
     volume->SetIdVolume(((TGeant3*)gMC)->VolId("ALIC"));
     volume->SetIdCopy(0);
     volume->SetItem(NULL);
@@ -193,20 +198,20 @@ void AliGeant3GeometryGUI::ReadGeometryTree()
 // Add volume to list tree
 	    
 	    if (nch!=0) {
-		item2 = fPanel->AddItem(new AliDrawVolume(vname), 
+		item2 = fPanel->AddItem(new StarDrawVolume(vname), 
 				    itemi, namec, OpenFolder, Folder);
 	    } else {
-		item2 = fPanel->AddItem(new AliDrawVolume(vname), 
+		item2 = fPanel->AddItem(new StarDrawVolume(vname), 
 				    itemi, namec, Document, Document);
 	    }
 //
 // Add medium information to list tree item
-	    ((AliDrawVolume *) item2->GetUserData())->SetIdVolume(ivol);
-	    ((AliDrawVolume *) item2->GetUserData())->SetIdMaterial(imat);
-	    ((AliDrawVolume *) item2->GetUserData())->SetIdMedium(imed);
+	    ((StarDrawVolume *) item2->GetUserData())->SetIdVolume(ivol);
+	    ((StarDrawVolume *) item2->GetUserData())->SetIdMaterial(imat);
+	    ((StarDrawVolume *) item2->GetUserData())->SetIdMedium(imed);
 //
 // Set current volume to first list tree entry
-	    if (!i) gCurrentVolume= ((AliDrawVolume *) item2->GetUserData());
+	    if (!i) gCurrentVolume= ((StarDrawVolume *) item2->GetUserData());
 	    
 //
 // Collect children information
@@ -220,7 +225,7 @@ void AliGeant3GeometryGUI::ReadGeometryTree()
 		strcpy(namec,((TGeant3*)gMC)->VolName(-icvol));
 		tmp = new char[4];
 		strncpy(tmp,(char *) &namec, 4);
-		volume = new AliDrawVolume(namec);
+		volume = new StarDrawVolume(namec);
 		volume->SetIdVolume(-icvol);
 // Number of divisions
 		Int_t jvo  = fZlq[fGclink->jvolum-ivol];
@@ -260,7 +265,7 @@ void AliGeant3GeometryGUI::ReadGeometryTree()
 			strcpy(namec,((TGeant3*)gMC)->VolName(icvol));
 			tmp = new char[4];
 			strncpy(tmp,(char *) &namec, 4);
-			volume = new AliDrawVolume(namec);
+			volume = new StarDrawVolume(namec);
 			volume->SetIdVolume(icvol);
 			volume->SetIdCopy(1);
 // Link to mother
@@ -279,7 +284,7 @@ void AliGeant3GeometryGUI::ReadGeometryTree()
     }
 }
 
-void AliGeant3GeometryGUI::ReadMaterials()
+void StarGeant3GeometryGUI::ReadMaterials()
 {
 //
 // Puts media and material names into ComboBox and 
@@ -311,8 +316,8 @@ void AliGeant3GeometryGUI::ReadMaterials()
 	    natmed[20]='\0';
 //
 // Create new medium object 
-	    AliGUIMedium * medium = 
-		new AliGUIMedium(itm, imat, natmed, isvol, ifield, fieldm, 
+	    StarGUIMedium * medium = 
+		new StarGUIMedium(itm, imat, natmed, isvol, ifield, fieldm, 
 				      tmaxfd, stemax, deemax, epsil, stmin);
 	    (*fMedia)[NEntries-1]=medium;
         { //Begin local scope for j
@@ -344,8 +349,8 @@ void AliGeant3GeometryGUI::ReadMaterials()
 	    namate[20]='\0';
 //
 // Create new material object
-	    AliGUIMaterial * material = 
-		new AliGUIMaterial(imat,namate,a,z,dens,radl,absl);
+	    StarGUIMaterial * material = 
+		new StarGUIMaterial(imat,namate,a,z,dens,radl,absl);
 	    (*fMaterials)[NEntries-1]=material;
 	    material->Dump();
 //
@@ -359,7 +364,7 @@ void AliGeant3GeometryGUI::ReadMaterials()
     fPanel->Update();
 }
 
-Int_t AliGeant3GeometryGUI::NChildren(Int_t idvol)
+Int_t StarGeant3GeometryGUI::NChildren(Int_t idvol)
 {
 //
 // Return number of children for volume idvol
@@ -368,7 +373,7 @@ Int_t AliGeant3GeometryGUI::NChildren(Int_t idvol)
     return nin;
 }
 
-Int_t AliGeant3GeometryGUI::Child(Int_t idvol, Int_t idc)
+Int_t StarGeant3GeometryGUI::Child(Int_t idvol, Int_t idc)
 {
 //
 // Return GEANT id of child number idc of volume idvol
@@ -383,7 +388,7 @@ Int_t AliGeant3GeometryGUI::Child(Int_t idvol, Int_t idc)
     }
 }
 
-Int_t AliGeant3GeometryGUI::Medium(Int_t idvol)
+Int_t StarGeant3GeometryGUI::Medium(Int_t idvol)
 {
 //
 // Return medium number for volume idvol.
@@ -402,7 +407,7 @@ Int_t AliGeant3GeometryGUI::Medium(Int_t idvol)
     return imed;
 }
 
-Int_t AliGeant3GeometryGUI::Material(Int_t idvol)
+Int_t StarGeant3GeometryGUI::Material(Int_t idvol)
 {
 // Return material number for volume idvol.
 // If idvol is negative the volume results from a division.
@@ -413,7 +418,7 @@ Int_t AliGeant3GeometryGUI::Material(Int_t idvol)
 }
 
 
-Float_t AliGeant3GeometryGUI::Cut(Int_t imed, Int_t icut)
+Float_t StarGeant3GeometryGUI::Cut(Int_t imed, Int_t icut)
 {
 // Return cuts icut for medium idmed 
 // 
@@ -431,10 +436,10 @@ Float_t AliGeant3GeometryGUI::Cut(Int_t imed, Int_t icut)
     return Float_t (fZq[jtm+icut]);
 }
 
-ClassImp(AliDrawVolume)
+ClassImp(StarDrawVolume)
 //
 // Drawing parameter tags
-enum AliDrawParamId {
+enum StarDrawParamId {
    P_Theta,
    P_Phi,
    P_Psi,
@@ -456,7 +461,7 @@ enum AliDrawParamId {
 };
 
 
-AliDrawVolume::AliDrawVolume(char* name)
+StarDrawVolume::StarDrawVolume(char* name)
 {
     fName   = name;
     fTheta  = 30;
@@ -479,7 +484,7 @@ AliDrawVolume::AliDrawVolume(char* name)
     fClipZmax=2000.;
 }
 
-char* AliDrawVolume::Name()
+char* StarDrawVolume::Name()
 {
 //
 // Return volume name
@@ -487,14 +492,14 @@ char* AliDrawVolume::Name()
 }
 
     
-void AliDrawVolume::Streamer(TBuffer &)
+void StarDrawVolume::Streamer(TBuffer &)
 {
 ;
 }
 
 
 
-void AliDrawVolume::Draw(Option_t *)
+void StarDrawVolume::Draw(Option_t *)
 {
     gMC->Gsatt(fName,"seen", fSeen);
     
@@ -525,7 +530,7 @@ void AliDrawVolume::Draw(Option_t *)
     if (higz) higz->Update();
 }
 
-void AliDrawVolume::DrawSpec()
+void StarDrawVolume::DrawSpec()
 {
     gMC->Gsatt(fName,"seen", fSeen);
     
@@ -555,7 +560,7 @@ void AliDrawVolume::DrawSpec()
     if (higz) higz->Update();
 }
 
-void AliDrawVolume::SetParam(Int_t ip, Float_t param)
+void StarDrawVolume::SetParam(Int_t ip, Float_t param)
 {
     switch (ip) {
     case P_Theta:
@@ -615,7 +620,7 @@ void AliDrawVolume::SetParam(Int_t ip, Float_t param)
     }
 }
 
-Float_t  AliDrawVolume::GetParam(Int_t ip)
+Float_t  StarDrawVolume::GetParam(Int_t ip)
 {
     switch (ip) {
     case P_Theta:
@@ -661,7 +666,7 @@ Float_t  AliDrawVolume::GetParam(Int_t ip)
 }
 
 
-ClassImp(AliGuiGeomMain)
+ClassImp(StarGuiGeomMain)
 
  const Text_t* LabelTextP[19]  = 
 {"PAIR  ", "COMP  ", "PHOT  ", "PFIS  ", "DRAY  ", "ANNI  ", "BREM  ", 
@@ -729,13 +734,13 @@ const char *filetypes[] = { "All files",     "*",
 
 
 
-TGListTreeItem*  AliGuiGeomMain::
+TGListTreeItem*  StarGuiGeomMain::
 AddItem(TObject * obj, TGListTreeItem *parent, const char* name, const TGPicture *open, const TGPicture *closed)
 {
     return fLt->AddItem(parent, name, obj, open, closed);
 }
 
-AliGuiGeomMain::AliGuiGeomMain(const TGWindow *p, UInt_t w, UInt_t h)
+StarGuiGeomMain::StarGuiGeomMain(const TGWindow *p, UInt_t w, UInt_t h)
       : TGMainFrame(p, w, h)
 {
     fDialog=0;
@@ -986,14 +991,14 @@ AliGuiGeomMain::AliGuiGeomMain(const TGWindow *p, UInt_t w, UInt_t h)
    tf->AddFrame(fF6, fL2);
 // Window name and final mapping
 //
-   SetWindowName("AliRoot Geometry Browser");
+   SetWindowName("StarRoot Geometry Browser");
    MapSubwindows();
    // We need to use GetDefault...() to initialize the layout algorithm...
    Resize(GetDefaultSize());
    MapWindow();
 }
 
-AliGuiGeomMain::~AliGuiGeomMain()
+StarGuiGeomMain::~StarGuiGeomMain()
 {
    // Delete all created widgets.
 
@@ -1009,12 +1014,12 @@ AliGuiGeomMain::~AliGuiGeomMain()
    delete fMenuHelp;
 }
 
-void AliGuiGeomMain::Streamer(TBuffer &)
+void StarGuiGeomMain::Streamer(TBuffer &)
 {
 ;
 }
 
-void AliGuiGeomMain::Plot()
+void StarGuiGeomMain::Plot()
 {
     const Float_t avo=0.60221367;
     Float_t *tkin  = new Float_t[fNbins];
@@ -1080,7 +1085,7 @@ void AliGuiGeomMain::Plot()
     
 }
 
-void AliGuiGeomMain::Update()
+void StarGuiGeomMain::Update()
 {
     if (fDialog) {
 	fDialog->Update();
@@ -1090,18 +1095,18 @@ void AliGuiGeomMain::Update()
     Int_t nmat=fComboEntries->GetEntriesFast();
     Int_t i=0;
     for (i=0; i<nmat; i++) {
-	gCurrentMaterial = (AliGUIMaterial*) 
+	gCurrentMaterial = (StarGUIMaterial*) 
 	    (fComboEntries->UncheckedAt(i));
 	if (gCurrentMaterial->Id()==imat) break;
     }
-    gCurrentMedium   = (AliGUIMedium*) 
+    gCurrentMedium   = (StarGUIMedium*) 
 	(fComboMediaEntries->UncheckedAt(i));
     UpdateCombo();
     UpdateListBox();
     
 }
 
-void AliGuiGeomMain::UpdateCombo()
+void StarGuiGeomMain::UpdateCombo()
 {
 
     Int_t   imat = gCurrentMaterial->Id();
@@ -1189,7 +1194,7 @@ void AliGuiGeomMain::UpdateCombo()
     gClient->NeedRedraw(fTehM[7]);
 }
 
-void AliGuiGeomMain::UpdateListBox()
+void StarGuiGeomMain::UpdateListBox()
 {
     Int_t i;
     fProcessLB->RemoveEntries(1,19);
@@ -1214,7 +1219,7 @@ void AliGuiGeomMain::UpdateListBox()
 }
 
 
-void AliGuiGeomMain::CloseWindow()
+void StarGuiGeomMain::CloseWindow()
 {
    // Got close message for this MainFrame. Calls parent CloseWindow()
    // (which destroys the window) and terminate the application.
@@ -1225,7 +1230,7 @@ void AliGuiGeomMain::CloseWindow()
    gApplication->Terminate(0);
 }
 
-Bool_t AliGuiGeomMain::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
+Bool_t StarGuiGeomMain::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
 {
     switch (GET_MSG(msg)) {
 //
@@ -1260,7 +1265,7 @@ Bool_t AliGuiGeomMain::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
 	    if (parm1 == kButton1) {
 		if ((item = fLt->GetSelected())) 
 		{
-		    gCurrentVolume=((AliDrawVolume *) item->GetUserData());
+		    gCurrentVolume=((StarDrawVolume *) item->GetUserData());
 		    Update();
 		}
 	    }
@@ -1272,9 +1277,9 @@ Bool_t AliGuiGeomMain::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
 		if ((item = fLt->GetSelected())) 
 		{
 
-		    ((AliDrawVolume *) item->GetUserData())->DrawSpec();
+		    ((StarDrawVolume *) item->GetUserData())->DrawSpec();
 
-		    gCurrentVolume=((AliDrawVolume *) item->GetUserData());
+		    gCurrentVolume=((StarDrawVolume *) item->GetUserData());
 		    Update();
 		}
 	    }
@@ -1284,8 +1289,8 @@ Bool_t AliGuiGeomMain::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
 		TGListTreeItem *item;
 		if ((item = fLt->GetSelected())) 
 		{
-		    ((AliDrawVolume *) item->GetUserData())->Draw();
-		    gCurrentVolume=((AliDrawVolume *) item->GetUserData());
+		    ((StarDrawVolume *) item->GetUserData())->Draw();
+		    gCurrentVolume=((StarDrawVolume *) item->GetUserData());
 		    Update();
 		}
 	    }
@@ -1319,9 +1324,9 @@ Bool_t AliGuiGeomMain::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
 //
 // Material Combo
 	    case 1:
-		gCurrentMaterial=(AliGUIMaterial*) 
+		gCurrentMaterial=(StarGUIMaterial*) 
 		    (fComboEntries->UncheckedAt(Int_t(parm2-1)));
-		gCurrentMedium=(AliGUIMedium*) 
+		gCurrentMedium=(StarGUIMedium*) 
 		    (fComboMediaEntries->UncheckedAt(Int_t(parm2-1)));
 		UpdateCombo();
 		UpdateListBox();
@@ -1329,9 +1334,9 @@ Bool_t AliGuiGeomMain::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
 //
 // Media Combo
 	    case 2:
-		gCurrentMedium=(AliGUIMedium*) 
+		gCurrentMedium=(StarGUIMedium*) 
 		    (fComboMediaEntries->UncheckedAt(Int_t(parm2-1)));
-		gCurrentMaterial=(AliGUIMaterial*) 
+		gCurrentMaterial=(StarGUIMaterial*) 
 		    (fComboEntries->UncheckedAt(Int_t(parm2-1)));
 		UpdateCombo();
 		UpdateListBox();
@@ -1364,7 +1369,7 @@ Bool_t AliGuiGeomMain::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
 	    break;
 	    
 	    case M_TEST_DLG:
-		fDialog = new AliGuiGeomDialog
+		fDialog = new StarGuiGeomDialog
 		    (gClient->GetRoot(), this, 400, 200);
 		break;
 		
@@ -1387,7 +1392,7 @@ Bool_t AliGuiGeomMain::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
     return kTRUE;
 }
 
-void AliGuiGeomMain::AddMaterial(AliGUIMaterial *Material, Int_t i)
+void StarGuiGeomMain::AddMaterial(StarGUIMaterial *Material, Int_t i)
 {
     char* tmp;
     tmp=Material->Name();
@@ -1397,7 +1402,7 @@ void AliGuiGeomMain::AddMaterial(AliGUIMaterial *Material, Int_t i)
     fMaterialCombo->Resize(200, 20);
 }
 
-void AliGuiGeomMain::AddMedium(AliGUIMedium *Medium, Int_t i)
+void StarGuiGeomMain::AddMedium(StarGUIMedium *Medium, Int_t i)
 {
     char* tmp;
     tmp=Medium->Name();
@@ -1409,7 +1414,7 @@ void AliGuiGeomMain::AddMedium(AliGUIMedium *Medium, Int_t i)
 }
 
 
-AliGuiGeomDialog::AliGuiGeomDialog(const TGWindow *p, const TGWindow *main, UInt_t w,
+StarGuiGeomDialog::StarGuiGeomDialog(const TGWindow *p, const TGWindow *main, UInt_t w,
                        UInt_t h, UInt_t options)
     : TGTransientFrame(p, main, w, h, options)
 {
@@ -1441,7 +1446,7 @@ AliGuiGeomDialog::AliGuiGeomDialog(const TGWindow *p, const TGWindow *main, UInt
 // Tab1: Sliders
 //
    TGCompositeFrame *tf = fTab->AddTab("Draw");
-   fF1 = new AliGUISliders(tf, this, 60, 20);
+   fF1 = new StarGUISliders(tf, this, 60, 20);
    tf->AddFrame(fF1,fL3);
    
 // 
@@ -1615,7 +1620,7 @@ AliGuiGeomDialog::AliGuiGeomDialog(const TGWindow *p, const TGWindow *main, UInt
    //gClient->WaitFor(this);    // otherwise canvas contextmenu does not work
 }
 
-AliGuiGeomDialog::~AliGuiGeomDialog()
+StarGuiGeomDialog::~StarGuiGeomDialog()
 {
    // Delete test dialog widgets.
 
@@ -1636,7 +1641,7 @@ AliGuiGeomDialog::~AliGuiGeomDialog()
    delete fSLabel1;  delete fSLabel2;  delete fSLabel3;
 }
 
-void AliGuiGeomDialog::Update()
+void StarGuiGeomDialog::Update()
 {
     
     Float_t param;
@@ -1676,13 +1681,13 @@ void AliGuiGeomDialog::Update()
     
 }
 
-void AliGuiGeomDialog::CloseWindow()
+void StarGuiGeomDialog::CloseWindow()
 {
    // Called when window is closed via the window manager.
    delete this;
 }
 
-Bool_t AliGuiGeomDialog::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
+Bool_t StarGuiGeomDialog::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
 {
    // Process messages coming from widgets associated with the dialog.
     char buf[10];
@@ -1812,7 +1817,7 @@ static Int_t   IRangeMin[7]  = {    0,     0,     0,    0,    0,   0,   0};
 static Int_t   IRangeMax[7]  = {36000, 36000, 36000, 2000, 2000, 10, 10};
 static Int_t   DefaultPos[7] = { 3000,  4000,     0, 1000, 1000,   1,   1};
 
-AliGUISliders::AliGUISliders(const TGWindow *p, const TGWindow *,
+StarGUISliders::StarGUISliders(const TGWindow *p, const TGWindow *,
                          UInt_t w, UInt_t h) :
     TGCompositeFrame(p, w, h,kVerticalFrame)
 {
@@ -1851,7 +1856,7 @@ AliGUISliders::AliGUISliders(const TGWindow *p, const TGWindow *,
    }
 }
 
-AliGUISliders::~AliGUISliders()
+StarGUISliders::~StarGUISliders()
 {
     delete fBfly1; delete fBly;
    // Delete dialog.
@@ -1863,7 +1868,7 @@ AliGUISliders::~AliGUISliders()
     }
 }
 
-void AliGUISliders::Update()
+void StarGUISliders::Update()
 {
     char buf[10];
     
@@ -1883,14 +1888,14 @@ void AliGUISliders::Update()
     
 }
 
-void AliGUISliders::CloseWindow()
+void StarGUISliders::CloseWindow()
 {
    // Called when window is closed via the window manager.
 
    delete this;
 }
 
-Bool_t AliGUISliders::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
+Bool_t StarGUISliders::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
 {
    // Process slider messages.
 
@@ -1923,9 +1928,9 @@ Bool_t AliGUISliders::ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2)
    return kTRUE;
 }
 
-ClassImp(AliGUIMaterial)
+ClassImp(StarGUIMaterial)
 
-AliGUIMaterial::AliGUIMaterial()
+StarGUIMaterial::StarGUIMaterial()
 { 
     fId=-1;
     fName = 0; 
@@ -1936,7 +1941,7 @@ AliGUIMaterial::AliGUIMaterial()
     fAbsl=-1;    
 }
 
-AliGUIMaterial::AliGUIMaterial(Int_t imat, char* name, Float_t a, Float_t z,
+StarGUIMaterial::StarGUIMaterial(Int_t imat, char* name, Float_t a, Float_t z,
 		   Float_t dens, Float_t radl, Float_t absl)
 { 
     fId=imat;
@@ -1947,7 +1952,7 @@ AliGUIMaterial::AliGUIMaterial(Int_t imat, char* name, Float_t a, Float_t z,
     fRadl=radl;   
     fAbsl=absl;    
 }
-void AliGUIMaterial::Dump()
+void StarGUIMaterial::Dump()
 {
     printf("\n *****************************************");
     printf("\n Material Number:   %10d", fId);
@@ -1959,61 +1964,61 @@ void AliGUIMaterial::Dump()
     printf("\n Absorption Length: %10.2f", fAbsl);        	
 }
 
-Int_t AliGUIMaterial::Id()
+Int_t StarGUIMaterial::Id()
 {
     return fId;
 }
 
-char*  AliGUIMaterial::Name()
+char*  StarGUIMaterial::Name()
 {
     return fName;
 }
 
-Float_t  AliGUIMaterial::A()
+Float_t  StarGUIMaterial::A()
 {
     return fA;
 }
 
-Float_t  AliGUIMaterial::Z()
+Float_t  StarGUIMaterial::Z()
 {
     return fZ;
 }
 
-Float_t  AliGUIMaterial::Density()
+Float_t  StarGUIMaterial::Density()
 {
     return fDensity;
 }
 
-Float_t  AliGUIMaterial::RadiationLength()
+Float_t  StarGUIMaterial::RadiationLength()
 {
     return fRadl;
 }
 
-Float_t  AliGUIMaterial::AbsorptionLength()
+Float_t  StarGUIMaterial::AbsorptionLength()
 {
     return fAbsl;
 }
 
 
-void AliGUIMaterial::Plot()
+void StarGUIMaterial::Plot()
 {
     ;
 }
 
-void AliGUIMaterial::Streamer(TBuffer &)
+void StarGUIMaterial::Streamer(TBuffer &)
 {
 ;
 }
 
-ClassImp(AliGUIMedium)
+ClassImp(StarGUIMedium)
 
-AliGUIMedium::AliGUIMedium()
+StarGUIMedium::StarGUIMedium()
 { 
     fId=-1;
     fName = 0; 
 }
 
-AliGUIMedium::AliGUIMedium(Int_t imed, Int_t imat, char* name, Int_t isvol, 
+StarGUIMedium::StarGUIMedium(Int_t imed, Int_t imat, char* name, Int_t isvol, 
 			   Int_t ifield,
 			   Float_t fieldm, Float_t tmaxfd, Float_t stemax, Float_t deemax,
 			   Float_t epsil, Float_t stmin)
@@ -2031,22 +2036,22 @@ AliGUIMedium::AliGUIMedium(Int_t imed, Int_t imat, char* name, Int_t isvol,
     fStmin=stmin;
 }
 
-void AliGUIMedium::Dump()
+void StarGUIMedium::Dump()
 {
     ;
 }
 
-Int_t AliGUIMedium::Id()
+Int_t StarGUIMedium::Id()
 {
     return fId;
 }
 
-char*  AliGUIMedium::Name()
+char*  StarGUIMedium::Name()
 {
     return fName;
 }
 
-Float_t AliGUIMedium::GetPar(Int_t ipar)
+Float_t StarGUIMedium::GetPar(Int_t ipar)
 { 
     Float_t p;
     if (ipar < 23) {
@@ -2060,7 +2065,7 @@ Float_t AliGUIMedium::GetPar(Int_t ipar)
     return p;
 }
  
-void AliGUIMedium::Streamer(TBuffer &)
+void StarGUIMedium::Streamer(TBuffer &)
 {
 ;
 }

@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: StarMC.h,v 1.1 2000/01/04 16:04:03 fisyak Exp $ */
+/* $Id: StarMC.h,v 1.2 2000/04/23 19:18:09 fisyak Exp $ */
 
 ///////////////////////////////////////////////////////////////////////////////
 //                                                                           //
@@ -53,7 +53,7 @@ public:
   virtual Bool_t  IsTrackStop() const =0;
   virtual Float_t TrackLength() const =0;
   virtual Float_t TrackTime() const =0;
-  virtual Bool_t  IsTrackAlive() const=0;
+  virtual Bool_t  IsTrackStarve() const=0;
   virtual Int_t   NSecondaries() const=0;
   virtual Int_t   CurrentEvent() const=0;
   virtual const char*   ProdProcess() const=0;

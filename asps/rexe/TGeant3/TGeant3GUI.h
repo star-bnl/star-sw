@@ -3,7 +3,7 @@
 /* Copyright(c) 1998-1999, ALICE Experiment at CERN, All rights reserved. *
  * See cxx source for full Copyright notice                               */
 
-/* $Id: TGeant3GUI.h,v 1.1.1.1 2000/04/23 18:21:15 fisyak Exp $ */
+/* $Id: TGeant3GUI.h,v 1.2 2000/04/23 19:18:14 fisyak Exp $ */
 
 #include <TROOT.h>
 #include <TVirtualX.h>
@@ -30,17 +30,17 @@
 #include <TClonesArray.h>
 #include <TGeant3.h>
 
-class AliGuiGeomDialog;
-class AliGUISliders;
-class AliGuiGeomMain;
-class AliDrawVolume;
-class AliGUIMaterial;
-class AliGUIMedium;
+class StarGuiGeomDialog;
+class StarGUISliders;
+class StarGuiGeomMain;
+class StarDrawVolume;
+class StarGUIMaterial;
+class StarGUIMedium;
 
 
-class AliGeant3GeometryGUI : public TObject {
+class StarGeant3GeometryGUI : public TObject {
  private:
-    AliGuiGeomMain *fPanel;     // the main gui panel
+    StarGuiGeomMain *fPanel;     // the main gui panel
     Int_t          fNstack;      // number of volumes
     TClonesArray   *fVolumes;    // array of volumes  
     Int_t          fNMaterials;  // number of materials and media
@@ -53,15 +53,15 @@ class AliGeant3GeometryGUI : public TObject {
     Gclink_t* fGclink;
     Gcnum_t*  fGcnum;
  public:
-    AliGeant3GeometryGUI();
+    StarGeant3GeometryGUI();
     // Reads the zebra geometry tree and put it into the ListTree
     void  ReadGeometryTree();
     // Read material and media information and put it into ComboBox 
     void  ReadMaterials();
     Float_t Cut(Int_t idmed, Int_t icut);
  private:
-    virtual AliDrawVolume* Volume(Int_t id)
-	{return (AliDrawVolume *) (fVolumes->UncheckedAt(id));}
+    virtual StarDrawVolume* Volume(Int_t id)
+	{return (StarDrawVolume *) (fVolumes->UncheckedAt(id));}
     // Return number of children for volume idvol
     Int_t NChildren(Int_t idvol);
     // Return child number idc of volume idvol
@@ -73,11 +73,11 @@ class AliGeant3GeometryGUI : public TObject {
     //
 
     
-    ClassDef(AliGeant3GeometryGUI,1)  // GUI for Geant3 geometry visualisation
+    ClassDef(StarGeant3GeometryGUI,1)  // GUI for Geant3 geometry visualisation
 };
 
 
-class AliGuiGeomMain : public TGMainFrame {
+class StarGuiGeomMain : public TGMainFrame {
 
 private:
     TGTab              *fTab;     
@@ -90,7 +90,7 @@ private:
     TGLayoutHints      *fMenuBarItemLayout, *fMenuBarHelpLayout,
 	               *fMenuBarLayout, fLTab;
     TGLayoutHints      *fL2;
-    AliGuiGeomDialog   *fDialog;                   //! no output please
+    StarGuiGeomDialog   *fDialog;                   //! no output please
     TGComboBox         *fMaterialCombo;
     TGComboBox         *fMechanismCombo;
     TGComboBox         *fMediaCombo, *fParticleCombo;
@@ -107,8 +107,8 @@ private:
     Int_t              fNbins;
     
  public:
-    AliGuiGeomMain(const TGWindow *p, UInt_t w, UInt_t h);
-    virtual ~AliGuiGeomMain();
+    StarGuiGeomMain(const TGWindow *p, UInt_t w, UInt_t h);
+    virtual ~StarGuiGeomMain();
     // Destroy the main window
     virtual void CloseWindow();
     // Add item to ListTree
@@ -116,9 +116,9 @@ private:
 	AddItem(TObject *, TGListTreeItem* ,
 		const char*, const TGPicture*, const TGPicture*);
     // Add Material to ComboBox
-    virtual void AddMaterial(AliGUIMaterial *Material, Int_t i);
+    virtual void AddMaterial(StarGUIMaterial *Material, Int_t i);
     // Add Medium to ComboBox
-    virtual void AddMedium(AliGUIMedium *Medium, Int_t i);
+    virtual void AddMedium(StarGUIMedium *Medium, Int_t i);
     // Process messages from this window
     virtual Bool_t ProcessMessage(Long_t msg, Long_t parm1, Long_t);
     // Update widgets
@@ -132,14 +132,14 @@ private:
     virtual void SetMediaComboEntries(TClonesArray *entries)
 	{fComboMediaEntries=entries;}
     virtual void Plot();
-    ClassDef(AliGuiGeomMain,1)  // MainFrame for Geometry Browser
+    ClassDef(StarGuiGeomMain,1)  // MainFrame for Geometry Browser
 };
 
 
-class AliGuiGeomDialog : public TGTransientFrame {
+class StarGuiGeomDialog : public TGTransientFrame {
 
 private:
-    AliGUISliders       *fF1;
+    StarGUISliders       *fF1;
     TGCompositeFrame    *fFrame1, *fF2, *fF3, *fF4;
     TGButton            *fOkButton, *fCancelButton;
     TGButton            *fChk1, *fChk2, *fChk3;
@@ -154,9 +154,9 @@ private:
     TGLabel             *fSLabel1,  *fSLabel2,  *fSLabel3;
     
 public:
-   AliGuiGeomDialog(const TGWindow *p, const TGWindow *main, UInt_t w, UInt_t h,
+   StarGuiGeomDialog(const TGWindow *p, const TGWindow *main, UInt_t w, UInt_t h,
                UInt_t options = kMainFrame | kVerticalFrame);
-   virtual ~AliGuiGeomDialog();
+   virtual ~StarGuiGeomDialog();
 // Destroy this window
    virtual void CloseWindow();
 // Process messages from this window    
@@ -165,7 +165,7 @@ public:
    virtual void Update();
 };
 
-class AliGUISliders : public  TGCompositeFrame {
+class StarGUISliders : public  TGCompositeFrame {
 
 private:
 //
@@ -177,20 +177,20 @@ private:
     TGLabel           *fLabel[8];
     Text_t            fLabelText[8];
 public:
-   AliGUISliders(const TGWindow *p, const TGWindow *main, UInt_t w, UInt_t h);
-   virtual ~AliGUISliders();
+   StarGUISliders(const TGWindow *p, const TGWindow *main, UInt_t w, UInt_t h);
+   virtual ~StarGUISliders();
    virtual void CloseWindow();
    virtual Bool_t ProcessMessage(Long_t msg, Long_t parm1, Long_t parm2);
    virtual void Update();
       
-   //   ClassDef(AliGUISliders,1)  // Window containing sliders 
+   //   ClassDef(StarGUISliders,1)  // Window containing sliders 
 };
 
-class AliDrawVolume : public TObject 
+class StarDrawVolume : public TObject 
 {
 public:
-    AliDrawVolume(char* name);
-    virtual ~AliDrawVolume(){;}
+    StarDrawVolume(char* name);
+    virtual ~StarDrawVolume(){;}
     // Draw the volume
     virtual void    Draw(Option_t * =0);
     // Draw volume specs
@@ -249,17 +249,17 @@ private:
     Int_t   fIdMaterial;  // geant material id    
     Int_t   fIdCopy;      // copy flag
     TGListTreeItem        *fItem;
-    ClassDef(AliDrawVolume,1) // Volume Object for Drawing 
+    ClassDef(StarDrawVolume,1) // Volume Object for Drawing 
 };
 
 
-class AliGUIMaterial : public TObject 
+class StarGUIMaterial : public TObject 
 {
 public:
-    AliGUIMaterial();
-    AliGUIMaterial(Int_t imat, char* name, Float_t a, Float_t z,
+    StarGUIMaterial();
+    StarGUIMaterial(Int_t imat, char* name, Float_t a, Float_t z,
 		   Float_t dens, Float_t radl, Float_t absl);
-    virtual ~AliGUIMaterial(){;}
+    virtual ~StarGUIMaterial(){;}
     // Dump material parameters
     virtual void  Dump();
     // Get material id
@@ -291,21 +291,21 @@ private:
     Float_t fAbsl;        // absorption length
     //
     Int_t   fItem;            // Link to Widget Entry
-    ClassDef(AliGUIMaterial,1) // Material Object for GUI 
+    ClassDef(StarGUIMaterial,1) // Material Object for GUI 
 };
 
 
 const static Int_t kNPars=33;
 
-class AliGUIMedium : public TObject 
+class StarGUIMedium : public TObject 
 {
 public:
-    AliGUIMedium();
-    AliGUIMedium(Int_t imed, Int_t imat, char* name, Int_t isvol, Int_t ifield,
+    StarGUIMedium();
+    StarGUIMedium(Int_t imed, Int_t imat, char* name, Int_t isvol, Int_t ifield,
 		 Float_t fieldm, Float_t tmaxfd, Float_t stemax, Float_t deemax,
 		 Float_t epsil, Float_t stmin);
     
-    virtual ~AliGUIMedium(){;}
+    virtual ~StarGUIMedium(){;}
     // Dump medium parameters
     virtual void    Dump();
     // Get id
@@ -343,7 +343,7 @@ public:
     Float_t fStmin;          // Minimum Step Size
     //
     Int_t   fItem;           // Link to Widget Entry
-    ClassDef(AliGUIMedium,1) // Tracking Medium Object for GUI 
+    ClassDef(StarGUIMedium,1) // Tracking Medium Object for GUI 
 };
 
 #endif
