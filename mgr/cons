@@ -2,12 +2,12 @@
 
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.1.1.6 2000/03/12 18:58:47 fisyak Exp $
+# $Id: cons,v 1.1.1.7 2000/06/07 15:03:29 fisyak Exp $
 
 $ver_num = 1.8;
 $ver_rev = "-dev";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.1.1.6 2000/03/12 18:58:47 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.1.1.7 2000/06/07 15:03:29 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -138,9 +138,26 @@ Arguments can be any of the following, in any order:
    The Official cons site is: http://www.dsmit.com/cons/
 );
 
+# stash the path to cons.
+$param::conspath = $0;
+
 # Simplify program name, if it is a path.
 ($vol, $dir, $file) = File::Spec->splitpath($0);
 $0 = $file;
+
+# make it an absolute path to cons.
+if (!File::Spec->file_name_is_absolute($param::conspath)) {
+    my ($vol, $dir, $file) = File::Spec->splitpath($param::conspath);
+    my $oldcwd = Cwd::cwd();
+    my $newcwd = File::Spec->catpath($vol, $dir, undef);
+    chdir($newcwd);
+    my ($cvol, $cdir, $cfile) = File::Spec->splitpath(Cwd::cwd().$dir::SEPARATOR);
+    $param::conspath = File::Spec->catpath($cvol,$cdir,$file);
+
+    chdir($oldcwd);
+}
+# regularize path
+$param::conspath =~ s,$dir::MATCH_SEPARATOR,$dir::SEPARATOR,g;
 
 # Default parameters.
 $param::topfile = 'Construct';	# Top-level construction file.
@@ -168,6 +185,9 @@ sub showcom {
      'CXX'          => '%CC',
      'CXXFLAGS'     => '%CFLAGS',
      'CXXCOM'       => '%CXX %CXXFLAGS %_IFLAGS -c %< -o %>',
+     'RC'           => 'rc',  # ok, so it doesn't really exist on UNIX...
+     'RCFLAGS'      => '',
+     'RCCOM'	    => '%RC %RCFLAGS %_IFLAGS -o %> %<',
      'LINK'	    => '%CXX',
      'LINKCOM'	    => '%LINK %LDFLAGS -o %> %< %_LDIRS %LIBS',
      'LINKMODULECOM'=> '%LD -r -o %> %<',
@@ -193,33 +213,63 @@ sub showcom {
 	 '.cpp'=> 'build::command::cxx',
 	 '.c++'=> 'build::command::cxx',
 	 '.C++'=> 'build::command::cxx',
+	 '.rc' => 'build::command::rc',
+	 '.RC' => 'build::command::rc',
      },
-     'SUFOBJ'	    => '.o',
+     'OBJMAP'       => {
+	 '.c'  => '.o',
+	 '.s'  => '.o',
+	 '.S'  => '.o',
+	 '.C'  => '.o',
+	 '.cc' => '.o',
+	 '.cxx'=> '.o',
+	 '.cpp'=> '.o',
+	 '.c++'=> '.o',
+	 '.C++'=> '.o',
+	 '.rc' => '.res',
+	 '.RC' => '.res',
+     },
      'ENV'	    => { 'PATH' => '/bin:/usr/bin' },
 );
 
-# overrides for Win32
+# overrides for win32
 if ($main::_WIN32) {
-    # Defined for VC++ 6.0 by Greg Spencer <greg_spencer@acm.org>.
-    # Your mileage may vary.
+    # these are defined for VC++ 6.0, your mileage
+    # may vary -GRS (greg_spencer@acm.org)
     my @win = (
-	'CC'             => 'cl',
-	'CFLAGS'         => '/nologo',
-	'CCCOM'          => '%CC %CFLAGS %_IFLAGS /c %< /Fo%>',
-	'LINK'           => 'link',
-	'LINKCOM'        => '%LINK %LDFLAGS /out:%> %< %_LDIRS %LIBS',
-	'LINKMODULECOM'  => '%LD /r /o %> %<',
-	'AR'             => 'lib',
-	'ARFLAGS'        => '/nologo ',
-	'ARCOM'          => "%AR %ARFLAGS /out:%> %<",
-	'RANLIB'         => '',
-	'LD'             => 'link',
-	'LDFLAGS'        => '/nologo ',
-	'PREFLIB'        => '',
-	'SUFEXE'         => '.exe',
-	'SUFLIB'         => '.lib',
-	'SUFLIBS'        => '.dll:.lib',
-	'SUFOBJ'         => '.obj',
+	       'PREFLIB'        => '',
+	       'CC'             => 'cl',
+	       'CCCOM'          => '%CC %CFLAGS %_IFLAGS /c %< /Fo%>',
+	       'CXXCOM'         => '%CXX %CXXFLAGS %_IFLAGS /c %< /Fo%>',
+	       'CFLAGS'         => '/nologo',
+	       'RC'		=> 'rc',
+	       'RCFLAGS'	=> '/l 0x409 %RCOPTFLAGS', # default language is US English
+	       'RCCOM'		=> '%RC %RCFLAGS /i%>:d %_IFLAGS /fo%> %<',
+	       'LINK'           => 'link',
+	       'LINKCOM'        => '%LINK %LDFLAGS /out:%> %< %_LDIRS %LIBS',
+	       'LINKMODULECOM'  => '%LINK %LDFLAGS /out:%> %< %_LDIRS %LIBS',
+	       'AR'             => '%LINK -lib',
+	       'ARCOM'          => "%AR %ARFLAGS /out:%> %<",
+	       'ARFLAGS'        => '/nologo ',
+	       'LD'             => 'link',
+	       'LDFLAGS'        => '/nologo ',
+	       'SUFEXE'		=> '.exe',
+	       'SUFLIB'         => '.lib',
+	       'SUFLIBS'        => '.dll:.lib',
+	       'OBJMAP'       => {
+		   '.c'  => '.obj',
+		   '.s'  => '.obj',
+		   '.S'  => '.obj',
+		   '.C'  => '.obj',
+		   '.cc' => '.obj',
+		   '.cxx'=> '.obj',
+		   '.cpp'=> '.obj',
+		   '.c++'=> '.obj',
+		   '.C++'=> '.obj',
+		   '.rc' => '.res',
+		   '.RC' => '.res',
+	       },
+	       'RANLIB'         => '',
     );
     push(@param::defaults, @win);
 }
@@ -338,19 +388,22 @@ if ($vol || $dir) {
     chdir($cd) || die("$0: couldn't change to directory $cd ($!)\n");
     $param::topfile = $file;
 }
-
-# Walk up the directory hierarchy looking for a Conscript file (if -t set).
-my $target_top;
-if ($param::traverse) {
-    my $cwd = cwd();
-    $target_top = dir::lookupdir(undef, $cwd);
+# if you specify a Construct file in another dir, then traversal is disabled.
+elsif ($param::traverse) {
+    # Walk up the directory hierarchy looking for a Conscript file.  (If -t set.)
+    my $cwd = Cwd::cwd();
+    my $target_top = dir::lookupdir(undef, $cwd);
     my $dir = $target_top;
     while (! -f $dir->prefix . $param::topfile) {
 	$dir = $dir->up;
 	die("$0: unable to find $param::topfile.\n") if ! $dir;
     }
+    
+    $param::start_dir = $cwd;
     chdir($dir->path);
-    @targets = map(dir::lookup($target_top, $_)->path, @targets);
+}
+else {
+    $param::start_dir = undef;
 }
 
 # Set up $dir::top and $dir::cwd, now that we are in the right directory.
@@ -398,9 +451,14 @@ doscripts($param::topfile);
 # If no targets were specified, supply default targets (if any).
 @targets = @param::default_targets if ! @targets;
 
+# Make sure the targets make sense in the current dir
+# if we specified a Construct file, or we traversed from a directory.
+@targets = dir::relocate_targets($param::start_dir, @targets) if $param::start_dir;
+
 # Build the supplied target patterns.
 for $tgt (map($dir::top->lookup($_), @targets)) {
-    if ($target_top && ! $tgt->is_under($target_top)) {
+    if (!File::Spec->file_name_is_absolute($tgt->path) &&
+	$target_top && ! $tgt->is_under($target_top)) {
 	# A -t option was used, and this target is not underneath
 	# the directory where we were invoked via -t.
 	# If the target is a directory and the -t directory
@@ -879,8 +937,7 @@ sub Objects {
 # Returns corresponding object files references.
 sub _Objects {
     my($env) = shift;
-    my($suffix) = $env->{SUFOBJ};
-    map(_Object($env, $_, $_->{dir}->lookup($_->base . $suffix)), @_);
+    map(_Object($env, $_, $_->{dir}->lookup($_->base . $env->{OBJMAP}{$_->suffix})), @_);
 }
 
 # Called with an object and source reference.  If no object reference
@@ -1069,29 +1126,52 @@ sub cachout {
 # f: return file part
 # F: return file part, but strip any suffix
 # d: return directory part
-# b: return full path, but strip any suffix (a.k.a. return basename)
+# b: return path, but strip any suffix (a.k.a. return basename)
 # s: return only the suffix (or an empty string, if no suffix is there)
-# no option: return full path to file
+# a: return the absolute path to the file.
+# S: return the absolute path to the source file.
+# no option: return path to file
 sub _variant {
-    my($opt, $file) = @_;
-    if ($opt eq 'f') { return $file->{entry}; }
-    elsif ($opt eq 'd') { return $file->{dir}->path; }
+  my $opt = shift;
+  my $tgt = shift;
+  my $isrfile = shift;
+
+  if ($opt eq 'f') { return $tgt->{entry}; }
+  elsif ($opt eq 'd') { 
+    return $isrfile ? $tgt->rfile->{dir}->path : $tgt->{dir}->path;
+  }
     elsif ($opt eq 'F') {
-	my $subst = $file->{entry};
+    my $subst = $tgt->{entry};
 	$subst =~ s/\.[^\.]+$//;
 	return $subst;
     }
     elsif ($opt eq 'b') {
-	my $subst = $file->path;
+    my $subst = $isrfile ? $tgt->rpath : $tgt->path;
 	$subst =~ s/\.[^\.]+$//;
 	return $subst;
     }
     elsif ($opt eq 's') {
-	my $subst = $file->{entry};
-	$subst =~ m/(\.[^\.]+)$/;
+    my $file = $tgt->{entry};
+    $file =~ m/(\.[^\.]+)$/;
 	return $1;
     }
-    else { return $file->path; }
+  elsif ($opt eq 'a') {
+    my $cwd = Cwd::cwd();
+    my $path = $isrfile ? $tgt->rpath : $tgt->path;
+    $cwd .= $dir::SEPARATOR.$path;
+    return $cwd;
+  }
+  elsif ($opt eq 'S') {
+    my $cwd = Cwd::cwd();
+    # regularize path
+    $cwd =~ s,$dir::MATCH_SEPARATOR,$dir::SEPARATOR,g;
+    $cwd .= $dir::SEPARATOR.$tgt->srcpath;
+    return $cwd;
+  }
+  else {
+    my $path = $isrfile ? $tgt->rpath : $tgt->path;
+    return $path;
+  }
 }
 
 # For the signature of a basic command, we don't bother
@@ -1106,6 +1186,7 @@ sub _variant {
 sub getcoms {
     my($self, $tgt) = @_;
     my(@coms);
+
     for $com (split(/\n/, $self->{com})) {
 	my(@src) = (undef, @{$tgt->{sources}});
 	my(@src1) = @src;
@@ -1120,27 +1201,27 @@ sub getcoms {
 	$com =~ s/%[()]//g;
 
 	# Deal with %n, n=1,9 and variants.
-	while ($com =~ /%([1-9])(:([fdbsF]?))?/) {
+	while ($com =~ /%([1-9])(:([fdbsFaS]?))?/) {
 	    my($match) = $&;
 	    my($src) = $src1[$1];
-	    my($subst) = _variant($3, $src1[$1]->rfile);
+	    my($subst) = _variant($3, $src1[$1], 1);
 	    undef $src[$1];
 	    $com =~ s/$match/$subst/;
 	}
 
 	# Deal with %0 aka %> and variants.
-	while ($com =~ /%[0>](:([fdbsF]?))?/) {
+	while ($com =~ /%[0>](:([fdbsFaS]?))?/) {
 	    my($match) = $&;
-	    my($subst) = _variant($2, $tgt);
+	    my($subst) = _variant($2, $tgt, 0);
 	    $com =~ s/$match/$subst/;
 	}
 
 	# Deal with %< (all sources except %n's already used)
-	while ($com =~ /%<(:([fdbsF]?))?/) {
+	while ($com =~ /%<(:([fdbsFaS]?))?/) {
 	    my($match) = $&;
 	    my @list = ();
 	    foreach (@src) {
-		push(@list, _variant($2, $_->rfile)) if $_;
+		push (@list,_variant($2, $_, 1)) if $_;
 	    }
 	    my($subst) = join(' ', @list);
 	    $com =~ s/$match/$subst/;
@@ -1423,6 +1504,31 @@ sub find {
 }
 
 # Invoke the associated	 C scanner to get signature of included files.
+sub includes {
+    my($self, $tgt) = @_;
+    $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
+}
+
+# Builder for a Windows resource module
+package build::command::rc;
+
+BEGIN { @ISA = qw(build::command) }
+
+sub find {
+    $_[1]->{_rc} || do {
+	my($class, $env) = @_;
+	my($cpppath) = $env->_subst($env->{CPPPATH});
+	my($rcscanner) = find scan::cpp($env->{_cwd}, $cpppath);
+	my($iflags) = $rcscanner->iflags;
+	$iflags =~ s, ${main::FLAG_CHARACTER}I, ${main::FLAG_CHARACTER}i,g;
+	$env->{_IFLAGS} = "%(" . $iflags . "%)";
+	my($self) = find build::command($env, $env->{RCCOM});
+	$self->{scanner} = $rcscanner;
+	bless $env->{_rc} = $self;
+    }
+}
+
+# Invoke the associated	 CPP scanner to get signature of included files.
 sub includes {
     my($self, $tgt) = @_;
     $self->{scanner}->includes($tgt, $tgt->{sources}[0]);
@@ -1812,7 +1918,12 @@ package dir;
 BEGIN {
     # A portable way of determing our directory separator.
     $SEPARATOR = File::Spec->catdir('', '');
-    $MATCH_SEPARATOR = "\Q$SEPARATOR\E";
+    if ($main::_WIN32) {
+	$MATCH_SEPARATOR = "[\\\\/]";
+    }
+    else {
+	$MATCH_SEPARATOR = "\Q$SEPARATOR\E";
+    }
 }
 
 # Look up a file (but not a directory) in a directory.
@@ -1831,6 +1942,9 @@ sub lookup {
 	if ($entry =~ s/^#//) {
 	    # Top-relative names begin with #.
 	    $dir = $dir::top;
+	}
+	elsif ($entry =~ s/^\!//) {
+	    $dir = $dir::cwd->srcdir;
 	}
     } else {
 	# Portable file name manipulation with File::Spec;
@@ -1862,15 +1976,20 @@ sub lookup {
 		# The path was absolute.  If no volume was supplied,
 		# use the volume of our current directory.
 		$vol ||= $cwd_vol;
+		if ($main::_WIN32) {
+		    # downcase the drive letter, since
+		    # it isn't consistent between shells.
+		    $vol = lc($vol);
+		}
 		if (! $root{$vol}) {
 		    # This is our first time looking up a path name
 		    # on this volume, so create a root node for it.
 		    # (On UNIX systems, $vol is always '', so '/'
 		    # always maps to the $root{''} node.)
 		    $root{$vol} = {path => $vol.$SEPARATOR,
-				prefix => $vol.$SEPARATOR,
-				srcpath => $vol.$SEPARATOR,
-				'exists' => 1 };
+				   prefix => $vol.$SEPARATOR,
+				   srcpath => $vol.$SEPARATOR,
+				   'exists' => 1 };
 		    $root{$vol}->{srcdir} = $root{$vol};
 		    bless $root{$vol};
 		}
@@ -1932,6 +2051,20 @@ sub is_under {
 	$dir = $dir->up;
     }
     return undef;
+}
+
+# now we move each target so that it is appropriately referenced.
+sub relocate_targets {
+    my $start = shift;
+    my @targets = @_;
+    my $tgttop = dir::lookupdir($dir::top, Cwd::cwd())->prefix;
+    my $tgtstart = dir::lookupdir($dir::top, $start)->prefix;
+    my $rel = $tgtstart;
+    $rel =~ s,^\Q$tgttop\E,,;
+    foreach (@targets) {
+	$_ = $rel.$_;
+    }
+    return @targets;
 }
 
 # Return the relative path from the specified directory ($_[1])
@@ -1998,7 +2131,7 @@ sub init {
     my $path = Cwd::cwd();
 
     # We know we can get away with passing undef to lookupdir
-    # as the directory because $dir is an absolute path.
+    # as the directory because $path is an absolute path.
     $top = lookupdir(undef, $path);
     $top->{path} = $top->{srcpath} = File::Spec->curdir;
     $top->{prefix} = '';
@@ -2007,6 +2140,11 @@ sub init {
     $cwd = $top;
 
     ($cwd_vol, undef, undef) = File::Spec->splitpath($path);
+    if ($main::_WIN32) {
+	# downcase the volume on win32 because it's not
+	# consistent between shells
+	$cwd_vol = lc($cwd_vol);
+    }
 }
 
 
