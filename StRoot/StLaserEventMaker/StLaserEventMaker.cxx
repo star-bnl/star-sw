@@ -1,5 +1,14 @@
-// $Id: StLaserEventMaker.cxx,v 1.31 2004/03/09 20:32:21 pfachini Exp $
+// $Id: StLaserEventMaker.cxx,v 1.32 2004/03/11 21:02:37 pfachini Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.32  2004/03/11 21:02:37  pfachini
+// The minimum number of valid tracks (minValidTracks) for a good drift velocity
+// calculation was lowered to 450 if both east and west lasers are up and 225
+// if one of them is down. If one of the lasers is down, the drift velocity for
+// east and west will be the same. The condition for a down laser was changed
+// from (fzlIntegralEastHigh()< 100. || fzlIntegralEastLow() < 100.) to
+// (fzlIntegralEastHigh()/nEvents() < 1. || fzlIntegralEastLow()/nEvents() < 1.)
+// and similarly to fzlIntegralWestHigh and fzlIntegralWestLow.
+//
 // Revision 1.31  2004/03/09 20:32:21  pfachini
 // Lowering the number of tracks threshold from 250 to 225 if the west side is down.
 // The east side has the sector 20 problem which will reduce the numbers of tracks.
@@ -176,6 +185,7 @@ Int_t StLaserEventMaker::InitRun(int RunId){
   fzlEastHigh = new TH1F("fzlWestHigh","fzlWestHigh",100,-190,-165);
   fzlEastLow = new TH1F("fzlWestLow","fzlWestLow",100,-40,-15);
   numberTracks = new TH1F("numberTracks","numberTracks",100,5,2005);
+  numberEvents = new TH1F("numberEvents","numberEvents",2,0,2);
   driftVelocityRec = new TH1F("driftVelocityRec","driftVelocityRec",100,5000000,6000000);
   AddHist(fzLaser);
   AddHist(fzlEastHigh);
@@ -183,6 +193,7 @@ Int_t StLaserEventMaker::InitRun(int RunId){
   AddHist(fzlWestHigh);
   AddHist(fzlWestLow);
   AddHist(numberTracks);
+  AddHist(numberEvents);
   AddHist(driftVelocityRec);
   date = 0;
   time = 0;
@@ -397,6 +408,7 @@ void StLaserEventMaker::MakeHistograms()
       }
     } //end of itrk for loop
     numberTracks->Fill(ngtk);
+    numberEvents->Fill(1);
     cout <<  ntks << " total tracks " << ngtk << " good tracks" << endl;
     delete [] sector;
     delete [] xl;
@@ -751,9 +763,9 @@ void StLaserEventMaker::UndoExB(Float_t *x, Float_t *y, Float_t *z){
 Int_t StLaserEventMaker::Finish() {
   if (numberTracks){
 
-    if (fzlIntegralEastHigh() < 100. || fzlIntegralEastLow() < 100.) {//in case east laser was down
+    if (fzlIntegralEastHigh()/nEvents() < 1. || fzlIntegralEastLow()/nEvents() < 1.) {//in case east laser was down
       gMessMgr->Warning() << "StLaserEventMaker::no east laser events. Drift Velocity east and west will be the same!!! " << endm;
-      if (numberTracks->GetMean() >= minValidTracks/2.) {
+      if (nTracks() >= minValidTracks/2.) {
 	velocityWest = 147.164*driftVelocityReco/fabs(fzlAverageWestHigh()-fzlAverageWestLow());
 	velocityEast = velocityWest;
 	//Now correcting for the clock...
@@ -771,10 +783,9 @@ Int_t StLaserEventMaker::Finish() {
       }
     } else {
       
-      if (fzlIntegralWestHigh() < 100. || fzlIntegralWestLow() < 100.) {//in case west laser was down
+      if (fzlIntegralWestHigh()/nEvents() < 1. || fzlIntegralWestLow()/nEvents() < 1.) {//in case west laser was down
 	gMessMgr->Warning() << "StLaserEventMaker:: no west laser events. Drift Velocity east and west will be the same!!! " << endm;
-	//if (numberTracks->GetMean() >= minValidTracks/2.) {
-	if (numberTracks->GetMean() >= 225.) {//Lowering from 250 to 225 - The east side has the sector 20 problem which will reduce the numbers of tracks. This change is for run in 2004.
+	if (nTracks() >= minValidTracks/2.) {
 	  velocityEast = 147.199*driftVelocityReco/fabs(fzlAverageEastHigh()-fzlAverageEastLow());
 	  velocityWest = velocityEast;
 	  //Now correcting for the clock...
@@ -792,7 +803,7 @@ Int_t StLaserEventMaker::Finish() {
 	}
       } else {
 	
-	if (numberTracks->GetMean() >= minValidTracks) {
+	if (nTracks() >= minValidTracks) {
 	  velocityEast = 147.199*driftVelocityReco/fabs(fzlAverageEastHigh()-fzlAverageEastLow());
 	  velocityWest = 147.164*driftVelocityReco/fabs(fzlAverageWestHigh()-fzlAverageWestLow());
 	  //Now correcting for the clock...
@@ -824,7 +835,7 @@ Int_t StLaserEventMaker::Finish() {
 /// Print CVS commit information
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.31 2004/03/09 20:32:21 pfachini Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.32 2004/03/11 21:02:37 pfachini Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -873,8 +884,10 @@ double StLaserEventMaker::fzlAverageEastHigh(){double mean = fzlEastHigh->GetMea
 double StLaserEventMaker::fzlAverageEastLow(){double mean = fzlEastLow->GetMean();return mean;};
 double StLaserEventMaker::fzlAverageWestHigh(){double mean = fzlWestHigh->GetMean();return mean;};
 double StLaserEventMaker::fzlAverageWestLow(){double mean = fzlWestLow->GetMean();return mean;};
+double StLaserEventMaker::nTracks(){double mean = numberTracks->GetMean();return mean;};
 double StLaserEventMaker::fzlIntegralEastHigh(){double integral = fzlEastHigh->Integral();return integral;};
 double StLaserEventMaker::fzlIntegralEastLow(){double integral = fzlEastLow->Integral();return integral;};
 double StLaserEventMaker::fzlIntegralWestHigh(){double integral = fzlWestHigh->Integral();return integral;};
 double StLaserEventMaker::fzlIntegralWestLow(){double integral = fzlWestLow->Integral();return integral;};
+double StLaserEventMaker::nEvents(){double integral = numberEvents->Integral();return integral;};
 
