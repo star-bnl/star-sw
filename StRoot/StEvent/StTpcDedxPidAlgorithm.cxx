@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPidAlgorithm.cxx,v 2.7 2000/04/20 16:47:31 ullrich Exp $
+ * $Id: StTpcDedxPidAlgorithm.cxx,v 2.8 2000/05/19 18:33:45 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPidAlgorithm.cxx,v $
- * Revision 2.7  2000/04/20 16:47:31  ullrich
- * Check for null pointer added.
+ * Revision 2.8  2000/05/19 18:33:45  ullrich
+ * Minor changes (add const) to cope with modified StArray.
  *
  * Revision 2.7  2000/04/20 16:47:31  ullrich
  * Check for null pointer added.
@@ -46,7 +46,7 @@
 #include "StDedxPidTraits.h"
 #include "StTrackGeometry.h"
 
-static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.7 2000/04/20 16:47:31 ullrich Exp $";
+static const char rcsid[] = "$Id: StTpcDedxPidAlgorithm.cxx,v 2.8 2000/05/19 18:33:45 ullrich Exp $";
 
 StTpcDedxPidAlgorithm::StTpcDedxPidAlgorithm(StDedxMethod dedxMethod)
     : mTraits(0),  mTrack(0), mDedxMethod(dedxMethod)
@@ -73,11 +73,7 @@ StTpcDedxPidAlgorithm::operator() (const StTrack& track, const StSPtrVecTrackPid
     mTraits = 0;
     mTrack  = &track;
     for (unsigned int i=0; i<vec.size(); i++) {
-#if defined (__SUNPRO_CC) && __SUNPRO_CC < 0x500
-        const StDedxPidTraits *p = dynamic_cast<StDedxPidTraits*>((StTrackPidTraits*)vec[i]);
-#else
-        const StDedxPidTraits *p = dynamic_cast<StDedxPidTraits*>(vec[i]);
-#endif
+	const StDedxPidTraits *p = dynamic_cast<const StDedxPidTraits*>(vec[i]);
         if (p && p->detector() == kTpcId && p->method() == mDedxMethod) mTraits = p;
     }
     if (!mTraits) return 0;    // no info available
