@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.3 1998/07/21 00:36:49 fisyak Exp $
+// $Id: bfc.C,v 1.4 1998/07/21 01:04:41 fisyak Exp $
 // $Log: bfc.C,v $
+// Revision 1.4  1998/07/21 01:04:41  fisyak
+// Clean up
+//
 // Revision 1.3  1998/07/21 00:36:49  fisyak
 // tcl and tpt
 //
@@ -50,11 +53,11 @@
   chain.Init();
 // Prepare TCanvas to show some histograms created by makers
   gBenchmark->Start("bfc");
-for (Int_t i=0;i<1;i++){
+for (Int_t i=0;i<2;i++){
   chain.Make(i);
   //  histCanvas->Modified();
   //  histCanvas->Update();
-  //  chain.Clear();
+  chain.Clear();
 }
   gBenchmark->Stop("bfc");
   gBenchmark->Print("bfc");

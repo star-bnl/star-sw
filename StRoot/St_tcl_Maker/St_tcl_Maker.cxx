@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.1 1998/07/21 00:36:46 fisyak Exp $
+// $Id: St_tcl_Maker.cxx,v 1.2 1998/07/21 01:04:39 fisyak Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.2  1998/07/21 01:04:39  fisyak
+// Clean up
+//
 // Revision 1.1  1998/07/21 00:36:46  fisyak
 // tcl and tpt
 //
@@ -151,7 +154,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.1 1998/07/21 00:36:46 fisyak Exp $    *\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.2 1998/07/21 01:04:39 fisyak Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
