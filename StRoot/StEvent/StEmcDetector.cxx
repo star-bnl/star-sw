@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcDetector.cxx,v 2.2 2000/05/22 19:21:53 akio Exp $
+ * $Id: StEmcDetector.cxx,v 2.3 2000/06/30 17:23:19 akio Exp $
  *
  * Author: Akio Ogawa, Jan 2000
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StEmcDetector.cxx,v $
- * Revision 2.2  2000/05/22 19:21:53  akio
- * Bug fix, add delta into EMcPoint, wider bits for Eta in RawHit
+ * Revision 2.3  2000/06/30 17:23:19  akio
+ * minor bug fix for return kFalse
+ *
+ * Revision 2.3  2000/06/30 17:23:19  akio
+ * minor bug fix for return kFalse
  *
  * Revision 2.2  2000/05/22 19:21:53  akio
  * Bug fix, add delta into EMcPoint, wider bits for Eta in RawHit
@@ -22,10 +25,10 @@
  **************************************************************************/
 #include "StEmcDetector.h"
 #include "StEmcRawHit.h"
-static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.2 2000/05/22 19:21:53 akio Exp $";
+static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.3 2000/06/30 17:23:19 akio Exp $";
 #include "StEmcClusterCollection.h"
 
-static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.2 2000/05/22 19:21:53 akio Exp $";
+static const char rcsid[] = "$Id: StEmcDetector.cxx,v 2.3 2000/06/30 17:23:19 akio Exp $";
 
 ClassImp(StEmcDetector)
 
@@ -51,7 +54,7 @@ StEmcDetector::addHit(StEmcRawHit* hit)
       UInt_t m = hit->module();
       if (m > 0 && m <= mNumberOfModules){
 	mModules[m-1].hits().push_back(hit);
-    else return kFALSE;
+	return kTRUE;
       }
     }
     return kFALSE;
