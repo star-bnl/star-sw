@@ -7,8 +7,21 @@
    cd [geant_Run]
    tdm/table/cell/getvalue 'calb_calg[0].shift' OFF
    if (staf_status(1).ne.STAFCV_OK) then
+	message ***** Previous error message is NOT problem         ******
+	message ***** You get this when you are analyzing data with ******
+	message ***** old CALB geometry by newer verion of software ******
+	message ***** Now calb_calg table is going to be updated    ******
+	trace on
 	dui/rm [geant_Run]/calb_calg	
-	tables calb/* [geant_Run]
+	call calbupdate
+       	tables calb/* [geant_Run]
+ 	tdm/table/cell/getvalue 'calb_calg[0].shift'
+	if (staf_status(1).ne.STAFCV_OK) then
+	   message ***** Problem! Fail to update calb_calg!    ******
+	else
+           message ***** calb_calg has been updated to ver.2.5 ******
+	endif
+	trace off
    endif
    cd /dui
 
