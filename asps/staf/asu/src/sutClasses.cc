@@ -23,7 +23,7 @@
 // ATTRIBUTES ----------------------
 // FUNCTIONS -----------------------
 // OPERATORS -----------------------
-#ifndef hpux
+#ifndef HPUX
 stafString stafString::operator + (stafString p)
 {
    stafString temp;
@@ -33,7 +33,7 @@ stafString stafString::operator + (stafString p)
    strcat(temp.myStr, p.myStr);
    return temp;
 }
-#endif /*hpux*/
+#endif /*HPUX*/
 
 stafString stafString::operator + (char* ptr)
 {

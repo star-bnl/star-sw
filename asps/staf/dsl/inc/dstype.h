@@ -141,49 +141,49 @@ typedef struct ds_dataset_t {
 * function prototypes
 *
 */
-int dsAddTable(DS_DATASET_T *pDataset, char *name,
-	char *typeSpecifier, size_t nRow, char **ppData);
+int dsAddTable(DS_DATASET_T *pDataset, const char *name,
+	const char *typeSpecifier, size_t nRow, char **ppData);
 int dsAllocTables(DS_DATASET_T *pDataset); 
 int dsCellAddress(char **pAddress, DS_DATASET_T *pTable,
-	size_t rowNumber , size_t colNumber);
+	size_t rowNumber , size_t colNumber); /* pAddress modif data*/
 int dsColumnDimCount(size_t *pCount, DS_DATASET_T *pTable, size_t colNumber);
 int dsColumnDimensions(size_t *dims, DS_DATASET_T *pTable, size_t colNumber);
 int dsColumnElcount(size_t *pCount, DS_DATASET_T *pTable, size_t colNumber);
-int dsColumnName(char **pName, DS_DATASET_T *pTable, size_t colNumber);
+int dsColumnName(const char **pName, DS_DATASET_T *pTable, size_t colNumber);
 int dsColumnSize(size_t *pSize, DS_DATASET_T *pTable, size_t colNumber);
 int dsColumnTypeCode(DS_TYPE_CODE_T *pCode, DS_DATASET_T *pTable, size_t colNumber);
-int dsColumnTypeName(char **pName, DS_DATASET_T *pTable, size_t colNumber);
+int dsColumnTypeName(const char **pName, DS_DATASET_T *pTable, size_t colNumber);
 void dsAllocStats(void);
 int dsDatasetEntry(DS_DATASET_T **ppEntry, DS_DATASET_T *pDataset,
 	size_t entryNumber); 
 int dsDatasetEntryCount(size_t *pCount, DS_DATASET_T *pDataset);
 int dsDatasetMaxEntryCount(size_t *pCount, DS_DATASET_T *pDataset);  
-int dsDatasetName(char **pName, DS_DATASET_T *pDataset);
+int dsDatasetName(const char **pName, DS_DATASET_T *pDataset);
 int dsEquijoin(DS_DATASET_T *pJoinTable,DS_DATASET_T *pTableOne,
 	DS_DATASET_T *pTableTwo, char *aliases, char *joinLst, char *projectList);
 int dsErrorCode(void);
-int dsFindColumn(size_t *pColNumber, DS_DATASET_T *pTable, char *name); 
-int dsFindEntry(DS_DATASET_T **ppEntry, DS_DATASET_T *pDataset, char *path);
+int dsFindColumn(size_t *pColNumber, DS_DATASET_T *pTable, const char *name); 
+int dsFindEntry(DS_DATASET_T **ppEntry, DS_DATASET_T *pDataset, const char *path);
 int dsFreeDataset(DS_DATASET_T *pDataset);
 int dsGetCell(char *address, DS_DATASET_T *pTable,
 	size_t rowNumber , size_t colNumber); 
-int dsInitTable(DS_DATASET_T *pTable, char *tableName,
-	char *typeSpecifier, unsigned rowCount, void *pData);
+int dsInitTable(DS_DATASET_T *pTable, const char *tableName,
+	const char *typeSpecifier, unsigned rowCount, void *pData);
 int dsIsAcyclic(DS_DATASET_T *dataset);
 int dsIsDataset(bool_t *pResult, DS_DATASET_T *handle);
 int dsIsTable(bool_t *pResult, DS_DATASET_T *handle);
 int dsLink(DS_DATASET_T *pParent, DS_DATASET_T *pChild);
 int dsLinkAcyclic(DS_DATASET_T *pParent, DS_DATASET_T *pChild);
 void dsLogError(DS_ERROR_CODE_T code, char *msg, char *file, size_t line);
-int dsPutCell(char *address, DS_DATASET_T *pTable,
+int dsPutCell(const char *address, DS_DATASET_T *pTable,
 	size_t rowNumber , size_t colNumber);
-int dsMapTable(DS_DATASET_T *pDataset, char *name,
-	char *typeSpecifier, size_t *pCount, char **ppData);
-int dsNewDataset(DS_DATASET_T **ppDataset, char *name);
-int dsNewTable(DS_DATASET_T **ppTable, char *tableName,
-	char *typeSpecifier,  unsigned rowCount, void *pData);
-void dsPerror(char *msg);
-const char * dsError(char *msg);
+int dsMapTable(DS_DATASET_T *pDataset, const char *name,
+	const char *typeSpecifier, size_t *pCount, char **ppData);
+int dsNewDataset(DS_DATASET_T **ppDataset, const char *name);
+int dsNewTable(DS_DATASET_T **ppTable, const char *tableName,
+	const char *typeSpecifier,  unsigned rowCount, void *pData);
+void dsPerror(const char *msg);
+const char * dsError(const char *msg);
 int dsProjectTable(DS_DATASET_T *pDst, DS_DATASET_T *pSrc, char *projectList);
 int dsRealloc(DS_DATASET_T *dataset, size_t maxcount);
 int dsReallocTable(DS_DATASET_T *pTable, size_t nRow);
@@ -191,18 +191,18 @@ int dsRefcount(size_t *pCount, DS_DATASET_T *pDataset);
 int dsSetTableRowCount(DS_DATASET_T *pTable, size_t rowCount);
 int dsTableColumnCount(size_t *pCount, DS_DATASET_T *pTable);
 int dsTableDataAddress(char **pAddress, DS_DATASET_T *pTable);
-int dsTableIsType(bool_t *pResult, DS_DATASET_T *pTable, char *specifier);
+int dsTableIsType(bool_t *pResult, DS_DATASET_T *pTable, const char *specifier);
 int dsTableMaxRowCount(size_t *pCount, DS_DATASET_T *pTable);
-int dsTableName(char **pName, DS_DATASET_T *pTable);
+int dsTableName(const char **pName, DS_DATASET_T *pTable);
 int dsTableRowCount(size_t *pRowCount, DS_DATASET_T *pTable);
 int dsTableRowSize(size_t *pSize, DS_DATASET_T *pTable);
-int dsTableTypeName(char **pName, DS_DATASET_T *pTable);
-int dsTableTypeSpecifier(char **pSpecifier, DS_DATASET_T *pTable);
-int dsTargetTable(DS_DATASET_T **ppTable, char *tableName, char *typeName, 
+int dsTableTypeName(const char **pName, DS_DATASET_T *pTable);
+int dsTableTypeSpecifier(const char **pSpecifier, DS_DATASET_T *pTable);
+int dsTargetTable(DS_DATASET_T **ppTable, const char *tableName, const char *typeName, 
 	DS_DATASET_T *parentOne, DS_DATASET_T *parentTwo, 
 	char *aliases, char *projectList);
-int dsTasProject(DS_DATASET_T *pDataset, char *name,
-	char *typeSpecifier, size_t *pCount, void *ppData);
+int dsTasProject(DS_DATASET_T *pDataset, const char *name,
+	const char *typeSpecifier, size_t *pCount, void *ppData);
  int dsUnlink(DS_DATASET_T *pParent, DS_DATASET_T *pChild);
 /******************************************************************************
 *
@@ -280,18 +280,18 @@ int dsCheckTable(void *pData, char *decl, size_t nRow, size_t checkNRow);
 int dsCmpFieldType(DS_FIELD_T *f1, DS_FIELD_T *f2);
 int dsColumnField(DS_FIELD_T **ppField, DS_DATASET_T *pTable, size_t colNumber);
 int dsCreateDataset(DS_DATASET_T **ppDataset,
-					 size_t *tList, char *str, char **ptr);
+					 size_t *tList, const char *str, const char **ptr);
 int dsErrorPrint(char *fmt, ...);
-int dsFindField(DS_FIELD_T **pFound, DS_TYPE_T *pType, char *name);
-int dsFindTable(DS_DATASET_T **ppTable, DS_DATASET_T *pDataset, char *name,
-	char *typeSpecifier);
+int dsFindField(DS_FIELD_T **pFound, DS_TYPE_T *pType, const char *name);
+int dsFindTable(DS_DATASET_T **ppTable, DS_DATASET_T *pDataset, const char *name,
+    const char *typeSpecifier);
 int dsFormatTypeSpecifier(char *str, size_t maxSize, DS_TYPE_T *type);
 int dsListAppend(DS_LIST_T *list, DS_DATASET_T *item);
 int dsListFree(DS_LIST_T *list);
 int dsListInit(DS_LIST_T *list);
 int dsListRealloc(DS_LIST_T *list, size_t maxcount);
 int dsMark(DS_LIST_T *list, DS_DATASET_T *item);
-int dsParseType(DS_TYPE_T **pType, size_t *pSize, char *str, char **ptr);
+int dsParseType(DS_TYPE_T **pType, size_t *pSize, const char *str, const char **ptr);
 void dsPrintData(FILE *stream, DS_TYPE_T *type, unsigned count, void *data);
 int dsPrintDatasetSpecifier(FILE *stream, DS_DATASET_T *pDataset);
 int dsPrintSpecifiers(FILE *stream, DS_DATASET_T *pDataset);
@@ -303,11 +303,11 @@ int dsQuickSort(char *base, unsigned count, int size,
 int dsSetDataset(DS_DATASET_T *pSet);
 int dsSetTable(void *pData, char *decl, size_t elcount);
 int dsTableType(DS_TYPE_T **ppType, DS_DATASET_T *pTable);
-int dsTargetTypeSpecifier(char *str, size_t maxSize, char *typeName, 
+int dsTargetTypeSpecifier(char *str, size_t maxSize, const char *typeName, 
 	size_t *tidList, char **names, char *projectList);
 int dsTypeCmp(DS_TYPE_T *t1, DS_TYPE_T *t2);
-int dsTypeSpecifier(char **ptr, size_t *pLen, size_t tid);
-int dsTypeId(size_t *pTid, char *str, char **ptr);
+int dsTypeSpecifier(const char **ptr, size_t *pLen, size_t tid);
+int dsTypeId(size_t *pTid, const char *str, const char **ptr);
 int dsTypePtr(DS_TYPE_T **pType, size_t tid);
 int dsVisited(DS_LIST_T *list, DS_DATASET_T *item);
 int dsVisitClear(DS_DATASET_T *dataset);
@@ -359,7 +359,7 @@ typedef struct ds_buf_t {
 /*
  * macros get and put characters
  */
-#define DS_GET_INIT(bp, str) {(bp)->first = (bp)->out = str;\
+#define DS_GET_INIT(bp, str) {(bp)->first = (bp)->out = (char*)str;\
 		(bp)->in = (bp)->limit = NULL;}
 #define DS_GETC(bp) (((bp)->in == NULL && *(bp)->out) || ((bp)->in &&\
 		(bp)->in > (bp)->out) ? 0XFF & (char)*(bp)->out++ : EOF)
@@ -387,8 +387,8 @@ typedef struct ds_key_t {
 int dsBufFree(DS_BUF_T *bp);
 int dsBufRealloc(DS_BUF_T *bp, size_t size);
 int dsCmpKeys(char *baseOne, char *baseTwo, DS_KEY_T *key);
-int dsCmpName(char *s1, char *s2);
-int dsCopyName(char *dst, char *str, char **ptr);\
+int dsCmpName(const char *s1, const char *s2);
+int dsCopyName(char *dst, const char *str, const char **ptr);
 int dsDatasetSpecifier(DS_BUF_T *bp, DS_DATASET_T *pDataset);
 int dsDumpTypes(void);
 int dsErrSemGive(void);
@@ -412,7 +412,7 @@ void dsTypeFree(void *ptr, size_t size);
 int dsTidHashStats(void);
 char *dsTypeLimit(DS_TYPE_T *type);
 int dsTypeListCreate(size_t **pList, size_t listDim);
-int dsTypeListEnter(size_t *list, char *str, char **ptr);
+int dsTypeListEnter(size_t *list, const char *str, const char **ptr);
 int dsTypeListFind(size_t *pH, size_t *list, char *str);
 int dsTypeListFree(size_t *list);
 int dsTypeSemGive(void);

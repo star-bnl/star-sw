@@ -14,7 +14,7 @@
 
 #include <iostream.h>
 #include <string.h>
-
+#include "asuAlloc.h"
 /*
 *:>---------------------------------------------------------------------
 *:ROUTINE:     class stafString
@@ -32,8 +32,9 @@ public:
 		strcpy(myStr,s); }
    ~stafString() { delete myStr; }
 // ATTRIBUTES ----------------------
-   char* show(){ return myStr; }
+   const char* show(){ return myStr; }
    int length(){ return myLen; }
+   char *copy() { char *c = (char*)MALLOC(myLen+1); strcpy(c,myStr); return c;}
 // FUNCTIONS -----------------------
 // OPERATORS -----------------------
    stafString operator + (stafString);

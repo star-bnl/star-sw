@@ -25,7 +25,7 @@ dsuPrintDataset(DS_DATASET_T *pDataset)
 {
    long i;
    size_t iclen;
-   char *typeSpec;
+   const char *typeSpec;
 
    if(pDataset->tid == 0) {
       printf(" ######################################## \n");

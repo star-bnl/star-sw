@@ -143,7 +143,7 @@ fail:
 */
 int dsPrintTypes(FILE *stream, DS_DATASET_T *dataset, size_t *tList)
 {
-	char *str;
+	const char *str;
 	size_t h, i, len;
 	DS_DATASET_T *item;
 	DS_LIST_T list;
@@ -209,7 +209,7 @@ void dsPrintTableData(FILE *stream, DS_DATASET_T *table)
 */
 void dsPrintTableType(FILE *stream, DS_DATASET_T *pTable)
 {
-	char *str;
+	const char *str;
 	size_t i;
 	
 	if (!dsTypeSpecifier(&str, &i, pTable->tid)) {

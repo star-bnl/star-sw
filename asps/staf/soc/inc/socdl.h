@@ -5,10 +5,10 @@
 extern "C" {
 #endif
 
-int soc_dl_load(char *pkgName);
-int soc_dl_init(char *pkgName);
-int soc_dl_start(char *pkgName);
-int soc_dl_stop(char *pkgName);
+int soc_dl_load (const char *pkgName);
+int soc_dl_init (const char *pkgName);
+int soc_dl_start(const char *pkgName);
+int soc_dl_stop (const char *pkgName);
 
 #ifdef __cplusplus
 }

@@ -152,8 +152,8 @@ int dsCmpKeys(char *baseOne, char *baseTwo, DS_KEY_T *key)
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsTasProject(DS_DATASET_T *pDataset, char *name,
-	char *typeSpecifier, size_t *pCount, void *ppData)
+int dsTasProject(DS_DATASET_T *pDataset, const char *name,
+	const char *typeSpecifier, size_t *pCount, void *ppData)
 {
 	int rtn;
 	DS_DATASET_T *pSrcTable, table;

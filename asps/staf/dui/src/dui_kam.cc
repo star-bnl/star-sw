@@ -70,22 +70,6 @@ kam_dui_df_()
 *:<---------------------------------------------------------------------
 */
 void 
-kam_dui_find_()
-{
-  char *searchtype=ku_gets();
-  char *name=ku_gets();
-  dui_find(searchtype,name);
-}
-/*
-*:>---------------------------------------------------------------------
-*:ROUTINE:      void kam_dui_du_
-*:DESCRIPTION:  KUIP Action Module to ...
-*:ARGUMENTS:    -- NONE --
-*:RETURN VALUE: -- NONE --
-*:* DUI/DU
-*:<---------------------------------------------------------------------
-*/
-void 
 kam_dui_du_()
 {
   dui_du();

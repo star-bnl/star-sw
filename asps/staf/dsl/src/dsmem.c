@@ -227,7 +227,7 @@ int dsListFree(DS_LIST_T *list)
 * 
 * RETURNS: TRUE if success else FALSE
 */
-int dsNewDataset(DS_DATASET_T **ppDataset, char *name)
+int dsNewDataset(DS_DATASET_T **ppDataset, const char *name)
 {
 	DS_DATASET_T *pDataset;
 
@@ -254,8 +254,8 @@ int dsNewDataset(DS_DATASET_T **ppDataset, char *name)
 *
 * RETURNS: TRUE if success else FALSE
 */
-int dsNewTable(DS_DATASET_T **ppTable, char *tableName,
-	char *typeSpecifier, unsigned rowCount, void *pData)
+int dsNewTable(DS_DATASET_T **ppTable, const char *tableName,
+	const char *typeSpecifier, unsigned rowCount, void *pData)
 {
 	DS_DATASET_T *pTable;
 

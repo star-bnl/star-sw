@@ -242,13 +242,13 @@ bool_t xdr_dataset_type(XDR *xdrs, DS_DATASET_T **ppDataset)
 			goto fail;
 		}
 		if (strncmp(buf, "type", 4) == 0) {
-			if (!dsTypeListEnter(tList, buf + 4, &str)) {
+			if (!dsTypeListEnter(tList, buf + 4, (const char**)&str)) {
 				goto fail;
 			}
 		}
 		else if (strncmp(buf, "data", 4) == 0) {
 			if (!dsCreateDataset(&pDataset,
-				tList, buf+4, &str)) {
+				tList, buf+4, (const char**)&str)) {
 				goto fail;
 			}
 			*ppDataset = pDataset;
@@ -431,7 +431,7 @@ static bool_t xdr_types(XDR *xdrs, DS_DATASET_T *pDataset, size_t *tList)
 			DS_LOG_ERROR(DS_E_DUPLICATE_TYPE_NAME);
 			goto fail;
 		}
-		if (!dsTypeSpecifier(&str, &len, item->tid)) {
+		if (!dsTypeSpecifier((const char**)&str, &len, item->tid)) {
 			goto fail;
 		}
 		size = len + strlen(typeStr);

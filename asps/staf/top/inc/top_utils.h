@@ -13,5 +13,5 @@ typedef unsigned char top_bool;
 #else
 #define CC_P 
 #endif
-extern CC_P top_bool isValidSelectSpec(char * spec);
-extern CC_P top_bool isValidWhereClause(char * clause);
+extern CC_P top_bool isValidSelectSpec(const char * spec);
+extern CC_P top_bool isValidWhereClause(const char * clause);

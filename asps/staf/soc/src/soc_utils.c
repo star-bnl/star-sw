@@ -5,57 +5,27 @@
 #endif /* WIN32 */
 
 #include "asuAlloc.h"
-#define HERB980611
-
-extern char *id2name(char *base, long id);
-extern char *shortname(char *longname, size_t length);
-
 /*--------------------------------------------------------------------*/
-char *id2name(char *base, long id)
+const char *id2name(const char *base, long id)
 {
-   char *name;
-   if(id < 1){
-      name = (char*)MALLOC(strlen(base) +1);
-      strcpy(name,base);
-      return name;
-   }
-   else {
-#ifdef HERB980611
-      size_t herb980611;
-      herb980611=strlen(base) + 1 + 1 + log10((double)id);
-      if(herb980611<strlen(base)+2) {
-        printf("herb980611 is too small, crash imminent.\n"); exit(2);
-      }
-      name = (char*)MALLOC(herb980611);  
-#else
-      name = (char*)MALLOC(strlen(base) +1
-                +(int)(1 +log10((double)id)));	/*INS++:BAD_DECL*/
-#endif
-      sprintf(name,"%s%ld",base,id);
-      return name;
-   }
+   static char name[100]; int lbase,from,to;
+   lbase = strlen(base);
+   strcpy(name,base); 
+   if(id > 0) sprintf(name+lbase,"%ld",id);
+   to=0;for(from=lbase;name[from];from++) {
+     if (name[from]!=' ') name[to++]=name[from];}
+   name[to] = '\0';
+   return name;
 }
 /*--------------------------------------------------------------------*/
-char *shortname(char *longname, size_t length)
+const char *shortname(const char *longname, size_t length)
 {
-	char *n=(char*)MALLOC(length +1);
-	size_t l1=(length-1)/2;
-	size_t l2=(length-l1-1);
-	size_t ll=(strlen(longname)-l2);
-	char *nn;
-	char *b;
-
-	n[0] = 0;
-	if( length < strlen(longname) ){
-		strncat(n,longname,l1); 
-		nn = n; nn += (l1+1);
-		b = longname; b += ll;
-		strncpy(nn,b,l2); 
-		nn[l2]=0; /* hjw 19Feb98 */
-		n[l1] = '~';
-	}
-	else {
-		strncat(n,longname,length); 
-	}
-	return n;
+  char *nn; size_t l1,l2,ll;
+  static char n[100];
+  
+  l1=(length-1)/2; l2=(length-l1-1); ll=strlen(longname);
+  strncpy(n,longname,length+1); 
+  if( length < ll){
+    n[0]=0; strncat(n,longname,l1); strcat(n,"~"); strcat(n,longname+ll-l2);}
+  return n;
 }

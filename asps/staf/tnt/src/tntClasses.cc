@@ -20,7 +20,7 @@
 char *tntColumnChform(tdmTable *, long); 
 extern "C" 
 {
-  char *id2name(char *base, long id);
+  const char *id2name(const char *base, long id);
   CWN_BLOCK_TYPE_T block_type(DS_TYPE_CODE_T);
 }
 
@@ -511,13 +511,11 @@ tntFactory::list () {
 //:---------------------------------
 STAFCV_T 
 tntFactory::deleteCWNtuple (long hid) {
-  char *name = id2name("tntCWNtuple",hid);
+  const char *name = id2name("tntCWNtuple",hid);
   
   if( !soc->deleteObject(name,"tntCWNtuple") ){
-    FREE(name);  //*VP-phenix* 
     EML_ERROR(CANT_DELETE_OBJECT);
   }
-  FREE(name);  //*VP-phenix*
  
   EML_SUCCESS(STAFCV_OK);
 }
@@ -527,17 +525,15 @@ tntCWNtuple *
 tntFactory::findCWNtuple (long hid) {
   socObject *obj;
   tntCWNtuple *CWNtuple;
-  char *name = id2name("tntCWNtuple",hid);
+  const char *name = id2name("tntCWNtuple",hid);
 
   obj = soc->findObject(name,"tntCWNtuple");
   if (obj == NULL) {
     CWNtuple = NULL;
-    if(name) { EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",name); }
-    if(name) FREE(name); /*fix memory leak -akio*/
+    EML_CONTEXT("ERROR: Are you sure you have a '%s'?\n",name); 
     EML_ERROR(OBJECT_NOT_FOUND);
   }
   CWNtuple = TNTCWNTUPLE(obj);
-  if(name) FREE(name); /*fix memory leak -akio*/
   return CWNtuple;
 }
 
@@ -567,7 +563,7 @@ tntCWNtuple *
 tntFactory::newCWNtuple (long hid) {
   IDREF_T id;
   tntCWNtuple *p = NULL;
-  char *name;
+  const char *name;
 
   if (findCWNtuple(hid) != NULL) {
     EML_CONTEXT("ERROR: You already have a CWNtuple of HID %d.'.\n",hid);
@@ -576,10 +572,8 @@ tntFactory::newCWNtuple (long hid) {
   p = new tntCWNtuple(hid);
   name = id2name("tntCWNtuple",hid);
   if (!soc->idObject(name, "tntCWNtuple", id)) {
-    FREE(name);
     EML_ERROR(OBJECT_NOT_FOUND);
   }
-  FREE(name);
   addEntry(id);
   
   return p;
@@ -589,7 +583,7 @@ tntFactory::newCWNtuple (long hid) {
 tntCWNtuple *
 tntFactory::createCWNtuple (long hid, tdmTable *table) {
    IDREF_T id;
-   char *name = id2name("tntCWNtuple",hid);
+   const char *name = id2name("tntCWNtuple",hid);
 
    if( soc->idObject(name,"tntCWNtuple",id) ){
       EML_CONTEXT("ERROR: You already have a ntuple '%d'.\n",hid);
@@ -601,7 +595,6 @@ tntFactory::createCWNtuple (long hid, tdmTable *table) {
    if( !soc->idObject(name,"tntCWNtuple",id) ){
       EML_ERROR(OBJECT_NOT_FOUND);
    }
-   FREE(name);
    addEntry(id);
 
    return p;

@@ -106,7 +106,7 @@ int Array(
   DS_DATASET_T *dsPtr, size_t colNum,int tentSubscript,
   int *off, size_t *dim, size_t *array_size_t, char **typeName) {
   /* see comment uu4 */
-  if(!dsColumnTypeName(typeName,dsPtr,colNum))		dsu_Err( 17);
+  if(!dsColumnTypeName((const char**)typeName,dsPtr,colNum))	dsu_Err( 17);
   if(!dsColumnDimCount(dim,dsPtr,colNum))		dsu_Err( 18);
   if(!dsColumnDimensions(array_size_t,dsPtr,colNum))	dsu_Err( 19);
   if(*dim>0) { *off=tentSubscript; if(*off<0||*off>=*array_size_t) dsu_Err( 20); }
@@ -254,7 +254,7 @@ void TouchUpType(void) {
   }
 }
 void FillgDs(char *parentName,DS_DATASET_T *dsPtr) {
-  int isDataset,isTable; size_t scr,numEntries,entryNumber; char *name;
+  int isDataset,isTable; size_t scr,numEntries,entryNumber; const char *name;
   DS_DATASET_T *local;
   gIndent++;
   if(!dsIsDataset(&isDataset,dsPtr))            dsu_Err(  4);
@@ -284,7 +284,7 @@ void FillgDs(char *parentName,DS_DATASET_T *dsPtr) {
     if(!dsDatasetEntryCount(&numEntries,dsPtr)) dsu_Err(  8);
     for(entryNumber=0;entryNumber<numEntries;entryNumber++) {
       if(!dsDatasetEntry(&local,dsPtr,entryNumber)) dsu_Err(  6);
-      FillgDs(name,local); /* recursive */
+      FillgDs((char*)name,local); /* recursive */
     }
   } else {
     strcpy(gDs[gNDs-1]->triText,"tb");
@@ -408,8 +408,8 @@ void ColumnList(char reportSpaceNeeded,int *nbytes,char *header,
     if(dimensionality>1) dsu_Err( 40);
     if(!dsColumnDimensions(&arraySize,pp,whichCol)) dsu_Err( 41);
     if(dimensionality==0) arraySize=1;
-    if(!dsColumnName(&cc,pp,whichCol)) dsu_Err( 27);
-    if(!dsColumnTypeName(&dd,pp,whichCol)) dsu_Err( 28);
+    if(!dsColumnName((const char**)&cc,pp,whichCol)) dsu_Err( 27);
+    if(!dsColumnTypeName((const char**)&dd,pp,whichCol)) dsu_Err( 28);
     MakeAbbreviations(typeA,dd);
     asi=arraySize;
     for(jj=1;jj<=asi;jj++) { /* loop over array members */
@@ -513,7 +513,7 @@ void PrimaryList(char *header,  /* goes with WIN_TYPE_PRIMARY June 28 1995 */
       strcpy(indentStr,"                                                ");
       indentStr[currIndent*2+2]='\0';
       for(colIdx=0;colIdx<nCol;colIdx++) {
-        if(!dsColumnName(&colName,pp,colIdx)) dsu_Err( 46);
+        if(!dsColumnName((const char**)&colName,pp,colIdx)) dsu_Err( 46);
         sprintf(oneLine,"%sCO %s\n",indentStr,colName);
         if(strlen(xx)+strlen(oneLine)>max-SLACK) dsu_Err( 47); strcat(xx,oneLine);
         if(lineCnt>=ml) dsu_Err( 34);

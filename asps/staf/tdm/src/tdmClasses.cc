@@ -67,7 +67,7 @@ extern CC_P void dsuPrintData(FILE *stream , DS_TYPE_CODE_T type
    tdmObject:: ~tdmObject(){ };
 //:----------------------------------------------- ATTRIBUTES         --
 char * tdmObject::  dslName () {
-   char *c=NULL;
+   const char *c=NULL;
    char *cc=NULL;
    if( isDataset() ){
       if( !dsDatasetName(&c,pDSthis) ){
@@ -199,7 +199,7 @@ long tdmTable::  columnCount () {
 //----------------------------------
 /* OVER-RIDE tdmObject::dslName */
 char * tdmTable::  dslName () {
-   char* c=NULL;
+   const char* c=NULL;
    char* cc=NULL;
    if( !dsTableName(&c, pDSthis) ){
       EML_PUSHERROR(DSL_ERROR);
@@ -257,7 +257,7 @@ long tdmTable::  rowSize () {
 
 //----------------------------------
 char * tdmTable::  typeName () {
-   char* tname=NULL;
+   const char* tname=NULL;
    char* tn=NULL;
 
    if(!dsTableTypeName(&tname,pDSthis)) {
@@ -271,7 +271,7 @@ char * tdmTable::  typeName () {
 
 //----------------------------------
 char * tdmTable::  typeSpecifier () {
-   char* tspec=NULL;
+   const char* tspec=NULL;
 
    if(!dsTableTypeSpecifier(&tspec,pDSthis)) {
       EML_PUSHERROR(DSL_ERROR);
@@ -516,7 +516,7 @@ tdmTable::printRow (long nrow) {
 
 //----------------------------------
 STAFCV_T tdmTable:: show () {
-   char* tspec=NULL;
+   const char* tspec=NULL;
 
    if(!dsTableTypeSpecifier(&tspec,pDSthis)) {
       EML_ERROR(DSL_ERROR);
@@ -561,7 +561,7 @@ long tdmTable:: columnNumber (const char * name) {
 
 //----------------------------------
 char * tdmTable:: columnName (long ncol) {
-   char *c;
+   const char *c;
    if( !dsColumnName(&c,pDSthis,ncol) ){
       return NULL;
    }
@@ -583,7 +583,7 @@ DS_TYPE_CODE_T tdmTable:: columnTypeCode (long ncol) {
 
 //----------------------------------
 char * tdmTable:: columnTypeName (long ncol) {
-   char *c;
+   const char *c;
    if( !dsColumnTypeName(&c,pDSthis,ncol) ){
       return NULL;
    }
@@ -825,7 +825,7 @@ tdmDataset:: ~tdmDataset() {
 //:----------------------------------------------- ATTRIBUTES         --
 /* OVER-RIDE tdmObject::dslName */
 char * tdmDataset::  dslName () {
-   char* c;
+   const char* c;
    char* cc=NULL;
    if( !dsDatasetName(&c, pDSthis) ){
       EML_PUSHERROR(DSL_ERROR);
@@ -1145,10 +1145,10 @@ tdmTable* tdmFactory:: createTable (const char * name
 
 //----------------------------------
 STAFCV_T tdmFactory:: getTypeName (long tid, char *& name) {
-   char *spec=NULL;	size_t lspec=0;
-   char *pre=NULL;	size_t lpre=0;
-   char *post=NULL;
-   char *buff=NULL;	size_t lbuff=0;
+   const char 	*spec=NULL;	size_t lspec=0;
+   const char 	*pre =NULL;	size_t lpre=0;
+   const char 	*post=NULL;
+   const char 	*buff=NULL;	size_t lbuff=0;
 
    if( !dsTypeSpecifier(&spec,&lspec,(size_t)tid)
    ||  (0 == (pre = strstr(spec,"struct")))
@@ -1171,7 +1171,7 @@ STAFCV_T tdmFactory:: getTypeName (long tid, char *& name) {
 
 //----------------------------------
 STAFCV_T tdmFactory:: getTypeSpecification (long tid, char *& spec) {
-   char *c;
+   const char *c;
    size_t l;
 
    if( !dsTypeSpecifier(&c,&l,(size_t)tid) ){

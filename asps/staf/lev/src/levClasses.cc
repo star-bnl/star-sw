@@ -45,7 +45,7 @@ typedef int pid_t;
 #define PP printf(
 //:----------------------------------------------- PROTOTYPES         --
 
-#if defined(sun)
+#if defined(SUN)
 extern "C" int gethostname(char *name, int namelen);
 #endif
 
@@ -143,7 +143,7 @@ void levFactory::levUpdate() {
   socObject *obj;
   for( int i=0; i<soc->count();i++ ){
      if(NULL != (obj = soc->getObject(i))) {
-        registerVersion(obj->name(),obj->type(),obj->version());
+        registerVersion(obj->Name(),obj->Type(),obj->Version());
      }
   }
 }
@@ -308,7 +308,7 @@ STAFCV_T levFactory:: registerVersion(const char *name,
 } /* nrow val */
 char *levFactory:: version() {
   char *c=NULL;
-  char *v="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/lev/src/Attic/levClasses.cc,v 1.11 1998/05/19 14:00:37 dave Exp $";
+  char *v="$Header: /scratch/smirnovd/cvs2git_readonly/cvs/star-sw/asps/staf/lev/src/Attic/levClasses.cc,v 1.12 1998/08/13 02:08:27 perev Exp $";
   c=(char*)MALLOC(strlen(v)+1);
   strcpy(c,v);
   return c;

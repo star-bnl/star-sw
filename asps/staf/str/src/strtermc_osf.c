@@ -1,1 +1,1 @@
-	void strterm_dummy( void ){}
+        void strterm_dummy( void ){}
