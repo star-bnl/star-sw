@@ -1,5 +1,8 @@
-* $Id: sisdgeo2.g,v 1.1 2004/10/28 22:04:01 potekhin Exp $
+* $Id: sisdgeo2.g,v 1.2 2004/10/28 22:11:04 potekhin Exp $
 * $Log: sisdgeo2.g,v $
+* Revision 1.2  2004/10/28 22:11:04  potekhin
+* Killed an unnecessary print
+*
 * Revision 1.1  2004/10/28 22:04:01  potekhin
 * Adding the new version of the file, as a separate code
 * to allow comparisons and preserve the older codebase
@@ -321,7 +324,6 @@ Module  SISDGEO2  is the Silicon Strip Detector
       USE SSDP
       USE SFPA version=SSDP_Config
       USE SFJP 
-	write(*,*) '------------------------',SSDP_Config
 
 *     G10 is about 60% SiO2 and 40% epoxy (stolen from ftpcgeo.g)
         Component Si  A=28.08  Z=14   W=0.6*1*28./60.
