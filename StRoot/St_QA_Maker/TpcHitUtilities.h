@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// $Id: TpcHitUtilities.h,v 1.3 2000/08/09 18:57:44 lansdell Exp $
+// $Id: TpcHitUtilities.h,v 1.4 2001/04/25 18:16:20 perev Exp $
 //
 // Author: M.L. Miller, Yale
 //
@@ -10,6 +10,9 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: TpcHitUtilities.h,v $
+// Revision 1.4  2001/04/25 18:16:20  perev
+// HPcorrs
+//
 // Revision 1.3  2000/08/09 18:57:44  lansdell
 // improvements in TPC gains code reduces CPU time per event by factor of 2
 //
@@ -26,9 +29,11 @@ class StThreeVectorD;
 #include <vector>
 #include <map>
 
+#ifndef ST_NO_NAMESPACES
 using std::vector;
 using std::map;
 using std::pair;
+#endif
 
 #include "TpcMapUtilities.h"
 

@@ -483,7 +483,7 @@ Int_t Stl3RawReaderMaker::findVertexMethod2(StPrimaryVertex& mvertex)
     Double_t B = 0.25 * 0.01 ; // this is important ! B-field in right dimension : * 0.01 
     TH1D* vertexZdis = new TH1D("vz2","vz2",800,-200,200) ;
     vertexZdis->Reset();
-    for(Int_t trackid = 0 ; trackid < numberOfTracks ;  trackid++)
+    {for(Int_t trackid = 0 ; trackid < numberOfTracks ;  trackid++)
 	{
 	  if ( globalL3Tracks[trackid].nHits>14  && globalL3Tracks[trackid].pt > 0.2  )
 	    { 
@@ -504,7 +504,7 @@ Int_t Stl3RawReaderMaker::findVertexMethod2(StPrimaryVertex& mvertex)
 	      //cout << ver << "\t" ;
 	      vertexZdis->Fill(ver) ;
 	    }
-	}
+	}}
     // fit z vertex
     Double_t vertexZ = 9999 ;
     TF1 *mygaus = new TF1("mygaus","[0]*exp(-0.5*( (x-[1])/[2])^2)", -10 ,10 );
@@ -536,7 +536,7 @@ Int_t Stl3RawReaderMaker::findVertexMethod2(StPrimaryVertex& mvertex)
     TH1D* vertexX = new TH1D("vertexX","vertexX",100,-5,5);
     TH1D* vertexY = new TH1D("vertexY","vertexY",100,-5,5);
 
-    for(Int_t trackid = 0 ; trackid < numberOfTracks ;  trackid++)
+    {for(Int_t trackid = 0 ; trackid < numberOfTracks ;  trackid++)
       {
 	if ( globalL3Tracks[trackid].nHits>14  && globalL3Tracks[trackid].pt >0.2 )
 	  { 
@@ -560,7 +560,7 @@ Int_t Stl3RawReaderMaker::findVertexMethod2(StPrimaryVertex& mvertex)
 	    vertexX->Fill(vertexXp) ;
 	    vertexY->Fill(vertexYp) ;
 	  }
-      }
+      }}
      
     /////
     // fit xy vertex

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.cc,v 1.18 2001/04/03 21:04:36 kisiel Exp $
+ * $Id: StHbtPair.cc,v 1.19 2001/04/25 18:05:09 perev Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,8 +14,13 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.cc,v $
+ * Revision 1.19  2001/04/25 18:05:09  perev
+ * HPcorrs
+ *
  * Revision 1.18  2001/04/03 21:04:36  kisiel
- * Changes needed to make the Theoretical code
+ *
+ *
+ *   Changes needed to make the Theoretical code
  *   work. The main code is the ThCorrFctn directory.
  *   The most visible change is the addition of the
  *   HiddenInfo to StHbtPair.
@@ -421,9 +426,13 @@ double StHbtPair::KStar() const{
   */
 }
 
-double StHbtPair::KStarFlipped() const{
-  StHbtLorentzVector& tP1 = mTrack1->FourMomentum();
-  tP1.vect() *= -1.; // flip it
+double StHbtPair::KStarFlipped() const {
+  StHbtLorentzVector tP1 = mTrack1->FourMomentum();
+
+  StThreeVectorD qwe = tP1.vect();
+  qwe *= -1.; // flip it
+  tP1.setVect(qwe);
+  
   StHbtLorentzVector tSum = (tP1+mTrack2->FourMomentum());
   double tMass = abs(tSum);
   StThreeVectorD tGammaBeta = (1./tMass)*tSum.vect(); 
@@ -432,7 +441,7 @@ double StHbtPair::KStarFlipped() const{
 			      (tGammaBeta*tGammaBeta))*tGammaBeta;
   StLorentzVectorD tK(tGamma*tP1.e() - tP1.vect()*tGammaBeta,
 		      tP1.vect() + (tGamma-1.)*tLongMom - tP1.e()*tGammaBeta);
-  tP1.vect() *= -1.; // unflip it
+//VP  tP1.vect() *= -1.; // unflip it
   return tK.vect().mag();
 }
 
@@ -450,8 +459,11 @@ double StHbtPair::CVK() const{
 }
 
 double StHbtPair::CVKFlipped() const{
-  const StHbtLorentzVector& tP1 = mTrack1->FourMomentum();
-  tP1.vect() *= -1.; // flip it
+  StHbtLorentzVector tP1 = mTrack1->FourMomentum();
+  StThreeVectorD qwe = tP1.vect();
+  qwe *= -1.; // flip it
+  tP1.setVect(qwe);
+  
   StHbtLorentzVector tSum = (tP1+mTrack2->FourMomentum());
   double tMass = abs(tSum);
   StThreeVectorD tGammaBeta = (1./tMass)*tSum.vect(); 
@@ -460,7 +472,7 @@ double StHbtPair::CVKFlipped() const{
 			      (tGammaBeta*tGammaBeta))*tGammaBeta;
   StLorentzVectorD tK(tGamma*tP1.e() - tP1.vect()*tGammaBeta,
 		      tP1.vect() + (tGamma-1.)*tLongMom - tP1.e()*tGammaBeta);
-  tP1.vect() *= -1.; // unflip it
+//VP  tP1.vect() *= -1.; // unflip it
   return (tK.vect())*tGammaBeta/tGamma;
 }
 

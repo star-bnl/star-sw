@@ -207,18 +207,18 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
   oldMuDstMaker = new StStrangeMuDstMaker("oldMuDstMaker");
   oldMuDstMaker->SetRead(input); // Selects READ mode
   // DoV0() and DoMc() are automatically called for the old maker by the new.
-  for( Int_t i=0; i<mNDstMakers; i++ )
-    newMuDstMakers[i]->SubDst(oldMuDstMaker);
+  {for( Int_t i=0; i<mNDstMakers; i++ )
+    newMuDstMakers[i]->SubDst(oldMuDstMaker);}
   // Next, any additional cuts that are being made should be added to
   // the cuts information in the new DST.
   char buff[80];
   // Event-wise cuts go here
-  for( Int_t i=0; i<mNDstMakers; i++ ) {
+  {for( Int_t i=0; i<mNDstMakers; i++ ) {
     sprintf(buff,"< +/- %f",evPrimVertexZ);
     newMuDstMakers[i]->Cuts().Add("evPrimVertexZ",buff);
     sprintf(buff,"> %d",evPrimTracks);
     newMuDstMakers[i]->Cuts().Add("evPrimTracks",buff);
-  }
+  }}
   // Specific cuts follow
   sprintf(buff,"> %f",v0DecayLength);
   v0MuDstMaker->Cuts().Add("v0DecayLength",buff);
@@ -255,7 +255,7 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
   if( istatus ) { chain.Fatal(istatus,"on init"); return; }
 
   // Loop over events
-  for( Int_t i=0; i<NEvents; i++ ) {
+  {for( Int_t i=0; i<NEvents; i++ ) {
     switch (istatus = chain.Make()) {
       case 0: break;
       case 2: { gMessMgr->Info("Last event from input."); break; }
@@ -272,16 +272,16 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
     // Apply cut on the primary vertex Z position
     if (TMath::Abs(primZ)<evPrimVertexZ && primaryTracks>evPrimTracks) {
       // Apply selection criteria to the V0s
-      for( Int_t j=0; j<oldMuDstMaker->GetNV0(); j++ ) {
+      {for( Int_t j=0; j<oldMuDstMaker->GetNV0(); j++ ) {
 	StV0MuDst *v0j = oldMuDstMaker->GetV0(j);
 	if( v0j->decayLengthV0() > v0DecayLength && 
 	    v0j->dcaV0ToPrimVertex() < v0DcaToPrimVertex &&
 	    ((v0j->dcaPosToPrimVertex() > v0DcaDaughtersToPrimVertex) ||
 	     (v0j->dcaNegToPrimVertex() > v0DcaDaughtersToPrimVertex)) )
 	  v0MuDstMaker->SelectV0(j);
-      }
+      }}
       // Apply selection criteria to the Xis
-      for( Int_t j=0; j<oldMuDstMaker->GetNXi(); j++ ) {
+      {for( Int_t j=0; j<oldMuDstMaker->GetNXi(); j++ ) {
 	StXiMuDst *xij = oldMuDstMaker->GetXi(j);
 	if( xij->dcaXiDaughters() < xiDcaDaughters &&
 	    xij->dcaV0Daughters() < xiDcaV0Daughters &&
@@ -289,19 +289,19 @@ void StrangeMuDstPlayer::Filter(Int_t NEvents, StFile* input, Char_t* output) {
 	    xij->dcaV0ToPrimVertex() > xiDcaV0ToPrimVertex &&
 	    xij->dcaBachelorToPrimVertex() > xiDcaBachelorToPrimVertex )
 	  xiMuDstMaker->SelectXi(j);
-      }
+      }}
       // Just copy the kinks for now
-      for( Int_t j=0; j<oldMuDstMaker->GetNKink(); j++ ) {
+      {for( Int_t j=0; j<oldMuDstMaker->GetNKink(); j++ ) {
 	kinkMuDstMaker->SelectKink(j);
-      }
+      }}
     } else {
-      for( Int_t j=0; j<mNDstMakers; j++ )
-	newMuDstMakers[j]->AbortEvent();
+      {for( Int_t j=0; j<mNDstMakers; j++ )
+	newMuDstMakers[j]->AbortEvent();}
     } // prim vertex Z and prim Tracks cut
   
     if( i != NEvents) chain.Clear();
     printf("*** Finished processing event %d\n",i);
-  }
+  }}
   
   // Finish
   if( NEvents >= 1 ) {
@@ -395,18 +395,18 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
   if( doT0Abort ) 
     oldMuDstMaker->DoT0JitterAbort();
   // DoV0() and DoMc() are automatically called for the old maker by the new.
-  for( Int_t i=0; i<mNDstMakers; i++ )
-    newMuDstMakers[i]->SubDst(oldMuDstMaker);
+  {for( Int_t i=0; i<mNDstMakers; i++ )
+    newMuDstMakers[i]->SubDst(oldMuDstMaker);}
   // Next, any additional cuts that are being made should be added to
   // the cuts information in the new DST.
   char buff[80];
   // Event-wise cuts go here
-  for( Int_t i=0; i<mNDstMakers; i++ ) {
+  {for( Int_t i=0; i<mNDstMakers; i++ ) {
     sprintf(buff,"< +/- %f",evPrimVertexZ);
     newMuDstMakers[i]->Cuts().Add("evPrimVertexZ",buff);
     sprintf(buff,"> %d",evPrimTracks);
     newMuDstMakers[i]->Cuts().Add("evPrimTracks",buff);
-  }
+  }}
   // Specific cuts follow
   sprintf(buff,"> %f",v0DecayLength);
   v0MuDstMaker->Cuts().Add("v0DecayLength",buff);
@@ -469,7 +469,7 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
 	  v0MuDstMaker->SelectV0(j);
       }
       // Apply selection criteria to the Xis
-      for( Int_t j=0; j<oldMuDstMaker->GetNXi(); j++ ) {
+      {for( Int_t j=0; j<oldMuDstMaker->GetNXi(); j++ ) {
 	StXiMuDst *xij = oldMuDstMaker->GetXi(j);
 	if( xij->dcaXiDaughters() < xiDcaDaughters &&
 	    xij->dcaV0Daughters() < xiDcaV0Daughters &&
@@ -477,14 +477,14 @@ void StrangeMuDstPlayer::Play(Int_t NEvents, StFile* input, Char_t* output) {
 	    xij->dcaV0ToPrimVertex() > xiDcaV0ToPrimVertex &&
 	    xij->dcaBachelorToPrimVertex() > xiDcaBachelorToPrimVertex )
 	  xiMuDstMaker->SelectXi(j);
-      }
+      }}
       // Just copy the kinks for now
-      for( Int_t j=0; j<oldMuDstMaker->GetNKink(); j++ ) {
+      {for( Int_t j=0; j<oldMuDstMaker->GetNKink(); j++ ) {
 	kinkMuDstMaker->SelectKink(j);
-      }
+      }}
     } else {
-      for( Int_t j=0; j<mNDstMakers; j++ )
-	newMuDstMakers[j]->AbortEvent();
+      {for( Int_t j=0; j<mNDstMakers; j++ )
+	newMuDstMakers[j]->AbortEvent();}
     } // prim vertex Z and prim Tracks cut
   
     if( i != NEvents) chain.Clear();

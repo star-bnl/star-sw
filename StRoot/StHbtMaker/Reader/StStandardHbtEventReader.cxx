@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.28 2001/02/08 22:38:26 laue Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.29 2001/04/25 18:08:16 perev Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.29  2001/04/25 18:08:16  perev
+ * HPcorrs
+ *
  * Revision 1.28  2001/02/08 22:38:26  laue
  * Reader can now switch between different track types: primary is default
  *
@@ -301,13 +304,13 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   int iWrongTrackType =0;
 
   // loop over all the tracks, accept only global
-  for (unsigned long int icount=0; icount<(unsigned long int)mult; icount++){
+  {for (unsigned long int icount=0; icount<(unsigned long int)mult; icount++){
     cTrack = rEvent->trackNodes()[icount]->track(mTrackType);
     if (cTrack) {
       iTracks++;
       if (cTrack->flag()>=0) iGoodTracks++;
     }
-  }
+  }}
 
   hbtEvent->SetNumberOfTracks(iTracks);
   hbtEvent->SetNumberOfGoodTracks(iGoodTracks);
@@ -333,7 +336,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     hbtEvent->SetReactionPlaneError(reactionPlaneError);
   }
 
-  for (unsigned long int icount=0; icount<(unsigned long int)mult; icount++){
+  {for (unsigned long int icount=0; icount<(unsigned long int)mult; icount++){
 #ifdef STHBTDEBUG
     cout << " track# " << icount << endl;
 #endif
@@ -463,7 +466,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     }
 
     hbtEvent->TrackCollection()->push_back(hbtTrack);
-  }
+  }}
   delete PidAlgorithm;
 
   printf(" StStandardHbtEventReader::ReturnHbtEvent() - %8i tracks of type %i           \n",iTracks,mTrackType);

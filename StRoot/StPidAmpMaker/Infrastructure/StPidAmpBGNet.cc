@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpBGNet.cc,v 1.7 2000/07/22 22:11:32 aihong Exp $
+ * $Id: StPidAmpBGNet.cc,v 1.8 2001/04/25 18:12:58 perev Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpBGNet.cc,v $
+ * Revision 1.8  2001/04/25 18:12:58  perev
+ * HPcorrs
+ *
  * Revision 1.7  2000/07/22 22:11:32  aihong
  * move some include files to StEventUtilities & change include path
  *
@@ -36,6 +39,7 @@
  **************************************************************************/
 
 
+#include <math.h>
 #include "TCanvas.h"
 #include "StMessMgr.h"
 
@@ -198,9 +202,9 @@ void StPidAmpBGNet::setUp(){//setUp based on mBandParams always.
                                                   //but also forces the
                                                  // capacity to zero!!
 
-  for (int j=0; j<mNetWindow.NWindows(); j++){
+  {for (int j=0; j<mNetWindow.NWindows(); j++){
        sz +=int((mNetWindow.length(j+1))/sliceWidth4Window[j]);
-  }
+  }}
 
    sz +=10;
 
@@ -208,13 +212,13 @@ void StPidAmpBGNet::setUp(){//setUp based on mBandParams always.
 
        //set up slices
  
-   for (j=0; j<mNetWindow.NWindows(); j++){ 
+   {for (j=0; j<mNetWindow.NWindows(); j++){ 
 
-     if (fabs(mNetWindow.windowBegin(j+1)>500)) 
-     localPathHeight=PathHeight/2.0; //for e, we need narrow net
+     if (fabs(mNetWindow.windowBegin(j+1))>500) 
+        localPathHeight=PathHeight/2.0; //for e, we need narrow net
 
 
- SliceLoop: if ( ((i+1.0)*sliceWidth4Window[j]+fabs(mNetWindow.windowBegin(j+1)))<fabs(mNetWindow.windowEnd(j+1)) ) {
+ SliceLoop: if ( ((i+1.0)*sliceWidth4Window[j]+fabs(mNetWindow.windowBegin(j+1))) < fabs(mNetWindow.windowEnd(j+1)) ) {
 //window index begin with 1.so j+1
 
  double midRig=sliceWidth4Window[j]*(double(i)+0.5)+fabs(mNetWindow.windowBegin(j+1));
@@ -239,7 +243,7 @@ void StPidAmpBGNet::setUp(){//setUp based on mBandParams always.
     i=0;
 
 
-   }
+   }}
 
 
       for (i=0; i<mNetWindow.NWindows();i++)  NSliceAccum[i]=0;

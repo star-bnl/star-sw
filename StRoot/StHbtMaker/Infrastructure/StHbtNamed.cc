@@ -8,6 +8,8 @@
  *
  ***************************************************************************/
 
+#include <stdlib.h>
+#include <string.h>
 #include "StHbtMaker/Infrastructure/StHbtNamed.hh"
 
 #ifdef __ROOT2__

@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcEventMaker.cxx,v 1.37 2001/03/13 16:14:02 pavlinov Exp $
+ * $Id: StMcEventMaker.cxx,v 1.38 2001/04/25 18:10:50 perev Exp $
  * $Log: StMcEventMaker.cxx,v $
+ * Revision 1.38  2001/04/25 18:10:50  perev
+ * HPcorrs
+ *
  * Revision 1.37  2001/03/13 16:14:02  pavlinov
  * StEmcGeom moved to StEmcUtil
  *
@@ -181,7 +184,7 @@ struct vertexFlag {
 	      StMcVertex* vtx;
 	      int primaryFlag; };
 
-static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.37 2001/03/13 16:14:02 pavlinov Exp $";
+static const char rcsid[] = "$Id: StMcEventMaker.cxx,v 1.38 2001/04/25 18:10:50 perev Exp $";
 ClassImp(StMcEventMaker)
 
 
@@ -534,14 +537,14 @@ Int_t StMcEventMaker::Make()
 	// of the particles in the particle table is never more than the current index.
 
 	long motherIndex = -1;  // Set it to some unused number. 
-	for (long gtrk=0; gtrk<NGeneratorTracks; gtrk++) {
+	{for (long gtrk=0; gtrk<NGeneratorTracks; gtrk++) {
 	    egTrk = new StMcTrack(&(particleTable[gtrk]));
 	    egTrk->setEventGenLabel(gtrk+1);
 	    ttempParticle[gtrk] = egTrk;
 	    mCurrentMcEvent->tracks().push_back(egTrk); // adds track egTrk to master collection 
 	    usedTracksEvGen++;
 	    
-	} // Generator Tracks Loop
+	}} // Generator Tracks Loop
 	
 	StMcTrack* t = 0;
 	long iStartVtxId = 0;
@@ -551,7 +554,7 @@ Int_t StMcEventMaker::Make()
 	int nThrownTracks = 0;
 	cout << "g2t Tracks..." << endl;
 	
-	for (long itrk=0; itrk<NTracks; itrk++) {
+	{for (long itrk=0; itrk<NTracks; itrk++) {
 	    iStopVtxId = (trackTable[itrk].stop_vertex_p) - 1;
 		    		
 	    if (iStopVtxId >= 0) {
@@ -658,8 +661,8 @@ Int_t StMcEventMaker::Make()
 		    else t->setParent(ttemp[motherIndex-1]);
 	    }
 	    
-	} // Track loop
-	for (long gtrk=0; gtrk<NGeneratorTracks; gtrk++) {
+	}} // Track loop
+	{for (long gtrk=0; gtrk<NGeneratorTracks; gtrk++) {
 	    // Find Mother...
 	    motherIndex = particleTable[gtrk].jmohep[0];
 	    if ((motherIndex > 0) && (motherIndex < NGeneratorTracks)) {
@@ -679,7 +682,7 @@ Int_t StMcEventMaker::Make()
 		    }
 		}
 	    }
-	}
+	}}
 	if (nThrownTracks)
 	    gMessMgr->Warning() << "StMcEventMaker::Make(): Throwing " << nThrownTracks
 				<< " whose stop vertex is the same as primary vertex." << endm;
@@ -747,18 +750,18 @@ Int_t StMcEventMaker::Make()
 	}
 	cout << "Filled " << mCurrentMcEvent->tpcHitCollection()->numberOfHits() << " TPC Hits" << endl;
 	cout << "Found " << nPseudoPadrow << " Hits in Pseudo-Padrows." << endl;
-	if (nBadVolId) gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
-					   << " TPC hits, wrong Volume Id." << endm;
+	if (nBadVolId) {gMessMgr->Warning() << "StMcEventMaker::Make(): cannot store " << nBadVolId
+					   << " TPC hits, wrong Volume Id." << endm;}
 	// Sort the hits
-	for (unsigned int iSector=0;
+	{for (unsigned int iSector=0;
 	     iSector<mCurrentMcEvent->tpcHitCollection()->numberOfSectors(); iSector++)
-	    for (unsigned int iPadrow=0;
+	    {for (unsigned int iPadrow=0;
 		 iPadrow<mCurrentMcEvent->tpcHitCollection()->sector(iSector)->numberOfPadrows();
 		 iPadrow++) {
 		StSPtrVecMcTpcHit& tpcHits = mCurrentMcEvent->tpcHitCollection()->sector(iSector)->padrow(iPadrow)->hits();
 		sort (tpcHits.begin(), tpcHits.end(), compMcHit() );
 	        
-	    }
+	    }}}
 	}
 	else {
 	    cout << "No TPC Hits in this event" << endl;

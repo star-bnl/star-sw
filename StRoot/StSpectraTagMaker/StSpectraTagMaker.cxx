@@ -54,7 +54,7 @@ Int_t StSpectraTagMaker::Make(){
 
   // now count up the number of interesting tracks
 
-   StPrimaryTrackIterator itr;
+   const_StPrimaryTrackIterator itr;
    StPrimaryTrack *track;
    float px;
    float py;

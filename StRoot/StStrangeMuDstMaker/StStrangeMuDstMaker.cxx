@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 3.9 2001/01/30 04:06:54 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.10 2001/04/25 18:20:53 perev Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.10  2001/04/25 18:20:53  perev
+// HPcorrs
+//
 // Revision 3.9  2001/01/30 04:06:54  genevb
 // Better handling of file switches
 //
@@ -145,13 +148,13 @@ Int_t StStrangeMuDstMaker::Init() {
     evClonesArray = new TClonesArray("StStrangeEvMuDst",1);
   }
   StStrangeControllerBase::currentMaker = this;
-  EachDoT(cont[i] = StStrangeControllerBase::Instantiate(i));
+  {EachDoT(cont[i] = StStrangeControllerBase::Instantiate(i));}
 
   v0 = cont[v0T];
   xi = cont[xiT];
   kink = cont[kinkT];
 
-  EachDoT( if (bsize[i]) cont[i]->SetBufferSize(bsize[i]) );
+  {EachDoT( if (bsize[i]) cont[i]->SetBufferSize(bsize[i]) );}
 
   if (rw == StrangeRead) {            // READING  the Micro Dst
     InitReadDst();
