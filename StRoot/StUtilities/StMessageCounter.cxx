@@ -1,5 +1,8 @@
-// $Id: StMessageCounter.cxx,v 1.6 1999/06/29 17:37:31 genevb Exp $
+// $Id: StMessageCounter.cxx,v 1.7 1999/06/30 04:18:45 genevb Exp $
 // $Log: StMessageCounter.cxx,v $
+// Revision 1.7  1999/06/30 04:18:45  genevb
+// Fixes: summary wrap-around, unsigned ints, last character of message, <> for time; no KNOWN remaining bugs
+//
 // Revision 1.6  1999/06/29 17:37:31  genevb
 // Lots of fixes...
 //
@@ -43,7 +46,7 @@ limitMessage(" - COUNT LIMIT REACHED!\n") {
 }
 //_____________________________________________________________________________
 StMessageCounter::~StMessageCounter() {
-  int i;
+  size_t i;
   for (i=0; i<limitTList.size(); i++) {
     delete (limitTList[i]);
     delete (limitTCountList[i]);
@@ -63,7 +66,7 @@ StMessageCounter* StMessageCounter::Instance() {
 //_____________________________________________________________________________
 void StMessageCounter::SetLimit(char* str, int n) {
   yesLimits = 1;
-  const int len = strlen(str);
+  const size_t len = strlen(str);
   if (len==1) {
     int typeN = messTypeList->FindTypeNum(str);
     if (typeN) {

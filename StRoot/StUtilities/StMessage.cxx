@@ -1,5 +1,8 @@
-// $Id: StMessage.cxx,v 1.6 1999/06/29 23:32:41 genevb Exp $
+// $Id: StMessage.cxx,v 1.7 1999/06/30 04:18:45 genevb Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.7  1999/06/30 04:18:45  genevb
+// Fixes: summary wrap-around, unsigned ints, last character of message, <> for time; no KNOWN remaining bugs
+//
 // Revision 1.6  1999/06/29 23:32:41  genevb
 // Handle multi-line calls to fortran routines better
 //
@@ -52,7 +55,7 @@ StMessage::StMessage(char *mess, char *ty, char* opt) :
 type(new char(toupper(*ty))),
 messTime(new TDatime()) {
   static char space = ' ';
-  int len = strlen(opt);
+  size_t len = strlen(opt);
   option = new char[len];
   while (len--)
     option[len] = toupper(opt[len]);
@@ -60,9 +63,9 @@ messTime(new TDatime()) {
 //  runNumber = 0;
   len = strlen(mess);
   while (mess[--len] == space) {}    // remove trailing spaces
-  message = new char[++len];
+  message = new char[(++len + 1)];
   strncpy(message,mess,len);
-  strcat(message,"");
+  strcpy(&(message[len]),"");
   Print();
 }
 //_____________________________________________________________________________
@@ -73,9 +76,9 @@ StMessage::~StMessage() {
 int StMessage::Print(int nChars) {
   static const char* leader = "St";
   static const char* insert1 = ": ";
-  static const char* insert2 = " (";
-  static const char* insert3 = ")";
-  static const char* insert4 = "\n";
+  static const char* insert2 = " <";
+  static const char* insert3 = ">";
+  static const char* endofline = "\n";
   messBuffer.seekp(0);
   int printIt=1;
   if (!nChars) {
@@ -85,13 +88,13 @@ int StMessage::Print(int nChars) {
     messBuffer << leader;
     const char* temp(StMessTypeList::Instance()->Text(type));
     if (temp) messBuffer << temp;
-    messBuffer << insert1 << message;         // ": ",message
+    messBuffer << insert1 << message;                    // ": ",message
     if (nChars<=0) {
       if (!strchr(option,'T')) {
         char* temp2 = strchr(messTime->AsString(),' ');
         messBuffer << insert2 << (++temp2) << insert3 ;  // " (",time,")"
       }
-      messBuffer << insert4;       // "\n" end-line
+      messBuffer << endofline;                           // "\n" end-line
     }
   }
   char* addedMessage=0;
@@ -101,6 +104,8 @@ int StMessage::Print(int nChars) {
     if (nChars>0) {
       if (messBuffer.tellp() > nChars)
         messBuffer.seekp(nChars);   // set end-of-string at nChars
+      int noReturns = strcspn(messBuffer.str(),endofline);
+      if (noReturns < messBuffer.tellp()) messBuffer.seekp(noReturns);
     } else
       nChars = 0;
   }
@@ -120,7 +125,7 @@ int StMessage::Print(int nChars) {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.6 1999/06/29 23:32:41 genevb Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.7 1999/06/30 04:18:45 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }

@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.9 1999/06/29 23:32:42 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.10 1999/06/30 04:18:45 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.10  1999/06/30 04:18:45  genevb
+// Fixes: summary wrap-around, unsigned ints, last character of message, <> for time; no KNOWN remaining bugs
+//
 // Revision 1.9  1999/06/29 23:32:42  genevb
 // Handle multi-line calls to fortran routines better
 //
@@ -332,9 +335,9 @@ void type_of_call Message_(char* mess, int* lines, int*, int) {
   char* type = new char[2];
   strcpy(type,defaultMessType);
   if (cptr) type[0] = cptr[1];
+  size_t messSize = strlen(mess);
   if (*lines>1) {
     char* mess1 = mess;
-    int messSize = strlen(mess);
     char* mess2 = new char[messSize];    // Build a new version of the
     int lineSize = messSize/(*lines);    // message with trailing spaces
     for (int i=(*lines); i>0; i--) {     // removed, and \n's inserted.
@@ -350,7 +353,7 @@ void type_of_call Message_(char* mess, int* lines, int*, int) {
     gMessMgr->Message(mess2,type);
     delete [] mess2;
   } else {
-    if (strlen(mess)>132) strcpy(&(mess[132]),"");
+    if (messSize>132) strcpy(&(mess[132]),"");
     gMessMgr->Message(mess,type);
   }
   delete [] type;
@@ -426,7 +429,7 @@ StMessageManager::~StMessageManager() {
   messVecIter current;
   for (current=messList.begin(); current!=messList.end(); current++)
     delete (*current);
-  for (int i=1; i<messCollection.size(); i++)
+  for (size_t i=1; i<messCollection.size(); i++)
     delete (messCollection[i]);
   cout << "WARNING!!! DELETING StMessageManager!" << endl;
   gMessMgr = 0;
@@ -666,7 +669,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.9 1999/06/29 23:32:42 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.10 1999/06/30 04:18:45 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
