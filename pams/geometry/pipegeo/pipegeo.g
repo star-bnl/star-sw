@@ -3,9 +3,12 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
   Created  30-03-99
   Author   W.B.Christie
 
-* $Id: pipegeo.g,v 1.8 2004/01/19 22:51:36 potekhin Exp $
+* $Id: pipegeo.g,v 1.9 2004/01/22 00:26:48 potekhin Exp $
 *
 * $Log: pipegeo.g,v $
+* Revision 1.9  2004/01/22 00:26:48  potekhin
+* Allow for optional positioning with MANY
+*
 * Revision 1.8  2004/01/19 22:51:36  potekhin
 * Will need to rework the code, because the thinner
 * mother volume for the pipe is clashing with the pixel
@@ -188,20 +191,27 @@ Module PIPEGEO is the geometry  of the STAR beam pipe.
       R2 = pipg_S4outR
 
       Create   PIPE
-      Position PIPE in CAVE 
-      Position PIPE in CAVE  ThetaZ=180
+      if(PIPV_pipeConfig>=4) then ! customized positioning
+         Position PIPE in CAVE             Konly='MANY'
+         Position PIPE in CAVE  ThetaZ=180 Konly='MANY'
+      else ! deault, no need to 'MANY'
+         Position PIPE in CAVE
+         Position PIPE in CAVE
+      endif
 *
 * -----------------------------------------------------------------------------
 Block PIPE is the STAR beam pipe mother volume
       Material  Air
       Medium    Standard
-      Attribute Pipe   Seen=0  colo=1
+      Attribute Pipe   Seen=1  colo=2
       SHAPE     PCON   phi1=0  Dphi=360  Nz=4,
           zi = { 0,   Z1-pipg_flange1t,   Z1-pipg_flange1t,            Z3 },
           Rmn= { 0,                  0,                  0,             0 },
           Rmx= { r1,                r1,                 r2,            r2 }
+
+* debug: write(*,*) 'Z1-pipg_flange1t,',Z1-pipg_flange1t,'    Z3,',Z3,' r1,',r1,'  r2,',r2
 *
-*                        select material for outer part
+*     select material for outer part
       if (pipg_material=='IRON') then    
           material Iron
       else
