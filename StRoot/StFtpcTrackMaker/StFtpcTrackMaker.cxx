@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.67 2004/09/03 20:36:22 perev Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.68 2004/09/07 14:06:19 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.68  2004/09/07 14:06:19  jcs
+// use the IAttr(".histos") to control histogramming
+//
 // Revision 1.67  2004/09/03 20:36:22  perev
 // Big LeakOff + mem optimisation
 //
@@ -386,38 +389,10 @@ Int_t StFtpcTrackMaker::Init()
   				 (St_ftpcPadrowZ *)ftpcGeometry("ftpcPadrowZ"));
 
   // Create Histograms
+
+#ifdef DEBUGFILE
   m_vtx_pos      = new TH1F("fpt_vtx_pos", "FTPC estimated vertex position", 800, -400.0, 400.0);
-  m_theta        = new TH1F("fpt_theta", "FTPC theta", 100, -5.0, 5.0 );
-  m_nrec_track   = new TH2F("fpt_hits_mom", "FTPC: points found per track vs. momentum" , 
-			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
-			    StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5, 100, 0., 20.);
-
-  m_padvstime_West = new TH2F("fpt_padvstimeW", "FTPCW padlength vs. timelength", 12, 0.5, 12.5, 
-			      StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
-			      StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5);
-  m_padvstime_East = new TH2F("fpt_padvstimeE", "FTPCE padlength vs. timelength", 12, 0.5, 12.5, 
-			      StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
-			      StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5);
-
-  m_maxadc_West = new TH1F("fpt_maxadcW", "FTPCW MaxAdc", 50, 0.5, 50.5);
-  m_maxadc_East = new TH1F("fpt_maxadcE", "FTPCE MaxAdc", 50, 0.5, 50.5);
-
-  m_charge_West = new TH1F("fpt_chargeW", "FTPCW charge", 50, 0.5, 500.5);
-  m_charge_East = new TH1F("fpt_chargeE", "FTPCE charge", 50, 0.5, 500.5);
- 
-  m_xres   = new TH1F("fpt_x_res",   "FTPC x residuals",   100, -0.25, 0.25);
-  m_yres   = new TH1F("fpt_y_res",   "FTPC y residuals",   100, -0.25, 0.25);
-  m_rres   = new TH1F("fpt_r_res",   "FTPC r residuals",   100, -0.25, 0.25);
-  m_phires = new TH1F("fpt_phi_res", "FTPC phi residuals", 100, -0.01, 0.01);
-
-  m_rres_vs_r_east   = new TH2F("fpt_r_res_vs_r_east", "FTPC east r residuals vs. r", 
-				100, -0.25, 0.25, 100, 6.5, 31.);
-  m_phires_vs_r_east = new TH2F("fpt_phi_res_vs_r_east", "FTPC east phi residuals vs. r", 
-				100, -0.01, 0.01, 100, 6.5, 31.);
-  m_rres_vs_r_west   = new TH2F("fpt_r_res_vs_r_west", "FTPC west r residuals vs. r", 
-				100, -0.25, 0.25, 100, 6.5, 31.);
-  m_phires_vs_r_west = new TH2F("fpt_phi_res_vs_r_west", "FTPC west phi residuals vs. r", 
-				100, -0.01, 0.01, 100, 6.5, 31.);
+#endif
 
   m_vertex_east_xy = new TH2F("fpt_vertex_east_xy", 
 			      "FTPC east vertex xy estimation with resp. to TPC vertex", 
@@ -432,24 +407,58 @@ Int_t StFtpcTrackMaker::Init()
 			      "FTPC west vertex z estimation with resp. to TPC vertex",
 			      100, -10., 10.);
 
-  m_vertex_east_x_vs_sector = new TH2F("fpt_vertex_east_x_vs_sector", 
-				       "FTPC east vertex x estimation vs. sector with resp. to TPC vertex", 
-				       6, 0.5, 6.5,  80,  -2.,  2.);
-  m_vertex_east_y_vs_sector = new TH2F("fpt_vertex_east_y_vs_sector", 
-				       "FTPC east vertex y estimation vs. sector with resp. to TPC vertex", 
-				       6, 0.5, 6.5,  80,  -2.,  2.);
-  m_vertex_east_z_vs_sector = new TH2F("fpt_vertex_east_z_vs_sector", 
-				       "FTPC east vertex z estimation vs. sector with resp. to TPC vertex", 
-				       6, 0.5, 6.5, 100, -10., 10.);
-  m_vertex_west_x_vs_sector = new TH2F("fpt_vertex_west_x_vs_sector", 
-				       "FTPC west vertex x estimation vs. sector with resp. to TPC vertex", 
-				       6, 0.5, 6.5,  80,  -2.,  2.);
-  m_vertex_west_y_vs_sector = new TH2F("fpt_vertex_west_y_vs_sector", 
-				       "FTPC west vertex y estimation vs. sector with resp. to TPC vertex", 
-				       6, 0.5, 6.5,  80,  -2.,  2.);
-  m_vertex_west_z_vs_sector = new TH2F("fpt_vertex_west_z_vs_sector", 
-				       "FTPC west vertex z estimation vs. sector with resp. to TPC vertex", 
-				       6, 0.5, 6.5, 100, -10., 10.);
+  if (IAttr(".histos")) {
+     m_theta        = new TH1F("fpt_theta", "FTPC theta", 100, -5.0, 5.0 );
+     m_nrec_track   = new TH2F("fpt_hits_mom", "FTPC: points found per track vs. momentum" , 
+			       StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
+			       StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5, 100, 0., 20.);
+
+     m_padvstime_West = new TH2F("fpt_padvstimeW", "FTPCW padlength vs. timelength", 12, 0.5, 12.5, 
+			         StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
+			         StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5);
+     m_padvstime_East = new TH2F("fpt_padvstimeE", "FTPCE padlength vs. timelength", 12, 0.5, 12.5, 
+			         StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide(), 0.5, 
+			         StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide() + 0.5);
+
+     m_maxadc_West = new TH1F("fpt_maxadcW", "FTPCW MaxAdc", 50, 0.5, 50.5);
+     m_maxadc_East = new TH1F("fpt_maxadcE", "FTPCE MaxAdc", 50, 0.5, 50.5);
+
+     m_charge_West = new TH1F("fpt_chargeW", "FTPCW charge", 50, 0.5, 500.5);
+     m_charge_East = new TH1F("fpt_chargeE", "FTPCE charge", 50, 0.5, 500.5);
+ 
+     m_xres   = new TH1F("fpt_x_res",   "FTPC x residuals",   100, -0.25, 0.25);
+     m_yres   = new TH1F("fpt_y_res",   "FTPC y residuals",   100, -0.25, 0.25);
+     m_rres   = new TH1F("fpt_r_res",   "FTPC r residuals",   100, -0.25, 0.25);
+     m_phires = new TH1F("fpt_phi_res", "FTPC phi residuals", 100, -0.01, 0.01);
+
+     m_rres_vs_r_east   = new TH2F("fpt_r_res_vs_r_east", "FTPC east r residuals vs. r", 
+        			   100, -0.25, 0.25, 100, 6.5, 31.);
+     m_phires_vs_r_east = new TH2F("fpt_phi_res_vs_r_east", "FTPC east phi residuals vs. r", 
+				   100, -0.01, 0.01, 100, 6.5, 31.);
+     m_rres_vs_r_west   = new TH2F("fpt_r_res_vs_r_west", "FTPC west r residuals vs. r", 
+				   100, -0.25, 0.25, 100, 6.5, 31.);
+     m_phires_vs_r_west = new TH2F("fpt_phi_res_vs_r_west", "FTPC west phi residuals vs. r", 
+				   100, -0.01, 0.01, 100, 6.5, 31.);
+
+     m_vertex_east_x_vs_sector = new TH2F("fpt_vertex_east_x_vs_sector", 
+ 				          "FTPC east vertex x estimation vs. sector with resp. to TPC vertex", 
+				          6, 0.5, 6.5,  80,  -2.,  2.);
+     m_vertex_east_y_vs_sector = new TH2F("fpt_vertex_east_y_vs_sector", 
+				          "FTPC east vertex y estimation vs. sector with resp. to TPC vertex", 
+				          6, 0.5, 6.5,  80,  -2.,  2.);
+     m_vertex_east_z_vs_sector = new TH2F("fpt_vertex_east_z_vs_sector", 
+				          "FTPC east vertex z estimation vs. sector with resp. to TPC vertex", 
+				          6, 0.5, 6.5, 100, -10., 10.);
+     m_vertex_west_x_vs_sector = new TH2F("fpt_vertex_west_x_vs_sector", 
+				          "FTPC west vertex x estimation vs. sector with resp. to TPC vertex", 
+				          6, 0.5, 6.5,  80,  -2.,  2.);
+     m_vertex_west_y_vs_sector = new TH2F("fpt_vertex_west_y_vs_sector", 
+				          "FTPC west vertex y estimation vs. sector with resp. to TPC vertex", 
+				          6, 0.5, 6.5,  80,  -2.,  2.);
+     m_vertex_west_z_vs_sector = new TH2F("fpt_vertex_west_z_vs_sector", 
+				          "FTPC west vertex z estimation vs. sector with resp. to TPC vertex", 
+				          6, 0.5, 6.5, 100, -10., 10.);
+  }  //end if IAttr(".histos")
 
   return StMaker::Init();
 }
@@ -673,20 +682,6 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
     
     if (tracker->GetNumberOfTracks() >= StFtpcTrackingParams::Instance()->MinNumTracks()) {
       
-      for (Int_t i = 1; i <= 6; i++) { // east
-	vertex = tracker->EstimateVertex(tracker->GetVertex(), -1, i, 1);
-	m_vertex_east_x_vs_sector->Fill((Float_t)i, vertex.GetX()-tracker->GetVertex()->GetX());
-	m_vertex_east_y_vs_sector->Fill((Float_t)i, vertex.GetY()-tracker->GetVertex()->GetY());
-	m_vertex_east_z_vs_sector->Fill((Float_t)i, vertex.GetZ()-tracker->GetVertex()->GetZ());
-      }
-      
-      for (Int_t i = 1; i <= 6; i++) { // west
-	vertex = tracker->EstimateVertex(tracker->GetVertex(), +1, i, 1);
-	m_vertex_west_x_vs_sector->Fill((Float_t)i, vertex.GetX()-tracker->GetVertex()->GetX());
-	m_vertex_west_y_vs_sector->Fill((Float_t)i, vertex.GetY()-tracker->GetVertex()->GetY());
-	m_vertex_west_z_vs_sector->Fill((Float_t)i, vertex.GetZ()-tracker->GetVertex()->GetZ());
-      }
-      
       // vertex estimation for both FTPCs (using all tracks)
       m_vertex_east_xy->Fill(tracker->GetVertexEast()->GetX()-tracker->GetVertex()->GetX(),
 			     tracker->GetVertexEast()->GetY()-tracker->GetVertex()->GetY());
@@ -694,54 +689,72 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
       m_vertex_west_xy->Fill(tracker->GetVertexWest()->GetX()-tracker->GetVertex()->GetX(),
 			     tracker->GetVertexWest()->GetY()-tracker->GetVertex()->GetY());
       m_vertex_west_z->Fill(tracker->GetVertexWest()->GetZ()-tracker->GetVertex()->GetZ());    
-    }
-  }    
+      
+      if (IAttr(".histos")) {
+         for (Int_t i = 1; i <= 6; i++) { // east
+	   vertex = tracker->EstimateVertex(tracker->GetVertex(), -1, i, 1);
+	   m_vertex_east_x_vs_sector->Fill((Float_t)i, vertex.GetX()-tracker->GetVertex()->GetX());
+	   m_vertex_east_y_vs_sector->Fill((Float_t)i, vertex.GetY()-tracker->GetVertex()->GetY());
+	   m_vertex_east_z_vs_sector->Fill((Float_t)i, vertex.GetZ()-tracker->GetVertex()->GetZ());
+         }
+      
+         for (Int_t i = 1; i <= 6; i++) { // west
+	   vertex = tracker->EstimateVertex(tracker->GetVertex(), +1, i, 1);
+	   m_vertex_west_x_vs_sector->Fill((Float_t)i, vertex.GetX()-tracker->GetVertex()->GetX());
+	   m_vertex_west_y_vs_sector->Fill((Float_t)i, vertex.GetY()-tracker->GetVertex()->GetY());
+	   m_vertex_west_z_vs_sector->Fill((Float_t)i, vertex.GetZ()-tracker->GetVertex()->GetZ());
+         }
+      } 
+    } 
+  } 
 
-  for (Int_t t_counter = 0; t_counter < tracker->GetTracks()->GetEntriesFast(); t_counter++) {
+  if (IAttr(".histos")) {
+     for (Int_t t_counter = 0; t_counter < tracker->GetTracks()->GetEntriesFast(); t_counter++) {
     
-    StFtpcTrack *track = (StFtpcTrack*) tracker->GetTracks()->At(t_counter);
-    TObjArray   *fhits = (TObjArray*) track->GetHits();
+       StFtpcTrack *track = (StFtpcTrack*) tracker->GetTracks()->At(t_counter);
+       TObjArray   *fhits = (TObjArray*) track->GetHits();
     
-    m_nrec_track->Fill(track->GetNumberOfPoints(),track->GetP());
-    m_theta->Fill(track->GetTheta());
+       m_nrec_track->Fill(track->GetNumberOfPoints(),track->GetP());
+       m_theta->Fill(track->GetTheta());
     
-    for (Int_t h_counter = 0; h_counter < fhits->GetEntriesFast(); h_counter++) {
+       for (Int_t h_counter = 0; h_counter < fhits->GetEntriesFast(); h_counter++) {
       
-      StFtpcPoint *mhit = (StFtpcPoint *) fhits->At(h_counter);
+         StFtpcPoint *mhit = (StFtpcPoint *) fhits->At(h_counter);
       
-      // Residuals (fill globals only, during tracking primary isn't filled anyway)
-      if (mhit->GetUsage()) {
-	m_xres->Fill(mhit->GetXGlobResidual());
-	m_yres->Fill(mhit->GetYGlobResidual());
-	m_rres->Fill(mhit->GetRGlobResidual());
-	m_phires->Fill(mhit->GetPhiGlobResidual());
-      }
+         // Residuals (fill globals only, during tracking primary isn't filled anyway)
+         if (mhit->GetUsage()) {
+	   m_xres->Fill(mhit->GetXGlobResidual());
+	   m_yres->Fill(mhit->GetYGlobResidual());
+	   m_rres->Fill(mhit->GetRGlobResidual());
+	   m_phires->Fill(mhit->GetPhiGlobResidual());
+         }
       
-      if (mhit->GetPadRow() <= StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
+         if (mhit->GetPadRow() <= StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
 	
-	m_maxadc_West->Fill(mhit->GetMaxADC());
-	m_charge_West->Fill(mhit->GetCharge());
-	m_padvstime_West->Fill(mhit->GetNumberBins(),mhit->GetNumberPads());
+	   m_maxadc_West->Fill(mhit->GetMaxADC());
+	   m_charge_West->Fill(mhit->GetCharge());
+	   m_padvstime_West->Fill(mhit->GetNumberBins(),mhit->GetNumberPads());
 	
-	if (mhit->GetUsage()) {
-	  m_rres_vs_r_west->Fill(mhit->GetRGlobResidual(), mhit->GetRadius());
-	  m_phires_vs_r_west->Fill(mhit->GetPhiGlobResidual(), mhit->GetRadius());
-	}
-      }
+	   if (mhit->GetUsage()) {
+	     m_rres_vs_r_west->Fill(mhit->GetRGlobResidual(), mhit->GetRadius());
+	     m_phires_vs_r_west->Fill(mhit->GetPhiGlobResidual(), mhit->GetRadius());
+	   }
+         }
 
-      else if (mhit->GetPadRow() > StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
+         else if (mhit->GetPadRow() > StFtpcTrackingParams::Instance()->NumberOfPadRowsPerSide()) {
 	
-	m_maxadc_East->Fill(mhit->GetMaxADC());
-	m_charge_East->Fill(mhit->GetCharge());
-	m_padvstime_East->Fill(mhit->GetNumberBins(),mhit->GetNumberPads());
+	   m_maxadc_East->Fill(mhit->GetMaxADC());
+	   m_charge_East->Fill(mhit->GetCharge());
+	   m_padvstime_East->Fill(mhit->GetNumberBins(),mhit->GetNumberPads());
 	
-	if (mhit->GetUsage()) {
-	  m_rres_vs_r_east->Fill(mhit->GetRGlobResidual(), mhit->GetRadius());
-	  m_phires_vs_r_east->Fill(mhit->GetPhiGlobResidual(), mhit->GetRadius());
-	}
-      }
-    }
-  }
+	   if (mhit->GetUsage()) {
+	     m_rres_vs_r_east->Fill(mhit->GetRGlobResidual(), mhit->GetRadius());
+	     m_phires_vs_r_east->Fill(mhit->GetPhiGlobResidual(), mhit->GetRadius());
+	   }
+         }
+       } //end for h_counter
+     } //end for t_counter
+  } //end IAttr(".histos")
 }
 
 
@@ -828,7 +841,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.67 2004/09/03 20:36:22 perev Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.68 2004/09/07 14:06:19 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
