@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.23 2001/07/27 23:52:33 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.24 2001/10/24 21:36:20 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.24  2001/10/24 21:36:20  hardtke
+ * Add sim flavor option
+ *
  * Revision 1.23  2001/07/27 23:52:33  hardtke
  * use Global (magnet) coordinates
  *
@@ -314,6 +317,11 @@ StTpcDbMaker::~StTpcDbMaker(){
 Int_t StTpcDbMaker::Init(){
 
    m_TpcDb = 0;
+   if (m_Mode==1){
+     gMessMgr->Info()  << "StTpcDbMaker::Setting Sim Flavor tag for database " << endm;
+     SetFlavor("sim","tpcGlobalPosition");
+     SetFlavor("sim","tpcSectorPosition");
+   }
 // Create Needed Tables:    
    if (!m_TpcDb) m_TpcDb = new StTpcDb(this);
   m_tpg_pad_plane = new St_tpg_pad_plane("tpg_pad_plane",1);
