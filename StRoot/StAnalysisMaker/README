@@ -1,5 +1,5 @@
 -*- mode:outline -*-
-Time-stamp: <00/03/02 12:53:13 ullrich>
+Time-stamp: <00/07/12 01:25:37 ullrich>
 
 * Package: StAnalysisMaker
 
@@ -10,9 +10,14 @@ It should only be used as a template or example
 on how to make one.
 
 * Author:
-Torre Wenaus, BNL
+Thomas Ullrich, BNL
 
 * History:
+00/07/12  T. Ullrich
+Added more comments. Remove tagFiller stuff
+and added code to show how ntuples are created
+and written to file.
+
 00/03/02  T. Ullrich
 Clean up, make code compile without
 warnings on Linux. Note: countPrimaryPions
