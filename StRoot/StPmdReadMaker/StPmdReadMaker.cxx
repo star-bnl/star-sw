@@ -1,5 +1,5 @@
 /***************************************************************************
- *$Id: StPmdReadMaker.cxx,v 1.5 2004/03/12 06:36:57 subhasis Exp $
+ *$Id: StPmdReadMaker.cxx,v 1.6 2004/03/23 08:52:22 subhasis Exp $
  *
  * StPmdReadMaker
  *
@@ -9,6 +9,9 @@
  * Description: Reading PMD data and filling hits for StEvent
  **************************************************************************
  *$Log: StPmdReadMaker.cxx,v $
+ *Revision 1.6  2004/03/23 08:52:22  subhasis
+ *several changes (Board Detail by hand etc) for first production
+ *
  *Revision 1.5  2004/03/12 06:36:57  subhasis
  *fillStEvent argument orders done properly
  *
@@ -74,6 +77,7 @@ StPmdReadMaker::StPmdReadMaker(const char *name)
   mPmdDBUtil = new StPmdDBUtil();
   mChainTh=0;
   mCalibFlag=kFALSE;
+  mPmdPrint=kFALSE;
   
 }
 
@@ -164,8 +168,6 @@ Int_t StPmdReadMaker::Make() {
   
   int ret=mThePmdReader->getAllPmdCpvData(&adc[0]);
   
-  cout<<"No of cells = "<<ret<<endl;
-  
   Int_t result=ApplyMapping(&adc[0]);
   if(result!=kStOK){gMessMgr->Info("Problem in getting PMD data:ApplyMap");
   return kStWarn;
@@ -191,13 +193,14 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
   StPmdDetector* det0 = mPmdCollection->detector(0); //! Collection for CPV
   StPmdDetector* det1 = mPmdCollection->detector(1); //! Collection for PMD
   
-  Int_t Chain_No,supmod,row,col,SubDet;
+  Int_t Chain_No,supmod,row,col,SubDet,chtemp;
   int AddCh_Count=0;
    for(int SEC=0; SEC < PMD_SECTOR; SEC++){
     for(int CRAM=0; CRAM < PMD_CRAMS_MAX; CRAM++){
       for(int BLOCK=0; BLOCK < PMD_CRAMS_BLOCK; BLOCK++){
 	for(int CHANNEL=0; CHANNEL < PMD_CRAMS_CH_MAX; CHANNEL++){
-	  Int_t channel=CHANNEL+1;
+//	  Int_t channel=CHANNEL+1;
+	  Int_t channel=CHANNEL;  // Input to apply mapping should be 0-1727.
 	  
 	  //Added for diffrent VME Crate conditions ////////////
 
@@ -225,6 +228,7 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 	    }
 	    break;
 	  }
+	  //Chain_No goes from 1 to 48
 	  //   VME Condition Ends ///////////////////////////////////
 	  
 	  // Setting the SubDetector No.
@@ -234,11 +238,11 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 
           // Apply Mapping to get the sm, row and col here
 	  // 	  
-	  mPmdGeom->ChainMapping(Chain_No,channel,supmod,col,row);
+          Int_t mapp= mPmdGeom->ChainMapping(Chain_No,channel,supmod,col,row,chtemp);
 	  Int_t DaqADC=adc[AddCh_Count];
 	  AddCh_Count++;
 	  
-	  if(DaqADC>0){
+	  if(DaqADC>0 && mapp==kStOK){
 	    
 	  // Apply uniformity calibration here
 	  //
@@ -261,8 +265,8 @@ Int_t StPmdReadMaker:: ApplyMapping(int *adc)
 	    //Fill StPmdHit
 	    StPmdHit *pmdhit = new StPmdHit();
 	    if(supmod>PMD_CRAMS_MAX)supmod-=PMD_CRAMS_MAX;
-	    pmdhit->setGsuper(Int_t(supmod));      //! filling supermodule no
-	    pmdhit->setSubDetector(Int_t(SubDet)); //! filling subdetector
+	    pmdhit->setGsuper(Int_t(supmod));      //! filling supermodule no (1-12)
+	    pmdhit->setSubDetector(Int_t(SubDet)); //! filling subdetector (pmd=1,cpv=2)
 	    pmdhit->setRow(Int_t(row));            //! filling row
 	    pmdhit->setColumn(Int_t(col));         //! filling col
 	    pmdhit->setAdc(Int_t(DaqADC));         //! filling ADC   
@@ -316,7 +320,8 @@ Int_t StPmdReadMaker::fillStEvent(StPmdDetector* cpv_det, StPmdDetector* pmd_det
   for(Int_t id=1;id<(PMD_CRAMS_MAX+1);id++){
 
     //Fill StEvent info for PMD and CPV, first PMD(subdet=1)
-    
+   //does the id goes from 1 to 12 for PmdHit (for PhmdHit it goes 0-11).
+	  
     StPmdModule * pmd_mod=pmd_det->module(id);
     Int_t nmh1=pmd_det->module_hit(id);
 
@@ -424,7 +429,7 @@ Int_t StPmdReadMaker::GetCalib(int supmod,int row,int col,float& calib){
     
     Int_t brdch=0;
     mPmdDBUtil->ChannelInBoard(supmod-1,row-1,col-1,brdch);
-    
+
     if(brdno>0 && brdch>0) calib=m_PmdCalibConst[brdno-1].MipPeakPosition[brdch];
    
 return kStOK;    
