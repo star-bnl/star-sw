@@ -64,9 +64,9 @@ void StEvtHddr::FillTag(EvtHddr_st *tag)
   void StEvtHddr::Print(Option_t *option) const
 {
   printf("\n *********** Event Info **********************\n");
-  printf("\tRun: \t%5d  Event %5d  TimeStamp %8d.%6d  Bunch %u\n"
+  printf("\tRun: \t%5d  Event %5d  TimeStamp %8d.%6d  Bunch %d:%d\n"
          ,mRunNumber,mEventNumber,mEventTime.GetDate(),mEventTime.GetTime()
-         ,mBunchCrossingNumber);
+         ,mBunchCrossingNumber[0],mBunchCrossingNumber[1]);
   printf("\t EvtSize: %d \tInpTrig: %4x OutTrig: %4x  \n"
          ,mEventSize,mInputTriggerMask,mTriggerMask);
   printf("\n *********************************************\n\n");

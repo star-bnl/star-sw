@@ -1,5 +1,8 @@
-// $Id: St_db_Maker.h,v 1.22 2004/04/08 00:28:53 perev Exp $
+// $Id: St_db_Maker.h,v 1.23 2004/07/23 17:06:58 perev Exp $
 // $Log: St_db_Maker.h,v $
+// Revision 1.23  2004/07/23 17:06:58  perev
+// AliasDate & AliasTime moved fro db maker to StMaker
+//
 // Revision 1.22  2004/04/08 00:28:53  perev
 // AliasDate & AliasTime now static methods
 //
@@ -79,7 +82,8 @@ private:
   TDatime     fDBTime;		//! Own DB time stamp
   Int_t       fUpdateMode;	//! 
   UInt_t      fMaxEntryTime;    //! MaxEntryTime accepted from DB
-//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.22 2004/04/08 00:28:53 perev Exp $";
+  TStopwatch  fTimer[4];        //!Timer object 
+//  static Char_t fVersionCVS = "$Id: St_db_Maker.h,v 1.23 2004/07/23 17:06:58 perev Exp $";
  protected:
  public: 
                    St_db_Maker(const char *name
@@ -104,8 +108,6 @@ private:
    virtual void    OnOff();
    virtual void    Clear(Option_t *opt=""){if(opt){/*unused*/}};
            void    SetMaxEntryTime(Int_t idate,Int_t itime);
-   static  Int_t   AliasDate(const char *alias);	   
-   static  Int_t   AliasTime(const char *alias);
 protected:
    virtual TDataSet* UpdateDB (TDataSet* ds);
    virtual int UpdateTable(UInt_t parId, TTable* dat, TDatime val[2]);
@@ -120,7 +122,7 @@ public:
    static int      Kind(const char *filename);
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.22 2004/04/08 00:28:53 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_db_Maker.h,v 1.23 2004/07/23 17:06:58 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(St_db_Maker, 0)   //StAF chain virtual base class for Makers
 };

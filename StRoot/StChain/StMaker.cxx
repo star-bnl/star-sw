@@ -1,4 +1,4 @@
-// $Id: StMaker.cxx,v 1.148 2004/04/26 00:07:12 perev Exp $
+// $Id: StMaker.cxx,v 1.149 2004/07/23 17:06:18 perev Exp $
 //
 /*!
  * Base class for user maker class. Provide common functionality for all
@@ -42,11 +42,35 @@
 #include "TMemStat.h"
 #include "StMkDeb.h"
 
-StMaker *StMaker::fgStChain = 0;
-StMaker *StMaker::fgFailedMaker = 0;
+StMaker     *StMaker::fgStChain     = 0;
+StMaker     *StMaker::fgFailedMaker = 0;
+StTestMaker *StMaker::fgTestMaker   = 0;
 Int_t    StMaker::fgTallyMaker[kStFatal+1] = {0,0,0,0,0};
 Int_t MaxWarnings = 26;
 
+static const char *DBaliases[]={
+   "sd97",     "sd98", "year_1a", "year_1b",  "year_1c",
+   "es99",     "er99",    "dc99", "year_1d",  "year_1e",
+"year_1h",  "year_2a", "year_2b","year2001", "year2003", 
+ "y2003x",   "y2003a",  "y2003b",   "y2004",   "y2004x",
+ "y2004a",          0
+};   
+
+static const int   DBdates[]=  {
+ 19970101,   19980101,  19990101,  19990501,   19991001,
+ 19990615,   19990616,  19991206,  19991101,   19991201,
+ 20000614,   20010610,  20010501,  20010615,   20021115, 
+ 20021115,   20021115,  20021115,  20031120,   20031120,
+ 20031120,          0
+};
+
+static const int   DBtimes[]=  {
+        0,          0,         0,         0,          0,
+        0,     120000,     80000,         0,          0,
+   175430,          0,         0,         0,          0,        
+        0,          0,         0,         0,          0,
+        0,          0
+};
 
 
 ClassImp(StMaker)
@@ -654,6 +678,8 @@ Int_t StMaker::Make()
        maker->m_LastRun=run;
      }
 // 		Call Maker
+     if (fgTestMaker) { fgTestMaker->SetNext(maker); fgTestMaker->Make();}
+
      maker->StartMaker();
      ret = maker->Make();
      assert((ret%10)>=0 && (ret%10)<=kStFatal);     
@@ -1256,7 +1282,55 @@ AGAIN: switch (fState) {
   assert(0); return 0;
 }
 //_____________________________________________________________________________
+Int_t StMaker::AliasDate(const char *alias)
+
+{
+
+  int n = strcspn(alias," ."); if (n<4) return 0;
+  int i;
+  for (i=0;DBaliases[i] && strncmp(alias,DBaliases[i],n);i++) {} 
+  return DBdates[i];
+}
+//_____________________________________________________________________________
+Int_t StMaker::AliasTime(const char *alias)
+
+{
+
+  int n = strcspn(alias," ."); if (n<4) return 0;
+  int i;
+  for (i=0;DBaliases[i] && strncmp(alias,DBaliases[i],n);i++) {} 
+  return DBtimes[i];
+}
+//_____________________________________________________________________________
+ClassImp(StTestMaker)
+//_____________________________________________________________________________
+StTestMaker::StTestMaker(const char *name):StMaker(name)
+{
+   fNext=0; fLast=0;
+   if (fgStChain == this ) {fgStChain=0;}
+   else                    {Shunt()    ;}
+   fgTestMaker = this;
+}
+//_____________________________________________________________________________
+void StTestMaker::SetNext(StMaker *mk)
+{
+  fLast=fNext;
+  fNext=mk;
+}
+//_____________________________________________________________________________
+void StTestMaker::Print(const char *) const
+{
+   if (fLast) printf("%s: Last Maker %s::%s(%p)\n",
+              ClassName(),fLast->ClassName(),fLast->GetName(),(void*)fLast);
+   if (fNext) printf("%s: Next Maker %s::%s(%p)\n",
+              ClassName(),fNext->ClassName(),fNext->GetName(),(void*)fNext);
+}
+
+//_____________________________________________________________________________
 // $Log: StMaker.cxx,v $
+// Revision 1.149  2004/07/23 17:06:18  perev
+// AliasDate & AliasTime moved fro db maker to StMaker
+//
 // Revision 1.148  2004/04/26 00:07:12  perev
 // RetCodeAsString(kode) added. String form of STAR return codes
 //
