@@ -42,6 +42,11 @@ C<----------------------------------------------------------------------
 #include "math_constants.inc"
 #include "phys_constants.inc"
 
+#define MXDET 3
+#define TPC_ONLY 1
+#define SVT_ONLY 2
+#define TPC_PLUS_SVT 3
+
       STRUCTURE/local_track/
         INTEGER id
         REAL*4 r
@@ -57,55 +62,40 @@ C<----------------------------------------------------------------------
       INTEGER   i, j, k, jk
       INTEGER   id_vertex, id_v0
       INTEGER   n_v, n_xi
+      INTEGER   idet_v0, idet_b, id_det
  
-      REAL	dca_max, rv_min, rv_max, bxi_max, dmass, v0_mass, bsum_v0
+      REAL	dca_max(MXDET), rv_xi(MXDET), rv_v0(MXDET)
+      REAL      bxi_max(MXDET), dmass(MXDET), bpn_v0(MXDET)
       REAL	dr, pb(3), rv, xv0(3), zcom(2)
       REAL      dx,ptot, ptot_2, ptot_b, ptot_b2, ptot_v0, ptot_v02
       REAL      epi, ek, ela, exi, eom
       REAL	ptrk, trkb(6), bdotx, vdotx, pv0(3), ppar, npar, pper
       REAL	trki(6), trkj(6)
       REAL	xc1(2), r1, r2, xcom(2), ycom(2), bxi, bb, bv0
-      REAL      invms_xi, invms_om
+      REAL      invs_xi, invms_om, mala, malb, v0_mass
       REAL	xp(2), xn1(2), xn2(2), dca, xpp(3), pxi(3)
       REAL      energy_v0, beta_v0, gamma_v0, ep, ppar_cm, vmain(3)
-      REAL      r0, phi0
+      REAL      r0, phi0, charge
       REAL      xlocal(3), bfield(3), bscale
       REAL      ptotp2, ptotn2, pdotn, eprp, eprn, epip, epin
 
       DATA      xlocal /3*0./
-      DATA      bscale /0.1/
 C-----------------------------------------------------------------------
+c*** pgj: copy parameters
 
-c      id=exipar(1).pid
-c      IF(id.eq.23) THEN
-c        id1=9
-c        id2=18
-c      ELSEIF(id.eq.31) THEN
-c        id1=8
-c        id2=26
-c      ELSEIF(id.eq.24) THEN
-c        id1=12
-c        id2=18
-c      ELSEIF(id.eq.32) THEN
-c        id1=11
-c        id2=26
-c      ENDIF
-
-      dca_max = exipar(1).dca_max
-      rv_min  = exipar(1).rv_min
-      rv_max  = exipar(1).rv_max
-      bxi_max = exipar(1).bxi_max
-      dmass   = exipar(1).dmass     ! wkw cut for lambda mass
-      bsum_v0 = exipar(1).bsum_v0
+      do i=1,MXDET
+        dca_max(i) = exipar(i).dca_max
+        rv_xi(i)   = exipar(i).rv_xi
+        rv_v0(i)   = exipar(i).rv_v0
+        bxi_max(i) = exipar(i).bxi_max
+        dmass(i)   = exipar(i).dmass     ! wkw cut for lambda mass
+        bpn_v0(i)  = exipar(i).bpn_v0
+      enddo
 
 c*** pgj: get magnetic field via call to gufld
 
       call gufld(xlocal,bfield)
       write(6,*) 'EXI - using a field of ',bfield(3),' KGauss'
-
-      bfield(1) = bfield(1)*bscale
-      bfield(2) = bfield(2)*bscale
-      bfield(3) = bfield(3)*bscale
 
 c*** pgj: current row counts
 
@@ -134,13 +124,56 @@ c          else if( vertex(i).vtx_id .eq. 2 ) then
         enddo
       endif
 
-c*** pgj: loop over all vertices
+c*** pgj: loop over all v0 vertices
 
       DO 10 j = 1, v0_vertex_h.nok
 
-c*** pgj: apply cuts in v0 decay distance and daughter impact parameters
+        id_v0 = v0_vertex(j).id_vertex
 
-        IF( abs(v0_vertex(j).dcan+v0_vertex(j).dcap).lt.bsum_v0 ) GOTO 20
+c*** pgj: fast lookup for locating vertex entry
+
+        k = id_v0
+        if( vertex(k).id .eq. id_v0 ) GO TO 101
+        write(6,*) 'EXI - Warning: fast lookup for vertex entry failed'
+
+c*** pgj: slow failsafe method for locating vertex index
+
+        do k = 1, vertex_h.nok
+          if( vertex(k).id .eq. id_v0 ) GO TO 101
+        enddo
+
+101     CONTINUE
+        if( k .le. vertex_h.nok ) then
+          xv0(1) =vertex(k).x
+          xv0(2) =vertex(k).y
+          xv0(3) =vertex(k).z
+          rv = sqrt( (xv0(1)-vmain(1))**2 + 
+     >               (xv0(2)-vmain(2))**2 + 
+     >               (xv0(3)-vmain(3))**2 )
+        else
+          write(6,*) 'EXI - Error: vertex entry not found'
+          return
+        endif
+
+c*** pgj: check detector id
+
+        if( vertex(k).det_id.eq.33 ) then
+          idet_v0 = TPC_PLUS_SVT
+        elseif( vertex(k).det_id.eq.11 .or. 
+     >          vertex(k).det_id.eq.31 .or.
+     >          vertex(k).det_id.eq.13 ) then
+          idet_v0 = TPC_ONLY
+        elseif( vertex(k).det_id.eq.22 .or.
+     >          vertex(k).det_id.eq.12 .or.
+     >          vertex(k).det_id.eq.21 .or.
+     >          vertex(k).det_id.eq.32 .or.
+     >          vertex(k).det_id.eq.23 ) then
+          idet_v0 = SVT_ONLY
+        else
+          GO TO 10
+        endif
+
+c*** pgj: apply M_LAMBDA mass check
 
         ptotp2 = ( v0_vertex(j).pos_px*v0_vertex(j).pos_px +
      >             v0_vertex(j).pos_py*v0_vertex(j).pos_py +
@@ -152,38 +185,56 @@ c*** pgj: apply cuts in v0 decay distance and daughter impact parameters
      >             v0_vertex(j).pos_py*v0_vertex(j).neg_py +
      >             v0_vertex(j).pos_pz*v0_vertex(j).neg_pz )
 
+        epip = sqrt(M_PION_PLUS*M_PION_PLUS + ptotp2)
+        eprn = sqrt(M_ANTIPROTON*M_ANTIPROTON + ptotn2)
+        malb = sqrt(M_PION_PLUS*M_PION_PLUS + 
+     >              M_ANTIPROTON*M_ANTIPROTON + 2*(epip*eprn - pdotn))
+
+        eprp = sqrt(M_PROTON*M_PROTON + ptotp2)
+        epin = sqrt(M_PION_MINUS*M_PION_MINUS + ptotn2)
+        mala = sqrt(M_PROTON*M_PROTON + M_PION_MINUS*M_PION_MINUS +
+     >              2*(eprp*epin - pdotn))
+
+c*** pgj: also apply cuts on v0 pion daughter impact param. and decay dist.
+
+        if( abs(mala-M_LAMBDA).le.dmass(idet_v0) ) then
+          v0_mass = mala
+          charge = -1.
+          if( abs(v0_vertex(j).dcan).lt.bpn_v0(idet_v0) .or.
+     >        rv.lt.rv_v0(idet_v0) ) GO TO 10
+        elseif( abs(malb-M_LAMBDA).le.dmass(idet_v0) ) then
+          v0_mass = malb
+          charge = +1.
+          if( abs(v0_vertex(j).dcap).lt.bpn_v0(idet_v0) .or.
+     >        rv.lt.rv_v0(idet_v0) ) GO TO 10
+        else
+          GO TO 10
+        endif
+
 c*** pgj: loop over all global tracks
 
         DO 20 i = 1, globtrk_h.nok
 
-c*** decide here if dE/dx,TOF can say anything about PID
-c*** if yes .and. it is a pion/proton pair proceed if not
-c*** take GEANT ID or a (hypothetical) mass will be assigned
+c*** pgj: select correct charge tracks
 
-c          IF(id.ne.0) THEN
-c            IF(idd(i).ne.id1) GOTO 10
-c          ENDIF
+          if( globtrk(i).icharge*int(charge).le.0 ) GO TO 20
 
 c*** pgj: don't use tracks already used in the v0
 
           IF( v0_vertex(j).idneg .eq. globtrk(i).id .or.
-     >        v0_vertex(j).idpos .eq. globtrk(i).id ) GOTO 20
+     >        v0_vertex(j).idpos .eq. globtrk(i).id ) GO TO 20
 
-c*** pgj: apply M_LAMBDA mass check
+          if( globtrk(i).det_id .eq. 1 ) then
+            idet_b = TPC_ONLY
+          elseif( globtrk(i).det_id .eq. 2 ) then
+            idet_b = SVT_ONLY
+          elseif( globtrk(i).det_id .eq. 3 ) then
+            idet_b = TPC_PLUS_SVT
+          else
+            GO TO 20
+          endif         
 
-          IF( globtrk(i).icharge .gt. 0 ) then
-            epip = sqrt(M_PION_PLUS*M_PION_PLUS + ptotp2)
-            eprn = sqrt(M_ANTIPROTON*M_ANTIPROTON + ptotn2)
-            v0_mass = sqrt(M_PION_PLUS*M_PION_PLUS + 
-     >                     M_ANTIPROTON*M_ANTIPROTON + 2*(epip*eprn - pdotn))
-          ELSE
-            eprp = sqrt(M_PROTON*M_PROTON + ptotp2)
-            epin = sqrt(M_PION_MINUS*M_PION_MINUS + ptotn2)
-            v0_mass = sqrt(M_PROTON*M_PROTON + M_PION_MINUS*M_PION_MINUS +
-     >                     2*(eprp*epin - pdotn))
-          ENDIF
-
-          IF( abs(v0_mass-M_LAMBDA).gt.dmass ) GOTO 20
+          id_det = min(idet_b,idet_v0)
 
 c*** pgj: convert to local parameters
 
@@ -195,8 +246,7 @@ c*** pgj: convert to local parameters
           trki(3) = globtrk(i).z0
           trki(4) = globtrk(i).psi*C_RAD_PER_DEG
           trki(5) = globtrk(i).tanl
-          trki(6) = FLOAT(globtrk(i).icharge)*C_D_CURVATURE*
-     >            bfield(3)*10*globtrk(i).invpt
+          trki(6) = charge*C_D_CURVATURE*bfield(3)*globtrk(i).invpt
 
 c*** pgj: calculate distance(s) of closest approach
 
@@ -211,28 +261,14 @@ c*** pgj: calculate distance(s) of closest approach
           pv0(2) = trkj(2)
           pv0(3) = trkj(3)
 
-          id_v0 = v0_vertex(j).id_vertex
-
-c*** pgj: slow method for locating vertex index
-
-          do k = 1, vertex_h.nok
-            if( vertex(k).id .eq. id_v0 ) then
-              xv0(1) =vertex(k).x
-              xv0(2) =vertex(k).y
-              xv0(3) =vertex(k).z
-              GO TO 101
-            endif
-          enddo
-101       CONTINUE
-
-          CALL circle_param(trki,xc1,r1)
+          CALL circle_param(trki,xc1,r1,bfield(3))
 
           CALL vzero(xcom,2)
           CALL vzero(ycom,2)
 
           iflag1=0
-          CALL casc_geom(dca_max,pv0,xv0,xc1,r1,xcom,ycom,zcom,iflag1)
-          IF( iflag1.eq.5 ) GOTO 20
+          CALL casc_geom(dca_max(id_det),pv0,xv0,xc1,r1,xcom,ycom,zcom,iflag1)
+          IF( iflag1.eq.5 ) GO TO 20
 
 c*** loop over the two intersection points
 
@@ -254,19 +290,20 @@ c*** loop over the two intersection points
 
 c*** decide here if it is a good candidate (pgj: removed lambda mass check)
 
-            IF( (dca.le.dca_max).and.(rv.gt.rv_min).and.(rv.lt.rv_max) ) THEN 
+            IF( (dca .le. dca_max(id_det)) .and. 
+     >          (rv .gt. rv_xi(id_det))    ) THEN
 
 c*** calculate xi impact parameter - careful, needs main vertex at (0,0,0)
 
-              CALL track_mom(trkb,0,pb)
+              CALL track_mom(trkb,0,pb,bfield(3))
 
               pxi(1) = pv0(1) + pb(1)
               pxi(2) = pv0(2) + pb(2)
               pxi(3) = pv0(3) + pb(3)
 
-              CALL casc_impact_param(vmain,xpp,pxi,bxi,iflag)
+              CALL casc_impact_param(vmain,xpp,pxi,bxi,iflag,charge,bfield(3))
 
-              IF( (bxi.le.bxi_max).and.(iflag.ne.2) ) THEN
+              IF( (bxi.le.bxi_max(id_det)) .and. (iflag.ne.2) ) THEN
 
 c*** wkw: breakout if n_xi=maxlen
 
@@ -291,6 +328,7 @@ c*** wkw: breakout if n_xi=maxlen
 c*** pgj: fill vertex table
 
                 vertex(n_v).id = id_vertex + n_xi
+                vertex(n_v).det_id = 100*idet_b+vertex(k).det_id
                 vertex(n_v).vtx_id = 3
                 vertex(n_v).x = xpp(1)
                 vertex(n_v).y = xpp(2)
@@ -359,6 +397,9 @@ c*** pgj: fill auxiliary table
                 xi_vertex(n_xi).b_xi  = bxi
                 xi_vertex(n_xi).b_b   = bb
                 xi_vertex(n_xi).b_v0  = bv0
+                xi_vertex(n_xi).px_b  = pb(1)
+                xi_vertex(n_xi).py_b  = pb(2)
+                xi_vertex(n_xi).pz_b  = pb(3)
 
 c*** pgj: fill exiaux table
 
@@ -366,6 +407,7 @@ c*** pgj: fill exiaux table
                 exiaux(n_xi).id_xi   = id_vertex + n_xi
                 exiaux(n_xi).id_b    = globtrk(i).id
                 exiaux(n_xi).id_v0   = id_v0
+                exiaux(n_xi).det_id  = 100*idet_b+vertex(k).det_id
 c                exiaux(n_xi).gpid_b  =
 c                exiaux(n_xi).ndegf   =
                 exiaux(n_xi).charge  = globtrk(i).icharge
@@ -388,6 +430,7 @@ c                exiaux(n_xi).sag_b   =
                 exiaux(n_xi).alpha   = (ppar-npar)/(ppar+npar)
                 exiaux(n_xi).mass_xi = sqrt((ela+epi)**2 - ptot_2)
                 exiaux(n_xi).mass_om = sqrt((ela+ek)**2  - ptot_2)
+                exiaux(n_xi).mass_v0 = v0_mass
                 exiaux(n_xi).tau_xi  = exiaux(n_xi).mass_xi*rv/ptot     
                 exiaux(n_xi).tau_om  = exiaux(n_xi).mass_om*rv/ptot 
                 exiaux(n_xi).rap_xi  = 0.5*log((exi+pxi(3))/(exi-pxi(3)))
@@ -398,7 +441,7 @@ c                exiaux(n_xi).costh   =
 
             ENDIF				! dca and rv check
 
-            IF( iflag1.eq.3 ) GOTO 30		! touching circles-loop once
+            IF( iflag1.eq.3 ) GO TO 30		! touching circles-loop once
 
           ENDDO					! jk=1,2
 
@@ -407,6 +450,8 @@ c                exiaux(n_xi).costh   =
  20     CONTINUE
 
  10   CONTINUE	
+
+      write(6,*) 'EXI - found ',n_xi,' candidates'
 
 c*** return a normal success code
 
