@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.13 2000/03/15 02:13:20 calderon Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.14 2000/04/20 21:25:20 long Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -10,6 +10,11 @@
  ***************************************************************************
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.14  2000/04/20 21:25:20  long
+ * timeBinLowerLimit---><-----timeBinUpperLimit in
+ * "if( signalTime-timeBinT> timeBinLowerLimit*mTimeBinWidth) break;
+ *  if( timeBinT-signalTime> timeBinUpperLimit*mTimeBinWidth)"
+ *
  * Revision 1.13  2000/03/15 02:13:20  calderon
  * Fixed bug from pad response function sigma:
  * The data member mPadResponseFunctionSigma was assigned the right values
@@ -643,9 +648,9 @@ void StTrsParameterizedAnalogSignalGenerator::sampleAnalogSignal()
 			// parameter.
 			//
 			
-			if( signalTime-timeBinT> timeBinUpperLimit*mTimeBinWidth) break;
+			if( signalTime-timeBinT> timeBinLowerLimit*mTimeBinWidth) break;
 
-			if( timeBinT-signalTime> timeBinLowerLimit*mTimeBinWidth) {
+			if( timeBinT-signalTime> timeBinUpperLimit*mTimeBinWidth) {
 			    lowerBound++;
 			    continue;
 			}
