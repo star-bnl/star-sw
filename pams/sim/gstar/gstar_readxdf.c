@@ -67,13 +67,12 @@ int  *igate;
    extern int gcflag_,gcbank_;
 
    jv=-(*igate); nt=0; nv=0;
+   if (d) dsFreeDataset(d); 
 
    if ( !xdr_dataset(&x,&d) )  
       { dsPerror("xdf_read: end of file "); *igate=-1; return; }
-      if (particle) free(particle); 
 
-/* if ( GET(p,"particle",particle,pok) ) */
-   if ( GETT(p,PARTICLE_SPEC,particle,pok) )
+   if ( GET(p,"particle",particle,pok) || GETT(p,PARTICLE_SPEC,particle,pok) )
       { 
         if (gcflag_) printf("  xdf_read: HEPEVNT table Npart=%d \n",pok);
         if (pok) 
@@ -174,4 +173,10 @@ int dsFindTab (DS_DATASET_T **ppEntry, DS_DATASET_T* pDataset, char* spec)
     }
     return 0;
 }
+
+
+
+
+
+
 
