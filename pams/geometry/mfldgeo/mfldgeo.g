@@ -290,10 +290,10 @@ end
       implicit   none
       complex    BBTOT
       real       IMAG,REAL,BBR,BBZ,BRR,BZZ,z,r,x(3),B(3)
-      BBR = Imag(BBTOT(z,r))
+      BBR = Imag(BBTOT(abs(z),abs(r)))
       return
       entry      BBZ(z,r)
-      BBZ = Real(BBTOT(z,r))
+      BBZ = Real(BBTOT(abs(z),abs(r)))
       return
       entry      BRR(z,r)
       x   = {0.,r,z};  call agufld(x,B);  BRR = B(2)
