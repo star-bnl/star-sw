@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.cc,v 1.19 2003/09/02 17:58:17 perev Exp $
+// $Id: StFtpcTrackingParams.cc,v 1.20 2003/09/11 21:31:30 jeromel Exp $
 // $Log: StFtpcTrackingParams.cc,v $
+// Revision 1.20  2003/09/11 21:31:30  jeromel
+// removed inline as it would leave a few undefined reference
+//
 // Revision 1.19  2003/09/02 17:58:17  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -102,86 +105,86 @@ StFtpcTrackingParams* StFtpcTrackingParams::mInstance = 0;
 
 
 // FTPC geometry
-inline Double_t StFtpcTrackingParams::InnerRadius()            { return mInnerRadius;            }
-inline Double_t StFtpcTrackingParams::OuterRadius()            { return mOuterRadius;            }
-inline    Int_t StFtpcTrackingParams::NumberOfPadRows()        { return mNumberOfPadRows;        }
-inline    Int_t StFtpcTrackingParams::NumberOfPadRowsPerSide() { return mNumberOfPadRowsPerSide; }
-inline Double_t StFtpcTrackingParams::PadRowPosZ(Int_t row)    { return mPadRowPosZ[row];        }
+Double_t StFtpcTrackingParams::InnerRadius()            { return mInnerRadius;            }
+Double_t StFtpcTrackingParams::OuterRadius()            { return mOuterRadius;            }
+   Int_t StFtpcTrackingParams::NumberOfPadRows()        { return mNumberOfPadRows;        }
+   Int_t StFtpcTrackingParams::NumberOfPadRowsPerSide() { return mNumberOfPadRowsPerSide; }
+Double_t StFtpcTrackingParams::PadRowPosZ(Int_t row)    { return mPadRowPosZ[row];        }
 
 // Vertex position
-inline Double_t StFtpcTrackingParams::MaxVertexPosZWarning() { return mMaxVertexPosZWarning; }
-inline Double_t StFtpcTrackingParams::MaxVertexPosZError()   { return mMaxVertexPosZError;   }
+Double_t StFtpcTrackingParams::MaxVertexPosZWarning() { return mMaxVertexPosZWarning; }
+Double_t StFtpcTrackingParams::MaxVertexPosZError()   { return mMaxVertexPosZError;   }
 
 // Vertex reconstruction
-inline    Int_t StFtpcTrackingParams::HistoBins()    { return mHistoBins;    }
-inline Double_t StFtpcTrackingParams::HistoMin()     { return mHistoMin;     }
-inline Double_t StFtpcTrackingParams::HistoMax()     { return mHistoMax;     }
-inline Double_t StFtpcTrackingParams::MaxDcaVertex() { return mMaxDcaVertex; }
-inline    Int_t StFtpcTrackingParams::MinNumTracks() { return mMinNumTracks; }
+   Int_t StFtpcTrackingParams::HistoBins()    { return mHistoBins;    }
+Double_t StFtpcTrackingParams::HistoMin()     { return mHistoMin;     }
+Double_t StFtpcTrackingParams::HistoMax()     { return mHistoMax;     }
+Double_t StFtpcTrackingParams::MaxDcaVertex() { return mMaxDcaVertex; }
+   Int_t StFtpcTrackingParams::MinNumTracks() { return mMinNumTracks; }
 
 // Tracker
-inline Int_t StFtpcTrackingParams::RowSegments() { return mRowSegments; }
-inline Int_t StFtpcTrackingParams::PhiSegments() { return mPhiSegments; }
-inline Int_t StFtpcTrackingParams::EtaSegments() { return mEtaSegments; }
+Int_t StFtpcTrackingParams::RowSegments() { return mRowSegments; }
+Int_t StFtpcTrackingParams::PhiSegments() { return mPhiSegments; }
+Int_t StFtpcTrackingParams::EtaSegments() { return mEtaSegments; }
 
 // Tracking
-inline   Bool_t StFtpcTrackingParams::Laser(Int_t tracking_method)             { return mLaser[tracking_method];             }
-inline   Bool_t StFtpcTrackingParams::VertexConstraint(Int_t tracking_method)  { return mVertexConstraint[tracking_method];  }
-inline    Int_t StFtpcTrackingParams::MaxTrackletLength(Int_t tracking_method) { return mMaxTrackletLength[tracking_method]; }
-inline    Int_t StFtpcTrackingParams::MinTrackLength(Int_t tracking_method)    { return mMinTrackLength[tracking_method];    }
-inline    Int_t StFtpcTrackingParams::RowScopeTracklet(Int_t tracking_method)  { return mRowScopeTracklet[tracking_method];  }
-inline    Int_t StFtpcTrackingParams::RowScopeTrack(Int_t tracking_method)     { return mRowScopeTrack[tracking_method];     }
-inline    Int_t StFtpcTrackingParams::PhiScope(Int_t tracking_method)          { return mPhiScope[tracking_method];          }
-inline    Int_t StFtpcTrackingParams::EtaScope(Int_t tracking_method)          { return mEtaScope[tracking_method];          }
-inline Double_t StFtpcTrackingParams::MaxDca(Int_t tracking_method)            { return mMaxDca[tracking_method];            }
+  Bool_t StFtpcTrackingParams::Laser(Int_t tracking_method)             { return mLaser[tracking_method];             }
+  Bool_t StFtpcTrackingParams::VertexConstraint(Int_t tracking_method)  { return mVertexConstraint[tracking_method];  }
+   Int_t StFtpcTrackingParams::MaxTrackletLength(Int_t tracking_method) { return mMaxTrackletLength[tracking_method]; }
+   Int_t StFtpcTrackingParams::MinTrackLength(Int_t tracking_method)    { return mMinTrackLength[tracking_method];    }
+   Int_t StFtpcTrackingParams::RowScopeTracklet(Int_t tracking_method)  { return mRowScopeTracklet[tracking_method];  }
+   Int_t StFtpcTrackingParams::RowScopeTrack(Int_t tracking_method)     { return mRowScopeTrack[tracking_method];     }
+   Int_t StFtpcTrackingParams::PhiScope(Int_t tracking_method)          { return mPhiScope[tracking_method];          }
+   Int_t StFtpcTrackingParams::EtaScope(Int_t tracking_method)          { return mEtaScope[tracking_method];          }
+Double_t StFtpcTrackingParams::MaxDca(Int_t tracking_method)            { return mMaxDca[tracking_method];            }
 
 // Tracklets
-inline Double_t StFtpcTrackingParams::MaxAngleTracklet(Int_t tracking_method) { return mMaxAngleTracklet[tracking_method]; }
+Double_t StFtpcTrackingParams::MaxAngleTracklet(Int_t tracking_method) { return mMaxAngleTracklet[tracking_method]; }
 
 // Tracks
-inline Double_t StFtpcTrackingParams::MaxAngleTrack(Int_t tracking_method) { return mMaxAngleTrack[tracking_method]; }
-inline Double_t StFtpcTrackingParams::MaxCircleDist(Int_t tracking_method) { return mMaxCircleDist[tracking_method]; }
-inline Double_t StFtpcTrackingParams::MaxLengthDist(Int_t tracking_method) { return mMaxLengthDist[tracking_method]; }
+Double_t StFtpcTrackingParams::MaxAngleTrack(Int_t tracking_method) { return mMaxAngleTrack[tracking_method]; }
+Double_t StFtpcTrackingParams::MaxCircleDist(Int_t tracking_method) { return mMaxCircleDist[tracking_method]; }
+Double_t StFtpcTrackingParams::MaxLengthDist(Int_t tracking_method) { return mMaxLengthDist[tracking_method]; }
 
 // Split tracks
-inline Double_t StFtpcTrackingParams::MaxDist()       { return mMaxDist;       }
-inline Double_t StFtpcTrackingParams::MinPointRatio() { return mMinPointRatio; }
-inline Double_t StFtpcTrackingParams::MaxPointRatio() { return mMaxPointRatio; }
+Double_t StFtpcTrackingParams::MaxDist()       { return mMaxDist;       }
+Double_t StFtpcTrackingParams::MinPointRatio() { return mMinPointRatio; }
+Double_t StFtpcTrackingParams::MaxPointRatio() { return mMaxPointRatio; }
 
 // dE/dx
-inline Int_t StFtpcTrackingParams::DebugLevel() { return mDebugLevel;    }
-inline Int_t StFtpcTrackingParams::IdMethod()   { return mIdMethod;      }
-inline Int_t StFtpcTrackingParams::NoAngle()    { return mNoAngle;       }
-inline Int_t StFtpcTrackingParams::MaxHit()     { return mMaxHit;        }
-inline Int_t StFtpcTrackingParams::MinHit()     { return mMinHit;        }
-inline Int_t StFtpcTrackingParams::MaxTrack()   { return mMaxTrack;      }
+Int_t StFtpcTrackingParams::DebugLevel() { return mDebugLevel;    }
+Int_t StFtpcTrackingParams::IdMethod()   { return mIdMethod;      }
+Int_t StFtpcTrackingParams::NoAngle()    { return mNoAngle;       }
+Int_t StFtpcTrackingParams::MaxHit()     { return mMaxHit;        }
+Int_t StFtpcTrackingParams::MinHit()     { return mMinHit;        }
+Int_t StFtpcTrackingParams::MaxTrack()   { return mMaxTrack;      }
 
-inline Double_t StFtpcTrackingParams::PadLength()    { return mPadLength;     }
-inline Double_t StFtpcTrackingParams::FracTrunc()    { return mFracTrunc;     }
-inline Double_t StFtpcTrackingParams::Aip()          { return mAip;           } 
-inline Double_t StFtpcTrackingParams::ALargeNumber() { return mALargeNumber;  }
+Double_t StFtpcTrackingParams::PadLength()    { return mPadLength;     }
+Double_t StFtpcTrackingParams::FracTrunc()    { return mFracTrunc;     }
+Double_t StFtpcTrackingParams::Aip()          { return mAip;           } 
+Double_t StFtpcTrackingParams::ALargeNumber() { return mALargeNumber;  }
 
 // transformation due to rotated and displaced TPC
-inline      StMatrixD StFtpcTrackingParams::TpcToGlobalRotation() { return mTpcToGlobalRotation; }
-inline      StMatrixD StFtpcTrackingParams::GlobalToTpcRotation() { return mGlobalToTpcRotation; }
-inline StThreeVectorD StFtpcTrackingParams::TpcPositionInGlobal() { return mTpcPositionInGlobal; } 
+     StMatrixD StFtpcTrackingParams::TpcToGlobalRotation() { return mTpcToGlobalRotation; }
+     StMatrixD StFtpcTrackingParams::GlobalToTpcRotation() { return mGlobalToTpcRotation; }
+StThreeVectorD StFtpcTrackingParams::TpcPositionInGlobal() { return mTpcPositionInGlobal; } 
 
-inline StMatrixD StFtpcTrackingParams::FtpcRotation(Int_t i)          { return *mFtpcRotation[i];           }
-inline StMatrixD StFtpcTrackingParams::FtpcRotationInverse(Int_t i)   { return *mFtpcRotationInverse[i];    }
-inline StMatrixD StFtpcTrackingParams::FtpcRotationX(Int_t i)         { return *mFtpcRotationX[i];           }
-inline StMatrixD StFtpcTrackingParams::FtpcRotationXInverse(Int_t i)  { return *mFtpcRotationXInverse[i];    }
-inline StMatrixD StFtpcTrackingParams::FtpcRotationY(Int_t i)         { return *mFtpcRotationY[i];           }
-inline StMatrixD StFtpcTrackingParams::FtpcRotationYInverse(Int_t i)  { return *mFtpcRotationYInverse[i];    }
+StMatrixD StFtpcTrackingParams::FtpcRotation(Int_t i)          { return *mFtpcRotation[i];           }
+StMatrixD StFtpcTrackingParams::FtpcRotationInverse(Int_t i)   { return *mFtpcRotationInverse[i];    }
+StMatrixD StFtpcTrackingParams::FtpcRotationX(Int_t i)         { return *mFtpcRotationX[i];           }
+StMatrixD StFtpcTrackingParams::FtpcRotationXInverse(Int_t i)  { return *mFtpcRotationXInverse[i];    }
+StMatrixD StFtpcTrackingParams::FtpcRotationY(Int_t i)         { return *mFtpcRotationY[i];           }
+StMatrixD StFtpcTrackingParams::FtpcRotationYInverse(Int_t i)  { return *mFtpcRotationYInverse[i];    }
 
-inline  Double_t StFtpcTrackingParams::InstallationPointX(Int_t i)    { return (i>=0 && i<=1) ? mInstallationPointX[i] : 0.; }
-inline  Double_t StFtpcTrackingParams::InstallationPointY(Int_t i)    { return (i>=0 && i<=1) ? mInstallationPointY[i] : 0.; }
-inline  Double_t StFtpcTrackingParams::InstallationPointZ(Int_t i)    { return (i>=0 && i<=1) ? mInstallationPointZ[i] : 0.; }
-inline  Double_t StFtpcTrackingParams::ObservedVertexOffsetY(Int_t i) { return (i>=0 && i<=1) ? mObservedVertexOffsetY[i] : 0.; }
-inline  Double_t StFtpcTrackingParams::ObservedVertexOffsetX(Int_t i) { return (i>=0 && i<=1) ? mObservedVertexOffsetX[i] : 0.; }
+ Double_t StFtpcTrackingParams::InstallationPointX(Int_t i)    { return (i>=0 && i<=1) ? mInstallationPointX[i] : 0.; }
+ Double_t StFtpcTrackingParams::InstallationPointY(Int_t i)    { return (i>=0 && i<=1) ? mInstallationPointY[i] : 0.; }
+ Double_t StFtpcTrackingParams::InstallationPointZ(Int_t i)    { return (i>=0 && i<=1) ? mInstallationPointZ[i] : 0.; }
+ Double_t StFtpcTrackingParams::ObservedVertexOffsetY(Int_t i) { return (i>=0 && i<=1) ? mObservedVertexOffsetY[i] : 0.; }
+ Double_t StFtpcTrackingParams::ObservedVertexOffsetX(Int_t i) { return (i>=0 && i<=1) ? mObservedVertexOffsetX[i] : 0.; }
 
 // magnetic field table
-inline Double_t StFtpcTrackingParams::MagFieldFactor()  { return mMagFieldFactor; }
-inline StMagUtilities *StFtpcTrackingParams::MagField() { return mMagField;       }
+Double_t StFtpcTrackingParams::MagFieldFactor()  { return mMagFieldFactor; }
+StMagUtilities *StFtpcTrackingParams::MagField() { return mMagField;       }
 
 
 StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug,
@@ -240,7 +243,7 @@ StFtpcTrackingParams* StFtpcTrackingParams::Instance(Bool_t debug, Double_t magF
 }
 
 
-inline StFtpcTrackingParams* StFtpcTrackingParams::Instance() {
+StFtpcTrackingParams* StFtpcTrackingParams::Instance() {
   // return instance only
   
   return mInstance;

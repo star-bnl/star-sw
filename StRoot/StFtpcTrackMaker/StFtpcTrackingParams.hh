@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.hh,v 1.12 2003/05/21 09:47:10 putschke Exp $
+// $Id: StFtpcTrackingParams.hh,v 1.13 2003/09/11 21:31:30 jeromel Exp $
 // $Log: StFtpcTrackingParams.hh,v $
+// Revision 1.13  2003/09/11 21:31:30  jeromel
+// removed inline as it would leave a few undefined reference
+//
 // Revision 1.12  2003/05/21 09:47:10  putschke
 // Include rotation around y-axis for FTPC east and west
 //
@@ -86,30 +89,30 @@ private:
   
   static StFtpcTrackingParams* mInstance;
   
-  // FTPC geometry
+  /// FTPC geometry
   Double_t  mInnerRadius;
   Double_t  mOuterRadius;
      Int_t  mNumberOfPadRows;
      Int_t  mNumberOfPadRowsPerSide;
   Double_t *mPadRowPosZ;
 
-  // Vertex position
+  /// Vertex position
   Double_t mMaxVertexPosZWarning;
   Double_t mMaxVertexPosZError;
 
-  // Vertex reconstruction
+  /// Vertex reconstruction
      Int_t mHistoBins;
   Double_t mHistoMin;
   Double_t mHistoMax;
   Double_t mMaxDcaVertex;
      Int_t mMinNumTracks;
 
-  // Tracker
+  /// Tracker
   Int_t mRowSegments;
   Int_t mPhiSegments;
   Int_t mEtaSegments;
   
-  // Tracking
+  /// Tracking
     Bool_t mLaser[4];
     Bool_t mVertexConstraint[4];
      Int_t mMaxTrackletLength[4];
@@ -120,15 +123,15 @@ private:
      Int_t mEtaScope[4];
   Double_t mMaxDca[4];
 
-  // Tracklets
+  /// Tracklets
   Double_t mMaxAngleTracklet[4];
 
-  // Tracks
+  /// Tracks
   Double_t mMaxAngleTrack[4];
   Double_t mMaxCircleDist[4];
   Double_t mMaxLengthDist[4];
   
-  // Split tracks
+  /// Split tracks
   Double_t mMaxDist;
   Double_t mMinPointRatio;
   Double_t mMaxPointRatio;
@@ -200,31 +203,44 @@ public:
   virtual ~StFtpcTrackingParams();
   
   void PrintParams();
+
   
-  // FTPC geometry
+  /// @name FTPC geometry
+  //@{
   Double_t InnerRadius();
   Double_t OuterRadius();
      Int_t NumberOfPadRows();
      Int_t NumberOfPadRowsPerSide();
   Double_t PadRowPosZ(Int_t row);
+  //@}
 
-  // Vertex position
+
+  /// @name Vertex position
+  //@{
   Double_t MaxVertexPosZWarning();
   Double_t MaxVertexPosZError();
+  //@}
 
-  // Vertex reconstruction
+
+  /// @name Vertex reconstruction
+  //@{
      Int_t HistoBins();
   Double_t HistoMin();
   Double_t HistoMax();
   Double_t MaxDcaVertex();
      Int_t MinNumTracks();
+  //@}
 
-  // Tracker
+  /// @name Tracker
+  //@{
   Int_t RowSegments();
   Int_t PhiSegments();
   Int_t EtaSegments();
+  //@}
+
   
-  // Tracking
+  /// @name Tracking
+  //@{
   Bool_t Laser(Int_t tracking_method);
   Bool_t VertexConstraint(Int_t tracking_method);
   Int_t MaxTrackletLength(Int_t tracking_method);
@@ -234,21 +250,30 @@ public:
   Int_t PhiScope(Int_t tracking_method);
   Int_t EtaScope(Int_t tracking_method);
   Double_t MaxDca(Int_t tracking_method);
+  //@}
 
-  // Tracklets
+  /// Tracklets
   Double_t MaxAngleTracklet(Int_t tracking_method);
 
-  // Tracks
+
+  /// @name Tracks
+  //@{
   Double_t MaxAngleTrack(Int_t tracking_method);
   Double_t MaxCircleDist(Int_t tracking_method);
   Double_t MaxLengthDist(Int_t tracking_method);
+  //@}
+
   
-  // Split tracks
+  /// @name Split tracks
+  //@{
   Double_t MaxDist();
   Double_t MinPointRatio();
   Double_t MaxPointRatio();
+  //@}
 
-  // dE/dx
+
+  /// @name dE/dx
+  //@{
   Int_t DebugLevel();
   Int_t IdMethod();
   Int_t NoAngle();
@@ -260,13 +285,17 @@ public:
   Double_t FracTrunc();
   Double_t Aip();
   Double_t ALargeNumber();
+  //@}
 
-  // transformation due to rotated and displaced TPC
+
+  /// transformation due to rotated and displaced TPC
   StMatrixD TpcToGlobalRotation();
   StMatrixD GlobalToTpcRotation();
   StThreeVectorD TpcPositionInGlobal(); 
 
-  // internal FTPC rotation
+
+  /// @name internal FTPC rotation
+  //@{
   StMatrixD FtpcRotation(Int_t i);
   StMatrixD FtpcRotationInverse(Int_t i);
   StMatrixD FtpcRotationX(Int_t i);
@@ -278,9 +307,10 @@ public:
   Double_t InstallationPointZ(Int_t i);
   Double_t ObservedVertexOffsetY(Int_t i);
   Double_t ObservedVertexOffsetX(Int_t i);
+  //@}
 
 
-  // magnetic field table
+  /// magnetic field table
   StMagUtilities *MagField();
   Double_t  MagFieldFactor();
 
