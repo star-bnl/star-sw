@@ -1,10 +1,13 @@
 /**********************************************************
- * $Id: StRichMaterialsDb.cxx,v 2.3 2000/11/30 23:31:32 lasiuk Exp $
+ * $Id: StRichMaterialsDb.cxx,v 2.4 2000/12/08 04:58:20 lasiuk Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichMaterialsDb.cxx,v $
+ *  Revision 2.4  2000/12/08 04:58:20  lasiuk
+ *  allow for index of refraction for liquid less than 170nm
+ *
  *  Revision 2.3  2000/11/30 23:31:32  lasiuk
  *  default setting of mInner and mOuter in c'tor
  *
@@ -214,7 +217,14 @@ void StRichMaterialsDb::setWavelengthRange(double shortwave, double longwave) {
 double StRichMaterialsDb::indexOfRefractionOfC6F14At(double wavelength) {
   
   // convert wavelenght from centimeters (base unit) into nanometers
+
   wavelength = wavelength/nanometer;
+
+  //
+  // this is a patch until we get a parameterization
+  // of the index of refraction to 165 nm
+  //
+  if (wavelength < 170) return 1.295;
   
   double index = (mLongestWavelength/nanometer - wavelength)/mConversion; 
   if(boundsCheck(index)) {
