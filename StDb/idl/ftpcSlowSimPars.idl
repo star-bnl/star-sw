@@ -16,4 +16,5 @@
        float chamberCathodeVoltage   ;  /* drift cathode voltage */
        float sigmaPadResponseFuntion ;  /* pad-response-function sigma in um */
        float shaperTime              ;  /* shaper time in ns */ 
+       float slowSimPressure         ;  /* atmospheric pressure in hPa */
    };
