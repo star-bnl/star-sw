@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.6 1999/09/12 23:08:12 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.7 1999/09/17 21:27:44 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.7  1999/09/17 21:27:44  fisyak
+// Add MySQL
+//
 // Revision 1.6  1999/09/12 23:08:12  fisyak
 // Add return value in Finish()
 //
@@ -63,6 +66,7 @@
 #include "St_XDFFile.h"
 #include "StMagF.h"
 #include "St_geant_Maker.h"
+#include "StDbBroker.h"
 #include "St_db_Maker.h"
 #include "StTreeMaker.h"
 #include "StIOMaker.h"
@@ -246,6 +250,7 @@ Int_t StBFChain::Load()
   gSystem->Load("StUtilities");
   //gSystem->Load("libmsg");
   gSystem->Load("libtls");
+  gSystem->Load("StDbBroker");
   gSystem->Load("St_db_Maker");
   if (GetOption(kFieldOff) || 
       GetOption(kFieldOn)  || 
@@ -382,6 +387,9 @@ Int_t StBFChain::Load()
     }
   }
   const char *mainDB = "$STAR/StDb/params";
+  //DbInit from StDbBroker.so checks that mysql db1 server is accessible
+  if (StDbBroker::DbInit("params")==0) mainDB = "MySQL:params";
+  printf ("QAInfo: Main DataBase == %s\n",mainDB);  
   dbMk = new St_db_Maker("db",mainDB);
   if (GetOption(kSD97)) { dbMk->SetDateTime("sd97");}
   if (GetOption(kSD98)) { dbMk->SetDateTime("sd98");}
@@ -566,8 +574,10 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
       printf (" *** NO FILE: %s, exit!\n", InFile->Data());
       gSystem->Exit(1); 
     }
-    setFiles= new StFile();
-    setFiles->AddFile(InFile->Data());
+    if (!GetOption(kFZIN) {
+      setFiles= new StFile();
+      setFiles->AddFile(InFile->Data());
+    }
   }
   if (GetOption(kGSTAR)) {
     if (!Outfile) FileOut = new TString("gtrack.root");
