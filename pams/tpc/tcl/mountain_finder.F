@@ -1,5 +1,8 @@
-* $Id: mountain_finder.F,v 1.3 1999/02/26 22:54:41 sakrejda Exp $
+* $Id: mountain_finder.F,v 1.4 1999/04/06 22:32:59 sakrejda Exp $
 * $Log: mountain_finder.F,v $
+* Revision 1.4  1999/04/06 22:32:59  sakrejda
+* removed writting to unit56
+*
 * Revision 1.3  1999/02/26 22:54:41  sakrejda
 * protection against empty clusters added
 *
@@ -345,15 +348,7 @@ c ok, passed peak:valley test... store this peak
             nmax=nmax+1
             if (nmax.gt.nmax_max) then
                nmax = nmax_max
-c ??? Direct write is forbidden
-               write(6,*)'Hey!... too many peaks... I am bailing...'
-               do iwriteout=1,nclspix
-c ??? Direct write is forbidden
-                  write(56,*)' '
-c ??? Direct write is forbidden
-                  write(56,*)iwriteout,
-     +                 ipad(iwriteout),itdc(iwriteout),iadc(iwriteout)
-               enddo
+c               write(6,*)'Hey!... too many peaks... I am bailing...'
                goto 20
             endif
             max_pad(nmax) = jpad
