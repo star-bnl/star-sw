@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsFastChargeTransporter.cc,v 1.3 1999/01/18 21:02:14 lasiuk Exp $
+ * $Id: StTrsFastChargeTransporter.cc,v 1.4 1999/01/28 02:47:03 lasiuk Exp $
  *
  * Author: brian June 1, 1998
  *
@@ -11,8 +11,11 @@
  **********************************************************************
  *
  * $Log: StTrsFastChargeTransporter.cc,v $
- * Revision 1.3  1999/01/18 21:02:14  lasiuk
- * frisch grid for +/-z
+ * Revision 1.4  1999/01/28 02:47:03  lasiuk
+ * drift length ambiguity
+ *
+ * Revision 1.4  1999/01/28 02:47:03  lasiuk
+ * drift length ambiguity
  *
  * Revision 1.3  1999/01/18 21:02:14  lasiuk
  * frisch grid for +/-z
@@ -58,11 +61,19 @@ StTrsFastChargeTransporter::~StTrsFastChargeTransporter() {/* nopt */}
 void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg)
 {
     // Projection onto pad plane
-
+    PR(frischGrid);
     double frischGrid = (seg.position().z() > 0) ?
 	mGeomDb->frischGrid() : -mGeomDb->frischGrid();
-    double driftLength = frischGrid - seg.position().z();
-    //PR(driftLength);
+//     PR(frischGrid);
+    // must keep time/z position of cluster! -->
+    // replace z component with transit (drift) distance!
+    double driftLength = (frischGrid>0) ?
+	seg.position().z() - frischGrid ;
+
+//     PR(driftLength);
+    if (driftLength<0) {// PROBLEMS
+	cerr << "ERROR: StTrsFastChargeTransporter::transportToWire()" << endl;
+    PR(driftLength);
 	cerr << "ERROR: Drift distance < 0" << endl;
 	//continue; // Do something!!!
     }
@@ -77,7 +88,7 @@ void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg)
 	seg.position().setZ( (mGaussDistribution.shoot(driftLength, (mSigmaLongitudinal*sqrt(driftLength)) ) ) );
     }
     else {
-    //PR(seg.position());
+    PR(seg.position());
     }
 
 //     PR(seg.position());
@@ -89,7 +100,7 @@ void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg)
 
     // O2 abosorption (stat)
     if(mChargeAttachment) {
-    //PR(seg.charge());
+    PR(seg.charge());
     }
     
 //     PR(seg.charge());
@@ -97,7 +108,7 @@ void StTrsFastChargeTransporter::transportToWire(StTrsMiniChargeSegment& seg)
     // Grid Transparency (stat)
     if(mGatingGridTransparency) {
 	//PR(wireGridTransmission());
-    //PR(seg.charge());
+    PR(seg.charge());
     }
 
 //     PR(seg.charge());
