@@ -102,6 +102,10 @@ inline  void  StHbtSmearedHiddenInfo::setInitialMom(const StHbtLorentzVector* aP
   case 321:
     mSmearedMom.setT(sqrt((0.493*0.493 + mSmearedMom.x() * mSmearedMom.x() + mSmearedMom.y() * mSmearedMom.y() + mSmearedMom.z() * mSmearedMom.z())));
     break;
+  case 2212:
+    mSmearedMom.setT(sqrt((0.938*0.938 + mSmearedMom.x() * mSmearedMom.x() + mSmearedMom.y() * mSmearedMom.y() + mSmearedMom.z() * mSmearedMom.z())));
+    break;
+
   }
 }
 

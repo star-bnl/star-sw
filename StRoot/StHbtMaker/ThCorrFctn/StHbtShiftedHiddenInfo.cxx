@@ -94,6 +94,10 @@ inline  void  StHbtShiftedHiddenInfo::setInitialMom(const StHbtLorentzVector* aP
   case 321:
     mShiftedMom.setT(sqrt((0.493*0.493 + mShiftedMom.x() * mShiftedMom.x() + mShiftedMom.y() * mShiftedMom.y() + mShiftedMom.z() * mShiftedMom.z())));
     break;
+  case 2212:
+    mShiftedMom.setT(sqrt((0.938*0.938 + mShiftedMom.x() * mShiftedMom.x() + mShiftedMom.y() * mShiftedMom.y() + mShiftedMom.z() * mShiftedMom.z())));
+    break;
+
   }
 }
 
