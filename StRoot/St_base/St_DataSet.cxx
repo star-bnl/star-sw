@@ -276,23 +276,21 @@ void  St_DataSet::SetParent(St_DataSet *parent){
        oldparent->Remove(this);       // Break relations with the current parents
     fList->SetParent(parent);         // Establish a new relationships
   }
-  SetMother(parent);                  // Adjust St_DataSet::fMother poiner as well
+  SetMother(parent);                  // Adjust St_DataSet::fMother pointer as well
 }
 //______________________________________________________________________________
 void St_DataSet::SetWrite()
 {
+ //
+ // To Write object first we should temporary break the 
+ // the backward fMother pointer (otherwise ROOT follows this links
+ // and will pull fMother out too.
+ //
   St_DataSet *mothersav = GetParent();
   SetParent();
-  this->Write();
+  Write();
+  // Restore the fMother pointer
   SetParent(mothersav);
-#if 0
-  set = new St_DataSet(GetName());
-  set->Update(this);
-  set->Write();
-  this->Delete();
-  this->Update(set);
-  delete set;
-#endif
 }
 //______________________________________________________________________________
 void St_DataSet::Shunt(St_DataSet *dataset)

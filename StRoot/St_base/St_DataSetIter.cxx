@@ -161,6 +161,20 @@ St_DataSet *St_DataSetIter::Dir(Char_t *dirname)
   return set;
 }
 //______________________________________________________________________________
+Int_t St_DataSetIter::Flag(const Char_t *path,UInt_t flag,EBitOpt reset)
+{
+  St_DataSet *set = Next(path);
+  if (set) set->SetBit(flag,reset);
+  return 0;
+}
+//______________________________________________________________________________
+Int_t St_DataSetIter::Flag(St_DataSet *dataset,UInt_t flag,EBitOpt reset)
+{
+  if (dataset) dataset->SetBit(flag,reset);
+  return 0;
+}
+
+//______________________________________________________________________________
 St_DataSet *St_DataSetIter::Ls(const Char_t *dirname,Option_t *opt) {
 //
 //   Ls(const Char_t *dirname,Option_t)
