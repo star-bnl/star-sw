@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofCalibMaker.cxx,v 1.6 2004/07/24 03:33:56 dongx Exp $
+ * $Id: StTofCalibMaker.cxx,v 1.7 2004/08/11 18:58:40 dongx Exp $
  *
  * Author: Xin Dong
  *****************************************************************
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTofCalibMaker.cxx,v $
+ * Revision 1.7  2004/08/11 18:58:40  dongx
+ * missing nSigmaXX in tofHit implemented
+ *
  * Revision 1.6  2004/07/24 03:33:56  dongx
  * Tofp slewing function changed back
  *
@@ -519,6 +522,23 @@ Int_t StTofCalibMaker::Make()
       aHit->setTofExpectedAsPion((Float_t)tofpi);
       aHit->setTofExpectedAsKaon((Float_t)tofk);
       aHit->setTofExpectedAsProton((Float_t)tofp);
+
+      float sigmae = 999.;
+      float sigmapi = 999.;
+      float sigmak = 999.;
+      float sigmap = 999.;
+      float res = mTofrRes[daqId];
+      if(fabs(res)>1.e-5) {
+	sigmae = (Float_t)((tof-tofe)/res);
+	sigmapi = (Float_t)((tof-tofpi)/res);
+	sigmak = (Float_t)((tof-tofk)/res);
+	sigmap = (Float_t)((tof-tofp)/res);
+      }
+      aHit->setSigmaElectron(sigmae);
+      aHit->setSigmaPion(sigmapi);
+      aHit->setSigmaKaon(sigmak);
+      aHit->setSigmaProton(sigmap);
+
     } else {
       aHit->setTimeOfFlight(9999.);
       aHit->setBeta(9999.);
@@ -575,11 +595,27 @@ Int_t StTofCalibMaker::Make()
       Double_t tofpi = L/(C_C_LIGHT/1.e9)*sqrt(ptot*ptot+M_PION_PLUS*M_PION_PLUS)/ptot;
       Double_t tofk = L/(C_C_LIGHT/1.e9)*sqrt(ptot*ptot+M_KAON_PLUS*M_KAON_PLUS)/ptot;
       Double_t tofp = L/(C_C_LIGHT/1.e9)*sqrt(ptot*ptot+M_PROTON*M_PROTON)/ptot;
-      
       aHit->setTofExpectedAsElectron((Float_t)tofe);
       aHit->setTofExpectedAsPion((Float_t)tofpi);
       aHit->setTofExpectedAsKaon((Float_t)tofk);
       aHit->setTofExpectedAsProton((Float_t)tofp);
+
+      float sigmae = 999.;
+      float sigmapi = 999.;
+      float sigmak = 999.;
+      float sigmap = 999.;
+      float res = mTofpRes[daqId];
+      if(fabs(res)>1.e-5) {
+	sigmae = (Float_t)((tof-tofe)/res);
+	sigmapi = (Float_t)((tof-tofpi)/res);
+	sigmak = (Float_t)((tof-tofk)/res);
+	sigmap = (Float_t)((tof-tofp)/res);
+      }
+      aHit->setSigmaElectron(sigmae);
+      aHit->setSigmaPion(sigmapi);
+      aHit->setSigmaKaon(sigmak);
+      aHit->setSigmaProton(sigmap);
+
     } else {
       aHit->setTimeOfFlight(9999.);
       aHit->setBeta(9999.);
@@ -610,27 +646,10 @@ Int_t StTofCalibMaker::Make()
       if(!aTrack) continue;
       if(aTrack->key()!=trkId) continue;
       StTofPidTraits* pidTof = new StTofPidTraits(tofHitVec[j]->trayIndex(), tofHitVec[j]->moduleIndex(), tofHitVec[j]->cellIndex(), tofHitVec[j]->timeOfFlight(), tofHitVec[j]->pathLength(), tofHitVec[j]->beta());
-      float sigmae = 999.;
-      float sigmapi = 999.;
-      float sigmak = 999.;
-      float sigmap = 999.;
-      float res = 999.;
-      if(tofHitVec[j]->trayIndex()==0&&tofHitVec[j]->moduleIndex()==0) { // tofp
-	res = mTofpRes[tofHitVec[j]->daqIndex()];
-      } else { // tofr
-	res = mTofrRes[tofHitVec[j]->daqIndex()];
-      }
-      
-      if(res!=0.) {
-	sigmae = (tofHitVec[j]->timeOfFlight()-tofHitVec[j]->tofExpectedAsElectron())/res;
-	sigmapi = (tofHitVec[j]->timeOfFlight()-tofHitVec[j]->tofExpectedAsPion())/res;
-	sigmak = (tofHitVec[j]->timeOfFlight()-tofHitVec[j]->tofExpectedAsKaon())/res;
-	sigmap = (tofHitVec[j]->timeOfFlight()-tofHitVec[j]->tofExpectedAsProton())/res;
-      }
-      pidTof->setSigmaElectron(sigmae);
-      pidTof->setSigmaPion(sigmapi);
-      pidTof->setSigmaKaon(sigmak);
-      pidTof->setSigmaProton(sigmap);
+      pidTof->setSigmaElectron(tofHitVec[j]->sigmaElectron());
+      pidTof->setSigmaPion(tofHitVec[j]->sigmaElectron());
+      pidTof->setSigmaKaon(tofHitVec[j]->sigmaElectron());
+      pidTof->setSigmaProton(tofHitVec[j]->sigmaElectron());
       
       theTrack->addPidTraits(pidTof);
     }
