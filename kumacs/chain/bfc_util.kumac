@@ -152,12 +152,12 @@
    if (STAF_STATUS(1).ne. STAFCV_OK) goto ERROR
    
   
- staf_status(1)=stafcv_ok
+ vec/input staf_status(1) stafcv_ok
  goto END
    
  ERROR:
    message ' ERROR IN BFC_START - JUMP OUT'
-   staf_status(1)=stafcv_bad
+   vec/input staf_status(1) stafcv_bad
  
 END:
  
@@ -399,12 +399,12 @@ macro bfc_init _
   enddo
   
 
- staf_status(1)=stafcv_ok
+ vec/input staf_status(1) stafcv_ok
  goto END
    
  EOF:
    message ' ERROR IN BFC_INIT - JUMP OUT'
-   staf_status(1)=stafcv_bad
+   vec/input staf_status(1) stafcv_bad
  
 END:
  
@@ -643,12 +643,12 @@ return
  
  NEXT_EVENT:
  
- staf_status(1)=stafcv_ok
+ vec/input staf_status(1) stafcv_ok
  goto END
    
  EOF:
    message ' SKIP OUT OF BFC_PROCESS  - GO TO BFC_FINISH'
-   staf_status(1)=stafcv_bad
+   vec/input staf_status(1) stafcv_bad
  
  END:
  
@@ -730,12 +730,12 @@ macro bfc_finish _
   endif
   
 
- staf_status(1)=stafcv_ok
+ vec/input staf_status(1) stafcv_ok
  goto END
    
  ERROR:
    message ' ERROR IN BFC_FINISH - JUMP OUT'
-   staf_status(1)=stafcv_bad
+   vec/input staf_status(1) stafcv_bad
  
  END:
  
@@ -759,12 +759,12 @@ macro bfc_finish _
   enddo
   
 
- staf_status(1)=stafcv_ok
+ vec/input staf_status(1) stafcv_ok
  goto END
    
  ERROR:
    message ' ERROR IN BFC_PRINT - JUMP OUT'
-   staf_status(1)=stafcv_bad
+   vec/input staf_status(1) stafcv_bad
  
  END:
  
@@ -791,12 +791,12 @@ macro bfc_g2t_b4_load chain
    ENDCASE
  enddo
  
- staf_status(1)=stafcv_ok
+ vec/input staf_status(1) stafcv_ok
  goto END
    
  ERROR:
    message ' ERROR IN BFC_G2T_B4_LOAD - JUMP OUT'
-   staf_status(1)=stafcv_bad
+   vec/input staf_status(1) stafcv_bad
  
 END:
  
@@ -826,12 +826,12 @@ return
    ENDCASE
  enddo
  
- staf_status(1)=stafcv_ok
+ vec/input staf_status(1) stafcv_ok
  goto END
    
  ERROR:
    message ' ERROR IN BFC_G2T_AFTER_LOAD - JUMP OUT'
-   staf_status(1)=stafcv_bad
+   vec/input staf_status(1) stafcv_bad
  
 END:
  
