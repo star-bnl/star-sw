@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcSimpleGeometry.hh,v 1.4 1999/10/11 23:55:10 calderon Exp $
+ * $Id: StTpcSimpleGeometry.hh,v 1.5 2000/01/10 23:11:30 lasiuk Exp $
  *
  * Author: brian May 20, 1998
  *
@@ -12,6 +12,9 @@
  **********************************************************************
  *
  * $Log: StTpcSimpleGeometry.hh,v $
+ * Revision 1.5  2000/01/10 23:11:30  lasiuk
+ * Include MACROS for compatibility with SUN CC5.0
+ *
  * Revision 1.4  1999/10/11 23:55:10  calderon
  * Version with Database Access and persistent file.
  * Not fully tested due to problems with cons, it
@@ -53,8 +56,12 @@
  **********************************************************************/
 #ifndef ST_TPC_SIMPLE_GEOMETRY_HH
 #define ST_TPC_SIMPLE_GEOMETRY_HH
+
 #include <iostream.h>
 #include <vector>
+#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+   using std::vector;
+#endif
 
 #include "StGlobals.hh"
 #include "StThreeVector.hh"

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSimpleMagneticField.hh,v 1.4 1999/06/16 14:26:51 fisyak Exp $
+ * $Id: StSimpleMagneticField.hh,v 1.5 2000/01/10 23:11:29 lasiuk Exp $
  *
  * Author: Thomas Ullrich, May 1998 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSimpleMagneticField.hh,v $
+ * Revision 1.5  2000/01/10 23:11:29  lasiuk
+ * Include MACROS for compatibility with SUN CC5.0
+ *
  * Revision 1.4  1999/06/16 14:26:51  fisyak
  * Add flags for egcs on Solaris
  *
@@ -38,6 +41,9 @@
 #include <stdcomp.h>
 #endif
 #include "SystemOfUnits.h"
+#ifndef ST_NO_NAMESPACES
+using namespace units;
+#endif
 
 #include "StMagneticField.hh"
 

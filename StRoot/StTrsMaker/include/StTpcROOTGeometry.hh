@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcROOTGeometry.hh,v 1.3 1999/10/11 23:55:10 calderon Exp $
+ * $Id: StTpcROOTGeometry.hh,v 1.4 2000/01/10 23:11:29 lasiuk Exp $
  *
  * Author: brian March 22, 1999
  *
@@ -12,6 +12,9 @@
  **********************************************************************
  *
  * $Log: StTpcROOTGeometry.hh,v $
+ * Revision 1.4  2000/01/10 23:11:29  lasiuk
+ * Include MACROS for compatibility with SUN CC5.0
+ *
  * Revision 1.3  1999/10/11 23:55:10  calderon
  * Version with Database Access and persistent file.
  * Not fully tested due to problems with cons, it
@@ -31,6 +34,9 @@
 #define ST_TPC_SIMPLE_GEOMETRY_HH
 #include <iostream.h>
 #include <vector>
+#if defined(__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+using std::vector;
+#endif
 
 #include "geometryDataSet.h"
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbSlowControl.hh,v 1.1 1999/10/11 23:55:09 calderon Exp $
+ * $Id: StTpcDbSlowControl.hh,v 1.2 2000/01/10 23:11:29 lasiuk Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez & Brian Lasiuk Sept 13, 1999
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbSlowControl.hh,v $
+ * Revision 1.2  2000/01/10 23:11:29  lasiuk
+ * Include MACROS for compatibility with SUN CC5.0
+ *
  * Revision 1.1  1999/10/11 23:55:09  calderon
  * Version with Database Access and persistent file.
  * Not fully tested due to problems with cons, it
@@ -28,8 +31,13 @@
 
 
 #include "SystemOfUnits.h"
+#ifndef ST_NO_NAMESPACES
+using namespace units;
+#endif
+
 #include "StTpcSlowControl.hh"
 #include "StTpcDb/StTpcDb.h"
+
 class StTpcDbSlowControl : public StTpcSlowControl {
 public:
     ~StTpcDbSlowControl();

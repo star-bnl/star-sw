@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsDigitalSector.hh,v 1.5 1999/11/05 22:17:04 calderon Exp $
+ * $Id: StTrsDigitalSector.hh,v 1.6 2000/01/10 23:11:31 lasiuk Exp $
  *
  * Author: bl prelim
  ***************************************************************************
@@ -24,6 +24,9 @@
  ***************************************************************************
  *
  * $Log: StTrsDigitalSector.hh,v $
+ * Revision 1.6  2000/01/10 23:11:31  lasiuk
+ * Include MACROS for compatibility with SUN CC5.0
+ *
  * Revision 1.5  1999/11/05 22:17:04  calderon
  * Made private copy constructor and operator= in StTrsDigitalSector.
  * Renamed DigitalSignalGenerators: Fast -> Old, Parameterized -> Fast
@@ -59,6 +62,9 @@
 
 #include <vector>
 #include <utility>
+#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+using std::vector;
+#endif
 
 #include "StTrsAnalogSignal.hh"
 #include "StTpcGeometry.hh"

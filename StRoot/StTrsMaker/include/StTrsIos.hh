@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsIos.hh,v 1.2 1999/12/08 02:10:25 calderon Exp $
+ * $Id: StTrsIos.hh,v 1.3 2000/01/10 23:11:32 lasiuk Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrsIos.hh,v $
+ * Revision 1.3  2000/01/10 23:11:32  lasiuk
+ * Include MACROS for compatibility with SUN CC5.0
+ *
  * Revision 1.2  1999/12/08 02:10:25  calderon
  * Modified to eliminate warnings on Linux.
  *
@@ -31,6 +34,11 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+
+#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+using std::vector;
+using std::string;
+#endif
 
 class StTpcGeometry;
 

@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.h,v 1.14 1999/11/11 19:42:25 calderon Exp $
+// $Id: StTrsMaker.h,v 1.15 2000/01/10 23:11:07 lasiuk Exp $
 //
 // $Log: StTrsMaker.h,v $
+// Revision 1.15  2000/01/10 23:11:07  lasiuk
+// Include MACROS for compatibility with SUN CC5.0
+//
 // Revision 1.14  1999/11/11 19:42:25  calderon
 // Add #ifdef HISTOGRAM for Ntuple Diagnostics.
 // Use ROOT_DATABASE_PARAMETERS.  As soon as Jeff and Dave give Ok,
@@ -79,9 +82,15 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+
 #ifndef HEP_SYSTEM_OF_UNITS_H
 #include "SystemOfUnits.h"
 #endif
+#ifndef ST_NO_NAMESPACES
+using namespace units;
+#endif
+
+
 // Dbs
 class StTpcGeometry;
 class StTpcSlowControl;
@@ -113,7 +122,7 @@ class StTrsMaker : public StMaker {
  private:
     StTrsMaker(const StTrsMaker&);
     StTrsMaker& operator=(const StTrsMaker&);
-// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.14 1999/11/11 19:42:25 calderon Exp $";
+// static Char_t  m_VersionCVS = "$Id: StTrsMaker.h,v 1.15 2000/01/10 23:11:07 lasiuk Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
 // St_stk_stkpar *m_stk_stkpar;  //! pointer to stk parameters
 
@@ -183,7 +192,7 @@ public:
     
   virtual const char *GetCVS() const
   {
-      static const char cvs[]= "Tag $Name:  $ $Id: StTrsMaker.h,v 1.14 1999/11/11 19:42:25 calderon Exp $ built __DATE__ __TIME__" ; return cvs;}
+      static const char cvs[]= "Tag $Name:  $ $Id: StTrsMaker.h,v 1.15 2000/01/10 23:11:07 lasiuk Exp $ built __DATE__ __TIME__" ; return cvs;}
 
     ClassDef(StTrsMaker, 1)   //StAF chain virtual base class for Makers
 

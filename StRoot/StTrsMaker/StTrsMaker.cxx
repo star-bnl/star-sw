@@ -1,6 +1,9 @@
-// $Id: StTrsMaker.cxx,v 1.50 1999/11/12 01:34:06 long Exp $
+// $Id: StTrsMaker.cxx,v 1.51 2000/01/10 23:11:07 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.51  2000/01/10 23:11:07  lasiuk
+// Include MACROS for compatibility with SUN CC5.0
+//
 // Revision 1.50  1999/11/12 01:34:06  long
 // 1)fix a bug for track with z<0
 // 2) turn on the switch on pseudo pad row and set the signal threshold to
@@ -200,6 +203,16 @@
 #include <utility>    // pair
 #include <algorithm>  // min() max()
 #include <ctime>      // time functions
+
+#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+using std::list;
+using std::vector;
+using std::string;
+using std::min;
+using std::max;
+#endif
+
+
 // SCL
 #include "StGlobals.hh"
 #include "Randomize.h"
@@ -283,7 +296,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.50 1999/11/12 01:34:06 long Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.51 2000/01/10 23:11:07 lasiuk Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)

@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTpcDbGeometry.hh,v 1.1 1999/10/11 23:55:09 calderon Exp $
+ * $Id: StTpcDbGeometry.hh,v 1.2 2000/01/10 23:11:29 lasiuk Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez & Brian Lasiuk Sept 13, 1999
  *
@@ -12,6 +12,9 @@
  **********************************************************************
  *
  * $Log: StTpcDbGeometry.hh,v $
+ * Revision 1.2  2000/01/10 23:11:29  lasiuk
+ * Include MACROS for compatibility with SUN CC5.0
+ *
  * Revision 1.1  1999/10/11 23:55:09  calderon
  * Version with Database Access and persistent file.
  * Not fully tested due to problems with cons, it
@@ -26,6 +29,9 @@
 #include <iostream.h>
 #include <vector>
 
+#if defined __SUNPRO_CC && __SUNPRO_CC >= 0x500
+using std::vector;
+#endif
 
 #include "StGlobals.hh"
 #include "StThreeVector.hh"

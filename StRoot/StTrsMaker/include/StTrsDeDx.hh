@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.hh,v 1.6 1999/10/21 23:52:27 calderon Exp $
+ * $Id: StTrsDeDx.hh,v 1.7 2000/01/10 23:11:31 lasiuk Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.hh,v $
+ * Revision 1.7  2000/01/10 23:11:31  lasiuk
+ * Include MACROS for compatibility with SUN CC5.0
+ *
  * Revision 1.6  1999/10/21 23:52:27  calderon
  * Added new constructor with char*
  * instead of string so Solaris doesn't complain.
@@ -75,7 +78,11 @@
 #include "SystemOfUnits.h"
 #ifndef ST_NO_NAMESPACES
 using namespace units;
+#if defined(__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+using std::string;
 #endif
+#endif
+
 #include "Randomize.h"
 
 class StTrsDeDx {
