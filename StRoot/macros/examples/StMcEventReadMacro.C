@@ -1,5 +1,8 @@
-// $Id: StMcEventReadMacro.C,v 1.12 2000/04/12 17:39:02 kathy Exp $
+// $Id: StMcEventReadMacro.C,v 1.13 2000/04/13 22:00:24 calderon Exp $
 // $Log: StMcEventReadMacro.C,v $
+// Revision 1.13  2000/04/13 22:00:24  calderon
+// set dst branch and appropriate tables as per Kathy
+//
 // Revision 1.12  2000/04/12 17:39:02  kathy
 // change to only load table libraries needed: lib*_Tables instead of all tables: St_Tables
 //
@@ -65,8 +68,8 @@ const char *MainFile=
 // Load all the System libraries
     gSystem->Load("St_base");
     gSystem->Load("StChain");
+    gSystem->Load("libgen_Tables");
     gSystem->Load("libsim_Tables");
-    
     gSystem->Load("StUtilities");
 
     gSystem->Load("StIOMaker");
@@ -85,10 +88,11 @@ const char *MainFile=
     IOMk->SetIOMode("r");
     IOMk->SetBranch("*",0,"0");                 //deactivate all branches
     IOMk->SetBranch("geantBranch",0,"r");
+    IOMk->SetBranch("dstBranch",0,"r");
 
     // StMcEvent
     StMcEventMaker  *mcEventReader  = new StMcEventMaker; // Make an instance...
-
+    
     // now execute the chain member functions
     
     chain->PrintInfo();
