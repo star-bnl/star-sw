@@ -70,7 +70,7 @@ class St_l3_ptrs_Coordinate {
      void Setp(double P) { ptrs[0] = P ; } ; 
      void Sett(double T) { ptrs[1] = T ; } ; 
      void Setr(double R) { ptrs[2] = R ; } ; 
-     void Sets(double S) { ptrs[2] = S ; } ; 
+     void Sets(double S) { ptrs[3] = S ; } ; 
      void Setptrs(double P,double  T, double R, double S ) 
 	 {
 	     ptrs[0] = P ;
