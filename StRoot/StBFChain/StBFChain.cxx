@@ -217,13 +217,13 @@ StEvent *Event;
 class StIOMaker; StIOMaker *inpMk=0;     
 class St_geant_Maker; St_geant_Maker *geantMk = 0;   
 class St_db_Maker;    
-St_db_Maker *dbMk    = 0; 
-St_db_Maker *calibMk = 0; 
+static St_db_Maker *dbMk    = 0; 
+static St_db_Maker *calibMk = 0; 
 //St_db_Maker *RunLogMk = 0;
-StMaker *tpcDBMk = 0;
+static StMaker *tpcDBMk = 0;
 class StTreeMaker;    
 StTreeMaker    *treeMk  = 0;
-Bool_t kMagF = kFALSE; 
+static Bool_t kMagF = kFALSE; 
 ClassImp(StBFChain)
 
 //_____________________________________________________________________________
@@ -554,6 +554,13 @@ void StBFChain::SetFlags(const Char_t *Chain)
       SetOption("geant");
     }
   }
+  else {
+    if (GetOption("fzin")) SetOption("-fzin");
+    if (GetOption("in") || GetOption("xin")) {
+      SetOption("-xin");
+      SetOption("-in");
+    }
+  }
   if (!GetOption("FieldOn") && !GetOption("FieldOff") && 
       !GetOption("HalfField") && !GetOption("ReverseField") &&    
       !GetOption("fzin") &&  !GetOption("gstar")) SetOption("magF"); 
@@ -796,5 +803,5 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.117 2000/07/19 13:36:00 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.118 2000/07/19 20:29:42 fisyak Exp $
 //_____________________________________________________________________
