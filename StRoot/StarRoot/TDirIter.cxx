@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: TDirIter.cxx,v 1.4 2003/11/17 22:14:41 perev Exp $
+ * $Id: TDirIter.cxx,v 1.5 2004/04/07 17:11:54 perev Exp $
  *
  ***************************************************************************
  *
@@ -78,8 +78,8 @@ void TDirIter::ResetQQ(const char *path)
 
   if (fFile.Length()==0) f = ".";
   if (fSele==0) {
-    Long_t flags;
-    int noexi = gSystem->GetPathInfo(f,0,0,&flags,0);
+    Long_t flags, id = 0, size = 0, modtime = 0;
+    int noexi = gSystem->GetPathInfo(f,&id,&size,&flags,&modtime);
     if (noexi) { fSele = -2;}
     else       { if ((flags&2)==0) fSele = -1;}}
   
@@ -153,7 +153,8 @@ const char *TDirIter::NextFileQQ()
     fFile.Remove(fLengStk[fLevel],999);
     if (fFile.Length()) fFile += "/"; fFile += name;
     Long_t flags=0; fState=0;
-    gSystem->GetPathInfo(fFile.Data(),0,0,&flags,0);
+    Long_t id = 0, size = 0, modtime = 0;
+    gSystem->GetPathInfo(fFile.Data(),&id,&size,&flags,&modtime);
     if (flags & 2) 	fState=1;
     if (fSele==0) 	break;
     int len;
