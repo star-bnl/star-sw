@@ -1,8 +1,9 @@
 //read root histogram file and send all histograms to a postscript file
+TCanvas *QACanvas = 0;
+TBrowser *QABrowser = 0;
 void QA_Hist_Draw(
      const Char_t *firstHistName="*",const Char_t *lastHistName="*",
-     const Char_t
-     *fileName="/diskA/star/kathy/output/psc0049_08_40evts_3EV_26feb.root",
+     const Char_t *fileName="/diskA/star/kathy/output/psc0049_08_40evts_3EV.root",
      const Char_t *psFile="QA_hist.ps")
 { 
     cout << endl   
@@ -16,17 +17,83 @@ void QA_Hist_Draw(
          << " ----- lastHistName  = \"*\" is by default and means ALL histograms by the end of file should be drawn" << endl
          << endl ;
 
-  TFile file1("/diskA/star/kathy/output/psc0049_08_40evts_3EV.root");  
+  //  check file first
+  Long_t id;
+  Long_t size;
+  Long_t flags; 
+  Long_t modtime;
+  if (gSystem->GetPathInfo(fileName, &id, &size, &flags, &modtime)) 
+  {
+   cerr << " *** Error ***  Can not find file: \"" << fileName << "\"" << endl;
+   return;
+  }
+//  TString tmodTime = ctime(modtime);
+  TFile file1(fileName);  
+  // TFile file1("/diskA/star/kathy/output/psc0049_08_40evts_3EV.root");  
   // file1.ls();
   TList *keys = file1.GetListOfKeys();
   if (keys) {
-  TCanvas QACanvas("CanvasName","Canvas Title");
-  gStyle->SetOptStat(111111);
- Int_t width = 16;
- Int_t height = 10;
- gStyle->SetPaperSize(width, height);
-  TPostScript p5(psFile);
-    // Create an itertor
+    QACanvas = new TCanvas("CanvasName","Canvas Title");
+    gStyle->SetOptStat(0);
+    Int_t width  = 16;
+    Int_t height = 10;
+    gStyle->SetPaperSize(width, height);
+    TPostScript p5(psFile);
+    TH1F dummy("QA","MDC2",1,0,1);
+ // Create banner page   
+//    QACanvas->Range(0,0,1,1);
+    QACanvas->SetFillColor(19);
+    QACanvas->SetBorderSize(2);
+   
+    dummy.SetMinimum(0);
+    dummy.Draw();
+    gStyle->SetOptStat(111111);
+    TString banner  =  "Input: \"";
+    banner += fileName;
+    banner += "\"";
+    TPaveLabel *pl = new TPaveLabel(0.06, 0.75, 0.9, 0.9, banner.Data(), "br");
+    pl->SetFillColor(18);
+    pl->SetTextSize(0.7);
+    pl->Draw();
+   
+    banner  =  "Output: \"";
+    banner += psFile;
+    banner += "\"";
+    pl = new TPaveLabel(0.06, 0.55, 0.9, 0.7, banner.Data(), "br");
+    pl->SetFillColor(18);
+    pl->SetTextSize(0.7);
+    pl->Draw();
+   
+   banner  =  "Starting from: \"";
+   if (strcmp(firstHistName,"*")){
+       banner += firstHistName;
+       banner += "\"";
+   }
+   else
+       banner =  "first histogram";
+
+   pl = new TPaveLabel(0.06, 0.3, 0.9, 0.45, banner.Data(),"br");
+   pl->SetFillColor(18);
+   pl->SetTextSize(0.7);
+   pl->Draw();
+   
+   banner =  "by: \"";
+   if (strcmp(lastHistName,"*")){
+       banner += lastHistName;
+       banner += "\"";
+   }
+   else
+       banner =  "the end of list";
+
+   pl = new TPaveLabel(0.06,0.06,0.92,0.2,banner.Data(),"br");
+   pl->SetFillColor(18);
+   pl->SetTextSize(0.7);
+   pl->Draw();
+   QACanvas->Modified();
+   QACanvas->Update();
+   p5.NewPage();
+  //_____________________
+  // Create an itertor
     TIter nextKey(keys);
     TKey *key = 0; 
     Int_t histCounter = 0;
@@ -56,5 +123,7 @@ void QA_Hist_Draw(
   printf(" %d histograms have been plotted from file: \"%s\"\n", histCounter,fileName);
   printf(" The postscript copy of them have been created: \"%s\"\n",psFile);
   printf(" ---------------------------------------------------------------------------\n");
-  
+  printf(" One may use ROOT browser to investigate some particular histogram now\n");
+  if (QABrowser) delete QABrowser;
+  QABrowser = new TBrowser;
 }
