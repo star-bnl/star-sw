@@ -1,8 +1,11 @@
 //*CMZ :          12/07/98  18.27.27  by  Valery Fine(fine@mail.cern.ch)
 //*-- Author :    Valery Fine(fine@mail.cern.ch)   03/07/98
 // Copyright (C) Valery Fine (Valeri Faine) 1998. All right reserved 
-// $Id: St_DataSetIter.cxx,v 1.24 1999/04/08 16:44:08 fine Exp $
+// $Id: St_DataSetIter.cxx,v 1.25 1999/04/15 19:44:45 fine Exp $
 // $Log: St_DataSetIter.cxx,v $
+// Revision 1.25  1999/04/15 19:44:45  fine
+// St_DataSetIter::FindObject bug has been fixed. aliases FindByName and FindByPath  introduced
+//
 // Revision 1.24  1999/04/08 16:44:08  fine
 // Working version of the NodeView family
 //
@@ -207,6 +210,11 @@ Int_t St_DataSetIter::Du() const {
   }
   return count;
 } 
+
+//______________________________________________________________________________
+St_DataSet  *St_DataSetIter::FindByName(const Char_t *name,const Char_t *path,Option_t *opt)
+{ return FindObject(name,path,opt);}
+
 //______________________________________________________________________________
 St_DataSet *St_DataSetIter::FindObject(const Char_t *name,const Char_t *path,Option_t *opt)
 {
@@ -234,15 +242,11 @@ St_DataSet *St_DataSetIter::FindObject(const Char_t *name,const Char_t *path,Opt
   else                      startset = fWorkingDataSet;
   if (!startset) return 0;
 
-  St_DataSetIter next(startset,100);
+  St_DataSetIter next(startset,0);
   St_DataSet *set = 0;
   while ((set = next())){
-     if (opti) 
-        if (strcasecmp(set->GetName(),name) == 0 ) 
-           break;
-     else 
-        if (set->IsThisDir(name))
-           break;
+     if (opti && strcasecmp(set->GetName(),name) == 0 )    break;
+     else if (strcmp(set->GetName(),name) == 0)            break;
   }
   return set;
 }
@@ -333,6 +337,9 @@ St_DataSet *St_DataSetIter::Mkdir(const Char_t *dirname)
  St_DataSet *set = 0;
  set = Find(dirname,0,kTRUE);
  if (!fNext)  Reset();  // Create a new iterator
+ // If this dataset is first one then make it the root and working
+ if (!fRootDataSet ) fRootDataSet  = set;
+ if (!fWorkingDataSet) fWorkingDataSet = fRootDataSet;
  return set;
 }
 
@@ -434,6 +441,10 @@ St_DataSet *St_DataSetIter::NextDataSet(Int_t nDataSet)
     if (next) return NextDataSet(*next);
     return 0;
 }
+//______________________________________________________________________________
+St_DataSet  *St_DataSetIter::FindByPath(const Char_t *path, St_DataSet *rootset,Bool_t mkdir)
+{ return Find(path,rootset,mkdir);}
+
 //______________________________________________________________________________
 St_DataSet *St_DataSetIter::Find(const Char_t *path, St_DataSet *rootset,
                                  Bool_t mkdirflag)

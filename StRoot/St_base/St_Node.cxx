@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.20 1999/04/13 14:26:39 fine Exp $
+// $Id: St_Node.cxx,v 1.21 1999/04/15 19:44:46 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.21  1999/04/15 19:44:46  fine
+// St_DataSetIter::FindObject bug has been fixed. aliases FindByName and FindByPath  introduced
+//
 // Revision 1.20  1999/04/13 14:26:39  fine
 // Geometry-based dataset implementation, next step
 //
@@ -535,11 +538,17 @@ void St_Node::ExecuteEvent(Int_t, Int_t, Int_t)
 //______________________________________________________________________________
 TRotMatrix *St_Node::GetIdentity()
 {
+ Double_t *IdentityMatrix = 0;
  // Return a pointer the "identity" matrix
  if (!gIdentity) {
       gIdentity = gGeometry->GetRotMatrix("Identity");
-      if (!gIdentity) 
-         gIdentity  =  new TRotMatrix("Identity","Identity matrix",90,0,90,90,0,0);
+      if (!gIdentity) {
+         gIdentity  =  new TRotMatrix();
+         gIdentity->SetName("Identity");
+         gIdentity->SetTitle("Identity matrix");
+         gIdentity->SetMatrix(IdentityMatrix);
+         gGeometry->GetListOfMatrices()->AddFirst(gIdentity);
+      }
  }
  return gIdentity;
 }
