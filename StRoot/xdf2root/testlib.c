@@ -19,7 +19,6 @@ collection of routine to test ds lib
 #include <stdlib.h>
 
 #define DS_PRIVATE
-#include "asuAlloc.h"
 #include "dsxdr.h"
 
 

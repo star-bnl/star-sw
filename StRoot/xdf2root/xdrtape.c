@@ -22,13 +22,16 @@ error has occured.
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#ifdef __KCC
+#include <stdint.h>
+#endif
 #include <rpc/rpc.h>
 #if defined(sparc) && !defined(ntohl)
 /* big-endian sun */
 #define ntohl(x)    (x)
 #define htonl(x)    (x)
 #endif
-#include "asuAlloc.h"
+#include <stdlib.h>
 #include "xdrtape.h"
 /*****************************************************************************
 *

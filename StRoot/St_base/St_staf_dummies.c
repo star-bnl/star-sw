@@ -1,7 +1,7 @@
-/* $Id: St_staf_dummies.c,v 1.17 2000/01/18 23:07:35 fine Exp $ */
+/* $Id: St_staf_dummies.c,v 1.18 2000/01/25 00:53:43 fisyak Exp $ */
 /*void ami(){}*/
 #include "table_header.h"
-#include "fortranc.h"
+#include "StarCallf77.h"
 void *ReAllocate(TABLE_HEAD_ST *h, int newsize);
 #if 0
 void *ami;
@@ -45,6 +45,9 @@ float type_of_call RG32(int *c){
 #endif
 /* 
   $Log: St_staf_dummies.c,v $
+  Revision 1.18  2000/01/25 00:53:43  fisyak
+  Devorce with StAF
+
   Revision 1.17  2000/01/18 23:07:35  fine
   fix comment
 

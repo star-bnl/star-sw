@@ -15,7 +15,17 @@ DESCRIPTION
 definitions for types and datasets
 */
 #ifndef DSTYPE_H
-#define DSTYPE_H 
+#define DSTYPE_H
+#ifndef ASU_ALLOC_H
+#define ASU_ALLOC_H 1
+#define CALLOC(NOBJ,SIZE) calloc(NOBJ,SIZE)
+#define MALLOC(SIZE) malloc(SIZE)
+#define REALLOC(P,SIZE) realloc(P,SIZE)
+#define FREE(P) { free(P); (P) = NULL;}
+#endif
+#ifdef __KCC
+typedef long long int int64_t;
+#endif
 #include <stdio.h>
 /* rpc.h already defines TRUE, FALSE ... */
 #ifdef FALSE
