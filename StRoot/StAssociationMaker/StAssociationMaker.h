@@ -1,7 +1,12 @@
 /**********************************************
  *
- * $Id: StAssociationMaker.h,v 1.11 2000/01/18 20:53:38 calderon Exp $
+ * $Id: StAssociationMaker.h,v 1.12 2000/03/06 18:08:56 calderon Exp $
  * $Log: StAssociationMaker.h,v $
+ * Revision 1.12  2000/03/06 18:08:56  calderon
+ * Hit comparisons are used for both sorting the hits in the
+ * StMcEvent containers and for ordering the hits in the multimaps,
+ * so they are kept now in StMcEvent.
+ *
  * Revision 1.11  2000/01/18 20:53:38  calderon
  * Changes to work with CC5
  *
@@ -95,30 +100,31 @@ using std::multimap;
 using std::pair;
 #endif
 
-// Define the comparisons to be used in the multimaps
-struct compTpcHit{
-    bool operator()(const StTpcHit*,const StTpcHit*) const;
-};
+#include "StMcHitComparisons.hh"
+// // Define the comparisons to be used in the multimaps
+// struct compTpcHit{
+//     bool operator()(const StTpcHit*,const StTpcHit*) const;
+// };
 
-struct compMcTpcHit{
-    bool operator()(const StMcTpcHit*,const StMcTpcHit*) const;
-};
+// struct compMcTpcHit{
+//     bool operator()(const StMcTpcHit*,const StMcTpcHit*) const;
+// };
 
-struct compSvtHit{
-    bool operator()(const StSvtHit*,const StSvtHit*) const;
-};
+// struct compSvtHit{
+//     bool operator()(const StSvtHit*,const StSvtHit*) const;
+// };
 
-struct compMcSvtHit{
-    bool operator()(const StMcSvtHit*,const StMcSvtHit*) const;
-};
+// struct compMcSvtHit{
+//     bool operator()(const StMcSvtHit*,const StMcSvtHit*) const;
+// };
 
-struct compFtpcHit{
-    bool operator()(const StFtpcHit*,const StFtpcHit*) const;
-};
+// struct compFtpcHit{
+//     bool operator()(const StFtpcHit*,const StFtpcHit*) const;
+// };
 
-struct compMcFtpcHit{
-    bool operator()(const StMcFtpcHit*,const StMcFtpcHit*) const;
-};
+// struct compMcFtpcHit{
+//     bool operator()(const StMcFtpcHit*,const StMcFtpcHit*) const;
+// };
 
 
 struct compTrack {
@@ -423,7 +429,7 @@ private:
     Bool_t drawinit;
 
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.11 2000/01/18 20:53:38 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.12 2000/03/06 18:08:56 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StAssociationMaker, 1)
 
