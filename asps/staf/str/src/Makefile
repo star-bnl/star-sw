@@ -9,6 +9,9 @@ CCFLAGS      = -c -O -ansi -fullwarn -prototypes
 CCFLAGS4     = -c -O -ansi -fullwarn -prototypes -irix4
 CCFLAGS_DBG  = -c -g -ansi -fullwarn -prototypes
 
+hi :
+	@echo "str Makefile hi"
+
 all : libstr.a libstr_dbg.a
 
 str4 : libstr4.a
@@ -34,6 +37,7 @@ strlib.f strlib$(ARCH_TAG).f strmth.f strplot.f strterm$(ARCH_TAG).f str_file.f 
 libstr.a : strlib.o strlib$(ARCH_TAG).o strmth.o strplot.o strterm$(ARCH_TAG).o str_file.o \
 str_parse.o str_time.o \
 strbyte$(ARCH_TAG).o strtermc$(ARCH_TAG).o strlibc$(ARCH_TAG).o
+	echo "Making libstr.a"
 	rm -f libstr.a
 	ar $(ARFLAGS) libstr.a strlib.o strlib$(ARCH_TAG).o strmth.o strplot.o \
 	strterm$(ARCH_TAG).o str_file.o str_parse.o str_time.o \
