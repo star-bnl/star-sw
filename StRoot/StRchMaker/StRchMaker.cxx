@@ -1,23 +1,23 @@
  /***************************************************************************
  *
- * $Id: StRchMaker.cxx,v 1.7 1999/07/15 13:57:22 perev Exp $
+ * $Id: StRchMaker.cxx,v 1.8 1999/07/21 13:33:55 gans Exp $
  *
- * Author: Dan Lyons
+ * Author: Jon Gans
  ***************************************************************************
  *
  * Description: RICH offline software:
  *              StRchMaker.cxx - ROOT/STAR Maker for offline chain.
- *              Start at
- *  http://rsgi01.rhic.bnl.gov/STAR/html/comp_l/root/index2.html
- *              for more info, or at
- *  http://rsgi01.rhic.bnl.gov/star/starlib/doc/www/star.html
- *              if the other one disappears for some reason
  ***************************************************************************
  *
  * $Log: StRchMaker.cxx,v $
+ * Revision 1.8  1999/07/21 13:33:55  gans
+ * *** empty log message ***
+ *
+ * Revision 1.8 1999/07/19 00:00:00 gans
+ * makes 3-d histogram to check data 	
  * Revision 1.7  1999/07/15 13:57:22  perev
  * cleanup
- *
+ *	 
  * Revision 1.6  1999/03/20 22:00:19  perev
  * new maker schema
  *
@@ -47,39 +47,56 @@
  * Revision 1.9  1999/09/24 01:23:22  fisyak
 // Data set definitions:
 #include "St_g2t_rch_hit_Table.h"
-#include "St_dst_rch_Table.h"
+// Internal Rch
 
 // dst tables in $STAR/include/tables/
-
+#include "tables/St_g2t_rch_hit_Table.h"
+#include "tables/St_dst_rch_pixel_Table.h"
 
 StRchMaker::StRchMaker(const char *name) : StMaker(name) {
 	: StMaker(name), mDaq(daq), mUseMatrix(matrix), mCfOnly(cf)
 {
 
+
+#ifdef RCH_HISTOGRAM   // in the .h file
     mRchNTupleFile = 0;
     mPadPlane = 0;
+    
+#endif
     drawinit=kFALSE;
     // Create tables
     // Create Histograms    
-    return StMaker::Init();
+  cerr << "before declare\n";
+  
+  hist = new TH3S("hist","test hist",200,0.,200,250,-250,0,150,-75,75);
+  
+  cerr << "after declare\n";
+  return StMaker::Init();
     mcratio        = new TH1F("cq2max","Cluster q/maxadc",50,0,5);
 
+			   unsigned long* pad, unsigned long* row, unsigned long* adc)
+{
     *pad = ( code        & 0xff);
-    
-// 		Read the Ionization
-  St_g2t_rch_hit *g2t_rch_hit = (St_g2t_rch_hit *) GetInputDS("geant/g2t_rch_hit");
+
+ St_DataSet *dst = GetDataSet("dst");    
+ St_DataSetIter dstI(dst);  
+ 
+ St_g2t_rch_hit *g2t_rch_hit = (St_g2t_rch_hit *) dstI["g2t_rch_hit"];
 
   if (!g2t_rch_hit) return kStWarn;
+  cout << " found g2t_rch_hit table" << endl;
 
   Int_t no_rch_hits =  g2t_rch_hit->GetNRows();
+  cout << " no rows in g2t_rch_hit = " << no_rch_hits << endl;
   if (!no_rch_hits) return kStWarn;
 
   g2t_rch_hit_st *rch_hit =  g2t_rch_hit->GetTable();
   assert(rch_hit);
 
-  St_dst_rch *dst_rch = new St_dst_rch("dst_rch_hit",no_rch_hits);
-  m_DataSet->Add(dst_rch);
-  if (Debug()) {//
+  int maxX = 0 ;
+  int maxY = 0 ;
+  int maxZ = 0 ;
+
     for(int i=0;i<no_rch_hits;i++,rch_hit++) {
       cout << "Hit number " << i << "of" << no_rch_hits << endl;
       cout << " id: " << rch_hit->id << endl;
@@ -95,10 +112,61 @@ StRchMaker::StRchMaker(const char *name) : StMaker(name) {
 	   << rch_hit->p[0] << ","
 	   << rch_hit->p[1] << ","
 	   << rch_hit->p[2] << ")" << endl;
-    }
-  }//Endif Debug
+      
+      /*    if(rch_hit->x[0] < maxX)
+	maxX = rch_hit->x[0];
+
+       if(rch_hit->x[1] < maxY)
+	maxY = rch_hit->x[1];
+ 
+       if(rch_hit->x[2] < maxZ)
+	maxZ = rch_hit->x[2];
+      */
+       	
+      hist->Fill3(rch_hit->x[0],rch_hit->x[1],rch_hit->x[2],1);
+      hist->Draw();
+    }		
+
+  no_rch_hits =  g2t_rch_hit->GetNRows();
+  cout << " no rows in g2t_rch_hit = " << no_rch_hits << endl;
+
+  cerr << "Max (x,y,z) " << maxX <<"  " << maxY << "  " << "  " << maxZ ;
+
  return kStOK;
 // 	PR(mSingleHitCollection->mTheHits[zz]);
+	}
+//     for(int zz=0; zz<mSimpleHitCollection->mTheHits.size(); zz++) {
+// 	PR(mSimpleHitCollection->mTheHits[zz]);
+//     }
+	mTheRichReader = 0;
+  printf("**************************************************************\n");
+  printf("* $Id: StRchMaker.cxx,v 1.8 1999/07/21 13:33:55 gans Exp $\n");
+	}
+    AddData(new St_ObjectSet("StRichEvent", richCollection));
+  printf("* $Id: StRchMaker.cxx,v 1.8 1999/07/21 13:33:55 gans Exp $\n");
+}
+//-----------------------------------------------------------------
+  printf("* $Id: StRchMaker.cxx,v 1.8 1999/07/21 13:33:55 gans Exp $\n");
+  printf("**************************************************************\n");
+Int_t StRchMaker::Finish() {  
+    cout << "Delete the cluster finder" << endl;
+    delete mClusterFinder;
+
+//-----------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     mClusterFinder = 0;
