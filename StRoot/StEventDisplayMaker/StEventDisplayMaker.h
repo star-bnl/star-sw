@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.h,v 1.29 2003/01/17 01:36:16 fine Exp $
+// $Id: StEventDisplayMaker.h,v 1.30 2003/01/18 01:35:06 fine Exp $
 // $Log: StEventDisplayMaker.h,v $
+// Revision 1.30  2003/01/18 01:35:06  fine
+// add EMC
+//
 // Revision 1.29  2003/01/17 01:36:16  fine
 // working version of Qt-based StEventDisplayMaker class
 //
@@ -73,7 +76,7 @@ class StEventDisplayInfo;
 
 class StEventDisplayMaker : public StMaker {
  private:
-// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.29 2003/01/17 01:36:16 fine Exp $";
+// static char    m_VersionCVS = "$Id: StEventDisplayMaker.h,v 1.30 2003/01/18 01:35:06 fine Exp $";
 
  private: 
  enum {kCOLORS=20};
@@ -117,6 +120,7 @@ static StEventDisplayInfo *fgInfo;
    virtual void   AddName(const char *name,Bool_t refresh=kTRUE);   // *MENU*
    virtual TList *GetNameList()   { return m_ListDataSetNames;}
            void   AddVolume(const char *name); // *MENU*
+   virtual const  TList *GetVolumeNameList()   { return m_VolumeList;}
    virtual void   AddFilter(StFilterABC* filt); 
    virtual Int_t  BuildGeometry();
    virtual void   ClearGeometry();
@@ -176,7 +180,7 @@ static StEventDisplayInfo *fgInfo;
    // --  end of filter list --
 
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.29 2003/01/17 01:36:16 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventDisplayMaker.h,v 1.30 2003/01/18 01:35:06 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StEventDisplayMaker, 0)   //
  private:

@@ -3,7 +3,7 @@
 //
 // Copyright (C)  Valery Fine, Brookhaven National Laboratory, 1999. All right reserved
 //
-// $Id: StEventControlPanel.cxx,v 1.4 2003/01/17 02:19:40 fine Exp $
+// $Id: StEventControlPanel.cxx,v 1.5 2003/01/18 01:35:05 fine Exp $
 //
 
 ////////////////////////////////////////////////////////////////////////
@@ -194,7 +194,7 @@ void StEventControlPanel::Build()
          "SVT"	 ,"STSI"	, 
          "SSD"	 ,"SSD"	, 
          "RICH" ,"RICH"	, 
-         "EMC"	 ,"EMC"	, 
+         "EMC"	 ,"CALB"	, 
          "TOF"	 ,"BTOF"	
       };
 
@@ -429,26 +429,43 @@ void StEventControlPanel::Refresh()
 {
    if (!fgDispMk) return;
    TList *tl = fgDispMk->GetNameList();
+   const TList  *lGeom = fgDispMk->GetVolumeNameList();
    if (!tl) return;
-   QButton *but=0;
+   QCheckBox *but=0;
    TObject *n=0;
-   QObjectList *l = fBar->queryList( "QButton" );
+   QObjectList *l = fBar->queryList( "QCheckBox" );
    QObjectListIt nextButton( *l ); // iterate over the buttons
-   while ( (but = (QButton *)nextButton.current())) {
+   while ( (but = (QCheckBox *)nextButton.current())) {
+//      printf(" StEventControlPanel::Refresh() %s %s\n",(const char *)but->name());
       ++nextButton;
-      TListIter nextParameter(tl);
-      while ((n=nextParameter())) {
-         if (strchr(n->GetName(),'(')==0) continue;
-         if (strstr(but->name(),n->GetName())) break; 
+      {  // refresh the event controls
+         TListIter nextParameter(tl);
+         while ((n=nextParameter())) {
+  //          printf(" StEventControlPanel::Refresh() %s %s\n",(const char *)but->name(),n->GetName());
+            if (strchr(n->GetName(),'(')==0)      continue;
+            if (strstr(but->name(),n->GetName())) break; 
+         }
+         if (n ) {
+            if (!but->isChecked()) but->setChecked(true);
+         } else {
+            if (but->isChecked()) but->setChecked(false);
+         }
       }
-      if (n ) {
-         if (!but->isDown()) but->setDown(true);
-      } else {
-         if (but->isDown()) but->setDown(false);
+      {  // refersh the geometry controls
+         TListIter nextParameter(lGeom);
+         while ((n=nextParameter())) {
+            if (strstr(but->name(),n->GetName())) break; 
+         }
+         if (n ) {
+            if (!but->isChecked()) but->setChecked(true);
+         } else {
+            if (but->isChecked()) but->setChecked(false);
+         }
       }
+
    }
    delete l;
-   //  Show();
+   gSystem->DispatchOneEvent(1);
 }
 //_______________________________________________________________________________________
 void StEventControlPanel::AddFilter(TObject *filter)
