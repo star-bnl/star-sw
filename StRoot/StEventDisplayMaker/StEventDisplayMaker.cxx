@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.16 1999/08/05 02:14:09 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.17 1999/08/05 02:41:12 fine Exp $
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.17  1999/08/05 02:41:12  fine
+// fix problem with the hits attributes
+//
 // Revision 1.16  1999/08/05 02:14:09  fine
-// style attribute for hits has been fixed
+//  style attribute for hits has been fixed
 //
 // Revision 1.15  1999/08/04 03:52:01  fine
 // Helix drawing improvements
@@ -566,8 +569,8 @@ Int_t StEventDisplayMaker::MakeHits(const StObjArray *eventCollection,StVirtualE
        StHits3DPoints   *hitsPoints  = new StHits3DPoints((StObjArray *)eventCollection);
        m_HitCollector->Add(hitsPoints);    // Collect to remove  
        St_PolyLineShape *hitsShape   = new St_PolyLineShape(hitsPoints);
-         hitsShape->SetVisibility(1);        hitsShape->SetLineColor(hitColor);
-         hitsShape->SetLineStyle(hitStyle);  hitsShape->SetLineWidth(hitSize);
+         hitsShape->SetVisibility(1);        hitsShape->SetColorAttribute(hitColor);
+         hitsShape->SetStyleAttribute(hitStyle);  hitsShape->SetSizeAttribute(hitSize);
        // Create a node to hold it
        St_Node *thisHit = new St_Node("hits",eventCollection->GetName(),hitsShape);
          thisHit->Mark();
