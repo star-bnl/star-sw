@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichPadMonitor.cxx,v 2.4 2000/09/29 17:36:58 gans Exp $
+ * $Id: StRichPadMonitor.cxx,v 2.5 2000/11/01 16:59:18 lasiuk Exp $
  * Description:
  *  A Pad Monitor for the STAR-RICH.
  *  Runs only in ROOT
@@ -7,8 +7,11 @@
  *****************************************************************
  *
  * $Log: StRichPadMonitor.cxx,v $
- * Revision 2.4  2000/09/29 17:36:58  gans
- * Modified addHit(), StThreeVector<double> -> StThreeVectorF,other minor stuff
+ * Revision 2.5  2000/11/01 16:59:18  lasiuk
+ * MAJOR.  add ringInfo().  Clear() of TObjArray containers is simplified
+ * (Valery suggestion)  Utilities added to draw lines and markers.
+ * hilite() members based on StEvent hit flags now implemented.  This
+ * makes use of the DrawableHits contained in the DrawableRings.
  *
  * Revision 2.4  2000/09/29 17:36:58  gans
  * Modified addHit(), StThreeVector<double> -> StThreeVectorF,other minor stuff
@@ -46,6 +49,7 @@
 #include "TLine.h"
 #include "TFile.h"
 #include "TNtuple.h"
+#include "TText.h"
 #include "TPaveText.h"
 #include "StTrackDetectorInfo.h"
 
@@ -64,14 +68,17 @@
 #include "StRichDrawableTMip.h"
 // #include "StRichTControl.h"
 
-#include "StRchMaker/StRichSimpleHit.h"
-
 #include "StRichPIDMaker/StRichTrack.h"
+#include "StRichPIDMaker/StRichRingHit.h"
 
 #include "StRichPadMonitorText.h"
-#include "TText.h"
 #include "StTrackGeometry.h"
 #include "StTrackFitTraits.h"
+
+#include "StRchMaker/StRichSimpleHit.h"
+
+#include "StEvent/StRichPidTraits.h"
+#include "StEvent/StRichPid.h" 
 
 StRichPadMonitor* StRichPadMonitor::mInstance = 0;
 
@@ -83,13 +90,10 @@ StRichPadMonitor* StRichPadMonitor::getInstance(StRichGeometryDb* geo)
     return mInstance;
 }
 
-StRichPadMonitor::StRichPadMonitor(StRichGeometryDb* geoDb) : mGeometryDb(geoDb) {
-
-    mLegendE = 0; // ---> initialize legend pointer to null
-    mLegendPi = 0;
-    mLegendK = 0;
-    mLegendP = 0;
-
+StRichPadMonitor::StRichPadMonitor(StRichGeometryDb* geoDb)
+    : mGeometryDb(geoDb),  mLegendE(0),  mLegendPi(0), mLegendK(0), mLegendP(0),
+      mFileEventNum(0),    mFileName(0), mZVertex(0),  mNumTracks(0)
+{
     pionminus   = StPionMinus::instance();
     kaonminus   = StKaonMinus::instance();
     antiproton  = StAntiProton::instance();
@@ -97,17 +101,20 @@ StRichPadMonitor::StRichPadMonitor(StRichGeometryDb* geoDb) : mGeometryDb(geoDb)
     pionplus   = StPionPlus::instance();
     kaonplus   = StKaonPlus::instance();
     proton     = StProton::instance();  
-    
-    mFileName = 0;
-    mFileEventNum = 0;
 
-    mZVertex = 0;
-    mNumTracks = 0;
+    mListOfParticles.push_back(pionminus);
+    mListOfParticles.push_back(pionplus);
+    mListOfParticles.push_back(kaonminus);
+    mListOfParticles.push_back(kaonplus);
+    mListOfParticles.push_back(proton);
+    mListOfParticles.push_back(antiproton);
     
     mTransform = StRichCoordinateTransform::getTransform(geoDb);
+
     // xtop, ytop, w h
     mRichCanvas = new TCanvas("richCanvas", "RICH Event Display",0,0,1200,900);
-    mRichCanvas->Range(-70,-50,85,50);
+    //mRichCanvas->Range(-70,-50,85,50);
+    mRichCanvas->Range(-70,-50,105,50);
 
     // ORiginal 1000,700 -- -70,-50,70,50
     //
@@ -115,7 +122,7 @@ StRichPadMonitor::StRichPadMonitor(StRichGeometryDb* geoDb) : mGeometryDb(geoDb)
     mTextWindow = new StRichPadMonitorText();
     StRichDrawableTPad::setPadMonitorText(mTextWindow);
     StRichDrawableTG2T::setPadMonitor(this);
-//     StRichTControl::setPadMonitor(this);
+    //StRichTControl::setPadMonitor(this);
     //
     // make the boundaries of the detector
     mRowPitch  = mGeometryDb->rowPitch();  //.84;
@@ -146,11 +153,6 @@ StRichPadMonitor::StRichPadMonitor(StRichGeometryDb* geoDb) : mGeometryDb(geoDb)
     double yci = -mGeometryDb->quadrantY0(4)-.5*mRowPitch; //1.5;
     double xci = mGeometryDb->quadrantX0(4)-.5*mPadPitch;  //1.5;
 
-//     cout << "yco (41.82) " << yco << endl;
-//     cout << "yci (1.5)   " << yci << endl;
-//     cout << "xco (65.5)  " << xco << endl;
-//     cout << "xci (1.5)   " << xci << endl;
-
     TLine aLine;
     aLine.SetLineWidth(2);
 
@@ -161,40 +163,21 @@ StRichPadMonitor::StRichPadMonitor(StRichGeometryDb* geoDb) : mGeometryDb(geoDb)
 
     // Quadrant 1 Outline
     aBox.DrawBox(xci,yci,xco,yco);
+
     // Quadrant 2 Outline
     aBox.DrawBox(-xci,yci,-xco,yco);
+
     // Quadrant 3 Outline
     aBox.DrawBox(-xci,-yci,-xco,-yco);
+
     // Quandrant 4 Outline
     aBox.DrawBox(xci,-yci,xco,-yco);
     
-    // Quadrant 1 outline
-    // aLine.DrawLine(xci, yco, xco, yco);
-    // aLine.DrawLine(xci, yci, xco, yci);
-    // aLine.DrawLine(xci, yco, xci, yci);
-    // aLine.DrawLine(xco, yco, xco, yci);
-    
-    // Quadrant 2 outline
-    //aLine.DrawLine(-xco, yco, -xci, yco);
-    //aLine.DrawLine(-xco, yci, -xci, yci);
-    //aLine.DrawLine(-xco, yco, -xco, yci);
-    //aLine.DrawLine(-xci, yco, -xci, yci);
-    
-    // Quadrant 3 outline
-    //aLine.DrawLine(-xco, -yci, -xci, -yci);
-    //aLine.DrawLine(-xco, -yco, -xci, -yco);
-    //aLine.DrawLine(-xco, -yci, -xco, -yco);
-    //aLine.DrawLine(-xci, -yci, -xci, -yco);
-    
-    // Quadrant 4 outline
-    //aLine.DrawLine(xci, -yci, xco, -yci);
-    //aLine.DrawLine(xci, -yco, xco, -yco);
-    //aLine.DrawLine(xci, -yci, xci, -yco);
     //aLine.DrawLine(xco, -yci, xco, -yco);
 
     // color scale
-    drawColorBox();
-    drawLegend();
+    this->drawColorBox();
+    this->drawLegend();
     // make control panel
     
     //
@@ -211,13 +194,15 @@ void StRichPadMonitor::drawColorBox()
     double upperX = 77.;
     double lowerY = -35;
     double upperY;
+
     //cout << "Draw Colors! " << endl;
     for(int ii=0; ii<1024; ii++) {
 	upperY = lowerY + .07; 
 	mColorBoxes.Add(new TBox(lowerX,lowerY,upperX,upperY));
 	((TBox*)mColorBoxes.Last())->SetFillColor(GetColorAttribute(static_cast<double>(ii)));
 	((TBox*)mColorBoxes.Last())->Draw();
-	if((ii == 10) || (ii == 50) || (ii == 100) || (ii == 200) || (ii == 500) || (ii == 1000)) {
+	if((ii == 10)  || (ii == 50)  || (ii == 100) ||
+	   (ii == 200) || (ii == 500) || (ii == 1000)) {
 	    mTextLabels.Add( new TPaveText((lowerX-7),(lowerY-2),(lowerX-2),(lowerY+1)) );
 	    char text[5];
 	    sprintf(text,"%d",ii);
@@ -255,41 +240,82 @@ void StRichPadMonitor::clearAll() {
   this->clearG2T();
   this->clearHits();
   this->clearTracks();
+  this->clearRingInfo();
+  this->clearMisc();
 }
 
 void StRichPadMonitor::clearPads()
 {
-    //cout << "StRichPadMonitor::clearPads()" << endl;
+//     //cout << "StRichPadMonitor::clearPads()" << endl;
 
-    for(int ii=0; ii<mAllFilledPads.GetEntries(); ii++) {
-	(mAllFilledPads[ii])->Delete();	    
-    }
-    mAllFilledPads.Clear();
-    mAllFilledPads.Expand(0);
+//     for(int ii=0; ii<mAllFilledPads.GetEntries(); ii++) {
+// 	(mAllFilledPads[ii])->Delete();	    
+//     }
+//     mAllFilledPads.Clear();
+//     mAllFilledPads.Expand(0);
 
-  }
+    mAllFilledPads.Delete();
+}
 
 void StRichPadMonitor::clearG2T()
 {
     //cout << "StRichPadMonitor::clearGeant()" << endl;
     //PR(mG2TSegments.GetEntries());
 
-    for(int ii=0; ii< mG2TSegments.GetEntries(); ii++) {
-	(mG2TSegments[ii])->Delete();	    
-    }
-    mG2TSegments.Clear();
-    mG2TSegments.Expand(0);
+//     for(int ii=0; ii< mG2TSegments.GetEntries(); ii++) {
+// 	(mG2TSegments[ii])->Delete();	    
+//     }
+//     mG2TSegments.Clear();
+//     mG2TSegments.Expand(0);
+    mG2TSegments.Delete();
 }
 
 void StRichPadMonitor::clearHits() {
-    //cout << "StRichPadMonitor::clearHits()" << endl;
-    //PR(mHits.GetEntries());
+//      cout << "StRichPadMonitor::clearHits()" << endl;
+//     PR(mHits.GetEntries());
 
-    for(int ii=0; ii< mHits.GetEntries(); ii++) {
-	(mHits[ii])->Delete();	    
+//     for(int ii=0; ii< mHits.GetEntries(); ii++) {
+// 	(mHits[ii])->Delete();	    
+//     }
+//     mHits.Clear();
+//     mHits.Expand(0);
+    mHits.Delete();
+}
+
+void StRichPadMonitor::clearTracks() {
+    //cout << "StRichPadMonitor::clearTracks()" << endl;
+    for(unsigned int j=0; j<mVectorTracks.size(); j++) {
+	delete mVectorTracks[j];
     }
-    mHits.Clear();
-    mHits.Expand(0);
+  
+    mVectorTracks.clear();
+    mVectorTracks.resize(0);
+
+    this->clearRingInfo();
+}
+
+void StRichPadMonitor::clearRingInfo() {
+     cout << "StRichPadMonitor::clearRingInfo()" << endl;
+//     for(int ii=0; ii< mRingInfo.GetEntries(); ii++) {
+// 	(mRingInfo[ii])->Delete();	    
+//     }
+//     mRingInfo.Clear();
+//     mRingInfo.Expand(0);
+     
+     mRingInfo.Delete();
+}
+
+void StRichPadMonitor::clearMisc()
+{
+//     cout << "StRichPadMonitor::clearMisc()" << endl;
+
+//     for(int ii=0; ii<mMisc.GetEntries(); ii++) {
+// 	(mMisc[ii])->Delete();	    
+//     }
+//     mMisc.Clear();
+//     mMisc.Expand(0);
+
+    mMisc.Delete();
 }
 
 void StRichPadMonitor::drawPads()
@@ -323,7 +349,7 @@ void StRichPadMonitor::drawPad(const StRichSingleMCPixel& mcPad)
     // Make it a drawable pad
     // Coordinate Transform
     double xl,xu,yl,yu;
-    calculatePadPosition(&mcPad,&xl,&yl,&xu,&yu);
+    this->calculatePadPosition(&mcPad,&xl,&yl,&xu,&yu);
     StRichDrawableMCTPad* dtp = new StRichDrawableMCTPad(xl,yl,xu,yu,&mcPad);
     dtp->SetFillColor(GetColorAttribute(mcPad.charge())); // scale by ADC color
     dtp->SetLineColor(2);  // black
@@ -396,21 +422,17 @@ void StRichPadMonitor::drawHit(StRichSimpleHit* hit)
 #endif
 }
 
-
-
 void StRichPadMonitor::doResiduals(double zVertex,long numPrim[],int runId,int eventId){
     
     float tempArray[16] = {-999};
     float primaryArray[26] = {0};
     
     TFile *residFile = new TFile("resid.root","NEW");
-    TNtuple *residNtuple = 0;
+    TNtuple *residNtuple    = 0;
     TNtuple * primaryNtuple = 0;
-    unsigned int appending = 0;
-
+    unsigned int appending  = 0;     
      
-     
-    if( !residFile->IsOpen() ){
+    if( !residFile->IsOpen() ) {
 	
 	delete residFile;
 	residFile = new TFile("resid.root","UPDATE");
@@ -425,9 +447,6 @@ void StRichPadMonitor::doResiduals(double zVertex,long numPrim[],int runId,int e
 			"run:evt:hitX:hitY:hitCharge:mipX:mipY:mipPx:mipPy:mipPz:zVert:assocToClosestMip:particleTypes:eta:nTpcHits:nTpcFitHits");
 	primaryNtuple = new TNtuple("primaryNtuple","Track Info","run:evt:numPrim1:numPrim2:numPrim3:numPrim4:numPrim5:numPrim6:numPrim7:numPrim8:numPrim9:numPrim10:zVert:nTracks1:nTracks2:nTracks3:nTracks4:nTracks5:nTracks6:nTracks7:nTracks8:nTracks9:nTracks10:nTracks11:numHitsInRich:numPadsInRich");
     }
-    
-    
-    
     
     primaryArray[0] = runId;
     primaryArray[1] = eventId;
@@ -444,18 +463,17 @@ void StRichPadMonitor::doResiduals(double zVertex,long numPrim[],int runId,int e
     primaryArray[12] = zVertex;
 
     // Fill Number Of Tracks Hitting Rich Binned in Momentum
-    for(unsigned int zz = 0 ; zz < mVectorTracks.size();zz++)
-	{
+    for(unsigned int zz=0; zz<mVectorTracks.size(); zz++) {
 
-	    StRichTrack * currentRichTrack = mVectorTracks[zz]->getTrack();
-	    double momentum = currentRichTrack->getMomentum().mag();
+	StRichTrack * currentRichTrack = mVectorTracks[zz]->getTrack();
+	double momentum = currentRichTrack->getMomentum().mag();
 	    
-	    if(momentum > 5) // Put In final Momentum Bin
-		momentum = 5;
+	if(momentum > 5) // Put In final Momentum Bin
+	    momentum = 5;
 
-	    primaryArray[static_cast<unsigned int>(floor(13+2*momentum))]++;
+	primaryArray[static_cast<unsigned int>(floor(13+2*momentum))]++;
 
-	}
+    }
     
     
     primaryArray[24] = mHits.GetEntries();
@@ -520,7 +538,6 @@ void StRichPadMonitor::doResiduals(double zVertex,long numPrim[],int runId,int e
 	    tempArray[11] = 0;
 	    unsigned int array12 = 0;
 	    
-	    
 	    for(int ringCounter = 0 ; ringCounter < curTTrack->numberOfRings();ringCounter++){
 		
 		StRichDrawableTRings* currentRing = curTTrack->getRing(ringCounter);
@@ -548,7 +565,7 @@ void StRichPadMonitor::doResiduals(double zVertex,long numPrim[],int runId,int e
 	residNtuple->Fill(tempArray);
     }
     
-    if(appending){
+    if(appending) {
 	residNtuple->Write("residNtuple",TObject::kOverwrite);
 	primaryNtuple->Write("primaryNtuple",TObject::kOverwrite); }
     else{
@@ -562,15 +579,13 @@ void StRichPadMonitor::doResiduals(double zVertex,long numPrim[],int runId,int e
 void StRichPadMonitor::addPad(StRichSinglePixel* pad)
 {
     double xl,xu,yl,yu;
-    calculatePadPosition(pad,&xl,&yl,&xu,&yu);
+    this->calculatePadPosition(pad,&xl,&yl,&xu,&yu);
     
     StRichDrawableTPad* dtp = new StRichDrawableTPad(xl,yl,xu,yu, pad);
 
     dtp->SetLineWidth(1);
     dtp->SetLineColor(2);  // black
-    //dtp->SetFillStyle(0);
     dtp->SetFillColor(GetColorAttribute(pad->charge())); // scale by ADC color
-//     mAllFilledPads.push_back(dtp);    
     mAllFilledPads.Add(dtp);    
 }
 
@@ -604,79 +619,324 @@ Color_t StRichPadMonitor::GetColorAttribute(double amp)
 }
 
 void StRichPadMonitor::addTrack(StRichTrack* track) {
-  mVectorTracks.push_back(new StRichDrawableTTrack(track)); 
+
+    mVectorTracks.push_back(new StRichDrawableTTrack(track));
+
+    //
+    // Draw the projection onto the pad plane from the MIP (and p value)
+    // in the StRichDrawableTTrack
+    //
+    //cout << "mVectorTracks.back()->getProjectedMIP()" << 
+    mVectorTracks.back()->getProjectedMIP()->draw();
+}
+
+void StRichPadMonitor::drawRingInfo() {
+
+    cout << "StRichPadMonitor::drawRingInfo() " << endl;
+    // loop over all tracks
+
+    int currentGoodTrack      = 0;
+    
+    float lowerY = 30;
+    float upperY = 50;
+    float ystep  = 22;
+
+    float lowerX = 80.;//85.;
+    float upperX = 95;//100.;
+    float xstep  = 20.;
+
+    float iy1,iy2,ix1,ix2;
+    
+//     cout << "mVectorTracks.size() " << mVectorTracks.size() << endl;
+    for(size_t itrack=0; itrack<mVectorTracks.size(); itrack++) {
+	StRichTrack* tt = mVectorTracks[itrack]->getTrack();
+
+	if(tt->getMomentum().mag() < .3) continue;
+
+	if(currentGoodTrack<4) {
+	    ix1 = lowerX;
+	    ix2 = upperX;
+	    iy1 = lowerY-(ystep*currentGoodTrack);
+	    iy2 = upperY-(ystep*currentGoodTrack);
+	}
+	else {
+	    ix1 = lowerX+xstep;
+	    ix2 = upperX+xstep;
+	    iy1 = lowerY-(ystep*(currentGoodTrack-4));
+	    iy2 = upperY-(ystep*(currentGoodTrack-4));
+	}
+    
+// 	TPaveText* particledata = new TPaveText(85, initialBottomCorner-(stepSize*currentGoodTrack),
+// 						100,initialTopCorner-(stepSize*currentGoodTrack));
+ 	TPaveText* particledata = new TPaveText(ix1, iy1, ix2, iy2);
+
+	char title[50];
+
+	//theta = acos(-pz/sqrt(px**2+py**2+pz**2));ls
+
+	sprintf(title,"%.3f  %.3f", tt->getMomentum().mag(), tt->getTheta()*180./M_PI);
+	particledata->AddText(title);
+	int total[3]    = {0,0,0}; // total number of photons associated
+	int inarea[3]   = {0,0,0}; // total number of photons in area
+	int sig1[3]     = {0,0,0}; // total number of photons within 1 sigma
+	int sig2[3]     = {0,0,0}; // total number of photons within 2 sigma
+	float area[3]   = {0.,0.,0.}; // total area
+	float tarea[3]  = {0.,0.,0.}; // truncated area
+
+	//
+	// loop over the hypothesis
+	StRichPidTraits* theTraits = tt->getPidTrait();
+	if(!theTraits) {cout << "drawringinfo error:::thetraits" << endl;}
+
+	const StSPtrVecRichPid& thePids = theTraits->getAllPids();
+// 	cout << "thePids.size() " << thePids.size() << endl;
+
+	if(thePids.size() == 0) continue;
+	
+	for(size_t ii=0; ii<thePids.size(); ii++) {
+	    StRichPid* pid = thePids[ii];
+
+	    if(!pid) {cout << "not okay " << ii << endl; continue;}
+
+	    area[ii] =  pid->getTotalArea();
+	    tarea[ii] = pid->getTruncatedArea();
+	    
+	    const StPtrVecRichHit& theHits = pid->getAssociatedRichHits();
+
+// 	    cout << "theHits.size() " << theHits.size() << endl;
+	    for(size_t jj=0; jj<theHits.size(); jj++) {
+		//cout << "pid->getParticleNumber() " << pid->getParticleNumber() << endl;
+		switch(pid->getParticleNumber()) {
+		case -211:      // pi- mListOfParticles[
+		    if(theHits[jj])
+			total[0]++;
+		    if(theHits[jj]->isSet(eInAreaPi))
+			inarea[0]++;
+		    if(theHits[jj]->isSet(e1SigmaPi))
+			sig1[0]++;
+		    if(theHits[jj]->isSet(e2SigmaPi))
+			sig2[0]++;
+		    break;
+		case -321:      // K- mListOfParticles[
+		    if(theHits[jj])
+			total[1]++;
+		    if(theHits[jj]->isSet(eInAreaK))
+			inarea[1]++;
+		    if(theHits[jj]->isSet(e1SigmaK))
+			sig1[1]++;
+		    if(theHits[jj]->isSet(e2SigmaK))
+			sig2[1]++;
+		    break;
+		case -2212:      // p- mListOfParticles[
+		    if(theHits[jj])
+			total[2]++;
+		    if(theHits[jj]->isSet(eInAreap))
+			inarea[2]++;
+		    if(theHits[jj]->isSet(e1Sigmap))
+			sig1[2]++;
+		    if(theHits[jj]->isSet(e2Sigmap))
+			sig2[2]++;
+		    break;
+		default:
+		    cout << "StRichPadMonitor::drawRingInfo()";
+		    cout << "\tERROR unknown particle " << pid->getParticleNumber() << endl;
+		    break;
+		}
+	    }
+	}
+    
+	char totalc[30];
+	sprintf(totalc,"all %d %d %d",total[0],total[1],total[2]);
+	particledata->AddText(totalc);
+	
+	char pareac[30];
+	sprintf(pareac,"pa %d %d %d",inarea[0],inarea[1],inarea[2]);
+	particledata->AddText(pareac);
+	
+	char sig1c[30];
+	sprintf(sig1c,"1s %d %d %d",sig1[0],sig1[1],sig1[2]);
+	particledata->AddText(sig1c);
+	
+	char sig2c[30];
+	sprintf(sig2c,"2s %d %d %d",sig2[0],sig2[1],sig2[2]);
+	particledata->AddText(sig2c);
+	
+	char areac[30];
+	sprintf(areac,"A  %.0f %.0f %.0f",area[0],area[1],area[2]);
+	particledata->AddText(areac);
+	
+	char tareac[30];
+	sprintf(tareac,"TA %.0f %.0f %.0f",tarea[0],tarea[1],tarea[2]);
+	particledata->AddText(tareac);
+	
+	particledata->SetTextSize(.02);
+	particledata->Draw();
+	
+	mRingInfo.Add(particledata);
+	currentGoodTrack++;
+    }
+}
+
+void StRichPadMonitor::drawMarker(StThreeVectorF& from, int type, float size, int color)
+{
+    // TMarker(x1,y1,type=26)  (triangle)
+    // store in mLine;
+    TMarker* marker = new TMarker(from.x(),from.y(),type);
+    marker->SetMarkerSize(size);
+    marker->SetMarkerColor(color);
+    marker->Draw();
+
+    mMisc.Add(marker);
+}
+
+void StRichPadMonitor::drawLine(StThreeVectorF& from, StThreeVectorF& to)
+{
+    // TLine(x1,y1,x2,y2)
+    // store in mLine;
+    TLine* line = new TLine(from.x(),from.y(),to.x(),to.y());
+    line->Draw();
+
+    mMisc.Add(line);
 }
 
 StRichDrawableTTrack* StRichPadMonitor::getTrack(StRichTrack* track) {
   
-  for(unsigned int i = 0; i < mVectorTracks.size() ; i++) {
-    if(mVectorTracks[i]->getTrack() == track)
-      return mVectorTracks[i];
-  }
+    for(unsigned int i = 0; i < mVectorTracks.size() ; i++) {
+	if(mVectorTracks[i]->getTrack() == track)
+	    return mVectorTracks[i];
+    }
 
-  return 0;
+    return 0;
 }
-
 
 void StRichPadMonitor::drawRings() {
-  for(unsigned int j = 0; j < mVectorTracks.size();j++) {
-    for(int i = 0;i < mVectorTracks[j]->numberOfRings();i++) {
-      
-      // this if is a cludge. Rings Should never have been made if under
-      // .5 GeV, but somehow are. limit now at 1 Gev/c
-      if( mVectorTracks[j]->getTrack()->getMomentum().mag() >= 0.5 ) 
-	mVectorTracks[j]->getRing(i)->draw();
-    }
-    mVectorTracks[j]->getProjectedMIP()->Draw();
-  }  
+    
+    cout << "StRichPadMonitor::drawRings()" << endl;
+    //
+    // Loop over the tracks
+    //
+    for(unsigned int j=0; j<mVectorTracks.size(); j++) {
+	for(int i=0; i<mVectorTracks[j]->numberOfRings(); i++) {
+// 	    cout << "mVectorTracks[j]->getTrack()->getMomentum().mag() "
+// 		 << mVectorTracks[j]->getTrack()->getMomentum().mag() << endl;
+	    if( mVectorTracks[j]->getTrack()->getMomentum().mag() < 0.3 ) continue;
+
+	    //
+	    // Draw the rings and load all the DrawableTHits
+	    // associated with a DrawableTRing
+	    //
+	    // an StRichDrawableTRing
+	    //
+	    mVectorTracks[j]->getRing(i)->draw();
+	    
+	} // the loop over the rings
+
+	//
+	// for the track in question
+	//
+
+	for (size_t particleIndex=0;
+	     particleIndex<mListOfParticles.size();
+	     particleIndex++) {
+	    StParticleDefinition* particle = mListOfParticles[particleIndex];
+	    
+	    if (!particle) continue;
+	    StRichDrawableTRings* currentTRing = mVectorTracks[j]->getRing(particle);
+		
+	    if (!currentTRing) continue;
+	    
+	    vector<StRichRingHit*> hits = mVectorTracks[j]->getTrack()->getRingHits(particle);
+	    //cout << "part index: " << particleIndex << " hits " << hits.size() << endl;
+	    //
+	    // Loop over all the hits and add them to the DrawableTRing
+	    //
+	    for (size_t hitIndex=0; hitIndex<hits.size(); hitIndex++) {
+		
+		if( hits[hitIndex] && hits[hitIndex]->getHit()) {
+		    currentTRing->addHit(hits[hitIndex]->getHit());
+		}
+	    } // loop over all the hits
+	    
+	}     // particle hypothesis
+    }         // for all tracks
 }
 
+void StRichPadMonitor::hiLiteHits() {
 
-void StRichPadMonitor::clearTracks() {
- 
-  for(unsigned int j=0; j < mVectorTracks.size();j++) {
-    delete mVectorTracks[j];
-  }
-  
-  mVectorTracks.clear();
-  mVectorTracks.resize(0);
+    cout << "StRichPadMonitor::hiLiteHits()" << endl;
+
+    //
+    // loop over all tracks
+    //
+    for(size_t ii=0; ii<mVectorTracks.size(); ii++) {
+	
+	for (size_t particleIndex=0;
+	     particleIndex<mListOfParticles.size();
+	     particleIndex++) {
+	    StParticleDefinition* particle = mListOfParticles[particleIndex];
+	    
+	    if (!particle) continue;
+	    StRichDrawableTRings* currentTRing = mVectorTracks[ii]->getRing(particle);
+		
+	    if (!currentTRing) continue;
+	    currentTRing->hilite();
+
+	}  // particle types
+    }      // tracks
+    
 }
 
+void StRichPadMonitor::hiLiteHits(const StRichHitFlag& flag) {
 
-void StRichPadMonitor::drawZVertex(double zVert,int numTracksPrim,int numTracksSec){
+    cout << "StRichPadMonitor::hiLiteHits(flag)" << endl;
 
+    //
+    // loop over all tracks
+    //
+    for(size_t ii=0; ii<mVectorTracks.size(); ii++) {
+	
+	for (size_t particleIndex=0;
+	     particleIndex<mListOfParticles.size();
+	     particleIndex++) {
+	    StParticleDefinition* particle = mListOfParticles[particleIndex];
+	    
+	    if (!particle) continue;
+	    StRichDrawableTRings* currentTRing = mVectorTracks[ii]->getRing(particle);
+		
+	    if (!currentTRing) continue;
+	    currentTRing->hilite(flag);
+
+	} // loop over particle type
+    }     // loop over tracks
+}
+
+void StRichPadMonitor::drawZVertex(double zVert,int numTracksPrim,int numTracksSec) {
     
+    if(mZVertex)   delete mZVertex;
+    if(mNumTracks) delete mNumTracks;
 
-    if(mZVertex){
-	delete mZVertex;     // Kill The Old Vertex
-    }
-    if(mNumTracks){
-	delete mNumTracks;
-    }
-    
     char tempChar[200];
-    
+
     if(zVert < -67 || zVert > 67){
 	sprintf(tempChar,"%d Vertex Not Above RICH: at %f",numTracksPrim,zVert);
 	mNumTracks = new TText(2,0,tempChar);
 	mZVertex = new TMarker(0,0,29);
     }
-    else{
+    else {
 	mZVertex = new TMarker(zVert,0,29);
 	sprintf(tempChar,"%d",numTracksPrim);
 	mNumTracks = new TText(zVert+2,0,tempChar);
     }
-
+    
 
     mNumTracks->SetTextColor(51);
     mNumTracks->SetTextSize(.023);
     mNumTracks->SetTextAlign(12);
     mNumTracks->Draw();
-
+    
     mZVertex->SetMarkerColor(51);
     mZVertex->SetMarkerSize(2.9);
     mZVertex->Draw();
-   
 }
 
 void StRichPadMonitor::drawLegend() {
@@ -703,45 +963,27 @@ void StRichPadMonitor::drawLegend() {
     
 }
 
-void StRichPadMonitor::drawEventNum(Int_t eventNum) {
-    /*
-    if(mFileEventNum)            // delete the old info
-	delete mFileEventNum;
-    
-    if (sprintf(mFileTextEventNum,"Event: %i",eventNum))
-	{
-	    mFileEventNum = new TText(65.2,-46.5,mFileTextEventNum);
-	    mFileEventNum->SetTextColor(1);
-	    mFileEventNum->SetTextFont(1);
-	    mFileEventNum->SetTextSize(.05);
-	    mFileEventNum->SetTextAlign(31);
-	    mFileEventNum->Draw();
-	}
-    */
-}
-
 void StRichPadMonitor::drawEventInfo(Long_t runId,Long_t eventId) {
-   
-    if(mFileEventNum)            // delete the old info
-	delete mFileEventNum;
+
+    // delete the old info
+    if(mFileEventNum)	delete mFileEventNum;
     
     if (sprintf(mFileTextEventNum,"Run: %u \t Event: %u",
-		static_cast<int>(runId),static_cast<int>(eventId)))
-	{
-	    mFileEventNum = new TText(65.2,-46.5,mFileTextEventNum);
-	    mFileEventNum->SetTextColor(1);
-	    mFileEventNum->SetTextFont(1);
-	    mFileEventNum->SetTextSize(.05);
-	    mFileEventNum->SetTextAlign(31);
-	    mFileEventNum->Draw();
-	}
+		static_cast<int>(runId),static_cast<int>(eventId))) {
+
+	mFileEventNum = new TText(65.2,-46.5,mFileTextEventNum);
+	mFileEventNum->SetTextColor(1);
+	mFileEventNum->SetTextFont(1);
+	mFileEventNum->SetTextSize(.05);
+	mFileEventNum->SetTextAlign(31);
+	mFileEventNum->Draw();
+    }
     
 }
 
 void StRichPadMonitor::drawFileName(char * fileName) {
 
-    if(mFileName)            
-	delete mFileName;
+    if(mFileName) delete mFileName;
     
     mFileName = new TText(65.2,-48.7,fileName);
     mFileName->SetTextColor(1);
@@ -767,9 +1009,9 @@ void StRichPadMonitor::printCanvas(char* directory, char * filename, int eventNu
     int j=0;
     int ii=i;
     while(j != 99) {
-      if (filename[ii]=='r') break;
-      newFile[j] = filename[ii++];
-      j++;
+	if (filename[ii]=='r') break;
+	newFile[j] = filename[ii++];
+	j++;
     }
     newFile[j]='\0';
 
