@@ -83,6 +83,7 @@ C :>--------------------------------------------------------------------
       enddo
       if (iX*iC*jX*jP.le.0) print *,' errenious G table ',iX,iP,jX,jP
 
+      nh = p_hits_h.nok
 *     STAR system TLA code is extracted from the table header:
       if   (  p_hits_h.name(1:4) .eq.'g2t_' 
      >  .and. p_hits_h.name(8:11).eq.'_hit') then
