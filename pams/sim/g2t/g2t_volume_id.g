@@ -1,7 +1,11 @@
-* $Id: g2t_volume_id.g,v 1.38 2002/10/16 19:12:44 kopytin Exp $
-* $Log: g2t_volume_id.g,v $
+* $Id: g2t_volume_id.g,v 1.39 2002/11/27 00:21:06 nevski Exp $
+*  g2t_volume_id.g,v 
+*
 * Revision 1.38  2002/10/16 19:12:44  kopytin
-* Volume ID for BBC elements added. If changed, will affect StBbcSimulationMaker.
+* Volume ID for BBC elements added. this Affects StBbcSimulationMaker.
+*
+* Revision ecal1.2  2002/10/03 15:48:55  zolni
+* updated g2t_volume_id.g from Ole
 *
 * Revision 1.37  2001/09/06 00:22:00  nevski
 * new svt geometry numbering intrroduced
@@ -55,11 +59,14 @@
 * 
       Character*3      Csys
       Integer          NUMBV(15)
+      Integer          i,ibublic,zsubsect,zsublayer
+      Integer          sector_hash(6,2)/ 4, 5, 6, 7, 8, 9, 
+                                        10,11,12, 1, 2, 3/
       Integer          innout,sector,sub_sector,volume_id
       Integer          rileft,eta,phi,phi_sub,superl,forw_back,strip
       Integer          endcap,zslice,innour,lnumber,wafer,lsub,phi_30d
       Integer          section,tpgv,tpss,tpad,isdet,ladder,is,nladder
-      Integer          nEndcap,nFpd,depth
+      Integer          nEndcap,nFpd,depth,shift,nv
       Integer          itpc/0/,ibtf/0/,ical/0/,ivpd/0/,ieem/0/,isvt/0/
 *
 *    this is an internal agfhit/digi information - need a better access.
@@ -68,14 +75,17 @@
       Integer          Iprin,Nvb
       Character*4                   cs,cd
       COMMON /AGCHITV/ Iprin,Nvb(8),cs,cd
+
       Structure  SVTG  {version}
       Structure  TPCG  {version}
       Structure  VPDG  {version}
       Structure  BTOG  {version, int choice, posit1 }
       Structure  CALG  {version, int Nmodule(2), int NetaT, int MaxModule, 
                                  int Nsub, int NetaSMDp, int NPhistr,
-     + 	                         int Netfirst, int Netsecon}
-      Structure  EMCG  {Version,OnOff(3)}
+      	                         int Netfirst, int Netsecon}
+*         
+      Structure  EMCG { Version, int Onoff, int fillMode}
+
       logical          first/.true./
 c - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 *
@@ -97,30 +107,14 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           if (ibtf>=0) print *,'              : TOF version =',btog_version,
      >                         ' choice  =',btog_choice,btog_posit1
           if (ical>=0) print *,'              : CALB patch  =',calg_nmodule
-          if (ical>=0) print *,'              : CALB patch  =',calg_nmodule
-          if (ieem>=0) then
-	    print *,'              : ECAL/FPD version =',emcg_version 
-	    print *,'              : ECAL/FPD : ',
-     >            emcg_onoff(1),emcg_onoff(2),emcg_onoff(3)
-	    if(emcg_onoff(1)==0) then 
-	      nEndcap=0
-	    elseif(emcg_onoff(1)<3) then
-	      nEndcap=1
-	    else 
-	      nEndcap=2
-	    endif
-	    if(emcg_onoff(2)==0) then
-	      nFpd=0
-	    else if(emcg_onoff(2)<3) then
-	      nFpd=1
-	    else 
-	      nFpd=2
-	    endif
-	  endif
+          if (ieem>=0) print *,'              : ECAL version=',emcg_version, 
+                               ' onoff   =',emcg_onoff,emcg_FillMode
       endif
-
-      volume_id = 0
 *
+      volume_id = 0
+      nv        = nvb(1)  ! number of real volume levels in NUMBV
+*
+*  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       If    (Csys=='svt') then
 *1*                                          Ken Wilson
 ** Helen altered SVT volume IDs so agrees with hardware defs.
@@ -171,7 +165,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         else If (Cd=='SFSD') then
            volume_id =  7000+100*numbv(2)+numbv(1)
         endif
-
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       else If (Csys=='tpc') then
 *2*                                        Peter M. Jacobs
         tpgv  = numbv(1)
@@ -198,7 +192,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         endif
 
         volume_id=100000*isdet+100*sector+tpad
-
+*
       else If (Csys=='mwc') then
 *3*
         rileft    = numbv(1)
@@ -206,7 +200,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         innout    = numbv(3)
         innour    = numbv(4)
         volume_id = 1000*rileft+100*innout+10*innour+sector
-
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
       else If (Csys=='tof') then
 *4*                                             Frank Geurts
         If (btog_version==1) then
@@ -281,7 +275,7 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         sector    = numbv(2)
         innout    = numbv(3)
         volume_id = 1000*rileft+100*innout+sector
-
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 *   ------------------  calorimetry  ---------------------
 
       else If (Csys=='emc') then
@@ -371,122 +365,91 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
           volume_id=100000000*rileft+1000000*eta+1000*phi+
      +              100*forw_back+strip
 	endif
-
+* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       else If (Csys=='eem') then
-*8*                                 end-cap calorimeter - Rashid
-
-*	write(*,*) 'g2t_volume_id eem:',
-*     +     numbv(1),numbv(2),numbv(3),numbv(4),numbv(5),numbv(6)
+*8*
+* PN, MAX:
+*      OnOff    = (0..3)  -  East-West config:  0-none,            1 - west,     2-east,   3-both
+*      FillMode = (1..3)  -  Sectors fill mode: 1- one 3rd filled, 2 - one half, 3 - full
+*
  
-	if(cd=='ESCI') then
-	  if(emcg_version < 4) then
-       	    rileft    = numbv(1)
-            phi_30d   = numbv(2)-1
-            section   = numbv(3)
-            eta       = numbv(6)
-            phi       = numbv(4)
+	if (cd=='ESCI') then
+
+          if (emcg_onoff < 3) then
+            rileft    = emcg_onoff
+            shift     = 0
+          else
+            rileft    = numbv(1)
+            shift     = 1
+          endif
+
+	  if (emcg_version = 5) then
+* need to look at fillmode:
+
+            if (emcg_FillMode <= 2 ) then
+                ibublic = 1
+            else
+                ibublic = numbv(1+shift) 
+                shift  += 1 
+            endif
+
+            section   = numbv(1+shift)
+            phi_30d   = sector_hash(numbv(2+shift),ibublic) 
+            zsubsect  = numbv(3+shift)  ! not used in the readout
+            zsublayer = numbv(4+shift)  ! not used in the readout
+            phi       = numbv(5+shift)  ! 5 fingers
+            eta       = numbv(6+shift)  ! radial division
+            if (6+shift != nv) print *,' G2T_VOL_ID: new chush in ECAL'
+* end version 5
+
 	  else
-	    if(nEndcap==1 & nFpd == 0) then
-       	      rileft    = emcg_onoff(1)
-              phi_30d   = numbv(1)-1
-              section   = numbv(2)
-              eta       = numbv(5)
-              phi       = numbv(3)
-	    else if(nEndcap==0 & nFpd==1) then
-       	      rileft    = emcg_onoff(2)+2
-              phi_30d   = 0
-              section   = numbv(1)
-              eta       = numbv(4)
-              phi       = numbv(2)
-	    else
-	      if(numbv(1)<=nEndcap)then	      
-		if(nEndcap==1) then
-		  rileft=emcg_onoff(1)
-                else 
-		  rileft=numbv(1)
-		endif
-            	phi_30d   = numbv(2)-1
-            	section   = numbv(3)
-            	eta       = numbv(6)
-            	phi       = numbv(4)
-	      else
-		if(nFpd==1) then
-		  rileft=emcg_onoff(2)+ 2
-                else 
-		  rileft=numbv(1)+ 2
-		endif
-		phi_30d   = 0
-                section   = numbv(1)
-	        eta       = numbv(5)
-                phi       = numbv(3)
-              endif
-	    endif
-	  endif
-	else
-	  rileft=5
-	  phi_30d   = 0
-	  eta       = numbv(2)
-          phi       = numbv(1)
-	  if(emcg_onoff(2)==2) phi=phi+4 
-	  if(cd=='EPCT') then
-	    section=2
-	  elseif(cd=='ELGR') then 
-	    section=1
-	  endif
+            shift     = 1
+            rileft    = numbv(0+shift)
+            phi_30d   = numbv(1+shift)
+            section   = numbv(2+shift)
+            phi       = numbv(3+shift)
+            eta       = numbv(5+shift)
+            if (5+shift != nv) print *,' G2T_VOL_ID: old chush in ECAL'
+          endif
+
 	endif
-	volume_id = 100000*rileft+5000*phi_30d+1000*phi
-     +             +10*eta+section
+
+	volume_id = 100000*rileft+1000*(5*(phi_30d-1)+phi)+10*eta+section
 		  
       else If (Csys=='esm') then
-*9*
-*        write(*,*) 'g2t_volume_id esm:',
-*     +     numbv(1),numbv(2),numbv(3),numbv(4),numbv(5),numbv(6)
-
-	if(emcg_version < 4) then
-          rileft    = numbv(1)
-          phi       = numbv(2)
-          depth     = numbv(3)
-          strip     = numbv(4) 
-	else
-	  if(nEndcap==1 & nFpd == 0) then
-       	    rileft    = emcg_onoff(1)
-            phi       = numbv(1)
-            depth     = numbv(2)
-            strip     = numbv(3) 
-	  else if(nEndcap==0 & nFpd==1) then
-            rileft    = emcg_onoff(2)+2
-            phi       = 1
-            depth     = numbv(1)
-            strip     = numbv(2) 
+*9* 
+          if (emcg_onoff < 3) then
+            rileft    = emcg_onoff
+            shift     = 0
           else
-	    if(numbv(1)<=nEndcap)then	      
-	      if(nEndcap==1) then
-		rileft=emcg_onoff(1)
-              else 
-		rileft=numbv(1)
-	      endif
-	      phi       = numbv(2)
-              depth     = numbv(3)
-              strip     = numbv(4) 
-	    else
-	      if(nFpd==1) then
-		rileft=emcg_onoff(2)+ 2
-              else 
-		rileft=numbv(1)+ 2
-	      endif
-	      if(nEndcap==0) then
-	      	phi       = 1
-       	      	depth     = numbv(1)
-	      	strip     = numbv(2) 
-              else 
-	      	phi       = numbv(1)
-       	      	depth     = numbv(2)
-	      	strip     = numbv(3) 
-	      endif
+            rileft    = numbv(1)
+            shift     = 1
+          endif
+
+	  if (emcg_version = 5) then
+
+            if (emcg_FillMode <= 2 ) then
+                ibublic = 1
+            else
+                ibublic = numbv(1+shift) 
+                shift  += 1 
             endif
-	  endif
+
+          depth     = numbv(1+shift)
+*         phi       = numbv(2+shift) 
+          phi_30d   = sector_hash(numbv(2+shift),ibublic)
+          strip     = numbv(3+shift) 
+
+        else
+
+* version before 5
+          rileft    = numbv(1)
+          depth     = numbv(2)
+          phi       = numbv(3)
+          strip     = numbv(4) 
+
 	endif       
-	volume_id = 1000000*rileft+10000*phi+1000*depth+strip
+	volume_id = 1000000*rileft+10000*phi_30d+1000*depth+strip
  
 *   ------------------ forward region ---------------------
 
@@ -532,12 +495,13 @@ c - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         volume_id = numbv(1)*1000000 + numbv(2)*100000 + numbv(3)*10000 _
                                      + numbv(4)*100    + numbv(5)
 
-*16*
+*16*                          Mikhail Kopytine for the BBC group
       else If (Csys=='bbc') then
-* 				Mikhail Kopytine for the BBC group
-* BBC has 4 levels: west/east, annulus, triple module, single module
+*        
+*       BBC has 4 levels: west/east, annulus, triple module, single module
         volume_id = numbv(1)*1000 + numbv(2)*100 + numbv(3)*10 + numbv(4)    
 *17*
+
       else
         print *,' G2T warning: volume  ',Csys,'  not found '  
       endif

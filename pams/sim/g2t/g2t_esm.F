@@ -19,7 +19,9 @@
       G2T_ESM=STAFCV_OK
       if (g2t_emc_hit_h.maxlen.le.0) return
 *
-      call G2R_GET_SYS ('ECAL','EXSE',Iprin,Idigi)
+      do Isys=1,2
+      if (Isys.eq.1) call G2R_GET_SYS ('ECAL','EXSE',Iprin,Idigi)
+      if (Isys.eq.2) call G2R_GET_SYS ('ECAL','EHMS',Iprin,Idigi)
       if (Iprin.lt.0) return
       Local  = Idigi.ge.2
 *
@@ -40,6 +42,6 @@
          g2t_track(trac).n_esm_hit    = g2t_track(trac).n_esm_hit + 1
 
       enddo    
-
+      enddo
       RETURN
       END
