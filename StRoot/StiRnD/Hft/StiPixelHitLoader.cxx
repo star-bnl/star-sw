@@ -46,6 +46,9 @@ void StiPixelHitLoader::loadHits(StEvent* source,
   cout << "StiPixelHitLoader::loadHits(StEvent*) -I- Done" << endl;
 }
 
+/// Load the MC hits of the Pixel detector associated with the given source, and StMcTrack
+/// Call once per MC track - but currently only able to load from source->pixelHitCollection()
+/// so... use a cached hit pointer to remember whether an event has already been loaded.
 void StiPixelHitLoader::loadMcHits(StMcEvent* source,
                                    bool useMcAsRec,
                                    Filter<StiTrack> * trackFilter,
@@ -63,61 +66,63 @@ void StiPixelHitLoader::loadMcHits(StMcEvent* source,
   StMcPixelHitCollection* allPixHitCol = source->pixelHitCollection();
   for(int tiLayer=0; tiLayer<allPixHitCol->numberOfLayers(); tiLayer++)
     {
-    //cout << "StiPixelHitLoader::loadMcHits(StMcEvent*) -I- layer " << tiLayer << endl;
+    cout << "StiPixelHitLoader::loadMcHits(StMcEvent*) -I- layer " << tiLayer << endl;
     StMcPixelLayerHitCollection* pixHitCol = allPixHitCol->layer(tiLayer);
     StSPtrVecMcPixelHit& hits =  pixHitCol->hits();
-  //  StPtrVecMcPixelHit& hits = stMcTrack.pixelHits();
-  cout << "Pixel - n:" << hits.size() << endl;
-  int nHitCount = 0;
-  for (vector<StMcPixelHit*>::const_iterator iterHit = hits.begin();iterHit != hits.end();iterHit++)
-    {
-    nHitCount++;
-    StMcPixelHit*hit = *iterHit;
+    //  StPtrVecMcPixelHit& hits = stMcTrack.pixelHits();
+    cout << "Pixel - n:" << hits.size() << endl;
+    int nHitCount = 0;
     StiDetector* detector;
-    int row = 1;
-    int nLadder = 0;
-    unsigned long volId = hit->volumeId();
-    unsigned long iModule = volId/1000000;
-    unsigned long iLadder = (volId%1000000)/10000;
-    unsigned long iLayer = 0;
-    unsigned long iSector = 0;
-    if (iLadder<4)
+    StMcPixelHit*hit = *(hits.begin());
+    if (!hit || hit==saveHit)
+      return;
+    saveHit = hit;
+    for (vector<StMcPixelHit*>::const_iterator iterHit = hits.begin();iterHit != hits.end();iterHit++)
       {
-      iLayer = 1;
-      iSector = (iModule-1)*3 + (iLadder-1);
-      }
-    else
-      {
-      iLayer = 0;
-      iSector = (iModule-1);
-      }
-    detector = _detector->getDetector(iLayer, iSector);
-    StiHit * stiHit = _hitFactory->getInstance();
-    if(!stiHit) throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- stiHit==0");
-    stiHit->reset();
-    double sigma = 0.; // um
-    double x = hit->position().x();
-    double y = hit->position().y();
-    double u1, u2, v1, v2;
-    double r = 2.;
-    double z1 = 10.;
-    double z2 = 10.;
-    while(fabs(z1)>2. || fabs(z2)>2.) // sigma
-      {
-      r = 2.;
-      while(r>1.)
+      nHitCount++;
+      hit = *iterHit;
+      int row = 1;
+      int nLadder = 0;
+      unsigned long volId = hit->volumeId();
+      unsigned long iModule = volId/1000000;
+      unsigned long iLadder = (volId%1000000)/10000;
+      unsigned long iLayer = 0;
+      unsigned long iSector = 0;
+      if (iLadder<4)
         {
-        u1 = rand()/double(RAND_MAX); u2 = rand()/double(RAND_MAX);
-        v1 = 2*u1 - 1.;  v2 = 2*u2 - 1.; r = pow(v1,2) + pow(v2,2);
+        iLayer = 1; iSector = (iModule-1)*3 + (iLadder-1);
         }
-      z1 = v1*sqrt(-2.*log(r)/r);  z2 = v2*sqrt(-2.*log(r)/r);
+      else
+        {
+        iLayer = 0; iSector = (iModule-1);
+        }
+      detector = _detector->getDetector(iLayer, iSector);
+      StiHit * stiHit = _hitFactory->getInstance();
+      if(!stiHit) throw runtime_error("StiPixelHitLoader::loadHits(StEvent*) -E- stiHit==0");
+      stiHit->reset();
+      double sigma = 0.; // um
+      double x = hit->position().x();
+      double y = hit->position().y();
+      double u1, u2, v1, v2;
+      double r = 2.;
+      double z1 = 10.;
+      double z2 = 10.;
+      while(fabs(z1)>2. || fabs(z2)>2.) // sigma
+        {
+        r = 2.;
+        while(r>1.)
+          {
+          u1 = rand()/double(RAND_MAX); u2 = rand()/double(RAND_MAX);
+          v1 = 2*u1 - 1.;  v2 = 2*u2 - 1.; r = pow(v1,2) + pow(v2,2);
+          }
+        z1 = v1*sqrt(-2.*log(r)/r);  z2 = v2*sqrt(-2.*log(r)/r);
+        }
+      stiHit->setGlobal(detector, 0, x+z1*sigma/1.0e04,y+z2*sigma/1.0e04,hit->position().z(),hit->dE());
+      _hitContainer->add( stiHit );
+      //stiMcTrack.addHit( stiHit );
       }
-    stiHit->setGlobal(detector, 0, x+z1*sigma/1.0e04,y+z2*sigma/1.0e04,hit->position().z(),hit->dE());
-    _hitContainer->add( stiHit );
-    stiMcTrack.addHit( stiHit );
-    }
-  cout << "StiPixelHitLoader::loadMcHits(StEvent*) -I-  number of hits uploaded, after: " << _hitContainer->size() << endl;
-  cout << "StiPixelHitLoader::loadMcHits(StEvent*) -I- Done" << endl;
+    cout << "StiPixelHitLoader::loadMcHits(StEvent*) -I-  number of hits uploaded, after: " << _hitContainer->size() << endl;
+    cout << "StiPixelHitLoader::loadMcHits(StEvent*) -I- Done" << endl;
     }
 }
 

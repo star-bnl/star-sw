@@ -34,6 +34,11 @@ public:
                           Filter<StiHit> * hitFilter,
                           StMcTrack & stMcTrack,
                           StiMcTrack & stiMcTrack);
+
+ protected:
+  // temporary hit ptr used to determine whether mc hits from a given event are
+  // already loaded.
+  StMcPixelHit * saveHit;
 };
 
 #endif
