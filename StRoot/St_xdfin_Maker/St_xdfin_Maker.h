@@ -10,20 +10,20 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+#include "St_XDFFile.h"
 
 class St_xdfin_Maker : public StMaker {
 private:
-   Bool_t         m_Init_Done; //Flag that it should be get initialization from xdf (kFALSE)
-   virtual void   Split();
+TString fFileName;
+St_XDFFile fXdfin;
+int m_InitDone;
 public:
-                  St_xdfin_Maker(const char *name="xdfin",const char *title="bfc_xdf");
+   St_xdfin_Maker(const char *name,const char *inputFile=0);
    virtual       ~St_xdfin_Maker();
    virtual Int_t  Init();
-   virtual void   Init_Done (Bool_t k=kFALSE){m_Init_Done = k;} // *MENU*
    virtual Int_t  Make();
    virtual void   PrintInfo();
-   virtual void   Set_Init_Done (Bool_t n=kFALSE) {m_Init_Done = n;}
-   ClassDef(St_xdfin_Maker, 1)   //StAF chain virtual base class for Makers
+   ClassDef(St_xdfin_Maker, 0)   //StAF chain virtual base class for Makers
 };
 
 #endif

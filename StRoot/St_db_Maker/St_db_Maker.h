@@ -21,31 +21,40 @@ class St_FileSet;
 class St_DataSet;
 class TList;
 class TBrowser;
+
+enum DBConst {kMinTime = 19950101, kMaxTime = 20380101};
+
+
 class St_db_Maker : public StMaker {
- private:
-               Bool_t drawinit;
-               TObjArray  *m_DBList;        // List of the nodes containing the active validation tables
-               TDatime     m_ValidTime;     // the start point (Date and time) of this validation period
-               Int_t       m_ValidDate;     //
-               Int_t       m_ValidHours;    //
-               TString     m_RootDbDirectory; // The root directory for the calibrarion data
-//  static Char_t m_VersionCVS = "$Id: St_db_Maker.h,v 1.1 1999/01/02 19:08:15 fisyak Exp $";
+private:
+
+  Bool_t drawinit;
+  TObjArray  *m_DBList;        // List of the nodes containing the active validation tables
+  
+  TString     m_MainDir;       // The main root directory for the calibrarion data
+  TString     m_UserDir;       // The user root directory for the calibrarion data
+  TString     m_CurrentDir;    // The current root directory for the calibrarion data
+
+//  static Char_t m_VersionCVS = "$Id: St_db_Maker.h,v 1.2 1999/03/11 01:32:56 perev Exp $";
  protected:
  public: 
-                   St_db_Maker(const char *name="db", const char *title="db", 
-                                  const TString &rootdir="/afs/rhic/star/packages/dev/StDb");
+                   St_db_Maker(const char *name,const char *maindir,const char *userdir=0);
    virtual        ~St_db_Maker();
    virtual void    Browse(TBrowser *b);
-   virtual void    Clear(Option_t *option="");
-   virtual TString GetDbDir(){ return m_RootDbDirectory;}
-   virtual Int_t Init();
-   virtual Int_t   Make();                                                               // *MENU*
+   virtual TString GetMainDir(){ return m_MainDir;}
+   virtual TString GetUserDir(){ return m_UserDir;}
+   virtual Int_t   Init();
+   virtual Int_t   Make(){return kStOK;};                                                               // *MENU*
    virtual void    PrintInfo();
-   virtual void    SetDbDir(const TString &db="/afs/rhic/star/packages/dev/StDb"){ m_RootDbDirectory = db;}     // *MENU*
-//   virtual void   SetValidTime(Int_t date, Int_t time){ m_ValidTime.Set(date-19000000, time); }
-   virtual void    SetValidTime(Int_t date=19950101, Int_t time=194500) { m_ValidTime.Set(date-19000000, time); m_ValidDate = date; m_ValidHours = time; } // *MENU*
-
-   ClassDef(St_db_Maker, 1)   //StAF chain virtual base class for Makers
+   virtual void    SetMainDir(const Char_t *db);
+   virtual void    SetUserDir(const Char_t *db);
+   virtual St_DataSet* UpdateDB (St_DataSet* ds);
+   static EDataSetPass UpdateDB (St_DataSet* ds,void *user );
+   static EDataSetPass PrepareDB(St_DataSet* ds,void *user );
+   static TDatime  Time(const char *filename);
+   static int      Kind(const char *filename);
+   virtual void Clear(Option_t *opt=""){if(opt){/*unused*/}};
+   ClassDef(St_db_Maker, 0)   //StAF chain virtual base class for Makers
 };
 
 #endif
