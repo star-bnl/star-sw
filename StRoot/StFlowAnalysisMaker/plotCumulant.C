@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plotCumulant.C,v 1.2 2001/12/11 22:04:22 posk Exp $
+// $Id: plotCumulant.C,v 1.3 2001/12/18 19:27:44 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Nov 2001
 // Description:  Macro to plot histograms made by StFlowCumulantMaker.
@@ -28,7 +28,7 @@ char   fileName[30];
 TFile* histFile;
 char   tmp[10];
 
-TCanvas* plotCumulant(Int_t pageNumber=0, Int_t orderN=0, Int_t selN=2, Int_t harN=0){
+TCanvas* plotCumulant(Int_t pageNumber=0, Int_t selN=2, Int_t orderN=0, Int_t harN=0){
 
   bool multiGraph  = kFALSE;                            // set flags
   bool singleGraph = kFALSE;
@@ -41,8 +41,10 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t orderN=0, Int_t selN=2, Int_t ha
 
   // names of histograms made by StFlowCumulantMaker
   const char* baseName[] = {
-    "Flow_Cumul_v_Order",
-    "Flow_Cumul_Order",
+    "Flow_Cumul_Order2",
+    "Flow_Cumul_v_Order2",
+    "Flow_Cumul_Order4",
+    "Flow_Cumul_v_Order4",
     "Flow_CumulEta_Order",
     "Flow_CumulPt_Order",
     "Flow_Cumul_vEta_Order",
@@ -51,7 +53,7 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t orderN=0, Int_t selN=2, Int_t ha
     //"Flow_Cumul_v2D_Order"
   };
   const int nNames = sizeof(baseName) / sizeof(char*);
-  const int nSingles =  2;
+  const int nSingles =  4;
 
   // construct array of short names
   char* shortName[] = new char*[nNames];
@@ -158,12 +160,15 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t orderN=0, Int_t selN=2, Int_t ha
 
       // construct histName
       TString* histName = new TString(baseName[pageNumber]);
-      histName->Append(*countOrder);
-      histName->Append("_Sel");
-      histName->Append(*countSel);
       if (!singleGraph) {
+	histName->Append(*countOrder);
+	histName->Append("_Sel");
+	histName->Append(*countSel);
 	histName->Append("_Har");
 	histName->Append(*countRows);
+      } else {
+	histName->Append("_Sel");
+	histName->Append(*countSel);
       }
       cout << " col= " << k+1 << " row= " << j+1 << " pad= " << padN << "\t" 
 	   << histName->Data() << endl;
@@ -240,7 +245,7 @@ TCanvas* plotCumulant(Int_t pageNumber=0, Int_t orderN=0, Int_t selN=2, Int_t ha
 
 void plotCumulantAll(Int_t nNames, Int_t orderN, Int_t selN, Int_t harN, Int_t first = 1) {
   for (int i =  first; i < nNames + 1; i++) {
-    TCanvas* c = plotCumulant(i, orderN, selN, harN);
+    TCanvas* c = plotCumulant(i, selN, orderN, harN);
     c->Update();
     cout << "save? y/[n], quit? q" << endl;
     fgets(tmp, sizeof(tmp), stdin);
@@ -254,6 +259,9 @@ void plotCumulantAll(Int_t nNames, Int_t orderN, Int_t selN, Int_t harN, Int_t f
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plotCumulant.C,v $
+// Revision 1.3  2001/12/18 19:27:44  posk
+// "proton" and "antiproton" replaced by "pr+" and "pr-".
+//
 // Revision 1.2  2001/12/11 22:04:22  posk
 // Four sets of phiWgt histograms.
 // StFlowMaker StFlowEvent::PhiWeight() changes.

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.36 2001/12/11 22:04:13 posk Exp $
+// $Id: plot.C,v 1.37 2001/12/18 19:27:37 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -451,9 +451,9 @@ TCanvas* plot(Int_t pageNumber=0, Int_t selN=0, Int_t harN=0){
 	TF1* fit_q = new TF1("qDist", qDist, 0., max, 3); // fit q dist
 	fit_q->SetParNames("v", "mult", "area");
 	float qMean = hist->GetMean();
-	//float v2N = (qMean > 1.) ? qMean - 1. : 0.;
-	//float vGuess = 100. * sqrt(v2N / mult);
-	float vGuess = (qMean > 2.) ? 8. : 1.;
+	float v2N = (qMean > 1.) ? qMean - 1. : 0.;
+	float vGuess = 100. * sqrt(v2N / mult);
+	//float vGuess = (qMean > 2.) ? 8. : 1.;
 	fit_q->SetParameters(vGuess, mult, area); // initial values
 	fit_q->SetParLimits(1, 1, 1);             // mult is fixed
 	fit_q->SetParLimits(2, 1, 1);             // area is fixed
@@ -623,6 +623,9 @@ static Double_t qDist(double* q, double* par) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.37  2001/12/18 19:27:37  posk
+// "proton" and "antiproton" replaced by "pr+" and "pr-".
+//
 // Revision 1.36  2001/12/11 22:04:13  posk
 // Four sets of phiWgt histograms.
 // StFlowMaker StFlowEvent::PhiWeight() changes.
