@@ -1,7 +1,10 @@
 *
-* $Id: gsckov.F,v 1.2 1998/04/16 16:59:40 fisyak Exp $
+* $Id: gsckov.F,v 1.3 2000/04/12 19:48:56 nevski Exp $
 *
 * $Log: gsckov.F,v $
+* Revision 1.3  2000/04/12 19:48:56  nevski
+* GCJLOC common (which contains links) restored
+*
 * Revision 1.2  1998/04/16 16:59:40  fisyak
 * 2nd pass with gstar
 *
@@ -37,10 +40,14 @@ C.    *       PN, 9-feb-98:   multiple calls subsitute same banks      *
 C.    *                                                                *
 C.    ******************************************************************
 C.
+      IMPLICIT NONE
+
 #include "geant321/gcbank.inc"
 #include "geant321/gcunit.inc"
+#include "geant321/gcjloc.inc"
 C
-      DIMENSION PPCKOV(*), ABSCO(*), EFFIC(*), RINDEX(*)
+      REAL     PPCKOV(*), ABSCO(*), EFFIC(*), RINDEX(*)
+      INTEGER  ITMED, J
 C.
 C.    ------------------------------------------------------------------
 C.
