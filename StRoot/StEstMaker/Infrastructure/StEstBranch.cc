@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstBranch.cc,v 1.2 2001/01/25 18:13:27 lmartin Exp $
+ * $Id: StEstBranch.cc,v 1.3 2001/01/26 10:16:45 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstBranch.cc,v $
+ * Revision 1.3  2001/01/26 10:16:45  lmartin
+ * Minor changes. Unused mLastLay data member removed. Short description of the data members added.
+ *
  * Revision 1.2  2001/01/25 18:13:27  lmartin
  * Minor changes in the GetHit and SetHelix methods
  *
@@ -32,12 +35,10 @@ StEstBranch::StEstBranch(StEstTrack *tr,
 			     int isgood) {
 
   int i;
-
   mDebugLevel = 0;
   mMaxHits    = maxhits;
   mNHits      = nh;
   mNFit       = nf;
-  mLastLay    = 4; 
   mIsGood     = isgood;
 
   if (mMaxHits==0) cout << "ERROR StEstBranch::StEstBranch  mMaxHits=0"<<endl;
@@ -75,9 +76,6 @@ StEstBranch::StEstBranch(StEstTrack *tr,
 	cout << "  StEstBranch after JoinBranch : hit_id,NBranch,MaxBranches,NShare,MaxShare ";
 	cout <<mHits[i]->GetId()<<" "<<mHits[i]->GetNBranch()<<" "<<mHits[i]->GetMaxBranches()<<" "<<mHits[i]->GetNShare()<<" "<<mHits[i]->GetMaxShare()<<endl;
       }
-      if (mDebugLevel>0) cout << "  mLastLay = ";
-      mLastLay=mHits[i]->GetWafer()->GetLayer();
-      if (mDebugLevel>0) cout << mLastLay << endl;
       if (mDebugLevel>0)
 	cout << "  StEstBranch::StEstBranch mHits["<<i<<"]->GetNBranch()="<< mHits[i]->GetNBranch()<<endl;
     }
@@ -97,16 +95,13 @@ StEstBranch::StEstBranch(StEstTrack *tr,
   
 StEstBranch::~StEstBranch() {
   if (mDebugLevel>0) cout << endl<<"StEstBranch::~StEstBranch ***START***" << endl;
-  //  cout<<"~StEstBranch this:"<<this<<" this->mTrack="<<this->mTrack<<endl;
   for (int i=mNHits-1;i>=0;i--) {
     mHits[i]->LeaveBranch(this);
   }
-  //  if (mTrack!=NULL) LeaveTrack();
   if(mHelix!=NULL) 
     delete mHelix;
   delete [] mDist;
   delete [] mHits;
-  //  delete [] mHits; dont even think about it
   if (mDebugLevel>0) cout << "StEstBranch::~StEstBranch ***STOP***" << endl;
 };
 
@@ -229,9 +224,6 @@ int StEstBranch::AddHit(StEstHit *hit, double dist) {
     if (mHits[i] == NULL && mDebugLevel>0) cout << "<-- HIT NULL!"<<endl;
     else if (mDebugLevel>0) cout <<endl;
   }
-  mLastLay=hit->GetWafer()->GetLayer();
-  if (mDebugLevel>0)
-    cout << " StEstBranch::AddHit mLastLay="<<mLastLay<<endl;
   if (mDebugLevel>0) cout <<"StEstBranch::AddHit ***STOP***"<<endl;
   return 0;
 }
@@ -285,8 +277,6 @@ int StEstBranch::RemoveHit(long int nr) {
 int StEstBranch::RemoveHit(StEstHit* hit) {
   
   if (mDebugLevel>0) cout <<"StEstBranch:RemoveHit v2 ***START***"<<endl;
-  //  cout <<"StEstBranch:RemoveHit v2 ***START***"<<endl;
-  //  cout <<" mNHits : "<<mNHits<<endl;
   if (mNHits>0) { 
     int i=0;
     while(mHits[i] != hit && i<mNHits) i++;
@@ -298,14 +288,13 @@ int StEstBranch::RemoveHit(StEstHit* hit) {
       mHits[mNHits-1] = NULL;
       mDist[mNHits-1] = 0;
       mNHits--;
-      //      cout <<" mNHits : "<<mNHits<<endl;
+
       if (mDebugLevel>0) cout << "  mNHits: "<<mNHits<<endl;
       for (i=0; i<mNHits; i++) {
 	if (mDebugLevel>0) cout <<i<<"\t"<<mHits[i];
 	if (mHits[i] == NULL) cout << "<-- HIT NULL!"<<endl;
 	else if (mDebugLevel>0) cout <<endl;
       }
-      //      cout <<"StEstBranch:RemoveHit v2 ***STOP*** 1 "<<endl;
       if (mDebugLevel>0) cout <<"StEstBranch:RemoveHit v2 ***STOP*** 1 "<<endl;
      return 0;
     }
