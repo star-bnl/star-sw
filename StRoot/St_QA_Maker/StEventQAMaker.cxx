@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.cxx,v 1.19 2000/01/11 23:50:51 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 1.20 2000/01/12 02:05:27 lansdell Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 1.20  2000/01/12 02:05:27  lansdell
+// fixed minor for-loop problem
+//
 // Revision 1.19  2000/01/11 23:50:51  lansdell
 // now filling FTPC hits histograms
 //
@@ -818,7 +821,7 @@ void StEventQAMaker::MakeHistPoint() {
     // it's better to do this with det_id, but need to code -CL
     for (UInt_t i=0; i<10; i++)
       ftpcHitsW += ftpcHits->plane(i)->numberOfHits();
-    for (UInt_t i=10; i<20; i++)
+    for (UInt_t j=10; j<20; j++)
       ftpcHitsE += ftpcHits->plane(i)->numberOfHits();
 
     m_pnt_ftpcW->Fill(ftpcHitsW);
