@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.33 1999/09/02 22:27:12 fisyak Exp $
+// $Id: StMaker.h,v 1.34 1999/09/03 23:11:48 perev Exp $
 // $Log: StMaker.h,v $
+// Revision 1.34  1999/09/03 23:11:48  perev
+// Add .runcont directory
+//
 // Revision 1.33  1999/09/02 22:27:12  fisyak
 // Add SetDEBUG
 //
@@ -114,6 +117,7 @@ protected:
    St_DataSet     *m_GarbSet;		//!  
    St_DataSet     *m_Inputs;	 	//!list of logInput:ActualInput
    St_DataSet     *m_Ouputs;	 	//!list of logOuput:ActualOuput
+   St_DataSet     *m_RunCont;	 	//!Run Control parameters
    TList          *m_Histograms;	//!list of Histograms
    static StMaker *fgStChain;     	//current pointer to StChain
    Int_t	   m_Mode;		// Integer mode of maker
@@ -152,6 +156,8 @@ public:
    virtual void        	AddConst(St_DataSet *data=0){AddData(data,".const");}
    virtual void        	AddHist(TH1 *h,const char *dir=0);
    virtual void        	AddGarb (St_DataSet *data=0){AddData(data,".garb");};
+   virtual void        	AddRunCont (St_DataSet *data=0){AddData(data,".runcontrol");};
+   virtual void        	AddRunCont (double par,const char* name,const char* comment);
    virtual TList       *GetHistList() const {return (TList*)GetDirObj(".hist");};
    virtual TH1         *GetHist(const Char_t *histName) const {TList *l=GetHistList(); return l?(TH1*)l->FindObject(histName):(TH1*)0;};
    virtual StMaker     *cd(){StMaker *ret = fgStChain; fgStChain=this; return ret;};
@@ -227,7 +233,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.33 1999/09/02 22:27:12 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.34 1999/09/03 23:11:48 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   //StChain virtual base class for Makers
 };
