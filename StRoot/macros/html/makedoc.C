@@ -1,5 +1,8 @@
-// $Id: makedoc.C,v 1.37 1999/06/11 21:41:19 fine Exp $
+// $Id: makedoc.C,v 1.38 1999/06/30 16:29:04 fine Exp $
 // $Log: makedoc.C,v $
+// Revision 1.38  1999/06/30 16:29:04  fine
+// New scheme to create gif directories. St_geom_Maker introduced
+//
 // Revision 1.37  1999/06/11 21:41:19  fine
 // StarClassLibary share lib is to be loaded
 //
@@ -73,6 +76,8 @@
      gSystem->Load("St_evg_Maker");
      gSystem->Load("StarClassLibrary");
      gSystem->Load("StRootEvent");
+     gSystem->Load("StPadDisplayMaker");
+     gSystem->Load("St_geom_Maker");
 
 //     gSystem->Load("St_ebye_Maker");
 //     gSystem->Load("St_laser_Maker");
@@ -96,13 +101,15 @@
     sourcedir += STAR;
     sourcedir += "/.share/tables:";
     sourcedir += STAR;
-    sourcedir += "/inc";
-    sourcedir += ":";
+    sourcedir += "/inc:";
     sourcedir += STAR;
-    sourcedir += "/StRoot/StRootEvent";
-    sourcedir += ":";
+    sourcedir += "/StRoot/StRootEvent:";
     sourcedir += STAR;
-    sourcedir += "/StRoot/StarClassLibrary";
+    sourcedir += "/StRoot/StPadDisplay:";
+    sourcedir += STAR;
+    sourcedir += "/StRoot/StarClassLibrary:";
+    sourcedir += STAR;
+    sourcedir += "/StRoot/St_geom_Maker";
   }
 
   TString lookup ;
@@ -123,6 +130,10 @@
     lookup += "/StRoot/St_base:";
     lookup += STAR;
     lookup += "/StRoot/St_io_Maker:";
+    lookup += STAR;
+    lookup += "/StRoot/St_geom_Maker:";
+    lookup += STAR;
+    lookup += "/StRoot/StPadDisplayMaker:";
     lookup += STAR;
     lookup += "/StRoot/StRootEvent";
     lookup += ":";
@@ -151,10 +162,10 @@
                        ,"St_io_Maker",   "StHelix3DPoints", "StHits3DPoints"
                        ,"StObjArray",    "StHit",            "StHelixD"
                        ,"StTrack",       "St_TableElementDescriptor"
-                       ,"St_TLA_Maker"
+                       ,"St_geom_Maker", "StPadDisplayMaker", "St_TLA_Maker"
                        ,"St_srs_Maker",  "St_xdfin_Maker"
                       };
-  Int_t nclass = 33;
+  Int_t nclass = 35;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("//sol/afs_rhic/star/packages/dev/inc/table_header.h");
@@ -175,49 +186,51 @@
 
   TString giffile = STAR;
   giffile += "/StRoot/html/src/gif";
-  
-  if (gSystem->AccessPathName(giffile.Data()) && !NT) {
+  if (!NT) {
+    if (gSystem->AccessPathName(giffile.Data()) && !NT) {
     // Create "gif" subdirectory for the first time
-    printf(" Image directiry is created: <%s>\n", giffile.Data());
-    gSystem->MakeDirectory(giffile.Data());
-    // Create links 
+      printf(" Image directiry is created: <%s>\n", giffile.Data());
+      gSystem->MakeDirectory(giffile.Data());
+      gSystem->Exec("cp /afs/rhic/star/packages/pro/StRoot/html/src/gif/*.* /afs/rhic/star/packages/dev/StRoot/html/src/gif");
+    }
+      // Create links 
     gSystem->Symlink("../src/gif","/afs/rhic/star/packages/dev/StRoot/html/examples/gif");
     gSystem->Symlink("src/gif","/afs/rhic/star/packages/dev/StRoot/html/gif");
-    // Copy the old images into a new directrory
-//    gSystem->Exec("cp /afs/rhic/star/packages/new/StRoot/html/src/gif/*.* /afs/rhic/star/packages/dev/StRoot/html/src/gif")
-    gSystem->Exec("cp /afs/rhic/star/packages/pro/StRoot/html/src/gif/*.* /afs/rhic/star/packages/dev/StRoot/html/src/gif");
+      // Copy the old images into a new directrory
+//      gSystem->Exec("cp /afs/rhic/star/packages/new/StRoot/html/src/gif/*.* /afs/rhic/star/packages/dev/StRoot/html/src/gif")
   }
 
   // Make HTML docs for the "plain" text files those are not in the dictionaries
-  cout << " Makeing HTML's for macros" << endl;
-  html.Convert("./basic3dPrimitives.C","An example of the basic 3D STAR object");
-  html.Convert("./EventPanel.C","An example of the ToolBar to control an applications");
-  html.Convert("./DrawTpcHits.C","How to draw 3D view for hits and");
-  html.Convert("./DrawTrackTpcHits.C","How to draw 3D view for hits and tracks");
-  html.Convert("./PadControlPanel.C","How to manipulate with 3D pad images");
-  html.Convert("./HitsDraw.C","3D drawing of the STAR Geometry and the hits from the STAF table");
-  html.Convert("./SubDetectorView.C","How to create sub-detector view");
-  html.Convert("./StarFromWeb.C","Access to ROOT/GEANT geometry database");
+  cout << " Making HTML's for macros" << endl;
+  html.Convert("../graphics/PadBrowser.C","How to use St_geom_Maker and StPadDisplayMaker");
+  html.Convert("../graphics/basic3dPrimitives.C","An example of the basic 3D STAR object");
+  html.Convert("../graphics/EventPanel.C","An example of the ToolBar to control an applications");
+  html.Convert("../graphics/DrawTpcHits.C","How to draw 3D view for hits and");
+  html.Convert("../graphics/DrawTrackTpcHits.C","How to draw 3D view for hits and tracks");
+  html.Convert("../graphics/PadControlPanel.C","How to manipulate with 3D pad images");
+  html.Convert("../graphics/HitsDraw.C","3D drawing of the STAR Geometry and the hits from the STAF table");
+  html.Convert("../graphics/SubDetectorView.C","How to create sub-detector view");
+  html.Convert("../graphics/StarFromWeb.C","Access to ROOT/GEANT geometry database");
   html.Convert("./GetEvent.C","An example of the reading MDC2 dst events");
   html.Convert("./QA_Hist_Draw.C","An example of the plotting postscript file of the MDC2 histograms");
-  html.Convert("./StarGeom.C","An example of the ROOT/STAR/GEANT interface");
-  html.Convert("./TestSorter.C","An example of the STAF table sort utility");
-  html.Convert("./XDFBrowser.C","XDF file interactive ROOT browser");
-  html.Convert("./../Chain/xdf.C","STAR chain example");
-  html.Convert("./../test/XDFcopy.C","How to read/write XDF file");
-  html.Convert("./../test/XDFtest.C","How to read/write XDF and ROOT files");
+  html.Convert("../graphics/StarGeom.C","An example of the ROOT/STAR/GEANT interface");
+  html.Convert("../examples/TestSorter.C","An example of the STAF table sort utility");
+  html.Convert("../examples/XDFBrowser.C","XDF file interactive ROOT browser");
+  html.Convert("../../Chain/xdf.C","STAR chain example");
+  html.Convert("../../test/XDFcopy.C","How to read/write XDF file");
+  html.Convert("../../test/XDFtest.C","How to read/write XDF and ROOT files");
   html.Convert("./par_anal.cxx","How to create several histrograms from XDF file");
-  html.Convert("./../test/test10.C","How to use the dataset iterator class");
-  html.Convert("./../test/test9.C","How to read the event from XDF file and build some histograms with ROOT");
+  html.Convert("../../test/test10.C","How to use the dataset iterator class");
+  html.Convert("../../test/test9.C","How to read the event from XDF file and build some histograms with ROOT");
   html.Convert("./makedoc.C","How to create the HTML documentation");
-  html.Convert("./tss.C","\"TPC slow simulator\" chain");
-  html.Convert("./bfc.C","An example of the \"Big Full Chain\" production chain");
+  html.Convert("../tss.C","\"TPC slow simulator\" chain");
+  html.Convert("../bfc.C","An example of the \"Big Full Chain\" production chain");
   html.Convert("./bfcx.C","An example of the \"Big Full Chain\" production chain");
   html.Convert("./ebye.C","An example of\"Event by Event\" production chain");
   html.Convert("./STAR_Demos.C","The source of the STAR_demos macro");
-  html.Convert("./STAR_shapes.C","Test for the basic STAR GEOMETRY classes");
-  html.Convert("./StarView.C","How to Draw the local STAR 3D geometry");
-  html.Convert("./StarWebView.C","How to Draw the remote STAR 3D geometry");
+  html.Convert("../graphics/STAR_shapes.C","Test for the basic STAR GEOMETRY classes");
+  html.Convert("../graphics//StarView.C","How to Draw the local STAR 3D geometry");
+  html.Convert("../graphics/StarWebView.C","How to Draw the remote STAR 3D geometry");
   if (NT) {
     html.Convert("//hepburn/common/p32/root/star/macros/CallMevSaveXDF.cxx","How to call STAF module");
     html.Convert("//hepburn/common/p32/root/star/macros/par_anal.cxx","How to pick the XDF file up with ROOT");
