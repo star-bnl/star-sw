@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.67 1999/02/28 20:25:37 fisyak Exp $
+# $Id: MakeDll.mk,v 1.68 1999/03/03 03:53:14 perev Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.68  1999/03/03 03:53:14  perev
+# Add additional sort to mechanism ln -s .so
+#
 # Revision 1.67  1999/02/28 20:25:37  fisyak
 # Fix bug with dependencies for NODEBUG version
 #
@@ -319,7 +322,7 @@ else
 
 MY_SO  := $(SO_LIB)
 ifndef NT
-  QWE    :=$(strip $(wildcard $(MY_SO).*))
+  QWE    :=$(strip $(sort $(wildcard $(MY_SO).*)))
   SL_NEW :=$(MY_SO).1000
 ifneq (,$(QWE))
   NQWE :=$(words $(QWE))
