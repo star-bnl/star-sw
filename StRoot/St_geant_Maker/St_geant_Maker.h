@@ -1,4 +1,4 @@
-// $Id: St_geant_Maker.h,v 1.12 1999/04/15 20:36:40 fine Exp $
+// $Id: St_geant_Maker.h,v 1.13 1999/04/19 06:25:36 nevski Exp $
 
 #ifndef STAR_St_geant_Maker
 #define STAR_St_geant_Maker
@@ -18,8 +18,8 @@
 #define agvolume_     F77_NAME(agvolume,AGVOLUME)
 extern "C" {
 R__EXTERN  void type_of_call rootmaptable_(Char_t *,Char_t *, Char_t*, Int_t *, Char_t *);
-R__EXTERN Int_t type_of_call agvolume_(St_Node**,Float_t**,Float_t**,
-                                       Float_t**,Int_t*,Int_t*,Float_t**);
+R__EXTERN Int_t type_of_call agvolume_(St_Node**,Float_t**,Float_t**,Float_t**,
+                                       Int_t*,Int_t*,Float_t**,Int_t*);
 }
 #endif
 
