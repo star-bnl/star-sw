@@ -44,6 +44,8 @@ franksTrackCut::franksTrackCut(){
   mPz[0] = -1e9;  mPz[1] = +1e9;
   mDCA[0] = -1e9;  mDCA[1] = +1e9;
   mDCAGlobal[0] = -1e9;  mDCAGlobal[1] = +1e9;
+  mNHits[0] = 0; mNHits[1] = 60;
+  mNdEdxHits[0] = 0; mNdEdxHits[1] = 60;
 }
 //------------------------------
 franksTrackCut::franksTrackCut(franksTrackCut& c) : StHbtTrackCut(c) {
