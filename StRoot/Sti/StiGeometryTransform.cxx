@@ -364,6 +364,10 @@ void StiGeometryTransform::operator() (const StTpcHit* tpchit, StiHit* stihit)
     stihit->setRefangle( refangle );
     stihit->setPosition( pos );
 
+    //if ( (refangle>=-1.*M_PI && refangle<=M_PI)==false ) {
+    //cout <<"Tpc Hit transform error: refangle not [-pi,pi]"<<endl;
+    //}
+
     //We'll temporarily keep
     stihit->setStHit(const_cast<StTpcHit*>(tpchit));
 
