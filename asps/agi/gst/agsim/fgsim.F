@@ -396,12 +396,12 @@ c----------------------------------------------------------------------
 *KEEP,VIDQQ.
       CHARACTER*68 VIDQQ
       DATA VIDQQ/
-     +'@(#)* Advanced Geant Inteface   1.40/05   C: 23/09/98  00.12.22
+     +'@(#)* Advanced Geant Inteface   1.40/05   C: 24/09/98  01.22.40
      +'/
 *KEEP,DATEQQ.
-      IDATQQ =   980923
+      IDATQQ =   980924
 *KEEP,TIMEQQ.
-      ITIMQQ =     12
+      ITIMQQ =    122
 *KEEP,VERSQQ.
       VERSQQ = ' 1.40/05'
       IVERSQ =  14005
