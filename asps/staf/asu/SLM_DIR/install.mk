@@ -8,41 +8,42 @@ MODULES := $(CVSROOT)/CVSROOT/modules
 #BRANCH_DIR := $(addprefix $(STAR_LIB)/,$(BRANCH_DIR))
 #BRANCH_DIR := $(dir $(BRANCH_DIR))
 SYS := sys
-ifeq( $(BRANCH_NAME),$(SYS) )
+ifeq ($(BRANCH_NAME),$(SYS))
 	BRANCH_DIR := $(STAR_LIB)/$(STAR_SYS_LEVEL)/$(BRANCH_NAME)/
 endif
 SIM := sim
-ifeq( $(BRANCH_NAME),$(SIM) )
+ifeq ($(BRANCH_NAME),$(SIM))
 	BRANCH_DIR := $(STAR_LIB)/$(STAR_SIM_LEVEL)/$(BRANCH_NAME)/
 endif
 ANA := ana
-ifeq( $(BRANCH_NAME),$(ANA) )
+ifeq ($(BRANCH_NAME),$(ANA))
 	BRANCH_DIR := $(STAR_LIB)/$(STAR_ANA_LEVEL)/$(BRANCH_NAME)/
 endif
 PHY := phy
-ifeq( $(BRANCH_NAME),$(PHY) )
+ifeq ($(BRANCH_NAME),$(PHY))
 	BRANCH_DIR := $(STAR_LIB)/$(STAR_PHY_LEVEL)/$(BRANCH_NAME)/
 endif
 OFL := ofl
-ifeq( $(BRANCH_NAME),$(OFL) )
+ifeq ($(BRANCH_NAME),$(OFL))
 	BRANCH_DIR := $(STAR_LIB)/$(STAR_OFL_LEVEL)/$(BRANCH_NAME)/
 endif
 ONL := onl
-ifeq( $(BRANCH_NAME),$(ONL) )
+ifeq ($(BRANCH_NAME),$(ONL))
 	BRANCH_DIR := $(STAR_LIB)/$(STAR_ONL_LEVEL)/$(BRANCH_NAME)/
 endif
 TRG := trg
-ifeq( $(BRANCH_NAME),$(TRG) )
+ifeq ($(BRANCH_NAME),$(TRG))
 	BRANCH_DIR := $(STAR_LIB)/$(STAR_TRG_LEVEL)/$(BRANCH_NAME)/
 endif
 DAQ := daq
-ifeq( $(BRANCH_NAME),$(DAQ) )
+ifeq ($(BRANCH_NAME),$(DAQ))
 	BRANCH_DIR := $(STAR_LIB)/$(STAR_DAQ_LEVEL)/$(BRANCH_NAME)/
 endif
 #
+# Fake install command for local tests should be "-ln -s"
+INSTALL := -ln -s
 # Real install command should be "cp".
 INSTALL := cp
-INSTALL := -ln -s
 #
 INSTALL_IDL_FILES := $(wildcard $(IDLDIR)/*.idl)
 install_idl:
@@ -92,11 +93,13 @@ endif
 #
 BINROOT := $(dir $(BINDIR))
 #INSTALL_BIN_FILES := $(shell cat $(BINROOT)/install_bin_files)
+INSTALL_BIN_FILES := $(addprefix $(BINDIR)/,$(INSTALL_BIN_FILES))
 install_bin:
 	@echo " "
 	@echo "Installing BIN files."
 ifneq ($(INSTALL_BIN_FILES),$(EMPTY))
-	cd $(BINDIR); \
+##	cd $(BINDIR); \
+##
 	$(INSTALL) $(INSTALL_BIN_FILES) \
 		$(BRANCH_DIR)/bin/
 else

@@ -1,3 +1,3 @@
 #ifdef __cplusplus
-#include "asuHashTable.hh"
+//#include "asuHashTable.hh"
 #endif /*__cplusplus*/
