@@ -599,7 +599,9 @@ void  StiKalmanTrackNode::propagateError()
 	  double dE=0.153e-3/beta2*(log(5940*beta2/(1-beta2)) - beta2)*d*rho;
 	  if (x1 < x2) dE=-dE;
 	  cc=fP3;
+		//cout << "ELOSS: c:" << cc;
 	  fP3 = fP3 *(1.- sqrt(p2+massHypothesis*massHypothesis)/p2*dE);
+		//cout << " c':" << fP3 << endl;
 	  fP2 = fP2 + fX*(fP3-cc);
 	}
     }
@@ -736,7 +738,7 @@ void StiKalmanTrackNode::rotate(double alpha) //throw ( Exception)
   if (fAlpha < -M_PI) fAlpha += 2*M_PI;
   if (fAlpha >= M_PI) fAlpha -= 2*M_PI;
   *(Messenger::instance(MessageType::kNodeMessage))  
-		<< "rotate() - new fAlpha:" << alpha*180/M_PI 
+		<< "rotate() - new fAlpha:" << fAlpha*180/M_PI 
 		<< " degs" << endl;
   double x1=fX;
   double y1=fP0;
@@ -796,9 +798,10 @@ void StiKalmanTrackNode::add(StiKalmanTrackNode * newChild)
 	// set counters of the newChild node
 	if (newChild->hit!=0)
 		{
+			//cout << "SKTN::add() Has a HIT" << endl;
 			// newChild has an associate hit
-			newChild->hitCount += hitCount;
-			newChild->contiguousHitCount += contiguousHitCount; 
+			newChild->hitCount = hitCount+1;
+			newChild->contiguousHitCount = contiguousHitCount+1; 
 			if (contiguousHitCount>minContiguousHitCountForNullReset)
 				newChild->contiguousNullCount = 0;
 			else
@@ -808,11 +811,20 @@ void StiKalmanTrackNode::add(StiKalmanTrackNode * newChild)
 	else
 		{
 			// a null hit
-			newChild->nullCount           += nullCount;
-			newChild->contiguousNullCount += contiguousNullCount;
+			//cout << "SKTN::add() NO HIT" << endl;
+			newChild->nullCount            = nullCount+1;
+			newChild->contiguousNullCount  = contiguousNullCount+1;
 			newChild->hitCount             = hitCount;
-			newChild->contiguousHitCount   = contiguousHitCount; 
+			newChild->contiguousHitCount   = 0;//contiguousHitCount; 
 		}
+	/*
+	 *(Messenger::instance(MessageType::kNodeMessage))
+	 << "SKTN::add()"
+	 << "            hitCount:" << newChild->hitCount << endl
+	 << "  contiguousHitCount:" << newChild->contiguousHitCount << endl
+	 << "           nullCount:" << newChild->nullCount << endl
+	 << " contiguousNullCount:" << newChild->contiguousNullCount << endl;
+	*/
 	// insert the newChild node as a child to this
   if(newChild != 0 && newChild->getParent() == this)
     insert(newChild, getChildCount() - 1);

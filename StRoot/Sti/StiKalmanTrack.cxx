@@ -26,8 +26,8 @@ void StiKalmanTrack::reset()
 //Null implementation, meant to be overwritten by graphical derived class
 void StiKalmanTrack::update()
 {
-    cout<<"void StiKalmanTrack::update()"<<endl;
-    return;
+	//cout<<"void StiKalmanTrack::update()"<<endl;
+	return;
 }
 
 void StiKalmanTrack::setKalmanTrackNodeFactory(StiObjectFactoryInterface<StiKalmanTrackNode>* val)
