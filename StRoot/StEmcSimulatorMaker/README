@@ -17,6 +17,11 @@ The main differences between two makers are:
 Modification history (reverse chronological)
 ====================
 
+13-may-2001 A.Pavlinov
+- Corrected for new version of StMcEvent staff for EMC.
+  In method StMcEmcModuleHitCollection::module(m) is 
+  module number(from 1 to ..), not index (from 0 to ..).
+
 22-mar-2001 A.Pavlinov
 - Clean up for MDC4.
   Added method for comparing  of deposit energy hits for 
