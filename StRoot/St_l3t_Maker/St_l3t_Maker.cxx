@@ -1,7 +1,9 @@
-// $Id: St_l3t_Maker.cxx,v 1.16 2000/01/26 18:59:18 yepes Exp $
+// $Id: St_l3t_Maker.cxx,v 1.17 2000/02/01 18:37:54 yepes Exp $
 // $Log: St_l3t_Maker.cxx,v $
+// Revision 1.17  2000/02/01 18:37:54  yepes
+// tphit table filled now with l3 clusters including track associated with hit
+//
 // Revision 1.16  2000/01/26 18:59:18  yepes
-// *** empty log message ***
 //
 // Revision 1.15  1999/12/23 18:09:07  yepes
 // Double interface to read DAQ format or tpchit_st from tpc
@@ -107,7 +109,7 @@ Int_t St_l3t_Maker::Make(){
    else if ( m_Mode == 1 ) {
       if ( MakeOnLine() == kStWarn ) return kStErr ;
    }
-   else if ( m_Mode == 3 ) {
+   else if ( m_Mode == 2 ) {
       if ( MakeOffLine() == kStWarn ) return kStErr ;
    }
    else {
@@ -143,6 +145,16 @@ Int_t St_l3t_Maker::MakeOnLine(){
 // tracker.para.infoLevel = 10 ;
    gl3.bField = 0.5 ;
    tracker.reset();
+//
+//    Create hit table to store L3 clusters in offline format
+//
+   int maxHits = 500000 ;
+   int nHits = 0 ;
+   St_tcl_tphit *hitS = new St_tcl_tphit("l3Hit",maxHits); 
+   m_DataSet->Add(hitS);
+   tcl_tphit_st*  hit  = (tcl_tphit_st  *)hitS->GetTable();
+   table_head_st* hitH = (table_head_st *)hitS->GetHeader(); 
+
 
 // create iterator
 
@@ -185,6 +197,15 @@ Int_t St_l3t_Maker::MakeOnLine(){
 //
       tracker.processSector();
 //
+//      Write online track buffer
+//
+      unsigned int token = ((TPCSECLP *)bankEntriesSt)->bh.token ;
+      tracker.fillTracks ( maxBytes, buffer, token ) ;
+//
+//     Pass buffer to gl3
+//
+      gl3.readSector ( maxBytes, buffer ) ;
+//
 //   Fill histos
 //
       m_l3_nHitsSector->Fill    ( tracker.nHits ) ;
@@ -192,11 +213,29 @@ Int_t St_l3t_Maker::MakeOnLine(){
       m_l3_cpuTimeSector->Fill  ( 1000.*tracker.cpuTime ) ;
       m_l3_realTimeSector->Fill ( 1000.*tracker.realTime ) ;
       printf ( "St_sl3Maker: %d tracks \n", tracker.nTracks ) ;
-
-      unsigned int token = ((TPCSECLP *)bankEntriesSt)->bh.token ;
-      tracker.fillTracks ( maxBytes, buffer, token ) ;
-
-      gl3.readSector ( maxBytes, buffer ) ;
+//
+//     Fill offline hit table
+//
+      for ( int j = 0 ; j < tracker.nHits ; j++ ) {
+         hit[nHits].id    = nHits + 1 ; 
+         hit[nHits].row   = secIndex * 100 + tracker.hit[j].row ; 
+         hit[nHits].x     = tracker.hit[j].x ;
+         hit[nHits].y     = tracker.hit[j].y ;
+         hit[nHits].z     = tracker.hit[j].z ;
+         hit[nHits].dx    = tracker.hit[j].dx ;
+         hit[nHits].dy    = tracker.hit[j].dy ;
+         hit[nHits].dz    = tracker.hit[j].dz ;
+         hit[nHits].q     = tracker.hit[j].q  ;
+         hit[nHits].track = 0  ;
+         if ( tracker.hit[j].track != NULL ) {
+            hit[nHits].track = tracker.hit[j].track->id + 10000 * secIndex  ;
+         }
+         nHits++ ;
+	 if ( nHits >= maxHits ) {
+            fprintf ( stderr, " St_l3t_Maker:MakeOnLine: %d larger than max in hit table \n", nHits ) ;
+            break ;
+	 }
+      }
    }
 //
 //   Generate output table
@@ -233,6 +272,7 @@ Int_t St_l3t_Maker::MakeOnLine(){
       tTrk->z0       = gTrk->z0   ;
    }
    trackH->nok = gl3.nTracks ;
+   hitH->nok   = nHits ;
 
    MakeHistograms();
   
