@@ -1,28 +1,28 @@
- /**************************************************************************
- * Class      : StSsdPointMaker.cxx
- **************************************************************************
- *
- * $Log: StSsdPointMaker.cxx,v $
- * Revision 1.5  2005/03/18 10:16:34  lmartin
- * positionSize argument added to the initLadders method
- *
- * Revision 1.4  2004/11/04 15:10:19  croy
- * use the IAttr(".histos") to control histogramming and modification of the SsdHitCollection creation
- *
- * Revision 1.3  2004/08/13 07:07:23  croy
- * Updates to read SSD databases
- *
- * Revision 1.2  2004/07/20 14:04:02  croy
- * Use of new database structure definitions related to SSD config
- *
- * Revision 1.1  2004/03/12 06:12:37  jeromel
- * Peer review closed. Yuri/Frank.
- *
- * Revision 1.3  2002/03/25 20:13:05  hippolyt
- * Merged the two former makers 
- *
- *
- **************************************************************************/
+// $Id: StSsdPointMaker.cxx,v 1.6 2005/03/18 13:35:40 lmartin Exp $
+//
+// $Log: StSsdPointMaker.cxx,v $
+// Revision 1.6  2005/03/18 13:35:40  lmartin
+// Partly missing cvs header added
+//
+// Revision 1.5  2005/03/18 10:16:34  lmartin
+// positionSize argument added to the initLadders method
+//
+// Revision 1.4  2004/11/04 15:10:19  croy
+// use the IAttr(".histos") to control histogramming and modification of the SsdHitCollection creation
+//
+// Revision 1.3  2004/08/13 07:07:23  croy
+// Updates to read SSD databases
+//
+// Revision 1.2  2004/07/20 14:04:02  croy
+// Use of new database structure definitions related to SSD config
+//
+// Revision 1.1  2004/03/12 06:12:37  jeromel
+// Peer review closed. Yuri/Frank.
+//
+// Revision 1.3  2002/03/25 20:13:05  hippolyt
+// Merged the two former makers 
+//
+//
 #include "StSsdPointMaker.h"
 
 #include "TFile.h"
