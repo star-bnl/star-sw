@@ -1,6 +1,7 @@
-rdEz2SmdCal(  char *run="R5107008",  int mxEve=1000 ) {
-  TString calDir="./calD1/";
-  TString out="/star/data05/scratch/balewski/outD2/";
+rdEz2SmdCal(  char *run="R5112017",  int mxEve=5000 ) {
+  TString calDir="../WWW-E/calibration/run4/smd+PQRT-calib-w-MIP/iter1/";
+  TString out="/star/data05/scratch/balewski/outXXX/";//BNL
+  out="/auto/pdsfdv34/starspin/balewski/calib2004/outE1/";
 
   int firstSec=5;
   int lastSec=8;
@@ -29,6 +30,10 @@ rdEz2SmdCal(  char *run="R5107008",  int mxEve=1000 ) {
   TChain *chain = new TChain("ezstar");
 
 #if 0
+  //............................
+  // use simple list of runs from fixed input directory
+  TString iPath="/auto/pdsfdv34/starspin/relyea/butterfly/"; //LBL
+  //  iPath="/star/data04/sim/balewski/daq/ezTree/pp200/pp2/";// BNL
   char *run=strtok(runL," "); // init 'strtok'
   int i=0;
   do {
@@ -38,11 +43,16 @@ rdEz2SmdCal(  char *run="R5107008",  int mxEve=1000 ) {
   } while(run=strtok(0," "));  // advance by one nam
 #endif
 
-  TString runList="ezList/"; runList+=run; 
-  FILE *fd=fopen(runList.Data(),"r"); assert(fd);
+#if 1
+  //............................
+  // read exact full path from the list
+  TString runList="ezListLBL/"; runList+=run; 
+  out+=run;
   printf("aa=%s=\n",runList.Data());
+
+  FILE *fd=fopen(runList.Data(),"r"); assert(fd);
   int i=0;
-  while(1) {
+  while(1) { 
     char text[500];
     int ret= fscanf(fd,"%s",text);
     if(ret<=0) break;
@@ -50,6 +60,7 @@ rdEz2SmdCal(  char *run="R5107008",  int mxEve=1000 ) {
     chain->Add(text);    
     printf("%d =%s=\n",i,text);
   }
+#endif
 
   int mSect=lastSec-firstSec+1;
   int nEntries = (Int_t)chain->GetEntries();
@@ -96,13 +107,16 @@ rdEz2SmdCal(  char *run="R5107008",  int mxEve=1000 ) {
     db->changeGains(tt.Data());
     tt=calDir+"gains"+tt1+"Vsmd.dat";    
     db->changeGains(tt.Data());
-
     tt=calDir+"mask"+tt1+".dat";    
     db->changeMask(tt.Data());
   }
   
+  // dump current DB content
+  //  db->exportAscii("dbDumpD1n.dat"); return;
+  //db->readAsciiDataBase("dbDumpD1h.dat"); //return;
+  
   TObjArray  HList;
-  //........... sorters ..........
+  //........... sorters .........
   float thrMipSmdE=0.3/1000.;
   int emptyStripCount=6;
   float offCenter=0.8; // fiducial area of tower =offCenter^2
@@ -118,9 +132,6 @@ rdEz2SmdCal(  char *run="R5107008",  int mxEve=1000 ) {
     sorterA[j]->init();
     sorterA[j]->initRun(eHead->getRunNumber());
   }
-
-  // dump current DB content
-  db->exportAscii("dbDumpD1.dat"); return;
    
   printf("Sort %d  of total Events %d\n",mxEve, nEntries);
 
@@ -162,7 +173,6 @@ rdEz2SmdCal(  char *run="R5107008",  int mxEve=1000 ) {
   }
 
   // save output histograms
-  out+=run;
   out+=".hist.root";
   TFile f( out,"recreate");
   assert(f.IsOpen());

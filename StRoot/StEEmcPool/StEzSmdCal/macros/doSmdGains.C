@@ -3,10 +3,10 @@ SmdGains *task=0;
 TObjArray  *HList;
 TFile *fd;
 
-doSmdGains( int iU=0){
-  int sectID=6;
-
-  TString iPath="/star/data05/scratch/balewski/outD1/";
+doSmdGains(  int sectID=6 ){
+int iU=1;
+  TString iPath="/star/data05/scratch/balewski/outD0/";//BNL
+  // iPath="/auto/pdsfdv34/starspin/balewski/calib2004/outD0/";//LBL
   
   char *libL[]={
    "../StRoot/StEEmcUtil/EEmcGeom/libEEmcGeom.so", // some hidden dependence
@@ -24,9 +24,7 @@ doSmdGains( int iU=0){
   HList=new TObjArray;
   task=new SmdGains;
 
-  // task->open("5UV.hist.root"); // Murad's file
-  //task->open("../outC3/mip.hist.root"); // Iter-3
-  fd=task->open(iPath+"mip06A.hist.root"); 
+   fd=task->open(iPath+"mip5-8Slow.hist.root"); 
   //fd=task->open(iPath+"R5112018.hist.root"); 
   //  return;
 
@@ -34,11 +32,18 @@ doSmdGains( int iU=0){
   task->init();
   int str1=1,str2=288;
 
-  // return;
-  //task->fitSlopes(30,38); return;
-  //  task->fitSlopes(str1,str2);  task-> doSlopesOnly(760.); 
+  //  plotAllTiles(); return;
 
-#if 1
+
+  //  task->fitSlopesSmd(250,280,1); return;
+
+  //  fitSlopesSmdPlain(); // plot all strips w/ slopes for one plain
+
+  task->fitSlopesSmd(str1,str2); 
+  //task->fitSlopesSmd(261,290,1);
+  task-> doSlopesOnly(760.); 
+
+#if 0
   task->doOneStripEne(str1,str2);
   task->doGainCorr(str1,str2);
   task->saveHisto();
@@ -53,6 +58,7 @@ doSmdGains( int iU=0){
   char tt[100];
   sprintf(tt,"smd%02d%c.dat",sectID,'U'+iU);
   FILE *fd=fopen(tt,"w"); assert(fd);
+  fprintf(fd,"# gains for SMD plain %02d%c, inverted slopes\n# stripName, gain[ch/GeV], erGain, anything\n",sectID,'U'+iU);
   task->saveGains(fd);
   fclose(fd);
   return;
@@ -73,3 +79,26 @@ doSmdGains( int iU=0){
  
 } 
 
+//--------------------------------
+//  UTIL
+//-------------------------------
+ 
+void  plotAllTiles() {
+  // fit raw P,Q,R,T  spectra with expo,  just plot
+  char cT[4]={'P','Q','R','T'};
+  int iT;
+  for(iT=0;iT<4;iT++) {
+    task->fitSlopesTile(1,6,cT[iT],3);  
+    task->fitSlopesTile(7,6,cT[iT],3);  
+  }
+}
+
+//-------------------------------
+// plot all strips w/ slopes for one plain
+void  fitSlopesSmdPlain(){
+  int k;
+  for(k=0;k<10;k++) {
+    int str1=30*k;
+    task->fitSlopesSmd(1+str1,30+str1,3);
+  }
+}
