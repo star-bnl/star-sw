@@ -2,8 +2,11 @@
 //                                                                      //
 // StV0Maker class                                                    //
 //                                                                      //
-// $Id: StV0Maker.cxx,v 1.24 2000/06/15 21:32:10 genevb Exp $
+// $Id: StV0Maker.cxx,v 1.25 2000/07/07 23:06:48 caines Exp $
 // $Log: StV0Maker.cxx,v $
+// Revision 1.25  2000/07/07 23:06:48  caines
+// Increase memory allocation for v0s
+//
 // Revision 1.24  2000/06/15 21:32:10  genevb
 // Bug fix for zeroing variables
 //
@@ -209,7 +212,7 @@ Int_t StV0Maker::Make(){
     if(Debug()) gMessMgr->Info() << "StV0Maker::Make(): Calling ev0..." << endm;
     Int_t v0_limit = globtrk->GetNRows()/80;
     v0_limit = v0_limit*v0_limit;
-    if (v0_limit < 2048) v0_limit=2048;
+    if (v0_limit < 15000) v0_limit=15000;
     if (! dst_v0_vertex) {
       dst_v0_vertex = new St_dst_v0_vertex("dst_v0_vertex",v0_limit); 
       AddData(dst_v0_vertex);
