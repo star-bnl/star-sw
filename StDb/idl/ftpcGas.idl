@@ -18,6 +18,6 @@ struct ftpcGas {
    float  baseTemperature;          /* degree Centigrade */
    float  basePressure;             /* Torr  */
    float  pressureOffset;           /* Torr  */
-   float  temperatureDifference;    /* gas temperature difference FTPC West-Eastin degree Centigrade */
+   float  temperatureDifference;    /* gas temperature difference FTPC West-East in degree Centigrade */
 
  };  
