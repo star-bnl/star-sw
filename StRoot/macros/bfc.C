@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.154 2002/03/19 21:16:58 jeromel Exp $
+// $Id: bfc.C,v 1.155 2002/05/23 21:54:37 jeromel Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -204,7 +204,10 @@ void bfc(const Int_t First,
        if (dstSet) xdf_out->NextEventPut(dstSet); // xdf output
      }
      iTotal++;
-     if (treeMk && iMake == kStErr) {treeMk->Make(i); iBad++;}
+     if (treeMk && iMake == kStErr) {
+       treeMk->IMake(i); 
+       iBad++;
+     }
      //    gSystem->Exec("ps ux");
      evnt.Stop("QAInfo:");
      //  evnt.Show("QAInfo:");
