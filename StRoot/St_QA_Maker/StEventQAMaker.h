@@ -1,5 +1,8 @@
-// $Id: StEventQAMaker.h,v 2.0 2000/08/25 16:02:40 genevb Exp $
+// $Id: StEventQAMaker.h,v 2.1 2001/04/28 22:05:13 genevb Exp $
 // $Log: StEventQAMaker.h,v $
+// Revision 2.1  2001/04/28 22:05:13  genevb
+// Added EMC histograms
+//
 // Revision 2.0  2000/08/25 16:02:40  genevb
 // New revision: new structure, multiplicity classes
 //
@@ -46,13 +49,14 @@ class StEventQAMaker : public StQAMakerBase {
   virtual void   MakeHistVertex();
   virtual void   MakeHistPoint();
   virtual void   MakeHistRich();
+  virtual void   MakeHistEMC();
   virtual void   MakeHistEval();
   
 //  virtual void   SetPntrToHistUtil(StHistUtil *m1);
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.0 2000/08/25 16:02:40 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StEventQAMaker.h,v 2.1 2001/04/28 22:05:13 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StEventQAMaker,0)   //StAF chain virtual base class for Makers
     };
