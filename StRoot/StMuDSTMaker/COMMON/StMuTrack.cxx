@@ -1,11 +1,12 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.9 2003/11/07 15:23:26 laue Exp $
+ * $Id: StMuTrack.cxx,v 1.10 2004/04/08 16:21:57 subhasis Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 
 #include "StMuTrack.h"
+#include "StMuDebug.h"
 #include "StMuException.hh"
 #include "StEvent/StEventTypes.h"
 #include "StEvent/StTrackGeometry.h"
@@ -19,11 +20,12 @@
 
 StuProbabilityPidAlgorithm* StMuTrack::mProbabilityPidAlgorithm=0;
 double StMuTrack::mProbabilityPidCentrality=0;
+ 
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, int index2Global, int index2RichSpectra, bool l3) : mId(0), mType(0), mFlag(0), mIndex2Global(index2Global), mIndex2RichSpectra(index2RichSpectra), mNHits(0), mNHitsPoss(0), mNHitsDedx(0),mNHitsFit(0), mPidProbElectron(0), mPidProbPion(0),mPidProbKaon(0),mPidProbProton(0), mNSigmaElectron(-999), mNSigmaPion(-999), mNSigmaKaon(-999), mNSigmaProton(-999) ,mdEdx(0.) {
 
-//----------------------------------------------------------------------------
-//----------------------------------------------------------------------------
-//----------------------------------------------------------------------------
-StMuTrack::StMuTrack(const StEvent* event, const StTrack* track, int index2Global, int index2RichSpectra, bool l3) : mIndex2Global(index2Global), mIndex2RichSpectra(index2RichSpectra) {
   const StTrack* globalTrack = track->node()->track(global);
 
   mId = track->key();
@@ -130,8 +132,15 @@ void StMuTrack::fillMuProbPidTraits(const StEvent* e, const StTrack* t) {
   // get the StDedxPidTraits
   StDedxPidTraits* dedxPidTraits =0;
   unsigned int size = traits.size();
+
+  if (StMuDebug::level()>=3) {
+      cout << " dedxPidTraits->method() ";
+  }
   for (unsigned int i = 0; i < size; i++) {
       if ( !(dedxPidTraits=dynamic_cast<StDedxPidTraits*>(traits[i])) ) continue;
+      if (StMuDebug::level()>=3) {
+	  cout << " " << dedxPidTraits->method();
+      }
       if (dedxPidTraits->method() == kTruncatedMeanIdentifier)  {
 	  mProbPidTraits.setdEdxTruncated( dedxPidTraits->mean() ); 
 	  mProbPidTraits.setdEdxErrorTruncated( dedxPidTraits->errorOnMean() ); 
@@ -141,6 +150,9 @@ void StMuTrack::fillMuProbPidTraits(const StEvent* e, const StTrack* t) {
 	  mProbPidTraits.setdEdxErrorFit( dedxPidTraits->errorOnMean() ); 
 	  mProbPidTraits.setdEdxTrackLength( dedxPidTraits->length() ); 
       }
+  }
+  if (StMuDebug::level()>=3) {
+      cout << endl;
   }
 
   // get the StProbPidTraits 
@@ -161,6 +173,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.10  2004/04/08 16:21:57  subhasis
+ * Initialization ,as suggested by Yuri
+ *
  * Revision 1.9  2003/11/07 15:23:26  laue
  * added error on dEdx measurements to the StMuProbPidTraits
  *
