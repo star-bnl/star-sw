@@ -29,11 +29,15 @@ public:
     double getBody2East();
     double getBody3East();
     double getBody4East();
+    double getBody5East();
+    double getBody6East();
     double getGasOutWest();
     double getBody1West();
     double getBody2West();
     double getBody3West();
     double getBody4West();
+    double getBody5West();
+    double getBody6West();
     double getBarometricPressure();
 
     void update(StMaker*);
