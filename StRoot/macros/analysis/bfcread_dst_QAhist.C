@@ -1,5 +1,8 @@
-// $Id: bfcread_dst_QAhist.C,v 1.2 1999/08/06 15:08:13 kathy Exp $
+// $Id: bfcread_dst_QAhist.C,v 1.3 1999/09/09 21:18:02 kathy Exp $
 // $Log: bfcread_dst_QAhist.C,v $
+// Revision 1.3  1999/09/09 21:18:02  kathy
+// changed to use StIOMaker instead of StTreeMaker so that it can read as input both .dst.root and .dst.xdf files
+//
 // Revision 1.2  1999/08/06 15:08:13  kathy
 // removed for loop and put in goto checks - due to CINT problems
 //
@@ -22,7 +25,7 @@
 // owner:  Kathy Turner
 // what it does: 
 //   (adapted from bfcread.C)
-//    - reads a *.dst.root file from 99e 
+//    - reads a *.dst.root OR .dst.xdf file from 99e and up
 //    - runs St_QA_Maker
 //    - draws QA histograms and then sends them to a postscript file
 //
@@ -55,7 +58,7 @@ StChain *chain;
 TBrowser *brow=0;
 
 void bfcread_dst_QAhist(Int_t nevents=1, 
-             const char *MainFile="/afs/rhic/star/data/test/dev/tfs_Solaris/Thu/year_2a/psc0208_01_40evts.dst.root",
+             const char *MainFile="/disk00000/star/test/dev/tfs_Solaris/Wed/year_2a/psc0208_01_40evts.dst.root",
              const Char_t *psFile="QA_hist.ps")
 {
 //
@@ -66,20 +69,25 @@ void bfcread_dst_QAhist(Int_t nevents=1,
   gSystem->Load("St_base");
   gSystem->Load("StChain");
   gSystem->Load("St_Tables");
-  gSystem->Load("StTreeMaker");
-  gSystem->Load("St_QA_Maker");
+  gSystem->Load("StUtilities");
+  gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
+  gSystem->Load("St_QA_Maker");
 
 //  Setup top part of chain
   chain = new StChain("bfc");
   chain->SetDebug();
    
+// Input File Maker
+    StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
+
+// commented out on 9/9/99 - now use StIOMaker
 //  Input Tree
-  StTreeMaker *treeMk = new StTreeMaker("treeRead",MainFile);
-  treeMk->SetIOMode("r");
-  treeMk->SetDebug();
-  treeMk->SetBranch("*",0,"0");  	//deactivate all branches
-  treeMk->SetBranch("dstBranch",0,"r");	//activate dstBranch
+    //  StTreeMaker *treeMk = new StTreeMaker("treeRead",MainFile);
+    //treeMk->SetIOMode("r");
+    //treeMk->SetDebug();
+    //treeMk->SetBranch("*",0,"0");  	//deactivate all branches
+    //treeMk->SetBranch("dstBranch",0,"r");	//activate dstBranch
 
 //  add other makers to chain:
   St_QA_Maker  *QA  = new St_QA_Maker;
