@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 1.1 1999/01/30 03:58:05 fisyak Exp $
+ * $Id: StEvent.cxx,v 1.2 1999/02/10 02:17:33 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -14,8 +14,11 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 1.1  1999/01/30 03:58:05  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/10 02:17:33  fisyak
+ * Merging with new Torre stuff
+ *
+ * Revision 1.5  1999/02/10 18:58:23  wenaus
+ * Print 'bad compiler' line only for bad compiler
  *
  * Revision 1.4  1999/01/30 23:03:10  wenaus
  * table load intfc change; include ref change
@@ -26,27 +29,28 @@
  * Revision 1.2  1999/01/15 22:53:39  wenaus
  *
 #include <iostream.h>
-
-static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.1 1999/01/30 03:58:05 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.2 1999/02/10 02:17:33 fisyak Exp $";
 using namespace std;
 #ifdef __ROOT__
 ClassImp(StEvent)
 
 #endif
 StEvent::StEvent()
-static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.1 1999/01/30 03:58:05 fisyak Exp $";
+static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.2 1999/02/10 02:17:33 fisyak Exp $";
  * Changes due to the addition of the EMC to StEvent
 StEvent::StEvent():St_DataSet("StEvent")
  * add rich pixel info/containers
-StEvent::StEvent(StRun* run, dst_event_header_st* hdr, dst_event_summary_st* sum) {
+StEvent::StEvent(StRun* run, dst_event_header_st& hdr, dst_event_summary_st& sum) {
 StEvent::StEvent(StRun* run, dst_event_header_st& hdr, dst_event_summary_st& sum):
-    mType = hdr->event_type;
-    mId.first = hdr->n_event[0];
-    mId.second = hdr->n_event[1];
-    mRunNumber = hdr->n_run;
-    mTime = hdr->time;
-    mTriggerMask = hdr->trig_mask;
-    mBunchCrossingNumber = hdr->bunch_cross;
+    mType = hdr.event_type;
+#if 0
+#include "StEmcCollection.h"
+    init(run);
+#endif
+    mType = hdr.event_type;
+    mTime = hdr.time;
+    mId.second = hdr.n_event[1];
+    mRunNumber = hdr.n_run;
     StThreeVectorF v;
     mBunchCrossingNumber = hdr.bunch_cross;
     dummyString = "Ditto!";
@@ -61,9 +65,13 @@ StEvent::operator=(const StEvent&) { return *this;} // private
     // delete mRun;             Open question?
     // delete mPrimaryVertex;   No, is deleted below in vertex collection
     delete mSummary;
-    //    for(StTrackIterator it=mTracks->begin(); it != mTracks->end(); it++) delete *it;
+#if 0
+    for(StTrackIterator it=mTracks->begin(); it != mTracks->end(); it++) delete *it;
+#endif
     delete mTracks;            
-    //    for(StVertexIterator iv=mVertices->begin(); iv != mVertices->end(); iv++) delete *iv;
+#if 0
+    for(StVertexIterator iv=mVertices->begin(); iv != mVertices->end(); iv++) delete *iv;
+#endif
     delete mVertices;
     delete mTpcHits;           
     delete mSvtHits;           
@@ -112,8 +120,12 @@ StEvent::operator=(const StEvent&) { return *this;} // private
   cout << *this << endl;
 }
 //______________________________________________________________________________
+#if 0
 
 Int_t StEvent::operator==(const StEvent& e) const
+#else
+    return 1;
+#endif
 {
     return e.mId.first == mId.first &&
 	   e.mId.second == mId.second; 
@@ -123,24 +135,26 @@ Int_t StEvent::operator!=(const StEvent& e) const
 {
     return !(e == *this);   // invoke operator==()
 }
+#if 0
     os << "Id: " << e.id().first << ", " << e.id().second << endl;
     os << "Type: " << e.type() << endl;
+#endif
     os << "Run: " << e.runNumber() << endl;
-    time_t theTime = e.time();
+    Long_t theTime = e.time();
     os << "Time: " << ctime(&theTime);  // \n provided by ctime()
     os << "Type: " << e.type() << endl;
     os << "Run: "  << e.runNumber() << endl;
     os << "Time: " << e.time() << endl;
     os << "Luminosity: " << e.luminosity() << endl;
-void StEvent::setType(const Char_t* val) { mType = val; }
-
+#if 0
+void StEvent::setType(const TString val) { mType = val; }
 void StEvent::setId(const pair<Long_t, Long_t>& val)
 void StEvent::setType(const Char_t* val) { mType = val; }
 
 void StEvent::setId(const pairL& val)
 {
-
-void StEvent::setTime(time_t val) { mTime = val; }
+#endif
+void StEvent::setTime(Long_t val) { mTime = val; }
     mId.second = val.second;
 }
     _lookup(hits, mContent);

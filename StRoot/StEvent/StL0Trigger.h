@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StL0Trigger.h,v 1.1 1999/01/30 03:58:06 fisyak Exp $
+ * $Id: StL0Trigger.h,v 1.2 1999/02/10 02:17:35 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,8 +10,11 @@
  ***************************************************************************
  *
  * $Log: StL0Trigger.h,v $
- * Revision 1.1  1999/01/30 03:58:06  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/10 02:17:35  fisyak
+ * Merging with new Torre stuff
+ *
+ * Revision 1.4  1999/03/04 15:56:59  wenaus
+ * add std namespace for Sun CC5 compatibility
  *
  * Revision 1.3  1999/02/09 22:38:22  wenaus
  * add missing 'inline'
@@ -42,9 +45,7 @@ class StL0Trigger : public StTrigger {
 public:
     StL0Trigger();
     
-#if 0
     // StL0Trigger(const StL0Trigger&);    use default
-#endif
 #ifndef __ROOT__    
     VecLong&      coarsePixelArray();
 #endif
@@ -65,9 +66,9 @@ public:
 	ClassDef(StL0Trigger,1)  //StL0Trigger structure
 #endif
     Long_t         mMwcCtbTopology;
-#if 0
-VecLong& StL0Trigger::coarsePixelArray() { return mCoarsePixelArray;}
-#endif
+
+  ClassDef(StL0Trigger,1)  //StL0Trigger structure
+#ifndef __ROOT__
 inline VecLong& StL0Trigger::coarsePixelArray() { return mCoarsePixelArray;}
 #endif
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.h,v 1.1 1999/01/30 03:58:06 fisyak Exp $
+ * $Id: StGlobalTrack.h,v 1.2 1999/02/10 02:17:35 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.h,v $
- * Revision 1.1  1999/01/30 03:58:06  fisyak
- * Root Version of StEvent
+ * Revision 1.2  1999/02/10 02:17:35  fisyak
+ * Merging with new Torre stuff
+ *
+ * Revision 1.5  1999/02/15 16:17:03  wenaus
+ * fix Double_t& -> Double_t referencing bug
  *
  * Revision 1.4  1999/02/12 02:01:18  wenaus
  * New track constructor to load helix params independently of table
@@ -22,7 +25,6 @@
  * Revision 1.3  1999/01/30 23:03:12  wenaus
  * table load intfc change; include ref change
  *
-
 #ifdef __ROOT__
 #include "TObject.h"
 #endif
@@ -31,17 +33,17 @@
 #else
   template< class T > class vector;
 #endif
-#include "StTrack.h"
 class StVecPtrSvtHit;
 class StVecPtrTpcHit;
 #include "StArray.h"
 #ifndef __ROOT__
+#include <vector>
 #include "StEmcHit.h"
 #include "StSmdHit.h"
 #include "StVecPtrTpcHit.h"
 #include "StVecPtrSvtHit.h"
 #include "StVecPtrFtpcHit.h"
-#include "dst_track.h"
+#include "StTpcHit.h"
 #include "StTrackPidTraits.h"
 #include "dst_track.h"
 
@@ -92,7 +94,7 @@ using namespace std;
 	ClassDef(StGlobalTrack,1)  //StGlobalTrack structure
 #endif
     StVecPtrFtpcHit*  mFtpcHits;
-#ifndef __CINT__
+
 inline const StVecPtrTpcHit& StGlobalTrack::tpcHits() const { return mTpcHits; }
 typedef StGlobalTrackIterator        StTrackIterator; 
 inline const StVecPtrSvtHit& StGlobalTrack::svtHits() const { return mSvtHits; }
@@ -108,7 +110,7 @@ inline StDedx* StGlobalTrack::ftpcDedx() { return mFtpcDedx; }
 inline StEmcHit* StGlobalTrack::emcHit() { return mEmcHit; }
 
 inline StSmdHit* StGlobalTrack::smdHit() { return mSmdHit; }
-#endif
+
 
 inline const StTrackPidTraits* StGlobalTrack::pidTraits() const { return mPidTraits; }
 #endif
