@@ -1,10 +1,8 @@
-// $Id: StFtpcFastSimu.cc,v 1.13 2000/11/24 14:57:02 hummler Exp $
+// $Id: StFtpcFastSimu.cc,v 1.14 2000/11/24 15:02:33 hummler Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
-// Revision 1.13  2000/11/24 14:57:02  hummler
-// - remove tables from StFtpcFastSimu
-// - remove memory leak
-// - general cleanup
+// Revision 1.14  2000/11/24 15:02:33  hummler
+// commit changes omitted in last commit
 //
 // Revision 1.12  2000/09/18 14:26:48  hummler
 // expand StFtpcParamReader to supply data for slow simulator as well
@@ -52,6 +50,7 @@
 #include "RanluxEngine.h"
 // random number engines from StarClassLibrary
 #include "RandGauss.h"
+#include "StFtpcTrackMaker/StFtpcPoint.hh"
 
 static RanluxEngine engine;
 
@@ -69,7 +68,7 @@ StFtpcFastSimu::StFtpcFastSimu(StFtpcGeantReader *geantReader,
   // allocate memory for local storage
   // we need local arrays here that we can mess around in
   nPoints=mGeant->numberOfHits();
-  mPoint=new StFtpcPoint[nPoints];
+  mPoint=new StFtpcReducedPoint[nPoints];
   mGeantPoint=new StFtpcGeantPoint[nPoints];
 
   //    check that fppoint and gepoint are large enough to hold g2t_ftp_hit
@@ -97,24 +96,25 @@ StFtpcFastSimu::StFtpcFastSimu(StFtpcGeantReader *geantReader,
   for (Int_t i = 0; i < nPoints; i++) {
     // use (default) copy constructor for StFtpcGeantPoint
     new(gpoint[i]) StFtpcGeantPoint(mGeantPoint[i]);
-    // as StFtpcPoint is in different package, copy constructor is not visible here
+    // as StFtpcPoint is in different package, we have to copy data 
+    // from StFtpcReducedPoint
     // hgrrrumpf!!!
-//    new(point[i]) StFtpcPoint();
-//    ((StFtpcPoint *)pointarray->At(i))->SetX(mPoint[i].GetX());
-//    ((StFtpcPoint *)pointarray->At(i))->SetY(mPoint[i].GetY());
-//    ((StFtpcPoint *)pointarray->At(i))->SetZ(mPoint[i].GetZ());
-//    ((StFtpcPoint *)pointarray->At(i))->SetXerr(mPoint[i].GetXerr());
-//    ((StFtpcPoint *)pointarray->At(i))->SetYerr(mPoint[i].GetYerr());
-//    ((StFtpcPoint *)pointarray->At(i))->SetZerr(mPoint[i].GetZerr());
-//    ((StFtpcPoint *)pointarray->At(i))->SetPadRow(mPoint[i].GetPadRow());
-//    ((StFtpcPoint *)pointarray->At(i))->SetSector(mPoint[i].GetSector());
-//    ((StFtpcPoint *)pointarray->At(i))->SetNumberPads(mPoint[i].GetNumberPads());
-//    ((StFtpcPoint *)pointarray->At(i))->SetNumberBins(mPoint[i].GetNumberBins());
-//    ((StFtpcPoint *)pointarray->At(i))->SetMaxADC(mPoint[i].GetMaxADC());
-//    ((StFtpcPoint *)pointarray->At(i))->SetCharge(mPoint[i].GetCharge());
-//    ((StFtpcPoint *)pointarray->At(i))->SetFlags(mPoint[i].GetFlags());
-//    ((StFtpcPoint *)pointarray->At(i))->SetSigmaPhi(mPoint[i].GetSigmaPhi());
-//    ((StFtpcPoint *)pointarray->At(i))->SetSigmaR(mPoint[i].GetSigmaR());
+    new(point[i]) StFtpcPoint();
+    ((StFtpcPoint *)pointarray->At(i))->SetX(mPoint[i].GetX());
+    ((StFtpcPoint *)pointarray->At(i))->SetY(mPoint[i].GetY());
+    ((StFtpcPoint *)pointarray->At(i))->SetZ(mPoint[i].GetZ());
+    ((StFtpcPoint *)pointarray->At(i))->SetXerr(mPoint[i].GetXerr());
+    ((StFtpcPoint *)pointarray->At(i))->SetYerr(mPoint[i].GetYerr());
+    ((StFtpcPoint *)pointarray->At(i))->SetZerr(mPoint[i].GetZerr());
+    ((StFtpcPoint *)pointarray->At(i))->SetPadRow(mPoint[i].GetPadRow());
+    ((StFtpcPoint *)pointarray->At(i))->SetSector(mPoint[i].GetSector());
+    ((StFtpcPoint *)pointarray->At(i))->SetNumberPads(mPoint[i].GetNumberPads());
+    ((StFtpcPoint *)pointarray->At(i))->SetNumberBins(mPoint[i].GetNumberBins());
+    ((StFtpcPoint *)pointarray->At(i))->SetMaxADC(mPoint[i].GetMaxADC());
+    ((StFtpcPoint *)pointarray->At(i))->SetCharge(mPoint[i].GetCharge());
+    ((StFtpcPoint *)pointarray->At(i))->SetFlags(mPoint[i].GetFlags());
+    ((StFtpcPoint *)pointarray->At(i))->SetSigmaPhi(mPoint[i].GetSigmaPhi());
+    ((StFtpcPoint *)pointarray->At(i))->SetSigmaR(mPoint[i].GetSigmaR());
   }
 
   
