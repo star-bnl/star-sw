@@ -1,5 +1,8 @@
-// $Id: StSvtHitMaker.h,v 1.7 2001/09/22 01:07:09 caines Exp $
+// $Id: StSvtHitMaker.h,v 1.8 2002/01/28 23:42:14 caines Exp $
 // $Log: StSvtHitMaker.h,v $
+// Revision 1.8  2002/01/28 23:42:14  caines
+// Move to SVT database with StSvtDbMaker
+//
 // Revision 1.7  2001/09/22 01:07:09  caines
 // Fixes now that AddData() is cleared everyevent
 //
@@ -34,10 +37,6 @@
 #endif
 
 #include "tables/St_scs_spt_Table.h"
-#include "tables/St_srs_srspar_Table.h"
-#include "tables/St_svg_shape_Table.h"
-#include "tables/St_svg_geom_Table.h"
-
 
 #include "TH2.h"
 
@@ -45,9 +44,7 @@ class TFile;
 class TNtuple;
 
 class St_scs_spt;
-class St_svg_shape;
-class St_svg_geom;
-class St_srs_srspar;
+class StSvtGeometry;
 class StSvtHybridCollection;
 class StSvtAnalysedHybridClusters;
 class StSvtData;
@@ -66,23 +63,21 @@ class StSvtHitMaker : public StMaker
   Int_t FillHistograms();
   Int_t GetSvtRawData();
   Int_t GetSvtClusterData();
+  Int_t GetSvtGeometry();
   void TransformIntoSpacePoint();
   void SaveIntoTable(int numOfCluster, int index);
   void SaveIntoNtuple(int numOfCluster, int index);
   void SetWriteNtuple(int iwrite){iWrite = iwrite;};
   Int_t Eval();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.7 2001/09/22 01:07:09 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.8 2002/01/28 23:42:14 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  protected:
 
   int iWrite;
 
-  St_svg_shape    *m_shape; //!
-  St_svg_geom     *m_geom;  //!
-  St_srs_srspar   *m_srs_srspar; //!
-
+  StSvtGeometry *m_geom; //!
   StSvtHybridCollection *mSvtCluColl; //!
   StSvtHybridCollection *mSvtGeantHitColl; //!
 
