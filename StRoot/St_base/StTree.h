@@ -130,7 +130,7 @@ public:
   const Char_t *NextFileName();
   const Char_t *GetBraName(){return GetAttr("branch=");}; 
   const Char_t *GetFormat() {return GetAttr("format=");};
-  Int_t Check(){return 0;};
+  //  Int_t Check(){return 0;};
 protected:
   void SetInfo();
   const Char_t *GetAttr(const char *att); 
