@@ -1,5 +1,7 @@
 #!/bin/bash
 
+  outDir=$2/log/
+  histDir=$2/
 
 #########
 runlist=`cat $1`
@@ -12,9 +14,6 @@ for runline in $runlist ; do
   
   run=5$clippedrun-$runsuffix
   
-  outDir=/star/u/relyea/star/bemc/abemc/log
-  histDir=/star/u/relyea/star/bemc/abemc/
-
   echo $firsthalf, $clippedrun, $run
   echo outDir=$outDir  histDir=$histDir
 
@@ -22,15 +21,9 @@ for runline in $runlist ; do
   blog=blog.$mufile
   rm $outDir/$log.gz
   rm $outDir/$blog
-#  root4star -b -q macros/runPPtree.C'("$run.","$inpDir/","$mufile","$histDir")' >& $outDir/$log
-#  root4star  >& $outDir/$log << EOF
   root4star << EOF
-    .x macros/runPPtree.C("$run.","$inpDir/","$mufile","$histDir");
+    .x ./StRoot/StEmcPool/CSMStatusUtils/macros/processMuDst.C("$run.","$inpDir/","$mufile","$histDir");
 EOF
   gzip $outDir/$log
-#echo 'macros/runPPtree.C("'$run'.","$inpDir/","$mufile","$histDir")'
-#sleep 180
-#  root4star << EOF
-#   .x macros/runPPtree.C("$run.","","$inpDir/$mufile","$histDir")
 
 done
