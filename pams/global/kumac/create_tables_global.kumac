@@ -245,9 +245,9 @@ macro svm
     cd [run_dst]
     tdm/newtable run_summary   dst_run_summary   1
     
-  ls [params]/global/dst_summary_param
+  ls [params]/global/dstpars/dst_summary_param
   if (staf_status(2).ne.STAFCV_OK) then
-      cd   [params]/global
+      cd   [params]/global/dstpars
       tdm/newtable  dst_summary_param   dst_summary_param   1
     endif
     
