@@ -204,7 +204,7 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 			    UInt_t av, charge ;
 			    Int_t mean ;
 			    UInt_t flags ;
-			    Int_t last_falling ;
+			    Int_t last_falling= -999999 ;
 			    Int_t k ;
 			    UInt_t *ri ;
 			    UInt_t tmp_charge ;
@@ -486,7 +486,7 @@ Int_t croatFinder(UChar_t *adcin, UShort_t *cppin, UInt_t *outres, Int_t rb, Int
 	    // write this row out
 	    {
 	      // now we store TPCMZCLD DATA WORD 2 3 : rowid and number of clusters for this row
-	      UInt_t *rows_ok_p, *cl_ok_p ;
+	      UInt_t *rows_ok_p=0, *cl_ok_p=0 ;
 	      // good cluster counter
 	      UInt_t cls_ok ;
 	      // reset good cluster counter

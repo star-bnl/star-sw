@@ -103,7 +103,7 @@ void StiPixelHitLoader::loadMcHits(StMcEvent* source,
       double sigma = 0.; // um
       double x = hit->position().x();
       double y = hit->position().y();
-      double u1, u2, v1, v2;
+      double u1, u2, v1=999, v2=999;
       double r = 2.;
       double z1 = 10.;
       double z2 = 10.;

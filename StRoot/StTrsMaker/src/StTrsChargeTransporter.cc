@@ -1,6 +1,6 @@
 /**********************************************************************
  *
- * $Id: StTrsChargeTransporter.cc,v 1.8 2003/09/08 02:13:27 perev Exp $
+ * $Id: StTrsChargeTransporter.cc,v 1.9 2004/05/03 23:31:12 perev Exp $
  *
  * Author: brian Nov 1, 1998
  *
@@ -11,6 +11,9 @@
  **********************************************************************
  *
  * $Log: StTrsChargeTransporter.cc,v $
+ * Revision 1.9  2004/05/03 23:31:12  perev
+ * Possible non init WarnOff
+ *
  * Revision 1.8  2003/09/08 02:13:27  perev
  * fabs instead abs
  *
@@ -188,7 +191,7 @@ double StTrsChargeTransporter::transparencyCalculation()
 
     Lg();
     
-    double trans;
+    double trans=-999999.;
     if(mGateVoltage <= maximumTransparency()) {
 	trans = 1.;
     }

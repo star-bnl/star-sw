@@ -160,7 +160,7 @@ long type_of_call tpt_sts_(
     int drow;                          /* Row number increment (+1 or -1) */
     int ldel;                          /* Index of outlier to delete */
     int lkeep;                         /* Counter for kept outliers */
-    int l_outlier_keep;                /* Index for kept outliers */
+    int l_outlier_keep=-1;             /* Index for kept outliers */
     int max_hole;                      /* par->hole = max row sep. of hits */
     int outlier[MAX_ROWS];             /* List of outliers */
     int outlier_keep[MAX_ROWS];        /* List of outliers to keep */
@@ -183,7 +183,7 @@ long type_of_call tpt_sts_(
     long l, ll;                        /* Loop counters */
     long loc_hit[MAX_HITS];            /* Hit indices, sorted by sector,row */
     long lrow;                         /* Row counter */
-    long lrow_last_hit;                /* lrow for last hit found on track */
+    long lrow_last_hit=-1;             /* lrow for last hit found on track */
     long m;                            /* Row index */
     long mrow;                         /* Row counter */
     long n, n_2, n_3;                  /* */
@@ -201,25 +201,25 @@ long type_of_call tpt_sts_(
     long sector;                       /* Sector number (1--24) */
     long skip_row[MAX_SECS][MAX_ROWS]; /* TRUE iff row is to be skipped */
 
-    float A, B, C, D;
+    float A=-999999, B=-999999, C=-999999, D=-999999;
     float Az, Bz;
     float Az_norm;                     /* 1.0/sqrt(Az*Az) */
     float a_ddy[MAX_ROWS];             /* Absolute distance to track in xy */
     float a_ddz[MAX_ROWS];             /* Absolute distance to track in z */
-    float alpha;                       /* Pad-row crossing angle (radians) */
-    float ax, bx;
-    float ax_norm;                     /* 1.0/sqrt(ax*ax) */
-    float ay, by;
-    float ay_norm;                     /* 1.0/sqrt(ay*ay) */
+    float alpha=999999;                /* Pad-row crossing angle (radians) */
+    float ax=999999, bx=999999;
+    float ax_norm=999999;              /* 1.0/sqrt(ax*ax) */
+    float ay=999999, by=999999;
+    float ay_norm=999999;              /* 1.0/sqrt(ay*ay) */
     float az, bz;
     float az_norm;                     /* 1.0/sqrt(az*az) */
     float chisqx, chisqz;
     float cosa;                        /* cosine for local->global rotation */
-    float cos_alpha;                   /* cos(alpha) */
+    float cos_alpha=999999;            /* cos(alpha) */
     float cross;                       /* Pad-row crossing angle (radians) */
     float d_2[MAX_ROWS];               /* (Distance to track)^2 */
     float d_2_lim;                     /* Dist.^2 to closest rejected hit */
-    float dA, dB, dC, dD;
+    float dA=999999, dB=999999, dC=999999, dD=999999;
     float daz, dbz;
     float dclosest_2;                  /* (Distance)^2 to closest hit */
     double detx, detx_n;
@@ -234,7 +234,7 @@ long type_of_call tpt_sts_(
     float dy_lim;                      /* Limit on xy residual (cm) */
     float dz, dz0, dz_2;               /*  z residuals */
     float dz_lim;                      /* Limit on  z residual (cm) */
-    float lambda;                      /* Polar angle of track */
+    float lambda=999999;               /* Polar angle of track */
     float par_outlimit;                /* Local value of par->outlimit */
     float row_max_x[MAX_ROWS];         /* Max. x for hit in row */
     float row_min_x[MAX_ROWS];         /* Min. x for hit in row */
@@ -276,7 +276,7 @@ long type_of_call tpt_sts_(
     TCL_TPHIT_ST *pjjp;
     TCL_TPHIT_ST *pjlp;
     TCL_TPHIT_ST *pjp, *pjp_2, *pjp_3;
-    TCL_TPHIT_ST *pjlp_best, *pjp_2_best, *pjp_3_best;
+    TCL_TPHIT_ST *pjlp_best=0, *pjp_2_best=0, *pjp_3_best=0;
 
 /* set all the counters to 0 */
     res_h[0].nok = 0;

@@ -17,7 +17,7 @@ void StiTrackToTrackMap::build(StiTrackContainer * firstTrackContainer,
 {
   TrackToTrackMap::const_iterator firstTrackIter;
   StiTrackAssociation * association;
-  StiHit * secondHit;
+  StiHit * secondHit=0;
   StiTrack * track;
   for (firstTrackIter=firstTrackContainer->begin();
        firstTrackIter!=firstTrackContainer->end();

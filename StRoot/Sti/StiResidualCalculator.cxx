@@ -1,7 +1,7 @@
 //StiResidualCalculator.cxx
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.cxx,v 2.11 2004/04/05 21:51:45 andrewar Exp $
+ * $Id: StiResidualCalculator.cxx,v 2.12 2004/05/03 23:36:46 perev Exp $
  *
  * \class  StiResidualCalculator provides a utility for determining the
  *         track residuals.
@@ -9,6 +9,9 @@
  * \date   October 2002
  ***************************************************************************
  * $Log: StiResidualCalculator.cxx,v $
+ * Revision 2.12  2004/05/03 23:36:46  perev
+ * Possible non init WarnOff
+ *
  * Revision 2.11  2004/04/05 21:51:45  andrewar
  * Added hist for dz vs. dy plot
  *
@@ -488,7 +491,7 @@ void StiResidualCalculator::FillHist(int offset, double z, double y,
 				     double dze, double dye)
 {
   TH3D* hist;
-  int check;
+  int check=0;
 
   vector<TH3D*>::iterator iH = mYResidualCrossZ.begin();
   hist = *(iH+offset);

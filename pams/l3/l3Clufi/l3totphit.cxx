@@ -33,7 +33,7 @@ long type_of_call l3totphit_(
   */
 
   Int_t index;
-  Int_t sector,supersector;
+  Int_t sector=-999999,supersector;
   Int_t rbindex,rboffset;
   Int_t mzindex,mzoffset,mzlength;
   UInt_t* bank = NULL ;    // DATAWORDS (=4 BYTE) to be written out in DAQ-Format 

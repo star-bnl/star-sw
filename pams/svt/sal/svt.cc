@@ -539,7 +539,7 @@
 
   void event::FindTracks(int nl, int nw, Point P)
 {
-  int j, l, k, kf;
+  int j, l, k, kf=-999999;
   float x, y, d, df;
   Point PP1, PP2;
 

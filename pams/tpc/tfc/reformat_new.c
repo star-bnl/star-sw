@@ -60,7 +60,7 @@ long type_of_call reformat_new_
     int    ij;
     long  iptr, sptr, dptr;
     long  npad;
-    int    row,current_sect,err;
+    int    row,current_sect,err=0;
     int    sector, RDO,datatype;
     long irepeatrow;
 

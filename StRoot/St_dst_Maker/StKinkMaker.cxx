@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.34 2004/03/16 20:59:37 jeromel Exp $
+// $Id: StKinkMaker.cxx,v 1.35 2004/05/03 23:32:10 perev Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.35  2004/05/03 23:32:10  perev
+// Possible non init WarnOff
+//
 // Revision 1.34  2004/03/16 20:59:37  jeromel
 // Naming clash resolved by changing name
 //
@@ -310,7 +313,7 @@ Int_t StOldKinkMaker::Make(){
 	  if( fabs(myTrack2->startPoint(2)-myTrack1->lastPoint(2)) > tkfpar->parentLastDaughterStartZ ) continue;	  
 	  
 	  Float_t xCords[2], yCords[2];
-	  Float_t xtarget, ytarget;
+	  Float_t xtarget=-999999, ytarget=-999999;
 	  Int_t numOfSolution = MeetTwoHelices2D(tkfpar->dcaParentDaughterMax, myTrack1->helix(), 
 		           		         myTrack2->helix(), xCords, yCords); 
 	  
@@ -641,7 +644,7 @@ void StOldKinkMaker::FillIflag()
 	tpt_track_st* tptPtr  = tptTrack->GetTable();
 	tte_eval_st*  tteEPtr = tteEval->GetTable(); 
 	
-	Int_t daughterMcId;
+	Int_t daughterMcId=-999999;
 	
 	for(Int_t m=0; m<tptTrack->GetNRows(); m++)
 	  {
@@ -663,8 +666,8 @@ void StOldKinkMaker::FillIflag()
 	tpt_track_st* tptPtr1  = tptTrack->GetTable();
 	tte_eval_st*  tteEPtr1 = tteEval->GetTable();
 	
-	Int_t parentMcId;
-	Int_t parentPid;
+	Int_t parentMcId=-999999;
+	Int_t parentPid =-999999;
 	
 	for(Int_t xl=0; xl<tptTrack->GetNRows(); xl++)
 	  {

@@ -1,7 +1,10 @@
 //*-- Author : Victor Perevoztchikov
 // 
-// $Id: St_l3Clufi_Maker.cxx,v 1.27 2003/09/02 17:59:29 perev Exp $
+// $Id: St_l3Clufi_Maker.cxx,v 1.28 2004/05/03 23:33:00 perev Exp $
 // $Log: St_l3Clufi_Maker.cxx,v $
+// Revision 1.28  2004/05/03 23:33:00  perev
+// Possible non init WarnOff
+//
 // Revision 1.27  2003/09/02 17:59:29  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -259,7 +262,7 @@ Int_t St_l3Clufi_Maker::Make(){
 			    // to handle supersectors two sectors must be treated as one !
 			    // create out array for the supersector 
 			    ///
-			    Int_t supersectorindex;
+			    Int_t supersectorindex=-999999;
 			    if ( sectorindex%2 == 1 )
 				{
 				    // in this case we have got the first sector of the two sectors

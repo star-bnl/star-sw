@@ -1,6 +1,6 @@
 /*****************************************************************
  *
- * $Id: StTrsDeDx.cc,v 1.15 2003/09/02 17:59:19 perev Exp $
+ * $Id: StTrsDeDx.cc,v 1.16 2004/05/03 23:31:12 perev Exp $
  *
  * Author: brian Nov 20, 1997
  *
@@ -13,6 +13,9 @@
  *****************************************************************
  *
  * $Log: StTrsDeDx.cc,v $
+ * Revision 1.16  2004/05/03 23:31:12  perev
+ * Possible non init WarnOff
+ *
  * Revision 1.15  2003/09/02 17:59:19  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -321,7 +324,7 @@ double StTrsDeDx::betheBloch(double bg) const
     double bigx = ::log(bg)/::log(10.);
     
     // Saturation term
-    double d;
+    double d=-999999.;
     if (bigx<x0)
 	d=0;
     else if ((bigx>x0) && (bigx<x1))

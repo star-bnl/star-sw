@@ -279,22 +279,22 @@ long type_of_call reformat_
     int    dptr_inc;
     int    i, j, k, l, rdoID, secID;
     long   iptr, sptr, dptr;
-    long   adcdata_nok;
-    long   g_indx;                      /* Pointer index into gain buffer */
-    long   nPad;
-    int    pad, row, group, chan, fee, fee0;
+    long   adcdata_nok=0;
+    long   g_indx=0;                      /* Pointer index into gain buffer */
+    long   nPad=0;
+    int    pad=0, row=0, group=0, chan=0, fee=0, fee0=0;
     int    nSeq, nSeq0, nSeq1, nBuck, nBuck0, bucket;
     int    l_ped_subtract;                  /* Local switch for ped. sub. */
     int    l_gain_correct;                  /* Local switch for gain corr. */
     int    sector, RDO;
     int    istat;
-    int    nPed;                            /* pedestal value plus threshold */
+    int    nPed=0;                          /* pedestal value plus threshold */
     int    pad_starting;                    /* TRUE if ped/pul. starts on pad*/
     long   inok, tnok;                      /* nok header counters */
-    long   pnok, pnok0, gnok;               /* more header counters */
+    long   pnok=0, pnok0=0, gnok=0;         /* more header counters */
     long   datum;
 
-    int zero_suppressed, mapped, warned;
+    int zero_suppressed, mapped, warned=0;
     int adc_8bit;                           /* Use 8-bit data */
     int adc_nonlin;                         /* 8-bit data is non-linear */
     int adc_10bit;                          /* Use 10-bit data */

@@ -217,10 +217,10 @@ void ResolutionPlots::fill(StMiniMcEvent* minimcevent)
       double tan_mc   = pz_mc/pt_mc;
       double curv_mc  = B*c/100/pt_mc;
 
-      double pt_rec, px_rec, py_rec, pz_rec, p_rec, eta_rec, phi_rec;
-      double nFitPts, chi2;
-      double tan_rec, curv_rec;
-      double tanError, curvError, ptError;
+      double pt_rec=0, px_rec=0, py_rec=0, pz_rec=0, p_rec=0, eta_rec=0, phi_rec=0;
+      double nFitPts=0, chi2=0;
+      double tan_rec=0, curv_rec=0;
+      double tanError=0, curvError=0, ptError=0;
       
       // _trackType == 0 primary
       //              1 global

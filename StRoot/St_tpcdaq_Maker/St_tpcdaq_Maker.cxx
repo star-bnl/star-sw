@@ -486,7 +486,7 @@ int St_tpcdaq_Maker::Output() {
   St_DataSet *sector;
   St_DataSetIter raw_data_tpc(m_DataSet); //raw_data_tpc=iterator on St_tpcdaq_Maker's top level
   raw_sec_m_st singlerow;
-  int pad,sectorStatus,ipadrow,npad,ipad,seqStatus,iseq,nseq,startTimeBin,ibin;
+  int pad=-1,sectorStatus,ipadrow,npad,ipad,seqStatus,iseq,nseq,startTimeBin,ibin;
   int numberOfUnskippedSeq,prevStartTimeBin,rowR,padR,seqR;  // row counters
   int iseqSave,pixTblWhere,seqLen,timeOff,numPadsWithSignal,pixOffset;
   int seqOffset,timeWhere;
@@ -888,6 +888,9 @@ char  St_tpcdaq_Maker::SetSequenceMerging(char mergeSequences)
 
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.88  2004/05/03 23:34:58  perev
+// Possible non init WarnOff
+//
 // Revision 1.87  2004/03/31 19:34:14  jeromel
 // Newline
 //

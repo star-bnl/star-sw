@@ -68,7 +68,7 @@ double THelixTrack::Fit(const double *pnts,int npnts, int rowsize)
 //
 {
    double xm,ym,xxm,yym,xym,rrm,rrxm,rrym;
-   double x,y,z,x1st,y1st,s,Xcd,Ycd,Rhoc,Rhoc2,dR,Rho,xyz[3],res,resmax;
+   double x,y,z,x1st=0,y1st=0,s,Xcd,Ycd,Rhoc,Rhoc2,dR,Rho,xyz[3],res,resmax;
    int ip,np,lv,maxres;
 
 
@@ -145,7 +145,7 @@ double THelixTrack::Fit(const double *pnts,int npnts, int rowsize)
      Set(fX,fP,Rho,0);
      THelixTrack temp(*this);
 
-     double zm=0,sm=0,zs=0,ss=0,s0;
+     double zm=0,sm=0,zs=0,ss=0,s0=0;
      double fullen = 1.e+10;
      if (fabs(Rho)>1./fullen) fullen = 2.*M_PI/fabs(Rho);
      for (lv =0,ip=0; ip < npnts; ip++,lv+=rowsize) 
@@ -374,7 +374,7 @@ double THelixTrack::StepHZ(const double *su, int nsurf,
                            double *xyz, double *dir) const
 {
    double tri[3] = {0,0,0};
-   double f0,fc,fs,R,tet,tet0,tet1,tet2,costet,su45,fcs;
+   double f0,fc,fs,R,tet,tet0,tet1,tet2,costet,su45=0,fcs;
    
 
    R = 1./fRho/fCosL;

@@ -1,10 +1,13 @@
-//$Id: St_srs_Maker.cxx,v 1.33 2003/04/30 20:39:23 perev Exp $
+//$Id: St_srs_Maker.cxx,v 1.34 2004/05/03 23:34:16 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_srs_Maker class for Makers                                        //
 // Author : Anon                                                       //
 //////////////////////////////////////////////////////////////////////////
 //$Log: St_srs_Maker.cxx,v $
+//Revision 1.34  2004/05/03 23:34:16  perev
+//Possible non init WarnOff
+//
 //Revision 1.33  2003/04/30 20:39:23  perev
 //Warnings cleanup. Modified lines marked VP
 //
@@ -213,9 +216,9 @@ Int_t St_srs_Maker::Make()
   St_scs_spt    *scs_spt    = new St_scs_spt("scs_spt",25000);       m_DataSet->Add(scs_spt);
   St_srs_result *srs_result = new St_srs_result("srs_result",25000); m_DataSet->Add(srs_result);
     
-  g2t_svt_hit_st *GeantHit;
-  g2t_vertex_st *GeantVertex;
-  g2t_track_st *GeantTrack;
+  g2t_svt_hit_st *GeantHit=0;
+  g2t_vertex_st *GeantVertex=0;
+  g2t_track_st *GeantTrack=0;
   
   St_DataSetIter geant(GetInputDS("geant"));
   St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("g2t_svt_hit");

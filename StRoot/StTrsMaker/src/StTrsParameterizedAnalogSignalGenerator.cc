@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.30 2004/03/26 04:18:35 fisyak Exp $
+ * $Id: StTrsParameterizedAnalogSignalGenerator.cc,v 1.31 2004/05/03 23:31:12 perev Exp $
  *
  * Author: Hui Long
  ***************************************************************************
@@ -11,6 +11,9 @@
  *
  *
  * $Log: StTrsParameterizedAnalogSignalGenerator.cc,v $
+ * Revision 1.31  2004/05/03 23:31:12  perev
+ * Possible non init WarnOff
+ *
  * Revision 1.30  2004/03/26 04:18:35  fisyak
  * Assign IdTruth even two or more tracks hit the same pixel
  *
@@ -416,7 +419,7 @@ void StTrsParameterizedAnalogSignalGenerator::inducedChargeOnPad(StTrsWireHistog
     int bin_start,bin_end;
     int pad_start,pad_end=max(mPadsAtRow[mNumberOfInnerRows-1],mPadsAtRow[mNumberOfRows-1])+1;
     int row_start,row_end;
-    int pad_shift,pad_shift0;
+    int pad_shift,pad_shift0=-999999;
     bin_start=0;
     bin_end=mGeomDb->numberOfTimeBuckets();
     row_start=0;

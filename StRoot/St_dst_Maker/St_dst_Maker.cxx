@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.cxx,v 1.77 2004/03/02 16:12:46 jcs Exp $
+// $Id: St_dst_Maker.cxx,v 1.78 2004/05/03 23:32:11 perev Exp $
 // $Log: St_dst_Maker.cxx,v $
+// Revision 1.78  2004/05/03 23:32:11  perev
+// Possible non init WarnOff
+//
 // Revision 1.77  2004/03/02 16:12:46  jcs
 // Get dst_mon_soft_ftpc table from fglobal
 // Create the table with all entries set to zero is it doesn't exist
@@ -240,7 +243,7 @@
 #include "StSvtClassLibrary/StSvtHybridCollection.hh"
 #include "StSvtClusterMaker/StSvtAnalysedHybridClusters.hh"
 
-static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.77 2004/03/02 16:12:46 jcs Exp $";
+static const char rcsid[] = "$Id: St_dst_Maker.cxx,v 1.78 2004/05/03 23:32:11 perev Exp $";
 ClassImp(St_dst_Maker)
   
   //_____________________________________________________________________________
@@ -359,7 +362,7 @@ Int_t St_dst_Maker::Make(){
   St_DataSet *dst = local.Mkdir("dst");
   St_DataSetIter dstI(dst);
   St_DataSet *ds=0,*mk=0;
-  const char *name,*mkname;
+  const char *name=0,*mkname=0;
   
   for (int idst=0; (name=fSelect[idst]); idst++) {
     

@@ -1,5 +1,8 @@
-// $Id: StObject.cxx,v 1.18 2003/09/02 17:59:24 perev Exp $
+// $Id: StObject.cxx,v 1.19 2004/05/03 23:31:46 perev Exp $
 // $Log: StObject.cxx,v $
+// Revision 1.19  2004/05/03 23:31:46  perev
+// Possible non init WarnOff
+//
 // Revision 1.18  2003/09/02 17:59:24  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -368,7 +371,7 @@ void StXRefManager::Update ()
   StObjArray *arr;
   StProxyUrr *urr;
   StCollListIter it;
-  UInt_t idx,udx,sizeUrr,lst;
+  UInt_t idx,udx,sizeUrr,lst=999999;
   TObject **p; 
   for (it = fColList.begin(); (urr = *it);) {//List
     sizeUrr = urr->size(); 
