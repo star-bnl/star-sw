@@ -405,7 +405,7 @@ void MainFrame::CloseWindow()
     // Got close message for this MainFrame. Terminate the application
     // or returns from the TApplication event loop (depending on the
     // argument specified in TApplication::Run()).
-    
+    StiMaker::kill();
     gApplication->Terminate(0);
 }
 
