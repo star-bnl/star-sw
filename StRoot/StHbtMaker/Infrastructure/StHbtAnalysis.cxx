@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtAnalysis.cxx,v 1.18 2001/05/25 23:23:59 lisa Exp $
+ * $Id: StHbtAnalysis.cxx,v 1.19 2001/11/06 20:20:53 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StHbtAnalysis.cxx,v $
+ * Revision 1.19  2001/11/06 20:20:53  laue
+ * Order of event-mixing fixed.
+ *
  * Revision 1.18  2001/05/25 23:23:59  lisa
  * Added in StHbtKink stuff
  *
@@ -438,9 +441,9 @@ void StHbtAnalysis::ProcessEvent(const StHbtEvent* hbtEvent) {
  	  StartInnerLoop = storedEvent->FirstParticleCollection()->begin();
 	  EndInnerLoop = storedEvent->FirstParticleCollection()->end();
 	  for (PartIter1=StartOuterLoop;PartIter1!=EndOuterLoop;PartIter1++){
-	    ThePair->SetTrack1(*PartIter1);
+	    ThePair->SetTrack2(*PartIter1);
 	    for (PartIter2=StartInnerLoop;PartIter2!=EndInnerLoop;PartIter2++){
-	      ThePair->SetTrack2(*PartIter2);
+	      ThePair->SetTrack1(*PartIter2);
 	      // testing...	      cout << "ThePair defined... going to pair cut... ";
 	      if (mPairCut->Pass(ThePair)){
 		// testing...		cout << " ThePair passed PairCut... ";
