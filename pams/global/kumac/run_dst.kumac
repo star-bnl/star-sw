@@ -32,8 +32,10 @@ ami/mod/call dst_monitor_soft_filler_
         [data]/svt/hits/scs_cluster _
         [data]/tpc/hits/tphit _
         [data]/svt/hits/scs_spt _
+        [data]/ftpc/hits/fcl_fppoint _
         [data]/tpc/tracks/tptrack _
         [data]/svt/tracks/stk_track _
+        [data]/ftpc/tracks/fpt_fptrack _
         [data]/global/tracks/evt_match _
         [data]/ctf/ctb_cor _
         [dst]/vertex _
@@ -150,6 +152,7 @@ message ' run_dst: finished calling dst_point_filler'
 ami/mod/call dst_point_unpack_    
         [data]/tpc/hits/tphit _
         [data]/svt/hits/scs_spt _
+        [data]/ftpc/hits/fcl_fppoint _
         [dst]/point
 
 if ( staf_status(1) .ne. stafcv_ok) then
@@ -182,11 +185,27 @@ RETURN
  
 ****************************************************************
 
+macro fill_ftpc_dst
 
+  macro/global/import *
 
+   message 'Calling fill_ftpc_dst'
 
+  ami/mod/call fill_ftpc_dst _
+               [data]/ftpc/tracks/fpt_fptrack_
+               [data]/ftpc/hits/fcl_fppoint_
+               [dst]/globtrk_
+               [dst]/globtrk_aux_
+               [dst]/point_
+               [dst]/vertex_
+               [dst]/dst_dedx
 
+  if (staf_status(1) .ne. stafcv_ok) then
+        message 'Problem on return from particle_dst_filler'
+  endif
 
+  message 'Finished calling fill_ftpc_dst'
 
-
-
+RETURN
+ 
+****************************************************************
