@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.8 2000/02/17 19:43:20 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.9 2000/02/22 19:40:30 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.9  2000/02/22 19:40:30  hardtke
+ * fix tpc_row_par to give expected results
+ *
  * Revision 1.8  2000/02/17 19:43:20  hardtke
  * fixes to tpc functions
  *
@@ -125,15 +128,18 @@ int type_of_call tpc_row_par_(int *isector, float *row, float *a, float *b){
   StTpcCoordinateTransform transform(gStTpcDb);
   transform(pad1,gc1);
   transform(pad2,gc2);
-  cout << pad1 << gc1 << endl;
-  cout << pad2 << gc2 << endl;
   float x1,y1,x2,y2;
   float m,bb; // y = mx + bb
   x1 = gc1.position().x();
   y1 = gc1.position().y();
   x2 = gc2.position().x();
   y2 = gc2.position().y();
-  if (abs(x2-x1)<0.000001) return 0;
+  if (abs(x2-x1)<0.000001) {
+     *a = 1/x1;
+     if (*isector<=12) *a = -*a;  // opposite sign to match tpg_row_par
+     *b = 0.;
+     return 1;
+  }
   m = (y2 - y1)/(x2 - x1);
   bb = y1 - m*x1;
   if (bb == 0) return 0;
