@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // StFlowTagMaker.hh
-// $Id: StFlowTagMaker.hh,v 1.5 2000/01/13 21:49:16 posk Exp $
+// $Id: StFlowTagMaker.hh,v 1.6 2000/01/14 01:36:03 snelling Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -16,6 +16,9 @@
 //
 // History:
 // $Log: StFlowTagMaker.hh,v $
+// Revision 1.6  2000/01/14 01:36:03  snelling
+// changed include path ../FlowMaker/ to FlowMaker/
+//
 // Revision 1.5  2000/01/13 21:49:16  posk
 // Updates and corrections.
 //
@@ -49,7 +52,7 @@
 #include <stdlib.h>
 #include "StMaker.h"
 #include "FlowTag.h"
-#include "../StFlowMaker/StFlowConstants.hh"
+#include "StFlowMaker/StFlowConstants.hh"
 class StFlowEvent;
 class TH1F;
 class TH1D;

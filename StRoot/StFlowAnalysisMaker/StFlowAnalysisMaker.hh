@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.hh,v 1.6 2000/01/13 21:50:24 posk Exp $
+// $Id: StFlowAnalysisMaker.hh,v 1.7 2000/01/14 01:35:52 snelling Exp $
 //
 // Authors: Art Poskanzer and Raimond Snellings, LBNL, Aug 1999
 //
@@ -11,6 +11,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.hh,v $
+// Revision 1.7  2000/01/14 01:35:52  snelling
+// changed include path ../FlowMaker/ to FlowMaker/
+//
 // Revision 1.6  2000/01/13 21:50:24  posk
 // Updates and corrections.
 //
@@ -43,9 +46,9 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include "StMaker.h"
-#include "../StFlowMaker/StFlowEvent.hh"
-#include "../StFlowTagMaker/StFlowTagMaker.hh"
-#include "../StFlowMaker/StFlowConstants.hh"
+#include "StFlowMaker/StFlowEvent.hh"
+#include "StFlowTagMaker/StFlowTagMaker.hh"
+#include "StFlowMaker/StFlowConstants.hh"
 #include "TVector2.h"
 class TH1F;
 class TH1D;
