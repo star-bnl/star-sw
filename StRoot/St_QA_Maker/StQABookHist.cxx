@@ -1,5 +1,20 @@
-// $Id: StQABookHist.cxx,v 2.3 2001/04/24 22:53:51 lansdell Exp $ 
+// $Id: StQABookHist.cxx,v 2.8 2001/05/01 15:17:36 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.8  2001/05/01 15:17:36  genevb
+// Execute EMC code only if EMC libs loaded
+//
+// Revision 2.7  2001/04/28 22:05:13  genevb
+// Added EMC histograms
+//
+// Revision 2.6  2001/04/26 20:45:19  lansdell
+// changed some histogram ranges (TPC+SVT radius at start, impact param for primary tracks)
+//
+// Revision 2.5  2001/04/26 16:34:28  genevb
+// Fixed some histogram ranges
+//
+// Revision 2.4  2001/04/25 21:35:26  genevb
+// Added V0 phi distributions
+//
 // Revision 2.3  2001/04/24 22:53:51  lansdell
 // Removed redundant radial position of first hit histograms
 //
@@ -20,8 +35,12 @@
 ///////////////////////////////////////////////////////////////////////////
 
 #include <iostream.h>
+#include <math.h>
 #include "QAH.h"
 #include "StQABookHist.h"
+#include "StEmcUtil/StEmcMath.h"
+#include "StEmcUtil/emcDetectorName.h"
+#include "TROOT.h"
 
 
 ClassImp(StQABookHist)
@@ -444,6 +463,7 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_pv_r=0;     //! radius to primary vertex
 
   m_vtx_z=0;    //! SVT vertex finder resolution relative to main finder
+  m_vtx_phi_dist=0;  //! azimuthal distribution of V0s
 
   m_v0           =0; //! # v0 vertices
   m_ev0_lama_hist=0; //! Lambda mass
@@ -485,6 +505,7 @@ void StQABookHist::BookHist(){
   BookHistVertex();
   BookHistPoint();
   BookHistRich();
+  BookHistEMC();
   BookHistEval();
   
 }
@@ -495,7 +516,8 @@ void StQABookHist::BookHistGlob(){
 
 // general
 
-  m_globtrk_tot      = QAH::H1F("QaGtrkTot","globtrk: tot num tracks - all",40,0.,10000.);
+  m_globtrk_tot      = QAH::H1F("QaGtrkTot","globtrk: tot num tracks - all",
+                            40,0.,12500.);
   m_globtrk_tot_sm   = QAH::H1F("QaGtrkTotsm","globtrk: tot num tracks - all",40,0.,20.);
   m_globtrk_iflag    = QAH::H1F("QaGtrkFlag","globtrk: iflag - all ",200,-999.,1001.);
   m_globtrk_good     = QAH::H1F("QaGtrkGood","globtrk: tot good tracks - all",40,0.,10000.);
@@ -647,7 +669,7 @@ void StQABookHist::BookHistGlob(){
     m_glb_ratioTS->SetMinimum(10);
   m_glb_ratiomTS = QAH::H1F("QaGtrkRnmTS",    "globtrk: ratio Nfit/max pnt, tpc+svt", 55, 0., 1.1);
   m_glb_chargeTS = QAH::H1F("QaGtrkChrgTS",   "globtrk: charge, tpc+svt ", 20,-2.,2.);
-  m_glb_r0TS     = QAH::H1F("QaGtrkR0TS",     "globtrk: radius at start (cm), tpc+svt", 50,0.,200.);
+  m_glb_r0TS     = QAH::H1F("QaGtrkR0TS",     "globtrk: radius at start (cm), tpc+svt", 100,0.,25.);
     m_glb_r0TS->SetMinimum(100);
   m_glb_phi0TS   = QAH::H1F("QaGtrkPhi0TS",   "globtrk: azimuth (phi) at start (deg,force 0-360),tpc+svt", 64, 0.,360.);
   m_glb_z0TS     = QAH::H1F("QaGtrkZ0TS",     "globtrk: z-coord at start (cm), tpc+svt", 50, -300.,300.);
@@ -830,10 +852,10 @@ void StQABookHist::BookHistPrim(){
 // for method MakeHistPrim - from table primtrk
 
 // 1D
-  m_primtrk_tot     = QAH::H1F("QaPtrkTot",   "primtrk: tot num tracks",100,0.,5000.);
-  m_primtrk_tot_sm  = QAH::H1F("QaPtrkTotsm", "primtrk: tot num tracks",100,0.,20.);
+  m_primtrk_tot     = QAH::H1F("QaPtrkTot",   "primtrk: tot num tracks",50,0.,5000.);
+  m_primtrk_tot_sm  = QAH::H1F("QaPtrkTotsm", "primtrk: tot num tracks",50,0.,20.);
   m_primtrk_iflag   = QAH::H1F("QaPtrkFlag",  "primtrk: iflag - all",160,-799.,801.);
-  m_primtrk_good    = QAH::H1F("QaPtrkGood",  "primtrk: tot num tracks iflag>0",50,0.,3000.);
+  m_primtrk_good    = QAH::H1F("QaPtrkGood",  "primtrk: tot num tracks iflag>0",50,0.,5000.);
   m_primtrk_good_sm = QAH::H1F("QaPtrkGoodsm","primtrk: tot num tracks iflag>0",50,0.,20.);
   m_pdet_id     = QAH::H1F("QaPtrkDetId",   "primtrk: Detector ID good tracks - all",25,0.,25.);
 
@@ -844,7 +866,7 @@ void StQABookHist::BookHistPrim(){
   m_prim_ratioT  = QAH::H1F("QaPtrkRnfT",    "primtrk: ratio Nfit/tot pnt, tpc", 55, 0., 1.1);
   m_prim_ratiomT = QAH::H1F("QaPtrkRnmT",    "primtrk: ratio Nfit/max pnt, tpc", 55, 0., 1.1);
   m_prim_chargeT = QAH::H1F("QaPtrkChrgT",   "primtrk: charge, tpc ", 20,-2.,2.);
-  m_prim_r0T     = QAH::H1F("QaPtrkR0T",     "primtrk: radius at start (cm), tpc ", 50,0.,200.);
+  m_prim_r0T     = QAH::H1F("QaPtrkR0T",     "primtrk: radius at start (cm), tpc ", 50,0.,.1);
   m_prim_phi0T   = QAH::H1F("QaPtrkPhi0T",   "primtrk: azimuth (phi) at start (deg,force 0,360), tpc ", 64,0.,360.);
   m_prim_z0T     = QAH::H1F("QaPtrkZ0T",     "primtrk: z-coord at start (cm), tpc ", 50, -300.,300.);
   m_prim_curvT   = QAH::H1F("QaPtrkCurvT",   "primtrk: log10 curvature (1/cm), tpc ", 80,-3.5,0.5);
@@ -869,7 +891,7 @@ void StQABookHist::BookHistPrim(){
   m_pchisq0T     = QAH::H1F("QaPtrkChisq0T", "primtrk: chisq0, tpc", 50, 0.,5.);
   m_pchisq1T     = QAH::H1F("QaPtrkChisq1T", "primtrk: chisq1, tpc", 50, 0.,5.);
   m_prim_impactT = QAH::H1F("QaPtrkImpactT", "primtrk: log10 impact param from prim vtx, tpc",120,-3.0,3.0);
-  m_prim_impactrT = QAH::H1F("QaPtrkImpactrT", "primtrk: impact param from prim vtx, tpc",100,0.,10.);
+  m_prim_impactrT = QAH::H1F("QaPtrkImpactrT", "primtrk: impact param from prim vtx, tpc",100,0.,0.01);
 
 // 2D - tpc
   m_ppT_eta_recT = QAH::H2F("QaPtrkPtVsEtaT","primtrk: log pT vs eta, tpc", 20,-2.,2.,40,1.,4.);
@@ -934,7 +956,7 @@ void StQABookHist::BookHistPrim(){
   m_prim_ratioTS  = QAH::H1F("QaPtrkRnfTS",    "primtrk: ratio Nfit/tot pnt, tpc+svt", 55, 0., 1.2005);
   m_prim_ratiomTS = QAH::H1F("QaPtrkRnmTS",    "primtrk: ratio Nfit/max pnt, tpc+svt", 55, 0., 1.2005);
   m_prim_chargeTS = QAH::H1F("QaPtrkChrgTS",   "primtrk: charge, tpc+svt ", 20,-2.,2.);
-  m_prim_r0TS     = QAH::H1F("QaPtrkR0TS",     "primtrk: radius at start (cm), tpc+svt", 50,0.,200.);
+  m_prim_r0TS     = QAH::H1F("QaPtrkR0TS",     "primtrk: radius at start (cm), tpc+svt", 50,0.,0.1);
   m_prim_phi0TS   = QAH::H1F("QaPtrkPhi0TS",   "primtrk: azimuth (phi) at start (deg,force 0-360),tpc+svt", 64, 0.,360.);
   m_prim_z0TS     = QAH::H1F("QaPtrkZ0TS",     "primtrk: z-coord at start (cm), tpc+svt", 50, -300.,300.);
   m_prim_curvTS   = QAH::H1F("QaPtrkCurvTS",   "primtrk: log10 curvature (1/cm), tpc+svt", 80,-3.5,0.5);
@@ -959,7 +981,7 @@ void StQABookHist::BookHistPrim(){
   m_pchisq0TS     = QAH::H1F("QaPtrkChisq0TS", "primtrk: chisq0, tpc+svt", 50, 0.,5.);
   m_pchisq1TS     = QAH::H1F("QaPtrkChisq1TS", "primtrk: chisq1, tpc+svt", 50, 0.,5.);
   m_prim_impactTS = QAH::H1F("QaPtrkImpactTS", "primtrk: log10 impact param from prim vtx, tpc+svt",120,-3.0,3.0);
-  m_prim_impactrTS = QAH::H1F("QaPtrkImpactrTS", "primtrk: impact param from prim vtx, tpc+svt",100,0.,10.);
+  m_prim_impactrTS = QAH::H1F("QaPtrkImpactrTS", "primtrk: impact param from prim vtx, tpc+svt",100,0.,0.01);
 
 // 2D - tpc + silicon (svt + ssd)
   m_ppT_eta_recTS = QAH::H2F("QaPtrkPtVsEtaTS","primtrk: log pT vs eta, tpc+svt", 20,-2.,2.,40,1.,4.);
@@ -1104,10 +1126,12 @@ void StQABookHist::BookHistDE(){
 void StQABookHist::BookHistGen(){
 
   // for MakeHistGen - from table particle
-  m_H_npart     = QAH::H1F("QaEvgenNPart",      "particle:total num particles (generated)",100,0.,30000.);
-  m_H_npart_sm  = QAH::H1F("QaEvgenNPartsm",    "particle:total num particles (generated)",20,0.,20.);
+  m_H_npart     = QAH::H1F("QaEvgenNPart",      "particle:total num particles (generated)",
+                       100,0.,50000.);
+  m_H_npart_sm  = QAH::H1F("QaEvgenNPartsm",    "particle:total num particles (generated)",
+                       20,0.,20.);
   m_H_ncpart    = QAH::H1F("QaEvgenNChgPart",   "particle:num chg (e,mu,pi,K,p) part (generated)",
-                       100,0.,20000.);
+                       100,0.,40000.);
   m_H_ncpart_sm = QAH::H1F("QaEvgenNChgPartsm", "particle:num chg (e,mu,pi,K,p) part (generated)",
                        20,0.,20.);
   m_H_pT_gen  = QAH::H1F("QaEvgenPt",         "particle: charged pt (generated)",nxpT,xminpT,xmaxpT);
@@ -1130,8 +1154,8 @@ void StQABookHist::BookHistPID(){
   
   m_p_dedx_rec = QAH::H2F("QaPidGlobtrkDstdedxPVsDedx","PID: globtrk-dst_dedx,  p vs dedx (reconstructed)",
 			  cnp,cminp,cmaxp,cndedx,cmindedx,cmaxdedx);
-  m_p_dedx_rec->SetYTitle("dedx");
   m_p_dedx_rec->SetXTitle("p (GeV)");
+  m_p_dedx_rec->SetYTitle("dedx");
   
 }
 //_____________________________________________________________________________
@@ -1139,7 +1163,7 @@ void StQABookHist::BookHistVertex(){
   // for MakeHistVertex - from table dst_vertex
   
   
-  m_v_num   = QAH::H1F("QaVtxNum",  " vertex: num vertices ",50,0.,2000.);
+  m_v_num   = QAH::H1F("QaVtxNum",  " vertex: num vertices ",50,0.,10000.);
   m_v_num_sm= QAH::H1F("QaVtxNumsm",  " vertex: num vertices ",50,0.,20.);
 
   m_v_vtxid = QAH::H1F("QaVtxVtxId"," vertex,2ndary: Vertex ID ",10,0.,10.);
@@ -1158,11 +1182,18 @@ void StQABookHist::BookHistVertex(){
 
   m_vtx_z    = QAH::H1F("QaVtxZres"," vertex: z(tpc)-z(svt), resolution check",100,-.1,.1);
   
+//  m_vtx_phi_dist  = QAH::H2F("QaV0VtxPhiDist",
+//            "V0 azimuthal distribution",36,0.,360.,25,1.,101.);
+//  m_vtx_phi_dist->SetXTitle("Mean of phi(V0)");
+//  m_vtx_phi_dist->SetYTitle("RMS of phi(V0)");
+  m_vtx_phi_dist  = QAH::H1F("QaV0VtxPhiDist",
+            "V0 azimuthal distribution",36,0.,360.);
+
   m_v0             = QAH::H1F("QaV0Vtx","dst_v0_vertex: Number V0 found ",50,0.,2000.);
   m_ev0_lama_hist  = QAH::H1F("QaV0LambdaMass","dst_v0_vertex: Lambda mass",50,1.05,1.15);
   m_ev0_k0ma_hist  = QAH::H1F("QaV0K0Mass","dst_v0_vertex: k0 mass",50,.4,.6);
 
-  m_xi_tot     = QAH::H1F("QaXiVtxTot", "dst_xi_vertex: tot # vertices ",80,0.,800.);
+  m_xi_tot     = QAH::H1F("QaXiVtxTot", "dst_xi_vertex: tot # vertices",50,0.,4000.);
   m_xi_ma_hist = QAH::H1F("QaXiaMass",  "dst_xi_vertex: Xi mass",50,1.2,1.4);
 
   m_kink_tot   = QAH::H1F("QaKinkTot",  "kinkVertex: # kinks ",25,0.,25.);
@@ -1173,13 +1204,13 @@ void StQABookHist::BookHistPoint(){
 
   m_z_hits      = QAH::H1F("QaPointZhits","point: z distribution of hits, tpc",100,-210,210);
 
-  m_pnt_tot     = QAH::H1F("QaPointTot", "point: # hits total ",100, 0.,250000.);
+  m_pnt_tot     = QAH::H1F("QaPointTot", "point: # hits total ",100, 0.,400000.);
   m_pnt_tot_med = QAH::H1F("QaPointTotmed","point: # hits total ",100, 0.,2500.);
   m_pnt_tot_sm  = QAH::H1F("QaPointTotsm", "point: # hits total ",100, 0.,250.);
   m_pnt_id      = QAH::H1F("QaPointId","point: detector ID of hit",30,0.,30.);
 
-  m_pnt_tpc     = QAH::H1F("QaPointTpc",  "point: # hits tpc ",100, 0.,250000.);
-  m_pnt_svt     = QAH::H1F("QaPointSvt",  "point: # hits svt ",100, 0.,10000.);
+  m_pnt_tpc     = QAH::H1F("QaPointTpc",  "point: # hits tpc ",100, 0.,300000.);
+  m_pnt_svt     = QAH::H1F("QaPointSvt",  "point: # hits svt ",100, 0.,15000.);
   m_pnt_ssd     = QAH::H1F("QaPointSsd",  "point: # hits ssd ",100, 0.,5000.);
   m_pnt_ftpcE   = QAH::H1F("QaPointFtpcE","point: # hits ftpcE ",100, 0.,10000.);
   m_pnt_ftpcW   = QAH::H1F("QaPointFtpcW","point: # hits ftpcW ",100, 0.,10000.);
@@ -1189,6 +1220,139 @@ void StQABookHist::BookHistPoint(){
 void StQABookHist::BookHistRich(){
 
   m_rich_tot   = QAH::H1F("QaRichTot",  "g2t_rch_hit: multiplicity ",50,0.,1000.);
+
+}
+//_____________________________________________________________________________
+void StQABookHist::BookHistEMC(){
+
+  if (!((gROOT->GetClass("StEmcMath")) && (gROOT->GetClass("StEmcGeom"))))
+    return;
+// Book the hists for SimulatorMaker
+  m_emc_nhit=QAH::H2F("EmcNHitsVsDet","emc: Number of hit(log) .vs. Detector #",100,0.0,4.5,4,0.5,4.5);
+  m_emc_etot=QAH::H2F("EmcEtotVsDet","emc: Total energy(log) .vs. Detector #",100,-4.0,4.5,8,0.5,4.5);
+
+  const Char_t* tit={"Barrel"};
+  const Int_t   nx[4] = {40,40,300,20};
+  const Int_t   ny[4]  = {120, 120, 60, 900};
+  Float_t rpi = M_PI + 0.00001;
+  TString name, title;
+  TArrayD *xb = StEmcMath::binForSmde();
+
+  for(Int_t i=0; i<4; i++){
+    name  = detname[i] + "Hits";
+    title = tit  + detname[i] + " hits dist.";
+    if(i==2) m_emc_hits[i]=QAH::H2F(name,title, xb->GetSize()-1,xb->GetArray(),ny[i],-rpi,rpi);
+    else m_emc_hits[i] = QAH::H2F(name,title, nx[i],-1.,+1., ny[i],-rpi, rpi);
+
+    name   = detname[i] + "Energy2D";
+    title  = tit + detname[i] + " energy dist. in eta&phi";
+    if(i==2) m_emc_energy2D[i] = QAH::H2F(name,title, xb->GetSize()-1,xb->GetArray(), ny[i],-rpi,rpi);
+    else m_emc_energy2D[i] = QAH::H2F(name,title, nx[i],-1.,+1., ny[i],-rpi, rpi);
+
+    name  = detname[i] + "Adc";
+    title = tit + detname[i] + " ADC dist.";
+    m_emc_adc[i]  = QAH::H1F(name,title, 5001, -0.5, 5000.5);
+    if(i==2) 
+
+    name   = detname[i] + "Energy";
+    title  = tit + detname[i] + " energy dist.";
+    m_emc_energy[i] = QAH::H1F(name,title, 600, 0.0, 60.0);
+  }
+  delete xb;
+
+// Book the hists for cluster finder
+  Int_t greta[4]={40,40,300,20};   // eta bins
+  Int_t grphi[4]={120,120,60,900}; // phi bins  => 16-apr by PAI
+  Float_t myPI = M_PI + 0.0001;
+  
+  m_emc_ncl=QAH::H2F("EmcNcluster","emc: Number of cluster(log) .vs. Detector #",40,0.0,4.0, 4,0.5,4.5);
+  m_emc_etotCl=QAH::H2F("EmcEcluster" ,"emc: Total PreCluster Energy(log) .vs. Detector #", 60,-2.0,4.0, 4,0.5,4.5);
+
+  Float_t rmsMax=0.026;
+  Int_t   rmsN=52;
+  m_emc_sig_e= QAH::H2F("EmcRMSeta" ,"emc: Sigma(eta) .vs. Detector #",rmsN,0.0,rmsMax,4,0.5,4.5);
+  m_emc_sig_p= QAH::H2F("EmcRMSphi" ,"emc: Sigma(phi) .vs. Detector #",rmsN,0.0,rmsMax,4,0.5,4.5);
+  for (Int_t i=0; i<4; i++)
+  {
+    TString name_h = detname[i] + "_cluster";
+    TString name_e = detname[i] + "_cluster_energy";
+    TString tit_h  = detname[i] + " cluster";
+    TString tit_e  = detname[i] + " energy of cluster";
+    if(i==2) {
+      m_emc_cl[i]     = QAH::H2F(name_h,tit_h,greta[i],-1.0,1.0,grphi[i],-M_PI*1.015, M_PI*0.985);
+      m_emc_energyCl[i] = QAH::H2F(name_e,tit_e,greta[i],-1.0,1.0,grphi[i],-M_PI*1.015, M_PI*0.985);
+    } else {
+      m_emc_cl[i]     = QAH::H2F(name_h,tit_h,greta[i],-1.0,1.0,grphi[i],-myPI, myPI);
+      m_emc_energyCl[i] = QAH::H2F(name_e,tit_e,greta[i],-1.0,1.0,grphi[i],-myPI, myPI);
+    }
+    
+
+    name  = detname[i] + "ClNum";
+    title   = "Number hits in cluster for " + detname[i];
+    m_emc_HitsInCl[i]   = QAH::H1F(name, title, 21, -0.5, 20.5);
+
+    name  = detname[i] + "ClEnergy";
+    title   = "Energy of cluster for " + detname[i];
+    m_emc_EnergyCl[i]    = QAH::H1F(name, title, 2000, 0.0, 20.0);
+
+    TString name_eta  = detname[i] + "Eta";
+    TString tit_eta   = "Eta of clusters for " + detname[i];
+    TString name_phi  = detname[i] + "Phi";
+    TString tit_phi   = "Phi of clusters for " + detname[i];
+    if(i==2) {
+      TArrayD *xb  = StEmcMath::binForSmde();
+      if(xb) {
+        m_emc_EtaInCl[i] = QAH::H1F(name_eta, tit_eta, xb->GetSize()-1, xb->GetArray());
+        delete xb;
+      }
+      m_emc_PhiInCl[i]   = QAH::H1F(name_phi, tit_phi, grphi[i], -M_PI*1.015, M_PI*0.985);
+    } else { 
+      m_emc_EtaInCl[i]   = QAH::H1F(name_eta, tit_eta, greta[i], -1., 1.);
+      m_emc_PhiInCl[i]   = QAH::H1F(name_phi, tit_phi, grphi[i], -myPI, myPI);
+    }
+  }
+  // Book the hists for Emc Ponits
+  const TString catname[] = {"EmcCat1", "EmcCat2", "EmcCat3", "EmcCat4"};
+
+  for (Int_t i=0; i<4; i++) {
+    name = catname[i] + "_Point_Energy";
+    title = catname[i] + " Point Energy";
+    m_emc_point_energy[i]= QAH::H1F(name,title,100,0.,10.);
+
+    name = catname[i] + "_Point_Eta";
+    title = catname[i] + " Point Eta";
+    m_emc_point_eta[i]= QAH::H1F(name,title,100,-1.,1.);
+
+    name = catname[i] + "_Point_Phi";
+    title = catname[i] + " Point Phi";
+    m_emc_point_phi[i]= QAH::H1F(name,title,100,-3.14,3.14);
+   
+    name = catname[i] + "_Sigma_Eta";
+    title = catname[i] + " Sigma Eta";
+    m_emc_point_sigeta[i]= QAH::H1F(name,title,100,0.,.2);
+  
+    name = catname[i] + "_Sigma_Phi";
+    title = catname[i] + " Sigma Phi";
+    m_emc_point_sigphi[i]= QAH::H1F(name,title,100,0.,.2);
+
+    name = catname[i] + "_Delta_Eta";
+    title = catname[i] + " Delta Eta";
+    m_emc_point_deleta[i]= QAH::H1F(name,title,100,-.5,.5);
+
+    name = catname[i] + "_Delta_Phi";
+    title = catname[i] + " Delta Phi";
+    m_emc_point_delphi[i]= QAH::H1F(name,title,100,-.5,.5);
+
+    name = catname[i] + "_Points_Multiplicity";
+    title = catname[i] + " Points Multiplicity";
+    m_emc_points[i]= QAH::H1F(name,title,200,0.,2000.);
+
+    name = catname[i] + "_Track_Momenta";
+    title = catname[i] + " Track Momenta ";
+    m_emc_point_trmom[i]= QAH::H1F(name,title,100,0.,10.);
+  }
+
+  m_emc_point_flag= QAH::H1F(" Point Flag "," Point Flag ",5,0.5,5.5);
 
 }
 //_____________________________________________________________________________

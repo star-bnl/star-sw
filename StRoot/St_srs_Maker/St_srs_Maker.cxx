@@ -1,10 +1,16 @@
-//$Id: St_srs_Maker.cxx,v 1.25 2001/04/23 23:22:43 caines Exp $
+//$Id: St_srs_Maker.cxx,v 1.27 2001/04/26 23:56:19 caines Exp $
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_srs_Maker class for Makers                                        //
 // Author : Anon                                                       //
 //////////////////////////////////////////////////////////////////////////
 //$Log: St_srs_Maker.cxx,v $
+//Revision 1.27  2001/04/26 23:56:19  caines
+//Check that Geant svt hits,tracks and vertex exist before do get table
+//
+//Revision 1.26  2001/04/26 23:51:39  caines
+//Check that Geant svt hits,tracks and vertex exist before do get table
+//
 //Revision 1.25  2001/04/23 23:22:43  caines
 //Fix setPosition error on Solaris
 //
@@ -154,13 +160,17 @@ Int_t St_srs_Maker::Make()
   St_scs_spt    *scs_spt    = new St_scs_spt("scs_spt",25000);       m_DataSet->Add(scs_spt);
   St_srs_result *srs_result = new St_srs_result("srs_result",25000); m_DataSet->Add(srs_result);
     
+  g2t_svt_hit_st *GeantHit;
+  g2t_vertex_st *GeantVertex;
+  g2t_track_st *GeantTrack;
+  
   St_DataSetIter geant(GetInputDS("geant"));
   St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("g2t_svt_hit");
-  g2t_svt_hit_st *GeantHit = g2t_svt_hit->GetTable();
+  if( g2t_svt_hit)  GeantHit = g2t_svt_hit->GetTable();
   St_g2t_vertex *g2t_vertex = (St_g2t_vertex *) geant("g2t_vertex");
-  g2t_vertex_st *GeantVertex = g2t_vertex->GetTable(); 
+  if( g2t_vertex) GeantVertex = g2t_vertex->GetTable(); 
   St_g2t_track *g2t_track = (St_g2t_track *) geant("g2t_track");
-  g2t_track_st *GeantTrack = g2t_track->GetTable(); 
+  if(g2t_track)GeantTrack = g2t_track->GetTable(); 
   if (g2t_svt_hit ) {
     
     res =  srs_am (srs_result,  g2t_svt_hit, scs_spt,

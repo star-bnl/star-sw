@@ -4,4 +4,4 @@ source /afs/rhic/rhstar/group/.starnew
 setenv NODEBUG yes
 starnew
 echo "Start $0 with $argv on" `date`
-perl $STAR/mgr/bfcm $argv
+perl $STAR/mgr/bfcp $argv

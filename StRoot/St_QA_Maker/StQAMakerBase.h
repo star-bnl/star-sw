@@ -1,5 +1,8 @@
-// $Id: StQAMakerBase.h,v 2.1 2000/08/25 16:04:10 genevb Exp $ 
+// $Id: StQAMakerBase.h,v 2.2 2001/04/28 22:05:13 genevb Exp $ 
 // $Log: StQAMakerBase.h,v $
+// Revision 2.2  2001/04/28 22:05:13  genevb
+// Added EMC histograms
+//
 // Revision 2.1  2000/08/25 16:04:10  genevb
 // Introduction of files
 //
@@ -30,7 +33,7 @@ class StQAMakerBase : public StMaker {
   virtual Int_t  Make();
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.1 2000/08/25 16:04:10 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQAMakerBase.h,v 2.2 2001/04/28 22:05:13 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -99,6 +102,7 @@ class StQAMakerBase : public StMaker {
   virtual void MakeHistVertex() = 0;
   virtual void MakeHistPoint() = 0;
   virtual void MakeHistRich() = 0;
+  virtual void MakeHistEMC() {}
   virtual void MakeHistEval() = 0;
 
   ClassDef(StQAMakerBase,0)   //needed for all code that will be used in CINT

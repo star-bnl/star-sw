@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 2.4 2001/04/24 22:53:51 lansdell Exp $
+// $Id: St_QA_Maker.cxx,v 2.5 2001/04/25 21:35:26 genevb Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.5  2001/04/25 21:35:26  genevb
+// Added V0 phi distributions
+//
 // Revision 2.4  2001/04/24 22:53:51  lansdell
 // Removed redundant radial position of first hit histograms
 //
@@ -1095,6 +1098,9 @@ void St_QA_Maker::MakeHistVertex(){
   if (vertex) {
     float z_svt = 999.;
     float z_tpc = -999.;
+    float pvtx_x = 500.;
+    float pvtx_y = 500.;
+    float pvtx_z = 500.;
 
     hists->m_v_num->Fill(vertex->GetNRows());
     hists->m_v_num_sm->Fill(vertex->GetNRows());
@@ -1106,9 +1112,18 @@ void St_QA_Maker::MakeHistVertex(){
       else if (t->iflag == 1 && t->vtx_id == kEventVtxId) { 
 	// plot of primary vertex only
         hists->m_pv_vtxid->Fill(t->vtx_id);
-	if (!isnan(double(t->x))) hists->m_pv_x->Fill(t->x);     
-	if (!isnan(double(t->y))) hists->m_pv_y->Fill(t->y);     
-	if (!isnan(double(t->z))) hists->m_pv_z->Fill(t->z);     
+	if (!isnan(double(t->x))) {
+	  hists->m_pv_x->Fill(t->x);
+	  pvtx_x = t->x;
+	}
+	if (!isnan(double(t->y))) {
+	  hists->m_pv_y->Fill(t->y);
+	  pvtx_y = t->y;
+	}
+	if (!isnan(double(t->z))) {
+	  hists->m_pv_z->Fill(t->z);
+	  pvtx_z = t->z;
+	}
         hists->m_pv_pchi2->Fill(t->chisq[0]);
         hists->m_pv_r->Fill(t->x*t->x + t->y*t->y);
       }
@@ -1120,6 +1135,17 @@ void St_QA_Maker::MakeHistVertex(){
 	if (!isnan(double(t->z))) hists->m_v_z->Fill(t->z);     
         hists->m_v_pchi2->Fill(t->chisq[0]); 
         hists->m_v_r->Fill(t->x*t->x + t->y*t->y);
+      }
+    }
+
+    if (!((pvtx_x == 500.) || (pvtx_y == 500.))) {
+      t   = vertex->GetTable();
+      for (Int_t i = 0; i < vertex->GetNRows(); i++,t++){
+        if (t->vtx_id == kV0VtxId) {
+           Float_t phi = atan2(t->y - pvtx_y, t->x - pvtx_x) * 180./M_PI;
+           if (phi<0.) phi += 360.;
+	   hists->m_vtx_phi_dist->Fill(phi);
+        }
       }
     }
     hists->m_vtx_z->Fill(z_tpc-z_svt);
@@ -1153,6 +1179,7 @@ void St_QA_Maker::MakeHistVertex(){
 
       hists->m_ev0_lama_hist->Fill(inv_mass_la);
       hists->m_ev0_k0ma_hist->Fill(inv_mass_k0);   
+
     }
   }
 
@@ -1313,8 +1340,9 @@ void St_QA_Maker::MakeHistEval(){
 
 
 
-  Float_t recoX, recoY, recoZ; 
   if (vertex) {
+    Float_t recoX, recoY, recoZ;
+    recoX = recoY = recoZ = 200.;
     dst_vertex_st  *t   = vertex->GetTable();
     if (vertex->GetNRows() <= 0) {
       cout << " St_QA_Maker::MakeHistEval - empty St_dst_vertex table\n" << endl;

@@ -1,5 +1,11 @@
-// $Id: StSvtSeqAdjMaker.h,v 1.5 2000/11/30 20:45:56 caines Exp $
+// $Id: StSvtSeqAdjMaker.h,v 1.7 2001/05/02 02:07:55 caines Exp $
 // $Log: StSvtSeqAdjMaker.h,v $
+// Revision 1.7  2001/05/02 02:07:55  caines
+// Fix function declaration for Solaris
+//
+// Revision 1.6  2001/05/01 00:23:58  caines
+//  Update h files for use with zsp data
+//
 // Revision 1.5  2000/11/30 20:45:56  caines
 // Dynamically calc prob values, use database
 //
@@ -58,8 +64,8 @@ class StSvtSeqAdjMaker : public StMaker
   Int_t GetSvtPedestals();
   Int_t GetBadAnodes();
   Int_t GetPedOffset(){return mPedOffSet;};
-  Int_t AdjustSequences1( int Anode); // Find sequences  based on ASICS
-  Int_t AdjustSequences2(int Anode); //adjust sequences base on LowInvProd
+  Int_t AdjustSequences1( int iAnode, int Anode); // Find sequences  based on ASICS
+  Int_t AdjustSequences2(int iAnode, int Anode); //adjust sequences base on LowInvProd
 
   Int_t CreateHist(Int_t tNuOfHyb);
   void  MakeHistogramsProb(int index,int Anode);

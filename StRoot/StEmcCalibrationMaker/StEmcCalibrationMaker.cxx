@@ -84,7 +84,7 @@ StEmcCalibrationMaker::StEmcCalibrationMaker(const char *name):StMaker(name)
   
   Settings_st[0].UseMipCalib=1;
   Settings_st[0].UseMipEtaBin=1;
-  Settings_st[0].EOverMipCte=0.252;
+  Settings_st[0].EOverMipCte=0.290;  // e/MIP for geant
   Settings_st[0].MipPeakFitFuntion=0;
   Settings_st[0].MipEventsPerBin=1200; //600
   Settings_st[0].MipMaxNumberOfTracks=1000;
@@ -113,6 +113,8 @@ Int_t StEmcCalibrationMaker::Init()
   
   emcCalSummary_st* Summary_st=SummaryTable->GetTable();
   emcCalSettings_st* Settings_st=SettingsTable->GetTable();
+  
+  if(Settings_st[0].DataType==1) Settings_st[0].EOverMipCte=0.252; // e/MIP for real data
   
   detnum=Summary_st[0].DetNumber-1;  // this is only the vector index
   
@@ -942,7 +944,7 @@ Bool_t StEmcCalibrationMaker::MakeCalibration()
         Float_t eta=0,phi=0;
         Geo->getEtaPhi(bin,eta,phi);
         Float_t theta=2.*atan(exp(-eta));
-        y[1]/=((1.-0.054*eta)*sin(theta)); // from V.Rykov
+        y[1]*=(1.+0.056)/sin(theta); // from V.Rykov
       }
     }
     

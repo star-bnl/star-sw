@@ -1,5 +1,8 @@
-// $Id: StSvtClusterMaker.h,v 1.2 2000/08/21 13:06:58 caines Exp $
+// $Id: StSvtClusterMaker.h,v 1.3 2001/04/29 20:11:57 caines Exp $
 // $Log: StSvtClusterMaker.h,v $
+// Revision 1.3  2001/04/29 20:11:57  caines
+// Added reset command for Online monitor
+//
 // Revision 1.2  2000/08/21 13:06:58  caines
 // Much improved hit finding and fitting
 //
@@ -41,6 +44,7 @@ class StSvtClusterMaker : public StMaker
   virtual Int_t Make();
   virtual Int_t Finish();
 
+  Int_t Reset();
   Int_t SetSvtCluster();
   Int_t SetHybridClusters();
 

@@ -1,5 +1,11 @@
-// $Id: StQABookHist.h,v 2.2 2001/04/24 22:53:51 lansdell Exp $ 
+// $Id: StQABookHist.h,v 2.4 2001/04/28 22:05:13 genevb Exp $ 
 // $Log: StQABookHist.h,v $
+// Revision 2.4  2001/04/28 22:05:13  genevb
+// Added EMC histograms
+//
+// Revision 2.3  2001/04/25 21:35:26  genevb
+// Added V0 phi distributions
+//
 // Revision 2.2  2001/04/24 22:53:51  lansdell
 // Removed redundant radial position of first hit histograms
 //
@@ -37,7 +43,7 @@ class StQABookHist : public TObject {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.2 2001/04/24 22:53:51 lansdell Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 2.4 2001/04/28 22:05:13 genevb Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
 // ******************** Histogram Booking Constants ************************
@@ -460,6 +466,8 @@ class StQABookHist : public TObject {
 
   TH1F     *m_vtx_z;    //! resolution of SVT vertex finder relative
                         //! to main vertex finder
+  TH1F     *m_vtx_phi_dist;  //! azimuthal distribution of V0s
+
   // from table dst_v0_vertex
   TH1F     *m_v0;            //! # v0 vertices
   TH1F     *m_ev0_lama_hist; //! Lambda mass
@@ -472,7 +480,7 @@ class StQABookHist : public TObject {
   // from kinkVertex
   TH1F     *m_kink_tot;   //! number of kinks
   
-  // for method MakeHistPoint
+// for method MakeHistPoint
   TH1F     *m_pnt_tot;     //! number of hits total
   TH1F     *m_pnt_tot_med; //! number of hits total, med range
   TH1F     *m_pnt_tot_sm;  //! number of hits total, small range
@@ -484,7 +492,7 @@ class StQABookHist : public TObject {
   TH1F     *m_pnt_ftpcE;   //! number of hits ftpcE
   TH1F     *m_pnt_ftpcW;   //! number of hits ftpcW
     
-  // for method MakeHistRich
+// for method MakeHistRich
   TH1F     *m_rich_tot;   //! number of rich hits
 
   // for method MakeHistEval
@@ -492,6 +500,40 @@ class StQABookHist : public TObject {
   TH1F *m_geant_reco_pvtx_y;  //! prim vtx y, diff geant - reco
   TH1F *m_geant_reco_pvtx_z;  //! prim vtx z, diff geant - reco
   TH2F *m_geant_reco_vtx_z_z; //! prim vtx z, diff geant - reco vs reco z
+
+// for method MakeHistEMC - from EMC (StEvent only)
+  // Hists for EMC hits
+ 
+  TH2F *m_emc_nhit;            //!
+  TH2F *m_emc_etot;            //!
+  TH2F *m_emc_hits[4];         //!
+  TH2F *m_emc_energy2D[4];     //!
+  TH1F *m_emc_adc[4];          //!
+  TH1F *m_emc_energy[4];       //!
+ 
+  // Hists for EMC cluster finder
+  TH2F *m_emc_ncl;             //!
+  TH2F *m_emc_etotCl;          //!
+  TH2F *m_emc_sig_e;           //!
+  TH2F *m_emc_sig_p;           //!
+  TH2F *m_emc_cl[4];           //!
+  TH2F *m_emc_energyCl[4];     //!
+  TH1F *m_emc_HitsInCl[4];     //!
+  TH1F *m_emc_EnergyCl[4];     //!
+  TH1F *m_emc_EtaInCl[4];      //!
+  TH1F *m_emc_PhiInCl[4];      //!
+ 
+  // Hists for Emc points
+  TH1F *m_emc_point_energy[4]; //! Point Energy spectra
+  TH1F *m_emc_point_eta[4];    //! Point Eta spectra
+  TH1F *m_emc_point_phi[4];    //! Point Phi spectra
+  TH1F *m_emc_point_sigeta[4]; //! Point SigmaEta spectra
+  TH1F *m_emc_point_sigphi[4]; //! Point SigmaPhi spectra
+  TH1F *m_emc_point_deleta[4]; //! Point DeltaEta spectra
+  TH1F *m_emc_point_delphi[4]; //! Point DeltaPhi spectra
+  TH1F *m_emc_point_trmom[4];  //! Point TrMom spectra
+  TH1F *m_emc_points[4];       //! Emc Point multiplicity
+  TH1F *m_emc_point_flag;      //! Point Flag spectra
 
 
 // ********************** Members For Internal Use *************************
@@ -507,6 +549,7 @@ class StQABookHist : public TObject {
   virtual void   BookHistVertex();
   virtual void   BookHistPoint();
   virtual void   BookHistRich();
+  virtual void   BookHistEMC();
   virtual void   BookHistEval();
 
   ClassDef(StQABookHist,0)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtProbValues.cc,v 1.3 2000/11/30 20:45:56 caines Exp $
+ * $Id: StSvtProbValues.cc,v 1.5 2001/04/30 22:25:43 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StSvtProbValues.cc,v $
+ * Revision 1.5  2001/04/30 22:25:43  caines
+ * Add Warning message
+ *
+ * Revision 1.4  2001/04/25 18:59:45  perev
+ * HPcorrs
+ *
  * Revision 1.3  2000/11/30 20:45:56  caines
  * Dynamically calc prob values, use database
  *
@@ -45,12 +51,12 @@ void StSvtProbValues::SetProbValue(float sigma)
   double num = 0;
 
   if (!sigma){
-    gMessMgr->Warning() << "StSvtSeqAdjMaker: No sigma set using default" << endm;
+ 
     sigma = mSigma;
   }
  for(int i = 0; i < MAX_ADC_COUNTS; i++)
   {
-   num = i/(sqrt(2)*sigma);
+   num = double(i)/(M_SQRT2*sigma);
    mProb[i] = 0.5*(1 - erf(num));
    if (mProb[i] < 1e-20)
      mProb[i] = 1e-20;

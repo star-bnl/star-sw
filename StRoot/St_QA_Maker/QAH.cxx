@@ -1,5 +1,8 @@
-// $Id: QAH.cxx,v 2.1 2000/08/25 16:04:09 genevb Exp $ 
+// $Id: QAH.cxx,v 2.2 2001/04/28 22:05:12 genevb Exp $ 
 // $Log: QAH.cxx,v $
+// Revision 2.2  2001/04/28 22:05:12  genevb
+// Added EMC histograms
+//
 // Revision 2.1  2000/08/25 16:04:09  genevb
 // Introduction of files
 //
@@ -31,12 +34,33 @@ TH1F* QAH::H1F(const Text_t* name, const Text_t* title,
 
 }
 //_____________________________________________________________________________
+TH1F* QAH::H1F(const Text_t* name, const Text_t* title,
+   Int_t nbinsx, const Double_t* xbins) {
+
+  TH1F* hist = new
+    TH1F(NameIt(name),TitleIt(title),nbinsx,xbins);
+  if (maker) maker->AddHist(hist);
+  return hist;
+
+}
+//_____________________________________________________________________________
 TH2F* QAH::H2F(const Text_t* name, const Text_t* title,
    Int_t nbinsx, Axis_t xlow, Axis_t xup,
    Int_t nbinsy, Axis_t ylow, Axis_t yup) {
 
   TH2F* hist = new
     TH2F(NameIt(name),TitleIt(title),nbinsx,xlow,xup,nbinsy,ylow,yup);
+  if (maker) maker->AddHist(hist);
+  return hist;
+
+}
+//_____________________________________________________________________________
+TH2F* QAH::H2F(const Text_t* name, const Text_t* title,
+   Int_t nbinsx, const Double_t* xbins,
+   Int_t nbinsy, Axis_t ylow, Axis_t yup) {
+
+  TH2F* hist = new
+    TH2F(NameIt(name),TitleIt(title),nbinsx,xbins,nbinsy,ylow,yup);
   if (maker) maker->AddHist(hist);
   return hist;
 

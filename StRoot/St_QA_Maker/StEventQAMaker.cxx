@@ -1,5 +1,17 @@
-// $Id: StEventQAMaker.cxx,v 2.5 2001/04/24 22:53:51 lansdell Exp $
+// $Id: StEventQAMaker.cxx,v 2.9 2001/05/01 15:17:36 genevb Exp $
 // $Log: StEventQAMaker.cxx,v $
+// Revision 2.9  2001/05/01 15:17:36  genevb
+// Execute EMC code only if EMC libs loaded
+//
+// Revision 2.8  2001/04/30 19:09:27  genevb
+// Catch missing EMC info
+//
+// Revision 2.7  2001/04/28 22:05:13  genevb
+// Added EMC histograms
+//
+// Revision 2.6  2001/04/25 21:35:25  genevb
+// Added V0 phi distributions
+//
 // Revision 2.5  2001/04/24 22:53:51  lansdell
 // Removed redundant radial position of first hit histograms
 //
@@ -28,11 +40,13 @@
 
 #include "PhysicalConstants.h"
 #include <math.h>
+#include "TROOT.h"
 #include "TMath.h"
 #include "SystemOfUnits.h"
 #include "StQABookHist.h"
 #include "TH1.h"
 #include "TH2.h"
+//#include "TSpectrum.h"
 #include "StEventQAMaker.h"
 #include "StEventTypes.h"
 #include "StTpcDedxPidAlgorithm.h"
@@ -41,6 +55,10 @@
 #include "StTpcDb/StTpcDb.h"
 #include "StarClassLibrary/StTimer.hh"
 #include "StMessMgr.h"
+#include "StEmcUtil/StEmcGeom.h"
+#include "StEmcUtil/StEmcMath.h"
+
+static StEmcGeom* emcGeom[4];
 
 ClassImp(StEventQAMaker)
 
@@ -62,6 +80,9 @@ Int_t StEventQAMaker::Init() {
 // StEventQAMaker - Init; book histograms and set defaults for member functions
 
   mHitHist = new HitHistograms("QaDedxAllSectors","dE/dx for all TPC sectors",100,0.,1.e-5,2);
+  if ((gROOT->GetClass("StEmcMath")) && (gROOT->GetClass("StEmcGeom"))) {
+    for(Int_t i=0; i<4; i++) {emcGeom[i] = new StEmcGeom(i+1);}
+  }
   return StQAMakerBase::Init();
 }
 
@@ -970,6 +991,12 @@ void StEventQAMaker::MakeHistVertex() {
   StSPtrVecV0Vertex &v0Vtx = event->v0Vertices();
   hists->m_v0->Fill(v0Vtx.size());
 
+//  static TH1F v0PhiHist("voph","v0 Phi Hist",36,0.,360.);
+//  static TH1F v0PhiHist2("voph2","v0 Phi Hist2",36,180.,540.);
+//  static TSpectrum v0PhiSpec;
+//  v0PhiHist.Reset();
+//  v0PhiHist2.Reset();
+
   for (UInt_t k=0; k<v0Vtx.size(); k++) {
     StV0Vertex *v0 = v0Vtx[k];
     if ((v0) && (v0->dcaParentToPrimaryVertex() >= 0.)) {
@@ -998,8 +1025,46 @@ void StEventQAMaker::MakeHistVertex() {
       hists->m_v_pchi2->Fill(v0->chiSquared());
       hists->m_v_r->Fill(v0->position().x()*v0->position().x() +
 		  v0->position().y()*v0->position().y());
+
+      if (!(isnan(double(v0->position().x())) ||
+            isnan(double(v0->position().y())))) {
+        Float_t phi = atan2(v0->position().y() - primVtx->position().y(),
+	                    v0->position().x() - primVtx->position().x())
+                       * 180./M_PI;
+        if (phi<0.) phi += 360.;
+        hists->m_vtx_phi_dist->Fill(phi);
+//        v0PhiHist.Fill(phi);
+//        if (phi<180.) phi += 360.;
+//        v0PhiHist2.Fill(phi);
+      }
     }
   }
+
+  /*
+  if (v0PhiHist.GetEntries()>=144) {
+    for (Float_t ssig=2.; ssig<100.; ssig+=2.) {
+      Int_t npeaks = v0PhiSpec.Search(&v0PhiHist,
+                   (Double_t) (ssig/v0PhiHist.GetBinWidth(0)));
+      Float_t* pks = v0PhiSpec.GetPositionX();
+      for (Int_t ipeak=0; ipeak<npeaks; ipeak++) {
+        if ((pks[ipeak]>=90.)&&(pks[ipeak]<270.)) {
+          hists->m_vtx_phi_dist->Fill(pks[ipeak], ssig);
+        }
+      }
+
+      npeaks = v0PhiSpec.Search(&v0PhiHist2,
+                   (Double_t) (ssig/v0PhiHist2.GetBinWidth(0)));
+      pks = v0PhiSpec.GetPositionX();
+      for (Int_t ipeak=0; ipeak<npeaks; ipeak++) {
+        if ((pks[ipeak]>=270.)&&(pks[ipeak]<450.)) {
+          Float_t phi2 = pks[ipeak];
+          if (phi2>360.) phi2 -= 360.;
+          hists->m_vtx_phi_dist->Fill(phi2, ssig);
+	}
+      }
+    }
+  }
+  */
 
   // Xi vertices
   if (Debug()) 
@@ -1127,6 +1192,153 @@ void StEventQAMaker::MakeHistRich() {
 
   if (event->softwareMonitor()->rich())
     hists->m_rich_tot->Fill(event->softwareMonitor()->rich()->mult_rich_tot);
+}
+
+//_____________________________________________________________________________
+void StEventQAMaker::MakeHistEMC() {
+
+  if (Debug()) 
+    gMessMgr->Info(" *** in StEventQAMaker - filling EMC histograms ");
+
+  StEmcCollection* emccol = event->emcCollection();
+  cout <<"emccol = "<<emccol<<"\n";
+  if (!emccol) return;
+
+  //Get vertex
+  StPrimaryVertex* pvert = event->primaryVertex(0);
+
+  UInt_t i;
+
+  for(i=0; i<4; i++){
+    Int_t det = i+1;
+    StDetectorId id = StEmcMath::detectorId(det);
+    StEmcDetector* detector=emccol->detector(id);
+
+    Float_t energy=0.0; // Energy for whole detector
+    UInt_t  nh=0;         // Hits for whole detectors
+    for(UInt_t j=1;j<121;j++){
+      StEmcModule* module = detector->module(j);
+      StSPtrVecEmcRawHit& rawHit=module->hits();
+        
+      Int_t m,e,s,adc;
+      Float_t eta,phi,E;
+      nh += rawHit.size();
+      for(UInt_t k=0;k<rawHit.size();k++){
+        m   = rawHit[k]->module();
+        e   = rawHit[k]->eta();
+        s   = rawHit[k]->sub();
+        if (s == -1) s = 1; // case of smde
+        adc = rawHit[k]->adc();
+        E   = rawHit[k]->energy();
+        emcGeom[i]->getEta(m, e, eta); 
+        emcGeom[i]->getPhi(m, s, phi);
+        hists->m_emc_hits[i]->Fill(eta,phi); 
+        hists->m_emc_energy2D[i]->Fill(eta,phi,E); 
+        hists->m_emc_adc[i]->Fill(float(adc)); 
+        hists->m_emc_energy[i]->Fill(E);
+        energy += E;
+       }
+     }
+     if(nh)     hists->m_emc_nhit->Fill(log10(Double_t(nh)), Float_t(det));
+     if(energy) hists->m_emc_etot->Fill(log10(Double_t(energy)), Float_t(det));
+  }
+  
+  for(i=0; i<4; i++) {  
+    Int_t det = i+1, nh;
+    StDetectorId id = StEmcMath::detectorId(det);
+    StEmcDetector* detector = emccol->detector(id);
+    StSPtrVecEmcCluster& cluster = detector->cluster()->clusters();
+
+    hists->m_emc_ncl->Fill(log10(Double_t(cluster.size())),(Float_t)det);
+    Float_t Etot=0.0, eta, phi, sigEta, sigPhi, eCl;
+    for(UInt_t j=0;j<cluster.size();j++){
+      nh     = cluster[j]->nHits();
+      eCl    = cluster[j]->energy();
+      eta    = cluster[j]->eta();
+      sigEta = cluster[j]->sigmaEta();
+      phi    = cluster[j]->phi();
+      sigPhi = cluster[j]->sigmaPhi();
+      if(sigEta > 0)   hists->m_emc_sig_e->Fill(sigEta, Axis_t(det));          
+      if(sigPhi > 0.0) hists->m_emc_sig_p->Fill(sigPhi, Axis_t(det));
+
+      hists->m_emc_cl[det-1]->Fill(Axis_t(eta), Axis_t(phi));
+      hists->m_emc_energyCl[det-1]->Fill(Axis_t(eta), Axis_t(phi), eCl);
+      hists->m_emc_HitsInCl[det-1]->Fill(Axis_t(nh));
+      hists->m_emc_EnergyCl[det-1]->Fill(Axis_t(eCl));
+      hists->m_emc_EtaInCl[det-1]->Fill(Axis_t(eta));
+      hists->m_emc_PhiInCl[det-1]->Fill(Axis_t(phi));
+      Etot  += eCl;
+    }
+    hists->m_emc_etotCl->Fill(log10(Etot), Axis_t(det));
+  }      
+
+  // Get the hists from StEmcPoints
+
+  StSPtrVecEmcPoint& pointvec = emccol->barrelPoints();
+ 
+  Int_t Point_Mult[4];
+  for(i=0;i<4;i++) {Point_Mult[i]=0;}
+  
+  for(i=0;i<pointvec.size();i++) {
+
+    StEmcPoint *point = (StEmcPoint*) pointvec[i];
+
+    //const StThreeVectorF & posP = point->position();
+    const StThreeVectorF & sizeP = point->size();
+
+    Float_t eta=0.;
+    Float_t phi=0.;
+    if (pvert) {
+      eta=StEmcMath::eta(point,(StMeasuredPoint*)pvert);
+      phi=StEmcMath::phi(point,(StMeasuredPoint*)pvert);
+    }
+
+    // Get category (ncat) for this point
+   
+    Float_t EnergyDet[4];
+    for(UInt_t ie=0;ie<4;ie++) {EnergyDet[ie]=0.0;}
+
+    for(Int_t j=0;j<4;j++) {
+      StDetectorId detid = static_cast<StDetectorId>(j+kBarrelEmcTowerId);
+      EnergyDet[j] = point->energyInDetector(detid);
+    }
+    Int_t ncat=0;
+
+    if(EnergyDet[2]==0 && EnergyDet[3] ==0) {
+      ncat=0;
+    } else if(EnergyDet[2]>0 && EnergyDet[3] ==0) {
+      ncat=1;
+    } else if(EnergyDet[2]==0 && EnergyDet[3]>0) {
+      ncat=2;
+    } else{
+      ncat=3;
+    }
+
+    //Fill the hists
+    Float_t energy=point->energy();
+    Float_t sigmaeta=sizeP.x();
+    Float_t sigmaphi=sizeP.y();
+    Float_t trackmom=point->chiSquare();
+    Float_t deltaeta=point->deltaEta();
+    Float_t deltaphi=point->deltaPhi();
+    if (ncat>3) ncat=3;
+    Point_Mult[ncat]++;
+    if (energy>0) hists->m_emc_point_energy[ncat]->Fill(energy);
+    if (pvert) {
+      hists->m_emc_point_eta[ncat]->Fill(eta);
+      hists->m_emc_point_phi[ncat]->Fill(phi);
+    }
+    hists->m_emc_point_sigeta[ncat]->Fill(sigmaeta);
+    hists->m_emc_point_sigphi[ncat]->Fill(sigmaphi);
+    hists->m_emc_point_flag->Fill(Float_t(ncat+1));
+    if (trackmom>0) {
+      hists->m_emc_point_trmom[ncat]->Fill(trackmom);
+      hists->m_emc_point_deleta[ncat]->Fill(deltaeta);
+      hists->m_emc_point_delphi[ncat]->Fill(deltaphi);
+    }
+  }
+  for(i=0;i<4;i++) {hists->m_emc_points[i]->Fill(Float_t(Point_Mult[i]));}
+
 }
 
 //_____________________________________________________________________________

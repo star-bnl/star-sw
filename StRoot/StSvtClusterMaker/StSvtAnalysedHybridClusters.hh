@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.hh,v 1.2 2000/08/24 04:27:56 caines Exp $
+ * $Id: StSvtAnalysedHybridClusters.hh,v 1.4 2001/05/04 14:20:05 caines Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,12 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.hh,v $
+ * Revision 1.4  2001/05/04 14:20:05  caines
+ * Improved historgramming
+ *
+ * Revision 1.3  2001/04/25 18:23:21  perev
+ * HPcorrs
+ *
  * Revision 1.2  2000/08/24 04:27:56  caines
  * Fixed casting warnings so compiles without errors on linux
  *
@@ -24,7 +30,7 @@
 
 #include "StSvtClassLibrary/StSvtHybridObject.hh" 
 #include "StarClassLibrary/StThreeVector.hh"
-#include "StSvtHit.h"
+#include "StEvent/StSvtHit.h"
 
 class StSvtAnalysis;
 
@@ -67,7 +73,7 @@ class StSvtAnalysedHybridClusters : public StSvtHybridObject
  private:
     
     int mNumOfHits;
-    ulong mHardWarePosition;
+    unsigned int mHardWarePosition;
     StSvtHitData* mSvtHitData;     //!
     StSvtHit* mSvtHit;          //!   
     StThreeVector<double>* mPos;        //!      

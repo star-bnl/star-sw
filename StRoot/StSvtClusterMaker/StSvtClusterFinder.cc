@@ -1,6 +1,6 @@
  /***************************************************************************
  *
- * $Id: StSvtClusterFinder.cc,v 1.6 2000/11/30 20:43:17 caines Exp $
+ * $Id: StSvtClusterFinder.cc,v 1.7 2001/04/25 18:38:28 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtClusterFinder.cc,v $
+ * Revision 1.7  2001/04/25 18:38:28  perev
+ * HPcorrs
+ *
  * Revision 1.6  2000/11/30 20:43:17  caines
  * Use database
  *
@@ -21,6 +24,9 @@
  *  now runs faster.
  *
  * $Log: StSvtClusterFinder.cc,v $
+ * Revision 1.7  2001/04/25 18:38:28  perev
+ * HPcorrs
+ *
  * Revision 1.6  2000/11/30 20:43:17  caines
  * Use database
  *
@@ -417,9 +423,9 @@ void StSvtClusterFinder::ResetContainers()
 
 // do only the ones that have been flagged
 
- for(int i = 0; i<mNumOfAnodes; i++)
+ {for(int i = 0; i<mNumOfAnodes; i++)
     for( j=0; j<mNumSeq[i];j++)
-      mSeqFlag[i][j] = 0;
+      mSeqFlag[i][j] = 0;}
 
   cluIndex=0;
 }

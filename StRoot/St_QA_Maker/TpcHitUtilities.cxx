@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// $Id: TpcHitUtilities.cxx,v 1.2 2000/08/09 18:57:44 lansdell Exp $
+// $Id: TpcHitUtilities.cxx,v 1.3 2001/04/25 18:14:12 perev Exp $
 //
 // Author: M.L. Miller, Yale
 //
@@ -10,12 +10,14 @@
 ///////////////////////////////////////////////////////////////////////////
 //
 // $Log: TpcHitUtilities.cxx,v $
+// Revision 1.3  2001/04/25 18:14:12  perev
+// HPcorrs
+//
 // Revision 1.2  2000/08/09 18:57:44  lansdell
 // improvements in TPC gains code reduces CPU time per event by factor of 2
 //
 //
 ///////////////////////////////////////////////////////////////////////////
-
 #include "TpcMapUtilities.h"
 #include "TpcHitUtilities.h"
 #include "StEventTypes.h" // StEvent
@@ -29,8 +31,10 @@
 #include "StTpcDb/StTpcDb.h"
 #include "StTpcDb/StTpcPadPlaneI.h"
 
+#ifndef ST_NO_NAMESPACES
 using std::sort;
 using std::pair;
+#endif
 
 TpcHitUtilities::TpcHitUtilities()
 {
@@ -126,13 +130,13 @@ void TpcHitUtilities::buildMaps()
 {
     StTpcCoordinateTransform transformer(gStTpcDb);
     //Build map with an outward pointing normal keyed by sector number
-    for (int sector=1; sector<=24; sector++) {
+    {for (int sector=1; sector<=24; sector++) {
 	m_SectorNormalMap[sector] = sectorNormal(sector);
-    }
+    }}
 
     //Build map with a point on outside, center, and inside of padrow (this plus normal define a plane)
     //StTpcCoordinateTransform transformer(gStTpcDb);
-    for (int sector=1; sector<=24; sector++) {
+    {for (int sector=1; sector<=24; sector++) {
 	
 	for (int padrow=1; padrow<=45; padrow++) {
 	    double padlength;
@@ -177,7 +181,7 @@ void TpcHitUtilities::buildMaps()
 	    //cout <<sector<<"\t"<<padrow<<"\t"<<endl;
 	    //padLocation.print();
 	}
-    }
+    }}
 
     cout<<"Done Building Maps"<<endl;
     return;

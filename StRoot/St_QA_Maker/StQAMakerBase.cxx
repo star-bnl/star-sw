@@ -1,5 +1,11 @@
-// $Id: StQAMakerBase.cxx,v 2.3 2000/08/25 22:06:15 genevb Exp $ 
+// $Id: StQAMakerBase.cxx,v 2.5 2001/04/28 22:05:13 genevb Exp $ 
 // $Log: StQAMakerBase.cxx,v $
+// Revision 2.5  2001/04/28 22:05:13  genevb
+// Added EMC histograms
+//
+// Revision 2.4  2001/04/26 16:34:40  genevb
+// Fixed some histogram ranges
+//
 // Revision 2.3  2000/08/25 22:06:15  genevb
 // Raised high mult bin to 2500 global tracks
 //
@@ -123,6 +129,8 @@ Int_t StQAMakerBase::Make(){
   MakeHistPoint();
   // histograms from table g2t_rch_hit
   MakeHistRich();
+  // histograms from EMC in StEvent
+  MakeHistEMC();
   // histograms from geant and reco tables 
   MakeHistEval();
 
@@ -205,7 +213,7 @@ void StQAMakerBase::BookHistEvSum(){
     "evsum: num good global tracks over total",55,0.,1.1);
   m_trk_tot_gd->SetXTitle("number of good/total tracks");
   m_glb_trk_tot = MH1F("QaEvsumTrkTot",
-    "evsum: num tracks total ",ntrk,0.,10000.);
+    "evsum: num tracks total ",ntrk,0.,12500.);
   m_glb_trk_tot_sm = MH1F("QaEvsumTrkTotsm",
     "evsum: num tracks total ",ntrk,0.,20.);
   m_glb_trk_plusminus = MH1F("QaEvsumPlusMinusTrk",
@@ -219,11 +227,11 @@ void StQAMakerBase::BookHistEvSum(){
   m_glb_trk_prim_sm = MH1F("QaEvsumTrkPrimsm",
     "evsum: num good tracks from primaries ",80,0.,20.);
   m_vert_total = MH1F("QaEvsumVertTot",
-    "evsum: total num of vertices",80,0.,2000.);
+    "evsum: total num of vertices",80,0.,10000.);
   m_vert_total_sm = MH1F("QaEvsumVertTotsm",
     "evsum: total num of vertices",80,0.,20.);
   m_mean_pt = MH1F("QaEvsumMeanPt","evsum: mean pt", nmnpt,0.,2.0);
-  m_mean_pt_sm = MH1F("QaEvsumMeanPtsm","evsum: mean pt", nmnpt,0.,0.5);
+  m_mean_pt_sm = MH1F("QaEvsumMeanPtsm","evsum: mean pt", nmnpt,0.,0.6);
   m_mean_eta = MH1F("QaEvsumMeanEta","evsum: mean eta", nmneta,-0.4,0.4);
   m_rms_eta = MH1F("QaEvsumRmsEta","evsum: rms eta", nmneta,0.,2.5);
   m_prim_vrtr = MH1F("QaEvsumPrimVertR",

@@ -702,7 +702,6 @@ CCC   Select and load global tracks; compute relevant quantities, e.g. DCAs.
            xx0 = globtrk(i).r0*dcosd(dble(globtrk(i).phi0))
            yy0 = globtrk(i).r0*dsind(dble(globtrk(i).phi0))
            zz0 = globtrk(i).z0
-           globtrk(i).id_start_vertex = 0
            if(globtrk(i).det_id .eq. kTpcId       .or.
      1        globtrk(i).det_id .eq. kSvtId       .or.
      2        globtrk(i).det_id .eq. kSsdId       .or.
@@ -713,6 +712,9 @@ CCC   Select and load global tracks; compute relevant quantities, e.g. DCAs.
               detIdOK = 1
            else
               detIdOK = 0
+           end if
+           if(detIdOK.eq.1) then
+              globtrk(i).id_start_vertex = 0
            end if
            
            if (ppt.ge.evrpar(1).ptmin .and. ppt.ne. 99999. .and.

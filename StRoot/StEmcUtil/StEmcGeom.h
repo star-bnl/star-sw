@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEmcGeom.h,v 1.6 2001/04/25 01:03:10 pavlinov Exp $
+ * $Id: StEmcGeom.h,v 1.7 2001/04/26 14:23:40 akio Exp $
  *
  * Author:  Aleksei Pavlinov
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEmcGeom.h,v $
+ * Revision 1.7  2001/04/26 14:23:40  akio
+ * Quick and dirty fix for crashing non-bfc chain
+ *
  * Revision 1.6  2001/04/25 01:03:10  pavlinov
  * Clean up
  *
@@ -77,12 +80,12 @@
 #include "tables/St_calb_calg_Table.h"
 #include "tables/St_calb_calr_Table.h"
 
-class StBFChain;
+class StMaker;
 class TDataSet;
 
 class StEmcGeom {
 private:
-  StBFChain*    mChain;    //!
+  StMaker*      mChain;    //!
   TDataSet*     mGeantGeom;//!
   St_calb_calg* mCalg;     //!
   calb_calg_st* mCalg_st;  //!

@@ -1,5 +1,11 @@
-// $Id: StFtpcTracker.cc,v 1.13 2001/04/02 14:20:15 oldi Exp $
+// $Id: StFtpcTracker.cc,v 1.15 2001/05/04 09:21:01 oldi Exp $
 // $Log: StFtpcTracker.cc,v $
+// Revision 1.15  2001/05/04 09:21:01  oldi
+// Changed TMath::TMath:: to TMath::
+//
+// Revision 1.14  2001/04/25 17:54:12  perev
+// HPcorrs
+//
 // Revision 1.13  2001/04/02 14:20:15  oldi
 // Some minor changes due to Insure++ was reporting problems.
 // These changes do not affect the physical output of StFtpcTrackMaker!
@@ -69,6 +75,7 @@
 //----------Last Modified: 10.11.2000
 //----------Copyright:     &copy MDO Production 1999
 
+#include <math.h>
 #include "StFtpcTracker.hh"
 #include "StFtpcPoint.hh"
 #include "StFtpcTrack.hh"
@@ -196,10 +203,10 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, St_fcl_fppoint *fcl_fppoint, 
   mHit = new TObjArray(n_clusters);    // create TObjArray
   mHitsCreated = (Bool_t)true;
 
-  for (Int_t i = 0; i < n_clusters; i++) {
+  {for (Int_t i = 0; i < n_clusters; i++) {
     mHit->AddAt(new StFtpcPoint(point_st++), i);
     ((StFtpcPoint *)mHit->At(i))->SetHitNumber(i);
-  }
+  }}
 
   // Copy tracks into ObjArray.
   Int_t n_tracks = fpt_fptrack->GetNRows();  // number of tracks
@@ -207,9 +214,9 @@ StFtpcTracker::StFtpcTracker(StFtpcVertex *vertex, St_fcl_fppoint *fcl_fppoint, 
 
   mTrack = new TObjArray(n_tracks);    // create TObjArray
 
-  for (Int_t i = 0; i < n_tracks; i++) {
+  {for (Int_t i = 0; i < n_tracks; i++) {
     mTrack->AddAt(new StFtpcTrack(track_st++, mHit, i), i);
-  }
+  }}
 
   mMaxDca = max_Dca;
 }
@@ -554,14 +561,14 @@ void StFtpcTracker::CalcEnergyLoss(FDE_FDEPAR_ST *fdepar)
 	      else {
 		xx  = hit->GetX();
 		yy  = hit->GetY();
-		rr  = TMath::TMath::Sqrt(xx*xx + yy*yy);
+		rr  = TMath::Sqrt(xx*xx + yy*yy);
 		xx  = xx/rr;                  // normalized
 		yy  = yy/rr;
 		
 		ftmp = (xx*px+yy*py)/pp; 
-		cos_lambda = TMath::TMath::Sqrt(1. - ftmp*ftmp);
+		cos_lambda = TMath::Sqrt(1. - ftmp*ftmp);
 		ftmp = yy*px-xx*py;
-		cos_alpha  = fabs(pz) / TMath::TMath::Sqrt(pz*pz + ftmp*ftmp); 
+		cos_alpha  = fabs(pz) / TMath::Sqrt(pz*pz + ftmp*ftmp); 
 	      } 
 	      
 	      if (cos_alpha == 0. || cos_lambda == 0.) {
@@ -955,14 +962,14 @@ Int_t StFtpcTracker::FitAnddEdxAndWrite(St_fpt_fptrack *trackTableWrapper, FDE_F
 		else {
 		  xx  = hit->GetX();
 		  yy  = hit->GetY();
-		  rr  = TMath::TMath::Sqrt(xx*xx + yy*yy);
+		  rr  = TMath::Sqrt(xx*xx + yy*yy);
 		  xx  = xx/rr;                  // normalized
 		  yy  = yy/rr;
 		
 		  ftmp = (xx*px+yy*py)/pp; 
-		  cos_lambda = TMath::TMath::Sqrt(1. - ftmp*ftmp);
+		  cos_lambda = TMath::Sqrt(1. - ftmp*ftmp);
 		  ftmp = yy*px-xx*py;
-		  cos_alpha  = fabs(pz) / TMath::TMath::Sqrt(pz*pz + ftmp*ftmp); 
+		  cos_alpha  = fabs(pz) / TMath::Sqrt(pz*pz + ftmp*ftmp); 
 		} 
 	      
 		if (cos_alpha == 0. || cos_lambda == 0.) {

@@ -1,41 +1,26 @@
 #!/usr/local/bin/perl
-# $Id: bfc2_cas,v 1.13 2001/05/04 01:38:41 didenko Exp $
-# $Log: bfc2_cas,v $
-# Revision 1.13  2001/05/04 01:38:41  didenko
-# fixed typ
+# $Id: bfcp,v 1.2 2001/05/04 03:24:17 didenko Exp $
+# $Log: bfcp,v $
+# Revision 1.2  2001/05/04 03:24:17  didenko
+# fix name
 #
-# Revision 1.12  2001/05/03 17:19:56  didenko
-# next file to mixed
+# Revision 1.3  2001/05/01 13:34:59  didenko
+# change disk
 #
-# Revision 1.11  2001/05/03 00:32:05  didenko
-# *** empty log message ***
+# Revision 1.2  2001/04/16 15:48:42  didenko
+# adjusted for MDC4
 #
-# Revision 1.10  2001/05/02 18:55:05  didenko
-# change disk number
+# Revision 1.1  2001/03/20 21:43:34  didenko
+# bfc for MC
 #
-# Revision 1.9  2001/04/28 03:56:01  didenko
-# fixed output files
+# Revision 1.12  2000/10/02 00:23:49  fisyak
+# Adjustment for P00hi
 #
-# Revision 1.8  2001/04/28 01:17:21  didenko
-# fix syntax
+# Revision 1.11  2000/07/19 21:26:51  didenko
+# fix shell
 #
-# Revision 1.7  2001/04/28 00:44:22  didenko
-# remove pile-up for FTPC
-#
-# Revision 1.6  2001/04/25 18:06:01  didenko
-# modify for SVT and FTPC pile-up
-#
-# Revision 1.5  2001/04/25 15:33:45  didenko
-# scripts to run pp with pile-up
-#
-# Revision 1.5  2001/04/20 21:04:43  didenko
-# fix syntax
-#
-# Revision 1.4  2001/04/20 20:14:01  didenko
-# fix string
-#
-# Revision 1.1  2000/06/01 15:27:20  didenko
-# script to run mixing events
+# Revision 1.10  2000/06/14 21:26:39  didenko
+# script interface for rcrs production
 #
 # Revision 1.9  2000/01/26 05:27:10  didenko
 # set disk name for simu data
@@ -63,15 +48,12 @@ use File::Basename;
 system 'echo "Starting job execution at" `date` " on " $HOSTNAME';
 print "STAR_LEVEL = $STAR_LEVEL\n";
 my $Chain = "";
-my $bfile = "pds0200_03_29136evts.fzd";
- symlink "/star/data04/simu/tests/pds0200/pds0200_03_29136evts.fzd", $bfile;
-
 die "No input Chain defined" if ! defined($ARGV[0]);
 for (my $i = 0;$i<=$#ARGV;$i++){
   if ($ARGV[$i] && ! ($ARGV[$i] =~ /\./)) {$Chain .= " " .  $ARGV[$i];}
 }
 my  $input_file;
-my $outfile;
+my  $outfile;
 if ($ACTUAL_INPUT0) {
   chomp ($ACTUAL_INPUT0);
   print "Input: ",$ACTUAL_INPUT0, "\n";
@@ -100,7 +82,7 @@ if ($ACTUAL_INPUT0) {
   my $output_file8 = basename($OUTPUT_FILE8);
   my $output_file9 = basename($OUTPUT_FILE9);
   my $out_dir      = dirname ($OUTPUT_FILE0);
-     $outfile = $output_file0;
+  $outfile = $output_file0;
   print "Output:", $output_file0,",",$output_file1,",",$output_file2,",",$output_file3,",",$output_file4,",",$output_file5,",",$output_file6,",",$output_file7,",",$output_file8,",",$output_file9,"\n";
   print "Dirname:", $out_dir, "\n";
   if ($out_dir && !-d $out_dir) {mkdir $out_dir,0773;}
@@ -143,29 +125,25 @@ else {
 }
 die "No input file has been defined" if ! $input_file;
 
-my $evts;
-my $nSeq;
-my $Nevts;
-my $nSeqi;
+my $NofEvents = 20000;
 my $Nev_first;
 my $Nev_last;
-my $NofEvents;
+my $nSeq;
 my @prt;
+my $Nevts;
+my $evts;
+my $outfl;
 
-my $outfl = $outfile;
+ $outfl = $outfile; 
 $outfile =~ s/dst.root/root/g;
 @prt = split("_", $outfl);
 $nSeq = $prt[1];
 $evts = $prt[2];
 ($Nevts,$dummy) = split /e/, $evts;
-$NofEvents = 100;
+ $Nev_first = $NofEvents * abs($nSeq -1) + 1;
+ $Nev_last = $Nev_first + $Nevts - 1;
 
-my $N3 = $Nevts * abs($nSeq - 385) + 1;
-my $N1 = $N3 + 1;
-my $N2 = $Nevts * $nSeq + 1;
-
-my $inputcs = " gfile B " . $bfile .";" . " mode SVTT back  22122; mode FTPC back 000;  mode TPCE back 1881188; gback 188 188 0.0213 213. 15.; rndm $N1 $N2; skip $N3 ";
-my $cmd = " root4star -b -q 'bfc.C(" . $NofEvents . ",\"" . $Chain . "\",\"" . $input_file . ";" . $inputcs . "\",\"" . $outfile . "\")\'";
+my $cmd = " root4star -b -q 'bfc.C(". $Nev_first . "," . $Nev_last . ",\"" . $Chain . "\",\"" . $input_file ."\",\"" . $outfile . "\")\'";
 print $cmd,"\n";
 system $cmd;
 system 'echo "Finished job execution at" `date` " on " `hostname`'; 
