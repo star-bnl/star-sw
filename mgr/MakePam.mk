@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.107 1999/08/16 17:03:05 fisyak Exp $
+# $Id: MakePam.mk,v 1.108 1999/08/20 01:42:59 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.108  1999/08/20 01:42:59  fisyak
+# Devorce StAF and STAR Library
+#
 # Revision 1.107  1999/08/16 17:03:05  fisyak
 # Add protection against empty directories
 #
@@ -234,12 +237,13 @@ SUBDIR2 := $(filter-out $(SUBDIR1), $(subst $(STAR)/pams/,, $(wildcard $(STAR)/p
 INC_DIRS:= $(addprefix $(OUT_DIR)/pams/, $(SUBDIR1)) $(addprefix $(STAR)/pams/, $(SUBDIR2)) 
 INC_DIRS+= $(STAF_UTILS_INCS)
 INC_NAMES := $(addprefix StRoot/,St_base StChain StUtilities xdf2root StarClassLibrary StEvent) \
-              StRoot .share .share/tables .share/$(PKG) pams inc 
+              StRoot .share .share/tables .share/$(PKG) pams inc StDb/include
 #                            StarClassLibrary/include
-INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES)))) $(ROOT_DIR) 
+INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES))))
 ifneq ($(ROOT_DIR),$(STAR))
   INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES)))) $(STAR)
 endif
+INC_DIRS  += $(STAF)/inc $(ROOT_DIR)
 #INC_DIRS:= $(wildcard $(OUT_DIR)/pams/*/inc $(STAR)/pams/*/inc)
 DINCINT  :=  -DROOT_CINT $(filter-out -DST_NO_TEMPLATE_DEF_ARGS, $(CPPFLAGS)) $(ROOTCINTD) $(INCINT)
 ifeq ($(STAR_HOST_SYS),sun4x_56)

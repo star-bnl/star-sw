@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.101 1999/08/16 16:31:32 fisyak Exp $
+# $Id: MakeDll.mk,v 1.102 1999/08/20 01:42:58 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.102  1999/08/20 01:42:58  fisyak
+# Devorce StAF and STAR Library
+#
 # Revision 1.101  1999/08/16 16:31:32  fisyak
 # Simplify Makefiles
 #
@@ -245,13 +248,14 @@ endif
 
 # 	Define internal and external includes dirs
 INC_NAMES := $(addprefix StRoot/,St_base StChain StUtilities xdf2root StarClassLibrary StEvent) \
-              StRoot .share .share/tables .share/$(PKG) pams inc 
+              StRoot .share .share/tables .share/$(PKG) pams inc StDb/include
 #                            StarClassLibrary/include
 INC_DIRS  := $(wildcard $(GEN_DIR) $(SRC_DIRS) $(SRC_DIR)/include)
-INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES)))) $(ROOT_DIR) 
+INC_DIRS  += $(strip $(wildcard $(addprefix $(ROOT_DIR)/,$(INC_NAMES)))) 
 ifneq ($(ROOT_DIR),$(STAR))
 INC_DIRS  += $(strip $(wildcard $(addprefix $(STAR)/,$(INC_NAMES)))) $(STAR)
 endif
+INC_DIRS  += $(STAF)/inc $(ROOT_DIR)
 INCINT    := $(INC_DIRS) $(CERN_ROOT)/include $(ROOTSYS)/src
 FFLAGS   += -DCERNLIB_TYPE
 INC_DIRS  += $(INCINT) $(STAF_UTILS_INCS) 
@@ -288,9 +292,9 @@ FILES_SRC := $(filter-out %_init.cc %_i.cc, $(FILES_SRC))
 FILES_SRC := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_SRC)))
 
 ifeq ($(PKG),xdf2root)
-  FILES_SRC  += $(wildcard $(STAR)/asps/staf/dsl/src/*.c)
+  FILES_SRC  += $(wildcard $(STAF)/asps/staf/dsl/src/*.c)
   FILES_SRC := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_SRC)))
-  INPUT_DIRS := $(STAR)/asps/staf/dsl/src
+  INPUT_DIRS := $(STAF)/asps/staf/dsl/src
 endif
 
 DOIT := $(strip $(FILES_SRC))
