@@ -92,7 +92,8 @@ long  type_of_call fill_dst_event_summary_ (
   float   pt_binsize,  eta_binsize, phi_binsize; 
   float   pt, eta, rms_eta=0 ,phi, theta;
   float   mean_pt=0, mean_pt2=0, mean_eta=0 ;
-  
+  float   xlocal[3], bfield[3];
+    
   
   /* ===========================  Begin Executable Code  =============== */
   
@@ -136,6 +137,14 @@ long  type_of_call fill_dst_event_summary_ (
     return STAFCV_BAD;
   }
   
+
+  /* get magnetic field   */
+  
+  
+  xlocal[0] =  xlocal[1] = xlocal[2] = 0.;
+  gufld_(xlocal,bfield);
+  dst_eventsummary->field = bfield[2];      
+
 
   /* 
      Get the min/max values for pt,eta,phi ranges from dst_summaryparam 
