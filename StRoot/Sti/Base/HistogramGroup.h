@@ -11,6 +11,7 @@ using namespace std;
 #include <TProfile.h>
 #include <TProfile2D.h>
 #include <TFile.h>
+#include <TString.h>
 
 class HistogramGroup : public Named, public Described, public vector<TH1*>
 {
@@ -18,6 +19,9 @@ class HistogramGroup : public Named, public Described, public vector<TH1*>
   HistogramGroup();
   HistogramGroup(const string & name, const string & description);
   virtual ~HistogramGroup();
+
+  TH1* hist(const TString  & nme);
+
   virtual void write(TFile * file);
   virtual void write(const string & fileName, const string &option="RECREATE");  
   virtual void write();

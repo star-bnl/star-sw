@@ -1,3 +1,4 @@
+#include "Stiostream.h"
 #include "HistogramGroup.h"
 
 HistogramGroup::HistogramGroup()
@@ -17,6 +18,16 @@ void HistogramGroup::write(TFile * file)
 {
   file->cd();
   write();
+}
+
+TH1* HistogramGroup::hist(const TString & nme)
+{
+  vector<TH1*>::iterator iter;
+  for (iter=begin();iter!=end();iter++)
+    {
+      if ( nme.Contains((*iter)->GetName()) ) return *iter;
+    }
+  return 0;
 }
 
 void HistogramGroup::write(const string & fileName, const string &option)
