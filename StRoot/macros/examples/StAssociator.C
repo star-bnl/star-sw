@@ -1,5 +1,17 @@
-// $Id: StAssociator.C,v 1.8 1999/09/10 19:11:55 calderon Exp $
+// $Id: StAssociator.C,v 1.9 1999/10/01 13:59:18 calderon Exp $
 // $Log: StAssociator.C,v $
+// Revision 1.9  1999/10/01 13:59:18  calderon
+// Opened up default Local X cut to 5 mm as a result of
+// studies on merged tracks.
+// Changed default Hit resolution histogram to plot from global z vs global x
+// to the more significant global z vs local x which are the variables
+// used in the association criterion.
+// The global z vs global x still belongs to StMcAnalysisMaker and is built
+// using the multimap, the global z vs local x is made by default in
+// StAssociationMaker without any requirement of association to serve
+// as a diagnostic.
+// Changed size of default canvas
+//
 // Revision 1.8  1999/09/10 19:11:55  calderon
 // Write the Ntuple in StMcAnalysisMaker into a file.
 // This way it can be accessed after the macro finishes,
@@ -46,7 +58,7 @@ StChain *chain=0;
 void StAssociator(Int_t nevents=1,
 const char *MainFile="/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on/tfsr/set0043_04_56evts.geant.root")
 
-// /disk0/star/test/SL99d/tfs_Solaris/Fri/year_1b/psc0050_01_40evts.geant.root
+// ~/TestFiles/merged.geant.root
 // /disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tfsr/psc0029_02_40evts.geant.root
 // /disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/hadronic_on/tfsr/set0043_04_56evts.geant.root
 {
@@ -81,7 +93,7 @@ const char *MainFile="/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/ha
 
     // Note, the title "events" is used in the Association Maker, so don't change it.
     StEventMaker*       eventReader   = new StEventMaker("events","title");
-    //StEventReaderMaker* eventReader   = new StEventReaderMaker("events","title");
+    
     StMcEventMaker*     mcEventReader = new StMcEventMaker; // Make an instance...
     StAssociationMaker* associator    = new StAssociationMaker;
     StMcAnalysisMaker*  examples      = new StMcAnalysisMaker;
@@ -89,7 +101,7 @@ const char *MainFile="/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/ha
     // Define the cuts for the Associations
 
     StMcParameterDB* parameterDB = StMcParameterDB::instance();  
-    parameterDB->setXCut(.1); // 1 mm
+    parameterDB->setXCut(.5); // 5 mm
     parameterDB->setZCut(.2); // 2 mm
     parameterDB->setReqCommonHits(3); // Require 3 hits in common for tracks to be associated
     
@@ -109,7 +121,7 @@ const char *MainFile="/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/ha
 	}
 	iev++; goto EventLoop;
     } // Event Loop
-    examples->mAssociationCanvas = new TCanvas("mAssociationCanvas", "Histograms",200,10,900,500);
+    examples->mAssociationCanvas = new TCanvas("mAssociationCanvas", "Histograms",200,10,600,600);
     TCanvas* myCanvas = examples->mAssociationCanvas;
     myCanvas->Divide(2,2);
 
@@ -119,7 +131,7 @@ const char *MainFile="/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/ha
 
     myCanvas->cd(2);
     gPad->SetLogy(0);
-    examples->mHitResolution->Draw();
+    associator->mLocalHitResolution->Draw();
 
     myCanvas->cd(3);
     gPad->SetLogy(0);
@@ -138,5 +150,12 @@ const char *MainFile="/disk00000/star/auau200/hijing135/jetq_off/b0_3/year_1b/ha
                      // comment it out if you want to keep the objects
                      // available at the command line after running
                      // the macro.
+
+    // To look at the ntuple after the macro has executed:
+    // f1 = new TFile("TrackMapNtuple.root");  //This opens the file, and loads the Ntuple
+    // TrackNtuple->Draw("px:pxrec")  //Once loaded, the Ntuple is available by name.
+    // To look at the Histograms once the Macro has executed:
+    // TList* dList = chain->GetMaker("McAnalysis")->Histograms();
+    // TH2F* hitRes = dList->At(0);  //or whatever index from 0 to 3
 }
 
