@@ -232,6 +232,7 @@ C     calculate correction to the error, coming from the crossing angle
             enddo   ! i
          
          endif    ! itpct
+         gtrk(igtrk).nfit = ncir
 C     
 C     Now fit provided there are at least MINFIT hits left
          if(ncir.le.egrpar(1).minfit) then
@@ -250,6 +251,7 @@ C     try the first full half of the circle
             if(bs.gt.as) then
                ncir = j-1
             endif
+            gtrk(igtrk).nfit = ncir
 C     
 C     Check whether enough hits survived
             if(ncir.le.egrpar(1).minfit) then
@@ -266,7 +268,6 @@ C     If yes, call the helix fit
      >                 (gtrk(igtrk).p(9)/real(ncir-2).lt.
      >                 egrpar(1).prob(2)
      >                 .or.egrpar(1).prob(2).lt.0.0)) then
-                     gtrk(igtrk).nfit = ncir
                      enough=.true. ! if fit succesful quit
                      gtrk(igtrk).flag=1
                   else
@@ -274,20 +275,26 @@ C     If yes, call the helix fit
                         call message('EGR_REFIT_TRACK-I: Calling 
      +                       outlier removal',1,imsg)
                      endif
-                     iret=egr_find_outlier(igtrk,gtrk,xcir,ycir,zcir
-     >                    ,wcir,wlin,ncir,ibad,egrpar_h,egrpar)
-                     if(egrpar(1).debug(2).eq.1) then
-                        call message('EGR_REFIT_TRACK-I: Outlier 
-     +                       removal completed',1,imsg)
-                     endif
-                     if(iret.eq.STAFCV_OK) then
-                        good_hit(pnt(ibad))= .false.
-                        gtrk(igtrk).flag=-3 ! Too many iterations
-                        ntry = ntry+1 ! increase number of iterations
-                     else
+                     if( egrpar(1).mxtry .gt. 1) then
+                        iret=egr_find_outlier(igtrk,gtrk,xcir,ycir,zcir
+     >                       ,wcir,wlin,ncir,ibad,egrpar_h,egrpar)
+                        if(egrpar(1).debug(2).eq.1) then
+                           call message('EGR_REFIT_TRACK-I: Outlier 
+     +                          removal completed',1,imsg)
+                        endif
+                        if(iret.eq.STAFCV_OK) then
+                           good_hit(pnt(ibad))= .false.
+                           gtrk(igtrk).flag=-3 ! Too many iterations
+                           ntry = ntry+1 ! increase number of iterations
+                        else
 C     could not identify the outlier
-                        gtrk(igtrk).flag = -6
-                        ntry=egrpar(1).mxtry+1 ! Leave fit have a bad trk
+                           gtrk(igtrk).flag = -6
+                           ntry=egrpar(1).mxtry+1 ! Leave fit have a bad trk
+                        endif
+                     
+                     else
+                        enough=.true.
+                        gtrk(igtrk).flag=1
                      endif
                   endif
                else
@@ -297,7 +304,7 @@ C     could not identify the outlier
             endif
          endif
       enddo
-C
+C     
 C     clean up list of hits and remove outliers
       if(.not.enough) then
 C     fit wasn't succesful, reset all the points
@@ -310,12 +317,12 @@ C     fit wasn't succesful, reset all the points
                endif
             enddo
          endif
-
          
-
+            
+         
          EGR_REFIT_TRACK = STAFCV_OK
       endif
       
       return
       end
-
+      
