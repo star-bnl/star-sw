@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.93 2004/07/30 00:29:54 potekhin Exp $
+// $Id: St_geant_Maker.cxx,v 1.94 2004/08/05 16:40:12 potekhin Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.94  2004/08/05 16:40:12  potekhin
+// Propagating Pythia event characterization data
+//
 // Revision 1.93  2004/07/30 00:29:54  potekhin
 // Fixed an old indexing typo
 //
@@ -339,15 +342,21 @@
 #endif
 #include "tables/St_g2t_run_Table.h"
 #include "tables/St_g2t_event_Table.h"
+#include "tables/St_g2t_pythia_Table.h"
 #include "tables/St_g2t_gepart_Table.h"
 #include "tables/St_g2t_vertex_Table.h"
 #include "tables/St_g2t_track_Table.h"
 #include "tables/St_geom_gdat_Table.h"
 
 #include "TDataSetIter.h"
+// event header:
 #include "g2t/St_g2t_get_event_Module.h"
+// Pythia-specific header
+#include "g2t/St_g2t_get_pythia_Module.h"
+//
 #include "g2t/St_g2t_get_kine_Module.h"
 #include "g2t/St_g2t_particle_Module.h"
+// Subsystems:
 #include "g2t/St_g2t_svt_Module.h"
 #include "g2t/St_g2t_pix_Module.h"
 #include "g2t/St_g2t_tpc_Module.h"
@@ -516,6 +525,7 @@ Int_t St_geant_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_geant_Maker::Make()
 {
+
   Int_t    nhits,nhit1,nhit2,nhit3,nhit4,link=1,ide=1,npart,irun,ievt,iwtfl;
   Float_t  vert[4],weigh;
   
@@ -595,7 +605,14 @@ Int_t St_geant_Maker::Make()
   m_DataSet->Add(g2t_track);
   
   iRes = g2t_get_kine(g2t_vertex,g2t_track); if (Debug() > 1) {g2t_vertex->Print(0,10); g2t_track->Print(0,10);}
-  iRes = g2t_get_event(g2t_event); if (Debug() > 1) g2t_event->Print(0,10);
+  iRes = g2t_get_event(g2t_event);   if (Debug() > 1) g2t_event->Print(0,10);
+
+  if(iRes>1) { // means there was Pythia information detected in the input
+    St_g2t_pythia *g2t_pythia = new St_g2t_pythia("g2t_pythia",1); // prepare an empty g2t_pythia
+    m_DataSet->Add(g2t_pythia);
+    cout<<"---------------------------- pythia ready"<<endl;
+    iRes = g2t_get_pythia(g2t_pythia);
+  }
   
   // --max--
   // Filling the event header, addition due to the new coding
