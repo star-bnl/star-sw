@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTagMaker.cxx,v 1.22 2000/05/12 22:39:28 snelling Exp $
+// $Id: StFlowTagMaker.cxx,v 1.23 2000/05/20 00:57:02 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTagMaker.cxx,v $
+// Revision 1.23  2000/05/20 00:57:02  posk
+// Minor update.
+//
 // Revision 1.22  2000/05/12 22:39:28  snelling
 // Fixed warning
 //
@@ -32,29 +35,17 @@
 // Revision 1.16  2000/02/23 22:14:08  posk
 // Renamed histograms to contain "Flow".
 //
-// Revision 1.15  2000/02/18 22:47:34  posk
-// Minor updates.
-//
 // Revision 1.14  2000/01/20 02:00:05  snelling
 // Fixed StFlowTag table size SetNRows=1 (Thanks Iwona)
 //
 // Revision 1.13  2000/01/14 05:44:34  snelling
 // Added St_FlowTag Table to .data
 //
-// Revision 1.12  2000/01/14 02:09:43  snelling
-// Fixed small typo (- ->)
-//
 // Revision 1.11  2000/01/14 01:36:02  snelling
 // changed include path ../FlowMaker/ to FlowMaker/
 //
 // Revision 1.10  2000/01/13 23:22:05  snelling
 // modified sum pt (spt) to mean pt (mpt)
-//
-// Revision 1.9  2000/01/13 21:49:14  posk
-// Updates and corrections.
-//
-// Revision 1.8  1999/12/21 21:28:33  posk
-// Updated the README file.
 //
 // Revision 1.7  1999/12/15 21:56:21  posk
 // Increased number of harmonics from 4 to 6.
@@ -102,7 +93,6 @@ StFlowTagMaker::StFlowTagMaker(const Char_t* name) : StMaker(name) {
   pFlowSelect = new StFlowSelection();
 }
 
-
 //-------------------------------------------------------------
 
 StFlowTagMaker::~StFlowTagMaker() {
@@ -118,6 +108,7 @@ Int_t StFlowTagMaker::Make() {
 
   // instantiate new St_FlowTag class
   pSt_FlowTag = new St_FlowTag("FlowTag",1);      // table header
+  if (!pSt_FlowTag) return kStOK;
   // set the size of the table
   pSt_FlowTag->SetNRows(1);
   // add FlowTag table to the root .data directory
@@ -135,6 +126,7 @@ Int_t StFlowTagMaker::Make() {
     FillFlowTag();                                // fill the tag database
   } else {
     pFlowTag = NULL;
+    cout << "$$$$$ null FlowEvent pointers" << endl;
     return kStOK;      // no StFlowEvent or no Tag pointer or no selection
   }
 
@@ -149,7 +141,7 @@ Int_t StFlowTagMaker::Make() {
 //-------------------------------------------------------------
 
 void StFlowTagMaker::PrintInfo() {
-  cout << "$Id: StFlowTagMaker.cxx,v 1.22 2000/05/12 22:39:28 snelling Exp $" << endl;
+  cout << "$Id: StFlowTagMaker.cxx,v 1.23 2000/05/20 00:57:02 posk Exp $" << endl;
   if (Debug()) StMaker::PrintInfo();
 }
 
