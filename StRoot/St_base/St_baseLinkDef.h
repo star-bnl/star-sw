@@ -7,6 +7,7 @@
 #pragma link C++ class StFile;
 #pragma link C++ class StIOEvent-;
 #pragma link C++ class StIO-;
+#pragma link C++ class StArray-;
 #pragma link C++ class StVectorInt-;
 #pragma link C++ class St_TableSorter!;
 #pragma link C++ class StObjArrayIter-;
