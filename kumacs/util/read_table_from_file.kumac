@@ -15,13 +15,13 @@ return
 
 ****************************************************************
 
-MACRO read alias table_directory 
+MACRO read alias=new table_directory=.
 macro/global/import *
 
  cd /dui
-
- message ' read table event from file and put in directory ',[table_directory]
- dio/stream/getevent [alias] [table_directory]
+ dir = $unquote([table_directory])
+ message " read table event from file  [alias] and put in directory [dir]"
+ dio/stream/getevent [alias] [dir]
 
  cd /dui
 

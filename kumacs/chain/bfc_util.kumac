@@ -104,6 +104,10 @@ macro bfc_init _
      (evin)
           exec read_table_from_file#init inev [input_file]
           exec read_table_from_file#read inev 
+     (esin)
+          dio/newfilestream inev [input_file] r
+          cd [run]
+          dio/stream/getevent inev
      (rgst)
      (rg2t) 
      (svg) exec init_svg#read
@@ -192,8 +196,9 @@ macro bfc_init _
     (dmhrd) exec create_tables_global#dst
     (desum) exec create_tables_global#dst
     (drsum) exec create_tables_global#dst   
-    (fzout)  user/output o [output_fzd_file]
-    (evout) if output_xdf_file="" then
+    (fzout) user/output o [output_fzd_file]
+    (evout)
+            if output_xdf_file="" then
               message "empty output file"
             else
 	      exec write_table_to_file#init outfile [output_xdf_file]
@@ -202,6 +207,18 @@ macro bfc_init _
                 goto eof
               endif
               exec write_table_to_file#write outfile [run]         
+            endif
+    (esout)
+            if output_xdf_file="" then
+              message "empty output file"
+            else
+              dio/newfilestream outfile [output_xdf_file] w
+              if (STAF_STATUS(1).ne. STAFCV_OK) then
+                message "Cannot open output file"
+                goto eof
+              endif
+              cd [run]
+              dio/stream/puteven outfile
             endif
       (*)   message " !!! bfc_util: No initialization for package " [mod]
     ENDCASE
@@ -233,6 +250,9 @@ EOF:
             if (staf_status(1).ne.STAFCV_OK) goto EOF
      (gtxin) nextl 1
      (evin) exec read_table_from_file#read inev
+     (esin) for dir in [evgen] [geantE] [raw_data] [data] [dst]
+              cd [dir]; dio/stream/getevent inev 
+            endfor
      (fzin) trig 1 
      (rgst) trig 1
      (rg2t) cd [geantE]
@@ -316,14 +336,23 @@ EOF:
                else
 		 exec write_table_to_file#write outfile [event]
 	       endif
+      if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
+    (esout)    if [output_xdf_file]="" then
+                 message "Empty output file"
+               else
+                 for dir in [evgen] [geantE] [raw_data] [data] [dst]
+                   cd [dir];  dio/stream/putevent outfile
+                 endfor
+	       endif
         (*)    message " !!! bfc_util: No process stage for package " [mod]
       if (staf_status(1) .ne. stafcv_ok) goto NEXT_EVENT
    ENDCASE
 	     
    sigma v[mod] = v[mod] + abs($cptime)
    sigma t[mod] = t[mod] + v[mod]
-   fmessage '---<bfc>---'//[mod]//': Event  '//$format([ievent],i6)//$format(v[mod],f12.5)//$format(t[mod],f12.5)    [log_file]
-    message '---<bfc>---'//[mod]//': Event  '//$format([ievent],i6)//$format(v[mod],f12.5)//$format(t[mod],f12.5)    [log_file]
+   string = '---<bfc>---'//[mod]//': Event  '//$format([ievent],i6)//$format(v[mod],f12.5)//$format(t[mod],f12.5)
+   fmessage $quote([string])    [log_file]
+    message $quote([string]) 
    vec/inp v[mod] 0.0
    
   enddo
@@ -349,7 +378,7 @@ macro bfc_finish _
      (g2tin)  exec input_g2t_file#close
       (rgst)  ge/rz/cd //PAWC;
 	        hi/list;  | show histograms
-     (evout) exec write_table_to_file#close outfile;
+     (evout,esout) exec write_table_to_file#close outfile;
       (*) message " !!! bfc_util#bfc_finish No final stage for package " [mod]
     ENDCASE
   enddo
@@ -366,8 +395,9 @@ return
   nw = $words([test])
   do i = 1, [nw]
     mod = $word([test],[i],1)
-   fmessage '---<bfc>---'//[mod]//': Event  '//$format([ievent],i6)//$format(v[mod],f12.5)//$format(t[mod],f12.5)    [log_file]
-    message '---<bfc>---'//[mod]//': Event  '//$format([ievent],i6)//$format(v[mod],f12.5)//$format(t[mod],f12.5)    [log_file]
+   string = '---<bfc>---'//[mod]//': Event  '//$format([ievent],i6)//$format(v[mod],f12.5)//$format(t[mod],f12.5)
+   fmessage $quote([string])    [log_file]
+    message $quote([string]) 
   enddo
   
  return

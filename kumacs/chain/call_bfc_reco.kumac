@@ -16,9 +16,9 @@
    domain=' geometry tpc svt global ' _
    chain=' evin tpg svg tcl tpt tte_e tid sgr svm egr ev0 evout' _
    first=1 _
-   no_events=1 _
+   no_events=20 _
    input_data_prefix=/star/mds/data/SD98/auau200/bfc/central/hijing/set0001/regular/tss/ _
-   input_data_file=auau_ce_b0-2_4441_4460.xdf _
-   output_file=bfc_reco_output
+   input_data_file=auau_ce_b0-2_0331_0350.xdf _
+   output_file=/star/mds/data/SD98/auau200/bfc/central/hijing/set0001/regular/reco/bfc_reco1_output
 
  
