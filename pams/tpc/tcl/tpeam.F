@@ -181,10 +181,16 @@ C-----------------------------------------------------------------------
 c to account for the fact that the number or volumes per row has changed..
 
 	integer numbv_row(mxrow),numbv_row_max
-	data numbv_row/9,9,9,9,9,9,9,9,9,9,9,9,9,	! inner sector
+	integer numbv_row_2mm(mxrow),numbv_row_4mm(mxrow)
+	data numbv_row_2mm/13,13,13,13,13,13,13,	! inner sector
+     +		 13,13,13,13,13,13,
+     +		 10,10,10,10,10,10,10,10,10,10,10,	! outer sector
+     +		 10,10,10,10,10,10,10,10,10,10,10,
+     +		 10,10,10,10,10,10,10,10,10,10/
+	data numbv_row_4mm/9,9,9,9,9,9,9,9,9,9,9,9,9,	! inner sector
      +		 5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,	! outer sector
      +		 5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5/
-	parameter (numbv_row_max=9)
+	parameter (numbv_row_max=13)
 	logical testcond
 
          integer mcptr(numbv_row_max*mxhits),dtptr(mxhits)
@@ -207,6 +213,22 @@ c
 
          if(first)then
             first = .false.
+
+c	    set up for 2mm or 4mm geant volumes...
+	    if (tsspar(1).geant_volm.eq.0.4) then
+	      do irow=1,mxrow
+		numbv_row(irow) = numbv_row_4mm(irow)
+	      enddo
+	    elseif (tsspar(1).geant_volm.eq.0.2) then
+	      do irow=1,mxrow
+		numbv_row(irow) = numbv_row_2mm(irow)
+	      enddo
+	    else
+	      write(6,*)'TPEAM -- Nonsense Geant volumes!!'
+	      do irow=1,mxrow
+		numbv_row(irow) = numbv_row_4mm(irow)
+	      enddo
+	    endif
 c
 c           open rz file for ntuple...
 c
@@ -229,7 +251,7 @@ c              iper = lochar(1H.,1,mctrl(1).infile,80)
             nquota=10000
             if(istat.eq.0)then
                iquest(10)=nquota
-               call hrfile(23,'ntup','NQ')
+               call hrfile(23,'NTUP','NQ')
             endif
 
 c things needed for the ntuple 500+ihisto...
@@ -243,16 +265,16 @@ c things needed for the ntuple 500+ihisto...
 
          endif
 
-         call hcdir('//ntup',' ')
+         call hcdir('//NTUP',' ')
 
          ihisto = ihisto+1
-         call hbookn(200+ihisto,'Hit Info',nvar,'ntup',8000,
+         call hbookn(200+ihisto,'Hit Info',nvar,'NTUP',8000,
      +           chtags)
-         call hbookn(300+ihisto,'Compare Info',nvar2,'ntup',12000,
+         call hbookn(300+ihisto,'Compare Info',nvar2,'NTUP',12000,
      +              chtags2)
-         call hbookn(400+ihisto,'Track Info',nvar3,'ntup',4000,
+         call hbookn(400+ihisto,'Track Info',nvar3,'NTUP',4000,
      +              chtags3)
-         call hbookn(500+ihisto,'Hit Pixel Info',nvar4,'ntup',17000,
+         call hbookn(500+ihisto,'Hit Pixel Info',nvar4,'NTUP',17000,
      +              chtags4)
 c        
 c        proceed with evaluation...
@@ -310,6 +332,7 @@ c                stupidity for HPUX compiler
 c
 c                dtptr(tphit(ihit).row) = ihit
                  kdummy = tphit(ihit).row
+		 kdummy = mod(kdummy,100)  ! now row=100*SECTOR+ROW mal 1mar95
                  dtptr(kdummy) = ihit
                  tphit_q(nhitrk)=tphit(ihit).q
               endif
@@ -419,6 +442,7 @@ c
                     vec(8) = 0.
                     vec(9) = 0.
                     vec(10) = 0.
+                    vec(12) = 0.
                  endif
                  call hfn(300+ihisto,vec)
                  
@@ -540,8 +564,8 @@ C----------------------------------------------------------------------
 
 C----------------------------------------------------------------------
 
-        call hcdir('//ntup',' ')
-        call hrend('ntup')
+        call hcdir('//NTUP',' ')
+        call hrend('NTUP')
         close(23)
 
         return

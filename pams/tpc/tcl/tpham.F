@@ -95,6 +95,14 @@ C     -	Changed the way x is calculated from the sector/pad #'s.
 C	Now I do the job of the tpg routine tpg_pad_to_x here, since
 C	now that routine demands integer pad#
 C
+C    17,19 Jan 1995 - malisa
+C     -	Now fill id and row entries in a way consistent with fast simulator
+C	(row = 100*((SECTOR+1)/2)+ROW)
+C
+C    13 Mar 1995
+C     -	Fill dx and dy according to reasonable prescription.
+
+C
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
@@ -186,6 +194,7 @@ C-----------------------------------------------------------------------
 
         real pad_width, time_bucket, time_bin, tval
         real rstat
+	real rad,dx_prime
 
 	integer min_hit_seq/2/	! this could go into switch table
 
@@ -314,6 +323,24 @@ c	also, calculate "orientation" of hit in terms of spatial quantities
 c
 c       finally, should calculate dx, dy, and dz ...
 c       note that sigma_prf IS NOT sigma_x, etc...
+c
+c Dhamika's code is complaining about dx=dy=dz=0.0  Here I put in
+c  what amounts to a first estimate of the spatial uncertainties...
+c  mal 3mar95
+c
+	if (tphit(tphith.nok).q.ne.0.0) then
+	  tphit(tphith.nok).dz = tphit(tphith.nok).zrf/
+     +		sqrt(tphit(tphith.nok).q)
+c for explanation of what follows, see bottom of notebook p59
+	  dx_prime = abs(tphit(tphith.nok).prf)/
+     +		sqrt(tphit(tphith.nok).q)
+	  rad = sqrt((tphit(tphith.nok).x)**2+
+     +		(tphit(tphith.nok).y)**2)
+	  tphit(tphith.nok).dx = dx_prime *
+     +		abs(tphit(tphith.nok).y)/rad
+	  tphit(tphith.nok).dy = dx_prime *
+     +		abs(tphit(tphith.nok).x)/rad
+	endif
 
  999       continue
         enddo
@@ -655,7 +682,7 @@ c
 	sigma = -1.0
 	if (nseq.ge.3) call tph_3point_gauss(padnum, padsum, nseq,
      +					     centroid, sigma)
-	if (sigma.lt.0.0) then
+	if (sigma.le.0.0) then
 	  call tph_weighted_mean(padnum, padsum, nseq,
      +				 centroid, sigma)
 	  sigma = -sigma		! use sign to flag different algorithm
