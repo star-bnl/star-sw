@@ -321,7 +321,7 @@ c---- increment the energy array...
      1     (i_phi.lt.1.or.i_phi.gt.60).OR.
      1     (i_sphi.lt.1.or.i_sphi.gt.50).OR.
      1     (i_seta.lt.1.or.i_seta.gt.300))then
-         write(*,*)i_rl,i_phi,i_dep,i_sphi,i_seta
+c         write(*,*)i_rl,i_phi,i_dep,i_sphi,i_seta
         else
          smd_de(i_seta,i_sphi,i_phi,i_rl)
      1              = smd_de(i_seta,i_sphi,i_phi,i_rl) 
