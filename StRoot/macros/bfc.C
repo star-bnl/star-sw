@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.155 2002/05/23 21:54:37 jeromel Exp $
+// $Id: bfc.C,v 1.156 2002/06/17 15:51:55 perev Exp $
 //////////////////////////////////////////////////////////////////////////
 #ifndef __CINT__
 #include "TSystem.h"
@@ -192,7 +192,7 @@ void bfc(const Int_t First,
   }
   xdf_out = chain->GetXdfOut();
   if (chain->GetOption("Event")) evMk  = (StEventMaker   *) chain->GetMaker("StEventMaker");  
-  treeMk = chain->GetMaker("OutputStream");
+  treeMk = chain->GetMaker("outputStream");
  EventLoop: if (i <= Last && iMake != kStEOF && iMake != kStFatal) {
    evnt.Reset();
    evnt.Start("QAInfo:");
