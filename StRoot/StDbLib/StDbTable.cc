@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.25 2001/07/13 02:28:15 porter Exp $
+ * $Id: StDbTable.cc,v 1.26 2001/07/13 22:53:26 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.26  2001/07/13 22:53:26  porter
+ * last night's schema-fix was in a switch-case ... I missed one & put it in today
+ *
  * Revision 1.25  2001/07/13 02:28:15  porter
  * fix problem in schema evolution for array size changes
  *
@@ -116,6 +119,9 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.26  2001/07/13 22:53:26  porter
+ * last night's schema-fix was in a switch-case ... I missed one & put it in today
+ *
  * Revision 1.25  2001/07/13 02:28:15  porter
  * fix problem in schema evolution for array size changes
  *
@@ -761,7 +767,8 @@ float* mfloat; double* mdouble;
         delete [] commentName;
         if(mchar){
              unsigned int len1=strlen(mchar);
-             strncpy(ptr,mchar,len1);
+             if(len>len1) len=len1;
+             strncpy(ptr,mchar,len);
              delete [] mchar;
         } else {
              *ptr='\0';
@@ -835,6 +842,7 @@ float* mfloat; double* mdouble;
   case Stfloat:
     {
       if(buff->ReadArray(mfloat,blen,name)){
+       if(len>blen)len=blen;
        memcpy(ptr,mfloat,len*sizeof(float));
        delete [] mfloat;
       }
@@ -843,7 +851,7 @@ float* mfloat; double* mdouble;
   case Stdouble:
     {
       if(buff->ReadArray(mdouble,blen,name)){
-	if(len>blen)len=blen;
+       if(len>blen)len=blen;
        memcpy(ptr,mdouble,len*sizeof(double));
        delete [] mdouble;
       }
