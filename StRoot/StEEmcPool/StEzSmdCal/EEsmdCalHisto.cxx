@@ -1,4 +1,4 @@
-// $Id: EEsmdCalHisto.cxx,v 1.4 2004/06/29 16:37:41 balewski Exp $
+// $Id: EEsmdCalHisto.cxx,v 1.5 2004/06/29 19:39:51 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -112,7 +112,7 @@ void EEsmdCal::addPresMipEbarsToHisto (int col, char cT) {
   // search all existing tower histo (with '05X' in name) and add 
   // bars for MIP limits
 
-  int iT=((int)kT)+cT-'P';
+  int iT=1+cT-'P';
   assert(iT>kT && iT<mxTile);
   assert(dbMapped>0);
 

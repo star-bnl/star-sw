@@ -1,4 +1,4 @@
-// $Id: EEsmdCal.cxx,v 1.4 2004/06/29 16:37:41 balewski Exp $
+// $Id: EEsmdCal.cxx,v 1.5 2004/06/29 19:39:50 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -18,7 +18,7 @@
 #include "StEEmcDbMaker/EEmcDbItem.h"
 
 #ifdef StRootFREE
-  #include "EEmcDb/EEmcDb.h"
+    #include "EEmcDb/EEmcDb.h"
 #else
   #include "StEEmcDbMaker/StEEmcDbMaker.h"
 #endif
@@ -184,7 +184,8 @@ void EEsmdCal::findSectorMip( ){
 //-------------------------------------------------
 void EEsmdCal::calibSMDwithMip(int iU, int iStrU){
   int iCut='b'-'a';
-  int stripStep=7;
+  int stripStep=emptyStripCount;
+  float twMatchAcc=0.9;
   int iV=1-iU; // calibrated plane
 
   int nT=mapSmd-> getNTowers(iSect,iU,iStrU);
@@ -195,6 +196,7 @@ void EEsmdCal::calibSMDwithMip(int iU, int iStrU){
     mapSmd-> getTower(iSect,iU,iStrU,i,iSub,iEta);
     // tmp use B & C only
     //if(iSub!=3 && iSub!=4) continue;
+    //if(iSub!=4) continue;
     int iPhi=iSect*MaxSubSec+iSub;
 
     int iMin,iMax;
@@ -206,7 +208,9 @@ void EEsmdCal::calibSMDwithMip(int iU, int iStrU){
     int j;
     int nMip=0;
     for(j=kP; j<=kR ; j++) {
-      nMip+=tileEne[j][iEta][iPhi]>presMipElow && tileEne[j][iEta][iPhi]<presMipEhigh;
+      nMip+=tileEne[j][iEta][iPhi]>presMipElow && 
+	    tileEne[j][iEta][iPhi]<presMipEhigh  ||
+   	        dbT[j][iEta][iPhi]->fail; // accept bead towers as good
       //isMip*= tileThr[j][iEta][iPhi];
     } 
     if(nMip<3) continue;
@@ -214,24 +218,36 @@ void EEsmdCal::calibSMDwithMip(int iU, int iStrU){
     float twEne=tileEne[kT][iEta][iPhi];
     //printf("TW ener=%f goal=%f diff%f\n", twEne,towerMipE[iEta], twEne-towerMipE[iEta]);
 
-    bool mipT=fabs( twEne-towerMipE[iEta]) <twMipEdev;
+    bool mipT=fabs( twEne-towerMipE[iEta]) <twMipEdev*towerMipE[iEta];
+    mipT=  mipT ||  dbT[kT][iEta][iPhi]->fail; // recover dead tower
     if(!mipT) continue;
     // printf("i=%d iSub=%d iEta%d\n",i,iSub,iEta);
     
-
-    mapSmd-> getRangeTw2Smd(iSect,iSub,iEta,iV,iMin,iMax);
-    // printf(" found %c-plane istrip range %d - %d\n",'U'+iV,iMin,iMax);
+    int jMin,jMax;
+    mapSmd-> getRangeTw2Smd(iSect,iSub,iEta,iV,jMin,jMax);
+    // printf(" found %c-plane istrip range %d - %d\n",'U'+iV,jMin,jMax);
     
-    for(j=iMin+stripStep; j<=iMax-stripStep; j++) {
-      hSs[iCut][iV][j]->Fill(smdAdc[iV][j]);
-      // QA of MIP's
+    for(j=jMin+stripStep; j<=jMax-stripStep; j++) {      
       TVector3 r;
       if(iV==kV)
 	r=geoSmd->getIntersection (iSect,iStrU,j);
-      else // reverse
+      else // reverse U with V
 	r=geoSmd->getIntersection (iSect,j,iStrU);
-      ((TH2F*) hA[24])->Fill( r.x(),r.y());
-      hA[14+iV]->Fill(j+1);
+      
+      // verify UxV is with this tower
+      int     iSecX, iSubX, iEtaX;
+      Float_t dphi, deta;
+      int ret=geoTw->getTower(r, iSecX, iSubX, iEtaX,dphi, deta);
+      if(ret==0 || iSecX!=iSect || iSubX!=iSub || iEtaX!=iEta ) continue;
+      int inCenter2=(fabs(dphi)< twMatchAcc && fabs(deta)< twMatchAcc);
+      if(!inCenter2) continue;
+
+      // ........... accept this strip
+      hSs[iCut][iV][j]->Fill(smdAdc[iV][j]); // calibration
+ 
+      // QA of MIP's
+     ((TH2F*) hA[24])->Fill( r.x(),r.y());
+     hA[14+iV]->Fill(j+1);
     }
 
   }
@@ -281,7 +297,7 @@ void EEsmdCal::calibPQRwithMip(int iStrU, int iStrV){
 
   // check MIP upper/lower limits
   float twEne=tileEne[kT][iEtaX][iPhiX];
-  bool mipT=fabs( twEne-towerMipE[iEtaX]) <twMipEdev;
+  bool mipT=fabs( twEne-towerMipE[iEtaX]) <twMipEdev*towerMipE[iEtaX];
   mipT=  mipT ||  dbT[kT][iEtaX][iPhiX]->fail; // recover dead tower
 
  
