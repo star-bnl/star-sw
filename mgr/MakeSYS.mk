@@ -1,5 +1,8 @@
-#  $Id: MakeSYS.mk,v 1.10 1998/05/03 18:27:43 fisyak Exp $
+#  $Id: MakeSYS.mk,v 1.11 1998/05/05 11:56:17 fisyak Exp $
 #  $Log: MakeSYS.mk,v $
+#  Revision 1.11  1998/05/05 11:56:17  fisyak
+#  Add -Msave for Linux
+#
 #  Revision 1.10  1998/05/03 18:27:43  fisyak
 #  Set fixed path to geant3
 #
@@ -53,7 +56,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/05/03 18:27:43 $ 
+#             Last modification $Date: 1998/05/05 11:56:17 $ 
 ALL_DEPS    = $^
 FIRST_DEP   = $<
 FIRSTF      = $(<D)/$(<F)
@@ -191,6 +194,7 @@ OPSYS      := Linux
 CPPFLAGS   += -Dlynx
 ifdef PGI
 FC         := /usr/pgi/linux86/bin/pgf77
+FFLAGS     += -Msave
 F_EXTENDED := -Mextend
 LD_LIBS    := -ldl -L/usr/X11R6/lib/ -lX11 -lXt -L/usr/local/lib/ -lF77 -lI77  -L/usr/pgi/linux86/lib/ -lpgftnrtl -lpgc 
 #                                       -lstdc++
