@@ -1,5 +1,5 @@
 /****************************************************************
- * $Id: StRichDrawableTMip.h,v 2.0 2000/08/09 16:28:03 gans Exp $
+ * $Id: StRichDrawableTMip.h,v 2.1 2000/08/09 23:26:08 gans Exp $
  *
  * Description:
  *   The MIP which is drawn in the pad monitor
@@ -7,8 +7,11 @@
  ****************************************************************
  *
  * $Log: StRichDrawableTMip.h,v $
- * Revision 2.0  2000/08/09 16:28:03  gans
- * Created New Maker for all drawable objects.
+ * Revision 2.1  2000/08/09 23:26:08  gans
+ * Added Description comments for Inspect
+ *
+ * Revision 2.1  2000/08/09 23:26:08  gans
+ * Added Description comments for Inspect
  *
  * Revision 2.0  2000/08/09 16:28:03  gans
  * Created New Maker for all drawable objects.
@@ -48,11 +51,15 @@ public:
     void clearMomText();   // *MENU*
     
     virtual ~StRichDrawableTMip();
-    double mThreeMomMag;
-    double mTheta,mPhi;
-    double mEta;
-    double mXImpactRadiator,mYImpactRadiator;
-    int mFastEnoughPion,mFastEnoughKaon,mFastEnoughProton;
+
+    virtual StRichDrawableTTrack * getDrawableTTrack();
+protected:
+    double mThreeMomMag;//|p| of track
+    double mTheta;//Theta From Rich Normal Degrees
+    double mPhi;//Phi From Rich X Degrees
+    double mEta;//pseudorapidity global
+    double mXImpactRadiator;//Radiator Impact X Local
+    double mYImpactRadiator;//Radiator Impact Y Local
     int mFastEnoughPion;//Pion Above Cherenkov Threshold
     int mFastEnoughKaon;//Kaon Above Cherenkov Threshold
     int mFastEnoughProton;//Proton Above Cherenkov Threshold
