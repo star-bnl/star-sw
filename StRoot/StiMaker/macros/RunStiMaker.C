@@ -5,7 +5,7 @@
 class StChain;
 StChain *chain=0;
 
-void RunStiMaker(Int_t nevents=1,
+void RunStiMaker(Int_t nevents=10,
 		 bool simulated=true, //sim or data?
 		 //bool doFit=true, // true->fit track only
 		 bool doFit=false, // false->find track only
