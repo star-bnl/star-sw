@@ -213,16 +213,8 @@ long type_of_call l3Clufi_(
 	  receiver += mzcld->length;
 
 	  // timing
-	  Int_t i960_id ;
-	  if ( rb < 6 ) 
-	    {
-	      i960_id = (rb * mz) - 1 ;
-	    }
-	  else if ( rb > 6 )
-	    {
-	      i960_id = ((rb-6) * mz) - 1 ;
-	    }
-	      
+	  Int_t i960_id  = (rb-1) * 3 + (mz-1) ;
+	    
 	  // check whether we have enough space to write the clusters out
 	  // 3 = nrows per mz ; 2 = number words per cluster ; 1000 = max cluster per row  
 	  if( (bank_limit-receiver) < 3*2*1000 )
@@ -232,7 +224,7 @@ long type_of_call l3Clufi_(
 		  break ;
 	      }
 
-	  i960[i960_id].Start(0);
+	  i960[i960_id].Start(kFALSE) ;
 	  //for (Int_t depp =0 ; depp < 1000000 ; depp++) { Double_t t = depp*depp; };
 	  /* do the clusterfinding on this mz  */
 	  ret = croatFinder((UChar_t*)adc,(UShort_t*) cpp, (UInt_t*) receiver, rb ,mz);
@@ -266,7 +258,7 @@ long type_of_call l3Clufi_(
 
   /* done  */
   /* printf("  Finished clusterfinding module!\n"); */
-  return 1;
+  return (receiver-bank) ;
 }
 
 
