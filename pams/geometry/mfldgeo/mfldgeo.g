@@ -14,6 +14,7 @@ Module     MFLDGEO  is the actual GUFLD routine for GSTAR
       Common /brcontr/ Iprin
 * --------------------------------------------------------------------------
 *
+   Begin
    FILL MFLG(1)      ! Magnetic Field description
       version  =  2        ! field version
       Bfield   =  B0       !  field value
@@ -85,8 +86,10 @@ end
              iz   = 1+a/dz
             Br   = mflg.BBR(iz,ir)
             Bz   = mflg.BBZ(iz,ir)
-            F(1) = BR*x(1)/r
-            F(2) = BR*x(2)/r
+            If (r>0) then
+               F(1) = BR*x(1)/r
+               F(2) = BR*x(2)/r
+            endif
             F(3) = BZ
          endif
       endif
@@ -215,7 +218,7 @@ end
       complex   BBEXTER, zero/0/
       real      z,r,wz,br,bz,wr1,wr2,br1,br2,bz1,bz2
       integer   JBBB,ier,ir1,ir2,nz/0/,iprin,Lout/6/
-      common /bfcontr/ iprin      
+      common /brcontr/ iprin      
 *
       Unless bdot_Zi <= z&z <= bdat_Zi 
       {  call  RBPUSHD
@@ -274,10 +277,12 @@ end
 
       subroutine btest(z,r)
       complex           bbtot,b
-      common /bfcontr/  iprin 
+      common /brcontr/  iprin 
       iprin = 10     
-      b = bbtot(z,r)
-      print *,' z,r =',z,r,'  B=> ',b
+      b  = bbtot(z,r)
+      bz = Bzz(z,r)
+      br = Brr(z,r)
+      print *,' z,r =',z,r,'  B=> ',b,bz,br
       iprin =  0     
       end
 
