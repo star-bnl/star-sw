@@ -1,12 +1,13 @@
 /**********************************************************
- * $Id: StRichRingPoint.cxx,v 2.0 2000/08/09 16:26:20 gans Exp $
+ * $Id: StRichRingPoint.cxx,v 2.1 2000/09/29 01:35:38 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingPoint.cxx,v $
- *  Revision 2.0  2000/08/09 16:26:20  gans
- *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
+ *  Revision 2.1  2000/09/29 01:35:38  horsley
+ *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
+ *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
  *
  *  changed StRichRingPoint  HUGE_VALUE   ---> MAXFLOAT for default value
  *
@@ -17,7 +18,6 @@
  *  Revision 1.2  2000/05/19 19:06:11  horsley
  *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
  *
-#include "StRrsMaker/StRichGeometryDb.h"
  *  Revision 1.1  2000/04/03 19:36:08  horsley
  **********************************************************/
 
@@ -28,35 +28,34 @@
 
 #ifndef ST_NO_NAMESPACES
 using namespace units;
+#endif
+
 
 StRichRingPoint::StRichRingPoint(StRichTrack* track, 
 				 StRichRingDefinition type) {
   
   mParticle = 0;
-  richMaterialsDb  = StRichMaterialsDb::getDb();
 
-  mInnerWavelength = richMaterialsDb->longestWaveLength(); 
-  mOuterWavelength = richMaterialsDb->shortestWaveLength(); 
-  mMeanWavelength  = richMaterialsDb->meanWaveLength(); 
-  richMaterialsDb = StRichMaterialsDb::getDb();
-
-  if (mInnerWavelength == 0 || mOuterWavelength == 0) {
-    cout << 
-      "StRichRingPoint:: problems accessing StRichMaterialsDb, aborting." << endl; 
+  if (!track) {
+    cerr << "WARNING: StRichRingPoint passed NULL pointer!" << endl;
     abort();
   }
-
-  // detector parameters used in light propagation to pad plane
-  // depth
-  StRichGeometryDb* richGeometryDb  = StRichGeometryDb::getDb();
-  mDepthRad      = richGeometryDb->radiatorDimension().z()*centimeter;
-  richGeometryDb  = StRichGeometryDb::getDb();
-  mOuterWavelength = richMaterialsDb->outerWavelength(); 
   
+  // get data bases
+  richMaterialsDb = StRichMaterialsDb::getDb();
+  richGeometryDb  = StRichGeometryDb::getDb();
+
+  mInnerWavelength = richMaterialsDb->innerWavelength();
+  mOuterWavelength = richMaterialsDb->outerWavelength(); 
+  mMeanWavelength  = richMaterialsDb->meanWavelength(); 
+  mMeanDepthRad    = richMaterialsDb->meanRadiatorDepth()*centimeter;
+  
+  mMeanPathInRadiator = 0.0;
+  mMeanPathInQuartz   = 0.0;
 
   // detector parameters used in light propagation to pad plane depth
+  mDepthRad  = richGeometryDb->radiatorDimension().z()*centimeter;  
   mDepthQuar = richGeometryDb->quartzDimension().z()*centimeter;
-
   
   // here we have changed the proximity depth to include the mwpc gap!!!
   mDepthProx = richGeometryDb->proximityGap()*centimeter;
@@ -77,7 +76,6 @@ StRichRingPoint::StRichRingPoint(StRichTrack* track,
   mIndexQuartz[eInnerRing] 
     = richMaterialsDb->indexOfRefractionOfQuartzAt(mInnerWavelength);
 
-
   mIndexQuartz[eOuterRing] 
     = richMaterialsDb->indexOfRefractionOfQuartzAt(mOuterWavelength);
 
@@ -88,8 +86,6 @@ StRichRingPoint::StRichRingPoint(StRichTrack* track,
   mIndexMeth[eInnerRing] 
     = richMaterialsDb->indexOfRefractionOfMethaneAt(mInnerWavelength);
   
-
-
   mIndexMeth[eOuterRing] 
     = richMaterialsDb->indexOfRefractionOfMethaneAt(mOuterWavelength);
 
@@ -110,27 +106,29 @@ StRichRingPoint::StRichRingPoint(StRichTrack* track,
   // define "fast" trig functions
   mTrackCosTheta = cos(mTrackTheta); 
   mTrackSinTheta = sin(mTrackTheta); 
-  mRefractedAway.setX(HUGE_VAL);
-  mRefractedAway.setY(HUGE_VAL);
-  mRefractedAway.setZ(HUGE_VAL);  
+  mRefractedAway.setX(static_cast<float>HUGE_VAL);
+  mRefractedAway.setY(static_cast<float>HUGE_VAL);
+  mRefractedAway.setZ(static_cast<float>HUGE_VAL);  
   
   // use this StThreeVectorD as a return 
+  // if ring is refracted away to infinity
+  mRefractedAway.setX(MAXFLOAT);
+  mRefractedAway.setY(MAXFLOAT);
   mRefractedAway.setZ(MAXFLOAT);  
 }
- 
+
+StParticleDefinition* StRichRingPoint::getParticleType() {
   return mParticle;
 }
 
 void StRichRingPoint::setParticleType(StParticleDefinition* particle) {
-
-  if (mCher>M_PI/2.0) {
+  
   mParticle   = particle;
   mMass       = particle->mass()*GeV;
   mBeta       = mMomentum/sqrt(mMomentum*mMomentum + mMass*mMass);
   mCher       = acos(1.0/(mBeta*mIndexRad[mRingType]));
+  
   if (mCher>M_PI/2.0 || mCher<0) {
-  mFastEnough = mTrack->fastEnough(particle);
-
     cout << "StRichRingPoint::setParticleType(): problem! abort!! "<< endl;
     abort();
   } 
@@ -142,32 +140,35 @@ void StRichRingPoint::setParticleType(StParticleDefinition* particle) {
 }
 
 
-void StRichRingPoint::setPoint(StThreeVector<double>& sPoint) {
+StRichRingPoint::~StRichRingPoint() { }
 
 StRichTrack* StRichRingPoint::getTrack() {
   return mTrack;
-bool StRichRingPoint::getPoint(double psi, StThreeVector<double>& point) {
+}
+
+void StRichRingPoint::setPoint(StThreeVectorF& sPoint) {
+  minPoint = sPoint;
 }
   // initailize point
   point = mRefractedAway;
 
   mMeanPathInRadiator = 0;
   mMeanPathInQuartz   = 0;  
-  StThreeVector<double> mLightRay(mTanCher*cosPsi*centimeter,
-				    mTanCher*sinPsi*centimeter,
-				    1.0*centimeter);
+  
+  // define "fast" trig functions
+  double cosPsi = cos(psi);
   double sinPsi = sin(psi);
 
-  StThreeVector<double> mRotatedLightRay(mTrackCosTheta*mTrackCosPhi*mLightRay.x() - 
-					   mTrackSinPhi*mLightRay.y() + 
-					   mTrackSinTheta*mTrackCosPhi*mLightRay.z(),
-					 
-					   mTrackCosTheta*mTrackSinPhi*mLightRay.x() + 
-					   mTrackCosPhi*mLightRay.y() + 
-					   mTrackSinTheta*mTrackSinPhi*mLightRay.z(),
-					 
-					  -mTrackSinTheta*mLightRay.x() + 
-					   mTrackCosTheta*mLightRay.z());
+  // light cone in radiator (unit height!)
+  StThreeVectorF mLightRay(mTanCher*cosPsi*centimeter,
+			   mTanCher*sinPsi*centimeter,
+			   1.0*centimeter);
+  
+  // rotated cherenkov cone
+  StThreeVectorF mRotatedLightRay(mTrackCosTheta*mTrackCosPhi*mLightRay.x() - 
+				  mTrackSinPhi*mLightRay.y() + 
+				  mTrackSinTheta*mTrackCosPhi*mLightRay.z(),
+				  
 				  mTrackCosTheta*mTrackSinPhi*mLightRay.x() + 
 				  mTrackCosPhi*mLightRay.y() + 
 				  mTrackSinTheta*mTrackSinPhi*mLightRay.z(),
@@ -193,9 +194,10 @@ bool StRichRingPoint::getPoint(double psi, StThreeVector<double>& point) {
   if (tempMVal >= 1.0)           {return false;}
   mMethaneAngle = asin(tempMVal);
 
+
   // define "fast" trig functions
   double mTanRAngle = tan(mRadiatorAngle);
-  StThreeVector<double> mPropagatedLightRay;
+  double mTanQAngle = tan(mQuartzAngle);
   double mTanMAngle = tan(mMethaneAngle);
 
  
@@ -219,7 +221,11 @@ bool StRichRingPoint::getPoint(double psi, StThreeVector<double>& point) {
   } 
 
   // mean ring  
+  if (mRingType==eMeanRing) {
     mPropagatedLightRay.setX((mDepthRad*mMeanDepthRad)*mTrackTanTheta*mTrackCosPhi 
+			   + (mDepthRad-mDepthRad*mMeanDepthRad)*mTanRAngle*cosPsiPrime);
+
+    mPropagatedLightRay.setY((mDepthRad*mMeanDepthRad)*mTrackTanTheta*mTrackSinPhi 
 
     mPropagatedLightRay.setZ(0.0);
 
@@ -236,6 +242,30 @@ bool StRichRingPoint::getPoint(double psi, StThreeVector<double>& point) {
     mDepthQuar*mTanQAngle*cosPsiPrime + 
     mDepthProx*mTanMAngle*cosPsiPrime;
   
+  double tempYVal = 
+    mImpactPoint.y() + 
+    mPropagatedLightRay.y() + 
+    mDepthQuar*mTanQAngle*sinPsiPrime + 
+    mDepthProx*mTanMAngle*sinPsiPrime;
+  
+  if (isnan(tempXVal) || isnan(tempYVal)) {
+    
+    cout << "impactxy = " << mImpactPoint << endl;
+    cout << "psi = " << psi/degree << endl;
+    cout << "mtanCher = " << mTanCher << endl;
+    cout << " cosPsi  sinPsi = " << cosPsi << "   " << sinPsi << endl;
+    cout << "mLightRay = " << mLightRay << endl;
+    cout << "mRotatedLightRay = " << mRotatedLightRay << endl;
+    cout << "mTrackCosTheta     mTrackCosPhi        mTrackSinPhi        mTrackSinTheta   " 
+	 << mTrackCosTheta  << "  " <<    mTrackCosPhi    << "  " <<     mTrackSinPhi    
+	 << "  " <<     mTrackSinTheta << endl;
+
+    cout << "mPsiPrime = " << mPsiPrime << endl;
+    cout << "cosPsiPrime    sinPsiPrime  = " << cosPsiPrime << "   " <<    sinPsiPrime << endl;
+    cout << "mRingType = " << mRingType << endl;
+    
+    cout << " mDepthQuar*mTanQAngle*cosPsiPrime  = " <<  mDepthQuar << "   " 
+	 << mTanQAngle << "   " << cosPsiPrime << endl;
     
     cout << " mPropagatedLightRay = " <<  mPropagatedLightRay << endl;
     cout << "mDepthProx*mTanMAngle*sinPsiPrime = " << mDepthProx 
@@ -246,17 +276,25 @@ bool StRichRingPoint::getPoint(double psi, StThreeVector<double>& point) {
     point.setY(tempYVal);
     point.setZ(0.0);
   
-  StThreeVector<double> rotatedPoint(mTrackCosPhi*tempPoint.x() + 
-				       mTrackSinPhi*tempPoint.y(),
-				      
-				      -mTrackSinPhi*tempPoint.x() + 
-				       mTrackCosPhi*tempPoint.y(),
-   
-				       0.0);
+    return true;
+}
+
+double StRichRingPoint::rotatedFunction(double psi) {
+  if (!getPoint(psi,tempPoint)) return HUGE_VAL;
+  tempPoint = tempPoint - mImpactPoint;
+  StThreeVectorF rotatedPoint(mTrackCosPhi*tempPoint.x() + 
 			      mTrackSinPhi*tempPoint.y(),
   return (rotatedPoint - minPoint).mag(); 
 			     -mTrackSinPhi*tempPoint.x() + 
 			      mTrackCosPhi*tempPoint.y(),
+			      
+			      0.0);
+  
+  return (rotatedPoint - minPoint).perp(); 
+}
+    
+double StRichRingPoint::getMeanPathInRadiator() {
+  return mMeanPathInRadiator;
 }
 
 double StRichRingPoint::getMeanPathInQuartz() {

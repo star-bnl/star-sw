@@ -1,12 +1,13 @@
 /**********************************************************
- * $Id: StRichRingCalculator.cxx,v 2.0 2000/08/09 16:26:20 gans Exp $
+ * $Id: StRichRingCalculator.cxx,v 2.1 2000/09/29 01:35:37 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingCalculator.cxx,v $
- *  Revision 2.0  2000/08/09 16:26:20  gans
- *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
+ *  Revision 2.1  2000/09/29 01:35:37  horsley
+ *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
+ *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
  *
  *  for individual photons, modified minimization routine to correct boundary
  *  problems
@@ -31,10 +32,30 @@
 
 
   mInnerRing = new StRichRingPoint(track,eInnerRing);
+  mOuterRing = new StRichRingPoint(track,eOuterRing);
+  mMeanRing  = new StRichRingPoint(track,eMeanRing);
  
   mInnerMinimization = new StRichMinimization(mInnerRing);
   mMeanMinimization  = new StRichMinimization(mMeanRing);
+  mOuterMinimization = new StRichMinimization(mOuterRing);
+  
+  mConstantAreaAngle=M_PI;
+
+
+StRichRingCalculator::StRichRingCalculator(StRichTrack* track, StParticleDefinition* particle)  {
+
+StRichRingCalculator::StRichRingCalculator(StRichTrack* track, StParticleDefinition* particle) {
+  mInnerRing = new StRichRingPoint(track,eInnerRing);
+  mOuterRing = new StRichRingPoint(track,eOuterRing);
+  mMeanRing  = new StRichRingPoint(track,eMeanRing);
+ 
+  mInnerMinimization = new StRichMinimization(mInnerRing);
+  mMeanMinimization  = new StRichMinimization(mMeanRing);
+  mOuterMinimization = new StRichMinimization(mOuterRing);
+  mInnerMinimization = new StRichMinimization(mInnerRing);
+  mConstantAreaAngle=M_PI;
   setParticleType(particle);
+
   mRichMaterialsDb = StRichMaterialsDb::getDb();
 
 
@@ -44,7 +65,9 @@
   delete mInnerRing;
   delete mOuterRing;
   delete mMeanRing;
-double StRichRingCalculator::calculateArea(double cut, bool gapCorrection) {
+    delete mMeanRing;
+  delete mInnerMinimization;
+  delete mOuterMinimization;
   delete mMeanMinimization;
     delete mMeanMinimization;
 
@@ -59,24 +82,31 @@ double StRichRingCalculator::calculateArea(double cut=0, bool gapCorrection=true
   }
 
   // clear vector of points
-vector<StThreeVector<double> >& StRichRingCalculator::getPtsToDraw() {
-  return vectorOfPtsToDraw;
-}
   vectorOfPtsToDraw     = areaCalc.getPtsToDraw();
   mTotalAngleOnPadPlane = areaCalc.getTotalAngleOnPadPlane();
-double StRichRingCalculator::getTotalArea() {
-  return mTotalArea;
+}
+  return area;
+  mDrawRingPoints = flag;
+}
+
+
+
+
+double StRichRingCalculator::calculateConstantArea(double cut, bool gapCorrection, double& totArea) {
+  StRichArea areaCalc(mInnerRing,mOuterRing);
+  areaCalc.correctForGap(gapCorrection);
+
+  double area           = areaCalc.calculateConstantArea(cut);
+  mTotalAngleOnPadPlane = areaCalc.getTotalAngleOnPadPlane();
+  mConstantAreaAngle    = areaCalc.getConstantAreaAngle();  
+  totArea               = areaCalc.getTotalArea();
+
+  /*
     vectorOfPtsToDraw.clear();
     vectorOfPtsToDraw.resize(0);
     vectorOfPtsToDraw     = areaCalc.getPtsToDraw();
-double StRichRingCalculator::getTotalAngle() {
-  return mTotalAngleOnPadPlane;
-}
   */
 
-double StRichRingCalculator::getPadPlaneArea() {
-  return mPadPlaneArea;
-}
   return area;
   return mMonteCarloPoints;
 }
@@ -91,64 +121,60 @@ StRichRingPoint* StRichRingCalculator::getRing(StRichRingDefinition ringType) {
   if (ringType==eMeanRing)   return  mMeanRing;
   return 0;
 
-void StRichRingCalculator::setParticleType(StParticleDefinition* particle) {
- 
+    if (ringType==eInnerRing)  return  mInnerRing;
 double StRichRingCalculator::getRingWidth() {
     if (ringType==eMeanRing)   return  mMeanRing;
     return 0;
 }
 double StRichRingCalculator::getRingWidth() const {
 void StRichRingCalculator::setParticleType(StParticleDefinition* particle) { 
-double StRichRingCalculator::getInnerDistance(StThreeVector<double>& testPoint,double& innerAngle) {
+  mInnerRing->setParticleType(particle);
   mOuterRing->setParticleType(particle);
   mMeanRing->setParticleType(particle);
-  return (closestInnerRingPoint - testPoint).mag();
+void StRichRingCalculator::setParticleType(StParticleDefinition* particle) { 
 
     mMeanRing->setParticleType(particle);
-double StRichRingCalculator::getOuterDistance(StThreeVector<double>& testPoint,double& outerAngle) {
+double StRichRingCalculator::getInnerDistance(StThreeVectorF& testPoint,double& innerAngle) {
+  closestInnerRingPoint = mInnerMinimization->rotatedMin(testPoint);
   innerAngle            = mInnerMinimization->getPsi();
   return (closestInnerRingPoint - testPoint).perp();
-  return (closestOuterRingPoint - testPoint).mag();
+					      double& innerAngle) {
 
     return (closestInnerRingPoint - testPoint).perp();
 double StRichRingCalculator::getOuterDistance(StThreeVectorF& testPoint,double& outerAngle) {
-double StRichRingCalculator::getMeanDistance(StThreeVector<double>& testPoint,double& meanAngle) {
+  closestOuterRingPoint = mOuterMinimization->rotatedMin(testPoint);
   outerAngle            = mOuterMinimization->getPsi();
   return (closestOuterRingPoint - testPoint).perp();
-  return (closestMeanRingPoint - testPoint).mag();
+    return (closestOuterRingPoint - testPoint).perp();
 double StRichRingCalculator::getMeanDistance(StThreeVectorF& testPoint,double& meanAngle) {
   closestMeanRingPoint = mMeanMinimization->rotatedMin(testPoint);
+  meanAngle            = mMeanMinimization->getPsi();
   mMeanPathInQuartz   = mMeanMinimization->getMeanPathInQuartz();
-  closestInnerRingPoint.setX(0);
-  closestInnerRingPoint.setY(0);
-  closestInnerRingPoint.setZ(0);
+  mMeanPathInRadiator = mMeanMinimization->getMeanPathInRadiator();
+  return (closestMeanRingPoint - testPoint).perp();
+    closestMeanRingPoint = mMeanMinimization->rotatedMin(testPoint);
+    meanAngle            = mMeanMinimization->getPsi();
 
-  closestOuterRingPoint.setX(0);
-  closestOuterRingPoint.setY(0);
-  closestOuterRingPoint.setZ(0);
-
-  closestMeanRingPoint.setX(0);
-  closestMeanRingPoint.setY(0);
-  closestMeanRingPoint.setZ(0);
+    mMeanPathInQuartz   = mMeanMinimization->getMeanPathInQuartz();
+    mMeanPathInRadiator = mMeanMinimization->getMeanPathInRadiator();
+    return (closestMeanRingPoint - testPoint).perp();
 }
 
+void StRichRingCalculator::clear() {
+  
+  StThreeVectorF temp(0,0,0);
   closestInnerRingPoint = temp;
-StThreeVector<double> StRichRingCalculator::getOuterRingPoint() {
-  return closestOuterRingPoint;
-}
-
+double StRichRingCalculator::getMeanPathInRadiator() { return mMeanMinimization->getMeanPathInRadiator();}
+double StRichRingCalculator::getMeanPathInQuartz() { return mMeanMinimization->getMeanPathInQuartz();}
 StThreeVectorF StRichRingCalculator::getOuterRingPoint() { return closestOuterRingPoint;}
-StThreeVector<double> StRichRingCalculator::getInnerRingPoint() {
-  return closestInnerRingPoint;
-}
-
-
-StThreeVector<double> StRichRingCalculator::getMeanRingPoint() {
-  return closestMeanRingPoint;
-}
+StThreeVectorF StRichRingCalculator::getInnerRingPoint() { return closestInnerRingPoint;}
 StThreeVectorF StRichRingCalculator::getMeanRingPoint()  { return closestMeanRingPoint;}
 
+double StRichRingCalculator::getMeanPathInRadiator() { return mMeanPathInRadiator;}
+double StRichRingCalculator::getMeanPathInQuartz() { return mMeanPathInQuartz;}
+
 double StRichRingCalculator::getConstantAreaAngle() {return mConstantAreaAngle;}
+
 double StRichRingCalculator::getTotalArea() { return mTotalArea;}
 double StRichRingCalculator::getTotalAngle() { return mTotalAngleOnPadPlane;}
 double StRichRingCalculator::getPadPlaneArea() { return mPadPlaneArea;}

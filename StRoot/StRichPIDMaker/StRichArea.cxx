@@ -1,12 +1,13 @@
 /**********************************************************
- * $Id: StRichArea.cxx,v 2.0 2000/08/09 16:26:17 gans Exp $
+ * $Id: StRichArea.cxx,v 2.1 2000/09/29 01:35:35 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichArea.cxx,v $
- *  Revision 2.0  2000/08/09 16:26:17  gans
- *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
+ *  Revision 2.1  2000/09/29 01:35:35  horsley
+ *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
+ *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
  *
  *  Revision 1.2  2000/05/19 19:06:10  horsley
  *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
@@ -36,16 +37,24 @@ StRichArea::StRichArea(StRichRingPoint* irp,
   
   mPositiveDirection =  1.0;
   mNegativeDirection = -1.0;
+
   mSmallAngleStep    = 0.0000174532925;  // ---> 0.01 degrees
   mStopCounter       = static_cast<int>(M_PI/mSmallAngleStep);
-  mNotEnoughAngleForCalculation = 179.0*degree;
+  mNotEnoughAngleForCalculation = 170.0*degree;
 
   mSmallDistance  = 0.01*centimeter;
   mTooManyCounts = (int) (mSmallDistance*10000000.0);   
-  mCorrectForGap  = true;  // ---> here we are concerned with the gap correction
 
+  mCorrectForGap  = true;  // ---> here we are concerned with the gap correction
   myGeometryDb = StRichGeometryDb::getDb();
   mTotalAngleOnPadPlane = 0;
+  mConstantAreaAngleCut = M_PI;
+  mDrawAreaRingPoints=false;
+}
+
+
+void StRichArea::drawAreaRingPoints(bool drawSwitch) {
+  mDrawAreaRingPoints = drawSwitch;
 }
 
 
@@ -55,27 +64,37 @@ void StRichArea::correctForGap(bool gapSwitch) {
   mCorrectForGap = gapSwitch;
 };
 
-vector<StThreeVector<double> >& StRichArea::getPtsToDraw() {
+vector<StThreeVectorF >& StRichArea::getPtsToDraw() {
   return vectorOfPtsToDraw;
 }
 
 double StRichArea::calculateArea(double psiCut) {
-  vectorOfPtsToDraw.resize(0);
-  vectorOfPtsToDraw.clear();
-
-  mTotalAngleOnPadPlane = 0.0;
-  mTotalArea      = 0.0;
-  mAreaSegment    = 0.0;
-  mStartAngle     = M_PI;
   
-  mStopAngle      = getStoppingAngle(psiCut);  
-  if (mStopAngle>mNotEnoughAngleForCalculation) return 0;
+  if (mDrawAreaRingPoints) {    
+    vectorOfPtsToDraw.resize(0);
+    vectorOfPtsToDraw.clear();
+  }
+  
+ 
+  mTotalAngleOnPadPlane   = 0.0;
+  
+  mCorrectedAreaSegment   = 0.0;
+  mUnCorrectedAreaSegment = 0.0;
+
+  mStartAngle             = M_PI;
+  mConstantAreaAngleCut   = M_PI;
+
+  mTotalArea              = 0.0;
+  mTotalAreaOnPadPlane    = 0.0;
+  
+  mStopAngle = getStoppingAngle(psiCut);  
+  if (mStopAngle==mNotEnoughAngleForCalculation) return 0;
   
   mAngleIncrement = M_PI/(mNumberOfSteps/2.0);
   int stopHere = (int) (mStopAngle/mAngleIncrement);
+  StThreeVectorF innerPointForDrawing,outerPointForDrawing;
 
 
-  StThreeVector<double> innerPointForDrawing,outerPointForDrawing;
   // -----------  pi ---> 0 degs  ---------------------- // 
   double angle = mStartAngle;
   if (!getRingPoints(angle,mInXYA,mOutXYA,mPositiveDirection)) {
@@ -85,24 +104,28 @@ double StRichArea::calculateArea(double psiCut) {
   
   
   for (int i=0;i<(mNumberOfSteps/2.0 - stopHere);i++) {
-    mAreaSegment = 0.0;
+    mCorrectedAreaSegment   = 0.0;
+    mUnCorrectedAreaSegment = 0.0;
     
     if (getRingPoints(angle,mInXYB,mOutXYB,mPositiveDirection)) {      
-      getAreaSegment(mInXYA,mOutXYA,mInXYB,mOutXYB,mAreaSegment);
-      mTotalArea += mAreaSegment;
-      if (mAreaSegment>0) {mTotalAngleOnPadPlane++;}
+      getAreaSegment(mInXYA,mOutXYA,mInXYB,mOutXYB,mCorrectedAreaSegment,mUnCorrectedAreaSegment);
+      mTotalArea += mUnCorrectedAreaSegment;
+      mTotalAreaOnPadPlane += mCorrectedAreaSegment;
+      if (mCorrectedAreaSegment>0) {mTotalAngleOnPadPlane++;}
     }
 
-    if (mInnerPtForDrawingA.x() !=-999) vectorOfPtsToDraw.push_back(mInnerPtForDrawingA);
-    if (mOuterPtForDrawingA.x() !=-999) vectorOfPtsToDraw.push_back(mOuterPtForDrawingA);
-    if (mInnerPtForDrawingB.x() !=-999) vectorOfPtsToDraw.push_back(mInnerPtForDrawingB);
-    if (mOuterPtForDrawingB.x() !=-999) vectorOfPtsToDraw.push_back(mOuterPtForDrawingB);
-    if (mInnerPtForDrawingC.x() !=-999) vectorOfPtsToDraw.push_back(mInnerPtForDrawingC);
-    if (mOuterPtForDrawingC.x() !=-999) vectorOfPtsToDraw.push_back(mOuterPtForDrawingC);
-
+    if (mDrawAreaRingPoints) {
+      if (mInnerPtForDrawingA.x() !=-999) vectorOfPtsToDraw.push_back(mInnerPtForDrawingA);
+      if (mOuterPtForDrawingA.x() !=-999) vectorOfPtsToDraw.push_back(mOuterPtForDrawingA);
+      if (mInnerPtForDrawingB.x() !=-999) vectorOfPtsToDraw.push_back(mInnerPtForDrawingB);
+      if (mOuterPtForDrawingB.x() !=-999) vectorOfPtsToDraw.push_back(mOuterPtForDrawingB);
+      if (mInnerPtForDrawingC.x() !=-999) vectorOfPtsToDraw.push_back(mInnerPtForDrawingC);
+      if (mOuterPtForDrawingC.x() !=-999) vectorOfPtsToDraw.push_back(mOuterPtForDrawingC);
+    }
     swapPoints(mInXYA,mOutXYA,mInXYB,mOutXYB);
   }
-  
+
+ 
   // ---------   -pi ---> 0 degs  -------------------- //
   angle = -mStartAngle;
   if (!getRingPoints(angle,mInXYA,mOutXYA,mNegativeDirection)) {
@@ -111,70 +134,185 @@ double StRichArea::calculateArea(double psiCut) {
   }
 
   for (int i=0;i<(mNumberOfSteps/2.0 - stopHere);i++) {
-    mAreaSegment = 0.0;
+    mCorrectedAreaSegment   = 0.0;
+    mUnCorrectedAreaSegment = 0.0;
 
     if (getRingPoints(angle,mInXYB,mOutXYB,mNegativeDirection)) {
-      getAreaSegment(mInXYA,mOutXYA,mInXYB,mOutXYB,mAreaSegment);
-      mTotalArea += mAreaSegment; 
-      if (mAreaSegment>0) {mTotalAngleOnPadPlane++;}
+      getAreaSegment(mInXYA,mOutXYA,mInXYB,mOutXYB,mCorrectedAreaSegment,mUnCorrectedAreaSegment);
+      mTotalArea += mUnCorrectedAreaSegment; 
+      mTotalAreaOnPadPlane += mCorrectedAreaSegment; 
+      if (mCorrectedAreaSegment>0) {mTotalAngleOnPadPlane++;}
     }
 
+    if (mDrawAreaRingPoints) {
+      if (mInnerPtForDrawingA.x() !=-999) vectorOfPtsToDraw.push_back(mInnerPtForDrawingA);
+      if (mOuterPtForDrawingA.x() !=-999) vectorOfPtsToDraw.push_back(mOuterPtForDrawingA);
+      if (mInnerPtForDrawingB.x() !=-999) vectorOfPtsToDraw.push_back(mInnerPtForDrawingB);
+      if (mOuterPtForDrawingB.x() !=-999) vectorOfPtsToDraw.push_back(mOuterPtForDrawingB);
+      if (mInnerPtForDrawingC.x() !=-999) vectorOfPtsToDraw.push_back(mInnerPtForDrawingC);
+      if (mOuterPtForDrawingC.x() !=-999) vectorOfPtsToDraw.push_back(mOuterPtForDrawingC);
+    }
 
-    if (mInnerPtForDrawingA.x() !=-999) vectorOfPtsToDraw.push_back(mInnerPtForDrawingA);
-    if (mOuterPtForDrawingA.x() !=-999) vectorOfPtsToDraw.push_back(mOuterPtForDrawingA);
-    if (mInnerPtForDrawingB.x() !=-999) vectorOfPtsToDraw.push_back(mInnerPtForDrawingB);
-    if (mOuterPtForDrawingB.x() !=-999) vectorOfPtsToDraw.push_back(mOuterPtForDrawingB);
-    if (mInnerPtForDrawingC.x() !=-999) vectorOfPtsToDraw.push_back(mInnerPtForDrawingC);
-    if (mOuterPtForDrawingC.x() !=-999) vectorOfPtsToDraw.push_back(mOuterPtForDrawingC);
+    swapPoints(mInXYA,mOutXYA,mInXYB,mOutXYB);
+  }
+ 
+
+  mTotalAngleOnPadPlane = mTotalAngleOnPadPlane*mAngleIncrement;
+  return mTotalAreaOnPadPlane;
+}
+
+double StRichArea::getTotalArea() {
+  return mTotalArea;
+}
+
+
+double StRichArea::calculateConstantArea(double areaCut) {
+  
+  if (mDrawAreaRingPoints) {    
+    vectorOfPtsToDraw.resize(0);
+    vectorOfPtsToDraw.clear();
+  }
+ 
+  mTotalAngleOnPadPlane   = 0.0;
+
+  mCorrectedAreaSegment   = 0.0;
+  mUnCorrectedAreaSegment = 0.0;
+
+  mStartAngle             = M_PI;
+  mConstantAreaAngleCut   = M_PI;
+
+  mTotalArea              = 0.0;
+  mTotalAreaOnPadPlane    = 0.0;
+
+  mStopAngle = getStoppingAngle(0);  
+  if (mStopAngle==mNotEnoughAngleForCalculation) return 0;
+
+  mAngleIncrement = M_PI/(mNumberOfSteps/2.0);
+  StThreeVectorF innerPointForDrawing,outerPointForDrawing;
+
+
+  // -----------  pi ---> 0 degs  ---------------------- // 
+  double angle = mStartAngle;
+  if (!getRingPoints(angle,mInXYA,mOutXYA,mPositiveDirection)) {
+    cout << "StRichNewArea::calculateArea  a --> starting point returns false. abort!" << endl;
+    abort();
+  }
+  
+
+  double tempArea  = 0.0;
+  bool   areaCheck = true;
+
+  while (areaCheck) {
+ 
+    mCorrectedAreaSegment   = 0.0;
+    mUnCorrectedAreaSegment = 0.0;
+
+    if (getRingPoints(angle,mInXYB,mOutXYB,mPositiveDirection)) {      
+      getAreaSegment(mInXYA,mOutXYA,mInXYB,mOutXYB,mCorrectedAreaSegment,mUnCorrectedAreaSegment);
+      mTotalAreaOnPadPlane += mCorrectedAreaSegment;
+      mTotalArea += mUnCorrectedAreaSegment;
+      if (mUnCorrectedAreaSegment>0) {mConstantAreaAngleCut -= mAngleIncrement;}      
+      if (mCorrectedAreaSegment>0)   {mTotalAngleOnPadPlane++;}     
+    }
+    
+
+    if (mTotalArea>areaCut/2.0 || angle < 0) {areaCheck=false;} 
+    if (mDrawAreaRingPoints) {    
+      if (mInnerPtForDrawingA.x() !=-999) vectorOfPtsToDraw.push_back(mInnerPtForDrawingA);
+      if (mOuterPtForDrawingA.x() !=-999) vectorOfPtsToDraw.push_back(mOuterPtForDrawingA);
+      if (mInnerPtForDrawingB.x() !=-999) vectorOfPtsToDraw.push_back(mInnerPtForDrawingB);
+      if (mOuterPtForDrawingB.x() !=-999) vectorOfPtsToDraw.push_back(mOuterPtForDrawingB);
+      if (mInnerPtForDrawingC.x() !=-999) vectorOfPtsToDraw.push_back(mInnerPtForDrawingC);
+      if (mOuterPtForDrawingC.x() !=-999) vectorOfPtsToDraw.push_back(mOuterPtForDrawingC);
+    }
+    swapPoints(mInXYA,mOutXYA,mInXYB,mOutXYB);
+  }
+
+
+  // ---------   -pi ---> 0 degs  -------------------- //
+  angle = -mStartAngle;
+  if (!getRingPoints(angle,mInXYA,mOutXYA,mNegativeDirection)) {
+    cout << "StRichNewArea::calculateArea  b --> starting point returns false. abort!" << endl;
+    abort();
+  }
+
+  tempArea=0;
+  double tempConstantAreaAngleCut = -mStartAngle;
+  areaCheck=true;
+  while (areaCheck) {
+    mCorrectedAreaSegment   = 0.0;
+    mUnCorrectedAreaSegment = 0.0;
+
+    if (getRingPoints(angle,mInXYB,mOutXYB,mNegativeDirection)) {
+      getAreaSegment(mInXYA,mOutXYA,mInXYB,mOutXYB,mCorrectedAreaSegment,mUnCorrectedAreaSegment);
+      mTotalAreaOnPadPlane += mCorrectedAreaSegment;
+      mTotalArea += mUnCorrectedAreaSegment;
+      tempArea   += mUnCorrectedAreaSegment;
+      if (mUnCorrectedAreaSegment>0) {tempConstantAreaAngleCut += mAngleIncrement;}  
+      if (mCorrectedAreaSegment>0) {mTotalAngleOnPadPlane++;}
+    }
+
+  
+    if (tempArea>areaCut/2.0 || angle > 0) {areaCheck=false;} 
+    
+    if (mDrawAreaRingPoints) {
+      if (mInnerPtForDrawingA.x() !=-999) vectorOfPtsToDraw.push_back(mInnerPtForDrawingA);
+      if (mOuterPtForDrawingA.x() !=-999) vectorOfPtsToDraw.push_back(mOuterPtForDrawingA);
+      if (mInnerPtForDrawingB.x() !=-999) vectorOfPtsToDraw.push_back(mInnerPtForDrawingB);
+      if (mOuterPtForDrawingB.x() !=-999) vectorOfPtsToDraw.push_back(mOuterPtForDrawingB);
+      if (mInnerPtForDrawingC.x() !=-999) vectorOfPtsToDraw.push_back(mInnerPtForDrawingC);
+      if (mOuterPtForDrawingC.x() !=-999) vectorOfPtsToDraw.push_back(mOuterPtForDrawingC);
+    }
     
     swapPoints(mInXYA,mOutXYA,mInXYB,mOutXYB);
   }
+
   
- 
+  mConstantAreaAngleCut    = fabs(mConstantAreaAngleCut);
+  tempConstantAreaAngleCut = fabs(tempConstantAreaAngleCut);
+  mConstantAreaAngleCut = (mConstantAreaAngleCut > tempConstantAreaAngleCut) ? (tempConstantAreaAngleCut) : (mConstantAreaAngleCut); 
+  
   mTotalAngleOnPadPlane = mTotalAngleOnPadPlane*mAngleIncrement;
-  return mTotalArea;
+  return mTotalAreaOnPadPlane;
+}
+
+
+double StRichArea::getConstantAreaAngle() {
+  return mConstantAreaAngleCut;
 }
 
 
 
 double StRichArea::getStoppingAngle(double cutAngle) {
-    StThreeVector<double> in;
+
+    StThreeVectorF out;
     double stopAngle = 0.0;
-  
-    bool iStatus = mInnerRing->getPoint(stopAngle,in); 
+    bool oStatus = mOuterRing->getPoint(stopAngle,out); 
     
     int safetyCounter=0;
-    while (!iStatus) {
+
+    while (!oStatus) {
       stopAngle += mSmallAngleStep;
-      iStatus = mInnerRing->getPoint(stopAngle,in); 
-      
+      oStatus = mOuterRing->getPoint(stopAngle,out); 
       safetyCounter++;
+
       if (safetyCounter>mStopCounter) {
+	cout << "StRichArea::getStoppingAngle. " << endl;
+	cout << "Not Enough Ring to Calculate Area." << endl;
 	cout << "Track parameters: " << endl;
 	cout << "-----------------------" << endl;
-	cout << "inner ring ---> p = " << mInnerRing->getTrack()->getMomentum() << endl;
-	cout << "outer ring ---> p = " << mOuterRing->getTrack()->getMomentum() << endl;
-	cout << "inner ring ---> xy = " << mInnerRing->getTrack()->getImpactPoint() << endl;
-	cout << "outer ring ---> xy = " << mOuterRing->getTrack()->getImpactPoint() << endl;
-	cout << "inner ring ---> theta = " << mInnerRing->getTrack()->getTheta()/degree 
-	     << endl;
-	cout << "outer ring ---> theta = " << mOuterRing->getTrack()->getTheta()/degree 
-	     << endl;
-
+	cout << "p = " << mOuterRing->getTrack()->getMomentum() << endl;
+	cout << "xy = " << mOuterRing->getTrack()->getImpactPoint() << endl;
+	cout << "theta = " << mOuterRing->getTrack()->getTheta()/degree << endl;
 	cout << "stop angle = " << stopAngle/degree << endl;
 	cout << "safetyCounter = " << safetyCounter << endl;
-	cout << "iStatus = " << iStatus << endl;
-	
-	//////////////  need to include a flag for this case and keep track of this
-	////////////////////////////
+	cout << "oStatus = " << oStatus << endl;
+	return mNotEnoughAngleForCalculation;
       }
     }
     
     
-
-    if (stopAngle<cutAngle) {
-      return cutAngle;}
-    
+    if (stopAngle<cutAngle) {return cutAngle;}
     return stopAngle;
 }
 
@@ -189,12 +327,12 @@ StRichArea::getTotalAngleOnPadPlane() {
 
 bool
 StRichArea::getRingPoints(double& angle, 
-			          StThreeVector<double>& ixy, 
-			          StThreeVector<double>& oxy, 
-			          int direction) {
+			  StThreeVectorF& ixy, 
+			  StThreeVectorF& oxy, 
+			  int direction) {
   
-  StThreeVector<double> tempInner(0,0,0);
-  StThreeVector<double> tempOuter(0,0,0);
+  StThreeVectorF tempInner(0,0,0);
+  StThreeVectorF tempOuter(0,0,0);
   
   bool mInStatus  = mInnerRing->getPoint(angle,tempInner);
   bool mOutStatus = mOuterRing->getPoint(angle,tempOuter);
@@ -204,7 +342,15 @@ StRichArea::getRingPoints(double& angle,
   if (mInStatus)  {ixy = tempInner;}
   if (mOutStatus) {oxy = tempOuter;}
   
-  if (mInStatus) {
+  if (isnan(ixy.x()) || isnan(ixy.y()) || isnan(ixy.z())) {
+    cout << "track p = " << mInnerRing->getTrack()->getMomentum() << endl;
+    cout << "track theta = " << mInnerRing->getTrack()->getTheta()/degree << endl;
+    cout << "angle = " << angle/degree << endl;
+    cout << "StRichArea::getRingPoints() --> problem track. abort() " << endl;
+    abort();
+  }
+
+  if (mInStatus && mOutStatus) {
     return true;  
   }
   
@@ -214,11 +360,11 @@ StRichArea::getRingPoints(double& angle,
 
 
 void
-StRichArea::swapPoints(StThreeVector<double>& ixya,
-		              StThreeVector<double>& oxya,
-		              StThreeVector<double>& ixyb, 
-		              StThreeVector<double>& oxyb) {
-      
+StRichArea::swapPoints(StThreeVectorF& ixya,
+		       StThreeVectorF& oxya,
+		       StThreeVectorF& ixyb, 
+		       StThreeVectorF& oxyb) {
+  
   // don't really have to swap the points, its 
   // enough to just set a = b
   ixya = ixyb;
@@ -228,11 +374,11 @@ StRichArea::swapPoints(StThreeVector<double>& ixya,
 
 
 void
-StRichArea::getAreaSegment(StThreeVector<double>& ixya,
-			            StThreeVector<double>& oxya,
-			            StThreeVector<double>& ixyb, 
-			            StThreeVector<double>& oxyb, 
-			            double& padAreaSeg) {
+StRichArea::getAreaSegment(StThreeVectorF& ixya,
+			   StThreeVectorF& oxya,
+			   StThreeVectorF& ixyb, 
+			   StThreeVectorF& oxyb, 
+			   double& correctedPadAreaSeg, double& unCorrectedPadAreaSeg) {
   
   mInnerPtForDrawingA.setX(-999);
   mInnerPtForDrawingA.setY(-999);
@@ -249,21 +395,23 @@ StRichArea::getAreaSegment(StThreeVector<double>& ixya,
   mOuterPtForDrawingC.setX(-999);
   mOuterPtForDrawingC.setY(-999);
 
-  padAreaSeg = 0;
+  correctedPadAreaSeg = 0;
   if (outOfBoundsCorrection(ixya,oxya) && outOfBoundsCorrection(ixyb,oxyb) ) {  
-    StThreeVector<double> tempixya,tempoxya,tempixyb,tempoxyb;
- 
+    StThreeVectorF tempixya,tempoxya,tempixyb,tempoxyb;
+    
+    // calculate total area segment here
+    // no gap correction necessary    
+    double term1,term2,term3,term4;
+    term1 = (ixya.x()*oxya.y() - oxya.x()*ixya.y());
+    term2 = (oxya.x()*oxyb.y() - oxyb.x()*oxya.y());
+    term3 = (oxyb.x()*ixyb.y() - ixyb.x()*oxyb.y());
+    term4 = (ixyb.x()*ixya.y() - ixya.x()*ixyb.y());
+    unCorrectedPadAreaSeg = 0.5*fabs(term1 + term2 + term3 + term4); 
+    
     if (!mCorrectForGap) {
       mInnerPtForDrawingA = tempixya;
-      mOuterPtForDrawingA = tempoxya;
-      // calculate total area segment here
-      // no gap correction necessary    
-      double term1,term2,term3,term4;
-      term1 = (ixya.x()*oxya.y() - oxya.x()*ixya.y());
-      term2 = (oxya.x()*oxyb.y() - oxyb.x()*oxya.y());
-      term3 = (oxyb.x()*ixyb.y() - ixyb.x()*oxyb.y());
-      term4 = (ixyb.x()*ixya.y() - ixya.x()*ixyb.y());
-      padAreaSeg = 0.5*fabs(term1 + term2 + term3 + term4); 
+      mOuterPtForDrawingA = tempoxya; 
+      correctedPadAreaSeg = 0.5*fabs(term1 + term2 + term3 + term4); 
       return;
     }
     
@@ -291,7 +439,7 @@ StRichArea::getAreaSegment(StThreeVector<double>& ixya,
       term2 = (tempoxya.x()*tempoxyb.y() - tempoxyb.x()*tempoxya.y());
       term3 = (tempoxyb.x()*tempixyb.y() - tempixyb.x()*tempoxyb.y());
       term4 = (tempixyb.x()*tempixya.y() - tempixya.x()*tempixyb.y());
-      padAreaSeg = 0.5*fabs(term1 + term2 + term3 + term4); 
+      correctedPadAreaSeg = 0.5*fabs(term1 + term2 + term3 + term4); 
       mInnerPtForDrawingA = tempixya;
       mOuterPtForDrawingA = tempoxya;
       return;
@@ -300,7 +448,7 @@ StRichArea::getAreaSegment(StThreeVector<double>& ixya,
 
     // case 3: 2 pts in one quadrant, 2 pts in adjacent quadrant
     if (adjacentCheck(tempixya,tempoxya) && adjacentCheck(tempixyb,tempoxyb)) {
-      StThreeVector<double> iEdgea,oEdgea,iEdgeb,oEdgeb;
+      StThreeVectorF iEdgea,oEdgea,iEdgeb,oEdgeb;
       if ( fullGapCorrectionNecessary(tempixya,tempoxya,iEdgea,oEdgea) &&
 	   fullGapCorrectionNecessary(tempixyb,tempoxyb,iEdgeb,oEdgeb)) {
 	mInnerPtForDrawingA = tempixya;
@@ -320,8 +468,8 @@ StRichArea::getAreaSegment(StThreeVector<double>& ixya,
 	term3b = (tempoxyb.x()*oEdgeb.y()   - oEdgeb.x()*tempoxyb.y());
 	term4b = (oEdgeb.x()*oEdgea.y()     - oEdgea.x()*oEdgeb.y());
 	
-	padAreaSeg = 0.5*fabs(term1a + term2a + term3a + term4a) 
-	           + 0.5*fabs(term1b + term2b + term3b + term4b);   
+	correctedPadAreaSeg = 0.5*fabs(term1a + term2a + term3a + term4a) 
+	                    + 0.5*fabs(term1b + term2b + term3b + term4b);   
 	return;
       }
     }
@@ -329,8 +477,8 @@ StRichArea::getAreaSegment(StThreeVector<double>& ixya,
 
     // case 4: 2 pts in one quadrant, 2 pts in non-adjacent quadrant
     if (!adjacentCheck(tempixya,tempoxya) && !adjacentCheck(tempixyb,tempoxyb)) {
-      StThreeVector<double> ixyaa,ixyab,oxyaa,oxyab;
-      StThreeVector<double> ixyba,ixybb,oxyba,oxybb;
+      StThreeVectorF ixyaa,ixyab,oxyaa,oxyab;
+      StThreeVectorF ixyba,ixybb,oxyba,oxybb;
       if ( nonAdjacentGapCorrection(tempixya,tempoxya,ixyaa,oxyaa,ixyab,oxyab) &&
 	   nonAdjacentGapCorrection(tempixyb,tempoxyb,ixyba,oxyba,ixybb,oxybb)) {
 	mInnerPtForDrawingA = tempixya;
@@ -365,9 +513,9 @@ StRichArea::getAreaSegment(StThreeVector<double>& ixya,
 	  term4c = (ixybb.x()*ixyab.y() - ixyab.x()*ixybb.y());
 	}
 	
-	padAreaSeg = 0.5*fabs(term1a + term2a + term3a + term4a) 
-	           + 0.5*fabs(term1b + term2b + term3b + term4b)
-	           + 0.5*fabs(term1c + term2c + term3c + term4c);
+	correctedPadAreaSeg = 0.5*fabs(term1a + term2a + term3a + term4a) 
+	                    + 0.5*fabs(term1b + term2b + term3b + term4b)
+	                    + 0.5*fabs(term1c + term2c + term3c + term4c);
 	return;
       }
     }
@@ -379,7 +527,7 @@ StRichArea::getAreaSegment(StThreeVector<double>& ixya,
     term2c = (tempoxya.x()*tempoxyb.y() - tempoxyb.x()*tempoxya.y());
     term3c = (tempoxyb.x()*tempixyb.y() - tempixyb.x()*tempoxyb.y());
     term4c = (tempixyb.x()*tempixya.y() - tempixya.x()*tempixyb.y());
-    padAreaSeg = 0.5*fabs(term1c + term2c + term3c + term4c); 
+    correctedPadAreaSeg = 0.5*fabs(term1c + term2c + term3c + term4c); 
     return;
  
   }
@@ -389,12 +537,12 @@ StRichArea::getAreaSegment(StThreeVector<double>& ixya,
 
 
 bool 
-StRichArea::nonAdjacentGapCorrection(StThreeVector<double>& ixy,   
-				     StThreeVector<double>& oxy,
-				     StThreeVector<double>& ixya, 
-				     StThreeVector<double>& oxya,
-				     StThreeVector<double>& ixyb, 
-				     StThreeVector<double>& oxyb) {
+StRichArea::nonAdjacentGapCorrection(StThreeVectorF& ixy,   
+				     StThreeVectorF& oxy,
+				     StThreeVectorF& ixya, 
+				     StThreeVectorF& oxya,
+				     StThreeVectorF& ixyb, 
+				     StThreeVectorF& oxyb) {
   if ( !mCorrectForGap )   return false;
 
   // checks if one (or both) point(s) in gap
@@ -404,10 +552,10 @@ StRichArea::nonAdjacentGapCorrection(StThreeVector<double>& ixy,
   /////////////   do gap correction   //////////////////
   // here we get the point closest to the outer point
   double phi = atan2(ixy.y()-oxy.y(),ixy.x()-oxy.x());    
-  StThreeVector<double> tempo,tempi,tempa;
-  StThreeVector<double> temp(mSmallDistance*centimeter,
-			       mSmallDistance*centimeter,
-			       mSmallDistance*centimeter);
+  StThreeVectorF tempo,tempi,tempa;
+  StThreeVectorF temp(mSmallDistance*centimeter,
+			     mSmallDistance*centimeter,
+			     mSmallDistance*centimeter);
   tempo = oxy;
   tempi = ixy;
 
@@ -505,10 +653,10 @@ StRichArea::nonAdjacentGapCorrection(StThreeVector<double>& ixy,
 
 
 bool 
-StRichArea::fullGapCorrectionNecessary(StThreeVector<double>& ixy,   
-				                    StThreeVector<double>& oxy,
-				                    StThreeVector<double>& itemp, 
-				                    StThreeVector<double>& otemp) {
+StRichArea::fullGapCorrectionNecessary(StThreeVectorF& ixy,   
+				                    StThreeVectorF& oxy,
+				                    StThreeVectorF& itemp, 
+				                    StThreeVectorF& otemp) {
   
   if ( !mCorrectForGap )   return false;
 
@@ -523,8 +671,8 @@ StRichArea::fullGapCorrectionNecessary(StThreeVector<double>& ixy,
   /////////////   do gap correction   //////////////////
   // here we get the point closest to the outer point
   double phi = atan2(ixy.y()-oxy.y(),ixy.x()-oxy.x());    
-  StThreeVector<double> tempo,tempi,tempa;
-  StThreeVector<double> temp(mSmallDistance*centimeter,
+  StThreeVectorF tempo,tempi,tempa;
+  StThreeVectorF temp(mSmallDistance*centimeter,
 			       mSmallDistance*centimeter,
 			       mSmallDistance*centimeter);
   tempo = oxy;
@@ -591,10 +739,10 @@ StRichArea::fullGapCorrectionNecessary(StThreeVector<double>& ixy,
   return true;
 }
 
-bool StRichArea::partialGapCorrection(StThreeVector<double>& ixy,   
-				                  StThreeVector<double>& oxy,
-				                  StThreeVector<double>& tempixy, 
-				                  StThreeVector<double>& tempoxy) {
+bool StRichArea::partialGapCorrection(StThreeVectorF& ixy,   
+				                  StThreeVectorF& oxy,
+				                  StThreeVectorF& tempixy, 
+				                  StThreeVectorF& tempoxy) {
   
   // if neither point in gap, no correction necessary
   if ( !gapCheck(ixy) && !gapCheck(oxy) ) {
@@ -604,7 +752,7 @@ bool StRichArea::partialGapCorrection(StThreeVector<double>& ixy,
 
   // Exclusive OR  -->  ^
   if (gapCheck(ixy)^gapCheck(oxy)) {
-    StThreeVector<double> tempo,tempi,tempa,temp;
+    StThreeVectorF tempo,tempi,tempa,temp;
     double phi;
     tempixy = ixy;
     tempoxy = oxy;
@@ -658,7 +806,7 @@ bool StRichArea::partialGapCorrection(StThreeVector<double>& ixy,
   // try to make correction  
   else  {
     
-    StThreeVector<double> tempo,tempi,tempa,temp;
+    StThreeVectorF tempo,tempi,tempa,temp;
     double phi;
     tempixy = ixy;
     tempoxy = oxy;
@@ -716,7 +864,7 @@ bool StRichArea::partialGapCorrection(StThreeVector<double>& ixy,
 
 
 
-bool StRichArea::gapCheck(StThreeVector<double>& xy) {
+bool StRichArea::gapCheck(StThreeVectorF& xy) {
 
   double xGapWidth = myGeometryDb->quadrantGapInX()/2.0;
   double yGapWidth = myGeometryDb->quadrantGapInY()/2.0;
@@ -728,8 +876,8 @@ bool StRichArea::gapCheck(StThreeVector<double>& xy) {
 }
 
 
-bool StRichArea::quadCheck(StThreeVector<double>& ixy,
-			           StThreeVector<double>& oxy) {
+bool StRichArea::quadCheck(StThreeVectorF& ixy,
+			           StThreeVectorF& oxy) {
  
   double gapWidth = myGeometryDb->quadrantGapInX()/2.0;
   
@@ -753,7 +901,7 @@ bool StRichArea::quadCheck(StThreeVector<double>& ixy,
 
 
 bool 
-StRichArea::inBounds(StThreeVector<double>& xy) {
+StRichArea::inBounds(StThreeVectorF& xy) {
   
   if ( (xy.x() > -myGeometryDb->radiatorDimension().x() && 
 	xy.x() <  myGeometryDb->radiatorDimension().x() ) && 
@@ -768,8 +916,8 @@ StRichArea::inBounds(StThreeVector<double>& xy) {
 
 
 bool 
-StRichArea::adjacentCheck(StThreeVector<double>& ixy, StThreeVector<double>& oxy) {
-  StThreeVector<double> check = ixy*oxy;
+StRichArea::adjacentCheck(StThreeVectorF& ixy, StThreeVectorF& oxy) {
+  StThreeVectorF check = ixy*oxy;
   if (check.x() > 0 || check.y() > 0) {
     return true;
   }
@@ -779,8 +927,8 @@ StRichArea::adjacentCheck(StThreeVector<double>& ixy, StThreeVector<double>& oxy
 
 
 bool 
-StRichArea::outOfBoundsCorrection(StThreeVector<double>& ixy, 
-				                 StThreeVector<double>& oxy) {
+StRichArea::outOfBoundsCorrection(StThreeVectorF& ixy, 
+				  StThreeVectorF& oxy) {
  
   if (inBounds(oxy) && inBounds(ixy)) {
     return true;
@@ -788,9 +936,9 @@ StRichArea::outOfBoundsCorrection(StThreeVector<double>& ixy,
 
   if (inBounds(oxy)) {
       double phi = atan2(ixy.y()-oxy.y(),ixy.x()-oxy.x());    
-      StThreeVector<double> tempo,tempi,tempa;
+      StThreeVectorF tempo,tempi,tempa;
 
-      StThreeVector<double> temp(mSmallDistance,
+      StThreeVectorF temp(mSmallDistance,
 				   mSmallDistance,
 				   mSmallDistance);
       tempo = oxy;
@@ -830,8 +978,8 @@ StRichArea::outOfBoundsCorrection(StThreeVector<double>& ixy,
  
   if (inBounds(ixy))  {
     double phi = atan2(oxy.y()-ixy.y(),oxy.x()-ixy.x());    
-    StThreeVector<double> tempo,tempi,tempa;
-      StThreeVector<double> temp(mSmallDistance,
+    StThreeVectorF tempo,tempi,tempa;
+      StThreeVectorF temp(mSmallDistance,
 				   mSmallDistance,
 				   mSmallDistance);
     tempo = oxy;
@@ -872,9 +1020,9 @@ StRichArea::outOfBoundsCorrection(StThreeVector<double>& ixy,
 }
 
 
-bool StRichArea::sanityCheck(StThreeVector<double>& ixy, 
-			                  StThreeVector<double>& mxy, 
-			                  StThreeVector<double>& oxy ) {
+bool StRichArea::sanityCheck(StThreeVectorF& ixy, 
+			     StThreeVectorF& mxy, 
+			     StThreeVectorF& oxy ) {
 
   // simple check to see if the middle point falls within
   // the bounds of the inner, outer points

@@ -1,12 +1,13 @@
 /**********************************************************
- * $Id: StRichRingPoint.h,v 2.0 2000/08/09 16:26:20 gans Exp $
+ * $Id: StRichRingPoint.h,v 2.1 2000/09/29 01:35:38 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichRingPoint.h,v $
- *  Revision 2.0  2000/08/09 16:26:20  gans
- *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
+ *  Revision 2.1  2000/09/29 01:35:38  horsley
+ *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
+ *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
  *
  *  Revision 1.2  2000/05/19 19:06:11  horsley
  *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
@@ -22,7 +23,8 @@
 #include "StParticleDefinition.hh"
 #include "StRichRingDefinition.h" 
 #include "StRichMaterialsDb.h"
-#include "StThreeVector.hh"
+#include "StRrsMaker/StRichGeometryDb.h"
+#include "StThreeVectorF.hh"
 
 class  StRichRingPoint {
 public:
@@ -30,35 +32,46 @@ public:
   StRichRingPoint(StRichTrack* track, StRichRingDefinition type);
   ~StRichRingPoint();
   double rotatedFunction(double psi);
-  bool   getPoint(double psi, StThreeVector<double>& point);
-  void   setPoint(StThreeVector<double>& sPoint);
+  bool   getPoint(double psi, StThreeVectorF& point);
+  void   setPoint(StThreeVectorF& sPoint);
   void   setParticleType(StParticleDefinition* particle);  
+  StParticleDefinition* getParticleType();  
   StRichTrack* getTrack(); 
+  double getMeanPathInRadiator();
+  double getMeanPathInQuartz();
   
-
 private:
+
   // ring parameters
+  StParticleDefinition* mParticle;
   StRichRingDefinition mRingType;
+
   double mInnerWavelength;
   double mOuterWavelength;
   double mMeanWavelength;
   
+  double mMeanPathInRadiator;  
+  double mMeanPathInQuartz;
+
   // track parameters
   double mTrackTheta;
   double mTrackPhi;
   double mPsi;
+
   double mMomentum;
   double mMass;
   double mBeta;
   double mCher;
+
   double mTrackCosTheta;
   double mTrackSinTheta;
   double mTrackCosPhi;
+
   double mTrackSinPhi;
   double mTrackTanTheta;
   double mTanCher;
 
-  StThreeVector<double> mImpactPoint;
+  StThreeVectorF mImpactPoint;
   bool mFastEnough;
   StRichTrack* mTrack;
 
@@ -66,6 +79,7 @@ private:
   double mDepthRad;
   double mMeanDepthRad;
   double mDepthQuar;
+
   double mDepthProx;
   double mIndexRad[3];
   double mIndexQuartz[3];
@@ -73,18 +87,18 @@ private:
 
   // detector parameters
   StRichMaterialsDb* richMaterialsDb;
-
+  StRichGeometryDb* richGeometryDb;
   // ray propagation
   double mRadiatorAngle;
   double mQuartzAngle;
   double mMethaneAngle;
   double mPsiPrime;
-  StThreeVector<double>  mRefractedAway;
+  StThreeVectorF  mRefractedAway;
   bool status;
 
   // rotated function
-  StThreeVector<double> tempPoint;
-  StThreeVector<double> minPoint;
+  StThreeVectorF tempPoint;
+  StThreeVectorF minPoint;
 
 };
 

@@ -1,12 +1,13 @@
 /**********************************************************
- * $Id: StRichArea.h,v 2.0 2000/08/09 16:26:17 gans Exp $
+ * $Id: StRichArea.h,v 2.1 2000/09/29 01:35:36 horsley Exp $
  *
  * Description:
  *  
  *
  *  $Log: StRichArea.h,v $
- *  Revision 2.0  2000/08/09 16:26:17  gans
- *  Naming Convention for TDrawable Ojects. All drawable objects now in StRichDisplayMaker
+ *  Revision 2.1  2000/09/29 01:35:36  horsley
+ *  Many changes, added StRichRingHits, StRichMcSwitch, TpcHitvecUtilities
+ *  Modified the StRichCalculator, StRichTracks, StRichMCTrack, StRichRingPoint
  *
  *  Revision 1.2  2000/05/19 19:06:10  horsley
  *  many revisions here, updated area calculation ring calc, ring, tracks , etc...
@@ -18,7 +19,7 @@
 #ifndef StRichArea_H
 #define StRichArea_H
 
-#include "StThreeVector.hh"
+#include "StThreeVectorF.hh"
 #include "StRichRingPoint.h"
 
 
@@ -29,91 +30,101 @@ class StRichArea {
 public:
   StRichArea(StRichRingPoint*, StRichRingPoint*);
   ~StRichArea();
-  double    calculateArea(double);
-  double getTotalAngleOnPadPlane();
-  vector<StThreeVector<double> >& getPtsToDraw();
-  void correctForGap(bool);
+  double  calculateArea(double);
+  double  getConstantAreaAngle();
+  double  calculateConstantArea(double);
+  double  getTotalAngleOnPadPlane();
+  double  getTotalArea();
+  void    correctForGap(bool);
+  vector<StThreeVectorF >& getPtsToDraw();
+
   
 private:
     
   double getStoppingAngle(double);
   
   bool   getRingPoints(double&, 
-		       StThreeVector<double>&, 
-		       StThreeVector<double>&, 
+		       StThreeVectorF&, 
+		       StThreeVectorF&, 
 		       int);
   
-  void getAreaSegment(StThreeVector<double>& , 
-		      StThreeVector<double>& ,
-		      StThreeVector<double>& , 
-		      StThreeVector<double>&,
-		      double&);
+  void getAreaSegment(StThreeVectorF& , 
+		      StThreeVectorF& ,
+		      StThreeVectorF& , 
+		      StThreeVectorF&,
+		      double&, double&);
   
-  void swapPoints(StThreeVector<double>&, 
-		  StThreeVector<double>&,
-		  StThreeVector<double>&, 
-		  StThreeVector<double>& );
+  void swapPoints(StThreeVectorF&, 
+		  StThreeVectorF&,
+		  StThreeVectorF&, 
+		  StThreeVectorF& );
   
-  bool fullGapCorrectionNecessary(StThreeVector<double>&, 
-				            StThreeVector<double>&,
-				            StThreeVector<double>&,
-				            StThreeVector<double>&);
+  bool fullGapCorrectionNecessary(StThreeVectorF&, 
+				  StThreeVectorF&,
+				  StThreeVectorF&,
+				  StThreeVectorF&);
   
-  bool partialGapCorrection(StThreeVector<double>&, 
-			            StThreeVector<double>&,
-			            StThreeVector<double>&,
-			            StThreeVector<double>&);
+  bool partialGapCorrection(StThreeVectorF&, 
+			    StThreeVectorF&,
+			    StThreeVectorF&,
+			    StThreeVectorF&);
 
-  bool nonAdjacentGapCorrection(StThreeVector<double>&, 
-				                 StThreeVector<double>&,
-				                 StThreeVector<double>&,
-				                 StThreeVector<double>&,
-				                 StThreeVector<double>&,
-				                 StThreeVector<double>&);
+  bool nonAdjacentGapCorrection(StThreeVectorF&, 
+				StThreeVectorF&,
+				StThreeVectorF&,
+				StThreeVectorF&,
+				StThreeVectorF&,
+				StThreeVectorF&);
   
-  bool quadCheck(StThreeVector<double>&, StThreeVector<double>&);
+  bool quadCheck(StThreeVectorF&, StThreeVectorF&);
   
-  bool adjacentCheck(StThreeVector<double>&,StThreeVector<double>&);
+  bool adjacentCheck(StThreeVectorF&,StThreeVectorF&);
   
-  bool gapCheck(StThreeVector<double>&);
+  bool gapCheck(StThreeVectorF&);
   
-  bool outOfBoundsCorrection(StThreeVector<double>&, StThreeVector<double>&);
+  bool outOfBoundsCorrection(StThreeVectorF&, StThreeVectorF&);
   
-  bool inBounds(StThreeVector<double>&);
+  bool inBounds(StThreeVectorF&);
   
-  bool sanityCheck(StThreeVector<double>& ,
-		        StThreeVector<double>& ,
-		        StThreeVector<double>& );
+  bool sanityCheck(StThreeVectorF& , StThreeVectorF& ,StThreeVectorF& );
+  
+  
+  void drawAreaRingPoints(bool);
   
   // data members
-  bool    mCorrectForGap;
-  double mNumberOfSteps;
-  
-  int mTooManyCounts;
-  double mNotEnoughAngleForCalculation;
+  bool   mCorrectForGap;
+  bool   mDrawAreaRingPoints;
 
+  int    mTooManyCounts;
+  int    mStopCounter;  
+ 
+  double mNumberOfSteps;
+  double mNotEnoughAngleForCalculation;
+  double mConstantAreaAngleCut;
   double mTotalAngleOnPadPlane;
+  
   double mStartAngle;
   double mStopAngle;
   double mAngleIncrement;
   double mSmallAngleStep;
-  int     mStopCounter;  
-
+ 
   double mSmallDistance;
   double mPositiveDirection;
   double mNegativeDirection;
-  
-  double mAreaSegment;
-  double mTotalArea;
-  
-  StThreeVector<double> mInXYA;
-  StThreeVector<double> mOutXYA;
-  StThreeVector<double> mInXYB;
-  StThreeVector<double> mOutXYB;
 
-  StThreeVector<double> mInnerPtForDrawingA,mInnerPtForDrawingB,mInnerPtForDrawingC;
-  StThreeVector<double> mOuterPtForDrawingA,mOuterPtForDrawingB,mOuterPtForDrawingC;
-  vector<StThreeVector<double> > vectorOfPtsToDraw; //!
+  double mCorrectedAreaSegment;
+  double mUnCorrectedAreaSegment;
+  double mTotalArea;
+  double mTotalAreaOnPadPlane;
+  
+  StThreeVectorF mInXYA;
+  StThreeVectorF mOutXYA;
+  StThreeVectorF mInXYB;
+  StThreeVectorF mOutXYB;
+
+  StThreeVectorF mInnerPtForDrawingA,mInnerPtForDrawingB,mInnerPtForDrawingC;
+  StThreeVectorF mOuterPtForDrawingA,mOuterPtForDrawingB,mOuterPtForDrawingC;
+  vector<StThreeVectorF > vectorOfPtsToDraw; //!
 
   StRichRingPoint* mInnerRing;
   StRichRingPoint* mOuterRing;
