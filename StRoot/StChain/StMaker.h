@@ -39,6 +39,7 @@ public:
    virtual void   Browse(TBrowser *b);
    virtual void   Clear(Option_t *option="");
    virtual St_DataSet *DataSet() {return m_DataSet;}
+   void           SetDataSet (St_DataSet *set);
    virtual void   Draw(Option_t *option="");
    virtual void   Finish();
    TList         *Histograms() {return m_Histograms;}

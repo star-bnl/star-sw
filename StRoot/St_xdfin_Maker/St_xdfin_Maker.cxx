@@ -39,17 +39,21 @@ void St_xdfin_Maker::Init(){
 //_____________________________________________________________________________
 Int_t St_xdfin_Maker::Make(){
   PrintInfo();
-  m_DataSet = gStChain->XDFFile()->NextEventGet();
-#if 0
-  St_DataSet *set = gStChain->XDFFile()->NextEventGet();
-  St_DataSetIter next(set);
-  if (strlen(GetTitle()) )   m_DataSet = set;
-  else if ( next(GetTitle())) m_DataSet = set;
-  else {
-    m_DataSet = new St_DataSet(GetTitle());
-    m_DataSet->Add(set);
-  }
-#endif
+   m_DataSet = gStChain->XDFFile()->NextEventGet();
+   if (m_DataSet){
+     const Char_t *makertype = GetTitle();
+     if (makertype && strlen(makertype)) {
+       St_DataSetIter    top(gStChain->DataSet());
+       top.Cd(gStChain->GetName());
+       St_DataSet       *set = top(makertype);
+       if (!set) {
+         top.Mkdir(makertype); 
+         set = top(makertype);
+       }
+       St_DataSetIter    parent(top(makertype));
+       parent.Add(m_DataSet);
+     }
+   }
   return m_DataSet ? 0:-1;
 }
 //_____________________________________________________________________________
