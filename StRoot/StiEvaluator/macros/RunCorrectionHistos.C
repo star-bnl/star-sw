@@ -1,11 +1,19 @@
 //
-// $Id: RunCorrectionHistos.C,v 1.1 2002/11/27 00:09:29 calderon Exp $
+// $Id: RunCorrectionHistos.C,v 1.2 2003/06/19 21:25:19 calderon Exp $
 //
 // This macro is the 3d step in the production of the Evaluation Histograms
 // It does the division of the raw distributions (obtained in step 1, RunEvaluationHistos.C)
 // once all files have been accumulated          (obtained in step 2, RunAdditionOfHistos.C)
 //
 // $Log: RunCorrectionHistos.C,v $
+// Revision 1.2  2003/06/19 21:25:19  calderon
+// Better handling of file names, don't assume the input files, but use
+// options in the macros (keep setting the default values as before).
+// Adding Zbigniew's scripts and macros.
+// Modified FillHistos.C due to a bug in the handling of the file name,
+// which was fortuitously counterbalanced by a call to TString::Data()
+// which truncated the TString at just the right place.
+//
 // Revision 1.1  2002/11/27 00:09:29  calderon
 // New version of evaluator using the minimctrees
 // Macros for running the evaluation and perl script to coordinate
@@ -30,11 +38,14 @@ void histStyle(TH1D* hist, int linecolor=4) {
 //     title += " Embedding High Set 1";
 //     hist->SetTitle(title.Data());
 }
-void RunCorrectionHistos() {
+void RunCorrectionHistos(bool fromEmbedding = false,
+			 TString topDir="StiEvalOutputRawHistos/",
+			 TString fileName = "SumHistosEvalItTest.root") {
     //
     // on rcf
     // file: StiEvalOutputRawHistos/SumHistosEvalItTest.root
-    TFile* iofile = TFile::Open("StiEvalOutputRawHistos/SumHistosEvalItTest.root","UPDATE");
+    fileName.Prepend(topDir);
+    TFile* iofile = TFile::Open(fileName.Data(),"UPDATE");
     gStyle->SetPalette(1,0);
     gStyle->SetTitleH(.05);
     gStyle->SetTitleW(0.6);
@@ -89,7 +100,7 @@ void RunCorrectionHistos() {
 //     else {
 // 	outfile += "FullField";
 //     }
-    outfile.Prepend("StiEvalOutputRawHistos/");
+    outfile.Prepend(topDir);
     outfile += ".root";
 
     cout << outfile << endl;
@@ -160,7 +171,7 @@ void RunCorrectionHistos() {
     
     //    return;
 	TFile* effFile = new TFile(outfile,"UPDATE");
-	if (dirname.Contains("Hijing")) {
+	if (!fromEmbedding) {
 	    correctiongho->Write();
 	    correctiondbg->Write();
 	    correctionebg->Write();
