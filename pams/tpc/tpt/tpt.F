@@ -1,5 +1,8 @@
-* $Id: tpt.F,v 1.13 1999/05/05 21:52:08 sakrejda Exp $
+* $Id: tpt.F,v 1.14 1999/05/21 02:46:02 sakrejda Exp $
 * $Log: tpt.F,v $
+* Revision 1.14  1999/05/21 02:46:02  sakrejda
+* pointers for malloc initialised - were causing crashes in peripheral events
+*
 * Revision 1.13  1999/05/05 21:52:08  sakrejda
 * local arrays converted to dynamic ones (with malloc)
 *
@@ -120,6 +123,11 @@ C     initialize timing counters
       time_ext = 0
       time_merge = 0
       ipass=1
+c     
+c     initialize pointers
+      p_loc_hit  = 0
+      p_next_hit = 0
+c
       if(tpar(ipass).debug(1).eq.1) then
           call Msg_Enable( 'TPTI1-E1' )
           call Msg_Enable( 'TPTI2-E1' )

@@ -1,5 +1,8 @@
-* $Id: tte.F,v 1.27 1999/04/21 23:41:51 sakrejda Exp $
+* $Id: tte.F,v 1.28 1999/05/21 02:46:18 sakrejda Exp $
 * $Log: tte.F,v $
+* Revision 1.28  1999/05/21 02:46:18  sakrejda
+* pointers for malloc initialised - were causing crashes in peripheral events
+*
 * Revision 1.27  1999/04/21 23:41:51  sakrejda
 * possible number of points on track added to the tpt_track table (Spirose's request
 *
@@ -255,6 +258,16 @@ C_____________________________________________________________________________
       event_number=event_number+1
 
       bad_track=0
+c     set all the pointers to 0, just in case they need to be freed without 
+c     allocation
+
+      p_list_g2t_hits = 0
+      p_list_hits = 0
+      p_list_g2t_tracks = 0
+      p_list_tracks = 0
+      p_list_index_mc = 0
+      p_list_index_rec = 0
+      p_loc_hit = 0
 
 c     set number of entries in the tables to 0
 
