@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRunInfo.h,v 2.2 2001/12/02 19:27:12 ullrich Exp $
+ * $Id: StRunInfo.h,v 2.3 2002/01/31 23:42:36 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 2001
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StRunInfo.h,v $
+ * Revision 2.3  2002/01/31 23:42:36  ullrich
+ * Added member to hold BBC coincidence rate.
+ *
  * Revision 2.2  2001/12/02 19:27:12  ullrich
  * Added new member and methods.
  *
@@ -44,6 +47,7 @@ public:
     double   zdcWestRate() const;
     double   zdcEastRate() const;
     double   zdcCoincidenceRate() const;
+    double   bbcCoincidenceRate() const;
     double   backgroundRate() const;
     double   l0RateToRich() const;
 
@@ -59,6 +63,7 @@ public:
     void     setZdcWestRate(double);
     void     setZdcEastRate(double);
     void     setZdcCoincidenceRate(double);
+    void     setBbcCoincidenceRate(double);
     void     setBackgroundRate(double);
     void     setL0RateToRich(double); 
     
@@ -80,7 +85,8 @@ protected:
     Double_t    mZdcCoincidenceRate;
     Double_t    mBackgroundRate;
     Double_t    mL0RateToRich;
+    Double_t    mBbcCoincidenceRate;
 
-    ClassDef(StRunInfo,2)
+    ClassDef(StRunInfo,3)
 };
 #endif
