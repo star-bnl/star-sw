@@ -1,0 +1,5 @@
+ macro init
+ macro/global/import *
+ message ' init_user '
+
+ return
