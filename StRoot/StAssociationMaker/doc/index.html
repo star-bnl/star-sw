@@ -1,0 +1,163 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+  <head>
+    <title>StAssociationMaker Guide</title>
+  </head>
+
+  <body bgcolor="#ffffff" text="#000000">
+    <table border="0" width ="100%" cellpadding="10">
+      <tr bgcolor="darkblue">
+	<td align="center" valign="top">
+	  <h1>
+	    <font color="lightgreen">StAssociationMaker</h1>
+	  </h1>
+	</td>
+    </table>
+    <center>
+      <h1>A Class for <font color="red">StMcEvent-StEvent</font> Object Association</h1>
+    </center>
+    <p>
+
+
+    <p>
+      For a detailed description, you can download the <b>StAssociationMaker</b>
+      <a href="./ps/StAssociationMaker.psnup"> User's Guide & Reference Manual</a>
+
+    </p>
+    <p>
+      The <b>StAssociationMaker</b> package provides the functionality to analyze Monte Carlo
+      data contained in <b>StMcEvent</b> and reconstructed data contained in <b>StEvent</b>.  It relates the
+      objects from the 2 packages according to user defined criteria.  The relationship is
+      established through a <i>multimap</i>.  For a better understanding of the workings of the Maker,
+      I'll very briefly discuss the idea behind a <i>multimap</i>.
+    </p>
+    <h2>Quick glance at Multimaps</h2>
+    <p>
+      A <a href="http://www.sgi.com/Technology/STL/Multimap.html"><i>multimap</i></a> is a type of C++
+      <a href="http://www.sgi.com/Technology/STL/stl_introduction.html">Standard Template Library</a>
+      associative container.  The crucial idea for
+      <a href="http://www.sgi.com/Technology/STL/Map.html"><i>maps</i></a> (and indeed, for all types of
+      associative containers) is to gain information based on a "key".  To illustrate the concept
+      in a more familiar context, one can think of a phonebook.  The idea of a phonebook is that it
+      contains people's phone numbers.  In other words, it is an associative container between a
+      character string (a person's name) and an integer (the person's phone number).  To use a phonebook,
+      one looks up a person's name and reads off the associated phone number.  The character
+      string representing the name is the "key", and the phone number is the key's associated "value".
+    </p>
+    <p>
+      A <i>map</i> is nothing else than a sequence of (key, value) pairs that provides for fast retrieval
+      of the value based on the key.  There is one main difference between the <i>map</i> and the
+      <i>multimap</i>:in a <i>map</i>,
+      keys are UNIQUE.  This means that if a phonebook were a <i>map</i>,
+      then each person would only
+      be able to have one phone number. Note that the phone number could be shared between people
+      (only the keys
+      are unique).  A <i>multimap</i>, on the other hand,
+      allows multiple keys.  This means that if a phonebook were a <i>multimap</i>, then everyone could have
+      as many phone numbers as they pleased.
+      
+    </p>
+    <hr>
+    <h2> Multimaps Implemented in the Package </h2>
+    <p>
+      Currently, there are only 2 multimaps implemented in <b>StAssociatonMaker</b>:
+    </p>
+    <ul>
+      <li> TPC Hits</li>
+      <li> Tracks  </li>
+    </ul>
+    <p>
+      Future versions will include hits in other detectors like SVT, FTPC, etc.
+    </p>
+    <p>
+      The association is made based on criteria given by the user.  These criteria are
+      established at runtime, and the user controls them at the macro level.
+    </p>
+    <p>
+      For the
+      TPC Hit multimap, the criterion is spatial proximity.  That is, if 2 hits are closer
+      in space than a certain distance cut, they are associated.  The user specifies the
+      desired distance cut.
+    </p>
+    <p>
+      For the Track multimap, the criterion is based on the number of hits the tracks share in common.
+      This means that to build the Track Multimap, the TPC Hit Multimap is used.  When the relevant
+      Hit Multimaps are implemented for the other detectors, these will be used too.  The user specifies
+      the minimum number of hits the tracks must share in order to be associated.
+    </p>
+    <hr>
+    <h2> Running the Code</h2>
+    <p>
+    The macro to use is:
+    </p>
+    <p>
+      <font face="courier">$STAR/StRoot/macros/examples/<b>StAssociator.C</b></font>
+    </p>
+    <p>
+      The following is a list of commands to run the code from scratch, building the libraries in your
+      own area.  The code compiles and runs on Linux, Solaris and HP.
+      (The libraries should be built in "new", and "dev".  Look in
+      <pre> $STAR/lib/ </pre> for the .so files.  If one of them is missing, contact
+      Lidia!)
+
+      <pre>
+	> mkdir workdir
+	> cd workdir
+	> klog
+	> cvs co StRoot/StMcEvent
+	> cvs co StRoot/StMcEventMaker
+	> cvs co StRoot/StAssociationMaker
+	> cvs co StRoot/StMcAnalysisMaker
+	> cvs co StRoot/macros/examples/StAssociator.C
+	> makel -C StRoot/StMcEvent
+	> makel -C StRoot/StMcEventMaker
+	> makel -C StRoot/StAssociationMaker
+	> makel -C StRoot/StMcAnalysisMaker
+	> root4star
+	root4star[0] .x StAssociator.C
+      </pre>
+	  
+    </p>
+    <p>
+      This will run a chain where all the needed packages are loaded and run.  After
+      StAssociationMaker is called, a user would normally have their own analysis package.
+      With this in mind, an example analysis package is also provided:
+      <b>StMcAnalysisMaker</b>.
+      This Maker illustrates the use of <b>StAssociationMaker</b>
+      to do simple histogramming and creation of an Ntuple.  The Maker already takes care of
+      getting the pointers to <b>StEvent</b>, <b>StMcEvent</b>, and <b>StAssociationMaker</b>.
+      Instead of starting from scratch a user would create her own analysis maker following the
+      examples illustrated in this maker.  These are:
+    </p>
+    <ul>
+      <li> Print the primary vertex position from StEvent and from StMcEvent to the screen.</li>
+      <li> Print the position of the first reconstructed TPC Hit in the multimap, and then print
+	the position of the associated MC TPC hit for comparison.</li>
+      <li> 2-D Histogram of X position difference vs. Y position difference of all TPC hits
+	in the multimap. </li>
+      <li> Print the magnitude of the momentum of the first reconstructed track in the multimap, and
+	then print the magnitude of the momentum of any associated MC Tracks for comparison.</li>
+      <li> 1-D Histogram of the momentum resolution: (p - p<sub>MC</sub>)/p</li>
+      <li> Ntuple containing the following information for each track pair:
+	<ul>
+	  <li> Reconstructed momentum (components and magnitude)
+	  <li> Monte Carlo momentum (components and magnitude)
+	  <li> Number of common TPC Hits
+	  <li> mean of the hit position difference in each spatial direction
+	</ul>
+      <li> Two 2-D Histograms: X vs. Y position of the hits from a Reconstructed track, and
+	from its associated Monte Carlo track.
+	
+    </ul>
+    <hr>
+    
+    <b>StAssociationMaker</b> is a work in progress.  For questions, contact
+    <address><a href="mailto:calderon@star.physics.yale.edu">Manuel Calderon de la Barca Sanchez</a></address>
+    or
+    <address><a href="mailto:lisa@mps.ohio-state.edu">Michael A. Lisa</a></address>
+<!-- Created: Mon Sep 27 15:18:56 EDT 1999 -->
+<!-- hhmts start -->
+Last modified: Mon Sep 27 18:22:51 EDT 1999
+<!-- hhmts end -->
+  </body>
+</html>
