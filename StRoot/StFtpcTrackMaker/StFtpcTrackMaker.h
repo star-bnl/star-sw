@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.h,v 1.13 2004/05/24 13:46:39 jcs Exp $
+// $Id: StFtpcTrackMaker.h,v 1.14 2004/06/04 11:04:15 jcs Exp $
 // $Log: StFtpcTrackMaker.h,v $
+// Revision 1.14  2004/06/04 11:04:15  jcs
+// replaced StarDb/ftpc/fdepars/fdepar with StarDb/ftpc/ftpcdEdxPars
+//
 // Revision 1.13  2004/05/24 13:46:39  jcs
 // fill StFtpcSoftwareMonitor not dst_mon_soft_ftpc
 //
@@ -72,7 +75,7 @@ class TH1F;
 class TH2F;
 class TProfile;
 class StEvent;
-class St_fde_fdepar;
+class St_ftpcdEdxPars;
  
 class StFtpcTrackMaker : public StMaker {
 
@@ -121,7 +124,7 @@ class StFtpcTrackMaker : public StMaker {
    virtual Int_t  Finish();                                         // final cleanup
    virtual Int_t  FinishRun(Int_t run);                             // cleanup after every run
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.13 2004/05/24 13:46:39 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StFtpcTrackMaker.h,v 1.14 2004/06/04 11:04:15 jcs Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    virtual void   PrintInfo();                                      // prints information
 	   void   MakeHistograms(StFtpcTracker *tracker);           // makes histograms
 	   void   FillMonSoftFtpc(StEvent *event,StFtpcTracker *tracker,StFtpcSoftwareMonitor *ftpcMon);  // fills StEvent->StSoftwareMonitor->StFtpcSoftwareMonitor

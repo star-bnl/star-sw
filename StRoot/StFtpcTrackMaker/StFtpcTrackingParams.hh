@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackingParams.hh,v 1.16 2003/10/07 14:11:10 jcs Exp $
+// $Id: StFtpcTrackingParams.hh,v 1.17 2004/06/04 11:05:26 jcs Exp $
 // $Log: StFtpcTrackingParams.hh,v $
+// Revision 1.17  2004/06/04 11:05:26  jcs
+// replaced StarDb/ftpc/fdepars/fdepar with StarDb/ftpc/ftpcdEdxPars
+//
 // Revision 1.16  2003/10/07 14:11:10  jcs
 // remove previous fix for determining magnetic field
 //
@@ -80,7 +83,7 @@ using namespace units;
 #include "tables/St_ftpcTrackingPars_Table.h"
 #include "tables/St_ftpcDimensions_Table.h"
 #include "tables/St_ftpcPadrowZ_Table.h"
-#include "tables/St_fde_fdepar_Table.h"
+#include "tables/St_ftpcdEdxPars_Table.h"
 #include "tables/St_ftpcCoordTrans_Table.h"
 
 #include "StDbUtilities/StMagUtilities.h"
@@ -88,7 +91,7 @@ using namespace units;
 
 class St_ftpcDimensions;
 class St_ftpcPadrowZ;
-class St_fde_fdepar;
+class St_ftpcdEdxPars;
 class StGlobalCoordinate;
 class StFtpcLocalCoordinate;
 class StTpcDb;
@@ -187,13 +190,13 @@ private:
 protected:
   
   StFtpcTrackingParams(St_ftpcTrackingPars *trackPars = 0,
-		       St_fde_fdepar *dEdxPars = 0,
+		       St_ftpcdEdxPars *dEdxPars = 0,
 		       St_ftpcDimensions *dimensions = 0,
 		       St_ftpcPadrowZ *padrow_z = 0);
   StFtpcTrackingParams(Double_t magFieldFactor);
   
   Int_t InitTrackingParams(ftpcTrackingPars_st *trackParsTable);
-  Int_t InitdEdx(FDE_FDEPAR_ST *dEdxParsTable);
+  Int_t InitdEdx(ftpcdEdxPars_st *dEdxParsTable);
   Int_t InitDimensions(ftpcDimensions_st* dimensionsTable);
   Int_t InitPadRows(ftpcPadrowZ_st* padrowzTable);
   Int_t InitCoordTransformation();
@@ -205,7 +208,7 @@ public:
   
   static StFtpcTrackingParams* Instance(Bool_t debug, 
 					St_ftpcTrackingPars *trackPars,
-					St_fde_fdepar *dEdxPars,
+					St_ftpcdEdxPars *dEdxPars,
 					St_ftpcDimensions *dimensions,
 					St_ftpcPadrowZ *padrow_z);
   static StFtpcTrackingParams* Instance(Bool_t debug, 

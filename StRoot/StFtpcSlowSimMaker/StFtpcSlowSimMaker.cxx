@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.25 2004/01/28 01:41:31 jeromel Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.26 2004/06/04 11:01:51 jcs Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.26  2004/06/04 11:01:51  jcs
+// replaced StarDb/ftpc/fdepars/fdepar with StarDb/ftpc/ftpcdEdxPars
+//
 // Revision 1.25  2004/01/28 01:41:31  jeromel
 // *** empty log message ***
 //
@@ -250,7 +253,7 @@ Int_t StFtpcSlowSimMaker::InitRun(int runnumber){
 
   StFtpcTrackingParams::Instance(0,
   				 (St_ftpcTrackingPars *)ftpcPars("ftpcTrackingPars"),
-  				 (St_fde_fdepar *)ftpcPars("fdepars/fdepar"),
+  				 (St_ftpcdEdxPars *)ftpcPars("ftpcdEdxPars"),
   				 (St_ftpcDimensions *)dblocal_geometry("ftpcDimensions"), 
   				 (St_ftpcPadrowZ *)dblocal_geometry("ftpcPadrowZ"));
 
