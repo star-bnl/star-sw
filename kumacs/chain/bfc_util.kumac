@@ -112,6 +112,8 @@
 *                           - create chain variable "insvt" to initialize
 *                             svt tables that are needed even when svt
 *                             packages aren't being called
+*                           - put in ebye chain
+* editted 9/21/98 K. Turner - new chain variable (user)
 *
 * ************************************************************
 *                     BFC_UTIL.KUMAC
@@ -315,6 +317,15 @@ macro bfc_init _
      (dehd) exec create_tables_global#fill_dst_event_header
      (drhd) exec create_tables_global#fill_dst_run_header
 	    exec init_dst#init_rhead
+    (ebye1)
+            exec create_tables_ebye#sca_io
+            exec create_tables_ebye#sca_prior
+            exec create_tables_ebye#sca_ensemble_ave
+            exec init_sca#init_params [calib_dir] [output_file] _
+             [ebye_prior_switch] [ebye_ensemble_switch]  [ebye_analysis_switch]
+            exec init_sca#init_analysis [calib_dir] [output_file] _
+             [ebye_prior_switch] [ebye_ensemble_switch]  [ebye_analysis_switch]
+    (user)  exec init_user
     (ntup)  exec write_table_to_ntuple#init_disk [nunit] [nfile]
     (fzout) user/output o [output_fzd_file]
     (evout)
@@ -516,6 +527,16 @@ ABEND:
     (dmhrd)    nextl 1
     (desum)    exec run_dst#dst_event_summary
     (drsum)    exec run_dst#dst_run_summary
+    (ebye1)    
+               exec run_sca#filter 
+               if ( staf_status(1) .ne. STAFCV_OK) then
+                 message <<< WARNING >>>  Problem with sca_filter in event [i]
+	       endif
+               exec run_sca#runsca
+               if ( staf_status(1) .ne. STAFCV_OK) then
+                 message <<< WARNING >>>  Problem with sca_runsca in event [i]
+               endif
+    (user)     exec run_user
     (ntup)     exec write_table_to_ntuple#write_event_disk [nid] [ntable]
     (evout)    if [output_xdf_file]="" then
                  message "Empty output file"
@@ -593,6 +614,11 @@ macro bfc_finish _
      (drsum) exec  finish_dst#dst_run_summary
              exec  run_dst#dst_run_summary
              vec/create randst
+     (ebye1) 
+             exec finish_sca#finish
+             exec run_sca#close [calib_dir] [ebye_prior_switch] _
+                                [ebye_ensemble_switch] [ebye_analysis_switch]
+      (user) exec finish_user
       (ntup) exec write_table_to_ntuple#close_disk [nunit] [nid]
      (evout,esout) 
             if [output_xdf_file]="" then

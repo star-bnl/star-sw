@@ -1,7 +1,7 @@
-* * $Id: bfc.kumac,v 1.56 1998/09/18 22:46:49 fisyak Exp $
+* * $Id: bfc.kumac,v 1.57 1998/09/21 19:56:41 kathy Exp $
 * $Log: bfc.kumac,v $
-* Revision 1.56  1998/09/18 22:46:49  fisyak
-* remove /net/rmds03 from input file
+* Revision 1.57  1998/09/21 19:56:41  kathy
+* new (ebye1) and (user) chain variables implemented;  new example to read in dst and do analysis -> call_bfc_read_dst_ebye.kumac
 *
 * Revision 1.55  1998/09/16 19:39:10  kathy
 * rm dst_chain.kumac because don't want to keep them up; fix dictionary in bfc; put emacs bfc.kumac &! into bfc to show users where to add in their own calls for testing
@@ -214,6 +214,8 @@
 *                             and input put both dir + file in input_data_file
 * editted 9/16/98 K. Turner - put in !!! to show where to put user code
 * 
+* editted 9/21/98 K. Turner - add inputs and global macros for ebye stuff
+*                           - remove !!! for user kumacs
 * ******************************************************************************
 * -- DICTIONARY OF INPUTS TO BFC.KUMAC --
 * TOP        - top level directory to search for kumacs 
@@ -223,6 +225,10 @@
 *                                  ~workdir/pams/domain
 * tpc_sector_first - first sector # of tpc to simulation using tss
 * tpc_sector_last -  last sector # of tpc to simulation using tss
+* calib_dir       - for ebye analysis
+* ebye_prior_switch    - for ebye analysis
+* ebye_ensemble_switch - for ebye analysis
+* ebye_analysis_switch - for ebye analysis
 * gstar_settings - settings for loading gstar libraries 
 *        when running gstar, set 'complete 4th_off hadr_on' 
 *                   (4th_off = svt 4th layer off)
@@ -252,6 +258,7 @@
 *   ctf
 *   svt
 *   global
+*   ebye
 * !! In order to run tpc code, you must load BOTH geometry and tpc 
 *     e.g. domain='geometry tpc'
 * !! In order to run global code, you must load svt,tpc & global
@@ -307,6 +314,8 @@
 * drsum - dst run summary
 * dehd  - dst event header
 * drhd  - dst run header
+* ebye1 - run ebye sca analysis code
+* user  - user kumacs (that aren't yet official) called here
 * ntup  - create output ntuple file
 * fzout - write out fz file from gstar (only works if you run gstar!)
 * evout - write event & run directories into xdf file
@@ -322,19 +331,40 @@
 *   - run g2t
 * 
 * 2. call_bfc_read_dst.kumac 
-* 
-* 3. call_bfc_readfz_g2t_sim.kumac
+*   - read in dst file
+*
+* 3. call_bfc_read_dst.kumac 
+*   - read in dst file
+*   - run ebye post-dst analysis
+*
+* 4. call_bfc_readfz_g2t_sim.kumac
 *   - read in fz file
 *   - run g2t
 *   - run tpc (tss) & svt (srs) simulation
 *   - write out xdf file containing full directories
 * 
-* 4. call_bfc_readfz_g2t_tfs_srs_emc.kumac
-* 
-* 5. call_bfc_readfz_to_dst.kumac
-* 
+* 5. call_bfc_readfz_g2t_tfs_srs_emc.kumac
+*   - read in fz file
+*   - run g2t
+*   - run tpc & svt & emc simulation
 *
-* 6. call_bfc_reco.kumac                  
+* 6. call_bfc_readfz_to_dst.kumac
+*   - read in fz file
+*   - run g2t
+*   - run tpc & svt simulation
+*   - tpc, svt reconstruction
+*   - global reconstruction
+*   - dst packages
+*
+* 7. call_bfc_readfz_to_dst_year1.kumac
+*   - read in fz file
+*   - run g2t
+*   - run tpc  simulation
+*   - tpc reconstruction
+*   - global reconstruction
+*   - dst packages
+*
+* 8. call_bfc_reco.kumac                  
 *  - read in simulated data file (thru tss & srs)
 *  - run tpc & svt clustering
 *  - run tpc & svt tracking
@@ -342,60 +372,64 @@
 *  - run dst packages
 *  - write xdf file containing full directories
 * 
-* 7. call_bfc_reco_global.kumac           
+* 9. call_bfc_reco_global.kumac           
 *  - read in data file that has simulation and tracking on it (thru tpt & sgr)
 *  - run global packages
 *  - run dst packages
 *  - write output file containing full directories
 * 
-* 8. call_bfc_reco_trk.kumac              
+* 10. call_bfc_reco_trk.kumac              
 *  - read in simulated data file (thru tss & srs)
 *  - run tpc & svt clustering
 *  - run tpc & svt tracking
 *  - write xdf file containing full directories
 * 
-* 9. call_bfc_reco_trk_ftpc.kumac              
+* 11. call_bfc_reco_trk_ftpc.kumac              
 *  - read in simulated data file (thru tss & srs)
 *  - run tpc & svt clustering
 *  - run tpc & svt tracking
 *  - run ftpc slow sim, clustering, tracking
 *  - write xdf file containing full directories
 *  
-* 10. call_bfc_svt_fast_sim_tracker.kumac
+* 12. call_bfc_svt_fast_sim_tracker.kumac
 *   - read in g2t file
 *   - run svt sim
 *   - run svt tracking
 *   - write xdf file containing full directories
 * 
-* 11. call_bfc_tfs_global_dst_testv0.kumac
+* 13. call_bfc_tfs_global_dst_testv0.kumac
+*   - read in g2t test file with lots of V0's
+*   - process thru whole chain to dst pkgs
+*   - write out ntuple
+*   - read back in ntuple and make plot and save to file
 * 
-* 12. call_bfc_tpc_fast_sim_tracker.kumac
+* 14. call_bfc_tpc_fast_sim_tracker.kumac
 *   - read in g2t file
 *   - run tpc fast sim 
 *   - run tpc tracking
 *   - write xdf file containing full directories
 * 
-* 13. call_bfc_tpc_slow_sim_tracker.kumac
+* 15. call_bfc_tpc_slow_sim_tracker.kumac
 *   - read in g2t file
 *   - run tpc slow sim & clustering
 *   - run tpc tracking
 *   - write xdf file containing full directories
 * 
-* 14.  call_bfc_tpc_svt_sim_global.kumac 
+* 16.  call_bfc_tpc_svt_sim_global.kumac 
 *   - read in g2t file
 *   - run svt & tpc fast sim 
 *   - run svt & tpc tracking
 *   - run global packages
 *   - write xdf file containing full directories
 * 
-* 15.  call_bfc_tpc_svt_sim_global_dst.kumac 
+* 18.  call_bfc_tpc_svt_sim_global_dst.kumac 
 *   - read in g2t file
 *   - run svt & tpc fast sim 
 *   - run svt & tpc tracking
 *   - run global packages
 *   - write xdf file containing full directories
 * 
-* 16. call_bfc_txt_gstar_g2t.kumac
+* 19. call_bfc_txt_gstar_g2t.kumac
 *   - read in text file
 *   - run gstar
 *   - run g2t
@@ -412,15 +446,19 @@
  
 MACRO bfc _
    TOP=$STAR _
+   calib_dir=$STAR_CALIB/ebye_
    tpc_sector_first=1 _
    tpc_sector_last=24 _
+   ebye_prior_switch=0 _
+   ebye_ensemble_switch=0 _
+   ebye_analysis_switch=1 _
    gstar_settings=' field_only' _
    domain=' geometry g2t tpc ctf svt global ' _
    chain=' fzin rg2t tpg svg tfs srs tpt tid tte_e sgr drhd dehd svm evr egr ev0 ddedx dpnt desum dmsft drsum dout ' _
    skip=0 _
    first=1 _
    no_events=1 _
-   input_data_file=/disk1/star/auau200/hijing135/default/b0_3/year1a/hadronic_off/Gstardata/set100/set100_01_45evts.fz _
+   input_data_file=/net/rmds03/disk1/star/auau200/hijing135/default/b0_3/year1a/hadronic_off/Gstardata/set100/set100_01_45evts.fz _
    output_file=set100_01_45evts _
    log=bfc.log _
    nunit=21 _
@@ -460,7 +498,10 @@ MACRO bfc _
  message ' ***  ntuple id          --> ' [nid]
  message ' ***  ntuple table       --> ' [ntable]
  
- 
+  message ' *** Calibration Directory -->        ' [calib_dir]
+  message ' *** Ebye Prior Switch -->            ' [ebye_prior_switch]
+  message ' *** Ebye Ensemble Switch -->         ' [ebye_ensemble_switch]
+  message ' *** Ebye Analysis Switch -->         ' [ebye_analysis_switch] 
  
 ***********************************************************
 * GLOBAL VARIABLES 
@@ -482,6 +523,11 @@ MACRO bfc _
    macro/global/create nid    [nid]
    macro/global/create ntable [ntable]
 	   
+  macro/global/create calib_dir            [calib_dir]
+  macro/global/create ebye_prior_switch    [ebye_prior_switch]
+  macro/global/create ebye_ensemble_switch [ebye_ensemble_switch]
+  macro/global/create ebye_analysis_switch [ebye_analysis_switch]
+
 ***********************************************************
 * BEGINNING STUFF 
 * **********************************************************
@@ -509,11 +555,7 @@ MACRO bfc _
  
  exec bfc_util#bfc_init chain=[chain]
  if (STAF_STATUS(1).ne. 1) goto ABEND
- 
-*!!!!!!! Add user init stuff here !!!!!!!!!
-* exec create_tables_mydst#part1
-* exec init_mydst#init
-*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
   
 ***********************************************************
 * SKIP EVENTS 
@@ -553,9 +595,6 @@ MACRO bfc _
      message ' BFC: skip to bfc_finish because problem reading input file'
      goto FINISH
    endif
-*!!!! Now add user finish stuff here !!!!!!!!!!!!!
-*  exec run_mydst#run
-*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
    nevents = [nevents] + 1
  enddo
 
@@ -567,9 +606,6 @@ FINISH:
   exec bfc_util#bfc_finish [chain]
   if (STAF_STATUS(1).ne. 1) goto ABEND
   
-* !!!! Now add the dst finish stuff here !!!!!!!!!!!!!
-* exec finish_mydst#finish
-* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  
  goto END
   
