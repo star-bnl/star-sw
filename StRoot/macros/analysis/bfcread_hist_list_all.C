@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_list_all.C,v 1.10 2000/01/19 16:29:51 kathy Exp $ 
+// $Id: bfcread_hist_list_all.C,v 1.11 2000/04/12 15:06:52 kathy Exp $ 
 // $Log: bfcread_hist_list_all.C,v $
+// Revision 1.11  2000/04/12 15:06:52  kathy
+// changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables because of a mismatch with tpt_track table
+//
 // Revision 1.10  2000/01/19 16:29:51  kathy
 // update macros to use default input files in /afs/rhic/star/data/samples
 //
@@ -63,7 +66,6 @@ void bfcread_hist_list_all(
 //
     gSystem->Load("St_base");
     gSystem->Load("StChain");
-    gSystem->Load("St_Tables");
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
    

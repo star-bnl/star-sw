@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doEvents.C,v 1.42 2000/04/07 15:54:26 perev Exp $
+// $Id: doEvents.C,v 1.43 2000/04/12 15:06:53 kathy Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -35,6 +35,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doEvents.C,v $
+// Revision 1.43  2000/04/12 15:06:53  kathy
+// changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables because of a mismatch with tpt_track table
+//
 // Revision 1.42  2000/04/07 15:54:26  perev
 // GC added
 //
@@ -90,9 +93,15 @@ void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
     //
     // First load some shared libraries we need
     //
+
     gSystem->Load("St_base");
     gSystem->Load("StChain");
-    gSystem->Load("St_Tables");
+
+    gSystem->Load("libgen_Tables");
+    gSystem->Load("libsim_Tables");
+    gSystem->Load("libglobal_Tables");
+    //    gSystem->Load("libtpc_Tables");
+
     gSystem->Load("StUtilities");
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
@@ -105,7 +114,7 @@ void doEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
     // Handling depends on whether file is a ROOT file or XDF file
     //
     chain  = new StChain("StChain");
-    StFileI *setFiles =0;
+    StFile *setFiles =0;
     if (fileList) {	//Normal case
       setFiles= new StFile(fileList);
     } else        {	//Grand Chalenge

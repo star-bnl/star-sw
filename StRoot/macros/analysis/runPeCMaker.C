@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: runPeCMaker.C,v 1.2 2000/04/03 20:47:32 nystrand Exp $
+// $Id: runPeCMaker.C,v 1.3 2000/04/12 15:06:53 kathy Exp $
 //
 // Description: 
 // Chain for StPeCMaker based on doEvents.C. Runs StEventMaker and StPeCMaker.
@@ -32,6 +32,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: runPeCMaker.C,v $
+// Revision 1.3  2000/04/12 15:06:53  kathy
+// changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables because of a mismatch with tpt_track table
+//
 // Revision 1.2  2000/04/03 20:47:32  nystrand
 // Bug fix
 //
@@ -71,7 +74,12 @@ void runPeCMaker(Int_t nevents, const Char_t **fileList, const char *qaflag)
     // Load shared libraries
     gSystem->Load("St_base");
     gSystem->Load("StChain");
-    gSystem->Load("St_Tables");
+
+    gSystem->Load("libgen_Tables");
+    gSystem->Load("libsim_Tables");
+    gSystem->Load("libglobal_Tables");
+    gSystem->Load("libtpc_Tables");
+
     gSystem->Load("StUtilities");
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");

@@ -1,5 +1,8 @@
-// $Id: bfcread_hist_to_ps.C,v 1.22 2000/03/20 17:32:55 kathy Exp $ 
+// $Id: bfcread_hist_to_ps.C,v 1.23 2000/04/12 15:06:53 kathy Exp $ 
 // $Log: bfcread_hist_to_ps.C,v $
+// Revision 1.23  2000/04/12 15:06:53  kathy
+// changed all macros that read DSTs to load Tables from libraries: gen,sim,global,dst instead of ALL Tables (previously loaded St_Tables); currently, if you are using DEV to read a DST in NEW,PRO, you must comment out the loading of libtpc_Tables because of a mismatch with tpt_track table
+//
 // Revision 1.22  2000/03/20 17:32:55  kathy
 // setbranches in all macros so that they will work with softlinks - for StIOMaker
 //
@@ -138,7 +141,6 @@ void bfcread_hist_to_ps(
 //
     gSystem->Load("St_base");
     gSystem->Load("StChain");
-    gSystem->Load("St_Tables");
     gSystem->Load("StIOMaker");
     gSystem->Load("StarClassLibrary");
     gSystem->Load("StUtilities");
