@@ -1,7 +1,7 @@
 // LinkDef.h
 /***************************************************************************
  *
- * $Id: StarClassLibraryLinkDef.hh,v 1.6 2003/05/07 20:34:23 perev Exp $
+ * $Id: StarClassLibraryLinkDef.hh,v 1.7 2003/05/22 21:01:02 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -23,6 +23,9 @@
  ***************************************************************************
  *
  * $Log: StarClassLibraryLinkDef.hh,v $
+ * Revision 1.7  2003/05/22 21:01:02  perev
+ * Remove redundant dependency
+ *
  * Revision 1.6  2003/05/07 20:34:23  perev
  * functions for CINT added
  *
@@ -164,5 +167,6 @@
 #pragma link C++ function operator<<(ostream&, const StHelixD&);                         
 
 #pragma link C++ class StPhysicalHelixD;
+#pragma link C++ class BetheBloch;
 
 #endif

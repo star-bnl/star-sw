@@ -1,11 +1,14 @@
 //
-// $Id: BetheBloch.h,v 1.5 2003/02/15 02:24:57 fisyak Exp $
+// $Id: BetheBloch.h,v 1.6 2003/05/22 21:01:01 perev Exp $
 //
 // Description:
 // Function to return the expected dE/dx as a function of
 // beta*gamma for the TPC
 // 
 // $Log: BetheBloch.h,v $
+// Revision 1.6  2003/05/22 21:01:01  perev
+// Remove redundant dependency
+//
 // Revision 1.5  2003/02/15 02:24:57  fisyak
 // Add static function Girrf for GEANT3 prediction for dE/dx
 //
@@ -24,14 +27,13 @@
 
 #ifndef BetheBloch_hh
 #define BetheBloch_hh
-
+#include "Rtypes.h"
 #include <map>
-#include "StObject.h"
 #ifndef ST_NO_NAMESPACES
 using std::map;
 #endif
 
-class BetheBloch : public StObject {
+class BetheBloch {
     map<double, double> mMap; //!
 public:
     BetheBloch();
@@ -39,6 +41,5 @@ public:
     double   operator() (double);
     static   Double_t Sirrf(Double_t poverm, Double_t Length=60., Int_t k=0);
     static   Double_t Girrf(Double_t poverm, Double_t Tmin=1.e-3, Int_t k=0);
-    ClassDef(BetheBloch,1)
 };
 #endif
