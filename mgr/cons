@@ -2,7 +2,7 @@
 
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.1.1.2 1999/09/13 15:13:15 fisyak Exp $
+# $Id: cons,v 1.1.1.3 1999/09/13 15:14:25 fisyak Exp $
 
 $cons_history =
   q(
@@ -32,12 +32,13 @@ $cons_history =
     Fix Repository to include appropriate library paths. - <rv@fore.com>
     Fix SourcePath to return correct repository path. - <rv@fore.com>
     Win32 Fix to work with generic perl. - <v-ronaar@Exchange.Microsoft.com>
+    Fix futil::copy - <rv@fore.com>
 );
 
 $ver_num = 1.6;
-$ver_rev = "a3";
+$ver_rev = "b1";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.1.1.2 1999/09/13 15:13:15 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.1.1.3 1999/09/13 15:14:25 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -2136,22 +2137,9 @@ sub copy {
     my ($sp, $tp) = @_;
     my($mode, $length, $atime, $mtime) = (stat($sp))[2,7,8,9];
 
-# ****XXX Remember to remove before going FCS, if fix is ok ****
-
-#     if (!open(SRC, $sp)) {
-#	die("$0: unable to read file $sp ($!)\n");
-#	return undef;
-#     }
-#     if (!open(TGT, ">$tp")) {
-#	die("$0: unable to write file $tp ($!)\n");
-#	close(SRC);
-#	return undef;
-#     }
-
     # Use Perl standard library module for file copying, which handles
     # binary copies. <schwarze@isa.de> 1998-06-18
-    File::Copy::copy($sp, $tp)
-	|| die qq($0: can't copy file "$sp" to "$tp" ($!)\n);
+    File::Copy::copy($sp, $tp) || return undef;
     utime $atime, $mtime, $tp
 	|| die qq($0: can't set modification time for file "$tp" ($!)\n); #'
     chmod $mode, $tp
@@ -2418,7 +2406,7 @@ the original.
 
 by Bob Sidebotham F<rns@fore.com>
 
-A guide and reference for version 1.6a3
+A guide and reference for version 1.6b1
 
 Copyright (c) 1996-1999 FORE Systems, Inc. All rights reserved.
 
