@@ -424,7 +424,8 @@ CCC
       row = tpt_rows(tpeval(i).rtrk)
 CCC   'row' is the row # in tptrack
       if(tptrack(row).invp .ne. 0.0) then
-           tpc_eval(i).pt = 1.0/abs(tptrack(row).invp)
+*           tpc_eval(i).pt = 1.0/abs(tptrack(row).invp)
+            tpc_eval(i).pt = tpeval(i).ptg
            tanl = tptrack(row).tanl
            sinl = tanl/sqrt(1.0 + tanl**2)
            costh = sinl
