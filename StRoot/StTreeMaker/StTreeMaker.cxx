@@ -238,7 +238,8 @@ Int_t StTreeMaker::Save()
 { 
   St_DataSetIter  nextBr(fTree);
   StBranch *br,*brSave=0;
-  TString saveFile;
+  TString saveName,saveDir,regPath;
+  char *savePath; 
   fTree->Clear(); 
   while ((br = (StBranch*)nextBr())) {
     if (strncmp("hist",br->GetName(),4)) continue;
@@ -246,15 +247,18 @@ Int_t StTreeMaker::Save()
     FillHistBranch(br);
   }
   if (!brSave) return 0;
-  saveFile = brSave->GetFile();
-  if (!saveFile.Contains(".root")) return 0;
-  saveFile.ReplaceAll(".root",".save.root");
-  brSave->SetFile((const char*)saveFile);
+  regPath = brSave->GetFile();
+  if (!regPath.Contains(".root")) return 0;
+  saveDir  = gSystem->DirName (regPath);
+  saveName = gSystem->BaseName(regPath);
+  saveName.Replace(0,0,"save.");
+  savePath = gSystem->ConcatFileName(saveDir,saveName);
+  brSave->SetFile((const char*)savePath);
   fTree->WriteEvent((ULong_t)(-2));	
   brSave->Close();
   fTree->Clear(); 
-  saveFile.ReplaceAll(".save.root",".root"); 
-  brSave->SetFile((const char*)saveFile); 
+  brSave->SetFile((const char*)regPath); 
+  delete [] savePath;
   brSave->Open();  
   
    
