@@ -40,6 +40,8 @@
 #include "Sti/StiCompositeSeedFinder.h"
 #include "Sti/StiKalmanTrack.h"
 #include "Sti/StiKalmanTrackFinder.h"
+#include "Sti/StiTrackMerger.h"
+#include "Sti/StiLocalTrackMerger.h"
 #include "Sti/Messenger.h"
 
 //StiGui
@@ -76,7 +78,7 @@ StiMaker::StiMaker(const Char_t *name) : StMaker(name),
 					 //Display
 					 mdisplay(0),
 					 //Utilities
-					 mhitfiller(0),
+					 mhitfiller(0), mTrackMerger(0),
 					 //SeedFinders
 					 mSeedFinder(0),
 					 //Tracker
@@ -114,6 +116,9 @@ StiMaker::~StiMaker()
     
     delete mhitfiller;
     mhitfiller = 0;
+
+    delete mTrackMerger;
+    mTrackMerger = 0;
 
     if (StiIOBroker::instance()->useGui()) {
 	StiDisplayManager::kill();
@@ -208,6 +213,9 @@ Int_t StiMaker::Init()
     
     //The track store
     mtrackstore = StiTrackContainer::instance();
+
+    //The track merger
+    mTrackMerger = new StiLocalTrackMerger(mtrackstore);
 
     //The hit container
     mhitstore = StiHitContainer::instance(StiIOBroker::instance()->useGui());
@@ -369,18 +377,14 @@ Int_t StiMaker::Make()
 
 	//Now we can loop, if we're not using the gui
 	if (StiIOBroker::instance()->useGui()==false) {
-	    // cout <<"StiMaker::Maker().  FinishEvent"<<endl;
 	    finishEvent();
-	    // cout <<"\tStiMaker::Maker().  FinishEvent. done"<<endl;
 	}
 	
     }
     
     if (StiIOBroker::instance()->useGui()==true) {
-	// cout <<"StiMaker::Make.  Draw/update"<<endl;
 	mdisplay->draw();
 	mdisplay->update();
-	// cout <<"\tStiMaker::Make.  Draw/update. done"<<endl;
     }
     return kStOK;
 }
@@ -408,6 +412,13 @@ void StiMaker::finishEvent()
 	    }
 	}
 	clock.stop();
+	cout <<"Time to find "<<n<<" tracks: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
+	cout <<"Merge Tracks"<<endl;
+	clock.reset();
+	//clock.start();
+	//mTrackMerger->mergeTracks();
+	//clock.stop();
+	//cout <<"Time to merge tracks: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
 	StiEventAssociator::instance()->associate(mMcEvent);
 	StiEvaluator::instance()->evaluateForEvent(mtrackstore);
     }
@@ -428,7 +439,6 @@ void StiMaker::finishEvent()
 	}
 	clock.stop();
     }
-    cout <<"Time to find/fit "<<n<<" tracks: "<<clock.elapsedTime()<<" cpu seconds"<<endl;
 
     cout <<"\tStiMaker::finishEvent(). done"<<endl;
 }

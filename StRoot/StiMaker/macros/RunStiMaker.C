@@ -181,8 +181,9 @@ void RunStiMaker(Int_t nevents=1,
     stiIO->setLTSFExtrapMaxSkipped(2);
     stiIO->setLTSFExtrapMinLength(4);
     stiIO->setLTSFExtrapMaxLength(5);
-    
     stiIO->setLTSFUseVertex(true);
+
+    stiIO->setLTMDeltaR(1.); //10% in r
     
     //Add sectors:
     for (unsigned int sector=1; sector<=12; ++sector) {
