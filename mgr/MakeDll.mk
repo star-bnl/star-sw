@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.54 1999/01/30 04:08:22 fisyak Exp $
+# $Id: MakeDll.mk,v 1.55 1999/01/30 20:22:31 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.55  1999/01/30 20:22:31  fisyak
+# fix double St_Module
+#
 # Revision 1.54  1999/01/30 04:08:22  fisyak
 # Add StRootEvent
 #
@@ -285,11 +288,13 @@ endif
 
 ifdef FILES_ORD
   NAMES_ORD    := $(basename $(notdir $(shell grep -l ClassDef $(SRC_DIR)/*.h*)))
+  NAMES_ORD    := $(filter-out St_$(NAMES_SYM) $(NAMES_SYT), $(NAMES_ORD)) 
   LinkDef        :=$(wildcard $(SRC_DIR)/$(PKGNAME)LinkDef.h $(SRC_DIR)/$(PKGNAME)LinkDef.hh)
   ifneq (,$(LinkDef))
     NAMES_DEF    := $(shell  grep C++ $(LinkDef) | grep class | awk '{print $$5}')
     NAMES_DEF    := $(subst ;, ,$(NAMES_DEF))    
     NAMES_DEF    := $(subst -, ,$(NAMES_DEF))   
+    NAMES_DEF    := $(filter-out St_$(NAMES_SYM) $(NAMES_SYT)), $(NAMES_DEF)) 
     NAMES_ORD    := $(strip $(filter-out $(NAMES_DEF), $(NAMES_ORD)))
     ifneq (,$(NAMES_DEF))
       FILES_CINT_DEF :=$(GEN_DIR)/$(PKGNAME)_DCint.cxx 
