@@ -430,6 +430,7 @@ c*** pgj: fill vertex table
                 vertex(n_v).y = xpp(2)
                 vertex(n_v).z = xpp(3)
                 vertex(n_v).n_daughters = 2
+                vertex(n_v).iflag = 1
                 vertex(n_v).id_aux_ent = n_xi
 
 c*** calculate parent and daughter kinematics

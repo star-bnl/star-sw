@@ -330,7 +330,7 @@ C---- find square of impact param of reconstructed particle------
                        vertex(vertex_h.nok).x=xpp(1)
                        vertex(vertex_h.nok).y=xpp(2)
                        vertex(vertex_h.nok).z=xpp(3)
-                       vertex(vertex_h.nok).iflag = 0
+                       vertex(vertex_h.nok).iflag = 1
                        vertex(vertex_h.nok).det_id = 
      +                      (100*trak(i).det_id)+trak(j).det_id
                        vertex(vertex_h.nok).vtx_id= kV0VtxId
