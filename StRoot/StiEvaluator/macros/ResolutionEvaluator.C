@@ -1,7 +1,9 @@
 ///#include "StiEvaluator/Evaluator.h"
 ///#include "StiEvaluator/ResolutionPlots.h"
 
-void ResolutionEvaluator(const char * outputDirectory, bool writeHistos=true, bool writeHtml=false)
+void ResolutionEvaluator(const char * inFile,
+			 const char * outputDirectory,
+			 bool writeHistos=true, bool writeHtml=false)
 {
   // load all required libraries
   char * list[]={"St_base","StChain","StUtilities", "St_Tables", "StarClassLibrary",
@@ -55,16 +57,8 @@ void ResolutionEvaluator(const char * outputDirectory, bool writeHistos=true, bo
 
 
   // run evaluator
-  /*evaluator.run("rcf0183_01_300evts.minimc.root");
-  evaluator.run("rcf0183_02_300evts.minimc.root");
-  evaluator.run("rcf0183_03_300evts.minimc.root");
-  evaluator.run("rcf0183_04_300evts.minimc.root");
-  evaluator.run("rcf0183_05_300evts.minimc.root");
-  */
+  evaluator.run(inFile);
 
-  evaluator.run("/home/pruneau/testArea/archive/2003-08-04-1/rcf0183_02_300evts.minimc.root");
-  evaluator.run("/home/pruneau/testArea/archive/2003-08-04-1/rcf0183_03_300evts.minimc.root");
-  evaluator.run("/home/pruneau/testArea/archive/2003-08-04-1/rcf0183_05_300evts.minimc.root");
   
   // save files
   evaluator.save(outputDirectory);
