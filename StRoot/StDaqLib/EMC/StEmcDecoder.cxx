@@ -70,7 +70,7 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
   Init_Crate=Init_Crate_tmp;
   
 
-  // which crate is connected to each TDC channel
+  // which crate is connected to each TDC channel. See log book for details
   if(date <= 20011223)
   {
     int TDC_Crate_tmp[]= {18,17,16,30,29,28,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
@@ -92,9 +92,23 @@ void StEmcDecoder::Init(unsigned int date,unsigned int time)
     TDC_Crate=TDC_Crate_tmp;      
     goto SMD;
   }
-  if(date >= 20011125)
+  if(date == 20011125 && time <=073000)
   {
     int TDC_Crate_tmp[]= {18,17,16,29,30,28,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
+                          19,20,21,22,23,24,25,26,27};
+    TDC_Crate=TDC_Crate_tmp;      
+    goto SMD;
+  }
+  if(date == 20011125 && time >073000)
+  {
+    int TDC_Crate_tmp[]= {18,17,16,30,29,28,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
+                          19,20,21,22,23,24,25,26,27};
+    TDC_Crate=TDC_Crate_tmp;      
+    goto SMD;
+  }
+  if(date >= 20011126)
+  {
+    int TDC_Crate_tmp[]= {18,17,16,30,29,28,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,
                           19,20,21,22,23,24,25,26,27};
     TDC_Crate=TDC_Crate_tmp;      
     goto SMD;
