@@ -1,7 +1,10 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEmcDbMaker.cxx,v 1.6 2003/03/26 21:28:02 balewski Exp $
+// $Id: StEEmcDbMaker.cxx,v 1.7 2003/04/02 20:42:23 balewski Exp $
 // $Log: StEEmcDbMaker.cxx,v $
+// Revision 1.7  2003/04/02 20:42:23  balewski
+// tower-->tube mapping
+//
 // Revision 1.6  2003/03/26 21:28:02  balewski
 // fix
 //
@@ -390,16 +393,16 @@ void  StEEmcDbMaker::mOptimizeDb(){
 
       int index=EEname2Index(name);
       // store valid entry
-      mDbItem1[index].crate=t->slot[j];
+      mDbItem1[index].crate=t->crate[j];
       mDbItem1[index].chan=t->channel[j];
       mDbItem1[index].setName(name);
 
-      assert(t->slot[j]>=0 && t->slot[j]<mxAdcCrate);
+      assert(t->crate[j]>=0 && t->crate[j]<mxAdcCrate);
       assert(t->channel[j]>=0 && t->channel[j]<mxAdcChan);
-      mLookup[t->slot[j]][t->channel[j]]=&mDbItem1[index];
+      mLookup[t->crate[j]][t->channel[j]]=&mDbItem1[index];
       
       //      if(j>300) break;
-      // printf("Mapped %s -->index=%d -->slot/chan=%d/%d \n",mDbItem1[index].name,index,t->slot[j],t->channel[j]);
+      // printf("Mapped %s -->index=%d -->crate/chan=%d/%d \n",mDbItem1[index].name,index,t->crate[j],t->channel[j]);
     }
 
   } 
@@ -459,7 +462,7 @@ void  StEEmcDbMaker::mOptimizeDb(){
 
 void  StEEmcDbMaker::mPrintItems  (){
 
-  printf("\n\nprintChan :::::: %s\n\nchan   slot -->  name\n ",GetName());
+  printf("\n\nprintChan :::::: %s\n\nchan   crate -->  name\n ",GetName());
 
   // int i=0,j=0;
 #if 0
