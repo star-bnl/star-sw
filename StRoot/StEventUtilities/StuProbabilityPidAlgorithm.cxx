@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.14 2000/08/23 15:15:33 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.15 2000/08/30 12:55:19 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.15  2000/08/30 12:55:19  aihong
+ * upgrade lowRigPID()
+ *
  * Revision 1.14  2000/08/23 15:15:33  aihong
  * *** empty log message ***
  *
@@ -367,21 +370,30 @@ double StuProbabilityPidAlgorithm::tossTail(double rig){
 //-------------------------------
 void StuProbabilityPidAlgorithm::lowRigPID(double rig,double dedx, int theCharge){
 
-              
+    TObjArray* myChannelLevelFuncAry
+      =(TObjArray *)mBetheBlochFuncSet.At(0);
+    TF1*       myBandBGFcn
+      =(TF1 *)myChannelLevelFuncAry->At(1);
+    
 
        double m; 
        double a;
        double upper;
        double lower;
-       double rigidity=rig;      
+       double rigidity=fabs(rig);      
        double mdedx=dedx; 
+      
+       double fakeMass=0.;
 
-       m = -1.74072;
-       a = 1.7548e-8;
+      //pion
+      fakeMass=0.32075026;
+      myBandBGFcn->SetParameter(3,1);
+      myBandBGFcn->SetParameter(4,0.32075026 );
+        
 
-       lower=a*pow(rigidity,m);
-       a = 2.3952e-7;
-       upper = a*pow(rigidity,m);
+      lower =0.;
+       upper =myBandBGFcn->Eval(rigidity,0,0);
+
        if (mdedx>lower && mdedx<upper){
 	 PID[0]=(theCharge>0.0)? 8 : 9;  //pi+/-
          mProb[0]=1.0;
@@ -389,10 +401,15 @@ void StuProbabilityPidAlgorithm::lowRigPID(double rig,double dedx, int theCharge
          mProb[2]=0.0;
        }
 
+           lower = upper;
 
-       lower = upper;
-       a = 6.6238e-7;
-       upper = a*pow(rigidity,m);
+       //kaon
+	   fakeMass=0.709707;
+      myBandBGFcn->SetParameter(3,1);
+      myBandBGFcn->SetParameter(4,fakeMass);
+        
+      upper =myBandBGFcn->Eval(rigidity,0,0);
+
        if (mdedx>lower && mdedx<upper){
          PID[0]=(theCharge>0.0)? 11:12;  //k+/-
          mProb[0]=1.0;
@@ -402,8 +419,14 @@ void StuProbabilityPidAlgorithm::lowRigPID(double rig,double dedx, int theCharge
 
 
        lower = upper;
-       a = 3.1824e-6;
-       upper = a*pow(rigidity,m);
+
+       //proton/pBar
+	   fakeMass=1.45;
+      myBandBGFcn->SetParameter(3,1);
+      myBandBGFcn->SetParameter(4,fakeMass);
+        
+      upper =myBandBGFcn->Eval(rigidity,0,0);
+
        if (mdedx>lower && mdedx<upper){
          PID[0]=(theCharge>0.0)? 14:15;  //proton/antiproton
          mProb[0]=1.0;
@@ -413,9 +436,14 @@ void StuProbabilityPidAlgorithm::lowRigPID(double rig,double dedx, int theCharge
 
                 
        lower = upper;
-       m = -1.5374;  //New slope needed for deuterons and tritons.
-       a = 8.8982e-6;
-       upper = a*pow(rigidity,m);
+
+       //deuteron
+	   fakeMass=2.4;
+      myBandBGFcn->SetParameter(3,1);
+      myBandBGFcn->SetParameter(4,fakeMass);
+
+      upper =myBandBGFcn->Eval(rigidity,0,0);
+
        if (mdedx>lower && mdedx<upper){
          PID[0]=45;  //deuteron
          mProb[0]=1.0;
@@ -424,6 +452,9 @@ void StuProbabilityPidAlgorithm::lowRigPID(double rig,double dedx, int theCharge
        }
 
        lower = upper;
+
+       //triton
+       m = -1.5374;  //New slope needed for deuterons and tritons.
        a = 1.8121e-5;
        upper = a*pow(rigidity,m);
        if (mdedx>lower && mdedx<upper){
