@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsWireHistogram.cc,v 1.3 1998/11/16 14:47:25 lasiuk Exp $
+ * $Id: StTrsWireHistogram.cc,v 1.4 1999/01/18 10:17:07 lasiuk Exp $
  *
  * Author: brian, May 1998 
  ***************************************************************************
@@ -11,9 +11,8 @@
  ***************************************************************************
  *
  * $Log: StTrsWireHistogram.cc,v $
- * Revision 1.3  1998/11/16 14:47:25  lasiuk
- * use wireIndex to clarify name (not wireNumber)
- * remove mLastWire, mLastEntry
+ * Revision 1.4  1999/01/18 10:17:07  lasiuk
+ * distanceToWire
  *
  *
  * Revision 1.7  1999/02/10 18:03:42  lasiuk
@@ -101,22 +100,38 @@ StTrsWireHistogram* StTrsWireHistogram::instance(StTpcGeometry* geoDb, StTpcSlow
     }
     else { // do nothing
 	cerr << "Cannot make a second instance of StTrsWireHistogram() " << endl;
-    if(yCoordinateOfHit < mGeomDb->outerSectorEdge()) { // in inner part of sector
+//     PR(yCoordinateOfHit);
+    }
+    return mInstance;
+}
+
+void StTrsWireHistogram::addEntry(StTrsWireBinEntry& bin)
     PR(innerSectorBoundary);
     // also needs db information to create coordinate->wire map
     // Find closes wire to: bin.position().y()
 // 	PR(mGeomDb->firstInnerSectorAnodeWire());
+    double yCoordinateOfHit = bin.position().y();
     //PR(yCoordinateOfHit);
-    else {
+    double tmpWire;
     int    offSet;
     int    wireLimit;
     double innerSectorBoundary =
 // 	PR(mGeomDb->firstOuterSectorAnodeWire());
+    //PR(innerSectorBoundary);
+    
     if(yCoordinateOfHit < innerSectorBoundary) { // in inner part of sector
 	//PR(mGeomDb->firstInnerSectorAnodeWire());
-    //if (tmpWire<0) tmpWire -=.5;   // let boundary wires catch more than +/- pitch/2
+	tmpWire =
+	    (yCoordinateOfHit - mGeomDb->firstInnerSectorAnodeWire())/mGeomDb->anodeWirePitch() + .5;
+	offSet = 0;
 	wireLimit = mGeomDb->numberOfInnerSectorAnodeWires() - 1;
-    
+    }
+    else { // in outer part of sector
+	//PR(mGeomDb->firstOuterSectorAnodeWire());
+	tmpWire =
+	    (yCoordinateOfHit - mGeomDb->firstOuterSectorAnodeWire())/mGeomDb->anodeWirePitch() + .5;
+	offSet = mGeomDb->numberOfInnerSectorAnodeWires();
+	wireLimit = mGeomDb->numberOfInnerSectorAnodeWires() +
 	    mGeomDb->numberOfOuterSectorAnodeWires() - 1;
     PR(offSet);
     PR(wireLimit);
@@ -136,12 +151,14 @@ StTrsWireHistogram* StTrsWireHistogram::instance(StTpcGeometry* geoDb, StTpcSlow
     //
     // Check Wire Index before doing any further calculations:
 // 	    PR(avalancheFactor);
-	if(mDoTimeDelay) {
-	    // add a small time offset to the charge collection!
-	    double distanceToWire = yCoordinateOfHit - wireCoordinate(wireIndex);
 	PR(bin.numberOfElectrons());
 	if(mDoGasGain) {
 	    double avalancheFactor = avalanche(wireIndex);
+// 	PR(bin.numberOfElectrons());
+	    bin.scaleNumberOfElectrons(avalancheFactor);
+	    //bin.scaleNumberOfElectrons(avalanche(wireIndex));
+	else {  // Do Gaussian scaling
+	}
 	
       }  // end of gas gain
       
@@ -156,8 +173,9 @@ StTrsWireHistogram* StTrsWireHistogram::instance(StTpcGeometry* geoDb, StTpcSlow
 
 	if(mDoTimeDelay) {
 	    double distanceToWire = fabs(yCoordinateOfHit - wireCoordinate(wireIndex));
+	    {
 #ifndef ST_NO_NAMESPACES
-
+		using namespace units;
 	PR(bin.position());
 		double increase = 250*micrometer/millimeter*distanceToWire;
 	PR(bin.position());
