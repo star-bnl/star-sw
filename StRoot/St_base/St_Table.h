@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.17 1998/12/17 16:57:57 fine Exp $
+// $Id: St_Table.h,v 1.18 1998/12/29 19:37:40 fine Exp $
 // $Log: St_Table.h,v $
+// Revision 1.18  1998/12/29 19:37:40  fine
+// St_NodeView:  new class to create refs topology of the "main" St_Node object has been introduced
+//
 // Revision 1.17  1998/12/17 16:57:57  fine
 // St_Table: some extra protections have been established (safe "strncat" have replaced the  unsafe  "strncpy")
 //
@@ -37,8 +40,8 @@
 
 #ifndef __CINT__
 #  include <string.h>
-#endif
 #include <fstream.h>
+#endif
 enum  EBufSizes { kChar1Byte   =sizeof(Char_t) 
                  ,kShort2Bytes =sizeof(Short_t)
                  ,kLong4Bytes  =sizeof(Long_t)
