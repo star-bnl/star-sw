@@ -88,6 +88,7 @@ public:
    virtual STAFCV_T getColumn (TDM_COLUMN_T& column, long ncol);
 
    virtual STAFCV_T printRows (long ifirst, long nrows);
+   virtual STAFCV_T dumpRows (long ifirst,long nrows,char *outfile,char *cols);
    virtual char * printRow (long nrow);
    virtual STAFCV_T show ();
 

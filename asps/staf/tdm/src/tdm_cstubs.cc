@@ -606,6 +606,18 @@ tdmtable_name(char* name)
 }
 
 STAFCV_T 
+tdmtable_dump(char* name, long nrows, long ifirst,char *outfile,char *colList)
+{
+
+   tdmTable* table;		
+   if( NULL == (table = tdm->findTable(name)) ){
+      EML_FAILURE(OBJECT_NOT_FOUND);
+   }
+   table->dumpRows(ifirst,nrows,outfile,colList);
+   EML_SUCCESS(STAFCV_OK);
+}
+
+STAFCV_T 
 tdmtable_print(char* name, long nrows, long ifirst)
 {
    tdmTable* table;		/* tdmTable object */

@@ -452,6 +452,26 @@ kam_tdmtable_name_()
 
 /*
 *:>---------------------------------------------------------------------
+*:ROUTINE:      void kam_tdmtable_dump_
+*:DESCRIPTION:  KUIP Action Module to ...
+*:ARGUMENTS:    -- NONE --
+*:RETURN VALUE: -- NONE --
+*:* TDM/TABLE/PRINT TNAME [ NROWS IFIRST ]
+*:<---------------------------------------------------------------------
+*/
+void 
+kam_tdmtable_dump_()
+{
+   char* name = ku_gets();	 /* table name */
+   long nrows = ku_geti();	 /* number of rows to dump */
+   long ifirst = ku_geti();	 /* first row number to dump */
+   char* outputfile = ku_gets(); /* name of output file */
+   char* colList = ku_gets();	 /* list of columns */
+
+   tdmtable_dump(name, nrows, ifirst, outputfile, colList);
+}
+/*
+*:>---------------------------------------------------------------------
 *:ROUTINE:      void kam_tdmtable_print_
 *:DESCRIPTION:  KUIP Action Module to ...
 *:ARGUMENTS:    -- NONE --
