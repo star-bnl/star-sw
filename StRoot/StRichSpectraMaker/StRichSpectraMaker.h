@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichSpectraMaker.h,v 1.10 2002/02/19 04:26:49 lasiuk Exp $
+ * $Id: StRichSpectraMaker.h,v 1.11 2002/02/22 15:38:40 dunlop Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,6 +9,9 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRichSpectraMaker.h,v $
+ * Revision 1.11  2002/02/22 15:38:40  dunlop
+ * Tweaked the ifdef to remove writing out of histograms
+ *
  * Revision 1.10  2002/02/19 04:26:49  lasiuk
  * addition of filling StEvent for inclusion in chain
  *
@@ -60,7 +63,7 @@ using std::pair;
 #endif
 
 #define FOR_RECONSTRUCTION 1
-#define RICH_SPECTRA_HISTOGRAM 0
+#define rICH_SPECTRA_HISTOGRAM 1
 //RICH_WITH_PAD_MONITOR 1
 
 #ifdef RICH_SPECTRA_HISTOGRAM
@@ -231,7 +234,7 @@ protected:
     
 virtual const char *GetCVS() const	{
     static const char cvs[]=
-	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.10 2002/02/19 04:26:49 lasiuk Exp $ built "__DATE__" "__TIME__ ;
+	"Tag $Name:  $ $Id: StRichSpectraMaker.h,v 1.11 2002/02/22 15:38:40 dunlop Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
 }
 public:
