@@ -1,5 +1,8 @@
-// $Id: St_l3t_Maker.cxx,v 1.12 1999/08/13 17:15:59 yepes Exp $
+// $Id: St_l3t_Maker.cxx,v 1.13 1999/11/18 17:08:54 fisyak Exp $
 // $Log: St_l3t_Maker.cxx,v $
+// Revision 1.13  1999/11/18 17:08:54  fisyak
+// Add protection against absense of tphit
+//
 // Revision 1.12  1999/08/13 17:15:59  yepes
 // *** empty log message ***
 //
@@ -198,8 +201,8 @@ Int_t St_l3t_Maker::Make(){
 
   St_DataSet *tpc_data =  GetDataSet("tpc_hits");
   if (tpc_data) {// Clusters exist -> do tracking
-    St_DataSetIter next(tpc_data);
-    St_tcl_tphit   *tphit = (St_tcl_tphit     *) next("tphit");
+    St_tcl_tphit   *tphit = (St_tcl_tphit     *) tpc_data->Find("tphit");
+    if (!tphit) return kStWarn;
     Int_t nHits = tphit->GetNRows();
     St_tcl_tphit   *l3hit = new St_tcl_tphit("l3Hit",nHits);
     m_DataSet->Add(l3hit);
