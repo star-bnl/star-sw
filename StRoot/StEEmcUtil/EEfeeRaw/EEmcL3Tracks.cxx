@@ -1,7 +1,10 @@
-// $Id: EEmcL3Tracks.cxx,v 1.5 2003/05/31 02:17:23 zolnie Exp $ 
+// $Id: EEmcL3Tracks.cxx,v 1.6 2003/05/31 02:31:30 zolnie Exp $ 
 // $Log: EEmcL3Tracks.cxx,v $
-// Revision 1.5  2003/05/31 02:17:23  zolnie
-// new fields tracks length, npoints
+// Revision 1.6  2003/05/31 02:31:30  zolnie
+// bring the changes back
+//
+// Revision 1.4  2003/05/30 21:07:52  zolnie
+// added track length and number of points
 //
 // Revision 1.3  2003/05/27 19:11:44  zolnie
 // added dE/dx info
@@ -18,20 +21,20 @@
 #include <math.h>
 #include "EEmcL3Tracks.h"
 
-
-
 ClassImp(EEmcHelix)
 
-
-
-
-EEmcHelix::EEmcHelix(Float_t x ,Float_t y ,Float_t z, Float_t px,Float_t py,Float_t pz,
-		     Int_t   q ,Float_t B)
+EEmcHelix::EEmcHelix(Float_t x , Float_t y , Float_t z, 
+		     Float_t px, Float_t py, Float_t pz,
+		     Int_t   q , Float_t B , 
+		     Int_t   np, Float_t l , Int_t flag)
 {
   mOx=x;  mOy=y;  mOz=z; 
   mPx=px; mPy=py; mPz=pz;
-  mQ    = q;
-  mB    = B;
+  mQ      = q;
+  mB      = B;
+  mPoints = np;
+  mLength = l;
+  mFlag   = flag;
 }
 
 
@@ -49,8 +52,9 @@ EEmcHelix :: print(FILE *fd) const
 {
   fprintf(fd,"\torigin  : %+f %+f %+f\n",mOx,mOy,mOz);
   fprintf(fd,"\tmomentum: %+f %+f %+f\n",mPx,mPy,mPz);
-  fprintf(fd,"\tcharge  : %+1d\n",mQ);
-  fprintf(fd,"\tfield   : %+f\n",mB);
+  fprintf(fd,"\tcharge  : %+1d\tfield : %+f\n",mQ,mB);
+  fprintf(fd,"\tpoints  : %2d \tlength: %+f\n",mPoints,mLength);
+  fprintf(fd,"\tflag    : %2d (0x%04x)\n",mFlag,mFlag);
 }
 
 
