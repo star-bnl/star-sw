@@ -80,7 +80,6 @@ StMessageManager::StMessageManager() : StMessMgr()
   AddType("D","Debug");
   AddType("Q","QAInfo");
   SwitchOff("D");
-  MemoryOn();
 #ifdef __linux__
   memset(listOfMessPtrs,0,(maxLOMP * sizeof(char*)));
 #endif
@@ -182,11 +181,11 @@ void StMessageManager::BuildMessage(const char* mess, const char* type,
     *curType = defaultMessType;               // default type is Info
     typeN = 1;                                // type number for Info is 1
   }
-  gMessage = new StMessage(mess, curType, curOpt);
-  if ((remember) || (gMessage->GetOption() & kMessOptDash)) {
-    if (gMessage) delete gMessage;            // not keeping in memory
+  if ((!remember) || (gMessage->GetOption() & kMessOptDash)) {
+    StMessage tmp(mess, curType, curOpt);
     gMessage = endm;
   } else {
+  gMessage = new StMessage(mess, curType, curOpt);
 #ifndef i386_redhat60
     messList.push_back(gMessage);             // add to message lists
     messCollection[typeN]->push_back(gMessage);
@@ -438,7 +437,7 @@ int StMessageManager::AddType(const char* type, const char* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.42 2004/09/16 02:25:54 perev Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.43 2004/09/25 03:01:04 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
@@ -451,8 +450,11 @@ static StMessMgr* temp=StMessageManager::Instance();
 
 
 //_____________________________________________________________________________
-// $Id: StMessageManager.cxx,v 1.42 2004/09/16 02:25:54 perev Exp $
+// $Id: StMessageManager.cxx,v 1.43 2004/09/25 03:01:04 perev Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.43  2004/09/25 03:01:04  perev
+// Improved correction with remember messages
+//
 // Revision 1.42  2004/09/16 02:25:54  perev
 // typo fixed, memory leak off
 //
