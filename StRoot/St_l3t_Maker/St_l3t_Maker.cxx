@@ -1,4 +1,4 @@
-// $Id: St_l3t_Maker.cxx,v 1.27 2000/06/26 22:14:27 fisyak Exp $
+// $Id: St_l3t_Maker.cxx,v 1.28 2000/07/03 19:34:06 yepes Exp $
 //
 // Revision 1.22  2000/03/28 20:22:15  fine
 // Adjusted to ROOT 2.24
@@ -194,13 +194,23 @@ Int_t St_l3t_Maker::MakeOnLine(){
    gl3.add ( &highPtM ) ;
 
    gl3.init();
+   gl3.setHitProcessing(2) ; // fill gl3Hit info
 
    int const maxBytes = 5000000 ;
-   char   buffer[maxBytes] ;
-   L3_P* gl3Header  = (L3_P *)buffer ;
-   memset ( buffer, 0, sizeof(L3_P) ) ;
-   int   nBytesUsed  = sizeof(L3_P);
-   char* trackDataPointer = buffer + nBytesUsed  ;
+   char* buffer = new char[maxBytes] ;
+   char* endTrackBuffer = buffer + maxBytes;     
+   L3_P *gl3Header = (L3_P *) buffer;
+   memcpy (gl3Header->bh.bank_type, CHAR_L3_P, 8);
+   gl3Header->bh.bank_id = 1;
+   gl3Header->bh.format_ver = DAQ_RAW_FORMAT_VERSION;
+   gl3Header->bh.byte_order = DAQ_RAW_FORMAT_ORDER;
+   gl3Header->bh.format_number = 0;
+   gl3Header->bh.token = 1;
+   gl3Header->bh.w9 = DAQ_RAW_FORMAT_WORD9;
+   gl3Header->bh.crc = 0;		//don't know yet....    
+
+   memset (buffer, 0, sizeof (L3_P));
+   char* trackDataPointer = buffer + sizeof(L3_P)  ;
    char* endTrackDataPointer = buffer + maxBytes ;
 //
 //    Set parameters
@@ -252,17 +262,14 @@ Int_t St_l3t_Maker::MakeOnLine(){
       }
       //
       L3_SECP* sectorHeader = (L3_SECP *)trackDataPointer ;
+      memset ( trackDataPointer, 0, sizeof(L3_SECP) ) ;   
       trackDataPointer += sizeof(L3_SECP);
       if ( trackDataPointer > endTrackDataPointer ) {
          printf ( "St_l3tMaker::MakeOnline: maxBytes %d too short a buffer", maxBytes ) ;
          return kStWarn;
       }
-
+//
       sectorHeader->bh.bank_id = (secIndex-1) * 2 + 1 ;
-      sectorHeader->clusterp.off = 0 ;
-      sectorHeader->clusterp.len = 0 ;
-      sectorHeader->trackp.off = 0 ;
-      sectorHeader->trackp.len = 0 ;
 //
 // Read clusters in DAQ format
 //
@@ -279,18 +286,22 @@ Int_t St_l3t_Maker::MakeOnLine(){
       int nBytes = tracker.fillTracks ( endTrackDataPointer-trackDataPointer,
                                         trackDataPointer,
 	                                token ) ;
-      printf ( "St_l3_Maker::MakeOnLine: nBytes %d bytes left %d\n",
-               nBytes, endTrackDataPointer-trackDataPointer ) ;
       if ( nBytes <= 0 ) continue ;
 
       sectorHeader->trackp.off = (trackDataPointer-(char *)sectorHeader)/4;
       sectorHeader->trackp.len = nBytes/4;
 
       trackDataPointer += nBytes ;
+
+      nBytes=tracker.fillHits (endTrackBuffer-trackDataPointer, trackDataPointer, token );
+//  set cluster offset and lenght
+      sectorHeader->sl3clusterp.off = (trackDataPointer-(char *)sectorHeader)/4;
+      sectorHeader->sl3clusterp.len = nBytes/4;
+
+      trackDataPointer+=nBytes;                    
       //
       //   Update gl3 header
       //
-      nBytesUsed += nBytes ;
       gl3Header->bh.token = token ;
       gl3Header->sector[secIndex].len = (trackDataPointer-(char *)sectorHeader)/4 ;
       gl3Header->sector[secIndex].off = ((char *)sectorHeader - buffer)/4  ; ;
@@ -304,39 +315,13 @@ Int_t St_l3t_Maker::MakeOnLine(){
       m_l3_realTimeSector->Fill ( 1000.*tracker.realTime ) ;
       fprintf (stderr, "St_sl3Maker: %d tracks, %d hits out of range \n", 
                      tracker.nTracks, tracker.nHitsOutOfRange ) ;
-      //
-      //     Fill offline hit table
-      //
-      for ( int j = 0 ; j < tracker.nHits ; j++ ) {
-	 hit[nHits].id    = nHits + 1 ; 
-	 hit[nHits].row   = secIndex * 100 + tracker.hit[j].row ; 
-	 hit[nHits].x     = tracker.hit[j].x ;
-	 hit[nHits].y     = tracker.hit[j].y ;
-	 hit[nHits].z     = tracker.hit[j].z ;
-	 hit[nHits].dx    = tracker.hit[j].dx ;
-	 hit[nHits].dy    = tracker.hit[j].dy ;
-	 hit[nHits].dz    = tracker.hit[j].dz ;
-	 hit[nHits].q     = tracker.hit[j].q  ;
-	 hit[nHits].track = 0  ;
-	 if ( tracker.hit[j].track != NULL ) {
-	    hit[nHits].track = ((FtfTrack *)tracker.hit[j].track)->id + 10000 * secIndex  ;
-	 }
-	 nHits++ ;
-	 if ( nHits >= maxHits ) {
-	      fprintf ( stderr, " St_l3t_Maker:MakeOnLine: %d larger than max in hit table \n", nHits ) ;
-	      break ;
-	 }
-      } //for ( int j = 0 ; j < tracker.nHits ; j++ )
    } //for(Int_t secIndex=1;secIndex<=12; secIndex++)
-
    //
    //  Read event in gl3Event
    //
-
-   gl3.processEvent ( nBytesUsed, buffer ) ;
+   gl3.processEvent ( trackDataPointer-buffer, buffer ) ;
    gl3Event* eventP = 0 ;
    eventP = gl3.getEvent(token);
-
    //
    //   Generate output table
    //
@@ -358,6 +343,27 @@ Int_t St_l3t_Maker::MakeOnLine(){
    nTracksWithDedx = 0;
 
    if ( eventP ) {
+//
+//   Loop over hits
+//
+      gl3Hit* gHit ;
+      for (int ihit = 0; ihit < eventP->getNHits (); ihit++)
+      {
+         gHit = eventP->getHit (ihit);
+         hit[ihit].id = nHits + 1;
+         hit[ihit].row = gHit->getRowSector ();
+         hit[ihit].x = gHit->getX ();
+         hit[ihit].y = gHit->getY ();
+         hit[ihit].z = gHit->getZ ();
+         hit[ihit].dx = tracker.xyError;
+         hit[ihit].dy = tracker.xyError;
+         hit[ihit].dz = tracker.zError;
+         hit[ihit].q = gHit->getCharge ();
+         hit[ihit].track = gHit->getTrackId ();
+      }
+
+      nHits = eventP->getNHits ();
+
       gl3Track     *gTrk ;
       dst_track_st *tTrk ;
       dst_dedx_st  *tDedx;
