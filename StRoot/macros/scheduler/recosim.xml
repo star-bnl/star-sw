@@ -1,9 +1,10 @@
 <job  maxFilesPerProcess="1" simulateSubmission ="false">
 <stdout URL="file:./$JOBID.out" />
-<!-- 
 <input URL="file:/star/simu/simu/gstardata/rcf1206/done/rcf1206_99_700evts.fzd"></input>
+
+<!--
+ <input URL="file:/star/simu/simu/gstardata/rcf1206/done/*.fzd"></input>
 -->
-   <input URL="file:/star/simu/simu/gstardata/rcf1206/done/*.fzd"></input>
    <command>       
    <![CDATA[
     # --------------------------
@@ -17,13 +18,14 @@
     # --------------------------
 
     set nSimulatedEvents=5
-    set finalDirectory=/star/rcf/prodlog/P04id/log/trs
+#    set finalDirectory=/star/rcf/prodlog/P04id/log/trs
+    set finalDirectory=/star/data05/scratch/didenko/gridwork/reco
 
     # --------------------------
 
     # check which site we are working on
     set BNL=0
-    set remoteNode=stargrid02.rcf.bnl.gov 
+    set remoteNode=stargrid04.rcf.bnl.gov 
 
     # ---  URL: http://www-pdsf.nersc.gov/~username/   ----
     set localWebPage=~/public_html
@@ -37,7 +39,7 @@
     # ----  at  BNL (local node) -----
     #
     set finalNode=gsiftp://${remoteNode}
-    set finalPackageDirectory=${finalNode}/${finalDirectory}
+    set finalPackageDirectory=gsiftp://stargrid04.rcf.bnl.gov/${finalDirectory}
 
     # local file directory tree definition
     set packageDirectory=${localWebPage}/gridwork/reco
@@ -48,15 +50,15 @@
     mkdir -p ${registerDirectory}
     mkdir -p ${packageDirectoryBin}
 
-    #--  Prepare the Web catalog
+    #--  Prepare the catalog
     # 
     if ( ! -f ${registerDirectory}/../index.html ) then;
-       echo "<HTML><META HTTP-EQUIV="Refresh" CONTENT=1200><TITLE>${jobTitle} catalog </TITLE> <BODY> <small> <code> <ul>"  >${registerDirectory}/../index.html
+       echo "<HTML><TITLE>${jobTitle} catalog </TITLE> <BODY> <small> <code> <ul>"  >${registerDirectory}/../index.html
     endif
     echo "<li><a href="$REQUESTID">Job: $REQUESTID `date`</a>" >> ${registerDirectory}/../index.html
     #
     if ( ! -f ${registerDirectory}/index.html ) then;
-       echo "<HTML><META HTTP-EQUIV="Refresh" CONTENT=12><TITLE>${jobTitle} $REQUESTID catalog </TITLE> <BODY> <small> <code> <ul>"  >${registerDirectory}/index.html
+       echo "<HTML><TITLE>${jobTitle} $REQUESTID catalog </TITLE> <BODY> <small> <code> <ul>"  >${registerDirectory}/index.html
     endif
     echo "<li><a href="$PROCESSID.html">Process: $PROCESSID `date` </a>" >> ${registerDirectory}/index.html
 
@@ -80,7 +82,7 @@
 # ---
 #   Start the local Web page
 # ---
-    echo "<HTML><META HTTP-EQUIV="Refresh" CONTENT=600><TITLE>${jobTitle} $PROCESSID.$REQUESTID has been started </TITLE> <BODY> <small> <code> <pre>"  >${localLogFile}
+    echo "<HTML><TITLE>${jobTitle} $PROCESSID.$REQUESTID has been started </TITLE> <BODY> <small> <code> <pre>"  >${localLogFile}
     cd ${packageDirectoryBin}
 
 #    -------------------------------
@@ -113,11 +115,20 @@
      set ZEBRAINPUT=${JOBFILEBASENAME}fzd
      if ("${BNL}" == "1") then;
        ln -s  ${INPUTFILE0}  $SCRATCH/${ZEBRAINPUT}
+       echo  "ln -s  ${INPUTFILE0}  $SCRATCH/${ZEBRAINPUT}"   >>${localLogFile}
+       echo  "ln -s  ${INPUTFILE0}  $SCRATCH/${ZEBRAINPUT}"
      else
-       globus-url-copy -p 25  ${remoteNode}${INPUTFILE0}  file:$SCRATCH/${ZEBRAINPUT}
-     endif
-
-
+       globus-url-copy -p 25  ${finalNode}${INPUTFILE0}  file:$SCRATCH/${ZEBRAINPUT}
+       echo "globus-url-copy -p 25  ${finalNode}${INPUTFILE0}  file:$SCRATCH/${ZEBRAINPUT}" >>${localLogFile} 
+       echo "globus-url-copy -p 25  ${finalNode}${INPUTFILE0}  file:$SCRATCH/${ZEBRAINPUT}"
+       if (! -s $SCRATCH/${ZEBRAINPUT} ) then;
+         echo " GRID copy   failed $status "  >>${localLogFile} 
+         echo " GRID copy   failed $status "         
+       endif
+    endif
+ 
+    ls -l  $SCRATCH/${ZEBRAINPUT}  >>${localLogFile}
+    ls -l  $SCRATCH/${ZEBRAINPUT}
     #set nFile=0
     #while ( $nFile < $INPUTFILECOUNT )
     #  eval set filename = '$INPUTFILE'$nFile 
@@ -131,8 +142,8 @@
 #    -------------------------------
 #   start "root4star" from the bin directory
 #    -------------------------------
-    echo root4star -b -l -q bfc.C\(${nSimulatedEvents},\"trs,srs,fss,y2004,tpc,l0,svt,Cdst,Kalman,tags,Tree,bbcsim,tofsim,evout,est,-xi,-v0,xi2,XiSvt,svtdEdx,emcY2,eefs,GeantOut,big,-dstout,CMuDst,fzin\",\"${ZEBRAINPUT}\"\)  >>${localLogFile}
-    root4star -b -l -q bfc.C\(${nSimulatedEvents},\"trs,srs,fss,y2004,tpc,l0,svt,Cdst,Kalman,tags,Tree,bbcsim,tofsim,evout,est,-xi,-v0,xi2,XiSvt,svtdEdx,emcY2,eefs,GeantOut,big,-dstout,CMuDst,fzin\",\"${ZEBRAINPUT}\"\)
+    echo root4star -b -l -q \'bfc.C\(${nSimulatedEvents},\"trs,srs,fss,y2004,tpc,ftpc,l0,svt,Cdst,Kalman,tags,Tree,bbcsim,tofsim,evout,est,-xi,-v0,xi2,XiSvt,svtdEdx,emcY2,eefs,GeantOut,big,-dstout,CMuDst,fzin\",\"${ZEBRAINPUT}\"\)\'  >>${localLogFile}
+    root4star -b -l -q bfc.C\(${nSimulatedEvents},\"trs,srs,fss,y2004,tpc,ftpc,l0,svt,Cdst,Kalman,tags,Tree,bbcsim,tofsim,evout,est,-xi,-v0,xi2,XiSvt,svtdEdx,emcY2,eefs,GeantOut,big,-dstout,CMuDst,fzin\",\"${ZEBRAINPUT}\"\)
     # --- check output
     #  we should see 4 files with non-zero length
     if (! -s ${JOBFILEBASENAME}.tags.root) then;
@@ -172,7 +183,7 @@
    foreach joboutfile (*.root) 
      echo " Starting ${joboutfile} transfering to BNL" >>${localLogFile}
      echo " Starting ${joboutfile} transfering to BNL"
-     globus-url-copy -p 20 file:$SCRATCH/${joboutfile}    ${finalPackageDirectory}/${joboutfile}
+     globus-url-copy -p 25 file:$SCRATCH/${joboutfile}    ${finalPackageDirectory}/${joboutfile}
    end      
      time
      time >>${localLogFile}
