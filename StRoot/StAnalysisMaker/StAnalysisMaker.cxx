@@ -1,5 +1,8 @@
-// $Id: StAnalysisMaker.cxx,v 1.4 1999/02/12 02:00:26 wenaus Exp $
+// $Id: StAnalysisMaker.cxx,v 1.5 1999/03/20 20:59:08 perev Exp $
 // $Log: StAnalysisMaker.cxx,v $
+// Revision 1.5  1999/03/20 20:59:08  perev
+// new maker schema
+//
 // Revision 1.4  1999/02/12 02:00:26  wenaus
 // Incorporate tag loading example
 //
@@ -35,7 +38,7 @@
 #include "StEvent/StRun.hh"
 #include "StEvent/StEvent.hh"
 
-static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.4 1999/02/12 02:00:26 wenaus Exp $";
+static const char rcsid[] = "$Id: StAnalysisMaker.cxx,v 1.5 1999/03/20 20:59:08 perev Exp $";
 #include "StMessMgr.h"
 void summarizeEvent(StEvent& event);
 //  specific analysis tasks.
@@ -79,9 +82,9 @@ void StAnalysisMaker::MakeBranch() {
 
 void StAnalysisMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StAnalysisMaker.cxx,v 1.4 1999/02/12 02:00:26 wenaus Exp $\n");
+  printf("* $Id: StAnalysisMaker.cxx,v 1.5 1999/03/20 20:59:08 perev Exp $\n");
   printf("**************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
+  if (Debug()) StMaker::PrintInfo();
 }
 
 void StAnalysisMaker::Clear(Option_t *opt) {
