@@ -1,5 +1,8 @@
-// $Id: StTpcHitFilterMaker.h,v 1.1 2001/03/22 19:55:30 hardtke Exp $
+// $Id: StTpcHitFilterMaker.h,v 1.2 2001/04/12 22:04:57 hardtke Exp $
 // $Log: StTpcHitFilterMaker.h,v $
+// Revision 1.2  2001/04/12 22:04:57  hardtke
+// Add option for setting large hit errors
+//
 // Revision 1.1  2001/03/22 19:55:30  hardtke
 // Initial version of hit filtering maker
 //
@@ -19,9 +22,11 @@
 
 class StTpcHitFilterMaker : public StMaker {
 private:
-//static Char_t m_VersionCVS = "$Id: StTpcHitFilterMaker.h,v 1.1 2001/03/22 19:55:30 hardtke Exp $";
+//static Char_t m_VersionCVS = "$Id: StTpcHitFilterMaker.h,v 1.2 2001/04/12 22:04:57 hardtke Exp $";
   Bool_t SectorOn[24];
   Bool_t RowOn[45];
+  Bool_t BigErrorsInner;
+  Bool_t BigErrorsOuter;
   float z_min;
   float z_max;
   float membrane_cut;
@@ -57,9 +62,11 @@ public:
   virtual void   EastOff();
   virtual void   WestOn(); 
   virtual void   WestOff();
+  virtual void   RidiculousErrorsInner();
+  virtual void   RidiculousErrorsOuter();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StTpcHitFilterMaker.h,v 1.1 2001/03/22 19:55:30 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StTpcHitFilterMaker.h,v 1.2 2001/04/12 22:04:57 hardtke Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
  ClassDef(StTpcHitFilterMaker, 1)   //StAF chain virtual base class for Makers
 };
