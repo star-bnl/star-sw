@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: St_table_header_Table.cxx,v 1.1 2000/03/23 17:58:13 fine Exp $
+// $Id: St_table_header_Table.cxx,v 1.2 2000/03/27 00:34:04 fine Exp $
 //
 #include "St_table_header_Table.h"
 /////////////////////////////////////////////////////////////////////////
@@ -31,7 +31,28 @@ St_table_header::St_table_header(const TTable *table)
 }
 
 //______________________________________________________________________________
+void *ReAllocate(table_head_st *header, Int_t newsize)
+{
+  //
+  // header - "plain" C interface to re-allocate the STAF table
+  //          "this"  pointer is  supplied indirectly via
+  //          header->dsl_pointer member
+  //
+  // newsize - is a new size of the STAF table.
+  //           If it is smaller is the old one then nothing happens
+  //
+ if (header && newsize)
+   return ((TTable *)header->dsl_pointer)->ReAllocate(newsize);
+ else
+   return 0;
+}
+ 
+
+//______________________________________________________________________________
 // $Log: St_table_header_Table.cxx,v $
+// Revision 1.2  2000/03/27 00:34:04  fine
+// function ReAllocate and method TTable::Object have been move to St_table_head class
+//
 // Revision 1.1  2000/03/23 17:58:13  fine
 // new class to hold STAF table header aside
 // 
