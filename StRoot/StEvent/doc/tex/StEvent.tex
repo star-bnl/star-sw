@@ -1,8 +1,9 @@
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.20 2000/02/24 13:25:12 ullrich Exp $
+% $Id: StEvent.tex,v 2.21 2000/02/28 19:37:26 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -21,9 +22,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 2.20  2000/02/24 13:25:12  ullrich
-% Added RICH and EMC to the reference section. Created
-% (empty) section for EMC and RICH in User Guide.
+% Revision 2.21  2000/02/28 19:37:26  ullrich
+% Added the hypperref package to add bookmarks and hyperlinks
+% tp pdf documents.
 %
 % Revision 2.33  2000/05/22 22:04:07  ullrich
 % Removed StRichPixelCollection ref section and added description
@@ -65,6 +66,7 @@
 %
 % Revision 2.32  2000/05/17 17:20:01  ullrich
 % Updates and improved description of StTrackTopologyMap.
+%
 % Revision 2.31  2000/05/16 13:22:39  ullrich
 % More details on the second chi2 value in StTrackFitTraits.
 %
@@ -147,8 +149,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.20 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/24 13:25:12 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.21 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/28 19:37:26 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -172,8 +174,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.20 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/24 13:25:12 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.21 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/28 19:37:26 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -181,17 +183,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.20 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/24 13:25:12 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.21 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/28 19:37:26 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.20 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/24 13:25:12 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.21 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/28 19:37:26 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.20 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/24 13:25:12 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.21 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/28 19:37:26 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -206,8 +208,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.20 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/02/24 13:25:12 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.21 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/02/28 19:37:26 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
