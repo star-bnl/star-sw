@@ -1,4 +1,4 @@
-// $Id: EzEEsmdCal.cxx,v 1.2 2004/06/15 20:03:26 balewski Exp $
+// $Id: EzEEsmdCal.cxx,v 1.3 2004/06/22 23:31:11 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -19,6 +19,7 @@
 
 #include "StEEmcDbMaker/EEmcDbItem.h"
 
+#include "StEEmcUtil/EEmcGeom/EEmcGeomSimple.h"
 
 #ifdef StRootFREE
   #include "EEmcDb/EEmcDb.h"
@@ -37,6 +38,7 @@ EzEEsmdCal::EzEEsmdCal(int sect){
   eEve=0;
   eTrig=0;
   setSector(sect);
+  //geoTw=new EEmcGeomSimple;
 }
 
 //--------------------------------------------------
@@ -66,19 +68,9 @@ void EzEEsmdCal::unpackEzTree(){
   nInpEve++;
   // printf(" EzEEsmdCal::getData()is called ......\n");
 
-  // check CTB multiplicity 
-  int ctbSum=0;
-  int isl;
-  for ( isl = 0; isl < 240; isl++ ) {
-    ctbSum+= eTrig -> CTB[isl];
-  }
-  //printf("ctbSum=%d \n",ctbSum);
-
   unpackEzTail();
   unpackEzSmd();
-  
   return ;
-
 }
 
 //--------------------------------------------------
@@ -117,16 +109,20 @@ void EzEEsmdCal:: unpackEzTail(){
       assert(ieta>=0 && ieta<MaxEtaBins);
 
       float adc=rawAdc-x->ped;
-      int iT=-1;
-      if(x->name[2]=='T')
+      int iT=-1;// store T,P,Q,R depending on 'iT'
+      if(x->name[2]=='T'){
 	iT=0;
-      else
+      } else{
 	iT=x->name[2]-'P'+1;
+      }
       assert(iT>=0 && iT<kTile);
-    
-      tileAdc[iT][ieta][iphi]=adc; // store T,P,Q,R depending on 'iT'
-      tileTag[iT][ieta][iphi]=rawAdc>x->thr;
-      //printf("%s adc=%f out=%d thr=%f\n",x->name,adc,tileThr[iT][ieta][iphi],x->thr);
+
+      tileAdc[iT][ieta][iphi]=adc; 
+      tileThr[iT][ieta][iphi]=rawAdc>x->thr;
+      
+      if(x->gain<=0) continue;
+      // ........ only elements with valid gains are processed below
+      tileEne[iT][ieta][iphi]=adc/x->gain; 
     }
   }
   
@@ -156,7 +152,7 @@ void EzEEsmdCal:: unpackEzSmd(){
       if(x==0) continue; 
 
       if(!x->isSMD()) break; // abort pre/post crates
-      // (assuming pre/post is not mixed with SMD pixels) 
+      // (assuming pre/post is not mixed in hrdware with SMD pixels) 
 
       if(x->fail ) continue; // drop broken channels
       if(x->gain<=0)continue; // drop channels w/o gains
@@ -169,8 +165,8 @@ void EzEEsmdCal:: unpackEzSmd(){
       float adc=rawAdc-x->ped;
       //     printf(" e=%f ",adc/x->gain); x->print();
 
-      // accept this hit
-      smdE[x->sec-1][x->plane-'U'][x->strip-1]=adc/x->gain;
+      // accept this hit for sector 5
+      smdEne[x->sec-1][x->plane-'U'][x->strip-1]=adc/x->gain;
     }
   }
   

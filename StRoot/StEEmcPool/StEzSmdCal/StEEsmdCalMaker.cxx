@@ -1,6 +1,6 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StEEsmdCalMaker.cxx,v 1.1 2004/06/12 04:09:25 balewski Exp $
+// $Id: StEEsmdCalMaker.cxx,v 1.2 2004/06/22 23:31:11 balewski Exp $
 
 #include <TFile.h>
 #include <TH2.h>
@@ -67,6 +67,8 @@ Int_t StEEsmdCalMaker::Make(){
 //________________________________________________
 //________________________________________________
 Int_t StEEsmdCalMaker::unpackMuDst(){
+  assert(strstr("Fix input arrays","only ezTree code is up to date,JB"));
+
   nInpEve++;
   gMessMgr->Message("","D") <<GetName()<<"::::getAdc() is called "<<endm;
 
@@ -182,7 +184,7 @@ Int_t StEEsmdCalMaker::unpackMuDst(){
 	value/=x->gain;
       }
       //  printf("SMD hit sec=%d plane=%c strip=%d value=%f\n",x->sec,x->plane,x->strip,value);
-      smdE[x->sec-1][x->plane-'U'][x->strip-1]=value;
+      smdEne[x->sec-1][x->plane-'U'][x->strip-1]=value;
       n3++;
     }
   }
@@ -194,6 +196,9 @@ Int_t StEEsmdCalMaker::unpackMuDst(){
 
 
 // $Log: StEEsmdCalMaker.cxx,v $
+// Revision 1.2  2004/06/22 23:31:11  balewski
+// few more gadgets added
+//
 // Revision 1.1  2004/06/12 04:09:25  balewski
 // start
 //

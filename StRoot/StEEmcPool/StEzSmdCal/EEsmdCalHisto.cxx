@@ -1,4 +1,4 @@
-// $Id: EEsmdCalHisto.cxx,v 1.2 2004/06/15 20:03:26 balewski Exp $
+// $Id: EEsmdCalHisto.cxx,v 1.3 2004/06/22 23:31:11 balewski Exp $
  
 #include <assert.h>
 #include <stdlib.h>
@@ -7,20 +7,29 @@
 #include <TObjArray.h> 
 #include <TH1.h> 
 #include <TH2.h> 
+#include <TLine.h> 
 #include <TFile.h> 
 
 #include "EEsmdCal.h"
+#include "StEEmcDbMaker/EEmcDbItem.h"
+
+
+#ifdef StRootFREE
+  #include "EEmcDb/EEmcDb.h"
+#else
+  #include "StEEmcDbMaker/StEEmcDbMaker.h"
+#endif
+
 
 //--------------------------------------------------
 //--------------------------------------------------
-void EEsmdCal::initTileHist(char cut, char *title) {
+void EEsmdCal::initTileHist(char cut, char *title, int col) {
   int iCut=cut -'a';
   assert(iCut>=0 && iCut<kCut);
   char tt1[100], tt2[500];
 
   char *cTile[kTile]={"Tower","Pres1","Pres2","Post"};
   char cT[kTile]={'T','P','Q','R'};
-  int colA[kCut]={kBlack,kRed,kBlue};
 
   int iT=0;
   for(iT=0;iT<kTile;iT++) {
@@ -33,9 +42,9 @@ void EEsmdCal::initTileHist(char cut, char *title) {
 	sprintf(core,"%02d%c%c%02d",sectID,cT[iT],sub,eta);
 	sprintf(tt1,"%c%s",cut,core);
 	sprintf(tt2,"%s(%c) %s , %s; ADC-ped",cTile[iT],cut,core,title);
-	//	printf("tt1=%s, tt2=%s\n",tt1,tt2);
+	//printf("tt1=%s, tt2=%s\n",tt1,tt2);
 	TH1F *h=new TH1F(tt1,tt2,220,-20,200.);
-	h->SetLineColor(colA[iCut]);
+	h->SetLineColor(col);
 	HList->Add(h);
 	hT[iCut][iT][iEta][iPhi]=h;
       }
@@ -43,15 +52,68 @@ void EEsmdCal::initTileHist(char cut, char *title) {
   }
 }
 
+//--------------------------------------------------
+//--------------------------------------------------
+void EEsmdCal:: mapTileDb(){
+  printf("EEsmdCal:: mapTileDb()\n");
+
+  char cT[kTile]={'T','P','Q','R'};
+  
+  int iT=0;
+  for(iT=0;iT<kTile;iT++) {
+    for(char iSub=0; iSub<MaxSubSec; iSub++){
+      for(int iEta=0; iEta<MaxEtaBins; iEta++){
+	int iPhi=iSect*MaxSubSec+iSub;
+	dbT[iT][iEta][iPhi]=eeDb->getTile(sectID,iSub+'A',iEta+1,cT[iT]);
+	//printf("%d %d %d '%s' \n",iT,iEta,iPhi,dbT[iT][iEta][iPhi]->name);
+      }
+    }
+  }
+}
 
 //--------------------------------------------------
 //--------------------------------------------------
-void EEsmdCal::initSmdHist(char cut, char *title) {
+void EEsmdCal::addTwMipEbarsToHisto (int col) {
+  // search all existing tower histo (with '05T' in name) and add 
+  // bars for MIP limits
+
+  assert(dbMapped>0);
+
+  char core[100];
+  sprintf(core,"%02dT",sectID);
+  float yMax=1000;
+  TIterator *it=HList->MakeIterator();
+  TH1 *h;
+  while( (h=(TH1*) it->Next())) {
+    const char *name=h->GetName();
+    if(strstr(name,core)==0) continue;
+    //printf("%s\n",h->GetName());
+    int iSub=name[4]-'A';
+    int iEta=atoi(name+5)-1;
+    int iPhi=iSect*MaxSubSec+iSub;
+    const EEmcDbItem *x=dbT[kT][iEta][iPhi];
+    assert(x);
+    if(x->gain<=0) continue;
+    float adcL=towerMipElow[iEta]*x->gain;
+    float adcH=towerMipEhigh[iEta]*x->gain;
+    TLine *lnL=new TLine(adcL,0,adcL,yMax);
+    TLine *lnH=new TLine(adcH,0,adcH,yMax);
+    lnL->SetLineColor(col);
+    lnH->SetLineColor(col);
+    TList *L=h->GetListOfFunctions();
+    L->Add(lnH);
+    L->Add(lnL);
+  }
+}
+
+
+//--------------------------------------------------
+//--------------------------------------------------
+void EEsmdCal::initSmdHist(char cut, char *title, int col) {
   int iCut=cut -'a';
   assert(iCut>=0 && iCut<kCut);
   char tt1[100], tt2[500];
 
-  int colA[kCut]={kBlack,kBlue,kRed};
   int iuv,istrip;
   for(iuv=0;iuv<MaxSmdPlains;iuv++) {
     for(istrip=0;istrip<MaxSmdStrips;istrip++) {
@@ -61,7 +123,7 @@ void EEsmdCal::initSmdHist(char cut, char *title) {
 	sprintf(tt2,"SMD(%c) %s+1 , %s; ADC-ped/gain, pair sum",cut,core,title);
 	//printf("tt1=%s, tt2=%s\n",tt1,tt2);
 	TH1F *h=new TH1F(tt1,tt2,100,0.,5.);
-	h->SetLineColor(colA[iCut]);
+	h->SetLineColor(col);
 	HList->Add(h);
 	hSp[iCut][iuv][istrip]=h;
 
@@ -71,7 +133,7 @@ void EEsmdCal::initSmdHist(char cut, char *title) {
 	sprintf(tt2,"SMD(%c) %s , %s; ADC-ped/gain",cut,core,title);
 	//printf("tt1=%s, tt2=%s\n",tt1,tt2);
 	h=new TH1F(tt1,tt2,100,0.,5.);
-	h->SetLineColor(colA[iCut]);
+	if(iCut<=2) h->SetLineColor(col);
 	HList->Add(h);
 	hSs[iuv][istrip]=h;
     }
@@ -162,8 +224,6 @@ void EEsmdCal::fillOneTailHisto(char cut, int iEta, int iPhi){
   }
 }
 
-
-
 //--------------------------------------------------
 //--------------------------------------------------
 void EEsmdCal::fillSmdHisto_a(){
@@ -172,7 +232,7 @@ void EEsmdCal::fillSmdHisto_a(){
 
   int iuv,istrip;
   for(iuv=0;iuv<MaxSmdPlains;iuv++) {
-    float *val=smdE[iSect][iuv];
+    float *val=smdEne[iSect][iuv];
     TH1F **hs=hSs[iuv]; // single strip spectra
     TH1F **hp=hSp[iCut][iuv]; // pairs of strip spectra
     // note, to loop over N-2 strips to get right the sum of pairs 
