@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimField.cc,v 1.14 2003/09/02 17:58:16 perev Exp $
+// $Id: StFtpcSlowSimField.cc,v 1.15 2003/10/07 14:01:48 jcs Exp $
 // $Log: StFtpcSlowSimField.cc,v $
+// Revision 1.15  2003/10/07 14:01:48  jcs
+// remove double Stiostream.h include
+//
 // Revision 1.14  2003/09/02 17:58:16  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -58,7 +61,6 @@
 ///////////////////////////////////////////////////////////////////////////
 
 #include <Stiostream.h>
-#include "Stiostream.h"
 #include "PhysicalConstants.h"
 
 #include "StFtpcSlowSimField.hh"
