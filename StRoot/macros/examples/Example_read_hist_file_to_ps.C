@@ -1,11 +1,17 @@
-// $Id: Example_read_hist_file_to_ps.C,v 1.2 1999/05/21 15:33:48 kathy Exp $
+// $Id: Example_read_hist_file_to_ps.C,v 1.3 1999/06/03 23:34:50 kathy Exp $
 // $Log: Example_read_hist_file_to_ps.C,v $
+// Revision 1.3  1999/06/03 23:34:50  kathy
+// got macros working with current files
+//
 // Revision 1.2  1999/05/21 15:33:48  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
 //
 //=======================================================================
 // owner: Kathy Turner
 // what it does: 
+//  read flat root histogram file and send histograms to a postscript file
+//   - separate paper for each hist.
+// 
 //=======================================================================
 //read root histogram file and send histograms to a postscript file
 // separate paper for each hist.
@@ -17,7 +23,10 @@
 //
 {
   // open root file
-TFile file1("/diskA/star/kathy/output/psc0049_08_40evts_3EV.root");  
+  //TFile file1("/diskA/star/kathy/output/psc0049_08_40evts_3EV.root"); 
+  //TFile file1("/disk00000/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/set0029_01_49evts.root");
+
+TFile file1("Kathy_hist.root");
   // list contents
 file1.ls();
   // create canvas
@@ -29,18 +38,17 @@ Int_t width = 21;
 Int_t height = 27;
 gStyle->SetPaperSize(width, height);
   // define output ps file 
-TPostScript ps("kathy.ps",111);
+TPostScript ps("kathynew.ps",111);
   //range of figures on ps page
 ps.Range(20,26);
 //ps.Range(16,24);
+//.. must do the following 2 commands for each histogram:
   // draw hist 
-QaGlobtrkNPoint->Draw();
+h1->Draw();
+//QaGlobtrkNPoint->Draw();
   // update (don't have to do if typing at command line(?)
 gPad->Update();
-  // draw hist
-QaDstV0VertexK0Mass->Draw();
-  // update 
-gPad->Update();
+//
   // close output file
 ps.Close();
 }

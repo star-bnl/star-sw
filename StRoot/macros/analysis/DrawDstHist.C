@@ -1,5 +1,8 @@
-// $Id: DrawDstHist.C,v 1.23 1999/06/03 17:55:26 kathy Exp $
+// $Id: DrawDstHist.C,v 1.24 1999/06/03 23:34:49 kathy Exp $
 // $Log: DrawDstHist.C,v $
+// Revision 1.24  1999/06/03 23:34:49  kathy
+// got macros working with current files
+//
 // Revision 1.23  1999/06/03 17:55:26  kathy
 // changed DrawDstHist from using St_io_Maker to Victor's new StIOMaker - actually just copied doEvents to DrawDstHist and hacked it. Fixed comments in read_bfc_hist_list.C
 //
@@ -29,15 +32,13 @@ class StChain;
 StChain *chain=0;
 
 TCanvas *QACanvas = 0;
-TBrowser *QABrowser = 0;
+TBrowser *QABrowser =  0;
 
 const char *dstFile ="/disk00001/star/auau200/two_photon/starlight/twogam/year_1b/hadronic_on/tfs/ric0022_01_14552evts.dst.root";
 const char *xdfFile ="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf";
 const char *mdcFile ="/disk00001/star/auau200/venus412/default/b0_3/year_1b/hadronic_on/tss/psc0081_07_40evts.root";
 const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
-//const char *firstHist ="qa1hist";
-//const char *lastHist ="qa2hist";
-//const char *psFile ="output_file.ps";
+
 
   // const Char_t *file="/afs/rhic/star/data/samples/psc0016_05_35evts.root")
   // const Char_t *file="/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/./set0022_01_56evts_dst.xdf")
@@ -63,16 +64,21 @@ const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
 // example multi-ROOT file invocation:
 // .x DrawDstHist.C(9999,"/disk00001/star/auau200/hijing/b0_3/jet05/year_1b/hadronic_on/tfs/","*.root")
 
+
+// 6/3/99 Kathy tested following files to use:
+//const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf",
+//const Char_t *file="/disk00000/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/set0029_08_49evts.root"
+
 void DrawDstHistQQ(const Int_t nevents, 
               const Char_t **fileList,
-              const Char_t *firstHist,
+              const Char_t *firstHist,     
               const Char_t *lastHist,   
               const Char_t *psFile);
 
 
 void DrawDstHist(const Int_t nevents=1,
-              const Char_t *path="-/disk00001/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/",
-              const Char_t *file="/afs/rhic/star/data/samples/psc0054_07_40evts_dst.xdf",
+              const Char_t *path="-",
+              const Char_t *file="/disk00000/star/auau200/hijing135/jetq_on/b0_3/year_1b/hadronic_on/tfs/set0029_08_49evts.root",
               const Char_t *firstHist="*",
               const Char_t *lastHist="*",   
               const Char_t *psFile="QA_hist.ps")
@@ -88,6 +94,7 @@ void DrawDstHist(const Int_t nevents=1,
   cout << "DrawDstHist.C, lastHist = " << lastHist << endl;
   cout << "DrawDstHist.C, input file = " << file << endl;
   cout << "DrawDstHist.C, output ps file = " << psFile << endl;
+  cout << "DrawDstHist.C, fileListQQ = " << fileListQQ[0] << endl;
 // now execute the "real" code:  
   DrawDstHistQQ(nevents,fileListQQ,firstHist,lastHist,psFile);
 }
@@ -107,7 +114,6 @@ void DrawDstHistQQ(const Int_t nevents,
   gSystem->Load("StIOMaker");
   gSystem->Load("StarClassLibrary");
   gSystem->Load("St_QA_Maker");
-
 
   // Handling depends on whether file is a ROOT file or XDF file
 
@@ -174,7 +180,7 @@ Int_t iInit = chain->Init();
   for (ilg=0;ilg<lengOfList;ilg++) {
     cout <<  " DrawDstHist.C, adding histogram " << LList[ilg] << " to LogY list "  << endl ;
     numLog = QA->AddToLogYList(LList[ilg]);
-  }
+  } 
   cout <<" DrawDstHist.C, Number hist to plot with log scale = " << numLog << endl;
 
 // Now remove a hist from the list:

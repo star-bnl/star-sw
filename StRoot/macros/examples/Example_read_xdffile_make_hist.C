@@ -1,17 +1,18 @@
-// $Id: Example_read_xdffile_make_hist.C,v 1.2 1999/05/21 15:33:48 kathy Exp $
+// $Id: Example_read_xdffile_make_hist.C,v 1.3 1999/06/03 23:34:50 kathy Exp $
 // $Log: Example_read_xdffile_make_hist.C,v $
+// Revision 1.3  1999/06/03 23:34:50  kathy
+// got macros working with current files
+//
 // Revision 1.2  1999/05/21 15:33:48  kathy
 // made sure Log & Id are in each file and also put in standard comment line with name of owner
 //
 //=======================================================================
 // owner: Kathy Turner
 // what it does: 
-//=======================================================================
-// root_read_xdf_file_make_hist.C
 //
 // - minimal set of commands to open xdf file and look at a table &
 //   then make a histogram and write to output ps file
-// - this is combination of root_look_at_table.C & root_make_histogram.C
+//=======================================================================
 //
 {
  // load libraries
