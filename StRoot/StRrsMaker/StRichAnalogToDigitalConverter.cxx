@@ -1,5 +1,5 @@
 /********************************************************
- * $Id: StRichAnalogToDigitalConverter.cxx,v 1.2 2000/01/25 22:02:19 lasiuk Exp $
+ * $Id: StRichAnalogToDigitalConverter.cxx,v 1.3 2000/02/08 16:22:19 lasiuk Exp $
  *
  * Description:
  *  StRichAnalogToDigitalConverter takes an analog signal
@@ -11,8 +11,9 @@
  *
  ******************************************************
  * $Log: StRichAnalogToDigitalConverter.cxx,v $
- * Revision 1.2  2000/01/25 22:02:19  lasiuk
- * Second Revision
+ * Revision 1.3  2000/02/08 16:22:19  lasiuk
+ * use dbs
+ * systemOfUnits now used
  *
  * Revision 1.2  2000/01/25 22:02:19  lasiuk
  * Second Revision
@@ -24,9 +25,12 @@
 
 #include <algorithm>
 
-#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+#include "SystemOfUnits.h"
+
+#ifndef ST_NO_NAMESPACES
 using std::min;
 using std::max;
+using namespace units;
 #endif
 
 #ifndef ST_NO_NAMESPACES
@@ -38,33 +42,31 @@ using std::max;
 #include "StRichAnalogToDigitalConverter.h"
 
 StRichAnalogToDigitalConverter::StRichAnalogToDigitalConverter()
-    : mAddPedestal(0) { /* nopt */ }
+    : mAddPedestal(0)
+{
+    mPhysicsDb      = StRichPhysicsDb::getDb();
+    //mMaxADC     = static_cast<int>(pow(2.,mPhysicsDb->channel_width));
+    mMaxADC         = static_cast<int>(pow(2.,mPhysicsDb->adcChannelWidth()));
+    mPedestal       = mPhysicsDb->averagePedestal();
+    mAdcConversion  = mPhysicsDb->adcConversion();// fC/ADC_channels
+
+    //mElectronCharge = e_SI*1.0e15;// #electrons -> fC conversion
+}
 
 StRichAnalogToDigitalConverter::~StRichAnalogToDigitalConverter() { /* nopt */ }
     
 int StRichAnalogToDigitalConverter::operator()(double signal) const
 {
-    static StRichPhysicsDb*  mPhysicsDb  = StRichPhysicsDb::getDb();
-    static MyRound          mRound;
-    static int adc_max       = static_cast<int>(pow(2.,mPhysicsDb->channel_width));
-    static int pedestal      = mPhysicsDb->pedestal;
-    static double adc_factor = mPhysicsDb->adc_factor;           // fC/ADC_channels
-    static double e_charge   = mPhysicsDb->e_charge * 1.0e15;    // C->fC conversion
-    
-    
+    //    
     // signal is in [electrons], e_charge in [fC] and adc_factor in [fC/channel]
-    
-    int Q = mRound( signal * e_charge  /  adc_factor );
-    PR(signal);
-    PR(e_charge);
-    PR(adc_factor);
-    PR(Q);
+
+    int Q = mRound( signal  /  mAdcConversion );
     if(mAddPedestal)
-	Q += pedestal;
+	Q += mPedestal;
     
     // check underflow or overflow ( saturation )
 	
-    Q=min(max(0,Q),adc_max);
+    Q=min(max(0,Q),mMaxADC);
     
     return Q;
 }
