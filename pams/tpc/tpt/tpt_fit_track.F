@@ -1,5 +1,14 @@
-* $Id: tpt_fit_track.F,v 1.16 2000/08/18 05:22:18 snelling Exp $
+* $Id: tpt_fit_track.F,v 1.19 2001/07/31 21:59:44 hardtke Exp $
 * $Log: tpt_fit_track.F,v $
+* Revision 1.19  2001/07/31 21:59:44  hardtke
+* For victors error routine, need to take sqrt of matrix elements
+*
+* Revision 1.18  2001/07/28 00:40:02  hardtke
+* bug in error transformation function - restore to old (wrong) way for now
+*
+* Revision 1.17  2001/07/27 23:53:12  hardtke
+* use tpc_local_to_global_err so that errors are transformed properly
+*
 * Revision 1.16  2000/08/18 05:22:18  snelling
 * fixed my own fix
 *
@@ -90,15 +99,15 @@ C#include "tpt_pointers.inc"
 
       INTEGER ipt, ncir,i,ntry,j,iret,ibad,ient ,ient1
       INTEGER tpt_helix_fit, tpt_find_outlier
-      INTEGER tpt_cross_fact, tte_skip,ipass, ipadrow, tpc_local_to_global
+      INTEGER tpt_cross_fact, tte_skip,ipass, ipadrow, tpc_local_to_global_err
       INTEGER n_good, ipnt_temp(mxpnt)
       LOGICAL enough, good_hit(mxpnt)
       REAL    xcir(mxpnt),ycir(mxpnt),zcir(mxpnt)
       REAL    wcir(mxpnt),wlin(mxpnt)
       INTEGER pnt(mxpnt), rowNextToLast, rowLast
-      REAL    as,bs,cf,xold,yold,theta, xlocal(3), xglobal(3)
+      REAL    as,bs,cf,xold,yold,theta, xlocal(3), xglobal_err(9)
       REAL    r1,tanphi0, lambda, sigx, sigz
-      data xlocal,xglobal /6*0/
+      data xlocal,xglobal_err /12*0/
 
 C
 C     at the beginning mark all the points that belong to a track as good
@@ -145,9 +154,9 @@ c                wcir(i)=1.0/sigx**2/cf
                 wcir(i)=1.0/sigx**2
                 wlin(i)=1.0/sigz**2
                 xlocal(1)=sigx
-                iret=tpc_local_to_global(int(hit(ient).row/100),xlocal,xglobal)
-                hit(ient).dx=abs(xglobal(1))
-                hit(ient).dy=abs(xglobal(2))
+                iret=tpc_local_to_global_err(int(hit(ient).row/100),xlocal,xglobal_err)
+                hit(ient).dx=sqrt(abs(xglobal_err(1)))
+                hit(ient).dy=sqrt(abs(xglobal_err(5)))
                 hit(ient).dz=abs(sigz)
            else if(ncir.eq.1) then
                 ient1 = ient

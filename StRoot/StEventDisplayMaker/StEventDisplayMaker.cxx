@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.73 2000/09/12 20:56:16 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.75 2001/07/30 19:29:33 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -83,6 +83,7 @@
 #include "TTableSorter.h"
 #include "StArray.h"
 #include "tables/St_tpt_track_Table.h"
+#include "tables/St_dst_event_summary_Table.h"
 
 // #include "StThreeVector.hh"
 // #include "StHelixD.hh"
@@ -500,6 +501,10 @@ Int_t StEventDisplayMaker::Make()
             ((TTable *)dstracks)->Print(0,1);
            }
         }
+        const char *vertex2Draw = "dst/vertex(vtx_id,x:y:z)";
+        {
+           AddName(vertex2Draw);
+        }
         // printf(" no %s found !!!\n",track2Draw); 
 #endif
       }
@@ -634,6 +639,10 @@ Int_t StEventDisplayMaker::MakeTableTracks(const StTrackChair *points,StVirtualE
   Int_t trackCounter = 0;
   Int_t nRows = 0;
   if (points && (nRows = points->GetNRows()) ) {
+    // Get the sign of the magnetic field
+    St_dst_event_summary *summary = (St_dst_event_summary *)GetDataSet("dst/event_summary");
+    float bField = -1;
+    if (summary) bField = summary->GetTable()->field;
     for (i = 0; i < nRows; i++ ){
       Color_t trackColor = kRed;
       Style_t trackStyle = 1;
@@ -644,7 +653,7 @@ Int_t StEventDisplayMaker::MakeTableTracks(const StTrackChair *points,StVirtualE
         if (filter) trackColor =  filter->Channel(points->Table(),i,trackSize,trackStyle);//
         // ----------------------------------------------------------------------------------//
         if (trackColor > 0) {
-           StHelixD *helix  = points->MakeHelix(i);
+           StHelixD *helix  = points->MakeHelix(i,bField);
            Float_t      len = points->Length(i);
     	   Int_t nSteps = Int_t(28*len*points->Curvature(i) + 1); 
 	       Float_t step = len / nSteps;
@@ -818,6 +827,12 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.75  2001/07/30 19:29:33  fine
+// Add vertex point into the default view
+//
+// Revision 1.74  2001/07/27 22:08:58  fine
+// Fix StEventDisplay maker to count the Mag field sign properly
+//
 // Revision 1.73  2000/09/12 20:56:16  fine
 // typo fixed
 //

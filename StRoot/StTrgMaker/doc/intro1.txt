@@ -7,7 +7,11 @@ SECTION 1, PRELIMINARY STEPS
 Get an account on a machine set up for the STAR offline environment.  I
 always use rmine602.rhic.bnl.gov (Solaris).
 
-Decide which run you want to analyze.
+Decide which run you want to analyze.  This may involve finding
+min-bias runs with the database SQL interface, with the WWW run 
+browser, or by visiting Jeff Porter.  Notes on using the database 
+SQL database are included in this StTrgMaker/doc directory in the
+file database_notes.txt.
 
 Write/visit Lidia Didenko (didenko@bnl.gov) with this message:
       Hello Lidia.  Where are the .event.root files

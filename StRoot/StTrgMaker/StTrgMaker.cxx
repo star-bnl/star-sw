@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrgMaker.cxx,v 1.1 2001/04/23 20:00:27 ward Exp $
+ * $Id: StTrgMaker.cxx,v 1.4 2001/07/27 17:40:18 ward Exp $
  *
  * Author: Herbert Ward April 2001
  ***************************************************************************
@@ -15,6 +15,15 @@
  ***************************************************************************
  *
  * $Log: StTrgMaker.cxx,v $
+ * Revision 1.4  2001/07/27 17:40:18  ward
+ * Handles reversed B field, also has code for chking triggerWord.
+ *
+ * Revision 1.3  2001/07/22 23:00:27  ward
+ * Added diagnostics to output file.  Also doc improvements.
+ *
+ * Revision 1.2  2001/07/17 19:14:38  ward
+ * Avoid edges of CTB slats and other wild situations.
+ *
  * Revision 1.1  2001/04/23 20:00:27  ward
  * Outputs info for CTB calib: slat ADCs and TPC track extensions.
  *
@@ -31,8 +40,9 @@
 #define RPD 0.0174533 // Radians per degree.
 #define INNERRADIUS 215.75 /* centimeters, inner slats */
 #define OUTERRADIUS 212.58 /* centimeters, outer slats */
-#define INNER_OUTER_ZBOUNDARY 112.0 // Actually, the inner and out slats overlap.  I'm ignoring this.
-#define OUTER_ZBOUNDARY       241.1
+#define INNER_OUTER_ZBOUNDARY 112.0
+#define DEAD_ZONE 12.0
+#define OUTER_ZBOUNDARY       231.1
 #define PI 3.1415926
 #define ZCUT 50.0 // cm
 #define MAXTRKS 500000
@@ -66,17 +76,37 @@ Int_t StTrgMaker::Make() {
   event = (StEvent *) GetInputDS("StEvent");
   if (!event) { fclose(out); return kStOK; }
   if(!event->primaryVertex()) {
-    fprintf(out,"# event %d has no primary vertex\n",mEventCounter);
+    fprintf(out,"# Event %3d: has no primary vertex\n",mEventCounter);
     fclose(out); return kStOK;
   }
   StThreeVectorD vertexPos(0,0,0);
   vertexPos=event->primaryVertex()->position();
-  printf("Event %d, the position of the primary vertex is (%g %g %g)\n",
+  printf("Event %3d: the position of the primary vertex is (%g %g %g)\n",
      mEventCounter,vertexPos.x(), vertexPos.y(), vertexPos.z());
-  if(vertexPos.z()>50.0||vertexPos.z()<-50.0) { fclose(out); return kStOK; }
+  if(vertexPos.z()>50.0||vertexPos.z()<-50.0) {
+    fprintf(out,"# Event %3d: the primary vertex is out of z-range: %6.1f.\n",mEventCounter,vertexPos.z());
+    fclose(out);
+    return kStOK;
+  }
+
+  StEventSummary *summary = event->summary();  // This should be in StTrgMaker::Init().  It wastes time 
+  assert(summary);                             // every event.  But no
+  mMagneticField = summary->magneticField();   // big deal.
 
   StTriggerDetectorCollection *theTriggers = event->triggerDetectorCollection();
-  if (!theTriggers) { fclose(out); return kStOK; }
+  if (!theTriggers) {
+    fprintf(out,"# Event %3d: triggerDetectorCollection is missing\n",mEventCounter);
+    fclose(out);
+    return kStOK;
+  }
+  StL0Trigger *l0Trigger = event->l0Trigger();
+  if(!l0Trigger) {
+    fprintf(out,"# Event %3d: l0Trigger is missing\n",mEventCounter);
+    fclose(out);
+    return kStOK;
+  }
+  fprintf(out,"# Event %3d, triggerWord = 0x%04x\n",mEventCounter,l0Trigger->triggerWord());
+
   StCtbTriggerDetector &theCtb = theTriggers->ctb();
 
   fprintf(out,"e %d\n",mEventCounter);
@@ -172,7 +202,8 @@ void StTrgMaker::CalcCenterOfCircleDefinedByTrack(int q,double radius,double psi
   double angleOffset,xstart,ystart;
   xstart=r0*cos(RPD*phi0);
   ystart=r0*sin(RPD*phi0);
-  if(q>=0) angleOffset=-90; else angleOffset=90;
+  if(mMagneticField>0) { if(q>=0) angleOffset=-90; else angleOffset= 90; }
+  else                 { if(q>=0) angleOffset= 90; else angleOffset=-90; }
   *xcenter=xstart+radius*cos(RPD*(psi+angleOffset));
   *ycenter=ystart+radius*sin(RPD*(psi+angleOffset));
 }
@@ -266,12 +297,14 @@ void StTrgMaker::DoOneTrack(FILE *oo,long q,double curvature,double phi0,
     angle+=atan2(outerIntersectionY-ycenter,outerIntersectionX-xcenter)-atan2(ystart-ycenter,xstart-xcenter);
     count++;
   }
+  // The 180 below does this. if(fabs(tanl)>0.8) { FakeInfo(oo,101); return; }
   if(count<1) { FakeInfo(oo,124); return; } /* The track does not intersect the CTB because of low pt. */
   angle/=count; zintersection=z0+tanl*radius*fabs(angle);
-  if(fabs(zintersection)<INNER_OUTER_ZBOUNDARY) {
+  if(fabs(zintersection)>180.0) { FakeInfo(oo,107); return; }
+  if(fabs(zintersection)<INNER_OUTER_ZBOUNDARY-DEAD_ZONE) {
     inner=7; if(noIntersectionInner) { FakeInfo(oo,121); return; }
     xintersection=innerIntersectionX; yintersection=innerIntersectionY;
-  } else if(fabs(zintersection)<=OUTER_ZBOUNDARY) {
+  } else if(fabs(zintersection)>INNER_OUTER_ZBOUNDARY+DEAD_ZONE&&fabs(zintersection)<=OUTER_ZBOUNDARY) {
     inner=0;
     xintersection=outerIntersectionX; yintersection=outerIntersectionY;
     if(noIntersectionOuter) { FakeInfo(oo,122); return; }
@@ -279,6 +312,7 @@ void StTrgMaker::DoOneTrack(FILE *oo,long q,double curvature,double phi0,
 
   /* Now we can determine the slat number. */
   traynumber=TrayNumber(xintersection,yintersection,zintersection);
+  if(traynumber<1) { FakeInfo(oo,129); return; }
 
   /* Output. */
   OO"X%1.1f\n",xintersection);
@@ -312,18 +346,26 @@ double r0,
 double tanl,
 double z0,
 */
+#define FIDUCIAL 0.4 // This tells how much of the slat on either side of the centerline
+                     // to accept as fiducial.  Thus, 0.5 would use the "entire" slat.
+                     // If you want to reject tracks which strike close to the edge, make
+                     // it a little smaller, say 0.4.
 int StTrgMaker::TrayNumber(double x,double y,double z) {
-  double angle; int rv;
+  double tv,angle; int rv;
   angle=atan2(y,x);
   while(angle< 0.0) angle+=2*PI;
   while(angle>2*PI) angle-=2*PI;
-  angle*=60/(2*PI); /* Var angle is in units of 1/60th of circle, ccw from x-axis. */
+  angle*=60/(2*PI); /* Var "angle" is in units of 1/60th of circle, ccw from x-axis. */
   if(z>0) {
-    rv=120-angle+13.5;  /* The "120" is to avoid problems with double -> int conversion of negative doubles. */
-    while(rv <1) rv+=60; while(rv> 60) rv-=60;
+    tv=120-angle+13.5; /* "120" avoids probs w double -> int conversion of negative doubles (next line). */
+    rv=tv;
+    if(fabs((double)(tv-rv-0.5))>FIDUCIAL) return -1; /* Track is not close enough to centerline of slat. */
+    while(rv<  1) rv+=60; while(rv> 60) rv-=60;
   } else {
-    rv=120+angle+103.5;  /* The "120" is to avoid problems with double -> int conversion of negative doubles. */
-    while(rv<61) rv+=60; while(rv>120) rv-=60;
+    tv=120+angle+103.5;  /* "120" avoids probs w double -> int conversion of negative doubles (next line). */
+    rv=tv;
+    if(fabs((double)(tv-rv-0.5))>FIDUCIAL) return -1; /* Track is not close enough to centerline of slat. */
+    while(rv< 61) rv+=60; while(rv>120) rv-=60;
   }
   return rv;
 }

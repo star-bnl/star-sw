@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.208 2001/07/03 21:53:39 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.218 2001/08/01 00:54:27 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -41,7 +41,7 @@ Bfc_st BFC[] = {
   {"Y2000"    ,"","","db,calib"             ,"","","actual 2000:  TPC+CTB+RICH+caloPatch+svtLadder",kFALSE},
   {"RY1h"        ,""  ,"","db,calib,VtxOffSet"              ,"","","Real data with Year1h geometry",kFALSE},
   {"RY2000"   ,"","","db,calib,VtxOffSet"   ,"","","actual 2000: Real data with Year2000 geometry ",kFALSE},
-  {"RY2001"   ,"","","db,calib,VtxOffSet"   ,"","","actual 2001: Real data with Year2001 geometry ",kFALSE},
+  {"RY2001"   ,"","","db,calib"             ,"","","actual 2001: Real data with Year2001 geometry ",kFALSE},
   {"Y2a"         ,""  ,"","db,calib"                          ,"","","Old (CDR time) complete STAR",kFALSE},
   {"Y2b"         ,"" ,"","db,calib","","","2001 geometry 1st guess:TPC+CTB+FTPC+RICH+CaloPatch+SVT",kFALSE},
   {"Y2001"       ,"","","db,calib","","","year2001: geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD",kFALSE},
@@ -82,10 +82,23 @@ Bfc_st BFC[] = {
   {"CComplete"   ,""  ,"","Complete,C2default"             ,"","","Turn on chain for Complete STAR",kFALSE},
   {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
+  
   {"P2000"       ,""  ,"","ry2000,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
-  {"P2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,ftpc,svt,emcY2,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
-                                                           ,"Production chain for summer 2001 data (incomplete)",kFALSE},
+  {"SvtD"        ,""  ,"","SvtSeqAdj,SvtClu,SvtCluAnal,SvtHit,SvtVtx", "", "",
+                                                                              "SVT makers for Data",kFALSE}, 
+
+
+  // Physics,Cdst,... Physics was removed since trg reads the wrong format
+  {"P2001"       ,""  ,"","ry2001,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB","",""
+                                               ,"Production chain for summer 2001 data (tpc, rich)",kFALSE},
+  {"P2001a"      ,""  ,"","ry2001,in,tpc_daq,tpc,rich,svt_daq,SvtD,emcY2,ftpc,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
+                                           ,"Production chain for summer 2001 data (full with trg)",kFALSE},
+  {"P2001b"      ,""  ,"","ry2001,in,tpc_daq,tpc,rich,svt_daq,SvtD,emcY2,ftpc,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
+                                   ,"Production chain for summer 2001 data (as P2001a, reshapable)",kFALSE},
+
+
+
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -99,10 +112,10 @@ Bfc_st BFC[] = {
   {"fzin"        ,""  ,"","geant,Simu","" ,""                                 ,"read gstar fz-file",kFALSE},
   {"NoInput"     ,""  ,"","","" ,""                                                ,"No input file",kFALSE},
   {"util"        ,""  ,"","","","StAnalysisUtilities",                   "Load StAnalysisUtilities",kFALSE},
-  {"FieldOn"     ,""  ,"",""                                 ,"","StMagF" ,"Constant nominal field",kFALSE},
-  {"FieldOff"    ,""  ,"",""                                        ,"","StMagF" ,"No Field option",kFALSE},
-  {"HalfField"   ,""  ,"",""                                       ,"","StMagF","Half Field option",kFALSE},
-  {"ReverseField",""  ,"",""                                    ,"","StMagF","Reverse Field option",kFALSE},
+  {"FieldOn"     ,""  ,"","MagF"                                   ,"","" ,"Constant nominal field",kFALSE},
+  {"FieldOff"    ,""  ,"","MagF"                                          ,"","" ,"No Field option",kFALSE},
+  {"HalfField"   ,""  ,"","MagF"                                         ,"","","Half Field option",kFALSE},
+  {"ReverseField",""  ,"","MagF"                                      ,"","","Reverse Field option",kFALSE},
   {"NoCintDb"    ,""  ,"",""                                   ,"","","Switch off standard Cint Db",kFALSE},
   {"NoCintCalDb" ,""  ,"",""                                      ,"","","Switch off Cint Calib Db",kFALSE},
   {"NoMySQLDb"   ,""  ,"",""                                           ,"","","Switch off MySQL Db",kFALSE},
@@ -110,7 +123,7 @@ Bfc_st BFC[] = {
   {"MakeDoc"     ,""  ,"",""                   ,"","","Make HTML documentation for the given Chain",kFALSE},
   {"Debug"       ,""  ,"",""                                            ,"","","Set debug flag = 1",kFALSE},
   {"Debug2"      ,""  ,"",""                                            ,"","","Set debug flag = 2",kFALSE},
-  {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},  
+  {"Higz"        ,""  ,"",""                                               ,"","","Pop Higz window",kFALSE},
   {"big"         ,""  ,"",""                                         ,"","","Set NwGEANT =20Mwords",kFALSE},
   {"bigbig"      ,""  ,"",""                                         ,"","","Set NwGEANT =40Mwords",kFALSE},
   {"InTree"      ,""  ,"","in",""                                     ,"","bfcTree Input Tree name",kFALSE},
@@ -264,7 +277,7 @@ Bfc_st BFC[] = {
 
   {"dst"         ,"dst","globalChain","dstOut,SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT","St_dst_Maker" 
                                                                 ,"St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"dEdx"       ,"dEdx","globalChain","globT,tpcDb,TbUtil"          ,"StdEdxMaker","StdEdxMaker","",kFALSE},
+  {"dEdx"        ,"dEdx","globalChain","globT,tpcDb,TbUtil"          ,"StdEdxMaker","StdEdxMaker","",kFALSE},
   {"Event"       ,"","","StEvent"                                 ,"StEventMaker","StEventMaker","",kFALSE},
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",
@@ -510,7 +523,11 @@ Int_t StBFChain::Instantiate()
 	  if (maker == "St_dst_Maker") SetInput("dst",".make/dst/.data/dst");
 	  if (maker == "St_dst_Maker" && GetOption("HitsBranch")) mk->SetMode(2); 
 	  if (maker == "StMatchMaker" && !GetOption("Kalman")) mk->SetMode(-1);
-	  if (maker == "St_tpt_Maker" && GetOption("ExB")) mk->SetMode(1); // Al Saulys request
+	  if (maker == "St_tpt_Maker" && GetOption("ExB")){
+	    int mask=1;                                  // Al Saulys request
+	    if( GetOption("RY2001") ) mask = mask & 2 ;  // Jim Thomas request
+	    mk->SetMode(mask); 
+	  }
 	  if (maker == "St_tcl_Maker") {
 	    St_tcl_Maker *tclMk = (St_tcl_Maker *) mk;
 	    if (GetOption("EastOff")) tclMk->EastOff(); 
@@ -967,7 +984,7 @@ void StBFChain::SetDbOptions(){
   else {if (GetOption("Y2a"))  db->SetDateTime("year_2a");
   else {if (GetOption("Y2b"))  db->SetDateTime("year_2b"); 
   else {if (GetOption("Simu")) db->SetDateTime("year_2b");
-  else {if (GetOption("Y2001"))  db->SetDateTime("year_2b");
+  else {if (GetOption("Y2001"))  db->SetDateTime("year_2b"); 
   }}}}}}}}}}}}}}}
 	gMessMgr->QAInfo() << db->GetName() 
 			   << " Maker set time = " 

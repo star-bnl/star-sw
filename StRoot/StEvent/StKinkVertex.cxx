@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StKinkVertex.cxx,v 2.7 2001/05/30 17:45:54 perev Exp $
+ * $Id: StKinkVertex.cxx,v 2.8 2001/07/13 16:25:20 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StKinkVertex.cxx,v $
+ * Revision 2.8  2001/07/13 16:25:20  perev
+ * last static array fixed
+ *
  * Revision 2.7  2001/05/30 17:45:54  perev
  * StEvent branching
  *
@@ -34,6 +37,7 @@
  **************************************************************************/
 #include <algorithm>
 #include "TClass.h"
+#include "TFile.h"
 #include "StKinkVertex.h"
 #include "StParticleTable.hh"
 #include "StTrack.h"
@@ -45,7 +49,7 @@ using std::copy;
 
 ClassImp(StKinkVertex)
 
-static const char rcsid[] = "$Id: StKinkVertex.cxx,v 2.7 2001/05/30 17:45:54 perev Exp $";
+static const char rcsid[] = "$Id: StKinkVertex.cxx,v 2.8 2001/07/13 16:25:20 perev Exp $";
 
 StKinkVertex::StKinkVertex()
 {
@@ -245,7 +249,11 @@ void StKinkVertex::Streamer(TBuffer &R__b)
        R__b >> mDcaParentPrimaryVertex;
        R__b >> mHitDistanceParentDaughter;
        R__b >> mHitDistanceParentVertex;
-       R__b.ReadStaticArray(mDeltaEnergy);
+
+       Int_t dumy;
+       if (gFile && gFile->GetVersion() < 30000) {R__b >> dumy;}
+
+       R__b.ReadFastArray(mDeltaEnergy,3);
        R__b >> mDecayAngle;
        R__b >> mDecayAngleCM;
        mParentMomentum.Streamer(R__b);

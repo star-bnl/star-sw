@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.14 2001/06/15 00:52:15 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.16 2001/08/01 18:34:39 jhthomas Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,12 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.16  2001/08/01 18:34:39  jhthomas
+ * Add temporary mode flag for year 2 running (different cathode potentials)
+ *
+ * Revision 1.15  2001/07/24 00:20:20  jhthomas
+ * Protect Divide by Zero in UndoBDistortion
+ *
  * Revision 1.14  2001/06/15 00:52:15  jhthomas
  * Protect discontinuity in distortions at CM
  *
@@ -63,7 +69,7 @@
 #define  StarMagE      148.0            // STAR Electric Field (V/cm) Magnitude
 #define  GG           -127.5            // Gating Grid voltage (volts)
 
-#define  TPC_Z0        208.7            // Z location of STAR TPC Gating Grid (cm)
+#define  TPC_Z0        209.3            // Z location of STAR TPC Ground Plane (cm)
 #define  XTWIST       -0.379            // X Displacement of West end of TPC wrt magnet (mRad)
 #define  YTWIST        0.153            // Y Displacement of West end of TPC wrt magnet (mRad)
 #define  EASTCLOCKERROR  0.0            // Phi rotation of East end of TPC in milli-radians
@@ -101,10 +107,28 @@ StMagUtilities::StMagUtilities( )
       gufld(X,B) ;                          // Read crude values from Chain to get scale
       gFactor = B[2] / 4.980 ;              // Select factor based on Chain values (kGauss) 
       gMap = kMapped ;                      // Do once & Select the B field map (mapped field or constant)
-      Init() ;                              // Read the Magnetic and Electric Field Data Files, set constants
+      Init( 0 ) ;                           // Read the Magnetic and Electric Field Data Files, set constants
     }
 
 }
+
+
+StMagUtilities::StMagUtilities( Int_t mode )
+
+{                                           // StMagUtilities constructor - temporary kludge in lieu of DB
+
+  Float_t  B[3], X[3] = { 0, 0, 0 } ;
+
+  if ( gMap == kUndefined ) 
+    {
+      gufld(X,B) ;                          // Read crude values from Chain to get scale
+      gFactor = B[2] / 4.980 ;              // Select factor based on Chain values (kGauss) 
+      gMap = kMapped ;                      // Do once & Select the B field map (mapped field or constant)
+      Init(mode) ;                          // Read the Magnetic and Electric Field Data Files, set constants
+    }
+
+}
+
 
 StMagUtilities::StMagUtilities( const EBField map = kMapped, const Float_t factor = 1.0 )
 
@@ -114,7 +138,7 @@ StMagUtilities::StMagUtilities( const EBField map = kMapped, const Float_t facto
     {
       gFactor = factor ;
       gMap = map ;                          // Do once & select the requested map (mapped or constant)
-      Init() ;                              // Read the Magnetic and Electric Field Data Files, set constants
+      Init( 0 ) ;                           // Read the Magnetic and Electric Field Data Files, set constants
     }
    
   if ( gMap != map || factor != gFactor ) 
@@ -125,7 +149,8 @@ StMagUtilities::StMagUtilities( const EBField map = kMapped, const Float_t facto
 
 }
 
-void StMagUtilities::Init ( )
+
+void StMagUtilities::Init ( Int_t mode )
 
 {
 
@@ -135,11 +160,16 @@ void StMagUtilities::Init ( )
   ReadField() ;                             // Read the Magnetic and Electric Field Data Files
   BField(X,B) ;                             // Work in kGauss, cm and assume Bz dominates
 
+  // Mode = 0 is for Year 1 running, Mode = 1 is for year 2 running (different cathode potentials)
+
   // Theoretically, OmegaTau is defined as shown in the next line.  
   // OmegaTau   =  -10. * B[2] * StarDriftV / StarMagE ;  // cm/microsec, Volts/cm
   // Instead, we will use scaled values from the Aleph collaboration
 
-  OmegaTau   =  -11. * B[2] * StarDriftV / StarMagE ;  // B in kGauss, note that the sign of B is important 
+  if ( mode == 0 ) 
+    OmegaTau   =  -11.0 * B[2] * StarDriftV / StarMagE ;  // B in kGauss, note that the sign of B is important 
+  else
+    OmegaTau   =  -12.4 * B[2] * StarDriftV / StarMagE ;  // B in kGauss, note that the sign of B is important 
   Const_0    =  1. / ( 1. + pow( OmegaTau, 2 ) ) ;
   Const_1    =  OmegaTau / ( 1. + pow( OmegaTau, 2 ) ) ;
   Const_2    =  pow( OmegaTau, 2 ) / ( 1. + pow( OmegaTau, 2 ) ) ;
@@ -305,8 +335,11 @@ void StMagUtilities::UndoBDistortion( const Float_t x[3], Float_t Xprime[3] )
       if ( i == NSTEPS ) index = 1 ;
       Xprime[2] +=  index*(ah/3) ;
       B3DField( Xprime, B ) ;                          // Work in kGauss, cm
-      Xprime[0] +=  index*(ah/3)*( Const_2*B[0] - Const_1*B[1] ) / B[2] ;
-      Xprime[1] +=  index*(ah/3)*( Const_2*B[1] + Const_1*B[0] ) / B[2] ;
+      if ( TMath::Abs(B[2]) > 0.001 )                  // Protect From Divide by Zero Faults
+	{
+	  Xprime[0] +=  index*(ah/3)*( Const_2*B[0] - Const_1*B[1] ) / B[2] ;
+	  Xprime[1] +=  index*(ah/3)*( Const_2*B[1] + Const_1*B[0] ) / B[2] ;
+	}
       if ( index != 4 ) index = 4; else index = 2 ;
     }    
 
@@ -602,7 +635,6 @@ void StMagUtilities::UndoEndcapDistortion( const Float_t x[3], Float_t Xprime[3]
   z      =  x[2] ;
   if ( z > 0 && z <  0.2 ) z =  0.2 ;               // Protect against discontinuity at CM
   if ( z < 0 && z > -0.2 ) z = -0.2 ;               // Protect against discontinuity at CM
-
 
   InterpolateEEdistortion( r, phi, z, Er_integral, Ephi_integral ) ;
 

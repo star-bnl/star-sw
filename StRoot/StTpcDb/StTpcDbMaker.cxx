@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.22 2001/06/21 16:27:52 perev Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.23 2001/07/27 23:52:33 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.23  2001/07/27 23:52:33  hardtke
+ * use Global (magnet) coordinates
+ *
  * Revision 1.22  2001/06/21 16:27:52  perev
  * two error matrix transformation methods added
  *
@@ -109,8 +112,8 @@ int type_of_call tpc_x_to_pad_(float *row,float *x, float* pad) {
   return 1;
 }
 int type_of_call tpc_global_to_local_(int *isect,float *xglobal, float* xlocal){
-  //  StGlobalCoordinate global(xglobal[0],xglobal[1],xglobal[2]);
-  StTpcLocalCoordinate global(xglobal[0],xglobal[1],xglobal[2]);
+  StGlobalCoordinate global(xglobal[0],xglobal[1],xglobal[2]);
+  //  StTpcLocalCoordinate global(xglobal[0],xglobal[1],xglobal[2]);
   StTpcLocalSectorCoordinate localSector;
   StTpcPadCoordinate pad;
   StTpcCoordinateTransform transform(gStTpcDb);
@@ -332,8 +335,7 @@ Int_t StTpcDbMaker::Init(){
      int ipad[2] = {20,40};
      StTpcPadCoordinate pad1(i+1, j+1, ipad[0], *time);
      StTpcPadCoordinate pad2(i+1, j+1, ipad[1], *time);
-     //     StGlobalCoordinate gc1,gc2;
-     StTpcLocalCoordinate gc1,gc2;
+     StGlobalCoordinate gc1,gc2;
      StTpcCoordinateTransform transform(gStTpcDb);
      transform(pad1,gc1);
      transform(pad2,gc2);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixModel.cxx,v 2.5 2001/04/05 04:00:50 ullrich Exp $
+ * $Id: StHelixModel.cxx,v 2.8 2001/07/21 18:04:02 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,15 @@
  ***************************************************************************
  *
  * $Log: StHelixModel.cxx,v $
+ * Revision 2.8  2001/07/21 18:04:02  ullrich
+ * Added code to helix() in order to stay backwards compatible.
+ *
+ * Revision 2.7  2001/07/19 16:18:46  ullrich
+ * Added missing method helicity().
+ *
+ * Revision 2.6  2001/07/17 22:23:30  ullrich
+ * Added helicity to track geometry.
+ *
  * Revision 2.5  2001/04/05 04:00:50  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -35,7 +44,7 @@
 
 ClassImp(StHelixModel)
 
-static const char rcsid[] = "$Id: StHelixModel.cxx,v 2.5 2001/04/05 04:00:50 ullrich Exp $";
+static const char rcsid[] = "$Id: StHelixModel.cxx,v 2.8 2001/07/21 18:04:02 ullrich Exp $";
 
 StHelixModel::StHelixModel() : mModel(helixModel)
 {
@@ -43,17 +52,19 @@ StHelixModel::StHelixModel() : mModel(helixModel)
     mCurvature = 0;
     mDipAngle = 0;
     mCharge = 0;
+    mHelicity = 0;
 }
 
 StHelixModel::StHelixModel(short q, float psi, float c, float dip,
-                           const StThreeVectorF& o, const StThreeVectorF& p)
+                           const StThreeVectorF& o, const StThreeVectorF& p, short h)
     : mModel(helixModel),
       mCharge(q),
       mPsi(psi),
       mCurvature(c),
       mDipAngle(dip),
       mOrigin(o),
-      mMomentum(p)
+      mMomentum(p),
+      mHelicity(h)
 {/* noop */}
 
 StHelixModel::StHelixModel(const dst_track_st& t) :  mModel(helixModel)
@@ -70,6 +81,7 @@ StHelixModel::StHelixModel(const dst_track_st& t) :  mModel(helixModel)
     mMomentum.setX(pt*cos(mPsi));
     mMomentum.setY(pt*sin(mPsi));
     mMomentum.setZ(pz);
+    // mHelicity not known at this level
 }
 
 StHelixModel::~StHelixModel() { /* noop */ }
@@ -85,6 +97,9 @@ StHelixModel::model() const {return mModel;}
 
 short
 StHelixModel::charge() const {return mCharge;}
+
+short
+StHelixModel::helicity() const {return mHelicity;}
 
 double
 StHelixModel::curvature() const {return mCurvature;}
@@ -115,20 +130,34 @@ StHelixModel::helix() const
 
     //
     //  h = -sign(q*B)
-    //  Here we assume B > 0. Here we run into
-    //  problems if STAR ever switches polarisation.
+    //  mHelicity is needed at this point. It is NOT
+    //  filled from the constructor using the table
+    //  but has to be provided separately.
+    //
     //  For B=0, h is ill defined and we can use
     //  +1 or -1. Both work as long as the phase
     //  is calculated correctly. Here we use the
     //  +1 convention.
     //
-    int h;
-    if (mCharge == 0)
-        h = 1;
-    else if (mCharge > 0)
-        h = -1;
-    else
-        h = 1;
+    int h = mHelicity;
+
+    //
+    //  Need to stay backwards compatible. All we can do here
+    //  is to assume B > 0. This is OK since the inverse field
+    //  and the introduction of mHelicity happened at the same time.
+    //
+    if (h == 0) {
+	if (mCharge == 0)
+	    h = 1;
+	else if (mCharge > 0)
+	    h = -1;
+	else
+	    h = 1;
+    }
+    // end backwards compatibility fix
+
+    
+    if (mCharge == 0) h = 1;
     
     double phase = mPsi-h*pi/2;
     
@@ -138,3 +167,21 @@ StHelixModel::helix() const
                             mOrigin,      // cm
                             h);
 }
+
+void
+StHelixModel::setCharge(short val) { mCharge = val; }
+
+void
+StHelixModel::setHelicity(short val) { mHelicity = val; }
+
+void
+StHelixModel::setCurvature(double val) { mCurvature = val; }
+
+void
+StHelixModel::setPsi(double val) { mPsi = val; }
+
+void
+StHelixModel::setDipAngle(double val) { mDipAngle = val; }
+
+void
+StHelixModel::setOrigin(const StThreeVectorF& val) { mOrigin = val; }

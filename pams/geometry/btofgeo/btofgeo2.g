@@ -1,5 +1,8 @@
-* $Id: btofgeo2.g,v 1.2 2001/03/14 00:03:50 nevski Exp $
+* $Id: btofgeo2.g,v 1.3 2001/07/18 22:39:13 geurts Exp $
 * $Log: btofgeo2.g,v $
+* Revision 1.3  2001/07/18 22:39:13  geurts
+* changed max ToF for CTB and TOFp HITS to 10us for pile-up studies in pp
+*
 * Revision 1.2  2001/03/14 00:03:50  nevski
 * btof corrected by F.Geurts
 *
@@ -31,6 +34,12 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
 *            08 Feb  2001  FG- final positions of the slats and FEE boards
 *            20 Feb  2001  FG- fixed bug in outer CTB slab dimensioning,
 *                              water in TOFp cooling loops
+*            19 Jul  2001  FG- changed max ToF for CTB and TOFp HITS
+*                              to 10us upon request by Jan Balewski.
+*                              The #bits for ToF has been increased to
+*                              20 to keep similar resolution and the
+*                              order of the HITS words is changed to
+*                              keep similar total HITS size
 *
 *******************************************************************************
 +CDE,AGECOM,GCUNIT,GCONST.
@@ -432,7 +441,7 @@ Block BXSA  is  the active trigger scintillator SLAB for ctb
 *
       HITS    BXSA   X:.01:S   Y:.01:   Z:.01:,
                      Ptot:18:(0,100)    cx:10:   cy:10:   cz:10:,
-                     Sleng:.1:(0,500)   ToF:16:(0,1.e-6) Step:.01:,      
+                     Step:.01:    ToF:20:(0,1.e-5)   Sleng:.1:(0,500),
                      Eloss:16:(0,0.01) 
 EndBlock
 *
@@ -448,7 +457,7 @@ Block BCSB  is  the active trigger scintillator SLAB for tof
 *
       HITS    BCSB   X:.01:S   Y:.01:   Z:.01:,
                      Ptot:18:(0,100)    cx:10:   cy:10:   cz:10:,
-                     Sleng:.1:(0,500)   ToF:16:(0,1.e-6)  Step:.01:,
+                     Step:.01:    ToF:20:(0,1.e-5)   Sleng:.1:(0,500),
                      Eloss:16:(0,0.01) 
 EndBlock
 *

@@ -19,5 +19,7 @@
   float     adcZDCEast;     /* Sum of attenuated East ZDC ADCs       */
   float     adcZDCWest;     /* Sum of attenuated West ZDC ADCs       */
   float     adcZDCsum;      /* Sum of total (East+West) attenuated ZDC ADCs */
+  unsigned short lastDSM[8];/* Jul 18 2001                           */
+  unsigned short BCdata[16];/* Jul 18 2001                           */
 } ;
-/*  Last mod. for dst_TrgDet:   $Date: 2000/07/19 21:47:29 $ */
+/*  Last mod. for dst_TrgDet:   $Date: 2001/07/20 20:51:10 $ */

@@ -1,7 +1,7 @@
 AUTHOR: Herbert Ward, May 29 2001.
 INTENDED AUDIENCE: Those wishing to use StTrgMaker for CTB calibration.
 
-First read the file intro.txt which is this directory.
+First read the file intro1.txt which is this directory.
 
 First, make a working directory, we'll call it "your working directory" below.
 

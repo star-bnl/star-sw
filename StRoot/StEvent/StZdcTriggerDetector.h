@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcTriggerDetector.h,v 2.5 2001/07/12 22:58:33 ullrich Exp $
+ * $Id: StZdcTriggerDetector.h,v 2.6 2001/07/13 16:25:20 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StZdcTriggerDetector.h,v $
+ * Revision 2.6  2001/07/13 16:25:20  perev
+ * last static array fixed
+ *
  * Revision 2.5  2001/07/12 22:58:33  ullrich
  * Added variable to store the vertex_z from timing info.
  *
@@ -64,6 +67,6 @@ protected:
     Float_t  mSum;
     Float_t  mVertexZ;
     
-    ClassDef(StZdcTriggerDetector,1)
+    ClassDef(StZdcTriggerDetector,2)
 };
 #endif

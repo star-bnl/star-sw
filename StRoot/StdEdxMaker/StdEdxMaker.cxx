@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.15 2001/05/31 16:12:20 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.17 2001/08/03 18:45:05 fine Exp $
 #include <iostream.h>
 #include "StdEdxMaker.h"
 // ROOT
@@ -33,6 +33,8 @@
 #include "tables/St_TpcDriftDistCorr_Table.h"
 #include "tables/St_fee_vs_pad_row_Table.h"
 #include "tables/St_tpcBadPad_Table.h"
+#include "tables/St_dst_event_summary_Table.h"
+
 // global
 #include "StDetectorId.h"
 #include "StDedxMethod.h"
@@ -435,6 +437,14 @@ Int_t StdEdxMaker::Finish() {
 }
 //_____________________________________________________________________________
 Int_t StdEdxMaker::Make(){ 
+// Get the magnetic field direction to build the helix properly:
+  St_dst_event_summary *summary = (St_dst_event_summary *)GetDataSet("dst/event_summary");
+  float bField = -1;
+  if (summary) { 
+      assert(summary->GetTable());
+      bField = summary->GetTable()->field;
+  }
+
   Double_t Scale2keV = 560./335.;
   Double_t Scale70   = 1.2684;//1.2876; //1.2315;
   Double_t Scale60   = 1.3506;//1.3712; //1.3146;
@@ -637,7 +647,7 @@ Int_t StdEdxMaker::Make(){
 	if (primTRK->id > Id) break;
 	iprim = jprim;
 	primTrk = primTRK;
-	helix  = primtrkC->MakeHelix(iprim);
+	helix  = primtrkC->MakeHelix(iprim,bField);
 	NoFitPoints = primTrk->n_fit_point;
 	kprim++;
 	if (m_Mode > 0) {
@@ -652,7 +662,7 @@ Int_t StdEdxMaker::Make(){
       }
     }
     if (!helix) {
-      helix = globtrkC->MakeHelix(iglob);
+      helix = globtrkC->MakeHelix(iglob,bField);
       NoFitPoints = globTrk->n_fit_point;
       if (m_Mode > 0) {
 	Double_t tanl  = globTrk->tanl;

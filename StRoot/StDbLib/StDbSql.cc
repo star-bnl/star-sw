@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.8 2001/04/23 19:24:31 porter Exp $
+ * $Id: StDbSql.cc,v 1.10 2001/08/02 17:37:19 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,13 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.10  2001/08/02 17:37:19  porter
+ * fixed problem in fetch by where-clause used in online in StDbSql.cc.
+ * also got rid of warning comparing unsigned int to int.
+ *
+ * Revision 1.9  2001/07/23 16:39:30  porter
+ * removed an extraneous "cout" left in by mistake
+ *
  * Revision 1.8  2001/04/23 19:24:31  porter
  * fixed row limit & initial buffer contents for query by where clause
  *
@@ -395,7 +402,6 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
   */
 
   unsigned int* retVal=0;
-  int  retSize=0;
   char* tName=table->printName();
 
   char* checkString=checkTablePrepForQuery(table);
@@ -416,7 +422,9 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
      return retVal;
    }
 
-   //table->zeroData();
+   table->setElementID((int*)retVal,0); // no rows to begin with
+   table->setRowNumber();
+
    char** dataTables=getDataTables(table,numTables);
    int i;
    for(i=0;i<numTables;i++){
@@ -432,16 +440,13 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
      }
 
      int retRows=Db.NbRows();
-     cout<<"Number of Rows at start " << table->GetNRows()<<endl; 
-     cout<< " Number of Rows = "<<retRows<<endl;
      if(retRows==0) continue;
 
      int* elements = new int[retRows];
      int* dataIDList = new int[retRows];
      unsigned int* timeList = new unsigned int[retRows];
-     numRowsReturned+=retRows;
-     table->addNRows(retRows-table->GetNRows());
-     table->setRowNumber();
+     table->addNRows(retRows);
+     // table->setRowNumber();
 
      int j=0;
      while(Db.Output(&buff)){
@@ -457,14 +462,15 @@ StDbSql::QueryDbTimes(StDbTable* table, const char* whereClause){
      table->addWrittenRows(dataIDList,retRows);
      table->setBeginTime(t1);     
 
-     unsigned int* tmpRet=new unsigned int[retSize+retRows];
+     unsigned int* tmpRet=new unsigned int[numRowsReturned+retRows];
      if(retVal){
-       memcpy(tmpRet,retVal,retSize*sizeof(int));
+       memcpy(tmpRet,retVal,numRowsReturned*sizeof(int));
        delete [] retVal;
      }
-     tmpRet+=retSize;
+     tmpRet+=numRowsReturned;
      memcpy(tmpRet,timeList,retRows*sizeof(int));
      retVal=tmpRet;
+     numRowsReturned+=retRows;
      Db.Release();
 
      if(table->IsIndexed() && t1>0){
@@ -536,6 +542,7 @@ StDbSql::QueryDbFunction(StDbTable* table, const char* whereClause, char* funcNa
      int retRows=Db.NbRows();
      if(retRows==0) continue;
      numRowsReturned+=retRows;
+     table->setRowNumber();  // reset to first row.
 
      while(Db.Output(&buff)){ table->dbStreamer(&buff,true); buff.Raz(); }
      Db.Release();

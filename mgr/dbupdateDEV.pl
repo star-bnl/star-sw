@@ -16,7 +16,7 @@ use Net::FTP;
 use Class::Struct;
 use File::Basename;
 
-require "/afs/rhic/star/packages/DEV/mgr/dbTJobsSetup.pl";
+require "/afs/rhic/star/packages/dev/mgr/dbTJobsSetup.pl";
 
 #require "dbTJobsSetup.pl";
 
@@ -29,17 +29,17 @@ my @daq_dir = ("minbias", "central");
 
 my @OUT_DIR;
 my @OUTD_DIR;
-my @Nday = ("Sun","Mon","Tue","Wed","Thu","Fri","Sat");
+my @Nday = ("Mon","Tue","Wed","Thu","Fri");
 
 
 my %dayHash = (
-                 "Sun" => 1,
-		 "Mon" => 2,
-		 "Tue" => 3, 
-		 "Wed" => 4, 
-		 "Thu" => 5, 
-		 "Fri" => 6,
-                 "Sat" => 7, 
+		 "Mon" => 1,
+		 "Tue" => 2, 
+		 "Wed" => 3, 
+		 "Thu" => 4, 
+		 "Fri" => 5,
+                 "Sat" => 6,
+                 "Sun" => 7, 
 		 );
 
 my $min;
@@ -68,10 +68,25 @@ my $thistime;
  my $testDay;
  my $beforeDay;
  $iday = $dayHash{$thisday}; 
- $testDay = $Nday[$iday - 2];
- $beforeDay = $Nday[$iday - 3];
+if($thisday eq "Mon") {
+  $testDay = "Fri";
+  $beforeDay = "Thu";
 
+}else{
+ $testDay = $Nday[$iday - 2];
+  if($testDay eq "Mon") {
+    $beforeDay = "Fri";
+  }else{
+ $beforeDay = $Nday[$iday - 3];
+}
+}
+if($thisday eq "Sat" or $thisday eq "Sun" ){
+ exit();
+} 
   print "Day Name: ",$thisday, " % ", "Index", $iday, "\n";
+
+#$testDay = "Fri";
+#$beforeDay = "Thu";
 
 ##### setup output directories for DEV with thisDay
 
