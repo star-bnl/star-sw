@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: dbquery.pl,v 1.3 1999/08/08 18:54:38 wenaus Exp $
+# $Id: dbquery.pl,v 1.4 1999/09/21 12:26:39 wenaus Exp $
 #
 # $Log: dbquery.pl,v $
+# Revision 1.4  1999/09/21 12:26:39  wenaus
+# Add calib/param databases to backup list
+#
 # Revision 1.3  1999/08/08 18:54:38  wenaus
 # Add dubna
 #
@@ -29,7 +32,7 @@ require "dbsetup.pl";
 
 %keys = (
          "beam" => "auau50,auau100,auau200,augas100,pa200,pau200,pp200,sisi200,cosmics",
-         "geom" => "year1a,year1b,year2a,year2b",
+         "geom" => "year1a,year1b,year1s,year2a,year2b",
          "mcgen" => "hbt_ven,hbt_vni,hijet,hijing,hijing135,muon,pythia,two_photon,venus412,vni",
          "bfc" => "evg,gst,tfs,trs,tss",
          "format" => "daq,xdf,fz,fzd,root,root-MDC2",

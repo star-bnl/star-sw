@@ -1,8 +1,11 @@
 #!/opt/star/bin/perl
 #
-# $Id: dbloaddaq.pl,v 1.3 1999/07/25 16:25:02 wenaus Exp $
+# $Id: dbloaddaq.pl,v 1.4 1999/09/21 12:26:39 wenaus Exp $
 #
 # $Log: dbloaddaq.pl,v $
+# Revision 1.4  1999/09/21 12:26:39  wenaus
+# Add calib/param databases to backup list
+#
 # Revision 1.3  1999/07/25 16:25:02  wenaus
 # Suppress junk runs
 #
@@ -34,7 +37,7 @@ require "dbsetup.pl";
 
 my $debugOn=0;
 
-@junkRuns = ( 515, 621 );
+@junkRuns = ( 515, 621, 2605 );
 
 $timestampFile = '/disk1/star/daq/last_update';
 
@@ -46,160 +49,166 @@ for ($ii=0; $ii<@ARGV; $ii++) {
 # connect to the DB
 &StDbConnect();
 
-# scan the old log file and load new entries
-$content = get("http://redford.star.bnl.gov/staronline/shifts/shiftLogReport.htm");
-open(SAVE,">log.txt");
-print SAVE $content;
-close SAVE;
-@content = split(/\r/,$content);
-$nl=0;
-foreach $line ( @content ) {
-    $nextl = $content[$nl+1];
-    $nextl =~ s/\n//g;
-    $nextl =~ s/&nbsp;/ /g;
-    $line =~ s/\n//g;
-    $nextl =~ s/<[a-zA-Z0-9\/]+>//g;    
-    $nextl =~ s/^\s*//;
-    if ( $line =~ m/Author/i ) {
-        $author = $nextl;
-        $nrun='';
-        $nevents=0;
-        $date='';
-        $gain='';
-        $ped='';
-        $type='';
-        $trig='';
-        $activity='';
-        $mag='';
-        $raw='';
-        $gcorr='';
-        $zerosupp='';
-    } elsif ( $line =~ m/<h3>comment<\/h3>/i ) {
-        # Comment, which is the last field. Pick it up and commit.
-        $inComment = 1;
-        $nc=0;
-        @comment=0;
-        while ( $inComment ) {
-            $comment[$nc] = $content[$nl+$nc+1];
-            $comment[$nc] =~ s/\n//g;
-            if ( $comment[$nc] =~ m/<\/p>/ ) {
-                $inComment=0;
+#### scan the old log file and load new entries
+$scanOldLog = 0;
+if ( $scanOldLog ) {
+    $content = get("http://redford.star.bnl.gov/staronline/shifts/shiftLogReport.htm");
+    open(SAVE,">log.txt");
+    print SAVE $content;
+    close SAVE;
+    @content = split(/\r/,$content);
+    $nl=0;
+    foreach $line ( @content ) {
+        $nextl = $content[$nl+1];
+        $nextl =~ s/\n//g;
+        $nextl =~ s/&nbsp;/ /g;
+        $line =~ s/\n//g;
+        $nextl =~ s/<[a-zA-Z0-9\/]+>//g;    
+        $nextl =~ s/^\s*//;
+        if ( $line =~ m/Author/i ) {
+            $author = $nextl;
+            $nrun='';
+            $nseq=0;
+            $nevents=0;
+            $date='';
+            $gain='';
+            $ped='';
+            $type='';
+            $trig='';
+            $activity='';
+            $mag='';
+            $raw='';
+            $gcorr='';
+            $zerosupp='';
+        } elsif ( $line =~ m/<h3>comment<\/h3>/i ) {
+            # Comment, which is the last field. Pick it up and commit.
+            $inComment = 1;
+            $nc=0;
+            @comment=0;
+            while ( $inComment ) {
+                $comment[$nc] = $content[$nl+$nc+1];
+                $comment[$nc] =~ s/\n//g;
+                if ( $comment[$nc] =~ m/<\/p>/ ) {
+                    $inComment=0;
+                }
+                $comment[$nc] =~ s/<p>//;
+                $comment[$nc] =~ s/<\/p>//;
+                $nc++;     
             }
-            $comment[$nc] =~ s/<p>//;
-            $comment[$nc] =~ s/<\/p>//;
-            $nc++;     
-        }
-        if ( $date ne '' ) {
-            if ( $gcorr =~ m/on/i && $gain eq '' ) { $gain='corrected' }
-            if ( $time =~ m/PM/i ) {$pm = 1} else {$pm = 0}
-            $time =~ s/\s*[AP]M\s*//;
-            ( $mo, $dy, $yr ) = split(/\//,$date);
-            ( $hr, $min, $sec ) = split(/:/,$time);
-            if ( ($pm) && $hr < 12 ) {$hr = $hr +12}
-            $ctime = sprintf ("%4.4d%2.2d%2.2d%2.2d%2.2d%2.2d",
-                                      $yr+1900,$mo,$dy,$hr,$min,$sec);
-            if ( $debugOn ) {
-                print "=== RUN=\"$nrun\" AUTHOR=\"$author\"";
-                print " DATE=$date";
-                print " TIME=$time";
-                print " CTIME=$ctime";
-                print " ZERO=$zerosupp";
-                print " GCORR=$gcorr";
-                print " RAW=$raw";
-                print " MAG=$mag";
-                print " FIELD=$field";
-                print " ACT=$activity";
-                print " TRG=$trig";
-                print " TYP=$type";
-                print " PED=$ped";
-                print " GAIN=$gain";
-                print " THRHI=$thrhi";
-                print " THRLO=$thrlo";
-                print " SEQHI=$seqhi";
-                print " SEQLO=$seqlo";
-                print "\n";
-            }
-            $fullcomment='';
-            foreach $cm ( @comment ) {
+            if ( $date ne '' ) {
+                if ( $gcorr =~ m/on/i && $gain eq '' ) { $gain='corrected' }
+                if ( $time =~ m/PM/i ) {$pm = 1} else {$pm = 0}
+                $time =~ s/\s*[AP]M\s*//;
+                ( $mo, $dy, $yr ) = split(/\//,$date);
+                ( $hr, $min, $sec ) = split(/:/,$time);
+                if ( ($pm) && $hr < 12 ) {$hr = $hr +12}
+                $ctime = sprintf ("%4.4d%2.2d%2.2d%2.2d%2.2d%2.2d",
+                                  $yr+1900,$mo,$dy,$hr,$min,$sec);
+                if ( $debugOn ) {
+                    print "=== RUN=\"$nrun\" AUTHOR=\"$author\"";
+                    print " DATE=$date";
+                    print " TIME=$time";
+                    print " CTIME=$ctime";
+                    print " ZERO=$zerosupp";
+                    print " GCORR=$gcorr";
+                    print " RAW=$raw";
+                    print " MAG=$mag";
+                    print " FIELD=$field";
+                    print " ACT=$activity";
+                    print " TRG=$trig";
+                    print " TYP=$type";
+                    print " PED=$ped";
+                    print " GAIN=$gain";
+                    print " THRHI=$thrhi";
+                    print " THRLO=$thrlo";
+                    print " SEQHI=$seqhi";
+                    print " SEQLO=$seqlo";
+                    print "\n";
+                }
+                $fullcomment='';
+                foreach $cm ( @comment ) {
 # include blank lines                if ( ! ($cm =~ m/^\s*$/) ) {
                     $fullcomment.=$cm."\n";
 #                }
+                }
+                
+                # add the log entry
+                &dbadd();
             }
-
-            # add the log entry
-            &dbadd();
+        } elsif ( $line =~ m/<b>T1:/i || $line =~ m/<b>Run_Num/i ) { #run no.
+            $nrun = $nextl;
+            if ( $nrun =~ m/^0+$/ ) {$nrun=''}
+        } elsif ( $line =~ m/>Date:/i ) {
+            $date = $nextl;
+        } elsif ( $line =~ m/>Time:/i ) {
+            $time = $nextl;
+        } elsif ( $line =~ m/Number_of_Events:/i ) {
+            $nevents = $nextl;
+        } elsif ( $line =~ m/>ZeroSuppSelected:/i ) {
+            $zerosup = $nextl;
+        } elsif ( $line =~ m/>GainCorrSelected:/i ) { # gain corrected
+            $gcorr = $nextl;
+        } elsif ( $line =~ m/>GainCorrSelected1:/i ) { # raw format
+            $raw = $nextl;
+            if ( $raw =~ m/on/i ) { $raw='Y' }
+        } elsif ( $line =~ m/>MagnetOn:/i ) {
+            $mag = $nextl;
+            if ( $mag =~ m/on/i ) {
+                $field=100;
+            } else {
+                $field=0;
+            }
+        } elsif ( $line =~ m/>activityName:/i ) {
+            $activity = $nextl;
+        } elsif ( $line =~ m/>TriggerType:/i ) {
+            $trig = $nextl;
+            if ( $trig =~ m/ped/i ) {$trig='ped'}
+            if ( $trig =~ m/cos/i ) {$trig='cosmic'}
+            if ( $trig =~ m/laser/i ) {$trig='laser'}
+            if ( $trig =~ m/gas/i ) {$trig='zdc'}
+            if ( $trig =~ m/coll/i ) {$trig='collision'}
+            if ( $trig =~ m/central/i ) {$trig='central'}
+            if ( $trig =~ m/fee/i ) {$trig='fee-pulser'}
+            if ( $trig =~ m/pad/i ) {$trig='pad-pulser'}
+        } elsif ( $line =~ m/>Run_Typ/i ) {
+            $type = $nextl;
+            $type =~ s/other//i;
+            if ( $type =~ m/ped/i ) {$type='ped'}
+            if ( $type =~ m/phy/i ) {$type='phy'}
+            if ( $type =~ m/gain/i ) {$type='gain'}
+            if ( $type eq '' ) {$type='test'}
+        } elsif ( $line =~ m/>OtherRun_Ped/i ) {
+            $ped = $nextl;
+            $ped =~ s/blank//gi;
+        } elsif ( $line =~ m/>OtherRun_Gain/i ) {
+            $gain = $nextl;
+            $gain =~ s/blank//gi;
+        } elsif ( $line =~ m/>asic_thresh_hi/i ) {
+            $thrhi = $nextl;
+        } elsif ( $line =~ m/>asic_thresh_lo/i ) {
+            $thrlo = $nextl;
+        } elsif ( $line =~ m/>asic_seq_hi/i ) {
+            $seqhi = $nextl;
+        } elsif ( $line =~ m/>asic_seq_lo/i ) {
+            $seqlo = $nextl;
         }
-    } elsif ( $line =~ m/<b>T1:/i || $line =~ m/<b>Run_Num/i ) { #run no.
-        $nrun = $nextl;
-        if ( $nrun =~ m/^0+$/ ) {$nrun=''}
-    } elsif ( $line =~ m/>Date:/i ) {
-        $date = $nextl;
-    } elsif ( $line =~ m/>Time:/i ) {
-        $time = $nextl;
-    } elsif ( $line =~ m/Number_of_Events:/i ) {
-        $nevents = $nextl;
-    } elsif ( $line =~ m/>ZeroSuppSelected:/i ) {
-        $zerosup = $nextl;
-    } elsif ( $line =~ m/>GainCorrSelected:/i ) { # gain corrected
-        $gcorr = $nextl;
-    } elsif ( $line =~ m/>GainCorrSelected1:/i ) { # raw format
-        $raw = $nextl;
-        if ( $raw =~ m/on/i ) { $raw='Y' }
-    } elsif ( $line =~ m/>MagnetOn:/i ) {
-        $mag = $nextl;
-        if ( $mag =~ m/on/i ) {
-            $field=100;
-        } else {
-            $field=0;
-        }
-    } elsif ( $line =~ m/>activityName:/i ) {
-        $activity = $nextl;
-    } elsif ( $line =~ m/>TriggerType:/i ) {
-        $trig = $nextl;
-        if ( $trig =~ m/ped/i ) {$trig='ped'}
-        if ( $trig =~ m/cos/i ) {$trig='cosmic'}
-        if ( $trig =~ m/laser/i ) {$trig='laser'}
-        if ( $trig =~ m/gas/i ) {$trig='zdc'}
-        if ( $trig =~ m/coll/i ) {$trig='collision'}
-        if ( $trig =~ m/central/i ) {$trig='central'}
-        if ( $trig =~ m/fee/i ) {$trig='fee-pulser'}
-        if ( $trig =~ m/pad/i ) {$trig='pad-pulser'}
-    } elsif ( $line =~ m/>Run_Typ/i ) {
-        $type = $nextl;
-        $type =~ s/other//i;
-        if ( $type =~ m/ped/i ) {$type='ped'}
-        if ( $type =~ m/phy/i ) {$type='phy'}
-        if ( $type =~ m/gain/i ) {$type='gain'}
-        if ( $type eq '' ) {$type='test'}
-    } elsif ( $line =~ m/>OtherRun_Ped/i ) {
-        $ped = $nextl;
-        $ped =~ s/blank//gi;
-    } elsif ( $line =~ m/>OtherRun_Gain/i ) {
-        $gain = $nextl;
-        $gain =~ s/blank//gi;
-    } elsif ( $line =~ m/>asic_thresh_hi/i ) {
-        $thrhi = $nextl;
-    } elsif ( $line =~ m/>asic_thresh_lo/i ) {
-        $thrlo = $nextl;
-    } elsif ( $line =~ m/>asic_seq_hi/i ) {
-        $seqhi = $nextl;
-    } elsif ( $line =~ m/>asic_seq_lo/i ) {
-        $seqlo = $nextl;
+        $nl++;
     }
-    $nl++;
 }
 
-# scan the DAQ data files and load new files
+#### scan the DAQ data files and load new files
 @daqfiles = </disk1/star/daq/*.daq>;
 `rm -f $timestampFile; touch $timestampFile`;
 if ( @daqfiles>0 ) {
     foreach $daqf ( @daqfiles ) {
-        if ( $daqf =~ m/([0-9]{2})([0-9]{2})([0-9]{2})\.([0-9]+)\.daq$/ ) {
+        if ( $daqf =~ m/([0-9]{2})([0-9]{2})([0-9]{2})\.([0-9]+)(\.[0-9]+)*\.daq$/ ) {
             $nrun = $4;
             $yr = $1;
             if ( $yr eq '00' ) {$yr=100}
             $mo = $2;
             $dy = $3;
+            $nseq = $5;
+            $nseq =~ s/\.//;
             $ctime = sprintf ("%4.4d%2.2d%2.2d%2.2d%2.2d%2.2d",
                               $yr+1900,$mo,$dy,0,0,0);
             my ($fmode, $uid, $gid, $filesize, 
@@ -220,7 +229,9 @@ exit;
 
 sub dbaddfile {
     ## First check whether an entry exists for this run number
-    $sql="select name,endtime from $RunT where name='$nrun'";
+    ## starttime is nonzero only for runs, distinguishing from
+    ## comments
+    $sql="select name,starttime from $RunT where name='$nrun'";
     $cursor =$dbh->prepare($sql) 
         || die "Cannot prepare statement: $DBI::errstr\n";
     $cursor->execute;
@@ -245,15 +256,18 @@ sub dbaddfile {
 #        $sql.="starttime=$ctime";
 #        $sql.=" where name='$nrun'";
         # if endtime=0, file has not been read
-        if (substr($val{'endtime'},0,4) eq '0000') {$runDaqscan = 1};
+        if (substr($val{'starttime'},0,4) eq '0000') {
+            print "$nrun File has not been read\n" if ($nrun > 100);
+            $runDaqscan = 1;
+        }
     } else {
         # New entry
         $sql="insert into $RunT set ";
         $sql.="name='".$nrun."',";
         $sql.="ctime=$ctime,";
         $sql.="starttime=$ctime";
-        print "$sql\n" if $debugOn;
-        $rv = $dbh->do($sql) || die $dbh->errstr;
+        print "$sql\n";# if $debugOn;
+#        $rv = $dbh->do($sql) || die $dbh->errstr;
         $runDaqscan = 1;
     }
     foreach $r ( @junkRuns ) {
@@ -264,8 +278,8 @@ sub dbaddfile {
     }
     if ( ($nrun > 100) && $runDaqscan ) {
         print "======== $daqf $sizeMB MB===========================\n";
-        $content = `LD_LIBRARY_PATH="$LD_LIBRARY_PATH"; export LD_LIBRARY_PATH; /star/u2d/wenaus/bin/daqscan $daqf`;
-        print $content;
+#        $content = `LD_LIBRARY_PATH="$LD_LIBRARY_PATH"; export LD_LIBRARY_PATH; /star/u2d/wenaus/bin/$STAR_SYS/daqscan $daqf`;
+#        print $content;
     }
 }
 
@@ -314,7 +328,7 @@ sub setfields {
     $sql.="user='".$author."',";
     $sql.="name='".$nrun."',";
     $sql.="ctime=$ctime,";
-    if ($nevents >0) {$sql.="nevents=".$nevents.","}
+    if ($nevents >0) {$sql.="events=".$nevents.","}
     $sql.="type='".$type."',";
     $sql.="trig='".$trig."',";
     $sql.="stage='daq',";
