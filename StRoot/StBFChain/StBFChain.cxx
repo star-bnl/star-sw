@@ -132,6 +132,9 @@ BfcItem BFC[] = {
                                            ,"StLaserEventMaker","StLaserEvent,StLaserEventMaker","",kFALSE},  
   {"PreVtx"     ,"","","tpt,SCL,sim_T,tpc_T,svt_T,ftpcT,globT,ctf_T",
                                        "StPreVertexMaker","St_tpc,St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"emc"         ,"emc","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl" ,"StChainMaker","StChain","",kFALSE},
+  {"ems"         ,"emc_raw","emc","geant,emc_T"    ,"St_ems_Maker","StEvent,St_emc,St_ems_Maker","",kFALSE},
+  {"emh"         ,"emc_hits","emc","geant,emc_T,tpc_T"     ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
   {"svt"         ,"svt","","svt_T,srs,stk"                             ,"StChainMaker","StChain","",kFALSE},
   {"srs"         ,"svt_hits","svt","tls"            ,"St_srs_Maker","St_tpc,St_svt,St_srs_Maker","",kFALSE},
   {"stk"         ,"svt_tracks","svt","tls"          ,"St_stk_Maker","St_tpc,St_svt,St_stk_Maker","",kFALSE},
@@ -160,9 +163,6 @@ BfcItem BFC[] = {
   {"dst"         ,"dst","global","SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT","St_dst_Maker" 
                                                                 ,"St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Event"       ,"","","globT,SCL"                       ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
-  {"emc"         ,"emc","","geant,emc_T,tpc_T,db,calib,ems,emh,PreEcl" ,"StChainMaker","StChain","",kFALSE},
-  {"ems"         ,"emc_raw","emc","geant,emc_T"    ,"St_ems_Maker","StEvent,St_emc,St_ems_Maker","",kFALSE},
-  {"emh"         ,"emc_hits","emc","geant,emc_T,tpc_T"     ,"St_emc_Maker","St_emc,St_emc_Maker","",kFALSE},
   {"PreEcl"      ,"preecl","emc","emh"                          ,"StPreEclMaker","StPreEclMaker","",kFALSE},
   {"Rrs"         ,"","","sim_T"                                       ,"StRrsMaker","StRrsMaker","",kFALSE},
   {"rich"        ,"","","sim_T,globT"                      ,"StRchMaker","StRrsMaker,StRchMaker","",kFALSE},
@@ -713,8 +713,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.90 2000/05/25 21:25:47 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.91 2000/05/26 21:44:51 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.91  2000/05/26 21:44:51  fisyak
+// move emc after PreVtx
+//
 // Revision 1.90  2000/05/25 21:25:47  fisyak
 // Put emc and rich after StEvent, add TpcTag
 //
