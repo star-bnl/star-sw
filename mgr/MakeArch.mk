@@ -1,5 +1,5 @@
-#  $Log: MakeSYS.mk,v $
-#  Revision 1.14  1998/06/11 12:39:23  fisyak
+#  $Log: MakeArch.mk,v $
+#  Revision 1.1  1998/06/11 12:39:22  fisyak
 #  New STAR/STAF makefiles
 #
 #  Revision 1.10  1998/05/19 16:36:38  perev
@@ -23,7 +23,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/06/11 12:39:23 $ 
+#             Last modification $Date: 1998/06/11 12:39:22 $ 
 #. default setings
 
 RM := rm -f
@@ -41,16 +41,15 @@ CERN_LEVEL :=pro
 MOTIF :=YES
 GCC      :=  gcc
 CC       :=  $(GCC)
-CFLAGS   := -fpic -w
+CFLAGS   := -g -fpic -w
 CXX      :=  g++
-CXXFLAGS := -fpic -w
+CXXFLAGS := -g -fpic -w
 FC 	 := f77
 AR       := ar
 ARFLAGS  := rvu
-#yf LD 	 := $(CXX)
+LD 	 := $(CXX)
 SO	 := $(CC)
 SOFLAGS	 := 
-SOEXT    := so
 So       :=so
 O        :=o
 A        :=a
@@ -104,8 +103,8 @@ ifneq (,$(findstring $(STAF_ARCH),rs_aix31 rs_aix32 rs_aix41))
 
   OSFID :=aix AIX CERNLIB_IBMRT CERNLIB_UNIX CERNLIB_QMIBM
   ifdef GCC.
-    CXXFLAGS :=  -fsigned-char -w  
-    CFLAGS  :=  -fsigned-char -w 
+    CXXFLAGS := -g  -fsigned-char -w  
+    CFLAGS  := -g  -fsigned-char -w 
     LDFLAGS  := 
     SOFLAGS  :=  -shared 
     CLIBS  :=  -lXm -lXt -lX11 -lg++ -lm -lld
@@ -115,15 +114,15 @@ ifneq (,$(findstring $(STAF_ARCH),rs_aix31 rs_aix32 rs_aix41))
     LD     := $(CXX)
     SO     := ???
     SOFLAGS := ???
-    CXXFLAGS := -w -qchars=signed -qnoro -qnoroconst 
-    CFLAGS  := -w -qchars=signed -qnoro -qnoroconst 
+    CXXFLAGS := -g -w -qchars=signed -qnoro -qnoroconst 
+    CFLAGS  := -g -w -qchars=signed -qnoro -qnoroconst 
     LDFLAGS  := 
     CLIBS  :=  -lXm -lXt -lX11  -lld  -lm -lc -lcurses
   endif
 
   FC         = xlf
   FLIBS   := -lxlf90 -lxlf
-  FFLAGS  := -qextname  -qrndsngl -qcharlen=6000 
+  FFLAGS  := -g -qextname  -qrndsngl -qcharlen=6000 
   FEXTEND := -e
 endif 
 
@@ -131,18 +130,18 @@ ifneq (,$(findstring $(STAF_ARCH),i386_linux2))
 #    case linux
 #  ====================
   MOTIF :=
+  CERN_LEVEL :=pgf98
   OSFID    := lnx Linux linux LINUX CERNLIB_LINUX CERNLIB_UNIX CERNLIB_LNX CERNLIB_QMLNX
   FC       := pgf77
-#yf  LD       := $(CXX)
+  LD       := $(CXX)
   SO	   := $(CXX)
-  CXXFLAGS := -fPIC
-  CFLAGS   := -fPIC
+  CXXFLAGS := -g -fPIC
+  CFLAGS   := -g -fPIC
   CPPFLAGS += f2cFortran
-#yf  LDFLAGS  := -Wl,-Bstatic
-LDFLAGS    += -shared
+  LDFLAGS  := 
   SOFLAGS  := -shared 
-#yf  CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lg++ -lpgc -lm -ldl -rdynamic
-##FLIBS    := -L/usr/pgi/linux86/lib  -lf2c
+##CLIBS    := -L/usr/X11R6/lib -Wl,-Bdynamic -lXpm -lXt -lXext -lX11 -lg++ -lpgc -lm -ldl -rdynamic
+  CLIBS    := -L/usr/pgi/linux86/lib -L/usr/X11R6/lib -L/usr/lib -lcrypt -lg++ -lpgc -lm -ldl -rdynamic
   FLIBS    := -L/usr/pgi/linux86/lib -lpgftnrtl 
   FFLAGS   := -DPGI -w 
   FEXTEND  := -Mextend
@@ -169,7 +168,7 @@ ifneq (,$(findstring $(STAF_ARCH),alpha_osf1 alpha_osf32c alpha_dux40))
     LD     :=$(CXX)
     SO     :=$(CXX)
     CXXFLAGS := -w -D__osf__ -D__alpha -Dcxxbug -DALPHACXX 
-    CFLAGS  := -w  
+    CFLAGS  := -g -w  
     LDFLAGS  := 
     SOFLAGS  :=  -call_shared -expect_unresolved '*'
     CLIBS  :=  -lXm -lXt -lX11 -lm -lPW -lm -lm_4sqrt -lots -lc
@@ -241,7 +240,7 @@ ifneq (,$(findstring $(STAF_ARCH),sgi_52 sgi_53))
   LDFLAGS   :=
   SO        :=   $(CXX)
   SOFLAGS   :=  -shared
-  CLIBS     := -lsun  -lm -lc -lPW -lXext
+  CLIBS     := -lsun -lmalloc  -lm -lc -lPW -lXext
   FLIBS     :=   -lftn 
 
 endif
@@ -256,11 +255,9 @@ ifneq (,$(findstring $(STAF_ARCH),sgi_64 ))
   CXX       :=    CC
   CXXFLAGS  :=  -n32 -fullwarn
   LD        :=   $(CXX)
-# LD        :=   ld
-# LDFLAGS   :=  -n32 -multigot
+  LDFLAGS   :=  -n32 -multigot
   SO        :=   $(CXX)
   SOFLAGS   :=  -n32 -shared -multigot
-  LDFLAGS   :=  -n32 -shared -multigot
   CLIBS     :=  -lsun  -lm -lc -lPW -lXext -lmalloc
   FLIBS     :=  -lftn 
 
@@ -273,17 +270,15 @@ ifneq (,$(findstring $(STAF_ARCH),sun4x_55 sun4x_56))
   OSFID := sun SUN SOLARIS solaris Solaris CERNLIB_UNIX CERNLIB_SUN
   CC :=  /opt/SUNWspro/bin/cc
   CXX := /opt/SUNWspro/bin/CC
-#yf  LD  := $(CXX)
-  LD  := ld
+  LD  := $(CXX)
   SO  := $(CXX)
   FC  := /opt/SUNWspro/bin/f77
 
-  FFLAGS   :=   -KPIC -w 
+  FFLAGS   :=  -g  -KPIC -w 
   FEXTEND  :=  -e
-  CFLAGS   :=   -KPIC 
-  CXXFLAGS :=   -KPIC 
-#yf  LDFLAGS  :=   -Bstatic
-  LDFLAGS  += -G 
+  CFLAGS   :=  -g  -KPIC 
+  CXXFLAGS :=  -g  -KPIC 
+  LDFLAGS  :=  -g  -Bstatic
   SOFLAGS  :=   -G
   CLIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
   FLIBS    := -lM77 -lF77 -lsunmath
@@ -297,25 +292,23 @@ ifneq (,$(findstring $(STAF_ARCH),sunx86_55))
   CXX      := /opt/SUNWspro/bin/CC
   SO       := $(CXX)
   FC       := /opt/SUNWspro/bin/f77
-#yf  LD       := $(CXX)
-  LD       := ld
-  FFLAGS   :=  -KPIC  
+  LD       := $(CXX)
+  FFLAGS   :=  -g -KPIC  
   FEXTEND  := -e
-  CFLAGS   :=  -KPIC +w2 -I/usr/dt/share/include -I/usr/openwin/share/include
+  CFLAGS   :=  -g -KPIC +w2 -I/usr/dt/share/include -I/usr/openwin/share/include
   CXXFLAGS :=  $(CFLAGS)
-#yf  LDFLAGS  :=   -z muldefs
-  LDFLAGS    += -G -t -z muldefs
-  SOFLAGS  :=   -G
-  CLIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -lC -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
+  LDFLAGS  :=  -g  -z muldefs
+  SOFLAGS  :=  -g  -G
+  CLIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib  -lm -lc -L/usr/ucblib -R/usr/ucblib -lucb -lmapmalloc
   FLIBS    := -lM77 -lF77 -lsunmath
-  NOROOT   := YES
+
 endif
 
 CPPFLAGS := $(CPPFLAGS) $(OSFID)
 CPPFLAGS := $(sort $(addprefix -D,$(CPPFLAGS)))
 
 FOR72 := $(FC)
-FC  := $(FC) 
+FC  := $(FC) $(FEXTEND)
 
 LD_LIBS := $(CLIBS) $(FLIBS)
 
