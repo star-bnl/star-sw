@@ -12,14 +12,14 @@
 ************************************************************************
 *--------------------------------------------------------------------
 
-macro initialize adcxyzon
+macro initialize adcxyzon tpc_sector_first tpc_sector_last
 
   message ' Initializing for tpc slow simulator '
 *  message ' adc xyz on = ', [adcxyzon]
 
 *
 *  create tables
-    exec create_tables_tpc#tss
+    exec create_tables_tpc#tss [tpc_sector_first] [tpc_sector_last]
     if [adcxyzon].eq.1 then
       exec create_tables_tpc#tfc
     endif
@@ -33,14 +33,14 @@ macro initialize adcxyzon
 
 *------------------------------------------------------------------------
 
-macro process_event  nev adcxyzon
+macro process_event  nev adcxyzon tpc_sector_first tpc_sector_last
 
 
    message ' TPC slow sim: Processing Event # ' [nev]
 *   message '  adcxyzon = ',[adcxyzon]
 
 * call tssam - simulated tpc pixels
-  exec tss_run#run
+  exec tss_run#run [tpc_sector_first] [tpc_sector_last]
 
 * call xyz - reordered tpc pixels with more info
   if [adcxyzon].eq.1 then

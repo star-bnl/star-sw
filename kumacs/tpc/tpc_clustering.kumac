@@ -35,15 +35,15 @@ macro initialize_fast
 
 *------------------------------------------------------------------------
 
-macro process_event nev 
+macro process_event nev tpc_sector_first tpc_sector_last   
   
     message ' TPC clustering: processing event # ' [nev]
 
 * call tcl_make_clusters - tpc cluster finder
-  exec tcl_run#run_tcl_make_clusters
+  exec tcl_run#run_tcl [tpc_sector_first] [tpc_sector_last] 
 
 * call tpham - tpc hit finder
-  exec tcl_run#run_tpham 
+  exec tcl_run#run_tph [tpc_sector_first] [tpc_sector_last]
 
 
 return
