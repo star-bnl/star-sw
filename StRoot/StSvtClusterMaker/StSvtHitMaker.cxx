@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.27 2003/09/18 18:16:38 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.28 2004/01/27 02:34:11 perev Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.28  2004/01/27 02:34:11  perev
+ * LeakOff
+ *
  * Revision 1.27  2003/09/18 18:16:38  caines
  * Initialise stuff for new compiler
  *
@@ -91,6 +94,8 @@
  *
  **************************************************************************/
 
+#include <stdlib.h>
+#include <string.h>
 #include "Stiostream.h"
 
 #include "StSvtHitMaker.h"
@@ -120,13 +125,27 @@ ClassImp(StSvtHitMaker)
 //___________________________________________________________________________
 StSvtHitMaker::StSvtHitMaker(const char *name) : StMaker(name)
 {
-  iWrite = 0;
-  filenameN = 0;
-  filenameC = 0;
+  int n = (char*)&filenameC - (char*)&iWrite + sizeof(filenameC);
+  memset(&iWrite,0,n);
 }
 
 //_____________________________________________________________________________
-StSvtHitMaker::~StSvtHitMaker(){
+StSvtHitMaker::~StSvtHitMaker()
+{
+  delete m_x_vs_y;  //! x vs y of Si points
+  for (int i=0;i<mNwaf_no;i++) {delete m_waf_no[i];}
+  delete [] m_waf_no; m_waf_no=0;
+
+  delete m_ClusTuple;                       //!
+  delete m_hfile;                           //!
+
+  // delete Evaluation histos
+  delete mTimeHitResolution;  //!
+  delete mAnodeHitResolution;  //!
+  delete mXHitResolution;  //!
+  delete mYHitResolution;  //!
+  delete mZHitResolution;  //!
+  delete mHitResolution;   //!
 
 }
 
@@ -168,8 +187,8 @@ Int_t StSvtHitMaker::Init()
   m_x_vs_y->SetYTitle("y cm");
   m_x_vs_y->SetXTitle("x cm");
 
-
-  m_waf_no = new TH2F*[2*mSvtData->getNumberOfBarrels()];
+  mNwaf_no = 2*mSvtData->getNumberOfBarrels();
+  m_waf_no = new TH2F*[mNwaf_no];
   
   char title1[20];
   char* title3;
@@ -372,9 +391,9 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
   int index, TotHits=0, GoodHit=0;
   
   
-  StSvtCoordinateTransform* SvtGeomTrans = new StSvtCoordinateTransform();
-  //SvtGeomTrans->setParamPointers(&srs_par[0], &geom[0], &shape[0], mSvtData->getSvtConfig());
-  if(m_geom)  SvtGeomTrans->setParamPointers(m_geom, mSvtData->getSvtConfig(), m_driftVeloc, m_t0);
+  StSvtCoordinateTransform SvtGeomTrans;;
+  //SvtGeomTrans.setParamPointers(&srs_par[0], &geom[0], &shape[0], mSvtData->getSvtConfig());
+  if(m_geom)  SvtGeomTrans.setParamPointers(m_geom, mSvtData->getSvtConfig(), m_driftVeloc, m_t0);
   StSvtLocalCoordinate localCoord(0,0,0);
   StSvtWaferCoordinate waferCoord(0,0,0,0,0,0);
   StGlobalCoordinate globalCoord(0,0,0); 
@@ -407,7 +426,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 	    waferCoord.setHybrid(hybrid);
 
 	    if( m_geom) {
-	      SvtGeomTrans->operator()(waferCoord,localCoord);
+	      SvtGeomTrans(waferCoord,localCoord);
 
 
 	    // Flag as bad those hits not in the drift region
@@ -418,7 +437,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
 						  mSvtBigHit->svtHit()[clu].flag()+5);
 	      }
 	      
-	      SvtGeomTrans->operator()(localCoord,globalCoord);
+	      SvtGeomTrans(localCoord,globalCoord);
 	    }
 	    // 	    cout << " Timebucket=" << waferCoord.timebucket() << 
 	    // 	      " x=" << localCoord.position().x() <<
@@ -449,7 +468,7 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
     
   }
 
-  delete SvtGeomTrans;
+
   gMessMgr->Info() << "Found " << GoodHit << " good hits " << endm;
 }
 
@@ -655,8 +674,10 @@ Int_t StSvtHitMaker::Finish(){
 				<<  GetName() << endm;
 
  if( iWrite == 1){
+   iWrite = 0;
    m_hfile->Write();
    m_hfile->Close();
+   delete m_hfile; m_hfile=0;
    cluInfo.close();
  }
  return kStOK;

@@ -1,5 +1,8 @@
-// $Id: StSvtClusterMaker.cxx,v 1.9 2003/01/28 20:28:34 munhoz Exp $
+// $Id: StSvtClusterMaker.cxx,v 1.10 2004/01/27 02:32:58 perev Exp $
 // $Log: StSvtClusterMaker.cxx,v $
+// Revision 1.10  2004/01/27 02:32:58  perev
+// LeakOff
+//
 // Revision 1.9  2003/01/28 20:28:34  munhoz
 // new filters for clusters
 //
@@ -64,7 +67,6 @@ StSvtClusterMaker::StSvtClusterMaker(const char *name) : StMaker(name)
 StSvtClusterMaker::~StSvtClusterMaker()
 {
 
-  delete mHybridCluster;
   delete mClusterFinder;
 }
 
@@ -108,7 +110,7 @@ Int_t StSvtClusterMaker::SetSvtCluster()
 
   
     mClusterColl = new StSvtHybridCollection(mSvtEvent->getConfiguration());
-    mClusterSet->SetObject((TObject*)mClusterColl);
+    mClusterSet->SetObject(mClusterColl);
 
   return kStOK;
 }
@@ -160,12 +162,13 @@ Int_t StSvtClusterMaker::SetHybridClusters()
 	  mHybridCluster = (StSvtHybridCluster* )mClusterColl->at(index);
 	  if( mHybridCluster){
 	    delete mHybridCluster;
+            mClusterColl->at(index)=0;
 	  }
 	  
 	  mHybridCluster = new StSvtHybridCluster();
 	  
 	  mHybridCluster->setCluster(mClusterFinder);
-	  mClusterColl->at(index) = mHybridCluster;
+	  mClusterColl->put_at(mHybridCluster,index);
           mClusterFinder->ResetContainers();
 	  
 	}
@@ -194,8 +197,8 @@ Int_t StSvtClusterMaker::Reset(){
   if (Debug()) gMessMgr->Debug() << "In StSvtClusterMaker::reset() ..."  << 
 		 GetName() << endm;
 
- delete mHybridCluster;
- delete mClusterColl;
+//VP delete mHybridCluster;
+ mClusterSet->SetObject(0);  //it will be deleted inside
  delete mClusterFinder;
 
  mHybridCluster = NULL;

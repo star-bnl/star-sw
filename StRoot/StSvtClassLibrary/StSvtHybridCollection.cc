@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridCollection.cc,v 1.11 2003/09/02 17:59:06 perev Exp $
+ * $Id: StSvtHybridCollection.cc,v 1.12 2004/01/27 02:27:56 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridCollection.cc,v $
+ * Revision 1.12  2004/01/27 02:27:56  perev
+ * LeakOff
+ *
  * Revision 1.11  2003/09/02 17:59:06  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -95,9 +98,8 @@ void StSvtHybridCollection::setConfiguration(const char* config)
   mConfig = TString(config);
   mSvtConfig = new StSvtConfig();
   mSvtConfig->setConfiguration(config);
-
-  resize(mSvtConfig->getTotalNumberOfHybrids());
   clear();
+  resize(mSvtConfig->getTotalNumberOfHybrids());
 }
 
 void StSvtHybridCollection::setConfiguration(StSvtConfig* config)
@@ -107,8 +109,8 @@ void StSvtHybridCollection::setConfiguration(StSvtConfig* config)
    mConfig = TString(config->getConfiguration());
    mSvtConfig = new StSvtConfig();
    mSvtConfig->setConfiguration(mConfig);
-  resize(mSvtConfig->getTotalNumberOfHybrids());
-  clear();
+   clear();
+   resize(mSvtConfig->getTotalNumberOfHybrids());
 }
 
 int StSvtHybridCollection::getHybridIndex(int barrelID, int ladderID, int waferID, int hybridID)

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtAnalysedHybridClusters.cc,v 1.11 2003/09/02 17:59:06 perev Exp $
+ * $Id: StSvtAnalysedHybridClusters.cc,v 1.12 2004/01/27 02:30:29 perev Exp $
  *
  * Author: Selemon Bekele
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtAnalysedHybridClusters.cc,v $
+ * Revision 1.12  2004/01/27 02:30:29  perev
+ * LeakOff
+ *
  * Revision 1.11  2003/09/02 17:59:06  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -48,19 +51,20 @@
  **************************************************************************/
 #include <Stiostream.h>
 #include <math.h>
+#include <assert.h>
 
 #include "StSvtAnalysis.hh"
 #include "StSvtAnalysedHybridClusters.hh"
 #include "StDbUtilities/StSvtWaferCoordinate.hh"
 #include "tables/St_scs_spt_Table.h"
 
-
 StSvtAnalysedHybridClusters::StSvtAnalysedHybridClusters(int barrel, int ladder, int wafer, int hybrid):StSvtHybridObject(barrel,ladder,wafer,hybrid)
 { 
  mNumOfHits = 0;
+ mHardWarePosition=0;
  mSvtHitData = NULL;
  mSvtHit = NULL;
-
+ mPos=0;             
 }
 
 StSvtAnalysedHybridClusters::~StSvtAnalysedHybridClusters()
@@ -81,9 +85,10 @@ void StSvtAnalysedHybridClusters::setMembers(int numOfClu, int index)
 
   HitSize = ( numOfClu < 10) ? 10 : mNumOfHits; 
   mHardWarePosition = index;
+  assert( !mSvtHitData && !mSvtHit && !mPos);
   mSvtHitData = new StSvtHitData[HitSize];
-  mSvtHit = new StSvtHit[HitSize];
-  mPos = new StThreeVector<double>[HitSize];
+  mSvtHit     = new StSvtHit[HitSize];
+  mPos        = new StThreeVector<double>[HitSize];
 
 }
 
@@ -92,12 +97,12 @@ void StSvtAnalysedHybridClusters::ReSize(){
  int hitSize = mNumOfHits+10; 
  StSvtHitData *tmp = new StSvtHitData[hitSize];
  for (int i=0; i<(mNumOfHits); i++) tmp[i] = mSvtHitData[i];
- delete mSvtHitData;
+ delete [] mSvtHitData;
  mSvtHitData = tmp; 
 
  StSvtHit *tmp2 = new StSvtHit[hitSize];
  for (int i=0; i<(mNumOfHits); i++) tmp2[i] = mSvtHit[i];
- delete mSvtHit;
+ delete [] mSvtHit;
  mSvtHit = tmp2; 
 
  StThreeVector<double> *tmp3 = new StThreeVector<double>[hitSize];

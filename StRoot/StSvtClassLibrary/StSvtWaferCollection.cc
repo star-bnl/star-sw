@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtWaferCollection.cc,v 1.2 2003/09/02 17:59:06 perev Exp $
+ * $Id: StSvtWaferCollection.cc,v 1.3 2004/01/27 02:29:29 perev Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtWaferCollection.cc,v $
+ * Revision 1.3  2004/01/27 02:29:29  perev
+ * LeakOff
+ *
  * Revision 1.2  2003/09/02 17:59:06  perev
  * gcc 3.2 updates + WarnOff
  *
@@ -80,8 +83,8 @@ void StSvtWaferCollection::setConfiguration(const char* config)
   mSvtConfig = new StSvtConfig();
   mSvtConfig->setConfiguration(config);
 
-  resize(mSvtConfig->getTotalNumberOfHybrids()/2);
   clear();
+  resize(mSvtConfig->getTotalNumberOfHybrids()/2);
 }
 
 void StSvtWaferCollection::setConfiguration(StSvtConfig* config)
@@ -91,8 +94,8 @@ void StSvtWaferCollection::setConfiguration(StSvtConfig* config)
   mSvtConfig = config;
   mConfig = TString(mSvtConfig->getConfiguration());
 
-  resize(mSvtConfig->getTotalNumberOfHybrids()/2);
   clear();
+  resize(mSvtConfig->getTotalNumberOfHybrids()/2);
 }
 
 int StSvtWaferCollection::getWaferIndex(int barrelID, int ladderID, int waferID)
