@@ -4,7 +4,7 @@
 //
 // Owner:  Yuri Fisyak
 //
-// $Id: bfcMixer.C,v 1.13 2002/03/15 16:39:56 pfachini Exp $
+// $Id: bfcMixer.C,v 1.14 2003/05/16 19:50:34 hjort Exp $
 //
 //////////////////////////////////////////////////////////////////////////
 
@@ -29,15 +29,22 @@ void Load(){
   gSystem->Load("StChain");
   gSystem->Load("StUtilities");
   gSystem->Load("StBFChain");
+  //Extra things to load for the acceptance filter
+  gSystem->Load("StarClassLibrary");
+  gSystem->Load("StAnalysisUtilities");
+  gSystem->Load("StV0AccMaker.so");
+
   if (chain) delete chain;
 }
 //_____________________________________________________________________
-void bfcMixer(const Int_t Nevents=3,
-             const Char_t *file1="/star/data09/hrm-cache/st_physics_2270008_raw_0030.daq",
-	     const Char_t *file2="/direct/star+u/hjort/test/gtest.fz",
-             const Char_t *file3="/direct/star+u/hjort/test/st_physics_2270008_raw_0030.vertices.dat",
+void bfcMixer_v4(const Int_t Nevents=10,
+             const Char_t *file1="/auto/pdsfdv09/starprod/daq/2001/minbias/st_physics_2270008_raw_0030.daq",
+	     const Char_t *file2="/auto/u/starofl/embedding/GSTAR/gtest.fz",
+             const Char_t *file3="/auto/u/starofl/embedding/GSTAR/st_physics_2270008_raw_0030.vertices.dat",
              const Float_t zvertex_low=-175.0,
-             const Float_t zvertex_high=175.0)
+             const Float_t zvertex_high=175.0,
+	     const Char_t *mode="strange",
+	     const Char_t *acc_mode="off" )
 {
   // Dynamically link some shared libs
   if (gClassTable->GetID("StBFChain") < 0) Load();
@@ -50,21 +57,52 @@ void bfcMixer(const Int_t Nevents=3,
   // Create chain1 object
   chain1 = new StBFChain("One");
   saveMk = chain1->cd();
-  chain1->SetFlags("in NoDefault");
+  chain1->SetFlags("in Physics DbV20030408 NoDefault");
   chain1->Set_IO_Files(file1);
   chain1->Load();
   chain1->Instantiate();
-  saveMk->cd();
 
+  saveMk->cd();
+  
   // Create chain2 object
   chain2 = new StBFChain("Two");
   saveMk = chain2->cd();
-  chain2->SetFlags("fzin gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq");   // 
+  chain2->SetFlags("fzin DbV20030408 gen_T geomT sim_T tpc trs -tcl -tpt -PreVtx -tpc_daq");   // 
   chain2->Set_IO_Files(file2);
   chain2->Load();
   chain2->Instantiate();
   St_geant_Maker *geantMk = chain2->GetMaker("geant");
   if (geantMk) geantMk->SetMode(1);   // Mixer mode - do not modify EvtHddr
+  
+  // Add the acceptance filter maker before TRS  
+  if (!strcmp(mode,"strange")){
+    if (!strcmp(acc_mode,"on")){
+      
+      Char_t *extraMaker = "StV0AccMaker";
+      if (gClassTable->GetID(extraMaker) < 0) gSystem->Load(extraMaker);
+      StMaker *extraMk = (StMaker *)chain1->GetMaker(extraMaker);
+      if(extraMk) delete extraMk;
+      extraMk = chain->New(extraMaker,"before");
+      if (extraMk) {
+	Char_t *before = "Trs";
+	StMaker *trsmk = chain1->GetMaker(before);
+	if (trsmk) chain1->AddBefore(before,extraMk);
+	StV0AccCuts *cuts = ((StV0AccMaker *)extraMk)->GetCutsPtr();
+	cuts->SetFilter();
+	cuts->SetV0MinDecayLen(0.);
+	cuts->SetV0DaughterMinImpact(0);
+	cuts->SetV0DaughterMinHit(10.);
+	cuts->SetXiV0MaxImpact(5);
+	cuts->SetXiMinDecayLen(2.);
+	cuts->SetXiV0PiMinImpact(0.);
+	cuts->SetXiDaughterMinHit(10.);
+	cuts->SetKinkMinDecayRad(128.);
+	cuts->SetKinkMaxDecayRad(184.);
+      }
+    }
+  }
+  // end additional maker code
+
   saveMk->cd();
 
   // Mixer
@@ -77,7 +115,7 @@ void bfcMixer(const Int_t Nevents=3,
   // Create chain3 object
   chain3 = new StBFChain("Three");
   saveMk = chain3->cd();
-  chain3->SetFlags("Simu NoDefault NoInput DbV20020226 db tpc_daq tpc global dst Kalman event qa Tree GeantOut"); 
+  chain3->SetFlags("Simu ppOpt beamline NoDefault DbV20030408 NoInput db tpc_daq tpc global dst Kalman event evout QA Tree GeantOut ctf -Prevtx"); 
 
   TString OutputFileName(gSystem->BaseName(file1));
   OutputFileName.ReplaceAll("*","");
@@ -91,6 +129,7 @@ void bfcMixer(const Int_t Nevents=3,
   StMaker *tpcdaqMk = chain3->GetMaker("tpc_raw");
   tpcdaqMk->SetMode(1);   // Trs
   tpcdaqMk->SetInput("Event","MixerEvent");
+
   saveMk->cd();
   {
     TDatime t;
@@ -118,7 +157,7 @@ void bfcMixer(const Int_t Nevents=3,
 
   // vtxMk = (StVertexMaker*) chain3->GetMaker("vertex");
 
- EventLoop: if (i <= Nevents && iMake != kStEOF && iMake != kStFatal) {
+EventLoop: if (i <= Nevents && iMake != kStEOF && iMake != kStFatal) {
    evnt->Reset();
    evnt->Start("QAInfo:");
    chain->Clear();
