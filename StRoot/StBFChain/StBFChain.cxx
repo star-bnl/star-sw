@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.267 2002/02/10 16:30:23 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.268 2002/02/10 22:13:08 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -307,10 +307,12 @@ Bfc_st BFC[] = {
 
 
   {"Ftpc"        ,"ftpcChain"  ,"","ftpcT,fcl,fpt,Fglobal,Fprimary"         ,"StMaker","StChain","",kFALSE},
+  //{"ppFtpc"      ,"ftpcChain"  ,"","ftpcT,fcl,ppfpt,Fglobal,Fprimary"       ,"StMaker","StChain","",kFALSE},
   {"fss"    ,"ftpc_raw","ftpcChain","SCL,Simu",        "StFtpcSlowSimMaker","StFtpcSlowSimMaker","",kFALSE},
   {"Fcl"    ,"ftpc_hits","ftpcChain","SCL"
                                   ,"StFtpcClusterMaker","StDaqLib,StDAQMaker,StFtpcClusterMaker","",kFALSE},
-  {"fpt"         ,"ftpc_tracks","ftpcChain","SCL"         ,"StFtpcTrackMaker","StFtpcTrackMaker","",kFALSE},
+  //{"fpt"         ,"ftpc_tracks","ftpcChain","SCL"         ,"StFtpcTrackMaker","StFtpcTrackMaker","",kFALSE},
+
 
   {"emcY2"    ,"emcY2","","geant,emc_T,tpc_T,db,calib,emcSim,PreEcl,epc"      ,"StMaker","StChain",
                             "EMC Chain for Y2A (must be before makers which include in this chain)",kFALSE},
@@ -331,6 +333,7 @@ Bfc_st BFC[] = {
   {"V0"          ,"v0","globalChain","SCL,globT,tls","StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Xi"          ,"xi","globalChain","SCL,globT,tls","StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Kink"   ,"kink","globalChain","SCL,globT,tls","StKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"fpt"      ,"ftpc_tracks","globalChain","SCL"          ,"StFtpcTrackMaker","StFtpcTrackMaker","",kFALSE},
   {"Fglobal"    ,"fglobal","globalChain","SCL,tables,tls"
                                                    ,"StFtpcGlobalMaker","St_global,St_dst_Maker","",kFALSE},
   {"Fprimary"    ,"fprimary","globalChain","SCL,tables,tls"
