@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.3 2000/05/12 22:42:05 snelling Exp $
+// $Id: StFlowTrack.h,v 1.4 2000/05/16 20:59:35 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.4  2000/05/16 20:59:35  posk
+// Voloshin's flownanoevent.root added.
+//
 // Revision 1.3  2000/05/12 22:42:05  snelling
 // Additions for persistency and minor fix
 //
@@ -111,7 +114,7 @@ private:
   Int_t    mSelection;
   Int_t    mSubevent[Flow::nHars][Flow::nSels];
 
-  ClassDef(StFlowTrack,1)
+  ClassDef(StFlowTrack, 1)                    // macro for rootcint
 };
 
 inline Float_t  StFlowTrack::PidPiPlus()  const { return mPidPiPlus; }

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.4 2000/05/12 22:42:04 snelling Exp $
+// $Id: StFlowEvent.cxx,v 1.5 2000/05/16 20:59:29 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -10,6 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.5  2000/05/16 20:59:29  posk
+// Voloshin's flownanoevent.root added.
+//
 // Revision 1.4  2000/05/12 22:42:04  snelling
 // Additions for persistency and minor fix
 //
@@ -130,11 +133,11 @@ StFlowEvent::StFlowEvent() {
 
 StFlowEvent::~StFlowEvent() {
 
-  StFlowTrackIterator iter;
-  for (iter= pTrackCollection->begin(); iter!= pTrackCollection->end(); iter++){
-    delete *iter;
-  }
-  delete pTrackCollection;
+//   StFlowTrackIterator iter;
+//   for (iter= pTrackCollection->begin(); iter!= pTrackCollection->end(); iter++){
+//     delete *iter;
+//   }
+//   delete pTrackCollection;
 
 }
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////
 // 
-// $Id: StFlowNanoEvent.h,v 1.4 2000/05/12 22:42:04 snelling Exp $
+// $Id: StFlowNanoEvent.h,v 1.5 2000/05/16 20:59:34 posk Exp $
 //
 // Author: Sergei Voloshin and Raimond Snellings, March 2000
 //
@@ -9,22 +9,17 @@
 //////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowNanoEvent.h,v $
-// Revision 1.4  2000/05/12 22:42:04  snelling
-// Additions for persistency and minor fix
-//
-// Revision 1.3  2000/05/11 20:00:37  posk
-// Preparation for micro and nano DSTs.
+// Revision 1.5  2000/05/16 20:59:34  posk
+// Voloshin's flownanoevent.root added.
 //
 // Revision 1.2  2000/03/08 15:10:50  posk
-// Added $Id: StFlowNanoEvent.h,v 1.4 2000/05/12 22:42:04 snelling Exp $ and $Log: StFlowNanoEvent.h,v $
-// Added $Id: StFlowNanoEvent.h,v 1.3 2000/05/11 20:00:37 posk Exp $ and Revision 1.4  2000/05/12 22:42:04  snelling
-// Added $Id: StFlowNanoEvent.h,v 1.3 2000/05/11 20:00:37 posk Exp $ and Additions for persistency and minor fix
-// Added $Id: StFlowNanoEvent.h,v 1.3 2000/05/11 20:00:37 posk Exp $ and
-// Added $Id: StFlowNanoEvent.h,v 1.4 2000/05/12 22:42:04 snelling Exp $ and Revision 1.3  2000/05/11 20:00:37  posk
-// Added $Id: StFlowNanoEvent.h,v 1.4 2000/05/12 22:42:04 snelling Exp $ and Preparation for micro and nano DSTs.
-// Added $Id: StFlowNanoEvent.h,v 1.4 2000/05/12 22:42:04 snelling Exp $ and.
+// Added $Id: StFlowNanoEvent.h,v 1.5 2000/05/16 20:59:34 posk Exp $ and $Log: StFlowNanoEvent.h,v $
+// Added $Id$ and Revision 1.5  2000/05/16 20:59:34  posk
+// Added $Id$ and Voloshin's flownanoevent.root added.
+// Added $Id$ and.
 //
 //
+// 
 //////////////////////////////////////////////////////////////////////////
 #ifndef StFlowNanoEvent__h
 #define StFlowNanoEvent__h
@@ -32,68 +27,64 @@
 #include <iostream.h>
 #include "TObject.h"
 #include "TClonesArray.h"
+#include "StFlowTrack.h"
+#include "StThreeVectorF.hh"
+#include "TVector2.h"
+#include "SystemOfUnits.h"
 
-
-class StFlowNanoEventHeader {
-  
- private:
-  Int_t   fEvtNum;
-  Int_t   fRun;
-  Int_t   fDate;
-  
- public:
-  StFlowNanoEventHeader() : fEvtNum(0), fRun(0), fDate(0) { }
-  virtual ~StFlowNanoEventHeader() { }
-  void    Set(Int_t i, Int_t r, Int_t d) { fEvtNum = i; fRun = r; fDate = d; }
-  Int_t   GetEvtNum() const { return fEvtNum; }
-  Int_t   GetRun() const { return fRun; }
-  Int_t   GetDate() const { return fDate; }
-  
-  ClassDef(StFlowNanoEventHeader,1)  //Event Header
-};
-    
-    
 class StFlowNanoEvent : public TObject {
-      
- private:
-  Int_t                  fNtrack;
-  StFlowNanoEventHeader  fEvtHdr;
-  TClonesArray           *fTracks;
-  static TClonesArray    *fgTracks;
-
- public:
-  StFlowNanoEvent();
-  virtual       ~StFlowNanoEvent();
-  void          Clear(Option_t *option ="");
-  static void   Reset(Option_t *option ="");
-  void          SetNtrack(Int_t n) { fNtrack = n; }
-  void          SetHeader(Int_t i, Int_t run, Int_t date);
-  void          AddTrack(Float_t pt, Float_t phi, Float_t eta );
   
-  Int_t         GetNtrack() const { return fNtrack; }
-  StFlowNanoEventHeader  *GetHeader() { return &fEvtHdr; }
+ public:
+                 StFlowNanoEvent();
+  virtual        ~StFlowNanoEvent() { Clear(); }
+  void           Clear(Option_t *option ="");
+  UInt_t         EventNumber() const;
+  UInt_t         OrigMult() const;
+  UInt_t         Centrality() const;
+  StThreeVectorF VertexPos() const;
+  Long_t         EventID() const; 
+  
+  void AddTrack(StFlowTrack* pFlowTrack);
+  void SetEventID(const Long_t&); 
+  void SetEventNumber(const UInt_t&);        
+  void SetOrigMult(const UInt_t&);
+  void SetCentrality(const UInt_t&);
+  void SetVertexPos(const StThreeVectorF&);
+  
+  Int_t         GetNtrack() const { return mNtrack; }
   TClonesArray *GetTracks() const { return fTracks; }
-
-  ClassDef(StFlowNanoEvent,1)  //Event structure
-};
-
-
-class StFlowNanoTrack : public TObject {
-
+  
  private:
-  Float_t  fPt;         
-  Float_t  fPhi;         
-  Float_t  fEta;         
+  Int_t           mNtrack;                     // track number
+  Long_t          mEventID;                    // event ID
+  //  UInt_t          mEventNumber;                // number of the event
+  UInt_t          mOrigMult;                   // number of StEvent tracks
+  UInt_t          mCentrality;                 // centrality bin
+  StThreeVectorF  mVertexPos;                  // primary vertex position
   
- public:
-  StFlowNanoTrack() { }
-  StFlowNanoTrack(Float_t pt, Float_t phi, Float_t eta);
-  virtual  ~StFlowNanoTrack() { }
-  Float_t  GetPt() const { return fPt; }
-  Float_t  GetPhi() const { return fPhi; }
-  Float_t  GetEta() const { return fEta; }
+  TClonesArray        *fTracks;
+  static TClonesArray *fgTracks;
   
-  ClassDef(StFlowNanoTrack,1)  //A track segment
+  ClassDef(StFlowNanoEvent,1)
 };
+
+//inline UInt_t StFlowNanoEvent::EventNumber() const { return mEventNumber; }
+inline Long_t StFlowNanoEvent::EventID() const { return mEventID; }
+inline UInt_t StFlowNanoEvent::OrigMult() const { return mOrigMult; }
+inline UInt_t StFlowNanoEvent::Centrality() const { return mCentrality; }
+inline StThreeVectorF StFlowNanoEvent::VertexPos() const { return mVertexPos; }
+//inline void StFlowNanoEvent::SetEventNumber(const UInt_t& event) {
+//  mEventNumber = event; }
+inline void StFlowNanoEvent::SetEventID(const Long_t& id) {
+  mEventID = id; }
+inline void StFlowNanoEvent::SetOrigMult(const UInt_t& tracks) {
+  mOrigMult = tracks; }
+inline void StFlowNanoEvent::SetCentrality(const UInt_t& centr) {
+  mCentrality = centr; }
+inline void StFlowNanoEvent::SetVertexPos(const StThreeVectorF& vertexPos) {
+  mVertexPos = vertexPos; }
 
 #endif
+
+
+

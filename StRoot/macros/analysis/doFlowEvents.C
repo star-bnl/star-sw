@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doFlowEvents.C,v 1.9 2000/05/11 00:22:28 posk Exp $
+// $Id: doFlowEvents.C,v 1.10 2000/05/16 20:57:31 posk Exp $
 //
 // Description: 
 // Chain to read events from files or database into StEvent and analyze.
@@ -20,14 +20,12 @@
 // If path begins with '-', 'file' will be taken to be a single file
 // to be processed.
 //
-// example invocation:
-// .x doFlowEvents.C(10,"-","some_directory/some_dst_file.xdf")
-//
-// example ROOT file invocation:
-// .x doFlowEvents.C(10,"-","some_directory/some_dst_file.root")
-//
-// example multi-ROOT file invocation:
-// .x doFlowEvents.C(9999,"some_directory","*.dst.root")
+// Usage: 
+// doFlowEvents.C(nevents, "-", "some_directory/some_dst_file.xdf")
+// doFlowEvents.C(nevents, "-", "some_directory/some_dst_file.root")
+// doFlowEvents.C(nevents, "some_directory", "*.dst.root/*.event.root")	
+// doFlowEvents.C(nevents)	
+// doFlowEvents.C()                // 2 events	
 //
 // Author List: Torre Wenaus, BNL  2/99
 //              Victor Perevoztchikov
@@ -36,6 +34,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doFlowEvents.C,v $
+// Revision 1.10  2000/05/16 20:57:31  posk
+// Voloshin's flownanoevent.root added.
+//
 // Revision 1.9  2000/05/11 00:22:28  posk
 // Can read StEvent files which have extention .event.root .
 //
@@ -78,20 +79,12 @@ TBrowser *b=0;
 const char *dstFile = 0;
 const char *xdfFile = 0;
 const char *mdcFile = 0;
-const char *fileList[] = {dstFile,xdfFile,mdcFile,0};
-
-// Usage: 
-// doFlowEvents.C(nevents, -, some_directory/some_dst_file.xdf)
-// doFlowEvents.C(nevents, -, some_directory/some_dst_file.root)
-// doFlowEvents.C(nevents, some_directory, *.dst.root/*.event.root)	
-// doFlowEvents.C(nevents)	
-// doFlowEvents.C()	
+const char *fileList[] = {dstFile, xdfFile, mdcFile, 0};
 
 void doFlowEvents(Int_t, const Char_t **, const char *qaflag = "");
 void doFlowEvents(Int_t, const Char_t *, const Char_t *, 
 		  const char *qaflag = "off");
-void doFlowEvents(Int_t nevents=2);
-void doFlowEvents(Int_t);
+void doFlowEvents(Int_t nevents = 2);
 
 void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 {
@@ -113,31 +106,40 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   gSystem->Load("StMagF");
 
   gSystem->Load("StFlowMaker");
-  //gSystem->Load("StFlowTagMaker");
-  //gSystem->Load("StFlowAnalysisMaker");
+  gSystem->Load("StFlowTagMaker");
+  gSystem->Load("StFlowAnalysisMaker");
   
-  //
-  // Handling depends on whether file is a ROOT file or XDF file
-  //
+  // Make a chain with a file list
   chain  = new StChain("StChain");
-  
+  //chain->SetDebug();
   StFile *setFiles= new StFile();
-  
   for (int ifil=0; fileList[ifil]; ifil++)
     { setFiles->AddFile(fileList[ifil]); }
-  StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
-  IOMk->SetBranch("runcoBranch",0,"r");
-  //IOMk->SetDebug();
   
   cout << "#### First File = " << fileList[0] << endl;
-  if (strstr(fileList[0], ".event.root")==0) {
-    //
-    // Maker to read raw events and make StEvent
-    //
+  if (strstr(fileList[0], "event.root")==0) {
+    // Read raw events and make StEvent
     gSystem->Load("StEventMaker");
-    StEventMaker *readerMaker =  new StEventMaker("events","title");
-  } else {               // read StEvent file
+    StIOMaker *IOMk = new StIOMaker("IO", "r", setFiles, "bfcTree");
+    IOMk->SetBranch("runcoBranch", 0, "r");
+    //IOMk->SetDebug();
+    StEventMaker *readerMaker =  new StEventMaker("events", "title");
+    StFlowMaker* flowMaker = new StFlowMaker();
+  } else if (strstr(fileList[0], "nano")==0) {
+    // Read StEvent (or StFlowEvent) files
+    StIOMaker *IOMk = new StIOMaker("IO", "r", setFiles, "bfcTree");
+    IOMk->SetBranch("runcoBranch", 0, "r");
     IOMk->SetBranch("event");
+    //IOMk->SetDebug();
+    StFlowMaker* flowMaker = new StFlowMaker();
+  } else {
+    //Read nano-DST
+    StFlowMaker* flowMaker = new StFlowMaker();
+    flowMaker->NanoEventRead(kTRUE);
+    flowMaker->SetNanoEventFileName(); 
+    //flowMaker->SetNanoEventFileName(fileList[0]); 
+    //flowMaker->SetNanoEventFileName("flownanoevent.root"); 
+    //flowMaker->SetNanoEventFileName("FlowNanoDSTa.root"); 
   }
   
   //
@@ -150,9 +152,8 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   //   If you want to read more than one PhiWeight file, instantiate multiple
   //      FlowMakers with the corresponding selection objects.
   //
-  StFlowMaker* flowMaker = new StFlowMaker();
-  //StFlowTagMaker* flowTagMaker = new StFlowTagMaker();
-  //StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker();
+  StFlowTagMaker* flowTagMaker = new StFlowTagMaker();
+  StFlowAnalysisMaker* flowAnalysisMaker = new StFlowAnalysisMaker();
   
   // Make Selection objects and instantiate Makers
 //     StFlowSelection flowSelect;
@@ -171,14 +172,13 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
 //     sprintf(makerName, "FlowAnalysis%s", flowSelect1->Number());
 //     StFlowAnalysisMaker* flowAnalysisMaker1 = new StFlowAnalysisMaker(makerName, flowSelect1);
 
-    // Set read-write flages
-//     flowMaker->NanoFlowEventOff();
-//     flowMaker->NanoFlowEventOn();
-//     flowMaker->FlowEventWrite(kTRUE);
+  // Set read-write flages
+  //flowMaker->NanoEventWrite(kTRUE);
+  //flowMaker->FlowEventWrite(kTRUE);
 //     flowMaker->FlowEventRead(kTRUE);
 
-    // Set Debug status
-//     flowMaker->SetDebug();
+  // Set Debug status
+  //flowMaker->SetDebug();
 //     flowTagMaker->SetDebug();
 //     flowAnalysisMaker->SetDebug();
 
@@ -215,7 +215,7 @@ void doFlowEvents(Int_t nevents, const Char_t **fileList, const char *qaflag)
   //
   // Event loop
   //
-  int istat=0,i=1;
+  int istat=0, i=1;
  EventLoop: if (i <= nevents && !istat) {
    cout << "============================ Event " << i
 	<< " start ============================" << endl;
@@ -248,37 +248,38 @@ void doFlowEvents(const Int_t nevents, const Char_t *path, const Char_t *file, c
   } else {
     fileListQQ[0] = gSystem->ConcatFileName(path,file);
   }
-  doFlowEvents(nevents,fileListQQ,qaflag);
+  doFlowEvents(nevents, fileListQQ, qaflag);
 }
 
 void doFlowEvents(const Int_t nevents)
 {
-  
   // Commit to cvs with these defaults:
   const Char_t *filePath="-";
   const Char_t *fileExt="/afs/rhic/star/data/samples/gstar.dst.root";
 
+  // BNL
   //Char_t* filePath="/star/rcf/data03/reco/auau200/mevsim/vanilla/flow/year_1h/hadronic_on/tfs_6/";
   //Char_t* fileExt="*.dst.root";
 
+  // Both
   //Char_t* filePath="/afs/rhic/star/ebye/flow/";
-  //Char_t* fileExt="test2.event.root";
+  //Char_t* fileExt="test.event.root";
 
   //Char_t* filePath="/afs/rhic/star/ebye/flow/fixed10/";
   //Char_t* filePath="/afs/rhic/star/ebye/flow/random10/";
   //Char_t* fileExt="*.xdf";
   
-  //Char_t* filePath="/data06/snelling/flow/";
-  //Char_t* fileExt="*.dst.root";
-  
   //Char_t* filePath="./";
   //Char_t* fileExt="*.event.root";
   
+  //Char_t* filePath="./";
+  //Char_t* fileExt="flownanoevent.root";
+
+  // LBNL
+  //Char_t* filePath="/data06/snelling/flow/";
+  //Char_t* fileExt="*.dst.root";
+  
   doFlowEvents(nevents, filePath, fileExt);
 }
-
-
-
-
 
 
