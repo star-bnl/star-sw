@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: plot.C,v 1.51 2003/05/06 21:33:07 posk Exp $
+// $Id: plot.C,v 1.52 2003/06/27 21:25:44 posk Exp $
 //
 // Author:       Art Poskanzer, LBNL, Aug 1999
 //               FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -711,10 +711,10 @@ TCanvas* plotResolution(){
       if (strstr(resName[resNumber],"_v")!=0) {
 	hist->SetMaximum(10.);
 	hist->SetMinimum(-5.);
-	for (int n=1; n < 4; n++) {
+	for (int n=1; n < nHars+1; n++) {
 	  v   = hist->GetBinContent(n);                       // output v values
 	  err = hist->GetBinError(n);
-	  if (n==2 && k==1) cout << " v2 = " << v << " +/- " << err << endl;
+	  if (k==1) cout << " v" << n << "= " << v << " +/- " << err << endl;
 	  if (TMath::IsNaN(v)) {
 	    hist->SetBinContent(n, 0.);
 	    hist->SetBinError(n, 0.);
@@ -871,6 +871,9 @@ static Double_t StruveL0(Double_t x)
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: plot.C,v $
+// Revision 1.52  2003/06/27 21:25:44  posk
+// v4 and v6 are with repect to the 2nd harmonic event plane.
+//
 // Revision 1.51  2003/05/06 21:33:07  posk
 // Removed some histograms.
 //

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: minBias.C,v 1.8 2003/03/11 23:03:07 posk Exp $
+// $Id: minBias.C,v 1.9 2003/06/27 21:25:44 posk Exp $
 //
 // Author:       Art Poskanzer and Alexander Wetzler, Mar 2001
 //                 Kirill Filimonov treated the one count case
@@ -26,7 +26,7 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 
   const  int nCens = 9;
   int    nSels = 2;
-  const  int nHars = 3;
+  const  int nHars = 6;
   char   fileName[80];
   TFile* histFile[nCens+1];
   TH1*   hist[nCens+1];
@@ -300,6 +300,9 @@ void minBias(Int_t firstRunNo, Int_t outputRunNo=99) {
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: minBias.C,v $
+// Revision 1.9  2003/06/27 21:25:44  posk
+// v4 and v6 are with repect to the 2nd harmonic event plane.
+//
 // Revision 1.8  2003/03/11 23:03:07  posk
 // Includes scalar product and cumulant hists.
 //

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowAnalysisMaker.cxx,v 1.72 2003/05/16 20:44:46 posk Exp $
+// $Id: StFlowAnalysisMaker.cxx,v 1.73 2003/06/27 21:25:41 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Aug 1999
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -1028,12 +1028,9 @@ Int_t StFlowAnalysisMaker::Init() {
 	if (j == 1) {
 	  my_order = 2;
 	}
-	
 	histFull[k].histFullHar[j].mHistPsi_Diff = new TH1F(histTitle->Data(),
 	     histTitle->Data(), nPsiBins, -psiMax/my_order/2., psiMax/my_order/2.);
-      }
-
-      else {
+      } else {
 	histFull[k].histFullHar[j].mHistPsi_Diff = new TH1F(histTitle->Data(),	
 		          histTitle->Data(), nPsiBins, -psiMax/2., psiMax/2.);
       }
@@ -1042,21 +1039,15 @@ Int_t StFlowAnalysisMaker::Init() {
 	if (j == 0) {
 	  histFull[k].histFullHar[j].mHistPsi_Diff->SetXTitle
 	    ("#Psi_{1,Sel1} - #Psi_{1,Sel2}(rad)");
-	}
-	
-	else if (j == 1) {
+	} else if (j == 1) {
 	  histFull[k].histFullHar[j].mHistPsi_Diff->SetXTitle
 	    ("#Psi_{2,Sel1} - #Psi_{2,Sel2}(rad)");
 	}
-      }
-
-      else if (k == 1) {
+      } else if (k == 1) {
 	if (j == 0) {
 	  histFull[k].histFullHar[j].mHistPsi_Diff->SetXTitle
 	    ("#Psi_{1,Sel1} - #Psi_{2,Sel2}(rad)");
-	}
-	
-	else if (j == 1) {
+	} else if (j == 1) {
 	  histFull[k].histFullHar[j].mHistPsi_Diff->SetXTitle
 	    ("#Psi_{1,Sel1} - #Psi_{2,Sel1}(rad)");
 	}
@@ -1168,7 +1159,7 @@ Int_t StFlowAnalysisMaker::Init() {
   }
 
   gMessMgr->SetLimit("##### FlowAnalysis", 2);
-  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.72 2003/05/16 20:44:46 posk Exp $");
+  gMessMgr->Info("##### FlowAnalysis: $Id: StFlowAnalysisMaker.cxx,v 1.73 2003/06/27 21:25:41 posk Exp $");
 
   return StMaker::Init();
 }
@@ -1241,7 +1232,7 @@ void StFlowAnalysisMaker::FillEventHistograms() {
     }
   }
 
-  // full event Psi, PsiSubCorr, PsiSubCorrDiff, cos, mult, q, <Pt>
+  // full event Psi, PsiSubCorr, PsiSubCorrDiff, cos, mult, q
   for (int k = 0; k < Flow::nSels; k++) {
     for (int j = 0; j < Flow::nHars; j++) {
       float order  = (float)(j+1);
@@ -1256,26 +1247,20 @@ void StFlowAnalysisMaker::FillEventHistograms() {
 	  
 	  if (diff < -twopi/2./(j+1)) {
 	    diff += twopi/(j+1);
-	  }
-	  
-	  else if (diff > +twopi/2./(j+1)) {
+	  } else if (diff > +twopi/2./(j+1)) {
 	    diff -= twopi/(j+1);
 	  }
 	  
 	  histFull[k].histFullHar[j].mHistPsi_Diff->Fill(diff);
-	}
-	
-	else if (k == 1) {
-	  
+
+	} else if (k == 1) {
 	  float psi1;
 	  float psi2;
 	  
 	  if (j == 0) {
 	    psi1 = mPsi[0][0];
 	    psi2 = mPsi[1][1];
-	  }
-	  
-	  else if (j == 1) {
+	  }  else if (j == 1) {
 	    psi1 = mPsi[0][0];
 	    psi2 = mPsi[0][1];
 	  }
@@ -1522,6 +1507,10 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	if (pFlowEvent->EtaSubs()) { // particles with the opposite subevent
 	  int i = Flow::nSels*k;
 	  psi_i = (eta > 0.) ? mPsiSub[i+1][j] : mPsiSub[i][j];
+	} else if (order > 3. && !oddHar) {
+	  psi_i = mPsi[k][1];  // 2nd harmomic event plane
+	  if (psi_i > twopi/order) psi_i -= twopi/order; // ???
+	  if (psi_i > twopi/order) psi_i -= twopi/order;
 	} else {
 	  psi_i = mPsi[k][j];
 	}
@@ -1630,7 +1619,12 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  }
 
 	  // Get phiWgt from file
-	  double phiWgt = pFlowEvent->PhiWeight(k, j, pFlowTrack);
+	  double phiWgt;
+	  if (order > 3. && !oddHar) {
+	    phiWgt = pFlowEvent->PhiWeight(k, 1, pFlowTrack);
+	  } else {
+	    phiWgt = pFlowEvent->PhiWeight(k, j, pFlowTrack);
+	  }
 	  if (oddHar && eta < 0.) phiWgt /= -1.; // only for flat hists
 
 	  // Fill Flat histograms
@@ -1656,10 +1650,17 @@ void StFlowAnalysisMaker::FillParticleHistograms() {
 	  // Remove autocorrelations
 	  TVector2 Q_i;
 	  if (!pFlowEvent->EtaSubs()) {
-	    Q_i.Set(phiWgt * cos(phi * order), phiWgt * sin(phi * order));
-	    TVector2 mQ_i = mQ[k][j] - Q_i;
-	    psi_i = mQ_i.Phi() / order;
-	    if (psi_i < 0.) psi_i += twopi / order;
+	    if (order > 3. && !oddHar) { // 2nd harmonic event plane
+	      Q_i.Set(phiWgt * cos(phi * 2), phiWgt * sin(phi * 2));
+	      TVector2 mQ_i = mQ[k][1] - Q_i;
+	      psi_i = mQ_i.Phi() / 2;
+	      if (psi_i < 0.) psi_i += twopi / 2;
+	    } else {
+	      Q_i.Set(phiWgt * cos(phi * order), phiWgt * sin(phi * order));
+	      TVector2 mQ_i = mQ[k][j] - Q_i;
+	      psi_i = mQ_i.Phi() / order;
+	      if (psi_i < 0.) psi_i += twopi / order;
+	    }
 	  }
 	}
 
@@ -1754,6 +1755,37 @@ static Double_t resEventPlane(double chi) {
 
 //-----------------------------------------------------------------------
 
+static Double_t resEventPlaneK2(double chi) {
+  // Calculates the event plane resolution as a function of chi
+  //  for the case k=2.
+
+  double con = 0.626657;                   // sqrt(pi/2)/2
+  double arg = chi * chi / 4.;
+
+  double besselOneHalf = sqrt(arg/halfpi) * sinh(arg)/arg;
+  double besselThreeHalfs = sqrt(arg/halfpi) * (cosh(arg)/arg - sinh(arg)/(arg*arg));
+  Double_t res = con * chi * exp(-arg) * (besselOneHalf + besselThreeHalfs); 
+
+  return res;
+}
+
+//-----------------------------------------------------------------------
+
+static Double_t resEventPlaneK3(double chi) {
+  // Calculates the event plane resolution as a function of chi
+  //  for the case k=3.
+
+  double con = 0.626657;                   // sqrt(pi/2)/2
+  double arg = chi * chi / 4.;
+
+  Double_t res = con * chi * exp(-arg) * (TMath::BesselI1(arg) +
+					  TMath::BesselI(2, arg)); 
+
+  return res;
+}
+
+//-----------------------------------------------------------------------
+
 static Double_t chi(double res) {
   // Calculates chi from the event plane resolution
 
@@ -1803,36 +1835,50 @@ Int_t StFlowAnalysisMaker::Finish() {
     for (int j = 0; j < Flow::nHars; j++) {
       char countHars[2];
       sprintf(countHars,"%d",j+1);
+      double order  = (double)(j+1);
       cosPair[k][j]    = histFull[k].mHistCos->GetBinContent(j+1);
       cosPairErr[k][j] = histFull[k].mHistCos->GetBinError(j+1);
-      if (pFlowEvent->EtaSubs()) { // sub res only
-	if (cosPair[k][j] > 0.) {
+      if (cosPair[k][j] > 0.) {
+	if (pFlowEvent->EtaSubs()) { // sub res only
 	  double resSub = sqrt(cosPair[k][j]);
 	  double resSubErr = cosPairErr[k][j] / (2. * resSub);
 	  mRes[k][j]    = resSub;
 	  mResErr[k][j] = resSubErr;
+	} else if (order==4. || order==6.) { // 2nd harmonic event plane
+	    double deltaResSub = 0.005;  // differential for the error propergation
+	    double resSub = sqrt(cosPair[k][1]);
+	    double resSubErr = cosPairErr[k][1] / (2. * resSub);
+	    double chiSub = chi(resSub);
+	    double chiSubDelta = chi(resSub + deltaResSub);
+	    double mResDelta;
+	    if (order==4.) {
+	      mRes[k][j] = resEventPlaneK2(sqrt(2.) * chiSub); // full event plane res.
+	      mResDelta = resEventPlaneK2(sqrt(2.) * chiSubDelta);
+	    } else {
+	      mRes[k][j] = resEventPlaneK3(sqrt(2.) * chiSub); // full event plane res.
+	      mResDelta = resEventPlaneK3(sqrt(2.) * chiSubDelta);
+	    }
+	    mResErr[k][j] = resSubErr * fabs((double)mRes[k][j] - mResDelta) 
+	      / deltaResSub;
 	} else {
-	  mRes[k][j]    = 0.;       // subevent correlation must be positive
-	  mResErr[k][j] = 0.;
+	  if (cosPair[k][j] > 0.92) { // resolution saturates
+	    mRes[k][j]    = 0.99;
+	    mResErr[k][j] = 0.007;
+	  } else {
+	    double deltaResSub = 0.005;  // differential for the error propergation
+	    double resSub = sqrt(cosPair[k][j]);
+	    double resSubErr = cosPairErr[k][j] / (2. * resSub);
+	    double chiSub = chi(resSub);
+	    double chiSubDelta = chi(resSub + deltaResSub);
+	    mRes[k][j] = resEventPlane(sqrt(2.) * chiSub); // full event plane res.
+	    double mResDelta = resEventPlane(sqrt(2.) * chiSubDelta);
+	    mResErr[k][j] = resSubErr * fabs((double)mRes[k][j] - mResDelta) 
+	      / deltaResSub;
+	  }
 	}
-      } else {
-	if (cosPair[k][j] > 0.92) { // resolution saturates
-	  mRes[k][j]    = 0.99;
-	  mResErr[k][j] = 0.007;
-	} else if (cosPair[k][j] > 0.) {
-	  double deltaResSub = 0.005;  // differential for the error propergation
-	  double resSub = sqrt(cosPair[k][j]);
-	  double resSubErr = cosPairErr[k][j] / (2. * resSub);
-	  double chiSub = chi(resSub);
-	  double chiSubDelta = chi(resSub + deltaResSub);
-	  mRes[k][j] = resEventPlane(sqrt(2.) * chiSub); // full event plane res.
-	  double mResDelta = resEventPlane(sqrt(2.) * chiSubDelta);
-	  mResErr[k][j] = resSubErr * fabs((double)mRes[k][j] - mResDelta) 
-	    / deltaResSub;
-	} else {
-	  mRes[k][j]    = 0.;     // subevent correlation must be positive
-	  mResErr[k][j] = 0.;
-	}
+      } else {      // subevent correlation must be positive
+	mRes[k][j]    = 0.;
+	mResErr[k][j] = 0.;
       }
       histFull[k].mHistRes->SetBinContent(j+1, mRes[k][j]);
       histFull[k].mHistRes->SetBinError(j+1, mResErr[k][j]);
@@ -2025,6 +2071,9 @@ void StFlowAnalysisMaker::SetHistoRanges(Bool_t ftpc_included) {
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowAnalysisMaker.cxx,v $
+// Revision 1.73  2003/06/27 21:25:41  posk
+// v4 and v6 are with repect to the 2nd harmonic event plane.
+//
 // Revision 1.72  2003/05/16 20:44:46  posk
 // First commit of StFlowPhiWgtMaker
 //
