@@ -2,58 +2,90 @@ STROOT        := ../StRoot
 
 STARCLASSPATH := $(STROOT)/StarClassLibrary
 HBTPATH       := $(STROOT)/StHbtMaker
-HBTSUBS       := -I$(STROOT) -I$(HBTPATH) -I$(HBTPATH)/Base -I$(HBTPATH)/Cut \
+ROOTPATH      := /afs/rhic/star/ROOT/2.25.00/include
+HBTSUBS       := -I$(ROOTPATH) \
+                 -I$(STROOT) -I$(HBTPATH) -I$(HBTPATH)/Base -I$(HBTPATH)/Cut \
                  -I$(HBTPATH)/Infrastructure/ -I$(HBTPATH)/CorrFctn \
-		 -I$(HBTPATH)/Fit -I$(HBTPATH)/Reader -I$(STARCLASSPATH)
+		 -I$(HBTPATH)/Fit -I$(HBTPATH)/Reader -I$(HBTPATH)/doc/Make -I$(STARCLASSPATH)
 
-VPATH         := $(STROOT) $(HBTPATH) $(HBTPATH)/Base $(HBTPATH)/Cut \
+VPATH         := $(ROOTPATH) \
+                 $(STROOT) $(HBTPATH) $(HBTPATH)/Base $(HBTPATH)/Cut \
                  $(HBTPATH)/Infrastructure/ $(HBTPATH)/CorrFctn \
-		 $(HBTPATH)/Fit $(HBTPATH)/Reader $(STARCLASSPATH)
+		 $(HBTPATH)/Fit $(HBTPATH)/Reader $(HBTPATH)/doc/Make $(STARCLASSPATH)
 
 HBTOBJ        := \
-StHbtIOBinary.o \
-StHbtV0.o \
-StHbtTrack.o \
-StHbtPair.o \
-StHbtEvent.o \
-StHbtPicoEvent.o \
-gamovCorrect.o \
-StHbtParticle.o \
-StHbtIO.o \
-franks1HistoD.o \
-franks2HistoD.o \
 StHbtMaker.o \
-OpeningAngleCorrFctn.o \
-MinvCorrFctnArmenteros.o \
-QinvCorrFctn.o \
 QvecCorrFctn.o \
+MinvCorrFctnM_vs_Phi.o \
+MinvCorrFctn.o \
+MinvCorrFctnArmenteros.o \
 MinvCorrFctnM_vs_Pt.o \
-MinvCorrFctnY_vs_Pt.o \
-QinvCorrFctnC.o \
+Q3invCorrFctn.o \
 ExitSepCorrFctn.o \
 ParityCorrFctn.o \
-MinvCorrFctn.o \
-helensV0Cut.o \
-mikesTrackCut.o \
-trackCutMonitor_DCA.o \
-trackCutMonitor_P_vs_Dedx.o \
-trackCutMonitor_Y_vs_Pt.o \
+MinvCorrFctnY_vs_Pt.o \
+QinvCorrFctn.o \
+MinvLikeSignCorrFctn.o \
+OpeningAngleCorrFctn.o \
+EtaCorrFctn.o \
+Eta_vs_QualityCorrFctn.o \
+Angle_vs_QualityCorrFctn.o \
+Eta_vs_PhiCorrFctn.o \
+Phi_vs_QualityCorrFctn.o \
+QinvCorrFctnCC.o \
+franksPairCut.o \
+v0CutMonitor_K0Short.o \
+v0CutMonitor_dcaV0Daughters.o \
+trackCutMonitor_P.o \
+franksV0PairCut.o \
+mikesEventCut.o \
+dummyV0Cut.o \
+GenericTripletCut.o \
 eventCutMonitor_Mult.o \
 mikesPairCut.o \
-franksTrackCut.o \
-trackCutMonitor_P.o \
-mikesEventCut.o \
-ParityEventCut.o \
+trackCutMonitor_P_vs_Dedx.o \
 trackCutMonitor_Pt.o \
-dummyV0Cut.o \
-StHbtManager.o \
+mikesTrackCut.o \
+v0CutMonitor_Minv.o \
+trackCutMonitor_DCA.o \
+v0CutMonitor_dcaV0ToPrimVertex.o \
+franksTrackCut.o \
+trackCutMonitor_Y_vs_Pt.o \
+franksV0Cut.o \
+helensV0Cut.o \
+trackCutMonitor_Eta.o \
+StHbtRadiusFit3.o \
 StHbtAnalysis.o \
+StHbtCheckPdgIdList.o \
+StHbtSectoredAnalysis.o \
 StHbtCutMonitorHandler.o \
+StHbtThreeParticleAnalysis.o \
 StHbtCoulomb.o \
+StHbtMultiTrackCut.o \
+StHbtManager.o \
+StHbtLikeSignAnalysis.o \
+StHbtVertexAnalysis.o \
 StHbtAsciiReader.o \
 StHbtBinaryReader.o \
-StHbtGstarTxtReader.o 
-
+StHbtClassImp.o \
+StHbtEvent.o \
+StHbtPair.o \
+StHbtIOBinary.o \
+franks1HistoD.o \
+StHbtSectoredPicoEvent.o \
+franks2HistoD.o \
+gamovCorrect.o \
+StHbtIO.o \
+StHbtTriplet.o \
+StHbtV0.o \
+StHbtPicoEvent.o \
+franks2Histo.o \
+StHbtTrack.o \
+StHbtParticle.o \
+StHbtPicoEventCollectionVectorHideAway.o
+#rotationEventCut.o \
+#randomRotateEventCut.o \
+#rotateToReactionPlaneEventCut.o \
 
 
 STARCLASSOBJ        := \
@@ -152,7 +184,7 @@ StAntiXiMinus.o \
 StAntiXiZero.o 
 
 
-CPPFLAGS      := -I. -I.. $(HBTSUBS) -DST_NO_NAMESPACES
+CPPFLAGS      := -I. -I.. $(HBTSUBS) -DST_NO_NAMESPACES -DST_NO_NUMERIC_LIMITS
 CXXFLAGS      := -g -Wall 
 LDFLAGS       := -L$(CERN)/pro/lib -lpacklib -lhbtlib
 #LDFLAGS       := -lhbtlib
