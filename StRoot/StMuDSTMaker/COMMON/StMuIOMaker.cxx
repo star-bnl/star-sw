@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuIOMaker.cxx,v 1.10 2004/04/20 18:49:16 perev Exp $
+ * $Id: StMuIOMaker.cxx,v 1.11 2004/07/02 01:51:09 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  * Made it integrated to StIOMaker for applying Grid Collector 
@@ -38,6 +38,8 @@ StMuIOMaker::StMuIOMaker(const char* name, const char *ioFile) :
   mBufferSize	=65536*4;  
   mMuSave	=0;        
   mBadInFile	=0;       
+  mIoMode       =0;
+  mCloseWrite	=1;       
 
 
 
@@ -48,7 +50,7 @@ StMuIOMaker::StMuIOMaker(const char* name, const char *ioFile) :
 //-----------------------------------------------------------------------
 StMuIOMaker::~StMuIOMaker() {
   DEBUGMESSAGE("");
-  if(mMuSave) closeWrite();
+  if(mMuSave && !mBadInFile && !mCloseWrite) closeMuWrite();
   DEBUGMESSAGE3("out");
 }
 
@@ -78,9 +80,15 @@ int StMuIOMaker::Init(){
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 int StMuIOMaker::Make(){
-  return Make(mCurrentIndex+1);
+// same as "Read mode" of StTreeMaker
+    int iret=0,ntry=13;
+    while(1999) {
+      iret = MakeRead();
+      if (iret!=kStErr && ntry--) break;
+      Warning("Make","%d *** ReadError ***\n",ntry);
+    }
+    return iret;
 }
-//-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 /**
@@ -110,7 +118,7 @@ int StMuIOMaker::Make(int index){
   int bytes = mChain->GetEntry(mCurrentIndex);
 
   DEBUGVALUE(mMuSave);
-  if(mMuSave) mTTree->Fill();
+  if(mMuSave) mOutTree->Fill();
 // One event would be skipped in StChain if making increment here!!!!
 //  mCurrentIndex++;
   DEBUGVALUE3(bytes);
@@ -143,22 +151,46 @@ int StMuIOMaker::Make(const StUKey& key){
 int StMuIOMaker::Finish() {
   DEBUGMESSAGE("");
   cout << "###### StMuIOMaker read " << mEventCounter << " events"  << endl;
-  if(mMuSave) { 
-    if (mTTree) mTTree->AutoSave(); 
-    mTTree=0;
+  if(mMuSave && !mBadInFile && !mCloseWrite) { 
+    if (mOutTree) mOutTree->AutoSave(); 
+    closeMuWrite();
   }
   DEBUGMESSAGE3("out");
   return kStOK;
 }
 
-// implementaion of 4 virtual methods of base StIOInterFace
+// implementaion of virtual methods of base StIOInterFace
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+Int_t StMuIOMaker:: MakeRead(const StUKey &key) {
+    DEBUGMESSAGE("");
+    if(!mBadInFile) {
+      if(key.IsNull()) { // sequential reading in normal case
+         DEBUGMESSAGE("Seq");
+         return Make(mCurrentIndex+1);
+      }
+      else  {            // GC
+         DEBUGMESSAGE("GC");
+         return Make(key);
+      }
+    }
+    else {               // Bad input file
+      DEBUGMESSAGE("BadFile");
+      return kStEOF;
+    }
+}
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 // Open() in BASE StIOInterace returns 1999 if not implemented in DERIVED here
 Int_t StMuIOMaker::Open(const char*) { 
   DEBUGMESSAGE("");
   mBadInFile = false;
+  mCloseWrite = true;
   int iret = openRead();
+  if(mMuSave && !mBadInFile) { 
+    openMuWrite();
+    mCloseWrite = false;
+  }
   return iret; 
 }
 //-----------------------------------------------------------------------
@@ -166,7 +198,7 @@ Int_t StMuIOMaker::Open(const char*) {
 // Close() in BASE StIOInterace will quit if not implemented in DERIVED here
 void StMuIOMaker::Close(Option_t *) { 
   DEBUGMESSAGE("");
-  if(mMuSave && !mBadInFile) closeWrite(); 
+  if(mMuSave && !mBadInFile && !mCloseWrite) closeMuWrite(); 
   closeRead(); 
   DEBUGMESSAGE3("out");
 }
@@ -206,9 +238,64 @@ int StMuIOMaker::openRead() {
   DEBUGMESSAGE3("out");
   return kStOK;
 }
+
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuIOMaker::openMuWrite() {
+  DEBUGMESSAGE("");
+  mOutFileName = fFile.Data(); 
+  while (mOutFileName.find("/")!=string::npos) {
+      int pos = mOutFileName.find("/");
+      mOutFileName.erase(0,pos+1);
+  }
+  int pos = mOutFileName.find("MuDst");
+  mOutFileName = mOutFileName.insert(pos,"Sel.");
+  DEBUGVALUE(mOutFileName.c_str());
+
+  mOutFile = new TFile(mOutFileName.c_str(),"RECREATE","StMuDst");
+  mOutFile->SetCompressionLevel(mCompression);
+
+  TTree *tree;
+  tree = mChain->GetTree();
+  mOutTree = new TTree("MuDst", "StMuDst", mSplit);
+  mOutTree->SetAutoSave(1000000);
+  mOutTree = tree->CloneTree(0);
+
+  DEBUGMESSAGE3("out");
+}
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuIOMaker::closeMuWrite(){
+  DEBUGMESSAGE("");
+  cout << __PRETTY_FUNCTION__ << endl;
+  if (mOutTree && mOutFile) {
+      cout << " ##### " << __PRETTY_FUNCTION__ << " ";
+      cout << " ##### " << endl;
+      cout << " ##### File=" << mOutFile->GetName() << " "; 
+      cout << " ##### " << endl;
+      cout << " ##### NumberOfEvents= " << mOutTree->GetEntries() << " ";
+      cout << " ##### " << endl;
+  }
+  StTimer timer;
+  timer.reset();
+  timer.start();
+
+  if(mOutTree) mOutTree->Write();
+  mOutTree = 0;
+  if(mOutFile) mOutFile->Close();
+  mOutFile = 0;
+
+  timer.stop();
+  cout << " Writing took " << timer.elapsedTime() << " seconds " << endl;
+  mCloseWrite = true;
+  DEBUGMESSAGE3("out");
+}
 /***************************************************************************
  *
  * $Log: StMuIOMaker.cxx,v $
+ * Revision 1.11  2004/07/02 01:51:09  perev
+ * Wei-Ming Zhang developments
+ *
  * Revision 1.10  2004/04/20 18:49:16  perev
  * Big reorganization, now StMuIOMkaer inherits from StMuDstMaker
  *
