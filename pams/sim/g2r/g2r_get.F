@@ -148,6 +148,7 @@
       integer         NUMBV(Nmh)/Nmh*0/
       character*3     Csys
 
+         call vzero (NUMBV,Nmh)
          i=AgFHIT1(ih,jtra,numbv,hits)
          G2R_GET_HIT = i
          if (i.ne.0) return
