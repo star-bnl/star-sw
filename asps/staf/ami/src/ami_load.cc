@@ -23,17 +23,19 @@ extern CC_P int ami_load(amiBroker *broker);
 //:ARGUMENTS:	amiBroker *broker
 //:RETURN VALUE:TRUE or FALSE
 //:<--------------------------------------------------------------------
-int ami_load(amiBroker *broker)
+int 
+ami_load(amiBroker *broker)
 {
-   printf("*****************************************************\n");
-   printf("*****************************************************\n");
-   printf("*****                                           *****\n");
-   printf("*****               WARNING !!!                 *****\n");
-   printf("*****                                           *****\n");
-   printf("*****  You are loading no analysis modules.     *****\n");
-   printf("*****                                           *****\n");
-   printf("*****************************************************\n");
-   printf("*****************************************************\n");
-   return TRUE;
+  static void *pb = &broker;
+  printf("*****************************************************\n");
+  printf("*****************************************************\n");
+  printf("*****                                           *****\n");
+  printf("*****               WARNING !!!                 *****\n");
+  printf("*****                                           *****\n");
+  printf("*****  You are loading no analysis modules.     *****\n");
+  printf("*****                                           *****\n");
+  printf("*****************************************************\n");
+  printf("*****************************************************\n");
+  return TRUE;
 }
 
