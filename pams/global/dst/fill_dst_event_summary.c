@@ -227,8 +227,14 @@ long  type_of_call fill_dst_event_summary_ (
       dst_eventsummary->prim_vrtx[2]    = dst_vertex[ivtx].z;
       dst_eventsummary->glb_trk_prim    = dst_vertex[ivtx].n_daughters;
     }
-    
-      dst_eventsummary->n_vert_type[vtx_id]++ ;
+    if (vtx_id != kUndefinedVertexIdentifier && 
+	vtx_id != kEventVertexIdentifier     &&
+	vtx_id != kV0DecayIdentifier         &&
+	vtx_id != kXiDecayIdentifier         &&
+	vtx_id != kKinkDecayIdentifier) {
+      printf ("Undefined vertex type = %d\n", vtx_id);
+    }
+    else  dst_eventsummary->n_vert_type[vtx_id]++ ;
 
       if(vtx_id == 5)  dst_eventsummary->n_vert_pileup++ ;
       
