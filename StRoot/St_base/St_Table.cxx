@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98  (E-mail: fine@bnl.gov)
-// $Id: St_Table.cxx,v 1.28 1998/12/07 03:57:42 fine Exp $ 
+// $Id: St_Table.cxx,v 1.29 1998/12/07 20:23:11 fine Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.29  1998/12/07 20:23:11  fine
+// St_Table:: working versions of the Print() and SavePrimitive methods
+//
 // Revision 1.28  1998/12/07 03:57:42  fine
 // St_Table::SavePrimitive () method has been introduced
 //
@@ -64,8 +67,6 @@
  
 #include <iostream.h>
 #include <iomanip.h>
-// #include <sstream>
-#include <string.h> 
 
 #include <TROOT.h>
 #include <TBuffer.h>
@@ -258,7 +259,7 @@ void St_Table::Adopt(Int_t n, void *arr)
 }
  
 //______________________________________________________________________________
-void St_Table::AddAt(ULong_t *row, Int_t i)
+void St_Table::AddAt(const void *row, Int_t i)
 {
    // Add one element (row) of structure at position i. Check for out of bounds.
  
@@ -302,8 +303,7 @@ Char_t *St_Table::Create()
 //______________________________________________________________________________
 void St_Table::Browse(TBrowser *b){
   St_DataSet::Browse(b);
-  Inspect();
-  Print(0,10);
+  Print(0,6);
 }
 //______________________________________________________________________________
 void St_Table::Clear(Option_t *opt)
@@ -560,15 +560,21 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
    Int_t thisLoopLenth = 0;
    const Char_t  *nextRow;
    while (rowCount) {
-     cout << "\n ---------------------------------------------------------------------------------------" << endl
+     cout << endl << " ---------------------------------------------------------------------------------------" << endl
          <<  " " << Path() 
                  <<"  Allocated rows: "<<fN
                  <<"\t Used rows: "<<*s_MaxIndex
                  <<"\t Row size: "      << *s_Size << " bytes"
       <<endl 
-      << " Table: " << classPtr->GetName()<<"["<<row+rowNumber-rowCount<<"] --> "
-                         << classPtr->GetName()<<"["<<row+rowNumber-rowCount+rowStep-1<<"]" 
-      << endl
+      << " Table: " << classPtr->GetName()<< "\t";
+      for (Int_t j = row+rowNumber-rowCount; j<row+rowNumber-rowCount+rowStep && j < row+rowNumber ;j++)
+      { 
+         Int_t hW = width-2;
+         if (j>=10) hW -= TMath::Log10(float(j))-1;
+         cout  << setw(hW) << "["<<j<<"]";
+         cout  << " :" ;
+      }
+      cout << endl
       <<       " ======================================================================================" << endl;
       next.Reset();
       TDataMember *member = 0;
@@ -579,7 +585,8 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
             isdate = kTRUE;
          }
 
-         cout << member->GetTypeName() << "\t" << member->GetName();
+//         cout << member->GetTypeName() << "\t" << member->GetName();
+         cout << member->GetTypeName();
 
          // Add the dimensions to "array" members 
          Int_t dim = member->GetArrayDim();
@@ -595,12 +602,10 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
          while (indx < dim ){
             arraySize[indx] = member->GetMaxIndex(indx);
             arrayLength *= arraySize[indx];
-            cout << "["<<  arraySize[indx] <<"]";
+//            cout << "["<<  arraySize[indx] <<"]";
            // Take in account the room this index will occupy
            indx++;
          }
-         cout << "\t";
-         if ( strlen(member->GetName())+3*dim < 8) cout << "\t";
 
          // Encode data value or pointer value
          Int_t offset = member->GetOffset();
@@ -612,12 +617,16 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
          for (indexOffset=0; indexOffset < arrayLength && !breakLoop; indexOffset++) 
          {
            nextRow = startRow;
-           if (dim && indexOffset) {
-                ArrayIndex(arrayIndex,arraySize,dim);
-                cout << "\t";
+           if (!indexOffset) cout << "\t" << member->GetName();
+           else              cout << "\t" << setw(strlen(member->GetName())) << " ";
+//           if (dim && indexOffset) {
+           if (dim) {
                 for (Int_t i=0;i<dim;i++) cout << "["<<arrayIndex[i]<<"]";
-                cout << "\t\t";
+                ArrayIndex(arrayIndex,arraySize,dim);
            }
+           cout << "\t";
+           if ( strlen(member->GetName())+3*dim < 8) cout << "\t";
+
            for (thisStepRows = 0;thisStepRows < thisLoopLenth; thisStepRows++,nextRow += GetRowSize())
            {
              const char *pointer = nextRow + offset  + indexOffset*membertype->Size();
@@ -644,9 +653,9 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
                           breakLoop = kTRUE;
                         }
                         else 
-//                           cout << membertype->AsString(p3pointer) << " : ";
+//                           cout << membertype->AsString(p3pointer) << " :";
                           ::AsString(p3pointer,membertype->GetTypeName(),width);
-                           cout << " : ";
+                           cout << " :";
                    }
                 } else if (!strcmp(member->GetFullTypeName(), "char*") ||
                          !strcmp(member->GetFullTypeName(), "const char*")) {
@@ -671,8 +680,8 @@ const Char_t *St_Table::Print(Int_t row, Int_t rownumber, const Char_t *colfirst
                  }
                  else{
                     ::AsString((void *)pointer,membertype->GetTypeName(),width);
-                    cout << " : ";
-//                    cout << membertype->AsString((void *)pointer) <<" : ";
+                    cout << " :";
+//                    cout << membertype->AsString((void *)pointer) <<" :";
                  }
              else
                 cout << "->" << (Long_t)pointer;
@@ -760,9 +769,6 @@ void St_Table::SavePrimitive(ofstream &out, Option_t *)
             isdate = kTRUE;
          }
 
-
-//  out << member->GetTypeName() << "\t" << member->GetName();
-
          // Add the dimensions to "array" members 
          Int_t dim = member->GetArrayDim();
          Int_t indx = 0;
@@ -777,8 +783,8 @@ void St_Table::SavePrimitive(ofstream &out, Option_t *)
          while (indx < dim ){
             arraySize[indx] = member->GetMaxIndex(indx);
             arrayLength *= arraySize[indx];
-           // Take in account the room this index will occupy
-           indx++;
+            // Take in account the room this index will occupy
+            indx++;
          }
 
          // Encode data value or pointer value
@@ -791,15 +797,25 @@ void St_Table::SavePrimitive(ofstream &out, Option_t *)
          for (indexOffset=0; indexOffset < arrayLength && !breakLoop; indexOffset++) 
          {
            nextRow = startRow;
+//           out.setf(left);
+           Int_t fieldLen = 20;
+           fieldLen -= strlen(member->GetName())+strlen(rowId)+1;
+           
+           if (dim && !indexOffset) out << endl;
+           out << setw(3) << " " ;  
            out << rowId << "." << member->GetName();
+
            if (dim) {
-                for (Int_t i=0;i<dim;i++) out << "["<<arrayIndex[i]<<"]";
-                ArrayIndex(arrayIndex,arraySize,dim);
+              for (Int_t i=0;i<dim;i++) {
+                out << "["<<arrayIndex[i]<<"]";
+                fieldLen -= 3;
+             }
+             ArrayIndex(arrayIndex,arraySize,dim);
            }
 
          // Generate "="
- 
-           out << " = ";
+           out << setw(TMath::Max(fieldLen,1)) << " " << " = ";
+//           out << " = ";
 
            for (thisStepRows = 0;thisStepRows < thisLoopLenth; thisStepRows++,nextRow += GetRowSize())
            {
@@ -841,9 +857,9 @@ void St_Table::SavePrimitive(ofstream &out, Option_t *)
                      breakLoop = kTRUE;
                 }
                  else
-                   out << membertype->AsString((void *)pointer) ;
+                   out << setw(10) << membertype->AsString((void *)pointer) ;
              else
-                  out << (Long_t)pointer;
+                  out << setw(10) << (Long_t)pointer;
            }
         // Encode data member title
            if (indexOffset==0) {
@@ -856,13 +872,14 @@ void St_Table::SavePrimitive(ofstream &out, Option_t *)
            out << ";" << endl;
          }
       }
-      out << tableId << "->AddRow(" << rowId << ");" << endl 
-      << "// ------------------ next row -----------------" << endl;
+      out << tableId << "->AddAt(&" << rowId << "," << rowNumber-rowCount <<");" 
+          << endl; 
       rowCount -= thisLoopLenth;
+      if (rowCount) cout << "// ------------------ next row -----------------" << endl;
       startRow  = nextRow;
    }
   out << "// ----------------- end of code ---------------" << endl
-      << " return tableSet;" << endl
+      << " return (St_DataSet *)tableSet;" << endl
       << "}"  << endl;
   return;
 }

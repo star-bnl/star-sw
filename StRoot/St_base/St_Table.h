@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.15 1998/12/06 00:45:49 fisyak Exp $
+// $Id: St_Table.h,v 1.16 1998/12/07 20:23:12 fine Exp $
 // $Log: St_Table.h,v $
+// Revision 1.16  1998/12/07 20:23:12  fine
+// St_Table:: working versions of the Print() and SavePrimitive methods
+//
 // Revision 1.15  1998/12/06 00:45:49  fisyak
 // Add SavePrimitive
 //
@@ -86,7 +89,7 @@ public:
    virtual    ~St_Table();
   
    virtual     void       Adopt(Int_t n, void *array);
-   virtual     void       AddAt(ULong_t *c, Int_t i);
+   virtual     void       AddAt(const void *c, Int_t i);
    virtual     void      *At(Int_t i);
    virtual     void       Browse(TBrowser *b);
    virtual     void       CopySet(St_Table &array);
