@@ -18,6 +18,6 @@
    nunit=21 _
    nfile=psc180_02_48evts_j_dst_smdst.ntup _
    nid=111 _
-   ntable=event/data/strange/smdst/smdst_v0
+   ntable=event/data/strange/smdst/smdst_v0 _
    nid2=112 _
    ntable2=event/data/global/dst/event_summary _

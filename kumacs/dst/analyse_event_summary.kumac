@@ -19,13 +19,13 @@ hi/file 21 [ntuple_file]
  set stat 111111
  
 * --- Book Histograms----------------------------------------------------
- 1dhist 101 'Num Global Tracks total'   100 0. 10000.
+ 1dhist 101 'Num Global Tracks total'   100 0. 8000.
  1dhist 102 'Num Global Tracks good '   100 0. 5000.
  1dhist 103 'Num Global Tracks primary' 100 0. 2000.
  
- 1dhist 104 'Num Vertex Total   ' 100 0. 50000.
- 1dhist 105 'Num Vertex V0   '    100 0. 50000.
- 1dhist 106 'Num Vertex K0   '    100 0. 50000.
+ 1dhist 104 'Num Vertex Total   ' 100 0. 25000.
+ 1dhist 105 'Num Vertex V0   '    100 0. 25000.
+ 1dhist 106 'Num Vertex K0   '    100 0. 25000.
  
  1dhist 107 ' Mean PT in each event   ' 100 0. 2.
  1dhist 108 ' Mean eta in each event ' 100 -0.1 0.1
@@ -55,9 +55,9 @@ hi/file 21 [ntuple_file]
  1dhist 144 ' Mult. pt 4 ' 100 0. 2000.
  1dhist 145 ' Mult. pt 5 ' 100 0. 2000.
    
- 2dhist 201 ' mult eta vs eta ' 5 -2.0 2.0 100 0. 2000. 
- 2dhist 202 ' mult pt vs pt   ' 5 0. 1.5 100 0. 3000. 
- 2dhist 203 ' mult phi vs phi ' 8 -180. 180. 100 0. 1000.
+ 2dhist 201 ' mult eta vs eta ' 80 -2.0 2.0 100 0. 3000. 
+ 2dhist 202 ' mult pt vs pt   ' 100 0. 1. 100 0. 1000. 
+ 2dhist 203 ' mult phi vs phi ' 90 -180. 180. 100 0. 1000.
  
  1dhist 301 ' mult eta vs eta ' 5 0. 5.
  1dhist 302 ' mult pt  vs pt  ' 5 0. 5.
@@ -95,11 +95,11 @@ hi/file 21 [ntuple_file]
  vec/input vmeta(5) $hinfo(128,'mean') 
  hi/put_vect/contents 301 vmeta 
  
- nt/proj 201 112.mult_eta(1)%-1.6 
- nt/proj 201 112.mult_eta(2)%-0.8 
+ nt/proj 201 112.mult_eta(1)%-1.5 
+ nt/proj 201 112.mult_eta(2)%-0.75 
  nt/proj 201 112.mult_eta(3)%-0.
- nt/proj 201 112.mult_eta(4)%0.8 
- nt/proj 201 112.mult_eta(5)%1.6 
+ nt/proj 201 112.mult_eta(4)%0.75
+ nt/proj 201 112.mult_eta(5)%1.5
  
 * mult phi histograms
  
@@ -140,11 +140,11 @@ hi/file 21 [ntuple_file]
  nt/proj 144 112.mult_pt(4)
  nt/proj 145 112.mult_pt(5) 
       
- nt/proj 202 112.mult_pt(1)%0.15
- nt/proj 202 112.mult_pt(2)%0.45
- nt/proj 202 112.mult_pt(3)%0.75
- nt/proj 202 112.mult_pt(4)%1.05
- nt/proj 202 112.mult_pt(5)%1.35
+ nt/proj 202 112.mult_pt(1)%0.125
+ nt/proj 202 112.mult_pt(2)%0.175
+ nt/proj 202 112.mult_pt(3)%0.25
+ nt/proj 202 112.mult_pt(4)%0.4
+ nt/proj 202 112.mult_pt(5)%0.75
   
  vec/create vmpt(5) 
  vec/input vmpt(1) $hinfo(141,'mean')
@@ -187,9 +187,9 @@ hi/file 21 [ntuple_file]
 * PLOT 2 ----------
   zone 1 3  
 * primary vertex
-    hi/pl 121
-    hi/pl 122
-    hi/pl 123
+* hi/pl 121
+* hi/pl 122
+* hi/pl 123
 * ---------------------------
     
   zone 2 3
@@ -220,9 +220,9 @@ hi/file 21 [ntuple_file]
 * PLOT 3 ----------
     zone 1 3
 * multiplicity phi,pt,eta
-* hi/pl 201
-* hi/pl 202
-* hi/pl 203
+ hi/pl 201
+ hi/pl 202
+ hi/pl 203
     
 * PLOT 4 -------
     zone 1 3
