@@ -20,6 +20,7 @@ my %class_hfile_depens_on = (); #
 my %class_written = (); 
 my @classes = 0; # list of classes
 my $h_files = "";
+my $coll = 0;
 
 # count no. of classes i LinkDef's
 my $ListOfWrittenClasses = ":"; 
@@ -49,7 +50,6 @@ for my $h  (split /\s/,$sources) {#  print "SRC:", $h, "\n";
   if ($h =~ /Stypes/)  {$h_files .= " " . basename($h); next;}
   if ($h =~ /LinkDef/) {next;}
   open (In,$h) or die "Can't open $h";
-  my $coll = 0;
   my $dummy;
   my $class;
   my $includes = "";
