@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDbReader.h,v 1.1 2002/04/11 14:19:30 laue Exp $
+ * $Id: StMuDbReader.h,v 1.2 2002/04/15 22:38:11 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDbReader_hh
@@ -27,7 +27,7 @@ class StMuDbReader  {
   int entries(const char* file);
  protected:
   StMuDbReader();
-  ~StMuDbReader();
+  virtual ~StMuDbReader();
  private:
   static StMuDbReader* _instance;
   //  FourTupleVector* mFourTupleVector;
@@ -43,6 +43,9 @@ class StMuDbReader  {
 /***************************************************************************
  *
  * $Log: StMuDbReader.h,v $
+ * Revision 1.2  2002/04/15 22:38:11  laue
+ * made destructors virtual
+ *
  * Revision 1.1  2002/04/11 14:19:30  laue
  * - update for RH 7.2
  * - decrease default arrays sizes
