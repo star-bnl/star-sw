@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowEvent.cxx,v 1.55 2005/02/08 20:57:36 psoren Exp $
+// $Id: StFlowEvent.cxx,v 1.56 2005/02/11 23:24:29 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //          FTPC added by Markus Oldenburg, MPI, Dec 2000
@@ -982,11 +982,19 @@ void StFlowEvent::SetPidsProb() {
 void StFlowEvent::SetCentrality() {
   // Centrality=0 is not retrieveable
 
-  Int_t* cent = 0;
+  Int_t* cent = 0; // Centrality=0 is not retrievable
   Int_t  tracks = mMultEta; // converts UInt_t to Int_t
 
-  if (mCenterOfMassEnergy == 0.) { // year=1
-    cent = Flow::cent130;
+  if (mRunID > 4000000 ) { // year 4
+    if (mCenterOfMassEnergy >= 199.) {
+      if (fabs(mMagneticField) >= 4.) { // year=4, Au+Au, Full Field
+	cent = Flow::cent200Year4Full;
+      } else { // year=4, Au+Au, Half Field
+	cent = Flow::cent200Year4Half;
+      }
+    } else if (mCenterOfMassEnergy >60. && mCenterOfMassEnergy < 65. ) { // 62 GeV
+      cent = Flow::cent62;
+    }
   } else if (mCenterOfMassEnergy >= 199.) {
     if (fabs(mMagneticField) >= 4.) { // year=2, Au+Au, Full Field
       cent = Flow::cent200Full;
@@ -995,8 +1003,8 @@ void StFlowEvent::SetCentrality() {
     }
   } else if (mCenterOfMassEnergy <= 25.){ // year=2, 22 GeV
     cent = Flow::cent22;
-  } else if(mCenterOfMassEnergy >60. && mCenterOfMassEnergy < 65. ) { // 62 GeV
-    cent = Flow::cent62;
+  } else if (mCenterOfMassEnergy == 0.) { // year=1
+    cent = Flow::cent130;
   }
 
   if      (tracks < cent[0])  { mCentrality = 0; }
@@ -1091,6 +1099,9 @@ void StFlowEvent::PrintSelectionList() {
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowEvent.cxx,v $
+// Revision 1.56  2005/02/11 23:24:29  posk
+// SetCentrality works for year4.
+//
 // Revision 1.55  2005/02/08 20:57:36  psoren
 // trigger and centrality selections were updated for all runs after run 4 to be compatible with trigger collections. Added TriggersFound() and GetFlowTriggerBitMap() functions.
 //
