@@ -1,5 +1,8 @@
-// $Id: bfc.C,v 1.54 1999/05/14 00:16:16 fisyak Exp $
+// $Id: bfc.C,v 1.55 1999/05/14 15:48:01 didenko Exp $
 // $Log: bfc.C,v $
+// Revision 1.55  1999/05/14 15:48:01  didenko
+// correct error in input_file
+//
 // Revision 1.54  1999/05/14 00:16:16  fisyak
 // take out analysis of input_file environment variable and redefiniton no. event to process from file name
 //
@@ -360,13 +363,13 @@ void Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0 ){
 	if (!ChainFlags[kGSTAR]) 
 	  infile ="/afs/rhic/star/data/samples/hijet-g2t.xdf";	       // g2t xdf file
     }
-    if (infile) {
-      InFile = new TString(infile);
-      //      Check the input file
-      if (gSystem->AccessPathName(InFile->Data())) {// file does not exist
-	printf(" *** NO FILE: %s, exit!\n", InFile->Data());
-	gSystem->Exit(1); 
-      }
+  }
+  if (infile) {
+    InFile = new TString(infile);
+    //      Check the input file
+    if (gSystem->AccessPathName(InFile->Data())) {// file does not exist
+      printf(" *** NO FILE: %s, exit!\n", InFile->Data());
+      gSystem->Exit(1); 
     }
   }
   if (ChainFlags[kGSTAR]) {
