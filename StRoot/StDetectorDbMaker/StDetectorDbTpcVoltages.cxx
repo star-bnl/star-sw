@@ -1,4 +1,4 @@
-#include <Stiostream.h>
+#include "StMessMgr.h"
 #include "StDetectorDbTpcVoltages.h"
 #include "tables/St_tpcHighVoltages_Table.h"
 
@@ -48,7 +48,7 @@ void StDetectorDbTpcVoltages::update(StMaker* maker){
 
 /// Default constructor
 StDetectorDbTpcVoltages::StDetectorDbTpcVoltages(){
-    cout << "StDetectorDbTpcVoltages::StDetectorDbTpcVoltages" << endl;
+    ~gMess << "StDetectorDbTpcVoltages::StDetectorDbTpcVoltages" << endm;
     mTpcVoltages = 0;
     mTable = 0;
 };

@@ -3,7 +3,6 @@
 
 #include "StMaker.h"
 
-#include <Stiostream.h>
 
 class TTable;
 struct tpcRDOMasks_st;

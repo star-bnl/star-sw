@@ -1,4 +1,4 @@
-#include <Stiostream.h>
+#include "StMessMgr.h"
 #include "StDetectorDbTriggerID.h"
 #include "tables/St_triggerID_Table.h"
 #include "tables/St_trigPrescales_Table.h"
@@ -87,7 +87,7 @@ void StDetectorDbTriggerID::update(StMaker* maker){
 
 /// Default constructor
 StDetectorDbTriggerID::StDetectorDbTriggerID(){
-    cout << "StDetectorDbTriggerID::StDetectorDbTriggerID" << endl;
+    ~gMess << "StDetectorDbTriggerID::StDetectorDbTriggerID" << endm;
     mTriggerID = 0;
     mIDNumRows = 0;
     mIDTable = 0;

@@ -1,6 +1,5 @@
 #ifndef StDetectorDbBeamInfo_h
 #define StDetectorDbBeamInfo_h
-#include <Stiostream.h>
 class StMaker;
 class  TTable;
 struct beamInfo_st;

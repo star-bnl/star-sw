@@ -1,6 +1,5 @@
 #ifndef StDetectorDbMagnet_h
 #define StDetectorDbMagnet_h
-#include <Stiostream.h>
 
 #include "StMaker.h"
 class  TTable;

@@ -1,6 +1,5 @@
 #ifndef StDetectorDbClock_h
 #define StDetectorDbClock_h
-#include <Stiostream.h>
 
 #include "StMaker.h"
 

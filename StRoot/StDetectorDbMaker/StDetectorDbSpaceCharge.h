@@ -1,6 +1,5 @@
 #ifndef StDetectorDbSpaceCharge_h
 #define StDetectorDbSpaceCharge_h
-#include <Stiostream.h>
 
 #include "StMaker.h"
 

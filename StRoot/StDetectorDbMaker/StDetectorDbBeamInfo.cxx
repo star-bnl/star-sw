@@ -1,4 +1,4 @@
-#include <Stiostream.h>
+#include "StMessMgr.h"
 #include "StMaker.h"
 #include "StDetectorDbBeamInfo.h"
 #include "tables/St_beamInfo_Table.h"
@@ -50,7 +50,7 @@ void StDetectorDbBeamInfo::update(StMaker* maker){
 
 /// Default constructor
 StDetectorDbBeamInfo::StDetectorDbBeamInfo(){
-    cout << "StDetectorDbBeamInfo::StDetectorDbBeamInfo" << endl;
+    ~gMess << "StDetectorDbBeamInfo::StDetectorDbBeamInfo" << endm;
     mBeamInfo = 0;
     mTable = 0;
 };

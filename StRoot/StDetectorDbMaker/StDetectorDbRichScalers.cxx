@@ -1,4 +1,4 @@
-#include <Stiostream.h>
+#include "StMessMgr.h"
 #include "StDetectorDbRichScalers.h"
 #include "tables/St_trigDetSums_Table.h"
 #include "tables/St_richvoltages_Table.h"
@@ -9,9 +9,9 @@
 
   #include "StDetectorDbMaker/StDetectorDbRichScalers.h"
   StDetectorRichScalers * scalers = StDetectorRichScalers::intstance();
-  cout << *scalers << endl;
-  cout << scalers->getZDCWest() << endl;
-  cout << scalers->getRichHVStatus() << endl;
+  ~gMess << *scalers << endm;
+  ~gMess << scalers->getZDCWest() << endm;
+  ~gMess << scalers->getRichHVStatus() << endm;
   
   or any other access methods.
   
@@ -37,7 +37,7 @@ StDetectorDbRichScalers* StDetectorDbRichScalers::instance()
 
 /// Default constructor
 StDetectorDbRichScalers::StDetectorDbRichScalers(){
-    cout << "StDetectorDbRichScalers::StDetectorDbRichScalers" << endl;
+    ~gMess << "StDetectorDbRichScalers::StDetectorDbRichScalers" << endm;
     mScalers = 0;
     mVolts = 0;
     mY1Mults = 0;

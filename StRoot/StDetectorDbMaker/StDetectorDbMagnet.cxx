@@ -1,4 +1,4 @@
-#include <Stiostream.h>
+#include "StMessMgr.h"
 #include "StDetectorDbMagnet.h"
 #include "tables/St_starMagOnl_Table.h"
 #include <math.h>
@@ -46,7 +46,7 @@ void StDetectorDbMagnet::update(StMaker* maker){
 
 /// Default constructor
 StDetectorDbMagnet::StDetectorDbMagnet(){
-    cout << "StDetectorDbMagnet::StDetectorDbMagnet" << endl;
+    ~gMess << "StDetectorDbMagnet::StDetectorDbMagnet" << endm;
     mStarMagOnl = 0;
     mNumRows = 0;
     mTable = 0;
