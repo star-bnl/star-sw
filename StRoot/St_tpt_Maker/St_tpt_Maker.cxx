@@ -1,5 +1,8 @@
-// $Id: St_tpt_Maker.cxx,v 1.63 2001/08/08 20:11:43 jeromel Exp $
+// $Id: St_tpt_Maker.cxx,v 1.64 2001/08/31 20:45:54 hardtke Exp $
 // $Log: St_tpt_Maker.cxx,v $
+// Revision 1.64  2001/08/31 20:45:54  hardtke
+// Add bums hit moving option
+//
 // Revision 1.63  2001/08/08 20:11:43  jeromel
 // Added debugging lines for ExB correction option. WAS NEVER ON ==> Corrected & -> | (i.e. mea culpa)
 //
@@ -214,6 +217,7 @@
 #include "tables/St_type_index_Table.h"
 #include "tables/St_dst_vertex_Table.h"
 #include "StDbUtilities/StMagUtilities.h"
+#include "StDbUtilities/StSectorAligner.h"
 
 static StMagUtilities* m_ExB = 0 ;
 
@@ -412,6 +416,27 @@ Int_t St_tpt_Maker::Make(){
 	    spc -> z = xprime[2];
 	  }
       }
+
+    if (m_AlignSector) {
+           cout << "############# ALIGNING HITS" << endl;
+      StSectorAligner* aligner = new StSectorAligner(gStTpcDb);
+      tcl_tphit_st* spc = tphit->GetTable();
+      float x[3], xprime[3];
+
+      for ( Int_t i = 0 ; i < tphit->GetNRows() ; i++ , spc++ ){
+	short sector = short(spc->row/100.);
+	short row    = spc->row - sector*100;
+
+	 x[0] = spc->x;      x[1] = spc->y;      x[2] = spc->z;
+
+	 aligner->moveHit(x,xprime,sector,row);
+
+	 spc->x = xprime[0]; spc->y = xprime[1]; spc->z = xprime[2];
+      }
+      delete aligner;
+      cout << "############ done " << endl;
+    }
+
 
     if (Debug()) cout << " start tpt_run " << endl;
     Int_t Res_tpt = tpt(m_tpt_pars,tphit,tptrack,clusterVertex);
