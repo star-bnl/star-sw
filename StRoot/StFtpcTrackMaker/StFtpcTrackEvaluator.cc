@@ -1,5 +1,9 @@
-// $Id: StFtpcTrackEvaluator.cc,v 1.7 2001/01/25 15:22:10 oldi Exp $
+// $Id: StFtpcTrackEvaluator.cc,v 1.8 2001/03/06 18:06:36 oldi Exp $
 // $Log: StFtpcTrackEvaluator.cc,v $
+// Revision 1.8  2001/03/06 18:06:36  oldi
+// Because StFtpcClusterMaker and StFtpcConfMapper have changed two things had
+// to be changed here: coeff[4] -> coeff[6], ffs_gepoint -> ffs_fgepoint.
+//
 // Revision 1.7  2001/01/25 15:22:10  oldi
 // Review of the complete code.
 // Fix of several bugs which caused memory leaks:
@@ -543,7 +547,7 @@ void StFtpcTrackEvaluator::Setup(St_DataSet *geant, St_DataSet *ftpc_data)
     
     GeantHitInit((St_g2t_ftp_hit *)geantI("g2t_ftp_hit"));
     GeantTrackInit((St_g2t_track *)geantI("g2t_track"), (St_g2t_ftp_hit *)geantI("g2t_ftp_hit"));
-    FastSimHitInit((St_ffs_gepoint *)ftpc_data->Find("ffs_gepoint"));   
+    FastSimHitInit((St_ffs_gepoint *)ftpc_data->Find("ffs_fgepoint"));   
     ParentTrackInit();
     CalcSplitTracks();
   }
@@ -1379,7 +1383,7 @@ void StFtpcTrackEvaluator::FillGCutHistos()
   // Evaluates the cuts by looking into the distibution od the cut-variables in GEANT tracks.
 
   StFtpcConfMapper t; 
-  Double_t coeff[4];
+  Double_t coeff[6];
 
   for (Int_t t_counter = 0; t_counter < mGeantTracks->GetEntriesFast(); t_counter++) {
     StFtpcTrack *track = (StFtpcTrack*) mGeantTracks->At(t_counter);
@@ -1440,7 +1444,7 @@ void StFtpcTrackEvaluator::FillFCutHistos()
   // Fills cut histograms for found tracks.
 
   StFtpcConfMapper t; 
-  Double_t coeff[4];
+  Double_t coeff[6];
 
   for (Int_t t_counter = 0; t_counter < mFoundTracks->GetEntriesFast(); t_counter++) {
     StFtpcTrack *track = (StFtpcTrack*) mFoundTracks->At(t_counter);
