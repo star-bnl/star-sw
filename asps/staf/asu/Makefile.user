@@ -5,9 +5,9 @@
 mytarget:
 	@echo "Put any special make targets in this file."
 #
-asuStaf asuStaf.%:
-	touch $@
-	@echo "THIS EXECUTABLE MUST NEVER BE MADE"
+#asuStaf asuStaf.%:
+#	touch $@
+#	@echo "THIS EXECUTABLE MUST NEVER BE MADE"
 #
 # - OLD TARGETS --- OBSOLETE ???
 # make -f Makefile.user install_slm

@@ -6,13 +6,13 @@ c:----------------------------------------------------------------------
 C: Duplicate emlLib.h 
 c:----------------------------------------------------------------------
 
-/*- STAFCV - STAR Analysis Framework Condition Value -*/
+C: STAFCV - STAR Analysis Framework Condition Value
 #define STAFCV_T        INTEGER*4
 
-/* #define STAFCV_BAD      0 */
+C: #define STAFCV_BAD      0
       INTEGER*4 stafcv_bad
       parameter (stafcv_bad=0)
-/* #define STAFCV_OK       1 */
+C: #define STAFCV_OK       1
       INTEGER*4 stafcv_ok
       parameter (stafcv_ok=1)
 
@@ -31,10 +31,10 @@ c:----------------------------------------------------------------------
 C: KUIP Vectors        
 c:----------------------------------------------------------------------
 
-/* #define STAF_STATUS_VECTOR(A) IQ(STAF_STATUS_LLOW+ A-1 ) */
-/* #define STAF_RESULT_VECTOR(A)  Q(STAF_RESULT_LLOW+ A-1 ) */
+C: #define STAF_STATUS_VECTOR(A) IQ(STAF_STATUS_LLOW+ A-1 )
+C: #define STAF_RESULT_VECTOR(A)  Q(STAF_RESULT_LLOW+ A-1 )
 
-/*HACK ---- CHECK THIS HACK ---- endif //EMLLIB_INC*/
+C: HACK ---- CHECK THIS HACK ---- endif //EMLLIB_INC
 
       INTEGER*4 NWPAW,IXPAWC,IHBOOK,IXHIGZ,IXKUIP,IFENCE,LMAIN
       REAL*4 WS 
