@@ -280,11 +280,16 @@ StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
 	cout <<"StiLocalTrackSeedFidnder::makeTrack(). ERROR:\t"
 	     <<"Factory is null pointer!"<<endl;
     }
-    
+
+    //This should be moved into the fit method.  If it fails, we've wasted a served track!
     track = mFactory->getObject();
     track->reset();
+
+    //Test: Scale the errors (MLM 12/10/01)
+    for_each( mSeedHitVec.begin(), mSeedHitVec.end(), ScaleHitError(10.) );
+    //End test
     
-    initializeTrack(track);
+    track = initializeTrack(track);
 
 #ifdef DEBUG
     mMessenger <<"\t leaving StiLocalTrackSeedFinder::makeTrack()"<<endl;
@@ -304,8 +309,8 @@ StiKalmanTrack* StiLocalTrackSeedFinder::makeTrack(StiHit* hit)
 
 
    ------------------- x --------- pt2
-   \
-   \   
+                        \
+                         \   
    ---------------------- x ------ pt1
 
    We try to extrapolate the segment (pt1->pt2) to predict pt3.  We
@@ -344,7 +349,7 @@ bool StiLocalTrackSeedFinder::extrapolate()
     mDetStore->setToDetector( hit2->detector() );
     //Test to see if move in worked
     for (unsigned int i=0; i<=mSkipped; ++i) {
-	if ( mDetStore->moveIn()==false ) {
+	if ( mDetStore->moveIn()==false) {
 #ifdef DEBUG
 	    mMessenger<<"StiLocalTrackSeedFinder::extrapolate(). ERROR:\t"
 		      <<"Nowhere to move in to.  Abort"<<endl;
@@ -355,6 +360,8 @@ bool StiLocalTrackSeedFinder::extrapolate()
 
     const StiDetector* newLayer = **mDetStore;
     double r3 = newLayer->getPlacement()->getCenterRadius();
+    //Temp hack by Mike
+    if (r3<=60.) { return false; }
     
     //First, r-y plane
     double m_ry = dr/dy;
@@ -451,7 +458,7 @@ bool StiLocalTrackSeedFinder::extrapolate()
     return true;
 }
 
-void StiLocalTrackSeedFinder::initializeTrack(StiKalmanTrack* track)
+StiKalmanTrack* StiLocalTrackSeedFinder::initializeTrack(StiKalmanTrack* track)
 {
 #ifdef DEBUG
     mMessenger <<"StiLocalTrackSeedFinder::initializeTrack(StiKalmanTrack*)"<<endl;
@@ -460,15 +467,17 @@ void StiLocalTrackSeedFinder::initializeTrack(StiKalmanTrack* track)
     if (mDoHelixFit) {
 	if (mSeedHitVec.size()>=3) { //if false, continue on to calculate
 	    fit(track);
-	    return;
+	    return (fit(track)==true) ? track : 0;
 	}
     }
 
     if (mUseOrigin==false && mSeedHitVec.size()>=3) { 
 	calculate(track);
+	return track;
     }
     else { //No choice!, too few points to exclude vertex assumption
 	calculateWithOrigin(track);
+	return track;
     }
 
 #ifdef DEBUG
@@ -477,7 +486,7 @@ void StiLocalTrackSeedFinder::initializeTrack(StiKalmanTrack* track)
 
 }
 
-void StiLocalTrackSeedFinder::fit(StiKalmanTrack* track)
+bool StiLocalTrackSeedFinder::fit(StiKalmanTrack* track)
 {
 #ifdef DEBUG
     mMessenger<<"StiLocalTrackSeedFinder::fit(StiKalmanTrack*)"<<endl;
@@ -491,7 +500,7 @@ void StiLocalTrackSeedFinder::fit(StiKalmanTrack* track)
 	mMessenger<<"StiLocalTrackSeedFinder::fit(StiKalmanTrack*). ERROR:\t"
 		  <<"Helix Fit failed.  abort"<<endl;
 #endif
-	return;
+	return false;
     }
 
 #ifdef DEBUG
@@ -504,7 +513,8 @@ void StiLocalTrackSeedFinder::fit(StiKalmanTrack* track)
     
     track->initialize( mHelixFitter.curvature(), mHelixFitter.tanLambda(),
 		       StThreeVectorD(mHelixFitter.xCenter(), mHelixFitter.yCenter(), 0.),
-		       mSeedHitVec);    
+		       mSeedHitVec);
+    return true;
 }
 
 void StiLocalTrackSeedFinder::calculate(StiKalmanTrack* track)
@@ -614,4 +624,9 @@ void StiLocalTrackSeedFinder::print() const
     }
     cout <<"\n Search Window in Y:\t"<<mDeltaY<<endl;
     cout <<"\n Search Window in Z:\t"<<mDeltaZ<<endl;
+}
+
+void ScaleHitError::operator()(StiHit* hit) const
+{
+    hit->scaleError(scale);
 }

@@ -59,12 +59,12 @@ private:
     ///Extrapolate to next layer using straight line, add hit closest in z
     bool extrapolate();
 
-    void initializeTrack(StiKalmanTrack*);
+    StiKalmanTrack* initializeTrack(StiKalmanTrack*);
     void calculate(StiKalmanTrack*);
     void calculateWithOrigin(StiKalmanTrack*);
     
     //Perform helix fit, Perform helix calculation (doesn't assume any vertex)
-    void fit(StiKalmanTrack*);
+    bool fit(StiKalmanTrack*);
     
     //This is just for testing
     void triggerPartition();
@@ -158,6 +158,13 @@ inline void StiLocalTrackSeedFinder::forgetSubject(Subject* obsolete)
 struct RPhiLessThan
 {
     bool operator()(const StiDetector*, const StiDetector*);
+};
+
+struct ScaleHitError
+{
+    ScaleHitError(double val) : scale(val) {};
+    double scale;
+    void operator()(StiHit*) const;
 };
 
 #endif
