@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StMagUtilities.cxx,v 1.26 2002/02/02 02:05:30 jhthomas Exp $
+ * $Id: StMagUtilities.cxx,v 1.27 2002/02/03 20:59:47 dunlop Exp $
  *
  * Author: Jim Thomas   11/1/2000
  *
@@ -11,6 +11,9 @@
  ***********************************************************************
  *
  * $Log: StMagUtilities.cxx,v $
+ * Revision 1.27  2002/02/03 20:59:47  dunlop
+ * *** empty log message ***
+ *
  * Revision 1.26  2002/02/02 02:05:30  jhthomas
  * Included gFactor explicitly in SpaceCharge call
  *
@@ -264,6 +267,8 @@ void StMagUtilities::CommonStart ( Int_t mode, StTpcDb* dbin, TDataSet* dbin2 )
   cout << "StMagUtilities::XTWIST     =  " << XTWIST << " mrad" << endl ;
   cout << "StMagUtilities::YTWIST     =  " << YTWIST << " mrad" << endl ;
   cout << "StMagUtilities::SpaceCharg =  " << SpaceCharge << " Coulombs/epsilon-nought" << endl ;
+  cout << "StMagUtilities::IFCShift =  " << IFCShift << " cm" << endl ;
+
 
 }
 
@@ -954,7 +959,10 @@ void StMagUtilities::UndoSpaceChargeDistortion( const Float_t x[], Float_t Xprim
   if ( z < 0 && z > -0.2 ) z = -0.2 ;               // Protect against discontinuity at CM
 
   InterpolateEdistortion( r, phi, z, spaceEr, spaceEphi, Er_integral, Ephi_integral ) ;
-  // Get Space Charge **** Every Event ***
+  // Get Space Charge **** Every Event (JCD This is actually per hit)***
+  // Need to reset the instance every hit.  May be slow, but there's no per-event hook.
+  fSpaceCharge = StDetectorDbSpaceCharge::instance();
+  
   if ( fSpaceCharge !=0 ) SpaceCharge = fSpaceCharge->getSpaceChargeCoulombs((double)gFactor) ;
 
   // Subtract to Undo the distortions
