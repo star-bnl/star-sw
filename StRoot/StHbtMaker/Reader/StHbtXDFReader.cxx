@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtXDFReader.cxx,v 1.5 2000/04/13 16:54:25 laue Exp $
+ * $Id: StHbtXDFReader.cxx,v 1.6 2000/04/13 18:15:33 fine Exp $
  *
  * Author: Frank Laue, Ohio State, laue@mps.ohio-state.edu
  ***************************************************************************
@@ -168,16 +168,9 @@ StHbtEvent* StHbtXDFReader::ReturnHbtEvent(){
     cout << "StHbtXDFReader - couldn't find  particle table!!! " << endl;
     return 0;
   }
-  table_head_st* t1_h = part->GetHeader();	// pointer to the table headers       // get the header, t1_h points to it
-  if (!t1_h) {
-    cout << "StHbtXDFReader - couldn't find  particle table's header !!! " << endl;
-    return 0;
-  }
-
-
+  
   StHbtEvent* hbtEvent = new StHbtEvent;
   
-  //int mult = t1_h->nok;  
   int mult = part->GetNRows();
 
   hbtEvent->SetNumberOfTracks(mult);
