@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.35 2002/01/15 17:15:36 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.36 2002/02/20 04:01:46 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.36  2002/02/20 04:01:46  porter
+ * changed test on runNumber from !=0 to >0 for initiating query by runNumber
+ *
  * Revision 1.35  2002/01/15 17:15:36  porter
  * moved timestamp translation to a separate method
  *
@@ -438,7 +441,7 @@ void * StDbBroker::Use(int tabID, int parID)
   bool fetchStatus;
   if(node->getDbType()==dbRunLog && 
      node->getDbDomain() != dbStar && 
-     m_runNumber !=0 ){
+     m_runNumber>0 ){
      fetchStatus=UseRunLog(node);   
   } else {
     fetchStatus=mgr->fetchDbTable(node);
