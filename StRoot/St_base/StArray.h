@@ -85,7 +85,7 @@ class StObjArray : public TCollection
 {
 public:
                 StObjArray(Int_t s = TCollection::kInitCapacity){fObjArr = new TObjArray(s,0);};
-                StObjArray(StObjArray& a);
+                StObjArray(StObjArray& a) {assert(0);}
 virtual        ~StObjArray(){delete fObjArr;};
 
             virtual void AddAfter(TObject* after, TObject* obj){fObjArr->AddAfter(after,obj);};

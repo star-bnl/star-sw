@@ -1,5 +1,8 @@
-// $Id: St_Table.cxx,v 1.80 1999/09/07 19:30:29 fine Exp $ 
+// $Id: St_Table.cxx,v 1.81 1999/09/08 00:18:08 fisyak Exp $ 
 // $Log: St_Table.cxx,v $
+// Revision 1.81  1999/09/08 00:18:08  fisyak
+// Add implementation for copy ctor of StObjArray
+//
 // Revision 1.80  1999/09/07 19:30:29  fine
 // table descriptor access has been changed. All tables are affected and must be re-compiled
 //
@@ -220,6 +223,10 @@
 #include <iostream.h>
 #include <fstream.h>
 #include <iomanip.h>
+
+#ifdef WIN32
+# include <float.h>
+#endif
 
 #include "TROOT.h"
 #include "TSystem.h"
@@ -1383,13 +1390,14 @@ void St_Table::ls(Option_t *option)
    DecreaseDirLevel();
 }
 
+
 #ifdef WIN32
 # ifndef finite
-#   define finit _finite;
+#   define finite _finite
 # endif
+#else
+extern "C" {int finite( double x );}
 #endif
-
-int finite( double x );
 
 //______________________________________________________________________________
 Int_t St_Table::NaN() {
