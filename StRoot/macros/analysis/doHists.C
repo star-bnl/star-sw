@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: doHists.C,v 3.2 2000/12/12 23:11:05 perev Exp $
+// $Id: doHists.C,v 3.3 2001/02/14 18:19:36 perev Exp $
 //
 // Description: 
 // Chain to read production histgrams from files or database and acculuate it across all files read
@@ -147,6 +147,7 @@ void doHists(Int_t nevents, const Char_t **fileList, const Char_t *qaflag, const
    if (wrStEOut) {
        cout << "!!!! doHists: will write out .event.root file !!" << endl << endl;
        StTreeMaker *outMk = new StTreeMaker("mergeOut","","mergeTree");
+         outMk->SetIOMode ("w");
          outMk->SetBranch ("mergeBranch","test.merge.root","w","const");
          outMk->IntoBranch("mergeBranch","Merged");
      }
@@ -207,6 +208,9 @@ void doHists(const Int_t nevents, const Char_t *path, const Char_t *file,
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: doHists.C,v $
+// Revision 3.3  2001/02/14 18:19:36  perev
+// add write mode
+//
 // Revision 3.2  2000/12/12 23:11:05  perev
 // Add write of merged histos
 //
