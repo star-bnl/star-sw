@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.11 2002/04/23 21:35:32 laue Exp $
+ * $Id: StMuDstMaker.cxx,v 1.12 2002/04/26 21:02:56 jeromel Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -71,7 +71,7 @@ StMuDstMaker::StMuDstMaker(const char* name) : StMaker(name),
   mSplit(99), mCompression(9), mBufferSize(65536*4)
 {
   StMuDebug::setLevel(0);
-  mDirName="";
+  mDirName="./";
   mFileName="";
   streamerOff();
   if (mIoMode==ioRead) openRead();
@@ -260,14 +260,17 @@ void StMuDstMaker::write(){
   DEBUGVALUE2(mIoNameMode);
   switch (mIoNameMode) {
   case ioFix:  
+    DEBUGMESSAGE2("===> ioFix\n");
     theFileName = buildFileName( mDirName+"/", basename(mFileName),".MuDst.root");
     break;
   case ioIOMaker:
+    DEBUGMESSAGE2("===> ioIOMaker\n");
     ioMakerFileName = string(mIOMaker->GetFile()); 
     DEBUGVALUE2(ioMakerFileName);
     theFileName = buildFileName( mDirName+"/", basename(ioMakerFileName),".MuDst.root"); 
     break;
   case ioTreeMaker:
+    DEBUGMESSAGE2("===> ioTreeMaker\n");
     ioMakerFileName = mTreeMaker->GetTree()->GetBaseName();
     theFileName = buildFileName(dirname(ioMakerFileName),basename(ioMakerFileName),".MuDst.root"); 
     break;
@@ -717,9 +720,13 @@ string StMuDstMaker::dirname(string s){
   DEBUGVALUE3(name.c_str());
   size_t pos;
   pos = name.find_last_of("/");
-  if (pos!=string::npos ) name.erase(pos, name.length());
+
+  if (pos != string::npos ) name.erase(pos, name.length());
+  if (name == s) name =".";
+
   name=name+"/";
   DEBUGVALUE3(name);
+  //cout << "==> will return " << name << " based on " << s << endl;
   return name;
 } 
 void StMuDstMaker::setProbabilityPidFile(const char* file) {
@@ -729,6 +736,10 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.12  2002/04/26 21:02:56  jeromel
+ * Bug fix in dirname(). Still cannot get the arg3 bla/test.root mechanism to work
+ * (but it does neither for everything else). Will come back to it.
+ *
  * Revision 1.11  2002/04/23 21:35:32  laue
  * Changed name of StStraMuDstMaker to 'strangeMuDst' so that it can get picked
  * from the bfc.
