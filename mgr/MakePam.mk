@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.108 1999/08/20 01:42:59 fisyak Exp $
+# $Id: MakePam.mk,v 1.109 1999/08/20 13:13:30 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.109  1999/08/20 13:13:30  fisyak
+# Devorce StAF and STAR Library
+#
 # Revision 1.108  1999/08/20 01:42:59  fisyak
 # Devorce StAF and STAR Library
 #
@@ -624,3 +627,4 @@ test_dir:
 	@echo FILES_IDMS    = $(FILES_IDMS)
 	@echo NAMES_IDM     = $(NAMES_IDM)
 	@echo NAMES_IDMS    = $(NAMES_IDMS)
+	@echo STAF_SYS_INCS = $(STAF_SYS_INCS)

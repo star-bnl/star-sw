@@ -1,5 +1,8 @@
-# $Id: MakeEnv.mk,v 1.16 1999/08/16 16:31:32 fisyak Exp $
+# $Id: MakeEnv.mk,v 1.17 1999/08/20 13:13:30 fisyak Exp $
 # $Log: MakeEnv.mk,v $
+# Revision 1.17  1999/08/20 13:13:30  fisyak
+# Devorce StAF and STAR Library
+#
 # Revision 1.16  1999/08/16 16:31:32  fisyak
 # Simplify Makefiles
 #
@@ -166,7 +169,7 @@ STAF_ANA := $(strip $(wildcard $(STAF_ANA)))
 
 
 ifdef STAF_SYS
-  STAF_SYS_INCS := $(STAF_SYS)/inc
+  STAF_SYS_INCS := $(STAF)/inc $(STAF_SYS)/inc
 #
 #	default staf libs
   STAF_SYS_LIB := $(STAF_SYS)/.$(STAF_ARCH)/lib

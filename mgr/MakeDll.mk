@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.102 1999/08/20 01:42:58 fisyak Exp $
+# $Id: MakeDll.mk,v 1.103 1999/08/20 13:13:29 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.103  1999/08/20 13:13:29  fisyak
+# Devorce StAF and STAR Library
+#
 # Revision 1.102  1999/08/20 01:42:58  fisyak
 # Devorce StAF and STAR Library
 #
@@ -290,12 +293,6 @@ FILES_SRC := $(filter-out %/.share/%/*.c, $(FILES_SRC))
 FILES_SRC := $(filter-out %/.share/%/*.g, $(FILES_SRC))
 FILES_SRC := $(filter-out %_init.cc %_i.cc, $(FILES_SRC)) 
 FILES_SRC := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_SRC)))
-
-ifeq ($(PKG),xdf2root)
-  FILES_SRC  += $(wildcard $(STAF)/asps/staf/dsl/src/*.c)
-  FILES_SRC := $(filter-out %~ ~%,$(subst ~,~ ~,$(FILES_SRC)))
-  INPUT_DIRS := $(STAF)/asps/staf/dsl/src
-endif
 
 DOIT := $(strip $(FILES_SRC))
 ifneq (,$(DOIT))

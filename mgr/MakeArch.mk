@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.83  1999/08/20 13:13:28  fisyak
+#  Devorce StAF and STAR Library
+#
 #  Revision 1.82  1999/08/16 16:31:31  fisyak
 #  Simplify Makefiles
 #
@@ -224,7 +227,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/08/16 16:31:31 $ 
+#             Last modification $Date: 1999/08/20 13:13:28 $ 
 #. default setings
 
 MAKE  := gmake
@@ -299,8 +302,8 @@ CLIBS    :=
 FLIBS    :=
 
 CPPFLAGS := $(UNAMES) $(STAF_ARCH) $(TULL_ARCH) QUIET_ASP DS_ADVANCED
-STIC       := $(STAR_BIN)/stic
-GEANT3     := $(STAR_BIN)/geant3
+STIC       := $(STAF_BIN)/stic
+GEANT3     := $(STAF_BIN)/geant3
 
 ifndef ASU_MALLOC_OFF
   CPPFLAGS += ASU_MALLOC_ON
