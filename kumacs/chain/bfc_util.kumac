@@ -17,11 +17,16 @@
 * 28Jul98 K. Turner - separate bfc_defaults and bfc_load to 
 *                      kumacs/util/setup_defaults and load_libraries
 * 1Aug98  K. Turner - tid now separated out of tpt
+* 3Aug98  K. Turner - use new detp geometry command instead of bfc_gstar_setup
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
 ******************************************************************
- macro bfc_start domain='geometry tpc svt global'  chain=' ' 
+ macro bfc_start _ 
+   domain='geometry tpc svt global' _
+   chain=' ' _
+   phystype=' ' _
+   geomtype=' '
 
 * SETUP LOCAL VARIABLES 
  alias/create STAFCV_OK  1
@@ -31,7 +36,8 @@
  macro/global/import *
    
 *  THESE NEXT 4 MUST BE DONE IN THIS ORDER!!!!
-   exec bfc_util#bfc_gstar_setup    [chain]
+* exec bfc_util#bfc_gstar_setup    [chain]
+   detp geometry [phystype] [geomtype]
    exec bfc_util#bfc_g2t_b4_load    [chain]
    exec load_libraries#run          [domain]
    exec bfc_util#bfc_g2t_after_load [chain]
