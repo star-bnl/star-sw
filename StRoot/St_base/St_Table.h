@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   24/03/98
-// $Id: St_Table.h,v 1.40 1999/10/28 16:24:35 fine Exp $
+// $Id: St_Table.h,v 1.41 1999/11/24 00:31:26 fine Exp $
 // $Log: St_Table.h,v $
+// Revision 1.41  1999/11/24 00:31:26  fine
+// operator[] const has been introduced
+//
 // Revision 1.40  1999/10/28 16:24:35  fine
 // St_DataSet major correction: it may be built with TList (default) or with TObjArray
 //
@@ -235,6 +238,7 @@ public:
    virtual     void       Update();
    virtual     void       Update(St_DataSet *set,UInt_t opt=0);
                void      *operator[](Int_t i);
+               const void *operator[](Int_t i) const;
 
  //  ----   Table descriptor service   ------
 
@@ -271,6 +275,13 @@ inline void *St_Table::operator[](Int_t i)
    if (!BoundsOk("St_Table::operator[]", i))
       i = 0;
     return (void *)(s_Table+i*(*s_Size));
+}
+
+inline const void *St_Table::operator[](Int_t i) const
+{
+   if (!BoundsOk("St_Table::operator[]", i))
+      i = 0;
+    return (const void *)(s_Table+i*(*s_Size));
 }
 
 inline void St_Table::Draw(Option_t *opt)
