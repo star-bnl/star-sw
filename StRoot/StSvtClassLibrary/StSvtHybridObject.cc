@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHybridObject.cc,v 1.1.1.1 2000/03/10 14:26:21 munhoz Exp $
+ * $Id: StSvtHybridObject.cc,v 1.2 2001/07/12 16:56:30 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHybridObject.cc,v $
+ * Revision 1.2  2001/07/12 16:56:30  munhoz
+ * layer numbers changed for barrel 2 due to new geometry
+ *
  * Revision 1.1.1.1  2000/03/10 14:26:21  munhoz
  * SVT Class Library
  *
@@ -81,9 +84,9 @@ int StSvtHybridObject::getLayerID()
 
   case 2:    
     if (mLadder%2)
-      mLayer = 3;
-    else
-      mLayer = 4;
+      mLayer = 4; //
+    else          // switched due to different geometry (07/12/2001) 
+      mLayer = 3; //
 
     break;
 
