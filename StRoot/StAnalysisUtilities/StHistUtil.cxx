@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.10 2000/02/08 19:45:31 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.11 2000/02/10 22:21:57 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.11  2000/02/10 22:21:57  kathy
+// turned the new impact param hist to logY scale
+//
 // Revision 1.10  2000/02/08 19:45:31  kathy
 // added a few more hist to print list for cosmics
 //
@@ -833,6 +836,7 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "TabQaGtrkLengthT",
  "TabQaGtrkChisq0T",
  "TabQaGtrkChisq1T",
+ "TabQaGtrkImpactrT",
  "TabQaGtrkXf0TS",
  "TabQaGtrkYf0TS",
  "TabQaGtrkZf0TS",
@@ -857,6 +861,7 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "TabQaGtrkLengthTS",
  "TabQaGtrkChisq0TS",
  "TabQaGtrkChisq1TS",
+ "TabQaGtrkImpactrTS",
  "TabQaGtrkNPntFE",
  "TabQaGtrkNPntMaxFE",
  "TabQaGtrkNPntFitFE",
@@ -909,6 +914,7 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "TabQaPtrkImpact",
  "TabQaPtrkChisq0",
  "TabQaPtrkChisq1",
+ "TabQaPtrkImpactr",
  "TabQaDedxNum",
  "TabQaDedxDedx0T", 
  "TabQaDedxDedx1T",
@@ -957,6 +963,7 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "StEQaGtrkLengthT",
  "StEQaGtrkChisq0T",
  "StEQaGtrkChisq1T",
+ "StEQaGtrkImpactrT",
  "StEQaGtrkXf0TS",
  "StEQaGtrkYf0TS",
  "StEQaGtrkZf0TS",
@@ -981,6 +988,7 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "StEQaGtrkLengthTS",
  "StEQaGtrkChisq0TS",
  "StEQaGtrkChisq1TS",
+ "StEQaGtrkImpactrTS",
  "StEQaGtrkNPntFE",
  "StEQaGtrkNPntMaxFE",
  "StEQaGtrkNPntFitFE",
@@ -1033,6 +1041,7 @@ void StHistUtil::SetDefaultLogYList(Char_t *dirName)
  "StEQaPtrkImpact",
  "StEQaPtrkChisq0",
  "StEQaPtrkChisq1",
+ "StEQaPtrkImpactr",
  "StEQaDedxNum",
  "StEQaDedxDedx0T", 
  "StEQaDedxDedx1T",
