@@ -9,7 +9,7 @@
    TOP=$STAR _
    tpc_sector_first=1 _
    tpc_sector_last=24 _
-   calib_dir=$STAR_CALIB/ebye_
+   calib_dir=$STAR_CALIB/ebye _
    ebye_prior_switch=0 _
    ebye_ensemble_switch=0 _
    ebye_analysis_switch=1 _
