@@ -1,6 +1,6 @@
 St_DataSet *CreateTable() { 
 // -----------------------------------------------------------------
-// Top/ftpcClusterPars Allocated rows: 1  Used rows: 1  Row size: 108 bytes
+// Top/ftpcClusterPars Allocated rows: 1  Used rows: 1  Row size: 140 bytes
 //  Table: ftpcClusterPars_st[0]--> ftpcClusterPars_st[0]
 // ====================================================================
 // ------  Test whether this table share library was loaded ------
@@ -36,6 +36,16 @@ memset(&row,0,tableSet->GetRowSize());
     row.threePadGaussError	  =    0.00057; // additional error 3-pad-cluster, gaussfit ;
     row.zDirectionError	          =       0.01; // parameter for error in z-direction ;
     row.normalizedNowPressure	  =    1013.25; // normalized air pressure (in hPa) ;
+    row.adjustedAirPressureWest   =    1013.25; // temperature adjusted air pressure for FTPC West 
+    row.adjustedAirPressureEast   =    1013.25; // temperature adjusted air pressure for FTPC East 
+    row.minPressure               =     990.;   // minimum barometric pressure (in hPa);
+    row.maxPressure               =    1040.;   // maximum barometric pressure (in hPa);
+    row.gasTemperatureWest        =      25.8;  // temperature of gas FTPC East ;
+                                                // initially set to default 
+    row.gasTemperatureEast        =      25.1;  // temperature of gas FTPC East ;
+                                                // initially set to default 
+    row.minGasTemperature         =      23.0;  // maximum gas temperature (in centigrade);
+    row.maxGasTemperature         =      30.0;  // maximum gas temperature (in centigrade);
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
  return (St_DataSet *)tableSet;
