@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.37 2003/01/23 03:09:05 jeromel Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.38 2003/02/04 18:33:19 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.38  2003/02/04 18:33:19  suaide
+// small modifications
+//
 // Revision 1.37  2003/01/23 03:09:05  jeromel
 // Include modif
 //
@@ -522,6 +525,7 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
 	if(det<2) MAX = 4800;
 	Float_t TOTALE=0;
 	Int_t   NHITS=0;
+	Int_t cap = 0;
 	for(Int_t id=1;id<=MAX;id++)
 	{
 		Float_t ADC = 0;
@@ -539,7 +543,7 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
 				mGeo[det]->getBin(id,m,e,s);
       	mDecoder->GetSmdRDO(det+1,m,e,s,RDO,index);
       	Int_t capacitor=mData->TimeBin[RDO];
-				Int_t cap = 0;
+				cap = 0;
 				if(capacitor == CAP1) cap = 1;
 				if(capacitor == CAP2) cap = 2;
 				PED = ((Float_t)smdpedst[0].AdcPedestal[id-1][cap])/100.;
@@ -569,9 +573,12 @@ Bool_t StEmcADCtoEMaker::calibrate(Int_t det)
 			if(det==0) mData->TowerEnergy[id-1] = EN;
 			if(det==2) mData->SmdeEnergy[id-1] = EN;     
 			if(det==3) mData->SmdpEnergy[id-1] = EN;     
-			TOTALE+=EN;
-			NHITS++;
-			//cout <<"id = "<<id<<"  ADC = "<<ADC<<"  PED = "<<PED<<"  ADCSUB = "<<ADCSUB<<"  E = "<<EN<<endl;
+			if(saveHit(det,id)) 
+			{
+				TOTALE+=EN;
+				NHITS++;
+			  //if(det==3) cout <<"id = "<<id<<"  ADC = "<<ADC<<"  PED = "<<PED<<"  CAP = "<<cap<<"  ADCSUB = "<<ADCSUB<<"  E = "<<EN<<endl;
+			}
 		}
     else
     {
