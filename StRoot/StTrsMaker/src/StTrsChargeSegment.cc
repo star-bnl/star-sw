@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.34 2002/04/25 21:40:23 long Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.35 2002/04/26 06:05:26 long Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -13,6 +13,9 @@
  *
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.35  2002/04/26 06:05:26  long
+ * add triton and correct charge for he3
+ *
  * Revision 1.34  2002/04/25 21:40:23  long
  * add he3,he4,deuteron
  *
@@ -250,18 +253,23 @@ void StTrsChargeSegment::whichGEANTParticle(double& particleMass, int& charge)
 	particleMass = .93827231*GeV;
 	charge = -1;
 	break;
-    case 49:    // he3
-	particleMass = 2.8*GeV;
-	charge = -1;
-	break;
-    case 45:    // deuteron
-	particleMass = 1.876*GeV;
-	charge = 2;
-	break;
-    case 47:    // he4
-	particleMass = 3.727*GeV;
-	charge = 2;
-	break;
+    case 45:  // deuteron
+        particleMass = 1.876*GeV; 
+        charge = 1;
+        break;
+    case 46:  // triton
+        particleMass = 2.809*GeV;
+        charge = 1;
+        break;
+    case 47:  // alpha
+        particleMass = 3.727*GeV;
+        charge = 2;
+        break; 
+    case 49:  // He3
+        particleMass = 2.809*GeV;
+        charge = 2;
+        break;
+
     default: // Probably uncharged, but DO NOT BREAK IT!
 	//cout << "Mass is Undefined (" << mPid << ")" << endl;
 	particleMass = 0*GeV;
