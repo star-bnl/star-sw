@@ -1,7 +1,27 @@
+/***************************************************************************
+ *
+ * $Id: StDbBroker.cxx,v 1.6 2000/01/10 20:31:16 porter Exp $
+ *
+ * Author: S. Vanyashin, V. Perevoztchikov
+ * Updated by:  R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description: Offline Interface from the Offline Maker interface to the
+ *              Database interface. 
+ *
+ ***************************************************************************
+ *
+ * $Log: StDbBroker.cxx,v $
+ * Revision 1.6  2000/01/10 20:31:16  porter
+ * modified StDbBroker to be an interface to the DB-interface, StDbLib.
+ *  - old functionality is retained for the short-term & modifications
+ *    are extensions
+ *
+ *
+ **************************************************************************/
 #include <iostream.h>
 #include <iomanip.h>
 #include <stdlib.h> 
-
 #include <strstream.h>
 
 #include "TString.h"
@@ -17,9 +37,13 @@
 
 #include "Api.h"
 #include "StDbBroker.h"
-
+#include "StDbLib/StDbManager.hh"
+#include "StDbLib/StDbConfigNode.hh"
+#include "StDbLib/StDbTable.h"
+#include "dbNodes.h"
+#include "StDbLib/TableIter.hh"
 //
-ClassImp(StDbBroker)
+//ClassImp(StDbBroker)
 //______________________________________________________________________________
 //the only remaining St_Table dependence is in this function 
 char **StDbBroker::GetComments(St_Table *parentTable)
@@ -48,6 +72,15 @@ char **StDbBroker::GetComments(St_Table *parentTable)
   }
   return ElementComment;
 }
+
+//_____________________________________________________________________________
+StDbBroker::StDbBroker(): m_structName(0), m_tableName(0), m_tableVersion(0), m_database(0), m_Nodes(0), m_Tree(0) {
+
+  mgr=StDbManager::Instance();
+
+} 
+
+
 //______________________________________________________________________________
 // int StDbBroker::Init(const char *dbname)
 // {
@@ -70,7 +103,7 @@ void StDbBroker::Fill(void * pArray, const char **Comments)
 	return;
       }
     
-    m_descriptor[i].name[19]='\0';
+    m_descriptor[i].name[31]='\0';
   }
   
   UInt_t date, time;
@@ -84,6 +117,71 @@ void StDbBroker::Fill(void * pArray, const char **Comments)
   
   delete [] Comments;
 }  
+
+//_____________________________________________________________________________
+void
+StDbBroker::SetDateTime(UInt_t date, UInt_t time)
+{
+
+   m_DateTime[0] = date; 
+   m_DateTime[1]= time;
+   char dateTime[16];
+   ostrstream os(dateTime,16);
+   os<<m_DateTime[0]<<m_DateTime[1]<<ends;
+   mgr->setRequestTime(dateTime);
+
+}
+
+
+
+//____________________________________________________________________________
+void * StDbBroker::Use(int tabID, int parID)
+{
+
+  // This is an "Offline" requirement of only 31 char per element name 
+  UInt_t i;
+  for (i=0;i<m_nElements;i++) {
+      m_descriptor[i].name[31]='\0';
+  }
+
+  void* pData = 0;
+
+  StDbNode* anode = m_Nodes->getNode(tabID);
+  if(anode && !anode->IsNode()){
+    StDbTable* node=(StDbTable*)anode;
+    if(!mgr->fetchDbTable(node))return pData;
+    m_nRows= node->GetNRows();
+    pData  = node->GetTableCpy(); // gives the "malloc'd version"
+
+    char* tmp1 = node->getBeginDateTime();
+    char* tmp2 = new char[strlen(tmp1)+1];
+    strcpy(tmp2,tmp1);  tmp1[8]='\0'; tmp2+=8;
+
+    m_BeginDate = (UInt_t)atoi(tmp1);
+    m_BeginTime = (UInt_t)atoi(tmp2);
+    delete [] tmp1; tmp2-=8; delete [] tmp2;
+
+    tmp1 = node->getEndDateTime();
+    tmp2 = new char[strlen(tmp1)+1];
+    strcpy(tmp2,tmp1); tmp1[8]='\0';tmp2+=8;
+
+    m_EndDate = (UInt_t)atoi(tmp1);
+    m_EndTime = (UInt_t)atoi(tmp2);
+    delete [] tmp1; tmp2-=8; delete [] tmp2;
+
+  } else {
+
+      SetNRows(0);
+      SetBeginDate(19950101);
+      SetBeginTime(0);
+      SetEndDate(20380101);
+      SetEndTime(0);
+      return pData;
+  }
+
+return pData;
+}
+
 //______________________________________________________________________________
 void * StDbBroker::Use()
 {
@@ -99,9 +197,8 @@ void * StDbBroker::Use()
   
   UInt_t i;
   for (i=0;i<m_nElements;i++) {
-      m_descriptor[i].name[19]='\0';
+      m_descriptor[i].name[31]='\0';
   }
-
 
   // Check if request is a "hierarchy" : if so send request to "params" DB
   char* id = strstr(m_tableName,"_hierarchy");
@@ -111,11 +208,17 @@ void * StDbBroker::Use()
     char* id2 = strstr(tmpName,"_hierarchy");
     *id2 = '\0';
     if(strcmp(tmpName,"Calib")==0){
-      m_database = new char[strlen("Calibrations")+1];
-      strcpy(m_database,"Calibrations");
+      m_database = new char[strlen("Calibrations_tpc")+1];
+      strcpy(m_database,"Calibrations_tpc");
+    } else if(strstr(tmpName,"Geom")){
+     m_database = new char[strlen("Geometry_tpc")+1];
+     strcpy(m_database,"Geometry_tpc");
+    } else if(strstr(tmpName,"RunParam")){
+     m_database = new char[strlen("RunParams_tpc")+1];
+     strcpy(m_database,"RunParams_tpc");
     } else {
-     m_database = new char[strlen(tmpName)+1];
-     strcpy(m_database,tmpName);
+     m_database = new char[strlen("params")+1];
+     strcpy(m_database,"params");
     }
      *id2='_';
     delete [] tmpName;
@@ -125,6 +228,8 @@ void * StDbBroker::Use()
   
   if(id || strcmp(m_database,"params")==0){
     
+    cout << "Looking for Table "<<m_tableName<<" In Db= "<<m_database<<endl;
+
   pDbData = ::DbUse(&nRows, datetime, (const char*)m_tableName,(const char*)m_structName,m_nElements,m_sizeOfStruct,m_descriptor);
 
   } else { 
@@ -152,7 +257,137 @@ void * StDbBroker::Use()
 
   return pDbData;
 }
-//______________________________________________________________________________
+//_____________________________________________________________________________
+
+dbConfig_st* 
+StDbBroker::InitConfig(const char* configName, int& numRows, char* versionName)
+{
+
+if(m_Nodes)delete m_Nodes;
+m_Nodes=new dbNodes;
+
+if(m_Tree) delete m_Tree;
+
+if(versionName){
+  m_Tree=mgr->initConfig(configName);
+}else{
+  m_Tree=mgr->initConfig(configName,versionName);
+}
+
+dbConfig_st* configTable = 0;
+numRows = 0;
+if(!buildNodes(m_Tree,0)) return configTable;
+
+numRows = m_Nodes->getNumNodes()-1;
+return buildConfig(numRows);
+}
+
+//_____________________________________________________________________________
+
+int
+StDbBroker::buildNodes(StDbConfigNode* parentNode, int pID){
+
+if(!parentNode) return 0;
+if(!m_Nodes) m_Nodes=new dbNodes;
+int cID;
+
+// check for tables in this Node
+   if( (parentNode->hasData()) ){   
+      TableIter* itr = parentNode->getTableIter();
+      while(!itr->done()){
+        if(!(cID=m_Nodes->addNode(itr->next()))){
+          return 0;
+        } else {
+          m_Nodes->setParentID(pID);
+        }
+      }
+      delete itr;
+   }
+
+   StDbConfigNode* next;
+
+// check for children of this Node
+   if((parentNode->hasChildren())){
+     next=parentNode->getFirstChildNode(); 
+     if(!(cID=m_Nodes->addNode(next)) ){
+       return 0;
+     } else {
+       m_Nodes->setParentID(pID);
+     }
+     return buildNodes(next, cID);
+   }
+
+// check for siblings of this Node
+   if( (next=parentNode->getNextNode()) ){
+      pID=m_Nodes->getParentID(pID);
+      if(!(cID=m_Nodes->addNode(next)) ){
+        return 0;
+      } else {
+       m_Nodes->setParentID(pID);
+      }
+      return buildNodes(next, cID);
+   }
+
+return 1;       
+}
+
+//_____________________________________________________________________________
+dbConfig_st*
+StDbBroker::buildConfig(int numRows){
+
+dbConfig_st* cTab= 0;
+m_Nodes->reset();
+int numNodes = m_Nodes->getNumNodes();
+
+if(numNodes-1 != numRows){
+  cerr<<"Error::#-mismatch, rows("<<numRows<<") & nodes("<<numNodes<<")"<<endl;
+  return cTab;
+}
+
+cTab=(dbConfig_st*)calloc(numRows,sizeof(dbConfig_st));
+
+StDbNode* node;
+StDbNode* parent;
+char* parName;
+char* nodeName;
+char* typeName;
+char* id;
+unsigned int parsize=sizeof(cTab[0].parname)-1;
+unsigned int tabsize=sizeof(cTab[0].tabname)-1;
+unsigned int typsize=sizeof(cTab[0].tabtype)-1;
+int parID;
+
+ for(int i=1; i<numNodes;i++){
+
+   node  = m_Nodes->getNode(i);
+   parent= m_Nodes->getParent(i);
+   parID   = m_Nodes->getParentID(i);
+
+   nodeName = node->getMyName();
+   typeName = node->getCstrName();
+   parName  = parent->getMyName();
+
+   strncpy(cTab[i-1].parname,parName,parsize); cTab[i-1].parname[parsize]='\0';
+   strncpy(cTab[i-1].tabname,nodeName,tabsize); cTab[i-1].tabname[tabsize]='\0';
+
+   id=cTab[i-1].tabtype; *id='.'; id++;
+
+   if(strstr(typeName,"None")){
+     strcpy(id,"node");
+   } else {
+     strncpy(id,typeName,typsize-1); cTab[i-1].tabtype[typsize]='\0';
+   }
+
+   cTab[i-1].tabID=i;
+   cTab[i-1].parID=parID;
+
+ }
+
+return cTab;
+}
+
+
+//_____________________________________________________________________________
 int StDbBroker::DbInit(const char * dbName)
 {  return ::DbInit(dbName) ;}
 

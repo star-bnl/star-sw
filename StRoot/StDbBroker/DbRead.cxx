@@ -1,3 +1,24 @@
+/***************************************************************************
+ *
+ * $Id: DbRead.cxx,v 1.5 2000/01/10 20:31:16 porter Exp $
+ *
+ * Author: S. Vanyashin 
+ * Updated by:  R. Jeff Porter
+ ***************************************************************************
+ *
+ * Description: Temporary C-code to call the C++ DB-API
+ *              
+ *
+ ***************************************************************************
+ *
+ * $Log: DbRead.cxx,v $
+ * Revision 1.5  2000/01/10 20:31:16  porter
+ * modified StDbBroker to be an interface to the DB-interface, StDbLib.
+ *  - old functionality is retained for the short-term & modifications
+ *    are extensions
+ *
+ *
+ **************************************************************************/
 // #include <stdio.h>
 // #include <stdlib.h>
 // #include <string.h>
@@ -65,23 +86,27 @@ if(!tableVersion)strcpy((char*)version,"default");
  if(!database){
    strcpy((char*)dbType,"TestScheme");
    strcpy((char*)dbDomain,"Star");
+   type = mgr->getDbType(dbType);
+   domain = mgr->getDbDomain(dbDomain);
  } else {
-   char* type=(char*)dbType;
-   char* domain = (char*)dbDomain;
-   if(!mgr->getDataBaseInfo(database, type, domain)){
+   char* atype;
+   char* adomain;
+   if(!mgr->getDataBaseInfo(database, atype, adomain)){
      cerr << "StDbManager:: Database specified incorrectly" << endl;
      *nRows=0;
      return NULL;
-   }
+   } 
+   //  cout << "Returned DbType = "<<atype<<" & DbDomain= "<<adomain<< endl;
+   type = mgr->getDbType(atype);
+   domain = mgr->getDbDomain(adomain);
+
  }
   
-   type = mgr->getDbType(dbType);
-   domain = mgr->getDbDomain(dbDomain);
 
 StDbConfigNode* node=mgr->initConfig(type,domain);
 // now try without descriptor --> can't
-StDbTable* mtable=node->addDbTable(tableName,version,1);
-//StDbTable* mtable=node->addTable(tableName,version,1);
+StDbTable* mtable=node->addDbTable(tableName,version);
+//StDbTable* mtable=node->addTable(tableName,version);
 
  if(!mtable){
    *nRows=0;
@@ -178,6 +203,9 @@ int nextDirTime;
 
 return data;
 }
+
+
+
 
 
 
