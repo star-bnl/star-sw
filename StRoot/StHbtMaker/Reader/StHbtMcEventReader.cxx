@@ -1,65 +1,73 @@
+// Cons tries to include even if there is a  '#ifdef #endif' around
+// For that reson I had to change all '#include' statements into
+// '//(notTheY2KBuf)#include' 
+#undef McEventExists
+#ifdef McEventExists
+
 #undef TheWorldIsNice 
 #define HBT_BFIELD 0.5*tesla
 #define DIFF_CUT_OFF 1.
 
-#include "StHbtMaker/Reader/StHbtMcEventReader.h"
-#include "StChain.h"
-#include "TOrdCollection.h"
+//(notTheY2KBug)#include "StHbtMaker/Reader/StHbtMcEventReader.h"
+//(notTheY2KBug)#include "StChain.h"
+//(notTheY2KBug)#include "TOrdCollection.h"
 
-#include "StEvent.h"
-#include "StGlobalTrack.h"
-#include "StTpcDedxPid.h"
-#include "StDedxPid.h"
+//(notTheY2KBug)#include "StEvent.h"
+//(notTheY2KBug)#include "StGlobalTrack.h"
+//(notTheY2KBug)#include "StTpcDedxPid.h"
+//(notTheY2KBug)#include "StDedxPid.h"
 
-#include "SystemOfUnits.h"   // has "tesla" in it
-#include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
-#include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
-#include "StV0MiniDstMaker/StV0MiniDstMaker.h"  
-#include "StV0MiniDstMaker/StV0MiniDst.hh"
-#include "StEventMaker/StEventMaker.h"
-#include "StAssociationMaker/StAssociationMaker.h"
+//(notTheY2KBug)#include "SystemOfUnits.h"   // has "tesla" in it
+//(notTheY2KBug)#include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
+//(notTheY2KBug)#include "StHbtMaker/Infrastructure/StHbtV0Collection.hh"
+//(notTheY2KBug)#include "StV0MiniDstMaker/StV0MiniDstMaker.h"  
+//(notTheY2KBug)#include "StV0MiniDstMaker/StV0MiniDst.hh"
+//(notTheY2KBug)#include "StEventMaker/StEventMaker.h"
+//(notTheY2KBug)#include "StMcEventMaker/StMcEventMaker.h"
+////(notTheY2KBug)#include "StAssociationMaker/StAssociationMaker.h"
 
-#include <iostream.h>
-#include <stdlib.h>
-#include <string>
-#include <vector>
-//#include "TStyle.h"
-//#include "TCanvas.h"
-#include "StMcEventMaker/StMcEventMaker.h"
-#include "PhysicalConstants.h"
-#include "SystemOfUnits.h"
-#include "StThreeVector.hh"
+//(notTheY2KBug)#include <iostream.h>
+//(notTheY2KBug)#include <stdlib.h>
+//(notTheY2KBug)#include <string>
+//(notTheY2KBug)#include <vector>
+////(notTheY2KBug)#include "TStyle.h"
+////(notTheY2KBug)#include "TCanvas.h"
 
-#include "StChain.h"
-#include "St_DataSet.h"
-#include "St_DataSetIter.h"
 
-#include "g2t_event.h"
-#include "g2t_ftp_hit.h"
-#include "g2t_svt_hit.h"
-#include "g2t_tpc_hit.h"
-#include "g2t_track.h"
-#include "g2t_vertex.h"
+//(notTheY2KBug)#include "PhysicalConstants.h"
+//(notTheY2KBug)#include "SystemOfUnits.h"
+//(notTheY2KBug)#include "StThreeVector.hh"
 
-#include "tables/St_g2t_event_Table.h"
-#include "tables/St_g2t_ftp_hit_Table.h"
-#include "tables/St_g2t_svt_hit_Table.h"
-#include "tables/St_g2t_tpc_hit_Table.h"
-#include "tables/St_g2t_track_Table.h"
-#include "tables/St_g2t_vertex_Table.h"
+//(notTheY2KBug)#include "StChain.h"
+//(notTheY2KBug)#include "St_DataSet.h"
+//(notTheY2KBug)#include "St_DataSetIter.h"
 
-// #include "StMcEvent/StMemoryInfo.hh"
+//(notTheY2KBug)#include "g2t_event.h"
+//(notTheY2KBug)#include "g2t_ftp_hit.h"
+//(notTheY2KBug)#include "g2t_svt_hit.h"
+//(notTheY2KBug)#include "g2t_tpc_hit.h"
+//(notTheY2KBug)#include "g2t_track.h"
+//(notTheY2KBug)#include "g2t_vertex.h"
 
-#include "StMcEvent.hh"
-#include "StMcTrack.hh"
-#include "StMcTpcHit.hh"
-#include "StMcFtpcHit.hh"
-#include "StMcSvtHit.hh"
-#include "StMcVertex.hh"
+//(notTheY2KBug)#include "tables/St_g2t_event_Table.h"
+//(notTheY2KBug)#include "tables/St_g2t_ftp_hit_Table.h"
+//(notTheY2KBug)#include "tables/St_g2t_svt_hit_Table.h"
+//(notTheY2KBug)#include "tables/St_g2t_tpc_hit_Table.h"
+//(notTheY2KBug)#include "tables/St_g2t_track_Table.h"
+//(notTheY2KBug)#include "tables/St_g2t_vertex_Table.h"
 
-#include "StAssociationMaker/StTrackPairInfo.hh"
-#include "StParticleDefinition.hh"
-#include "StPhysicalHelix.hh"
+// //(notTheY2KBug)#include "StMcEvent/StMemoryInfo.hh"
+
+//(notTheY2KBug)#include "StMcEvent.hh"
+//(notTheY2KBug)#include "StMcTrack.hh"
+//(notTheY2KBug)#include "StMcTpcHit.hh"
+//(notTheY2KBug)#include "StMcFtpcHit.hh"
+//(notTheY2KBug)#include "StMcSvtHit.hh"
+//(notTheY2KBug)#include "StMcVertex.hh"
+
+////(notTheY2KBug)#include "StAssociationMaker/StTrackPairInfo.hh"
+//(notTheY2KBug)#include "StParticleDefinition.hh"
+//(notTheY2KBug)#include "StPhysicalHelix.hh"
 
 
 
@@ -385,3 +393,6 @@ StHbtEvent* StHbtMcEventReader::ReturnHbtEvent(){
 
   return hbtEvent;
 }
+
+
+#endif

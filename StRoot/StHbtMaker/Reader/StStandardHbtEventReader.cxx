@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.12 1999/09/28 15:06:06 didenko Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.13 1999/11/24 21:56:05 laue Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,10 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.13  1999/11/24 21:56:05  laue
+ * a typo fixed ; ClassDef() was splitted by an accidental carriage-return
+ * ----------------------------------------------------------------------
+ *
  * Revision 1.12  1999/09/28 15:06:06  didenko
  * Cleanup dependencies on non existing h-files
  *
@@ -69,8 +73,23 @@
 
 #include "StEvent.h"
 #include "StGlobalTrack.h"
-#include "StTpcDedxPid.h"
-#include "StDedxPid.h"
+// <<<<< #include "StTpcDedxPid.h"
+// <<<<< #include "StDedxPid.h"
+#include "StTrackNode.h"
+#include "StContainers.h"
+#include "StPrimaryVertex.h"
+#include "StVertex.h"
+#include "StMeasuredPoint.h"
+#include "StDedxPidTraits.h"
+#include "StTrackPidTraits.h"
+#include "StTrackGeometry.h"
+
+#include "StParticleTypes.hh"
+#include "StTpcDedxPidAlgorithm.h"
+
+#include <typeinfo>
+#include <cmath>
+
 
 /* .hh files
 //   #include "StEvent/StEvent.hh"
@@ -100,12 +119,24 @@ StStandardHbtEventReader::StStandardHbtEventReader(){
   mV0Cut=0;
   mReaderStatus = 0;  // "good"
   mV0=0;
+
+  mPion = StPionPlus::instance(); 
+  mKaon = StKaonPlus::instance(); 
+  mProton = StProton::instance(); 
+  mPidAlgorithm = new StTpcDedxPidAlgorithm();
+
 }
 //__________________
 StStandardHbtEventReader::~StStandardHbtEventReader(){
   if (mEventCut) delete mEventCut;
   if (mTrackCut) delete mTrackCut;
   if (mV0Cut) delete mV0Cut;
+
+  delete mPion;
+  delete mKaon;
+  delete mProton;
+  delete mPidAlgorithm;
+
 }
 //__________________
 StHbtString StStandardHbtEventReader::Report(){
@@ -150,15 +181,22 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     cout << "StStandardHbtEventReader - No StEvent!!! " << endl;
     return 0;
   }
+
+
   StHbtEvent* hbtEvent = new StHbtEvent;
 
-
-  int mult = rEvent->trackCollection()->size();
+  //int mult = rEvent->trackCollection()->size();
+  int mult = rEvent->trackNodes().size();
   hbtEvent->SetNumberOfTracks(mult);
   hbtEvent->SetNumberOfGoodTracks(mult);  // same for now
+  if ( rEvent->numberOfPrimaryVertices() != 1) {
+    delete hbtEvent;
+    return 0;
+  }
   StHbtThreeVector vp = rEvent->primaryVertex()->position();
   hbtEvent->SetPrimVertPos(vp);
-  
+  cout << " primary vertex : " << vp << endl;
+ 
   // By now, all event-wise information has been extracted and stored in hbtEvent
   // see if it passes any front-loaded event cut
   if (mEventCut){
@@ -168,104 +206,131 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
     }
   }
 
-
-  StGlobalTrack* rTrack;
+  StTrack* rTrack;
   cout << "StStandardHbtReader::ReturnHbtEvent - We have " << mult << " tracks to store - we skip tracks with nhits==0" << endl;
 
 
-  // UNBELIEVABLY the star software cannot even handle its own iterators.  So the following line does not compile.
-  //  for (StTrackIterator iter=rEvent->trackCollection()->begin();
-  //    iter!=rEvent->trackCollection()->end();iter++){
-
-  // gotta do it this way (incredibly)
-  StTrackIterator iter=rEvent->trackCollection()->begin();
-  for (int icount=0; icount<mult; icount++, iter++){
-
-    rTrack = *iter;
-    int nhits = rTrack->numberOfTpcHits();
-    //    cout << "nhits\t" << nhits << endl;
+  int iNoGlobal = 0;
+  int iNoHits = 0;
+  int iNoPidTraits = 0;
+  int iFailedCut =0;
+  // loop over all the tracks, accept only global
+  for (int icount=0; icount<mult; icount++){
+    //cout << " track# " << icount << endl;
+    rTrack = rEvent->trackNodes()[icount]->track(global);
+    // don't make a hbtTrack if not a global track
+    if (!rTrack) {
+      iNoGlobal++;
+      //cout << "No global track -- skipping track" << endl;
+      continue;
+    }
+    // check number points in tpc
+    int nhits = rTrack->detectorInfo()->numberOfPoints(kTpcId);
+    //cout << "nhits\t" << nhits << endl;
     if (nhits==0) {
-      //      cout << "No hits -- skipping track (because it crashes otherwise)" << endl;
+      iNoHits++;
+      //cout << "No hits -- skipping track (because it crashes otherwise)" << endl;
       continue;
     }
-
-    //cout << "Now getting the pidTraits" << endl;
-    //StTrackPidTraits pidTraitsTemp = rTrack->pidTraits();
-    //cout << " Got it"<<endl;
-
-    const StDedxPid* tpcDedxPid = rTrack->pidTraits().tpcDedxPid();
-    if (!tpcDedxPid) {
-      cout << "No dEdx information - skipping track with " << nhits << " hits"<<endl;
+    // get dedxPidTraits
+    //cout << " number of pidTraits " << rTrack->pidTraits().size();
+    //cout << " number of pidTraits for tpc: " << rTrack->pidTraits(kTpcId).size() << endl;
+    StTrackPidTraits* trackPidTraits; 
+    int iPidTraitsCounter=0;
+    do {
+      trackPidTraits = rTrack->pidTraits(kTpcId)[iPidTraitsCounter];
+      iPidTraitsCounter++;
+    } while (iPidTraitsCounter < rTrack->pidTraits(kTpcId).size() && (!trackPidTraits) );
+    if (!trackPidTraits) {
+      iNoPidTraits++;
+      //cout << " No dEdx information from Tpc- skipping track with " << nhits << " hits"<< endl;
       continue;
     }
+    const StDedxPidTraits* dedxPidTraits = (const StDedxPidTraits*)trackPidTraits;
+    //cout << " dE/dx = " << dedxPidTraits->mean() << endl;
 
-    //    cout << "Getting readty to instantiate new StHbtTrack " << endl;
+    // get fitTraits
+    StTrackFitTraits fitTraits = rTrack->fitTraits();
+    //cout << " got fitTraits " << endl;
 
+    //cout << "Getting readty to instantiate new StHbtTrack " << endl;
+
+    // o.k., we got the track with all we need, let's create the StHbtTrack
     StHbtTrack* hbtTrack = new StHbtTrack;
-
     //cout << "StHbtTrack instantiated " << endl;
 
     hbtTrack->SetNHits(nhits);
 
-    float nsigpi = tpcDedxPid->numberOfSigma(0.139);
+    // while getting the bestGuess, the pidAlgorithm (StTpcDedxPidAlgorithm) is set up.
+    // pointers to track and pidTraits are set 
+    //cout << "look for best guess " << endl;
+    mBestGuess = rTrack->pidTraits(*mPidAlgorithm);
+    //if (mBestGuess) cout << "best guess for particle is " << mBestGuess->name() << endl;
+
+    float nsigpi = mPidAlgorithm->numberOfSigma(mPion);
     //cout << "nsigpi\t\t" << nsigpi << endl;
     hbtTrack->SetNSigmaPion(nsigpi);
-    float nsigk = tpcDedxPid->numberOfSigma(0.495);
+
+    float nsigk = mPidAlgorithm->numberOfSigma(mKaon);
     //cout << "nsigk\t\t\t" << nsigk << endl;
     hbtTrack->SetNSigmaKaon(nsigk);
-    float nsigprot = tpcDedxPid->numberOfSigma(0.938);
+
+    float nsigprot = mPidAlgorithm->numberOfSigma(mProton);
     //cout << "nsigprot\t\t\t\t" << nsigprot << endl;
     hbtTrack->SetNSigmaProton(nsigprot);
+
     //cout << "Nsig pion,kaon,proton : " << nsigpi << " " << nsigk << " " << nsigprot << endl;
     
-    float dEdx = rTrack->tpcDedx()->mean();
+    float dEdx = dedxPidTraits->mean();
     //cout << "dEdx\t" << dEdx << endl; 
     hbtTrack->SetdEdx(dEdx);
     
-    double pathlength = rTrack->helix().pathLength(vp);
+    double pathlength = rTrack->geometry()->helix().pathLength(vp);
     //cout << "pathlength\t" << pathlength << endl;
-    StHbtThreeVector p = rTrack->helix().momentumAt(pathlength,HBT_B_FIELD);
+    StHbtThreeVector p = rTrack->geometry()->helix().momentumAt(pathlength,HBT_B_FIELD);
     //cout << "p: " << p << endl;
     hbtTrack->SetP(p);
 
-    StHbtThreeVector  DCAxyz = rTrack->helix().at(pathlength)-vp;
+    StHbtThreeVector  DCAxyz = rTrack->geometry()->helix().at(pathlength)-vp;
     //cout << "DCA\t\t" << DCAxyz << " " << DCAxyz.perp() << endl;
     hbtTrack->SetDCAxy( DCAxyz.perp() );
     hbtTrack->SetDCAz(  DCAxyz.z()  );
 
-    hbtTrack->SetChiSquaredXY( rTrack->fitTraits().chiSquaredInXY() );
-    hbtTrack->SetChiSquaredZ( rTrack->fitTraits().chiSquaredInPlaneZ() ); 
+    hbtTrack->SetChiSquaredXY( rTrack->fitTraits().chi2(0) );
+    hbtTrack->SetChiSquaredZ( rTrack->fitTraits().chi2(1) ); 
 
-    StPhysicalHelixD&  helix = rTrack->helix();
+    StPhysicalHelixD&  helix = rTrack->geometry()->helix();
     hbtTrack->SetHelix( helix );
 
-     float pt = sqrt(p[0]*p[0]+p[1]*p[1]);
+    float pt = sqrt(p[0]*p[0]+p[1]*p[1]);
     //cout << "pt\t\t\t" << pt << endl;
     //hbtTrack->SetPt(pt);
-
+    
     hbtTrack->SetPt(pt);
-
-    int charge = ((rTrack->helix().charge(HBT_B_FIELD)>0) ? 1 : -1);
+    
+    int charge = (rTrack->geometry()->charge());
     //cout << "charge\t\t\t\t" << charge << endl;
     hbtTrack->SetCharge(charge);
     
     //cout << "pushing..." <<endl;
-
+    
     // By now, all track-wise information has been extracted and stored in hbtTrack
     // see if it passes any front-loaded event cut
     if (mTrackCut){
       if (!(mTrackCut->Pass(hbtTrack))){                  // track failed - delete it and skip the push_back
+	iFailedCut++;
 	delete hbtTrack;
 	continue;
       }
     }
-
-
     hbtEvent->TrackCollection()->push_back(hbtTrack);
   }
 
-
-
+  printf("%8i non-global tracks skipped \n",iNoGlobal);
+  printf("%8i tracks skipped because of nHits=0 \n",iNoHits);
+  printf("%8i tracks skipped because of not tpcPidTraits \n",iNoPidTraits);
+  printf("%8i tracks failed the track cuts \n",iFailedCut);
+  printf("%8i(%i) tracks pushed into collection \n",hbtEvent->TrackCollection()->size(),mult); 
 
   //Now do v0 stuff
 
