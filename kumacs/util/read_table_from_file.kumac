@@ -5,8 +5,8 @@ MACRO init alias file_name
 *** make place to keep the input
 cd /dui
 
- message ' open file to write to: alias, filename =' [alias] [file_name]
- dio/newfilestream [alias] [file_name] w
+ message ' open file to read from: alias, filename =' [alias] [file_name]
+ dio/newfilestream [alias] [file_name] r
 
 cd /dui
 
@@ -14,12 +14,12 @@ return
 
 ****************************************************************
 
-MACRO write alias table_directory 
+MACRO read alias table_directory 
 
  cd /dui
 
- message ' write event to file from table directory = ',[table_directory]
- dio/stream/putevent [alias] [table_directory]
+ message ' read table event from file and put in directory ',[table_directory]
+ dio/stream/getevent [alias] [table_directory]
 
  cd /dui
 
@@ -29,7 +29,8 @@ return
 MACRO close alias
 
  cd /dui
-
+ 
+ message ' close input table file'
  dio/stream/close [alias]
 
  cd /dui

@@ -1,8 +1,8 @@
 * Sets up STAR STAF directroy tree .
 
-MESS ********************************
-MESS *** Setting up directory tree **
-MESS ********************************
+MESSAGE ********************************
+MESSAGE *** Setting up directory tree **
+MESSAGE ********************************
 
 
 mkdir  /dui/constants/  
