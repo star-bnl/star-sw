@@ -90,7 +90,7 @@ my $FEXTEND = $env->{FEXTEND};
 
 # Resolve Mysql right away i.e. use the Linux local installed
 # library instead of the eventually provided /opt/star one.
-my $MYSQLINC,$MYSQLLIB;
+my ($MYSQLINC,$MYSQLLIB);
 if (-d "/usr/include/mysql"){
     $MYSQLINC = "/usr/include/mysql";
     $MYSQLLIB = "/usr/lib/mysql";
@@ -395,8 +395,9 @@ if ( $#QtDefs > -1 ) {
  
 #____________________________________Tables____________________________
 
-Tables:
-my @sourcesT = ();
+ Tables: 
+
+    my @sourcesT = ();
 
 if ( $#idlL > -1 ) {
     my @idlT = ();
