@@ -1,5 +1,8 @@
-// $Id: StMessageCounter.cxx,v 1.12 1999/07/17 00:38:03 genevb Exp $
+// $Id: StMessageCounter.cxx,v 1.13 2000/01/05 19:53:46 genevb Exp $
 // $Log: StMessageCounter.cxx,v $
+// Revision 1.13  2000/01/05 19:53:46  genevb
+// Fixed CC5 warnings, and several other small improvements under the hood
+//
 // Revision 1.12  1999/07/17 00:38:03  genevb
 // Small typo
 //
@@ -67,7 +70,7 @@ StMessageCounter* StMessageCounter::Instance() {
   return mInstance;
 }
 //_____________________________________________________________________________
-void StMessageCounter::SetLimit(char* str, int n) {
+void StMessageCounter::SetLimit(const char* str, int n) {
   if (!yesLimits && (n >= 0)) yesLimits = 1;
   const size_t len = strlen(str);
   char* temp;
@@ -114,7 +117,7 @@ void StMessageCounter::SetLimit(char* str, int n) {
   return;
 }
 //_____________________________________________________________________________
-int StMessageCounter::GetLimit(char* str) {
+int StMessageCounter::GetLimit(const char* str) {
   if (yesLimits) {
     index=0;
     for (curString=limitList.begin(); curString!=limitList.end(); curString++) {

@@ -1,5 +1,8 @@
-// $Id: StMessage.cxx,v 1.18 1999/12/28 21:29:55 porter Exp $
+// $Id: StMessage.cxx,v 1.19 2000/01/05 19:53:46 genevb Exp $
 // $Log: StMessage.cxx,v $
+// Revision 1.19  2000/01/05 19:53:46  genevb
+// Fixed CC5 warnings, and several other small improvements under the hood
+//
 // Revision 1.18  1999/12/28 21:29:55  porter
 // added 'using std::vector' and a (char*) cast to allow compilation
 // using solaris CC5.  Many warnings of const char* vs char* still
@@ -78,19 +81,18 @@ static int messBuffSize = 1024;
 char* tempPtr = new char[messBuffSize];
 static char* messBuff = strcpy(tempPtr,"Empty\n");
 static ostrstream messBuffer(messBuff,messBuffSize,ios::out);
+static char space = ' ';
+static char tab = '\t';
 
 #ifdef __ROOT__
 ClassImp(StMessage)
 #endif
 
 //_____________________________________________________________________________
-StMessage::StMessage(char *mess, char *ty, char* opt) :
-type(new char[2]),
+StMessage::StMessage(const char *mess, const char *ty, const char* opt) :
 messTime() {
-  char* type1 = (const_cast<char*> (type));
-  *type1 = *ty;
-  *(++type1) = 0;
-  static char space = ' ';
+  *type = *ty;
+  type[1] = 0;
   size_t len = strlen(opt);
   option = new char[(len+1)];
   option[len] = 0;
@@ -108,7 +110,6 @@ messTime() {
 //_____________________________________________________________________________
 StMessage::~StMessage() {
   delete [] message;
-  delete [] (const_cast<char*> (type));
   delete [] option;
 }
 //_____________________________________________________________________________
@@ -127,7 +128,21 @@ int StMessage::Print(int nChars) {
     if (!strchr(option,'S')) messBuffer << leader;       // "No St" option
     const char* temp(StMessTypeList::Instance()->Text(type));
     if (temp) messBuffer << temp;
-    messBuffer << insert1 << message;                    // ": ",message
+    if ((nChars) && (strchr(message,tab))) {             // If nChars, replace
+      char* message2 = new char[strlen(message)+1];      // tabs with spaces
+      char* m0 = message;
+      char* m1 = message2;
+      while (*m0) {                                      // Go to end of string
+        if (*m0==tab) *m1 = space;                       // tab => space,
+        else *m1 = *m0;                                  // otherwise copy
+        m0++; m1++;
+      }
+      *m1 = 0; 
+      messBuffer << insert1 << message2;                 // ": ",message
+      delete [] message2;
+    } else {
+      messBuffer << insert1 << message;                  // ": ",message
+    }
     if (nChars<=0) {
       if (!strchr(option,'T')) {                         // "No time" option
         char* temp2 = strchr((char*)messTime.AsString(),' ');
@@ -164,7 +179,7 @@ int StMessage::Print(int nChars) {
 //_____________________________________________________________________________
 void StMessage::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessage.cxx,v 1.18 1999/12/28 21:29:55 porter Exp $\n");
+  printf("* $Id: StMessage.cxx,v 1.19 2000/01/05 19:53:46 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
