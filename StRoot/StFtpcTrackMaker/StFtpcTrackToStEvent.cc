@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.cc,v 1.2 2004/05/07 14:39:39 oldi Exp $
+ * $Id: StFtpcTrackToStEvent.cc,v 1.3 2004/08/05 23:46:31 oldi Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -259,7 +259,7 @@ void StFtpcTrackToStEvent::FillDetectorInfo(StTrackDetectorInfo* detInfo, StFtpc
   
   detInfo->setFirstPoint(((StFtpcPoint*)hitVec->Last())->GetStFtpcHit()->position());
   detInfo->setLastPoint(((StFtpcPoint*)hitVec->First())->GetStFtpcHit()->position());
-  detInfo->setNumberOfPoints(EncodedStEventFitPoints(track));
+  detInfo->setNumberOfPoints(EncodedStEventFitPoints(track), track->GetDetectorId());
 
   for (Int_t iHit = hitVec->GetEntriesFast()-1; iHit >= 0; iHit--) {  // revert order
     StFtpcPoint *pt = (StFtpcPoint*)hitVec->At(iHit);
@@ -376,7 +376,6 @@ void StFtpcTrackToStEvent::FilldEdxInfo(StTrack* gTrack, StFtpcTrack* track) {
   double errordEdx = 0.;
   double nPoints = track->GetNumdEdxHits();
   short  method;
-  StDetectorId  detId = (track->GetHemisphere() == 1.) ? kFtpcWestId : kFtpcEastId;
   
   if (StFtpcTrackingParams::Instance()->IdMethod() == 0) {
     method = kTruncatedMeanId;
@@ -404,7 +403,7 @@ void StFtpcTrackToStEvent::FilldEdxInfo(StTrack* gTrack, StFtpcTrack* track) {
     cout <<"StFtpcTrackToStEvent::Error: errordEdx non-finite."<<endl;
   }
   
-  StTrackPidTraits* pidTrait = new StDedxPidTraits(detId,
+  StTrackPidTraits* pidTrait = new StDedxPidTraits(track->GetDetectorId(),
 						   static_cast<short>(method),
 						   static_cast<unsigned short>(nPoints),
 						   static_cast<float>(dEdx),
@@ -445,12 +444,12 @@ void StFtpcTrackToStEvent::FillTrack(StTrack* gTrack, StFtpcTrack* track) {
   else if (gTrack->type()==primary) { // is 'primary candidate' automatically
     gTrack->setFlag(801);
   }
-  
+
   gTrack->setEncodedMethod(mStiEncoded); 
   
   gTrack->setImpactParameter(ImpactParameter(track));
   gTrack->setLength(track->GetTrackLength());
-  gTrack->setNumberOfPossiblePoints(static_cast<unsigned short>(track->GetNMax()));
+  gTrack->setNumberOfPossiblePoints(static_cast<unsigned short>(track->GetNMax()), track->GetDetectorId());
 
   FillGeometry(gTrack, track, false); // inner geometry
   FillGeometry(gTrack, track, true);  // outer geometry
