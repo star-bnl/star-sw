@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrsChargeSegment.cc,v 1.18 1999/10/22 15:51:47 calderon Exp $
+ * $Id: StTrsChargeSegment.cc,v 1.19 1999/11/12 01:42:15 long Exp $
  *
  * Author: brian May 18, 1998
  *
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StTrsChargeSegment.cc,v $
+ * Revision 1.19  1999/11/12 01:42:15  long
+ * delete "fabs((magDb->at(mSector12Position)).z())>0.01)" because it is not needed
+ *
  * Revision 1.18  1999/10/22 15:51:47  calderon
  * Remove ifdefs for erf.  Problem is solved by loading libm at the
  * macro level.
@@ -483,7 +486,7 @@ void StTrsChargeSegment::tssSplit(StTrsDeDx*       gasDb,
 	//To decompose track use the helix parameterization.
 	//StPhysicalHelix(p,x,B,+/-)
 	// Need some track info from pid:
-       if(mDE>0.&&fabs((magDb->at(mSector12Position)).z())>0.01){    //HL,9/4/99,if mDe<0,helix model is not good
+       if(mDE>0.&&fabs((magDb->at(mSector12Position)).z())>1.e-28){    //HL,9/4/99,if mDe<0,helix model is not good
 	 
 	StPhysicalHelix
 	    track(mMomentum,
