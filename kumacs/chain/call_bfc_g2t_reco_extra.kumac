@@ -1,4 +1,4 @@
- * 8/12/98 K. Turner
+* 8/12/98 K. Turner
 * 
 * This kumac is to run bfc (98g version) in the following way
 * - read in an fz file in which gstar has already been run
@@ -24,7 +24,7 @@
    tpc_sector_last=24 _
    gstar_settings=' field_only' _
    domain=' geometry sim/g2t tpc svt ftpc mwc ctf emc global ' _
-   chain='  fzin rg2t svg tpg tss tcl srs sgr tpt tte_e tid ffs fpt fte ctf mwc evr svm egr ev0 ddedx dpnt desum dmsft evout' _
+   chain='  fzin rg2t svg tpg tss tcl srs sgr tpt tte_e tid ffs fpt_f fte_f ctf mwc evr svm egr ev0 ddedx dpnt desum dmsft evout' _
    first=1 _
    no_events=1 _
    input_data_prefix=/star/mds/data/SD98/auau200/bfc/central/hijing/set0001/regular/tss/ _

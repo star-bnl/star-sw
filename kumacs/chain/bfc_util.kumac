@@ -45,7 +45,7 @@
 *                                     fpt - ftpc tracking
 *                                     fte - ftpc track evaluator
 *                                    
-* 
+* editted 8/24/98 K. Turner - 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -166,12 +166,18 @@ macro bfc_init _
       (fcl) 
 	    exec create_tables_ftpc#fcl_tables
 	    exec fcl_init#init
-      (fpt)
+    (fpt_f)
 	    exec create_tables_ftpc#fpt_tables
 	    exec fpt_init#init
-      (fte)
+    (fte_f)
 	    exec create_tables_ftpc#fte_tables
             exec fte_init#init
+    (fpt_s)
+            exec create_tables_ftpc#fpt_tables
+            exec fpt_init#init
+    (fte_s)
+            exec create_tables_ftpc#fte_tables
+            exec fte_init#init	    
       (svm) 
             exec create_tables_global#svm
             exec init_svm
@@ -322,8 +328,10 @@ ABEND:
       (ffs) exec ffs_run#run 
       (fss) exec fss_run#run
       (fcl) exec fcl_run#run
-      (fpt) exec fpt_run#run_slow_sim
-      (fte) exec fte_run#run_slow_sim
+    (fpt_f) exec fpt_run#run_fast_sim
+    (fte_f) exec fte_run#run_fast_sim
+    (fpt_s) exec fpt_run#run_slow_sim
+    (fte_s) exec fte_run#run_slow_sim
       (svm)    exec run_svm#run_svm 	     |  TPC to SVT Matching 
       (evr)    exec run_evr
       (egr)    exec run_egr#egr	|  Event Global Refit
