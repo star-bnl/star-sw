@@ -7,7 +7,7 @@ macro egr
 
 ami/mod/call egr_fitter_
         [data]/tpc/hits/tphit_
-        [data]/global/vertices/evr_privert_
+        [dst]/vertex_
         [data]/tpc/tracks/tptrack_
         [data]/tpc/tracks/evaltrk_
         [data]/svt/hits/scs_spt_
