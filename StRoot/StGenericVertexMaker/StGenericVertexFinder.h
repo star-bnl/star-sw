@@ -22,7 +22,7 @@
  * is enforced.
  *
  *
- * $Id: StGenericVertexFinder.h,v 1.5 2004/07/24 02:57:40 balewski Exp $
+ * $Id: StGenericVertexFinder.h,v 1.6 2004/07/24 19:40:38 balewski Exp $
  */
 
 #ifndef STAR_StGenericVertexFinder
@@ -44,8 +44,8 @@ class StGenericVertexFinder {
   virtual void           printInfo(ostream& = cout) const=0;
 
   // General (default)
-  virtual StThreeVectorD result() const {return mFitError;};  // result of fit
-  virtual StThreeVectorD error()  const {return mFitResult;}; // error on fit result
+  virtual StThreeVectorD result() const {return mFitResult;};  // result of fit
+  virtual StThreeVectorD error()  const {return  mFitError;}; // error on fit result
   virtual int            status() const {return mStatus;};    // status flag
 
   void                   FillStEvent(StEvent*) const;
@@ -91,6 +91,9 @@ class StGenericVertexFinder {
 
 
 // $Log: StGenericVertexFinder.h,v $
+// Revision 1.6  2004/07/24 19:40:38  balewski
+// fix swap of vert & errVert
+//
 // Revision 1.5  2004/07/24 02:57:40  balewski
 // clean up of ppLMV, CTB-util separated
 //
