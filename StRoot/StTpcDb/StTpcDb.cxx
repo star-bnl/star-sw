@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.cxx,v 1.13 1999/12/16 22:00:53 hardtke Exp $
+ * $Id: StTpcDb.cxx,v 1.14 2000/01/11 15:49:52 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.cxx,v $
+ * Revision 1.14  2000/01/11 15:49:52  hardtke
+ * get Electronics table from Calibrations database, Fix error messages
+ *
  * Revision 1.13  1999/12/16 22:00:53  hardtke
  * add CVS tags
  *
@@ -54,12 +57,11 @@ StTpcDb::StTpcDb(St_DataSet* input) {
    St_DataSetIter dataBase(input);
    for (int i = 0;i<lBases;i++,dataBase.Cd("/") )
      if ( !(tpc[i] = dataBase.Cd(bases[i]) ? dataBase("tpc") : 0 ) ){
-      char message[80];
-      cout << message << "StTpcDb::Error Getting TPC database: " << bases[i];
-      gMessMgr->Message(message,"E");}
+       gMessMgr->Error() << "StTpcDb::Error Getting TPC database: " << bases[i]       << endm;
+     }
  }
  else{
-   gMessMgr->Message("StTpcDb::Error Creating StTpcDb: Need to specify input DataSet","E");
+   gMessMgr->Message("StTpcDb::Error Creating StTpcDb: Need to specify input Da   taSet","E");
  }
  gStTpcDb = this;
 }
@@ -84,10 +86,7 @@ void StTpcDb::GetDataBase(StMaker* maker) {
      dbFullPath += dbPath;
      if ( ( tpc[i] = maker->GetDataBase(dbPath)) || 
           ( tpc[i] = maker->GetDataBase(dbFullPath)) ) continue;
-      char message[80];
-      cout << message << "StTpcDb::Error Getting TPC database: " << bases[i] << "   ";
-      gMessMgr->Message(message,"E");
-   //     gMessMgr->Message("StTpcDb::Error Getting TPC Calibrations database","E");
+     gMessMgr->Error() << "StTpcDb::Error Getting TPC database: " << bases[i] << "   " << endm;
    }
  }
  else{
@@ -161,7 +160,7 @@ StTpcDimensionsI* StTpcDb::Dimensions(){
 //_____________________________________________________________________________
 StTpcSlowControlSimI* StTpcDb::SlowControlSim(){
   if (!slowControlSim){            // get wire plane from data base
-   const int dbIndex = kCalibrarion;
+   const int dbIndex = kCalibration;
    if (tpc[dbIndex]){
     St_DataSet* tpd = tpc[dbIndex]->Find("tpcSlowControlSim");
     if (!(tpd && tpd->HasData()) ){
@@ -177,7 +176,7 @@ StTpcSlowControlSimI* StTpcDb::SlowControlSim(){
 //_____________________________________________________________________________
 StTpcElectronicsI* StTpcDb::Electronics(){
   if (!electronics){            // get electronics from data base
-   const int dbIndex = kGeometry;
+   const int dbIndex = kCalibration;
    if (tpc[dbIndex]){
     St_DataSet* tpd = tpc[dbIndex]->Find("tpcElectronics");
     if (!(tpd && tpd->HasData()) ){
@@ -197,7 +196,7 @@ StTpcGainI* StTpcDb::Gain(int sector){
     return 0;
   }
   if(!gain[sector-1]){
-   const int dbIndex = kCalibrarion;
+   const int dbIndex = kCalibration;
    char dbname[25];
    sprintf(dbname,"Sector_%.2d/tpcGainFactors",sector);
    printf("Getting %s \n",dbname);
@@ -222,7 +221,7 @@ StTpcT0I* StTpcDb::T0(int sector){
     return 0;
   }
   if(!t0[sector-1]){
-   const int dbIndex = kCalibrarion;
+   const int dbIndex = kCalibration;
    char dbname[25];
    sprintf(dbname,"Sector_%.2d/tpcTimeOffsets",sector);
    printf("Getting %s \n",dbname);

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.5 1999/12/16 22:00:53 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.6 2000/01/11 15:49:53 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.6  2000/01/11 15:49:53  hardtke
+ * get Electronics table from Calibrations database, Fix error messages
+ *
  * Revision 1.5  1999/12/16 22:00:53  hardtke
  * add CVS tags
  *
@@ -50,8 +53,10 @@ Int_t StTpcDbMaker::Init(){
 Int_t StTpcDbMaker::Make(){
 
   if (!m_TpcDb) m_TpcDb = new StTpcDb(this);
-  Update_tpg_pad_plane();
-  Update_tpg_detector();
+  if (tpcDbInterface()->PadPlaneGeometry()&&tpcDbInterface()->Dimensions())
+   Update_tpg_pad_plane();
+  if (tpcDbInterface()->Electronics()&&tpcDbInterface()->Dimensions())
+   Update_tpg_detector();
   return kStOK;
 }
 
