@@ -90,12 +90,15 @@ void EEfeeRawEvent::maskWrongCrates( long timeStamp, unsigned headToken) {
   // add more patterns below
   int listA[]={1,2,3,4,5,6};
   int listB[]={1,2,3,4,5,6,84,85,86};
+  int listC[]={1,2,3,4,5,6,84,85,86,87,88,89,90,91,92,93,94,95};
 
   int *list, dim;
   if (timeStamp< 1068761131)  //Thu Nov 13 17:05:31 2003
     { list=listA; dim=sizeof(listA)/sizeof(int); }
-  else 
+  else  if (timeStamp< 1070474417 ) //  Wed Dec  3 13:00:17 2003
     { list=listB; dim=sizeof(listB)/sizeof(int); }
+  else 
+    { list=listC; dim=sizeof(listC)/sizeof(int); }
 
   int ic;
   for(ic=0;ic<block->GetEntries();ic++) {
@@ -127,6 +130,9 @@ UShort_t  EEfeeRawEvent::getValue(int crateID, int channel) const {
 
 /*
  * $Log: EEfeeRawEvent.cxx,v $
+ * Revision 1.10  2003/12/04 18:29:25  balewski
+ * I forgot
+ *
  * Revision 1.9  2003/12/02 17:22:08  balewski
  * fix after version mixup
  *

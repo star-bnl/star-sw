@@ -2,7 +2,7 @@
 #ifndef EEfeeDataBlock_h
 #define EEfeeDataBlock_h
 /*********************************************************************
- * $Id: EEfeeDataBlock.h,v 1.5 2003/12/02 17:22:08 balewski Exp $
+ * $Id: EEfeeDataBlock.h,v 1.6 2003/12/04 18:29:25 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw FEE Data Block
@@ -14,10 +14,9 @@ class EEfeeDataBlock :public TObject {
 
 public:
   enum { EVTYPE=0,WRDCNT=1,TOKEN=2,CRATE=3};
-
   static const int DefaultMaxHead;
   static const int DefaultMaxData;
-  
+ 
 private:
   int      MaxHead;
   int      MaxData;
@@ -57,6 +56,9 @@ public:
 
 /*
  * $Log: EEfeeDataBlock.h,v $
+ * Revision 1.6  2003/12/04 18:29:25  balewski
+ * I forgot
+ *
  * Revision 1.5  2003/12/02 17:22:08  balewski
  * fix after version mixup
  *
