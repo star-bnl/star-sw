@@ -1,5 +1,11 @@
-// $Id: St_TableNtuple.cxx,v 1.7 1999/02/22 00:31:21 genevb Exp $
+//*CMZ :          23/02/99  18.27.27  by Gene Van Buren ( genevb@bnl.gov)
+//*-- Author :    Gene Van Buren ( genevb@bnl.gov)   23/02/99
+//
+// $Id: St_TableNtuple.cxx,v 1.8 1999/02/25 15:44:32 fine Exp $
 // $Log: St_TableNtuple.cxx,v $
+// Revision 1.8  1999/02/25 15:44:32  fine
+// author's name has been introduced for HTML doc
+//
 // Revision 1.7  1999/02/22 00:31:21  genevb
 // Fixed problem with arrays
 //
@@ -459,7 +465,7 @@ void St_TableNtuple::LearnTable(const St_Table &table, Bool_t buildTree, Int_t b
 //_____________________________________________________________________________
 void St_TableNtuple::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: St_TableNtuple.cxx,v 1.7 1999/02/22 00:31:21 genevb Exp $\n");
+  printf("* $Id: St_TableNtuple.cxx,v 1.8 1999/02/25 15:44:32 fine Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("* Using %d columns from table with:\n",mNvar);
   printf("*   Name: %s\n",GetName());
