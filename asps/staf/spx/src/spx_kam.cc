@@ -267,7 +267,9 @@ void kam_spx_list_()
 }
 STAFCV_T spx_list()
 {
-   printf("%s",spx->list() );
+   char *c=NULL;
+   printf("%s", c = spx->list() );
+   FREE(c);
    EML_SUCCESS(STAFCV_OK);
 }
 

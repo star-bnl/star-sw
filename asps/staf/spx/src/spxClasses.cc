@@ -48,7 +48,7 @@ char * spxDummy::  listing () {
    char* cc = NULL;
    cc = (char*)MALLOC(79);
    memset(cc,0,79);
-   sprintf(cc,"%s Calls = %d",c,nCalls());
+   sprintf(cc,"%s %d calls",c,nCalls());
    FREE(c);
    return cc;
 }

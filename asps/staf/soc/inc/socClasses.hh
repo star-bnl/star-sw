@@ -77,6 +77,9 @@ public:
    virtual long count ();
    virtual long maxCount ();
 
+//- OVER-RIDE VIRTUAL
+   virtual char * listing ();
+
 //:----------------------------------------------- PUB FUNCTIONS      --
    virtual char * list ();			// list all objects
 
