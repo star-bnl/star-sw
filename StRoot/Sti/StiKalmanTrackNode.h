@@ -13,6 +13,8 @@
 #include "StiCylindricalShape.h"
 #include "StiPlacement.h"
 #include "StiHit.h"
+#include "StiMaterial.h"
+
 class StiDetector;
 class StiMaterial;
 class Messenger;
@@ -163,6 +165,10 @@ public:
   double crossAngle() const;
   double sinCrossAngle() const;
   double pathlength() const;
+  double pathLToNode(const StiKalmanTrackNode * const oNode);
+  StThreeVectorD* getLengths(StiKalmanTrackNode *nextNode);
+
+  double length(const StThreeVector<double>& delta, double curv);
   double getDedx() const;
   double nice(double angle) const;
   /// Return center of helix circle in global coordinates
@@ -430,10 +436,25 @@ inline StThreeVector<double> StiKalmanTrackNode::getGlobalPoint() const
 
 inline double StiKalmanTrackNode::pathlength() const
 {
-  const StiDetector * det = _hit->detector();
-  if (!det) return -1.; 
-  double thickness = det->getShape()->getThickness();
-  return thickness*_cosCA/sqrt(1.+_p4*_p4);
+
+  //returns pathlength within detector volume
+    const StiDetector * det = getDetector();
+    if (!det) return -1.; 
+    double thickness = det->getShape()->getThickness();
+    return (thickness*sqrt(1.+_p4*_p4)) / _cosCA;
+}
+
+inline StThreeVectorD* StiKalmanTrackNode::getLengths(StiKalmanTrackNode* nextNode)
+{
+  double x1=pathlength()/2.;
+  double x3=nextNode->pathlength()/2.;
+  double x2=pathLToNode(nextNode);
+  if (x2> (x1+x3)) x2=x2-x1-x3;
+  else x2=0;
+
+  return new StThreeVectorD(x1/getDetector()->getGas()->getX0(), 
+			    x2/getDetector()->getMaterial()->getX0(), 
+			    x3/nextNode->getDetector()->getGas()->getX0());
 }
 
 inline double StiKalmanTrackNode::getDedx() const
