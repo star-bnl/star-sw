@@ -1,4 +1,5 @@
 MACRO init_egr
+   
 macro/global/import *
 
 message ' Creating egr tables...' 
@@ -84,11 +85,7 @@ tdm/table/cell/putvalue 'egr_egrpar[0].usesvt' 1
 tdm/table/cell/putvalue 'egr_egrpar[0].usevert' 0
 tdm/table/cell/putvalue 'egr_egrpar[0].useglobal' 2
 
-cd [data]/global/tracks
-tdm/newtable globtrk dst_track 100000
-maxrowcount [data]/global/tracks/globtrk 100000
-tdm/newtable globtrk_aux dst_track_aux 100000
-maxrowcount [data]/global/tracks/globtrk_aux 100000
+
 
 cd [data]/global/vertices
 tdm/newtable evr_privert evr_privert 1
@@ -106,4 +103,4 @@ tdm/table/cell/putvalue 'evr_privert[0].ptmin' 0.
 
 RETURN
 
-
+* ***************************************************************

@@ -1,24 +1,9 @@
 **********************************************************
-macro egr i=1 
-macro/global/import *
+macro egr 
+  
+  macro/global/import *
 
-i = [1]
-
-
-*
-* macro for testing the egr module in STAF
-macro/global/import *
-*
-*
-* first generate the tables  needed and select scenario
-* some values for testing
-*
-
-
-*
-* Call egr
-*
-message ' Calling EGR_fitter'
+  message ' Calling EGR_fitter'
 
 ami/mod/call egr_fitter_
         [data]/tpc/hits/tphit_

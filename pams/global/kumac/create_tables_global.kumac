@@ -1,0 +1,93 @@
+* ----------------------------------------------------
+
+macro svm
+  
+  macro/global/import *
+    
+  cd [data]/global/tracks
+
+  tdm/newtable evt_match svm_evt_match 3000
+  tdm/table/rowcount evt_match 3000
+ 
+  cd /dui
+
+ return
+ 
+* ----------------------------------------------------
+ 
+ macro egr
+   
+   
+  macro/global/import *
+    
+  cd [data]/global/tracks
+  tdm/newtable globtrk dst_track 100000
+  maxrowcount [data]/global/tracks/globtrk 100000
+  tdm/newtable globtrk_aux dst_track_aux 100000
+  maxrowcount [data]/global/tracks/globtrk_aux 100000
+   
+  cd /dui
+
+ return
+    
+* ----------------------------------------------------
+ 
+ macro ev0
+   
+   
+  macro/global/import *
+    
+  cd [data]/global/vertices
+  tdm/newtable ev0out ev0_aux 100000
+  tdm/newtable vertex dst_vertex 100000
+  
+  rowcount [data]/global/tracks/globtrk 
+  if ( staf_result(1) .eq. 0 ) then
+    cd [data]/global/tracks
+    tdm/newtable globtrk dst_track 100000
+  endif
+  
+  cd [data]/global/tracks
+  maxrowcount globtrk
+
+  tdm/newtable ev0track ev0_track  staf_result(1)
+
+  cd /dui
+
+ return
+ 
+* ----------------------------------------------------
+ 
+ macro ev0_eval2
+      
+  macro/global/import *
+    
+   cd [data]/global/vertices
+   tdm/newtable ev0_eval ev0_eval 100000
+   
+ 
+  cd /dui
+
+ return
+* ---------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
