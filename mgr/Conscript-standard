@@ -76,24 +76,26 @@ my $CPPPATH = $env->{CPPPATH};
 my $FC      = $env->{FC};
 my $FFLAGS  = $env->{FFLAGS};
 my $FEXTEND = $env->{FEXTEND};
-
 if ( $pkg =~ /^St.*Db/ ) {
-    $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{OPTSTAR} . "/include";
+  $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{OPTSTAR} . "/include";
 }
 if ( $pkg =~ /^StDbLib$/ ) {
     if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }
-    $LIBPATH .= $env->{ENV}->{OPTSTAR} . "/lib/mysql";
+    $LIBPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{OPTSTAR} . "/lib/mysql";
     print "LIBPATH = $LIBPATH\n" if $param::debug;
     $LIBS .= " -lmysqlclient";
     print "LIBS = $LIBS\n" if $param::debug;
 }
 
 if ( $pkg =~ /^pyth$/ ) {
-    my $CERN_ROOT = $env->{ENV}->{CERN_ROOT};
-    print "CERN_ROOT = $CERN_ROOT\n" if $param::debug;
-    if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }
-    $LIBPATH .= $CERN_ROOT . "/lib";
-    $LIBS .= " -lpythia ";
+  my $CERN_ROOT = $env->{ENV}->{CERN_ROOT};
+  print "CERN_ROOT = $CERN_ROOT\n" if $param::debug;
+  if ($LIBPATH) { $LIBPATH .= $main::PATH_SEPARATOR; }
+  $LIBPATH .= $CERN_ROOT . "/lib";
+  foreach my $py ("pythia","pythia6152","pythia6136") { 
+    my $file = $CERN_ROOT . "/lib/lib" . $py . ".a";
+    if (-f $file) {$LIBS .= " -l" . $py; last;}
+  }
 }
 ( my $share = $EXPORT . "/" . $Dir ) =~ s/\/pams//g;
 print "new share $share\n" if $param::debug;
@@ -138,8 +140,10 @@ my @srco   = @src;
 if ( $LIBPKG && $Dir =~ /pams\// || $STAR_SYS =~ /^intel_wnt$/ ) {
     $LIBS .= " -l" . $pkg;    #"lib" . $pkg . "." . $env->{SUFLIB};
 }
-if ( $STAR_SYS =~ /^hp_ux102$/ && $pkg =~ /^St_base$/ ) {
+if ($pkg =~ /^St_base$/) {
+  if ( $STAR_SYS =~ /^hp_ux102$/) {
     $CPPPATH .= $main::PATH_SEPARATOR . "/usr/local/include";
+  }
 }
 my $CXXFLAGS = $env->{CXXFLAGS};
 my $FCCOM = $env->{FCCOM};

@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.34 2001/04/05 22:12:03 didenko Exp $
+# $Id: ConsDefs.pm,v 1.35 2001/09/17 13:37:57 fisyak Exp $
 {
     use File::Basename;
     use Sys::Hostname;
@@ -19,6 +19,12 @@
 
     @search_files = ();
     $DEBUG        = "-g";
+    $FDEBUG       = $DEBUG;
+    if ( defined( $ARG{NODEBUG} ) or $NODEBUG ) {
+      $DEBUG = "-O -g";
+      $FDEBUG = $DEBUG;
+      print "set DEBUG = $DEBUG\n" unless ($param::quiet);
+    }
     $O      = "o";
     $A      = "a";
     $Cxx    = "cxx";
@@ -50,7 +56,8 @@
     $SHADOWLIBS  = "";
     $AUTHFLAGS     = $SHADOWFLAGS . " " . $AFSFLAGS . " " . $SRPFLAGS;
     $AUTHLIBS      = $SHADOWLIBS . " " . $AFSLIBS . " " . $SRPLIBS;
-    $R_CPPFLAGS    = " -DR__AFS -DHAVE_CONFIG ";
+#    $R_CPPFLAGS    = "-DG__LONGBUF -DR__AFS -DHAVE_CONFIG";
+    $R_CPPFLAGS    = "-DR__AFS -DHAVE_CONFIG";
     $CPP           = "";                                              #"gcc -E";
     $CPPPATH       = "";
     $EXTRA_CPPPATH = "";
@@ -105,10 +112,10 @@
     $LINKCOM =
       "%LD %DEBUG %LDFLAGS %EXTA_LDFLAGS %< %_LDIRS %LIBS %Libraries %Lout%>";
     $FCCOM =
-      "%FC %FFLAGS %CPPFLAGS %EXTRA_CPPFLAGS %DEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>";
+      "%FC %FFLAGS %CPPFLAGS %EXTRA_CPPFLAGS %FDEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>";
     $GEANT3COM = "test -f %>:b.F && rm %>:b.F;";
     $GEANT3COM .=
-"%GEANT3 %< -o %>:b.F && %FC %FFLAGS %CPPFLAGS %EXTRA_CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %>:b.F -o %>";
+"%GEANT3 %< -o %>:b.F && %FC %FFLAGS %CPPFLAGS %EXTRA_CPPFLAGS %FDEBUG %_IFLAGS  %FCPPPATH -c %>:b.F -o %>";
     $INCLUDE_PATH = $INCLUDE;
     $Salt = undef;
     if ( !$OPTSTAR ) { $OPTSTAR = "/opt/star"; }
@@ -137,14 +144,25 @@
         }
         $R_CPPFLAGS .=
 " -DGNU_CC -DR__GLIBC -DG__REGEXP -DG__UNIX -DG__SHAREDLIB -DG__OSFDLL -DG__ROOT -DG__REDIRECTIO";
-        $CXXFLAGS     = "-pipe -fPIC -Wall -Woverloaded-virtual";# -march=pentiumpro";
+        $CXXFLAGS     = "-pipe -fPIC";# -march=pentiumpro";
+#	$CXXFLAGS    .= " -ansi -pedantic"; 
+	$CXXFLAGS    .= " -Wall";# -W -Wwrite-strings -Wpointer-arith";# -Wnested-externs";
+	$CXXFLAGS    .= " -Woverloaded-virtual";# -Wbad-function-cast";
+#	$CXXFLAGS    .= " -fnonnull-objects";
+	if ( defined( $ARG{NODEBUG} ) or $NODEBUG ) {
+	  $DEBUG = "-O -g -march=pentium -mcpu=pentium -malign-loops=2";
+	  $DEBUG.= " -malign-jumps=2 -malign-functions=2";
+	  $FDEBUG = "-O -g";
+	  print "set DEBUG = $DEBUG\n" unless ($param::quiet);
+	}
         $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
-
         #                                             -fpipe
         $CFLAGS     = "-pipe -fPIC -Wall";               # -march=pentiumpro";
+#	$CFLAGS    .= " -ansi -pedantic";
+	$CFLAGS    .= " -Wall";# -W -Wwrite-strings -Wpointer-arith";# -Wnested-externs";
+	$CFLAGS    .= " -Wshadow";# -Wbad-function-cast";
         $CINTCFLAGS = $CFLAGS . " " . $R_CPPFLAGS;
         $LDFLAGS  = "";    #$DEBUG . " " . $CXXFLAGS . " -Wl,-Bdynamic";
-        $F77FLAGS = "";
         $SOFLAGS   = "-shared -Wl,-Bdynamic";
         $XLIBS     = "-L/usr/X11R6/lib -lXpm -lX11";
         $THREAD    = "-lpthread";
@@ -154,16 +172,16 @@
         if ( /egcs$/ || !$STAR ) {
             $CLIBS = "-L/usr/X11R6/lib  -lXt -lXpm -lX11 -lm -ldl  -rdynamic";
             $FC    = "g77";
-
 #    $FLIBS   .= " -L/usr/local/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.66 -lg2c";
-            $FFLAGS = "-w %DEBUG -fno-second-underscore -fno-automatic";
+            $FFLAGS = "-pipe -fno-second-underscore -fno-automatic -Wall -W -Wsurprising"; 
             $FCCOM  = "test -f %>.g && rm %>.g ; test -f %>.f && rm %>.f;";
+	    $FDEBUG = $DEBUG;
             $FCCOM .=
-            "%FC -E -P %CPPFLAGS %EXTRA_CPPFLAGS %DEBUG %_IFLAGS  %FCPPPATH -c %< %Fout%>.g &&";
+            "%FC -E -P %CPPFLAGS %EXTRA_CPPFLAGS %FDEBUG %_IFLAGS  %FCPPPATH -c %< %Fout%>.g &&";
             $FCCOM .= "%GEANT3 -V 1 -V f -i %>.g %Fout%>:b.f;";
             $FCCOM .= "if [ -f %>:b.f ]; then %FC %FFLAGS -c %>:b.f %Fout%> ;";
             $FCCOM .=
-"else %FC %FFLAGS %CPPFLAGS %EXTRA_CPPFLAGS %DEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>; fi";
+"else %FC %FFLAGS %CPPFLAGS %EXTRA_CPPFLAGS %FDEBUG %FEXTEND %_IFLAGS  %FCPPPATH -c %< %Fout%>; fi";
             my $GEANT3COM = $FCCOM;
             $FEXTEND = "-ffixed-line-length-132";
         }
@@ -175,7 +193,6 @@
             if ($STAR) {
                 $OSFID .= " ST_NO_NUMERIC_LIMITS ST_NO_EXCEPTIONS";
             }
-            $DEBUG    = "-g";
             $CXXOPT   = "+K0 -O0 --no_exceptions";
             $CXX      = "KCC";
             $CXXFLAGS = $CXXOPT . " --signed_chars -D_EXTERN_INLINE=inline";
@@ -233,7 +250,7 @@
 " -DR__ACC -DG__REGEXP -DG__UNIX -DG__HPUXCPPDLL -DG__SHAREDLIB  -DG__ROOT -DG__REDIRECTIO -D__STDCPP__";
         $CINTCXXFLAGS = "-z +Z " . $R_CPPFLAGS . " -D_POSIX2_SOURCE";
         $CFLAGS       = " -Ae -z +Z -Dextname";
-        $CINTCFLAGS   = $CFLAGS . $R_CPPFLAGS . " -D_POSIX2_SOURCE";
+        $CINTCFLAGS   = $CFLAGS . " " . $R_CPPFLAGS . " -D_POSIX2_SOURCE";
         $SOEXT        = "sl";
 
         #   $XLIBS    = $ROOTSYS . "../lib/libXpm.a -lX11";
@@ -274,19 +291,17 @@
         $CXXFLAGS       = "-KPIC";                # -library=iostream,no%%Cstd";
         $EXTRA_CXXFLAGS = " -D__CC5__";
         $EXTRA_CFLAGS   = " -D__CC5__";
-        $R_CPPFLAGS     =
-"-DG__REGEXP1 -DG__UNIX -DG__OSFDLL -DG__SHAREDLIB -DG__ROOT -DG__REDIRECTIO";
+        $R_CPPFLAGS    .=
+" -DG__REGEXP1 -DG__UNIX -DG__OSFDLL -DG__SHAREDLIB -DG__ROOT -DG__REDIRECTIO";
         $CINTCXXFLAGS = $CXXFLAGS . " " . $R_CPPFLAGS;
         $CLIBS        =
-          "-lmalloc -lm -ltermcap -ldl -lnsl -lsocket -lgen -L" . $OPTSTAR
-          . "/lib -lCstd -liostream -lCrun";
+          "-lmalloc -lm -ltermcap -ldl -lnsl -lsocket -lgen";# -L" . $OPTSTAR  . "/lib -lCstd -liostream -lCrun";
         $FLIBS = "-L/opt/WS5.0/lib -lM77 -lF77 -lsunmath";
         $XLIBS = "-L" . $ROOTSYS . "/lib -lXpm -L/usr/openwin/lib -lX11";
 
         #   $XLIBS     = "-L/usr/local/lib -lXpm -L/usr/openwin/lib -lX11";
         $SYSLIBS =
-          "-lmalloc -lm -ldl -lnsl -lsocket -L" . $OPTSTAR
-          . "/lib -lCstd -liostream -lCrun";
+          "-lmalloc -lm -ldl -lnsl -lsocket";# -L" . $OPTSTAR . "/lib -lCstd -liostream -lCrun";
         $FFLAGS     = "-KPIC -w";
         $FEXTEND    = "-e";
         $CFLAGS     = "-KPIC";
@@ -309,11 +324,8 @@
 
     if ( $STAR_SYS ne $STAR_HOST_SYS ) { $OSFID .= " " . $STAR_HOST_SYS; }
     my $FLAGS = $OSFID . " CERNLIB_TYPE" . " __ROOT__";
+#    $CPPFLAGS .= " " . $R_CPPFLAGS;
     $CPPFLAGS .= " -D" . join ( " -D", split ( " ", $FLAGS ) );
-    if ( defined( $ARG{NODEBUG} ) or $NODEBUG ) {
-        $DEBUG = "-O -g";
-        print "set DEBUG = $DEBUG\n" unless ($param::quiet);
-    }
 
     $ROOTSRC = $ROOT . "/" . $ROOT_LEVEL . "/include";
     my @params = (
@@ -337,6 +349,7 @@
       'EXTRA_CPPFLAGS'=> $EXTRA_CPPFLAGS,
       'R_CPPFLAGS'    => $R_CPPFLAGS,
       'DEBUG'         => $DEBUG,
+      'FDEBUG'        => $FDEBUG,
       'FC'            => $FC,
       'FFLAGS'        => $FFLAGS,
       'FEXTEND'       => $FEXTEND,
