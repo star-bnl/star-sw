@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerBase.h,v 3.0 2000/07/14 12:56:48 genevb Exp $
+// $Id: StStrangeControllerBase.h,v 3.1 2000/07/17 20:28:40 genevb Exp $
 // $Log: StStrangeControllerBase.h,v $
+// Revision 3.1  2000/07/17 20:28:40  genevb
+// File size limitation workaround, some under the hood improvements
+//
 // Revision 3.0  2000/07/14 12:56:48  genevb
 // Revision 3 has event multiplicities and dedx information for vertex tracks
 //
@@ -33,9 +36,9 @@ class TClass;
 
 class StStrangeControllerBase : public TNamed {
  public: 
-  StStrangeControllerBase(const char* name);
+  StStrangeControllerBase(Int_t type);
   virtual ~StStrangeControllerBase();
-  static StStrangeControllerBase* Instantiate(const char* name);
+  static StStrangeControllerBase* Instantiate(Int_t type);
 
   TClonesArray* GetDataArray();
   TClonesArray* GetMcArray();   
@@ -57,7 +60,7 @@ class StStrangeControllerBase : public TNamed {
   virtual void Unselect(Int_t i=-1);   // use i<0 to specify whole event
   
   virtual void InitReadDst();
-  virtual void InitCreateDst(const char* filename);
+  virtual void InitCreateDst();
   virtual void InitCreateSubDst();
   virtual Int_t MakeReadDst() = 0;
   virtual Int_t MakeCreateDst(StEvent& event) = 0;
@@ -87,6 +90,7 @@ class StStrangeControllerBase : public TNamed {
 
   TTree* tree;                      //!
   char* file;                       //!
+  Int_t dstType;                    //!
   TClass* dataClass;                //!
 
   // Array of muDst indices to copy

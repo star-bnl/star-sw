@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.h,v 3.0 2000/07/14 12:56:50 genevb Exp $
+// $Id: StStrangeMuDstMaker.h,v 3.1 2000/07/17 20:28:40 genevb Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 3.1  2000/07/17 20:28:40  genevb
+// File size limitation workaround, some under the hood improvements
+//
 // Revision 3.0  2000/07/14 12:56:50  genevb
 // Revision 3 has event multiplicities and dedx information for vertex tracks
 //
@@ -50,6 +53,8 @@ class StKinkMc;
 class StStrangeCuts;
 
 enum StrangeEnum {StrangeNoKeep, StrangeNoFile, StrangeWrite, StrangeRead};
+enum StrDstType  {evT = 0, v0T, xiT, kinkT, strDstT} ;
+static char* strTypeNames[strDstT] = {"Ev","V0","Xi","Kink"};
 
 class StStrangeMuDstMaker : public StMaker {
  public: 
@@ -61,15 +66,18 @@ class StStrangeMuDstMaker : public StMaker {
   void SetWrite(char* eFile=0, char* vFile=0, char* xFile=0, char* kFile=0);
   void SetNoKeep();
   StrangeEnum GetMode();
-  
+  char* GetFile(Int_t dstType) const;
+
   void DoV0(Bool_t doIt=kTRUE);
   void DoXi(Bool_t doIt=kTRUE);
   void DoKink(Bool_t doIt=kTRUE);
   void DoMc(Bool_t doIt=kTRUE);
+  void Do(Int_t dstType, Bool_t doIt=kTRUE);
   void Do(const char* name, Bool_t doIt=kTRUE);
   Bool_t GetDoMc();
   
   StStrangeControllerBase* Get(const char* name) const;
+  StStrangeControllerBase* Get(Int_t dstType) const;
   
   TClonesArray* GetEvClonesArray();
 
@@ -142,25 +150,21 @@ class StStrangeMuDstMaker : public StMaker {
   void SetStFiles();
   Int_t OpenFile();
   Int_t CloseFile();
-  
+  void CheckFile();
+
+  Int_t MatchName(const char* name) const;
+
   TTree* tree;                   //!
   StStrangeCuts* cuts;           //!
-  char* evFile;                  //!
-  char* v0File;                  //!
-  char* xiFile;                  //!
-  char* kinkFile;                //!
-  StFile* evFiles;               //!
-  StFile* v0Files;               //!
-  StFile* xiFiles;               //!
-  StFile* kinkFiles;             //!
+  char* file[strDstT];           //!
+  StFile* files[strDstT];        //!
   TFile* muDst;                  //!
 
   Bool_t firstEvent;
   Int_t evNumber;
+  Int_t outFileNum;
 
-  Bool_t doV0;
-  Bool_t doXi;
-  Bool_t doKink;
+  Bool_t doT[strDstT];
   Bool_t doMc;
 
   StrangeEnum rw;
@@ -173,6 +177,7 @@ class StStrangeMuDstMaker : public StMaker {
   StStrangeControllerBase* v0;    //!
   StStrangeControllerBase* xi;    //!
   StStrangeControllerBase* kink;  //!
+  StStrangeControllerBase* cont[strDstT];  //!
  private:
   ClassDef(StStrangeMuDstMaker,3)
 };
@@ -180,18 +185,17 @@ class StStrangeMuDstMaker : public StMaker {
 inline StrangeEnum StStrangeMuDstMaker::GetMode()
             { return rw; }
 inline void StStrangeMuDstMaker::DoV0(Bool_t doIt)
-            { doV0 = doIt; }
+            { doT[v0T] = doIt; }
 inline void StStrangeMuDstMaker::DoXi(Bool_t doIt)
-            { doXi = doIt; }
+            { doT[xiT] = doIt; }
 inline void StStrangeMuDstMaker::DoKink(Bool_t doIt)
-            { doKink = doIt; }
+            { doT[kinkT] = doIt; }
+inline void StStrangeMuDstMaker::Do(Int_t dstType, Bool_t doIt)
+            { doT[dstType] = doIt; }
+inline void StStrangeMuDstMaker::Do(const char* name, Bool_t doIt)
+            { Do(MatchName(name),doIt); }
 inline void StStrangeMuDstMaker::DoMc(Bool_t doIt)
             { doMc = doIt; }
-inline void StStrangeMuDstMaker::Do(const char* name, Bool_t doIt)
-            { if (!(strcmp(name,"V0"))) DoV0(doIt);
-	      if (!(strcmp(name,"Xi"))) DoXi(doIt);
-	      if (!(strcmp(name,"Kink"))) DoKink(doIt);
-	      if (!(strcmp(name,"Mc"))) DoMc(doIt); }
 inline Bool_t StStrangeMuDstMaker::GetDoMc()
             { return doMc; }
 inline TClonesArray* StStrangeMuDstMaker::GetEvClonesArray()
@@ -211,10 +215,15 @@ inline void StStrangeMuDstMaker::SubDst(const char* maker_name)
             { SubDst((StStrangeMuDstMaker*) GetMaker(maker_name)); }
 inline StStrangeMuDstMaker* StStrangeMuDstMaker::GetSubDst()
             { return dstMaker; }
+inline StStrangeControllerBase* StStrangeMuDstMaker::Get(Int_t dstType) const
+            { return cont[dstType]; }
 inline StStrangeControllerBase* StStrangeMuDstMaker::Get(const char* name) const
-            { if (!(strcmp(name,"V0"))) return v0;
-	      if (!(strcmp(name,"Xi"))) return xi;
-	      if (!(strcmp(name,"Kink"))) return kink;
-	      return 0; }
+            { return cont[MatchName(name)]; }
+inline char* StStrangeMuDstMaker::GetFile(Int_t dstType) const
+            { return file[dstType]; }
+inline Int_t StStrangeMuDstMaker::MatchName(const char* name) const
+            { for (Int_t i=1; i<strDstT; i++)
+	        if (!(strcmp(name,strTypeNames[i]))) return i;
+              return 0; }
 
 #endif

@@ -1,5 +1,8 @@
-// $Id: StKinkController.cxx,v 3.1 2000/07/14 21:28:34 genevb Exp $
+// $Id: StKinkController.cxx,v 3.2 2000/07/17 20:28:40 genevb Exp $
 // $Log: StKinkController.cxx,v $
+// Revision 3.2  2000/07/17 20:28:40  genevb
+// File size limitation workaround, some under the hood improvements
+//
 // Revision 3.1  2000/07/14 21:28:34  genevb
 // Added V0Mc index for XiMc, fixed bug with entries for XiMc, cleaned up controllers
 //
@@ -35,7 +38,7 @@
 #include "StStrangeControllerInclude.h"  // Location of header for this class
 
 //_____________________________________________________________________________
-StKinkController::StKinkController() : StStrangeControllerBase("Kink") {
+StKinkController::StKinkController() : StStrangeControllerBase(kinkT) {
   increment = 100;
   max = 500;
 }

@@ -1,5 +1,8 @@
-// $Id: StV0Controller.cxx,v 3.1 2000/07/14 21:28:34 genevb Exp $
+// $Id: StV0Controller.cxx,v 3.2 2000/07/17 20:28:40 genevb Exp $
 // $Log: StV0Controller.cxx,v $
+// Revision 3.2  2000/07/17 20:28:40  genevb
+// File size limitation workaround, some under the hood improvements
+//
 // Revision 3.1  2000/07/14 21:28:34  genevb
 // Added V0Mc index for XiMc, fixed bug with entries for XiMc, cleaned up controllers
 //
@@ -37,7 +40,7 @@
 class StStrangeEvMuDst;
 
 //_____________________________________________________________________________
-StV0Controller::StV0Controller() : StStrangeControllerBase("V0") {
+StV0Controller::StV0Controller() : StStrangeControllerBase(v0T) {
 }
 //_____________________________________________________________________________
 StV0Controller::~StV0Controller() {

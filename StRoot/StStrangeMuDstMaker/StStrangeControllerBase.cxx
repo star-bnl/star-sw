@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerBase.cxx,v 3.0 2000/07/14 12:56:48 genevb Exp $
+// $Id: StStrangeControllerBase.cxx,v 3.1 2000/07/17 20:28:40 genevb Exp $
 // $Log: StStrangeControllerBase.cxx,v $
+// Revision 3.1  2000/07/17 20:28:40  genevb
+// File size limitation workaround, some under the hood improvements
+//
 // Revision 3.0  2000/07/14 12:56:48  genevb
 // Revision 3 has event multiplicities and dedx information for vertex tracks
 //
@@ -25,24 +28,25 @@ StStrangeMuDstMaker* StStrangeControllerBase::currentMaker = 0;
 
 ClassImp(StStrangeControllerBase)
 //_____________________________________________________________________________
-StStrangeControllerBase::StStrangeControllerBase(const char *name) :
-TNamed(name,"StStrangeController") {
+StStrangeControllerBase::StStrangeControllerBase(Int_t type) :
+TNamed(strTypeNames[type],"StStrangeController") {
+  dstType = type;
   masterMaker = currentMaker;
   doMc = masterMaker->GetDoMc();
   if ((dstMaker = masterMaker->GetSubDst())) {
     if (doMc) dstMaker->DoMc();
-    dstMaker->Do(name);
+    dstMaker->Do(dstType);
   }
   tree = 0;
   file = 0;
   selections = 0;
   tempArray = 0;
-  mcName = name;
+  mcName = GetName();
   mcName += "Mc";
-  assocName = name;
+  assocName = GetName();
   assocName += "Assoc";
   TString str;
-  ((str = "St") += name) += "MuDst";
+  ((str = "St") += GetName()) += "MuDst";
   dataArray = new TClonesArray(str.Data(),max);
   dataClass = gROOT->GetClass(str.Data());
   if (doMc && !(dstMaker)) {
@@ -72,8 +76,8 @@ StStrangeControllerBase::~StStrangeControllerBase() {
   delete selections; selections = 0;
 }
 //_____________________________________________________________________________
-StStrangeControllerBase* StStrangeControllerBase::Instantiate(const char* name){
-  TString nom = name;
+StStrangeControllerBase* StStrangeControllerBase::Instantiate(Int_t type){
+  TString nom = strTypeNames[type];
   TString first = nom;
   first.Remove(1).ToUpper();
   nom.Replace(0,1,first);
@@ -97,9 +101,9 @@ void StStrangeControllerBase::InitReadDst() {
   }
 }
 //_____________________________________________________________________________
-void StStrangeControllerBase::InitCreateDst(const char* filename) {
+void StStrangeControllerBase::InitCreateDst() {
   tree = masterMaker->GetTree();
-  file = const_cast<char*> (filename);
+  file = masterMaker->GetFile(dstType);
   AssignBranch(GetName(),&dataArray);
   if (doMc && !(dstMaker)) {
     AssignBranch(GetMcName(),&mcArray);
