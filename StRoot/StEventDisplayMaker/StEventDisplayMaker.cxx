@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.74 2001/07/27 22:08:58 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.75 2001/07/30 19:29:33 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -501,6 +501,10 @@ Int_t StEventDisplayMaker::Make()
             ((TTable *)dstracks)->Print(0,1);
            }
         }
+        const char *vertex2Draw = "dst/vertex(vtx_id,x:y:z)";
+        {
+           AddName(vertex2Draw);
+        }
         // printf(" no %s found !!!\n",track2Draw); 
 #endif
       }
@@ -823,6 +827,9 @@ DISPLAY_FILTER_DEFINITION(TptTrack)
 
 //_____________________________________________________________________________
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.75  2001/07/30 19:29:33  fine
+// Add vertex point into the default view
+//
 // Revision 1.74  2001/07/27 22:08:58  fine
 // Fix StEventDisplay maker to count the Mag field sign properly
 //
