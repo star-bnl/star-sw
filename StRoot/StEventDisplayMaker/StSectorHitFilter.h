@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StSectorHitFilter.h,v 1.1 2000/09/26 17:45:48 fine Exp $ 
+// $Id: StSectorHitFilter.h,v 1.2 2003/08/02 02:51:28 perev Exp $ 
 //
 #ifndef STAR_StSectorHitFilter
 #define STAR_StSectorHitFilter
@@ -45,6 +45,11 @@ class StSectorHitFilter : public StVirtualEventFilter  {
     virtual ~StSectorHitFilter() {Reset();}
     virtual Int_t Channel(const TTableSorter *tableObject,Int_t index,Size_t &size,Style_t &style);
     virtual Int_t Channel(const TTable *tableObject,Int_t rowNumber,Size_t &size,Style_t &style);
+
+            Int_t Channel(StGlobalTrack *globTrack,Size_t &size,Style_t &style)       {return 0;}
+            Int_t Channel(const StObjArray *hitCollection,Size_t &size,Style_t &style){return 0;}
+            Int_t Channel(const StVertex *vertexObject,Size_t &size,Style_t &style)   {return 0;}  
+
     virtual Int_t Reset(Int_t reset=0); 
     Int_t SetSecRow(Int_t *sectorRows,Int_t n=1); 
 
@@ -53,6 +58,9 @@ class StSectorHitFilter : public StVirtualEventFilter  {
 
 //__________________________________________________
 // $Log: StSectorHitFilter.h,v $
+// Revision 1.2  2003/08/02 02:51:28  perev
+// warnOff
+//
 // Revision 1.1  2000/09/26 17:45:48  fine
 // Dst and Tcl chair classes have been moved from example to here
 //
