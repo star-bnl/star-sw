@@ -16,6 +16,7 @@
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+
 #include "tables/St_emcStatus_Table.h"
 #include "tables/St_smdStatus_Table.h"
 #include "tables/St_emcCalib_Table.h"
@@ -24,7 +25,6 @@
 #include "tables/St_smdPed_Table.h"
 
 #include "StEmcMipSpectra.h"
-//#include "StEmcElecSpectra.h"
 #include "StEmcEqualSpectra.h"
 #include "StEmcPedSpectra.h"
 
@@ -68,6 +68,8 @@ class StEmcCalibrationMaker : public StMaker
 					 TH1F*                mHitsE;   //!
 					 
 					 TString mDetName;
+					 TString mHVDatabase;
+					 TString mHVCalibration;
            
 					 Bool_t  mSubPedestal;
 					 Bool_t  mDoUseL3;
@@ -111,6 +113,8 @@ class StEmcCalibrationMaker : public StMaker
 					 Int_t   mElecStatus;
            Int_t   mCalibStatus;
            
+					 TString mDir;
+					 
            Bool_t  GetEvent();
 					 Bool_t  ReadStEvent(); ///< Read Hits using StEvent format
            Bool_t  CalcZVertex(); ///< Gets zVertex. if fails try to calculate one
@@ -132,7 +136,7 @@ class StEmcCalibrationMaker : public StMaker
            Float_t GetDeltaTime(Int_t,Int_t,Int_t,Int_t);
            void    SavePedestals(Int_t,Int_t);
            void    SaveCalibration(Int_t,Int_t);
-           void    CorrectGain(char*,Int_t,Int_t);
+           void    GenerateHV(Float_t,char* = "newHVDatabase.dat",Int_t = 1);
 
    
            StEmcEqualSpectra* GetEqualSpec()      { return mEqualSpec;} ///< Equalization spectra
@@ -152,6 +156,9 @@ class StEmcCalibrationMaker : public StMaker
            void    SetSavePedToDB(Bool_t a)       {   mSavePedToDB = a; }
            void    SetSaveCalibToDB(Bool_t a)     {   mSaveCalibToDB = a; }
            void    SetFakeRun(Bool_t a)           {   mFakeRun = a; }
+           void    SetDir(char* a)                {   mDir = a; }
+					 void    SetHVDatabase(char* a)         {   mHVDatabase = a; }
+					 void    SetHVCalibration(char* a)      {   mHVCalibration = a; }
 
            void    SetGainMode(Int_t a)           {   mGainMode = a; }
 					 void    SetDetNum(Int_t a)             {   mDetNum = a; }

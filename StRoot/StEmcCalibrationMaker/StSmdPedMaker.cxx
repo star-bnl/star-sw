@@ -11,7 +11,6 @@
 #include "TStopwatch.h"
 #include <fstream.h>
 #include "TFile.h"
-#include "StEmcUtil/geometry/StEmcGeom.h"
 #include "time.h"
 #include "TDatime.h"
 
@@ -21,6 +20,7 @@
 
 #include "tables/St_smdPed_Table.h"
 #include "StDaqLib/EMC/StEmcDecoder.h"
+#include "StEmcUtil/geometry/StEmcGeom.h"
 
 ClassImp(StSmdPedMaker);
 
@@ -110,7 +110,7 @@ Bool_t StSmdPedMaker::GetEvent()
 	  StL0Trigger* trg = Event->l0Trigger();
 	  Int_t trigger=8192;
 	  if(trg) trigger = trg->triggerWord();
-	  if(trigger!=8192 && trigger!=4096) return kFALSE;
+	  //if(trigger!=0x2001 && trigger!=0x2002) return kFALSE;
     
     if(Event->l3Trigger())
     {
@@ -128,6 +128,8 @@ void StSmdPedMaker::FillPedestal()
   Int_t CAP[8];
   for(Int_t i=0;i<8;i++) CAP[i]=-1;
   Bool_t ok = kFALSE;
+	Float_t SMDESUM=0;
+	Float_t SMDPSUM=0;
   for(Int_t i=0; i<2; i++)
   {  
     StDetectorId id = static_cast<StDetectorId>(i+2+kBarrelEmcTowerId);
@@ -157,10 +159,13 @@ void StSmdPedMaker::FillPedestal()
           mSmdPedX[i][c][id-1]+=adc;
           mSmdPedX2[i][c][id-1]+=adc*adc;
           mSmdPedSum[i][c][id-1]++;
+					if(i==0) SMDESUM+=(Float_t)adc;
+					if(i==1) SMDPSUM+=(Float_t)adc;
         }
       }
     }
   }
+	cout <<"Total SMDE sum = "<<SMDESUM<<"  SMDP sum = "<<SMDPSUM<<endl;
   delete decoder;
   if(ok)
   {
@@ -324,6 +329,7 @@ void StSmdPedMaker::SavePedestals(Int_t date, Int_t time)
 	  StDbTable* tab=node->addDbTable(tn[i].Data());
 	  tab->SetTable((char*)&tnew,1);
 	  mgr->setStoreTime(timestamp.Data());
+	  //mgr->setStoreTime("2003-01-01 00:00:00");
 	  mgr->storeDbTable(tab);
   }
 }
