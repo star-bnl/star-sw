@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StV0MuDst.hh,v 3.1 2000/08/10 01:16:24 genevb Exp $
+ * $Id: StV0MuDst.hh,v 3.2 2000/08/24 20:02:59 genevb Exp $
  *
  * Authors: Gene Van Buren, UCLA, 24-Mar-2000
  *          Peter G. Jones, University of Birmingham, 04-Jun-1999
@@ -12,6 +12,9 @@
  ***********************************************************************
  *
  * $Log: StV0MuDst.hh,v $
+ * Revision 3.2  2000/08/24 20:02:59  genevb
+ * Fixed a typo
+ *
  * Revision 3.1  2000/08/10 01:16:24  genevb
  * Added number of dedx points
  *
@@ -188,8 +191,8 @@ inline StTrackTopologyMap& StV0MuDst::topologyMapPos()
              { return mTopologyMapPos; }
 inline StTrackTopologyMap& StV0MuDst::topologyMapNeg()
              { return mTopologyMapNeg; }
-inline UShort_t StV0MuDst::keyPos() const { return 0; } 
-inline UShort_t StV0MuDst::keyNeg() const { return 0; } 
+inline UShort_t StV0MuDst::keyPos() const { return return mKeyPos; } 
+inline UShort_t StV0MuDst::keyNeg() const { return return mKeyNeg; } 
 inline Float_t StV0MuDst::momV0X()  const { return mMomPosX + mMomNegX; }
 inline Float_t StV0MuDst::momV0Y()  const { return mMomPosY + mMomNegY; }
 inline Float_t StV0MuDst::momV0Z()  const { return mMomPosZ + mMomNegZ; }
