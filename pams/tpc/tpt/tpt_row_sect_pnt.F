@@ -1,5 +1,9 @@
-* $Id: tpt_row_sect_pnt.F,v 1.14 1999/11/23 03:53:49 sakrejda Exp $
+* $Id: tpt_row_sect_pnt.F,v 1.15 1999/12/16 16:11:44 sakrejda Exp $
 * $Log: tpt_row_sect_pnt.F,v $
+* Revision 1.15  1999/12/16 16:11:44  sakrejda
+* Dimension of the loc_hit array passed correctly to the index sort.
+* Now that the array is allocated dynamically, the dimension is set to the number of hits.
+*
 * Revision 1.14  1999/11/23 03:53:49  sakrejda
 * Allow tfs_filt.c  to pass hits with >1 flags and catch them here
 *
@@ -141,7 +145,7 @@ c       so deal with it separately
         loc_hit(1)=1
       else
         iret=tls_Index_Sort_i(hit_h.nok,rhit(1),rhit(2),loc_hit,
-     >  tpt_mxhit)
+     >  hit_h.nok)
       endif
 
       call Msg_Enable( 'TPT-RSP' )
