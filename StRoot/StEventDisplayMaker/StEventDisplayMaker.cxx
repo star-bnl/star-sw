@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.40 1999/11/24 14:57:52 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.41 1999/11/24 16:26:27 fine Exp $
 
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
@@ -120,7 +120,7 @@ StEventDisplayMaker::~StEventDisplayMaker(){
      m_ListDataSetNames = 0;
   }
 }
-//
+
 //_____________________________________________________________________________
 Int_t StEventDisplayMaker::Init(){
    // Create geometry 
@@ -559,4 +559,475 @@ Int_t StEventDisplayMaker::MakeEvent()
     total += hitCounter;
   }
 
-  filter = (St
+  filter = (StVirtualEventFilter *)m_FilterArray->At(kPrimaryVertex);
+  if (!filter || filter->IsOn() ) {
+    StVertex  *vertex   = m_Event->primaryVertex();
+    hitCounter =  MakeVertex(vertex,filter);
+    if (Debug()) printf(" Primary Vertex: %d vertex\n", hitCounter);
+    total += hitCounter;
+  }
+#endif
+  return total;
+}
+//_____________________________________________________________________________
+Color_t StEventDisplayMaker::GetColorAttribute(Int_t adc)
+{
+  // Convert the inpput signal amplitude into color index
+//  return Color_t(10-(adc?TMath::Log2(adc):10));
+//  return Color_t(adc?TMath::Log2(adc)+50:10);
+  return Color_t(50 + (adc/256));
+}
+
+
+//_____________________________________________________________________________
+Int_t StEventDisplayMaker::MakeHits(const StObjArray *eventCollection,StVirtualEventFilter *filter)
+{
+  if (eventCollection && eventCollection->GetLast() ) {
+    Int_t   hitCounter = 0;
+    Color_t hitColor = kYellow;
+    Style_t hitStyle = 1;
+    Width_t hitSize  = 2;
+
+    // ---------------------------- hits filter ----------------------------- //
+    if (filter) hitColor =  filter->Filter(eventCollection,hitSize,hitStyle); //
+    // ---------------------------------------------------------------------- //
+#ifdef STEVENT
+    if (hitColor > 0) {
+       StHits3DPoints   *hitsPoints  = new StHits3DPoints((StObjArray *)eventCollection);
+       m_HitCollector->Add(hitsPoints);    // Collect to remove  
+       St_PolyLineShape *hitsShape   = new St_PolyLineShape(hitsPoints);
+         hitsShape->SetVisibility(1);        hitsShape->SetColorAttribute(hitColor);
+         hitsShape->SetStyleAttribute(hitStyle);  hitsShape->SetSizeAttribute(hitSize);
+       // Create a node to hold it
+       St_Node *thisHit = new St_Node("hits",eventCollection->GetName(),hitsShape);
+         thisHit->Mark();
+         thisHit->SetVisibility();
+       St_NodePosition *pp = m_EventsNode->Add(thisHit); 
+       if (!pp && hitCounter) {
+          printf(" no track position %d\n",hitCounter);
+       }
+       return hitsPoints->Size(); // hitColor;
+    }
+#endif
+  }
+  return 0;
+}
+
+//_____________________________________________________________________________
+Int_t StEventDisplayMaker::MakeVertex(const StVertex *vertex,StVirtualEventFilter *filter)
+{
+  if (vertex) {
+    Int_t   vertexCounter = 0;
+    Color_t vertexColor = kBlue;
+    Style_t vertexStyle = 3;
+    Width_t vertexSize  = 1;
+
+#ifdef STEVENT
+    // ---------------------------- hits filter ----------------------------- //
+    if (filter) vertexColor =  filter->Filter(vertex,vertexSize,vertexStyle); //
+    // ---------------------------------------------------------------------- //
+    if (vertexColor > 0) {
+       const StThreeVectorF &vertexVector = ((StVertex *)vertex)->position();
+       Float_t x = vertexVector[0];
+       Float_t y = vertexVector[1];
+       Float_t z = vertexVector[2];
+       St_Points3D *vertexPoint =  new St_Points3D(1, &x, &y, &z);
+       m_HitCollector->Add(vertexPoint);    // Collect to remove  
+       St_PolyLineShape *vertexShape   = new St_PolyLineShape(vertexPoint);
+         vertexShape->SetVisibility(1);                vertexShape->SetColorAttribute(vertexColor);
+         vertexShape->SetStyleAttribute(vertexStyle);  vertexShape->SetSizeAttribute(vertexSize);
+       // Create a node to hold it
+       St_Node *thisVertex = new St_Node("vertex",vertex->GetName(),vertexShape);
+         thisVertex->Mark();
+         thisVertex->SetVisibility();
+       St_NodePosition *pp = m_EventsNode->Add(thisVertex); 
+       if (!pp) 
+          printf(" no track position \n");
+       vertexCounter = 1;
+       return vertexCounter;
+    }
+#endif
+  }
+  return 0;
+}
+
+//_____________________________________________________________________________
+Int_t StEventDisplayMaker::MakeVertices(const StObjArray *eventCollection,StVirtualEventFilter *filter)
+{
+  if (eventCollection && eventCollection->GetLast() ) {
+    Int_t   hitCounter = 0;
+    Color_t hitColor = kYellow;
+    Style_t hitStyle = 1;
+    Width_t hitSize  = 2;
+#ifdef STEVENT
+    // ---------------------------- hits filter ----------------------------- //
+    if (filter) hitColor =  filter->Filter(eventCollection,hitSize,hitStyle); //
+    // ---------------------------------------------------------------------- //
+    if (hitColor > 0) {
+      StVertices3DPoints *hitsPoints  = new StVertices3DPoints((StObjArray *)eventCollection);
+       m_HitCollector->Add(hitsPoints);    // Collect to remove  
+       St_PolyLineShape *hitsShape   = new St_PolyLineShape(hitsPoints);
+         hitsShape->SetVisibility(1);        hitsShape->SetLineColor(hitColor);
+         hitsShape->SetLineStyle(hitStyle);  hitsShape->SetLineWidth(hitSize);
+       // Create a node to hold it
+       St_Node *thisHit = new St_Node("hits",eventCollection->GetName(),hitsShape);
+         thisHit->Mark();
+         thisHit->SetVisibility();
+       St_NodePosition *pp = m_EventsNode->Add(thisHit); 
+       if (!pp && hitCounter) {
+          printf(" no track position %d\n",hitCounter);
+       }
+       return hitsPoints->Size(); // hitColor;
+    }
+#endif
+  }
+  return 0;
+}
+//_____________________________________________________________________________
+Int_t StEventDisplayMaker::MakeTracks( StGlobalTrack *globTrack,StVirtualEventFilter *filter)
+{
+  if (globTrack) {
+    Int_t   trackCounter = 0;
+    Color_t trackColor = kRed;
+    Style_t trackStyle = 1;
+    Width_t trackSize  = 2;
+#ifdef STEVENT
+    // --------------------- tracks filter ---------------------------------- //
+    if (filter) trackColor =  filter->Filter(globTrack,trackSize,trackStyle); //
+    // ---------------------------------------------------------------------- //
+    if (trackColor > 0) {
+       StHelix3DPoints *tracksPoints  = new StHelix3DPoints(globTrack);
+       m_TrackCollector->Add(tracksPoints);    // Collect to remove  
+       St_PolyLineShape *tracksShape   = new St_PolyLineShape(tracksPoints,"L");
+         tracksShape->SetVisibility(1);         tracksShape->SetColorAttribute(trackColor);
+         tracksShape->SetLineStyle(trackStyle); tracksShape->SetSizeAttribute(trackSize);
+       // Create a node to hold it
+       St_Node *thisTrack = new St_Node("tracks",globTrack->GetName(),tracksShape);
+         thisTrack->Mark();   thisTrack->SetVisibility();
+         trackCounter++;
+       St_NodePosition *pp = m_EventsNode->Add(thisTrack); 
+       if (!pp && trackCounter) {
+          printf(" no track position %d\n",trackCounter);
+       }
+       return trackCounter;
+    }
+#endif
+  }
+  return 0;
+}
+
+//_____________________________________________________________________________
+Int_t StEventDisplayMaker::MakeTable(const Char_t **positions)
+{
+  StVirtualEventFilter *filter = 0;
+  Int_t tableCounter = 0;
+
+  if (strcmp(m_Table->GetType(),"tpt_track")) {
+    filter = (StVirtualEventFilter *)m_FilterArray->At(kTable);
+    if (!filter || filter->IsOn() ) {
+       tableCounter += MakeTableHits(m_Table,filter,positions[1],&positions[2]);
+       if (Debug()) printf(" St_Table: %d \n", tableCounter);
+    }
+  }
+  else {
+    filter = (StVirtualEventFilter *)m_FilterArray->At(kTptTrack);
+    if (!filter || filter->IsOn() ) {
+       tableCounter += MakeTableTracks(m_Table,filter);
+       if (Debug()) printf(" St_Table:tpc_Track %d \n", tableCounter);
+    }
+  }
+  return tableCounter;
+}
+
+//_____________________________________________________________________________
+Int_t StEventDisplayMaker::MakeTableTracks(const St_Table *points,StVirtualEventFilter *filter)
+{
+  Int_t i = 0;
+  Int_t trackCounter = 0;
+  if (points && points->GetNRows() ) {
+    St_tpt_track *tptTrack = (St_tpt_track *)points;
+    tpt_track_st *track = tptTrack->GetTable();
+    Color_t trackColor = kRed;
+    Style_t trackStyle = 1;
+    Width_t trackSize  = 2;
+    for (i = 0; i < points->GetNRows();i++ ){
+      filter = (StVirtualEventFilter *)m_FilterArray->At(kTptTrack);
+      if (!filter || filter->IsOn() ) {
+        // --------------------- tracks filter ------------------------------------ //
+        if (filter) trackColor =  filter->Filter(tptTrack,i,trackSize,trackStyle);  //
+        // ------------------------------------------------------------------------ //
+        if (trackColor > 0) {
+           tpt_track_st &t = *(track+i);
+           const float pi2 = 3.1415926/2.;
+           const float rad = pi2/90.;
+           float angle =  t.phi0 * rad;
+           int h = t.q > 0 ? -1 : 1;  
+           StThreeVectorD vector(t.r0*cos(angle),t.r0*sin(angle),t.z0);
+           StHelixD *helix  = new  StHelixD(t.curvature, atan(t.tanl), t.psi*rad-h*pi2, vector, h);           
+	   Int_t nSteps = Int_t(12*t.length*t.curvature + 1); 
+	   Float_t step = t.length / nSteps;
+           StHelix3DPoints *tracksPoints  = new StHelix3DPoints(helix,step,nSteps);
+           m_TrackCollector->Add(tracksPoints);    // Collect to remove  
+           St_PolyLineShape *tracksShape   = new St_PolyLineShape(tracksPoints,"L");
+             tracksShape->SetVisibility(1);         tracksShape->SetColorAttribute(trackColor);
+             tracksShape->SetLineStyle(trackStyle); tracksShape->SetSizeAttribute(trackSize);
+           // Create a node to hold it
+           St_Node *thisTrack = new St_Node("tracks",points->GetName(),tracksShape);
+             thisTrack->Mark();   thisTrack->SetVisibility();
+             trackCounter++;
+           St_NodePosition *pp = m_EventsNode->Add(thisTrack); 
+           if (!pp && trackCounter) {
+              printf(" no track position %d\n",trackCounter);
+           }
+        }
+        else if (trackColor == -1) break;
+      }
+    }
+  }
+  return trackCounter;
+}
+
+//_____________________________________________________________________________
+Int_t StEventDisplayMaker::MakeTableHits(const St_Table *points,StVirtualEventFilter *filter
+                                        ,const Char_t *keyColumn,const Char_t *keyPositions[]
+)
+{
+  Int_t totalHits = 0;
+  St_Table &ttt = *((St_Table *)points);
+  TString tr = keyColumn; 
+  if (ttt.GetNRows() ) {
+    St_TableSorter *track2Line = new St_TableSorter (ttt,tr);
+    m_TableCollector->Add(track2Line);    // Collect to remove  
+    Color_t hitColor = kGreen;
+    Style_t hitStyle = 1;
+    Width_t hitSize  = 2;
+    Int_t i = 0;
+    Int_t nextKeyIndx = 0;
+    Int_t maxTrackCounter = track2Line->CountKeys();
+    for (i=0;i<maxTrackCounter;i++) 
+    { 
+       // -------------------------- hits filter -------------------------------------- //
+       if (filter) hitColor =  filter->Filter(track2Line,nextKeyIndx,hitSize,hitStyle); //
+       if (filter->IsOff() ) break;                                                     //
+       // ----------------------------------------------------------------------------- //
+       if (hitColor > 0) {
+           St_Table3Points *hitsPoints =  new St_Table3Points(track2Line,
+                                             nextKeyIndx,
+                                             keyPositions[0],keyPositions[1],keyPositions[2]);
+         m_HitCollector->Add(hitsPoints);    // Collect to remove  
+         St_PolyLineShape *hitsShape   = new St_PolyLineShape(hitsPoints);
+         hitsShape->SetVisibility(1);            hitsShape->SetColorAttribute(hitColor);
+         hitsShape->SetStyleAttribute(hitStyle); hitsShape->SetSizeAttribute(hitSize);
+         // Create a node to hold it
+         St_Node *thisHit = new St_Node("tableHits",points->GetName(),hitsShape);
+           thisHit->Mark();
+           thisHit->SetVisibility();
+         St_NodePosition *pp = m_EventsNode->Add(thisHit); 
+         Int_t s = hitsPoints->Size();
+         totalHits   += s;
+         nextKeyIndx += s; 
+         if (!pp && totalHits) printf(" no track position %d\n",totalHits);
+       }
+       else if (hitColor == -1) break;
+       else {
+         const void *newID = track2Line->GetKeyAddress(nextKeyIndx);
+         nextKeyIndx      += track2Line->CountKey(newID,nextKeyIndx,kFALSE); 
+       }
+    }
+  }
+  return totalHits;
+}
+
+//________________________________
+//
+//       -- Filters  --
+//________________________________
+
+
+//_____________________________________________________________________________
+Int_t StEventDisplayMaker::SetFlag(Int_t flag, EDisplayEvents filterIndex)
+{
+ // Set the new filter flag and return the previous one
+  StVirtualEventFilter *f = (StVirtualEventFilter *)m_FilterArray->At(filterIndex);
+  Int_t res = f ? f->Turn(flag): 0;
+  if (Debug()) PrintFilterStatus();
+  return res;
+}
+//_____________________________________________________________________________
+StVirtualEventFilter *StEventDisplayMaker::SetFilter(StVirtualEventFilter *filter, EDisplayEvents filterIndex)
+{
+ // Set the new filter and return the previous one
+  StVirtualEventFilter *f = 0;
+  if (filter) {
+   f = (StVirtualEventFilter *)m_FilterArray->At(filterIndex);
+   if (f) 
+     filter->Turn(f->GetFlag());
+   m_FilterArray->AddAt(filter,filterIndex);
+  }
+  if (Debug()) PrintFilterStatus();
+  return f;
+}
+ 
+//_____________________________________________________________________________
+void StEventDisplayMaker::PrintFilterStatus()
+{
+  const Char_t *filterNames[] = {
+                                  "Primary Vertex"
+                                 , "Tpc Hit"
+                                 , "Svt Hit"
+                                 , "Ftpc Hit"
+                                 , "EmcTower Hit"
+                                 , "EmcPreShower Hit"
+                                 , "SmdPhi Hit"
+                                 , "SmdEta Hit"
+                                 , "Vertices"
+                                 , "Global Tracks"
+                                 ,  "Track"
+                                 ,  "Track Tpc Hits"
+                                 ,  "Track Svt Hits"
+                                 ,  "Track Ftpc Hits" 
+                                 ,  "St_Table generic object" 
+                                 ,  "tpt_track table object" 
+                                } ;
+   
+  Int_t i;
+  for (i =0;i<kEndOfEventList;i++) {
+      StVirtualEventFilter *filter = (StVirtualEventFilter *)m_FilterArray->At(i);
+      printf(" Filter for %16s",filterNames[i]);
+      if (filter) {
+          if (filter->IsOn()) printf(" is ON\n");
+          else printf(" is       OFF\n");
+      }
+      else printf(" doesn't exist\n");
+  }
+}
+
+#define DISPLAY_FILTER_DEFINITION(filterName)                                 \
+Int_t  StEventDisplayMaker::_NAME3_(Set,filterName,Flag)(Int_t flag)         \
+{ return SetFlag(flag,_NAME2_(k,filterName)); }                              \
+StVirtualEventFilter *StEventDisplayMaker::_NAME2_(Set,filterName)(StVirtualEventFilter *filter) \
+{ return SetFilter(filter,_NAME2_(k,filterName)); }
+
+DISPLAY_FILTER_DEFINITION(PrimaryVertex)
+
+// -- Hits collections filters --
+
+DISPLAY_FILTER_DEFINITION(TpcHit)
+DISPLAY_FILTER_DEFINITION(SvtHit)
+DISPLAY_FILTER_DEFINITION(FtpcHit)
+DISPLAY_FILTER_DEFINITION(EmcTowerHit)
+DISPLAY_FILTER_DEFINITION(EmcPreShowerHit)
+DISPLAY_FILTER_DEFINITION(SmdPhiHit)
+DISPLAY_FILTER_DEFINITION(SmdEtaHit)
+DISPLAY_FILTER_DEFINITION(Vertices)
+
+// -- StGlobalTrack filters --
+
+DISPLAY_FILTER_DEFINITION(GlobalTracks)
+DISPLAY_FILTER_DEFINITION(Track)
+DISPLAY_FILTER_DEFINITION(TrackTpcHits)
+DISPLAY_FILTER_DEFINITION(TrackSvtHits)
+DISPLAY_FILTER_DEFINITION(TrackFtpcHits)
+
+// -- Generic St_Table  filters --
+
+DISPLAY_FILTER_DEFINITION(Table)
+
+// -- Tpt track  filter --
+
+DISPLAY_FILTER_DEFINITION(TptTrack)
+
+// --  end of filter list --
+
+// $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.41  1999/11/24 16:26:27  fine
+// Overlap the corrupted v.1.40 with 1.39
+//
+// Revision 1.39  1999/11/24 03:06:46  fine
+// Improved Helix parameters and parser
+//
+// Revision 1.38  1999/11/22 18:41:45  fine
+// Parser for single parameter fixed
+//
+// Revision 1.37  1999/11/22 16:14:31  fine
+// palette() has been removed
+//
+// Revision 1.36  1999/11/21 00:56:58  fine
+// SVT volume name typo fixed
+//
+// Revision 1.35  1999/11/16 14:40:15  fine
+// reference type has been introduced
+//
+// Revision 1.34  1999/11/12 18:12:37  fine
+// SVT view has been introduced
+//
+// Revision 1.33  1999/11/12 05:27:32  fine
+// phase parameter for  StHelix fixed. Thanks  Wensheng and Thomas
+//
+// Revision 1.32  1999/11/11 17:29:10  fine
+// typo Filer replaced with Filter
+//
+// Revision 1.31  1999/11/10 02:24:36  fine
+// StVirtualFilter::Reset method has been introduced
+//
+// Revision 1.30  1999/11/09 22:47:39  fine
+// psi angle was forgotten to be converted from degrees to rad.
+//
+// Revision 1.29  1999/11/08 17:47:54  fine
+// The bug for tpt_track filtering was fixed
+//
+// Revision 1.28  1999/11/07 05:27:12  fine
+// Take in account new data-member of tpt_track table: length
+//
+// Revision 1.27  1999/11/05 23:18:40  fine
+// convertor degree to rad was introduced
+//
+// Revision 1.26  1999/11/05 02:29:25  fine
+// helix drawing for tpt_track table improved
+//
+// Revision 1.25  1999/11/04 17:59:59  fine
+//  several bugs fixed to draw table-objects
+//
+// Revision 1.24  1999/11/04 01:49:47  fine
+// tpt_track drawing is turned On
+//
+// Revision 1.23  1999/11/02 01:49:26  fine
+// A special case for tpt_track table has been introduced
+//
+// Revision 1.22  1999/10/14 13:42:14  fine
+// Some big to draw tables have been fixed
+//
+// Revision 1.21  1999/10/09 18:17:10  fine
+// Some correction to draw tptrack table
+//
+// Revision 1.20  1999/08/16 16:28:09  fine
+// StVirtualEventFilter has been moved to St_base
+//
+// Revision 1.19  1999/08/09 01:36:47  fine
+// MakeTable methods have been activated
+//
+// Revision 1.18  1999/08/07 20:31:22  fine
+// MakeVertex method has been introduced
+//
+// Revision 1.17  1999/08/05 02:41:12  fine
+//  fix problem with the hits attributes
+//
+// Revision 1.16  1999/08/05 02:14:09  fine
+//  style attribute for hits has been fixed
+//
+// Revision 1.15  1999/08/04 03:52:01  fine
+// Helix drawing improvements
+//
+// Revision 1.14  1999/08/03 19:18:37  fine
+// Vertices collections have been introduced
+//
+// Revision 1.13  1999/08/03 14:50:02  fine
+// Clean up
+//
+// Revision 1.12  1999/08/02 14:43:25  fine
+// Vertices collection has been introduced, more simple geometry
+//
+// Revision 1.11  1999/08/02 02:21:51  fine
+// new method ParseName has been introduced,but not activated yet
+//
+
