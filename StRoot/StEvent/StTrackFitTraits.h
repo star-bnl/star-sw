@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackFitTraits.h,v 2.6 2001/04/05 04:00:45 ullrich Exp $
+ * $Id: StTrackFitTraits.h,v 2.7 2001/05/04 19:50:52 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackFitTraits.h,v $
+ * Revision 2.7  2001/05/04 19:50:52  perev
+ * Streamer to account old ROOT2
+ *
  * Revision 2.6  2001/04/05 04:00:45  ullrich
  * Replaced all (U)Long_t by (U)Int_t and all redundant ROOT typedefs.
  *
@@ -65,6 +68,6 @@ protected:
     Float_t  mChi2[2];
     TArrayF  mCovariantMatrix;
     
-    ClassDef(StTrackFitTraits,2) //!OWNSTREAMER
+    ClassDef(StTrackFitTraits,3) //!OWNSTREAMER
 };
 #endif
