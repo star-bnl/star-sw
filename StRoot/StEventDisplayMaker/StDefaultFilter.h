@@ -1,5 +1,5 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StDefaultFilter.h,v 1.3 2000/09/01 22:39:03 fine Exp $ 
+// $Id: StDefaultFilter.h,v 1.4 2000/09/25 01:29:50 fine Exp $ 
 #ifndef STAR_StDefaultFilter
 #define STAR_StDefaultFilter
 
@@ -40,8 +40,8 @@ class StDefaultFilter : public StVirtualEventFilter  {
     const TTableSorter *mDedx;
 
  protected:
-    Int_t SubChannel(St_dst_track &track, Int_t index,Size_t &size, Style_t &style);
-    Int_t SubChannel(const TTableSorter *tableObject, Int_t index,Size_t &size, Style_t &style);
+    virtual Int_t SubChannel(St_dst_track &track, Int_t index,Size_t &size, Style_t &style);
+    virtual Int_t SubChannel(const TTableSorter *tableObject, Int_t index,Size_t &size, Style_t &style);
     Int_t MakeColor(Double_t energy);
     Int_t CreatePalette(TTable *obj);
 
@@ -56,6 +56,9 @@ class StDefaultFilter : public StVirtualEventFilter  {
     ClassDef(StDefaultFilter,0)
 };
 // $Log: StDefaultFilter.h,v $
+// Revision 1.4  2000/09/25 01:29:50  fine
+// new StFtpcTrackFilter for Janet has been introdcued
+//
 // Revision 1.3  2000/09/01 22:39:03  fine
 // minor bug fixex (Sun complained)
 //
