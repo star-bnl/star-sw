@@ -1,0 +1,43 @@
+package agetof
+
+# use commons commons-01-* 
+
+
+author  Pavel Nevski
+
+use AtlasPolicy AtlasPolicy-01-* 
+
+branches src
+
+apply_pattern no_include_path
+
+macro agetof_fflags "" \
+      Linux         "-pipe -Wall -W -Wsurprising"
+
+macro flink          "g77               -Wl,-Bstatic"
+macro agetoflinkopts "`cernlib kernlib` -Wl,-Bdynamic"
+
+build_strategy no_prototypes
+
+application agetof  -s=../ *.F *.c
+
+macro agetof "$(AGETOFROOT)/$(agetof_tag)/agetof.exe"
+
+macro CPP_TITLE "$(package)"
+macro CPP_DATE "`date +%y%m%d`"
+macro CPP_TIME "`date +%H%M`"
+macro CPP_VERS "$(version)"
+
+make_fragment age
+make_fragment age_library
+make_fragment build_agetof -header=build_agetof_header
+
+document build_agetof build_agetof
+macro build_agetof_dependencies agetof
+
+language age -suffix=age 
+
+macro agetof_preprocess "g77 -E -P"
+
+ignore_pattern config
+

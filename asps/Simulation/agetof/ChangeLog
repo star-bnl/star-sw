@@ -1,0 +1,127 @@
+Sun Nov 16 18:54:19 CET 2003  Pavel Nevski <nevski@bnl.gov> 
+  
+	* new tag  agetof-00-01-17  generated 
+	- follow cernlib 2002 release note
+  
+Sun Nov 16 18:47:49 CET 2003  Pavel Nevski <nevski@bnl.gov> 
+  
+	* new tag  agetof-00-01-16  generated 
+	- follow cernlib 2002 release note
+  
+Mon Nov 10 19:44:32 CET 2003  Pavel Nevski <nevski@bnl.gov> 
+  
+	* new tag  agetof-00-01-15  generated 
+	- make age static
+  
+Mon Nov 10 19:41:02 CET 2003  Pavel Nevski <nevski@bnl.gov> 
+  
+	* new tag  agetof-00-01-08  generated 
+	- make age static
+  
+2003-03-19  Christian Arnault  <carnault@lxplus051.cern.ch>
+
+	* cmt/fragments/age_library: Use macros $(package) and $(version) 
+
+	* cmt/fragments/age: Use macros $(package) and $(version) 
+
+	* cmt/fragments/age_library: Cleanup the sequence of agetof generation
+	first step : preprocessing only 
+	second step : compilation only (no preprocessing)
+
+2002-11-12  David Rousseau  <droussea@lxplus029.cern.ch>
+
+	* cmt/requirements: add use AtlasPolicy
+
+2002-05-17  RD Schaffer  <R.D.Schaffer@cern.ch>
+
+        * tagging agetof-00-01-11 for release 3.0.2
+
+	* cmt/requirements: removed  -finit-local-zero
+
+2002-05-14  RD Schaffer  <R.D.Schaffer@cern.ch>
+
+        * tagging agetof-00-01-08-01 for release 3.0.2
+
+2002-04-30  RD Schaffer  <R.D.Schaffer@cern.ch>
+
+        * tagging agetof-00-01-10
+
+	* cmt/requirements: undid the commenting out of the fflags.
+
+2002-04-16  RD Schaffer  <R.D.Schaffer@cern.ch>
+
+        * tagging agetof-00-01-09
+	
+	* cmt/requirements: commented out setting of local fflags
+
+2002-02-08  Christian Arnault  <carnault@atlas50.cern.ch>
+
+	* new tag  agetof-00-01-08
+	
+	* cmt/fragments/age:
+	* cmt/fragments/age_library: Select which preprocessor to use through the
+	macro agetof_preprocess.
+
+	* cmt/requirements: Adapt requirements file for parallel build in
+	gmake (ie force agetof to be built before build_agetof.  Add the
+	definition for the F77 preprocessor to be used in the make
+	fragments through the macro agetof_preprocess.
+
+Thu Dec 6 08:45:41 CET 2001  Pavel Nevski <nevski@bnl.gov> 
+  
+	* new tag  agetof-00-01-07  generated 
+	- list of dirs is required in requirements
+  
+Fri Nov 30 20:34:39 CET 2001  Pavel Nevski <nevski@bnl.gov> 
+  
+	* new tag  agetof-00-01-06  generated 
+	- macro agetof should be define in this requirments
+  
+Fri Nov 30 20:19:10 CET 2001  Pavel Nevski <nevski@bnl.gov> 
+  
+	* new tag  agetof-00-01-05  generated 
+	- src directory restored - someone needs it
+  
+Fri Nov 30 14:03:47 CET 2001  Pavel Nevski <nevski@bnl.gov> 
+  
+	* new tag  agetof-00-01-04  generated 
+	- correcting HIDDEN cmt fragments
+  
+Thu Nov 29 01:44:22 CET 2001  Pavel Nevski <nevski@bnl.gov> 
+  
+	* new tag  agetof-00-01-03  generated 
+	- restoring automatic definition search
+  
+Tue Nov 27 11:32:06 CET 2001  Pavel Nevski <nevski@bnl.gov> 
+  
+	* new tag  agetof-00-01-02  generated 
+	- bugfix: update to CMT release structure
+  
+Tue Nov 27 11:30:31 CET 2001  Pavel Nevski <nevski@bnl.gov> 
+  
+	* new tag  agetof-00-01-01  generated 
+	- bugfix: update to CMT release structure
+  
+============    Version  agetof-00-01-00     ============
+2001-02-28 Pavel Nevski <Pavel.Nevski@bnl.gov>
+        * - Stack-save version
+	* - Comments starting with * in the first column may contain
+	*   any combination of characters
+	* - Alphanumeric match _always_ starts at the beginning of a word
+        * - F77 structures can be converted into "floating" arrays
+	
+============    Version  agetof-00-00-07     ============
+1999-01-26 Gilbert Poulard <Gilbert.Poulard@cern.ch> 
+	*  agetof.txt  | SYSNAME removed from local procedure 
+	*  for Linux compatibility 
+
+==========================================================
+
+1998-06-22  Chris Onions  <Christopher.Onions@cern.ch>
+	* agetof updated to the version in the 98_2 cmz file 
+
+1998-03-12  Chris Onions  <Chris.Onions@cern.ch>
+	* Changed text from GEANT3 to agetof in FORMAT statements
+	* Modified GNUmakefile.in to use zeroinit option set which
+	* basically sets the compiler option -K on HP
+

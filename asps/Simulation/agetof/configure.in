@@ -1,0 +1,23 @@
+dnl $Id: configure.in,v 1.1.1.1 2003/12/23 14:54:43 fisyak Exp $ -*- m4 -*-
+dnl $Name:  $
+dnl
+dnl COPYRIGHT (C) CERN, 1997.
+dnl
+dnl ######################################################################
+dnl Introduce revision number to the generated script.
+AC_PREREQ(2.10)
+AC_REVISION([$Id: configure.in,v 1.1.1.1 2003/12/23 14:54:43 fisyak Exp $])
+
+dnl ######################################################################
+dnl Initialisation
+dnl
+AC_INIT(PACKAGE)
+SRT_INIT
+
+dnl ######################################################################
+dnl
+SRT_CONFIG_LOCAL
+
+dnl ######################################################################
+dnl
+SRT_OUTPUT(GNUmakefile)
