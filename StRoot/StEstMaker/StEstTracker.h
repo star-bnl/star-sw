@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * 
+ * $Id: StEstTracker.h,v 1.3 2001/02/01 12:59:02 lmartin Exp $
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -9,7 +9,10 @@
  *
  ***************************************************************************
  *
- *  
+ * $Log: StEstTracker.h,v $
+ * Revision 1.3  2001/02/01 12:59:02  lmartin
+ * Correction of the cvs keywords to get the log in the file header.
+ * 
  **************************************************************************/
 #ifndef STAR_StEstTracker
 #define STAR_StEstTracker
