@@ -44,7 +44,6 @@ message 'start run_tte'
                [params]/tpc/tclpars/type _
                [data]/tpc/tracks/evaltrk _
                [data]/tpc/tracks/mctrk _
-               [data]/tpc/tracks/res _
                [params]/tpc/ttepars/tte_control
  
 
