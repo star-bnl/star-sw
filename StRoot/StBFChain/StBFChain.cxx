@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.344 2003/07/22 19:09:47 lbarnby Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.345 2003/07/24 21:35:58 lbarnby Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -29,6 +29,9 @@
 #include "StiMaker/StiDefaultToolkit.h"
 #include "StiMaker/StiMakerParameters.h"
 #include "StiMaker/StiMaker.h"
+#include "StSecondaryVertexMaker/StV0FinderMaker.h"
+#include "StSecondaryVertexMaker/StXiFinderMaker.h"
+
 
 //_____________________________________________________________________
 Bfc_st BFC1[] = {
@@ -428,8 +431,15 @@ Bfc_st BFC1[] = {
   {"dEdxY2"       ,"dEdxY2","","tpcDb,StEvent","StdEdxY2Maker","StBichsel,StdEdxY2Maker",
                                                                      "Bichsel method used for dEdx",kFALSE},
 
-  {"V02"         ,"v02","","db,StEvent","StV0FinderMaker","StSecondaryVertexMaker","Find V0s from StEvent",kFALSE},
-  {"Xi2"      ,"xi2","","db,StEvent","StXiFinderMaker","StSecondaryVertexMaker","Xis AND V0s from StEvent",kFALSE},
+  {"V02"         ,"v02","","db,StEvent","StV0FinderMaker","StSecondaryVertexMaker",
+                                                                            "Find V0s from StEvent",kFALSE},
+  {"Xi2"      ,"xi2","","db,StEvent","StXiFinderMaker","StSecondaryVertexMaker",
+                                                                         "Xis AND V0s from StEvent",kFALSE},
+  {"V0svt"       ,"v0svt","","db,StEvent","StV0FinderMaker","StSecondaryVertexMaker",
+                                                              "Special: use estGlobal from StEvent",kFALSE},
+  {"Xisvt"       ,"xisvt","","db,StEvent","StXiFinderMaker","StSecondaryVertexMaker",
+                                                              "Special: use estGlobal from StEvent",kFALSE},
+
 
   {"PostEmc"     ,"PostChain","","geant,emc_T,tpc_T,db,calib,PreEcl,EmcUtil","StMaker","StChain","",kFALSE},
   {"PreEcl"      ,"preecl","PostChain",""                 ,"StPreEclMaker",      "StPreEclMaker","",kFALSE},
@@ -1399,6 +1409,21 @@ Int_t StBFChain::Instantiate()
 	      QAmk->AllTriggers();
 	    }
 	  }
+	  //Special options for V0s and Xis using estGlobal tracks
+	  if(maker=="StV0FinderMaker" && Key=="v0svt"){
+	    StV0FinderMaker *V0mk=(StV0FinderMaker*)mk;
+	    V0mk->SetLanguageUsage(0);
+	    V0mk->SetSVTUsage(1);
+	    V0mk->SetV0LanguageUsage(3);
+	  }
+	  if(maker=="StXiFinderMaker" && Key=="xisvt"){
+	    StXiFinderMaker *Ximk=(StXiFinderMaker*)mk;
+	    Ximk->SetLanguageUsage(0);
+	    Ximk->SetSVTUsage(1);
+	    Ximk->SetV0LanguageUsage(3);
+	    Ximk->SetXiLanguageUsage(5);
+	  }
+	  
 	  if (maker == "St_trg_Maker") {
 	    Int_t mode = 0;
 	    if (! GetOption("alltrigger")){
