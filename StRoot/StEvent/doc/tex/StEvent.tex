@@ -2,7 +2,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 1.12 1999/03/26 08:10:29 ullrich Exp $
+% $Id: StEvent.tex,v 1.13 1999/03/30 18:54:15 genevb Exp $
 %
 % Author: Thomas Ullrich, March 1999
 %
@@ -21,8 +21,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 1.12  1999/03/26 08:10:29  ullrich
-% Corrected typos, text smoothed.
+% Revision 1.13  1999/03/30 18:54:15  genevb
+% Add Xi documentation
+%
+% Revision 1.17  1999/04/08 15:27:52  ullrich
+% Added description of PID classes
 %
 % Revision 1.16  1999/03/31 19:03:50  ullrich
 % Corrected typos in UML appendix
@@ -140,8 +143,8 @@
 % Added description of new method of StVertex.
 %
 % Revision 2.22  2000/03/02 12:40:40  ullrich
-  {\LARGE $ $Revision: 1.12 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/26 08:10:29 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.13 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/30 18:54:15 $ $}  % replaced by cvs with current revision
 % Revision 2.21  2000/02/28 19:37:26  ullrich
 % Added the hypperref package to add bookmarks and hyperlinks
 % tp pdf documents.
@@ -149,14 +152,14 @@
 % Revision 2.20  2000/02/24 13:25:12  ullrich
 % Added RICH and EMC to the reference section. Created
 % (empty) section for EMC and RICH in User Guide.
-  {\LARGE $ $Revision: 1.12 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/26 08:10:29 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.13 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/30 18:54:15 $ $}  % replaced by cvs with current revision
 %
 % Revision 2.18  2000/02/11 16:23:45  ullrich
 % Add info on order in which primary vertices are stored
   {\LARGE User Guide and Reference Manual}\\[2cm]
-  {\LARGE $ $Revision: 1.12 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 1999/03/26 08:10:29 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 1.13 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/30 18:54:15 $ $}  % replaced by cvs with current revision
 % Added Helens description of iflag (see StTrack::flag()).
 %
 % Revision 2.16  2000/01/27 18:38:30  ullrich
@@ -300,7 +303,7 @@ are not guaranteed to compile. Their only purpose is to illustrate a
 specific feature and not to provide a fully functional programming
 unit.
 
-  {\LARGE $ $Date: 1999/03/26 08:10:29 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Date: 1999/03/30 18:54:15 $ $}  % replaced by cvs with current revision
      \advance\leftmargin by \labelsep%
 \section{Further documentation}
 \label{sec:furtherdoc}
@@ -3203,7 +3206,7 @@ bool triggerDetectorsComplete(StEvent *event)
 
     The data stored is taken from the \name{dst\_v0\_vertex.idl}
     table.\index{dst\_v0\_vertex.idl} The collection of all vertices
-    container.  The same collection holds also different classes as
+    (class \name{StVertexCollection}) in the event can be obtained
     through \name{StEvent::vertex\-Collection()}.  Remember that
     \name{StVertexCollection} stores all elements by pointer and that
     the actual vertex collection contains various types of vertices.
@@ -3212,6 +3215,13 @@ bool triggerDetectorsComplete(StEvent *event)
     of the examples.\index{type cast}
 
 \item[Persistence]
+    None
+
+\item[Related Classes]   
+    \name{StV0Vertex} inherits from \name{StVertex}.  All vertices in
+    one event are stored in the StVertexCollection class. The
+    collection stores the vertices by pointer; it is a polymorphic
+    container.  The same collection also holds different classes such as
     \name{StVertex} and \name{StXiVertex}.  \index{StVertex}
     \index{StXiVertex} \index{StVertexCollection}
 
@@ -3340,6 +3350,10 @@ unsigned long countGoodV0s(StEvent *event, double limit)
 \item[Persistence]
     None
 
+\item[Related Classes]
+    \name{StVertex} serves as a base class for StV0Vertex and StXiVertex.
+    table entry.\index{dst_vertex.idl}
+    in the StVertexCollection class. The collection stores the
     vertices by pointer; it is a polymorphic container.
     The same collection holds also the derived vertex types.
     \index{StV0Vertex}
@@ -3611,50 +3625,149 @@ void printVpdAdcs(StEvent *event)
     defined in \name{StEnumerations.hh} and takes two values
     only: \name{east} and \name{west}.
 
+    \verb+void setMinimumTime(StBeamDirection, float);+\\ 
     Sets minimum east/west time.
     
     \verb+void setVertexZ(float); +\\
     Sets the z position of the vertex as determined by the VPD.
     
-    Vertex class for cascades.
-     
+\end{Entry}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
 %    Reference: StXiVertex
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{StXiVertex}
 \index{StXiVertex|textbf}
-    Gene ...
+\index{vertex class}
+\index{cascades}
+\label{sec:StXiVertex}
+
+\begin{Entry}
+\item[Summary]
+    \name{StXiVertex} describes a Xi, or cascade, vertex.
+    A charged parent decays into a charged bachelor track and a neutral
+    daughter, which subsequently decays as a V0 vertex.
+    
+\item[Synopsis]
+    \verb+#include "StXiVertex.hh"+\\
+    \verb+class StXiVertex;+\\
+
+\item[Description]
+    \name{StXiVertex} is a specialisation of the more general
+    \name{StVertex} class. \index{StVertex} Its type
+    (\name{StVertex::type()}) is always Xi. It cannot be changed.
+    The vertex really has two daughters, but the charged one
+    is refered to as the bachelor, and the netural is a V0. Instead
+    of deriving from, or containing the associated \name{StV0Vertex},
+    the \name{StXiVertex} class simply holds a pointer to
+    one.\index{StV0Vertex} Any querries regarding the
+    V0 vertex are passed through the pointer to the actual
+    \name{StV0Vertex}. In
+    addition to the functionality inherited from \name{StVertex} this
+    class carries information on the distance-of-closest-approach
+    (DCA) between bachelor and the
+    primary vertex, the DCA between the parent track and the primary vertex,
+    the DCA between the two daughters, and the
+    momentum of the bachelor at the Xi vertex. The latter can be
     different from the momentum obtained via the actual bachelor
     track (\name{StGlobalTrack::helix().momentumAt()}) since the
     locally stored momentum is the result of a fit using the
     information of the Xi vertex.
 
-    \name{StXiVertex} inherits from \name{StVertex}.\index{StVertex}
-    
+    The data stored is taken from the \name{dst\_xi\_vertex.idl}
+    table.\index{dst\_xi\_vertex.idl} The collection of all vertices
+    (class \name{StVertexCollection}) in the event can be obtained
+    through \name{StEvent::vertex\-Collection()}.  Remember that
+    \name{StVertexCollection} stores all elements by pointer and that
+    the actual vertex collection contains various types of vertices.
+    In order to access member functions from a derived classes the
+    instance must be casted to its actual type. This is shown in one
     of the examples.\index{type cast}
 
+    
+\item[Persistence]
+    None
+
+\item[Related Classes]
+    \name{StXiVertex} inherits from \name{StVertex}, and contains
+    a pointer to a \name{StV0Vertex}. All vertices in
+    one event are stored in the StVertexCollection class. The
+    collection stores the vertices by pointer; it is a polymorphic
+    container.  The same collection also holds different classes such as
+    \name{StVertex} and \name{StV0Vertex}.  \index{StVertex}
+    \index{StV0Vertex} \index{StVertexCollection}
+ 
 \item[Public\\ Constructors]
     \verb+StXiVertex();+\\
     Default constructor. Constructs an instance of \name{StXiVertex} with
+    values initialized to 0 (zero), and a null \name{StV0Vertex} pointer.
+
+    \verb+StXiVertex(dst_xi_vertex_st* xivtx, dst_vertex_st* vtx);+\\
     Constructor using a \name{dst\_xi\_vertex.idl} table
+    entry.\index{dst\_xi\_vertex.idl} A pointer to the corresponding
+    entry in a \name{dst\_vertex.idl} table must also be
     provided.\index{dst\_vertex.idl} This constructor builds both the
+    base \name{StVertex} object and the derived \name{StXiVertex} object.
+    \verb+StGlobalTrack* bachelor();+\\
     Pointer to the bachelor global track.
+
+    \verb+double chargeOfBachelor(double B);+\\
     Charge of the bachelor track given the magnetic field B.
+
+    \verb+float dcaBachelorToPrimaryVertex() const;+\\
     Distance-of-closest-approach (DCA) from the bachelor
+    track to the primary vertex.
+
     \verb+float dcaV0ToPrimaryVertex() const;+\\
+    DCA of the V0 daughter to the primary vertex.
+
     \verb+float dcaDaughters() const;+\\
+    DCA between the two daughters.
+
     \verb+float dcaParentToPrimaryVertex() const;+\\
+    DCA of the parent track to the primary vertex.
+
     \verb+StThreeVector<float>& momentumOfV0() const;+\\
+    Momentum of the neutral daughter (the associated V0).
+
     \verb+StThreeVector<float> momentum() const;+\\
+    Momentum of the xi vertex.
+
     \verb+StV0Vertex* v0Vertex() const;+\\
+    Return a pointer to the associated \name{StV0Vertex}.
 
     \verb+void setDcaBachelorToPrimaryVertex(float);+\\
     Sets the DCA of the bachelor to the primary vertex.
 
     \verb+void setMomentumOfBachelor(const StThreeVector<float>&);+\\
-//  What the example does
+    Sets the momentum of the bachelor.
+
     \verb+void setDcaDaughters(float);+\\
-Gene ...
+    Sets the DCA between the two daughters.
+
+    \verb+void setDcaParentToPrimaryVertex(float);+\\   
+    Sets the DCA between the parent track and the primary vertex.
+
+    \verb+void setV0Vertex(StV0Vertex*);+\\
+    Sets the pointer for the associated \name{StV0Vertex}.
+
+\item[Examples]
+{\footnotesize
+\begin{verbatim}
+//
+//  Count Xi vertices where the transverse momentum is greater than
+//  some value (limit).
+//
+
+unsigned long countHighPtXis(StEvent *event, double limit)
+{
+    unsigned long counter = 0;
+    StVertexCollection *vertices =
+                    event->vertexCollection();
+    StVertexIterator iter;
+    StXiVertex *xip;
     StVertex   *vertex;
     for (iter = vertices->begin();
              if (xiMom.perp() > limit)
