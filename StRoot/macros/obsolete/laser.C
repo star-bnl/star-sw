@@ -1,5 +1,8 @@
-// $Id: laser.C,v 1.1 1998/08/10 02:35:13 fisyak Exp $
+// $Id: laser.C,v 1.2 1998/08/14 18:18:14 love Exp $
 // $Log: laser.C,v $
+// Revision 1.2  1998/08/14 18:18:14  love
+// An example analysis of 10 events
+//
 // Revision 1.1  1998/08/10 02:35:13  fisyak
 // add laser
 //
@@ -38,7 +41,7 @@
 #include "St_Module.h"
 #include "St_Table.h"
 #endif
-  Char_t *filename = "/star/mds/data/SD97/cosmic/Sept/log-p274-t23-f6-las.xdf"; 
+  Char_t *filename = "/scr20/love/star/test/log-p274-t23-f6-las.xdf"; 
   St_XDFFile xdffile_in(filename,"r");
 // Create the main chain object
   StChain chain("StChain");
@@ -53,15 +56,22 @@
   //  tss_Maker.adcxyzon();
   chain.PrintInfo();
 // Init the mai chain and all its makers
-   gBenchmark->Start("laser");chain.Init();
+   gBenchmark->Start("laser");
+   chain.Init();
+   TFile f("fntup.root","RECREATE");
 // Prepare TCanvas to show some histograms created by makers
   gBenchmark->Start("laser");
-for (Int_t i=0;i<1;i++){
-  chain.Make(i);
+  // Skip one bad event.
+  St_DataSet *set = xdffile_in.NextEventGet();  
+  delete set;
+  for (Int_t i=0;i<10;i++){
+    chain.Clear();
+    chain.Make(i);
   //  histCanvas->Modified();
   //  histCanvas->Update();
-  //  chain.Clear();
-}
+  //chain.Clear();
+  }
+  laser_Maker.Histograms()->Write();
   gBenchmark->Stop("laser");
   gBenchmark->Print("laser");
   TBrowser b;
