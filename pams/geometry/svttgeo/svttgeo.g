@@ -1293,9 +1293,9 @@ Block SFSD is the strip detector
 		  dz=sfpa_sdlen/2
       call      GSTPAR (%Imed,'STRA',1.)
 
-*     The following is the corrected hits definition: 25-dec-98 (PN)
+*     The following is the corrected hits definition: 25-apr-99 (PN)
       HITS    SFSD   X:.001:S   Y:.001:   Z:.001:   cx:10:   cy:10:   cz:10:,
-                     Sleng:16:(0,500)     ToF:16:(0,1.e-6)   Step:.01:,
+                     Step:.01:   Sleng:16:(0,500)   ToF:16:(0,1.e-6),  
                      Ptot:16:(0,100)      Eloss:16:(0,0.01) 
 * wkw fixed 4th layer hit definition Feb 27
 *     HITS    SFSD   xx:16:SH(-30,30)   yy:16:(-30,30)     zz:16:(-35,35),
