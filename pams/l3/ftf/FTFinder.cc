@@ -417,10 +417,12 @@ int FTFinder::setPointers ( )
       i_phi = (int)( (this_hit->phi-para.phi_min)/para.phi_slice + 1);
       this_hit->i_phi = i_phi ; 
       if ( i_phi < 1 || i_phi > para.n_phi ) {
+         if ( para.infoLevel > 0 ) {
 	      printf ( " \n === > Hit %d has Phi = %f  ", this_hit->id, 
                                                      this_hit->phi ) ;
-         printf ( " \n Phi index %d out of range ", i_phi ) ;
-	      continue ;
+              printf ( " \n Phi index %d out of range ", i_phi ) ;
+         }
+	 continue ;
       } 
 
 /*-------------------------------------------------------------------------
@@ -430,11 +432,13 @@ int FTFinder::setPointers ( )
     i_eta = (int)((this_hit->eta - para.eta_min)/para.eta_slice + 1);
     this_hit->i_eta = i_eta ;
     if ( i_eta < 1 || i_eta > para.n_eta ) {
-	    printf ( " \n === > Hit %d has Eta = %f  ", this_hit->id, 
+       if ( para.infoLevel > 0 ) {
+          printf ( " \n === > Hit %d has Eta = %f  ", this_hit->id, 
                                                      this_hit->eta ) ;
-	    printf ( " \n Eta min/max %f %f ", para.eta_min, para.eta_max ) ;
-	    printf ( " \n Eta slice   %f    ", para.eta_slice ) ;
-	    printf ( " \n Eta index %d out of range ", i_eta ) ;	  
+          printf ( " \n Eta min/max %f %f ", para.eta_min, para.eta_max ) ;
+          printf ( " \n Eta slice   %f    ", para.eta_slice ) ;
+          printf ( " \n Eta index %d out of range ", i_eta ) ;	  
+       }
        continue ;
     }
 
