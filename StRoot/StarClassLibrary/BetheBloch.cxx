@@ -507,15 +507,15 @@ double BetheBloch::operator() (double betagamma) {
 //     return (Double_t) operator()((double) betagamma);
 // }
 Double_t BetheBloch::Sirrf(Double_t Poverm, Double_t Length, Int_t k) {
-  Double_t Scale2keV = 1.7428;
+  Double_t Scale2keV = 1.;
   Double_t par[7] = {
-    7.18739e-01, // Scale
-    1.58587e-05, // I
-    1.15874e+01, // Delta
-   -3.30560e-01, // a0
-    8.62137e-02, // a1
-   -7.21336e-03, // a2
-    1.06436e+01  // Delta_e
+    2.12188e-01,//2.33912e-01, // Scale  
+    1.83678e-05, // I      
+    1.17380e+01, // Delta  
+   -3.52538e-01, // a0     
+    9.38373e-02, // a1     
+   -7.95122e-03, // a2     
+    1.13168e+01  // Delta_e
   };
   Double_t poverm = Poverm;
   if (poverm > 527.5) poverm = 527.5;
@@ -542,19 +542,17 @@ Double_t BetheBloch::Sirrf(Double_t Poverm, Double_t Length, Int_t k) {
   if (si <= 0) si = 1.e-12;
   Double_t value = par[0] + TMath::Log(si) + 
     Lpoverm*(par[3] + Lpoverm*(par[4] + Lpoverm*par[5]));
-  Double_t sirrf =  TMath::Exp(value);
-  // track length correction
-  Double_t coeff[9] = { 
-    4.84187e-01, -3.87216e-02,  1.63463e-03, -3.91121e-05,
-    5.52376e-07, -4.49661e-09,  1.94136e-11, -3.43526e-14
-  };
-  Double_t X = Length;
-  if (X <  20.5) X =  20.5;
-  if (X > 120  ) X = 120;
+  Double_t sirrf =  TMath::Exp(value)/Scale2keV;
+   const Int_t Nm = 12;
+   Double_t coeff[Nm] = { 
+   -3.16420e-01, 6.54653e-02,-4.01169e-03, 1.10047e-04,-1.18392e-06,-7.18814e-09, //hist112
+    3.06893e-10,-2.33023e-12,-7.70897e-15, 2.13252e-16,-1.18276e-18, 2.24178e-21
+   };
+   Double_t X = Length;
+  if (X > 130) X = 130;
   Double_t FPARAM = 0;
-  for (int i = 8; i >= 0; i--) FPARAM = coeff[i] + X*FPARAM;
-  FPARAM += -7.01522e-02;
-  sirrf *= TMath::Exp(FPARAM)/Scale2keV;
+  for (int i = Nm-1; i >= 0; i--) FPARAM = coeff[i] + X*FPARAM;
+  sirrf *= TMath::Exp(FPARAM);
   return sirrf;
 }
     
