@@ -1,7 +1,13 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.24 2004/01/24 04:35:53 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.25 2004/02/08 00:10:58 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.25  2004/02/08 00:10:58  calderon
+ * Histogram of rc hits is now not restricted to TPC only.   Histogram of mc hits is
+ * done looping over tpc and svt hits.
+ * If the first entry of the track nodes is not associated, use the first entry of
+ * the map.
+ *
  * Revision 1.24  2004/01/24 04:35:53  calderon
  * The last commits using BFChain broke StAssociator.  The histograms were
  * not found and nothing was plotted.  Revert back to the usual mode (this
@@ -457,8 +463,12 @@ Int_t StMcAnalysisMaker::Make()
     cout << "GlobalTrack for first Track Nodehas not been found!" << endl;
     return kStWarn;
   }
-  pair<rcTrackMapIter,rcTrackMapIter> trackBounds = theTrackMap->equal_range(firstTrack);
   cout << "MC Tracks associated with first Track in collection: " << theTrackMap->count(firstTrack) << endl;
+  if (!theTrackMap->count(firstTrack)) {
+      cout << "First track in track node container was not associated.  Pick first track in map." << endl;
+      firstTrack = theTrackMap->begin()->first; //first entry in the map is a pair, and first entry of pair is the global track
+  }
+  pair<rcTrackMapIter,rcTrackMapIter> trackBounds = theTrackMap->equal_range(firstTrack);
   cout << "Momentum of First Track and of Associated Tracks (if there are any):" << endl;
   // Get the momentum of the track and compare it to MC Track.
   // Use primary track if available
@@ -469,12 +479,13 @@ Int_t StMcAnalysisMaker::Make()
   else
     recMom = firstTrack->geometry()->momentum();
   for (rcTrackMapIter trkIt=trackBounds.first; trkIt!=trackBounds.second; ++trkIt) { 
+    StMcTrack*   origTrk = (*trkIt).second->partnerMcTrack();
     cout << "[" << abs(recMom) << ", ";
     cout << abs((*trkIt).second->partnerMcTrack()->momentum()) << "]" << endl;
     cout << "These tracks have : \n";
-    cout << (*trkIt).second->commonTpcHits() << " TPC  hits in common." << endl;
-    cout << (*trkIt).second->commonSvtHits() << " SVT  hits in common." << endl;
-    cout << (*trkIt).second->commonFtpcHits() <<" FTPC hits in common." << endl;
+    cout << (*trkIt).second->commonTpcHits() << " TPC  hits in common, out of " << origTrk->tpcHits().size() << endl;
+    cout << (*trkIt).second->commonSvtHits() << " SVT  hits in common, out of " << origTrk->svtHits().size() << endl;
+    cout << (*trkIt).second->commonFtpcHits() <<" FTPC hits in common, out of " << origTrk->ftpcHits().size() << endl;
   }
   // Example: Make a histogram of the momentum resolution of the event
   //          Make an Ntuple with rec & monte carlo mom, mean hit difference, and # of common hits
@@ -559,15 +570,20 @@ Int_t StMcAnalysisMaker::Make()
   }
   StHitIterator rcHitIt;
   StMcTpcHitIterator mcHitIt;
-  StPtrVecHit theHits = firstTrack->detectorInfo()->hits(kTpcId);
+  StMcSvtHitIterator mcSitIt;
+  StPtrVecHit theHits = firstTrack->detectorInfo()->hits();
   for (rcHitIt  = theHits.begin();
        rcHitIt != theHits.end();
        rcHitIt++) coordRec->Fill((*rcHitIt)->position().x(),(*rcHitIt)->position().y());
-  if (partner)
+  if (partner) {
     for (mcHitIt  = partner->tpcHits().begin();
 	 mcHitIt != partner->tpcHits().end();
 	 mcHitIt++) coordMcPartner->Fill((*mcHitIt)->position().x(),(*mcHitIt)->position().y());
-  
+    for (mcSitIt  = partner->svtHits().begin();
+	 mcSitIt != partner->svtHits().end();
+	 mcSitIt++) coordMcPartner->Fill((*mcSitIt)->position().x(),(*mcSitIt)->position().y());
+    
+  }
   if (!theMcV0Map) {
     gMessMgr->Warning() << "----------WARNING----------\n"
 			<< "No V0 Map found for this event!" << endm;
