@@ -11,8 +11,8 @@
     #  Reconstruction of the simulated jobs
     # --------------------------
     set jobTitle="STAR Reconstruction of the simulated events"   
-    time
-    echo ${jobTitle}
+    date
+    echo ${jobTitle} `date`   
     # --------------------------
     #  Some user constants
     # --------------------------
@@ -39,7 +39,11 @@
     # ----  at  BNL (local node) -----
     #
     set finalNode=gsiftp://${remoteNode}
-    set finalPackageDirectory=gsiftp://stargrid04.rcf.bnl.gov/${finalDirectory}
+    if ("${BNL}" == "1" ) then;
+      set finalPackageDirectory=${finalDirectory}
+    else
+      set finalPackageDirectory=gsiftp://stargrid04.rcf.bnl.gov/${finalDirectory}
+    endif
 
     # local file directory tree definition
     set packageDirectory=${localWebPage}/gridwork/reco
@@ -183,14 +187,21 @@
    foreach joboutfile (*.root) 
      echo " Starting ${joboutfile} transfering to BNL" >>${localLogFile}
      echo " Starting ${joboutfile} transfering to BNL"
-     globus-url-copy -p 25 file:$SCRATCH/${joboutfile}    ${finalPackageDirectory}/${joboutfile}
+     if ("${BNL}" == "1") then;
+        cp $SCRATCH/${joboutfile}  ${finalPackageDirectory}/${joboutfile}
+     else
+        globus-url-copy -p 25 file:$SCRATCH/${joboutfile}    ${finalPackageDirectory}/${joboutfile}
+     endif
    end      
-     time
+     date
+     date >>${localLogFile}
      time >>${localLogFile}
  # ----
  #   close local Web page
  # ----
-    echo "</PRE></BODY><HTML>"  >>${localLogFile}
+    echo "</PRE>"  >>${localLogFile}
+    echo "<P><h2>Job finished</h2>"  >>${localLogFile}
+    echo "</BODY><HTML>"  >>${localLogFile}
  ]]>
    </command>  
     <output fromScratch="$ZEBRAOUTPUT" >
