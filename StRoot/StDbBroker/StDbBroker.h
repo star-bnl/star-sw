@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.h,v 1.22 2001/10/26 15:44:02 porter Exp $
+ * $Id: StDbBroker.h,v 1.23 2001/10/26 16:36:17 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.h,v $
+ * Revision 1.23  2001/10/26 16:36:17  porter
+ * more runNumber implementation
+ *
  * Revision 1.22  2001/10/26 15:44:02  porter
  * add query by runNumber
  *
@@ -223,7 +226,7 @@ struct oldDescriptor {
     };
 
     void   SetDateTime(UInt_t date,UInt_t time);
-    void   SetRunNumber(UInt_t runNumber);
+    void   SetRunNumber(UInt_t runNumber)  {m_runNumber=runNumber;};
     void   SetDictionary(UInt_t nElements, Descriptor *D)
                                      {m_nElements=nElements; mdescriptor = D;}
     void   SetDictionary(Descriptor *D)
