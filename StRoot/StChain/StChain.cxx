@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.21 1998/11/25 21:58:21 fisyak Exp $
+// $Id: StChain.cxx,v 1.22 1998/11/29 20:01:09 fisyak Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.22  1998/11/29 20:01:09  fisyak
+// Fix typo with Run/run
+//
 // Revision 1.21  1998/11/25 21:58:21  fisyak
 // Cleanup
 //
@@ -258,7 +261,7 @@ StChain::StChain()
 
 //_____________________________________________________________________________
 StChain::StChain(const char *name, const char *title):
-m_VersionCVS("$Id: StChain.cxx,v 1.21 1998/11/25 21:58:21 fisyak Exp $"),
+m_VersionCVS("$Id: StChain.cxx,v 1.22 1998/11/29 20:01:09 fisyak Exp $"),
 m_VersionTag("$Name:  $")
 {
    SetName(name);
@@ -406,7 +409,7 @@ Int_t StChain::Init()
      St_DataSetIter next(m_DataSet);
      next.Cd(GetName());
      St_DataSet *set = next("run");
-     if (set) set = next("Run");
+     if (!set) set = next("Run");
      if (set) m_FileOut->NextEventPut(set);
    }
    return kStOK;
@@ -440,7 +443,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.21 1998/11/25 21:58:21 fisyak Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.22 1998/11/29 20:01:09 fisyak Exp $    \n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");
