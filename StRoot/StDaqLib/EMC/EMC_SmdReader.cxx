@@ -1,9 +1,3 @@
-/*!\class EMC_SmdReader
-\author Subhasis, Herbert Ward and Alexandre A. P. Suaide
-
-EMC Barrel SMD reader.
-*/ 
-
 #include "EMC_SmdReader.hh"
 #include <assert.h>
 #define MAX_ADC 0xFFF
@@ -13,7 +7,6 @@ EMC Barrel SMD reader.
 #include <stdio.h>
 
 /////////////////////////////////////////////////////////////////////
-///EMC_SmdReader constructor
 EMC_SmdReader::EMC_SmdReader(EventReader* er,Bank_EMCP *pEMCP): pBankEMCP(pEMCP),ercpy(er)
 {
   EventInfo info=er->getEventInfo();
@@ -35,13 +28,12 @@ EMC_SmdReader::EMC_SmdReader(EventReader* er,Bank_EMCP *pEMCP): pBankEMCP(pEMCP)
   Initialize();
 }
 /////////////////////////////////////////////////////////////////////
-///EMC_SmdReader destructor
 EMC_SmdReader::~EMC_SmdReader()
 {
   if(decoder) delete decoder;
 }
 /////////////////////////////////////////////////////////////////////
-///Initialization of arrays
+
 void EMC_SmdReader::Initialize()
 {
   mTheSmdAdcR.NSmdHits = 0;
