@@ -1,5 +1,8 @@
-// $Id: StSvtClusterAnalysisMaker.h,v 1.7 2001/09/22 01:07:09 caines Exp $
+// $Id: StSvtClusterAnalysisMaker.h,v 1.8 2002/04/25 20:34:51 caines Exp $
 // $Log: StSvtClusterAnalysisMaker.h,v $
+// Revision 1.8  2002/04/25 20:34:51  caines
+// Pass bad anode information into cluster fitter
+//
 // Revision 1.7  2001/09/22 01:07:09  caines
 // Fixes now that AddData() is cleared everyevent
 //
@@ -46,6 +49,7 @@ class StSvtHybridData;
 class StSvtData;
 class StSvtAnalysis;
 class StSvtAnalysedHybridClusters;
+class StSvtBadAnode;
  
 class StSvtClusterAnalysisMaker : public StMaker
 {
@@ -77,7 +81,7 @@ class StSvtClusterAnalysisMaker : public StMaker
   void  printClusterInfo();
   void MakeHistograms(); // Tracking histograms
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterAnalysisMaker.h,v 1.7 2001/09/22 01:07:09 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtClusterAnalysisMaker.h,v 1.8 2002/04/25 20:34:51 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
     
  protected:
@@ -104,13 +108,15 @@ class StSvtClusterAnalysisMaker : public StMaker
   StSvtHybridCollection* mSvtPixelColl;       //!
   StSvtHybridCollection* mSvtClusterColl;     //!
   StSvtHybridCollection* mSvtRawEventColl;    //! 
+  StSvtHybridCollection* mSvtBadAnodeSet;     //!
   //StSvtData* mSvtClusterColl;     //!
   //StSvtData* mSvtRawEventColl;    //! 
   StSvtHybridCollection* mSvtAnalColl;        //! 
   StSvtAnalysis* mSvtAnalysis;                //!
   StSvtAnalysedHybridClusters* mSvtAnalClusters;      //! 
   StSvtHit* mSvtHit;                          //!
- 
+  StSvtBadAnode* mSvtBadAnode;                //!
+
   St_ObjectSet* mSvtAnalSet;                  //!
 
   TH1F *m_n_seq;                              //! No. of seq on a cluster
@@ -119,7 +125,7 @@ class StSvtClusterAnalysisMaker : public StMaker
   TH2F **m_time_anode_clu;                    //! Timebucket vs anode for clusters
   TH2F **m_time_anode_raw;                    //! Timebucket vs anode for raw sequences
   TH2F *m_SumADCvsTime;                       //! Timebucket vs SUM ADC of clusters
- TH2F *m_PeakADCvsTime;                       //! Timebucket vs Peak ADC of clusters
+  TH2F *m_PeakADCvsTime;                       //! Timebucket vs Peak ADC of clusters
 
 
  private:
