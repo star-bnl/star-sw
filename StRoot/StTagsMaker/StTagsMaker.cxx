@@ -1,5 +1,8 @@
-// $Id: StTagsMaker.cxx,v 1.6 2000/06/08 22:21:08 vanyashi Exp $
+// $Id: StTagsMaker.cxx,v 1.7 2000/06/17 15:41:56 vanyashi Exp $
 // $Log: StTagsMaker.cxx,v $
+// Revision 1.7  2000/06/17 15:41:56  vanyashi
+// Comments from idl files are added to tags
+//
 // Revision 1.6  2000/06/08 22:21:08  vanyashi
 // event header tags fixed
 //
@@ -22,18 +25,13 @@
 #include "StTagsMaker.h"
 #include "StEvtHddr.h"
 #include "StBFChain.h"
-#include "tables/St_HighPtTag_Table.h"
-#include "tables/St_FlowTag_Table.h"
-#include "tables/St_HbtTag_Table.h"
-#include "tables/St_PCollTag_Table.h"
-#include "tables/St_ScaTag_Table.h"
-#include "tables/St_StrangeTag_Table.h"
-#include "StBFChain.h"
 #include "TROOT.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TTable.h"
 #include "TClass.h"
-#include "St_tableDescriptor.h"
+#include "TDataMember.h"
+#include "TDataType.h"
 
 static TClass *tabClass = 0;
 static TTree  *fTree = 0; //!
@@ -76,12 +74,14 @@ Int_t StTagsMaker::Make(){
 	  cl = gROOT->GetClass("EvtHddr_st");
 	}
 	if (cl) {
-	  St_tableDescriptor td(cl);
-	  for (UInt_t i=0;i<td.NumberOfColumns();i++){
+	  TIter next(cl->GetListOfDataMembers());
+	  TDataMember *member = 0;
+	  while ( (member = (TDataMember *) next()) ) {
 	    TString branchName=ds->GetName();
 	    branchName += ".";
-	    branchName += td.ColumnName(i);
-	    fTree->SetBranchAddress(branchName.Data(),(char*)address+td.Offset(i));
+	    branchName += member->GetName();
+	    fTree->SetBranchAddress(branchName.Data(),
+				    (char*)address+member->GetOffset());
 	  }
 	}
       }
@@ -116,32 +116,71 @@ EDataSetPass StTagsMaker::GetTags (St_DataSet* ds)
   else return kContinue;
 
   // create separate branch for each tag (or array of tags)
-  const Char_t TypeMapTBranch[]="\0FIISDiisbBC";
   cl = gROOT->GetClass(name.Data());
   if (cl) {
-    St_tableDescriptor td(cl);
-    for (UInt_t i=0;i<td.NumberOfColumns();i++){
-      const Char_t *colName = td.ColumnName(i);
-
+    TIter next(cl->GetListOfDataMembers());
+    const Char_t *types;
+    TDataMember *member = 0;
+    while ( (member = (TDataMember *) next()) ) {
+      const Char_t *colName = member->GetName();
       //prepare name/type description for individual tags or tag arrays
       leaflist = colName;
-      Int_t nDim = td.Dimensions(i);
-      if (nDim) {
-	const UInt_t *indx = td.IndexArray(i);
-	Char_t buf[64];
-	for (Int_t k=0; k<nDim; k++) {
-	  sprintf(buf,"[%d]",indx[k]);
-	  leaflist += buf;
-	}
+      Int_t nDim = member->GetArrayDim();
+      Char_t buf[64];
+      for (Int_t k=0; k<nDim; k++) {
+	UInt_t indx = member->GetMaxIndex(k);
+	sprintf(buf,"[%d]",indx);
+	leaflist += buf;
       }
+      //in ROOT everything beyond the '[' in leaf name remains as a title
+      //see TLeaf::TLeaf(const char *name, const char *):TNamed(name,name) {
+      TString Comment = member->GetTitle();
+      Comment=Comment.Strip(TString::kBoth,' ');
+      //these happen for ROOT Streamer
+      Comment.ReplaceAll("!","");
+      if (!Comment.IsNull()) {
+	//these happen due to html restrictions
+	Comment.ReplaceAll("&lt;",'<');
+	Comment.ReplaceAll("&gt;",'>');
+	//these are not allowed by leaflist restrictions
+	Comment.ReplaceAll(":",' ');
+	Comment.ReplaceAll("/",' ');
+	//have to add '[' for non-arrays
+	if (nDim==0) {
+	  leaflist += '[';
+	  leaflist += Comment;
+	  leaflist += "] ";
+	}
+	else {
+	  leaflist += " '";
+	  leaflist += Comment;
+	  leaflist += "' ";
+	}
+        //leafname is limited to char[64] -> cut off lengthy comments
+	if (leaflist.Length()>64) leaflist.Resize(64);
+      }
+      //in ROOT everything before the '/' in leaflist is leafname, see
+      //TBranch::TBranch(const char *name, void *address, const char *leaflist,...
       leaflist += "/";
-      leaflist += TypeMapTBranch[(Int_t)td.ColumnType(i)];
+      TDataType *memberType = member->GetDataType();
+      types = memberType->GetTypeName();
+      if (!strcmp("float", types))              leaflist += 'F';
+      else if (!strcmp("int", types))           leaflist += 'I';
+      else if (!strcmp("long", types))          leaflist += 'I';
+      else if (!strcmp("short", types))         leaflist += 'S';
+      else if (!strcmp("double", types))        leaflist += 'D';
+      else if (!strcmp("unsigned int", types))  leaflist += 'i';
+      else if (!strcmp("unsigned long", types)) leaflist += 'i';
+      else if (!strcmp("unsigned short", types))leaflist += 's';
+      else if (!strcmp("unsigned char", types)) leaflist += 'b';
+      //this is used only in EvtHddr->mEventType
+      else if (!strcmp("char", types))          leaflist += 'B';
 
       //save name of the structure (e.g. "FlowTag") in the TTree branchName
       branchName = Name;
       branchName += ".";
       branchName += colName;
-      fTree->Branch(branchName.Data(),(char*)address+td.Offset(i),
+      fTree->Branch(branchName.Data(),(char*)address+member->GetOffset(),
 		    leaflist.Data(),bufsize);
     }
     newds->SetTitle(ds->Path());

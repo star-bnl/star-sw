@@ -22,13 +22,14 @@ void Example_tags()
    
   // set loop optimization level
   gROOT->ProcessLine(".O4");
-  // gather all files from the same Run into one chain for loading to tagDB
+  // gather all files from the same Run into one chain
   TChain chain("Tag");
 
-  chain.Add("/star/rcf/test/dst/run9/st_physics_1164056_raw_0001.tags.root");
-  chain.Add("/star/rcf/test/dst/run9/st_physics_1164056_raw_0002.tags.root");
-  chain.Add("/star/rcf/test/dst/run9/st_physics_1164056_raw_0003.tags.root");
-  chain.Add("/star/rcf/test/dst/run9/st_physics_1164056_raw_0004.tags.root");
+  chain.Add("st_physics_1164056_raw_0003.tags.root");
+//   chain.Add("/star/rcf/test/dst/run9/st_physics_1164056_raw_0001.tags.root");
+//   chain.Add("/star/rcf/test/dst/run9/st_physics_1164056_raw_0002.tags.root");
+//   chain.Add("/star/rcf/test/dst/run9/st_physics_1164056_raw_0003.tags.root");
+//   chain.Add("/star/rcf/test/dst/run9/st_physics_1164056_raw_0004.tags.root");
 
   cout<<"chained "<<chain->GetEntries()<<" events "<<endl;
 
@@ -137,7 +138,6 @@ void Example_tags()
       ncoll++;
       sprintf(aevent,"%d",event->GetValue());
       t.DrawText(Np+10,Nm+10,aevent);
-      
     }
   }
 
