@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.17 1999/08/26 17:30:39 wdeng Exp $
+// $Id: StKinkMaker.cxx,v 1.18 1999/08/31 21:56:37 fisyak Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.18  1999/08/31 21:56:37  fisyak
+// Remove SetNRows
+//
 // Revision 1.17  1999/08/26 17:30:39  wdeng
 // Fix typo. Reorganize Make() function. Use shorter names for identifiers
 //
@@ -107,7 +110,6 @@ Int_t StKinkMaker::Init(){
   if (!m_tkfpar) {
     m_tkfpar = new St_tkf_tkfpar("tkfpar",1);
     AddConst(m_tkfpar);
-    m_tkfpar->SetNRows(1);
   }
   tkf_tkfpar_st parRow;  
   
