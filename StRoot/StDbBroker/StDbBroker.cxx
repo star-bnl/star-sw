@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBroker.cxx,v 1.8 2000/01/19 20:21:48 porter Exp $
+ * $Id: StDbBroker.cxx,v 1.9 2000/01/24 15:12:19 porter Exp $
  *
  * Author: S. Vanyashin, V. Perevoztchikov
  * Updated by:  R. Jeff Porter
@@ -12,6 +12,11 @@
  ***************************************************************************
  *
  * $Log: StDbBroker.cxx,v $
+ * Revision 1.9  2000/01/24 15:12:19  porter
+ * verbose check before resetting StDbManager verbose setting
+ * + timestamp check from St_db_Maker where time and date are
+ * separate integers.
+ *
  * Revision 1.8  2000/01/19 20:21:48  porter
  * change of TableIter to StDbTableIter
  *
@@ -134,7 +139,9 @@ StDbBroker::SetDateTime(UInt_t date, UInt_t time)
    m_DateTime[1]= time;
    char dateTime[16];
    ostrstream os(dateTime,16);
-   os<<m_DateTime[0]<<m_DateTime[1]<<ends;
+   os<<m_DateTime[0];
+   if(time<=99999) os<<"0"; // time must be 2 digits for hr
+   os<<m_DateTime[1]<<ends;
    mgr->setRequestTime(dateTime);
 
 }
@@ -286,9 +293,10 @@ if(!versionName){
  if(m_isVerbose){
  cout << "****************************************************************"<<endl;
  cout << "***    Will Print the Tree "<<endl;
- mgr->setVerbose(true);
+ bool verbCheck = mgr->IsVerbose();
+ if(!verbCheck)mgr->setVerbose(true);
  m_Tree->printTree(0);
- mgr->setVerbose(false);
+ if(!verbCheck)mgr->setVerbose(false);
  cout << "***    End Print the Tree "<<endl;
  cout << "****************************************************************"<<endl;
  };
