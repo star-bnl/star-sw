@@ -11,8 +11,19 @@ use Sys::Hostname;
 #my $debugOn=0;
 
 my $hostname     = hostname();
-my $dir_log      = "/star/rcf/data07/reco/embeddingk-/P00hg/log/daq";
-my $dir_sum      = "/star/rcf/data07/reco/embeddingk-/P00hg/sum/daq";   
+my @dir_log      = (
+                    "/star/rcf/data06/reco/embedding_alamhipt/P00hg/log/daq",
+                    "/star/rcf/data06/reco/embedding_alamlopt/P00hg/log/daq",
+                    "/star/rcf/data06/reco/embedding_lamhipt/P00hg/log/daq",
+                    "/star/rcf/data06/reco/embedding_lamlopt/P00hg/log/daq",
+);
+
+my @dir_sum      = (
+                     "/star/rcf/data06/reco/embedding_alamhipt/P00hg/sum/daq",
+                     "/star/rcf/data06/reco/embedding_alamlopt/P00hg/sum/daq",
+                     "/star/rcf/data06/reco/embedding_lamhipt/P00hg/sum/daq",
+                     "/star/rcf/data06/reco/embedding_lamlopt/P00hg/sum/daq",
+);   
 my @set ;
 my @list;
 my $nlist = 0; 
@@ -42,13 +53,13 @@ struct FileAttr => {
 
  };
 
-
-  opendir(DIR, $dir_log) or die "can't open $dir_log\n";
+for ($ii = 0; $ii < scalar(@dir_log); $ii++)  {
+  opendir(DIR, $dir_log[$ii]) or die "can't open $dir_log[$ii]\n";
   while( defined($flname = readdir(DIR)) ) {
            next if $flname =~ /^\.\.?$/;
            next if $flname =~ /.err/; 
 
-        $fullname = $dir_log ."/".$flname;
+        $fullname = $dir_log[$ii] ."/".$flname;
          $size = (stat($fullname))[7];
                
        $fObjAdr = \(FileAttr->new());
@@ -61,7 +72,7 @@ struct FileAttr => {
  closedir DIR;
 
 
-chdir $dir_log;
+chdir $dir_log[$ii];
 
 foreach my $logFile (@list) {
      
@@ -77,7 +88,7 @@ foreach my $logFile (@list) {
               $file_sum = $mfile;
               $file_sum =~ s/.log//g;
               $file_sum = $file_sum . ".sum";
-        chdir $dir_sum;
+        chdir $dir_sum[$ii];
         if(-f $file_sum ) {
              my $stime = `mod_time $file_sum`;
         if( $ltime < $stime) {
@@ -87,19 +98,19 @@ foreach my $logFile (@list) {
                $f_flag = 1;
 	     }
            }
-         chdir $dir_log;
+         chdir $dir_log[$ii];
               if($f_flag != 1) {  
 #         print "Name of file: ", $mfile, "\n";
              parse_log($mfile);
              timestamp($mfile);
             $name_log = $mfile; 
-         $dummy = `mv $file_sum $dir_sum`;
+         $dummy = `mv $file_sum $dir_sum[$ii]`;
 #         $dummy = `mv $name_log $dir_lg`;   
            }             
         }
      }
   }
-#}
+}
 exit(0);
 #==========================================================
  sub mod_time($) { 
