@@ -20,6 +20,8 @@ if ( -e .i386_linux24) then
 	echo "Creating Alternate RedHat 7.2 support (naming scheme changed at RH7.2)"
 	ln -s .i386_linux24 .i386_redhat72
     endif
+else
+    echo "The base OS support directory, .i386_linux24, does not exists"
 endif
 
 # ----------
@@ -31,6 +33,13 @@ if ( -e .rh80_gcc32) then
 	echo "Creating Generic Redhat support / alternate STAR_HOST_SYS for RH8.0"
 	ln -s .rh80_gcc32 .i386_redhat80
     endif
+    # alternate gcc support
+    if ( ! -e .rh80_gcc322) then
+	echo "Creating alternate gcc support for RH8.0"
+	ln -s .rh80_gcc32 .rh80_gcc322
+    endif
+else
+    echo "The base OS support directory, .rh80_gcc32, does not exists"
 endif
 
 # 
@@ -42,5 +51,7 @@ if ( -e .rh80_gcc32) then
 	echo "Creating RedHat 9 is supported via RedHat 8 using an assumed equivalence gcc 3.2 -> 3.2.2"
 	ln -s .rh80_gcc32 .rh9_gcc322
     endif
+else
+    echo "The base OS support directory, .rh80_gcc32, does not exists"
 endif
 
