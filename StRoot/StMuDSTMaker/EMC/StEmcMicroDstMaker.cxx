@@ -3,7 +3,7 @@
 #include "StEventTypes.h"
 #include "StEmcMicroEvent.h"
 #include "StIOMaker/StIOMaker.h"
-#include "StEmcUtil/StEmcFilter.h"
+#include "StEmcUtil/filters/StEmcFilter.h"
 #include "StEmcMicroUtil.h"
 #include "StChain/StEvtHddr.h"
 #include "StTreeMaker/StTreeMaker.h"

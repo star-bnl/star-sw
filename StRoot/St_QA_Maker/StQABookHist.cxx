@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.33 2003/01/13 19:09:43 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.34 2003/01/23 04:03:18 jeromel Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.34  2003/01/23 04:03:18  jeromel
+// Include fixed
+//
 // Revision 2.33  2003/01/13 19:09:43  genevb
 // Minor FTPC histo changes
 //
@@ -113,8 +116,8 @@
 #include <math.h>
 #include "QAH.h"
 #include "StQABookHist.h"
-#include "StEmcUtil/StEmcMath.h"
-#include "StEmcUtil/emcDetectorName.h"
+#include "StEmcUtil/others/StEmcMath.h"
+#include "StEmcUtil/others/emcDetectorName.h"
 #include "TROOT.h"
 
 
