@@ -29,7 +29,6 @@
 using std::vector;
 #endif
 
-ClassImp(BetheBloch)
 
 BetheBloch::BetheBloch(){
     // it's more elegant to read the values from a file, but to put it
