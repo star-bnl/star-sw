@@ -1,5 +1,8 @@
-// $Id: StFtpcSlowSimMaker.cxx,v 1.6 2001/04/04 17:08:57 jcs Exp $
+// $Id: StFtpcSlowSimMaker.cxx,v 1.7 2001/04/23 20:34:40 oldi Exp $
 // $Log: StFtpcSlowSimMaker.cxx,v $
+// Revision 1.7  2001/04/23 20:34:40  oldi
+// Output sent to StMessMgr now.
+//
 // Revision 1.6  2001/04/04 17:08:57  jcs
 // remove references to StFtpcParamReader from StFtpcDbReader
 //
@@ -158,7 +161,7 @@ Int_t StFtpcSlowSimMaker::Make(){
                                                            dbReader,
 							   dataWriter);
  
-    cout<< " start StFtpcSlowSimulator "<<endl;
+    gMessMgr->Message("", "I", "OST") << "start StFtpcSlowSimulator " << endm;
     Int_t Res_fss = slowsim->simulate();
 
     delete slowsim;
@@ -168,7 +171,7 @@ Int_t StFtpcSlowSimMaker::Make(){
     delete geantReader;
 
     if (Res_fss) {
-      if(Debug()) cout<< " finished fss "<<endl;
+      if(Debug()) gMessMgr->Message("", "I", "OST") << "finished fss" << endm;
     }
   }
   MakeHistograms(); // FTPC slow simulator histograms
@@ -177,7 +180,7 @@ Int_t StFtpcSlowSimMaker::Make(){
 //_____________________________________________________________________________
 void StFtpcSlowSimMaker::MakeHistograms() {
 
-   if(Debug()) cout<<"*** NOW MAKING HISTOGRAMS FOR FtpcSlowSim ***"<<endl;
+   if(Debug()) gMessMgr->Message("", "I", "OST") << "*** NOW MAKING HISTOGRAMS FOR FtpcSlowSim ***" << endm;
 
    // Create an iterator
    St_DataSetIter ftpc_raw(m_DataSet);
@@ -192,13 +195,13 @@ void StFtpcSlowSimMaker::MakeHistograms() {
    // Fill histograms for FTPC slow simulator
    if (adc) {
      Float_t nadc = adc->GetNRows();
-     printf("total # adcs = %ld, nadc = %f\n",adc->GetNRows(),nadc);
+     gMessMgr->Message("", "I", "OST") << "total # adcs = " << adc->GetNRows() << ", nadc = " << nadc << endm;
      m_nadc->Fill(nadc);
    }
    if (ndx) {
      fcl_ftpcndx_st *r = ndx->GetTable();
      Float_t index1 = ++r->index;
-     printf("index1 = %d\n",r->index);
+
      if (adc) {
        m_nadc_index1->Fill((float)adc->GetNRows(),(float)index1); 
      }
