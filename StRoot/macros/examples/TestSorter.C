@@ -28,6 +28,7 @@ void TestSorter(Char_t *xdffilename="/afs/rhic/star/data/samples/test.xdf",const
 	    <<" : " << sorter->GetTableType() 
 	    << "[" << cols << "]> "
             << " along: \"" << sorter->GetName() << "\" column" << endl;
+       cout << "This table contains " << sorter->CountKeys() << " different keys" << endl;
        int i;
 
        cout << "Index:";
@@ -45,5 +46,10 @@ void TestSorter(Char_t *xdffilename="/afs/rhic/star/data/samples/test.xdf",const
           Int_t lastFound = sorter->BinarySearch(ph);
           cout << i << ". " << ph << " == " << lastFound << " : " << sorter->GetLastFound() << endl;
        }
+   
+//      Int_t key2Count = 1;
+//      cout << " Key: " << key2Count << " found " << sorter->CountKey(&key2Count) << " times" << endl;
+//      key2Count = 10;
+//      cout << " Key: " << key2Count << " found " << sorter->CountKey(&key2Count) << " times" << endl;
     }
 }
