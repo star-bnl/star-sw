@@ -1,5 +1,8 @@
-// $Id: StLaserEventMaker.cxx,v 1.22 2002/01/24 23:56:31 pfachini Exp $
+// $Id: StLaserEventMaker.cxx,v 1.23 2002/02/20 16:14:20 pfachini Exp $
 // $Log: StLaserEventMaker.cxx,v $
+// Revision 1.23  2002/02/20 16:14:20  pfachini
+// The clock is now obtained from Jon Gans offline db code
+//
 // Revision 1.22  2002/01/24 23:56:31  pfachini
 // Correcting for the clock
 //
@@ -73,6 +76,7 @@
 #include "tables/St_type_index_Table.h"
 #include "tables/St_dst_vertex_Table.h"
 #include "StTpcDb/StTpcDb.h"
+#include "StDetectorDbMaker/StDetectorDbClock.h"
 #include "TMath.h"
 ClassImp(StLaserEventMaker)
 
@@ -101,7 +105,7 @@ void StLaserEventMaker::Clear(Option_t *option){
 
 //_____________________________________________________________________________
 /// Create tables
-Int_t StLaserEventMaker::Init(){
+Int_t StLaserEventMaker::InitRun(int RunId){
 
   // 		TPG parameters
   m_tpg_pad_plane =(St_tpg_pad_plane *) GetChain()->FindObject("tpg_pad_plane");
@@ -154,7 +158,7 @@ Int_t StLaserEventMaker::Init(){
   date = 0;
   time = 0;
 
-  return StMaker::Init();
+  return kStOk;
 }
 
 //_____________________________________________________________________________
@@ -241,20 +245,22 @@ void StLaserEventMaker::MakeHistograms()
     Float_t m_tzero = gStTpcDb->Electronics()->tZero();
     Float_t m_clockNominal = gStTpcDb->Electronics()->samplingFrequency();
     clockNominal = m_clockNominal;
-    Float_t m_clock = 0;
-    TDataSet* rundb=GetDataBase("RunLog/onl");
-    if (rundb) {
-     St_starClockOnl* starclock = (St_starClockOnl*)rundb->Find("starClockOnl");
-     if (starclock) {
-       starClockOnl_st* clkstr = (starClockOnl_st*)starclock->GetArray();
-       if (clkstr) m_clock = clkstr->frequency/1000000.0;
-     }
-    }
-    if (m_clock == 0) {
-      m_clock = m_clockNominal;
-      cout << "No real clock! Clock is set to be ClockNominal then." << endl;
-    }
-    clock = m_clock;
+    //Float_t m_clock = 0;
+    //TDataSet* rundb=GetDataBase("RunLog/onl");
+    //if (rundb) {
+    //St_starClockOnl* starclock = (St_starClockOnl*)rundb->Find("starClockOnl");
+    //if (starclock) {
+    //starClockOnl_st* clkstr = (starClockOnl_st*)starclock->GetArray();
+    //if (clkstr) m_clock = clkstr->frequency/1000000.0;
+    //}
+    //}
+    //if (m_clock == 0) {
+    //m_clock = m_clockNominal;
+    //cout << "No real clock! Clock is set to be ClockNominal then." << endl;
+    //}
+    StDetectorDbClock* dbclock = StDetectorDbClock::instance();
+    double freq = dbclock->getCurrentFrequency()/1000000.0;
+    clock = freq;
     Float_t m_trigger = gStTpcDb->triggerTimeOffset();
     m_date = GetDate();
     m_time = GetTime();
@@ -267,6 +273,7 @@ void StLaserEventMaker::MakeHistograms()
     cout << " tZero "<< m_tzero << " trigger " << m_trigger << endl;
     cout << " clock "<< m_clock << " clockNominal " << m_clockNominal << endl;
     cout << " drivel " << m_drivel << endl;
+    cout << " freq "<< freq << endl;
 
     //  Make the "laser"  TTree  Should be controllable.
     // Create an iterator for the track dataset
@@ -730,7 +737,7 @@ Int_t StLaserEventMaker::Finish() {
 /// Print CVS commit information
 void StLaserEventMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StLaserEventMaker.cxx,v 1.22 2002/01/24 23:56:31 pfachini Exp $\n");
+  printf("* $Id: StLaserEventMaker.cxx,v 1.23 2002/02/20 16:14:20 pfachini Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
