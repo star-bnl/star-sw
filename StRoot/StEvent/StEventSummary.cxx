@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventSummary.cxx,v 2.6 2000/01/25 15:31:47 fisyak Exp $
+ * $Id: StEventSummary.cxx,v 2.7 2000/01/31 12:01:00 ullrich Exp $
  *
  * Author: Thomas Ullrich, July 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEventSummary.cxx,v $
- * Revision 2.6  2000/01/25 15:31:47  fisyak
- * Add namespace for CC5
+ * Revision 2.7  2000/01/31 12:01:00  ullrich
+ * Unique const_cast syntax for all platforms.
  *
  * Revision 2.6  2000/01/25 15:31:47  fisyak
  * Add namespace for CC5
@@ -43,7 +43,7 @@ using units::tesla;
 using units::degree;
 #endif
 
-static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.6 2000/01/25 15:31:47 fisyak Exp $";
+static const char rcsid[] = "$Id: StEventSummary.cxx,v 2.7 2000/01/31 12:01:00 ullrich Exp $";
 
 ClassImp(StEventSummary)
 
@@ -157,13 +157,8 @@ Long_t
 StEventSummary::numberOfVerticesOfType(StVertexId id) const
 {
     unsigned int i = id-1;        // vector numbering scheme starts at 1
-    if (i < mVertexTypeArraySize) {
-#if defined(__SUNPRO_CC)
-        return (*(const_cast<TArrayL*>(&mNumberOfVertexTypes)))[i];
-#else
-        return const_cast<TArrayL>(mNumberOfVertexTypes)[i];
-#endif
-    }
+    if (i < mVertexTypeArraySize) 
+        return const_cast<TArrayL&>(mNumberOfVertexTypes)[i];
     else
         return 0;
 }
@@ -192,51 +187,31 @@ StEventSummary::numberOfBins() const { return mHistogramSize; }
 Long_t
 StEventSummary::tracksInEtaBin(UInt_t i) const
 {
-#if defined(__SUNPRO_CC)
-        return i < mHistogramSize ? (*(const_cast<TArrayL*>(&mEtaOfTracksHisto)))[i] : 0;
-#else
-        return i < mHistogramSize ? const_cast<TArrayL>(mEtaOfTracksHisto)[i] : 0;
-#endif
+        return i < mHistogramSize ? const_cast<TArrayL&>(mEtaOfTracksHisto)[i] : 0;
 }
 
 Long_t
 StEventSummary::tracksInPhiBin(UInt_t i) const
 {
-#if defined(__SUNPRO_CC)
-        return i < mHistogramSize ? (*(const_cast<TArrayL*>(&mPhiOfTracksHisto)))[i] : 0;
-#else
-        return i < mHistogramSize ? const_cast<TArrayL>(mPhiOfTracksHisto)[i] : 0;
-#endif
+        return i < mHistogramSize ? const_cast<TArrayL&>(mPhiOfTracksHisto)[i] : 0;
 }
 
 Long_t
 StEventSummary::tracksInPtBin(UInt_t i) const
 {
-#if defined(__SUNPRO_CC)
-        return i < mHistogramSize ? (*(const_cast<TArrayL*>(&mPtOfTracksHisto)))[i] : 0;
-#else
-        return i < mHistogramSize ? const_cast<TArrayL>(mPtOfTracksHisto)[i] : 0;
-#endif
+        return i < mHistogramSize ? const_cast<TArrayL&>(mPtOfTracksHisto)[i] : 0;
 }
 
 Float_t
 StEventSummary::energyInEtaBin(UInt_t i) const
 {
-#if defined(__SUNPRO_CC)
-        return i < mHistogramSize ? (*(const_cast<TArrayF*>(&mEneryVsEtaHisto)))[i] : 0;
-#else
-        return i < mHistogramSize ? const_cast<TArrayF>(mEneryVsEtaHisto)[i] : 0;
-#endif
+        return i < mHistogramSize ? const_cast<TArrayF&>(mEneryVsEtaHisto)[i] : 0;
 }
 
 Float_t
 StEventSummary::energyInPhiBin(UInt_t i) const
 {
-#if defined(__SUNPRO_CC)
-        return i < mHistogramSize ? (*(const_cast<TArrayF*>(&mEnergyVsPhiHisto)))[i] : 0;
-#else
-        return i < mHistogramSize ? const_cast<TArrayF>(mEnergyVsPhiHisto)[i] : 0;
-#endif
+        return i < mHistogramSize ? const_cast<TArrayF&>(mEnergyVsPhiHisto)[i] : 0;
 }
 
 Float_t
@@ -246,11 +221,7 @@ StEventSummary::lowerEdgeEtaBin(UInt_t i) const
         if (i == 0)
             return -FLT_MAX;     // no lower limit
         else
-#if defined(__SUNPRO_CC)
-            return (*(const_cast<TArrayF*>(&mEtaBins)))[i-1];
-#else
-            return const_cast<TArrayF>(mEtaBins)[i-1];
-#endif
+            return const_cast<TArrayF&>(mEtaBins)[i-1];
     }
     else
         return 0;
@@ -263,11 +234,7 @@ StEventSummary::upperEdgeEtaBin(UInt_t i) const
        if (i == mPtAndEtaBinsSize)
            return FLT_MAX;
        else
-#if defined(__SUNPRO_CC)
-           return (*(const_cast<TArrayF*>(&mEtaBins)))[i];
-#else
-           return const_cast<TArrayF>(mEtaBins)[i];
-#endif
+           return const_cast<TArrayF&>(mEtaBins)[i];
     }
     else
         return 0;
@@ -280,11 +247,7 @@ StEventSummary::lowerEdgePtBin(UInt_t i) const
         if (i == 0)
             return 0;
         else
-#if defined(__SUNPRO_CC)
-            return (*(const_cast<TArrayF*>(&mPtBins)))[i-1];
-#else
-            return const_cast<TArrayF>(mPtBins)[i-1];
-#endif
+            return const_cast<TArrayF&>(mPtBins)[i-1];
     }
     else
         return 0;
@@ -297,11 +260,7 @@ StEventSummary::upperEdgePtBin(UInt_t i) const
        if (i == mPtAndEtaBinsSize)
            return FLT_MAX;
        else
-#if defined(__SUNPRO_CC)
-           return (*(const_cast<TArrayF*>(&mPtBins)))[i];
-#else
-           return const_cast<TArrayF>(mPtBins)[i];
-#endif
+           return const_cast<TArrayF&>(mPtBins)[i];
     }
     else
         return 0;
@@ -311,11 +270,7 @@ Float_t
 StEventSummary::lowerEdgePhiBin(UInt_t i) const
 {
     if (i < mPhiBinsSize)
-#if defined(__SUNPRO_CC)
-        return (*(const_cast<TArrayF*>(&mPhiBins)))[i];
-#else
-        return const_cast<TArrayF>(mPhiBins)[i];
-#endif
+        return const_cast<TArrayF&>(mPhiBins)[i];
     else
         return 0;
 }
@@ -325,17 +280,9 @@ StEventSummary::upperEdgePhiBin(UInt_t i) const
 {
     if (i < mPhiBinsSize) {
        if (i == mPhiBinsSize-1)
-#if defined(__SUNPRO_CC)
-           return (*(const_cast<TArrayF*>(&mPhiBins)))[0];
-#else
-           return const_cast<TArrayF>(mPhiBins)[0];
-#endif
+           return const_cast<TArrayF&>(mPhiBins)[0];
        else
-#if defined(__SUNPRO_CC)
-           return (*(const_cast<TArrayF*>(&mPhiBins)))[i+1];
-#else
-           return const_cast<TArrayF>(mPhiBins)[i+1];
-#endif
+           return const_cast<TArrayF&>(mPhiBins)[i+1];
     }
     else
         return 0;

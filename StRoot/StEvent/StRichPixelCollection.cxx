@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichPixelCollection.cxx,v 2.1 2000/01/13 21:06:22 lasiuk Exp $
+ * $Id: StRichPixelCollection.cxx,v 2.2 2000/01/31 12:01:03 ullrich Exp $
  *
  * Author: bl, Jan 2000
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StRichPixelCollection.cxx,v $
- * Revision 2.1  2000/01/13 21:06:22  lasiuk
- * add rich pixel info/containers
+ * Revision 2.2  2000/01/31 12:01:03  ullrich
+ * Unique const_cast syntax for all platforms.
  *
  * Revision 2.3  2000/02/23 11:45:05  ullrich
  * Added missing ClassImp macro and missing rcsid string.
@@ -24,7 +24,7 @@
  *
  **************************************************************************/
 
-static const char rcsid[] = "$Id: StRichPixelCollection.cxx,v 2.1 2000/01/13 21:06:22 lasiuk Exp $";
+static const char rcsid[] = "$Id: StRichPixelCollection.cxx,v 2.2 2000/01/31 12:01:03 ullrich Exp $";
   
 StRichPixelCollection::StRichPixelCollection()
 {
@@ -53,14 +53,8 @@ StRichPixelCollection::~StRichPixelCollection()
 { /* nopt */ }
 
 StRichPixel StRichPixelCollection::pixel(unsigned int index) const
-    if(index < size()) {
-#if defined(__SUNPRO_CC)
-	aPixel.setPackedData(( *(const_cast<TArrayL*>(&mPackedData)))[index] );
-#else
-	aPixel.setPackedData( (const_cast<TArrayL>(mPackedData))[index] );
-	//aPixel.setPackedData(mPackedData[index]);
-#endif
-    }
+{
+    StRichPixel aPixel;
 
     //
     // check the size; if it is okay, return the item
