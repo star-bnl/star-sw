@@ -60,10 +60,12 @@ tdm/table/cell/putvalue 'ev0par2[0].dlen' 2
 tdm/table/cell/putvalue 'ev0par2[0].alpha_max' 1.2
 tdm/table/cell/putvalue 'ev0par2[0].ptarm_max' 0.3
 
-
+ 
+* change dlen to 100 10/28/98 Kathy & Al
+ 
 tdm/table/cell/putvalue 'ev0par2[1].dca'   0.8
 tdm/table/cell/putvalue 'ev0par2[1].dcav0' 0.3
-tdm/table/cell/putvalue 'ev0par2[1].dlen'  0.6
+tdm/table/cell/putvalue 'ev0par2[1].dlen'  100
 tdm/table/cell/putvalue 'ev0par2[1].alpha_max' 1.2
 tdm/table/cell/putvalue 'ev0par2[1].ptarm_max' 0.3
 
