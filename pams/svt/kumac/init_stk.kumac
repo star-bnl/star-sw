@@ -24,7 +24,7 @@
          
  message ' !!! run_stk: vertex not found,  filled from MC ***'
  
-  cd [params]/global/vertices
+  cd [params]/global
   tdm/newtable stk_vtx stk_vtx 1
   tdm/table/rowcount stk_vtx 1
   tdm/table/cell/putvalue 'stk_vtx[0].id' 1
