@@ -8,6 +8,7 @@
 
 #ifndef Bichsel_h
 #define Bichsel_h
+#define P03ia
 #include "dEdxParameterization.h"
 class Bichsel {
  private: 
@@ -24,9 +25,7 @@ class Bichsel {
   Double_t    GetRmsZ(Double_t log10bg, Double_t log2dx, Int_t kase=0) {
     return m_dEdxParameterization->GetRmsZ(log10bg,log2dx,kase);
   }
-  Double_t    GetI70(Double_t log10bg, Double_t log2dx, Int_t kase=0)  {
-    return m_dEdxParameterization->GetI70(log10bg,log2dx,kase);
-  }
+  Double_t    GetI70(Double_t log10bg, Double_t log2dx, Int_t kase=0);
   Double_t    GetI60(Double_t log10bg, Double_t log2dx, Int_t kase=0)  {
     return m_dEdxParameterization->GetI60(log10bg,log2dx,kase);
   }
@@ -38,6 +37,7 @@ class Bichsel {
   }
   Double_t    GetProbability(Double_t log10bg, Double_t log2dx, Double_t z, Int_t kase=0) {
     return m_dEdxParameterization->GetProbability(log10bg,log2dx,z,kase);}
+  Double_t    TofCorrection(Double_t log10bg);
   ClassDef(Bichsel,0)
 };
 #endif
