@@ -125,6 +125,14 @@ class StStrangeMuDstMaker : public StMaker {
   // turn off filling of TTree for this event, regardless
   void AbortEvent() { abortEvent = kTRUE; }
 
+  virtual const char *GetCVS() const {
+    static const char cvs[]="Tag $Name:  $ $Id: StStrangeMuDstMaker.h,v 3.12 2003/02/16 21:28:45 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    return cvs;
+  }
+
+
+
+
  protected:
   virtual void InitReadDst();
   virtual void InitCreateDst();
@@ -233,8 +241,11 @@ inline Int_t StStrangeMuDstMaker::MatchName(const char* name) const
 
 //____________________________________________________________________
 //
-// $Id: StStrangeMuDstMaker.h,v 3.11 2003/02/10 16:02:24 genevb Exp $
+// $Id: StStrangeMuDstMaker.h,v 3.12 2003/02/16 21:28:45 jeromel Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 3.12  2003/02/16 21:28:45  jeromel
+// GetCVS() added
+//
 // Revision 3.11  2003/02/10 16:02:24  genevb
 // Now read files using TChains; no splitting of MuDst file
 //
