@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.3 2002/11/05 01:56:58 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.4 2002/11/05 13:44:29 fisyak Exp $
 #define Mip 2002
 #define PadSelection
 #define  AdcCorrection
@@ -934,8 +934,8 @@ Int_t StdEdxY2Maker::Make(){
 	  gMessMgr->Error() << "StdEdxY2Maker:: NdEdx = " << NdEdx 
 			    << ">  NoFitPoints ="<< NoFitPoints << endm; 
       }
-      //      if (NdEdx <= 0) continue;
-      if (TrackLength < TrackLengthCut) continue;
+      if (NdEdx <= 0) continue;
+      //      if (TrackLength < TrackLengthCut) continue;
       SortdEdx(NdEdx,CdEdx,dEdxS);
 #if 0
       PrintdEdx(2);
