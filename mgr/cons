@@ -11,12 +11,12 @@ use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.36 2000/05/15 21:25:50 fisyak Exp $
+# $Id: cons,v 1.37 2000/05/16 01:33:26 fisyak Exp $
 
 $ver_num = 1.8;
 $ver_rev = "-dev";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.36 2000/05/15 21:25:50 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.37 2000/05/16 01:33:26 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -409,7 +409,7 @@ sub Override {
 package main;
 # Check script inclusion regexps
 my $pwd = cwd();# print "Pwd = $pwd\n"; 
-(my $Rpwd = $pwd) =~ s/\/(pams|StRoot|asps).*//;# print "Root pwd = $Rpwd\n";
+(my $Rpwd = $pwd) =~ s/\/(pams|StRoot|asps|ROOT\/root).*//;# print "Root pwd = $Rpwd\n";
 if ($1) {
   chdir($Rpwd) if $Rpwd;
   (my $Lpwd = $pwd) =~ s/$Rpwd\///;#print "Local pwd = $Lpwd\n";
@@ -2255,17 +2255,19 @@ sub scan {
 		last;
 	    }
 	}
-      if ($param::defaultInclude && $default_include && !$default_include->ignore) { 
-	if ($default_include->path !~ /incbeg\.inc$/ &&
-	    $default_include->path !~ /incend\.inc$/ &&
-	    $default_include->path !~ /math\.h$/ &&
-	    $default_include->path !~ /descrip\.h$/ &&
-	    $default_include->path !~ /fortran\.h$/ &&
-	    $default_include->path !~ /not_cern/    &&
-	    $default_include->path !~ /compiledata\.h$/    
-	   ) {
-	  push @includes, $default_include;
-	}
+      if ($param::defaultInclude && $default_include) { 
+#	if ($default_include->path !~ /incbeg\.inc$/ &&
+#	    $default_include->path !~ /incend\.inc$/ &&
+#	    $default_include->path !~ /math\.h$/ &&
+#	    $default_include->path !~ /descrip\.h$/ &&
+#	    $default_include->path !~ /fortran\.h$/ &&
+#	    $default_include->path !~ /not_cern/    &&
+#	    $default_include->path !~ /compiledata\.h$/    
+#	   ) {
+	  if (!$default_include->ignore) {
+	    push @includes, $default_include;
+	  }
+#	}
       }
     }
 
