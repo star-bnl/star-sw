@@ -1,5 +1,8 @@
-// $Id: StMinidaqMaker.cxx,v 1.3 1999/02/23 16:36:45 love Exp $
+// $Id: StMinidaqMaker.cxx,v 1.4 1999/03/15 00:36:45 perev Exp $
 // $Log: StMinidaqMaker.cxx,v $
+// Revision 1.4  1999/03/15 00:36:45  perev
+// For new Maker schema
+//
 // Revision 1.3  1999/02/23 16:36:45  love
 // Set Clock to 9.4345 MC
 //
@@ -24,9 +27,9 @@
 // Revision 1.2  1998/07/20 15:08:15  fisyak
 // Add tcl and tpt
 //
-
+//////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// StMinidaqMaker class for Makers                                        //
+// StMinidaqMaker class for Makers                                      //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 #include <iostream.h>
@@ -52,17 +55,17 @@
 ClassImp(StMinidaqMaker)
 
 //_____________________________________________________________________________
-StMinidaqMaker::StMinidaqMaker(const char *name, const char *title):
-m_Params(0),
+StMinidaqMaker::StMinidaqMaker(const char *name):StMaker(name),
+
 m_tpg_pad_plane(0),
 m_tpg_detector(0),
 m_tpg_pad(0),
+m_Params(0)
 
-StMaker(name,title){
+{
    m_first_sector=1;
    m_last_sector=no_of_sectors;
-   drawinit=kFALSE;
-   //   m_clock_frequency = 13359400.0;  //Nominal for tss
+//   m_clock_frequency = 13359400.0;  //Nominal for tss
    m_clock_frequency = 9.4345e+6; // For 1997 and 1998 tpc test runs.
 }
 //_____________________________________________________________________________
@@ -73,7 +76,7 @@ Int_t StMinidaqMaker::Init() {
   //Tell me I am here
   cout<<"Init miniDAQ maker"<<endl;
   // access to tsspar
-   St_DataSetIter       local(gStChain->DataSet("params"));
+   St_DataSetIter       local(GetDataBase("params"));
    St_DataSet *tsspars = local("tpc/tsspars");
    if (tsspars){
        St_DataSetIter partable(tsspars);
@@ -91,7 +94,7 @@ Int_t StMinidaqMaker::Init() {
        }
    }
 // geometry parameters
-   //   St_DataSetIter atpc = local(gStChain->DataSet("params/tpc"));
+   //   St_DataSetIter atpc = local(GetDataBase("params/tpc"));
    //  St_DataSet *tpc(atpc);
    St_DataSet *tpc=local("tpc"); 
    if(!tpc) tpc=local.Mkdir("tpc");
@@ -112,11 +115,13 @@ Int_t StMinidaqMaker::Init() {
          m_tpg_pad       = new St_tpg_pad("tpg_pad",1); partable.Add(m_tpg_pad);
        }
        Int_t res = tpg_main(m_tpg_pad_plane,m_tpg_detector,m_tpg_pad); 
+       if(res!=kSTAFCV_OK) Warning("Make","tpg_main==%d",res);
+
    }
    // add the params/tpc/tfcpars/tfc_sector_index table
-   St_DataSet *tfspars = local("tpc/tfcpars");
+//   St_DataSet *tfspars = local("tpc/tfcpars");
    if (!m_tfc_sector_index) {
-         St_DataSetIter  loc(gStChain->DataSet("params"));
+         St_DataSetIter  loc(GetDataBase("params"));
          loc.Cd("tpc/tfcpars");
          m_tfc_sector_index = (St_tcl_sector_index *) loc("tfc_sector_index");
          if (!m_tfc_sector_index) {
@@ -128,7 +133,7 @@ Int_t StMinidaqMaker::Init() {
 // Create tables in DataSet priv
 
    if (!m_Params) {m_Params = new St_DataSet("priv");}
-   m_Fruits = m_Params;
+   //yf   m_Fruits = m_Params;
    //
    if (m_Params) {
      St_DataSetIter       local(m_Params);
@@ -145,7 +150,7 @@ Int_t StMinidaqMaker::Init() {
    //
      cout<<"just before the loop"<<endl;
 
-     St_DataSet     *gg = gStChain->DataSet("params");
+     St_DataSet     *gg = GetDataBase("params");
      St_DataSetIter param(gg);
      St_DataSet     *begin_run = param("tpc/BEGIN_RUN");
      St_DataSetIter gaintables(begin_run);
@@ -196,7 +201,7 @@ Int_t StMinidaqMaker::Init() {
               cout<<" gaindir"<<gaindir<<endl;
               St_DataSet *sectorN = 0;
               Int_t sectorNumber =0;
-              while (sectorN = nextSector()) {
+              while ((sectorN = nextSector())) {
                    if(strcmp(sectorN->GetName(),"Sector") == 0){
                    sectorNumber++;
                   if(sectorNumber == list_of_sectors[l]){
@@ -209,6 +214,7 @@ Int_t StMinidaqMaker::Init() {
 		 St_type_floatdata *fdo = (St_type_floatdata *) localIter.Find("gain_data_out");
 		 cout<<"input pointers"<<rri<<" "<<rro<<" "<<fdi<<" "<<fdo<<endl;
 		 Int_t result = tfc_load_native_gains(tsi,m_it,m_gt,m_st,rsm,rri,fdi, rro, fdo); 
+                 if(result!=kSTAFCV_OK) Warning("Make","tfc_load_native_gains==%d",result);
                   }
                 }
               }
@@ -255,7 +261,7 @@ void StMinidaqMaker::TransferData(){
 // Check sectors output tables   
    for (Int_t i=m_first_sector;i<=m_last_sector;i++){
      Char_t name_of_sector[80];
-     Int_t Nchar = sprintf(name_of_sector,"Sector_%i",i);
+     sprintf(name_of_sector,"Sector_%i",i);
      sector = raw_data_tpc(name_of_sector);
      if (!sector) {
        raw_data_tpc.Mkdir(name_of_sector);
@@ -289,13 +295,13 @@ void StMinidaqMaker::TransferData(){
    //begin to run module init_raw_table
     cout<<"begin to run module init_raw_table in StMinidaqMaker"<<endl;
    St_DataSetIter next(m_DataSet);
-   while (sector=next()){
+   while ((sector=next())){
        Char_t *name= 0;
-       if (name = strstr(sector->GetName(),"Sector")) {
+       if ((name = strstr(sector->GetName(),"Sector"))) {
        // look for the sector number
            name  = strchr(name,'_')+1;
            Int_t indx = atoi(name);
-           if (gStChain->Debug()) printf(" Sector = %d \n", indx);
+           if (Debug()) printf(" Sector = %d \n", indx);
            Int_t k;
            k = indx; if (k == m_first_sector) k = - indx;
            tss_tsspar_st *tsspar = m_tsspar->GetTable();
@@ -307,6 +313,7 @@ void StMinidaqMaker::TransferData(){
            Int_t initraw = init_raw_table(m_tsspar,  raw_sec_m,
                            raw_row_in, 
                            raw_row_out);
+           if(!initraw!=kSTAFCV_OK) Warning("Make","init_raw_table==%d",initraw);
        }
      }
        //begin to call module reformat_new
@@ -317,14 +324,14 @@ void StMinidaqMaker::TransferData(){
     //rewind DataSetIter
     next.Reset();
     // goto the TPC_DATA directory
-    //   St_DataSetIter mdaqdata(gStChain->DataSet("event/raw_data/tpc/TPC_DATA"));
+    //   St_DataSetIter mdaqdata(GetDataSet("event/raw_data/tpc/TPC_DATA"));
      St_DataSet     *tpcmin =next.Find("TPC_DATA");
      St_DataSetIter mdaqdata(tpcmin);
 
     //loop over all the sectors to run reformat_new module
      for (Int_t im=m_first_sector;im<=m_last_sector;im++){
        Char_t name_of_sector[80];
-       Int_t Nchar = sprintf(name_of_sector,"Sector_%i",im);
+       sprintf(name_of_sector,"Sector_%i",im);
        sector = raw_data_tpc(name_of_sector);
        if (!sector) {
 	 //         raw_data_tpc.Mkdir(name_of_sector);
@@ -332,17 +339,17 @@ void StMinidaqMaker::TransferData(){
         printf("there is no this sector_%d\n", i);
        }
  
-      while (sector=next()){
+      while ((sector=next())){
          Char_t *name= 0;
-          if (name = strstr(sector->GetName(),"Sector")) {
+          if ((name = strstr(sector->GetName(),"Sector"))) {
           // look for the sector number
               name  = strchr(name,'_')+1;
               Int_t indx = atoi(name);
-               if (gStChain->Debug()) printf(" Sector = %d \n", indx);
+               if (Debug()) printf(" Sector = %d \n", indx);
               Int_t k;
               k = indx; if (k == m_first_sector) k = - indx;
                //store sector no. into tfc_sector_index table
-	      // St_DataSetIter sectpp(gStChain->DataSet("params/tpc/tfcpars"));
+	      // St_DataSetIter sectpp(GetDataBase("params/tpc/tfcpars"));
               // m_tfc_sector_index= (St_tcl_sector_index *) sectpp("tfc_sector_index");
               tcl_sector_index_st *tfcss=m_tfc_sector_index->GetTable();
               tfcss->CurrentSector=k;
@@ -377,11 +384,12 @@ void StMinidaqMaker::TransferData(){
                     St_type_shortdata  *pixel_data_in  = (St_type_shortdata *) sect("pixel_data_in");
                     St_type_shortdata  *pixel_data_out = (St_type_shortdata *) sect("pixel_data_out");
                     Int_t res = reformat_new(m_tsspar,m_tfc_sector_index,
-                           m_it,m_sd,m_st,
-                           raw_sec_m,
-                           raw_row_in, raw_pad_in, raw_seq_in, pixel_data_in,
-                           raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out);
-                }
+                        		     m_it,m_sd,m_st,
+                        		     raw_sec_m,
+                        		     raw_row_in, raw_pad_in, raw_seq_in, pixel_data_in,
+                        		     raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out);
+                    if(res!=kSTAFCV_OK) Warning("TransferData","reformat_new==%d",res);
+                 }
              }
           }
        }
@@ -409,7 +417,7 @@ void StMinidaqMaker::MakeHistograms(){
      if (m_adcxyzon) {//Create  pixels table
 // tss Debug tables control
        if (!m_tfc_sector_index) {
-         St_DataSetIter  loc(gStChain->DataSet("params"));
+         St_DataSetIter  loc(GetDataBase("params"));
          loc.Cd("tpc/tfcpars");
          m_tfc_sector_index = (St_tcl_sector_index *) loc("tfc_sector_index");
          if (!m_tfc_sector_index) {
@@ -435,8 +443,8 @@ void StMinidaqMaker::MakeHistograms(){
       raw_sec_m = (St_raw_sec_m *) next("raw_sec_m");
      } // if (m_adcxyzon) 
 
-     while (sector=next()){// Iterate over sectors
-       if (name = strstr(sector->GetName(),"Sector")) {
+     while ((sector=next())){// Iterate over sectors
+       if ((name = strstr(sector->GetName(),"Sector"))) {
          St_DataSetIter sect(sector); 
        // look for the sector number
          name  = strchr(name,'_')+1;
@@ -469,6 +477,7 @@ void StMinidaqMaker::MakeHistograms(){
                                    raw_row_in,raw_pad_in,raw_seq_in,pixel_data_in,
                                    raw_row_out,raw_pad_out,raw_seq_out,pixel_data_out,
                                    adcxyz);
+           if(res!=kSTAFCV_OK) Warning("Make","xyz_newtab==%d",res);
 	 }
        }
      }
@@ -487,10 +496,10 @@ void StMinidaqMaker::MakeHistograms(){
 //_____________________________________________________________________________
 void StMinidaqMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StMinidaqMaker.cxx,v 1.3 1999/02/23 16:36:45 love Exp $\n");
+  printf("* $Id: StMinidaqMaker.cxx,v 1.4 1999/03/15 00:36:45 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
+  if (Debug()) StMaker::PrintInfo();
 }
 
 //_____________________________________________________________________________
