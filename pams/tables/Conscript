@@ -5,11 +5,13 @@ my $DirPath = DirPath '.';# print "DirPath = $DirPath\n";
 my $Dir = "pams";                           print "Build Tables for $Dir\n" unless ($param::quiet);
 my @idlL = find_idl($Dir);#  print "@idlL\n"; 
 my @Repo = Repository_List;# print "Repositories = |@Repo|\n";
-foreach my $Rep (@Repo) {
-  my $RepDir = $Rep . "/" . $Dir;# print "RepDir = $RepDir\n";
-  my @idlR = find_idl($RepDir);
-  foreach my $i (@idlR) {
-    push @idlL, $i; 
+if (!$param::noRepository) {
+  foreach my $Rep (@Repo) {
+    my $RepDir = $Rep . "/" . $Dir;# print "RepDir = $RepDir\n";
+    my @idlR = find_idl($RepDir);
+    foreach my $i (@idlR) {
+      push @idlL, $i; 
+    }
   }
 }
 my @idl = sortu (@idlL);# print "idl = @idl\n"; 
