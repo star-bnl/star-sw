@@ -1,25 +1,27 @@
-* $Id: btofgeo2.g,v 1.5 2002/12/05 04:46:30 geurts Exp $
+* $Id: btofgeo2.g,v 1.6 2004/02/12 18:59:56 llope Exp $
 *
 * btofgeo2.g is the geometry to contain TOFp+r and the CTB
 * $Log: btofgeo2.g,v $
-* Revision 1.5  2002/12/05 04:46:30  geurts
-* incl. cvs tags
+* Revision 1.6  2004/02/12 18:59:56  llope
+* modifications for run4 MRPC positioning inside TOFr-prime
+*
+* Revision 1.6 2004/02/12 12:00:00 llope modifications for run4
 *
 *
 *******************************************************************************
 Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system 
 *******************************************************************************
 
-  Author     W.J. Llope et al.
+  Author     W.J. Llope 
   Created    29 December 1999
 *---Version 3------------------------------------------------------------------
 * modified   29 Dec  1999, WJL- many changes to implement actual "TOFp Detector" 
-*	better HVSys cell geometry....
-*	slat length now 20cm...
-*	big changes to divisioning scheme for phi segmentation!!! 
-*	slat positioning based on AutoCAD file...
-*	foam-support plastic angles included...
-*	FEE dimensioning updated, FEE posns from AutoCAD, including lemo connectors...
+*       better HVSys cell geometry....
+*       slat length now 20cm...
+*       big changes to divisioning scheme for phi segmentation!!! 
+*       slat positioning based on AutoCAD file...
+*       foam-support plastic angles included...
+*       FEE dimensioning updated, FEE posns from AutoCAD, including lemo connectors...
 * modified   ~9 Apr  2000  PN?- rearranged phi segmentation scheme
 * modified   27 Apr  2000  FG- removed posit2 from BTOG structure
 *                          FG- increased version number to 3
@@ -36,13 +38,14 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
 *            10 Jun  2002  GE- add BRSG BUPC BRFE on geometry & change the 
 *            sensitive volume to gas layers
 *            Oct/Nov 2002  SY/SH/FG - many, many updates
-*            26 Nov 2002  FG - posit2 reintroduced. TOFr is now at
+*            26 Nov  2002  FG - posit2 reintroduced. TOFr is now at
 *                              pos.23. New TOF_choices are 5 (single
 *                              TOFp+single TOFr tray) and 6 (full TOFr
 *                              system)
-*            04 Dec 2002 FG - modr structure changed. Position arrays
+*            04 Dec  2002 FG - modr structure changed. Position arrays
 *                             introduced for the TOFr geometry. Common
 *                             material definitions moved to the top.
+*            12 Feb  2004 WJL- modifications for run-4 TOFr' geometry
 *
 *
 *******************************************************************************
@@ -60,7 +63,8 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
 
 *
 *   Data Base interface staff:
-      Structure BTOG { Version, Rmin, Rmax, dz, choice, posit1, posit2 }
+      Structure BTOG { Version, Rmin, Rmax, dz, choice, posit1, posit2, 
+                       tofrver }
 *
       Structure TRAY { Height, Width, Length, WallThk, SupFullH, SupFullW,
                        SupLen,
@@ -96,6 +100,14 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
                        SPRMin, SPRMax, SPLen,  WGRMin, WGRMax, WGLen,
                        FEEH,   HBWid,  NGap }
 *
+      Structure MOD4 { Height, Width, Length, Center, mrpcX(32), 
+                       mrpcZ(32), mrpcA(32),
+                       HCHgt,  HCWid,  HCLen,  PCBHgt, PCBWid, PCBLen,
+                       MYHgt,  MYWid,  MYLen,  GRHgt,  GRWid,  GRLen,
+                       OGHgt,  OGWid,  OGLen,  IGHgt,  IGWid,  IGLen,
+                       SPRMin, SPRMax, SPLen,  WGRMin, WGRMax, WGLen,
+                       FEEH,   HBWid,  NGap, TrayEdgeZ }
+*
       real      support_arm_width,  support_arm_Xpos,  support_arm_Ypos,
                 support_aile_width, support_aile_Ypos, 
                 xpos, ypos, zpos, totlen, sublen, subcen, x0, z0,
@@ -105,18 +117,19 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
 * -------------------------------------------------------------------------
 *
       Fill BTOG ! Barrel Trigger, CTB/TOF Basic dimensions 
-         Version   = 4         ! geometry version
+         Version   = 5         ! geometry version
          Rmin      = 207.80    ! minimum CTB/TOF system radius (as built)
          Rmax      = 219.5     ! maximum CTB/TOF system radius
          dz        = 246.0     ! CTB/TOF tube half length
-         choice    = 5         ! 1=CTB, 2=TOF, 3=25% TOF, 4=1 tray-TOFp, 5=tray-TOFr, 6=Full-TOFr
+         choice    = 6         ! 1=CTB, 2=TOF, 3=25% TOF, 4=1 tray-TOFp, 5=1 tray-TOFr, 6=Full-TOFr
          posit1    = 32        ! TOFp tray position for choice 4 or 5
          posit2    = 23        ! TOFr tray position for choice 5 
+         tofrver   = 4         ! 3=TOFr (Run-3), 4=TOFrp (Run-4)
 *
       Fill TRAY ! general tray stats        
          Height    =  8.89      ! tray height(8.89)
          Width     = 21.59      ! full tray width
-         Length    = 241.62      ! full tray length(241.62)
+         Length    = 241.62     ! full tray length(241.62)
          WallThk   =  0.13      ! tray wall thickness
          SupFullH  =  2.03      ! support height (radial)
          SupFullW  =  15.24     ! support full width with arms
@@ -197,15 +210,15 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
          CoolOutR  = 0.635    ! Cooling loop pipe outer radius, 0.5in/2
          CoolInnR  = 0.561    ! Cooling loop pipe inner radius, (0.5in-0.058in)/2
 *
-      Fill MODR ! RPC TOF Module dimensions and positions
+      Fill MODR ! RUN3 MRPC TOF Module dimensions and positions
          Height    = 1.95     ! Module height (r)
          Width     = 21.2     ! Module width (phi)
          Length    = 9.4      ! Module length (z)
          Center    = 0.35     ! Module detector center in (phi)
-	 mrpcX = { 4.76, 1.21, 4.99, 1.46, 5.19, 1.71, 4.98, 1.54, 2.69, 3.39,
+         mrpcX = { 4.76, 1.21, 4.99, 1.46, 5.19, 1.71, 4.98, 1.54, 2.69, 3.39,
                    3.25, 3.49, 3.33, 3.54, 3.54, 3.57, 3.48, 3.51, 3.19, 3.19,
-		   3.19, 3.19, 3.19, 3.43, 3.43, 3.43, 3.43, 3.43, 3.43, 3.43,
-		   3.43, 3.43, 3.43 } ! mrpc Xpositions
+                   3.19, 3.19, 3.19, 3.43, 3.43, 3.43, 3.43, 3.43, 3.43, 3.43,
+                   3.43, 3.43, 3.43 } ! mrpc Xpositions
          mrpcZ = {  4.50,  10.48,  16.83,  22.64,  29.25,  34.89,
                    41.68,  47.19,  53.76,  60.18,  66.53,  72.95,
                    79.42,  85.97,  92.59,  99.28, 106.00, 112.84,
@@ -247,12 +260,61 @@ Module  BTOFGEO2 is the Geometry of Barrel Trigger / Time Of Flight system
          NGap   = 6       ! Number of gaps in MRPC
       EndFill
 *         NPad   = 6       ! Number of pads within a MRPC
+* 
+      Fill MOD4   ! RUN4 MRPC TOF Module dimensions and positions 
+         Height    = 1.95     ! Module height (r)
+         Width     = 21.2     ! Module width (phi)
+         Length    = 9.4      ! Module length (z)
+         Center    = 0.35     ! Module detector center (phi)
+         mrpcZ = { 5.83, 11.97, 18.17, 24.03, 30.55, 36.22, 42.54, 48.87, 
+                  55.19, 61.53, 67.86, 74.24, 80.68, 87.08, 93.64, 100.36, 
+                  107.19,114.05,121.02,128.08,135.24,142.51,149.88,157.35, 
+                  164.93,172.63,180.43,188.35,196.38,204.52,212.79,221.17 } ! mrpc Zposns
+         mrpcX = { 1.5, 2.83, 4.16, 1.55, 4.73, 1.88, 2.56, 3.06, 
+                   3.3, 3.41, 3.32, 3.2, 3.07, 2.73, 2.58, 2.64, 
+                   2.74, 2.74, 2.76, 2.76, 2.76, 2.76, 2.76, 2.76, 
+                   2.76, 2.76, 2.76, 2.76, 2.76, 2.76, 2.76, 2.76 } ! mrpc Xposns
+         mrpcA = { 6., 6., 6., 6., 0., 12., 12., 16., 
+                  16., 19., 19., 19., 19., 24., 24., 25., 
+                  27., 29., 30., 30., 30., 30., 30., 30., 
+                  30., 30., 30., 30., 30., 30., 30., 30. } ! mrpc angles
+         HCHgt  =  0.466  ! HC->Height (r)
+         HCWid  = 20.8    !  HC->Width (phi)
+         HCLen  =  8.4    !   HC->Length (z)
+         PCBHgt =  0.15   ! PCB->Height (r)
+         PCBWid = 21.0    !  PCB->Width  (phi)
+         PCBLen =  9.4    !   PCB->Length (z) *PCBLen =  9.4(real)
+         MYHgt  =  0.035  ! MYlar->Height
+         MYWid  = 21.2    !  MYlar->Width
+         MYLen  =  8.4    !   MYlar->Length
+         GRHgt  =  0.013  ! GRaphite->Height
+         GRWid  = 20.2    !  GRaphite->Width
+         GRLen  =  7.4    !   GRaphite->Length
+         OGHgt  =  0.11   ! Outer Glass->Height
+         OGWid  = 20.6    !  Outer Glass->Width
+         OGLen  =  7.8    !   Outer Glass->Length
+         IGHgt  =  0.054  ! Inner Glass->Height
+         IGWid  = 20.0    !  Inner Glass->Width
+         IGLen  =  6.1    !   Inner Glass->Length
+         SPRMin =  0.     ! SeParator Tube->RMin
+         SPRMax =  0.011  !  SeParator Tube->RMax
+         SPLen  =  7.8    !   SeParator Tube->Length
+         WGRMin =  0.     ! Wedge Tube: RMin
+         WGRMax =  0.15   !  Wedge Tube->RMax
+         WGLen  = 10.0    !   Wedge Tube->Length
+         FEEH   =  0.15   ! tofr fee pcb thickness
+         HBWid  =  0.635  ! the slim honeycomb support box width
+         NGap   = 6       ! Number of gaps in MRPC
+         TrayEdgeZ = 3.0*2.54 ! tray posn along rail wrt TPC centerplane (Z)
+      EndFill
+*         NPad   = 6       ! Number of pads within a MRPC
 *
       USE   BTOG
       USE   TRAY
       USE   CTBB
       USE   TOFF
       USE   MODR
+      USE   MOD4
 *
 * ---
 * G10 material definition for PCBs
@@ -334,7 +396,7 @@ EndBlock
 *     remember that volume attributes are inherited, no need to redefine serial
 *
 Block BTRA is one full tray plus supporting structure for CTB/TOF
-      Attribute BTRA      seen=0   colo=2
+      Attribute BTRA      seen=1   colo=2
       Shape     BOX       dx=(tray_SupFullH+tray_height+tray_StripT)/2,
                           dy=tray_Width/2
       Create and Position BXTR     X=(tray_SupFullH+tray_StripT)/2,
@@ -345,7 +407,7 @@ EndBlock
 *
 *------------------------------------------------------------------------------
 *
-Block BRFE is the front end electronic of tofr
+Block BRFE is the FEE of tofr (run-3)
       Attribute BRFE seen=0   colo=3
       Material  G10
       Shape     BOX       dx=modr_feeh/2,
@@ -373,7 +435,7 @@ EndBlock
 *
 *------------------------------------------------------------------------------
 *
-Block BMTC  is  the Main Tray Cavity filled with thedetails for CTB
+Block BMTC  is  the Main Tray Cavity filled with the details for CTB
       Attribute  BMTC     seen=-1   colo=5
       Material   Air
       Shape      BOX      dx=tray_height/2-tray_WallThk,  
@@ -482,7 +544,7 @@ EndBlock
 *
 *------------------------------------------------------------------------------
 *
-Block BRTC  is  the Main Tray Cavity filled with the details for TOFr 
+Block BRTC is the Main Tray Cavity filled with the details for TOFr (run3 or run4)
       Attribute  BRTC     seen=0   colo=5
       Material   HoneyComb Dens=0.282
       Shape      BOX      dx=tray_Height/2-tray_WallThk,
@@ -495,9 +557,6 @@ Block BRTC  is  the Main Tray Cavity filled with the details for TOFr
      Create and Position BGMT konly='MANY'
 
 *
-      z0 = tray_Length/2 - 0.05
-*      x0 = -(btog_Rmin+tray_SupFullH+tray_StripT+tray_Height/2) - 1.5
-      x0=-3.66
 *
 *---- create and position TOFr modules
 * 
@@ -508,11 +567,28 @@ Block BRTC  is  the Main Tray Cavity filled with the details for TOFr
 
       Create BRMD
 
+	if (btog_tofrver==3) then
+      z0 = tray_Length/2 - 0.05
+*      x0 = -(btog_Rmin+tray_SupFullH+tray_StripT+tray_Height/2) - 1.5
+      x0 = -3.66
       do i=1,33
-      Position BRMD  X=x0+modr_mrpcX(i) ,
-                     Z=z0-modr_mrpcZ(i) ,
-                     alphay=modr_mrpcA(i)
+            Position BRMD  X=x0+modr_mrpcX(i) ,
+                           Z=z0-modr_mrpcZ(i) ,
+                           alphay=modr_mrpcA(i)
       enddo
+	elseif (btog_tofrver==4) then
+      z0 = tray_Length/2 - 0.05 - mod4_TrayEdgeZ
+      x0 = -3.66
+      do i=1,32
+         if (i.le.20.or.(i.ge.25.and.i.le.28)) then
+            Position BRMD  X=x0+mod4_mrpcX(i) ,
+                           Z=z0-mod4_mrpcZ(i) ,
+                           alphay=mod4_mrpcA(i)
+         endif
+      enddo
+    else 
+
+	endif
 *
 EndBlock
 *
@@ -883,7 +959,7 @@ EndBlock
 *
 *------------------------------------------------------------------------------
 Block BRMD  is a six channel module for TOFr
-      Attribute  BRMD     seen=1   colo=5
+      Attribute  BRMD     seen=0   colo=6
       Material   RPCgas
       Shape      BOX      dx=modr_Height/2,
                           dy=modr_Width/2,
@@ -942,7 +1018,7 @@ EndBlock
  
 *------------------------------------------------------------------------------
 Block BRHC  is the HoneyComb in the TOFr module
-      Attribute  BRHC
+      Attribute  BRHC      seen=1 colo=1
       Material   HoneyComb
       Shape      BOX       dx = modr_HCHgt/2,
                            dy = modr_HCWid/2,
@@ -951,7 +1027,7 @@ EndBlock
 
 *------------------------------------------------------------------------------
 Block BRCB  is the PCB in the TOFr module
-      Attribute  BRCB
+      Attribute  BRCB   seen=1 colo=3
       Material   G10
       Shape      BOX    dx = modr_PCBHgt/2,
                         dy = modr_PCBWid/2,
@@ -960,7 +1036,7 @@ EndBlock
 
 *------------------------------------------------------------------------------
 Block BRMY  is the MYlar in the TOFr module
-      Attribute  BRMY
+      Attribute  BRMY   seen=0 colo=1
       Material   MYLAR
       Shape      BOX    dx = modr_MYHgt/2,
                         dy = modr_MYWid/2,
@@ -969,7 +1045,7 @@ EndBlock
 
 *------------------------------------------------------------------------------
 Block BRGR  is the GRaphite in the TOFr module
-      Attribute  BRGR
+      Attribute  BRGR   seen=0 colo=1
       Material   Carbon
       Shape      BOX    dx = modr_GRHgt/2,
                         dy = modr_GRWid/2,
@@ -978,7 +1054,7 @@ EndBlock
 
 *------------------------------------------------------------------------------
 Block BROG  is the Outer Glass in the TOFr module
-      Attribute  BROG
+      Attribute  BROG   seen=1 colo=7
       Component  Si     A=28  Z=14  W=1.
       Component  O      A=16  Z=8   W=2.
       Mixture    Glass  Dens=2.2
@@ -1043,7 +1119,7 @@ EndBlock
 
 *------------------------------------------------------------------------------
 Block BRIG  is the Inner Glass in the TOFr module
-      Attribute  BRIG
+      Attribute  BRIG   seen=1 colo=7
       Material   Glass
       Shape      BOX    dx = modr_IGHgt/2,
                         dy = modr_IGWid/2,
@@ -1052,7 +1128,7 @@ EndBlock
 
 *------------------------------------------------------------------------------
 *Block BRSP  is the SeParator in the TOFr module
-*      Attribute  BRSP
+*      Attribute  BRSP 
 *      Component  O    A=16     Z=8    W=1
 *      Component  N    A=14     Z=7    W=1
 *      Component  C    A=12     Z=6    W=6
@@ -1078,7 +1154,7 @@ Block BRSG  is the sensitive gas layer in the TOFr module
 EndBlock
 *------------------------------------------------------------------------------
 Block BRWG  is the WedGe(support) in the TOFr module
-      Attribute  BRWG
+      Attribute  BRWG seen=0
       Component  O    A=16     Z=8    W=2
       Component  C    A=12     Z=6    W=5
       Component  H    A=1      Z=1    W=8
@@ -1091,16 +1167,5 @@ EndBlock
 
 * ----------------------------------------------------------------------------
    end
-
-
-
-
-
-
-
-
-
-
-
 
 
