@@ -58,8 +58,8 @@
                               DeclFileName(), ImplFileName(), \
                               DeclFileLine(), ImplFileLine()); \
       TClass *b = CreateClass(_QUOTE2_(name,_st), Class_Version(), \
-                              _QUOTE2_(name,.h), ImplFileName(), \
-                               1,              ImplFileLine()); \
+                              _QUOTE2_(name,.h), _QUOTE2_(name,.h), \
+                               1,               1 ); \
       fgIsA = c; \
    } \
    _TableImp_(name)
