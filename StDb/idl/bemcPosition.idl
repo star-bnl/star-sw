@@ -1,11 +1,10 @@
-#ifndef BEMC_POSITION_H
-#define BEMC_POSITION_H
-
-/* table definition for L2 BEMC positions */
+/* 
+ * table definition for L2 BEMC positions 
+ */
 
 struct bemcPosition {
-  unsigned int daqId;
-  unsigned int towerId;
+  unsigned long daqId;
+  unsigned long towerId;
   float x;
   float y;
   float z;
@@ -13,4 +12,4 @@ struct bemcPosition {
   float phi;
 };
 
-#endif
+

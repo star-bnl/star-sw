@@ -1,29 +1,20 @@
-//:Description: electronic signal characteristics 
-//:Synonyms::::
-//:Source:  
-//:Update:
-//:Update frequncy:
-//:Reminder:
-//:Recall frequency:
-//:Size of Data:
-//:Pointer to data:  
-
-#ifndef SVTDAQ_H
-#define SVTDAQ_H
+/*
+ * Description: electronic signal characteristics 
+ */
 
 struct svtDaq {
 
   //  type varnam;    //Units : Comments
 
-  int clearedTimeBins;   // 
-  int savedBlackAnodes[4];   // 
-  int pixelsBefore;
-  int pixelsAfter;
-  int pedOffset;
-  int seqLo;
-  int seqHi;
-  int threshLo;
-  int threshHi;
+  long clearedTimeBins;       /* ?? */
+  long savedBlackAnodes[4];   /* ?? */  
+  long pixelsBefore;          /* ?? */
+  long pixelsAfter;           /* ?? */
+  long pedOffset;             /* ?? */
+  long seqLo;                 /* ?? */
+  long seqHi;                 /* ?? */
+  long threshLo;              /* ?? */
+  long threshHi;              /* ?? */
 };
 
-#endif
+

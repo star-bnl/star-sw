@@ -1,18 +1,12 @@
-/*    svtRms.h
-*
-*  Table: svtRms
-*
-*       description: //  SVT RMS
-*/ 
-
-#ifndef __svtRms__H
-#define __svtRms__H
+/* svtRms.h
+ *
+ * Table: svtRms
+ *
+ * description: //  SVT RMS
+ */ 
 
 struct svtRms { 
+  long   ID;
+  float  rms[240][128];   /* ??  */
+};  
 
-  int ID;
-
-  float  rms[240][128];   /*   */
-
- };  
-#endif 
