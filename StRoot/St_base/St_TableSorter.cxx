@@ -86,28 +86,33 @@ St_TableSorter::St_TableSorter(const St_Table &table, TString &colName,Int_t fir
   //                   = 0 means sort all rows from the "firstRow" by the end of table
   //
 
+  m_numberOfRows = 0;
+  m_colType      = kNAN;
+  m_simpleArray  = 0;
+
   TString n = table.GetName();
   n += ".";
   n += colName;
   SetName(n);
 
-  m_SortIndex  = 0;
+  m_SortIndex    = 0;
   m_searchMethod = 0;
   m_colType      = kNAN;
 
   Char_t *name = (Char_t *) colName.Data();
-  if (!(name || strlen(colName.Data()))) return;
+  if (!(name || strlen(colName.Data()))) { MakeZombie(); return; }
   name = StrDup(colName.Data());
 
   // check bounds:
-  if (firstRow > m_ParentTable.GetNRows()) return; 
+  if (firstRow > m_ParentTable.GetNRows()) { MakeZombie(); return; }
   m_firstRow = firstRow;
 
   m_numberOfRows = m_ParentTable.GetNRows()- m_firstRow;
   if (numberRows > 0)  m_numberOfRows = TMath::Min(numberRows,m_numberOfRows);
 
   // Allocate index array
-  if (m_numberOfRows) m_SortIndex = new void*[m_numberOfRows];
+  if (!m_numberOfRows > 0) { MakeZombie(); return; }
+  m_SortIndex = new void*[m_numberOfRows];
 
   // define dimensions if any;
   // count the open "["
@@ -136,7 +141,8 @@ St_TableSorter::St_TableSorter(const St_Table &table, TString &colName,Int_t fir
           if (closeBracket > openBracket) 
              m_IndexArray[i] = atoi(openBracket+1);
           else {
-            Error("St_Tabel ctor", "Wrong parethethis <%s>",colName.Data());
+            Error("St_Table ctor", "Wrong parethethis <%s>",colName.Data());
+            MakeZombie();
             return;
           }
      }      
@@ -163,7 +169,7 @@ St_TableSorter::St_TableSorter(const Float_t *simpleArray, Int_t arraySize, Int_
   //
 
   SetSimpleArray(arraySize,firstRow,numberRows);
-  if (!m_simpleArray) return;
+  if (!m_simpleArray) { MakeZombie(); return; }
 
  //  LearnTable();
 
@@ -196,7 +202,7 @@ St_TableSorter::St_TableSorter(const Double_t *simpleArray, Int_t arraySize, Int
   //
 
   SetSimpleArray(arraySize,firstRow,numberRows);
-  if (!m_simpleArray) return;
+  if (!m_simpleArray)  {MakeZombie(); return; }
 
  //  LearnTable();
 
@@ -229,7 +235,7 @@ St_TableSorter::St_TableSorter(const Long_t *simpleArray, Int_t arraySize, Int_t
   //
 
   SetSimpleArray(arraySize,firstRow,numberRows);
-  if (!simpleArray) return;
+  if (!simpleArray) { MakeZombie(); return; }
 
  //  LearnTable();
 
@@ -267,7 +273,7 @@ void St_TableSorter::SetSimpleArray(Int_t arraySize, Int_t firstRow,Int_t number
   if (numberRows > 0)  m_numberOfRows = TMath::Min(numberRows,m_numberOfRows);
 
   // Allocate index array
-  if (m_numberOfRows) m_SortIndex = new void*[m_numberOfRows];
+  if (m_numberOfRows > 0) m_SortIndex = new void*[m_numberOfRows];
 }
 //_____________________________________________________________________________
 St_TableSorter::~St_TableSorter() 
