@@ -59,6 +59,7 @@
 * 
 * editted 8/26/98 K. Turner - in (evin), rm run/params/svt tables that
 *                             are in wrong place and not needed
+* editted 8/26/98 K. Turner - fixed (fzin) so it would work 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
 *************************************************************
@@ -127,12 +128,12 @@ macro bfc_init _
           exec read_table_from_file#read inev
 * 8/26/98 - now read in run/params using db,par2mem and these tables
 *          were in the wrong place in an old version
-	  rm run/params/svt/config
-	  rm run/params/svt/shape
-	  rm run/params/svt/geom
-	  rm run/params/svt/srs_activea
-	  rm run/params/svt/srs_srspar
-	  rm run/params/svt/srs_direct
+* rm run/params/svt/config
+* rm run/params/svt/shape
+* rm run/params/svt/geom
+* rm run/params/svt/srs_activea
+* rm run/params/svt/srs_srspar
+* rm run/params/svt/srs_direct
      (esin)
           dio/newfilestream inev [input_file] r
           cd [run]
@@ -142,7 +143,6 @@ macro bfc_init _
       (svg) 	  
 *          exec init_svg#read
            exec init_svg#svg_am
-           exec init_svg#init
       (tpg) 
 *          exec tpg_init#read
            exec tpg_init#init
@@ -315,7 +315,7 @@ ABEND:
      (evin) exec read_table_from_file#read inev
             if (staf_status(1).ne.STAFCV_OK) goto EOF
 * 8/25/98 K.Turner - because of mismatch between old and new structure:
-            rmdir event/dst
+* rmdir event/dst
      (esin) for dir in [evgen] [geantE] [raw_data] [data] [dst]
               cd [dir]; dio/stream/getevent inev 
               if (staf_status(1).ne.STAFCV_OK) goto EOF
@@ -323,8 +323,15 @@ ABEND:
      (fzin) trig 1 
      (rgst) trig 1
      (rg2t) cd [geantE]
-            for/call g2t
-            cd /dui
+          for/call g2t
+          tdm/table/rowcount g2t_vertex
+          no_vert=$format(staf_result(1),i10)
+          tdm/table/rowcount g2t_track
+          no_track=$format(staf_result(1),i10)
+          string = '---<bfc>---rg2t: Event  No.vertices ='//no_vert//' No.Tracks = '//no_track
+	  fmessage $quote([string])    [log_file]
+          message $quote([string])
+          cd /dui
       (svg)    nextl 1
       (tpg)    nextl 1
       (sss)    exec run_sss
