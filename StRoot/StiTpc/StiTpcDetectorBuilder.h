@@ -1,49 +1,34 @@
 #ifndef StiTpcDetectorBuilder_H
 #define StiTpcDetectorBuilder_H
-
 #include "Sti/StiDetectorBuilder.h"
-class StTpcCoordinateTransform;
+#include "Sti/StiHitErrorCalculator.h"
 class StTpcPadPlaneI;
 class StTpcDimensionsI;
-class StTpcCoordinateTransform;
-class StiDefaultHitErrorCalculator;
+class HitError;
 
 class StiTpcDetectorBuilder : public StiDetectorBuilder
 {
 
 public:
-    // constructors
-    StiTpcDetectorBuilder(bool active, char* baseName);
+    StiTpcDetectorBuilder(bool active);
     virtual ~StiTpcDetectorBuilder(); 	
-    virtual void loadDb();
-    virtual void buildMaterials();
-    virtual void buildShapes();
-    virtual void buildDetectors();
-
+    virtual void buildDetectors(StMaker&s);
     /// returns the azimuthal angle [-pi, pi) for tpc sector [1-24]
     double phiForTpcSector(unsigned int iSector) const;
-    // radius of tpc padrow (cm) [1-45]
-    //double positionForTpcPadrow(unsigned int iPadrow) const;
-    // tpc padrow [1-45] for global position
-    //unsigned int tpcPadrowForGlobal(const StThreeVector<double> &vec) const;
-    // tpc sector [1-45] for global position
-    //unsigned int tpcSectorForGlobal(const StThreeVector<double> &vec) const;
-    
+		double phiForSector(unsigned int iSector,     unsigned int nSectors) const;
+		double phiForWestSector(unsigned int iSector, unsigned int nSectors) const;
+		double phiForEastSector(unsigned int iSector, unsigned int nSectors) const;
  protected:
     int rdoForPadrow(int iPadrow);
-
-
     StiMaterial * _gas;
     StiMaterial * _fcMaterial;    
-		
-    StTpcCoordinateTransform *_transform;
     StTpcPadPlaneI   * _padPlane; 
     StTpcDimensionsI * _dimensions; 
-
-    StiDefaultHitErrorCalculator * _innerCalc;
-    StiDefaultHitErrorCalculator * _outerCalc;
+    StiDefaultHitErrorCalculator  _innerCalc;
+    StiDefaultHitErrorCalculator  _outerCalc;
 };
 
+/// Get the azimuthal angle of the given sector
 inline double StiTpcDetectorBuilder::phiForTpcSector(unsigned int sector) const
 {
   if(sector<0 || sector>=_nSectors[0])
@@ -53,6 +38,53 @@ inline double StiTpcDetectorBuilder::phiForTpcSector(unsigned int sector) const
     }
   return phiForSector(sector, _nSectors[0]);
 } // phiForTpcSector
+
+/// nSectors is the number of sectors in 360 degrees (one half of the
+/// TPC or all of the SVT, for example)
+inline double StiTpcDetectorBuilder::phiForSector(unsigned int iSector, 
+					unsigned int nSectors) const
+{
+  if(iSector>=2*nSectors)
+    {
+      cerr << "StiDetectorBuilder::phiForSector(" << iSector << ", "
+	   << nSectors << "):  Error, invalid sector" << endl;
+    }
+  return (iSector < nSectors) ? 
+    phiForWestSector(iSector, nSectors) :
+    phiForEastSector(iSector, nSectors);
+}
+
+/// returns the reference angle for the given sector number (out of the 
+/// given total).  This assumes the star convention where the highest
+/// numbered sector is at "12 o'clock", or pi/2, and the sector numbering
+/// _decreases_ with increasing phi.  [I guess this must have seemed like
+/// a good idea at the time....]
+///
+/// returns in [-pi, pi)
+///
+/// nSectors is the number of sectors in the west half of the detector,
+/// not both halves.
+inline double StiTpcDetectorBuilder::phiForWestSector(unsigned int iSector, 
+					    unsigned int nSectors) const
+{
+  int offset = nSectors/4;
+  double deltaPhi = 2.*M_PI/nSectors;
+  
+  // make phi ~ sector (not -sector) and correct offset
+  double dPhi = (offset - static_cast<int>(iSector+1))*deltaPhi;
+  return nice(dPhi);  
+} // phiForWestSector
+
+/// as above, but numbering _increases_ with increasing phi.
+inline double StiTpcDetectorBuilder::phiForEastSector(unsigned int iSector, 
+					    unsigned int nSectors) const
+{
+  int offset = 3*nSectors/4;
+  double deltaPhi = 2.*M_PI/nSectors;
+  double dPhi = (static_cast<int>(iSector+1) - offset)*deltaPhi;
+  return nice(dPhi);  
+} // phiForEastSector
+
 
 ///Function returns the rdo board number for a given 
 ///padrow index. 

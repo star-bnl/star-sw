@@ -15,48 +15,27 @@
 #include "Sti/StiToolkit.h"
 #include "Sti/StiIsActiveFunctor.h"
 #include "Sti/StiNeverActiveFunctor.h"
-#include "Sti/Base/Messenger.h"
 #include "Sti/StiHitErrorCalculator.h"
 #include "StiTpcDetectorBuilder.h" 
 #include "StiTpcIsActiveFunctor.h"
 #include "StDetectorDbMaker/StDetectorDbTpcRDOMasks.h"
+#include "tables/St_HitError_Table.h"
 
-StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active, char* baseName)
+StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active)
   : StiDetectorBuilder("Tpc",active)
+{}
+
+/*
+void StiTpcDetectorBuilder::load(char* baseName)
 {
-
-  StiTrackingParameters * trackingPars = getTrackingParameters();
-
-  //resolve file name
+  StiTrackingParameters & trackingPars = getTrackingParameters();
   string fName= _name + baseName;
-
-  cout <<"Reading Parameters from file "<<fName<<endl;
+  cout <<"StiTpcDetectorBuilder::load( ) -I- Reading Parameters from file "<<fName<<endl;
   ifstream inF(fName.c_str());
   if (inF)
     {
-      trackingPars->setPar(inF);
       cout <<"New tracking parameters set from file:"<<fName<<endl;
-      cout <<*trackingPars<<endl;
-
-    }
-  else
-    {
-      cout <<"Tracking Parameters set from defaults."<<endl;
-      trackingPars->setMaxChi2ForSelection(10.);
-      trackingPars->setMinSearchWindow(1.6);
-      trackingPars->setMaxSearchWindow(7.);
-      trackingPars->setSearchWindowScaling(15.);
-      cout <<*trackingPars<<endl;
-    }
-
-
-
-
-  _innerCalc = new StiDefaultHitErrorCalculator();
-  _outerCalc = new StiDefaultHitErrorCalculator();
-
-  if(inF)
-    {
+      trackingPars.setPar(inF);
       double intrY, driftY, dipY, intrZ,driftZ,dipZ;
       inF>>intrY;
       inF>>driftY;
@@ -64,62 +43,84 @@ StiTpcDetectorBuilder::StiTpcDetectorBuilder(bool active, char* baseName)
       inF>>intrZ;
       inF>>driftZ;
       inF>>dipZ;
-      _innerCalc->set(intrY,driftY,dipY,intrZ,driftZ,dipZ);
+      _innerCalc.set(intrY,driftY,dipY,intrZ,driftZ,dipZ);
        inF>>intrY;
       inF>>driftY;
       inF>>dipY;
       inF>>intrZ;
       inF>>driftZ;
       inF>>dipZ;
-      _outerCalc->set(intrY,driftY,dipY,intrZ,driftZ,dipZ);
+      _outerCalc.set(intrY,driftY,dipY,intrZ,driftZ,dipZ);
     }
   else
     {
-      _innerCalc->set(.066, 1.2e-04, 0.0004,
-		  .066, 4.4e-4, 2.8e-02);
-      _outerCalc->set(.02, 4.e-3, 0.04,
-		  .02, 3.2e-3, 9.e-2);
+      cout <<"Tracking Parameters set from defaults."<<endl;
+      trackingPars.setMaxChi2ForSelection(10.);
+      trackingPars.setMinSearchWindow(1.6);
+      trackingPars.setMaxSearchWindow(7.);
+      trackingPars.setSearchWindowScaling(15.);
+      _innerCalc.set(.066, 1.2e-04, 0.0004, 0.066, 4.4e-4, 2.8e-02);
+      _outerCalc.set(.02, 4.e-3, 0.04, 0.02, 3.2e-3, 9.e-2);
     }
-
-
+	cout <<trackingPars<<endl;
 }
+*/
+
 
 StiTpcDetectorBuilder::~StiTpcDetectorBuilder()
-{
-  delete _innerCalc;
-  delete _outerCalc;
-}
+{}
 
-/*! Builds the material required for the TPC
-<p>
-The material currently used are P10, and NOMEX. The properties
-of these materials are extracted from the Particle Data Book.
-*/  
-void StiTpcDetectorBuilder::buildMaterials()
-{
-  _messenger << "StiTpcDetectorBuilder::buildMaterials() - INFO - Started" << endl;
-  _gas        = add(new StiMaterial("P10",   16.4,  36.2741, 0.00156,  12820.*0.00156, 15.48) ); 
-  _fcMaterial = add(new StiMaterial("Nomex",  6.24, 12.40,   0.064,       39.984,  1.)        );
-  _messenger << "StiTpcDetectorBuilder::buildMaterials() - INFO - Done" << endl;
-}
-
-void StiTpcDetectorBuilder::buildShapes()
-{
-  _messenger << "StiTpcDetectorBuilder::buildShapes() - INFO - Started/Done" << endl;
-}
 
 /*! Build all detector components of the TPC.
-<p>
+The material currently used are P10, and NOMEX. The properties
+of these materials are extracted from the Particle Data Book.
 The detector components of the TPC include the 24 sectors, 45 padrow gas volumes, and
 the inner and outer field cage of the TPC. The padrows  are polygonal with 12  sides
 whereas  the field cage are cylindrical. However to match the 12 fold symmetry of the 
 TPC, the field cage are artificially segmented into 12 sectors each.
 */
-  void StiTpcDetectorBuilder::buildDetectors()
+void StiTpcDetectorBuilder::buildDetectors(StMaker&source)
 {
   char name[50];
-  _messenger << "StiTpcDetectorBuilder::buildDetectors() - INFO - Started" << endl;
+  cout << "StiTpcDetectorBuilder::buildDetectors() -I- Started" << endl;
   unsigned int row;
+
+	TDataSet * ds = source.GetDataSet("calibration/tracker");
+	if (ds)
+		{
+			cout << "StiTpcDetectorBuilder::buildDetectors(StMaker&source) -I- Loading TPC tracking parameters from tracking database" << endl;
+			StiTrackingParameters & trackingPars = getTrackingParameters();
+			trackingPars.load(ds);
+	
+			St_HitError * t = dynamic_cast<St_HitError*>(ds->Find("TpcHitError"));
+			HitError_st * h = t->GetTable();
+			_innerCalc = h[0];
+			_outerCalc = h[1];
+		}
+	else
+		cout << "StiTpcDetectorBuilder::buildDetectors(StMaker&source) -W- Default TPC tracking parameters will be used" << endl;
+
+  if (!gStTpcDb) 
+		throw runtime_error("StiTpcDetectorBuilder::buildDetectors() -E- gStTpcDb==0");
+
+	_padPlane = gStTpcDb->PadPlaneGeometry();
+  if (!_padPlane) 
+		throw runtime_error("StiTpcDetectorBuilder::buildDetectors() -E- _padPlane==0");
+
+	_dimensions = gStTpcDb->Dimensions();
+  if (!_dimensions)
+		throw runtime_error("StiTpcDetectorBuilder::buildDetectors() -E- _dimensions==0");
+
+  unsigned int nRows = _padPlane->numberOfRows()+2;
+  setNRows(nRows);
+  for(unsigned int row = 0; row<nRows;row++)
+    {
+      setNSectors(row,12);
+    }
+
+  _gas        = add(new StiMaterial("P10",   16.4,  36.2741, 0.00156,  12820.*0.00156, 15.48) ); 
+  _fcMaterial = add(new StiMaterial("Nomex",  6.24, 12.40,   0.064,       39.984,  1.)        );
+
 
   // Inner field cage
   StiCylindricalShape *ifcShape = new StiCylindricalShape;
@@ -243,38 +244,13 @@ TPC, the field cage are artificially segmented into 12 sectors each.
 	  pDetector->setShape(pShape);
 	  pDetector->setPlacement(pPlacement);
 	  if (row<20)
-	    pDetector->setHitErrorCalculator(_innerCalc);
+	    pDetector->setHitErrorCalculator(&_innerCalc);
 	  else
-	    pDetector->setHitErrorCalculator(_outerCalc);
+	    pDetector->setHitErrorCalculator(&_outerCalc);
 	  add(row,sector,pDetector);
 	}// for sector
     }// for row
 
-  _messenger << "StiTpcDetectorBuilder::buildDetectors() - INFO - Done" << endl;
+  cout << "StiTpcDetectorBuilder::buildDetectors() -I- Done" << endl;
 }
-
-void StiTpcDetectorBuilder::loadDb()
-{
-  if (!gStTpcDb) 
-		throw runtime_error("StiTpcDetectorBuilder::buildShapes() - ERROR - gStTpcDb==0");
-	_padPlane = gStTpcDb->PadPlaneGeometry();
-  if (!_padPlane) 
-		throw runtime_error("StiTpcDetectorBuilder::buildShapes() - ERROR - _padPlane==0");
-	_dimensions = gStTpcDb->Dimensions();
-  if (!_dimensions)
-		throw runtime_error("StiTpcDetectorBuilder::loadDb() - ERROR - _dimensions==0");
-  _transform = new StTpcCoordinateTransform(gStTpcDb);
-  if (!_transform)
-    throw runtime_error("StiTpcDetectorBuilder::loadDb() - ERROR - gStTpcDb==0");
-  StTpcPadPlaneI *_padPlane = gStTpcDb->PadPlaneGeometry();
-  if (!_padPlane)
-    throw runtime_error("StiTpcDetectorBuilder::loadDb() - ERROR - _padPlane==0");
-  unsigned int nRows = _padPlane->numberOfRows()+2;
-  setNRows(nRows);
-  for(unsigned int row = 0; row<nRows;row++)
-    {
-      setNSectors(row,12);
-    }
-}
-
 
