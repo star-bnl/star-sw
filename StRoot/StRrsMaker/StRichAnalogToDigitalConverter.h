@@ -1,5 +1,5 @@
-/*************************************************************
- * $Id: StRichAnalogToDigitalConverter.h,v 1.2 2000/01/25 22:02:19 lasiuk Exp $
+/********************************************************************
+ * $Id: StRichAnalogToDigitalConverter.h,v 1.3 2000/02/08 16:22:20 lasiuk Exp $
  *
  * Description:
  *   StRichAnalogToDigitalConverter is the function object containing
@@ -13,10 +13,11 @@
  *   and converts it to an ADC count, depending on the
  *   given adc factor, pedestal and adc range.
  *
- ****************************************************************
+ ********************************************************************
  * $Log: StRichAnalogToDigitalConverter.h,v $
- * Revision 1.2  2000/01/25 22:02:19  lasiuk
- * Second Revision
+ * Revision 1.3  2000/02/08 16:22:20  lasiuk
+ * use dbs
+ * systemOfUnits now used
  *
  * Revision 1.2  2000/01/25 22:02:19  lasiuk
  * Second Revision
@@ -29,12 +30,12 @@
  *     - 8/24/1999 initial implementation
  *     - 8/31/1999 final ADC counts implementation
  *
- *************************************************************/
+ ********************************************************************/
 #ifndef ST_RICH_ANALOG_TO_DIGITAL_CONVERTER_H
 #define ST_RICH_ANALOG_TO_DIGITAL_CONVERTER_H
 
 #include <functional>
-#if defined (__SUNPRO_CC) && __SUNPRO_CC >= 0x500
+#ifndef ST_NO_NAMESPACES
 using std::unary_function;
 #endif
 
@@ -48,14 +49,22 @@ class StRichAnalogToDigitalConverter : public unary_function<double,double> {
 public:
     StRichAnalogToDigitalConverter();
     ~StRichAnalogToDigitalConverter();
+    
     //SRichAnalogToDigitalConverter(const StRichAnalogToDigitalConverter&);
     //operator=RichAnalogToDigitalConverter(StRichAnalogToDigitalConverter&);
+
     int operator()(double) const;
 
     void setAddPedestal(int);
     
 private:
-    int mAddPedestal;
+    StRichPhysicsDb*  mPhysicsDb;
+    MyRound           mRound;
+    int               mMaxADC;
+    int               mPedestal;
+    double            mAdcConversion;
+    double            mElectronCharge;
+    int               mAddPedestal;
 };
 inline
 void StRichAnalogToDigitalConverter::setAddPedestal(int v) {mAddPedestal = v;}
