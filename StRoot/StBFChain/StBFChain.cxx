@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.68 2000/02/13 00:05:49 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.69 2000/02/14 13:58:27 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.69  2000/02/14 13:58:27  fisyak
+// Add dependence of dst Maker on tables
+//
 // Revision 1.68  2000/02/13 00:05:49  fisyak
 // Add dependence of St_dst_Maker versus gen,sim,ctf,trg and l3t tables
 //
@@ -382,17 +385,18 @@ BfcItem BFC[] = {
   {"l3cl"        ,"","l3","l3_T"                    ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
   {"l3t"         ,"","l3","l3_T"                            ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
   {"rich"        ,"","","sim_T,globT"                                 ,"StRchMaker","StRchMaker","",kFALSE},
-  {"global"      ,"global","","gen_t,sim_T,ctf_T,trg_T,l3_T,globT,Match,primary,v0,xi,kink,dst,SCL"
+  {"global"      ,"global","","globT,Match,primary,v0,xi,kink,dst,SCL"
                                                          ,"StChainMaker","St_tpc,St_svt,StChain","",kFALSE},
   {"Match"       ,"match","global","SCL,tpc_T,svt_T,globT,tls"
                                                  ,"StMatchMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
   {"Primary"     ,"primary","global","SCL,globT,tls"
                                                ,"StPrimaryMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"V0"          ,"v0","global","SCL,globT,tls"    ,"StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"Xi"          ,"xi","global","SCL,globT,tls"    ,"StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"Kink"        ,"kink","global","SCL,globT,tls","StKinkMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"dst"         ,"dst","global","SCL,globT,tls","St_dst_Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
-  {"Event"       ,"","","globT,SCL"                      ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
+  {"V0"          ,"v0","global","SCL,globT,tls"     ,"StV0Maker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"Xi"          ,"xi","global","SCL,globT,tls"     ,"StXiMaker","St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"Kink"        ,"kink","global","SCL,globT,tls","StKinkMaker" ,"St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"dst"         ,"dst","global","SCL,tls,gen_t,sim_T,ctf_T,trg_T,l3_T,ftpcT","St_dst_Maker" 
+                                                                ,"St_svt,St_global,St_dst_Maker","",kFALSE},
+  {"Event"       ,"","","globT,SCL"                       ,"StEventMaker","StEvent,StEventMaker","",kFALSE},
   {"analysis"    ,"","","Event"           ,"StAnalysisMaker","StAnalysisMaker","Exampe of Analysis",kFALSE},
   {"TagsChain"   ,"TagsChain","",""                                    ,"StChainMaker","StChain","",kFALSE},
   {"Flow"        ,"","TagsChain","Event"                            ,"StFlowMaker","StFlowMaker","",kFALSE},
