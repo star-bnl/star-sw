@@ -195,6 +195,8 @@ int FTF_Track::Build_Track ( FTF_Hit *first_hit, VOLUME *volume ) {
 //
    if ( para->go_backwards ) Follow ( volume, GO_UP, para->row_start ) ;
 
+   Fill ( ) ;
+
    return 1 ;
 }
 //***************************************************************************
@@ -275,7 +277,7 @@ void FTF_Track::Fill (  ) {
    double rc   = sqrt ( a2_xy * a2_xy + 1 ) / ( 2 * fabs(a1_xy) ) ;
    pt          = (float)(2.9979e-3 * para->bfield * rc );
 
-   if ( pt > para->pt_min_helix_fit == 1 ) Fit_Helix ( ) ;
+   if ( pt > para->pt_min_helix_fit ) Fit_Helix ( ) ;
    else{
       if ( para->primaries ) Fill_Primary ( xc, yc, rc ) ;
       else
@@ -296,10 +298,10 @@ void FTF_Track::Fill (  ) {
 //****************************************************************************
 void FTF_Track::Fill_Primary (  double &xc, double &yc, double &rc  ) {
 //
-//   Get cercle parameters
+//   Get circle parameters
 //
-   double xcp = - a2_xy / ( 2. * a1_xy ) ;
-   double ycp = - 1.   /  ( 2. * a1_xy ) ;
+   double xcp = - a2_xy / ( 2. * a1_xy ) + para->x_vertex ;
+   double ycp = - 1.   /  ( 2. * a1_xy ) + para->y_vertex ;
 
    xc = xcp + para->x_vertex ;
    yc = ycp + para->y_vertex ;
@@ -488,7 +490,7 @@ int FTF_Track::Follow ( VOLUME *volume, int way, int ir_stop ) {
 //
 //  Otherwise go for it
 //
-   Fill ( ) ;
+//   Fill ( ) ;
 #ifdef TRDEBUG
    Debug_Fill ( ) ;
 #endif
