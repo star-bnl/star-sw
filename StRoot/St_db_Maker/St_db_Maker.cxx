@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.29 2000/04/14 14:49:59 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.30 2000/05/11 01:27:54 fisyak Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.30  2000/05/11 01:27:54  fisyak
+// Change y1h from 03/01/2000 to 05/01/2000
+//
 // Revision 1.29  2000/04/14 14:49:59  perev
 // Communication via descriptor struct -> class
 //
@@ -53,7 +56,7 @@ static const char *aliases[]={
 static const int   dates[]=  {
 19970101, 19980101, 19990101, 19990501, 19991001,
 19990615, 19990616, 19991206, 19991101, 19991201,
-20000301, 20010610, 0};
+20000501, 20010610, 0};
 static const int   times[]=  {
        0,        0,        0,        0,        0,
        0,   120000,    80000,        0,        0,
