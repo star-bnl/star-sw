@@ -1,6 +1,6 @@
 /******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.cc,v 1.8 2004/08/31 22:26:16 oldi Exp $
+ * $Id: StFtpcTrackToStEvent.cc,v 1.9 2004/10/13 22:26:46 oldi Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -103,7 +103,7 @@ StEvent* StFtpcTrackToStEvent::FillEvent(StEvent* e, TObjArray* t) {
     
     StFtpcTrack* kTrack = (StFtpcTrack*)mTrackStore->At(trackIt);
     StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
-    FillDetectorInfo(detInfo, kTrack);
+    FillDetectorInfo(detInfo, kTrack, kTRUE);
     // track node where the new StTrack will reside
     StTrackNode* trackNode = new StTrackNode;
     // actual filling of StTrack from StFtpcTrack
@@ -213,7 +213,7 @@ StEvent* StFtpcTrackToStEvent::FillEventPrimaries(StEvent* e, TObjArray* t) {
 	
       // detector info
       StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
-      FillDetectorInfo(detInfo, kTrack);
+      FillDetectorInfo(detInfo, kTrack, kFALSE);
       StPrimaryTrack* pTrack = new StPrimaryTrack;
       
       try {
@@ -249,7 +249,7 @@ StEvent* StFtpcTrackToStEvent::FillEventPrimaries(StEvent* e, TObjArray* t) {
 }
 
 
-void StFtpcTrackToStEvent::FillDetectorInfo(StTrackDetectorInfo* detInfo, StFtpcTrack* track) {
+void StFtpcTrackToStEvent::FillDetectorInfo(StTrackDetectorInfo* detInfo, StFtpcTrack* track, Bool_t global) {
 
   TObjArray *hitVec = track->GetHits();
   
@@ -260,7 +260,7 @@ void StFtpcTrackToStEvent::FillDetectorInfo(StTrackDetectorInfo* detInfo, StFtpc
   for (Int_t iHit = hitVec->GetEntriesFast()-1; iHit >= 0; iHit--) {  // revert order
     StFtpcPoint *pt = (StFtpcPoint*)hitVec->At(iHit);
     StHit *hh = dynamic_cast<StHit*>(pt->GetStFtpcHit());
-    if (hh) detInfo->addHit(hh);
+    if (hh) detInfo->addHit(hh, global);
   }
 }
 

@@ -1,17 +1,7 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StJets.h,v 1.4 2004/09/22 15:46:21 mmiller Exp $
+// $Id: StJets.h,v 1.2 2004/09/10 18:13:53 mmiller Exp $
 // $Log: StJets.h,v $
-// Revision 1.4  2004/09/22 15:46:21  mmiller
-// Added a double check to verify that jet 4p is equal to the vector sum of
-// the particles 4-p.  Removed troublesome access methods to StJets.  See
-// StJetReader::exampleEventAna() for access to jet-particles.
-//
-// Revision 1.3  2004/09/20 23:15:52  mmiller
-// Fixed bug in retreiving emc towers for jet, introduced
-// TrackToJetIndex inherits from TLorentzVector now.  See StJetReader::exampleAna
-// for example of how to retreive the corrected 4-momenta used for barrel towers.
-//
 // Revision 1.2  2004/09/10 18:13:53  mmiller
 // Two fixes:
 // 1) add StDetectorId to the TTree to allow sorting of jet particles into
@@ -86,7 +76,6 @@ using std::vector;
 #include <cmath>
 #include "TObject.h"
 #include "TClonesArray.h"
-#include "TLorentzVector.h"
 #include "StDetectorId.h"
 #include "StMuDSTMaker/COMMON/StMuTrack.h"
 
@@ -94,8 +83,7 @@ class StProtoJet;
 class StJet;
 class StMuDst;
 
-//!class TrackToJetIndex : public TObject
-class TrackToJetIndex : public TLorentzVector
+class TrackToJetIndex : public TObject
 {
 public:
     TrackToJetIndex(int ji=-1, int ti=-1, StDetectorId id=kUnknownId) : mJetIndex(ji), mTrackIndex(ti) , mDetId(id) {};
@@ -153,6 +141,8 @@ public:
     void Clear(bool clearTracks = false);
     void Clear(const char *opt);
         
+    void  print();
+
     ///add a jet to the container
     void addProtoJet(StProtoJet& pj);
 
@@ -162,18 +152,17 @@ public:
     ///The number of jets found in this event
     int nJets() {return mJets->GetLast()+1;}
 
-    ///Access to the jets in this event.
+    ///Access to the jets in this event. 
     TClonesArray* jets() {return mJets;}
 
-    ///The track to jet indices TClonesArray: this contains _all_ the 4momenta contained in jets for jet finding!  This is for expert use only
-    TClonesArray* indices() {return mTrackToJetIndices;}
-    
-    ///Here's how you get the 4-momenta of a particles in a given jet.  This contains tracks and energy-corrected-towers.  Use this for Frag. Function
-    vector<TrackToJetIndex*> particles(int jetIndex);
-    
     ///Access to a container of the charged-tracks associated with a jet
     TrackVec jetParticles(StMuDst*, int jetIndex);
-    
+
+    ///Access to the indices of the BEMC towers in the jet:
+    vector<int> jetBemcTowerIndices(int jetIndex);
+
+    //vector<int> jetTrackIndices(int jetIndex);
+
     ///access to event numbers, used to synchronize with StMuDstMaker for simultaneous reading
     int eventId();
     int eventNumber();

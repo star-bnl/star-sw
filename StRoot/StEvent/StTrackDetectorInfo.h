@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.h,v 2.11 2004/08/05 22:23:32 ullrich Exp $
+ * $Id: StTrackDetectorInfo.h,v 2.12 2004/10/13 16:11:59 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -31,6 +31,9 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.h,v $
+ * Revision 2.12  2004/10/13 16:11:59  ullrich
+ * Added optional arg to addHit() to allow NOT to increase ref counter.
+ *
  * Revision 2.11  2004/08/05 22:23:32  ullrich
  * Fixed bug in first argument type of setNumberOfPoints().
  *
@@ -102,7 +105,7 @@ public:
     void setFirstPoint(const StThreeVectorF&);
     void setLastPoint(const StThreeVectorF&);
     void setNumberOfPoints(unsigned char, StDetectorId);
-    void addHit(StHit*);
+    void addHit(StHit*, bool = true);
     void removeHit(StHit*&);
     int  bad() const;
     

@@ -1,12 +1,17 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.10 2004/08/06 22:23:29 calderon Exp $
+ * $Id: StiStEventFiller.h,v 2.11 2004/10/14 02:21:35 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.11  2004/10/14 02:21:35  calderon
+ * Updated code in StTrackDetectorInfo, now only increment the reference count
+ * for globals, not for primaries.  So fillTrackDetectorInfo changed to reflect
+ * this.
+ *
  * Revision 2.10  2004/08/06 22:23:29  calderon
  * Modified the code to use the setNumberOfxxxPoints(unsigned char,StDetectorId)
  * methods of StTrack, StTrackDetectorInfo, StTrackFitTraits, and to use
@@ -136,7 +141,7 @@ public:
     virtual ~StiStEventFiller();
     StEvent* fillEvent(StEvent*, StiTrackContainer*);
     StEvent* fillEventPrimaries(StEvent*, StiTrackContainer*);
-    void fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanTrack* kTrack);
+    void fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanTrack* kTrack,bool refCountIncr);
     void fillGeometry(StTrack* track, StiKalmanTrack* kTrack, bool outer);
     //void fillTopologyMap(StTrack* track, StiKalmanTrack* kTrack);
     void fillFitTraits(StTrack* track, StiKalmanTrack* kTrack);

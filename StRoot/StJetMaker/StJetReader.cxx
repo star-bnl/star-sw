@@ -50,7 +50,7 @@ double gDeltaR(const TLorentzVector* jet, const StThreeVectorF& track)
 }
 
 StJetReader::StJetReader(const char* name, StMuDstMaker* uDstMaker)
-    : StMaker(name), mFile(0), mTree(0), mDstMaker(uDstMaker), mCounter(0), mOfstream(0)
+    : StMaker(name), mFile(0), mTree(0), mDstMaker(uDstMaker), mCounter(0)
 {
     cout <<"StJetReader::StJetReader()"<<endl;
 }
@@ -107,12 +107,6 @@ void StJetReader::InitFile(const char* file)
 	}
     }
 
-    if (0) {
-	string jetCheck(file);
-	jetCheck += ".read.txt";
-	mOfstream = new ofstream(jetCheck.c_str());
-    }
-    
     cout <<"\tfinished!"<<endl;
 
     return ;
@@ -194,67 +188,8 @@ Int_t StJetReader::Make()
 
 Int_t StJetReader::Finish()
 {
-    if (mOfstream) {
-	delete mOfstream;
-	mOfstream=0;
-    }
-
     return kStOk;
 }
-
-void dumpProtojetToStream(int event, ostream& os, StJets* stjets);
-
-string idString(TrackToJetIndex* t)
-{
-    string idstring;
-    StDetectorId mDetId = t->detectorId();
-    if (mDetId==kTpcId) {
-	idstring = "kTpcId";
-    }
-    else if (mDetId==kBarrelEmcTowerId) {
-	idstring = "kBarrelEmcTowerId";
-    }
-    else {
-	idstring = "kUnknown";
-    }
-    return idstring;
-}
-
-//nice check to verify that the jet 4-mom is equal to the _vector_ sum of it's part
-bool verifyJet(StJets* stjets, int ijet)
-{
-    TClonesArray& jets = *(stjets->jets());
-    StJet* pj = static_cast<StJet*>(jets[ijet]);
-    
-    
-    StThreeVectorD j3(pj->Px(), pj->Py(), pj->Pz());
-    StLorentzVectorD j4(pj->E(),j3 );
-
-    //cout <<"\tjet:\t"<<ijet<<"\t4mom:\t"<<j4<<endl;
-	
-    StLorentzVectorD jetMom(0., 0., 0., 0.);
-    
-    typedef vector<TrackToJetIndex*> FourpList;
-    FourpList particles = stjets->particles(ijet);
-    
-    for (FourpList::iterator it=particles.begin(); it!=particles.end(); ++it) {
-	TLorentzVector* v = *it;
-	StThreeVectorD v3(v->Px(), v->Py(), v->Pz() );
-	StLorentzVectorD v4(v->E(), v3 );
-	jetMom += v4;
-	//cout <<"\t\t4p:\t"<<v4<<endl;
-    }
-    //cout <<"\t\t\tcheck:\t"<<jetMom<<endl;
-    StLorentzVectorD diff = j4-jetMom;
-    if (abs(diff)>1.e-6) { //they have to be the same to 1 eV
-	cout <<"verifyJet.  assert will fail for jet:\t"<<ijet<<"\t4p:\t"<<j4<<"\tcompared to sum_particles:\t"<<jetMom<<endl;
-	return false;
-    }
-    else {
-	return true;
-    }
-}
-
 
 void StJetReader::exampleEventAna()
 {
@@ -281,46 +216,16 @@ void StJetReader::exampleEventAna()
 	cout <<"Found\t"<<nJets<<"\tjets from:\t"<<(*it).first<<endl;
 	
 	TClonesArray* jets = stjets->jets();
-
-	//Dylan, here's a nice check...
-	if (0) {
-	    if (stjets->nJets()>0) {
-		dumpProtojetToStream(muDst->event()->eventId(), *mOfstream, stjets);
-	    }
-	}
-	
-	for(int ijet=0; ijet<nJets; ++ijet){ 
+	for(int i=0; i<nJets; ++i){ 
 	    
 	    //loop on jets
-	    StJet* j = static_cast<StJet*>( (*jets)[ijet] );
-	    assert(j);
-	    assert(verifyJet(stjets, ijet));
-	    
-	    cout <<"jet:\t"<<ijet<<"\tEjet:\t"<<j->E()<<"\tEta:\t"<<j->Eta()<<"\tPhi:\t"<<j->Phi()<<endl;
+	    StJet* j = static_cast<StJet*>( (*jets)[i] );
+	    cout <<"\nEjet:\t"<<j->E()<<"\tEta:\t"<<j->Eta()<<"\tPhi:\t"<<j->Phi()<<endl;
 
-	    //look at 4-momenta in the jet:
-	    typedef vector<TrackToJetIndex*> TrackToJetVec;
-	    TrackToJetVec particles = stjets->particles(ijet);
-
-	    for (TrackToJetVec::iterator it=particles.begin(); it!=particles.end(); ++it) {
-		TrackToJetIndex* t2j = (*it); //remember, TrackToJetIndex inherits from TLorentzVector, so it _is_ the 4p of a track/tower
-		assert(t2j);
-		double dphi = gDeltaPhi(j->Phi(), t2j->Phi());
-		double deta = j->Eta()-t2j->Eta();
-		double dR = sqrt(dphi*dphi + deta*deta);
-
-		cout <<"\tPt_part:\t"<<t2j->Pt()<<"\tEta_part:\t"<<t2j->Eta()<<"\tPhi_part:\t"<<t2j->Phi()<<"\tdR:\t"<<dR<<"\t"<<idString(t2j)<<endl;
-		
+	    if (!muDst) {
+		cout <<"StJetReader::exampleEventAna(). ERROR:\tmuDst==0"<<endl;
 	    }
-	}
-    }
-}
-
-
-
-// -------------------- old, MLM
-/*
-  	    else {
+	    else {
 		typedef StJets::TrackVec TrackVec;
 		TrackVec tracks = stjets->jetParticles(muDst, i);
 		
@@ -335,14 +240,6 @@ void StJetReader::exampleEventAna()
 			 <<"\tEta_track:\t"<<mom.pseudoRapidity()
 			 <<"\tPhi_track:\t"<<mom.phi()
 			 <<"\tdR:\t"<<dR<<endl;
-		    
-		    //dylan, now get it from the double-check method (stored directly at jet finding, _with_ energy subtraction)
-		    const TLorentzVector* check = stjets->trackToJetIndex(muDst, i, muTrack); //see StJets::addProtoJet(), where 4-p is stored
-		    assert(check);
-		    double dphi_check = gDeltaPhi(j->Phi(), check->Phi());
-		    double deta_check = j->Eta()-check->Eta();
-		    double dR_check = sqrt(dphi_check*dphi_check + deta_check*deta_check);
-		    cout <<"\tPt_check:\t"<<check->Pt()<<"\tEta_check:\t"<<check->Eta()<<"\tPhi_check:\t"<<check->Phi()<<"\tdR:\t"<<dR_check<<endl;
 		    
 		    ++itrack;
 		}
@@ -363,17 +260,8 @@ void StJetReader::exampleEventAna()
 		    double deta = j->Eta()-eta;
 		    double dR = sqrt( dphi*dphi  +  deta*deta );
 		    cout <<"\tE_tower:\t"<<e<<"\tEta_tower:\t"<<eta<<"\tPhi_tower:\t"<<phi<<"\tdR:\t"<<dR<<endl;
-
-		    //dylan, now get it from the double-check method (stored directly at jet finding, _with_ energy subtraction)
-		    const TLorentzVector* check = stjets->trackToJetIndex(i, (*bit));
-		    if (!check) {
-			cout <<"you're going to segfualt on jet:\t"<<i<<"\ttower:\t"<<(*bit)<<endl;
-		    }
-		    assert(check);
-		    double dphi_check = gDeltaPhi(j->Phi(), check->Phi());
-		    double deta_check = j->Eta()-check->Eta();
-		    double dR_check = sqrt(dphi_check*dphi_check + deta_check*deta_check);
-		    cout <<"\tE_check:\t"<<check->E()<<"\tEta_check:\t"<<check->Eta()<<"\tPhi_check:\t"<<check->Phi()<<"\tdR:\t"<<dR_check<<endl;
 		}
+	    }
+	}
+    }
 }
-*/

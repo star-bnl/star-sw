@@ -1,7 +1,7 @@
 //StFtpcTrackToStEvent.h
 /*******************************************************************************
  *
- * $Id: StFtpcTrackToStEvent.hh,v 1.3 2004/08/31 22:26:17 oldi Exp $
+ * $Id: StFtpcTrackToStEvent.hh,v 1.4 2004/10/13 22:26:46 oldi Exp $
  *
  * Author: Markus D. Oldenburg 
  * (changed version of StiStEventFiller by Manuel Calderon de la Barca Sanchez)
@@ -42,7 +42,7 @@ public:
   virtual ~StFtpcTrackToStEvent();
   StEvent* FillEvent(StEvent*, TObjArray*);
   StEvent* FillEventPrimaries(StEvent*, TObjArray*);
-  void FillDetectorInfo(StTrackDetectorInfo* detInfo, StFtpcTrack* kTrack);
+  void FillDetectorInfo(StTrackDetectorInfo* detInfo, StFtpcTrack* kTrack, Bool_t global = kTRUE);
   void FillGeometry(StTrack* track, StFtpcTrack* kTrack, bool outer);
   void FillFitTraits(StTrack* track, StFtpcTrack* kTrack);
   void FillPidTraits(StTrack* track, StFtpcTrack* kTrack);

@@ -1,11 +1,16 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.41 2004/10/01 01:13:51 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 2.42 2004/10/14 02:21:34 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.42  2004/10/14 02:21:34  calderon
+ * Updated code in StTrackDetectorInfo, now only increment the reference count
+ * for globals, not for primaries.  So fillTrackDetectorInfo changed to reflect
+ * this.
+ *
  * Revision 2.41  2004/10/01 01:13:51  calderon
  * Added bug fix from Marco:
  * flag%100 -> flag/100.
@@ -456,7 +461,7 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
       StiKalmanTrack* kTrack = static_cast<StiKalmanTrack*>((*trackIt).second);
       if (!accept(kTrack)) continue; // get rid of riff-raff
       StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
-      fillDetectorInfo(detInfo,kTrack);
+      fillDetectorInfo(detInfo,kTrack,true); //3d argument used to increase/not increase the refCount. MCBS oct 04.
       // track node where the new StTrack will reside
       StTrackNode* trackNode = new StTrackNode;
       // actual filling of StTrack from StiKalmanTrack
@@ -565,7 +570,7 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 	    throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- currentTrackNode->entries(global)<1");
 	  // detector info
 	  StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
-	  fillDetectorInfo(detInfo,kTrack);
+	  fillDetectorInfo(detInfo,kTrack,false); //3d argument used to increase/not increase the refCount. MCBS oct 04.
 	  StPrimaryTrack* pTrack = new StPrimaryTrack;
 	  try
 	    {
@@ -606,7 +611,7 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 /// change: currently point and fit points are the same for StiKalmanTracks,
 /// if this gets modified later in ITTF, this must be changed here
 /// but maybe use track->getPointCount() later?
-void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanTrack* track) 
+void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanTrack* track, bool refCountIncr) 
 {
   //cout << "StiStEventFiller::fillDetectorInfo() -I- Started"<<endl;
   vector<StMeasuredPoint*> hitVec = track->stHits();
@@ -628,7 +633,7 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiKalmanT
     {
       StHit * hh = dynamic_cast<StHit*>(*point);
       if (hh) {
-	  detInfo->addHit(hh);
+	  detInfo->addHit(hh,refCountIncr);
       }
     }
   //cout << "StiStEventFiller::fillDetectorInfo() -I- Done"<<endl;

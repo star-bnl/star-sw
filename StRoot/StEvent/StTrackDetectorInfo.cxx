@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrackDetectorInfo.cxx,v 2.11 2004/08/05 22:23:32 ullrich Exp $
+ * $Id: StTrackDetectorInfo.cxx,v 2.12 2004/10/13 16:11:59 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrackDetectorInfo.cxx,v $
+ * Revision 2.12  2004/10/13 16:11:59  ullrich
+ * Added optional arg to addHit() to allow NOT to increase ref counter.
+ *
  * Revision 2.11  2004/08/05 22:23:32  ullrich
  * Fixed bug in first argument type of setNumberOfPoints().
  *
@@ -51,7 +54,7 @@
 
 ClassImp(StTrackDetectorInfo)
 
-static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.11 2004/08/05 22:23:32 ullrich Exp $";
+static const char rcsid[] = "$Id: StTrackDetectorInfo.cxx,v 2.12 2004/10/13 16:11:59 ullrich Exp $";
 
 StTrackDetectorInfo::StTrackDetectorInfo() : mNumberOfPoints(0),
 					     mNumberOfPointsTpc(0),
@@ -219,11 +222,11 @@ StTrackDetectorInfo::setNumberOfPoints(unsigned char val, StDetectorId det)
 }
 
 void
-StTrackDetectorInfo::addHit(StHit* hit)
+StTrackDetectorInfo::addHit(StHit* hit, bool increaseRefCounter) // 2nd arg is optional, defaults to true
 {
     if (hit) {
         mHits.push_back(hit);
-        hit->setTrackReferenceCount(hit->trackReferenceCount()+1);
+        if (increaseRefCounter) hit->setTrackReferenceCount(hit->trackReferenceCount()+1);
     }
 }
 

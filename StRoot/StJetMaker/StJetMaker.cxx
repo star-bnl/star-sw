@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StJetMaker.cxx,v 1.6 2004/09/30 13:58:46 mmiller Exp $
+ * $Id: StJetMaker.cxx,v 1.4 2004/09/14 17:27:15 mmiller Exp $
  * 
  * Author: Thomas Henry February 2003
  ***************************************************************************
@@ -55,9 +55,6 @@
 #include "StJet.h"
 #include "StFourPMaker.h"
 
-//temp, MLM
-void dumpProtojetToStream(int event, int jet, ostream& os, StProtoJet& pj);
-
 double gDeltaPhi(double p1, double p2);
 double gDeltaR(const TLorentzVector* jet, const StThreeVectorF& track);
 
@@ -66,7 +63,7 @@ ClassImp(StJetMaker)
     StJetMaker::StJetMaker(const Char_t *name, StFourPMaker* fPMaker, 
 			   StMuDstMaker* uDstMaker, const char *outputName) 
 	: StMaker(name), fourPMaker(fPMaker), muDstMaker(uDstMaker),
-	  outName(outputName), mGoodCounter(0), mBadCounter(0), mEventCounter(0), mOfstream(0)
+	  outName(outputName), mGoodCounter(0), mBadCounter(0), mEventCounter(0)
 {
     infoLevel = 0;
     mudst=0;
@@ -99,12 +96,6 @@ void StJetMaker::InitFile(void)
     m_outfile->SetCompressionLevel(1);
     
     jetTree->SetDirectory(m_outfile);
-
-    if (0) {
-	string jetCheck(outName);
-	jetCheck += ".run.txt";
-	mOfstream = new ofstream(jetCheck.c_str());
-    }
 }
 
 Int_t StJetMaker::Init() 
@@ -129,7 +120,6 @@ Int_t StJetMaker::Make()
     
     //Find the Jets, using the fourPMaker information:
     bool hadJets = false;
-
     for(jetBranchesMap::iterator jb = jetBranches.begin(); jb != jetBranches.end(); jb++) {
 	StppJetAnalyzer* thisAna = (*jb).second;
 	if(!thisAna) {
@@ -160,28 +150,9 @@ Int_t StJetMaker::Make()
 	muDstJets->setMuDst(mudst);
 	
 	if (cJets.size() > 0) hadJets = true;
-
-	int ijet=0;
+	
 	for(JetList::iterator it=cJets.begin(); it!=cJets.end(); ++it) {
-
-	    /*
-	    //temp check from here.................
-	    //dumpProtojetToStream(mudst->event()->eventId(), ijet, *mOfstream, *it);
-	    StProtoJet& pj = (*it);
-	    cout <<"jet "<<ijet<<"\t\t"<<pj.pt()<<"\t"<<pj.phi()<<"\t"<<pj.eta()<<endl;
-	    StProtoJet::FourVecList &trackList = pj.list(); // Get the tracks too.	    
-	    for(StProtoJet::FourVecList::iterator it2=trackList.begin(); it2!=trackList.end(); ++it2)  {
-		//AbstractFourVec* v = (*it2);
-		//cout <<"\t"<<"\t\t"<<v->pt()<<"\t"<<v->phi()<<"\t"<<v->eta()<<endl;
-		StMuTrackFourVec* fv = dynamic_cast<StMuTrackFourVec*>(*it2);
-		assert(fv);
-		cout <<"\t\t\t"<<(*fv)<<endl;
-	    }
-	    //to here .............................
-	    */
-	    
 	    muDstJets->addProtoJet(*it);
-	    ++ijet;
 	}
 	cout << "Number Jets Found: " << muDstJets->nJets() << endl;
 	
@@ -189,6 +160,54 @@ Int_t StJetMaker::Make()
 	    StJet* jet = (StJet*) muDstJets->jets()->At(i);
 	    cout<<"jet "<<i<<"\t\t"<<jet->E()<<"\t\t"<<jet->Phi()<<"\t\t"<<jet->Eta()<<endl;
 
+	    /*
+	    // begin test......................................................................................................
+	    StJet* j = jet;
+	    //Get pointers to retreive the emc info
+	    StEmcGeom* geom = StEmcGeom::getEmcGeom(detname[0].Data());
+	    StEmcADCtoEMaker* adc2e =dynamic_cast<StEmcADCtoEMaker*>( GetMaker("Eread") );
+	    assert(adc2e);
+	    StBemcData* data = adc2e->getBemcData();
+	    
+	    StJets* stjets = muDstJets;
+	    typedef StJets::TrackVec TrackVec;
+	    StMuDst* muDst = muDstMaker->muDst();
+	    TrackVec tracks = stjets->jetParticles(muDst, i);
+	    
+	    int itrack = 0;
+	    for (TrackVec::iterator tit = tracks.begin(); tit!=tracks.end(); ++tit) {
+		StMuTrack *muTrack = *tit;
+		
+		//cout <<"\t--track "<<itrack<<endl;
+		const StThreeVectorF& mom = muTrack->momentum();
+		double dR = gDeltaR(j, mom);
+		cout <<"\tPt_track:\t"<<mom.perp()
+		     <<"\tEta_track:\t"<<mom.pseudoRapidity()
+		     <<"\tPhi_track:\t"<<mom.phi()
+		     <<"\tdR:\t"<<dR<<endl;
+		
+		++itrack;
+	    }
+	    //now get the bemc info:
+	    vector<int> towerIndices = stjets->jetBemcTowerIndices(i);
+	    const int maxHits = 4800;
+
+	    for (vector<int>::iterator bit=towerIndices.begin(); bit!=towerIndices.end(); ++bit) {
+		int towerIndex = (*bit);
+		if (towerIndex>maxHits) {
+		    cout <<"StJetReader::exampleEventAna(). ERROR:\ttowerIndex out of bounds. abort()"<<endl;
+		    abort();
+		}
+		float eta, phi;
+		geom->getEtaPhi(towerIndex, eta, phi);
+		double e = data->TowerEnergy[towerIndex];
+		double dphi = gDeltaPhi(j->Phi(), phi);
+		double deta = j->Eta()-eta;
+		double dR = sqrt( dphi*dphi  +  deta*deta );
+		cout <<"\tE_tower:\t"<<e<<"\tEta_tower:\t"<<eta<<"\tPhi_tower:\t"<<phi<<"\tdR:\t"<<dR<<endl;
+	    }
+	    //end test.............................................................................................................
+	    */
 	}
     }
     
@@ -203,12 +222,6 @@ void StJetMaker::FinishFile(void)
     m_outfile->Write();
     m_outfile->Close();
     delete m_outfile;
-
-    if (mOfstream) {
-	mOfstream->close();
-	delete mOfstream;
-	mOfstream=0;
-    }
 }
 
 Int_t StJetMaker::Finish()

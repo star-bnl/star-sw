@@ -5,11 +5,11 @@ class  StChain;
 StChain *chain;
 int total=0;
 
-void RunJetFinder2(int nevents=100,
+void RunJetFinder2(int nevents=300,
 		   const char* dir = "",
-		   const char* file = "/star/data44/reco/productionPP/ReversedFullField/P04ij/2004/135/st_physics_adc_5135068_raw_2050001.MuDst.root",
+		   const char* file = "/star/data16/reco/ppLong-1/FullField/P03ih/2003/150/st_physics_4150010_raw_0010005.MuDst.root",
 		   const char *filter = "",
-		   const char *outfile="./4150010_raw_0030061")
+		   const char *outfile="4150010_raw_0010005")
 {
     if (gClassTable->GetID("TTable") < 0) {
 	gSystem->Load("libStar");
@@ -28,6 +28,7 @@ void RunJetFinder2(int nevents=100,
     gSystem->Load("St_db_Maker");
     gSystem->Load("StJetFinder");
     gSystem->Load("StJetMaker");
+    gSystem->Load("StSpinPoolThomasUtilities");
 
     double pi = atan(1.0)*4.0;
     cout << " loading done " << endl;
@@ -47,6 +48,7 @@ void RunJetFinder2(int nevents=100,
 
     //Database
     St_db_Maker *dbMk = new St_db_Maker("StarDb", "MySQL:StarDb");
+    dbMk->SetDateTime(20030101,10000); 
 
     //EmcAdc2EMaker
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
@@ -75,14 +77,12 @@ void RunJetFinder2(int nevents=100,
     //set the analysis cuts: (see StJetMaker/StppJetAnalyzer.h -> class StppAnaPars )
     StppAnaPars* anapars = new StppAnaPars();
     anapars->setFlagMin(0); //track->flag() > 0
-    anapars->setNhits(15); //track->nHitsFit()>15
-    anapars->setCutPtMin(0.2); //track->pt() > 0.2
+    anapars->setNhits(15); //track->nHitsFit()>15    anapars->setCutPtMin(0.2); //track->pt() > 0.2
     anapars->setAbsEtaMax(1.6); //abs(track->eta())<1.6
-    anapars->setJetPtMin(5.0); //MLM, remember to change this back to 5!
+    anapars->setJetPtMin(5.0);
     anapars->setJetEtaMax(100.0);
     anapars->setJetEtaMin(0);
     anapars->setJetNmin(0);
-    
 
     //Setup the cone finder (See StJetFinder/StConeJetFinder.h -> class StConePars)
     StConePars* cpars = new StConePars();
@@ -112,7 +112,7 @@ void RunJetFinder2(int nevents=100,
     ktpars->setR(1.0);
     ktpars->setDebug(false);
     emcJetMaker->addAnalyzer(anapars, ktpars, "MkKtJet");
-    
+  
     chain->Init();
     chain->PrintInfo();
 
@@ -145,7 +145,7 @@ void RunJetFinder2(int nevents=100,
 	const char* bname = branch->GetName();
 	TString bnameString(bname);
 	cout <<"\t--- Found branch:\t"<<bnameString<<endl;
-	for (int jb=0; jb<branchesToKill.GetLast()+1; ++jb) {
+	for (int jb=0; jb<branchesToKill->GetLast()+1; ++jb) {
 	    TObjString* tos = static_cast<TObjString*>( branchesToKill[jb] );
 	    TString btk = tos->GetString();
 	    //cout <<"\t\tcompare to:\t"<<btk<<endl;
@@ -155,8 +155,8 @@ void RunJetFinder2(int nevents=100,
 	    }
 	}
     }
-    
-    for (Int_t iev=0; iev<nevents; iev++) {
+
+    for (Int_t iev=0;iev<nevents; iev++) {
 	cout << "****************************************** " << endl;
 	cout << "Working on eventNumber " << iev << endl;
 	cout << "*************************1***************** " << endl;
