@@ -161,6 +161,26 @@ void StiGeometryTransform::kill()
     }
 }
 
+void StiGeometryTransform::setStiHitError(const StHit* stHit, StiHit* stiHit, double theta)
+{
+    //Note, we currently assume a diagonal error matrix from StHit, since that is all it stores.
+    //This will have to be changed in the future:
+    double sinTheta = sin(theta);
+    double cosTheta = cos(theta);
+    
+    StThreeVectorF error = stHit->positionError();
+    
+    //diagonal elements
+    stiHit->setSxx( error.x()*cosTheta*cosTheta + error.y()*sinTheta*sinTheta );
+    stiHit->setSyy( error.x()*sinTheta*sinTheta + error.y()*cosTheta*cosTheta );
+    stiHit->setSzz( error.z() );
+    
+    //off-diagonal elements
+    stiHit->setSxy( -1.*error.x()*sinTheta*cosTheta + error.y()*sinTheta*cosTheta );
+    stiHit->setSxz( 0. );
+    stiHit->setSyz( 0. );
+}
+
 // returns the reference angle for the given sector number (out of the 
 // given total).  This assumes the star convention where the highest
 // numbered sector is at "12 o'clock", or pi/2, and the sector numbering
@@ -358,10 +378,12 @@ void StiGeometryTransform::operator() (const StTpcHit* tpchit, StiHit* stihit)
     }
 
     
-    //The errors take for god-damn ever to transform!
-    //Now Transform Errors
-    StMatrixF covMatrix = tpchit->covariantMatrix();
-    stihit->setError( gCovarianceRotation( covMatrix, stihit->refangle() ) );
+    //Now Transform Errors by hand (using matrix is too slow).
+
+    setStiHitError(tpchit, stihit, refangle);
+    
+    //StMatrixF covMatrix = tpchit->covariantMatrix();
+    //stihit->setError( gCovarianceRotation( covMatrix, stihit->refangle() ) );
     
     /*
       //This is currently performed in the HitFiller to speed things up (MLM, 8/27/01)
@@ -411,17 +433,25 @@ void StiGeometryTransform::operator() (const StSvtHit* svthit, StiHit* stihit){
   stihit->setY(-svthit->position().x() * sin(dRefAngle) +
                 svthit->position().y() * cos(dRefAngle) );
 
+  //Transform the error
+  setStiHitError(svthit, stihit, dRefAngle);
+
+  //We currently do this in StiHitFiller to speed up the process
+  
   // find detector for this hit
   char szBuf[100];
   sprintf(szBuf, "Svg/Layer_%d/Ladder_%d/Ladder", (int) svthit->layer(),
-          (int) (svthit->ladder() + 1)/2);
+	  (int) (svthit->ladder() + 1)/2);
   StiDetector* layer = StiDetectorFinder::instance()->findDetector(szBuf);
   if (!layer) {
       *(Messenger::instance(MessageType::kGeometryMessage)) <<"Error, no detector for layer "<<svthit->layer()<<"\tladder: "<<svthit->ladder()<<"\tABORT"<<endl;
       return;
   }
+  
   stihit->setDetector( layer );
+
 }
+
 void StiGeometryTransform::operator() (const StiHit* stihit, StSvtHit* svthit){
 }
 

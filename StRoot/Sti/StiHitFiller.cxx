@@ -142,9 +142,25 @@ void StiHitFiller::fillSvtHits(StiHitContainer* store, StiObjectFactoryInterface
 	    for (unsigned int wafer=1; wafer<=ladderhits->numberOfWafers(); ++wafer) {
 		//mMessenger <<"Barrel "<<barrel<<"\tladder "<<ladder<<"\twafer "<<wafer<<endl;
 		StSvtWaferHitCollection* waferhits = ladderhits->wafer(wafer-1);
+		
+		// find detector for this layer
+		//char szBuf[100];
+		//sprintf(szBuf, "Svg/Layer_%d/Ladder_%d/Ladder", (int) svthit->layer(),
+		//(int) (svthit->ladder() + 1)/2);
+		//StiDetector* layer = StiDetectorFinder::instance()->findDetector(szBuf);
+		//if (!layer) {
+		//  mMessenger <<"StiHitFiller::fillSvtHits() Error:\t"
+		//       <<"no detector for layer "
+		//       <<svthit->layer()<<"\tladder: "
+		//       <<svthit->ladder()<<"\tABORT"<<endl;
+		//  return;
+		//}
+		
 		const StSPtrVecSvtHit& hits = waferhits->hits();  //Finally!
 		for (vector<StSvtHit*>::const_iterator it=hits.begin(); it!=hits.end(); ++it) {
 		    StSvtHit* hit = dynamic_cast<StSvtHit*>(*it);
+		    
+		    
 		    if (hit) {
 			if (hit->flag()<4) {
 			    //Now we've got the hit, fillerup!
@@ -152,6 +168,7 @@ void StiHitFiller::fillSvtHits(StiHitContainer* store, StiObjectFactoryInterface
 			    stihit->reset();
 			    
 			    mtranslator->operator()(hit, stihit);
+			    //stihit->setDetector (layer );
 			    
 			    //Now Fill the Hit Container!
 			    store->push_back( stihit );

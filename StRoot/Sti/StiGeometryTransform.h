@@ -16,6 +16,7 @@ class StiKalmanTrackNode;
 class StTrack;
 class StGlobalTrack;
 class StTpcHit;
+class StHit;
 class StSvtHit;
 class StSsdHit;
 class StiHit;
@@ -67,6 +68,10 @@ public:
     double phiForSector(int iSector, int nSectors) const;
     int westSectorForPhi(double phi, int nSectors) const;
     int eastSectorForPhi(double phi, int nSectors) const;
+
+    ///Set the hit errors in the rotated (StiHit) system defined by rotation of the StHit
+    /// error matrix by angle theta about the z-axis.
+    void setStiHitError(const StHit* stHit, StiHit* stiHit, double theta);
 
 public:
     //Hit Transform Functors (Transfrom from first argument to second argument)
