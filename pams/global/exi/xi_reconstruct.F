@@ -177,7 +177,7 @@ C----two possible intersection points ---------------------------
 			DO jk=1,2
 		xp(1)=xcom(jk)
 		xp(2)=ycom(jk)
-111		call project_track(xc1,r1,xp,xn1)
+111		call exi_project_track(xc1,r1,xp,xn1)
 		call update_track_param(xc1,r1,xn1,trki,trk1)
 		rd=sqrt( (xn1(1)-xp(1))**2 + (xn1(2)-xp(2))**2
      +			+(trk1(3)-zcom(jk))**2 )
@@ -235,7 +235,7 @@ C--calculate impact parameters--- wkw
 		xp(1)=0.
 		xp(2)=0.
 c               negative track
-		call project_track(xc1,r1,xp,xn1)
+		call exi_project_track(xc1,r1,xp,xn1)
 c		call ev0_update_track_param(xc1,r1,xn1,trki,trk1)
                 exiout(ok).chi2=sqrt(xn1(1)**2.+xn1(2)**2.)
 
