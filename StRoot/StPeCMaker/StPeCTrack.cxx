@@ -6,10 +6,9 @@
 #include <Stiostream.h>
 #include "StPeCTrack.h"
 #include "StEventTypes.h"
-// Temp fix to avoid Yuris new version
-// use this for P00hm production 
-// #include "BetheBloch.h"
-#include "myBetheBloch.h"
+#include "BetheBloch.h"
+// this is the old BB, used for P00hm
+//#include "myBetheBloch.h"
 
 #include <math.h>
 ClassImp(StPeCTrack)
@@ -45,11 +44,12 @@ void StPeCTrack::set ( Int_t _primary, StTrack* trk) {
 
   //   cout << "Flag: " << trk->flag() << " primary " << _primary << endl;
   dedx   = 0. ;
-  dedxZel         = -9999. ;  
-  dedxZmu         = -9999. ;
-  dedxZpi         = -9999. ;
-  dedxZk          = -9999. ;
-  dedxZp          = -9999. ;
+  dedxZel         = -9999.;  
+  dedxZmu         = -9999.;
+  dedxZpi         = -9999.;
+  dedxZk          = -9999.;
+  dedxZp          = -9999.;
+  length          = -9999.;
   StSPtrVecTrackPidTraits& traits =  trk->pidTraits();
   if ( &traits ) {
     StDedxPidTraits *dedxPid = 0 ;
@@ -61,12 +61,17 @@ void StPeCTrack::set ( Int_t _primary, StTrack* trk) {
         }
      }
      if ( dedxPid ){
+       length= dedxPid->length();
        dedx = dedxPid->mean(); 
        dedxZel       = getZdEdx(mMassElectron);
        dedxZmu       = getZdEdx(mMassMuon);
        dedxZpi       = getZdEdx(mMassPion);
        dedxZk        = getZdEdx(mMassKaon);
        dedxZp        = getZdEdx(mMassProton);
+       nSigmaEl  =0;   // later, not filled from StEvent
+       nSigmaPi  =0;
+       nSigmaK   =0;
+       nSigmaP   =0;
 	
      }
      nHits = trk->detectorInfo()->numberOfPoints() ;
@@ -89,23 +94,32 @@ void StPeCTrack::set(Int_t _primary, StMuTrack* trk)
    phi0 = trk->firstPoint().phi();
    z0 = trk->firstPoint().z(); 
    r0 = trk->firstPoint().perp(); 
-
-
-   dedx = 0.;
-   dedxZel = -9999.;  
-   dedxZmu = -9999.;
-   dedxZpi = -9999.;
-   dedxZk = -9999.;
-   dedxZp = -9999.;
-
-
- 
+   length= trk->length();  // hope this is correct // needed for dedxZ
+   
    dedx = trk->dEdx(); 
+   // OLd
+   //    dedxZel       = getZdEdx(mMassElectron);
+   //    dedxZmu       = getZdEdx(mMassMuon);
+   //    dedxZpi       = getZdEdx(mMassPion);
+   //    dedxZk        = getZdEdx(mMassKaon);
+   //    dedxZp        = getZdEdx(mMassProton);
+   // probabilities from muDst
    dedxZel = trk->pidProbElectron();
+   dedxZmu = -9999; // not done in muDst
    dedxZpi = trk->pidProbPion();
    dedxZk = trk->pidProbKaon();
    dedxZp = trk->pidProbProton();
+
+   nSigmaEl = trk->nSigmaElectron();
+   //   nSignaMu = -9999;  // not done in muDst
+   nSigmaPi = trk->nSigmaPion();
+   nSigmaK  = trk->nSigmaKaon();
+   nSigmaP  = trk->nSigmaProton();
+
    nHits = trk->nHits();
+   
+
+
 
 // printf ( "pt psi eta r0 phi0 z0 nHits %f %f %f %f %f %f %f \n",
 //pt, psi, eta, r0, phi0, z0, nHits ) ;
@@ -117,11 +131,15 @@ void StPeCTrack::set(Int_t _primary, StMuTrack* trk)
 
 // Private Helper 
 Float_t StPeCTrack::getZdEdx(Float_t mass) {
-  static myBetheBloch bb;
+  // old; FLK
+  //static myBetheBloch bb;
   
-  if ( ! mass ) { return -9999; }
+  if ( ! mass || length<=0. ) { return -9999; }
   Double_t betaGamma = p / mass ;
-  Double_t dedxBB = bb(betaGamma);
+  // old
+  // Double_t dedxBB = bb(betaGamma);
+  Double_t dedxBB= BetheBloch::Sirrf(betaGamma, length);
+  
   if (p && dedx && dedxBB ) {
     return log ( dedx/dedxBB);
   } else {

@@ -1,7 +1,10 @@
 /////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.cxx,v 1.7 2003/09/02 17:58:46 perev Exp $
+// $Id: StPeCTrigger.cxx,v 1.8 2003/11/25 01:54:37 meissner Exp $
 // $Log: StPeCTrigger.cxx,v $
+// Revision 1.8  2003/11/25 01:54:37  meissner
+// correct several bugs: eta cut for tracks, charge sorting, add counting of FTPC and TPC primary tracks, Add bbc information
+//
 // Revision 1.7  2003/09/02 17:58:46  perev
 // gcc 3.2 updates + WarnOff
 //
@@ -87,6 +90,7 @@ Int_t StPeCTrigger::process(StEvent *event)
   StCtbTriggerDetector& ctb = trg->ctb();
   StMwcTriggerDetector& mwc = trg->mwc();
   StZdcTriggerDetector& zdc = trg->zdc();
+  StBbcTriggerDetector& bbc = trg->bbc();
 
   if ( l0Data && infoLevel > 0 ){
     cout << "L0 mwcCtbMultiplicity = " << l0Data->mwcCtbMultiplicity() << endl;
@@ -195,6 +199,40 @@ Int_t StPeCTrigger::process(StEvent *event)
   }
   ctbSum = ctbsum ;
   mwcSum = mwcsum ;
+
+
+
+  // BBC 
+  if(&bbc){
+
+    bbcAdcSumEastSm=bbc.adcSumEast();
+    bbcAdcSumWestSm=bbc.adcSumWest();
+    bbcAdcSumEastLg=bbc.adcSumEastLarge();;
+    bbcAdcSumWestLg=bbc.adcSumWestLarge();;
+
+    bbcNHitEastSm=bbc.nHitEast();
+    bbcNHitWestSm=bbc.nHitWest();
+    bbcNHitEastLg=bbc.nHitEastLarge();;
+    bbcNHitWestLg=bbc.nHitWestLarge();;
+ 
+    bbcTacEast=bbc.tdcEarliestEast();
+    bbcTacWest=bbc.tdcEarliestWest();  
+
+  } else {
+    bbcAdcSumEastSm=0;
+    bbcAdcSumWestSm=0;
+    bbcAdcSumEastLg=0;
+    bbcAdcSumWestLg=0;
+
+    bbcNHitEastSm=0;
+    bbcNHitWestSm=0;
+    bbcNHitEastLg=0;
+    bbcNHitWestLg=0;
+
+    bbcTacEast=0;
+    bbcTacWest=0;  
+  }
+    
 //
 //   Simulate l0
 //
@@ -261,6 +299,28 @@ Int_t StPeCTrigger::process(StMuDst* mudst)
   // get trigger word 
   tw = mudst->event()->l0Trigger().triggerWord();
 
+  // get triggger ids
+  vector<unsigned int> triggerIds;
+  StMuTriggerIdCollection  tt=mudst->event()->triggerIdCollection();
+  if(&tt) {
+    StTriggerId ttid= tt.nominal();
+    if(&ttid) {
+    cout << "Got IDS " << endl; 
+
+    triggerIds=  ttid.triggerIds();
+    std::vector<unsigned int>::iterator iiter;
+    for(iiter=triggerIds.begin(); iiter!=triggerIds.end(); iiter++) {
+      cout << "TiD " << *iiter << endl;
+    }
+  
+    trg_3000     =ttid.isTrigger(3000);  
+    trg_3001     =ttid.isTrigger(3001);
+    trg_2001     =ttid.isTrigger(2001);
+    trg_2004     =ttid.isTrigger(2004);
+    
+    printf("upc %1d, upc_zdc %1d, minb1 %1d, minb2 %1d\n", trg_3000, trg_3001, trg_2001, trg_2004 );
+    }
+  }
   
   l0_2000->setInfoLevel ( infoLevel );
 //  l0_2000Corrected->setInfoLevel ( infoLevel );
@@ -274,6 +334,7 @@ Int_t StPeCTrigger::process(StMuDst* mudst)
   StCtbTriggerDetector& ctb = mudst->event()->ctbTriggerDetector();
 //  StMwcTriggerDetector& mwc = &mudst->event()->ctbTriggerDetector();
   StZdcTriggerDetector& zdc = mudst->event()->zdcTriggerDetector();
+  StBbcTriggerDetector& bbc = mudst->event()->bbcTriggerDetector();
 
   if ( l0Data && infoLevel > 0 ){
     cout << "L0 mwcCtbMultiplicity = " << l0Data->mwcCtbMultiplicity() << endl;
@@ -347,6 +408,37 @@ Int_t StPeCTrigger::process(StMuDst* mudst)
   }
   ctbSum = ctbsum ;
   mwcSum = 0 ;
+
+  // BBC 
+  if(&bbc){
+
+    bbcAdcSumEastSm=bbc.adcSumEast();
+    bbcAdcSumWestSm=bbc.adcSumWest();
+    bbcAdcSumEastLg=bbc.adcSumEastLarge();;
+    bbcAdcSumWestLg=bbc.adcSumWestLarge();;
+
+    bbcNHitEastSm=bbc.nHitEast();
+    bbcNHitWestSm=bbc.nHitWest();
+    bbcNHitEastLg=bbc.nHitEastLarge();;
+    bbcNHitWestLg=bbc.nHitWestLarge();;
+ 
+    bbcTacEast=bbc.tdcEarliestEast();
+    bbcTacWest=bbc.tdcEarliestWest();  
+
+  } else {
+    bbcAdcSumEastSm=0;
+    bbcAdcSumWestSm=0;
+    bbcAdcSumEastLg=0;
+    bbcAdcSumWestLg=0;
+
+    bbcNHitEastSm=0;
+    bbcNHitWestSm=0;
+    bbcNHitEastLg=0;
+    bbcNHitWestLg=0;
+    
+    bbcTacEast=0;
+    bbcTacWest=0;  
+  }
 //
 //   Simulate l0
 //

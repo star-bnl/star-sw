@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.h,v 1.5 2002/12/16 23:04:02 yepes Exp $
+// $Id: StPeCTrigger.h,v 1.6 2003/11/25 01:54:38 meissner Exp $
 // $Log: StPeCTrigger.h,v $
+// Revision 1.6  2003/11/25 01:54:38  meissner
+// correct several bugs: eta cut for tracks, charge sorting, add counting of FTPC and TPC primary tracks, Add bbc information
+//
 // Revision 1.5  2002/12/16 23:04:02  yepes
 // Field comes in KGauss and should be passed to routines in Teslas
 // problem pointed out by Vladimir
@@ -87,6 +90,29 @@ public:
   Float_t   zdcSumUA  ;
   //trigger word 
   Int_t     tw;
+
+  // BBC 
+  Float_t bbcAdcSumEastSm;
+  Float_t bbcAdcSumWestSm;
+  Float_t bbcAdcSumEastLg;
+  Float_t bbcAdcSumWestLg;
+
+  Int_t  bbcNHitEastSm;
+  Int_t  bbcNHitWestSm;
+  Int_t  bbcNHitEastLg;
+  Int_t  bbcNHitWestLg;
+
+  Int_t  bbcTacEast;
+  Int_t  bbcTacWest;
+
+  // trigger ids efficiency analysis 
+  Int_t trg_3000;   // UPC
+  Int_t trg_3001;   // UPC+ZDC
+  Int_t trg_2001;   // Minbias
+  Int_t trg_2004;   // Minbias
+
+
+
   
 #ifndef __CINT__
   void  setInfoLevel ( Int_t in ) { infoLevel = in ; } ; 

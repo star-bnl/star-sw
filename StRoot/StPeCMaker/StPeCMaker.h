@@ -1,6 +1,9 @@
-// $Id: StPeCMaker.h,v 1.14 2003/09/10 19:47:25 perev Exp $
+// $Id: StPeCMaker.h,v 1.15 2003/11/25 01:54:32 meissner Exp $
 //
 // $Log: StPeCMaker.h,v $
+// Revision 1.15  2003/11/25 01:54:32  meissner
+// correct several bugs: eta cut for tracks, charge sorting, add counting of FTPC and TPC primary tracks, Add bbc information
+//
 // Revision 1.14  2003/09/10 19:47:25  perev
 // ansi corrs
 //
@@ -111,9 +114,9 @@ private:
 	Int_t triggerSim(StEvent*);
 
 	virtual const char *GetCVS() const
-	{static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.14 2003/09/10 19:47:25 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+	{static const char cvs[]="Tag $Name:  $ $Id: StPeCMaker.h,v 1.15 2003/11/25 01:54:32 meissner Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
-	ClassDef(StPeCMaker,0)
+	ClassDef(StPeCMaker,1)
 };
 
 #endif

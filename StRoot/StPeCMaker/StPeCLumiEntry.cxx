@@ -13,7 +13,7 @@ StPeCLumiEntry::StPeCLumiEntry() {
   StPeCLumiEntry::Clear();  
 }
 
-void StPeCLumiEntry::Clear(const char*) {
+void StPeCLumiEntry::Clear(const Option_t* t) {
   runNr=0;    
   eventNr=0 ; 
   uTime=0;    
@@ -90,8 +90,8 @@ Int_t StPeCLumiEntry::fill ( StMuDst *muDst) {
    }
   
 
-   nGlobal = muDst->globalTracks()->GetEntries();
-   nPrimary = muDst->primaryTracks()->GetEntries(); 
+   nGlobal = muDst->numberOfGlobalTracks ();
+   nPrimary = muDst->numberOfPrimaryTracks(); 
 
    StThreeVectorF vtx = MuEvent->primaryVertexPosition();
 
