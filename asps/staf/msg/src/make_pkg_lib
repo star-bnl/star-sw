@@ -46,13 +46,6 @@ else if ( "$STAR_ARCH" == "irix" ) then
    setenv FFLAGS_DBG  " -extend_source -c -g -w "
    setenv CCFLAGS     " -c -O -ansi -fullwarn -v -prototypes -DIRIX "
    setenv CCFLAGS_DBG " -c -g -ansi -fullwarn -v -prototypes -DIRIX "
-else if ( "$STAR_ARCH" == "aix" ) then
-   setenv ARCH_TAG    "_aix"
-   setenv ARFLAGS     " slqv "
-   setenv FFLAGS      " -c -w -qextname -qsave -qfixed=132 -qctyplss -qintlog -qxlfag=oldtab "
-   setenv FFLAGS_DBG  " -c -g -w -qextname -qsave -qfixed=132 -qctyplss -qintlog -qxlfag=oldtab "
-   setenv CCFLAGS     " -c -D AIX -I../inc "
-   setenv CCFLAGS_DBG " -c -g -D AIX -I../inc "
 
 #
 #  INCLUDES under irix require this step...

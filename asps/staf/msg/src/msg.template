@@ -52,7 +52,7 @@
 	IF (MSG_Enabled( '<Subroutine Name>-T1', IDI1 ) ) THEN
 *	  This write is strictly an example -- it's a two-line message:
 	  WRITE( M132, 101 ) Junque, Stuff, Nonsense
-	  CALL Message( M132, 2 ) !2 line message -- note that "_Out" takes no ID.
+	  CALL Message( M132, 2, IDI1 ) !2 line message.
 	END IF
 101	FORMAT('<Subroutine Name>-T1  Junque:  'I11'  Stuff:'E15.8 /
      1	       '                      Nonsense:'I11 )
@@ -61,7 +61,7 @@
 
 	Here's how to make a table -- MSG_Enabled & Message do msg accounting, Message_Out does't:
 	IF (MSG_Enabled( '<Subroutine Name>-I2', IDI2 ) THEN
-	  CALL Message( '<Subroutine Name>-I2  This is a pedagogical table:', 1 )
+	  CALL Message( '<Subroutine Name>-I2  This is a pedagogical table:', 1, IDI2 )
 	  DO Irow = 1, Nrows
 	    WRITE( M132, 102 ) Irow
 	    CALL Message_Out( M132, 1 )  !Use Message_Out here, since no msg accounting
