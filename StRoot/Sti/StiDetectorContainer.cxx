@@ -307,9 +307,9 @@ StiDetectorContainer::build(StiDetectorBuilder * builder)
     mMessenger <<"StiDetectorContainer::build() - INFO - reset()"<<endl;
 
     //temp MLM
-    cout <<" \n---------------------------- Detector Container ---------------------\n"<<endl;
-    RecursiveStreamNode<StiDetector> myStreamer;
-    myStreamer( mroot );
+    //cout <<" \n---------------------------- Detector Container ---------------------\n"<<endl;
+    //RecursiveStreamNode<StiDetector> myStreamer;
+    //myStreamer( mroot );
     //end temp
 
     
