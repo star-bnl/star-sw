@@ -90,8 +90,8 @@ void EEfeeDataBlock ::setHead(UShort_t *h) {
 //--------------------------------------------------
 
 int EEfeeDataBlock ::getValidDataLen() const {
-  if(getCrateID()>=MinTwCrateID && getCrateID()<= MaxTwCrateID ) return MxTwCrateCh;
-  if(getCrateID()>=MinMapmtCrateID && getCrateID()<= MaxMapmtCrateID ) return MxMapmtCrateCh;
+  if(getCrateID()>=MinTwCrateID && getCrateID()<= MaxTwCrateID ) return MaxTwCrateCh;
+  if(getCrateID()>=MinMapmtCrateID && getCrateID()<= MaxMapmtCrateID ) return MaxMapmtCrateCh;
   return 0;
 }
 
@@ -155,10 +155,16 @@ void EEfeeDataBlock :: clear(){
 //--------------------------------------------------
 //--------------------------------------------------
 //--------------------------------------------------
+int  EEfeeDataBlock :: isValid(){
+  return (getCrateID()< MaxAnyCrate);// add more conditions as emerge
+}
 
 
 /*
  * $Log: EEfeeDataBlock.cxx,v $
+ * Revision 1.5  2003/11/24 05:40:55  balewski
+ * new stuff for miniDaq
+ *
  * Revision 1.4  2003/11/20 16:01:46  balewski
  * towars run 4
  *

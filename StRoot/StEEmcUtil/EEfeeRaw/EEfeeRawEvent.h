@@ -1,7 +1,7 @@
 #ifndef EEfeeRawEvent_h
 #define EEfeeRawEvent_h
 /*********************************************************************
- * $Id: EEfeeRawEvent.h,v 1.4 2003/11/22 05:35:39 balewski Exp $
+ * $Id: EEfeeRawEvent.h,v 1.5 2003/11/24 05:40:55 balewski Exp $
  *********************************************************************
  * Descripion:
  * STAR Endcap Electromagnetic Calorimeter Raw FEE Events
@@ -14,7 +14,7 @@ class EEfeeRawEvent :public TObject {
   int ID; // event ID
   
 public:
-  TClonesArray  *block;
+  TClonesArray  *block; 
 
   EEfeeRawEvent();
   virtual ~EEfeeRawEvent();
@@ -23,13 +23,17 @@ public:
   void setID(int i){ ID=i; }
   int  getID() const{return ID;};
   void addFeeDataBlock(EEfeeDataBlock*);
-  void maskWrongCrates( long timeStamp);
+  void maskWrongCrates( long timeStamp,   unsigned token);
   UShort_t  getValue(int crateID, int channel) const;
   ClassDef(EEfeeRawEvent,1) 
 };
 #endif
 
-/* $Log: EEfeeRawEvent.h,v $
+/*
+ * $Log: EEfeeRawEvent.h,v $
+ * Revision 1.5  2003/11/24 05:40:55  balewski
+ * new stuff for miniDaq
+ *
  * Revision 1.4  2003/11/22 05:35:39  balewski
  * *** empty log message ***
  *

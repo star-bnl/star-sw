@@ -76,7 +76,11 @@ void EEfeeRawEvent ::addFeeDataBlock(EEfeeDataBlock* b){
 //--------------------------------------------------
 //--------------------------------------------------
 
-void EEfeeRawEvent::maskWrongCrates( long timeStamp) {
+void EEfeeRawEvent::maskWrongCrates( long timeStamp, unsigned headToken) {
+  /* check for:
+     - token in every data block
+     - crateID vs. positon in event
+  */
 
   if(timeStamp< 1068744930) {// Thu Nov 13 12:35:30 2003
     printf(" maskWrongCrates() not implemented for time stamp   : %ld / %s",timeStamp,ctime((const time_t *)& timeStamp));
@@ -93,11 +97,12 @@ void EEfeeRawEvent::maskWrongCrates( long timeStamp) {
   else 
     { list=listB; dim=sizeof(listB)/sizeof(int); }
 
-  int i;
-  for(i=0;i<block->GetEntries();i++) {
-    EEfeeDataBlock *b=(EEfeeDataBlock *)block->At(i);
+  int ic;
+  int token =-1;
+  for(ic=0;ic<block->GetEntries();ic++) {
+    EEfeeDataBlock *b=(EEfeeDataBlock *)block->At(ic);
     int crateID=b->getCrateID();
-    if(i>=dim ||  crateID!=list[i]) b->maskCrate();
+    if(ic>=dim ||  crateID!=list[ic] || headToken!=b->getToken()) b->maskCrate();
     //pr-intf("vvv %d %d \n",i,crateID);
   }
   
@@ -123,6 +128,9 @@ UShort_t  EEfeeRawEvent::getValue(int crateID, int channel) const {
 
 /*
  * $Log: EEfeeRawEvent.cxx,v $
+ * Revision 1.6  2003/11/24 05:40:55  balewski
+ * new stuff for miniDaq
+ *
  * Revision 1.5  2003/11/20 22:59:40  balewski
  * *** empty log message ***
  *
