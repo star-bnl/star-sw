@@ -106,9 +106,12 @@ StiKalmanTrackFinder::StiKalmanTrackFinder(StiToolkit * userToolkit)
   trackFilter      = trackFilterFactory->getObject();
   if (broker->useGui())
     {
+      cout << "StiKalmanTrackFinder() - INFO - Instantiating gui filters" << endl;
       guiTrackFilter   = trackFilterFactory->getObject();
       guiMcTrackFilter = trackFilterFactory->getObject();
     }
+  else
+    cout << "StiKalmanTrackFinder() - INFO - No GUI filters selected" << endl;
   trackSeedFinder  = toolkit->getTrackSeedFinder();
   
   trackNodeFactory = toolkit->getTrackNodeFactory();

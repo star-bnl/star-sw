@@ -102,10 +102,8 @@ public:
     
 protected:
     ///Return a pointer to a new Parameter object on the heap.
-    virtual void * makeNewObject() const
-      {
-	return new Parameter();
-      }
+    virtual void * makeNewObject() const;
+
 private:
     ParameterFactory(); //Not implemented
 };

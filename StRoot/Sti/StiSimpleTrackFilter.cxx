@@ -116,10 +116,10 @@ StiSimpleTrackFilterFactory::StiSimpleTrackFilterFactory(const string& newName,
 							 int original,
 							 int incremental, 
 							 int maxInc)
-  : StiTrackFilterFactory(newName, 
-			  original, 
-			  incremental, 
-			  maxInc)
+  : StiObjectFactoryInterface<StiTrackFilter>(newName, 
+					      original, 
+					      incremental, 
+					      maxInc)
 {
   initialize();
 }
@@ -128,3 +128,10 @@ StiSimpleTrackFilterFactory::~StiSimpleTrackFilterFactory()
 {
   // cout <<"StiSimpleTrackFilterFactory::~StiSimpleTrackFilterFactory()"<<endl;
 }
+
+void * StiSimpleTrackFilterFactory::makeNewObject() const
+{
+  cout << "StiSimpleTrackFilterFactory::makeNewObject() - Instantiating StiSimpleTrackFilter()." << endl;
+  return new StiSimpleTrackFilter();
+}
+  

@@ -20,14 +20,14 @@ class EditableParameters : public Parameters, public Subject
   
   virtual void setDefaults()=0;
 
-  void add(const string & name, 
-	   const string & description,
-	   double value, 
-	   double defaultValue, 
-	   double min, 
-	   double max,
-	   double increment,
-	   int    type);
+  virtual void add(const string & name, 
+		   const string & description,
+		   double value, 
+		   double defaultValue, 
+		   double min, 
+		   double max,
+		   double increment,
+		   int    type);
 };
 
 #endif  // !defined(EDITABLEPARAMETERS_H_INCLUDED_)

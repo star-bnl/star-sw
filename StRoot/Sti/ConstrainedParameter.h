@@ -6,6 +6,7 @@
 #endif // _MSC_VER > 1000
 
 #include "Parameter.h"
+#include "StiObjectFactoryInterface.h"
 
 class ConstrainedParameter : public Parameter  
 {
@@ -143,7 +144,7 @@ inline  void ConstrainedParameter::set(double value,
 
 /*! ConstrainedParameter factory
  */
-class ConstrainedParameterFactory : public ParameterFactory
+class ConstrainedParameterFactory : public StiObjectFactoryInterface<Parameter>
 {
 public:
     ///This is the only constructor available.
@@ -156,10 +157,7 @@ public:
     
 protected:
     ///Return a pointer to a new Parameter object on the heap.
-    virtual void* makeNewObject() const
-      {
-	return new ConstrainedParameter();
-      }
+    virtual void* makeNewObject() const;
     
 private:
     ConstrainedParameterFactory(); // no imp

@@ -36,13 +36,27 @@ void EditableParameters::add(const string & name,
 			     double increment,
 			     int    type)
 {
+  cout << "EditableParameters::add(name,...)" << endl;
   Parameter * parameter = StiToolkit::instance()->getParameterFactory()->getObject();
+
+  if (parameter)
+    cout << "EditableParameters::add(name,...) - INFO - parameter OK" << endl;
+  else
+    {
+      cout << "EditableParameters::add(name,...) - INFO - parameter NOK" << endl;
+      return;
+    }
   EditableParameter * editableParameter = static_cast<EditableParameter*>(parameter);
   if (editableParameter)
     {
+      cout << "EditableParameters::add(name,...) - INFO - editableParameter OK" << endl;
       editableParameter->set(name,description,value,defaultValue,min,max,increment,type);
       this->Parameters::add(editableParameter);
     }
   else
-    throw runtime_error("EditableParameters::add() - ERROR - static_cast return null pointer");
+    {
+      cout << "EditableParameters::add(name,...) - INFO - editablearameter NOK" << endl;
+      return;
+      // throw runtime_error("EditableParameters::add() - ERROR - static_cast return null pointer");
+    }
 }

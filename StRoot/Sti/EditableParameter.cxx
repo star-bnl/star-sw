@@ -56,10 +56,10 @@ EditableParameterFactory::EditableParameterFactory(const string& newName,
 						   int original,
 						   int incremental, 
 						   int maxInc)
-  : ConstrainedParameterFactory(newName, 
-				original, 
-				incremental, 
-				maxInc)
+  : StiObjectFactoryInterface<Parameter>(newName, 
+					 original, 
+					 incremental, 
+					 maxInc)
 {
   initialize();
 }
@@ -69,3 +69,7 @@ EditableParameterFactory::~EditableParameterFactory()
   // cout <<"EditableParameterFactory::~EditableParameterFactory()"<<endl;
 }
 
+void * EditableParameterFactory::makeNewObject() const
+{
+  return new EditableParameter();
+}

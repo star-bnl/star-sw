@@ -2,6 +2,7 @@
 #define StiSimpleTrackFilter_H 1
 #include "StiTrackFilter.h"
 #include "Parameters.h"
+#include "StiObjectFactoryInterface.h"
 
 class StiTrack;
 
@@ -61,7 +62,7 @@ class StiSimpleTrackFilter : public StiTrackFilter, public Parameters
 
 /*! StiSimpleTrackFilter factory
  */
-class StiSimpleTrackFilterFactory : public StiTrackFilterFactory
+class StiSimpleTrackFilterFactory : public StiObjectFactoryInterface<StiTrackFilter>
 {
 public:
   ///This is the only constructor available.
@@ -74,10 +75,7 @@ public:
 
  protected:
   ///Return a pointer to a new StiSimpleTrackFilter object on the heap.
-  virtual void * makeNewObject() const
-    {
-      return new StiSimpleTrackFilter();
-    }
+  virtual void * makeNewObject() const;
   
  private:
   StiSimpleTrackFilterFactory(); //Not implemented

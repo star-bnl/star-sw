@@ -49,3 +49,8 @@ ParameterFactory::~ParameterFactory()
 {
   // cout <<"ParameterFactory::~ParameterFactory()"<<endl;
 }
+
+void * ParameterFactory::makeNewObject() const
+{
+  return new Parameter();
+}

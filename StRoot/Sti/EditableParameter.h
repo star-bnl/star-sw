@@ -6,6 +6,7 @@
 #endif // _MSC_VER > 1000
 
 #include "ConstrainedParameter.h"
+#include "StiObjectFactoryInterface.h"
 
 class EditableParameter : public ConstrainedParameter
 {
@@ -73,7 +74,7 @@ inline void    EditableParameter::reset()
 
 /*! EditableParameter factory
  */
-class EditableParameterFactory : public ConstrainedParameterFactory
+class EditableParameterFactory : public StiObjectFactoryInterface<Parameter>
 {
 public:
     ///This is the only constructor available.
@@ -86,10 +87,7 @@ public:
     
 protected:
     ///Return a pointer to a new Parameter object on the heap.
-    virtual void* makeNewObject() const
-      {
-	return new EditableParameter();
-      }
+    virtual void* makeNewObject() const;
     
 private:
     EditableParameterFactory(); // no imp
