@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StThreeVectorF.cc,v 1.11 2003/10/30 20:06:47 perev Exp $
+ * $Id: StThreeVectorF.cc,v 1.12 2004/01/27 02:52:26 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StThreeVectorF.cc,v $
+ * Revision 1.12  2004/01/27 02:52:26  perev
+ * Add finite() for float
+ *
  * Revision 1.11  2003/10/30 20:06:47  perev
  * Check of quality added
  *
@@ -50,6 +53,7 @@
  *
  **************************************************************************/
 #include <assert.h>
+#include "StMath.hh"
 #include "StThreeVectorF.hh"
 #include "StThreeVectorD.hh"
 
@@ -144,7 +148,7 @@ istream&  operator>>(istream& is, StThreeVectorF& v)
 int StThreeVectorF::valid(double world) const
 {		
   for (int i=0;i<3;i++) {
-    if (!::finite((&mX1)[i])      ) return 0; 		
+    if (!StMath::Finite((&mX1)[i])      ) return 0; 		
     if ( ::fabs  ((&mX1)[i])>world) return 0; 		
   }		
   return 1;		

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMath.hh,v 1.3 2003/11/25 04:22:33 perev Exp $
+ * $Id: StMath.hh,v 1.4 2004/01/27 02:51:57 perev Exp $
  *
  * Author: Thomas Ullrich, Apr 2000
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StMath.hh,v $
+ * Revision 1.4  2004/01/27 02:51:57  perev
+ * Add finite() for float
+ *
  * Revision 1.3  2003/11/25 04:22:33  perev
  * finite(float) implemented
  *
@@ -30,7 +33,8 @@ class StMath
 public:
 static int tooBig(float  *arr, int narr, double toobig = 1.e+6); 
 static int tooBig(double *arr, int narr, double toobig = 1.e+6); 
-static int finite(const float &f); 
+static int Finite(const float  &f); 
+static int Finite(const double &f); 
 };
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMath.cc,v 1.2 2003/11/25 04:21:54 perev Exp $
+ * $Id: StMath.cc,v 1.3 2004/01/27 02:51:35 perev Exp $
  *
  * Author: Victor Perev - Created: 19 Nov 2003
  *       
@@ -12,6 +12,9 @@
  ***************************************************************************
  *
  * $Log: StMath.cc,v $
+ * Revision 1.3  2004/01/27 02:51:35  perev
+ * Add finite() for float
+ *
  * Revision 1.2  2003/11/25 04:21:54  perev
  * finite(float) implemented
  *
@@ -25,7 +28,11 @@
 #include <math.h>
 #include "StMath.hh"
 //_____________________________________________________________________________
-int StMath::finite(const float &f)
+int StMath::Finite(const double &f)
+{return ::finite(f);}
+
+//_____________________________________________________________________________
+int StMath::Finite(const float &f)
 {
 /*
 The IEEE single precision floating point standard representation requires a 32 bit word, which may be represented as numbered from 0 to 31, left to right. The first bit is the sign bit, S, the next eight bits are the exponent bits, 'E', and the final 23 bits are the fraction 'F':
@@ -64,7 +71,7 @@ If E=0 and F is zero and S is 0, then V=0
 int StMath::tooBig(float  *arr, int narr, double toobig) 
 {
   for (int i=0;i<narr;i++) {
-    if (!  finite(arr[i])         )	return 1;
+    if (!  Finite(arr[i])         )	return 1;
     if ( ::fabs  (arr[i]) > toobig)	return 2;
   }
   return 0;
