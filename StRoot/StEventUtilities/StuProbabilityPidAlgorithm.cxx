@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StuProbabilityPidAlgorithm.cxx,v 1.16 2000/10/24 15:19:58 aihong Exp $
+ * $Id: StuProbabilityPidAlgorithm.cxx,v 1.17 2000/10/24 22:36:47 aihong Exp $
  *
  * Author:Aihong Tang, Richard Witt(FORTRAN version). Kent State University
  *        Send questions to aihong@cnr.physics.kent.edu 
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StuProbabilityPidAlgorithm.cxx,v $
+ * Revision 1.17  2000/10/24 22:36:47  aihong
+ * pass if no parameter file read
+ *
  * Revision 1.16  2000/10/24 15:19:58  aihong
  * fix bug in fillPIDByLookUpTable()
  *
@@ -183,6 +186,7 @@ StParticleDefinition* StuProbabilityPidAlgorithm::operator() (const StTrack& the
      mProb[2]=0;
      mExtrap=false;
 
+     if (StuProbabilityPidAlgorithm::mHasParameterFile){
 
           double rig    =0.0;
           double dedx   =0.0;
@@ -261,7 +265,7 @@ StParticleDefinition* StuProbabilityPidAlgorithm::operator() (const StTrack& the
 
  
        } else if (dedx==0.0){ fillAsUnknown();}
-
+     } else { fillAsUnknown();}
 
 
        return table->findParticleByGeantId(PID[0]);
@@ -609,6 +613,8 @@ void StuProbabilityPidAlgorithm::readParametersFromFile(TString fileName){
 
       if (f.IsOpen()){
 
+	StuProbabilityPidAlgorithm::mHasParameterFile=true;
+
       StPidAmpNetOut*          netOut;
       StPidAmpChannelInfoOut*  channelInfoOut;      
 
@@ -878,6 +884,7 @@ TVectorD* StuProbabilityPidAlgorithm::mTheRangeSettingVector = new TVectorD();
  int  StuProbabilityPidAlgorithm::mNChargeBins=2;
 
 bool StuProbabilityPidAlgorithm::mDynamicallyCalculatePID=false;
+bool StuProbabilityPidAlgorithm::mHasParameterFile=false;
 
 double   StuProbabilityPidAlgorithm::mDedxBinWidth=0.4e-05/200.;
 double   StuProbabilityPidAlgorithm::mRigBinWidth=2.0/200; //do not let NBins exceed 999.
