@@ -25,6 +25,7 @@ my @SetD = (
 #             "daq/2000/06",
 #             "daq/2000/07", 
              "daq/2000/08",               
+             "daq/2000/09",
 );
 
 my $prodPeriod = "P00hi"; 
@@ -224,7 +225,8 @@ my $mrunId;
        $mrunId = 0;
      }
 #        if ( $mrunId < 1223003 || $mrunId > 1228003 ) {   
-      if ( $mrunId == 1244027 ) {
+#      if ( $mrunId == 1246037 ) {
+        if ( $mrunId > 1243002 ) {
       foreach my $runNum (@runSet) {
 
         if ( $mrunId eq $runNum) {      
