@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.h,v 1.3 2002/04/15 22:29:28 laue Exp $
+ * $Id: StMuChainMaker.h,v 1.4 2002/04/15 22:38:11 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuChainMaker_hh
@@ -13,7 +13,7 @@ class StMuDbReader;
 class StMuChainMaker  {
  public:
   StMuChainMaker(const char* name="MuDst");
-  ~StMuChainMaker();
+  virtual ~StMuChainMaker();
 
   string** subFilter(string filter);
   TChain* make(string dir, string file, string filter, int maxFiles=10);
@@ -39,6 +39,9 @@ ClassDef(StMuChainMaker,0)
 /***************************************************************************
  *
  * $Log: StMuChainMaker.h,v $
+ * Revision 1.4  2002/04/15 22:38:11  laue
+ * made destructors virtual
+ *
  * Revision 1.3  2002/04/15 22:29:28  laue
  * updates
  *
