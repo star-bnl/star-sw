@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: DetectorReader.cxx,v 1.13 2003/03/24 18:12:15 ward Exp $
+ * $Id: DetectorReader.cxx,v 1.14 2004/02/18 20:17:48 ward Exp $
  * Author: Jeff Landgraf
  ***************************************************************************
  * Description:  Detector Factory
@@ -12,6 +12,9 @@
  *
  ***************************************************************************
  * $Log: DetectorReader.cxx,v $
+ * Revision 1.14  2004/02/18 20:17:48  ward
+ * Access SSD data in makers.
+ *
  * Revision 1.13  2003/03/24 18:12:15  ward
  * Full support for EEMC from Herbert Ward.
  *
@@ -106,13 +109,6 @@ DetectorReader *getDetectorReader(EventReader *er, string det)
       if (!pTPCP) dr = FALSE;
       else dr =  new TPCV2P0_Reader(er,pTPCP);
      }
-  else if  (det == "SSD")
-     {
-      Bank_SSDP *pSSDP;
-      pSSDP = (Bank_SSDP *)er->findBank("SSDP");
-      if (!pSSDP) dr = FALSE;
-      else dr =  new SSD_Reader(er,pSSDP);
-     }
   else if  (det == "SVT")
      {
       Bank_SVTPV1P0 *pSVTP;
@@ -171,6 +167,12 @@ EEMC_Reader *getEEMCReader(EventReader *er)
   }
   return FALSE;
 }
+SSD_Reader *getSSDReader(EventReader *er)
+{
+  printf("this is diag msg H in DetectorReader.cxx before instantiation of SSD_Reader.\n"); 
+  return new SSD_Reader(er);
+  return FALSE;
+}
 EMC_Reader *getEMCReader(EventReader *er)
 {
   Bank_EMCP *pEMCP;
@@ -199,7 +201,6 @@ PMD_Reader *getPMDReader(EventReader *er)
   }
   return FALSE;
 }
-
 TRG_Reader *getTRGReader(EventReader *er)
 {
   Bank_TRGP *pTRGP;

@@ -21,7 +21,7 @@ void St_trg_Maker::SecondDstDaq2003(St_dst_L0_Trigger *dst2) {
   tt->DSMInput         = mS2003->EvtDesc.DSMInput;
   tt->DSMAddress       = mS2003->EvtDesc.DSMAddress;
   tt->TriggerWd        = mS2003->EvtDesc.TriggerWord;
-  tt->DetectorBusy     = mS2003->EvtDesc.modifiedBusyStatus; // bbb chk with Zoran.
+  tt->DetectorBusy     = mS2003->EvtDesc.modifiedBusyStatus;
   tt->addBits          = mS2003->EvtDesc.addBits;
   for(i=0;i<32;i++) tt->CPA[i]=mS2003->TrgSum.DSMdata.CPA[i];
   tt->MWC_CTB_mul      = mS2003->TrgSum.DSMdata.lastDSM[2];
@@ -269,7 +269,6 @@ void St_trg_Maker::VpdDaq2003(St_dst_TrgDet *dst1) {
   tt->vertexZ=0;
 }
 void St_trg_Maker::ZdcDaq2003(St_dst_TrgDet *dst1) {
-  // bbb Need to add BBC stuff for Mikhail.
   int i;
   dst_TrgDet_st *tt = dst1->GetTable();
   for(i=0;i<8;i++) tt->lastDSM[i]=mS2003->TrgSum.DSMdata.lastDSM[i];

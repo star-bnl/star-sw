@@ -51,44 +51,44 @@ extern "C" {
 
 /* exists in all flavors */
 //extern volatile int tonkoLogLevel ;	
-  int tonkoLogLevel;
+//  int tonkoLogLevel;
 
 extern int rtsLogAddDest(char *server, int port) ;
 
 
-INLINE_HACK void rtsLogLevelInt(int level)
-{
-  tonkoLogLevel = level;
-  return;
-}
+// INLINE_HACK void rtsLogLevelInt(int level)
+// {
+//   tonkoLogLevel = level;
+//  return;
+//}
 
 /* let's have a function too... */
-INLINE_HACK void rtsLogLevel(char *level) 
-{
-	switch((int) *level) {
-	case 'D' :
-		tonkoLogLevel = 0 ;
-		break ;
-	case 'N' :
-		tonkoLogLevel = 1 ;
-		break ;
-	case 'W' :
-		tonkoLogLevel = 2 ;
-		break ;
-	case 'E' :
-		tonkoLogLevel = 3 ;
-		break ;
-	case 'O' :
-		tonkoLogLevel = 4 ;
-		break ;
-	case 'C' :
-	default :
-		tonkoLogLevel = 5 ;
-		break ;
-	}
-
-	return ;
-}
+// /INLINE_HACK void rtsLogLevel(char *level) 
+// /{
+// /	switch((int) *level) {
+// /	case 'D' :
+// /		tonkoLogLevel = 0 ;
+// /		break ;
+// /	case 'N' :
+// /		tonkoLogLevel = 1 ;
+// /		break ;
+// /	case 'W' :
+// /		tonkoLogLevel = 2 ;
+// /		break ;
+// /	case 'E' :
+// /		tonkoLogLevel = 3 ;
+// /		break ;
+// /	case 'O' :
+// /		tonkoLogLevel = 4 ;
+// /		break ;
+// /	case 'C' :
+// /	default :
+// /		tonkoLogLevel = 5 ;
+// /		break ;
+// /	}
+// /
+// /	return ;
+// /}
 
 
 

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.25 2004/02/03 03:25:06 jeromel Exp $
+ * $Id: StDAQReader.h,v 1.26 2004/02/18 20:17:45 ward Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.26  2004/02/18 20:17:45  ward
+ * Access SSD data in makers.
+ *
  * Revision 1.25  2004/02/03 03:25:06  jeromel
  * Added counter for ZeroToken events
  *
@@ -93,6 +96,7 @@ struct  EventInfo;
 typedef  EventInfo DAQEventInfo;
 class EventReader ;  
 class StTPCReader ;  
+class StSSDReader ;
 class StEMCReader ;  
 class StEEMCReader ;  
 class StPMDReader ;  
@@ -151,6 +155,7 @@ public:
   virtual int SVTPresent () const; 
   virtual int TOFPresent () const;
   virtual int FPDPresent () const;
+  virtual int SSDPresent () const;
   virtual int EMCPresent () const;
   virtual int PMDPresent () const;
   virtual int SMDPresent () const;
@@ -164,6 +169,7 @@ public:
   virtual const char *getTPCVersion()  const {return fTPCVersion ;} 
   virtual const char *getFTPCVersion() const {return fFTPCVersion;} 
   StTPCReader  *getTPCReader (); 
+  StSSDReader  *getSSDReader ();
   StEMCReader  *getEMCReader (); 
   StEEMCReader  *getEEMCReader (); 
   StPMDReader  *getPMDReader (); 
@@ -185,6 +191,7 @@ protected:
   int fVerbose;
   EventReader  *fEventReader;  
   StTPCReader  *fTPCReader;  
+  StSSDReader  *fSSDReader;
   StEMCReader  *fEMCReader;  
   StEEMCReader *fEEMCReader;  
   StPMDReader  *fPMDReader;  

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.41 2004/02/04 01:39:43 jeromel Exp $
+ * $Id: StDAQReader.cxx,v 1.42 2004/02/18 20:17:44 ward Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.42  2004/02/18 20:17:44  ward
+ * Access SSD data in makers.
+ *
  * Revision 1.41  2004/02/04 01:39:43  jeromel
  * Minor change (forgot a \n)
  *
@@ -147,6 +150,7 @@
 #include "StDAQReader.h"
 #include "StTPCReader.h"
 #include "StEMCReader.h"
+#include "StSSDReader.h"
 #include "StEEMCReader.h"
 #include "StPMDReader.h"
 #include "StFTPCReader.h"
@@ -164,6 +168,7 @@ StDAQReader::StDAQReader(const char *file)
   fEventReader	= 0;
   fTPCReader 	= 0;
   fEMCReader 	= 0;
+  fSSDReader 	= 0;
   fEEMCReader 	= 0;
   fPMDReader 	= 0;
   fFTPCReader   = 0;
@@ -211,6 +216,7 @@ int StDAQReader::close()
   delete fEventReader;	fEventReader 	= 0;  
 
   if(fTPCReader) 	fTPCReader ->close();  
+  if(fSSDReader)        fSSDReader ->close();
   if(fEMCReader) 	fEMCReader ->close();  
   if(fEEMCReader) 	fEEMCReader ->close();  
   if(fPMDReader) 	fPMDReader ->close();  
@@ -259,6 +265,7 @@ int StDAQReader::readEvent()
   if (fFTPCReader&&FTPCPresent())	fFTPCReader->Update();  
   if (fTRGReader&&TRGPresent  ())       fTRGReader ->Update();
   if (fSVTReader&&SVTPresent  ()) 	fSVTReader ->Update();
+  if (fSSDReader&&SSDPresent  ())       fSSDReader ->Update();
   if (fEMCReader&&EMCPresent  ()) 	fEMCReader ->Update();
   if (fEEMCReader&&EMCPresent ()) 	fEEMCReader->Update();
   if (fPMDReader&&PMDPresent  ()) 	fPMDReader ->Update();
@@ -322,6 +329,8 @@ void StDAQReader::setFTPCVersion(const char* vers)
 //_____________________________________________________________________________
    int StDAQReader::FPDPresent()  const {return  fEventInfo->FPDPresent;}
 //_____________________________________________________________________________
+   int StDAQReader::SSDPresent()  const {return  fEventInfo->SSDPresent;}
+//_____________________________________________________________________________
    int StDAQReader::EMCPresent()  const {return  fEventInfo->EMCPresent;}
 //_____________________________________________________________________________
    int StDAQReader::PMDPresent()  const {return  fEventInfo->PMDPresent;}
@@ -367,6 +376,14 @@ StEMCReader *StDAQReader::getEMCReader()
   return fEMCReader;
 } 
 //_____________________________________________________________________________
+StSSDReader *StDAQReader::getSSDReader()
+{
+  if (!SSDPresent()) return 0;
+  if (!fSSDReader) {
+    fSSDReader = new StSSDReader(this);
+  }
+  return fSSDReader;
+}
 //_____________________________________________________________________________
 StPMDReader *StDAQReader::getPMDReader()
 {
