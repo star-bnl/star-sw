@@ -1,5 +1,8 @@
-// $Id: StHbtExample.C,v 1.7 2000/03/20 17:50:40 kathy Exp $
+// $Id: StHbtExample.C,v 1.8 2000/04/12 17:39:02 kathy Exp $
 // $Log: StHbtExample.C,v $
+// Revision 1.8  2000/04/12 17:39:02  kathy
+// change to only load table libraries needed: lib*_Tables instead of all tables: St_Tables
+//
 // Revision 1.7  2000/03/20 17:50:40  kathy
 // fix all macros so that they set all branches on that are needed - otherwise won't work with soft links
 //
@@ -47,7 +50,10 @@ void StHbtExample(Int_t nevents=1,
     // Dynamically link needed shared libs
     gSystem->Load("St_base");
     gSystem->Load("StChain");
-    gSystem->Load("St_Tables");
+    gSystem->Load("libglobal_Tables");
+    gSystem->Load("libsim_Tables");
+    gSystem->Load("libgen_Tables");
+    gSystem->Load("libtpc_Tables");
     gSystem->Load("StUtilities");  // new addition 22jul99
     gSystem->Load("StAnalysisUtilities");  // needed by V0dstMaker
     gSystem->Load("StMagF");
