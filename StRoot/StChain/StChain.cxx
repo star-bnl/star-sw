@@ -1,5 +1,8 @@
-// $Id: StChain.cxx,v 1.24 1999/01/02 19:08:12 fisyak Exp $
+// $Id: StChain.cxx,v 1.25 1999/01/20 23:44:46 fine Exp $
 // $Log: StChain.cxx,v $
+// Revision 1.25  1999/01/20 23:44:46  fine
+// The special Input/Output makers and the static variable StChain::g_Chain have been introduced
+//
 // Revision 1.24  1999/01/02 19:08:12  fisyak
 // Add ctf
 //
@@ -266,7 +269,7 @@ StChain::StChain()
 
 //_____________________________________________________________________________
 StChain::StChain(const char *name, const char *title):
-m_VersionCVS("$Id: StChain.cxx,v 1.24 1999/01/02 19:08:12 fisyak Exp $"),
+m_VersionCVS("$Id: StChain.cxx,v 1.25 1999/01/20 23:44:46 fine Exp $"),
 m_VersionTag("$Name:  $")
 {
    SetName(name);
@@ -279,6 +282,7 @@ m_VersionTag("$Name:  $")
    m_Mode        = 0;
 //   m_Display     = 0;
    m_DataSet       = 0;
+   m_DebugLevel    = kNormal;
    SetDefaultParameters();
 
    gROOT->GetListOfBrowsables()->Add(this,GetName());
@@ -341,13 +345,25 @@ St_DataSet *StChain::DataSet(const Char_t *makername, const Char_t *path) const
 {
 // find the maker by name and return its dataset or subdataset if "path" supplied
  St_DataSet *set = 0;
+ StMaker *inputMaker = 0;
+ const Char_t *inputMakerName = "Input";
  if (makername) {
   set = 0;
   if (m_Makers) {
      TIter next(m_Makers);
      StMaker *maker;
-     while (maker = (StMaker*) next()){if (!strcmp(maker->GetName(),makername)) break;}
-     if (maker) set = maker->DataSet(); 
+     while (maker = (StMaker*) next())
+     {
+         const Char_t *name = maker->GetName();
+         // Find and remner the point of the special "Input" maker
+         if (strcmp(name,inputMakerName) == 0) inputMaker = maker;
+         if (!strcmp(maker->GetName(),makername)) break;
+     }
+     if (maker) 
+         set = maker->DataSet(); // Get dataset from Maker
+     else if (inputMaker) 
+         set = inputMaker->DataSet(makername); // If failed try to pool it from the "Input" maker
+       
      if (set && path && strlen(path)) set=0;
 #if 0
      {
@@ -456,7 +472,7 @@ void StChain::PrintInfo()
    printf("**************************************************************\n");
    printf("*             StChain version:%3d released at %6d         *\n",m_Version, m_VersionDate);
    printf("**************************************************************\n");
-   printf("* $Id: StChain.cxx,v 1.24 1999/01/02 19:08:12 fisyak Exp $    \n");
+   printf("* $Id: StChain.cxx,v 1.25 1999/01/20 23:44:46 fine Exp $    \n");
    //   printf("* %s    *\n",m_VersionCVS);
    printf("**************************************************************\n");
    printf("\n\n");
@@ -470,13 +486,23 @@ void StChain::PrintInfo()
 }
 
 //_____________________________________________________________________________
-void StChain::FillTree()
+Int_t StChain::FillTree()
 {
 //  Fill the ROOT tree, looping on all active branches
-
-
+#if 0
+   TIter next(m_Makers);
+   StMaker *maker;
+   //   Save();
+   //   MakeBranch();
+   while ((maker = (StMaker*)next())) {
+   //   maker->Save();
+      if (maker->IsToSave())
+              maker->FillClone();
+   }
+#endif
   // Now ready to fill the Root Tree
-   if(m_Tree) m_Tree->Fill();
+   if(m_Tree) return m_Tree->Fill();
+   return 0;
 }
 //_____________________________________________________________________________
 void StChain::FillXDF(St_XDFFile &file)
@@ -515,11 +541,16 @@ TTree *StChain::MakeTree(const char* name, const char*title)
    StMaker *maker;
    //   Save();
    //   MakeBranch();
-   while ((maker = (StMaker*)next())) {
+   while (maker = (StMaker*)next()) {
    //   maker->Save();
-      if (maker->IsToSave())
+      if (maker->IsToSave()) {
+#if 0
+              maker->MakeTree();
+#endif
               maker->MakeBranch();
+      }
    }
+
    return m_Tree;
 }
 //_____________________________________________________________________________
@@ -726,9 +757,90 @@ void StChain::Streamer(TBuffer &R__b)
       R__b << m_Run;
       R__b << m_Event;
       R__b << m_Mode;
-      m_Tree->Write();
-      R__b << m_Makers;
+      R__b << m_Tree;
+
+     // replace list of makers with the list of its name
+     // instead of  R__b << m_Makers;
+
+      TIter next(m_Makers);
+      TList makerNames;
+      StMaker *maker = 0;
+      while (maker = (StMaker *)next() )
+         makerNames.Add(new TObjString(maker->GetName()));
+      makerNames.Streamer();
+      makeNames.Delete();
+      
 //      m_HistBrowser.Streamer(R__b);
    }
 }
+#else
+void StChain::Streamer(TBuffer &R__b)
+{
+   // Stream an object of class StChain.
+
+   if (R__b.IsReading()) {
+      Version_t R__v = R__b.ReadVersion(); if (R__v) { }
+      gStChain = this;
+      StMaker::Streamer(R__b);
+      //R__b.ReadArray(m_VersionCVS);
+      //R__b.ReadArray(m_VersionTag);
+      R__b >> m_Version;
+      R__b >> m_VersionDate;
+      R__b >> m_Run;
+      R__b >> m_Event;
+      R__b >> m_Mode;
+      R__b >> m_EvenType;
+      R__b >> mBunchCrossingNumber;
+      R__b >> mTriggerMask;
+      mTimeStapm.Streamer(R__b);
+      mProcessTime.Streamer(R__b);
+      R__b >> (Int_t&)m_DebugLevel;
+      R__b >> m_Makers;
+      // Uncheck all makers
+      TIter next(m_Makers);
+      StMaker *maker = 0;
+      while (maker = (StMaker *)next()) maker->Save(kFALSE);
+      R__b >> fNtrack;
+   } else {
+      R__b.WriteVersion(StChain::IsA());
+      StMaker::Streamer(R__b);
+      //R__b.WriteArray(m_VersionCVS, __COUNTER__);
+      //R__b.WriteArray(m_VersionTag, __COUNTER__);
+      R__b << m_Version;
+      R__b << m_VersionDate;
+      R__b << m_Run;
+      R__b << m_Event;
+      R__b << m_Mode;
+      R__b << m_EvenType;
+      R__b << mBunchCrossingNumber;
+      R__b << mTriggerMask;
+      mTimeStapm.Streamer(R__b);
+      mProcessTime.Streamer(R__b);
+      R__b << (Int_t)m_DebugLevel;
+      // Create temp list to save
+      if (m_Makers && m_Makers->GetSize())  {
+           TList tempListMakers;
+           TIter next(m_Makers);
+           StMaker *maker=0;
+           while(maker = (StMaker *)next()) 
+                if (maker->IsToSave()) tempListMakers.Add(maker);
+           R__b << &tempListMakers;
+      }
+      else 
+          R__b << m_Makers;
+      R__b << fNtrack;
+   }
+}
 #endif
+//_____________________________________________________________________________
+void StChain::ResetPoints()
+{
+}
+//_____________________________________________________________________________
+void StChain::ResetHits()
+{
+}
+//_____________________________________________________________________________
+void StChain::CleanDetectors()
+{
+}
