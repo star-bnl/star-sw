@@ -6,6 +6,7 @@
 //:              3jun1999 ppy add fillTracks flag
 //:             11aug1999 ppy add vertexContrainedFit variable
 //:             23aug1999 ppy add Root option
+//:             11feb2000 ppy add maxTime 
 //:                       
 //:<------------------------------------------------------------------
 //:>------------------------------------------------------------------
@@ -82,6 +83,7 @@ void FtfPara::setDefaults (void)
    dxVertex          = 0.005F ;
    dyVertex          = 0.005F ;
    phiVertex         = 0.F    ;
+   maxTime           = 1.e18 ; // by default tracker can run as long as the age of the Universe
 
    return  ;
 }

@@ -27,6 +27,7 @@
 **:           dec 21, 1999  ppy ptHelixFit set to zero in setParameters
 **:           dec 21, 1999  ppy maxChi2Primary =10 in setParameters
 **:           jan 27, 2000  ppy canItMerged beefed up
+**:           feb 10, 2000  ppy add xyError and zError
 **:<------------------------------------------------------------------*/
 #include "FtfSl3.h"
 #include <iostream.h>
@@ -490,21 +491,21 @@ int FtfSl3::readMezzanine (int sector, struct TPCMZCLD_local *mzcld) {
 	    fp = (double) swap16(xt->x) / 64.0 ;
 	    ft = (double) swap16(xt->t) / 64.0 ;
 	 }
-	 //  printf("%02d %9.5f %9.5f %6d %3d\n", row,
-	 //         fp, ft, c->c , c->f) ;
+//	 printf("row pad td ipad itd %02d %9.5f %9.5f %6d %3d\n", row,
+//	          fp, ft, c->c , c->f) ;
 	 rawToGlobal(sector, row, fp, ft, &x, &y, &z);
 
-//	  printf(" %d  %d  %f  %f  %f  %f  %f\n",
-//	   	  sector, row, x, y, z, fp, ft);
+//	  printf(" sector row  x y  z %d  %d  %f  %f  %f  \n",
+//	   	                     sector, row, x, y, z);
 
 	 hitP->id  = counter ;
 	 hitP->row = row ;
 	 hitP->x   = (float) x;
 	 hitP->y   = (float) y;
 	 hitP->z   = (float) z;
-	 hitP->dx  = 0.2F ;
-	 hitP->dy  = 0.2F ;
-	 hitP->dz  = 0.2F ;
+	 hitP->dx  = xyError ;
+	 hitP->dy  = xyError ;
+	 hitP->dz  = zError ;
 
 	 hitP++;
 
@@ -537,7 +538,6 @@ int FtfSl3::readSector ( struct TPCSECLP *seclp ) {
    // reset sector-hit counter
    nHits = 0;
    //
-
    // check byte order of SECLP bank
    // byte swapping is needed
    short swapByte = 0 ;
@@ -588,6 +588,9 @@ int FtfSl3::readSector ( struct TPCSECLP *seclp ) {
 
       if ( !(unsigned int)seclp->rb[iRb].off) continue ;
 
+//    printf ( "rb %d off len %d %d \n",
+//             iRb, seclp->rb[iRb].off, seclp->rb[iRb].len ) ;
+
       int off = (unsigned int)seclp->rb[iRb].off;
       if ( swapByte ) off = swap32(off);
       rbclp = (struct TPCRBCLP *)((char *)seclp + off * 4) ;
@@ -608,6 +611,8 @@ int FtfSl3::readSector ( struct TPCSECLP *seclp ) {
 
 	 off = rbclp->mz[kMz].off ;
 	 if ( swapByteMezzaninne ) off = swap32(off);
+//       printf ( "mezz %d off len %d %d \n",
+//                kMz, rbclp->mz[kMz].off, rbclp->mz[kMz].len ) ;
 	 mzcld = (struct TPCMZCLD_local *) ((char *)rbclp + off*4) ;
 
 	 if (mzcld) {
@@ -685,7 +690,7 @@ int FtfSl3::setParameters ( ) {
    para.szErrorScale     = 1.0F   ;
    para.phiClosed        = 0      ;
 
-   para.ptMinHelixFit     = 0.F  ;
+   para.ptMinHelixFit    = 100.F  ;
    para.rVertex          = 0.F    ;
    para.xVertex          = 0.F    ;
    para.yVertex          = 0.F    ;
