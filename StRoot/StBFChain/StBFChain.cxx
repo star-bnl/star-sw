@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.171 2001/02/15 00:44:36 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.172 2001/02/15 21:55:26 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -55,8 +55,8 @@ Bfc_st BFC[] = {
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis,EventQA"                          ,"","","",kFALSE},
   {"C1default"   ,""  ,"","tpc,rrs,rich,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits"
                                                                               ,"","","Year 1 chain",kFALSE}, 
-  {"C2default"   ,""  ,"","C1default,ftpc,svt"                                ,"","","Year 2 chain",kFALSE}, 
-  {"CAdefault"   ,""  ,"","tpc,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits,ftpc,svt"
+  {"C2default"   ,""  ,"","C1default,ftpc,svt,emcY2"                          ,"","","Year 2 chain",kFALSE}, 
+  {"CAdefault"   ,""  ,"","tpc,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits,ftpc,svt,emcY2"
                                                                          ,"","","Assymptotic chain",kFALSE}, 
   {"Cy1a"        ,""  ,"","y1a,C1default"                                ,"","","Turn on chain y1a",kFALSE},
   {"Cy1b"        ,""  ,"","y1b,C1default"                                ,"","","Turn on chain y1b",kFALSE},
