@@ -3,9 +3,9 @@
 
 
 long type_of_call sca_filter_(
-  TABLE_HEAD_ST   *dst_track_h,     DST_TRACK_ST     *dstTrack,
+  TABLE_HEAD_ST   *dst_track_h,         DST_TRACK_ST         *dstTrack,
   TABLE_HEAD_ST   *sca_filter_const_h,  SCA_FILTER_CONST_ST  *filter_const,
-  TABLE_HEAD_ST   *sca_switch_h,         SCA_SWITCH_ST         *sca_switch,
+  TABLE_HEAD_ST   *sca_switch_h,        SCA_SWITCH_ST        *sca_switch,
   TABLE_HEAD_ST   *sca_const_h,         SCA_CONST_ST         *sca_const,
   TABLE_HEAD_ST   *sca_in_h,            SCA_IN_ST            *sca_in  )   
 {

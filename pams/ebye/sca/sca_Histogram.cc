@@ -1,3 +1,35 @@
+// ------- System includes -------------- 
+#include <math.h>
+#include <assert.h>
+// ------- Local includes -------  
+#include "Histogram.hh"
+
+
+//>--------------------------------------------------------------------
+// ROUTINE:     sca_Histogram.cc
+//
+// DESCRIPTION: This is the Histogram class used by the Dataset class
+//              to do bin counting at various scales.
+//
+// AUTHOR:      Dhammika Weerasundara -- University of Washington
+//              dhammika@gibbs.npl.washington.edu
+//
+// HISTORY:    
+//      06/19/1995       SJ Bailey  Orginal was written to run
+//                       JG Reid    in NA49/DSPACK environment.
+//
+//      06/26/1998       DSW        Adapted to run in STAF/ROOT.
+//
+//      08/10/1998       LDC        Worked on debugging.
+//
+//      08/13/1998       DSW        Put debug print statements on a 
+//                                  DEBUG switch. 
+//      
+//      09/01/1998       DSW        Added function overloading for
+//                                  AddDatum to loop over xdata points.
+//
+//>--------------------------------------------------------------------
+
 ////////////////////////////////////////////////////////////
 //
 // Histogram.cc
@@ -34,10 +66,6 @@
 // number of hits but does not take significantly more time
 // for 2D than it does for 1D.
 //
-
-#include <math.h>
-#include <assert.h>
-#include "Histogram.hh"
 
 
 ////////////////////////////////////////////////////////////
@@ -117,6 +145,24 @@ void Histogram::AddDatum(double x, double y)
     }
 }  // end AddDatum()
 
+void Histogram::AddDatum(sca_data_t **xdata, int numvalid, 
+			 double xoff, double yoff)
+{
+
+  for (int iloop=0; iloop<numvalid ; iloop++){
+    double x = xdata[iloop]->x + xoff;
+    double y = xdata[iloop]->y + yoff;
+    // locate which bin
+    int binx = (int) ((x - xmin) / binsize_x);
+    int biny = (int) ((y - ymin) / binsize_y);
+    
+    if(0 <= binx && binx < nbinsx && 0 <= biny && biny < nbinsy)
+      {
+	binlist[N] = biny * nbinsx + binx + 1;
+	N++;
+      }
+  }
+}  // end AddDatum()
 
 ////////////////////////////////////////////////////////////
 // public: GetVolume()
@@ -138,8 +184,6 @@ double Histogram::GetVolume (double rank,
   int hitcount = 0;		// hitcount for that bin
   int cur_marker = 1;
 
-  static float prior_p0_marker;
-
   //JP
   if (!prior_p) {
     cerr << "Unable to load sca_prior.\n";
@@ -148,9 +192,6 @@ double Histogram::GetVolume (double rank,
  
   if(!sorted && num_dim != 1)
     SortBinList();
-
-  if  (prior_p[0].w == 0 )
-    prior_p0_marker = prior_p[0].w;
 
   prior = 1.0;
   currentbin = binlist[0];
@@ -166,8 +207,10 @@ double Histogram::GetVolume (double rank,
 	      cur_marker++;
 	   }
 
-	  if (prior_p[0].w != 0) prior_p[prior_p[0].marker].w += ((double) hitcount/(double) N);
-	  else prior = prior_p[prior_p[0].marker].w;
+	  if (prior_p[0].w != 0) 
+	    prior_p[prior_p[0].marker].w += ((double) hitcount/(double) N);
+	  else 
+	    prior = prior_p[prior_p[0].marker].w;
 
 	  prior_p[prior_p[0].marker++].marker = currentbin;
 	  cur_marker++;
@@ -192,8 +235,10 @@ double Histogram::GetVolume (double rank,
     cur_marker++;
   }
 
-  if (prior_p[0].w != 0) prior_p[prior_p[0].marker].w += ((double) hitcount/(double) N);
-  else prior = prior_p[prior_p[0].marker].w;
+  if (prior_p[0].w != 0) 
+    prior_p[prior_p[0].marker].w += ((double) hitcount/(double) N);
+  else 
+    prior = prior_p[prior_p[0].marker].w;
 
   prior_p[prior_p[0].marker++].marker = currentbin;
   cur_marker++;
@@ -210,9 +255,6 @@ double Histogram::GetVolume (double rank,
     prior_p[prior_p[0].marker++].marker = cur_marker;
     cur_marker++;
   }
-
-  if  (prior_p[0].w == 0 )
-    prior_p[0].w = prior_p0_marker;
 
   return vol;
 
@@ -235,7 +277,8 @@ double Histogram::GetBinSizeY(void)  {  return binsize_y; }
 void Histogram::ClearHisto(void)
 {
   sorted = FALSE;
-  memset(binlist, 0, N * sizeof(int));
+  if (N)
+    memset(binlist, 0, N * sizeof(int));
   N = 0;
 }  // end ClearHisto()
 

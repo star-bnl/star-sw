@@ -20,6 +20,7 @@ public:
   void SetRange(double xminl, double xmaxl, double yminl, double ymaxl);
   void AddDatum(sca_data_t &datum);
   void AddDatum(double x, double y);
+  void AddDatum(sca_data_t **xdata, int numvalid, double x, double y);
   void ClearHisto(void);	// Clear histogram to 0
   void SetMaxPoints(int n);	// Optional: Set number of points to use
 

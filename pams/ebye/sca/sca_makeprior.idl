@@ -1,0 +1,14 @@
+/*  sca_makeprior.idl
+*   This is the staf interface file for sca_makeprior.cc, the final
+*   prior calculation module in the sca package
+*
+*   written by Dhammika Weerasundara -- dhammika@gibbs.npl.washington.edu
+*/
+#include "PAM.idl"
+#include "sca_prior.idl"
+
+interface sca_makeprior : amiModule{
+        STAFCV_T call (  
+                  inout  sca_prior    prior);
+};
+/* last mod. for sca_makeprior.idl : $Date: 1998/09/12 08:34:01 $ */
