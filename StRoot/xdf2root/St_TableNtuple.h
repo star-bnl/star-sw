@@ -1,5 +1,8 @@
-// $Id: St_TableNtuple.h,v 1.5 1999/02/19 21:13:30 genevb Exp $
+// $Id: St_TableNtuple.h,v 1.6 1999/03/02 14:52:07 genevb Exp $
 // $Log: St_TableNtuple.h,v $
+// Revision 1.6  1999/03/02 14:52:07  genevb
+// Made enum global to compile on Redhat
+//
 // Revision 1.5  1999/02/19 21:13:30  genevb
 // Fixed const problems for pickier compilers
 //
@@ -49,6 +52,9 @@ class St_Table;
 class TFile;
 class St_XDFFile;
 class TBrowser;
+ enum NumType {
+       kNAN, kFloat, kInt, kLong, kShort, kDouble, kUInt, kULong, kUShort
+      } ;
 
 class St_TableNtuple : public TTree {
  private:
@@ -56,9 +62,7 @@ class St_TableNtuple : public TTree {
     Int_t   mNvar;       //  Number of columns used
      void **mArgs;       //! Array of pointers to variables
    TClass  *mClassPtr;   //! StAF table class used in the table
-     enum   NumType {
-    kNAN, kFloat, kInt, kLong, kShort, kDouble, kUInt, kULong, kUShort
-  }        *mType;       //! Number type of table columns
+  NumType  *mType;       //! Number type of table columns
     Int_t  *mOffset;     //! Offset values for pointers to table columns
 
  protected:
