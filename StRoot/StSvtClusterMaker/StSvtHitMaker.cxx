@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.30 2004/05/05 21:27:54 caines Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.31 2004/06/14 21:27:46 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.31  2004/06/14 21:27:46  caines
+ * Fine tuning of drift velocity using laser spots from Jana Bielcikova
+ *
  * Revision 1.30  2004/05/05 21:27:54  caines
  * Fix bug that causes default drift vel. to be used instead of value from database...
  *
@@ -403,6 +406,9 @@ void StSvtHitMaker::TransformIntoSpacePoint(){
   StSvtWaferCoordinate waferCoord(0,0,0,0,0,0);
   StGlobalCoordinate globalCoord(0,0,0); 
   StThreeVectorF mPos(0,0,0);
+
+  //here is applied laser correction for temperature variations;
+  SvtGeomTrans.setVelocityScale(LaserTemperatureCorrection());
   
   for(int barrel = 1;barrel <= mSvtData->getNumberOfBarrels();barrel++) {
 
@@ -692,4 +698,57 @@ Int_t StSvtHitMaker::Finish(){
 void StSvtHitMaker::SetFileNames(char* filen, char* filec){
   filenameN = filen;
   filenameC = filec;
+}
+
+
+double StSvtHitMaker::LaserTemperatureCorrection() {
+  // This function returns a percentage change of the drift velocity
+  // obtained from the laser spot positions. It is actually a ratio of the 
+  // average distance between the laser spots over the current distance (both in timebuckets). 
+
+  
+  double driftVelocityChange;
+  int barrel,ladder,wafer,hybrid;
+  double anode,tbin; //anode, timebucket position of a given hit
+
+  int index;         //index of laser spot 1/2 located at B3L15W7 (it is the same one for both of the spots)
+  double tbin1,tbin2; //timebucket positions of laser spot 1/2 located at B3L15W7
+
+  driftVelocityChange=1.0;
+  barrel=3;
+  ladder=15;
+  wafer=7;
+  hybrid=1;
+  
+  index= mSvtData->getHybridIndex(barrel,ladder,wafer,hybrid);
+  mSvtBigHit = (StSvtAnalysedHybridClusters*)mSvtCluColl->at(index);
+  if(!mSvtBigHit) {
+    // cout << "No data on B3L15W7" << endl;
+    return driftVelocityChange;
+  }
+
+  tbin1=-1;
+  tbin2=-1;
+  for( int clu=0; clu<mSvtBigHit->numOfHits(); clu++){
+    // we have to find laser spots:
+    // spot1: 195<anode<197, 123<tbin<125
+    // spot2: 198<anode<201, 95<tbin<98
+    // x: timebucket, y: anode
+    tbin=mSvtBigHit->WaferPosition()[clu].x();
+    anode=mSvtBigHit->WaferPosition()[clu].y();
+    if((tbin>123)&&(tbin<125)&&(anode>195)&&( anode<197)) tbin1=tbin;
+    if((tbin>95)&&(tbin<98)&&(anode>198)&&(anode<201)) tbin2=tbin;
+  }
+  
+  if((tbin1>0)&&(tbin2>0)&&(tbin1!=tbin2)) driftVelocityChange=27.03/(tbin1-tbin2);
+  else {
+    // Print out in the case laser spot(s) was(were) not found.
+    // Spot which was not found has tbin=-1.
+    cout << "Missing laser spot(s):" << endl;
+    cout << "spot 1 status " << tbin1 << endl;
+    cout << "spot 2 status " << tbin2 << endl;
+    return driftVelocityChange;
+  }
+  
+  return driftVelocityChange;
 }

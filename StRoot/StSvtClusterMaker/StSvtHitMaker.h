@@ -1,5 +1,8 @@
-// $Id: StSvtHitMaker.h,v 1.16 2004/03/18 04:02:56 caines Exp $
+// $Id: StSvtHitMaker.h,v 1.17 2004/06/14 21:27:46 caines Exp $
 // $Log: StSvtHitMaker.h,v $
+// Revision 1.17  2004/06/14 21:27:46  caines
+// Fine tuning of drift velocity using laser spots from Jana Bielcikova
+//
 // Revision 1.16  2004/03/18 04:02:56  caines
 // Remove from global scope variables used in debug mode as they shouldnt be there and caused erratic behaviour
 //
@@ -98,8 +101,10 @@ class StSvtHitMaker : public StMaker
   void SetWriteNtuple(int iwrite){iWrite = iwrite;};
   void SetFileNames(char* name1="/dev/null", char* name2="/dev/null");
   Int_t Eval();
+  double LaserTemperatureCorrection();
+
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.16 2004/03/18 04:02:56 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.17 2004/06/14 21:27:46 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  protected:
