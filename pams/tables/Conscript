@@ -1,5 +1,6 @@
 #!/usr/local/bin/perl
 Import qw ( env INCLUDE LIB BIN EXPORT BUILD OBJ);
+my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 $my_env = $env->clone(
 		    'DEBUG'      => ' '
 		    );
@@ -23,7 +24,9 @@ my $share  = "#.share/tables";# print "share = $share\n";
 my $include = $INCLUDE . "/tables";
 my $SHARE  = $DIR . "/.share/tables";
 Link $DirPath =>  $SHARE; print "Link $DirPath =>  $SHARE\n";
-my $SO_PKG = "St_Tables.so";
+my $PKG = "St_Tables";
+my $SO_PKG = $PKG . "." . $env->{SUFSOLIB}; #print "SO_PKG = $SO_PKG\n";
+my $LIBPKG = $PKG . "." . $env->{SUFLIB};
 foreach my $idl (@idl) {#  print "$idl\n";
   if (! grep (/\/idl\//,$idl)) {next;} 
 #  my $IDL =  $DIR . "/" . $Dir . "/" . $idl;# print "i=",$i++," idl = $idl IDL=$IDL\n";
@@ -50,10 +53,12 @@ foreach my $idll (@idlT) {
   my $idlCintH = $share   . "/St_" . $stem . "_TableCint.h";   #print "idlCintH = $idlCintH\n";
   my $idlCintC = $share   . "/St_" . $stem . "_TableCint.cxx"; #print "idlCintC = $idlCintC\n";
   my @Deps = ($idll);# print "Deps: $Deps[0]\n";
-  Command $my_env [$idlh, $idli], @Deps, qq (stic.pl %>:d $stem  -H -q %1 );
-  Command $my_env [$idlH],        @Deps, qq (ConstructTable.pl %>);
-  Command $my_env [$idlC],        @Deps, qq (ConstructTable.pl %>);
-  Command $my_env [$LinkDef],     @Deps, qq (ConstructTable.pl %>);
+  if ($STAR_SYS !~ /^intel_wnt$/) {
+    Command $my_env [$idlh, $idli], @Deps, qq (stic.pl %>:d $stem  -H -q %1 );
+    Command $my_env [$idlH],        @Deps, qq (ConstructTable.pl %>);
+    Command $my_env [$idlC],        @Deps, qq (ConstructTable.pl %>);
+    Command $my_env [$LinkDef],     @Deps, qq (ConstructTable.pl %>);
+  }
   @Deps = ();
   push @Deps, $idlH;
   push @Deps, $LinkDef;
@@ -61,30 +66,28 @@ foreach my $idll (@idlT) {
   push @Deps, $idli;
   push @Deps, $INCLUDE . "/St_Table.h";
   push @Deps, $INCLUDE . "/tableDescriptor.h";
-  Command $my_env [$idlCintC, $idlCintH], @Deps,  
-  qq (rootcint.pl %>:d -f %>:f -c  "$ROOTCINT_CPPPATH -D__ROOT__" %1:f %2:f);
+  if ($STAR_SYS !~ /^intel_wnt$/) {
+    Command $my_env [$idlCintC, $idlCintH], @Deps,  
+    qq (rootcint.pl %>:d -f %>:f -c  "$ROOTCINT_CPPPATH -D__ROOT__" %1:f %2:f);
+  }
   push @Deps, $idlCintC;
   push @Deps, $idlCintH;
   push @Deps, $idlC;
-##  my @deps = ();
-  my @src  = ();
-  push @src, $idlC;
-  push @src, $idlCintH;
-  push @src, $idlCintC;
+  my @src  = ($idlC,$idlCintH,$idlCintC);
   Install $my_env $obj, @src;
   my $s;
   ($s = $idlC)     =~  s/$share/$obj/g; push @sources, $s;
   ($s = $idlCintC) =~  s/$share/$obj/g; push @sources, $s;
-#  foreach my $dep (@Deps) {
-##    print "$dep ->";
-#    (my $depp = $dep) =~ s/$share/$obj/g;# print "dep: $dep\n";
-#    if ($dep =~ /\.cxx$/) {push @sources, $depp; push @src, $dep;} # print "sources: @sources\n";
-##    push @src, $dep;
-#  }
-  
 }
-LinkedModule $my_env $SO_PKG, @sources;
-Install $my_env $LIB, $SO_PKG;
+if ($#sources > -1) {
+  if ($STAR_SYS =~ /^intel_wnt$/) {
+    Library      $env2 $LIBPKG, @sources;  
+    Install $env2 $LIB, $LIBPKG;
+  }
+  
+  LinkedModule $my_env $SO_PKG, @sources;
+  Install $my_env $LIB, $SO_PKG;
+}
 #________________________________________
 sub script::find_idl {
   if (defined($AFS)) {$File::Find::dont_use_nlink;}
