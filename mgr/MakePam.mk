@@ -1,4 +1,7 @@
 #  $Log: MakePam.mk,v $
+#  Revision 1.19  1998/06/05 11:45:53  fisyak
+#  clean up
+#
 #  Revision 1.18  1998/05/06 17:27:39  didenko
 #  makefile updated by Yuri
 #
@@ -82,7 +85,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/05/06 17:27:39 $ 
+#           Last modification $Date: 1998/06/05 11:45:53 $ 
 #  #. default setings
 include $(STAR)/mgr/MakeSYS.mk
 ifdef SILENT
@@ -127,6 +130,9 @@ ifeq ($(LEVEL), $(TWO))  #default is domain
 ifeq (gen,$(PKG))              
 	PKG     :=
 endif                          
+#ifeq (sim,$(PKG))              
+#	PKG     :=
+#endif                          
 endif
 ifeq ($(LEVEL), $(THREE)) #package level
 	ROOT    := $(shell cd $(INP_DIR)/../../../; $(PWD))
@@ -141,7 +147,7 @@ ifeq ($(LEVEL),$(FOUR)) #subpackage level
 #	PKG     := $(notdir $(shell cd $(INP_DIR)/../; $(PWD)))
 endif                          
 ifndef OUT_DIR                 
-	override OUT_DIR := $(shell cd $(ROOT); $(PWD))/lib
+	override OUT_DIR := $(shell cd $(ROOT); $(PWD))
 endif                          
 ifeq ($(NAME),$(PKG))          
 	SUBDIRS :=
@@ -186,26 +192,33 @@ ifndef RANLIB
 override RANLIB := /bin/true
 endif                          
 ROOTD   := $(shell cd $(ROOT)/..; $(PWD) )
-LIB_DIR := $(OUT_DIR)/$(STAR_HOST_SYS)
+SYS_DIR := $(OUT_DIR)/.$(STAR_HOST_SYS)
+LIB_DIR := $(SYS_DIR)/lib
 DOMAIN  := $(notdir $(DOM_DIR))
-OBJ_DIR := $(LIB_DIR)/$(DOMAIN).obj
-OBJ_DIR_:= $(subst .,\., $(subst /,\/,$(OBJ_DIR)))
-DIR_GEN := $(OUT_DIR)/share
-GEN_DIR := $(OUT_DIR)/share/$(DOMAIN).gen
-GEN_DIR_:= $(subst .,\., $(subst /,\/,$(GEN_DIR)))
+OBJ_DIR := $(SYS_DIR)/obj/$(DOMAIN)
+DEP_DIR := $(SYS_DIR)/dep/$(DOMAIN)
+DIR_GEN := $(OUT_DIR)/.share
+TAB_DIR := $(DIR_GEN)/tables
+TMP_DIR := $(DIR_GEN)/tmp/$(DOMAIN)
+GEN_DIR := $(DIR_GEN)/$(DOMAIN)
 DOM_DIRS:= $(filter-out CVS, $(shell cd $(ROOT)/$(PAMS); ls))
 #.
-check_out   := $(shell test -d $(OUT_DIR) || mkdir $(OUT_DIR)) 
-check_lib   := $(shell test -d $(LIB_DIR) || mkdir $(LIB_DIR))
-check_obj   := $(shell test -d $(OBJ_DIR) || mkdir $(OBJ_DIR))
-check_gen   := $(shell test -d $(DIR_GEN) || mkdir $(DIR_GEN))
-check_neg   := $(shell test -d $(GEN_DIR) || mkdir $(GEN_DIR))
+check_out   := $(shell test -d $(OUT_DIR) || mkdir -p $(OUT_DIR)) 
+check_lib   := $(shell test -d $(LIB_DIR) || mkdir -p $(LIB_DIR))
+check_lib   := $(shell test -h $(OUT_DIR)/lib || ln -s  .@sys/lib $(OUT_DIR)/lib)
+#check_lib   := $(shell test -h $(OUT_DIR)/lib/$(STAR_HOST_SYS) || ln -s $(SYS_DIR) $(OUT_DIR)/lib/$(STAR_HOST_SYS))
+check_obj   := $(shell test -d $(OBJ_DIR) || mkdir -p $(OBJ_DIR))
+check_dep   := $(shell test -d $(DEP_DIR) || mkdir -p $(DEP_DIR))
+check_gen   := $(shell test -d $(DIR_GEN) || mkdir -p $(DIR_GEN))
+check_neg   := $(shell test -d $(GEN_DIR) || mkdir -p $(GEN_DIR))
+check_tab   := $(shell test -d $(TAB_DIR) || mkdir -p $(TAB_DIR))
+check_tmp   := $(shell test -d $(TMP_DIR) || mkdir -p $(TMP_DIR))
 #.
 sources := $(strip $(sort $(dir $(wildcard $(SRC_DIR)/*.* $(SRC_DIR)/*/*.* $(SRC_DIR)/*/*/*.*))))
 SRC_DIRS:= $(subst /TAIL, ,$(addsuffix TAIL, $(sources)))
 IDL_DIRS:= $(wildcard $(ROOT)/$(PAMS)/*/idl $(STAR)/$(PAMS)/*/idl)
-INC_DIRG:= $(wildcard $(STAR)/lib/share/*.gen)
-INC_DIRS:= $(wildcard $(ROOT)/$(PAMS)/*/inc $(STAR)/$(PAMS)/*/inc)
+INC_DIRG:= $(GEN_DIR) $(TAB_DIR) 
+INC_DIRS:= $(wildcard $(ROOT)/$(PAMS)/*/inc $(STAR)/$(PAMS)/*/inc) $(STAR)/.share/$(DOMAIN) $(STAR)/.share/tables
 VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_DIR) $(OBJ_DIR)
 VPATH   += $(IDL_DIRS)
 #VPATH   := $(filter-out $(DOM_DIR)/idl, $(VPATH))
@@ -242,13 +255,19 @@ LIB_PKG := $(LIB_DIR)/$(PKG_LIB)
 endif                          
 ifneq ($(EMPTY),$(PKG))        
 	PKG_SL  := $(PKG).sl
+        PKG_ST  := St_$(PKG).so
+        PKG_TAB := St_Tables.so
+	PKG_BASE:= St_base.so
 ifneq ($(EMPTY),$(strip $(FILES_IDM) $(FILES_G) $(FILES_CDF))) 
         SL_PKG  := $(LIB_DIR)/$(PKG_SL)
+        ST_PKG  := $(LIB_DIR)/$(PKG_ST)
+	ST_TAB  := $(LIB_DIR)/$(PKG_TAB)
+	ST_BASE := $(LIB_DIR)/$(PKG_BASE)
 endif                           
 endif                          
 MKDEPFLAGS:= -MG -MM -w
 ifndef NODEPEND                
-FILES_D  :=                          $(addsuffix .d,   $(basename $(FILES_O)))
+FILES_D  := $(addprefix $(DEP_DIR)/, $(addsuffix .d,   $(notdir $(basename $(FILES_O)))))
 FILES_DM := $(addprefix $(GEN_DIR)/, $(addsuffix .didl, $(NAMES_IDM)))                         
 endif                          
 FILES_O  += $(addprefix $(OBJ_DIR)/, $(addsuffix .o,   $(notdir $(basename $(FILES_CA)))))
@@ -280,11 +299,11 @@ STICFLAGS =  $(addprefix -I,  $(STAR)/asps/staf/inc $(SRC_DIR) $(IDL_DIRS))
 ifneq ($(STAR_SYS),hp_ux102)   
 CPPFLAGS += -D$(STAR_SYS) $(strip -D$(shell uname)) 
 endif                          
+ifneq ($(ROOT),$(STAR))        
+CPPFLAGG +=  $(addprefix -I, $(INC_DIRG))
+endif                          
 CPPFLAGS += -I. -I../ -I/usr/include -I$(STAR)/asps/staf/inc \
              $(addprefix -I, $(SRC_DIR) $(GEN_DIR) $(INC_DIRS)) -I$(CERN_ROOT)/include -I$(CERN_ROOT)/include/cfortran
-ifneq ($(ROOT),$(STAR))        
-CPPFLAGG :=  $(addprefix -I, $(INC_DIRG))
-endif                          
 FFLAGS   += -DCERNLIB_TYPE
 #                                   -I$(CERN_ROOT)/src/geant321 
 ifndef NODEBUG                 
@@ -312,11 +331,41 @@ LIBRARIES += $(shell test -f $(STAR_LIB)/$(PKG_LIB) && echo  $(STAR_LIB)/$(PKG_L
 endif                           
 endif                           
 LIBRARIES += -L$(STAR)/asps/../.$(STAR_HOST_SYS)/lib -ltls -lmsg
-endif                          
+endif
+define TAB_GEN
+	cp  $(FIRST_DEP) $(TAB_DIR)/ ; cd $(TAB_DIR); $(STIC) -r -q $(STICFLAGS) $(FIRST_DEP); $(RM) $(STEM).idl
+endef
+define MOD_GEN
+	cp  $(FIRST_DEP) $(TMP_DIR)/ ; cd $(TMP_DIR);\
+        $(STIC) -r -q $(STICFLAGS) $(FIRST_DEP); \
+        mv $(STEM)_i.cc $(STEM).h $(STEM).inc St_$(STEM)_Module.cxx  St_$(STEM)_Module.h $(GEN_DIR);\
+        mv *.h *.inc *.cxx $(TAB_DIR)/; \
+        gcc  $(MKDEPFLAGS)  -x c $(STICFLAGS) $(FIRST_DEP) | \
+        sed -e 's/$(STEM)\.idl\.o/$(subst .,\., $(subst /,\/, $(GEN_DIR)))\/$(STEM)\.didl/g' \
+        > $(GEN_DIR)/$(STEM).didl; \
+        $(STIC) -q -M  $(STICFLAGS) $(FIRST_DEP) | grep ":" | sed -e 's/or merger//g'  \
+        >> $(GEN_DIR)/$(STEM).didl; $(RM) $(STEM).idl
+#       temporarly, until stic is fixed:
+	@sed -e 's/broker->newInvoker(\(.*\),/broker->deleteInvoker(\1); broker->newInvoker(\1,/' \
+                $(GEN_DIR)/$(STEM)_i.cc > temp
+	@mv  -f temp $(GEN_DIR)/$(STEM)_i.cc
+endef                          
 #-------------------------------rules-------------------------------
+NOROOT=yes
+ifndef NOROOT
+TARGETS := $(PKG) $(ST_PKG)  $(ST_BASE) $(ST_TAB)
+else
+TARGETS := $(PKG)
+endif
 # phony - not a file
-.PHONY               : $(PKG) depend clean test
-all                  : $(PKG)  
+.PHONY               : $(TARGETS) depend clean test
+all                  : $(TARGETS)
+$(ST_PKG) : $(wiildcard $(addprefix $(GEN_DIR), *.h *.cxx))
+	gmake -f $(STAR)/mgr/MakeDll.mk -C $(GEN_DIR) SO_LIB=$(ALL_TAGS)
+$(ST_TAB) : $(wiildcard $(addprefix $(TAB_DIR), *.h *.cxx))
+	gmake -f $(STAR)/mgr/MakeDll.mk -C $(TAB_DIR) SO_LIB=$(ALL_TAGS)
+$(ST_BASE) : $(wildcard $(addprefix $(STAR)/StRoot/base/, *.c *.cxx *.h)) 
+	gmake -f $(STAR)/mgr/MakeDll.mk -C $(STAR)/StRoot/base SO_LIB=$(ALL_TAGS)
 # all files:
 ifneq ($(EMPTY),$(strip $(FILES_O) $(FILES_SL))) 
 #                 I have NO idl- and NO g-files
@@ -354,11 +403,13 @@ $(OBJ_DIR)/$(PKG)_init.o: $(FILES_IDM)
 endif                           
 endif                           # NO idl- or g-files
 #-----cleaning------------------------------
-clean: clean_obj clean_lib
+clean: clean_obj clean_lib clean_dep
 clean_share:
 	rm -rf $(GEN_DIR) 
 clean_obj:
 	rm -rf $(OBJ_DIR) 
+clean_dep:
+	rm -rf $(DEP_DIR) 
 clean_lib:
 	rm -rf $(SL_PKG) $(LIB_PKG)
 #-----dependencies--------------------------
@@ -371,8 +422,14 @@ endif                               #
 endif                            # end if of FILES_O FILES_SL
 endif       # LEVEL 4
 #--------  idm, idl --------
-$(GEN_DIR)/%.h $(GEN_DIR)/%.inc %.h %.inc: %.idl
-	cp  $(FIRST_DEP) $(GEN_DIR)/ ; cd $(GEN_DIR); $(STIC) $(STICFLAGS) $(FIRST_DEP); $(RM) $(STEM).idl
+$(TAB_DIR)/%.h           : %.idl  
+	$(TAB_GEN)
+$(TAB_DIR)/%.inc         : %.idl
+	 $(TAB_GEN)
+$(TAB_DIR)/St_%_Table.cxx: %.idl
+	 $(TAB_GEN)
+$(TAB_DIR)/St_%_Table.h  : %.idl
+	 $(TAB_GEN)
 #--- compilation -
 $(GEN_DIR)/geant3.def: $(STAR)/asps/agi/gst/geant3.def
 	test -h $(GEN_DIR)/geant3.def || $(RM)  $(GEN_DIR)/geant3.def
@@ -392,31 +449,31 @@ $(OBJ_DIR)/%.o: %.cdf
 	$(CC)  $(CPPFLAGS) $(CFLAGS)   -c $(GEN_DIR)/$(STEM).c -o $(OBJ_DIR)/$(STEM).o; \
         $(RM)  $(GEN_DIR)/$(STEM).c
 #-----dependencies-------
-$(GEN_DIR)/%.didl $(GEN_DIR)/%_i.cc $(GEN_DIR)/%.h $(GEN_DIR)/%.inc: %.idl
-	cp  $(FIRST_DEP) $(GEN_DIR)/ ; cd $(GEN_DIR);\
-        $(STIC) $(STICFLAGS) $(FIRST_DEP); \
-        gcc  $(MKDEPFLAGS)  -x c $(STICFLAGS) $(FIRST_DEP) | \
-        sed -e 's/$(STEM)\.idl\.o/$(subst .,\., $(subst /,\/, $(GEN_DIR)))\/$(STEM)\.didl/g' \
-        > $(GEN_DIR)/$(STEM).didl; \
-        $(STIC) -M  $(STICFLAGS) $(FIRST_DEP) | grep ":" | sed -e 's/or merger//g'  \
-        >> $(GEN_DIR)/$(STEM).didl; $(RM) $(STEM).idl
-#       temporarly, until stic is fixed:
-	@sed -e 's/broker->newInvoker(\(.*\),/broker->deleteInvoker(\1); broker->newInvoker(\1,/' \
-                $(GEN_DIR)/$(STEM)_i.cc > temp
-	@mv  -f temp $(GEN_DIR)/$(STEM)_i.cc
-$(OBJ_DIR)/%.d: %.cc 
+$(GEN_DIR)/%.didl        : %.idl 
+	$(MOD_GEN)
+$(GEN_DIR)/%_i.cc        : %.idl
+	$(MOD_GEN)
+$(GEN_DIR)/%.h           : %.idl
+	$(MOD_GEN)
+$(GEN_DIR)/%.inc         : %.idl
+	$(MOD_GEN)
+$(GEN_DIR)/%.inc         : %.idl
+	$(MOD_GEN)
+$(GEN_DIR)/St_%_Module.h : %.idl
+	$(MOD_GEN)
+$(DEP_DIR)/%.d: %.cc 
 	gcc $(MKDEPFLAGS) $(CPPFLAGS) $(FIRST_DEP) | sed -e \
 's/$(notdir $(STEM))\.o/$(subst .,\.,$(subst /,\/,$(OBJ_DIR)))\/$(STEM)\.o $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
-$(OBJ_DIR)/%.d: %.c
+$(DEP_DIR)/%.d: %.c
 	gcc $(MKDEPFLAGS) $(CPPFLAGS) $(FIRST_DEP) | sed -e \
 's/$(notdir $(STEM))\.o/$(subst .,\.,$(subst /,\/,$(OBJ_DIR)))\/$(STEM)\.o $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
-$(OBJ_DIR)/%.d: %.F
+$(DEP_DIR)/%.d: %.F
 	gcc -traditional -x c $(MKDEPFLAGS) $(CPPFLAGS) $(FIRST_DEP) | sed -e \
 's/$(notdir $(STEM))\.F\.o/$(subst .,\.,$(subst /,\/,$(OBJ_DIR)))\/$(STEM)\.o $(subst .,\.,$(subst /,\/,$(ALL_TAGS)))/g'\
         > $(ALL_TAGS)
-$(OBJ_DIR)/%.d: %.cdf
+$(DEP_DIR)/%.d: %.cdf
 	cd $(SRC_DIR); \
         echo "$(notdir $(STEM)).c $(ALL_TAGS): $(ALL_DEPS)" > $(ALL_TAGS) ;
         echo "$(STEM).o: $(STEM).c" >> $(ALL_TAGS)
@@ -504,6 +561,7 @@ test_dir:
 	@echo "INC_DIRS  =" $(INC_DIRS)
 	@echo "LIB_DIR   =" $(LIB_DIR)
 	@echo "OBJ_DIR   =" $(OBJ_DIR)
+	@echo "DEP_DIR   =" $(DEP_DIR)
 	@echo "GEN_DIR   =" $(GEN_DIR)
 	@echo "SRC_DIRS  =" $(SRC_DIRS)
 	@echo "INP_DIR   =" $(INP_DIR)
@@ -514,6 +572,8 @@ test_dir:
 	@echo "IDLS      =" $(IDLS)
 	@echo "IDLSD     =" $(IDLSD)
 	@echo "FILES_DD  =" $(FILES_DD)
+	@echo "FILES_D   =" $(FILES_D)
+	@echo "FILES_DM  =" $(FILES_DM)
 else
 .PHONY               : default
 all:

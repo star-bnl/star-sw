@@ -1,5 +1,8 @@
-#  $Id: MakeSYS.mk,v 1.12 1998/05/07 21:45:55 didenko Exp $
+#  $Id: MakeSYS.mk,v 1.13 1998/06/05 11:45:54 fisyak Exp $
 #  $Log: MakeSYS.mk,v $
+#  Revision 1.13  1998/06/05 11:45:54  fisyak
+#  clean up
+#
 #  Revision 1.12  1998/05/07 21:45:55  didenko
 #  modified makefile
 #
@@ -59,7 +62,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/05/07 21:45:55 $ 
+#             Last modification $Date: 1998/06/05 11:45:54 $ 
 ALL_DEPS    = $^
 FIRST_DEP   = $<
 FIRSTF      = $(<D)/$(<F)
@@ -83,6 +86,7 @@ ARFLAGS    := rvu
 PWD        := /bin/pwd
 CWD        := $(shell $(PWD))
 GEANT3     := $(STAR_BIN)/geant3
+SUFFIXES   := .c .cc .cxx .C .p .F .h .hh .inc .idl
 ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),rs_aix31 rs_aix32 rs_aix41))
 CXX        := xlC
 FFLAGS     +=-O -qextname -qcharlen=6000 -WF,-D
@@ -101,6 +105,8 @@ LDFLAGS    += -shared -expect_unresolved \*\
 LD_LIBS    := lUfor -lfor -lFutil -lm -lm_4sqrt -lots -lc
 OPSYS      := OSF1V32
 CPPFLAGS   += -DCERNLIB_QMVAOS -DCERNLIB_DECS -DCERNLIB_UNIX
+    SO     :=$(CXX)
+    SOFLAGS  :=  -call_shared -expect_unresolved '*'
 endif
 ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),hp700_ux90))
 CXX        :=      CC
@@ -133,7 +139,7 @@ LD_LIBS    := -lCsup -lstream                        # P.Nevski
 CERN_LIBS  := 
 CPPFLAGS   += -DCERNLIB_HPUX -DCERNLIB_UNIX
 endif
-ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),sgi_52 sgi_53))
+ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),sgi_52 sgi_53 sgi_62))
 FFLAGS     +=-Nn20000 -static -trapuv -KPIC
 #                                                  -u
 F_EXTENDED :=-extend_source
@@ -149,43 +155,24 @@ LDS        := $(FC)
 LDS_FLAGS  := $(LDFLAGS)
 OPSYS      := IRIX53
 CPPFLAGS   += -DCERNLIB_SGI -DCERNLIB_UNIX
+  SO        :=   $(CXX)
+  SOFLAGS   :=  -shared
 endif
 ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),sgi_63 sgi_64))
-FFLAGS     +=-32 -Nn20000 -static -trapuv -KPIC
+FFLAGS     += -n32 -static -trapuv -KPIC
 #                                                       -u
 F_EXTENDED :=-extend_source
 CC         := cc
-CFLAGS     +=   -32 -ansi -KPIC -kpicopt -w
+CFLAGS     +=   -n32 -ansi -KPIC -w
 CXX        :=  CC
-CXXFLAGS   +=  ${CFLAGS} -xansi -use_cfront -w
+CXXFLAGS   +=   -n32 -xansi -KPIC -use_cfront -w
 LD         := CC
-LDFLAGS    += -32 -shared
+LDFLAGS    += -n32 -shared
 LD_LIBS    := -lXext -lm
 OPSYS      := IRIX64_32
 CPPFLAGS   += -DCERNLIB_QMIRIX64 -DCERNLIB_SGI -DCERNLIB_UNIX
-else
-ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),sgi_64_n32))
-CXX        :=  CC
-CXXFLAGS   += -n32
-CFLAGS     += -n32
-FFLAGS     += -n32 -Nn20000 -O2
-F_EXTENDED := -extend_source
-LDFLAGS    += -n32 -shared
-LD_LIBS    := -lXext -lm
-OPSYS      := IRIX64_n32
-CPPFLAGS   += -DCERNLIB_QMIRIX64 -DCERNLIB_SGI -DCERNLIB_UNIX
-endif
-ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),sgi_64_64))
-CXX        :=  CC
-CXXFLAGS   += -64
-CFLAGS     += -64
-FFLAGS     += -64 -Nn20000 #-O2
-F_EXTENDED := -extend_source
-LDFLAGS    += -64 -shared
-LD_LIBS    := -lXext -lm
-OPSYS      := IRIX64_64
-CPPFLAGS   += -DCERNLIB_QMIRIX64 -DCERNLIB_SGI -DCERNLIB_UNIX
-endif
+  SO        :=   $(CXX)
+  SOFLAGS   :=  -n32 -shared
 endif
 ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),i386_linux2))
 #  ====================
@@ -195,14 +182,15 @@ LDFLAGS    += -shared
 LD_LIBS    := -ldl -L/usr/X11R6/lib/ -lX11 -lXt
 OPSYS      := Linux
 CPPFLAGS   += -Dlynx
+CXX        := g++
 ifdef PGI
 FC         := /usr/pgi/linux86/bin/pgf77
 FFLAGS     += -Msave
 F_EXTENDED := -Mextend
-LD_LIBS    := -ldl -L/usr/X11R6/lib/ -lX11 -lXt -L/usr/local/lib/ -lF77 -lI77  -L/usr/pgi/linux86/lib/ -lpgftnrtl -lpgc /usr/lib/libstdc++.a
+LD_LIBS    := -ldl -L/usr/X11R6/lib/ -lX11 -lXt -L/usr/local/lib/ -L/afs/rhic/asis/i386_linux2/usr.local/lib -lF77 -lI77  -L/usr/pgi/linux86/lib/ -lpgftnrtl -lpgc /usr/lib/libstdc++.a
 #CC         := /usr/pgi/linux86/bin/pgcc -g77libs 
 #CXX        := /usr/pgi/linux86/bin/pgCC
-CPPFLAGS   += -DCERNLIB_QFPGF77
+#CPPFLAGS   += -DCERNLIB_QFPGF77
 else
 FC         := g77
 endif
@@ -229,6 +217,8 @@ LDS_FLAGS   := -g -t -z muldefs
 LD_LIBS    := -L/opt/SUNWspro/lib -L/opt/SUNWspro/SC4.2/lib -lM77 -lF77 -lm -lc -lC -L/usr/ucblib -R/usr/ucblib -lucb -lsunmath
 CC_LIBS    := -L/usr/ucblib -R/usr/ucblib -lm -ldl -lform -lmalloc
 CPPFLAGS   += -DCERNLIB_SUN -DCERNLIB_SOLARIS -DCERNLIB_UNIX
+  SO	   := $(CXX)
+  SOFLAGS  := -G 
 endif 
 ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),sunx86_55))
 CXX        :=  /opt/SUNWspro/bin/CC
@@ -243,6 +233,8 @@ OPSYS      := sun4os5pc
 CPPFLAGS   += -DCERNLIB_SUN -DCERNLIB_SOLARIS -DCERNLIB_UNIX -DCERNLIB_MSDOS
 LDS        := $(CXX)
 LDS_FLAGS  := -g -t -z muldefs
+  SO	   := $(CXX)
+  SOFLAGS  := -G 
 endif
 ifneq ($(EMPTY),$(findstring $(STAR_HOST_SYS),intel_wnt))
 CPPFLAGS   += -DCERNLIB_WINNT -DCERNLIB_UNIX -DCERNLIB_MSSTDCALL -DCERNLIB_QFMSOFT
