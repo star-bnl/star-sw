@@ -15,7 +15,8 @@
 #include "ctg_slat_eta.idl"
 #include "cts_mpara.idl"
 #include "cts_mslat.idl"
-#include "dst_tof.idl"
+#include "dst_tof_trk.idl"
+#include "dst_tof_evt.idl"
 
 interface fill_dst_tof: amiModule {
         STAFCV_T call
@@ -30,7 +31,8 @@ interface fill_dst_tof: amiModule {
                 , in    ctg_slat_eta ctg_slat_eta
                 , in    cts_mpara    cts_mpara
                 , in    cts_mslat    cts_mslat
-                , inout dst_tof      dst_tof
+                , inout dst_tof_trk  dst_tof_trk
+                , inout dst_tof_evt  dst_tof_evt
                 );
 };
 

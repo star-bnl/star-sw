@@ -20,7 +20,8 @@
   newtab tof_raw   ctu_raw     5400
   newtab tof_cor   ctu_cor     5400
 
-  newtab dst_tof   dst_tof   100000
+  newtab dst_tof_trk   dst_tof_trk  25000
+  newtab dst_tof_evt   dst_tof_evt      1
 
   cd /dui
  return
