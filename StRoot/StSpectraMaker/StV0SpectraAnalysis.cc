@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StV0SpectraAnalysis.cc,v 1.1 2000/03/23 03:21:49 munhoz Exp $
+ * $Id: StV0SpectraAnalysis.cc,v 1.2 2000/03/28 03:20:06 munhoz Exp $
  *
  * Author: Marcelo Munhoz
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StV0SpectraAnalysis.cc,v $
+ * Revision 1.2  2000/03/28 03:20:06  munhoz
+ * correcting normalization of weighted histogram
+ *
  * Revision 1.1  2000/03/23 03:21:49  munhoz
  * added V0 classes
  *
@@ -212,10 +215,10 @@ void StV0SpectraAnalysis::projectHistograms() {
 
   if (mNumEvent==0) return;
   float xnorm = 1./float(mNumEvent);
-  m3DInvMass->Scale(xnorm);
+  m3DInvMassWeighted->Scale(xnorm);
 
   Stat_t stats[8];
-  m3DInvMass->GetStats(stats);
+  m3DInvMassWeighted->GetStats(stats);
   cout << "sum of weights " << stats[0] << endl;
 }
 

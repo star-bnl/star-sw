@@ -1,5 +1,8 @@
-// $Id: StSpectraMaker.cxx,v 1.11 2000/03/23 03:21:49 munhoz Exp $
+// $Id: StSpectraMaker.cxx,v 1.12 2000/03/28 03:20:06 munhoz Exp $
 // $Log: StSpectraMaker.cxx,v $
+// Revision 1.12  2000/03/28 03:20:06  munhoz
+// correcting normalization of weighted histogram
+//
 // Revision 1.11  2000/03/23 03:21:49  munhoz
 // added V0 classes
 //
@@ -64,7 +67,7 @@ string readString(ifstream& ifs) {
   return line;
 }
 
-static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.11 2000/03/23 03:21:49 munhoz Exp $";
+static const char rcsid[] = "$Id: StSpectraMaker.cxx,v 1.12 2000/03/28 03:20:06 munhoz Exp $";
 
 StSpectraMaker::StSpectraMaker(const Char_t *name) : StMaker(name) {
 }
@@ -78,7 +81,7 @@ Int_t StSpectraMaker::Init() {
   // create the analyses that are stored in the file analysis.dat, 
   // 
 
-  ifstream from("StRoot/StSpectraMaker/analysis.dat");
+  ifstream from("analysis.dat");
   StSpectraAnalysisType analysisType;
   string analysisSType = readString(from);
   while (!from.eof()) {
