@@ -10,6 +10,7 @@
 #include "StGetConfigValue.hh"
 
 //Sti
+#include "StiObjectFactoryInterface.h"
 #include "StiDetector.h"
 #include "StiPlacement.h"
 #include "StiHitContainer.h"
@@ -22,7 +23,8 @@
 ostream& operator<<(ostream&, const StiDetector&);
 
 //Nested class StiSeedFinderRep
-StiCompositeSeedFinder::StiSeedFinderRep::StiSeedFinderRep(const string& path, StiKalmanTrackFactory* fac)
+StiCompositeSeedFinder::StiSeedFinderRep::StiSeedFinderRep(const string& path,
+							   StiObjectFactoryInterface<StiKalmanTrack>* fac)
     : mBuildPath(path), mTrackFactory(fac), mSeedFinder(0), mHitComboFilter(0)
 {
     //cout <<"\nStiSeedFidnerRep::StiSeedFinderRep()"<<endl;

@@ -16,7 +16,7 @@ using std::map;
 using std::string;
 
 #include "StiSeedFinder.h"
-#include "StiGui/StiRootDrawableStiEvaluableTrack.h" //For factory
+#include "StiObjectFactoryInterface.h"
 
 class StiKalmanTrack;
 class StMcEvent;
@@ -33,7 +33,7 @@ public:
     
     //Sets
     void setEvent(StMcEvent* mcevt=0);
-    void setFactory(StiEvaluableTrackFactory* val);
+    void setFactory(StiObjectFactoryInterface<StiKalmanTrack>* val);
     void setBuildPath(const string&);
     
     //User query interface to StiKalmanTracks
@@ -49,7 +49,7 @@ private:
     
     StAssociationMaker* mAssociationMaker;
     StMcEvent* mMcEvent;
-    StiEvaluableTrackFactory* mFactory;
+    StiObjectFactoryInterface<StiKalmanTrack>* mFactory;
     StTpcHitFilter* mTpcHitFilter; //deep memeber, requires non-defualt assignment and copy
     string mBuildPath;
     bool mBuilt;
@@ -77,7 +77,7 @@ private:
     StTrackPairInfo* mPair;
 };
     
-inline void StiEvaluableTrackSeedFinder::setFactory(StiEvaluableTrackFactory* val)
+inline void StiEvaluableTrackSeedFinder::setFactory(StiObjectFactoryInterface<StiKalmanTrack>* val)
 {
     mFactory=val;
 }

@@ -6,7 +6,6 @@
 #define StiEvaluableTrack_HH
 
 #include "StiKalmanTrack.h"
-#include "StiObjectFactory.h"
 
 class StTrackPairInfo;
 
@@ -30,8 +29,6 @@ protected:
     
 private:
 };
-
-//typedef StiObjectFactory<StiEvaluableTrack> StiEvaluableTrackFactory;
 
 inline void StiEvaluableTrack::setStTrackPairInfo(StTrackPairInfo* val)
 {

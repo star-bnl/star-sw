@@ -9,12 +9,10 @@
 #include "StiDetector.h"
 #include "StiPlacement.h"
 #include "StiGeometryTransform.h"
-//#include "StiKalmanTrackNodeFactory
-//#include "StEventTypes.h"
 
 ostream& operator<<(ostream&, const StiHit&);
 
-StiKalmanTrackNodeFactory* StiKalmanTrack::trackNodeFactory = 0;
+StiObjectFactoryInterface<StiKalmanTrackNode>* StiKalmanTrack::trackNodeFactory = 0;
 
 void StiKalmanTrack::reset()
 {
@@ -31,7 +29,7 @@ void StiKalmanTrack::update()
     return;
 }
 
-void StiKalmanTrack::setKalmanTrackNodeFactory(StiKalmanTrackNodeFactory* val)
+void StiKalmanTrack::setKalmanTrackNodeFactory(StiObjectFactoryInterface<StiKalmanTrackNode>* val)
 {
     trackNodeFactory = val;
 }
@@ -131,7 +129,7 @@ StiKalmanTrackNode * StiKalmanTrack::addHit(StiHit *h)
 
   if (lastNode!=0)
     {
-      StiKalmanTrackNodeFactory * f = dynamic_cast<StiKalmanTrackNodeFactory*>(trackNodeFactory);
+      StiObjectFactoryInterface<StiKalmanTrackNode> * f = dynamic_cast<StiObjectFactoryInterface<StiKalmanTrackNode>*>(trackNodeFactory);
       StiKalmanTrackNode * n = f->getObject();
 			n->reset();
       n->setHit(h);
@@ -142,7 +140,7 @@ StiKalmanTrackNode * StiKalmanTrack::addHit(StiHit *h)
     }
   else 
     {
-      StiKalmanTrackNodeFactory * f = dynamic_cast<StiKalmanTrackNodeFactory*>(trackNodeFactory);
+      StiObjectFactoryInterface<StiKalmanTrackNode> * f = dynamic_cast<StiObjectFactoryInterface<StiKalmanTrackNode>*>(trackNodeFactory);
       firstNode  = f->getObject(); 
 			firstNode->reset();
       firstNode->setHit(h);
@@ -163,7 +161,7 @@ StiKalmanTrackNode * StiKalmanTrack::insertHit(StiHit *hInserted, StiHit * targe
   // It is further assumed that the targetParent has at most
   // one child.
 
-  StiKalmanTrackNodeFactory * f = dynamic_cast<StiKalmanTrackNodeFactory*>(trackNodeFactory);
+  StiObjectFactoryInterface<StiKalmanTrackNode> * f = dynamic_cast<StiObjectFactoryInterface<StiKalmanTrackNode>*>(trackNodeFactory);
   StiKalmanTrackNode * n = f->getObject();
 	n->reset();
   n->setHit(hInserted);
@@ -335,7 +333,7 @@ void StiKalmanTrack::initialize(double curvature,
       cout <<"StiKalmanTrack::initialize()\tERROR:\ttrackNodeFactory==0.  Abort"<<endl;
       return;
     }
-  StiKalmanTrackNodeFactory * fac = dynamic_cast<StiKalmanTrackNodeFactory *>(trackNodeFactory);
+  StiObjectFactoryInterface<StiKalmanTrackNode> * fac = dynamic_cast<StiObjectFactoryInterface<StiKalmanTrackNode> *>(trackNodeFactory);
   if (!fac) {
       cout <<"StiKalmanTrack::initialize(). ERROR:\tfactory cast failed.  Seg-fault"<<endl;
   }

@@ -28,7 +28,7 @@ public:
     
     void reset();
 
-    void setFactory(StiKalmanTrackFactory*);    
+    void setFactory(StiObjectFactoryInterface<StiKalmanTrack>*);    
     void setBuildPath(const string&);
     
 private:
@@ -37,7 +37,7 @@ private:
     class StiSeedFinderRep
     {
     public:
-	StiSeedFinderRep(const string& buildPath, StiKalmanTrackFactory*);
+	StiSeedFinderRep(const string& buildPath, StiObjectFactoryInterface<StiKalmanTrack>*);
 
 	//We instantiate objects on the heap, so we implement "deep copy"
 	StiSeedFinderRep(const StiSeedFinderRep&);
@@ -76,7 +76,7 @@ private:
 	IntDetectorMap_t mIntDetMap;
 	IntDetectorMap_t::iterator mCurrentStartPoint;
 	string mBuildPath;
-	StiKalmanTrackFactory* mTrackFactory;
+	StiObjectFactoryInterface<StiKalmanTrack>* mTrackFactory;
 
     private:
 	//deep members
@@ -92,7 +92,7 @@ private:
     bool incrementRep();
 
     StiSeedFinder* mCurrentSeedFinder;
-    StiKalmanTrackFactory* mTrackFactory;
+    StiObjectFactoryInterface<StiKalmanTrack>* mTrackFactory;
     string mBuildPath;
     
     RepVec_t mRepVec;
@@ -104,7 +104,7 @@ inline void StiCompositeSeedFinder::setBuildPath(const string& val)
     mBuildPath=val;
 }
 
-inline void StiCompositeSeedFinder::setFactory(StiKalmanTrackFactory* val)
+inline void StiCompositeSeedFinder::setFactory(StiObjectFactoryInterface<StiKalmanTrack>* val)
 {
     mTrackFactory = val;
 }

@@ -5,26 +5,25 @@
 #ifndef StiObjectFactory_H
 #define StiObjectFactory_H
 
-#include "StiFactory.h"
 #include <iostream>
 #include <vector>
+#include <string>
 
 using std::vector;
 using std::cout;
 using std::endl;
 using std::ostream;
+using std::string;
 
-template <class T>
-class StiObjectFactory : public StiFactory
+class StiObjectFactory 
 {
 public:
-    
-    typedef vector<T*> t_vector;
-    
-    StiObjectFactory(const char* newName, int original=-1, int incremental=-1, int maxInc=-1);
+
+    typedef vector<void*> t_vector;
+    StiObjectFactory(const string& newName, int original, int incremental, int maxInc);
     
     virtual ~StiObjectFactory();
-    
+
     // Declare all objects owned by this container as unused.
     void reset();
     
@@ -35,121 +34,77 @@ public:
     int getIncrementalSize() const;
     
     int getMaxIncrementCount() const;
-    
+
     int getCurrentSize() const;
     
-    T* getObject();
+    string& getName() const;
     
 protected:
+
+    //Author of derived classes must call initialize after construction.
+    //Internal protection against re-initialization;
+    void initialize();
+    
+    void* returnObject();
+    
+    virtual void* makeNewObject() const = 0;
+    
+private:
+    
+    StiObjectFactory(); //Not implemented
     
     enum StiObjectFacotryDefaults {defaultMaxIncrementCount = 10, 
 				   defaultIncrementSize=5000,defaultOriginalSize=10000};
     
-    virtual void createObjects(int);
-    
+    void createObjects(int);
+    bool initialized;
+    string name;
     int originalSize;
     int incrementalSize;
     int maxIncrementCount;
     int incrementCount;
     
     t_vector container;
-    t_vector::iterator mCurrent;
-    
-private:
-    
+    t_vector::iterator mCurrent;    
 };
 
-template <class T>
-StiObjectFactory<T>::StiObjectFactory(const char* newName, int original, int incremental, int maxInc)
-    : StiFactory(newName)
-{
-    originalSize = (original>0) ? original : defaultOriginalSize;
-    incrementalSize = (incremental>0) ? incremental : defaultIncrementSize;
-    maxIncrementCount = (maxInc>0) ? maxInc : defaultMaxIncrementCount;
-    incrementCount = 0;
-    
-    mCurrent = container.begin();
-    createObjects(originalSize);
-}
 
-template <class T>
-StiObjectFactory<T>::~StiObjectFactory() 
-{
-    for (t_vector::iterator it=container.begin(); it!=container.end(); ++it) {
-	delete (*it);
-	(*it) = 0;
-    }
-}
-
-template <class T>
-inline void StiObjectFactory<T>::reset()  
+inline void StiObjectFactory::reset()  
 {
     mCurrent = container.begin();
 }
 
-template <class T>    
-inline void StiObjectFactory<T>::setIncrementalSize(int increment) 
+inline void StiObjectFactory::setIncrementalSize(int increment) 
 {
     incrementalSize = increment;
-}
-    
-template <class T>
-inline void StiObjectFactory<T>::setMaxIncrementCount(int maxCount) 
+}   
+
+inline void StiObjectFactory::setMaxIncrementCount(int maxCount) 
 {
     maxIncrementCount = maxCount;
-}
+}    
 
-template <class T>	
-inline int StiObjectFactory<T>::getIncrementalSize() const 
+inline int StiObjectFactory::getIncrementalSize() const 
 {
     return incrementalSize;
 }
 
-template <class T>    
-inline int StiObjectFactory<T>::getMaxIncrementCount() const 
+inline int StiObjectFactory::getMaxIncrementCount() const 
 {
     return maxIncrementCount;
 }
 
-template <class T>
-inline int StiObjectFactory<T>::getCurrentSize() const 
+inline int StiObjectFactory::getCurrentSize() const 
 {
     return container.size();
 }
 
-template <class T>
-T* StiObjectFactory<T>::getObject() 
+inline void StiObjectFactory::initialize()
 {
-    if ( mCurrent < container.end() ) {
-	return *mCurrent++;
+    if (initialized==false) {
+	createObjects(originalSize);
+	initialized=true;
     }
-    
-    else {
-	if (incrementCount< maxIncrementCount) {
-	    // expand container size
-	    ++incrementCount;
-	    createObjects(incrementalSize);
-	    return *mCurrent++;
-	}
-	else {
-	    // s.o.l.
-	    cout << "StiObjectFactory::getObject() - FATAL" << endl;
-	    cout << "     Too many expension request " << endl;
-	    cout << "     incrementCount : " << incrementCount << endl;
-	    return 0;
-	}
-    }
-}
-
-template <class T>
-void StiObjectFactory<T>::createObjects(int n) 
-{
-    int currentDistance = mCurrent-container.begin();
-    container.reserve( container.size()+n );
-    for (int i=0;i<n; ++i) {
-	container.push_back( new T() );
-    }
-    mCurrent = container.begin()+currentDistance;
 }
 
 #endif

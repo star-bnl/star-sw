@@ -44,7 +44,7 @@ void StiHitFiller::addDetector(StDetectorId det)
     return;
 }
 
-void StiHitFiller::fillHits(StiHitContainer* store, StiHitFactory* factory)
+void StiHitFiller::fillHits(StiHitContainer* store, StiObjectFactoryInterface<StiHit>* factory)
 {
     cout <<"StiHitFiller::fillHits()"<<endl;
     for (det_id_vector::const_iterator it=mvec.begin(); it!=mvec.end(); ++it) {
@@ -56,7 +56,7 @@ void StiHitFiller::fillHits(StiHitContainer* store, StiHitFactory* factory)
     return;
 }
 
-void StiHitFiller::fillTpcHits(StiHitContainer* store, StiHitFactory* factory)
+void StiHitFiller::fillTpcHits(StiHitContainer* store, StiObjectFactoryInterface<StiHit>* factory)
 {
     cout <<"StiHitFiller::fillTpcHits()"<<endl;
     mtimer.reset();
@@ -112,7 +112,7 @@ void StiHitFiller::fillTpcHits(StiHitContainer* store, StiHitFactory* factory)
     return;
 }
 
-void StiHitFiller::fillSvtHits(StiHitContainer* store, StiHitFactory* factory)
+void StiHitFiller::fillSvtHits(StiHitContainer* store, StiObjectFactoryInterface<StiHit>* factory)
 {
     cout <<"StiHitFiller::fillSvtHits()"<<endl;
     mtimer.reset();
@@ -157,7 +157,7 @@ void StiHitFiller::fillSvtHits(StiHitContainer* store, StiHitFactory* factory)
     return;
 }
 
-void StiHitFiller::fillPrimaryVertices(StiHitContainer* store, StiHitFactory* factory)
+void StiHitFiller::fillPrimaryVertices(StiHitContainer* store, StiObjectFactoryInterface<StiHit>* factory)
 {
     StPrimaryVertex* primVtx = 0;
     for(unsigned int i=0; i<mevent->numberOfPrimaryVertices(); i++) {

@@ -8,9 +8,6 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
-//StiGui
-//#include "StiGui/StiRootDrawableDetector.h"
-
 //Sti
 #include "StiDetector.h"
 #include "StiPlacement.h"
@@ -35,8 +32,8 @@ StiDetectorTreeBuilder::~StiDetectorTreeBuilder()
   cout <<"StiDetectorTreeBuilder::~StiDetectorTreeBuilder()"<<endl;
 }
 
-data_node* StiDetectorTreeBuilder::build(data_node_factory* nodefactory,
-					 detector_factory* detfactory)
+data_node* StiDetectorTreeBuilder::build(StiObjectFactoryInterface<StiDetectorNode>* nodefactory,
+					 StiObjectFactoryInterface<StiDetector>* detfactory)
 {
     if (mroot) {
       cout << "StiDetectorTreeBuilder::build()\tError!\t" 

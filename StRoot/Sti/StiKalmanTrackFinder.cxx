@@ -75,23 +75,23 @@ bool StiKalmanTrackFinder::isValid(bool debug) const
 //Temporary patch, to test seed finder (MLM, 8/20/01)
 void StiKalmanTrackFinder::doNextAction()
 {
-  StiKalmanTrack* track = 0;
-  if (trackSeedFinder->hasMore()) {
-    track = trackSeedFinder->next();
-    if (!track) {
-      cout <<"StiKalmanTrackFinder::doNextAction()\t Track==0. return "<<endl;
-      return;
+    StiKalmanTrack* track = 0;
+    if (trackSeedFinder->hasMore()) {
+	track = trackSeedFinder->next();
+	if (!track) {
+	    cout <<"StiKalmanTrackFinder::doNextAction()\t Track==0. return "<<endl;
+	    return;
+	}
+	else {
+	    cout <<"StiKalmanTrackFinder::doNextAction()\t Got Valid track"<<endl;
+	    track->update(); //append to display if drawable
+	}
+	
     }
     else {
-      cout <<"StiKalmanTrackFinder::doNextAction()\t Got Valid track"<<endl;
-      track->update(); //append to display if drawable
+	cout <<"\ttrackSeedFinder->hasMore()==false"<<endl;
     }
-    
-  }
-  else {
-    cout <<"\ttrackSeedFinder->hasMore()==false"<<endl;
-  }
-  return;
+    return;
 }
 
 void StiKalmanTrackFinder::findTracks()

@@ -2,7 +2,7 @@
 //M.L. Miller (Yale Software)
 //04/01
 
-//class to define interface between StEvent, StiHitContainer, and StiHitFactory (adaptor)
+//class to define interface between StEvent, StiHitContainer, and StiObjectFactoryInterface<StiHit> (adaptor)
 
 #ifndef StiHitFiller_HH
 #define StiHitFiller_HH
@@ -15,6 +15,7 @@
 #include "../pams/global/inc/StDetectorId.h" //for detector enumerations
 
 #include "StiHit.h"
+#include "StiObjectFactoryInterface.h"
 
 using std::vector;
 using std::map;
@@ -36,15 +37,15 @@ public:
 
     void addDetector(StDetectorId det);
     void setEvent(StEvent* val) {mevent=val;}
-    void fillHits(StiHitContainer*, StiHitFactory*);
+    void fillHits(StiHitContainer*, StiObjectFactoryInterface<StiHit>*);
 
     void setTranslator();
     friend ostream& operator<<(ostream&, const StiHitFiller&);
 
 private:
-    void fillTpcHits(StiHitContainer*, StiHitFactory*);
-    void fillSvtHits(StiHitContainer*, StiHitFactory*);
-    void fillPrimaryVertices(StiHitContainer*, StiHitFactory*);
+    void fillTpcHits(StiHitContainer*, StiObjectFactoryInterface<StiHit>*);
+    void fillSvtHits(StiHitContainer*, StiObjectFactoryInterface<StiHit>*);
+    void fillPrimaryVertices(StiHitContainer*, StiObjectFactoryInterface<StiHit>*);
     
 private:
     StiGeometryTransform* mtranslator;

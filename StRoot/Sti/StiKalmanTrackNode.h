@@ -3,7 +3,6 @@
 #include <iostream.h>
 #include <stdlib.h>
 #include "Exception.h"
-#include "StiObjectFactory.h"
 #include "StiTrackNode.h"
 
 class StiHit;
@@ -83,8 +82,6 @@ class StiKalmanTrackNode : public StiTrackNode
   static bool   mcsCalculated;
   static double massHypothesis;
 };
-
-typedef StiObjectFactory<StiKalmanTrackNode>   StiKalmanTrackNodeFactory;
 
 #endif
 

@@ -117,7 +117,9 @@ StiKalmanTrack* StiEvaluableTrackSeedFinder::next()
 
 StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
 {
-    StiEvaluableTrack* track = mFactory->getObject();
+    StiEvaluableTrack* track = dynamic_cast<StiEvaluableTrack*>(mFactory->getObject());
+    if (!track) return 0;
+    
     track->reset();
   
     mcTrackMapType* mcToStTrackMap = mAssociationMaker->mcTrackMap();

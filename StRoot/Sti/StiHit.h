@@ -7,8 +7,6 @@
 #ifndef StiHit_HH
 #define StiHit_HH
 
-#include "StiObjectFactory.h"
-
 class StHit;
 class StThreeVectorD;
 class StThreeVectorF;
@@ -185,7 +183,5 @@ inline void StiHit::copyToThis(const StiHit& rhs)
     msyz = rhs.msyz;
     mused = rhs.mused;
 }
-
-typedef StiObjectFactory<StiHit> StiHitFactory;
 
 #endif

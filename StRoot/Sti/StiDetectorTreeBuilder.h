@@ -8,7 +8,9 @@
 #include <vector>
 using std::vector;
 #include "StiCompositeTreeNode.h"
-#include "StiGui/StiRootDrawableDetector.h"
+
+#include "StiFactoryTypes.h"
+#include "StiObjectFactoryInterface.h"
 
 class StiDetectorBuilder;
 
@@ -19,7 +21,7 @@ public:
     StiDetectorTreeBuilder();
     virtual ~StiDetectorTreeBuilder();
 
-    data_node* build(data_node_factory* nodefactory, detector_factory* detfactory);
+    data_node* build(StiObjectFactoryInterface<StiDetectorNode>* nodefactory, StiObjectFactoryInterface<StiDetector>* detfactory);
     
 private:
     void loopOnDetectors();
@@ -29,8 +31,8 @@ private:
                          string& keystring);
     
     data_node* mroot;
-    data_node_factory* mnodefactory;
-    detector_factory* mdetfactory;
+    StiObjectFactoryInterface<StiDetectorNode>* mnodefactory;
+    StiObjectFactoryInterface<StiDetector>* mdetfactory;
 
     StiDetectorBuilder *mDetectorBuilder;
 

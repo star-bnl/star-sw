@@ -10,8 +10,6 @@
 #include <string>
 #include <algorithm>
 
-#include "StiObjectFactory.h"
-
 using std::find;
 using std::vector;
 using std::string;
@@ -230,8 +228,9 @@ typedef StiCompositeTreeNode<data_t> data_node;
 #else
 class data_node;
 #endif
-
+  
 typedef vector<data_node*> data_node_vec; 
-typedef StiObjectFactory<data_node> data_node_factory;
+
+//typedef StiObjectFactory<data_node> data_node_factory;
 
 #endif
