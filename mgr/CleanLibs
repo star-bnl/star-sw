@@ -1,0 +1,37 @@
+#!/usr/bin/env perl
+use Env;
+#if (defined($AFS)) {$File::Find::dont_use_nlink;}
+require "find.pl";
+my $dir = "obj";
+if ($#ARGV > -1) {$dir = $ARGV[0];}
+my $KEEP = 1;
+if ($#ARGV > 0) {$KEEP = $ARGV[1];}
+if (-l $dir) {
+  $dir = readlink $dir;
+}
+if (-r $dir) {
+  print "Run $0 in $dir keep = $KEEP\n";
+  &File::Find::find (\&wanted_S,$dir);
+}
+sub wanted_S {
+  ($dev,$ino,$mode,$nlink,$uid,$gid) = lstat($_);
+  my $name = $File::Find::name; #print "name = $name\n";
+  if (-e _ && /\.\d+$/) {#    print "Version $name\n";
+    my $so = $_; $so =~ s/\.\d*$//; 
+    my $link = $so; 
+    if (-l $link) {#      print "Found Link = $link\n";
+      my $file = readlink $link;#      print "which is pointing to $file\n";
+#      chop ($file);
+      $so .= ".*";# print "so = $so\n";
+      my @so = glob $so;# print "sos = @so\n";
+      my $keep = 0;
+      while ($s = pop @so) {
+	$keep++;# print "keep = $keep from $KEEP\n";
+	if ($file =~ $s ) {print "keep \t$file => \t$link\n"; next;}
+	if ($keep <= $KEEP) {print "keep $s because it is linked to $keep <= $KEEP\n"; next;}
+	print "Delete $s \n";	unlink $s;
+      }
+    }
+  }
+}
+
