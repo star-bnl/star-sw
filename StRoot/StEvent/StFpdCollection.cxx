@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StFpdCollection.cxx,v 2.3 2002/01/17 18:38:10 ullrich Exp $
+ * $Id: StFpdCollection.cxx,v 2.4 2002/09/25 14:04:17 akio Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StFpdCollection.cxx,v $
+ * Revision 2.4  2002/09/25 14:04:17  akio
+ * Bug fix in the service functions, no change in data
+ *
  * Revision 2.3  2002/01/17 18:38:10  ullrich
  * Several new methods added. Bug fixed.
  *
@@ -23,7 +26,7 @@
 #include "StFpdCollection.h"
 #include <iostream>
 
-static const char rcsid[] = "$Id: StFpdCollection.cxx,v 2.3 2002/01/17 18:38:10 ullrich Exp $";
+static const char rcsid[] = "$Id: StFpdCollection.cxx,v 2.4 2002/09/25 14:04:17 akio Exp $";
 
 ClassImp(StFpdCollection)
 
@@ -138,14 +141,14 @@ StFpdCollection::bottom(unsigned int n) const
 unsigned short
 StFpdCollection::smdx(unsigned int n) const
 {
-    if(n>0 && n<=mMaxPMTSmdX) return mAdc[n+119]; 
+    if(n>0 && n<=mMaxPMTSmdX) return mAdc[n+59]; 
     return 9999;
 }
 
 unsigned short
 StFpdCollection::smdy(unsigned int n) const
 {
-    if(n>0 && n<=mMaxPMTSmdY) return mAdc[n+59]; 
+    if(n>0 && n<=mMaxPMTSmdY) return mAdc[n+119]; 
     return 9999;
 }
 
@@ -250,8 +253,8 @@ StFpdCollection::dump()
     cout << "Bottom ADC "; for(i=1; i<17;  i++){cout << bottom(i) << " ";}; cout << endl;
     cout << "PreShower1 "; for(i=1; i<13;  i++){cout << pres1(i) << " ";}; cout << endl;
     cout << "PreShower2 "; for(i=1; i<13;  i++){cout << pres2(i) << " ";}; cout << endl;
-    cout << "SMD X      "; for(i=1; i<101; i++){cout << smdx(i) << " ";}; cout << endl;
-    cout << "SMD Y      "; for(i=1; i<61;  i++){cout << smdx(i) << " ";}; cout << endl;
+    cout << "SMD X      "; for(i=1; i<61;  i++){cout << smdx(i) << " ";}; cout << endl;
+    cout << "SMD Y      "; for(i=1; i<101; i++){cout << smdy(i) << " ";}; cout << endl;
     cout << "South Veto  " << southVeto() << endl;
     cout << "Scalers    "; for(i=0; i<128; i++){printf(" %x ",mScl[i]);}; cout << endl;
 }

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StFpdCollection.h,v 2.4 2002/02/22 22:56:48 jeromel Exp $
+ * $Id: StFpdCollection.h,v 2.5 2002/09/25 14:04:17 akio Exp $
  *
  * Author: Akio Ogawa, Jan 2002
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StFpdCollection.h,v $
+ * Revision 2.5  2002/09/25 14:04:17  akio
+ * Bug fix in the service functions, no change in data
+ *
  * Revision 2.4  2002/02/22 22:56:48  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -95,8 +98,8 @@ protected:
 	  mMaxPedestal = 256,
           mMaxPMTpEEMC = 12,
           mMaxPMTPbg   = 16,
-          mMaxPMTSmdX  = 100,
-          mMaxPMTSmdY  = 60,
+          mMaxPMTSmdX  = 60,
+          mMaxPMTSmdY  = 100,
           mMaxScalers  = 128};
     
     UShort_t mAdc[mMaxAdc];
