@@ -1,5 +1,8 @@
-// $Id: StMessageManager.h,v 1.4 1999/06/28 02:40:56 genevb Exp $
+// $Id: StMessageManager.h,v 1.5 1999/06/28 15:42:13 genevb Exp $
 // $Log: StMessageManager.h,v $
+// Revision 1.5  1999/06/28 15:42:13  genevb
+// Added Debug message class
+//
 // Revision 1.4  1999/06/28 02:40:56  genevb
 // Additional backward compatibilit with MSG (msg_enable, msg_enabled, msg_disable
 //
@@ -21,9 +24,9 @@
 //                                                                      //
 // This class manages the messages in STAR software. It is a singleton. //
 // Messages are stored in a vector, and come in several types           //
-// (i.e. info, error). The types "I" (info), "W" (warning) and          //
-// "E" (error) are predefined. Message finding and summary tools are    //
-//  also available.                                                     //
+// (i.e. info, error, debug ). The types "I" (info), "W" (warning),     //
+// "E" (error), and "D" (debug) are predefined. Message finding         //
+// and summary tools are also available.                                //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 
@@ -40,6 +43,7 @@
 #define StInfo_ F77_NAME(stinfo,STINFO)
 #define StWarning_ F77_NAME(stwarning,STWARNING)
 #define StError_ F77_NAME(sterror,STERROR)
+#define StDebug_ F77_NAME(stdebug,STDEBUG)
 #define StMessAddType_ F77_NAME(stmessaddtype,StMESSADDTYPE)
 extern "C" {
 R__EXTERN  void type_of_call Message_(Char_t* mess="", int lines=1, int id=-1);
@@ -50,6 +54,7 @@ R__EXTERN  void type_of_call StMessage_(Char_t* mess="", Char_t* type="I", Char_
 R__EXTERN  void type_of_call StInfo_(Char_t* mess="", Char_t* opt="O");
 R__EXTERN  void type_of_call StWarning_(Char_t* mess="", Char_t* opt="O");
 R__EXTERN  void type_of_call StError_(Char_t* mess="", Char_t* opt="O");
+R__EXTERN  void type_of_call StDebug_(Char_t* mess="", Char_t* opt="O");
 R__EXTERN  void type_of_call StMessAddType_(const Char_t* type, const Char_t* text);
 }
 #endif
@@ -136,6 +141,16 @@ class StMessageManager {
          Char_t* s4="") {return FindMessage(s1,s2,s3,s4,messCollection[3]);}
    virtual messVec& FindErrorList(const Char_t* s1, Char_t* s2="", Char_t* s3="",
          Char_t* s4="") {return FindMessageList(s1,s2,s3,s4,messCollection[3]);}
+
+// Debug Messages:
+   virtual StMessage& Debug(Char_t* mess="", Char_t* opt="O")
+         { return Message(mess, "D", opt);}
+   virtual        int PrintDebug() {return PrintList(messCollection[4]); }
+   virtual const messVec& GetDebugs() {return *(messCollection[4]);}
+   virtual StMessage* FindDebug(const Char_t* s1, Char_t* s2="", Char_t* s3="",
+         Char_t* s4="") {return FindMessage(s1,s2,s3,s4,messCollection[4]);}
+   virtual messVec& FindDebugList(const Char_t* s1, Char_t* s2="", Char_t* s3="",
+         Char_t* s4="") {return FindMessageList(s1,s2,s3,s4,messCollection[4]);}
 
    virtual       void PrintInfo();
    ClassDef(StMessageManager,0)
