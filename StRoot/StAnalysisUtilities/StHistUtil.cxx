@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.14 2000/02/28 19:03:01 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.15 2000/02/29 18:19:47 kathy Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.15  2000/02/29 18:19:47  kathy
+// fix code so it will handle without crashing when there is no histogram branch of the one requested
+//
 // Revision 1.14  2000/02/28 19:03:01  kathy
 // print list for FlowTag Maker histograms
 //
@@ -274,6 +277,8 @@ Int_t StHistUtil::DrawHists(Char_t *dirName)
   TList  *dirList = 0;
   dirList = FindHists(dirName);
  
+  if (!dirList) cout << " DrawHists - histograms not available! " << endl;
+
   Int_t padCount = 0;
   
 // Create an iterator called nextHist - use TIter constructor
@@ -464,12 +469,14 @@ TList* StHistUtil::FindHists(Char_t *dirName)
     hBN += "Hist";
     
 //find particular branch
-    St_DataSet *QAH = hist->Find(hBN.Data());
-
+    St_DataSet *QAH = 0;
+    QAH = hist->Find(hBN.Data());
 // or can create iterator and look over all branches
 
 //now get the list of histograms
-    dList = (TList *)QAH->GetObject();
+    if (QAH)  {
+      dList = (TList *)QAH->GetObject();
+    }
 
   }
 
@@ -478,11 +485,16 @@ TList* StHistUtil::FindHists(Char_t *dirName)
       cout << " FindHists - found hist. in histBranch, with name:  " 
 	   << dirName <<  endl;
      }
+  else { 
+         cout << " FindHists - histogram branch has not been found for branch --> "
+	   << dirName <<  endl;
+     }
 
   }
 
-  cout << " End: FindHists, dList pointer = " << dList << endl;
+  cout << " FindHists, dList pointer = " << dList << endl;
   
+ 
  return dList;
 }
 //_____________________________________________________________________________
@@ -499,6 +511,7 @@ Int_t StHistUtil::ListHists(Char_t *dirName)
   TList  *dirList = 0;
   dirList = FindHists(dirName);
 
+  if (!dirList) cout << " ListHists - histograms not available! " << endl;
 
 //Now want to loop over all histograms
 // Create an iterator
