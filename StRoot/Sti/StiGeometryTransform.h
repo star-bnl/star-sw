@@ -4,6 +4,7 @@
 #ifndef STI_GEOMETRY_TRANSFORM_HH
 #define STI_GEOMETRY_TRANSFORM_HH
 
+#include <map>
 #include "StThreeVector.hh"
 #include "tables/St_svg_config_Table.h"
 
@@ -13,10 +14,15 @@ class StiHit;
 class StTpcCoordinateTransform;
 class svg_geom_st;
 class svg_shape_st;
+class StPrimaryVertex;
 
 class StiGeometryTransform{
     
 public:
+    
+    typedef map<unsigned int, double> padrow_radius_map;
+    typedef padrow_radius_map::value_type padrow_radius_map_ValType;
+    
     
     virtual ~StiGeometryTransform();
 
@@ -56,6 +62,8 @@ public:
     void operator() (const StSvtHit*, StiHit*); //From Svt -> Sti
     void operator() (const StiHit, StSvtHit*);  //From Sti -> Svt
     
+    void operator() (const StPrimaryVertex*, StiHit*); //From StPrimaryVertex -> StiHit
+    
 protected: 
     StiGeometryTransform();
     static StiGeometryTransform* sinstance;
@@ -66,6 +74,8 @@ protected:
     svg_shape_st *aSvgShape;
 
     StTpcCoordinateTransform* tpcTransform;
+
+    padrow_radius_map mpadrowradiusmap;
 
 };
 

@@ -22,30 +22,17 @@
 
 #include "StiHitFiller.h"
 
-double gRefAnleForSector(unsigned int sector);
 
-//StiHitFiller::StiHitFiller() : mtranslator(StiGeometryTransform::instance())
-StiHitFiller::StiHitFiller() : mtranslator(0), mtpctransformer( new StTpcCoordinateTransform(gStTpcDb) )
+//StiHitFiller::StiHitFiller() : mtranslator(0), mtpctransformer( new StTpcCoordinateTransform(gStTpcDb) )
+StiHitFiller::StiHitFiller() : mtranslator(StiGeometryTransform::instance())
 {
     cout <<"\nStiHitFiller::StiHitFiller()\n"<<endl;
 
-    //Temp, build map of padrow radius
-    cout <<"Generating Padrow Radius Map"<<endl;
-    for (unsigned int padrow=1; padrow<=45; ++padrow) {
-	double center = gStTpcDb->PadPlaneGeometry()->radialDistanceAtRow(padrow);
-	mpadrowradiusmap.insert( padrow_radius_map_ValType( padrow, center ) );	
-    }
-    cout <<"\nPadrow\tRadius"<<endl;
-    for (padrow_radius_map::const_iterator it=mpadrowradiusmap.begin(); it!=mpadrowradiusmap.end(); ++it) {
-	cout <<(*it).first<<"\t"<<(*it).second<<endl;
-    }
 }
 
 StiHitFiller::~StiHitFiller()
 {
     cout <<"\nStiHitFiller::~StiHitFiller()\n"<<endl;
-    delete mtpctransformer;
-    mtpctransformer=0;
 }
 
 void StiHitFiller::addDetector(StDetectorId det)
@@ -83,8 +70,7 @@ void StiHitFiller::fillTpcHits(StiHitContainer* store, StiHitFactory* factory)
 		    StiHit* stihit = factory->getObject();
 		    stihit->reset();
 		    
-		    this->operator()(hit, stihit);
-		    //mtranslator->operator()(hit, stihit);
+		    mtranslator->operator()(hit, stihit);
 
 		    //Now Fill the Hit Container!
 		    store->push_back( stihit );
@@ -110,7 +96,8 @@ void StiHitFiller::fillPrimaryVertices(StiHitContainer* store, StiHitFactory* fa
 	StiHit* stihit = factory->getObject();
 	stihit->reset();
 	
-	this->operator() ( primVtx, stihit);
+	mtranslator->operator() ( primVtx, stihit);
+	
 	store->addVertex(stihit);
 	//cout <<primVtx->position()<<endl;
     }
@@ -126,75 +113,3 @@ ostream& operator<<(ostream& os, const StiHitFiller& h)
     return os;
 }
 
-void StiHitFiller::operator() (const StPrimaryVertex* vtx, StiHit* stihit)
-{
-    //A primary vertex doesn't come from a detector, so it doesn't have a well defined refAngle and centerRadius
-    //We'll define these two from global position in cylindrical coordinates
-    //refAngle = arctan(global_y / global_x)
-    //centerRadius = sqrt (global_x^2 + global_y^2)
-    //We'll then say that Sti_x = centerRadius and Sti_y = 0, with Sti_z begin global z, as usual
-
-    const StThreeVectorF& position = vtx->position();
-    double pos = sqrt(position.x()*position.x() + position.y()*position.y() );
-    double refangle = atan2( position.y(), position.x() );
-
-    if (refangle<0.) refangle+=2.*M_PI;
-    
-    stihit->setRefangle( refangle );
-    stihit->setPosition( pos );
-    stihit->setX( pos );
-    stihit->setY( 0. );
-    stihit->setZ( position.z() );
-    
-    return;
-}
-
-void StiHitFiller::operator() (const StTpcHit* tpchit, StiHit* stihit)
-{
-    //Change if we change numbering scheme
-    double refangle = gRefAnleForSector( tpchit->sector() );
-    double pos = mpadrowradiusmap[ tpchit->padrow() ];
-    stihit->setRefangle( refangle );
-    stihit->setPosition( pos );
-
-    //Make Tpc hits
-    StGlobalCoordinate gHit( tpchit->position() );
-    StTpcLocalSectorCoordinate lsHit;
-
-    //Transform 
-    mtpctransformer->operator()(gHit, lsHit);
-
-    //Careful, we have to swap z for all hits, and x and y for hits with global z>0
-
-    //Keep z in global coordinates
-    stihit->setZ( tpchit->position().z() );
-
-    //Take x -> -x, then swap x for y
-    if (tpchit->position().z() >0) {
-	stihit->setX( lsHit.position().y() );
-	stihit->setY( -1.*lsHit.position().x() );
-    }
-
-    //Swap x for y, 
-    else {
-	stihit->setX( lsHit.position().y() );
-	stihit->setY( lsHit.position().x() );
-    }
-
-    /*
-      cout <<"TpcHit: "<<tpchit->sector()<<" "<<tpchit->padrow()<<" "<<tpchit->position();
-      cout <<" GlobHit: "<<gHit.position();
-      cout <<" LSHit: "<<lsHit.position()<<" From Sector: "<<lsHit.fromSector()<<" ";
-      cout <<" StiHit: "<<stihit->x()<<" "<<stihit->y()<<" "<<stihit->z()<<endl;
-    */
-    return;
-}
-
-double gRefAnleForSector(unsigned int sector)
-{
-    unsigned int numSectors = 24;
-    double tolerance = .00001;
-    double beta = (sector > 12) ?(numSectors-sector)*2.*M_PI/(static_cast<double>(numSectors)/2.) :
-	sector*2.*M_PI/(static_cast<double>(numSectors)/2.);
-    return ( fabs(2.*M_PI - beta) < tolerance ) ? fabs(2.*M_PI-beta) : beta;
-}
