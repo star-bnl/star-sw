@@ -1,6 +1,9 @@
-// $Id: StRareMaker.h,v 1.3 2001/09/14 18:00:25 perev Exp $
+// $Id: StRareMaker.h,v 1.4 2001/10/15 20:20:27 struck Exp $
 //
 // $Log: StRareMaker.h,v $
+// Revision 1.4  2001/10/15 20:20:27  struck
+// first version with L3 included
+//
 // Revision 1.3  2001/09/14 18:00:25  perev
 // Removed references to StRun.
 //
@@ -44,6 +47,7 @@ class StEvent;
 class StRareEvent;
 class StRareEventCut;
 class StRareTrackCut;
+class StL3RareTrackCut;
 
 class StRareMaker : public StMaker {
 
@@ -59,6 +63,9 @@ public:
 
   StRareMaker(const Char_t *name="RareParticles");
   StRareMaker(const Char_t *name,StRareEventCut* cut, StRareTrackCut* track);
+  StRareMaker(const Char_t *name,StRareEventCut* cut,
+	      StRareTrackCut* trackCut,
+	      StL3RareTrackCut* l3trackCut);
   virtual ~StRareMaker(){};
   virtual void Clear(Option_t *option="");
   virtual Int_t Init();
@@ -68,9 +75,10 @@ public:
   virtual void   Report();
 
 private:
-  StRareTrackCut* TrackCut;  //!
-  StRareEventCut* EventCut;  //!
-  StRareEvent* revt;
+  StRareTrackCut* mTrackCut;  //!
+  StRareEventCut* mEventCut;  //!
+  StL3RareTrackCut* mL3TrackCut; //!
+  StRareEvent* mRareEvent;
 
   ClassDef(StRareMaker, 1)
 };
