@@ -63,6 +63,7 @@ Int_t StIOMaker::Init()
  void  StIOMaker::SetFile(const char *file)
 {
   if (!file || !file[0]) return;
+  StIOInterFace::SetFile(file);
 //		Add file to StFile
   if(!fFileSet) fFileSet = new StFile();
   fFileSet->AddFile(file);
@@ -99,6 +100,7 @@ Int_t StIOMaker::Open()
 
   if (!fCurrMk) return kStErr;
   fCurrMk->SetBranch(bra,fNextFile,0);
+  StIOInterFace::SetFile(fNextFile);
   fCurrMk->SetFile(fNextFile);
   
   return fCurrMk->Open();
