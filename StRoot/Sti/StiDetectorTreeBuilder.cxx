@@ -67,7 +67,7 @@ void StiDetectorTreeBuilder::buildRoot()
 void StiDetectorTreeBuilder::addToTree(StiDetector* layer)
 {
     //Where do we hang in radius?
-    StiOrderKey_t radius = layer->getPlacement()->getCenterRadius();
+    StiOrderKey_t radius = layer->getPlacement()->getLayerRadius();
     string radstring = "_radius";
     data_node* radialnode = hangWhere(mregion, radius, radstring);
 

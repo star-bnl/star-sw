@@ -26,10 +26,12 @@
  // given, as well as an orientation angle.  The orientation angle is the
 // angle from the vector above to the detector plane's outward normal.
 // It is 0 for detectors which have xOffset==0.
-
+//
 // when setting the values, one must set all 3 for a representation at once.
 // the other representation is then recalculated and both are available
 // for quick access
+//
+// The layerRadius is independent and is used for ordering detectors in R.
 
 #ifndef STI_PLACEMENT_H
 #define STI_PLACEMENT_H
@@ -47,11 +49,13 @@ public:
     float getCenterRefAngle() const { return centerRefAngle; }
     float getCenterRadius() const { return centerRadius; }
     float getCenterOrientation() const { return centerOrientation; }
+    float getLayerRadius() const { return layerRadius; }
     float getZcenter() const { return zCenter; }
 
     // mutators
     void setNormalRep(float refAngle_, float radius_, float xOffset_);
     void setCenterRep(float refAngle_, float radius_, float orientation_);
+    void setLayerRadius(float radius_){ if(radius_>=0) layerRadius = radius_; }
     void setZcenter(float val){ zCenter = val; }
 
 protected:
@@ -63,6 +67,9 @@ protected:
     float centerRefAngle; // in [0,2pi)
     float centerRadius;   // >= 0
     float centerOrientation;  // in [-pi/2, pi/2)
+
+    // independent radius for ordering
+    float layerRadius;
 
     float zCenter; 
 

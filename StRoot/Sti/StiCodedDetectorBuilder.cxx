@@ -101,14 +101,6 @@ void StiCodedDetectorBuilder::buildShapes()
                          pPadPlane->numberOfPadsAtRow(iPadrow + 1) / 2.);
 
     sprintf(szName, "Tpc/Padrow_%d", iPadrow + 1);
-
-    //string theName = "Tpc/Padrow_";
-    //stringstream stemp("");
-    //stemp << iPadrow + 1;
-    //theName += stemp.str();
-    //NameMapKey key(theName);    
-    //m_messenger <<"szName: "<<szName<<"\ttheName: "<<theName<<endl;
-    
     NameMapKey key(szName);
     mShapeMap.insert( shapeMapValType(key, pShape) );
 
@@ -207,6 +199,7 @@ void StiCodedDetectorBuilder::buildDetectors(){
       pPlacement->setZcenter(0.);
       pPlacement->setNormalRep(
           pGeometryTransform->phiForSector(iSector + 1, 12), fRadius, 0.); 
+      pPlacement->setLayerRadius(fRadius);
 
       sprintf(szName, "Tpc/Padrow_%d/Sector_%d", iPadrow + 1, iSector + 1);
 
@@ -272,11 +265,23 @@ void StiCodedDetectorBuilder::buildDetectors(){
     //   finally half the gap distance
     float fHalfGap = fGapRadius*tan(fHalfGapPhi);
 
+    // determine the radius for the detector's barrel
+    float fBarrelRadius = fLadderRadius;
+    if(iLayer < nLayers - 1){
+      if(iLayer%2==0){
+        fBarrelRadius += svgConfig.layer_radius[iLayer + 1];
+      }else{
+        fBarrelRadius += svgConfig.layer_radius[iLayer - 1];
+      }
+      fBarrelRadius /= 2.;
+    }
+
     for(Int_t iLadder = 0; iLadder<nLadders; iLadder++){
 
       // ladder
       StiPlacement *pPlacement = new StiPlacement;
       pPlacement->setZcenter(0.);
+      pPlacement->setLayerRadius(fBarrelRadius);
       float fLadderPhi = pGeometryTransform->phiForSector(
           2*(iLadder + 1) - iLayer%2, 2*nLadders);
 
@@ -310,6 +315,7 @@ void StiCodedDetectorBuilder::buildDetectors(){
       // hybrid 1
       pPlacement = new StiPlacement;
       pPlacement->setZcenter(0.);
+      pPlacement->setLayerRadius(fBarrelRadius);
       pPlacement->setNormalRep(fLadderPhi + fDeltaPhi/2., fGapRadius,
                                pHybridShape->getHalfWidth() - fHalfGap);
       
@@ -337,6 +343,7 @@ void StiCodedDetectorBuilder::buildDetectors(){
 
       pPlacement = new StiPlacement;
       pPlacement->setZcenter(0.);
+      pPlacement->setLayerRadius(fBarrelRadius);
       pPlacement->setNormalRep(fLadderPhi - fDeltaPhi/2., fGapRadius,
                                fHalfGap - pHybridShape->getHalfWidth());
       
@@ -371,6 +378,7 @@ void StiCodedDetectorBuilder::buildDetectors(){
 
     StiPlacement *pPlacement = new StiPlacement;
     pPlacement->setZcenter(0.);
+    pPlacement->setLayerRadius(fIfcRadius);
     pPlacement->setNormalRep(pGeometryTransform->phiForSector(iSector, 12),
                              fIfcRadius, 0.);
     

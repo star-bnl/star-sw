@@ -74,7 +74,10 @@ public:
     static void kill();
 
     /// Destructor;
-    virtual ~Messenger(){}
+    virtual ~Messenger(){      
+      MessengerBuf *pBuf = dynamic_cast<MessengerBuf *>(rdbuf());
+      delete pBuf;
+    }
 
 protected:
 
