@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRichRayTracer.h,v 1.5 2002/05/21 22:07:13 lasiuk Exp $
+ * $Id: StRichRayTracer.h,v 1.6 2002/05/21 22:52:56 lasiuk Exp $
  *
  * Author:  bl Feb 21, 2001
  ***************************************************************************
@@ -10,9 +10,8 @@
  ***************************************************************************
  *
  * $Log: StRichRayTracer.h,v $
- * Revision 1.5  2002/05/21 22:07:13  lasiuk
- * revision of index of refraction
- * and ray tracing
+ * Revision 1.6  2002/05/21 22:52:56  lasiuk
+ * attempt 2
  *
  * Revision 1.4  2002/01/12 00:10:23  lasiuk
  * debin addition; quartz cerenkov angle, tuple modification, shift

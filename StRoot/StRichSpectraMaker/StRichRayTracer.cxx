@@ -10,9 +10,8 @@
  ***************************************************************************
  *
  * $Log: StRichRayTracer.cxx,v $
- * Revision 1.8  2002/05/21 22:07:13  lasiuk
- * revision of index of refraction
- * and ray tracing
+ * Revision 1.9  2002/05/21 22:52:56  lasiuk
+ * attempt 2
  *
  * Revision 1.7  2002/02/19 04:26:50  lasiuk
  * addition of filling StEvent for inclusion in chain
