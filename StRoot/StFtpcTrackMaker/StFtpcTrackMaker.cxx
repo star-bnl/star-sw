@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.58 2004/05/19 17:45:06 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.59 2004/05/24 13:46:39 jcs Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.59  2004/05/24 13:46:39  jcs
+// fill StFtpcSoftwareMonitor not dst_mon_soft_ftpc
+//
 // Revision 1.58  2004/05/19 17:45:06  oldi
 // *** empty log message ***
 //
@@ -253,13 +256,15 @@
 
 #include "TObjArray.h"
 #include "TObjectSet.h"
+#include "StEvent.h"
 
 #include <Stiostream.h>
 #include <math.h>
 
 #include "St_DataSet.h"
 #include "St_DataSetIter.h"
-#include "StEvent.h"
+#include "StSoftwareMonitor.h"
+#include "StFtpcSoftwareMonitor.h"
 
 #include "StVertexId.h"
 #include "StFtpcHit.h"
@@ -270,7 +275,6 @@
 #include "tables/St_g2t_track_Table.h"
 
 #include "tables/St_dst_vertex_Table.h"
-#include "tables/St_dst_mon_soft_ftpc_Table.h"
 
 #include "TH1.h"
 #include "TH2.h"
@@ -525,7 +529,15 @@ Int_t StFtpcTrackMaker::Make()
     tracker->EstimateVertex(tracker->GetVertex(), 1);
   }
 
-  FillDstMonSoftFtpcTable(tracker);
+  StFtpcSoftwareMonitor* ftpcMon;
+  if (event->softwareMonitor()) {
+     ftpcMon = event->softwareMonitor()->ftpc();
+     if (!ftpcMon){
+       ftpcMon = new StFtpcSoftwareMonitor();
+       event->softwareMonitor()->setFtpcSoftwareMonitor(ftpcMon);
+     }      
+  }       	       
+  FillMonSoftFtpc(event,tracker,ftpcMon);
 
   // write global tracks, do primary fit, write primary tracks
   StFtpcTrackToStEvent *trackToStEvent = new StFtpcTrackToStEvent();
@@ -689,30 +701,13 @@ void   StFtpcTrackMaker::MakeHistograms(StFtpcTracker *tracker)
 
 
 //_____________________________________________________________________________
-void StFtpcTrackMaker::FillDstMonSoftFtpcTable(StFtpcTracker *tracker) {
+void StFtpcTrackMaker::FillMonSoftFtpc(StEvent *event,StFtpcTracker *tracker, StFtpcSoftwareMonitor *ftpcMon) {
 
   // This is a copy of the stuff formerly done in St_dst_Maker/StFtpcGobalMaker.
   // Make sure that this function is only called for global tracks.
 
   Int_t iftpc;
 
-  St_dst_mon_soft_ftpc *dst_mon_soft_ftpc = new St_dst_mon_soft_ftpc("mon_soft_ftpc",1);
-  AddData(dst_mon_soft_ftpc);
-  dst_mon_soft_ftpc->SetNRows(1);
-  // Initialize dst_mon_soft_ftpc table
-  // mon_soft_ftpc[1].n_clus_ftpc[iftpc] is not used
-  dst_mon_soft_ftpc_st *mon_soft_ftpc = dst_mon_soft_ftpc->GetTable();
-
-  for (iftpc=0; iftpc<2; iftpc++) {
-    mon_soft_ftpc[0].n_clus_ftpc[iftpc] = 0;	  
-    mon_soft_ftpc[0].n_pts_ftpc[iftpc] = 0;   
-    mon_soft_ftpc[0].n_trk_ftpc[iftpc] = 0;
-    mon_soft_ftpc[0].chrg_ftpc_tot[iftpc] = 0.;   
-    mon_soft_ftpc[0].hit_frac_ftpc[iftpc] = 0.; 
-    mon_soft_ftpc[0].avg_trkL_ftpc[iftpc] = 0.;
-    mon_soft_ftpc[0].res_pad_ftpc[iftpc] = 0.;   
-    mon_soft_ftpc[0].res_drf_ftpc[iftpc] = 0.;
-  }  
 
   // Loop over all tracks
   for (Int_t itrk=0; itrk<tracker->GetTracks()->GetEntriesFast(); itrk++) {
@@ -722,13 +717,13 @@ void StFtpcTrackMaker::FillDstMonSoftFtpcTable(StFtpcTracker *tracker) {
     
     iftpc = (firstPoint->GetDetectorId() == 5) ? 0 : 1; // 0 for detId == 5 and 1 for detId == 4
 
-    mon_soft_ftpc[0].n_trk_ftpc[iftpc]++;
+    ftpcMon->n_trk_ftpc[iftpc]++;
 
     Int_t nFitPoints = track->GetHits()->GetEntriesFast();
-    mon_soft_ftpc[0].res_pad_ftpc[iftpc] += track->GetChiSq()[0] / (nFitPoints - 3);
-    mon_soft_ftpc[0].res_drf_ftpc[iftpc] += track->GetChiSq()[1] / (nFitPoints - 2);
+    ftpcMon->res_pad_ftpc[iftpc] += track->GetChiSq()[0] / (nFitPoints - 3);
+    ftpcMon->res_drf_ftpc[iftpc] += track->GetChiSq()[1] / (nFitPoints - 2);
 
-    mon_soft_ftpc[0].avg_trkL_ftpc[iftpc] += track->GetTrackLength();
+    ftpcMon->avg_trkL_ftpc[iftpc] += track->GetTrackLength();
   }
 
   // Loop over all hits
@@ -738,22 +733,22 @@ void StFtpcTrackMaker::FillDstMonSoftFtpcTable(StFtpcTracker *tracker) {
  
     iftpc = (hit->GetDetectorId() == 5) ? 0 : 1; // 0 for detId == 5 and 1 for detId == 4
     
-    if (hit->GetUsage() == kTRUE) mon_soft_ftpc[0].hit_frac_ftpc[iftpc]++;
-    mon_soft_ftpc[0].n_pts_ftpc[iftpc]++;
-    mon_soft_ftpc[0].chrg_ftpc_tot[iftpc] += hit->GetCharge();
+    if (hit->GetUsage() == kTRUE) ftpcMon->hit_frac_ftpc[iftpc]++;
+    ftpcMon->n_pts_ftpc[iftpc]++;
+    ftpcMon->chrg_ftpc_tot[iftpc] += hit->GetCharge();
   }
 
-  // Compute dst_mon_soft_ftpc table averages if tracks are found
+  // Compute StFtpcSoftwareMonitor averages if tracks are found
   for (iftpc=0; iftpc<2; iftpc++) {
     
-    if (mon_soft_ftpc[0].n_pts_ftpc[iftpc] != 0) {
-      mon_soft_ftpc[0].hit_frac_ftpc[iftpc] = mon_soft_ftpc[0].hit_frac_ftpc[iftpc]/mon_soft_ftpc[0].n_pts_ftpc[iftpc];
+    if (ftpcMon->n_pts_ftpc[iftpc] != 0) {
+      ftpcMon->hit_frac_ftpc[iftpc] = ftpcMon->hit_frac_ftpc[iftpc]/ftpcMon->n_pts_ftpc[iftpc];
     }	       
     
-    if (mon_soft_ftpc[0].n_trk_ftpc[iftpc] != 0) {
-      mon_soft_ftpc[0].avg_trkL_ftpc[iftpc] = mon_soft_ftpc[0].avg_trkL_ftpc[iftpc]/mon_soft_ftpc[0].n_trk_ftpc[iftpc];
-      mon_soft_ftpc[0].res_pad_ftpc[iftpc] = mon_soft_ftpc[0].res_pad_ftpc[iftpc]/mon_soft_ftpc[0].n_trk_ftpc[iftpc];
-      mon_soft_ftpc[0].res_drf_ftpc[iftpc] = mon_soft_ftpc[0].res_drf_ftpc[iftpc]/mon_soft_ftpc[0].n_trk_ftpc[iftpc];
+    if (ftpcMon->n_trk_ftpc[iftpc] != 0) {
+      ftpcMon->avg_trkL_ftpc[iftpc] = ftpcMon->avg_trkL_ftpc[iftpc]/ftpcMon->n_trk_ftpc[iftpc];
+      ftpcMon->res_pad_ftpc[iftpc]  = ftpcMon->res_pad_ftpc[iftpc]/ftpcMon->n_trk_ftpc[iftpc];
+      ftpcMon->res_drf_ftpc[iftpc]  = ftpcMon->res_drf_ftpc[iftpc]/ftpcMon->n_trk_ftpc[iftpc];
     }
   }       
 
@@ -766,7 +761,7 @@ Int_t StFtpcTrackMaker::Finish()
 {
   // final cleanup
   // nothing to do right now
-  
+	
   return StMaker::Finish();
 }
 
@@ -788,7 +783,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.58 2004/05/19 17:45:06 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.59 2004/05/24 13:46:39 jcs Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
