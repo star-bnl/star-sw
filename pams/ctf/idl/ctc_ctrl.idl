@@ -1,9 +1,0 @@
-/*   ctc_ctrl 
- * Controls ctc   
- */
-   struct ctc_ctrl {
-       short      action     ;       /* Selects action to be run */
-   };
-
-
-
