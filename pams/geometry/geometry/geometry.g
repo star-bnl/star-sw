@@ -1,5 +1,8 @@
-* $Id: geometry.g,v 1.45 2001/04/09 15:31:35 nevski Exp $
+* $Id: geometry.g,v 1.46 2001/05/21 21:07:05 nevski Exp $
 * $Log: geometry.g,v $
+* Revision 1.46  2001/05/21 21:07:05  nevski
+* Steves field map added
+*
 * Revision 1.45  2001/04/09 15:31:35  nevski
 * second version of cerenkov light properties introduced
 *
@@ -48,7 +51,7 @@
               on/.true./,off/.false./
    real       Par(1000),field,dcay(5),shift(2),wdm
    Integer    LENOCC,LL,IPRIN,Nsi,i,j,l,nmod(2),nonf(3),
-              Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx
+              Nleft,Mleft,Rv,Rp,Wfr,Itof,mwx,mf
    character  Commands*4000,Geom*8
 * - - - - - - - - - - - - - - - - -
 +CDE,GCBANK,GCUNIT,GCPHYS,GCCUTS,GCFLAG,AGCKINE,QUEST.
@@ -84,6 +87,7 @@ replace[;ON#{#;] with [
    Rv=2                  " add non-sensetive hits to RICH system          "
    Rp=2                  " real RICH position and spectra inst.of nominal "
    nonf={1,2,2}          " ecal on right side, FPD parts on left side     "
+   mf=2                  " default field - simetrical, as fitted by Bill  "
    Commands=' '; Geom=' '
 *
 * -------------------- select USERS configuration ------------------------
@@ -100,7 +104,7 @@ If LL>1
    
   {CUTGAM,CUTELE,CUTNEU,CUTHAD,CUTMUO,BCUTE,BCUTM,DCUTE,DCUTM,PPCUTM} =.001;
   {IDCAY,IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,ILOSS,IDRAY,IMULS} = 1;
-  {IRAYL,ISTRA} = 0;
+  {IRAYL,ISTRA} = 0; 
   TOFMAX        = 1.e-4 
 *
   for(j=1;j>0;) { j=0;
@@ -147,7 +151,7 @@ If LL>1
 
   on YEAR2001   { 2001 geometry - TPC+CTB+FTPC+RICH+CaloPatch+SVT+FPD;
                   {rich,ems,t1}=on;  nmod={24,0}; shift={21,0};  
-                  nonf={0,2,2};  Itof=2;  Rv=2;                        Nsi=6; }
+                  nonf={0,2,2};  Itof=2;  Rv=2;  Mf=3;                 Nsi=6; }
 
   on YEAR_2A    { old asymptotic STAR;    Itof=1; mwx=1;  nonf={3,0,0}        }
   on COMPLETE   { Complete STAR geometry; Itof=2; tof=on; nonf={1,2,2}        }
@@ -266,6 +270,7 @@ If LL>1
 * - reset magnetic field value (default is 5): DETP MFLD MFLG.Bfield=5
    If (LL>1) call AgDETP new ('MFLD')
    if (mfld & field!=5) call AgDETP add ('MFLG(1).Bfield=',field,1)
+   if (mfld & mf!=0)    call AgDETP add ('MFLG(1).version=',mf,1)
    if (mfld) Call mfldgeo
 *
    if JVOLUM>0 
