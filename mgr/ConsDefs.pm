@@ -1,4 +1,4 @@
-# $Id: ConsDefs.pm,v 1.12 2000/04/24 16:48:04 fisyak Exp $
+# $Id: ConsDefs.pm,v 1.13 2000/05/01 21:08:57 fisyak Exp $
 {
  use File::Basename;
  use Sys::Hostname;
@@ -34,7 +34,7 @@
  $CXXinp   = "";
  $CPP      = "gcc";
  $CPPFLAGS = "";#-I-";
- $R_CPPFLAGS = "-DR__AFS";
+ $R_CPPFLAGS = " -DR__AFS";
  $CPPPATH  = "";
  $EXTRA_CPPPATH = "";
  $CXX      = "g++";
@@ -61,6 +61,7 @@
  $GEANT3   = "geant3";
  $KUIP     = $CERN_ROOT . "/bin/kuipc";
  $ROOTCINT = $ROOTSYS . "/bin/rootcint";
+ $CINTSYSDIR = $ROOTSYS . "/cint";
  $LIBS     = "";
  $Libraries= "";
  $CLIBS    = "";
@@ -170,10 +171,10 @@
    $CC       = "cc";
    $LD       = $CXX;
    $SO       = $CXX;
-   $CXXFLAGS = "+W70,495,740,749,823,829 -z +Z -Dextname";
+   $CXXFLAGS = "+W70,495,740,749,823,829 -z +Z -Dextname ";
    $R_CPPFLAGS .= " -DR__ACC -DG__REGEXP -DG__UNIX -DG__HPUXCPPDLL -DG__SHAREDLIB -D_POSIX2_SOURCE -DG__ROOT -DG__REDIRECTIO -D__STDCPP__";
-   $CINTCXXFLAGS = "-z +Z " . $R_CPPFLAGS;
-   $CFLAGS   = " -Ae -z +Z -Dextname";  
+   $CINTCXXFLAGS = "-z +Z " . " " . $R_CPPFLAGS;
+   $CFLAGS   = " -Ae -z +Z -Dextname ";  
    $CINTCFLAGS = $CFLAGS .  $R_CPPFLAGS . " -D__STDCPP__";
    $SOEXT    = "sl";
 #   $XLIBS    = $ROOTSYS . "../lib/libXpm.a -lX11";
@@ -431,6 +432,7 @@
 				     'INCLUDE' => $INCLUDE_PATH,
 				     'ROOTSRC' => $ROOTSRC,
 				     'ROOTSYS' => $ROOTSYS,
+				     'CINTSYSDIR' => $CINTSYSDIR,
 				     'LD_LIBRARY_PATH' => $LD_LIBRARY_PATH,
 				     'SHLIB_PATH' => $SHLIB_PATH,
 				     'LIB'   => $LIB,

@@ -11,10 +11,20 @@ my $STAR_SYS = $env->{ENV}->{STAR_SYS};
 @Repo = Repository_List unless $param::noRepository; #print "Repositories = |@Repo|\n";
 my $pkg  = basename($Dir);# print "Run cons in $Dir for $PKG\n";
 my $PKG = $pkg;
+my @idlL     = find_idl($Dir);  print "In Dir = $Dir idlL = @idlL\n"  if $param::debug;
+foreach my $Rep (@Repo) {
+  my $RepDir = $Rep . "/" . $Dir; print "RepDir = $RepDir\n" if $param::debug;
+  if (-d $RepDir) {
+    my @idlR = find_idl($RepDir);
+    foreach my $i (@idlR) {push @idlL, $i;}
+  }
+}
+my @idlL   = sortu (@idlL); print "idlL = @idlL\n" if $param::debug;
 if ($pkg =~ /^sim$/ || $pkg =~ /^gen$/) {goto Tables;}
 my $i;
 my @idlML    = find_idlM($Dir);    
 if ($param::debug){$i = 0; foreach my $s (@idlML) {print "i=",$i++," idlM = ",$s,"\n";}} 
+
 my @srcL     = find_sources($Dir); 
 if ($param::debug){$i = 0; foreach my $s (@srcL) {print "i=",$i++," src = ",$s,"\n";}}
 my @h_filesL = find_hfiles($Dir);  
@@ -33,14 +43,14 @@ foreach my $Rep (@Repo) {
 my @src     = sortu (@srcL);# print "src = @src\n";
 my @h_files = sortu (@h_filesL);
 my @idlM    = sortu (@idlML);# print "idlM = @idlM\n";
-if ($pkg eq 'g2t') {
-  my @srcg2t = ();
-  my @idlMg2t = ();
-  foreach my $s (@src)  {next if ($s =~ /g2.main.g$/);   push @srcg2t, $s;}
-  foreach my $s (@idlM) {next if ($s =~ /g2.main.idl$/); push @idlMg2t, $s;}
-  @src = @srcg2t;# print "scr = @src\n";
-  @idlM = @idlMg2t;# print "idlM = @idlM\n";
-}
+#if ($pkg eq 'g2t') {
+#  my @srcg2t = ();
+#  my @idlMg2t = ();
+#  foreach my $s (@src)  {next if ($s =~ /g2.main.g$/);   push @srcg2t, $s;}
+#  foreach my $s (@idlM) {next if ($s =~ /g2.main.idl$/); push @idlMg2t, $s;}
+#  @src = @srcg2t;# print "scr = @src\n";
+#  @idlM = @idlMg2t;# print "idlM = @idlM\n";
+#}
 if ($#idlM > -1) {$PKG = "St_" . $PKG;}
 my $obj  = $ObjDir;  print "obj = $obj\n" if $param::debug;
 my $SO_PKG = $PKG . "." . $env->{SUFSOLIB}; print "SO_PKG = $SO_PKG\n" if $param::debug;
@@ -60,24 +70,31 @@ if ($pkg =~ /^pyth$/){
 (my $share = $EXPORT .  "/" . $Dir) =~ s/\/pams//g; print "new share $share\n" if $param::debug;
 $share =~ s/\/StRoot//g;
 $share =~ s/\/(sim|gen)//g; 
-my $CPPP = $env->{CPPPATH};
+my $CPPPATH = $env->{CPPPATH};
 if ($pkg =~ /^StTrsMaker$/) {
-  $CPPP = "#" . $Dir . ":#" . $Dir . "/include:" . $env->{CPPPATH}; print "CPPP = $CPPP\n" if $param::debug;
+  $CPPPATH = "#" . $Dir . ":#" . $Dir . "/include:" . $env->{CPPPATH}; print "CPPPATH = $CPPPATH\n" if $param::debug;
 }
 if ($pkg =~ /^StHbtMaker$/) {
-   $CPPP = "#" . $Dir . ":#" . $Dir . "/Base:" . $Dir . "/Infrastructure:" . $Dir . "/Reader:" . $Dir . "/Cut:" . $Dir . "/CorrFctn:" . $Dir . "/Fit:" . $env->{CPPPATH}; print "CPPP = $CPPP\n" if $param::debug;
+  $CPPPATH = "#" . $Dir;
+  foreach my $subdir ("Base","Infrastructure","Reader","Cut","CorrFctn","Fit") {
+    $CPPPATH .= ":#" . $Dir . "/" . $subdir; 
+  }
+  $CPPPATH .= ":" . $env->{CPPPATH}; print "CPPPATH = $CPPPATH\n" if $param::debug;
 }
 
-if ($pkg =~ /^StDaqLib$/) {$CPPP = "#" . $Dir . ":" . $env->{CPPPATH}; print "CPPP = $CPPP\n"  if $param::debug;}
+if ($pkg =~ /^StDaqLib$/) {$CPPPATH = "#" . $Dir . ":" . $env->{CPPPATH}; print "CPPPATH = $CPPPATH\n"  if $param::debug;}
 if ($Dir =~ /pams\//) {
-  $CPPP = $INCLUDE . "/" . $pkg . ":" . $env->{CPPPATH}; print "CPPP = $CPPP\n" if $param::debug;
+  $CPPPATH = $INCLUDE . "/" . $pkg . ":" . $CPPPATH; print "CPPPATH = $CPPPATH\n" if $param::debug;
+}
+elsif ($#idlL > -1) {
+  $CPPPATH .= ":" . $INCLUDE . "/tables"; print "CPPPATH = $CPPPATH\n" if $param::debug;
 }
 my $LIBPKG = "";
 my @srco = @src;
 if ($LIBPKG && $Dir =~ /pams\// || $STAR_SYS =~ /^intel_wnt$/) {
   $LIBS  .= " -l" . $pkg; #"lib" . $pkg . "." . $env->{SUFLIB};
 }
-if ($STAR_SYS =~ /^hp_ux102$/ && $pkg =~ /^St_base$/) {$CPPP .= ":/usr/local/include";}
+if ($STAR_SYS =~ /^hp_ux102$/ && $pkg =~ /^St_base$/) {$CPPPATH .= ":/usr/local/include";}
 my $CXXFLAGS = $env->{CXXFLAGS};
 my $FCCOM    = $env->{FCCOM};
 if ($STAR_SYS =~ /^sun4x_5.$/) {$CXXFLAGS .= " -ptr" . $obj_dir;}
@@ -87,11 +104,14 @@ if ($STAR_SYS =~ /kcc$/)  {$LIBPATH = ""; $LIBS = "";}
 #  else           {$LIBPATH .= ":/opt/WS5.0/SC5.0/lib";}
 #  $LIBS    .= " -lCstd -liostream";
 #}
-$env2 = $env->clone('CPPPATH'      => $CPPP,
+$env2 = $env->clone('CPPPATH'      => $CPPPATH,
 		    'CXXFLAGS'     => $CXXFLAGS,
 		    'FCCOM'        => $FCCOM,
                     'LIBPATH'      => $LIBPATH,
-                    'LIBS'         => $LIBS);
+                    'LIBS'         => $LIBS,
+		    'share'        => $share,
+		    'ObjDir'       => $ObjDir
+		   );
 print "LIBPATH = |", $env2->{LIBPATH}, "|\n LIBS = |",$env2->{LIBS},"|\n"  if $param::debug;
 print "LINKMODULECOM |",$env2->{LINKMODULECOM},"|\n"  if $param::debug;
 my $cscanner= find scan::cpp($env2->{_cwd}, $env2->{CPPPATH});
@@ -112,7 +132,8 @@ foreach my $cpp ($Dir,@cpps) {
   else           {$STIC_CPP = $cpp;}
 }
 $cscanner= find scan::cpp($env2->{_cwd}, $ROOTCINT_CPP); print "ROOTCINT_CPP = $ROOTCINT_CPP\n" if $param::debug;
-my $ROOTCINT_CPPPATH = $cscanner->iflags; print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n" if $param::debug;
+my $ROOTCINT_CPPPATH = $cscanner->iflags; 
+print "ROOTCINT_CPPPATH = $ROOTCINT_CPPPATH\n" if $param::debug;
 $cscanner= find scan::cpp($env2->{_cwd}, $STIC_CPP);
 my $STIC_CPPPATH = $cscanner->iflags;
 my $DIR = cwd(); print "DIR = $DIR\n" if $param::debug;
@@ -184,16 +205,7 @@ if ($#Defs > -1) {
 
 #____________________________________Tables____________________________
 Tables: 
-my @idlL     = find_idl($Dir);  print "@idlL\n"  if $param::debug;
-  my @sourcesT = (); 
-foreach my $Rep (@Repo) {
-  my $RepDir = $Rep . "/" . $Dir; print "RepDir = $RepDir\n" if $param::debug;
-  if (-d $RepDir) {
-    my @idlR = find_idl($RepDir);
-    foreach my $i (@idlR) {push @idlL, $i;}
-  }
-}
-my @idlL   = sortu (@idlL); print "idlL = @idlL\n" if $param::debug;
+my @sourcesT = (); 
 
 if ($#idlL > -1) {
   my @idlT = ();
@@ -268,6 +280,7 @@ if ($#idlL > -1) {
 	  push @Deps, $idlH;
 	  Command $env3 [$idlC],        @Deps, qq (ConstructTable.pl %1 %>);
 	  Command $env3 [$LinkDef],     @Deps, qq (ConstructTable.pl %1 %>);
+#	  Install $env $share, @Deps; print "Install $env3 $share, @Deps;\n";
 	}
 	@Deps = ();
 	push @Deps, $idlH;
@@ -321,6 +334,7 @@ if ($#src > -1) {
       $pkg eq "StUtilities"
      ) {my $lib = $LIB . "/lib" . $SO_PKG; InstallAs $env2 $lib, $SO_PKG;}
 }
+
 #________________________________________________________________________________
   
   
