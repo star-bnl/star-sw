@@ -1,5 +1,9 @@
-// $Id: St_mwc_Maker.cxx,v 1.7 1999/02/26 18:09:02 kathy Exp $
+// $Id: St_mwc_Maker.cxx,v 1.8 1999/03/02 18:33:33 druss Exp $
 // $Log: St_mwc_Maker.cxx,v $
+// Revision 1.8  1999/03/02 18:33:33  druss
+// Freed up wasted space by lowering number of Rows in the tables from
+// 384 to 96.  Also removed the cor table that is not used in this module.
+//
 // Revision 1.7  1999/02/26 18:09:02  kathy
 // made hist limits go neg
 //
@@ -91,15 +95,16 @@ Int_t St_mwc_Maker::Make(){
 
 // Create Empty tables for us
 
-     St_mwc_mevent *mevent = new St_mwc_mevent("mevent",400);
-     St_mwc_sector *sector = new St_mwc_sector("sector",384);
-     St_mwc_raw    *raw    = new St_mwc_raw("raw",384);
-     St_mwc_cor    *cor    = new St_mwc_cor("cor",384);
+     St_mwc_mevent *mevent = new St_mwc_mevent("mevent",96);
+     St_mwc_sector *sector = new St_mwc_sector("sector",96);
+     St_mwc_raw    *raw    = new St_mwc_raw("raw",96);
+//   the cor table is not implemented
+//     St_mwc_cor    *cor    = new St_mwc_cor("cor",384);
 
      m_DataSet->Add(mevent);
      m_DataSet->Add(sector);
      m_DataSet->Add(raw);
-     m_DataSet->Add(cor);
+//     m_DataSet->Add(cor);
 
 // Read in Geant Tables
 
@@ -146,7 +151,7 @@ Int_t St_mwc_Maker::Make(){
 //_____________________________________________________________________________
 void St_mwc_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_mwc_Maker.cxx,v 1.7 1999/02/26 18:09:02 kathy Exp $\n");
+  printf("* $Id: St_mwc_Maker.cxx,v 1.8 1999/03/02 18:33:33 druss Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
