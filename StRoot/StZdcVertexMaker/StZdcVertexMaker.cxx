@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcVertexMaker.cxx,v 1.6 2004/03/02 15:52:16 lbarnby Exp $
+ * $Id: StZdcVertexMaker.cxx,v 1.7 2004/09/09 22:45:56 fisyak Exp $
  *
  * Author:  Johan E. Gonzalez, August 2001
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StZdcVertexMaker.cxx,v $
+ * Revision 1.7  2004/09/09 22:45:56  fisyak
+ * Add protection for missing StTriggerData
+ *
  * Revision 1.6  2004/03/02 15:52:16  lbarnby
  * Completely updated to use StTriggerData from StEvent
  *
@@ -48,7 +51,7 @@
 
 //#include "StEventMaker/StEventMaker.h"
 
-static const char rcsid[] = "$Id: StZdcVertexMaker.cxx,v 1.6 2004/03/02 15:52:16 lbarnby Exp $";
+static const char rcsid[] = "$Id: StZdcVertexMaker.cxx,v 1.7 2004/09/09 22:45:56 fisyak Exp $";
 
 ClassImp(StZdcVertexMaker)
 
@@ -145,6 +148,10 @@ Int_t StZdcVertexMaker::Make()
     //  Get trigger data
     //
     StTriggerData *td=event->triggerData();
+    if (!td) {
+      gMessMgr->Error() << "StZdcVertexMaker::Make() : unable to get StTriggerData." << endm;
+      return kStOK;
+    }
 
     // If change to getting StTriggerData before StEvent created then
     // everything in Make() function above here should be changed but 
