@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.36  1998/12/10 22:48:01  fine
+#  Correction for fit Window NT branch
+#
 #  Revision 1.35  1998/12/04 01:17:30  fisyak
 #  fix for fortran source in StRoot
 #
@@ -184,7 +187,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/12/04 01:17:30 $ 
+#           Last modification $Date: 1998/12/10 22:48:01 $ 
 #  default setings
 # Current Working Directory
 #
@@ -395,7 +398,7 @@ all:
 	$(MAKE)  -f $(MakePam) $(MAKEFLG)
 ifndef NOROOT
 	$(MAKE)  -f $(MakeDll) $(MAKEFLG) -C  $(GEN_DIR) SO_LIB=$(SO_LIB)
- endif
+endif
 clean:;      $(MAKE)  -f $(MakePam) $(MAKEFLG)  clean
 clean_lib:;  $(MAKE)  -f $(MakePam) $(MAKEFLG)  clean_lib
 clean_share:;$(MAKE)  -f $(MakePam) $(MAKEFLG)  clean_share

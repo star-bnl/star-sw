@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.70 1998/12/09 13:53:54 fisyak Exp $
+# $Id: MakePam.mk,v 1.71 1998/12/10 22:47:55 fine Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.71  1998/12/10 22:47:55  fine
+# Correction for fit Window NT branch
+#
 # Revision 1.70  1998/12/09 13:53:54  fisyak
 # Remove dependencies from module idl
 #
@@ -188,7 +191,7 @@ VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_DIR) $(GEN_TAB) $(OBJ_DIR) $(IDL_DIRS) 
 STICFLAGS =  $(addprefix -I,  $(STAF_SYS_INCS) $(SRC_DIR) $(IDL_DIRS))
 CXXFLAGS   += -DASU_MALLOC_OFF
 
-CPPFLAGS += -I. -I../ -I/usr/include -I$(STAF_SYS_INCS) \
+INCLUDES += -I. -I../ -I/usr/include -I$(STAF_SYS_INCS) \
              $(addprefix -I, $(SRC_DIR) $(GEN_TAB) $(GEN_DIR) $(INC_DIRS)) \
             -I$(CERN_ROOT)/include
 

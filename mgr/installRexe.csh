@@ -15,12 +15,12 @@ set OUT = $cwd
 
 # define where all Make*.mk are. Here the place is the same as input area
 if ( ! ${?STAF_MAKE_HOME} ) then
-  if ( -e $cwd/MakeRexe.mk ) then
+  if ( -f $cwd/MakeRexe.mk ) then
     setenv STAF_MAKE_HOME $cwd
   endif
 endif
 if ( ! ${?STAF_MAKE_HOME} ) then
-  if ( -e $cwd/mgr/MakeRexe.mk ) then
+  if ( -f $cwd/mgr/MakeRexe.mk ) then
     setenv STAF_MAKE_HOME $cwd/mgr
   endif
 endif
@@ -39,7 +39,7 @@ echo Use makefiles from $STAF_MAKE_HOME
 gmake -f ${STAF_MAKE_HOME}/MakeRexe.mk INP_DIR=${INP} OUT_DIR=${OUT} setup
 
 set StarBin = ${OUT}/.${STAR_SYS}/bin
-if ( ! -e  $StarBin/root4star) ln -s $StarBin/Root.exe $StarBin/root4star 
+if ( ! -f  $StarBin/root4star) ln -s $StarBin/Root.exe $StarBin/root4star 
 
 #real run of makefile. It creates executable
 
