@@ -2,17 +2,6 @@
 //M.L. Miller (Yale Software)
 //03/01
 
-/*A class to make combinations of elements stored in vectors, over a variable number of vectors.
-  i.e., you can make combinations from points from set 1 with those  in set 2, set 3, ..., set n,
-  with an stl iterator interface.
-
-  This class meets the requirements of an STL input iterator and can thus be used in any STL agloorthim
-  that requires only an input iterator (e.g., find, find_if, etc).
-
-  Additionally, we define validity via bool valid() s.t. the iterator is vailid iff each set is non-empty
-
-*/
-
 //Templated, 3/29/01, MLM
 
 #ifndef CombinationIterator_HH
@@ -27,50 +16,64 @@ class CombinationIterator
 public:
     typedef vector<T> tvector;
 
-    CombinationIterator() {};
-    
+    /*!
+      A class to make combinations of elements stored in vectors,
+      over a variable number of vectors.
+      i.e., you can make combinations from points from set 1 with
+      those  in set 2, set 3, ..., set n,
+      with an stl iterator interface.  This class meets the requirements
+      of an STL input iterator and can thus be used in any STL agloorthim
+      that requires only an input iterator (e.g., find, find_if, etc).
+      Additionally, we define validity via bool valid() s.t. the iterator
+      is vailid iff each set is non-empty
+      
+      \author M.L. Miller (Yale Software)
+    */
+    CombinationIterator() {}; //!Defualt Constructor 
+
+    ///Default Destructor
     virtual ~CombinationIterator() {};
     
-    //Add sequence
+    ///Add sequence
     void push_back(tvector::const_iterator begin, tvector::const_iterator end);
     
-    //Full internal reset
+    ///Full internal reset
     void clear();
   
-    //Return number of possible combinations
+    ///Return number of possible combinations
     int size() const;
 
-    //check that each vector of points has size>0
+    ///check that each vector of points has size>0
     bool valid() const;
   
-    //Access to end, marks termination of forward traversal
+    ///Access to end, marks termination of forward traversal
     const tvector::const_iterator& end() const;
     
-    //Reset iterator to first combination
+    ///Reset iterator to first combination
     void init();
     
-    //equality
+    ///equality
     bool operator==(const tvector::const_iterator& rhs) const;
 
-    //inequality
+    ///inequality
     bool operator!=(const tvector::const_iterator& rhs) const;
     
-    //prefix
+    ///prefix
     CombinationIterator& operator++ ();
     
-    //postfix
+    ///postfix
     CombinationIterator operator++(int);
     
-    //dereference iterator
-    //Get a vector containing pts of current combination
+    ///dereference iterator
+    ///Get a vector containing pts of current combination
     const tvector& operator* ();
     
-    //print utility
+    ///print utility
     void print() const;
     
 private:
     
-    //Nested Helper class:
+    ///Nested Helper class:
     class VectorEntry
     {
     public:
@@ -84,7 +87,7 @@ private:
 	tvector::const_iterator currentIt;
 	
     private:
-	VectorEntry(); //not implemented
+	VectorEntry(); ///not implemented
     }; //End nested class VectorEntry definition
     
     
@@ -93,7 +96,7 @@ private:
 private:
     
     vector_entry_vector mvector;
-    tvector mreturnvector; //Keep for dereference, avoid constructor calls  
+    tvector mreturnvector; ///Keep for dereference, avoid constructor calls  
 };
 
 //implementation and inlines

@@ -1,69 +1,69 @@
-//-----------------------------------------------------------------------------
-// A <code>StiDefaultMutableTreeNode</code> is a general-purpose node in a tree data
-// structure. A tree node may have at most one parent and 0 or more children.
-// <code>StiDefaultMutableTreeNode</code> provides operations for examining and modifying a
-// node's parent and children and also operations for examining the tree that
-// the node is a part of.  A node's tree is the set of all nodes that can be
-// reached by starting at the node and following all the possible links to
-// parents and children.  A node with no parent is the root of its tree; a
-// node with no children is a leaf.  A tree may consist of many subtrees,
-// each node acting as the root for its own subtree.
-// <p>
-// This class provides enumerations for efficiently traversing a tree or
-// subtree in various orders or for following the path between two nodes.
-// <p>
-// <b>This is not a thread safe class.</b>If you intend to use
-// a StiDefaultMutableTreeNode (or a tree of TreeNodes) in more than one thread, you
-// need to do your own synchronizing. A good convention to adopt is
-// synchronizing on the root node of a tree.
-// <p>
-// While StiDefaultMutableTreeNode implements the MutableTreeNode interface and
-// will allow you to add in any implementation of MutableTreeNode not all
-// of the methods in StiDefaultMutableTreeNode will be applicable to all
-// StiTreeNodes implementations. Especially with some of the enumerations
-// that are provided, using some of these methods assumes the
-// StiDefaultMutableTreeNode contains only StiDefaultMutableNode instances. All
-// of the TreeNode/MutableTreeNode methods will behave as defined no
-// matter what implementations are added.
-// <p>
-//
-// @see StiTreeNode
-//
-//-----------------------------------------------------------------------------
+/*!
+  A <code>StiDefaultMutableTreeNode</code> is a general-purpose
+  node in a tree data
+  structure. A tree node may have at most one parent and 0 or more children.
+  <code>StiDefaultMutableTreeNode</code> provides operations for examining
+  and modifying a
+  node's parent and children and also operations for examining the tree that
+  the node is a part of.  A node's tree is the set of all nodes that can be
+  reached by starting at the node and following all the possible links to
+  parents and children.  A node with no parent is the root of its tree; a
+  node with no children is a leaf.  A tree may consist of many subtrees,
+  each node acting as the root for its own subtree.
+  <p>
+  This class provides enumerations for efficiently traversing a tree or
+  subtree in various orders or for following the path between two nodes.
+  <p>
+  <b>This is not a thread safe class.</b>If you intend to use
+  a StiDefaultMutableTreeNode (or a tree of TreeNodes) in more than one
+  thread, you
+  need to do your own synchronizing. A good convention to adopt is
+  synchronizing on the root node of a tree.
+  <p>
+  While StiDefaultMutableTreeNode implements the MutableTreeNode interface and
+  will allow you to add in any implementation of MutableTreeNode not all
+  of the methods in StiDefaultMutableTreeNode will be applicable to all
+  StiTreeNodes implementations. Especially with some of the enumerations
+  that are provided, using some of these methods assumes the
+  StiDefaultMutableTreeNode contains only StiDefaultMutableNode instances. All
+  of the TreeNode/MutableTreeNode methods will behave as defined no
+  matter what implementations are added.
+  <p>
+  
+  @see StiTreeNode
+
+  \author Claude Pruneau
+
+*/
 
 #include "StiDefaultMutableTreeNode.h"
 
 
+/// Creates a tree node that has no parent and no children, but which
+/// allows children.
 StiDefaultMutableTreeNode::StiDefaultMutableTreeNode()
-  //--------------------------------------------------------------
-  // Creates a tree node that has no parent and no children, but which
-  // allows children.
-  //--------------------------------------------------------------
 {
-  initialize(true);
+    initialize(true);
 }
 
+/// Creates a tree node with no parent, no children
+/// 
+/// @param allowsChildren if true, the node is allowed to have child
+///        nodes -- otherwise, it is always a leaf node
 StiDefaultMutableTreeNode::StiDefaultMutableTreeNode(bool allowsChild) 
-  //--------------------------------------------------------------
-  // Creates a tree node with no parent, no children
-  // 
-  // @param allowsChildren if true, the node is allowed to have child
-  //        nodes -- otherwise, it is always a leaf node
-  //--------------------------------------------------------------
 {
-  initialize(allowsChild);
+    initialize(allowsChild);
 }
-
 
 void StiDefaultMutableTreeNode::reset()
 {
-  initialize(true);
-  children.clear();
+    initialize(true);
+    children.clear();
 }
 
 void StiDefaultMutableTreeNode::set(int depth)
 {
-  mDepth = depth;
+    mDepth = depth;
 }
 
 void StiDefaultMutableTreeNode::setAsCopyOf(const StiDefaultMutableTreeNode * node)
@@ -76,32 +76,30 @@ void StiDefaultMutableTreeNode::setAsCopyOf(const StiDefaultMutableTreeNode * no
 
 
 
+  ///  Initialize data members of the class
 void StiDefaultMutableTreeNode::initialize(bool allowsChild)
 {
-  //-------------------------------------------------------------------------------
-  //  Initialize data members of the class
-  //-------------------------------------------------------------------------------
   parent         = 0;
   allowsChildren = allowsChild;
 }
 
 
 //-------------------------------------------------------------------------------
-//  Primitives
+///  Primitives
 //-------------------------------------------------------------------------------
 
 void StiDefaultMutableTreeNode::insert(StiTreeNode * newChild, int childIndex)
   //--------------------------------------------------------------
-  // Removes <code>newChild</code> from its present parent (if it has a
-  // parent), sets the child's parent to this node, and then adds the child
-  // to this node's child array at index <code>childIndex</code>.
-  // <code>newChild</code> must not be null and must not be an ancestor of
-  // this node.
-  //
-  // @param	newChild	the StiTreeNode * to insert under this node
-  // @param	childIndex	the index in this node's child array
-  //				where this node is to be inserted
-  // @see	#isNodeDescendant
+  /// Removes <code>newChild</code> from its present parent (if it has a
+  /// parent), sets the child's parent to this node, and then adds the child
+  /// to this node's child array at index <code>childIndex</code>.
+  /// <code>newChild</code> must not be null and must not be an ancestor of
+  /// this node.
+  ///
+  /// @param	newChild	the StiTreeNode * to insert under this node
+  /// @param	childIndex	the index in this node's child array
+  ///				where this node is to be inserted
+  /// @see	#isNodeDescendant
   //--------------------------------------------------------------
 {
   if (!allowsChildren) 
@@ -139,14 +137,14 @@ void StiDefaultMutableTreeNode::insert(StiTreeNode * newChild, int childIndex)
 
 void StiDefaultMutableTreeNode::remove(int childIndex) 
   //--------------------------------------------------------------
-  // Removes the child at the specified index from this node's children
-  // and sets that node's parent to 0. The child node to remove
-  // must be a <code>StiTreeNode *</code>.
-  //
-  // @param	childIndex	the index in this node's child array
-  //				of the child to remove
-  // @exception	ArrayIndexOutOfBoundsException	if
-  //				<code>childIndex</code> is out of bounds
+  /// Removes the child at the specified index from this node's children
+  /// and sets that node's parent to 0. The child node to remove
+  /// must be a <code>StiTreeNode *</code>.
+  ///
+  /// @param	childIndex	the index in this node's child array
+  ///				of the child to remove
+  /// @exception	ArrayIndexOutOfBoundsException	if
+  ///				<code>childIndex</code> is out of bounds
   //--------------------------------------------------------------
 {
   StiDefaultMutableTreeNodeIterator iter = children.begin();
@@ -160,13 +158,13 @@ void StiDefaultMutableTreeNode::remove(int childIndex)
 }
 
 //--------------------------------------------------------------
-// Sets this node's parent to <code>newParent</code> but does not 
-// change the parent's child array.  This method is called from
-// <code>insert()</code> and <code>remove()</code> to
-// reassign a child's parent, it should not be messaged from anywhere
-// else.
-//
-// @param	newParent	this node's new parent
+/// Sets this node's parent to <code>newParent</code> but does not 
+/// change the parent's child array.  This method is called from
+/// <code>insert()</code> and <code>remove()</code> to
+/// reassign a child's parent, it should not be messaged from anywhere
+/// else.
+///
+/// @param	newParent	this node's new parent
 //--------------------------------------------------------------
 void StiDefaultMutableTreeNode::setParent(StiTreeNode *  newParent) 
 {
@@ -174,31 +172,29 @@ void StiDefaultMutableTreeNode::setParent(StiTreeNode *  newParent)
 }
 
 //--------------------------------------------------------------
-// Returns this node's parent or 0 if this node has no parent.
-//
-// @return	this node's parent TreeNode, or 0 if this node has no parent
+/// Returns this node's parent or 0 if this node has no parent.
+///
+/// @return	this node's parent TreeNode, or 0 if this node has no parent
 //--------------------------------------------------------------
 StiTreeNode *  StiDefaultMutableTreeNode::getParent() 
 {
   return parent;
 }
 
-//--------------------------------------------------------------
-// Returns the child at the specified index in this node's child array.
-//
-// @param	index	an index into this node's child array
-//						is out of bounds
-// @return	the StiTreeNode in this node's child array at  the specified index
-//--------------------------------------------------------------
+/// Returns the child at the specified index in this node's child array.
+///
+/// @param	index	an index into this node's child array
+///						is out of bounds
+/// @return	the StiTreeNode in this node's child array at  the specified index
 StiTreeNode *  StiDefaultMutableTreeNode::getChildAt(int index) const
 {
   return children[index];
 }
 
 //--------------------------------------------------------------
-// Returns the number of children of this node.
-//
-// @return	an int giving the number of children of this node
+/// Returns the number of children of this node.
+///
+/// @return	an int giving the number of children of this node
 //--------------------------------------------------------------
 int StiDefaultMutableTreeNode::getChildCount() const
 {
@@ -206,15 +202,15 @@ int StiDefaultMutableTreeNode::getChildCount() const
 }
 
 //--------------------------------------------------------------
-// Returns the index of the specified child in this node's child array.
-// If the specified node is not a child of this node, returns
-// <code>-1</code>.  This method performs a linear search and is O(n)
-// where n is the number of children.
-//
-// @param	aChild	the StiTreeNode to search for among this node's children
-// @return	an int giving the index of the node in this node's child 
-//          array, or <code>-1</code> if the specified node is a not
-//          a child of this node
+/// Returns the index of the specified child in this node's child array.
+/// If the specified node is not a child of this node, returns
+/// <code>-1</code>.  This method performs a linear search and is O(n)
+/// where n is the number of children.
+///
+/// @param	aChild	the StiTreeNode to search for among this node's children
+/// @return	an int giving the index of the node in this node's child 
+///          array, or <code>-1</code> if the specified node is a not
+///          a child of this node
 //--------------------------------------------------------------
 int StiDefaultMutableTreeNode::getIndex(StiTreeNode *  aChild) 
 {
@@ -228,7 +224,7 @@ int StiDefaultMutableTreeNode::getIndex(StiTreeNode *  aChild)
     {
       return -1;
     }
-  return 0;//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  return 0;
 }
 
 //--------------------------------------------------------------
