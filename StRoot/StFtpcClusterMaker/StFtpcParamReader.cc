@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.cc,v 1.9 2000/12/11 16:39:07 jcs Exp $
+// $Id: StFtpcParamReader.cc,v 1.10 2001/01/08 17:07:09 jcs Exp $
 //
 // $Log: StFtpcParamReader.cc,v $
+// Revision 1.10  2001/01/08 17:07:09  jcs
+// move remaining constants from code to database
+//
 // Revision 1.9  2000/12/11 16:39:07  jcs
 // move FTPC geant volume id and cluster flags from code to parameter reader
 //
@@ -27,6 +30,7 @@
 //
 
 #include "StFtpcParamReader.hh"
+#include "PhysicalConstants.h"
 
 #include <math.h>
 #include "StMessMgr.h"
@@ -99,7 +103,7 @@ StFtpcParamReader::StFtpcParamReader(St_fcl_ampoff *ampoff,
   mSensitiveVolumeInnerRadius = detTable->r_in;
   mSensitiveVolumeOuterRadius = detTable->r_out;
   mRadiusTimesField = detTable->rad_times_field;
-  mRadiansPerDegree = M_PI / 180;
+  mRadiansPerDegree = degree;
   mMicrosecondsPerTimebin = detTable->timebin_size;
   mRadiansPerPad = detTable->rad_per_pad;
   mRadiansPerBoundary = detTable->rad_per_gap;
@@ -137,12 +141,22 @@ StFtpcParamReader::StFtpcParamReader(St_fcl_ampoff *ampoff,
   //  just copy zrow table start to pointer
   mPadrowZPosition = (Float_t *) &(zrow->GetTable()->z);
 
+  //  temporarily set Ftpc fast simulator geometry parameters until in data base
+  mPadLength = 2.0;
   //  temporarily set Ftpc fast simulator parameters until in data base
   mFtpcWestGeantVolumeId = 100;
   mFtpcEastGeantVolumeId = 200;
   mUnfoldedClusterFlag = 1;
   mBadShapeClusterFlag = 8;
-  mRemoveClusterFlag = 1000;
+  mMergedClusterFlag = 1000;
+  mNumberOfPadsDedxSmearing = 4;
+  mNumberOfBinsDedxSmearing = 3;
+  mSimulationPhiOrigin = 90.;
+  mSimulationPhiSector = 60.;
+  mRadiusTolerance = 0.25;
+  mSigmaSpacingFactorForCluster = 2.5;
+  mAdcConversionFactor = 8000000.0;
+  mClusterChargeConversionFactor = 6;
   //  just copy gaspar array pointers  
   mOrderOfFastEstimates = 4;
   mVDriftEstimates = (Float_t *) &(gaspar->GetTable()->vdrift);
@@ -259,7 +273,7 @@ StFtpcParamReader::StFtpcParamReader(St_fss_gas *gas,
   mSensitiveVolumeInnerRadius = detTable->r_in;
   mSensitiveVolumeOuterRadius = detTable->r_out;
   mRadiusTimesField = detTable->rad_times_field;
-  mRadiansPerDegree = M_PI / 180;
+  mRadiansPerDegree = degree;
   mMicrosecondsPerTimebin = detTable->timebin_size;
   mRadiansPerPad = detTable->rad_per_pad;
   mRadiansPerBoundary = detTable->rad_per_gap;

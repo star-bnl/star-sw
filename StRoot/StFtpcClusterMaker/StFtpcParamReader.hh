@@ -1,6 +1,9 @@
-// $Id: StFtpcParamReader.hh,v 1.9 2000/12/11 16:39:11 jcs Exp $
+// $Id: StFtpcParamReader.hh,v 1.10 2001/01/08 17:07:17 jcs Exp $
 //
 // $Log: StFtpcParamReader.hh,v $
+// Revision 1.10  2001/01/08 17:07:17  jcs
+// move remaining constants from code to database
+//
 // Revision 1.9  2000/12/11 16:39:11  jcs
 // move FTPC geant volume id and cluster flags from code to parameter reader
 //
@@ -19,6 +22,7 @@
 // Revision 1.2  2000/09/18 14:26:51  hummler
 // expand StFtpcParamReader to supply data for slow simulator as well
 // introduce StFtpcGeantReader to separate g2t tables from simulator code
+
 // implement StFtpcGeantReader in StFtpcFastSimu
 //
 // Revision 1.1  2000/08/03 14:39:01  hummler
@@ -117,11 +121,6 @@ protected:
   Float_t mPercentHe;
   Float_t *mPadrowZPosition;
   //FastSimulator parameters
-  Int_t mFtpcWestGeantVolumeId;
-  Int_t mFtpcEastGeantVolumeId;
-  Int_t mUnfoldedClusterFlag;
-  Int_t mBadShapeClusterFlag;
-  Int_t mRemoveClusterFlag;
   Int_t mOrderOfFastEstimates;
   Float_t *mVDriftEstimates;
   Float_t *mTDriftEstimates;
@@ -129,6 +128,19 @@ protected:
   Float_t *mSigmaAzimuthalEstimates;
   Float_t *mErrorRadialEstimates;
   Float_t *mErrorAzimuthalEstimates;
+  Int_t mFtpcWestGeantVolumeId;
+  Int_t mFtpcEastGeantVolumeId;
+  Int_t mUnfoldedClusterFlag;
+  Int_t mBadShapeClusterFlag;
+  Int_t mMergedClusterFlag;
+  Int_t mNumberOfPadsDedxSmearing;
+  Int_t mNumberOfBinsDedxSmearing;
+  Float_t mSimulationPhiOrigin;
+  Float_t mSimulationPhiSector;
+  Float_t mRadiusTolerance;
+  Float_t mSigmaSpacingFactorForCluster;
+  Float_t mAdcConversionFactor;
+  Float_t mClusterChargeConversionFactor;
   //SlowSimulator parameters
   Int_t mNumberOfFssGasValues;
   Float_t *mFssGasEField;
@@ -255,7 +267,15 @@ public:
   Int_t ftpcEastGeantVolumeId() {return mFtpcEastGeantVolumeId;}
   Int_t unfoldedClusterFlag() {return mUnfoldedClusterFlag;}
   Int_t badShapeClusterFlag() {return mBadShapeClusterFlag;}
-  Int_t removeClusterFlag() {return mRemoveClusterFlag;}
+  Int_t mergedClusterFlag() {return mMergedClusterFlag;}
+  Int_t numberOfPadsDedxSmearing() {return mNumberOfPadsDedxSmearing;}
+  Int_t numberOfBinsDedxSmearing() {return mNumberOfBinsDedxSmearing;}
+  Float_t simulationPhiOrigin() {return mSimulationPhiOrigin;}
+  Float_t simulationPhiSector() {return mSimulationPhiSector;}
+  Float_t radiusTolerance() {return mRadiusTolerance;}
+  Float_t sigmaSpacingFactorForCluster() {return mSigmaSpacingFactorForCluster;}
+  Float_t adcConversionFactor() {return mAdcConversionFactor;}
+  Float_t clusterChargeConversionFactor() {return mClusterChargeConversionFactor;}
   Int_t numberOfFssGasValues() {return mNumberOfFssGasValues;}
   Int_t randomNumberGenerator() {return mRandomNumberGenerator;}
   Int_t zeroSuppressThreshold() {return mZeroSuppressThreshold;}

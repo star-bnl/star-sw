@@ -1,6 +1,9 @@
-// $Id: StFtpcFastSimu.cc,v 1.17 2000/12/11 17:05:24 jcs Exp $
+// $Id: StFtpcFastSimu.cc,v 1.18 2001/01/08 17:09:56 jcs Exp $
 //
 // $Log: StFtpcFastSimu.cc,v $
+// Revision 1.18  2001/01/08 17:09:56  jcs
+// move remaining constants from code to database
+//
 // Revision 1.17  2000/12/11 17:05:24  jcs
 // use micrometers to convert from microns to cms
 //
@@ -144,7 +147,7 @@ int StFtpcFastSimu::ffs_gen_padres()
     float sigma_l, sigma_z;
     float alpha, lambda;
     float r, pt; 
-    float twist_cosine, twist, theta, cross_ang;
+    float twist_cosine,twist, theta, cross_ang;
     
     // Variables to call ffs_hit_smear
     
@@ -153,11 +156,6 @@ int StFtpcFastSimu::ffs_gen_padres()
     // Loop Variables
 
     int k;
-
-    //------------------------------------------------------------------------
-    // Parameters
-
-    const float l=2.0;
 
     //-----------------------------------------------------------------------
 
@@ -226,6 +224,7 @@ int StFtpcFastSimu::ffs_gen_padres()
 			sqr(mGeant->pLocalY(k)));
 	    twist_cosine=(mGeant->pLocalX(k)*mGeant->x(k)+
 			  mGeant->pLocalY(k)*mGeant->y(k))/(r*pt);
+            // protect against cases where abs(twist_cosine)>1.0 
 	    if ( twist_cosine > 1.0 ) 
 	      twist_cosine = 1.0;
 	    if ( twist_cosine < -1.0 ) 
@@ -260,7 +259,7 @@ int StFtpcFastSimu::ffs_gen_padres()
 	sigPhi = err_azi[0]+err_azi[1]*Rh+err_azi[2]*sqr(Rh)+err_azi[3]*sqr(Rh)*Rh;
 
 	//   Sigma_tr response
-	sigma_tr = sqrt(sqr(sigPhi)+(sqr(l*tan(alpha))));
+	sigma_tr = sqrt(sqr(sigPhi)+(sqr(mParam->padLength()*tan(alpha))));
 
 	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -271,7 +270,7 @@ int StFtpcFastSimu::ffs_gen_padres()
 	  err_rad[3]*sqr(Rh)*Rh;
 
 	//mk Sigma longitudinal at anode [micron] 
-	sigma_l = sqrt(sqr(sigTimeb)+sqr(l*tan(lambda)));
+	sigma_l = sqrt(sqr(sigTimeb)+sqr(mParam->padLength()*tan(lambda)));
 
 	//<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -356,11 +355,11 @@ int StFtpcFastSimu::ffs_hit_rd()
         mPoint[ih].SetSector( int ( dphi/phisec ) + 1);  
 	
 	//de/dx
-	mPoint[ih].SetMaxADC(int( 8000000.0 * mGeant->energyLoss(ih) ));
-	mPoint[ih].SetCharge(6*mPoint[ih].GetMaxADC());
+	mPoint[ih].SetMaxADC(int( mParam->adcConversionFactor() * mGeant->energyLoss(ih) ));
+	mPoint[ih].SetCharge(mParam->clusterChargeConversionFactor()*mPoint[ih].GetMaxADC());
 	// for de/dx simulations, introduce de/dx smearing + adjust factors! hh
-	mPoint[ih].SetNumberPads(4);
-	mPoint[ih].SetNumberBins(3);
+	mPoint[ih].SetNumberPads(mParam->numberOfPadsDedxSmearing());
+	mPoint[ih].SetNumberBins(mParam->numberOfBinsDedxSmearing());
 	// possibly make n_pads, n_bins dependent on exact position, charge
       }
 
@@ -426,14 +425,10 @@ int StFtpcFastSimu::ffs_hit_smear(float phi,
 
 int StFtpcFastSimu::ffs_ini()
   {
-    //------   TEMPORARY:  put in parameter table   ------------------
-    const float phi_origin=90.;
-    const float phi_sector=360/mParam->numberOfSectors();
-    //------   TEMPORARY:  put in parameter table   ------------------
     //-----------------------------------------------------------------------
     // mk
-    ri = mParam->sensitiveVolumeInnerRadius()+0.25;
-    ra = mParam->sensitiveVolumeOuterRadius()-0.25;
+    ri = mParam->sensitiveVolumeInnerRadius()+mParam->radiusTolerance();
+    ra = mParam->sensitiveVolumeOuterRadius()-mParam->radiusTolerance();
     padrows = mParam->numberOfPadrowsPerSide();
 
     //mk Drift-Velocity:
@@ -448,8 +443,6 @@ int StFtpcFastSimu::ffs_ini()
     Tbm[2] = mParam->tDriftEstimates(2);
     Tbm[3] = mParam->tDriftEstimates(3);
     
-    // upper entries of sig_arrays temporarily used to store error parameters
-
     //mk Radial Sigma
     s_rad[0] = mParam->sigmaRadialEstimates(0);
     s_rad[1] = mParam->sigmaRadialEstimates(1);
@@ -463,19 +456,19 @@ int StFtpcFastSimu::ffs_ini()
     s_azi[3] = 0;
     
     //Radial Error
-    err_rad[0] = mParam->sigmaRadialEstimates(2);
-    err_rad[1] = mParam->sigmaRadialEstimates(3);
+    err_rad[0] = mParam->errorRadialEstimates(0);
+    err_rad[1] = mParam->errorRadialEstimates(1);
     err_rad[2] = 0;
     err_rad[3] = 0;
 
     //Azimuthal Error
-    err_azi[0] = mParam->sigmaAzimuthalEstimates(2);
-    err_azi[1] = mParam->sigmaAzimuthalEstimates(3);
+    err_azi[0] = mParam->errorAzimuthalEstimates(0);
+    err_azi[1] = mParam->errorAzimuthalEstimates(1);
     err_azi[2] = 0;
     err_azi[3] = 0;
     
-    cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
-    cout << "Parametrization for vd, Td, sig_rad and sig_azi:" << endl;
+    cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
+    cout << "Parametrization for vd, Td, sig_rad and sig_azi, err_rad and err_azi,:" << endl;
     cout << "vd=" << Vhm[0]<<"+"<<Vhm[1]<<"x+"<<Vhm[2]<<"xx+"
 	 <<Vhm[3]<<"xxx" << endl;
     cout << "Td="<<Tbm[0]<<"+"<<Tbm[1]<<"x+"<<Tbm[2]<<"xx+"<<Tbm[3]
@@ -484,20 +477,20 @@ int StFtpcFastSimu::ffs_ini()
 	 <<"xx+"<<s_rad[3]<<"xxx" << endl;
     cout << "sig_azi="<<s_azi[0]<<"+"<<s_azi[1]<<"x+"<<s_azi[2]
 	 <<"xx+"<<s_azi[3]<<"xxx" << endl;
-    cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
+    cout << "err_rad="<<err_rad[0]<<"+"<<err_rad[1]<<"x+"<<err_rad[2]
+	 <<"xx+"<<err_rad[3]<<"xxx" << endl;
+    cout << "err_azi="<<err_azi[0]<<"+"<<err_azi[1]<<"x+"<<err_azi[2]
+	 <<"xx+"<<err_azi[3]<<"xxx" << endl;
+    cout << "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" << endl;
     
-    // if slong <0, use built-in longitudinal resolution from radial diffusion 
-    // if slong >=0, longintudinal resolution is constant and equal to slong
-    slong  = -1;
-
     // Drift velocity at anode (Ranode = ra from/ftpc_params/ ) [cm/microsec]
     Va = Vhm[0] + Vhm[1]*ra + Vhm[2]*sqr(ra) + Vhm[3]*ra*sqr(ra);
 
     //     phi of sector number 1 origin
-    phimin = degree * phi_origin;
+    phimin = degree * mParam->simulationPhiOrigin();
 
     //     size of one sector in phi
-    phisec = degree * phi_sector;
+    phisec = degree * mParam->simulationPhiSector();
 
     //     a cluster is too close to lower sector boundary if it is
     //     not more than 2 pads away 
@@ -542,7 +535,7 @@ int StFtpcFastSimu::ffs_merge_tagger()
 	  s_azi[2]*sqr(r1[i]) + s_azi[3]*sqr(r1[i])*r1[i];
 	mPoint[i].SetSigmaPhi(sig_azi_1*micrometer*(r1[i]/ra));
 
-	sig_azi_1 = (2.5*sig_azi_1)*micrometer;
+	sig_azi_1 = (mParam->sigmaSpacingFactorForCluster()*sig_azi_1)*micrometer;
 	sigazi[i] = sig_azi_1*(r1[i]/ra);
 
 	// radial direction
@@ -553,7 +546,7 @@ int StFtpcFastSimu::ffs_merge_tagger()
 
 	mPoint[i].SetSigmaR(sig_rad_1*micrometer*(v1/Va));
 
-	sig_rad_1 = (2.5*sig_rad_1)*micrometer;
+	sig_rad_1 = (mParam->sigmaSpacingFactorForCluster()*sig_rad_1)*micrometer;
 	sigrad[i] = sig_rad_1*(v1/Va);
 
       }
@@ -570,7 +563,7 @@ int StFtpcFastSimu::ffs_merge_tagger()
 	    for(j=i+1; j<nrowmax[h]; j++)
 	      {
 		id_2 = nrow[h][j]-1;
- 		if((mPoint[id_2].GetFlags()==mParam->removeClusterFlag()) || 
+ 		if((mPoint[id_2].GetFlags()==mParam->mergedClusterFlag()) || 
  		   (mPoint[id_2].GetSector()!=mPoint[id_1].GetSector()))
  		  continue;
 		
@@ -582,7 +575,7 @@ int StFtpcFastSimu::ffs_merge_tagger()
 		   (delta_azi < (2 * sigazi[id_1])))
 		  {
 		    // mark clusters as unfolded 
-		    if(mPoint[id_1].GetFlags() != mParam->removeClusterFlag())
+		    if(mPoint[id_1].GetFlags() != mParam->mergedClusterFlag())
 		      {
 			mPoint[id_1].SetFlags(mParam->unfoldedClusterFlag());
 		      }
@@ -595,11 +588,11 @@ int StFtpcFastSimu::ffs_merge_tagger()
 		    k++;
 		    
 		    // merge clusters, mark second for removal
-		    if(mPoint[id_1].GetFlags() != mParam->removeClusterFlag())
+		    if(mPoint[id_1].GetFlags() != mParam->mergedClusterFlag())
 		      {
 			mPoint[id_1].SetFlags(mParam->badShapeClusterFlag());
 		      }
-		    mPoint[id_2].SetFlags(mParam->removeClusterFlag());
+		    mPoint[id_2].SetFlags(mParam->mergedClusterFlag());
 		    mPoint[id_1].SetMaxADC(mPoint[id_1].GetMaxADC()+
 					   mPoint[id_2].GetMaxADC() / 2);
 		      // maxadc adds up somehow, maybe more, maybe less
@@ -651,9 +644,9 @@ int StFtpcFastSimu::ffs_merge_tagger()
            (delta_azi > sector_phi_max) ||
 	   (r1[id_2] < ri+dist_rad_in) ||
 	   (r1[id_2] > ra-dist_rad_out) ||
-           (mPoint[id_2].GetFlags() > 256))
+           (mPoint[id_2].GetFlags() == mParam->mergedClusterFlag()))
 	  {
-            if(mPoint[id_2].GetFlags() > 256)
+            if(mPoint[id_2].GetFlags() == mParam->mergedClusterFlag())
 	      {
 		rem_count1++;
 	      }
