@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   09/08/99  (E-mail: fine@bnl.gov)
-// $Id: St_tableDescriptor.cxx,v 1.4 1999/08/13 16:35:53 fine Exp $
+// $Id: St_tableDescriptor.cxx,v 1.5 1999/09/13 13:28:27 fine Exp $
 // $Log: St_tableDescriptor.cxx,v $
+// Revision 1.5  1999/09/13 13:28:27  fine
+// One cast int -> uint introduced to avoid compiler warnings
+//
 // Revision 1.4  1999/08/13 16:35:53  fine
 // The artificial restrictions for tableDescriptor have been introduced since database want that
 //
@@ -63,7 +66,7 @@ void St_tableDescriptor::LearnTable(const St_Table *parentTable)
 //  This is to introduce an artificial restriction demanded by STAR database group
 //
 //    1. the name may be 19 symbols at most
-//    2. the number the dimension is 2 at mots
+//    2. the number the dimension is 2 at most
 //
 //  To lift this restriction one has to provide -DNORESTRICTIONS CPP symbol and
 //  recompile code.
@@ -122,7 +125,7 @@ void St_tableDescriptor::LearnTable(const St_Table *parentTable)
 #ifdef NORESTRICTIONS
                                               elementDescriptor.m_IndexArray = new UInt_t(dim);
 #else
-       if (dim > sizeof(elementDescriptor.m_IndexArray)/sizeof(UInt_t *)) {
+       if (UInt_t(dim) > sizeof(elementDescriptor.m_IndexArray)/sizeof(UInt_t *)) {
                 Error("LearnTable","Too many dimenstions - %d", dim);
                 dim =  2;
        }
