@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.69 2000/02/14 13:58:27 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.70 2000/02/15 22:29:17 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.70  2000/02/15 22:29:17  fisyak
+// Add rrs into chain
+//
 // Revision 1.69  2000/02/14 13:58:27  fisyak
 // Add dependence of dst Maker on tables
 //
@@ -384,6 +387,7 @@ BfcItem BFC[] = {
   {"l3"          ,"l3","","l3cl,l3t"                                 ,"StChainMaker","StBFChain","",kFALSE},
   {"l3cl"        ,"","l3","l3_T"                    ,"St_l3Clufi_Maker","St_l3,St_l3Clufi_Maker","",kFALSE},
   {"l3t"         ,"","l3","l3_T"                            ,"St_l3t_Maker","St_l3,St_l3t_Maker","",kFALSE},
+  {"rrs"         ,"","","sim_T"                                       ,"StRrsMaker","StRrsMaker","",kFALSE},
   {"rich"        ,"","","sim_T,globT"                                 ,"StRchMaker","StRchMaker","",kFALSE},
   {"global"      ,"global","","globT,Match,primary,v0,xi,kink,dst,SCL"
                                                          ,"StChainMaker","St_tpc,St_svt,StChain","",kFALSE},
