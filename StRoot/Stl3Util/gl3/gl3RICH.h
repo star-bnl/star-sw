@@ -31,13 +31,10 @@ public:
     virtual const int   getAlgorithmID() 
 	{ return L3_ALGORITHM_RICH; }
     virtual const char *getAlgorithmName() 
-	{ return algoName; }
+	{ return L3_ALGORITHM_RICH_NAME; }
     
 
 private:
-
-  static const char algoName[20] = "RICH";
-
   double mGlobalRichEdgeXmin;
   double mGlobalRichEdgeXmax;
   double mGlobalRichEdgeYmin;

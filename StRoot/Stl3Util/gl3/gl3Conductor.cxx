@@ -235,8 +235,8 @@ int gl3Conductor::init  (  ){
 
 int  gl3Conductor::processEvent(EventDescriptor *desc, 
                                 L3_P* l3data,
-                                TrgSumData* trgSum = NULL, 
-                                RawTrgDet* trgRaw = NULL)
+                                TrgSumData* trgSum, 
+                                RawTrgDet* trgRaw)
 {
     resetTimer();
     

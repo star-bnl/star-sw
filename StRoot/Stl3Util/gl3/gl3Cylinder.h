@@ -24,10 +24,10 @@ class gl3Cylinder: public gl3Algorithm {
 	{ return L3_ALGORITHM_CYLINDER; }
 
     virtual const char *getAlgorithmName() 
-	{ return algoName; }
+	{ return L3_ALGORITHM_CYLINDER_NAME; }
  
  private:
-    static const char algoName[20] = "Cylinder";
+    //static const char algoName[20];
 
     int minNoOfHitsOnTrack;
 

@@ -18,10 +18,9 @@ class gl3True : public gl3Algorithm
   virtual const int   getAlgorithmID() 
     { return L3_ALGORITHM_TRUE; }
   virtual const char *getAlgorithmName() 
-    { return algoName; }
+    { return L3_ALGORITHM_TRUE_NAME; }
   
  private:
-  static const char algoName[20] = "True";
 
 };
 

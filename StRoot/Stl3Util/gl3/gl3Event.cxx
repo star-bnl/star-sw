@@ -19,8 +19,8 @@
 // Constructor and Destructor 
 //####################################################################
 
-gl3Event::gl3Event(int mxHits=500000, int mxTracks=20000,
-		   St_l3_Coordinate_Transformer* inTrans=0 )
+gl3Event::gl3Event(int mxHits, int mxTracks,
+		   St_l3_Coordinate_Transformer* inTrans)
 {
     hit   = NULL;
     track = NULL;
