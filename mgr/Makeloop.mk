@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.39  1998/12/17 17:21:00  fisyak
+#  Add Akio's insure++
+#
 #  Revision 1.38  1998/12/16 16:38:39  fisyak
 #  Add gstar to Root
 #
@@ -193,7 +196,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1998/12/16 16:38:39 $ 
+#           Last modification $Date: 1998/12/17 17:21:00 $ 
 #  default setings
 # Current Working Directory
 #
@@ -422,7 +425,7 @@ endif
 endif
 test: test_level
 test_level:
-	@echo "MAKEFLG  = |"$(MAKEFLG)"|"
+	@echo "MAKEFLG   = |"$(MAKEFLG)"|"
 	@echo "PWD       = |"$(PWD)"|"
 	@echo "LEVEL     = |"$(LEVEL)"|"
 	@echo "SUBDIRS   = |"$(SUBDIRS)"|"
@@ -438,5 +441,5 @@ test_level:
 	@echo "MakeDll   = |"$(MakeDll)"|"
 	@echo "STAR_MAKE_HOME=|"$(STAR_MAKE_HOME)"|"
 	@echo "DIRS=|"$(DIRS)"|"
-	@echo "NT=$(NT)"
-
+	@echo "Makers    = |"$(Makers)"|"
+	@echo "NT        ="$(NT)"

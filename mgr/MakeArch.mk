@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.52  1998/12/17 17:21:00  fisyak
+#  Add Akio's insure++
+#
 #  Revision 1.51  1998/12/12 00:58:32  fisyak
 #  remove STAF
 #
@@ -131,7 +134,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/12/12 00:58:32 $ 
+#             Last modification $Date: 1998/12/17 17:21:00 $ 
 #. default setings
 
 MAKE  := gmake
@@ -176,9 +179,17 @@ CERN_ROOT_INCS = $(CERN_ROOT)/include/cfortran
 MAKECERNLIB := cernlib
 
 GCC      :=  gcc
+CXX      :=  g++
+ifdef INSURE
+  GCC      :=  insure -g -Zoi "compiler_c gcc"
+  CXX      :=  insure -g -Zoi "compiler_cpp g++"
+endif
+ifdef CODEWIZ
+  GCC      :=  codewizard -g -Zoi "compiler_c gcc"
+  CXX      :=  codewizard -g -Zoi "compiler_cpp g++"
+endif
 CC       :=  $(GCC)
 CFLAGS   := $(DEBUG) -fpic -w
-CXX      :=  g++
 CXXFLAGS := $(DEBUG) -fpic -w
 FC 	 := f77
 AR       := ar
@@ -191,7 +202,8 @@ EXEFLAGS := NONE
 So       :=so
 O        :=o
 A        :=a
-Cxx   :=cc
+Cxx      :=cc
+
 CLIBS    :=
 FLIBS    :=
 
@@ -578,6 +590,14 @@ ifneq (,$(findstring $(STAR_SYS),sun4x_55 sun4x_56))
   STRID :=  sun
   CC :=  /opt/SUNWspro/bin/cc
   CXX := /opt/SUNWspro/bin/CC
+  ifdef INSURE
+    CC       :=  insure -g -Zoi "compiler_c cc"
+    CXX      :=  insure -g -Zoi "compiler_cpp CC"
+  endif
+  ifdef CODEWIZ
+    CC       :=  codewizard -g -Zoi "compiler_c cc"
+    CXX      :=  codewizard -g -Zoi "compiler_cpp CC"
+  endif
   LD  := $(CXX)
   SO  := $(CXX)
   FC  := /opt/SUNWspro/bin/f77
