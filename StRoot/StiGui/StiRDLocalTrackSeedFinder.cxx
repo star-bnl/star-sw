@@ -4,7 +4,7 @@
 
 //StiGui
 #include "StiGui/StiRootDrawableHits.h"
-#include "StiGui/StiDisplayManager.h"
+#include "StiGui/StiRootDisplayManager.h"
 
 //std
 #include <math.h>
@@ -25,7 +25,7 @@
 
 //StiGui
 #include "StiGuiIOBroker.h"
-#include "StiDisplayManager.h"
+#include "StiRootDisplayManager.h"
 #include "StiRootDrawableHits.h"
 
 #include "StiRDLocalTrackSeedFinder.h"
@@ -44,7 +44,7 @@ StiRDLocalTrackSeedFinder::StiRDLocalTrackSeedFinder(StiDetectorContainer* det,
     mdrawablehits->setMarkerSize(1.);
     mdrawablehits->setRemoved(false);
     //mdrawablehits->setName("Seed Finder Hits");
-    StiDisplayManager::instance()->addDrawable(mdrawablehits);
+    StiRootDisplayManager::instance()->addDrawable(mdrawablehits);
 
     getNewState();
 }
@@ -86,8 +86,8 @@ StiKalmanTrack* StiRDLocalTrackSeedFinder::makeTrack(StiHit* hit)
     
     mdrawablehits->fillHitsForDrawing();
     if (StiGuiIOBroker::instance()->updateEachTrack()) {
-	StiDisplayManager::instance()->draw();
-	StiDisplayManager::instance()->update();
+	StiRootDisplayManager::instance()->draw();
+	StiRootDisplayManager::instance()->update();
     }
 
     mMessenger <<"\t leaving StiRDLocalTrackSeedFinder::makeTrack()"<<endl;

@@ -18,7 +18,7 @@
 #include "Sti/StiPlanarShape.h"
 #include "Sti/StiCylindricalShape.h"
 #include "Sti/StiConicalShape.h"
-#include "StiDisplayManager.h"
+#include "StiRootDisplayManager.h"
 #include "StiRootDrawableDetector.h"
 
 //rotation about z-axis by angle phi
@@ -48,7 +48,7 @@ void StiRootDrawableDetector::build()
     StiDetector::build();
     makeShape();
     StiDrawable::setName( StiDetector::getName().c_str() );
-    StiDisplayManager::instance()->addDrawable(this);
+    StiRootDisplayManager::instance()->addDrawable(this);
     //cout <<(*this)<<endl;
     return;
 }
@@ -60,7 +60,7 @@ void StiRootDrawableDetector::makeShape()
     //Make Shape
     
     //Make sure that our shape get's hung on the main node
-    StiDisplayManager::instance()->cd();
+    StiRootDisplayManager::instance()->cd();
 
     char* shapename = new char[200];
     sprintf(shapename,"Shape_%s",StiDetector::getName().c_str());

@@ -1,14 +1,16 @@
-//StiDisplayManager.h
+//StiRootDisplayManager.h
 //M.L. Miller (Yale Software)
 //04/01
 
 //This  class manages the Sti display
 
-#ifndef StiDisplayManager_HH
-#define StiDisplayManager_HH
+#ifndef StiRootDisplayManager_HH
+#define StiRootDisplayManager_HH
 
 #include <string>
 #include <map>
+
+#include "../Sti/StiDisplayManager.h"
 
 using std::map;
 using std::multimap;
@@ -19,7 +21,7 @@ class TShape;
 class TVolume;
 class StiDrawable;
 
-class StiDisplayManager
+class StiRootDisplayManager : public StiDisplayManager
 {
 public:
     friend class nobody;
@@ -29,7 +31,6 @@ public:
     
     //Singleton access
     static StiDisplayManager* instance(TCanvas* c1=0);
-    static void kill();
 
     //Action
     void addDrawable(StiDrawable*);
@@ -63,18 +64,18 @@ protected:
     
 private:
 
-    static StiDisplayManager* sinstance;
+    static StiRootDisplayManager* sinstance;
 
     //dx, dy, and dz define the volume within which objects are drawn.
     //The volume is a rectangle of lengths 2*dx, 2*dy, 2*dz
     enum StiCanvasSize {kXmin=200, kXmax=600, kYmin=100, kYmax=500};
     enum StiMainVolumeSize {kdx=200, kdy=200, kdz=240};
     
-    StiDisplayManager(TCanvas*);
-    StiDisplayManager(); //Not implemented
-    StiDisplayManager(const StiDisplayManager&); //Not implemented
+    StiRootDisplayManager(TCanvas*);
+    StiRootDisplayManager(); //Not implemented
+    StiRootDisplayManager(const StiRootDisplayManager&); //Not implemented
     
-    virtual ~StiDisplayManager();
+    virtual ~StiRootDisplayManager();
     
     void setup();
 

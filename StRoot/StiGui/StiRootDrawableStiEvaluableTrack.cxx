@@ -28,7 +28,7 @@ using namespace std;
 
 //StiGui
 #include "StiTPolyLine3D.h"
-#include "StiDisplayManager.h"
+#include "StiRootDisplayManager.h"
 #include "StiRootDrawableLine.h"
 #include "StiRootDrawableHits.h"
 #include "StiRootDrawableStiEvaluableTrack.h"
@@ -184,10 +184,10 @@ void StiRootDrawableStiEvaluableTrack::fillHitsForDrawing()
     //These get automatically removed from display each event
     //The display dynamically shrinks temp objects each event (tracks, hits, etc)
     if (!mLineHitPair.first->isAdded()) {
-	StiDisplayManager::instance()->addDrawable( mLineHitPair.first );
+	StiRootDisplayManager::instance()->addDrawable( mLineHitPair.first );
     }
     if (!mLineHitPair.second->isAdded()) {
-	StiDisplayManager::instance()->addDrawable( mLineHitPair.second );
+	StiRootDisplayManager::instance()->addDrawable( mLineHitPair.second );
     }    
 	
     return;

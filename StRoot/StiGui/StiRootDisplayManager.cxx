@@ -1,4 +1,4 @@
-//StiDisplayManager.cxx
+//StiRootDisplayManager.cxx
 //M.L. Miller (Yale Software)
 //04/01
 
@@ -23,16 +23,16 @@
 #include "StiRootDrawable.h"
 #include "StiDrawableHits.h"
 #include "StiRootDrawableHits.h"
-#include "StiDisplayManager.h"
+#include "StiRootDisplayManager.h"
 
-StiDisplayManager* StiDisplayManager::sinstance = 0;
+StiRootDisplayManager* StiRootDisplayManager::sinstance = 0;
 
-StiDisplayManager::StiDisplayManager(TCanvas* c)
+StiRootDisplayManager::StiRootDisplayManager(TCanvas* c)
     : mcanvas(c), mzone(0), mnode(0)
 {
-    cout <<"StiDisplayManager::StiDisplayManager(int, int, int)"<<endl;
+    cout <<"StiRootDisplayManager::StiRootDisplayManager(int, int, int)"<<endl;
     if (!mcanvas) {
-	cout <<"StiDisplayManager::StiDisplayManager() ERROR:\t";
+	cout <<"StiRootDisplayManager::StiRootDisplayManager() ERROR:\t";
 	cout <<"Canvas null.  Seg-fault"<<endl;
     }
 
@@ -46,13 +46,13 @@ StiDisplayManager::StiDisplayManager(TCanvas* c)
 	//mnode->SetVisibility(TVolume::kThisUnvisible);
     }
     
-    cout <<"Leaving StiDisplayManager::StiDisplayManager()"<<endl;
+    cout <<"Leaving StiRootDisplayManager::StiRootDisplayManager()"<<endl;
     sinstance = this;
 }
 
-StiDisplayManager::~StiDisplayManager()
+StiRootDisplayManager::~StiRootDisplayManager()
 {
-    cout <<"StiDisplayManager::~StiDisplayManager()"<<endl;
+    cout <<"StiRootDisplayManager::~StiRootDisplayManager()"<<endl;
     delete mcanvas;
     mcanvas=0;
     delete mzone;
@@ -61,32 +61,24 @@ StiDisplayManager::~StiDisplayManager()
     mnode = 0;
 }
 
-StiDisplayManager* StiDisplayManager::instance(TCanvas* c)
+StiDisplayManager* StiRootDisplayManager::instance(TCanvas* c)
 {
-    return (sinstance) ? sinstance : new StiDisplayManager(c);
+    return (sinstance) ? sinstance : new StiRootDisplayManager(c);
 }
 
-void StiDisplayManager::kill()
-{
-    if (sinstance) {
-	delete sinstance;
-	sinstance = 0;
-    }
-    return;
-}
 
-void StiDisplayManager::cd()
+void StiRootDisplayManager::cd()
 {
     //mnode->cd();
     mcanvas->cd();
     return;
 }
 
-void StiDisplayManager::draw()
+void StiRootDisplayManager::draw()
 {
     mnode->Draw();
 
-    //cout <<"StiDisplayManager::draw()"<<endl;
+    //cout <<"StiRootDisplayManager::draw()"<<endl;
     for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
 	StiDrawableHits* val = dynamic_cast<StiDrawableHits*>((*it).second);
 	if (val) {
@@ -94,12 +86,12 @@ void StiDisplayManager::draw()
 	    val->draw();
 	}
     }
-    //cout <<"StiDisplayManger::draw()\tDone drawing"<<endl;
+    //cout <<"StiRootDisplayManger::draw()\tDone drawing"<<endl;
     
     return;
 }
 
-void StiDisplayManager::reset()
+void StiRootDisplayManager::reset()
 {
     for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
 	if ((*it).second->canBeRemoved()) {
@@ -109,13 +101,13 @@ void StiDisplayManager::reset()
     
 }
 
-void StiDisplayManager::update()
+void StiRootDisplayManager::update()
 {
     mcanvas->Update();
     return;
 }
 
-void StiDisplayManager::setVisible()
+void StiRootDisplayManager::setVisible()
 {
     for (stidrawablemap::const_iterator it=mmap.begin(); it!=mmap.end(); ++it) {
 	StiDetector* tempDet = dynamic_cast<StiDetector*>( (*it).second);
@@ -131,7 +123,7 @@ void StiDisplayManager::setVisible()
     return;
 }
 
-void StiDisplayManager::setInvisible()
+void StiRootDisplayManager::setInvisible()
 {
     for (stidrawablemap::const_iterator it=mmap.begin(); it!=mmap.end(); ++it) {
 	(*it).second->setVisibility(false);
@@ -139,7 +131,7 @@ void StiDisplayManager::setInvisible()
     return;
 }
 
-void StiDisplayManager::setVisible(const StiDrawable* val)
+void StiRootDisplayManager::setVisible(const StiDrawable* val)
 {
     string name = val->name();
     stidrawablemap::const_iterator where = mmap.find(name);
@@ -154,7 +146,7 @@ void StiDisplayManager::setVisible(const StiDrawable* val)
     return;
 }
 
-void StiDisplayManager::setInvisible(const StiDrawable* val)
+void StiRootDisplayManager::setInvisible(const StiDrawable* val)
 {
     string name = val->name();
     stidrawablemap::const_iterator where = mmap.find(name);
@@ -169,7 +161,7 @@ void StiDisplayManager::setInvisible(const StiDrawable* val)
     return;
 }
 
-void StiDisplayManager::addDrawable(StiDrawable* tempval)
+void StiRootDisplayManager::addDrawable(StiDrawable* tempval)
 {
     string name = tempval->name();
     //cout <<"Adding detector: "<<name<<endl;
@@ -190,7 +182,7 @@ void StiDisplayManager::addDrawable(StiDrawable* tempval)
     return;
 }
 
-void StiDisplayManager::setZoomSkeletonView()
+void StiRootDisplayManager::setZoomSkeletonView()
 {
     setVisible();
     setIfcInvisible();
@@ -202,7 +194,7 @@ void StiDisplayManager::setZoomSkeletonView()
 	    if ( where != (*it).first.npos ) { //it's from padrow 1	    
 		StiDetector* tempDet = dynamic_cast<StiDetector*>( (*it).second );
 		if (!tempDet) {
-		    cout <<"StiDisplayManager::setZoomSkeletonView(). ERROR:\t"
+		    cout <<"StiRootDisplayManager::setZoomSkeletonView(). ERROR:\t"
 			 <<" cast to StiDetector failed.  Abort"<<endl;
 		    return;
 		}
@@ -218,7 +210,7 @@ void StiDisplayManager::setZoomSkeletonView()
     return;
 }
 
-void StiDisplayManager::setSkeletonView()
+void StiRootDisplayManager::setSkeletonView()
 {
     setVisible();
     setIfcInvisible();
@@ -230,7 +222,7 @@ void StiDisplayManager::setSkeletonView()
 	    if ( where != (*it).first.npos ) { //it's from padrow 45	    
 		StiDetector* tempDet = dynamic_cast<StiDetector*>( (*it).second );
 		if (!tempDet) {
-		    cout <<"StiDisplayManager::setSkeletonView(). ERROR:\t"
+		    cout <<"StiRootDisplayManager::setSkeletonView(). ERROR:\t"
 			 <<" cast to StiDetector failed.  Abort"<<endl;
 		    return;
 		}
@@ -246,14 +238,14 @@ void StiDisplayManager::setSkeletonView()
     return;
 }
 
-void StiDisplayManager::setSvtVisible()
+void StiRootDisplayManager::setSvtVisible()
 {
     for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
 	string::size_type where = (*it).first.find("Svg");
 	if ( where != (*it).first.npos ) {
 	    StiDetector* tempDet = dynamic_cast<StiDetector*>( (*it).second );
 	    if (!tempDet) {
-		cout <<"StiDisplayManager::setSvtVisible(). ERROR:\t"
+		cout <<"StiRootDisplayManager::setSvtVisible(). ERROR:\t"
 		     <<" cast to StiDetector failed.  Abort"<<endl;
 		return;
 	    }
@@ -265,7 +257,7 @@ void StiDisplayManager::setSvtVisible()
     return;
 }
 
-void StiDisplayManager::setSvtInvisible()
+void StiRootDisplayManager::setSvtInvisible()
 {
     for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
 	string::size_type where = (*it).first.find("Svg");
@@ -276,14 +268,14 @@ void StiDisplayManager::setSvtInvisible()
     return;
 }
 
-void StiDisplayManager::setIfcVisible()
+void StiRootDisplayManager::setIfcVisible()
 {
     for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
 	string::size_type where = (*it).first.find("Ifc");
 	if ( where != (*it).first.npos ) {
 	    StiDetector* tempDet = dynamic_cast<StiDetector*>( (*it).second );
 	    if (!tempDet) {
-		cout <<"StiDisplayManager::setIfcVisible(). ERROR:\t"
+		cout <<"StiRootDisplayManager::setIfcVisible(). ERROR:\t"
 		     <<" cast to StiDetector failed.  Abort"<<endl;
 		return;
 	    }
@@ -295,7 +287,7 @@ void StiDisplayManager::setIfcVisible()
     return;
 }
 
-void StiDisplayManager::setIfcInvisible()
+void StiRootDisplayManager::setIfcInvisible()
 {
     for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
 	string::size_type where = (*it).first.find("Ifc");
@@ -306,14 +298,14 @@ void StiDisplayManager::setIfcInvisible()
     return;
 }
 
-void StiDisplayManager::setTpcVisible()
+void StiRootDisplayManager::setTpcVisible()
 {
     for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
 	string::size_type where = (*it).first.find("Tpc");
 	if ( where != (*it).first.npos ) {
 	    StiDetector* tempDet = dynamic_cast<StiDetector*>( (*it).second );
 	    if (!tempDet) {
-		cout <<"StiDisplayManager::setTpcVisible(). ERROR:\t"
+		cout <<"StiRootDisplayManager::setTpcVisible(). ERROR:\t"
 		     <<" cast to StiDetector failed.  Abort"<<endl;
 		return;
 	    }
@@ -325,7 +317,7 @@ void StiDisplayManager::setTpcVisible()
     return;
 }
 
-void StiDisplayManager::setTpcInvisible()
+void StiRootDisplayManager::setTpcInvisible()
 {
     for (stidrawablemap::iterator it=mmap.begin(); it!=mmap.end(); ++it) {
 	string::size_type where = (*it).first.find("Tpc");
@@ -336,9 +328,9 @@ void StiDisplayManager::setTpcInvisible()
     return;
 }
 
-void StiDisplayManager::print() const
+void StiRootDisplayManager::print() const
 {
-    cout <<"\nStiDisplayManager::print()"<<endl;
+    cout <<"\nStiRootDisplayManager::print()"<<endl;
     for (stidrawablemap::const_iterator it=mmap.begin(); it!=mmap.end(); ++it) {
 	cout <<(*it).first<<endl;
     }
