@@ -1,5 +1,11 @@
-// $Id: StFtpcTrackingParams.hh,v 1.8 2002/11/19 12:45:11 oldi Exp $
+// $Id: StFtpcTrackingParams.hh,v 1.9 2002/11/21 15:46:30 oldi Exp $
 // $Log: StFtpcTrackingParams.hh,v $
+// Revision 1.9  2002/11/21 15:46:30  oldi
+// Enabled rotation for FTPC west. If there is an observed shift of the vertex
+// position in y-direction (in FTPC west), just fill this offset into the Db.
+// Up to now this offset is set to 0., i.e. only FTPC east is rotated (because
+// the offset is at 0.3427 cm).
+//
 // Revision 1.8  2002/11/19 12:45:11  oldi
 // A new database entry (installationPointY[east/west]) was introduced. Now
 // the rotation of FTPC east is done around the correct axis, which isn't
@@ -129,9 +135,9 @@ private:
        StMatrixD mGlobalToTpcRotation; // (3X3)
   StThreeVectorD mTpcPositionInGlobal; 
 
-  // internal FTPC rotation (East only)
-  StMatrixD mFtpcRotation;
-  StMatrixD mFtpcRotationInverse;
+  // internal FTPC rotation
+  StMatrixD *mFtpcRotation;
+  StMatrixD *mFtpcRotationInverse;
    Double_t mInstallationPointY[2];
    Double_t mInstallationPointZ[2];
    Double_t mObservedVertexOffsetY[2];
@@ -236,8 +242,8 @@ public:
        StMatrixD GlobalToTpcRotation();
   StThreeVectorD TpcPositionInGlobal(); 
 
-  StMatrixD FtpcRotation();
-  StMatrixD FtpcRotationInverse();
+  StMatrixD FtpcRotation(Int_t i);
+  StMatrixD FtpcRotationInverse(Int_t i);
    Double_t InstallationPointY(Int_t i);
    Double_t InstallationPointZ(Int_t i);
    Double_t ObservedVertexOffsetY(Int_t i);

@@ -1,5 +1,11 @@
-// $Id: StFtpcPoint.cc,v 1.12 2002/11/19 12:45:07 oldi Exp $
+// $Id: StFtpcPoint.cc,v 1.13 2002/11/21 15:46:21 oldi Exp $
 // $Log: StFtpcPoint.cc,v $
+// Revision 1.13  2002/11/21 15:46:21  oldi
+// Enabled rotation for FTPC west. If there is an observed shift of the vertex
+// position in y-direction (in FTPC west), just fill this offset into the Db.
+// Up to now this offset is set to 0., i.e. only FTPC east is rotated (because
+// the offset is at 0.3427 cm).
+//
 // Revision 1.12  2002/11/19 12:45:07  oldi
 // A new database entry (installationPointY[east/west]) was introduced. Now
 // the rotation of FTPC east is done around the correct axis, which isn't
@@ -265,21 +271,19 @@ void StFtpcPoint::TransformFtpc2Global()
    
     StThreeVectorD org(mCoord.X(), mCoord.Y(), mCoord.Z());
 
-    // internal FTPC rotation (FTPC east only)
-    if (org.z() < 0) {
-      // check if hit is in FTPC east
-      
-      // first tranformation to new origin (FTPC installation point)
-      org.setY(org.y() - StFtpcTrackingParams::Instance()->InstallationPointY(0));
-      org.setZ(org.z() - StFtpcTrackingParams::Instance()->InstallationPointZ(0));
-      
-      // actual rotation
-      org = StFtpcTrackingParams::Instance()->FtpcRotation() * org;
-      
-      // set z-position back to original value
-      org.setY(org.y() + StFtpcTrackingParams::Instance()->InstallationPointY(0));      
-      org.setZ(org.z() + StFtpcTrackingParams::Instance()->InstallationPointZ(0));
-    }
+    // internal FTPC rotation
+    Int_t i = (org.z() < 0) ? 0 : 1; // east or west
+
+    // first tranformation to new origin (FTPC installation point)
+    org.setY(org.y() - StFtpcTrackingParams::Instance()->InstallationPointY(i));
+    org.setZ(org.z() - StFtpcTrackingParams::Instance()->InstallationPointZ(i));
+    
+    // actual rotation
+    org = StFtpcTrackingParams::Instance()->FtpcRotation(i) * org;
+    
+    // set z-position back to original value
+    org.setY(org.y() + StFtpcTrackingParams::Instance()->InstallationPointY(i));      
+    org.setZ(org.z() + StFtpcTrackingParams::Instance()->InstallationPointZ(i));
     
     StThreeVectorD transform = StFtpcTrackingParams::Instance()->TpcToGlobalRotation() * org + StFtpcTrackingParams::Instance()->TpcPositionInGlobal();
     
@@ -312,21 +316,19 @@ void StFtpcPoint::TransformGlobal2Ftpc()
     StThreeVectorD org(mCoord.X(), mCoord.Y(), mCoord.Z());
     StThreeVectorD transform = StFtpcTrackingParams::Instance()->GlobalToTpcRotation() * (org - StFtpcTrackingParams::Instance()->TpcPositionInGlobal());
 
-    // internal FTPC rotation (FTPC east only)
-    if (transform.z() < 0) {
-      // check if hit is in FTPC east
-      
-      // first tranformation to new origin (FTPC installation point)
-      transform.setY(transform.y() - StFtpcTrackingParams::Instance()->InstallationPointY(0));
-      transform.setZ(transform.z() - StFtpcTrackingParams::Instance()->InstallationPointZ(0));
-      
-      // actual rotation
-      transform = StFtpcTrackingParams::Instance()->FtpcRotationInverse() * transform;
-      
-      // set z-position back to original value
-      transform.setY(transform.y() + StFtpcTrackingParams::Instance()->InstallationPointY(0));
-      transform.setZ(transform.z() + StFtpcTrackingParams::Instance()->InstallationPointZ(0));
-    }
+    // internal FTPC rotation
+    Int_t i = (transform.z() < 0) ? 0 : 1; // east or west
+    
+    // first tranformation to new origin (FTPC installation point)
+    transform.setY(transform.y() - StFtpcTrackingParams::Instance()->InstallationPointY(i));
+    transform.setZ(transform.z() - StFtpcTrackingParams::Instance()->InstallationPointZ(i));
+    
+    // actual rotation
+    transform = StFtpcTrackingParams::Instance()->FtpcRotationInverse(i) * transform;
+    
+    // set z-position back to original value
+    transform.setY(transform.y() + StFtpcTrackingParams::Instance()->InstallationPointY(i));
+    transform.setZ(transform.z() + StFtpcTrackingParams::Instance()->InstallationPointZ(i));
     
     mCoord.SetX(transform.x());
     mCoord.SetY(transform.y());
@@ -334,12 +336,12 @@ void StFtpcPoint::TransformGlobal2Ftpc()
     
     SetGlobalCoord(kFALSE);
   }
-
+  
   else {
     // hit is in local (FTPC) coordinates already
     gMessMgr->Message("", "W", "OST") << "Hit is in local (FTPC) coordinates already! Not transformed." << endm;
   }
-
+  
   return;
 }
 
