@@ -1,5 +1,8 @@
-// $Id: St_dst_Maker.h,v 1.6 1999/05/04 21:00:44 fisyak Exp $
+// $Id: St_dst_Maker.h,v 1.7 1999/07/01 17:27:42 fisyak Exp $
 // $Log: St_dst_Maker.h,v $
+// Revision 1.7  1999/07/01 17:27:42  fisyak
+// New global chain from  Wensheng Deng
+//
 // Revision 1.6  1999/05/04 21:00:44  fisyak
 // Step back to MDC2 version
 //
@@ -46,17 +49,23 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "StMaker.h"
+
+class St_dst_summary_param;
+
 class St_dst_Maker : public StMaker {
  private:
   const Char_t **fSelect;
   Char_t collectionName[256];
-  
+
+  St_dst_summary_param *m_dst_summary_param; //!
+
  protected:
  public: 
                   St_dst_Maker(const char *name="dst");
    virtual       ~St_dst_Maker();
    virtual Int_t  Init();
    virtual Int_t  Make();
+   virtual Int_t  Filler();
    virtual void   SetSelection(const Char_t **sel ){fSelect=sel;};
    virtual void   PrintInfo();
    
