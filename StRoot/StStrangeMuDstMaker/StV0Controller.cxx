@@ -1,5 +1,8 @@
-// $Id: StV0Controller.cxx,v 3.2 2000/07/17 20:28:40 genevb Exp $
+// $Id: StV0Controller.cxx,v 3.3 2000/08/31 21:25:34 genevb Exp $
 // $Log: StV0Controller.cxx,v $
+// Revision 3.3  2000/08/31 21:25:34  genevb
+// Adjustment for V0s used in Xis only
+//
 // Revision 3.2  2000/07/17 20:28:40  genevb
 // File size limitation workaround, some under the hood improvements
 //
@@ -68,10 +71,13 @@ Int_t StV0Controller::MakeCreateDst(StEvent& event) {
   Int_t asize = dataArray->GetSize();
   if (entries > asize) dataArray->Expand(entries+increment);
   StStrangeEvMuDst* ev = masterMaker->GetEvent();
+  Int_t j=0;
   for (Int_t i=0; i<entries; i++) {
     StV0Vertex* v0Vertex = v0Vertices[i];
-    new((*dataArray)[i]) StV0MuDst(v0Vertex,ev);
+    if (v0Vertex->dcaParentToPrimaryVertex() >= 0)
+      new((*dataArray)[j++]) StV0MuDst(v0Vertex,ev);
   }
+  entries = j;
   PrintNumCand("found",entries);
   nEntries += entries;
 
