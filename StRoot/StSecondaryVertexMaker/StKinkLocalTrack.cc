@@ -10,12 +10,15 @@
 #include "StKinkLocalTrack.hh"
 #include "SystemOfUnits.h"
 #include "StTrackGeometry.h"
+#include "StTrack.h"
+#include <iostream>
+using namespace std;
 #ifndef ST_NO_NAMESPACES
 using namespace units;
 #endif
 
 
-
+ClassImp(StKinkLocalTrack)
 StKinkLocalTrack::StKinkLocalTrack()
 {
   mEndRadius2D = 0.;
@@ -33,9 +36,6 @@ StKinkLocalTrack::StKinkLocalTrack(StTrack* trk)
   mEndRadius2D = mLastPoint.perp();//r at his last point
 
   mTrack = trk;
-}
-
-StKinkLocalTrack::~StKinkLocalTrack() {
 }
 
 Int_t StKinkLocalTrack::Compare(const TObject *obj) const

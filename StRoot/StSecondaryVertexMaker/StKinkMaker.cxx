@@ -13,6 +13,8 @@
 #include "TMemStat.h"
 #include "StKinkMaker.h"
 #include "StKinkLocalTrack.hh"
+#include "StTrackGeometry.h"
+#include "StV0FinderMaker.h"
 #include "StEvent/StEventTypes.h"
 #include "StEvent.h"
 #include "TMath.h"
@@ -78,7 +80,7 @@ Int_t StKinkMaker::Init(){
   m_tkfpar =  new St_tkf_tkfpar("tkf_tkfpar",1);
   {
     tkf_tkfpar_st parRow;  
-    memset(&parRow,0,m_tkfpar->GetRowSize());
+    memset(&parRow,0,sizeof(tkf_tkfpar_st));
     parRow.dcaParentDaughterMax      =  0.5;
     parRow.parentPtMin               =  0.2;   
     parRow.vertexRMax2D              =  179.;  
@@ -113,7 +115,7 @@ Int_t StKinkMaker::Make(){//called for each event
   unsigned short nNodes,i,j;
   int cutLast=0;
   StKinkLocalTrack* tempTrack;
-  TObjArray trackArray(MAXNUMOFTRACKS);
+  TObjArray trackArray(MAXNUMOFTRACKS);trackArray.SetOwner();
  
   tkf_tkfpar_st *tkfpar = m_tkfpar->GetTable();
   StThreeVectorF p,start,end;
@@ -139,7 +141,8 @@ Int_t StKinkMaker::Make(){//called for each event
   nNodes = theNodes.size();
   mGlobalTrks=0;
   for (i=0;i<nNodes;i++){
-    for (j=0; j<theNodes[i]->entries(global);j++){
+    int nj = theNodes[i]->entries(global);
+    for (j=0; j<nj;j++){
       StTrack* trk = theNodes[i]->track(global,j);
       if( !acceptTrack(trk) )continue;
 
@@ -191,7 +194,8 @@ Int_t StKinkMaker::Make(){//called for each event
   Int_t   kinkCandidate=0;
   Int_t cutPPt=0,cutPImpact=0,initial=0;
   
-  for (i=0;i<trackArray.GetEntries();i++){//parent
+  int ni=trackArray.GetEntries();
+  for (i=0;i<ni;i++){//parent
     initial++;
     mTrack1 = (StKinkLocalTrack*)trackArray.At(i);
     mParentTrackCandidate = mTrack1->trackBack();
@@ -210,7 +214,8 @@ Int_t StKinkMaker::Make(){//called for each event
     if (mParentImpact > tkfpar->impactCut ) continue;
     cutPImpact++;
     Int_t foundDaughters = 0;
-    for (j=i+1;j<=trackArray.GetLast();j++ ){//daughter
+    int nj = trackArray.GetLast()+1;
+    for (j=i+1;j<nj;j++ ){//daughter
       mTrack2 = (StKinkLocalTrack*)trackArray.At(j);
       mDaughterTrackCandidate = mTrack2->trackBack();
       StTrackGeometry* myDaughterGeometry1 = mDaughterTrackCandidate->geometry();//first point

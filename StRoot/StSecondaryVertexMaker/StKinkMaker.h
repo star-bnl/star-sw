@@ -15,9 +15,6 @@
 
 #include "StMaker.h"
 #include "StThreeVectorD.hh"
-#include "TMath.h"
-#include "StTrackGeometry.h"
-#include "StV0FinderMaker.h"
 
 class StKinkLocalTrack;
 class St_tkf_tkfpar;
@@ -27,6 +24,7 @@ class StEvent;
 class StKinkVertex;
 class StTrack;
 class pairD;
+class StTrackGeometry;
 
 // enum TrackerUsage{ //See StV0FinderMaker.h */
 //  kTrackerUseTPT  = 0, 
@@ -45,7 +43,7 @@ public:
   virtual Int_t   GetTrackerUsage(){return mUseTracker;}
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.7 2004/07/15 17:48:01 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StKinkMaker.h,v 1.8 2004/09/17 03:14:06 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  private:

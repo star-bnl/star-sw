@@ -9,12 +9,9 @@
 #ifndef StKinkLocalTrack_hh
 #define StKinkLocalTrack_hh
 
-#include <iostream>
-using namespace std;
-#include "TMath.h"
 #include "TObject.h"
-#include "StThreeVectorF.hh"
-#include "StTrack.h"
+#include "StThreeVectorD.hh"
+class StTrack;
 
 class StKinkLocalTrack:public TObject {
 public:
@@ -22,7 +19,6 @@ public:
   StKinkLocalTrack(StTrack* trk);
 
 
-  ~StKinkLocalTrack();
   // StKinkLocalTrack(const StKinkLocalTrack&);                  use default
   // const StKinkLocalTrack& operator=(const StKinkLocalTrack&); use default
   
@@ -43,6 +39,7 @@ protected:
   StTrack* mTrack;
   
 private:
+ClassDef(StKinkLocalTrack,0)
 };
 
 inline Float_t StKinkLocalTrack::endRadius2D() const { return mEndRadius2D; }
