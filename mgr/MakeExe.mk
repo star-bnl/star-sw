@@ -69,7 +69,7 @@ CCload = YES
 
 
 #DOEXE  = $(GSC) $(GST_DIR)/main/acmain.c -o $(EXE_DIR)/$(TARGET) $(FILES_O)
-DOEXE  = $(GSC) -o $(EXE_DIR)/$(TARGET) $(FILES_O)
+DOEXE  = $(GSC)  $(FILES_O)
 
 
 ifdef STAF
@@ -126,7 +126,8 @@ $(OBJ_DIR)/%.o : %.cc
 geant3: geant3.f; $(GEA) -o geant3 geant3.f `cernlib kernlib`
 #
 $(CMDS): $(FILES_O)
-	$(DOEXE)  $(ALL_EXE_LIBS)   
+	echo $(TARGET)
+	$(DOEXE)  $(ALL_EXE_LIBS) -o $(EXE_DIR)/$(notdir $(TARGET))  
 #
 ifneq (,$(findstring $(STAF_ARCH),rs_aix31 rs_aix32 rs_aix41))
 	echo '#!'$(PWD)'/$@'  > import.map
