@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.19 2000/09/05 16:11:30 snelling Exp $
+// $Id: StFlowCutEvent.cxx,v 1.20 2000/11/30 16:40:20 snelling Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,10 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.20  2000/11/30 16:40:20  snelling
+// Protection agains loading probability pid caused it not to work anymore
+// therefore protection removed again
+//
 // Revision 1.19  2000/09/05 16:11:30  snelling
 // Added global DCA, electron and positron
 //
@@ -116,8 +120,10 @@ Bool_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
   
   // Primary vertex
   Long_t nvtx = pEvent->numberOfPrimaryVertices();
-  if (nvtx == 0) return kFALSE;
-
+  if (nvtx == 0) {
+    //      cout << "FlowCutEvent: no Vertex " << endl;
+    return kFALSE;
+  }
   StPrimaryVertex* pVertex = pEvent->primaryVertex(0);
   if (!pVertex) return kFALSE;
 
