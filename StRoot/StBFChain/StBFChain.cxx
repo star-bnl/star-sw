@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.279 2002/02/25 21:19:32 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.280 2002/02/28 23:33:28 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -82,6 +82,8 @@ Bfc_st BFC[] = {
   {"C2000"       ,""  ,"","y2000,C1default"                            ,"","","Turn on chain Y2000",kFALSE},
   {"C2001"       ,""  ,"","y2001,C2default"                            ,"","","Turn on chain Y2001",kFALSE},
   {"MDC4"        ,""  ,"","C2001,trs,srs,fss,rrs,big,GeantOut"      ,"","","Turn on chain for MDC4",kFALSE},
+  {"MDC4New"     ,""  ,"","y2001n,C2default,trs,srs,fss,rrs,big,GeantOut","","",
+                                                     "Turn on chain for MDC4 (for after September)",kFALSE},
   {"PostMDC4"    ,""  ,"","C2001,trs,sss,fss,rrs,big,GeantOut"     ,"","","Turn on Post MDC4 chain",kFALSE},
   {"ppMDC4"      ,""  ,"","pp,C2001,-PreVtx,ppMCTrig,mwc,ppLPeval1,trs,srs,rrs,big,GeantOut",
                                                                     "","","Turn on chain for ppMDC",kFALSE},
@@ -1125,6 +1127,7 @@ void StBFChain::SetGeantOptions(){
 		GetOption("RY2000a")) geantMk->LoadGeometry("detp geometry year2000");
       else {if (GetOption("Y2a"))     geantMk->LoadGeometry("detp geometry YEAR_2A");
       else {if (GetOption("Y2001")  ||
+		GetOption("Y2001n") ||
 		GetOption("RY2001"))  geantMk->LoadGeometry("detp geometry year2001");
       else {if (GetOption("Y2b"))     geantMk->LoadGeometry("detp geometry YEAR_2b");
       //else {if (GetOption("Y2001"))   geantMk->LoadGeometry("detp geometry year2001");
@@ -1200,22 +1203,24 @@ void StBFChain::SetDbOptions(){
   while ((maker = nextMaker.NextMaker())) {
     if (!strcmp(maker->ClassName(),"St_db_Maker")) {
       St_db_Maker *db = (St_db_Maker *) maker;
-        if (GetOption("SD97")) db->SetDateTime("sd97");
-  else {if (GetOption("SD98")) db->SetDateTime("sd98");
-  else {if (GetOption("Y1a"))  db->SetDateTime("year_1a");
-  else {if (GetOption("Y1b"))  db->SetDateTime("year_1b");
-  else {if (GetOption("Y1s"))  db->SetDateTime("year_1s");
-  else {if (GetOption("ES99")) db->SetDateTime("es99");
-  else {if (GetOption("ER99")) db->SetDateTime("er99");
-  else {if (GetOption("DC99")) db->SetDateTime("dc99");
-  else {if (GetOption("Y1d"))  db->SetDateTime("year_1d");
-  else {if (GetOption("Y1e"))  db->SetDateTime("year_1e");
-  else {if (GetOption("Y1h"))  db->SetDateTime("year_1h");
-  else {if (GetOption("Y2000"))db->SetDateTime("year_1h");
-  else {if (GetOption("Y2a"))  db->SetDateTime("year_2a");
-  else {if (GetOption("Y2b"))  db->SetDateTime("year_2b");
-  else {if (GetOption("Y2001"))db->SetDateTime("year_2b");
-  }}}}}}}}}}}}}}
+        if (GetOption("SD97"))  db->SetDateTime("sd97");
+  else {if (GetOption("SD98"))  db->SetDateTime("sd98");
+  else {if (GetOption("Y1a"))   db->SetDateTime("year_1a");
+  else {if (GetOption("Y1b"))   db->SetDateTime("year_1b");
+  else {if (GetOption("Y1s"))   db->SetDateTime("year_1s");
+  else {if (GetOption("ES99"))  db->SetDateTime("es99");
+  else {if (GetOption("ER99"))  db->SetDateTime("er99");
+  else {if (GetOption("DC99"))  db->SetDateTime("dc99");
+  else {if (GetOption("Y1d"))   db->SetDateTime("year_1d");
+  else {if (GetOption("Y1e"))   db->SetDateTime("year_1e");
+  else {if (GetOption("Y1h"))   db->SetDateTime("year_1h");
+  else {if (GetOption("Y2000")) db->SetDateTime("year_1h");
+  else {if (GetOption("Y2a"))   db->SetDateTime("year_2a");
+  else {if (GetOption("Y2b"))   db->SetDateTime("year_2b");
+  else {if (GetOption("Y2001")) db->SetDateTime("year_2b");
+  else {if (GetOption("Y2001n"))db->SetDateTime("year2001"); // Year_2b ** db ** timestamp does not reflect
+                                                             // svt shift. Small hack to make it work.
+  }}}}}}}}}}}}}}}
 	gMessMgr->QAInfo() << db->GetName()
 			   << " Maker set time = "
 			   << db->GetDateTime().GetDate() << "."

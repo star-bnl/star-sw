@@ -1,6 +1,21 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   10/08/98 
-// $Id: St_db_Maker.cxx,v 1.54 2002/01/18 16:18:03 perev Exp $
+// $Id: St_db_Maker.cxx,v 1.55 2002/02/28 23:34:04 jeromel Exp $
 // $Log: St_db_Maker.cxx,v $
+// Revision 1.55  2002/02/28 23:34:04  jeromel
+// Since the svt geant geometry appears to have changed in Spectember 5th 2001,
+// the definition of y2001 geometry must have changed since MDC4 (where y2001
+// was used but the geometry did not have those recent updates). Furthermore,
+// y2001 equates to year_2b for St_db_Maker, that is, timestamp 20010501 that's
+// May 1st 2001. The 'db' entries for svt should also be different. So, we
+// added a hacked entry to correct this very very very confusing issue.
+//
+// 	MDC4New chain added
+// 	Timestamp for this y2001n, will equate to egant geometry y2001
+// 	but a new timestamp in St_db_maker .
+//
+// This allows for re-running through the geant MDC4 produced files using
+// MDC4 chain option in the reco pass and find the same result.
+//
 // Revision 1.54  2002/01/18 16:18:03  perev
 // TimeStamp for absent table fix
 //
@@ -124,12 +139,12 @@ static Int_t AliasTime(const char *alias);
 static const char *aliases[]={
 "sd97",   "sd98",   "year_1a","year_1b","year_1c",
 "es99",   "er99",   "dc99"   ,"year_1d","year_1e",
-"year_1h","year_2a", "year_2b", 0};   
+"year_1h","year_2a", "year_2b", "year2001", 0};   
 
 static const int   dates[]=  {
 19970101, 19980101, 19990101, 19990501, 19991001,
 19990615, 19990616, 19991206, 19991101, 19991201,
-20000614, 20010610, 20010501, 0};
+20000614, 20010610, 20010501, 0, 0};
 static const int   times[]=  {
        0,        0,        0,        0,        0,
        0,   120000,    80000,        0,        0,
