@@ -193,7 +193,7 @@ printf("fppoint[%d].row = %d\n",iPoint,fppoint[iPoint].row);
                 +fptrack[itrk].p[2]*fptrack[itrk].p[2]);
 
 /*  curvature */
-    dst_track[dst_track_h->nok].curvature =  0;
+    dst_track[dst_track_h->nok].curvature =  fptrack[itrk].curvature;
 
 /*  covariance matrix */
 /*  (currently not set for FTPC)  */
