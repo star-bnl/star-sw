@@ -24,7 +24,7 @@ class St_io_Maker : public StMaker {
  private:
    Bool_t drawinit;
    Bool_t fSplit;    // flag of the "split" mode
-// static Char_t  m_VersionCVS = "$Id: St_io_Maker.h,v 1.8 1999/03/05 22:38:51 fine Exp $";
+// static Char_t  m_VersionCVS = "$Id: St_io_Maker.h,v 1.9 1999/03/07 16:38:07 fine Exp $";
 // Int_t          m_mode;        // mode 1 = primaries;
    TFile         *m_TreeRootFile;   //! ROOT file to keep TTRee object in their.
    TObjArray     *m_ListOfBranches; //!
@@ -55,6 +55,7 @@ class St_io_Maker : public StMaker {
    virtual Int_t      GetEvent(Int_t nevent=0);
    virtual Int_t      GetMaxEvent(){ return m_MaxEventToProcess;} 
    virtual Int_t      Init();
+   virtual Bool_t     IsNewTree(Int_t nevent);
    virtual Int_t      Make();
    virtual TTree     *MakeTree(const char* name, const char*title);
            Int_t      NextEventPut();
