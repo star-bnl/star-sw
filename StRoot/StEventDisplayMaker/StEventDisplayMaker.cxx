@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   11/07/99  
-// $Id: StEventDisplayMaker.cxx,v 1.19 1999/08/09 01:36:47 fine Exp $
+// $Id: StEventDisplayMaker.cxx,v 1.20 1999/08/16 16:28:09 fine Exp $
 // $Log: StEventDisplayMaker.cxx,v $
+// Revision 1.20  1999/08/16 16:28:09  fine
+// StVirtualEventFilter has been moved to St_base
+//
 // Revision 1.19  1999/08/09 01:36:47  fine
 // MakeTable methods have been activated
 //
@@ -75,7 +78,7 @@
 #include "StVertices3DPoints.h"
 #include "StHelix3DPoints.h"
 #include "St_Table3Points.h"
-#include "StEvent/StVirtualEventFilter.h"
+#include "StVirtualEventFilter.h"
 #include "St_Table.h"
 #include "St_TableSorter.h"
 
@@ -479,7 +482,7 @@ Int_t StEventDisplayMaker::ParseName(Char_t *inName, Char_t *positions[])
     }
     if (nParsed > 1) {
       for (Int_t i=1;i<nParsed;nParsed++) 
-         if (!positions[i]) Error("ParseName","%s",errorMessages[i-1]);
+         if (!positions[i]) cerr << "StEventDisplayMaker::ParseName" << errorMessages[i-1] << endl;
       if (nParsed < lenExpr) nParsed = 0;
     }
   }
