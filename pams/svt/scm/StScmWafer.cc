@@ -311,6 +311,50 @@ int StScmWafer::doSolvePackage(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl)
  	  mPoint->addNewPoint(newPointB);
           nSolved++;
   	}
+//  ********************************************************************
+      else if(!strcmp(currentKind,"1p1n2n3n"))// case (1-3)A
+ 	{
+	  StScmPoint *newPointA = new StScmPoint(mPoint->getSize(), mId, currentPackage->getNPackage(), 13);
+          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+ 	  newPointA->setEnergyLoss(Adc[0]-Adc[2]-Adc[3], Adc[1]);
+          newPointA->setFlag(100);
+	  mPoint->addNewPoint(newPointA);
+
+	  StScmPoint *newPointB = new StScmPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  13);
+          setMatcheds(geom_par, newPointB, currentPackage->getMatched(0), currentPackage->getMatched(2));
+ 	  newPointB->setEnergyLoss(Adc[0]-Adc[1]-Adc[3], Adc[2]);
+          newPointB->setFlag(100);
+	  mPoint->addNewPoint(newPointB);
+
+	  StScmPoint *newPointC = new StScmPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  13);
+          setMatcheds(geom_par, newPointC, currentPackage->getMatched(0), currentPackage->getMatched(3));
+ 	  newPointC->setEnergyLoss(Adc[0]-Adc[1]-Adc[2], Adc[3]);
+          newPointC->setFlag(100);
+	  mPoint->addNewPoint(newPointC);
+	  nSolved++;
+ 	}
+//  *********************************************************************
+        else if(!strcmp(currentKind,"1p1n2p1n3p1n"))// case (1-3)AS
+  	{
+ 	  StScmPoint *newPointA = new StScmPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  31);
+          setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
+ 	  newPointA->setEnergyLoss(Adc[0], Adc[1]-Adc[2]-Adc[3]);
+          newPointA->setFlag(100);
+ 	  mPoint->addNewPoint(newPointA);
+
+ 	  StScmPoint *newPointB = new StScmPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  31);
+          setMatcheds(geom_par, newPointB, currentPackage->getMatched(2), currentPackage->getMatched(1));
+ 	  newPointB->setEnergyLoss(Adc[2], Adc[1]-Adc[0]-Adc[3]);
+          newPointB->setFlag(100);
+ 	  mPoint->addNewPoint(newPointB);
+
+ 	  StScmPoint *newPointC = new StScmPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  31);
+          setMatcheds(geom_par, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(1));
+ 	  newPointC->setEnergyLoss(Adc[3], Adc[1]-Adc[0]-Adc[2]);
+          newPointC->setFlag(100);
+ 	  mPoint->addNewPoint(newPointC);
+          nSolved++;
+  	}
 // 4 *********************************************************************
         else if(!strcmp(currentKind,"1p1n2n2p2n"))//        case (2-2)A checked
   	{
@@ -1269,8 +1313,9 @@ int StScmWafer::doSolvePackage(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl)
 
           nSolved++;
   	}
+
 // 26 *********************************************************************
-        else if(!strcmp(currentKind,"1p1n2p2n3n3p1n2n3n"))//   case (3-3)CP
+        else if(!strcmp(currentKind,"1p1n2p1n2n3p1n2n3n"))//    case (3-3)CS
   	{
 	  StScmPoint *newPointA = new StScmPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(geom_par, newPointA, currentPackage->getMatched(0), currentPackage->getMatched(1));
@@ -1278,11 +1323,11 @@ int StScmWafer::doSolvePackage(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl)
           newPointA->setFlag(100);
 	  mPoint->addNewPoint(newPointA);
 
-	  StScmPoint *newPointC = new StScmPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
-          setMatcheds(geom_par, newPointC, currentPackage->getMatched(2), currentPackage->getMatched(4));
- 	  newPointC->setEnergyLoss(Adc[2], Adc[4]);
-          newPointC->setFlag(100);
-	  mPoint->addNewPoint(newPointC);
+	  StScmPoint *newPointD = new StScmPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
+          setMatcheds(geom_par, newPointD, currentPackage->getMatched(2), currentPackage->getMatched(4));
+ 	  newPointD->setEnergyLoss(Adc[2], Adc[4]);
+          newPointD->setFlag(100);
+	  mPoint->addNewPoint(newPointD);
 
 	  StScmPoint *newPointF = new StScmPoint(mPoint->getSize(), mId, currentPackage->getNPackage(),  33);
           setMatcheds(geom_par, newPointF, currentPackage->getMatched(5), currentPackage->getMatched(8));
@@ -1292,6 +1337,7 @@ int StScmWafer::doSolvePackage(sdm_geom_par_st *geom_par, scm_ctrl_st *scm_ctrl)
 
           nSolved++;
   	}
+
 // 27 *********************************************************************
         else if(!strcmp(currentKind,"1p1n2n3n2p2n3n3p2n3n"))//   case (3-3)D
   	{
@@ -1927,6 +1973,70 @@ int StScmWafer::convertLocalToGlobal()
   return 1;
 }
 
+
+int StScmWafer::printborder()
+{
+  if (mId==7101){
+    printf("Wafer = %d \n",mId);
+    float activeXs[4],BXs[4],tempXls[4];
+    float activeYs[4],BYs[4],tempYls[4];
+    float activeZs[4],BZs[4],tempZls[4];
+    float activeXe[4],BXe[4],tempXle[4];
+    float activeYe[4],BYe[4],tempYle[4];
+    float activeZe[4],BZe[4],tempZle[4];
+    float wD[3],wT[3],wN[3];
+    float delta = 0;
+
+    activeXs[0]=-3.65,activeXs[1]= 3.65,activeXs[2]= 3.65,activeXs[3]=-3.65;
+    activeYs[0]= 2.00,activeYs[1]= 2.00,activeYs[2]=-2.00,activeYs[3]=-2.00;
+    activeZs[0]= 0.00,activeZs[1]= 0.00,activeZs[2]= 0.00,activeZs[3]= 0.00;
+
+    activeXe[0]= 3.65,activeXe[1]= 3.65,activeXe[2]=-3.65,activeXe[3]=-3.65;
+    activeYe[0]= 2.00,activeYe[1]=-2.00,activeYe[2]=-2.00,activeYe[3]= 2.00;
+    activeZe[0]= 0.00,activeZe[1]= 0.00,activeZe[2]= 0.00,activeZe[3]= 0.00;
+
+    wD[0] = mT[1]*mN[2]-mT[2]*mN[1];
+    wD[1] = mD[2]*mN[1]-mD[1]*mN[2];
+    wD[2] = mD[1]*mT[2]-mD[2]*mT[1];
+    wT[0] = mT[2]*mN[0]-mT[0]*mN[2];
+    wT[1] = mD[0]*mN[2]-mD[2]*mN[0];
+    wT[2] = mD[2]*mT[0]-mD[0]*mT[2];
+    wN[0] = mT[0]*mN[1]-mT[1]*mN[0];
+    wN[1] = mD[1]*mN[0]-mD[0]*mN[1];
+    wN[2] = mD[0]*mT[1]-mD[1]*mT[0];
+    for(int i=0;i<5;i++)
+      {
+	BXs[i]=activeXs[i]+mD[0]*mX[0]+mD[1]*mX[1]+mD[2]*mX[2];
+	BYs[i]=activeYs[i]+mT[0]*mX[0]+mT[1]*mX[1]+mT[2]*mX[2]; 
+	BZs[i]=activeZs[i]+mN[0]*mX[0]+mN[1]*mX[1]+mN[2]*mX[2];
+
+	BXe[i]=activeXe[i]+mD[0]*mX[0]+mD[1]*mX[1]+mD[2]*mX[2];
+	BYe[i]=activeYe[i]+mT[0]*mX[0]+mT[1]*mX[1]+mT[2]*mX[2]; 
+	BZe[i]=activeZe[i]+mN[0]*mX[0]+mN[1]*mX[1]+mN[2]*mX[2];
+
+	tempXls[i] = wD[0]*BXs[i]+wD[1]*BYs[i]+wD[2]*BZs[i];
+	tempYls[i] = wT[0]*BXs[i]+wT[1]*BYs[i]+wT[2]*BZs[i];
+	tempZls[i] = wN[0]*BXs[i]+wN[1]*BYs[i]+wN[2]*BZs[i];
+
+	tempXle[i] = wD[0]*BXe[i]+wD[1]*BYe[i]+wD[2]*BZe[i];
+	tempYle[i] = wT[0]*BXe[i]+wT[1]*BYe[i]+wT[2]*BZe[i];
+	tempZle[i] = wN[0]*BXe[i]+wN[1]*BYe[i]+wN[2]*BZe[i];
+
+      }
+    delta = mD[0]*mT[1]*mN[2]-mD[0]*mT[2]*mN[1]-mD[1]*mT[0]*mN[2]+mD[2]*mT[0]*mN[1]+mD[1]*mT[2]*mN[0]-mD[2]*mT[1]*mN[0]; // change frame =>delta = -1 !..
+
+
+
+    printf("xsSsdLadder%d set {%.2f %.2f %.2f %.2f}\n",mId-7100,tempXls[0]/delta,tempXls[1]/delta,tempXls[2]/delta,tempXls[3]/delta);
+    printf("xeSsdLadder%d set {%.2f %.2f %.2f %.2f}\n",mId-7100,tempXle[0]/delta,tempXle[1]/delta,tempXle[2]/delta,tempXle[3]/delta);
+    printf("ysSsdLadder%d set {%.2f %.2f %.2f %.2f}\n",mId-7100,tempYls[0]/delta,tempYls[1]/delta,tempYls[2]/delta,tempYls[3]/delta);
+    printf("yeSsdLadder%d set {%.2f %.2f %.2f %.2f}\n",mId-7100,tempYle[0]/delta,tempYle[1]/delta,tempYle[2]/delta,tempYle[3]/delta);
+    printf("zsSsdLadder%d set {%.2f %.2f %.2f %.2f}\n",mId-7100,tempZls[0]/delta,tempZls[1]/delta,tempZls[2]/delta,tempZls[3]/delta);
+    printf("zeSsdLadder%d set {%.2f %.2f %.2f %.2f}\n",mId-7100,tempZle[0]/delta,tempZle[1]/delta,tempZle[2]/delta,tempZle[3]/delta);
+
+  }
+  return 1;
+}
 
 StScmWafer::StScmWafer(const StScmWafer & originalWafer)
 {
