@@ -7,6 +7,7 @@
 #ifndef StHbtIOBinary_hh
 #define StHbtIOBinary_hh
 
+
 #include "StHbtMaker/Infrastructure/StHbtV0.hh"
 #include "StHbtMaker/Infrastructure/StHbtTrack.hh"
 #include "StHbtMaker/Infrastructure/StHbtEvent.hh"
@@ -38,9 +39,18 @@ public:
   StHbtIOBinary(const char* dirName, const char* fileName, const char* appendix, const char* readWrite);
   ~StHbtIOBinary();
   
-
+#ifndef SOLARIS
   template<class T> int read(T& x);
   template<class T> int write(const T& x);
+#else
+  int read(unsigned short x) {return 0;}
+  int read(const StHbtTrack) {return 0;}
+  int read(const StHbtV0) {return 0;};
+  int write(const StHbtTrack) {return 0;}
+  int write(unsigned short x) {return 0;}
+  int write(const StHbtV0) {return 0;}
+#endif
+
   int read(StThreeVectorD& x);
   int write(const StThreeVectorD& x);
   int read(StPhysicalHelixD& x);
@@ -102,6 +112,7 @@ inline int StHbtIOBinary::inputStreamStatus() {
   return ioERR;
 }
 
+#ifndef SOLARIS
 template<class T> 
 inline int StHbtIOBinary::read(T& x){
   mIStream->read( (char*)&x, sizeof(x) );
@@ -114,6 +125,8 @@ inline int StHbtIOBinary::write(const T& x){
   byteCounterEvent += sizeof(x);
   return (!mOStream->good());
 }
+#endif
+
 inline int StHbtIOBinary::read(StThreeVectorD& x) {
   int iret;
   double a,b,c; 
@@ -164,6 +177,5 @@ inline int StHbtIOBinary::write(const StPhysicalHelixD& x){
   iret = write(h);
   return (!mOStream->good());
 };
-
 
 #endif
