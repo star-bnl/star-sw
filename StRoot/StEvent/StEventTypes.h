@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEventTypes.h,v 2.7 2000/04/26 20:29:50 ullrich Exp $
+ * $Id: StEventTypes.h,v 2.8 2000/05/22 21:43:06 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StEventTypes.h,v $
- * Revision 2.7  2000/04/26 20:29:50  ullrich
- * Removed obsolete StBrowsableEvent.
+ * Revision 2.8  2000/05/22 21:43:06  ullrich
+ * Add RICH related containers.
  *
  * Revision 2.8  2000/05/22 21:43:06  ullrich
  * Add RICH related containers.
@@ -71,8 +71,13 @@
 #include "StL3Trigger.h"
 #include "StL3SoftwareMonitor.h"
 #include "StMeasuredPoint.h"
+#include "StMwcTriggerDetector.h"
+#include "StPrimaryTrack.h"
+#include "StPrimaryVertex.h"
+#include "StRichCluster.h"
+#include "StRichCollection.h"
+#include "StRichHit.h"
 #include "StRichMCHit.h"
-#include "StRichPixelCollection.h"
 #include "StRichMCInfo.h"
 #include "StRichMCPixel.h"
 #include "StRichPixel.h"
