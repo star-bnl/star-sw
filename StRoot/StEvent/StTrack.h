@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.h,v 1.5 1999/04/30 13:16:29 fisyak Exp $
+ * $Id: StTrack.h,v 1.6 1999/06/23 15:06:16 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,11 @@
  ***************************************************************************
  *
  * $Log: StTrack.h,v $
- * Revision 1.5  1999/04/30 13:16:29  fisyak
- * add StArray for StRootEvent
+ * Revision 1.6  1999/06/23 15:06:16  perev
+ * length of track is added
+ *
+ * Revision 1.6  1999/06/23 15:06:16  perev
+ * length of track is added
  *
  * Revision 1.5  1999/04/30 13:16:29  fisyak
  * add StArray for StRootEvent
@@ -74,12 +77,15 @@
     virtual StVertex*         stopVertex();
     virtual StTrackFitTraits& fitTraits();
 
+    virtual void setHelix(const StPhysicalHelixD&);
+    virtual void setStartVertex(StVertex*);
     virtual void setStopVertex(StVertex*);
     virtual void setLength(float length){mLength=length;};
     virtual float length(){return mLength;};
     StTrackGeometry*               geometry();
     const StTrackGeometry*         geometry() const;
     StPhysicalHelixD  mHelix;
+    StVertex*        mStartVertex;
     StVertex*        mStopVertex;
     StTrackFitTraits mFitTraits;
     float            mLength;
