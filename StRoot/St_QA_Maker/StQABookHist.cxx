@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.31 2000/02/02 16:35:23 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.32 2000/02/03 22:02:30 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.32  2000/02/03 22:02:30  kathy
+// adding histograms for Akio - needed smaller ranges of some of them for use by peripheral collisions group
+//
 // Revision 1.31  2000/02/02 16:35:23  kathy
 // fixing some histograms - booking params
 //
@@ -170,25 +173,30 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
 //  - zero all pointers defined in the header file
 
 // for method MakeEvSum - from table event_summary
-  m_trk_tot_gd = 0;       //! number of good global tracks divided by total
-  m_glb_trk_tot=0;        //! # tracks total from globtrk
-  m_glb_trk_plusminus=0;  //! # trks pos/neg. 
-  m_glb_trk_prim=0;        //! # trks from primaries
+  m_trk_tot_gd = 0;         //! number of good global tracks divided by total
+  m_glb_trk_tot=0;          //! # tracks total from globtrk
+  m_glb_trk_tot_sm=0;       //! # tracks total from globtrk, small range
+  m_glb_trk_plusminus=0;    //! # trks pos/neg. 
+  m_glb_trk_plusminus_sm=0; //! # trks pos/neg., small range
+  m_glb_trk_prim=0;         //! # trks from primaries
+  m_glb_trk_prim_sm=0;      //! # trks from primaries, small range
   m_vert_total=0;    //! total number of vertices
-  //  m_vert_V0=0;       //! number of V0 vertices
+  m_vert_total_sm=0; //! total number of vertices, small range
   m_mean_pt=0;       //! mean pt value
+  m_mean_pt_sm=0;    //! mean pt value, small range
   m_mean_eta=0;      //! mean eta value 
   m_rms_eta=0;       //! rms eta value 
-  //  m_T_average=0;     //! mean Temp
   m_prim_vrtx0=0;    //! primary vrtx x position
   m_prim_vrtx1=0;    //! primary vrtx y position
   m_prim_vrtx2=0;    //! primary vrtx z position
-  //  m_vrtx_chisq=0;    //! primary vrtx chisq
+
   
 // for method MakeGlob - from table globtrk
 
   m_globtrk_tot=0;
+  m_globtrk_tot_sm=0;
   m_globtrk_good=0;
+  m_globtrk_good_sm=0;
   m_globtrk_iflag=0;
   m_det_id=0;
   m_pointT=0;
@@ -346,7 +354,9 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
 // for method MakeHistPrim - from table primtrk
 
   m_primtrk_tot=0;
+  m_primtrk_tot_sm=0;
   m_primtrk_good=0;
+  m_primtrk_good_sm=0;
   m_primtrk_iflag=0;
   m_pdet_id=0;
   m_ppoint=0;
@@ -398,7 +408,10 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_H_vtxy=0;       //! production vertex (mm)
   m_H_vtxz=0;       //! production vertex (mm)
   m_H_npart=0;      //! total num particles generated
+  m_H_npart_sm=0;   //! total num particles generated,small range
   m_H_ncpart=0;     //! number of charged e,mu,proton,kaon,pion
+  m_H_ncpart_sm=0;  //! number of charged e,mu,proton,kaon,pion,small range
+
   
   // for MakeHistV0 - from table dst_v0_vertex
   m_v0           =0; //! # v0 vertices
@@ -410,7 +423,8 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   
   
   // for method MakeHistVertex - from table dst_vertex
-  m_v_num        =0; //! number of vertices
+  m_v_num=0;   //! number of vertices
+  m_v_num_sm=0;//! number of vertices,small range
   m_v_detid=0; //! detector id where vertex was found 
   m_v_vtxid=0; //! vertex type
   m_v_x=0;     //! vertex coordinates in
@@ -545,27 +559,37 @@ void StQABookHist::BookHistEvSum(){
 // for method MakeEvSum - from table event_summary
 
   m_trk_tot_gd    = QAH1F("QaEvsumTrkGoodDTotal",
-    "evsum: num good track over total",  55,0.,1.1);
+                   "evsum: num good global tracks over total",  55,0.,1.1);
     m_trk_tot_gd->SetXTitle("number of good/total tracks");
 
-  m_glb_trk_tot   = QAH1F("QaEvsumTrkTot","evsum: num tracks total ",
+  m_glb_trk_tot      = QAH1F("QaEvsumTrkTot","evsum: num tracks total ",
                              ntrk, 0., 10000.);
-  m_glb_trk_plusminus  = QAH1F("QaEvsumPlusMinusTrk", "evsum: num pos. over neg trks",
+  m_glb_trk_tot_sm   = QAH1F("QaEvsumTrkTotsm","evsum: num tracks total ",
+                             ntrk, 0., 20.);
+
+  m_glb_trk_plusminus     = QAH1F("QaEvsumPlusMinusTrk", "evsum: num pos. over neg trks",
                              ntrk,0.8,1.4);
-  m_glb_trk_prim    = QAH1F("QaEvsumTrkPrim","evsum: num good tracks from primaries ",
+  m_glb_trk_plusminus_sm  = QAH1F("QaEvsumPlusMinusTrksm", "evsum: num pos. over neg trks",
+                             ntrk,0.,4.);
+
+  m_glb_trk_prim       = QAH1F("QaEvsumTrkPrim","evsum: num good tracks from primaries ",
                              80, 0.,4000.);
+  m_glb_trk_prim_sm    = QAH1F("QaEvsumTrkPrimsm","evsum: num good tracks from primaries ",
+                             80, 0.,20.);
 	  
-  m_vert_total = QAH1F("QaEvsumVertTot", "evsum: total num of vertices",80,0.,2000.);
-  //  m_vert_V0    = QAH1F("QaEvsumVertV0", "evsum: num V0 vertices",80,0.,8000.); 
+  m_vert_total    = QAH1F("QaEvsumVertTot", "evsum: total num of vertices",80,0.,2000.);
+  m_vert_total_sm = QAH1F("QaEvsumVertTotsm", "evsum: total num of vertices",80,0.,20.);
  
-  m_mean_pt    = QAH1F("QaEvsumMeanPt",   "evsum: mean pt", nmnpt, 0., 2.0);
+  m_mean_pt       = QAH1F("QaEvsumMeanPt",   "evsum: mean pt", nmnpt, 0., 2.0);
+  m_mean_pt_sm    = QAH1F("QaEvsumMeanPtsm",   "evsum: mean pt", nmnpt, 0., 0.5);
+
   m_mean_eta   = QAH1F("QaEvsumMeanEta",  "evsum: mean eta", nmneta, -0.4,0.4);
-  m_rms_eta    = QAH1F("QaEvsumRmsEta",   "evsum: rms eta", nmneta, -2.5,2.5);
-  //  m_T_average  = QAH1F("QaEvsumMeanTemp", "evsum: mean Temp", nmneta, 0., 0.5);
+  m_rms_eta    = QAH1F("QaEvsumRmsEta",   "evsum: rms eta", nmneta, 0.,2.5);
+
   m_prim_vrtx0 = QAH1F("QaEvsumPrimVertX","evsum: X of primary vertex", 40, -1.,1.);
   m_prim_vrtx1 = QAH1F("QaEvsumPrimVertY","evsum: Y of primary vertex", 40,-1.,1.);
   m_prim_vrtx2 = QAH1F("QaEvsumPrimVertZ","evsum: Z of primary vertex", nxyz,-50., 50.);
-  //  m_vrtx_chisq = QAH1F("QaEvsumVrtxChisq","evsum: chisq of primary vertex",nchisq, 0., 10.); 
+
   
 }
 //_____________________________________________________________________________
@@ -575,12 +599,15 @@ void StQABookHist::BookHistGlob(){
 
 // 1D general
 
-  m_globtrk_tot   = QAH1F("QaGtrkTot",  "globtrk: tot num tracks - all",40,0.,10000.);
-  m_globtrk_iflag = QAH1F("QaGtrkFlag", "globtrk: iflag - all ",160,-799.,801.);
+  m_globtrk_tot     = QAH1F("QaGtrkTot",  "globtrk: tot num tracks - all",40,0.,10000.);
+  m_globtrk_tot_sm  = QAH1F("QaGtrkTotsm",  "globtrk: tot num tracks - all",40,0.,20.);
 
-  m_globtrk_good  = QAH1F("QaGtrkGood", "globtrk: tot good tracks - all",40,0.,10000.);  
-  m_det_id        = QAH1F("QaGtrkDetId","globtrk: Detector ID good tracks - all",25,0.,25.);
+  m_globtrk_iflag   = QAH1F("QaGtrkFlag", "globtrk: iflag - all ",160,-799.,801.);
 
+  m_globtrk_good    = QAH1F("QaGtrkGood", "globtrk: tot good tracks - all",40,0.,10000.);
+  m_globtrk_good_sm = QAH1F("QaGtrkGoodsm", "globtrk: tot good tracks - all",40,0.,20.);
+  
+  m_det_id          = QAH1F("QaGtrkDetId","globtrk: Detector ID good tracks - all",25,0.,25.);
 
 // 1D tpc
 
@@ -891,10 +918,12 @@ void StQABookHist::BookHistPrim(){
 // for method MakeHistPrim - from table primtrk
 
 // 1D
-  m_primtrk_tot   = QAH1F("QaPtrkTot",  "primtrk: tot num tracks - all",100,0.,5000.);
-  m_primtrk_iflag = QAH1F("QaPtrkFlag", "primtrk: iflag - all",160,-799.,801.);
-
-  m_primtrk_good  = QAH1F("QaPtrkGood",  "primtrk: tot num good tracks - all",50,0.,2500.);  
+  m_primtrk_tot     = QAH1F("QaPtrkTot",   "primtrk: tot num tracks - all",100,0.,5000.);
+  m_primtrk_tot_sm  = QAH1F("QaPtrkTotsm", "primtrk: tot num tracks - all",100,0.,20.);
+  m_primtrk_iflag   = QAH1F("QaPtrkFlag",  "primtrk: iflag - all",160,-799.,801.);
+  m_primtrk_good    = QAH1F("QaPtrkGood",  "primtrk: tot num good tracks - all",50,0.,2500.);
+  m_primtrk_good_sm = QAH1F("QaPtrkGoodsm","primtrk: tot num good tracks - all",50,0.,20.);
+  
   m_pdet_id     = QAH1F("QaPtrkDetId",   "primtrk: Detector ID good tracks - all",25,0.,25.);
 
   m_ppoint      = QAH1F("QaPtrkNPnt",    "primtrk: N points on track",     60, 0.,60.);
@@ -1022,8 +1051,12 @@ void StQABookHist::BookHistDE(){
 void StQABookHist::BookHistGen(){
 
   // for MakeHistGen - from table particle
-  m_H_npart   = QAH1F("QaEvgenNPart",      "particle:total num particles (generated)",100,0.,30000.);
-  m_H_ncpart  = QAH1F("QaEvgenNChgPart",   "particle:num chg (e,mu,pi,K,p) part (generated)",100,0.,20000.);
+  m_H_npart     = QAH1F("QaEvgenNPart",      "particle:total num particles (generated)",100,0.,30000.);
+  m_H_npart_sm  = QAH1F("QaEvgenNPartsm",    "particle:total num particles (generated)",20,0.,20.);
+  m_H_ncpart    = QAH1F("QaEvgenNChgPart",   "particle:num chg (e,mu,pi,K,p) part (generated)",
+                       100,0.,20000.);
+  m_H_ncpart_sm = QAH1F("QaEvgenNChgPartsm", "particle:num chg (e,mu,pi,K,p) part (generated)",
+                       20,0.,20.);
   m_H_pT_gen  = QAH1F("QaEvgenPt",         "particle: charged pt (generated)",nxpT,xminpT,xmaxpT);
   m_H_eta_gen = QAH1F("QaEvgenEta",        "particle: charged eta (generated)",60,-6.,6.);
   m_H_pT_eta_gen = QAH2F("QaEvgenPtVsEta", "particle: charged pT versus eta (generated)",
@@ -1062,6 +1095,7 @@ void StQABookHist::BookHistVertex(){
   
   
   m_v_num   = QAH1F("QaVtxNum",  " vertex: num vertices ",50,0.,2000.);
+  m_v_num_sm= QAH1F("QaVtxNumsm",  " vertex: num vertices ",50,0.,20.);
 
   m_v_detid = QAH1F("QaVtxDetId"," vertex,2ndary: Detector ID ",100,0.,10000.);
   m_v_vtxid = QAH1F("QaVtxVtxId"," vertex,2ndary: Vertex ID ",10,0.,10.);
