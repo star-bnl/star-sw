@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StEstTracker.cxx,v 1.6 2001/03/02 16:23:49 lmartin Exp $ 
+ * $Id: StEstTracker.cxx,v 1.7 2001/03/19 16:09:03 lmartin Exp $ 
  *
  * Author: PL,AM,LM,CR (Warsaw,Nantes)
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StEstTracker.cxx,v $
+ * Revision 1.7  2001/03/19 16:09:03  lmartin
+ * GetVertexZ method added.
+ *
  * Revision 1.6  2001/03/02 16:23:49  lmartin
  * New method CumulEval to save the tracking performances.
  *
@@ -707,4 +710,8 @@ void StEstTracker::CumulEval(long* CumulIdealPrim,
   *CumulBadPrim=*CumulBadPrim+mNBadPrim;
   *CumulBadSeco=*CumulBadSeco+mNBadSeco;
   *CumulEvents=*CumulEvents+1;
+}
+
+float StEstTracker::GetVertexZ() {
+  return mVertex->GetGlobX()->z();
 }
