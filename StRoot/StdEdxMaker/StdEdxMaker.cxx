@@ -1,4 +1,4 @@
-// $Id: StdEdxMaker.cxx,v 1.9 2001/03/21 16:25:22 fisyak Exp $
+// $Id: StdEdxMaker.cxx,v 1.10 2001/03/23 20:00:28 fisyak Exp $
 #include <iostream.h>
 #include "StdEdxMaker.h"
 // ROOT
@@ -211,9 +211,9 @@ Int_t StdEdxMaker::Init(){
       TPoints  = new TH3F("TPoints","dEdx(fit) versus no. of measured points and length", 
 			  50,0,50., 150,10.,160., 200,-1.,1.);
       FShapeI  = new TH2F("FShapeI","(log(dEdx)-<z_{fit}>)*(dx)**0.36 versus log(dx) for Inner Sector", 
-			  80,0, 4., 400,-10.,10.);
+			  26,0.1, 1.4, 800,-15.,25.);
       FShapeO  = new TH2F("FShapeO","(log(dEdx)-<z_{fit}>)*(dx)**0.36 versus log(dx) for Outer Sector", 
-			  80,0, 4., 400,-10.,10.);
+			  36,0.6, 2.4, 800,-15.,25.);
       for (int hyp=0; hyp<NHYPS;hyp++) {
 	for (int sCharge = 0; sCharge < 2; sCharge++) {
 	  TString nameP = Names[hyp];
@@ -553,7 +553,7 @@ Int_t StdEdxMaker::Make(){
     }
     Double_t chisq, fitZ, fitdZ;
     DoFitZ(chisq, fitZ, fitdZ);
-    fitdZ *= 1.32920; // scale errors
+    fitdZ *= 1.32920/(1.01405e+00 -8.12759e-04*TrackLength); // scale errors
     if (chisq > 0 && chisq < 10000.0) {
       dedx.id_track  =  Id;
       dedx.det_id    =  kTpcId;    // TPC track 
@@ -737,6 +737,7 @@ Double_t StdEdxMaker::MyDate(Int_t date,Int_t time) {// combine date in time in 
 void fGaus(Double_t x, Double_t *val, ESector l){
   static const Int_t NpGaus = 12;
   static Double_t parGaus[2][NpGaus] = {
+#if 0
   {0.023172, 1.437271, 2.460729, // inner
    0.103880, 0.242696, 1.577239,
    0.195327,-0.024190, 0.889409,
@@ -745,6 +746,31 @@ void fGaus(Double_t x, Double_t *val, ESector l){
    0.073707, 0.963552, 1.515737,
    0.048300,-0.318190, 1.308623,
    0.200573,-0.038547,-0.945790}
+  {0.025611, 1.418447,2.220133,  // inner 
+   0.121489, 0.201385,1.415622,
+   0.000408,-4.223811,0.757573,
+   0.202918, 0.006651,0.836666},
+  {0.013792, 2.854905, 2.672949, // outer
+   0.068082, 1.024063, 1.654282,
+   0.066709,-0.199578,-1.401709,
+   0.156028,-0.045180,-1.000343}
+  {0.027301, 1.259608,2.255916, // inner
+   0.119186, 0.233070,1.401950,
+   0.009470,-1.188956,0.585663,
+   0.205339, 0.030715,0.802100},
+  {0.013503, 2.878258,2.676623,
+   0.070468, 0.971207,1.674857,
+   0.064795,-0.199962,-1.387658,
+   0.153726,-0.041741,-1.008292}
+#endif
+  {0.025665, 1.423958,2.213710,
+   0.123577, 0.193294,1.408513,
+   0.000420,-4.221713,0.769640,
+   0.203597, 0.005066,0.823813},
+  {0.013443, 2.874708,2.680563,
+   0.064505, 1.049656,1.669515,
+   0.070611,-0.159342,1.408693,
+   0.154166,-0.044689,1.011159}
   };
   val[0] = val[1] = 0;
   for (Int_t j=0; j<NpGaus; j+=3){
