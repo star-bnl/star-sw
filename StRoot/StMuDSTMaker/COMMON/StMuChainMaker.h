@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.h,v 1.10 2003/04/15 16:17:11 laue Exp $
+ * $Id: StMuChainMaker.h,v 1.11 2003/04/21 18:18:53 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 /** @class StMuChainMaker
@@ -10,49 +10,67 @@
 #ifndef StMuChainMaker_hh
 #define StMuChainMaker_hh
 
+
+#include <vector>
+#include <utility>
 #include <string>
 #if !defined(ST_NO_NAMESPACES)
 using namespace std;
 #endif
 
 
+typedef pair<string,int> StMuStringIntPair;
+typedef vector<StMuStringIntPair> StMuStringIntPairVector;
+typedef vector<StMuStringIntPair>::iterator StMuStringIntPairVectorIterator;
+
 class TChain;
 class StMuDbReader;
 
 class StMuChainMaker  {
- public:
-  StMuChainMaker(const char* name="MuDst");
-  virtual ~StMuChainMaker();
+public:
+    StMuChainMaker(const char* name="MuDst");
+    virtual ~StMuChainMaker();
+    static void setUseFileCatalog(const char* connection="mysql://duvall.star.bnl.gov:3306/FileCatalog_BNL") {
+	mSQLConnection = string(connection);
+    }
+    
+    TChain* make(string dir, string file, string filter, int maxFiles=10);
+    void fromFileCatalog(string file);
+    void fromList(string file);
+    void fromFile(string file);
+    void fromDir(string dir);
+    
+    void subFilter(string filter);
+    string basename(string);
+    string dirname(string);
+    string buildFileName(string dir, string fileName, string extention);
 
-  void subFilter(string filter);
-  TChain* make(string dir, string file, string filter, int maxFiles=10);
-  void fromFileCatalog(string file,int maxFiles);
-  void fromList(string file,int maxFiles);
-  void fromFile(string file, int maxFiles);
-  void fromDir(string dir, int maxFiles);
-
-  string basename(string);
-  string dirname(string);
-  string buildFileName(string dir, string fileName, string extention);
-
- private:
-  TChain *mChain;
-  StMuDbReader* mDbReader;
-  string mSubFilters[100];
-  string mTreeName;
-  int mFileCounter;
-  
-  bool pass(string file, string*  filters);
-  void add(string file);
-
+private:
+    static string mSQLConnection;
+    TChain *mChain;
+    StMuDbReader* mDbReader;
+    string mSubFilters[100];
+    string mTreeName;
+    int mFileCounter;
+    int mMaxFiles;
+    StMuStringIntPairVector mFileList;
+    bool pass(string file, string*  filters);
+    void add(StMuStringIntPairVector);
+    void add(StMuStringIntPair);
+    
     ClassDef(StMuChainMaker,0)
-};
+	};
 
 #endif
 
 /***************************************************************************
  *
  * $Log: StMuChainMaker.h,v $
+ * Revision 1.11  2003/04/21 18:18:53  laue
+ * Modifications for the new scheduler implementation:
+ * - the filenames and the number of events per files are now supplied
+ * - files on local disk are given in the rootd format
+ *
  * Revision 1.10  2003/04/15 16:17:11  laue
  * Minor changes to be able to filter MuDst.root files. The StMuDstFilterMaker
  * is just an example of how to do it. It has be be customized (spoilers,

@@ -27,7 +27,7 @@ void load() {
 }
 
 
-void SchedulerExample(const char* fileList, const char* outFile) {
+void SchedulerExample(const char* fileList, const char* outFile="SchedulerExample.root") {
   load();
 
   // create the chain
@@ -43,6 +43,7 @@ void SchedulerExample(const char* fileList, const char* outFile) {
   // "" : filter 
   // 1e9 : maximum number of files to read
   // MuDstMaker : name of the maker
+  //cout << " press any key " << endl; cin.ignore();
   StMuDebug::setLevel(0);
   StMuDstMaker* muDstMaker = new StMuDstMaker(0,0,"",fileList,"",10,"MuDstMaker");
 

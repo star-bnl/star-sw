@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuChainMaker.cxx,v 1.17 2003/04/15 16:15:29 laue Exp $
+ * $Id: StMuChainMaker.cxx,v 1.18 2003/04/21 18:18:52 laue Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -22,6 +22,8 @@
 
 extern TSystem* gSystem;
 
+string StMuChainMaker::mSQLConnection ="";
+
 ClassImp(StMuChainMaker)
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -29,13 +31,13 @@ ClassImp(StMuChainMaker)
 /**
    Constructor: The argument 'name' is the name of the TTrees be chained   
 */
-StMuChainMaker::StMuChainMaker(const char* name) : mTreeName(name) {
-  DEBUGMESSAGE2("");
-  mChain = new TChain(mTreeName.c_str());
-  mChain->SetDirectory(0);
-  mDbReader = StMuDbReader::instance();
-  mFileCounter=0;
-  //  mSubFilters = new string[100];
+    StMuChainMaker::StMuChainMaker(const char* name) : mTreeName(name) {
+    DEBUGMESSAGE2("");
+    mChain = new TChain(mTreeName.c_str());
+    mChain->SetDirectory(0);
+    mDbReader = StMuDbReader::instance();
+    mFileCounter=0;
+    //  mSubFilters = new string[100];
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -118,25 +120,22 @@ string StMuChainMaker::dirname(string s){
  */
 TChain* StMuChainMaker::make(string dir, string file, string filter, int maxFiles) {
   DEBUGMESSAGE1("");
+  mMaxFiles = maxFiles;
   subFilter(filter);
 
-  //  for (int i=0; i<1e6; i++) double ii=pow(2,i);
+  string dirFile = dir+file;
+  DEBUGVALUE1(dir.c_str());
+  DEBUGVALUE1(file.c_str());
+  DEBUGVALUE1(dirFile.c_str());
 
-  if (file!="") {
-    if (file.find(".lis")!=string::npos) {
-	/*
-	  if (file.find(".list")!=string::npos) 
-	  fromFileCatalog(file, maxFiles);
-	  else
-	*/
-      fromList(file, maxFiles);
-    }
-    if (file.find(".files")!=string::npos) fromList(file, maxFiles);
-    if (file.find(".MuDst.root")!=string::npos) fromFile(file, maxFiles);
-  }
-  else {
-    fromDir(dir, maxFiles);
-  }
+  if (dirFile.find(".lis")!=string::npos) 	        fromList(dirFile);
+  else if (dirFile.find(".files")!=string::npos)        fromList(dirFile);
+  else if (dirFile.find(".MuDst.root")!=string::npos)   fromFile(dirFile);
+  else if (dirFile.rfind("/") == dirFile.length()-1 )   fromDir(dirFile);
+  else                                                  FORCEDDEBUGMESSAGE(" don't know how to read input ");
+
+  add( mFileList );
+  
   DEBUGMESSAGE2("return");
   return mChain;
 }
@@ -166,38 +165,62 @@ void StMuChainMaker::subFilter(string filter) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuChainMaker::add(string file) {
-  DEBUGMESSAGE3("");
-  /// if no entries in db, just add file
-  DEBUGVALUE2(file.c_str());
+void StMuChainMaker::add( StMuStringIntPairVector fileList ) {
+    DEBUGMESSAGE3("");
+    // if no entries in db, just add file
 
-  int entries;
+    StMuStringIntPairVectorIterator iter;
+    for ( iter=fileList.begin(); iter!=fileList.end(); iter++) {
+	if (mFileCounter>=mMaxFiles) break;
+	add( *iter );
+    }
+}	
 
-  // read number of events in file from db
-  entries = mDbReader->entries(file.c_str());
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+//-----------------------------------------------------------------------
+void StMuChainMaker::add( StMuStringIntPair filenameEvents) { 
+    string file = filenameEvents.first;
+    int entries = filenameEvents.second;
 
-  entries = 10000;
-  // if I can not read the number of events from db, open file and read number.
-  if (entries==0) {
-    TFile f1(file.c_str());
-    TTree *tree = (TTree*)dynamic_cast<TTree*>(f1.Get("MuDst"));
-    if (tree) entries = (int)tree->GetEntries();
-    f1.Close();
-  } 
-
-  // add to chain if #events > 0
-  if (entries) {
+    string rootdTag = "root://";
+    // if this is a rootd file, check whether you are on the corresponding host
+    //cout << file.c_str() << endl;
+    if ( file.find(rootdTag)==0 ) {
+	// get local machine name 
+	string machine(gSystem->Getenv("HOST"));
+	if (machine.find("rcas")!=string::npos) machine += ".rcf.bnl.gov";
+	if (machine.find("pdsf")!=string::npos) machine += ".nersc.gov";
+	//cout << machine.c_str() << endl;
+	// get name of machine holding the file
+	int pos = file.find("//",rootdTag.length());
+	string node = file.substr(rootdTag.length(),pos-rootdTag.length());
+	//cout << node.c_str() << endl;
+	if ( node == machine ) {
+	    cout << " filename changed from " << file.c_str();  
+	    file.erase(0,pos+1);
+	    cout << " to : " << file.c_str() << endl;
+	}
+    }
+    
+    if (entries==0) { // try to read the number of event from the db reader 
+	entries = mDbReader->entries(file.c_str());
+    }
+    if (entries==0) { // open the file and get the number of events
+	TFile f1(file.c_str());
+	TTree* tree = (TTree*)dynamic_cast<TTree*>(f1.Get("MuDst"));
+	if (tree) entries = (int)tree->GetEntries();
+	f1.Close();
+    }
     mChain->Add( file.c_str(), entries );
     mFileCounter++;
-  }
-    
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuChainMaker::fromDir(string dir, int maxFiles) {
+void StMuChainMaker::fromDir(string dir) {
   DEBUGMESSAGE2("");
-  DEBUGVALUE(gSystem);
+  DEBUGVALUE2(gSystem);
 
   void *pDir = gSystem->OpenDirectory(dir.c_str());
   // now find the files that end in the specified extention
@@ -210,13 +233,11 @@ void StMuChainMaker::fromDir(string dir, int maxFiles) {
     if ( name.find(".MuDst.root")==string::npos ) good=false;
     if ( good && pass(name,mSubFilters) ) {
       char* fullFile = gSystem->ConcatFileName(dir.c_str(),fileName);
-      // add it to the chain
-      add( fullFile );
+      // add it to the list of files
+      mFileList.push_back( StMuStringIntPair( fullFile, 0 ) );
       delete []fullFile;
     }
-    if(mFileCounter >= maxFiles) break;
   }   
-  DEBUGVALUE2(mFileCounter);
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -224,9 +245,9 @@ void StMuChainMaker::fromDir(string dir, int maxFiles) {
 #include "TSQLServer.h"
 #include "TSQLResult.h"
 #include "TSQLRow.h"
-void StMuChainMaker::fromFileCatalog(string list, int maxFiles) { 
+void StMuChainMaker::fromFileCatalog(string list) { 
   DEBUGMESSAGE2("");
-  TSQLServer* server = TSQLServer::Connect("mysql://duvall.star.bnl.gov:3306/FileCatalog_BNL","","");
+  TSQLServer* server = TSQLServer::Connect(mSQLConnection.c_str(),"","");
   if ( !server ) DEBUGMESSAGE("could not connect to server");
 
   /// get machine name 
@@ -249,10 +270,12 @@ void StMuChainMaker::fromFileCatalog(string list, int maxFiles) {
     string path = full.substr(0,split);
     DEBUGVALUE(path);
     DEBUGVALUE(name);
-    if (path.find("/star/data/")==string::npos) // if it's a local disk, then add the machine name to the query
-      files += " || (filePath='" + path + "'&&fileName='" + name +"')";
-    else
-      files += " || (filePath='" + path + "'&&fileName='" + name + "'&&nodeName='" + machine + "')";
+    if (path.find("/star/data")==0) { // if it's NFS  disk
+	files += " || (filePath='" + path + "'&&fileName='" + name +"')";
+    }
+    else { // if it's a local disk, then add the maschine to the querey
+	files += " || (filePath='" + path + "'&&fileName='" + name + "'&&nodeName='" + machine + "')";
+    }
   }
   in.close();
 	  
@@ -263,6 +286,7 @@ void StMuChainMaker::fromFileCatalog(string list, int maxFiles) {
   timer.stop();
   timer.reset();
   string query = "SELECT filePath,fileName,numEntries FROM FileData LEFT JOIN FileLocations USING (fileDataId) WHERE " + files;
+  DEBUGVALUE2(query.c_str());
   TSQLResult* result = server->Query(query.c_str());
   timer.stop();
   
@@ -278,8 +302,7 @@ void StMuChainMaker::fromFileCatalog(string list, int maxFiles) {
     file += +"/";
     file += row->GetField(1);
     entries = atoi(row->GetField(2));
-    mChain->Add( file.c_str(), entries );
-    mFileCounter++;
+    mFileList.push_back( StMuStringIntPair(file, entries ));
   }
 
   server->Close();
@@ -289,119 +312,125 @@ void StMuChainMaker::fromFileCatalog(string list, int maxFiles) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuChainMaker::fromList(string list, int maxFiles) {
+void StMuChainMaker::fromList(string list) {
   DEBUGMESSAGE2("");
   ifstream* inputStream = new ifstream;
   inputStream->open(list.c_str());
   if (!(inputStream)) {
     DEBUGMESSAGE("can not open list file");
   }
-  char* temp;
+  char line[512];
+  char name[500];
   DEBUGVALUE(inputStream->good());
   for (;inputStream->good();) {
-    temp = new char[200];
-    inputStream->getline(temp,200);
-    if ( pass(temp,mSubFilters) ) {
-      add(temp);
-    }
-    delete []temp;
-    if (mFileCounter>=maxFiles) break;
+      inputStream->getline(line,512);
+      if  ( inputStream->good() ) {
+	  int numberOfEvents = 0;
+	  int iret = sscanf(line,"%s%i",name, &numberOfEvents);
+	  if ( pass(name,mSubFilters) ) {
+	      mFileList.push_back( StMuStringIntPair( name, numberOfEvents) );
+	  }
+      }
   }   
   delete inputStream;
-  DEBUGVALUE2(mFileCounter);
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-void StMuChainMaker::fromFile(string file, int maxFiles) {
+void StMuChainMaker::fromFile(string file) {
   DEBUGMESSAGE2("");
   DEBUGMESSAGE2(mTreeName.c_str());
-  add( file );
+  mFileList.push_back( StMuStringIntPair( file, 0 ) );
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-bool StMuChainMaker::pass(string file, string* filters) {
-  bool good = true;
-  int n=0;
-  while (filters[n].find("endOfFilters")==string::npos  && good) {
-    if ( StMuDebug::level()==3 ) printf("%s %s %d ",file.c_str(),filters[n].c_str(), file.find(filters[n])==string::npos);
-    if ( (file.find(filters[n])==string::npos) ) good=false;
-    if ( StMuDebug::level()==3 ) printf("good= %d \n",good);
-    n++;
-  }
-  DEBUGVALUE3(good);
-  return good;
-}
-/***************************************************************************
- *
- * $Log: StMuChainMaker.cxx,v $
- * Revision 1.17  2003/04/15 16:15:29  laue
- * Minor changes to be able to filter MuDst.root files and an example
- * how to do this. The StMuDstFilterMaker is just an example, it has to be
- * customized (spoilers, chrome weels, etc.) by the user.
- *
- * Revision 1.16  2003/03/19 18:58:04  laue
- * StMuChainMaker: updates for moved file catalog
- * StTriggerIdCollection added to the createStEvent function in StMuDst.cxx
- *
- * Revision 1.15  2003/03/06 01:34:18  laue
- * StAddRunInfoMaker is a make helper maker to add the StRunInfo for the
- * only year1 Au+Au 130GeV data
- *
- * Revision 1.14  2003/01/22 13:49:12  laue
- * debug message removed
- *
- * Revision 1.13  2003/01/10 16:37:37  laue
- * Bug fix for FileCatalog look-up. Don't require machine for NFS files on
- * /star/data... . I know a hard-wired string this is not the nice way to do
- * it, I'll improve this once I find the time.
- *
- * Revision 1.12  2002/12/31 19:52:11  laue
- * bug fix in built of filters
- *
- * Revision 1.11  2002/12/19 19:44:25  laue
- * update to read number of events from database, for files ending with .list
- *
- * Revision 1.10  2002/11/27 20:37:02  laue
- * output removed
- *
- * Revision 1.9  2002/11/18 14:29:31  laue
- * update for Yuri's new StProbPidTraits
- *
- * Revision 1.8  2002/10/01 23:46:13  laue
- * setting all unused subFilters explicitly to NULL
- *
- * Revision 1.7  2002/08/27 21:20:07  laue
- * Fei Du's request
- * fileCouter>maxFiles changed to fileCounter>=maxFiles
- * Now maxFiles and not maxFiles+1 are added to the list
- *
- * Revision 1.6  2002/08/20 19:55:48  laue
- * Doxygen comments added
- *
- * Revision 1.5  2002/05/04 23:56:29  laue
- * some documentation added
- *
- * Revision 1.4  2002/04/17 21:04:15  laue
- * minor updates
- *
- * Revision 1.3  2002/04/15 22:18:15  laue
- * bug fix in reading of single file
- *
- * Revision 1.2  2002/04/11 14:19:30  laue
- * - update for RH 7.2
- * - decrease default arrays sizes
- * - add data base readerfor number of events in a file
- *
- * Revision 1.1  2002/04/01 22:42:29  laue
- * improved chain filter options
- *
- *
- **************************************************************************/
-
-
-
+ bool StMuChainMaker::pass(string file, string* filters) {
+     bool good = true;
+     int n=0;
+     while (filters[n].find("endOfFilters")==string::npos  && good) {
+	 if ( StMuDebug::level()==3 ) printf("%s %s %d ",file.c_str(),filters[n].c_str(), file.find(filters[n])==string::npos);
+	 if ( (file.find(filters[n])==string::npos) ) good=false;
+	 if ( StMuDebug::level()==3 ) printf("good= %d \n",good);
+	 n++;
+     }
+     DEBUGVALUE3(good);
+     return good;
+ }
+ /***************************************************************************
+  *
+  * $Log: StMuChainMaker.cxx,v $
+  * Revision 1.18  2003/04/21 18:18:52  laue
+  * Modifications for the new scheduler implementation:
+  * - the filenames and the number of events per files are now supplied
+  * - files on local disk are given in the rootd format
+  *
+  * Revision 1.17  2003/04/15 16:15:29  laue
+  * Minor changes to be able to filter MuDst.root files and an example
+  * how to do this. The StMuDstFilterMaker is just an example, it has to be
+  * customized (spoilers, chrome weels, etc.) by the user.
+  *
+  * Revision 1.16  2003/03/19 18:58:04  laue
+  * StMuChainMaker: updates for moved file catalog
+  * StTriggerIdCollection added to the createStEvent function in StMuDst.cxx
+  *
+  * Revision 1.15  2003/03/06 01:34:18  laue
+  * StAddRunInfoMaker is a make helper maker to add the StRunInfo for the
+  * only year1 Au+Au 130GeV data
+  *
+  * Revision 1.14  2003/01/22 13:49:12  laue
+  * debug message removed
+  *
+  * Revision 1.13  2003/01/10 16:37:37  laue
+  * Bug fix for FileCatalog look-up. Don't require machine for NFS files on
+  * /star/data... . I know a hard-wired string this is not the nice way to do
+  * it, I'll improve this once I find the time.
+  *
+  * Revision 1.12  2002/12/31 19:52:11  laue
+  * bug fix in built of filters
+  *
+  * Revision 1.11  2002/12/19 19:44:25  laue
+  * update to read number of events from database, for files ending with .list
+  *
+  * Revision 1.10  2002/11/27 20:37:02  laue
+  * output removed
+  *
+  * Revision 1.9  2002/11/18 14:29:31  laue
+  * update for Yuri's new StProbPidTraits
+  *
+  * Revision 1.8  2002/10/01 23:46:13  laue
+  * setting all unused subFilters explicitly to NULL
+  *
+  * Revision 1.7  2002/08/27 21:20:07  laue
+  * Fei Du's request
+  * fileCouter>maxFiles changed to fileCounter>=maxFiles
+  * Now maxFiles and not maxFiles+1 are added to the list
+  *
+  * Revision 1.6  2002/08/20 19:55:48  laue
+  * Doxygen comments added
+  *
+  * Revision 1.5  2002/05/04 23:56:29  laue
+  * some documentation added
+  *
+  * Revision 1.4  2002/04/17 21:04:15  laue
+  * minor updates
+  *
+  * Revision 1.3  2002/04/15 22:18:15  laue
+  * bug fix in reading of single file
+  *
+  * Revision 1.2  2002/04/11 14:19:30  laue
+  * - update for RH 7.2
+  * - decrease default arrays sizes
+  * - add data base readerfor number of events in a file
+  *
+  * Revision 1.1  2002/04/01 22:42:29  laue
+  * improved chain filter options
+  *
+  *
+  **************************************************************************/
+ 
+ 
+ 
 
 
 

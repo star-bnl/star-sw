@@ -24,19 +24,18 @@ char* outFile="test.root") {
   gROOT->LoadMacro("StRoot/StMuDSTMaker/COMMON/macros/loadSharedLibraries.C");
   loadSharedLibraries();
 
-   StMuDebug::setLevel(0);  
-   StMuDbReader* db = StMuDbReader::instance();
-   db->addDb("/star/u/laue/afsWork/P02gc.db");
-   db->addDb("/star/u/laue/afsWork/P02gd.db");
+   StMuDebug::setLevel(2);  
+//    StMuDbReader* db = StMuDbReader::instance();
+//    db->addDb("/star/u/laue/afsWork/P02gc.db");
+//    db->addDb("/star/u/laue/afsWork/P02gd.db");
+   StMuChainMaker::setNumberOfEventsModeUseFileCatalog();
 
-  int counter=0;
+   int counter=0;
   int iret=0;
   StMuTimer timer;
   timer.start();
-  StMuDebug::setLevel(0);  
   maker = new StMuDstMaker(0,0,dir,file,filter,10);   // set up maker in read mode
   cout << "time to load chain: " << timer.elapsedTime() <<endl;
-  StMuDebug::setLevel(0);  
   timer.reset();
   timer.start();
   cout << maker->chain()->GetEntries() << " events in chain" << endl;
