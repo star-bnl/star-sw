@@ -639,9 +639,8 @@ c new way to unpack data
 c              iadc(iclspix) = real(idatum(1))
               itdc(iclspix) = itdc(iclspix-1)+1
               iadc(iclspix) = ldatum - numseq_factor*kseqpix 
-     +		- tdc_factor*itdc(iclspix)
+     +		- tdc_factor*(itdc(iclspix)-1)
               ipad(iclspix) = ipad(iclspix-1)
-              itdc(iclspix) = itdc(iclspix)+1 ! added 9apr96 malisa
 c
 c             for MC data!
 c
