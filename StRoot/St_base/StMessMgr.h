@@ -90,7 +90,8 @@ class StMessMgr : public ostrstream {
  protected:
    virtual void IgnoreRepeats() =0;
    virtual void AllowRepeats() =0;
- 
+   // fake operator= to follish the bug in the RootCint
+  StMessMgr& operator=(const StMessMgr&){ return *this;}
  public: 
    StMessMgr();
    StMessMgr(const StMessMgr&){;}
@@ -218,4 +219,4 @@ inline ostream& operator-(StMessMgr&) {
 
 #endif
 
-// $Id: StMessMgr.h,v 1.1 2004/04/15 16:01:59 fine Exp $
+// $Id: StMessMgr.h,v 1.2 2004/04/16 15:20:07 fine Exp $
