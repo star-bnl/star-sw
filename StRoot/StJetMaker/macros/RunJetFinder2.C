@@ -6,7 +6,8 @@ StChain *chain;
 int total=0;
 
 void RunJetFinder2(int nevents=100,
-		   const char* file="/star/data45/reco/productionPP/ReversedFullField/P04ik/2004/117/st_physics_adc_5117052_raw_2060003.MuDst.root",
+		   //const char* file="/star/data45/reco/productionPP/ReversedFullField/P04ik/2004/117/st_physics_adc_5117052_raw_2060003.MuDst.root",
+		   const char* file="/star/data44/reco/ppLong-1/FullField/P03ih/2003/137/st_physics_4137037_raw_0040001.MuDst.root",
 		   const char* outfile="blah.root",
 		   const char* dir = "",
 		   const char *filter = "")
@@ -62,18 +63,22 @@ void RunJetFinder2(int nevents=100,
     //EmcAdc2EMaker
     StEmcADCtoEMaker *adc = new StEmcADCtoEMaker();
 
+    /*
     //Instantiate the StEmcTpcFourPMaker (this will hopefully disappear from CVS soon!)
     StEmcTpcFourPMaker* emcFourPMaker = new StEmcTpcFourPMaker("EmcTpcFourPMaker", muDstMaker, 30, 30, .3, .3, .003, adc);
     emcFourPMaker->setUseType(StEmcTpcFourPMaker::Hits);//if don't have this line then default is 0 (which is hits)
     emcFourPMaker->setMaxPoints(150);
     emcFourPMaker->setMinPointThreshold(.3);
+    */
 
     //test Mike's new 4p maker:
     StBET4pMaker* bet4pMaker = new StBET4pMaker("BET4pMaker",muDstMaker,adc);
 
+    /*
     //test Mike's new 4p maker with Endcap (defualts to noEndcap)
     StBET4pMaker* bet4pMaker2 = new StBET4pMaker("BET4pMaker",muDstMaker,adc);
     bet4pMaker2->setUseEndcap(true);
+    */
 
     //Instantiate the JetMaker
     StJetMaker* emcJetMaker = new StJetMaker("emcJetMaker", muDstMaker, outfile);
@@ -122,9 +127,9 @@ void RunJetFinder2(int nevents=100,
     ktpars->setR(1.0);
     ktpars->setDebug(false);
     
-    emcJetMaker->addAnalyzer(anapars, ktpars, emcFourPMaker, "MkKtJet");
+    //emcJetMaker->addAnalyzer(anapars, ktpars, emcFourPMaker, "MkKtJet");
     emcJetMaker->addAnalyzer(anapars, ktpars, bet4pMaker, "4pKtJet");
-    emcJetMaker->addAnalyzer(anapars, ktpars, bet4pMaker2, "EndcapKtJet");
+    //emcJetMaker->addAnalyzer(anapars, ktpars, bet4pMaker2, "EndcapKtJet");
     
     chain->PrintInfo();
     chain->Init();
