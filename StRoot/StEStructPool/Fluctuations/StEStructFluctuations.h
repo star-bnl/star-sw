@@ -54,6 +54,7 @@ class StEStructFluctuations: public StEStructAnalysis {
     int   etaSummingMode, phiSummingMode;
     int   histosFilled;
 
+    int   TOTBINS;
     int   nTotEvents, nCentEvents[NCENTBINS];
 
     int    nBins[NPHIBINS][NETABINS];
@@ -66,35 +67,78 @@ class StEStructFluctuations: public StEStructAnalysis {
     TH2F *hnBins;
     TH2F *hoffset;
     TH2F *hfUnique;
+
+  // For ease of I/O I put info into histograms.
+  // Accumulating into histograms is very slow, so I
+  // accumulate into arrays. Copy to histograms for
+  // writing at the end.
+    double *TotEvents[NCENTBINS][5];
+    double *NSum[NCENTBINS][2];
+    double *NDiff[NCENTBINS][2];
+    double *NPlus[NCENTBINS][2];
+    double *NMinus[NCENTBINS][2];
+    double *NPlusMinus[NCENTBINS];
+    double *PSum[NCENTBINS][5];
+    double *PDiff[NCENTBINS][8];
+    double *PPlus[NCENTBINS][5];
+    double *PMinus[NCENTBINS][5];
+    double *PPlusMinus[NCENTBINS][8];
+    double *PNSum[NCENTBINS][4];
+    double *PNDiff[NCENTBINS][4];
+    double *PNPlus[NCENTBINS][4];
+    double *PNMinus[NCENTBINS][4];
+    double *PNPlusMinus[NCENTBINS][8];
+
     TH1D *hTotEvents[NCENTBINS][5];
     TH1D *hNSum[NCENTBINS][2];
-    TH1D *hNDel[NCENTBINS][2];
+    TH1D *hNDiff[NCENTBINS][2];
     TH1D *hNPlus[NCENTBINS][2];
     TH1D *hNMinus[NCENTBINS][2];
     TH1D *hNPlusMinus[NCENTBINS];
     TH1D *hPSum[NCENTBINS][5];
+    TH1D *hPDiff[NCENTBINS][8];
     TH1D *hPPlus[NCENTBINS][5];
     TH1D *hPMinus[NCENTBINS][5];
     TH1D *hPPlusMinus[NCENTBINS][8];
     TH1D *hPNSum[NCENTBINS][4];
+    TH1D *hPNDiff[NCENTBINS][4];
     TH1D *hPNPlus[NCENTBINS][4];
     TH1D *hPNMinus[NCENTBINS][4];
-    TH1D *hPNPlusMinus[NCENTBINS][12];
+    TH1D *hPNPlusMinus[NCENTBINS][8];
+
+    double *ptTotEvents[NPTCENTBINS][NPTBINS][5];
+    double *ptNSum[NPTCENTBINS][NPTBINS][2];
+    double *ptNDiff[NPTCENTBINS][NPTBINS][2];
+    double *ptNPlus[NPTCENTBINS][NPTBINS][2];
+    double *ptNMinus[NPTCENTBINS][NPTBINS][2];
+    double *ptNPlusMinus[NPTCENTBINS][NPTBINS];
+    double *ptPSum[NPTCENTBINS][NPTBINS][5];
+    double *ptPDiff[NPTCENTBINS][NPTBINS][8];
+    double *ptPPlus[NPTCENTBINS][NPTBINS][5];
+    double *ptPMinus[NPTCENTBINS][NPTBINS][5];
+    double *ptPPlusMinus[NPTCENTBINS][NPTBINS][8];
+    double *ptPNSum[NPTCENTBINS][NPTBINS][4];
+    double *ptPNDiff[NPTCENTBINS][NPTBINS][4];
+    double *ptPNPlus[NPTCENTBINS][NPTBINS][4];
+    double *ptPNMinus[NPTCENTBINS][NPTBINS][4];
+    double *ptPNPlusMinus[NPTCENTBINS][NPTBINS][8];
 
     TH1D *hptTotEvents[NPTCENTBINS][NPTBINS][5];
     TH1D *hptNSum[NPTCENTBINS][NPTBINS][2];
-    TH1D *hptNDel[NPTCENTBINS][NPTBINS][2];
+    TH1D *hptNDiff[NPTCENTBINS][NPTBINS][2];
     TH1D *hptNPlus[NPTCENTBINS][NPTBINS][2];
     TH1D *hptNMinus[NPTCENTBINS][NPTBINS][2];
     TH1D *hptNPlusMinus[NPTCENTBINS][NPTBINS];
     TH1D *hptPSum[NPTCENTBINS][NPTBINS][5];
+    TH1D *hptPDiff[NPTCENTBINS][NPTBINS][8];
     TH1D *hptPPlus[NPTCENTBINS][NPTBINS][5];
     TH1D *hptPMinus[NPTCENTBINS][NPTBINS][5];
     TH1D *hptPPlusMinus[NPTCENTBINS][NPTBINS][8];
     TH1D *hptPNSum[NPTCENTBINS][NPTBINS][4];
+    TH1D *hptPNDiff[NPTCENTBINS][NPTBINS][4];
     TH1D *hptPNPlus[NPTCENTBINS][NPTBINS][4];
     TH1D *hptPNMinus[NPTCENTBINS][NPTBINS][4];
-    TH1D *hptPNPlusMinus[NPTCENTBINS][NPTBINS][12];
+    TH1D *hptPNPlusMinus[NPTCENTBINS][NPTBINS][8];
 
   // Histogram declarations.
   // These are summed over events for this job.
@@ -132,11 +176,30 @@ class StEStructFluctuations: public StEStructAnalysis {
     TH2F *occptPNMinus[NPTCENTBINS][NPTBINS];
     TH2F *occptPNDiff[NPTCENTBINS][NPTBINS];
 
+    TH1F *multNSum[NCENTBINS];
+    TH1F *multNPlus[NCENTBINS];
+    TH1F *multNMinus[NCENTBINS];
+    TH1F *multNDiff[NCENTBINS];
+    TH1F *multPSum[NCENTBINS];
+    TH1F *multPPlus[NCENTBINS];
+    TH1F *multPMinus[NCENTBINS];
+    TH1F *multPDiff[NCENTBINS];
+    TH1F *multptNSum[NPTCENTBINS][NPTBINS];
+    TH1F *multptNPlus[NPTCENTBINS][NPTBINS];
+    TH1F *multptNMinus[NPTCENTBINS][NPTBINS];
+    TH1F *multptNDiff[NPTCENTBINS][NPTBINS];
+    TH1F *multptPSum[NPTCENTBINS][NPTBINS];
+    TH1F *multptPPlus[NPTCENTBINS][NPTBINS];
+    TH1F *multptPMinus[NPTCENTBINS][NPTBINS];
+    TH1F *multptPDiff[NPTCENTBINS][NPTBINS];
+
   // Here is the object I use to hold the binned tracks.
     multStruct      *ms;
 
-    void  initArraysAndHistograms();
-    void  deleteArraysAndHistograms();
+    void  initArrays();
+    void  deleteArrays();
+    void  initHistograms();
+    void  deleteHistograms();
     void  moveEvents();
 
     StEStructFluctuations(int mode=0, int invokePairCuts = 0,
@@ -157,7 +220,7 @@ class StEStructFluctuations: public StEStructAnalysis {
     void  init();
     void  cleanUp();
     void  finish() {};
-    void  fillHistograms() {};
+    void  fillHistograms();
     void  writeHistograms(TFile* tf);
     void  writeQAHists(TFile* qatf);
 
