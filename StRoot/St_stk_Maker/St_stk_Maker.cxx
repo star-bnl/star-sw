@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.cxx,v 1.21 2000/06/23 16:52:51 fisyak Exp $
+// $Id: St_stk_Maker.cxx,v 1.22 2001/04/22 21:12:16 caines Exp $
 // $Log: St_stk_Maker.cxx,v $
+// Revision 1.22  2001/04/22 21:12:16  caines
+// Removed Vertex finding code, moved to StSvtClusterMaker as own maker
+//
 // Revision 1.21  2000/06/23 16:52:51  fisyak
 // remove params
 //
@@ -92,7 +95,6 @@
 #include "TH1.h"
 #include "TH2.h"
 
-long sft_main( St_scs_spt *scs_spt, St_dst_vertex *vertex);
 
 ClassImp(St_stk_Maker)
   
@@ -113,8 +115,7 @@ ClassImp(St_stk_Maker)
     m_z0(0),
     m_azimuth(0),
     m_tan_dip(0),
-    m_dedx(0),
-    m_vtx_z(0)  
+    m_dedx(0) 
 {
   m_mode = 2;
   m_method = 2;
@@ -194,7 +195,7 @@ Int_t St_stk_Maker::Init(){
   m_azimuth   = new TH1F("StkAzimuth"     ,"Azimuthal distribution of svt tracks" ,60,0.,360.0);
   m_tan_dip   = new TH1F("StkTanDip"      ,"Distribution of the svt dip angle"    ,100,-1.5,1.5);
   m_dedx      = new TH2F("StkDedx"        ,"Svt dE/dx distribution"               ,100,0.,2.0,100,0.,0.01);
-   m_vtx_z     = new TH1F("StkSvtVert"        ,"Z SVT - Z TPC Primary vertex resolution"        ,100,-0.1,0.1);
+
   return StMaker::Init();
 }
 //_____________________________________________________________________________
@@ -262,18 +263,7 @@ Int_t St_stk_Maker::Make()
   
   //pointer to preVertex
   St_dst_vertex  *preVtx  = (St_dst_vertex *)preVertexI("preVertex");
-  int numRowPreVtx = preVtx->GetNRows();
-  preVtx->ReAllocate(numRowPreVtx+1);
-
-
-  // Find SVT vertex
-  Int_t Res_sft= sft_main(scs_spt,preVtx);
-
-  if (Res_sft !=  kSTAFCV_OK) {
-	cout << " Problem on return from SFT" << endl;
-	
-	return kStOK;}
-
+ 
 
   if (preVtx) {
     dst_vertex_st *preVtxPtr = preVtx->GetTable();
@@ -326,16 +316,7 @@ void St_stk_Maker::MakeHistograms() {
   St_stk_track *spr = 0;
   St_sgr_groups *gpr = 0;
   St_scs_spt *spc = 0;
-  //pointer to preVertex dataset
-  St_DataSet *preVertex = GetDataSet("preVertex"); 
-  
-  //iterator
-  St_DataSetIter preVertexI(preVertex);
-  
-  //pointer to preVertex
-  St_dst_vertex*  vtx  = (St_dst_vertex *)preVertexI("preVertex");
-
-  
+    
   spr  = (St_stk_track  *) svt_tracks.Find("stk_track");  
   gpr  = (St_sgr_groups *) svt_tracks.Find("groups");
   spc  = (St_scs_spt    *) hits.Find("scs_spt");
@@ -365,23 +346,4 @@ void St_stk_Maker::MakeHistograms() {
     }
   }
 
-
-  if (vtx) {
-    float z_svt=999.;
-    float z_tpc=-999.;
-    dst_vertex_st *preVtxPtr = vtx->GetTable();
-    
-    for (Int_t i = 0; i <vtx->GetNRows();i++,preVtxPtr++) {
-      
-      if (preVtxPtr->iflag == 201) {
-	z_svt = preVtxPtr->z;
-      }
-      else if(preVtxPtr->iflag == 101) {
-	z_tpc = preVtxPtr->z;
-      }
-    }
-    m_vtx_z->Fill(z_tpc-z_svt);
-  }
-    
 }
-

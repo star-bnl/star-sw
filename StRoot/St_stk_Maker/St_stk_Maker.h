@@ -1,5 +1,8 @@
-// $Id: St_stk_Maker.h,v 1.13 2000/05/24 14:19:03 caines Exp $
+// $Id: St_stk_Maker.h,v 1.14 2001/04/22 21:12:16 caines Exp $
 // $Log: St_stk_Maker.h,v $
+// Revision 1.14  2001/04/22 21:12:16  caines
+// Removed Vertex finding code, moved to StSvtClusterMaker as own maker
+//
 // Revision 1.13  2000/05/24 14:19:03  caines
 // Use prevertex for search not geant + find own vertex for alignment
 //
@@ -69,7 +72,7 @@ class TH2F;
 
 class St_stk_Maker : public StMaker {
 protected:
-// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.13 2000/05/24 14:19:03 caines Exp $";
+// static Char_t m_VersionCVS = "$Id: St_stk_Maker.h,v 1.14 2001/04/22 21:12:16 caines Exp $";
    Int_t  m_mode;      // mode 1 = primaries;
 	               // mode 2 = secondaries;
 	               // mode 3 = primaries to secondaries 
@@ -128,7 +131,6 @@ protected:
    TH1F *m_azimuth;       //!azimuthal angle
    TH1F *m_tan_dip;       //!tangent of the dip angle
    TH2F *m_dedx;       //! dedx plot
-   TH1F *m_vtx_z;      //! Z diff of found primary vertex
 public: 
                   St_stk_Maker(const char *name="svt_tracks");
    virtual       ~St_stk_Maker();
@@ -136,7 +138,7 @@ public:
    virtual Int_t  Make();
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: St_stk_Maker.h,v 1.13 2000/05/24 14:19:03 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: St_stk_Maker.h,v 1.14 2001/04/22 21:12:16 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(St_stk_Maker, 1)   //STAR chain virtual base class for Makers
 };
 
