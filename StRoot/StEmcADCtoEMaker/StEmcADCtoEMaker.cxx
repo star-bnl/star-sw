@@ -1,6 +1,9 @@
 // 
-// $Id: StEmcADCtoEMaker.cxx,v 1.71 2004/04/14 15:54:51 suaide Exp $
+// $Id: StEmcADCtoEMaker.cxx,v 1.72 2004/04/16 15:24:56 suaide Exp $
 // $Log: StEmcADCtoEMaker.cxx,v $
+// Revision 1.72  2004/04/16 15:24:56  suaide
+// small modification for embedding
+//
 // Revision 1.71  2004/04/14 15:54:51  suaide
 // small bug fixed on some vector initialization
 //
@@ -999,17 +1002,7 @@ Bool_t StEmcADCtoEMaker::getEmc()
      
   // check if there is event from StEvent
   StEvent* event=NULL;
-  if(!mEmbedd) event = (StEvent*)GetInputDS("StEvent");
-  else 
-  {
-    StMaker *m = GetMaker("embedIO");
-    if(!m) 
-    { 
-      if(mPrint) cout<<"No embedIO maker"<<endl; 
-      return kFALSE; 
-    }
-    event = (StEvent*)m->GetInputDS("StEvent");  
-  }
+  event = (StEvent*)GetInputDS("StEvent");
   if(event)
 	{
   	mData->RunNumber = event->runId();
@@ -1018,7 +1011,7 @@ Bool_t StEmcADCtoEMaker::getEmc()
 		
 		StEmcCollection* emctemp=event->emcCollection();
   	if(!emctemp)  return kFALSE;
-    if(emctemp->bemcRawData()) return getEmcFromStEventRaw(emctemp->bemcRawData());
+    if(emctemp->bemcRawData() && !mEmbedd) return getEmcFromStEventRaw(emctemp->bemcRawData());
   	return getEmcFromStEvent(emctemp);
 	}  
   
@@ -1213,17 +1206,7 @@ Bool_t StEmcADCtoEMaker::fillStEvent()
 {  
   // first need to clean hits with adc = 0
   StEvent* event=NULL;
-  if(!mEmbedd) event = (StEvent*)GetInputDS("StEvent");
-  else
-  {
-    StMaker *m = GetMaker("embedIO");
-    if(!m) 
-    { 
-      if(mPrint) cout<<"No embedIO maker"<<endl; 
-      return kFALSE; 
-    }
-    event = (StEvent*)m->GetInputDS("StEvent");  
-  }
+  event = (StEvent*)GetInputDS("StEvent");
   
   mEmc = NULL;	
 	if(event) mEmc = event->emcCollection();
