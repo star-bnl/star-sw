@@ -21,7 +21,7 @@
 #pragma link C++ class StV0I+;
 #pragma link C++ class StV0Mc+;
 #pragma link C++ class StV0MuDst+;
-#pragma link C++ class StXiI+;
-#pragma link C++ class StXiMc+;
+#pragma link C++ class StXiI;
+#pragma link C++ class StXiMc;
 #pragma link C++ class StXiMuDst+;
 #endif
