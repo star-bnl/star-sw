@@ -5,8 +5,8 @@
 *   written by L. D. Carr -- lcarr@u.washington.edu
 */
 #include "PAM.idl"
-#include "dst_run_header.idl"
-#include "dst_event_header.idl"
+#include "run_header.idl"
+#include "event_header.idl"
 #include "dst_track.idl"
 #include "sca_in.idl"
 #include "sca_filter_const.idl"
@@ -15,12 +15,12 @@
 
 interface sca_filter : amiModule{
         STAFCV_T call (
-	          in    dst_run_header          dstRunHead   ,
-                  in    dst_event_header        dstEventHead ,
+	          in    run_header              dstRunHead   ,
+                  in    event_header            dstEventHead ,
                   in	dst_track		dstTrack     ,   
                   in	sca_filter_const	filter_const ,   
                   in	sca_switch		sca_switch   ,   
                   in	sca_const       	sca_const    ,  
                   out	sca_in			sca_in  );
 };
-/* last mod. for sca_filter.idl : $Date: 1999/01/21 18:40:34 $ */
+/* last mod. for sca_filter.idl : $Date: 1999/10/15 14:55:19 $ */
