@@ -140,6 +140,7 @@ long  type_of_call fill_dst_event_summary_ (
   for (irange=0; irange<NETARANGE; irange++) {
     dst_eventsummary->T_eta_bins[irange]      = 0;
   }
+  nphirange = dst_summaryparam->n_phi_bins;
   for (irange=0; irange<nphirange; irange++) {
     dst_eventsummary->mult_phi[irange]        = 0;
     dst_eventsummary->energy_emc_phi[irange]  = 0;
