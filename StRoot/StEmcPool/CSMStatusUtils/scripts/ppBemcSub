@@ -1,0 +1,36 @@
+#!/bin/bash
+
+
+#########
+runlist=`cat $1`
+for runline in $runlist ; do
+  inpDir=`echo $runline | awk 'BEGIN{FS="::"}{print $1}'`
+  mufile=`echo $runline | awk 'BEGIN{FS="::"}{print $2}'`
+  firsthalf=`echo $mufile | awk 'BEGIN{FS="_raw_"}{print $1}'`
+  runsuffix=`echo $mufile | awk 'BEGIN{FS="_raw_"}{print $2}' | cut -c1-7`
+  clippedrun=`echo $firsthalf | awk 'BEGIN{FS="_5"}{print $2}'`
+  
+  run=5$clippedrun-$runsuffix
+  
+  outDir=/star/u/relyea/star/bemc/abemc/log
+  histDir=/star/u/relyea/star/bemc/abemc/
+
+  echo $firsthalf, $clippedrun, $run
+  echo outDir=$outDir  histDir=$histDir
+
+  log=log.$mufile
+  blog=blog.$mufile
+  rm $outDir/$log.gz
+  rm $outDir/$blog
+#  root4star -b -q macros/runPPtree.C'("$run.","$inpDir/","$mufile","$histDir")' >& $outDir/$log
+#  root4star  >& $outDir/$log << EOF
+  root4star << EOF
+    .x macros/runPPtree.C("$run.","$inpDir/","$mufile","$histDir");
+EOF
+  gzip $outDir/$log
+#echo 'macros/runPPtree.C("'$run'.","$inpDir/","$mufile","$histDir")'
+#sleep 180
+#  root4star << EOF
+#   .x macros/runPPtree.C("$run.","","$inpDir/$mufile","$histDir")
+
+done
