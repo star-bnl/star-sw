@@ -1,23 +1,19 @@
 #ifndef StiFactory_H
 #define StiFactory_H 1
-#include "TObject.h"
-#include "stdlib.h"
 
-class StiFactory : public TObject
+class StiFactory
 {
  public:
 
-  StiFactory(const char * name);
-  virtual ~StiFactory();
-
-  const char * getName();
-  void  setName(const char * newName);
- 
- protected:
-
-  char * name;
-  
-  ClassDef(StiFactory, 1)
+    //StiFactory(); //Not implemented
+    StiFactory(const char * name);
+    virtual ~StiFactory();
+    
+    const char * getName();
+    
+protected:
+    
+    const char * name;
 };
 
 #endif

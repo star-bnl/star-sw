@@ -6,23 +6,24 @@
 #include "StiObjectFactory.h"
 #include "StiHit.h"
 
-
 class StiHitFactory : public StiObjectFactory
 {
  public:
 
-  StiHitFactory(int originalSize=10000,
-		int incrementalSize=1000,
-		int maxIncrementCount=5);
+    //StiHitFactory(); //Not implemented
+  StiHitFactory(int original=10000,
+		int incremental=10000,
+		int maxIncrement=100);
   virtual ~StiHitFactory();
 
   StiHit * getHit();
-  
+
+    //Diagnostic:
+    void print() const;
+    
  protected:
 
-  void createObjects(int n); 
-
-  ClassDef(StiHitFactory, 1)
+  virtual void createObjects(int n); 
 };
 
 #endif

@@ -40,11 +40,20 @@
  * the value of "maxIncrementCount".                                      *
  *                                                                        *
  **************************************************************************/
+
+//STD
+#include <iostream.h>
+//Root
+#include "TObject.h"
+//Sti
 #include "StiObjectFactory.h"
 
 int StiObjectFactory::defaultOriginalSize      = 10000;
-int StiObjectFactory::defaultIncrementSize     =  5000;
-int StiObjectFactory::defaultMaxIncrementCount =     2;
+int StiObjectFactory::defaultIncrementSize     = 5000;
+int StiObjectFactory::defaultMaxIncrementCount =  10;
+//int StiObjectFactory::defaultOriginalSize      = 10000;
+//int StiObjectFactory::defaultIncrementSize     =  5000;
+//int StiObjectFactory::defaultMaxIncrementCount =     2;
 
 StiObjectFactory::StiObjectFactory( const char *newName,
 				    int original, 
@@ -58,24 +67,17 @@ StiObjectFactory::StiObjectFactory( const char *newName,
   // undue increase of the container size
   //------------------------------------------------------------------
 
-  originalSize          = original>0    ? original    : defaultOriginalSize;
-  incrementalSize       = incremental>0 ? incremental : defaultIncrementSize;
-  maxIncrementCount     = max>0         ? max         : defaultMaxIncrementCount;
-  currentSize      = 0;
-  nextObjectIndex  = 0;
-  incrementCount   = 0;
-  container = new TObjArray(originalSize);
-  if (container)
-    currentSize = container->GetSize();
+    originalSize          = original>0    ? original    : defaultOriginalSize;
+    incrementalSize       = incremental>0 ? incremental : defaultIncrementSize;
+    maxIncrementCount     = max>0         ? max         : defaultMaxIncrementCount;
+    currentSize      = 0;
+    nextObjectIndex  = 0;
+    incrementCount   = 0;
 }
+
 
 StiObjectFactory::~StiObjectFactory()
 {
-  //------------------------------------------------------------------
-  // D-tor
-  // Delete the object container
-  //------------------------------------------------------------------
-  delete container;
 }
 
 TObject * StiObjectFactory::getObject()
@@ -83,28 +85,27 @@ TObject * StiObjectFactory::getObject()
   //------------------------------------------------------------------
   // serve the next object
   //------------------------------------------------------------------
-  if (nextObjectIndex<originalSize)
-    {
-      // return next object available
-      return (*container)[nextObjectIndex++];
+    if ( nextObjectIndex<getCurrentSize() ) {
+	// return next object available
+	//cout <<"Returning Hit "<<nextObjectIndex<<endl;
+	return container[nextObjectIndex++];
     }
-  else
-    { 
-      if (incrementCount< maxIncrementCount)
-	{
-	  // expand container size
-	  container->Expand(currentSize+incrementalSize);
-	  currentSize = container->GetSize();
-	  createObjects(incrementalSize);
-	  return (*container)[nextObjectIndex++];
+    else {
+	if (incrementCount< maxIncrementCount) {
+	    // expand container size
+	    ++incrementCount;
+	    //cout <<"Expanding, creating "<<incrementalSize<<" hits"<<endl;
+	    createObjects(incrementalSize);
+	    currentSize = container.size();
+	    //cout <<"Returning Hit "<<nextObjectIndex<<endl;
+	    return container[nextObjectIndex++];
 	}
-      else
-	{
+	else {
 	  // s.o.l.
-	  cout << "StiObjectFactory::getObject() - FATAL" << endl
-	       << "     Too many expension request " << endl
-	       << "     incrementCount : " << incrementCount << endl;
-	  return 0;
+	    cout << "StiObjectFactory::getObject() - FATAL" << endl
+		 << "     Too many expension request " << endl
+		 << "     incrementCount : " << incrementCount << endl;
+	    return 0;
 	}
     }
 }
