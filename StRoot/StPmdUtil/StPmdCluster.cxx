@@ -1,6 +1,6 @@
 /************************************************************
  *
- * $Id: StPmdCluster.cxx,v 1.2 2003/05/12 12:07:12 subhasis Exp $
+ * $Id: StPmdCluster.cxx,v 1.3 2003/10/14 07:28:53 subhasis Exp $
  *
  * Author:  Subhasis Chattopadhyay
  ************************************************************
@@ -10,6 +10,9 @@
  ************************************************************
  *
  * $Log: StPmdCluster.cxx,v $
+ * Revision 1.3  2003/10/14 07:28:53  subhasis
+ * CluX, CluY added
+ *
  * Revision 1.2  2003/05/12 12:07:12  subhasis
  * Mapping added
  *
@@ -30,7 +33,7 @@ StPmdCluster::StPmdCluster() : StObject()
 {
   mCluEdep = 0.0; mCluEta = 0.0; mCluPhi = 0.0; 
   mNumofMems = 0; mModule = 0;
-  
+  mCluX = 0.0;mCluY = 0.0;  
 }
 //__________________________________________________
 
