@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-// $Id: runPeCMaker.C,v 1.1 2000/03/28 23:52:24 nystrand Exp $
+// $Id: runPeCMaker.C,v 1.2 2000/04/03 20:47:32 nystrand Exp $
 //
 // Description: 
 // Chain for StPeCMaker based on doEvents.C. Runs StEventMaker and StPeCMaker.
@@ -32,6 +32,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // $Log: runPeCMaker.C,v $
+// Revision 1.2  2000/04/03 20:47:32  nystrand
+// Bug fix
+//
 // Revision 1.1  2000/03/28 23:52:24  nystrand
 // First version
 //
@@ -86,6 +89,9 @@ void runPeCMaker(Int_t nevents, const Char_t **fileList, const char *qaflag)
       setFiles->AddFile(fileList[ifil]);
     }
     StIOMaker *IOMk = new StIOMaker("IO","r",setFiles,"bfcTree");
+    IOMk->SetIOMode("r");
+    IOMk->SetBranch("*",0,"0");                 //deactivate all branches
+    IOMk->SetBranch("dstBranch",0,"r");
     IOMk->SetBranch("runcoBranch",0,"r");
     IOMk->SetDebug();
 
@@ -102,7 +108,6 @@ void runPeCMaker(Int_t nevents, const Char_t **fileList, const char *qaflag)
 
     // Event loop
     int istat=0,i=1;
-    cout<<"Before EventLoop..."<<endl;
  EventLoop: if (i <= nevents && !istat) {
      cout << "============================ Event " << i
 	  << " start ============================" << endl;
