@@ -1,5 +1,8 @@
-// $Id: StMaker.h,v 1.32 1999/08/13 01:12:25 fine Exp $
+// $Id: StMaker.h,v 1.33 1999/09/02 22:27:12 fisyak Exp $
 // $Log: StMaker.h,v $
+// Revision 1.33  1999/09/02 22:27:12  fisyak
+// Add SetDEBUG
+//
 // Revision 1.32  1999/08/13 01:12:25  fine
 // StMaker::GetHist has been introduced
 //
@@ -196,7 +199,8 @@ public:
 
 //    Setters for flags and switches
 
-   virtual void        	SetDebug(Int_t l=1){m_DebugLevel=l;}     // *MENU*
+   virtual void        	SetDebug(Int_t l=1){m_DebugLevel = l;}   // *MENU*
+   virtual void        	SetDEBUG(Int_t l=1);                     // *MENU*
    virtual void         SetActive(Bool_t k=kTRUE){fActive = k;}  // *MENU*
    virtual void       	SetAlias(const char* log,const char* act,const char* dir=".aliases");
    virtual void       	AddAlias(const char* log,const char* act,const char* dir=".aliases");
@@ -223,7 +227,7 @@ void            SetDirObj(TObject *obj,const char *dir);
 
 
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.32 1999/08/13 01:12:25 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StMaker.h,v 1.33 1999/09/02 22:27:12 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
    ClassDef(StMaker, 0)   //StChain virtual base class for Makers
 };
