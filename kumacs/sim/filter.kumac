@@ -18,13 +18,6 @@ macro filter
  endif
  
  n3=1
- if ([n1].gt.10) then
-   if ([n1].le.9999) then
-       dd=([n2]-[n1])/([nn]-1)
-       message n3 set to 20, dd = [dd]
-       n3=20
-   endif
- endif
  mm=0     | number of output files
  nn=0     | number of input files in this output
  cnt=0    | total number of events in this job
@@ -85,11 +78,11 @@ macro filter
     endif
    
     call rzcdir('//SLUGRZ',' ')
-    trig 1000
+    trig 100000
 
     cnt=$iquest(100)
     nev=[cnt]-[cno]
-    if ([nev].gt.1000) then
+    if ([nev].gt.99999) then
       nev=0
     endif
     cmv=mv [output].fzd ../[output]_[nev]evts.fzd
