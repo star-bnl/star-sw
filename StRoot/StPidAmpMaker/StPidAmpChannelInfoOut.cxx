@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpChannelInfoOut.cxx,v 1.1.1.1 2000/03/09 17:48:33 aihong Exp $
+ * $Id: StPidAmpChannelInfoOut.cxx,v 1.2 2000/03/24 15:11:14 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpChannelInfoOut.cxx,v $
+ * Revision 1.2  2000/03/24 15:11:14  aihong
+ * add PrintContent()
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:33  aihong
  * Installation of package
  *
@@ -95,3 +98,18 @@ Bool_t StPidAmpChannelInfoOut::IsInChannel(Int_t nhits,Double_t pt){
 
 // return ((nhits<=mNHitsEnd)&&(nHits>mNHitsStart)&&(pt<=mPtEnd)&&(pt>mPtStart)&&(x<=mXEnd)&&(x>mXStart));
 //}
+
+void StPidAmpChannelInfoOut::PrintContent(){
+  cout<<"NHitsStart: "<<NHitsStart()<<" NHitsEnd: "<<NHitsEnd()<<endl;
+  cout<<"PtStart:    "<<PtStart()   <<" PtEnd:    "<<PtEnd()<<endl;
+  cout<<endl;
+}
+
+
+ostream& operator<<(ostream& s, const StPidAmpChannelInfoOut& infoOut){
+
+  s<<"NHitsStart: "<<infoOut.NHitsStart()<<" NHitsEnd: "<<infoOut.NHitsEnd()<<endl;
+  s<<"PtStart:    "<<infoOut.PtStart()   <<" PtEnd:    "<<infoOut.PtEnd()<<endl;
+  s<<endl;
+  return s;
+}

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StPidAmpNetOut.h,v 1.1.1.1 2000/03/09 17:48:34 aihong Exp $
+ * $Id: StPidAmpNetOut.h,v 1.2 2000/03/24 15:10:37 aihong Exp $
  *
  * Author: Aihong Tang & Richard Witt (FORTRAN Version),Kent State U.
  *         Send questions to aihong@cnr.physics.kent.edu
@@ -17,6 +17,9 @@
  ***************************************************************************
  *
  * $Log: StPidAmpNetOut.h,v $
+ * Revision 1.2  2000/03/24 15:10:37  aihong
+ * add PrintContent()
+ *
  * Revision 1.1.1.1  2000/03/09 17:48:34  aihong
  * Installation of package
  *
@@ -33,6 +36,7 @@
 //*KEND.
 #endif 
 
+#include <iostream.h>
 #include "TNamed.h"
 #include "TArrayD.h"
 
@@ -43,24 +47,28 @@ class StPidAmpNetOut : public TNamed {
   StPidAmpNetOut();
   StPidAmpNetOut(const StPidAmpNetOut&);
   StPidAmpNetOut(Text_t* name,Text_t* title, Int_t id,TArrayD bandParAry, TArrayD ampParAry, TArrayD linrParAry); 
+  StPidAmpNetOut(const char* name,const char* title, Int_t id,TArrayD bandParAry, TArrayD ampParAry, TArrayD linrParAry); 
+
+
   virtual  ~StPidAmpNetOut();
   void SetBandParArray(TArrayD bandParAry);
-  void SetAmpParArray(TArrayD ampParAry);
+  void SetAmpParArray(TArrayD ampParAry);   
   void SetResoParArray(TArrayD linrAry);
   void SetGeantID(Int_t id);
   void SetCalibConst(Double_t cal);
+  void PrintContent();
 
 
-  TArrayD   GetBandParArray();
-  TArrayD   GetAmpParArray();
-  TArrayD   GetResoParArray();
+  TArrayD   GetBandParArray() const;
+  TArrayD   GetAmpParArray()  const;
+  TArrayD   GetResoParArray() const;
 
-  Int_t     GetNBandPars();
-  Int_t     GetNAmpPars();
-  Int_t     GetNResoPars();
+  Int_t     GetNBandPars()    const;
+  Int_t     GetNAmpPars()     const;
+  Int_t     GetNResoPars()    const;
 
-  Int_t     GetGeantID();
-  Double_t  GetCalibConst();
+  Int_t     GetGeantID()      const;
+  Double_t  GetCalibConst()   const;
 
  private:
 
@@ -74,6 +82,8 @@ class StPidAmpNetOut : public TNamed {
  ClassDef(StPidAmpNetOut,1)
 
    };
+
+ostream& operator<<(ostream& s, const StPidAmpNetOut& netOut);
 
 #endif
 
