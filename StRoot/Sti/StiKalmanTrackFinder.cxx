@@ -230,7 +230,15 @@ void StiKalmanTrackFinder::doTrackFit()
 	    {
 	      trackMes <<"StiKalmanTrackFinder::doTrackFit()\t Got Valid track"<<endl;
 	      track->fit();
-	      trackContainer->push_back(track);
+				if (pars->useTrackFilter)
+					{
+						if (trackFilter->filter(track)) 
+							trackContainer->push_back(track);
+					}
+				else
+					{
+						trackContainer->push_back(track);
+					}
 	      track->update();  //This updates the track on the display
 	      trackMes << "track parameters:";
 	      trackMes << *track<<endl;
@@ -265,7 +273,15 @@ void StiKalmanTrackFinder::doTrackFind()
       findTrack(track);
 
       trackMes << " SKTFinder::doTrackFind() - Track Parameters" << endl << *track;
-      trackContainer->push_back(track);
+			if (pars->useTrackFilter)
+				{
+					if (trackFilter->filter(track)) 
+						trackContainer->push_back(track);
+				}
+			else
+				{
+					trackContainer->push_back(track);
+				}
       track->update();  //This updates the track on the display
       trackDone = false;  // ready for a new track
     }
@@ -296,8 +312,15 @@ void StiKalmanTrackFinder::findTracks()
 	  return;
 	}
       findTrack(t);
-      if (trackFilter->accept(t)) 
-	trackContainer->push_back(t);
+			if (pars->useTrackFilter)
+				{
+					if (trackFilter->filter(t)) 
+						trackContainer->push_back(t);
+				}
+			else
+				{
+					trackContainer->push_back(t);
+				}
     }
 }
 
@@ -338,7 +361,7 @@ void StiKalmanTrackFinder::findTrack(StiTrack * t)
     track->setCharge(-1);
   else
     track->setCharge(1);
-  //extendToMainVertex(lastNode);
+  if (pars->xtrapolateToMainVertex) extendToMainVertex(lastNode);
 }
 
 void StiKalmanTrackFinder::doInitTrackSearch()
@@ -376,7 +399,16 @@ void StiKalmanTrackFinder::doFinishTrackSearch()
   if (!trackDone) return;   // must finish 
   if (!scanningDone) return;
   //trackMes<<"SKTF::doFinishTrackSearch() - begins"<<endl;
-  trackContainer->push_back(track);
+	if (pars->useTrackFilter)
+		{
+			if (trackFilter->filter(track)) 
+				trackContainer->push_back(track);
+		}
+	else
+		{
+			trackContainer->push_back(track);
+		}
+
   track->update();  //This updates the track on the display
 }
 
