@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtParticle.cc,v 1.1.1.1 1999/06/29 16:02:57 lisa Exp $
+ * $Id: StHbtParticle.cc,v 1.2 1999/06/29 17:50:27 fisyak Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtParticle.cc,v $
+ * Revision 1.2  1999/06/29 17:50:27  fisyak
+ * formal changes to account new StEvent, does not complie yet
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:57  lisa
  * Installation of StHbtMaker
  *
@@ -32,7 +35,7 @@ StHbtParticle::~StHbtParticle(){
 //_____________________
 StHbtParticle::StHbtParticle(const StHbtTrack* hbtTrack,const double& mass){
   // I know there is a better way to do this...
-  StThreeVector<double> temp = hbtTrack->P();
+  StThreeVectorD temp = hbtTrack->P();
   mFourMomentum.setVect(temp);
   double ener = sqrt(temp.mag2()+mass*mass);
   mFourMomentum.setE(ener);

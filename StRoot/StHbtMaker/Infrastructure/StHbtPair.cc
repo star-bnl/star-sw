@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHbtPair.cc,v 1.1.1.1 1999/06/29 16:02:57 lisa Exp $
+ * $Id: StHbtPair.cc,v 1.2 1999/06/29 17:50:27 fisyak Exp $
  *
  * Author: Brian Laziuk, Yale University
  *         slightly modified by Mike Lisa
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHbtPair.cc,v $
+ * Revision 1.2  1999/06/29 17:50:27  fisyak
+ * formal changes to account new StEvent, does not complie yet
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:57  lisa
  * Installation of StHbtMaker
  *
@@ -72,10 +75,10 @@ double StHbtPair::kT() const
 //_________________
 double StHbtPair::qOut() const
 {
-  //brian    StThreeVector<double> tmp1 = mTrack1.initialP();
-  //brian    StThreeVector<double> tmp2 = mTrack2.initialP();
-    StThreeVector<double> tmp1 = mTrack1.FourMomentum().vect();
-    StThreeVector<double> tmp2 = mTrack2.FourMomentum().vect();
+  //brian    StThreeVectorD tmp1 = mTrack1.initialP();
+  //brian    StThreeVectorD tmp2 = mTrack2.initialP();
+    StThreeVectorD tmp1 = mTrack1.FourMomentum().vect();
+    StThreeVectorD tmp2 = mTrack2.FourMomentum().vect();
 
     double dx = tmp1.x() - tmp2.x();
     double xt = tmp1.x() + tmp2.x();
@@ -98,10 +101,10 @@ StLorentzVector<double> StHbtPair::fourMomentum() const
 //_________________
 double StHbtPair::qSide() const
 {
-  //brian    StThreeVector<double> tmp1 = mTrack1.initialP();
-  //brian    StThreeVector<double> tmp2 = mTrack2.initialP();
-    StThreeVector<double> tmp1 = mTrack1.FourMomentum().vect();
-    StThreeVector<double> tmp2 = mTrack2.FourMomentum().vect();
+  //brian    StThreeVectorD tmp1 = mTrack1.initialP();
+  //brian    StThreeVectorD tmp2 = mTrack2.initialP();
+    StThreeVectorD tmp1 = mTrack1.FourMomentum().vect();
+    StThreeVectorD tmp2 = mTrack2.FourMomentum().vect();
 
     double dx = tmp1.x() - tmp2.x();
     double xt = tmp1.x() + tmp2.x();
