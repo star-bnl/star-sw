@@ -112,6 +112,7 @@
 * drhd  - dst run header
 * ebye1 - run ebye sca analysis code
 * ev0j  - join ev0out and vertex tables and make new ev0joined table
+* smdst - strange micro dst analysis 
 * user  - user kumacs called here: init_user,run_user,finish_user
 * ntup  - create output ntuple file
 * fzout - write out fz file from gstar (only works if you run gstar!)
@@ -143,12 +144,17 @@
 *   - read in dst file
 *   - run ebye post-dst analysis
 *
-* 5. call_bfc_read_dst_strange.kumac 
+* 5. call_bfc_read_dst_smdst.kumac 
 *   - read in dst file
-*   - run strange post-dst analysis
+*   - run Ken Wilson's strange post-dst analysis
 *   - write out ntuple 
 *
-* 5a. call_bfc_read_dst_user.kumac 
+* 5a. call_bfc_read_dst_strange.kumac 
+*   - read in dst file
+*   - run Al Saulys' strange post-dst analysis
+*   - write out ntuple 
+*
+* 5b. call_bfc_read_dst_user.kumac 
 *   - read in dst file
 *   - run user post-dst analysis
 *   - write out ntuple and full event file
