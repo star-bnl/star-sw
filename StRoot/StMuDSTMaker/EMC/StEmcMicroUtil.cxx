@@ -614,6 +614,7 @@ void StEmcMicroUtil::processMicroEventV0()
           {
             StThreeVectorF p = t->geometry()->momentum();
             v->setMomentumOfDaughter((StChargeSign)j,p);
+						v->addDaughter(t);
           }
         }
       }
