@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.cxx,v 2.22 2004/01/26 22:56:28 perev Exp $
+ * $Id: StTrack.cxx,v 2.23 2004/08/05 22:24:51 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StTrack.cxx,v $
+ * Revision 2.23  2004/08/05 22:24:51  ullrich
+ * Changes to the handling of numberOfPoints() to allow ITTF more flexibility.
+ *
  * Revision 2.22  2004/01/26 22:56:28  perev
  * Add Finite for float
  *
@@ -93,7 +96,7 @@
 
 ClassImp(StTrack)
 
-static const char rcsid[] = "$Id: StTrack.cxx,v 2.22 2004/01/26 22:56:28 perev Exp $";
+static const char rcsid[] = "$Id: StTrack.cxx,v 2.23 2004/08/05 22:24:51 ullrich Exp $";
 
 StTrack::StTrack()
 {
@@ -103,6 +106,11 @@ StTrack::StTrack()
     mImpactParameter = 0;
     mLength = 0;
     mNumberOfPossiblePoints = 0;
+    mNumberOfPossiblePointsTpc = 0;
+    mNumberOfPossiblePointsFtpcWest = 0;
+    mNumberOfPossiblePointsFtpcEast = 0;
+    mNumberOfPossiblePointsSvt = 0;
+    mNumberOfPossiblePointsSsd = 0;
     mGeometry = 0;
     mOuterGeometry = 0;
     mDetectorInfo = 0;
@@ -122,6 +130,11 @@ StTrack::StTrack(const dst_track_st& track) :
     mOuterGeometry = 0;                           // has to come from outside
     mDetectorInfo = 0;                            // has to come from outside
     mNode = 0;                                    // has to come from outside
+    mNumberOfPossiblePointsTpc = 0;
+    mNumberOfPossiblePointsFtpcWest = 0;
+    mNumberOfPossiblePointsFtpcEast = 0;
+    mNumberOfPossiblePointsSvt = 0;
+    mNumberOfPossiblePointsSsd = 0;
 }
 
 StTrack::StTrack(const StTrack& track)
@@ -132,6 +145,11 @@ StTrack::StTrack(const StTrack& track)
     mImpactParameter = track.mImpactParameter;
     mLength = track.mLength;
     mNumberOfPossiblePoints = track.mNumberOfPossiblePoints;
+    mNumberOfPossiblePointsTpc = track.mNumberOfPossiblePointsTpc;
+    mNumberOfPossiblePointsFtpcWest = track.mNumberOfPossiblePointsFtpcWest;
+    mNumberOfPossiblePointsFtpcEast = track.mNumberOfPossiblePointsFtpcEast;
+    mNumberOfPossiblePointsSvt = track.mNumberOfPossiblePointsSvt;
+    mNumberOfPossiblePointsSsd = track.mNumberOfPossiblePointsSsd;
     mTopologyMap = track.mTopologyMap;
     mFitTraits = track.mFitTraits;
     if (track.mGeometry)
@@ -157,6 +175,11 @@ StTrack::operator=(const StTrack& track)
         mImpactParameter = track.mImpactParameter;
         mLength = track.mLength;
         mNumberOfPossiblePoints = track.mNumberOfPossiblePoints;
+	mNumberOfPossiblePointsTpc = track.mNumberOfPossiblePointsTpc;
+	mNumberOfPossiblePointsFtpcWest = track.mNumberOfPossiblePointsFtpcWest;
+	mNumberOfPossiblePointsFtpcEast = track.mNumberOfPossiblePointsFtpcEast;
+	mNumberOfPossiblePointsSvt = track.mNumberOfPossiblePointsSvt;
+	mNumberOfPossiblePointsSsd = track.mNumberOfPossiblePointsSsd;
         mTopologyMap = track.mTopologyMap;
         mFitTraits = track.mFitTraits;
         if (mGeometry) delete mGeometry;
@@ -239,30 +262,62 @@ StTrack::length() const { return mLength; }
 unsigned short
 StTrack::numberOfPossiblePoints() const
 {
-    return (numberOfPossiblePoints(kTpcId) +
-            numberOfPossiblePoints(kSvtId) +
-            numberOfPossiblePoints(kSsdId));
+    if (mNumberOfPossiblePoints) {
+	return (numberOfPossiblePoints(kTpcId) +
+		numberOfPossiblePoints(kSvtId) +
+		numberOfPossiblePoints(kSsdId));
+    }
+    else {
+	return (numberOfPossiblePoints(kTpcId) +
+		numberOfPossiblePoints(kFtpcWestId) +
+		numberOfPossiblePoints(kFtpcEastId) +
+		numberOfPossiblePoints(kSvtId) +
+		numberOfPossiblePoints(kSsdId));	
+    }
 }
 
 unsigned short
 StTrack::numberOfPossiblePoints(StDetectorId det) const
 {
-    // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
-    switch (det) {
-    case kFtpcWestId:
-    case kFtpcEastId:
-    case kTpcId:
-        return mNumberOfPossiblePoints%1000;
-        break;
-    case kSvtId:
-        return (mNumberOfPossiblePoints%10000)/1000;
-        break;
-    case kSsdId:
-        return mNumberOfPossiblePoints/10000;
-        break;
-    default:
-        return 0;
+    if (mNumberOfPossiblePoints) {    
+	// 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
+	switch (det) {
+	case kFtpcWestId:
+	case kFtpcEastId:
+	case kTpcId:
+	    return mNumberOfPossiblePoints%1000;
+	    break;
+	case kSvtId:
+	    return (mNumberOfPossiblePoints%10000)/1000;
+	    break;
+	case kSsdId:
+	    return mNumberOfPossiblePoints/10000;
+	    break;
+	default:
+	    return 0;
+	}
     }
+    else {
+	switch (det) {
+	case kFtpcWestId:
+	    return mNumberOfPossiblePointsFtpcWest;
+	    break;
+	case kFtpcEastId:
+	    return mNumberOfPossiblePointsFtpcEast;
+	    break;
+	case kTpcId:
+	    return mNumberOfPossiblePointsTpc;
+	    break;
+	case kSvtId:
+	    return mNumberOfPossiblePointsSvt;
+	    break;
+	case kSsdId:
+	    return mNumberOfPossiblePointsSsd;
+	    break;
+	default:
+	    return 0;
+	}
+    }  
 }
 
 const StTrackTopologyMap&
@@ -365,72 +420,50 @@ void
 StTrack::setNumberOfPossiblePoints(unsigned short val) {mNumberOfPossiblePoints = val;}
 
 void
+StTrack::setNumberOfPossiblePoints(unsigned char val, StDetectorId det)
+{
+    mNumberOfPossiblePoints = 0;  // make sure old method is NOT active
+    switch (det) {
+    case kFtpcWestId:
+	mNumberOfPossiblePointsFtpcWest = val;
+	break;
+    case kFtpcEastId:
+	mNumberOfPossiblePointsFtpcEast = val;
+	break;
+    case kTpcId:
+	mNumberOfPossiblePointsTpc = val;
+	break;
+    case kSvtId:
+	mNumberOfPossiblePointsSvt = val;
+	break;
+    case kSsdId:
+	mNumberOfPossiblePointsSsd = val;
+	break;
+    default:
+	break;
+    }
+}
+
+void
 StTrack::setNode(StTrackNode* val) { mNode = val; }
 
 #include "StHelixModel.h"
 int StTrack::bad() const
 {
-static const double world = 1.e+5;
- if (mFlag <=0                     )            return 01;
- if (!StMath::Finite(mImpactParameter)   ) 	return 10;
- if (::fabs(mImpactParameter)>world) 		return 11;
- if (!StMath::Finite(mLength)            )    	return 20;
- if (::fabs(mLength)         >world) 		return 21;
- if (mLength <1./world	           )    	return 22;
- if (mGeometry      && mGeometry->bad()     )	return 30;
-//if (mOuterGeometry && mOuterGeometry->bad())  return 40;
- if (mOuterGeometry && mOuterGeometry->bad())  {//Hope temporary HACK
-    StTrack *This = (StTrack *)this;
-    This->setOuterGeometry(new StHelixModel());}
-
- const StTrackDetectorInfo *di = mDetectorInfo;
- if (di             && di->bad()            )   return 50;
-return 0;
-
+    static const double world = 1.e+5;
+    if (mFlag <=0                     )                 return 01;
+    if (!StMath::Finite(mImpactParameter)   ) 	        return 10;
+    if (::fabs(mImpactParameter)>world) 		return 11;
+    if (!StMath::Finite(mLength)            )    	return 20;
+    if (::fabs(mLength)         >world) 		return 21;
+    if (mLength <1./world	           )    	return 22;
+    if (mGeometry      && mGeometry->bad()     )	return 30;
+    //if (mOuterGeometry && mOuterGeometry->bad())  return 40;
+    if (mOuterGeometry && mOuterGeometry->bad())  {//Hope temporary HACK
+	StTrack *This = (StTrack *)this;
+	This->setOuterGeometry(new StHelixModel());}
+    
+    const StTrackDetectorInfo *di = mDetectorInfo;
+    if (di             && di->bad()            )   return 50;
+    return 0;
 }
-void StTrack::Streamer(TBuffer &R__b)
-{
-    // Stream an object of class .
-
-    if (R__b.IsReading()) {
-       UInt_t R__s, R__c;
-       Version_t R__v = R__b.ReadVersion(&R__s, &R__c);
-       if (R__v > 1) {
-          Class()->ReadBuffer(R__b, this, R__v, R__s, R__c);
-          return;
-       }
-       //====process old versions before automatic schema evolution
-       StObject::Streamer(R__b);
-       R__b >> mKey;
-       R__b >> mFlag;
-
-//     R__b >> mEncodedMethod;
-       UChar_t oldEncodedMethod;
-       R__b >> oldEncodedMethod;
-       mEncodedMethod=oldEncodedMethod;
-
-       R__b >> mImpactParameter;
-       R__b >> mLength;
-       R__b >> mNumberOfPossiblePoints;
-       mTopologyMap.Streamer(R__b);
-       mFitTraits.Streamer(R__b);
-       R__b >> mGeometry;
-
-//     R__b >> mDetectorInfo;
-       R__b >> (StTrackDetectorInfo*&)mDetectorInfo;
-
-//     R__b >> mNode;
-       R__b >> (StTrackNode*&)mNode;
-
-
-       mPidTraitsVec.Streamer(R__b);
-
-       R__b.CheckByteCount(R__s, R__c, Class());
-       //====end of old versions
-      
-    } else {
-       Class()->WriteBuffer(R__b,this);
-    }
-} 
-
-
