@@ -1,4 +1,4 @@
-// $Id: StEEmcDataMaker.cxx,v 1.19 2004/07/24 02:58:07 balewski Exp $
+// $Id: StEEmcDataMaker.cxx,v 1.20 2004/09/03 00:36:50 jeromel Exp $
 
 #include <Stiostream.h>
 #include <math.h>
@@ -24,7 +24,11 @@ ClassImp(StEEmcDataMaker)
 //_____________________________________________________________________
 StEEmcDataMaker::StEEmcDataMaker(const char *name):StMaker(name){
   mDb=0;
-
+  hs[0] = NULL;
+  hs[1] = NULL;
+  hs[2] = NULL;
+  hs[3] = NULL;
+  hs[4] = NULL;
 }
 
 //___________________________________________________________
@@ -45,14 +49,16 @@ Int_t StEEmcDataMaker::Init(){
     printf("\n\nWARN %s::Init() did not found \"eeDb-maker\", all EEMC data will be ignored\n\n", GetName());
   } 
 
-  hs[0]= new TH1F("health","raw data health; X: 0=nEve, 1=raw, 2=OKhead , 3=tower(No ghost/n256)",9,-1.5,7.5);
+  if (IAttr(".histos")) {
+    hs[0]= new TH1F("health","raw data health; X: 0=nEve, 1=raw, 2=OKhead , 3=tower(No ghost/n256)",9,-1.5,7.5);
 
-  hs[1]= new TH1F("n256","No. of n256/eve, all header OK",100, -1.5,98.5);
-  hs[2]= new TH1F("nGhost","No. of tower nGhost/eve, all header OK, chan>119",100,-1.5,98.5);
+    hs[1]= new TH1F("n256","No. of n256/eve, all header OK",100, -1.5,98.5);
+    hs[2]= new TH1F("nGhost","No. of tower nGhost/eve, all header OK, chan>119",100,-1.5,98.5);
 
-  hs[3]=new TH1F("snB","sanity, crates Tw cr=0-5, Mapmt cr=6-53,  X= bits(cr)+ cr*10;bits: 0=crID, 1=token,2=len,3=trgCom,4=ErrFlg,5=Ghost,6=n256 ",540,-0.5,539.5);
+    hs[3]=new TH1F("snB","sanity, crates Tw cr=0-5, Mapmt cr=6-53,  X= bits(cr)+ cr*10;bits: 0=crID, 1=token,2=len,3=trgCom,4=ErrFlg,5=Ghost,6=n256 ",540,-0.5,539.5);
 
-  hs[4]=new TH1F("snT","total # of corruption bits in Headers per eve",220,-0.5,219.5);
+    hs[4]=new TH1F("snT","total # of corruption bits in Headers per eve",220,-0.5,219.5);
+  }
 
   return StMaker::Init();
 }
@@ -96,18 +102,18 @@ Int_t StEEmcDataMaker::Make(){
 
   // printf("\n%s  accesing StEvent ID=%d\n",GetName(),mEvent->id());
 
-  hs[0]->Fill(0);
+  if (hs[0]) hs[0]->Fill(0);
   //::::::::::::::::: copy raw data to StEvent ::::::::::::: 
   if(!copyRawData(mEvent)) return kStOK;
-  hs[0]->Fill(1);
+  if(hs[0]) hs[0]->Fill(1);
 
  //::::::::::::::: assure raw data are sane  :::::::::::::::: 
 
  if(headersAreSick(mEvent))   return kStOK;
- hs[0]->Fill(2);
+ if (hs[0]) hs[0]->Fill(2);
 
  if(towerDataAreSick(mEvent))   return kStOK;
- hs[0]->Fill(3);
+ if (hs[0]) hs[0]->Fill(3);
 
 
  //:::::::::::::: store tower/pre/post/smd hits in StEvent
@@ -227,13 +233,13 @@ int  StEEmcDataMaker::headersAreSick(StEvent* mEvent) {
       totErrBit++;
       int k=icr*10+i;
       //      printf("ic=%d on bit=%d k=%d   %d %d  \n",ic,i,k,1<<i,sn&(1<<i) );
-      hs[3]->Fill(k);
+      if (hs[3]) hs[3]->Fill(k);
     }
     gMessMgr->Message("","I") << GetName()<<"::headersAreSick() errors found="<<sanity<<endm;
     //   printf("sanity=%d ",sanity); fiber->print();
   }
 
-   hs[4]->Fill(totErrBit);
+  if (hs[4]) hs[4]->Fill(totErrBit);
    
    gMessMgr->Message("","I") << GetName()<<"::headersAreSick() totErrBit="<<totErrBit<< endm;
   return totErrBit;
@@ -280,17 +286,17 @@ int  StEEmcDataMaker::towerDataAreSick(StEvent* mEvent) {
     n256Tot+=n256;
     if(nGhost>0) {
       int k=icr*10+5;
-      hs[3]->Fill(k);
+      if (hs[3]) hs[3]->Fill(k);
     }
     if(n256>mxN256one) {
       int k=icr*10+6;
-      hs[3]->Fill(k);
+      if (hs[3]) hs[3]->Fill(k);
     }
     
   }
 
-  hs[1]->Fill(n256Tot);
-  hs[2]->Fill(nGhostTot);
+  if(hs[1]) hs[1]->Fill(n256Tot);
+  if(hs[2]) hs[2]->Fill(nGhostTot);
 
   gMessMgr->Message("","I") << GetName()<<"::towerDataAreSick() ,total n256="<<n256Tot <<", nGhost="<<nGhostTot<<endm; 
   if(nGhostTot>0)return true;
@@ -473,6 +479,9 @@ void  StEEmcDataMaker::raw2pixels(StEvent* mEvent) {
  
 
 // $Log: StEEmcDataMaker.cxx,v $
+// Revision 1.20  2004/09/03 00:36:50  jeromel
+// Create histos only if attribute is ON. Added TH1F pointer protection everywhere
+//
 // Revision 1.19  2004/07/24 02:58:07  balewski
 // all assert() deactivated
 //
