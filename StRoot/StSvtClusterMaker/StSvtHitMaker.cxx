@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StSvtHitMaker.cxx,v 1.28 2004/01/27 02:34:11 perev Exp $
+ * $Id: StSvtHitMaker.cxx,v 1.29 2004/03/18 04:02:56 caines Exp $
  *
  * Author: 
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StSvtHitMaker.cxx,v $
+ * Revision 1.29  2004/03/18 04:02:56  caines
+ * Remove from global scope variables used in debug mode as they shouldnt be there and caused erratic behaviour
+ *
  * Revision 1.28  2004/01/27 02:34:11  perev
  * LeakOff
  *
@@ -119,7 +122,6 @@
 #include "StSvtAnalysedHybridClusters.hh"
 #include "StSvtSimulationMaker/StSvtGeantHits.hh"
 
-fstream cluInfo;
 
 ClassImp(StSvtHitMaker)
 //___________________________________________________________________________
@@ -227,9 +229,9 @@ Int_t StSvtHitMaker::Init()
     
     m_ClusTuple = new TNtuple("Clusters","Clusters","flag:xl:yl:x:y:z:charge:mom2x:mom2y:numAnodes:numPixels:peak:hybrid:evt");
     
-    if( iWrite > 1){
-      cluInfo.open(filenameC,ios::out);    
-    }
+    // if( iWrite > 1){
+//       //cluInfo.open(filenameC,ios::out);    
+//     }
   }
 
   if (mSvtGeantHitColl){
@@ -587,22 +589,22 @@ Int_t StSvtHitMaker::FillHistograms(){
 			mSvtBigHit->svtHitData()[i].peakAdc,
 			index,
 			mSvtData->getEventNumber());
-    if( iWrite > 1){
-      cluInfo<<mSvtData->getEventNumber()
-	     <<setw(13)<<  index
-	     <<setw(13)<<  mSvtBigHit->svtHit()[i].flag()
-	     <<setw(13)<<  mSvtBigHit->WaferPosition()[i].x()
-	     <<setw(13)<<  mSvtBigHit->WaferPosition()[i].y()
-	     <<setw(13)<<  mSvtBigHit->svtHit()[i].position().x()
-	     <<setw(13)<<  mSvtBigHit->svtHit()[i].position().y()
-	     <<setw(13)<<  mSvtBigHit->svtHit()[i].position().z()
-	     <<setw(13)<<  mSvtBigHit->svtHit()[i].charge()
-	     <<setw(13)<<  mSvtBigHit->svtHitData()[i].mom2[0]
-	     <<setw(13)<<  mSvtBigHit->svtHitData()[i].mom2[1]
-	     <<setw(13)<<  mSvtBigHit->svtHitData()[i].numOfAnodesInClu
-	     <<setw(13)<<  mSvtBigHit->svtHitData()[i].numOfPixelsInClu
-	     <<setw(13)<<  mSvtBigHit->svtHitData()[i].peakAdc<<endl;
-    }
+ //    if( iWrite > 1){
+//       cluInfo<<mSvtData->getEventNumber()
+// 	     <<setw(13)<<  index
+// 	     <<setw(13)<<  mSvtBigHit->svtHit()[i].flag()
+// 	     <<setw(13)<<  mSvtBigHit->WaferPosition()[i].x()
+// 	     <<setw(13)<<  mSvtBigHit->WaferPosition()[i].y()
+// 	     <<setw(13)<<  mSvtBigHit->svtHit()[i].position().x()
+// 	     <<setw(13)<<  mSvtBigHit->svtHit()[i].position().y()
+// 	     <<setw(13)<<  mSvtBigHit->svtHit()[i].position().z()
+// 	     <<setw(13)<<  mSvtBigHit->svtHit()[i].charge()
+// 	     <<setw(13)<<  mSvtBigHit->svtHitData()[i].mom2[0]
+// 	     <<setw(13)<<  mSvtBigHit->svtHitData()[i].mom2[1]
+// 	     <<setw(13)<<  mSvtBigHit->svtHitData()[i].numOfAnodesInClu
+// 	     <<setw(13)<<  mSvtBigHit->svtHitData()[i].numOfPixelsInClu
+// 	     <<setw(13)<<  mSvtBigHit->svtHitData()[i].peakAdc<<endl;
+//     }
   }
 }
 
@@ -678,7 +680,7 @@ Int_t StSvtHitMaker::Finish(){
    m_hfile->Write();
    m_hfile->Close();
    delete m_hfile; m_hfile=0;
-   cluInfo.close();
+   //cluInfo.close();
  }
  return kStOK;
 }

@@ -1,5 +1,8 @@
-// $Id: StSvtHitMaker.h,v 1.15 2004/01/27 02:34:55 perev Exp $
+// $Id: StSvtHitMaker.h,v 1.16 2004/03/18 04:02:56 caines Exp $
 // $Log: StSvtHitMaker.h,v $
+// Revision 1.16  2004/03/18 04:02:56  caines
+// Remove from global scope variables used in debug mode as they shouldnt be there and caused erratic behaviour
+//
 // Revision 1.15  2004/01/27 02:34:55  perev
 // LeakOff
 //
@@ -59,6 +62,8 @@
 
 #include "TH2.h"
 
+//class ofstream;
+
 class TFile;
 class TNtuple;
 
@@ -94,12 +99,13 @@ class StSvtHitMaker : public StMaker
   void SetFileNames(char* name1="/dev/null", char* name2="/dev/null");
   Int_t Eval();
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.15 2004/01/27 02:34:55 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StSvtHitMaker.h,v 1.16 2004/03/18 04:02:56 caines Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
 
  protected:
 
   int iWrite;
+  //ofstream cluInfo; //!
 
   StSvtGeometry *m_geom; //!
   StSvtHybridCollection *mSvtCluColl; //!
