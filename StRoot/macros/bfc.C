@@ -3,7 +3,7 @@
 // Macro for running chain with different inputs                        //
 // owner:  Yuri Fisyak                                                  //
 //                                                                      //
-// $Id: bfc.C,v 1.122 1999/12/22 18:10:00 fine Exp $
+// $Id: bfc.C,v 1.123 2000/01/07 21:13:11 fisyak Exp $
 //////////////////////////////////////////////////////////////////////////
 TBrowser *b = 0;
 class StBFChain;        
@@ -93,15 +93,17 @@ void bfc(const Int_t First,
   printf ("QAInfo: with %s\n", chain->GetCVS());
    
   // Init the chain and all its makers
-  Int_t iInit = chain->Init();
-  // skip if any
-  St_geant_Maker *geant = (St_geant_Maker *) chain->GetMaker("geant");
-  St_XDFFile *xdf_out = chain->GetXdfOut();
-  if (chain->GetOption("Event")) evMk  = (StEventMaker   *) chain->GetMaker("StEventMaker");  
-  if (geant && First > 1) geant->Skip(First-1);
-  else {
-    StIOMaker *inpMk      = (StIOMaker *)      chain->GetMaker("inputStream");
-    if (inpMk && First > 1) {printf ("Skip %i Events\n",First-1);inpMk->Skip(First-1);}
+  if (Last >= 0) {
+    Int_t iInit = chain->Init();
+    // skip if any
+    St_geant_Maker *geant = (St_geant_Maker *) chain->GetMaker("geant");
+    St_XDFFile *xdf_out = chain->GetXdfOut();
+    if (chain->GetOption("Event")) evMk  = (StEventMaker   *) chain->GetMaker("StEventMaker");  
+    if (geant && First > 1) geant->Skip(First-1);
+    else {
+      StIOMaker *inpMk      = (StIOMaker *)      chain->GetMaker("inputStream");
+      if (inpMk && First > 1) {printf ("Skip %i Events\n",First-1);inpMk->Skip(First-1);}
+    }
   }
   TBenchmark evnt;
   Int_t iMake = 0, i = First;
@@ -117,8 +119,8 @@ void bfc(const Int_t First,
    //    gSystem->Exec("ps ux");
    evnt->Stop("QAInfo:");
    evnt->Show("QAInfo:");
-   printf ("QAInfo: Done with Event [no. %d/run %d/evt. %d/sta %d] Real Time = %10.2f seconds Cpu Time =  %10.2f seconds \n",
-	   i,chain->GetRunNumber(),chain->GetEventNumber(),
+   printf ("QAInfo: Done with Event [no. %d/run %d/evt. %d/Date.Time %d.%d/sta %d] Real Time = %10.2f seconds Cpu Time =  %10.2f seconds \n",
+	   i,chain->GetRunNumber(),chain->GetEventNumber(),chain->GetDate(), chain->GetTime(),
 	   iMake,evnt->GetRealTime("QAInfo:"),evnt->GetCpuTime("QAInfo:"));
    i++; goto EventLoop;
  }
