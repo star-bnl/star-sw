@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.6 1999/08/06 18:57:31 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.7 1999/08/07 19:42:21 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.7  1999/08/07 19:42:21  fisyak
+// use default ctor for St_tpcdaq_Maker
+//
 // Revision 1.6  1999/08/06 18:57:31  fisyak
 // Put MinidaqMaker after TPC
 //
@@ -34,7 +37,6 @@
 #include "StRoot/St_dst_Maker/StV0Maker.h"
 #include "StRoot/St_tcl_Maker/St_tcl_Maker.h"
 #include "StRoot/St_tpt_Maker/St_tpt_Maker.h"
-#include "StRoot/St_tpcdaq_Maker/St_tpcdaq_Maker.h"
 #include "StRoot/StTreeMaker/StTreeMaker.h"
 #include "StRoot/StIOMaker/StIOMaker.h"
 
@@ -395,11 +397,15 @@ Int_t StBFChain::Load()
   }
   else {
     //  S I M U L A T I O N  or D A Q
-    if (ChainFlags[kTDAQ])  new St_tpcdaq_Maker("tpc_raw","daq");
+    if (ChainFlags[kTDAQ])  {
+      StMaker *tpcdaq = New("St_tpcdaq_Maker","tpc_raw"); 
+      tpcdaq->SetMode(0); // daq
+    }
     else {
       if (ChainFlags[kTRS]) {//		trs
 	New("StTrsMaker");
-        new St_tpcdaq_Maker("tpc_raw","trs");
+        StMaker *tpcdaq = New("St_tpcdaq_Maker","tpc_raw");
+	tpcdaq->SetMode(1); // trs
       }
       else { 
 	if (ChainFlags[kTSS]) {//		tss
