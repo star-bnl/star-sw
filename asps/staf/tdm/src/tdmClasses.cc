@@ -276,10 +276,15 @@ STAFCV_T tdmTable:: printRows (long ifirst, long nrows) {
    if(ifirst < 0 || ii <= ifirst){
       EML_ERROR(INVALID_TABLE_ROW);
    }
+   fprintf(stdout," ROW #");
+   for( i=0;i<columnCount();i++ ){
+      fprintf(stdout,"\t%s",columnName(i));
+   }
+   fprintf(stdout,"\n");
    pCellData = (char*)pDSthis->p.data;
    pCellData += ifirst*rowSize();
    for( i=ifirst;i<MIN(ii,ifirst+nrows);i++){
-      fprintf(stdout," %6X:",i);
+      fprintf(stdout,"%6d:",i);
 /*REPLACE *** dsPrintData with dsuPrintData ***
       dsPrintData(stdout, type
 		, 1 

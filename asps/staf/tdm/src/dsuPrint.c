@@ -73,3 +73,9 @@ void dsuPrintData(FILE *stream, DS_TYPE_CODE_T code
    }
 }
 
+/*--------------------------------------------------------------------*/
+void dsuPrintHeader(FILE *stream, DS_DATASET_T *pTable)
+{
+   fprintf(stream,"NOT_YET_IMPLEMENTED\n");
+}
+
