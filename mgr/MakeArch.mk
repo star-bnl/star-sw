@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.70  1999/04/18 23:36:04  fisyak
+#  Add -lpgc for new pgf77
+#
 #  Revision 1.69  1999/04/02 22:59:00  fisyak
 #  filter-out St_laser_Maker St_run_summary_Maker St_tpctest_Maker
 #
@@ -185,7 +188,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/04/02 22:59:00 $ 
+#             Last modification $Date: 1999/04/18 23:36:04 $ 
 #. default setings
 
 MAKE  := gmake
@@ -415,6 +418,7 @@ ifneq (,$(findstring $(STAR_SYS),i386_linux2 i386_redhat50 i386_redhat51 i386_re
 #  FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib -lg2c -lI77 -lF77
   FLIBS    := -L/opt/star/lib -lpgf77S -lpgf77A -L/usr/local/lib -L/usr/local/egcs-1.1.1 \
               -L/usr/local/egcs-1.1.1/lib/gcc-lib/i686-pc-linux-gnu/egcs-2.91.60 -lg2c 
+  SL_EXTRA_LIB := -L/usr/pgi/linux86/lib -lpgc
 ifneq (,$(findstring $(STAR_SYS),i386_linux2))
   FLIBS   += -lI77 -lF77
 endif
