@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.h,v 1.37 2004/09/18 20:35:09 jeromel Exp $
+ * $Id: StMuDstMaker.h,v 1.38 2004/10/19 01:42:29 mvl Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
 #ifndef StMuDstMaker_hh
@@ -142,12 +142,15 @@ class StMuDstMaker : public StIOInterFace {
 
   virtual const char *GetCVS() const {  ///< Returns version tag.
 
-    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.37 2004/09/18 20:35:09 jeromel Exp $ built "__DATE__" "__TIME__ ;
+    static const char cvs[]="Tag $Name:  $ $Id: StMuDstMaker.h,v 1.38 2004/10/19 01:42:29 mvl Exp $ built "__DATE__" "__TIME__ ;
     return cvs;
   }
 
 
 protected:
+  /// routine to set up connection between mEmcCollection and Emc arrays
+  void connectEmcCollection();
+  void connectPmdCollection();
   enum ioMode {ioRead, ioWrite};
   /** Specifies the way the output file name is contructed when creating muDsts.
       ioFix = use filename specified in when calling the constructor, right in the
@@ -217,10 +220,8 @@ virtual   void closeRead();
 
   void setBranchAddresses(TChain*);
 
-  void clear(TClonesArray* &t, int& counter,int del=1);
-  void clear(int del=0);
-
   void assignArrays();
+  void clearArrays();
   void zeroArrays();
   void createArrays();
   TClonesArray* clonesArray(TClonesArray*& p, const char* type, int size, int& counter);
@@ -279,6 +280,10 @@ virtual   void closeRead();
   TClonesArray** mPmdArrays;    //[__NPMDARRAYS__    ];
   TClonesArray** mTofArrays;    //[__NTOFARRAYS__    ];
   char           mStatusArrays    [__NALLARRAYS__    ];
+  TClonesArray*  mEmcCollectionArray; // Needed to hold old format
+  StMuEmcCollection *mEmcCollection;
+  TClonesArray*  mPmdCollectionArray; // Needed to hold old format
+  StMuPmdCollection *mPmdCollection;
 
   ClassDef(StMuDstMaker, 0)
 };
@@ -314,6 +319,9 @@ inline void StMuDstMaker::setBufferSize(int buf) { mBufferSize = buf; }
 /***************************************************************************
  *
  * $Log: StMuDstMaker.h,v $
+ * Revision 1.38  2004/10/19 01:42:29  mvl
+ * Changes for splitting Emc and Pmd collections. Emc clusters and points dropped
+ *
  * Revision 1.37  2004/09/18 20:35:09  jeromel
  * Little bit baffled by what CVS did around here
  * http://www.star.bnl.gov/cgi-bin/cvsweb.cgi/StRoot/StMuDSTMaker/COMMON/StMuDstMaker.h.diff?r1=1.35&r2=1.36
