@@ -1,5 +1,8 @@
-// $Id: St_geant_Maker.cxx,v 1.32 1999/04/08 00:39:08 fine Exp $Id: 1999/03/11 00:15:22 perev Exp $
+// $Id: St_geant_Maker.cxx,v 1.33 1999/04/09 23:52:48 nevski Exp $Id: 1999/03/11 00:15:22 perev Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.33  1999/04/09 23:52:48  nevski
+// checking 3 volume parameters now
+//
 // Revision 1.32  1999/04/08 00:39:08  fine
 // Work metod - workaround for ROOT bug PCON definition
 //
@@ -118,7 +121,7 @@
 #include <iostream.h>
 #include <stdio.h>
 #include <string.h>
-
+#include "GtHash.h"
 #include "TGeometry.h"
 #include "TMaterial.h"
 #include "TMixture.h"
@@ -445,7 +448,7 @@ void St_geant_Maker::LoadGeometry(Char_t *option){
 //_____________________________________________________________________________
 void St_geant_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_geant_Maker.cxx,v 1.32 1999/04/08 00:39:08 fine Exp $\n");
+  printf("* $Id: St_geant_Maker.cxx,v 1.33 1999/04/09 23:52:48 nevski Exp $\n");
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
 }
@@ -728,6 +731,7 @@ void St_geant_Maker::Work()
 
   TObjArray nodes(nvol+1);
   new TGeometry("STAR","nash STAR");
+  GtHash *H = new GtHash;
  
   printf(" looping on agvolume \n");
   //   ======================================================
@@ -739,7 +743,7 @@ void St_geant_Maker::Work()
     TShape*  t;
     shapes   shape   = (shapes) volu[1];
     Int_t    nin     = 0;
-    Int_t    medium  = (Int_t)  volu[3]; 
+    //   Int_t    medium  = (Int_t)  volu[3]; 
     Int_t    np      = (Int_t)  volu[4];
     Float_t* p0      = volu+6;
     Float_t* att     = volu+6+np;
@@ -747,37 +751,48 @@ void St_geant_Maker::Work()
     Char_t   nick[]  = {0,0,0,0,0};
     float    xx[3]   = {0.,0.,0.};
     St_Node *newNode = 0;
-    if (mother) nin = (Int_t) mother[2];
+    if (mother)  nin = (Int_t) mother[2];
+    St_Node *Hp      = 0;
 
-   if (!nodes[who])
-   {
+    strncpy(nick,(const Char_t*)&cvolu->names[cvolu->nlevel-1],4);
     strncpy(name,(const Char_t*)(volu-5),4);
-    t=(TShape*)gGeometry->GetListOfShapes()->FindObject(name);
-    printf(" found object %s %d %f %f \n",name,t,p0[0],p[0]);
-    if (!t) 
-    { switch (shape) 
-      { case BOX:  t=new TBRIK(name,"BRIK","void",
+
+    if (np==0)
+    { 
+       Hp = (St_Node *) H->GetPointer(p,3);
+       // printf(" 0-object %s %s %f %f %f %p \n",name,nick,p[0],p[1],p[2],Hp);
+    }
+
+   if (nodes[who]==0 || np==0 && Hp==0)
+   {
+    t=(TShape*)gGeometry->GetListOfShapes()->FindObject(nick);
+    if (t==0 || np==0 && Hp==0) 
+    { 
+      printf(" creating object %s  %f  %f  %f  %f \n",
+                           name,p0[0],p[0],p[1],p[2]);
+      switch (shape) 
+      { case BOX:  t=new TBRIK(nick,"BRIK","void",
                          p[0],p[1],p[2]);                         break;
-        case TRD1: t=new TTRD1(name,"TRD1","void",
+        case TRD1: t=new TTRD1(nick,"TRD1","void",
                          p[0],p[1],p[2],p[3]);                    break;
-        case TRD2: t=new TTRD2(name,"TRD2","void",
+        case TRD2: t=new TTRD2(nick,"TRD2","void",
                          p[0],p[1],p[2],p[3],p[4]);               break;
-        case TRAP: t=new TTRAP(name,"TRAP","void",
+        case TRAP: t=new TTRAP(nick,"TRAP","void",
                          p[0],p[1],p[2],p[3],p[4],p[5],
                          p[6],p[7],p[8],p[9],p[10]);              break;
-        case TUBE: t=new TTUBE(name,"TUBE","void",
+        case TUBE: t=new TTUBE(nick,"TUBE","void",
                          p[0],p[1],p[2]);                         break;
-        case TUBS: t=new TTUBS(name,"TUBS","void",
+        case TUBS: t=new TTUBS(nick,"TUBS","void",
                          p[0],p[1],p[2],p[3],p[4]);               break;
-        case CONE: t=new TCONE(name,"CONE","void",
+        case CONE: t=new TCONE(nick,"CONE","void",
                          p[0],p[1],p[2],p[3],p[4]);               break;
-        case CONS: t=new TCONS(name,"CONS","void",
+        case CONS: t=new TCONS(nick,"CONS","void",
                          p[1],p[2],p[3],p[4],p[0],p[5],p[6]);     break;
-        case SPHE: t=new TSPHE(name,"SPHE","void",
+        case SPHE: t=new TSPHE(nick,"SPHE","void",
                          p[0],p[1],p[2],p[3],p[4],p[5]);          break;
-        case PARA: t=new TPARA(name,"PARA","void",
+        case PARA: t=new TPARA(nick,"PARA","void",
                          p[0],p[1],p[2],p[3],p[4],p[5]);          break;
-        case PGON: t=new TPGON(name,"PGON","void",
+        case PGON: t=new TPGON(nick,"PGON","void",
                          p[0],p[1],p[2],p[3]);  
                    {
                     Float_t *pp = p+4;
@@ -785,7 +800,7 @@ void St_geant_Maker::Work()
                        (( TPGON*)t)->DefineSection(i,*pp++,*pp++,*pp++);
                    }
                                                                   break;
-        case PCON: t=new TPCON(name,"PCON","void",
+        case PCON: t=new TPCON(nick,"PCON","void",
                          p[0],p[1],p[2]);                         
                    {
                      Float_t *pp = p+3;
@@ -793,17 +808,17 @@ void St_geant_Maker::Work()
                         ((TPCON *)t)->DefineSection(i,*pp++,*pp++,*pp++);
                    }
                                                                   break;
-        case ELTU: t=new TELTU(name,"ELTU","void",
+        case ELTU: t=new TELTU(nick,"ELTU","void",
                          p[0],p[1],p[2]);                         break;
-//      case HYPE: t=new THYPE(name,"HYPE","void",
+//      case HYPE: t=new THYPE(nick,"HYPE","void",
 //                       p[0],p[1],p[2],p[3]);                    break;
-        case GTRA: t=new TGTRA(name,"GTRA","void",
+        case GTRA: t=new TGTRA(nick,"GTRA","void",
                          p[0],p[1],p[2],p[3],p[4],p[5],
                          p[6],p[7],p[8],p[9],p[10],p[11]);        break;
-        case CTUB: t=new TCTUB(name,"CTUB","void",
+        case CTUB: t=new TCTUB(nick,"CTUB","void",
                          p[0],p[1],p[2],p[3],p[4],p[5],
                          p[6],p[7],p[8],p[9],p[10]);              break;
-        default:   t=new TBRIK(name,"BRIK","void",
+        default:   t=new TBRIK(nick,"BRIK","void",
                          p[0],p[1],p[2]);                         break;
       };
       t->SetLineColor(att[4]);
@@ -812,7 +827,7 @@ void St_geant_Maker::Work()
     ivol  = (Int_t) *(position+1);
     irot  = (Int_t) *(position+3);
 
-    strncpy(nick,(const Char_t*)&cvolu->names[cvolu->nlevel-1],4);
+//     strncpy(nick,(const Char_t*)&cvolu->names[cvolu->nlevel-1],4);
 
     // to build a compressed tree, name should be checked for repetition
     newNode = new St_Node(name,nick,t);
@@ -822,18 +837,24 @@ void St_geant_Maker::Work()
 //  --------------------
     nodes[who]=newNode;
    }
-   newNode = (St_Node *)nodes[who];
+   if (np>0)     { newNode = (St_Node *)nodes[who]; }
+   else if (Hp)  { newNode = Hp; }
+   else          { printf(" New 0-object \n"); H->SetPointer(newNode); }
 //  --------------------
 
     gfxzrm_ (&nlev, &xx[0],&xx[1],&xx[2], &theta1,&phi1, 
                     &theta2,&phi2, &theta3,&phi3, &type);
 
-    if (node)
-    {  TRotMatrix *matrix=GetMatrix(theta1,phi1,theta2,phi2,theta3,phi3);
+     if (node)
+     {  TRotMatrix *matrix=GetMatrix(theta1,phi1,theta2,phi2,theta3,phi3);
        node->Add(newNode,xx[0],xx[1],xx[2],matrix); // Copy to add
-    }
+       if (strcmp(name,"BANG")==0) 
+          printf(" BANG: %f %f %f %f %f %f \n",
+                   theta1,phi1,theta2,phi2,theta3,phi3);
+     }
     node = newNode;
   };
+
   fNode=node;
   gGeometry->GetListOfNodes()->Add(node);
 }
