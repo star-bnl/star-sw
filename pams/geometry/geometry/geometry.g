@@ -58,6 +58,7 @@ If LL>1
   NtrSubEv      = 1000
 *
   do while (j>0)
+  j=0
   on HELP       { you may select the following keywords: ;
                   <W>;('---------------:----------------------------- ');
                   <W>;('Configurations : complete,tpc_only,field_only ');
