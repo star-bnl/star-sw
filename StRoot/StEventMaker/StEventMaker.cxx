@@ -27,6 +27,7 @@
 #include "StDetectorDbMaker/StDetectorDbBeamInfo.h"
 #include "StDetectorDbMaker/StDetectorDbTriggerID.h"
 #include "StDAQMaker/StDAQReader.h"
+#include "StTriggerDataMaker/StTriggerDataMaker.h"
 #include "StPrompt.hh"
 #include <typeinfo>
 
@@ -42,7 +43,7 @@ using std::pair;
 #define StVector(T) vector<T>
 #endif
 
-static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.55 2003/04/13 23:07:01 jeromel Exp $";
+static const char rcsid[] = "$Id: StEventMaker.cxx,v 2.56 2003/04/15 22:37:54 jeromel Exp $";
 
 ClassImp(StEventMaker)
   
@@ -288,6 +289,27 @@ StEventMaker::makeEvent()
 
     if (dstL0Trigger && dstL1Trigger && !mCurrentEvent->l1Trigger())
 	mCurrentEvent->setL1Trigger(new StL1Trigger(*dstL0Trigger, *dstL1Trigger));
+
+
+    //
+    // Get trgStructure from StTriggerDataMaker and put it into StEvent
+    //
+    StTriggerDataMaker* trgDataMaker = (StTriggerDataMaker*) GetMaker("trgd");
+    cout << "StEventMaker: getting StTriggerDataMaker" << endl;
+    if(trgDataMaker==0) {
+      cout << "StEventMaker: No StTriggerDataMaker found" << endl;     
+    }else{ 
+      cout << "StEventMaker: found StTriggerDataMaker" << endl;     
+      StTriggerData* pTrg = trgDataMaker->getTriggerData();
+      if(pTrg==0){
+	cout << "StEventMaker: StTriggerDataMaker was empty" << endl;
+      }else{
+	mCurrentEvent->setTriggerData(pTrg);
+	cout << "StEventMaker: got StTriggerData" << endl;     
+      }
+      mCurrentEvent->statistics();
+    }
+
 
     //
     //  Trigger ID summary
@@ -1485,8 +1507,11 @@ StEventMaker::printTrackInfo(StTrack* track)
 }
 
 /**************************************************************************
- * $Id: StEventMaker.cxx,v 2.55 2003/04/13 23:07:01 jeromel Exp $
+ * $Id: StEventMaker.cxx,v 2.56 2003/04/15 22:37:54 jeromel Exp $
  * $Log: StEventMaker.cxx,v $
+ * Revision 2.56  2003/04/15 22:37:54  jeromel
+ * StTriggerDataMaker added
+ *
  * Revision 2.55  2003/04/13 23:07:01  jeromel
  * Use of access method on null already fixed. Additional dbTriggerId fix closes bug # 85
  *
