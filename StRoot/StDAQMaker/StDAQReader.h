@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.h,v 1.4 1999/08/01 00:14:50 perev Exp $
+ * $Id: StDAQReader.h,v 1.5 1999/08/06 16:20:59 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.h,v $
+ * Revision 1.5  1999/08/06 16:20:59  perev
+ * RICHReader added
+ *
  * Revision 1.4  1999/08/01 00:14:50  perev
  * leak removed author added
  *
@@ -20,6 +23,12 @@
  **************************************************************************/
 #ifndef _StDAQReader_
 #define _StDAQReader_
+
+#ifndef __CINT__
+#include "StDaqLib/GENERIC/EventReader.hh"
+#include "StDaqLib/RICH/RICH_Reader.hh"
+
+#endif /*__CINT__*/
 
 //		Forward declarations
 struct  EventInfo;
@@ -33,6 +42,8 @@ class  PedestalRMSReader;
 class  GainReader;
 class  CPPReader;
 class  BadChannelReader;
+class  RICH_Reader;
+typedef RICH_Reader StRICHReader;
 //
 
 
@@ -90,12 +101,14 @@ public:
 
   virtual void setTPCVersion(const char* vers = "TPCV2P0"); 
   StTPCReader *getTPCReader(); 
+  StRICHReader *getRICHReader(); 
   virtual void printEventInfo();
 
 protected:
 int fFd;	//File descriptor
 EventReader *fEventReader;  
 StTPCReader *fTPCReader;  
+StRICHReader *fRICHReader;  
 long fOffset;
 DAQEventInfo *fEventInfo;
 char *fFile;

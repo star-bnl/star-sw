@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDAQReader.cxx,v 1.4 1999/08/01 00:14:49 perev Exp $
+ * $Id: StDAQReader.cxx,v 1.5 1999/08/06 16:20:58 perev Exp $
  *
  * Author: Victor Perev
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StDAQReader.cxx,v $
+ * Revision 1.5  1999/08/06 16:20:58  perev
+ * RICHReader added
+ *
  * Revision 1.4  1999/08/01 00:14:49  perev
  * leak removed author added
  *
@@ -29,6 +32,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "Stypes.h"
+#include "StDAQReader.h"
 //
 
 
@@ -39,6 +43,7 @@ StDAQReader::StDAQReader(const char *file)
   fFd = -1;
   fEventReader = 0;
   fTPCReader = 0;
+  fRICHReader = 0;
   fOffset = 0;
   fFile = 0;
   if (!file || !file[0]) return;
@@ -84,6 +89,7 @@ StDAQReader::~StDAQReader()
 int StDAQReader::readEvent()
 {  
   delete fEventReader;
+  delete fRICHReader; fRICHReader = 0;
   if (fOffset == -1) return 1;
   fEventReader = new EventReader();
   fEventReader->InitEventReader(fFd, fOffset, 0);
@@ -147,6 +153,14 @@ StTPCReader *StDAQReader::getTPCReader()
     fTPCReader = new StTPCReader(this);
   }
   return fTPCReader;
+}
+//_____________________________________________________________________________
+StRICHReader *StDAQReader::getRICHReader() 
+{
+  if (!fRICHReader) {
+    fRICHReader = ::getRICHReader(fEventReader);
+  }
+  return fRICHReader;
 }
 //_____________________________________________________________________________
 void StDAQReader::printEventInfo()
