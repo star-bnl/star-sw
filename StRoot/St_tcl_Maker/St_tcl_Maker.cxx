@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.24 1999/03/01 18:53:32 sakrejda Exp $
+// $Id: St_tcl_Maker.cxx,v 1.25 1999/03/02 19:50:42 sakrejda Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.25  1999/03/02 19:50:42  sakrejda
+// Histograms cleaned up
+//
 // Revision 1.24  1999/03/01 18:53:32  sakrejda
 // hit eveluation switchable
 //
@@ -158,19 +161,21 @@ Int_t St_tcl_Maker::Init(){
   // Create Histograms
 
   // for tph pam
-  m_nseq_hit   = new TH1F("TclTphitNseq","num seq in hit",50,0.,200.);
-  m_tpc_row    = new TH1F("TclTphitRow","tpc row num",150,100.,250.);
+  m_nseq_hit   = new TH1F("TclTphitNseq","num seq in hit",200,0.5,200.5);
+  m_tpc_row    = new TH1F("TclTphitRow","tpc row num",2345,100.5,2445.5);
   m_x_of_hit   = new TH1F("TclTphitHitX","x dist of hits",50,-200.,200.);
   m_y_of_hit   = new TH1F("TclTphitHitY","y dist of hits",50,-200.,200.);
   m_z_of_hit   = new TH1F("TclTphitHitZ","z dist of hits",50,-250.,250.);
-  m_charge_hit = new TH1F("TclTphitTotChargeHit","total charge in hit",50,0.,0.0001);
-  m_alpha      = new TH1F("TclTphitAlpha","crossing angle in xy",50,-200.,200.);
-  m_phi        = new TH1F("TclTphitPhi","orientation of hit wrt padplane",64,0.,64.);
-  m_lambda     = new TH1F("TclTphitLambda","dip angle(radians)",64,0.,64.);
+  m_charge_hit = new TH1F("TclTphitTotChargeHit","total charge in hit",100,0.,0.00004);
+
+  // The following quantities are known only AFTER tracking
+  //  m_alpha      = new TH1F("TclTphitAlpha","crossing angle in xy",50,-200.,200.);
+  // m_phi        = new TH1F("TclTphitPhi","orientation of hit wrt padplane",64,0.,64.);
+  // m_lambda     = new TH1F("TclTphitLambda","dip angle(radians)",64,0.,64.);
 
   // for tcl pam
-  m_nseq_cluster = new TH1F("TclTpclusterNseqCluster"," num seq in cluster",50,0.,200.);
-  m_nhits = new TH1F("TclTpclusterNhits"," estimated num overlapping hits in cluster",50,0.,200.);
+  m_nseq_cluster = new TH1F("TclTpclusterNseqCluster"," num seq in cluster",100,0.5,200.5);
+  m_nhits = new TH1F("TclTpclusterNhits"," estimated num overlapping hits in cluster",20,-0.5,19.5);
   
   return StMaker::Init();
 }
@@ -252,7 +257,6 @@ Int_t St_tcl_Maker::Make(){
 	St_tcl_tpc_index  *index = (St_tcl_tpc_index *) local("index");
 	if (!index) {index = new St_tcl_tpc_index("index",2*max_hit); local.Add(index);}
 	cout << "start tfs_run" << endl;
-	
 	Int_t Res_tfs_g2t =   tfs_g2t(g2t_tpc_hit, g2t_track, g2t_vertex,
 				      m_tfs_fspar,m_tfs_fsctrl,
 				      index, m_type, tphit);
@@ -272,7 +276,7 @@ Int_t St_tcl_Maker::Make(){
 //_____________________________________________________________________________
 void St_tcl_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_tcl_Maker.cxx,v 1.24 1999/03/01 18:53:32 sakrejda Exp $\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.25 1999/03/02 19:50:42 sakrejda Exp $\n");
   //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
@@ -308,9 +312,9 @@ void St_tcl_Maker::MakeHistograms() {
         m_y_of_hit->Fill(tphit_y);
         m_z_of_hit->Fill(tphit_z);
         m_charge_hit->Fill(tphit_q);
-        m_alpha->Fill(tphit_alpha);
-        m_phi->Fill(tphit_phi);
-        m_lambda->Fill(tphit_lambda);
+	//        m_alpha->Fill(tphit_alpha);
+	//        m_phi->Fill(tphit_phi);
+	//        m_lambda->Fill(tphit_lambda);
     }
   }
   if (ptpcl) {
