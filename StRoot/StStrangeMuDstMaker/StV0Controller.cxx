@@ -1,5 +1,8 @@
-// $Id: StV0Controller.cxx,v 3.7 2002/04/30 16:02:48 genevb Exp $
+// $Id: StV0Controller.cxx,v 3.8 2002/05/29 19:09:51 genevb Exp $
 // $Log: StV0Controller.cxx,v $
+// Revision 3.8  2002/05/29 19:09:51  genevb
+// Removed some mistakes left in last time
+//
 // Revision 3.7  2002/04/30 16:02:48  genevb
 // Common muDst, improved MC code, better kinks, StrangeCuts now a branch
 //
@@ -121,7 +124,6 @@ Int_t StV0Controller::MakeCreateMcDst(StMcVertex* mcVert) {
   StV0Vertex* rcV0Partner = 0;
   Int_t indexRecoArray = -1;
   Int_t count = theMcV0Map->count(mcVert);
-  StV0MuDst* vvv = 0;
   
   if (count>0) {
     pair<mcV0MapIter,mcV0MapIter> mcV0Bounds = theMcV0Map->equal_range(mcVert);
@@ -156,26 +158,24 @@ Int_t StV0Controller::MakeCreateMcDst(StMcVertex* mcVert) {
       if( fabs(x - tmpV0->decayVertexV0X()) < 0.00001 &&
           fabs(y - tmpV0->decayVertexV0Y()) < 0.00001 &&
           fabs(z - tmpV0->decayVertexV0Z()) < 0.00001 )
-      //{ indexRecoArray = i; break; }
-      { indexRecoArray = i; vvv = tmpV0; break; }
+      { indexRecoArray = i; break; }
+    }
+
+    StSPtrVecMcTrack& Daughters = mcVert->daughters();
+    for (StMcTrackIterator DTrackIt = Daughters.begin();
+                           DTrackIt != Daughters.end(); DTrackIt++) {
+      switch ((Int_t)(*DTrackIt)->particleDefinition()->charge()) {
+        case ( 1) : // Positive
+          Pos = (*DTrackIt); break;
+        case (-1) : // Negative
+          Neg = (*DTrackIt); break;
+      }
     }
   }
 
-  StSPtrVecMcTrack& Daughters = mcVert->daughters();
-  for (StMcTrackIterator DTrackIt = Daughters.begin();
-                         DTrackIt != Daughters.end(); DTrackIt++) {
-    switch ((Int_t)(*DTrackIt)->particleDefinition()->charge()) {
-      case ( 1) : // Positive
-        Pos = (*DTrackIt); break;
-      case (-1) : // Negative
-        Neg = (*DTrackIt); break;
-    }
-  }
   if ((Pos)&&(Neg)) {
     StV0Mc* v0Mc = new((*mcArray)[mcEntries++]) StV0Mc(mcVert,Pos,Neg,ev);
-    if ((v0Mc->decayMode() > 26) && (v0Mc->decayMode() < 33) &&
-        (indexRecoArray != -1))
-    if((assocMaker)&&(count>0)) {
+    if((assocMaker)&&(indexRecoArray!=-1)) {
       new((*assocArray)[assocEntries++]) 
             StStrangeAssoc(indexRecoArray,mcEntries-1);
 
