@@ -1,12 +1,8 @@
-// $Id: RdoFinder.h,v 1.2 2002/02/19 16:07:56 wdeng Exp $
-// $Log: RdoFinder.h,v $
-// Revision 1.2  2002/02/19 16:07:56  wdeng
-// cvs control strings.
-//
 
 #ifndef  RdoFinder_HH
 #define  RdoFinder_HH
 
+class StTrack;
 class dst_track_st;
 
 class  RdoFinder{
@@ -14,29 +10,40 @@ class  RdoFinder{
   static RdoFinder *mRdoFinder;
   RdoFinder();
 
-  float  magneticField;
-  float  avg_gap;
+  float magneticField;
+  float avg_gap;
+  float OuterRdoRs[5];
+  long  OuterOffRdos[4];
 
-  int    nRowsInSectorGaps(float x_first,float y_first,float x_cent,float y_cent,float x_last,float y_last);
-  int    CageCrossings(float x_cent, float y_cent, float radius, float cage_radius, float* x_out,float* y_out, int first_or_second);
-  int    RowCrossings(float x_cent, float y_cent, float radius, float row_y, float* x_out,float* y_out, int first_or_second);
-  int    FindSectorCrossings(float x_first,float y_first,float x_cent,float y_cent,float x_last,float y_last,float r_first_row,float r_last_row);
-  int   Sector(float x, float y, float z);
-  int   Row(float x, float y);
+  int   removeOffRdos(dst_track_st *t);
+  int   removeOffRdos(StTrack* t);
+  int   nRowsCrossed(dst_track_st *t,float r_first_row,float r_last_row, int sector);
+  int   nRowsCrossed(StTrack* t,float r_first_row,float r_last_row, int sector);
+
+  int   InGap(float *p);
+  int   GetOutOfGap(float *p,int *last_cross);
+  int   GotoNextCross(float *p,int *last_cross,int pos_side_sector);
+
+  int   FindEndPoints(dst_track_st *t,float *p);
+  int   FindEndPoints(StTrack *t,float *p);
+  int   FindPointsBetween(dst_track_st *t,float *p,float r_first_row, float r_last_row, float* limits);
+  int   FindPointsBetween(StTrack *t,float *p,float r_first_row, float r_last_row, float* limits);
+  int   FindRowCrossing(float* p,float y_row, float* x, int first_or_second);
+
+  int   IsItBetween(float x,float y,float* p);
+  int   Sector(float x,float y,float z);
+  int   Row(float x,float y);
   float Local_y(float x,float y);
 
  public:
-  //  RdoFinder(){avg_gap = 3.8*cos(M_PI/12);}
-  static RdoFinder* Instance(); 
-  void setMagneticField(float bField) { magneticField=bField; }
 
-  int PossiblePoints(dst_track_st *dstTrack);
-  int CheckRdoInt(int rdoFinderInt, int sector){
-    if(sector<0||sector>24) return 0;
-    return (rdoFinderInt&(1<<sector-1)) ? 1:0;
-  }
-  int  BinarySubset(int a,int b,int n=24);
-  void PrintResults(int rdoFinderInt);
+  static RdoFinder* Instance();
+
+  void setMagneticField(float bField);
+
+  int  PossiblePoints(dst_track_st *t);
+  int  PossiblePoints(StTrack *t);
+
 };
 
 #endif
