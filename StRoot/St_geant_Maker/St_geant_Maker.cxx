@@ -1,6 +1,9 @@
 //  St_geant_Maker.cxx,v 1.37 1999/04/19 06:29:30 nevski Exp 
-// $Id: St_geant_Maker.cxx,v 1.54 2000/01/23 19:20:53 nevski Exp $
+// $Id: St_geant_Maker.cxx,v 1.55 2000/02/02 21:21:19 fisyak Exp $
 // $Log: St_geant_Maker.cxx,v $
+// Revision 1.55  2000/02/02 21:21:19  fisyak
+// Hack for CC5
+//
 // Revision 1.54  2000/01/23 19:20:53  nevski
 // pseudo-doc
 //
@@ -211,7 +214,11 @@ extern "C" int isprint (int);
 //     #include "THYPE.h"
 #include "TGTRA.h"
 #include "TCTUB.h"
+#ifdef __CC5__
+#include <TGeant3.h>
+#else
 #include "TGeant3.h"
+#endif
 #include "tables/St_g2t_run_Table.h"
 #include "tables/St_g2t_event_Table.h"
 #include "tables/St_g2t_gepart_Table.h"
