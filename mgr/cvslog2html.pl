@@ -57,6 +57,8 @@ while (<COMMITLOG>) {
       close USERFILE;
       $uname = <COMMITLOG>;
       chomp $uname;
+      # if screwy username is found, skip it. A few records are messed up.
+      if ( ! ( $uname =~ m/^[a-z0-9]+$/ ) ) {next}
       $commitTime = <COMMITLOG>;
       chomp $commitTime;
       $userDir = "$cvsHtml/user/$uname";
