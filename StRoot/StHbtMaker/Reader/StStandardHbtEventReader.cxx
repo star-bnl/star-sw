@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StStandardHbtEventReader.cxx,v 1.1.1.1 1999/06/29 16:02:57 lisa Exp $
+ * $Id: StStandardHbtEventReader.cxx,v 1.2 1999/06/29 17:50:28 fisyak Exp $
  *
  * Author: Mike Lisa, Ohio State, lisa@mps.ohio-state.edu
  ***************************************************************************
@@ -20,6 +20,9 @@
  ***************************************************************************
  *
  * $Log: StStandardHbtEventReader.cxx,v $
+ * Revision 1.2  1999/06/29 17:50:28  fisyak
+ * formal changes to account new StEvent, does not complie yet
+ *
  * Revision 1.1.1.1  1999/06/29 16:02:57  lisa
  * Installation of StHbtMaker
  *
@@ -27,11 +30,10 @@
 
 #include "StHbtMaker/Reader/StStandardHbtEventReader.h"
 #include "StChain/StChain.h"
-#include "StEvent/StEvent.hh"
-#include "StEvent/StGlobalTrack.hh"
-#include "StEvent/StTpcDedxPid.hh"
-#include "StEvent/StDedxPid.hh"
-#include "StEventReaderMaker/StEventReaderMaker.h"
+#include "StEvent.h"
+#include "StGlobalTrack.h"
+#include "StTpcDedxPid.h"
+#include "StDedxPid.h"
 #include "SystemOfUnits.h"   // has "tesla" in it
 #include "StHbtMaker/Infrastructure/StHbtTrackCollection.hh"
 #define HBT_B_FIELD 0.5*tesla
@@ -53,7 +55,10 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   cout << "StStandardHbtEventReader::ReturnHbtEvent" << endl;
 
   StEvent* rEvent = 0;
+#if 0
   rEvent = ((StEventReaderMaker*) mTheChain->Maker("events"))->event();
+#endif
+  rEvent =  (StEvent *) GetInputDS("StEvent");
   if (!rEvent){
     cout << "StStandardHbtEventReader - No StEvent!!! " << endl;
     return 0;
@@ -65,7 +70,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
   cout << "StStandardHbtReader::ReturnHbtEvent() - mult, size() : "
        << mult << rEvent->trackCollection()->size() << endl;
   hbtEvent->SetMult(mult);
-  StThreeVector<double> vp = rEvent->primaryVertex()->position();
+  StThreeVectorD vp = rEvent->primaryVertex()->position();
   hbtEvent->SetPrimVertPos(vp);
   
   StGlobalTrack* rTrack;
@@ -103,7 +108,7 @@ StHbtEvent* StStandardHbtEventReader::ReturnHbtEvent(){
 
     double pathlength = rTrack->helix().pathLength(vp);
     //cout << "pathlength\t" << pathlength << endl;
-    StThreeVector<double> p = rTrack->helix().momentumAt(pathlength,HBT_B_FIELD);
+    StThreeVectorD p = rTrack->helix().momentumAt(pathlength,HBT_B_FIELD);
     //cout << "p: " << p << endl;
     hbtTrack->SetP(p);
 
