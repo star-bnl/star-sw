@@ -36,4 +36,4 @@
        float     c_stdv;      /* STDV of points to circ-fit */
     };
 
-/*  Last mod. for fte_fteval: $Date: 1997/12/31 14:34:15 $ */
+/*  Last mod. for fte_fteval: $Date: 1998/01/19 02:25:14 $ */
