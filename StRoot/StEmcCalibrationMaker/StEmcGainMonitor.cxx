@@ -1,7 +1,10 @@
 //*-- Author : Alexandre Suaide 
 // 
-// $Id: StEmcGainMonitor.cxx,v 1.1 2001/12/29 20:33:51 suaide Exp $
+// $Id: StEmcGainMonitor.cxx,v 1.2 2002/05/22 18:50:38 jklay Exp $
 // $Log: StEmcGainMonitor.cxx,v $
+// Revision 1.2  2002/05/22 18:50:38  jklay
+// Fixed bug in the way emcTowerGain table is filled
+//
 // Revision 1.1  2001/12/29 20:33:51  suaide
 // added documentation
 //
@@ -39,8 +42,10 @@ StEmcGainMonitor::StEmcGainMonitor()
 {
   m_TowerTmp=new TH2F("tmp","tmp",4800,0.5,4800.5,500,0,500);  
   m_TowerMean=new TH2F("TowerMean","Tower mean values",4800,0.5,4800.5,500,0,500);  
-  m_TowerRelGain=new TH2F("TowerRelGain","Tower Relative Gain",4800,0.5,4800.5,500,0,3);  
-  m_TowerRelGainDayByDay=new TH2F("TowerRelGainDayByDay","Tower Relative Day by Day",365,0,365,500,0,3);  
+  m_TowerRelGain=new TH2F("TowerRelGain","Tower Relative Gain ADC>30/ADC>0",4800,0.5,4800.5,500,0,3);  
+  m_TowerRelGain1=new TH2F("TowerRelGain1","Tower Relative Gain ADC>80/ADC>30",4800,0.5,4800.5,500,0,3);  
+  m_TowerRelGainDayByDay=new TH2F("TowerRelGainDayByDay","Tower Relative Day by Day ADC>30/ADC>0",365,0,365,500,0,3);  
+  m_TowerRelGainDayByDay1=new TH2F("TowerRelGainDayByDay1","Tower Relative Day by Day ADC>80/ADC>30",365,0,365,500,0,3);  
   m_TowerRMS=new TH2F("TowerRMS","Tower RMS values",4800,0.5,4800.5,500,0,500);  
   nDir = 0;
   nFilesMax=50000;
@@ -145,7 +150,7 @@ Bool_t StEmcGainMonitor::ProcessFiles()
     if(i==0) {baseday=day; baseyear=year;}
     
     char name[40],title[100];
-    sprintf(name,"BTOW-%03d-%04d-%03d",i,year,day);
+    sprintf(name,"BTOW_%03d_%04d_%03d",i,year,day);
     sprintf(title,"BTOW spectrum (%03d) for year %04d and day %03d",i,year,day);
     m_Tower=new TH2F(name,title,4800,0.5,4800.5,500,0,500);  
     
@@ -194,6 +199,8 @@ void StEmcGainMonitor::WriteMeanRMS()
   m_TowerRMS->Write();
   m_TowerRelGain->Write();
   m_TowerRelGainDayByDay->Write();
+  m_TowerRelGain1->Write();
+  m_TowerRelGainDayByDay1->Write();
   gainTable->Write();
   output.Close();
   return;
@@ -205,10 +212,10 @@ Bool_t StEmcGainMonitor::CalcMeanRMS(Int_t year,Int_t day,Int_t run)
   row.year = year;
   row.day = day;
   row.run = run;
-  Float_t sum=0,sumAbove30=0;
   
   for(Int_t i=1;i<4801;i++) // loop over towers
   {
+    Float_t sum=0,sumAbove30=0,sumAbove80=0; //These need to be zeroed for every tower
     row.Mean[i-1]=0;
     row.RMS[i-1]=0;
     Float_t x=0,x2=0,n=0,nlin=0;
@@ -218,23 +225,28 @@ Bool_t StEmcGainMonitor::CalcMeanRMS(Int_t year,Int_t day,Int_t run)
       if(j>=30)
       {
         sumAbove30+=m_Tower->GetBinContent(i-1,j);
-        if(j<140)
+        if(j>=80)
         {
-          Float_t xt=m_Tower->GetBinContent(i-1,j);
-          if(xt>1)
+          sumAbove80+=m_Tower->GetBinContent(i-1,j);
+          if(j<140)
           {
-            Float_t wt=log(xt);
-            //if(xt==1) wt=1;
-            x+=wt*(Float_t)j;
-            x2+=pow((Float_t)j,2)*wt;
-            n+=wt;
-            nlin++;
+            Float_t xt=m_Tower->GetBinContent(i-1,j);
+            if(xt>1)
+            {
+              Float_t wt=log(xt);
+              //if(xt==1) wt=1;
+              x+=wt*(Float_t)j;
+              x2+=pow((Float_t)j,2)*wt;
+              n+=wt;
+              nlin++;
+            }
           }
         }
       }
     }
     row.Sum[i-1]=sum;
     row.SumAbove30[i-1]=sumAbove30;
+    row.SumAbove80[i-1]=sumAbove80;
     if(n>0)
     {
       Float_t mean=x/n;
@@ -252,10 +264,13 @@ Bool_t StEmcGainMonitor::CalcMeanRMS(Int_t year,Int_t day,Int_t run)
   {
     Float_t mean = row.Mean[i-1];
     Float_t refMean = ref[0].Mean[i-1];
-    Float_t thisSum=0,refSum=0;
+    Float_t thisSum=0,refSum=0,thisSum1=0,refSum1=0;
     
     if(ref[0].Sum[i-1]>0) refSum = ref[0].SumAbove30[i-1]/ref[0].Sum[i-1];
     if(row.Sum[i-1]>0)    thisSum = row.SumAbove30[i-1]/row.Sum[i-1];
+    if(ref[0].SumAbove30[i-1]>0) refSum1 = ref[0].SumAbove80[i-1]/ref[0].SumAbove30[i-1];
+    if(row.SumAbove30[i-1]>0)    thisSum1 = row.SumAbove80[i-1]/row.SumAbove30[i-1];
+
     //cout <<"tower "<<i<<"  rel gain = "<<refMean<<"  row = "<<row.Mean[i-1]<<endl;
 
     /*if(refMean>0)
@@ -269,6 +284,13 @@ Bool_t StEmcGainMonitor::CalcMeanRMS(Int_t year,Int_t day,Int_t run)
       Float_t gain=thisSum/refSum;
       m_TowerRelGain->Fill((Float_t)i,gain);
       m_TowerRelGainDayByDay->Fill((Float_t)(gainTable->GetNRows()-1),gain);
+    }
+
+    if(refSum1>0)
+    {
+      Float_t gain=thisSum1/refSum1;
+      m_TowerRelGain1->Fill((Float_t)i,gain);
+      m_TowerRelGainDayByDay1->Fill((Float_t)(gainTable->GetNRows()-1),gain);
     }
   }
 }
