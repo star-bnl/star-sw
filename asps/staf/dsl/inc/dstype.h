@@ -41,7 +41,7 @@ definitions for types and datasets
 #define DS_MAX_JOIN 	100 	/* max number of fields in a join */
 #define DS_MAX_NAME_LEN	31		/* max length of a name */
 #define DS_MAX_NEST		10		/* max levels of nested structs */
-#define DS_MAX_SPEC_LEN	1000	/* maximum length of specifier string */
+#define DS_MAX_SPEC_LEN	10000	/* maximum length of specifier string */
 #define DS_MAX_STRUCT	100		/* max number of struct defs in a type */
 #define DS_MAX_ERR		20		/* max number of thread error structures */
 #define DS_MAX_TID		1000	/* max number of tids */
