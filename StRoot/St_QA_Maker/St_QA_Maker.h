@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.h,v 1.5 1999/02/25 19:25:39 kathy Exp $
+// $Id: St_QA_Maker.h,v 1.6 1999/02/26 18:42:34 kathy Exp $
 // $Log: St_QA_Maker.h,v $
+// Revision 1.6  1999/02/26 18:42:34  kathy
+// added vertex histograms
+//
 // Revision 1.5  1999/02/25 19:25:39  kathy
 // fix up histograms
 //
@@ -63,7 +66,7 @@
 class St_QA_Maker : public StMaker {
  private:
    Bool_t drawinit;
-// static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.5 1999/02/25 19:25:39 kathy Exp $";
+// static Char_t m_VersionCVS = "$Id: St_QA_Maker.h,v 1.6 1999/02/26 18:42:34 kathy Exp $";
    // Histograms booking constants
    static const Int_t nxpT;
    static const Int_t nyeta;
@@ -178,6 +181,8 @@ class St_QA_Maker : public StMaker {
 
 // for method MakeHistGen - from table particle
    TH2F     *m_H_pT_eta_gen;  //! pT versus eta Spectra for generated
+   TH1F     *m_H_pT_gen;  //! pT Spectra for generated
+   TH1F     *m_H_eta_gen;  //! eta Spectra for generated
 
 
 // for MakeHistV0 - from table dst_v0_vertex
@@ -187,6 +192,16 @@ class St_QA_Maker : public StMaker {
 // for MakeHistPID - from tables primtrk & dst_dedx 
    TH2F     *m_p_dedx_rec;   //! dedx vs p
 
+
+// for method MakeHistVertex - from table dst_vertex
+   TH1F     *m_v_flag;  //! bitmask of e.g. quality information
+   TH1F     *m_v_detid; //! detector id where vertex was found 
+   TH1F     *m_v_vtxid; //! vertex type
+   TH1F     *m_v_ndau;  //! number of charged daughter tracks
+   TH1F     *m_v_x;     //! vertex coordinates in
+   TH1F     *m_v_y;     //!  STAR reference 
+   TH1F     *m_v_z;     //!   system
+   TH1F     *m_v_pchi2; //! P(chi^2,ndf) of vertex fit
 
 
 //------------------------------------------------------------------------
@@ -203,6 +218,7 @@ class St_QA_Maker : public StMaker {
    virtual void   MakeHistGen();
    virtual void   MakeHistV0();
    virtual void   MakeHistPID();
+   virtual void   MakeHistVertex();
    virtual void   BookHistEvSum();
    virtual void   BookHistGlob();
    virtual void   BookHistDE();
@@ -210,6 +226,7 @@ class St_QA_Maker : public StMaker {
    virtual void   BookHistGen();
    virtual void   BookHistV0();
    virtual void   BookHistPID();
+   virtual void   BookHistVertex();
    virtual void   PrintInfo();
    ClassDef(St_QA_Maker, 1)   //StAF chain virtual base class for Makers
 };
