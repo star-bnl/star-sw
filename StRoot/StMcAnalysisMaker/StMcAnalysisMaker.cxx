@@ -1,7 +1,10 @@
 /*************************************************
  *
- * $Id: StMcAnalysisMaker.cxx,v 1.10 1999/12/14 07:08:48 calderon Exp $
+ * $Id: StMcAnalysisMaker.cxx,v 1.11 2000/01/24 22:22:24 calderon Exp $
  * $Log: StMcAnalysisMaker.cxx,v $
+ * Revision 1.11  2000/01/24 22:22:24  calderon
+ * use delete [] for the array of floats
+ *
  * Revision 1.10  1999/12/14 07:08:48  calderon
  * First version to work with new StEvent, StMcEvent & StAssociationMaker.
  * Need to add more examples of all the new maps.
@@ -356,7 +359,7 @@ Int_t StMcAnalysisMaker::Make()
     } // Tracks in Map Loop
     cout << "Finished Track Loop, Made Ntuple" << endl;
     //delete vars;
-    delete values;
+    delete [] values;
     mNtupleFile->Write(); // Write the Ntuple to the File.
 
     // Example: Make 2 Histograms
