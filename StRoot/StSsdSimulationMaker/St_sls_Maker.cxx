@@ -3,8 +3,8 @@
  **************************************************************************
  *
  * $Log: St_sls_Maker.cxx,v $
- * Revision 1.5  2003/09/02 17:59:04  perev
- * gcc 3.2 updates + WarnOff
+ * Revision 1.6  2003/10/08 03:46:34  suire
+ * *** empty log message ***
  *
  * Revision 1.4  2002/03/25 20:06:43  suire
  * Doxygen documentation, cleaning
@@ -16,12 +16,17 @@
 #include "St_sls_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
-#include "svt/St_sls_am_Module.h"
 #include "TFile.h"
 #include "StMessMgr.h"
 
-ClassImp(St_sls_Maker)
+#include "StSlsBarrel.hh"
+#include "tables/St_sls_strip_Table.h"
+#include "tables/St_g2t_svt_hit_Table.h"
+#include "tables/St_sdm_geom_par_Table.h"
+//#include "tables/St_svg_geom_Table.h"
+#include "tables/St_sls_ctrl_Table.h"
 
+ClassImp(St_sls_Maker)
 //_____________________________________________________________________________
   St_sls_Maker::St_sls_Maker(const char *name):
 StMaker(name),
@@ -66,14 +71,35 @@ Int_t St_sls_Maker::Make()
 
    St_DataSetIter geant(GetInputDS("geant"));
    St_g2t_svt_hit *g2t_svt_hit = (St_g2t_svt_hit *) geant("g2t_svt_hit");
-   res = sls_am (g2t_svt_hit, m_geom, m_geom_par, m_ctrl, sls_strip);
 
-   if(res!=kSTAFCV_OK){
+   sdm_geom_par_st *geom_par = m_geom_par->GetTable();
+   sls_ctrl_st *ctrl = m_ctrl->GetTable();
+
+   cout<<"#################################################"<<endl;
+   cout<<"####       START OF SSD LAZY SIMULATOR       ####"<<endl;
+   cout<<"####        SSD BARREL INITIALIZATION        ####"<<endl;
+   StSlsBarrel *mySsd = new StSlsBarrel(geom_par);
+   cout<<"####        SSD WAFERS INITIALIZATION        ####"<<endl;
+   mySsd->initWafers(m_geom);
+   int nSsdHits = mySsd->readPointFromTable(g2t_svt_hit);
+   cout<<"####    ->  "<<nSsdHits<<" HITS READ FROM TABLE        ####"<<endl;
+   mySsd->convertGlobalFrameToOther();
+   int inactiveHit = mySsd->removeInactiveHitInTable(g2t_svt_hit);
+   cout<<"####    ->   "<<inactiveHit<<" DEAD ZONE HITS REMOVED      ####"<<endl;
+   mySsd->chargeSharingOverStrip(ctrl);
+   int nSsdStrips = mySsd->writeStripToTable(sls_strip);
+   sls_strip->Purge();
+   cout<<"####    -> "<<nSsdStrips<<" FIRED STRIPS INTO TABLE     ####"<<endl;
+   cout<<"####        END OF SSD LAZY SIMULATOR        ####"<<endl;
+   cout<<"#################################################"<<endl;
+   delete mySsd;
+   if (nSsdStrips) res = kStOK;
+
+   if(res!=kStOK){
      gMessMgr->Warning("St_sls_Maker: no output");
      return kStWarn;
    }
-   if(Debug())  gMessMgr->Debug() << "In St_sls_Maker::Make() ... "
-                               << GetName() << endm;
+   if(Debug())  gMessMgr->Debug() << "In St_sls_Maker::Make() ... "<< GetName() << endm;
   return kStOK;
 }
 //_____________________________________________________________________________

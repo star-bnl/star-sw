@@ -3,8 +3,8 @@
  **************************************************************************
  *
  * $Log: St_spa_Maker.cxx,v $
- * Revision 1.4  2003/09/02 17:59:04  perev
- * gcc 3.2 updates + WarnOff
+ * Revision 1.5  2003/10/08 03:46:34  suire
+ * *** empty log message ***
  *
  * Revision 1.3  2002/03/25 20:06:44  suire
  * Doxygen documentation, cleaning
@@ -16,9 +16,17 @@
 #include "St_spa_Maker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
-#include "svt/St_spa_am_Module.h"
+//#include "svt/St_spa_am_Module.h"
 #include "TFile.h"
 #include "StMessMgr.h"
+
+#include "StSpaBarrel.hh"
+#include "tables/St_spa_strip_Table.h"
+#include "tables/St_sls_strip_Table.h"
+#include "tables/St_sdm_geom_par_Table.h"
+#include "tables/St_sdm_calib_par_Table.h"
+#include "tables/St_sls_ctrl_Table.h"
+#include "tables/St_sdm_calib_db_Table.h"
 
 ClassImp(St_spa_Maker)
   
@@ -78,13 +86,34 @@ Int_t St_spa_Maker::Make()
   St_spa_strip *spa_strip = new St_spa_strip("spa_strip",40000);
   m_DataSet->Add(spa_strip);
   
-  res =  spa_am(m_geom_par, m_cal_par, sls_strip, m_ctrl,
-		spa_strip, m_noise, m_condition);
-  
-   if(res!=kSTAFCV_OK){
-     gMessMgr->Warning("St_spa_Maker: no output");
-     return kStWarn;
-   }
+  sdm_geom_par_st  *geom_par =  m_geom_par->GetTable();
+  sdm_calib_par_st *cal_par  =  m_cal_par->GetTable();
+  sls_ctrl_st      *ctrl     =  m_ctrl->GetTable(); 
+
+  cout<<"#################################################"<<endl;
+  cout<<"####    START OF SSD PEDESTAL ANNIHILATOR    ####"<<endl;
+  cout<<"####        SSD BARREL INITIALIZATION        ####"<<endl;
+  StSpaBarrel *mySsd = new StSpaBarrel(geom_par, cal_par);
+  mySsd->readStripFromTable(sls_strip);
+  cout<<"####        NUMBER OF SLS STRIPS "<<sls_strip->GetNRows()<<"       ####"<<endl;
+  mySsd->readNoiseFromTable(m_noise);
+  cout<<"####       NUMBER OF DB ENTRIES "<<m_noise->GetNRows()<<"       ####"<<endl;
+  mySsd->readConditionDbFromTable(m_condition);
+  cout<<"####             ADD SPA NOISE               ####"<<endl;
+  mySsd->addNoiseToStrip(ctrl);
+  cout<<"####           DO DAQ SIMULATION             ####"<<endl;
+  mySsd->doDaqSimulation(ctrl);
+  int nSsdStrips = mySsd->writeStripToTable(spa_strip);
+  spa_strip->Purge();
+  cout<<"####       NUMBER OF SPA STRIP "<<nSsdStrips<<"          ####"<<endl;
+  delete mySsd;
+  cout<<"#################################################"<<endl;
+  if (nSsdStrips)  res =  kStOK;
+
+  if(res!=kStOK){
+    gMessMgr->Warning("St_spa_Maker: no output");
+    return kStWarn;
+  }
   
   return kStOK;
 }
