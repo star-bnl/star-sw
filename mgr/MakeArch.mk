@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.87  1999/09/09 23:02:16  fisyak
+#  Suppress library versioning for users
+#
 #  Revision 1.86  1999/09/02 20:14:15  fisyak
 #  Cleanup for redhat60
 #
@@ -236,7 +239,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1999/09/02 20:14:15 $ 
+#             Last modification $Date: 1999/09/09 23:02:16 $ 
 #. default setings
 
 MAKE  := gmake
@@ -278,7 +281,7 @@ CERN_LEVEL =pro
 CERN_STAF = $(CERN)/$(CERN_LEVEL)
 CERN_ROOT_INCS = $(CERN_ROOT)/include/cfortran 
 
-MAKECERNLIB := cernlib -v $CERN_LEVEL
+MAKECERNLIB := cernlib -v $(CERN_LEVEL)
 
 GCC      :=  gcc
 CXX      :=  g++

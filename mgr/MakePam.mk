@@ -1,5 +1,8 @@
-# $Id: MakePam.mk,v 1.115 1999/09/07 21:01:10 fine Exp $
+# $Id: MakePam.mk,v 1.116 1999/09/09 23:02:17 fisyak Exp $
 # $Log: MakePam.mk,v $
+# Revision 1.116  1999/09/09 23:02:17  fisyak
+# Suppress library versioning for users
+#
 # Revision 1.115  1999/09/07 21:01:10  fine
 # new macro for Stypes.h TableImpl has been introduced
 #
@@ -285,7 +288,7 @@ echo "//                                          ">>$(GEN_TAB)/St_$(STEM)_Table
 echo "/////////////////////////////////////////////////////////////////////////  ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
 echo "                                            ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
 echo "#include \"Stypes.h\"                       ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
-echo "TableImpl($(STEM))                     ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;\
+echo "TableImpl($(STEM))                     ">>$(GEN_TAB)/St_$(STEM)_Table.cxx;
 endef
 define MAKE_TABLE_H
 	@$(RM) 	$(GEN_TAB)/St_$(STEM)_Table.h ;\
@@ -378,14 +381,18 @@ DIRS_O    = $(sort $(dir $(FILES_O)))
 # *.cc moved to sl $(NAMES_CC)
 ifneq (,$(strip $(FILES_IDM) $(FILES_G) $(FILES_CDF))) 
   SL_PKG  := $(LIB_DIR)/$(PKG).sl
-  QWE  := $(sort $(wildcard $(SL_PKG).*))
-  SL_NEW := $(SL_PKG).1000
-  ifneq (,$(QWE))
-    NQWE := $(words $(QWE))
-    QWE  := $(word $(NQWE),$(QWE))
-    QWE  := $(subst $(SL_PKG).,,$(QWE))
-    QWE  := $(shell expr $(QWE) + 1)
-    SL_NEW := $(SL_PKG).$(QWE)
+  ifeq ($(ROOT_DIR),$(STAR))
+    QWE  := $(sort $(wildcard $(SL_PKG).*))
+    SL_NEW := $(SL_PKG).1000
+    ifneq (,$(QWE))
+      NQWE := $(words $(QWE))
+      QWE  := $(word $(NQWE),$(QWE))
+      QWE  := $(subst $(SL_PKG).,,$(QWE))
+      QWE  := $(shell expr $(QWE) + 1)
+      SL_NEW := $(SL_PKG).$(QWE)
+    endif
+  else
+    SL_NEW :=$(SL_PKG).9999
   endif
 endif
 SL_PKG_NOTDIR := $(notdir $(SL_PKG))
