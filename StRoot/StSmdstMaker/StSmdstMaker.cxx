@@ -1,5 +1,8 @@
-// $Id: StSmdstMaker.cxx,v 1.6 1999/06/22 19:06:15 genevb Exp $
+// $Id: StSmdstMaker.cxx,v 1.7 1999/06/24 22:09:21 genevb Exp $
 // $Log: StSmdstMaker.cxx,v $
+// Revision 1.7  1999/06/24 22:09:21  genevb
+// Add README file, use StMessageManager
+//
 // Revision 1.6  1999/06/22 19:06:15  genevb
 // Fixed no vertex collection error for cascades too
 //
@@ -42,6 +45,7 @@
 #include <iostream.h>
 #include "TROOT.h"
 
+#include "StMessageManager.h"
 #include "StSmdstMaker.h"
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -207,11 +211,11 @@ Int_t StSmdstMaker::FillV0Table() {
    if (!ev) return kStOK;
    StVertexIterator vertices = ev->vertexCollection()->begin();
    if (!(vertices)) {
-     printf("StSmdstMaker: Warning - no vertex collection in event.\n");
+     gMessMgr->Warning("StSmdstMaker: No vertex collection in event.");
      return kStOK;
    }
    if (!(*vertices)) {
-     printf("StSmdstMaker: Warning - no vertices in event.\n");
+     gMessMgr->Warning("StSmdstMaker: No vertices in event.");
      return kStOK;
    }
 
@@ -221,7 +225,7 @@ Int_t StSmdstMaker::FillV0Table() {
    agufld_(x,bf);
    bf[2] = bf[2]*0.1;
    if( bf[2] == 0. )
-     printf("StSmdstMaker: Warning - magnetic field not loaded.\n");
+     gMessMgr->Warning("StSmdstMaker: Magnetic field not loaded.");
 
    StVertex *primaryVertex = ev->primaryVertex();
    if (primaryVertex) {
@@ -231,7 +235,7 @@ Int_t StSmdstMaker::FillV0Table() {
      primY = primaryPos.y();
      primZ = primaryPos.z();
    } else {
-     printf("StSmdstMaker: Warning - no primary vertex, setting to (0,0,0).\n");
+     gMessMgr->Warning("StSmdstMaker: No primary vertex, setting to (0,0,0).");
      primX = 0.;
      primY = 0.;
      primZ = 0.;
@@ -273,7 +277,7 @@ Int_t StSmdstMaker::FillV0Table() {
 
       
        if (++out == m_v0_maxlen) {
-         printf("StSmdstMaker: Error - v0 table maxlen exceeded.\n");
+         gMessMgr->Error("StSmdstMaker: V0 table maxlen exceeded.");
          return kStErr;
        }
 
@@ -434,11 +438,11 @@ void StSmdstMaker::FillXiHistograms() {
   if (!ev) return;
   StVertexIterator vertices = ev->vertexCollection()->begin();
   if (!(vertices)) {
-    printf("StSmdstMaker: Warning - no vertex collection in event.\n");
+    gMessMgr->Warning("StSmdstMaker: No vertex collection in event.");
     return;
   }
   if (!(*vertices)) {
-    printf("StSmdstMaker: Warning - no vertices in event.\n");
+    gMessMgr->Warning("StSmdstMaker: No vertices in event.");
     return;
   }
 
@@ -498,7 +502,7 @@ void StSmdstMaker::PrintInfo() {
 // PrintInfo() prints information about the class to standard output.
 //
   printf("**************************************************************\n");
-  printf("* $Id: StSmdstMaker.cxx,v 1.6 1999/06/22 19:06:15 genevb Exp $\n");
+  printf("* $Id: StSmdstMaker.cxx,v 1.7 1999/06/24 22:09:21 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   if (draw_histos) printf("* Strangeness Histograms are active\n");
   printf("**************************************************************\n");
