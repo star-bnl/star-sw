@@ -1,6 +1,7 @@
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
+#include "TObjString.h"
 #include "TRegexp.h"
 #include "TSystem.h"
 #include "StBFChain.h"
@@ -225,39 +226,43 @@ StBFChain::~StBFChain(){
 Int_t StBFChain::Load() 
 {
   Int_t status = kStOk;
-  Int_t i, j, k, l, iok;
+  Int_t i, iok;
   for (i = 1; i< NoChainOptions; i++) {// Load Libraries if any
     if (fBFC[i].Flag) {
       if (strlen(fBFC[i].Libs) > 0) { 
-	TString *Libs[80];
-	Int_t NParsed = ParseString(fBFC[i].Libs,Libs);
-	for (j=0;j<=NParsed;j++) {
+	TObjArray Libs;
+	ParseString(fBFC[i].Libs,Libs);
+	TIter nextL(&Libs);
+	TObjString *libe = 0;
+	while ((libe = (TObjString *) nextL())) {
+	  TObjArray LoadedLibs;
 	  TString lib(gSystem->GetLibraries(0,"D")); 
-	  TString *LoadedLibs[80];
-	  Int_t NLoaded = ParseString(lib,LoadedLibs);
-	  TString libe(*Libs[j]);
-	  libe.Append(".so");
-	  for (l = 0; l < 2; l++) { // so / sl
-	    if (l) libe.ReplaceAll(".so",".sl");
-	    for (k = 0; k < NLoaded; k++) {
-	      const Char_t *Base =  gSystem->BaseName(LoadedLibs[k]->Data());
-	      if (!strcmp(Base,libe.Data())) goto ENDL;
-	    }
+	  ParseString(lib,LoadedLibs);
+	  TIter next(&LoadedLibs);
+	  TObjString *LoadedLib;
+	  while ((LoadedLib = (TObjString *) next())){
+	    TString Base(gSystem->BaseName(LoadedLib->GetString().Data()));
+	    Base.ReplaceAll(".so","");
+	    Base.ReplaceAll(".sl","");
+	    if (Base == libe->GetString()) goto ENDL;
 	  }
 	  //	  if (!strstr(lib,libe.Data())) {
-	  iok = gSystem->Load(Libs[j]->Data());
+	  iok = gSystem->Load(libe->GetString().Data());
+	  
 	  if (iok < 0)  {
 	    printf("QAInfo: problem with loading\t%s\nQAInfo: %s is switched off \t!!!!\n"
-		   ,Libs[j]->Data(),fBFC[i].Key);
+		   ,libe->GetString().Data(),fBFC[i].Key);
 	    fBFC[i].Flag = kFALSE;
 	    status = kStErr;
 	    break;
 	  }
-	  else printf("QAInfo: Library %-20s\t(%s)\tis loaded\n",Libs[j]->Data(),
-		      gSystem->DynamicPathName(Libs[j]->Data()));
+	  else printf("QAInfo: Library %-20s\t(%s)\tis loaded\n",libe->GetString().Data(),
+		      gSystem->DynamicPathName(libe->GetString().Data()));
 	  //	  }
 	ENDL: continue;
+	  LoadedLibs.Delete();
 	}
+	Libs.Delete();
       }
     }
   }
@@ -454,7 +459,7 @@ Int_t StBFChain::AddAB (const Char_t *mkname,const StMaker *maker,const Int_t Op
   return kStOk;
 }
 //_____________________________________________________________________
-Int_t StBFChain::ParseString (const TString &tChain, TString *Opt[]) {
+Int_t StBFChain::ParseString (const TString &tChain, TObjArray &Opt) {
   Int_t nParsed = -1;
   Ssiz_t begin, index, end, end2;
   begin = index = end = end2 = 0;
@@ -463,7 +468,10 @@ Int_t StBFChain::ParseString (const TString &tChain, TString *Opt[]) {
   while ( (begin < tChain.Length()) && (index != kNPOS) ) { 
     // loop over given Chain options 
     index = tChain.Index(separator,&end,begin);
-    if (index >= 0 && end > 1) Opt[++nParsed] = new TString(tChain(index,end));
+    if (index >= 0 && end > 1) {
+      TString substring(tChain(index,end));
+      Opt.Add(new TObjString(substring.Data()));
+    }
     begin += end+1;
   }
   return nParsed;
@@ -481,11 +489,16 @@ Int_t StBFChain::kOpt (const TString *tag) const {
   Tag.ToLower();
   TString opt, nopt;
   for (Int_t i = 1; i< NoChainOptions; i++) {
-    opt = TString(fBFC[i].Key);
+    opt = TString(fBFC[i].Key); //check nick name
     opt.ToLower();
     nopt = TString("-");
     nopt += opt;
     if       (Tag ==  opt) {return  i;}
+    else {if (Tag == nopt) {return -i;}}
+    opt = TString(fBFC[i].Maker); //check full maker name2
+    nopt = TString("-");
+    nopt += opt;
+    if       (Tag ==  opt) {return  i;} 
     else {if (Tag == nopt) {return -i;}}
   }
   printf ("Option %s has not been recognized\n", Tag.Data());
@@ -495,10 +508,12 @@ void StBFChain::SetOption(const Int_t k) {// set all off
   if (k > 0 && !fBFC[k].Flag) {
     //    printf ("SetOption: %s %i",fBFC[k].Key,k);
     if (strlen(fBFC[k].Opts) > 0) {
-      TString *Opt[80];
-      Int_t NParsed = ParseString(fBFC[k].Opts,Opt);
-      Int_t i;
-      for (i=0;i<=NParsed;i++) SetOption(Opt[i]);
+      TObjArray Opts;
+      ParseString(fBFC[k].Opts,Opts);
+      TIter next(&Opts);
+      TObjString *Opt;
+      while ((Opt = (TObjString *) next())) SetOption(Opt->GetString().Data());
+      Opts.Delete();
     }
     fBFC[k].Flag = kTRUE;
     printf (" Switch On  %s\n", fBFC[k].Key);
@@ -534,13 +549,16 @@ void StBFChain::SetFlags(const Char_t *Chain)
   TString tChain(Chain);
   gMessMgr->QAInfo() << "Requested chain " << GetName() << " is :\t" << tChain.Data() << endm;
   tChain.ToLower(); //printf ("Chain %s\n",tChain.Data());
-  TString *Opt[80];
-  Int_t NParsed = ParseString(tChain,Opt);
-  Int_t i;
-  for (i=0;i<=NParsed;i++){
-    Int_t kgo = kOpt(*Opt[i]);
+  TObjArray Opts;
+  ParseString(tChain,Opts);
+  TIter next(&Opts);
+  TObjString *Opt;
+  while ((Opt = (TObjString *) next())) {
+    TString string = Opt->GetString();
+    Int_t kgo = kOpt(string.Data());
     if (kgo != 0) SetOption(kgo);
   }
+  Opts.Delete();
   // Check flags consistency   
   if (!GetOption("NoInput")) {
     if (!GetOption("fzin") && !GetOption("gstar") && 
@@ -616,17 +634,20 @@ void StBFChain::Set_IO_Files (const Char_t *infile, const Char_t *outfile){
     if (fInFile) {
       if (!GetOption("fzin")) {
 	fSetFiles= new StFile();
-	TString *Files[80];
-	Int_t NParsed = ParseString((const TString )*fInFile,Files);
-	Int_t i;
-	for (i=0;i<=NParsed;i++) {
-	  if (!strstr(Files[i]->Data(),"*") &&
-	      gSystem->AccessPathName(Files[i]->Data())) {// file does not exist
-	    printf (" *** NO FILE: %s, exit!\n", Files[i]->Data());
+	TObjArray Files;
+	ParseString((const TString )*fInFile,Files);
+	TIter next(&Files);
+	TObjString *File;
+	while ((File = (TObjString *) next())) {
+	  TString string = File->GetString();
+	  if (!strstr(string.Data(),"*") &&
+	      gSystem->AccessPathName(string.Data())) {// file does not exist
+	    printf (" *** NO FILE: %s, exit!\n", string.Data());
 	    gSystem->Exit(1); 
 	  }
-	  else fSetFiles->AddFile(Files[i]->Data());
+	  else fSetFiles->AddFile(File->String().Data());
 	}
+	Files.Delete();
       }
     }
   }
@@ -758,8 +779,11 @@ void StBFChain::SetTreeOptions()
   else if (GetOption("TrsOut") && GetOption("Trs")) treeMk->IntoBranch("TrsBranch","Trs");
 }
 //_____________________________________________________________________
-// $Id: StBFChain.cxx,v 1.101 2000/06/14 21:17:58 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.102 2000/06/16 23:34:16 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.102  2000/06/16 23:34:16  fisyak
+// replace arrays in parser by TObjArrays
+//
 // Revision 1.101  2000/06/14 21:17:58  fisyak
 // PCollTag into tags chain
 //

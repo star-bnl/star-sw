@@ -1,5 +1,8 @@
-// $Id: StBFChain.h,v 1.12 2000/05/20 01:03:49 perev Exp $
+// $Id: StBFChain.h,v 1.13 2000/06/16 23:34:16 fisyak Exp $
 // $Log: StBFChain.h,v $
+// Revision 1.13  2000/06/16 23:34:16  fisyak
+// replace arrays in parser by TObjArrays
+//
 // Revision 1.12  2000/05/20 01:03:49  perev
 // Sequential event IventNumber added
 //
@@ -70,6 +73,7 @@
 
 class St_XDFFile;
 class StFile;
+class TObjArray;
 struct BfcItem {
   Char_t       *Key;      // nick name
   Char_t       *Name;     // maker name
@@ -100,7 +104,7 @@ class StBFChain : public StChain {
    virtual Int_t       AddAB (const Char_t *after="",const StMaker *maker=0,const Int_t Opt=1); 
    virtual Int_t       AddAfter  (const Char_t *after, const StMaker *maker) {return AddAB (after,maker);} 
    virtual Int_t       AddBefore (const Char_t *before,const StMaker *maker) {return AddAB (before,maker,-1);} 
-   virtual Int_t       ParseString (const TString &tChain, TString *Opt[]);
+   virtual Int_t       ParseString (const TString &tChain, TObjArray &Opt);
    void                SetFlags(const Char_t *Chain="gstar tfs"); // *MENU*
    void                Set_IO_Files(const Char_t *infile=0, const Char_t *outfile=0); // *MENU
    virtual Int_t       kOpt(const TString *Tag) const; 
@@ -123,7 +127,7 @@ class StBFChain : public StChain {
    virtual Bool_t      GetOption(const TString *Opt) {return GetOption(kOpt(Opt));}
    virtual Bool_t      GetOption(const Char_t *Opt)  {return GetOption(kOpt(Opt));}
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.12 2000/05/20 01:03:49 perev Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.13 2000/06/16 23:34:16 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StBFChain, 0)   //StBFChain control class
 };
 #endif
