@@ -75,7 +75,8 @@ void StObjArray::Browse(TBrowser *b)
    }
 }
 //______________________________________________________________________________
-Bool_t StObjArray::IsFolder(){ return size();}
+Bool_t StObjArray::IsFolder() const 
+{ return size();}
    
 //______________________________________________________________________________
 void StObjArray::random_shuffle(int start,int end)
@@ -194,4 +195,12 @@ void StStrArray::Streamer(TBuffer &R__b)
       StObjArray::Streamer(R__b);
    }
 
+}
+//______________________________________________________________________________
+void StStrArray::makeZombie() 
+{
+   StObject::makeZombie();
+   int n = size();
+   for (int i=0;i<n;i++)
+   {  StObject *o = (StObject*)at(i); if (o) o->makeZombie();}
 }

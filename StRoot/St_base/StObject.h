@@ -1,5 +1,8 @@
-// $Id: StObject.h,v 1.9 2000/09/15 15:11:58 perev Exp $
+// $Id: StObject.h,v 1.10 2000/09/30 17:48:27 perev Exp $
 // $Log: StObject.h,v $
+// Revision 1.10  2000/09/30 17:48:27  perev
+// Zombies cons and loop for stru vector
+//
 // Revision 1.9  2000/09/15 15:11:58  perev
 // Zombie for StEvent
 //
@@ -39,10 +42,10 @@ class StObject : public TObject {
   public:
   virtual ~StObject();
   virtual void Browse(TBrowser *b);
-  virtual Bool_t IsFolder();
+  virtual Bool_t IsFolder() const;
   virtual TObject *clone() const {return 0;}
-  Int_t   isZombie(){return IsZombie();}
-  void    makeZombie(){MakeZombie();}
+  Int_t   isZombie() const {return IsZombie();}
+  virtual void makeZombie(){MakeZombie();}
   ClassDef(StObject,2) // Base class for StEvent
 };
 #endif
