@@ -1,26 +1,20 @@
-//StiTrackContainer.h
-//M.L. Miller (Yale Software)
-//05/01
-
 /*!
   \class StiTrackContainer
   
-  StiTrackContainer is meant to provide the interface between the StiTracker and the persistency model.
-  That is, StiTrackContainer will be the only thing that StiTracker will have to know about and
-  StiTrackContainer will interface to (most likely) StEvent, unless we decide to make StiTrackContainer
-  persistent.
+  StiTrackContainer is a container of track based on the STL vector class.
   <p>
   StiTrackContainer is polymorphic and can hold all forms of StiTrack objects. That includes in
   particular StiKalmanTrack and StiMcTrack.
 
   \author M.L. Miller (Yale Software)
+  \author C.A. Pruneau(Wayne State University)
 */
 
 #ifndef StiTrackContainer_HH
 #define StiTrackContainer_HH
 #include "Sti/Base/Named.h"
 #include "Sti/Base/Described.h"
-#include <map>
+#include <vector>
 using namespace std;
 
 class StiTrack;
@@ -32,33 +26,22 @@ struct StiTrackLessThan
     bool operator()(const StiTrack* lhs, const StiTrack* rhs) const;
 };
 
-typedef map<StiTrack*, StiTrack*, StiTrackLessThan> TrackToTrackMap;
-typedef TrackToTrackMap::value_type TrackToTrackMapValType;
-
-class StiTrackContainer : public TrackToTrackMap, public Named, public Described
+class StiTrackContainer : public vector<StiTrack*>, public Named, public Described
 {
 public:
     
-    /// Add given track to the container
-    void add(StiTrack * track);
-
-    ///Preserve simple interface to add tracks
-    void push_back(StiTrack*);
-    
     StiTrackContainer(const string & name, const string & description);
     virtual ~StiTrackContainer();  
+    void add(StiTrack * track);
     int getTrackCount(Filter<StiTrack> * filter) const;
     
 };
 
+
+/// Add the given track to the container
 inline void StiTrackContainer::add(StiTrack * track)
 {
-  insert(  TrackToTrackMapValType(track, track) );
-}
-
-inline void StiTrackContainer::push_back(StiTrack* track)
-{
-    insert(  TrackToTrackMapValType(track, track) );
+  push_back(track);
 }
 
 #endif

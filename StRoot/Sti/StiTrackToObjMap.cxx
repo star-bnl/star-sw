@@ -23,7 +23,7 @@ void StiTrackToObjMap::build(StiTrackContainer* trackContainer,
       //create a new trackToIntMap obj 
       StiTrackToIntMap * trackToIntMap = new StiTrackToIntMap;
       //loops through tracks
-      const vector<StiHit*> & hits = trackIter->first->getHits();
+      const vector<StiHit*> & hits = (*trackIter)->getHits();
       for( hitIter = hits.begin();hitIter!=hits.end();++hitIter)
 	{ 
 	  HitToHitMap::const_iterator hitToHitMapIterator;
@@ -38,7 +38,7 @@ void StiTrackToObjMap::build(StiTrackContainer* trackContainer,
 		}
           }
 	}
-       insert(TrackToObjMap::value_type(trackIter->first, trackToIntMap));
+       insert(TrackToObjMap::value_type(*trackIter, trackToIntMap));
     }
 }
   
@@ -77,7 +77,7 @@ void StiTrackToObjMap::analyze(Filter<StiTrack> * filter, StiHit * vertex)
       //cout << "StiTrackToObjMap::analyze() -I- loop "<<endl;          
       StiTrack * first = iter->first;
       if(!first) continue;
-      StiTrack * second=0; 	if(second){}
+      //StiTrack * second=0; 	if(second){}
       ++analyzed;
       if (filter->filter(first))
 	{
@@ -92,7 +92,6 @@ void StiTrackToObjMap::analyze(Filter<StiTrack> * filter, StiHit * vertex)
 	  StiTrackToIntMap * trackToIntMap = iter->second;
 	  if (trackToIntMap && nPtsFirst>0)
 	    {
-
 	      //cout << "Number of cnadidates:"<<trackToIntMap->getSize()<<endl;
 	      nCommon = trackToIntMap->getBestTrackHitCount();
 	      ratio = nCommon/nPtsFirst;

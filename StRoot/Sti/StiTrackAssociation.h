@@ -1,5 +1,8 @@
 #ifndef StiTrackAssociation_H_INCLUDED
 #define StiTrackAssociation_H_INCLUDED
+#include <vector>
+#include <map>
+using namespace std;
 #include "Sti/Base/Factory.h"
 #include "Sti/StiTrack.h"
 #include "Sti/StiTrackContainer.h"

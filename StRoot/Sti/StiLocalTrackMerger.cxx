@@ -29,34 +29,39 @@ void StiLocalTrackMerger::mergeTracks()
 {
     cout <<"StiLocalTrackMerger::mergeTracks()"<<endl;
     
-    if (!mTrackStore) {
-			cout <<"StiLocalTrackMerger::mergeTracks(). ERROR:\t"
-					 <<"mTrackStore==0.  Abort"<<endl;
-			return;
-    }
+    if (!mTrackStore) 
+      {
+	cout <<"StiLocalTrackMerger::mergeTracks(). ERROR:\t"
+	     <<"mTrackStore==0.  Abort"<<endl;
+	return;
+      }
     
     cout <<"\t N-tracks before merge: "<<mTrackStore->size()<<endl;
 		
-    for (TrackToTrackMap::iterator lower=mTrackStore->begin(); lower!=mTrackStore->end(); ++lower) {
-	if (configureMaxTrack( static_cast<StiKalmanTrack*>((*lower).second) )) {
-
-	    //Now find the bounds of search:
-	    TrackToTrackMap::iterator upper = mTrackStore->upper_bound(&mMaxTrack);
-	    if (lower!=upper) {
-		TrackToTrackMap::iterator start = lower;
-		++start;
-		int i=0;
-		for (TrackToTrackMap::iterator it = start; it!=upper; ++it) {
-		    ++i;
-		    if (sameTrack( static_cast<StiKalmanTrack*>((*start).second), 
-				   static_cast<StiKalmanTrack*>((*it).second) ) ) {
-			cout <<"sameTrack==true"<<endl;
-		    }
-		}
-		cout <<"Considered: "<<i<<" pairs for merging"<<endl;
-	    }
-	}
-    }
+    for (vector<StiTrack*>::iterator lower=mTrackStore->begin(); lower!=mTrackStore->end(); ++lower)
+      {
+	if (configureMaxTrack( static_cast<StiKalmanTrack*>(*lower) )) 
+	  {
+	    
+	    /*
+	      //Now find the bounds of search:
+	      vector<StiTrack*>::iterator upper = mTrackStore->upper_bound(&mMaxTrack);
+	      if (lower!=upper) {
+	      vector<StiTrack*>::iterator start = lower;
+	      ++start;
+	      int i=0;
+	      for (vector<StiTrack*>::iterator it = start; it!=upper; ++it) {
+	      ++i;
+	      if (sameTrack( static_cast<StiKalmanTrack*>(*start), 
+	      static_cast<StiKalmanTrack*>(*it) ) ) {
+	      cout <<"sameTrack==true"<<endl;
+	      }
+	      }
+	      cout <<"Considered: "<<i<<" pairs for merging"<<endl;
+	      }
+	    */
+	  }
+      }
     cout <<"\t N-tracks before merge: "<<mTrackStore->size()<<endl;
 }
 

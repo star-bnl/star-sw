@@ -20,7 +20,7 @@ StiTrackContainer::StiTrackContainer(const string & name, const string & descrip
 
 StiTrackContainer::~StiTrackContainer()
 {
-    cout <<"StiTrackContainer::~StiTrackContainer()"<<endl;
+  cout <<"StiTrackContainer::~StiTrackContainer() -I- Done"<<endl;
 }
 
 
@@ -46,9 +46,9 @@ int StiTrackContainer::getTrackCount(Filter<StiTrack> * filter) const
       // reset filter counter to zero.
       filter->reset();
       // loop over all tracks and filter
-      TrackToTrackMap::const_iterator it;
+      vector<StiTrack*>::const_iterator it;
       for (it=begin(); it!=end(); ++it) 
-	filter->filter((*it).second);
+	filter->filter(*it);
       return filter->getAcceptedCount();
     }
   else
