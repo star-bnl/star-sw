@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98   
-// $Id: St_NodePosition.h,v 1.11 1999/04/08 16:44:10 fine Exp $
+// $Id: St_NodePosition.h,v 1.12 1999/04/13 14:26:40 fine Exp $
 // $Log: St_NodePosition.h,v $
+// Revision 1.12  1999/04/13 14:26:40  fine
+// Geometry-based dataset implementation, next step
+//
 // Revision 1.11  1999/04/08 16:44:10  fine
 // Working version of the NodeView family
 //
@@ -58,11 +61,13 @@ class St_NodePosition  : public TObject /*, public St_DefineSet */ {
    Double_t        fZ;           //Z offset with respect to parent object
    TRotMatrix     *fMatrix;      //Pointer to rotation matrix
    St_Node        *fNode;        //Refs pointer to the node defined
+   UInt_t          fId;          // Unique ID of this position
  
  public:
         St_NodePosition(St_Node *node=0,Double_t x=0, Double_t y=0, Double_t z=0, TRotMatrix *matrix=0);
         St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t z, const Text_t *matrixname);
-        St_NodePosition(const St_NodePosition&pos):fNode(pos.GetNode()),fX(pos.GetX()),fY(pos.GetY()),fZ(pos.GetZ()),fMatrix(pos.GetMatrix()){;}
+        St_NodePosition(const St_NodePosition&pos):fNode(pos.GetNode()),
+                      fX(pos.GetX()),fY(pos.GetY()),fZ(pos.GetZ()),fMatrix(pos.GetMatrix()),fId(pos.GetId()){;}
         virtual ~St_NodePosition(){;}
         virtual void        Browse(TBrowser *b);
         virtual Int_t       DistancetoPrimitive(Int_t px, Int_t py);
@@ -78,6 +83,7 @@ class St_NodePosition  : public TObject /*, public St_DefineSet */ {
         virtual Double_t    GetX() const {return fX;}
         virtual Double_t    GetY() const {return fY;}
         virtual Double_t    GetZ() const {return fZ;}
+        virtual UInt_t      GetId() const {return fId;}
         Bool_t              IsFolder() {return GetNode()?kTRUE:kFALSE;}
 //        Bool_t              IsFolder() {return kFALSE;}
         virtual Bool_t      Is3D()  {return kTRUE;}
@@ -92,9 +98,10 @@ class St_NodePosition  : public TObject /*, public St_DefineSet */ {
         virtual void        SetMatrix(TRotMatrix *matrix=0) {fMatrix = matrix;}
         virtual void        SetNode(St_Node *node){ fNode = node;}
         virtual void        SetPosition( Double_t x=0, Double_t y=0, Double_t z=0) {fX=x; fY=y; fZ=z;}
-        virtual void        SetX(Double_t x){ fX = x;}
-        virtual void        SetY(Double_t y){ fY = y;}
-        virtual void        SetZ(Double_t z){ fZ = z;}
+        virtual void        SetX(Double_t x){ fX  =  x;}
+        virtual void        SetY(Double_t y){ fY  =  y;}
+        virtual void        SetZ(Double_t z){ fZ  =  z;}
+        virtual void        SetId(UInt_t id){fId  = id;}
 //        virtual void        UpdateMatrix();
 //        virtual void        UpdateTempMatrix(Double_t *dx1,Double_t *rmat1
 //                             , Double_t x, Double_t y, Double_t z, Double_t *matrix

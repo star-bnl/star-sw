@@ -112,7 +112,7 @@ St_NodeView::St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition,ED
 }
 
 //_____________________________________________________________________________
-St_NodeView::St_NodeView(Double_t *translate, Double_t *rotate, St_Node *topNode,
+St_NodeView::St_NodeView(Double_t *translate, Double_t *rotate, UInt_t positionId, St_Node *topNode,
                          const Char_t *thisNodePath, const Char_t *matrixName, const Int_t matrixType)
 {
   // Special ctor to back St_NodeView::SavePrimitive() method
@@ -144,7 +144,7 @@ St_NodeView::St_NodeView(Double_t *translate, Double_t *rotate, St_Node *topNode
   }
   else
        Error("St_NodeView"," No rotation matrix is defined");
-
+  thisPosition->SetId(positionId);
   SetObject(thisPosition);
   if (thisNode) {
     SetName(thisNode->GetName());
@@ -282,7 +282,7 @@ void St_NodeView::Draw(Option_t *option)
 }
 
 //_____________________________________________________________________________
-St_Node *St_NodeView::GetNode(){ 
+St_Node *St_NodeView::GetNode() const { 
   St_NodePosition *pos = GetPosition();
   if (pos)
     return pos->GetNode();
@@ -339,13 +339,34 @@ void St_NodeView::Paint(Option_t *option)
   }
   gGeometry->PopLevel();
 }
+//______________________________________________________________________________
+TString St_NodeView::PathP() const
+{
+ // return the full path of this data set 
+   TString str;
+   St_NodeView *parent = (St_NodeView *)GetParent();
+   if (parent) { 
+       str = parent->PathP();
+       str += "/";
+   }
+   str +=  GetName();
+   UInt_t positionId = 0;
+   St_NodePosition *p = GetPosition();
+   if (p) {
+      char buffer[10];
+      positionId = p->GetId();
+      sprintf(buffer,"%d",p->GetId());
+      str +=  buffer;
+   }
+   return str;
+}
 //_______________________________________________________________________
 void St_NodeView::SavePrimitive(ofstream &out, Option_t *option)
 {
 const Char_t *sceleton[] = {
    "St_NodeView *CreateNodeView(St_Node *topNode) {"
   ,"  TString     thisNodePath   = "
-  ," "
+  ,"  UInt_t      thisPositionId = "
   ,"  Double_t thisTranslate[3]  = "
   ," "
   ,"  TString        matrixName  = " 
@@ -354,7 +375,7 @@ const Char_t *sceleton[] = {
   ,"                                  "
   ,"                                  "
   ,"                               };"
-  ,"  return = new St_NodeView(thisTranslate, thisMatrix, topNode,"
+  ,"  return = new St_NodeView(thisTranslate, thisMatrix, thisPositionId, topNode,"
   ,"                          thisNodePath.Data(),matrixName.Data(), matrixType);"
   ,"}"
   };
@@ -364,6 +385,7 @@ const Char_t *sceleton[] = {
   St_Node *thisFullNode = GetNode();
   TString thisNodePath = thisFullNode ? thisFullNode->Path() : TString("");
   // Define position
+  UInt_t thisPositionId = thisPosition ? thisPosition->GetId():0;
   Double_t thisX  = thisPosition ? thisPosition->GetX():0;
   Double_t thisY  = thisPosition ? thisPosition->GetY():0;
   Double_t thisZ  = thisPosition ? thisPosition->GetZ():0;
@@ -382,6 +404,8 @@ const Char_t *sceleton[] = {
     out << sceleton[lineNumber];                             // cout << lineNumber << ". " << sceleton[lineNumber];
     switch (lineNumber) {
     case  1:  out  << "\"" << thisNodePath.Data() << "\";" ; // cout  << "\"" << thisNodePath.Data() << "\";" ;
+       break;
+    case  2:  out   << thisPositionId << ";" ; // cout  << "\"" << thisNodePath.Data() << "\";" ;
        break;
     case  3:  out << "{" << thisX << ", " << thisY << ", "<< thisZ << "};";  // cout << thisX << ";" ;
        break;

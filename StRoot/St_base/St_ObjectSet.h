@@ -12,7 +12,7 @@ public:
   St_ObjectSet(TObject *obj=0);
   virtual ~St_ObjectSet();
   virtual void     Browse(TBrowser *b);
-  virtual TObject *GetObject(){return fObj;};
+  virtual TObject *GetObject() const {return fObj;};
   virtual void     SetObject(TObject *obj){ fObj = obj;}
   virtual void     AddObject(TObject *obj){ SetObject(obj);}
   virtual Long_t   HasData() const {return fObj ? 1 : 0;} 

@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_NodePosition.cxx,v 1.14 1999/04/08 16:44:10 fine Exp $
+// $Id: St_NodePosition.cxx,v 1.15 1999/04/13 14:26:40 fine Exp $
 // $Log: St_NodePosition.cxx,v $
+// Revision 1.15  1999/04/13 14:26:40  fine
+// Geometry-based dataset implementation, next step
+//
 // Revision 1.14  1999/04/08 16:44:10  fine
 // Working version of the NodeView family
 //
@@ -100,7 +103,7 @@ ClassImp(St_NodePosition)
  
 //______________________________________________________________________________
 St_NodePosition::St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t z, const Text_t *matrixname)
-: fNode(node),fX(x),fY(y),fZ(z),fMatrix(0)
+: fNode(node),fX(x),fY(y),fZ(z),fMatrix(0),fId(0)
 {
 //*-*-*-*-*-*-*-*-*-*-*Node normal constructor*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 //*-*                  ======================
@@ -124,7 +127,7 @@ St_NodePosition::St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t 
  
 //______________________________________________________________________________
 St_NodePosition::St_NodePosition(St_Node *node,Double_t x, Double_t y, Double_t z, TRotMatrix *matrix)
-               : fNode(node),fX(x),fY(y),fZ(z),fMatrix(matrix)
+               : fNode(node),fX(x),fY(y),fZ(z),fMatrix(matrix),fId(0)
 {
 //*-*-*-*-*-*-*-*-*-*-*Node normal constructor*-*-*-*-*-*-*-*-*-*-*
 //*-*                  ================================

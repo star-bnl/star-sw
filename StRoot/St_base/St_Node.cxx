@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.19 1999/04/08 16:44:09 fine Exp $
+// $Id: St_Node.cxx,v 1.20 1999/04/13 14:26:39 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.20  1999/04/13 14:26:39  fine
+// Geometry-based dataset implementation, next step
+//
 // Revision 1.19  1999/04/08 16:44:09  fine
 // Working version of the NodeView family
 //
@@ -322,33 +325,38 @@ St_NodePosition *St_Node::Add(St_Node *node, St_NodePosition *nodePosition)
 }
 //______________________________________________________________________________
 St_NodePosition *St_Node::Add(St_Node *node, Double_t x, Double_t y, Double_t z,
-                              TRotMatrix *matrix, Option_t *)
+                              TRotMatrix *matrix,  UInt_t id, Option_t *)
 {
 //*-*
 //*-*    node    the pointer to the node to be placed
 //*-*    x,y,z   are the offsets of the volume with respect to his mother
 //*-*    matrix  is the pointer to the rotation matrix
+//*-*     id     is a unique position id 
 //*-*
  if (!node) return 0;
  TRotMatrix *rotation = matrix;
  if(!rotation) rotation = GetIdentity();
  St_NodePosition *position = new St_NodePosition(node,x,y,z,rotation);
+ position->SetId(id);
  return Add(node,position);
 }
 
 //______________________________________________________________________________
-St_NodePosition *St_Node::Add(St_Node *node, Double_t x, Double_t y, Double_t z,  const Text_t *matrixname, Option_t *)
+St_NodePosition *St_Node::Add(St_Node *node, Double_t x, Double_t y, Double_t z, 
+                              const Text_t *matrixname,  UInt_t id, Option_t *)
 {
 //*-*
 //*-*    node        the pointer to the node to be placed
 //*-*    x,y,z       are the offsets of the volume with respect to his mother
 //*-*    matrixname  is the name of the rotation matrix
+//*-*     id     is a unique position id 
 //*-*
  if (!node) return 0;
  TRotMatrix *rotation = 0;
  if (matrixname && strlen(matrixname)) rotation = gGeometry->GetRotMatrix(matrixname);
  if (!rotation)                        rotation = GetIdentity();
  St_NodePosition *position = new St_NodePosition(node,x,y,z,rotation);
+ position->SetId(id);
  return Add(node,position);
 }
 
@@ -360,13 +368,13 @@ void St_Node::Browse(TBrowser *b)
        TIter next(GetListOfPositions());
        Int_t posNumber = 0;
        while (nodePosition = (St_NodePosition *)next()) {
+         posNumber       = nodePosition->GetId();
          TString posName = nodePosition->GetNode()->GetTitle();
-         char num[20];
+         char num[10];
          posName += ";";
-         sprintf(num,"Pos:%d",posNumber);
+         sprintf(num,"%d",posNumber);
          posName += num;
          b->Add(nodePosition,posName.Data());       
-         posNumber++;
        }
 //       GetListOfPositions()->Browse(b);
    }
