@@ -1,6 +1,6 @@
 /*******************************************************************
  *
- * $Id: StTofGeometry.cxx,v 1.4 2003/04/15 03:24:17 geurts Exp $
+ * $Id: StTofGeometry.cxx,v 1.5 2003/08/06 23:45:36 geurts Exp $
  *
  * Author: Frank Geurts
  *****************************************************************
@@ -10,6 +10,9 @@
  *****************************************************************
  *
  * $Log: StTofGeometry.cxx,v $
+ * Revision 1.5  2003/08/06 23:45:36  geurts
+ * refer to tofPathLength.hh for function definitions
+ *
  * Revision 1.4  2003/04/15 03:24:17  geurts
  * many, many changes:
  * . updated and extended StructSlatHit, introduced tofSlatHitVector and Iterator
@@ -56,12 +59,11 @@
 #include "StThreeVectorD.hh"
 #include "StPhysicalHelixD.hh"
 #include "StMaker.h"
-#include "StTofGeometry.h"
+#include "StTofUtil/StTofGeometry.h"
+#include "StTofUtil/tofPathLength.hh"
 
 #include <utility>
 using std::pair;
-
-double tofPathLength(const StThreeVectorD*, const StThreeVectorD*, const double);
 
 
 /// defaulty constructor
