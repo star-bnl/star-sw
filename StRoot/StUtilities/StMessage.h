@@ -5,7 +5,7 @@
   This is the class of messages used by StMessageManager in STAR.
   Messages have a type and message specified at instantiation,
   and also include a time-date stamp and options for printing.
-  
+
 */
 
 #ifndef ClassStMessage
@@ -52,6 +52,8 @@ class StMessage {
          char* GetOptions() const;
           void SetOptions(const char* opt);
         size_t GetMemoryUsage();
+
+    static int InitBuffer();
 #ifdef __ROOT__
    ClassDef(StMessage,0)
 #endif
@@ -59,10 +61,10 @@ class StMessage {
 
 #endif
 
-// $Id: StMessage.h,v 1.14 2003/10/01 20:02:51 genevb Exp $
+// $Id: StMessage.h,v 1.15 2003/10/01 20:06:50 genevb Exp $
 // $Log: StMessage.h,v $
-// Revision 1.14  2003/10/01 20:02:51  genevb
-// No changes (testing)
+// Revision 1.15  2003/10/01 20:06:50  genevb
+// Initialize and test ostrstream buffer sizes (support for gcc before 3.2)
 //
 // Revision 1.13  2003/09/25 21:18:14  genevb
 // Changed option storage

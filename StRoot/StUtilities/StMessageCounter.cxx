@@ -19,6 +19,8 @@ limitMessage(" - COUNT LIMIT REACHED!\n") {
   messTypeList = StMessTypeList::Instance();
   yesLimits = 0;
   noLimits = 0;
+  // Initialize buffer with 256 bytes
+  *this << ch64 << ch64 << ch64 << ch64;
 }
 //_____________________________________________________________________________
 StMessageCounter::~StMessageCounter() {
@@ -209,8 +211,11 @@ void StMessageCounter::AddType(const char* type) {
 }
 
 //_____________________________________________________________________________
-// $Id: StMessageCounter.cxx,v 1.18 2003/09/25 21:19:22 genevb Exp $
+// $Id: StMessageCounter.cxx,v 1.19 2003/10/01 20:06:50 genevb Exp $
 // $Log: StMessageCounter.cxx,v $
+// Revision 1.19  2003/10/01 20:06:50  genevb
+// Initialize and test ostrstream buffer sizes (support for gcc before 3.2)
+//
 // Revision 1.18  2003/09/25 21:19:22  genevb
 // Some new cout-like functions and friend functions, some doxygen-ization
 //
