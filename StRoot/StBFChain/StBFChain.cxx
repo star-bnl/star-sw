@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.72 2000/02/25 21:43:49 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.73 2000/02/25 21:53:39 fisyak Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.73  2000/02/25 21:53:39  fisyak
+// Add rrs to default
+//
 // Revision 1.72  2000/02/25 21:43:49  fisyak
 // Change default
 //
@@ -295,7 +298,7 @@ BfcItem BFC[] = {
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"doEvents"    ,""  ,"","xin,event,analysis,FieldOn"                                    ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis"                                  ,"","","",kFALSE},
-  {"Cdefault"    ,""  ,"","tpc,ftpc,rich,l3,Cdst,qa,tags,tree"               ,"","","Default chain",kFALSE}, 
+  {"Cdefault"    ,""  ,"","tpc,ftpc,rrs,rich,l3,Cdst,qa,tags,tree"           ,"","","Default chain",kFALSE}, 
   {"Cy1a"        ,""  ,"","y1a,Cdefault"                                 ,"","","Turn on chain y1a",kFALSE},
   {"Cy1b"        ,""  ,"","y1b,Cdefault"                                 ,"","","Turn on chain y1b",kFALSE},
   {"Cy1c"        ,""  ,"","y1c,Cdefault"                                 ,"","","Turn on chain y1c",kFALSE},
