@@ -1,7 +1,11 @@
 /////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCTrigger.cxx,v 1.4 2001/04/25 18:12:05 perev Exp $
+// $Id: StPeCTrigger.cxx,v 1.5 2002/03/19 22:23:52 meissner Exp $
 // $Log: StPeCTrigger.cxx,v $
+// Revision 1.5  2002/03/19 22:23:52  meissner
+// New variables: zdc unatt., Trigger word, MC tree if Geant Branch, DCA  for primary pairs, all tracks for secondary pairs (Test)
+//
+// add un attenuated zdc;s
 // Revision 1.4  2001/04/25 18:12:05  perev
 // HPcorrs
 //
@@ -58,7 +62,11 @@ void StPeCTrigger::clear() {
 
 Int_t StPeCTrigger::process(StEvent *event){
   unsigned int i,j;
- 
+
+  // get trigger word 
+  tw = event->l0Trigger()->triggerWord();
+
+  
   l0_2000->setInfoLevel ( infoLevel );
 //  l0_2000Corrected->setInfoLevel ( infoLevel );
 
@@ -81,11 +89,20 @@ Int_t StPeCTrigger::process(StEvent *event){
        cout << "ZDC sum west " << zdc.adcSum(west) << endl;
        cout << "ZDC sum east " << zdc.adcSum(east) << endl;
     }
+    // attenuated signals 
     zdcWest = zdc.adcSum(west) ;
     zdcEast = zdc.adcSum(east) ;
     zdcSum  = zdc.adcSum() ;
+    // unattenuated  // see StZdcTriggerDetector documentation
+    zdcWestUA = zdc.adc(0) ;
+    zdcEastUA = zdc.adc(4) ;
+    zdcSumUA  = zdcEastUA+zdcWestUA ;
   }
   else {
+    zdcWestUA = 0 ;
+    zdcEastUA = 0 ;
+    zdcSumUA  = 0 ;
+
     zdcWest = 0 ;
     zdcEast = 0 ;
     zdcSum  = 0 ;

@@ -1,5 +1,8 @@
-// $Id: StPeCMaker.cxx,v 1.19 2002/02/11 20:20:09 akio Exp $
+// $Id: StPeCMaker.cxx,v 1.20 2002/03/19 22:23:44 meissner Exp $
 // $Log: StPeCMaker.cxx,v $
+// Revision 1.20  2002/03/19 22:23:44  meissner
+// New variables: zdc unatt., Trigger word, MC tree if Geant Branch, DCA  for primary pairs, all tracks for secondary pairs (Test)
+//
 // Revision 1.19  2002/02/11 20:20:09  akio
 // remove SetFormat
 //
@@ -98,12 +101,12 @@ using std::vector;
 
 
 
-static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.19 2002/02/11 20:20:09 akio Exp $";
+static const char rcsid[] = "$Id: StPeCMaker.cxx,v 1.20 2002/03/19 22:23:44 meissner Exp $";
 
 ClassImp(StPeCMaker)
 
 StPeCMaker::StPeCMaker(const Char_t *name) : StMaker(name) {
-  infoLevel = 0 ;
+  infoLevel = 2 ;
   filter    = 0 ;
 }
 
@@ -188,7 +191,8 @@ Int_t StPeCMaker::Make() {
   TDataSet *geantBranch = 0 ;
   geantBranch = GetInputDS("geantBranch");
   if ( geantBranch ) {
-//   if ( !geant2->fill ( geantBranch ) ) geantTree->Fill ( ) ;
+   //   if ( !geant2->fill ( geantBranch ) ) geantTree->Fill ( ) ;
+    cout<< "Fill Geant " << endl;
      geant->fill ( geantBranch ) ;
   }
 
@@ -208,22 +212,39 @@ Int_t StPeCMaker::Make() {
     cout<<"Not a peripheral event (NTracks>15)"<<endl;
     flag = kStErr;
   }
-  if( NTracks <= 0 ){
-    cout<<"StPeCMaker: Event has no tracks!"<<endl;
+  if( NTracks <= 1 ){
+    cout<<"StPeCMaker: Event has no tracks <1!"<<endl;
     flag = kStErr;
   }
 
-  // Fill StPeCEvent
-  if ( flag == kStOk ) {
-     if ( infoLevel ) printf ( "StPeCMaker: Fill StPeCEvent \n" ) ;
-     pevent->fill ( event ) ;
-     uDstTree->Fill();
-//
-//   Select only 4 prong candidates
-//
-     if      ( filter == 1 ) flag = Cuts       ( event, pevent ) ; 
-     else if ( filter == 2 ) flag = Cuts4Prong ( event, pevent ) ; 
+  int tw = event->l0Trigger()->triggerWord();
+  cout << "Trigger word " << tw << endl;
+  // take the event anyway
+  if (tw == 0x3001 || tw==0x3002 || tw == 0x3011 || tw == 0x1001  ) {
+    cout << "UPC trigger"  << endl;
+    //    flag= kStOk;
   }
+  
+  // Fill StPeCEvent
+  // always output for MC
+  if (geantBranch || ( flag == kStOk )) {
+    if ( infoLevel ) printf ( "StPeCMaker: Fill StPeCEvent \n" ) ;
+    pevent->fill ( event ) ;    
+    uDstTree->Fill();
+    //
+    //   Select only 4 prong candidates
+    //
+    if      ( filter == 1 ) flag = Cuts       ( event, pevent ) ; 
+    else if ( filter == 2 ) flag = Cuts4Prong ( event, pevent ) ; 
+  } else {
+    cout<<"StPeCMaker: Do Not fill  Event to Tree !"<<endl;
+  } 
+
+
+
+
+  
+
    
   pevent->clear();
   geant->clear ( ) ;

@@ -1,7 +1,10 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StPeCEvent.cxx,v 1.8 2001/04/23 21:44:30 meissner Exp $
+// $Id: StPeCEvent.cxx,v 1.9 2002/03/19 22:23:26 meissner Exp $
 // $Log: StPeCEvent.cxx,v $
+// Revision 1.9  2002/03/19 22:23:26  meissner
+// New variables: zdc unatt., Trigger word, MC tree if Geant Branch, DCA  for primary pairs, all tracks for secondary pairs (Test)
+//
 // Revision 1.8  2001/04/23 21:44:30  meissner
 // add dEdx z variable to tree, setFormat(1) for tree, use private BetheBloch (temp solution)
 //
@@ -72,6 +75,7 @@ void  StPeCEvent::clear ( ) {
    xVertex = 0 ;
    yVertex = 0 ;
    zVertex = 0 ;
+   rVertex = 0 ;
    nPPairs = 0 ;
    nSPairs = 0 ;
    nTracks = 0 ;
@@ -144,23 +148,26 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
   qTot = SumQ ;
   pt   = sqrt( SumPx*SumPx + SumPy*SumPy );
 
+  cout << "Number of Primary Vertices " << event->numberOfPrimaryVertices() << endl;
   StPrimaryVertex* vtx = event->primaryVertex();
   if(vtx) {
+    cout << "Vertex flag " << vtx->flag() << endl;    
     xVertex = vtx->position().x();
     yVertex = vtx->position().y();
     zVertex = vtx->position().z();
-    if ( infoLevel > 1 ) {
-     cout << "StPeCEvent : primary vertex " << vtx->position().x() << " " 
-       << vtx->position().y() << " " << vtx->position().z() << endl;
-    }
-  }
-  else {
+    rVertex = sqrt(xVertex*xVertex + yVertex*yVertex);
+    
+    //if ( infoLevel > 1 ) {
+    cout << "StPeCEvent : primary vertex x:" << xVertex << " y: "  <<  yVertex  << " z: " << zVertex << " r: " << rVertex <<endl;
+    // }
+  }   else {
     xVertex = -9999. ;
     yVertex = -9999. ;
     zVertex = -9999. ;
+    rVertex = -9999. ;
     cout<<"StPeCEvent: There was no primary vertex!"<<endl;
   }
-
+  
   // HERE  flag must  be tested. 
   StPeCPair* lPair ; 
   nPPairs = 0 ;
@@ -190,34 +197,38 @@ Int_t StPeCEvent::fill ( StEvent *event ) {
 #endif	   
      }
   }
-//
-//   Look for V0
-//
+  //
+  //   Look for V0
+  //   Do not skip the primaries here for the time being.....
+  // 
+
+
   // HERE must flag be tested. 
   for( Int_t i=0; i<nnode-1; i++ ) {
-     if ( exnode[i]->entries(primary)  ) continue ; 
-     if ( exnode[i]->entries(global)  !=1 ) continue ;
-     for( Int_t j=i+1; j<nnode; j++ ) {
-        if ( exnode[j]->entries(primary)     ) continue ; 
-        if ( exnode[j]->entries(global)  !=1 ) continue ;
-        StTrack *trk1 = exnode[i]->track(global);
-        StTrack *trk2 = exnode[j]->track(global);
-
-	// DANGER 
-	if (! (trk1->flag()>0)) continue;
-	if (! (trk2->flag()>0)) continue;
-	// --------
-	StPhysicalHelixD h1 = trk1->geometry()->helix() ;
-	StPhysicalHelixD h2 = trk2->geometry()->helix() ;
-
-	pairD dcaLengths = h1.pathLengths(h2);
-        StThreeVectorD x1 = h1.at(dcaLengths.first);
-        StThreeVectorD x2 = h2.at(dcaLengths.second);
-        StThreeVectorD x = (x1-x2) ;
+    // if ( exnode[i]->entries(primary)  ) continue ; 
+    if ( exnode[i]->entries(global)  !=1 ) continue ;
+    for( Int_t j=i+1; j<nnode; j++ ) {
+      //if ( exnode[j]->entries(primary)     ) continue ; 
+      if ( exnode[j]->entries(global)  !=1 ) continue ;
+      StTrack *trk1 = exnode[i]->track(global);
+      StTrack *trk2 = exnode[j]->track(global);
+      
+      // DANGER 
+      if (! (trk1->flag()>0)) continue;
+      if (! (trk2->flag()>0)) continue;
+      // --------
+      StPhysicalHelixD h1 = trk1->geometry()->helix() ;
+      StPhysicalHelixD h2 = trk2->geometry()->helix() ;
+      
+       pairD dcaLengths = h1.pathLengths(h2);
+       StThreeVectorD x1 = h1.at(dcaLengths.first);
+       StThreeVectorD x2 = h2.at(dcaLengths.second);
+       StThreeVectorD x = (x1-x2) ;
 	if ( x.mag() > 10 ) continue ; // Hardwire cut
 
         // TClonesArray &spairs = *sPairs;
         // lPair = new(spairs[nSPairs++]) StPeCPair(trk1,trk2,0,event) ;
+	// 
         lPair = new((*sPairs)[nSPairs++]) StPeCPair(trk1,trk2,0,event) ;
 #ifdef PECPRINT
         cout << "StPeCEvent : Secondary Pair : " 
