@@ -5,7 +5,7 @@ TDataSet *CreateTable() {
   Int_t nrows = 1;
   St_tpcCorrection *tableSet = new St_tpcCorrection("tpcMethaneIn",nrows);
   memset(&row,0,tableSet->GetRowSize()); 
-  row.index       = 1;
+  row.idx       = 1;
   row.nrows       = nrows;
   row.npar        =            2;       //percentMethaneInPCGFHist843P04ifAuAu200
   row.a[0]	  =  2.19558e-01;// 2.50502e-01;

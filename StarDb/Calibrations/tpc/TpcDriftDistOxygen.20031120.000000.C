@@ -9,10 +9,10 @@ TDataSet *CreateTable() {
   tpcCorrection_st row;
   Int_t nrows = 2;
   St_tpcCorrection *tableSet = new St_tpcCorrection("TpcDriftDistOxygen",nrows);
-  for (Int_t index = 1; index <=2; index++) {
+  for (Int_t idx = 1; idx <=2; idx++) {
     memset(&row,0,tableSet->GetRowSize()); 
     row.nrows      =  nrows;
-    row.index      =  index;
+    row.idx      =  idx;
     row.npar       =         2;  // Z3OGPHist834P04ifAuAu200
     row.a[0]	   =  3.57e-04;  // FitP->Draw("mu:y","chisq>0&&chisq<1000&&abs(mu)<.2&&x<14&&mu>.02","prof")
     row.a[1]	   = -7.00e-08;  // freeze Blair no. (Bliar gave %/meter=99.6-0.017502    O2 in ppm. V TPC obichno ~25 ppm) = 7e-8

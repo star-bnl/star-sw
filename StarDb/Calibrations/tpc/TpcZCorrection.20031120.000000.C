@@ -5,7 +5,7 @@ TDataSet *CreateTable() {
   St_tpcCorrection *tableSet = new St_tpcCorrection("TpcZCorrection",nrows);
   memset(&row,0,tableSet->GetRowSize()); 
   row.nrows      = nrows;
-  row.index      =  1;
+  row.idx      =  1;
   row.npar       =  3;           // Z3GFHist841P04ifAuAu200
   row.a[0]	 =  1.18231e-02;//
   row.a[1]	 = -1.23456e-04;//
@@ -13,7 +13,7 @@ TDataSet *CreateTable() {
   tableSet->AddAt(&row);
   memset(&row,0,tableSet->GetRowSize()); 
   row.nrows      = nrows;
-  row.index      =    2;
+  row.idx      =    2;
   row.npar       =    4;           // Z3GFHist841P04ifAuAu200
 #if 0
   row.min        =  20.;
