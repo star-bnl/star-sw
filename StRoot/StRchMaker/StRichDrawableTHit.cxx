@@ -1,10 +1,13 @@
 /***************************************************************
- * $Id: StRichDrawableTHit.cxx,v 1.3 2000/05/23 16:55:48 lasiuk Exp $
+ * $Id: StRichDrawableTHit.cxx,v 1.4 2000/05/25 21:35:32 fisyak Exp $
  *
  * Description:
  *
  ***************************************************************
  * $Log: StRichDrawableTHit.cxx,v $
+ * Revision 1.4  2000/05/25 21:35:32  fisyak
+ * Make rootcint happy
+ *
  * Revision 1.3  2000/05/23 16:55:48  lasiuk
  * Incorporate new MC info
  * add clone() where necessary
@@ -17,6 +20,8 @@
  * Initial Revision
  *
  ***************************************************************/
+#include <iostream.h>
+#include <fstream.h>
 #ifdef __ROOT__
 #include "StRichDrawableTHit.h"
 #include "StRichSimpleHit.h"

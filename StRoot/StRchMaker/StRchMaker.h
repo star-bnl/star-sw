@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRchMaker.h,v 1.11 2000/05/23 16:49:55 lasiuk Exp $
+ * $Id: StRchMaker.h,v 1.12 2000/05/25 21:35:32 fisyak Exp $
  *
  * Author: 
  ***************************************************************************
@@ -9,8 +9,11 @@
  *              StRchMaker.h - ROOT/STAR Maker for offline chain.
  ***************************************************************************
  * $Log: StRchMaker.h,v $
- * Revision 1.11  2000/05/23 16:49:55  lasiuk
- * writing to StEvent/StRichCollection
+ * Revision 1.12  2000/05/25 21:35:32  fisyak
+ * Make rootcint happy
+ *
+ * Revision 1.12  2000/05/25 21:35:32  fisyak
+ * Make rootcint happy
  *
  * Revision 1.11  2000/05/23 16:49:55  lasiuk
  * writing to StEvent/StRichCollection
@@ -46,16 +49,16 @@
 
 #ifndef __CINT__
 #include <vector>
-
+#ifndef ST_NO_NAMESPACES
 using std::vector;
 #endif
 #endif
 #ifdef RCH_HISTOGRAM
 #include "TFile.h"
-
+#include "TH1.h"
 #include "TNtuple.h"
 #endif
-
+#ifndef __CINT__
 #include "StRrsMaker/StRichSinglePixel.h"
 #include "StRrsMaker/StRichSingleMCPixel.h"
 #endif
@@ -111,14 +114,14 @@ private:
     // flags
     short mRichCollectionPresent ;
     short mPixelCollectionPresent;
-    
+    float mSigma[160][96];
     const char* mPedestalFile;
     
 #ifndef __CINT__    
     vector<StRichSinglePixel*> mPixelStore;//!
     StRichClusterAndHitFinder*  mClusterFinder;//!
     // this is used only to pass the hits via the DataSet
-    
+    // We will access them via the richcollection
     StRichSimpleHitCollection*  mSimpleHitCollection;//!
     vector<StRichSimpleHit*>    mTheHits;//!
 #endif    
@@ -144,7 +147,7 @@ private:
     // hits
     TH1F* mhc;//!
     TH1F* mhmc;//!
-	static const char cvs[]="Tag $Name:  $ $Id: StRchMaker.h,v 1.11 2000/05/23 16:49:55 lasiuk Exp $ built "__DATE__" "__TIME__ ;
+	static const char cvs[]="Tag $Name:  $ $Id: StRchMaker.h,v 1.12 2000/05/25 21:35:32 fisyak Exp $ built "__DATE__" "__TIME__ ;
 #endif
     virtual const char *GetCVS() const	{
     
