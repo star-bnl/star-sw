@@ -558,6 +558,8 @@ Int_t StTree::ReadEvent(const StUKey &ukey)
   fUKey.Update(ukey,GetName()); Open();
   TDataSetIter next(this);StBranch *br;
   while ((br=(StBranch*)next())) {      //Read all branches
+    if (! br->fIOMode<0) continue;
+    if (! br->fIOMode&1) continue;
     iret=br->ReadEvent(fUKey);
     if (!iret) num++;
   if(iret==kStErr) return kStErr;
@@ -575,13 +577,15 @@ Int_t StTree::NextEvent(StUKey  &ukey)
 Int_t StTree::NextEvent()
 {
   int iret=0;
+  int iakt=0;
   if (Open()) return kStEOF;
   TDataSetIter next(this); StBranch *br; int fst = 1;
   while ((br=(StBranch*)next())) {
     if (! br->fIOMode<0) continue;
     if (! br->fIOMode&1) continue;
-      if (fst && !br->IsOption("const")) {  //Read only 1st branch
-      iret = br->NextEvent(fUKey);
+    iakt++;  
+    if (fst && !br->IsOption("const")) {  //Read only 1st branch
+      iret = br->NextEvent(fUKey); 
       if(iret) return iret;
       fst=0;
       continue;
@@ -589,8 +593,8 @@ Int_t StTree::NextEvent()
     iret = br->ReadEvent(fUKey);
     if (iret==kStErr) return iret;
   }
-
-  return 0;
+  
+  return (iakt) ? 0:kStEOF;
 }
 
 //_______________________________________________________________________________
