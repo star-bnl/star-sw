@@ -1,6 +1,12 @@
-// $Id: StTrsMaker.cxx,v 1.32 1999/04/27 19:38:37 lasiuk Exp $
+// $Id: StTrsMaker.cxx,v 1.33 1999/04/29 00:15:10 lasiuk Exp $
 //
 // $Log: StTrsMaker.cxx,v $
+// Revision 1.33  1999/04/29 00:15:10  lasiuk
+// make sure to clean up pointers that are stored
+// in the StTrsRawDataEvent() because they are allocated
+// for each event.  This is done with StTrsRawDataEvent::clear()
+// which has been added.
+//
 // Revision 1.32  1999/04/27 19:38:37  lasiuk
 // Bfield units in kG from STAR database
 //
@@ -181,7 +187,7 @@ extern "C" {void gufld(Float_t *, Float_t *);}
 //#define VERBOSE 1
 //#define ivb if(VERBOSE)
 
-static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.32 1999/04/27 19:38:37 lasiuk Exp $";
+static const char rcsid[] = "$Id: StTrsMaker.cxx,v 1.33 1999/04/29 00:15:10 lasiuk Exp $";
 
 ClassImp(electronicsDataSet)
 ClassImp(geometryDataSet)
@@ -456,6 +462,10 @@ Int_t StTrsMaker::Make(){
 	 << mFirstSectorToProcess
 	 << "--"
 	 << mLastSectorToProcess << endl;
+
+    //
+    cout << "make sure pointer are clean" << endl;
+    mAllTheData->clear();
     //
     //
     
@@ -831,7 +841,7 @@ Int_t StTrsMaker::Finish()
 
 void StTrsMaker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: StTrsMaker.cxx,v 1.32 1999/04/27 19:38:37 lasiuk Exp $\n");
+  printf("* $Id: StTrsMaker.cxx,v 1.33 1999/04/29 00:15:10 lasiuk Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (Debug()) StMaker::PrintInfo();
