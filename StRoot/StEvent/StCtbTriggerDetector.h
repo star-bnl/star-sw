@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StCtbTriggerDetector.h,v 2.4 2002/02/22 22:56:46 jeromel Exp $
+ * $Id: StCtbTriggerDetector.h,v 2.5 2002/11/19 20:21:00 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StCtbTriggerDetector.h,v $
+ * Revision 2.5  2002/11/19 20:21:00  ullrich
+ * Added method to sum all mips.
+ *
  * Revision 2.4  2002/02/22 22:56:46  jeromel
  * Doxygen basic documentation in all header files. None of this is required
  * for QM production.
@@ -50,6 +53,8 @@ public:
     float          mips(unsigned int tray, unsigned int slot, unsigned int evt = 0) const;
     char           time(unsigned int tray, unsigned int slot, unsigned int evt = 0) const;
     float          aux(unsigned int, unsigned int evt = 0) const;
+
+    double         mips(unsigned int evt = 0) const;     // sum over all trays, slot
 
     void setMips(unsigned int, unsigned int, unsigned int, float);
     void setTime(unsigned int, unsigned int, unsigned int, char);
