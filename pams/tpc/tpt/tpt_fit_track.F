@@ -1,5 +1,11 @@
-* $Id: tpt_fit_track.F,v 1.14 2000/08/14 17:16:18 snelling Exp $
+* $Id: tpt_fit_track.F,v 1.16 2000/08/18 05:22:18 snelling Exp $
 * $Log: tpt_fit_track.F,v $
+* Revision 1.16  2000/08/18 05:22:18  snelling
+* fixed my own fix
+*
+* Revision 1.15  2000/08/18 02:22:17  snelling
+* fixed radian degree bug and removed second crossing angle correction
+*
 * Revision 1.14  2000/08/14 17:16:18  snelling
 * changed hit errors to absolute values
 *
@@ -132,10 +138,11 @@ C          crossing angle
      >                           xold,yold,cf,theta)
            ipadrow=mod(hit(ient).row,100)
            if(ncir.gt.1) then
-                lambda = atan(abs(zcir(ncir)-zcir(ncir-1))/
+                lambda = atand(abs(zcir(ncir)-zcir(ncir-1))/
      >                   sqrt((xcir(ncir)-xcir(ncir-1))**2+(ycir(ncir)-ycir(ncir-1))**2))
                 call tpt_hit_uncert(zcir(ncir),theta,lambda,ipadrow,sigX,sigZ)
-                wcir(i)=1.0/sigx**2/cf
+c                wcir(i)=1.0/sigx**2/cf
+                wcir(i)=1.0/sigx**2
                 wlin(i)=1.0/sigz**2
                 xlocal(1)=sigx
                 iret=tpc_local_to_global(int(hit(ient).row/100),xlocal,xglobal)

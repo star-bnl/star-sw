@@ -1,5 +1,11 @@
-// $Id: StQABookHist.cxx,v 1.49 2000/08/11 13:28:43 lansdell Exp $ 
+// $Id: StQABookHist.cxx,v 1.51 2000/08/17 21:13:55 lansdell Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.51  2000/08/17 21:13:55  lansdell
+// loop over all TPC hits for the z-hit distribution histogram
+//
+// Revision 1.50  2000/08/17 18:52:30  lansdell
+// added z distribution of hits histogram to StEventQA set
+//
 // Revision 1.49  2000/08/11 13:28:43  lansdell
 // changed axis limits for FTPC chisq histograms
 //
@@ -249,6 +255,7 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_prim_vrtx2=0;    //! primary vrtx z position
 
 // for method MakeGlob - from table globtrk
+  m_z_hits=0;
   m_globtrk_tot=0;
   m_globtrk_tot_sm=0;
   m_globtrk_good=0;
@@ -1429,6 +1436,8 @@ void StQABookHist::BookHistVertex(){
 }
 //_____________________________________________________________________________
 void StQABookHist::BookHistPoint(){
+
+  m_z_hits      = QAH1F("QaPointZhits","point: z distribution of hits, tpc",100,-210,210);
 
   m_pnt_tot     = QAH1F("QaPointTot", "point: # hits total ",100, 0.,250000.);
   m_pnt_tot_med = QAH1F("QaPointTotmed","point: # hits total ",100, 0.,2500.);
