@@ -81,7 +81,7 @@ rdEz2SmdCal(
   sorter->set(&HList,db,eFee,eHead,eTrig);
   float thrMipSmdE=0.2;
   int emptyStripCount=nDot;
-  float twMipEdev=0.2;
+  float twMipEdev=0.5;
   sorter->setMipCuts(thrMipSmdE,emptyStripCount, twMipEdev);
   sorter->init();
   sorter->initRun(eHead->getRunNumber());
