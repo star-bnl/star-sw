@@ -1,5 +1,14 @@
-// $Id: StEmcADCtoEMaker.h,v 1.30 2003/09/12 22:03:16 jeromel Exp $
+// $Id: StEmcADCtoEMaker.h,v 1.31 2003/09/18 17:16:20 suaide Exp $
 // $Log: StEmcADCtoEMaker.h,v $
+// Revision 1.31  2003/09/18 17:16:20  suaide
+// Modifications in the way StEmcADCtoEMaker handles the database requests,
+// fixed a bug related to GetDate() that was making the maker extremely slow,
+// added the option of reading muDst events directly (need to use StEmcPreDbMaker
+// in order to set the correct timestamp for database)
+//
+// StEmcPreDbMaker just sets the correct timestamp for St_db_Maker when reading
+// muDst files without convertion to StEvent. Should run before St_db_Maker
+//
 // Revision 1.30  2003/09/12 22:03:16  jeromel
 // No changes (ident)
 //
@@ -92,6 +101,7 @@ This class gets EMC raw ADC's and convert them to calibrated energy.<br><br>
 #ifndef StMaker_H
 #include "StMaker.h"
 #endif
+#define MAXDETBARREL 4
 
 #include "tables/St_emcCalib_Table.h"
 #include "tables/St_smdCalib_Table.h"
@@ -109,6 +119,7 @@ This class gets EMC raw ADC's and convert them to calibrated energy.<br><br>
 #include "TH2.h"
 
 class StEmcCollection;
+class StMuEmcCollection;
 class StEmcDecoder;
 class StEmcGeom;
 class StBemcData;
@@ -118,31 +129,43 @@ class StEmcADCtoEMaker : public StMaker
  private: 
   TH2F              *mNhit;           //! 
   TH2F              *mEtot;           //!
-  TH2F              *mHits[MAXDET];   //!
-  TH2F              *mAdc[MAXDET];    //!
-  TH2F              *mEnergyHist[MAXDET]; //!
-  TH2F              *mEnergySpec[MAXDET][3]; //!
-  TH1F              *mAdc1d[MAXDET];  //!           
-  TH1F              *mEn1d[MAXDET];  //!           
+  TH2F              *mHits[MAXDETBARREL];   //!
+  TH2F              *mAdc[MAXDETBARREL];    //!
+  TH2F              *mEnergyHist[MAXDETBARREL]; //!
+  TH2F              *mEnergySpec[MAXDETBARREL][3]; //!
+  TH1F              *mAdc1d[MAXDETBARREL];  //!           
+  TH1F              *mEn1d[MAXDETBARREL];  //!           
   TH2F              *mTower;          //!           
   TH2F              *mSmdTimeBinHist; //!
   TH2F              *mValidEvents;    //!
            
   controlADCtoE_st  *mControlADCtoE; 
+  
+  Bool_t            mHasPed[MAXDETBARREL];
+  Bool_t            mHasCalib[MAXDETBARREL];
+  Bool_t            mHasGain[MAXDETBARREL];
+  Float_t           mPed[MAXDETBARREL][18000][3];
+  Float_t           mGain[MAXDETBARREL][18000];
+  Float_t           mCalib[MAXDETBARREL][18000][5];
 					 
   TDataSet          *mDb;
   StEmcCollection   *mEmc;            
   StEmcDecoder      *mDecoder;          
   StBemcData        *mData;                      
-  StEmcGeom         *mGeo[MAXDET]; 
+  StEmcGeom         *mGeo[MAXDETBARREL]; 
+  Int_t             mDBRunNumber;
+  Int_t             mRunNumber;
            
   Bool_t            mEmbedd;
   Bool_t            mFromDaq;
   Bool_t            mPrint;
+  Bool_t            mSave[MAXDETBARREL]; 
+  Bool_t            mFillHisto;
 					 
 					 
   void              zeroAll(); ///< Zero all temporary vectors
   Bool_t            getEmc(); ///< This method gets EMC hits from different sources.
+  Bool_t            getTables(); ///< This method gets EMC tables from DB
   Bool_t            getStatus(Int_t); ///< This method gets the status tables 
   Bool_t            calibrate(Int_t); ///< This method applies the calibration constants to get the hit energy.
   Bool_t            fillHistograms(); ///< This method fills QA histograms
@@ -150,6 +173,7 @@ class StEmcADCtoEMaker : public StMaker
   Bool_t            getEmcFromDaq(TDataSet* daq);///< This method gets EMC collection from DAQ dataset.
   Bool_t            clearOldEmc(); ///< Clear old emc collection
   Bool_t            getEmcFromStEvent(StEmcCollection*); ///< This method creates a temporary ADC vector for each detector.
+  Bool_t            getEmcFromMuDst(StMuEmcCollection*); ///< This method creates a temporary ADC vector for each detector.
   Bool_t            saveHit(Int_t,Int_t);///< Decide if a hit should be saved or not
  protected:    
     
@@ -166,10 +190,10 @@ class StEmcADCtoEMaker : public StMaker
   StBemcData*       getBemcData()      {return mData;} ///< Return BemcData pointer
   void              clearStEventStaf() {mEmc = NULL;} ///< Clear emcCollection (does not delete from memory)
   void              setEmbeddingMode(Bool_t a) {mEmbedd = a; } ///< Set embedding mode (default is kFALSE)
-  void              setPrint(Bool_t a) {mPrint = a; } /// Set it to kFALSE if you do not want to print messages
-
+  void              setPrint(Bool_t a) {mPrint = a; } ///< Set it to kFALSE if you do not want to print messages
+  void              setFillHisto(Bool_t a) {mFillHisto = a;} ///< Turns on/off histogram filling
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.30 2003/09/12 22:03:16 jeromel Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StEmcADCtoEMaker.h,v 1.31 2003/09/18 17:16:20 suaide Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 

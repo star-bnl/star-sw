@@ -23,6 +23,7 @@ class StBemcData: public TDataSet
           void    validateData();               ///< Validates EMC data. Should be used only if headers are properly filled
 					void    printTower();                 ///< Print tower data
 					void    printSMD();                   ///< Print SMD data
+          void    zeroAll();
 					
 					// global event data
 					Int_t   RunNumber;
