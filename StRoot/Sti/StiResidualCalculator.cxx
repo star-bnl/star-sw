@@ -1,7 +1,7 @@
 //StiResidualCalculator.cxx
 /***************************************************************************
  *
- * $Id: StiResidualCalculator.cxx,v 2.7 2003/09/07 03:49:08 perev Exp $
+ * $Id: StiResidualCalculator.cxx,v 2.8 2003/10/28 15:59:22 andrewar Exp $
  *
  * \class  StiResidualCalculator provides a utility for determining the
  *         track residuals.
@@ -9,6 +9,9 @@
  * \date   October 2002
  ***************************************************************************
  * $Log: StiResidualCalculator.cxx,v $
+ * Revision 2.8  2003/10/28 15:59:22  andrewar
+ * Fixed int() to (int) for var.
+ *
  * Revision 2.7  2003/09/07 03:49:08  perev
  * gcc 3.2 + WarnOff
  *
@@ -97,6 +100,7 @@ void StiResidualCalculator::initDetector(StiDetectorBuilder *detBuilder)
   if (detBuilder)
     {
       cout <<"Group ID: "<<detBuilder->getGroupId()<<endl;
+      cout <<"Det Name: "<<detBuilder->getName()<<endl;
       int rows = detBuilder->getNRows();
       cout <<"Rows: "<<rows;
       int sectors = detBuilder->getNSectors(0);
@@ -106,19 +110,20 @@ void StiResidualCalculator::initDetector(StiDetectorBuilder *detBuilder)
       
 
 
-      for(int i=15, j=0; j<sectors;j++,i=i+2)
+      for(int i=49, j=0; j<detBuilder->getNSectors(i);j++)
 	{
 	  StiDetector* det = detBuilder->getDetector(i,j);
 	  //mark detector as unused
-
+	  cout <<"Name: "<<det->getName()<<endl;
 	  det->setIsActive(isNotActiveFunc);
 	  //store detector pointer in vector
 	  candidates.push_back(det);
 	  
 	  //Slashes in name make root unhappy
-	  detName=(det->getName()).c_str();
+	  detName=(string)(det->getName());
 	  int x=detName.find("/");
-	  while(x<int(detName.size()))
+
+	  while( x < (int)(detName.size()) && x>0 )
 	    {
 	      detName.replace(x,1,"_");
 	      x=detName.find("/");
@@ -299,9 +304,12 @@ int StiResidualCalculator::trackResidue(const StiKalmanTrack *track)
   //! pertinant values (fillHist).
 
 
-  double nHits =0;	if(nHits){}
-     
-  int count=0;		if(count){}
+  double nHits =0;	
+
+  vector<StiKalmanTrackNode*> trackNodes=track->getNodes(kSvtId);
+  nHits=trackNodes.size();
+  if (nHits<2) return 1;
+
   StiKalmanTrackNode* leaf = track->getLastNode();
   StiKTNForwardIterator iT(leaf);
   StiKTNForwardIterator end = iT.end();
@@ -310,6 +318,7 @@ int StiResidualCalculator::trackResidue(const StiKalmanTrack *track)
 
   while(iT != end)
     {
+
       
       StiKalmanTrackNode iNode = (*iT);
       
