@@ -1,6 +1,12 @@
-* $Id: svttgeo2.g,v 1.3 2003/09/17 22:27:05 potekhin Exp $
+* $Id: svttgeo2.g,v 1.4 2003/10/10 23:17:53 potekhin Exp $
 *
 * $Log: svttgeo2.g,v $
+* Revision 1.4  2003/10/10 23:17:53  potekhin
+* Introduced the ShieldVer steering variable as well
+* as a version of the data structure, to modify (when necessary)
+* the inner shield radius. This is quite necessary
+* due to the pixel detector placement inside that shield.
+*
 * Revision 1.3  2003/09/17 22:27:05  potekhin
 * Lots more corrections to the material in the SVT and probably the
 * final version:
@@ -69,7 +75,7 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
                        SCBM,SCBL,SFED,SPLS,SOUM,SOUR
 *
       structure SVTG { Version,   Nlayer,    RsizeMin,  RsizeMax,
-		       ZsizeMax,  Angoff}
+		       ZsizeMax,  Angoff, ShieldVer}
 *     
       structure SWCA { Version,   Length,
                        WaferWid,  WaferLen,  WaferThk,  RohaThk,
@@ -153,6 +159,7 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
       RsizeMax  = 46.107     ! STV outermost radius
       ZsizeMax  = 270        ! SVT+FTPC length
       Angoff    = 0          ! angular offset x1 for slayer 2 x2 for slayer 3
+      ShieldVer = 1          ! versioning of the shield
 *
    Fill SWCA ! Wafer Carrier
       Version   = 1          ! geometry version
@@ -347,6 +354,13 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
       AlMshThk  = 0.03      ! Aluminum shield mesh effective thickness
       AlMshPos  = 53.5      ! Aluminum shield mesh z position
    EndFill
+* this version of the shield will accomodate the PIXEL detector,
+* so it needs to be slightly bigger
+   Fill SSLD ! shielding parameters
+      version  = 2          ! geometry version
+      SInRInn  = 5.7        ! inner shield cylinder, inner radius
+      SInROut  = 5.708      ! inner shield cylinder, outer radius
+   EndFill
 *
    do i=1,4
      rad_cones_in(i) = 8.5+2.60*(i-1)
@@ -355,7 +369,7 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
 
    Fill SCBP                ! Cabling
       Layer=1               ! Layer
-      Len  =1.85             ! Length
+      Len  =1.85            ! Length
       Rmin1=rad_cones_in(1) ! Min radius closer to wafers
       Rmin2=rad_cones_out(1)! Min radius further from wafers
       Vol  =7.24+3.21       ! Volume of copper, LV+HV cables
@@ -439,7 +453,7 @@ Module  SVTTGEO2  is the SVT geometry for STAR: corrected and augmented
       USE SWAM
       USE SELC
       USE SFPA
-      USE SSLD
+      USE SSLD version=SVTG_Shieldver
       USE SCBP
       USE SWCX
       USE SOUP
