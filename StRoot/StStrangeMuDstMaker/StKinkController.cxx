@@ -1,5 +1,8 @@
-// $Id: StKinkController.cxx,v 3.3 2000/09/18 19:25:19 genevb Exp $
+// $Id: StKinkController.cxx,v 3.4 2000/12/18 21:35:17 genevb Exp $
 // $Log: StKinkController.cxx,v $
+// Revision 3.4  2000/12/18 21:35:17  genevb
+// Introduced variable buffer-sizing
+//
 // Revision 3.3  2000/09/18 19:25:19  genevb
 // Additional protection for missing MC info
 //
@@ -44,6 +47,7 @@
 StKinkController::StKinkController() : StStrangeControllerBase(kinkT) {
   increment = 100;
   max = 500;
+  bsize = 128000;
 }
 //_____________________________________________________________________________
 StKinkController::~StKinkController() {

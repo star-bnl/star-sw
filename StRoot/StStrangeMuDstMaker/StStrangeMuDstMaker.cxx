@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 3.6 2000/10/27 21:55:31 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 3.7 2000/12/18 21:35:18 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 3.7  2000/12/18 21:35:18  genevb
+// Introduced variable buffer-sizing
+//
 // Revision 3.6  2000/10/27 21:55:31  genevb
 // Allow use of event.root files
 //
@@ -95,7 +98,8 @@ StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
   for (Int_t i=0; i<strDstT; i++) {
     doT[i] = kFALSE;
     cont[i] = 0;
-    files[i]=0;
+    files[i] = 0;
+    bsize[i] = 0;
     
     // Defaults file names: evMuDst.root, v0MuDst.root, etc.
     TString prefix = strTypeNames[i];
@@ -110,6 +114,8 @@ StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
   doMc = kFALSE;
   rw = StrangeNoFile;
   abortEvent = kFALSE;
+
+  bsize[evT] = 64000;
 
 }
 //_____________________________________________________________________________
@@ -138,6 +144,8 @@ Int_t StStrangeMuDstMaker::Init() {
   v0 = cont[v0T];
   xi = cont[xiT];
   kink = cont[kinkT];
+
+  EachDoT( if (bsize[i]) cont[i]->SetBufferSize(bsize[i]) );
 
   if (rw == StrangeRead) {            // READING  the Micro Dst
     InitReadDst();
@@ -175,8 +183,7 @@ void StStrangeMuDstMaker::InitCreateDst() {
 
   if (!dstMaker) {
     Int_t split=2;
-    Int_t bsize=1024000;
-    TBranch* branch = tree->Branch("Event",&evClonesArray,bsize,split);
+    TBranch* branch = tree->Branch("Event",&evClonesArray,bsize[evT],split);
     branch->SetFile(file[evT]);
     cuts->Assure();
   }
@@ -186,8 +193,7 @@ void StStrangeMuDstMaker::InitCreateSubDst() {
 
   evClonesArray = dstMaker->GetEvClonesArray();
   Int_t split=2;
-  Int_t bsize=64000;
-  TBranch* branch = tree->Branch("Event",&evClonesArray,bsize,split);
+  TBranch* branch = tree->Branch("Event",&evClonesArray,bsize[evT],split);
   branch->SetFile(file[evT]);
   EachController(InitCreateSubDst());
   cuts->Append(dstMaker->Cuts().GetCollection());

@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.h,v 3.3 2000/09/28 20:16:05 jones Exp $
+// $Id: StStrangeMuDstMaker.h,v 3.4 2000/12/18 21:35:18 genevb Exp $
 // $Log: StStrangeMuDstMaker.h,v $
+// Revision 3.4  2000/12/18 21:35:18  genevb
+// Introduced variable buffer-sizing
+//
 // Revision 3.3  2000/09/28 20:16:05  jones
 // Added doT0JitterAbort() optio; added fix to CheckFile in case of no file
 //
@@ -144,6 +147,10 @@ class StStrangeMuDstMaker : public StMaker {
   void UnselectXi(Int_t i=-1)   { xi->Unselect(i); }
   void UnselectKink(Int_t i=-1) { kink->Unselect(i); }
 
+  void SetV0BufferSize(Int_t b)   { bsize[v0T]=b; }
+  void SetXiBufferSize(Int_t b)   { bsize[xiT]=b; }
+  void SetKinkBufferSize(Int_t b) { bsize[kinkT]=b; }
+
   // turn off filling of TTree for this event, regardless
   void AbortEvent() { abortEvent = kTRUE; }
 
@@ -177,6 +184,7 @@ class StStrangeMuDstMaker : public StMaker {
 
   Bool_t doT[strDstT];
   Bool_t doMc;
+  Int_t  bsize[strDstT];
 
   Bool_t doT0JitterAbort;
 

@@ -1,5 +1,8 @@
-// $Id: StStrangeControllerBase.cxx,v 3.2 2000/07/18 15:58:04 genevb Exp $
+// $Id: StStrangeControllerBase.cxx,v 3.3 2000/12/18 21:35:18 genevb Exp $
 // $Log: StStrangeControllerBase.cxx,v $
+// Revision 3.3  2000/12/18 21:35:18  genevb
+// Introduced variable buffer-sizing
+//
 // Revision 3.2  2000/07/18 15:58:04  genevb
 // Increased buffer size
 //
@@ -70,6 +73,7 @@ TNamed(strTypeNames[type],"StStrangeController") {
 
   increment = 500;
   max = 2000;
+  bsize=1024000;
 }
 //_____________________________________________________________________________
 StStrangeControllerBase::~StStrangeControllerBase() {
@@ -133,7 +137,6 @@ void StStrangeControllerBase::InitCreateSubDst() {
 TBranch* StStrangeControllerBase::AssignBranch(const char* name,
                                                TClonesArray** address) {
   static Int_t split=2;
-  static Int_t bsize=1024000;
   TBranch* branch = tree->Branch(name,address,bsize,split);
   if (masterMaker->GetMode() == StrangeWrite) branch->SetFile(file);
   return branch;
