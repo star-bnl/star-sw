@@ -1,3 +1,6 @@
+#include "St_PolyLineShape.h"
+
+#include "TPoints3DABC.h"
 #include "St_PolyLine3D.h"
 #include <TPolyLine3D.h>
 #include <TPolyMarker3D.h>
@@ -9,9 +12,8 @@
 #include <TView.h>
 #include <TPad.h>
 
-#include "St_PolyLineShape.h"
 
-#define MyInputPoints St_PolyLine3D
+#define MyInputPoints TPoints3DABC
 
 ClassImp(St_PolyLineShape)
 
@@ -28,11 +30,7 @@ St_PolyLineShape::St_PolyLineShape()
 }
 
 //______________________________________________________________________________
-#ifdef LINES
 St_PolyLineShape::St_PolyLineShape(MyInputPoints  *points,Option_t* option)
-#else
-St_PolyLineShape::St_PolyLineShape(MyInputPoints  *points,Option_t* option)
-#endif
 {
    m_Shape       = new TTUBE("tube","tube","void",0.5,0.5);
    m_ShapeType   = kNULL;
@@ -115,8 +113,7 @@ void St_PolyLineShape::Create()
 //______________________________________________________________________________
 Int_t St_PolyLineShape::SetConnection(EShapeTypes connection)
 {
-// Float_t size = 0.5*GetWidthFactor()*(m_Points->GetLineWidth());
- Float_t size = 0.5;
+ Float_t size = 0.5*GetWidthFactor()*GetLineWidth();
 
  if (m_ShapeType != connection) {
    SafeDelete(m_Connection);
@@ -143,16 +140,8 @@ Int_t St_PolyLineShape::DistancetoPrimitive(Int_t px, Int_t py)
 //______________________________________________________________________________
 void St_PolyLineShape::Draw(Option_t *opt)
 {
-
-  if (m_HasDrawn) return;
-
   Create();
-
-  if (m_Points) {
-//   m_Points->Draw();
-    AppendPad();
-    m_HasDrawn = kTRUE;
-  }  
+  AppendPad();
 }
 
 //______________________________________________________________________________
@@ -195,7 +184,8 @@ void St_PolyLineShape::PaintNode(Float_t *start,Float_t *end,Option_t *option)
     Float_t width = GetWidthFactor()*(m_Points->GetLineWidth());
 #else
 //    Float_t width = GetWidthFactor()*(m_Points->GetMarkerSize());
-    Float_t width = GetWidthFactor()*(m_Points->GetSizeAttribute());
+      Float_t width = GetWidthFactor()*GetLineWidth();
+//==      width  *= m_Points->GetSizeAttribute();
 #endif
 
     mrot[0][0] *= width;
@@ -213,7 +203,8 @@ void St_PolyLineShape::PaintNode(Float_t *start,Float_t *end,Option_t *option)
 #ifdef LINES  
     Color_t color = m_Points->GetLineColor();
 #else
-    Color_t color = m_Points->GetColorAttribute();
+    Color_t color = GetLineColor();
+//    color = m_Points->GetColorAttribute();
 //    Color_t color = m_Points->GetMarkerColor();
 #endif
 
@@ -253,11 +244,24 @@ void St_PolyLineShape::PaintNode(Float_t *start,Float_t *end,Option_t *option)
 void St_PolyLineShape::Paint(Option_t *opt)
 {
   if (!m_Points) return;
-  if (!strstr(opt, "x3d"))
-     m_Points->Paint(opt);
-  else
-     m_Points->Paint(opt);
+  if (!strstr(opt, "x3d")) {
+     St_PolyLine3D *line =  new St_PolyLine3D(m_Points);
+     line->SetColorAttribute(GetLineColor());
+     line->SetSizeAttribute(GetLineWidth());
+     line->SetBit(kCanDelete);
+     line->Paint(opt);
+//     m_Points->Paint(opt);
+  }
+  else {
+     St_PolyLine3D *line =  new St_PolyLine3D(m_Points);
+     line->SetColorAttribute(GetLineColor());
+     line->SetSizeAttribute(GetLineWidth());
+     line->SetBit(kCanDelete);
+     line->Paint(opt);
+
+//     m_Points->Paint(opt);
 //     Paint3d(opt);
+  }
 }
 
 //______________________________________________________________________________

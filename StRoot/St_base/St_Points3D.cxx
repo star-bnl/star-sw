@@ -63,7 +63,7 @@ ClassImp(St_Points3D)
  
  
 //______________________________________________________________________________
-St_Points3D::St_Points3D(St_Points3DABC *points) : fPoints(points)
+St_Points3D::St_Points3D(TPoints3DABC *points) : fPoints(points)
 {
 //*-*-*-*-*-*-*-*-*-*-*-*-*3-D PolyLine default constructor*-*-*-*-*-*-*-*-*-*-*
 //*-*                      ================================
@@ -131,7 +131,7 @@ void St_Points3D::Copy(TObject &obj)
 //*-*-*-*-*-*-*-*-*-*-*-*-*Copy this St_Points3D to another *-*-*-*-*-*-*-*-*-*-*-*
 //*-*                      ==============================
  
-   St_Points3DABC::Copy(obj);
+   TPoints3DABC::Copy(obj);
    St_Points3D &thatObject = (St_Points3D&)obj;
    thatObject.Delete();
    if (thatObject.IsOwner()) {

@@ -63,7 +63,7 @@ ClassImp(St_PolyLine3D)
  
  
 //______________________________________________________________________________
-St_PolyLine3D::St_PolyLine3D(St_Points3DABC *points) : St_Points3D(points)
+St_PolyLine3D::St_PolyLine3D(TPoints3DABC *points) : St_Points3D(points)
 {
 //*-*-*-*-*-*-*-*-*-*-*-*-*3-D PolyLine default constructor*-*-*-*-*-*-*-*-*-*-*
 //*-*                      ================================
@@ -165,7 +165,7 @@ Int_t St_PolyLine3D::DistancetoPrimitive(Int_t px, Int_t py)
       view->WCtoNDC(&xyz[3], xndc);
       x2 = xndc[0];
       y2 = xndc[1];
-      dsegment =  St_Points3DABC::DistancetoLine(px,py,
+      dsegment =  TPoints3DABC::DistancetoLine(px,py,
                                   gPad->XtoAbsPixel(x1),
                                   gPad->XtoAbsPixel(y1),
                                   gPad->XtoAbsPixel(x2),
@@ -246,7 +246,13 @@ void St_PolyLine3D::Paint(Option_t *option)
     if (!fPoints) return;
     //*-* Check whether there is some 3D view class for this TPad
     TPadView3D *view3D = gPad->GetView3D();
-//  if (view3D) view3D->PaintPolyLine(this,option);
+#ifdef WIN32
+    if (view3D) {
+        view3D->SetLineAttr(GetColorAttribute(), GetSizeAttribute());
+        view3D->PaintPoints3D((const TPoints3DABC *)this, "L");
+    }
+
+#endif
  
     //*-* Check if option is 'x3d'.      NOTE: This is a simple checking
     //                                         but since there is no other
