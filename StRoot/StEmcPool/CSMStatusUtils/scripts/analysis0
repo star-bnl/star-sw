@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#change the following to your own environment
+  outDir=/star/data05/scratch/$USER/bemc
+  outDirlog=$outDir/log
+
 # #############################################################################
 # loop over the list of files
 rm shortlists*
@@ -14,14 +18,13 @@ done
 #next line just makes the code below pretty - it does not add an iteration!
   niters=`expr $niters + 1`
 
-  outDir=/star/data05/scratch/relyea/bemc/log
   queue=star_cas_big                 
 for (( iteration = 1 ; iteration < $niters ; iteration++ )) ; do
   log=log.$iteration
   blog=blog.$iteration
-  rm $outDir/$log.gz
-  rm $outDir/$blog
-  bsub -R "linux" -q $queue  -J relyea$run -o $outDir/$blog   << EOF
-    ./scripts/ppBemcSub shortlists$iteration
+  rm $outDirlog/$log.gz
+  rm $outDirlog/$blog
+  bsub -R "linux" -q $queue  -J CSM$USER$run -o $outDirlog/$blog   << EOF
+    ./StRoot/StEmcPool/CSMStatusUtils/scripts/submitOneRunBatch shortlists$iteration $outDir
 EOF
 done
