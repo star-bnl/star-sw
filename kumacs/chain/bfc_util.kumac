@@ -415,10 +415,11 @@ ANR:       exec read_table_from_file#read inev /dui/run/params/tpc
 	    exec l3t_init
 	    exec create_tables_l3
       (ems) exec create_tables_emc#ems
-*	    exec init_ems#init
+	    exec init_ems#init
       (emc) exec create_tables_emc#cal
+	    exec init_cal#init
       (jet) exec create_tables_emc#jet
-*	    exec init_jet#init
+	    exec init_jet#init
     (ddedx) exec create_tables_global#dst_dedx_filler
      (dpnt) exec create_tables_global#dst_point_filler
     (dmsft) exec create_tables_global#dst_monitor_soft_filler
