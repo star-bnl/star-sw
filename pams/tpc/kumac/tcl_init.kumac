@@ -4,12 +4,11 @@
  
 macro init
 
-  macro/global/import PARAMS_TPC
 
 cd /dui/constants/tpc/params
 
 
-  dio/newfilestream tclp [PARAMS_TPC]tcl_pars.xdf r
+  dio/newfilestream tclp $STAR/params/tpc/tcl_pars.xdf r
   dio/stream/getevent    tclp
   dio/stream/close       tclp
 

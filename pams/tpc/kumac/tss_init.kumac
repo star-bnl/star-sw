@@ -1,14 +1,8 @@
-********************* tss.kumac  ************************************
-**************************************************************************
-**************************************************************************
-
 macro init tpc_sector_first tpc_sector_last magfield
-
-  macro/global/import PARAMS_TPC
 
   cd /dui/constants/tpc/params
 
-  dio/newfilestream tss [PARAMS_TPC]tss_pars.xdf r
+  dio/newfilestream    tss $STAR/params/tpc/tss_pars.xdf r
   dio/stream/getevent  tss
   dio/stream/close     tss
 

@@ -1,12 +1,9 @@
 macro init
 
-  macro/global/import PARAMS_TPC
-
-
 cd /dui/constants/tpc/params
 
 
-  dio/newfilestream    tfspars [PARAMS_TPC]tfs_pars.xdf r
+  dio/newfilestream    tfspars $STAR/params/tpc/tfs_pars.xdf r
   dio/stream/getevent  tfspars
   dio/stream/close     tfspars
 
