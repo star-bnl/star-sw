@@ -3,7 +3,7 @@
 %
 % StEvent - User Guide and Reference Manual -- LaTeX Source
 %
-% $Id: StEvent.tex,v 2.22 2000/03/02 12:40:40 ullrich Exp $
+% $Id: StEvent.tex,v 2.23 2000/03/08 14:27:45 ullrich Exp $
 %
 % Author: Thomas Ullrich, Nov 1999
 %
@@ -22,8 +22,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % $Log: StEvent.tex,v $
-% Revision 2.22  2000/03/02 12:40:40  ullrich
-% Added description of modified StTpcDedxPidAlgorithm
+% Revision 2.23  2000/03/08 14:27:45  ullrich
+% Added description of new method of StVertex.
 %
 % Revision 2.33  2000/05/22 22:04:07  ullrich
 % Removed StRichPixelCollection ref section and added description
@@ -148,8 +148,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % Define header and footer style
-  {\LARGE $ $Revision: 2.22 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/02 12:40:40 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.23 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/08 14:27:45 $ $}  % replaced by cvs with current revision
 \pagestyle{fancyplain}
 \rhead[\fancyplain{}{\bfseries\leftmark}]
       {\fancyplain{}{\bfseries\rightmark}}
@@ -173,8 +173,8 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\entrylabel}[1]{\mbox{\textbf{{#1}}}\hfil}%
-  {\LARGE $ $Revision: 2.22 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/02 12:40:40 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.23 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/08 14:27:45 $ $}  % replaced by cvs with current revision
     {\renewcommand{\makelabel}{\entrylabel}%
      \setlength{\labelwidth}{90pt}%
      \setlength{\leftmargin}{\labelwidth}
@@ -182,17 +182,17 @@
       }%
     }%
   {\end{list}}
-  {\LARGE $ $Revision: 2.22 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/02 12:40:40 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.23 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/08 14:27:45 $ $}  % replaced by cvs with current revision
 {\raisebox{0pt}[1ex][0pt]{\makebox[\labelwidth][l]%
     {\parbox[t]{\labelwidth}{\hspace{0pt}\textbf{{#1}}}}}}
 \newenvironment{Entry}%
 {\renewcommand{\entrylabel}{\Entrylabel}\begin{entry}}%
-  {\LARGE $ $Revision: 2.22 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/02 12:40:40 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.23 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/08 14:27:45 $ $}  % replaced by cvs with current revision
 \begin{document}
-  {\LARGE $ $Revision: 2.22 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/02 12:40:40 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.23 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/08 14:27:45 $ $}  % replaced by cvs with current revision
 %
 %    Title page
 %
@@ -207,8 +207,8 @@
   \mbox{\includegraphics[width=\textwidth]{StEventTitle.eps}}
   \hfill\mbox{}\\[3cm]
   {\LARGE User Guide and Reference Manual \\[5mm] for Version 2}\\[2cm]
-  {\LARGE $ $Revision: 2.22 $ $}  \\[5mm] % replaced by cvs with current revision
-  {\LARGE $ $Date: 2000/03/02 12:40:40 $ $}  % replaced by cvs with current revision
+  {\LARGE $ $Revision: 2.23 $ $}  \\[5mm] % replaced by cvs with current revision
+  {\LARGE $ $Date: 2000/03/08 14:27:45 $ $}  % replaced by cvs with current revision
   \vfill
 \end{center}
 \cleardoublepage
@@ -4572,6 +4572,9 @@ numberOfPoints(kTpcId) == numberOfPoints(kFtpcWestId)
 \label{sec:StV0Vertex}
 \begin{Entry}
 \item[Summary]
+\item[Synopsis]
+    \verb+#include "StV0Vertex.h"+\\
+    \verb+class StV0Vertex;+\\
 \item[Description]
 \item[Related Classes]
 \item[Public\\ Constructors]
@@ -4590,6 +4593,7 @@ numberOfPoints(kTpcId) == numberOfPoints(kFtpcWestId)
 
     \verb+const StTrack* daughter(UInt_t) const;+\\
 
+    \verb+StPtrVecTrack daughters(StTrackFilter&);+\\
 
     \verb+void addDaughter(StTrack*);+\\
 
