@@ -10,7 +10,7 @@ St_cts_mpara *tableSet = new St_cts_mpara("cts_ctb",1);
 //
 memset(&row,0,tableSet->GetRowSize());
     row.init	 =   65495260; // ;
-    row.geo_from_geant	 =          1; // ;
+    row.geo_from_geant	 =          0; // ;
     row.adc_overflow	 =       1024; // ;
     row.tdc_overflow	 =       1024; // ;
     row.slat_para	 =          1; // ;
@@ -277,7 +277,7 @@ memset(&row,0,tableSet->GetRowSize());
     row.time_response[97]	 = 3.72079e-33;
     row.time_response[98]	 = 3.7208e-33;
     row.time_response[99]	 = 3.7208e-33;
-    row.zero_suppression	 =          0; // ;
+    row.zero_suppression	 =          1; // ;
 tableSet->AddAt(&row,0);
 // ----------------- end of code ---------------
  return (St_DataSet *)tableSet;
