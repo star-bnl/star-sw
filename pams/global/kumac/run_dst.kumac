@@ -50,3 +50,20 @@ message ' run_dst: finished calling dst_monitor_soft_filler'
 return
  
 **********************************************************
+ 
+ macro run_summary
+   
+     macro/global/import *
+
+       message ' run_dst: Calling fill_dst_run_summary'
+       
+ return
+* *****************************************************
+ 
+ macro event_summary
+     macro/global/import *
+
+       message ' run_dst: Calling fill_dst_event_summary'
+       
+ return
+* **************************************************
