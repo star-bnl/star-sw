@@ -1,5 +1,8 @@
-// $Id: vmcAppLinkDef.h,v 1.3 2004/07/16 22:52:53 potekhin Exp $
+// $Id: vmcAppLinkDef.h,v 1.4 2004/09/02 23:28:16 potekhin Exp $
 // $Log: vmcAppLinkDef.h,v $
+// Revision 1.4  2004/09/02 23:28:16  potekhin
+// new files included
+//
 // Revision 1.3  2004/07/16 22:52:53  potekhin
 // Incremental changes
 //
@@ -31,6 +34,7 @@
 #pragma link C++ class StarMedium+;
 #pragma link C++ class StarRotation+;
 #pragma link C++ class StarVolume+;
+#pragma link C++ class StarVertex+;
 #pragma link C++ class StarCaveGeometry+;
 #pragma link C++ class StarTpcGeometry+;
 #pragma link C++ class StarMCDisplay+;
