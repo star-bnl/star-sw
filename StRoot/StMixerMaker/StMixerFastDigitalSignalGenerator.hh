@@ -18,24 +18,25 @@
 #ifndef ST_MIXER_PARAMETERIZED_DIGITAL_SIGNAL_GENERATOR_HH
 #define ST_MIXER_PARAMETERIZED_DIGITAL_SIGNAL_GENERATOR_HH
 #include <iostream.h>
-#include "StMixerDigitalSignalGenerator.hh"
+#include "StTrsMaker/include/StTrsDigitalSignalGenerator.hh"
 //#include "StDaqLib/TPC/trans_table.hh"
-class StMixerFastDigitalSignalGenerator : public StMixerDigitalSignalGenerator {
+class StMixerFastDigitalSignalGenerator : public StTrsDigitalSignalGenerator {
 public:
     ~StMixerFastDigitalSignalGenerator();
     //StMixerFastDigitalSignalGenerator(const StMixerFastDigitalSignalGenerator&);
     //StMixerFastDigitalSignalGenerator& operator=(const StMixerFastDigitalSignalGenerator&);
 
-    static StMixerDigitalSignalGenerator* instance();
-    static StMixerDigitalSignalGenerator* instance(StTpcElectronics*, StMixerSector*);
+    static StTrsDigitalSignalGenerator* instance();
+    static StTrsDigitalSignalGenerator* instance(StTpcElectronics*, StTrsSector*);
     
     void digitizeSignal()    ;
+    void addWhiteNoise()     ;
+    void addCorrelatedNoise();
 private :  
     //unsigned char do10to8Translation(int ) const;  
 protected:
-    StMixerFastDigitalSignalGenerator(StTpcElectronics*, StMixerSector*);
-
+    StMixerFastDigitalSignalGenerator(StTpcElectronics*, StTrsSector*);
 private:
-    static StMixerDigitalSignalGenerator* mInstance;
+    static StTrsDigitalSignalGenerator* mInstance;
 };
 #endif

@@ -18,7 +18,7 @@
 
 StMixerEmbedding* StMixerEmbedding::mInstance = 0; // static member
 
-StMixerEmbedding::StMixerEmbedding(StTpcElectronics* el, StMixerSector* sec, StMixerSector* sec1, StMixerSector* sec2)
+StMixerEmbedding::StMixerEmbedding(StTpcElectronics* el, StTrsSector* sec, StTrsSector* sec1, StTrsSector* sec2)
     : mElectronicsDb(el), mSector(sec), mSector1(sec1), mSector2(sec2)
 {
     mNumberOfTimeBins = mElectronicsDb->numberOfTimeBins();
@@ -31,7 +31,7 @@ StMixerEmbedding* StMixerEmbedding::instance()
     return mInstance;
 }
 
-StMixerEmbedding* StMixerEmbedding::instance(StTpcElectronics* el, StMixerSector* sec, StMixerSector* sec1, StMixerSector* sec2)
+StMixerEmbedding* StMixerEmbedding::instance(StTpcElectronics* el, StTrsSector* sec, StTrsSector* sec1, StTrsSector* sec2)
 {
     if(!mInstance) {
 	mInstance = new StMixerEmbedding(el, sec, sec1, sec2);
@@ -65,7 +65,7 @@ void StMixerEmbedding::doEmbedding()
 	  bin1 = static_cast<int>(mTimeSequenceIterator1->time());
 	  conversion1 = static_cast<float>(mTimeSequenceIterator1->amplitude());
 	  //if (irow==3 && ipad==54) cout << irow << ' ' << ipad << ' ' << bin1 << ' ' << conversion1 <<endl;  
-	  StMixerAnalogSignal padSignal(bin1,conversion1);
+	  StTrsAnalogSignal padSignal(bin1,conversion1);
 	  mSector->addEntry(irow,ipad,padSignal);
 	}
       }
@@ -75,7 +75,7 @@ void StMixerEmbedding::doEmbedding()
 	    mTimeSequenceIterator2++) {
 	  bin2 = static_cast<int>(mTimeSequenceIterator2->time());
 	  conversion2 = static_cast<float>(mTimeSequenceIterator2->amplitude());
-	  StMixerAnalogSignal padSignal(bin2,conversion2);
+	  StTrsAnalogSignal padSignal(bin2,conversion2);
 	  mSector->addEntry(irow,ipad,padSignal);
 	  //if (irow==14) cout << "2nomixer" << ' ' << irow << ' ' << ipad << ' ' << bin2 << ' ' << conversion2  << endl;
 	}
@@ -102,7 +102,7 @@ void StMixerEmbedding::doEmbedding()
 	for(int binn=0; binn<mTimeBins; binn++) {
 	  if (accum[binn]>0) {
 	  //if (irow==3 && ipad==54) cout << irow << ' ' << ipad << ' ' << binn << ' ' << accum[binn] <<endl;  
-	  StMixerAnalogSignal padSignal(binn,accum[binn]);
+	  StTrsAnalogSignal padSignal(binn,accum[binn]);
 	  mSector->addEntry(irow,ipad,padSignal);
 	  }
 	}

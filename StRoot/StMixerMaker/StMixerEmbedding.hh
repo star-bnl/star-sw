@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMixerEmbedding.hh,v 1.2 2000/02/22 20:25:05 pfachini Exp $
+ * $Id: StMixerEmbedding.hh,v 1.3 2000/03/15 17:26:53 pfachini Exp $
  *
  * Author: Patricia Fachini
  *
@@ -18,21 +18,21 @@
 #define ST_MIXER_EMBEDDING_HH
 #include <vector>
 
-#include "StMixerSector.hh"
-#include "StMixerAnalogSignal.hh"
+#include "StTrsMaker/include/StTrsSector.hh"
+#include "StTrsMaker/include/StTrsAnalogSignal.hh"
 #include "StTrsMaker/include/StTpcElectronics.hh"
-#include "StMixerDigitalSector.hh"
+#include "StTrsMaker/include/StTrsDigitalSector.hh"
 
 class StMixerEmbedding {
 public:
     ~StMixerEmbedding();
 
     static StMixerEmbedding* instance();
-    static StMixerEmbedding* instance(StTpcElectronics*, StMixerSector*, StMixerSector*, StMixerSector*);
+    static StMixerEmbedding* instance(StTpcElectronics*, StTrsSector*, StTrsSector*, StTrsSector*);
 
     void doEmbedding();
 protected:
-    StMixerEmbedding(StTpcElectronics*, StMixerSector*, StMixerSector*, StMixerSector*);
+    StMixerEmbedding(StTpcElectronics*, StTrsSector*, StTrsSector*, StTrsSector*);
 
 #define mTimeBins 512
     unsigned int        mNumberOfTimeBins;
@@ -40,19 +40,19 @@ protected:
     int                 bin1,bin2;  
 
     StTpcElectronics*     mElectronicsDb;
-    StMixerSector*        mSector;
-    StMixerSector*        mSector1;
-    StMixerSector*        mSector2;
-    StMixerDigitalSector* mDigitalSector;
+    StTrsSector*        mSector;
+    StTrsSector*        mSector1;
+    StTrsSector*        mSector2;
+    StTrsDigitalSector* mDigitalSector;
 
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
-    vector<StMixerAnalogSignal>::iterator mTimeSequenceIterator1;
-    vector<StMixerAnalogSignal>::iterator mTimeSequenceIterator2;
-    vector<StMixerAnalogSignal>::iterator mTimeSequenceIterator;
+    vector<StTrsAnalogSignal>::iterator mTimeSequenceIterator1;
+    vector<StTrsAnalogSignal>::iterator mTimeSequenceIterator2;
+    vector<StTrsAnalogSignal>::iterator mTimeSequenceIterator;
 #else
-    vector<StMixerAnalogSignal, allocator<StMixerAnalogSignal> >::iterator mTimeSequenceIterator1;
-    vector<StMixerAnalogSignal, allocator<StMixerAnalogSignal> >::iterator mTimeSequenceIterator2;
-    vector<StMixerAnalogSignal, allocator<StMixerAnalogSignal> >::iterator mTimeSequenceIterator;
+    vector<StTrsAnalogSignal, allocator<StTrsAnalogSignal> >::iterator mTimeSequenceIterator1;
+    vector<StTrsAnalogSignal, allocator<StTrsAnalogSignal> >::iterator mTimeSequenceIterator2;
+    vector<StTrsAnalogSignal, allocator<StTrsAnalogSignal> >::iterator mTimeSequenceIterator;
 #endif
 private:
     static StMixerEmbedding* mInstance;

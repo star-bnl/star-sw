@@ -16,16 +16,16 @@
 #include <utility>
 #include "StMixerFastDigitalSignalGenerator.hh"
 
-StMixerDigitalSignalGenerator* StMixerFastDigitalSignalGenerator::mInstance = 0; // static member
+StTrsDigitalSignalGenerator* StMixerFastDigitalSignalGenerator::mInstance = 0; // static member
 
-StMixerFastDigitalSignalGenerator::StMixerFastDigitalSignalGenerator(StTpcElectronics* el, StMixerSector* sec)
-    : StMixerDigitalSignalGenerator(el, sec)
+StMixerFastDigitalSignalGenerator::StMixerFastDigitalSignalGenerator(StTpcElectronics* el, StTrsSector* sec)
+    : StTrsDigitalSignalGenerator(el, sec)
 {
 }
 
 StMixerFastDigitalSignalGenerator::~StMixerFastDigitalSignalGenerator() {/* missing */}
 
-StMixerDigitalSignalGenerator*
+StTrsDigitalSignalGenerator*
 StMixerFastDigitalSignalGenerator::instance()
 {
     if(!mInstance) {
@@ -40,8 +40,8 @@ StMixerFastDigitalSignalGenerator::instance()
     return mInstance;
 }
 
-StMixerDigitalSignalGenerator*
-StMixerFastDigitalSignalGenerator::instance(StTpcElectronics* el, StMixerSector* sec)
+StTrsDigitalSignalGenerator*
+StMixerFastDigitalSignalGenerator::instance(StTpcElectronics* el, StTrsSector* sec)
 {
     if(!mInstance) {
 	mInstance = new StMixerFastDigitalSignalGenerator(el, sec);
@@ -66,7 +66,6 @@ void StMixerFastDigitalSignalGenerator::digitizeSignal()
     // Loop over the sector
 
     tpcTimeBins currentPad; 
-  
    
     // Make a digital Pad!
 #ifndef ST_NO_TEMPLATE_DEF_ARGS
@@ -186,5 +185,15 @@ void StMixerFastDigitalSignalGenerator::digitizeSignal()
         
     
 
+}
+
+void StMixerFastDigitalSignalGenerator::addCorrelatedNoise()
+{
+    cerr << "Dummy" << endl;
+}
+
+void StMixerFastDigitalSignalGenerator::addWhiteNoise()
+{
+    cerr << "Dummy" << endl;    
 }
 
