@@ -106,8 +106,11 @@ void asuMallocStats()
 void asuMallocPrintTrace(void *p, size_t size, char* file, int line)
 {
    long v;
+   char c[5], *s=c;
    memcpy(&v,p,4);
-   fprintf(stderr,"(%p:%d) %s.%d [%x]", p, size, file, line, v);
+   memcpy(s,p,4);
+   c[5]=0;
+   fprintf(stderr,"(%p:%d) %s.%d [%x:%4s]", p, size, file, line, v, s);
 }
 
 /*--------------------------------------------------------------------*/

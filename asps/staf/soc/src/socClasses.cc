@@ -6,7 +6,7 @@
 //:BUGS:        -- STILL IN DEVELOPMENT --
 //:HISTORY:     21jul95-v000a-cet- creation
 //:<--------------------------------------------------------------------
-#define FILE_VERSION "$Id: socClasses.cc,v 1.12 1997/01/24 00:37:25 tull Exp $"
+#define FILE_VERSION "$Id: socClasses.cc,v 1.13 1997/01/30 21:00:57 tull Exp $"
 
 //:----------------------------------------------- INCLUDES           --
 #include <stream.h>
@@ -132,9 +132,11 @@ char * socObject:: listing () {
    char *c = NULL; 
    c = (char*)MALLOC(79);
    memset(c,0,79);
+   char l='|';
+   if(lock())l='-';
    char *n, *t;
-   sprintf(c,"| %5d | %-15s | %-15s |"
-   		, idRef(), n=name(), t=type());
+   sprintf(c,"| %5d %c %-15s | %-15s |"
+   		, idRef(), l, n=name(), t=type());
    FREE(n); FREE(t);
    return c;
 }
@@ -177,6 +179,18 @@ long socFactory :: maxCount () {
    return myMaxCount;
 }
 
+//----------------------------------
+// over-ride socObject::listing()
+char * socFactory::  listing () {
+   char* c = socObject::listing();
+   char* cc = NULL;
+   cc = (char*)MALLOC(79);
+   memset(cc,0,79);
+   sprintf(cc,"%s %d/%d obj.s",c,count(),maxCount());
+   FREE(c);
+   return cc;
+}
+
 //:----------------------------------------------- PUB FUNCTIONS      --
 char * socFactory :: list () {
    char *c=NULL;
@@ -187,8 +201,8 @@ char * socFactory :: list () {
    sprintf(c,
 		"+-------+-----------------+-----------------"
 		"+----------------------------------\n"
-		"| IDREF | OBJECT NAME     | CLASS TYPE      "
-		"| OBJECT DESCRIPTION               \n"
+		"| IDREF | NAME:OBJECT     | TYPE:CLASS      "
+		"| DESCRIPTION                      \n"
 		"+-------+-----------------+-----------------"
 		"+----------------------------------\n"
    );
