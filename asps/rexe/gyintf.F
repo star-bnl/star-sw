@@ -20,6 +20,8 @@ CDECK  ID>, GYINTF.
       EXTERNAL VMOD,VDIST,VDOTN2,VSUB,VUNIT
       EXTERNAL BESJ0,BESJ1,BESY0,BESY1,BESI0,BESI1,BESK0,BESK1
       EXTERNAL EBESI0,EBESI1,EBESK0,EBESK1,DCAUCH
+      EXTERNAL IUCOMP, lvsimx, lvmax, gufld
+      external KUVCRE 
       double precision DVAL
       complex CCA,CCB      
 *               "$EXP  "  Narg = 2 : 2
@@ -275,7 +277,22 @@ c      RVAL(1,0) = SECNDS (RVAL(1,1))
       CCA = CCA*CCB/(CCA+CCB)
       CCA = CCA/RRR
       CCA = exp(cca) + log(cca) +cos(cca) + sin(cca)
-
+*----------------------
+      a = 1.
+      b = 2.
+      n = 1.
+      i1 = iucomp(a,b,n)
+      i1 = lvmaxa(a,n)
+      i1 = lvmax (a,n)
+      i1 = lvmina(a,n)
+      i1 = lvmin (a,n)
+      i1 = lvsmi (a,n,i)
+      i1 = lvsmx (a,n,i)
+      i1 = lvsdmi(dval,n,i)
+      i1 = lvsdmx(dval,n,i)
+      i1 = lvsimi(ia,n,i)
+      i1 = lvsimx(ia,n,i)
+      
  999  return
       END
 *-- Author :    Pavel Nevski
@@ -368,6 +385,11 @@ c      RVAL(1,0) = SECNDS (RVAL(1,1))
      &  *,' RG32 substituted by RANNOR, set seed using G/CONT/RNDM'
       end
 *
- 
+      subroutine gufld  (x,b)
+      real x(3), b(3)
+      b(1) = 0.0
+      b(2) = 0.0
+      b(3) = 5.0
+      end 
  
  
