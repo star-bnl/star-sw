@@ -1,5 +1,8 @@
-// $Id: bfcread_eventBranch.C,v 1.1 2000/05/15 20:42:08 kathy Exp $
+// $Id: bfcread_eventBranch.C,v 1.2 2000/05/16 19:29:27 kathy Exp $
 // $Log: bfcread_eventBranch.C,v $
+// Revision 1.2  2000/05/16 19:29:27  kathy
+// update some print statements
+//
 // Revision 1.1  2000/05/15 20:42:08  kathy
 // adding new example macro to show how to read in a .event.root file  and print info about it
 //
@@ -22,7 +25,7 @@ StChain *chain;
 void bfcread_eventBranch(
  Int_t nevents=2, 
  const char *MainFile=
- "/star/rcf/test/dev/tfs_redhat61/Fri/year_1h/hc_standard/hc_standard.40_evts.event.root",
+ "/afs/rhic/star/data/samples/gstar.event.root",
   const char *fname="qa_event.out")
 {
 //
@@ -51,14 +54,14 @@ void bfcread_eventBranch(
 
 
 //  Setup top part of chain
-    chain = new StChain("bfc");
+    chain = new StChain("AChain");
     chain->SetDebug();
    
   StIOMaker *IOMk = new StIOMaker("IO","r",MainFile,"bfcTree");
   IOMk->SetDebug();
   IOMk->SetIOMode("r");
   IOMk->SetBranch("*",0,"0");                 //deactivate all branches
-  IOMk->SetBranch("event",0,"r"); //activate event Branch
+  IOMk->SetBranch("eventBranch",0,"r"); //activate event Branch
 
 
 // sample analysis Maker to check StEvent objects
