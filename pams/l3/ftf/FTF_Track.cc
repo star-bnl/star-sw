@@ -608,11 +608,11 @@ int FTF_Track::Merge_Primary ( AREA *track_area ){
 //
    i_phi = (int)(( psi - para->phi_min_track ) / para->phi_slice_track + 1 );
    if ( i_phi < 0 ) {
-       printf ( " Track phi index too low  %d \n", i_phi ) ;
+       if ( para->infoLevel ) printf ( " Track phi index too low  %d \n", i_phi ) ;
        i_phi = 1 ;
    }
    if ( i_phi >= para->n_phit ) {
-       printf ( " Track phi index too high %d \n", i_phi ) ;
+       if ( para->infoLevel) printf ( " Track phi index too high %d \n", i_phi ) ;
        i_phi = para->n_phit - 1 ;
    }
 //
@@ -620,11 +620,11 @@ int FTF_Track::Merge_Primary ( AREA *track_area ){
 //
    i_eta = (int)(( eta - para->eta_min_track ) / para->eta_slice_track + 1 );
    if ( i_eta <= 0 ) {
-       printf ( " Track eta index too low  %d \n", i_eta ) ;
+       if ( para->infoLevel ) printf ( " Track eta index too low  %d \n", i_eta ) ;
        i_eta = 1 ;
    }
    if ( i_eta >= para->n_etat ) {
-       printf ( " Track eta index too high %d \n", i_eta ) ;
+       if ( para->infoLevel ) printf ( " Track eta index too high %d \n", i_eta ) ;
        i_eta = para->n_etat - 1 ;
    }
 //
