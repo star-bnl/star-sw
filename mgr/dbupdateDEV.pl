@@ -87,7 +87,7 @@ for ($i = 0; $i < 2; $i++) {
      for ($j = 0; $j < 2; $j++) {
       for ($ll = 0; $ll < scalar(@hc_dir); $ll++) {
    $OUT_DIR[$ii] = $TOP_DIRD . $node_dir[$i] . "/" . $testDay . "/". $dir_year[$j] . "/" . $hc_dir[$ll];
-    print "Output Dir for DEV :", $OUT_DIR[$ii], "\n";
+#    print "Output Dir for DEV :", $OUT_DIR[$ii], "\n";
         $ii++;
       }
   }
@@ -99,7 +99,7 @@ for ($i = 0; $i < 2; $i++) {
      for ($j = 0; $j < 2; $j++) {
       for ($ll = 0; $ll < scalar(@hc_dir); $ll++) {
    $OUT_DIR[$ii] = $TOP_DIRD . $node_dir[$i] . "/" . $beforeDay . "/". $dir_year[$j] . "/" . $hc_dir[$ll];
-    print "Output Dir for DEV :", $OUT_DIR[$ii], "\n";
+#    print "Output Dir for DEV :", $OUT_DIR[$ii], "\n";
         $ii++;
       }
   }
@@ -254,7 +254,7 @@ struct JFileAttr => {
 
 #####  select all files from JobStatusT from beforeDay direcroties
 
- $sql="SELECT jobID, path, logFile,createTime avail FROM $JobStatusT WHERE path LIKE '%$beforeDay%' AND avail = 'Y'";
+ $sql="SELECT jobID, path, logFile, createTime, avail FROM $JobStatusT WHERE path LIKE '%$beforeDay%' AND avail = 'Y'";
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
    $cursor->execute;
@@ -336,7 +336,7 @@ my $pfullName;
  $jobTime = 0; 
 
        if ($fname =~ /evts.log/)  {
-    print "File Name:",$fname, "\n";       
+#    print "File Name:",$fname, "\n";       
        $fullname = $eachOutLDir."/".$fname;
       $mpath = $eachOutLDir;
       @dirF = split(/\//, $eachOutLDir);
@@ -367,7 +367,7 @@ my $pfullName;
           $pvjbId = ($$eachOldJob)->oldjbId;
           $pvpath = ($$eachOldJob)->oldpath;
           $pvfile = ($$eachOldJob)->oldfile;
-          $pvTime = ($$eachOldJob)->oldTime
+          $pvTime = ($$eachOldJob)->oldTime;
           $pvavail = ($$eachOldJob)->oldvail;
           $pfullName = $pvpath . "/" . $pvfile;
         
@@ -377,7 +377,7 @@ my $pfullName;
  
           $newAvail = "N";
   print  "Changing availability for test files", "\n";
-  print  "files to be updated:", $pvjbId, " % ", $mpath, " % ", $newAvail, "\n"; 
+#  print  "files to be updated:", $pvjbId, " % ",$mpath, " % ",$pvTime, " % ", $newAvail, "\n"; 
 
          &updateJSTable();
 	
@@ -390,7 +390,7 @@ my $pfullName;
       $crCode = "n\/a"; 
 
   print  "Filling JobStatus with DEV log files for testDay and beforeDay\n";
-  print  "files to be inserted:", $mjID, " % ",$mpath, " % ", $mavail, "\n";  
+  print  "files to be inserted:", $mjID, " % ",$mpath, " % ",$timeS , " % ",$mavail, "\n";  
          &fillJSTable();
 
        $fObjAdr = \(LFileAttr->new());
@@ -567,7 +567,7 @@ foreach  $eachOutNDir (@OUT_DIR) {
         ($$fObjAdr)->oldjbId($fvalue)   if( $fname eq 'jobID');
         ($$fObjAdr)->oldpath($fvalue)   if( $fname eq 'path');
         ($$fObjAdr)->oldfile($fvalue)   if( $fname eq 'fName'); 
-        ($$fObjAdr)->oldTime($fvalue)   if( $fname eq 'createTime')
+        ($$fObjAdr)->oldTime($fvalue)   if( $fname eq 'createTime');
         ($$fObjAdr)->oldvail($fvalue)   if( $fname eq 'avail'); 
    }
 
@@ -578,7 +578,7 @@ foreach  $eachOutNDir (@OUT_DIR) {
 
 #####  select all files from FilesCatalog from beforeDay direcroties
 
-  $sql="SELECT path, fName, createTime, avail FROM $FilesCatalogT WHERE path LIKE '%$beforeDay%' AND avail = 'Y'";
+  $sql="SELECT jobID, path, fName, createTime, avail FROM $FilesCatalogT WHERE path LIKE '%$beforeDay%' AND avail = 'Y'";
    $cursor =$dbh->prepare($sql)
     || die "Cannot prepare statement: $DBI::errstr\n";
    $cursor->execute;
@@ -682,11 +682,11 @@ foreach  $eachOutNDir (@OUT_DIR) {
 
               $newAvail = "N";
    print "Changing availability for test files", "\n";
-#   print "file to be updated:", $pvjbId, " % ", $pfullName, " % ", $newAvail, "\n"; 
+#   print "file to be updated:", $pvjbId, " % ", $pfullName, " % ",$pvTime, " % ", $newAvail, "\n"; 
    &updateDbTable();
 
-    print "Filling Files Catalog with DEV output files for testDay\n";
-    print "file to be inserted:", $mjID, " % ",$thfullName, " % ", $mavail, "\n";
+    print "Filling Files Catalog with DEV output files for testDay and beforeDay\n";
+    print "file to be inserted:", $mjID, " % ",$thfullName, " % ", $mcTime," % ", $mavail, "\n";
    &fillDbTable();
 	    }else{
 	    }
@@ -871,12 +871,12 @@ sub  updateJSTable {
 # get number of tracks and vertices
 
       if ($line =~ /QAInfo: StAnalysisMaker/ ) {
-
+           next if ($line =~ /...................../);
             my  $string = $logfile[$num_line];
               @word_tr = split /:/,$string;
               $no_tracks = $word_tr[2];
               $tot_tracks += $no_tracks; 
-#               print $word_tr[2], $no_tracks, "\n";
+#              print $word_tr[2], $no_tracks, "\n";
               $string = $logfile[$num_line + 1];
               @word_tr = split /:/,$string;
               $no_prtracks = $word_tr[2]; 

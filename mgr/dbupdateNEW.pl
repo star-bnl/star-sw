@@ -753,7 +753,7 @@ sub  updateJSTable {
 # get number of tracks and vertices
 
       if ($line =~ /QAInfo: StAnalysisMaker/ ) {
-
+       next if ($line =~ /...................../);
             my  $string = $logfile[$num_line];
               @word_tr = split /:/,$string;
               $no_tracks = $word_tr[2];
