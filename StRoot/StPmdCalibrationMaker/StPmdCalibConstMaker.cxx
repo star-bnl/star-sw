@@ -57,8 +57,6 @@ using units::tesla;
 #endif 
 
 
-//FILE *fpar = fopen("normNumber.dat","w");
-//FILE *fmap = fopen("fitParam.dat","w");
 
 ClassImp(StPmdCalibConstMaker)
 
@@ -109,7 +107,6 @@ StPmdCalibConstMaker::~StPmdCalibConstMaker()
 Int_t StPmdCalibConstMaker::Init()
 {
   //Initialize date and time
-  cout << "**** I am in StPmdCalibConstMaker::Init() " <<endl;
   if(mOptHist)BookHistograms();
   
   //---------------------------------------------------
@@ -130,7 +127,6 @@ Int_t StPmdCalibConstMaker::Init()
 //--------------------------------------
 void StPmdCalibConstMaker::BookHistograms()
 {
-  cout << "**** I am in StPmdCalibConstMaker::BookHistograms()"<< endl;
 
   for(Int_t sm=0;sm<2*PMD_CRAMS_MAX;sm++){//! SM goes from 0 to 23
     for(Int_t i =0;i<imax[sm];i++){
@@ -138,7 +134,7 @@ void StPmdCalibConstMaker::BookHistograms()
 	char text[40],title[80];
 	sprintf(text,"calib_%02d_%02d_%02d",sm,i,j);
 	sprintf(title,"MIP plot for %02d_%02d_%2d",sm,i,j);
-	mMipEnergy[sm][i][j]=new TH1F(text,title,200,0.,30.);
+	mMipEnergy[sm][i][j]=new TH1F(text,title,200,0.,150.);
       }
     }
   }
@@ -224,7 +220,6 @@ if((xpad>0 && xpad<=PMD_ROW_MAX) && (ypad>0 && ypad <=PMD_COL_MAX))d0[xpad-1][yp
 		    if(mOptHist)mMipEnergy[gsuper][i][j]->Fill(d0[i][j]);
 		    Int_t channel=(Int_t)d0[i][j];
 		    if(channel<MIP_CH_MAX)MipArray[gsuper][i][j][channel]++;
-		    //cout<<"CPV: do,ch,mipa "<<d0[i][j]<<" "<<channel<<" "<<MipArray[gsuper][i][j][channel]<<endl;
 		    
 		  }
 		}
@@ -305,7 +300,7 @@ Int_t StPmdCalibConstMaker::FindMipParameters()
 {
   Float_t MipFitParam[3];
   Float_t MipFitChiSqr, MipPeakPosition, MipPeakWidth;
-  TF1* LandauFunction = new TF1("LandauFunction","landau",0,7);
+  TF1* LandauFunction = new TF1("LandauFunction","landau",0,100);
   LandauFunction->SetParameters(1,1,1);
   LandauFunction->SetParNames("Constant","MPV","Sigma");
   Float_t MPV_Sum   = 0;
@@ -313,11 +308,10 @@ Int_t StPmdCalibConstMaker::FindMipParameters()
   TH1F * miphist;
   Stat_t entryFlag=0;
   for(Int_t sm=0;sm<2*PMD_CRAMS_MAX;sm++){
-cout<<"SM to go "<<sm<<endl;
     for(Int_t i =0;i<imax[sm];i++){
       for(Int_t j =0;j<jmax[sm];j++){
 	if(!mOptHist){
-	 miphist=new TH1F("miphist","MipHist",200,0.,30.);
+	 miphist=new TH1F("miphist","MipHist",200,0.,140.);
        for(Int_t k =0;k<10;k++){
 	      miphist->SetBinContent(k+1,(Stat_t)MipArray[sm][i][j][k]);
        }
@@ -325,8 +319,8 @@ cout<<"SM to go "<<sm<<endl;
 	}
 	if(mOptHist)entryFlag = mMipEnergy[sm][i][j]->GetEntries();
 
-	if(entryFlag > 5){
-	  //if(entryFlag > MIP_MIN_ENTRY){ // new 
+	//if(entryFlag > 5){
+	 if(entryFlag > MIP_MIN_ENTRY){ // new 
 	 if(mOptHist)mMipEnergy[sm][i][j]->Fit("LandauFunction","q","r");
 	 if(!mOptHist)miphist->Fit("LandauFunction","q","r");
 	  for(Int_t m=0; m < 3; m++){
@@ -357,22 +351,19 @@ cout<<"SM to go "<<sm<<endl;
 	  //mMipPeak[BrdNo][BrdCh]=MipPeakPosition;//!new
           mMipWidth[BrdNo][BrdCh]=MipPeakWidth;
 	  
-	 // fprintf(fmap,"%f %f %f %d %f\n", MipFitParam[0], MipFitParam[1], 
-	//	  MipFitParam[2],(Int_t) entryFlag,MipFitChiSqr);
 	}//! if for entryFlag
-	delete miphist;
+	if(!mOptHist)delete miphist;
       } // ! col
     }  //! row
   } //! Sm
   
   Float_t MPV_Av = MPV_Sum/MPV_Count;
   //  Float_t MPV_Av = 4.5;
-  //cout << "Calibration*********: MPV_Sum = " <<MPV_Sum<<" MPV_Count= " <<MPV_Count<<" MPV_Av=  " << MPV_Av <<endl;
   
   for(Int_t sm=0;sm<2*PMD_CRAMS_MAX;sm++){
     for(Int_t i =0;i<imax[sm];i++){
       for(Int_t j =0;j<jmax[sm];j++){
-	if(MPV_Entry[sm][i][j] > 0)
+	if(MPV_Entry[sm][i][j] > 0.)
 	  normFactor[sm][i][j] = (Float_t) MPV_Av/(Float_t) MPV_Entry[sm][i][j];
 	Int_t BrdNo=0;
 	mPmdDbUtil->BoardNumber(sm,i,j,BrdNo);
@@ -380,7 +371,6 @@ cout<<"SM to go "<<sm<<endl;
 	mPmdDbUtil->ChannelInBoard(sm,i,j,BrdCh);
 	
 	mMipPeak[BrdNo][BrdCh]=normFactor[sm][i][j];//!new
-	//fprintf(fpar,"%f\n", normFactor[sm][i][j]);
       }
     }
   }
@@ -430,8 +420,6 @@ void StPmdCalibConstMaker::SaveCalibration()
 	Int_t brd_ch=0;
 	mPmdDbUtil->BoardNumber(ism,irow,icol,brd);
 	mPmdDbUtil->ChannelInBoard(ism,irow,icol,brd_ch);
-	//  fprintf(fmap,"%d %d %d %d %d\n",ism,irow,icol,brd,brd_ch); 
-	
 	pbd[brd].FEEBoardNumber = brd;
 	//filling peak and width from arrays
 	
@@ -453,11 +441,11 @@ void StPmdCalibConstMaker::SaveCalibration()
   sprintf(timestamp,"%08d%06d",mDate,mTime);
   mgr->setStoreTime(timestamp);
   //mgr->setStoreTime("2003-12-29 11:11:15");
-  cout<<"storing in DB"<<endl;
+  cout<<"PMD Calib: storing in DB"<<endl;
   
   mgr->storeDbTable(tab1);
   mgr->storeDbTable(tab2);
-  cout<<"Stored in DB "<<endl;
+  cout<<"PMD Calib: Stored in DB "<<endl;
   
 }
 
@@ -466,8 +454,8 @@ void StPmdCalibConstMaker::InitMipParams()
 {
   for(Int_t i=0;i<PMD_BOARD_MAX;i++){
     for(Int_t j=0;j<PMD_BOARD_CH_MAX;j++){
-      mMipPeak[PMD_BOARD_MAX][PMD_BOARD_CH_MAX]=0.;
-      mMipWidth[PMD_BOARD_MAX][PMD_BOARD_CH_MAX]=0.;
+      mMipPeak[i][j]=0.;
+      mMipWidth[i][j]=0.;
       
     }
   }
