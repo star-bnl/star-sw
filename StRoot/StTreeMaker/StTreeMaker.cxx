@@ -25,7 +25,7 @@ Int_t StTreeMaker::Init()
   if (fIOMode[0]=='r') { //Read mode
     TFile *tf = new TFile(fFileName,"read","BFC StTree file");
     fTree = StTree::GetTree(tf,"bfc");
-    AddDataSet(fTree);
+    AddData(fTree);
     fTree->SetUKey(0);
     
   } else            { //Write mode  
@@ -54,6 +54,7 @@ Int_t StTreeMaker::Init()
     }
     
     fTree->SetIOMode("w");
+    fTree->Close("keep");
   } 
   return 0;
 }
@@ -82,12 +83,12 @@ Int_t StTreeMaker::MakeWrite(){
     br = BranchOfMaker(mk,1999);
     if (!br) 	continue;
     dat = mk->Find(".data"); assert(dat);
-    br->Update(dat);
+    br->Add(dat);
   }
 //		Write StTree
   ULong_t ukey = fTopMaker->GetNumber();
   fTree->WriteEvent(ukey);	
-//fTree->Clear(); /*Must be called later. Now it is dangerous*/
+  fTree->Clear(); 
   return 0;
 }
 //_____________________________________________________________________________
