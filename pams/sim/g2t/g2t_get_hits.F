@@ -197,13 +197,13 @@ C :>--------------------------------------------------------------------
          nh     = nh + 1
          id     = nh
          trac   = abs(jtra)
-         volume = g2t_volume_id (Csys,NUMBV)
          do k=1,Nmh
             if (iadr(k).gt.0) QQ(iadr(k))=(hits(k))
          enddo
 
 C        overwrite global coordinates with local if they are not measured
          if (abs(ih).eq.1)  call Agfpath(numbv)
+         volume  =   g2t_volume_id (Csys,NUMBV)
          if ( xD2M .ne. 0)  call GDTOM(x,xxx,1)
          if ( pD2M .ne. 0)  call GDTOM(c,ccc,2)
          if ( iflg(iPT).le.0.and.iflg(iLP).gt.0) p(4)=10.**Lpto
