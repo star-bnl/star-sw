@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 // StFlowTagMaker.hh
-// $Id: StFlowTagMaker.h,v 1.8 2000/03/15 23:30:56 posk Exp $
+// $Id: StFlowTagMaker.h,v 1.9 2000/03/21 00:23:00 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -16,6 +16,9 @@
 //
 // History:
 // $Log: StFlowTagMaker.h,v $
+// Revision 1.9  2000/03/21 00:23:00  posk
+// Added GetCVS.
+//
 // Revision 1.8  2000/03/15 23:30:56  posk
 // Added StFlowSelection.
 //
@@ -88,6 +91,9 @@ public:
   void         PrintInfo();
   Int_t        Finish();
   FlowTag_st*  TagPointer() const;         // returns pointer to the tag table
+  virtual const char *GetCVS() const
+    {static const char cvs[]="Tag $Name:  $ $Id: StFlowTagMaker.h,v 1.9 2000/03/21 00:23:00 posk Exp $ built "__DATE__" "__TIME__ ;
+    return cvs;}
 
 private:
 
