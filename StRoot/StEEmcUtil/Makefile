@@ -1,4 +1,4 @@
-LIBNAME=EEmcUtil
+LIBNAME=StEEmcUtil
 SUBDIRS=EEevent EEfeeRaw EEmcGeom 
 AR     = ar rul
 ARX    = ar x
@@ -12,10 +12,15 @@ compile:
 
 clean:
 	for i in $(SUBDIRS); do echo "make clean in $$i" ; cd $$i; $(MAKE) clean ; cd ..; done
-	rm -f lib$(LIBNAME).*  *.o
+	rm -f *.so *.a  *.o
 
 lib:	
 	for i in $(SUBDIRS); do $(ARX) $$i/lib$$i.a; done
-	$(AR)               lib$(LIBNAME).a  *.o 
+	$(AR)                lib$(LIBNAME).a  *.o 
 	$(CXX) $(LDFLAGS) -o lib$(LIBNAME).so *.o 
+	ln -sf lib$(LIBNAME).so $(LIBNAME).so
 	rm -f *.o
+
+install:
+	mkdir -p ../../lib
+	cp -pr *.a *.so ../../lib
