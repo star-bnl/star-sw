@@ -1,7 +1,7 @@
 # Makefile jml - 3/9/99
 # CFLAGS = -g -D_REENTRANT
 # CFLAGS = -g -D__EXTENSIONS__ -D_POSIX_C_SOURCE=199506L
-INCL_DIRS = -I../../  -I/usr/local/include/g++
+INCL_DIRS = -I../../  -I../ -I/usr/local/include/g++
 CFLAGS = -g $(INCL_DIRS)
 
 IFACE_DIR = GENERIC
