@@ -8,6 +8,8 @@
 *	Modified 4-Feb-1992   Robert Hackenburg
 *	Full on/off capability
 *	added    8-May-1992   Robert Hackenburg
+*	Classes
+*	added   26-Jan-1994   Robert Hackenburg
 
 *	INCLUDE files follow the STAR standard, which is that
 *	they are logical names, assigned to actual files by
@@ -161,7 +163,88 @@
 
 	RETURN
 	END
+
+	SUBROUTINE MSG_Class_Define( Class, State, Count_Limit, Abort_Limit )
 
+	IMPLICIT NONE
+
+*  Inputs:
+	CHARACTER*(*) Class       !A STAR-standard message class.
+	CHARACTER*(*) State       !'Active', 'Count' or 'Inactive'.
+	INTEGER       Count_Limit !Default count-limit for this class.
+	INTEGER       Abort_Limit !Default count-limit for this class.
+
+*  Brief description:  Define a new MSG class (of prefixes).
+
+*  Description:
+*	Each MSG prefix is assigned to a class according to this scheme:
+
+*	     * If the prefix contains a "-", its class is the first character
+*	       after the "-", if non-blank.
+
+*	     * If the prefix ends with a "-" or has no "-", it is assigned
+*	       to the null class.
+
+*	The MSG class to which a prefix is assigned is used (soley) for the
+*	purpose of setting the prefix's state and limits (count and abort).
+*	Classes permit the assignment of a variety of default MSG states
+*	and counts for diffent groups of messages.  The predefined MSG
+*	classes are these:
+
+*	Class Description            State    Count Limit    Abort Limit
+
+*	 ""   No-class message       Active       50            None
+*	  A   Abort message          Active      None        Abort on 1st (msg abort)
+*	  B   Bug message            Active      None           None
+*	  D   Debug message          Active      None           None
+*	  E   Error message          Active       20            None
+*	  F   Fatal message          Active      None           None (Application abort)
+*	  I   Informative message    Active      None           None
+*	  T   Trace message        Inactive      None           None
+*	  W   Warning message        Active       10            None
+
+*	These can be changed or new classes added with a call to this routine.
+
+*   Return conditions:  none
+
+*   Error conditions:  none
+
+	INCLUDE 'msg_inc'
+
+	CHARACTER*20 CAP_State
+	LOGICAL Found
+	INTEGER ID
+
+	LOGICAL MSG_Enter_Class
+	LOGICAL MSG_Find_Class
+
+	Found = MSG_Find_Class( Class, ID ) !Look up the class in the index.
+	IF ( .NOT. Found ) THEN !Didn't find it.
+	  IF ( .NOT. MSG_Enter_Class( Class, ID ) ) THEN !No more room & already complained.
+	    RETURN !Just get out.
+	  END IF
+	END IF
+
+	CAP_state = State
+	CALL STRCAPS( CAP_state ) !All caps.
+
+	IF      ( CAP_state .EQ. 'ACTIVE' ) THEN
+	  MSG_Class_Default_Active(      ID ) = .TRUE.
+	  MSG_Class_Default_Counting(    ID ) = .TRUE.
+	ELSE IF ( CAP_state .EQ. 'INACTIVE' ) THEN
+	  MSG_Class_Default_Active(      ID ) = .FALSE.
+	  MSG_Class_Default_Counting(    ID ) = .FALSE.
+	ELSE IF ( CAP_state .EQ. 'COUNTING' ) THEN
+	  MSG_Class_Default_Active(      ID ) = .FALSE.
+	  MSG_Class_Default_Counting(    ID ) = .TRUE.
+	END IF
+
+	MSG_Class_Default_Abort_Limit( ID ) = Abort_Limit
+	MSG_Class_Default_Count_Limit( ID ) = Count_Limit
+
+
+	RETURN
+	END
 
 	SUBROUTINE MSG_Count( PREFIX )
 
@@ -625,7 +708,7 @@
 
 	  IF (.NOT.FOUND) THEN !Enter the prefix in the index:
 
-	    CALL MSG_ENTER(PREFIX,LID)  !Enter it, permitting faster ID-reference.
+	    CALL MSG_Enter(PREFIX,LID)  !Enter it, permitting faster ID-reference.
 
 	    IF (LID.GT.0) THEN          !Check that it was entered OK.
 	      MSG_Active(LID)=.FALSE.   !But don't enable a message defined here!
@@ -685,12 +768,12 @@
 	RETURN
 	END
 
-	SUBROUTINE MSG_Ini( JOURNAL_LUN )
+	SUBROUTINE MSG_Ini( Journal_LUN )
 
 	IMPLICIT NONE
 
 *  Input:
-	INTEGER JOURNAL_LUN !FORTRAN logical unit number of journal file.
+	INTEGER Journal_LUN !FORTRAN logical unit number of journal file.
 
 *  Brief description:  MSG package initializion and journal-LUN specification.
 
@@ -702,18 +785,37 @@
 
 	INCLUDE 'msg_inc'
 
-	INTEGER TERMINAL_LUN
-	PARAMETER (TERMINAL_LUN=6)
+	INTEGER     Terminal_LUN
+	PARAMETER ( Terminal_LUN = 6 )
 
-	MSG_Nprefixes=0
-	MSG_Total_Lookups=0 !Count of all prefix (character-search) lookups.
-	MSG_All_Count_Limit=0 !No count limit is the default.
-	MSG_All_Disable=.FALSE.
-	MSG_All_Nocount=.FALSE.
+	MSG_Nprefixes       = 0
+	MSG_Nclasses        = 0
+	MSG_Total_Lookups   = 0 !Count of all prefix (character-search) lookups.
+	MSG_All_Count_Limit = 50 !Default for no-class messages.
+	MSG_All_Disable     = .FALSE.
+	MSG_All_Nocount     = .FALSE.
 	CALL MSG_Journal_Off
-	CALL MSG_Set_LUN(TERMINAL_LUN,JOURNAL_LUN)
-	CALL MSG_Set_Summary_Page_Length ( 66 ) !66 lines per page -- default.
-	CALL MSG_Name_Node(' ')
+	CALL MSG_Set_LUN( Terminal_LUN, Journal_LUN )
+	CALL MSG_Name_Node( ' ' )
+
+*	MSG Summary defaults:
+	CALL MSG_Set_Summary_Page_Length (   60 )     !60 lines per page.
+	CALL MSG_Set_Summary_Mode_Active(   .TRUE.  ) !List active messages.
+	CALL MSG_Set_Summary_Mode_Counting( .TRUE.  ) !List counting (but not displaying) messages.
+	CALL MSG_Set_Summary_Mode_Inactive( .FALSE. ) !Do not list inactive messages.
+	CALL MSG_Set_Summary_Mode_Aborted(  .TRUE. )  !List the aborted message.
+
+*	Define the predefined classes:
+	CALL MSG_Class_Define( ' ',   'Active', 50, 0 ) !Null or blank class.
+	CALL MSG_Class_Define( 'A',   'Active',  0, 1 ) !Abort message class (MSG abort).
+	CALL MSG_Class_Define( 'B',   'Active',  0, 0 ) !Bug message class.
+	CALL MSG_Class_Define( 'D',   'Active',  0, 0 ) !Debug message class.
+	CALL MSG_Class_Define( 'E',   'Active', 20, 0 ) !Error message class.
+	CALL MSG_Class_Define( 'F',   'Active',  0, 0 ) !Fatal message class (application abort).
+	CALL MSG_Class_Define( 'I',   'Active',  0, 0 ) !Informative message class.
+	CALL MSG_Class_Define( 'O',   'Active',  1, 0 ) !Once-only message class.
+	CALL MSG_Class_Define( 'T', 'Inactive',  0, 0 ) !Trace (silient debug) message class.
+	CALL MSG_Class_Define( 'W',   'Active', 10, 0 ) !Warning message class.
 
 	CALL STRELA0 !Initialize elapsed real-time.
 	CALL STRCPU0 !Initialize elapsed CPU-time.
@@ -1420,6 +1522,86 @@
 	RETURN
 	END
 
+	SUBROUTINE MSG_Set_Summary_Mode_Aborted( Mode )
+
+	IMPLICIT NONE
+
+*  Input:
+	LOGICAL Mode !Whether the mode is to be set TRUE or FALSE.
+
+*  Brief description:  Set the MSG summary mode for "Aborted" messages.
+
+*  Return conditions:  none
+
+*  Error conditions:  none
+
+	INCLUDE 'msg_inc'
+
+	MSG_Summary_Mode_Aborted = Mode
+
+	RETURN
+	END
+
+	SUBROUTINE MSG_Set_Summary_Mode_Active( Mode )
+
+	IMPLICIT NONE
+
+*  Input:
+	LOGICAL Mode !Whether the mode is to be set TRUE or FALSE.
+
+*  Brief description:  Set the MSG summary mode for "Active" messages.
+
+*  Return conditions:  none
+
+*  Error conditions:  none
+
+	INCLUDE 'msg_inc'
+
+	MSG_Summary_Mode_Active = Mode
+
+	RETURN
+	END
+
+	SUBROUTINE MSG_Set_Summary_Mode_Counting( Mode )
+
+	IMPLICIT NONE
+
+*  Input:
+	LOGICAL Mode !Whether the mode is to be set TRUE or FALSE.
+
+*  Brief description:  Set the MSG summary mode for "Counting" messages.
+
+*  Return conditions:  none
+
+*  Error conditions:  none
+
+	INCLUDE 'msg_inc'
+
+	MSG_Summary_Mode_Counting = Mode
+
+	RETURN
+	END
+
+	SUBROUTINE MSG_Set_Summary_Mode_Inactive( Mode )
+
+	IMPLICIT NONE
+
+*  Input:
+	LOGICAL Mode !Whether the mode is to be set TRUE or FALSE.
+
+*  Brief description:  Set the MSG summary mode for "Inactive" messages.
+
+*  Return conditions:  none
+
+*  Error conditions:  none
+
+	INCLUDE 'msg_inc'
+
+	MSG_Summary_Mode_Inactive = Mode
+
+	RETURN
+	END
+
 	SUBROUTINE MSG_Set_Summary_Page_Length( Page_Length )
 
 	IMPLICIT NONE
@@ -1502,6 +1684,7 @@
 	INTEGER I
 	INTEGER LINE,EPT
 	REAL Fraction
+	LOGICAL List_this_Message
 
 	INTEGER Header_Lines
 
@@ -1580,7 +1763,18 @@
 	    CALL MSG_TO_LUN_OUT( MSG, Header_Lines, LUN )
 	  END IF
 
+	  List_this_Message = .FALSE. !Set true if the state is selected for listing.
+
 	  Sample=MSG_Sample(SID(ID))
+
+*	  Sometimes a \n (newline) character is embedded in a message, or even a \f, \b or \0:
+	  I = MIN( INDEX( Sample, '\n' ), INDEX( Sample, '\f' ), INDEX( Sample, '\b' ), INDEX( Sample, '\0' ) )
+	  IF      ( I .GE. 1 ) THEN !Blan out \n etc. and all after.
+	    Sample(I:) = ' '
+	  END IF
+
+	  CALL STRClean( Sample, MSG_Sample_length_P, Sample ) !Clean out any non-printables.
+
 	  CALL STREND(Sample,EPT) !Find last non-blank.
 	  IF (EPT.LT.(MSG_Sample_length_P-6)) THEN !More than 6 blanks.
 	    DO I=MSG_Sample_length_P-2,EPT+2,-2 !Append alternating dots.
@@ -1595,6 +1789,7 @@
 	  ELSE IF (MSG_Counts( SID(ID) ).GE.MSG_Abort_Limit( SID(ID) ) ) THEN
 *	    This message caused a program termination -- should only be one!
 	    State = ' Aborted'
+	    IF ( MSG_Summary_Mode_Aborted ) List_this_Message = .TRUE.
 	  ELSE
 	    State = ' '
 	  END IF
@@ -1602,49 +1797,56 @@
 	  IF (State .NE. ' ') THEN !State already determined.
 	  ELSE IF ( MSG_Active( SID(ID) ) ) THEN
 	    State = '  Active'
+	    IF ( MSG_Summary_Mode_Active ) List_this_Message = .TRUE.
 	  ELSE IF ( MSG_Counting( SID(ID) ) ) THEN
 	    State = 'Counting'
+	    IF ( MSG_Summary_Mode_Counting ) List_this_Message = .TRUE.
 	  ELSE
 	    State = 'Inactive'
+	    IF ( MSG_Summary_Mode_Inactive ) List_this_Message = .TRUE.
 	  END IF
 
 
-	  IF (EVENTS.LE.0) THEN !No fractional occurances:
-	    WRITE(MSG,101)
-     1	          Sample,MSG_Counts(SID(ID))
-     1	         ,MSG_Count_limit(SID(ID))
-     1	         ,MSG_Lookups(SID(ID))
-     1	         ,MSG_Abort_Limit(SID(ID))
-     1	         ,State
-	  ELSE !Fractional occurances:
-	    Fraction=FLOAT(MSG_Counts(SID(ID)))/FLOAT(EVENTS)
-	    WRITE(MSG,104)
-     1	          Sample,MSG_Counts(SID(ID)),Fraction
-     1	         ,MSG_Count_limit(SID(ID))
-     1	         ,MSG_Lookups(SID(ID))
-     1	         ,MSG_Abort_Limit(SID(ID))
-     1	         ,State
-	  END IF
-	  CALL STREND(MSG,EPT) !Find last non-blank.
-	  Ghost = ' '
-	  DO I=MSG_Sample_length_P,EPT-2,2 !Fill in with alternating dots.
-	    IF (MSG(1)(I-1:I+1).EQ.' ') THEN !Three blanks in a row:
-	      MSG(1)(I:I)='.'
-	      Ghost(I:I)='.'
+	  IF ( List_this_message ) THEN !List only those selected by the mode flags:
+
+	    IF (EVENTS.LE.0) THEN !No fractional occurances:
+	      WRITE(MSG,101)
+     1	            Sample,MSG_Counts(SID(ID))
+     1	           ,MSG_Count_limit(SID(ID))
+     1	           ,MSG_Lookups(SID(ID))
+     1	           ,MSG_Abort_Limit(SID(ID))
+     1	           ,State
+	    ELSE !Fractional occurances:
+	      Fraction=FLOAT(MSG_Counts(SID(ID)))/FLOAT(EVENTS)
+	      WRITE(MSG,104)
+     1	            Sample,MSG_Counts(SID(ID)),Fraction
+     1	           ,MSG_Count_limit(SID(ID))
+     1	           ,MSG_Lookups(SID(ID))
+     1	           ,MSG_Abort_Limit(SID(ID))
+     1	           ,State
 	    END IF
-	  END DO
-	  DO I=MSG_Sample_length_P+2,EPT-4,2 !Check for lone (inserted) dots & remove them.
-	    IF (Ghost(I-2:I+2) .EQ. '  .  ' ) THEN
-	      MSG(1)(I:I) = ' '
-	    END IF
-	  END DO
-	  CALL MSG_TO_LUN_OUT(MSG,1,LUN)
+	    CALL STREND(MSG,EPT) !Find last non-blank.
+	    Ghost = ' '
+	    DO I=MSG_Sample_length_P,EPT-2,2 !Fill in with alternating dots.
+	      IF (MSG(1)(I-1:I+1).EQ.' ') THEN !Three blanks in a row:
+	        MSG(1)(I:I)='.'
+	        Ghost(I:I)='.'
+	      END IF
+	    END DO
+	    DO I=MSG_Sample_length_P+2,EPT-4,2 !Check for lone (inserted) dots & remove them.
+	      IF (Ghost(I-2:I+2) .EQ. '  .  ' ) THEN
+	        MSG(1)(I:I) = ' '
+	      END IF
+	    END DO
+	    CALL MSG_TO_LUN_OUT(MSG,1,LUN)
 
-	  IF ( LINE + 1 + Header_Lines .GE. MSG_Summary_Page_Length) THEN
-	    LINE=0 !Start a new page.
-	  ELSE
-	    LINE=LINE+1
-	  END IF
+	    IF ( LINE + 1 + Header_Lines .GE. MSG_Summary_Page_Length) THEN
+	      LINE=0 !Start a new page.
+	    ELSE
+	      LINE=LINE+1
+	    END IF
+
+	  END IF ! List_this_message
 
 	END DO !ID=1,MSG_Nprefixes
 

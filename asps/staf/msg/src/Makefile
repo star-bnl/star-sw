@@ -2,11 +2,15 @@ ARFLAGS    = vqs
 FFLAGS     = -c -O -w -extend_source
 FFLAGS_DBG = -c -g -w -extend_source
 
-all : libmsg.a libmsg_dbg.a
+all : libmsg.a libmsg_dbg.a doc
 
 msg : libmsg.a
 
 dbg : libmsg_dbg.a
+
+doc : msglib.f msgsub.f
+	cd ../doc; docfor ../src/msglib.f; mv buttons.html msg_application.html; cd ../src
+	cd ../doc; docfor ../src/msgsub.f; mv buttons.html msg_innards.html    ; cd ../src
 
 libmsg.a : msglib.o msgsub.o Makefile
 	rm -f libmsg.a
