@@ -1,5 +1,8 @@
-// $Id: St_tcl_Maker.cxx,v 1.50 1999/11/22 23:18:45 snelling Exp $
+// $Id: St_tcl_Maker.cxx,v 1.51 1999/12/05 00:07:04 snelling Exp $
 // $Log: St_tcl_Maker.cxx,v $
+// Revision 1.51  1999/12/05 00:07:04  snelling
+// Modifications made for eval option: added Histograms and NTuple support
+//
 // Revision 1.50  1999/11/22 23:18:45  snelling
 // added Li Qun's changes to tfs
 //
@@ -188,17 +191,10 @@ ClassImp(St_tcl_Maker)
 //_____________________________________________________________________________
 St_tcl_Maker::St_tcl_Maker(const char *name):
   StMaker(name),
-  m_tclPixTransOn(kFALSE),
   m_tclEvalOn(kFALSE),
+  m_tclPixTransOn(kFALSE),
   m_tclMorphOn(kFALSE),
-  m_tpg_detector(0),
-  m_tpg_pad(0),
-  m_tpg_pad_plane(0),
-  m_tsspar(0),
-  m_tclpar(0),
-  m_type(0),
-  m_tfs_fspar(0),
-  m_tfs_fsctrl(0) {
+  bWriteTNtupleOn(kFALSE) {
 }
 
 //_____________________________________________________________________________
@@ -208,11 +204,18 @@ St_tcl_Maker::~St_tcl_Maker() {
 //_____________________________________________________________________________
 
 Int_t St_tcl_Maker::Init() {
+
   // Limit Error Messages
   gMessMgr->SetLimit("TPSEQ",10);
   gMessMgr->SetLimit("TPHAM",10);
   gMessMgr->SetLimit("TCL_Get_Row_Seq-E2",5);
 
+  // set bools
+  if (m_tclEvalOn) {
+    m_tclPixTransOn = kTRUE;
+    //    m_tclMorphOn = kTRUE;
+    bWriteTNtupleOn = kTRUE; 
+  }
 
   // 		Create tables
   St_DataSet *tpc = GetDataBase("params/tpc");
@@ -224,10 +227,14 @@ Int_t St_tcl_Maker::Init() {
   St_DataSet *tpgpar = local("tpgpar");
   assert(tpgpar);
 
+  m_tpg_pad_plane = NULL;
   m_tpg_pad_plane = (St_tpg_pad_plane *) tpgpar->Find("tpg_pad_plane");
+
+  m_tpg_detector  = NULL;
   m_tpg_detector  = (St_tpg_detector  *) tpgpar->Find("tpg_detector");
   assert ((m_tpg_pad_plane && m_tpg_detector)) ;
 
+  m_tpg_pad = NULL;
   m_tpg_pad = (St_tpg_pad*) tpgpar->Find("tpg_pad");
   if (!m_tpg_pad) {
     m_tpg_pad =new St_tpg_pad("tpg_pad",1); AddConst(m_tpg_pad);} 
@@ -242,13 +249,17 @@ Int_t St_tcl_Maker::Init() {
   m_tcl_sector_index = new St_tcl_sector_index("tcl_sector_index",1);
   m_tcl_sector_index->SetNRows(1); AddConst(m_tcl_sector_index);
   
+  m_tclpar           = NULL;
   m_tclpar           = (St_tcl_tclpar *)         tclpars->Find("tclpar");
+  m_type             = NULL;
   m_type             = (St_tcl_tpc_index_type *) tclpars->Find("type");
   assert(m_tclpar && m_type);
 
   // 		TSS parameters
   St_DataSet *tsspars = local("tsspars");
   assert(tsspars);
+
+  m_tsspar = 0;
   m_tsspar = (St_tss_tsspar *) tsspars->Find("tsspar");
   assert(m_tsspar); 
   tss_tsspar_st *tsspar = m_tsspar->GetTable();
@@ -258,7 +269,9 @@ Int_t St_tcl_Maker::Init() {
   // 		TFS parameters
   St_DataSet *tfspars = local("tfspars");
   assert(tfspars);
+  m_tfs_fspar = NULL;
   m_tfs_fspar = (St_tfs_fspar *) local("tfspars/tfs_fspar");
+  m_tfs_fsctrl= NULL;
   m_tfs_fsctrl= (St_tfs_fsctrl*) local("tfspars/tfs_fsctrl");
 
 
@@ -279,11 +292,12 @@ Int_t St_tcl_Maker::Make() {
   // get the parameters for TCL
   tcl_tclpar_st* sttclpar = m_tclpar->GetTable();
 
-  // define the tables used
-  St_tcl_tp_seq *tpseq = 0;
-  St_tcl_tphit* tphit = 0;
-  St_tcl_tpcluster* tpcluster = 0;
-  St_tcc_morphology* morph = 0;
+  // initialize pointers to tables
+  tpseq = NULL;
+  tphit = NULL;
+  tpcluster = NULL;
+  morph = NULL;
+  index = NULL;
 
   St_DataSet* sector;
   St_DataSet* raw_data_tpc = GetInputDS("tpc_raw");
@@ -398,11 +412,10 @@ Int_t St_tcl_Maker::Make() {
         if (tcl_res!=kSTAFCV_OK) Warning("Make","tcl == %d",tcl_res);
 
 	// Create morphology table only if needed
-	if (m_tclMorphOn){
+	if (m_tclMorphOn) {
 	  if(Debug()) printf("Starting %20s for sector %2d.\n","cluster_morphology",indx);
 
-	  Int_t tcc_res = cluster_morphology( indx, pixel_data_in, pixel_data_out,
-					      tpcluster, tpseq, morph);
+	  Int_t tcc_res = cluster_morphology( indx, pixel_data_in, pixel_data_out);
 	  if(tcc_res) { printf("ERROR %d, tcl maker\n",tcc_res); return kStErr; }
 	}
 	sector_tot++;
@@ -422,7 +435,7 @@ Int_t St_tcl_Maker::Make() {
 
     // end raw data
 
-    if (sector_tot && m_tclEvalOn) { //slow simulation exist
+    if (sector_tot && m_tclEvalOn) { //slow simulation exist and evaluation switch set
       if (Debug()) cout << "start run_tte_hit_match" << endl;
       St_DataSet *geant = GetInputDS("geant");
       if (geant) {
@@ -431,7 +444,7 @@ Int_t St_tcl_Maker::Make() {
 	if (g2t_tpc_hit){//geant data exists too
 
 	  // create the index table, if any
-	  St_tcl_tpc_index  *index = (St_tcl_tpc_index *) local("index");
+	  index = (St_tcl_tpc_index *) local("index");
 	  if (!index) {
 	    index = new St_tcl_tpc_index("index",2*max_hit); 
 	    local.Add(index);
@@ -462,7 +475,7 @@ Int_t St_tcl_Maker::Make() {
       St_g2t_vertex  *g2t_vertex  = (St_g2t_vertex  *) geantI("g2t_vertex");
       if (g2t_tpc_hit && g2t_track){
 	// create the index table, if any
-	St_tcl_tpc_index  *index = (St_tcl_tpc_index *) local("index");
+	index = (St_tcl_tpc_index *) local("index");
 	if (!index) {
 	  index = new St_tcl_tpc_index("index",2*max_hit); 
 	  local.Add(index);
@@ -503,6 +516,23 @@ Int_t St_tcl_Maker::Make() {
   cout << "got through St_tcl_Maker OK." << endl;
 
   return kStOK;
+}
+
+//-----------------------------------------------------------------------
+
+void St_tcl_Maker::PrintInfo() {
+  printf("**************************************************************\n");
+  printf("* $Id: St_tcl_Maker.cxx,v 1.51 1999/12/05 00:07:04 snelling Exp $\n");
+  printf("**************************************************************\n");
+
+  if (Debug()) StMaker::PrintInfo();
+}
+
+//-----------------------------------------------------------------------
+
+Int_t St_tcl_Maker::Finish() {
+  
+  return StMaker::Finish();
 }
 
 //----------------------------------------------------------------------
@@ -593,10 +623,7 @@ void St_tcl_Maker::MakeHistograms() {
 Int_t St_tcl_Maker::cluster_morphology( 
      	Int_t 		   sectorNumber,
         St_type_shortdata *pixel_data_in, 
-        St_type_shortdata *pixel_data_out,
-        St_tcl_tpcluster  *tpcluster, 
-        St_tcl_tp_seq     *tpseq,
-        St_tcc_morphology *morph)
+        St_type_shortdata *pixel_data_out)
 {
   type_shortdata_st *pixTbl;
   unsigned short charge[TCC_PAD][TCC_BIN];
@@ -669,7 +696,7 @@ Int_t St_tcl_Maker::cluster_morphology(
              linEcc1Eq8,linEcc2Eq9)) 					return 111;
 
     if(FillOneRowOfMorphTable(
-       iClusterTbl,	morph,	padrow,	sector,	nseq,	numberOfPixels,
+       iClusterTbl,	padrow,	sector,	nseq,	numberOfPixels,
        npad,		totChargeEq1,	maxCharge,
        (float)((1.0*totChargeEq1)/numberOfPixels),
        meanPadEq3,	meanTimeEq4,
@@ -702,7 +729,6 @@ type_shortdata | pixel_data_out | pixTbl       | tpseq->jpix,        | ++,
 
 Int_t St_tcl_Maker::FillOneRowOfMorphTable(
   int               	iClusterTbl,
-  St_tcc_morphology    *morph,
   int 			padrow,
   int 			sector,
   int 			nseq,
