@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowMaker.cxx,v 1.35 2000/08/10 23:00:22 posk Exp $
+// $Id: StFlowMaker.cxx,v 1.36 2000/08/12 20:22:20 posk Exp $
 //
 // Authors: Raimond Snellings and Art Poskanzer, LBNL, Jun 1999
 //
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowMaker.cxx,v $
+// Revision 1.36  2000/08/12 20:22:20  posk
+// Recalculate centrality in read from pico.
+//
 // Revision 1.35  2000/08/10 23:00:22  posk
 // New centralities. pt and eta cuts.
 //
@@ -217,7 +220,6 @@ Int_t StFlowMaker::Make() {
   UInt_t flowEventMult;
   if (!pFlowEvent) { flowEventMult = 0;}
   else { flowEventMult = pFlowEvent->FlowEventMult(); }
-  PR(flowEventMult);
 
   if (Debug()) StMaker::PrintInfo();
 
@@ -240,7 +242,7 @@ Int_t StFlowMaker::Init() {
   if (mFlowEventRead)  kRETURN += InitFlowEventRead();
 
   gMessMgr->SetLimit("##### FlowMaker", 5);
-  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.35 2000/08/10 23:00:22 posk Exp $");
+  gMessMgr->Info("##### FlowMaker: $Id: StFlowMaker.cxx,v 1.36 2000/08/12 20:22:20 posk Exp $");
   if (kRETURN) gMessMgr->Info() << "##### FlowMaker: Init return = " << kRETURN << endm;
 
   return kRETURN;
@@ -369,6 +371,7 @@ void StFlowMaker::FillFlowEvent() {
   // Get initial multiplicity before TrackCuts 
   UInt_t origMult = pEvent->primaryVertex(0)->numberOfDaughters(); 
   pFlowEvent->SetOrigMult(origMult);
+  //pFlowEvent->SetCentrality(origMult);
   PR(origMult);
 
   // loop over tracks in StEvent
@@ -436,17 +439,17 @@ void StFlowMaker::FillFlowEvent() {
     }
   }
 
-  pFlowEvent->SetMultEta1(goodTracksEta1);
-  pFlowEvent->SetCentrality(goodTracksEta1);
-  pFlowEvent->SetMultEta2(goodTracksEta2);
-  
-  // Check Eta Symmetry
-  if (!StFlowCutEvent::CheckEtaSymmetry(pEvent)) {  
-    delete pFlowEvent;             // if kFALSE delete this event
+  // Check for > 10 tracks and check Eta Symmetry
+  if (goodTracks < 10 || !StFlowCutEvent::CheckEtaSymmetry(pEvent)) {  
+    delete pFlowEvent;             //  delete this event
     pFlowEvent = NULL;
     return;
   }
 
+  pFlowEvent->SetMultEta1(goodTracksEta1);
+  pFlowEvent->SetCentrality(goodTracksEta1);
+  pFlowEvent->SetMultEta2(goodTracksEta2);
+  
   // For use with STL vector
 //   random_shuffle(pFlowEvent->TrackCollection()->begin(),
 // 		 pFlowEvent->TrackCollection()->end());
@@ -601,20 +604,26 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
   pFlowEvent->SetEventID(pPicoEvent->EventID());
   UInt_t origMult = pPicoEvent->OrigMult();
   pFlowEvent->SetOrigMult(origMult);
+  PR(origMult);
   pFlowEvent->SetVertexPos(StThreeVectorF(pPicoEvent->VertexX(),
 					  pPicoEvent->VertexY(),
 					  pPicoEvent->VertexZ()) );
   pFlowEvent->SetMultEta1(pPicoEvent->MultEta1());
   pFlowEvent->SetMultEta2(pPicoEvent->MultEta2());
-  pFlowEvent->SetCentrality(pPicoEvent->MultEta1());
+  //pFlowEvent->SetCentrality(pPicoEvent->MultEta1());
   pFlowEvent->SetCTB(pPicoEvent->CTB());
   pFlowEvent->SetZDCe(pPicoEvent->ZDCe());
   pFlowEvent->SetZDCw(pPicoEvent->ZDCw());
 
+  int goodTracks = 0;
+  UInt_t goodTracksEta1 = 0;
   // Fill FlowTracks
   for (Int_t nt=0; nt<pPicoEvent->GetNtrack(); nt++) {
     StFlowPicoTrack* pPicoTrack = (StFlowPicoTrack*)pPicoEvent->Tracks()
       ->UncheckedAt(nt);
+    if (fabs(pPicoTrack->Eta()) < 0.75) {
+      goodTracksEta1++;
+    }
     if (pPicoTrack && StFlowCutTrack::CheckTrack(pPicoTrack)) {
       // Instantiate new StFlowTrack
       StFlowTrack* pFlowTrack = new StFlowTrack;
@@ -636,15 +645,20 @@ Bool_t StFlowMaker::FillFromPicoDST(StFlowPicoEvent* pPicoEvent) {
       pFlowTrack->SetPidKaonMinus(pPicoTrack->PidKaonMinus());
       pFlowTrack->SetPidDeuteron(pPicoTrack->PidDeuteron());
       pFlowEvent->TrackCollection()->push_back(pFlowTrack);
+      goodTracks++;
     }
   }
     
-  // Check event cuts and Eta Symmetry
+  // Recreate centrality
+  pFlowEvent->SetCentrality(goodTracksEta1);
+
+  // Check event cuts and Eta Symmetry and tracks > 10
   if (!StFlowCutEvent::CheckEvent(pPicoEvent) ||
-      !StFlowCutEvent::CheckEtaSymmetry(pPicoEvent)) {  
+      !StFlowCutEvent::CheckEtaSymmetry(pPicoEvent) ||
+      goodTracks < 10) {  
     Int_t eventID = pPicoEvent->EventID();
     gMessMgr->Info() << "##### FlowMaker: picoevent " << eventID << " cut" << endm;
-    delete pFlowEvent;             // if kFALSE delete this event
+    delete pFlowEvent;             // delete this event
     pFlowEvent = NULL;
     return kTRUE;
   }

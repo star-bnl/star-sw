@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.cxx,v 1.4 2000/05/26 21:29:32 posk Exp $
+// $Id: StFlowSelection.cxx,v 1.5 2000/08/12 20:22:21 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.cxx,v $
+// Revision 1.5  2000/08/12 20:22:21  posk
+// Recalculate centrality in read from pico.
+//
 // Revision 1.4  2000/05/26 21:29:32  posk
 // Protected Track data members from overflow.
 //
@@ -51,7 +54,7 @@ StFlowSelection::~StFlowSelection() {
 
 Bool_t StFlowSelection::Select(StFlowEvent* pFlowEvent) {
   // Returns kTRUE if the event is selected
-  
+
   // Centrality
   if (mCentrality) {
     UInt_t cent = pFlowEvent->Centrality();
