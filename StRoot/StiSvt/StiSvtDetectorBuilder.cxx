@@ -98,7 +98,7 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
   setNRows(nRows);
   cout << "SVT Number of  Rows : "<<2* _config->getNumberOfBarrels()<<endl
 			 << "  Layer#  numberOfLadders      Radius" << endl;
-  for (unsigned int layer=0;layer<nRows;layer++)
+  for (int layer=0;layer<nRows;layer++)
 		cout << "  "<<layer<<"     "<<_config->getNumberOfLadders(1+layer/2)/2 << "   " 
 				 << _geometry->getBarrelRadius(layer+1) << endl;
 
@@ -124,7 +124,7 @@ void StiSvtDetectorBuilder::buildDetectors(StMaker & source)
       add(_hybridShape[layer]);
     } // for layer
 
-	for (unsigned int layer=0;layer<nRows;layer++)
+	for (int layer=0;layer<nRows;layer++)
     {
 			int nSectors = _config->getNumberOfLadders(1+layer/2)/2;
       setNSectors(layer,nSectors); 
