@@ -1,4 +1,7 @@
 #  $Log: Makeloop.mk,v $
+#  Revision 1.57  1999/02/19 14:40:14  fisyak
+#  remove extra dependencies for idls
+#
 #  Revision 1.56  1999/02/16 15:37:38  fisyak
 #  Clean up HP stuff
 #
@@ -247,7 +250,7 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#           Last modification $Date: 1999/02/16 15:37:38 $ 
+#           Last modification $Date: 1999/02/19 14:40:14 $ 
 #  default setings
 # Current Working Directory
 #
@@ -301,7 +304,8 @@ ifndef SUBDIRS
   SUBDIRS := $(filter-out St_mev_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out St_hbt_Maker, $(SUBDIRS))
   SUBDIRS := $(filter-out StRootEvent, $(SUBDIRS))
-  SUBDIRS := $(filter-out StTrsMaker, $(SUBDIRS))
+  SUBDIRS := $(filter-out vpd, $(SUBDIRS))
+  SUBDIRS := $(filter-out par crs egz fri g2x mev, $(SUBDIRS))
 #  ifndef OBJY_HOME
     SUBDIRS := $(filter-out objy, $(SUBDIRS))
 #  endif
