@@ -4,6 +4,7 @@
 * 7Jul98 K. Turner - changed to use gstar stuff
 * 9Jul98 K. Turner - changed to use new tpc cluster and track eval for slow sim
 * 9Jul98 K. Turner - changed to use tfc_run#run_newtab - can set adcxyzon=1
+* 10Jul98 K. Turner - changed to use new version of global pam kumacs
 * 
 *************************************************************
 *                     BFC_UTIL.KUMAC
@@ -134,10 +135,16 @@ macro bfc_init _
             exec tte_init#init
       (stk) exec svt_tracker#initialize
       (sgr) exec svt_tracker#initialize
-      (svm) exec init_svm
-      (egr) exec init_egr
-      (ev0) exec init_ev0#init_ev0
-(ev0_eval2) exec init_ev0#ev0_eval2 
+      (svm) 
+            exec create_tables_global#svm
+            exec init_svm
+      (egr) 
+	    exec create_tables_global#egr
+	    exec init_egr
+      (ev0) exec create_tables_global#ev0 
+            exec init_ev0#init_ev0
+(ev0_eval2) exec create_tables_global#ev0_eval2
+	    exec init_ev0#ev0_eval2 
       (emc)
             exec init_ems;  
             exec init_jet;     |  EMC geometry &  pam initialization 
@@ -215,10 +222,10 @@ EOF:
                    message ' problem with tpc_tracker_tte'
                  endif
     (tte_e)    exec tte_run#run_tte
-      (svm)    exec run_svm#run_svm 2	|  TPC to SVT Matching 
-      (egr)    exec run_egr#egr 2             |  Event Global Refit
-      (ev0)    exec run_ev0#ev0_am  2         |  V0 Finder 
-(ev0_eval2)    exec run_ev0#ev0_eval2  [ievent]
+      (svm)    exec run_svm#run_svm 	     |  TPC to SVT Matching 
+      (egr)    exec run_egr#egr              |  Event Global Refit
+      (ev0)    exec run_ev0#ev0_am           |  V0 Finder 
+(ev0_eval2)    exec run_ev0#ev0_eval2  
       (erj)    exec run_jet_egrid
                exec run_jet_erj
     (evout)    if [output_file]="" then
