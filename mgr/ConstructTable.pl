@@ -35,6 +35,8 @@ sub TableH {
   print OUT "  static St_tableDescriptor *fgColDescriptors;\n";
   print OUT "  virtual St_tableDescriptor *GetRowDescriptors() const { return fgColDescriptors?fgColDescriptors:(fgColDescriptors=GetTableDescriptors());}\n";
   print OUT "  virtual void  SetRowDescriptors(St_tableDescriptor *list) { fgColDescriptors = list;}\n";
+  print OUT "  virtual St_tableDescriptor *GetDescriptorPointer() const { return fgColDescriptors;}\n";
+  print OUT "  virtual void SetDescriptorPointer(St_tableDescriptor *list) const { fgColDescriptors = list;}\n";
   print OUT "public:\n";
   print OUT "  St_",$stem,"() : St_Table(\"",$stem,"\",sizeof(",$stem,"_st)) {SetType(\"",$stem,"\");}\n";
   print OUT "  St_",$stem,"(Text_t *name) : St_Table(name,sizeof(",$stem,"_st)) {SetType(\"",$stem,"\");}\n";
@@ -65,9 +67,7 @@ sub TableCXX {
   print OUT "/////////////////////////////////////////////////////////////////////////\n";
   print OUT "\n";
   print OUT "#include \"Stypes.h\"\n";
-  print OUT "St_tableDescriptor *_NAME2_(St_,",$stem,")::fgColDescriptors = 0;\n";
-  print OUT "TableImp(",$stem,")\n";
-  print OUT "TableStreamerImp(",$stem,")\n";
+  print OUT "TableImpl(",$stem,")\n";
   close (OUT);
 }
 #________________________________________
