@@ -1,3 +1,4 @@
+#include "TView.h"
 #include "TGFrame.h"
 #include "StThreeVector.hh"
 #include "StiGui/EventDisplay.h"
@@ -163,10 +164,17 @@ void EventDisplay::update()
 
 void EventDisplay::draw()
 { 
-  //cout << "EventDisplay::draw() -I- Started"<<endl;
+  cout << "EventDisplay::draw() -I- Started"<<endl;
   reset();
-  _canvas->cd();
-  _canvas->Update();
+  TView * view = gPad->GetView();
+  double pmin[3];
+  double pmax[3];
+  if (view) view->GetRange(pmin,pmax);
+  gPad->Clear();
+  
+  //_canvas->Clear();
+  //_canvas->cd();
+  //_canvas->Update();
   if (!_initialized)
     {
       cout << "EventDisplay::draw() -I- Initialize detector display"<<endl;
@@ -179,8 +187,13 @@ void EventDisplay::draw()
   //if (_options->getMcHitVisible())     draw(_mcHitContainer,  _mcHitFilter,  _mcHitDrawingPolicy);
   if (_options->getMcTrackVisible())   draw(_mcTrackContainer,_mcTrackFilter,_mcTrackDrawingPolicy);
   if (_options->getTrackVisible())     draw(_trackContainer,  _trackFilter,  _trackDrawingPolicy); 
+  if (view)
+    {
+      view = gPad->GetView();
+      view->SetRange(pmin,pmax);
+    }
   _canvas->Update();
-  //cout << "EventDisplay::draw() -I- Started"<<endl;
+  cout << "EventDisplay::draw() -I- Started"<<endl;
 }
 
 void EventDisplay::draw(StiDetectorContainer * detectorContainer)

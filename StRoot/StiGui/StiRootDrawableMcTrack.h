@@ -15,7 +15,8 @@ public:
     StiRootDrawableMcTrack();
     virtual ~StiRootDrawableMcTrack();
     virtual void setStMcTrack(const StMcTrack * mcTrack);
-    virtual void reset();
+    virtual void reset(); 
+    virtual void draw();
 };
 
 
