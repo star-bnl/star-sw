@@ -162,8 +162,8 @@ Int_t StFtpcPrimaryMaker::Make(){
        ptrk->psi = ptrk->psi + C_2PI;
     }
     ptrk->psi = ptrk->psi * C_DEG_PER_RAD;
-    ptrk->tanl  = trk->p[2];
     ptrk->invpt = 1./sqrt(trk->p[0]*trk->p[0]+trk->p[1]*trk->p[1]);
+    ptrk->tanl  = trk->p[2] * ptrk->invpt;
     ptrk->curvature = trk->curvature;
 
     Int_t i = 0;
