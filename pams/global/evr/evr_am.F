@@ -69,7 +69,7 @@ CC:>----------------------------------------------------------------------
       REAL	dr
       REAL      x0(maxtr),y0(maxtr),z0(maxtr)
       REAL	phi0(maxtr),tanl(maxtr)
-      REAL      psi,p,r0,phi,b,z,tanla
+      REAL      psi,ppt,xx0,yy0,b,zz0,tanla
       INTEGER   icharge
       REAL	xp(2),x(4)
       REAL	zsum(100),seed,zmax
@@ -107,11 +107,11 @@ C=== decide which tracks to use===
               endif
               psi = tptrack(ipnt).psi
              icharge = tptrack(ipnt).q
-              p = 1/tptrack(ipnt).invp
+              ppt = 1/tptrack(ipnt).invp
               tanla = tptrack(ipnt).tanl
-              r0 = tptrack(ipnt).r0
-              phi = tptrack(ipnt).phi0
-              z = tptrack(ipnt).z0
+              xx0 = tptrack(ipnt).r0*cosd(tptrack(ipnt).phi0)
+              yy0 = tptrack(ipnt).r0*sind(tptrack(ipnt).phi0)
+              zz0 = tptrack(ipnt).z0
            elseif (evrpar(1).use.eq.1) then
               if (match_flag) then
                  ipnt = evt_match(i).idsvt
@@ -120,25 +120,25 @@ C=== decide which tracks to use===
               endif
               psi = svt_track(ipnt).psi
              icharge = sign(1.0,svt_track(ipnt).invpt)
-              p = 1/abs(svt_track(ipnt).invpt)
+              ppt = 1/abs(svt_track(ipnt).invpt)
               tanla = svt_track(ipnt).tanl
-              r0 = svt_track(ipnt).r0
-              phi = svt_track(ipnt).phi0
-              z = svt_track(ipnt).z0
+              xx0 = svt_track(ipnt).r0*cosd(svt_track(ipnt).phi0)
+              yy0 = svt_track(ipnt).r0*sind(svt_track(ipnt).phi0)
+              zz0 = svt_track(ipnt).z0
            elseif (evrpar(1).use.eq.2) then
               psi = globtrk(i).psi
              icharge = globtrk(i).icharge
-              p = 1/globtrk(i).invpt
+              ppt = 1/globtrk(i).invpt
               tanla = globtrk(i).tanl
-              r0 = sqrt(globtrk(i).x0**2+globtrk(i).y0**2)
-              phi = atan2(globtrk(i).x0,globtrk(i).y0)*57.29
-              z = globtrk(i).z0
+              xx0 = globtrk(i).x0
+              yy0 = globtrk(i).y0
+              zz0 = globtrk(i).z0
            endif
-           if (p.ge.evrpar(1).ptmin) then
+           if (ppt.ge.evrpar(1).ptmin) then
               b = 5.0
               xp(1) = 0.0
               xp(2) = 0.0
-              call evr_project_track(psi,icharge,p,tanla,r0,phi,b,z,xp,x)
+              call evr_project_track(psi,icharge,ppt,tanla,xx0,yy0,b,zz0,xp,x)
               k = k + 1
 	      x0(k) = x(1)
 	      y0(k) = x(2)
@@ -245,9 +245,9 @@ cc        privert(index).ntch = k
         privert(index).x = xv
         privert(index).y = yv
         privert(index).z = zv
-        privert(index).iflag  = 1     ! found
-        privert(index).vtx_id  = 1    ! primary
-        privert(index).n_daughters  = 0
+        privert(index).iflag  = 1              ! found
+        privert(index).vtx_id  = 1             ! primary
+        privert(index).n_daughters  = k
         privert(index).pchi2  = 0
         privert(index).id_aux_ent  = 0
 
@@ -389,19 +389,19 @@ c  Calcualate the determinant
 999	return
 	end
 C
-      SUBROUTINE EVR_PROJECT_TRACK(psi,q,p,tanl,r0,phi,bfld,z0,xp,x)
+      SUBROUTINE EVR_PROJECT_TRACK(psi,q,pt,tanl,x0,y0,bfld,z0,xp,x)
       IMPLICIT NONE
 CC:>----------------------------------------------------------------------
 CC: INPUT ARGUMENTS  :	
 CC:                       psi     !azimuthal angle for pt at first point
 CC:                               !on track
 CC:                       q       !charge
-CC:                       p       !momentum of track
+CC:                       pt      !transverse momentum of track
 CC:                       tanl    !tangent of dip angle at first point on track
-CC:                       r0      !radial coordinate of first point
-CC:                       phi     !azimuthal angle of first point
-CC:                       bfld    !magnetic field in kG
+CC:                       x0      !x
+CC:                       y0      !y
 CC:                       z0      !z coord of first point on track
+CC:                       bfld    !magnetic field in kG
 CC:                       xp      !x & y coord. of new point
 CC:
 CC: OUTPUT ARGUMENTS : 	x(4)	!xyz coord. of point of closest approach
@@ -419,11 +419,11 @@ CC: STATUS	     : Test
 CC:
 CC:>---------------------------------------------------------------------
 
-      REAL psi,p,tanl,r0,phi,bfld,z0
+      REAL psi,pt,tanl,x0,y0,bfld,z0
       INTEGER q,i
       REAL rh,phih,psin
       REAL xp(2),xc(2),x(4)
-      REAL x0,y0,axb,arg,dphih,ds,dz
+      REAL axb,arg,dphih,ds,dz
       REAL x1(2),x2(2),yy1,yy2,zz1,zz2
       REAL a,b,c,ka
       DATA ka / 0.0003 /
@@ -441,17 +441,7 @@ C
 C
 C now find rh, the radius of the helix
 C
-      rh = p/abs(ka*float(q)*bfld)
-C
-C next calculate x0 and y0, the first points on the track
-C
-      if( phi.ge.-90.0.and.phi.le.90.0 ) then
-         x0 = r0/sqrt(1.0 + tand(phi)**2)
-         y0 = x0*tand(phi)
-      else
-         x0 = -r0/sqrt(1.0 + tand(phi)**2)
-         y0 = x0*tand(phi)
-      endif
+      rh = pt/abs(ka*float(q)*bfld)
 C
 C now calculate the coords of the centre of the helix
 C
