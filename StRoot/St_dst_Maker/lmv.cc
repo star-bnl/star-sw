@@ -1,5 +1,8 @@
-// $Id: lmv.cc,v 1.8 1999/12/15 01:29:54 nystrand Exp $
+// $Id: lmv.cc,v 1.9 2000/01/25 16:01:49 fisyak Exp $
 // $Log: lmv.cc,v $
+// Revision 1.9  2000/01/25 16:01:49  fisyak
+// Devorce with StAF
+//
 // Revision 1.8  1999/12/15 01:29:54  nystrand
 // changed return code to kStWarn when no vertex is found (needed by StPrimaryMaker)
 //
@@ -61,13 +64,13 @@
 #include "Stypes.h"
 #include "math_constants.h"
 
-#include "fortranc.h"
+#include "StarCallf77.h"
 extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 #define gufld F77_NAME(gufld,GUFLD)
 //#include "StMagF/StMagF.h"
 
 
-//static const char rcsid[] = "$Id: lmv.cc,v 1.8 1999/12/15 01:29:54 nystrand Exp $";
+//static const char rcsid[] = "$Id: lmv.cc,v 1.9 2000/01/25 16:01:49 fisyak Exp $";
 
 long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
 {

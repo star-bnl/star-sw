@@ -1,5 +1,8 @@
-// $Id: StKinkLocalTrack.cc,v 1.7 1999/12/07 21:47:31 wdeng Exp $
+// $Id: StKinkLocalTrack.cc,v 1.8 2000/01/25 16:01:48 fisyak Exp $
 // $Log: StKinkLocalTrack.cc,v $
+// Revision 1.8  2000/01/25 16:01:48  fisyak
+// Devorce with StAF
+//
 // Revision 1.7  1999/12/07 21:47:31  wdeng
 // Made change to please the compiler
 //
@@ -18,7 +21,9 @@
 
 #include "StKinkLocalTrack.hh"
 #include "SystemOfUnits.h"
-
+#ifndef ST_NO_NAMESPACES
+using namespace units;
+#endif
 StKinkLocalTrack::StKinkLocalTrack():
   mHelix(0, 0, 0, StThreeVectorD()) 
 {

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDb.h,v 1.12 2000/01/11 15:49:52 hardtke Exp $
+ * $Id: StTpcDb.h,v 1.13 2000/01/25 16:01:10 fisyak Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDb.h,v $
+ * Revision 1.13  2000/01/25 16:01:10  fisyak
+ * Devorce with StAF
+ *
  * Revision 1.12  2000/01/11 15:49:52  hardtke
  * get Electronics table from Calibrations database, Fix error messages
  *
@@ -34,7 +37,7 @@
 
 
 #ifndef __CINT__
-#include "fortranc.h"
+#include "StarCallf77.h"
 #define numberOfPadsAtRow_ F77_NAME(numberofpadsatrow,NUMBEROFPADSATROW)
 extern "C" {
 int type_of_call numberOfPadsAtRow_(int *row);
