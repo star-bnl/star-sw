@@ -1,5 +1,8 @@
-// $Id: StKinkMaker.cxx,v 1.12 1999/07/17 00:31:24 genevb Exp $
+// $Id: StKinkMaker.cxx,v 1.13 1999/08/02 18:41:05 wdeng Exp $
 // $Log: StKinkMaker.cxx,v $
+// Revision 1.13  1999/08/02 18:41:05  wdeng
+// Change if{ } range. Use new loop-variable name.
+//
 // Revision 1.12  1999/07/17 00:31:24  genevb
 // Use StMessMgr
 //
@@ -75,8 +78,7 @@ ClassImp(StKinkMaker)
   //_____________________________________________________________________________
 StKinkMaker::StKinkMaker(const char *name):
     StMaker(name),
-    m_tkfpar(0),
-    mKinkLocalTrack(0)
+    m_tkfpar(0)
 {
   m_kinkEvalOn = kTRUE;
 }
@@ -207,16 +209,16 @@ Int_t StKinkMaker::Make(){
 					 phase*radian,
 					 origin*centimeter,
 					 h);
-      }
-    
-    if(((*tempTrack).getStartRadius2D()<tkfpar->vertexRMin2D ) &&
-       ((*tempTrack).getEndRadius2D()>tkfpar->vertexRMax2D )) 
-      continue; 
-    
-    if(((*tempTrack).getStartRadius2D()<tkfpar->vertexRMax2D ) ||
-       ((*tempTrack).getEndRadius2D()>tkfpar->vertexRMin2D ))	
-      {
-	trackArray->Add(tempTrack);
+	
+	if(((*tempTrack).getStartRadius2D()<tkfpar->vertexRMin2D ) &&
+	   ((*tempTrack).getEndRadius2D()>tkfpar->vertexRMax2D )) 
+	  continue; 
+	
+	if(((*tempTrack).getStartRadius2D()<tkfpar->vertexRMax2D ) ||
+	   ((*tempTrack).getEndRadius2D()>tkfpar->vertexRMin2D ))	
+	  {
+	    trackArray->Add(tempTrack);
+	  }
       }
   }
   
@@ -334,7 +336,7 @@ Int_t StKinkMaker::Make(){
 	  parentMom   = myTrack1->helix().momentumAt(p1PathLength, B);
 	  daughterMom = myTrack2->helix().momentumAt(p2PathLength, B);
 	  
-	  decayAngle = 57.3*parentMom.angle(daughterMom);
+	  decayAngle = radToDeg*parentMom.angle(daughterMom);
 	  if(decayAngle<tkfpar->thetaMin) continue;
 	  
 	  Float_t xn1[3], xn2[3], sxz1, syz1, sxz2, syz2, point1AtDca[3], point2AtDca[3];
@@ -502,11 +504,11 @@ Int_t StKinkMaker::Make(){
 		Int_t parentMcId;
 		Int_t parentPid;
 		
-		for(Int_t x=0; x<tptTrack->GetNRows(); x++)
+		for(Int_t xl=0; xl<tptTrack->GetNRows(); xl++)
 		  {
 		    if(tptPtr1->id_globtrk == myTrack1->getId())
 		      {
-			for(Int_t y=0; y<tteEval->GetNRows(); y++)
+			for(Int_t yl=0; yl<tteEval->GetNRows(); yl++)
 			  {
 			    if(tteEPtr1->rtrk == tptPtr1->id)
 			      {
