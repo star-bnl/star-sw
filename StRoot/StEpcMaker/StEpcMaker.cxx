@@ -1,6 +1,9 @@
 //
-// $Id: StEpcMaker.cxx,v 1.2 2000/05/15 21:53:57 subhasis Exp $
+// $Id: StEpcMaker.cxx,v 1.3 2000/05/16 21:48:32 subhasis Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.3  2000/05/16 21:48:32  subhasis
+// new checks for events with no clusters
+//
 // Revision 1.2  2000/05/15 21:53:57  subhasis
 // initialversion
 //
@@ -69,7 +72,7 @@ StEpcMaker::StEpcMaker(const char *name):StMaker(name){
 //_____________________________________________________________________________
 StEpcMaker::~StEpcMaker(){
 }
-//_____________________________________________________________________________
+//________________________________________________________________________
 Int_t StEpcMaker::Init(){
 //Making QA histgrams
   // for points
@@ -86,7 +89,7 @@ Int_t StEpcMaker::Init(){
 
   return StMaker::Init();
 }  
-//_____________________________________________________________________________
+//_________________________________________________________________________
 Int_t StEpcMaker::Make(){
   if (!m_DataSet->GetList()){   //if DataSet is empty, create object and fill it
   //
@@ -102,6 +105,7 @@ Int_t StEpcMaker::Make(){
     St_DataSetIter itr(GetDataSet("emc_hits"));
    Int_t nhitsw =0;
    Int_t nhit =0;
+   Int_t cluster_tot=0;
 
     while ( (hit = (StEmcHitCollection *)itr()) ) {
       if(hit->GetTitle() == tit){
@@ -110,24 +114,32 @@ Int_t StEpcMaker::Make(){
         nhit +=nhitsw;
         if(nhitsw > 0){
           if(!strcmp(name.Data(),"bemc")){
-          cout <<" Name "<< name.Data() <<"  Hits " << nhitsw << endl;
+          // cout <<" Name "<< name.Data() <<"  Hits " << nhitsw << endl;
           hits = (StEmcHitCollection *)hit;
           }
           else if(!strcmp(name.Data(),"bsmde")){ 
-          cout <<" Name "<< name.Data() <<"  Hits " << nhitsw << endl;
+          // cout <<" Name "<< name.Data() <<"  Hits " << nhitsw << endl;
           hit_e = (StEmcHitCollection *)hit;
           }
           else if(!strcmp(name.Data(),"bsmdp")){
-          cout <<" Name "<< name.Data() <<"  Hits " << nhitsw << endl;
+          // cout <<" Name "<< name.Data() <<"  Hits " << nhitsw << endl;
           hit_p = (StEmcHitCollection *)hit;
           } 
         }   // nhitsw if end
-    else if(nhit<=0){
+    else{
           cout <<" nhitsw<=0 Name "<< hit->GetName()<<"  Hits " << nhitsw << endl;
-	return kStWarn;
+//	return kStWarn;
         }
       } // tit if end
    } // while loop end for StEmcHitCollection
+
+   cout<<" Total number of hits **"<<nhit<<endl;
+
+//If there is no Emc hit, return
+  if(nhit<=0){
+    cout<<" StEpcMaker:: No Emc Hits Found ***, Returning"<<endl;
+    return kStWarn;
+  }
 
 //  If there is EMC hit, then get the clusters
 
@@ -140,7 +152,8 @@ Int_t StEpcMaker::Make(){
   if(hit0 != 0){
       if(hit0->GetTitle() == tit){
         Int_t nhit0 = hit0->Nclusters();
-          cout <<"  Hit0  " << nhit0 << endl;
+        cluster_tot +=nhit0;
+         // cout <<"  Hit0  " << nhit0 << endl;
       }
    }
 
@@ -149,7 +162,8 @@ Int_t StEpcMaker::Make(){
   if(hit1 != 0){
       if(hit1->GetTitle() == tit){
         Int_t nhit1 = hit0->Nclusters();
-          cout <<"  Hit1  " << nhit1 << endl;
+        cluster_tot +=nhit1;
+         // cout <<"  Hit1  " << nhit1 << endl;
       }
    }
 
@@ -158,10 +172,20 @@ Int_t StEpcMaker::Make(){
   if(hit2 != 0){
       if(hit2->GetTitle() == tit){
         Int_t nhit2 = hit2->Nclusters();
-          cout <<"  Hit2  " << nhit2 << endl;
+        cluster_tot +=nhit2;
+         // cout <<"  Hit2  " << nhit2 << endl;
       }
    }
 }
+
+   cout<<" Total number of clusters **"<<cluster_tot<<endl;
+
+//If there is no Emc cluster, return
+  if(cluster_tot<=0){
+    cout<<" StEpcMaker::  No Emc Cluster Found ***, Returning"<<endl;
+    return kStWarn;
+  }
+
 
   // Getting tracks from globals
    
@@ -169,7 +193,7 @@ Int_t StEpcMaker::Make(){
   St_DataSetIter matchI(match);
  
   St_dst_track     *globtrk  = (St_dst_track *) matchI("globtrk");
-//  long NGlbTrk = globtrk->GetNRows(); 
+  long NGlbTrk = globtrk->GetNRows(); 
 
 //******Creating StPointCollection and calling findPoints
 	StPointCollection *point = new StPointCollection("point");
@@ -187,7 +211,7 @@ else
   }
 return kStOK;
 }
-//_____________________________________________________________________________
+//_________________________________________________________________________
 
 void StEpcMaker::MakeHistograms()
 {
@@ -231,7 +255,7 @@ void StEpcMaker::MakeHistograms()
             }
           }
 }
-//----------------------------------------------------------------------------
+//-------------------------------------------------------------------------
 Int_t StEpcMaker::fillStEvent()
 {
   if(!m_DataSet)return kStOK;
