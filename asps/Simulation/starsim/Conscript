@@ -36,14 +36,14 @@ $CPPPATH .= $main::PATH_SEPARATOR . $env->{Packages}->{MYSQL}->{INCDIR};
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/include";
 $CPPPATH .= $main::PATH_SEPARATOR . $env->{ENV}->{CERN_ROOT} . "/src/pawlib/paw/ntuple";
 $CPPFLAGS  = "-DCERNLIB_DZDOC -DCERNLIB_NONEWL -DCERNLIB_SHL -DCERNLIB_HADRON -DCERNLIB_BSLASH -DCERNLIB_HIGZ -DCERNLIB_CG";
-if ($STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^i386/ or $STAR_HOST_SYS =~ /^sl/) {
+if ($STAR_SYS =~ /^rh/ or $STAR_SYS =~ /^i386/ or $STAR_SYS =~ /^sl/) {
   $FPPFLAGS .= " -DCERNLIB_LINUX";
   $CPPFLAGS .= " -DCERNLIB_LINUX";
 }
-if ($STAR_SYS =~ /^rh8/ or $STAR_SYS =~ /^rh9/ or $STAR_HOST_SYS =~ /^sl/) {
-  $FPPFLAGS .= " -DCERNLIB_MYSQL";
+if ($STAR_SYS =~ /^rh8/ or $STAR_SYS =~ /^rh9/ or $STAR_SYS =~ /^sl/) {
+  $FPPFLAGS .= " -DCERNLIB_MYSQL -DCERNLIB_QMGLIBC";
   $CPPFLAGS .= " -DCERNLIB_MYSQL";
-  $CPPFLAGS  = " -Df2cFortran -DCERNLIB_QMGLIBC";
+  $CPPFLAGS .= " -Df2cFortran -DCERNLIB_QMGLIBC";
 }
 if ($FC =~ /pgf77/) { 
   $FC       = $env->{G77}; print "set FC => $FC ==============================\n" if $param::debug;
@@ -81,6 +81,9 @@ foreach my $s (@src) {
     next if $ss =~ /atmain\/sterror\.age/;
     next if $ss =~ /deccc\/fputools\.c/ and $FC !~ /g77/;
     next if $ss =~ /deccc\/ctype\.c/ and $STAR_SYS !~ /^rh9/;
+#    next if $ss =~ /comis\/csallo\.c/ and $STAR_SYS !~ /^sl/;
+#    next if $ss =~ /comis\/mdext\.F/ and $STAR_SYS !~ /^sl/;
+#    next if $ss =~ /comis\/mhloc\.F/ and $STAR_SYS !~ /^sl/;
     push @sources, $ss; 
   }
 }
