@@ -46,8 +46,8 @@ static int rowEnd[MAX_LOGICAL_ROWS] ;
 static uint adcOff[MAX_LOGICAL_ROWS][PADS_PER_ROW] ;
 static ushort cppOff[MAX_LOGICAL_ROWS][PADS_PER_ROW] ;
 #else
-extern uint adcOff[ABS_ROWS][MAX_P] ;
-extern uint cppOff[ABS_ROWS][MAX_P] ;
+//extern uint adcOff[ABS_ROWS][MAX_P] ;
+//extern uint cppOff[ABS_ROWS][MAX_P] ;
 #endif
 
 
@@ -73,7 +73,7 @@ static uint *pres1 = (uint *) 0x300 ;		/* size 256 bytes (i.e. MAXIMUM 64 old cl
 static uint *pres2 = (uint *) 0x400 ;		/* size 256 bytes (i.e. MAXIMUM 64 new clusters) */
 static struct resx *rr = (struct resx *) 0x500 ;	/* sizeof(resx[0]) */
 #else  /* UNIX_OFFLINE */
-extern ushort adc8to10[256];
+//extern ushort adc8to10[256];
 static uint pres1[500], pres2[500] ;
 static struct resx rr_local ;
 static struct resx *rr = &rr_local ;
@@ -191,6 +191,22 @@ int croatFinder(u_char *adcin, ushort *cppin, uint *outres)
     uint rows ;
 
     register struct resx  *r ;
+
+    ushort adc8to10[256];
+ 
+    int adcOff[ABS_ROWS][MAX_P] ;
+    int cppOff[ABS_ROWS][MAX_P] ;
+    
+    /* fill adcOff and cppOff arrays with offsets  */
+    for( i=0; i<ABS_ROWS; i++) 
+	{
+	    int j;
+	    for( j=0; j<MAX_P; j++) 
+		{
+		    adcOff[i][j] = i*MAX_T*MAX_P + j*MAX_T ;
+		    cppOff[i][j] = i*MAX_C*MAX_P + j*MAX_C ;	/* 2 entities each...  */
+		}
+	}
 
 
     padrows = outres ;	/* reserve this space */
