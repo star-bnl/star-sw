@@ -15,6 +15,7 @@
 * 7/30/98 - K. Turner - change to use new utility kumacs
 * 8/10/98 - K. Turner - added nid to call to write_table_to_ntuple#close_disk
 * 8/10/98 - K. Turner - fixed for change to tpg_init
+* 8/26/98 - K. Turner - fix for change to tss_init
 * 
 ************************************************************************
 ************************************************************************
@@ -105,7 +106,8 @@
   
 
 * tpc slow sim init
-    exec create_tables_tpc#tss [tpc_sector_first] [tpc_sector_last]
+  exec create_tables_tpc#tss [tpc_sector_first] [tpc_sector_last]
+    exec tss_init#read
     exec tss_init#init [tpc_sector_first] [tpc_sector_last] 
     
 * tpc unpack raw init
