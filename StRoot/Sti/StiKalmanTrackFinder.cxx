@@ -82,7 +82,16 @@ StiKalmanTrackFinder::~StiKalmanTrackFinder()
 
 void StiKalmanTrackFinder::getNewState()
 {
-    cout <<"StiKalmanTrackFinder::getNewState()"<<endl;
+    //cout <<"StiKalmanTrackFinder::getNewState()"<<endl;
+    StiIOBroker* broker = StiIOBroker::instance();
+    
+    if (broker->ktfUseHelixExtrapolation()==true) {
+	//cout <<"Using helix extrapolation"<<endl;
+	StiMaterialInteraction::setExtrapolationType(kHelixExtrapolation);
+    }
+    else {
+	StiMaterialInteraction::setExtrapolationType(kLinearExtrapolation);
+    }
 }
 
 void StiKalmanTrackFinder::reset()

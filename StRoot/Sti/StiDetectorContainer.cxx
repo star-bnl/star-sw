@@ -193,6 +193,9 @@ bool StiDetectorContainer::setPhi(const StiOrderKey& oldOrder)
 */
 bool StiDetectorContainer::moveOut()
 {
+    //remember where we started:
+    const data_node* oldPhiNode = *mphi_it;
+    
     //if there's nowher to go, get out before doing work!
     // mMessenger <<"StiDetectorContainer::moveOut()"<<endl;
     if ( (++mradial_it<mregion->end())==false) {
@@ -201,10 +204,6 @@ bool StiDetectorContainer::moveOut()
 	--mradial_it;
 	return false;
     }
-    
-    ++mradial_it;
-    //remember where we started:
-    const data_node* oldPhiNode = *mphi_it;
     
     if ( (*mradial_it)->getChildCount() == oldPhiNode->getParent()->getChildCount()) {
 	// cout <<"Index into array"<<endl;

@@ -113,7 +113,19 @@ public:
     //max # contiguous layers w/o hit
     virtual void setKTFMaxContiguousNullCount(unsigned int) = 0; 
     virtual unsigned int ktfMaxContiguousNullCount() const = 0;
-    
+
+    //Min search radius to be passed to track finder
+    virtual void setKTFMinSearchRadius(double) = 0;
+    virtual double ktfMinSearchRadius() const = 0;
+
+    //Maxs search radius to be passed to track finder
+    virtual void setKTFMaxSearchRadius(double) = 0;
+    virtual double ktfMaxSearchRadius() const = 0;
+ 
+    //Use helix extrapolation (defaults to line)
+    virtual void setKTFUseHelixExtrapolation(bool) = 0;
+    virtual bool ktfUseHelixExtrapolation() const = 0;
+   
 protected:
     
     //singleton management
