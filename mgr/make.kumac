@@ -26,9 +26,20 @@ list = ''
 if $fexist([pam])=1 then
 list = $shell('find '//[pam]//[cut]);
 endif
-listr= $shell('find $STAR/'//[pam]//[cut]);
-exec load [list] [listr] 
-ami/list
+listr = ''
+file = $STAR/[pam]
+if $fexist([file])=1 then
+  listr= $shell('find $STAR/'//[pam]//[cut]);
+endif
+list_len = $len([list]) + $len([listr])
+l1 = [list]
+l2 = [listr]
+if [list_len]>0 then
+  exec load [list] [listr]  
+  ami/list
+else
+  message 'Domain/package' [pam] 'does not exist nor in your privite area neither in standrad one'
+endif
 return
 **************************************************
 macro load 
