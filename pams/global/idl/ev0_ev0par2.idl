@@ -9,6 +9,7 @@
        float     dlen;       /* cut on dist. of decay from prim. vertex */
        float     alpha_max;  /* Max. abs. value of arm. alpha allowed, only first entry used */
        float     ptarm_max;  /* Max. value of arm. pt allowed, only first entry used*/
+       float     dcapnmin;   /* Min. value of tracks at interaction */
    } ;
 /*  Last mod. for ev0par2: $Data: $  */
 
