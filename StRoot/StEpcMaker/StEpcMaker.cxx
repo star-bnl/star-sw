@@ -1,6 +1,9 @@
 //
-// $Id: StEpcMaker.cxx,v 1.17 2001/12/01 02:44:49 pavlinov Exp $
+// $Id: StEpcMaker.cxx,v 1.18 2001/12/03 22:24:28 pavlinov Exp $
 // $Log: StEpcMaker.cxx,v $
+// Revision 1.18  2001/12/03 22:24:28  pavlinov
+// tuned for case of no tracks
+//
 // Revision 1.17  2001/12/01 02:44:49  pavlinov
 // Cleanp for events with zero number of tracks
 //
@@ -248,7 +251,9 @@ Int_t StEpcMaker::Make()
       mBField = summary->magneticField()/10.; // mBField in Tesla
       cout <<"StEpcMaker::Make() -> mBField(summary->magneticField()) = "
            <<mBField<<"(tesla)"<<endl;
-    } else {
+    }
+    if(fabs(mBField) < 0.01) {
+    // Sometimes StEventSummary get wrong value of field - 3 Dec 2001
       // Get mBField from gufld(,)
       cout <<"Trying to Get the mBField ..."<<endl;
       float x[3] = {0,0,0};
@@ -307,7 +312,7 @@ Int_t StEpcMaker::Make()
     {
       return kStWarn;
     } 
-    else cout<<" findEmcPoint called"<<endl;
+    else cout<<" findEmcPoint called is ok "<<endl;
 
     MakeHistograms(); // Fill QA histgrams
     //------------------------------------------

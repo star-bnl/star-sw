@@ -2,6 +2,9 @@
 // $id$
 //
 // $Log: StPointCollection.cxx,v $
+// Revision 1.14  2001/12/03 22:24:28  pavlinov
+// tuned for case of no tracks
+//
 // Revision 1.13  2001/12/01 02:44:50  pavlinov
 // Cleanp for events with zero number of tracks
 //
@@ -154,16 +157,26 @@ Int_t StPointCollection::findEmcPoints(StEmcClusterCollection* Bemccluster,
   // Getting BemcGeom to obtain radius etc
   BemcGeomIn  = StEmcGeom::getEmcGeom("bemc");
 
+  Int_t *Trcheck;
   if(TrackToFit.size()>0)
   {
     cout<<" Taking Tracks from StEvent for track matching**"<<endl;
     TrackSort(TrackToFit);
-  }
 
   //track check array for checking if the track is matched
-  Int_t *Trcheck = new Int_t[HitTrackEta.size()];
-  
-  for(UInt_t i1=0;i1<HitTrackEta.size();i1++) Trcheck[i1]=0;
+    Trcheck = new Int_t[HitTrackEta.size()];
+    for(UInt_t i1=0;i1<HitTrackEta.size(); i1++) Trcheck[i1]=0;
+  } else { // 3-dec-2001 
+    //
+    // if no tracks !!!
+    //
+    HitTrackEta.clear();
+    HitTrackPhi.clear();
+    HitTrackMom.clear();
+    HitTrackPointer.clear();
+    Trcheck = 0;
+  }
+
 
 // MATCHING****************
 
@@ -187,9 +200,9 @@ Int_t StPointCollection::findEmcPoints(StEmcClusterCollection* Bemccluster,
           return kStWarn;
         }
       }
-	  }
+    }
   }
-  delete [] Trcheck;
+  if (Trcheck) delete [] Trcheck;
   return kStOK;
 }
 //_____________________________________________________________________________
@@ -540,7 +553,7 @@ Int_t StPointCollection::MatchClusterAndTrack(const StMatchVecClus mvec,
         {
           if(MatchFlag!=1)
           {
-            if(Trcheck[it]!=1)
+            if(Trcheck && Trcheck[it]!=1) // 3-dec-2001
             {
               Float_t EtaTrack=E_tvec[it];
               Float_t PhiTrack=P_tvec[it];
