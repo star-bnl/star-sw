@@ -58,7 +58,8 @@ c---<<<<<<<<<<<<<<<<<<<<<<<<
       globtrk_h.nok = globtrk_h.nok + 1
       iglob = globtrk_h.nok
       globtrk(iglob).id = iglob
-      globtrk(iglob).n_point = gtrk(igtrk).nhit
+      globtrk(iglob).n_point = gtrk(igtrk).ntpc+
+     +     1000*(gtrk(igtrk).nhit-gtrk(igtrk).ntpc)
       globtrk(iglob).n_max_point = 0
       globtrk(iglob).n_fit_point = gtrk(igtrk).nfit
       globtrk(iglob).icharge = sign(1.0,gtrk(igtrk).p(2))
@@ -211,7 +212,19 @@ C---  <<<<<<<
       endif
 
       if( itpct .ne. 0 .and. isvtt .ne. 0) then
-         globtrk(iglob).det_id = kTpcSsdSvtIdentifier
+
+         if((globtrk(iglob).x_first(1)**2+globtrk(iglob).x_first(2)**2)
+     +        .gt. 400) then
+            
+            globtrk(iglob).det_id = kTpcSsdId
+         else
+            if( (gtrk(igtrk).nhit .eq. gtrk(igtrk).ntpc+1 .and.
+     +       ipriv .eq. 0) .or. (gtrk(igtrk).nhit.eq.gtrk(igtrk).ntpc+2))then
+               globtrk(iglob).det_id = kTpcSvtId
+            else
+               globtrk(iglob).det_id = kTpcSsdSvtId
+            endif
+        endif
          if( ipriv .eq. 0) then
             globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
      +           flag)))*500.+gtrk(igtrk).flag 
@@ -229,8 +242,9 @@ C---  <<<<<<<
      +           flag)))*300.+gtrk(igtrk).flag 
          endif
       elseif( itpct .eq. 0) then
-         globtrk(iglob).det_id = kSsdSvtId
-         if( ipriv .eq. 0) then
+ 
+            globtrk(iglob).det_id = kSsdSvtId
+          if( ipriv .eq. 0) then
             globtrk(iglob).iflag = (sign(1.0,float(gtrk(igtrk).
      +           flag)))*200.+gtrk(igtrk).flag 
          else
@@ -242,7 +256,7 @@ C---  <<<<<<<
          globtrk(iglob).length=99999.9
       endif
       globtrk(iglob).impact = 0.
-      globtrk(iglob).curvature = gtrk(igtrk).p(2)
+      globtrk(iglob).curvature = 1/gtrk(igtrk).p(2)
       globtrk(iglob).method = 0
       globtrk(iglob).map(1) = 0
       globtrk(iglob).map(2) = 0
