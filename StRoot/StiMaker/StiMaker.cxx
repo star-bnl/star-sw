@@ -7,6 +7,9 @@
 //
 //
 // $Log: StiMaker.cxx,v $
+// Revision 1.109  2003/01/22 20:06:26  andrewar
+// Changed includes to point to new libraries (StiTpc, StiSvt, etc)
+//
 // Revision 1.108  2002/12/19 19:29:42  pruneau
 // *** empty log message ***
 //
@@ -76,11 +79,13 @@
 #include "Sti/StiIOBroker.h"
 #include "Sti/StiKalmanTrackFinder.h"
 #include "Sti/StiDefaultTrackFilter.h"
-#include "Sti/Tpc/StiTpcDetectorGroup.h"
-#include "Sti/Svt/StiSvtDetectorGroup.h"
-#include "Sti/Emc/StiEmcDetectorGroup.h"
 #include "Sti/Star/StiStarDetectorGroup.h"
+#include "StiTpc/StiTpcDetectorGroup.h"
+#include "StiSvt/StiSvtDetectorGroup.h"
+#include "StiEmc/StiEmcDetectorGroup.h"
+
 #include "StiGui/StiRootDisplayManager.h"
+
 #include "StiDefaultToolkit.h"
 #include "StiMaker.h"
 
