@@ -1,5 +1,8 @@
-* $Id: tph.F,v 1.6 1998/08/31 17:03:43 hardtke Exp $
+* $Id: tph.F,v 1.7 1998/09/10 12:56:08 sakrejda Exp $
 * $Log: tph.F,v $
+* Revision 1.7  1998/09/10 12:56:08  sakrejda
+* mod function used to get the row number
+*
 * Revision 1.6  1998/08/31 17:03:43  hardtke
 * fix bug in alpha estimation
 *
@@ -333,7 +336,7 @@ c Loop over the sequences in this cluster:
            jseq = tpcluster(jtpcl).jseq
            isec = tpcluster(jtpcl).tpc_row/100
          if(isec.eq.CurrentSector) then      
-           irow = tpcluster(jtpcl).tpc_row-isec*100
+           irow = mod(tpcluster(jtpcl).tpc_row,100)
 c ??? Check index?
            npads = pads_per_row(irow)
            if(nseq.ge.tclpar(1).min_nseq)then
