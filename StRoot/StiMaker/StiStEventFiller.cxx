@@ -1,11 +1,16 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.19 2003/05/15 03:50:26 andrewar Exp $
+ * $Id: StiStEventFiller.cxx,v 2.20 2003/07/01 20:25:28 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.20  2003/07/01 20:25:28  calderon
+ * fillGeometry() - use node->getX(), as it should have been since the beginning
+ * impactParameter() - always use the innermos hit node, not just for globals
+ * removed extra variables which are no longer used.
+ *
  * Revision 2.19  2003/05/15 03:50:26  andrewar
  * Disabled call to filldEdxInfo for the SVT. Checks need to be
  * applied to make sure the detector is active before calculator
@@ -219,14 +224,6 @@ StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0), mTrkNodeMap()
   dEdxTpcCalculator.setDetectorFilter(kTpcId);
   dEdxSvtCalculator.setDetectorFilter(kSvtId);
   
-  //helix = new StHelix(0.,0.,0.,StThreeVector<double>(-999,-999,-999));
-
-  
-  origin=new StThreeVectorF(0,0,0);
-  mom=new StThreeVectorF(0,0,0);
-  //use origin, a zero vector (currently) to init StHelixModel
-  helix = new StHelixModel(0,0.,0.,0.,*origin,*mom,-1);
-
   originD = new StThreeVectorD(0,0,0);
   physicalHelix = new StPhysicalHelixD(0.,0.,0.,*originD,-1);
  
@@ -252,7 +249,6 @@ StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0), mTrkNodeMap()
 StiStEventFiller::~StiStEventFiller()
 {
   cout <<"StiStEventFiller::~StiStEventFiller()"<<endl;
-  delete helix;
 }
 
 //Helper functor, gotta live some place else, just a temp. test of StiKalmanTrack::stHits() method
@@ -504,7 +500,7 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, StiKalmanTrack* track, bool
     node = track->getOuterMostHitNode();
   else
     node = track->getInnerMostHitNode();
-  StThreeVectorF origin(node->getRefPosition(),node->getY(),node->getZ());
+  StThreeVectorF origin(node->getX(),node->getY(),node->getZ());
   origin.rotateZ(node->getRefAngle());
   // making some checks.  Seems the curvature is infinity sometimes and
   // the origin is sometimes filled with nan's...
@@ -712,32 +708,19 @@ float StiStEventFiller::impactParameter(StiKalmanTrack* track)
     {
       return DBL_MAX;
     }
-  StiKalmanTrackNode*	lastNode;
   StiKalmanTrackNode*	node;
 
-  if (track->isPrimary())
-    {
-      lastNode = track->getInnerMostNode();
-      //cout << " ///////////////////// LAST NODE :" << *lastNode<<endl;
-      node = static_cast<StiKalmanTrackNode*>(lastNode->getParent());
-    }
-  else
-    node = track->getInnerMostNode();
-  //cout << "  Previous node:"<<*node<<endl;
-  //const StThreeVector<double> momentum = node->getGlobalMomentum();
-  //cout << "StiKalmanTrack  ------->  px:"<< momentum.x() << " py:"<<  momentum.y() << " pz:"<< momentum.z()<<endl;
-  StThreeVector<double> origin(node->getRefPosition(), node->getY(),node->getZ());
-  origin.rotateZ(node->getRefAngle());
+  node = track->getInnerMostNode();
 
   const StThreeVectorF& vxF = mEvent->primaryVertex()->position();
-  StThreeVector<double> vxD(vxF.x(),vxF.y(),vxF.z());
-
 
   originD->setX(node->getX());
   originD->setY(node->getY());
   originD->setZ(node->getZ());
+
   StThreeVectorD vxDD(vxF.x(),vxF.y(),vxF.z());
   originD->rotateZ(node->getRefAngle());
+
   physicalHelix->setParameters(fabs(node->getCurvature()),
 			       node->getDipAngle(),
 			       node->getPhase()-node->getHelicity()*M_PI/2.,

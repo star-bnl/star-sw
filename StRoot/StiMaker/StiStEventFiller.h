@@ -1,12 +1,17 @@
 //StiStEventFiller.h
 /***************************************************************************
  *
- * $Id: StiStEventFiller.h,v 2.4 2003/04/25 21:41:18 andrewar Exp $
+ * $Id: StiStEventFiller.h,v 2.5 2003/07/01 20:25:28 calderon Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.h,v $
+ * Revision 2.5  2003/07/01 20:25:28  calderon
+ * fillGeometry() - use node->getX(), as it should have been since the beginning
+ * impactParameter() - always use the innermos hit node, not just for globals
+ * removed extra variables which are no longer used.
+ *
  * Revision 2.4  2003/04/25 21:41:18  andrewar
  * Added data memebers.
  *
@@ -115,10 +120,7 @@ private:
 
     unsigned short mStiEncoded;
     //helix parameters
-    StThreeVectorF *origin;
-    StThreeVectorF *mom;
     StThreeVectorD *originD;
-    StHelixModel * helix;
     StPhysicalHelixD * physicalHelix;
 
 
