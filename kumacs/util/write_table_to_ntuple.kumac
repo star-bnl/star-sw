@@ -68,7 +68,13 @@ macro close_disk funit nid
     message  'close file unit, ntuple id: ' [funit] [nid]
     hi/delete [nid]
     close [funit]
- 
+    
+    message ' delete the soc object for the ntuple ' [nid]
+     soc/object/oid [nid]
+     oid = staf_result(1)
+     soc/deleteoid [oid]
+
+    
 return
 
 *******************************************************************
