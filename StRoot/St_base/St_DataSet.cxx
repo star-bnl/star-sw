@@ -204,15 +204,15 @@ void St_DataSet::ls(Int_t depth)
  /////////////////////////////////////////////////////////////////////
  
   TNamed::ls();
+  if (!fList || depth == 1 ) return;
+  if (!depth) depth = 99999;
  
-  if (fList && depth != 1 ) {
-    TIter next(fList);
-    St_DataSet *d=0;
-    while (d = (St_DataSet *)next()) {
-        IncreaseDirLevel();
-        d->ls(depth == 0 ? 0 : --depth);
-        DecreaseDirLevel();
-    }
+  TIter next(fList);
+  St_DataSet *d=0;
+  while (d = (St_DataSet *)next()) {
+    IncreaseDirLevel();
+    d->ls(depth-1);
+    DecreaseDirLevel();
   }
 } 
 #if 0
@@ -363,8 +363,8 @@ void St_DataSet::Shunt(St_DataSet *dataset)
 {
   // Remove object from the original and add it to dataset 
 
-  St_DataSet *par = GetParent();
-  if (par) par->Remove(this);
+  if (fParent) fParent->Remove(this);
+  fParent = 0;
   if (dataset) dataset->Add(this);
 }
 //______________________________________________________________________________
