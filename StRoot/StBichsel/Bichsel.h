@@ -11,13 +11,17 @@
 //#define P03ia
 #include "TString.h"
 #include "dEdxParameterization.h"
+class tpcCorrection_st;
 class Bichsel {
  private: 
   TString               m_Tag;
   dEdxParameterization *m_dEdxParameterization; //!
- public :
+ public:
   Bichsel(const Char_t *tag="bich");
- virtual ~Bichsel() {}
+  virtual ~Bichsel() {}
+  static Double_t GetdEdxResolution(Int_t k=1, Double_t TrackLengthInTPC=60);
+  static Double_t CalcCorrection(const tpcCorrection_st *cor,const Double_t x);
+  static Double_t SumSeries(const Double_t &X,const Int_t &N,const Float_t *params);
   Double_t    GetMostProbableZ(Double_t log10bg, Double_t log2dx = 1., Int_t kase=0) {
     return m_dEdxParameterization->GetMostProbableZ(log10bg,log2dx,kase);
   }
