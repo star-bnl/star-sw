@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 2.12 2003/02/19 06:38:29 genevb Exp $
+// $Id: St_QA_Maker.cxx,v 2.13 2003/02/20 20:09:54 genevb Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 2.13  2003/02/20 20:09:54  genevb
+// Several changes for new trigger scheme, dAu data
+//
 // Revision 2.12  2003/02/19 06:38:29  genevb
 // Rework trigger and mult/event class sections
 //
@@ -186,7 +189,7 @@ void St_QA_Maker::MakeHistEvSum(){
       else
 	tpcChgEast += t->chrg_tpc_in[i]+t->chrg_tpc_out[i];
     }
-    m_glb_trk_chg->Fill(tpcChgEast/tpcChgWest,eventClass);
+    m_glb_trk_chg->Fill(tpcChgEast/tpcChgWest,(float) eventClass);
   }
 }
 

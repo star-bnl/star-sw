@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 2.38 2003/02/19 06:38:29 genevb Exp $
+// $Id: StQABookHist.cxx,v 2.39 2003/02/20 20:09:54 genevb Exp $
 // $Log: StQABookHist.cxx,v $
+// Revision 2.39  2003/02/20 20:09:54  genevb
+// Several changes for new trigger scheme, dAu data
+//
 // Revision 2.38  2003/02/19 06:38:29  genevb
 // Rework trigger and mult/event class sections
 //
@@ -218,11 +221,6 @@ StQABookHist::StQABookHist(const char* type) : QAHistType(type) {
   m_zDcaZf=0;
   m_zDcaPsi=0;
   m_zDcaPhi0=0;
-
-  m_ftpc_chargestepW=0;
-  m_ftpc_chargestepE=0;
-  m_ftpc_fcl_radialW=0;
-  m_ftpc_fcl_radialE=0;
 
   m_pointT=0;
   m_pointF=0;
