@@ -36,5 +36,7 @@ class EMC_SmdReader
     Bank_BSMDADCD mTheSmdAdcD;
     Bank_BSMDPEDR mTheSmdPedR;
     Bank_BSMDRMSR mTheSmdRMSR;
+
+    int            mNSMD;
 };
 #endif

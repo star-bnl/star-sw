@@ -28,7 +28,7 @@ struct Bank_EMCP: public Bank
 
 struct Bank_EMCSECP: public Bank
 {
-  struct Pointer FiberPointer[8] ; /* No of fibere to daq from each subdetector, can be maximum 8 */
+  struct Pointer FiberPointer[12] ; /* No of fibere to daq from each subdetector, can be maximum 12 */
 };
 
 struct Bank_EMCRBP: public Bank
@@ -113,12 +113,12 @@ struct BSMDDATA
   unsigned int    SMDErrorFlag;                 ///< Error from TDC
   unsigned int    ReceivedByteCount;            ///< Total number of channels
   unsigned int    NSmdHits;                     ///< Total number of channels
-  unsigned int    TimeBin[8];                   ///< Time bin for each SMD fiber
-  unsigned short  SMDADCArray[8][4800] ;        ///< Matrix of ADC's as obtained from daq
+  unsigned int    TimeBin[12];                   ///< Time bin for each SMD fiber. Now it has 12 fibers for the PSD detector
+  unsigned short  SMDADCArray[12][4800] ;        ///< Matrix of ADC's as obtained from daq
   unsigned short  SmdE_ADCMatrix[120][150] ;    ///< Matrix of ADC's in Physical Positions for SMD_Eta
   unsigned short  SmdP_ADCMatrix[120][10][15] ; ///< Matrix of ADC's in Physical Positions for SMD_Phi
-  unsigned short  SmdHeader[8][128];            ///< SMDHeader for each fiber
-  unsigned short  HasData[8]; ///< 1 if there is data for that fiber
+  unsigned short  SmdHeader[12][128];            ///< SMDHeader for each fiber
+  unsigned short  HasData[12]; ///< 1 if there is data for that fiber
 };
 
 
