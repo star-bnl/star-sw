@@ -1,5 +1,8 @@
-// $Id: StHistUtil.cxx,v 1.7 2000/01/31 17:22:31 kathy Exp $
+// $Id: StHistUtil.cxx,v 1.8 2000/02/01 00:10:00 lansdell Exp $
 // $Log: StHistUtil.cxx,v $
+// Revision 1.8  2000/02/01 00:10:00  lansdell
+// added check on max value of bins to Overlay methods; set 2D overlay to box plot
+//
 // Revision 1.7  2000/01/31 17:22:31  kathy
 // put chisq hist for globtrk,primtrk tpc+svt in logY scale
 //
@@ -1335,7 +1338,7 @@ Int_t StHistUtil::Overlay1D(Char_t *dirName,Char_t *inHist1,
     hist1f2->SetStats(kFALSE);
 
     hist1f1->SetTitle(hist1f1->GetTitle()+(TString)" and "+hist1f2->GetTitle());
-
+    hist1f2->SetTitle(hist1f1->GetTitle());
 // create a new canvas
     TCanvas *newCanvas = new TCanvas("c1d","Combined 1D Histogram",600,780);
     newCanvas->Draw();
@@ -1363,8 +1366,14 @@ Int_t StHistUtil::Overlay1D(Char_t *dirName,Char_t *inHist1,
     newPad->cd();
 
 // draw the histograms
-    hist1f1->Draw();
-    hist1f2->Draw("Same");
+    if (hist1f1->GetMaximum() >= hist1f2->GetMaximum()) {
+      hist1f1->Draw();
+      hist1f2->Draw("Same");
+    }
+    else {
+      hist1f2->Draw();
+      hist1f1->Draw("Same");
+    }
 
 // make a legend
     TLegend *legend = new TLegend(0.75,0.85,0.98,0.95);
@@ -1442,15 +1451,14 @@ Int_t StHistUtil::Overlay2D(Char_t *dirName,Char_t *inHist1,
 
 // if the two histograms exist, overlay them
   if (n2dHists == 2) {
-    //hist2f1->SetFillColor(4);
-    //hist2f1->SetFillStyle(3006);
-    //hist2f2->SetFillColor(2);
-    //hist2f2->SetFillStyle(3007);
+    hist2f1->SetLineColor(4);
+    hist2f2->SetLineColor(2);
 
     hist2f1->SetStats(kFALSE);
     hist2f2->SetStats(kFALSE);
 
     hist2f1->SetTitle(hist2f1->GetTitle()+(TString)" and "+hist2f2->GetTitle());
+    hist2f2->SetTitle(hist2f1->GetTitle());
 
 // set global title which goes at top of each page of histograms
     const Char_t *gtitle = m_GlobalTitle.Data();
@@ -1479,8 +1487,14 @@ Int_t StHistUtil::Overlay2D(Char_t *dirName,Char_t *inHist1,
     newPad->cd();
 
 // draw the histograms
-    hist2f1->Draw("Surf3Fb");
-    hist2f2->Draw("Surf3FbSame");
+    if (hist2f1->GetMaximum() >= hist2f2->GetMaximum()) {
+      hist2f1->Draw("Box");
+      hist2f2->Draw("BoxSame");
+    }
+    else {
+      hist2f2->Draw("Box");
+      hist2f1->Draw("BoxSame");
+    }
 
 // make a legend
     TLegend *legend = new TLegend(0.75,0.85,0.98,0.95);
