@@ -1,33 +1,67 @@
-macro run nevt=1
+ macro run _ 
+   nevt=1_
+   datadir=$AFS_RHIC/star/data/samples/_
+   mfile=muons_100_ctb.dsl  
+* 
 *
-*
-*
-exec /afs/rhic/star/packages/SL98b/kumacs/util/setup_global_macros.kumac
-*
-*    Import global macro names
-*
-macro/global/import DATA_SAMPLES
-macro/global/import KUMACS_UTIL
-macro/global/import PAMS_CTF_KUMAC 
-*
-exec [KUMACS_UTIL]setup_dir
-*
+* 
+    DEFAULT = _
+./kumacs/util,_
+./kumacs/ctf,_
+./kumacs/chain,_
+./kumacs/tpc,_
+./pams/ctf/kumac,_
+./pams/emc/kumac,_
+./pams/ftpc/kumac,_
+./pams/global/kumac,_
+./pams/svt/kumac,_
+./pams/tpc/kumac,_
+$STAR/kumacs/util,_
+$STAR/kumacs/chain,_
+$STAR/kumacs/ctf,_
+$STAR/kumacs/svt,_
+$STAR/kumacs/tpc,_
+$STAR/pams/ctf/kumac,_
+$STAR/pams/emc/kumac,_
+$STAR/pams/ftpc/kumac,_
+$STAR/pams/gen/kumac,_
+$STAR/pams/global/kumac,_
+$STAR/pams/mwc/kumac,_
+$STAR/pams/svt/kumac,_
+$STAR/pams/tpc/kumac,_
+$STAR/pams/trg/kumac
+    
+   def [DEFAULT]
+ message 'Define default kumac search path as' def
+ 
+
+* 
+ 
+exec setup_dir
+ 
+* 
 *   Open input file
 *
-mfile = [DATA_SAMPLES]muons_100_ctb.dsl
-exec [KUMACS_UTIL]input_g2t_file#init [mfile]
-*
+
+exec input_g2t_file#init [datadir][mfile]
+ 
+* 
 *   Loop over events
-*
-do ie=1,[nevt]
-   exec [KUMACS_UTIL]input_g2t_file#read
-   if ( [ie] .eq. 1 ) then 
-      exec [PAMS_CTF_KUMAC]cts_init 
-      exec [PAMS_CTF_KUMAC]ctu_init 
-   endif 
-  exec [PAMS_CTF_KUMAC]cts_run
-  exec [PAMS_CTF_KUMAC]ctu_run
-  table/print data/ctf/ctb_raw
-  wait
-enddo 
-*
+* 
+ 
+ message 'INITIALIZATION'
+* wait
+ exec cts_init
+ exec ctu_init
+* wait
+ 
+message 'LOOPING OVER EVENTS' 
+* do ie=1,[nevt]
+* exec input_g2t_file#read
+* exec cts_run
+* exec ctu_run
+* table/print data/ctf/ctb_raw
+* wait
+* enddo 
+ 
+* 
