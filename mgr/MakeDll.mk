@@ -1,5 +1,8 @@
-# $Id: MakeDll.mk,v 1.108 1999/09/02 20:14:15 fisyak Exp $
+# $Id: MakeDll.mk,v 1.109 1999/09/02 22:42:06 fisyak Exp $
 # $Log: MakeDll.mk,v $
+# Revision 1.109  1999/09/02 22:42:06  fisyak
+# typo in StEvent
+#
 # Revision 1.108  1999/09/02 20:14:15  fisyak
 # Cleanup for redhat60
 #
@@ -269,7 +272,7 @@ endif
 
 # 	Define internal and external includes dirs
 INC_NAMES := $(addprefix StRoot/,St_base StChain StUtilities StAnalysisUtilities \
-	xdf2root StarClassLibrary StEven  StDbLib) \
+	xdf2root StarClassLibrary StEvent  StDbLib) \
         StRoot .share .share/tables .share/$(PKG) pams inc StDb/include
 #                            StarClassLibrary/include
 INC_DIRS  := $(wildcard $(GEN_DIR) $(SRC_DIRS) $(SRC_DIR)/include)
