@@ -15,7 +15,9 @@ typedef StiObjectFactory<StiHit> StiHitFactory; //OK
 typedef StiObjectFactory<StiKalmanTrack> StiKalmanTrackNodeFactory; //OK
 
 #include "StiEvaluableTrack.h" //OK
-typedef StiObjectFactory<StiEvaluableTrack> StiEvaluableTrackFactory; //OK
+#include "StiGui/StiRootDrawableStiEvaluableTrack.h"
+//typedef StiObjectFactory<StiEvaluableTrack> StiEvaluableTrackFactory; //OK
+typedef StiObjectFactory<StiRootDrawableStiEvaluableTrack> StiEvaluableTrackFactory; //OK
 
 #include "StiDetector.h" //OK
 #include "StiGui/StiRootDrawableDetector.h"

@@ -127,29 +127,23 @@ void StiDetector::write(const char *szFileName){
 
 ostream& operator<<(ostream& os, const StiDetector& d)
 {
-  /*
-  os <<d.isOn()<<" "<<d.isActive()<<" "<<d.isContinuousMedium()<<" "<<d.isDiscreteScatterer()<<" ";
-
-  if (!d.getGas()){ 
-    cout <<"No Gas ";
-  }else{ 
-    os <<*(d.getGas())<<" ";
-  }
-
-  if (!d.getMaterial()){ 
-    cout <<"No Material ";
-  }else{ 
-    os <<*(d.getMaterial())<<" ";
-  }
-/*
-  os <<d.getShapeCode()<<" "<<d.getCenterRadius()<<" "<<d.getCenterRefAngle()<<" ";
-  os <<d.getOrientationAngle()<<" "<<d.getHalfWidth()<<" ";
-  os <<d.getNormalRadius()<<" "<<d.getNormalRefAngle()<<" ";
-  os <<d.getYmin()<<" "<<d.getYmax()<<" ";
-  os <<d.getActivePosition()<<" "<<d.getZCenter()<<" ";
-  os <<d.getHalfDepth()<<" "<<d.getThickness()<<" ";
-  os <<d.getSector()<<" "<<d.getPadrow()<<" "<<d.getName();;
-*/
-  return os;
-
+    os << d.getName()<<"\t"<<d.getPlacement()->getCenterRadius()<<"\t"<<d.getPlacement()->getCenterRefAngle();
+    return os;
+    /*
+      os <<d.isOn()<<" "<<d.isActive()<<" "<<d.isContinuousMedium()<<" "<<d.isDiscreteScatterer()<<" ";
+      
+      if (!d.getGas()){ 
+      cout <<"No Gas ";
+      }else{ 
+      os <<*(d.getGas())<<" ";
+      }
+      
+      if (!d.getMaterial()){ 
+      cout <<"No Material ";
+      }else{ 
+      os <<*(d.getMaterial())<<" ";
+      }
+    */
+    return os;
+    
 }
