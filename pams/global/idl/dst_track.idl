@@ -80,9 +80,7 @@
  *                       The FTPC is the straight number,user should check
  *                       det_id variable to distinguish between two cases.
  *
- *    id_start_vertex    This is always initialized to zero by global and by
- *                       FTPC tracking and FTPC DST filler modules.  It is
- *                       only filled by the primary vertex finder, evr, to
+ *    id_start_vertex    It is filled by the primary vertex finder, evr, to
  *                       indicate the following:
  *                          (1) whether the track was used in the final
  *                              iteration of the primary vertex fit
@@ -95,6 +93,16 @@
  *                             1, if trk was used in final primary vertex fit}
  *                           +{10*dst_vertex(final prim vrtx row).id, if track
  *                             passes final 3D DCA primary vertex cut}
+ *                       It is filled by the FTPC DST filler maker StFtpcGlobalMaker
+ *                       to indicate whether the track is a primary track candidate or not.
+ *                       (Primary track candiates are tracks which pass the 3D DCA
+ *                       primary vertex cut defined in StarDb/ftpc/ftpcTrackingPars->maxDca):
+ *                          = 0  if the track does not pass the cut
+ *                          = 10*dst_vertex(vrtx used for FTPC tracking row).id, if the
+ *                            track passes the cut
+ *                      It is filled by the FTPC DST filler maker StFtpcPrimaryMaker
+ *                      for all FTPC primary tracks 
+ *                          = 10*dst_vertex(final prim vrtx row).id
  *
  *       map[2]          Packed 64-bits used to indicate either the
  *                       continuity or gaps in tracks as they cross different
@@ -242,7 +250,7 @@
   float      tanlout;             /* tan(dip) =pz/pt at r0out               */
   float      invptout;            /* 1/pt at r0out (GeV/c)^(-1)             */
  } ;
-/*  Last mod. for dst_track:   $Date: 2001/09/27 17:12:53 $ */
+/*  Last mod. for dst_track:   $Date: 2002/11/29 20:52:04 $ */
 
 
 
