@@ -1,5 +1,8 @@
-// $Id: St_TLA_Maker.cxx,v 1.8 1999/03/10 15:02:07 fine Exp $
+// $Id: St_TLA_Maker.cxx,v 1.9 1999/03/11 03:33:16 perev Exp $
 // $Log: St_TLA_Maker.cxx,v $
+// Revision 1.9  1999/03/11 03:33:16  perev
+// new schema
+//
 // Revision 1.8  1999/03/10 15:02:07  fine
 // HTML link to STAR problem report form has been introduced
 //
@@ -36,7 +39,6 @@ ClassImp(St_TLA_Maker)
 
 //_____________________________________________________________________________
 St_TLA_Maker::St_TLA_Maker(const char *name, const char *title):StMaker(name,title){
-   drawinit=kFALSE;
 }
 //_____________________________________________________________________________
 St_TLA_Maker::~St_TLA_Maker(){
@@ -44,23 +46,22 @@ St_TLA_Maker::~St_TLA_Maker(){
 //_____________________________________________________________________________
 Int_t St_TLA_Maker::Init(){
 // Create tables
-   St_DataSetIter       local(gStChain->DataSet("params"));
+   St_DataSetIter       local(GetDataBase("params"));
 // Create Histograms    
    return StMaker::Init();
 }
 //_____________________________________________________________________________
 Int_t St_TLA_Maker::Make(){
 //  PrintInfo();
-  if (!m_DataSet->GetList())  {//if DataSet is empty fill it
-}
+
  return kStOK;
 }
 //_____________________________________________________________________________
 void St_TLA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_TLA_Maker.cxx,v 1.8 1999/03/10 15:02:07 fine Exp $\n");
+  printf("* $Id: St_TLA_Maker.cxx,v 1.9 1999/03/11 03:33:16 perev Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
-  if (gStChain->Debug()) StMaker::PrintInfo();
+  if (Debug()) StMaker::PrintInfo();
 }
 
