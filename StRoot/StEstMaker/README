@@ -23,3 +23,6 @@ Modification history
 
 12/05/00 Lilian Martin
 - First CVS commit.
+01/26/01 Lilian Martin
+- Major changes. Maker separated from the tracking code
+- Some memory leaks fixed
