@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 2.13 2004/07/15 16:36:24 ullrich Exp $
+ * $Id: StHit.cxx,v 2.14 2004/07/30 22:28:31 fisyak Exp $
  *
  * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
@@ -10,6 +10,9 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
+ * Revision 2.14  2004/07/30 22:28:31  fisyak
+ * Add transient pointer to next Hit
+ *
  * Revision 2.13  2004/07/15 16:36:24  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -61,7 +64,7 @@
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-static const char rcsid[] = "$Id: StHit.cxx,v 2.13 2004/07/15 16:36:24 ullrich Exp $";
+static const char rcsid[] = "$Id: StHit.cxx,v 2.14 2004/07/30 22:28:31 fisyak Exp $";
 
 ClassImp(StHit)
 
@@ -72,14 +75,15 @@ StHit::StHit()
     mTrackRefCount = 0;
     mFlag = mFitFlag = 0;
     mIdTruth = mQuality = 0;
+    mNextHit = 0;
 }
 
 StHit::StHit(const StThreeVectorF& p,
              const StThreeVectorF& e,
-             unsigned int hp, float q, unsigned char c, UShort_t id, UShort_t quality)
+             unsigned int hp, float q, unsigned char c, UShort_t idTruth, UShort_t quality)
     : StMeasuredPoint(p), mHardwarePosition(hp),
       mCharge(q), mTrackRefCount(c), mPositionError(e),
-      mIdTruth(id), mQuality(quality)
+      mIdTruth(idTruth), mQuality(quality), mNextHit(0)
 {
     mFlag = mFitFlag = 0;
 }
@@ -93,7 +97,10 @@ StHit::operator==(const StHit& h) const
            h.mPositionError    == h.mPositionError &&
            h.mCharge           == mCharge &&
            h.mHardwarePosition == mHardwarePosition &&
-           h.mFlag             == mFlag;
+           h.mFlag             == mFlag &&
+           h.mIdTruth          == mIdTruth &&
+           h.mQuality          == mQuality &&
+           h.mNextHit          == mNextHit;
 }
 
 int

@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StHit.h,v 2.12 2004/07/15 16:36:24 ullrich Exp $
+ * $Id: StHit.h,v 2.13 2004/07/30 22:28:31 fisyak Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StHit.h,v $
+ * Revision 2.13  2004/07/30 22:28:31  fisyak
+ * Add transient pointer to next Hit
+ *
  * Revision 2.12  2004/07/15 16:36:24  ullrich
  * Removed all clone() declerations and definitions. Use StObject::clone() only.
  *
@@ -74,7 +77,7 @@ public:
     StHit(const StThreeVectorF&,
           const StThreeVectorF&,
           unsigned int, float, unsigned char = 0,
-	  UShort_t id=0, UShort_t quality=0);
+	  UShort_t idTruth=0, UShort_t quality=0);
     // StHit(const StHit&);            use default
     // StHit& operator=(const StHit&); use default
     ~StHit();
@@ -91,6 +94,7 @@ public:
     int             usedInFit() const;
     UShort_t        idTruth() const {return mIdTruth;}
     UShort_t        quality() const {return mQuality;}
+    StHit*          nextHit() const {return mNextHit;}
     void setCharge(float);
     void setFlag(unsigned char);
     void setFitFlag(unsigned char);
@@ -99,6 +103,7 @@ public:
     void setPositionError(const StThreeVectorF&);
     void setIdTruth(UShort_t id=0) {mIdTruth=id;}
     void setQuality(UShort_t quality=0) {mQuality = quality;}
+    void SetNextHit(StHit *next = 0) {mNextHit = next;}
     virtual StPtrVecTrack relatedTracks(const StSPtrVecTrackNode&, StTrackType);
     
 protected:
@@ -112,6 +117,7 @@ protected:
     UChar_t        mFitFlag;
     UShort_t       mIdTruth; // simulation track id 
     UShort_t       mQuality; // quality of this information (percentage of charge produced by mIdTruth)
+    StHit*         mNextHit; //!
     ClassDef(StHit,2)
 };
 
