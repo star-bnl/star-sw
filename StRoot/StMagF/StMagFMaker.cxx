@@ -1,5 +1,8 @@
-// $Id: StMagFMaker.cxx,v 1.2 2000/01/07 00:42:33 fisyak Exp $
+// $Id: StMagFMaker.cxx,v 1.3 2000/03/15 21:49:59 fisyak Exp $
 // $Log: StMagFMaker.cxx,v $
+// Revision 1.3  2000/03/15 21:49:59  fisyak
+// Change to RunLog
+//
 // Revision 1.2  2000/01/07 00:42:33  fisyak
 // merge Make with Init
 //
@@ -33,8 +36,8 @@ StMagFMaker::~StMagFMaker(){}
 //_____________________________________________________________________________
 Int_t StMagFMaker::Init(){
   if (!fMagFactor) {
-    St_DataSet *magnet = GetDataBase("params/magnet"); assert(magnet);
-    fMagFactor = (St_MagFactor *) magnet->Find("MagFactor"); assert(fMagFactor);
+    St_DataSet *RunLog = GetDataBase("RunLog");
+    fMagFactor = (St_MagFactor *) RunLog->Find("MagFactor"); assert(fMagFactor);
   }
   Float_t Scale = (*fMagFactor)[0].ScaleFactor;
   if (Scale == fScale && fMagF) return kStOK;
