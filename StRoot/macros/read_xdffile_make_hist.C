@@ -12,7 +12,7 @@
  // create instance of St_XDFFile called f1
  // use method OpenXDF of St_XDFFile with instance f1 to open input file
  St_XDFFile f1;
- f1.OpenXDF("/disk00000/star/test_data/year2a_psc079_01_46evts_dst.xdf");
+ f1.OpenXDF("/disk00000/star/mdc1_test_data/mdc1_year2a_psc079_01_46evts_dst.xdf");
  // create a pointer to an St_DataSet called record
  St_DataSet *record;
  St_DataSet *recorde;

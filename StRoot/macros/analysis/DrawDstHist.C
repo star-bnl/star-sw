@@ -1,4 +1,5 @@
-//read root histogram file and send all histograms to a postscript file
+//create chain to read in root dst file(s), run QA_Maker & 
+//  send all histograms to a postscript file
 TCanvas *QACanvas = 0;
 TBrowser *QABrowser = 0;
 class StChain;
@@ -53,7 +54,7 @@ void DrawDstHist(
   cout << nExcluded << " files will be excluded" << endl ;
   if (!chain) {
     chain = new StChain("bfc");
-    St_io_Maker *in    = new St_io_Maker("Input","all");
+    St_io_Maker *input    = new St_io_Maker("Input","all");
     Int_t  nFile = 0;
     if ((flags & 2)) {
 
@@ -75,21 +76,21 @@ void DrawDstHist(
           ie++;
         }
         if (isExcluded) continue;
-        in->AddFile(rootfilename);
+        input->AddFile(rootfilename);
         nFile++;
       } 
     } else {
-      in->AddFile(exFileName);
+      input->AddFile(exFileName);
       nFile++;
     }
     cout << "Total: " << nFile << " files will be analysed" << endl ;
 
-//    in->SetMaxEvent(2);
+    input->SetMaxEvent(25);
     St_QA_Maker *QA   = new St_QA_Maker("QA","event/geant/Event");
     QA->SetHistsNames(firstHistName,lastHistName);
     QA->SetDraw();
     QA->SetPostScriptFile(psFile);
-//    in->MakeDoc(); 
+//    input->MakeDoc(); 
   }
 
   chain->Init();
