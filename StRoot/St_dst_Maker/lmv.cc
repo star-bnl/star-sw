@@ -1,5 +1,8 @@
-// $Id: lmv.cc,v 1.5 1999/11/27 18:21:42 fisyak Exp $
+// $Id: lmv.cc,v 1.6 1999/12/02 17:41:53 nystrand Exp $
 // $Log: lmv.cc,v $
+// Revision 1.6  1999/12/02 17:41:53  nystrand
+// minor bugs fixed, thanks to Victor
+//
 // Revision 1.5  1999/11/27 18:21:42  fisyak
 // Add test that primary vertex exists
 //
@@ -58,7 +61,7 @@ extern "C" {void type_of_call F77_NAME(gufld,GUFLD)(float *x, float *b);}
 //#include "StMagF/StMagF.h"
 
 
-//static const char rcsid[] = "$Id: lmv.cc,v 1.5 1999/11/27 18:21:42 fisyak Exp $";
+//static const char rcsid[] = "$Id: lmv.cc,v 1.6 1999/12/02 17:41:53 nystrand Exp $";
 
 long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
 {
@@ -113,7 +116,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
   double x0,y0,z0;
   double ptinv,psi,tanl;
   double px,py,pz;
-  StThreeVectorD XVertex=(0.0,0.0,0.0);
+  StThreeVectorD XVertex(0.,0.,0.);
   double chi2=0.0, chi2pdof;
 
   long Ntrk = track->GetNRows();
@@ -237,7 +240,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
     }
 
     //Check SVT
-    if( Is_SVT = 1 && R1St > RIfc ){
+    if( (Is_SVT = 1) && (R1St > RIfc) ){
       //Scattered in 3rd SVT Barrel
       double svt3path = 0.0;
       pairD Ssvt3 = helices[jj].pathLength(R_SVT_Barrel3);
@@ -259,7 +262,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
       double lpath_svt3 = X_X0_SVTBarrel/cos(incang); 
       lpath_tot = lpath_tot + lpath_svt3;
     }
-    if( Is_SVT = 1 && R1St > R_SVT_Barrel3 ){
+    if( (Is_SVT = 1) && (R1St > R_SVT_Barrel3) ){
       //Scattered in 2nd SVT Barrel
       double svt2path = 0.0;
       pairD Ssvt2 = helices[jj].pathLength(R_SVT_Barrel2);
@@ -281,7 +284,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
       double lpath_svt2 = X_X0_SVTBarrel/cos(incang); 
       lpath_tot = lpath_tot + lpath_svt2;
     }
-    if( Is_SVT = 1 && R1St > R_SVT_Barrel2 ){
+    if( (Is_SVT = 1) && (R1St > R_SVT_Barrel2) ){
       //Scattered in 1st SVT Barrel
       double svt1path = 0.0;
       pairD Ssvt1 = helices[jj].pathLength(R_SVT_Barrel1);
@@ -482,11 +485,11 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
     }  
     if( icheck == 1 ){
       // This track was included in the Vertex
-      sec_pointer->id_start_vertex = 10.*IVertex + 1;
+      sec_pointer->id_start_vertex = 10*IVertex + 1;
     }
     else{
       // This track was NOT included in the Vertex
-      sec_pointer->id_start_vertex = 10.*IVertex;
+      sec_pointer->id_start_vertex = 10*IVertex;
     } 
     sec_pointer++;
   }
@@ -499,7 +502,7 @@ long lmv(St_dst_track *track, St_dst_vertex *vertex, Int_t mdate)
   dst_vertex_pointer->n_daughters = helices.size();
   dst_vertex_pointer->id          = 1;
   dst_vertex_pointer->iflag       = 1;
-  if( Is_SVT = 1){
+  if( (Is_SVT = 1) ){
     dst_vertex_pointer->det_id    = kTpcSsdSvtIdentifier; 
   }
   else{
