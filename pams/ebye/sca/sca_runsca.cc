@@ -111,13 +111,13 @@ long type_of_call sca_runsca_(
   if (!sca_switch->makePrior   && 
       !sca_switch->makeEnsembleAve  &&
       !sca_switch->doAnalysis ) {
-    cerr << "Invalid switch values.   Exit " << endl;
+    cerr << "<<<ERROR>>> sca_runsca::Invalid switch values.   Exit " << endl;
     return STAFCV_BAD;
   }
   if (sca_switch->makePrior){
     iret = alloc_prior (sca_prior_h, sca_prior);
     if (iret) {
-      cerr << "alloc_prior failed. Exit " << endl;
+      cerr << "<<<ERROR>>> sca_runsca::alloc_prior failed. Exit " << endl;
       return STAFCV_BAD;
     }
   }
@@ -137,7 +137,7 @@ long type_of_call sca_runsca_(
   //CalcEntropy is a method common to all options
   iret = dataSet.CalcEntropy();
   if (iret) {
-    cerr << "CalcEntropy failed. Exit " << endl;
+    cerr << "<<<ERROR>>> sca_runsca::CalcEntropy failed. Exit " << endl;
     return STAFCV_BAD;
   }
   
@@ -146,7 +146,7 @@ long type_of_call sca_runsca_(
   if ( sca_switch->makePrior ) {  // Fill prior table 
     iret = dataSet.fillPrior(sca_prior_h, sca_prior);
     if (iret) {
-      cerr << "fillPrior failed. Exit " << endl;
+      cerr << "<<<ERROR>>> sca_runsca::fillPrior failed. Exit " << endl;
       return  STAFCV_BAD;
     }
   } //end makePrior option
@@ -159,12 +159,12 @@ long type_of_call sca_runsca_(
   if ( sca_switch->makeEnsembleAve || sca_switch->doAnalysis) {
     iret = dataSet.CalcDimension();
     if (iret) {
-      cerr << "CalcDimension failed. Exit " << endl;
+      cerr << "<<<ERROR>>> sca_runsca::CalcDimension failed. Exit " << endl;
       return  STAFCV_BAD;
     }
     iret = dataSet.fillScaOutTable(sca_out_h, sca_out);
     if (iret) {
-      cerr << "fillScaOutTable failed. Exit " << endl;
+      cerr << "<<<ERROR>>> sca_runsca::fillScaOutTable failed. Exit " << endl;
       return  STAFCV_BAD;
     }
   } //end makeEnsemble and/or doAnalysis option(s).
@@ -174,7 +174,7 @@ long type_of_call sca_runsca_(
     iret = ensemble_sum( sca_out_h, sca_out, sca_ensemble_ave_h, 
 			 sca_ensemble_ave );
     if (iret) {
-      cerr << "ensemble_sum failed. Exit " << endl;
+      cerr << "<<<ERROR>>> sca_runsca::ensemble_sum failed. Exit " << endl;
       return  STAFCV_BAD;
     }
   }
@@ -184,7 +184,7 @@ long type_of_call sca_runsca_(
       iret = sca_deltad ( sca_out_h, sca_out, sca_ensemble_ave_h, 
 			 sca_ensemble_ave );
     if (iret) {
-      cerr << "sca_deltad failed. Exit " << endl;
+      cerr << "<<<ERROR>>> sca_runsca::sca_deltad failed. Exit " << endl;
       return  STAFCV_BAD;
     }
   }

@@ -119,8 +119,9 @@ long type_of_call sca_filter_(
   if ( iGoodTrack >= filter_const->nGoodTraks )
     return STAFCV_OK;
   else {
-    cout << " sca_filter:: Nglobtrk = " << dst_track_h[0].nok << " iGoodTrack = "<< 
-      iGoodTrack  << endl;
+    cout << 
+      " <<< WARNING >>> sca_filter:: Failed multiplicity cut. Nglobtrk = " 
+	 << dst_track_h[0].nok << " iGoodTrack = "<<  iGoodTrack  << endl;
     return STAFCV_BAD;
   }
 }  // end sca_filter
