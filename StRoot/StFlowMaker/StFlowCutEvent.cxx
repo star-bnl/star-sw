@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.cxx,v 1.10 2000/05/11 20:00:31 posk Exp $
+// $Id: StFlowCutEvent.cxx,v 1.11 2000/05/26 21:29:26 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.cxx,v $
+// Revision 1.11  2000/05/26 21:29:26  posk
+// Protected Track data members from overflow.
+//
 // Revision 1.10  2000/05/11 20:00:31  posk
 // Preparation for micro and nano DSTs.
 //
@@ -78,7 +81,7 @@ StFlowCutEvent::~StFlowCutEvent() {
 
 //-----------------------------------------------------------------------
 
-Int_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
+Bool_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
   // Returns kTRUE if the event survives all the cuts
 
   mEventN++;
@@ -130,7 +133,7 @@ Int_t StFlowCutEvent::CheckEvent(StEvent* pEvent) {
 
 //-----------------------------------------------------------------------
 
-Int_t StFlowCutEvent::CheckEtaSymmetry() {
+Bool_t StFlowCutEvent::CheckEtaSymmetry() {
   // Returns kTRUE if the event survives this Eta symmetry cut
   // Call at the end of the event after doing CheckTrack for each track
   // If kFALSE you should delete the last event

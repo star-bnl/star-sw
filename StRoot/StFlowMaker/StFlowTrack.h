@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrack.h,v 1.5 2000/05/20 00:55:20 posk Exp $
+// $Id: StFlowTrack.h,v 1.6 2000/05/26 21:29:34 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //
@@ -9,6 +9,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrack.h,v $
+// Revision 1.6  2000/05/26 21:29:34  posk
+// Protected Track data members from overflow.
+//
 // Revision 1.5  2000/05/20 00:55:20  posk
 // Condensed flownanoevent.root somewhat.
 //
@@ -17,9 +20,6 @@
 //
 // Revision 1.3  2000/05/12 22:42:05  snelling
 // Additions for persistency and minor fix
-//
-// Revision 1.2  2000/05/11 20:00:39  posk
-// Preparation for micro and nano DSTs.
 //
 // Revision 1.1  2000/03/02 23:02:57  posk
 // Changed extensions from .hh and .cc to .h and .cxx .
@@ -68,8 +68,8 @@ class StFlowTrack : public StObject {
 
 public:
 
-                StFlowTrack()  { };
-  virtual       ~StFlowTrack() { };
+                StFlowTrack();
+  virtual       ~StFlowTrack();
 
   Float_t       PidPiPlus()  const;
   Float_t       PidPiMinus() const;
@@ -110,12 +110,14 @@ private:
   Float_t mEta;
   Float_t mPt;
   Short_t mCharge;
-  Int_t   mDca;
-  Int_t   mChi2;
+  UInt_t  mDca;
+  UInt_t  mChi2;
   Int_t   mFitPts;
   Int_t   mMaxPts;
   Int_t   mSelection;
   Short_t mSubevent[Flow::nHars][Flow::nSels];
+  static  Float_t maxInt;
+  static  Float_t maxUInt;
 
   ClassDef(StFlowTrack, 1)                     // macro for rootcint
 };
@@ -129,7 +131,7 @@ inline Float_t  StFlowTrack::Eta()        const { return mEta; }
 inline Float_t  StFlowTrack::Pt()         const { return mPt; }                
 inline Short_t  StFlowTrack::Charge()     const { return mCharge; }   
 inline Float_t  StFlowTrack::Dca()        const { return mDca/1000.; }
-inline Float_t  StFlowTrack::Chi2()       const { return mChi2/100.; } 
+inline Float_t  StFlowTrack::Chi2()       const { return mChi2/1000.; } 
 inline Int_t    StFlowTrack::FitPts()     const { return mFitPts; }  
 inline Int_t    StFlowTrack::MaxPts()     const { return mMaxPts; }  
 
@@ -142,21 +144,33 @@ inline Int_t    StFlowTrack::Select(Int_t harmonic, Int_t selection,
   return kFALSE;         
 }
 
-inline void StFlowTrack::SetPidPiPlus(Float_t pid)  { mPidPiPlus = 
-							(Int_t)(pid*1000.); }
-inline void StFlowTrack::SetPidPiMinus(Float_t pid) { mPidPiMinus =
-							(Int_t)(pid*1000.); }
-inline void StFlowTrack::SetPidProton(Float_t pid)  { mPidProton = 
-							(Int_t)(pid*1000.); }
+inline void StFlowTrack::SetPidPiPlus(Float_t pid)  {
+  if (pid > maxInt) pid = maxInt; mPidPiPlus = (Int_t)(pid*1000.); }
+
+inline void StFlowTrack::SetPidPiMinus(Float_t pid) {
+  if (pid > maxInt) pid = maxInt; mPidPiMinus = (Int_t)(pid*1000.); }
+
+inline void StFlowTrack::SetPidProton(Float_t pid)  {
+  if (pid > maxInt) pid = maxInt; mPidProton = (Int_t)(pid*1000.); }
+
 inline void StFlowTrack::SetPid(const Char_t* pid)  { strncpy(mPid, pid, 9);
- mPid[9] = '\0'; }
+                                                         mPid[9] = '\0'; }
 inline void StFlowTrack::SetPhi(Float_t phi)        { mPhi = phi; }              
+
 inline void StFlowTrack::SetEta(Float_t eta)        { mEta = eta; }              
+
 inline void StFlowTrack::SetPt(Float_t pt)          { mPt = pt; }              
+
 inline void StFlowTrack::SetCharge(Short_t charge)  { mCharge = charge; }     
-inline void StFlowTrack::SetDca(Float_t dca)        { mDca = (Int_t)(dca*1000.); }
-inline void StFlowTrack::SetChi2(Float_t chi2)      { mChi2 = (Int_t)(chi2*100.); }
+
+inline void StFlowTrack::SetDca(Float_t dca)        {
+  if (dca > maxUInt) dca = maxUInt; mDca = (UInt_t)(dca*1000.); }
+
+inline void StFlowTrack::SetChi2(Float_t chi2)      {
+  if (chi2 > maxUInt) chi2 = maxUInt; mChi2 = (UInt_t)(chi2*1000.); }
+
 inline void StFlowTrack::SetFitPts(Int_t fitPts)    { mFitPts = fitPts; }
+
 inline void StFlowTrack::SetMaxPts(Int_t maxPts)    { mMaxPts = maxPts; }
 
 inline void StFlowTrack::SetSelect(Int_t harmonic, Int_t selection) {

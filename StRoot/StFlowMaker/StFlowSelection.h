@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.h,v 1.3 2000/05/12 22:42:05 snelling Exp $
+// $Id: StFlowSelection.h,v 1.4 2000/05/26 21:29:33 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.h,v $
+// Revision 1.4  2000/05/26 21:29:33  posk
+// Protected Track data members from overflow.
+//
 // Revision 1.3  2000/05/12 22:42:05  snelling
 // Additions for persistency and minor fix
 //
@@ -46,9 +49,9 @@ class StFlowSelection : public StObject {
   Int_t   Sel() const;
   Int_t   Har() const;
   Int_t   Sub() const;
-  Int_t   Select(StFlowEvent*);
-  Int_t   Select(StFlowTrack*);
-  Int_t   SelectPart(StFlowTrack*);
+  Bool_t  Select(StFlowEvent*);
+  Bool_t  Select(StFlowTrack*);
+  Bool_t  SelectPart(StFlowTrack*);
   void    SetNumber(const UInt_t&);
   void    SetCentrality(const UInt_t&);
   void    SetPid(const Char_t*);

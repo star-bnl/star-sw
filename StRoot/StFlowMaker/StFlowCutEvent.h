@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowCutEvent.h,v 1.1 2000/03/02 23:02:40 posk Exp $
+// $Id: StFlowCutEvent.h,v 1.2 2000/05/26 21:29:26 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Oct 1999
 //
@@ -13,6 +13,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowCutEvent.h,v $
+// Revision 1.2  2000/05/26 21:29:26  posk
+// Protected Track data members from overflow.
+//
 // Revision 1.1  2000/03/02 23:02:40  posk
 // Changed extensions from .hh and .cc to .h and .cxx .
 //
@@ -48,14 +51,14 @@ class StFlowCutEvent {
                StFlowCutEvent();
   virtual      ~StFlowCutEvent();
 
-  static Int_t CheckEvent(StEvent* pEvent);
-  static Int_t CheckEtaSymmetry();
-  static void  PrintCutList();
-  static void  SetMult(const Int_t lo, const Int_t hi);
-  static void  SetVertexX(const Float_t lo, const Float_t hi);
-  static void  SetVertexY(const Float_t lo, const Float_t hi);
-  static void  SetVertexZ(const Float_t lo, const Float_t hi);
-  static void  SetEtaSym(Float_t lo, Float_t hi);
+  static Bool_t CheckEvent(StEvent* pEvent);
+  static Bool_t CheckEtaSymmetry();
+  static void   PrintCutList();
+  static void   SetMult(const Int_t lo, const Int_t hi);
+  static void   SetVertexX(const Float_t lo, const Float_t hi);
+  static void   SetVertexY(const Float_t lo, const Float_t hi);
+  static void   SetVertexZ(const Float_t lo, const Float_t hi);
+  static void   SetEtaSym(Float_t lo, Float_t hi);
   
  private:
 

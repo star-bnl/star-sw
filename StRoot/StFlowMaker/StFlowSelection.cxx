@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.cxx,v 1.3 2000/05/11 20:00:38 posk Exp $
+// $Id: StFlowSelection.cxx,v 1.4 2000/05/26 21:29:32 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -9,6 +9,9 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.cxx,v $
+// Revision 1.4  2000/05/26 21:29:32  posk
+// Protected Track data members from overflow.
+//
 // Revision 1.3  2000/05/11 20:00:38  posk
 // Preparation for micro and nano DSTs.
 //
@@ -46,7 +49,7 @@ StFlowSelection::~StFlowSelection() {
 
 //-----------------------------------------------------------------------
 
-Int_t StFlowSelection::Select(StFlowEvent* pFlowEvent) {
+Bool_t StFlowSelection::Select(StFlowEvent* pFlowEvent) {
   // Returns kTRUE if the event is selected
   
   // Centrality
@@ -60,7 +63,7 @@ Int_t StFlowSelection::Select(StFlowEvent* pFlowEvent) {
 
 //-----------------------------------------------------------------------
 
-Int_t StFlowSelection::Select(StFlowTrack* pFlowTrack) {
+Bool_t StFlowSelection::Select(StFlowTrack* pFlowTrack) {
   // Selects particles for event plane determination
   // Returns kTRUE if the track is selected
 
@@ -78,7 +81,7 @@ Int_t StFlowSelection::Select(StFlowTrack* pFlowTrack) {
 
 //-----------------------------------------------------------------------
 
-Int_t StFlowSelection::SelectPart(StFlowTrack* pFlowTrack) {
+Bool_t StFlowSelection::SelectPart(StFlowTrack* pFlowTrack) {
   // Selects particles for correlation with the event plane
   // Returns kTRUE if the track is selected
 

@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrackCollection.h,v 1.4 2000/05/12 22:42:05 snelling Exp $
+// $Id: StFlowTrackCollection.h,v 1.5 2000/05/26 21:29:35 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrackCollection.h,v $
+// Revision 1.5  2000/05/26 21:29:35  posk
+// Protected Track data members from overflow.
+//
 // Revision 1.4  2000/05/12 22:42:05  snelling
 // Additions for persistency and minor fix
 //
@@ -53,6 +56,7 @@
 //typedef vector<StFlowTrack*>::iterator  StFlowTrackIterator;
 StCollectionDef(FlowTrack)
 typedef StSPtrVecFlowTrack StFlowTrackCollection;
+
 //typedef StFlowTrackIterator StFlowTrackIterator;
 
 #endif
