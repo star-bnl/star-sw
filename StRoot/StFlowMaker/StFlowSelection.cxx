@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowSelection.cxx,v 1.2 2000/03/28 23:21:04 posk Exp $
+// $Id: StFlowSelection.cxx,v 1.3 2000/05/11 20:00:38 posk Exp $
 //
 // Author: Art Poskanzer and Raimond Snellings, LBNL, Mar 2000
 //
@@ -9,19 +9,19 @@
 ////////////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowSelection.cxx,v $
+// Revision 1.3  2000/05/11 20:00:38  posk
+// Preparation for micro and nano DSTs.
+//
 // Revision 1.2  2000/03/28 23:21:04  posk
 // Allow multiple instances of the AnalysisMaker.
 //
 // Revision 1.1  2000/03/15 23:28:53  posk
 // Added StFlowSelection.
 //
-//
-//
 ////////////////////////////////////////////////////////////////////////////
 
 #include <iostream.h>
 #include <stdlib.h>
-//#include "StEventTypes.h"
 #include "StFlowSelection.h"
 #include "StFlowEvent.h"
 #include "StFlowTrack.h"

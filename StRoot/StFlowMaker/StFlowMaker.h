@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
-//  $Id: StFlowMaker.h,v 1.4 2000/03/28 23:21:03 posk Exp $
+//  $Id: StFlowMaker.h,v 1.5 2000/05/11 20:00:36 posk Exp $
 //
 // Author List: 
 //  Raimond Snellings and Art Poskanzer, LBNL, 6/99
@@ -13,6 +13,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //
 //  $Log: StFlowMaker.h,v $
+//  Revision 1.5  2000/05/11 20:00:36  posk
+//  Preparation for micro and nano DSTs.
+//
 //  Revision 1.4  2000/03/28 23:21:03  posk
 //  Allow multiple instances of the AnalysisMaker.
 //
@@ -30,9 +33,6 @@
 //
 //  Revision 1.9  2000/02/18 22:49:57  posk
 //  Added PID and centrality.
-//
-//  Revision 1.8  2000/01/13 22:19:20  posk
-//  Updates and corrections.
 //
 //  Revision 1.7  1999/12/21 01:11:01  posk
 //  Added more quantities to StFlowEvent.
@@ -78,44 +78,63 @@ class StFlowMaker : public StMaker {
 
 public:
 
-                  StFlowMaker(const Char_t* name="Flow");
-		  StFlowMaker(const Char_t* name,
+                StFlowMaker(const Char_t* name="Flow");
+		StFlowMaker(const Char_t* name,
 			      const StFlowSelection& pFlowSelect);
-  virtual         ~StFlowMaker();
+  virtual       ~StFlowMaker();
 
-  Int_t           Init();
-  void            PrintInfo();
-  Int_t           Make();
-  Int_t           Finish();
-  StFlowEvent*    FlowEventPointer() const;  // returns pointer to the StFlowEvent
-  virtual void    NanoFlowEventOn() {NanoFlowEvent(kTRUE);}
-  virtual void    NanoFlowEventOff(){NanoFlowEvent();} 
+  Int_t         Init();
+  void          PrintInfo();
+  Int_t         Make();
+  Int_t         Finish();
+  StFlowEvent*  FlowEventPointer() const;  // returns pointer to the StFlowEvent
+  void          NanoFlowEventOn() {NanoFlowEvent(kTRUE);}
+  void          NanoFlowEventOff(){NanoFlowEvent();} 
+  void          FlowEventWrite(Bool_t flag=kFALSE);
+  void          FlowEventRead(Bool_t flag=kFALSE);
   virtual const char *GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StFlowMaker.h,v 1.4 2000/03/28 23:21:03 posk Exp $ built "__DATE__" "__TIME__ ;
+    {static const char cvs[]="Tag $Name:  $ $Id: StFlowMaker.h,v 1.5 2000/05/11 20:00:36 posk Exp $ built "__DATE__" "__TIME__ ;
     return cvs;}
 
 protected:
 
-  Flow::PhiWgt_t  mPhiWgt;                   // To make event plane isotropic
+  Flow::PhiWgt_t   mPhiWgt;                   // To make event plane isotropic
 
 private:
-  Bool_t           mNanoFlowEventOn;          // switch for the nano DST
+  Bool_t           mNanoFlowEventOn;          // switch for nano DST
+  Bool_t           mFlowEventWrite;           // switch for StFlowEvent
+  Bool_t           mFlowEventRead;            // switch for StFlowEvent
   void             NanoFlowEvent(Bool_t flag=kFALSE){ mNanoFlowEventOn=flag; }
   StFlowSelection* pFlowSelect;               //! selection object
   Int_t            ReadPhiWgtFile();          // get the weight file
   void             InitFlowNanoEvent();       // fill a persistent nano dst
-  void             FillFlowEvent();           // fill the transient flow event
+  void             InitEventRead();           // open StEvent
+  void             InitFlowEventWrite();      // open StFlowEvent
+  void             InitFlowEventRead();       // open StFlowEvent
+  void             FillFlowEvent();           // fill the flow event
   void             FillFlowNanoEvent();       // fill a persistent nano dst
+  void             WriteFlowEvent();          // write StFlowEvent
   void             CloseFlowNanoEvent();      // Close the output file
+  void             CloseEventRead();          // close StEvent
+  void             CloseFlowEventWrite();     // close StFlowEvent
+  void             CloseFlowEventRead();      // close StFlowEvent
   StEvent*         pEvent;                    //! pointer to DST data
   StFlowEvent*     pFlowEvent;                //! pointer to micro-DST data
   StFlowNanoEvent* pFlowNanoEvent;            // pointer to the nano DST Event
   TTree*           pFlowTree;                 // pointer to the nano DST Tree
   TFile*           pFlowNanoDST;              //! pointer to the nano DST File
+  TFile*           pFlowDST;                  //! pointer to the micro DST File
+  TFile*           pDST;                      //! pointer to the DST File
   ClassDef(StFlowMaker, 1)                    // macro for rootcint
 
 };
 
 inline StFlowEvent* StFlowMaker::FlowEventPointer() const { return pFlowEvent; }
+
+inline void StFlowMaker::FlowEventWrite(Bool_t flag) 
+          { mFlowEventWrite=flag; mFlowEventRead=kFALSE; }
+
+inline void StFlowMaker::FlowEventRead(Bool_t flag) 
+          { mFlowEventRead=flag; mFlowEventWrite=kFALSE;}
 
 #endif

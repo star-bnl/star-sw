@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 //
-// $Id: StFlowTrackCollection.h,v 1.2 2000/03/15 23:28:55 posk Exp $
+// $Id: StFlowTrackCollection.h,v 1.3 2000/05/11 20:00:40 posk Exp $
 //
 // Author: Raimond Snellings and Art Poskanzer
 //////////////////////////////////////////////////////////////////////
@@ -11,6 +11,9 @@
 //////////////////////////////////////////////////////////////////////
 //
 // $Log: StFlowTrackCollection.h,v $
+// Revision 1.3  2000/05/11 20:00:40  posk
+// Preparation for micro and nano DSTs.
+//
 // Revision 1.2  2000/03/15 23:28:55  posk
 // Added StFlowSelection.
 //
@@ -19,9 +22,6 @@
 //
 // Revision 1.4  2000/01/31 22:17:00  posk
 // CC5 compliant.
-//
-// Revision 1.3  2000/01/13 22:19:21  posk
-// Updates and corrections.
 //
 // Revision 1.2  1999/11/30 18:52:56  snelling
 // First modification for the new StEvent
