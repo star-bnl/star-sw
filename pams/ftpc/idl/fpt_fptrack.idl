@@ -12,9 +12,10 @@
        long      flag;        /* status flag */
                               /* 1=primary track, 2=secondary track */
        long      hitid[10];   /* id's of all points on track */
-       long      nrec;        /* number of points on track */
-       long      nfit;        /* number of points in momentum fit */
-       long      ndedx;       /* number of points in dedx calc */
+       short     nmax;        /* maximum number of points possible on track */ 
+       short     nrec;        /* number of points on track */
+       short     nfit;        /* number of points in momentum fit */
+       short     ndedx;       /* number of points in dedx calc */
        long      q;           /* measured charge (+/- 1) */
        float     chisq[2];    /* chi squared of momentum fit */
        float     dedx;        /* dedx-value calculated for track */
@@ -24,4 +25,4 @@
        float     curvature;   /* Track curvature (1/cm) */
     };
 
-/*  Last mod. for fpt_fptrack: $Date: 1999/11/12 10:34:39 $ */
+/*  Last mod. for fpt_fptrack: $Date: 1999/11/29 12:14:22 $ */
