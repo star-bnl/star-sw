@@ -7,7 +7,7 @@ CC=gcc
 CPPFLAGS= $(patsubst %, -I%, $(HPATH))
 CFLAGS= -Wall
 ifeq "$(STAR_ARCH)" "sun4os5"
-LDFLAGS= -lnsl -L/lib
+LDFLAGS= -lnsl
 endif
 vpath %.c $(SPATH)
 vpath %.h $(HPATH)

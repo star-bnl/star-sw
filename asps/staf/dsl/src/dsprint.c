@@ -32,7 +32,12 @@ void dsPrintData(FILE *stream, DS_TYPE_T *type, unsigned count, void *data)
 	switch(type->code) {
 
 		case DS_TYPE_CHAR:
-				fprintf(stream, "\t%s", p.c);
+			/* 04sep97-cet- BUG FIX
+			fprintf(stream, "\t%s", p.c);*/
+			fprintf( stream,  "\t");
+			for (i = 0; i < count; i++) {
+				fprintf( stream,  "%c", p.c[i]);
+			}
 			break;
 			
 		case DS_TYPE_OCTET:

@@ -152,7 +152,7 @@ void dsPerror(char *str)
 *
 * RETURNS: none
 */
-const char * dsSerror(char *str)
+const char * dsError(char *str)
 {
 	char b[1024];
 	char * buff=b;
