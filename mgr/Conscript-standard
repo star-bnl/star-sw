@@ -157,7 +157,8 @@ if ($#Defs > -1) {
   foreach my $def (@Defs) {
     push @defs, $share . "/" . basename($def);
   }
-  push @defs, $INCLUDE . "/St_Module.h";
+  my @Mod = ($INCLUDE . "/St_Module.h");
+  Depends $env2 [@CintFiles], @Mod;
   Command $env2 [@CintFiles], @defs,  qq(RootCint.pl "%>" "%<" "$ROOTCINT_CPPPATH" );
   Install $env2 $ObjDir, @CintFiles;
   (my $cint =  $CintFiles[0]) =~ s/$share/$obj/g;

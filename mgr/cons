@@ -9,12 +9,12 @@ use Sys::Hostname;
 use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
-# $Id: cons,v 1.21 1999/10/29 23:35:40 fisyak Exp $
+# $Id: cons,v 1.22 1999/11/02 00:49:44 fisyak Exp $
 
 $ver_num = 1.7;
 $ver_rev = "";
 $version = "This is Cons $ver_num$ver_rev " .
-	    '($Id: cons,v 1.21 1999/10/29 23:35:40 fisyak Exp $)'. "\n";
+	    '($Id: cons,v 1.22 1999/11/02 00:49:44 fisyak Exp $)'. "\n";
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 
@@ -2631,12 +2631,20 @@ package futil;
 sub install {
     my($sp, $tgt) = @_;
     my($tp) = $tgt->path;
+    my $dir_prefix = "";
+    if ($sp !~ /^$dir::MATCH_SEPARATOR/) {
+      $dir_prefix = File::Basename::dirname($tp);
+      $dir_prefix .= $dir::MATCH_SEPARATOR;
+      $dir_prefix =~ s/[\w|\.]*$dir::MATCH_SEPARATOR/\.\.$dir::MATCH_SEPARATOR/g;
+    }
+    my $lsp = $dir_prefix . $sp;
     return 1 if $tp eq $sp;
     return 1 if eval { link($sp, $tp) };
-#yf    return 1 if eval { symlink($sp, $tp) };
+    return 1 if eval { symlink($lsp, $tp) };
     unlink($tp);
     futil::mkdir($tgt->{dir});
     return 1 if eval { link($sp, $tp) };
+    return 1 if eval { symlink($lsp, $tp) };
     futil::copy($sp, $tp);
 }
 
