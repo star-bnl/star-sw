@@ -1,5 +1,8 @@
-// $Id: St_tpcdaq_Maker.h,v 1.1 1999/02/19 16:32:21 fisyak Exp $
+// $Id: St_tpcdaq_Maker.h,v 1.2 1999/03/15 03:24:14 perev Exp $
 // $Log: St_tpcdaq_Maker.h,v $
+// Revision 1.2  1999/03/15 03:24:14  perev
+// New maker schema
+//
 // Revision 1.1  1999/02/19 16:32:21  fisyak
 // rename h-file and access name to Trs
 //
@@ -30,7 +33,6 @@ class StTpcUnpacker;
 class StSequence;
 class St_tpcdaq_Maker : public StMaker {
  private:
-   Bool_t drawinit;
    StTpcRawDataEvent *mEvent; //!
 #ifdef TRS_SIMPLE
    StTrsSimpleMaker *mUnpacker; //!
@@ -40,8 +42,7 @@ class St_tpcdaq_Maker : public StMaker {
    Int_t GetEventAndDecoder();
  protected:
  public: 
-                  St_tpcdaq_Maker(const char *name="tpc_raw", 
-                           const char *title="event/raw_data/tpc");
+                  St_tpcdaq_Maker(const char *name="tpc_raw");
    int mErr;
    
    void OrderTheSequences(int nseq,StSequence *los);
@@ -75,7 +76,7 @@ class St_tpcdaq_Maker : public StMaker {
    int myDecoderZgetSequences(int ipadrow,int pad,int *nseq,
                  StSequence **listOfSequences); // junk for early debugging
    virtual       ~St_tpcdaq_Maker();
-   virtual Int_t Init();
+   virtual Int_t  Init();
    virtual Int_t  Make();
    virtual void   PrintInfo();
 // virtual void Set_mode       (Int_t   m =      2){m_mode       = m;} // *MENU*

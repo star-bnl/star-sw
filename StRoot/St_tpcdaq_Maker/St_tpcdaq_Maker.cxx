@@ -1,5 +1,8 @@
 //  
 // $Log: St_tpcdaq_Maker.cxx,v $
+// Revision 1.7  1999/03/15 03:24:14  perev
+// New maker schema
+//
 // Revision 1.6  1999/03/10 19:18:17  ward
 // Correctly fill raw_sec_m table.
 //
@@ -48,10 +51,9 @@ ClassImp(St_tpcdaq_Maker)
 #define NSECT 24
 #define NROW  45
 #define DEBUG_ACTIVE_ROW 33
-St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name, const char *title):
-      StMaker(name,title) {
+St_tpcdaq_Maker::St_tpcdaq_Maker(const char *name):StMaker(name) 
+{
   printf("St_tpcdaq_Maker constructor.\n");
-  drawinit=kFALSE;
 }
 St_tpcdaq_Maker::~St_tpcdaq_Maker() {
 }
@@ -316,7 +318,7 @@ timeOff     pad         SeqWrite SeqWrite m              0x100
 ------------------------------------------------------------------------*/
 // BBB Brian don't forget LinArray[] ("DAQ to Offline").
 Int_t St_tpcdaq_Maker::GetEventAndDecoder() {
- St_DataSetIter trs(gStChain->DataSet("Trs"));            
+ St_DataSetIter trs(GetDataSet("Trs"));            
 #ifdef TRS_SIMPLE
  mEvent=NULL;
  St_ObjectSet *decoder=(St_ObjectSet*)trs("Decoder"); if(!decoder) return 22;
@@ -353,8 +355,7 @@ void St_tpcdaq_Maker::PrintInfo() {
   printf("**************************************************************\n");
   printf("St_tpcdaq_Maker, started by Herbert Ward on Feb 1 1999.\n");
   printf("Compiled on %s at  %s.\n",__DATE__,__TIME__);
-  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.6 1999/03/10 19:18:17 ward Exp $ \n");
-  // printf("* %s *\n",m_VersionCVS);
+  printf("* $Id: St_tpcdaq_Maker.cxx,v 1.7 1999/03/15 03:24:14 perev Exp $ \n");
   printf("**************************************************************\n");
-  if(gStChain->Debug()) StMaker::PrintInfo();
+  if(Debug()) StMaker::PrintInfo();
 }
