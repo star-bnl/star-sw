@@ -1,5 +1,8 @@
-// $Id: StBFChain.h,v 1.1 1999/09/02 16:14:43 fine Exp $
+// $Id: StBFChain.h,v 1.2 1999/09/08 00:14:06 fisyak Exp $
 // $Log: StBFChain.h,v $
+// Revision 1.2  1999/09/08 00:14:06  fisyak
+// Add kReverseField option
+//
 // Revision 1.1  1999/09/02 16:14:43  fine
 // new StBFChain library has been introduced to break dependences
 //
@@ -40,7 +43,7 @@ enum EChainOptions {
   kES99    ,kER99    ,kY1d     ,kY1e     ,kY2a     ,
   kEval    ,kOFF     ,kXIN     ,kXOUT    ,kGSTAR   ,          // Chains, options
   kTDAQ    ,kFZIN    ,kGEANT   ,
-  kFieldOn ,kFieldOff,kHalfField,                             // Magnetic Field
+  kFieldOn ,kFieldOff,kHalfField,kReverseField     ,          // Magnetic Field
   kTPC     ,kTSS     ,kTRS     ,kMINIDAQ ,kTFS     ,kTCL     ,kTPT     ,// TPC
   kSVT     ,kSRS     ,kSTK     ,                              // SVT  
   kFTPC    ,kFSS     ,kFCL     ,kFPT     ,                    // FTPC
@@ -73,7 +76,7 @@ class StBFChain : public StChain {
    virtual St_XDFFile *GetXdfOut() {return xdf_out;}
    Bool_t              GetOption(Int_t k);
    virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.1 1999/09/02 16:14:43 fine Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StBFChain.h,v 1.2 1999/09/08 00:14:06 fisyak Exp $ built "__DATE__" "__TIME__ ; return cvs;}
    ClassDef(StBFChain, 0)   //StBFChain control class
 };
 #endif
