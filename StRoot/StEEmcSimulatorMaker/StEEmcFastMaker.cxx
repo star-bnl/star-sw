@@ -1,6 +1,6 @@
 // *-- Author : J.Balewski, A.Ogawa, P.Zolnierczuk
 // 
-// $Id: StEEmcFastMaker.cxx,v 1.12 2004/05/26 21:28:37 jwebb Exp $
+// $Id: StEEmcFastMaker.cxx,v 1.13 2004/10/20 22:46:36 balewski Exp $
 
 #include "StChain.h"
 #include "St_DataSetIter.h"
@@ -117,12 +117,14 @@ Int_t StEEmcFastMaker::Make(){
   if(stevent==0) {
     //printf("Access full StEvent ...\n");
     stevent =   (StEvent *) (StEvent *) GetInputDS("StEvent");
-    assert(stevent); // do sth to provide StEvent first
-    // printf("check existence of emcCollection... StEvent=%p\n",stevent);
-    assert(stevent->emcCollection()); 
-    
+    assert(stevent); // do sth to provide StEvent first   
   }  
-
+ 
+  if(stevent->emcCollection()==0) {
+    stevent->setEmcCollection(new StEmcCollection());
+    gMessMgr->Message("","W") << GetName()<<"::Make() has added a non existing StEmcCollection()"<<endm;
+  }
+  
   //  SetDumEE(eeve);
 
   mEE2ST(meeve, stevent);
@@ -372,6 +374,9 @@ Float_t StEEmcFastMaker::getPreshowerGain()
 /////////////////////////////////////////////////////////////////////////////
 
 // $Log: StEEmcFastMaker.cxx,v $
+// Revision 1.13  2004/10/20 22:46:36  balewski
+// add emcCollection if not exist
+//
 // Revision 1.12  2004/05/26 21:28:37  jwebb
 // o Changes to StEEmcFastMaker to provide methods to get sampling fraction,
 //   gains, etc...
