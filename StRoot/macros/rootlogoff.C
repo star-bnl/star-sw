@@ -1,5 +1,8 @@
-// $Id: rootlogoff.C,v 1.5 2001/09/01 20:04:45 perev Exp $
+// $Id: rootlogoff.C,v 1.6 2003/10/02 17:58:24 perev Exp $
 // $Log: rootlogoff.C,v $
+// Revision 1.6  2003/10/02 17:58:24  perev
+// little improvement in rootlogoff
+//
 // Revision 1.5  2001/09/01 20:04:45  perev
 // namespace introduced to avoi clashes
 //
@@ -20,7 +23,7 @@
 class StMaker;
 namespace rootlogoff {
 TClass *tclassMk=0;
-StMaker *mk=0;
+::StMaker *mk=0;
 }
 
 rootlogoff::tclassMk = gROOT->GetClass("StMaker",0);
