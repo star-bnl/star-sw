@@ -36,7 +36,7 @@
 *
       if (AgFHIT0('TPCE','TPAD') .ne. 0) return
       Iprin = ISLFLAG('G2TM','PRIN')
-      print *,' G2TM prin=',Iprin
+
       call vzero (QQ,   Lnmax)
       call vzero (iflg, Lnmax)
       call vzero (iadr, Nmh)
@@ -60,6 +60,7 @@
          If (Gname(j).eq. 'PX'  )   jP=j
          If (Gname(j).eq. 'ETOT')   iET=j
          If (Gname(j).eq. 'PTOT')   iPT=j
+         If (Gname(j).eq. 'LPTO')   iLP=j
       enddo
       if (iX*iC*jX*jP.le.0) print *,' errenious G1 table ',iX,iC,jX,jP
       if (iET*iPT*iLP.le.0) print *,' errenious G2 table ',iET,iPT,iLP
@@ -104,7 +105,7 @@
          if (iflg(iX+i).eq.0) iflg(iX+i)=-iflg(jX+i)
       enddo
       
-      If (Iprin.ge.0) then
+      If (Iprin.ge.3) then
          print *,'hits provide the following elements'     
          do j=1,Nh
             print *,Chit(j),iadr(j)

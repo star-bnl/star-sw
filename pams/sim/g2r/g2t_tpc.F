@@ -14,6 +14,7 @@
       Equivalence     (QQ(1),IQQ(1),id)
 *    - - - - - - - - -
       INTEGER   G2T_TPC,G2R_GET_HIT,Iprin/0/,i
+      logical   Local/.true./
 *
       G2T_TPC=STAFCV_OK
       call G2R_GET_SYS ('TPCE','TPAD')
@@ -33,18 +34,33 @@
          i=i+1
          g2t_tpc_hit_h.nok            = i
          g2t_tpc_hit(i).id            = i
-         g2t_tpc_hit(i).x(1)          = x(1)
-         g2t_tpc_hit(i).x(2)          = x(2)
-         g2t_tpc_hit(i).x(3)          = x(3)
-         g2t_tpc_hit(i).p(1)          = p(1)
-         g2t_tpc_hit(i).p(2)          = p(2)
-         g2t_tpc_hit(i).p(3)          = p(3)
+         If (local) then
+           g2t_tpc_hit(i).x(1)        = x(1)
+           g2t_tpc_hit(i).x(2)        = x(2)
+           g2t_tpc_hit(i).x(3)        = x(3)
+           g2t_tpc_hit(i).p(1)        = c(1)*p(4)
+           g2t_tpc_hit(i).p(2)        = c(2)*p(4)
+           g2t_tpc_hit(i).p(3)        = c(3)*p(4)
+         else
+           g2t_tpc_hit(i).x(1)        = xx(1)
+           g2t_tpc_hit(i).x(2)        = xx(2)
+           g2t_tpc_hit(i).x(3)        = xx(3)
+           g2t_tpc_hit(i).p(1)        = p(1)
+           g2t_tpc_hit(i).p(2)        = p(2)
+           g2t_tpc_hit(i).p(3)        = p(3)
+         endif
          g2t_tpc_hit(i).tof           = tof
          g2t_tpc_hit(i).de            = Elos
          g2t_tpc_hit(i).ds            = Step
          g2t_tpc_hit(i).track_p       = trac
          g2t_tpc_hit(i).volume_id     = volume
-         g2t_tpc_hit(i).next_tr_hit_p = next
+*
+*                  add to track linked list 
+*
+         g2t_tpc_hit(i).next_tr_hit_p = g2t_track(trac).hit_tpc_p
+         g2t_track(trac).hit_tpc_p    = i
+         g2t_track(trac).n_tpc_hit    = g2t_track(trac).n_tpc_hit + 1
+
       enddo    
 
       RETURN
