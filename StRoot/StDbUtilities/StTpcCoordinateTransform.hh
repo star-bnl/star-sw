@@ -1,6 +1,6 @@
 /***********************************************************************
  *
- * $Id: StTpcCoordinateTransform.hh,v 1.6 2000/07/27 23:06:50 hardtke Exp $
+ * $Id: StTpcCoordinateTransform.hh,v 1.7 2001/05/22 22:32:14 hardtke Exp $
  *
  * Author: brian made this on  Feb 6, 1998
  *
@@ -16,6 +16,9 @@
  ***********************************************************************
  *
  * $Log: StTpcCoordinateTransform.hh,v $
+ * Revision 1.7  2001/05/22 22:32:14  hardtke
+ * Add tpc global to local transformations
+ *
  * Revision 1.6  2000/07/27 23:06:50  hardtke
  * Hui requested that all member functions be public -- probably bad programming, but TRS needs to be speeded up
  *
@@ -181,6 +184,9 @@ private:
     StMatrix<double>  mRotation;  // (2x2)
     StMatrix<double>  mRotate;    // (2x1)
     StMatrix<double>  mResult;    // (2x1)
+    StMatrix<double>  mTpcToGlobalRotation; // (3X3)
+    StMatrix<double>  mGlobalToTpcRotation; // (3X3)
+    StThreeVector<double> mTpcPositionInGlobal; 
     
     //StTpcGeometry    *mTPCdb;         // singleton class
     //StTpcSlowControl *mSCdb;          // singleton class
