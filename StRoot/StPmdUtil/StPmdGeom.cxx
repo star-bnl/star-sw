@@ -1,6 +1,6 @@
 /********************************************************
  *
- * $Id: StPmdGeom.cxx,v 1.7 2004/04/01 15:41:00 subhasis Exp $
+ * $Id: StPmdGeom.cxx,v 1.8 2004/04/13 20:12:55 subhasis Exp $
  *
  * Author: Dipak Mishra
  *
@@ -11,8 +11,11 @@
  *
  *********************************************************
  * $Log: StPmdGeom.cxx,v $
+ * Revision 1.8  2004/04/13 20:12:55  subhasis
+ * Rashmi's fix of chain46 mapping
+ *
  * Revision 1.7  2004/04/01 15:41:00  subhasis
- * 3rd (or 4th?) access board detail added by Dipak
+ *  3rd (or 4th?) access board detail added by Dipak
  *
  * Revision 1.6  2004/03/23 08:49:27  subhasis
  * biardDetail put by had
@@ -528,7 +531,9 @@ Int_t StPmdGeom::ChainMapping(Int_t& chainno,Int_t& ch,Int_t& supmod,Int_t& col,
     chain45(chtemp,supmod,col,row);
     break;
   case 46:
-    chain46(chtemp,supmod,col,row);
+    chain46(chtemp,supmod,col1,row1);
+    if(supmod==23){col = 73 - row1; row = 49 - col1;}
+    if(supmod==24){col = col1; row = row1;}
     break;
   case 47:
       chain45(chtemp,supmod,col1,row1);
@@ -1191,29 +1196,29 @@ void StPmdGeom::chain46(Int_t& ch,Int_t& supmod,Int_t& col,Int_t& row)
     col = imirr[ch-2*192]; row = jmirr[ch-2*192] + 48;
     break;
   case 3:
-    col = 25 - inorm[ch-3*192]; row = 9-jnorm[ch-3*192] +24 + 16; 
-    supmod = 24; 
-    break;
+    col = 48 + jnorm[ch-3*192]; row = 48 + inorm[ch-3*192];
+    supmod = 24;
+    break; 
   case 4:
-    col = 25 - inorm[ch-4*192] + 24; row = 9-jnorm[ch-4*192] + 24 + 16; 
+    col = 48 + jnorm[ch-4*192]; row = 24 + inorm[ch-4*192];
     supmod = 24;
-    break;
+    break;    	   
   case 5:
-    col = inorm[ch-5*192] + 24; row = jnorm[ch-5*192] + 24 + 8; 
+    col = 9 - jnorm[ch-5*192] + 56; row = 49 - inorm[ch-5*192];
     supmod = 24;
-    break;
+    break; 
   case 6:
-    col = inorm[ch-6*192]; row = jnorm[ch-6*192]+ 24 +8; 
+    col = 9 - jnorm[ch-6*192] + 56; row = 73 - inorm[ch-6*192];
     supmod = 24;
-    break;
+    break;    	   
   case 7:
-    col = 25 - inorm[ch-7*192]; row = 9-jnorm[ch-7*192] + 24; 
+    col = jnorm[ch-7*192] + 64; row = 48 + inorm[ch-7*192];
     supmod = 24;
-    break;
+    break; 
   case 8:
-    col = 25 - inorm[ch-8*192] + 24; row = 9-jnorm[ch-8*192] + 24; 
+    col = jnorm[ch-8*192] + 64; row = 24 + inorm[ch-8*192];
     supmod = 24;
-    break;
+    break;    	   
   }
 }
 void StPmdGeom::ADC2Edep(Int_t ADC, Float_t& Edep)
