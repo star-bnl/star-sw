@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDbMaker.cxx,v 1.24 2001/10/24 21:36:20 hardtke Exp $
+ * $Id: StTpcDbMaker.cxx,v 1.25 2001/10/25 22:59:36 hardtke Exp $
  *
  * Author:  David Hardtke
  ***************************************************************************
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDbMaker.cxx,v $
+ * Revision 1.25  2001/10/25 22:59:36  hardtke
+ * Add function tpc_localsector_to_local
+ *
  * Revision 1.24  2001/10/24 21:36:20  hardtke
  * Add sim flavor option
  *
@@ -151,6 +154,17 @@ int type_of_call tpc_local_to_global_(int *isect,const float *xlocal, float* xgl
   xglobal[0] = global.position().x(); 
   xglobal[1] = global.position().y(); 
   xglobal[2] = global.position().z(); 
+  return 1; 
+}
+int type_of_call tpc_localsector_to_local_(int *isect,const float *xlocal, float* xtpc){
+  //translates from sector 12 coordinates to TPC local coordinates
+  StTpcLocalCoordinate tpc;
+  StTpcLocalSectorCoordinate localSector(xlocal[0],xlocal[1],xlocal[2],*isect);
+  StTpcCoordinateTransform transform(gStTpcDb);
+  transform(localSector,tpc); 
+  xtpc[0] = tpc.position().x(); 
+  xtpc[1] = tpc.position().y(); 
+  xtpc[2] = tpc.position().z(); 
   return 1; 
 }
 int tpc_local_to_global_emx_(int &isect,const float *glocal, float* gglobal)
