@@ -16,13 +16,13 @@
           INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
           input_g2t_file=event_0000050.xdf_
           num_events=1_
-          tpc_sector_first=18_
-          tpc_sector_last=18_
+          tpc_sector_first=1_
+          tpc_sector_last=24_
           tracker=tpt _
           funit=21 _
           nfile=tphit.ntup _
           nid=111_
-          table=tpc/hits/tphit_
+          table=tpc/tracks/mctrk_
           adcxyzon=0
   
   
@@ -90,7 +90,10 @@
    exec tpt_init#init
    exec tid_init#init
 
-  
+
+* tpc evaluation init
+   exec create_tables_tpc#tte
+   exec tte_init#init
 * ------------------- process events ------------------------------*
   
 * read event and then process thru tpc slow sim
@@ -109,6 +112,10 @@
 * clustering
     exec tcl_run#run_tcl [tpc_sector_first] [tpc_sector_last] 
     exec tcl_run#run_tph [tpc_sector_first] [tpc_sector_last]
+
+* evaluation of clustering
+    exec tte_run#run_tte_hit_match
+
 *  tracking
     if [tracker]=tpt then
       exec tpt_run#run
@@ -117,6 +124,10 @@
       exec tte_run#run_tte_track
       exec tid_run#run_tde_new
     endif
+
+* tpc track evaluation
+    exec tte_run#run_tte
+
 * write table to ntuple 
     exec write_table_to_ntuple#write_event_disk [nid] [data]/[table]
   enddo
