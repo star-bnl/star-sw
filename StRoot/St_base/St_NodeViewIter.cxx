@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/01/99  
-// $Id: St_NodeViewIter.cxx,v 1.5 1999/04/05 03:18:28 fine Exp $
+// $Id: St_NodeViewIter.cxx,v 1.6 1999/04/08 16:44:11 fine Exp $
 // $Log: St_NodeViewIter.cxx,v $
+// Revision 1.6  1999/04/08 16:44:11  fine
+// Working version of the NodeView family
+//
 // Revision 1.5  1999/04/05 03:18:28  fine
 // St_Node family steps
 //
@@ -18,6 +21,21 @@
 #include "St_DataSetIter.h"
 #include "TGeometry.h"
 
+/////////////////////////////////////////////////////////////////////////////////
+//
+//   St_NodeViewIter is a special class-iterator to
+//   iterate over GEANT geometry dataset St_NodeView.
+//   Class should provide a "standard" well-known 
+//   "St_DataSetIter" interface to navigate and access 
+//   the geometry information supplied by St_geant_Maker
+//   as the St_Node object. Apart of the the base
+//   St_DataSetIter this special class may supply
+//   not only pointer to the selected dataset but some
+//   "position" information (like translate vectors and
+//   rotation matrice).
+//
+/////////////////////////////////////////////////////////////////////////////////
+
 ClassImp(St_NodeViewIter)
 //______________________________________________________________________________
 St_NodeViewIter::St_NodeViewIter(St_NodeView *view, Int_t depth, Bool_t dir):
@@ -30,9 +48,9 @@ St_NodeViewIter::~St_NodeViewIter()
   if (m_Positions) { m_Positions->Delete(); delete m_Positions; }
 }
 //______________________________________________________________________________
-St_NodePosition *St_NodeViewIter::GetPosition(Int_t level)
+const St_NodePosition *St_NodeViewIter::GetPosition(Int_t level) const
 {
-  St_NodePosition *pos = 0;
+  const St_NodePosition *pos = 0;
   if (m_Positions) {
     Int_t thisLevel = level;
     if (!thisLevel) thisLevel = fDepth;
@@ -42,16 +60,13 @@ St_NodePosition *St_NodeViewIter::GetPosition(Int_t level)
 }
 
 //______________________________________________________________________________
-St_NodePosition St_NodeViewIter::operator[](Int_t level)
+St_NodePosition *St_NodeViewIter::operator[](Int_t level) const 
 {
-  Int_t thisLevel = level;
-  if (!thisLevel) thisLevel = fDepth;
-  St_NodePosition *pos = GetPosition(thisLevel);
-  St_NodePosition  null;
-  if (pos) return *pos;
+  const St_NodePosition *pos = GetPosition(level);
+  if (pos) return new St_NodePosition(*pos);
   else {
-     printf(" GetPostion: %d \n", thisLevel);
-     return null;
+     Error("operator[]"," GetPosition: %d %d %x", level,fDepth, m_Positions);
+     return 0;
   }
 }
 
@@ -110,8 +125,12 @@ St_NodePosition *St_NodeViewIter::UpdateTempMatrix(St_NodePosition *curPosition)
        newPosition = SetPositionAt(curNode,newTranslation[0],newTranslation[1],newTranslation[2]);
     }
   }
-  else
-       newPosition =  SetPositionAt(curNode);
+  else if (curPosition)  {
+         newPosition =  SetPositionAt(*curPosition);
+//         printf(" new level %d %s\n",fDepth, curNode->GetName());
+       }
+       else 
+         Error("UpdateTempMatrix","No position has been defined");
   return newPosition;
 }
 
@@ -120,17 +139,9 @@ void St_NodeViewIter::ResetPosition(Int_t level, St_NodePosition *newPosition)
 {
   Int_t thisLevel = level;
   if (!thisLevel) thisLevel = fDepth;
-  St_NodePosition *thisPosition  =  GetPosition(level);
-  if (thisPosition) delete thisPosition;
-  thisPosition = 0;
+  St_NodePosition *thisPosition  =  (St_NodePosition *) GetPosition(level);
   if (newPosition) 
-     thisPosition =  
-#ifdef Clone
-                new ((*m_Positions)[thisLevel]) St_NodePosition(*newPosition);
-#else
-//               delete (*m_Positions)[thisLevel]
-                   new  St_NodePosition(*newPosition);
-#endif
+     *thisPosition =  *newPosition;
 }
 //______________________________________________________________________________
 void St_NodeViewIter::Reset(St_DataSet *l,Int_t depth)
@@ -151,5 +162,17 @@ St_NodePosition *St_NodeViewIter::SetPositionAt(St_Node *node,Double_t x, Double
    return position;
 }
 
+//______________________________________________________________________________
+St_NodePosition *St_NodeViewIter::SetPositionAt(St_NodePosition &curPosition)
+{
+   if (!m_Positions)  m_Positions = new TObjArray(100);
+   St_NodePosition *position =  (St_NodePosition *) m_Positions->At(fDepth);
+   if (position) *position = curPosition;
+   else {
+      position = new St_NodePosition(curPosition);
+      m_Positions->AddAtAndExpand(position,fDepth);
+    }
+   return position;
+}
 
 

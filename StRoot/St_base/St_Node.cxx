@@ -1,8 +1,11 @@
 //*-- Author :    Valery Fine   10/12/98
-// $Id: St_Node.cxx,v 1.18 1999/04/02 23:56:17 fine Exp $
+// $Id: St_Node.cxx,v 1.19 1999/04/08 16:44:09 fine Exp $
 // $Log: St_Node.cxx,v $
+// Revision 1.19  1999/04/08 16:44:09  fine
+// Working version of the NodeView family
+//
 // Revision 1.18  1999/04/02 23:56:17  fine
-// Clean up
+//  Clean up
 //
 // Revision 1.17  1999/03/30 22:30:13  fine
 //  Visibility test has been added for Paint method
@@ -357,7 +360,7 @@ void St_Node::Browse(TBrowser *b)
        TIter next(GetListOfPositions());
        Int_t posNumber = 0;
        while (nodePosition = (St_NodePosition *)next()) {
-         TString posName = nodePosition->GetNode()->GetName();
+         TString posName = nodePosition->GetNode()->GetTitle();
          char num[20];
          posName += ";";
          sprintf(num,"Pos:%d",posNumber);

@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98   
-// $Id: St_NodePosition.h,v 1.10 1999/04/05 03:18:27 fine Exp $
+// $Id: St_NodePosition.h,v 1.11 1999/04/08 16:44:10 fine Exp $
 // $Log: St_NodePosition.h,v $
+// Revision 1.11  1999/04/08 16:44:10  fine
+// Working version of the NodeView family
+//
 // Revision 1.10  1999/04/05 03:18:27  fine
 // St_Node family steps
 //
@@ -87,6 +90,7 @@ class St_NodePosition  : public TObject /*, public St_DefineSet */ {
         virtual void        SavePrimitive(ofstream &out, Option_t *option);
 
         virtual void        SetMatrix(TRotMatrix *matrix=0) {fMatrix = matrix;}
+        virtual void        SetNode(St_Node *node){ fNode = node;}
         virtual void        SetPosition( Double_t x=0, Double_t y=0, Double_t z=0) {fX=x; fY=y; fZ=z;}
         virtual void        SetX(Double_t x){ fX = x;}
         virtual void        SetY(Double_t y){ fY = y;}

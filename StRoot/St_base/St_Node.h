@@ -1,6 +1,9 @@
 //*-- Author :    Valery Fine(fine@bnl.gov)   25/12/98  
-// $Id: St_Node.h,v 1.9 1999/04/05 03:18:26 fine Exp $
+// $Id: St_Node.h,v 1.10 1999/04/08 16:44:09 fine Exp $
 // $Log: St_Node.h,v $
+// Revision 1.10  1999/04/08 16:44:09  fine
+// Working version of the NodeView family
+//
 // Revision 1.9  1999/04/05 03:18:26  fine
 // St_Node family steps
 //
@@ -26,7 +29,7 @@
  
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
-// St_Node                                                                //
+// St_Node                                                              //
 //                                                                      //
 // Description of parameters to position a 3-D geometry object          //
 //                                                                      //

@@ -11,6 +11,7 @@
 #include "TPadView3D.h"
 #include "TGeometry.h"
 #include "TVirtualPad.h"
+#include "TObjArray.h"
 //////////////////////////////////////////////////////////////////////////
 //                                                                      //
 // St_NodeView                                                          //
@@ -30,7 +31,7 @@
 ClassImp(St_NodeView)
 //_____________________________________________________________________________
 St_NodeView::St_NodeView(St_NodeView *viewNode,St_NodePosition *nodePosition)
-            : St_ObjectSet(viewNode->GetName(),(TObject *)nodePosition)
+            : St_ObjectSet(viewNode->GetName(),(TObject *)nodePosition),m_Positions(0)
 {
   if (viewNode) 
   {
@@ -41,21 +42,19 @@ St_NodeView::St_NodeView(St_NodeView *viewNode,St_NodePosition *nodePosition)
      while (nextView = (St_NodeView *)next(mode)){     
        mode = kContinue;
        if (nextView->IsMarked()) {
-         St_NodePosition tempPos = next[0];
-         St_NodePosition *position = new St_NodePosition(tempPos);
-         printf("AAAA!!! %s \n",GetName());
+         St_NodePosition *position = next[0];
          if (!position->GetNode()) {
-             printf("uuuuuuuuuu !!! %s \n",GetName());
+             Error("St_NodeView ctor","%s %s ",GetName(),nextView->GetName());
          }
          Add(new St_NodeView(nextView,position));
-//         mode = kPrune;
+         mode = kPrune;
        }
     }
   }
 }
 //_____________________________________________________________________________
-St_NodeView::St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition,EDataSetPass iopt)
-            : St_ObjectSet(pattern.GetName(),(TObject *)nodePosition)
+St_NodeView::St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition,EDataSetPass iopt,Int_t level)
+            : St_ObjectSet(pattern.GetName(),(TObject *)nodePosition),m_Positions(0)
 {
   //
   // Creates St_DataSet (clone) with a topology similar with St_DataSet *pattern
@@ -75,22 +74,109 @@ St_NodeView::St_NodeView(St_Node &pattern,const St_NodePosition *nodePosition,ED
   SetTitle(pattern.GetTitle());
   if ( pattern.IsMarked() ) Mark(); 
   St_NodePosition *position = 0;
-  TIter next(pattern.GetListOfPositions());
-  Bool_t optsel = (iopt == kStruct);
-  Bool_t optall = (iopt == kAll);
+  const TList *list = pattern.GetListOfPositions();
+  if (!list) return;
+
+  TIter next(list);
+  Bool_t optSel    = (iopt == kStruct);
+  Bool_t optAll    = (iopt == kAll);
+  Bool_t optMarked = (iopt == kMarked);
+  Int_t thisLevel = level + 1;
   while (position = (St_NodePosition *)next()) {
     // define the the related St_Node
      St_Node *node = position->GetNode(); 
      if (node) {
-       St_DataSet *parent = node->GetParent(); 
-       if ( optall || (optsel && parent == (St_DataSet *)&pattern) )
-                                  Add(new St_NodeView(*node,position));
+       if ( optMarked) {
+        // Update position
+           position = UpdateTempMatrix(position,thisLevel);
+           if ( !node->IsMarked() )  continue;
+           position = new St_NodePosition(*position);
+       }
+
+       if (optSel) {
+            St_DataSet *parent = node->GetParent(); 
+            if ( parent && (parent != (St_DataSet *)&pattern) ) continue;
+       }
+
+       Add(new St_NodeView(*node,position,iopt,thisLevel));       
      }
      else 
        Error("St_NodeView ctor","Position with NO node attached has been supplied");
      
   }
 }
+//______________________________________________________________________________
+St_NodeView::~St_NodeView()
+{
+ if (m_Positions) { m_Positions->Delete(); delete m_Positions; }
+}
+
+//______________________________________________________________________________
+St_NodePosition *St_NodeView::SetPositionAt(Int_t level,St_Node *node,Double_t x,
+                                      Double_t y, Double_t z, TRotMatrix *matrix)
+{
+   if (!m_Positions)  m_Positions = new TObjArray(100);
+   St_NodePosition *position =  (St_NodePosition *) m_Positions->At(level);
+   if (position) position->Reset(node,x,y,z,matrix);
+   else {
+      position = new St_NodePosition(node,x,y,z,matrix);
+      m_Positions->AddAtAndExpand(position,level);
+    }
+   return position;
+}
+
+//______________________________________________________________________________
+St_NodePosition *St_NodeView::UpdateTempMatrix(St_NodePosition *curPosition,Int_t level)
+{
+  // Pick the "old" position by pieces
+  St_NodePosition *newPosition = 0;
+  St_Node *curNode = 0;
+  if (curPosition) curNode = curPosition->GetNode();
+  if (level-1) {
+    St_NodePosition *oldPosition = 0;
+    TRotMatrix *oldMatrix = 0;
+    oldPosition = m_Positions ? (St_NodePosition *)m_Positions->At(level-1):0;
+    Double_t oldTranslation[] = { 0, 0, 0 };
+    if (oldPosition) 
+    {
+      oldMatrix         = oldPosition->GetMatrix();
+ 
+      oldTranslation[0] = oldPosition->GetX();
+      oldTranslation[1] = oldPosition->GetY();
+      oldTranslation[2] = oldPosition->GetZ();
+    }
+
+    // Pick the "current" position by pieces
+    TRotMatrix *curMatrix        = curPosition->GetMatrix();
+ 
+    // Create a new position
+    Double_t newTranslation[3];
+    Double_t newMatrix[9];
+
+    if(oldMatrix)
+    {
+      TGeometry::UpdateTempMatrix(oldTranslation,oldMatrix->GetMatrix()
+                       ,curPosition->GetX(),curPosition->GetY(),curPosition->GetZ(),curMatrix->GetMatrix()
+                       ,newTranslation,newMatrix);
+      Int_t num = gGeometry->GetListOfMatrices()->GetSize();
+      Char_t anum[100];
+      sprintf(anum,"%d",num+1);
+      newPosition = SetPositionAt(level,curNode
+                                ,newTranslation[0],newTranslation[1],newTranslation[2]
+                                ,new TRotMatrix(anum,"NodeView",newMatrix));
+    }
+    else {
+       newTranslation[0] = oldTranslation[0] + curPosition->GetX();
+       newTranslation[1] = oldTranslation[1] + curPosition->GetY();
+       newTranslation[2] = oldTranslation[2] + curPosition->GetZ();
+       newPosition = SetPositionAt(level,curNode,newTranslation[0],newTranslation[1],newTranslation[2]);
+    }
+  }
+  else
+       newPosition =  SetPositionAt(level,curNode);
+  return newPosition;
+}
+
 //_____________________________________________________________________________
 void St_NodeView::Browse(TBrowser *b){
   St_ObjectSet::Browse(b);
@@ -256,11 +342,11 @@ void St_NodeView::Paint(Option_t *option)
   St_NodeView *node;
   TIter  next(fNodes);
   while ((node = (St_NodeView *)next())) {
-     if (view3D && position)  view3D->PushMatrix();
+     if (view3D)  view3D->PushMatrix();
 
      node->Paint(option);
 
-     if (view3D && position)  view3D->PopMatrix();
+     if (view3D)  view3D->PopMatrix();
   }
   gGeometry->PopLevel();
 }
