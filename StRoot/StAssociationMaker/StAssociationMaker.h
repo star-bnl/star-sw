@@ -1,7 +1,10 @@
 /**********************************************
  *
- * $Id: StAssociationMaker.h,v 1.15 2000/06/09 19:54:02 calderon Exp $
+ * $Id: StAssociationMaker.h,v 1.16 2001/04/27 18:41:48 calderon Exp $
  * $Log: StAssociationMaker.h,v $
+ * Revision 1.16  2001/04/27 18:41:48  calderon
+ * Update with switches to use L3 Trigger.
+ *
  * Revision 1.15  2000/06/09 19:54:02  calderon
  * use the new StMcHitComparisons
  * use the message manager more extensively
@@ -402,7 +405,7 @@ class StAssociationMaker : public StMaker {
     virtual Int_t Init();
     virtual Int_t Make();
     virtual Int_t Finish();
-
+    void useL3Trigger() {mL3TriggerOn = true;}
     TH2F*     mTpcLocalHitResolution;    //! Diff btw local  x and z coords of TPC hits.
     TH2F*     mSvtHitResolution;         //! Diff btw global x and z coords of SVT hits.
     TH2F*     mFtpcHitResolution;        //! Diff btw global r and phi coords of FTPC hits.
@@ -445,9 +448,9 @@ private:
     mcXiMapType*      mMcXiMap;      //!
 
     Bool_t drawinit;
-
+    bool              mL3TriggerOn; //!
     virtual const char* GetCVS() const
-    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.15 2000/06/09 19:54:02 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
+    {static const char cvs[]="Tag $Name:  $ $Id: StAssociationMaker.h,v 1.16 2001/04/27 18:41:48 calderon Exp $ built "__DATE__" "__TIME__; return cvs;}	
     // the following is a ROOT macro  that is needed in all ROOT accessible code
     ClassDef(StAssociationMaker, 1)
 
