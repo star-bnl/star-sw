@@ -5,7 +5,7 @@ TDataSet *CreateTable() {
   Int_t nrows = 1;
   St_tpcCorrection *tableSet = new St_tpcCorrection("tpcWaterOut",nrows);
   memset(&row,0,tableSet->GetRowSize()); 
-  row.index       = 1;
+  row.idx       = 1;
   row.nrows       = nrows;
   tableSet->AddAt(&row);
   // ----------------- end of code ---------------

@@ -5,7 +5,7 @@ TDataSet *CreateTable() {
   St_tpcCorrection *tableSet = new St_tpcCorrection("TpcdXCorrection",nrows);
   memset(&row,0,tableSet->GetRowSize()); 
   row.nrows      = nrows;       // Outer dXdECGFHist842P04ifAuAu200
-  row.index      = 1;
+  row.idx      = 1;
   row.npar       = 4;
   row.min        = 0.95;
   row.max        = 2.20;
@@ -16,7 +16,7 @@ TDataSet *CreateTable() {
   tableSet->AddAt(&row);
   memset(&row,0,tableSet->GetRowSize()); 
   row.nrows      = nrows;       // Outer dXdECGFHist842P04ifAuAu200
-  row.index      = 2;
+  row.idx      = 2;
   row.npar       = 6;
   row.min        = 0.2;
   row.max        = 1.4;

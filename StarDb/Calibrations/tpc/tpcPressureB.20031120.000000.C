@@ -20,7 +20,7 @@ TDataSet *CreateTable() {
     row.a[1]	  =-2.87419e+00;
 #endif
 #endif
-    row.index     = indx;
+    row.idx     = indx;
     tableSet->AddAt(&row);
   }
   // ----------------- end of code ---------------
