@@ -15,10 +15,11 @@
   else
      suffix =".so";
 
-   Char_t buffer[256];
+ //  Char_t buffer[256];
    for(Int_t i=0;i<nlist;i++) {
-      strcpy(buffer,libs[i]);strcat(buffer,suffix);
-      if (gSystem.Load(buffer))  printf(" Loading DLL \"%s\" failed \n",buffer);
+    const char *buffer = libs[i];
+    printf(" %s \n", buffer);
+    if (gSystem.Load(buffer))  printf(" Loading DLL \"%s\" failed \n",buffer);
   }
 
   void *dirhandle = 0;
