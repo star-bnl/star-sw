@@ -1,4 +1,4 @@
-// $Id: StdEdxY2Maker.cxx,v 1.42 2004/11/02 16:00:40 fisyak Exp $
+// $Id: StdEdxY2Maker.cxx,v 1.43 2004/11/03 23:04:05 fisyak Exp $
 #define dChargeCorrection
 #define SpaceChargeQdZ
 #define CompareWithToF
@@ -115,7 +115,7 @@ Int_t StdEdxY2Maker::Init(){
     //    SETBIT(m_Mode,kOldClusterFinder); 
     m_Mode = 0;
     SETBIT(m_Mode,kPadSelection); 
-    if (mode == -10) SETBIT(m_Mode,kDoNotCorrectdEdx); 
+    if (mode == -10) {m_Mask = 0; SETBIT(m_Mask,StTpcdEdxCorrection::kTpcLast);}
   }
   if (Debug()) {
     if (! TESTBIT(m_Mode, kOldClusterFinder)) 
