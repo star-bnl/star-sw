@@ -35,9 +35,12 @@
       PARAMETER (kPhmdCpvId = kPhmdCpvIdentifier)
       PARAMETER (kPhmdId = kPhmdIdentifier)
 
-C     $Id: StDetectorId.inc,v 1.9 2002/12/18 02:28:52 lbarnby Exp $
+C     $Id: StDetectorId.inc,v 2.1 2004/04/26 16:35:19 fisyak Exp $
 C
 C     $Log: StDetectorId.inc,v $
+C     Revision 2.1  2004/04/26 16:35:19  fisyak
+C     Move enumerations from pams/global/inc => StEvent
+C
 C     Revision 1.9  2002/12/18 02:28:52  lbarnby
 C     PMD identifiers added
 C

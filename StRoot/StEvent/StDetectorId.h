@@ -33,9 +33,12 @@ enum StDetectorId {
 #endif
 
 
-// $Id: StDetectorId.h,v 1.9 2002/12/18 02:28:48 lbarnby Exp $
+// $Id: StDetectorId.h,v 2.1 2004/04/26 16:35:19 fisyak Exp $
 //
 // $Log: StDetectorId.h,v $
+// Revision 2.1  2004/04/26 16:35:19  fisyak
+// Move enumerations from pams/global/inc => StEvent
+//
 // Revision 1.9  2002/12/18 02:28:48  lbarnby
 // PMD identifiers added
 //

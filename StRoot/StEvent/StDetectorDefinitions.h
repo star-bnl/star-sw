@@ -61,9 +61,12 @@
 #define kPhmdIdentifier               26
 #endif /*STDETECTORDEFINITIONS*/
 
-/* $Id: StDetectorDefinitions.h,v 1.10 2002/12/19 21:52:38 lbarnby Exp $
+/* $Id: StDetectorDefinitions.h,v 2.1 2004/04/26 16:35:19 fisyak Exp $
 **
 ** $Log: StDetectorDefinitions.h,v $
+** Revision 2.1  2004/04/26 16:35:19  fisyak
+** Move enumerations from pams/global/inc => StEvent
+**
 ** Revision 1.10  2002/12/19 21:52:38  lbarnby
 ** Corrected CVS tags
 **
