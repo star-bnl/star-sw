@@ -1,13 +1,15 @@
 #!/bin/csh
-# $Id: star_html,v 1.1 1998/04/19 21:00:35 fisyak Exp $
+# $Id: star_html,v 1.2 1998/04/20 21:46:11 fisyak Exp $
 # $Log: star_html,v $
+# Revision 1.2  1998/04/20 21:46:11  fisyak
+# Module description
+#
 # Revision 1.1  1998/04/19 21:00:35  fisyak
 # Add cross reference module documentation
 #
-# $Date: 1998/04/19 21:00:35 $
 set all_idl = `find $STAR/pams -name "*.idl"`
-set list_idlm = `egrep -l 'interface.*:.*amiModule' $all_idl`
-set list_idl  = `egrep -l 'struct'                  $all_idl`
+set list_idlm = `egrep -l 'interface' $all_idl`
+set list_idl  = `egrep -l 'struct '   $all_idl`
 echo "<HTML>"
 echo "<HEAD>"
 echo "<TITLE>List of STAR pams and tables</TITLE>"
@@ -27,7 +29,7 @@ set domain = ""
       set count = 0
    endif
    set id = `basename $idlm .idl`
-   echo '<a href="#'$id'"><strong>'$id'</strong></a>     ,'
+   echo '<a href="#'$id'_mod"><strong>'$id'</strong></a> &nbsp; &nbsp; &nbsp;'
    set count = `expr $count + 1`;
 #   if ($count >= 10) then
 #       echo "<br>"
@@ -50,7 +52,7 @@ set domain = ""
    endif
 
    set id = `basename $idl .idl`
-   echo '<a href="#'$id'"><strong>'$id'</strong></a>   ,'
+   echo '<a href="#'$id'_tab"><strong>'$id'</strong></a> &nbsp; &nbsp; &nbsp;'
    set count = `expr $count + 1`;
 #   if ($count >= 5) then
 #       echo "<br>"
@@ -63,11 +65,9 @@ echo "<ol>"
  foreach idl ($list_idlm) 
    set id = `basename $idl .idl`
    set hid = `echo $idl | sed -e 's/\/afs\/rhic\/star\/packages\//http:\/\/www.rhic.bnl.gov\/afs\/rhic\/star\/doc\/www\/packages_l\//'`
-   echo '<li>Module <a name="'$id'"><strong>'$id'</strong></a> defined in <a href="'$hid'">'$idl'</a>'
+   echo '<li>Module <a name="'$id'_mod"><strong>'$id'</strong></a> defined in <a href="'$hid'">'$idl'</a>'
 echo '<BR>'
-#echo '<DIV ALIGN="CENTER">'
 echo '<TABLE CELLPADDING=3 BORDER="1">'
-#echo '<CAPTION><a href="#'$id'"><strong>'$id'</strong></a> module specification</CAPTION>'
 echo '<TR><TD>Module</TD><TD>Input tables</TD><TD>Output tables</TD></TR>'
    ./module_html   $idl
 echo '</TABLE>'                                                                                                 
@@ -80,11 +80,11 @@ echo "<ol>"
  foreach idl ($list_idl) 
    set id = `basename $idl .idl`
    set hid = `echo $idl | sed -e 's/\/afs\/rhic\/star\/packages\//http:\/\/www.rhic.bnl.gov\/afs\/rhic\/star\/doc\/www\/packages_l\//'`
-   echo '<li> Table <a name="'$id'"><strong>'$id'</strong></a> is defined in <a href="'$hid'">'$idl'</a> and used by the following modules:'
+   echo '<li> Table <a name="'$id'_tab"><strong>'$id'</strong></a> is defined in <a href="'$hid'">'$idl'</a> and used by the following modules:'
    set idlm_idl = `egrep -l ${id}.idl $list_idlm`
    foreach idlm ($idlm_idl)
      set did = `basename $idlm .idl`
-     echo '<a href="#'$did'">'$did'</a>    ,'
+     echo '<a href="#'$did'_mod">'$did'</a> &nbsp;&nbsp;&nbsp;&nbsp;'
    end
  end
 echo "</ol>"
