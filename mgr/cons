@@ -13,13 +13,13 @@ use Cwd;
 # Cons: A Software Construction Tool.
 # Bob Sidebotham (rns@fore.com), FORE Systems, 1996.
 
-# $Id: cons,v 1.47 2000/07/01 23:06:21 fisyak Exp $
+# $Id: cons,v 1.48 2000/07/02 15:29:58 fisyak Exp $
 
 # Copyright (c) 1996-1999 FORE Systems, Inc.	 All rights reserved.
 $ver_num = 2.0;
 $ver_rev = ".1";
 $version = sprintf "This is Cons %2.1f%s " .
-	    '($Id: cons,v 1.47 2000/07/01 23:06:21 fisyak Exp $)'. "\n",
+	    '($Id: cons,v 1.48 2000/07/02 15:29:58 fisyak Exp $)'. "\n",
 	    $ver_num, $ver_rev;
 
 # Cons: A Software Construction Tool.
@@ -1606,17 +1606,31 @@ sub getcoms {
 sub action {
     my($self, $tgt) = @_;
     my($env) = $self->{env};
-
+    my $vers = 0;
+    my $file = $tgt->path;
+    my $dir =  File::Basename::dirname($file);#$tgt->{dir};
+    my $nefile = "";
     if ($param::build) {
 	futil::mkdir($tgt->{dir});
-	if (-f $tgt->path &&  $tgt->keep) {
+	unlink($tgt->path) if ! $tgt->precious;
+	if ($tgt->keep) {
 	  my $date = `date +\%d\%b-%T`; 
 	  my $file = $tgt->path;
-	  my $newfile = $file . "." . $date;
-	  my $cmd = "mv $file $newfile"; print "$cmd,\b";
-	  my $exit = `$cmd`;
+#	  $dir  = File::Basename::dirname($file);
+	  my $local= $tgt->{entry}; #File::Basename::basename($file);
+	  opendir (DIR,$dir) or die "Can't open $dir\n";
+	  my @files = readdir DIR;
+	  closedir DIR;
+	  foreach my $f (@files) {
+            next if $f !~ /$local\.\d*/;
+	    (my $v = $f) =~ s/$local\.//;
+	    if ($v > $vers) {$vers = $v;}
+	  } 
+	  $vers += 1;
+	  $newfile = $local . "." . $vers;
+	  symlink($newfile,$file);
+#	  $tgt->{entry} .= "." . $vers;
 	}
-	unlink($tgt->path) if ! $tgt->precious;
     }
 
     # Set environment.
@@ -1682,6 +1696,10 @@ sub action {
     }
 
     # success.
+    if ($newfile && !-l $tgt->path) {
+      rename $file, $dir . "/" . $newfile or die "Can't rename $file to $newfile";
+      symlink($newfile,$file);
+    }
     return 1;
 }
 
