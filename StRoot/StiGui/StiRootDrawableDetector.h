@@ -25,7 +25,7 @@ protected:
     virtual const char* name() const;
 
     //Overide StiDetector methods
-    virtual void build(const char* infile);
+    virtual void build();
     
 protected:
     virtual void makeShape();

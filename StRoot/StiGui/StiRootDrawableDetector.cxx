@@ -44,7 +44,7 @@ void StiRootDrawableDetector::update()
 
 const char* StiRootDrawableDetector::name() const
 {
-    return StiDetector::getName();
+    return StiDetector::getName().c_str();
 }
 
 void StiRootDrawableDetector::makeShape()
@@ -57,7 +57,7 @@ void StiRootDrawableDetector::makeShape()
     StiDisplayManager::instance()->cd();
 
     char* shapename = new char[200];
-    sprintf(shapename,"Shape_%s",getName());
+    sprintf(shapename,"Shape_%s",getName().c_str());
     // make rectangular or cylindrical shapes based on shape code
     StiPlacement *pPlacement = getPlacement();
     StiShapeCode code = getShape()->getShapeCode();
@@ -174,10 +174,10 @@ void StiRootDrawableDetector::makeShape()
     return;
 }
 
-void StiRootDrawableDetector::build(const char* buildfile)
+void StiRootDrawableDetector::build()
 {
     //cout <<"StiRootDrawableDetector::build()"<<endl;
-    StiDetector::build(buildfile);
+    StiDetector::build();
     makeShape();
     StiDisplayManager::instance()->addDrawable(this);
     //cout <<(*this)<<endl;
