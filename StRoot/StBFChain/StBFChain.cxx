@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.395 2004/03/18 02:08:26 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.396 2004/03/18 02:17:01 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -1495,6 +1495,7 @@ Int_t StBFChain::Instantiate()
 	    //		  kPadrow13,kTwist,kClock,kMembrane,kEndcap,
 	    //            kIFCShift,kSpaceCharge,kSpaceChargeR2);
 	    if( GetOption("OBmap") ){	      mask |=   (kBMap          << 1); }
+	    if( GetOption("OBMap2d") ){       mask |=   (kFast2DBMap    << 1); }
 	    if( GetOption("OPr13") ){	      mask |=   (kPadrow13      << 1); }
 	    if( GetOption("OTwist") ){	      mask |=   (kTwist         << 1); }
 	    if( GetOption("OClock") ){	      mask |=   (kClock         << 1); }
