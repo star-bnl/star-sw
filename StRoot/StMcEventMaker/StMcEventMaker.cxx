@@ -99,7 +99,7 @@ void StMcEventMaker::Clear(const char*)
 void StMcEventMaker::PrintInfo() {
     // StMcEventMaker - PrintInfo,
     printf("**************************************************************\n");
-    printf("* $Id: StMcEventMaker.cxx,v 1.1.1.1 1999/07/13 18:07:44 calderon Exp $\n");
+    printf("* $Id: StMcEventMaker.cxx,v 1.2 1999/07/21 19:46:36 calderon Exp $\n");
     printf("**************************************************************\n");
 
    
@@ -146,7 +146,6 @@ Int_t StMcEventMaker::Make()
 
   
     St_DataSet* Event = GetDataSet("geant");
-
         
   // This is done only for one file, though.  I haven't put functionality for
   // multiple file handling.  If needed, it should start in the StMcEventReadMacro
@@ -157,7 +156,7 @@ Int_t StMcEventMaker::Make()
   // Now we have the DataSet, but for some reason, we need the Iterator to navigate
 
   St_DataSetIter geantDstI(Event);
-
+  
   // Now the Iterator is set up, and this allows us to access the tables
   // This is done like so:
   // TableClass *instanceOfTableClassPointer = cast to TableClassPointer instanceOfDataSetIter("actual name of table in data set");
@@ -169,25 +168,23 @@ Int_t StMcEventMaker::Make()
   St_g2t_svt_hit *g2t_svt_hitTablePointer =  (St_g2t_svt_hit *) geantDstI("g2t_svt_hit");
   St_g2t_ftp_hit *g2t_ftp_hitTablePointer =  (St_g2t_ftp_hit *) geantDstI("g2t_ftp_hit");
 
-  
   // Now we check if we have the pointer, if we do, then we can access the tables!
 
-  
    if (g2t_vertexTablePointer && g2t_trackTablePointer
-       && g2t_tpc_hitTablePointer && g2t_ftp_hitTablePointer )
-  
-      {
-	  
-	  //g2t_event_st   *eventTable  = g2t_eventTablePointer->GetTable();
-	  g2t_vertex_st  *vertexTable = g2t_vertexTablePointer->GetTable();
-	  g2t_track_st   *trackTable  = g2t_trackTablePointer->GetTable();
-	  g2t_tpc_hit_st *tpcHitTable = g2t_tpc_hitTablePointer->GetTable();
-	  g2t_svt_hit_st *svtHitTable = g2t_svt_hitTablePointer->GetTable();
-	  g2t_ftp_hit_st *ftpHitTable = g2t_ftp_hitTablePointer->GetTable();
-	  
-	  // Before filling StMcEvent, we can check whether we can actually
-	  // access the tables.
-
+       && g2t_tpc_hitTablePointer && g2t_ftp_hitTablePointer ){
+       
+       //g2t_event_st   *eventTable  = g2t_eventTablePointer->GetTable();
+       g2t_vertex_st  *vertexTable = g2t_vertexTablePointer->GetTable();
+       g2t_track_st   *trackTable  = g2t_trackTablePointer->GetTable();
+       g2t_tpc_hit_st *tpcHitTable = g2t_tpc_hitTablePointer->GetTable();
+       g2t_ftp_hit_st *ftpHitTable = g2t_ftp_hitTablePointer->GetTable();
+       g2t_svt_hit_st *svtHitTable;
+       if (g2t_svt_hitTablePointer) svtHitTable = g2t_svt_hitTablePointer->GetTable();
+       
+       
+       // Before filling StMcEvent, we can check whether we can actually
+       // access the tables.
+       
 // 	  cout << "Event Table Examples: " << endl;
 // 	  cout << "eg_label: " << eventTable->eg_label << endl; 
 // 	  cout << "n_event : " << eventTable->n_event << endl;
@@ -294,8 +291,8 @@ Int_t StMcEventMaker::Make()
 		      
 		      delete v;
 		      vtemp[vertexTable[ivtx].id - 1].vtx = mCurrentMcEvent->primaryVertex();
-		  };
-   	      };
+		  }
+   	      }
 
 	  //______________________________________________________________________
 	  // Step 3 - Fill Tracks - we do not fill associated hits until Step 4
@@ -389,7 +386,7 @@ Int_t StMcEventMaker::Make()
 	  StMcFtpcHit* fh = 0;
 
 	  // TPC Hits
-	  cout << "Trying to establish relationship btw Tpc Hit & Parent Track" << endl;
+	  //cout << "Trying to establish relationship btw Tpc Hit & Parent Track" << endl;
 	  long NHits = g2t_tpc_hitTablePointer->GetNRows();
 	  long iTrkId = 0;
 	  for(long ihit=0; ihit<NHits; ihit++) {
@@ -420,6 +417,7 @@ Int_t StMcEventMaker::Make()
 	  
 
 	  // SVT Hits
+	  if (g2t_svt_hitTablePointer) {
 	  NHits = g2t_svt_hitTablePointer->GetNRows();
 	  iTrkId = 0;
 	  for(ihit=0; ihit<NHits; ihit++) {
@@ -435,7 +433,11 @@ Int_t StMcEventMaker::Make()
 	      
 	  };
 	  cout << "Filled SVT Hits" << endl;
-	  
+	  }
+	  else {
+	      cout << "No SVT Hits in this file" << endl;
+	      mCurrentMcEvent->svtHitCollection()->clear();
+	  }
 	  
 	  // FTPC Hits
 	  NHits = g2t_ftp_hitTablePointer->GetNRows();
