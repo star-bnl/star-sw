@@ -1,56 +1,3 @@
-/* Begun May 1 1995, Herb Ward.  ward@physics.utexas.edu
- Here are instructions for people who want to use my table cuts mechanism
- under dsl.
- At the risk of looking difficult, these notes are detailed.
- This file (and its companion cuts.h, which you should #include in your
- files where you call anything from this file, contain
- software for doing table cuts under dsl for STAR.  You must link
- to STAR's dsl and dsu libraries.
- There are two functions (DoCuts() and RowPassedCuts()) that you call.
- Here is how to use them.
- 1.  Declarations:
-        char ba[NBYTES];       (ba means Boolean Array)
-        size_t rowIndex,nBytes;
-        DS_DATASET_T *pTable;
- 2.  Determine the number of rows in your table.  Divide this number by 8,
-     round up to the next integer.  Check that your result <= NBYTES.
-     (I use every bit (to conserve memory) instead of all eight bits to
-     store one true/false.)
- 3.  Make a cuts string [eg, "(id.ge.200.and.id.le.299).or.(invpt.le.5.23)"].
-     The identifiers (eg "invpt") are column names.
-     Use square brackets for columns whose data types are arrays [eg,
-     "cov[5].gt.6.12"].
- 4.  Use dsl to make a pointer to the table named "pTable".
- 5.  Call the first function
-       myBool DoCuts(char *errMess,size_t NBYTES,
-        char *ba,char *cuts,DS_DATASET_T *pTable);
-     It returns FALSE (0) in case of error, TRUE (1) otherwise.
-     Error messages are written in errMess, less than 80 bytes.
-     It fills in the array ba, the primary output.
- 6.  To determine whether a given row (row number rowIndex) passed the cuts,
-     call the second function:
-        myBool RowPassedCuts(char *ba,size_t rowIndex);
-     Here, returning FALSE does not indicate an error condition, but rather
-     simply means that the row in question failed during the call to DoCuts.
-     NB:  set rowIndex according to C conventions, and not FORTRAN conventions
-     (ie, the first row has rowIndex=0, NOT rowIndex=1).
-     NB:  you CANNOT use the construction if(ba[rowIndex]), you MUST use
-     if(RowPassedCuts(ba,rowIndex)).
- 7.  You must provide a function void Say(char *) for error messages from
-     this file.  Say() must add a newline, if required.  A simple Say() would
-     be (this has to be in YOUR code for ME to call):
-     #include <stdio.h>
-     void Say(char *errMessageFromCuts) {
-       printf("Error message from cuts:\n%s\n",errMessageFromCuts);
-     }
- 8.  You must provide a second function named Err.  You might use the
-     following code for your Err() (this has to be (this has to be in
-     YOUR code for ME to call):
-         #include <stdio.h>
-         void Err(int xx) {
-            printf("Fatal error number %d during cuts.\n",xx);
-         }
-*/
 /***********************************************************  TYPEDEFS  **/
 typedef int myBool;
 /***********************************************************  INCLUDES  **/
@@ -60,7 +7,7 @@ typedef int myBool;
 #include <stdlib.h>
 #include "dstype.h"
 #include "dsxdr.h"
-#include "cuts.h"
+#include "dscuts.h"
 extern char gStr[100];
 /***********************************************************  DEFINES  **/
 #define ERR_1 "The number typed in the subscript box is too small.\nMin=1."
@@ -246,7 +193,7 @@ int PassCuts(DS_DATASET_T *pTable,long row,char *cuts) {
   DelWhiteSpace(cuts); ToLowerCase(cuts);
   strncpy(gCopy,cuts,PSIZE-2); strncpy(copy,cuts,PSIZE-2);
   if(!DelOutParens(cuts)) {
-    Say1("Parse error in DoCuts().");
+    Say1("Parse error in dsuDoCuts().");
     return PARSE_ERR; /* BBB This was TRUE as from evl. */
   }
   ip=FALSE; len=strlen(cuts);
@@ -301,7 +248,7 @@ void ConvertFromCtoFortran(char *xx) {
   }
 }
 #define SHOW 35
-myBool DoCuts(size_t nBytes,char *ba,char *cuts,DS_DATASET_T *pTable) {
+myBool dsuDoCuts(size_t nBytes,char *ba,char *cuts,DS_DATASET_T *pTable) {
   size_t numRows; long ii; char copy[COPY],litCopy[SHOW+5]; /* 5 for "..." */
   strncpy(copy,cuts,COPY-2); ConvertFromCtoFortran(copy);
   if(strlen(copy)>COPY-4) { Say1("Cuts string too big."); return FALSE; }
@@ -311,25 +258,25 @@ myBool DoCuts(size_t nBytes,char *ba,char *cuts,DS_DATASET_T *pTable) {
   Progress(-5,(int)numRows,"Cuts Progress                       ",litCopy);
   if(sizeof(char)!=1) {
     /* If you get this error message, you may have to adjust BITSPERCHAR */
-    Say1("This is DoCuts(). I need 8 bit chars."); return FALSE;
+    Say1("This is dsuDoCuts(). I need 8 bit chars."); return FALSE;
   }
   dsTableRowCount(&numRows,pTable);
   for(ii=nBytes-1;ii>=0;ii--) ba[ii]=0;
   gTableError=FALSE;
   for(ii=0;ii<numRows;ii++) {
     if(ii%150==0) Progress(ii,(int)numRows,NULL,NULL);
-    if(gTableError) { Say1("Error 66d in DoCuts()."); return FALSE; }
+    if(gTableError) { Say1("Error 66d in dsuDoCuts()."); return FALSE; }
     switch(PassCuts(pTable,ii,copy)) {
       case TRUE: SetThisRow(ii,ba); break;
       case FALSE: break;
       case PARSE_ERR: Say1("Parse error on your cuts."); return FALSE; break;
-      default: Say1("Error 66c in DoCuts()."); return FALSE;
+      default: Say1("Error 66c in dsuDoCuts()."); return FALSE;
     }
   }
   Progress(-10,(int)numRows,NULL,NULL);
   return TRUE;
 }
-myBool RowPassedCuts(char *ba,long row) {
+myBool dsuRowPassedCuts(char *ba,long row) {
   long whichChar; int whichBit; char mask;
   whichBit=row%BITSPERCHAR; whichChar=row/BITSPERCHAR;
   switch(whichBit) {
