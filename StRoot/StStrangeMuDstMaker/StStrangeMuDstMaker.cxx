@@ -1,5 +1,8 @@
-// $Id: StStrangeMuDstMaker.cxx,v 1.7 2000/04/27 14:13:04 genevb Exp $
+// $Id: StStrangeMuDstMaker.cxx,v 1.8 2000/04/27 14:17:34 genevb Exp $
 // $Log: StStrangeMuDstMaker.cxx,v $
+// Revision 1.8  2000/04/27 14:17:34  genevb
+// Safer deletes
+//
 // Revision 1.7  2000/04/27 14:13:04  genevb
 // Added old tree deletion
 //
@@ -79,13 +82,22 @@ StStrangeMuDstMaker::StStrangeMuDstMaker(const char *name) : StMaker(name) {
 }
 //_____________________________________________________________________________
 StStrangeMuDstMaker::~StStrangeMuDstMaker() {
-  if (!dstMaker) delete evClonesArray;  // Don't delete other maker's array!
+  if (!dstMaker) {           // Don't delete other maker's array!
+    delete evClonesArray;
+    evClonesArray = 0;
+  }
   delete v0ClonesArray;
+  v0ClonesArray = 0;
   delete xiClonesArray;
+  xiClonesArray = 0;
   delete kinkClonesArray;
+  kinkClonesArray = 0;
   delete v0Selections;
+  v0Selections = 0;
   delete xiSelections;
+  xiSelections = 0;
   delete kinkSelections;
+  kinkSelections = 0;
 }
 //_____________________________________________________________________________
 Int_t StStrangeMuDstMaker::Init() {
