@@ -61,11 +61,19 @@ public:
   virtual Float_t momBachelorX() const=0;
   virtual Float_t momBachelorY() const=0; /// Momentum components of bachelor
   virtual Float_t momBachelorZ() const=0;
-  /// Momentum of Xi/Omega
-          TVector3 momXi();
-  virtual Float_t momXiX() const=0;
-  virtual Float_t momXiY() const=0; /// Momentum components of Xi/Omega
-  virtual Float_t momXiZ() const=0;
+
+  /// Momentum of Xi/Omega at decay vertex
+  virtual TVector3 momXi()=0;
+  virtual Float_t momXiX()=0;
+  virtual Float_t momXiY()=0; /// Momentum components of Xi/Omega at decay vertex
+  virtual Float_t momXiZ()=0;
+
+  /// Momentum of Xi/Omega at primary vertex
+  virtual TVector3 momXiAtPrimVertex()=0;
+  virtual Float_t momXiAtPrimVertexX()=0;
+  virtual Float_t momXiAtPrimVertexY()=0; /// Momentum components of Xi/Omega at primary vertex
+  virtual Float_t momXiAtPrimVertexZ()=0;
+
   /// Transverse momentum of Xi/Omega
           Float_t ptXi();
   /// Transverse momentum of bachelor
@@ -238,10 +246,6 @@ inline Float_t StXiI::decayLengthXi() const {
 
 inline TVector3 StXiI::momBachelor() {
      return TVector3(momBachelorX(), momBachelorY(), momBachelorZ());
-}
-
-inline TVector3 StXiI::momXi() {
-     return TVector3(momXiX(), momXiY(), momXiZ());
 }
 
 inline Float_t StXiI::alphaXi() {
@@ -456,8 +460,11 @@ inline TVector3 StXiI::momXiFrame(Float_t m1, Float_t m2, StXiDaughter type) {
 
 
 /***********************************************************************
- * $Id: StXiI.hh,v 3.8 2003/05/30 21:20:20 genevb Exp $
+ * $Id: StXiI.hh,v 3.9 2003/08/26 22:36:28 genevb Exp $
  * $Log: StXiI.hh,v $
+ * Revision 3.9  2003/08/26 22:36:28  genevb
+ * Calculate Xi momenta at/near primary vertex
+ *
  * Revision 3.8  2003/05/30 21:20:20  genevb
  * doxygen savvy, encoding of FTPC mults, change virtual funcs
  *
