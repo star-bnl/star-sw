@@ -1,8 +1,11 @@
 ///////////////////////////////////////////////////////////////////////////
 //
-// $Id: fill_ftpc_dst.cc,v 1.4 2000/02/09 08:44:37 jcs Exp $
+// $Id: fill_ftpc_dst.cc,v 1.5 2000/06/06 13:09:12 jcs Exp $
 //
 // $Log: fill_ftpc_dst.cc,v $
+// Revision 1.5  2000/06/06 13:09:12  jcs
+// save fcl_fppoint.flags in dst_point.charge
+//
 // Revision 1.4  2000/02/09 08:44:37  jcs
 // add cast to fabs
 //
@@ -213,7 +216,7 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
     dst_track[dst_track_h->nok].covar[13] = 0;
     dst_track[dst_track_h->nok].covar[14] = 0;
 
-//  chi-sqare fit
+//  chi-square fit
     dst_track[dst_track_h->nok].chisq[0]      = fptrack[itrk].chisq[0]
           / (dst_track[dst_track_h->nok].n_fit_point - 3);
     dst_track[dst_track_h->nok].chisq[1]      = fptrack[itrk].chisq[1]
@@ -333,11 +336,11 @@ long  type_of_call fill_ftpc_dst_(TABLE_HEAD_ST *fptrack_h, FPT_FPTRACK_ST *fptr
          dst_point[dst_point_h->nok].pos_err[0] = ftpcx + (two20*ftpcy11);
          dst_point[dst_point_h->nok].pos_err[1] = ftpcy10 + (two10*ftpcz);
 
-//        Fill charge and maximum ADC value contained in cluster   
-//                     bits 0-15    charge                        
-//                     bits 16-31   maximum ADC value contained in cluster
+//        Fill charge and flags for cluster   
+//                     bits 0-15    charge (sum of adc channels) 
+//                     bits 16-31   flags  (see fcl_fppoint.idl)
          dst_point[dst_point_h->nok].charge  =  
-                         (fppoint[iPoint].max_adc<<16)
+                         (fppoint[iPoint].flags<<16)
                        + fppoint[iPoint].charge;
 
 //        Fill Foreign Key to dst_track table 
