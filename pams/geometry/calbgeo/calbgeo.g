@@ -119,6 +119,8 @@ external etsphit
       prin1  calg_RMin;               (' CALB inner radius    =',F7.1)
       prin1  2.0*calg_CrackWd;        (' CALB crack width     =',F7.1)
 *
+* ---------------------------------------------------------------------------
+*
 block CALB is  EMC Barrel envelope
       Material  Air
       Medium    Standard
