@@ -1,3 +1,10 @@
+// $Id: StFtpcFastSimu.hh,v 1.3 2000/01/03 12:48:59 jcs Exp $
+//
+// $Log: StFtpcFastSimu.hh,v $
+// Revision 1.3  2000/01/03 12:48:59  jcs
+// Add CVS Id strings
+//
+
 #ifndef STAR_StFtpcFastSimu
 #define STAR_StFtpcFastSimu
 #include "g2t_ftp_hit.h"

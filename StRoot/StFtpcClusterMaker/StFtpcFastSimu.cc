@@ -1,3 +1,10 @@
+// $Id: StFtpcFastSimu.cc,v 1.4 2000/01/03 12:48:57 jcs Exp $
+//
+// $Log: StFtpcFastSimu.cc,v $
+// Revision 1.4  2000/01/03 12:48:57  jcs
+// Add CVS Id strings
+//
+
 #include "StFtpcFastSimu.hh"
 #include <iostream.h>
 #include <stdlib.h>
