@@ -232,7 +232,7 @@ int StHbtIOBinary::readEvent(StHbtEvent& ev){
 } 
 
 // **********************************************************************
-char* StHbtIOBinary::parseDirFile(const char* dir, const char* file, const char* appendix) {
+const char* StHbtIOBinary::parseDirFile(const char* dir, const char* file, const char* appendix) {
   if (dir) cout << dir << endl;
   if (file) cout << file << endl;
   if (appendix) cout << appendix << endl;
