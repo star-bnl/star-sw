@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StZdcTriggerDetector.h,v 2.1 1999/10/13 19:44:22 ullrich Exp $
+ * $Id: StZdcTriggerDetector.h,v 2.2 1999/12/20 12:54:48 ullrich Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -10,8 +10,8 @@
  ***************************************************************************
  *
  * $Log: StZdcTriggerDetector.h,v $
- * Revision 2.1  1999/10/13 19:44:22  ullrich
- * Initial Revision
+ * Revision 2.2  1999/12/20 12:54:48  ullrich
+ * Adapted changed in trigger table dst_TrgDet
  *
  * Revision 2.2  1999/12/20 12:54:48  ullrich
  * Adapted changed in trigger table dst_TrgDet
@@ -44,7 +44,7 @@ public:
     void setAdc(UInt_t, Float_t);
     void setTdc(UInt_t, Float_t);
     void setAdcSum(StBeamDirection, Float_t);
-    enum {mMaxZdcCounter = 6};
+    void setAdcSum(Float_t);
     
 protected:
     enum {mMaxZdcCounter = 16};
