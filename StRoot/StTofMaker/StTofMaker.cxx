@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTofMaker.cxx,v 1.13 2004/01/27 23:12:23 dongx Exp $
+ * $Id: StTofMaker.cxx,v 1.14 2004/01/27 23:17:01 dongx Exp $
  *
  * Author: W.J. Llope / Wei-Ming Zhang / Frank Geurts
  *
@@ -11,13 +11,11 @@
  ***************************************************************************
  *
  * $Log: StTofMaker.cxx,v $
- * Revision 1.13  2004/01/27 23:12:23  dongx
- * *** empty log message ***
+ * Revision 1.14  2004/01/27 23:17:01  dongx
+ * change for year4 run (pVPD+TOFp+TOFr')
+ *  - Additional TOFr' ADC and TDC channels put in
+ *  - Add TOTs of TOFr' in
  *
- *
- * New year run year4(TOFp+pVPD+TOFr') raw data
- *  - Additional ADCs and TDCs put in
- *  - TOTs of TOFr' added in, combined with TDCs
  *
  * Revision 1.12  2003/09/17 19:54:28  geurts
  * zeroed geometry pointer
