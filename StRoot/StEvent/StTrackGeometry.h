@@ -4,7 +4,7 @@
  */
 /***************************************************************************
  *
- * $Id: StTrackGeometry.h,v 2.7 2003/04/09 17:59:39 genevb Exp $
+ * $Id: StTrackGeometry.h,v 2.8 2003/10/30 20:07:32 perev Exp $
  *
  * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
@@ -14,6 +14,9 @@
  ***************************************************************************
  *
  * $Log: StTrackGeometry.h,v $
+ * Revision 2.8  2003/10/30 20:07:32  perev
+ * Check of quality added
+ *
  * Revision 2.7  2003/04/09 17:59:39  genevb
  * Add setMomentum function
  *
@@ -73,7 +76,7 @@ public:
     virtual void setMomentum(const StThreeVectorF&) = 0;
     
     virtual StTrackGeometry*       copy() const = 0;     // virtual constructor
-
+    int     bad() const;
 protected:
     virtual StObject*  clone() const = 0;     // virtual constructor used in StArray
     ClassDef(StTrackGeometry,2)

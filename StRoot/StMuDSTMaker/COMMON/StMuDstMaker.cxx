@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuDstMaker.cxx,v 1.42 2003/10/28 00:03:46 perev Exp $
+ * $Id: StMuDstMaker.cxx,v 1.43 2003/10/30 20:08:13 perev Exp $
  * Author: Frank Laue, BNL, laue@bnl.gov
  *
  **************************************************************************/
@@ -711,20 +711,20 @@ void StMuDstMaker::addTrackNode(const StEvent* ev, const StTrackNode* node, StMu
   int index2Global =-1;
   if (gTCA) {
     tr= node->track(global);
-    if (tr ) index2Global = addTrack(gTCA, ev, tr, cut, -1, l3);
+    if (tr && !tr->bad()) index2Global = addTrack(gTCA, ev, tr, cut, -1, l3);
   }
   /// do primary track track
   int index;
   if (pTCA) {
     tr = node->track(primary);
-    if (tr) index = addTrack(pTCA, ev, tr, cut, index2Global, l3);
+    if (tr && !tr->bad()) index = addTrack(pTCA, ev, tr, cut, index2Global, l3);
   }
   /// all other tracks
   if (oTCA) {
     size_t nEntries = node->entries();
     for (size_t j=0; j<nEntries; j++) { /// loop over all tracks in tracknode
       tr = node->track(j);
-      if (tr && (tr->type()!=global) && (tr->type()!=primary) ) { /// exclude global and primary tracks
+      if (tr && !tr->bad() && (tr->type()!=global) && (tr->type()!=primary) ) { /// exclude global and primary tracks
 	index = addTrack(oTCA, ev, tr, cut, index2Global, l3);
       }
     }
@@ -805,7 +805,7 @@ void StMuDstMaker::fillStrange(StStrangeMuDstMaker* maker) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 template <class T>
-void StMuDstMaker::addType(TClonesArray* tcaFrom, TClonesArray* tcaTo , T *t) {
+int StMuDstMaker::addType(TClonesArray* tcaFrom, TClonesArray* &tcaTo ,T *t) {
   if (tcaFrom && tcaTo) {
     int n = tcaFrom->GetEntries();
     int counter = tcaTo->GetEntries();
@@ -814,6 +814,7 @@ void StMuDstMaker::addType(TClonesArray* tcaFrom, TClonesArray* tcaTo , T *t) {
 	new((*tcaTo)[counter++]) T( *(T*)(void*)tcaFrom->UncheckedAt(i) );
     }
   }
+  return 0;
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
@@ -831,7 +832,7 @@ void StMuDstMaker::addType(TClonesArray* tcaFrom, TClonesArray* tcaTo , T *t) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 template <class T>
-int StMuDstMaker::addType(TClonesArray* tcaTo , T &t) {
+int StMuDstMaker::addType(TClonesArray* tcaTo ,T &t) {
   int counter =-1;
   if (tcaTo) {
     counter = tcaTo->GetEntries();
@@ -843,7 +844,7 @@ int StMuDstMaker::addType(TClonesArray* tcaTo , T &t) {
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
 template <class T, class U>
-int StMuDstMaker::addType(TClonesArray* tcaTo , U &u, T *t) {
+int StMuDstMaker::addType(TClonesArray* tcaTo ,U &u,T *t) {
   int counter =-1;
   if (tcaTo) {
     counter = tcaTo->GetEntries();
@@ -920,6 +921,9 @@ void StMuDstMaker::setProbabilityPidFile(const char* file) {
 /***************************************************************************
  *
  * $Log: StMuDstMaker.cxx,v $
+ * Revision 1.43  2003/10/30 20:08:13  perev
+ * Check of quality added
+ *
  * Revision 1.42  2003/10/28 00:03:46  perev
  * remove some debug lines
  *

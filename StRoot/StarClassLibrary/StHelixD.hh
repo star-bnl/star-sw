@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StHelixD.hh,v 1.4 2002/06/21 17:49:26 genevb Exp $
+ * $Id: StHelixD.hh,v 1.5 2003/10/30 20:06:46 perev Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  ***************************************************************************
@@ -15,6 +15,9 @@
  ***************************************************************************
  *
  * $Log: StHelixD.hh,v $
+ * Revision 1.5  2003/10/30 20:06:46  perev
+ * Check of quality added
+ *
  * Revision 1.4  2002/06/21 17:49:26  genevb
  * Some minor speed improvements
  *
@@ -110,7 +113,7 @@ public:
     double       distance(const StThreeVectorD&) const;    
     
     // checks for valid parametrization
-    int          valid() const;
+    int          valid(double world = 1.e+5) const;
     
     // move the origin along the helix to s which becomes then s=0
     virtual void moveOrigin(double s);

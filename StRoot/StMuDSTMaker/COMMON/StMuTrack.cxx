@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMuTrack.cxx,v 1.7 2003/10/28 18:57:56 perev Exp $
+ * $Id: StMuTrack.cxx,v 1.8 2003/10/30 20:08:13 perev Exp $
  *
  * Author: Frank Laue, BNL, laue@bnl.gov
  ***************************************************************************/
@@ -118,8 +118,9 @@ double StMuTrack::lengthMeasured() const {
 
 int StMuTrack::bad() const 
 {
-   if (mHelix.bad()) 		return 1;
-   if (mOuterHelix.bad())	return 2;
+   if (mFlag <= 0  )            return 10;
+   if (mHelix.bad()) 		return 20;
+   if (mOuterHelix.bad())	return 30;
    return 0;
 }
 #include "StEvent/StProbPidTraits.h"
@@ -156,6 +157,9 @@ ClassImp(StMuTrack)
 /***************************************************************************
  *
  * $Log: StMuTrack.cxx,v $
+ * Revision 1.8  2003/10/30 20:08:13  perev
+ * Check of quality added
+ *
  * Revision 1.7  2003/10/28 18:57:56  perev
  * BadData protection added
  *
