@@ -37,7 +37,7 @@ CC:>---------------------------------------------------------------------
       REAL x0,y0,axb,adb,arg,dphih,ds,dz
       REAL x1(2),x2(2),yy1,yy2,zz1,zz2
       REAL a,b,c,ka
-      DATA ka / 0.0003 /
+      DATA ka / 0.000299792458 /
 C
       i = i + 1
 C     
@@ -45,7 +45,7 @@ C first find phih, azimuthal angle of starting point wrt helix axis
 C
       phih = psi + float(q)*90.0
       if (phih.lt.-180.0) then
-         phih = 360.0 - phih
+         phih = 360.0 + phih
       elseif (phih.gt.180.0) then
          phih = phih - 360.0
       endif
@@ -97,28 +97,38 @@ C
       adb = adb/(rh*rh)
       if( arg.ge.1.0) arg = 1.0
       if( arg.le.-1.0) arg = -1.0
-      if( arg .gt. 0) then
-      dphih=acos(adb)
-      elseif( arg .lt. 0 .and. adb .gt. 0) then
-         dphih = asin(arg)
-      else
-         dphih = C_2PI - acos(adb)
-      endif
-      ds = dphih*rh
-      dz = ds*tanl
+
+
+C      if( arg .gt. 0) then
+C         dphih=acos(adb)
+C      elseif( arg .lt. 0 .and. adb .gt. 0) then
+C         dphih = asin(arg)
+C      else
+C         dphih = - acos(adb)
+C      endif
+C      ds = dphih*rh
+C      dz = ds*tanl
 C
 C     calculate z0 and psin
 C
-      x(3) = z0 - float(q)*dz
-      dphih = asind(arg)
-      psin = phih + dphih
+
+      dphih = acos(adb)
+      if( arg .gt.0) dphih = (2*C_PI)-dphih
+      if(q .lt. 0) dphih = 2*C_PI - dphih
+
+      dphih = dphih-(2*C_PI)
+
+*      dphih = asin(arg)
+      x(3) = z0 + rh*tanl*dphih
+
+      psin = phih + (dphih*180./C_PI)
       if( psin.lt.-180.0 ) then
-         psin = 360.0 - psin
+         psin = 360.0 + psin
       elseif (psin.gt.180.0) then
          psin = psin - 360.0
       endif
       x(4) = psin - float(q)*90.0
-
+      
   999 CONTINUE
       RETURN
       END
@@ -204,7 +214,7 @@ C---find the two intersections----------------------------------------
       d=(a*a+b*b)*r1sq-c*c
 C---check if there is any solution, one or two -----------------------
       IF(d.lt.0.0) GOTO 137
-      IF(d.eq.0.0) iflag=3
+      IF(d.eq.0.0) iflag=3 
       d = sqrt(d)
       om1=( -b*c+abs(a)*d ) / (a*a+b*b)
       om2=( -b*c-abs(a)*d ) / (a*a+b*b)
@@ -317,8 +327,8 @@ C----------------------------------------------------------------------
 C-----Extract momentum components from helix --------------------------
 
 	psi  =trk(4)
-	cph  =cos(psi)
-	sph  =sin(psi)
+	cph  =cosd(psi)
+	sph  =sind(psi)
 
 	pt   =trk(7)
 
