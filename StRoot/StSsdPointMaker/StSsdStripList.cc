@@ -184,14 +184,15 @@ int* StSsdStripList::getListAdc(int idStrip, int sizeCluster)
 void StSsdStripList::setSigma(int iStrip, int iSigma, StSsdDynamicControl *dynamicControl)
 {
   const int     NAdcChannel             = 1 << (dynamicControl->getNBitEncoding()); // 1 << x == 2^x 
-  const float   conversionFactor = (float)(NAdcChannel)/(dynamicControl->getADCDynamic()*dynamicControl->getNElectronInAMip());
-  
+  //  const float   conversionFactor = (float)(NAdcChannel)/(dynamicControl->getADCDynamic()*dynamicControl->getNElectronInAMip());
+  const float   conversionFactor = 1./16.;
   StSsdStrip *currentStrip=this->first(); 
   while((currentStrip) && (currentStrip->getNStrip()!=iStrip))
     currentStrip=this->next(currentStrip);
   if(currentStrip) 
     {
-      int sigmaAdc = (int)(iSigma*conversionFactor);
+      //      int sigmaAdc = (int)(iSigma*conversionFactor);
+      float sigmaAdc = iSigma*conversionFactor;
       if (sigmaAdc<NAdcChannel)	currentStrip->setSigma(sigmaAdc);
       else                      currentStrip->setSigma(NAdcChannel-1);
     }
