@@ -1,0 +1,20 @@
+#!/usr/local/bin/perl
+# Conscript file for directory
+Import qw ( CONS INCLUDE LIB BIN OBJ);
+# Install the products of this directory
+#Install $CONS $LIB, 'libworld.a';
+#Install $CONS $INCLUDE, 'world.h';
+# Internal products
+#Library $CONS 'libworld.a', 'world.c';
+#Install $CONS $LIB, 'St_dst_Maker.so';
+print "OBJ == ",$OBJ,"\n";
+my $PWD = `pwd`;
+print "Build in $PWD\n";
+#Link $OBJ => 'StRoot';
+#Link $OBJ => 'St_dst_Maker';
+#Link  'build' => 'St_dst_Maker';
+#my $obj = $OBJ . "/Conscript";
+#Build $obj;
+#Build qw( $obj );
+
+Build ( "St_dst_Maker/Conscript" );
