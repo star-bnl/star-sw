@@ -1,4 +1,4 @@
-void load() {
+void loadSharedLibraries() {
   // Dynamically link needed shared libs
   gSystem->Load("libStar");
   gSystem->Load("libPhysics");
