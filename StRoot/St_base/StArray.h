@@ -142,7 +142,9 @@ virtual const TIterator *Begin() const;
 virtual const TIterator *End() const;
 virtual TIterator* MakeIterator(Bool_t dir = kIterForward) const;
 virtual TObject** GetCell(Int_t idx) const;
+virtual void    random_shuffle(int start=0,int end = 0x7fffffff);
 TObject *fOrBrowser; //! temporary VP
+
 ClassDef(StObjArray,1)
 };
 
