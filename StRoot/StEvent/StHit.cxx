@@ -1,11 +1,8 @@
 /***************************************************************************
  *
- * $Id: StHit.cxx,v 1.5 1999/05/03 01:36:18 fisyak Exp $
+ * $Id: StHit.cxx,v 2.0 1999/10/12 18:42:17 ullrich Exp $
  *
- * Author: Thomas Ullrich, Jan 1999
- *
- * History:
- * 15/01/1999 T. Wenaus  Add table-based constructor
+ * Author: Thomas Ullrich, Sept 1999
  ***************************************************************************
  *
  * Description:
@@ -13,80 +10,159 @@
  ***************************************************************************
  *
  * $Log: StHit.cxx,v $
- * Revision 1.5  1999/05/03 01:36:18  fisyak
- * Add Print
- *
- * Revision 1.5  1999/05/03 01:36:18  fisyak
- * Add Print
- *
- * Revision 1.4  1999/04/28 22:27:33  fisyak
- * New version with pointer instead referencies
- *
- * Revision 1.4  1999/03/23 21:51:49  ullrich
- * Removed table-based constructor.
- *
- * Revision 1.3  1999/01/30 23:03:12  wenaus
- * table load intfc change; include ref change
- *
- * Revision 1.2  1999/01/15 22:53:45  wenaus
- * version with constructors for table-based loading
+ * Revision 2.0  1999/10/12 18:42:17  ullrich
+ * Completely Revised for New Version
  *
  * Revision 2.3  2000/06/01 21:38:53  ullrich
  * Added member mFlag and access member flag() and setFlag().
-#include "StGlobalTrack.h"
-#include "StGlobalTrack.h"
  *
-static const Char_t rcsid[] = "$Id: StHit.cxx,v 1.5 1999/05/03 01:36:18 fisyak Exp $";
+ * Revision 2.2  2000/05/19 18:33:14  ullrich
+ * Minor changes (add const) to cope with modified StArray.
+ *
+ * Revision 2.1  1999/10/28 22:25:47  ullrich
  * Adapted new StArray version. First version to compile on Linux and Sun.
  *
  * Revision 2.0  1999/10/12 18:42:17  ullrich
  * Completely Revised for New Version
  *
  **************************************************************************/
+#include "StHit.h"
 #include "StTrack.h"
 #include "StTrackNode.h"
 #include "StTrackDetectorInfo.h"
 
-	     const StThreeVectorF& e,
-	     Float_t q, UChar_t c)
-    : mPosition(p), mPositionError(e), mCharge(q), mTrackRefCount(c)
+static const char rcsid[] = "$Id: StHit.cxx,v 2.0 1999/10/12 18:42:17 ullrich Exp $";
+
+ClassImp(StHit)
+StHit::StHit()
 {
     : StMeasuredPoint(p), mPositionError(e), mHardwarePosition(hp),
       mCharge(q), mTrackRefCount(c)
     mHardwarePosition = 0;
-Int_t StHit::operator==(const StHit& h) const
+    mTrackRefCount = 0;
+}
     
 {
-           h.mCharge   == mCharge;
+    mFlag = 0;
+}
+
 StHit::~StHit() { /* noop */ }
 
-Int_t StHit::operator!=(const StHit& h) const
+StObject*
+StHit::clone() { return new StHit(*this); }
    
     return h.mPosition == mPosition &&
         h.mPositionError == h.mPositionError &&
         h.mCharge           == mCharge &&
-void StHit::setPosition(const StThreeVectorF& val) { mPosition = val; }
+        h.mHardwarePosition == mHardwarePosition;
+           h.mCharge           == mCharge &&
+           h.mHardwarePosition == mHardwarePosition &&
+	   h.mFlag             == mFlag;
+}
 
-void StHit::setPositionError(const StThreeVectorF& val) { mPositionError = val; }
+Int_t
+StHit::operator!=(const StHit& h) const
+{
+    return !(*this == h);  // use operator==()
+}
+
+void
+StHit::setCharge(Float_t val) { mCharge = val; }
+
+void
+StHit::setFlag(UChar_t val) { mFlag = val; }
     
-void StHit::setCharge(Float_t val) { mCharge = val; }
+void
+StHit::setHardwarePosition(ULong_t val) { mHardwarePosition = val; }
+
+void
+StHit::setPositionError(const StThreeVectorF& e) { mPositionError = e; }
+
+UChar_t
+StHit::flag() const { return mFlag; }
+
+UChar_t
+StHit::trackReferenceCount() const { return mTrackRefCount; }
+
+StDetectorId
+StHit::detector() const
+{
+    unsigned int id = bits(0, 4);
+    switch (id) {
+    case kTpcId:
+        return kTpcId;
+    case kSvtId:
+        return kSvtId;
+    case kRichId:
+        return kRichId;
+    case kFtpcWestId:
+        return kFtpcWestId;
+    case kFtpcEastId:
+        return kFtpcEastId;
+    case kTofPatchId:
+        return kTofPatchId;
+    case kCtbId:
+        return kCtbId;
+    case kSsdId:
+        return kSsdId;
+    case kBarrelEmcTowerId:
+        return kBarrelEmcTowerId;
+    case kBarrelEmcPreShowerId:
+        return kBarrelEmcPreShowerId;
+    case kBarrelSmdEtaStripId:
+        return kBarrelSmdEtaStripId;
+    case kBarrelSmdPhiStripId:
+        return kBarrelSmdPhiStripId;
+    case kEndcapEmcTowerId:
+        return kEndcapEmcTowerId;
+    case kEndcapEmcPreShowerId:
+        return kEndcapEmcPreShowerId;
+    case kEndcapSmdEtaStripId:
+        return kEndcapSmdEtaStripId;
+    case kEndcapSmdPhiStripId:
+        return kEndcapSmdEtaStripId;
+    case kZdcWestId:
+        return kZdcWestId;
+    case kZdcEastId:
+        return kZdcEastId;
+    case kMwpcWestId:
+        return kMwpcWestId;
+    case kMwpcEastId:
+        return kMwpcEastId;
+    case kTpcSsdId:
         return kTpcSsdId;
-void StHit::setTrackReferenceCount(UChar_t val) { mTrackRefCount = val; }
-    
-ostream& operator<<(ostream& os, const StHit& h)
+    case kTpcSvtId:
+        return kTpcSvtId;
+    case kTpcSsdSvtId:
+        return kTpcSsdSvtId;
+    case kSsdSvtId:
         return kSsdSvtId;
-    os << "Position: " << h.position() << endl;
-    os << "Error:    " << h.positionError() << endl;
-    os << "Charge:   " << h.charge() << endl;
-    os << "RefCount: " << h.trackReferenceCount() << endl;
-    return os;
+    case kUnknownId:
+    default:
+        return kUnknownId;
+    }
+}
 
-//______________________________________________________________________________
-void StHit::Print(Option_t *opt)
+StThreeVectorF
+StHit::positionError() const { return mPositionError; }
+   
 StMatrixF
-  cout << *this << endl;
+StHit::covariantMatrix() const
+{
+    StMatrixF m(3,3);
+    m(1,1) = mPositionError.x()*mPositionError.x();
+    m(3,3) = mPositionError.z()*mPositionError.z();
+    return m;
+    for (int i=0; i<nodes.size(); i++) {
 
-//______________________________________________________________________________
+        int ntracks = node->entries(type);
+        for (int k=0; k<ntracks; k++) {
+        StTrackNode *node = nodes[i];
+            StPtrVecHit hvec = track->detectorInfo()->hits(id);
+            for (int j=0; j<hvec.size(); j++)
+    StDetectorId id = this->detector();
+
+    for (unsigned int i=0; i<nodes.size(); i++) {
         const StTrackNode *node = nodes[i];
         unsigned int ntracks = node->entries(type);
         for (unsigned int k=0; k<ntracks; k++) {

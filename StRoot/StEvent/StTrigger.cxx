@@ -1,8 +1,8 @@
 /***************************************************************************
  *
- * $Id: StTrigger.cxx,v 1.4 1999/04/28 22:27:38 fisyak Exp $
+ * $Id: StTrigger.cxx,v 2.0 1999/10/12 18:43:10 ullrich Exp $
  *
- * Author: Thomas Ullrich, Jan 1999
+ * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
  *
  * Description:
@@ -10,19 +10,13 @@
  ***************************************************************************
  *
  * $Log: StTrigger.cxx,v $
- * Revision 1.4  1999/04/28 22:27:38  fisyak
- * New version with pointer instead referencies
- *
- * Revision 1.4  1999/04/28 22:27:38  fisyak
- * New version with pointer instead referencies
- *
- * Revision 1.2  1999/01/15 22:54:11  wenaus
- * version with constructors for table-based loading
+ * Revision 2.0  1999/10/12 18:43:10  ullrich
+ * Completely Revised for New Version
  *
  **************************************************************************/
 #include "StTrigger.h"
 
-static const Char_t rcsid[] = "$Id: StTrigger.cxx,v 1.4 1999/04/28 22:27:38 fisyak Exp $";
+static const char rcsid[] = "$Id";
 
 ClassImp(StTrigger)
 
@@ -40,17 +34,27 @@ StTrigger::StTrigger(UShort_t aw, UShort_t w)
 
 StTrigger::~StTrigger() { /* noop */}
 
-Int_t StTrigger::operator==(const StTrigger& t) const
+Int_t
+StTrigger::operator==(const StTrigger& t) const
 {
     return mTriggerActionWord == t.mTriggerActionWord &&
-	mTriggerWord == t.mTriggerWord;
+        mTriggerWord == t.mTriggerWord;
 }
 
-Int_t StTrigger::operator!=(const StTrigger& t) const
+Int_t
+StTrigger::operator!=(const StTrigger& t) const
 {
     return !(t == *this);
 }
 
-void StTrigger::setTriggerActionWord(UShort_t val) { mTriggerActionWord = val; }
+UShort_t
+StTrigger::triggerActionWord() const { return mTriggerActionWord; }
 
-void StTrigger::setTriggerWord(UShort_t val) { mTriggerActionWord = val; }
+UShort_t
+StTrigger::triggerWord() const { return mTriggerWord; }
+
+void
+StTrigger::setTriggerActionWord(UShort_t val) { mTriggerActionWord = val; }
+
+void
+StTrigger::setTriggerWord(UShort_t val) { mTriggerWord = val; }

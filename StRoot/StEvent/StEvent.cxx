@@ -1,12 +1,8 @@
 /***************************************************************************
  *
- * $Id: StEvent.cxx,v 1.13 1999/07/20 15:48:51 fisyak Exp $
+ * $Id: StEvent.cxx,v 2.0 1999/10/12 18:41:53 ullrich Exp $
  *
- * Author: Thomas Ullrich, Jan 1999
- *
- * History:
- * 14/01/1999 T. Wenaus  Add table-based constructor
- *
+ * Author: Thomas Ullrich, Sep 1999
  ***************************************************************************
  *
  * Description:
@@ -14,311 +10,255 @@
  ***************************************************************************
  *
  * $Log: StEvent.cxx,v $
- * Revision 1.13  1999/07/20 15:48:51  fisyak
- * Don't delete mPrimaryVertex
- *
- * Revision 1.13  1999/07/20 15:48:51  fisyak
- * Don't delete mPrimaryVertex
- *
- * Revision 1.12  1999/07/19 20:07:32  fisyak
- * add delete of mPrimaryVertex
- *
- * Revision 1.11  1999/07/17 19:10:29  perev
- * type() check for non print characters added
- *
- * Revision 1.10  1999/06/23 15:07:38  perev
- * zeroing added
- *
- * Revision 1.9  1999/06/16 14:22:04  fisyak
- * take out StRun from StEvent
- *
- * Revision 1.8  1999/05/05 22:36:37  fisyak
- * restore relatedTracks
- *
- * Revision 1.7  1999/05/04 20:59:23  fisyak
- * move CVS Tag to StRun
- *
- * Revision 1.6  1999/05/03 01:36:18  fisyak
- * Add Print
- *
- * Revision 1.5  1999/04/30 13:16:27  fisyak
- * add StArray for StRootEvent
- *
- * Revision 1.4  1999/04/28 22:27:31  fisyak
- * New version with pointer instead referencies
- *
- * Revision 1.13  1999/03/23 21:58:03  ullrich
- * StGlobalTrack header file added.
- *
- * Revision 1.12  1999/03/09 22:31:18  wenaus
- * new Sun hack needed even though C++ 4.2 is supposed to be same as before
- *
- * Revision 1.11  1999/03/04 18:11:41  ullrich
- * Mods to cope with CC5
- *
- * Revision 1.10  1999/02/23 21:20:22  ullrich
- * Modified EMC hit collections.
- *
- * Revision 1.9  1999/02/22 20:48:52  wenaus
- * more delete cleanup
- *
- * Revision 1.8  1999/02/22 19:53:51  wenaus
- * cleaner deleting
- *
- * Revision 1.7  1999/02/10 23:26:53  wenaus
- * fix setPrimaryVertex in StEvent to set the vertex type to primary
- *
- * Revision 1.6  1999/02/10 21:50:27  wenaus
- * Plug memory leaks
- *
- * Revision 1.5  1999/02/10 18:58:23  wenaus
- * Print 'bad compiler' line only for bad compiler
- *
- * Revision 1.4  1999/01/30 23:03:10  wenaus
- * table load intfc change; include ref change
- *
- * Revision 1.3  1999/01/21 20:51:41  wenaus
- * Fix for Sun compiler peculiarity
- *
- * Revision 1.2  1999/01/15 22:53:39  wenaus
- * version with constructors for table-based loading
+ * Revision 2.0  1999/10/12 18:41:53  ullrich
+ * Completely Revised for New Version
  *
  * Revision 2.11  2000/05/15 18:35:38  ullrich
-#include <iostream.h>
  * All data member related to collections and containers are now
-#include "StGlobalTrack.h"
-#include "StThreeVectorF.hh"
-#include "TString.h"
-#include "TBrowser.h"
-#if !defined(ST_NO_NAMESPACES) 
-using namespace std;
-#endif
- extern "C" {int isprint(int);}
+ * kept by pointer. The interface (public methods) stays the same.
+ * Those methods which returns references were modified to create
+ * an empty collection in case the pointer is null.
  *
-static const Char_t rcsid[] = "$Id: StEvent.cxx,v 1.13 1999/07/20 15:48:51 fisyak Exp $";
+ * Revision 2.10  2000/04/26 20:33:24  ullrich
+ * Removed redundant virtual keywords.
+ *
+ * Revision 2.9  2000/04/20 14:27:29  perev
+ * Add Dataset browser to StEvent browser
+ *
+#include "tables/event_header.h"
+#include "tables/dst_event_summary.h"
+#include "tables/dst_summary_param.h"
+ *
  * Changes due to the addition of the EMC to StEvent
-StEvent::StEvent():St_DataSet("StEvent")
+ *
+ * Revision 2.5  2000/02/11 16:14:00  ullrich
+ * Primary vertices automatically sorted in addPrimaryVertex().
  * add rich pixel info/containers
-    init();
+ *
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.0 1999/10/12 18:41:53 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.0 1999/10/12 18:41:53 ullrich Exp $";
+ *
+ * Revision 2.0  1999/10/12 18:41:53  ullrich
+
+#include "StRichPixelCollection.h"
+#include <typeinfo>
+#include <algorithm>
+#include "StEvent.h"
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.0 1999/10/12 18:41:53 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.0 1999/10/12 18:41:53 ullrich Exp $";
 #include "StTpcHitCollection.h"
-static const char rcsid[] = "$Id: StEvent.cxx,v 1.13 1999/07/20 15:48:51 fisyak Exp $";
-StEvent::StEvent(StRun* run, dst_event_header_st& hdr, dst_event_summary_st& sum):
-St_DataSet("StEvent")
+TString StEvent::mCvsTag  = "$Id: StEvent.cxx,v 2.0 1999/10/12 18:41:53 ullrich Exp $";
+static const char rcsid[] = "$Id: StEvent.cxx,v 2.0 1999/10/12 18:41:53 ullrich Exp $";
+#include "StFtpcHitCollection.h"
 #include "StEmcCollection.h"
-    init(run);
-    mType = hdr.event_type;
-    mId.first = hdr.n_event[0];
-    mId.second = hdr.n_event[1];
-    mRunNumber = hdr.n_run;
-    setTime(hdr.time);
-    mTriggerMask = hdr.trig_mask;
-    mBunchCrossingNumber = hdr.bunch_cross;
-    StThreeVectorD v;
-#ifdef ST_NO_TEMPLATE_DEF_ARGS
-    cout << "Ignore this line; required to make Sun's lousy compiler work " << v << endl;
-    TString dummyString;
-    dummyString = "Ditto!";
-    cout << dummyString << endl;
-#endif
+#include "StRichCollection.h"
+#include "StTrackDetectorInfo.h"
+    
+    mBunchCrossingNumber = 0;
+    mSummary = 0;
+    mSoftwareMonitor = 0;
+    mTriggerDetectors = 0;
+    mL0Trigger = 0;
+    mL3Trigger = 0;
+    mTrackDetectorInfo = 0;
+    mTrackNodes = 0;
+    mPrimaryVertices = 0;
+    mV0Vertices = 0;
+    mXiVertices = 0;
+    mKinkVertices = 0;
+    mType  = evtHdr.event_type;
     mRunId = evtHdr.exp_run_id;
     mId    = evtHdr.n_event;
-StEvent::StEvent(const StEvent&) { /* noop */} // private
-
-const StEvent&
-StEvent::operator=(const StEvent&) { return *this;} // private
-
     mTime  = evtHdr.time;
     mTriggerMask = evtHdr.trig_mask;
-    // SafeDelete(mRun);             Open question?
-    // SafeDelete(mPrimaryVertex);   No, is deleted below in vertex collection
-    SafeDelete(mSummary);
-    //    SafeDelete(mPrimaryVertex);
-    SafeDelete(mTpcHits);
-    SafeDelete(mSvtHits);
-    SafeDelete(mFtpcHits);
-    SafeDelete(mEmcTowerHits); 
-    SafeDelete(mEmcPreShowerHits);
-    SafeDelete(mSmdPhiHits);
-    SafeDelete(mSmdEtaHits);
-    SafeDelete(mTriggerDetectors);
-    SafeDelete(mTracks);
-    SafeDelete(mVertices);
-    SafeDelete(mL0Trigger);
-}
-
-void StEvent::init(StRun* run)
-{
-    mType = "Unknown";
-    //    mRun = run;
-    mRunNumber = 0;           
-    mTriggerMask = 0;         
-    mBunchCrossingNumber = 0; 
-    mTime.Set();
-    mLuminosity = 0;          
-    mPrimaryVertex = 0;       
-    mSummary = 0;             
-    mTracks = 0;              
-    mVertices = 0;            
-    mTpcHits = 0;             
-    mSvtHits = 0;             
-    mFtpcHits = 0;            
-    mEmcTowerHits = 0;            
-    mEmcPreShowerHits = 0;            
-    mSmdPhiHits = 0;            
-    mSmdEtaHits = 0;            
-    mTriggerDetectors = 0;    
-    mL0Trigger = 0;
-    for (Int_t i=0; i<3; i++) {
-	mBeamPolarizationEast[i] = 0;
-	mBeamPolarizationWest[i] = 0;
-    }
-    mSummary 		= 0;
-    mTracks 		= 0;
-    mVertices 		= 0;
-    mTpcHits 		= 0;
-    mSvtHits 		= 0;
-    mFtpcHits 		= 0;
-    mTriggerDetectors 	= 0;
-    mL0Trigger 		= 0;
-    mEmcTowerHits 	= 0;        
-    mEmcPreShowerHits 	= 0;
-    mSmdPhiHits 	= 0;
-    mSmdEtaHits 	= 0;
-// 		Create the collections
-    if (run) {
-      mSummary = new StDstEventSummary();
-      mTracks = new StGlobalTrackCollection("Tracks");
-      mVertices = new StVertexCollection("Vertices");
-      mTpcHits = new StTpcHitCollection("TpcHits");
-      mSvtHits = new StSvtHitCollection("SvtHits");
-      mFtpcHits = new StFtpcHitCollection("FtpcHits");
-      mTriggerDetectors = new StTriggerDetectorCollection();
-      mL0Trigger = new StL0Trigger();
-    //
-    // Attention it would be more (CPU) efficient if we
-    // would allocate the EMC related collections
-    // with a given size.  tu
-    //
-      mEmcTowerHits = new StEmcTowerHitCollection("EmcTowerHits");        
-      mEmcPreShowerHits = new StEmcPreShowerHitCollection("EmcPreShowerHits");
-      mSmdPhiHits = new StSmdPhiHitCollection("SmdPhiHits");
-      mSmdEtaHits = new StSmdEtaHitCollection("SmdEtaHits");
-    }
+    mBunchCrossingNumber = evtHdr.bunch_cross;
+void
+    mTriggerMask = evtHdr.trig_mask;
+    mBunchCrossingNumber = evtHdr.bunch_cross;
+	    return;
+	}    
+    if (val) vec.push_back(val);
 StEvent::initToZero() { /* noop */ }
-//______________________________________________________________________________
-void StEvent::Browse(TBrowser *b)
-{
-  // Browse this dataset (called by TBrowser).
-   if (b) {
-     //     if (mRun)              b->Add(mRun);                
-     if (mPrimaryVertex)    b->Add(mPrimaryVertex);
-     if (mSummary)          b->Add(mSummary);
-     if (mTracks)           b->Add(mTracks);
-     if (mVertices)         b->Add(mVertices);
-     if (mTpcHits)          b->Add(mTpcHits);
-     if (mSvtHits)          b->Add(mSvtHits);
-     if (mFtpcHits)         b->Add(mFtpcHits);
-     if (mTriggerDetectors) b->Add(mTriggerDetectors);
-     if (mL0Trigger)        b->Add(mL0Trigger);
-     if (mEmcTowerHits)     b->Add(mEmcTowerHits);
-     if (mEmcPreShowerHits) b->Add(mEmcPreShowerHits);
-     if (mSmdPhiHits)       b->Add(mSmdPhiHits);
-     if (mSmdEtaHits)       b->Add(mSmdEtaHits);
-   }
-  St_DataSet::Browse(b);
-}
-//______________________________________________________________________________
-void StEvent::Print(Option_t *opt)
-{
-  cout << endl;
-  cout << *this << endl;
-}
-//______________________________________________________________________________
 
-Int_t StEvent::operator==(const StEvent& e) const
+    mContent[mInfo] = new StEventInfo(evtHdr);
+StEvent::init(const event_header_st& evtHdr)
 {
-    return e.mId.first == mId.first &&
-	   e.mId.second == mId.second; 
+    mContent.push_back(new StEventInfo(evtHdr));
 }
+{
+    initToZero();
+    mSummary = new StEventSummary(evtSum, sumPar);
+  
+StEvent::StEvent(const event_header_st& evtHdr,
+    delete mSummary; mSummary = 0;
+    delete mSoftwareMonitor; mSoftwareMonitor = 0;
+    delete mTpcHits; mTpcHits = 0;
+    delete mFtpcHits; mFtpcHits = 0;
+    delete mSvtHits; mSvtHits = 0;
+    delete mSsdHits; mSsdHits = 0;
+    delete mTriggerDetectors; mTriggerDetectors = 0;
+    delete mL0Trigger; mL0Trigger = 0;
+    delete mL3Trigger; mL3Trigger = 0;
+    delete mTriggerDetectors;  mTriggerDetectors = 0;
+    delete mL0Trigger;         mL0Trigger = 0;
+    delete mL3Trigger;         mL3Trigger = 0;
+    delete mTrackDetectorInfo; mTrackDetectorInfo = 0;
+    delete mTrackNodes;        mTrackNodes = 0;
+    delete mPrimaryVertices;   mPrimaryVertices = 0;
+    delete mV0Vertices;        mV0Vertices = 0;
+    delete mXiVertices;        mXiVertices = 0;
+    delete mKinkVertices;      mKinkVertices = 0;
+StEvent::StEvent(const event_header_st& evtHdr) :
+    St_DataSet("StEvent")
+const TString&
+StEvent::type() const { return mType; }
+
+StEvent::~StEvent()
+StEvent::id() const { return mId; }
     _lookup(info, mContent);
-Int_t StEvent::operator!=(const StEvent& e) const
-{
-    return !(e == *this);   // invoke operator==()
-}
+    return info ? info->type() : TString();
+StEvent::runId() const { return mRunId; }
+    _lookup(info, mContent);
+    return info ? info->id() : 0;
+StEvent::time() const { return mTime; }
+    _lookup(info, mContent);
+    return info ? info->runId() : 0;
+StEvent::triggerMask() const { return mTriggerMask; }
+    _lookup(info, mContent);
+    return info ? info->time() : 0;
+StEvent::bunchCrossingNumber() const { return mBunchCrossingNumber; }
+    _lookup(info, mContent);
+    return info;
+StEvent::summary() { return mSummary; }
+    _lookup(info, mContent);
+    return info;
+StEvent::summary() const { return mSummary; }
     _lookup(summary, mContent);
-ostream&  operator<<(ostream& os, const StEvent& e)
-{
-    os << "Id: "   << e.id().first << ", " << e.id().second << endl;
-    os << "Type: " << e.type() << endl;
-    os << "Run: "  << e.runNumber() << endl;
-    os << "Time: " << e.time() << endl;
-    os << "Luminosity: " << e.luminosity() << endl;
-    return os;
+    return summary;
 }
 
-void StEvent::setType(const Char_t* val) { mType = val; }
+    return static_cast<StEventSummary*>(mContent[mSummary]);
+StEvent::softwareMonitor() { return mSoftwareMonitor; }
 
-void StEvent::setId(const pairL& val)
-{
-    mId.first = val.first;
-    mId.second = val.second;
-}
+    return hits;
+StEvent::svtHitCollection() const { return mSvtHits; }
     _lookup(hits, mContent);
+    return hits;
+StEvent::ssdHitCollection() { return mSsdHits; }
     _lookup(hits, mContent);
-void StEvent::setRunNumber(ULong_t val) { mRunNumber = val; }                
+    return hits;
+StEvent::ssdHitCollection() const { return mSsdHits; }
     _lookup(hits, mContent);
-void StEvent::setTriggerMask(ULong_t val) { mTriggerMask = val; }              
+    return hits;
+StEvent::emcCollection() { return mEmcCollection; }
     _lookup(hits, mContent);
-void StEvent::setBunchCrossingNumber(ULong_t val) { mBunchCrossingNumber = val; }      
+StRichPixelCollection*
+StEvent::richPixelCollection() { return mRichPixels; }
     _lookup(emc, mContent);
-void StEvent::setLuminosity(Double_t val) { mLuminosity = val; }               
+const StRichPixelCollection*
+StEvent::richPixelCollection() const { return mRichPixels; }
     _lookup(emc, mContent);
-//void StEvent::setRun(StRun* val) { mRun = val; }                            
+    return emc;
+StEvent::richCollection() const { return mRichCollection; }
+    _lookup(rich, mContent);
+    return trg;
+StEvent::l0Trigger() { return mL0Trigger; }
+    _lookup(trg, mContent);
+    return trg;
+StEvent::trackDetectorInfo() { return mTrackDetectorInfo; }
 StEvent::l3Trigger() const { return mL3Trigger; }
-void StEvent::setPrimaryVertex(StVertex* val) {
-  mPrimaryVertex = val;
-  if (val) val->setType(primary);
+    _lookup(trg, mContent);
+StEvent::trackDetectorInfo() const { return mTrackDetectorInfo; }
+}
+
+StEvent::trackNodes() { return mTrackNodes; }
+    return *info;
+}
 StEvent::trackNodes() const { return mTrackNodes; }
     return *info;
-void StEvent::setSummary(StDstEventSummary* val) { mSummary = val; }                        
+}
+StEvent::numberOfPrimaryVertices() const { return mPrimaryVertices.size(); }
+        mTrackNodes = new StSPtrVecTrackNode;
+    return *mTrackNodes;
+    return *nodes;
+}
+    if (i < mPrimaryVertices.size())
+        return mPrimaryVertices[i];
         mContent[mTrackNodes] = new StSPtrVecTrackNode;
-void StEvent::setTrackCollection(StGlobalTrackCollection* val) { mTracks = val; }                
+    return mPrimaryVertices ? mPrimaryVertices->size() : 0;
+    StSPtrVecTrackNode *nodes = 0;
     _lookupOrCreate(nodes, mContent);
-void StEvent::setTpcHitCollection(StTpcHitCollection* val) { mTpcHits = val; }               
+    return *nodes;
+}
 
-void StEvent::setSvtHitCollection(StSvtHitCollection* val) { mSvtHits = val; }               
+    if (i < mPrimaryVertices.size())
+        return mPrimaryVertices[i];
     _lookupOrCreate(vertices, mContent);
-void StEvent::setFtpcHitCollection(StFtpcHitCollection* val) { mFtpcHits = val; }              
+    return vertices ? vertices->size() : 0;
+}
 
-void StEvent::setVertexCollection(StVertexCollection* val) { mVertices = val; }               
+    if (mContent[mPrimaryVertices] && i < static_cast<StSPtrVecPrimaryVertex*>(mContent[mPrimaryVertices])->size())
+StEvent::v0Vertices() { return mV0Vertices; }
 }
-void StEvent::setTriggerDetectorCollection(StTriggerDetectorCollection* val) { mTriggerDetectors = val; }      
+
+StEvent::v0Vertices() const { return mV0Vertices; }
         return 0;
-void StEvent::setL0Trigger(StL0Trigger* val) { mL0Trigger = val; }
-    return *vertices;
-void StEvent::setEmcTowerHitCollection(StEmcTowerHitCollection* val) { mEmcTowerHits = val; }               
-    return *vertices;
-void StEvent::setEmcPreShowerHitCollection(StEmcPreShowerHitCollection* val) { mEmcPreShowerHits = val; }               
-StEvent::setType(const Char_t* val) { mType = val; }
-void StEvent::setSmdPhiHitCollection(StSmdPhiHitCollection* val) { mSmdPhiHits = val; }                
-    info->setId(val);
-void StEvent::setSmdEtaHitCollection(StSmdEtaHitCollection* val) { mSmdEtaHits = val; }                
-    static_cast<StEventInfo*>(mContent[mInfo])->setBunchCrossingNumber(val);
-void StEvent::setBeamPolarization(StBeamDirection dir, StBeamPolarizationAxis axis, Float_t val)
 }
-    if (dir == east)
-	mBeamPolarizationEast[axis] = val;
-    else
-	mBeamPolarizationWest[axis] = val;
+StEvent::xiVertices() { return mXiVertices; }
+    return *vertices;
+}
+StEvent::xiVertices() const { return mXiVertices; }
+    return *vertices;
+}
+StEvent::kinkVertices() { return mKinkVertices; }
+    return *vertices;
+}
+StEvent::kinkVertices() const { return mKinkVertices; }
+    return *vertices;
+}
+
+    if (!mContent[mKinkVertices])
+        mContent[mKinkVertices] = new StSPtrVecKinkVertex;
+    if (!mKinkVertices)
+        mKinkVertices = new StSPtrVecKinkVertex;
+    return *mKinkVertices;
+
+StSPtrVecObject&
+StEvent::content() { return mContent; }
+StEvent::setType(const Char_t* val) { mType = val; }
+    info->setType(val);
+}
+StEvent::setRunId(Long_t val) { mRunId = val; }
+    info->setRunId(val);
+}
+StEvent::setId(Long_t val) { mId = val; }
+    info->setId(val);
+}
+StEvent::setTime(Long_t val) { mTime = val; }
+    info->setTime(val);
+}
+StEvent::setTriggerMask(ULong_t val) { mTriggerMask = val; }
+    info->setTriggerMask(val);
+    static_cast<StEventInfo*>(mContent[mInfo])->setBunchCrossingNumber(val);
+StEvent::setBunchCrossingNumber(ULong_t val) { mBunchCrossingNumber = val; }
+    info->setBunchCrossingNumber(val, i);
+}
+
+    if (mContent[mSummary]) delete mContent[mSummary];
     if (mSoftwareMonitor) delete mSoftwareMonitor;
     mSoftwareMonitor = val;
+    _lookupAndSet(val, mContent);
+}
+
+    if (mContent[mSvtHits]) delete mContent[mSvtHits];
+    if (mSsdHits) delete mSsdHits;
+    mSsdHits = val;
 {
-const char* StEvent::type() const
-{ 
- char *t = (char*)((const char*)mType);
- for (int i=0; t[i]; i++) {if (!isprint(t[i])) t[i]=0;}
- return  (const char*)mType; 
-}                        
+    _lookupAndSet(val, mContent);
+}
+
+    if (mContent[mSsdHits]) delete mContent[mSsdHits];
+    mContent[mSsdHits] = val;
     if (mEmcCollection) delete mEmcCollection;
     mEmcCollection = val;
 StEvent::setRichPixelCollection(StRichPixelCollection* val)
