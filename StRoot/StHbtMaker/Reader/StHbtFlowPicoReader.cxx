@@ -314,7 +314,7 @@ StHbtEvent* hbtEvent = new StHbtEvent();
      crrnt_entry++;
      crrnt_eventI++;
           cout << "StHbtFlowPicoReader return event # "<<crrnt_eventI<<"\n";
-	  hbtEvent->RandomizeTrackOrder();
+	  //	  hbtEvent->RandomizeTrackOrder();
      return hbtEvent;
    }
  else
