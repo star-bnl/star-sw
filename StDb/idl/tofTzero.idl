@@ -1,0 +1,13 @@
+/* tofTzero.idl
+ *
+ * Tables: tofTzero
+ *
+ * description: T0 of each daq channel of TOF dectectors
+ *
+ */
+
+struct tofTzero {
+  long daqChannel; /* pVPD:0-5(11), TOFp:0-41, TOFr:0-71(119) */
+  long tdcChan; /* CAMAC TDC# 0-119(167) */
+  float Tzero; /* Time offset of each daq channel */
+};
