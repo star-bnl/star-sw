@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTrack.hh,v 1.6 1999/02/24 12:49:01 ullrich Exp $
+ * $Id: StTrack.hh,v 1.7 1999/03/23 21:47:39 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StTrack.hh,v $
- * Revision 1.6  1999/02/24 12:49:01  ullrich
- * Added argument (h) to constructor needed to instatiate helix
+ * Revision 1.7  1999/03/23 21:47:39  ullrich
+ * Member function made virtual
  *
  * Revision 1.7  1999/03/23 21:47:39  ullrich
  * Member function made virtual
@@ -57,15 +57,15 @@ public:
     // StTrack(const StTrack&);                     use default
     // const StTrack & operator=(const StTrack&);   use default
     
-    StPhysicalHelix&  helix();
-    StVertex*         startVertex();
-    StVertex*         stopVertex();
-    StTrackFitTraits& fitTraits();
-    StTrackPidTraits& pidTraits();
+    int operator==(const StTrack&) const;
+    int operator!=(const StTrack&) const;
+
+    virtual StPhysicalHelix&  helix();
+    virtual StVertex*         startVertex();
     virtual StVertex*         stopVertex();
-    void setHelix(const StPhysicalHelix&);
-    void setStartVertex(StVertex*);
-    void setStopVertex(StVertex*);
+    virtual StTrackFitTraits& fitTraits();
+    virtual StTrackPidTraits& pidTraits();
+
     virtual void setHelix(const StPhysicalHelix&);
     virtual void setStartVertex(StVertex*);
     virtual void setStopVertex(StVertex*);

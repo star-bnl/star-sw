@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StRun.hh,v 1.6 1999/03/04 18:17:10 ullrich Exp $
+ * $Id: StRun.hh,v 1.7 1999/03/23 21:47:41 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StRun.hh,v $
- * Revision 1.6  1999/03/04 18:17:10  ullrich
- * Namespace std not used if ST_NO_NAMESPACES defined
+ * Revision 1.7  1999/03/23 21:47:41  ullrich
+ * Member function made virtual
  *
  * Revision 1.6  1999/03/04 18:17:10  ullrich
  * Namespace std not used if ST_NO_NAMESPACES defined
@@ -54,21 +54,21 @@ public:
     int operator==(const StRun&) const;
     int operator!=(const StRun&) const;
     
-    long          id() const;
-    const string& type() const;
-    long          triggerMask() const;
-    double        centerOfMassEnergy() const;
-    short         beamMassNumber(StBeamDirection) const;
-    short         beamCharge(StBeamDirection) const;
-    StRunSummary* summary();
+    virtual long          id() const;
+    virtual const string& type() const;
+    virtual long          triggerMask() const;
+    virtual double        centerOfMassEnergy() const;
+    virtual short         beamMassNumber(StBeamDirection) const;
+    virtual short         beamCharge(StBeamDirection) const;
+    virtual StRunSummary* summary();
     
-    void setId(long);
-    void setType(const char*);
-    void setTriggerMask(long);
-    void setCenterOfMassEnergy(double);
-    void setBeamMassNumber(StBeamDirection, short);
-    void setBeamCharge(StBeamDirection, short);
-    void setSummary(StRunSummary*);
+    virtual void setId(long);
+    virtual void setType(const char*);
+    virtual void setTriggerMask(long);
+    virtual void setCenterOfMassEnergy(double);
+    virtual void setBeamMassNumber(StBeamDirection, short);
+    virtual void setBeamCharge(StBeamDirection, short);
+    virtual void setSummary(StRunSummary*);
     
 protected:
     long          mId;

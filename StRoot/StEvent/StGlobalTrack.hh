@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StGlobalTrack.hh,v 1.9 1999/03/04 18:17:04 ullrich Exp $
+ * $Id: StGlobalTrack.hh,v 1.10 1999/03/23 21:47:37 ullrich Exp $
  *
  * Author: Thomas Ullrich, Jan 1999
  *
@@ -13,8 +13,8 @@
  ***************************************************************************
  *
  * $Log: StGlobalTrack.hh,v $
- * Revision 1.9  1999/03/04 18:17:04  ullrich
- * Namespace std not used if ST_NO_NAMESPACES defined
+ * Revision 1.10  1999/03/23 21:47:37  ullrich
+ * Member function made virtual
  *
  * Revision 1.11  1999/04/08 14:58:34  ullrich
  * Moved PID traits from StTrack to StGlobalTrack.
@@ -71,30 +71,29 @@ public:
     StGlobalTrack(dst_track_st* trk,
                   double curvature,
                   double dip,
-    const StVecPtrTpcHit&     tpcHits() const;
-    const StVecPtrSvtHit&     svtHits() const;
-    const StVecPtrFtpcHit&    ftpcHits() const;
-    StDedx*                   svtDedx();
-    StDedx*                   tpcDedx();
-    StDedx*                   ftpcDedx();
+                  double phase,
+                  StThreeVector<double>& origin,
+		  int h);
+    // StGlobalTrack(const StGlobalTrack&);     use default
+    // const StGlobalTrack & operator=(const StGlobalTrack &);
+    
     virtual StDedx*                   svtDedx();
-    void setTpcDedx(StDedx*);      
-    void setFtpcDedx(StDedx*);     
-    void setSvtDedx(StDedx*);
+    virtual StDedx*                   tpcDedx();
+    virtual StDedx*                   ftpcDedx();
+    virtual const StDedx*             tpcDedx() const;
     virtual const StDedx*             ftpcDedx() const;
     virtual const StTrackPidTraits&   pidTraits() const;
 
     virtual void setTpcDedx(StDedx*);      
     virtual void setFtpcDedx(StDedx*);     
     virtual void setSvtDedx(StDedx*);
-    void addTpcHit(StTpcHit*);
-    void addFtpcHit(StFtpcHit*);
-    void addSvtHit(StSvtHit*);
-    void removeTpcHit(StTpcHit*);
-    void removeFtpcHit(StFtpcHit*);
-    void removeSvtHit(StSvtHit*);
+
+    //
+    // The following methods also manage the ref counting,
+    // i.e. they increase or decrease the reference counter
+    // of the referring hit (see StHit).
+    //
     virtual void addTpcHit(StTpcHit*);
-    
     virtual void addFtpcHit(StFtpcHit*);
     virtual void addSvtHit(StSvtHit*);
     virtual void removeTpcHit(StTpcHit*);
