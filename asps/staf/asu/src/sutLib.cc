@@ -52,6 +52,8 @@ sutMatchWild(char *pattern,char* string)
    return !fnmatch(pattern,string,flags);
 #elif defined(sun) || defined(IRIX)
    return gmatch(string,pattern);
+#else
+   return 0;
 #endif
 }
 

@@ -7,7 +7,7 @@
 void perror();
 #elif defined(AIX)
 #include "dlfcn.h"
-#else
+#elif !defined(WIN32)
 #include <dlfcn.h>
 #endif
 

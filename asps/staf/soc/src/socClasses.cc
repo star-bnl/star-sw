@@ -6,16 +6,20 @@
 //:BUGS:        -- STILL IN DEVELOPMENT --
 //:HISTORY:     21jul95-v000a-cet- creation
 //:<--------------------------------------------------------------------
-#define FILE_VERSION "$Id: socClasses.cc,v 1.28 1998/07/28 22:26:49 pope Exp $"
+#define FILE_VERSION "$Id: socClasses.cc,v 1.29 1998/08/11 12:43:34 fisyak Exp $"
 
 //:----------------------------------------------- INCLUDES           --
 #include <sys/types.h>
 #include <stdio.h>
-#ifndef linux
-#include <sys/stream.h>
+#ifdef WIN32
+# include <stdio.h>
+# include <iostream.h>
+#elif !defined(linux)
+# include <sys/stream.h>
 #else
-#include <g++/stream.h>
+# include <g++/stream.h>
 #endif
+
 #include <math.h>
 
 #define KUIP

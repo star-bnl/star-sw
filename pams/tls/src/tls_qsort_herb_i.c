@@ -1,4 +1,8 @@
 #include <stdio.h>
+#include "PAM.h"
+
+#define tls_qsort_herb_i_ F77_NAME(tls_qsort_herb_i,TLS_QSORT_HERB_I)
+
 #define TLS_SORT_QS_LONGROW_CV 11012
 #define TLS_SORT_NORMAL_CV      3585
 void tls_swap_two_rows(int row1,int row2,int rowsize,int *table) {
@@ -33,7 +37,7 @@ int tls_qsort(int *sortCol,int rsize,int *table,int left,int rite) {
     tls_qsort(sortCol,rsize,table,ileft,rite);
   }
 }
-int tls_qsort_herb_i_(int *nrows,int *sortCol,
+int type_of_call tls_qsort_herb_i_(int *nrows,int *sortCol,
       int *sortColRow2,int *table) {
   int rowsize;
   rowsize=(sortColRow2-sortCol);
