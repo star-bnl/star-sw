@@ -38,14 +38,14 @@ class StiKalmanTrackNode : public StiTrackNode
   double getPt() const;
   void getGlobalMomentum(double p[3], double e[6]=0) const;
   void setAsCopyOf(const StiKalmanTrackNode * node);
-  int  propagate(StiKalmanTrackNode *p, StiDetector * tDet)	throw (Exception);
+    int  propagate(StiKalmanTrackNode *p, StiDetector * tDet);	//throw (Exception);
   void propagate(double x, 
 		 double x0,   
-		 double rho) throw (Exception); // mass hypothesis
-  double evaluateChi2() throw ( Exception);
-  void updateNode() throw (Exception);
-  void extendToVertex() throw (Exception);
-  void rotate(double alpha) throw ( Exception);
+		 double rho); //throw (Exception); // mass hypothesis
+	double evaluateChi2(); //throw ( Exception);
+	void updateNode(); //throw (Exception);
+	void extendToVertex(); //throw (Exception);
+	void rotate(double alpha); //throw ( Exception);
   
   double fAlpha;          // rotation angle
   double fX;              // X-coordinate of this track (reference plane)

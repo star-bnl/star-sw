@@ -31,7 +31,7 @@ void StiTrack::reset()
   chi2   = 0.;
 }
 
-void StiTrack::fit() throw (Exception)
+void StiTrack::fit() //throw (Exception)
 {
   trackFitter->fit(this);
 }

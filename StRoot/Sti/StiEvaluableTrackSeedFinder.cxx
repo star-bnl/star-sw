@@ -102,7 +102,8 @@ void StiEvaluableTrackSeedFinder::build()
 	mTpcHitFilter = new StTpcPadrowHitFilter();
     }
     else {
-	cout <<"StiEvalaubleTrackSeedFinder::build(). ERROR:\tunkown hitfilter type: "<<hitFilterType<<".  ABORT"<<endl;
+	cout <<"StiEvalaubleTrackSeedFinder::build(). ERROR:t";
+	cout <<"unkown hitfilter type: "<<hitFilterType<<".  ABORT"<<endl;
 	return;
     }
     mTpcHitFilter->build(mBuildPath);
@@ -129,35 +130,34 @@ StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack)
   
     mcTrackMapType* mcToStTrackMap = mAssociationMaker->mcTrackMap();
     if (!mcToStTrackMap) {
-	cout <<"StiEvaluableTrackSeedFinder::makeTrack(StMcTrack*).  ERROR:\tMcTrackMap==0"<<endl;
+	cout <<"StiEvaluableTrackSeedFinder::makeTrack(StMcTrack*).  ERROR:\t";
+	cout <<"McTrackMap==0"<<endl;
 	return track;
     }
 
     pair<mcTrackMapType::iterator, mcTrackMapType::iterator> range = mcToStTrackMap->equal_range(mcTrack);
-    /*
-      if (range.first==mcToStTrackMap->end()) {
-      cout <<"McTrack not found in map?"<<endl;
-      }
-      if ( (*(range.first)).first != mcTrack) {
-      cout <<"equal_range.first != mcTrack???"<<endl;
-      }
-    */
+    if (range.first==mcToStTrackMap->end()) {
+	cout <<"StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack() Error:\t";
+	cout <<"No valid range found.  Abort"<<endl;
+	return 0;
+    }
     
     //Find bestTrack from association (linear search)
     //cout <<"New Track"<<endl;
     BestCommonHits theBest = for_each(range.first, range.second, BestCommonHits());
+
     StTrackPairInfo* bestPair = theBest.pair();
     
     if (!bestPair) {
-	//cout <<"StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack) ERROR:\t";
-	//cout <<"BestPair==0.  Abort"<<endl;
+	cout <<"StiEvaluableTrack* StiEvaluableTrackSeedFinder::makeTrack(StMcTrack* mcTrack) ERROR:\t";
+	cout <<"BestPair==0.  Abort"<<endl;
 	return 0;
     }
     else {
 	cout <<"Match Found, commonTpcHits:\t"<<bestPair->commonTpcHits()<<endl;
     }
     track->setStTrackPairInfo(bestPair);
-    //ATTENTION CLAUDE: Uncomment the following to seed KalmanTrack and investigate problems!
+
     //StiGeometryTransform::instance()->operator()(bestPair->partnerTrack(), track); //unfiltered
     StiGeometryTransform::instance()->operator()(bestPair->partnerTrack(), track, mTpcHitFilter); //fitlered
 

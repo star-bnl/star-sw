@@ -30,8 +30,8 @@ class StiKalmanTrackFinder : public StiTrackFinder
     double getMassHypothesis();
 
     //Local
-    virtual void findTrack(StiTrack * t) throw ( Exception);
-    virtual StiKalmanTrackNode * followTrackAt(StiKalmanTrackNode * node) throw (Exception);
+    virtual void findTrack(StiTrack * t); //throw ( Exception);
+	virtual StiKalmanTrackNode * followTrackAt(StiKalmanTrackNode * node); //throw (Exception);
     void removeNodeFromTrack(StiKalmanTrackNode * node, StiKalmanTrack* track);
     void pruneNodes(StiKalmanTrackNode * node);
     bool extendToMainVertex(StiKalmanTrackNode * node);
