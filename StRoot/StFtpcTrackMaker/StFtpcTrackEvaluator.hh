@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackEvaluator.hh,v 1.4 2000/11/10 18:38:24 oldi Exp $
+// $Id: StFtpcTrackEvaluator.hh,v 1.5 2000/11/29 08:37:46 jcs Exp $
 // $Log: StFtpcTrackEvaluator.hh,v $
+// Revision 1.5  2000/11/29 08:37:46  jcs
+// remove obsolete include statement
+//
 // Revision 1.4  2000/11/10 18:38:24  oldi
 // Short tracks are treated now.
 //
@@ -49,7 +52,6 @@
 #include "St_DataSet.h"
 
 #include "tables/St_fpt_fptrack_Table.h"
-#include "ftpc/St_fde_Module.h"
 
 class StFtpcTrackEvaluator : public TObject {
 
