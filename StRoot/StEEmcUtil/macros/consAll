@@ -3,4 +3,5 @@ cvs co StRoot/StEEmcDbMaker
 cvs co StRoot/StEEmcUtil
 cvs co StRoot/StEEmcSimulatorMaker
 cvs co StRoot/StEEmcDataMaker
+cvs co StRoot/StEEmcPool
 cons
