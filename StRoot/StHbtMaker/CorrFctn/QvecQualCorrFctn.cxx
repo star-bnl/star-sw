@@ -21,17 +21,17 @@ QvecQualCorrFctn::  QvecQualCorrFctn(char* title, const int& nbinsQ, const float
 					     const int& nbinsQual, const float& QualLo, const float& QualHi){
   // set up numeratorS
   char Tit[100];
-  sprintf(Tit,"2D Num");
+  sprintf(Tit,"Num2D");
   strcat(Tit,title);
   mNumerator2D = new StHbt2DHisto(Tit,title,nbinsQ,QLo,QHi,nbinsQual,QualLo,QualHi);
 
   // set up denominatorS
-  sprintf(Tit,"2D Den");
+  sprintf(Tit,"Den2D");
   strcat(Tit,title);
   mDenominator2D = new StHbt2DHisto(Tit,title,nbinsQ,QLo,QHi,nbinsQual,QualLo,QualHi);
 
   // set up ratioS
-  sprintf(Tit,"2D Rat");
+  sprintf(Tit,"Rat2D");
   strcat(Tit,title);
   mRatio2D = new StHbt2DHisto(Tit,title,nbinsQ,QLo,QHi,nbinsQual,QualLo,QualHi);
 
