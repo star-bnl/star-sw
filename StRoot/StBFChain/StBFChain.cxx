@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.298 2002/06/29 00:31:25 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.299 2002/08/20 19:24:47 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -401,7 +401,8 @@ Bfc_st BFC1[] = {
 
 
   {"MuDSTChain","MuDSTChain","EMCmDST,CMuDST",""                            ,"StMaker","StChain","",kFALSE},
-  {"MuDSTDeps","","","","",          "StEvent,StStrangeMuDstMaker","MuDST misc. dependencies (all)",kFALSE},
+  {"MuDSTDeps","","","","",                                  "StEvent,StEventUtilities,StStrangeMuDstMaker",
+                                                                   "MuDST misc. dependencies (all)",kFALSE},
   {"StrngMuDST","","","",                                       "StStrangeMuDstMaker","StStrangeMuDstMaker",
                                                                             "Load Stangeness MuDST",kFALSE},
 
