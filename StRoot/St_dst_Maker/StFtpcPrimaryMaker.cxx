@@ -1,5 +1,8 @@
-// $Id: StFtpcPrimaryMaker.cxx,v 1.17 2004/02/12 18:38:21 oldi Exp $
+// $Id: StFtpcPrimaryMaker.cxx,v 1.18 2004/02/13 21:13:13 oldi Exp $
 // $Log: StFtpcPrimaryMaker.cxx,v $
+// Revision 1.18  2004/02/13 21:13:13  oldi
+// Protection against missing FTPC DAQ data added.
+//
 // Revision 1.17  2004/02/12 18:38:21  oldi
 // Removal of intermediate tables to store FTPC hits and tracks.
 // Now the TObjArray's of hits and tracks are passed directly to
@@ -112,45 +115,53 @@ Int_t StFtpcPrimaryMaker::Make(){
   
   St_DataSet *primary = GetDataSet("primary"); 
   if (!primary) {
-    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): primary is missing" << endm;
+    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): primary is missing." << endm;
     return kStWarn;
   }
 
   St_DataSet *match = GetDataSet("match");
   if (!match) {
-    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): match is missing" << endm;
+    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): match is missing." << endm;
     return kStWarn;
   }
   
   St_dst_track *globtrk = (St_dst_track *) match->Find("globtrk");
   if (!globtrk) {
-    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): globtrk is missing" << endm;
+    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): globtrk is missing." << endm;
     return kStWarn;
   }
 
   TObjectSet* objSetClusters = (TObjectSet*)GetDataSet("ftpcClusters");
+  if (!objSetClusters) {
+    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): TObjectSet of ftpc clusters is missing." << endm;
+    return kStWarn;
+  }
   TObjArray *ftpcHits = (TObjArray*)objSetClusters->GetObject();
   if (!ftpcHits) {
-    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): TObjArray of ftpc hits is missing" << endm;
+    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): TObjArray of ftpc hits is missing." << endm;
     return kStWarn;
   }
 
   TObjectSet* objSetTracks = (TObjectSet*)GetDataSet("ftpcTracks");
-  if (!objSetTracks) { // this had to be introduced since in cases of a bad vertex there's not even an empty TObjArray written 
-    gMessMgr->Warning() << "StFtpcGlobalMaker::Make(): TObjectSet of ftpc tracks is missing" << endm;
+  if (!objSetTracks) {
+    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): TObjectSet of ftpc tracks is missing." << endm;
     return kStWarn;
   }
   TObjArray *ftpcTracks = (TObjArray*)objSetTracks->GetObject();
   if (!ftpcTracks) {
-    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): TObjArray of ftpc tracks is missing" << endm;
+    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): TObjArray of ftpc tracks is missing." << endm;
     return kStWarn;
   }
 
   // assume found primary vertex earlier already
   TObjectSet* objSetVertex = (TObjectSet*)GetDataSet("ftpcVertex");
+  if (!objSetVertex) {
+    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): TObjectSet of ftpc vertex is missing." << endm;
+    return kStWarn;
+  }
   StFtpcVertex *ftpcVertex = (StFtpcVertex*)objSetVertex->GetObject();
   if (!ftpcVertex) {
-    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): StFtpcVertex is missing" << endm;
+    gMessMgr->Warning() << "StFtpcPrimaryMaker::Make(): StFtpcVertex is missing." << endm;
     return kStWarn;
   }
   

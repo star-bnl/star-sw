@@ -1,5 +1,8 @@
-// $Id: StFtpcTrackMaker.cxx,v 1.53 2004/02/12 19:37:11 oldi Exp $
+// $Id: StFtpcTrackMaker.cxx,v 1.54 2004/02/13 21:12:19 oldi Exp $
 // $Log: StFtpcTrackMaker.cxx,v $
+// Revision 1.54  2004/02/13 21:12:19  oldi
+// Protection against missing FTPC DAQ data added.
+//
 // Revision 1.53  2004/02/12 19:37:11  oldi
 // *** empty log message ***
 //
@@ -411,6 +414,10 @@ Int_t StFtpcTrackMaker::Make()
   gMessMgr->Message("", "I", "OS") << "Tracking (FTPC) started..." << endm;
 
   TObjectSet* objSet = (TObjectSet*)GetDataSet("ftpcClusters");
+  if (!objSet) {
+    gMessMgr->Warning() << "StFtpcTrackMaker::Make(): TObjectSet of ftpc clusters is missing." << endm;
+    return kStWarn;
+  }
   TObjArray *ftpcHits = (TObjArray*)objSet->GetObject();
   if (!ftpcHits) {
     gMessMgr->Message("", "W", "OS") << "No FTPC clusters available!" << endm;
@@ -681,7 +688,7 @@ void StFtpcTrackMaker::PrintInfo()
   // Prints information.
   
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
-  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.53 2004/02/12 19:37:11 oldi Exp $ *" << endm;
+  gMessMgr->Message("", "I", "OS") << "* $Id: StFtpcTrackMaker.cxx,v 1.54 2004/02/13 21:12:19 oldi Exp $ *" << endm;
   gMessMgr->Message("", "I", "OS") << "******************************************************************" << endm;
   
   if (Debug()) {
