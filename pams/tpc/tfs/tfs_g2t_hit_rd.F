@@ -1,5 +1,8 @@
-* $Id: tfs_g2t_hit_rd.F,v 1.7 1998/12/16 18:29:01 sakrejda Exp $
+* $Id: tfs_g2t_hit_rd.F,v 1.8 1999/01/21 01:47:21 sakrejda Exp $
 * $Log: tfs_g2t_hit_rd.F,v $
+* Revision 1.8  1999/01/21 01:47:21  sakrejda
+* ordering of geant hits changed, Victor's assumptions not valid any more, had to correct it
+*
 * Revision 1.7  1998/12/16 18:29:01  sakrejda
 * references to the central membrane deleted - pavel takes care of it in gstar
 *
@@ -149,14 +152,15 @@ C     ---  Dhammika W.  April 18, 1996 ---
 
 C     increment row counter
             nok = nok + 1
-
+c     The following assumption is not valid any more.I tried to edit  
+c     the merging routine to compensate for that. I hope I did it right......
 c     check whether Victor's assumption is valid            
-            if(g2t_hit(ih).id.ne.nok) then
-              write(m132,*) 'TFS-READ-I1 gstar hits not in order ',
-     >        g2t_hit(ih).id,nok
-              call Message( m132, 1, idI1 )
-              return
-            endif
+c            if(g2t_hit(ih).id.ne.nok) then
+c              write(m132,*) 'TFS-READ-I1 gstar hits not in order ',
+c     >        g2t_hit(ih).id,nok
+c              call Message( m132, 1, idI1 )
+c              return
+c            endif
             
 C     Initialize tphit id/flags for this hit to their default value.
 C     DSW 03/13/97

@@ -1,5 +1,8 @@
-* $Id: tfs_tpchit_merge.F,v 1.8 1998/09/21 19:32:19 perev Exp $
+* $Id: tfs_tpchit_merge.F,v 1.9 1999/01/21 01:47:23 sakrejda Exp $
 * $Log: tfs_tpchit_merge.F,v $
+* Revision 1.9  1999/01/21 01:47:23  sakrejda
+* ordering of geant hits changed, Victor's assumptions not valid any more, had to correct it
+*
 * Revision 1.8  1998/09/21 19:32:19  perev
 * Redundant work array removed
 *
@@ -136,8 +139,8 @@ C     Quick_sort tpc_index table for key2 so it's easy to find  right
 C     geant hit corresponding to given tpc hit. This is needed to update
 C     the tpc_index table after tpc hit merging.
 
-      iret = tls_Quick_Sort_i(tpc_index_h.nok,tpc_index(1).key1,
-     >     tpc_index(2).key1, tpc_index)
+      iret = tls_Quick_Sort_i(tpc_index_h.nok,tpc_index(1).key2,
+     >     tpc_index(2).key2, tpc_index)
       if(iret.ne.tls_sort_normal_cv)then
            write(m132,*) 'TFS-MERGE-I2 sorting failed ',iret
            call Message( m132, 1, idI2 )
@@ -401,9 +404,9 @@ CCC   IMS 12/15/96
 CCC   
                ii_rows=1
                i_rows(1) = tphit(k).id
-               if(tpc_index(i_rows(1)).key1 .ne. tphit(k).id) 
-     >           iret = tls_Search_i(tpc_index_h.nok,tpc_index(1).key1, 
-     >           tpc_index(2).key1,tphit(k).id,i_rows,ii_rows)
+               if(tpc_index(i_rows(1)).key2 .ne. tphit(k).id) 
+     >           iret = tls_Search_i(tpc_index_h.nok,tpc_index(1).key2, 
+     >           tpc_index(2).key2,tphit(k).id,i_rows,ii_rows)
                
 C     store the tpc_index table row# & tphit(l).id for this hit
 C     04/16/1997  DSW
