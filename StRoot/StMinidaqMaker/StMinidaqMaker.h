@@ -22,7 +22,7 @@ class TH3C;
 
 class StMinidaqMaker : public StMaker {
  private:
-// static Char_t  m_VersionCVS = "$Id: StMinidaqMaker.h,v 1.4 1999/03/15 00:36:45 perev Exp $";
+// static Char_t  m_VersionCVS = "$Id: StMinidaqMaker.h,v 1.5 1999/03/30 15:58:11 love Exp $";
 // St_stk_stkpar *m_stk_stkpar;  	//! pointer to stk parameters
    St_tpg_pad_plane *m_tpg_pad_plane; 	//! Constants that describe TPC pad plane
    St_tpg_detector  *m_tpg_detector;  	//! TPC geometry parameters 
@@ -40,7 +40,10 @@ class StMinidaqMaker : public StMaker {
    virtual void TransferData();
    virtual void MakeHistograms();
    Float_t      m_clock_frequency;	//Different clock
-
+   Float_t      m_drift_velocity;       //Different by run
+   Float_t      m_z_inner_offset;       //varies? (in cm)
+   Float_t      m_trigger_offset;       //Differs by run (in seconds)
+ 
 protected:
 TH2F *m_pxl_in; 			//! No. of pixel in versus Sector
 TH2F *m_pxl_out;			//! No. of pixel out versus Sector
