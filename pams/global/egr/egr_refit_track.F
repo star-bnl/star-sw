@@ -119,7 +119,7 @@ c Has to be maxpnt-1 in case primary vertex is added to fit
       if (ipriv.ne.0) then
          gtrk(igtrk).nhit = gtrk(igtrk).nhit+1
          ient = gtrk(igtrk).nhit
-         gtrk(igtrk).ipnt(ient) = 999
+         gtrk(igtrk).ipnt(ient) = -999	!!!*VP*
          gtrk(igtrk).pos(ient) = ient
          gtrk(igtrk).det(ient) = 3
       endif
