@@ -1,51 +1,75 @@
-* $Id: gstar_input.g,v 1.25 2000/01/22 17:25:24 nevski Exp $
+* $Id: gstar_input.g,v 1.26 2000/01/30 21:29:44 nevsky Exp $
 *
 * $Log: gstar_input.g,v $
+* Revision 1.26  2000/01/30 21:29:44  nevsky
+* ntuple input debugged
+*
 * Revision 1.25  2000/01/22 17:25:24  nevski
 * unused ier removed
 *
 *
    subroutine gstar_input
 +CDE,typing,gcnum.
-   print *,' Gstar User Input for TEXT, TXOLD and FZ formats activated '
-   print *,' To activate XDF format readout do " gexec gstar_readxdf " '
+   print *,' All Gstar User Input formats are activated (XDF,TX,FZ,St,MM,Nt)'
+   print *,' Automatic recognition uses the first letter of a file extension'
+*  print *,' To activate XDF format readout do " gexec gstar_readxdf " '
    end
 
 *************************************************************************
-   subroutine agusopen(file)
+   subroutine agusopen(ifile)
 *
 * Description: open a TXT, EGZ(FZ) or XDF event generator data file.    *
 *              Data type should corresponds to the filename extension   *
 *              File types are saved in Ccommand - one letter per file   *
+* /agcuser/ compensates for lack of IO descriptors in some cases:       *
+*       irec   - Ntuple read needs a record number in ReadNT            *
+*       Table  - XDF read needs staf table name in AgUsRead             *
 *************************************************************************
-   Implicit   None   
-   Integer    LENOCC,CSADDR,Iadr,i,J,ier,L,N,idot,Igate
-   Character  file*(*),C*1,Table*120
-   common     /agcuser/ Igate,Table
+   Implicit         None   
+   Integer          SYSTEMF,LENOCC,CSADDR,Iadr,i,J,ier,L,N,idot,Igate,Irec,Lrec
+   Character        ifile*(*),C*1,Table*120,CDIR*8,Zcom*256,file*256
+   common /agcuser/ Irec(10),Table
 *
 +CDE,AGCKINE.
 *
-    L=LENOCC(file);  Check L>0;
+    file=ifile;  L=LENOCC(file);  Check L>0; 
+
+    If file(L-2:L)=='.gz' 
+    { 
+       print *,' AgUsOpen: unzipping input file ',ifile
+       J=0;   Do i=1,L-1  {  if (file(i:i)='/') J=i; }
+       file='/tmp/'//ifile(J+1:L-3)
+       Zcom='zcat -f '//ifile(1:L)//' > '//file(1:L-J+2)
+
+       Ier=SYSTEMF(Zcom);  if (Ier!=0) go to :e:;  
+       L=LENOCC(file)
+    }
+
     C=' '
     Do i=1,L-1  {  check file(i:i)='.'; idot=i; C=file(i+1:i+1);  }
     Call CLTOU(C)
 *
     N=LENOCC(CCOMMAND)+1;  Igate=N
-    print *,' AgUsOpen: input from ',file,' mode ',C 
+    print *,' AgUsOpen: input from ',file(:L),' mode ',C 
 *
     if      C=='E'                       " egz format "
-    {  Call AgzOPEN('PZ',file,'EK',0,0)
+    {  Call AgzOPEN('PZ',file(:L),'EK',0,0)
        Call AgZREAD('P',ier)
        if (Ier!=0)  goto :e:
     }
     else if C=='X'                       " xdf format "
     {  J=Csaddr('XDF_OPEN')
        If ( J==0 )  goto :e:
-       call CsJCAL(J,2,file)
+       call CsJCAL(J,2,file(:L))
     }
     else if C=='T'                       "  any text  "
-    {  Call ApFOPEN(21-N,file,ier) 
+    {  Call ApFOPEN(21-N,file(:L),ier) 
        if (ier!=0)  goto :e:
+    } 
+    else if C=='N'                       " HEP Ntuple "
+    {  Lrec=0;     CDIR='HEPEVNT'//CHAR(48+N);    Irec(N)=0;
+       Call HREND (CDIR)
+       Call HROPEN(21-N,CDIR,file(:L),'X',Lrec,ier);  if (ier!=0) goto :e:; 
     } 
     else if C=='S'                       " STAF table "
     {  Table=File(1:idot-1)
@@ -63,12 +87,15 @@
 *                                                                       *
 * Description: loop over all files opened by USER/INPUT                 *
 *              and call the corresponding readout routine               *
+*  Igate passed to a readout routine is a bi-directional parameter:     *
+*        input: gate number in a composite event                        *
+*       return: error flag                                              *
 *************************************************************************
    Implicit   None
 +CDE,GCBANK,GCNUM,SCLINK,RBBANK,AgCKINE.
-   Integer    LENOCC,CSADDR,AMI_CALL,Igate,Ier,J,I
+   Integer    LENOCC,CSADDR,AMI_CALL,Igate,Irec,Ier,J,I
    Character  C*1, o*1, Table*120
-   common     /agcuser/ Igate,Table
+   common     /agcuser/ Irec(10),Table
 *
 *
    o=CHAR(0)
@@ -82,6 +109,7 @@
      elseif C=='X' { IrbDIV=IxDIV;           LKARP2=LkEvnt
                      J=CsADDR('XDF_READ'); If (J!=0) call CsJCAL(J,1,Igate)}
      elseif C=='T' { J=1;                    call gstar_ReadTXT(Igate)     }
+     elseif C=='N' { J=1;                    call gstar_ReadNT (Igate)     }
      elseif C=='M' { J=CsADDR ('MICKINE'); IF (J!=0) Call CsJCAL(J,1,Igate)}
      elseif C=='S' { J=AMI_CALL ('gstar_readtab'//o,1,%L(Table)//o)-1;     }
      If Igate<=0   { Ier=1; return }
@@ -95,6 +123,81 @@
 *
    End
  
+*************************************************************************
+   Subroutine    gstar_ReadNT(Igate)
+   implicit      none
++CDE,GCUNIT,GCFLAG.
+*
+   Integer           Igate,Irec,NpHEP,IdEvHep(5)
+   Real              CT/3.e11/,Comp(4)/4*0/,Hpar(4)/4*0/
+   Character         Table*120,CDIR*10
+   common /agcuser/  Irec(10),Table
+*
+   Integer           Ip,Istat,Ipdg,Moth,Idau
+   Real              Pxyz,Ener,mass,Vxyz,Vtime
+   Common /hep_part/ Ip,Istat,Ipdg,Moth(2),Idau(2),Pxyz(3),Ener,mass,
+                                                   Vxyz(3),Vtime
+*
+   Integer           Id/999/,StartVx/0/,Ubuf/0/,num(4),
+                     Ge_pid,nin,nv,nt,ier,L,Ia,i             
+   Character         CWD*20, Cform*8/'/6I 9F'/
+   Logical           First/.true./
+*
+
+   CDIR='//'//'HEPEVNT'//CHAR(48+Igate)
+   Call RZCDIR(CWD, 'R')
+   Call RZCDIR(CDIR,' ')
+   Call  HCDIR(CDIR,' ')
+   Call RZCDIR(' ', 'P')
+   Call HRin  (Id,  99999,Igate*1000) 
+   Call HRin  (Id-1,99999,Igate*1000) 
+   if (Irec(Igate)=<0) then
+       CALL HBNAME (id+Igate*1000,'        ', 0,'$CLEAR')
+       Call HBNAME (id+Igate*1000,'particle',Ip,'$SET'  )
+   endif
+* 
+   Nin=0
+   Loop
+   {  Irec(Igate)+=1; 
+      Call HGNT(Id+Igate*1000,Irec(Igate),ier); if (ier!=0) goto :err:;
+
+      if Istat>10 
+      {
+        if ipdg=999999 
+        {  if nin>0   { Irec(Igate)-=1; Break; }
+           NpHEP=ip;  Num = {1,Igate,1,NpHep+1 }
+           do i=1,5   { IdEvHep(i) = Pxyz(i);  }
+           Call REBANK('/EVNT/GENE/GENT.GENT',num,15,L,ia)
+        }
+        elseif ipdg=999998 { call Ucopy(Pxyz,Hpar,4) }
+        elseif ipdg=999997 { call Ucopy(Pxyz,Comp,4) }
+        else   { print *,' Yet unknown HEP header '  }
+
+        Call Ucopy  (IdEvHep,Moth,4)
+        Call Ucopy  (Hpar,   Pxyz,4)
+        Call Ucopy  (Comp,   Vxyz,4)
+        Ip=0; Nin=0; mass=IdEvHep(5)
+      }
+      Nin+=1; num(3)=Nin;  
+      Call RbSTORE ('/EVNT/GENE/GENT*',num,Cform,15,istat)
+    
+      Check Istat==1
+
+      Call apdg2gea (Ipdg, ge_pid); If ge_pid<=0    
+      {  If (idebug>0) <W> Ipdg; (' gstar_read HEPTUP unknown particle',i6)
+         ge_pid = 1000000+Ipdg
+      }
+
+      Call Vscale   (Vxyz,0.1,Vxyz,3);  Vtime=Vtime/ct
+      Call AgSVERT  (Vxyz,0, -Igate,Ubuf,     0,nv)  
+      call AgSKINE  (Pxyz,ge_pid,nv,num(3)+0.,0,nt)
+      if (ip<0 | Ip==NpHEP) break
+   }
+   goto :ok:
+*
+:err: Igate=-1
+:ok:  Call RZCDIR(CWD,' ')
+   end
 *************************************************************************
    Subroutine    gstar_ReadTXT(Igate)
 *                                                                       *

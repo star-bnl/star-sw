@@ -1,5 +1,6 @@
 *******************************************************************************
  subroutine heptup
+    call hermes (0)
     call hephelp
  end
 
@@ -7,14 +8,14 @@
  subroutine HEPexample
     integer mm(2)/0,0/,dd(2)/0,0/,iw(2)/90,91/,pipe,p/0/
     real    pp(3),vv(3)
+*   call HEPfat
+*   call HEPdense
     np=12000
-    call HEPdense
     do j =1,3
        call hepevent ('hijing',12,np,  3.,1.5,100.,0.1, 197.,97.,197.,97.)
        do i=1,np
-          pp={1,2,3*rndm()}
-          vv={0,0,.1*rndm()}
-          call heppart (1,2,101,mm,dd,pp,10.,1.,vv,0.)
+          pp={1,2,3*rndm()};      vv={0,0,.01*rndm()}
+          call heppart (i,1,421,mm,dd,pp,10.,1.,vv,0.)
        enddo
     enddo
     call hepend('z')
@@ -22,30 +23,31 @@
 
 *******************************************************************************
 
- subroutine   HEPHelp
-print*,'**********************************************************************'
-print*,' a utility set to write a standard HEPEVNT n-tuple 999 in evgen.run.nt'
-print*,'**********************************************************************'
-print*,'         mandatory Calles:'
-print*,'HEPEvent (generator, run, Npart, B,F,Et,At, A1,Z1,A2,Z2) - new event'
-print*,'HEPPart (ipa,ist,pdg, moth,idau,pp, Ep,Am,vv,vt) - write new particle'
-print*,'HEPEnd (option) - close ntuple and compress it on "z" option'
-print*,'         optional Calls:'
-print*,'HEPnormal - default packing'
-print*,'HEPdens  - dense packing: no mother-daughter relations, no vertex info'
-print*,'HEPfat  - fat packing: precise vertex info'
-print*,'HEPmax (Pdg, Ref, NPart, Vxyzt, Nbit) - for experts'
-print*,'**********************************************************************'
- end
+subroutine   HEPHelp
+replace [X#;] with [print *,#1;]
+X'**************************************************************************'
+X'* A utility set to write a standard HEPEVNT n-tuple 999 in evgen.run.nt  *'
+X'**************************************************************************'
+X'*          mandatory Calles:                                             *'
+X'* HEPEvent (generator, run, Npart, B,F,Et,At, A1,Z1,A2,Z2) - new event   *'
+X'* HEPPart  (ipa,ist,pdg, moth,idau,pp, Ep,Am,vv,vt) - write new particle *'
+X'* HEPEnd   (option) - close ntuple and compress it on "z" option         *'
+X'*          optional Calls:                                               *'
+X'* HEPdens  - dense packing: no mother-daughter relations, no vertex info *'
+X'* HEPfat   - fat packing: precise vertex info                            *'
+X'* HEPnormal- return to default packing: vertex limited within 1 mk       *'
+X'*          experts Call:                                                 *'
+X'* HEPmax (IPdg, IRef, NPart, Vxyzt, Nbit) - set limits on HEP variables  *'
+X'**************************************************************************'
+end
 
 *******************************************************************************
 
  Subroutine HEPEvent (generator, run, Npart, B,F,Et,At, A1,Z1,A2,Z2)
  Implicit          none
- Integer           MaxIP,MaxRf,MaxPa,MaxVx,MaxNv,K
- Integer           Id/999/,Iver/11/,Icycle/0/,
-                   IpMx/1000000/,MxRf/1/,MxPa/32000/,MxVx/200/,Nv/16/
-
+ Integer           Iver/11/,IpMx/1000000/,MxRf/1/,MxPa/32000/,Nv/16/
+ Integer           MaxIP,MaxRf,MaxPa,MaxNv,K,Ic/0/,Id/999/
+ Real              VxMax,VxMx/0.001/,VxMm,VxRm
 * Input parameters:
  Character         generator*(*)
  Integer           run,Npart,ipa,ist,pdg,moth(2),idau(2)
@@ -57,10 +59,10 @@ print*,'**********************************************************************'
  Common /pawc/     iPaw(Nwpaw)
 
 * Hepevnt related:
- Integer           IdRun,NTrack,Itype,Is,L,Mref
- Character         cR*8, code*1, gener*20, file*20
- Integer           Np,Ievt,Idat,Itim,gen
- Common /hep_head/ Np,Ievt,Idat,Itim,gen,gener,file
+ Integer           NTrack,Itype,Is,L,Mref
+ Character         cR*8, option*1, gener*20, file*20
+ Integer           Np,IdRun,Ievt,Idat,Itim,Igen
+ Common /hep_head/ Np,IdRun,Ievt,Idat,Itim,Igen
  Integer           Ip,Istat,Ipdg,Mot1,Mot2,Ida1,Ida2
  Real              Pxyz,Ener,mass,Vxyz,Vtime
  Common /hep_part/ Ip,Istat,Ipdg,Mot1,Mot2,Ida1,Ida2,Pxyz(3),Ener,mass,
@@ -88,7 +90,8 @@ print*,'**********************************************************************'
 *   Is HBOOK and memory initialised ?
     If Ipaw(1)==0 { print *,' HBOOK initialised for HEP'; Call HLIMIT(NwPaw) }
 
-    Call HEPNUMBER  (Run,cR)
+    Call HEPNUMBER  (Run,cR);              IdRun=Run;
+    VxMm=0; if (VxMx>0) VxMm=-VxMx
     file='evgen.'//%L(cR)//'.nt'
     Call HROpen   (99,'HEPEVNT',file,'N',1024,is)
     call RZCDIR   ('//HEPEVNT', ' ')
@@ -104,17 +107,18 @@ print*,'**********************************************************************'
     Call HepBNAME (id,Pxyz, 'Pxyz(3)'      , 0,  0,      0)
     Call HepBNAME (id,Ener, 'ener'         , 0,  0,      0)
     Call HepBNAME (id,Mass, 'mass:R:'      ,16, -1,     10)
-    Call HepBNAME (id,Vxyz, 'Vxyz(3):R:'   ,nv,  0,   MxVx)     " mm "
-    Call HepBNAME (id,Vtime,'Vtime:R:'     ,nv,  0,   Mxvx)     "mm/c"
+    Call HepBNAME (id,Vxyz, 'Vxyz(3):R:'   ,nv, VxMm, VxMx)     " mm "
+    Call HepBNAME (id,Vtime,'Vtime:R:'     ,nv,  0,   VxMx)     "mm/c"
 *   1 mm/c=0.33 ns;   ct=3.e11: tmax=5000 -> 17 ns
    
-    Do gen=1,K-1 
-    {L=min(lenocc(gener),Lenocc(GG(gen))); If(gener(1:L)==GG(gen)(1:L)) break;}
-    call HEPinput(FF(gen))
+    Do Igen=1,K-1 
+    {  L=min(lenocc(gener),Lenocc(GG(Igen))) 
+       If(gener(1:L)==GG(Igen)(1:L)) break
+    }  call HEPinput(FF(Igen))
   endif
 *
   Ievt+=1;  Ip=NPart;  Istat=Iver;  Ipdg=IpMx;   Call DATIME (Idat,Itim);
-  Ipdg-=1;  Pxyz={Run,Ievt,Idat,Itim,CC(gen)};   Call HFNT(Id)
+  Ipdg-=1;  Pxyz={Run,Ievt,Idat,Itim,CC(Igen)};  Call HFNT(Id)
   Ipdg-=1;  Pxyz={  B,    F,   Et,   At,   1};   Call HFNT(Id)
   Ipdg-=1;  Pxyz={ A1,   Z1,   A2,   Z2,   2};   Call HFNT(Id) 
   Np=Npart;
@@ -137,25 +141,25 @@ print*,'**********************************************************************'
   Vtime = vt
   Mass  = Am
   Ener  = Ep
-  if (ipa==Np) Ip=-Ipa
+*  if (ipa==Np) Ip=-1
   Call HFNT(Id)
   return
 
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  entry  HEPend(code)
+  entry  HEPend(option)
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-  Call HROUT(0,ICYCLE,'NT'); 
-  Call HREND('//HEPEVNT')
-  if (Code=='z' | Code=='Z') i=systemF('gzip -f '//%L(file))
+  Call HROUT(0,ic,'NT'); 
+  Call HREND('HEPEVNT')
+  if (Option=='z' | Option=='Z') i=systemF('gzip -f '//%L(file))
   return
 
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   entry  HEPnormal;  MxRf=1;  Nv=16;    return
   entry  HEPdense;   MxRf=0;  Nv= 1;    return
-  entry  HEPfat  ;   MxRf=1;  Nv=31;    return
-  entry  HEPmax (MaxIP, MaxRf, MaxPa, MaxVx, MaxNv)
-         IpMx=MaxIp; Mref=MaxRf; MxPa=MaxPa; MxVx=MaxVx; Nv=MaxNv;
+  entry  HEPfat  ;   MxRf=1;  VxMx=0;    return
+  entry  HEPmax (MaxIP, MaxRf, MaxPa, VxMax, MaxNv)
+         IpMx=MaxIp; Mref=MaxRf; MxPa=MaxPa; VxMx=VxMax; Nv=MaxNv;
          Return
 * - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
   End
@@ -180,7 +184,8 @@ print*,'**********************************************************************'
   character    c*8,CC*80,form*(*)  
   CC=form;     L=index(form,':'); If (L>0) CC=form(1:L-1)
   if Ia!=0 | Ib!=0
-  {  CC = form
+  { 
+     CC = form
      call HEPNUMBER(Nb,c)
      if (nb>0)              CC=%L(CC)//%L(c)
      if (Index(CC,':')>0)   CC=%L(CC)//':'
@@ -192,12 +197,14 @@ print*,'**********************************************************************'
 
 *************************************************************************
 
-  subroutine   HEPNUMBER(num,cnum)
+  subroutine   HEPNUMBER(Num,cnum)
   implicit     none
-  character    cnum*(*),S*8
+  character    cnum*(*),S*10
   integer      num,L,i,i1,i2
-     write (S,*) NUM;  i1=8;  i2=1; 
-     do i=1,8 { check S(i:i)!=' '; i1=min(i1,i); i2=max(i2,i); }
+     If abs(Num)<=1000000 { write (S,    *    ) NUM; }
+     else                 { write (S,'(f10.6)') NUM; }  
+     i1=10;  i2=1; 
+     do i=1,10 { check S(i:i)!=' '; i1=min(i1,i); i2=max(i2,i); }
      cnum=S(i1:i2);    L=i2-i1+1
   end
 
