@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.442 2004/09/03 01:51:42 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.443 2004/09/03 14:21:57 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -38,7 +38,7 @@
 //_____________________________________________________________________
 // PLease, preserve the comment after = { . It is used for documentation formatting
 //
-Bfc_st BFC1[] = { // standard chains 
+Bfc_st BFC1[] = { // standard chains
   {"Key"         ,"Name"       ,"Chain"      ,"Opts"                      ,"Maker","Libs","Comment",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"TIME STAMPS ","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -379,7 +379,7 @@ Bfc_st BFC1[] = { // standard chains
                          ,"StppTrigMaker","StppSpin","Add emulation of pp Trigger based on CTB+MWC",kFALSE},
 
   {"tpc"         ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,tcl,tpt,PreVtx"   ,"StMaker","StChain","",kFALSE},
-  
+
   {"Trs"         ,"Trs","tpcChain","scl,tpcDB,tpc_daq,Simu"           ,"StTrsMaker","StTrsMaker","",kFALSE},
   {"TrsMini"     ,"","tpcChain","scl,tpcDB,-Trs,-tpc_daq,Simu","StTrsMiniMaker","StTrsMiniMaker","",kFALSE},
 
@@ -613,7 +613,7 @@ Bfc_st BFC1[] = { // standard chains
 
 
 // ITTF Chain will be put here. Option list starting from minimalistic requirements
-// and may not initially work. 
+// and may not initially work.
 // Please, preserve the comment after = { . It is used for documentation formatting
 //
 Bfc_st BFC2[] = { // ITTF Chains
@@ -776,26 +776,26 @@ Bfc_st BFC2[] = { // ITTF Chains
   //             "Production chain for winter 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
   //{"pp2004"     ,"" ,"","B2004,l3onl,fcf,ToF,emcDY2,fpd,Corr4,ppOpt,-PreVtx,ftpc,trgd,ZDCvtx,OSpaceZ2",
   //                "","","Production chain for 2004 pp data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
-  // 
+  //
   // *** ITTF chains *** Year4 drops standard chains and support ITTF chains only
   //     Main change tpc -> tpcI and Cdst -> Idst
-  // 
+  //
   {"B2004"       ,""        ,"","ry2004,in,tpc_daq,tpcI,svt_daq,SvtD,Physics,Idst,l0,tags,Tree,evout","",""
                                                              ,"Base chain for 2004 ITTF (tpc+svt)",kFALSE},
 
   // Notes:
   //  fcf was not added by default to allow switching if needed
   //  there is no PreVtx in tpcI so no need to do -PreVtx for pp chain
-  //  SVT is added as base default, svtIT in chains 
+  //  SVT is added as base default, svtIT in chains
   {"P2004"       ,"" ,"",
                    "B2004,fcf,VFMinuit,l3onl,ToF,emcDY2,eemcD,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr4,OSpaceZ2",
               "","","Production chain for 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
   {"pp2004"      ,"" ,"",
   "B2004,fcf,ppOpt,VFppLMV5,CtbMatchVtx,l3onl,ToF,emcDY2,eemcD,fpd,ftpc,trgd,ZDCvtx,svtIT,Corr4,OSpaceZ2",
-             "","","Production chain for 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},   
-   
+             "","","Production chain for 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, e/b-emc, trgd)",kFALSE},
 
-   
+
+
   // Other chains/Calibration
   {"LaserCal0","" ,"","db,detDb,tpc_daq,tpcDb,tcl,globT,laser,LaserTest","","",
                                                                     "Laser Calibration Chain (tcl)",kFALSE},
@@ -893,9 +893,9 @@ Bfc_st BFC2[] = { // ITTF Chains
   // in ITTF mode, all options may apply
   {"beamLine"    ,""  ,"","",""                                ,"","... Beam line constraint in ON",kFALSE},
   {"CtbMatchVtx" ,""  ,"","",""                         ,"","... CTB Matching ON in Vertex Finding",kFALSE},
-  {"VFMinuit"      ,""  ,"","",""                       ,"","... Generic VF will use Minuit method",kFALSE}, 
-  {"VFppLMV"       ,""  ,"","",""                        ,"","... Generic VF will use ppLMV method",kFALSE}, 
-  {"VFppLMV5"      ,""  ,"","",""                ,"","... Generic VF will use ppLMV method (tuned)",kFALSE}, 
+  {"VFMinuit"      ,""  ,"","",""                       ,"","... Generic VF will use Minuit method",kFALSE},
+  {"VFppLMV"       ,""  ,"","",""                        ,"","... Generic VF will use ppLMV method",kFALSE},
+  {"VFppLMV5"      ,""  ,"","",""                ,"","... Generic VF will use ppLMV method (tuned)",kFALSE},
 
   {"onlcl"  ,""  ,"","",""                                       ,"","Read/use TPC DAQ100 clusters",kFALSE},
   {"onlraw" ,""  ,"","",""                                              ,"","Read/use TPC raw hits",kFALSE},
@@ -1262,7 +1262,7 @@ StBFChain::StBFChain(const char *name, const Bool_t UseOwnHeader):
 // Hack constructor.
 /*!
  * This method can be called with mode 1 or 2 to enable chain setup 1 or chain
- * setup 2. 
+ * setup 2.
  *
  * Note: This constructor now accepts a second argument for the chain name.
  * Embedding scripts were modified accordingly.
@@ -1377,7 +1377,7 @@ Int_t StBFChain::Instantiate()
 	  if (Key.CompareTo("db",TString::kIgnoreCase) == 0) {
             if (!dbMk && ! GetChain()->GetMaker(fBFC[i].Name)) {
 	      if (!GetOption("NoMySQLDb") && !GetOption("NoCintDb"))
-		if ( GetOption("NoCintCalDb") ){ 
+		if ( GetOption("NoCintCalDb") ){
 		  dbMk = new St_db_Maker(fBFC[i].Name,"MySQL:StarDb","$STAR/StarDb");
 		} else {
 		  dbMk = new St_db_Maker(fBFC[i].Name,"MySQL:StarDb","$STAR/StarDb","$PWD/StarDb");
@@ -1535,10 +1535,10 @@ Int_t StBFChain::Instantiate()
 	      StGenericVertexMaker* gvtxMk = (StGenericVertexMaker*) mk;
 	      int                   VtxOpt = 0;
 
-	      // VertexFinder method
-	      if ( GetOption("VFMinuit") ){  VtxOpt |= 0x1;}	      
-	      if ( GetOption("VFppLMV") ){   VtxOpt |= 0x2;}
-	      if ( GetOption("VFppLMV5") ){  VtxOpt |= 0x3;}
+	      // VertexFinder methods
+	      if ( GetOption("VFMinuit") ){  VtxOpt |= (0x1 << 0);} // 1
+	      if ( GetOption("VFppLMV") ){   VtxOpt |= (0x1 << 1);} // 2
+	      if ( GetOption("VFppLMV5") ){  VtxOpt |= (0x1 << 2);} // 4
 	      gvtxMk->SetMode(VtxOpt);
 
 	      // All VertexFinders implement those (or not)
@@ -1716,8 +1716,8 @@ Int_t StBFChain::Instantiate()
 	  // Turn on alternative V0 method
 	  if (maker == "StV0Maker" && GetOption("Ev03")) mk->SetMode(1);
 	  //if (maker == "StKinkMaker"){
-	  // // Placeholder for KinkMaker control. 
-	  // // - SetMode(1)   TPT, 
+	  // // Placeholder for KinkMaker control.
+	  // // - SetMode(1)   TPT,
 	  // // - SetMode(2)   ITTF
 	  // // Default = Both
 	  //}
@@ -1831,7 +1831,7 @@ Int_t StBFChain::Instantiate()
   if (GetOption("Debug2"))   SetDEBUG(2);
   if (GetOption("nohistos")) SetAttr(".histos",0,"*");
   else                       SetAttr(".histos",1,"*");
-  if (GetOption("NoRepeat")) gMessMgr->IgnoreRepeats(); 
+  if (GetOption("NoRepeat")) gMessMgr->IgnoreRepeats();
   return status;
 }
 
@@ -2063,11 +2063,11 @@ void StBFChain::SetFlags(const Char_t *Chain)
 	// messages NOW !!!
 	if( ! strncmp( string.Data() ,"dbv",3) && strlen(string.Data()) == 11){
 	  (void) sscanf(string.Data(),"dbv%d",&FDate);
-	  cout << " ... but still will be considered as a dynamic timestamp (MaxEntryTime) " 
+	  cout << " ... but still will be considered as a dynamic timestamp (MaxEntryTime) "
 	       << FDate  << endl;
 	} else if( ! strncmp( string.Data() ,"sdt",3) && strlen(string.Data()) == 11){
 	  (void) sscanf(string.Data(),"sdt%d",&FDateS);
-	  cout << " ... but still will be considered as a dynamic timestamp (DateTime)     " 
+	  cout << " ... but still will be considered as a dynamic timestamp (DateTime)     "
 	       << FDateS << endl;
 	} else {
 	  cout << " Invalid Option " << string.Data() << ". !! ABORT !! " << endl;
