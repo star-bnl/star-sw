@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.9 1999/02/26 18:42:33 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.10 1999/03/03 23:34:29 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.10  1999/03/03 23:34:29  kathy
+// fixes to histograms
+//
 // Revision 1.9  1999/02/26 18:42:33  kathy
 // added vertex histograms
 //
@@ -49,6 +52,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "PhysicalConstants.h"
+#include <math.h>
 #include "TMath.h"
 #include "St_QA_Maker.h"
 
@@ -78,15 +82,15 @@
     const Int_t St_QA_Maker::nleng  = 50;
     const Int_t St_QA_Maker::npsi   = 36;
     const Int_t St_QA_Maker::knpsi  = 42;
-    const Int_t St_QA_Maker::ntrk   = 100;
+    const Int_t St_QA_Maker::ntrk   = 50;
     const Int_t St_QA_Maker::nvrt   = 100;
     const Int_t St_QA_Maker::nmnpt  = 50;
     const Int_t St_QA_Maker::nmneta = 40;
     const Int_t St_QA_Maker::nxyz   = 50;
     const Int_t St_QA_Maker::knyeta = 60;
     const Int_t St_QA_Maker::knid   = 10;
-    const  Int_t St_QA_Maker::cnp = 100;
-    const  Int_t St_QA_Maker::cndedx = 100;    
+    const  Int_t St_QA_Maker::cnp   = 50;
+    const  Int_t St_QA_Maker::cndedx = 50;    
 
     const Float_t St_QA_Maker::kminnid  = 0.0;
     const Float_t St_QA_Maker::kmaxnid  = 10.0;
@@ -94,11 +98,11 @@
     const Float_t St_QA_Maker::kminpsi  = -60.0;
     const Float_t St_QA_Maker::maxpsi   = 360.0;
     const Float_t St_QA_Maker::minchisq = 0.;
-    const Float_t St_QA_Maker::maxchisq = 50.0;
+    const Float_t St_QA_Maker::maxchisq = 10.0;
     const Float_t St_QA_Maker::minmass  = 0.0;
     const Float_t St_QA_Maker::maxmass  = 2.0;
     const Float_t St_QA_Maker::mindedx  = 0.0;
-    const Float_t St_QA_Maker::maxdedx  = 0.0005;
+    const Float_t St_QA_Maker::maxdedx  = 0.0005*1e6; // in keV/cm
     const Float_t St_QA_Maker::minpnt   = 0.0;
     const Float_t St_QA_Maker::maxpnt   = 50.0;
     const Float_t St_QA_Maker::minleng  = 0.0;
@@ -108,7 +112,7 @@
     const Float_t St_QA_Maker::mintrk   = 0.0;
     const Float_t St_QA_Maker::maxtrk   = 10000.0;
     const Float_t St_QA_Maker::minvrt   = 0.0;
-    const Float_t St_QA_Maker::maxvrt   = 100.0;
+    const Float_t St_QA_Maker::maxvrt   = 5000.0;
     const Float_t St_QA_Maker::minmpt   = 0.0;
     const Float_t St_QA_Maker::maxmpt   = 5.0;
     const Float_t St_QA_Maker::minmeta  = -1.0;
@@ -120,7 +124,7 @@
     const Float_t St_QA_Maker::cminp = 0.0;
     const Float_t St_QA_Maker::cmaxp = 2.0;
     const Float_t St_QA_Maker::cmindedx = 0.0;
-    const Float_t St_QA_Maker::cmaxdedx =  0.1e-04;
+    const Float_t St_QA_Maker::cmaxdedx =  0.1e-04*1e6; // change from GeV to keV per cm
 
 ClassImp(St_QA_Maker)
 
@@ -180,40 +184,28 @@ Int_t St_QA_Maker::Make(){
 void St_QA_Maker::BookHistEvSum(){
 
 // for method MakeEvSum - from table event_summary
-   m_trk_tot_gd    = new TH2F("QaEvsumGlbTrkGoodVsTotal","number of good track versus total",
-                             ntrk, mintrk, maxtrk, ntrk, mintrk, maxtrk);
-     m_trk_tot_gd->SetXTitle("total number of tracks");
-     m_trk_tot_gd->SetYTitle("number of good tracks");
+   m_trk_tot_gd    = new TH1F("QaEvsumGlbTrkGoodDTotal","number of good track over total",
+                             55,0.,1.1);
+     m_trk_tot_gd->SetXTitle("number of good/total tracks");
    m_glb_trk_gd    = new TH1F("QaEvsumGlbTrkGd","number of good tracks ",
                              ntrk, mintrk, maxtrk);
    m_glb_trk_tot   = new TH1F("QaEvsumGlbTrkTot","number of tracks total ",
                              ntrk, mintrk, maxtrk);
-   m_glb_trk_plus  = new TH1F("QaEvsumPlusTrk", "number of positive tracks",
-                                                     ntrk, mintrk, maxtrk);   
-   m_glb_trk_minus = new TH1F("QaEvsumMinusTrk", "number of negative tracks",
-                                                     ntrk, mintrk, maxtrk);
-   m_trk_pls_mns   = new TH2F("QaEvsumTrkPlsMns", "number of (+) vs (-) trks",  
-                                  ntrk, mintrk, maxtrk, ntrk, mintrk, maxtrk);
-     m_trk_pls_mns->SetXTitle("number of (+) tracks");
-     m_trk_pls_mns->SetYTitle("number of (-) tracks");
-
-
-   m_vert_total = new TH1F("QaEvsumVertTot", "total number of vertices",nvrt,
+   m_glb_trk_plusminus  = new TH1F("QaEvsumPlusMinusTrk", "number of pos. over neg trks",
+                                                     ntrk, 0., 2.);  
+   m_vert_total = new TH1F("QaEvsumVertTot", "total number of vertices",500,
                                                       minvrt, maxvrt);
-   m_vert_V0    = new TH1F("QaEvsumVertV0", "number of V0 vertices", nvrt,minvrt,maxvrt);
-   m_vert_La    = new TH1F("QaEvsumVertLa", "number of La vertices", nvrt,minvrt,maxvrt);
-   m_vert_Ala   = new TH1F("QaEvsumVertLb", "number of Lb vertices", nvrt,minvrt,maxvrt);
-   m_vert_K0    = new TH1F("QaEvsumVertK0", "number of K0 vertices", nvrt,minvrt,maxvrt);   
-   m_mean_pt    = new TH1F("QaEvsumMeanPt", "mean pt", nmnpt, -maxmpt, maxmpt);
+   m_vert_V0    = new TH1F("QaEvsumVertV0", "number of V0 vertices", nvrt,minvrt,5000.);
+//    m_vert_La    = new TH1F("QaEvsumVertLa", "number of La vertices", nvrt,minvrt,maxvrt);
+//    m_vert_Ala   = new TH1F("QaEvsumVertLb", "number of Lb vertices", nvrt,minvrt,maxvrt);
+//    m_vert_K0    = new TH1F("QaEvsumVertK0", "number of K0 vertices", nvrt,minvrt,maxvrt);   
+   m_mean_pt    = new TH1F("QaEvsumMeanPt", "mean pt", nmnpt, 0., maxmpt);
    m_mean_eta   = new TH1F("QaEvsumMeanEta","mean eta", nmneta, minmeta, maxmeta);
-   m_prim_vrtx0 = new TH1F("QaEvsumPrimVertX","X of primary vertex", nxyz,
-                                                        -maxxyz, maxxyz);
-   m_prim_vrtx1 = new TH1F("QaEvsumPrimVertY","Y of primary vertex", nxyz,
-                                                        -maxxyz, maxxyz);
-   m_prim_vrtx2 = new TH1F("QaEvsumPrimVertZ","Z of primary vertex", nxyz,
-                                                        minxyz, maxxyz);
+   m_prim_vrtx0 = new TH1F("QaEvsumPrimVertX","X of primary vertex", nxyz, -5.,5.);
+   m_prim_vrtx1 = new TH1F("QaEvsumPrimVertY","Y of primary vertex", nxyz,-5.,5.);
+   m_prim_vrtx2 = new TH1F("QaEvsumPrimVertZ","Z of primary vertex", nxyz,-maxxyz, maxxyz);
    m_vrtx_chisq = new TH1F("QaEvsumVrtxChisq", "chisq of primary vertex",
-                                            nchisq, -maxchisq, maxchisq); 
+                                            nchisq, 0., maxchisq); 
      
 }
 
@@ -222,18 +214,26 @@ void St_QA_Maker::BookHistGlob(){
 
 // for method MakeGlob - from table globtrk
    m_pT         = new TH1F("QaGlobtrkPt","pT distribution",nxpT,xminpT,xmaxpT);
-   m_eta        = new TH1F("QaGlobtrkEta","eta distribution",knyeta,kmineta,kmaxeta);
+   m_eta        = new TH1F("QaGlobtrkEta","eta of track",knyeta,kmineta,kmaxeta);
    m_pT_eta_rec = new TH2F("QaGlobtrkPtVsEta","pT versus eta (reconstructed)",
-                           nyeta,ymineta,ymaxeta,nxpT,xminpT,xmaxpT);
+                           20,ymineta,ymaxeta,20,xminpT,xmaxpT);
      m_pT_eta_rec->SetXTitle("eta");
      m_pT_eta_rec->SetYTitle("pT (GeV)");
+   m_mom_trklength = new TH2F("QaGlobtrkPVsTrkLength","momentum versus track length",
+                           50,0.,200.,20,0.,10.);
    m_point      = new TH1F("QaGlobtrkNPoint","N points on track", npnt, minpnt, maxpnt);
    m_fit_point  = new TH1F("QaGlobtrkNPointFit","N fit points on track", npnt,minpnt, maxpnt);
    m_length     = new TH1F("QaGlobtrkLength","Length of track", nleng,minleng,maxleng);
-   m_chisq0     = new TH1F("QaGlobtrkChisq0P","chisq[0]", nchisq, minchisq, maxchisq);
-   m_chisq1     = new TH1F("QaGlobtrkChisq1P","chisq[1]", nchisq, minchisq, maxchisq);
+   m_npoint_length = new TH2F("QaGlobtrkNPntLength","num points on trk vs trk length",
+                              25,minleng,maxleng,25,minpnt,maxpnt);
+   m_fpoint_length = new TH2F("QaGlobtrkFitPntLength","num fit points on trk vs trk length",
+                              25,minleng,maxleng,25,minpnt,maxpnt);
+   m_chisq0     = new TH1F("QaGlobtrkChisq0P","chisq[0]", nchisq, 0.,10.);
+   m_chisq1     = new TH1F("QaGlobtrkChisq1P","chisq[1]", nchisq, 0.,10.);
    m_psi        = new TH1F("QaGlobtrkPsi","psi distribution", npsi, minpsi,maxpsi);
-   m_det_id     = new TH1F("QaGlobtrkDetId","Detector ID for tracks",knid,kminnid,kmaxnid);
+   m_det_id     = new TH1F("QaGlobtrkDetId","Detector ID for tracks",11,-0.5,10.5);
+   m_chisq0_mom = new TH2F("QaGlobtrkChi0Mom","Chisq0 vs mom",20,0.,10.,20,0.,10.);
+   m_chisq1_mom = new TH2F("QaGlobtrkChi1Mom","Chisq1 vs mom",20,0.,10.,20,0.,10.);
       
 }
 
@@ -241,9 +241,9 @@ void St_QA_Maker::BookHistGlob(){
 void St_QA_Maker::BookHistDE(){
    
 // for method MakeDE - from table dst_dedx
-   m_ndedx   = new TH1F("QaDstDedxNdedx", "number of point to define dE/dx", npnt,
-                                                          minpnt, maxpnt);  
-   m_dedx0   = new TH1F("QaDstDedxDedx0","dE/dx[0]", ndedx, mindedx, maxdedx);
+   m_ndedx   = new TH1F("QaDstDedxNdedx", "number of point to define dE/dx", 50,
+                                                          -0.5, 49.5);  
+   m_dedx0   = new TH1F("QaDstDedxDedx0","dE/dx[0]", ndedx, mindedx, maxdedx/10.);
    m_dedx1   = new TH1F("QaDstDedxDedx1","dE/dx[1]", ndedx, mindedx, maxdedx);
 
 }
@@ -254,28 +254,38 @@ void St_QA_Maker::BookHistPrim(){
   m_prim_pT         = new TH1F("QaPrimtrkPt","primtrk: pT distribution",nxpT,xminpT,xmaxpT);
   m_prim_eta        = new TH1F("QaPrimtrkEta","primtrk: eta distribution",knyeta,kmineta,kmaxeta);
   m_prim_pT_eta_rec = new TH2F("QaPrimtrkPtVsEta","primtrk: pT versus eta (reconstructed)",
-			  knyeta,kmineta,kmaxeta,nxpT,xminpT,xmaxpT);
+			  20,kmineta,kmaxeta,20,xminpT,xmaxpT);
     m_prim_pT_eta_rec->SetXTitle("eta");
     m_prim_pT_eta_rec->SetYTitle("pT (GeV)");
   m_prim_tlength    = new TH1F("QaPrimtrkLength","primtrk: track length",100,0.,200.);
-  m_prim_chi2xd     = new TH1F("QaPrimtrkChi2xd","primtrk: - x chisq/degf",100,0.,10.);
-  m_prim_chi2yd     = new TH1F("QaPrimtrkChi2yd","primtrk: - y chisq/degf",100,0.,10.);
-   m_prim_point     = new TH1F("QaPrimtrkNPoint","N points on track", npnt, minpnt, maxpnt);
-   m_prim_fit_point = new TH1F("QaPrimtrkNPointFit","N fit points on track", npnt,minpnt, maxpnt);
-   m_prim_psi       = new TH1F("QaPrimtrkPsi","psi distribution", knpsi, kminpsi,maxpsi);
-   m_prim_det_id    = new TH1F("QaPrimtrkDetId","Detector ID for tracks",knid,kminnid,kmaxnid);
+  m_prim_chi2xd     = new TH1F("QaPrimtrkChiXY","primtrk: chisqxy/degf",100,0.,10.);
+  m_prim_chi2yd     = new TH1F("QaPrimtrkChiSZ","primtrk: chisqsz/degf",100,0.,10.);
+  m_prim_point     = new TH1F("QaPrimtrkNPoint","N points on track", npnt, minpnt, maxpnt);
+  m_prim_fit_point = new TH1F("QaPrimtrkNPointFit","N fit points on track", npnt,minpnt, maxpnt);
+  m_prim_psi       = new TH1F("QaPrimtrkPsi","psi distribution", 60, 0.,360.);
+  m_prim_det_id    = new TH1F("QaPrimtrkDetId","Detector ID for tracks",knid,kminnid,kmaxnid);
+
+  m_prim_mom_trklength = new TH2F("QaPrimtrkPVsTrkLength","momentum versus track length",
+                           50,0.,200.,20,0.,10.);
+  m_prim_npoint_length = new TH2F("QaPrimtrkNPntLength","num points on trk vs trk length",
+                              25,minleng,maxleng,25,minpnt,maxpnt);
+  m_prim_fpoint_length = new TH2F("QaPrimtrkFitPntLength","num fit points on trk vs trk length",
+                              25,minleng,maxleng,25,minpnt,maxpnt);
+  m_prim_chisq0_mom = new TH2F("QaPrimtrkChi0Mom","Chisq0 vs mom",20,0.,10.,20,0.,10.);
+  m_prim_chisq1_mom = new TH2F("QaPrimtrkChi1Mom","Chisq1 vs mom",20,0.,10.,20,0.,10.);
 
 }
+
 
 //_____________________________________________________________________________
 void St_QA_Maker::BookHistGen(){
 // for MakeHistGen - from table particle
-  m_H_pT_eta_gen = new TH2F("QaParticlePtVsEta","pT versus eta (generated)",
+  m_H_pT_eta_gen = new TH2F("QaParticlePtVsEta","charged:pT versus eta (generated)",
 			  nyeta,kmineta,kmaxeta,nxpT,xminpT,xmaxpT);
     m_H_pT_eta_gen->SetXTitle("eta");
     m_H_pT_eta_gen->SetYTitle("pT (GeV)");
- m_H_pT_gen  = new TH1F("QaParticlePt","pt (generated)",nxpT,xminpT,xmaxpT);
- m_H_eta_gen = new TH1F("QaParticleEta","eta (generated)",nyeta,kmineta,kmaxeta);
+ m_H_pT_gen  = new TH1F("QaParticlePt","charged: pt (generated)",nxpT,xminpT,xmaxpT);
+ m_H_eta_gen = new TH1F("QaParticleEta","charged:eta (generated)",nyeta,kmineta,kmaxeta);
 }
 
 //_____________________________________________________________________________
@@ -304,14 +314,13 @@ void St_QA_Maker::BookHistPID(){
 void St_QA_Maker::BookHistVertex(){
 // for MakeHistVertex - from table dst_vertex
 
-    m_v_flag  = new TH1F("QaVertexFlag", " vertex: flag ",10,0.,10.);
-    m_v_detid = new TH1F("QaVertexDetId"," vertex: Detector ID ",10,0.,10.);
+
+    m_v_detid = new TH1F("QaVertexDetId"," vertex: Detector ID ",40,0.,40.);
     m_v_vtxid = new TH1F("QaVertexVtxId"," vertex: Vertex ID ",10,0.,10.);
-    m_v_ndau  = new TH1F("QaVertexNDau"," vertex: num daughters ",10,0.,10.);
     m_v_x     = new TH1F("QaVertexX"," vertex: x ",50,-25.,25.);
     m_v_y     = new TH1F("QaVertexY"," vertex: y ",50,-25.,25.);
-    m_v_z     = new TH1F("QaVertexZ"," vertex: z ",100,-50.,50.);
-    m_v_pchi2 = new TH1F("QaVertexChisq"," vertex: chisq/dof ",50,0.,50.);
+    m_v_z     = new TH1F("QaVertexZ"," vertex: z ",50,-50.,50.);
+    m_v_pchi2 = new TH1F("QaVertexChisq"," vertex: chisq/dof ",50,0.,5.);
 
 }
 //_____________________________________________________________________________
@@ -330,22 +339,22 @@ void St_QA_Maker::MakeHistEvSum(){
        Float_t trk_good = tt->glb_trk_good;
        Float_t trk_plus = tt->glb_trk_plus;
        Float_t trk_minus = tt->glb_trk_minus;
-       m_trk_tot_gd->Fill(trk_tot,trk_good); 
+       m_trk_tot_gd->Fill(trk_good/trk_tot); 
        m_glb_trk_gd->Fill(trk_good);
        m_glb_trk_tot->Fill(trk_tot);
-       m_glb_trk_plus->Fill(trk_plus);
-       m_glb_trk_minus->Fill(trk_minus);
-       m_trk_pls_mns->Fill(trk_plus,trk_minus);
+       m_glb_trk_plusminus->Fill(trk_plus/trk_minus);
+
+
        m_vert_total->Fill(tt->n_vert_total);
        m_vert_V0->Fill(tt->n_vert_V0);
-       m_vert_La->Fill(tt->n_vert_Lambda);
-       m_vert_Ala->Fill(tt->n_vert_ALambda);
-       m_vert_K0->Fill(tt->n_vert_K0);  
+//        m_vert_La->Fill(tt->n_vert_Lambda);
+//        m_vert_Ala->Fill(tt->n_vert_ALambda);
+//        m_vert_K0->Fill(tt->n_vert_K0);  
        m_mean_pt->Fill(tt->mean_pt);
        m_mean_eta->Fill(tt->mean_eta);
-       m_prim_vrtx0->Fill(tt->prim_vrtx[0]);
-       m_prim_vrtx1->Fill(tt->prim_vrtx[1]);
-       m_prim_vrtx2->Fill(tt->prim_vrtx[2]);
+       if(!isnan((double)(tt->prim_vrtx[0])))  m_prim_vrtx0->Fill(tt->prim_vrtx[0]);
+       if(!isnan((double)(tt->prim_vrtx[1])))  m_prim_vrtx1->Fill(tt->prim_vrtx[1]);
+       if(!isnan((double)(tt->prim_vrtx[2])))  m_prim_vrtx2->Fill(tt->prim_vrtx[2]);
        m_vrtx_chisq->Fill(tt->prim_vrtx_chisq); 
       }
    }
@@ -370,21 +379,27 @@ void St_QA_Maker::MakeHistGlob(){
        if (t->invpt) pT = 1./TMath::Abs(t->invpt);
        Float_t theta = asin(1.) - atan(t->tanl);
        Float_t eta   =-log(tan(theta/2.));
+       Float_t gmom  = pT/sin(theta); 
+       m_mom_trklength->Fill(t->length,gmom);
        m_pT->Fill(pT);
        m_eta->Fill(eta);
        m_pT_eta_rec->Fill(eta,pT);
        Float_t chisq0 = t->chisq[0];
        Float_t chisq1 = t->chisq[1]; 
-       Float_t pointk = t->n_point ;
-       Float_t chisq0_p = chisq0/pointk ;
-       Float_t chisq1_p = chisq1/pointk ;
-       m_point->Fill(pointk);
+       Float_t degoffree = t->n_fit_point;
+       Float_t chisq0_p = chisq0/(degoffree-3);
+       Float_t chisq1_p = chisq1/(degoffree-2);
+       m_point->Fill(t->n_point);
        m_fit_point->Fill(t->n_fit_point); 
        m_chisq0->Fill(chisq0_p);
        m_chisq1->Fill(chisq1_p);
        m_length->Fill(t->length);
+       m_npoint_length->Fill(t->length,float(t->n_point));
+       m_fpoint_length->Fill(t->length,float(t->n_fit_point));
        m_psi->Fill(t->psi);
        m_det_id->Fill(t->det_id);
+       m_chisq0_mom->Fill(gmom,chisq0_p);
+       m_chisq1_mom->Fill(gmom,chisq1_p);
       }
     }
   }       
@@ -405,12 +420,11 @@ void St_QA_Maker::MakeHistGlob(){
       for (Int_t i = 0; i < dst_dedx->GetNRows(); i++) {
        dst_dedx_st *d = dedx + i;
        m_ndedx->Fill(d->ndedx);
-       m_dedx0->Fill(d->dedx[0]);
-       m_dedx1->Fill(d->dedx[1]);
+       m_dedx0->Fill(d->dedx[0]*1e6);
+       m_dedx1->Fill(d->dedx[1]*1e6);
       }
      }
    }
-
 
 //_____________________________________________________________________________
 
@@ -431,6 +445,7 @@ void St_QA_Maker::MakeHistPrim(){
        if (t->invpt) pT = 1./TMath::Abs(t->invpt);
        Float_t theta = TMath::Pi()/2.0 - TMath::ATan(t->tanl);
        Float_t eta   =-TMath::Log(TMath::Tan(theta/2.));
+       Float_t primmom  = pT/sin(theta); 
        m_prim_pT->Fill(pT);
        m_prim_eta->Fill(eta);
        m_prim_pT_eta_rec->Fill(eta,pT);
@@ -438,12 +453,17 @@ void St_QA_Maker::MakeHistPrim(){
        m_prim_fit_point->Fill(t->n_fit_point);
        m_prim_psi->Fill(t->psi);
        m_prim_det_id->Fill(t->det_id);
-       // Al histograms
        m_prim_tlength->Fill(t->length);
+       // Al histograms
        if (t->ndegf>0) {
         m_prim_chi2xd->Fill(t->chisq[0]/((t->ndegf+5.)/2.-3.));  
         m_prim_chi2yd->Fill(t->chisq[1]/((t->ndegf+5.)/2.-2.));  
        }
+       m_prim_mom_trklength->Fill(t->length,primmom);
+       m_prim_npoint_length->Fill(t->length,float(t->n_point));
+       m_prim_fpoint_length->Fill(t->length,float(t->n_fit_point));
+       m_prim_chisq0_mom->Fill(primmom,float(t->chisq[0]/((t->ndegf+5.)/2.-3.)));
+       m_prim_chisq1_mom->Fill(primmom,float(t->chisq[0]/((t->ndegf+5.)/2.-3.)));
       }
     }
   }
@@ -461,17 +481,29 @@ void St_QA_Maker::MakeHistGen(){
       if (part){
         particle_st *p = part->GetTable();
         for (Int_t l=0; l < part->GetNRows(); l++, p++){
-          if (p->isthep == 1) {
-            Double_t px = p->phep[0];
-            Double_t py = p->phep[1];
-            Double_t pz = p->phep[2];
-            Double_t pT    =  TMath::Sqrt(px*px+py*py);
-            Double_t theta =  TMath::ATan2 ( pT, pz );
-	    //        Double_t theta =  atan2 ( pT, pz );
-            Float_t  eta  = -TMath::Log(TMath::Tan(theta/2.));
-            m_H_pT_eta_gen->Fill(eta, (Float_t) pT);
-            m_H_pT_gen->Fill((Float_t) pT);
-            m_H_eta_gen->Fill(eta);
+          //
+          //  select only particles which can be detected
+          //  in the STAR detector. Here we restrict us to
+	  //  the most common species.
+	  //
+          if (abs(p->idhep) == 11   ||     // electrons
+              abs(p->idhep) == 13   ||     // muon
+              abs(p->idhep) == 211  ||     // pion
+              abs(p->idhep) == 321  ||     // kaon
+              abs(p->idhep) == 2212) {     // proton
+	    
+	    if (p->isthep == 1) {
+	      Double_t px = p->phep[0];
+	      Double_t py = p->phep[1];
+	      Double_t pz = p->phep[2];
+	      Double_t pT    =  TMath::Sqrt(px*px+py*py);
+	      Double_t theta =  TMath::ATan2 ( pT, pz );
+	      //        Double_t theta =  atan2 ( pT, pz );
+	      Float_t  eta  = -TMath::Log(TMath::Tan(theta/2.));
+	      m_H_pT_eta_gen->Fill(eta, (Float_t) pT);
+	      m_H_pT_gen->Fill((Float_t) pT);
+	      m_H_eta_gen->Fill(eta);
+	    }
 	  }
 	}
       }
@@ -547,8 +579,8 @@ void St_QA_Maker::MakeHistPID(){
                Float_t y0 = t->x_first[1];
                Float_t r0 = sqrt(x0*x0+y0*y0);
 
-	       if (d->det_id==1 && d->ndedx >15 ) {
-		 m_p_dedx_rec->Fill(p,dedx_m);
+	       if (d->det_id==1 && d->ndedx >15 ) { 
+		    m_p_dedx_rec->Fill(p,(float)(dedx_m*1e6)); // change from GeV/cm to keV/cm
 	       }
 	}
   }
@@ -568,16 +600,14 @@ void St_QA_Maker::MakeHistVertex(){
     dst_vertex_st  *trk   = vertex->GetTable();
     for (Int_t i = 0; i < vertex->GetNRows(); i++){
       dst_vertex_st *t = trk + i;
-      m_v_flag->Fill(t->iflag);
-         if (t->iflag>0) {            
+      //         if (t->iflag>0) {            
            m_v_detid->Fill(t->det_id); 
            m_v_vtxid->Fill(t->vtx_id);
-           m_v_ndau->Fill(t->n_daughters);  
-           m_v_x->Fill(t->x);     
-           m_v_y->Fill(t->y);     
-           m_v_z->Fill(t->z);     
+            if (!isnan(double(t->x))) m_v_x->Fill(t->x);     
+           if (!isnan(double(t->y))) m_v_y->Fill(t->y);     
+           if (!isnan(double(t->z))) m_v_z->Fill(t->z);     
            m_v_pchi2->Fill(t->pchi2); 
-	 }
+      // }
     }
   }
 }
@@ -587,7 +617,7 @@ void St_QA_Maker::MakeHistVertex(){
 
 void St_QA_Maker::PrintInfo(){
   printf("**************************************************************\n");
-  printf("* $Id: St_QA_Maker.cxx,v 1.9 1999/02/26 18:42:33 kathy Exp $\n");
+  printf("* $Id: St_QA_Maker.cxx,v 1.10 1999/03/03 23:34:29 kathy Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
   if (gStChain->Debug()) StMaker::PrintInfo();
