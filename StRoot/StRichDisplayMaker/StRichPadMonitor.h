@@ -1,5 +1,5 @@
 /***************************************************************
- * $Id: StRichPadMonitor.h,v 2.1 2000/08/11 20:20:44 gans Exp $
+ * $Id: StRichPadMonitor.h,v 2.2 2000/08/13 01:26:50 gans Exp $
  * Description:
  *  First aTtempt at a simple Pad Monitor.
  *  Runs only in ROOT
@@ -7,6 +7,9 @@
  ***************************************************************
  *
  * $Log: StRichPadMonitor.h,v $
+ * Revision 2.2  2000/08/13 01:26:50  gans
+ * Added directory changing for pidMaker->printCanvas("directory/")
+ *
  * Revision 2.1  2000/08/11 20:20:44  gans
  * Added use of StRichDrawableTControl
  *
@@ -115,7 +118,7 @@ public:
     void drawZVertex(double,int,int);
     
     void drawLegend();
-    void printCanvas(char*,int);
+    void printCanvas(char*,char*,int);
     TCanvas * getRichCanvas();
     
     void printCanvas(char*,char*, int);
