@@ -1,5 +1,9 @@
-* $Id: fgtdgeo.g,v 1.2 2005/02/19 05:14:27 potekhin Exp $
+* $Id: fgtdgeo.g,v 1.3 2005/03/31 18:34:25 potekhin Exp $
 * $Log: fgtdgeo.g,v $
+* Revision 1.3  2005/03/31 18:34:25  potekhin
+* Declare the sector of the ring a sensitive volume,
+* and leave comment to that effect
+*
 * Revision 1.2  2005/02/19 05:14:27  potekhin
 * Roughly, it's done according to Bernd's powerpoint specs.
 * Things they might want to add:
@@ -104,11 +108,15 @@ Block FGRN is a Ring in the GEM detector
 
 endblock
 * -----------------------------------------------------------------------------
+* Sensitive volume in this model. 90%Ar+10%CO2
+*
 Block FGSC is an Ar Sector of a Ring in the GEM detector
       Component Ar A=39.95   Z=18.   W=0.9
       Component C  A=12.01   Z=6.    W=0.1*1*12.01/44.01
       Component O  A=16.     Z=8.    W=0.1*2*16./44.01
       Mixture   Ar_mix  Dens=0.0018015  Isvol=1        
+
+      Material  Sensitive  Isvol=1
 
       Attribute FGRN  Seen=1  colo=2
 
