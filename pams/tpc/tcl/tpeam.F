@@ -1,5 +1,8 @@
-* $Id: tpeam.F,v 1.40 1998/01/27 00:49:14 fisyak Exp $
+* $Id: tpeam.F,v 1.41 1998/02/20 22:18:41 sakrejda Exp $
 * $Log: tpeam.F,v $
+* Revision 1.41  1998/02/20 22:18:41  sakrejda
+* tsspar.v_drift replaced with a call to tgc_drift_velocity
+*
 * Revision 1.40  1998/01/27 00:49:14  fisyak
 * Split sources
 *
@@ -96,6 +99,8 @@ c
 c   03nov97 R.Bossingham
 c	- eliminate declarations of unused variables.
 c
+C     19Feb1998-IMS
+C     replaced tsspar.v_drift by a call to tgc_drift_velocity
 C   Error conditions : 
 C   ================
 C-----------------------------------------------------------------------
@@ -196,6 +201,13 @@ c (as usual index2=0 tells *number* of hits in the list for that sector/padrow)
          integer index1,index2,histid
          real weight,xydist,zdist
 c
+C-----------------------------------------------------------------------
+        real dvel                     !drift velocity
+        real dummy1                   !it is what it says
+        integer tgc_drift_velocity    !function that returns as a first
+c                                     !argument the drift velocity
+c                                     !two next arguments dummy 
+        integer istatus               !return value            
 C-----------------------------------------------------------------------
          data chtags/'itrk','itcl','nrow','x','y','z','prf','zrf','q'/
          data chtags2/'itrk','mcx ','mcy ','mcz ','tpx ','tpy ','tpz '
@@ -299,10 +311,14 @@ c ntuple 200 as defined has no more information than the hits table...
 c********** 23may96 * if this is real data, then things are simpler
 c******************** we only want visualization ntuples 500,300,600
          icycle = 0
+c        replace tsspar(1).v_drift by a call to
+c        tgc_drift_velocity call, should be figured out and properly
+c        fixed by having this call in the initialisation phase
+         istatus = tgc_drift_velocity(dvel,dummy1,dummy1)
          if (tclpar(1).mc.eq.0) then
 c fill ntuple 500 = pixel information
 	WRITE(6,*)'OFFSETTING PIXELS BY ...',
-     +		3.0*tsspar(1).tau*tsspar(1).v_drift
+     +		3.0*tsspar(1).tau*dvel*10.0e-6
             do kclus=1,tpcluster_h.nok
                vec(4)=kclus
                nseq_hit=tpcluster(kclus).nseq
@@ -332,7 +348,7 @@ c fill ntuple 500 = pixel information
 c I'm tired of answering the same question of why there is a time
 c  offset between the pixels and the hits, so offset the pixels too
                      vec(2) = vec(2) - 
-     +                    3.0*tsspar(1).tau*tsspar(1).v_drift
+     +                    3.0*tsspar(1).tau*dvel*10.0e-6
                      call hfn(500+ihisto,vec)
                      kpix=kpix+1
                   enddo
