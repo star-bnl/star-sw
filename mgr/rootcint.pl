@@ -1,9 +1,9 @@
 #!/usr/bin/env perl
 #use File::Basename;
 #print "rootcint @ARGV\n";
-my $DirName = shift;
-(my $dir = $DirName) =~ s/\S*\//\.\.\//g;# print "DirName = $DirName dir = $dir\n";
-$dir =~ s/\/\S*/\/\.\./g;# print "dir = $dir\n";
+my $DirName = shift; #print "DirName = $DirName ";
+my $dir = `pwd`; chomp $dir;  print "dir = $dir\n";
+
 my @argv = ();
 foreach my $a (@ARGV) {
   foreach my $c (split / /, $a) {
