@@ -1,12 +1,11 @@
 // *-- Author : Jan Balewski
 // 
-// $Id: StMuLcp2TreeMaker.cxx,v 1.2 2003/10/20 17:04:39 balewski Exp $
+// $Id: StMuLcp2TreeMaker.cxx,v 1.3 2003/11/12 18:43:41 balewski Exp $
 
 #include <TFile.h>
 #include <TH2.h>
 
 #include "StMuLcp2TreeMaker.h"
-
 
 #include "TChain.h"
 #include "TClonesArray.h"
@@ -45,6 +44,7 @@ StMuLcp2TreeMaker::StMuLcp2TreeMaker(const char* self ,const char* muDstMakerNam
   SetMinFitPfrac(0.55);
   SetMaxZvert(100.); // (cm)
   ctb=new CtbMatching();
+  eve_nGlob=-1;
 }
 
 
@@ -103,6 +103,7 @@ Int_t StMuLcp2TreeMaker::InitRunFromMake  (int runNumber){
     tree->Branch("id",   &eve_id,"id/I");
     tree->Branch("sb",   &eve_sb,"sb/I");
     tree->Branch("nPrim",&eve_nPrim,"nPrim/I");
+    tree->Branch("nGlob",&eve_nGlob,"nGlob/I");
     tree->Branch("vz",   &eve_vz ,"vz/F");
     tree->Branch("cosm", &eve_cosm ,"cosm/F");
     
@@ -222,13 +223,35 @@ Int_t StMuLcp2TreeMaker::Make(){
     if(eve_cosm>1000) h[10]->Fill(lcp_pt);
   }
   
-   if(tree)tree->Fill();
-   if(kEve%500==0)printf("%s::Make(%d) nPrim=%d lcp: pt=%f nFit=%d \n",GetName(),kEve,eve_nPrim,lcp_pt,lcp_nFit);
-   
-   // extra tests of cuts
-   //   examinCut(lcp);
-   
-   return kStOK;
+  // scan for good globals, to match Olg's analysis
+  {
+    //    TClonesArray*  globTrA=dst->globalTracks();
+    TClonesArray*  globTrA=dst->primaryTracks();
+    //printf("tot Glob=%d\n", globTrA->GetEntries());
+    int nTr=0;
+    for (int i=0; i<globTrA->GetEntries();i++) {
+      StMuTrack* gTr = (StMuTrack*)globTrA->UncheckedAt(i);
+      if(gTr->flag() <=0) continue;
+      StThreeVectorF dca=gTr->dcaGlobal();
+      if(!gTr->topologyMap().trackTpcOnly()) continue;
+      if(gTr->nHitsFit()<15 )continue;
+      if(dca.perp()>3.) continue;  
+      if(fabs(dca.z())>3.) continue;
+      //printf("nFit=%d,DCA  x=%f y=%f z=%f zV=%f\n",gTr->nHitsFit(),dca.x(),dca.y(),dca.z(),ver.z());
+      nTr++;
+    }
+    eve_nGlob=nTr;
+  }
+  
+  
+  if(tree)tree->Fill();
+  if(kEve%500==0)
+    printf("%s::Make(%d) nPrim=%d nGlob=%d lcp: pt=%f nFit=%d \n",GetName(),kEve,eve_nPrim, eve_nGlob, lcp_pt,lcp_nFit);
+  
+  // extra tests of cuts
+  //   examinCut(lcp);
+  
+  return kStOK;
 }
 
 //________________________________________________
@@ -339,6 +362,9 @@ void StMuLcp2TreeMaker::examinCut(StMuTrack*lcp0){
 
 
 // $Log: StMuLcp2TreeMaker.cxx,v $
+// Revision 1.3  2003/11/12 18:43:41  balewski
+// final for LCP paper
+//
 // Revision 1.2  2003/10/20 17:04:39  balewski
 // LCP analysis code
 //

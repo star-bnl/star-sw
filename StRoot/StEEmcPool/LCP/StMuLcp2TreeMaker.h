@@ -1,4 +1,4 @@
-// $Id: StMuLcp2TreeMaker.h,v 1.2 2003/10/20 17:04:39 balewski Exp $
+// $Id: StMuLcp2TreeMaker.h,v 1.3 2003/11/12 18:43:41 balewski Exp $
 
 #ifndef STAR_StMuLcp2TreeMaker
 #define STAR_StMuLcp2TreeMaker
@@ -46,7 +46,8 @@ class StMuLcp2TreeMaker : public StMaker {
   Int_t eve_bx48,eve_bx120;// bXing raw,corrected
   Int_t eve_id; // event ID
   Int_t eve_sb; // spin bits
-  Int_t eve_nPrim; // # of primary tracks
+  Int_t eve_nPrim; // # of good primary tracks
+  Int_t eve_nGlob; // # of good global tracks
   Int_t eve_cosm; //Mike's Cosmics Rejector & other tests value
   Float_t lcp_eta,lcp_phi,lcp_pt; // momentum
   Int_t lcp_q,lcp_nFit;// charge, # of hits on track
@@ -82,7 +83,7 @@ class StMuLcp2TreeMaker : public StMaker {
 
   /// Displayed on session exit, leave it as-is please ...
   virtual const char *GetCVS() const {
-    static const char cvs[]="Tag $Name:  $ $Id: StMuLcp2TreeMaker.h,v 1.2 2003/10/20 17:04:39 balewski Exp $ built "__DATE__" "__TIME__ ; 
+    static const char cvs[]="Tag $Name:  $ $Id: StMuLcp2TreeMaker.h,v 1.3 2003/11/12 18:43:41 balewski Exp $ built "__DATE__" "__TIME__ ; 
     return cvs;
   }
 
@@ -93,6 +94,9 @@ class StMuLcp2TreeMaker : public StMaker {
 
 
 // $Log: StMuLcp2TreeMaker.h,v $
+// Revision 1.3  2003/11/12 18:43:41  balewski
+// final for LCP paper
+//
 // Revision 1.2  2003/10/20 17:04:39  balewski
 // LCP analysis code
 //
