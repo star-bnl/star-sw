@@ -553,7 +553,7 @@ sub parse_log($) {
 
    for ($i = 0; $i < $last_maker; $i++){
 
-   $msize_aver[$i] = $maker_size[$i]/($num_event * 1000);
+   $msize_aver[$i] = $maker_size[$i]/$num_event;
    printf("Package   %s     Memory size =  %10.3f  MB; \n", $maker_name[$i], $msize_aver[$i]);
     }
   }
