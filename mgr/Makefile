@@ -1,4 +1,7 @@
 #  $Log: Makefile,v $
+#  Revision 1.8  1998/02/14 02:08:20  fisyak
+#  Add silent mode for make
+#
 #  Revision 1.7  1998/02/13 14:18:19  fisyak
 #  Simplify Makefile, reduce SLibrary
 #
@@ -16,19 +19,22 @@
 #
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #
-#             Last modification $Date: 1998/02/13 14:18:19 $ 
-ifndef NOSILENT
+#             Last modification $Date: 1998/02/14 02:08:20 $ 
+ifdef SILENT
 .SILENT:
 endif
 ALL_DEPS  = $^
 FIRST_DEP = $<
+FIRSTF    = $(<D)/$(<F)
 ALL_TAGS  = $@
 STEM      = $*
+STEMF     = $(*D)/$(*F)
 STIC      = stic
 PWD       = /bin/pwd
 CWD      := $(shell $(PWD))
 EMPTY    :=
 FOUR     :=4
+TWO      :=2
 ifndef MAKEFILE
 MAKEFILE = $(STAR)/mgr/Makefile
 endif
@@ -142,19 +148,19 @@ DOMAIN  := $(notdir $(DOM_DIR))
 OBJ_DIR := $(LIB_DIR)/$(DOMAIN).obj
 DIR_GEN := $(OUT_DIR)/share
 GEN_DIR := $(OUT_DIR)/share/$(DOMAIN).gen
-DOM_DIRS:= $(filter-out CVS, $(shell cd $(ROOT)/pams; ls))
+DOM_DIRS:= $(filter-out CVS, $(shell cd $(ROOT)/$(PAMS); ls))
 #.
 check_out   := $(shell test -d $(OUT_DIR) || mkdir $(OUT_DIR)) 
 check_lib   := $(shell test -d $(LIB_DIR) || mkdir $(LIB_DIR))
 check_obj   := $(shell test -d $(OBJ_DIR) || mkdir $(OBJ_DIR))
 check_gen   := $(shell test -d $(DIR_GEN) || mkdir $(DIR_GEN))
 check_neg   := $(shell test -d $(GEN_DIR) || mkdir $(GEN_DIR))
-check_bil   := $(shell test -f $(LIB_DIR)/lib$(PKG).a || $(AR) r $(LIB_DIR)/lib$(PKG).a)
 #.
 sources := $(strip $(sort $(dir $(wildcard $(SRC_DIR)/*.* $(SRC_DIR)/*/*.*))))
 SRC_DIRS:= $(subst /TAIL, ,$(addsuffix TAIL, $(sources)))
-IDL_DIRS:= $(wildcard $(ROOT)/pams/*/idl $(STAR)/pams/*/idl)
-INC_DIRS:= $(wildcard $(ROOT)/pams/*/inc $(STAR)/pams/*/inc)
+IDL_DIRS:= $(wildcard $(ROOT)/$(PAMS)/*/idl $(STAR)/$(PAMS)/*/idl)
+INC_DIRG:= $(wildcard $(STAR)/lib/share/*.gen)
+INC_DIRS:= $(wildcard $(ROOT)/$(PAMS)/*/inc $(STAR)/$(PAMS)/*/inc)
 VPATH   := $(wildcard $(SRC_DIRS)) $(GEN_DIR) $(OBJ_DIR)
 VPATH   := $(filter-out $(DOM_DIR)/idl, $(VPATH))
 #                 I have idl- or g-files
@@ -193,9 +199,16 @@ endif
 FILES_O  += $(addprefix $(OBJ_DIR)/, $(addsuffix .o,   $(NAMES_G)))
 FILES_O  += $(addprefix $(OBJ_DIR)/, $(addsuffix .o,   $(notdir $(basename $(FILES_CA)))))
 NAMES_O   = $(notdir $(FILES_O))
+ifeq ($(LEVEL),$(TWO)) # domain level: add all domain IDM
+ifneq ($(EMPTY),$(FILES_IDM))
+IDLSD    := $(wildcard $(STAR)/$(PAMS)/$(DOMAIN)/*/*.idl $(STAR)/$(PAMS)/$(DOMAIN)/*/*/*.idl)
+FILES_DD := $(shell egrep -l 'interface.*:.*amiModule' $(IDLSD))
+NAMES_IDM+= $(basename $(notdir $(FILES_DD)))
+override  NAMES_IDM := $(sort $(NAMES_IDM))
+endif
+endif
 ifneq (,$(NAMES_IDM))
 FILES_K  := $(addprefix $(OBJ_DIR)/, $(PKG)_init.o)
-#FILES_O  += $(FILES_K)
 endif
 #-------------------------------includes----------------------------
 STICFLAGS =  $(addprefix -I, $(SRC_DIR) $(IDL_DIRS))
@@ -204,6 +217,9 @@ CPPFLAGS  = -D$(SYS_STAR) -D$(shell uname)
 endif
 CPPFLAGS +=              -I. -I../ -I/usr/include \
              $(addprefix -I, $(SRC_DIR) $(GEN_DIR) $(INC_DIRS)) 
+ifneq ($(ROOT),$(STAR))
+CPPFLAGG :=  $(addprefix -I, $(INC_DIRG))
+endif
 FFLAGS   += -DCERNLIB_TYPE -I$(CERN_ROOT)/src -I$(CERN_ROOT)/src/geant321
 ifndef NODEBUG
 FFLAGS   += -g
@@ -231,16 +247,17 @@ all                  : $(PKG)
 $(PKG)               : $(LIB_DIR)/$(PKG_LIB) $(LIB_DIR)/$(PKG_SL)
 $(LIB_DIR)/$(PKG_SL): $(FILES_K) $(LIB_DIR)/$(PKG_LIB)
 	$(LD) $(LDFLAGS) $(FILES_K) -o $(LIB_DIR)/$(PKG_SL) \
-         $(LIBRARIES) $(CERN_LIBS) $(LD_LIBS) $(CC_LIBS) 
+        $(LIBRARIES) $(CERN_LIBS) $(LD_LIBS) $(CC_LIBS) 
 $(LIB_DIR)/$(PKG_LIB): $(FILES_O)
 	$(AR) $(ARFLAGS) $(LIB_DIR)/$(PKG_LIB) $(FILES_O)
 #--------- module ---------
 $(OBJ_DIR)/$(PKG)_init.o: $(FILES_IDM) 
 	@if [ -f $(GEN_DIR)/$(PKG)_init.cc ]; then  rm $(GEN_DIR)/$(PKG)_init.cc ; fi
 	@echo '/* '$(PKG)' package interface to STAF */' > $(GEN_DIR)/$(PKG)_init.cc
-	@echo '/* automatically generated file */'       >> $(GEN_DIR)/$(PKG)_init.cc
+	@echo '/* automatically generated file */'      >> $(GEN_DIR)/$(PKG)_init.cc
 ifneq ($(NAMES_IDM),)
-	@for p in $(NAMES_IDM); do echo $p; echo '#include "'$$p'.h"'   >> $(GEN_DIR)/$(PKG)_init.cc ; done
+	@for p in $(NAMES_IDM); do echo $p; echo '#include "'$$p'.h"'   \
+                                                        >> $(GEN_DIR)/$(PKG)_init.cc ; done
 	@echo 'extern "C" int  $(PKG)_init (void);'     >> $(GEN_DIR)/$(PKG)_init.cc
 	@echo 'extern "C" int  $(PKG)_start(void);'     >> $(GEN_DIR)/$(PKG)_init.cc
 	@echo 'extern "C" int  $(PKG)_stop (void);'     >> $(GEN_DIR)/$(PKG)_init.cc
@@ -248,11 +265,12 @@ ifneq ($(NAMES_IDM),)
 	@echo 'void $(PKG)_init_() {$(PKG)_start();}'   >> $(GEN_DIR)/$(PKG)_init.cc
 	@echo 'int  $(PKG)_init () { return 1; }'       >> $(GEN_DIR)/$(PKG)_init.cc
 	@echo 'int  $(PKG)_start() {'                   >> $(GEN_DIR)/$(PKG)_init.cc
-	@for p in $(NAMES_IDM); do echo "      $${p}_load_ami(ami);" >> $(GEN_DIR)/$(PKG)_init.cc ; done
+	@for p in $(NAMES_IDM); do echo "      $${p}_load_ami(ami);" \
+                                                        >> $(GEN_DIR)/$(PKG)_init.cc ; done
 	@echo '                       return 1; }'      >> $(GEN_DIR)/$(PKG)_init.cc
 	@echo 'int  $(PKG)_stop () { return 1; }'       >> $(GEN_DIR)/$(PKG)_init.cc
 endif    #
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(GEN_DIR)/$(PKG)_init.cc -o $(ALL_TAGS)
+	$(CXX) $(CPPFLAGS) $(CPPFLAGG) $(CXXFLAGS) -c $(GEN_DIR)/$(PKG)_init.cc -o $(ALL_TAGS)
 #--------  idm, idl --------
 $(GEN_DIR)/%.h $(GEN_DIR)/%.inc %.h %.inc: %.idl
 	cd $(GEN_DIR); $(STIC) $(STICFLAGS) $(ALL_DEPS)
@@ -260,6 +278,7 @@ $(GEN_DIR)/%.h $(GEN_DIR)/%.inc %.h %.inc: %.idl
 $(OBJ_DIR)/%.o: %.g
 	test -h $(GEN_DIR)/geant3.def || ln -s $(STAR)/bin/share/geant3.def  $(GEN_DIR)/geant3.def
 	cd $(GEN_DIR); geant3    $(FIRST_DEP)  -o  $(GEN_DIR)/$(STEM).f 
+	$(FC) $(FFLAGS) -c $(GEN_DIR)/$(STEM).f  -o  $(ALL_TAGS)
 $(OBJ_DIR)/%.o: %.F
 	$(FC)  $(CPPFLAGS) $(FFLAGS) $(F_EXTENDED)   -c $(FIRST_DEP) -o $(OBJ_DIR)/$(STEM).o
 $(OBJ_DIR)/%.o: %.c
@@ -268,23 +287,28 @@ $(OBJ_DIR)/%.o: %.cc
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $(FIRST_DEP) -o $(OBJ_DIR)/$(STEM).o
 #-----dependencies-------
 $(GEN_DIR)/%.didl $(GEN_DIR)/%_i.cc $(GEN_DIR)/%.h $(GEN_DIR)/%.inc: %.idl
-	cd $(GEN_DIR); $(STIC) $(STICFLAGS) $(FIRST_DEP); \
+	cp  $(FIRST_DEP) $(GEN_DIR)/ ; cd $(GEN_DIR);\
+        $(STIC) $(STICFLAGS) $(FIRST_DEP); \
         gcc  $(MKDEPFLAGS) $(STICFLAGS) $(FIRST_DEP) | \
-        sed -e 's/.idl.o/.didl/g' > $(GEN_DIR)/$(STEM).didl
-	$(STIC) -M  $(STICFLAGS) $(FIRST_DEP) | grep ":" >> $(GEN_DIR)/$(STEM).didl
+        sed -e 's/.idl.o/.didl/g' > $(GEN_DIR)/$(STEM).didl; \
+        $(STIC) -M  $(STICFLAGS) $(FIRST_DEP) | grep ":" \
+        >> $(GEN_DIR)/$(STEM).didl; $(RM) $(STEM).idl
 #       temporarly, until stic is fixed:
 	@sed -e 's/broker->newInvoker(\(.*\),/broker->deleteInvoker(\1); broker->newInvoker(\1,/' \
                 $(GEN_DIR)/$(STEM)_i.cc > temp
 	@mv  -f temp $(GEN_DIR)/$(STEM)_i.cc
 $(OBJ_DIR)/%.d: %.cc 
-	gcc $(MKDEPFLAGS) $(CPPFLAGS) $(FIRST_DEP) | \
-        sed -e 's/$(notdir $(STEM)).o/$(subst /,\/,$(OBJ_DIR)/$(STEM).o) $(subst /,\/,$(ALL_TAGS))/g' > $(ALL_TAGS)
+	gcc $(MKDEPFLAGS) $(CPPFLAGS) $(FIRST_DEPQ) | \
+        sed -e 's/$(notdir $(STEM)).o/$(subst /,\/,$(OBJ_DIR)/$(STEM).o) $(subst /,\/,$(ALL_TAGS))/g'\
+        > $(ALL_TAGS)
 $(OBJ_DIR)/%.d: %.c
 	gcc $(MKDEPFLAGS) $(CPPFLAGS) $(FIRST_DEP) | \
-        sed -e 's/$(notdir $(STEM)).o/$(subst /,\/,$(OBJ_DIR)/$(STEM).o) $(subst /,\/,$(ALL_TAGS))/g' > $(ALL_TAGS)
+        sed -e 's/$(notdir $(STEM)).o/$(subst /,\/,$(OBJ_DIR)/$(STEM).o) $(subst /,\/,$(ALL_TAGS))/g'\
+        > $(ALL_TAGS)
 $(OBJ_DIR)/%.d: %.F
 	gcc  $(MKDEPFLAGS) $(CPPFLAGS) $(FIRST_DEP) | \
-        sed -e 's/$(notdir $(STEM)).o/$(subst /,\/,$(OBJ_DIR)/$(STEM).o) $(subst /,\/,$(ALL_TAGS))/g' > $(ALL_TAGS)
+        sed -e 's/$(notdir $(STEM)).o/$(subst /,\/,$(OBJ_DIR)/$(STEM).o) $(subst /,\/,$(ALL_TAGS))/g'\
+        > $(ALL_TAGS)
 $(OBJ_DIR)/%.d: %.cdf
 	cd $(SRC_DIR); \
         echo "$(notdir $(STEM)).c $(ALL_TAGS): $(ALL_DEPS)" > $(ALL_TAGS) ;/
@@ -336,6 +360,7 @@ test_files:
 	@echo "NAMES_CC  =" $(NAMES_CC)
 	@echo "NAMES_C   =" $(NAMES_C)
 	@echo "NAMES_F   =" $(NAMES_F)
+	@echo "IDLSD     =" $(IDLSD)
 test_mk:
 	@echo "MAKEFILES =" $(MAKEFILES)
 	@echo "VPATH     =" $(VPATH)
@@ -371,9 +396,6 @@ test_dir:
 	@echo "INP_DIR   =" $(INP_DIR)
 	@echo "DOM_DIR   =" $(DOM_DIR)
 	@echo "DOM_DIRS  =" $(DOM_DIRS)
-	@echo "INP_DIR   =" $(INP_DIR)
-	@echo "DOM_DIR   =" $(DOM_DIR)
-	@echo "DOM_DIRS  =" $(DOM_DIRS)
 	@echo "OUT_DIR   =" $(OUT_DIR)
 	@echo "SRC_DIR   =" $(SRC_DIR)
 	@echo "IDL_DIRS  =" $(IDL_DIRS)
@@ -389,3 +411,5 @@ test_dir:
 	@echo "SUBDIRS   =" $(SUBDIRS)
 	@echo "sources   =" $(sources)
 	@echo "SRC_DIRS  =" $(SRC_DIRS)
+	@echo "IDLSD     =" $(IDLSD)
+	@echo "FILES_DD  =" $(FILES_DD)
