@@ -27,6 +27,9 @@ StiKalmanTrackFitter::~StiKalmanTrackFitter()
 */
 void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (Exception)
 {
+static int nCall=0; nCall++;
+StiKalmanTrackNode::Break(nCall);
+
   if (debug() > 2) cout << "SKTFitter::fit() -I- Started:"<<endl;
   StiKalmanTrack * track = dynamic_cast<StiKalmanTrack * >(stiTrack);
   if (track==0) 
@@ -51,27 +54,23 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
   }
   if (debug()) cout << "StiKalmanTrackFitter::fit set direction T/F= " << trackingDirection << "\t" << fitDirection << endl;
 // 1st count number of accepted already good nodes
-  int nGoodNodes = 0;
-  for (source=first;source!=last;source++) {
-    targetNode = &(*source);
-    targetHit = targetNode->getHit();
-    if (!targetHit) 			continue;
-    if (targetNode->getChi2()>1e10)	continue;
-    ++nGoodNodes;
-  }
-  if (!nGoodNodes) return;
+  int nGoodNodes = track->getNNodes(3);
+  if (!nGoodNodes) 			return;
   double errFactor = double(nGoodNodes+1)/nGoodNodes;
 
 
   StiKalmanTrackNode *pNode = 0;
   for (source=first;source!=last;source++) {
-    do { //do block
+    do { //do refit block
       targetNode = &(*source);
       targetDet = targetNode->getDetector();
       targetHit = targetNode->getHit();
-      if (!pNode && ((!targetHit)||targetNode->getChi2()>1e10)) continue;
-      targetNode->setChi2(1e52);
+      double oldChi2 = targetNode->getChi2(); if(oldChi2){/*debugonly*/};
+static int myKount=0;myKount++;
+      if (!pNode && ((!targetHit)||!targetNode->isValid())) continue;
+      targetNode->setChi2(1e51);
       //begin refit at first hit
+      status = 0;
       if (pNode) {
 	if (targetDet)
 	  status = targetNode->propagate(pNode,targetDet,fitDirection);	// hit
@@ -84,22 +83,28 @@ void StiKalmanTrackFitter::fit(StiTrack * stiTrack, int fitDirection) //throw (E
 	  targetNode->ResetComment(::Form("%30s start refit",targetDet->getName().c_str()));
 	  targetNode->PrintpT("S");}
       }
-      // if targetNode has hit, get chi2 and update track parameters accordingly
-      if (targetHit) { //There is a hit. try to refit it
-        if (targetNode->nudge())	continue;
-        chi2 = targetNode->evaluateChi2(targetHit);
+// target node has parameters now but not fitted
+// if targetNode has hit, get chi2 and update track parameters accordingly
+      do {// Fit
+        targetNode->setChi2(0.);
+        if (!targetHit) 		break; //There is no hit.
+        StiKalmanTrackNode tryNode = *targetNode;
         targetNode->setChi2(1e52);
-        if ((chi2<_pars.getMaxChi2()))	{//Chi2 is good
-          status = targetNode->updateNode();
-          if (status) 			continue;
-          targetNode->setChi2(chi2);
-          targetNode->resetError(errFactor);
-      } }
+        if (tryNode.nudge())		break;
+        chi2 = tryNode.evaluateChi2(targetHit);
+        if ((chi2>_pars.getMaxChi2()))	break;	//Chi2 is bad
+        status = tryNode.updateNode();
+        if (status) 			break;
+        tryNode.setChi2(chi2);
+        tryNode.resetError(errFactor);
+        *targetNode=tryNode;
+      }while(0);//end fit block
       pNode = targetNode;
-    } while(0); { //continue block
+    } while(0);//end refit block
+    { //continue block
       if (debug()) cout << Form("%5d ",status) << StiKalmanTrackNode::Comment() << endl;
     }//end continue block
-  }//end for
+  }//end for of nodes
 }
 
 void StiKalmanTrackFitter::setParameters(const StiKalmanTrackFitterParameters & pars)
