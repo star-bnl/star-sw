@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.225 2001/08/29 19:52:34 didenko Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.226 2001/08/31 21:20:34 didenko Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -18,6 +18,7 @@
 #include "StIOMaker/StIOMaker.h"
 #include "StChallenger/StChallenger.h"
 #include "St_tcl_Maker/St_tcl_Maker.h"
+#include "St_tpt_Maker/St_tpt_Maker.h"
 #include "St_dst_Maker/StPrimaryMaker.h"
 #include "StMessMgr.h"
 //_____________________________________________________________________
@@ -141,6 +142,7 @@ Bfc_st BFC[] = {
   {"AllEvent"    ,""  ,"","Tree"                               ,"","","Write whole event to StTree",kFALSE},
   {"AllTables"   ,""  ,"","",""                                     ,"St_Tables","Load Star Tables",kFALSE},
   {"ExB"         ,""  ,"","",""                       ,"","Activate ExB correction in St_tpt_Maker",kFALSE},
+  {"AlignSectors"         ,""  ,"","",""                       ,"","Activate Sector Alignment correction in St_tpt_Maker",kFALSE},
   {"EastOff"     ,""  ,"","",""                                  ,"","Disactivate East part of tpc",kFALSE},
   {"WestOff"     ,""  ,"","",""                                  ,"","Disactivate West part of tpc",kFALSE},
   {"AllOn"       ,""  ,"","",""                      ,"","Activate both East and West parts of tpc",kFALSE},
@@ -531,6 +533,10 @@ Int_t StBFChain::Instantiate()
 	    if( GetOption("RY2001") ) mask = mask | 2 ;  // Jim Thomas request
 	    (void) printf("StBFChain: ExB The option passed will be %d\n",mask);
 	    mk->SetMode(mask); 
+	  }
+	  if (maker == "St_tpt_Maker" && GetOption("AlignSectors")){
+	    St_tpt_Maker *tptMk = (St_tpt_Maker*)mk;
+            tptMk->AlignHits(kTRUE);
 	  }
 	  if (maker == "St_tcl_Maker") {
 	    St_tcl_Maker *tclMk = (St_tcl_Maker *) mk;
