@@ -1,5 +1,8 @@
-// $Id: StBFChain.cxx,v 1.53 2000/01/19 22:29:07 fisyak Exp $
+// $Id: StBFChain.cxx,v 1.54 2000/01/19 23:43:09 didenko Exp $
 // $Log: StBFChain.cxx,v $
+// Revision 1.54  2000/01/19 23:43:09  didenko
+// take out l3 from chains
+//
 // Revision 1.53  2000/01/19 22:29:07  fisyak
 // replace l3t to l3 in chain option
 //
@@ -239,13 +242,13 @@ BfcItem BFC[] = {
   {"doEvents"    ,""  ,"","xin,event,analysis,FieldOn"                                    ,"","","",kFALSE},
   {"Kalman"      ,""  ,"","geant"                                                         ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis"                                  ,"","","",kFALSE},
-  {"Cy1a"        ,""  ,"","y1a,tpc,ftpc,l0,l3,Cdst,tree"                 ,"","","Turn on chain y1a",kFALSE},
-  {"Cy1b"        ,""  ,"","y1b,tpc,ftpc,l0,l3,emc,rich,Cdst,tree"        ,"","","Turn on chain y1b",kFALSE},
-  {"Cy1c"        ,""  ,"","y1c,tpc,ftpc,l0,l3,Cdst,tree"                 ,"","","Turn on chain y1c",kFALSE},
+  {"Cy1a"        ,""  ,"","y1a,tpc,ftpc,l0,Cdst,tree"                    ,"","","Turn on chain y1a",kFALSE},
+  {"Cy1b"        ,""  ,"","y1b,tpc,ftpc,l0,emc,rich,Cdst,tree"           ,"","","Turn on chain y1b",kFALSE},
+  {"Cy1c"        ,""  ,"","y1c,tpc,ftpc,l0,Cdst,tree"                    ,"","","Turn on chain y1c",kFALSE},
   {"Cy1d"        ,""  ,"","y1d,tpc,global,Cdst,qa,event,analysis,tree"   ,"","","Turn on chain y1d",kFALSE},
   {"cy1e"        ,""  ,"","y1e,tpc,Cdst,tree"                            ,"","","Turn on chain y1e",kFALSE},
-  {"cy1h"        ,""  ,"","y1h,tpc,ftpc,l0,l3,emc,rich,Cdst,tree"        ,"","","Turn on chain y1e",kFALSE},
-  {"Cy2a"        ,""  ,"","y2a,tpc,svt,ftpc,l0,l3,emc,rich,Cdst,tree"    ,"","","Turn on chain y2a",kFALSE},
+  {"cy1h"        ,""  ,"","y1h,tpc,ftpc,l0,emc,rich,Cdst,tree"           ,"","","Turn on chain y1e",kFALSE},
+  {"Cy2a"        ,""  ,"","y2a,tpc,svt,ftpc,l0,emc,rich,Cdst,tree"       ,"","","Turn on chain y2a",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"OPTIONS     ","-----------","-----","------------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----","------------------------------------------------","","","",kFALSE},
