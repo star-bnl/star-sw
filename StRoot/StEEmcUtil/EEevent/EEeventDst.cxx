@@ -1,4 +1,4 @@
-// $Id: EEeventDst.cxx,v 1.6 2003/11/12 19:59:06 balewski Exp $
+// $Id: EEeventDst.cxx,v 1.7 2004/04/07 18:54:47 perev Exp $
 
 #include <cassert>
 #include <TClonesArray.h>
@@ -19,7 +19,10 @@ EEeventDst::EEeventDst(){
 //--------------------------------------------------
 //--------------------------------------------------
 //--------------------------------------------------
-EEeventDst::~EEeventDst() {/* noop */}
+EEeventDst::~EEeventDst() 
+{
+  delete Sec; Sec = 0;
+}
 
 //--------------------------------------------------
 //--------------------------------------------------
@@ -122,6 +125,9 @@ void EEeventDst:: sumRawMC(EEeventDst* eveOut,float minE) {
 
 
 // $Log: EEeventDst.cxx,v $
+// Revision 1.7  2004/04/07 18:54:47  perev
+// Cleanup delete in destructor added
+//
 // Revision 1.6  2003/11/12 19:59:06  balewski
 // I forgot what has changed
 //
