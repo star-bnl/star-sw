@@ -165,7 +165,8 @@
 * 
 * 11/4/98  K. Turner - create "obin" and "obout" chain for reading and
 *                      writing objectivity database - Torre will implement
-*                    - create "ntup2" chain so can write a 2nd ntuple
+*                    - create "ntup2" chain so can write a 2nd ntuple to
+*                      the ntuple file
 * 
 * ************************************************************
 *                     BFC_UTIL.KUMAC
@@ -418,7 +419,6 @@ macro bfc_init _
 	    exec dst_chk_tabl#run_header
     (user)  exec init_user
     (ntup)  exec write_table_to_ntuple#init_disk [nunit] [nfile]
-   (ntup2)  exec write_table_to_ntuple#init_disk [nunit2] [nfile2]    
     (fzout) user/output o [output_fzd_file]
     (evout)
             if output_xdf_file="" then
@@ -801,8 +801,12 @@ macro bfc_finish _
 	      endif
             endif
      (user) exec finish_user
-     (ntup) exec write_table_to_ntuple#close_disk [nunit] [nid]
-    (ntup2) exec write_table_to_ntuple#close_disk [nunit2] [nid2]    
+     (ntup) 
+            exec write_table_to_ntuple#close_disk_ntup
+            exec write_table_to_ntuple#close_file_ntup [nunit]
+            exec write_table_to_ntuple#delete_soc_ntup [nid]
+     (ntup2) 
+            exec write_table_to_ntuple#delete_soc_ntup [nid2]
      (evout,esout) 
             if [output_xdf_file]="" then
                  message "Empty output file"
