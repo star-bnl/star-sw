@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 1.15 2002/08/12 21:39:56 calderon Exp $
+ * $Id: StiStEventFiller.cxx,v 1.16 2002/08/19 19:33:00 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 1.16  2002/08/19 19:33:00  pruneau
+ * eliminated cout when unnecessary, made helix member of the EventFiller
+ *
  * Revision 1.15  2002/08/12 21:39:56  calderon
  * Introduced fillPidTraits, which uses the values obtained from
  * Andrews brand new dEdxCalculator to create two instances of an
@@ -112,6 +115,7 @@ StiStEventFiller::StiStEventFiller() : mEvent(0), mTrackStore(0), mTrkNodeMap()
   dEdxTpcCalculator.setDetectorFilter(kTpcId);
   dEdxSvtCalculator.setDetectorFilter(kSvtId);
 
+
   //mResMaker.setLimits(-1.5,1.5,-1.5,1.5,-10,10,-10,10);
   //mResMaker.setDetector(kSvtId);
 }
@@ -126,16 +130,16 @@ StiStEventFiller::~StiStEventFiller()
 struct StreamStHit
 {
     void operator()(const StHit* h) {
-	cout << "DetectorId: " << (unsigned long) h->detector();
+      //cout << "DetectorId: " << (unsigned long) h->detector();
 	if (const StTpcHit* hit = dynamic_cast<const StTpcHit*>(h)) {
 	    cout <<hit->position() << " Sector: " << hit->sector() << " Padrow: " << hit->padrow() << endl;
 	}
 	else if (const StSvtHit* hit = dynamic_cast<const StSvtHit*>(h)) {
-	    cout << hit->position() << " layer: " << hit->layer() << " ladder: " << hit->ladder()
-		 << " wafer: " << hit->wafer() << " barrel: " << hit->barrel() << endl;
+	  //cout << hit->position() << " layer: " << hit->layer() << " ladder: " << hit->ladder()
+	  // << " wafer: " << hit->wafer() << " barrel: " << hit->barrel() << endl;
 	}
 	else {	
-	    cout << hit->position() << endl;
+	  //cout << hit->position() << endl;
 	}
     }
 };
@@ -231,14 +235,14 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 	    detInfoVec.push_back(detInfo);
 	    gTrack->setDetectorInfo(detInfo);
 	    trackNode->addTrack(gTrack);
-	    cout<<"Track Node Entries: "<<trackNode->entries()<<endl;
+	    //cout<<"Track Node Entries: "<<trackNode->entries()<<endl;
 	    trNodeVec.push_back(trackNode);
 	    // reuse the utility to fill the topology map
 	    // this has to be done at the end as it relies on
 	    // having the proper track->detectorInfo() relationship
 	    // and a valid StDetectorInfo object.
 	    StuFixTopoMap(gTrack);
-	    cout<<"Tester: Event Track Node Entries: "<<trackNode->entries()<<endl;
+	    //cout<<"Tester: Event Track Node Entries: "<<trackNode->entries()<<endl;
 	    mTrkNodeMap.insert(map<const StiKalmanTrack*,StTrackNode*>::value_type (kTrack,trNodeVec.back()) );
 	    if (trackNode->entries(global)<1)
 		cout << "StiStEventFiller::fillEvent() - ERROR - Track Node has no entries!! " << endl;
@@ -286,31 +290,31 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t) 
     StPrimaryVertex*       vertex = mEvent->primaryVertex(0);
     StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo();
 
-    cout <<"Checking Vertex. "
-         <<"Daughters: "<< vertex->numberOfDaughters()<<endl;
+    //cout <<"Checking Vertex. "
+    //     <<"Daughters: "<< vertex->numberOfDaughters()<<endl;
     if(!vertex)
       {
 	cout <<"Failed to find a primary vertex."<<endl;
 	return (StEvent*)NULL;
 	  
       }
-    else
-      {
-      cout << "original daughters " << vertex->daughters().size() << endl;
-      }
+    //else
+    //  {
+	//cout << "original daughters " << vertex->daughters().size() << endl;
+    //}
     
     int skippedCount=0;
     int fillTrackCount=0;
     // loop over StiKalmanTracks
-    cout << "Tracks in container " << mTrackStore->size() << endl;
+    //cout << "Tracks in container " << mTrackStore->size() << endl;
     int mTrackN=0;
     for (KalmanTrackMap::const_iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt,++mTrackN) {
-      cout <<"Current track: "<< mTrackN<<endl;
+      //cout <<"Current track: "<< mTrackN<<endl;
 	// get track and corresponding StTrackNode
 	const StiKalmanTrack* kTrack = (*trackIt).second;
 	//mResMaker.setTrackResiduals(kTrack);
 	if (kTrack==0) {
-	    cout<< "kTrackLoop: kTrack pointer==0"<<endl;
+	  //cout<< "kTrackLoop: kTrack pointer==0"<<endl;
 	    continue;
 	}
 	map<const StiKalmanTrack*, StTrackNode*>::iterator itKtrack = mTrkNodeMap.find(kTrack);
@@ -319,16 +323,16 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t) 
 		cout << "skipping track which was not entered in an StTrackNode" << endl;
 	    continue;
 	}
-	cout <<"Tester: Primary Track Map Node Entries: "<<(*itKtrack).second->entries()<<endl;
+	//cout <<"Tester: Primary Track Map Node Entries: "<<(*itKtrack).second->entries()<<endl;
 	if (kTrack->isPrimary()) {
-	  cout <<"Track is a primary."<<endl;
+	  //cout <<"Track is a primary."<<endl;
 	    StTrackNode* currentTrackNode = (*itKtrack).second;
-		  cout <<"Got Current Node."<<endl;
-		  cout<<"Total entries in track node: "<<currentTrackNode->entries()<<endl;
+	    //cout <<"Got Current Node."<<endl;
+	    //  cout<<"Total entries in track node: "<<currentTrackNode->entries()<<endl;
 	    if (currentTrackNode->entries()>10)
 	       {
-		  cout <<"Track map gone pathalogic. Next track!"<<endl;
-		  continue;
+		 cout <<"Track map gone pathalogic. Next track!"<<endl;
+		 continue;
 	       }
 	    if (currentTrackNode->entries(global)<1) {
 		cout << "skipping Node: this node should have a global track but doesn't" << endl;
@@ -338,17 +342,17 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t) 
 	    // detector info
 	    StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
 	    fillDetectorInfo(detInfo,kTrack);
-		  cout <<"Filled Detector info."<<endl;
+	    //cout <<"Filled Detector info."<<endl;
 
 	    
 	    // actual filling of StTrack from StiTrack
-	    cout <<"Creating new track"<<endl;
+	    //cout <<"Creating new track"<<endl;
 	    StPrimaryTrack* pTrack = new StPrimaryTrack;
 
-	    cout <<"Entering try-catch block"<<endl;
+	    //cout <<"Entering try-catch block"<<endl;
 	    try	{
 		fillTrackCount++;
-		cout << "trying to fill track " << fillTrackCount++ << endl;
+		//cout << "trying to fill track " << fillTrackCount++ << endl;
 		fillTrack(pTrack,kTrack);
 		
 		// set up relationships between objects
@@ -372,8 +376,8 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t) 
 	    }
 	}//end if primary
     } // kalman track loop
-    cout << "# isPrimary()=true " << fillTrackCount << endl;
-    cout << "new vtx  daughters " << vertex->daughters().size() << endl;
+    //cout << "# isPrimary()=true " << fillTrackCount << endl;
+    //cout << "new vtx  daughters " << vertex->daughters().size() << endl;
     if (skippedCount>0)
 	cout << "A total of "<<skippedCount<<" StiTracks were skipped"<<endl;
     mTrkNodeMap.clear();  // need to reset for the next event
@@ -433,15 +437,17 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, const StiTrack* track, bool
     // values and then use the assignment operator to put them into
     // the instance that we pass to it.
     StThreeVector<double> dummyVec(-999,-999,-999);
-    StPhysicalHelix* helix = new StPhysicalHelix(dummyVec,dummyVec,-100.,-100);
-    transformer->operator()(node, helix);
-    const StThreeVector<double> orig = helix->origin();
+
+    // transform node into "helix" (which is a Physical Helix)
+    // and then create a HelixModel out of it.
+    transformer->operator()(node, &helix);
+    const StThreeVector<double> orig = helix.origin();
     StThreeVectorF origin(orig.x(),orig.y(),orig.z());
     
     double mom[3];
     node->getGlobalMomentum(mom);
     StThreeVectorF momF(mom[0],mom[1],mom[2]); 
-    cout <<"Global Momentum: "<<momF<<endl;
+    //cout <<"Global Momentum: "<<momF<<endl;
 
     double bField = -99999;
     // test
@@ -453,33 +459,34 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, const StiTrack* track, bool
 	bField = bField*tesla*.1;
       }
     else bField =  0.5; 
-    cout <<"Helix BField: "<<bField<<endl;
-    cout <<"Helix Momentum: "<<helix->momentum(bField).x()
-	                     <<helix->momentum(bField).y()
-	                     <<helix->momentum(bField).z()
-	                     <<endl;
-    cout <<"Old phase: "<<helix->phase();
-    double newPhase = helix->phase() + helix->h()*halfpi;
-    cout <<"New phase: "<<newPhase<<endl;
-    StTrackGeometry* geometry = new StHelixModel(helix->charge(bField),
+    /*
+      cout <<"Helix BField: "<<bField<<endl;
+      cout <<"Helix Momentum: "<<helix.momentum(bField).x()
+      <<helix.momentum(bField).y()
+      <<helix.momentum(bField).z()
+      <<endl;
+    cout <<"Old phase: "<<helix.phase();
+    */
+    double newPhase = helix.phase() + helix.h()*halfpi;
+    //cout <<"New phase: "<<newPhase<<endl;
+    StTrackGeometry* geometry = new StHelixModel(helix.charge(bField),
 				         	 newPhase,
-						 helix->curvature(),
-						 helix->dipAngle(),
+						 helix.curvature(),
+						 helix.dipAngle(),
 						 origin, momF,
-						 helix->h());
-    cout <<"Helix: "<<(*helix)<<endl;
+						 helix.h());
+    //cout <<"Helix: "<<helix<<endl;
     
-    delete helix;
     if (outer)
       {
 	gTrack->setOuterGeometry(geometry);
 
-	cout <<"Helix From Track: "<<gTrack->outerGeometry()->helix()<<endl;
+	//cout <<"Helix From Track: "<<gTrack->outerGeometry()->helix()<<endl;
       }
     else
       {
 	gTrack->setGeometry(geometry);
-	cout <<"Helix From Track: "<<gTrack->geometry()->helix()<<endl;
+	//cout <<"Helix From Track: "<<gTrack->geometry()->helix()<<endl;
       }
 
     
@@ -517,7 +524,7 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, const StiTrack* track){
     StiKalmanTrackNode* node = kTrack->getInnerMostHitNode();
     double alpha, xRef, x[5], covM[15], dEdxNode, chi2node;
     node->get(alpha,xRef,x,covM,dEdxNode,chi2node);
-    cout <<"GetAlpha: "<<alpha<<" Alpha: "<<node->fAlpha<<endl;
+    //cout <<"GetAlpha: "<<alpha<<" Alpha: "<<node->fAlpha<<endl;
     float chi2[2];
     chi2[0] = chi2node; // change: perhaps use chi2node instead of track->getChi2()?
     chi2[1] = -9999; // change: here goes an actual probability, need to calculate?
@@ -660,17 +667,16 @@ float StiStEventFiller::impactParameter(const StiTrack* track) {
     // construct a Helix using Ben's Routines
     StiGeometryTransform* transformer = StiGeometryTransform::instance();
     StThreeVector<double> dummyVec(-999,-999,-999);
-    StPhysicalHelix* helix = new StPhysicalHelix(dummyVec,dummyVec,-100.,-100);
-    transformer->operator()(node, helix);
+    //StPhysicalHelix* helix = new StPhysicalHelix(dummyVec,dummyVec,-100.,-100);
+    transformer->operator()(node, &helix);
     // these next lines are just to keep prototypes right, Ben uses StPhysicalHelix<double>
     // but StEvent uses StThreeVectorF for persistency...
     const StThreeVectorF& vxF = mEvent->primaryVertex()->position();
     StThreeVector<double> vxD(vxF.x(),vxF.y(),vxF.z());
     //cout << "primary vertex " << vxD << endl;
     // return distance of closest approach to primary vertex
-    //cout << "helix " << *helix << endl;
-    float dca = static_cast<float>(helix->distance(vxD));
+    //cout << "helix " << helix << endl;
+    float dca = static_cast<float>(helix.distance(vxD));
     //cout << "dca " << dca << endl;
-    delete helix;
     return dca;
 }

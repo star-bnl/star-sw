@@ -1,8 +1,11 @@
 //
-// $Id: TestEvalIT.C,v 1.8 2002/06/28 23:33:46 calderon Exp $
+// $Id: TestEvalIT.C,v 1.9 2002/08/19 19:33:19 pruneau Exp $
 //
 //
 // $Log: TestEvalIT.C,v $
+// Revision 1.9  2002/08/19 19:33:19  pruneau
+// eliminated cout when unnecessary, made helix member of the EventFiller
+//
 // Revision 1.8  2002/06/28 23:33:46  calderon
 // Changes to work with bug fixes and new conventions in StMiniMcMaker
 // Output file names will begin with "EvalItTest" and the rest of the input
@@ -286,8 +289,10 @@ void TestEvalIT(Int_t firstEvtIndex,
 	stiIO->setKTFMaxSearchRadius(4.); //cm
 	stiIO->setKTFSearchWindowScale(5.); //cm
 	//Set Local Track Seed Finder (LTSF) run-time values
-	stiIO->setLTSFZWindow(5.);
-	stiIO->setLTSFYWindow(2.);
+	//stiIO->setLTSFZWindow(5.);
+	//stiIO->setLTSFYWindow(2.);
+	stiIO->setLTSFZWindow(10.);
+	stiIO->setLTSFYWindow(4.);
 	stiIO->setLTSFSeedLength(2);
 	stiIO->setLTSFDoHelixFit(true);
 	stiIO->setLTSFExtrapYWindow(1.);
@@ -390,7 +395,7 @@ void TestEvalIT(Int_t firstEvtIndex,
 	minimcMaker->setDebug();
 	minimcMaker->setOutDir("./");
 	minimcMaker->setFileName(fileName);
-	minimcMaker->setFilePrefix(filePrefix);
+	//minimcMaker->setFilePrefix(filePrefix);
 	
 	/*
 		dbaseMk->Init();

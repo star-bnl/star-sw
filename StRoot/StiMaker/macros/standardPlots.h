@@ -1,9 +1,12 @@
 /*
- * $Id: standardPlots.h,v 1.4 2002/07/08 14:32:49 pruneau Exp $
+ * $Id: standardPlots.h,v 1.5 2002/08/19 19:33:20 pruneau Exp $
  * A. Rose, WSU
  *
  *
  * $Log: standardPlots.h,v $
+ * Revision 1.5  2002/08/19 19:33:20  pruneau
+ * eliminated cout when unnecessary, made helix member of the EventFiller
+ *
  * Revision 1.4  2002/07/08 14:32:49  pruneau
  * added efficiency plots
  *
@@ -628,7 +631,7 @@ class standardPlots {
    TBranch        *b_fUniqueID;   //!
    TBranch        *b_fBits;   //!
 
-   standardPlots(TTree *tree=0,char* infile="/star/data22/ITTF/EvalData/MCNtuple/auau200.rcf0183_12.190.root");
+   standardPlots(TTree *tree,char* infile="/star/data22/ITTF/EvalData/MCNtuple/auau200.rcf0183_12.190.root");
    standardPlots(char* infile="/star/data22/ITTF/EvalData/MCNtuple/auau200.rcf0183_12.190.root");
    ~standardPlots();
 
@@ -642,6 +645,7 @@ class standardPlots {
    float  primary;
    float  global;
 
+   Int_t iEntry;
    Int_t nentries;
    Int_t nbytes;
    Int_t nb;
