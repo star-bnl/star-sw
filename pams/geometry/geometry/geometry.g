@@ -1,35 +1,46 @@
    subroutine geometry
    Implicit   none
    Logical    cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal,
-              mfld,mwc,pse,tof,four,on/.true./,off/.false./
-   real       Par(1000),field,dcay(5)
-   Integer    LL,IDEB,Nsi,i
+              mfld,mwc,pse,tof,four,ems,on/.true./,off/.false./
+   real       Par(1000),field,dcay(5),shift
+   Integer    LENOCC,LL,IDEB,Nsi,i,j,l,nmod(2)
    character  Commands*4000
 * - - - - - - - - - - - - - - - - -
 +CDE,GCBANK,GCUNIT,GCPHYS,GCCUTS,GCFLAG,AGCKINE.
 * - - - - - - - - - - - - - - - - -
-replace[;ON#{#;] with [;IF (Index(Commands,'#1')>0) { <W>;(' #1: #2');]
+replace[;ON#{#;] with [
+  IF Index(Commands,'#1')>0 
+  { j=Index(Commands,'#1');  l=j+Lenocc('#1')-1;  Commands(j:l)=' ';
+    <W>; (' #1: #2');
+]
 *
    call ASLGETBA ('GEOM','DETP',1000,LL,Par)
-   Call AGSFLAG  ('GEOM',1)
    If (JVOLUM>0) call AGDROP ('*')
    IDEB = IDEBUG
 *
 * -------------------- set GSTAR absolute default ------------------------
+* Set only flags for the main configuration (everthing on, except for tof),
+* but no actual parameters (CUTS,Processes,MODES) are set or modified here. 
+* If an empty or no DETP GEOM was issued, geometry is defined externally.
 *
-*  main configuration - everthing on, except for tof
    {cave,pipe,svtt,tpce,ftpc,btof,vpdd,calb,ecal,magp,mfld} = on;
-   {mwc,four,pse}=on;  tof=off;
-   field=5;  Nsi=7;    
+   {mwc,four,pse}=on      "MultiWire Chambers, 4th Si layer, pseudopadrows"   
+   {tof,ems}=off                      "TimeOfFlight, EM calorimeter Sector"
+   field=5;  Nsi=7;                                    "defaults constants"
    Commands=' '
 *
 * -------------------- select USERS configuration ------------------------
-*
+* On a non-empty DETP GEOM every keyword makes an action and is erased.
+* Actions consist here of selecting the appropriate parameteres and flags.
+* This flags are used in the next section to create subsystems and 
+* to communicate DETP commands with parameters to them.
+* 
 If LL>1   
-{ CALL UHTOC(PAR(2),4,Commands,LL*4); 
+{ Call AGSFLAG  ('GEOM',1)
+  CALL UHTOC(PAR(2),4,Commands,LL*4-4); 
   Call CLTOU(Commands); i=Index(Commands,'FIELD=');
 
-  * set geant flags and cuts only if any detp geometry was issued:
+  * set geant processes and cuts only if any detp geometry was issued:
    
   {CUTGAM,CUTELE,CUTNEU,CUTHAD,CUTMUO,BCUTE,BCUTM,DCUTE,DCUTM,PPCUTM} =.001;
   {IDCAY,IANNI,IBREM,ICOMP,IHADR,IMUNU,IPAIR,IPHOT,ILOSS,IDRAY,IMULS} = 1;
@@ -37,10 +48,10 @@ If LL>1
   TOFMAX        = 1.e-4 
   NtrSubEv      = 1000
 *
-  on HELP       { you may select following the keywords: ;
+  on HELP       { you may select the following keywords: ;
                   <W>;('---------------:----------------------------- ');
-                  <W>;('Configurations : complete, year_1a, year_2a,  ');
-                  <W>;('               : tpc_only, field_only         ');
+                  <W>;('Configurations : complete,tpc_only,field_only ');
+                  <W>;('               : year_1a(b,c), year_2a        ');
                   <W>;('Geant Physics  : Hadr_on, Hadr_off, Decay_Only');
                   <W>;('Geometry Detail: mwc_off, pse_off, 4th_off    ');
                   <W>;('Magnetic Field : Field_on/off, field=value    ');
@@ -50,8 +61,10 @@ If LL>1
                   <W>;('--------------------------------------------- ');
                 }  
   on COMPLETE   { Complete STAR geometry;                                     }
-  on YEAR_1A    { STAR initial geometry;      {vpdd,calb,ecal}=off; Nsi=0;    }
-  on YEAR_2A    { STAR second year upgrade;   {vpdd,ecal}=off;      tof=on;   }
+  on YEAR_1A    { STAR initial geometry;      {vpdd,calb,ecal}=off;    Nsi=0; }
+  on YEAR_1B    { TPCs+calo patch, no svt;    {vpdd,ecal}=off; ems=on; Nsi=0; }
+  on YEAR_1C    { TPCs+barrel calo, no svt;   {vpdd,ecal}=off;         Nsi=0; }
+  on YEAR_2A    { STAR second year upgrade;   {vpdd,ecal}=off;        tof=on; }
   on HADR_ON    { default Geant Physics On;                                   }
   on HADR_OFF   { Geant Physics on, except for hadronic interactions; IHADR=0;}
   on DECAY_ONLY { Some Physics: decays, mult.scat and energy loss;
@@ -62,8 +75,8 @@ If LL>1
                   {cave,pipe,svtt,tpce,ftpc,btof,vpdd,magp,calb,ecal}=off;    }
   on FIELD_OFF  { no magnetic field;                field=0;                  }
   on FIELD_ON   { Standard (5 KGs) field on;        field=5;                  }
-  if i>0        { field=Par(i/4+4);  <W> field;
-                  (' Modified field value =',F6.2,' KGS');                    }
+  if i>0        { j=i/4+3; field=Par(1+j);  Commands(i:j*4)=' ';
+                  <W> field; (' Modified field value =',F6.2,' KGS');         }
   on MWC_OFF    { Trigger Multy-wire readout off;   mwc=off;                  }
   on PSE_OFF    { No TPC pseudo-padrow generated;   pse=off;                  }
   on 4TH_OFF    { SVT fourth layer off;             Nsi=min(Nsi,6);           }
@@ -72,12 +85,21 @@ If LL>1
   on DEBUG_ON   { verbose mode, some graphics; Idebug=max(Idebug,1); Itest=1; }
   on DEBUG_OFF  { standard debug mode;         {Idebug,Itest}=0;              }
  }
+
+* sanity check - if something left in commands (unknown keyword), we stop!
+  l=LENOCC(commands); if l>0
+  {  print *,' Unknown command left => ', commands(1:l), ' <='
+     if (Ideb<3) stop 'You better stop here to avoid problems'
+  }
 *
 * -------------------- setup selected configuration ------------------------
+* Now when all parameters and flags are ready, make gstar work as usually
+* ie put a MODE or/and DETP command and executing them for selected systems.
 *
+
 * - to save secondaries AFTER all decays:      DETP TRAC DCAY 210 210 0.1 0.01
    dcay={210,210,0.1,0.01}
-   call AgDETP new ('trac')
+   call AgDETP new ('Trac')
    call AgDETP add ('TracDCAY',dcay,4)
 *
    if (cave) Call cavegeo
@@ -91,6 +113,7 @@ If LL>1
  
 * - MWC or pseudo padrows needed ? DETP TPCE TPCG(1).MWCread=0 TPRS(1).super=1
 *  CRAY does not accept construction: IF (mwc==off) ... I do it differntly:
+
    call AgDETP new ('tpce')
    If (tpce &.not.mwc) call AgDETP add ('tpcg(1).MWCread=',0,1)
    If (tpce &.not.pse) call AgDETP add ('tprs(1).super='  ,1,1) 
@@ -104,7 +127,14 @@ If LL>1
      
    Call AGSFLAG('SIMU',1)
    if (vpdd) Call vpddgeo
+
+*  - barrel calorimeter may be a patch of 12 modules at the left side
+   Call AgDETP new ('calb')
+   nmod={0,12};  shift=51
+   if (ems)  call AgDETP add ('calg.nmodule=',Nmod,2)
+   if (ems)  call AgDETP add ('calg.shift=',shift,1)
    if (calb) Call calbgeo
+
    if (ecal) Call ecalgeo
    if (magp) Call magpgeo
 *

@@ -47,14 +47,15 @@ external etsphit
                        SmAlfWdh, SmAlfThk, SmGasThk, SmGasWdh, SmGasRad,
                        SmAffWdh, SmAfbWdh, SmetaWdh, Seta1Wdh, Netfirst, 
                        Seta2Wdh, Netsecon, Set12Wdh, SphiWdh,  SphidWdh, 
-                       NPhistr,  NSmdAlw,  Nsuper  , Nsmd,     NsubLay(2) }
+                       NPhistr,  NSmdAlw,  Nsuper  , Nsmd,     NsubLay(2),
+                       Nmodule(2), Shift }
       Real      RKB2sc/0.013/, RKB3sc/9.6E-6/
 *---- local definitions...
       real      current_depth, current, layer_width, smd_width, tan_theta,
                 cut_length, cut_radius, future_depth,c_dep,c_lead_dep, 
                 eta_lenght, current_csda, h_eta1, h_eta2, h_phi1, h_phi2,
-                sh_eta1,sh_eta2,sh_phi1,sh_phi2,Rmax,Hleng
-      integer   layer,super,sub,i,j
+                sh_eta1,sh_eta2,sh_phi1,sh_phi2,Rmax,Hleng,Dphi
+      integer   layer,super,sub,i,j,ii,nn
 *
 * ----------------------------------------------------------------------------
 *
@@ -93,6 +94,8 @@ external etsphit
       Nsuper   = 2           ! number of readout superlayer
       Nsmd     = 5           ! SMD positioned after sandvich type layers EMC
       NsubLay  = {1,20}      ! number of layers in a superlayer
+      Nmodule  = {60,60}     ! number of modules
+      Shift    = 75          ! starting azimuth of the first module   
    Endfill
 *
       USE    CALG
@@ -113,11 +116,12 @@ external etsphit
       tan_theta  = tan(2*atan(exp(-calg_EtaCut)))
       cut_length = calg_Rmin/tan_theta
       Hleng = cut_radius/tan_theta  
+      nn    = max(calg_Nmodule(1),calg_Nmodule(2))
+      dphi  = 6*nn
 *
-      create and position CALB in CAVE  AlphaZ=75
+      create and position CALB in CAVE  AlphaZ=calg_shift
       prin1  calg_Version;            (' CALB geo. version    =',F7.1)
       prin1  calg_RMin;               (' CALB inner radius    =',F7.1)
-      prin1  2.0*calg_CrackWd;        (' CALB crack width     =',F7.1)
 *
 * ---------------------------------------------------------------------------
 *
@@ -126,19 +130,20 @@ block CALB is  EMC Barrel envelope
       Medium    Standard
       attribute CALB  seen=0  colo=7
 *
-      SHAPE     PCON  Phi1=0  Dphi=360  Nz=4,
+      SHAPE     PCON  Phi1=0  Dphi=Dphi  Nz=4,
                       zi  = {-Hleng,      -cut_length, cut_length, Hleng},
                       rmn = { cut_radius,  Calg_rmin,  Calg_Rmin,  cut_radius},
                       rmx = { Rmax,        Rmax,       Rmax,       Rmax };
-      create    CHLV
-      Position  CHLV
-      Position  CHLV  thetaZ=180
+
+      if calg_Nmodule(1)>0 { ii=1; create and Position  CHLV;            }
+      
+      if calg_Nmodule(2)>0 { ii=2; create and Position  CHLV thetaZ=180; }
 *
 EndBlock
 * -----------------------------------------------------------------------------
 Block CHLV corresponds to double modules...
 *
-      shape     PCON  Phi1=0  Dphi=360  Nz=3,
+      shape     PCON  Phi1=0  Dphi=6*calg_Nmodule(ii)  Nz=3,
                       zi  = { 0,          cut_length,  Hleng},
                       rmn = { Calg_rmin,  Calg_Rmin,   cut_radius},
                       rmx = { Rmax,       Rmax,        Rmax };
@@ -147,7 +152,7 @@ EndBlock
 * -----------------------------------------------------------------------------
 Block CPHI corresponds to a single module
       attribute CPHI  seen=0   colo=4
-      Shape  Division Iaxis=2  Ndiv=60    " C0=105 - not supported by GEANT3 "
+      Shape  Division Iaxis=2  Ndiv=calg_Nmodule(ii) " C0=105 - not supported "
 *
       current_depth = calg_Rmin
       c_dep=current_depth
