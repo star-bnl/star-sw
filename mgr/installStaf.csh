@@ -1,5 +1,9 @@
 #
-#	installRL script to create RL99.x STAF libraries
+#	installStaf script to create RL99.x STAF libraries
+
+set NODEBUG =
+if ($1 == "NODEBUG") set NODEBUG = "NODEBUG=Yess"
+if ($1 == "nodebug") set NODEBUG = "NODEBUG=Yess"
 
 # define input area where directories asu,sdd,... are
 set INP = $cwd/asps/staf
@@ -35,7 +39,7 @@ gmake -f ${STAF_MAKE_HOME}/MakeStaf.mk INP_DIR=${INP} OUT_DIR=${OUT} setup
 # if you add "exes" only executables will be created (no libraries)
 
 
-gmake -f ${STAF_MAKE_HOME}/MakeStaf.mk 
+gmake -f ${STAF_MAKE_HOME}/MakeStaf.mk $NODEBUG
 
 
 # Makefile does not touch input area
@@ -46,4 +50,4 @@ gmake -f ${STAF_MAKE_HOME}/MakeStaf.mk
 
 #
 # All comments to perev@bnl.gov
-
+#

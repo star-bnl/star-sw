@@ -138,7 +138,7 @@ geant3: $(GST_DIR)/geant3/geant3.f
 	$(GEA) -o $(EXE_DIR)/geant3 $(GST_DIR)/geant3/geant3.f `cernlib kernlib`
 #
 $(CMDS): $(FILES_O)
-	$(DOEXE)  $(ALL_EXE_LIBS) -o $(EXE_DIR)/$(notdir $(TARGET))  
+	$(DOEXE)   $(ALL_EXE_LIBS) -o $(EXE_DIR)/$(notdir $(TARGET))  
 #
 ifneq (,$(findstring $(STAF_ARCH),rs_aix31 rs_aix32 rs_aix41))
 	echo '#!'$(PWD)'/$@'  > import.map

@@ -1,5 +1,9 @@
 #
 #	installExe script to create RL99.x STAF executable
+set NODEBUG =
+if ($1 == "NODEBUG") set NODEBUG = "NODEBUG=Yess"
+if ($1 == "nodebug") set NODEBUG = "NODEBUG=Yess"
+
 
 # define input area where directories asu,sdd,... are
 set INP = $cwd/asps/agi
@@ -38,7 +42,7 @@ gmake -f ${STAF_MAKE_HOME}/MakeExe.mk INP_DIR=${INP} OUT_DIR=${OUT} setup
 gmake -f ${STAF_MAKE_HOME}/MakeGe3.mk INP_DIR=${INP} OUT_DIR=${OUT} geant3
 rehash
 
-gmake -f ${STAF_MAKE_HOME}/MakeExe.mk INP_DIR=${INP} OUT_DIR=${OUT} Staf
+gmake -f ${STAF_MAKE_HOME}/MakeExe.mk INP_DIR=${INP} OUT_DIR=${OUT} $NODEBUG Staf
 
 
 

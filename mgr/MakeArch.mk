@@ -1,4 +1,7 @@
 #  $Log: MakeArch.mk,v $
+#  Revision 1.21  1998/08/22 01:26:00  perev
+#  QUIET_ASP to MakeArch
+#
 #  Revision 1.20  1998/08/21 15:44:47  fisyak
 #  Add reco_ds
 #
@@ -41,7 +44,7 @@
 #  Revision 1.1.1.1  1997/12/31 14:35:23  fisyak
 #  Revision ?.?.?.?  1998/02/07           perev
 #
-#             Last modification $Date: 1998/08/21 15:44:47 $ 
+#             Last modification $Date: 1998/08/22 01:26:00 $ 
 #. default setings
 
 RM := rm -f
@@ -63,8 +66,8 @@ LOUT := -o
 
 CERN_LEVEL =pro
 CERN_STAF = $(CERN)/$(CERN_LEVEL)
-STAF_CERN_INCS = $(STAF_CERN)/include/cfortran 
-STAF_CERN_LIBS = $(shell cernlib geant321 pawlib graflib mathlib)
+CERN_ROOT_INCS = $(CERN_ROOT)/include/cfortran 
+CERN_ROOT_LIBS = $(shell cernlib geant321 pawlib graflib mathlib)
 
 MOTIF :=YES
 GCC      :=  gcc
@@ -87,7 +90,7 @@ Cxx   :=cc
 CLIBS    :=
 FLIBS    :=
 
-CPPFLAGS := $(UNAMES) $(STAF_ARCH) $(TULL_ARCH)
+CPPFLAGS := $(UNAMES) $(STAF_ARCH) $(TULL_ARCH) QUIET_ASP
 OSFID    :=
 STRID    :=
 YACC     := yacc
