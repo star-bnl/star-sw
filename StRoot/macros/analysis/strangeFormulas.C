@@ -1,5 +1,8 @@
-// $Id: strangeFormulas.C,v 3.4 2001/05/04 21:17:57 genevb Exp $
+// $Id: strangeFormulas.C,v 3.5 2002/04/30 01:29:18 genevb Exp $
 // $Log: strangeFormulas.C,v $
+// Revision 3.5  2002/04/30 01:29:18  genevb
+// Updated macros for common micro DST
+//
 // Revision 3.4  2001/05/04 21:17:57  genevb
 // Catch ROOT definition of TTreeFormula class, add McEvent branch
 //
@@ -45,7 +48,8 @@
 // what it does:  creates formulas for use with strangeness micro DST
 // usage: The parameter is either a pointer to a strangeness
 //          micro DST tree, a pointer to a TFile containing such
-//          a tree (tree name assumed to be "StrangeMuDst"), or
+//          a tree (tree name assumed to be either "StrangeMuDst"
+//          or "MuDst" (in the case of a common micro DST)), or
 //          the name of such a file. In the latter two cases, a
 //          pointer to the strangeness TTree is returned.
 //          See documentation for more information.
@@ -59,8 +63,8 @@
 //        .x strangeFormulas.C(myTreePtr);
 //          Returns the number of new formulas loaded into Root.
 //        .x strangeFormulas.C(myFilePtr);
-//          Returns a pointer to the tree named "StrangeMuDst" in the
-//          file pointed to by myFilePtr.
+//          Returns a pointer to the tree named either "StrangeMuDst"
+//          or "MuDst" in the file pointed to by myFilePtr.
 //======================================================
 //
 // Should be careful to optimize formulas for number of calls to
@@ -163,6 +167,7 @@ TTree* strangeFormulas(TFile* fptr) {
     gSystem->Load("libTreePlayer");
   }
   strangeTree = (TTree*) fptr->Get("StrangeMuDst");
+  if (!strangeTree) strangeTree = (TTree*) fptr->Get("MuDst");
   strangeFormulas(strangeTree);
   return strangeTree;
 }
