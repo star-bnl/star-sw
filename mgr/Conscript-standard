@@ -169,7 +169,7 @@ if ( $pkg =~ m/^StEventDisplay/){
 
 # This block can be used for ANY maker having a 2 level
 # directory structure using auto-globbing
-} elsif ( $pkg =~ n/^StAssociationMaker$/ ||
+} elsif ( $pkg =~ m/^StAssociationMaker$/ ||
 	  $pkg =~ m/^StEmcUtil$/          ||
 	  $pkg =~ m/^StMuDSTMaker$/       ||
 	  $pkg =~ m/^StRichPool$/         ||
