@@ -145,8 +145,7 @@ StiKalmanTrackNode * StiKalmanTrack::addHit(StiHit *h)
     
     if (lastNode!=0)
 	{
-	    StiObjectFactoryInterface<StiKalmanTrackNode> * f = dynamic_cast<StiObjectFactoryInterface<StiKalmanTrackNode>*>(trackNodeFactory);
-	    StiKalmanTrackNode * n = f->getObject();
+	    StiKalmanTrackNode * n = trackNodeFactory->getObject();
 	    n->reset();
 	    n->setHit(h);
 	    n->fX = h->x();
@@ -156,8 +155,7 @@ StiKalmanTrackNode * StiKalmanTrack::addHit(StiHit *h)
 	}
     else 
 	{
-	    StiObjectFactoryInterface<StiKalmanTrackNode> * f = dynamic_cast<StiObjectFactoryInterface<StiKalmanTrackNode>*>(trackNodeFactory);
-	    firstNode  = f->getObject(); 
+	    firstNode  = trackNodeFactory->getObject(); 
 	    firstNode->reset();
 	    firstNode->setHit(h);
 	    firstNode->fX = h->x();
@@ -177,8 +175,7 @@ StiKalmanTrackNode * StiKalmanTrack::insertHit(StiHit *hInserted, StiHit * targe
     // It is further assumed that the targetParent has at most
     // one child.
     
-    StiObjectFactoryInterface<StiKalmanTrackNode> * f = dynamic_cast<StiObjectFactoryInterface<StiKalmanTrackNode>*>(trackNodeFactory);
-    StiKalmanTrackNode * n = f->getObject();
+    StiKalmanTrackNode * n = trackNodeFactory->getObject();
     n->reset();
     n->setHit(hInserted);
     if (targetParent==0)
@@ -204,7 +201,7 @@ StiKalmanTrackNode * StiKalmanTrack::insertHit(StiHit *hInserted, StiHit * targe
 		}
 	    else
 		{
-		    StiKalmanTrackNode * cn = dynamic_cast<StiKalmanTrackNode *> (pn->getFirstChild());
+		    StiKalmanTrackNode * cn = static_cast<StiKalmanTrackNode *> (pn->getFirstChild());
 		    if (cn!=0)
 			{
 			    pn->remove(cn);
@@ -231,12 +228,12 @@ void StiKalmanTrack::removeHit(StiHit *h)
     if (n!=0)
 	{
 	    // the hit belongs to this track, let's remove it
-	    StiKalmanTrackNode * cn = dynamic_cast<StiKalmanTrackNode *> (n->getFirstChild());
+	    StiKalmanTrackNode * cn = static_cast<StiKalmanTrackNode *> (n->getFirstChild());
 	    
 	    if (cn==0)
 		{
 		    // no child, this is the last hit
-		    StiKalmanTrackNode * pn = dynamic_cast<StiKalmanTrackNode *> (n->getParent());
+		    StiKalmanTrackNode * pn = static_cast<StiKalmanTrackNode *> (n->getParent());
 		    if (pn==0)
 			{
 			    // no parent, this is the first hit
@@ -252,7 +249,7 @@ void StiKalmanTrack::removeHit(StiHit *h)
 	    else
 		{
 		    // child exist
-		    StiKalmanTrackNode * pn = dynamic_cast<StiKalmanTrackNode *> (n->getParent());
+		    StiKalmanTrackNode * pn = static_cast<StiKalmanTrackNode *> (n->getParent());
 		    if (pn==0)
 			{
 			    // no parent, this is the first hit
@@ -286,7 +283,7 @@ StiKalmanTrackNode * StiKalmanTrack::findHit(StiHit * h)
 	    StiKalmanTrackNode * n = firstNode;
 	    while (n->getChildCount()>0)
 		{
-		    n = dynamic_cast<StiKalmanTrackNode *> (n->getFirstChild());
+		    n = static_cast<StiKalmanTrackNode *> (n->getFirstChild());
 		    if (h==n->getHit())
 			{
 			    return firstNode;
@@ -332,8 +329,7 @@ void StiKalmanTrack::initialize(double curvature,
 	    cout <<"trackNodeFactory==0.  Abort"<<endl;
 	    return;
 	}
-    StiObjectFactoryInterface<StiKalmanTrackNode> * fac 
-	= dynamic_cast<StiObjectFactoryInterface<StiKalmanTrackNode> *>(trackNodeFactory);
+    StiObjectFactoryInterface<StiKalmanTrackNode>* fac = trackNodeFactory;
     if (!fac) 
 	{
 	    cout <<"StiKalmanTrack::initialize(). ERROR:\t";
@@ -424,7 +420,7 @@ StiKalmanTrackNode * StiKalmanTrack::getNodeNear(double x) const
     StiDefaultMutableTreeNodeIterator it;
     for (it=nodes->begin(); it!=nodes->end(); it++)
 	{
-	    StiKalmanTrackNode * node = dynamic_cast<StiKalmanTrackNode *>(*it);
+	    StiKalmanTrackNode * node = static_cast<StiKalmanTrackNode *>(*it);
 	    xx = node->fX;
 	    diff = xx-x; if (diff<0) diff = -diff;
 	    //cout << "===> x/diff:" << xx << "\t" << diff << endl;
