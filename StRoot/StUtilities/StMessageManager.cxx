@@ -1,5 +1,8 @@
-// $Id: StMessageManager.cxx,v 1.6 1999/06/28 02:40:56 genevb Exp $
+// $Id: StMessageManager.cxx,v 1.7 1999/06/28 15:42:12 genevb Exp $
 // $Log: StMessageManager.cxx,v $
+// Revision 1.7  1999/06/28 15:42:12  genevb
+// Added Debug message class
+//
 // Revision 1.6  1999/06/28 02:40:56  genevb
 // Additional backward compatibilit with MSG (msg_enable, msg_enabled, msg_disable
 //
@@ -27,9 +30,9 @@
 //                                                                      //
 // This class manages the messages in STAR software. It is a singleton. //
 // Messages are stored in a vector, and come in several types           //
-// (i.e. info, error). The types "I" (info), "W" (warning) and          //
-// "E" (error) are predefined. Message finding and summary tools are    //
-//  also available.                                                     //
+// (i.e. info, error, debug ). The types "I" (info), "W" (warning),     //
+// "E" (error), and "D" (debug) are predefined. Message finding         //
+// and summary tools are also available.                                //
 //                                                                      //
 //////////////////////////////////////////////////////////////////////////
 //
@@ -81,8 +84,9 @@
 //   gMessMgr->Message(myText);
 //
 // The default action here is to create an "Info" message.
-// "Info" is one of three predefined message types (the other
-// two are "Warning" and "Error"). The type of the message can
+// "Info" is one of four predefined message types (the other three
+// are "Warning", "Error", and "Debug" - Debug messages are by default
+// switched off; see section II-11). The type of the message can
 // be specified as a second field in the message declaration:
 //
 //   gMessMgr->Message("This is an error message.","E");
@@ -91,6 +95,7 @@
 // "E" = "Error"
 // "I" = "Info"
 // "W" = "Warning"
+// "D" = "Debug"
 // Additional message types can be declared with AddType():
 //
 //   gMessMgr->AddType("F","Fatal");
@@ -110,7 +115,7 @@
 //     is the same as
 //   gMessMgr->Message("Hello world.","I");
 //
-// Similarly, Error() and Warning() also exist.
+// Similarly, Error(), Warning(), and Debug() also exist.
 //
 // If you would like to add variables to your message output,
 // you can use the stream version of the message declaration:
@@ -142,11 +147,12 @@
 //
 //   call StMessAddType('A','Abort')
 //
-// The three predefined types also have associated declaration calls:
+// The four predefined types also have associated declaration calls:
 //
 //   call StInfo('info text')
 //   call StError('error message')
 //   call StWarning('better not')
+//   call StDebug('value above zero')
 //
 // Format statements can also be used with character strings:
 //
@@ -250,7 +256,7 @@
 //
 //   gMessMgr->Info() << "Here, n=";
 //   gMessage->width(5)
-//   gMessage* << x << endm;
+//   *gMessage << x << endm;
 //
 // Notice that once an StMessage gets printed (either by a Print() call
 // or the use of "endm"), a message is closed to further streamed input.
@@ -280,7 +286,8 @@
 // to limiting message counts:
 // - RemoveLimit(string/type) sets the limit on a string/type to -1, thereby
 //   effectively removing the limit.
-// - SwitchOff(string/type) sets the limit to zero.
+// - SwitchOff(string/type) sets the limit to zero. This is the default case
+//   for type "D", debug messages - on can use SwitchOn("D") to enable them.
 // - SwitchOn(string/type) sets the limit to -1, removing any limit.
 //
 ///////////////////////////////////////////////////////////////////////////
@@ -333,6 +340,10 @@ void type_of_call StError_(Char_t* mess, Char_t* opt) {
   gMessMgr->Message(mess,"E",opt);
 }
 //________________________________________
+void type_of_call StDebug_(Char_t* mess, Char_t* opt) {
+  gMessMgr->Message(mess,"D",opt);
+}
+//________________________________________
 void type_of_call StMessAddType_(const Char_t* type, const Char_t* text) {
   gMessMgr->AddType(type,text);
 }
@@ -356,6 +367,8 @@ StMessageManager::StMessageManager() {
   AddType("I","Info");
   AddType("W","Warning");
   AddType("E","Error");
+  AddType("D","Debug");
+  SwitchOff("D");
 }
 //_____________________________________________________________________________
 StMessageManager::~StMessageManager() {
@@ -572,7 +585,7 @@ int StMessageManager::AddType(const Char_t* type, const Char_t* text) {
 //_____________________________________________________________________________
 void StMessageManager::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StMessageManager.cxx,v 1.6 1999/06/28 02:40:56 genevb Exp $\n");
+  printf("* $Id: StMessageManager.cxx,v 1.7 1999/06/28 15:42:12 genevb Exp $\n");
 //  printf("* %s    *\n",m_VersionCVS);
   printf("**************************************************************\n");
 }
