@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StTpcDedxPid.cc,v 1.1 1999/04/08 14:56:29 ullrich Exp $
+ * $Id: StTpcDedxPid.cc,v 1.2 1999/05/20 16:17:37 ogilvie Exp $
  *
  * Author: Craig Ogilvie, April 1999
  ***************************************************************************
@@ -13,6 +13,9 @@
  ***************************************************************************
  *
  * $Log: StTpcDedxPid.cc,v $
+ * Revision 1.2  1999/05/20 16:17:37  ogilvie
+ * added static dedx calibration data members, set, get functions
+ *
  * Revision 1.1  1999/04/08 14:56:29  ullrich
  * Initial Revision
  *
@@ -22,8 +25,20 @@
 #include "StDedx.hh"
 #include "SystemOfUnits.h"
 
-StTpcDedxPid::StTpcDedxPid(const StGlobalTrack& t) : StDedxPid(t) { /* noop */ }
+double StTpcDedxPid::mTpcDedxGain = 0.174325e-06;
+double StTpcDedxPid::mTpcDedxOffset = -2.71889 ;
+double StTpcDedxPid::mTpcDedxRise = 776.626 ;
 
+
+StTpcDedxPid::StTpcDedxPid(const StGlobalTrack& t) : StDedxPid(t) { 
+ }
+
+StTpcDedxPid::StTpcDedxPid() : StDedxPid() { 
+  cout << "in constructor, offset = " << mTpcDedxOffset << endl; 
+   mTpcDedxGain = 0.174325e-06;
+   mTpcDedxOffset = -2.71889 ;
+   mTpcDedxRise = 776.626 ;
+}
 StTpcDedxPid::~StTpcDedxPid() { /* noop */ }
 
 int StTpcDedxPid::detectorInfoAvailable() const
@@ -84,14 +99,15 @@ double StTpcDedxPid::meanPidFunction(double mass) const
     // placeholder constants for charcaterizeing bethe-bloch curve
     // use some data-base solution
     
-    double bpar[3] = {0.1221537e-06,-4.608514, 5613.} ;
-    
+    // double bpar[3] = {0.1221537e-06,-4.608514, 5613.} ;
+    // double bpar[3] = {0.174325e-06,-2.71889, 776.626} ;
     double gamma =sqrt(pow(momentum/mass,2)+1.);
     double beta = sqrt(1. - 1./pow(gamma,2));
-    double rise = bpar[2]*pow(beta*gamma,2);
+    double rise = mTpcDedxRise*pow(beta*gamma,2);
     double dedxmean;
     if ( beta > 0) 
-	dedxmean = bpar[0]/pow(beta,2)*(0.5*log(rise)-pow(beta,2)-bpar[1]);
+	dedxmean = mTpcDedxGain/pow(beta,2)*
+	  (0.5*log(rise)-pow(beta,2)- mTpcDedxOffset);
     else 
 	dedxmean = 1000. ;
     return dedxmean ;
@@ -119,6 +135,14 @@ double StTpcDedxPid::sigmaPidFunction(double mass) const
     
     return resolution;
 }
+
+void StTpcDedxPid::setTpcDedxGain(double gain) {mTpcDedxGain = gain ;} 
+void StTpcDedxPid::setTpcDedxOffset(double offset) {mTpcDedxOffset=offset;} 
+void StTpcDedxPid::setTpcDedxRise(double rise) {mTpcDedxRise = rise ;} 
+
+double StTpcDedxPid::getTpcDedxGain() { return mTpcDedxGain ;} 
+double StTpcDedxPid::getTpcDedxOffset() { return mTpcDedxOffset ;} 
+double StTpcDedxPid::getTpcDedxRise() { return mTpcDedxRise;} 
 
 
 
