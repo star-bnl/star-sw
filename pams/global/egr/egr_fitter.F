@@ -29,7 +29,8 @@ C ***                    egrpar.perfect to egrpar.useglobal          **
 C ***  9/9/97 - CAINES - Updated the SVT track-hit  identification   **
 C ***  12/2/97 - CAINES - Added message routine as official one now  **
 C ***                     unmanaged                                  **
-C ***  6/5/98 - CAINES - Changed globtrk to dst_track and dst_track_aux* 
+C ***  6/5/98 - CAINES - Changed globtrk to dst_track and dst_track_aux*
+C ***  9/29/00 - CAINES - Removed scenario setting,now just usetpc etc *
 C *********************************************************************
 
 C Input Arguments:
@@ -134,119 +135,10 @@ CCC  L. Ray, 9/16/98
 
       write(6,*) 'Using a field of',bfield(3),' KGauss'  
 
-C  Use the egrpar(1).scenario variable to set the running schem
-
-      if (egrpar(1).scenario.eq.1) then     ! Real TPC stand-alone tracking
-         egrpar(1).useglobal = 0             ! Refit the tptrack hits
-         egrpar(1).usetpc = 2
-         egrpar(1).usesvt = 0
-         egrpar(1).usevert = 0
-         egrpar(1).useemc = 0
-         egrpar(1).usetof = 0
-
-      else if (egrpar(1).scenario.eq.2) then ! Perfect TPC stand-alone tracking
-         egrpar(1).useglobal = 0          ! Straight copy of the tptrack table
-         egrpar(1).usetpc = 1
-         egrpar(1).usesvt = 0
-         egrpar(1).usevert = 0
-         egrpar(1).useemc = 0
-         egrpar(1).usetof = 0
-C Real SVT  stand-alone tracking. Refit the SVT hits
-      else if (egrpar(1).scenario.eq.3) then                         
-         egrpar(1).useglobal = 0
-         egrpar(1).usetpc = 0
-         egrpar(1).usesvt = 2
-         egrpar(1).usevert = 0
-         egrpar(1).useemc = 0
-         egrpar(1).usetof = 0
-
-C Perfect SVT stand-alone tracking. Straight copy of the svt_track table
-
-      else if (egrpar(1).scenario.eq.4) then
-         egrpar(1).useglobal = 0 
-         egrpar(1).usetpc = 0
-         egrpar(1).usesvt = 1
-         egrpar(1).usevert = 0
-         egrpar(1).useemc = 0
-         egrpar(1).usetof = 0
-
-C Refit TPC tracks with prim. vertex
-
-      else if (egrpar(1).scenario.eq.5) then
-         egrpar(1).useglobal = 0
-         egrpar(1).usetpc = 2
-         egrpar(1).usesvt = 0
-         if (egrpar(1).usevert.eq.0) egrpar(1).usevert = 1
-         egrpar(1).useemc = 0
-         egrpar(1).usetof = 0
-
-C  Real SVT/TPC matching with svm. Only tracks including TPC into globtrk
-
-      else if (egrpar(1).scenario.eq.6) then
-         egrpar(1).useglobal = 2
-         egrpar(1).usetpc = 1
-         egrpar(1).usesvt = 0
-         egrpar(1).usevert = 0
-         egrpar(1).useemc = 0
-         egrpar(1).usetof = 0
-
-C Perfect SVT/TPC matching (M.C.). Only tracks w/ TPC into globtrk
-
-      else if (egrpar(1).scenario.eq.7) then
-         egrpar(1).useglobal = 1
-         egrpar(1).usetpc = 0
-         egrpar(1).usesvt = 0
-         egrpar(1).usevert = 0
-         egrpar(1).useemc = 0
-         egrpar(1).usetof = 0
-
-C Improved real SVT/TPC matching. Also handles leftover SVT/TPC tracks 
-
-      else if (egrpar(1).scenario.eq.8) then
-         egrpar(1).useglobal = 2
-         egrpar(1).usetpc = 1
-         egrpar(1).usesvt = 1
-         egrpar(1).usevert = 0
-         egrpar(1).useemc = 0
-         egrpar(1).usetof = 0
-
-C  Improved perfect SVT/TPC matching. Also handles leftover SVT/TPC tracks
-
-      elseif (egrpar(1).scenario.eq.9) then
-         egrpar(1).useglobal = 1
-         egrpar(1).usetpc = 1
-         egrpar(1).usesvt = 1
-         egrpar(1).usevert = 0
-         egrpar(1).useemc = 0
-         egrpar(1).usetof = 0
-
-C Real SVT/TPC matching with svm  Only tracks including TPC into globtrk 
-C All info from svt_track except invpt taken from tptrack.       
-      else if (egrpar(1).scenario.eq.10) then 
-         egrpar(1).useglobal = 3
-         egrpar(1).usetpc = 1
-         egrpar(1).usesvt = 0      
-         egrpar(1).usevert = 0
-         egrpar(1).useemc = 0
-         egrpar(1).usetof = 0
-
-C Perfect SVT/TPC matching (M.C.). Only tracks w/ TPC into globtrk
-C Refit done
-
-      else if (egrpar(1).scenario.eq.11) then
-         egrpar(1).useglobal = 1
-         egrpar(1).usetpc = -1
-         egrpar(1).usesvt = -1
-         egrpar(1).usevert = 0
-         egrpar(1).useemc = 0
-         egrpar(1).usetof = 0
-      end if ! End of choosing scenario
-
 
 C *************************************************************************
 C  Fill the gtrk refitting array here.
 C  First work on the TPC hit information.  Set up hit assignments.
-C  This step is necessary for all scenarios except 4.
 C  The vertex and SVT information will be added in egr_refit_track.
 
       if (egrpar(1).usetpc.gt.0 .or. 
@@ -353,11 +245,12 @@ c     Fill tracks
                  globtrk(igtrk).iflag = svt_track(svt(isvtt)).flag*10
      +                 +(sign(1.0,float(tptrack(itrk).flag)))*500
      +                 +tptrack(itrk).flag
-                  globtrk(igtrk).det_id = kTpcSsdSvtIdentifier
-                  globtrk(igtrk).n_point = svt_track(svt(isvtt)).nspt +
+                  globtrk(igtrk).det_id = kTpcSvtIdentifier 
+! Add SSD if there later
+                  globtrk(igtrk).n_point = 1000*svt_track(svt(isvtt)).nspt +
      +                 tptrack(itpct).nrec
-                  globtrk(igtrk).n_max_point = 0
-              globtrk(igtrk).n_fit_point = svt_track(svt(isvtt)).nspt +
+                  globtrk(igtrk).n_max_point =  tptrack(itpct).npos
+              globtrk(igtrk).n_fit_point = 1000*svt_track(svt(isvtt)).nspt +
      +                 tptrack(itpct).nfit
                   globtrk(igtrk).icharge=tptrack(itpct).q ! tpc q
                   if( abs(globtrk(igtrk).icharge) .ne. 1) then
@@ -410,6 +303,9 @@ C     Now find first point on track
                      if( svt_group(ishit).id1 .eq.
      +                    svt_track(svt(isvtt)).id) then
                         ient = svt_group(ishit).id2
+                        if( svt_spt(ient).id_wafer .gt. 6000 ) then
+                           globtrk(igtrk).det_id = kTpcSsdSvtIdentifier
+                        endif
                      r =  (svt_spt(ient).x(1)**2+svt_spt(ient).x(2)**2+
      +                       svt_spt(ient).x(3)**2)
                         if( r .lt. rfirst) then
@@ -449,7 +345,7 @@ C----->>>>  new calculation of .length   S.Margetis
 C---<<<<<<<
                   globtrk(igtrk).impact = 0.                  
                   globtrk(igtrk).id_start_vertex = 0
-                  globtrk(igtrk).curvature = 0
+                  globtrk(igtrk).curvature = tptrack(itpct).curvature
                   globtrk(igtrk).method = 0
                   globtrk(igtrk).map(1) = 0
                   globtrk(igtrk).map(2) = 0
@@ -476,7 +372,7 @@ C---<<<<<<<
                svt_track(svt(isvtt)).id_globtrk = globtrk_h.nok  
             endif               ! isvtt>0
 c     mark spts as used
-            do ient = 1, gtrk(itpct).nfit
+            do ient = 1, gtrk(itpct).nhit
                if( gtrk(itpct).det(ient) .eq. 1) then
                   ithit = gtrk(itpct).ipnt(ient)
                   tphit(ithit).id_globtrk = globtrk_h.nok
@@ -506,7 +402,7 @@ c     mark spts as used
      +              svt_spt,cov,itpct,isvtt,ipriv,bfield(3))
                
 c     mark spts as used
-               do ient = 1, gtrk(itpct).nfit
+               do ient = 1, gtrk(itpct).nhit
                   if( gtrk(itpct).det(ient) .eq. 1) then
                      ithit = gtrk(itpct).ipnt(ient)
                      tphit(ithit).id_globtrk = globtrk_h.nok
@@ -537,7 +433,7 @@ c     mark spts as used
      +              ipriv,bfield(3))
                
 c     mark spts as used
-               do ient = 1, gtrk(itpct).nfit
+               do ient = 1, gtrk(itpct).nhit
                   if( gtrk(itpct).det(ient) .eq. 1) then
                      ithit = gtrk(itpct).ipnt(ient)
                      tphit(ithit).id_globtrk = globtrk_h.nok
@@ -559,11 +455,11 @@ c     mark spts as used
                globtrk(igtrk).iflag = svt_track(svt(isvtt)).flag*10
      +              +(sign(1.0,float(tptrack(tpc(itpct)).flag)))*500
      +              +tptrack(tpc(itpct)).flag             
-               globtrk(igtrk).det_id = kTpcSsdSvtIdentifier
-               globtrk(igtrk).n_point = svt_track(svt(isvtt)).nspt +
+               globtrk(igtrk).det_id = kTpcSvtIdentifier
+               globtrk(igtrk).n_point = 1000*svt_track(svt(isvtt)).nspt +
      +              tptrack(tpc(itpct)).nrec
-                globtrk(igtrk).n_max_point = 0  
-               globtrk(igtrk).n_fit_point = svt_track(svt(isvtt)).nspt +
+                globtrk(igtrk).n_max_point = tptrack(tpc(itpct)).npos  
+               globtrk(igtrk).n_fit_point = 1000*svt_track(svt(isvtt)).nspt +
      +              tptrack(tpc(itpct)).nfit 
                globtrk(igtrk).icharge=tptrack(tpc(itpct)).q ! tpc q
                globtrk(igtrk).r0=svt_track(svt(isvtt)).r0           
@@ -596,6 +492,9 @@ C     Now find first point on track
                   if( svt_group(ishit).id1 .eq.
      +                 svt_track(svt(isvtt)).id) then
                      ient = svt_group(ishit).id2
+                     if( svt_spt(ient).id_wafer .gt. 6000) then
+                        globtrk(igtrk).det_id = kTpcSsdSvtIdentifier
+                     endif
                      r = (svt_spt(ient).x(1)**2+svt_spt(ient).x(2)**2+
      +                    svt_spt(ient).x(3)**2)
                      if( r .lt. rfirst) then
@@ -640,13 +539,11 @@ C---<<<<<<<
            
                globtrk(igtrk).impact = 0
                globtrk(igtrk).id_start_vertex = 0
-               globtrk(igtrk).curvature = 0
+               globtrk(igtrk).curvature = tptrack(itpct).curvature
                globtrk(igtrk).method = 0
                globtrk(igtrk).map(1) = 0
                globtrk(igtrk).map(2) = 0
-               globtrk(igtrk).pid = 0
-
-               
+               globtrk(igtrk).pid = 0             
  
 c     mark spts as used
                
@@ -814,7 +711,7 @@ C---<<<<<<<
                   endif
 
                   globtrk(iglob).id_start_vertex= 0
-                  globtrk(iglob).curvature = 0
+                  globtrk(iglob).curvature = tptrack(itrk).curvature
                   globtrk(iglob).method = 0
                   globtrk(iglob).map(1) = 0
                   globtrk(iglob).map(2) = 0
@@ -875,9 +772,9 @@ C     Now loop over unmatched SVT tracks.  Straight svt_track copy.
      +                    svt_track(itrk).flag)))*200.
      +                    +svt_track(itrk).flag
                      globtrk(iglob).det_id = kSsdSvtIdentifier
-                     globtrk(iglob).n_point = svt_track(itrk).nspt
+                     globtrk(iglob).n_point = 1000*svt_track(itrk).nspt
                      globtrk(iglob).n_max_point = 0
-                     globtrk(iglob).n_fit_point =  svt_track(itrk).nspt
+                     globtrk(iglob).n_fit_point =  1000*svt_track(itrk).nspt
                      globtrk(iglob).icharge = 
      +                    sign(1.0,svt_track(itrk).invpt)
                      globtrk(iglob).r0 = svt_track(itrk).r0
@@ -961,9 +858,11 @@ C---<<<<<<<
      +                   tphit,svt_spt_h,svt_spt,cov,itpct,isvtt
      +                   ,ipriv,bfield(3))
                     
-                    do ishit = 1, gtrk(igtrk).nfit
-                       ient = gtrk(igtrk).ipnt(ishit)
-                       svt_spt(ient).id_globtrk = globtrk_h.nok
+                    do ishit = 1, gtrk(igtrk).nhit
+                       if( gtrk(igtrk).det(ishit) .eq. 2) then
+                          ient = gtrk(igtrk).ipnt(ishit)
+                          svt_spt(ient).id_globtrk = globtrk_h.nok
+                       endif
                     enddo
                  elseIF( egrpar(1).usesvt .eq. 4) then
                     igtrk = igtrk + 1
@@ -985,9 +884,11 @@ C---<<<<<<<
      +                   tphit,svt_spt_h,svt_spt,covar,itpct,isvtt,ipriv,
      +                   bfield(3))
                     
-                    do ishit = 1, gtrk(igtrk).nfit
-                       ient = gtrk(igtrk).ipnt(ishit)
-                       svt_spt(ient).id_globtrk = globtrk_h.nok
+                    do ishit = 1, gtrk(igtrk).nhit
+                       if( gtrk(igtrk).det(ishit) .eq. 2) then
+                          ient = gtrk(igtrk).ipnt(ishit)
+                          svt_spt(ient).id_globtrk = globtrk_h.nok
+                       endif
                     enddo
                     
                  endif          ! End of if usesvt=1
