@@ -254,7 +254,7 @@ void StVertexSeedMaker::FindResult(Bool_t checkDb) {
 //_____________________________________________________________________________
 void StVertexSeedMaker::PrintInfo() {
   printf("**************************************************************\n");
-  printf("* $Id: StVertexSeedMaker.cxx,v 1.10 2002/04/19 22:24:16 perev Exp $\n");
+  printf("* $Id: StVertexSeedMaker.cxx,v 1.11 2003/01/22 23:32:23 genevb Exp $\n");
   printf("**************************************************************\n");
 
   if (Debug()) StMaker::PrintInfo();
@@ -515,8 +515,8 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
       << fileName << endm;
     currentFile = new TFile(fileName);
     TNtuple* curNtuple = (TNtuple*) currentFile->Get("resNtuple");
-    Stat_t nentries = curNtuple->GetEntries();
-    for (Stat_t entryn = 0; entryn < nentries; entryn++) {
+    Int_t nentries = (Int_t) curNtuple->GetEntries();
+    for (Int_t entryn = 0; entryn < nentries; entryn++) {
       curNtuple->GetEvent(entryn);
       vals = curNtuple->GetArgs();
       resNtuple->Fill(vals);
@@ -535,8 +535,11 @@ Int_t StVertexSeedMaker::Aggregate(Char_t* dir) {
   return nfiles;
 }
 //_____________________________________________________________________________
-// $Id: StVertexSeedMaker.cxx,v 1.10 2002/04/19 22:24:16 perev Exp $
+// $Id: StVertexSeedMaker.cxx,v 1.11 2003/01/22 23:32:23 genevb Exp $
 // $Log: StVertexSeedMaker.cxx,v $
+// Revision 1.11  2003/01/22 23:32:23  genevb
+// Type cast fix
+//
 // Revision 1.10  2002/04/19 22:24:16  perev
 // fixes for ROOT/3.02.07
 //
