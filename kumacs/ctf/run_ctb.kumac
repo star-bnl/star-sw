@@ -2,11 +2,12 @@
 * run_ctb.kumac
 * 
 * 7/28/98 K. Turner - editted to make it standard
+* 7/29/98 K. Turner - editted to use new utility functions
 ************************************************************************
 ************************************************************************
 
  macro run__
-          TOP=/scr22/kathy/test26 _
+          TOP=$STAR _
           domain='ctf' _
           INPUT_DATA_DIR=$AFS_RHIC/star/data/samples/ _
           input_g2t_file=muons_central_2.xdf _
@@ -42,11 +43,6 @@
   
  macro/global/create TOP              [TOP]
 
-* setup default directories to search for kumacs in
-* setup default table directory structure in STAF
-* load libraries [domain]
-   
-   
    exec $STAR/kumacs/util/setup_defaults#run
    
    exec setup#setup
