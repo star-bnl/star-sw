@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.190 2001/04/17 21:08:06 fisyak Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.191 2001/04/18 15:03:07 fisyak Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -19,6 +19,7 @@
 #include "StIOMaker/StIOMaker.h"
 #include "StChallenger/StChallenger.h"
 #include "St_tcl_Maker/St_tcl_Maker.h"
+#include "St_dst_Maker/StPrimaryMaker.h"
 #include "StMessMgr.h"
 //_____________________________________________________________________
 Bfc_st BFC[] = {
@@ -59,8 +60,7 @@ Bfc_st BFC[] = {
   {"doEvents"    ,""  ,"","xin,event,analysis,NoDb"                                       ,"","","",kFALSE},
   {"drawDst"     ,""  ,"","xin,ry1h,globT,SCL,geant,display,NoDb,TbUtil"                  ,"","","",kFALSE},
   {"Cdst"        ,""  ,"","global,dst,qa,event,analysis,EventQA"                          ,"","","",kFALSE},
-  {"C1default"   ,""  ,"","tpc,rrs,rich,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits"
-                                                                              ,"","","Year 1 chain",kFALSE}, 
+  {"C1default"   ,""  ,"","tpc,rich,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits"    ,"","","Year 1 chain",kFALSE}, 
   {"C2default"   ,""  ,"","C1default,ftpc,svt,emcY2"                          ,"","","Year 2 chain",kFALSE}, 
   {"CAdefault"   ,""  ,"","tpc,l0,Cdst,Kalman,tags,Tree,EvOut,NoHits,ftpc,svt,emcY2"
                                                                          ,"","","Assymptotic chain",kFALSE}, 
@@ -74,7 +74,9 @@ Bfc_st BFC[] = {
   {"Cy2b"        ,""  ,"","y2b,C2default"                                ,"","","Turn on chain y2b",kFALSE},
   {"C2000"       ,""  ,"","y2000,C1default"                            ,"","","Turn on chain Y2001",kFALSE},
   {"C2001"       ,""  ,"","y2001,C2default"                            ,"","","Turn on chain Y2001",kFALSE},
-  {"mdc4"        ,""  ,"","C2001,trs,sss,fss,rrs,GeantOut"          ,"","","Turn on chain for mdc4",kFALSE},
+  {"MDC4"        ,""  ,"","C2001,trs,sss,fss,rrs,big,GeantOut"      ,"","","Turn on chain for MDC4",kFALSE},
+  {"ppMDC4"      ,""  ,"","pp,C2001,-PreVtx,ppMCTrig,mwc,ppLPeval1,trs,rrs,big,GeantOut","","",
+                                                                         "Turn on chain for ppMDC4",kFALSE},
   {"CComplete"   ,""  ,"","Complete,C2default"             ,"","","Turn on chain for Complete STAR",kFALSE},
   {"P00h"        ,""  ,"","ry1h,in,tpc_daq,tpc,rich,Physics,Cdst,Kalman,tags,Tree,evout,ExB,NoHits","",""
                                                            ,"Production chain for summer 2000 data",kFALSE},
@@ -87,8 +89,8 @@ Bfc_st BFC[] = {
   {"Eval"        ,""  ,"","","",""                ,"Turn on evaluation switch for different makers",kFALSE},
   {"Ev03"        ,""  ,"","","",""                                 ,"Turn on alternative V0 method",kFALSE},
   {"off"         ,""  ,"","","",""                                        ,"Turn off default chain",kFALSE},
-  {"gstar"       ,""  ,"","geant,Simu","","" ,"gstar for 10 muon tracks with pT = 10GeV in |eta|<1",kFALSE}, 
-  {"tdaq"        ,""  ,"","xin,tpc_daq"                                                   ,"","","",kFALSE},  
+  {"gstar"       ,""  ,"","geant,Simu","","" ,"gstar for 10 muon tracks with pT = 10GeV in |eta|<1",kFALSE},
+  {"tdaq"        ,""  ,"","xin,tpc_daq"                                                   ,"","","",kFALSE}, 
   {"miniDAQ"     ,"tpc_raw","tpc","xin,FieldOff,SD97,Eval"    ,"StMinidaqMaker","StMinidaqMaker","",kFALSE}, 
   {"fzin"        ,""  ,"","geant,Simu","" ,""                                 ,"read gstar fz-file",kFALSE},
   {"NoInput"     ,""  ,"","","" ,""                                                ,"No input file",kFALSE},
@@ -125,6 +127,7 @@ Bfc_st BFC[] = {
   {"WestOff"     ,""  ,"","",""                                  ,"","Disactivate West part of tpc",kFALSE},
   {"AllOn"       ,""  ,"","",""                      ,"","Activate both East and West parts of tpc",kFALSE},
   {"ReadAll"     ,""  ,"","",""                                 ,"","Activate all branches to read",kFALSE},
+  {"pp"          ,""  ,"","ppLPfind1,ppLPprojectA",""              ,"","Use pp specific parameters",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"Tables      ","-----------","-----------","------------------------------------------","","","",kFALSE},
   {"------------","-----------","-----------","------------------------------------------","","","",kFALSE},
@@ -187,6 +190,7 @@ Bfc_st BFC[] = {
   {"ctf"         ,"ctf","l0Chain","ctf_T,db"               ,"St_ctf_Maker","St_ctf,St_ctf_Maker","",kFALSE}, 
   {"mwc"         ,"mwc","l0Chain","mwc_T,db,tpcDB"         ,"St_mwc_Maker","St_mwc,St_mwc_Maker","",kFALSE}, 
   {"trg"         ,"trg","l0Chain","trg_T,globT,db"         ,"St_trg_Maker","St_trg,St_trg_Maker","",kFALSE},
+  {"ppMCTrig"    ,"ppMC_trig1","l0Chain",""                          ,"StppTrigMaker","StppSpin","",kFALSE},
   {"tpc"         ,"tpcChain","","tpc_T,globT,tls,db,tpcDB,tcl,tpt,PreVtx"   ,"StMaker","StChain","",kFALSE},
   {"Trs"         ,"","tpcChain","scl,tpcDB,tpc_daq,Simu"              ,"StTrsMaker","StTrsMaker","",kFALSE},
   {"Mixer"       ,"tpc_raw","","","StMixerMaker"  ,"StDaqLib,StDAQMaker,StTrsMaker,StMixerMaker","",kFALSE},
@@ -290,6 +294,11 @@ Bfc_st BFC[] = {
   {"McAna"       ,"","McChain","McEvent",                "StMcAnalysisMaker","StMcAnalysisMaker","",kFALSE},
   {"LAna"        ,"","","in,RY1h,geant,tpcDb","StLaserAnalysisMaker"
                                                       ,"StLaserAnalysisMaker","Laser data Analysis",kFALSE},
+  {"ppLPfind1"   ,"ppLPfind1"  ,"",""         ,"StppLPfindMaker","StppSpin","Find leading particle",kFALSE},
+  {"SpinSortA"   ,"SpinSortA"  ,"",""               ,"StSpinSortMaker","StppSpin","Spin sort event",kFALSE},
+  {"ppLPprojectA","ppLPprojectA","",""   ,"StppLPprojectMaker","StppSpin","PROJECT LP TO PHI-HISTO",kFALSE},
+  {"ppLPeval1"   ,"ppLPeval1"  ,"","","StppLPevalMaker","StppSpin","EVAL LEADING PARTICLE(no cuts)",kFALSE},
+  {"ppDAQfilter1","ppDAQfilter1"  ,"",""                ,"StDAQfilterMaker","StppSpin","DAQ FILTER",kFALSE},
   {"xout"        ,""  ,"",""                                 ,"","xdf2root","Write dst to XDF file",kFALSE}, 
   {"Tree"        ,"OutTree","","","StTreeMaker","StTreeMaker","Write requested branches into files",kFALSE}
 };
@@ -489,6 +498,12 @@ Int_t StBFChain::Instantiate()
 	}
 	// special maker options 
 	if (mk) {
+	  if (GetOption("pp")) {// pp specific stuff
+	    if (maker == "StTrsMaker") mk->SetMode(1);
+	    if (maker == "StPrimaryMaker") {
+	      ((StPrimaryMaker *) mk)->ppLMVuse(15.); // 
+	    }
+	  }
 	  if ((maker == "StPrimaryMaker"  ||
 	       maker == "StPreVertexMaker") && 
 	      (GetOption("ry1h") || GetOption("ry2000"))) mk->SetMode(2);
