@@ -1,5 +1,5 @@
 //_____________________________________________________________________
-// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.394 2004/03/16 21:01:44 jeromel Exp $
+// @(#)StRoot/StBFChain:$Name:  $:$Id: StBFChain.cxx,v 1.395 2004/03/18 02:08:26 jeromel Exp $
 //_____________________________________________________________________
 #include "TROOT.h"
 #include "TString.h"
@@ -177,8 +177,8 @@ Bfc_st BFC1[] = {
   // Year 4 chains (2003/2004) *** CHAINS WILL BE RESHAPED AS RUN PROGRESS ***
   {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                        ,"Base chain for 2004 (tpc)",kFALSE},
-  {"P2004"       ,""     ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr2,svt_daq,SvtD,ftpc,trgd,OSpaceZ","",""
-  ,"Production chain for winter 2003/2004 data (+ l3, tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
+  {"P2004"       ,""     ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr2,ftpc,trgd,OSpaceZ","",""
+                ,"Production chain for winter 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
 
 
   // Other chains/Calibration
@@ -240,6 +240,7 @@ Bfc_st BFC1[] = {
   {"EB1"         ,""  ,"","",""                                     ,"","Force ExB configuration 1",kFALSE},
   {"EB2"         ,""  ,"","",""                                     ,"","Force ExB configuration 2",kFALSE},
   {"OBmap"       ,""  ,"","",""                                          ,"","ExB shape correction",kFALSE},
+  {"OBmap2D"     ,""  ,"","",""                                      ,"","ExB 2 D shape correction",kFALSE},
   {"OTwist"      ,""  ,"","",""                                          ,"","ExB twist correction",kFALSE},
   {"OClock"      ,""  ,"","",""                                     ,"","Clock/tpc rot. correction",kFALSE},
   {"OPr13"       ,""  ,"","",""                                          ,"","PadRow 13 distortion",kFALSE},
@@ -720,8 +721,8 @@ Bfc_st BFC2[] = {
   // Year 4 chains (2003/2004) *** CHAINS WILL BE RESHAPED AS RUN PROGRESS ***
   {"B2004"       ,""  ,"","ry2004,in,tpc_daq,tpc,Physics,Cdst,Kalman,tags,Tree,evout","",""
                                                                        ,"Base chain for 2004 (tpc)",kFALSE},
-  {"P2004"       ,""      ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr2,svt_daq,SvtD,ftpc,trgd,OSpaceZ","",""
-  ,"Production chain for winter 2003/2004 data (+ l3, tof, bcc/fpd, svt (no est), ftpc, emc, trgd)",kFALSE},
+  {"P2004"       ,""     ,"","B2004,l3onl,fcf,tofDat,emcDY2,fpd,Corr2,ftpc,trgd,OSpaceZ","",""
+                ,"Production chain for winter 2003/2004 data (+ l3, tof, bcc/fpd, ftpc, emc, trgd)",kFALSE},
 
 
   // Other chains/Calibration
@@ -784,6 +785,7 @@ Bfc_st BFC2[] = {
   {"EB1"         ,""  ,"","",""                                     ,"","Force ExB configuration 1",kFALSE},
   {"EB2"         ,""  ,"","",""                                     ,"","Force ExB configuration 2",kFALSE},
   {"OBmap"       ,""  ,"","",""                                          ,"","ExB shape correction",kFALSE},
+  {"OBmap2D"     ,""  ,"","",""                                      ,"","ExB 2 D shape correction",kFALSE},
   {"OTwist"      ,""  ,"","",""                                          ,"","ExB twist correction",kFALSE},
   {"OClock"      ,""  ,"","",""                                     ,"","Clock/tpc rot. correction",kFALSE},
   {"OPr13"       ,""  ,"","",""                                          ,"","PadRow 13 distortion",kFALSE},
