@@ -7,20 +7,16 @@
   Char_t *suffix=0;
   Int_t nlist = 2;
   Bool_t NT=kFALSE;
+
   if (strcmp(gSystem.GetName(),"WinNT") == 0 ) {
      NT = kTRUE;
      gSystem.Load("Root_html.dll");
-     suffix = ".dll";
   }
-  else
-     suffix =".so";
-
- //  Char_t buffer[256];
-   for(Int_t i=0;i<nlist;i++) {
-    const char *buffer = libs[i];
-    printf(" %s \n", libs[i]);
-    if (gSystem.Load(libs[i]))  printf(" Loading DLL \"%s\" failed \n",libs[i]);
-  }
+  
+  gSystem->Load("St_base");
+  gSystem->Load("St_Tables");
+  
+  cout << "Dynamic libraries have been loaded" << endl;
 
   void *dirhandle = 0;
   const Char_t *affix="_st";
