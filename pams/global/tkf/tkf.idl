@@ -9,8 +9,8 @@
 #include "g2t_track.idl"
 #include "g2t_tpc_hit.idl"
 #include "tpt_track.idl"
-#include "dst_track.idl"
 #include "tte_mctrk.idl"
+#include "dst_track.idl"
 #include "epi_glob_pid_eval.idl"
 
 interface tkf:        amiModule {
@@ -26,7 +26,7 @@ interface tkf:        amiModule {
                 , in	epi_glob_pid_eval	gpideval
         );
 };
-/* Last mod. for egr_fitter: $Date: 1998/08/31 21:06:06 $ */
+/* Last mod. for tkf: $Date: 1998/08/31 21:26:41 $ */
    
 
 
