@@ -1,4 +1,4 @@
-// $Id: makedoc.C,v 1.53 2000/02/24 02:23:47 fine Exp $
+// $Id: makedoc.C,v 1.54 2000/04/18 23:31:16 fine Exp $
 //=======================================================================
 // owner: Valery Fine
 // what it does: 
@@ -6,7 +6,7 @@
   {
  //*-- Author :    Valery Fine   25/12/98
  gROOT.Reset();
-  Char_t *libs[] = { "St_base","xdf2root","St_Tables"                    
+  Char_t *libs[] = { "libSTAR", "St_base","xdf2root","St_Tables"                    
                     , "StChain","StUtilities","StBFChain"};
 
  TString AFS; // STAR root directory
@@ -32,6 +32,8 @@
     
    }
    else {
+     gSystem->Load("libSTAR");
+     gSystem->Load("Star2Root");
      gSystem->Load("St_base");
      gSystem->Load("St_baseTest");
      gSystem->Load("xdf2root");
@@ -108,6 +110,8 @@
   else {
     lookup = "$STAR";
     lookup += ":";
+    lookup += "$ROOTSYS/ROOT/root/STAR:";
+    lookup += "$ROOTSYS/include:";
     lookup += "$STAR";
     lookup += "/StRoot/StChain:";
     lookup += "$STAR";
@@ -154,23 +158,23 @@
 
   // Create the list of the classes defined with the loaded DLL's to be documented
 
-  Char_t *classes[] = { "St_TableSorter","StCL", "StMicky", "St_tableDescriptor"
-                       ,"St_XDFFile",    "St_Module",       "St_Table"
-                       ,"St_DataSet",    "St_DataSetIter",  "St_FileSet"
-                       ,"StParticleView","St_ObjectSet",    "St_Node",     "St_NodePosition"
-                       ,"StMaker",       "StChain",         "St_NodeView"
-                       ,"table_head_st", "St_NodeViewIter", "St_PolyLineShape"
-                       ,"St_Points3D",   "St_PolyLine3D",   "St_PointsArray3D"
-                       ,"St_AttributesABC", "St_Table3Points","St_TablePoints"
+  Char_t *classes[] = { "TTableSorter",  "TCL", "StMicky",  "TTableDescriptor"
+                       ,"St_XDFFile",    "St_Module",       "TTable"
+                       ,"TDataSet",      "TDataSetIter",     "TFileSet"
+                       ,"StParticleView","St_ObjectSet",    "TVolume",     "TVolumePosition"
+                       ,"StMaker",       "StChain",         "TVolumeView"
+                       ,"table_head_st", "TVolumeViewIter", "St_PolyLineShape"
+                       ,"TPoints3D",     "St_PolyLine3D",    "TPointsArray3D"
+                       ,"TTable3Points", "TTablePoints"
                        ,"St_io_Maker",   "StHelix3DPoints", "StHits3DPoints"
                        ,"StObjArray",    "StHit",            "StHelixD"
-                       ,"StTrack",       "St_TableElementDescriptor"
+                       ,"StTrack",       
                        ,"St_geom_Maker", "StPadDisplayMaker", "St_TLA_Maker"
                        ,"StBFChain",     "StEventDisplayMaker",
                        ,"StVirtualEventFilter", "St_TableIter"
                        ,"St_srs_Maker",  "St_xdfin_Maker"
                       };
-  Int_t nclass = 41;
+  Int_t nclass = 39;
   // Creat the definitions of the classes not derived from TObjects
   if (NT) {
      gROOT->LoadMacro("$STAF/inc/table_header.h");
@@ -296,6 +300,9 @@
 //___________________________________________________________________________
 //___________________________________________________________________________
 // $Log: makedoc.C,v $
+// Revision 1.54  2000/04/18 23:31:16  fine
+// adjusted to ROOT 2.24
+//
 // Revision 1.53  2000/02/24 02:23:47  fine
 // St_Table html docs generationn added
 //
