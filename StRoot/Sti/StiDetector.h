@@ -14,6 +14,7 @@ class StiMaterial;
 class StiShape;
 template<class T> class StiCompositeTreeNode;
 class StiHitErrorCalculator;
+class StiElossCalculator;
 
 /*!
    StiDetector represents a detector for the purposes of ITTF tracking.
@@ -103,6 +104,16 @@ public:
 	return -1;
       }
 
+    void setElossCalculator(StiElossCalculator * calculator)
+      {
+	_elossCalculator = calculator;
+      }
+
+    StiElossCalculator * getElossCalculator() const
+      {
+	return _elossCalculator;
+      }
+
  protected:
     
     /// Toggle switch determining whether this detector is to be added to the detector tree.
@@ -144,6 +155,8 @@ public:
     int _groupId;
     const StiTrackingParameters * _pars;
     int _key1, _key2;
+
+    StiElossCalculator * _elossCalculator;
 
 };
 

@@ -236,7 +236,6 @@ public:
 
  protected:   
   static int counter;
-  static const StiElossCalculator * _elossCalculator;
   const StiDetector * _detector;
   static Messenger &  _messenger;
 

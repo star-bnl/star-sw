@@ -1,3 +1,4 @@
+
 #ifndef StiElossCalculator_H_INCLUDED
 #define StiElossCalculator_H_INCLUDED
 
@@ -24,12 +25,18 @@
 class StiElossCalculator
 {
  public:
-  StiElossCalculator();
+  StiElossCalculator(double zOverA, double ionization2);
   virtual ~StiElossCalculator();
   double calculate(double z2, double zOverA, double m, double beta2, double ionization2 ) const;
+  double calculate(double z2, double m, double beta2) const;
  protected:  
   static const double _k;
   static const double _mec;
+
+  /// Ratio of Z to A of the scattering material
+  double _zOverA;
+  /// square of the ionization potential.
+  double _ionization2;
 };
 
 #endif
