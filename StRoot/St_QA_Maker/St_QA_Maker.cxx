@@ -1,5 +1,8 @@
-// $Id: St_QA_Maker.cxx,v 1.67 1999/12/12 23:09:47 kathy Exp $
+// $Id: St_QA_Maker.cxx,v 1.68 1999/12/14 18:33:24 kathy Exp $
 // $Log: St_QA_Maker.cxx,v $
+// Revision 1.68  1999/12/14 18:33:24  kathy
+// removed 4 ftpc histograms as per Janet's request
+//
 // Revision 1.67  1999/12/12 23:09:47  kathy
 // add pt vs eta in ftpc histogram as per Janet
 //
@@ -436,8 +439,6 @@ void St_QA_Maker::MakeHistGlob(){
         m_glb_ratioFE->Fill(nfitntot);
         m_glb_ratiomFE->Fill(nfitnmax);
 	m_psiFE->Fill(t->psi);
-        m_tanlFE->Fill(t->tanl);
-        m_glb_thetaFE->Fill(theta);
 	m_etaFE->Fill(eta);
 	m_pTFE->Fill(pT);
         m_momFE->Fill(gmom);
@@ -469,8 +470,6 @@ void St_QA_Maker::MakeHistGlob(){
         m_glb_ratioFW->Fill(nfitntot);
         m_glb_ratiomFW->Fill(nfitnmax);
 	m_psiFW->Fill(t->psi);
-        m_tanlFW->Fill(t->tanl);
-        m_glb_thetaFW->Fill(theta);
 	m_etaFW->Fill(eta);
 	m_pTFW->Fill(pT);
         m_momFW->Fill(gmom);

@@ -1,5 +1,8 @@
-// $Id: StQABookHist.cxx,v 1.13 1999/12/12 23:09:47 kathy Exp $ 
+// $Id: StQABookHist.cxx,v 1.14 1999/12/14 18:33:23 kathy Exp $ 
 // $Log: StQABookHist.cxx,v $
+// Revision 1.14  1999/12/14 18:33:23  kathy
+// removed 4 ftpc histograms as per Janet's request
+//
 // Revision 1.13  1999/12/12 23:09:47  kathy
 // add pt vs eta in ftpc histogram as per Janet
 //
@@ -176,11 +179,7 @@ StQABookHist::StQABookHist(const char *name, const char *title, const char* type
   m_psiFE=0;  
   m_psiFW=0;        
   m_tanlT=0;   
-  m_tanlFE=0;   
-  m_tanlFW=0;       
   m_glb_thetaT=0;  
-  m_glb_thetaFE=0;  
-  m_glb_thetaFW=0;  
   m_etaT=0;    
   m_etaFE=0;    
   m_etaFW=0;        
@@ -613,10 +612,6 @@ void StQABookHist::BookHistGlob(){
   m_lengthFW     = QAH1F("QaGtrkLengthFW",  "globtrk: track length, ftpc west", 60,0.,120.);
   m_psiFE        = QAH1F("QaGtrkPsiFE",     "globtrk: psi, ftpc east", 36, 0.,360.);
   m_psiFW        = QAH1F("QaGtrkPsiFW",     "globtrk: psi, ftpc west", 36, 0.,360.);
-  m_tanlFE       = QAH1F("QaGtrkTanlFE",    "globtrk: tanl, ftpc east",30,-60.,60.);
-  m_tanlFW       = QAH1F("QaGtrkTanlFW",    "globtrk: tanl, ftpc west",30,-60.,60.);
-  m_glb_thetaFE  = QAH1F("QaGtrkThetaFE",   "globtrk: theta, ftpc east",20,0.,4.);
-  m_glb_thetaFW  = QAH1F("QaGtrkThetaFW",   "globtrk: theta, ftpc west",20,0.,4.);
   m_etaFE        = QAH1F("QaGtrkEtaFE",     "globtrk: eta, ftpc east",80,-8.,8.);
   m_etaFW        = QAH1F("QaGtrkEtaFW",     "globtrk: eta, ftpc west",80,-8.,8.);
   m_pTFE         = QAH1F("QaGtrkPtFE",      "globtrk: pT, ftpc east",50,0.,5.);

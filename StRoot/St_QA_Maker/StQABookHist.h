@@ -1,5 +1,8 @@
-//! $Id: StQABookHist.h,v 1.8 1999/12/12 23:09:47 kathy Exp $ 
+//! $Id: StQABookHist.h,v 1.9 1999/12/14 18:33:24 kathy Exp $ 
 //! $Log: StQABookHist.h,v $
+//! Revision 1.9  1999/12/14 18:33:24  kathy
+//! removed 4 ftpc histograms as per Janet's request
+//!
 //! Revision 1.8  1999/12/12 23:09:47  kathy
 //! add pt vs eta in ftpc histogram as per Janet
 //!
@@ -41,7 +44,7 @@ class TH2F;
 class StQABookHist : public StMaker {
  public:
 
-//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.8 1999/12/12 23:09:47 kathy Exp $";
+//! static Char_t m_VersionCVS = "$Id: StQABookHist.h,v 1.9 1999/12/14 18:33:24 kathy Exp $";
 
 //! Histograms booking constants
   static const Int_t nxpT;
@@ -161,11 +164,7 @@ class StQABookHist : public StMaker {
   TH1F     *m_psiFE;         //! psi reconstructed, ftpc east
   TH1F     *m_psiFW;         //! psi reconstructed, ftpc west
   TH1F     *m_tanlT;         //! tan(dip) =pz/pt at start, tpc
-  TH1F     *m_tanlFE;        //! tan(dip) =pz/pt at start, ftpc east
-  TH1F     *m_tanlFW;        //! tan(dip) =pz/pt at start, ftpc west 
   TH1F     *m_glb_thetaT;    //! theta - tpc
-  TH1F     *m_glb_thetaFE;   //! theta - ftpc east
-  TH1F     *m_glb_thetaFW;   //! theta - ftpc west
   TH1F     *m_etaT;          //! eta, tpc
   TH1F     *m_etaFE;         //! eta, ftpc east
   TH1F     *m_etaFW;         //! eta, ftpc west
@@ -398,7 +397,7 @@ class StQABookHist : public StMaker {
 
 // the following is a ROOT macro  that is needed in all ROOT code
   virtual const char *GetCVS() const
-  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.8 1999/12/12 23:09:47 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
+  {static const char cvs[]="Tag $Name:  $ $Id: StQABookHist.h,v 1.9 1999/12/14 18:33:24 kathy Exp $ built "__DATE__" "__TIME__ ; return cvs;}
 
   ClassDef(StQABookHist, 1)   //needed for all code that will be used in CINT
     };
