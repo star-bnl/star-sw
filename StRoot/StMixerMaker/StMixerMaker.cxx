@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StMixerMaker.cxx,v 1.4 2000/03/15 20:50:41 pfachini Exp $
+ * $Id: StMixerMaker.cxx,v 1.5 2000/03/15 22:16:32 pfachini Exp $
  *
  * Author: Patricia Fachini
  *
@@ -11,6 +11,9 @@
  ***************************************************************************
  *
  * $Log: StMixerMaker.cxx,v $
+ * Revision 1.5  2000/03/15 22:16:32  pfachini
+ * *** empty log message ***
+ *
  * Revision 1.4  2000/03/15 20:50:41  pfachini
  * The command line to write out the mixed events into a file is now commented
  *
@@ -62,19 +65,11 @@
 #include "St_ObjectSet.h"
 
 // DataBase Initialization
-#ifdef TPC_DATABASE_PARAMETERS
 // Dave's Header file
 #include "StTpcDb/StTpcDb.h"
 #include "StTrsMaker/include/StTpcDbGeometry.hh"
 #include "StTrsMaker/include/StTpcDbSlowControl.hh"
 #include "StTrsMaker/include/StTpcDbElectronics.hh"
-#endif
-
-#ifdef ROOT_DATABASE_PARAMETERS
-#include "StTpcROOTGeometry.hh"
-#include "StTpcROOTSlowControl.hh"
-#include "StTpcROOTElectronics.hh" 
-#endif
 
 // processes
 #include "StMixerFastDigitalSignalGenerator.hh"
@@ -148,29 +143,10 @@ int StMixerMaker::writeFile(char* file, int numEvents)
 
 Int_t StMixerMaker::Init() {
 
-#ifdef TPC_DATABASE_PARAMETERS
   // The global pointer to the Db is gStTpcDb and it should be created in the macro.  
   mGeometryDb = StTpcDbGeometry::instance(gStTpcDb);
   mElectronicsDb = StTpcDbElectronics::instance(gStTpcDb);
   mSlowControlDb = StTpcDbSlowControl::instance(gStTpcDb);
-#endif
-
-#ifdef ROOT_DATABASE_PARAMETERS
-  // Set up the DataBase access
-  St_DataSet *MixerPars = GetDataBase("params/tpc/trspars");
-  assert(MixerPars);
-  // should use dynamic_cast when available
-  geometryDataSet *Geometry    =
-      static_cast<geometryDataSet*>(MixerPars->Find("Trs/Geometry"));
-  electronicsDataSet *Electronics =
-      static_cast<electronicsDataSet*>(MixerPars->Find("Trs/Electronics"));
-  slowcontrolDataSet *SlowControl =
-      static_cast<slowcontrolDataSet*>(MixerPars->Find("Trs/SlowControl"));
-
-  mGeometryDb = StTpcROOTGeometry::instance(Geometry);
-  mSlowControlDb = StTpcROOTSlowControl::instance(SlowControl);
-  mElectronicsDb = StTpcROOTElectronics::instance(Electronics);
-#endif
 
   mSector = new StTrsSector(mGeometryDb);
   mSector1 = new StTrsSector(mGeometryDb);
