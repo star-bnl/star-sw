@@ -1,11 +1,14 @@
 /***************************************************************************
  *
- * $Id: StiStEventFiller.cxx,v 2.8 2003/03/13 16:01:48 pruneau Exp $
+ * $Id: StiStEventFiller.cxx,v 2.9 2003/03/13 18:59:44 pruneau Exp $
  *
  * Author: Manuel Calderon de la Barca Sanchez, Mar 2002
  ***************************************************************************
  *
  * $Log: StiStEventFiller.cxx,v $
+ * Revision 2.9  2003/03/13 18:59:44  pruneau
+ * various updates
+ *
  * Revision 2.8  2003/03/13 16:01:48  pruneau
  * remove various cout
  *
@@ -282,9 +285,9 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
   StSPtrVecTrackNode& trNodeVec = mEvent->trackNodes(); 
   StSPtrVecTrackDetectorInfo& detInfoVec = mEvent->trackDetectorInfo(); 
   int errorCount=0; 
-  for (TrackMap::const_iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt) 
+  for (TrackMap::iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt) 
     {
-      const StiKalmanTrack* kTrack = static_cast<const StiKalmanTrack*>((*trackIt).second);
+      StiKalmanTrack* kTrack = static_cast<StiKalmanTrack*>((*trackIt).second);
       StTrackDetectorInfo* detInfo = new StTrackDetectorInfo;
       fillDetectorInfo(detInfo,kTrack);
       // track node where the new StTrack will reside
@@ -305,7 +308,7 @@ StEvent* StiStEventFiller::fillEvent(StEvent* e, StiTrackContainer* t)
 	  // and a valid StDetectorInfo object.
 	  StuFixTopoMap(gTrack);
 	  //cout<<"Tester: Event Track Node Entries: "<<trackNode->entries()<<endl;
-	  mTrkNodeMap.insert(map<const StiKalmanTrack*,StTrackNode*>::value_type (kTrack,trNodeVec.back()) );
+	  mTrkNodeMap.insert(map<StiKalmanTrack*,StTrackNode*>::value_type (kTrack,trNodeVec.back()) );
 	  if (trackNode->entries(global)<1)
 	    cout << "StiStEventFiller::fillEvent() - ERROR - Track Node has no entries!! -------------------------" << endl;
 	}
@@ -359,13 +362,13 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
   // loop over StiKalmanTracks
   //cout << "Tracks in container " << mTrackStore->size() << endl;
   int mTrackN=0;
-  const StiKalmanTrack* kTrack;
-  for (TrackMap::const_iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt,++mTrackN) 
+  StiKalmanTrack* kTrack;
+  for (TrackMap::iterator trackIt = mTrackStore->begin(); trackIt!=mTrackStore->end();++trackIt,++mTrackN) 
     {
-      kTrack = static_cast<const StiKalmanTrack*>((*trackIt).second);
+      kTrack = static_cast<StiKalmanTrack*>((*trackIt).second);
       if (kTrack==0) 
-	throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- static_cast<const StiKalmanTrack*>((*trackIt).second)==0");
-      map<const StiKalmanTrack*, StTrackNode*>::iterator itKtrack = mTrkNodeMap.find(kTrack);
+	throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- static_cast<StiKalmanTrack*>((*trackIt).second)==0");
+      map<StiKalmanTrack*, StTrackNode*>::iterator itKtrack = mTrkNodeMap.find(kTrack);
       if (itKtrack == mTrkNodeMap.end()) 
 	throw runtime_error("StiStEventFiller::fillEventPrimaries() -F- itKtrack == mTrkNodeMap.end()");
       //	{ 
@@ -421,7 +424,7 @@ StEvent* StiStEventFiller::fillEventPrimaries(StEvent* e, StiTrackContainer* t)
 /// change: currently point and fit points are the same for StiTracks,
 /// if this gets modified later in ITTF, this must be changed here
 /// but maybe use track->getPointCount() later?
-void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, const StiTrack* track) 
+void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, StiTrack* track) 
 {
   //cout << "StiStEventFiller::fillDetectorInfo() -I- Started"<<endl;
   vector<StMeasuredPoint*> hitVec = track->stHits();
@@ -436,14 +439,14 @@ void StiStEventFiller::fillDetectorInfo(StTrackDetectorInfo* detInfo, const StiT
   //cout << "StiStEventFiller::fillDetectorInfo() -I- Done"<<endl;
 }
 
-void StiStEventFiller::fillGeometry(StTrack* gTrack, const StiTrack* track, bool outer)
+void StiStEventFiller::fillGeometry(StTrack* gTrack, StiTrack* track, bool outer)
 {
   //cout << "StiStEventFiller::fillGeometry() -I- Started"<<endl;
   if (!gTrack)
     throw runtime_error("StiStEventFiller::fillGeometry() -F- gTrack==0");
   if (!track) 
     throw runtime_error("StiStEventFiller::fillGeometry() -F- track==0");
-  const StiKalmanTrack* kTrack = dynamic_cast<const StiKalmanTrack*>(track);
+  StiKalmanTrack* kTrack = dynamic_cast<StiKalmanTrack*>(track);
   if (!kTrack)
     throw runtime_error("StiStEventFiller::fillGeometry() -F- kTrack==0 cast failed");
   StiKalmanTrackNode* node;
@@ -451,20 +454,14 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, const StiTrack* track, bool
     node = kTrack->getOuterMostHitNode();
   else
     node = kTrack->getInnerMostHitNode();
-  double phase;
   StThreeVectorF origin(node->getRefPosition(),node->getY(),node->getZ());
   origin.rotateZ(node->getRefAngle());
-  StThreeVectorF p = node->getGlobalMomentumF();
-  short int h = (short int) node->getHelicity();
-  phase = (p.y()==0&&p.x()==0) ? phase =(1-2.*h)*M_PI/4. : atan2(p.y(),p.x())-h*M_PI/2.;
-  phase += h*halfpi;
-  double curv=fabs(node->getCurvature());
   StTrackGeometry* geometry =new StHelixModel(short(node->getCharge()),
 					      node->getPhase(),
 					      fabs(node->getCurvature()),
 					      node->getDipAngle(),
 					      origin, 
-					      p, 
+					      node->getGlobalMomentumF(), 
 					      node->getHelicity());
   if (outer)
     gTrack->setOuterGeometry(geometry);
@@ -473,7 +470,7 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, const StiTrack* track, bool
   return;
 }
 
-// void StiStEventFiller::fillTopologyMap(StTrack* gTrack, const StiTrack* track){
+// void StiStEventFiller::fillTopologyMap(StTrack* gTrack, StiTrack* track){
 // 	cout << "StiStEventFiller::fillTopologyMap()" << endl;
 //     int map1,map2;
 //     map1 = map2 = 0;
@@ -484,7 +481,7 @@ void StiStEventFiller::fillGeometry(StTrack* gTrack, const StiTrack* track, bool
 //     return;
 // }
 
-void StiStEventFiller::fillFitTraits(StTrack* gTrack, const StiTrack* track){
+void StiStEventFiller::fillFitTraits(StTrack* gTrack, StiTrack* track){
   // mass
   double massHyp = track->getMass();  // change: perhaps this mass is not set right?
   unsigned short geantIdPidHyp = 9999;
@@ -492,7 +489,7 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, const StiTrack* track){
   unsigned short nFitPoints = encodedStEventFitPoints(track);
   // chi square and covariance matrix, plus other stuff from the
   // innermost track node
-  const StiKalmanTrack* kTrack = dynamic_cast<const StiKalmanTrack*>(track);
+  StiKalmanTrack* kTrack = dynamic_cast<StiKalmanTrack*>(track);
   if (!kTrack) {
     cout << "StiStEventFiller::fillFitTraits(). ERROR:\t"
 	 << "StiTrack can't be dynamic_cast'd to StiKalmanTrack.  Exit" <<endl;
@@ -520,10 +517,10 @@ void StiStEventFiller::fillFitTraits(StTrack* gTrack, const StiTrack* track){
   return;
 }
 
-void StiStEventFiller::filldEdxInfo(StiDedxCalculator& dEdxCalculator, StTrack* gTrack, const StiTrack* track){
+void StiStEventFiller::filldEdxInfo(StiDedxCalculator& dEdxCalculator, StTrack* gTrack, StiTrack* track){
   double dEdx, errordEdx, nPoints;
   dEdx = errordEdx = nPoints = 9999;
-  const StiKalmanTrack* kTrack = dynamic_cast<const StiKalmanTrack*>(track);
+  StiKalmanTrack* kTrack = dynamic_cast<StiKalmanTrack*>(track);
   if (kTrack) {
     dEdxCalculator.getDedx(kTrack, dEdx, errordEdx, nPoints);
   }
@@ -536,7 +533,7 @@ void StiStEventFiller::filldEdxInfo(StiDedxCalculator& dEdxCalculator, StTrack* 
   gTrack->addPidTraits(pidTrait);
   return;
 }
-void StiStEventFiller::fillPidTraits(StTrack* gTrack, const StiTrack* track){
+void StiStEventFiller::fillPidTraits(StTrack* gTrack, StiTrack* track){
 
   // TPC
   filldEdxInfo(dEdxTpcCalculator,gTrack,track);
@@ -557,7 +554,7 @@ void StiStEventFiller::fillPidTraits(StTrack* gTrack, const StiTrack* track){
 /// 	x=6 -> SVT+TPC+primary vertex 
 /// 	x=7 -> FTPC only 
 /// 	x=8 -> FTPC+primary 
-void StiStEventFiller::fillTrack(StTrack* gTrack, const StiTrack* track)
+void StiStEventFiller::fillTrack(StTrack* gTrack, StiTrack* track)
 {
   //cout << "StiStEventFiller::fillTrack()" << endl;
   if (gTrack->type()==global) {
@@ -583,7 +580,7 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, const StiTrack* track)
   double impactParam = impactParameter(track);
 
   /*
-  const StiKalmanTrack * kktrack = static_cast<const StiKalmanTrack *>(track);
+  StiKalmanTrack * kktrack = static_cast<StiKalmanTrack *>(track);
   if (kktrack->isPrimary())
     {
       double dy,dz,d;
@@ -606,7 +603,7 @@ void StiStEventFiller::fillTrack(StTrack* gTrack, const StiTrack* track)
   return;
 }
 
-unsigned short StiStEventFiller::encodedStEventFitPoints(const StiTrack* track) {
+unsigned short StiStEventFiller::encodedStEventFitPoints(StiTrack* track) {
   // need to write the fit points in StEvent following the convention
   // 1*tpc + 1000*svt + 10000*ssd (Helen/Spiros Oct 29, 1999)
   //vector<StHit*> hitVec = track->stHits();
@@ -642,14 +639,14 @@ unsigned short StiStEventFiller::encodedStEventFitPoints(const StiTrack* track) 
   return (nFitTpc + 1000*nFitSvt + 10000*nFitSsd);
     
 }
-float StiStEventFiller::impactParameter(const StiTrack* track) 
+float StiStEventFiller::impactParameter(StiTrack* track) 
 {
   if (!mEvent->primaryVertex()) {
     return DBL_MAX;
   }
     
   // get the innermost hit node
-  const StiKalmanTrack* kTrack = static_cast<const StiKalmanTrack*>(track);
+  StiKalmanTrack* kTrack = static_cast<StiKalmanTrack*>(track);
   StiKalmanTrackNode*	node = kTrack->getInnerMostHitNode();
   //cout << " ///////////////////// LAST NODE :" << *lastNode<<endl;
   //StiKalmanTrackNode*	node = static_cast<StiKalmanTrackNode*>(lastNode->getParent());
@@ -693,6 +690,6 @@ float StiStEventFiller::impactParameter(const StiTrack* track)
   float dca = static_cast<float>(helix->distance(vxD));
   //cout << "dcaHelix    : " << dca << endl;  
   //cout << "dcaPhysical : " << static_cast<float>(physical.distance(vxD) ) << endl;  
-
+  kTrack->setDca(dca);
   return dca;
 }

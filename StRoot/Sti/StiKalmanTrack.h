@@ -40,7 +40,6 @@ using namespace std;
 #include "StiHit.h"
 #include "StiTrack.h"
 #include "StiKalmanTrackFinderParameters.h"
-class StiMaker;
 
 #define TRACKMESSENGER *(Messenger::instance(MessageType::kTrackMessage))
 /*! 
@@ -152,6 +151,8 @@ class StiKalmanTrack : public StiTrack
    */
    double  getDca()    const;
 
+   void setDca(double dca);
+   
   /*!
    * Returns the distance of closest approach of this track to the give track.
    * @return dca in cm.
@@ -298,8 +299,6 @@ class StiKalmanTrack : public StiTrack
 
   void setFlag(long v);
   long getFlag() const;
-
-  static StiMaker* maker;
 
 protected:
     
@@ -486,6 +485,12 @@ inline double  StiKalmanTrack::getDca()    const
 {
   return _dca;
 }
+
+inline void  StiKalmanTrack::setDca(double dca)  
+{
+  _dca = dca;
+}
+
 
 /*! Calculate and return the distance of closest approach to given track
    <h3>Notes</h3> 

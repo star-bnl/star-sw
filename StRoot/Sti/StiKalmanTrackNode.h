@@ -14,7 +14,6 @@
 #include "StiPlacement.h"
 #include "StiHit.h"
 #include "StiMaterial.h"
-class StiMaker;
 class StiDetector;
 class StiMaterial;
 class Messenger;
@@ -216,8 +215,6 @@ public:
   short int contiguousHitCount;
   short int contiguousNullCount;
 
-  static StiMaker * maker;
-  
  protected:   
   static const StiElossCalculator * _elossCalculator;
   const StiDetector * _detector;

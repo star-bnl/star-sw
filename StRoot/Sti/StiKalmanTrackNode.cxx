@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrackNode.cxx,v 2.12 2003/03/12 17:57:31 pruneau Exp $
+ * $Id: StiKalmanTrackNode.cxx,v 2.13 2003/03/13 18:59:13 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrackNode.cxx,v $
+ * Revision 2.13  2003/03/13 18:59:13  pruneau
+ * various updates
+ *
  * Revision 2.12  2003/03/12 17:57:31  pruneau
  * Elss calc updated.
  *
@@ -38,7 +41,6 @@ using namespace std;
 #include "StiKalmanTrackFinderParameters.h"
 #include "StiHitErrorCalculator.h"
 #include "Sti/StiElossCalculator.h"
-#include "StiMaker/StiMaker.h"
 
 // Local Track Model
 //
@@ -48,7 +50,6 @@ using namespace std;
 // x[3] = C  (local) curvature of the track
 // x[4] = tan(l) 
 
-StiMaker* StiKalmanTrackNode::maker = 0;
 StiKalmanTrackFinderParameters * StiKalmanTrackNode::pars = 0;
 bool StiKalmanTrackNode::recurse = false;
 
@@ -745,15 +746,6 @@ double StiKalmanTrackNode::evaluateChi2(const StiHit * hit)
   double dy=hit->y()-_p0;
   double dz=hit->z()-_p1;
   double cc= (dy*r00*dy + 2*r01*dy*dz + dz*r11*dz)/det;
-  if (!hit->detector())
-    {//main vertex
-      maker->dyHist->Fill(dy);
-      maker->dzHist->Fill(dz);
-      /*cout << " evaluateChi2(VERTEX): _x:"<<_x 
-	   << " dy:"<<dy << " dz:"<<dz
-	   << " sqrt(dy^2+dz^2):" << sqrt(dy*dy+dz*dz) 
-	   << " CHI2:"<< cc <<endl;    */
-    }
   MESSENGER <<"evaluateChi2() -I- Done"<<cc<<endl;
   return cc;
 }

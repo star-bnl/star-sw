@@ -1,10 +1,13 @@
 //StiKalmanTrack.cxx
 /*
- * $Id: StiKalmanTrack.cxx,v 2.14 2003/03/13 16:38:11 andrewar Exp $
+ * $Id: StiKalmanTrack.cxx,v 2.15 2003/03/13 18:59:08 pruneau Exp $
  *
  * /author Claude Pruneau
  *
  * $Log: StiKalmanTrack.cxx,v $
+ * Revision 2.15  2003/03/13 18:59:08  pruneau
+ * various updates
+ *
  * Revision 2.14  2003/03/13 16:38:11  andrewar
  * Made use of X0() calls in getTrackRadLength()
  *
@@ -40,8 +43,6 @@
 #include "StiDetector.h"
 #include "StiPlacement.h"
 #include "StiMaterial.h"
-#include "StiMaker/StiMaker.h"
-StiMaker* StiKalmanTrack::maker = 0;
 
 ostream& operator<<(ostream&, const StiHit&);
 
@@ -544,12 +545,8 @@ double StiKalmanTrack::getTrackLength() const
  */
 double StiKalmanTrack::getTrackRadLength() const
 {
-
-
-
   double x1, x2, x3;  //lengths in different media
   double totalR=0.;
-
   //Are we going in or out? Makes a difference which material to call
   bool trackIn = (kOutsideIn==getTrackingDirection());
 
@@ -590,23 +587,24 @@ double StiKalmanTrack::getTrackRadLength() const
 	   <<"\n\t\tMaterial: "<<nextNode->getDetector()->getMaterial()
 	   <<"\n\t\tLength: "<<x3
            << endl;
-
       if(trackIn)
-	totalR += x1/thisNode->getX0()
-	          + x2/nextNode->getGasX0()
-	          + x3/nextNode->getX0();
+	{
+	  if (thisNode->getX0()>0)    totalR += x1/thisNode->getX0();
+	  if (nextNode->getGasX0()>0) totalR += x2/nextNode->getGasX0();
+	  if (nextNode->getX0()>0)    totalR += x3/nextNode->getX0();
+	}
       else
-	totalR +=  x1/thisNode->getX0()
-	          + x2/thisNode->getGasX0()
-	          + x3/nextNode->getX0();
-      
+	{
+	  if (thisNode->getX0()>0)    totalR += x1/thisNode->getX0();
+	  if (thisNode->getGasX0()>0) totalR += x2/thisNode->getGasX0();
+	  if (nextNode->getX0()>0)    totalR += x3/nextNode->getX0();
+	}
       //cache nextNode for next iteration...
       thisNode = nextNode;
       x1       = x3;
-
     }
-
-  cout <<"Rad Length: "<<totalR;
+  if (totalR>200.)
+    cout <<"StiKalmanTrack::getTrackRadLength() -W- Total Rad Length Error: "<<totalR;
   return totalR;
 }
 
@@ -882,16 +880,18 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
     { 
       //cout << " on vertex plane:";
       chi2 = tNode->evaluateChi2(&localVertex); 
-      double dx,dy,dz,d;
-      dx=tNode->_x- localVertex.x();
-      dy=tNode->_p0- localVertex.y();
-      dz=tNode->_p1- localVertex.z();
-      d= sqrt(dx*dx+dy*dy+dz*dz);
-      cout << " dx:"<< dx
-	   << " dy:"<< dy
-	   << " dz:"<< dz
-	   << " d: "<< d<<endl;
-      _dca = sqrt(dy*dy+dz*dz);
+      /*
+	double dx,dy,dz,d;
+	dx=tNode->_x- localVertex.x();
+	dy=tNode->_p0- localVertex.y();
+	dz=tNode->_p1- localVertex.z();
+	d= sqrt(dx*dx+dy*dy+dz*dz);
+	cout << " dx:"<< dx
+	<< " dy:"<< dy
+	<< " dz:"<< dz
+	<< " d: "<< d<<endl;
+	_dca = sqrt(dy*dy+dz*dz);
+      */
       if (chi2<pars->maxChi2Vertex)
 	{
 	  myHit = StiToolkit::instance()->getHitFactory()->getInstance();
@@ -899,9 +899,7 @@ bool StiKalmanTrack::extendToVertex(StiHit* vertex)
 	  tNode->setHit(myHit);
 	  tNode->setChi2(chi2);
 	  tNode->setDetector(0);
-	 
 	  add(tNode);
-
 	  trackExtended = true;
 	}
     }
