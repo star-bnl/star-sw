@@ -417,8 +417,10 @@ Bool_t MainFrame::ProcessMessage(Long_t msg, Long_t parm1, Long_t)
 		finishEvent();
 	    }
 	    else if (parm1 == M_Tracking_ResetEvent) {
+		setCurrentDetectorToDefault();
 		StiMaker::instance()->Clear();
 		StiMaker::instance()->Make();
+		showCurrentDetector();
 	    }
 	    else if (parm1 == M_Tracking_EventStep) {
 		stepToNextEvent();
