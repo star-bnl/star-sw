@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbTable.cc,v 1.28 2001/10/24 04:05:20 porter Exp $
+ * $Id: StDbTable.cc,v 1.29 2001/10/26 20:59:46 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -11,6 +11,10 @@
  ***************************************************************************
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.29  2001/10/26 20:59:46  porter
+ * fixed new endtime flag from previous checkin. made StDataBaseI available
+ * at root-cli.
+ *
  * Revision 1.28  2001/10/24 04:05:20  porter
  * added long long type to I/O and got rid of obsolete dataIndex table
  *
@@ -126,6 +130,10 @@
  * so that delete of St_Table class i done correctly
  *
  * $Log: StDbTable.cc,v $
+ * Revision 1.29  2001/10/26 20:59:46  porter
+ * fixed new endtime flag from previous checkin. made StDataBaseI available
+ * at root-cli.
+ *
  * Revision 1.28  2001/10/24 04:05:20  porter
  * added long long type to I/O and got rid of obsolete dataIndex table
  *
@@ -902,14 +910,7 @@ StDbTable::WriteElement(char* ptr, char* name, int len, StTypeE type, StDbBuffer
   case Stuchar:
     {
     unsigned char* muchar = (unsigned char*)ptr;
-    int* tmp = new int[len] ;
-    for(int k=0;k<len;k++){
-      tmp[k]= (int)*muchar;
-      muchar++;
-    }
-    //   buff->WriteArray(muchar,len,name);
-    buff->WriteArray(tmp,len,name);
-    delete [] tmp;
+    buff->WriteArray(muchar,len,name);
     break;
     }
   case Stshort:

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbBuffer.h,v 1.6 2001/10/24 04:05:19 porter Exp $
+ * $Id: StDbBuffer.h,v 1.7 2001/10/26 20:59:46 porter Exp $
  *
  * Author: Laurent Conin
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbBuffer.h,v $
+ * Revision 1.7  2001/10/26 20:59:46  porter
+ * fixed new endtime flag from previous checkin. made StDataBaseI available
+ * at root-cli.
+ *
  * Revision 1.6  2001/10/24 04:05:19  porter
  * added long long type to I/O and got rid of obsolete dataIndex table
  *
@@ -39,9 +43,8 @@
 
 enum myctype{_char,_uchar,_short,_ushort,_int,_uint,_long,_ulong,_longlong,_float,_double,_ascii,_string};
 
-const int mycsize[]={sizeof(char),sizeof(unsigned char),sizeof(short),sizeof(unsigned short),
-		 sizeof(int),sizeof(unsigned int),sizeof(long),sizeof(unsigned long),sizeof(long long),
-		 sizeof(float),sizeof(double),sizeof(char*),sizeof(char*)};
+const int mycsize[]={sizeof(char),sizeof(unsigned char),sizeof(short),sizeof(unsigned short),sizeof(int),sizeof(unsigned int),sizeof(long),sizeof(unsigned long),sizeof(long long),sizeof(float),sizeof(double),sizeof(char*),sizeof(char*)};
+
 #ifdef SOLARIS
 const int mycswapl[]={1,1,1,1,4,4,4,4,8,4,8,1,1};
 #else

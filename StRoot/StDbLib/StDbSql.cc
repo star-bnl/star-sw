@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDbSql.cc,v 1.11 2001/10/24 04:05:20 porter Exp $
+ * $Id: StDbSql.cc,v 1.12 2001/10/26 20:59:46 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDbSql.cc,v $
+ * Revision 1.12  2001/10/26 20:59:46  porter
+ * fixed new endtime flag from previous checkin. made StDataBaseI available
+ * at root-cli.
+ *
  * Revision 1.11  2001/10/24 04:05:20  porter
  * added long long type to I/O and got rid of obsolete dataIndex table
  *
@@ -390,10 +394,10 @@ bool StDbSql::updateEndTime(StDbTable* table, const char* dataTable, unsigned in
   bool retVal = true;
   if(!checkColumn(dataTable,"endTime")) return retVal;
   int nrows;
-
+  int* wrows = table->getWrittenRows(nrows);
+  
   Db<<" select unix_timestamp(Min(endTime)) as mendTime from "<<dataTable;
-  Db<<" where dataID In("<<getElementList(table->getWrittenRows(nrows),nrows)<<")";
-  Db<<endsql;
+  Db<<" where dataID In("<<getElementList(wrows,nrows)<<")"<<endsql;
 
   if( (Db.NbRows()>0) && Db.Output(&buff)){
     unsigned int t1 = table->getEndTime();
@@ -1246,9 +1250,14 @@ char*
 StDbSql::getElementList(int* e, int num){
 
 // prepares comma separated list of integers
+
  ostrstream es;
- for(int i=0;i<num-1;i++)es<<e[i]<<",";
- es<<e[num-1]<<ends;
+ if(!e){ 
+   es<<0<<ends;
+ } else {
+   for(int i=0;i<num-1;i++)es<<e[i]<<",";
+   es<<e[num-1]<<ends;
+ }
 
  return mRetString(es);
 }

@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- * $Id: StDataBaseI.hh,v 1.1 2001/01/22 18:37:50 porter Exp $
+ * $Id: StDataBaseI.hh,v 1.2 2001/10/26 20:59:46 porter Exp $
  *
  * Author: R. Jeff Porter
  ***************************************************************************
@@ -10,6 +10,10 @@
  ***************************************************************************
  *
  * $Log: StDataBaseI.hh,v $
+ * Revision 1.2  2001/10/26 20:59:46  porter
+ * fixed new endtime flag from previous checkin. made StDataBaseI available
+ * at root-cli.
+ *
  * Revision 1.1  2001/01/22 18:37:50  porter
  * Update of code needed in next year running. This update has little
  * effect on the interface (only 1 method has been changed in the interface).
@@ -37,6 +41,10 @@ class StDbConfigNode;
 class StDbElementIndex;
 
 #include "StDbDefs.hh"
+
+#ifdef __ROOT__
+#include "TROOT.h"
+#endif
 
 class StDataBaseI {
 
@@ -116,6 +124,9 @@ public:
   virtual int*         selectElements(const char* elementName, 
                                       StDbElementIndex* inval, 
                                       int& numElements)                   = 0;
+#ifdef __ROOT__
+  ClassDef(StDataBaseI,0)
+#endif
 
 };
 
