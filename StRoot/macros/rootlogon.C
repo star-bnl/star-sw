@@ -1,5 +1,8 @@
-// $Id: rootlogon.C,v 1.19 2000/03/27 02:57:12 fine Exp $
+// $Id: rootlogon.C,v 1.20 2000/03/27 02:59:46 fine Exp $
 // $Log: rootlogon.C,v $
+// Revision 1.20  2000/03/27 02:59:46  fine
+// Star2Root has been added to logon
+//
 // Revision 1.19  2000/03/27 02:57:12  fine
 // ROOT 2.24 needs libSTAR to be loaded
 //
@@ -120,5 +123,6 @@ TBuffer::SetGlobalWriteParam(2003);
   gSystem->Exec("echo $USER from $HOST in STAR_LEVEL=$STAR_LEVEL / STAR_VERSION=$STAR_VERSION  `date` >>  $GROUP_DIR/statistics/root4star${STAR_VERSION}");
   gSystem->SetIncludePath("-I./include -I./StRoot -I$STAR/include -I$STAR/StRoot -I$STAF/inc -I$CERN_ROOT/include -I$ROOTSYS/src");
   gSystem->Load("libSTAR");
+  gSystem->Load("Star2Root");
 }
  
