@@ -1,6 +1,6 @@
 #include "GParticle.h"
  
-ClassImp(GParticle)
+//ClassImp(GParticle)
  
 //__________________________________________
 const Text_t *GParticle::GetName() const

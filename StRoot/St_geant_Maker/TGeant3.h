@@ -126,7 +126,7 @@ public:
    virtual  void  Gprotm(Int_t nmat=0); 
    virtual  Int_t Gsvolu(const char *name, const char *shape, Int_t nmed,  
                          Float_t *upar, Int_t np); 
- 
+   virtual  Int_t Glvolu(const Int_t Nlev, Int_t *Lnam, Int_t *Lnum);  
    ClassDef(TGeant3,1)  //C++ interface to Geant basic routines 
 }; 
  
@@ -139,7 +139,14 @@ EXTERN TGeant3 *geant;
 //      DIMENSION IQ(2),Q(2),LQ(8000),IWS(2)
 //      EQUIVALENCE (Q(1),IQ(1),LQ(9)),(LQ(1),LMAIN),(IWS(1),WS(1))  
 typedef struct {
-  Int_t nzebra,gversion,zversn,ixstor,ixdiv,ixcons,fendq[16],lq[7],iq[1];
+  Int_t   nzebra;
+
+
+
+  Float_t gversion,zversn;
+  Int_t   ixstor,ixdiv,ixcons;
+  Float_t fendq[15];
+  Int_t   lq[8],iq[1];
 } common_gcbank;
 //----------QUEST 
 //      COMMON/QUEST/IQUEST(100) 
@@ -466,6 +473,7 @@ EXTERN Float_t *z_q;
 # define gsrotm  gsrotm_ 
 # define gprotm  gprotm_ 
 # define gsvolu  gsvolu_ 
+# define glvolu  glvolu_ 
 # define gprint  gprint_ 
 # define dzshow  dzshow_ 
 # define agmain  agmain_ 
@@ -541,6 +549,7 @@ EXTERN Float_t *z_q;
 #endif /* not Geant3Dummy */
 # define gprotm  GPROTM 
 # define gsvolu  GSVOLU 
+# define glvolu  GLVOLU 
 # define gprint  GPRINT 
 # define dzshow  DZSHOW 
 # define agmain  AGMAIN
@@ -614,18 +623,19 @@ extern "C" void type_of_call gsdvn2(DEFCHARD,DEFCHARD, Int_t &, Int_t &, Float_t
 extern "C" void type_of_call gsdvs(DEFCHARD,DEFCHARD, Float_t &, Int_t &, Int_t & DEFCHARL DEFCHARL); 
 extern "C" void type_of_call gsdvs2(DEFCHARD,DEFCHARD, Float_t &, Int_t &, Float_t &, Int_t & DEFCHARL DEFCHARL); 
 extern "C" void type_of_call gsdvt(DEFCHARD,DEFCHARD, Float_t &, Int_t &, Int_t &, Int_t & DEFCHARL DEFCHARL); 
-extern "C" void type_of_call gsord(DEFCHARD, Int_t & DEFCHARL); 
+extern "C" void type_of_call gsord(DEFCHARD, Int_t & DEFCHARL);
 extern "C" void type_of_call gspos(DEFCHARD, Int_t &, DEFCHARD, Float_t &, Float_t &, Float_t &, Int_t &, DEFCHARD DEFCHARL DEFCHARL DEFCHARL); 
 extern "C" void type_of_call gsposp(DEFCHARD, Int_t &, DEFCHARD, Float_t &, Float_t &, Float_t &, Int_t &, DEFCHARD,  
 				    Float_t *, Int_t & DEFCHARL DEFCHARL DEFCHARL); 
 extern "C" void type_of_call gsvolu(DEFCHARD, DEFCHARD, Int_t &, Float_t *, Int_t &, Int_t & DEFCHARL DEFCHARL); 
+extern "C" void type_of_call glvolu(Int_t *, Int_t *, Int_t *, Int_t *);
 extern "C" void type_of_call gprint(DEFCHARD,const int& DEFCHARL); 
-extern "C" void type_of_call dzshow(DEFCHARD,const int&,const int&,DEFCHARD,const int&, const int&, const int&, const int& DEFCHARL DEFCHARL); 
+extern "C" void type_of_call dzshow(DEFCHARD,const int&,const int&,DEFCHARD,const int&, const int&, const int&, const int& DEFCHARL DEFCHARL);
 extern "C" void type_of_call agmain(Int_t*,Int_t*,Int_t*);
 extern "C" void type_of_call agxuser();
 extern "C" void type_of_call agxinit();
 extern "C" void type_of_call geometry();
-extern "C" Int_t  type_of_call agvolume(St_Node**,Float_t**,Float_t**,Float_t**,Int_t*);
+extern "C" Int_t  type_of_call agvolume(St_Node**,Float_t**,Float_t**,Float_t**);
 extern "C" void type_of_call kuexel   (const Char_t*,Int_t);
 extern "C" void type_of_call set_kupatl(const Char_t*,Int_t*,Int_t);
 extern "C" void type_of_call dzddiv   (Int_t*,Int_t*,Char_t*,Char_t*,Int_t*,Int_t*,Int_t*,Int_t*,Int_t,Int_t);
